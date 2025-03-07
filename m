@@ -1,135 +1,197 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+Received: from mail-pj1-f41.google.com (mail-pj1-f41.google.com [209.85.216.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79B3918DB3A
-	for <fstests@vger.kernel.org>; Fri,  7 Mar 2025 04:04:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 477EC1C27;
+	Fri,  7 Mar 2025 05:51:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741320270; cv=none; b=KDVaJFPe6quxzfpp7M8LTWvmPB9AW0yNubSdv1ZkylEE18akDlPLVb5gTA7rhZEouhp5WvR9ipcEtQJTyif8uNXNuxc5A0wjwVfcDTjjPHUOt0FxsqO54llW08Gm4wTTR4oPchQLN+yZetcSWlWUcp22vvc/MOgX14nHoY+eBmk=
+	t=1741326682; cv=none; b=ojv+olZqjFr2orayzZ4V7T3rsApoy0Pkmlho1T73xEt2OYAC7QfAmTbYBc+VxUSRVTrJQL45hnWNIEjo/SDcE2MUy9dpZGZDTOEcgDPXk5/ll8qB2/iW3AfjpggI/mJAQLenVMa97qFPZi69DyxdJNU0uzGiPSzDVheIJge3GIg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741320270; c=relaxed/simple;
-	bh=mexwXOOGZEWFtaVep5N4+9e7U/D/bvfUpLrW7WNbYSQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=RSDKg0qbR3bpB+8KiT4jABrLMxQFCPwFNX5LHXePtfhxZgWsxnmiyRSMuI2TITpJsQMaV/4xjLb4tjc8yp0OjGmMvelUNEhWhGbt+XUGHipI09jRbSdV0TECGGTKai1/C93ZSAEJS9v+rVxFeMI1wffGfz7JLYoD7AXJholXxhs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=BdyUl0QT; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=hS74Wif5; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=BdyUl0QT; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=hS74Wif5; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	s=arc-20240116; t=1741326682; c=relaxed/simple;
+	bh=N7QfQ818LnaP9EYBqnFiIYWNhDWeK9UxSAuBB5F24mY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=oVf9xhOJRxXPl43uLXiw//UKJiwvY3a/e+BzmDQz8Nen3KjZIEVm6/OBNfV4nWJntX6hQy71uPZWal2X40ddi1/jL0ReOyHMgD5FOyWkfDQDY8xyTeH6h9M9GfwIMXHFeyOezcy7LDsQGiqjdphpRktzSTQZMkyHKVt8Hxaflr4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=F65regMo; arc=none smtp.client-ip=209.85.216.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="BdyUl0QT";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="hS74Wif5";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="BdyUl0QT";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="hS74Wif5"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id A4C4B21193;
-	Fri,  7 Mar 2025 04:04:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1741320266; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Fsdef/Q34xmF6k+hmNqaO0zc1hZhJuOuDXccUfsdpzk=;
-	b=BdyUl0QTmQkz7bSm1EYXxPMNbPYXltkdkleVfukctqF1XC33a/Nr1X4ePrI9bO5w7HiPiB
-	ZjyPWj57pELk18o7P88Z6Ion3XNQrke8TMlgMhE8DDugL4AGwyfLCekomXnQKT8wQvxaOL
-	y2Iadx5sYdyxIeCWM+qUClBc/9NOccc=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1741320266;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Fsdef/Q34xmF6k+hmNqaO0zc1hZhJuOuDXccUfsdpzk=;
-	b=hS74Wif5tobYhz0JJmejiCrRT0aK2YL82tknojQaD15fOvmS7zBQSTfjSClT3lnpXuzy6a
-	lUHP8fU5D/TltxAg==
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1741320266; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Fsdef/Q34xmF6k+hmNqaO0zc1hZhJuOuDXccUfsdpzk=;
-	b=BdyUl0QTmQkz7bSm1EYXxPMNbPYXltkdkleVfukctqF1XC33a/Nr1X4ePrI9bO5w7HiPiB
-	ZjyPWj57pELk18o7P88Z6Ion3XNQrke8TMlgMhE8DDugL4AGwyfLCekomXnQKT8wQvxaOL
-	y2Iadx5sYdyxIeCWM+qUClBc/9NOccc=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1741320266;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Fsdef/Q34xmF6k+hmNqaO0zc1hZhJuOuDXccUfsdpzk=;
-	b=hS74Wif5tobYhz0JJmejiCrRT0aK2YL82tknojQaD15fOvmS7zBQSTfjSClT3lnpXuzy6a
-	lUHP8fU5D/TltxAg==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 6885B13726;
-	Fri,  7 Mar 2025 04:04:25 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id BtHpB0lwymfLagAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Fri, 07 Mar 2025 04:04:25 +0000
-Date: Fri, 7 Mar 2025 15:04:20 +1100
-From: David Disseldorp <ddiss@suse.de>
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 0/5] fstests: remove old SGI QE scripts
-Message-ID: <20250307150420.738c4d28.ddiss@suse.de>
-In-Reply-To: <20250306213921.3769440-1-david@fromorbit.com>
-References: <20250306213921.3769440-1-david@fromorbit.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="F65regMo"
+Received: by mail-pj1-f41.google.com with SMTP id 98e67ed59e1d1-2fe9759e5c1so2306972a91.0;
+        Thu, 06 Mar 2025 21:51:20 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1741326680; x=1741931480; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=F5vkcR+tWXq3UvWo4eKw0Oda2yrE0hWS8QxOpDzT0PQ=;
+        b=F65regMoBuuc7VnZtO5aEYCTw9GYCuTLt13oOmDDreXFE+NaxJtfkWvyeHjTaLNQmO
+         aHNXJnbNRli1TDH8mMXBodaHW/pThv2RUn9PzeXH1ujQDIUZO5Qj8WqE/7tg5VSiUs3N
+         /OYXwXxQxOohptYA1qDz82rDNkF/zb00KmrK9W5mDMPGEAXiZf8CnZ7PtsEcAVJfHl8O
+         zyvP7rkWHNz+0Q6Mu/NQXJTsz+C7MfvvNMr707BVk+ZLRsYVDtMk+NWsiziqT+tjVZSp
+         Gyy5iK9cecm+RrUC/LvVnpkJxnMYhPv9QTgB4kMxkyXhK+9WaGrepG5zNrMdWd6PCG6Q
+         Qi5w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1741326680; x=1741931480;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=F5vkcR+tWXq3UvWo4eKw0Oda2yrE0hWS8QxOpDzT0PQ=;
+        b=UMqCkqg6h3CUyYsuq5fiePea441FvB6WeEQdQ5/V8AJiijKKx3Pfj8C4+ESvdXphbc
+         AlcjQEMGqPaKGGqnapy8XzIocEv23uPUG16l/95NxIXEL0VyjV58Wvef/rlIhYZnC+EB
+         kK3/b/8p/mJVeQKWYjR1Z4fSZGfy5zowq2gU22YQM9wPWtnM6y0q1AvGsM0GeFHtW4VO
+         66oPKgCNVmXUWRbTNCXV4MgJNY78b//kwQyQAUynG3SZXUej63MqbfxPWFUA/ax+1vxE
+         +bua0zRBG/tAnqLX7WY29EXZuzSY33imN3kJG9jUF8ZqLS/vPFk3FGQjVAleOYDkzwly
+         Tqcg==
+X-Forwarded-Encrypted: i=1; AJvYcCVPyOA2cFLFU+Q2iitNtl9huksvd9zP9TpnEOphv/M2b0uquHttLa428W4xG3GufYcngTdC5B+BOfgS@vger.kernel.org, AJvYcCXqkhSEvO/HnYp71wcNIIZZaJLgVhG0CFlTlCj+FNHewttZZwLTwLXBagl79vJqUJ9/ZxKi6ZAcCiN+@vger.kernel.org
+X-Gm-Message-State: AOJu0YzfgXp0syq+nDEsrfDSkM/tBcyZ4TdS1O5B4i6wfPuVu0d1PBN1
+	yV0rIMxbvLoGVBfvXgCanvMUZIGxtoJKGURI8LBTs8pH0NeYYEYo
+X-Gm-Gg: ASbGncsDXDyjwujN0qqCnHnpaM28ZeXOjCDgO2EHdwGAavxkDg5jbIPNetwT3ZNNzhI
+	HA4O8jHFDIgBi7OD7yvOIFL+3/GHEjuU7yH07UmRoqz4vEeUDk8Y+zu8Qd7IcAGUQI5lKtB87Jw
+	mvzFeGsyakxyq3JB1hdWfTapwNkaF3aByJ9bgyha1nLLsmopjzkIgUtLlgQuJ/pNzznfHtZTgo8
+	yBBqcv4FWtVU3+s8kwejBcoaISTy7JuxPQZF+j6x7HPLyoK4m1RX4gG/vo/kWucXobJmjNbfISI
+	iqW4Y5VIbyE4q9Jm+HDIizdX6VJ4TaR4XkW1DgFwtKwMEVYllI5IF6k=
+X-Google-Smtp-Source: AGHT+IHgW2yFtUhnN2+llXSdfzN6cZOoFzJ0PNxIZXQVJMcmAnQibISj6yF3etnQBx6wDKeQpCR9cQ==
+X-Received: by 2002:a05:6a20:9150:b0:1f3:3e91:fac0 with SMTP id adf61e73a8af0-1f544af00e2mr4214662637.11.1741326680278;
+        Thu, 06 Mar 2025 21:51:20 -0800 (PST)
+Received: from [192.168.0.120] ([49.205.39.113])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-736985387d3sm2439715b3a.172.2025.03.06.21.51.17
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 06 Mar 2025 21:51:19 -0800 (PST)
+Message-ID: <716e0d26-7728-42bb-981d-aae89ef50d7f@gmail.com>
+Date: Fri, 7 Mar 2025 11:21:15 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v1 2/2] check,common/{preamble,rc},soak: Decoupling
+ init_rc() call from sourcing common/rc
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+ linux-xfs@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
+ zlang@kernel.org, david@fromorbit.com
+References: <cover.1741248214.git.nirjhar.roy.lists@gmail.com>
+ <1d07e5657c2817c74e939894bb554424199fd290.1741248214.git.nirjhar.roy.lists@gmail.com>
+ <20250306174653.GP2803749@frogsfrogsfrogs>
+Content-Language: en-US
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+In-Reply-To: <20250306174653.GP2803749@frogsfrogsfrogs>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-Spam-Score: -3.30
-X-Spamd-Result: default: False [-3.30 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	NEURAL_HAM_SHORT(-0.20)[-0.983];
-	MIME_GOOD(-0.10)[text/plain];
-	RCPT_COUNT_TWO(0.00)[2];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	MISSING_XM_UA(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	ARC_NA(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	FROM_HAS_DN(0.00)[];
-	TO_DN_SOME(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:mid,suse.de:email,imap1.dmz-prg2.suse.org:helo]
-X-Spam-Flag: NO
-X-Spam-Level: 
 
-On Fri,  7 Mar 2025 08:34:45 +1100, Dave Chinner wrote:
 
-> Hi folks,
-> 
-> The scripts this patchset removes are historical relics. They
-> haven't been maintained, in many cases they don't work, and in a
-> couple fo cases they are reliant on test machines that SGI
-> decomissioned almost two decades ago.
-> 
-> There is no point in trying to maintain these scripts, but they
-> still create dependencies on common fstests code that is now getting
-> in the way of making changes to fstests infrastructure.
-> 
-> Hence we should simply remove them and get rid of all the technical
-> debt they contain with them.
+On 3/6/25 23:16, Darrick J. Wong wrote:
+> On Thu, Mar 06, 2025 at 08:17:41AM +0000, Nirjhar Roy (IBM) wrote:
+>> Silently executing scripts during sourcing common/rc doesn't look good
+>> and also causes unnecessary script execution. Decouple init_rc() call
+>> and call init_rc() explicitly where required.
+>>
+>> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+>> ---
+>>   check           | 10 ++--------
+>>   common/preamble |  1 +
+>>   common/rc       |  2 --
+>>   soak            |  1 +
+>>   4 files changed, 4 insertions(+), 10 deletions(-)
+>>
+>> diff --git a/check b/check
+>> index ea92b0d6..d30af1ba 100755
+>> --- a/check
+>> +++ b/check
+>> @@ -840,16 +840,8 @@ function run_section()
+>>   		_prepare_test_list
+>>   	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
+>>   		_test_unmount 2> /dev/null
+>> -		if ! _test_mount
+>> -		then
+>> -			echo "check: failed to mount $TEST_DEV on $TEST_DIR"
+>> -			status=1
+>> -			exit
+>> -		fi
+> Unrelated change?  I was expecting a mechanical ". ./common/rc" =>
+> ". ./common/rc ; init_rc" change in this patch.
+This patch adds an init_rc() call to _begin_fstests() in common/preamble 
+and hence the above _test_mount() will be executed during that call. So 
+this _test_mount isn't necessary here, right? _test_mount() will be 
+executed (as a part of init_rc() call) before every test run. Please let 
+me know if my understanding isn't correct.
+>>   	fi
+>>   
+>> -	init_rc
+> Why remove init_rc here?
+Same reason as above.
+>
+>> -
+>>   	seq="check.$$"
+>>   	check="$RESULT_BASE/check"
+>>   
+>> @@ -870,6 +862,8 @@ function run_section()
+>>   	needwrap=true
+>>   
+>>   	if [ ! -z "$SCRATCH_DEV" ]; then
+>> +		_check_mounted_on SCRATCH_DEV $SCRATCH_DEV SCRATCH_MNT $SCRATCH_MNT
+>> +		[ $? -le 1 ] || exit 1
+>>   	  _scratch_unmount 2> /dev/null
+>>   	  # call the overridden mkfs - make sure the FS is built
+>>   	  # the same as we'll create it later.
+>> diff --git a/common/preamble b/common/preamble
+>> index 0c9ee2e0..c92e55bb 100644
+>> --- a/common/preamble
+>> +++ b/common/preamble
+>> @@ -50,6 +50,7 @@ _begin_fstest()
+>>   	_register_cleanup _cleanup
+>>   
+>>   	. ./common/rc
+>> +	init_rc
+>>   
+>>   	# remove previous $seqres.full before test
+>>   	rm -f $seqres.full $seqres.hints
+>> diff --git a/common/rc b/common/rc
+>> index d2de8588..f153ad81 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -5754,8 +5754,6 @@ _require_program() {
+>>   	_have_program "$1" || _notrun "$tag required"
+>>   }
+>>   
+>> -init_rc
+>> -
+>>   ################################################################################
+>>   # make sure this script returns success
+>>   /bin/true
+>> diff --git a/soak b/soak
+>> index d5c4229a..5734d854 100755
+>> --- a/soak
+>> +++ b/soak
+>> @@ -5,6 +5,7 @@
+>>   
+>>   # get standard environment, filters and checks
+>>   . ./common/rc
+>> +# ToDo: Do we need an init_rc() here? How is soak used?
+> I have no idea what soak does and have never used it, but I think for
+> continuity's sake you should call init_rc here.
 
-For the series:
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+Okay. I think Dave has suggested removing this file[1]. This doesn't 
+seem to used anymore.
 
-Thanks
+[1] https://lore.kernel.org/all/Z8oT_tBYG-a79CjA@dread.disaster.area/
+
+--NR
+
+>
+> --D
+>
+>>   . ./common/filter
+>>   
+>>   tmp=/tmp/$$
+>> -- 
+>> 2.34.1
+>>
+>>
+-- 
+Nirjhar Roy
+Linux Kernel Developer
+IBM, Bangalore
+
