@@ -1,75 +1,75 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85302140E5F
-	for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 20:03:32 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0EF541DE8AA
+	for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 20:25:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741637017; cv=none; b=j8jVlaXqw2SJkJlSWyMUwtVbNFsQV39CpLRoxsq43dE1yPm0MSozWbehdiPkb40Cih3sAmzYFZUXA99D67xIvJ+RKc2Hk2fk4HJhXYgF9CQNLMTSbioSBcFiGNpDsQcRNp+XQW55pnpOdzjm+ytz6sHorVz/P4UzB/eTSkYM1/s=
+	t=1741638341; cv=none; b=KixgWTt3UxE21n34USJtNQd2oaaDDa7cJwizPle6V9/OG2BYbBaN90ysUSScMTnIyq8MMPE6WSSsfZM/CibR/u3DqbQHCqaZIPEtjCtIyyDcydqb3zgFoj+4h18DbpB14nZuZUrEUgtfFDp857pB+sw9Zsxq6Mwsv+Dt0MVIkmE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741637017; c=relaxed/simple;
-	bh=XPnrY8w26PlV2Q8RCCEDDRRLqoMCEhvCHkY8THm9Dhw=;
+	s=arc-20240116; t=1741638341; c=relaxed/simple;
+	bh=at6VCHpIgKSzb5VmnHhaEd3Qi3lq2txlyekY3x9q66Q=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=UQJA6mDlIaceWlvyhgW94YCbjKpNbQBTs0yyCTVcoKuWUkcLcMdtKMPHbYaXwbwQU6VWq6urOurvchpnA9SWvpXU4ZemsknP8bYybcYu5RPZfeamUBeUyBZN5HNXeBgb7gaJ6VWaeAPJUz7juribtjUnf/mnq3wbc5HAXSvgtpQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XYn+/jzJ; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=DrGmMNYuNTnNzu03NiwVpxJ+mDDdwcr/uDHJMG2N8haccDqcW7qxYDsEansTgdGh4jHUU3b09n8tjI6gAVbOi4NPUU3RYv0yQ/jgYahqEjOGYuKQmfcVFtWX19jigsvSBGKDSVPIjrGmI76xp6XdPEQ5VWesJmJHGrnoLdzjnqU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=GvbWkGG/; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XYn+/jzJ"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GvbWkGG/"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1741637010;
+	s=mimecast20190719; t=1741638338;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=uakVQJCzySOCijcVMdsByC12sKBD/ugHJsyA4B8eqjg=;
-	b=XYn+/jzJCrwrXT+kyovFRGjsJJ1ryWzXhyVS/4CGh5PexF4hz63dS1x8IPGCCHSh1MDzwo
-	5MhpKNHADgelNlYqiZvslq1DtrhGk5iqhAZ8CQCKDHO/dL3W3gZytJmz+ZMb7qQpvL891J
-	CRhH7iFfFUHcXiLgVcDeNJ/NdFwaQXs=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=DzXTnrCrylALmiqhMAxlKqzEAqMAoi54ub7ST5/3JnI=;
+	b=GvbWkGG/9ZErBzv0WqcITqtFXumC/K3k9vm93s6LFwG5jig6SYkwFh71ir8P5dWDPjSHm+
+	zC8t6Y42Sk0/sb7RnwGM0DKlJFy2gjIRoSe/emtbipn3dFybI/aOwDYgBIhjSZXkrhdc8Q
+	U2CwVf+RGmDZA3QWioVaozDzje4o5vU=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-594-EiiWKlzhMmKgS4Icqs78ug-1; Mon, 10 Mar 2025 16:03:29 -0400
-X-MC-Unique: EiiWKlzhMmKgS4Icqs78ug-1
-X-Mimecast-MFC-AGG-ID: EiiWKlzhMmKgS4Icqs78ug_1741637008
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-223a2770b75so83094935ad.1
-        for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 13:03:29 -0700 (PDT)
+ us-mta-350-DMq8aLzRNvaxUUJLFFjgxw-1; Mon, 10 Mar 2025 16:25:37 -0400
+X-MC-Unique: DMq8aLzRNvaxUUJLFFjgxw-1
+X-Mimecast-MFC-AGG-ID: DMq8aLzRNvaxUUJLFFjgxw_1741638336
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-225505d1ca5so33372775ad.2
+        for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 13:25:37 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741637008; x=1742241808;
+        d=1e100.net; s=20230601; t=1741638336; x=1742243136;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=uakVQJCzySOCijcVMdsByC12sKBD/ugHJsyA4B8eqjg=;
-        b=iF8EYOvjGjfIpK/bGq8gYvxciC9mOyksJizVNLOo28vUXAdXw11cMhiBt6Ni+pB+W+
-         t7gJoBJ7wqxbMS97q8pET+bMWANBVldMSzo0WDecjjvDhGSnXcJaR+9NeWVpmqcLF85b
-         GL0z0N5mI92EioGHFG5+iQJAFAZtnVUgrsBCpXwniUoNVUnyofIGL5l50r0bjE5vnZFk
-         k8GPwZ+mWhgWGT9Qchy0HvqFlphGsjxWNbV9OqSMxka1i7SuSlqOEVCfSuRaI8rVVeZ2
-         pP9wBasgyI3bBwaJYBBC9UVAnaMXAJDSPEM/iGWxlcwbRn1X+Ixl9hflDLWqc1SHnQOF
-         KbGA==
-X-Forwarded-Encrypted: i=1; AJvYcCUggCnSrhnLWzso7dgPR7A6SX9JV5EgXhpHCrx4I2hlJ+/MmpplWZokn5wkfnygJ72xOfz2XVWr@vger.kernel.org
-X-Gm-Message-State: AOJu0YwsiUGmmo5z+H5Sw2fgiJmGe59eIeN2E55xqht7q0zAYznmpO4O
-	54FGysWuGOPsfjcvhrTzPuKgaBcsx8BiMU7dut4jPZZIksv/PueiSEIGAaVZ9bG9d+DkLHurkAM
-	MgOCGqCK1okRe0NQKbJkW8Ef9I4nrrg/JUgPtnVBYGywxp/4RrBM0vI0=
-X-Gm-Gg: ASbGncuLZf0M5SjCJzcHSRsCey4THZf7gQRIwFfkY57XafKa7WyKvbIIavKm38vhtgz
-	yJr9YbQ4hj0V2D86vW0vubJKqO12e4waoN5k5JFC/sJnaQAxJPViPQuX1ekF+VOEBMVruyH4Y59
-	0CcjXhHBVmDhKACRyrczEW/xvuqQ3vIsRzUcLFwR9XFjPAks3dECV2wuyXkhFdwqBtWzdbhSAVU
-	H98xYr4nXqxvcvVO7/0YkSkBC/0V4WOd443rks9vSTNA6tW+oHa2xN3O0hKGGURgE8ZR7wKyfd1
-	IbK0YPKsVX8/bP2qZuYcUBFWUN3MUz75gigKjwQ18aLp0lIxdR6x1rN9
-X-Received: by 2002:a17:903:32c6:b0:224:13c0:58e3 with SMTP id d9443c01a7336-22428bf1976mr198870415ad.51.1741637008525;
-        Mon, 10 Mar 2025 13:03:28 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGHdP3lhkvO4vv1v0uqKE6VKOKrmQ5TN8oJrfPJ8ZypUYZSMUOGOmUKXlyfH5/KX2KJQg/5Cw==
-X-Received: by 2002:a17:903:32c6:b0:224:13c0:58e3 with SMTP id d9443c01a7336-22428bf1976mr198870135ad.51.1741637008095;
-        Mon, 10 Mar 2025 13:03:28 -0700 (PDT)
+        bh=DzXTnrCrylALmiqhMAxlKqzEAqMAoi54ub7ST5/3JnI=;
+        b=CzRjDs+TiTPMpKiQtB3OKdjiPf9NNnu6mo7i2wvhExatHVRF981GFnwQsW2rNukcZe
+         rvHkqEjSidO3HZctyC6zFSFG6iiCoI68rh2hDK0RKCxqDOZQ70evkO6/kSZbryzA1CS7
+         opfKWwrh4F4rG4uMJPELtFOJloncApRzJ21nCZgLYTKWvG1fIfsfDbrXbMTEijGaF0Mo
+         0zYLTEWMPgy6fyJV4u4jPU/BK+bpeiACszX54oowLiG5g4rjFP7EUZ35GWxcxmFZNJYS
+         QU49PfNmI784BmEWrbKXhHCQR3c+AfyXF29YwL66z3NRTp69q8H9EhDeGhTGetQ3CyX/
+         WT8Q==
+X-Forwarded-Encrypted: i=1; AJvYcCUx0O+tn0BxQRaNalm2GW60SUwDpnycrssfhauLBpN0FX3JFhpubtLrE1/yctiMiVdJT2/Cv7hQ@vger.kernel.org
+X-Gm-Message-State: AOJu0YzMLdTGkyrrwIRbFJmxzHKxWj8SmQXFTqfINSIVtLQ3MoyiDRlN
+	Yqj7Gertuob+RgyC1L9cyr1evty5HuRUwovCoQKoPrsMW3PoQM5xFOt1sqKVgo8KnUfpt18z+R4
+	YwckSsZeCKzufonb3XTz2i5WkI66J5RIA1r0Nvp7lKr3rNEvjF0+/hTs=
+X-Gm-Gg: ASbGncu5wICmGn+dVvraXNEIQUj+FR3HXIKxjZLQJOc+ptFyT6Oi4XvtWHdiKgSWKzT
+	hjqOWYfxEn0S+zggn7L/SCy9qALeFdz56vSigE0xsFOke8emUDC2OXM1XJWfTONh/cJJPYBRY+j
+	pTv9PB99N9Et4eL0VfpBErYv0sKMYgzD/ejOInd4R9RJdOaopTHnEP/agbCbSqkrMGbyjPyod/J
+	6mauiCrtwQtqm2fCTSOlgiPxVoovgJ5tU+xo5IHvWChf9pd5I8QSICqSBITplrbdY5ZjTVvg8fw
+	8wna++jjM54XAq+/M7Ni2ChdtSQWyPVSgfdEVm1hPaAmutdX/daW3NgK
+X-Received: by 2002:a17:902:f54b:b0:224:c47:cbd with SMTP id d9443c01a7336-22592d95bfdmr14756645ad.0.1741638336397;
+        Mon, 10 Mar 2025 13:25:36 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGdhRPF/9qQyxk/8HridFguvWf2Vlm1zX/sntLmxPfLxK0eP3fSpNj3YgskzB5IGUBoax66Kw==
+X-Received: by 2002:a17:902:f54b:b0:224:c47:cbd with SMTP id d9443c01a7336-22592d95bfdmr14756455ad.0.1741638336054;
+        Mon, 10 Mar 2025 13:25:36 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22410aa5eedsm82871265ad.236.2025.03.10.13.03.25
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22410a7f7cbsm82898005ad.140.2025.03.10.13.25.33
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 10 Mar 2025 13:03:27 -0700 (PDT)
-Date: Tue, 11 Mar 2025 04:03:23 +0800
+        Mon, 10 Mar 2025 13:25:35 -0700 (PDT)
+Date: Tue, 11 Mar 2025 04:25:31 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Chao Yu <chao@kernel.org>
 Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
 	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
 Subject: Re: [PATCH v2 4/4] f2fs/009: detect and repair nlink corruption
-Message-ID: <20250310200323.fl647x67kxe6r7xe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Message-ID: <20250310202531.kpbloh4c6lopyvw7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20250310115621.3441518-1-chao@kernel.org>
  <20250310115621.3441518-4-chao@kernel.org>
 Precedence: bulk
@@ -126,46 +126,161 @@ On Mon, Mar 10, 2025 at 07:56:21PM +0800, Chao Yu wrote:
 > +        else
 > +            _check_generic_filesystem $device
 > +        fi
-
-If the "--dry-run" of fsck.f2fs is similar with "-n -y" of fsck.ext4. Then
-you might need to change the fsck_opts() function in common/config.
-
-  _fsck_opts()
-  {
-        case $FSTYP in
-        ext2|ext3|ext4)
-                export FSCK_OPTIONS="-nf"
-                ;;
-        reiser*)
-                export FSCK_OPTIONS="--yes"
-                ;;
-        f2fs)
-                export FSCK_OPTIONS=""
-                ;;
-	...
-  }
-
-The default FSCK_OPTIONS for f2fs should be "--dry-run".
-        f2fs)
-                export FSCK_OPTIONS="--dry-run"
-
-Then ...
-
-[snip]
-
-> +	$F2FS_INJECT_PROG --node --mb i_links --nid $ino --val $nlink $SCRATCH_DEV \
-> +		>> $seqres.full || _fail "fail to inject"
+> +        ;;
+>      *)
+>  	_check_generic_filesystem $device
+>  	;;
+> diff --git a/tests/f2fs/009 b/tests/f2fs/009
+> new file mode 100755
+> index 00000000..d14df968
+> --- /dev/null
+> +++ b/tests/f2fs/009
+> @@ -0,0 +1,133 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
+> +#
+> +# FS QA Test No. f2fs/009
+> +#
+> +# This is a regression test to check whether fsck can handle corrupted
+> +# nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
+> +# and expects fsck.f2fs can detect such corruption and do the repair.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
 > +
-> +	export FSCK_OPTIONS="--dry-run"
+> +_require_scratch
+> +_require_command "$F2FS_INJECT_PROG" inject.f2fs
+> +
+> +_fixed_by_git_commit f2fs-tools 958cd6e
+                                           ^^^^^^^^
+                                           commit subject?
 
-... then you can save this export FSCK_OPTIONS="--dry-run". I've explained
-more in your v1 patch review, refer to:
+> +
+> +filename=$SCRATCH_MNT/foo
+> +hardlink=$SCRATCH_MNT/bar
+> +
+> +for ((i=0;i<14;i++)) do
+> +	echo "round: " $i >> $seqres.full
+> +
+> +	_scratch_mkfs "-f" >> $seqres.full
 
-https://lore.kernel.org/fstests/20250310194818.wki325qreuta26nc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/T/#u
+As you've add "-f" in _scratch_mkfs, so this "-f" can be removed.
+
+> +	_scratch_mount >> $seqres.full
+                          ^^^^^^
+                          I think it's useless
+
+> +
+> +	if [ $i == 0 ]; then
+> +		touch $filename
+> +		ino=`stat -c '%i' $filename`
+> +		nlink=0
+> +	elif [ $i == 1 ]; then
+> +		mkdir $filename
+> +		ino=`stat -c '%i' $filename`
+> +		nlink=1
+> +	elif [ $i == 2 ]; then
+> +		mknod $filename c 9 0
+> +		ino=`stat -c '%i' $filename`
+> +		nlink=0
+> +	elif [ $i == 3 ]; then
+> +		mknod $filename b 8 0
+> +		ino=`stat -c '%i' $filename`
+> +		nlink=0
+> +	elif [ $i == 4 ]; then
+> +		mkfifo $filename
+> +		ino=`stat -c '%i' $filename`
+> +		nlink=0
+> +	elif [ $i == 5 ]; then
+> +		socket -s $filename >> $seqres.full 2>&1 &
+                ^^^^^^
+
+Where's the "socket" command from? I think it's not always installed on any
+Linux system. fstests never use this command in any test case. If you
+need this command, you might need to check that, and _notrun if it's
+not installed.
+
+> +		pid=$!
+
+As you have background processes in this test case, you need to make sure
+these processes are killed properly in _cleanup, especially if the test
+is killed suddently, refer to generic/019.
 
 Thanks,
 Zorro
 
+> +		sleep 2
+> +		ino=`stat -c '%i' $filename`
+> +		kill $pid >> $seqres.full 2>&1
+> +		nlink=0
+> +	elif [ $i == 6 ]; then
+> +		ln -s $SCRATCH_MNT/empty $filename
+> +		ino=`stat -c '%i' $filename`
+> +		nlink=0
+> +	elif [ $i == 7 ]; then
+> +		# orphan inode
+> +		touch $filename
+> +		ino=`stat -c '%i' $filename`
+> +		$F2FS_IO_PROG write 1 0 1 zero atomic_commit $filename 5000 >> $seqres.full 2>&1 &
+> +		stat $filename >> $seqres.full
+> +		rm $filename
+> +		$F2FS_IO_PROG shutdown 1 $SCRATCH_MNT/ >> $seqres.full
+> +		sleep 6
+> +		nlink=1
+> +	elif [ $i == 8 ]; then
+> +		# hardlink on file
+> +		touch $filename
+> +		ino=`stat -c '%i' $filename`
+> +		ln $filename $hardlink
+> +		nlink=0
+> +	elif [ $i == 9 ]; then
+> +		# hardlink on charactor
+> +		mknod $filename c 9 0
+> +		ino=`stat -c '%i' $filename`
+> +		ln $filename $hardlink
+> +		nlink=0
+> +	elif [ $i == 10 ]; then
+> +		# hardlink on blockdev
+> +		mknod $filename b 8 0
+> +		ino=`stat -c '%i' $filename`
+> +		ln $filename $hardlink
+> +		nlink=0
+> +	elif [ $i == 11 ]; then
+> +		# hardlink on pipe
+> +		mkfifo $filename
+> +		ino=`stat -c '%i' $filename`
+> +		ln $filename $hardlink
+> +		nlink=0
+> +	elif [ $i == 12 ]; then
+> +		# hardlink on socket
+> +		socket -s $filename >> $seqres.full 2>&1 &
+> +		pid=$!
+> +		sleep 2
+> +		ino=`stat -c '%i' $filename`
+> +		kill $pid >> $seqres.full 2>&1
+> +		ln $filename $hardlink
+> +		nlink=0
+> +	elif [ $i == 13 ]; then
+> +		# hardlink on symlink
+> +		ln -s $SCRATCH_MNT/empty $filename
+> +		ino=`stat -c '%i' $filename`
+> +		ln $filename $hardlink
+> +		nlink=0
+> +	fi
+> +
+> +	if [ $i != 7 ]; then
+> +		stat $SCRATCH_MNT/* >> $seqres.full
+> +	fi
+> +	echo "ino:"$ino >> $seqres.full
+> +	echo "nlink:"$nlink >> $seqres.full
+> +
+> +	_scratch_unmount
+> +
+> +	$F2FS_INJECT_PROG --node --mb i_links --nid $ino --val $nlink $SCRATCH_DEV \
+> +		>> $seqres.full || _fail "fail to inject"
+> +
+> +	export FSCK_OPTIONS="--dry-run"
 > +	_check_scratch_fs >>$seqres.full 2>&1 && _fail "can't find corruption"
 > +	_repair_scratch_fs >> $seqres.full
 > +	_check_scratch_fs
