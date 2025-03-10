@@ -1,80 +1,83 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC069223302
-	for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 08:03:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C71DE84E1C
+	for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 08:06:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741593790; cv=none; b=Fy6PJb3OcWjpuHW2RYMJUG4v0eTMYOI/AS2Uijt0jC7n5X8wZV2/b9A6eWC9IY9mQ0B6fB5ygUyguGQj3qL7yD2DpnmhRvGWNLubwgfFALaA2ma6HNAYLwNUQMEsaYyE9Fb/JGmAHCkCxNqV9RQDlc6Lr70kMyUndYETpvc7jYI=
+	t=1741594002; cv=none; b=G4nXzFzGo8j9gE0G0sGGFDI8bejtDAtamRMKwZlLdShbCLs/4fQ+YVApovNZ014kQyq+Uz5B9aE2QFbyiZ+2BIPb3xhOoGHRAKYJsCkjjhO1W5dBmyfBUv3JUmqnCNzcN3UGhW/gY05+IopoBpUzc1HlQdmmCPJGoMsosN91mwE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741593790; c=relaxed/simple;
-	bh=Mc3Ol7qT24BrzSkcrpvB1khbU6uyQizilgo1DtZ0qt4=;
+	s=arc-20240116; t=1741594002; c=relaxed/simple;
+	bh=93W6ybCwcYA7AqE4AGQacqgIe8KHvftkYc5f4XtCDwk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=tioi+VBYk3pteMUi8k1UerSodFFcykFTFuP0OIalysLlGYvYB7gjQDqy/wV4Bthx2ogQ/76fzThF4r58fLlbx5jyXDCNmz88F6bz1ojf0e+ne+IBc+5ITyoxnYUHU/i5hlBfGkJT0NkRHrhGAVfvHImuP5+3URv3S+CaUxen8Zk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZLue011P; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=h3bT3d9pgdRid84FgYst2pIgCFBOr/lYPo0Z9T6I5sgVo2wBtaGqte7INLkPa41D+jJ8c0a9bNQrRvkalWR+IFMRvVgRbxnHRm4hQxePRTcaRZuGADzjgYNHw3zBbicC55fiK/XHaZK3GTdvZVmoQrBNdxnW1mgcC4UELHhL/tg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=SJt47uIL; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZLue011P"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SJt47uIL"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1741593787;
+	s=mimecast20190719; t=1741593998;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=KUXALxltmaZpj+QULpZ9mOYplNM+oXSkx8amdFd68t0=;
-	b=ZLue011P3YPaWbUZfWggWrQ1rCc7z9FF8+vXWHOGWvPspDiM1makUCjPa/lFFjShPB8Qnz
-	n97XVRHoAsPycN7rGVUF6AeJmyyC8gxciGzd8UYHS7vZ/0s8vSWtHuVbryFX9msdzCstx3
-	/xnuGcZl1PUpovSC/NTJmRYq3zemleA=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=RCOLOU56jiLb/4wdgy3TIcrzpp/26Wu5xoarM9qeWc0=;
+	b=SJt47uILYl6R2MXsYZ1KOD2Bn5YjlR978EL9Jm2iJ2TyY/X9Bsr+KqQn6q76CXZr6IMLcZ
+	OfnYBhR0ugsk9rdfDpxs1aStFbTt74nihdYuKb+MepgZSljOlZvqia/Es9pUUwacHR39fx
+	mjpOC7PfDQITpK0yMKSFqaLJvRx+/T8=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-39-2FwlcsC5N8KSUesgrBs6KA-1; Mon, 10 Mar 2025 04:03:06 -0400
-X-MC-Unique: 2FwlcsC5N8KSUesgrBs6KA-1
-X-Mimecast-MFC-AGG-ID: 2FwlcsC5N8KSUesgrBs6KA_1741593785
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2ff52e1c56fso11946284a91.2
-        for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 01:03:06 -0700 (PDT)
+ us-mta-584-urUqFqcbOSav_fTNNTme_A-1; Mon, 10 Mar 2025 04:06:37 -0400
+X-MC-Unique: urUqFqcbOSav_fTNNTme_A-1
+X-Mimecast-MFC-AGG-ID: urUqFqcbOSav_fTNNTme_A_1741593996
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-2ff605a7a43so11950076a91.3
+        for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 01:06:37 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741593785; x=1742198585;
+        d=1e100.net; s=20230601; t=1741593996; x=1742198796;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=KUXALxltmaZpj+QULpZ9mOYplNM+oXSkx8amdFd68t0=;
-        b=hi/J76i8iuClxdK7ayshfSXFUgUnWBuip8czkSEKfE5WroeEqYvpOXlH3o9OIzBXCf
-         YqcdtC/TfRLG6zhkOFzyXPL7L+oyXaGStMV30IH3ahfSBSDhE4ekThvXNk8/nDovIZfg
-         BDYvigfdF/XFfxuSQNtdas3WKXRuY+P8ymS5QXjaxb9MpzIq18i2vUTIabgH8JiC6BFN
-         br+ZkM5mwFqpWeuS2tyVQCp7+Tms18jUtPNecexn8BLestvrQB0/fKA5CUYyG9rNeUjr
-         ejM6czaLueQZwYNFy4EZ5oQSrslmMoSOr/FymTXvf36GIBkjUQYWyzF3RNMBhucurdgN
-         4h3g==
-X-Forwarded-Encrypted: i=1; AJvYcCX6NlNaQIHMgWMe+sfu9Ry0dkjVFWCWhUMbNHG0LoBe/XDMFzLvv2MmsyzDAY7D6ApDmhB9dLco@vger.kernel.org
-X-Gm-Message-State: AOJu0YzFh7kMNKnFjjNIARRCVSr9m6JXoJh+w27EoB+XgAg0mGKDIg7b
-	FourpToDGiZUYoUBb/I2VC6wHP7JBshqRU2z3qKg20riGqnqrUkJIcZ3oqH1M3J/lmNQL2bQscZ
-	LOTOwtflwH5bVs+flWR8UDf3lB+GnVxESwQNYdOalB2m4xVIJ/FjgljT1F+Uaa64u4g==
-X-Gm-Gg: ASbGncu2BZj01fhdgjI/mNvwHoyKz8SfGGcrFUjIlH6hQ4q8QQFeuLF3RvvMAFbm/q7
-	TcmPfuWQxmC5KrYPJ7nnriSfjnWvUPZzJkeZK+1nDzxGbfa5govlN9XaBrLbhwVfA1kLvnyOdot
-	wyHBy2HB6BZQmgSBtRoR4S04jsdqW0hUM2QGij0F2Ug5Xj4QvZ0JrFuz80zK4BoBP8hs8ztQggx
-	cJLrFzs1kpM10DL8QeOYmTg/gV4y9l412SRb/bfamGuY+Lb12w8WTXjIyDkFHm1xx3tWKzOBSs1
-	aqfEpiqlFe5+0o0jjREqoECxVvqSOBfwMtgSaapTU2NPpf+6mWA+Aw3a
-X-Received: by 2002:a17:90b:4c44:b0:2fc:a3b7:1096 with SMTP id 98e67ed59e1d1-2ff7cf128c2mr19974608a91.27.1741593785168;
-        Mon, 10 Mar 2025 01:03:05 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IG/fPGQPoLD3g3f5weSujfZfGcb7ysyP5LcmQV0AwZdXmgjt59/dkPBihuAiaciymYjD7qtTw==
-X-Received: by 2002:a17:90b:4c44:b0:2fc:a3b7:1096 with SMTP id 98e67ed59e1d1-2ff7cf128c2mr19974570a91.27.1741593784695;
-        Mon, 10 Mar 2025 01:03:04 -0700 (PDT)
+        bh=RCOLOU56jiLb/4wdgy3TIcrzpp/26Wu5xoarM9qeWc0=;
+        b=TAyLgsVXEtA62WNuuIb5rZ8W94qRqlf3jskTF1qnsasX8VBXie2U9UHdoRyq2Q2DZk
+         T+TGO/dHwd9MefrqB0gweoh0shSY3PxE+ir443X75P7aDNLwaZyd3ntZ98y4ovCLT3y2
+         kaIBpF90sxiES9uQR2I+oEFZn6JQZC0T4BRYhAWeIKnVi6O54UAZMr7o2RBpCu5EL45S
+         7cWaLZ8Ix54zRWiKfEH+jgG73o73dBZU8ce3pQFkA1YPaQfaee1JKhb5IpC3KF7qoDYn
+         Rm6X3BCZpvDIKNE2/vGtYjoJMjFzzjZ2OqnKLmevDZkhL/fZXMdGLxj7i3EfKsymksgK
+         LXBQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWN9XUp6h2yBYTT2MzBn57vwYmZ0qqPQpTNkXsBZPqvCpYWw3GOfKaJaCpkGhB0YcZW6PyFh3LR@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw4xRxRD197E6FMCYhxJCoUinw1omN+Rhd5kgnG6Gy8RHYKPCp+
+	Vns+2+YQQfqkYONXMApX5gqN1GFV7TOWeaCfrh2+Y0HuREbGW9zkpB/5rqyI0ggdcoPh8RDYZKZ
+	mGtTv1H5iJRSXHDKgCelvmKyyEE0E2D05A9KXZ6ZKRRDy6+no+alxqI4=
+X-Gm-Gg: ASbGncs2gygCp4Dk+aa26uVzeF6M/W+guSTCWS2BVwoREKdj6yxUWKIN9tOIsfAAwBT
+	q4MiEGA0KgiK6PRMvX6LMG7zIgiXa1ZldT4rkTtH+T8BnriJ3bzqXi1BqfTZdf22inlrb6yOLlA
+	QdkVZsZaNeqYSzJFY+R942OID0iLvg8NNlh5mO+6FnzKB+e5kreXYCQ5u+tiYAKuxpWkFFmZ4iB
+	HkgWErN1zqz4X6k9Ix4lINYhJdMaGZRTDwyO5VQyM/jMMZ9T+ig5VY35CSJC5QSayypBR/DxGh3
+	NxUxjrKf6T1XfyVL7APjMmCNG69/CKU/CCddKBPh7XswhoY63sLSS7Y6
+X-Received: by 2002:a05:6a00:3d55:b0:736:52d7:daca with SMTP id d2e1a72fcca58-736aaadf019mr20663424b3a.18.1741593996269;
+        Mon, 10 Mar 2025 01:06:36 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IF3zepBp9E0MRImticocc6MTl8Bx7wo5uHRMcLdiudFO4r9G/SfjZxODbq9kG76X31x/uUrMQ==
+X-Received: by 2002:a05:6a00:3d55:b0:736:52d7:daca with SMTP id d2e1a72fcca58-736aaadf019mr20663391b3a.18.1741593995950;
+        Mon, 10 Mar 2025 01:06:35 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2ff693e7393sm7272399a91.31.2025.03.10.01.03.02
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-736cd220c5fsm2495334b3a.55.2025.03.10.01.06.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 10 Mar 2025 01:03:04 -0700 (PDT)
-Date: Mon, 10 Mar 2025 16:02:59 +0800
+        Mon, 10 Mar 2025 01:06:35 -0700 (PDT)
+Date: Mon, 10 Mar 2025 16:06:30 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Chao Yu <chao@kernel.org>
-Cc: David Disseldorp <ddiss@suse.de>, Zorro Lang <zlang@kernel.org>,
-	fstests@vger.kernel.org, jaegeuk@kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH 1/4] common/config: remove redundant export of
- F2FS_IO_PROG
-Message-ID: <20250310080259.6ormkanynd7l2yrd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250306081809.2397527-1-chao@kernel.org>
- <20250307145629.2b2c6e99.ddiss@suse.de>
- <20250310071636.gombdbhdfbqxwib5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org,
+	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
+	ritesh.list@gmail.com, ojaswin@linux.ibm.com, djwong@kernel.org,
+	zlang@kernel.org
+Subject: Re: [PATCH v1 2/2] check,common/{preamble,rc},soak: Decoupling
+ init_rc() call from sourcing common/rc
+Message-ID: <20250310080630.4lnscrcbaputlocv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1741248214.git.nirjhar.roy.lists@gmail.com>
+ <1d07e5657c2817c74e939894bb554424199fd290.1741248214.git.nirjhar.roy.lists@gmail.com>
+ <Z8oT_tBYG-a79CjA@dread.disaster.area>
+ <5c38f84d-cc60-49e7-951e-6a7ef488f9df@gmail.com>
+ <20250308072034.t7y2d3u4wgxvrhgd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -83,95 +86,79 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250310071636.gombdbhdfbqxwib5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20250308072034.t7y2d3u4wgxvrhgd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Mon, Mar 10, 2025 at 03:16:36PM +0800, Zorro Lang wrote:
-> On Fri, Mar 07, 2025 at 02:56:29PM +1100, David Disseldorp wrote:
-> > On Thu,  6 Mar 2025 16:18:06 +0800, Chao Yu wrote:
+On Sat, Mar 08, 2025 at 03:20:34PM +0800, Zorro Lang wrote:
+> On Fri, Mar 07, 2025 at 01:35:02PM +0530, Nirjhar Roy (IBM) wrote:
 > > 
-> > > F2FS_IO_PROG was been exported twice, remove the redudant one.
+> > On 3/7/25 03:00, Dave Chinner wrote:
+> > > On Thu, Mar 06, 2025 at 08:17:41AM +0000, Nirjhar Roy (IBM) wrote:
+> > > > Silently executing scripts during sourcing common/rc doesn't look good
+> > > > and also causes unnecessary script execution. Decouple init_rc() call
+> > > > and call init_rc() explicitly where required.
+> > > > 
+> > > > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> > > FWIW, I've just done somethign similar for check-parallel. I need to
+> > > decouple common/config from common/rc and not run any code from
+> > > either common/config or common/rc.
 > > > 
-> > > Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> > > Signed-off-by: Chao Yu <chao@kernel.org>
-> > > ---
-> > >  common/config | 1 -
-> > >  1 file changed, 1 deletion(-)
+> > > I've included the patch below (it won't apply because there's all
+> > > sorts of refactoring for test list and config-section parsing in the
+> > > series before it), but it should give you an idea of how I think we
+> > > should be separating one-off initialisation environment varaibles,
+> > > common code inclusion and the repeated initialisation of section
+> > > specific parameters....
+> > Thank you so much. I can a look at this.
 > > > 
-> > > diff --git a/common/config b/common/config
-> > > index 2afbda14..8d3047a5 100644
-> > > --- a/common/config
-> > > +++ b/common/config
-> > > @@ -191,7 +191,6 @@ export XFS_COPY_PROG="$(type -P xfs_copy)"
-> > >  export FSTRIM_PROG="$(type -P fstrim)"
-> > >  export DUMPE2FS_PROG="$(type -P dumpe2fs)"
-> > >  export RESIZE2FS_PROG="$(type -P resize2fs)"
-> > > -export F2FS_IO_PROG="$(type -P f2fs_io)"
-> > >  export FIO_PROG="$(type -P fio)"
-> > >  export FILEFRAG_PROG="$(type -P filefrag)"
-> > >  export E4DEFRAG_PROG="$(type -P e4defrag)"
+> > > .....
+> > > > diff --git a/soak b/soak
+> > > > index d5c4229a..5734d854 100755
+> > > > --- a/soak
+> > > > +++ b/soak
+> > > > @@ -5,6 +5,7 @@
+> > > >   # get standard environment, filters and checks
+> > > >   . ./common/rc
+> > > > +# ToDo: Do we need an init_rc() here? How is soak used?
+> > > >   . ./common/filter
+> > > I've also go a patch series that removes all these old 2000-era SGI
+> > > QE scripts that have not been used by anyone for the last 15
+> > > years. I did that to get rid of the technical debt that these
+> > > scripts have gathered over years of neglect. They aren't used, we
+> > > shouldn't even attempt to maintain them anymore.
 > > 
-> > Looks good. @Zorro, might as well squash in removal of the duplicate
-> > TIMEOUT_PROG export too.
+> > Okay. What do you mean by SGI QE script (sorry, not familiar with this)? Do
+> > you mean some kind of CI/automation-test script?
 > 
-> Sure, I roughly tried to find all duplication by:
+> SGI is Silicon Graphics International Corp. :
+> https://en.wikipedia.org/wiki/Silicon_Graphics_International
 > 
->   $ for prog in `sed -n "/export/s/export \(.*_PROG\)=.*/\1/p" common/config `;do n=`grep -E "\b$prog=" common/config|wc -l`;if [ $n -gt 1 ];then grep "\b$prog=" common/config;fi;done
-> 
-> Currently only found F2FS_IO_PROG and TIMEOUT_PROG. So I'll change this patch
-> commit to:
-> 
->   common/config: remove redundant export variables
-> 
->   F2FS_IO_PROG and TIMEOUT_PROG are exported twice, remove the
->   redundant one.
+> xfstests was created to test xfs on IRIX (https://en.wikipedia.org/wiki/IRIX)
+> of SGI. Dave Chinner worked in SGI company long time ago, so he's the expert
+> of all these things, and knows lots of past details :)
 
-Hi Chao,
+Hi Nirjhar,
 
-As you need to change patch 4/4 more. I thought you might change others, so
-please change this patch refer to below:)
+I've merged Dave's "[PATCH 0/5] fstests: remove old SGI QE scripts" into
+patches-in-queue branch. You can base on that to write your V2, to avoid
+dealing with the "soak" file.
 
 Thanks,
 Zorro
-
-Author: Chao Yu <chao@kernel.org>
-Date:   Thu Mar 6 16:18:06 2025 +0800
-
-    common/config: remove redundant export variables
-    
-    F2FS_IO_PROG and TIMEOUT_PROG are exported twice, remove the redudant
-    one.
-    
-    Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-    Signed-off-by: Chao Yu <chao@kernel.org>
-    Reviewed-by: David Disseldorp <ddiss@suse.de>
-
-
-diff --git a/common/config b/common/config
-index 2afbda141..aa5258250 100644
---- a/common/config
-+++ b/common/config
-@@ -191,7 +191,6 @@ export XFS_COPY_PROG="$(type -P xfs_copy)"
- export FSTRIM_PROG="$(type -P fstrim)"
- export DUMPE2FS_PROG="$(type -P dumpe2fs)"
- export RESIZE2FS_PROG="$(type -P resize2fs)"
--export F2FS_IO_PROG="$(type -P f2fs_io)"
- export FIO_PROG="$(type -P fio)"
- export FILEFRAG_PROG="$(type -P filefrag)"
- export E4DEFRAG_PROG="$(type -P e4defrag)"
-@@ -220,7 +219,6 @@ export UBIUPDATEVOL_PROG="$(type -P ubiupdatevol)"
- export THIN_CHECK_PROG="$(type -P thin_check)"
- export PYTHON3_PROG="$(type -P python3)"
- export SQLITE3_PROG="$(type -P sqlite3)"
--export TIMEOUT_PROG="$(type -P timeout)"
- export SETCAP_PROG="$(type -P setcap)"
- export GETCAP_PROG="$(type -P getcap)"
- export CAPSH_PROG="$(type -P capsh)"
 
 > 
 > Thanks,
 > Zorro
 > 
 > > 
-> > Reviewed-by: David Disseldorp <ddiss@suse.de>
+> > --NR
+> > 
+> > > 
+> > > -Dave.
+> > > 
+> > -- 
+> > Nirjhar Roy
+> > Linux Kernel Developer
+> > IBM, Bangalore
+> > 
 > > 
 
