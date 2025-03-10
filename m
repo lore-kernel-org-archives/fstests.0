@@ -1,164 +1,260 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C71DE84E1C
-	for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 08:06:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 356F12253E6
+	for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 09:46:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741594002; cv=none; b=G4nXzFzGo8j9gE0G0sGGFDI8bejtDAtamRMKwZlLdShbCLs/4fQ+YVApovNZ014kQyq+Uz5B9aE2QFbyiZ+2BIPb3xhOoGHRAKYJsCkjjhO1W5dBmyfBUv3JUmqnCNzcN3UGhW/gY05+IopoBpUzc1HlQdmmCPJGoMsosN91mwE=
+	t=1741599997; cv=none; b=Qa4/a4yP1tchVq5JSHRbUh1NlwDXubQJ6E03FtMQsm+fZIdGQx+hDL0IW0qYh+6q3Pp709NvP7kyHpnTyFTF/UBA+ZQLOQtOSvkDd26Gz4BTjySAPTcn0pb0YajKQwzmXKB7b0AvuD1e0p0QqmtYysf3aylWOoO0NHW915TJPIM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741594002; c=relaxed/simple;
-	bh=93W6ybCwcYA7AqE4AGQacqgIe8KHvftkYc5f4XtCDwk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=h3bT3d9pgdRid84FgYst2pIgCFBOr/lYPo0Z9T6I5sgVo2wBtaGqte7INLkPa41D+jJ8c0a9bNQrRvkalWR+IFMRvVgRbxnHRm4hQxePRTcaRZuGADzjgYNHw3zBbicC55fiK/XHaZK3GTdvZVmoQrBNdxnW1mgcC4UELHhL/tg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=SJt47uIL; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1741599997; c=relaxed/simple;
+	bh=dcXEUFug6D8brVanUiIMLLCorna/mNPQSinIVrWWZ3o=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=iqBRz8HiRlzHEVZ4IUifEBFgyjcqfgLYVODLk9U2cr2n4+3hrnN00KP5lvyDTCtp2I05j4upbfs6AfEWAQDbXZzpglYRULg9V8yBNJ3b4BFvkOYUWCsM8cm7x79xZdrFMRKRRjupPrlxHgeyBj6aJ7lXMJyNQWb9CS/HRgndwCk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=S0AsezGZ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SJt47uIL"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1741593998;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=RCOLOU56jiLb/4wdgy3TIcrzpp/26Wu5xoarM9qeWc0=;
-	b=SJt47uILYl6R2MXsYZ1KOD2Bn5YjlR978EL9Jm2iJ2TyY/X9Bsr+KqQn6q76CXZr6IMLcZ
-	OfnYBhR0ugsk9rdfDpxs1aStFbTt74nihdYuKb+MepgZSljOlZvqia/Es9pUUwacHR39fx
-	mjpOC7PfDQITpK0yMKSFqaLJvRx+/T8=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-584-urUqFqcbOSav_fTNNTme_A-1; Mon, 10 Mar 2025 04:06:37 -0400
-X-MC-Unique: urUqFqcbOSav_fTNNTme_A-1
-X-Mimecast-MFC-AGG-ID: urUqFqcbOSav_fTNNTme_A_1741593996
-Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-2ff605a7a43so11950076a91.3
-        for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 01:06:37 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741593996; x=1742198796;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=RCOLOU56jiLb/4wdgy3TIcrzpp/26Wu5xoarM9qeWc0=;
-        b=TAyLgsVXEtA62WNuuIb5rZ8W94qRqlf3jskTF1qnsasX8VBXie2U9UHdoRyq2Q2DZk
-         T+TGO/dHwd9MefrqB0gweoh0shSY3PxE+ir443X75P7aDNLwaZyd3ntZ98y4ovCLT3y2
-         kaIBpF90sxiES9uQR2I+oEFZn6JQZC0T4BRYhAWeIKnVi6O54UAZMr7o2RBpCu5EL45S
-         7cWaLZ8Ix54zRWiKfEH+jgG73o73dBZU8ce3pQFkA1YPaQfaee1JKhb5IpC3KF7qoDYn
-         Rm6X3BCZpvDIKNE2/vGtYjoJMjFzzjZ2OqnKLmevDZkhL/fZXMdGLxj7i3EfKsymksgK
-         LXBQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWN9XUp6h2yBYTT2MzBn57vwYmZ0qqPQpTNkXsBZPqvCpYWw3GOfKaJaCpkGhB0YcZW6PyFh3LR@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw4xRxRD197E6FMCYhxJCoUinw1omN+Rhd5kgnG6Gy8RHYKPCp+
-	Vns+2+YQQfqkYONXMApX5gqN1GFV7TOWeaCfrh2+Y0HuREbGW9zkpB/5rqyI0ggdcoPh8RDYZKZ
-	mGtTv1H5iJRSXHDKgCelvmKyyEE0E2D05A9KXZ6ZKRRDy6+no+alxqI4=
-X-Gm-Gg: ASbGncs2gygCp4Dk+aa26uVzeF6M/W+guSTCWS2BVwoREKdj6yxUWKIN9tOIsfAAwBT
-	q4MiEGA0KgiK6PRMvX6LMG7zIgiXa1ZldT4rkTtH+T8BnriJ3bzqXi1BqfTZdf22inlrb6yOLlA
-	QdkVZsZaNeqYSzJFY+R942OID0iLvg8NNlh5mO+6FnzKB+e5kreXYCQ5u+tiYAKuxpWkFFmZ4iB
-	HkgWErN1zqz4X6k9Ix4lINYhJdMaGZRTDwyO5VQyM/jMMZ9T+ig5VY35CSJC5QSayypBR/DxGh3
-	NxUxjrKf6T1XfyVL7APjMmCNG69/CKU/CCddKBPh7XswhoY63sLSS7Y6
-X-Received: by 2002:a05:6a00:3d55:b0:736:52d7:daca with SMTP id d2e1a72fcca58-736aaadf019mr20663424b3a.18.1741593996269;
-        Mon, 10 Mar 2025 01:06:36 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IF3zepBp9E0MRImticocc6MTl8Bx7wo5uHRMcLdiudFO4r9G/SfjZxODbq9kG76X31x/uUrMQ==
-X-Received: by 2002:a05:6a00:3d55:b0:736:52d7:daca with SMTP id d2e1a72fcca58-736aaadf019mr20663391b3a.18.1741593995950;
-        Mon, 10 Mar 2025 01:06:35 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-736cd220c5fsm2495334b3a.55.2025.03.10.01.06.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 10 Mar 2025 01:06:35 -0700 (PDT)
-Date: Mon, 10 Mar 2025 16:06:30 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org,
-	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
-	ritesh.list@gmail.com, ojaswin@linux.ibm.com, djwong@kernel.org,
-	zlang@kernel.org
-Subject: Re: [PATCH v1 2/2] check,common/{preamble,rc},soak: Decoupling
- init_rc() call from sourcing common/rc
-Message-ID: <20250310080630.4lnscrcbaputlocv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cover.1741248214.git.nirjhar.roy.lists@gmail.com>
- <1d07e5657c2817c74e939894bb554424199fd290.1741248214.git.nirjhar.roy.lists@gmail.com>
- <Z8oT_tBYG-a79CjA@dread.disaster.area>
- <5c38f84d-cc60-49e7-951e-6a7ef488f9df@gmail.com>
- <20250308072034.t7y2d3u4wgxvrhgd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="S0AsezGZ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 66F1AC4CEE5;
+	Mon, 10 Mar 2025 09:46:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1741599996;
+	bh=dcXEUFug6D8brVanUiIMLLCorna/mNPQSinIVrWWZ3o=;
+	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
+	b=S0AsezGZvFLFVMuXi6YOnxMPdTOqib/FVoMehJOJjiISnZlJXzO/OsM/aatzd+0j3
+	 qfEXourI+9XeaH6/b+YIDP1J4Rqhtna5BBOB+AW0peSb0oNPOXAnEoA5ObB5LyPtcO
+	 U4WyKLFCkAew1Sdd8wnhKunrHY7b8EtzS0EgJd1cGBYpz4XxpKRrWfIky39zefZ/5s
+	 OnI7FqXVEKGrlShMb7jNdzsMJj1UKFYrlZcOm4uAB+y+aFiJhsN6GRqr8N0fwQZK1d
+	 NzPhtaROeL82P1c1J3wZ1htM6G5RFzIVb+RW5EeZ+2reiitjihAnE9gPeM7f1MU6yf
+	 Fv3Te8V+uD+Qg==
+Message-ID: <16a90282-2245-4765-8d0e-a1bff48853a3@kernel.org>
+Date: Mon, 10 Mar 2025 17:46:32 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250308072034.t7y2d3u4wgxvrhgd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+User-Agent: Mozilla Thunderbird
+Cc: chao@kernel.org, Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+ jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH 4/4] f2fs/009: detect and repair nlink corruption
+To: David Disseldorp <ddiss@suse.de>
+References: <20250306081809.2397527-1-chao@kernel.org>
+ <20250306081809.2397527-4-chao@kernel.org>
+ <20250307150212.7cda01f2.ddiss@suse.de>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <20250307150212.7cda01f2.ddiss@suse.de>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Sat, Mar 08, 2025 at 03:20:34PM +0800, Zorro Lang wrote:
-> On Fri, Mar 07, 2025 at 01:35:02PM +0530, Nirjhar Roy (IBM) wrote:
-> > 
-> > On 3/7/25 03:00, Dave Chinner wrote:
-> > > On Thu, Mar 06, 2025 at 08:17:41AM +0000, Nirjhar Roy (IBM) wrote:
-> > > > Silently executing scripts during sourcing common/rc doesn't look good
-> > > > and also causes unnecessary script execution. Decouple init_rc() call
-> > > > and call init_rc() explicitly where required.
-> > > > 
-> > > > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-> > > FWIW, I've just done somethign similar for check-parallel. I need to
-> > > decouple common/config from common/rc and not run any code from
-> > > either common/config or common/rc.
-> > > 
-> > > I've included the patch below (it won't apply because there's all
-> > > sorts of refactoring for test list and config-section parsing in the
-> > > series before it), but it should give you an idea of how I think we
-> > > should be separating one-off initialisation environment varaibles,
-> > > common code inclusion and the repeated initialisation of section
-> > > specific parameters....
-> > Thank you so much. I can a look at this.
-> > > 
-> > > .....
-> > > > diff --git a/soak b/soak
-> > > > index d5c4229a..5734d854 100755
-> > > > --- a/soak
-> > > > +++ b/soak
-> > > > @@ -5,6 +5,7 @@
-> > > >   # get standard environment, filters and checks
-> > > >   . ./common/rc
-> > > > +# ToDo: Do we need an init_rc() here? How is soak used?
-> > > >   . ./common/filter
-> > > I've also go a patch series that removes all these old 2000-era SGI
-> > > QE scripts that have not been used by anyone for the last 15
-> > > years. I did that to get rid of the technical debt that these
-> > > scripts have gathered over years of neglect. They aren't used, we
-> > > shouldn't even attempt to maintain them anymore.
-> > 
-> > Okay. What do you mean by SGI QE script (sorry, not familiar with this)? Do
-> > you mean some kind of CI/automation-test script?
+On 3/7/25 12:02, David Disseldorp wrote:
+> Thanks for submitting the new test. It looks good aside from a few minor
+> things below...
 > 
-> SGI is Silicon Graphics International Corp. :
-> https://en.wikipedia.org/wiki/Silicon_Graphics_International
+> On Thu,  6 Mar 2025 16:18:09 +0800, Chao Yu wrote:
 > 
-> xfstests was created to test xfs on IRIX (https://en.wikipedia.org/wiki/IRIX)
-> of SGI. Dave Chinner worked in SGI company long time ago, so he's the expert
-> of all these things, and knows lots of past details :)
+>> This is a regression test to check whether fsck can handle corrupted
+>> nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
+>> and expects fsck.f2fs can detect such corruption and do the repair.
+>>
+>> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+>> Signed-off-by: Chao Yu <chao@kernel.org>
+>> ---
+>>  tests/f2fs/009     | 142 +++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/f2fs/009.out |   2 +
+>>  2 files changed, 144 insertions(+)
+>>  create mode 100755 tests/f2fs/009
+>>  create mode 100644 tests/f2fs/009.out
+>>
+>> diff --git a/tests/f2fs/009 b/tests/f2fs/009
+>> new file mode 100755
+>> index 00000000..8f6a3e11
+>> --- /dev/null
+>> +++ b/tests/f2fs/009
+>> @@ -0,0 +1,142 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
+>> +#
+>> +# FS QA Test No. f2fs/009
+>> +#
+>> +# This is a regression test to check whether fsck can handle corrupted
+>> +# nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
+>> +# and expects fsck.f2fs can detect such corruption and do the repair.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick
+>> +
+>> +_require_scratch
+> 
+> You should probably check for F2FS_INJECT_PROG and skip if not present.
+> Is it dependent on CONFIG_F2FS_FAULT_INJECTION? If so it'd be nice if
 
-Hi Nirjhar,
+It isn't dependent on CONFIG_F2FS_FAULT_INJECTION.
 
-I've merged Dave's "[PATCH 0/5] fstests: remove old SGI QE scripts" into
-patches-in-queue branch. You can base on that to write your V2, to avoid
-dealing with the "soak" file.
+> you could check for that too.
+> 
+> Flag the fix for the regression via e.g.:
+> _fixed_by_git_commit f2fs-tools 958cd6e
+> 
+>> +
+>> +dir=$SCRATCH_MNT
+> 
+> I think it'd be easier to follow if you dropped this alias and just used
+> $SCRATCH_MNT directly.
+> 
+>> +filename=$dir/foo
+>> +hardlink=$dir/bar
+>> +
+>> +for ((i=0;i<14;i++)) do
+>> +	echo "round: " $i >> $seqres.full
+>> +
+>> +	_scratch_mkfs "-f" >> $seqres.full
+>> +	_scratch_mount >> $seqres.full
+>> +
+>> +	if [ $i == 0 ]; then
+>> +		touch $filename
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+> 
+> Use "stat -c '%i'" instead of piping into awk. Also, it looks like this
+> is called in every round, so just move it after the elifs.
+> 
+>> +		nlink=0
+>> +	elif [ $i == 1 ]; then
+>> +		mkdir $filename
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+>> +		nlink=1
+>> +	elif [ $i == 2 ]; then
+>> +		mknod $filename c 9 0
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+>> +		nlink=0
+>> +	elif [ $i == 3 ]; then
+>> +		mknod $filename b 8 0
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+>> +		nlink=0
+>> +	elif [ $i == 4 ]; then
+>> +		mkfifo $filename
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+>> +		nlink=0
+>> +	elif [ $i == 5 ]; then
+>> +		socket -s $filename >> $seqres.full 2>&1 &
+>> +		pid=$!
+>> +		sleep 2
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+>> +		kill $pid >> $seqres.full 2>&1
+>> +		nlink=0
+>> +	elif [ $i == 6 ]; then
+>> +		ln -s $dir/empty $filename
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+>> +		nlink=0
+>> +	elif [ $i == 7 ]; then
+>> +		# orphan inode
+>> +		touch $filename
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+>> +		$F2FS_IO_PROG write 1 0 1 zero atomic_commit $filename 5000 >> $seqres.full 2>&1 &
+>> +		stat $filename >> $seqres.full
+>> +		rm $filename
+>> +		$F2FS_IO_PROG shutdown 1 $dir/ >> $seqres.full
+>> +		sleep 6
+>> +		nlink=1
+>> +	elif [ $i == 8 ]; then
+>> +		# hardlink on file
+>> +		touch $filename
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 9 ]; then
+>> +		# hardlink on charactor
+>> +		mknod $filename c 9 0
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 10 ]; then
+>> +		# hardlink on blockdev
+>> +		mknod $filename b 8 0
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 11 ]; then
+>> +		# hardlink on pipe
+>> +		mkfifo $filename
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 12 ]; then
+>> +		# hardlink on socket
+>> +		socket -s $filename >> $seqres.full 2>&1 &
+>> +		pid=$!
+>> +		sleep 2
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+>> +		kill $pid >> $seqres.full 2>&1
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 13 ]; then
+>> +		# hardlink on symlink
+>> +		ln -s $dir/empty $filename
+>> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	fi
+>> +
+>> +	if [ $i != 7 ]; then
+>> +		stat $dir/* >> $seqres.full
+>> +	fi
+>> +	echo "ino:"$ino >> $seqres.full
+>> +	echo "nlink:"$nlink >> $seqres.full
+>> +
+>> +	_scratch_unmount
+>> +
+>> +	$F2FS_INJECT_PROG --node --mb i_links --nid $ino --val $nlink $SCRATCH_DEV >> $seqres.full
+>> +	if [ $? != 0 ]; then
+>> +		exit
+>> +	fi
+> 
+> xfstests failures are normally triggered via golden output mismatch
+> instead of explicit status checks or _fail calls... Can you filter the
+> inject / repair output so that it ends up in the golden output for
+> comparison?
+
+I tried to avoid filting inject/repair outputs and compare the output w/
+golden output in 009.out, since I'm not sure whether the output will change
+or not later in f2fs-tools...
+
+Will fix all others according to your comments, thanks a lot for the comments.
 
 Thanks,
-Zorro
 
 > 
-> Thanks,
-> Zorro
+>> +	export FSCK_OPTIONS="-f"
+>> +	_repair_scratch_fs >> $seqres.full
+>> +	if [ $? != 1 ]; then
+>> +		_fail "fsck can not detect and repair zero nlink corruption "$i
+>> +		exit
+>> +	fi
+>> +
+>> +	export FSCK_OPTIONS=""
+>> +	_check_scratch_fs >> $seqres.full
+>> +	if [ $? != 0 ]; then
+>> +		_fail "fsck hasn't fixed nlink corruption "$i
+>> +		exit
+>> +	fi
+>> +
+>> +	_scratch_mount >> $seqres.full
+>> +	_scratch_unmount
+>> +done
+>> +
+>> +echo "Silence is golden"
+>> +
+>> +status=0
+>> +exit
+>> diff --git a/tests/f2fs/009.out b/tests/f2fs/009.out
+>> new file mode 100644
+>> index 00000000..7e977155
+>> --- /dev/null
+>> +++ b/tests/f2fs/009.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 009
+>> +Silence is golden
 > 
-> > 
-> > --NR
-> > 
-> > > 
-> > > -Dave.
-> > > 
-> > -- 
-> > Nirjhar Roy
-> > Linux Kernel Developer
-> > IBM, Bangalore
-> > 
-> > 
 
