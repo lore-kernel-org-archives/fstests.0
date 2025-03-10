@@ -1,78 +1,78 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C7102356AB
-	for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 18:30:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6EEA82356AA
+	for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 18:30:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741631406; cv=none; b=Kco7Ujr9uMG+0rsDetm5cofT22ykVG7wRsvSx8ZY9HcPfl7XpdgoAHPf9NkogSG2KDqgG7wcdb+OGRUH9Ykdl+Fxbiy4efp08QdK5cdldgUfPaJJ5QqBpCQNBa8JHVHZ+OEyVoJJkpQmjYPEyZLUbSCypLJVuLl2IKcke0xFB88=
+	t=1741631407; cv=none; b=cNV5HgSrXFUKcT21cBfhcaJ5Pq9+DQx5CFU04u00dVLwjx1B1B3IAgf9OcykGaaQuPtFpmU7RA0tg9Ijmhf1xVrxMqc9tVAbS4hzdiP/2wPHyUZG8YCHv93zkfTB9AAIeCYic2Ze+JRG43TZz2nEeofwJ6qEF8CJ54VN4B2Mt4A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741631406; c=relaxed/simple;
-	bh=0t9BCgW7QPQlncTRz5pkKuwmjAjcun4gJbJwI+1/oGI=;
+	s=arc-20240116; t=1741631407; c=relaxed/simple;
+	bh=jBdY0mo2vgWMSmvDnelDdrM9/pN4RUvOPj9hbeyurr4=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=BL78QzqIPPgJnXszcoE4cwnQzChFD00pmbyiHCK0LVd7LSD/+pIifoLDqFI8dbDSq7b4heUmMKR4gGMGIQ/dpd0HLjMAkzAVHO8ENwOo3XG/czBXTPF4XO/IQadFUZDoFZDejVYdJ3bPUtrjn1HfZdFONmm4jBuba0yuKzWIBuk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=P24MmAbz; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=ndwHX9ygggfMogmOF4qn8oY5wKUjS6OiSKbCF/pf2hzu0RVbhRauJKsvB6GLwjDWGyAbLnn6IV+NOtqSTgVSpdDLfr3T9nTWMVRfo1En2Qt0qVlqULzdWfHV2BNHkhq5lekPqHiFjssgOMZuwrPgKuxaINEGYcEpSDbWe1WBMfw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=LxlqdLT6; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="P24MmAbz"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LxlqdLT6"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1741631403;
+	s=mimecast20190719; t=1741631404;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=vZYxbXAxz4FnZhUraCDTh0jfDoW7Ipx7CtPh87NNppI=;
-	b=P24MmAbz177kOMHsGmflr+vYuPs9FJUj3Ge+tkoRPHDfr84zxHUk7upQB4xSpIdNQg0jCG
-	TPMW1DrhFJurc+VELBSM/FflER/h2F1AFg+XWNqKMkIrxEgiiWsJ3FMZTWwaPKenUSgcTc
-	LHkEuDcRP4lQlMNyoKhDmTYa0RFFb24=
-Received: from mail-io1-f70.google.com (mail-io1-f70.google.com
- [209.85.166.70]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=7Oz2FBjvUAa5LzJk847xEj48krMp/+FjZ6+AxKkihX4=;
+	b=LxlqdLT6lr4RXu/+zCwd69tKS/IioOeobQ2Evx9kdKDKeTqhBbrgnoXie97P+bTZRg379O
+	oDXz4SPPlJlULF4e7fizuJ04w5LDiWIBXohwCLhWVZ2hoHIi4h5j8Cjlp3eGUecmldx2YX
+	MceM71KStdhuWYIpwObDqnLv+8BawsQ=
+Received: from mail-il1-f199.google.com (mail-il1-f199.google.com
+ [209.85.166.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-300-MUIr3eQDPB6Rxb1Xjm5w4w-1; Mon, 10 Mar 2025 14:30:02 -0400
-X-MC-Unique: MUIr3eQDPB6Rxb1Xjm5w4w-1
-X-Mimecast-MFC-AGG-ID: MUIr3eQDPB6Rxb1Xjm5w4w_1741631401
-Received: by mail-io1-f70.google.com with SMTP id ca18e2360f4ac-85b37197e83so164190439f.2
-        for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 11:30:02 -0700 (PDT)
+ us-mta-663-0jbiRh5PMNavDqD-r_OnCQ-1; Mon, 10 Mar 2025 14:30:03 -0400
+X-MC-Unique: 0jbiRh5PMNavDqD-r_OnCQ-1
+X-Mimecast-MFC-AGG-ID: 0jbiRh5PMNavDqD-r_OnCQ_1741631402
+Received: by mail-il1-f199.google.com with SMTP id e9e14a558f8ab-3d2a6b4b2d4so83201495ab.2
+        for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 11:30:03 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741631401; x=1742236201;
+        d=1e100.net; s=20230601; t=1741631402; x=1742236202;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=vZYxbXAxz4FnZhUraCDTh0jfDoW7Ipx7CtPh87NNppI=;
-        b=J9Ei4/ph3v0j0GEiVee1lRPshyCQPjanJCC+Q0oRumQtUsU1B4HUhbCo+rxTrbyBjm
-         9oMkZPGQmZlaCFMD0si4navjuumZISnoOMW+kN012wx+ehjDreXpOvluObyIsTsxShdk
-         97fxkXoM7cYb38CtDG8C9YZxQQTtQ1AjZGkh0g9NrvXSO+a85LD8FUtlnby+6m758nqr
-         rCyMYkeb/PrygdgS3nHOq3LsH7sqzISUoRMjrBzq/MgKMHQPKGAVq59A7hH7hA6Nijc0
-         3TAOmx2HpN+qiSg61v+y2B0LDbk/CZraodY+C8eoTCCjDu4uazGM0vbT6eWCLEgZfOYM
-         W04w==
-X-Gm-Message-State: AOJu0YwOpgEVDCD7EhtWzTawpZFaMK2uoIDkpSjHy9qluC+oLEurZwLb
-	7sXcrl3iuTSIpl5Q0gkXRq/Hb4gOHSo0FwTJmdpD4mS0YB9uW90UNh3aXI+l1UL/RKtsoPspKwq
-	ea4DSsiscLSIDOjrlgw+v9Vwk3lBpTIARK1m6OMt+xW/y5aFM4euTh+L51sOxn1OO6AqnRS+rAV
-	sgP7A/v7KGlyHww4xmX1al94OjLlhI7zvS3sSub9hA
-X-Gm-Gg: ASbGncsny7WW72TxVR9WktQxdYYq7cpduR33sLaaeEEOKrhovHu1s+NdTnzZ0YCjv/X
-	ICkWyfOa/DmBPfJWto3cJeVV/RyuPufvapg56LQu6mrVrbVq6+BRocjzaxw/e5hIQWMO6rriNyY
-	q98uD4qrI3fYyxUySN09h8vjTvA3Av4HR2kNRBtOLV1tKzpGSIXc+ygZ94QfeC2Hn1Rob3SYBiC
-	xf8uXv3//FDAQ/IoqSxAQGbXYwCiNpLYmrbnn3xNWu3TOD52JG5IhDxYXSx5sx1eNV+1X3gfyJO
-	tfGQMHWy2ylTghPeB5+RCADADo2zgBs=
-X-Received: by 2002:a05:6602:6a8a:b0:85b:4afc:11d1 with SMTP id ca18e2360f4ac-85b4afc1399mr633957639f.5.1741631401335;
+        bh=7Oz2FBjvUAa5LzJk847xEj48krMp/+FjZ6+AxKkihX4=;
+        b=D2viTYyyzemNXe4QNrrj6jKL/ZBb+1FMCQn4La8sR68Bgexp8fhychSgqd3TE7A7bl
+         A9yzfN1DbnDDO+4ZmNz0fM9P7ZTprAJQkNWvLWijeKVVEg3ylGgs9nxa5EF7ef+AN11f
+         gITLZawshKzeF2NA3vzUz79jQ+JVTvW1zbbCl7Rrh3ggCB2+ebhpqpoUUoIDRKqIkx/m
+         1xiVEyTbryjrL+YjJJhGBDloqfR1//+h09t5cLFx63q46Tk+ix7oi//pwFOqxQ3xmdkB
+         bmG2sUnusxfbe76xnmGLlTFaE73kTNtUtH2HXJHLENJusv9vvm4KtiMCoerA3bjwC7tn
+         vrgA==
+X-Gm-Message-State: AOJu0YwKY9Y66BwFq8eM6uqgyH3wmDAsr/zXOtjHMmzjR+9ivptcjnaQ
+	TCAuADfCXLF33vnLUzMW86mnKo4OE/csYVfnFZ3VOtZaJKwGZUS97GoW3A/dbeVDzKPlHOcUU0P
+	Gvet1jVJ4fi6SO7XGgLCOKzfcJGuqtJqqris5vcmA+a7GgV782/P6YkHk6Kk5QBQwWbS+3gjwOk
+	Zvbvsf7N+2036kN1+cL4HyUIceWkAizSOakaqrMSmh
+X-Gm-Gg: ASbGncs99j4J+fEoasmEeLnDL7BpX0Om6ep3tra/eSTHel81SaKi+pu+UPZSXdnpchp
+	RcgXTFWAZJRalCAUM/RKht/32k0id/+hOiq58VKlRf1LDbjnKLwgHaoe4XutejNFdt0hNY2kujq
+	rL3eHr+RsLsYJSDf4mh7it8BE6MOY8EwBpXDS9TmAihmDl8wGQQkMSqRyW0aVGJL9rLm4A5PRTP
+	gC9vqk7YlirHfarJmegOc9LjW/YSCsEfSQ4i2aP840Rls729YG7p0RU34y2tujXA+0/ZzG8L/+S
+	an4B/CNTFnRuJpsjHKtLCY+754N0qnI=
+X-Received: by 2002:a05:6e02:1aaa:b0:3d4:3d63:e076 with SMTP id e9e14a558f8ab-3d44192e5f9mr204817935ab.18.1741631402439;
+        Mon, 10 Mar 2025 11:30:02 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IH2EZ2cRwM+hF1ITF8lv8BIyCdRDQqEuqubnekLrwUN1QPAwEX/+WpOGaaYvc1Tk/EI87Wk2w==
+X-Received: by 2002:a05:6e02:1aaa:b0:3d4:3d63:e076 with SMTP id e9e14a558f8ab-3d44192e5f9mr204817585ab.18.1741631401962;
         Mon, 10 Mar 2025 11:30:01 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IF315xHqr/2TzlOLv2q9RJN26/2xg2p2aaZqB3teqvXqtKfchY9hLoULhA3ca7yFlGesQ0n2w==
-X-Received: by 2002:a05:6602:6a8a:b0:85b:4afc:11d1 with SMTP id ca18e2360f4ac-85b4afc1399mr633953839f.5.1741631400964;
-        Mon, 10 Mar 2025 11:30:00 -0700 (PDT)
 Received: from fedora-rawhide.sandeen.net ([65.128.97.82])
-        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4f222ee2efdsm1587512173.13.2025.03.10.11.30.00
+        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4f222ee2efdsm1587512173.13.2025.03.10.11.30.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 10 Mar 2025 11:30:00 -0700 (PDT)
+        Mon, 10 Mar 2025 11:30:01 -0700 (PDT)
 From: Eric Sandeen <sandeen@redhat.com>
 To: fstests@vger.kernel.org
 Cc: djwong@kernel.org,
 	hch@infradead.org,
 	Eric Sandeen <sandeen@redhat.com>,
 	Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 4/7] lib: fix empty arg function prototypes
-Date: Mon, 10 Mar 2025 13:29:06 -0500
-Message-ID: <20250310182954.1396724-5-sandeen@redhat.com>
+Subject: [PATCH 5/7] lib: replace aiocb_t with struct aiocb
+Date: Mon, 10 Mar 2025 13:29:07 -0500
+Message-ID: <20250310182954.1396724-6-sandeen@redhat.com>
 X-Mailer: git-send-email 2.48.0
 In-Reply-To: <20250310182954.1396724-1-sandeen@redhat.com>
 References: <20250310182954.1396724-1-sandeen@redhat.com>
@@ -84,116 +84,50 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Several function prototypes used () when in fact they take
-arguments. Fix those to make sparse happy.
+aiocb_t isn't defined anywhere, use struct aiocb instead,
+to make sparse happy.
 
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 Reviewed-by: Christoph Hellwig <hch@lst.de>
 ---
- include/random_range.h | 2 +-
- include/write_log.h    | 2 +-
- lib/random_range.c     | 6 ++----
- lib/string_to_tokens.c | 1 -
- lib/tlibio.c           | 2 +-
- lib/write_log.c        | 2 +-
- 6 files changed, 6 insertions(+), 9 deletions(-)
+ lib/tlibio.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
-diff --git a/include/random_range.h b/include/random_range.h
-index b47aef9e..c352c5a9 100644
---- a/include/random_range.h
-+++ b/include/random_range.h
-@@ -6,7 +6,7 @@
- #ifndef _RANDOM_RANGE_H_
- #define _RANDOM_RANGE_H_
- 
--int       parse_ranges     ( char *, int, int, int, int (*)(), char **, char ** );
-+int       parse_ranges     ( char *, int, int, int, int (*)(char *, int *), char **, char ** );
- int       range_min        ( char *, int );
- int       range_max        ( char *, int );
- int       range_mult       ( char *, int );
-diff --git a/include/write_log.h b/include/write_log.h
-index 6b088416..a7ad2ee4 100644
---- a/include/write_log.h
-+++ b/include/write_log.h
-@@ -125,7 +125,7 @@ extern int	wlog_close(struct wlog_file *wfile);
- extern int	wlog_record_write(struct wlog_file *wfile,
- 				  struct wlog_rec *wrec, long offset);
- extern int	wlog_scan_backward(struct wlog_file *wfile, int nrecs,
--				   int (*func)(struct wlog_rec *rec),
-+				   int (*func)(struct wlog_rec *rec, long data),
- 				   long data);
- #else
- int	wlog_open();
-diff --git a/lib/random_range.c b/lib/random_range.c
-index 680bf71c..0b38eb7f 100644
---- a/lib/random_range.c
-+++ b/lib/random_range.c
-@@ -69,7 +69,7 @@ struct range {
-  * parse_range() returns -1 on error, or the number of ranges parsed.
-  */
- 
--static int       str_to_int();
-+static int       str_to_int(char *str, int *ip);
- static long long divider(long long, long long, long long, long long);
- 
- int
-@@ -78,7 +78,7 @@ parse_ranges(
- 	int defmin,
- 	int defmax,
- 	int defmult,
--	int (*parse_func)(),
-+	int (*parse_func)(char *str, int *ip),
- 	char **rangeptr,
- 	char **errptr)
- {
-@@ -570,8 +570,6 @@ printf("   diff = %lld, half = %lld,   med = %lld\n", diff, half, med);
- void
- random_range_seed(long s)
- {
--    extern void srand48();
--
-     srand48(s);
- }
- 
-diff --git a/lib/string_to_tokens.c b/lib/string_to_tokens.c
-index 08df9fcc..8383ed4c 100644
---- a/lib/string_to_tokens.c
-+++ b/lib/string_to_tokens.c
-@@ -54,7 +54,6 @@ int
- string_to_tokens(char *arg_string, char *arg_array[], int array_size, char *separator)
- {
-    int num_toks = 0;  /* number of tokens found */
--   char *strtok();
- 	
-    if ( arg_array == NULL || array_size <= 1 || separator == NULL )
- 	return -1;
 diff --git a/lib/tlibio.c b/lib/tlibio.c
-index 17ab34ee..75f10cec 100644
+index 75f10cec..9d852ff0 100644
 --- a/lib/tlibio.c
 +++ b/lib/tlibio.c
-@@ -75,7 +75,7 @@
+@@ -42,6 +42,7 @@
+  *
+  */
  
- 
- #ifndef __linux__
--static void lio_async_signal_handler();
-+static void lio_async_signal_handler(int sig);
- #endif
- 
- /*
-diff --git a/lib/write_log.c b/lib/write_log.c
-index 32567a1c..eb3fa2b3 100644
---- a/lib/write_log.c
-+++ b/lib/write_log.c
-@@ -217,7 +217,7 @@ int
- wlog_scan_backward(
- 	struct wlog_file	*wfile,
- 	int 			nrecs,
--	int 			(*func)(),
-+	int 			(*func)(struct wlog_rec *, long data),
- 	long			data)
++#include <aio.h>
+ #include <stdio.h>
+ #include <ctype.h>
+ #include <fcntl.h>
+@@ -810,7 +811,7 @@ lio_read_buffer(
+  * (rrl 04/96)
+  ***********************************************************************/
+ int
+-lio_check_asyncio(char *io_type, int size, aiocb_t *aiocbp, int method)
++lio_check_asyncio(char *io_type, int size, const struct aiocb *aiocbp, int method)
  {
- 	int			fd, leftover, nbytes, offset, recnum, reclen;
+     int ret;
+     int cnt = 1;
+@@ -895,9 +896,10 @@ lio_check_asyncio(char *io_type, int size, aiocb_t *aiocbp, int method)
+  * (rrl 04/96)
+  ***********************************************************************/
+ int
+-lio_wait4asyncio(int method, int fd, aiocb_t *aiocbp)
++lio_wait4asyncio(int method, int fd, const struct aiocb *aiocbp)
+ {
+-    int cnt;
++    struct aiocb *const aioary[1];
++    int cnt, ret;
+ 
+     if ( (method & LIO_WAIT_RECALL)
+ 	|| ((method & LIO_WAIT_TYPES) == 0) ){
 -- 
 2.48.0
 
