@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 356F12253E6
-	for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 09:46:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA2F122576A
+	for <fstests@vger.kernel.org>; Mon, 10 Mar 2025 09:59:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741599997; cv=none; b=Qa4/a4yP1tchVq5JSHRbUh1NlwDXubQJ6E03FtMQsm+fZIdGQx+hDL0IW0qYh+6q3Pp709NvP7kyHpnTyFTF/UBA+ZQLOQtOSvkDd26Gz4BTjySAPTcn0pb0YajKQwzmXKB7b0AvuD1e0p0QqmtYysf3aylWOoO0NHW915TJPIM=
+	t=1741600768; cv=none; b=BVvJCf9mSF4+OVyXH6+rmLft5J+8ujDPuLcRfH+SDnHTnhun5EM5WpIjFEfmGXfoYwVOr6ubrcp4FSa2KudDxNcl0HS1kebTPEFMhZGqjMCxCvJbtjX4VaTBa5Ff261xuaTeFZrB/3/2uaLITWS5YTtPq1MHiU5dhwYj2SM0RgE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741599997; c=relaxed/simple;
-	bh=dcXEUFug6D8brVanUiIMLLCorna/mNPQSinIVrWWZ3o=;
+	s=arc-20240116; t=1741600768; c=relaxed/simple;
+	bh=Z3q0VNDQQJqiKLtoo0JN0jgPsoXgNcXUyw1rKUaKMO4=;
 	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=iqBRz8HiRlzHEVZ4IUifEBFgyjcqfgLYVODLk9U2cr2n4+3hrnN00KP5lvyDTCtp2I05j4upbfs6AfEWAQDbXZzpglYRULg9V8yBNJ3b4BFvkOYUWCsM8cm7x79xZdrFMRKRRjupPrlxHgeyBj6aJ7lXMJyNQWb9CS/HRgndwCk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=S0AsezGZ; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=MQ/z9eMfW/Avgo27zXuNlC47bN795N7d4X/sq3xlmb/uNxvkzJ18ZyHwoAVjFdFVEkNV2u+11Cqq9MwfJd12PpkKJh2ftL94ax9JXuKAIyfrRXX854DmW7mm/HIeHH/6erxnhDF4rLgWpBBJb8NgY6SNOQX2yNcxAMxsByXFpHU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YmnZSVQA; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="S0AsezGZ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 66F1AC4CEE5;
-	Mon, 10 Mar 2025 09:46:35 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YmnZSVQA"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2A0C7C4CEE5;
+	Mon, 10 Mar 2025 09:59:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1741599996;
-	bh=dcXEUFug6D8brVanUiIMLLCorna/mNPQSinIVrWWZ3o=;
+	s=k20201202; t=1741600767;
+	bh=Z3q0VNDQQJqiKLtoo0JN0jgPsoXgNcXUyw1rKUaKMO4=;
 	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
-	b=S0AsezGZvFLFVMuXi6YOnxMPdTOqib/FVoMehJOJjiISnZlJXzO/OsM/aatzd+0j3
-	 qfEXourI+9XeaH6/b+YIDP1J4Rqhtna5BBOB+AW0peSb0oNPOXAnEoA5ObB5LyPtcO
-	 U4WyKLFCkAew1Sdd8wnhKunrHY7b8EtzS0EgJd1cGBYpz4XxpKRrWfIky39zefZ/5s
-	 OnI7FqXVEKGrlShMb7jNdzsMJj1UKFYrlZcOm4uAB+y+aFiJhsN6GRqr8N0fwQZK1d
-	 NzPhtaROeL82P1c1J3wZ1htM6G5RFzIVb+RW5EeZ+2reiitjihAnE9gPeM7f1MU6yf
-	 Fv3Te8V+uD+Qg==
-Message-ID: <16a90282-2245-4765-8d0e-a1bff48853a3@kernel.org>
-Date: Mon, 10 Mar 2025 17:46:32 +0800
+	b=YmnZSVQA9+m0LIV4kJ4RJlWP199iAdJ29LWn4mMZU80vyrh4dBTs+NwYLRg84IdT9
+	 J/SFMLp2IQ7/TW7ikW2fS8wK8dMHZQxUvq/gTM4uN6AKo+HOUpF/lDqAvWPdGyuZga
+	 ypLQibmyQYkJp+WlKQiF7GAMXRae1yM8vV71wBiu4FK9l7Y3QY0wOiVGQMxfCyKmCR
+	 4uUtnQR1Wnz9fDm69rK3II3FWIsBy/c+m6hdU/yTPMaQCT1Tm2qoKIBGH9N2DOgwTM
+	 4/9fOU/VOqW0M/Y92hQNlCPDRCABondjuNLxPeZ0OYYffccnqfYCPkN24o8+tg4cdE
+	 NzZobEs+OaitA==
+Message-ID: <c62943db-6169-462a-95a0-15fb2d5bc079@kernel.org>
+Date: Mon, 10 Mar 2025 17:59:23 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -38,22 +38,18 @@ User-Agent: Mozilla Thunderbird
 Cc: chao@kernel.org, Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
  jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
 Subject: Re: [PATCH 4/4] f2fs/009: detect and repair nlink corruption
-To: David Disseldorp <ddiss@suse.de>
+To: Zorro Lang <zlang@redhat.com>
 References: <20250306081809.2397527-1-chao@kernel.org>
  <20250306081809.2397527-4-chao@kernel.org>
- <20250307150212.7cda01f2.ddiss@suse.de>
+ <20250310080006.rkvoxu55fe3qlxmd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Content-Language: en-US
 From: Chao Yu <chao@kernel.org>
-In-Reply-To: <20250307150212.7cda01f2.ddiss@suse.de>
+In-Reply-To: <20250310080006.rkvoxu55fe3qlxmd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 3/7/25 12:02, David Disseldorp wrote:
-> Thanks for submitting the new test. It looks good aside from a few minor
-> things below...
-> 
-> On Thu,  6 Mar 2025 16:18:09 +0800, Chao Yu wrote:
-> 
+On 3/10/25 16:00, Zorro Lang wrote:
+> On Thu, Mar 06, 2025 at 04:18:09PM +0800, Chao Yu wrote:
 >> This is a regression test to check whether fsck can handle corrupted
 >> nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
 >> and expects fsck.f2fs can detect such corruption and do the repair.
@@ -61,6 +57,15 @@ On 3/7/25 12:02, David Disseldorp wrote:
 >> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
 >> Signed-off-by: Chao Yu <chao@kernel.org>
 >> ---
+> 
+> Hi Chao,
+> 
+> I planned to merge patch 1~3 at first. But as you need to change this
+> patch more, and might need to change other patches, so how about you
+> send v2 with all this patchset. I'll wait your v2 :)
+> 
+> Some review points as below...
+> 
 >>  tests/f2fs/009     | 142 +++++++++++++++++++++++++++++++++++++++++++++
 >>  tests/f2fs/009.out |   2 +
 >>  2 files changed, 144 insertions(+)
@@ -87,23 +92,8 @@ On 3/7/25 12:02, David Disseldorp wrote:
 >> +_begin_fstest auto quick
 >> +
 >> +_require_scratch
-> 
-> You should probably check for F2FS_INJECT_PROG and skip if not present.
-> Is it dependent on CONFIG_F2FS_FAULT_INJECTION? If so it'd be nice if
-
-It isn't dependent on CONFIG_F2FS_FAULT_INJECTION.
-
-> you could check for that too.
-> 
-> Flag the fix for the regression via e.g.:
-> _fixed_by_git_commit f2fs-tools 958cd6e
-> 
 >> +
 >> +dir=$SCRATCH_MNT
-> 
-> I think it'd be easier to follow if you dropped this alias and just used
-> $SCRATCH_MNT directly.
-> 
 >> +filename=$dir/foo
 >> +hardlink=$dir/bar
 >> +
@@ -111,15 +101,32 @@ It isn't dependent on CONFIG_F2FS_FAULT_INJECTION.
 >> +	echo "round: " $i >> $seqres.full
 >> +
 >> +	_scratch_mkfs "-f" >> $seqres.full
+> 
+> Can we give "-f" to _scratch_mkfs "f2fs" part? Likes:
+
+Looks better,
+
+> 
+>   diff --git a/common/rc b/common/rc
+>   index bf24da4eb..cafe2f3dd 100644
+>   --- a/common/rc
+>   +++ b/common/rc
+>   @@ -993,7 +993,7 @@ _scratch_mkfs()
+>                   mkfs_filter="grep -v -e ^Warning: -e \"^mke2fs \""
+>                   ;;
+>           f2fs)
+>   -               mkfs_cmd="$MKFS_F2FS_PROG"
+>   +               mkfs_cmd="$MKFS_F2FS_PROG -f"
+>                   mkfs_filter="cat"
+>                   ;;
+> 
+> 
+> 
 >> +	_scratch_mount >> $seqres.full
 >> +
 >> +	if [ $i == 0 ]; then
 >> +		touch $filename
 >> +		ino=`stat $filename | awk '/Inode:/ {print $4}'`
-> 
-> Use "stat -c '%i'" instead of piping into awk. Also, it looks like this
-> is called in every round, so just move it after the elifs.
-> 
 >> +		nlink=0
 >> +	elif [ $i == 1 ]; then
 >> +		mkdir $filename
@@ -211,36 +218,71 @@ It isn't dependent on CONFIG_F2FS_FAULT_INJECTION.
 >> +	if [ $? != 0 ]; then
 >> +		exit
 >> +	fi
-> 
-> xfstests failures are normally triggered via golden output mismatch
-> instead of explicit status checks or _fail calls... Can you filter the
-> inject / repair output so that it ends up in the golden output for
-> comparison?
-
-I tried to avoid filting inject/repair outputs and compare the output w/
-golden output in 009.out, since I'm not sure whether the output will change
-or not later in f2fs-tools...
-
-Will fix all others according to your comments, thanks a lot for the comments.
-
-Thanks,
-
-> 
+>> +
 >> +	export FSCK_OPTIONS="-f"
+> 
+> You've set below code in _repair_scratch_fs():
+> 
+>     f2fs)
+>         fsck -t $FSTYP -f $SCRATCH_DEV
+>         ;;
+> 
+> The FSCK_OPTIONS="-f" is useless.
+> 
 >> +	_repair_scratch_fs >> $seqres.full
 >> +	if [ $? != 1 ]; then
+> 
+> What does $?=1 mean? Does $?=1 mean finding corruption and fixed, $?=0 mean no corruption?
+
+That's correct.
+
+> 
+> If you want to detect there's a corruption, then fix it, then check if it's fixed. How about
+> calling _check_scratch_fs at first to get the corruption error you expect, then call
+> _repair_scratch_fs to fix it. Then call _check_scratch_fs to make sure the corruption is
+> fixed?
+> 
+> Something likes (just a rough example)
+> 
+> _check_scratch_fs >>$seqres.full 2>&1 && _fail "can't find corruption"
+
+You mean this?
+
+export FSCK_OPTIONS="--dry-run"
+_check_scratch_fs >>$seqres.full 2>&1 || _fail "can't find corruption"
+
+We need to export FSCK_OPTIONS w/ "--dry-run", otherwise _check_scratch_fs
+will be stuck once it detects corruption.
+
+> _repair_scratch_fs >> $seqres.full
+> _check_scratch_fs
+> 
 >> +		_fail "fsck can not detect and repair zero nlink corruption "$i
 >> +		exit
 >> +	fi
 >> +
 >> +	export FSCK_OPTIONS=""
 >> +	_check_scratch_fs >> $seqres.full
+> 
+> I think _check_scratch_fs outputs nothing if run passed, right?
+> 
+> _check_scratch_fs calls _check_generic_filesystem for f2fs, the FSCK_OPTIONS
+> is "null" by default, so above FSCK_OPTIONS="" is useless too.
+> 
 >> +	if [ $? != 0 ]; then
 >> +		_fail "fsck hasn't fixed nlink corruption "$i
 >> +		exit
 >> +	fi
 >> +
 >> +	_scratch_mount >> $seqres.full
+> 
+> ">> $seqres.full" isn't necessary.
+
+Will update according to you comments, thanks a lot.
+
+Thanks,
+
+> 
 >> +	_scratch_unmount
 >> +done
 >> +
@@ -256,5 +298,9 @@ Thanks,
 >> @@ -0,0 +1,2 @@
 >> +QA output created by 009
 >> +Silence is golden
+>> -- 
+>> 2.48.1
+>>
+>>
 > 
 
