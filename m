@@ -1,40 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E78EB1EB9E8
-	for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 08:04:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DEEAD1EB9E8
+	for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 08:04:42 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741680281; cv=none; b=XJzHSHpAQFvKpIPxQxu0Uy5ZAdfBP4ZMVSe23LeTqkJobxX97ECGvArbKe8lWRrnGXtN0gyiYA+8ZRBVskX6AOsZiLjM6GEH9sOnrZM9c8TklAdd2xvnZpflGjbPQKSrYKpXZAmMgC0sjf7X4PvmTebyVSti6EIiRXRDp777OxA=
+	t=1741680283; cv=none; b=MzK1srQXT7EwjTKRPWABC/laJkrnqcf6yMD3W1o8CAzMyqSsK3hoDJ6q7Pn4nZOcF+OSTAicl7B6L6Uv5Vg3hljJCnALCljmgJOvhSVxZ0eA7vs88UkPDhzApIKfEwIYpYNGq/iaNa9nm+ZXkFb5N0TdZewbDP183HjyfctAzC8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741680281; c=relaxed/simple;
-	bh=n74Q+Fo38Qqi4LLhMmspI7Gq5r0ceUnTLDVgnA8ssQs=;
+	s=arc-20240116; t=1741680283; c=relaxed/simple;
+	bh=XMiIuJb3J5tTBjUVwyhd29X9iHjR/S3NZk4YUuvZCpk=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=bUSEut4k56980EQ83IephE1IZN5cCIiYwnyyg61W5zGgwccJd6uj3JLZWtMu/JEsn1aKg4CIc0b/AFAg82vlwfmzEHwPcNBhTDnp7VASz3tEXqL7J3t6IitkUK2EN5buXAXqCEOv5K6UzRX/7/7sDmbqfjNaX+WmJMSYIxfEe7o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hs60DmJU; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=g88TKYrr182PIalT32yPD4ymTs5uOgfvRAI1MjJvqLZDAjcPrVxLRinLPVQJu1+K3Il0G2cG5ZqKZQ5xyjMNGWKEZVrtHpeuRnm2JmHjcYH4dCFKGIP6mrVGBvW2PK8kkbyPrbScWJc6OZyGD8BqBI+OEju+pEaS4CME/5d+mqU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XaA2lejT; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hs60DmJU"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A5D5CC4CEEE;
-	Tue, 11 Mar 2025 08:04:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XaA2lejT"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3CA8FC4CEF0;
+	Tue, 11 Mar 2025 08:04:41 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1741680280;
-	bh=n74Q+Fo38Qqi4LLhMmspI7Gq5r0ceUnTLDVgnA8ssQs=;
+	s=k20201202; t=1741680282;
+	bh=XMiIuJb3J5tTBjUVwyhd29X9iHjR/S3NZk4YUuvZCpk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=hs60DmJUdPqFhpK0PlioTPj/kRvct5XGLFK5rKGlyBP2mpSXBXPd8MxGmVfUuRj3w
-	 mHMtTlLpcP9iu3sfs//x7WyoEsq/7MoX9ZgQXFKwJcppp2Xtg3v0XYo0oEnCu5mioR
-	 6vN5DQWqPV5wCagPf2oFpS102KNCKCrY4lL7a8J3N6JPAfHhAI1GItG1TyV+qhu3pa
-	 olQLAiti65YZauTYiKpbgu5vY5N3kfGcAfmw8HaUTn4GV2KPiDhUqP1FZ6jA1/pqMz
-	 VFfK05cNyZd0QDehV4L3wckTuEm8jkHRjzpRjr1hR6dO8ShkxxLjk1Gf757mSAHmI4
-	 9aYF+i2SGyXVg==
+	b=XaA2lejTGXmrf40Mt1xVI6zerzlXgWPl2CJ1mIBrRGv72vQKsnbLm8E4jJREm2s//
+	 DUAnRwaQAR653mnoL/2XTpn0F7BCxWtQj9BBgqqgQEUuvbXnsdm9fzzSqDqAYy4z8x
+	 HR6x0aE0c90f5/B8CKf/CFzuoHIkSx3vvaZekRJWn10ANNwisD0WKh48GltG7BzHrV
+	 XkssthhUZ4WJl2YjZYCp72ywouoh0lFPW424tOAYghwnoWOa5jC45E/+9k3/g9q6im
+	 0bc6oUINzIIAJuiXrUqpW/KVjkBXK61vsFUTqvif+tFsfW8NC+KG4DjtgFReiUGlY6
+	 BEw+cbtbM5VSw==
 From: Chao Yu <chao@kernel.org>
 To: Zorro Lang <zlang@kernel.org>,
 	fstests@vger.kernel.org
 Cc: jaegeuk@kernel.org,
 	linux-f2fs-devel@lists.sourceforge.net,
 	Chao Yu <chao@kernel.org>
-Subject: [PATCH v3 4/6] common/rc: use -f for mkfs.f2fs by default
-Date: Tue, 11 Mar 2025 16:04:28 +0800
-Message-ID: <20250311080430.3696582-4-chao@kernel.org>
+Subject: [PATCH v3 5/6] common/rc: introduce _check_f2fs_filesystem()
+Date: Tue, 11 Mar 2025 16:04:29 +0800
+Message-ID: <20250311080430.3696582-5-chao@kernel.org>
 X-Mailer: git-send-email 2.49.0.rc0.332.g42c0ae87b1-goog
 In-Reply-To: <20250311080430.3696582-1-chao@kernel.org>
 References: <20250311080430.3696582-1-chao@kernel.org>
@@ -46,40 +46,90 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Otherwise, mkfs will fail due to there is an existing filesystem
-in the image.
+_check_generic_filesystem() will fail the test once it detects
+corruption, let's introduce _check_f2fs_filesystem() to just check
+filesystem w/ --dry-run option, and return the error number, then
+let caller to decide whether the corruption is as expected or not.
 
 Cc: Jaegeuk Kim <jaegeuk@kernel.org>
 Signed-off-by: Chao Yu <chao@kernel.org>
 ---
 v3:
-- split change from f2fs/009, and cover both _scratch_mkfs() and
-_try_scratch_mkfs_sized()
- common/rc | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+- introduce _check_f2fs_filesystem() to dry run on f2fs image
+ common/rc | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 46 insertions(+)
 
 diff --git a/common/rc b/common/rc
-index ca755055..23b642f4 100644
+index 23b642f4..00883eb7 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -993,7 +993,7 @@ _scratch_mkfs()
- 		mkfs_filter="grep -v -e ^Warning: -e \"^mke2fs \""
- 		;;
- 	f2fs)
--		mkfs_cmd="$MKFS_F2FS_PROG"
-+		mkfs_cmd="$MKFS_F2FS_PROG -f"
- 		mkfs_filter="cat"
- 		;;
- 	ocfs2)
-@@ -1336,7 +1336,7 @@ _try_scratch_mkfs_sized()
- 	f2fs)
- 		# mkfs.f2fs requires # of sectors as an input for the size
- 		local sector_size=`blockdev --getss $SCRATCH_DEV`
--		$MKFS_F2FS_PROG $MKFS_OPTIONS "$@" $SCRATCH_DEV `expr $fssize / $sector_size`
-+		$MKFS_F2FS_PROG -f $MKFS_OPTIONS "$@" $SCRATCH_DEV `expr $fssize / $sector_size`
- 		;;
- 	tmpfs)
- 		local free_mem=`_free_memory_bytes`
+@@ -3519,6 +3519,46 @@ _check_generic_filesystem()
+     return 0
+ }
+ 
++_check_f2fs_filesystem()
++{
++    local device=$1
++
++    # If type is set, we're mounted
++    local type=`_fs_type $device`
++    local ok=1
++
++    if [ "$type" = "$FSTYP" ]
++    then
++        # mounted ...
++        local mountpoint=`_umount_or_remount_ro $device`
++    fi
++
++    FSCK_OPTIONS="--dry-run"
++    $F2FS_FSCK_PROG $FSCK_OPTIONS $device >>$seqres.full 2>&1
++    if [ $? -ne 0 ]
++    then
++        ok=0
++    fi
++
++    if [ $ok -eq 0 ]
++    then
++        echo "*** mount output ***"		>>$seqres.full
++        _mount					>>$seqres.full
++        echo "*** end mount output"		>>$seqres.full
++    elif [ "$type" = "$FSTYP" ]
++    then
++	# was mounted ...
++	_mount_or_remount_rw "$MOUNT_OPTIONS" $device $mountpoint
++	ok=$?
++    fi
++
++    if [ $ok -eq 0 ]; then
++	return 1
++    fi
++
++    return 0
++}
++
+ # Filter the knowen errors the UDF Verifier reports.
+ _udf_test_known_error_filter()
+ {
+@@ -3623,6 +3663,9 @@ _check_test_fs()
+     ubifs)
+ 	# there is no fsck program for ubifs yet
+ 	;;
++    f2fs)
++        _check_f2fs_filesystem $TEST_DEV
++        ;;
+     *)
+ 	_check_generic_filesystem $TEST_DEV
+ 	;;
+@@ -3679,6 +3722,9 @@ _check_scratch_fs()
+     ubifs)
+ 	# there is no fsck program for ubifs yet
+ 	;;
++    f2fs)
++        _check_f2fs_filesystem $device
++        ;;
+     *)
+ 	_check_generic_filesystem $device
+ 	;;
 -- 
 2.48.1
 
