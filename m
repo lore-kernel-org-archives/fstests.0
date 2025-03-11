@@ -1,72 +1,79 @@
-Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com [209.85.214.174])
+Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 50B552620F9
-	for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 20:48:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02A84199FBA
+	for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 21:19:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741726136; cv=none; b=pdOwzmxLWBL30sUBMp9M25Syxrtn4fcZr7xd3ymVP/++qMkk3DhxsV5RkvQuFXh/bsg3wkv1O77UMGK8uTt1zhKZYRS6Xzly70QCYQJ+w0hY+0dZro0YdQCDSnymiRGyx/ZlM7jsSia/ki4OSo2XN1JuWzAPVs19pGRHnbQNeTA=
+	t=1741727970; cv=none; b=YVin3DJGb25Ay5hqPIhSy17QmrtZsVbcx0s5sJVsNrNaSupY2iqJV+00oR2iY36QQg8OhPwYQ28PJ41YXH6DI4W/1zvGr2mqLSjGZA5ygKMtn97VN70PYBI2WbL0f3Ha1RaZ/1cmlrDFAKNOJP8cZbBZ8R7Yy5MmUmV9XodgPYs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741726136; c=relaxed/simple;
-	bh=k0jrNNW6g+Emfc/5qu2lpVME5kRHpft6PLjRejKGpRc=;
+	s=arc-20240116; t=1741727970; c=relaxed/simple;
+	bh=3Ln4F14YP/h+ZxbuqTzOaFyUr7PkbSz3fcJH2sxb7Z8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=K/+5yNm4T1A0pB7yRh1fMogr0khYNvWkGCKRIAPODio+phpogT7fgBZR4c2YRGXTUN7I61xDzkDPCgb2PsvXfab2vjkBmMoX4YvCekCRzxuysJRerP7FTeXIE9VpL8rcaqVynVq5llP6cWpZZ3xwEht/PkcDoO/Jh7CZ4Cp0Yjc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=Jj2IeGrk; arc=none smtp.client-ip=209.85.214.174
+	 Content-Type:Content-Disposition:In-Reply-To; b=KhcNRVP+mntqKDzudIj/cs3cW30x+sURrGmFK/u05QFiVXKp0Uq2zNULZXqyqkD5qcrWfF3pYcfF9foWh8rKnLQB179LI6dSxHt9+1cN/BJzoml0DFAx6nY3IIhCKALgkZ5//kAVYC6Ci60ZuNxXl00ovz/FCTw1BDY7VYHcxCA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=m91XHOTE; arc=none smtp.client-ip=209.85.214.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="Jj2IeGrk"
-Received: by mail-pl1-f174.google.com with SMTP id d9443c01a7336-225a28a511eso15785785ad.1
-        for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 13:48:55 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="m91XHOTE"
+Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-225477548e1so65772145ad.0
+        for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 14:19:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1741726134; x=1742330934; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1741727968; x=1742332768; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=A41jK0hv/dY/20SIs/rShB67Ygs4/TeS4b/uxOa4UG0=;
-        b=Jj2IeGrkd0eFZpfCLl8MrARQgpCCh9gIRkm4yb8cSAMnJkdfMGOPCuDDkRQGnVzFAL
-         boOYg1WYce40vcZHi9NrgG3KHv69I2zWzMt0QTYIwtjM1arLGfXQ/ciQ7+Doqe3oJuu1
-         XZsVSC4Tp8que+/fU7I90mju45d4CdyzQ2tqGKz2KqrdjNpu09O+u517lk6E2xY6anX5
-         uq8VKhFJ8VjaxmmNdMz+8I/xX7PJ+KVND8njzShWtPk042FfgHYsU17OTjHtgEZbWv9h
-         tyiPAiSeZDvySfVfGe4p1UKQ5rKGcSH+Ih++7STXKM7jFzr2PumvCZjQk1+GHa7kdjTU
-         JQtA==
+        bh=QhvF91j8QAWGZT8Ko79zlX4hWPyLZFoRaCgvhr0uQSA=;
+        b=m91XHOTEFpGvdFK8Ne9NS0jX9yPx3xrbJ/69MUO6/u/liVbDp6U1QiarpyW1vZEjyO
+         bWogj/x7pVEpyfGVtPEx1QOkrYxXKAzOuliXUaW14PliNjuG8Km/D9x7tLjw/eniIfLO
+         c9D6KiiS2yTJwlq3J0RB2ZvGwewrvN+DX4pOcf+PN71VcqIU84ruoEThI2xXo8i/okyI
+         +w+gGL2on4YqL66ZtFBPA9u72AWvs7RsTmWsmGbziBXMxVkhk4Dk/ruPDtoqOIfGK1Wi
+         a33VZs045oKbe4yeutMUeKFwyiu0V/ysGLakbQ4RVXZwZhUybWmMlnBnRIZuJC+eS0Og
+         cnIA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741726134; x=1742330934;
+        d=1e100.net; s=20230601; t=1741727968; x=1742332768;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=A41jK0hv/dY/20SIs/rShB67Ygs4/TeS4b/uxOa4UG0=;
-        b=mlg8coE0DXhcryNuH7UhQ0coTHwU53LKMln1kkogVfS6ghFs6NahWS5O3wyLJFtAHp
-         jnCeF7iMXuumo/SkjNXoIHUX0jZDSqLaRi4QLwaWWTwWGcPZxgF0KB72PgjXm27JZtaf
-         lAoU3EemU6p7yRkA4vj8nWUqhjcNguy7lFQzZD8Zhc1YdrSgZbb8YdxnylQgty58LvoB
-         caQyzmIKU43BD1+2uZcgPukGgYeGEqFplBxZG/YhHsJ877ZpJ77D1RW7pAfLAHdMb+Ay
-         zF8nQKmrQXCHCPsF8OcaAUY5SP+NS0wIYwz+v8328D7plG2qAmR4qeFXzapa5lD3ZWMV
-         oHeA==
-X-Gm-Message-State: AOJu0Yxwg3ChTKFITzwSKD8LoFAu6pKKw5LoDclaa9wFgCHmsMbDP7ac
-	liyGAuIUmYTkn09tkyvZHyqH6WLm2tZJCo7O9nGvmHZW9qAA+0jlnigAytUWqkM=
-X-Gm-Gg: ASbGnct/QBUDFDoI8ELApg8cgitbuvXU9EGXBXj3fqflf9pfpUd1lKWLZV7kMsW+pnL
-	9X+1TRcdG/cGf94Vv/1y4RZktE14O59bzvUIDevXWbejJWzlPjlUXym7ykGtu5r2onL4lQhbp1g
-	jxiLmhfLKufTfXHezKamBV+oTRubXcULhggPiAjHe65BAq7E3AXyjb2vS0Qztc/duiy6HGC6x2v
-	srApEn0PIeMHXyLBb+YwiIlHxVm8h7RR6qTWaFplMoQmZX8rMYip98l4Q1v2hqfp7JBLxX/kuza
-	dKF2vgcouGsI0DiWy49BRSXf0bUc9A7TS3QtLYZFlTJPFLHoRcdsVOntQP6tQGq6pLf6WEUqwKB
-	DPNMfjoRa9rNfFBLIoVAc
-X-Google-Smtp-Source: AGHT+IFBjv1Buu0qgRkjiUUYSCI3OqA4JVRqIb9TLkr8uU7XvCY2VDQ7FKHF0oIb+eaWUWi/ymo3FQ==
-X-Received: by 2002:a17:902:e750:b0:21f:68ae:56e3 with SMTP id d9443c01a7336-22428be5a43mr273882875ad.39.1741726134518;
-        Tue, 11 Mar 2025 13:48:54 -0700 (PDT)
+        bh=QhvF91j8QAWGZT8Ko79zlX4hWPyLZFoRaCgvhr0uQSA=;
+        b=bSiC9AktUWLi7qSnxXyZiP7cSAWRBOfTul8QXeYplDgITmZBfkUJuSedLl5ydlC9ll
+         /VmpMzv6P6U2D2W57vdbu+5Zl9vhrlqZQx4VP2I0WihAp6dQQsD3Z7FR/GD12KREcLgW
+         wNTW0iuwXrslCTqMaVy306z5XShmnbCMPTQ1IYiMdk8lgR8iJedBlubOgbNeUoBVxhkT
+         od3dB6OOInH2/T7gvXKXnGRzeComBH6VWgW4rcZN+DgIrsLsHpR+xCJW7Zo0WAIpNmBi
+         9RPJo8TPQfNKDre3POivDdqE9OYBMDOfmKpwFTiqOVe/HmF1W9xL2/ZKW44y1WF+BlNz
+         Ruyw==
+X-Forwarded-Encrypted: i=1; AJvYcCXUPcT1dHzv1bjBx9HqKpohtDLlVDb8kfpu3iiWbkpwMuk7Tifn9S2e2Zny3JNOX5plgG/ABrlh@vger.kernel.org
+X-Gm-Message-State: AOJu0YwpitVGAMcuvL1yhKAb4jBbuog6siWEE6KNZUrEPtAs26O3zMZn
+	vxqbVNrueGojyZPtSzM82xjxTgOMK8yr6bMsjLSG+XSmcrlGCPpsHt37iGnGu7wm8M8pRbjcdgl
+	y
+X-Gm-Gg: ASbGncvFhEEXtm2fA4GpEoyqDCuUEhiKEjnhvN8LSJPpaM5d3NdiokCx8zC/usxj0tJ
+	KkilAwCjJ3xuFQdZ2VnIu3NlthpC0yN2MN2aCBVvDNKNdTUWxavxLZTwayaeFuI1DBEG/SB2Kr/
+	x9bVLotVolyMDxRo6gdW0C6IKbCW4U6DvCX6tSyxht2m9VmUr1I6x/G52Yf+yAsCAGbW2NlWc9W
+	W3489qXrPSB0Uk+aKy9opwIBGQ+B3W2vqAT2RYUc/ntZLoFnsrm8lU0R4H+FLC7q9JKR/0b5bZM
+	7QaboFSQiNsQ231oztyUdNqUh/wv3NxuF/17n55aRj5NZLLGBzWmlV9fOWqkDJpH+GAqvocERmC
+	wtfgUmJ0anQjRGLLjXQMr
+X-Google-Smtp-Source: AGHT+IGeWsyE8McypzNHrL8vFFmERDIthfi2fscLkZah+e9ANYcUSe5hH5osXrbdLi3D6T3lux0C/g==
+X-Received: by 2002:a17:902:ccc9:b0:223:2aab:462c with SMTP id d9443c01a7336-22428899f43mr303773255ad.15.1741727968053;
+        Tue, 11 Mar 2025 14:19:28 -0700 (PDT)
 Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22410a7fc7csm102894615ad.120.2025.03.11.13.48.53
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22410a7f95fsm102886335ad.154.2025.03.11.14.19.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 Mar 2025 13:48:53 -0700 (PDT)
+        Tue, 11 Mar 2025 14:19:27 -0700 (PDT)
 Received: from dave by dread.disaster.area with local (Exim 4.98)
 	(envelope-from <david@fromorbit.com>)
-	id 1ts6Wx-0000000Bs8e-0jNr;
-	Wed, 12 Mar 2025 07:48:51 +1100
-Date: Wed, 12 Mar 2025 07:48:51 +1100
+	id 1ts70X-0000000BshA-0S5D;
+	Wed, 12 Mar 2025 08:19:25 +1100
+Date: Wed, 12 Mar 2025 08:19:25 +1100
 From: Dave Chinner <david@fromorbit.com>
-To: David Disseldorp <ddiss@suse.de>
-Cc: fstests@vger.kernel.org, Chao Yu <chao@kernel.org>, jaegeuk@kernel.org
-Subject: Re: [PATCH] f2fs/008: avoid endless wait
-Message-ID: <Z9Chs5qdOg7rXevY@dread.disaster.area>
-References: <20250311050346.5868-2-ddiss@suse.de>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] check: disable HAVE_PRIVATENS by default
+Message-ID: <Z9Co3WnndML6zciA@dread.disaster.area>
+References: <20250306094924.1353269-1-zlang@kernel.org>
+ <20250306094924.1353269-2-zlang@kernel.org>
+ <Z8mBacJNAj6gVd7N@dread.disaster.area>
+ <20250306134723.x5fovpzmzemleyi3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <Z8oL_LAc9XQsKwd-@dread.disaster.area>
+ <20250307154722.iafm7hm7qo6x54c3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -75,74 +82,104 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250311050346.5868-2-ddiss@suse.de>
+In-Reply-To: <20250307154722.iafm7hm7qo6x54c3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Tue, Mar 11, 2025 at 04:03:47PM +1100, David Disseldorp wrote:
-> "udevadm wait <dev>" without a --timeout=SECONDS parameter will wait
-> endlessly. Endless wait can be triggered in f2fs/008 by e.g. using a
-> zram device as a SCRATCH_DEV, where "device type is unknown" failure
-> sees the /dev/mapper/$vgname-$lvname node never appear.
+On Fri, Mar 07, 2025 at 11:47:22PM +0800, Zorro Lang wrote:
+> On Fri, Mar 07, 2025 at 07:56:28AM +1100, Dave Chinner wrote:
+> > I'm talking about removing all the setsid and namspace bits that we
+> > added to try to solve the need for pkill --parent. i.e. this series
+> > of patches:
+> > 
+> > 949bdf8ea check: deprecate using process sessions to isolate test instances
+> > 247ab01fa check: run tests in a private pid/mount namespace
+> > 88d60f434 common: fix pkill by running test program in a separate session
+> > c71349150 common/rc: hoist pkill to a helper function
+> > 77548e606 common/rc: create a wrapper for the su command
+> > 
+> > Using private PID namespaces in check-parallel has solved the
+> > original problem that required the pkill --parent usage and the
+> > fsstress binary rename/copy workaround by wrapping process isolation
+> > outside of each check instance. Hence check and the internal
+> > check infrastructure doesn't need to ever care about process
+> > isolation to solve this check-parallel problem anymore.
 > 
-> Signed-off-by: David Disseldorp <ddiss@suse.de>
-> ---
-> It might make more sense to add a default timeout to _udev_wait(), but
-> that could also call udev{adm }settle.
-
-One of the points of moving to _udev_wait was to explicitly wait for
-the specific device to appear or disappear, indicating that the
-previous admin operations have completed. 'udevadm settle' does not
-do that - it waits for the global queue of events to drain and
-dev config failure doesn't generate udev events.
-
-Hence tests that silently fail dm/lvm device setup will continue to
-run on something they shouldn't have, and nobody will realise that
-the LVM setup did not run correctly.
-
-OTOH, _udev_wait() will hang in that situation because it's waiting
-for the device node to appear (or disappear) so it can be
-immediately used. We don't need udev to finish draining queues - we
-only need to wait for the device node to appear and the test is good
-to go.
-
-This behaviour provides obvious failures when device setup/teardown
-fails in some way. This should not happen, and when it does
-_udev_wait hanging forces that failure to be triaged and fixed
-immediately....
-
-If we add a timeout to _udev_wait(), then we're back to the old
-behaviour where device config failures get ignored and the test runs
-incorrectly. Except now it is worse because we have to wait a
-timeout before the test is then run....
-
+> If "check" doesn't need these namespace isolation things, that will be good
+> to me. That'll help to isolate the issues on check or on check-parallel.
+> And we won't bring in regressions to check when try to fix check-parallel.
 > 
->  tests/f2fs/008 | 9 ++++++---
->  1 file changed, 6 insertions(+), 3 deletions(-)
+> Now let me merge this patch at first, to avoid the regressions on btrfs.
+> Then please feel free to send patches to remove/reduce the coupling of
+> two testing ways (check and check-parallel:)
+
+Sure.
+
+FWIW, it's not necessary for you to test whether the merged version
+of check-parallel runs correctly right now. If some other change
+breaks it, I will fix it and send patches to fix it. I'm much more
+concerned that changes made to support check-parallel don't break
+check...
+
+> > i.e. the isolation fix should have been made to check-parallel,
+> > not to check.
+> > 
+> > It is not ideal to have to walk all this stuff back, but this is
+> > what happens when an RFC-scope feature prototype is merged without
+> > allowing adequate time for review or give the author a chance to
+> > address at least one round of review comments and bug fixes before
+> > it gets merged....
 > 
-> diff --git a/tests/f2fs/008 b/tests/f2fs/008
-> index 47696f2b..fdb0b0c2 100755
-> --- a/tests/f2fs/008
-> +++ b/tests/f2fs/008
-> @@ -35,9 +35,12 @@ _cleanup()
->  	rm -f $tmp.*
->  }
->  
-> -$LVM_PROG pvcreate -f $SCRATCH_DEV >>$seqres.full 2>&1
-> -$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
-> -$LVM_PROG lvcreate -y -L 1024m -n $lvname $vgname >>$seqres.full 2>&1
-> +$LVM_PROG pvcreate -f $SCRATCH_DEV >>$seqres.full 2>&1 \
-> +	|| _notrun "unabled to create LVM physical volume"
-> +$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1 \
-> +	|| _notrun "unabled to create LVM volume group"
-> +$LVM_PROG lvcreate -y -L 1024m -n $lvname $vgname >>$seqres.full 2>&1 \
-> +	|| _notrun "unabled to create LVM logical volume"
+> Sorry, I've learned from this. I thought I've given it lots of test,
+> and fixed all bug reports at that time. And I asked several times
+> if there's any objection about merging it in next release. As there's
+> not objection from anyone in 2 weeks, so I decided to give it a chance,
+> to save the super complicated rebasing workload...
 
-These should be _fail calls, IMO.
+Sure, not having anyone review a prototype after a couple of
+weeks is pretty common - it does not mean it is ready for merge.
+It typically means that the author will then post a newer, more
+complete version when they are ready, and then maybe people will
+look at it.
 
-AFAICT, there is no reason for LVM config to fail on a valid block
-device.  If there is a block device that doesn't support LVM, then
-we've got lots of tests that are going to fail the same way and we
-should have a _require_scratch_lvm() to notrun those tests for that
-type of block device (or fix the block device...).
+Hence my comment on where I wanted people to focus their review -
+not on the check-parallel stuff, but on the generic infrastructure
+changes (i.e. "get the process underway") because they were much more
+important to get right than the check-parallel script.
+
+IOWs, I was not asking anyone to bypass the normal cyclic
+review-repost process - I was simply doing what ever experienced
+developer does when posting a large patchset: guiding reviewers to
+the important areas of the patch set to focus on first.
+
+> Anyway, next time,
+> for each complex patchset on infrastructure, I'll always give it 3+
+> release cycles time. And never merge it if without 3 acks from xfs,
+> ext4 and btrfs,
+
+And that, IMO, is swinging too far the other way. If the code is
+complete and ready to go and nobody will review it, then the
+above rule makes it impossible for the author to get their code
+merged.
+
+now we have the opposite problem: people have to carry large
+infrastructure changes for a long time because they cannot get
+anyone to review it.
+
+The normal process is to let review-and-repost cycles occur
+naturally (e.g. every couple of weeks for a few versions), with the
+author indicating what the important things to focus review on in
+the patchset are. When that cycle reaches it's end, a request for
+merge will be made (e.g. a pull request or a repost with all patches
+containing RVBs). This shouldn't take months, and if the reviewers
+focus on the things that the author asks them to look at first then
+the important things end up being ready for merge earlier rather
+than later.
+
+IOWs, there is no need for placing arbitrary bars to jump over if the
+process is allowed to follow it's natural path. Problems typically
+only arise when the process is not followed, so there needs to be a
+very good reason for stepping outside normal processes or having
+arbitrary rules that nobody really knows when/if they might
+trigger...
 
 -Dave.
 -- 
