@@ -1,312 +1,200 @@
-Received: from fhigh-b5-smtp.messagingengine.com (fhigh-b5-smtp.messagingengine.com [202.12.124.156])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 365E71C695
-	for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 13:46:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.156
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F2E8253B64
+	for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 13:54:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741700812; cv=none; b=KSV0CR5PB4W+K7guAij9/ZoxHHq+pYbah3iAYqIx+7NRiujOKMg9DUxAIakUyJGDNgo0QPvDAL2nrdyVcDZecKXSla4IL4f6IgpJzri3/6g+mirLnUHlbDxIjbubkjhCU2CQNJV2/uzObiIYzrcexBw34TS7w7YjlL8zBDl9FQk=
+	t=1741701254; cv=none; b=a7gKlzyoosPndGX4LelUC6HKuNm5UvvZLvziNd3yQHVEPMkQZNpbEjuE0sVoEIUmsg/LrptKSpnoXuyukeH+r3J5U+IfjiOTaaoqQss8GbmCzVR9ONHESFksMTkW/oaJYGQC35zl+fok93vGgU3cSqAOB7KsTwir2j77XBPHZPY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741700812; c=relaxed/simple;
-	bh=H9eYqo2zTPlHeI6F5pjZag12ySmD19EyMdsYhi281Yo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=PqgMM7F+pHPL6bayDmt3MPu2Jw+f3e74lkoPh/8iy/QWpMuMqbObQa9ElK/bXG+skQk27Imb0Xk7wbWU1H3WfHB+rFIEWoIbD9RoXL6A3s/fna+3gjhHhDSfLN9boTV/v9RJvwN2cP9tUl+ajMhuwgsrs3skI+dO02N0SpgVqt0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net; spf=pass smtp.mailfrom=sandeen.net; dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b=J6gq0kDp; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=WjU1MGu2; arc=none smtp.client-ip=202.12.124.156
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandeen.net
+	s=arc-20240116; t=1741701254; c=relaxed/simple;
+	bh=/f9gHLJ1WSp9G8C61z4yJ/xBQ5zof5EehChauy8qQUo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=LJPCzZS7MfMk62GA9epuZHAxwcra3I4gWDFZRCTd/Rzi+Aj25iyIgYeLImijG2PomWcd0Vx6txyHn9keRXqNNOww8E4Fs96q2lLdzqWZfepDxXTdaHncbDfCuYORvG2MvKUB2oQTXzAGsf0/XJTDSwSXwr5RLfiVE0Yi7/OIXVE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=cm1D5DDE; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b="J6gq0kDp";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="WjU1MGu2"
-Received: from phl-compute-07.internal (phl-compute-07.phl.internal [10.202.2.47])
-	by mailfhigh.stl.internal (Postfix) with ESMTP id 4355525400E9;
-	Tue, 11 Mar 2025 09:46:49 -0400 (EDT)
-Received: from phl-mailfrontend-02 ([10.202.2.163])
-  by phl-compute-07.internal (MEProxy); Tue, 11 Mar 2025 09:46:49 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net; h=
-	cc:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm1; t=1741700809;
-	 x=1741787209; bh=aUSb5Cze6U/+4NXHlcLen0ifAV6F+Ii2tyeaBAD8z2Q=; b=
-	J6gq0kDpjumz/k5KDVdapJgW101+TengVjs9sxU3p5IngemtSVOhE0FYYHGmj5s2
-	anm637sfWp4OHArnqCiUVNc3j0PTbxDjXw3L6eq1f5EEnQttGVHVguK8YTCWIUAc
-	O4r14bJFIdaSs/SvED8kdFLGOgTEveLwq1AUp5CcfezvJKrC3/IrXcnpDkreuJ/W
-	4ZXT1iT070dXo18tzHLMlKalLtnpsDR10kkfGKITElXH42qir7OCogVHSE/FJff4
-	seSjaIB5vn9FC21V261CXSzimJQo4ZVDWimvRF/n7nZWNWUq29KFvCveh8IJm74s
-	XdLro6fZ1iLZNi7/B0RIMw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1741700809; x=
-	1741787209; bh=aUSb5Cze6U/+4NXHlcLen0ifAV6F+Ii2tyeaBAD8z2Q=; b=W
-	jU1MGu2AYyyVgPd9yVnUgV9vHExPu5Ug4F5iXTo4j+JgGZ4gcOip86CJJQuHuev7
-	t5WyZu/4Ttpz/aKaXslIt6t0M5coMMtQHlRN9mU1iiZ8wUiZyGFQ4MPTkVbBFAX3
-	o6qUuYX5CPUhiCX56hIF3TcbU6Suf440liKcu+K/ofIh2Pxpy3dgamBS4WxjmCuX
-	N8asK9zV8YoJHIbs2KBRULLnv/7Gd54v25YvemZGOMfxEv2bTNUsroWwWqN4lEzz
-	XtBPIUrGlAPAqcE4d7MCeR5zicX5X8VAEGrMZiKTi8drQOORx2ddwrVbAt4/VoR4
-	0KYHwmDo7n8VaI/ZM2wYw==
-X-ME-Sender: <xms:yD7QZy1SGjiZxJrIsNr8IjHy4JjuZNbdek3tVboLxtrRZTmVfm60JQ>
-    <xme:yD7QZ1GHe5hsOIlcCgxh8Wx1zAkSCJFid-stB3HPB4jLkO7nlyvKr9mAvzYA20FtY
-    It5KW0wutPFJ8gMSAE>
-X-ME-Received: <xmr:yD7QZ667N9xq1sFDH-sNVzEViSBDXnK_Q4NpuEW9y4w_qGtLMZwyQazwliPZPA>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefvddrtddtgdduvddvfeekucetufdoteggodetrf
-    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdggtfgfnhhsuhgsshgtrhhisggv
-    pdfurfetoffkrfgpnffqhgenuceurghilhhouhhtmecufedttdenucenucfjughrpefkff
-    ggfgfuvfevfhfhjggtgfesthejredttddvjeenucfhrhhomhepgfhrihgtucfurghnuggv
-    vghnuceoshgrnhguvggvnhesshgrnhguvggvnhdrnhgvtheqnecuggftrfgrthhtvghrnh
-    epveeikeeuteefueejtdehfeefvdegffeivdejjeelfffhgeegjeeutdejueelhfdvnecu
-    vehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepshgrnhguvg
-    gvnhesshgrnhguvggvnhdrnhgvthdpnhgspghrtghpthhtohepgedpmhhouggvpehsmhht
-    phhouhhtpdhrtghpthhtohepshgrnhguvggvnhesrhgvughhrghtrdgtohhmpdhrtghpth
-    htohepfhhsthgvshhtshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopegu
-    jhifohhngheskhgvrhhnvghlrdhorhhgpdhrtghpthhtohephhgthhesihhnfhhrrgguvg
-    grugdrohhrgh
-X-ME-Proxy: <xmx:yD7QZz2ppAObs9gzFzBkc6cuRpuBVcdSAJh039EwXWzCeF0iL9TGZQ>
-    <xmx:yD7QZ1GhqKOM7NlxJGtWMyheNwBHudGT3bHGqJEbaUjmgFob7ASgLw>
-    <xmx:yD7QZ88RTqWrzZMXrl0LXfnF9jZ5MGyS2cUJc69RId0ojCUxefRsSg>
-    <xmx:yD7QZ6kgr-XZZWtPymVie0OKyktnuH5d4sUu9D7rkxQgMy2Cm-W7uA>
-    <xmx:yT7QZ5i7OmX3vpBT4uzJu-pjJpIdS9jcDzqyvcGyOJq3iucQ6lgXgZLj>
-Feedback-ID: i2b59495a:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
- 11 Mar 2025 09:46:48 -0400 (EDT)
-Message-ID: <290f4825-dc3c-405f-a306-49a978fa2597@sandeen.net>
-Date: Tue, 11 Mar 2025 08:46:48 -0500
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cm1D5DDE"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1741701251;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=O79965GHMnQZdzqvYs+SILCGjWQCxMrxIT59ZGPi2yo=;
+	b=cm1D5DDEAZ25mtMuMKp2O+6cTLGE9/zK83bjFm5EEs9b0BOVckIZ1jUU9T6f6imdT6hsvw
+	9ajE40Lddzaw20aPDdUCHyd+Qmf/7jHbdhAm/8E2VMLzvwPRz+bHo0dCzMcNXMpIkO6ry/
+	NZBMkfkZ01TGyg0nNBwuL5wN8GPpN0U=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-222-qgYpZEUFMEWFdgiYiWVQ-Q-1; Tue, 11 Mar 2025 09:54:10 -0400
+X-MC-Unique: qgYpZEUFMEWFdgiYiWVQ-Q-1
+X-Mimecast-MFC-AGG-ID: qgYpZEUFMEWFdgiYiWVQ-Q_1741701249
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-300fefb8e05so2047832a91.3
+        for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 06:54:09 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1741701249; x=1742306049;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=O79965GHMnQZdzqvYs+SILCGjWQCxMrxIT59ZGPi2yo=;
+        b=tY0njMIzOlfwBG/Q/39wQM9WsD70MsH829X6kQxahE87bF3ohcXulMqDeosJ8rLDWo
+         poSNTx5p3XZRGdm15UvILPpjqXJ5yLkNST8xVAA5fbaV5pJ7/Lj0OVFcvkNht6sJqHvq
+         XPKFDq0G0jfXEm/IHJ+hJfpa959rCN4DBjuQfIdYlTiw2uzDSGDXyqGRtz8pkNiQw3/O
+         ErwmpEQSlcST1adTJrTWwVvM0ZyM5BDu5rz+nlLDF87zQWiu5XsvfovLGKmCOn/TmYpt
+         lpKJrvkZo4PpqQ0yPVDGuvZQSSLOELanUIL2k7bQ7fzsX8EHvk0f5HpD/rfwfYU5PXEx
+         P9ug==
+X-Forwarded-Encrypted: i=1; AJvYcCUg+P2sAvaYMFMDU2Savl8adHrTfJFetctKgmBVNQy9xSgmSvjoEHX99Y1PNY0GFyemVSMD839o@vger.kernel.org
+X-Gm-Message-State: AOJu0YyocV5HgcIpUBhyDQmEeCM4vv5ZzKumnErFgMn3ZaNqCtNWf0KU
+	QaF5i7GJ3Mae53stN4dVgGYXrGqbVc+PDfToK707V8/1bHl4/ZVWqOh7Y5AuiNOTbjD9Vx1Xz4s
+	yYh5WT29ttcDYwbvZyMcPM7l3JWvjhwRrMHdC4AZVhkodGxsNJkNI+Fg=
+X-Gm-Gg: ASbGncsc3gWMftJx2olWhdYk0iXo4DSeLuIN25iaD/2CFBWVcvJ1+LKR2oZamlpSAsy
+	H0ND9f7H6UPqnqV/bR4tMDNm/4t2mZ4T/HTAfVAFgQVDX7y4dyir67HmdVNwTb0DzuKRZjv+82l
+	qmsVxz+kpaSc6y1PgXhGWifnofBFQvtISe+pHd1/nZeRqIMDSbMfr41MyBB38Pju9npYQRqBt4s
+	aFw6O2gHETKf/e6obzasc1IHvM5AmXBTvtRz+xA7Jjmd8igh63I42iQI1WzFRawjCpn8/Su83oc
+	O9odUeO+FtqBTpVGRQoEFfFv5Gs2RXGsUQiX0N7IaRMGLnd0N932sz5R
+X-Received: by 2002:a05:6a21:6da7:b0:1f5:9961:c40 with SMTP id adf61e73a8af0-1f599612eacmr452707637.8.1741701247504;
+        Tue, 11 Mar 2025 06:54:07 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGsfa+HMGbPL4Sr6Zt8vhSaG/t2qB01wMJ0yaRFEIHDO2gb3d0qnjhzZcjHOyI0QBFYX+tEVg==
+X-Received: by 2002:a05:6a21:6da7:b0:1f5:9961:c40 with SMTP id adf61e73a8af0-1f599612eacmr452672637.8.1741701247117;
+        Tue, 11 Mar 2025 06:54:07 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-af533af1fd1sm3095346a12.62.2025.03.11.06.54.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 11 Mar 2025 06:54:06 -0700 (PDT)
+Date: Tue, 11 Mar 2025 21:54:02 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Chao Yu <chao@kernel.org>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH v3 5/6] common/rc: introduce _check_f2fs_filesystem()
+Message-ID: <20250311135402.l3kpgbgnwg6zn33e@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250311080430.3696582-1-chao@kernel.org>
+ <20250311080430.3696582-5-chao@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: [PATCH 2/7 V3] treewide: check for #ifdef __linux__ not linux
-To: Eric Sandeen <sandeen@redhat.com>, fstests@vger.kernel.org
-Cc: djwong@kernel.org, hch@infradead.org
-References: <20250310182954.1396724-1-sandeen@redhat.com>
- <20250310182954.1396724-3-sandeen@redhat.com>
-Content-Language: en-US
-From: Eric Sandeen <sandeen@sandeen.net>
-In-Reply-To: <20250310182954.1396724-3-sandeen@redhat.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250311080430.3696582-5-chao@kernel.org>
 
-There are several #ifdef linux guards in the code, which caused
-a few sparse warnings, because while gcc defines both linux
-and __linux__, sparse defines only __linux__. So, switch our
-guards to check for __linux__ which is defined by both gcc
-and sparse.
+On Tue, Mar 11, 2025 at 04:04:29PM +0800, Chao Yu wrote:
+> _check_generic_filesystem() will fail the test once it detects
+> corruption, let's introduce _check_f2fs_filesystem() to just check
+> filesystem w/ --dry-run option, and return the error number, then
+> let caller to decide whether the corruption is as expected or not.
+> 
+> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+> Signed-off-by: Chao Yu <chao@kernel.org>
+> ---
+> v3:
+> - introduce _check_f2fs_filesystem() to dry run on f2fs image
+>  common/rc | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 46 insertions(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index 23b642f4..00883eb7 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3519,6 +3519,46 @@ _check_generic_filesystem()
+>      return 0
+>  }
+>  
+> +_check_f2fs_filesystem()
+> +{
+> +    local device=$1
+> +
+> +    # If type is set, we're mounted
+> +    local type=`_fs_type $device`
+> +    local ok=1
+> +
+> +    if [ "$type" = "$FSTYP" ]
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-Reviewed-by: Christoph Hellwig <hch@lst.de>
----
- include/tlibio.h    |  6 +++---
- include/write_log.h |  2 +-
- lib/str_to_bytes.c  |  2 +-
- lib/tlibio.c        | 12 ++++++------
- lib/write_log.c     |  2 +-
- ltp/doio.c          |  8 ++++----
- ltp/iogen.c         |  6 +++---
- 7 files changed, 19 insertions(+), 19 deletions(-)
+This's f2fs check function, so $FSTYP can be "f2fs" directly.
 
-diff --git a/include/tlibio.h b/include/tlibio.h
-index 12649cf5..4f462ff1 100644
---- a/include/tlibio.h
-+++ b/include/tlibio.h
-@@ -11,7 +11,7 @@
- #define LIO_IO_SYNCV            00020   /* single-buffer readv/writev */
- #define LIO_IO_SYNCP            00040   /* pread/pwrite */
- 
--#ifdef linux
-+#ifdef __linux__
- #define LIO_IO_TYPES            00021   /* all io types */
- #endif /* linux */
- 
-@@ -21,14 +21,14 @@
- #define LIO_WAIT_SIGPAUSE       00100000 /* call pause */
- #define LIO_WAIT_SIGACTIVE      00200000 /* spin waiting for signal */
- 
--#ifdef linux
-+#ifdef __linux__
- #define LIO_WAIT_TYPES          00300000 /* all wait types, except nowait */
- #endif /* linux */
- 
- /* meta wait io  */
- /*  00  000 0000 */
- 
--#ifdef linux
-+#ifdef __linux__
- /* all signal wait types */
- #define LIO_WAIT_SIGTYPES	(LIO_WAIT_SIGPAUSE)
- #endif /* linux */
-diff --git a/include/write_log.h b/include/write_log.h
-index 025ebac0..6b088416 100644
---- a/include/write_log.h
-+++ b/include/write_log.h
-@@ -79,7 +79,7 @@ struct wlog_rec {
-  */
- 
- struct wlog_rec_disk {
--#ifdef linux
-+#ifdef __linux__
-     uint    w_offset    : 32;	    /* file offset  	    	    */
-     uint    w_extra0    : 32;       /* EXTRA BITS IN WORD 0         */
- #endif
-diff --git a/lib/str_to_bytes.c b/lib/str_to_bytes.c
-index 2f6b2b92..89bc7d31 100644
---- a/lib/str_to_bytes.c
-+++ b/lib/str_to_bytes.c
-@@ -31,7 +31,7 @@
-  *
-  ****************************************************************************/
- 
--#if linux
-+#ifdef __linux__
- #define B_MULT	DEV_BSIZE	/* block size */
- #endif
- 
-diff --git a/lib/tlibio.c b/lib/tlibio.c
-index 5b810059..ae936f41 100644
---- a/lib/tlibio.c
-+++ b/lib/tlibio.c
-@@ -74,7 +74,7 @@
- #endif
- 
- 
--#ifndef linux
-+#ifndef __linux__
- static void lio_async_signal_handler();
- #endif
- 
-@@ -351,7 +351,7 @@ lio_help2(char *prefix)
-     return;
- }
- 
--#ifndef linux
-+#ifndef __linux__
- /***********************************************************************
-  * This is an internal signal handler.
-  * If the handler is called, it will increment the Received_signal
-@@ -453,7 +453,7 @@ char **errmsg;	/* char pointer that will be updated to point to err message */
- long wrd;	/* to allow future features, use zero for now */
- {
-     int ret = 0;	/* syscall return or used to get random method */
--#ifndef linux
-+#ifndef __linux__
-     int omethod = method;
-     int listio_cmd;		/* Holds the listio/lio_listio cmd */
- #endif
-@@ -650,7 +650,7 @@ char **errmsg;	/* char pointer that will be updated to point to err message */
- long wrd;	/* to allow future features, use zero for now */
- {
-     int ret = 0;	/* syscall return or used to get random method */
--#ifndef linux
-+#ifndef __linux__
-     int listio_cmd;		/* Holds the listio/lio_listio cmd */
-     int omethod = method;
- #endif
-@@ -797,7 +797,7 @@ long wrd;	/* to allow future features, use zero for now */
- }	/* end of lio_read_buffer */
- 
- 
--#ifndef linux
-+#ifndef __linux__
- /***********************************************************************
-  * This function will check that async io was successful.
-  * It can also be used to check sync listio since it uses the
-@@ -998,7 +998,7 @@ lio_wait4asyncio(int method, int fd, aiocb_t *aiocbp)
- 
- } /* end of lio_wait4asyncio */
- 
--#endif /* ifndef linux */
-+#endif /* ifndef __linux__ */
- 
- #if UNIT_TEST
- /***********************************************************************
-diff --git a/lib/write_log.c b/lib/write_log.c
-index cdc72593..7c58a95f 100644
---- a/lib/write_log.c
-+++ b/lib/write_log.c
-@@ -49,7 +49,7 @@
- #include "write_log.h"
- 
- #ifndef BSIZE
--#ifdef linux
-+#ifdef __linux__
- #define BSIZE DEV_BSIZE
- #else
- #define BSIZE BBSIZE
-diff --git a/ltp/doio.c b/ltp/doio.c
-index fd64df0f..ba080a0b 100644
---- a/ltp/doio.c
-+++ b/ltp/doio.c
-@@ -222,7 +222,7 @@ int     parse_cmdline( int, char **, char * );
- int     lock_file_region( char *, int, int, int, int );
- struct	fd_cache *alloc_fdcache(char *, int);
- int     aio_register( int, int, int );
--#ifndef linux
-+#ifndef __linux__
- int aio_wait(int);
- #endif
- 
-@@ -1990,7 +1990,7 @@ do_rw(req)
- 		/*
- 		 * If the syscall was async, wait for I/O to complete
- 		 */
--#ifndef linux
-+#ifndef __linux__
- 		if(sy->sy_flags & SY_ASYNC) {
- 			for(i=0; i < nents; i++) {
- 				aio_wait(s->aioid[i]);
-@@ -2425,7 +2425,7 @@ int nbytes;
- 	static int	mturn = 0;	/* which memory type to use */
- 	struct memalloc	*M;
- 	char		filename[255];
--#ifdef linux
-+#ifdef __linux__
- 	struct shmid_ds shm_ds;
- 	bzero( &shm_ds, sizeof(struct shmid_ds) );
- #endif
-@@ -2997,7 +2997,7 @@ int	aio_id;
- 	return 0;
- }
- 
--#ifndef linux
-+#ifndef __linux__
- int
- aio_wait(aio_id)
- int	aio_id;
-diff --git a/ltp/iogen.c b/ltp/iogen.c
-index 0c8b97e9..416dedbc 100644
---- a/ltp/iogen.c
-+++ b/ltp/iogen.c
-@@ -128,7 +128,7 @@ void	startup_info(FILE *stream, int seed);
-  */
- 
- struct strmap	Aio_Strat_Map[] = {
--#ifndef linux
-+#ifndef __linux__
- 	{ "poll",	A_POLL		},
- 	{ "signal",	A_SIGNAL	},
- #else
-@@ -1610,7 +1610,7 @@ FILE	*stream;
- {
-     usage(stream);
-     fprintf(stream, "\n");
--#ifndef linux
-+#ifndef __linux__
-     fprintf(stream, "\t-a aio_type,...  Async io completion types to choose.  Supported types\n");
-     fprintf(stream, "\t                 are:  poll, signal, suspend, and callback.\n");
-     fprintf(stream, "\t                 Default is all of the above.\n");
-@@ -1643,7 +1643,7 @@ FILE	*stream;
-     fprintf(stream, "\t-q               Quiet mode.  Normally iogen spits out info\n");
-     fprintf(stream, "\t                 about test files, options, etc. before starting.\n");
-     fprintf(stream, "\t-s syscall,...   Syscalls to do.  Supported syscalls are\n");
--#ifdef linux
-+#ifdef __linux__
-     fprintf(stream, "\t                 read, write, pread, pwrite, readv, writev,\n");
-     fprintf(stream, "\t                 mmread, mmwrite, fsync2, fdatasync,\n");
-     fprintf(stream, "\t                 Default is 'read,write,readv,writev,mmread,mmwrite'.\n");
--- 
-2.48.0
+> +    then
+> +        # mounted ...
+> +        local mountpoint=`_umount_or_remount_ro $device`
+> +    fi
+> +
+> +    FSCK_OPTIONS="--dry-run"
+> +    $F2FS_FSCK_PROG $FSCK_OPTIONS $device >>$seqres.full 2>&1
 
+FSCK_OPTIONS looks useless.
+
+> +    if [ $? -ne 0 ]
+> +    then
+> +        ok=0
+> +    fi
+
+We generally output nothing if no corruption:
+
+$F2FS_FSCK_PROG --dry-run $device >$tmp.fsck.f2fs 2>&1
+if [ $? -ne 0 ];then
+	_log_err "_check_f2fs_filesystem: filesystem on $device is inconsistent"
+	echo "*** fsck.f2fs output ***" >>$seqres.full
+	cat $tmp.fsck.f2fs              >>$seqres.full
+	echo "*** end fsck.f2fs output" >>$seqres.full
+
+	ok=0
+fi
+rm -f $tmp.fsck.f2fs
+
+
+> +
+> +    if [ $ok -eq 0 ]
+> +    then
+> +        echo "*** mount output ***"		>>$seqres.full
+> +        _mount					>>$seqres.full
+> +        echo "*** end mount output"		>>$seqres.full
+> +    elif [ "$type" = "$FSTYP" ]
+
+This's f2fs check function, so $FSTYP can be "f2fs" directly.
+
+Thanks,
+Zorro
+
+> +    then
+> +	# was mounted ...
+> +	_mount_or_remount_rw "$MOUNT_OPTIONS" $device $mountpoint
+> +	ok=$?
+> +    fi
+> +
+> +    if [ $ok -eq 0 ]; then
+> +	return 1
+> +    fi
+> +
+> +    return 0
+> +}
+> +
+>  # Filter the knowen errors the UDF Verifier reports.
+>  _udf_test_known_error_filter()
+>  {
+> @@ -3623,6 +3663,9 @@ _check_test_fs()
+>      ubifs)
+>  	# there is no fsck program for ubifs yet
+>  	;;
+> +    f2fs)
+> +        _check_f2fs_filesystem $TEST_DEV
+> +        ;;
+>      *)
+>  	_check_generic_filesystem $TEST_DEV
+>  	;;
+> @@ -3679,6 +3722,9 @@ _check_scratch_fs()
+>      ubifs)
+>  	# there is no fsck program for ubifs yet
+>  	;;
+> +    f2fs)
+> +        _check_f2fs_filesystem $device
+> +        ;;
+>      *)
+>  	_check_generic_filesystem $device
+>  	;;
+> -- 
+> 2.48.1
+> 
 
