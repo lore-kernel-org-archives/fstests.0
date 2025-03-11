@@ -1,74 +1,41 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B12025258
-	for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 14:19:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69E351684AC
+	for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 15:25:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741702742; cv=none; b=WuXI8IB1I3lZSzbG+aOO3e/0nRx0SvODishgAS3xrxS8IoQf/+VuNIV/iNCOLugSgcVc1iYzOQV5B4UIBw+X9WaPsJN6WwFLOcaB+Mp8j+G1iTbTgNaR7txIY9+u+wPxX0PfmcPODDZhJWJzhGrcecyTLhsXplWKKxaaRk1CiBo=
+	t=1741706705; cv=none; b=psSBuk75cHsg53B9TzK6WuJxToIby/qrc7ZXXeF2eNocTES3QvyJDu1ro5Kswvy4yUxOWkAOUj3Gw4NW9iVJNcsF64vKt0TT9INMSSJ52qmWYyFd/6z3SnpqcU+EpGbZpp8bZOgfb+AqIBJEJVmARleVsZQzh8Fc3CuQm5kBkq8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741702742; c=relaxed/simple;
-	bh=aSTJP1De0b/UVr2EWtRFJuikXzA4EeGkTC/NhjwY2iU=;
+	s=arc-20240116; t=1741706705; c=relaxed/simple;
+	bh=Hj7qVfWTrPMSP2i25w8TiVv9tP5kXzO302sQueLSi9A=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=FkhJ7RTknhAHdFdONn9ydRdrpctPjURnFlHkgXA2Rbw9sqZ3h8OXQEx2FLw2FuYo0jYEiJzDe9rW8RKL9Re1m9/Ffedc6BCX3wrzplLYPU9FcKN3Qx2uEJXTOkPCvKSSPXEkiQtXJgY+azLZzgWA1BnQ0B+KsvegFrzVLRzrPts=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=b/cC3/UC; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=GzYnZNqbtcpkvWtXvweswPPbWSw084YXdSt9vr3ulQ87QMSuFgT+mjBmbPaL14GBbeKhIpHUMmHuKNEs1MZtwF5RCXJrueBEYL8/ihZJDmy5huB7ZRXwtQcEEnTd0b5gt4f2+McdOoWlyh/ptV96Tk7cPNRQ+u363v8bTo87xLQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aShWBHGV; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="b/cC3/UC"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1741702739;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=53XH3kuajGlBpjomZB1JhqXApbCioeI/k4JtST4IrY0=;
-	b=b/cC3/UCCn3JOQ+JTXo3E/ebRk4BcUR3y/gI/SJYJTWaT+GYkQazkt/YVi2B2moJp9ztzh
-	innl2+0VhD2m+QcSdAcZ3YEMYgu03c54qKXQzacptgSkaVdHx6Kv4DQC7cdasaVDZLqfCe
-	z8ptse1Qf/1Ppkslz2l8eCYIGJ1H7DU=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-650-ACTmGB7MMZCA3jVdCEKweQ-1; Tue, 11 Mar 2025 10:18:49 -0400
-X-MC-Unique: ACTmGB7MMZCA3jVdCEKweQ-1
-X-Mimecast-MFC-AGG-ID: ACTmGB7MMZCA3jVdCEKweQ_1741702727
-Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-2ff6167e9ccso15356102a91.1
-        for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 07:18:47 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741702727; x=1742307527;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=53XH3kuajGlBpjomZB1JhqXApbCioeI/k4JtST4IrY0=;
-        b=Nv9AI87j2xi1Fe57gELUx3eNfMKdQ4SmAdmKj6b94vbgY/ZDyjN23wznZz7J+Tzw0g
-         ZQgNNs0+DBFggzreziNINxaJ+7oRQXytRF2MfspLzNlXTkrAjP6XsDYV2Cxd0e9Xf21L
-         ClQXi3g5KikJ2xMrGo5cN5j5eN5oeCv6Qn7kbUQQj4Jp0fFMNkAKIsbkj1hTlVVN79vv
-         P3QNytaEvd8hpPv8qpuSdejge6iMUwU40wnMZbGdGrqMBR8tdC/pxQZ0hsvspd/3BOGq
-         4Rr2fzTUtXtqD6z4GTuxLNnZUWcvFC8OH6ko9KY/KqjhGY5rrqTWbUu2nVM4aq7utQlN
-         2kuA==
-X-Gm-Message-State: AOJu0YwrdlUZl+jrWZACXsKJ56weqCQx3YsfXHwyn/j4rlt+j6xZUEBG
-	KONoowOPef0DcyIE0xohgvOi5YW0b3aVoED/9V2eVU3R+MTiKIZ12MohjPXbRoEFxmfj4LklEu/
-	vdrPtZjuQHY/ocxhzpl9XGdg4jW/Z/85y8GoPM2Y9goqwdp5/g3qoqTg=
-X-Gm-Gg: ASbGncsfyC9v1vhYF1hh0eSe8xHOud+Wbbqb+DFG5avq23D2fjKmtJJE/n/W27JuoW0
-	6wAiOV0EVNoeNW0J0XbEtx++YxGZHQKb1n74eiLUgDvalzv93L1X+vcsR07T5ONYnMPEYVwXj5J
-	A0pCgj3D2XLIF4jsWvmzJ5KrtRckmc4RYwesKkXQBG7RCg/vXobpl0dOQM3hn8qnBymx6l42stG
-	xzHbkMkM4IZuPI3rIwZd6+PCQrKKBTsm5IPz5PXOkQrbp19FG2nO1PXI5POFjlfSGOxzrkdMQ16
-	O/ClB12leIF//slacAg/HYwsqDp5Mw8TQyrZ/O9bYw+4rMaqjMd78M1k
-X-Received: by 2002:a17:90b:3887:b0:2ee:d193:f3d5 with SMTP id 98e67ed59e1d1-2ff7ce59637mr28293914a91.7.1741702727097;
-        Tue, 11 Mar 2025 07:18:47 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGpKPdlPcIYLWxDRGRLePrODxtIvirak1ZUXzMeqJz9UPrAhZ3BIGw6KiWpGIyTeJbe7m/OLg==
-X-Received: by 2002:a17:90b:3887:b0:2ee:d193:f3d5 with SMTP id 98e67ed59e1d1-2ff7ce59637mr28293884a91.7.1741702726732;
-        Tue, 11 Mar 2025 07:18:46 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-224109dddd8sm97928755ad.12.2025.03.11.07.18.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 Mar 2025 07:18:45 -0700 (PDT)
-Date: Tue, 11 Mar 2025 22:18:41 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH] common/rc: use getent when available
-Message-ID: <20250311141841.4fessnivr6z6sxpd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <52747027-2915-4c92-a6e9-b0dce1cbe198@redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aShWBHGV"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 20E49C4CEE9;
+	Tue, 11 Mar 2025 15:25:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1741706705;
+	bh=Hj7qVfWTrPMSP2i25w8TiVv9tP5kXzO302sQueLSi9A=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=aShWBHGVvCvQMvZnmEM26Qy9yAz/+BS8+WxdugYh3346U6yVwIFlbgVHwVos1wsWb
+	 mB3G/a3X3Zl+wvebeumkXFnYf/myzxRcfOYuKeVUGbBP7lFDiWgTrs/nA72hFEzcHF
+	 CyEShBBGFV5wiaAENlAQTR5lFJJSPUKO8ssNGfmvd/eVoG64C9xSmYfLTtlUHXN/No
+	 6GvUHJTE36Ews2mNrQrnv4Bz2YHB/CPDJJGzvwh6ojVgIQtMwKmupKmQXOk6/Rpqel
+	 dtfwkFnxaw4nLCwJIMg57m+MjURcuSfrdIQlE4tzBd14XJE5VNTrkArsoDjGx6NI4m
+	 8lHGpckuGCofw==
+Date: Tue, 11 Mar 2025 08:25:04 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Eric Sandeen <sandeen@redhat.com>, fstests@vger.kernel.org,
+	hch@infradead.org
+Subject: Re: [PATCH 2/7 V3] treewide: check for #ifdef __linux__ not linux
+Message-ID: <20250311152504.GH2803740@frogsfrogsfrogs>
+References: <20250310182954.1396724-1-sandeen@redhat.com>
+ <20250310182954.1396724-3-sandeen@redhat.com>
+ <290f4825-dc3c-405f-a306-49a978fa2597@sandeen.net>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -77,57 +44,233 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <52747027-2915-4c92-a6e9-b0dce1cbe198@redhat.com>
+In-Reply-To: <290f4825-dc3c-405f-a306-49a978fa2597@sandeen.net>
 
-On Mon, Mar 10, 2025 at 12:55:51PM -0500, Eric Sandeen wrote:
-> Zorro noticed that on systems using nss-altfiles, some tests failed when
-> trying to parse /etc/passwd directly. The "getent" command does the
-> right thing in this case, so let's use it as long as it's available.
+On Tue, Mar 11, 2025 at 08:46:48AM -0500, Eric Sandeen wrote:
+> There are several #ifdef linux guards in the code, which caused
+> a few sparse warnings, because while gcc defines both linux
+> and __linux__, sparse defines only __linux__. So, switch our
+> guards to check for __linux__ which is defined by both gcc
+> and sparse.
 > 
 > Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
+
+Looks good to me,
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+
+--D
+
 > ---
-
-Hahah, you're so fast:) This's similar with what I'm doing, so it's good to me.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-I tend to use getent too, if anyone has any better idea, please feel free to
-share.
-
-Thanks,
-Zorro
-
+>  include/tlibio.h    |  6 +++---
+>  include/write_log.h |  2 +-
+>  lib/str_to_bytes.c  |  2 +-
+>  lib/tlibio.c        | 12 ++++++------
+>  lib/write_log.c     |  2 +-
+>  ltp/doio.c          |  8 ++++----
+>  ltp/iogen.c         |  6 +++---
+>  7 files changed, 19 insertions(+), 19 deletions(-)
 > 
-> diff --git a/common/rc b/common/rc
-> index 6592c835..50312331 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2621,7 +2621,11 @@ _yp_active()
->  _cat_passwd()
->  {
->  	[ $(_yp_active) -eq 0 ] && ypcat passwd
-> -	cat /etc/passwd
-> +	if type getent &>/dev/null; then
-> +		getent passwd
-> +	else
-> +		cat /etc/passwd
-> +	fi
+> diff --git a/include/tlibio.h b/include/tlibio.h
+> index 12649cf5..4f462ff1 100644
+> --- a/include/tlibio.h
+> +++ b/include/tlibio.h
+> @@ -11,7 +11,7 @@
+>  #define LIO_IO_SYNCV            00020   /* single-buffer readv/writev */
+>  #define LIO_IO_SYNCP            00040   /* pread/pwrite */
+>  
+> -#ifdef linux
+> +#ifdef __linux__
+>  #define LIO_IO_TYPES            00021   /* all io types */
+>  #endif /* linux */
+>  
+> @@ -21,14 +21,14 @@
+>  #define LIO_WAIT_SIGPAUSE       00100000 /* call pause */
+>  #define LIO_WAIT_SIGACTIVE      00200000 /* spin waiting for signal */
+>  
+> -#ifdef linux
+> +#ifdef __linux__
+>  #define LIO_WAIT_TYPES          00300000 /* all wait types, except nowait */
+>  #endif /* linux */
+>  
+>  /* meta wait io  */
+>  /*  00  000 0000 */
+>  
+> -#ifdef linux
+> +#ifdef __linux__
+>  /* all signal wait types */
+>  #define LIO_WAIT_SIGTYPES	(LIO_WAIT_SIGPAUSE)
+>  #endif /* linux */
+> diff --git a/include/write_log.h b/include/write_log.h
+> index 025ebac0..6b088416 100644
+> --- a/include/write_log.h
+> +++ b/include/write_log.h
+> @@ -79,7 +79,7 @@ struct wlog_rec {
+>   */
+>  
+>  struct wlog_rec_disk {
+> -#ifdef linux
+> +#ifdef __linux__
+>      uint    w_offset    : 32;	    /* file offset  	    	    */
+>      uint    w_extra0    : 32;       /* EXTRA BITS IN WORD 0         */
+>  #endif
+> diff --git a/lib/str_to_bytes.c b/lib/str_to_bytes.c
+> index 2f6b2b92..89bc7d31 100644
+> --- a/lib/str_to_bytes.c
+> +++ b/lib/str_to_bytes.c
+> @@ -31,7 +31,7 @@
+>   *
+>   ****************************************************************************/
+>  
+> -#if linux
+> +#ifdef __linux__
+>  #define B_MULT	DEV_BSIZE	/* block size */
+>  #endif
+>  
+> diff --git a/lib/tlibio.c b/lib/tlibio.c
+> index 5b810059..ae936f41 100644
+> --- a/lib/tlibio.c
+> +++ b/lib/tlibio.c
+> @@ -74,7 +74,7 @@
+>  #endif
+>  
+>  
+> -#ifndef linux
+> +#ifndef __linux__
+>  static void lio_async_signal_handler();
+>  #endif
+>  
+> @@ -351,7 +351,7 @@ lio_help2(char *prefix)
+>      return;
 >  }
 >  
->  # cat the group file
-> @@ -2629,7 +2633,11 @@ _cat_passwd()
->  _cat_group()
+> -#ifndef linux
+> +#ifndef __linux__
+>  /***********************************************************************
+>   * This is an internal signal handler.
+>   * If the handler is called, it will increment the Received_signal
+> @@ -453,7 +453,7 @@ char **errmsg;	/* char pointer that will be updated to point to err message */
+>  long wrd;	/* to allow future features, use zero for now */
 >  {
->  	[ $(_yp_active) -eq 0 ] && ypcat group
-> -	cat /etc/group
-> +	if type getent &>/dev/null; then
-> +		getent group
-> +	else
-> +		cat /etc/group
-> +	fi
+>      int ret = 0;	/* syscall return or used to get random method */
+> -#ifndef linux
+> +#ifndef __linux__
+>      int omethod = method;
+>      int listio_cmd;		/* Holds the listio/lio_listio cmd */
+>  #endif
+> @@ -650,7 +650,7 @@ char **errmsg;	/* char pointer that will be updated to point to err message */
+>  long wrd;	/* to allow future features, use zero for now */
+>  {
+>      int ret = 0;	/* syscall return or used to get random method */
+> -#ifndef linux
+> +#ifndef __linux__
+>      int listio_cmd;		/* Holds the listio/lio_listio cmd */
+>      int omethod = method;
+>  #endif
+> @@ -797,7 +797,7 @@ long wrd;	/* to allow future features, use zero for now */
+>  }	/* end of lio_read_buffer */
+>  
+>  
+> -#ifndef linux
+> +#ifndef __linux__
+>  /***********************************************************************
+>   * This function will check that async io was successful.
+>   * It can also be used to check sync listio since it uses the
+> @@ -998,7 +998,7 @@ lio_wait4asyncio(int method, int fd, aiocb_t *aiocbp)
+>  
+>  } /* end of lio_wait4asyncio */
+>  
+> -#endif /* ifndef linux */
+> +#endif /* ifndef __linux__ */
+>  
+>  #if UNIT_TEST
+>  /***********************************************************************
+> diff --git a/lib/write_log.c b/lib/write_log.c
+> index cdc72593..7c58a95f 100644
+> --- a/lib/write_log.c
+> +++ b/lib/write_log.c
+> @@ -49,7 +49,7 @@
+>  #include "write_log.h"
+>  
+>  #ifndef BSIZE
+> -#ifdef linux
+> +#ifdef __linux__
+>  #define BSIZE DEV_BSIZE
+>  #else
+>  #define BSIZE BBSIZE
+> diff --git a/ltp/doio.c b/ltp/doio.c
+> index fd64df0f..ba080a0b 100644
+> --- a/ltp/doio.c
+> +++ b/ltp/doio.c
+> @@ -222,7 +222,7 @@ int     parse_cmdline( int, char **, char * );
+>  int     lock_file_region( char *, int, int, int, int );
+>  struct	fd_cache *alloc_fdcache(char *, int);
+>  int     aio_register( int, int, int );
+> -#ifndef linux
+> +#ifndef __linux__
+>  int aio_wait(int);
+>  #endif
+>  
+> @@ -1990,7 +1990,7 @@ do_rw(req)
+>  		/*
+>  		 * If the syscall was async, wait for I/O to complete
+>  		 */
+> -#ifndef linux
+> +#ifndef __linux__
+>  		if(sy->sy_flags & SY_ASYNC) {
+>  			for(i=0; i < nents; i++) {
+>  				aio_wait(s->aioid[i]);
+> @@ -2425,7 +2425,7 @@ int nbytes;
+>  	static int	mturn = 0;	/* which memory type to use */
+>  	struct memalloc	*M;
+>  	char		filename[255];
+> -#ifdef linux
+> +#ifdef __linux__
+>  	struct shmid_ds shm_ds;
+>  	bzero( &shm_ds, sizeof(struct shmid_ds) );
+>  #endif
+> @@ -2997,7 +2997,7 @@ int	aio_id;
+>  	return 0;
 >  }
 >  
->  # check if a user exists in the system
+> -#ifndef linux
+> +#ifndef __linux__
+>  int
+>  aio_wait(aio_id)
+>  int	aio_id;
+> diff --git a/ltp/iogen.c b/ltp/iogen.c
+> index 0c8b97e9..416dedbc 100644
+> --- a/ltp/iogen.c
+> +++ b/ltp/iogen.c
+> @@ -128,7 +128,7 @@ void	startup_info(FILE *stream, int seed);
+>   */
+>  
+>  struct strmap	Aio_Strat_Map[] = {
+> -#ifndef linux
+> +#ifndef __linux__
+>  	{ "poll",	A_POLL		},
+>  	{ "signal",	A_SIGNAL	},
+>  #else
+> @@ -1610,7 +1610,7 @@ FILE	*stream;
+>  {
+>      usage(stream);
+>      fprintf(stream, "\n");
+> -#ifndef linux
+> +#ifndef __linux__
+>      fprintf(stream, "\t-a aio_type,...  Async io completion types to choose.  Supported types\n");
+>      fprintf(stream, "\t                 are:  poll, signal, suspend, and callback.\n");
+>      fprintf(stream, "\t                 Default is all of the above.\n");
+> @@ -1643,7 +1643,7 @@ FILE	*stream;
+>      fprintf(stream, "\t-q               Quiet mode.  Normally iogen spits out info\n");
+>      fprintf(stream, "\t                 about test files, options, etc. before starting.\n");
+>      fprintf(stream, "\t-s syscall,...   Syscalls to do.  Supported syscalls are\n");
+> -#ifdef linux
+> +#ifdef __linux__
+>      fprintf(stream, "\t                 read, write, pread, pwrite, readv, writev,\n");
+>      fprintf(stream, "\t                 mmread, mmwrite, fsync2, fdatasync,\n");
+>      fprintf(stream, "\t                 Default is 'read,write,readv,writev,mmread,mmwrite'.\n");
+> -- 
+> 2.48.0
 > 
 > 
-
+> 
