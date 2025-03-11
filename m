@@ -1,77 +1,77 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7047625B68D
-	for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 14:09:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A16F1D63E2
+	for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 14:10:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741702171; cv=none; b=kXJMe8xqSbWh7n/A7PPtf352Pv6xT3VM2/u/3/+EoHsCWKCGNZ+LNJSP/YdaRxHr63UyryveHKfkot/LYRkeJTqKNCjEtSgoJ7taPUkAZD/nCKSWNM5Pt/iIqTbxOCQ3zwcI7hSLqQoLiXnLdPT8/LU5E+U9J8dpXVHEOcZ7h3A=
+	t=1741702260; cv=none; b=ufnvngrg5mVvFDqPFO7oFWucSKxG5jFVeqIhUesgh99bZpFQihPk/S4gD9uenZlWZOiKc+86cBZn24wshuYVJd++i5sMtXlY+Cx3jQI9gB9a7ccTSiMWvCj26jhJPiqTfP2Yl6oLAqFH/4VXAfxZQrcCEbAsp5/wtOTa4VuQAdo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741702171; c=relaxed/simple;
-	bh=jWr4Qm7qootQE1IuB4z6zf/sIKlm0MhPhBadWgR5bxU=;
+	s=arc-20240116; t=1741702260; c=relaxed/simple;
+	bh=IFdzE8aWAG0/ZbYQeMGJj4OJEDclSTteZZS2tMWfxiA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=eyRpI6UHxBhdU5F+tuQH08A09yrn9gri2/6/NhHIYkX2e9VKDnD+Gh0JUULtgZoYrw/5viDPHfeCnt/Q6XCblCdL97QtiBPYmbuhdw9QKxYSbhGLLI8iJ00LOnb0TYM/y1gNRL9JhjvRqvbSwTM5kB9PwDh5ukubwsJyzwjP9Q4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=bQ6vO8AL; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=tExLcieakGHLCggjxG/A07ZhJzxDwT2A3EOtVQcKvDoz7HkCktX4vMvWYi36PvokkG0kByh1fjPWlDW0TYbVz44XfLlgln6yVfVps+yrj8vToybA+FLUx9xzVUelRS1g+LGQ3N9CCrYnSMRqNbpkG0y2UZFYG4L6/ZMUkTR9WqA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JE4LpVlx; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bQ6vO8AL"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JE4LpVlx"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1741702168;
+	s=mimecast20190719; t=1741702257;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=QHN+WyTXC9cTVt8Szj+5ZB32yaeO7+nSt9V6FrdnRtk=;
-	b=bQ6vO8ALGigRZrcptizNsaX9sF4Ut/zY9mg4d+P62gT32cMLZVJbYtB4vMNNHF+BTfc4Cg
-	li/87CLTOdpTVN840Mo+WAFgll/NanWHDBaNXuxnNfOUWuFGKfFu45kYthFLx9ll11FtQd
-	p5+gFmWgula6pOaoRvaV3PoB0WcmdpU=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=SkvND+eYHH9qsacQ7rfWb/ck3Os9E/r1JZIjq4LYTVM=;
+	b=JE4LpVlx9PiD7dDjPMTD2uI/BMLuO2l91vwbsaOESmpZ+/U8aD2KYJ04i22MIE32Od5IR3
+	FXYQRb0SsPy+s3XPFWcslddfqtZ05G+mX3oCjCxm2OwWWkyETfA9y1WheyTrs3wEOb1js4
+	MbiT21dQeeo5+m5An0w11jt2qPwhSPM=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-267-Pid1ZAr2MZmQqEfXBIn6nw-1; Tue, 11 Mar 2025 10:09:27 -0400
-X-MC-Unique: Pid1ZAr2MZmQqEfXBIn6nw-1
-X-Mimecast-MFC-AGG-ID: Pid1ZAr2MZmQqEfXBIn6nw_1741702166
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2242ca2a4a5so54054445ad.2
-        for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 07:09:26 -0700 (PDT)
+ us-mta-452-rnSVPEPcMMaUUqp52HJEuQ-1; Tue, 11 Mar 2025 10:10:55 -0400
+X-MC-Unique: rnSVPEPcMMaUUqp52HJEuQ-1
+X-Mimecast-MFC-AGG-ID: rnSVPEPcMMaUUqp52HJEuQ_1741702253
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2241e7e3addso77796135ad.1
+        for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 07:10:54 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741702166; x=1742306966;
+        d=1e100.net; s=20230601; t=1741702253; x=1742307053;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=QHN+WyTXC9cTVt8Szj+5ZB32yaeO7+nSt9V6FrdnRtk=;
-        b=v+IsOuyZ/C+IHGzdhj10/jEZDqWSWyWnHjbNgJNVz7ep5M0hEYEQWd3f2jDmlgi1NI
-         9bt9DH+gbdoCbuPr6jNbCGS8aQBhSZhC5ly7+T9v64baGydbgbIpz5pQ1IThRCnMb44P
-         hyl+H3O8bfHBJF4+bMCfLl2hckDj1itvwxtR4+6zGgxLSxx5pDveBQZJuJe0Uh7iEDSN
-         UfSKROzPg7oYSFxUweAvrKHBpU+QZbOqofpLO0ny8svktRk3a7olKA236ur1t1BtYx6E
-         tvR/pD6Jjk8dp7nWdW9J+pXiawUAyZVf2jp1EfcpI4pW0Ui77EIK4JAD9GCgJxBWFnUx
-         S19A==
-X-Forwarded-Encrypted: i=1; AJvYcCXXELSAunI5gezG1COWIhWxib7Ld9zCos8quOYVMyvNv7+QyZ7dq+SBS7asxETDFFye8gDIk3AC@vger.kernel.org
-X-Gm-Message-State: AOJu0YzuCd0YS/sax3xM7N+A+yXt1fCE5EHfgGKkYtnKSSPguSqc6D3Q
-	9IaNrlrpbfgLxTjzvGisniQJw+hUv8t3SFQW5kkfqCxnkf7z8iHRlgWRjYLd6KDC5phmZU6iDHt
-	djweQkAgPzU7kHMS/qUVJhRsxjdurEUzhcXBbqJQXXjRMSfDz1uILLLg=
-X-Gm-Gg: ASbGncu1RKXyeZpaFaoiGlKEkpaCYCqGEQd2cRIUXDOrQ6/6b42NpgDnYNcCZwjE2lq
-	k4/CsilQDwyxTOnE+XUFKBBGOd3D+MJkEKLvJDSTfHWaHEjI4z6iqgX8JcyNEZflr7F/xw9F8tS
-	s/5JobX3O6YPI5pSpQzyd5rZxNE4Qf/aZvPnjCkoph+6x8nSG6sD3yjeM72oqqX2O2y8NVXok6I
-	vNSghG5MQOAMJEol+6PjmkYP48umcTcCTRYR/Jb+Y0tQEYxxbXPWtF8IK5FK7uWWO6JtulJ91+6
-	STSoWsZaa04tP7ceXRpgEWMPK8uWArZnctrT0jYnlttOdBbtMK6Snpgb
-X-Received: by 2002:a05:6a00:27a0:b0:736:532b:7c10 with SMTP id d2e1a72fcca58-736aaae81dbmr24406301b3a.21.1741702165932;
-        Tue, 11 Mar 2025 07:09:25 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFwRe8L4LDh2K3HMdnKilzZNO0IeGk2PElblD0WViJm8ydFFUjXMlOdlQ58DkPx2DHiK9Q+JQ==
-X-Received: by 2002:a05:6a00:27a0:b0:736:532b:7c10 with SMTP id d2e1a72fcca58-736aaae81dbmr24406271b3a.21.1741702165614;
-        Tue, 11 Mar 2025 07:09:25 -0700 (PDT)
+        bh=SkvND+eYHH9qsacQ7rfWb/ck3Os9E/r1JZIjq4LYTVM=;
+        b=dbTBsHKRSuMZhkepALrLnYH/aSkh+Zmah0PyBZkfRp3O4fQ0Va4jNKOWgGBuTCyArd
+         dWVm7rp7ziDy81eia2xwIf4kCK0fZf/REVf9a51Fmkm8KNn7kHf3sneoVaYAs5B7lh5v
+         sKuvFhB/9bXlSqSUkmMX6HAZMqBUKs7ks0iNB0jUfulDQ5Rt6NQk6M43+RI9OvAYad+A
+         gjq3bukBcTKnNBveVGeQ4t03FXNOpbIMv3f7L7XO9piyA55n2a4wrb/e7faJBr8h40yW
+         Qz84N3jycdW1nszEikUxwVeGMTeyerj16nLqO7RgQWG7DE0By/ycepcSEAjl7wtEi8q8
+         LF1w==
+X-Forwarded-Encrypted: i=1; AJvYcCXROKAQhICFhqHdf/jYpDGHrjMzfMtEuMFx42ySpYLQlXdai7JijU90CqVcjUBHIsNIFn4jqaXI@vger.kernel.org
+X-Gm-Message-State: AOJu0YwNqADJASFNTZmuGVpvk5wcuIEYgWS7ALamuepae8ciy1gz46e/
+	DRXpvH4FksohYr3ZGtxIqkg4vfEuASvQwnBDjTgRQ1HjHdClaqw8ZWXdDvx4VF/G8gsdyX5cG6x
+	v3YTETBoRrkv2Bo0q8ww6RZPIZz5uDzGVgUx4heimdDRezWH0lql2lMc=
+X-Gm-Gg: ASbGncuaQFLlZQD1gUOJ990/4ZR5v8IrF1+vqC6H2yyqr1t6qfkNafFBLuaYndhHob/
+	cXDZSjv/r6uhaQvViwX8R7E4K9xugsGpp9lpS4N/55Yp8jsxEKyZDVjtohHOkoyTyHnR/QlbSdu
+	aYtMyRFa2dEnmTMKr0RG9/L6enOfB+2X6A586njyz46oFPark6ZUdue4lywHwQ9yHQ9isLTBAmo
+	MgbsUby6TNgT3CNAWr142/ftqgl1Bu2Fy4Crv30Xx5kxg60OiVTXCHGtfw7/YzDxvPD0EgOUSUR
+	vP30vIomRmbsKYyiMRuGmHCpnwmwPt7bPf1iki8KXjsn6d9OYz5fVESO
+X-Received: by 2002:a05:6a00:a09:b0:736:ab1d:83c4 with SMTP id d2e1a72fcca58-736eb65d07amr5709722b3a.0.1741702253333;
+        Tue, 11 Mar 2025 07:10:53 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFGBAe6qYUv/1LSdx10iDSl+9jxSxX1nvqdNSscZ0FP3Zlo9UqY1wsdnnJeIUzm79j1aANS0w==
+X-Received: by 2002:a05:6a00:a09:b0:736:ab1d:83c4 with SMTP id d2e1a72fcca58-736eb65d07amr5709685b3a.0.1741702253020;
+        Tue, 11 Mar 2025 07:10:53 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-736aead3439sm8716245b3a.64.2025.03.11.07.09.23
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-736d8f0ea83sm4312868b3a.143.2025.03.11.07.10.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 Mar 2025 07:09:25 -0700 (PDT)
-Date: Tue, 11 Mar 2025 22:09:19 +0800
+        Tue, 11 Mar 2025 07:10:51 -0700 (PDT)
+Date: Tue, 11 Mar 2025 22:10:46 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Chao Yu <chao@kernel.org>
 Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
 	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v3 3/6] common/config: export F2FS_FSCK_PROG
-Message-ID: <20250311140919.5r4vossfrose2w2q@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH v3 4/6] common/rc: use -f for mkfs.f2fs by default
+Message-ID: <20250311141046.hpwurbjqc6dbwoml@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20250311080430.3696582-1-chao@kernel.org>
- <20250311080430.3696582-3-chao@kernel.org>
+ <20250311080430.3696582-4-chao@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -80,39 +80,48 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250311080430.3696582-3-chao@kernel.org>
+In-Reply-To: <20250311080430.3696582-4-chao@kernel.org>
 
-On Tue, Mar 11, 2025 at 04:04:27PM +0800, Chao Yu wrote:
-> Let's export F2FS_FSCK_PROG, then we can use it in
-> _check_f2fs_filesystem() later.
+On Tue, Mar 11, 2025 at 04:04:28PM +0800, Chao Yu wrote:
+> Otherwise, mkfs will fail due to there is an existing filesystem
+> in the image.
 > 
 > Cc: Jaegeuk Kim <jaegeuk@kernel.org>
 > Signed-off-by: Chao Yu <chao@kernel.org>
 > ---
-
-Although patch 2 and 3 can be in one patch, I don't mind seperating
-them if you'd like.
+> v3:
+> - split change from f2fs/009, and cover both _scratch_mkfs() and
+> _try_scratch_mkfs_sized()
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-> v3:
-> - export F2FS_FSCK_PROG, and it will be used latter
->  common/config | 1 +
->  1 file changed, 1 insertion(+)
+>  common/rc | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> diff --git a/common/config b/common/config
-> index 7d017a05..79bec87f 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -317,6 +317,7 @@ export MKFS_F2FS_PROG=$(set_mkfs_prog_path_with_opts f2fs)
->  export DUMP_F2FS_PROG=$(type -P dump.f2fs)
->  export F2FS_IO_PROG=$(type -P f2fs_io)
->  export F2FS_INJECT_PROG=$(type -P inject.f2fs)
-> +export F2FS_FSCK_PROG=$(type -P fsck.f2fs)
->  export BTRFS_UTIL_PROG=$(type -P btrfs)
->  export BTRFS_SHOW_SUPER_PROG=$(type -P btrfs-show-super)
->  export BTRFS_CONVERT_PROG=$(type -P btrfs-convert)
+> diff --git a/common/rc b/common/rc
+> index ca755055..23b642f4 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -993,7 +993,7 @@ _scratch_mkfs()
+>  		mkfs_filter="grep -v -e ^Warning: -e \"^mke2fs \""
+>  		;;
+>  	f2fs)
+> -		mkfs_cmd="$MKFS_F2FS_PROG"
+> +		mkfs_cmd="$MKFS_F2FS_PROG -f"
+>  		mkfs_filter="cat"
+>  		;;
+>  	ocfs2)
+> @@ -1336,7 +1336,7 @@ _try_scratch_mkfs_sized()
+>  	f2fs)
+>  		# mkfs.f2fs requires # of sectors as an input for the size
+>  		local sector_size=`blockdev --getss $SCRATCH_DEV`
+> -		$MKFS_F2FS_PROG $MKFS_OPTIONS "$@" $SCRATCH_DEV `expr $fssize / $sector_size`
+> +		$MKFS_F2FS_PROG -f $MKFS_OPTIONS "$@" $SCRATCH_DEV `expr $fssize / $sector_size`
+>  		;;
+>  	tmpfs)
+>  		local free_mem=`_free_memory_bytes`
 > -- 
 > 2.48.1
+> 
 > 
 
