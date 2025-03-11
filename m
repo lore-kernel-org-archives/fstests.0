@@ -1,129 +1,150 @@
-Received: from fhigh-b6-smtp.messagingengine.com (fhigh-b6-smtp.messagingengine.com [202.12.124.157])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com [209.85.214.174])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07130255E37
-	for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 15:44:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.157
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 50B552620F9
+	for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 20:48:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741707900; cv=none; b=MFG+5WzZ/5J2hqy+7EEMhVJjvFzatLJdakazNj0+vvb4xHEOAgQe9Aawrzrq/d5q1Nk0IHz/2c+RgMyxc6av743MFBQnj4Kdg0NTA1rSwcQ4sL7kvI+vaNltRQNFPmGYc9cYVkwvx2E7/Fbb3CxSRGAg/5/VjVxUDDXqipSdQ9Q=
+	t=1741726136; cv=none; b=pdOwzmxLWBL30sUBMp9M25Syxrtn4fcZr7xd3ymVP/++qMkk3DhxsV5RkvQuFXh/bsg3wkv1O77UMGK8uTt1zhKZYRS6Xzly70QCYQJ+w0hY+0dZro0YdQCDSnymiRGyx/ZlM7jsSia/ki4OSo2XN1JuWzAPVs19pGRHnbQNeTA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741707900; c=relaxed/simple;
-	bh=cgkIu+3XxOmiwEaHWdrKPhmfx4faZR3QWschZj2oArE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=gMNcMYjs82vH0OSsb2Wzr/EGelCxuZ8O0Ker1xZsM+rPvwEEKvkG9VJvLRnReXlv50amq0G/SaRE9TIj3Q9kWroOeC1y63E8yDthCUntImyacO+WCmlosVMqu+0krw9twEykO4xemBlUllBtbknzgovGsLk/aBxux1CgEQg87Vs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net; spf=pass smtp.mailfrom=sandeen.net; dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b=c3zk5dpM; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=zwT9gGBm; arc=none smtp.client-ip=202.12.124.157
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandeen.net
+	s=arc-20240116; t=1741726136; c=relaxed/simple;
+	bh=k0jrNNW6g+Emfc/5qu2lpVME5kRHpft6PLjRejKGpRc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=K/+5yNm4T1A0pB7yRh1fMogr0khYNvWkGCKRIAPODio+phpogT7fgBZR4c2YRGXTUN7I61xDzkDPCgb2PsvXfab2vjkBmMoX4YvCekCRzxuysJRerP7FTeXIE9VpL8rcaqVynVq5llP6cWpZZ3xwEht/PkcDoO/Jh7CZ4Cp0Yjc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=Jj2IeGrk; arc=none smtp.client-ip=209.85.214.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b="c3zk5dpM";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="zwT9gGBm"
-Received: from phl-compute-12.internal (phl-compute-12.phl.internal [10.202.2.52])
-	by mailfhigh.stl.internal (Postfix) with ESMTP id B5F9A254017F;
-	Tue, 11 Mar 2025 11:44:57 -0400 (EDT)
-Received: from phl-mailfrontend-02 ([10.202.2.163])
-  by phl-compute-12.internal (MEProxy); Tue, 11 Mar 2025 11:44:57 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net; h=
-	cc:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm1; t=1741707897;
-	 x=1741794297; bh=oH+yXkwdlLo0/ClEj/JR0Rg9OJbAvJxFhtYH9nPFK/4=; b=
-	c3zk5dpMliRaagNga51DXM5Ub8cNd7491+wcS78gjwFvD2U4hxM3rLxS4F5wSsN+
-	ROKz5ZOQ2jmYk4xVNj35kQUm0+2d9u9qcqwEkKxEK/MH3pmfbi71b9dVm+CdGDpS
-	ksF1WbFxyyeuoGmAK60Nshelyk5ipw9A9g1rddS/YeX1UqIax/+0n6NqIt8CUvJ+
-	QdMeRvCkcVpMEcFSkAqroqnfojZQCgcujKchbr8sGZVORemBiA2/NHHznTfwFPy5
-	G+h5cmY6wnl1k92ZNvGvXE+m3taueP6tbd+RImvbC4WGx5PL3sJroBO5U5Q6O2AM
-	L0DZu6rluboD2tVxup5VBQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1741707897; x=
-	1741794297; bh=oH+yXkwdlLo0/ClEj/JR0Rg9OJbAvJxFhtYH9nPFK/4=; b=z
-	wT9gGBm3HsOhOKrfYKwfI+jFUuTFFbFl1008CBstrI8vMa4qjehRjWPfOI5PaDqY
-	LM9t6rNTmlC0duDXLMbsh+K/hfU9aHDXsYa3eDMVoJ/gjRUUr+WudMAsKesB969I
-	tBkr72wRvrQyrYy8oWodpVxAE0n4B8eoSP1Yi3aODVxLXAVX0ot4CTCl03RcobOk
-	XOuGUM6VJEq3nZMPVHmaT8zBv/TFiIG2qf8k97l5qvvhgSCZigDpfcUm1SvLZtNG
-	CC26l5ilEily7Qv3cLzyzA8Mu7Qcf2BUaIOIIDSpITMwfdQoNxUr7u5ccL/4kRYJ
-	RwbK9+IPb94jDWFX3EqoA==
-X-ME-Sender: <xms:eVrQZw2t-HE2nGVg81g68F5CX5WW4YJxUKIgJDgKqpWpXa3IOPw0aA>
-    <xme:eVrQZ7F4TQjIDi3wHdhbl5-k63BIQxo_ApcxMYXPGbxber0AcM0oUyEyrNk9wqGTZ
-    knfILoAXr0wCTwZZMU>
-X-ME-Received: <xmr:eVrQZ47B99s_vw9L92ZRKJdOudP01cPcwLr_8r0NL9wV4LKDSzbtw1IC_594kQ>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefvddrtddtgdduvddviedvucetufdoteggodetrf
-    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdggtfgfnhhsuhgsshgtrhhisggv
-    pdfurfetoffkrfgpnffqhgenuceurghilhhouhhtmecufedttdenucesvcftvggtihhpih
-    gvnhhtshculddquddttddmnecujfgurhepkfffgggfuffvvehfhfgjtgfgsehtjeertddt
-    vdejnecuhfhrohhmpefgrhhitgcuufgrnhguvggvnhcuoehsrghnuggvvghnsehsrghnug
-    gvvghnrdhnvghtqeenucggtffrrghtthgvrhhnpeevieekueetfeeujedtheeffedvgeff
-    iedvjeejleffhfeggeejuedtjeeulefhvdenucevlhhushhtvghrufhiiigvpedtnecurf
-    grrhgrmhepmhgrihhlfhhrohhmpehsrghnuggvvghnsehsrghnuggvvghnrdhnvghtpdhn
-    sggprhgtphhtthhopeefpdhmohguvgepshhmthhpohhuthdprhgtphhtthhopegujhifoh
-    hngheskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepshgrnhguvggvnhesrhgvughhrght
-    rdgtohhmpdhrtghpthhtohepfhhsthgvshhtshesvhhgvghrrdhkvghrnhgvlhdrohhrgh
-X-ME-Proxy: <xmx:eVrQZ51pLhgGFsmPzx7H2pjNL4vcoO6JS--gaCXTCCWFKuBq7TvnXQ>
-    <xmx:eVrQZzHKpb0H2sK-k7pcK2FvLvLGiD2NTXlficbI7i6Ne7EjpZZBsw>
-    <xmx:eVrQZy-5URc3mr7uCI4NqMdfgIL-b5ufOcvNh3MnlIW5MPQ9afmXtw>
-    <xmx:eVrQZ4mkHUZ6P4M-zxSU-2-fcee30X8K-JHUiEcRdBOsXAg9titx8Q>
-    <xmx:eVrQZ7B1AJ7r-lqDE5I1myWIn326focvkBiWosaBBZA-fAogXOkWWha3>
-Feedback-ID: i2b59495a:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
- 11 Mar 2025 11:44:56 -0400 (EDT)
-Message-ID: <a4f915b2-d261-41e8-bc07-8fb2174af89e@sandeen.net>
-Date: Tue, 11 Mar 2025 10:44:56 -0500
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="Jj2IeGrk"
+Received: by mail-pl1-f174.google.com with SMTP id d9443c01a7336-225a28a511eso15785785ad.1
+        for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 13:48:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1741726134; x=1742330934; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=A41jK0hv/dY/20SIs/rShB67Ygs4/TeS4b/uxOa4UG0=;
+        b=Jj2IeGrkd0eFZpfCLl8MrARQgpCCh9gIRkm4yb8cSAMnJkdfMGOPCuDDkRQGnVzFAL
+         boOYg1WYce40vcZHi9NrgG3KHv69I2zWzMt0QTYIwtjM1arLGfXQ/ciQ7+Doqe3oJuu1
+         XZsVSC4Tp8que+/fU7I90mju45d4CdyzQ2tqGKz2KqrdjNpu09O+u517lk6E2xY6anX5
+         uq8VKhFJ8VjaxmmNdMz+8I/xX7PJ+KVND8njzShWtPk042FfgHYsU17OTjHtgEZbWv9h
+         tyiPAiSeZDvySfVfGe4p1UKQ5rKGcSH+Ih++7STXKM7jFzr2PumvCZjQk1+GHa7kdjTU
+         JQtA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1741726134; x=1742330934;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=A41jK0hv/dY/20SIs/rShB67Ygs4/TeS4b/uxOa4UG0=;
+        b=mlg8coE0DXhcryNuH7UhQ0coTHwU53LKMln1kkogVfS6ghFs6NahWS5O3wyLJFtAHp
+         jnCeF7iMXuumo/SkjNXoIHUX0jZDSqLaRi4QLwaWWTwWGcPZxgF0KB72PgjXm27JZtaf
+         lAoU3EemU6p7yRkA4vj8nWUqhjcNguy7lFQzZD8Zhc1YdrSgZbb8YdxnylQgty58LvoB
+         caQyzmIKU43BD1+2uZcgPukGgYeGEqFplBxZG/YhHsJ877ZpJ77D1RW7pAfLAHdMb+Ay
+         zF8nQKmrQXCHCPsF8OcaAUY5SP+NS0wIYwz+v8328D7plG2qAmR4qeFXzapa5lD3ZWMV
+         oHeA==
+X-Gm-Message-State: AOJu0Yxwg3ChTKFITzwSKD8LoFAu6pKKw5LoDclaa9wFgCHmsMbDP7ac
+	liyGAuIUmYTkn09tkyvZHyqH6WLm2tZJCo7O9nGvmHZW9qAA+0jlnigAytUWqkM=
+X-Gm-Gg: ASbGnct/QBUDFDoI8ELApg8cgitbuvXU9EGXBXj3fqflf9pfpUd1lKWLZV7kMsW+pnL
+	9X+1TRcdG/cGf94Vv/1y4RZktE14O59bzvUIDevXWbejJWzlPjlUXym7ykGtu5r2onL4lQhbp1g
+	jxiLmhfLKufTfXHezKamBV+oTRubXcULhggPiAjHe65BAq7E3AXyjb2vS0Qztc/duiy6HGC6x2v
+	srApEn0PIeMHXyLBb+YwiIlHxVm8h7RR6qTWaFplMoQmZX8rMYip98l4Q1v2hqfp7JBLxX/kuza
+	dKF2vgcouGsI0DiWy49BRSXf0bUc9A7TS3QtLYZFlTJPFLHoRcdsVOntQP6tQGq6pLf6WEUqwKB
+	DPNMfjoRa9rNfFBLIoVAc
+X-Google-Smtp-Source: AGHT+IFBjv1Buu0qgRkjiUUYSCI3OqA4JVRqIb9TLkr8uU7XvCY2VDQ7FKHF0oIb+eaWUWi/ymo3FQ==
+X-Received: by 2002:a17:902:e750:b0:21f:68ae:56e3 with SMTP id d9443c01a7336-22428be5a43mr273882875ad.39.1741726134518;
+        Tue, 11 Mar 2025 13:48:54 -0700 (PDT)
+Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22410a7fc7csm102894615ad.120.2025.03.11.13.48.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 11 Mar 2025 13:48:53 -0700 (PDT)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1ts6Wx-0000000Bs8e-0jNr;
+	Wed, 12 Mar 2025 07:48:51 +1100
+Date: Wed, 12 Mar 2025 07:48:51 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: David Disseldorp <ddiss@suse.de>
+Cc: fstests@vger.kernel.org, Chao Yu <chao@kernel.org>, jaegeuk@kernel.org
+Subject: Re: [PATCH] f2fs/008: avoid endless wait
+Message-ID: <Z9Chs5qdOg7rXevY@dread.disaster.area>
+References: <20250311050346.5868-2-ddiss@suse.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] common/rc: use getent when available
-To: "Darrick J. Wong" <djwong@kernel.org>, Eric Sandeen <sandeen@redhat.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-References: <52747027-2915-4c92-a6e9-b0dce1cbe198@redhat.com>
- <20250311153037.GI2803740@frogsfrogsfrogs>
-Content-Language: en-US
-From: Eric Sandeen <sandeen@sandeen.net>
-In-Reply-To: <20250311153037.GI2803740@frogsfrogsfrogs>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250311050346.5868-2-ddiss@suse.de>
 
-On 3/11/25 10:30 AM, Darrick J. Wong wrote:
-> On Mon, Mar 10, 2025 at 12:55:51PM -0500, Eric Sandeen wrote:
->> Zorro noticed that on systems using nss-altfiles, some tests failed when
->> trying to parse /etc/passwd directly. The "getent" command does the
->> right thing in this case, so let's use it as long as it's available.
->>
->> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
->> ---
->>
->> diff --git a/common/rc b/common/rc
->> index 6592c835..50312331 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -2621,7 +2621,11 @@ _yp_active()
->>  _cat_passwd()
->>  {
->>  	[ $(_yp_active) -eq 0 ] && ypcat passwd
->> -	cat /etc/passwd
->> +	if type getent &>/dev/null; then
+On Tue, Mar 11, 2025 at 04:03:47PM +1100, David Disseldorp wrote:
+> "udevadm wait <dev>" without a --timeout=SECONDS parameter will wait
+> endlessly. Endless wait can be triggered in f2fs/008 by e.g. using a
+> zram device as a SCRATCH_DEV, where "device type is unknown" failure
+> sees the /dev/mapper/$vgname-$lvname node never appear.
 > 
-> If you want to be really nitpicky, 'type' isn't defined for posix
-> shells; you're supposed to use command[1]:
-> 
-> 	if command -v getent &>/dev/null; then
-> 
-> I don't care that much since fstests is wholly dependent on bashisms so:
+> Signed-off-by: David Disseldorp <ddiss@suse.de>
+> ---
+> It might make more sense to add a default timeout to _udev_wait(), but
+> that could also call udev{adm }settle.
 
-Yup, I started with "command -v," realized it wasn't used anywhere else
-in fstests, and that we always used "type" - so when in Rome, etc.
+One of the points of moving to _udev_wait was to explicitly wait for
+the specific device to appear or disappear, indicating that the
+previous admin operations have completed. 'udevadm settle' does not
+do that - it waits for the global queue of events to drain and
+dev config failure doesn't generate udev events.
 
-> Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+Hence tests that silently fail dm/lvm device setup will continue to
+run on something they shouldn't have, and nobody will realise that
+the LVM setup did not run correctly.
 
-Thanks,
--Eric
- 
-> if you decide to change it or not.
+OTOH, _udev_wait() will hang in that situation because it's waiting
+for the device node to appear (or disappear) so it can be
+immediately used. We don't need udev to finish draining queues - we
+only need to wait for the device node to appear and the test is good
+to go.
+
+This behaviour provides obvious failures when device setup/teardown
+fails in some way. This should not happen, and when it does
+_udev_wait hanging forces that failure to be triaged and fixed
+immediately....
+
+If we add a timeout to _udev_wait(), then we're back to the old
+behaviour where device config failures get ignored and the test runs
+incorrectly. Except now it is worse because we have to wait a
+timeout before the test is then run....
+
 > 
-> --D
+>  tests/f2fs/008 | 9 ++++++---
+>  1 file changed, 6 insertions(+), 3 deletions(-)
+> 
+> diff --git a/tests/f2fs/008 b/tests/f2fs/008
+> index 47696f2b..fdb0b0c2 100755
+> --- a/tests/f2fs/008
+> +++ b/tests/f2fs/008
+> @@ -35,9 +35,12 @@ _cleanup()
+>  	rm -f $tmp.*
+>  }
+>  
+> -$LVM_PROG pvcreate -f $SCRATCH_DEV >>$seqres.full 2>&1
+> -$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
+> -$LVM_PROG lvcreate -y -L 1024m -n $lvname $vgname >>$seqres.full 2>&1
+> +$LVM_PROG pvcreate -f $SCRATCH_DEV >>$seqres.full 2>&1 \
+> +	|| _notrun "unabled to create LVM physical volume"
+> +$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1 \
+> +	|| _notrun "unabled to create LVM volume group"
+> +$LVM_PROG lvcreate -y -L 1024m -n $lvname $vgname >>$seqres.full 2>&1 \
+> +	|| _notrun "unabled to create LVM logical volume"
+
+These should be _fail calls, IMO.
+
+AFAICT, there is no reason for LVM config to fail on a valid block
+device.  If there is a block device that doesn't support LVM, then
+we've got lots of tests that are going to fail the same way and we
+should have a _require_scratch_lvm() to notrun those tests for that
+type of block device (or fix the block device...).
+
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
