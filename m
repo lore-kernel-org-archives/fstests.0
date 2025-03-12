@@ -1,187 +1,164 @@
-Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
+Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02A84199FBA
-	for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 21:19:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF0FD22098;
+	Wed, 12 Mar 2025 04:41:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741727970; cv=none; b=YVin3DJGb25Ay5hqPIhSy17QmrtZsVbcx0s5sJVsNrNaSupY2iqJV+00oR2iY36QQg8OhPwYQ28PJ41YXH6DI4W/1zvGr2mqLSjGZA5ygKMtn97VN70PYBI2WbL0f3Ha1RaZ/1cmlrDFAKNOJP8cZbBZ8R7Yy5MmUmV9XodgPYs=
+	t=1741754483; cv=none; b=lU1tF//6eklv9girOLpj81gA3rIARkN8WaQeQvfNyp1K1HA3nBoYJ0jeMwCs+/s7ywYE6EmnIPIyXNFRTpqf9SrIsNAlGm52ci/zmTauyrDofTCsDttJofvWXndtietANKZemrj2oL8QrLj/3WquxjbPfUtgmtxMHYEZEAx68Hg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741727970; c=relaxed/simple;
-	bh=3Ln4F14YP/h+ZxbuqTzOaFyUr7PkbSz3fcJH2sxb7Z8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KhcNRVP+mntqKDzudIj/cs3cW30x+sURrGmFK/u05QFiVXKp0Uq2zNULZXqyqkD5qcrWfF3pYcfF9foWh8rKnLQB179LI6dSxHt9+1cN/BJzoml0DFAx6nY3IIhCKALgkZ5//kAVYC6Ci60ZuNxXl00ovz/FCTw1BDY7VYHcxCA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=m91XHOTE; arc=none smtp.client-ip=209.85.214.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
+	s=arc-20240116; t=1741754483; c=relaxed/simple;
+	bh=VhuGfbQiAi1E4FjNNMN27pGX3DrTrJlaxXhSdQOLzLg=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=G5kFSNLSJctZQGA30PMUbVmjR+Ag+B6rpWjNJHJhIfqjPfOPbq3Hg/RCqBbPTqfXuFBqEw/jt9hLFbDOueBYpt32hKXcba0TfKvI36/MrhrqIfOtE1kLfMo5BWmctmlB1xLwCUmodlam8SsnY6mUdmem0XiY6TWKSAYJBrfbpdU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gyvcXl9n; arc=none smtp.client-ip=209.85.214.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="m91XHOTE"
-Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-225477548e1so65772145ad.0
-        for <fstests@vger.kernel.org>; Tue, 11 Mar 2025 14:19:28 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gyvcXl9n"
+Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-223594b3c6dso113639645ad.2;
+        Tue, 11 Mar 2025 21:41:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1741727968; x=1742332768; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=QhvF91j8QAWGZT8Ko79zlX4hWPyLZFoRaCgvhr0uQSA=;
-        b=m91XHOTEFpGvdFK8Ne9NS0jX9yPx3xrbJ/69MUO6/u/liVbDp6U1QiarpyW1vZEjyO
-         bWogj/x7pVEpyfGVtPEx1QOkrYxXKAzOuliXUaW14PliNjuG8Km/D9x7tLjw/eniIfLO
-         c9D6KiiS2yTJwlq3J0RB2ZvGwewrvN+DX4pOcf+PN71VcqIU84ruoEThI2xXo8i/okyI
-         +w+gGL2on4YqL66ZtFBPA9u72AWvs7RsTmWsmGbziBXMxVkhk4Dk/ruPDtoqOIfGK1Wi
-         a33VZs045oKbe4yeutMUeKFwyiu0V/ysGLakbQ4RVXZwZhUybWmMlnBnRIZuJC+eS0Og
-         cnIA==
+        d=gmail.com; s=20230601; t=1741754481; x=1742359281; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=prIWCBRfy9KfwUTCFYPi925wPUiEgsj60Kr5IOCZZu4=;
+        b=gyvcXl9nfHbq6rNrOtVOhVDGwlBoCHd+9lAcaH8hcy5Lw91nfKaimxtrHlQ5XJwIB1
+         8LNA1GNBU9mObFTeIlEShRsobsxxYlzDhXwd8orI9ExTT6Ioy4ra8FEAAGEONfmB+/Yn
+         6ep5QYWX62fjtAFAZ6ysB4mvVHNTBzK11J3SlR51XurbGw8TnXc5ZoJA5u/4J5uYOGLg
+         OxExv3mgoak49glTj8US+MB8O+yVJxrtMShcfYe1/OfthJC+MzPz0cAhQiPTkliVz/Qv
+         6RpTi+CE1S1ytiCm6ozVXSUVfEVnPR6OPvF1EMKjsUphd8HDGCz4fPoSWK9N1ZW2t+fv
+         qGZg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741727968; x=1742332768;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=QhvF91j8QAWGZT8Ko79zlX4hWPyLZFoRaCgvhr0uQSA=;
-        b=bSiC9AktUWLi7qSnxXyZiP7cSAWRBOfTul8QXeYplDgITmZBfkUJuSedLl5ydlC9ll
-         /VmpMzv6P6U2D2W57vdbu+5Zl9vhrlqZQx4VP2I0WihAp6dQQsD3Z7FR/GD12KREcLgW
-         wNTW0iuwXrslCTqMaVy306z5XShmnbCMPTQ1IYiMdk8lgR8iJedBlubOgbNeUoBVxhkT
-         od3dB6OOInH2/T7gvXKXnGRzeComBH6VWgW4rcZN+DgIrsLsHpR+xCJW7Zo0WAIpNmBi
-         9RPJo8TPQfNKDre3POivDdqE9OYBMDOfmKpwFTiqOVe/HmF1W9xL2/ZKW44y1WF+BlNz
-         Ruyw==
-X-Forwarded-Encrypted: i=1; AJvYcCXUPcT1dHzv1bjBx9HqKpohtDLlVDb8kfpu3iiWbkpwMuk7Tifn9S2e2Zny3JNOX5plgG/ABrlh@vger.kernel.org
-X-Gm-Message-State: AOJu0YwpitVGAMcuvL1yhKAb4jBbuog6siWEE6KNZUrEPtAs26O3zMZn
-	vxqbVNrueGojyZPtSzM82xjxTgOMK8yr6bMsjLSG+XSmcrlGCPpsHt37iGnGu7wm8M8pRbjcdgl
-	y
-X-Gm-Gg: ASbGncvFhEEXtm2fA4GpEoyqDCuUEhiKEjnhvN8LSJPpaM5d3NdiokCx8zC/usxj0tJ
-	KkilAwCjJ3xuFQdZ2VnIu3NlthpC0yN2MN2aCBVvDNKNdTUWxavxLZTwayaeFuI1DBEG/SB2Kr/
-	x9bVLotVolyMDxRo6gdW0C6IKbCW4U6DvCX6tSyxht2m9VmUr1I6x/G52Yf+yAsCAGbW2NlWc9W
-	W3489qXrPSB0Uk+aKy9opwIBGQ+B3W2vqAT2RYUc/ntZLoFnsrm8lU0R4H+FLC7q9JKR/0b5bZM
-	7QaboFSQiNsQ231oztyUdNqUh/wv3NxuF/17n55aRj5NZLLGBzWmlV9fOWqkDJpH+GAqvocERmC
-	wtfgUmJ0anQjRGLLjXQMr
-X-Google-Smtp-Source: AGHT+IGeWsyE8McypzNHrL8vFFmERDIthfi2fscLkZah+e9ANYcUSe5hH5osXrbdLi3D6T3lux0C/g==
-X-Received: by 2002:a17:902:ccc9:b0:223:2aab:462c with SMTP id d9443c01a7336-22428899f43mr303773255ad.15.1741727968053;
-        Tue, 11 Mar 2025 14:19:28 -0700 (PDT)
-Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22410a7f95fsm102886335ad.154.2025.03.11.14.19.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 Mar 2025 14:19:27 -0700 (PDT)
-Received: from dave by dread.disaster.area with local (Exim 4.98)
-	(envelope-from <david@fromorbit.com>)
-	id 1ts70X-0000000BshA-0S5D;
-	Wed, 12 Mar 2025 08:19:25 +1100
-Date: Wed, 12 Mar 2025 08:19:25 +1100
-From: Dave Chinner <david@fromorbit.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [PATCH v2 1/2] check: disable HAVE_PRIVATENS by default
-Message-ID: <Z9Co3WnndML6zciA@dread.disaster.area>
-References: <20250306094924.1353269-1-zlang@kernel.org>
- <20250306094924.1353269-2-zlang@kernel.org>
- <Z8mBacJNAj6gVd7N@dread.disaster.area>
- <20250306134723.x5fovpzmzemleyi3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <Z8oL_LAc9XQsKwd-@dread.disaster.area>
- <20250307154722.iafm7hm7qo6x54c3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+        d=1e100.net; s=20230601; t=1741754481; x=1742359281;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=prIWCBRfy9KfwUTCFYPi925wPUiEgsj60Kr5IOCZZu4=;
+        b=X/BlumprUmHPUX661lsVGJdOsUu8YVLWNyHwEHDI4QjgnyoEu2Ppk2EBRppCYVY5bv
+         IzCNsIM6XY2Er0riQQwq/clEpWcWXJkf6QUB6EQsalXTRah53Is4T+ELftMdFKNjRBmz
+         PL0AeIj5pmpzJ8LsHXnnUcbILruGJ57RPjpPSrD7orzUPiSM1aAAZTqj3AXuqmk2BVn9
+         s7Xf9xFiqfHZ6nUiIstdr7dafgxa95rk3zbEVipLP0DrcCsYoGom6h3biPnYVAsfvO4u
+         +nPFSezU7phxmOh7/z2diJgL8CH5AWF+FCwBMo9d5iVoKG3gPrJzu8foOWfaQELBTj4c
+         4AyQ==
+X-Forwarded-Encrypted: i=1; AJvYcCV+QE+N2ji7VolIqJUdzrrQtF7gVX9/zxzoNpR444CTuY9SP9AEHlTTP+t9j6zqvQW5OtnffAFGVFbLsA==@vger.kernel.org, AJvYcCVGE6uMb5gwyjh0AYKOTK77j2B2nMHwnacXoXQ5niZhV3YybZfvtkrTwS8/0/OEuu7Hcx5ZxPzeGbkL@vger.kernel.org, AJvYcCXzs2fXjPxI6BsJeM9LenFvoVlxui4L2YMcxVF4ocnHpmCFtWtnMYP2rx6XrMPq8FbKFK49PVnf@vger.kernel.org
+X-Gm-Message-State: AOJu0YwSDDYqGrLPvhC4RnE3aWFL3BD2VBJ3uuOxOelZHSavQydMzieb
+	2cJMRaInbak8G7mf1S0EfQucfQhmNq9pTxuMP8meCAaw4Q8TYEvV
+X-Gm-Gg: ASbGnctdTarsilYbqzGJPSm3idohX8Sdm0U4o5lK9KfIoWZ21H/Ga+Z188ev0PlLT0U
+	g+jg6ibGflDBG3+V0AyS6Rot8BEqd+nTsBfqfp5W/WkT8NgodZ5zCWX/G2ZDo4g8wePsl1m2JQH
+	gHT6BQLNL9yTRqc5b0ErEIbgCseYkrCQIG/OB6+MpenCCFeh7szTXG2f+U+41Eh//R6GBI0ua3W
+	uhpUwvMdz/7EccFTcgIOTkpFtMlaDrigedcO2Wj1HPaXfoNxsZnlgy6o9F5SS9pscRQLU9DYpvm
+	zlWhv55nI5O+YhJyhrceo/Sy+Zp2ojUUB2Iefnzw5VfUNE/gsAfIaKU=
+X-Google-Smtp-Source: AGHT+IGa+xo0J/bjyiHZoADJ1aV9uoEH+Elwp3tvSBwT3t6dHEjeUlBPHjydJGw1nQ09WdXUTw+ebg==
+X-Received: by 2002:a17:902:f686:b0:224:1ec0:8a1d with SMTP id d9443c01a7336-22428ab535bmr267702285ad.30.1741754480795;
+        Tue, 11 Mar 2025 21:41:20 -0700 (PDT)
+Received: from [192.168.0.120] ([49.205.39.113])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22410aaa9e7sm106983855ad.244.2025.03.11.21.41.17
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 11 Mar 2025 21:41:20 -0700 (PDT)
+Message-ID: <aa13b199-c6e4-4692-829d-4f73b714081f@gmail.com>
+Date: Wed, 12 Mar 2025 10:11:15 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250307154722.iafm7hm7qo6x54c3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v1 2/2] check,common/{preamble,rc},soak: Decoupling
+ init_rc() call from sourcing common/rc
+Content-Language: en-US
+To: Zorro Lang <zlang@redhat.com>
+Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org,
+ linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
+ ritesh.list@gmail.com, ojaswin@linux.ibm.com, djwong@kernel.org,
+ zlang@kernel.org
+References: <cover.1741248214.git.nirjhar.roy.lists@gmail.com>
+ <1d07e5657c2817c74e939894bb554424199fd290.1741248214.git.nirjhar.roy.lists@gmail.com>
+ <Z8oT_tBYG-a79CjA@dread.disaster.area>
+ <5c38f84d-cc60-49e7-951e-6a7ef488f9df@gmail.com>
+ <20250308072034.t7y2d3u4wgxvrhgd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20250310080630.4lnscrcbaputlocv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+In-Reply-To: <20250310080630.4lnscrcbaputlocv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Fri, Mar 07, 2025 at 11:47:22PM +0800, Zorro Lang wrote:
-> On Fri, Mar 07, 2025 at 07:56:28AM +1100, Dave Chinner wrote:
-> > I'm talking about removing all the setsid and namspace bits that we
-> > added to try to solve the need for pkill --parent. i.e. this series
-> > of patches:
-> > 
-> > 949bdf8ea check: deprecate using process sessions to isolate test instances
-> > 247ab01fa check: run tests in a private pid/mount namespace
-> > 88d60f434 common: fix pkill by running test program in a separate session
-> > c71349150 common/rc: hoist pkill to a helper function
-> > 77548e606 common/rc: create a wrapper for the su command
-> > 
-> > Using private PID namespaces in check-parallel has solved the
-> > original problem that required the pkill --parent usage and the
-> > fsstress binary rename/copy workaround by wrapping process isolation
-> > outside of each check instance. Hence check and the internal
-> > check infrastructure doesn't need to ever care about process
-> > isolation to solve this check-parallel problem anymore.
-> 
-> If "check" doesn't need these namespace isolation things, that will be good
-> to me. That'll help to isolate the issues on check or on check-parallel.
-> And we won't bring in regressions to check when try to fix check-parallel.
-> 
-> Now let me merge this patch at first, to avoid the regressions on btrfs.
-> Then please feel free to send patches to remove/reduce the coupling of
-> two testing ways (check and check-parallel:)
 
-Sure.
+On 3/10/25 13:36, Zorro Lang wrote:
+> On Sat, Mar 08, 2025 at 03:20:34PM +0800, Zorro Lang wrote:
+>> On Fri, Mar 07, 2025 at 01:35:02PM +0530, Nirjhar Roy (IBM) wrote:
+>>> On 3/7/25 03:00, Dave Chinner wrote:
+>>>> On Thu, Mar 06, 2025 at 08:17:41AM +0000, Nirjhar Roy (IBM) wrote:
+>>>>> Silently executing scripts during sourcing common/rc doesn't look good
+>>>>> and also causes unnecessary script execution. Decouple init_rc() call
+>>>>> and call init_rc() explicitly where required.
+>>>>>
+>>>>> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+>>>> FWIW, I've just done somethign similar for check-parallel. I need to
+>>>> decouple common/config from common/rc and not run any code from
+>>>> either common/config or common/rc.
+>>>>
+>>>> I've included the patch below (it won't apply because there's all
+>>>> sorts of refactoring for test list and config-section parsing in the
+>>>> series before it), but it should give you an idea of how I think we
+>>>> should be separating one-off initialisation environment varaibles,
+>>>> common code inclusion and the repeated initialisation of section
+>>>> specific parameters....
+>>> Thank you so much. I can a look at this.
+>>>> .....
+>>>>> diff --git a/soak b/soak
+>>>>> index d5c4229a..5734d854 100755
+>>>>> --- a/soak
+>>>>> +++ b/soak
+>>>>> @@ -5,6 +5,7 @@
+>>>>>    # get standard environment, filters and checks
+>>>>>    . ./common/rc
+>>>>> +# ToDo: Do we need an init_rc() here? How is soak used?
+>>>>>    . ./common/filter
+>>>> I've also go a patch series that removes all these old 2000-era SGI
+>>>> QE scripts that have not been used by anyone for the last 15
+>>>> years. I did that to get rid of the technical debt that these
+>>>> scripts have gathered over years of neglect. They aren't used, we
+>>>> shouldn't even attempt to maintain them anymore.
+>>> Okay. What do you mean by SGI QE script (sorry, not familiar with this)? Do
+>>> you mean some kind of CI/automation-test script?
+>> SGI is Silicon Graphics International Corp. :
+>> https://en.wikipedia.org/wiki/Silicon_Graphics_International
+>>
+>> xfstests was created to test xfs on IRIX (https://en.wikipedia.org/wiki/IRIX)
+>> of SGI. Dave Chinner worked in SGI company long time ago, so he's the expert
+>> of all these things, and knows lots of past details :)
+> Hi Nirjhar,
+>
+> I've merged Dave's "[PATCH 0/5] fstests: remove old SGI QE scripts" into
+> patches-in-queue branch. You can base on that to write your V2, to avoid
+> dealing with the "soak" file.
+>
+> Thanks,
+> Zorro
 
-FWIW, it's not necessary for you to test whether the merged version
-of check-parallel runs correctly right now. If some other change
-breaks it, I will fix it and send patches to fix it. I'm much more
-concerned that changes made to support check-parallel don't break
-check...
+Okay, thank you for the pointer. I will send the v2 after rebasing.
 
-> > i.e. the isolation fix should have been made to check-parallel,
-> > not to check.
-> > 
-> > It is not ideal to have to walk all this stuff back, but this is
-> > what happens when an RFC-scope feature prototype is merged without
-> > allowing adequate time for review or give the author a chance to
-> > address at least one round of review comments and bug fixes before
-> > it gets merged....
-> 
-> Sorry, I've learned from this. I thought I've given it lots of test,
-> and fixed all bug reports at that time. And I asked several times
-> if there's any objection about merging it in next release. As there's
-> not objection from anyone in 2 weeks, so I decided to give it a chance,
-> to save the super complicated rebasing workload...
+--NR
 
-Sure, not having anyone review a prototype after a couple of
-weeks is pretty common - it does not mean it is ready for merge.
-It typically means that the author will then post a newer, more
-complete version when they are ready, and then maybe people will
-look at it.
-
-Hence my comment on where I wanted people to focus their review -
-not on the check-parallel stuff, but on the generic infrastructure
-changes (i.e. "get the process underway") because they were much more
-important to get right than the check-parallel script.
-
-IOWs, I was not asking anyone to bypass the normal cyclic
-review-repost process - I was simply doing what ever experienced
-developer does when posting a large patchset: guiding reviewers to
-the important areas of the patch set to focus on first.
-
-> Anyway, next time,
-> for each complex patchset on infrastructure, I'll always give it 3+
-> release cycles time. And never merge it if without 3 acks from xfs,
-> ext4 and btrfs,
-
-And that, IMO, is swinging too far the other way. If the code is
-complete and ready to go and nobody will review it, then the
-above rule makes it impossible for the author to get their code
-merged.
-
-now we have the opposite problem: people have to carry large
-infrastructure changes for a long time because they cannot get
-anyone to review it.
-
-The normal process is to let review-and-repost cycles occur
-naturally (e.g. every couple of weeks for a few versions), with the
-author indicating what the important things to focus review on in
-the patchset are. When that cycle reaches it's end, a request for
-merge will be made (e.g. a pull request or a repost with all patches
-containing RVBs). This shouldn't take months, and if the reviewers
-focus on the things that the author asks them to look at first then
-the important things end up being ready for merge earlier rather
-than later.
-
-IOWs, there is no need for placing arbitrary bars to jump over if the
-process is allowed to follow it's natural path. Problems typically
-only arise when the process is not followed, so there needs to be a
-very good reason for stepping outside normal processes or having
-arbitrary rules that nobody really knows when/if they might
-trigger...
-
--Dave.
+>
+>> Thanks,
+>> Zorro
+>>
+>>> --NR
+>>>
+>>>> -Dave.
+>>>>
+>>> -- 
+>>> Nirjhar Roy
+>>> Linux Kernel Developer
+>>> IBM, Bangalore
+>>>
+>>>
 -- 
-Dave Chinner
-david@fromorbit.com
+Nirjhar Roy
+Linux Kernel Developer
+IBM, Bangalore
+
