@@ -1,75 +1,253 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 352061E25EF;
-	Wed, 12 Mar 2025 06:46:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F01281E9B03
+	for <fstests@vger.kernel.org>; Wed, 12 Mar 2025 07:14:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741761994; cv=none; b=P+SLgo9hudgmM90S4g9JcEzYRF3+AlEa8/RcutyzRHVt50hwCoBmfeR30r1lZyU7qe2k8b1Gp1f3fRWyzb3LY87hNhoTT+RuwT9zlBAg6geQnYxImzaGDJTT76zE32KhLogvqUSMZAIV6QOpk6hrHscXSUCZ4S/QRFKoPwyaRyU=
+	t=1741763654; cv=none; b=Cogf7ekHEm5FNUrIF8IOyfGHRKjsle8LweJNM5JHpxBdjErFSmIVCJtQNTGmebobMzcTTyLuc7tVZS2xGDGWP2lcQ7PfdfY0QyAIfyJFaJ2QUdzKW0Fx8Ro/7ASbX+cBmx0uG+LbISmb0DT//AutQQ4RyfS5cgpg01hrTdVHU48=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741761994; c=relaxed/simple;
-	bh=LGcMO4L5SjAqR4JL+byLtIvA9eFwqrCO7ivh9CUt/M4=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=SRoXFbH4HtimMyG7pbNJmqtyUY+Wyyk+xUupG8UwvZwiTE89IBrFAgeIYjLvPANoPxBXiMzezEZa8UWVABLHk7GV9MYbycxZJmPqK83Y86/vCWMgeZMlnizEeISrvMV98b0Oj+4I8dhIPFyTxiDST/Wjz7MvL/0iP6BbFsVx7BM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=DcUZJ0eQ; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1741763654; c=relaxed/simple;
+	bh=GKueyk+4/bDpJKO28wkD9UiqQi2v+xzj2KG3kFXjdes=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=qTI13IZtduUcsX03TqKBnPAv6kMX18vZ5U1DzUdNI343rlPYf7O93pZT7GJ7YBKLMTp/I+wRe5h1yo1GFhPuoO49fx6UWfruyd92zudKbxZd/3h+XfINb480LXIqyK+4dNHwzHJcczFoTDa9cwI0bXPkQEHv7L0RPPiZQr0cC8k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dKEYu46k; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="DcUZJ0eQ"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender
-	:Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=mg4jF/elO0L6V3QDR+jzf12z+53XfQM3w4/bfLcOl0w=; b=DcUZJ0eQeIAULugcBa3fBYujDC
-	veI78+7+JBn2uRC/483ncWXY2MvVPRkD4LJkOfmxVtTDs06SqcA5gvT8+3mv+kervdv3iYxJpCOya
-	Y4gcZzGzMbilh2z5B7zaeSN46+6C1LkLh5Snkry2w85Zq6h65G6XVVSdDuu9RsoQy2yXro00yRIsM
-	Xc7+7tqMp+2Gkt6sIzAjGcZCEsq1WHw+Vxu98B8XYfXm/VY8JYkOgJCiYC71JuLNlYl+ulqNiEzaP
-	NUTiu14oWLG7irJiV2I0SiHJAMugVV84dmVXmS7kOjaxMP1mzXY00TauE2PpwcPyg78Uj8DrXXAjA
-	za/g0uiA==;
-Received: from 2a02-8389-2341-5b80-f359-bc8f-8f56-db64.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:f359:bc8f:8f56:db64] helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.98 #2 (Red Hat Linux))
-	id 1tsFrM-00000007cxD-1E0v;
-	Wed, 12 Mar 2025 06:46:32 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: Zorro Lang <zlang@kernel.org>
-Cc: "Darrick J. Wong" <djwong@kernel.org>,
-	Hans Holmberg <hans.holmberg@wdc.com>,
-	fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: [PATCH 17/17] xfs/206: filter out the zoned line from mkfs output
-Date: Wed, 12 Mar 2025 07:45:09 +0100
-Message-ID: <20250312064541.664334-18-hch@lst.de>
-X-Mailer: git-send-email 2.45.2
-In-Reply-To: <20250312064541.664334-1-hch@lst.de>
-References: <20250312064541.664334-1-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dKEYu46k"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1FDF9C4CEE3;
+	Wed, 12 Mar 2025 07:14:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1741763653;
+	bh=GKueyk+4/bDpJKO28wkD9UiqQi2v+xzj2KG3kFXjdes=;
+	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
+	b=dKEYu46k+Lyx0C+2VTalv2VUX8+XoHem23oCxJxbaoqCjBK+Ex8YZg14n0ppc76ev
+	 304m7rOz36Phi2rma59O00l2iXdXqVlYuGFNmH5/BQZaCe2QoMG3MRHgBJvWB3ymCJ
+	 8VDDzx3lufV9ftvydAUeT+NxEmpUkWHMfydXgWngZS26GzEJytDuMxRPQ2y9ReErqA
+	 YLOAV4oSP3iwSLU+7HHHAqpaqi24phowapbs8CR5N0daXhne6Sfd5KrVaa0tK64eqB
+	 cfRXQuDGfU+19DcgMKQD55IREmOF5l6VFqo3VtZKiIGsZAiFrQvkL19GcGeoNamIkV
+	 cB4dkAwieCK3Q==
+Message-ID: <31242101-efdd-41ca-8eb9-3f393e63f92c@kernel.org>
+Date: Wed, 12 Mar 2025 15:14:09 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+User-Agent: Mozilla Thunderbird
+Cc: chao@kernel.org, Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+ jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH v3 6/6] f2fs/009: detect and repair nlink corruption
+To: Zorro Lang <zlang@redhat.com>
+References: <20250311080430.3696582-1-chao@kernel.org>
+ <20250311080430.3696582-6-chao@kernel.org>
+ <20250311140629.acdx54w4t3pitl22@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <20250311140629.acdx54w4t3pitl22@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-So that the test still passes with a zone enabled mkfs.
+On 3/11/25 22:06, Zorro Lang wrote:
+> On Tue, Mar 11, 2025 at 04:04:30PM +0800, Chao Yu wrote:
+>> This is a regression test to check whether fsck can handle corrupted
+>> nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
+>> and expects fsck.f2fs can detect such corruption and do the repair.
+>>
+>> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+>> Signed-off-by: Chao Yu <chao@kernel.org>
+>> ---
+>> v3:
+>> - check socket command
+>> - add _cleanup to kill & wait background thread
+>> - add commit title in _fixed_by_git_commit line
+>> - clean up codes
+>>  tests/f2fs/009     | 145 +++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/f2fs/009.out |   2 +
+>>  2 files changed, 147 insertions(+)
+>>  create mode 100755 tests/f2fs/009
+>>  create mode 100644 tests/f2fs/009.out
+>>
+>> diff --git a/tests/f2fs/009 b/tests/f2fs/009
+>> new file mode 100755
+>> index 00000000..4f8b2079
+>> --- /dev/null
+>> +++ b/tests/f2fs/009
+>> @@ -0,0 +1,145 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
+>> +#
+>> +# FS QA Test No. f2fs/009
+>> +#
+>> +# This is a regression test to check whether fsck can handle corrupted
+>> +# nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
+>> +# and expects fsck.f2fs can detect such corruption and do the repair.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick
+>> +
+>> +if [ ! -x "$(type -P socket)" ]; then
+>> +	_notrun "Couldn't find socket"
+>> +fi
+>> +
+>> +_require_scratch
+>> +_require_command "$F2FS_INJECT_PROG" inject.f2fs
+>> +_require_command "$F2FS_FSCK_PROG" fsck.f2fs
+>> +
+>> +_fixed_by_git_commit f2fs-tools 958cd6e "fsck.f2fs: support to repair corrupted i_links"
+> 
+> _fixed_by_git_commit f2fs-tools 958cd6e \
+> 	"fsck.f2fs: support to repair corrupted i_links"
+> 
+>> +
+>> +filename=$SCRATCH_MNT/foo
+>> +hardlink=$SCRATCH_MNT/bar
+>> +
+>> +_cleanup()
+>> +{
+>> +	if [ -n "$pid" ]; then
+>> +		kill $pid &> /dev/null
+>> +		wait
+>> +	fi
+> 
+> 	cd /
+> 	rm -r -f $tmp.*
+> 
+> I don't have more review points on this test case now, f2fs list might give it
+> more reviewing :)
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- tests/xfs/206 | 1 +
- 1 file changed, 1 insertion(+)
+Thanks a lot for the review. :)
 
-diff --git a/tests/xfs/206 b/tests/xfs/206
-index 01531e1f08c3..bfd2dee939dd 100755
---- a/tests/xfs/206
-+++ b/tests/xfs/206
-@@ -66,6 +66,7 @@ mkfs_filter()
- 	    -e '/metadir=.*/d' \
- 	    -e 's/, parent=[01]//' \
- 	    -e '/rgcount=/d' \
-+	    -e '/zoned=/d' \
- 	    -e "/^Default configuration/d"
- }
- 
--- 
-2.45.2
+Thanks,
+
+> 
+> Thanks,
+> Zorro
+> 
+>> +}
+>> +
+>> +for ((i=0;i<14;i++)) do
+>> +	echo "round: " $i >> $seqres.full
+>> +
+>> +	_scratch_mkfs >> $seqres.full
+>> +	_scratch_mount
+>> +
+>> +	if [ $i == 0 ]; then
+>> +		touch $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		nlink=0
+>> +	elif [ $i == 1 ]; then
+>> +		mkdir $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		nlink=1
+>> +	elif [ $i == 2 ]; then
+>> +		mknod $filename c 9 0
+>> +		ino=`stat -c '%i' $filename`
+>> +		nlink=0
+>> +	elif [ $i == 3 ]; then
+>> +		mknod $filename b 8 0
+>> +		ino=`stat -c '%i' $filename`
+>> +		nlink=0
+>> +	elif [ $i == 4 ]; then
+>> +		mkfifo $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		nlink=0
+>> +	elif [ $i == 5 ]; then
+>> +		socket -s $filename >> $seqres.full 2>&1 &
+>> +		pid=$!
+>> +		sleep 2
+>> +		ino=`stat -c '%i' $filename`
+>> +		kill $pid >> $seqres.full 2>&1
+>> +		nlink=0
+>> +	elif [ $i == 6 ]; then
+>> +		ln -s $SCRATCH_MNT/empty $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		nlink=0
+>> +	elif [ $i == 7 ]; then
+>> +		# orphan inode
+>> +		touch $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		$F2FS_IO_PROG write 1 0 1 zero atomic_commit $filename 5000 >> $seqres.full 2>&1 &
+>> +		stat $filename >> $seqres.full
+>> +		rm $filename
+>> +		$F2FS_IO_PROG shutdown 1 $SCRATCH_MNT/ >> $seqres.full
+>> +		sleep 6
+>> +		nlink=1
+>> +	elif [ $i == 8 ]; then
+>> +		# hardlink on file
+>> +		touch $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 9 ]; then
+>> +		# hardlink on charactor
+>> +		mknod $filename c 9 0
+>> +		ino=`stat -c '%i' $filename`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 10 ]; then
+>> +		# hardlink on blockdev
+>> +		mknod $filename b 8 0
+>> +		ino=`stat -c '%i' $filename`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 11 ]; then
+>> +		# hardlink on pipe
+>> +		mkfifo $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 12 ]; then
+>> +		# hardlink on socket
+>> +		socket -s $filename >> $seqres.full 2>&1 &
+>> +		pid=$!
+>> +		sleep 2
+>> +		ino=`stat -c '%i' $filename`
+>> +		kill $pid >> $seqres.full 2>&1
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 13 ]; then
+>> +		# hardlink on symlink
+>> +		ln -s $SCRATCH_MNT/empty $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	fi
+>> +
+>> +	if [ $i != 7 ]; then
+>> +		stat $SCRATCH_MNT/* >> $seqres.full
+>> +	fi
+>> +	echo "ino:"$ino >> $seqres.full
+>> +	echo "nlink:"$nlink >> $seqres.full
+>> +
+>> +	_scratch_unmount
+>> +
+>> +	$F2FS_INJECT_PROG --node --mb i_links --nid $ino --val $nlink $SCRATCH_DEV \
+>> +		>> $seqres.full || _fail "fail to inject"
+>> +
+>> +	_check_scratch_fs >> $seqres.full 2>&1 && _fail "can't find corruption"
+>> +	_repair_scratch_fs >> $seqres.full
+>> +	_check_scratch_fs >> $seqres.full 2>&1 || _fail "fsck can't fix corruption"
+>> +
+>> +	_scratch_mount
+>> +	_scratch_unmount
+>> +done
+>> +
+>> +echo "Silence is golden"
+>> +
+>> +status=0
+>> +exit
+>> diff --git a/tests/f2fs/009.out b/tests/f2fs/009.out
+>> new file mode 100644
+>> index 00000000..7e977155
+>> --- /dev/null
+>> +++ b/tests/f2fs/009.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 009
+>> +Silence is golden
+>> -- 
+>> 2.48.1
+>>
+> 
 
