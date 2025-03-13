@@ -1,83 +1,46 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B01F1F1508;
-	Wed, 12 Mar 2025 23:12:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02F481FC118;
+	Thu, 13 Mar 2025 07:24:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741821124; cv=none; b=qk8bsFp+cz7/F4FELBE4qyc9iTH06828KNRaduKlwTpvNguTJ624HTvA+UtPmDuSFC2rr7DYNKTE2WoaqfDiFAt728jncHHM8NMT2aOBQ7Rn3an0KZdu9A9+xrcuLZTK2aNg0YhSX4NGzzeg1SCsyJgWzhGPJ9LHSbETpMFN1zk=
+	t=1741850665; cv=none; b=drjSeVN1jPXQW+WBS5D9IGFOzaY2SznjaNeaSVr75aK01KHuPfsblGOCvGNbE13ttTsMOm41bJKR4qfplWtXeXZOgmKvzShvHYB6Vb2JNTxuEUfWhcLAowwFkpRfAGHfNbYU4zIUH04xunMt27W8A9eKm4MDQeecpvh72T86bJw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741821124; c=relaxed/simple;
-	bh=ecpk6l1eGopc7pVscXzS4Cc9+7gjRfUu9VQF56iisFw=;
-	h=Date:Subject:From:To:Cc:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=MkF0naNUdLG1d7u2uFJt1Krn+MOqNVNDWBklEEgXjqj+QeDgQKmhz5OnUbP8+/UbRwxRffvcFlG6UOT6MSROGIhWzSd5G5TrNrzmOMl5o6b0gCuyGWL0ZvsT/kSFWr0GQeyPEGk45cGUg48Car2GWicz5v2Q+91YFrEOcar/DdA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SZbgA+X4; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SZbgA+X4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 702A0C4CEDD;
-	Wed, 12 Mar 2025 23:12:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1741821124;
-	bh=ecpk6l1eGopc7pVscXzS4Cc9+7gjRfUu9VQF56iisFw=;
-	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
-	b=SZbgA+X4oQ9ZLxB2m5fXj7KhuKnqyLN6MH/rpfbJUNGjUkffoknDE5h0BHGrjpJEq
-	 my8qb5Fo7n0Bkvs4FRulMoZFyIc669z9MgKdF1V1agDBpfYcn7lshmPTKGJvA267hm
-	 a9WWaJEdDnqcmTuYsNDZSRl3rMxenn7AE9myNXDLKfid/qe8GpVC4Djv8fO6UAkDuu
-	 JaRqa+eGTOVoncVZBEQMOD6OvYyyxypQwtk0Bz8QFMjHiYFr0jw4OVkLwD1CheDINS
-	 dp3qV78eMP9qmAIBsw7f7FZuO4PqkWO3mqQWO5Wy9U+jYpBR2Qoxldpw4kX01cn2Ig
-	 9COZbxbCMClMg==
-Date: Wed, 12 Mar 2025 16:12:04 -0700
-Subject: [PATCH 3/3] check: don't allow TEST_DIR/SCRATCH_MNT to be in /tmp
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: zlang@redhat.com, djwong@kernel.org
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Message-ID: <174182089161.1400713.6024925682002640886.stgit@frogsfrogsfrogs>
-In-Reply-To: <174182089094.1400713.5283745853237966823.stgit@frogsfrogsfrogs>
-References: <174182089094.1400713.5283745853237966823.stgit@frogsfrogsfrogs>
+	s=arc-20240116; t=1741850665; c=relaxed/simple;
+	bh=3NshRvn65Q92EDA611Kpx9oJ/YQWuWpDQFJhqA4g8+c=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=K04ePiByJYPPenc3HiuZDJ5L5Sp6ZEpRgg9/cqJ8zf0lmORYxl6VbN6xYG0VAkSELYGEBPJIBUE1JNDaNCqp4T3OE8GABvHz1DftDlEsFgbhKZpqfHTgpq/KBt3/JMvq2dVmawtuXPduAlPQ7KXYBAgD9jNDf+CJ6fZ462tFOhg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 9C00468C4E; Thu, 13 Mar 2025 08:24:18 +0100 (CET)
+Date: Thu, 13 Mar 2025 08:24:18 +0100
+From: Christoph Hellwig <hch@lst.de>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>,
+	Hans Holmberg <hans.holmberg@wdc.com>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 02/17] xfs/419: use _scratch_mkfs_xfs
+Message-ID: <20250313072418.GA11310@lst.de>
+References: <20250312064541.664334-1-hch@lst.de> <20250312064541.664334-3-hch@lst.de> <20250312200512.GB2803749@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250312200512.GB2803749@frogsfrogsfrogs>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Wed, Mar 12, 2025 at 01:05:12PM -0700, Darrick J. Wong wrote:
+> On Wed, Mar 12, 2025 at 07:44:54AM +0100, Christoph Hellwig wrote:
+> > So that the test is _notrun instead of failed for conflicting options.
+> 
+> Which options are those?  I'm assuming that you're forcing -r zoned=1?
 
-If we're running in a private mount namespace, /tmp is a private tmpfs
-mount.  Using TEST_DIR/SCRATCH_MNT that point there is a bad idea
-because anyone can write to there.  Let's just stop that.
-
-Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
----
- check |   14 ++++++++++++++
- 1 file changed, 14 insertions(+)
-
-
-diff --git a/check b/check
-index 33eb3e0859e578..09134ee63e41e2 100755
---- a/check
-+++ b/check
-@@ -815,6 +815,20 @@ function run_section()
- 		echo "SECTION       -- $section"
- 	fi
- 
-+	# If we're running in a private mount namespace, /tmp is a private
-+	# directory.  We /could/ just mkdir it, but we'd rather have people
-+	# set those paths elsewhere.
-+	if [ "$HAVE_PRIVATENS" = yes ] && [[ $TEST_DIR =~ ^\/tmp ]]; then
-+		echo "$TEST_DIR: TEST_DIR must not be in /tmp"
-+		status=1
-+		exit
-+	fi
-+	if [ "$HAVE_PRIVATENS" = yes ] && [[ $SCRATCH_MNT =~ ^\/tmp ]]; then
-+		echo "$SCRATCH_MNT: SCRATCH_MNT must not be in /tmp"
-+		status=1
-+		exit
-+	fi
-+
- 	sect_start=`_wallclock`
- 	if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ]; then
- 		echo "RECREATING    -- $FSTYP on $TEST_DEV"
+Yes.
 
