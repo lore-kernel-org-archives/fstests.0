@@ -1,186 +1,161 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E81C238FAD
-	for <fstests@vger.kernel.org>; Fri, 14 Mar 2025 14:36:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EADA8202C34
+	for <fstests@vger.kernel.org>; Fri, 14 Mar 2025 14:36:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741962980; cv=none; b=uuZTl98YrKBNvIVjsr9eEsFb0OIjX1ltNVuVh/fTNPOY9i7VWGjlXtFiYW2qaKsfezsjqDlwyZ33edt+fbqszRw2U0OWP9wG1lY3kX+cYrvTrZ1EtNbDJPT5nWMdCX8lAJIeh2zGqY7h0NrNv572oFz/vsBjyiR9p+Lz7Itdo0Q=
+	t=1741963020; cv=none; b=LIad74MwUHfVpv3kgpUlCKj9Zenx8/fm9RgMeJynmcmLfa2rVV4+6focg7P32HnX+UG7REKgSLd0YqgbwtFIT1TxOgznfpfxc0TMcPL2ct0nggUi/QjIkhpZyqnOVRtXfwPEH4sEpdXyAlUrzevVqw0QrDtDCru1u+oFwXJTqXw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741962980; c=relaxed/simple;
-	bh=FXXKXZ12cPhbf0dAyieVF47ua1RG29rGsyzqOjA7rHg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gwLQD1MJ3h+QfmY1OrHTkA3b+afJ4t42cXygS/FhJQkmZHpfrw8NeH8GLYr+90CYNv8SRNweyh/QJ928XwxLH8DPQIsnvilKqlosJAryl1EwgDe1xmQK27STbZAzxJPbhwy1Kd4xzBB6AR4bTBjvEEQkFpYO8W49lKBB8wWTnSA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=IJ7lJgZv; arc=none smtp.client-ip=170.10.133.124
+	s=arc-20240116; t=1741963020; c=relaxed/simple;
+	bh=IA2yzTb5y4p1IU9zttcKwpyBRcmzgroMBNoS6lg//tg=;
+	h=Message-ID:Date:MIME-Version:To:Cc:From:Subject:Content-Type; b=SErdSY9RgawZ77H5g9Sjg2sBAYk96LGdBqjbdaTtdHS6KaesskN+irf1vi0lOCq7jOxr4nXnXDgl4m7V0Fp5mzrVKg/4vZuTPyAkC1OzsNzbB9tVjDsOcUjbfKALaMcPRDIO0nU42SbpdohQCDFSLtBhff+1K5N2fwaTujaEh2U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=EsKpwqVQ; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="IJ7lJgZv"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="EsKpwqVQ"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1741962977;
+	s=mimecast20190719; t=1741963016;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=b+nT/4o/eXs8XVff6DeAG5bsQQOREHU5LVR58wpdpCw=;
-	b=IJ7lJgZvTNOdzaDHlgsZ5Zq7k6pj4EHdxPt8X9caU+Tsy+QkVm3hOqezYJ0Omu7p9qLSef
-	A47aF/Bv8TL+M/cD2LYnIrkF1Oi/D5X4YhKXnhBC7Ee5wdtyadtpDgZJT/cKTQ8d9cw6zE
-	/L2xwvpGZUyM9564JkAjvw3OygjCNTg=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=eyt0wyzS9v/6ZehUMNv0fObOSKpPXF2i2F+B0E1faVo=;
+	b=EsKpwqVQppKXbMQpldib6VLhbNiMvFwwQrDSVLHVT8WG2/ZkQlLxxU/MD1uIREGKYvvJvZ
+	Rw4jBY+tdssiRlMNKd3uMyvyEZHPblPThEAXCKXngplAIiQRB3flym21xBlu45ZNSxXsvm
+	f0ru2nchKje8OdjJQn+kCm1loiL8Vyc=
+Received: from mail-il1-f199.google.com (mail-il1-f199.google.com
+ [209.85.166.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-528-kKWitTmBNqu7n_GdUHrPvQ-1; Fri, 14 Mar 2025 10:36:14 -0400
-X-MC-Unique: kKWitTmBNqu7n_GdUHrPvQ-1
-X-Mimecast-MFC-AGG-ID: kKWitTmBNqu7n_GdUHrPvQ_1741962973
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-225429696a9so59751045ad.1
-        for <fstests@vger.kernel.org>; Fri, 14 Mar 2025 07:36:14 -0700 (PDT)
+ us-mta-655-02mGfWa_Onek_alwxUay1w-1; Fri, 14 Mar 2025 10:36:55 -0400
+X-MC-Unique: 02mGfWa_Onek_alwxUay1w-1
+X-Mimecast-MFC-AGG-ID: 02mGfWa_Onek_alwxUay1w_1741963014
+Received: by mail-il1-f199.google.com with SMTP id e9e14a558f8ab-3ce81a40f5cso43464045ab.1
+        for <fstests@vger.kernel.org>; Fri, 14 Mar 2025 07:36:55 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741962973; x=1742567773;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=b+nT/4o/eXs8XVff6DeAG5bsQQOREHU5LVR58wpdpCw=;
-        b=Nsp65gCT+Y9TwJRM2z/vXpM3kH+6Z1NX6BdSyZQllFHWWc/bADTekuO0Yiv77R5+FT
-         iBiBpvD1DlILU48vsjhdtsJ6VDb1/HYh0GjxNT2cRfYnwLRCV/Xnz1wlCPRvJeLBjCf7
-         QlJLCw8CGWYWL/veco6Ff1QE17k/7kLBsD58d7mjBnP0FPYYW7GL0xmkrUh8lSdhF5LS
-         w2P2TV/oi6AZD5orjer3Lz7cKmPNsRhWVm9VJ2zsigzWgIOf5sxQTHCSazFfdIwz6kpm
-         gLKtFz40f4hDg4J6nsAgV0nStda3A/4XRSepzJq8l+rM9C/Jp2Y3T4xl39VRtYEEYc7I
-         x02g==
-X-Gm-Message-State: AOJu0Yy5/sstkXqKTgM4AsZumOHDxKw/UNAQkJcYsNNauDDMhdPYfuMo
-	0iS7UNLTxauGrhOrWkDLpTQJDunMMfPdvPEfZ0FeF/55wvlh6L90Dh47cL7HCLSFUoAPf8sROs+
-	EYTKe3U+fJIBs20LH3FNxzbceIr0wuda3/zsv2eBkxk9aik1y/nasAMY=
-X-Gm-Gg: ASbGncubk2R6sBqoox/2BA599C80jJgtESCMbx9k+ySrpB+SlUBmbTClCLFgs09CVBr
-	9U1K/essQldwX3/Ftby/2l5YTxBUVta9cBMK9fBjf9bhN+NodvmloYol5yxuVYblC2FB0eHrzjG
-	QE/4eyAzR7vwNmqsBv2h9WuGqp0ZZI0tpB49wo/mH1jo26HiN2eCmGZgbTG1LZBBUaJjYZX/+AH
-	tIafqb/gMMD4h8E6lI5IzGsG3Psk/G04yaAMJaxVY6IXJPTBpStkZoRQDSEsuBUgMUIahbH2P9r
-	n3ZO/xKskfTs8d9NEwHST19yCvBsahMIzojjJlavlDPGph+oFC5HBdIV
-X-Received: by 2002:a17:902:e5cb:b0:21f:7a8b:d675 with SMTP id d9443c01a7336-225e0a62f94mr41373925ad.4.1741962973532;
-        Fri, 14 Mar 2025 07:36:13 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEnfK1t+QeVWEJ2bqxna9KYQ176Ne8FQXURso/Yy2gaODkHIBLSSKmafzuUC8oU+FsmspfrBQ==
-X-Received: by 2002:a17:902:e5cb:b0:21f:7a8b:d675 with SMTP id d9443c01a7336-225e0a62f94mr41373595ad.4.1741962973198;
-        Fri, 14 Mar 2025 07:36:13 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-225c688858asm29186955ad.46.2025.03.14.07.36.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Mar 2025 07:36:12 -0700 (PDT)
-Date: Fri, 14 Mar 2025 22:36:09 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	Jeff Moyer <jmoyer@redhat.com>
-Subject: Re: [PATCH] common/rc: explicitly test for engine availability in
- _require_fio
-Message-ID: <20250314143609.wk4ceplp5y3tw4mo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <b761e302-8b4e-4a79-b025-d344d7bf5a69@redhat.com>
+        d=1e100.net; s=20230601; t=1741963014; x=1742567814;
+        h=content-transfer-encoding:subject:from:cc:to:content-language
+         :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=eyt0wyzS9v/6ZehUMNv0fObOSKpPXF2i2F+B0E1faVo=;
+        b=JNje5z+XJRCqBRwaJFAJDqL9GJ2UcuxnKP4zm1CUaPTtcHGKxwlM3nD2a+WX9kc6M2
+         UkTWDMnyZa1nNnFmD723Hf//qCSl2YKT03rSWPLNXNfk9azxXCifFIL/y0/EfAJy95b/
+         5/UABhKAxlgypEWHuPMs3suT2Hn97LdsRaquwsMPnsh7t/NgNEA15oD6ufVvIA9eVz2n
+         q5KBQ1zH5UOdA5Pira3Ta3pkIIcyFktBDsw6luoCHPsnfM7tBK/CEGdy53soJoBifldw
+         ixZvog3Zeui4iaaC8f1PB6/k/ZWTB8MSw39+XxTdh8pPWoXyOPf/SQKfflqiScCGtEmX
+         li6A==
+X-Gm-Message-State: AOJu0YyI8Zzlg3Ng2mVMbjd3MtPPcvKQJdZcaAP9GSfjF71bsHejuaT6
+	RmU1o5R19yQH4RCuwh9QsjiwcF8EtD0zJJwkO9t44O3q/dP/H2sfGWNnDwxd9nWPBLNBwDb0zF+
+	kDjAHMyiSTgQnpStFj0Wm64GybZV/dZ0L4j7AgW+qC8LLDNTKfyJEguu1XIIODTCLrtlDNZ3UzQ
+	udme6BZvzSn1Hka7naFQzpGbmmXarACuGIek8caIDh
+X-Gm-Gg: ASbGncvcrHwKIvH0m14xPabQdX7E24+22qtdOS5Z8/jiYPpVdWFdWMp21ctJe6gxYh5
+	/BQdU3Q2O4wIOyROQHa+qX+SXXaG2zYRU7ynJ7Awsk13ObckBbuhZ1JhOOtNbGYBtIrfmYY0esB
+	F4zw7Xu2boPzP/TC0RfkuHc+/L34jXDHpiH67mQ9WNa0mr/6s2Pabu5NXeh89gY8d4pxpcs/m5Q
+	Eyge8AlJD5bW0O6/iK4jYaDCpDRJefo793Iiyn7Yy6ZDL/+YvMAMLmua+ZTkfP82S3+6V4gfE8k
+	kxzfQP1FaeR2pR12HFlvqqg=
+X-Received: by 2002:a05:6e02:3687:b0:3d4:35d3:87d3 with SMTP id e9e14a558f8ab-3d4839f6027mr28160555ab.4.1741963014392;
+        Fri, 14 Mar 2025 07:36:54 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHnP3cvCq1RGGjXzH2qTT9qCDOpzPHAeHieXDS/9U7SXCPgNQO5dmUFGMrw5lHhWceKVm06kA==
+X-Received: by 2002:a05:6e02:3687:b0:3d4:35d3:87d3 with SMTP id e9e14a558f8ab-3d4839f6027mr28160255ab.4.1741963013959;
+        Fri, 14 Mar 2025 07:36:53 -0700 (PDT)
+Received: from [10.0.0.176] ([65.128.97.82])
+        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4f263727457sm871581173.68.2025.03.14.07.36.53
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 14 Mar 2025 07:36:53 -0700 (PDT)
+Message-ID: <aaf2e2de-b337-4d7f-81fe-1aa8ef6b6b21@redhat.com>
+Date: Fri, 14 Mar 2025 09:36:53 -0500
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <b761e302-8b4e-4a79-b025-d344d7bf5a69@redhat.com>
+User-Agent: Mozilla Thunderbird
+Content-Language: en-US
+To: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Cc: Jan Kara <jack@suse.cz>
+From: Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH RFC] fstests: test for CONFIG_QFMT_V2 in _require_quota
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Wed, Mar 12, 2025 at 11:48:11AM -0500, Eric Sandeen wrote:
-> The current test in _require_fio (--warnings-fatal --showcmd) does not
-> fail if an invalid/unavailable io engine is specified.
-> 
-> Add an explicit test that every requested io engine in the job file
-> is actually available.
-> 
-> Remove the "ioe_e4defrag" entries in ext4 tests - an engine with this
-> name has seemingly never existed, but in each case later stanzas
-> overrode the io engine, so it did not cause problems without this
-> explicit parsing and checking.
-> 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> ---
-> 
-> diff --git a/common/rc b/common/rc
-> index ca755055..c155bb46 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3983,6 +3983,12 @@ _require_fio()
->  		return 1;
->  	fi
->  
-> +	# Explicitly check for every ioengine availability
-> +	for ENGINE in `grep ioengine= $job | awk -F= '{print $2}'; sort`; do
-            ^^^^^^
+When CONFIG_QUOTA is enabled but CONFIG_QFMT_V2 is disabled in the
+kernel config, many quota tests on ext4 will fail in odd ways,
+when in fact they should be _notrun. Add a CONFIG_QFMT_V2 test to
+_require_quota() to catch this for filesystems that require it.
 
-I think a local variable is enough, e.g. "local eng".
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-And, how about:
-  for eng in `sed -n "s/ioengine=\(.*\)/\1/p" $job`
+Backstory:
 
-> +		fio --enghelp | grep -qw $ENGINE || \
-                ^^^
-              $FIO_PROG
+I was handed a bunch of ext4 xfstests failures on a system which had
+(accidentally?) been built with CONFIG_QUOTA enabled, but with
+CONFIG_QFMT_V2 disabled. This led to lots of tests failing when in fact
+they should have _notrun due to lack of sufficient quota support, and
+the reason for the failure was not obvious.
 
-And to make sure the "||" checks the return value of grep, how about:
+I'm going to just admit that I get lost in the maze of
+quota kernel configs, mount options, and on-disk features:
+CONFIG_QFMT_V1, CONFIG_QFMT_V2, vfsold, vfsv1, vfsv2, usrjquota,
+tune2fs -O quota, etc. I think that requiring CONFIG_QFMT_V2 might
+be a little bit heavy-handed here, but perhaps in the name of simplicity
+this change is reasonable, and I cc'd Jan in case he sees a better
+or more fine-grained approach, or if there are certain quota tests
+which should not require CONFIG_QFMT_V2, or if we should check for
+CONFIG_QFMT_V1 as well...
 
-  grep -wq $eng <($FIO_PROG --enghelp 2>/dev/null) ||
+(Even on my old RHEL7 hosts, CONFIG_QFMT_V1 is disabled, so I don't think
+it's worth a separate check.)
 
+There are a couple tests which oddly enough still succeed even with this
+kernel feature off - generic/234 for example. It does quotacheck and
+quotaon - the latter of which fails, but is ignored, then a bunch of
+setquota calls which succeed. I'm not sure what to make of that, I guess
+userspace can happily write to the quotafile without the kernel needing
+to understand it, but the kernel cannot do the accounting ...
 
-Others look good to me.
+generic/280 is similar.
 
-Thanks,
-Zorro
+So this change would _notrun those tests even though they only exercise
+setquota, and do not require kernel functionality. I'm not sure it's
+worth carving out special cases for them, though.
 
-> +			_notrun "fio engine $ENGINE not available"
-> +	done
-> +
->  	$FIO_PROG --warnings-fatal --showcmd $job >> $seqres.full 2>&1
->  	[ $? -eq 0 ] || _notrun "$FIO_PROG too old, see $seqres.full"
->  }
-> diff --git a/tests/ext4/301 b/tests/ext4/301
-> index abf47d4b..a05b8e8a 100755
-> --- a/tests/ext4/301
-> +++ b/tests/ext4/301
-> @@ -31,7 +31,6 @@ FILE_SIZE=$((BLK_DEV_SIZE * (512 / (2 + 1))))
->  cat >$fio_config <<EOF
->  # Common e4defrag regression tests
->  [global]
-> -ioengine=ioe_e4defrag
->  iodepth=1
->  directory=${SCRATCH_MNT}
->  filesize=${FILE_SIZE}
-> diff --git a/tests/ext4/302 b/tests/ext4/302
-> index 87820184..e0f5f2f9 100755
-> --- a/tests/ext4/302
-> +++ b/tests/ext4/302
-> @@ -31,7 +31,6 @@ FILE_SIZE=$((BLK_DEV_SIZE * (512 / (2 + 1))))
->  cat >$fio_config <<EOF
->  # Common e4defrag regression tests
->  [global]
-> -ioengine=ioe_e4defrag
->  iodepth=1
->  directory=${SCRATCH_MNT}
->  filesize=${FILE_SIZE}
-> diff --git a/tests/ext4/303 b/tests/ext4/303
-> index 2381f047..0a83e86c 100755
-> --- a/tests/ext4/303
-> +++ b/tests/ext4/303
-> @@ -31,7 +31,6 @@ FILE_SIZE=$((BLK_DEV_SIZE * (512 / (3+1))))
->  cat >$fio_config <<EOF
->  # Common e4defrag regression tests
->  [global]
-> -ioengine=ioe_e4defrag
->  iodepth=1
->  directory=${SCRATCH_MNT}
->  filesize=${FILE_SIZE}
-> diff --git a/tests/ext4/304 b/tests/ext4/304
-> index 53b522ee..5f2ae4bd 100755
-> --- a/tests/ext4/304
-> +++ b/tests/ext4/304
-> @@ -32,7 +32,6 @@ FILE_SIZE=$((BLK_DEV_SIZE * (512 / (2 + 1))))
->  cat >$fio_config <<EOF
->  # Common e4defrag regression tests
->  [global]
-> -ioengine=ioe_e4defrag
->  iodepth=1
->  directory=${SCRATCH_MNT}
->  filesize=${FILE_SIZE}
-> 
-> 
+Thanks for listening ;)
+
+diff --git a/common/quota b/common/quota
+index 3bf7d552..237fc115 100644
+--- a/common/quota
++++ b/common/quota
+@@ -5,7 +5,9 @@
+ # Functions useful for quota tests
+ 
+ # checks that the generic quota support in the kernel is enabled
+-# and that we have valid quota user tools installed.
++# and that we have valid quota user tools installed, as well as
++# support for the modern on-disk quota format kernel config
++# for filesystems that require it.
+ #
+ _require_quota()
+ {
+@@ -16,6 +18,7 @@ _require_quota()
+ 	if [ ! -d /proc/sys/fs/quota ]; then
+ 	    _notrun "Installed kernel does not support quotas"
+ 	fi
++	_require_kernel_config CONFIG_QFMT_V2
+ 	;;
+     gfs2|ocfs2|bcachefs)
+ 	;;
+diff --git a/tests/ext4/053 b/tests/ext4/053
+index 4f20d217..45747317 100755
+--- a/tests/ext4/053
++++ b/tests/ext4/053
+@@ -46,7 +46,6 @@ _require_loop
+ _require_command "$TUNE2FS_PROG" tune2fs
+ MKE2FS_PROG=$(type -P mke2fs)
+ _require_command "$MKE2FS_PROG" mke2fs
+-_require_kernel_config CONFIG_QFMT_V2
+ 
+ LOG=""
+ print_log() {
 
