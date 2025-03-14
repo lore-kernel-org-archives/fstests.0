@@ -1,54 +1,40 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECD9C12B63
-	for <fstests@vger.kernel.org>; Fri, 14 Mar 2025 16:16:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 565812E3362
+	for <fstests@vger.kernel.org>; Fri, 14 Mar 2025 16:48:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741968963; cv=none; b=nGjLCbYi+huxvfDGnAcEDOOfgbz1rXoin7SdBblAF3RDuxwgSN03PoOvvVeVcpvPuO13SqE/xhKA2zZ78Sc4tJmDl1Wc+C5Cyc6d6Ad4qK/iFROzEOzeDKGtToK8ab3A8MOBx10G7gFI4FdhQPObBR25+SwQsArtL7L9gIVa7uc=
+	t=1741970893; cv=none; b=Ypt+nYnej10ZldtagH5KlUqf2QjC/rU1tsDKprAKQ9tty6yrlOYepfc/yvcERxetCJuUW+br6XN8d9+GQ9vkxgn4P8BAKeCCLtmguGL5of0Sydb6TeofteHiNKOzJtgxPllGgAow/EQd4ekAev9SwMfu8mlNePMTpjAV1OrJivg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741968963; c=relaxed/simple;
-	bh=XM33nyTWcSSBV+t0v5V+vTuJr5I5UCC9pXw+6+e2/8A=;
+	s=arc-20240116; t=1741970893; c=relaxed/simple;
+	bh=pVYcOKHBzojbrddbezbcx+RXkHVCqy2zpwD4IUP4gHk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=t93aM+GTbfODksQvxxVf2RaXv02+Uw5wvhXo+2MB04IHOD7R/Z4Bv3cmOQW1LhwZho7TkPXUmVVyE0UYBaJ+ztPrYeCqzeSgE84Ae+hfRFj/cjH5gFcNx574qyojIgrf6+HZWbAnLWtOGUzNZkAwQ9klbGWyir9TSEqM6AIp7P4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=aWugQPOz; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=hMlcM0y1xBjP9Xvp5HYWZ/Of05/IuPGgp0YOeYZbaoVSwwHdadkQh5PRkv29mCxQx7QIUoLDTtYoz4LVMs/FcU2w2ufYn4E7lT8+efdgCvCOMWYjrflBUAlCIQtYtoyn+LgwK8aphyZrPB53fmT6hwH3VH+cL9RRz17JeR6LMQU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MnFxd4IK; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aWugQPOz"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1741968960;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=NpiwrWhX7WwD9ZoVVpBx/Ka7EmuZOQFlBemNybH836k=;
-	b=aWugQPOzgmrZ6mOO/3JeQpnq8CsnbklPBFvvpP5iBF8c5JgHMKOeu5pjjFe3jJPSJSX39g
-	4vXbwm9Fin4p/cnB1mBg5qURrXr+3hnonUWrKO0iwgrB/9SBL9kOwzHIm5dJW0+SFtF9FP
-	izo0jXHru4DcPFKhggwgcVxnFqXAzQ8=
-Received: from mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-223-ICzhVx5_Ncmb7oChlfCd2w-1; Fri,
- 14 Mar 2025 12:15:57 -0400
-X-MC-Unique: ICzhVx5_Ncmb7oChlfCd2w-1
-X-Mimecast-MFC-AGG-ID: ICzhVx5_Ncmb7oChlfCd2w_1741968956
-Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 5C8741809CA5;
-	Fri, 14 Mar 2025 16:15:56 +0000 (UTC)
-Received: from redhat.com (unknown [10.22.64.45])
-	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 16D3F300376F;
-	Fri, 14 Mar 2025 16:15:54 +0000 (UTC)
-Date: Fri, 14 Mar 2025 11:15:52 -0500
-From: Bill O'Donnell <bodonnel@redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MnFxd4IK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C703CC4CEE5;
+	Fri, 14 Mar 2025 16:48:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1741970892;
+	bh=pVYcOKHBzojbrddbezbcx+RXkHVCqy2zpwD4IUP4gHk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=MnFxd4IK+aIX77P6ZK6iEIHznh8It92qeY4MldwCtvKL4sZkuD2kGPne/1O8xavqD
+	 YBVD1FopsH2gH++qJgfZs1MqkLrSEncIwdbBOrN+IIaxZ1ZAqZ3WElaoQHdwWRvtoK
+	 7Npk2MfV0gstd8YyZexb8WZiwo3oudIs1SFNE4movC7PPsmW63dRFQ/CZkoWPBrHZY
+	 88BWlf+g/Wj2chMkLZ9c6682iMjzFXbPowbjTp5wMm53eluZS58O3u39U6V0WdPhcM
+	 Bcz0o1yJpYxvHm9bBNsYqYJaH21Q+lG8AfA+HpGbtYAlKHeVGg7Girgz6x02ANFmmN
+	 64RK3nGco8gFg==
+Date: Fri, 14 Mar 2025 09:48:12 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
 To: Eric Sandeen <sandeen@redhat.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, 
-	Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH V2] fstests: test for CONFIG_QFMT_V2 in _require_quota
-Message-ID: <qxrk5tfu3e2deg7ij23tjn4ggilmwsb4md6h3aphzb6ney3hfe@rkd5wottjpij>
-References: <5637d8c8-d92e-43b0-95b6-a8decc5e2025@redhat.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	Jeff Moyer <jmoyer@redhat.com>, Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH V2] common/rc: explicitly test for engine availability in
+ _require_fio
+Message-ID: <20250314164812.GK2803740@frogsfrogsfrogs>
+References: <7ca733f5-f33a-4b2e-a70d-4a48a4904391@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -57,73 +43,118 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <5637d8c8-d92e-43b0-95b6-a8decc5e2025@redhat.com>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
+In-Reply-To: <7ca733f5-f33a-4b2e-a70d-4a48a4904391@redhat.com>
 
-On Fri, Mar 14, 2025 at 10:44:16AM -0500, Eric Sandeen wrote:
-> When CONFIG_QUOTA is enabled but CONFIG_QFMT_V2 is disabled in the
-> kernel config, many quota tests on ext4 will fail in odd ways,
-> when in fact they should be _notrun. Add a CONFIG_QFMT_V2 test to
-> _require_quota() to catch this for filesystems that require it.
+On Fri, Mar 14, 2025 at 09:56:20AM -0500, Eric Sandeen wrote:
+> The current test in _require_fio (--warnings-fatal --showcmd) does not
+> fail if an invalid/unavailable io engine is specified.
 > 
+> Add an explicit test that every requested io engine in the job file
+> is actually available.
+> 
+> Remove the "ioe_e4defrag" entries in ext4 tests - an engine with this
+> name has seemingly never existed, but in each case later stanzas
+> overrode the io engine, so it did not cause problems without this
+> explicit parsing and checking.
+
+Well, they override it with the correct name "e4defrag":
+
+$ fio --enghelp
+Available IO engines:
+        cpuio
+        mmap
+        sync
+<snip>
+        falloc
+        e4defrag
+
+I think the commit message should call that out specifically "...but in
+each case later stanzas provide the correct ioengine name 'e4defrag',
+so...").
+
 > Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> Reviewed-by: Jan Kara <jack@suse.cz>
 
-Looks fine.
-Reviewed-by: Bill O'Donnell <bodonnel@redhat.com>
+With that amended, this all looks good to me so
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
+--D
 
 > ---
 > 
-> V2: add _require_quota to ext4/055, because it adds the -O quota
-> feature at mkfs time, and mount fails without CONFIG_QFMT_V2.
-> Jan, I took the liberty of leaving your RVB: despite that minor change,
-> please let me know if you object. Thanks!
+> V2: Be Better at Bash, thanks Zorro. Also add | sort | uniq to ensure
+>     we only test each requested engine once.
 > 
-> diff --git a/common/quota b/common/quota
-> index e306e2e3..a51386b1 100644
-> --- a/common/quota
-> +++ b/common/quota
-> @@ -16,6 +16,7 @@ _require_quota()
->  	if [ ! -d /proc/sys/fs/quota ]; then
->  	    _notrun "Installed kernel does not support quotas"
+> diff --git a/common/rc b/common/rc
+> index ca755055..ac443ec2 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3977,12 +3977,19 @@ _require_scratch_dev_pool_equal_size()
+>  _require_fio()
+>  {
+>  	local job=$1
+> +	local eng
+>  
+>  	_require_command "$FIO_PROG" fio
+>  	if [ -z "$1" ]; then
+>  		return 1;
 >  	fi
-> +	_require_kernel_config CONFIG_QFMT_V2
->  	;;
->      gfs2|ocfs2|bcachefs)
->  	;;
-> diff --git a/tests/ext4/053 b/tests/ext4/053
-> index 5922ed57..77b3ac81 100755
-> --- a/tests/ext4/053
-> +++ b/tests/ext4/053
-> @@ -45,7 +45,6 @@ _require_loop
->  _require_command "$TUNE2FS_PROG" tune2fs
->  MKE2FS_PROG=$(type -P mke2fs)
->  _require_command "$MKE2FS_PROG" mke2fs
-> -_require_kernel_config CONFIG_QFMT_V2
 >  
->  LOG=""
->  print_log() {
-> diff --git a/tests/ext4/055 b/tests/ext4/055
-> index 3117bf15..711d18c2 100755
-> --- a/tests/ext4/055
-> +++ b/tests/ext4/055
-> @@ -14,6 +14,7 @@
->  # The test is based on a testcase from Zhang Yi <yi.zhang@huawei.com>.
->  #
->  . ./common/preamble
-> +. ./common/quota
->  _begin_fstest auto quota
->  
->  _exclude_fs ext2
-> @@ -23,6 +24,7 @@ _require_scratch_nocheck
->  _require_user fsgqa
->  _require_user fsgqa2
->  _require_command "$DEBUGFS_PROG" debugfs
-> +_require_quota
->  
->  echo "Silence is golden"
->  
+> +	# Explicitly check for every ioengine listed in the job
+> +	for eng in `sed -n "s/ioengine=\(.*\)/\1/p" $job | sort | uniq`; do
+> +		grep -wq $eng <($FIO_PROG --enghelp 2>/dev/null) || \
+> +			_notrun "fio engine $eng not available"
+> +	done
+> +
+>  	$FIO_PROG --warnings-fatal --showcmd $job >> $seqres.full 2>&1
+>  	[ $? -eq 0 ] || _notrun "$FIO_PROG too old, see $seqres.full"
+>  }
+> diff --git a/tests/ext4/301 b/tests/ext4/301
+> index abf47d4b..a05b8e8a 100755
+> --- a/tests/ext4/301
+> +++ b/tests/ext4/301
+> @@ -31,7 +31,6 @@ FILE_SIZE=$((BLK_DEV_SIZE * (512 / (2 + 1))))
+>  cat >$fio_config <<EOF
+>  # Common e4defrag regression tests
+>  [global]
+> -ioengine=ioe_e4defrag
+>  iodepth=1
+>  directory=${SCRATCH_MNT}
+>  filesize=${FILE_SIZE}
+> diff --git a/tests/ext4/302 b/tests/ext4/302
+> index 87820184..e0f5f2f9 100755
+> --- a/tests/ext4/302
+> +++ b/tests/ext4/302
+> @@ -31,7 +31,6 @@ FILE_SIZE=$((BLK_DEV_SIZE * (512 / (2 + 1))))
+>  cat >$fio_config <<EOF
+>  # Common e4defrag regression tests
+>  [global]
+> -ioengine=ioe_e4defrag
+>  iodepth=1
+>  directory=${SCRATCH_MNT}
+>  filesize=${FILE_SIZE}
+> diff --git a/tests/ext4/303 b/tests/ext4/303
+> index 2381f047..0a83e86c 100755
+> --- a/tests/ext4/303
+> +++ b/tests/ext4/303
+> @@ -31,7 +31,6 @@ FILE_SIZE=$((BLK_DEV_SIZE * (512 / (3+1))))
+>  cat >$fio_config <<EOF
+>  # Common e4defrag regression tests
+>  [global]
+> -ioengine=ioe_e4defrag
+>  iodepth=1
+>  directory=${SCRATCH_MNT}
+>  filesize=${FILE_SIZE}
+> diff --git a/tests/ext4/304 b/tests/ext4/304
+> index 53b522ee..5f2ae4bd 100755
+> --- a/tests/ext4/304
+> +++ b/tests/ext4/304
+> @@ -32,7 +32,6 @@ FILE_SIZE=$((BLK_DEV_SIZE * (512 / (2 + 1))))
+>  cat >$fio_config <<EOF
+>  # Common e4defrag regression tests
+>  [global]
+> -ioengine=ioe_e4defrag
+>  iodepth=1
+>  directory=${SCRATCH_MNT}
+>  filesize=${FILE_SIZE}
 > 
 > 
-
