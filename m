@@ -1,152 +1,227 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B03731EF366
-	for <fstests@vger.kernel.org>; Tue, 18 Mar 2025 10:08:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D86B8207E0D;
+	Tue, 18 Mar 2025 10:28:21 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742292531; cv=none; b=ZkdE9KZtMdHWxVqsxdq8Ryh10J5bbnOluwyZQsrFWTjQ9ZyZInxWxq2WBBIWETJYDk8w/ldZPBkC5dZnA5EAHPWmhpcwmbRTtKN727PXBqn0sUn/tFNREdVK3mdpLWbQCRbFkKvZ3+Ows4LEq4j+TnLsknUxkn4sIrx/5HyR56w=
+	t=1742293702; cv=none; b=StCsJtB6f8vHU8JMP6XhAkV2HrYBErXaWqpLGqikd6BFP4gtnRnK5iFL1n0+Qhlfn7oX2jQBzSxtcre6dalyw+TwezN7LHL6dr51hLL8Wfn4xAv2kUbGkp45HERE6eMuQkGY0mvZEgektYeexcv7i1Zm9hV2ICHNqrdD2ZiTV98=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742292531; c=relaxed/simple;
-	bh=moaGJwlVeGpPCuhd4Yy9qK2ktR0HZ79JjcGi7HjckH4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=TKCddo2+BYAseP7FPpquQKtBISpfEkjVaTbB2dsqj9B8Mop3hEwd4mfDv9B1vtq5PCCIqrKoN6QRoKG7pYl6mWDs9TUxo0Nfv9pVQgPtUnEeYlzl/Fg9o0tNA3mFNZA7W439nDfv8RwGJVoW1FJIQhlAoYhCa3EQhKkv9bSDycs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kUKf6koL; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1742293702; c=relaxed/simple;
+	bh=8FM+w0uKEg4GlCykw8p30Aen1+985h5jBOFnbcJDI88=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=gsgDVH0283/skSxVtW9G1MQ+rLm+BvzvOnMwcowntfc8hxqcpPG9CDPhDLuDeWih0iYHpLpy5AgOQ8RoJiUpznvJFPxuvCVA/ty3FopJdVLJqFKIbMRpZg65huNdIP/hKnWaMHxBuXUQZOGjm8g5sQW7OBjieplc1k1TohASRdI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CyIhWWwD; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kUKf6koL"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6E20AC4CEDD;
-	Tue, 18 Mar 2025 10:08:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CyIhWWwD"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3E8AEC4CEDD;
+	Tue, 18 Mar 2025 10:28:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1742292531;
-	bh=moaGJwlVeGpPCuhd4Yy9qK2ktR0HZ79JjcGi7HjckH4=;
-	h=From:To:Cc:Subject:Date:From;
-	b=kUKf6koLvbujVu9IyhZF9JeC+sRjOgqs5hbsPIA83Xi0J8F26VFzt3ZaxC0gfyB3Z
-	 iLheLvu+O1hnLUGhAhRhczQ0XU6f1wKlqje5kwlzYMwc6iaBOwKQbP+wgn9iAiqEoo
-	 rr27bYPOpIFZUloz/x6vjZwQn8r/pWwSMcfqciFMafvKBZUO3fy98rhmgj5cquw7Nk
-	 iEpByNRGK4k+Cg5/8WoVHvY6D71bOIXPClYi8ft3Bh5Hw8HfviLyY82z+f4rrMuo4s
-	 2KIYLme/Qz5YzRVAszNXMgdVEYkF2re+538fFng3v8oHulj5QvoaBoIHL8IIEuG6Zg
-	 Z+Dzl7+BtGUYg==
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Cc: djwong@kernel.org
-Subject: [PATCH] common/rc: explicitly test for engine availability in _require_fio
-Date: Tue, 18 Mar 2025 18:08:48 +0800
-Message-ID: <20250318100848.114915-1-zlang@kernel.org>
-X-Mailer: git-send-email 2.47.1
+	s=k20201202; t=1742293701;
+	bh=8FM+w0uKEg4GlCykw8p30Aen1+985h5jBOFnbcJDI88=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=CyIhWWwD4VcTQ483yib3pnVTHBLXLs+JSlLwatg9E5yUR111toRzvaG/xs3YeVeq5
+	 Ix/pgwmwuFlsi0E1CNulKicosVcbPpqQQNRhh65edboexnREqPbv9nB3eKHb1EBKWe
+	 XC7rza/nmyqHKQNGuBnFPC1JEgIHTcJT75KEp5bizf6irdlGA3lWKnidE8cGgLLnwK
+	 ykBZBTr57JIWX+7puGqq1PW1M3jNL7WlAjIWpyYx+MMkuk1av+MiM8EofIYA7h9edJ
+	 trb61ArW92W+EBJQJ2mnO3ueAg/e3KOVT2n3m/qAYLBQ8iFabKD903m16+iD8PnUsN
+	 ukaMZ3BC95rww==
+Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-ac2af2f15d1so783920666b.1;
+        Tue, 18 Mar 2025 03:28:21 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCWevUL6q4lmcWD5azEKJ2YzZK/WKkP3Cs9099CUhZn89E1RLNwEfcEPuciHEWKVjG3APWnWsPtxSruIvQ==@vger.kernel.org
+X-Gm-Message-State: AOJu0YwJSdiID3sOhA+zPCmxq92K6OtfFgzQFMRpeJnk9zta2MY93kWm
+	WlLDliuJKF4qwkE/yAfNALDKAz4L6Ly/jTV2XEY/rbPXFgRikpXGfPNAw2r9iU8bOxx/s2RzYlV
+	7jxLYiGha14DDzawxdG9/kL8HIUI=
+X-Google-Smtp-Source: AGHT+IH+2CcAdomNLVKzNSaZpeBihIK+5sBbMcLHe6lfTzD9+5dsqbeqx4VVQW4qDs+sNDbyaHLOOYzxm19zKtOe5t4=
+X-Received: by 2002:a17:907:bb4c:b0:ac3:3e40:e183 with SMTP id
+ a640c23a62f3a-ac38d366f4cmr315466166b.3.1742293699656; Tue, 18 Mar 2025
+ 03:28:19 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <5c6dcd33d98c4d79630748381b2aa3880fd156ac.1742223870.git.jth@kernel.org>
+In-Reply-To: <5c6dcd33d98c4d79630748381b2aa3880fd156ac.1742223870.git.jth@kernel.org>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Tue, 18 Mar 2025 10:27:43 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H7aoYKhQG6V_MgvxVvNhE9mdEnEYgv3b1A10wyz0Zkr_Q@mail.gmail.com>
+X-Gm-Features: AQ5f1JptjL8znoZEvcYYNBrswmPCO2lewKg3jxKDGA63crgezEm73COjNLQ3x_E
+Message-ID: <CAL3q7H7aoYKhQG6V_MgvxVvNhE9mdEnEYgv3b1A10wyz0Zkr_Q@mail.gmail.com>
+Subject: Re: [PATCH] fstests: btrfs: zoned: verify RAID conversion with write
+ pointer mismatch
+To: Johannes Thumshirn <jth@kernel.org>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>, 
+	Naohiro Aota <naohiro.aota@wdc.com>, Damien Le Moal <dlemoal@kernel.org>, 
+	Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: Eric Sandeen <sandeen@sandeen.net>
+On Mon, Mar 17, 2025 at 3:05=E2=80=AFPM Johannes Thumshirn <jth@kernel.org>=
+ wrote:
+>
+> From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+>
+> Recently we had a bug report about a kernel crash that happened when the
+> user was converting a filesystem to use RAID1 for metadata, but for some
+> reason the device's write pointers got out of sync.
+>
+> Test this scenario by manually injecting de-synchronized write pointer
+> positions and then running conversion to a metadata RAID1 filesystem.
+>
+> In the testcase also repair the broken filesystem and check if both syste=
+m
+> and metadata block groups are back to the default 'DUP' profile
+> afterwards.
+>
+> Link: https://lore.kernel.org/linux-btrfs/CAB_b4sBhDe3tscz=3DduVyhc9hNE+g=
+u=3DB8CrgLO152uMyanR8BEA@mail.gmail.com/
+> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+> ---
+>  tests/btrfs/329     | 61 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/329.out |  3 +++
+>  2 files changed, 64 insertions(+)
+>  create mode 100755 tests/btrfs/329
+>  create mode 100644 tests/btrfs/329.out
+>
+> diff --git a/tests/btrfs/329 b/tests/btrfs/329
+> new file mode 100755
+> index 000000000000..441be133e230
+> --- /dev/null
+> +++ b/tests/btrfs/329
+> @@ -0,0 +1,61 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 Western Digital Corporation.  All Rights Reserved.
+> +#
+> +# FS QA Test 329
+> +#
+> +# what am I here for?
 
-The current test in _require_fio (--warnings-fatal --showcmd) does not
-fail if an invalid/unavailable io engine is specified.
+Missing description here.
 
-Add an explicit test that every requested io engine in the job file
-is actually available.
+> +#
+> +. ./common/preamble
+> +_begin_fstest zone quick volume
+> +
+> +. ./common/filter
+> +
+> +_fixed_by_kernel_commit XXXXXXXXXXXX \
+> +       "btrfs: zoned: return EIO on RAID1 block group write pointer mism=
+atch"
+> +
+> +_require_scratch_dev_pool 2
+> +declare -a devs=3D"( $SCRATCH_DEV_POOL )"
+> +_require_zoned_device ${devs[0]}
+> +_require_zoned_device ${devs[1]}
+> +_require_command "$BLKZONE_PROG" blkzone
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
 
-Also, remove the "ioe_e4defrag" entries in the [global] stanza of several
-ext4 tests which use fio jobfiles. While ioengines can be set in the
-[global] section, they can also be overridden in individual, subsequent
-stanzas. In each affected test (ext4/301, ext4/302, ext4/303, and
-ext4/304) every individual stanza after [global]re-specifies an ioengine;
-either with ioengine=e4defrag or ioengine=libaio.
+|| _fail "mkfs failed"
 
-Because of this re-specification, the ioengine in the [global] section
-is ignored. This is a good thing, because ioe_e4defrag is not a valid
-ioengine, and would fail this new hand-rolled check, even though fio
-did not complain.
+That's what we do nowadays.
 
-So rather than over-complicate this new check, simply remove the unused,
-invalid "ioengine=ioe_e4defrag" lines in these tests.
+> +_scratch_mount
+> +
+> +# Write some data to the FS to dirty it
+> +dd if=3D/dev/zero of=3D$SCRATCH_MNT/test bs=3D128k count=3D1024 >> $seqr=
+es.full 2>&1
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-Signed-off-by: Zorro Lang <zlang@kernel.org>
----
- common/rc      | 7 +++++++
- tests/ext4/301 | 1 -
- tests/ext4/302 | 1 -
- tests/ext4/303 | 1 -
- tests/ext4/304 | 1 -
- 5 files changed, 7 insertions(+), 4 deletions(-)
+Is there any reason to use dd?
 
-diff --git a/common/rc b/common/rc
-index dcdfa86e4..e51686389 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3985,12 +3985,19 @@ _require_scratch_dev_pool_equal_size()
- _require_fio()
- {
- 	local job=$1
-+	local eng
- 
- 	_require_command "$FIO_PROG" fio
- 	if [ -z "$1" ]; then
- 		return 1;
- 	fi
- 
-+	# Explicitly check for every ioengine listed in the job
-+	for eng in `sed -n "s/ioengine=\(.*\)/\1/p" $job | sort -u`; do
-+		grep -wq $eng <($FIO_PROG --enghelp 2>/dev/null) || \
-+			_notrun "fio engine $eng not available"
-+	done
-+
- 	$FIO_PROG --warnings-fatal --showcmd $job >> $seqres.full 2>&1
- 	[ $? -eq 0 ] || _notrun "$FIO_PROG too old, see $seqres.full"
- }
-diff --git a/tests/ext4/301 b/tests/ext4/301
-index abf47d4b7..a05b8e8a8 100755
---- a/tests/ext4/301
-+++ b/tests/ext4/301
-@@ -31,7 +31,6 @@ FILE_SIZE=$((BLK_DEV_SIZE * (512 / (2 + 1))))
- cat >$fio_config <<EOF
- # Common e4defrag regression tests
- [global]
--ioengine=ioe_e4defrag
- iodepth=1
- directory=${SCRATCH_MNT}
- filesize=${FILE_SIZE}
-diff --git a/tests/ext4/302 b/tests/ext4/302
-index 87820184e..e0f5f2f98 100755
---- a/tests/ext4/302
-+++ b/tests/ext4/302
-@@ -31,7 +31,6 @@ FILE_SIZE=$((BLK_DEV_SIZE * (512 / (2 + 1))))
- cat >$fio_config <<EOF
- # Common e4defrag regression tests
- [global]
--ioengine=ioe_e4defrag
- iodepth=1
- directory=${SCRATCH_MNT}
- filesize=${FILE_SIZE}
-diff --git a/tests/ext4/303 b/tests/ext4/303
-index 2381f0477..0a83e86cd 100755
---- a/tests/ext4/303
-+++ b/tests/ext4/303
-@@ -31,7 +31,6 @@ FILE_SIZE=$((BLK_DEV_SIZE * (512 / (3+1))))
- cat >$fio_config <<EOF
- # Common e4defrag regression tests
- [global]
--ioengine=ioe_e4defrag
- iodepth=1
- directory=${SCRATCH_MNT}
- filesize=${FILE_SIZE}
-diff --git a/tests/ext4/304 b/tests/ext4/304
-index 53b522ee8..5f2ae4bdc 100755
---- a/tests/ext4/304
-+++ b/tests/ext4/304
-@@ -32,7 +32,6 @@ FILE_SIZE=$((BLK_DEV_SIZE * (512 / (2 + 1))))
- cat >$fio_config <<EOF
- # Common e4defrag regression tests
- [global]
--ioengine=ioe_e4defrag
- iodepth=1
- directory=${SCRATCH_MNT}
- filesize=${FILE_SIZE}
--- 
-2.47.1
+A simple:
 
+$XFS_IO_PROG -f "pwrite 0 128M" $SCRATCH_MNT/test
+
+would do it and it's easier to read (don't have to do the
+multiplication to figure out it's 128M of data).
+
+Also, why redirect both stdout and stderr to the .full file?
+We want to detect errors and fail with a golden output mismatch rather
+than silently ignore errors, so at least don't redirect stderr.
+I see this pattern done everywhere in the test case, effectively
+ignoring errors.
+
+
+> +
+> +# Add device two to the FS
+> +$BTRFS_UTIL_PROG device add ${devs[1]} $SCRATCH_MNT >> $seqres.full 2>&1
+
+Same here.
+
+> +
+> +# Move write pointers of all empty zones by 4k to simulate write pointer
+> +# mismatch.
+> +# 'blkzone report' reports the zone numbers in sectors so we need to con=
+vert
+> +# it to bytes first. Afterwards we need to convert it to 4k blocks for d=
+d.
+> +zones=3D$($BLKZONE_PROG report ${devs[1]} | $AWK_PROG '/em/ { print $2 }=
+' |\
+> +       sed 's/,//')
+> +for zone in $zones;
+> +do
+> +       zone=3D$(($zone / 8))
+> +       dd if=3D/dev/zero of=3D${devs[1]} seek=3D$zone bs=3D4k oflag=3Ddi=
+rect \
+> +               count=3D1 >> $seqres.full 2>&1
+
+Same here.
+
+$XFS_IO_PROG can also be used.
+And since this is using odirect, we should have a _require_odirect above.
+
+
+> +done
+> +
+> +# expected to fail
+> +$BTRFS_UTIL_PROG balance start -mconvert=3Draid1 $SCRATCH_MNT \
+> +       >> $seqres.full 2>&1
+
+Expected to fail, but the test is not checking if it fails at all - if
+it doesn't fail it doesn't detect it all.
+So don't redirect stderr and include stderr output in the golden output fil=
+e.
+
+> +
+> +_scratch_unmount
+> +
+> +$MOUNT_PROG -t btrfs -odegraded ${devs[0]} $SCRATCH_MNT
+> +
+> +$BTRFS_UTIL_PROG device remove --force missing $SCRATCH_MNT >> $seqres.f=
+ull 2>&1
+> +$BTRFS_UTIL_PROG balance start --full-balance $SCRATCH_MNT >> $seqres.fu=
+ll 2>&1
+
+Same here, ignoring failures.
+
+> +
+> +# Check that both System and Metadata are back to the DUP profile
+> +$BTRFS_UTIL_PROG filesystem df /mnt/scratch/ |\
+
+Please replace /mnt/scratch/ with $SCRATCH_MNT, otherwise the test
+will not work on setups with a different scratch mount point (like
+mine).
+
+Thanks.
+
+> +       grep -o -e "System, DUP" -e "Metadata, DUP"
+> +
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/329.out b/tests/btrfs/329.out
+> new file mode 100644
+> index 000000000000..eab11130981d
+> --- /dev/null
+> +++ b/tests/btrfs/329.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 329
+> +System, DUP
+> +Metadata, DUP
+> --
+> 2.43.0
+>
+>
