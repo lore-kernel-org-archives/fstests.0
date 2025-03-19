@@ -1,127 +1,150 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9AF41255229;
-	Wed, 19 Mar 2025 12:13:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A3A71A287E
+	for <fstests@vger.kernel.org>; Wed, 19 Mar 2025 15:11:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742386416; cv=none; b=ZFEddpPy+6313pgHvtukzWfzKdykZFumI4JmL1e2zQDxmsz9sMpZXjpme72bPS0N1oZorFHEYVxe16dAs4SPW6jtWQsk21MIrk/4bZmp7oS676TcZnPpNrnyGNSDr9vnq0LyagjHsE9CxIfjgSMI0nwmJo4Wy7GbKbZM2dyBFoo=
+	t=1742397116; cv=none; b=CLVQqiD6MtNejcdOBCLaz9gjeM9Cw8aFfaw4akyZZv0UW6QS6WKCI7N34X86p+8geaUFqdTd7SBrpR5TlclhxJM6q7pFt3cjBs2MqdCBa21GzBZC5AN2zoC6ar5hqKs9Od/HDE/CB6cT+1Fg5PlKiG+hi6JZypmnF0v2T+WugpQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742386416; c=relaxed/simple;
-	bh=tKvjDXay4kDdnP2nTDaxUlvCdTkuZ24dO+VQ4nktrsE=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=NdiPqVRSetauET8yDK6tRT3U9JrHwoGV+AsEjZzoGUmjBaK+GRC6DFFYXO5RZpqQ4Ti0pxpW/sd5uMcBfeE4Fw1+g5dswa5EmTmmtxy6idLejAyi72Me96RvG0uxRkeRLcr8u1+xINazVrx8VHFNRcyrEkfccnHNObvLfXro0fo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qdYYXYvw; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1742397116; c=relaxed/simple;
+	bh=vtX+5SvSzsUwfd6k6Z4ufYXzC8kZgwrldiWr5BVioHk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=fQ6heVUeP24DpLWvtsHi6lHxB3sK82qJ6kz5Nbjnkp6VeNjwTVYU4GDjrh6v0EzxBup0G1TQhF0KSBxrnYmPUrVwxMrbd6Ioh/GRpddcmOtEy8Gf2/kOcLH1PYO6Ry2AibULAQBmgqDQipyHaEtz5nAJhbaW9GzMvALSxB/aGmU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=U74l18Rs; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qdYYXYvw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 38E91C4CEE9;
-	Wed, 19 Mar 2025 12:13:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1742386416;
-	bh=tKvjDXay4kDdnP2nTDaxUlvCdTkuZ24dO+VQ4nktrsE=;
-	h=From:To:Cc:Subject:Date:From;
-	b=qdYYXYvwzAHv8uAXcUC0H3kv5NlxYAlgAhUYqIH4v2TksuidHP1BKDhFtDMmNEk/l
-	 gRy4ek5r3IoNga0pmenuAWF4eusjk1g3bc+ZdmHWAO0eHyLuaT6gZvXkJFtSma98Nu
-	 jh+SWvX65NWk9s4UxKdiahCJQVhHtVanaDxPJV+M3YDa1MUlVlBgbAc1hMzKt2V5wz
-	 +zFMb3z1Da6bKqG6EW+FYtHFDQ2K3zuPqv43/V9TSUtCiTf2ZSjfFqdacMa6MzqUhT
-	 vQKLZ3+p6KA8QTDb2p6+mUvo8tqMuoUq5zUe585mEu5k1Ud+jo5guNo6+vd6ei0FGN
-	 rHlnSt47yqu7w==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs/058: fix test to actually have an open tmpfile during the send operation
-Date: Wed, 19 Mar 2025 12:13:28 +0000
-Message-ID: <f2f3902ab7603f82751a9729cc8f1b406c5cbf98.1742386250.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.45.2
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="U74l18Rs"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1742397113;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=i4KSVKPtaTj+sOBsrbtnf/Pl8QpcLZWVsioZqzoadiM=;
+	b=U74l18RsA26SbDd4vernlK+Ur84JueKRq3aBYc0NKES0Mju6QpVJmEw+FNYfrWr8ALB9zT
+	TjtKp64wZ3R8PC74EhcUpT0/abdKZnAW/WEWlWF+hbCI2Gl56BsFeSKNXFw7yU9ljeCFKT
+	4J6lz297w/ODHALhoNMOrvkWQO4Ymfk=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-662-NVDcm8hMNDK3XY4jXa_dBA-1; Wed, 19 Mar 2025 11:11:51 -0400
+X-MC-Unique: NVDcm8hMNDK3XY4jXa_dBA-1
+X-Mimecast-MFC-AGG-ID: NVDcm8hMNDK3XY4jXa_dBA_1742397110
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2ff82dd6de0so6288969a91.0
+        for <fstests@vger.kernel.org>; Wed, 19 Mar 2025 08:11:51 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1742397110; x=1743001910;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=i4KSVKPtaTj+sOBsrbtnf/Pl8QpcLZWVsioZqzoadiM=;
+        b=FrXYR1KE927vU5Zj+RvSZxJV8LeZgzb12fQAtFoOjQVxBwDNBOF5KdhNAiuBUQpv0S
+         JR+nCqhFTBgbyqb4CKu3AIQ3RTgC9ZWkOWcdGoHceMCWMBo2qmA06s6EpkLwmmzm0jGK
+         B5n2LEW2SWTwZREdoEQ7p7tkbkG+WITMC1FLd7i8rDqKWsHLgkDgRYIZworOvzJ8CjB6
+         5y13Ps07W59Za472pYce1pSqxmNl+uH9IWiezl9gZBBfYZjU6hRb/LMxUs97R7r5Fdx9
+         YesYlzYuTK9D2KdzqM03RWKxF+awtkwC2VzHaQD9sqpEJWFlAW0zd9wPlKWGjDg2lari
+         GRdg==
+X-Forwarded-Encrypted: i=1; AJvYcCVU0hM8eOj+eTvxmc+ZmHOV1FAUpxeRiSXKcggrDAB9hiDpmUh4niZD5oi4Z7xcatnbM4kONd2D@vger.kernel.org
+X-Gm-Message-State: AOJu0YxbL160d51XFLk/rd04BvEJXWf3fXowXhW/TBW/DURKO3scaP7M
+	l9pRGIxZRcRpt1bj6wNqCheg7QznPOLuIflE1xPwWxG2Unkd1Bsg6ReE1E5IMSUD3R8/UKtBaYn
+	DnVx3f907I3S873ZxfxRWtrE0WvVyo53vI2SZY+BUC4uBk+JaYn8tZq/H5kOwUJxLFA==
+X-Gm-Gg: ASbGnctWKEWxJBxo8NJnAXaH8hoBKapU5IUxn9cuX9ZukRLKP+Kp6kEYB0rRl7uht0W
+	TfjAJkJKy6dwry0Bdgrv6s1hTZfMb8UvyMiPo5IhTOZE4OOJx3azQoIuXSvCI0+wigAKomsF0B5
+	3zG3RvXEaU7ZHJ5kan5n6ByxZQeXOqn0dUlhcLtVJz7FiC+hOYot20ep33sJHvUKQIFi1x300xj
+	rAQ4Poenj4lgnGVIJh0RPjMNDkqqMrl3RAQHgKAHyPnRi3Zrfxzfyu+hJWIT/x6DCX9we4JYeBU
+	qCdxF1aepCeoXvHorAlEZgoen7WlzqgI4+43cxtrNFiYBFAdkfb+dkKM
+X-Received: by 2002:a17:90a:3f17:b0:301:cba1:7ada with SMTP id 98e67ed59e1d1-301cba17e75mr1160113a91.1.1742397109935;
+        Wed, 19 Mar 2025 08:11:49 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFwhIL3oPfttiDLIurR3jvWCi/rSpOWaQyto7vH5y8Va2SeirFrwH1MxBHQ7Bj2PCJ3El0auQ==
+X-Received: by 2002:a17:90a:3f17:b0:301:cba1:7ada with SMTP id 98e67ed59e1d1-301cba17e75mr1160094a91.1.1742397109622;
+        Wed, 19 Mar 2025 08:11:49 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-301bf575936sm1705819a91.4.2025.03.19.08.11.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 19 Mar 2025 08:11:49 -0700 (PDT)
+Date: Wed, 19 Mar 2025 23:11:44 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Theodore Ts'o <tytso@mit.edu>,
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: Re: generic/699 fails on ext4 due to using ext4 mount options w/
+ overlayfs
+Message-ID: <20250319151144.3r27tjgenbzty5tr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <c46d8caf-053a-4af1-b562-7ca7203cb926@sandeen.net>
+ <20250318235116.GE787758@mit.edu>
+ <ffed04f3-5743-4a92-9b2c-20887c04a4cf@sandeen.net>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ffed04f3-5743-4a92-9b2c-20887c04a4cf@sandeen.net>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Tue, Mar 18, 2025 at 07:58:05PM -0500, Eric Sandeen wrote:
+> On 3/18/25 6:51 PM, Theodore Ts'o wrote:
+> > On Tue, Mar 18, 2025 at 03:39:33PM -0500, Eric Sandeen wrote:
+> >> generic/699 fails because _overlay_mount_dirs() uses _common_dev_mount_options(),
+> >> and when FSTYP is ext4, that yields "-o acl,user_xattr" and acl is not a valid
+> >> option for overlayfs.
+> > 
+> > Hmm, I hadn't noticed because the test is getting skipped for me:
+> > 
+> > BEGIN TEST 4k (1 test): Ext4 4k block Tue Mar 18 19:44:51 EDT 2025
+> > DEVICE: /dev/vdb
+> > EXT_MKFS_OPTIONS: -b 4096
+> > EXT_MOUNT_OPTIONS: -o block_validity
+> > FSTYP         -- ext4
+> > PLATFORM      -- Linux/x86_64 kvm-xfstests 6.14.0-rc2-xfstests-00063-g6630cf085eb0 #14 SMP PREEMPT_DYNAMIC Mon Mar 17 11:19:56 EDT 2025
+> > MKFS_OPTIONS  -- -F -q -b 4096 /dev/vdc
+> > MOUNT_OPTIONS -- -o acl,user_xattr -o block_validity /dev/vdc /vdc
+> > 
+> > generic/699        [19:44:51][   12.536740] run fstests generic/699 at 2025-03-18 19:44:51
+> > [   12.794084] overlay: Unknown parameter 'acl'
+> >  [19:44:52] [not run]
+> >         generic/699 -- overlayfs doesn't support idmappped layers
+> > Ran: generic/699
+> > 
+> > I haven't really played with idmapped mount.  Is there some CONFIG
+> > option I need to enable this test to run?
+> > 
+> > 						- Ted
+> 
+> I shouldn't have said "failed" - you're seeing what I'm seeing, it's 
+> skipped (not failed) because it tries to test overlayfs idmapped layers
+> using the ext4 default options, and acl mounts fail, skipping the test.
 
-The test's goal is to exercise a send operation while there's a tmpfile in
-the snapshot, but that doesn't happen since the background xfs_io process
-that created the tmpfile ends up exiting before we create the snapshot, so
-the snapshot nevers gets a tmpfile.
+How about changing as below?
 
-Fix this by using a different approach, with a fifo and tailing it to the
-stdin of a background xfs_io process and then writing to the fifo to
-create the tmpfile. This keeps the xfs_io process running with the tmpfile
-open while we snapshot and run the send operation.
-
-While at it also add code to verify we have the tmpfile (an orphan inode
-item) in the snapshot's tree.
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/058 | 28 ++++++++++++++++++++++++----
- 1 file changed, 24 insertions(+), 4 deletions(-)
-
-diff --git a/tests/btrfs/058 b/tests/btrfs/058
-index 7bc4af5b..3bb0ed21 100755
---- a/tests/btrfs/058
-+++ b/tests/btrfs/058
-@@ -21,6 +21,7 @@ _cleanup()
+diff --git a/tests/generic/699 b/tests/generic/699
+index 620a40aa..3ca92254 100755
+--- a/tests/generic/699
++++ b/tests/generic/699
+@@ -100,7 +100,8 @@ reset_ownership()
+ setup_overlayfs_idmapped_lower_metacopy_off()
  {
- 	if [ ! -z $XFS_IO_PID ]; then
- 		kill $XFS_IO_PID > /dev/null 2>&1
-+		wait
- 	fi
- 	rm -fr $tmp
+        mkdir -p $upper $work $merge
+-       _overlay_mount_dirs $lower $upper $work \
++       # Ignore the MOUNT_OPTIONS isn't for overlay
++       MOUNT_OPTIONS="" _overlay_mount_dirs $lower $upper $work \
+                            overlay $merge -ometacopy=off || \
+                            _notrun "overlayfs doesn't support idmappped layers"
  }
-@@ -29,18 +30,22 @@ _cleanup()
+@@ -109,7 +110,8 @@ setup_overlayfs_idmapped_lower_metacopy_off()
+ setup_overlayfs_idmapped_lower_metacopy_on()
+ {
+        mkdir -p $upper $work $merge
+-       _overlay_mount_dirs $lower $upper $work overlay $merge -ometacopy=on
++       # Ignore the MOUNT_OPTIONS isn't for overlay
++       MOUNT_OPTIONS="" _overlay_mount_dirs $lower $upper $work overlay $merge -ometacopy=on
+ }
  
- _require_scratch
- _require_xfs_io_command "-T"
-+_require_mknod
-+_require_btrfs_command inspect-internal dump-tree
- 
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
-+mkfifo $SCRATCH_MNT/fifo
-+
- # Create a tmpfile file, write some data to it and leave it open, so that our
- # main subvolume has an orphan inode item.
--$XFS_IO_PROG -T $SCRATCH_MNT >>$seqres.full 2>&1 < <(
--	echo "pwrite 0 65536"
--	read
--) &
-+tail -f $SCRATCH_MNT/fifo | $XFS_IO_PROG >>$seqres.full &
- XFS_IO_PID=$!
- 
-+echo "open -T $SCRATCH_MNT" > $SCRATCH_MNT/fifo
-+echo "pwrite 0 64K" > $SCRATCH_MNT/fifo
-+
- # Give it some time to the xfs_io process to create the tmpfile.
- sleep 3
- 
-@@ -48,6 +53,21 @@ sleep 3
- # The send operation used to fail with -ESTALE due to the presence of the
- # orphan inode.
- _btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap
-+
-+snap_id=$(_btrfs_get_subvolid $SCRATCH_MNT mysnap)
-+# Inode numbers are sequential, so our tmpfile's inode number is the number of
-+# the fifo's inode plus 1.
-+ino=$(( $(stat -c %i $SCRATCH_MNT/fifo) + 1 ))
-+
-+# Verify that we indeed have the tmpfile in the snapshot tree.
-+$BTRFS_UTIL_PROG inspect-internal dump-tree -t $snap_id $SCRATCH_DEV | \
-+	grep -q "(ORPHAN ORPHAN_ITEM $ino)"
-+if [ $? -ne 0 ]; then
-+	echo "orphan item for tmpfile not found in the snapshot tree!"
-+	echo -e "snapshot tree dump is:\n"
-+	$BTRFS_UTIL_PROG inspect-internal dump-tree -t $snap_id $SCRATCH_DEV
-+fi
-+
- _btrfs send -f /dev/null $SCRATCH_MNT/mysnap
- 
- status=0
--- 
-2.45.2
+ reset_overlayfs()
+
+> 
+> -Eric
+> 
 
