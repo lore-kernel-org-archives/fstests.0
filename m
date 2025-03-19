@@ -1,152 +1,134 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 93B3A251796
-	for <fstests@vger.kernel.org>; Wed, 19 Mar 2025 10:54:08 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D322025484D
+	for <fstests@vger.kernel.org>; Wed, 19 Mar 2025 10:57:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742381650; cv=none; b=PPvApmjyHrLrvXGbhxcdmLxQtO9inkJKUnsHTjBM0z8ywSf9LmzdGDRRiEB5WoVwFfBTEGry2uoCcZ+O0o4wv1SUhpcHeGFJJya+Yb5Q/2rhf/815DvIUlb/QPiki3jQJ/9SmdcXlm+mt6HNZMDymyAJNJscr4HRHv6vluLPi/E=
+	t=1742381860; cv=none; b=kB3xo5xnyr0N2rM+8dlhT5rUDL7gG9Prm6uwG8nMDqapf1ICB/HDqYcEWGfs9ymrFTmYBr1tmodGcGaCvl0CwTvhYIAu3BZbe8aRO11+gkgkvbUIAlQ/p2OZV1cy/TBea+3Mb9mdBokEIWe2aCS04pEe1OJYw/KS9EocCM3OkTQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742381650; c=relaxed/simple;
-	bh=WAabwxnTGOL8Ujttl5LoUsaZkJtnRlMXFXxCus1adcg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=FArOLegiG3qhNF+AFY/rbyRaCw+tHPMiYmiBs6y51bJekTkgP75Z35UTbNdTrynwQlTwBOwUSxeyEIEY4dP45jgsZocCbyiwo1KLB0+Tr12k7MJCGIOepNnPpgQ3v73O6TP4DlV87KK+CfTHo7NFlQ/um8aCtXpC9OTI6XT/RLk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NOKNkfdK; arc=none smtp.client-ip=170.10.129.124
+	s=arc-20240116; t=1742381860; c=relaxed/simple;
+	bh=wyY+oetOYDPuFeWad7tOx7yjjWVdCVPzmfQnkXLBoYM=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=lt+vn8gN7SjkfflOuf07psMDSpIK+t1WVkjX1h6xwBGLaL168sPySe/nyPsSmFNXPezKiNCZDgn8wfp1yCeIBXNM9uevkwwjs43Gw4zfdf/9Qk/OjE2CtvQGcBYPhYIynRakr2NXB5Uch0TGnDr0TWJ0HW6O5LTJoIMsucUxj2Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=N1LXR0gF; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NOKNkfdK"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="N1LXR0gF"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1742381647;
+	s=mimecast20190719; t=1742381857;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=hmmBQM6+gzkEBaTUsXzJYVbA/vn3n8h18EIwPhYpF+c=;
-	b=NOKNkfdKE1rDTD4lee4VGRbzHq4msEcC41Fwp9qZZYLpzL8kwtwXmvdtwmKwu5Muc0CsH5
-	D2C4itMIMZWu0ISR6QdPq/O81IdxOkwVlsIOcNSanNPAgX0grvWDFF8x26xBY7YoNEistN
-	0FDFAo9JL/YIa81G7CwNUa6Gm7hbYag=
-Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
- [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=iDh2G25cDrqSFxGejdnMGDPJkuorNI9XTWy2sSoHYFI=;
+	b=N1LXR0gF3H7t07Jms5Ma6ZXfrwO2T6LY20ZCz4lWOfKJQ4yKki3XaXj2BuJyRAXKEq7/7+
+	a0EUeqN489kspA+vYVMD8KIrpp4OFIAuUzwwGgZOsOkWdjPvVbob9wX5rZU5j53TslW+/W
+	8elrqfw+t3BPEr6gI+OtreIwtGk0y7g=
+Received: from mail-ed1-f70.google.com (mail-ed1-f70.google.com
+ [209.85.208.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-169-wu2_KSPCP0iSxnvdygNucQ-1; Wed, 19 Mar 2025 06:54:06 -0400
-X-MC-Unique: wu2_KSPCP0iSxnvdygNucQ-1
-X-Mimecast-MFC-AGG-ID: wu2_KSPCP0iSxnvdygNucQ_1742381645
-Received: by mail-ej1-f72.google.com with SMTP id a640c23a62f3a-ac2db121f95so139310766b.1
-        for <fstests@vger.kernel.org>; Wed, 19 Mar 2025 03:54:06 -0700 (PDT)
+ us-mta-457-uwEeClkvMfKRCtVZAbF4KQ-1; Wed, 19 Mar 2025 06:57:36 -0400
+X-MC-Unique: uwEeClkvMfKRCtVZAbF4KQ-1
+X-Mimecast-MFC-AGG-ID: uwEeClkvMfKRCtVZAbF4KQ_1742381855
+Received: by mail-ed1-f70.google.com with SMTP id 4fb4d7f45d1cf-5e636b06d34so3929813a12.1
+        for <fstests@vger.kernel.org>; Wed, 19 Mar 2025 03:57:35 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1742381645; x=1742986445;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=hmmBQM6+gzkEBaTUsXzJYVbA/vn3n8h18EIwPhYpF+c=;
-        b=aPb839JHkJK9OGq0yrm5mPIT3T2Fs1TBjo/Rts1npKHpYUEP0igF9N7jW0yyep4xHs
-         6XrJcem3aXN0kyP9NlLMgBb30SwfjEcptvgXzbfW27Lo1i1HHPE7b42UmZlrsd3t5wFW
-         d7ADBKVsGA/7X19M3NRyr7H3PPpP1oIF+kF7bFNIKj0UWJpmmiL1u1T75VAW+SlhxELu
-         Ot15wfgD2Qc5uK/vxNZhFI4KUI11Zme4q7TOotKFxLBscRXljBTTUUSH0Kd5ZWaW513l
-         LO1VLJL5C3/jjwhQ83+TPZNN40hzGtt0aJAaitO2pj1hLERVgMTWmjhFknnfRF3I+4ZH
-         B3Ow==
-X-Gm-Message-State: AOJu0Yz0iXOdYbZXnrgXos1ofCq7lFz/v/TE9f1AB/NQiau/5WaLy5O4
-	e8OP+Qr57ThBxwW8GyZtCvihHH0ZudF1B0ZFyJsj6aiGrNxKkUIQpKANL1uCcBxytDMj96U3stk
-	6s/ISDSl76hPxDzA4rvU9DgAj2N9Mhy3yD5zyHCSb4q6ai/J0ZRDfvNf4K/g1C9HnqhRu6GuHcl
-	P1BI8oylgi4aujGKFLTfDa5n12GWzsRtbE1K0N0w==
-X-Gm-Gg: ASbGncu0Gul2WdWMyrTxbxxFFJVepzsD+0J+NyuE+1WWakQLbLfDnZHLARYFNIjh+kW
-	3+8LWgpj84+SI+2AeV21JU8l6Oha/VYF7Wvz5/jzso7xg7rBdxrN21nExU3HZ1VSpjueBBv0qcd
-	FS2Hm/xWjmQpgIqii6xTNXISUPAYJ7yxQYQHo06LUFXE5tiKyUQiXzWHRgBiKr+zNcT5qHLgVbU
-	FVPY7lZIqGTPHRrghIhU6roeY40N23ObNNzq9+E+0JoXu3qCvxTTqaQmXNCMV8rvmDYCrFNMnsX
-	Ig1A+/+eQbLZasmcc/Pu26eQy1HKhkwetUQ=
-X-Received: by 2002:a17:907:ec8c:b0:abf:6f87:c732 with SMTP id a640c23a62f3a-ac3b7c01cb1mr225590766b.20.1742381644706;
-        Wed, 19 Mar 2025 03:54:04 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHo3dyk5XjonUp03HZM2nbGgssJQNwtKrmCPIDmxnhu8baJ81sqXnqqzplqvXIFtTQkUAwkeg==
-X-Received: by 2002:a17:907:ec8c:b0:abf:6f87:c732 with SMTP id a640c23a62f3a-ac3b7c01cb1mr225588266b.20.1742381644176;
-        Wed, 19 Mar 2025 03:54:04 -0700 (PDT)
-Received: from thinky (ip-217-030-074-039.aim-net.cz. [217.30.74.39])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ac3146aef90sm998247366b.6.2025.03.19.03.54.03
+        d=1e100.net; s=20230601; t=1742381855; x=1742986655;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=iDh2G25cDrqSFxGejdnMGDPJkuorNI9XTWy2sSoHYFI=;
+        b=W6cAvEpUbh+MRlp2HT2n3Ju3DsbsLhZ33tMzCMYkU5Sb5XnaX5N0t+D56u7ASBfMuZ
+         /8P2mJ15HuD1srFigi2vVJBQvUQ6qjrkmyTmpok73xntnmckgA6AC/nM/guP4fFfjde0
+         MFdkolHPKY2lwLAm476Bjo6vt1hrbzX5pamtQqVlYXkysVQS77inIyqfsEwfwQ4g3BJm
+         u0BRz2OTkxJaqe8Ujr+hNz6JD40QdHRC8WqD33w89Ux5xXuQdsnfVoml/0lekqerEjtk
+         P9w/7c5imAt7erHFlKf5YAr2y/Qf59q4Pil7fK9ruMVgufKHeGCWLKMHHTHugrs9dj85
+         NnkQ==
+X-Gm-Message-State: AOJu0Yw/PJBsyc9S3s/hkMhUphh92vavgkSSVBuQvIn1IpmNMPQ68Ouh
+	I/NAqP7+Y+L+HRNpCdqv/USKKJ+qsdUs/otmjAIY0RIHlLn4zwyiHNXk7frzvAk1eCBP2BUoxs2
+	B/QgSLAkaJQu+PjcTmrK0Onr+PrhhiGvfW6MmF7bZfol5JQa7dscAUgSJgJARBQ==
+X-Gm-Gg: ASbGncvAg1VdjAti5g1gHByt1l/+2K1nfvb4FLovByISHeeEKMWOOa+mrxC1cY3UQgK
+	9xZ9TKYcF/ZYiezWphQdvkxxl/L41a1CETwPRubV6i1T+oaW3r/HWltfcUtoMGsvtfV7byVKDQH
+	pF+Lv/3wBnnujlUGWVOaU4lY+HMdJlpqDCybi1AghGhxHVJEIyfAezTgvZgD+3EEUypR/Bah6g0
+	3ZjoC91MfLAIjBJwc004O9rns78NTBKI10HTfeVunZGLNP0hI1I6axfg5QQLScmINsh5cbSDHC+
+	fI31q4LtQQNFVr1cnrdesipkzudmr+pkRBPZshrWaw==
+X-Received: by 2002:a17:907:2ce3:b0:ac3:b12c:b1f2 with SMTP id a640c23a62f3a-ac3b7f58e9amr206370166b.35.1742381854602;
+        Wed, 19 Mar 2025 03:57:34 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IH+unE+cSnn5ri/XC/BpamEegJX9z98cSfZmnySMSVti5hTcf7tS5fyE3ocJChuFUxwlJt/Bw==
+X-Received: by 2002:a17:907:2ce3:b0:ac3:b12c:b1f2 with SMTP id a640c23a62f3a-ac3b7f58e9amr206368366b.35.1742381854079;
+        Wed, 19 Mar 2025 03:57:34 -0700 (PDT)
+Received: from [127.0.0.2] (ip-217-030-074-039.aim-net.cz. [217.30.74.39])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ac3149cf10asm985433566b.120.2025.03.19.03.57.33
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 19 Mar 2025 03:54:03 -0700 (PDT)
-Date: Wed, 19 Mar 2025 11:54:03 +0100
+        Wed, 19 Mar 2025 03:57:33 -0700 (PDT)
 From: Andrey Albershteyn <aalbersh@redhat.com>
-To: fstests@vger.kernel.org
-Cc: Andrey Albershteyn <aalbersh@kernel.org>
-Subject: Re: [PATCH] fstests: update missing gitignore entries
-Message-ID: <onefsbwensjkrkjav3tycjklhns3j3f67wemhxduvucmznhzwn@x67jswejm6sd>
-References: <20250319-update-gitignore-v1-1-6664aab9df35@kernel.org>
+X-Google-Original-From: Andrey Albershteyn <aalbersh@kernel.org>
+Date: Wed, 19 Mar 2025 11:57:33 +0100
+Subject: [PATCH v2] fstests: update missing gitignore entries
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250319-update-gitignore-v1-1-6664aab9df35@kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20250319-update-gitignore-v2-1-a77183931c15@kernel.org>
+X-B4-Tracking: v=1; b=H4sIAByj2mcC/32NQQ7CIBBFr9LMWgzQFlNX3sN0gTLQiQaaARtN0
+ 7uLPYDL95L//goZmTDDuVmBcaFMKVbQhwbuk40BBbnKoKXuZasG8ZqdLSgCFQoxMQojOy29lkb
+ LE9TZzOjpvSevY+WJckn82R8W9bN/YosSShhjOmtvg/Ntf3kgR3weEwcYt237AoGKeaOxAAAA
+X-Change-ID: 20250319-update-gitignore-60420f206207
+To: fstests@vger.kernel.org
+Cc: Andrey Albershteyn <aalbersh@kernel.org>
+X-Mailer: b4 0.14.2
+X-Developer-Signature: v=1; a=openpgp-sha256; l=944; i=aalbersh@kernel.org;
+ h=from:subject:message-id; bh=wyY+oetOYDPuFeWad7tOx7yjjWVdCVPzmfQnkXLBoYM=;
+ b=owJ4nJvAy8zAJea2/JXEGuOHHIyn1ZIY0m8tlnUO/bul1XbhldI8zqDTehLT4173yBpMX5Gz4
+ vV9Z7UHtts7SlkYxLgYZMUUWdZJa01NKpLKP2JQIw8zh5UJZAgDF6cATORkBSPDpttSB2yevjut
+ 9G/ZccZ5bar3Oy91PeHZFJ7mbhrcf2v1Sob/yZ5GT0ob88MSze492+C4uPnrXMmy6+rGLvWiM29
+ k7vvICwDxLErs
+X-Developer-Key: i=aalbersh@kernel.org; a=openpgp;
+ fpr=AE1B2A9562721A6FC4307C1F46A7EA18AC33E108
 
-On 2025-03-19 10:55:56, Andrey Albershteyn wrote:
-> Some build artifacts seems to be missing from gitignore (list them
-> with ls -l src/*.c). Also, add autoconf backup files (tilda).
-> 
-> Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
-> ---
-> Minor patch to update gitignore with build artifacts.
-> ---
-> Compare .gitignore to src/*.c
-> 
-> diff \
->         <(grep -F '/src/' .gitignore |sed -E 's~/src/(.*)~\1~' | sort) \
->         <(ls -l src/*.c | awk '{ print $9 }' | sed -E 's~src/(.*).c~\1~' | sort)
-> ---
->  .gitignore | 9 +++++++++
->  1 file changed, 9 insertions(+)
-> 
-> diff --git a/.gitignore b/.gitignore
-> index 4fd817243dca37715d9a6ca52afa0f7fecfabc64..9b44071f8de3d43536e0a59c1a4a7416d6525f85 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -7,6 +7,7 @@
->  .*
->  *.state
->  tags
-> +/*~
->  
->  /local.config
->  /results
-> @@ -37,6 +38,7 @@ tags
->  /include/builddefs
->  /include/config.h
->  /include/config.h.in
-> +/include/*~
->  
->  # quilt
->  /patches
-> @@ -210,6 +212,13 @@ tags
->  /src/fiemap-fault
->  /src/min_dio_alignment
->  /src/dio-writeback-race
-> +/src/enospc_unlink
-> +/src/iopat
-> +/src/md5
-> +/src/scaleread
-> +/src/btrfs_encoded_read
-> +/src/btrfs_encoded_write
-> +/src/fsxattrat
+Add autoconf backup files (file~).
 
-ops, some of them aren't compiled into separate executables and some
-got from an older branch
+Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
+---
+Minor patch to update gitignore autoconf backup files.
+---
+Changes in v2:
+- Remove sources compiled into other executables or removed
+- Link to v1: https://lore.kernel.org/r/20250319-update-gitignore-v1-1-6664aab9df35@kernel.org
+---
+ .gitignore | 2 ++
+ 1 file changed, 2 insertions(+)
 
-ignore
+diff --git a/.gitignore b/.gitignore
+index 4fd817243dca37715d9a6ca52afa0f7fecfabc64..cce0795ea81878e88957324377b81051905471a6 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -7,6 +7,7 @@
+ .*
+ *.state
+ tags
++/*~
+ 
+ /local.config
+ /results
+@@ -37,6 +38,7 @@ tags
+ /include/builddefs
+ /include/config.h
+ /include/config.h.in
++/include/*~
+ 
+ # quilt
+ /patches
 
->  
->  # Symlinked files
->  /tests/generic/035.out
-> 
-> ---
-> base-commit: d71157da4ef4cfdbf39e2c4a07f8013633e6bcbe
-> change-id: 20250319-update-gitignore-60420f206207
-> 
-> Best regards,
-> -- 
-> Andrey Albershteyn <aalbersh@kernel.org>
-> 
+---
+base-commit: d71157da4ef4cfdbf39e2c4a07f8013633e6bcbe
+change-id: 20250319-update-gitignore-60420f206207
 
+Best regards,
 -- 
-- Andrey
+Andrey Albershteyn <aalbersh@kernel.org>
 
