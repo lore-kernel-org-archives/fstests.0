@@ -1,60 +1,38 @@
-Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A5232566E2;
-	Wed, 19 Mar 2025 11:09:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9AF41255229;
+	Wed, 19 Mar 2025 12:13:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742382600; cv=none; b=Lr3tjc2kPyUZWCJTv5ixbVA4ZM7Lb0yYvrINbCfe06MfRxz9m2vxsH7/WUj+QvbiTGsyctzEM/8TK48wMUHGdkBAEIFjjHv8AWAJWNJnc/OVK29q3i4DH5mEbgxz7thuHYkg82iUD0dHBXeOkFDrEHxFWqm9VaJZG63RKj/dHFQ=
+	t=1742386416; cv=none; b=ZFEddpPy+6313pgHvtukzWfzKdykZFumI4JmL1e2zQDxmsz9sMpZXjpme72bPS0N1oZorFHEYVxe16dAs4SPW6jtWQsk21MIrk/4bZmp7oS676TcZnPpNrnyGNSDr9vnq0LyagjHsE9CxIfjgSMI0nwmJo4Wy7GbKbZM2dyBFoo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742382600; c=relaxed/simple;
-	bh=37GMARm6SsZgGyyJ49TH1agrS1XI91mHl8WdB+gcs38=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Uok2WsewZs7f3xbVm+BXByW56h83m+Xyp1tZaiunMgrY718Sm1qI1gLoegYmgqlJkM2GqmG186F3TDHKUa7M8PTpE6UlYPY9XDQ3c98yd2DawSJnx+Dd/gvW78AArzAjFt36xkJeLJoRGmRjLAa2ybLqk+OPJjZ6j7NSkCCKKqE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=kernel.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.128.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-43cfba466b2so43987325e9.3;
-        Wed, 19 Mar 2025 04:09:58 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1742382597; x=1742987397;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=7eLAcV8rbjgVs6g5F+NzOMCwmzdyfNTYKDpyQzK/Boc=;
-        b=hxJ6QpzYMKS+31lqKJDM8kyDgw8jpH8uCQi8kwbV/c1ezhYYCS+gAm6G2Ow6IrPhxv
-         TtTbjlcGKG72yYWMprEYJG6gYIrf+idWwYcl6kY26eEXUgfdeiZElTgCsUypTuKKkuPy
-         shEE3fgRiYIiAKrWscrK5o5szCSMi8kEjHWhW5juK/UiAqoMrkwWTD36fyOz8F39yPp0
-         gmcnUBs5JI4rLa2CUp3FL/wdQG6TzrvqU5cLNP5qQygfaG4q0sdpmTw6fCWMwzGthoZr
-         O9pcSA7rHxbR5UDALR9YIp9pr0Ljgmbr5zQkZ8KJSppK/Bgj3K8PwXuzQ7PjKUq+BU8P
-         6KDw==
-X-Forwarded-Encrypted: i=1; AJvYcCVgkwoHJN2sMTyVhlHrqB6CfJf7eLRDQ4+ETBXIQerg0b1ffZBX90Tk7V2g/OGNIGHzb5gz9W2ii/icfA==@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy92Mr8RbHtSVtqPzCHZiH7uVGo+1UWR/IiO3XejSDs7a7N5qYI
-	5bNxvMlEGUOVjH7o2qdaKXyIcs5uOPEQc+wPeiO8pp74qEHjBu0E
-X-Gm-Gg: ASbGncvtPrhcRK3cpkvSLYS3Yih0Mo5aH88rp7VjC4ViYy3x8pCzOzw6OKf54uYWlCT
-	H54L4vffEBVIOwiYetJBVekAksseR/m7eSrEJSRPeuQMSS3qKO4AuxUAuVw2k0w2c8QG0hpdAQj
-	LZjIkDhTjAoqHgpnRoLXL6z3ZIWT1NhxQ4E2pNFNCvu7zRiMI9ITVHzaeUmezCQ2S6jP161spzr
-	TQJbVvL29i7blHxKPrA5FFQLiCrr50DTOqlYw+IjiEv/sFFO7s276irSe6ZZ6L8nKhnGnkoBoGd
-	RzdKCEGA0OutVodl90zBGhM+7L9zq7RUVQqTz4gP+M4Qe65vLMPHX8cLT+9ngajuY+LMcgbrLPn
-	2Zc0df1ppnrx7edQ9XR4nxjdeQZE=
-X-Google-Smtp-Source: AGHT+IG+0YdeT9v/2F/PzP0Fy3xMcXYLmBJUnmp1KPaciLbMpW8Xwqda01WPW1LllJ35WWk0RZ8qWw==
-X-Received: by 2002:a05:600c:1d8a:b0:43c:ec28:d31b with SMTP id 5b1f17b1804b1-43d43798a40mr23401915e9.10.1742382596838;
-        Wed, 19 Mar 2025 04:09:56 -0700 (PDT)
-Received: from nuc.fritz.box (p200300f6f710c800fa633ffffe02074c.dip0.t-ipconnect.de. [2003:f6:f710:c800:fa63:3fff:fe02:74c])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-43d3ba44e63sm31357785e9.1.2025.03.19.04.09.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 19 Mar 2025 04:09:56 -0700 (PDT)
-From: Johannes Thumshirn <jth@kernel.org>
-To: Zorro Lang <zlang@redhat.com>,
-	Anand Jain <anand.jain@oracle.com>,
+	s=arc-20240116; t=1742386416; c=relaxed/simple;
+	bh=tKvjDXay4kDdnP2nTDaxUlvCdTkuZ24dO+VQ4nktrsE=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=NdiPqVRSetauET8yDK6tRT3U9JrHwoGV+AsEjZzoGUmjBaK+GRC6DFFYXO5RZpqQ4Ti0pxpW/sd5uMcBfeE4Fw1+g5dswa5EmTmmtxy6idLejAyi72Me96RvG0uxRkeRLcr8u1+xINazVrx8VHFNRcyrEkfccnHNObvLfXro0fo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qdYYXYvw; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qdYYXYvw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 38E91C4CEE9;
+	Wed, 19 Mar 2025 12:13:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1742386416;
+	bh=tKvjDXay4kDdnP2nTDaxUlvCdTkuZ24dO+VQ4nktrsE=;
+	h=From:To:Cc:Subject:Date:From;
+	b=qdYYXYvwzAHv8uAXcUC0H3kv5NlxYAlgAhUYqIH4v2TksuidHP1BKDhFtDMmNEk/l
+	 gRy4ek5r3IoNga0pmenuAWF4eusjk1g3bc+ZdmHWAO0eHyLuaT6gZvXkJFtSma98Nu
+	 jh+SWvX65NWk9s4UxKdiahCJQVhHtVanaDxPJV+M3YDa1MUlVlBgbAc1hMzKt2V5wz
+	 +zFMb3z1Da6bKqG6EW+FYtHFDQ2K3zuPqv43/V9TSUtCiTf2ZSjfFqdacMa6MzqUhT
+	 vQKLZ3+p6KA8QTDb2p6+mUvo8tqMuoUq5zUe585mEu5k1Ud+jo5guNo6+vd6ei0FGN
+	 rHlnSt47yqu7w==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
 	Filipe Manana <fdmanana@suse.com>
-Cc: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org,
-	Naohiro Aota <naohiro.aota@wdc.com>,
-	Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Subject: [PATCH v4] fstests: btrfs: zoned: verify RAID conversion with write pointer mismatch
-Date: Wed, 19 Mar 2025 12:09:47 +0100
-Message-ID: <8390a7748c1e2005fb7b9dbc1f5e6bd38ea22506.1742382386.git.jth@kernel.org>
-X-Mailer: git-send-email 2.43.0
+Subject: [PATCH] btrfs/058: fix test to actually have an open tmpfile during the send operation
+Date: Wed, 19 Mar 2025 12:13:28 +0000
+Message-ID: <f2f3902ab7603f82751a9729cc8f1b406c5cbf98.1742386250.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -63,127 +41,87 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+From: Filipe Manana <fdmanana@suse.com>
 
-Recently we had a bug report about a kernel crash that happened when the
-user was converting a filesystem to use RAID1 for metadata, but for some
-reason the device's write pointers got out of sync.
+The test's goal is to exercise a send operation while there's a tmpfile in
+the snapshot, but that doesn't happen since the background xfs_io process
+that created the tmpfile ends up exiting before we create the snapshot, so
+the snapshot nevers gets a tmpfile.
 
-Test this scenario by manually injecting de-synchronized write pointer
-positions and then running conversion to a metadata RAID1 filesystem.
+Fix this by using a different approach, with a fifo and tailing it to the
+stdin of a background xfs_io process and then writing to the fifo to
+create the tmpfile. This keeps the xfs_io process running with the tmpfile
+open while we snapshot and run the send operation.
 
-In the testcase also repair the broken filesystem and check if both system
-and metadata block groups are back to the default 'DUP' profile
-afterwards.
+While at it also add code to verify we have the tmpfile (an orphan inode
+item) in the snapshot's tree.
 
-Link: https://lore.kernel.org/linux-btrfs/CAB_b4sBhDe3tscz=duVyhc9hNE+gu=B8CrgLO152uMyanR8BEA@mail.gmail.com/
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
-Changes to v3:
-- Limit number of dirtied zones to 64
-Changes to v2:
-- Filter SCRATCH_MNT in golden output
-Changes to v1:
-- Add test description
-- Don't redirect stderr to $seqres.full
-- Use xfs_io instead of dd
-- Use $SCRATCH_MNT instead of hardcoded mount path
-- Check that 1st balance command actually fails as it's supposed to
----
- tests/btrfs/329     | 68 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/329.out |  7 +++++
- 2 files changed, 75 insertions(+)
- create mode 100755 tests/btrfs/329
- create mode 100644 tests/btrfs/329.out
+ tests/btrfs/058 | 28 ++++++++++++++++++++++++----
+ 1 file changed, 24 insertions(+), 4 deletions(-)
 
-diff --git a/tests/btrfs/329 b/tests/btrfs/329
-new file mode 100755
-index 000000000000..24d34852db1f
---- /dev/null
-+++ b/tests/btrfs/329
-@@ -0,0 +1,68 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 Western Digital Corporation.  All Rights Reserved.
-+#
-+# FS QA Test 329
-+#
-+# Regression test for a kernel crash when converting a zoned BTRFS from
-+# metadata DUP to RAID1 and one of the devices has a non 0 write pointer
-+# position in the target zone.
-+#
-+. ./common/preamble
-+_begin_fstest zone quick volume
+diff --git a/tests/btrfs/058 b/tests/btrfs/058
+index 7bc4af5b..3bb0ed21 100755
+--- a/tests/btrfs/058
++++ b/tests/btrfs/058
+@@ -21,6 +21,7 @@ _cleanup()
+ {
+ 	if [ ! -z $XFS_IO_PID ]; then
+ 		kill $XFS_IO_PID > /dev/null 2>&1
++		wait
+ 	fi
+ 	rm -fr $tmp
+ }
+@@ -29,18 +30,22 @@ _cleanup()
+ 
+ _require_scratch
+ _require_xfs_io_command "-T"
++_require_mknod
++_require_btrfs_command inspect-internal dump-tree
+ 
+ _scratch_mkfs >/dev/null 2>&1
+ _scratch_mount
+ 
++mkfifo $SCRATCH_MNT/fifo
 +
-+. ./common/filter
+ # Create a tmpfile file, write some data to it and leave it open, so that our
+ # main subvolume has an orphan inode item.
+-$XFS_IO_PROG -T $SCRATCH_MNT >>$seqres.full 2>&1 < <(
+-	echo "pwrite 0 65536"
+-	read
+-) &
++tail -f $SCRATCH_MNT/fifo | $XFS_IO_PROG >>$seqres.full &
+ XFS_IO_PID=$!
+ 
++echo "open -T $SCRATCH_MNT" > $SCRATCH_MNT/fifo
++echo "pwrite 0 64K" > $SCRATCH_MNT/fifo
 +
-+_fixed_by_kernel_commit XXXXXXXXXXXX \
-+	"btrfs: zoned: return EIO on RAID1 block group write pointer mismatch"
+ # Give it some time to the xfs_io process to create the tmpfile.
+ sleep 3
+ 
+@@ -48,6 +53,21 @@ sleep 3
+ # The send operation used to fail with -ESTALE due to the presence of the
+ # orphan inode.
+ _btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap
 +
-+_require_scratch_dev_pool 2
-+declare -a devs="( $SCRATCH_DEV_POOL )"
-+_require_zoned_device ${devs[0]}
-+_require_zoned_device ${devs[1]}
-+_require_command "$BLKZONE_PROG" blkzone
++snap_id=$(_btrfs_get_subvolid $SCRATCH_MNT mysnap)
++# Inode numbers are sequential, so our tmpfile's inode number is the number of
++# the fifo's inode plus 1.
++ino=$(( $(stat -c %i $SCRATCH_MNT/fifo) + 1 ))
 +
-+_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-+_scratch_mount
-+
-+# Write some data to the FS to dirty it
-+$XFS_IO_PROG -fc "pwrite 0 128M" $SCRATCH_MNT/test | _filter_xfs_io
-+
-+# Add device two to the FS
-+$BTRFS_UTIL_PROG device add ${devs[1]} $SCRATCH_MNT >> $seqres.full
-+
-+# Move write pointers of all empty zones by 4k to simulate write pointer
-+# mismatch.
-+
-+nzones=$($BLKZONE_PROG report ${devs[1]} | wc -l)
-+if [ $nzones -gt 64 ]; then
-+	nzones=64
++# Verify that we indeed have the tmpfile in the snapshot tree.
++$BTRFS_UTIL_PROG inspect-internal dump-tree -t $snap_id $SCRATCH_DEV | \
++	grep -q "(ORPHAN ORPHAN_ITEM $ino)"
++if [ $? -ne 0 ]; then
++	echo "orphan item for tmpfile not found in the snapshot tree!"
++	echo -e "snapshot tree dump is:\n"
++	$BTRFS_UTIL_PROG inspect-internal dump-tree -t $snap_id $SCRATCH_DEV
 +fi
 +
-+zones=$($BLKZONE_PROG report ${devs[1]} | $AWK_PROG '/em/ { print $2 }' |\
-+	sed 's/,//' | head -n $nzones)
-+for zone in $zones;
-+do
-+	# We have to ignore the output here, as a) we don't know the number of
-+	# zones that have dirtied and b) if we run over the maximal number of
-+	# active zones, xfs_io will output errors, both we don't care.
-+	$XFS_IO_PROG -fdc "pwrite $(($zone << 9)) 4096" ${devs[1]} > /dev/null 2>&1
-+done
-+
-+# expected to fail
-+$BTRFS_UTIL_PROG balance start -mconvert=raid1 $SCRATCH_MNT 2>&1 |\
-+	_filter_scratch
-+
-+_scratch_unmount
-+
-+$MOUNT_PROG -t btrfs -odegraded ${devs[0]} $SCRATCH_MNT
-+
-+$BTRFS_UTIL_PROG device remove --force missing $SCRATCH_MNT >> $seqres.full
-+$BTRFS_UTIL_PROG balance start --full-balance $SCRATCH_MNT >> $seqres.full
-+
-+# Check that both System and Metadata are back to the DUP profile
-+$BTRFS_UTIL_PROG filesystem df $SCRATCH_MNT |\
-+	grep -o -e "System, DUP" -e "Metadata, DUP"
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/329.out b/tests/btrfs/329.out
-new file mode 100644
-index 000000000000..e47a2a6ff04b
---- /dev/null
-+++ b/tests/btrfs/329.out
-@@ -0,0 +1,7 @@
-+QA output created by 329
-+wrote 134217728/134217728 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+ERROR: error during balancing 'SCRATCH_MNT': Input/output error
-+There may be more info in syslog - try dmesg | tail
-+System, DUP
-+Metadata, DUP
+ _btrfs send -f /dev/null $SCRATCH_MNT/mysnap
+ 
+ status=0
 -- 
-2.43.0
+2.45.2
 
