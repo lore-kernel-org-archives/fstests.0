@@ -1,157 +1,81 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D07B41F17EB;
-	Fri, 21 Mar 2025 11:10:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 096481993B9;
+	Fri, 21 Mar 2025 15:17:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742555403; cv=none; b=e4YD8/lMDLqI6l8D+PU1FN7kYiw6N4753cyAGhU6oLm0iHE36DmIJvWKZLEb1ZH5pq8oxrA2q6pYeul2Bbv2YUrTgEiu7qAHiMfsTWzO+g6G3rLNtq2HemjEYyVgPWZTMMoPHIXWDi8xjq6ECtnXXqxhp3WskmCVajBDz+wDsKw=
+	t=1742570230; cv=none; b=KjSu3Jl9OyNeZDa/Wx99wyuY8oVwB75AFvlM6BGH6hFDAibi8j5UjZrRAcjouXKa5HmVaAvyXKEU69RSKqGGcYKxu4xPTz28o/Ndre1r2WxQCoLtu/LrljomoeaKarL0BLtLS17SySzv7sB+xo6t+1sK4SxlEGnovjmLNaNvz9g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742555403; c=relaxed/simple;
-	bh=6k6lsCNecjGpeis8m8LNOHmXmgFXIFNQu8X5IgTE9qA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=lD3bhzv+46iWD3eH/4lFSytS2k0CI1Nc+1sb+8DeGGKyVz/dV3Xyg/rtnpHaW9mq8eAzrr+NJv0yma/cowqHQa1rvBizI0xSWRPFdrCc8qxYU0AuPbYUYIK7TXj5lCU1dcGcBrAEqZtQoPiM0KVPJYbNFeSagYlPBYE+2tdmEkU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FrT/QsPB; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1742570230; c=relaxed/simple;
+	bh=yOIe6GmSPOUxn9v+yNLE97KxRKMENEfP01ZH5QYTa3Y=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=bY6qy7N+ahn9U9YieBOobfWpXtGnnKZsLoi7NcWV7thzSP/fcx3jJVoKu4DkxexzGhpITT08kyZMKcENyV34N2XzP/meM1Qzp4Bu1338TkbS/B/8+sqkNkB0YItbk0OKkLpc0oFZOVyE+NJI7l4KrAeZW0e9goQTmTuo2GjZ/Is=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QkfWYNGB; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FrT/QsPB"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C8805C4CEE3;
-	Fri, 21 Mar 2025 11:10:02 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QkfWYNGB"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 65665C4CEE3;
+	Fri, 21 Mar 2025 15:17:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1742555403;
-	bh=6k6lsCNecjGpeis8m8LNOHmXmgFXIFNQu8X5IgTE9qA=;
-	h=From:To:Cc:Subject:Date:From;
-	b=FrT/QsPBydfeqs9AZaGzpX5v2326xHqMEt0EH4EuSA9LvEI3T8ASMxOaJhERVzcse
-	 deXXvWnEAlQuEDclovY3vFuzLx3Onp0479/hy9zOlehGBqX3JmSJzqyNDsdEV50lta
-	 6vynsK4Eh6YMLEMybgSHHF0XTuaFpesBuZG+DqX78eQBUm4y3QWtCUicBFB7sz/4SN
-	 gHrx1dROIhOEILVZfy9nKoNbL4sKCkB3XrJISCvJvpXX/oV1r6nNSvm7wHwOSstklG
-	 TAH6OufCenEcHpsj/C69fEU0HmsmZZTXEKx5WYEWwyMKnOlH+dK1bFj+xkqZIn39SF
-	 GBLx/BGX8e93Q==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] generic: test fsync of file with no more hard links
-Date: Fri, 21 Mar 2025 11:09:58 +0000
-Message-ID: <3476019b76d6df3ce6eb364aeb1a2725b8fb4846.1742555101.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.45.2
+	s=k20201202; t=1742570229;
+	bh=yOIe6GmSPOUxn9v+yNLE97KxRKMENEfP01ZH5QYTa3Y=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=QkfWYNGBZ7b8XyZo2TiQEtoVB+csuTMyWxOucukXMSwK6RkWN+RVLsT7rz1Bp6CJ1
+	 3jN0xBvvTB5FxudJUSvAcQCJZjtw37myuCtYca2LjKSmABrCup0Qg6URNUtMPw5sXx
+	 pkf5aO+c2TX3OpdiCrzdM3yhj5rZL30+FjWSPwgbuv3WES0pyTzLClPkHvWPXWHLbO
+	 NP391jGjI1jAzajv/9jOLnt2EoinmIUYy0s8ja4rN9x8xU2s4YgX8qwatdcM6oZNfP
+	 /76ZnupHwMhW8FSJtWruUOJtxEcIgGbkB5vHwSqCp26DEqqTrUQyTy3Ubj5EK1lxPN
+	 QZPgQuNlqcbcA==
+Date: Fri, 21 Mar 2025 08:17:08 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, Hans Holmberg <hans.holmberg@wdc.com>,
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 05/13] common: allow _require_non_zoned_device without an
+ argument
+Message-ID: <20250321151708.GF2803749@frogsfrogsfrogs>
+References: <20250321072145.1675257-1-hch@lst.de>
+ <20250321072145.1675257-6-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250321072145.1675257-6-hch@lst.de>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Fri, Mar 21, 2025 at 08:21:34AM +0100, Christoph Hellwig wrote:
+> So that callers can pass $SCRATCH_RTDEV directly without needing to check
+> that it actually is set.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Test that if we fsync a file that has no more hard links, power fail and
-then mount the filesystem, after the journal/log is replayed, the file
-doesn't exists anymore.
+Looks good,
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
-This exercises a bug recently found and fixed by the following patch for
-the linux kernel:
+--D
 
-   btrfs: fix fsync of files with no hard links not persisting deletion
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/generic/764     | 78 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/764.out |  2 ++
- 2 files changed, 80 insertions(+)
- create mode 100755 tests/generic/764
- create mode 100644 tests/generic/764.out
-
-diff --git a/tests/generic/764 b/tests/generic/764
-new file mode 100755
-index 00000000..57d21095
---- /dev/null
-+++ b/tests/generic/764
-@@ -0,0 +1,78 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# FS QA Test 764
-+#
-+# Test that if we fsync a file that has no more hard links, power fail and then
-+# mount the filesystem, after the journal/log is replayed, the file doesn't
-+# exists anymore.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick log
-+
-+_cleanup()
-+{
-+	if [ ! -z $XFS_IO_PID ]; then
-+		kill $XFS_IO_PID > /dev/null 2>&1
-+		wait $XFS_IO_PID > /dev/null 2>&1
-+	fi
-+	_cleanup_flakey
-+	cd /
-+	rm -r -f $tmp.*
-+}
-+
-+. ./common/dmflakey
-+
-+[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: fix fsync of files with no hard links not persisting deletion"
-+
-+_require_scratch
-+_require_dm_target flakey
-+_require_mknod
-+
-+_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+_mount_flakey
-+
-+touch $SCRATCH_MNT/foo
-+
-+# Commit the current transaction and persist the file.
-+_scratch_sync
-+
-+# A fifo to communicate with a background xfs_io process that will fsync the
-+# file after we deleted its hard link while it's open by xfs_io.
-+mkfifo $SCRATCH_MNT/fifo
-+
-+tail -f $SCRATCH_MNT/fifo | $XFS_IO_PROG $SCRATCH_MNT/foo >>$seqres.full &
-+XFS_IO_PID=$!
-+
-+# Give some time for the xfs_io process to open a file descriptor for the file.
-+sleep 1
-+
-+# Now while the file is open by the xfs_io process, delete its only hard link.
-+rm -f $SCRATCH_MNT/foo
-+
-+# Now that it has no more hard links, make the xfs_io process fsync it.
-+echo "fsync" > $SCRATCH_MNT/fifo
-+
-+# Terminate the xfs_io process so that we can unmount.
-+echo "quit" > $SCRATCH_MNT/fifo
-+wait $XFS_IO_PID
-+unset XFS_IO_PID
-+
-+# Simulate a power failure and then mount again the filesystem to replay the
-+# journal/log.
-+_flakey_drop_and_remount
-+
-+# We don't expect the file to exist anymore, since it was fsynced when it had no
-+# more hard links.
-+[ -f $SCRATCH_MNT/foo ] && echo "file foo still exists"
-+
-+_unmount_flakey
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/764.out b/tests/generic/764.out
-new file mode 100644
-index 00000000..bb58e5b8
---- /dev/null
-+++ b/tests/generic/764.out
-@@ -0,0 +1,2 @@
-+QA output created by 764
-+Silence is golden
--- 
-2.45.2
-
+> ---
+>  common/rc | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 7cd8d5ffd2e8..dc6d4ce01e05 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2545,8 +2545,7 @@ _require_non_zoned_device()
+>  {
+>  	local target=$1
+>  	if [ -z $target ]; then
+> -		echo "Usage: _require_non_zoned_device <device>"
+> -		exit 1
+> +		return
+>  	fi
+>  
+>  	local type=`_zone_type ${target}`
+> -- 
+> 2.45.2
+> 
+> 
