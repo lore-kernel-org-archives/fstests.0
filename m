@@ -1,76 +1,61 @@
 Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65280155330;
-	Fri, 21 Mar 2025 07:22:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53CA3155330
+	for <fstests@vger.kernel.org>; Fri, 21 Mar 2025 07:24:23 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742541741; cv=none; b=rnnIZJJ6bxYqabg3khyIvgGHCVGGzYwXx42ybX9m2nru5n+aXWS4H4poNppXd9zHS839UeWVc0Nfni+1Kd0hlTCBjsR1WhrUes9pfg8+sugVzCKYp9VB8uzHtHAvG+s4EqILBfwCxIymJhaGVclX6Ln7avymzH7+BlRVrDqLJxA=
+	t=1742541864; cv=none; b=GtRWDSM9DHr2RtapepUNU+SA1Xa0tS+gQZhEeWZt9lzEiURkF8aOzbplEk4D/VyITOgzN/RqDFYhdbWmD0Vwga3LmDjaJPwrQ58wNdsx8xk+iOQn/5BpQ23YUMNZHaiq4jJKA+p+RAEBY945LjFX0V67r+GLYgHhGZU1hd6MDdY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742541741; c=relaxed/simple;
-	bh=EwsG5SHT0er1vi16CnWn5qBPl1CYm4rIhMnCmPzNAw0=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=jBNttX8D/tZj7DKka+4vPhL+mWUfWFGXTCHWEfBL9VYNpMxRU7wpv6HURoNIwEOMtH7fMUpExEfyqs7mjVBbIGZSqvruD48Npjxe0pL6eG1cQ5xPX1y+cndC3O0Rnd6k3oJJiGQCYR3QDP9oL2l6cgCK5woPnV7Nn5HeHSKP478=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=3hwNjPyV; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+	s=arc-20240116; t=1742541864; c=relaxed/simple;
+	bh=ydqLUl2u18QjE0ixxOc+iJ5SZOFm7qYau1+MhAgRt8k=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=uEihI6wghcDQUwNIRS+kcYHThDta2O/Ji8mfdnQGo5ilRvCVxCdmuiomON2IshTfzozLdkaepKPkHx8HAjlyac92TIlI/+HbmvkM/63l211caEBuF/X3IBDTqp3Wbzp2Ry+3ncMkwXkUI20DxVIJ33UGq6RcB2BxHP+oD/KE9kI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=DEIMNbZ3; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="3hwNjPyV"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="DEIMNbZ3"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender
-	:Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=Lw7hPiIqwbd11YHqKohhne1m9Y3tugoyzwR/EGKxXQA=; b=3hwNjPyVKyLbMaS7NxBscdghUy
-	nJsWf3KqvnHGEBPyxmgenwQtbdQ1u7QSfmeX7bk/bKnXSQ2LtoIYU4FQ46LiNckol4WQtH6pwdDs/
-	Xm1eAlVCCdEiEJeNCc81VCta5/YYhvaWuWHTm3CEyTTSNzTLmePXOWB9IrEoNOsPUH5Z1RLwX/0uj
-	AxZEv10K7WgTZQaajspAJQFEb5lx4dzuuxNPoAeviq+GhZCUJ2NQrt1LFtfE0FWXQZ2h9/ybXGHg9
-	5gLSqnLROeZy0WSWyqYeEWmrp7NAgswUxYqL2I6j6lL5K9dmKBj+QU91jr5N62HtzDXRzgb1qZr8b
-	NNdZpeDA==;
-Received: from 2a02-8389-2341-5b80-85eb-1a17-b49a-7467.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:85eb:1a17:b49a:7467] helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.98 #2 (Red Hat Linux))
-	id 1tvWhv-0000000E5Kn-1u7b;
-	Fri, 21 Mar 2025 07:22:20 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: Zorro Lang <zlang@kernel.org>
-Cc: "Darrick J. Wong" <djwong@kernel.org>,
-	Hans Holmberg <hans.holmberg@wdc.com>,
-	fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: [PATCH 13/13] xfs/206: filter out the zoned line from mkfs output
-Date: Fri, 21 Mar 2025 08:21:42 +0100
-Message-ID: <20250321072145.1675257-14-hch@lst.de>
-X-Mailer: git-send-email 2.45.2
-In-Reply-To: <20250321072145.1675257-1-hch@lst.de>
-References: <20250321072145.1675257-1-hch@lst.de>
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=KkOCKW5nfshYoiAteM9qg0kYHcmbYS1fr5PpBROde5s=; b=DEIMNbZ36n2NSNYr6GpqtqF+p3
+	fxqFcymzhJZCSmK76ujQFN2FmvYln019/oqMyFfZc2CWDv0zYsteOklerj80ZJLKkAv7fAUhEyxsp
+	Hrc+dvyVGXDBOZGCYZ1ECPK5Nl0h8l5COMcIkvIg+bhL/zcKuCvcniQ1GQ1uS/d5lgxYFAKt7q1Wg
+	6Fc7k30ASyWg6auqPUoWYGP6/GNnVl4/WJCyRieWWvfprYKHuizzipko+5oYP/nMttNqOF0EaM2o2
+	peTjGEn7Vlq91V2rGVAacIZDDkrpJowkLv5qdviZ72TE/AVs7R9jZAu9EOHBjdkDlZolvzjGNdT3e
+	cSxnYp1A==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
+	id 1tvWjv-0000000E5lr-04G8;
+	Fri, 21 Mar 2025 07:24:23 +0000
+Date: Fri, 21 Mar 2025 00:24:22 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: Andrey Albershteyn <aalbersh@redhat.com>
+Cc: fstests@vger.kernel.org, Andrey Albershteyn <aalbersh@kernel.org>
+Subject: Re: [PATCH v2] fstests: update missing gitignore entries
+Message-ID: <Z90UJq9JN-Tos4f3@infradead.org>
+References: <20250319-update-gitignore-v2-1-a77183931c15@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250319-update-gitignore-v2-1-a77183931c15@kernel.org>
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-So that the test still passes with a zone enabled mkfs.
+On Wed, Mar 19, 2025 at 11:57:33AM +0100, Andrey Albershteyn wrote:
+> Add autoconf backup files (file~).
+> 
+> Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
+> ---
+> Minor patch to update gitignore autoconf backup files.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
----
- tests/xfs/206 | 1 +
- 1 file changed, 1 insertion(+)
+> +/*~
 
-diff --git a/tests/xfs/206 b/tests/xfs/206
-index 01531e1f08c3..bfd2dee939dd 100755
---- a/tests/xfs/206
-+++ b/tests/xfs/206
-@@ -66,6 +66,7 @@ mkfs_filter()
- 	    -e '/metadir=.*/d' \
- 	    -e 's/, parent=[01]//' \
- 	    -e '/rgcount=/d' \
-+	    -e '/zoned=/d' \
- 	    -e "/^Default configuration/d"
- }
- 
--- 
-2.45.2
+Why would we ignore those files?  They are garbage that should be
+removed.
 
