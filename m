@@ -1,39 +1,39 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E1472AE84
-	for <fstests@vger.kernel.org>; Fri, 21 Mar 2025 15:36:55 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 06AE82AE84;
+	Fri, 21 Mar 2025 15:40:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742571416; cv=none; b=cp04FnMabG9Jimobr+EfP2iYdcFORHW0eb/rGyTtUyff10tsu8Q3S5gLHgCcya/OOnpyLIzvI5EVXgfiuqntxaazYiS9pEKdnEdhp2eX1USV+CTCCV969DCEPKN3o6fKm6x+LDEc18ufBUKdnnmQDezmENOBq7x7sZeTsDDCtvk=
+	t=1742571611; cv=none; b=WtFTw+n861wfZtw/Y42yVBv7cer645it02dOPaaWniXousbcpmjhvuf4p0v1jXnDx3J0/ccaxrUCpy2C1OnXYtd27lwTgLCeze41tdMQ+ekUi4m6ZXuDGA43aB8PqqTfAjPWhuiRLcYnq+kLEdjGjWSkMBKILudQMKhB4H7Q3S0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742571416; c=relaxed/simple;
-	bh=Vbs4UFmaY1ENdhPZugNOs/8syJ4xwXtOh8pO7YmpFDk=;
+	s=arc-20240116; t=1742571611; c=relaxed/simple;
+	bh=Ro2a9ja0TwBp/Wt/y/Mom69Yv8pR3PPk1fakmQAgG9o=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=PCPjtxerhvb+JXEsz1hhbSLL5Ymc9mydrLrNOziA8QEAL5eCTwh6K83lgxwovOSdeg3jQxqvQLZCsn0OCanT7rqnEOtPCQecuAU2cJQp48cLpODuRI7lO5OYoaO1/iPh0Eo6eCKjCLJc8G+WwmfXSALMQG5aKY6nj0t6XVM7Q2Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Bj/5kG7D; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=AbWStg/vLO7fDLzG7137fvkRYYGjp82esVQibXUtx1WKvDBePzqeUA/DOiRSxy5IZMKDfh3oOaIytEKaxgi7NJr91qtHlS4q6Hml/p4Bf+Aay7Ge7PVf7kuXubEFhbmC/scXEr4IXlJUFYMsLvZwi3hC1PlbZRMcEwrPV0DIaPs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mCJrWcDz; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Bj/5kG7D"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AD7ADC4CEE3;
-	Fri, 21 Mar 2025 15:36:55 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mCJrWcDz"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8952EC4CEE3;
+	Fri, 21 Mar 2025 15:40:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1742571415;
-	bh=Vbs4UFmaY1ENdhPZugNOs/8syJ4xwXtOh8pO7YmpFDk=;
+	s=k20201202; t=1742571610;
+	bh=Ro2a9ja0TwBp/Wt/y/Mom69Yv8pR3PPk1fakmQAgG9o=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Bj/5kG7D6RshiNvLKmFshFU8JTh7o5vvxhnlmXyRuZZLtUPtxMtVuGg0yjYqo1tdF
-	 A3qilSwPyDqMETsRH5HqYlQ7uf97AOdsx3fQonPsg70zFlRb/hYiUCCTXVGsM5+IVK
-	 +S2YAKrKlDbGqwLpwhVwjIpBBpD4EUVkjTEGiJ4G3nHVolX7AtQsmlpF4EgBbCviwg
-	 D85G7UxClOz7DM1Py7FtciqLCccY4Lx4It/v2UKm71oeLx4/9l4QoIML1xzz8BfBEu
-	 z7p0jl0XOBY06Jh345ZB0hsc07yBPIaiT3i7aMqER4rH0Tkts3lnb3nz1gS5JvZgm9
-	 4tgpOAyEm8FDw==
-Date: Fri, 21 Mar 2025 08:36:55 -0700
+	b=mCJrWcDzN1kw5/rC4wQd7gZlTOvwI/2NYgYrDc1nyqhGu1WQwO29tDOOGHgxejEJN
+	 bYNMtnmZ8loIZoTmTzMpASk7oEf0pXEkuZ3qZpfvbyi93gE+POg65SAc/qfee8Hmjq
+	 GhnxiwmpgwJPHDM5ApgP03dqGWvhL8FGf1p3zHti/onbxMMyR0EsfeyGS0rw+En8hT
+	 7vVFn0KIntP6jw24URi1mWSe2h3aYG5zZbvkFr6ObWqs7endCXPCDSatxW40c/meVv
+	 t7PPz+7nsxfvzjN56GZ050BMTTFG/UC8+VPK/23MMWbwZ609JTFWHWcAP03wMfbmIU
+	 k+mV0H2QsT7gw==
+Date: Fri, 21 Mar 2025 08:40:10 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 2/2] fstests: remove run_setsid test way from check
-Message-ID: <20250321153655.GD4001511@frogsfrogsfrogs>
-References: <20250320192812.782380-1-zlang@kernel.org>
- <20250320192812.782380-3-zlang@kernel.org>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] generic: test fsync of file with no more hard links
+Message-ID: <20250321154010.GE4001511@frogsfrogsfrogs>
+References: <3476019b76d6df3ce6eb364aeb1a2725b8fb4846.1742555101.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,162 +42,129 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250320192812.782380-3-zlang@kernel.org>
+In-Reply-To: <3476019b76d6df3ce6eb364aeb1a2725b8fb4846.1742555101.git.fdmanana@suse.com>
 
-On Fri, Mar 21, 2025 at 03:28:12AM +0800, Zorro Lang wrote:
-> This patch partially revert most of the 88d60f434 ("common: fix pkill
-> by running test program in a separate session"), it does:
-> 1. Remove run_setsid script
-> 2. Remove all run_setsid related things from check
-> 3. Keep the change in _scratch_xfs_stress_scrub_cleanup() which is a
->    bug fix for xfs_scrub test.
+On Fri, Mar 21, 2025 at 11:09:58AM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
+> Test that if we fsync a file that has no more hard links, power fail and
+> then mount the filesystem, after the journal/log is replayed, the file
+> doesn't exists anymore.
+> 
+> This exercises a bug recently found and fixed by the following patch for
+> the linux kernel:
+> 
+>    btrfs: fix fsync of files with no hard links not persisting deletion
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+>  tests/generic/764     | 78 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/764.out |  2 ++
+>  2 files changed, 80 insertions(+)
+>  create mode 100755 tests/generic/764
+>  create mode 100644 tests/generic/764.out
+> 
+> diff --git a/tests/generic/764 b/tests/generic/764
+> new file mode 100755
+> index 00000000..57d21095
+> --- /dev/null
+> +++ b/tests/generic/764
+> @@ -0,0 +1,78 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 SUSE Linux Products GmbH.  All Rights Reserved.
+> +#
+> +# FS QA Test 764
+> +#
+> +# Test that if we fsync a file that has no more hard links, power fail and then
+> +# mount the filesystem, after the journal/log is replayed, the file doesn't
+> +# exists anymore.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick log
+> +
+> +_cleanup()
+> +{
+> +	if [ ! -z $XFS_IO_PID ]; then
+> +		kill $XFS_IO_PID > /dev/null 2>&1
+> +		wait $XFS_IO_PID > /dev/null 2>&1
+> +	fi
+> +	_cleanup_flakey
+> +	cd /
+> +	rm -r -f $tmp.*
+> +}
+> +
+> +. ./common/dmflakey
+> +
+> +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
+> +	"btrfs: fix fsync of files with no hard links not persisting deletion"
+> +
+> +_require_scratch
+> +_require_dm_target flakey
+> +_require_mknod
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
+> +_require_metadata_journaling $SCRATCH_DEV
+> +_init_flakey
+> +_mount_flakey
+> +
+> +touch $SCRATCH_MNT/foo
+> +
+> +# Commit the current transaction and persist the file.
+> +_scratch_sync
+> +
+> +# A fifo to communicate with a background xfs_io process that will fsync the
+> +# file after we deleted its hard link while it's open by xfs_io.
+> +mkfifo $SCRATCH_MNT/fifo
+> +
+> +tail -f $SCRATCH_MNT/fifo | $XFS_IO_PROG $SCRATCH_MNT/foo >>$seqres.full &
+> +XFS_IO_PID=$!
+> +
+> +# Give some time for the xfs_io process to open a file descriptor for the file.
+> +sleep 1
+> +
+> +# Now while the file is open by the xfs_io process, delete its only hard link.
+> +rm -f $SCRATCH_MNT/foo
+> +
+> +# Now that it has no more hard links, make the xfs_io process fsync it.
+> +echo "fsync" > $SCRATCH_MNT/fifo
+> +
+> +# Terminate the xfs_io process so that we can unmount.
+> +echo "quit" > $SCRATCH_MNT/fifo
 
-This looks like a reasonable revert to me and it doesn't seem to break
-anything so
+Hee hee, what a way to drive xfs_io ;)
+
+Seems reasonable to me
 Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
 --D
 
-> ---
->  check            | 39 ++++++---------------------------------
->  common/rc        |  4 ++--
->  tools/Makefile   |  1 -
->  tools/run_setsid | 22 ----------------------
->  4 files changed, 8 insertions(+), 58 deletions(-)
->  delete mode 100755 tools/run_setsid
-> 
-> diff --git a/check b/check
-> index ba853ae85..32890470a 100755
-> --- a/check
-> +++ b/check
-> @@ -698,46 +698,19 @@ _adjust_oom_score -500
->  # systemd doesn't automatically remove transient scopes that fail to terminate
->  # when systemd tells them to terminate (e.g. programs stuck in D state when
->  # systemd sends SIGKILL), so we use reset-failed to tear down the scope.
-> -#
-> -# Use setsid to run the test program with a separate session id so that we
-> -# can pkill only the processes started by this test.
->  _run_seq() {
-> +	local cmd=(bash -c "test -w ${OOM_SCORE_ADJ} && echo 250 > ${OOM_SCORE_ADJ}; exec ./$seq")
->  	local res
-> -	unset CHILDPID
-> -	unset FSTESTS_ISOL	# set by tools/run_seq_*
->  
->  	if [ -n "${HAVE_SYSTEMD_SCOPES}" ]; then
->  		local unit="$(systemd-escape "fs$seq").scope"
->  		systemctl reset-failed "${unit}" &> /dev/null
-> -		systemd-run --quiet --unit "${unit}" --scope \
-> -			./tools/run_setsid "./$seq" &
-> -		CHILDPID=$!
-> -		wait
-> +		systemd-run --quiet --unit "${unit}" --scope "${cmd[@]}"
->  		res=$?
-> -		unset CHILDPID
->  		systemctl stop "${unit}" &> /dev/null
-> +		return "${res}"
->  	else
-> -		# bash won't run the SIGINT trap handler while there are
-> -		# foreground children in a separate session, so we must run
-> -		# the test in the background and wait for it.
-> -		./tools/run_setsid "./$seq" &
-> -		CHILDPID=$!
-> -		wait
-> -		res=$?
-> -		unset CHILDPID
-> -	fi
-> -
-> -	return $res
-> -}
-> -
-> -_kill_seq() {
-> -	if [ -n "$CHILDPID" ]; then
-> -		# SIGPIPE will kill all the children (including fsstress)
-> -		# without bash logging fatal signal termination messages to the
-> -		# console
-> -		pkill -PIPE --session "$CHILDPID"
-> -		wait
-> -		unset CHILDPID
-> +		"${cmd[@]}"
->  	fi
->  }
->  
-> @@ -746,9 +719,9 @@ _prepare_test_list
->  fstests_start_time="$(date +"%F %T")"
->  
->  if $OPTIONS_HAVE_SECTIONS; then
-> -	trap "_kill_seq; _summary; exit \$status" 0 1 2 3 15
-> +	trap "_summary; exit \$status" 0 1 2 3 15
->  else
-> -	trap "_kill_seq; _wrapup; exit \$status" 0 1 2 3 15
-> +	trap "_wrapup; exit \$status" 0 1 2 3 15
->  fi
->  
->  function run_section()
-> diff --git a/common/rc b/common/rc
-> index 55c384a63..fa0f02ac4 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -33,7 +33,7 @@ _test_sync()
->  # Kill only the processes started by this test.
->  _pkill()
->  {
-> -	pkill --session 0 "$@"
-> +	pkill "$@"
->  }
->  
->  # Find only the test processes started by this test
-> @@ -2792,7 +2792,7 @@ _require_user_exists()
->  # not, passing $SHELL in this manner works both for "su" and "su -c cmd".
->  _su()
->  {
-> -	su --session-command $SHELL "$@"
-> +	su "$@"
->  }
->  
->  # check if a user exists and is able to execute commands.
-> diff --git a/tools/Makefile b/tools/Makefile
-> index 2d502884f..af7adc2a6 100644
-> --- a/tools/Makefile
-> +++ b/tools/Makefile
-> @@ -7,7 +7,6 @@ include $(TOPDIR)/include/builddefs
->  
->  TOOLS_DIR = tools
->  helpers=\
-> -	run_setsid \
->  	run_privatens
->  
->  include $(BUILDRULES)
-> diff --git a/tools/run_setsid b/tools/run_setsid
-> deleted file mode 100755
-> index 5938f80e6..000000000
-> --- a/tools/run_setsid
-> +++ /dev/null
-> @@ -1,22 +0,0 @@
-> -#!/bin/bash
-> -
-> -# SPDX-License-Identifier: GPL-2.0
-> -# Copyright (c) 2025 Oracle.  All Rights Reserved.
-> -#
-> -# Try starting things in a new process session so that test processes have
-> -# something with which to filter only their own subprocesses.
-> -
-> -if [ -n "${FSTESTS_ISOL}" ]; then
-> -	# Allow the test to become a target of the oom killer
-> -	oom_knob="/proc/self/oom_score_adj"
-> -	test -w "${oom_knob}" && echo 250 > "${oom_knob}"
-> -
-> -	exec "$@"
-> -fi
-> -
-> -if [ -z "$1" ] || [ "$1" = "--help" ]; then
-> -	echo "Usage: $0 command [args...]"
-> -	exit 1
-> -fi
-> -
-> -FSTESTS_ISOL=setsid exec setsid "$0" "$@"
+> +wait $XFS_IO_PID
+> +unset XFS_IO_PID
+> +
+> +# Simulate a power failure and then mount again the filesystem to replay the
+> +# journal/log.
+> +_flakey_drop_and_remount
+> +
+> +# We don't expect the file to exist anymore, since it was fsynced when it had no
+> +# more hard links.
+> +[ -f $SCRATCH_MNT/foo ] && echo "file foo still exists"
+> +
+> +_unmount_flakey
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/generic/764.out b/tests/generic/764.out
+> new file mode 100644
+> index 00000000..bb58e5b8
+> --- /dev/null
+> +++ b/tests/generic/764.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 764
+> +Silence is golden
 > -- 
-> 2.47.1
+> 2.45.2
 > 
 > 
