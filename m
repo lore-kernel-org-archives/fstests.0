@@ -1,48 +1,39 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B7A24207A;
-	Fri, 21 Mar 2025 16:18:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F310A22D4F3;
+	Fri, 21 Mar 2025 16:54:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742573928; cv=none; b=D3FQf5XRMuzTvBWMaRDjkfiFBZh3MlNwSUv3/YxXrks2J81qASehLZdvoIov0097Xi9o7y8lYhVbRl2+7ScV7I4FcZ3Io8TOyQWra4p+xclBg6JJ0/lCN2kHN2r8OveJTeDHoJUoreiOjchItyZ7MyppFJJwLviWy3WOtrrx0aM=
+	t=1742576061; cv=none; b=jKPGVbqrVIQ5moSThVWJpqyrVcHt7MNvavXIqS+n5LmMu83TbByEAvO0V3gphXOq25hdliphH63UGgxOG5YpNhTpZBMpM1rJVZvAyvovyBV8W1VOgugMFCRMy4P70N188qR1NyxKi8BKWv9m4dPAuLyW2qoGnQae7tWspX2dMPg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742573928; c=relaxed/simple;
-	bh=DwRKLtbDRxPFh80TV0iuQKFtLNQUyPAH4/roK7qMEJk=;
+	s=arc-20240116; t=1742576061; c=relaxed/simple;
+	bh=8dUJmfPs4S10R56woWhthw8lqM8k9CXT9AERs+VsvAU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=c8mGcr7ymHHARJch0MHDA9tmvs57e6mjEhnDl8wdspnVJSRyCex09X2JuuNdsSSNYVaRVBP4mrn6QU12w9neO6Z70a75rRNxHEJVNFJN9URzxx/cUJ4zM18VR1gjCG9riBPhgR4a1e+HEia+s1I5FJO7qGFnAQwUtSetztPNU+U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JgN/Kq3M; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=nl3xUqjaSZe+v429bREGlNjK2bdbbra/VZgfQztSTYwQUHN6U6ApNTsJoKJdV7xWPO3ok7W3PRm5cHCs9tZlqfGSOvWPjjWwPI6SCMVb95pqL9Tvoz9jK02CRpNy4P6NKO5LiVUYEUzg+nOvPfD9y1Tdje1mueZ0Z5ZqsCv7GaU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=trQPcVRk; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JgN/Kq3M"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 91D83C4CEE3;
-	Fri, 21 Mar 2025 16:18:47 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="trQPcVRk"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6527AC4CEE8;
+	Fri, 21 Mar 2025 16:54:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1742573927;
-	bh=DwRKLtbDRxPFh80TV0iuQKFtLNQUyPAH4/roK7qMEJk=;
+	s=k20201202; t=1742576059;
+	bh=8dUJmfPs4S10R56woWhthw8lqM8k9CXT9AERs+VsvAU=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=JgN/Kq3Ml/oM5k8p9EPp7vxpr9XfoeVAlpdfmHtas/sgseXzJ/NoZVJfuVyh11FVB
-	 DD+fjMw5bG20j7jSONan0v6UZODfIXucWAgiEHPgp86afAvtL8z0jg+haG4xoRCTAA
-	 ZlxqwkN5gnreHTyT5hU+QuhZWDZLenYx6ebNNU/6NRyRqEqu+1tc5rVE1hxpS6lZ1K
-	 oO638cNblYA+36tMuLpc9SO0hx5xZQXjU1qMJMe9tnFU0JMLWvEw0pLbavcNQwWGTI
-	 102LNKn0Wv1M8JtaoPanvQvjqdUKCqCOeH2o/2FyQ7hiaoYtHKJLA5HuEb80XVgR17
-	 Si1ouPD0ouKKA==
-Date: Fri, 21 Mar 2025 09:18:46 -0700
+	b=trQPcVRkyMM8rHbdft3UyOh9Bs2kmMcV5L+On1c4kPjGH2kjvbO6F76Rwtl3esEEp
+	 V81br/TsFgaB0PvbVAw9invNYH5UUh4bQKwSebwSdJsnfMmswb1xf8K4K0g1j9RCRF
+	 F9BniosWgD4Z/ihRA9AGtrFMt/cmtsjGGzS15KuJbfXH4iMS+8ErDd+Rwgs9TXaaF+
+	 1JDHtbHZVDyfvBO6G9LH0Ngnxh4L5k7b9FVKeHxZG2M9N5AvKVsecmEVZGX1CfgWW4
+	 vVOMs5peI2AZv80DzFb52bqLEtOYsAuaezuT8TeXvZb1e2JS7ILcZ1ud7ilwyNod3X
+	 QmEZPjetJL1Gg==
+Date: Fri, 21 Mar 2025 09:54:18 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Petr Vorel <pvorel@suse.cz>
-Cc: ltp@lists.linux.it, Li Wang <liwang@redhat.com>,
-	Cyril Hrubis <chrubis@suse.cz>,
-	Andrea Cervesato <andrea.cervesato@suse.com>,
-	"Darrick J . Wong" <darrick.wong@oracle.com>,
-	Amir Goldstein <amir73il@gmail.com>,
-	Allison Collins <allison.henderson@oracle.com>,
-	Christoph Hellwig <hch@lst.de>, Gao Xiang <hsiangkao@redhat.com>,
-	Dave Chinner <dchinner@redhat.com>, Jan Kara <jack@suse.cz>,
-	linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [RFC PATCH 1/1] ioctl_ficlone03: Require 5.10 for XFS
-Message-ID: <20250321161846.GM2803749@frogsfrogsfrogs>
-References: <20250321100320.162107-1-pvorel@suse.cz>
- <20250321152358.GK2803749@frogsfrogsfrogs>
- <20250321160633.GA177324@pevik>
+To: zlang@redhat.com
+Cc: hch@lst.de, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH 5/3] xfs/818: fix some design issues
+Message-ID: <20250321165418.GP2803749@frogsfrogsfrogs>
+References: <20250312230736.GS2803749@frogsfrogsfrogs>
+ <174182089094.1400713.5283745853237966823.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -51,129 +42,66 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250321160633.GA177324@pevik>
+In-Reply-To: <174182089094.1400713.5283745853237966823.stgit@frogsfrogsfrogs>
 
-On Fri, Mar 21, 2025 at 05:06:33PM +0100, Petr Vorel wrote:
-> > On Fri, Mar 21, 2025 at 11:03:20AM +0100, Petr Vorel wrote:
-> > > Test fails on XFS on kernel older than 5.10:
-> 
-> > >     # ./ioctl_ficlone03
-> > > 	...
-> > >     tst_test.c:1183: TINFO: Mounting /dev/loop0 to /tmp/LTP_ioc6ARHZ7/mnt fstyp=xfs flags=0
-> > >     [   10.122070] XFS (loop0): Superblock has unknown incompatible features (0x8) enabled.
-> 
-> > 0x8 is XFS_SB_FEAT_INCOMPAT_BIGTIME, maybe you need to format with a set
-> > of filesystem features compatible with 5.10?
-> 
-> > # mkfs.xfs -c options=/usr/share/xfsprogs/mkfs/lts_5.10.conf /dev/sda1
-> 
-> Yes, XFS_SB_FEAT_INCOMPAT_BIGTIME is what is missing for the test. Device is
-> formatted with: -m reflink=1 (I'm sorry to not posting this before):
+From: Darrick J. Wong <djwong@kernel.org>
 
-You could remove reflink=1 from the test specification, reflink has been
-on by default for quite a while now...
+While QA'ing zoned filesystem support, I discovered some design errors
+in this test:
 
-> 
-> tst_test.c:1170: TINFO: Formatting /dev/loop0 with xfs opts='-m reflink=1' extra opts=''
-> 
-> I thought it would imply XFS_SB_FEAT_INCOMPAT_BIGTIME, but when I tried to remove it
-> it did not help:
-> 
-> tst_test.c:1909: TINFO: Tested kernel: 5.0.21-00005-gb6c47615d7bf #211 SMP Fri Mar 21 12:23:18 CET 2025 x86_64
-> ...
-> tst_test.c:1833: TINFO: === Testing on xfs ===
-> tst_cmd.c:281: TINFO: Parsing mkfs.xfs version
-> tst_test.c:1170: TINFO: Formatting /dev/loop0 with xfs opts='' extra opts=''
-> tst_test.c:1183: TINFO: Mounting /dev[   75.418676] XFS (loop0): Superblock has unknown incompatible features (0x8) enabled.
-> /loop0 to /tmp/L[   75.419683] XFS (loop0): Filesystem cannot be safely mounted by this kernel.
-> TP_iocO8VAIk/mnt[   75.420629] XFS (loop0): SB validate failed with error -22.
->  fstyp=xfs flags=0
-> tst_test.c:1183: TBROK: mount(/dev/loop0, mnt, xfs, 0, (nil)) failed: EINVAL (22)
-> 
-> Well, I tried with mkfs.xfs from openSUSE Leap 15.6 (tested via rapido-linux),
-> probably the defaults add it.
-> 
-> $ mkfs.xfs -V
-> mkfs.xfs version 6.7.0
+1) Since we're test formatting a sparse file on an xfs filesystem,
+there's no need to play games with optimal device size; we can create
+a totally sparse file that's the same size as SCRATCH_DEV.
 
-...but mkfs.xfs 6.7 enables y2038 support by default unless you specify
-otherwise, which is why it still won't mount.  Hence my suggestion to
-use the config files if they're available.  If not, then either run
-xfsprogs 5.10 on kernel 5.10, or create per-kernel xfs opts that
-override the defaults to put them back down to whatever were the mkfs
-defaults in 5.10.
+2) mkfs.xfs cannot create realtime files, so if it fails with that,
+there's no need to continue the test.
 
-> Also I noted that test works on our 5.3.18 based SLES15-SP2 with xfsprogs
-> 4.15.0. Maybe I'm just wasting your time with wrong patch.
+3) If mkfs -p fails for none of the proscribed reasons, it should exit
+the test.  The final cat $tmp.mkfs will take care of tweaking the golden
+output to register the test failure for further investigation.
 
-<shrug> QA configuration for a bunch of kernels is irritatingly hard,
-we all need to compare notes when we can. :)
+Cc: <fstests@vger.kernel.org> # v2025.03.09
+Fixes: 6d39dc34e61e11 ("xfs: test filesystem creation with xfs_protofile")
+Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+---
+ tests/xfs/818 |   19 ++++++++++++++++---
+ 1 file changed, 16 insertions(+), 3 deletions(-)
 
---D
-
-> Kind regards,
-> Petr
-> 
-> > --D
-> 
-> > >     [   10.123035] XFS (loop0): Filesystem cannot be safely mounted by this kernel.
-> > >     [   10.123916] XFS (loop0): SB validate failed with error -22.
-> > >     tst_test.c:1183: TBROK: mount(/dev/loop0, mnt, xfs, 0, (nil)) failed: EINVAL (22)
-> 
-> > > This also causes Btrfs testing to be skipped due TBROK on XFS. With increased version we get on 5.4 LTS:
-> 
-> > >     # ./ioctl_ficlone03
-> > >     tst_test.c:1904: TINFO: Tested kernel: 5.4.291 #194 SMP Fri Mar 21 10:18:02 CET 2025 x86_64
-> > >     ...
-> > >     tst_supported_fs_types.c:49: TINFO: mkfs is not needed for tmpfs
-> > >     tst_test.c:1833: TINFO: === Testing on xfs ===
-> > >     tst_cmd.c:281: TINFO: Parsing mkfs.xfs version
-> > >     tst_test.c:969: TCONF: The test requires kernel 5.10 or newer
-> > >     tst_test.c:1833: TINFO: === Testing on btrfs ===
-> > >     tst_test.c:1170: TINFO: Formatting /dev/loop0 with btrfs opts='' extra opts=''
-> > >     [   30.143670] BTRFS: device fsid 1a6d250c-0636-11f0-850f-c598bdcd84c4 devid 1 transid 6 /dev/loop0
-> > >     tst_test.c:1183: TINFO: Mounting /dev/loop0 to /tmp/LTP_iocjwzyal/mnt fstyp=btrfs flags=0
-> > >     [   30.156563] BTRFS info (device loop0): using crc32c (crc32c-generic) checksum algorithm
-> > >     [   30.157363] BTRFS info (device loop0): flagging fs with big metadata feature
-> > >     [   30.158061] BTRFS info (device loop0): using free space tree
-> > >     [   30.158620] BTRFS info (device loop0): has skinny extents
-> > >     [   30.159911] BTRFS info (device loop0): enabling ssd optimizations
-> > >     [   30.160652] BTRFS info (device loop0): checking UUID tree
-> > >     ioctl_ficlone03_fix.c:49: TPASS: invalid source : EBADF (9)
-> > >     ioctl_ficlone03_fix.c:55: TPASS: invalid source : EBADF (9)
-> 
-> > > Fixing commit is 29887a2271319 ("xfs: enable big timestamps").
-> 
-> > > Signed-off-by: Petr Vorel <pvorel@suse.cz>
-> > > ---
-> > > Hi all,
-> 
-> > > I suppose we aren't covering a test bug with this and test is really
-> > > wrong expecting 4.16 would work on XFS. FYI this affects 5.4.291
-> > > (latest 5.4 LTS which is still supported) and would not be fixed due a
-> > > lot of missing functionality from 5.10.
-> 
-> > > Kind regards,
-> > > Petr
-> 
-> > >  testcases/kernel/syscalls/ioctl/ioctl_ficlone03.c | 2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> > > diff --git a/testcases/kernel/syscalls/ioctl/ioctl_ficlone03.c b/testcases/kernel/syscalls/ioctl/ioctl_ficlone03.c
-> > > index 6a9d270d9f..e2ab10cba1 100644
-> > > --- a/testcases/kernel/syscalls/ioctl/ioctl_ficlone03.c
-> > > +++ b/testcases/kernel/syscalls/ioctl/ioctl_ficlone03.c
-> > > @@ -113,7 +113,7 @@ static struct tst_test test = {
-> > >  		{.type = "bcachefs"},
-> > >  		{
-> > >  			.type = "xfs",
-> > > -			.min_kver = "4.16",
-> > > +			.min_kver = "5.10",
-> > >  			.mkfs_ver = "mkfs.xfs >= 1.5.0",
-> > >  			.mkfs_opts = (const char *const []) {"-m", "reflink=1", NULL},
-> > >  		},
-> > > -- 
-> > > 2.47.2
-> 
-> 
-> 
+diff --git a/tests/xfs/818 b/tests/xfs/818
+index aeb462353df7e9..bc809390b9e340 100755
+--- a/tests/xfs/818
++++ b/tests/xfs/818
+@@ -75,9 +75,8 @@ _run_fsstress -n 1000 -d $SCRATCH_MNT/newfiles
+ make_stat $SCRATCH_MNT before
+ make_md5 $SCRATCH_MNT before
+ 
+-kb_needed=$(du -k -s $SCRATCH_MNT | awk '{print $1}')
+-img_size=$((kb_needed * 2))
+-test "$img_size" -lt $((300 * 1024)) && img_size=$((300 * 1024))
++scratch_sectors="$(blockdev --getsz $SCRATCH_DEV)"
++img_size=$((scratch_sectors * 512 / 1024))
+ 
+ echo "Clone image with protofile"
+ $XFS_PROTOFILE_PROG $SCRATCH_MNT > $testfiles/protofile
+@@ -99,7 +98,21 @@ if ! _try_mkfs_dev -p $testfiles/protofile $testfiles/image &> $tmp.mkfs; then
+ 	if grep -q 'No space left on device' $tmp.mkfs; then
+ 		_notrun "not enough space in filesystem"
+ 	fi
++
++	# mkfs cannot create realtime files.
++	#
++	# If zoned=1 is in MKFS_OPTIONS, mkfs will create an internal realtime
++	# volume with rtinherit=1 and fail, so we need to _notrun that case.
++	#
++	# If zoned=1 is /not/ in MKFS_OPTIONS, we didn't pass a realtime device
++	# to mkfs so it will not create realtime files.  The format should work
++	# just fine.
++	if grep -q 'creating realtime files from proto file not supported' $tmp.mkfs; then
++		_notrun "mkfs cannot create realtime files"
++	fi
++
+ 	cat $tmp.mkfs
++	exit
+ fi
+ 
+ _mount $testfiles/image $testfiles/mount
