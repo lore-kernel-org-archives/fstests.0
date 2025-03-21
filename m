@@ -1,39 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 06AE82AE84;
-	Fri, 21 Mar 2025 15:40:10 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B74F1DA62E;
+	Fri, 21 Mar 2025 15:43:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742571611; cv=none; b=WtFTw+n861wfZtw/Y42yVBv7cer645it02dOPaaWniXousbcpmjhvuf4p0v1jXnDx3J0/ccaxrUCpy2C1OnXYtd27lwTgLCeze41tdMQ+ekUi4m6ZXuDGA43aB8PqqTfAjPWhuiRLcYnq+kLEdjGjWSkMBKILudQMKhB4H7Q3S0=
+	t=1742571832; cv=none; b=PJ0BsrtcTUPM4U8VP7TGisOoGoW3MrRJl3QcQv+tKzxqe8q23menXWcNabFuLwW97iUx33OxiyHZTWm69jMW8XZf3dvPp3FwC2pWazADrIpjRK73toQjTmQIPeCNZs3JRVowa+AAq76bAj3v3eQGJ1VLeO3CMgJ1IBTKyuCX5RA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742571611; c=relaxed/simple;
-	bh=Ro2a9ja0TwBp/Wt/y/Mom69Yv8pR3PPk1fakmQAgG9o=;
+	s=arc-20240116; t=1742571832; c=relaxed/simple;
+	bh=qLt7MBCEvEfE29n7ki763pA92Oe7/fYuFfWZyJsILr4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=AbWStg/vLO7fDLzG7137fvkRYYGjp82esVQibXUtx1WKvDBePzqeUA/DOiRSxy5IZMKDfh3oOaIytEKaxgi7NJr91qtHlS4q6Hml/p4Bf+Aay7Ge7PVf7kuXubEFhbmC/scXEr4IXlJUFYMsLvZwi3hC1PlbZRMcEwrPV0DIaPs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mCJrWcDz; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=JdnZZK41ytgik559+bkk/jGh/8L/AIVXzSwE1B1kq+UQO5OfhcHiR7rB6FAs3Lfi2nZEwW679oA71IPOUPp8CxhUcM8Qv5Kw78NGZZqLewBbVA35GXXrYjahu9ppuSoamRWBJe7fuc2FiS1hEN4LF6mWPib8Dfz5vYn7y3OYZkw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qdxr/ZXq; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mCJrWcDz"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8952EC4CEE3;
-	Fri, 21 Mar 2025 15:40:10 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qdxr/ZXq"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 82B65C4CEE3;
+	Fri, 21 Mar 2025 15:43:51 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1742571610;
-	bh=Ro2a9ja0TwBp/Wt/y/Mom69Yv8pR3PPk1fakmQAgG9o=;
+	s=k20201202; t=1742571831;
+	bh=qLt7MBCEvEfE29n7ki763pA92Oe7/fYuFfWZyJsILr4=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=mCJrWcDzN1kw5/rC4wQd7gZlTOvwI/2NYgYrDc1nyqhGu1WQwO29tDOOGHgxejEJN
-	 bYNMtnmZ8loIZoTmTzMpASk7oEf0pXEkuZ3qZpfvbyi93gE+POg65SAc/qfee8Hmjq
-	 GhnxiwmpgwJPHDM5ApgP03dqGWvhL8FGf1p3zHti/onbxMMyR0EsfeyGS0rw+En8hT
-	 7vVFn0KIntP6jw24URi1mWSe2h3aYG5zZbvkFr6ObWqs7endCXPCDSatxW40c/meVv
-	 t7PPz+7nsxfvzjN56GZ050BMTTFG/UC8+VPK/23MMWbwZ609JTFWHWcAP03wMfbmIU
-	 k+mV0H2QsT7gw==
-Date: Fri, 21 Mar 2025 08:40:10 -0700
+	b=qdxr/ZXqZDPPXf9oQ30MNVrTEzEyGXYCN/rZ166Y8/R4k98hwBg7+LDQpsIsIKy4b
+	 maLft8N5hnvRi+JSh/D+0BIWSJuguhzeIpkBH2Nj8NpcbZEMeyrUa3l5cktC9TLeit
+	 UpKn4jchriIHvWuo2pOd29CFYIkTPMTOIkYH1F11gjBUUTTFppbu5VAe+BEY8CeICp
+	 9Cf6GE9utV+DgoHNRuuX8cnwZKMHifmWjUH6hBushRy/GpHySpvyM/fHoEQwq8BQZF
+	 NDpYBaf3cxAYqpZYvqCTZmHUsXo7IcdJ/S1tWoZlSRAAtf6xgdxgYyEOUl/GE//5lE
+	 MwdowydSf6sSQ==
+Date: Fri, 21 Mar 2025 08:43:51 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] generic: test fsync of file with no more hard links
-Message-ID: <20250321154010.GE4001511@frogsfrogsfrogs>
-References: <3476019b76d6df3ce6eb364aeb1a2725b8fb4846.1742555101.git.fdmanana@suse.com>
+To: zlang@redhat.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 2/3] generic/537: disable quota mount options for
+ pre-metadir rt filesystems
+Message-ID: <20250321154351.GF4001511@frogsfrogsfrogs>
+References: <174182089094.1400713.5283745853237966823.stgit@frogsfrogsfrogs>
+ <174182089142.1400713.12586249978501158339.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,129 +43,67 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <3476019b76d6df3ce6eb364aeb1a2725b8fb4846.1742555101.git.fdmanana@suse.com>
+In-Reply-To: <174182089142.1400713.12586249978501158339.stgit@frogsfrogsfrogs>
 
-On Fri, Mar 21, 2025 at 11:09:58AM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Wed, Mar 12, 2025 at 04:11:48PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Test that if we fsync a file that has no more hard links, power fail and
-> then mount the filesystem, after the journal/log is replayed, the file
-> doesn't exists anymore.
+> Fix this regression in generic/537:
 > 
-> This exercises a bug recently found and fixed by the following patch for
-> the linux kernel:
+> mount: /opt: permission denied.
+>        dmesg(1) may have more information after failed mount system call.
+> mount -o uquota,gquota,pquota, -o ro,norecovery -ortdev=/dev/sdb4 /dev/sda4 /opt failed
+> mount -o uquota,gquota,pquota, -o ro,norecovery -ortdev=/dev/sdb4 /dev/sda4 /opt failed
+> (see /var/tmp/fstests/generic/537.full for details)
 > 
->    btrfs: fix fsync of files with no hard links not persisting deletion
+> for reasons explained in the giant comment.  TLDR: quota and rt aren't
+> compatible on older xfs filesystems so we have to work around that.
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
->  tests/generic/764     | 78 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/764.out |  2 ++
->  2 files changed, 80 insertions(+)
->  create mode 100755 tests/generic/764
->  create mode 100644 tests/generic/764.out
-> 
-> diff --git a/tests/generic/764 b/tests/generic/764
-> new file mode 100755
-> index 00000000..57d21095
-> --- /dev/null
-> +++ b/tests/generic/764
-> @@ -0,0 +1,78 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 SUSE Linux Products GmbH.  All Rights Reserved.
-> +#
-> +# FS QA Test 764
-> +#
-> +# Test that if we fsync a file that has no more hard links, power fail and then
-> +# mount the filesystem, after the journal/log is replayed, the file doesn't
-> +# exists anymore.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick log
-> +
-> +_cleanup()
-> +{
-> +	if [ ! -z $XFS_IO_PID ]; then
-> +		kill $XFS_IO_PID > /dev/null 2>&1
-> +		wait $XFS_IO_PID > /dev/null 2>&1
-> +	fi
-> +	_cleanup_flakey
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +
-> +. ./common/dmflakey
-> +
-> +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"btrfs: fix fsync of files with no hard links not persisting deletion"
-> +
-> +_require_scratch
-> +_require_dm_target flakey
-> +_require_mknod
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-> +_require_metadata_journaling $SCRATCH_DEV
-> +_init_flakey
-> +_mount_flakey
-> +
-> +touch $SCRATCH_MNT/foo
-> +
-> +# Commit the current transaction and persist the file.
-> +_scratch_sync
-> +
-> +# A fifo to communicate with a background xfs_io process that will fsync the
-> +# file after we deleted its hard link while it's open by xfs_io.
-> +mkfifo $SCRATCH_MNT/fifo
-> +
-> +tail -f $SCRATCH_MNT/fifo | $XFS_IO_PROG $SCRATCH_MNT/foo >>$seqres.full &
-> +XFS_IO_PID=$!
-> +
-> +# Give some time for the xfs_io process to open a file descriptor for the file.
-> +sleep 1
-> +
-> +# Now while the file is open by the xfs_io process, delete its only hard link.
-> +rm -f $SCRATCH_MNT/foo
-> +
-> +# Now that it has no more hard links, make the xfs_io process fsync it.
-> +echo "fsync" > $SCRATCH_MNT/fifo
-> +
-> +# Terminate the xfs_io process so that we can unmount.
-> +echo "quit" > $SCRATCH_MNT/fifo
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
 
-Hee hee, what a way to drive xfs_io ;)
-
-Seems reasonable to me
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+Ping?
 
 --D
 
-> +wait $XFS_IO_PID
-> +unset XFS_IO_PID
+> ---
+>  tests/generic/537 |   17 +++++++++++++++++
+>  1 file changed, 17 insertions(+)
+> 
+> 
+> diff --git a/tests/generic/537 b/tests/generic/537
+> index f57bc1561dd57e..3be743c4133f4f 100755
+> --- a/tests/generic/537
+> +++ b/tests/generic/537
+> @@ -18,6 +18,7 @@ _begin_fstest auto quick trim
+>  
+>  # Import common functions.
+>  . ./common/filter
+> +. ./common/quota
+>  
+>  _require_scratch
+>  _require_fstrim
+> @@ -36,6 +37,22 @@ _scratch_mount -o ro >> $seqres.full 2>&1
+>  $FSTRIM_PROG -v $SCRATCH_MNT >> $seqres.full 2>&1
+>  _scratch_unmount
+>  
+> +# As of kernel commit 9f0902091c332b ("xfs: Do not allow norecovery mount with
+> +# quotacheck"), it is no longer possible to mount with "norecovery" and any
+> +# quota mount option if the quota mount options would require a metadata update
+> +# such as quotacheck.  For a pre-metadir XFS filesystem with a realtime volume
+> +# and quota-enabling options, the first two mount attempts will have succeeded
+> +# but with quotas disabled.  The mount option parsing for this next mount
+> +# attempt will see the same quota-enabling options and a lack of qflags in the
+> +# ondisk metadata and reject the mount because it thinks that will require
+> +# quotacheck.  Edit out the quota mount options for this specific
+> +# configuration.
+> +if [ "$FSTYP" = "xfs" ]; then
+> +	if [ "$USE_EXTERNAL" = "yes" ] && [ -n "$SCRATCH_RTDEV" ]; then
+> +		_qmount_option ""
+> +	fi
+> +fi
 > +
-> +# Simulate a power failure and then mount again the filesystem to replay the
-> +# journal/log.
-> +_flakey_drop_and_remount
-> +
-> +# We don't expect the file to exist anymore, since it was fsynced when it had no
-> +# more hard links.
-> +[ -f $SCRATCH_MNT/foo ] && echo "file foo still exists"
-> +
-> +_unmount_flakey
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/generic/764.out b/tests/generic/764.out
-> new file mode 100644
-> index 00000000..bb58e5b8
-> --- /dev/null
-> +++ b/tests/generic/764.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 764
-> +Silence is golden
-> -- 
-> 2.45.2
+>  echo "fstrim on ro mount with no log replay"
+>  norecovery="norecovery"
+>  test $FSTYP = "btrfs" && norecovery=nologreplay
 > 
 > 
