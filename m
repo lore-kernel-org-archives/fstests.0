@@ -1,154 +1,218 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f178.google.com (mail-pl1-f178.google.com [209.85.214.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 983C125D543
-	for <fstests@vger.kernel.org>; Mon, 24 Mar 2025 12:38:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4081EC4
+	for <fstests@vger.kernel.org>; Mon, 24 Mar 2025 21:38:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742819928; cv=none; b=GgOy7+Z1ocVNAcww6yfts2QJa2iRGINs4gv1szFhxuh80dQz3oHVyYX/ZYfykMO3KekE7W0V84hSUn1YRJ9IQA8+ooWi3HqBiFy1e4jMNOGctHXBCGYPZ8rsy000g+jv+CZOefAaCT6Eulbb6AgKucx6/Sum1YcL5IV/DxvA3Jk=
+	t=1742852305; cv=none; b=nJI1FYLW4BNQEHHzLDfPY0cWcpIAixAnETEFwJzsGEibM1YZ6/DZqHrESHo8d8OOUAg/R2H6PKo4B4Vgo/pDl9n8FPDsCP3ERdRVhQTjqhi3XBk8FBcxcb1MWk8++pzwIxUz26OCs8sxk25s0Hb6Ww1fI7JMXaO4QTxqJmL0p8U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742819928; c=relaxed/simple;
-	bh=PIKk/rQU2Xe6f/2Nwfdobvb7T1ZWBBTYT7hjOleiHjk=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=goreGw/dfdoHvoy2oHoUtZF6E48sZsGVULSC4UMEX4B6l6/yCv5bEWZvwPu7kpdKm6Evn0sqQPCPngMgFJb4cOn+Uk+1cZeiazvyC5AdeG/9Y7vZl5NRvyNzsnNbzxGRo2hGoXOlg61tqskI745U8wJ97rth0cXt1Ckb//+lLQA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YM+6io1y; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1742852305; c=relaxed/simple;
+	bh=e6+o7WJw5TOEzbrDuJYbMePrGMIO0NZQPacJerUpzQE=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=MWZ473zWbPtUSlIg03EudG2wTeS8W/Jo6explNZ5iPJJ4ln1sPanFqJ5Bkzx3XrUwHPNHuUpC8OBMJ6+FTllcNaarWauzCMkJCeiTFMhQbCWz1apETGAHFD2vQOfsrL8q6VkgCiuBUdc5A0MGAdfgjWC0j1/DQtu5bsUW1lEabg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=2VgWxT7O; arc=none smtp.client-ip=209.85.214.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YM+6io1y"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 86C76C4CEDD;
-	Mon, 24 Mar 2025 12:38:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1742819928;
-	bh=PIKk/rQU2Xe6f/2Nwfdobvb7T1ZWBBTYT7hjOleiHjk=;
-	h=From:To:Cc:Subject:Date:From;
-	b=YM+6io1y4nGde/qJd+8lje7cxVVn7n3oG3GdKjjsXEBbXJRzG9G59bLkxQt6UMNmG
-	 Go/pyCEcSaVrC6q2Y29o4bQ8D39JwmLFlFBf+zyOjCst18CNPh3W0oJl9yOHSMT+o1
-	 nW+ihfGoWh52hNca1u0S8qcenPQ2UXcqP+4+YC+QQlDGolcnsRq7R3Z4byE0BQaWsh
-	 czvbMZXSIqYXL03lNpBOqXLBaox8AKmO4OGlisZpyeAOiIZz2nagLfIGyDTIvPS8Ml
-	 RCl7fhK60b9AP2XTdDNAu2+dJUZcVv+TQv7LkjOslCQm6pT863MBO31X8IzCuL7Ygr
-	 viCUVQQW+58IQ==
-From: Chao Yu <chao@kernel.org>
-To: Zorro Lang <zlang@kernel.org>,
-	fstests@vger.kernel.org
-Cc: jaegeuk@kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net,
-	Chao Yu <chao@kernel.org>,
-	Daeho Jeong <daehojeong@google.com>,
-	Jianan Huang <huangjianan@xiaomi.com>
-Subject: [PATCH] f2fs/010: test dirty status handling on database file
-Date: Mon, 24 Mar 2025 20:38:36 +0800
-Message-ID: <20250324123836.3098377-1-chao@kernel.org>
-X-Mailer: git-send-email 2.49.0.395.g12beb8f557-goog
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="2VgWxT7O"
+Received: by mail-pl1-f178.google.com with SMTP id d9443c01a7336-223a7065ff8so23561345ad.0
+        for <fstests@vger.kernel.org>; Mon, 24 Mar 2025 14:38:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1742852303; x=1743457103; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=So+22YhDM1kXmK3vjKe26la8c3db2c2zBGBpnn//tjQ=;
+        b=2VgWxT7Opojfy/Yja1BYmwhnfShWhJbA16pkXL5fvu5WPG5viFx5Z4GR86OadmlmSt
+         4d8XbhXod4lmgw+4X/UoSN9lk0eocgk+XJuRaxTBKhiYMyg8lRkabD0k4pA/aYhiHApw
+         m36EGkGZpBXAWe3RXa8YbvkkmpJPjREQMdro/E8GxVuT+5Ikm+SrPb6aGFZKaoODJtJf
+         qSIoVCywHevyfglbJ6/LeI04191e7nvkeK+woo+JpDqdgeNNF6mxOxrCB9l0SQ1ta5tU
+         kl8ozpwAto0ztygH2BIlN62eOlUwizdlImAQnCdpkL/FqxUVF3fVUmlpuIADczk11Mbz
+         zeUg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1742852303; x=1743457103;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=So+22YhDM1kXmK3vjKe26la8c3db2c2zBGBpnn//tjQ=;
+        b=UsQWfI6um8uT5Tt6RBp5gWcqj9BWVQddhzcNfZ6NkVNl4xID5+q5d2C12PPQtWcPNV
+         F7PlbOK2hNqo5g4xZD1pxNx5bNyRKUXJP9F1m+cYP3lDpu9ooAohaPnJlpvn1fQiBhkx
+         XG2pmbl3HZb6nMu37TjCRKoaUmdKB4VKlUdS3QR5sXXz3k94Ouy9JJ2qqR4lyTpTv5XB
+         ypi8cycXPXw0YVX+KWvETKIp7gPKgOSax0JcbYiLU7sqFLKPze+aJJ0P8bSzSaBmeG41
+         bFkbVMGUjhSnNu/Qgtovow8YAOan1vWsWJnDTGeDZhRs/cSv00gn1dqGrED8TBrTXrMi
+         TorQ==
+X-Gm-Message-State: AOJu0YwxCXhCGe+mHDa3TbDkKOy33YAX9hVOgv+xXAnG9qBZGx+tTOOC
+	xcsjb+SEaKzMbdG//D9RSQGltvZa9yF8Nm7eCiqyDmfugYM6HhFoFVVAWOkc58Y=
+X-Gm-Gg: ASbGncsFEYzmYY72so3dWsUcYDmJNE3bX25uqrl3hM5Qa06dwyfdIlzCIEe/MSEu2vr
+	r0by298IzmC74Ig2W5anLJ9adIbb5l1kGgDDuoo46bhjwrVtZLR3fkGOR3W58HsfbkgPzaWMtuL
+	FQKKxleFBgOuF4bZZ20Kfo+Cko8c7uO8NxZxJ8o4FFwFcKMYdtWAfsn6fxy5g5md0IENm4NTZZB
+	mxiWbgEbaQwksVA1VAXYYq96FypB6sAenIaEVo1x36JuPmeOlyMzliJBSX8L1rM8whe1CI5f8dO
+	xN2vUIvO4LQg4d3cEgqsYoPMSQTIGgVdojNmBHOf/x9pa5RFU8XPII8+Vy4HQyNbt9tueRWJnrV
+	7YMBTRZPMgA==
+X-Google-Smtp-Source: AGHT+IGCX+fLHojZeOyrTf1lxQ0kKWVc5WI/q9cCJe7TEnPc4EtJkvieI+p3apb0hkNrtxp51zlbSg==
+X-Received: by 2002:a05:6a00:928f:b0:736:2a73:6756 with SMTP id d2e1a72fcca58-73905a25194mr23726136b3a.21.1742852302550;
+        Mon, 24 Mar 2025 14:38:22 -0700 (PDT)
+Received: from dread.disaster.area (pa49-186-36-239.pa.vic.optusnet.com.au. [49.186.36.239])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7390611cae4sm8826909b3a.101.2025.03.24.14.38.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 24 Mar 2025 14:38:22 -0700 (PDT)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1twpUw-0000000HRM5-1wRa;
+	Tue, 25 Mar 2025 08:38:18 +1100
+Date: Tue, 25 Mar 2025 08:38:18 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] generic: test fsync of file with no more hard links
+Message-ID: <Z-HQypONiMW6tnYi@dread.disaster.area>
+References: <3476019b76d6df3ce6eb364aeb1a2725b8fb4846.1742555101.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <3476019b76d6df3ce6eb364aeb1a2725b8fb4846.1742555101.git.fdmanana@suse.com>
 
-This is a regression testcase to check whether we will handle database
-inode dirty status correctly:
-1. create a regular file, and write data into the file
-2. start transaction on the file (via F2FS_IOC_START_ATOMIC_WRITE)
-3. write transaction data to the file
-4. rename the file
-5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
-6. drop caches in order to call f2fs_evict_inode()
-It expects kernel panic will gone after we apply commit 03511e936916
-("f2fs: fix inconsistent dirty state of atomic file").
+On Fri, Mar 21, 2025 at 11:09:58AM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Test that if we fsync a file that has no more hard links, power fail and
+> then mount the filesystem, after the journal/log is replayed, the file
+> doesn't exists anymore.
+> 
+> This exercises a bug recently found and fixed by the following patch for
+> the linux kernel:
+> 
+>    btrfs: fix fsync of files with no hard links not persisting deletion
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+>  tests/generic/764     | 78 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/764.out |  2 ++
+>  2 files changed, 80 insertions(+)
+>  create mode 100755 tests/generic/764
+>  create mode 100644 tests/generic/764.out
+> 
+> diff --git a/tests/generic/764 b/tests/generic/764
+> new file mode 100755
+> index 00000000..57d21095
+> --- /dev/null
+> +++ b/tests/generic/764
+> @@ -0,0 +1,78 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 SUSE Linux Products GmbH.  All Rights Reserved.
+> +#
+> +# FS QA Test 764
+> +#
+> +# Test that if we fsync a file that has no more hard links, power fail and then
+> +# mount the filesystem, after the journal/log is replayed, the file doesn't
+> +# exists anymore.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick log
+> +
+> +_cleanup()
+> +{
+> +	if [ ! -z $XFS_IO_PID ]; then
 
-Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-Cc: Daeho Jeong <daehojeong@google.com>
-Cc: Jianan Huang <huangjianan@xiaomi.com>
-Signed-off-by: Chao Yu <chao@kernel.org>
----
- tests/f2fs/010     | 68 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/f2fs/010.out |  2 ++
- 2 files changed, 70 insertions(+)
- create mode 100755 tests/f2fs/010
- create mode 100644 tests/f2fs/010.out
+	if [ -n "$XFS_IO_PID" ]; then
 
-diff --git a/tests/f2fs/010 b/tests/f2fs/010
-new file mode 100755
-index 00000000..360c09b9
---- /dev/null
-+++ b/tests/f2fs/010
-@@ -0,0 +1,68 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
-+#
-+# FS QA Test No. f2fs/010
-+#
-+# This is a regression testcase to check whether we will handle database
-+# inode dirty status correctly:
-+# 1. create a regular file, and write data into the file
-+# 2. start transaction on the file (via F2FS_IOC_START_ATOMIC_WRITE)
-+# 3. write transaction data to the file
-+# 4. rename the file
-+# 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
-+# 6. drop caches in order to call f2fs_evict_inode()
-+# It expects kernel panic will gone after we apply commit 03511e936916
-+# ("f2fs: fix inconsistent dirty state of atomic file").
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+_cleanup()
-+{
-+	kill -9 $atomic_write_pid > /dev/null 2>&1
-+	wait
-+	cd /
-+	rm -r -f $tmp.*
-+}
-+
-+_fixed_by_kernel_commit 03511e936916 \
-+	"f2fs: fix inconsistent dirty state of atomic file"
-+
-+_require_scratch
-+_require_command "$F2FS_IO_PROG" f2fs_io
-+
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount >> $seqres.full
-+
-+src_db=$SCRATCH_MNT/src.db
-+dst_db=$SCRATCH_MNT/dst.db
-+
-+# initialize database file
-+$XFS_IO_PROG -c "pwrite 0 4k" -c "fsync" -f $src_db >> $seqres.full
-+
-+# sync filesystem to clear dirty inode
-+sync
-+
-+# start atomic_write on src.db database file and commit transaction after 3000ms
-+$F2FS_IO_PROG write 1 0 0 zero atomic_commit $src_db 3000 >> $seqres.full &
-+atomic_write_pid=$!
-+
-+# wait a moment to let atomic write starts
-+sleep 1
-+
-+# it will dirty inode when updating i_pino
-+mv $src_db $dst_db
-+
-+# wait for atomic_write commit completion
-+sleep 4
-+
-+# drop caches in order to call f2fs_evict_inode()
-+echo 3 > /proc/sys/vm/drop_caches
-+
-+wait $atomic_write_pid
-+
-+echo "Silence is golden"
-+
-+status=0
-+exit
-diff --git a/tests/f2fs/010.out b/tests/f2fs/010.out
-new file mode 100644
-index 00000000..1d83a8d6
---- /dev/null
-+++ b/tests/f2fs/010.out
-@@ -0,0 +1,2 @@
-+QA output created by 010
-+Silence is golden
+> +		kill $XFS_IO_PID > /dev/null 2>&1
+> +		wait $XFS_IO_PID > /dev/null 2>&1
+> +	fi
+> +	_cleanup_flakey
+> +	cd /
+> +	rm -r -f $tmp.*
+> +}
+> +
+> +. ./common/dmflakey
+> +
+> +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
+> +	"btrfs: fix fsync of files with no hard links not persisting deletion"
+> +
+> +_require_scratch
+> +_require_dm_target flakey
+> +_require_mknod
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
+> +_require_metadata_journaling $SCRATCH_DEV
+> +_init_flakey
+> +_mount_flakey
+> +
+> +touch $SCRATCH_MNT/foo
+> +
+> +# Commit the current transaction and persist the file.
+> +_scratch_sync
+> +
+> +# A fifo to communicate with a background xfs_io process that will fsync the
+> +# file after we deleted its hard link while it's open by xfs_io.
+> +mkfifo $SCRATCH_MNT/fifo
+> +
+> +tail -f $SCRATCH_MNT/fifo | $XFS_IO_PROG $SCRATCH_MNT/foo >>$seqres.full &
+> +XFS_IO_PID=$!
+> +
+> +# Give some time for the xfs_io process to open a file descriptor for the file.
+> +sleep 1
+> +
+> +# Now while the file is open by the xfs_io process, delete its only hard link.
+> +rm -f $SCRATCH_MNT/foo
+> +
+> +# Now that it has no more hard links, make the xfs_io process fsync it.
+> +echo "fsync" > $SCRATCH_MNT/fifo
+> +
+> +# Terminate the xfs_io process so that we can unmount.
+> +echo "quit" > $SCRATCH_MNT/fifo
+> +wait $XFS_IO_PID
+> +unset XFS_IO_PID
+
+So this is effectively src/multi_open_unlink.c with an added fsync
+after the unlink() call.
+
+Wouldn't it be better to add a "-F" option to multi_open_unlink.c to
+tell it to fsync after the unlink to src/multi_open_unlink.c, and
+then the test becomes a lot simpler
+
+> +# Simulate a power failure and then mount again the filesystem to replay the
+> +# journal/log.
+> +_flakey_drop_and_remount
+> +
+> +# We don't expect the file to exist anymore, since it was fsynced when it had no
+> +# more hard links.
+> +[ -f $SCRATCH_MNT/foo ] && echo "file foo still exists"
+
+`ls $SCRATCH_MNT` and let the golden image match fail because
+there's output when the file still exists. i.e. the ls command
+should be silent if the test passes.
+
+> +_unmount_flakey
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+
+OK, so this seems to me that the test could be written as:
+
+	src/multi_open_unlink -F -f $SCRATCH_MNT -s 0 -n 1
+	_flakey_drop_and_remount
+
+	ls $SCRATCH_MNT
+	_unmount_flakey
+
+	echo "Silence is golden"
+	status=0
+	exit
+
+if we add a few lines of code to add fsync support to
+src/multi_open_unlink.c...
+
+-Dave.
 -- 
-2.48.1
-
+Dave Chinner
+david@fromorbit.com
