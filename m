@@ -1,204 +1,186 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9DBE92594B7;
-	Tue, 25 Mar 2025 12:24:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51C04277803
+	for <fstests@vger.kernel.org>; Tue, 25 Mar 2025 12:55:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742905490; cv=none; b=g6CkpZuBUyc9LB5LUZLPtZvngtnufiu5BontLgYustoduz717TaZ+muKqQsz/gq+M3SL+GG6mPjjGP32r/O9dqGt5ygiZ3g39BPbXKRVfwoCMhA2E9rB/Cw9w31DgMXUIv/obApuDqm4KW+rb+2itQcgmW9ENgL092WsWtnd7+8=
+	t=1742907312; cv=none; b=eslmrhPDRhh0lRyXryj6YJZgfpDfWxN8aWZTVJwafjZJg28MwOQAGDBd8HNiDCGQTWWIejKSROQ3udGldxmStAs8HgEdfpyQoHGxFnP6itRXAPO8Eh/wSzZcZdAQGi6YCAYR2bq6wWJtWuXkVwsVEo73z+L52Hswxf7qCoyQ3gQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742905490; c=relaxed/simple;
-	bh=IfdcHatEmipxRsn5wUmDJUnnTto6PmTIwLIFvNib0NQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=eJjwAkWlHi/repWFlJdbd4aIhkxMo4t0i/xCXNrIRb/HmDaQ9sRmXN4gnQwfbz9RU1z8DcfZqCIRwt5O+RxQlMqhTIwaBy8J0TCuMJzvbeKPCR8mG2neAxUx69MVYgp8gMPXEiejX8XgeaXdsjov42GQRbYlFacr/ohgYdRCh/U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mt8ILXaQ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1742907312; c=relaxed/simple;
+	bh=Kfw42C6tDQ+goG19KwTiJ4ohGwXs3Iv/EnsP7pZVEw4=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=uH0AB1M2wvtyE9DN/SQNYQcPqHLO4lRxtLdxSMgAiIpzF4Jy+zrYOShnsQKgCvmARyt0w8bTEA+5BarehyF/YzwpWdrztBeKsCu2JCJyX90Rm7ajEkEsf5iDBd0aUvQwtvpy39rTokkxfOZTlA4Mqi9ao9DbF7yrW9Xgk9KNelY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jTGw74w+; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mt8ILXaQ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 23541C4CEEE;
-	Tue, 25 Mar 2025 12:24:48 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jTGw74w+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 578FAC4AF0B;
+	Tue, 25 Mar 2025 12:55:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1742905490;
-	bh=IfdcHatEmipxRsn5wUmDJUnnTto6PmTIwLIFvNib0NQ=;
-	h=From:To:Cc:Subject:Date:From;
-	b=mt8ILXaQRQaxpCWOIYZU0uzqdXjQsAU1MCgsQuGpEIQPZpEpu9GkVfTQYIUAkETeP
-	 KVxTTHoap7Fnwf0Lq7QW3wiGSS4td7tyWJfZLnDNc5N+7z4yR6jPxrywOe396e8154
-	 q1N+GTn6T3b5xZsu04cn9fxYJusDMyMQ8YK8WynEyebDuQeK4NZVFIMjJQ+Xdz3UTK
-	 gBG60XvaMqzLo6TRVgxcGqiB8z/kmHd8K0wNhkKlKL2tUTuyQ0ZZNt9s7d9BHBrvn4
-	 DmKHCt8Ru4CGgohaPzMy2FXtncYnhxsE0lINTpQAghCnHrHsWW134e1G0+/fWoJjzR
-	 lpszIUsMC2Arg==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v2] generic: test fsync of file with no more hard links
-Date: Tue, 25 Mar 2025 12:24:40 +0000
-Message-ID: <9a9c54e662293fb01591c256dd32243b1a149fe2.1742905343.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.45.2
+	s=k20201202; t=1742907311;
+	bh=Kfw42C6tDQ+goG19KwTiJ4ohGwXs3Iv/EnsP7pZVEw4=;
+	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
+	b=jTGw74w+bYHU354IX+4j3pncVpAd1WQXe36LyM6cd8TToxzmR80jSm9TQfypLTVLs
+	 IECD9ViwnwmaYEdHMMZuxX0ZW3nDy0LxECVBXkfWPYfrCSS8xX8zj+tR7qW7tfytsv
+	 fe9Aaa1qp6KmmH7dsExF9xVuLbjC/kZ16U/1Iagcql4/5H0MLbgXfnVWliibjJ3+bV
+	 usw1rywY9hxcKe6KzXTSIFi1+nLKQSg1t42Km9SODcS/O0T4TtsorvOkDRnLuxJiqQ
+	 anmBIx5PsrRHndUqBzZQbHshpENfG921tZx3XEC5EAhAhvibocul5Z1A8xdS1nnzZw
+	 DcHsRa6D3oyhQ==
+Message-ID: <68e0cf2c-31f2-47b6-a789-df2df3763856@kernel.org>
+Date: Tue, 25 Mar 2025 20:55:07 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Cc: chao@kernel.org, Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+ jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH v4 6/6] f2fs/009: detect and repair nlink corruption
+To: Dave Chinner <david@fromorbit.com>
+References: <20250312072309.3989074-1-chao@kernel.org>
+ <20250312072309.3989074-6-chao@kernel.org>
+ <Z-J0LnCEWX2bo9LF@dread.disaster.area>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <Z-J0LnCEWX2bo9LF@dread.disaster.area>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-From: Filipe Manana <fdmanana@suse.com>
+On 3/25/25 17:15, Dave Chinner wrote:
+> On Wed, Mar 12, 2025 at 03:23:09PM +0800, Chao Yu wrote:
+>> This is a regression test to check whether fsck can handle corrupted
+>> nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
+>> and expects fsck.f2fs can detect such corruption and do the repair.
+>>
+>> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+>> Signed-off-by: Chao Yu <chao@kernel.org>
+>> ---
+>> v4:
+>> - remove unnecessary "_require_command fsck.f2fs"
+>> - clean up _fixed_by_git_commit line
+>> - fix to clean all tmp files in _cleanup
+>>  tests/f2fs/009     | 147 +++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/f2fs/009.out |   2 +
+>>  2 files changed, 149 insertions(+)
+>>  create mode 100755 tests/f2fs/009
+>>  create mode 100644 tests/f2fs/009.out
+>>
+>> diff --git a/tests/f2fs/009 b/tests/f2fs/009
+>> new file mode 100755
+>> index 00000000..9120d8a5
+>> --- /dev/null
+>> +++ b/tests/f2fs/009
+>> @@ -0,0 +1,147 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
+>> +#
+>> +# FS QA Test No. f2fs/009
+>> +#
+>> +# This is a regression test to check whether fsck can handle corrupted
+>> +# nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
+>> +# and expects fsck.f2fs can detect such corruption and do the repair.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick
+>> +
+>> +if [ ! -x "$(type -P socket)" ]; then
+>> +	_notrun "Couldn't find socket"
+>> +fi
+>> +
+>> +_require_scratch
+>> +_require_command "$F2FS_INJECT_PROG" inject.f2fs
+>> +
+>> +_fixed_by_git_commit f2fs-tools 958cd6e \
+>> +	"fsck.f2fs: support to repair corrupted i_links"
+>> +
+>> +filename=$SCRATCH_MNT/foo
+>> +hardlink=$SCRATCH_MNT/bar
+>> +
+>> +_cleanup()
+>> +{
+>> +	if [ -n "$pid" ]; then
+>> +		kill $pid &> /dev/null
+>> +		wait
+>> +	fi
+>> +	cd /
+>> +	rm -r -f $tmp.*
+>> +}
+>> +
+>> +for ((i=0;i<14;i++)) do
+>> +	echo "round: " $i >> $seqres.full
+>> +
+>> +	_scratch_mkfs >> $seqres.full
+>> +	_scratch_mount
+>> +
+>> +	if [ $i == 0 ]; then
+>> +		touch $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		nlink=0
+>> +	elif [ $i == 1 ]; then
+> .....
+> 
+> Ok, it works, but it's a bit nasty. You want to run the same
+> injection and checking on all types of inodes, so factor that out
+> like so:
+> 
+> inject_and_check()
+> {
+> 	local nlink=$1
+> 	local ino=`stat -c '%i' $filename`
+> 
+> 	echo "ino:"$ino >> $seqres.full
+> 	echo "nlink:"$nlink >> $seqres.full
+> 
+> 	_scratch_unmount
+> 
+> 	$F2FS_INJECT_PROG --node --mb i_links --nid $ino --val $nlink $SCRATCH_DEV \
+> 		>> $seqres.full || _fail "fail to inject"
+> 
+> 	_check_scratch_fs >> $seqres.full 2>&1 && _fail "can't find corruption"
+> 	_repair_scratch_fs >> $seqres.full
+> 	_check_scratch_fs >> $seqres.full 2>&1 || _fail "fsck can't fix corruption"
+> 
+> 	_scratch_mount
+> 	_scratch_unmount
+> 
+> 	_scratch_mkfs >> $seqres.full
+> 	_scratch_mount
+> }
+> 
+> And now most of the test cases become this:
+> 
+> _scratch_mkfs >> $seqres.full
+> _scratch_mount
+> 
+> touch $filename
+> inject_and_check 0
+> 
+> mkdir $filename
+> inject_and_check 1
+> 
+> mknod $filename c 9 0
+> inject_and_check 0
+> 
+> mknod $filename b 8 0
+> inject_and_check 0
+> 
+> .....
+> 
+> The whacky cases with socket and orphan inodes can be handled
+> by factoring inject_and_check so there's a second function that
+> takes both ino and nlink as parameters.
+> 
+> This gets rid of all the unnecessary if/elif logic and looping, 
+> leaving only the test code that does the work behind.
 
-Test that if we fsync a file that has no more hard links, power fail and
-then mount the filesystem, after the journal/log is replayed, the file
-doesn't exists anymore.
+Thanks a lot for the suggestion, it will be more clean w/ above
+implementation, will update v5.
 
-This exercises a bug recently found and fixed by the following patch for
-the linux kernel:
+Thanks,
 
-   btrfs: fix fsync of files with no hard links not persisting deletion
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
-
-V2: Use the src/multi_open_unlink.c program with added options to sync
-    filesystem after creating files and fsync files after the unlink.
-
- src/multi_open_unlink.c | 24 ++++++++++++++++++--
- tests/generic/764       | 50 +++++++++++++++++++++++++++++++++++++++++
- tests/generic/764.out   |  2 ++
- 3 files changed, 74 insertions(+), 2 deletions(-)
- create mode 100755 tests/generic/764
- create mode 100644 tests/generic/764.out
-
-diff --git a/src/multi_open_unlink.c b/src/multi_open_unlink.c
-index c221d39e..fb054e87 100644
---- a/src/multi_open_unlink.c
-+++ b/src/multi_open_unlink.c
-@@ -28,7 +28,7 @@
- void
- usage(char *prog)
- {
--	fprintf(stderr, "Usage: %s [-e num-eas] [-f path_prefix] [-n num_files] [-s sleep_time] [-v ea-valuesize] \n", prog);
-+	fprintf(stderr, "Usage: %s [-e num-eas] [-f path_prefix] [-F] [-n num_files] [-s sleep_time] [-S] [-v ea-valuesize] \n", prog);
- 	exit(1);
- }
- 
-@@ -44,8 +44,10 @@ main(int argc, char *argv[])
- 	int value_size = MAX_VALUELEN;
- 	int fd = -1;
- 	int i,j,c;
-+	int fsync_files = 0;
-+	int sync_fs = 0;
- 
--	while ((c = getopt(argc, argv, "e:f:n:s:v:")) != EOF) {
-+	while ((c = getopt(argc, argv, "e:f:Fn:s:Sv:")) != EOF) {
- 		switch (c) {
- 			case 'e':   /* create eas */
- 				num_eas = atoi(optarg);
-@@ -53,12 +55,18 @@ main(int argc, char *argv[])
- 			case 'f':   /* file prefix */
- 				given_path = optarg;
- 				break;
-+			case 'F':   /* fsync files after unlink */
-+				fsync_files = 1;
-+				break;
- 			case 'n':   /* number of files */
- 				num_files = atoi(optarg);
- 				break;
- 			case 's':   /* sleep time */
- 				sleep_time = atoi(optarg);
- 				break;
-+			case 'S':   /* sync fs after creating files */
-+				sync_fs = 1;
-+				break;
- 			case 'v':  /* value size on eas */
- 				value_size = atoi(optarg);
- 				break;
-@@ -83,6 +91,12 @@ main(int argc, char *argv[])
- 			return 1;
- 		}
- 
-+		if (sync_fs && syncfs(fd) == -1) {
-+			fprintf(stderr, "%s: failed to sync filesystem: %s\n",
-+				prog, strerror(errno));
-+			return 1;
-+		}
-+
- 		/* set the EAs */
- 		for (j = 0; j < num_eas; j++) {
- 			int sts;
-@@ -111,6 +125,12 @@ main(int argc, char *argv[])
- 				prog, path, strerror(errno));
- 			return 1;
- 		}
-+
-+		if (fsync_files && fsync(fd) == -1) {
-+			fprintf(stderr, "%s: failed to fsync \"%s\": %s\n",
-+				prog, path, strerror(errno));
-+			return 1;
-+		}
- 	}
- 
- 	sleep(sleep_time);
-diff --git a/tests/generic/764 b/tests/generic/764
-new file mode 100755
-index 00000000..1b21bc02
---- /dev/null
-+++ b/tests/generic/764
-@@ -0,0 +1,50 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# FS QA Test 764
-+#
-+# Test that if we fsync a file that has no more hard links, power fail and then
-+# mount the filesystem, after the journal/log is replayed, the file doesn't
-+# exists anymore.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick log
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -r -f $tmp.*
-+}
-+
-+. ./common/dmflakey
-+
-+[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: fix fsync of files with no hard links not persisting deletion"
-+
-+_require_scratch
-+_require_dm_target flakey
-+_require_test_program "multi_open_unlink"
-+
-+_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+_mount_flakey
-+
-+mkdir $SCRATCH_MNT/testdir
-+$here/src/multi_open_unlink -f $SCRATCH_MNT/testdir/foo -F -S -n 1 -s 0
-+
-+# Simulate a power failure and then mount again the filesystem to replay the
-+# journal/log.
-+_flakey_drop_and_remount
-+
-+# We don't expect the file to exist anymore, since it was fsynced when it had no
-+# more hard links.
-+ls $SCRATCH_MNT/testdir
-+
-+_unmount_flakey
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/764.out b/tests/generic/764.out
-new file mode 100644
-index 00000000..bb58e5b8
---- /dev/null
-+++ b/tests/generic/764.out
-@@ -0,0 +1,2 @@
-+QA output created by 764
-+Silence is golden
--- 
-2.45.2
+> 
+> -Dave.
 
