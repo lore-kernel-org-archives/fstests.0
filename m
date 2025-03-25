@@ -1,214 +1,231 @@
-Received: from mail-pl1-f178.google.com (mail-pl1-f178.google.com [209.85.214.178])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E9D52E3399
-	for <fstests@vger.kernel.org>; Tue, 25 Mar 2025 09:15:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.178
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742894132; cv=none; b=svV54RndQTZ+44XrQ1Ir2gmFNyIrAeIcRVbBRmAUpzxN77bIm9zcBalq4y0tDzYkXKcQG6ryxHBBRfd7SiW8riU/EbGjnWjro1oPIHZrlzMPwbacQvMpfjze0t4mtYiUMF8bhHyuQco+jqn173iFuWX5wNQIM3xZ2smzeNcBDBI=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742894132; c=relaxed/simple;
-	bh=BDYl50AWJpEUL6kl8zVcz5BaIDFlUGP2gRwRKgyKzio=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=eZiSJIP2Z6be4RtbHBb6cvSDt4x7JdfSUi/xr6FruA/QQEeTAGlUtTjbTLpwn7Z/L4fMO02aL/pmfE0jkxd/z/h/yRgp7k5IVFLyPBkG/ad4b/OkH/rxBVNFroRKV3AH/4R96RR3QS0E40AmF/eBlNaDhnjRHz0LMDfPwTyonbU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=r2yhSP6c; arc=none smtp.client-ip=209.85.214.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 00EB41EA7E7;
+	Tue, 25 Mar 2025 10:52:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1742899962; cv=fail; b=R+aU+f2aDl1hg7Jm/pDD7AKHHAQkqHKKOvaJEkxEsQPnrnHo9/8fGnSR2hUuxwnQ27/+XexNhH9vBFrDpgbLHjhcRVS81lYlUQTT1iH7gYidChFrnDnXJW6io5sFHv6xso0ejN6m4WjTtnPpHXtKN/eq+Vq2xCsQblLhmGA+RhQ=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1742899962; c=relaxed/simple;
+	bh=KGyIyCQnBKqhaui/h3TKylM46zoSYoweaPaDKOE3qnw=;
+	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=IV4COKLyrhiVHa9zD/MgSmax7P54pKgtXsi65xDhcWuJtbRFEISwb1CDzRnd540pGBP9W2q/Itm1aOqFkgFxi1zA9ctsVqvtICDhNMbF0QpeX0z8grNb0Jn4kRIQkiSPahjr3bYSHe/EAY+TbjIgCEg5weRh5qixDBjrizKA6Es=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=RDq11AJH; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=tNoC6rPR; arc=fail smtp.client-ip=205.220.165.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="r2yhSP6c"
-Received: by mail-pl1-f178.google.com with SMTP id d9443c01a7336-22580c9ee0aso104775845ad.2
-        for <fstests@vger.kernel.org>; Tue, 25 Mar 2025 02:15:30 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="RDq11AJH";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="tNoC6rPR"
+Received: from pps.filterd (m0246629.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 52P2txg1030292;
+	Tue, 25 Mar 2025 10:52:35 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
+	:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=
+	corp-2023-11-20; bh=+MUM/2Z7ug1YSaQ/qygiYjx6MI80NQi3NcRuAJOSA3w=; b=
+	RDq11AJH/3eYvMXYhku1xvT79XOSt5WWP4RjBcfWe7wazhRZyO33faydurBgB/sx
+	qF9kX6/L678PmrdQyZru8koSxnvyfyKBllqLISIP01XwYzFw5kNGGcgpOtUnXaQJ
+	P+0xHPIrCxC+tXaZNCirxXREDKAK2+gpxFPa9CMeAbyXuYPLL3NXClXtSoE1sA2d
+	7zZMuuxWg2XCDhPH5LN4q6Nu12inAhgNrZFqia52qRyP4yl/qOqmlZ4TjOZV6UFj
+	wKe3Mbgqg++wDY/vL7e0G9nET4ArL+h44/Y+gAayVakb2Npn1tSnpkedAO6eJ0kB
+	8OEBaDVg1h4KpxVgURH15g==
+Received: from iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta02.appoci.oracle.com [147.154.18.20])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 45hn86xhny-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 25 Mar 2025 10:52:34 +0000 (GMT)
+Received: from pps.filterd (iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 52P9iRXm022883;
+	Tue, 25 Mar 2025 10:52:33 GMT
+Received: from nam11-dm6-obe.outbound.protection.outlook.com (mail-dm6nam11lp2168.outbound.protection.outlook.com [104.47.57.168])
+	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 45jjcddwyn-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 25 Mar 2025 10:52:33 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=GRcklMhjnHognPsNahtHiaSTbA/p5zRlj8isfFQgGyCwPFhrJVOwZzAM3xhmFFROV9bQKKwafF/K1jsUuSRIavmeiB/pJeotqPIFWJrw7rZhP0snkUEw/3ffz7SBKgn6e/xAKL4oiCFi7stXXmaLYgzDLCgsRgIv9wwrWrBkueP1cm4lnDLTYZwVO0BREBz1zFvjyIe4Pg5lJtCHM4f7xaksd/GtrCcGSqGI+rSN+1ZyNlOWJqc2kE/c/WKIA67jNyW+TCVHsSIPAwjNS6XMT9dElf6NXsTDHgsUw7X3OL/452oT1kPMVQlO4VDv0j1dpFQDm9tBe4/EEQvaeXNx8A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=+MUM/2Z7ug1YSaQ/qygiYjx6MI80NQi3NcRuAJOSA3w=;
+ b=JzTe9KvWgcvZ38lJHXuHMTjIxmLZkdct5m79MmUYvlsWtEhBDlndsVHSKQD49ay7HHxuuRdMJfniixv7GobCM98s0wFZpQXkumfX6GAYkwYxrLZ57FRAfjkxCZnYHoT24QvQO4QjJtZ9xNCm5ontEQMDqMAsETAZxkjDW5WvUxnPIQki+JKnzRTqj8CMQtcHrPRZYx9p5iRljpvXLo9hdxSANlWxT6loGnCxMBczpMpX1ykZ7vPAG2QcXYKk0WNpnJbC8cdtQ1wjKP6y8I8ymwWfBmTYhswNJI7d+dsM2wQptihwe2L6NXk7k3ag9K18eitZK9GCAZ6ZHv0x5YH1Yw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1742894130; x=1743498930; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=PuWY4FxnO4+NOwwcfeuO+0rdzoMVdvrsuUW0ofjodWo=;
-        b=r2yhSP6cQpHk++8J2lfJ9xo24UQ2F83la2BddIeR+s+9yXGx8MgXlKCz3uRVuRdttC
-         ZFEJ2mil2ukosFQydbDnYQ2eBdzQQ5YYj6hpxlXl7SJ78vuwZawyHdBlGP8Xr76QKs3A
-         SXu52ZLTLtPvXK5vBLlDEGAjXiHWzrPe7YTXk3KRXTJsRg+K77sgw8B62Jydl9cMdLh6
-         1JBzUFOK2pjr5300tpHnEJ37wzbdRrk/Kb0U6PiDonQUm4pBjB/t+H4EljzA6zUqWDwr
-         DxKYUGVPV3BE8QGXrTal9uak/mazXXmZSQ8QmhC73KrLQql/m5cjZQb9FXy1Gfe/pi9v
-         4VTA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1742894130; x=1743498930;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=PuWY4FxnO4+NOwwcfeuO+0rdzoMVdvrsuUW0ofjodWo=;
-        b=ebgu/DvwelHUoSKINWQAxUsTaU/f0kUpQ5IKZGfTQsgme17NsRkAaYex1Ntr7jjTAr
-         cT0QyeruhvNSikjsK3luhrILwJGAxNjIvX+XfvDqhC1/iSL9fCoLjOZH83EFiy5R+GrR
-         sIaEXqxjHBI/vDRtH4l+Hf5niEx+jG0pM+Takc/bJJTyCd+IepkO+1XZwY0yCH+w5ITY
-         SaxlCu5s467mSYCnNNvBgkwq6xTRjwrrjuROFUHaAdgro0uEcHHfgXEutS65kDPlNU0F
-         TcuoTPE/iWj4Vwcl5ZPIfQ4S3K0HfJu03+/i8xrz+MHiL1KTDxqKnFzQfmON+ij8sZE6
-         bOtQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXzan0IkOIyw1Xd1TyOlgJ9ft9mgC7Vz0mWnHli5koWrVFj+NWAAI90irp9eF3z/KUci3fon+2R@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw4qvnqoaj0uAaPD6f9pilH3UIOepdjKu8nubBZlQvWVPj9rAg4
-	e63vxH5AMCi4osZCCzEey++kOZSiVjh2iuqLiSILUx6j/T0y27GyYzBAS5jTkOEn0hZ4saQQg02
-	r
-X-Gm-Gg: ASbGncvgUbdd8Gl7y8iVAkb5Ej/qWHm9Dlqe/IwUuCwtmXjCYnbR3dJWRoawEcMcSXV
-	vcByXsIR3nGgHtqHneuX84Zf8vyc0vi/fjpp8fnL1pEm1LJX/GKVhVONpA7sSzx8+YXWaYfzizp
-	QU4aHU+rxQb+qse/JeY0+24+Ex9eTyJt/NkJwtHgyv7nCnhkvvZMH6SxjJB/bby48wdRecmC5gj
-	NBnB+1sx1yzz2uiLfubXbtil5mqJEV10QLyJpac3yuJ7ND95M/gopag1KiLzvzsAjrH+5xOdewo
-	8j3SLs1GKsLbj/hC7Zd/xWtkUTrchysWdbE7+TOxgG8fBz+FKCufaW09CzUw3RhHVBNgXJc3XKi
-	HViVWI2CPkUa85pDBew9MDoSSi4bN9zM=
-X-Google-Smtp-Source: AGHT+IE7mretUNcH2qauevhGMcyv2ME+bUwpr7TkZvXTiCQuz3MoKuqVjSbqXqiXrp10chHoDpNk5Q==
-X-Received: by 2002:a05:6a20:914e:b0:1f5:862b:a583 with SMTP id adf61e73a8af0-1fe4342cc3emr34821170637.34.1742894130098;
-        Tue, 25 Mar 2025 02:15:30 -0700 (PDT)
-Received: from dread.disaster.area (pa49-186-36-239.pa.vic.optusnet.com.au. [49.186.36.239])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7390600a75asm9575168b3a.84.2025.03.25.02.15.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 25 Mar 2025 02:15:29 -0700 (PDT)
-Received: from dave by dread.disaster.area with local (Exim 4.98)
-	(envelope-from <david@fromorbit.com>)
-	id 1tx0Na-0000000033c-36Np;
-	Tue, 25 Mar 2025 20:15:26 +1100
-Date: Tue, 25 Mar 2025 20:15:26 +1100
-From: Dave Chinner <david@fromorbit.com>
-To: Chao Yu <chao@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v4 6/6] f2fs/009: detect and repair nlink corruption
-Message-ID: <Z-J0LnCEWX2bo9LF@dread.disaster.area>
-References: <20250312072309.3989074-1-chao@kernel.org>
- <20250312072309.3989074-6-chao@kernel.org>
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=+MUM/2Z7ug1YSaQ/qygiYjx6MI80NQi3NcRuAJOSA3w=;
+ b=tNoC6rPRaKxfIQe2LyQWnw1tM8p9zBYM5/X0m+aaM4/zeKu0xD0KL6Uo4Zj+K6WFnG2UEe9UnrbnOCgwK69Paz7tYTPPs0eXNjZ3Obd5Nwv9Zip7IwweJ0Q/lrP5JTgL/1xQRb8xEaeqXbzGXXz7InRxOFZal2hEZB5A93npoDA=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by MN2PR10MB4301.namprd10.prod.outlook.com (2603:10b6:208:1d9::7) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8534.42; Tue, 25 Mar
+ 2025 10:52:30 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::fea:df00:2d94:cb65%5]) with mapi id 15.20.8534.040; Tue, 25 Mar 2025
+ 10:52:30 +0000
+Message-ID: <a4b1056a-feeb-4c0a-bbc7-2d2cebdae8f5@oracle.com>
+Date: Tue, 25 Mar 2025 18:52:25 +0800
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4] fstests: btrfs: zoned: verify RAID conversion with
+ write pointer mismatch
+To: Johannes Thumshirn <jth@kernel.org>, Zorro Lang <zlang@redhat.com>,
+        Filipe Manana <fdmanana@suse.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>
+References: <8390a7748c1e2005fb7b9dbc1f5e6bd38ea22506.1742382386.git.jth@kernel.org>
+Content-Language: en-US
+From: Anand Jain <anand.jain@oracle.com>
+In-Reply-To: <8390a7748c1e2005fb7b9dbc1f5e6bd38ea22506.1742382386.git.jth@kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: SG2PR02CA0084.apcprd02.prod.outlook.com
+ (2603:1096:4:90::24) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250312072309.3989074-6-chao@kernel.org>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|MN2PR10MB4301:EE_
+X-MS-Office365-Filtering-Correlation-Id: 5d450f53-8601-458d-384e-08dd6b8b23d1
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|376014|366016|1800799024;
+X-Microsoft-Antispam-Message-Info:
+	=?utf-8?B?bVBSemVhZHZtaEVOQTN6TUZPN0lKR1d6V1RDaXU2bXNxMnFJamlqTzlRUzhi?=
+ =?utf-8?B?L3pNQ2ZQcWVCTnY2M0pEWkJZUFJoMmZQbCs5Z20yajdUQUNuR09NSUxWQlRW?=
+ =?utf-8?B?U094NkRyemp6NE15cmpycE5rNU5QWk5iRnpUK3FBbzZuS2xTV1pURzhqaExV?=
+ =?utf-8?B?V2xFZ3ZZNXNORzFpdFovNWVNUW1Ieml2dFVyaU0wWWxvY2c2WGRZdmZOZ3JS?=
+ =?utf-8?B?NzFUZFE4d0x6dzVOMnFtWEJiTDBXQ2g3bHQ5NllFVUkyTjRJZ0I5dWJoNTVj?=
+ =?utf-8?B?SnpQNjg4c3k0OU9uK1V3N1ZBdFBVbWxLaFNEOFJLNFhOdHVCdTVabm5wOWJ5?=
+ =?utf-8?B?UzJldVpEM001V3lwRkFleXhmUVZjWWNvQlZLZFNGRkZlQkR1STJZaGVEL1ZQ?=
+ =?utf-8?B?dFpTK2hCdmhtYWRwR25NL2dLeFVaSDBmNHcvaXkrd2ZTVXpMMUMzVEZOMEZL?=
+ =?utf-8?B?aS8rd0RzNWQ3a3A5SHJHNGp1bXM0K0lBMENXOHJoWmhrdVNBYjBZeTNjcXIy?=
+ =?utf-8?B?UC91WVZRdUV6aWtUOEI1ZXUxSER2c04vTi9xelBITFBNOHlmZVpOdGhuZWFR?=
+ =?utf-8?B?dFZuZXYzYldueGJpTkU0Z1hKdnZ4eDZmYnU3emVXcTVRT1ZhVkxOSDN2V0o3?=
+ =?utf-8?B?NVVaUUhqVDFIOHp1aUdESzlIWFF4OENuL3FZbGhycGJvL09GaWtNVWRNYmVH?=
+ =?utf-8?B?Y0Q1MkN6ZnNjaTV4dTh5T25GNXEwd0xHS2I1RC9ObXNUZmVGWmk3THMyNXBu?=
+ =?utf-8?B?aVVZdUNsbzZ6bmVsSkVkYUNnUDVGMUtJbmVLbVozY0srK3BvZ3JTUXBQVnl0?=
+ =?utf-8?B?MHR3SEdwaHh2VFpnM21Sbkd4RE1RaUpQMUFDcWR5WklONTNWN0tPbmI1Unht?=
+ =?utf-8?B?L0NJaW5WVUZKTUZLSEtTWGRWMWsrdU9Xem1KWjlPMENmREtIQlJWSUxPdTUv?=
+ =?utf-8?B?UmZMT3F6SWtvMGNZb2dYV040VHQ5bnZYbkw3Zm0xQUxQVzhuWldXSSt3WlVn?=
+ =?utf-8?B?WG1xcWg2RWRKV1hIcm91NFdXOE1sRXNKYjZ1ZTBxY3UyMnJNZDIvR1hlMEVw?=
+ =?utf-8?B?cktrS0prNkFETnFJaWlLeU1JVHRvOStZVVFDMUtEdzJWd2FlTndYM0U3dEpp?=
+ =?utf-8?B?UldJRlVWOU56SjkyUktzMHlKZTRwdVcrajI4aitFM1NiQVd6cmJaVEpKaS9N?=
+ =?utf-8?B?bU90UWpGODFaYmZLQ0RpZlZJOC9uVllkenRRUVV4bGxxS0UrcVhTUHlmaERS?=
+ =?utf-8?B?TEZJNzg4dC9OK0RKamdOOFovQWMzcE5SaWVOellqZUtPMHNYNTdiS0tCcGhX?=
+ =?utf-8?B?bThwdTE2S1ZrYnZDRmlOcGJ0WHZJWXYvdG5wSVZBeUFrODN6NUx2RXN2Zm5u?=
+ =?utf-8?B?UGJBdUV6MnNPcFJvUXRYZ3VlOG9jay9KN21qSjFDZ29DcmU5cU5xUFE4WWtH?=
+ =?utf-8?B?eWFvMWVLWlFLVEQ4UUdrOXpUSWo5WEJvd0FnSjFlQzJjV0FLZXc1VmpNWjJ2?=
+ =?utf-8?B?YXNRanZLZkFHQjh2TjhGdFovVW9ienVmUEhwN0syWk1tU0lCWXFEVTlOZEhm?=
+ =?utf-8?B?eVNTVnNnNHBac1U3MThudk1Nb3JQMWVyY09KRUZZekk1UWhpY2QvakFNQnFZ?=
+ =?utf-8?B?a20zYkgvTzVKVFBValE4MmVPOURoR2hKbUs2TlowZUZ0NUM0Z2NLOW9pVUky?=
+ =?utf-8?B?MjlSRVpxa0FHb2crK3hwbnRreEJKOS85aTg3akZIOGY2KzNNKzMrS2podk01?=
+ =?utf-8?B?UWVuM2w1SjFHUmlsbXl6UkR1dDUwemsvTFE1Q2xkVHhidDg5MEVGaWFtcXFo?=
+ =?utf-8?B?VEhFR1VSa1drUnFJK3djRzlOdTlFNEJjQ1VNTUZBYnY2dktJdWtkM1E2YXBj?=
+ =?utf-8?Q?1Wj3lNSA+6vv5?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(366016)(1800799024);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?c2o1c2V5UTNaNjdEUmxnUk1wcjU0N3dKbTBMbDhwNTdxVGREdkZEQmxFVHlT?=
+ =?utf-8?B?dTk3b1FtY09nVHo2VnpvNmM2d1UvNlBPUE5Uc25NVTA0RGZnWmxzU0VHOGhS?=
+ =?utf-8?B?aHpvUkdiZDNIa1psVlE5YjA2NTVQTkF6U0YvSitpODNUSGRWMFZmM1JGTzd0?=
+ =?utf-8?B?OHppQWQzUEh6SGVlWXJvQVROcGJUSlBGd0ZQU0NhTWhHTUlwM0NhdlFrYjND?=
+ =?utf-8?B?bW0zTEN0aVhSNFJWbk91WWR5WjJhRHNQdGZjSlJGNDJ6WXdhTjJNdzcrUEdp?=
+ =?utf-8?B?OGQxZ1FRRVZKdnEwRjRscHhOcmVDTEtId3gxcGtZanh1c2t3NW1kVG5IWksx?=
+ =?utf-8?B?enYyTW9VWkxwTjFGT01XRXRpQS82TkJoMWlTUnBObjVLbDJicmViaTZaKys3?=
+ =?utf-8?B?dVNQS0lTUnViOU53cmlwbTNSOGl5cS85NEZIblpJWkhxZ0JaT21wYzRJaUdq?=
+ =?utf-8?B?NUphN3NtNmRGSnFWd05oMmRPRVhOd01EbVlnTFhGNmUwSGczLzFXbVJ3K0ZH?=
+ =?utf-8?B?WFRBdmVwNmtPWjhVbUdpTWxTUXA0bTJBV0dLaDNJR3k2TnE5RFlYTzF0UHBB?=
+ =?utf-8?B?NUJNY2hPVkdHV09mcWVmUDdUMVBkelNxOTlXaXV5Q1cvaHdFb2QwL1Y0dHR2?=
+ =?utf-8?B?eGxtcHRqcm9UeGtrKzZzU0lyVmFPNFFuQzhzUjhwa1FxaWlyVWFZQ0FWR2Fa?=
+ =?utf-8?B?QkNtZ0RkU3lnVnVYOWk3Si9yallzUFZBS3pHd1lQNWNEZy91MUE3ZW51MytX?=
+ =?utf-8?B?SjBLOFI0QVFId3IyRC9HRks4SStPcFV2Z0FrcEJoL1NZZ0syeFhuZFBpWE1m?=
+ =?utf-8?B?UkFPTjdUQkphUDVEMU8rN21NZ2loNklrRUMwY3RVT09iU3dZRG0yUk9nU2pY?=
+ =?utf-8?B?Z01ZZEh3d3pzSDRjaW9lM0tNdWhSbm1WNjlYMWhoem56N0Z6dnRXaC9aSElD?=
+ =?utf-8?B?OFAzeThhcktESlF4R2NPZDNYRThoeVl2cG1wUlZwbTNxTS9yWEJLSW1DcGJ4?=
+ =?utf-8?B?NjIyejRqaFQwOTRCUGY3OWhaMjVwWGM5Y2NGZUE2ZkphL2FueUh5NTRWNW1E?=
+ =?utf-8?B?b2xucDh4em53Vys5N0NRUzlXMDkzUXg1R21ld1pORFNLY2dpNGtuMUMvb0lk?=
+ =?utf-8?B?cXgyR1poaXN3SHFIbWhHbDkzbnhkWVlzZ3dRaDYwTkdIM1JLbDh2NkhESFJl?=
+ =?utf-8?B?ZVhtWWpNREFRclkyVjF2Ri9ac25ER3l0NWYxa3R2S1hySGI2YXZHYnhFSm0r?=
+ =?utf-8?B?UllrVm5DaEJkSkdBL2VOWWxid1lmK0tLeG1nUzk5dFJjODJGaUlMNmRUV3ZI?=
+ =?utf-8?B?dnpMcGpOUDFpK3h4dUtkUkRxa2wrTUJrZ2xUbjZLMmpwS2hKVnllb0Vzc2Y3?=
+ =?utf-8?B?bDdNQi9UYWwxRllmNURPN2dhM2VZNGt4bmlZR052VlNtLzZwakdJblI3MVBs?=
+ =?utf-8?B?dTBwRjFudXlQZWx1ZWlFRnVoU0h1MmRxeFhpRXBBc0hRbW16MmVLOGhsUVBM?=
+ =?utf-8?B?NzQ1T202cnJ4a1ZJNVNPbSsrb1YwMDFYTC9wcEFwRm9LdlBwWjNnTk1wRENN?=
+ =?utf-8?B?VUZidEpQeUhvK2ROQ0k3NEx6TE5ZMGNOVnh4enc0ZCtrd3lTelRWM1FMT09a?=
+ =?utf-8?B?R2pucnBQZjRreWowRjBwVDloWkRmZ0Vqa3gvSk5wZzQwaW01eVpGbFZhYllT?=
+ =?utf-8?B?bkUvS0ZYNVZQd2kvNHBCdUQ0T0hnTnFBUzZLWi9MSEFNOXYrYlRpZFlsMms5?=
+ =?utf-8?B?RFVZVHZkRFkraW4xcHM4OUdzSDlTTXloVGQ4R1hiT2Vsb1BtdWp6QlBJbDd5?=
+ =?utf-8?B?dUNZekdZL2JCWnFtR2orRVBDNi82cWxvcW5uOUVOTW1GdEN3bHRsVzE0S0hu?=
+ =?utf-8?B?dlhOWEFCbTR3UkUrU1VyZ0pGMkhhYjlQNXg2aS9TVS96VG5FK216MFNMVTJv?=
+ =?utf-8?B?MzRxa2gwNFJQNnQyZ2cvN1FxU0R0cUlJRVBXak0rNzRud2l3VXJhTEhpb3JR?=
+ =?utf-8?B?Slk2YllQR1JseFBjc1pzMVBZY05EalloS1RVRmlYUnlYTzY4dzc2Yi92OW4x?=
+ =?utf-8?B?VUR1NFZCbk9QclVMZmhhZlNjRjE2M0V1UG9xMTl1Q01IZXNJSzA2QjE4T0ds?=
+ =?utf-8?Q?sQ9nU4bR28cO6OCftvhw/0/Bs?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	mQy+PAyrJp2/5+hzq88rshv7ro6e3RIqmbhcbFDIImEG9HovEFm0t3zRyPtnj8oCVS5rtaDCmOJ7Tw/7aJFN6HkTX4CJykJuVbXNbJL1n20IFzkd1lAkx3yky42YUm13joTKZYZuQIS2Q8RnFTZ7FQ7IpVVAE4ftL9sqhIt4g8V0SNmzoYJPA8DIUZorD0GYdYM7EH12pMnohY3scFJ0KyIunsKLd6oLiRjA9zH1QsrBR1OshhoY53htut51h6ZA+xyNrZFG71zkOyrzH0V25hm2Cn43hgmhXfsVQlm/G4WTF/Jy6CVhISwf8hr3vlwnxJE86sasW299nnqBoJ+8yjiac+tHxQ+2lopr/SLt/1PRvLKvq4CCeDCy8KJvD1E2ivCEUhK6n6Pcy333028Trp2gPIathbonG1WuNL5L66sdG7o9rFczrutcUegOmdNX1bXDbNGUAO7VkF0iHGzOsMgViGVmb0D8ipgeU3afbGFkC84rC7RqChszFmMbuCLzVpNRNTqmz0LLT/ucqn4IVtwj7wXdkxHDST3MNjefkVq/xxS01O+sdnsRoPFY21HF+iUhz3kf2kFJaNK1Nt/bCkHMxeDvD6mc813tQaByfcs=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 5d450f53-8601-458d-384e-08dd6b8b23d1
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Mar 2025 10:52:30.5641
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 7XLNta04T2fIc9J0xRPCIET6sQOVraL/GnnYEqZez6X593DQCPg5S7yaAsMzvtwPKYdsxH+1PkugsnkpgzkTdw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR10MB4301
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1093,Hydra:6.0.680,FMLib:17.12.68.34
+ definitions=2025-03-25_04,2025-03-25_02,2024-11-22_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 phishscore=0 suspectscore=0
+ adultscore=0 malwarescore=0 spamscore=0 mlxlogscore=999 mlxscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2502280000
+ definitions=main-2503250075
+X-Proofpoint-GUID: x8108fvsHwL6WPRxTTElACs6W28ZvzZv
+X-Proofpoint-ORIG-GUID: x8108fvsHwL6WPRxTTElACs6W28ZvzZv
 
-On Wed, Mar 12, 2025 at 03:23:09PM +0800, Chao Yu wrote:
-> This is a regression test to check whether fsck can handle corrupted
-> nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
-> and expects fsck.f2fs can detect such corruption and do the repair.
+On 19/3/25 19:09, Johannes Thumshirn wrote:
+> From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 > 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Signed-off-by: Chao Yu <chao@kernel.org>
+> Recently we had a bug report about a kernel crash that happened when the
+> user was converting a filesystem to use RAID1 for metadata, but for some
+> reason the device's write pointers got out of sync.
+> 
+> Test this scenario by manually injecting de-synchronized write pointer
+> positions and then running conversion to a metadata RAID1 filesystem.
+> 
+> In the testcase also repair the broken filesystem and check if both system
+> and metadata block groups are back to the default 'DUP' profile
+> afterwards.
+> 
+> Link: https://lore.kernel.org/linux-btrfs/CAB_b4sBhDe3tscz=duVyhc9hNE+gu=B8CrgLO152uMyanR8BEA@mail.gmail.com/
+> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+> Reviewed-by: Filipe Manana <fdmanana@suse.com>
 > ---
-> v4:
-> - remove unnecessary "_require_command fsck.f2fs"
-> - clean up _fixed_by_git_commit line
-> - fix to clean all tmp files in _cleanup
->  tests/f2fs/009     | 147 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/f2fs/009.out |   2 +
->  2 files changed, 149 insertions(+)
->  create mode 100755 tests/f2fs/009
->  create mode 100644 tests/f2fs/009.out
-> 
-> diff --git a/tests/f2fs/009 b/tests/f2fs/009
-> new file mode 100755
-> index 00000000..9120d8a5
-> --- /dev/null
-> +++ b/tests/f2fs/009
-> @@ -0,0 +1,147 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
-> +#
-> +# FS QA Test No. f2fs/009
-> +#
-> +# This is a regression test to check whether fsck can handle corrupted
-> +# nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
-> +# and expects fsck.f2fs can detect such corruption and do the repair.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +if [ ! -x "$(type -P socket)" ]; then
-> +	_notrun "Couldn't find socket"
-> +fi
-> +
-> +_require_scratch
-> +_require_command "$F2FS_INJECT_PROG" inject.f2fs
-> +
-> +_fixed_by_git_commit f2fs-tools 958cd6e \
-> +	"fsck.f2fs: support to repair corrupted i_links"
-> +
-> +filename=$SCRATCH_MNT/foo
-> +hardlink=$SCRATCH_MNT/bar
-> +
-> +_cleanup()
-> +{
-> +	if [ -n "$pid" ]; then
-> +		kill $pid &> /dev/null
-> +		wait
-> +	fi
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +
-> +for ((i=0;i<14;i++)) do
-> +	echo "round: " $i >> $seqres.full
-> +
-> +	_scratch_mkfs >> $seqres.full
-> +	_scratch_mount
-> +
-> +	if [ $i == 0 ]; then
-> +		touch $filename
-> +		ino=`stat -c '%i' $filename`
-> +		nlink=0
-> +	elif [ $i == 1 ]; then
-.....
+> Changes to v3:
+> - Limit number of dirtied zones to 64
+> Changes to v2:
+> - Filter SCRATCH_MNT in golden output
+> Changes to v1:
+> - Add test description
+> - Don't redirect stderr to $seqres.full
+> - Use xfs_io instead of dd
+> - Use $SCRATCH_MNT instead of hardcoded mount path
+> - Check that 1st balance command actually fails as it's supposed to
 
-Ok, it works, but it's a bit nasty. You want to run the same
-injection and checking on all types of inodes, so factor that out
-like so:
+Much cleaner. Thx.
 
-inject_and_check()
-{
-	local nlink=$1
-	local ino=`stat -c '%i' $filename`
+Reviewed-by: Anand Jain <anand.jain@oracle.com>
 
-	echo "ino:"$ino >> $seqres.full
-	echo "nlink:"$nlink >> $seqres.full
+Updated.
 
-	_scratch_unmount
-
-	$F2FS_INJECT_PROG --node --mb i_links --nid $ino --val $nlink $SCRATCH_DEV \
-		>> $seqres.full || _fail "fail to inject"
-
-	_check_scratch_fs >> $seqres.full 2>&1 && _fail "can't find corruption"
-	_repair_scratch_fs >> $seqres.full
-	_check_scratch_fs >> $seqres.full 2>&1 || _fail "fsck can't fix corruption"
-
-	_scratch_mount
-	_scratch_unmount
-
-	_scratch_mkfs >> $seqres.full
-	_scratch_mount
-}
-
-And now most of the test cases become this:
-
-_scratch_mkfs >> $seqres.full
-_scratch_mount
-
-touch $filename
-inject_and_check 0
-
-mkdir $filename
-inject_and_check 1
-
-mknod $filename c 9 0
-inject_and_check 0
-
-mknod $filename b 8 0
-inject_and_check 0
-
-.....
-
-The whacky cases with socket and orphan inodes can be handled
-by factoring inject_and_check so there's a second function that
-takes both ino and nlink as parameters.
-
-This gets rid of all the unnecessary if/elif logic and looping, 
-leaving only the test code that does the work behind.
-
--Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Thx.
