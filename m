@@ -1,269 +1,261 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EAE39B666;
-	Tue, 25 Mar 2025 01:20:35 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4212C1891AB
+	for <fstests@vger.kernel.org>; Tue, 25 Mar 2025 06:54:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742865636; cv=none; b=UmLis7wnJTrJ1tYOtwFUFI5oNzFkbflR8cqLAEJb9aBo2zqO8z8lcuCTSkLHA1v/r620YNZ2j/09qGt9iazU/rjHrsWK6K9v2DwaaFWksYvoFC3Rjx9DZy2hIKwT2XV+acRlcDPmyPdM5f+2tRSTqHUWD+10VcNCpF4mrFRMo8A=
+	t=1742885659; cv=none; b=Pxd0nt/6P5s6LgDZ/4/hn9jIm1eQqfPyWqEJzqkVBXRqjCjhi+uhkbVuKF7QBePqEg6VrcVZYKMMk269tLrlWR4/aT+yJakSgeEvhWyVCv6pjbMktumNHysOAC7K7BuzQgbFcw606T1XEP+mGsa+UzJBlYz37Vz0mo/eROGYvoc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742865636; c=relaxed/simple;
-	bh=kq6Vt2/xd35olKy2ixyVBcjCZPe92NLPuxzfgG+kBTk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=A98ktzwkPvLqQvkzvBVNet51TeJSYJc11Qi86JTFP+SCuwWDAZIaQLlrKoKw810NveTf1afg/o2/PgWqVt9z1LIQCHE88KT7TPF5F67MnlhGoyLHbqR11mes9IO1W80NFYNBRPyy6dsLHDU9oyYGGuP0lkptkPOAm5Us04UOo/U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=h555OcMW; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1742885659; c=relaxed/simple;
+	bh=77DQRojoYWf5m2oCtXQuAg5HNyWuTE3SfSPulFwVz/w=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=SZ1om4UnqX0qRVHxYwOA+loCQCiWkOrcHN6WeIDZqfDy7lLShia+XEqpnxtEaK47qAiYVo6kWjO+oX6+1fIS3Nl3Hi1NwBOUQnhImhWWNTvqbKmi3KGJHyaG42XuqiPVq30SvTzLaoa3OYn6EisD+a3CICL1LK8xsmM8APUgJGg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JFi3AUvs; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="h555OcMW"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 576F2C4CEDD;
-	Tue, 25 Mar 2025 01:20:35 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JFi3AUvs"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 924CBC4CEE8;
+	Tue, 25 Mar 2025 06:54:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1742865635;
-	bh=kq6Vt2/xd35olKy2ixyVBcjCZPe92NLPuxzfgG+kBTk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=h555OcMWFTBR5Kgs2MCz1ziWdb8N5AQMQD27u3w/HQHNKfE1nHjDcmD44b1HV+vdS
-	 aUQTxnV2rZjlSqTDEvd92Yqj0EK6aEwnMUuGtCARFmUDnOZIdNhBs6TXjs+lHx/ncq
-	 Q9JKXtfoefGoEEbEAVu3qMglrmFmlgvJ669/HGCx1Oj7Lx1lPgittDXKVBUmRFrvra
-	 FHpXE4txVti/H9TEWs1ze4Rv03O398o7kqbPUCAlpuZ/5iGqdEAKD9uoXROECvuZLd
-	 9B285pURIqMNvZKpfhRme8X2TGTbKdFFXWjBHZBNGXrNzLdQODaG9gGVkFw5OYFMxe
-	 LTVbNzfbTWRng==
-Date: Mon, 24 Mar 2025 18:20:34 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@redhat.com>
-Cc: hch@lst.de, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/1] xfs: test filesystem recovery with rdump
-Message-ID: <20250325012034.GJ89034@frogsfrogsfrogs>
-References: <174259233514.743419.14108043386932063353.stgit@frogsfrogsfrogs>
- <174259233533.743419.11473495762149004746.stgit@frogsfrogsfrogs>
- <20250322200429.7xtqnvss64qbt4ib@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20250325005026.GI4001511@frogsfrogsfrogs>
- <20250325010851.3lzh3wclopjpygso@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	s=k20201202; t=1742885658;
+	bh=77DQRojoYWf5m2oCtXQuAg5HNyWuTE3SfSPulFwVz/w=;
+	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
+	b=JFi3AUvssyipf+pEiWE4L2ZEhYlWxHOe96kSxSL3rif7TtZu9CoAz+PUQT2x7IZ31
+	 APzz9UPOT+wKXSlIBmbLwgAJYAkgvspvl5RM4Vcyq2+b/FTxWKK1Hvij8SLJocXn2O
+	 /OjSAzpCwxH38CrxWUqmM1aiowQfOiVeFfw+K0I5bLwIEimMFrXZLkuRI9httWDy7v
+	 pGe4f8WAFZhejN7Epfe/aC1kxPo+DbzTEWNyI3WzwGtuXa/q8n+Xy1DbQH+3L1BILw
+	 mA9CYt8Z4ktGdnujBM0AN99acB3HDIIcNEYLZBf+pVPkOBQ9Ro6N2Su5mcVTeG3ptf
+	 ZyeWLlZhV0yHA==
+Message-ID: <597972b3-7327-422d-962c-a7843eb0c516@kernel.org>
+Date: Tue, 25 Mar 2025 14:54:15 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250325010851.3lzh3wclopjpygso@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+User-Agent: Mozilla Thunderbird
+Cc: chao@kernel.org, Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+ jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH v4 6/6] f2fs/009: detect and repair nlink corruption
+To: Zorro Lang <zlang@redhat.com>
+References: <20250312072309.3989074-1-chao@kernel.org>
+ <20250312072309.3989074-6-chao@kernel.org>
+ <20250325010701.pe3u2qryvjwl6dpf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <20250325010701.pe3u2qryvjwl6dpf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Tue, Mar 25, 2025 at 09:08:51AM +0800, Zorro Lang wrote:
-> On Mon, Mar 24, 2025 at 05:50:26PM -0700, Darrick J. Wong wrote:
-> > On Sun, Mar 23, 2025 at 04:04:29AM +0800, Zorro Lang wrote:
-> > > On Fri, Mar 21, 2025 at 02:27:07PM -0700, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > 
-> > > > Test how well we can dump a fully populated filesystem's contents.
-> > > > 
-> > > > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> > > > Reviewed-by: Christoph Hellwig <hch@lst.de>
-> > > > ---
-> > > >  tests/xfs/1895     |  153 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > > >  tests/xfs/1895.out |    6 ++
-> > > >  2 files changed, 159 insertions(+)
-> > > >  create mode 100755 tests/xfs/1895
-> > > >  create mode 100644 tests/xfs/1895.out
-> > > > 
-> > > > 
-> > > > diff --git a/tests/xfs/1895 b/tests/xfs/1895
-> > > > new file mode 100755
-> > > > index 00000000000000..18b534d328e9fd
-> > > > --- /dev/null
-> > > > +++ b/tests/xfs/1895
-> > > > @@ -0,0 +1,153 @@
-> > > > +#! /bin/bash
-> > > > +# SPDX-License-Identifier: GPL-2.0
-> > > > +# Copyright (c) 2025 Oracle, Inc.  All Rights Reserved.
-> > > > +#
-> > > > +# FS QA Test No. 1895
-> > > > +#
-> > > > +# Populate a XFS filesystem, ensure that rdump can "recover" the contents to
-> > > > +# another directory, and compare the contents.
-> > > > +#
-> > > > +. ./common/preamble
-> > > > +_begin_fstest auto scrub
-> > > > +
-> > > > +_cleanup()
-> > > > +{
-> > > > +	command -v _kill_fsstress &>/dev/null && _kill_fsstress
-> > > 
-> > > I'm wondering why you always do "command -v _kill_fsstress &>/dev/null" before
-> > > _kill_fsstress, isn't _kill_fsstress a common helper in common/rc ?
-> > 
-> > Yeah, I probably copy-pasta'd that from common/preamble.  Will remove it
-> > before the next posting, assuming you don't decide to fix+merge it.
+On 3/25/25 09:07, Zorro Lang wrote:
+> On Wed, Mar 12, 2025 at 03:23:09PM +0800, Chao Yu wrote:
+>> This is a regression test to check whether fsck can handle corrupted
+>> nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
+>> and expects fsck.f2fs can detect such corruption and do the repair.
+>>
+>> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+>> Signed-off-by: Chao Yu <chao@kernel.org>
+>> ---
+>> v4:
+>> - remove unnecessary "_require_command fsck.f2fs"
+>> - clean up _fixed_by_git_commit line
+>> - fix to clean all tmp files in _cleanup
+>>  tests/f2fs/009     | 147 +++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/f2fs/009.out |   2 +
+>>  2 files changed, 149 insertions(+)
+>>  create mode 100755 tests/f2fs/009
+>>  create mode 100644 tests/f2fs/009.out
+>>
+>> diff --git a/tests/f2fs/009 b/tests/f2fs/009
+>> new file mode 100755
+>> index 00000000..9120d8a5
+>> --- /dev/null
+>> +++ b/tests/f2fs/009
+>> @@ -0,0 +1,147 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
+>> +#
+>> +# FS QA Test No. f2fs/009
+>> +#
+>> +# This is a regression test to check whether fsck can handle corrupted
+>> +# nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
+>> +# and expects fsck.f2fs can detect such corruption and do the repair.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick
+>> +
+>> +if [ ! -x "$(type -P socket)" ]; then
 > 
-> I can "fix+merge" that:) if you don't have more changes, except:
+> Hi Chao,
 > 
->   - command -v _kill_fsstress &>/dev/null && _kill_fsstress
->   + _kill_fsstress
+> Which package provides this "socket" command? I tried to search it in Fedora, but
+> got nothing:
+> 
+>   # yum search */socket
+>   Updating and loading repositories:
+>    Fedora - Rawhide - Developmental packages for the next Fedora release                                              100% |  19.1 KiB/s |  23.6 KiB |  00m01s
+>    Fedora - Rawhide - Developmental packages for the next Fedora release                                              100% | 694.7 KiB/s |   6.9 MiB |  00m10s
+>   Repositories loaded.
+>   No matches found.
+> 
+> If it's a program by yourself, we might can put it in xfstests/src/socket.c?
 
-No changes other than applying hch's rvb that he attached to the other
-thread.
+Hi Zorro,
 
---D
+It's not a program from me, I just installed it w/ "sudo apt install socket", can
+you try that?
 
+Thanks,
+
+> 
 > Thanks,
 > Zorro
 > 
-> > 
-> > --D
-> > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > > > +	cd /
-> > > > +	test -e "$testfiles" && rm -r -f $testfiles
-> > > > +}
-> > > > +
-> > > > +_register_cleanup "_cleanup" BUS
-> > > > +
-> > > > +# Import common functions.
-> > > > +. ./common/filter
-> > > > +. ./common/populate
-> > > > +. ./common/fuzzy
-> > > > +
-> > > > +_require_xfs_db_command "rdump"
-> > > > +_require_test
-> > > > +_require_scratch
-> > > > +_require_scrub
-> > > > +_require_populate_commands
-> > > > +
-> > > > +make_md5()
-> > > > +{
-> > > > +	(cd $1 ; find . -type f -print0 | xargs -0 md5sum) > $tmp.md5.$2
-> > > > +}
-> > > > +
-> > > > +cmp_md5()
-> > > > +{
-> > > > +	(cd $1 ; md5sum --quiet -c $tmp.md5.$2)
-> > > > +}
-> > > > +
-> > > > +make_stat()
-> > > > +{
-> > > > +	# columns:	raw mode in hex,
-> > > > +	# 		major rdev for special
-> > > > +	# 		minor rdev for special
-> > > > +	# 		uid of owner
-> > > > +	# 		gid of owner
-> > > > +	# 		file type
-> > > > +	# 		total size
-> > > > +	# 		mtime
-> > > > +	# 		name
-> > > > +	# We can't directly control directory sizes so filter them.
-> > > > +	# Too many things can bump (or not) atime so don't test that.
-> > > > +	(cd $1 ; find . -print0 |
-> > > > +		xargs -0 stat -c '%f %t:%T %u %g %F %s %Y %n' |
-> > > > +		sed -e 's/ directory [1-9][0-9]* / directory SIZE /g' |
-> > > > +		sort) > $tmp.stat.$2
-> > > > +}
-> > > > +
-> > > > +cmp_stat()
-> > > > +{
-> > > > +	diff -u $tmp.stat.$1 $tmp.stat.$2
-> > > > +}
-> > > > +
-> > > > +make_stat_files() {
-> > > > +	for file in "${FILES[@]}"; do
-> > > > +		find "$1/$file" -print0 | xargs -0 stat -c '%f %t:%T %u %g %F %s %Y %n'
-> > > > +	done | sed \
-> > > > +		-e 's/ directory [1-9][0-9]* / directory SIZE /g' \
-> > > > +		-e "s| $1| DUMPDIR|g" \
-> > > > +		| sort > $tmp.stat.files.$2
-> > > > +}
-> > > > +
-> > > > +cmp_stat_files()
-> > > > +{
-> > > > +	diff -u $tmp.stat.files.$1 $tmp.stat.files.$2
-> > > > +}
-> > > > +
-> > > > +make_stat_dir() {
-> > > > +	find "$1" -print0 | \
-> > > > +		xargs -0 stat -c '%f %t:%T %u %g %F %s %Y %n' | sed \
-> > > > +		-e 's/ directory [1-9][0-9]* / directory SIZE /g' \
-> > > > +		-e "s| $1| DUMPDIR|g" \
-> > > > +		| sort > $tmp.stat.dir.$2
-> > > > +}
-> > > > +
-> > > > +cmp_stat_dir()
-> > > > +{
-> > > > +	diff -u $tmp.stat.dir.$1 $tmp.stat.dir.$2
-> > > > +}
-> > > > +
-> > > > +FILES=(
-> > > > +	"/S_IFDIR.FMT_INLINE"
-> > > > +	"/S_IFBLK"
-> > > > +	"/S_IFCHR"
-> > > > +	"/S_IFLNK.FMT_LOCAL"
-> > > > +	"/S_IFIFO"
-> > > > +	"/S_IFDIR.FMT_INLINE/00000001"
-> > > > +	"/ATTR.FMT_EXTENTS_REMOTE3K"
-> > > > +	"/S_IFREG.FMT_EXTENTS"
-> > > > +	"/S_IFREG.FMT_BTREE"
-> > > > +	"/BNOBT"
-> > > > +	"/S_IFDIR.FMT_BLOCK"
-> > > > +)
-> > > > +DIR="/S_IFDIR.FMT_LEAF"
-> > > > +
-> > > > +testfiles=$TEST_DIR/$seq
-> > > > +mkdir -p $testfiles
-> > > > +
-> > > > +echo "Format and populate"
-> > > > +_scratch_populate_cached nofill > $seqres.full 2>&1
-> > > > +_scratch_mount
-> > > > +
-> > > > +_run_fsstress -n 500 -d $SCRATCH_MNT/newfiles
-> > > > +
-> > > > +make_stat $SCRATCH_MNT before
-> > > > +make_md5 $SCRATCH_MNT before
-> > > > +make_stat_files $SCRATCH_MNT before
-> > > > +make_stat_dir $SCRATCH_MNT/$DIR before
-> > > > +_scratch_unmount
-> > > > +
-> > > > +echo "Recover filesystem"
-> > > > +dumpdir1=$testfiles/rdump
-> > > > +dumpdir2=$testfiles/sdump
-> > > > +dumpdir3=$testfiles/tdump
-> > > > +rm -r -f $dumpdir1 $dumpdir2 $dumpdir3
-> > > > +
-> > > > +# as of linux 6.12 fchownat does not work on symlinks
-> > > > +_scratch_xfs_db -c "rdump / $dumpdir1" | sed -e '/could not be set/d'
-> > > > +_scratch_xfs_db -c "rdump ${FILES[*]} $dumpdir2" | sed -e '/could not be set/d'
-> > > > +_scratch_xfs_db -c "rdump $DIR $dumpdir3" | sed -e '/could not be set/d'
-> > > > +
-> > > > +echo "Check file contents"
-> > > > +make_stat $dumpdir1 after
-> > > > +cmp_stat before after
-> > > > +cmp_md5 $dumpdir1 before
-> > > > +
-> > > > +echo "Check selected files contents"
-> > > > +make_stat_files $dumpdir2 after
-> > > > +cmp_stat_files before after
-> > > > +
-> > > > +echo "Check single dir extraction contents"
-> > > > +make_stat_dir $dumpdir3 after
-> > > > +cmp_stat_dir before after
-> > > > +
-> > > > +# remount so we can check this fs
-> > > > +_scratch_mount
-> > > > +
-> > > > +# success, all done
-> > > > +status=0
-> > > > +exit
-> > > > diff --git a/tests/xfs/1895.out b/tests/xfs/1895.out
-> > > > new file mode 100644
-> > > > index 00000000000000..de639ed3fc7e38
-> > > > --- /dev/null
-> > > > +++ b/tests/xfs/1895.out
-> > > > @@ -0,0 +1,6 @@
-> > > > +QA output created by 1895
-> > > > +Format and populate
-> > > > +Recover filesystem
-> > > > +Check file contents
-> > > > +Check selected files contents
-> > > > +Check single dir extraction contents
-> > > > 
-> > > 
-> > > 
-> > 
+>> +	_notrun "Couldn't find socket"
+>> +fi
+>> +
+>> +_require_scratch
+>> +_require_command "$F2FS_INJECT_PROG" inject.f2fs
+>> +
+>> +_fixed_by_git_commit f2fs-tools 958cd6e \
+>> +	"fsck.f2fs: support to repair corrupted i_links"
+>> +
+>> +filename=$SCRATCH_MNT/foo
+>> +hardlink=$SCRATCH_MNT/bar
+>> +
+>> +_cleanup()
+>> +{
+>> +	if [ -n "$pid" ]; then
+>> +		kill $pid &> /dev/null
+>> +		wait
+>> +	fi
+>> +	cd /
+>> +	rm -r -f $tmp.*
+>> +}
+>> +
+>> +for ((i=0;i<14;i++)) do
+>> +	echo "round: " $i >> $seqres.full
+>> +
+>> +	_scratch_mkfs >> $seqres.full
+>> +	_scratch_mount
+>> +
+>> +	if [ $i == 0 ]; then
+>> +		touch $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		nlink=0
+>> +	elif [ $i == 1 ]; then
+>> +		mkdir $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		nlink=1
+>> +	elif [ $i == 2 ]; then
+>> +		mknod $filename c 9 0
+>> +		ino=`stat -c '%i' $filename`
+>> +		nlink=0
+>> +	elif [ $i == 3 ]; then
+>> +		mknod $filename b 8 0
+>> +		ino=`stat -c '%i' $filename`
+>> +		nlink=0
+>> +	elif [ $i == 4 ]; then
+>> +		mkfifo $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		nlink=0
+>> +	elif [ $i == 5 ]; then
+>> +		socket -s $filename >> $seqres.full 2>&1 &
+>> +		pid=$!
+>> +		sleep 2
+>> +		ino=`stat -c '%i' $filename`
+>> +		kill $pid >> $seqres.full 2>&1
+>> +		nlink=0
+>> +	elif [ $i == 6 ]; then
+>> +		ln -s $SCRATCH_MNT/empty $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		nlink=0
+>> +	elif [ $i == 7 ]; then
+>> +		# orphan inode
+>> +		touch $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		$F2FS_IO_PROG write 1 0 1 zero atomic_commit $filename 5000 >> $seqres.full 2>&1 &
+>> +		stat $filename >> $seqres.full
+>> +		rm $filename
+>> +		$F2FS_IO_PROG shutdown 1 $SCRATCH_MNT/ >> $seqres.full
+>> +		sleep 6
+>> +		nlink=1
+>> +	elif [ $i == 8 ]; then
+>> +		# hardlink on file
+>> +		touch $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 9 ]; then
+>> +		# hardlink on charactor
+>> +		mknod $filename c 9 0
+>> +		ino=`stat -c '%i' $filename`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 10 ]; then
+>> +		# hardlink on blockdev
+>> +		mknod $filename b 8 0
+>> +		ino=`stat -c '%i' $filename`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 11 ]; then
+>> +		# hardlink on pipe
+>> +		mkfifo $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 12 ]; then
+>> +		# hardlink on socket
+>> +		socket -s $filename >> $seqres.full 2>&1 &
+>> +		pid=$!
+>> +		sleep 2
+>> +		ino=`stat -c '%i' $filename`
+>> +		kill $pid >> $seqres.full 2>&1
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	elif [ $i == 13 ]; then
+>> +		# hardlink on symlink
+>> +		ln -s $SCRATCH_MNT/empty $filename
+>> +		ino=`stat -c '%i' $filename`
+>> +		ln $filename $hardlink
+>> +		nlink=0
+>> +	fi
+>> +
+>> +	if [ $i != 7 ]; then
+>> +		stat $SCRATCH_MNT/* >> $seqres.full
+>> +	fi
+>> +	echo "ino:"$ino >> $seqres.full
+>> +	echo "nlink:"$nlink >> $seqres.full
+>> +
+>> +	_scratch_unmount
+>> +
+>> +	$F2FS_INJECT_PROG --node --mb i_links --nid $ino --val $nlink $SCRATCH_DEV \
+>> +		>> $seqres.full || _fail "fail to inject"
+>> +
+>> +	_check_scratch_fs >> $seqres.full 2>&1 && _fail "can't find corruption"
+>> +	_repair_scratch_fs >> $seqres.full
+>> +	_check_scratch_fs >> $seqres.full 2>&1 || _fail "fsck can't fix corruption"
+>> +
+>> +	_scratch_mount
+>> +	_scratch_unmount
+>> +done
+>> +
+>> +echo "Silence is golden"
+>> +
+>> +status=0
+>> +exit
+>> diff --git a/tests/f2fs/009.out b/tests/f2fs/009.out
+>> new file mode 100644
+>> index 00000000..7e977155
+>> --- /dev/null
+>> +++ b/tests/f2fs/009.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 009
+>> +Silence is golden
+>> -- 
+>> 2.48.1
+>>
 > 
+
