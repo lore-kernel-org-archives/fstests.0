@@ -1,283 +1,214 @@
-Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f178.google.com (mail-pl1-f178.google.com [209.85.214.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0185C2F5B;
-	Tue, 25 Mar 2025 09:04:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742893455; cv=fail; b=udJJaO900OtQRTnfO+WdtehvSKT/o1R5qMSigE8sOtuq4w976tb+9KtGEBqg2N+p7f+4p8trvbBAXx2OBE0KggWGvFFP6cyl0e51Ge1sNYju4pv9U5zmmC/NLCLhL4N/dQVzD+rZPzElpx6TBlcUy/PxbNgAJTa63S3U3UMZ70g=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742893455; c=relaxed/simple;
-	bh=gAPzgWlL401PX44WcyypIAFWx5it31lJO7tEpdWfG98=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=JAenNHNol/RQRlnBlf0GCX4nTYlStryFFrwP05aicmzPYbiCScnHaAOQxLw1hGKhVskzilZacjw7cikj+JGNIaCTGimExeidpOu2R3M8F2v9hiT5RUKz+xVjX6ekCCnuGbGLzJHFRoQcbAECZhd/arFeKC5vRo46MHr4NlcHNIk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=LnhyMxnb; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=U90ZBxu+; arc=fail smtp.client-ip=205.220.165.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E9D52E3399
+	for <fstests@vger.kernel.org>; Tue, 25 Mar 2025 09:15:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.178
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1742894132; cv=none; b=svV54RndQTZ+44XrQ1Ir2gmFNyIrAeIcRVbBRmAUpzxN77bIm9zcBalq4y0tDzYkXKcQG6ryxHBBRfd7SiW8riU/EbGjnWjro1oPIHZrlzMPwbacQvMpfjze0t4mtYiUMF8bhHyuQco+jqn173iFuWX5wNQIM3xZ2smzeNcBDBI=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1742894132; c=relaxed/simple;
+	bh=BDYl50AWJpEUL6kl8zVcz5BaIDFlUGP2gRwRKgyKzio=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=eZiSJIP2Z6be4RtbHBb6cvSDt4x7JdfSUi/xr6FruA/QQEeTAGlUtTjbTLpwn7Z/L4fMO02aL/pmfE0jkxd/z/h/yRgp7k5IVFLyPBkG/ad4b/OkH/rxBVNFroRKV3AH/4R96RR3QS0E40AmF/eBlNaDhnjRHz0LMDfPwTyonbU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=r2yhSP6c; arc=none smtp.client-ip=209.85.214.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="LnhyMxnb";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="U90ZBxu+"
-Received: from pps.filterd (m0246629.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 52P2txw6030297;
-	Tue, 25 Mar 2025 09:04:04 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=
-	corp-2023-11-20; bh=61N4gutgNh1tPn+YBwe5hrGra4I7THiTJBPiAPMWLKE=; b=
-	LnhyMxnbDr2zWqIgSk1+MP9NKFnFyGZvpvSq/aM+EfPREf+WigyrUyQP85bS2fgj
-	HrBVcdtvAiGRpPVGn5Goru/SUNaVR2YrP/LiY/pMCS70ukBSxEEjdUEV+4r8fW+S
-	YKzhA6SZaxHLWYCM8uAiaSULsN6IxKZHo7uDZJzbUwY7MtNEhBPdXXRmlmCzTIF+
-	cEf4fc96DOUhc9lKi3qle5ioMUPACLVPrxjn5p0tb96RWtntTn5lsyKjJIt6PER5
-	esKLwujsOWWRVXTNLeaCIhBfq6hYo5CoXuEosLSDyxxnjr4iy3bCiuEcw/oy6q6A
-	TRZfRHBnVls19W0D2XG4Ow==
-Received: from iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta02.appoci.oracle.com [147.154.18.20])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 45hn86xcd3-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 25 Mar 2025 09:04:03 +0000 (GMT)
-Received: from pps.filterd (iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 52P8bimn022906;
-	Tue, 25 Mar 2025 09:04:02 GMT
-Received: from nam12-bn8-obe.outbound.protection.outlook.com (mail-bn8nam12lp2175.outbound.protection.outlook.com [104.47.55.175])
-	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 45jjcda7s7-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 25 Mar 2025 09:04:02 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=ExWR1l3N8/jK6tbRLBdcgtCl+L7WH3NCMLnw3jyoNkG0Uw8WYKtiq5SqIbqSHxYFtIoudCDHmq0vmKbpRLH4kGwhkX2la7jUT5sG4bRbV70/iTlYZdOwqstWChBycw2SQOXao/lPW2ZMzSuZw3G58vSCx9xytH4jrryU5L9OFxsAkC1so4skqTpmkC8Cn51DC8Wl60GWk/+8Cza37QYapnIm20op2PLOOWU5ufHIWEHb5501Bfje293wws0V/Xn0Zs6avvLrfkgV11Mgkb6KWNQJqySbYWrMP3NTQSYO9J2GkAZ+R8fFXcDd3zxwCOXyuZhhXdEyCTN9MhDObkr8Qg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=61N4gutgNh1tPn+YBwe5hrGra4I7THiTJBPiAPMWLKE=;
- b=mKecfq7nnTDj3oevn5TDrpMGv/cJusnLCycGJaxdXppPHuNNPOF9onS4SWPGEJrPC3Z3qdfPjpBHsDiDAov0rZH+zra7TlKkvHESs2nxEhC3h+FVPsgZhwrfWeAeOPBKVFyeYSOha9cG/pmkB95tFqub8h0B8QnOH6xbudPEsfrWOZQFW80w+Vumpk2lZgTpl+zEjwtQlz822kwjj3i3m33u60VLyDUe4sY4G98v7GZucRYLj9ZBQJF3a1n4IXJVKx7tjkwOhZj//1WzkzYx4m6JAcD+1H717s7QpZwgQJcQYHS2E4v9aXWY7/mLHga/AZsJGGUbpz0bZYYyDrD1ug==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="r2yhSP6c"
+Received: by mail-pl1-f178.google.com with SMTP id d9443c01a7336-22580c9ee0aso104775845ad.2
+        for <fstests@vger.kernel.org>; Tue, 25 Mar 2025 02:15:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=61N4gutgNh1tPn+YBwe5hrGra4I7THiTJBPiAPMWLKE=;
- b=U90ZBxu+qYtCjvNFCk7/xNm2XvJ2SkwPCi0qu6RaTh85oWRYj5JvBheGr4kwzlzZfuOqxe372HTQiIvhoeRIvJZRKGxd3s8+2ZQS3mU/Q9ANxMoD/RDKa28vXv3iaNyk9aG9UXISTUp4E7EklVJt7BzQAinSs4uW047NLbMTvsk=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by DS0PR10MB8152.namprd10.prod.outlook.com (2603:10b6:8:1fd::14) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8534.42; Tue, 25 Mar
- 2025 09:04:00 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65%5]) with mapi id 15.20.8534.040; Tue, 25 Mar 2025
- 09:04:00 +0000
-Message-ID: <1302dc1f-ab5e-4f7b-8338-3ce806717c08@oracle.com>
-Date: Tue, 25 Mar 2025 17:03:56 +0800
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] btrfs/058: fix test to actually have an open tmpfile
- during the send operation
-To: fdmanana@kernel.org, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <f2f3902ab7603f82751a9729cc8f1b406c5cbf98.1742386250.git.fdmanana@suse.com>
-Content-Language: en-US
-From: Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <f2f3902ab7603f82751a9729cc8f1b406c5cbf98.1742386250.git.fdmanana@suse.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: SG2PR02CA0132.apcprd02.prod.outlook.com
- (2603:1096:4:188::15) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1742894130; x=1743498930; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=PuWY4FxnO4+NOwwcfeuO+0rdzoMVdvrsuUW0ofjodWo=;
+        b=r2yhSP6cQpHk++8J2lfJ9xo24UQ2F83la2BddIeR+s+9yXGx8MgXlKCz3uRVuRdttC
+         ZFEJ2mil2ukosFQydbDnYQ2eBdzQQ5YYj6hpxlXl7SJ78vuwZawyHdBlGP8Xr76QKs3A
+         SXu52ZLTLtPvXK5vBLlDEGAjXiHWzrPe7YTXk3KRXTJsRg+K77sgw8B62Jydl9cMdLh6
+         1JBzUFOK2pjr5300tpHnEJ37wzbdRrk/Kb0U6PiDonQUm4pBjB/t+H4EljzA6zUqWDwr
+         DxKYUGVPV3BE8QGXrTal9uak/mazXXmZSQ8QmhC73KrLQql/m5cjZQb9FXy1Gfe/pi9v
+         4VTA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1742894130; x=1743498930;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=PuWY4FxnO4+NOwwcfeuO+0rdzoMVdvrsuUW0ofjodWo=;
+        b=ebgu/DvwelHUoSKINWQAxUsTaU/f0kUpQ5IKZGfTQsgme17NsRkAaYex1Ntr7jjTAr
+         cT0QyeruhvNSikjsK3luhrILwJGAxNjIvX+XfvDqhC1/iSL9fCoLjOZH83EFiy5R+GrR
+         sIaEXqxjHBI/vDRtH4l+Hf5niEx+jG0pM+Takc/bJJTyCd+IepkO+1XZwY0yCH+w5ITY
+         SaxlCu5s467mSYCnNNvBgkwq6xTRjwrrjuROFUHaAdgro0uEcHHfgXEutS65kDPlNU0F
+         TcuoTPE/iWj4Vwcl5ZPIfQ4S3K0HfJu03+/i8xrz+MHiL1KTDxqKnFzQfmON+ij8sZE6
+         bOtQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXzan0IkOIyw1Xd1TyOlgJ9ft9mgC7Vz0mWnHli5koWrVFj+NWAAI90irp9eF3z/KUci3fon+2R@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw4qvnqoaj0uAaPD6f9pilH3UIOepdjKu8nubBZlQvWVPj9rAg4
+	e63vxH5AMCi4osZCCzEey++kOZSiVjh2iuqLiSILUx6j/T0y27GyYzBAS5jTkOEn0hZ4saQQg02
+	r
+X-Gm-Gg: ASbGncvgUbdd8Gl7y8iVAkb5Ej/qWHm9Dlqe/IwUuCwtmXjCYnbR3dJWRoawEcMcSXV
+	vcByXsIR3nGgHtqHneuX84Zf8vyc0vi/fjpp8fnL1pEm1LJX/GKVhVONpA7sSzx8+YXWaYfzizp
+	QU4aHU+rxQb+qse/JeY0+24+Ex9eTyJt/NkJwtHgyv7nCnhkvvZMH6SxjJB/bby48wdRecmC5gj
+	NBnB+1sx1yzz2uiLfubXbtil5mqJEV10QLyJpac3yuJ7ND95M/gopag1KiLzvzsAjrH+5xOdewo
+	8j3SLs1GKsLbj/hC7Zd/xWtkUTrchysWdbE7+TOxgG8fBz+FKCufaW09CzUw3RhHVBNgXJc3XKi
+	HViVWI2CPkUa85pDBew9MDoSSi4bN9zM=
+X-Google-Smtp-Source: AGHT+IE7mretUNcH2qauevhGMcyv2ME+bUwpr7TkZvXTiCQuz3MoKuqVjSbqXqiXrp10chHoDpNk5Q==
+X-Received: by 2002:a05:6a20:914e:b0:1f5:862b:a583 with SMTP id adf61e73a8af0-1fe4342cc3emr34821170637.34.1742894130098;
+        Tue, 25 Mar 2025 02:15:30 -0700 (PDT)
+Received: from dread.disaster.area (pa49-186-36-239.pa.vic.optusnet.com.au. [49.186.36.239])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7390600a75asm9575168b3a.84.2025.03.25.02.15.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 25 Mar 2025 02:15:29 -0700 (PDT)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1tx0Na-0000000033c-36Np;
+	Tue, 25 Mar 2025 20:15:26 +1100
+Date: Tue, 25 Mar 2025 20:15:26 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: Chao Yu <chao@kernel.org>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH v4 6/6] f2fs/009: detect and repair nlink corruption
+Message-ID: <Z-J0LnCEWX2bo9LF@dread.disaster.area>
+References: <20250312072309.3989074-1-chao@kernel.org>
+ <20250312072309.3989074-6-chao@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|DS0PR10MB8152:EE_
-X-MS-Office365-Filtering-Correlation-Id: bddbbe26-bbb0-43b5-b20e-08dd6b7bfbab
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|376014|366016|7053199007;
-X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?czBYc3N1WjlWZGMrQkJGMlpvMkwvVWV3UGM4WEtxT04vUnRteU5OVk52L1Ey?=
- =?utf-8?B?b2hwQzAzRGUzR0tFc2Z6RkhlcUFyTFJNSVRpN0JPaGFSdGUwZndQUzNzK053?=
- =?utf-8?B?OWJYVXY5QlRybUpBTUM2STFrWjlVdENUN2FMeGpJTVBZVjRxZmpUN3d0TE43?=
- =?utf-8?B?Wm83RVJkZ00rMFFlWGkxV2pHelJqd0tSOGtCSXpXdlZQQk1sR05LaTV5TGlO?=
- =?utf-8?B?SGZiS3N5R0FDRzdSV214YTZUeTBOZS9JT2NUMTNwSXI3Qk9EQ2x5aW1Sd211?=
- =?utf-8?B?VHNDZEI2UU90MFM4clBIVGNsbUpXQi93V1RSWnNHOFZ5bFMrSnJoc1dzWEI2?=
- =?utf-8?B?WG44c0NtVC93eGM1ZDlFbUhqRG9HeFQyV3NYUDE2RW9TclRycjEvMkQyZGhF?=
- =?utf-8?B?Mis4eWxLc0RCdW5yai9JakFPdDRvWkFzMTRWMzBYS1lDbWxSaVNML2M1d2o4?=
- =?utf-8?B?QVRYbWhybjRmZDNVM1BSSWxQKysyMWYrTWtHcXJWNFpPa3ErVm00UFN5aTFp?=
- =?utf-8?B?UDBvUUFPR3RZd2F1ZnNsNzJoUWk2R3JubjhqZ3lKcG1SNFNpb1J3TFhZeUpp?=
- =?utf-8?B?UGRucnl6NFBYYWdVTjVjbmFDMFNLWFU4dmpzVkpLS0N0cDQyRW14N1dXRTdC?=
- =?utf-8?B?alhzeldQWHgyUTFCTHY1TlBnVGtRd1RFekVkYTFvOTh6YW5IbVVZS0tyQitZ?=
- =?utf-8?B?T3NyeHM2UlRrWVoyMHhBcDJrVG5nS3RCektRcFpYZUV2a1hVdktYTFF3TVFh?=
- =?utf-8?B?Qk9pOGszWHFyM3Y2Z3I5V1ZidTBiSnpLYTE2eWxTOVBwWHMycm94NzBUMFd4?=
- =?utf-8?B?R0RHaEpLM2N6c3h0Ynp5elp4SWYxclRQTCtLV2hrZXgrWkFIS2JLdDNlYlpV?=
- =?utf-8?B?RUxzcFpDaktndVZoMWx3Zmh0MkNINFU2ZXg5MmZwbG5TTEZ1QVRsOXJJTVpZ?=
- =?utf-8?B?RzZwN2xvcDRQNjkyakZydkNGYTdLQU1maUFTRXowMUsxUnhLZDM3S3FKais2?=
- =?utf-8?B?QkhFNWZBUEw3WlRLTDhXMDVTUXp2aSt3ZXl3enFmZndYNXJsbDdnNUI1ZERt?=
- =?utf-8?B?NmZnUXlvK2hyMjVkMGYwdCtBem5idFNPd1diZmxpbWlSWDVjOUU5MXFQWldM?=
- =?utf-8?B?Z1NUeWJhVVZ0cTVybndJOVoxZnliTXhuNWl6WnAyY2JYL21BakkzQ0VFeDkv?=
- =?utf-8?B?Sm9yUzVqdXVydWZ6RitpN2lENWN3eWoyaEZFUURyeDFCUG5QbXBvM2l6N0o3?=
- =?utf-8?B?MllxanVHNXpQZWJuVXVtRkI5dnF6T0tlVlE4YWlYeEJWeXFrZnh6QzE5QTVG?=
- =?utf-8?B?RHVFWC85VGx3MTJZL2kwNFhvN3k5U3RKd0NJb2dyUDFmS1BxdFFqc25qdS9S?=
- =?utf-8?B?S0pXdG9jUUlOOHJ3SDRVYkRuOHhkaEt1d3FQK1JvSmNGUkhMWE0yeGphTDJo?=
- =?utf-8?B?clRiaEZtYWRmcm5Hb2o2VVJ0cVFvNlRPTndNbnFNRzNLR3hZanRlTzFGNnV6?=
- =?utf-8?B?MjVqMTdGcnpoQTFuQjNzYk1sZHo0d2pVeDVlQXFrS2tkZ0k3b1hGKy84VDRs?=
- =?utf-8?B?dVZickVyVHdzTURBbUZIMkpoUTVDQjFldDl3ZUlPdkVFdU5rSm40Sjczem1o?=
- =?utf-8?B?a3JTbzhXeVM3WDJaN005RE9CZk4rc3AzaDF0K291MlJNaGtBa2lGdVh0Lzc4?=
- =?utf-8?B?ZmJwaWZIZHVUZE51UzhLZmtlcklmT25LZmx6MjRkMVlheHl4b1BtWXFoaG1N?=
- =?utf-8?B?K2tpTFQ3RGFKZTNZMXpyVy81SzN0dE9XbTE1ZnJEU3VEV0o0OHA2M0RRMjFE?=
- =?utf-8?B?NXVEQkhndVNrb2c4dmJRbkYvUWoxdTVRSnc0T3oraWZaRkkzRGJKSUsrenFj?=
- =?utf-8?Q?ugKbHEMQh/Tqt?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(366016)(7053199007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?MlN3RzNQT0l1RnZ0emJ4MVBjUVZHMTJoMVNoNW5GSjA5Tk1DcmxISkkrOHdy?=
- =?utf-8?B?aVVkektxUlVXL3ZaaW9SWW9aUnZmeUNPdWxhb2lHcWpJOWxPZ3hFUkhzWnpj?=
- =?utf-8?B?S21QQU83aFVJeG9wMzNla0hVMXZNYktUam14eWVDMnBiOVZmQ1BLOS9lOU5w?=
- =?utf-8?B?UytwNGs0Q1RvOHBpVGUwMUZlWDlYMk8vQU82WlRZZHdIVjVDT0d0ZzVyQjFX?=
- =?utf-8?B?aU9wc3NBQWR6WnBzZG1JL2d5V1R1UFhuY0lUSjhMbWhlOW9QcTdRZHlId2Jw?=
- =?utf-8?B?ZjFkdk4rTFV0QXdRS3JUOTdHWXUvTXlnTmFwYUQ5MHpHeFA0cHhaNk5tUS8v?=
- =?utf-8?B?eGNSaFRkditYNmpkVU95QmNOWHFZMStLM0tyZ1h6S1BkSDBIMGRPaDFUNVJs?=
- =?utf-8?B?c1NRRnpjWGZ2UVpac3cvQWUrSk1qRW04a2wrQkxLSk04NjZtUjErVzM0eVg0?=
- =?utf-8?B?WjVPc2QxQlNSbEs5dmh1eXphYm12SXVZT0F1NnBSSU0rR3NJU1NmL3M3MlIv?=
- =?utf-8?B?LzNURUFSdFJKQzdWREJsd3NkY3JkRW12SGVWRi95MUdWeUFFMGZBOG5nRWdU?=
- =?utf-8?B?UzFnakQwZHJoN25rd1hvMWV1UzBsU1htK242dkc5RGY1U1ZiY2xPQm5iU0Z1?=
- =?utf-8?B?SWNJY1hiYVpHNkxTb1RPZWFVSjJYeHJYQmdvdEJJNjJSZzVua0JhQkowaE51?=
- =?utf-8?B?UUxwTkhwZ2gzVU5iR0xYdm55OHAwT0I4eHRYT3ViSXBaVk04bWYrTGtNckN0?=
- =?utf-8?B?Mk9keG1nRVlTNnZoVURDVzY3UE92bU1EQW4vMmtpWEVFWXRaTG5rT0xyNjJy?=
- =?utf-8?B?djRlYkRQK0Y5VkphOERSYzlKaVZsUVlDOEJSN3Brd2xMdk1lZ2FVOVg2dnpL?=
- =?utf-8?B?L2JVQnZUNFBmL3llanh0SXRMTjBLYmdWQW9MRzhCTllQd0xWOWNFOXY4L2Yy?=
- =?utf-8?B?azFWcll6OElNUlkrU096dkxSbVZxMUpSRnFJSUpmaGRXQnhMTFllbUZzUGtu?=
- =?utf-8?B?WEwyc2NrZ1Vka1lSRlVxaGJ0RzJmUk9UeDhwRVk3ZkxQbUtQZ3RMdC9tYVl6?=
- =?utf-8?B?MThUc1YwOXV6aURETFhkYUcwU0NadytQbExzdmh5cjJVd1NRd3psbEVhNG5q?=
- =?utf-8?B?b1ZqMExEOUoxRUVMRTNRb1hxZDZVSVIzOFVzcFluR1BiWmZ4VTk1eGRpSmlX?=
- =?utf-8?B?OUROcko2NWp1bTRpK2xuUkxBb09mMC82ajMxdDFyNzBoMFRuNDV5VUVneGFL?=
- =?utf-8?B?Y1FtMStERGRZdXJqWXREYUxYWGpBQW93V3Y5RlNycnlwUWgrSXkxZnBUeUNa?=
- =?utf-8?B?MDhqbGtjcmtyNGdFYlVzRjVISHhQNFA1RkR2WWpvMmpxRnJKcEliNkJVVEhO?=
- =?utf-8?B?YWhXUmRRaGxjYURxVmRCcE5Kdy83T05FUXRkZXRIQzFJMnlVdExGNzNLZFp3?=
- =?utf-8?B?VExIckRaZ2J0d0dKUDJHajEyZE81ZndRd29YYVJHWjRyMXJWdGxhTG95d2RK?=
- =?utf-8?B?TDJHa3FOeVdJUHV3M2hiLzBnaW53SStuMVBnSHY2a2xYWlMyekhodjByWi9M?=
- =?utf-8?B?WFBFMjZSY3VCZWFVUEZFY3IxQnNpOVFJZndVdFplMVRMTXptdExYTTl1TDBu?=
- =?utf-8?B?K2xZbUdIeU1YRmZNdlY2SEhjOXlKMnBESUpXcUhJeU91WjhON0JIMVd6cFZi?=
- =?utf-8?B?MjlDV0dHZ1U0ZGxoY1J4Zm1RZ3lxck5pU1A5VlRDWmptNjBXTzJlUlFkYzdK?=
- =?utf-8?B?UVUvQmRiNWdodkZoc01VSml1UnVLRCtHRklIZzVnaGliZG9NRlZQN0hQWG9l?=
- =?utf-8?B?eE0zV2ZCSTBMdTdNelZYRjg1WHJNam1XZkoyVjZXTHo3dXJJdGFFNFQ0UHpW?=
- =?utf-8?B?RWwxaGp3YUxHaDdTVkhuR3BLeEhiVDgxYkNha3Yxb3JMZEN1OVQzcWlmVTN5?=
- =?utf-8?B?bWxzL01QZ0swdFJta1V4dkNIZ05PanhmNzZrVlNhMU9sUElVMFNRNFJTVzFX?=
- =?utf-8?B?MlJTTDB1VXFpSnJJNlBKbStLSjdRbXBLMTlnM0xCZVlxeE50Mjc3OWlpRCt2?=
- =?utf-8?B?QTlTVXRkeFhtQUZYRDErRDNjeTJPT3lvckhraUFEQXNkL2ZNVXFmZVF4WGlU?=
- =?utf-8?Q?68G3PDahQMyCliA+dyk5MhaS0?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	2wPF/uBd4QLQAxSNMVu8BKgL1c01Tqgr5xZ/maJlDzHxoeVKbi8pEFbIlMZdhaHK2TsWeVarf2FbdhWJlEdV+AdJ18kaBLIuEJYjH7bOn8K2C1s3ejcYrsyjfAcVIHmm3BqG7BfBjv71GkyYUzdSETulpuz3wiH2mPkouer72weO4taco8BsCj0nN91thsway6EAInFHY670AfNwfHBsvEbnqn/ksMVrbh/OFPAdtsC1RKFeOSCtDvZUE17PirzHSX97giDqZn+f5Id7yxoeuIJv4aR6rFWG43SdYd+FV7UpPOiNMP6tody6M2oi2j+bqcwEBHKUDuwFvNqJ/RIKkVr15uqyiT8pr+yovTop3bor3OO2lLZniN1wrC/vDVDfAXhrsgDGO2vhtBhIVgWwUi0dajZv5SqKvhySEgASKTndr+yRoSlkkYOJofEpV2tMTdG0jCoLvzzN3PUzzkV2WRp6ABlWJhkhCPKhYQHvd57Sll9aWW3SiyXsP5rKc4OItXfzNqBz3qMKJp99wYvGb/2WKDiw7ypc3S/tzI4FAJgYqWLIGi9vjWMT2fzyOF6ldEx8NOoNEbCuZ50fg1koWBwybM7pKFvPOuh/5BuLO58=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: bddbbe26-bbb0-43b5-b20e-08dd6b7bfbab
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Mar 2025 09:04:00.8054
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: AwIsvh3mOweE08XO9+YdxzjFLlWn4uirSRX6yde7eAuxkQiIoFy1PAFZFnyijNJf7k4FL6Ft/gQK7B6rE8kudQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR10MB8152
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1093,Hydra:6.0.680,FMLib:17.12.68.34
- definitions=2025-03-25_03,2025-03-25_01,2024-11-22_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 phishscore=0 suspectscore=0
- adultscore=0 malwarescore=0 spamscore=0 mlxlogscore=999 mlxscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2502280000
- definitions=main-2503250063
-X-Proofpoint-GUID: huHQvMYFEufRPyv4QWUnNpFOUswgfCkT
-X-Proofpoint-ORIG-GUID: huHQvMYFEufRPyv4QWUnNpFOUswgfCkT
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250312072309.3989074-6-chao@kernel.org>
 
-On 19/3/25 20:13, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Wed, Mar 12, 2025 at 03:23:09PM +0800, Chao Yu wrote:
+> This is a regression test to check whether fsck can handle corrupted
+> nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
+> and expects fsck.f2fs can detect such corruption and do the repair.
 > 
-> The test's goal is to exercise a send operation while there's a tmpfile in
-> the snapshot, but that doesn't happen since the background xfs_io process
-> that created the tmpfile ends up exiting before we create the snapshot, so
-> the snapshot nevers gets a tmpfile.
-> 
-> Fix this by using a different approach, with a fifo and tailing it to the
-> stdin of a background xfs_io process and then writing to the fifo to
-> create the tmpfile. This keeps the xfs_io process running with the tmpfile
-> open while we snapshot and run the send operation.
-> 
-> While at it also add code to verify we have the tmpfile (an orphan inode
-> item) in the snapshot's tree.
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-
-Reviewed-by: Anand Jain <anand.jain@oracle.com>
-
-Applied to for-next.
-
-Thx.
-Anand
-
+> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+> Signed-off-by: Chao Yu <chao@kernel.org>
 > ---
->   tests/btrfs/058 | 28 ++++++++++++++++++++++++----
->   1 file changed, 24 insertions(+), 4 deletions(-)
+> v4:
+> - remove unnecessary "_require_command fsck.f2fs"
+> - clean up _fixed_by_git_commit line
+> - fix to clean all tmp files in _cleanup
+>  tests/f2fs/009     | 147 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/f2fs/009.out |   2 +
+>  2 files changed, 149 insertions(+)
+>  create mode 100755 tests/f2fs/009
+>  create mode 100644 tests/f2fs/009.out
 > 
-> diff --git a/tests/btrfs/058 b/tests/btrfs/058
-> index 7bc4af5b..3bb0ed21 100755
-> --- a/tests/btrfs/058
-> +++ b/tests/btrfs/058
-> @@ -21,6 +21,7 @@ _cleanup()
->   {
->   	if [ ! -z $XFS_IO_PID ]; then
->   		kill $XFS_IO_PID > /dev/null 2>&1
-> +		wait
->   	fi
->   	rm -fr $tmp
->   }
-> @@ -29,18 +30,22 @@ _cleanup()
->   
->   _require_scratch
->   _require_xfs_io_command "-T"
-> +_require_mknod
-> +_require_btrfs_command inspect-internal dump-tree
->   
->   _scratch_mkfs >/dev/null 2>&1
->   _scratch_mount
->   
-> +mkfifo $SCRATCH_MNT/fifo
+> diff --git a/tests/f2fs/009 b/tests/f2fs/009
+> new file mode 100755
+> index 00000000..9120d8a5
+> --- /dev/null
+> +++ b/tests/f2fs/009
+> @@ -0,0 +1,147 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
+> +#
+> +# FS QA Test No. f2fs/009
+> +#
+> +# This is a regression test to check whether fsck can handle corrupted
+> +# nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
+> +# and expects fsck.f2fs can detect such corruption and do the repair.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
 > +
->   # Create a tmpfile file, write some data to it and leave it open, so that our
->   # main subvolume has an orphan inode item.
-> -$XFS_IO_PROG -T $SCRATCH_MNT >>$seqres.full 2>&1 < <(
-> -	echo "pwrite 0 65536"
-> -	read
-> -) &
-> +tail -f $SCRATCH_MNT/fifo | $XFS_IO_PROG >>$seqres.full &
->   XFS_IO_PID=$!
->   
-> +echo "open -T $SCRATCH_MNT" > $SCRATCH_MNT/fifo
-> +echo "pwrite 0 64K" > $SCRATCH_MNT/fifo
-> +
->   # Give it some time to the xfs_io process to create the tmpfile.
->   sleep 3
->   
-> @@ -48,6 +53,21 @@ sleep 3
->   # The send operation used to fail with -ESTALE due to the presence of the
->   # orphan inode.
->   _btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap
-> +
-> +snap_id=$(_btrfs_get_subvolid $SCRATCH_MNT mysnap)
-> +# Inode numbers are sequential, so our tmpfile's inode number is the number of
-> +# the fifo's inode plus 1.
-> +ino=$(( $(stat -c %i $SCRATCH_MNT/fifo) + 1 ))
-> +
-> +# Verify that we indeed have the tmpfile in the snapshot tree.
-> +$BTRFS_UTIL_PROG inspect-internal dump-tree -t $snap_id $SCRATCH_DEV | \
-> +	grep -q "(ORPHAN ORPHAN_ITEM $ino)"
-> +if [ $? -ne 0 ]; then
-> +	echo "orphan item for tmpfile not found in the snapshot tree!"
-> +	echo -e "snapshot tree dump is:\n"
-> +	$BTRFS_UTIL_PROG inspect-internal dump-tree -t $snap_id $SCRATCH_DEV
+> +if [ ! -x "$(type -P socket)" ]; then
+> +	_notrun "Couldn't find socket"
 > +fi
 > +
->   _btrfs send -f /dev/null $SCRATCH_MNT/mysnap
->   
->   status=0
+> +_require_scratch
+> +_require_command "$F2FS_INJECT_PROG" inject.f2fs
+> +
+> +_fixed_by_git_commit f2fs-tools 958cd6e \
+> +	"fsck.f2fs: support to repair corrupted i_links"
+> +
+> +filename=$SCRATCH_MNT/foo
+> +hardlink=$SCRATCH_MNT/bar
+> +
+> +_cleanup()
+> +{
+> +	if [ -n "$pid" ]; then
+> +		kill $pid &> /dev/null
+> +		wait
+> +	fi
+> +	cd /
+> +	rm -r -f $tmp.*
+> +}
+> +
+> +for ((i=0;i<14;i++)) do
+> +	echo "round: " $i >> $seqres.full
+> +
+> +	_scratch_mkfs >> $seqres.full
+> +	_scratch_mount
+> +
+> +	if [ $i == 0 ]; then
+> +		touch $filename
+> +		ino=`stat -c '%i' $filename`
+> +		nlink=0
+> +	elif [ $i == 1 ]; then
+.....
 
+Ok, it works, but it's a bit nasty. You want to run the same
+injection and checking on all types of inodes, so factor that out
+like so:
+
+inject_and_check()
+{
+	local nlink=$1
+	local ino=`stat -c '%i' $filename`
+
+	echo "ino:"$ino >> $seqres.full
+	echo "nlink:"$nlink >> $seqres.full
+
+	_scratch_unmount
+
+	$F2FS_INJECT_PROG --node --mb i_links --nid $ino --val $nlink $SCRATCH_DEV \
+		>> $seqres.full || _fail "fail to inject"
+
+	_check_scratch_fs >> $seqres.full 2>&1 && _fail "can't find corruption"
+	_repair_scratch_fs >> $seqres.full
+	_check_scratch_fs >> $seqres.full 2>&1 || _fail "fsck can't fix corruption"
+
+	_scratch_mount
+	_scratch_unmount
+
+	_scratch_mkfs >> $seqres.full
+	_scratch_mount
+}
+
+And now most of the test cases become this:
+
+_scratch_mkfs >> $seqres.full
+_scratch_mount
+
+touch $filename
+inject_and_check 0
+
+mkdir $filename
+inject_and_check 1
+
+mknod $filename c 9 0
+inject_and_check 0
+
+mknod $filename b 8 0
+inject_and_check 0
+
+.....
+
+The whacky cases with socket and orphan inodes can be handled
+by factoring inject_and_check so there's a second function that
+takes both ino and nlink as parameters.
+
+This gets rid of all the unnecessary if/elif logic and looping, 
+leaving only the test code that does the work behind.
+
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
