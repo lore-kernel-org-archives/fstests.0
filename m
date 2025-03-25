@@ -1,78 +1,42 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC4E0B666
-	for <fstests@vger.kernel.org>; Tue, 25 Mar 2025 01:19:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EAE39B666;
+	Tue, 25 Mar 2025 01:20:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742865544; cv=none; b=MA+B186JPZ6SeeI4CeIFvnCsgJoUlg0lC9yielnNgAO7eRNCFqsfZdVP5BCfduq4iv8tIBVzc1wPuPq7OUgXY2H6fZLM2ce6bxbmLYHuoQ5gv/EJ9GUl7N4UFpXnUPtBsXbSVwXJazlmneEaINKSlK6kEnPx5XaJO2cOwp1Z3M4=
+	t=1742865636; cv=none; b=UmLis7wnJTrJ1tYOtwFUFI5oNzFkbflR8cqLAEJb9aBo2zqO8z8lcuCTSkLHA1v/r620YNZ2j/09qGt9iazU/rjHrsWK6K9v2DwaaFWksYvoFC3Rjx9DZy2hIKwT2XV+acRlcDPmyPdM5f+2tRSTqHUWD+10VcNCpF4mrFRMo8A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742865544; c=relaxed/simple;
-	bh=xq0PeV8mbZfAOI8yGLKIAYwtnbFy/lvBu3jMJSQ1p2A=;
+	s=arc-20240116; t=1742865636; c=relaxed/simple;
+	bh=kq6Vt2/xd35olKy2ixyVBcjCZPe92NLPuxzfgG+kBTk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=JDTDL55IHAz29/wh9WIiU05Jwy2RNCyr5Kykd4qkl7C8IbUl0lnJU2qz/wwyn4Ik3I0DrWdTGuNM5/1Dv1iNkraO8clPcIL215viwIRhZ+8IkPAmR3lK3Ex+zNqdCuH4eOskMLkNPFabuEkZ/USvKe+9cmdDvOkgJYEl9SBXQWY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=cj+6aFVU; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=A98ktzwkPvLqQvkzvBVNet51TeJSYJc11Qi86JTFP+SCuwWDAZIaQLlrKoKw810NveTf1afg/o2/PgWqVt9z1LIQCHE88KT7TPF5F67MnlhGoyLHbqR11mes9IO1W80NFYNBRPyy6dsLHDU9oyYGGuP0lkptkPOAm5Us04UOo/U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=h555OcMW; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cj+6aFVU"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1742865541;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=QeXy7bC9ytkDSw1rq/sYqAEDub4dZTXCLp5YKB3fW6I=;
-	b=cj+6aFVU2/zRpNQVUJvoaVnXHzaFtZY9/5C6kHk92W0SvUHe9Q+1x7e68fIbwRRBPsH33T
-	nrH5t7EhDOgc2Q9/FqhX/wq0HKfybuTvNC4tyPKJLx4F8J8wkLD7VCshHQMHNQ31jmbhLA
-	deOacnNjGNg64FEg4bwW8ri+OnFhNqE=
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
- [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-331-RMq_s-G_Pb-v0FCFmHT4bg-1; Mon, 24 Mar 2025 21:19:00 -0400
-X-MC-Unique: RMq_s-G_Pb-v0FCFmHT4bg-1
-X-Mimecast-MFC-AGG-ID: RMq_s-G_Pb-v0FCFmHT4bg_1742865539
-Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2240a960f9cso80874345ad.0
-        for <fstests@vger.kernel.org>; Mon, 24 Mar 2025 18:18:59 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1742865539; x=1743470339;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=QeXy7bC9ytkDSw1rq/sYqAEDub4dZTXCLp5YKB3fW6I=;
-        b=mEcCvxu4FTwR/gtYeuh56ZiZnFqtdH3OvDbeFAa6FQYH79RNh+M+FYh7bJBcZvsJOD
-         L0O9ayUxGCD9MOCrS4rZMVPf7yODxbQoJdMtLBAekrwQHLbbQY3n4Ik1zJ/arhPp095w
-         OVC0wCCyie0iZpF58NFZWeb5GYsDsE1NK+t38vyUnORjLWPl5L6ljpeMWDDZLhxMgcAl
-         rRK/6BTTeI5TEmKcqBfa74B0IFewxA0rvAlwTDYMyNOq/a6/xu9RSgx2iG3fQeauA2tk
-         1WKV7+fVZNUUKT6WnjwFdagFkO6JUFrZs7Yfbe1YMJ4F6tCuMu3grUsx+3/XUPGnX57k
-         iQBg==
-X-Forwarded-Encrypted: i=1; AJvYcCUhBzgLWu5o4wVxdp+B4hNcfZNNIDYbu9D2tKypEoYq9K0yp6KBcKzHdZTdh0RU4APESBEQSE/m@vger.kernel.org
-X-Gm-Message-State: AOJu0YzAgZ5asAvcIVpZKqovkidnEx6CDCEN6qRXVJacM7AwEckpZK7W
-	8r1sYr6T/zTA1FtzUxR5GhVwMAsxROfeZLUEHAZkunjgIwUp8zfPn51RnEZJac2gezvnxsVYW7W
-	lxKvcx3bnehB3ISr+WLt+AP6HwraTGaafF2PdNaj0rlksRQotbymXHIFO0zVD1Uui4g==
-X-Gm-Gg: ASbGncuuNaS+ggJypAHzSRg+dqp95ECpoKUu2hYXQHss0DbvW6p9C9oKu9Na7ZfM9nG
-	2mvE5Jm1Ub5nE8r+sXWSo1+l7EkM5DuQuSgTY1//NhJ9r0mfzpJzSnpCXJo1JnVZZ/tFcqxcB/4
-	Ou25gRH06OVbrf7QggEDYOnyNqijhE1OjdgNsINsRqMizzE9pG/fiWXlfHerTHY4+tZ8U0orka+
-	9A9C+ha1oCq7TCO5EFwChBdXOcqtDaaKwzFnyOR/5KIfv84nPN3lmVFdIzR624ywf5An1SrzETV
-	OFTUdaqkpdTOlWRkKbq+nfPDHA8J/IBrdPll2XcJOIOkRMRzg2WWbkjY
-X-Received: by 2002:a05:6a00:1826:b0:732:2484:e0ce with SMTP id d2e1a72fcca58-73905a139fbmr19006177b3a.17.1742865538624;
-        Mon, 24 Mar 2025 18:18:58 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEEO9+WpdOEqQ7A5ng1Den/8MVf0K7JGB87AUqqAfvuRXdpcuQlUXrUFU2gmgqgHSlO0EUdvg==
-X-Received: by 2002:a05:6a00:1826:b0:732:2484:e0ce with SMTP id d2e1a72fcca58-73905a139fbmr19006150b3a.17.1742865538048;
-        Mon, 24 Mar 2025 18:18:58 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7390618abc9sm8736336b3a.165.2025.03.24.18.18.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 24 Mar 2025 18:18:57 -0700 (PDT)
-Date: Tue, 25 Mar 2025 09:18:54 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Chao Yu <chao@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-	Daeho Jeong <daehojeong@google.com>,
-	Jianan Huang <huangjianan@xiaomi.com>
-Subject: Re: [PATCH] f2fs/010: test dirty status handling on database file
-Message-ID: <20250325011854.svncwerxilkimg5j@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250324123836.3098377-1-chao@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="h555OcMW"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 576F2C4CEDD;
+	Tue, 25 Mar 2025 01:20:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1742865635;
+	bh=kq6Vt2/xd35olKy2ixyVBcjCZPe92NLPuxzfgG+kBTk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=h555OcMWFTBR5Kgs2MCz1ziWdb8N5AQMQD27u3w/HQHNKfE1nHjDcmD44b1HV+vdS
+	 aUQTxnV2rZjlSqTDEvd92Yqj0EK6aEwnMUuGtCARFmUDnOZIdNhBs6TXjs+lHx/ncq
+	 Q9JKXtfoefGoEEbEAVu3qMglrmFmlgvJ669/HGCx1Oj7Lx1lPgittDXKVBUmRFrvra
+	 FHpXE4txVti/H9TEWs1ze4Rv03O398o7kqbPUCAlpuZ/5iGqdEAKD9uoXROECvuZLd
+	 9B285pURIqMNvZKpfhRme8X2TGTbKdFFXWjBHZBNGXrNzLdQODaG9gGVkFw5OYFMxe
+	 LTVbNzfbTWRng==
+Date: Mon, 24 Mar 2025 18:20:34 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: hch@lst.de, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/1] xfs: test filesystem recovery with rdump
+Message-ID: <20250325012034.GJ89034@frogsfrogsfrogs>
+References: <174259233514.743419.14108043386932063353.stgit@frogsfrogsfrogs>
+ <174259233533.743419.11473495762149004746.stgit@frogsfrogsfrogs>
+ <20250322200429.7xtqnvss64qbt4ib@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20250325005026.GI4001511@frogsfrogsfrogs>
+ <20250325010851.3lzh3wclopjpygso@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -81,129 +45,225 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250324123836.3098377-1-chao@kernel.org>
+In-Reply-To: <20250325010851.3lzh3wclopjpygso@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Mon, Mar 24, 2025 at 08:38:36PM +0800, Chao Yu wrote:
-> This is a regression testcase to check whether we will handle database
-> inode dirty status correctly:
-> 1. create a regular file, and write data into the file
-> 2. start transaction on the file (via F2FS_IOC_START_ATOMIC_WRITE)
-> 3. write transaction data to the file
-> 4. rename the file
-> 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
-> 6. drop caches in order to call f2fs_evict_inode()
-> It expects kernel panic will gone after we apply commit 03511e936916
-> ("f2fs: fix inconsistent dirty state of atomic file").
+On Tue, Mar 25, 2025 at 09:08:51AM +0800, Zorro Lang wrote:
+> On Mon, Mar 24, 2025 at 05:50:26PM -0700, Darrick J. Wong wrote:
+> > On Sun, Mar 23, 2025 at 04:04:29AM +0800, Zorro Lang wrote:
+> > > On Fri, Mar 21, 2025 at 02:27:07PM -0700, Darrick J. Wong wrote:
+> > > > From: Darrick J. Wong <djwong@kernel.org>
+> > > > 
+> > > > Test how well we can dump a fully populated filesystem's contents.
+> > > > 
+> > > > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> > > > Reviewed-by: Christoph Hellwig <hch@lst.de>
+> > > > ---
+> > > >  tests/xfs/1895     |  153 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/xfs/1895.out |    6 ++
+> > > >  2 files changed, 159 insertions(+)
+> > > >  create mode 100755 tests/xfs/1895
+> > > >  create mode 100644 tests/xfs/1895.out
+> > > > 
+> > > > 
+> > > > diff --git a/tests/xfs/1895 b/tests/xfs/1895
+> > > > new file mode 100755
+> > > > index 00000000000000..18b534d328e9fd
+> > > > --- /dev/null
+> > > > +++ b/tests/xfs/1895
+> > > > @@ -0,0 +1,153 @@
+> > > > +#! /bin/bash
+> > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > +# Copyright (c) 2025 Oracle, Inc.  All Rights Reserved.
+> > > > +#
+> > > > +# FS QA Test No. 1895
+> > > > +#
+> > > > +# Populate a XFS filesystem, ensure that rdump can "recover" the contents to
+> > > > +# another directory, and compare the contents.
+> > > > +#
+> > > > +. ./common/preamble
+> > > > +_begin_fstest auto scrub
+> > > > +
+> > > > +_cleanup()
+> > > > +{
+> > > > +	command -v _kill_fsstress &>/dev/null && _kill_fsstress
+> > > 
+> > > I'm wondering why you always do "command -v _kill_fsstress &>/dev/null" before
+> > > _kill_fsstress, isn't _kill_fsstress a common helper in common/rc ?
+> > 
+> > Yeah, I probably copy-pasta'd that from common/preamble.  Will remove it
+> > before the next posting, assuming you don't decide to fix+merge it.
 > 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Cc: Daeho Jeong <daehojeong@google.com>
-> Cc: Jianan Huang <huangjianan@xiaomi.com>
-> Signed-off-by: Chao Yu <chao@kernel.org>
-> ---
->  tests/f2fs/010     | 68 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/f2fs/010.out |  2 ++
->  2 files changed, 70 insertions(+)
->  create mode 100755 tests/f2fs/010
->  create mode 100644 tests/f2fs/010.out
+> I can "fix+merge" that:) if you don't have more changes, except:
 > 
-> diff --git a/tests/f2fs/010 b/tests/f2fs/010
-> new file mode 100755
-> index 00000000..360c09b9
-> --- /dev/null
-> +++ b/tests/f2fs/010
-> @@ -0,0 +1,68 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
-> +#
-> +# FS QA Test No. f2fs/010
-> +#
-> +# This is a regression testcase to check whether we will handle database
-> +# inode dirty status correctly:
-> +# 1. create a regular file, and write data into the file
-> +# 2. start transaction on the file (via F2FS_IOC_START_ATOMIC_WRITE)
-> +# 3. write transaction data to the file
-> +# 4. rename the file
-> +# 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
-> +# 6. drop caches in order to call f2fs_evict_inode()
-> +# It expects kernel panic will gone after we apply commit 03511e936916
-> +# ("f2fs: fix inconsistent dirty state of atomic file").
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +_cleanup()
-> +{
-> +	kill -9 $atomic_write_pid > /dev/null 2>&1
+>   - command -v _kill_fsstress &>/dev/null && _kill_fsstress
+>   + _kill_fsstress
 
-[ -n "$atomic_write_pid" ] && kill -9 $atomic_write_pid
+No changes other than applying hch's rvb that he attached to the other
+thread.
 
-> +	wait
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +
-> +_fixed_by_kernel_commit 03511e936916 \
-> +	"f2fs: fix inconsistent dirty state of atomic file"
-> +
-> +_require_scratch
-> +_require_command "$F2FS_IO_PROG" f2fs_io
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount >> $seqres.full
-> +
-> +src_db=$SCRATCH_MNT/src.db
-> +dst_db=$SCRATCH_MNT/dst.db
-> +
-> +# initialize database file
-> +$XFS_IO_PROG -c "pwrite 0 4k" -c "fsync" -f $src_db >> $seqres.full
-> +
-> +# sync filesystem to clear dirty inode
-> +sync
-> +
-> +# start atomic_write on src.db database file and commit transaction after 3000ms
-> +$F2FS_IO_PROG write 1 0 0 zero atomic_commit $src_db 3000 >> $seqres.full &
-> +atomic_write_pid=$!
-> +
-> +# wait a moment to let atomic write starts
-> +sleep 1
-> +
-> +# it will dirty inode when updating i_pino
-> +mv $src_db $dst_db
-> +
-> +# wait for atomic_write commit completion
-> +sleep 4
-> +
-> +# drop caches in order to call f2fs_evict_inode()
-> +echo 3 > /proc/sys/vm/drop_caches
-> +
-> +wait $atomic_write_pid
+--D
 
-So after this line, the $atomic_write_pid has been released. If so, how about:
-
-unset atomic_write_pid
-
-And then in _cleanup function .... (see above)
-
-Others look good to me,
-
-Thanks,
-Zorro
-
-> +
-> +echo "Silence is golden"
-> +
-> +status=0
-> +exit
-> diff --git a/tests/f2fs/010.out b/tests/f2fs/010.out
-> new file mode 100644
-> index 00000000..1d83a8d6
-> --- /dev/null
-> +++ b/tests/f2fs/010.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 010
-> +Silence is golden
-> -- 
-> 2.48.1
+> Thanks,
+> Zorro
 > 
-
+> > 
+> > --D
+> > 
+> > > Thanks,
+> > > Zorro
+> > > 
+> > > > +	cd /
+> > > > +	test -e "$testfiles" && rm -r -f $testfiles
+> > > > +}
+> > > > +
+> > > > +_register_cleanup "_cleanup" BUS
+> > > > +
+> > > > +# Import common functions.
+> > > > +. ./common/filter
+> > > > +. ./common/populate
+> > > > +. ./common/fuzzy
+> > > > +
+> > > > +_require_xfs_db_command "rdump"
+> > > > +_require_test
+> > > > +_require_scratch
+> > > > +_require_scrub
+> > > > +_require_populate_commands
+> > > > +
+> > > > +make_md5()
+> > > > +{
+> > > > +	(cd $1 ; find . -type f -print0 | xargs -0 md5sum) > $tmp.md5.$2
+> > > > +}
+> > > > +
+> > > > +cmp_md5()
+> > > > +{
+> > > > +	(cd $1 ; md5sum --quiet -c $tmp.md5.$2)
+> > > > +}
+> > > > +
+> > > > +make_stat()
+> > > > +{
+> > > > +	# columns:	raw mode in hex,
+> > > > +	# 		major rdev for special
+> > > > +	# 		minor rdev for special
+> > > > +	# 		uid of owner
+> > > > +	# 		gid of owner
+> > > > +	# 		file type
+> > > > +	# 		total size
+> > > > +	# 		mtime
+> > > > +	# 		name
+> > > > +	# We can't directly control directory sizes so filter them.
+> > > > +	# Too many things can bump (or not) atime so don't test that.
+> > > > +	(cd $1 ; find . -print0 |
+> > > > +		xargs -0 stat -c '%f %t:%T %u %g %F %s %Y %n' |
+> > > > +		sed -e 's/ directory [1-9][0-9]* / directory SIZE /g' |
+> > > > +		sort) > $tmp.stat.$2
+> > > > +}
+> > > > +
+> > > > +cmp_stat()
+> > > > +{
+> > > > +	diff -u $tmp.stat.$1 $tmp.stat.$2
+> > > > +}
+> > > > +
+> > > > +make_stat_files() {
+> > > > +	for file in "${FILES[@]}"; do
+> > > > +		find "$1/$file" -print0 | xargs -0 stat -c '%f %t:%T %u %g %F %s %Y %n'
+> > > > +	done | sed \
+> > > > +		-e 's/ directory [1-9][0-9]* / directory SIZE /g' \
+> > > > +		-e "s| $1| DUMPDIR|g" \
+> > > > +		| sort > $tmp.stat.files.$2
+> > > > +}
+> > > > +
+> > > > +cmp_stat_files()
+> > > > +{
+> > > > +	diff -u $tmp.stat.files.$1 $tmp.stat.files.$2
+> > > > +}
+> > > > +
+> > > > +make_stat_dir() {
+> > > > +	find "$1" -print0 | \
+> > > > +		xargs -0 stat -c '%f %t:%T %u %g %F %s %Y %n' | sed \
+> > > > +		-e 's/ directory [1-9][0-9]* / directory SIZE /g' \
+> > > > +		-e "s| $1| DUMPDIR|g" \
+> > > > +		| sort > $tmp.stat.dir.$2
+> > > > +}
+> > > > +
+> > > > +cmp_stat_dir()
+> > > > +{
+> > > > +	diff -u $tmp.stat.dir.$1 $tmp.stat.dir.$2
+> > > > +}
+> > > > +
+> > > > +FILES=(
+> > > > +	"/S_IFDIR.FMT_INLINE"
+> > > > +	"/S_IFBLK"
+> > > > +	"/S_IFCHR"
+> > > > +	"/S_IFLNK.FMT_LOCAL"
+> > > > +	"/S_IFIFO"
+> > > > +	"/S_IFDIR.FMT_INLINE/00000001"
+> > > > +	"/ATTR.FMT_EXTENTS_REMOTE3K"
+> > > > +	"/S_IFREG.FMT_EXTENTS"
+> > > > +	"/S_IFREG.FMT_BTREE"
+> > > > +	"/BNOBT"
+> > > > +	"/S_IFDIR.FMT_BLOCK"
+> > > > +)
+> > > > +DIR="/S_IFDIR.FMT_LEAF"
+> > > > +
+> > > > +testfiles=$TEST_DIR/$seq
+> > > > +mkdir -p $testfiles
+> > > > +
+> > > > +echo "Format and populate"
+> > > > +_scratch_populate_cached nofill > $seqres.full 2>&1
+> > > > +_scratch_mount
+> > > > +
+> > > > +_run_fsstress -n 500 -d $SCRATCH_MNT/newfiles
+> > > > +
+> > > > +make_stat $SCRATCH_MNT before
+> > > > +make_md5 $SCRATCH_MNT before
+> > > > +make_stat_files $SCRATCH_MNT before
+> > > > +make_stat_dir $SCRATCH_MNT/$DIR before
+> > > > +_scratch_unmount
+> > > > +
+> > > > +echo "Recover filesystem"
+> > > > +dumpdir1=$testfiles/rdump
+> > > > +dumpdir2=$testfiles/sdump
+> > > > +dumpdir3=$testfiles/tdump
+> > > > +rm -r -f $dumpdir1 $dumpdir2 $dumpdir3
+> > > > +
+> > > > +# as of linux 6.12 fchownat does not work on symlinks
+> > > > +_scratch_xfs_db -c "rdump / $dumpdir1" | sed -e '/could not be set/d'
+> > > > +_scratch_xfs_db -c "rdump ${FILES[*]} $dumpdir2" | sed -e '/could not be set/d'
+> > > > +_scratch_xfs_db -c "rdump $DIR $dumpdir3" | sed -e '/could not be set/d'
+> > > > +
+> > > > +echo "Check file contents"
+> > > > +make_stat $dumpdir1 after
+> > > > +cmp_stat before after
+> > > > +cmp_md5 $dumpdir1 before
+> > > > +
+> > > > +echo "Check selected files contents"
+> > > > +make_stat_files $dumpdir2 after
+> > > > +cmp_stat_files before after
+> > > > +
+> > > > +echo "Check single dir extraction contents"
+> > > > +make_stat_dir $dumpdir3 after
+> > > > +cmp_stat_dir before after
+> > > > +
+> > > > +# remount so we can check this fs
+> > > > +_scratch_mount
+> > > > +
+> > > > +# success, all done
+> > > > +status=0
+> > > > +exit
+> > > > diff --git a/tests/xfs/1895.out b/tests/xfs/1895.out
+> > > > new file mode 100644
+> > > > index 00000000000000..de639ed3fc7e38
+> > > > --- /dev/null
+> > > > +++ b/tests/xfs/1895.out
+> > > > @@ -0,0 +1,6 @@
+> > > > +QA output created by 1895
+> > > > +Format and populate
+> > > > +Recover filesystem
+> > > > +Check file contents
+> > > > +Check selected files contents
+> > > > +Check single dir extraction contents
+> > > > 
+> > > 
+> > > 
+> > 
+> 
