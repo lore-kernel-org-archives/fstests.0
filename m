@@ -1,76 +1,77 @@
-Received: from mail-pl1-f172.google.com (mail-pl1-f172.google.com [209.85.214.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8BD2B1E1E05
-	for <fstests@vger.kernel.org>; Tue, 25 Mar 2025 23:20:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A03A111BF
+	for <fstests@vger.kernel.org>; Wed, 26 Mar 2025 00:47:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742944836; cv=none; b=ruB7BgxC7BxUoEuzZL1QzXuOlWZ1TqRbP0EMPRebEIXlo49at4GuMW7YbDWZCfbiSudOvs/ZJOOLwWrb1JOt7iPTExw80Tg8wpnB5Pce7HUOCxnYXO/NrblxPi1hKQ9AzUshxEFUuytTkNAHezZGT5awdm73zDwgRyOu3MRDSVA=
+	t=1742950079; cv=none; b=mlE1ptNoHFF1i5Z0jh8nJB6U6tBBHmbDwbrsbt4EMzQZR8+PjcUBWkuCXN6z02bLoKSeGflIqYV5nU1QJdcS6bpnVOiozt9au2Wij/ewGw3od2DgfYm3EbUULJ5Um+w1MnZTcoh+PBqLjqsl/8y0+MG7S3V2QzuoCRGY2bu4tww=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742944836; c=relaxed/simple;
-	bh=Y9aYbw3uoMV1SC4X/SSkU8CvywSpynyzFOLN+R3eLB4=;
+	s=arc-20240116; t=1742950079; c=relaxed/simple;
+	bh=QhPrTHZdjwvQkQ1Q5PAMBV4B0c0eEPiPjD5beLYYX+w=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=d5MDOJTrKNfbJWci1uuzm+0RVHpwLnmd6T1Sh5/T9xLnlcE6wkXkp0tWCJ3TQQBWdwUbUzOS53+gfikjfcGR9+i+mgDvvMaYLT1bw06970rIIANUyaScy5drd4cQtSQ1fc4D8DH3s8F1GghsJlv0wTMudFK6OIUyoFDLH61TK+I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=qjAaSAiR; arc=none smtp.client-ip=209.85.214.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=rWe0D0fzAJw7v3B/m98QhA0ViGCKxz1zFw1c26QvlbGgFk3YzPW7XtnbIMXnxGn9HpZd6wGYFiVMAJYsi0JRm92Zquq5l3ZXiwOSyOsMry71zOkds7xBCHyERo2HC+w7UogpVdApvSFwD55zN+zHPS2YDhaNdcHDSvYVQgJX8D4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=M5n2LI8B; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="qjAaSAiR"
-Received: by mail-pl1-f172.google.com with SMTP id d9443c01a7336-2255003f4c6so120204905ad.0
-        for <fstests@vger.kernel.org>; Tue, 25 Mar 2025 16:20:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1742944834; x=1743549634; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=xN1R4jttMHrmK3BdJr5+xjDCnhrufGspgu+PHeQu2dQ=;
-        b=qjAaSAiRSSwlE8YGPbKOJlOMra46d7HioA2OOU962sFxS2JCAIhlPzwgpaGJR8Um7Y
-         Fs3XZ416IlSQzTbupxsdVG5b+6L8wy5Wq164edBUTSbSRKSHpbbwOb/NaAyU7vEaWRr4
-         fa+zrlf2WBiwD+iquc+t6Qrzf5zRmyiXets2XRp4nOIVC4iMRZw7vaGH6Z+tgh28KPwL
-         3Wgu0FHmygKYAD2aQeIJpHC/znWEQwHMcRCheckuM7Z1Vo5juqAQA7nYhJVTZDr87uxA
-         L8C7cfrXqygbRZS6z1nyRVFl8g0uS99pMbaY2B8Y1Ug26G/DuzENQpdi0ecWbzyKrhjq
-         qUMQ==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="M5n2LI8B"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1742950076;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=4KHyk1+MRQuxC+eJ9QzulpisBcombtQV4ojfnxT6JVo=;
+	b=M5n2LI8BkzKBg7lLtGWQjcmLwN7XKz7Kxk9eTWds20r84+U1N0cmnxSXpCkt1gQEoJgwKO
+	Tmnn1KAejWWTjDJWnlgQroXKPIRDVkPKREuM4mTlCrBgtc57SqxQY7zsaoPITYsxezMk57
+	rA1NMBarT07ba6v5vGAdToHJMsFrWog=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-189-b2PDoHHLPrOpMVIMRaH7jA-1; Tue, 25 Mar 2025 20:47:53 -0400
+X-MC-Unique: b2PDoHHLPrOpMVIMRaH7jA-1
+X-Mimecast-MFC-AGG-ID: b2PDoHHLPrOpMVIMRaH7jA_1742950073
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-2265a09dbfcso162836085ad.0
+        for <fstests@vger.kernel.org>; Tue, 25 Mar 2025 17:47:53 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1742944834; x=1743549634;
+        d=1e100.net; s=20230601; t=1742950072; x=1743554872;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=xN1R4jttMHrmK3BdJr5+xjDCnhrufGspgu+PHeQu2dQ=;
-        b=oSrBECMAx+wjxroWVCW06S1l6FzvGLzrSkOVvXGY83llrqJsjRoqKNjkKGifGUQCCL
-         9iIByGMjGhVIA5PMtnzApccSUcpfONwM77UTEVF90ghmLje2sMo0/Y+UIGPYMyGn99Y+
-         6dd+Bgh6/K8hNwNK1AfATBQ6DMgYlja4xp4WtLffcGrCRL8VbdKsBc3o3BIX/ue7Zy57
-         NK/G4U5LrRUvHAniiO3NSZQGHzpXxRPcPa7xBjd82g6Jo7goyNGBYCWERMxHcqrS2tRQ
-         4Hc/p+F8COIAawsGUxagU9YZQiMUEOQ1Ce01ZzfI+mfXPG9JdPJKbvcw8//qXossFxuU
-         vl9w==
-X-Forwarded-Encrypted: i=1; AJvYcCXEe8B7HuRkF9/a8blUPqKACpECpiRQYA59na6PVN3Bqp4qeFdv4vymRXQC8OLGlDRTMeNYsznG@vger.kernel.org
-X-Gm-Message-State: AOJu0YzovDN9jRzIyQeqRRCLG+IeR9J1BjCquXibZhFW0Za3+6PWpwMJ
-	Zt7uZfyW8otaT7i6Mlg/7kO9WrowCNNdzrubg+GuB+/caInP6/jeKAF1sWMmdYDJuRIf+qQco0+
-	dKzk=
-X-Gm-Gg: ASbGncvnfSGrwfhWQ04mo8DMvq87vPs3PsibmCmKuXnlvaoG5nViXC3ta8Pqqdd6YEP
-	AvIMLpQQte+2YKdYfug3I9VSlTcU0qwfE8Gyh7WoLeX9OoUKfh0MtIkku2BY7t9+rI3lRqblo/X
-	I0HH9RIjb9eMvjiASvOWm8xoT01ADv2VZeLmzJFtLEbEnjRQi+C1i/j5YPi72F1Kxr5xvH7OZKX
-	ZI0JdAASGVwazUUhxpIkZbWqQCpwOMPJMhXZdueNlIQlrZ23AtK/RLfjLJGYDxWgABl0mU5CSAr
-	127F+fYbah4X3yua0DhjewpeRWfTMdxl6r3GIpiFYAWubOq9CA1Ye+nnlpaUpX1KmJFe0CserL9
-	DgdzMoOEttQ==
-X-Google-Smtp-Source: AGHT+IFPvwqH3aFp6ptKNymYWn0hEgv6uWOBsU8mhsLRdoc8XyQn/nxx7iSZSiHI8TChl/8J59OZdA==
-X-Received: by 2002:a17:902:e541:b0:223:7006:4db2 with SMTP id d9443c01a7336-22780dbb924mr272665915ad.31.1742944833515;
-        Tue, 25 Mar 2025 16:20:33 -0700 (PDT)
-Received: from dread.disaster.area (pa49-186-36-239.pa.vic.optusnet.com.au. [49.186.36.239])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22780f50c80sm96377285ad.104.2025.03.25.16.20.32
+        bh=4KHyk1+MRQuxC+eJ9QzulpisBcombtQV4ojfnxT6JVo=;
+        b=ClXvaBd+Se0UaU2sUpwK0BICmgiDISDAMZ5BIDKcRoNxpQbGwhJ4Bpn/W49KYgoP1j
+         LNnHobjSH3UYG9Lv5Pp9DLZhuNedt5sLp8kaGgb6UGsSGQ98TazeN5rK7sadfujyg8Nn
+         aQ0xek1rEMGZ/nQAq1PwEMLlyIXJDmyWnoM1csRjoEZmcvpY2aTodQvpEqsDiqCtZFcU
+         Ynaoc00UXecKyuL9qZ4xvyxchp89jZzj4Dy5uwVGO+qiuE2MIcCcvpmt/DtPlLTxgP+R
+         f1JxqAmfT3gDI1UWkcTBnxmLqZ4qvoLxheLAFEdUmhhjaYQY+793Vmv8Lo/gGdAxgeJu
+         jmDQ==
+X-Gm-Message-State: AOJu0Yw5zDcyGiW8iLUeI6MV7qpzp7Wolj3GA5+0lSgtmpbsOIcAJ3kF
+	5H3d9Qp2tlE6sKMsEzSykFrGRoiPkcnpZvYlXzhjfH48n3pukxv1e+1+rkbeo1fYUE8TWao/4cC
+	hqGZNFMAvxGkTo61JlvLMjg4alAw3BCxfgycCbcrs/I3CDdmO9RPlEtk=
+X-Gm-Gg: ASbGncv+EpIBaja44QdhsM5u3/48vfQyRM2wUsLj5qmMbxT+FIghCMRQlRjVD3GXtf6
+	wVij+H5YMiYh36nD9QzcMRGV1gDa32AMuMsWVGnMWnxCa5Mv1CYx3KhcYmxfeKaaYFYxJZjQtz8
+	v42jebGtybR+0woSl7urRks5DMQhrvGNO8NR7cVAVmWugWJ8I1kuXh0wOeWHCjhtUIrmErsXy+a
+	gGlxKTLGKfwBrYns+qe6uDFkkFRhZndoY42Em+vAuF7J3w6RKNAxpDOErb8pGr3x+jcQ4hoy9yn
+	PQLbXxNFRV9/StSNQJbA4zZu3n+usKp4peeCMtJ1pCWHphaaDdbtZ+TE
+X-Received: by 2002:a05:6a00:14d1:b0:736:728b:5f1f with SMTP id d2e1a72fcca58-73905a140b0mr25926452b3a.19.1742950072653;
+        Tue, 25 Mar 2025 17:47:52 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFCvdk9I2rUhFXerNCzyrQucBGAY0/7qw28RR08tM8XnBkghbtmD6M8PrQvM6kBEW6czcrE0Q==
+X-Received: by 2002:a05:6a00:14d1:b0:736:728b:5f1f with SMTP id d2e1a72fcca58-73905a140b0mr25926425b3a.19.1742950072169;
+        Tue, 25 Mar 2025 17:47:52 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73905fd7a3fsm11261915b3a.67.2025.03.25.17.47.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 25 Mar 2025 16:20:32 -0700 (PDT)
-Received: from dave by dread.disaster.area with local (Exim 4.98)
-	(envelope-from <david@fromorbit.com>)
-	id 1txDZO-00000000ImA-0XSx;
-	Wed, 26 Mar 2025 10:20:30 +1100
-Date: Wed, 26 Mar 2025 10:20:30 +1100
-From: Dave Chinner <david@fromorbit.com>
-To: Chao Yu <chao@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
+        Tue, 25 Mar 2025 17:47:51 -0700 (PDT)
+Date: Wed, 26 Mar 2025 08:47:48 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Dave Chinner <david@fromorbit.com>, Chao Yu <chao@kernel.org>
+Cc: fstests@vger.kernel.org, jaegeuk@kernel.org,
+	linux-f2fs-devel@lists.sourceforge.net
 Subject: Re: [PATCH v5 6/6] f2fs/009: detect and repair nlink corruption
-Message-ID: <Z-M6PkLZI2LIOlXY@dread.disaster.area>
+Message-ID: <20250326004748.bx2z62lpqpg6rjlj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20250325125824.3367060-1-chao@kernel.org>
  <20250325125824.3367060-6-chao@kernel.org>
+ <Z-M6PkLZI2LIOlXY@dread.disaster.area>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -79,103 +80,118 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250325125824.3367060-6-chao@kernel.org>
+In-Reply-To: <Z-M6PkLZI2LIOlXY@dread.disaster.area>
 
-On Tue, Mar 25, 2025 at 08:58:24PM +0800, Chao Yu wrote:
-> This is a regression test to check whether fsck can handle corrupted
-> nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
-> and expects fsck.f2fs can detect such corruption and do the repair.
+On Wed, Mar 26, 2025 at 10:20:30AM +1100, Dave Chinner wrote:
+> On Tue, Mar 25, 2025 at 08:58:24PM +0800, Chao Yu wrote:
+> > This is a regression test to check whether fsck can handle corrupted
+> > nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
+> > and expects fsck.f2fs can detect such corruption and do the repair.
+> > 
+> > Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+> > Signed-off-by: Chao Yu <chao@kernel.org>
+> > ---
+> > v5:
+> > - clean up codes suggested by Dave.
+> >  tests/f2fs/009     | 141 +++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/f2fs/009.out |   2 +
+> >  2 files changed, 143 insertions(+)
+> >  create mode 100755 tests/f2fs/009
+> >  create mode 100644 tests/f2fs/009.out
+> > 
+> > diff --git a/tests/f2fs/009 b/tests/f2fs/009
+> > new file mode 100755
+> > index 00000000..864fdcfb
+> > --- /dev/null
+> > +++ b/tests/f2fs/009
+> > @@ -0,0 +1,141 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. f2fs/009
+> > +#
+> > +# This is a regression test to check whether fsck can handle corrupted
+> > +# nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
+> > +# and expects fsck.f2fs can detect such corruption and do the repair.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick
+> > +
+> > +if [ ! -x "$(type -P socket)" ]; then
+> > +	_notrun "Couldn't find socket"
+> > +fi
 > 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Signed-off-by: Chao Yu <chao@kernel.org>
-> ---
-> v5:
-> - clean up codes suggested by Dave.
->  tests/f2fs/009     | 141 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/f2fs/009.out |   2 +
->  2 files changed, 143 insertions(+)
->  create mode 100755 tests/f2fs/009
->  create mode 100644 tests/f2fs/009.out
+> Perhaps something like:
 > 
-> diff --git a/tests/f2fs/009 b/tests/f2fs/009
-> new file mode 100755
-> index 00000000..864fdcfb
-> --- /dev/null
-> +++ b/tests/f2fs/009
-> @@ -0,0 +1,141 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
-> +#
-> +# FS QA Test No. f2fs/009
-> +#
-> +# This is a regression test to check whether fsck can handle corrupted
-> +# nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
-> +# and expects fsck.f2fs can detect such corruption and do the repair.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +if [ ! -x "$(type -P socket)" ]; then
-> +	_notrun "Couldn't find socket"
-> +fi
+> _require_command $(type -P socket) socket
 
-Perhaps something like:
+Good point! Maybe double quotation marks -- "$(type -P socket)" is
+helpful, due to if socket isn't installed, there will be only one
+argument.
 
-_require_command $(type -P socket) socket
+> 
+> would be more consistent with all the other code that checks for
+> installed utilities that a test requires?
+> 
+> > +_require_scratch
+> > +_require_command "$F2FS_INJECT_PROG" inject.f2fs
+> > +
+> > +_fixed_by_git_commit f2fs-tools 958cd6e \
+> > +	"fsck.f2fs: support to repair corrupted i_links"
+> > +
+> > +filename=$SCRATCH_MNT/foo
+> > +hardlink=$SCRATCH_MNT/bar
+> > +
+> > +_cleanup()
+> > +{
+> > +	if [ -n "$pid" ]; then
+> > +		kill $pid &> /dev/null
+> > +		wait
+> > +	fi
+> > +	cd /
+> > +	rm -r -f $tmp.*
+> > +}
+> > +
+> > +_inject_and_check()
+> 
+> Single leading "_" is reserved for fstests functions, not for local
+> test functions.
+> 
+> Just call this one "inject_and_test", because that is what it does,
+> and call this one:
+> 
+> > +inject_and_check()
+> > +{
+> > +	local nlink=$1
+> > +	local create_hardlink=$2
+> > +	local ino=$3
+> > +
+> > +	if [ -z $ino ]; then
+> > +		ino=`stat -c '%i' $filename`
+> > +	fi
+> > +
+> > +	if [ $create_hardlink == 1 ]; then
+> > +		ln $filename $hardlink
+> > +	fi
+> > +
+> > +	_inject_and_check $nlink $ino
+> > +}
+> 
+> something like check_links()
+> 
+> Otherwise this is a good improvement.
 
-would be more consistent with all the other code that checks for
-installed utilities that a test requires?
+Hi Chao, if you agree with all these changes, and don't need to change more, I can
+help to merge this patchset with above changes. Or you'd like to send a new version?
 
-> +_require_scratch
-> +_require_command "$F2FS_INJECT_PROG" inject.f2fs
-> +
-> +_fixed_by_git_commit f2fs-tools 958cd6e \
-> +	"fsck.f2fs: support to repair corrupted i_links"
-> +
-> +filename=$SCRATCH_MNT/foo
-> +hardlink=$SCRATCH_MNT/bar
-> +
-> +_cleanup()
-> +{
-> +	if [ -n "$pid" ]; then
-> +		kill $pid &> /dev/null
-> +		wait
-> +	fi
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +
-> +_inject_and_check()
+Thanks,
+Zorro
 
-Single leading "_" is reserved for fstests functions, not for local
-test functions.
+> 
+> -Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> 
 
-Just call this one "inject_and_test", because that is what it does,
-and call this one:
-
-> +inject_and_check()
-> +{
-> +	local nlink=$1
-> +	local create_hardlink=$2
-> +	local ino=$3
-> +
-> +	if [ -z $ino ]; then
-> +		ino=`stat -c '%i' $filename`
-> +	fi
-> +
-> +	if [ $create_hardlink == 1 ]; then
-> +		ln $filename $hardlink
-> +	fi
-> +
-> +	_inject_and_check $nlink $ino
-> +}
-
-something like check_links()
-
-Otherwise this is a good improvement.
-
--Dave.
--- 
-Dave Chinner
-david@fromorbit.com
