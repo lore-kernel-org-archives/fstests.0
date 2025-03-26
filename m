@@ -1,181 +1,145 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8C6A3BBF0
-	for <fstests@vger.kernel.org>; Wed, 26 Mar 2025 03:24:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 444524C6C
+	for <fstests@vger.kernel.org>; Wed, 26 Mar 2025 12:03:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742959487; cv=none; b=S2zSoGO/fj7jvurjKDN87hkPAkZAcy+jRGzgQpCjTjI6Gbk8RGITNFZ2DU0M2EF57b/XD9RYx35Q6uEn6qbAgB2JvJ8CFyYUhT4cLkc77rlzGZAMLMKf8xmJ9IlnhRdER8jNF94Wrxr+lkTez4ZxtT/qPawJj89WkhFo2shdyFQ=
+	t=1742990633; cv=none; b=YU6IE5aw8Bt3UAjJgomOwzAcxWTPxCIUUdkBPrsi7I7d7W71KGCUW5VnnJ914F/ndmCnjeouocR3v+dLFdFvCX8HGZPq1A7ffMITO+6RsVYsaurAH1zzf+zEykM8HJz04SMF/3PwFgEw4TOsBZXEHePDwk2DACflNEOl2pKO0w8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742959487; c=relaxed/simple;
-	bh=slulgQE+aQy8LnXABstJI1BsbYuK7K2GlkRqWtbSuz8=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=CJPK/kVX6rMOdjbw01DZRjgcIoNOryM+Zajsw+tzADssK0Z5rY25jFSRNOuXQPeWFS4D0TuZaRhuzBN87Uski7a66VVIYPIc22sytp0zp8IqdZvX5hW8GPUPK1Hn/JZhdo/v8t19JbK7rHv2dDaOfteqq9GnBDhS7D/nGja2eiU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=F9FPCAbz; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1742990633; c=relaxed/simple;
+	bh=Y+epb3NLQIDPGyb4Dk0u1R+/gTlL8sesV7u4E5OVk6s=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=lC5gxNUTPpdUOKXONnoWous2Z2vII1gklKO0apepYg5LtRrFN7gqhsuNAS/ar2hEiqOXHWrYx+J5QaERhpqAmj6sFeRMV7ZowaPpUTJNzMbWCndmjb205jeKWilIFDfBPrf9VarDrxIfU7w/7rfMcCpB/C28pgiminTQYoiT0JQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Cf3Y4PfA; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="F9FPCAbz"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2890FC4CEE2;
-	Wed, 26 Mar 2025 03:24:45 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Cf3Y4PfA"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 84C04C4CEE2;
+	Wed, 26 Mar 2025 12:03:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1742959487;
-	bh=slulgQE+aQy8LnXABstJI1BsbYuK7K2GlkRqWtbSuz8=;
-	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
-	b=F9FPCAbzYPZeT7YoHrHWfj7nRRfLTkWj90rnHLh+VVjsp+DRmVQRme/X4w3npGZx+
-	 ax5usCDXTPnwLm+b67FHZjFrwEDp8HmzjU70dO7wp9ChsewDV5YDIIn6DZsIo11IrT
-	 IM10FIOzkiiY2IDQSdWfpgbrLxUCP3VlmG/2Vep32R3p/+4Psq2QFOkykI3C//zx8j
-	 1rsRH4R1gMKOiWWel35ifQuag9+NrsPM2tjXRIcYJQfSXSfxnmVsn/hKhKfqqmmdUl
-	 etYNpPDJFYDVXGqRnSriuUQ1pAzlFImYq64qZkPtW2BWsAA57JEXR43aO1LIjbz92C
-	 6tXHSWF6yyKxg==
-Message-ID: <5ae5a7d0-18bb-49f1-abb2-46807e39a7fe@kernel.org>
-Date: Wed, 26 Mar 2025 11:24:44 +0800
+	s=k20201202; t=1742990631;
+	bh=Y+epb3NLQIDPGyb4Dk0u1R+/gTlL8sesV7u4E5OVk6s=;
+	h=From:To:Cc:Subject:Date:From;
+	b=Cf3Y4PfAO6mQHZ1bcqtJMgZcj6lh+bwCtSFD6EXxixYXhzaqcr9NSxPmFGSOvbXWB
+	 SLDEH/64xuO90UU+eSxf6ALJtJFEjbEo7OBTXIrl2uyGbc7n5s4/CgC8+aew7j65F/
+	 4/e7V5wvwwr75q5U4l9qFtiEDa9stunuOmymB2D79HjlwBRII0VRvaxeLxwbNGbwup
+	 0q7SeurlbgXNtt5l7u9WdK9BzA0K/z+Eq+CuUNRnn/Lw/Q+xdy1ouxH4kDv777INlA
+	 RjZewIatkuD3F0MSi8wpd0mKHQOBPwnX5Fp+VctscIH8qYHOHCqi8gL16GpMc/Gw9O
+	 gqW8JK+gNsDNA==
+From: Chao Yu <chao@kernel.org>
+To: Zorro Lang <zlang@kernel.org>,
+	fstests@vger.kernel.org
+Cc: jaegeuk@kernel.org,
+	linux-f2fs-devel@lists.sourceforge.net,
+	Chao Yu <chao@kernel.org>
+Subject: [PATCH] f2fs/011: test to check out-of-space issue
+Date: Wed, 26 Mar 2025 20:03:41 +0800
+Message-ID: <20250326120341.3641535-1-chao@kernel.org>
+X-Mailer: git-send-email 2.49.0.395.g12beb8f557-goog
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: chao@kernel.org, fstests@vger.kernel.org, jaegeuk@kernel.org,
- linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v5 6/6] f2fs/009: detect and repair nlink corruption
-To: Zorro Lang <zlang@redhat.com>, Dave Chinner <david@fromorbit.com>
-References: <20250325125824.3367060-1-chao@kernel.org>
- <20250325125824.3367060-6-chao@kernel.org>
- <Z-M6PkLZI2LIOlXY@dread.disaster.area>
- <20250326004748.bx2z62lpqpg6rjlj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Chao Yu <chao@kernel.org>
-In-Reply-To: <20250326004748.bx2z62lpqpg6rjlj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 3/26/25 08:47, Zorro Lang wrote:
-> On Wed, Mar 26, 2025 at 10:20:30AM +1100, Dave Chinner wrote:
->> On Tue, Mar 25, 2025 at 08:58:24PM +0800, Chao Yu wrote:
->>> This is a regression test to check whether fsck can handle corrupted
->>> nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
->>> and expects fsck.f2fs can detect such corruption and do the repair.
->>>
->>> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
->>> Signed-off-by: Chao Yu <chao@kernel.org>
->>> ---
->>> v5:
->>> - clean up codes suggested by Dave.
->>>  tests/f2fs/009     | 141 +++++++++++++++++++++++++++++++++++++++++++++
->>>  tests/f2fs/009.out |   2 +
->>>  2 files changed, 143 insertions(+)
->>>  create mode 100755 tests/f2fs/009
->>>  create mode 100644 tests/f2fs/009.out
->>>
->>> diff --git a/tests/f2fs/009 b/tests/f2fs/009
->>> new file mode 100755
->>> index 00000000..864fdcfb
->>> --- /dev/null
->>> +++ b/tests/f2fs/009
->>> @@ -0,0 +1,141 @@
->>> +#! /bin/bash
->>> +# SPDX-License-Identifier: GPL-2.0
->>> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
->>> +#
->>> +# FS QA Test No. f2fs/009
->>> +#
->>> +# This is a regression test to check whether fsck can handle corrupted
->>> +# nlinks correctly, it uses inject.f2fs to inject nlinks w/ wrong value,
->>> +# and expects fsck.f2fs can detect such corruption and do the repair.
->>> +#
->>> +. ./common/preamble
->>> +_begin_fstest auto quick
->>> +
->>> +if [ ! -x "$(type -P socket)" ]; then
->>> +	_notrun "Couldn't find socket"
->>> +fi
->>
->> Perhaps something like:
->>
->> _require_command $(type -P socket) socket
-> 
-> Good point! Maybe double quotation marks -- "$(type -P socket)" is
-> helpful, due to if socket isn't installed, there will be only one
-> argument.
-> 
->>
->> would be more consistent with all the other code that checks for
+This is a regression testcase to check whether we will handle
+out-of-space case correctly during fallocate() on pinned file
+once we disable checkpoint.
 
-Agreed.
+Testcase:
+1. mount f2fs w/ checkpoint=disable option
+2. create fragmented file data
+3. set flag w/ pinned flag
+4. fallocate space for pinned file, expects panic due to running
+out of space.
 
->> installed utilities that a test requires?
->>
->>> +_require_scratch
->>> +_require_command "$F2FS_INJECT_PROG" inject.f2fs
->>> +
->>> +_fixed_by_git_commit f2fs-tools 958cd6e \
->>> +	"fsck.f2fs: support to repair corrupted i_links"
->>> +
->>> +filename=$SCRATCH_MNT/foo
->>> +hardlink=$SCRATCH_MNT/bar
->>> +
->>> +_cleanup()
->>> +{
->>> +	if [ -n "$pid" ]; then
->>> +		kill $pid &> /dev/null
->>> +		wait
->>> +	fi
->>> +	cd /
->>> +	rm -r -f $tmp.*
->>> +}
->>> +
->>> +_inject_and_check()
->>
->> Single leading "_" is reserved for fstests functions, not for local
->> test functions.
+We should apply commit 48ea8b200414 ("f2fs: fix to avoid panic
+once fallocation fails for pinfile") to avoid system panic.
+Note that it only fix the issue for regular block device, problem
+still exist for zoned block device.
 
-Oh, got it.
+Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+Signed-off-by: Chao Yu <chao@kernel.org>
+---
+ tests/f2fs/011     | 58 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/f2fs/011.out |  2 ++
+ 2 files changed, 60 insertions(+)
+ create mode 100755 tests/f2fs/011
+ create mode 100644 tests/f2fs/011.out
 
->>
->> Just call this one "inject_and_test", because that is what it does,
->> and call this one:
->>
->>> +inject_and_check()
->>> +{
->>> +	local nlink=$1
->>> +	local create_hardlink=$2
->>> +	local ino=$3
->>> +
->>> +	if [ -z $ino ]; then
->>> +		ino=`stat -c '%i' $filename`
->>> +	fi
->>> +
->>> +	if [ $create_hardlink == 1 ]; then
->>> +		ln $filename $hardlink
->>> +	fi
->>> +
->>> +	_inject_and_check $nlink $ino
->>> +}
->>
->> something like check_links()
->>
->> Otherwise this is a good improvement.
-
-Thanks Dave for all your review and suggestion!
-
-> 
-> Hi Chao, if you agree with all these changes, and don't need to change more, I can
-> help to merge this patchset with above changes. Or you'd like to send a new version?
-
-Zorro, I'm fine w/ all the changes, I'm appreciate for that if you can
-help to update the patch!
-
-Thanks,
-
-> 
-> Thanks,
-> Zorro
-> 
->>
->> -Dave.
->> -- 
->> Dave Chinner
->> david@fromorbit.com
->>
-> 
+diff --git a/tests/f2fs/011 b/tests/f2fs/011
+new file mode 100755
+index 00000000..1ece8fd0
+--- /dev/null
++++ b/tests/f2fs/011
+@@ -0,0 +1,58 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
++#
++# FS QA Test No. f2fs/012
++#
++# This is a regression testcase to check whether we will handle
++# out-of-space case correctly during fallocate() on pinned file
++# once we disable checkpoint.
++# 1. mount f2fs w/ checkpoint=disable option
++# 2. create fragmented file data
++# 3. set flag w/ pinned flag
++# 4. fallocate space for pinned file, expects panic due to running
++# out of space
++# We should apply commit 48ea8b200414 ("f2fs: fix to avoid panic
++# once fallocation fails for pinfile") to avoid system panic.
++# Note that it only fix the issue for regular block device, problem
++# still exist for zoned block device.
++#
++. ./common/preamble
++_begin_fstest auto quick
++
++_cleanup()
++{
++	cd /
++	rm -r -f $tmp.*
++}
++
++_fixed_by_kernel_commit 48ea8b200414 \
++       "f2fs: fix to avoid panic once fallocation fails for pinfile"
++
++_require_scratch
++_require_command "$F2FS_IO_PROG" f2fs_io
++
++_scratch_mkfs_sized $((1*1024*1024*1024)) >> $seqres.full
++_scratch_mount -o checkpoint=disable:10%
++
++pinfile=$SCRATCH_MNT/file
++
++# simulate fragment status in f2fs
++for ((i=0;i<256;i++)) do
++       dd if=/dev/zero of=$SCRATCH_MNT/$i bs=1M count=1 >>$seqres.full 2>&1
++done
++sync
++
++for ((i=0;i<256;i+=2)) do
++       rm $SCRATCH_MNT/$i >> $seqres.full 2>&1
++done
++sync
++
++touch $pinfile
++$F2FS_IO_PROG pinfile set $pinfile >> $seqres.full
++fallocate -l $((3*256*1024*1024)) $pinfile >> $seqres.full 2>&1
++
++echo "Silence is golden"
++
++status=0
++exit
+diff --git a/tests/f2fs/011.out b/tests/f2fs/011.out
+new file mode 100644
+index 00000000..62e02519
+--- /dev/null
++++ b/tests/f2fs/011.out
+@@ -0,0 +1,2 @@
++QA output created by 011
++Silence is golden
+-- 
+2.49.0
 
