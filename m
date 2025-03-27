@@ -1,144 +1,159 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70B451BC3C
-	for <fstests@vger.kernel.org>; Thu, 27 Mar 2025 05:51:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A09642139CF
+	for <fstests@vger.kernel.org>; Thu, 27 Mar 2025 11:53:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743054709; cv=none; b=oR9dA+Vi3JB2yxaq/8lX3lCK/+Xj6zV1We1oM4fG55qjVy9YRITjirDEnyXhkF95TAefQkvYNCgm/2sQIer7RitBB4s5U70gyngF/h7el+wbwtbVx+eVIhTX5rmY2EjD5kUKBlEJm+ywDzcyVoapeZix+56rYc92ALf9DPEnF34=
+	t=1743076415; cv=none; b=bV+0hWDGB0yApeEkISdjVWxyswSTywnpP6fe+LAQ6U799ljrNYmAH0mv20rf3fET3ja5wRckf0HhhyqMEWx8M3IihPUe2rUCx/vtTte34QAsjrn7tAVtnyYTAp9PgMU7Sjl3zLRrK0ON7j4m5KivO1NMfYO0eTZlCwBd4NCEOgQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743054709; c=relaxed/simple;
-	bh=SJIyKCRKFBYowD/M/cJu/HYSC7rzw8jixMT6n76IJts=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=hgixwQJC4m01TzBmW7wl+giw8gMVxl9DF5Pds/5nZcuvCvBOVV1jdKo8inqSdhCQ4PT7K3+OG4diufOcylh9tx8bgwxKHHL7aLAhN+8p5dzcZobiAq1e2groORtc1XjDkhZ7OcMIy0VPxBDSqT01IZLyRiqr68oCXC5vJi22OM0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=icW0DUIe; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1743076415; c=relaxed/simple;
+	bh=XABOlLOdb+GYGihfxxXpKbRns0kIKcDt7XDQoGxdyfM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Asa49hyI+RZSO38JZoC9CPvsUQfPYouiS3d6Dd5CrIpawvB/nf67oS4OWCOafyyfqmAcUoa3LtsCiMLdR793KJVoEIhC66vWPhrppvdZWcGaO2CGMOxhiiexECK971AosTlInvFGe0gEL1rrDFsB4Dv6n4I3ZN+aHNjFc06cFMQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=0WmmS6iH; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=pIotN3XF; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=0WmmS6iH; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=pIotN3XF; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="icW0DUIe"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ACD75C4CEDD;
-	Thu, 27 Mar 2025 05:51:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1743054708;
-	bh=SJIyKCRKFBYowD/M/cJu/HYSC7rzw8jixMT6n76IJts=;
-	h=From:To:Cc:Subject:Date:From;
-	b=icW0DUIeUcDUPNCt+txYgmrjj68MKU+PGnynOBnMPrzWMh9u+IdyHb1ouNMsYShXe
-	 Hv0JPJho2HnxL21A3jcV0lhBM+KKPb107Tvvj//tyAIoELBed7teGwdkzMdSFdg97g
-	 Sps6LxcfrzzHAmeEuS9K8iF/5uT6hjvkouyvzzMvCmeMg4slnrGQt4gk94zkZ6A+8e
-	 yaXPDTLDqlYOb+eKLOBvY1Q8O9ebPmgJ99SNJ6XtXPg14X/jtNi4c0/L+NMs4+A+Am
-	 JEUgkQLMCA4NiASmFxf4KnYwoBCx5C73f8lRJzN1YyuSrQLmXzI5xGDV/QNcqtO30b
-	 n3m205FppsSfg==
-From: Chao Yu <chao@kernel.org>
-To: Zorro Lang <zlang@kernel.org>,
-	fstests@vger.kernel.org
-Cc: jaegeuk@kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net,
-	Chao Yu <chao@kernel.org>
-Subject: [PATCH v2] f2fs/011: test to check out-of-space issue
-Date: Thu, 27 Mar 2025 13:50:51 +0800
-Message-ID: <20250327055051.3827735-1-chao@kernel.org>
-X-Mailer: git-send-email 2.49.0.395.g12beb8f557-goog
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="0WmmS6iH";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="pIotN3XF";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="0WmmS6iH";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="pIotN3XF"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id A2A181F449;
+	Thu, 27 Mar 2025 11:53:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1743076410; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=R+QxkDVy5JRXbW51kJ2F9UVtUHbBkep2u9RXAqpaoBw=;
+	b=0WmmS6iHlw/gOs91YI8HSX8we1JIoZSAW6ycjBmd9yfK0HSf1J+h20t4Z96p3NQL4EgvLy
+	pqVLrN6Hm1zJlzxIuQ4gqZGmb2fGiZFJ/KjnMFQiPTnM3hIGCP4XyrnCBa1aTDa4jL1LK7
+	HJfIKZQ8nZ1pjFXGLmphhZqpXOIIL9c=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1743076410;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=R+QxkDVy5JRXbW51kJ2F9UVtUHbBkep2u9RXAqpaoBw=;
+	b=pIotN3XFDhfuYS4qF+/VXHQh4jiW8JPxvUg9Zao5zvzq318vz6yZH7IPHfymstt2WoLJK5
+	9gpWYqRYiKvLeaBw==
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=0WmmS6iH;
+	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=pIotN3XF
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1743076410; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=R+QxkDVy5JRXbW51kJ2F9UVtUHbBkep2u9RXAqpaoBw=;
+	b=0WmmS6iHlw/gOs91YI8HSX8we1JIoZSAW6ycjBmd9yfK0HSf1J+h20t4Z96p3NQL4EgvLy
+	pqVLrN6Hm1zJlzxIuQ4gqZGmb2fGiZFJ/KjnMFQiPTnM3hIGCP4XyrnCBa1aTDa4jL1LK7
+	HJfIKZQ8nZ1pjFXGLmphhZqpXOIIL9c=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1743076410;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=R+QxkDVy5JRXbW51kJ2F9UVtUHbBkep2u9RXAqpaoBw=;
+	b=pIotN3XFDhfuYS4qF+/VXHQh4jiW8JPxvUg9Zao5zvzq318vz6yZH7IPHfymstt2WoLJK5
+	9gpWYqRYiKvLeaBw==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 941D9139D4;
+	Thu, 27 Mar 2025 11:53:30 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id CNgjJDo85WdlMAAAD6G6ig
+	(envelope-from <jack@suse.cz>); Thu, 27 Mar 2025 11:53:30 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+	id 49C00A082A; Thu, 27 Mar 2025 12:53:30 +0100 (CET)
+Date: Thu, 27 Mar 2025 12:53:30 +0100
+From: Jan Kara <jack@suse.cz>
+To: Luis Chamberlain <mcgrof@kernel.org>
+Cc: patches@lists.linux.dev, fstests@vger.kernel.org, linux-mm@kvack.org, 
+	linux-fsdevel@vger.kernel.org, linux-block@vger.kernel.org, oliver.sang@intel.com, 
+	hannes@cmpxchg.org, willy@infradead.org, jack@suse.cz, apopple@nvidia.com, 
+	brauner@kernel.org, hare@suse.de, oe-lkp@lists.linux.dev, lkp@intel.com, 
+	john.g.garry@oracle.com, p.raghav@samsung.com, da.gomez@samsung.com, dave@stgolabs.net, 
+	riel@surriel.com, krisman@suse.de, boris@bur.io, jackmanb@google.com, 
+	gost.dev@samsung.com
+Subject: Re: [PATCH] generic/764: fsstress + migrate_pages() test
+Message-ID: <pociwdgfqbzw4mjass6u6wcnvmqlh3ddqzoeoiwiyqs64pl6yu@5ad7ne7rgwe2>
+References: <20250326185101.2237319-1-mcgrof@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250326185101.2237319-1-mcgrof@kernel.org>
+X-Rspamd-Queue-Id: A2A181F449
+X-Spam-Level: 
+X-Spamd-Result: default: False [-4.01 / 50.00];
+	BAYES_HAM(-3.00)[99.99%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_RHS_NOT_FQDN(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MISSING_XM_UA(0.00)[];
+	RCPT_COUNT_TWELVE(0.00)[24];
+	MIME_TRACE(0.00)[0:+];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.cz:dkim];
+	TO_DN_SOME(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	RCVD_COUNT_THREE(0.00)[3];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	RCVD_TLS_LAST(0.00)[];
+	DKIM_TRACE(0.00)[suse.cz:+]
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Rspamd-Action: no action
+X-Spam-Score: -4.01
+X-Spam-Flag: NO
 
-This is a regression testcase to check whether we will handle
-out-of-space case correctly during fallocate() on pinned file
-once we disable checkpoint.
+On Wed 26-03-25 11:50:55, Luis Chamberlain wrote:
+> 0-day reported a page migration kernel warning with folios which happen
+> to be buffer-heads [0]. I'm having a terribly hard time reproducing the bug
+> and so I wrote this test to force page migration filesystems.
+> 
+> It turns out we have have no tests for page migration on fstests or ltp,
+> and its no surprise, other than compaction covered by generic/750 there
+> is no easy way to trigger page migration right now unless you have a
+> numa system.
+> 
+> We should evaluate if we want to help stress test page migration
+> artificially by later implementing a way to do page migration on simple
+> systems to an artificial target.
+> 
+> So far, this doesn't trigger any kernel splats, not even warnings for me.
+> 
+> Reported-by: kernel test robot <oliver.sang@intel.com>
+> Link: https://lore.kernel.org/r/202503101536.27099c77-lkp@intel.com # [0]
+> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
 
-Testcase:
-1. mount f2fs w/ checkpoint=disable option
-2. create fragmented file data
-3. set flag w/ pinned flag
-4. fallocate space for pinned file, expects panic due to running
-out of space.
+So when I was testing page migration in the past MM guys advised me to use
+THP compaction as a way to trigger page migration. You can manually
+trigger compaction by:
 
-We should apply both commit ("f2fs: fix to avoid panic once
-fallocation fails for pinfile") and commit ("f2fs: fix to avoid
-running out of free segments") to avoid system panic.
-Note that w/ these two commit, we fixed such issue in both
-convential and zoned block device.
+echo 1 >/proc/sys/vm/compact_memory
 
-Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-Signed-off-by: Chao Yu <chao@kernel.org>
----
-v2:
-- clean up codes suggested by Zorro
-- change output to expect ENOSPC error if we have applied fixes
- tests/f2fs/011     | 53 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/f2fs/011.out |  2 ++
- 2 files changed, 55 insertions(+)
- create mode 100755 tests/f2fs/011
- create mode 100644 tests/f2fs/011.out
+So you first mess with the page cache a bit to fragment memory and then
+call the above to try to compact it back...
 
-diff --git a/tests/f2fs/011 b/tests/f2fs/011
-new file mode 100755
-index 00000000..ec3d39ec
---- /dev/null
-+++ b/tests/f2fs/011
-@@ -0,0 +1,53 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
-+#
-+# FS QA Test No. f2fs/011
-+#
-+# This is a regression testcase to check whether we will handle
-+# out-of-space case correctly during fallocate() on pinned file
-+# once we disable checkpoint.
-+# 1. mount f2fs w/ checkpoint=disable option
-+# 2. create fragmented file data
-+# 3. set flag w/ pinned flag
-+# 4. fallocate space for pinned file, expects panic due to running
-+# out of space
-+# We should apply both commit ("f2fs: fix to avoid panic once
-+# fallocation fails for pinfile") and commit ("f2fs: fix to avoid
-+# running out of free segments") to avoid system panic.
-+# Note that w/ these two commit, we fixed such issue in both
-+# convential and zoned block device.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+_fixed_by_kernel_commit 48ea8b200414 \
-+	"f2fs: fix to avoid panic once fallocation fails for pinfile"
-+_fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"f2fs: fix to avoid running out of free segments"
-+
-+_require_scratch
-+_require_command "$F2FS_IO_PROG" f2fs_io
-+
-+_scratch_mkfs_sized $((1*1024*1024*1024)) >> $seqres.full
-+_scratch_mount -o checkpoint=disable:10%
-+
-+pinfile=$SCRATCH_MNT/file
-+
-+# simulate fragment status in f2fs
-+for ((i=0;i<256;i++)) do
-+	$XFS_IO_PROG -f -c "pwrite 0 1m" $SCRATCH_MNT/$i >>$seqres.full
-+done
-+sync
-+
-+for ((i=0;i<256;i+=2)) do
-+	rm -f $SCRATCH_MNT/$i
-+done
-+sync
-+
-+touch $pinfile
-+$F2FS_IO_PROG pinfile set $pinfile >> $seqres.full
-+$XFS_IO_PROG -c "falloc 0 $((3*256*1024*1024))" $pinfile
-+
-+status=0
-+exit
-diff --git a/tests/f2fs/011.out b/tests/f2fs/011.out
-new file mode 100644
-index 00000000..559c3fdf
---- /dev/null
-+++ b/tests/f2fs/011.out
-@@ -0,0 +1,2 @@
-+QA output created by 011
-+fallocate: No space left on device
+								Honza
 -- 
-2.49.0
-
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
