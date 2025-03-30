@@ -1,181 +1,201 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 62D091CAA86
-	for <fstests@vger.kernel.org>; Fri, 28 Mar 2025 18:02:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F25D71D5CD6
+	for <fstests@vger.kernel.org>; Sun, 30 Mar 2025 15:21:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743184942; cv=none; b=uBBLMIS84IAGsAgE/OLW1/ayF/UZbEpSIqgjgKg/xScr4Tphh50q5r/JUnocnpDT6inlwYfQxUTvnvZr8p5dnF3ShhOCk7qpW9Sh3Z7TqZ8kpsjtAu0yFMCcW4tLKPjITYsDojBRn57fPSgZAxpEGd7vuWbDJZlEXbWT5N8HOh4=
+	t=1743348104; cv=none; b=FWofLPAKpopCBBZAjBGci133SoU1abvlsOM/pI/3BJ+tyZ1o/SRu/65QRKkn2GEZAhcVUAGqg4NLETZB+yzahQb6fmk2BitMrV5RRMN65oWvW/GoK4ROIZdDBK6YmjopDwiQaYDf5DifCuND+zqGG6ofdDmpAuJ/2WaxHG2ED2Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743184942; c=relaxed/simple;
-	bh=6lQd11Y9xF2RgGqOZvXdT+H6PdK2acTcFl7qhzVfLCY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rSsx9UXIP9MB/wsC3lkjbCLxED0JeLaGvbHgaYbnYvwr3AxB+BPqw+D7Friyoq1mxeQ+NF3vaGC65Cj+GBBBB4DHdb59JEtlPdppYthMxui4LLNyratHfDZCjt3yQlcuVuij4iFUCgHGjUPP9Hhww3pUcCQQ62KHuRgOTp0TEbw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=gCyGI6uc; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=ZLIi9IUE; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=gCyGI6uc; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=ZLIi9IUE; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	s=arc-20240116; t=1743348104; c=relaxed/simple;
+	bh=mHVm9KW4Rl8UkzRDxg2awIwHmmXERHw1xbx1dpxOsR0=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=WmgiBHFyAWczr3wiOMvCyeUHhwI/+JI7gKrMc78rZ8zc5VRtm79sb2pLTvJCDd6wxw93ZH94VUUM499FkWJ4jtxeTNwgx/2Dmo2hTWv3lE77HJiuhkjKkW3rRemnegu2LQivBD+asUVgNT+oQ7WloCvCWNbM4zYZedPi4V08zsM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Dr/Z0sIk; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="gCyGI6uc";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="ZLIi9IUE";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="gCyGI6uc";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="ZLIi9IUE"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 577C4211C8;
-	Fri, 28 Mar 2025 18:02:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1743184938;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=isyx4xQh1w4gf5Yr7sgvQ5gdvNcZb2x3/RnO6lezoJM=;
-	b=gCyGI6ucctKw7Jaw4UYde8fvDDq2eDUqokEEJgOSrqJFRO5KuGWS/UeKqhxsgqB8QlXUJ5
-	6zMrxoFWhtE/da28as44kFaWK6xmanvf3DhzaRgv9Tg+Gq7B9XvdXSiFkxvU25EXROHxwA
-	8C2w+8g+KGlI21PUbFSCG+RMfW8yBQA=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1743184938;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=isyx4xQh1w4gf5Yr7sgvQ5gdvNcZb2x3/RnO6lezoJM=;
-	b=ZLIi9IUEtut3ni0lHS08FjzM4KkecQYmIQfmuRndUddodVHCiDlQX+GFkGIJZeBBjSZyXt
-	IU3CpDpgyb7rIrDw==
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=gCyGI6uc;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=ZLIi9IUE
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1743184938;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=isyx4xQh1w4gf5Yr7sgvQ5gdvNcZb2x3/RnO6lezoJM=;
-	b=gCyGI6ucctKw7Jaw4UYde8fvDDq2eDUqokEEJgOSrqJFRO5KuGWS/UeKqhxsgqB8QlXUJ5
-	6zMrxoFWhtE/da28as44kFaWK6xmanvf3DhzaRgv9Tg+Gq7B9XvdXSiFkxvU25EXROHxwA
-	8C2w+8g+KGlI21PUbFSCG+RMfW8yBQA=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1743184938;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=isyx4xQh1w4gf5Yr7sgvQ5gdvNcZb2x3/RnO6lezoJM=;
-	b=ZLIi9IUEtut3ni0lHS08FjzM4KkecQYmIQfmuRndUddodVHCiDlQX+GFkGIJZeBBjSZyXt
-	IU3CpDpgyb7rIrDw==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 3F1F113998;
-	Fri, 28 Mar 2025 18:02:18 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id x2IrDyrk5mezNgAAD6G6ig
-	(envelope-from <dsterba@suse.cz>); Fri, 28 Mar 2025 18:02:18 +0000
-Date: Fri, 28 Mar 2025 19:02:13 +0100
-From: David Sterba <dsterba@suse.cz>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org
-Subject: Re: [GIT PULL] fstests: btrfs changes for for-next staged-20250328
-Message-ID: <20250328180213.GH32661@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <20250328012637.23744-1-anand.jain@oracle.com>
- <20250328020312.psokbxpz5untmeey@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Dr/Z0sIk"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EF9C3C4CEDD;
+	Sun, 30 Mar 2025 15:21:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1743348102;
+	bh=mHVm9KW4Rl8UkzRDxg2awIwHmmXERHw1xbx1dpxOsR0=;
+	h=Date:From:To:Subject:From;
+	b=Dr/Z0sIkkdV3yu06hO0CPoz4tGc+QH0p5MjYhZTr5LazfNfQ1OGmVZJs1iOA5d9hY
+	 FHl0Q1F4TYXeLE5uvFUItDnpg1Kpbk6s0XDa3cj2YTyk+oX+wWOUEju1CU6XQqL8+o
+	 tY6PCB/9bpaIPGC9DNbjK6NYbhuySqMcXw4HKU9+ANxWNCUrkM+rU/mk4Dnbafs7zk
+	 9FH1iU0I+/Vca2n69+43kbM9ANtJpRmqabQFYG4PeKfWc7/rIEyowGJ2seb/GFV5ZJ
+	 4iDdc0luPwzWUXp04YKJO298i6FTz+2++j+7s7bvVvP+U6mgA9MMuZMS2G0zXbluwM
+	 up7gCeP4NA1XQ==
+Date: Sun, 30 Mar 2025 23:21:39 +0800
+Message-ID: <8175022655a3be98435b302c33757239@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2025.03.30
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="YbW0Z6orVSPe"
+Content-Disposition: inline
+
+
+--YbW0Z6orVSPe
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250328020312.psokbxpz5untmeey@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
-X-Rspamd-Queue-Id: 577C4211C8
-X-Spam-Level: 
-X-Spamd-Result: default: False [-4.21 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	HAS_REPLYTO(0.30)[dsterba@suse.cz];
-	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	FROM_HAS_DN(0.00)[];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	ARC_NA(0.00)[];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	TO_DN_SOME(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	DKIM_TRACE(0.00)[suse.cz:+];
-	RCVD_COUNT_TWO(0.00)[2];
-	REPLYTO_ADDR_EQ_FROM(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	REPLYTO_DOM_NEQ_TO_DOM(0.00)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	ASN(0.00)[asn:25478, ipnet:::/0, country:RU];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	RCPT_COUNT_THREE(0.00)[4];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns]
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Rspamd-Action: no action
-X-Spam-Score: -4.21
-X-Spam-Flag: NO
 
-On Fri, Mar 28, 2025 at 10:03:12AM +0800, Zorro Lang wrote:
-> On Fri, Mar 28, 2025 at 09:26:24AM +0800, Anand Jain wrote:
-> > Zorro,
-> > 
-> > Please pull this branch, which includes test cases for sysfs syntax
-> > verification of btrfs read policy and chunk size. v4 has been on the
-> > mailing list for a month now, along with fix from Filipe and Zoned
-> > testcase from Johannes.
-> > 
-> > Please note that the commit:
-> >  "fstests: btrfs: zoned: verify RAID conversion with write pointer mismatch"
-> > 
-> > has the changes discussed with Naohiro, including his review-by tag,
-> > (which is missing in your patches-in-queue branch).
-> > 
-> > Test case number for above commit is changed to btrfs/335 following
-> > the integration of the sysfs patches.
-> > 
-> > Thank you.
-> > 
-> > The following changes since commit d71157da4ef4cfdbf39e2c4a07f8013633e6bcbe:
-> > 
-> >   common/rc: explicitly test for engine availability in _require_fio (2025-03-17 00:43:12 +0800)
-> > 
-> > are available in the Git repository at:
-> > 
-> >   https://github.com/asj/fstests/tree/staged-20250328 
-> > 
-> > for you to fetch changes up to 208a7f874df38bf873137d00634783422965a7ab:
-> > 
-> >   fstests: btrfs: zoned: verify RAID conversion with write pointer mismatch (2025-03-28 08:25:55 +0800)
-> > 
-> > ----------------------------------------------------------------
-> > Anand Jain (5):
-> >       fstests: common/rc: set_fs_sysfs_attr: redirect errors to stdout
-> >       fstests: filter: helper for sysfs error filtering
-> >       fstests: common/rc: add sysfs argument verification helpers
-> >       fstests: btrfs: testcase for sysfs policy syntax verification
-> >       fstests: btrfs: testcase for sysfs chunk_size attribute validation
-> 
-> Hi Anand, these 5 patches don't have any RVBs or ACKs. Do you miss that?
-> Although you can ack patches by yourself, but these patches are from you,
-> maintainers would better not push their own patches directly without any
-> RVBs. So please let someone review and ack them at first.
+Hi all,
 
-Maintainers should be allowed to push their patches without RVB, that's
-where the role and status adds value. In case of the generic/common
-patches there was a discusison and an agreed solution, only the formal
-RVB were missing. And in case of fstests it's IMNSHO an overkill, we
-rather need the functional improvements, i.e. new test cases for the
-specific filesystem without pointless delays and insisiting on reviews
-or not trusting a dedicated maintainer with their own patches.
+The for-next branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated and tagged as v2025.03.30 release.
+
+Release Notes:
+1) There're 5 new test cases in this release, include btrfs/335, f2fs/009,
+   f2fs/010, generic/764 and xfs/633.
+2) Remove "privatens" and "setsid" test ways from ./check, isolate the
+   codes of ./check and ./check-parallel.
+3) Make fstests to support zoned XFS.
+4) Enhance f2fs related codes.
+
+More updates and fixes refer to below, thanks for all these contributions!
+
+After the change 2), I think this version fstests might be stable enough.
+I plan to merge it to master branch in next release, if there's not
+critical bug reports. Please tell me, if there're still some issues block
+or break your test.
+
+Thanks,
+Zorro
+
+The new head of the for-next branch is commit:
+
+0e33d528cf89 xfs/235: add to the auto group
+
+New commits:
+
+Chao Yu (7):
+      [d3053a227494] common/config: remove redundant export variables
+      [bf36679ee712] common/config: export F2FS_INJECT_PROG
+      [b2c469debb76] common/config: export F2FS_FSCK_PROG
+      [520d651ee9cc] common/rc: use -f for mkfs.f2fs by default
+      [b9d1c36bcce4] common/rc: introduce _check_f2fs_filesystem()
+      [82d0ff759c67] f2fs: new test to detect and repair nlink corruption
+      [32272b1e895e] f2fs: test dirty status handling on database file
+
+Christoph Hellwig (14):
+      [415846d433df] xfs/177: force a small file system size
+      [5f57ee3ad4f1] xfs/419: use _scratch_mkfs_xfs
+      [332dd50da02b] xfs/540: use _scratch_mkfs_xfs
+      [21810ac207c3] common: extend the zoned device checks in _require_dm_target
+      [4d2283f87ed2] common: allow _require_non_zoned_device without an argument
+      [9b6b461417ab] xfs: add helpers to require zoned/non-zoned file systems
+      [2dbbf5debad1] xfs: handle zoned file systems in _scratch_xfs_force_no_metadir
+      [8d221e7be774] xfs: no quota support with internal rtdev
+      [54cabdaa03e6] xfs: xfs_copy doesn't like RT sections
+      [9ec7d058eb92] xfs: skip filestreams tests on internal RT devices
+      [ea888a5571e0] xfs: skip various tests when using the zoned allocator
+      [283339e65cc7] xfs/049: skip on zoned devices
+      [8893b54c0a60] xfs/206: filter out the zoned line from mkfs output
+      [0e33d528cf89] xfs/235: add to the auto group
+
+Darrick J. Wong (6):
+      [3e73e52ad931] xfs: test filesystem recovery with rdump
+      [5efe0accdc55] generic/45[34]: add colored emoji variants to unicode tests
+      [8e4282818e57] xfs/614: determine the sector size of the fs image by doing a test format
+      [768c74f45422] generic/537: disable quota mount options for pre-metadir rt filesystems
+      [eff1baf42a79] common/populate: drop fallocate mode 0 requirement
+      [faa0190b363d] xfs/818: fix some design issues
+
+Eric Sandeen (1):
+      [cd4ca5ac3512] fstests: test for CONFIG_QFMT_V2 in _require_quota
+
+Filipe Manana (2):
+      [6542628fc958] generic: test fsync of file with no more hard links
+      [b8cbda37d9ce] btrfs/058: fix test to actually have an open tmpfile during the send operation
+
+Johannes Thumshirn (1):
+      [4368c82e2a7e] fstests: btrfs: zoned: verify RAID conversion with write pointer mismatch
+
+Zorro Lang (2):
+      [0acf53d6d9d3] fstests: remove privatens test way from check
+      [b6ccf1272734] fstests: remove run_setsid test way from check
+
+
+Code Diffstat:
+
+ check                   |  72 +++++------------------
+ common/config           |   4 +-
+ common/filestreams      |   5 ++
+ common/populate         |   1 -
+ common/quota            |   1 +
+ common/rc               |  75 +++++++++++++++++++-----
+ common/xfs              |  47 ++++++++++++++-
+ src/multi_open_unlink.c |  24 +++++++-
+ tests/btrfs/058         |  28 +++++++--
+ tests/btrfs/335         |  62 ++++++++++++++++++++
+ tests/btrfs/335.out     |   7 +++
+ tests/ext4/053          |   1 -
+ tests/ext4/055          |   2 +
+ tests/f2fs/009          | 138 +++++++++++++++++++++++++++++++++++++++++++
+ tests/f2fs/009.out      |   2 +
+ tests/f2fs/010          |  69 ++++++++++++++++++++++
+ tests/f2fs/010.out      |   2 +
+ tests/generic/453       |  55 +++++++++++++++++
+ tests/generic/454       |  55 +++++++++++++++++
+ tests/generic/537       |  17 ++++++
+ tests/generic/764       |  50 ++++++++++++++++
+ tests/generic/764.out   |   2 +
+ tests/xfs/015           |   7 +++
+ tests/xfs/041           |   5 ++
+ tests/xfs/049           |   2 +
+ tests/xfs/177           |   4 +-
+ tests/xfs/206           |   1 +
+ tests/xfs/235           |   2 +-
+ tests/xfs/272           |   5 ++
+ tests/xfs/276           |   5 ++
+ tests/xfs/306           |   4 ++
+ tests/xfs/419           |   5 +-
+ tests/xfs/449           |   3 +
+ tests/xfs/521           |   3 +
+ tests/xfs/524           |   4 ++
+ tests/xfs/540           |   5 +-
+ tests/xfs/541           |   3 +
+ tests/xfs/556           |  13 ++++
+ tests/xfs/596           |   3 +
+ tests/xfs/614           |  13 ++--
+ tests/xfs/633           | 153 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/633.out       |   6 ++
+ tests/xfs/818           |  19 +++++-
+ tools/Makefile          |   1 -
+ tools/run_setsid        |  22 -------
+ 45 files changed, 890 insertions(+), 117 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--YbW0Z6orVSPe
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmfpYV4ACgkQlNbPkfr2
+tMz0MRAAhUKZA5Z0S92vn3oxT5tpuiNitc8Z/Ic+UCEvhG7s0mVRn1C/RT9TKUlv
+10pqE3frUDEj2n+4RzIpCW27QXvktV+/uXAdciM52/xFu34XTg5IuCY3YP42xnzP
+eWRPkoK2mZxw76CQbOajYnEyauGki4TURInxgOyq5rNboD/PgADCNsUsoE0qpL2y
+IXjPrBZxU9CQsWC3gJM6/xp6K7W9jFmWI6tM7spYoujEfVvJqX694gAJt9XNHdik
+imRtdbzcOOoritleSWv3AzFE6UG3V6MtQtN9EtbkRtE1qV4o03J0sXz+RNNR/VIW
+opNdAWGfXwQPypFiG/vSaShwn3djoDkYaYD9xSD2zGeacgLE4oXwevP0lIlQ7NjY
+dG9DfCO/1KofDuFqLpdgcKGNHC3mxQ/0ayoxp+HMGvNfVQKQ+rFx3PNk+PPKsv/+
+S39J03A7WAkO2xnv4mFeJ7w1ReV6r+CW77JBZhb8lO9ZSX3gArujSKuzffxe+JKe
+UHDw6EdAdIdOR6KqsqhSeSUM+/bzdiN8nbEK9WT+6mQOWqpqtPirdQMOB/4cjETG
+Ti3XL6ZbwhtofJocIHbjdq2Veq+a5ra04SZaJ9lHmWG1A2x/Ir7GL4dggG3EMhs5
+fqWjN9bvNvTx5hQeKHhXyykZfpYraYIBbbFQWSGOeYhscihGCLM=
+=7izf
+-----END PGP SIGNATURE-----
+
+--YbW0Z6orVSPe--
