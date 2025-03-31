@@ -1,77 +1,77 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 767E418A93C
-	for <fstests@vger.kernel.org>; Mon, 31 Mar 2025 14:04:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31654212FB7
+	for <fstests@vger.kernel.org>; Mon, 31 Mar 2025 14:05:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743429895; cv=none; b=pD9IYi3Foi4ZqGzizLR0sjdEECG5JUlBZVzzflQZtf+nQyfmKwFFrrIwV84yU5BYz3jPOMOzEWDu+WL1T1VqnYUOiR8PKnXnvYL1J0/Mb/7qGoo225i6cCxjG1G6Jf9VUERpqH0Xsa+4qXzTVCZuCraNMisFcUMublgMbu0r6n0=
+	t=1743429929; cv=none; b=OatrhESwGQEzTPW9Gp4B50aA+4xbHgeyl0f3+t1QTvLMXkv9ZY/1foezYzOnFwIFyufJEmKfJmmFrmUFdq8n2u1JNWz5P1DTIbpJ6QrnQjyYyq+bX4t1FcbQafEa6AcMUOnmg1BX/ap4UyfS6p6YLZnhHNvWM2r1qFTNS9yOrf0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743429895; c=relaxed/simple;
-	bh=7HdFVsgydu4N2NlCq68SSQPnsLUSra1IFzqCvf6r6F8=;
+	s=arc-20240116; t=1743429929; c=relaxed/simple;
+	bh=B+AwkAZOJEiT2q+B6HITmNEqaPPCcCX4MXwG5fdQAjs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=d17tdYPU+dfE2nGI9KdyMr8WmLPSJGrTr8lbNADhzwt2qa/3Dr3YjFqDoswOt9wJ1GKllrV1EHwmMqu/+qOzEGv/jDP3FF1xKh/c+bSEwhL4BZQMxO6p6OgN+TWSJDVktbAc08Bm9IChrSpLJjUBQULS6gAMjIHHh0rlenfJXZo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=DaWpWsIJ; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=E/ir3Xs8CZJBr+7bHOi8d/smmqG+Q/MSZKZv0rdcQ0unWVDOE9FnZVncL49sWBgOqBvq5Jbm6yHQS5hF5fxcZV4WGagkkc0gNPWNx64aBY0K2HfgQt+yG99xUZc16tAVl44jU4pOD3VGVCAWZR2pJ10jYsm8nr0Y9H0R4Yx4+bk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WjPWFx8L; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="DaWpWsIJ"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WjPWFx8L"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1743429892;
+	s=mimecast20190719; t=1743429927;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=pSUPs/LT3mRYH17wZQqF/ZEsL4G4iiiHu3bBKIPDiBQ=;
-	b=DaWpWsIJGS2kRo83iH6VH7FkqE05vXhYYLMc6nS/o4Xktf7s+wi3UyXIGbLk0aUu3CCQK8
-	AGXIL6MAlRtnQP0S/zTPujOeQRa3N34R8qcDG49SVhsF3z6lf/EPCt9T12mw0sy4SrH3BJ
-	AVMfvgqlCHMYy9JNFQeMZ6+Orz5n1T0=
+	bh=lbJE47OqdqR3/52t5jOg708wyYmsdkilsHpLK6arp/s=;
+	b=WjPWFx8LdXI3nO81GJ5c4qzr4OSgLXgkmB5Xs/PHDHDGqxliENP9G+W8ZXYAtma1smjZ6b
+	85Aa32S3oFOMzXmCcTnaNdelWbX1hiFYMFbO7qjFyr49aHWgKdMjTiJJTqT85wQxJ5zMPS
+	dqYUovpCeQOF926DZuba9BrwhjmSjug=
 Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
  [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-94-2V1vRIamPy-QARSP9F2xbw-1; Mon, 31 Mar 2025 10:04:51 -0400
-X-MC-Unique: 2V1vRIamPy-QARSP9F2xbw-1
-X-Mimecast-MFC-AGG-ID: 2V1vRIamPy-QARSP9F2xbw_1743429890
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-223f3357064so72082325ad.3
-        for <fstests@vger.kernel.org>; Mon, 31 Mar 2025 07:04:50 -0700 (PDT)
+ us-mta-77-XOotyBV7OWGu6S_3I_D4DA-1; Mon, 31 Mar 2025 10:05:25 -0400
+X-MC-Unique: XOotyBV7OWGu6S_3I_D4DA-1
+X-Mimecast-MFC-AGG-ID: XOotyBV7OWGu6S_3I_D4DA_1743429924
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-22406ee0243so64318055ad.3
+        for <fstests@vger.kernel.org>; Mon, 31 Mar 2025 07:05:25 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1743429890; x=1744034690;
+        d=1e100.net; s=20230601; t=1743429924; x=1744034724;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=pSUPs/LT3mRYH17wZQqF/ZEsL4G4iiiHu3bBKIPDiBQ=;
-        b=uX/z4tBOx0dZ4A95f6xFkrhHKCQcNKSxWYcaimx5NdDo016kdcnF2YCQ9ktkT4M1OP
-         OVZyhC1vjsbC/AjmRfi/fn36CK6mP3zmgF8wRCwChSjzwvlz1pBKNQmcBDDToRJiu1uA
-         QHrgJEDGY+LN6xNSyYOJzSZ+eKYLDRXmQIdzH/ZSXXHbcZy2dAQFRgIR4X2IdWxUKcVi
-         07XObUptBvsdop6lJozCjKnwlZ0nE0NXFwoj5qfog4RQp0kOcpp/f+qv+A5EY1uImvH+
-         gUz+oyDnA/hEmqeSRLPCVXiZ/TL4jp00vt+Wedt49ipRKg4MEY047w7gUPgER+at7k16
-         7JfA==
-X-Gm-Message-State: AOJu0Yzl1Q3QpLH11gqyIu5peRf51y88BXNobB25QXQ+We+i1v3vKvM+
-	OVitDtIpSoUE9j0ELdsaeonvB4YqeDR10kLN3IIql+AvS0Uak6xp0g8taQIhM0byVJUldBsdKzG
-	g9Rt+UX2hC2ml1YpJprz4speq8844PcL5uYt6YebyWyI3Pdr8CMrJBTk=
-X-Gm-Gg: ASbGncu2AcA7tg5/AMlFMYuuZFScZiXg3VhkV/7qhIBK7RjKCfi+drznrQWCUSH7E2h
-	0MNmScI6T2CTf5IMcO8e5cE1B/6yXVp90dQoc4RxqwxFshejSvtywXAMBFbsjlsh9qoC7T6OWwT
-	0TBdzfAr+bc2Ky3KXJf00oUMJafdvEJ2lkQxZN5XH8cmrtvMTVgJ0am1Hb3/51GpILbXOvsChkA
-	v0p6qL24nEP9+RBMaQPpv8wvz5czjPnJJaPPPb6himyVFay3P+R8OAgm8v+QVCGIzLsqCclhPcU
-	dh68a7ZW3QHeHMJL1O7Nf4aZe/NXu1sV4pxj9p8OvbCEiufIQBj6zyrV
-X-Received: by 2002:a05:6a20:9f08:b0:1f5:58be:b1e9 with SMTP id adf61e73a8af0-2009f5bbd9emr14857248637.4.1743429889933;
-        Mon, 31 Mar 2025 07:04:49 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IF/CjtDFO5+ARDmtdJpl9Mo3f8QgnLccxc2wrTTR9Zgt3D32sI1Ol4nNe94fmvqOJYskuSi7Q==
-X-Received: by 2002:a05:6a20:9f08:b0:1f5:58be:b1e9 with SMTP id adf61e73a8af0-2009f5bbd9emr14857214637.4.1743429889607;
-        Mon, 31 Mar 2025 07:04:49 -0700 (PDT)
+        bh=lbJE47OqdqR3/52t5jOg708wyYmsdkilsHpLK6arp/s=;
+        b=A4e+m4Xv1nEwFBJN2TGoW7gXVgmPtN85Xc/zE3C+jD3Tw8HmGZJOWT3rpMAQNpzRsH
+         KKoctm7hwi21TvUIsrf8zYGDEph/cygWCCZTFuP17m9a2iMkWfiO3eeCXa3eZPorR9Eu
+         hXbpUHfeoGFiLaAtv6ByP+dH0DPTStSpkTDADeJq4uEL0Enh93+eXwkOkantXokXg1l+
+         IE+I3KUoUOof0o8nIlWIKdWLVw2iMrph86pCf/Bd0siLM+0BWnqJyMRC7RIDgMuQof8u
+         vfDtout3bV9VhZyuoYbpXi09tXu3gzE0pArWaaYYMJ2xRd13dA4CLz0pFO32eUs8jbNf
+         syAA==
+X-Gm-Message-State: AOJu0YzLSSVCH9RET+hF/8k3QM8VUPgMXnlbD5ISI9aesdyfif/UKJOc
+	QZdfE3F5KWwyfdXHRa2BRkUA2XA+QwF+bh0PXuuKUqz6DdhF7MJRaEVahuElLK62E+8h0PGAeQZ
+	5vyQOFzw/tVvLP1ASSt+UrbVmSStyUj9xKx7mT/q9LunWOc+0jaD3reY=
+X-Gm-Gg: ASbGncsZ56u4eM9t1zAP/QZSuLzO+T0fFQhIWcl8pPM0CgcKP9FTFlHIKdozuil4F7v
+	4Ia1DW34lzSIuS496BEY7U3NXWsYDD7tEN4nbostsH6NCYfpGZoZxIehNk6jhj6Ya72ILSsbHk6
+	/nhW6OSY8e8CVdYnUiY/Q9og5TZYA6BIAKbfxaz80l/HNQDFGh5EJ2WvafqlO4MGtyLA1c9YmXr
+	dmYsj+ID3ovaO4UdQyeLhJywGoIUNwWQicPjPAH9D8nVuGM9ObtoyjnTP8+qErjYSsCOlTNSIg+
+	hwzQsCPqiOiHvZWQZrxeEnx1LFSgRB3BqsqmHbo1qgAf2KG0cEt6UhNk
+X-Received: by 2002:a05:6a00:2e18:b0:736:2ff4:f255 with SMTP id d2e1a72fcca58-7398043955emr13493803b3a.15.1743429924374;
+        Mon, 31 Mar 2025 07:05:24 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGOm+wZTjpuHBz9/z/NZkXD5KYjRzV24qYWQ5XAIB3MRLSHrrSWS1KF20c3rGNnimE6+Wshjw==
+X-Received: by 2002:a05:6a00:2e18:b0:736:2ff4:f255 with SMTP id d2e1a72fcca58-7398043955emr13493763b3a.15.1743429923958;
+        Mon, 31 Mar 2025 07:05:23 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-af93b6a1719sm6375909a12.32.2025.03.31.07.04.47
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7397109d361sm7142605b3a.138.2025.03.31.07.05.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 31 Mar 2025 07:04:49 -0700 (PDT)
-Date: Mon, 31 Mar 2025 22:04:45 +0800
+        Mon, 31 Mar 2025 07:05:23 -0700 (PDT)
+Date: Mon, 31 Mar 2025 22:05:20 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Anand Jain <anand.jain@oracle.com>
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
 	david@fromorbit.com, djwong@kernel.org
-Subject: Re: [PATCH v4 4/5] fstests: btrfs: testcase for sysfs policy syntax
- verification
-Message-ID: <20250331140445.vepkrueevvrxrtyk@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH v4 5/5] fstests: btrfs: testcase for sysfs chunk_size
+ attribute validation
+Message-ID: <20250331140520.r57xfhsijfiltfct@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <cover.1740721626.git.anand.jain@oracle.com>
- <8331718c0314fc373ebb2f43655ea2272759de63.1740721626.git.anand.jain@oracle.com>
+ <8b6df6ccabf016310063e75117759c835931f70a.1740721626.git.anand.jain@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -80,33 +80,33 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <8331718c0314fc373ebb2f43655ea2272759de63.1740721626.git.anand.jain@oracle.com>
+In-Reply-To: <8b6df6ccabf016310063e75117759c835931f70a.1740721626.git.anand.jain@oracle.com>
 
-On Fri, Feb 28, 2025 at 01:55:22PM +0800, Anand Jain wrote:
+On Fri, Feb 28, 2025 at 01:55:23PM +0800, Anand Jain wrote:
 > Checks if the sysfs attribute sanitizes arguments and verifies
-> input syntax.
+> input syntax allocation/data/chunk_size.
 > 
 > Signed-off-by: Anand Jain <anand.jain@oracle.com>
 > ---
->  tests/btrfs/329     | 19 +++++++++++++++++++
->  tests/btrfs/329.out | 19 +++++++++++++++++++
->  2 files changed, 38 insertions(+)
->  create mode 100755 tests/btrfs/329
->  create mode 100644 tests/btrfs/329.out
+>  tests/btrfs/334     | 19 +++++++++++++++++++
+>  tests/btrfs/334.out | 14 ++++++++++++++
+>  2 files changed, 33 insertions(+)
+>  create mode 100755 tests/btrfs/334
+>  create mode 100644 tests/btrfs/334.out
 > 
-> diff --git a/tests/btrfs/329 b/tests/btrfs/329
+> diff --git a/tests/btrfs/334 b/tests/btrfs/334
 > new file mode 100755
-> index 000000000000..48849ac82706
+> index 000000000000..532fe37a0489
 > --- /dev/null
-> +++ b/tests/btrfs/329
+> +++ b/tests/btrfs/334
 > @@ -0,0 +1,19 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +# Copyright (c) 2025 Oracle.  All Rights Reserved.
 > +#
-> +# FS QA Test 329
+> +# FS QA Test 334
 > +#
-> +# Verify sysfs knob input syntax for read_policy round-robin
+> +# Verify sysfs knob input syntax for allocation/data/chunk_size
 > +#
 > +. ./common/preamble
 > +_begin_fstest auto quick
@@ -114,35 +114,21 @@ On Fri, Feb 28, 2025 at 01:55:22PM +0800, Anand Jain wrote:
 > +. ./common/sysfs
 > +. ./common/filter
 > +
-> +_require_fs_sysfs_attr_policy $TEST_DEV read_policy round-robin
-> +verify_sysfs_syntax $TEST_DEV read_policy round-robin 4096
+> +_require_fs_sysfs_attr $TEST_DEV allocation/data/chunk_size
+> +verify_sysfs_syntax $TEST_DEV allocation/data/chunk_size 256m
 
-Please change the verify_sysfs_syntax to _verify_sysfs_syntax after you
-update the patch 3/5.
-
-And just be curious, do we need to make sure the $TEST_DEV is mounted
-before testing the sysfs' read_policy of $TEST_DEV? For example, calls
-
-  _require_test
-
-Thanks,
-Zorro
+Same review points with patch 4/5.
 
 > +
 > +status=0
 > +exit
-> diff --git a/tests/btrfs/329.out b/tests/btrfs/329.out
+> diff --git a/tests/btrfs/334.out b/tests/btrfs/334.out
 > new file mode 100644
-> index 000000000000..eff7573adb6a
+> index 000000000000..f64f9ac09499
 > --- /dev/null
-> +++ b/tests/btrfs/329.out
-> @@ -0,0 +1,19 @@
-> +QA output created by 329
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
+> +++ b/tests/btrfs/334.out
+> @@ -0,0 +1,14 @@
+> +QA output created by 334
 > +Invalid argument
 > +Invalid argument
 > +Invalid argument
