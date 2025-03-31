@@ -1,76 +1,77 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4377D2A1D7
-	for <fstests@vger.kernel.org>; Mon, 31 Mar 2025 13:15:30 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A67E12101B3
+	for <fstests@vger.kernel.org>; Mon, 31 Mar 2025 13:48:37 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743426933; cv=none; b=PkP8OmiFLwYE4cloqC5UEGuoVGj1NG09PmyrLDn+oe8sW/5GNSy2vU8geFEDIVGvjLZ5BPvNqjRb7r+rqO749eFHb3+yXVcRgBBg3DJItQfIeo/QJGXsnav+pG8XAgy0h+g3BpOYUrOOY2A3cjVGQIbdS20iun41tsL68721NpY=
+	t=1743428919; cv=none; b=finor7cCWMp/cI1ydTGANOhVe4Hzv2yzozCkHkXWfMRk0EGlgayReY4BkZOGr20lGlYKi3ekYVAG2y0oHl5c3iK3cMKVTLdXesOJ9jZbBn8QS6ClGRuvAGCr7Ieqw8yxg8/Ih7lofLh2M90UYo6NZWfGxlt77bDK0vzriyP+Qms=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743426933; c=relaxed/simple;
-	bh=KSWjcdg4h5QoHP7C/GCWplToljF2To+s22/BFx4tcvg=;
+	s=arc-20240116; t=1743428919; c=relaxed/simple;
+	bh=hfHXqtCM9g3kme35ZkfKhWwanTOeUWoZHrNcFTF+P50=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=fJH9Kp8zppS1rUqww80kiV9A4B/a+ak682zMV2KqvzvJyLTNHPI1CviD0BpZceBJkuXxG9vDDWC1PiEl0U6uuQvZOOqOg18B/uIS88PcBH3AuFMQT4nmHCugHNssAxrDFAZxi4R8g3QPkpAUBKky1EXkWUOboN20kIcM8RfaN24=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=I+E8liG6; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=LpQCxBXqp13/UGj1uU5njsxKFF5uQbEmEuvSGlRFn6cWph8/3p/p4fPhNgziswcEG2LXF0QCJVvH/mXcw93mNTJGKWO1o/2DRNvFgckbkL+c2cUmJXuJhE+tPaU7m7sUrdDRydnT5A+oVptRERPKCPz50ujxoGIi9zsuymykiXY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=i6rixDrM; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="I+E8liG6"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="i6rixDrM"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1743426930;
+	s=mimecast20190719; t=1743428916;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=Gf+E1T41Dq18PBLvBV2qCLbFdmC3AI2Uqj5f6N41ons=;
-	b=I+E8liG6kXGKzpD41gfCPC80Um7DxX9dPGygGp71L9sBe528/z/7JoGVvBjtEyIwpS9nDs
-	OEsCt1iEvN/mx4x8Qo0UtrHIiH1q0aiCZFnBGrtL0/uREUs8+/HPVj5Z6zSeqt3Q4E7OyJ
-	p3e0JOkS6YKfwtz9oSH9Q60prBc/iV4=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=V6YWlaHb/+sQxHYU09XE2mXXZQH2Pq2JQG12aswrcG4=;
+	b=i6rixDrMYr4vTc38IznC7dbHf7un6hm2XYe0sq5IKbVTbyJ5yoDSt781LsH+3AizYyczgh
+	2/fQI5jyY3aRJExdCqGpotjFWSdXPifGSMV5/hB2S1lki84OU/K3ncPNRMFuMm7wWM6GzY
+	o3ZWvEkC2ehgLXjVkCLcDnmsz6VFRpY=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-524-yrBK_mSZNLKs466KY8am2g-1; Mon, 31 Mar 2025 09:15:28 -0400
-X-MC-Unique: yrBK_mSZNLKs466KY8am2g-1
-X-Mimecast-MFC-AGG-ID: yrBK_mSZNLKs466KY8am2g_1743426928
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-224347aef79so123297305ad.2
-        for <fstests@vger.kernel.org>; Mon, 31 Mar 2025 06:15:28 -0700 (PDT)
+ us-mta-680-CBMlQS-8NvO8yI40mkZrzw-1; Mon, 31 Mar 2025 09:48:33 -0400
+X-MC-Unique: CBMlQS-8NvO8yI40mkZrzw-1
+X-Mimecast-MFC-AGG-ID: CBMlQS-8NvO8yI40mkZrzw_1743428913
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-2ff581215f7so4811015a91.3
+        for <fstests@vger.kernel.org>; Mon, 31 Mar 2025 06:48:33 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1743426927; x=1744031727;
+        d=1e100.net; s=20230601; t=1743428913; x=1744033713;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Gf+E1T41Dq18PBLvBV2qCLbFdmC3AI2Uqj5f6N41ons=;
-        b=pQTx3ZO0u+LHI9QwcH47FyHwHpXcOOeuCwGzHTr9cxmZKM74+m/F76AMz7js2TR+9C
-         kxldUfzZqmEXzKuRsvIlBVg/+TePDC2iM2TSqICDqiIjqcGckz34jhg6D1/vtbwcZgew
-         se52uZXPmBrPQaYvLUfkR8yTn2WJJpQsXwYHnbT9mgHwwkMy1FZwfiTCsXDlbf7SMLr9
-         +D98ZURtILzloeqq78Bsw1pGHzo3FGQGlQmANCP5HO8mj/j56aHX7mIRBj6JRSAh8NLI
-         O0turTOo2lbn/3y0SZm5oueAJhNhWej4dAQW84f0g8tL4QiXuRV8uX9cUc7y4QRBtWM0
-         4RXQ==
-X-Gm-Message-State: AOJu0Yz4h5W0brzLqnWs7GHV5kkYl74j+3ajS6IiptH85YOcq4uLcLic
-	xXjUooa2TJoblB9powtYS+A99igh39G7KyMyiS+VL4mq2MQh4jDTWeXaLXtuK4frQhsQTGbDUPa
-	QL5VZtIW7+FLNpx5xJgh88EFJWckludlRybZncxg+J/XvT4RIfxGjRwHBzRXb6CwfKA==
-X-Gm-Gg: ASbGncu6refuhtQ14FTuDlXxoKdjhs/jBtI99ymFczXr0jOLDNCcvIgwiSAnjxwj8h5
-	ErfjJeBZrfdgtYbkEPeiQCQ9oiv5vGI+hh8T8kJS+XVdEysPPhZWs2a8q+FHQ8GGRZIkvXlXaLf
-	LujPH86SBA2towmokvtDVGV6x/4DRP6ehA42ntHGP0YV9nvg3gjJBr6xHgmIG2A/kpCZmLTTKjm
-	sBajb8RYVgXTyRSCbbkyJJpgB4yjVw/+K9Ro/0DP5U8bK4Fllh3TUKYQ3W/4PTZydYLKyAKR851
-	ndwUPA31+WOsJjHG264MEpbaH4Sx1T6N+F3GUUneWG3Aux3zULBV1vMu
-X-Received: by 2002:a05:6a00:3cc1:b0:736:6043:69f9 with SMTP id d2e1a72fcca58-7398042a634mr10656970b3a.19.1743426927427;
-        Mon, 31 Mar 2025 06:15:27 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEY1oFKQl5vXjRjDpIAWkxF6I4Sg+XHiii6oqAgMjCpAl/v3ccVFaD2n6+GuxApQ/YxmskYvg==
-X-Received: by 2002:a05:6a00:3cc1:b0:736:6043:69f9 with SMTP id d2e1a72fcca58-7398042a634mr10656936b3a.19.1743426927003;
-        Mon, 31 Mar 2025 06:15:27 -0700 (PDT)
+        bh=V6YWlaHb/+sQxHYU09XE2mXXZQH2Pq2JQG12aswrcG4=;
+        b=j5pk+HY2udLTWiylScgLuXL26pw2fooVpoELjX1UmAMhQxuIaQLAOBwyqrqm6CqsBW
+         errsGHNYbp7XhyLpwo5Kx0nz2TCbOGYWJSfQslxjozv+AiWjqT5A41Nd9SY5clq3Ij+B
+         ZOIWZcj999G73YBET5wYXFvp+24/ZxlnQbvleFKXUPwlb3nGMXndXB/Po9xzz0tpjkgX
+         xy3eir8RflYwbxmjb/DVLR1Gk3oXTX6EUDuCievVrhoQ0C3sW/8+SyP2mfnYoUXYTGD1
+         BtrjS6m1W9p8dLlWx4S5GUsbWIB3WWKpEF9W6C4NErSasFtJ+Cd9fv7LEEixJwt3WLTM
+         aX5w==
+X-Gm-Message-State: AOJu0Ywl8DWFC6SgcbIZeCZj9pwF4njtiYBj14JE3rutxrWMaTSWxSX7
+	jsWW+2Wkb+gWg6fqr1rc3pKaKtyIdpCZkc97gXBK6/D23ZMfo81UcUwlgqqFc+aTa8wJsSFQz+O
+	YlupTCLU47qL0hkwFJrzYaoNEGpacpDULyXTcYN7P3hzPaXoCRvZfNgk=
+X-Gm-Gg: ASbGncu3rUbbjow8OvIvIFXa4pKIRy0979nDLHeU48/Jj1/kG2RZH7WmtdkkW1GMVbU
+	Ak6xq/5BJd2ZBhuV2VpjHKP2aAN8LPd1HVmcj/zEUa0bMsqqsnUnk14JOSQvhXSwVH88senEaS0
+	E/wiMSKvOWDsXpVSPQ/VqnqN1aP+qJwNleW4kHY6o9oW9XPi8n5b24xZyT3sdJFXgoHycXWvzew
+	p20NMi60RjlxYX1z5WXSqSv+k84CSn5YtnPak+gPrWQELioXLPNM6mLBkC8I3tRgdn0F7/TYNXX
+	fJSlHL8ViHdBjqPHQxtaSU7NtxZX5vj/KaXmUsfzQaMYocYaw6PrBPhJ
+X-Received: by 2002:a17:90b:2e4e:b0:2ff:618c:a1e9 with SMTP id 98e67ed59e1d1-30532153717mr11908699a91.23.1743428912862;
+        Mon, 31 Mar 2025 06:48:32 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEQKSNhk8NiYd8Hn1ZwyKJ6CjBpwAC/RgBvb3iPW3KMEFIllNvo17+flUhvAe5tyvFxT0OTlQ==
+X-Received: by 2002:a17:90b:2e4e:b0:2ff:618c:a1e9 with SMTP id 98e67ed59e1d1-30532153717mr11908676a91.23.1743428912537;
+        Mon, 31 Mar 2025 06:48:32 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-739710cbd88sm6826076b3a.157.2025.03.31.06.15.25
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3039f6b6cfbsm9518248a91.47.2025.03.31.06.48.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 31 Mar 2025 06:15:26 -0700 (PDT)
-Date: Mon, 31 Mar 2025 21:15:23 +0800
+        Mon, 31 Mar 2025 06:48:31 -0700 (PDT)
+Date: Mon, 31 Mar 2025 21:48:28 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v4 3/5] fstests: common/rc: add sysfs argument
- verification helpers
-Message-ID: <20250331131523.gk5mnb3jagdsc5xi@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	david@fromorbit.com, djwong@kernel.org
+Subject: Re: [PATCH v4 1/5] fstests: common/rc: set_fs_sysfs_attr: redirect
+ errors to stdout
+Message-ID: <20250331134828.atadwmenvglahjrk@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <cover.1740721626.git.anand.jain@oracle.com>
- <4c40bdaf996d9b04c2bd8423815d52d930ee32a2.1740721626.git.anand.jain@oracle.com>
+ <cb5e54259bcd2bd6cd310ffa2411a79370698f61.1740721626.git.anand.jain@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -79,183 +80,47 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <4c40bdaf996d9b04c2bd8423815d52d930ee32a2.1740721626.git.anand.jain@oracle.com>
+In-Reply-To: <cb5e54259bcd2bd6cd310ffa2411a79370698f61.1740721626.git.anand.jain@oracle.com>
 
-On Fri, Feb 28, 2025 at 01:55:21PM +0800, Anand Jain wrote:
-> Introduce `verify_sysfs_syntax()` and `_require_fs_sysfs_attr_policy()` to verify
-> whether a sysfs attribute rejects invalid input arguments during writes.
+On Fri, Feb 28, 2025 at 01:55:19PM +0800, Anand Jain wrote:
+> Redirect sysfs write errors to stdout as a preparatory patch to enable
+> testing of expected sysfs write failures. Also, log the executed
+> sysfs write command and its failure if any to seqres.full for better
+> debugging and traceability.
 > 
 > Signed-off-by: Anand Jain <anand.jain@oracle.com>
 > ---
-
-The subject is "common/rc: ...", but this patch isn't about common/rc.
-So feel free to remove the "/rc", or use "/sysfs".
-
->  common/sysfs | 142 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 142 insertions(+)
->  create mode 100644 common/sysfs
+>  common/rc | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 > 
-> diff --git a/common/sysfs b/common/sysfs
-> new file mode 100644
-> index 000000000000..1362a1261dfc
-> --- /dev/null
-> +++ b/common/sysfs
-> @@ -0,0 +1,142 @@
-> +##/bin/bash
-> +# SPDX-License-Identifier: GPL-2.0+
-> +# Copyright (c) 2025 Oracle.  All Rights Reserved.
-> +#
-> +# Common/sysfs file for the sysfs related helper functions.
-> +
-> +# Test for the existence of a policy at /sys/fs/$FSTYP/$DEV/$ATTR
-> +#
-> +# All arguments are necessary, and in this order:
-> +#  - dev: device name, e.g. $SCRATCH_DEV
-> +#  - attr: path name under /sys/fs/$FSTYP/$dev
-> +#  - policy: policy within /sys/fs/$FSTYP/$dev
-> +#
-> +# Usage example:
-> +#   _has_fs_sysfs_attr_policy /dev/mapper/scratch-dev read_policy round-robin
-> +_has_fs_sysfs_attr_policy()
-> +{
-> +	local dev=$1
-> +	local attr=$2
-> +	local policy=$3
-> +
-> +	if [ ! -b "$dev" -o -z "$attr" -o -z "$policy" ]; then
-> +		_fail \
-> +	     "Usage: _has_fs_sysfs_attr_policy <mounted_device> <attr> <policy>"
-> +	fi
-> +
-> +	local dname=$(_fs_sysfs_dname $dev)
-> +	test -e /sys/fs/${FSTYP}/${dname}/${attr}
-> +
-> +	cat /sys/fs/${FSTYP}/${dname}/${attr} | grep -q ${policy}
-> +}
-> +
-> +# Require the existence of a sysfs entry at /sys/fs/$FSTYP/$DEV/$ATTR
-> +# and value in it contains $policy
-> +# All arguments are necessary, and in this order:
-> +#  - dev: device name, e.g. $SCRATCH_DEV
-> +#  - attr: path name under /sys/fs/$FSTYP/$dev
-> +#  - policy: mentioned in /sys/fs/$FSTYP/$dev/$attr
-> +#
-> +# Usage example:
-> +#   _require_fs_sysfs_attr_policy /dev/mapper/scratch-dev read_policy round-robin
-> +_require_fs_sysfs_attr_policy()
-> +{
-> +	_has_fs_sysfs_attr_policy "$@" && return
-> +
-> +	local dev=$1
-> +	local attr=$2
-> +	local policy=$3
-> +	local dname=$(_fs_sysfs_dname $dev)
-> +
-> +	_notrun "This test requires /sys/fs/${FSTYP}/${dname}/${attr} ${policy}"
-> +}
-> +
-> +set_sysfs_policy()
-> +{
-> +	local dev=$1
-> +	local attr=$2
-> +	shift
-> +	shift
-> +	local policy=$@
-> +
-> +	_set_fs_sysfs_attr $dev $attr ${policy}
-> +
-> +	case "$FSTYP" in
-> +	btrfs)
-> +		_get_fs_sysfs_attr $dev $attr | grep -q "[${policy}]"
-> +		if [[ $? != 0 ]]; then
-> +			echo "Setting sysfs $attr $policy failed"
-> +		fi
-> +		;;
-> +	*)
-> +		_fail \
-> +"sysfs syntax verification for '${attr}' '${policy}' for '${FSTYP}' is not implemented"
-> +		;;
-> +	esac
-> +}
-> +
-> +set_sysfs_policy_must_fail()
-> +{
-> +	local dev=$1
-> +	local attr=$2
-> +	shift
-> +	shift
-> +	local policy=$@
-> +
-> +	_set_fs_sysfs_attr $dev $attr ${policy} | _filter_sysfs_error \
-> +							   | tee -a $seqres.full
-> +}
-> +
-> +# Verify sysfs attribute rejects invalid input.
-> +# Usage syntax:
-> +#   verify_sysfs_syntax <$dev> <$attr> <$policy> [$value]
-> +# Examples:
-> +#   verify_sysfs_syntax $TEST_DEV read_policy pid
-> +#   verify_sysfs_syntax $TEST_DEV read_policy round-robin 4k
-> +# Note:
-> +#  Process must call . ./common/filter
-> +verify_sysfs_syntax()
-> +{
-> +	local dev=$1
-> +	local attr=$2
-> +	local policy=$3
-> +	local value=$4
-> +
-> +	# Do this in the test case so that we know its prerequisites.
-> +	# '_require_fs_sysfs_attr_policy $TEST_DEV $attr $policy'
-> +
-> +	# Test policy specified wrongly. Must fail.
-> +	set_sysfs_policy_must_fail $dev $attr "'$policy $policy'"
-> +	set_sysfs_policy_must_fail $dev $attr "'$policy t'"
-> +	set_sysfs_policy_must_fail $dev $attr "' '"
-> +	set_sysfs_policy_must_fail $dev $attr "'${policy} n'"
-> +	set_sysfs_policy_must_fail $dev $attr "'n ${policy}'"
-> +	set_sysfs_policy_must_fail $dev $attr "' ${policy}'"
-> +	set_sysfs_policy_must_fail $dev $attr "' ${policy} '"
-> +	set_sysfs_policy_must_fail $dev $attr "'${policy} '"
-> +	set_sysfs_policy_must_fail $dev $attr _${policy}
-> +	set_sysfs_policy_must_fail $dev $attr ${policy}_
-> +	set_sysfs_policy_must_fail $dev $attr _${policy}_
-> +	set_sysfs_policy_must_fail $dev $attr ${policy}:
-> +	# Test policy longer than 32 chars fails stable.
-> +	set_sysfs_policy_must_fail $dev $attr 'jfdkkkkjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjffjfjfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-> +
-> +	# Test policy specified correctly. Must pass.
-> +	set_sysfs_policy $dev $attr $policy
-> +
-> +	# If the policy has no value return
-> +	if [[ -z $value ]]; then
-> +		return
-> +	fi
-> +
-> +	# Test value specified wrongly. Must fail.
-> +	set_sysfs_policy_must_fail $dev $attr "'$policy: $value'"
-> +	set_sysfs_policy_must_fail $dev $attr "'$policy:$value '"
-> +	set_sysfs_policy_must_fail $dev $attr "'$policy:$value typo'"
-> +	set_sysfs_policy_must_fail $dev $attr "'$policy:${value}typo'"
-> +	set_sysfs_policy_must_fail $dev $attr "'$policy :$value'"
-> +
-> +	# Test policy and value all specified correctly. Must pass.
-> +	set_sysfs_policy $dev $attr $policy:$value
-> +}
-> +
+> diff --git a/common/rc b/common/rc
+> index c7d7dbb8e93b..59af83a01e3a 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -5181,7 +5181,8 @@ _set_fs_sysfs_attr()
+>  
+>  	local dname=$(_fs_sysfs_dname $dev)
+>  
+> -	echo "$content" > /sys/fs/${FSTYP}/${dname}/${attr}
+> +	echo "echo '$content' 2>&1 > /sys/fs/${FSTYP}/${dname}/${attr}" >> $seqres.full
+> +	echo "$content" 2>&1 > /sys/fs/${FSTYP}/${dname}/${attr} | tee -a $seqres.full
 
-I got this warning:
-Applying: fstests: common/rc: add sysfs argument verification helpers
-.git/rebase-apply/patch:153: new blank line at EOF.
-+
-warning: 1 line adds whitespace errors.
+Actually I doubt the $seqres might be not defined before calling _set_fs_sysfs_attr.
+For example, we call _set_fs_sysfs_attr in ./check as
 
-Other looks good to me,
+ _test_mount -> _prepare_for_eio_shutdown -> _xfs_prepare_for_eio_shutdown -> _set_fs_sysfs_attr
+
+The _test_mount is called before $seqres is defined. At that time, the $seqres.full
+will be ".full" if the FSTYP=xfs
+
+Anyway, we can fix this problem in another patch, this
+patch is good to me,
+
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Thanks,
-Zorro
-
+>  }
+>  
+>  # Print the content of /sys/fs/$FSTYP/$DEV/$ATTR
 > -- 
 > 2.47.0
 > 
