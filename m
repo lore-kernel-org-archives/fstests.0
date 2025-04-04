@@ -1,269 +1,101 @@
-Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
+Received: from mail-pg1-f180.google.com (mail-pg1-f180.google.com [209.85.215.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25ED524339C;
-	Thu,  3 Apr 2025 08:59:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 751704689;
+	Fri,  4 Apr 2025 03:33:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743670783; cv=none; b=bYCK1ZES0x7zjlLcbm16y0q41Ej2rbwctGewzcEf1Fv0ASTgk+MSJCI0cadq2Z/c5KgWdSPWWTgSKEkEDD3MLWLuHQHGr73QQsQhBF9djEtwCfL42GUgiMLVFPqcNoQ9ZcZw707wKbJsguzkvJXdxKYErDIIX7N0ZwUXUWiikgQ=
+	t=1743737600; cv=none; b=nTgNE8cyi+T4a6k9WeJ+Nsct7ujwj7VvmghPK5AKCdlBfoO9yRYp0zc6MTJ9hcuLZscsYEi1rQfVkl9+TwzCmjyNWzrU3OHadIdYjEvrK60vpEHSe/vrceFTBJEf0/NxaZTMnwtBJhsrsR9X6YHsirwNpQ9ZaHmNYGWgI+1LO8Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743670783; c=relaxed/simple;
-	bh=cXpMG4evM+/eBh0rh9cOx22wN60fLnLdyOex1885nT0=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=I5YPZ7Bh99aobuic3uXKxwFpNriFo/FNYgfyVa/Z6qC+c+JpxPonQB9wM5LPDWRKyGB/m0NcXPCihS24kSP026cgtC0XisftM4IeDPbWsSNcUl2zS7fNpT4Qft8qBDmDW70ZNdo2ccqTk28uJQNlj6CshVUspyLWVWf9eWndQqU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=cnG1vZR3; arc=none smtp.client-ip=209.85.214.176
+	s=arc-20240116; t=1743737600; c=relaxed/simple;
+	bh=jbGmYx23pGajaqIVhrf/yYbfbemA0dPKmyRwDNyymag=;
+	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=PHxEP23Gqt5XjX/w7sQvYB8gtsQcsv08PJilqYgBw50hSrjCq/DBG9z50/avnhwivaQ18Nb5bwuzQi9CBP2+fcs7uFEiPfld3JF08kUQWyUoxatNdGKKHS5ykhJZEGNLhDoi8CZ9zBLvcF8kCOfd2dQDCh0TfbdqR0v4qVzb5QE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=eZJ0+Gpj; arc=none smtp.client-ip=209.85.215.180
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cnG1vZR3"
-Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-22409077c06so9954525ad.1;
-        Thu, 03 Apr 2025 01:59:41 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eZJ0+Gpj"
+Received: by mail-pg1-f180.google.com with SMTP id 41be03b00d2f7-af980595952so1089478a12.2;
+        Thu, 03 Apr 2025 20:33:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1743670781; x=1744275581; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=NR4dPmRB+WlVaBFBqvFj4uKQeU+r3bP802+oB47JMSg=;
-        b=cnG1vZR3aJ7KW3zxwm+5273mHxVvzGMXV2bIAH6D+zrU4XJfbsEF0gyFRRqhmf8U7b
-         gg7x/2LmIaS8KKOrDWZig2RtNXjic0Vwo2cGuQRr5Z+/E8RB2sdQOD7OOvC83tE3Nm3A
-         HSfrpnJWbfJOVT+YnumgmqNbJPqdWbiz0jrOn0zrS8oDVyJNDMscfEeKeOB9/52O73Ux
-         1/n/3kyxOcibY/qb2ueF28snDPykp4SmcXZIeQCruYiq35VqQHXrpfkifKXrnq+sSMH7
-         KY9hVv/L32OSW85p+8SEejwvdcgewpehm+04iZF3HCtdEsPWlCrLQq9ecR/KRZvCpGo/
-         rFGQ==
+        d=gmail.com; s=20230601; t=1743737596; x=1744342396; darn=vger.kernel.org;
+        h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=8JG+xIxfQUa6rSFyBv4OipnW7Cc4/fNxgI8QayiS1IY=;
+        b=eZJ0+GpjjK7HHzNAllN2xTHOP/5kHXLTGDnSXwdPrxCuh5pXNbeMiRms9N+SjIZf59
+         cGfzupJHDN+8e2GkHNyI9Oq3Ec3sF6UIOQoSTxgaNoy9DxcrArarT6ADKXJEMvOZdh8s
+         htuJTphkIkTFzCCECowkiooqICAVUT0ZQWdJQqgq0xxBKwrG1x3eEw0BMA+VKG+lSnNJ
+         0iIQ55+IAEnVtdyl5iTJge53ZOB/KE9J9K50ylKixU/fQyAVofs7Zhw0rzxgJioSrAcU
+         E6DLSCvHqkNmUSDxepUBPZ/8Q7xR81tmtd51TtbhvTNi8UgFJiEM442kHVNXqW8gDzGi
+         uP8Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1743670781; x=1744275581;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=NR4dPmRB+WlVaBFBqvFj4uKQeU+r3bP802+oB47JMSg=;
-        b=HRiumoi/DmXu+196xZ6Pht5DYyaDlqRHD5eoN8nwuWjnWg+XGOE/DjMWl7gijwXnv4
-         Y9C4pMsyDcRrBOilFPduI/WGTMTMlMnZ3bJUvwyNFH6w8WfOWA1RWv4+Er5ISIvWdRPv
-         9NBtoXvyby3VsAgma47Uuia/kQM0nP99nNw2Qr+j4w9dqDLDbd6tCo9bGdB2cBAvB7wD
-         3KeZ7l4I5c54V21MrOSQV7xi1RIgoc9oDuBi9L3jdzkWZ9tCLWtlkVTbqIfmFBIhAnup
-         Jw+yUZFhVvpHWo1w/3LPB/fYj4D7POHzIXVsMmnmJVI17Q7ysgBAeOlW0W82Rw5So2Ne
-         xRMg==
-X-Forwarded-Encrypted: i=1; AJvYcCWP++72HSKrDuVWX/uQQ00YDySH4wqHY8kxKPKJq7PjAxMJyaUeZj3dlyLo5kHQWlqfwGwvkDez798=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxVxphUyTVRp3lbPbL/ROpbvIU3yrARhznAgJUAhigN/EPhOFze
-	0UZ/TNyohG1rt+/Ni0PocWYiSpFXcXZ+/rcfhKuE2wQ7cVCRgOlgDx4xOw==
-X-Gm-Gg: ASbGncsf3t0ee/PMvpnnf4KXKIFWbs+Wj1KS3O0VLDCeq3eArkVzw6NJ4fpDtNPTYuz
-	6TbOZcsZPCmj8G1ZaaTR9QpuEGVEQB/kkG3H7C8E5/NVYOCYn16X/4y4J+AulLv/kUMySUf2jES
-	BUix+9zFwTj52duLha+/zwgBO6ZK6nwLEpkOeI+7ApqhpKyrcDalB+e1oFu/khAs4jlDAl15iZE
-	t8dYPfjwI8GtWKz85Z2+LbDfEoI+QAYMTDsyuIcDMpmHNh+FEM9bCU99C72/9mM9n6fz7c2qj8A
-	VUz5BxNSP+3XzBJveHdet8kGQry92mM72DGDbLuDQOekMLuk1Gu/s8ySoCU=
-X-Google-Smtp-Source: AGHT+IHC0+dVJMNf5ScPuEOnU+uWmFtn7jonuLrkEs1Gl0dp4lJ4z5Yberxu3G9N6t2PTIb1OjGQTA==
-X-Received: by 2002:a17:902:cf10:b0:21b:b3c9:38ff with SMTP id d9443c01a7336-2292f9f54d6mr304729445ad.37.1743670780789;
-        Thu, 03 Apr 2025 01:59:40 -0700 (PDT)
-Received: from citest-1.. ([49.205.34.162])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-229785c01cdsm9535715ad.99.2025.04.03.01.59.37
+        d=1e100.net; s=20230601; t=1743737596; x=1744342396;
+        h=references:message-id:date:in-reply-to:subject:cc:to:from
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=8JG+xIxfQUa6rSFyBv4OipnW7Cc4/fNxgI8QayiS1IY=;
+        b=UYG6KdprC/inKmFHK/fXpl2vtqBOdB2Bv7TyDWOP1PhXDDpPeGgV/GM3/dtQXD/h1J
+         Mr+n6PboVGtDcJj8E1NZf1ajZ5tvK55qVLUz1EHB3b7g70UrhSlgVOVa+scKm+5HMB+m
+         ExlQXyXLjzcQGlShIDD+8PKepMQm5bo7hL1GTPKDhYLNsN6ZMCaOXI3KSy5jSZEfZfwA
+         SSojBkbi09q7FXmNto3aKdJCRuvZ8vlFNMpK17DVFTp1ZebZLimO3BRehSB3fwmfTRev
+         GRW8hAiDvpXVYVgEstagm5YwAWg25GuY3bwBn7e5fa0KBgBZ+PAZRwtpXQT+WRI4Wzwy
+         9r1w==
+X-Forwarded-Encrypted: i=1; AJvYcCUggiXbJSAVJGekQxIwn1MXqMDSAvQpceBR7axmv3ouFVu/QaWSFrK9/+CTeZVIz6XiO1+D5otY@vger.kernel.org, AJvYcCXapUgKSMp0Za3DVCpi1QUyJ1iIGY6PGOoKnSbCnGt7fVlTPIbxD+aqJhHnktLb76fnXHkMCtIxosm1@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy6q5FqPxd8AyiMlMPp8bR4gaALyIeBRuNaRYksIQLCqfaF7CEb
+	mOZrpXUBwKw4NblJYJj4RKGx07Y+ygWqeHeEi7IbZNdpRon+HYVj97ymC/qd
+X-Gm-Gg: ASbGncuLybBAGMzCItQ/4YqIPavrSei1o/SiBNVH4hcKixVmh3mkPvLcNI1O8TaHIq+
+	n3i7QcCsqtZTBtWqUB/DB1OVZx2LRbXBNeCqKJntxfkPb9vCl8Ra2t+VCqH9Wo5dId47HaxsjF+
+	An63YJYfmn/kQGpZ2RBuSSwV3CAtGIcC19a0R5MGMLmZqc+ROKjxMak8U72eFIojPeLdxKgiZdn
+	hKhbelWhZykTw+seO1KRM9/0Yt7slHgZvUkIRin/+dqoO5hD4V6MZ438ceoOAoKbAZGwyMA/du+
+	lYicWMyQpeaL2jOIGymm7N9vEdrE8VwrV62X
+X-Google-Smtp-Source: AGHT+IEfkdBKQ+0fPYp0QQthjiAoGbX0znJcTPV4MIeAVedv8ovEnl7PQolUlB3ebMhgvnGA0w3yTQ==
+X-Received: by 2002:a17:90b:518d:b0:2ff:58e1:2bb4 with SMTP id 98e67ed59e1d1-306a61ee10fmr1354488a91.22.1743737596474;
+        Thu, 03 Apr 2025 20:33:16 -0700 (PDT)
+Received: from dw-tp ([171.76.86.91])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3057cb8e2afsm2547711a91.42.2025.04.03.20.33.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 03 Apr 2025 01:59:40 -0700 (PDT)
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org,
-	ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com,
-	djwong@kernel.org,
-	zlang@kernel.org,
-	david@fromorbit.com,
-	nirjhar.roy.lists@gmail.com
-Subject: [PATCH v2 3/3] check: Improve pass/fail metrics and section config output
-Date: Thu,  3 Apr 2025 08:58:20 +0000
-Message-Id: <72dd490d0d00ce2e35c168d21983c015ae471354.1743670253.git.nirjhar.roy.lists@gmail.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <cover.1743670253.git.nirjhar.roy.lists@gmail.com>
-References: <cover.1743670253.git.nirjhar.roy.lists@gmail.com>
+        Thu, 03 Apr 2025 20:33:15 -0700 (PDT)
+From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>, fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org, ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org, david@fromorbit.com, nirjhar.roy.lists@gmail.com
+Subject: Re: [PATCH v2 1/5] generic/749: Remove redundant sourcing of common/rc
+In-Reply-To: <b44393e0f3d6fce937058525bf5726421f7ca576.1743487913.git.nirjhar.roy.lists@gmail.com>
+Date: Fri, 04 Apr 2025 09:01:48 +0530
+Message-ID: <87tt74vbyz.fsf@gmail.com>
+References: <cover.1743487913.git.nirjhar.roy.lists@gmail.com> <b44393e0f3d6fce937058525bf5726421f7ca576.1743487913.git.nirjhar.roy.lists@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-This patch improves the output by:
-- Adding pass/fail aggregate results in the stdout for each section's
-  summary. Also adds the location of the xunit xml files in the
-  section's summary.
-- Adds section config details into the result's global log file.
+"Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
 
-e.g.
+> common/rc is already sourced before the test starts running
+> in _begin_fstest() preamble.
 
-$ ./check -q 2 -R xunit-quiet   selftest/001
+Indeed. The patch looks good to me. 
+Feel free to add:
 
-SECTION       -- s1
-=========================
-selftest/001 aggregate results across 2 runs: pass=2 (100.0%)
-Ran: selftest/001
-Passed all 1 tests
-Xunit report: /home/ubuntu/xfstests/results//s1/result.xml
+Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
 
-SECTION       -- s2
-=========================
-selftest/001 aggregate results across 2 runs: pass=2 (100.0%)
-Ran: selftest/001
-Passed all 1 tests
-Xunit report: /home/ubuntu/xfstests/results//s2/result.xml
-
-Output in results/check.log file
-
-Kernel version: 6.13.0-rc1-00182-gb8f52214c61a-dirty
-Wed Jan  8 11:23:57 UTC 2025
-SECTION       -- s1
-=========================
-FSTYP         -- ext4
-PLATFORM      -- Linux/x86_64 citest-1 6.13.0-rc1-00182-gb8f52214c61a-dirty #5 SMP PREEMPT_DYNAMIC Wed Dec 18 14:03:34 IST 2024
-MKFS_OPTIONS  -- -F /dev/loop1
-MOUNT_OPTIONS -- -o acl,user_xattr /dev/loop1 /mnt1/scratch
-selftest/001 aggregate results across 2 runs: pass=2 (100.0%)
-Ran: selftest/001
-Passed all 1 tests
-Xunit report: /home/ubuntu/xfstests/results//s1/result.xml
-
-Kernel version: 6.13.0-rc1-00182-gb8f52214c61a-dirty
-Wed Jan  8 11:24:02 UTC 2025
-SECTION       -- s2
-=========================
-FSTYP         -- ext4
-PLATFORM      -- Linux/x86_64 citest-1 6.13.0-rc1-00182-gb8f52214c61a-dirty #5 SMP PREEMPT_DYNAMIC Wed Dec 18 14:03:34 IST 2024
-MKFS_OPTIONS  -- -F /dev/loop1
-MOUNT_OPTIONS -- -o acl,user_xattr /dev/loop1 /mnt1/scratch
-selftest/001 aggregate results across 2 runs: pass=2 (100.0%)
-Ran: selftest/001
-Passed all 1 tests
-Xunit report: /home/ubuntu/xfstests/results//s2/result.xml
-
-Suggested-by: Ritesh Harjani <ritesh.list@gmail.com>
-Co-developed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
----
- check | 67 ++++++++++++++++++++++++++++++++++++++++-------------------
- 1 file changed, 46 insertions(+), 21 deletions(-)
-
-diff --git a/check b/check
-index f6007750..bb91cf9d 100755
---- a/check
-+++ b/check
-@@ -468,6 +468,25 @@ if [ -n "$REPORT_GCOV" ]; then
- 	_gcov_check_report_gcov
- fi
- 
-+_print_list()
-+{
-+	local -n list=$1
-+	local item
-+	for item in "${list[@]}"; do
-+		echo "$item"
-+	done
-+}
-+
-+_display_test_configuration()
-+{
-+	echo "FSTYP         -- `_full_fstyp_details`"
-+	echo "PLATFORM      -- `_full_platform_details`"
-+	if [ ! -z "$SCRATCH_DEV" ]; then
-+		echo "MKFS_OPTIONS  -- `_scratch_mkfs_options`"
-+		echo "MOUNT_OPTIONS -- `_scratch_mount_options`"
-+	fi
-+}
-+
- _wrapup()
- {
- 	seq="check.$$"
-@@ -505,11 +524,19 @@ _wrapup()
- 
- 		echo "SECTION       -- $section" >>$tmp.summary
- 		echo "=========================" >>$tmp.summary
-+
-+		_global_log "SECTION       -- $section"
-+		_global_log "=========================" >>$tmp.summary
-+		_global_log "$(_display_test_configuration)"
- 		if ((${#try[*]} > 0)); then
-+			local test_aggr_stats=$(_print_list loop_test_stats_per_section)
- 			if [ $brief_test_summary == "false" ]; then
-+				[[ -n "$test_aggr_stats" ]] && echo "$test_aggr_stats" >> \
-+					$tmp.summary
- 				echo "Ran: ${try[*]}"
- 				echo "Ran: ${try[*]}" >>$tmp.summary
- 			fi
-+			_global_log "$test_aggr_stats"
- 			_global_log "Ran: ${try[*]}"
- 		fi
- 
-@@ -539,12 +566,15 @@ _wrapup()
- 			_global_log "Passed all ${#try[*]} tests"
- 			echo "Passed all ${#try[*]} tests" >>$tmp.summary
- 		fi
--		echo "" >>$tmp.summary
- 		if $do_report; then
- 			_make_section_report "$section" "${#try[*]}" \
- 					     "${#bad[*]}" "${#notrun[*]}" \
- 					     "$((sect_stop - sect_start))"
-+			local out_fn="$REPORT_DIR/result.xml"
-+			echo "Xunit report: $out_fn" >> $tmp.summary
-+			_global_log "Xunit report: $out_fn"
- 		fi
-+		echo "" >>$tmp.summary
- 
- 		# Generate code coverage report
- 		if [ -n "$REPORT_GCOV" ]; then
-@@ -655,18 +685,19 @@ _stash_test_status() {
- 
- 		if ((loop_on_fail && ${#loop_status[*]} > loop_on_fail)) || \
- 		   ((loop_unconditional && ${#loop_status[*]} > loop_unconditional)); then
--			printf "%s aggregate results across %d runs: " \
--				"$test_seq" "${#loop_status[*]}"
--			awk "BEGIN {
--				n=split(\"${loop_status[*]}\", arr);"'
--				for (i = 1; i <= n; i++)
--					stats[arr[i]]++;
--				for (x in stats)
--					printf("%s=%d (%.1f%%)",
--					       (i-- > n ? x : ", " x),
--					       stats[x], 100 * stats[x] / n);
--				}'
--			echo
-+			local test_stats=$(printf "%s aggregate results across %d runs: " \
-+				"$test_seq" "${#loop_status[*]}")
-+			test_stats+=$(awk "BEGIN {
-+					n=split(\"${loop_status[*]}\", arr);"'
-+					for (i = 1; i <= n; i++)
-+						stats[arr[i]]++;
-+					for (x in stats)
-+						printf("%s=%d (%.1f%%)",
-+							   (i-- > n ? x : ", " x),
-+							   stats[x], 100 * stats[x] / n);
-+					}')
-+			echo "$test_stats"
-+			loop_test_stats_per_section+=("$test_stats")
- 			loop_status=()
- 			is_bad_test=false
- 		fi
-@@ -834,14 +865,7 @@ function run_section()
- 	rm -f $check.full
- 
- 	[ -f $check.time ] || touch $check.time
--
--	# print out our test configuration
--	echo "FSTYP         -- `_full_fstyp_details`"
--	echo "PLATFORM      -- `_full_platform_details`"
--	if [ ! -z "$SCRATCH_DEV" ]; then
--	  echo "MKFS_OPTIONS  -- `_scratch_mkfs_options`"
--	  echo "MOUNT_OPTIONS -- `_scratch_mount_options`"
--	fi
-+	_display_test_configuration
- 	echo
- 	test -n "$REPORT_GCOV" && _gcov_reset
- 	needwrap=true
-@@ -879,6 +903,7 @@ function run_section()
- 
- 	is_bad_test=false
- 	loop_status=()	# track loop rerun state
-+	loop_test_stats_per_section=() # store loop test statistics per section
- 	local tc_status ix
- 	local -a _list=( $list )
- 	for ((ix = 0; ix < ${#_list[*]}; !${#loop_status[*]} && ix++)); do
--- 
-2.34.1
-
+>
+> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+> ---
+>  tests/generic/749 | 1 -
+>  1 file changed, 1 deletion(-)
+>
+> diff --git a/tests/generic/749 b/tests/generic/749
+> index fc747738..451f283e 100755
+> --- a/tests/generic/749
+> +++ b/tests/generic/749
+> @@ -15,7 +15,6 @@
+>  # boundary and ensures we get a SIGBUS if we write to data beyond the system
+>  # page size even if the block size is greater than the system page size.
+>  . ./common/preamble
+> -. ./common/rc
+>  _begin_fstest auto quick prealloc
+>  
+>  # Import common functions.
+> -- 
+> 2.34.1
