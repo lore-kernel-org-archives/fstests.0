@@ -1,232 +1,297 @@
-Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C60721A3A8A;
-	Mon,  7 Apr 2025 03:49:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743997800; cv=fail; b=W6vOnOdqmdmGb62LtpuA/ld5GPzMclHxW+3YtQKRFaVv651Fel9zXMzXZ+79jBJl2x13WKxXRcR88hqD9j+MGRT0It2asuU34kEjYv1rz9LYtTF/gpJsSgUi9hxPspuf1QXH1CO+19aFlvT1SLxmU/XN9E4VLQ0LlLctRDPTNLg=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743997800; c=relaxed/simple;
-	bh=RhfEqtJgBdB15cja38uaaryi+F2zJAUkguGPwA9Dazc=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=Tkh8hijaPa+Z20vrnKGAmiizwUkAYvuEcdtYHm7y9IX+awnfsfurmfIcPZfIUNK0ifGVG+SATpyij5YUxYFD2XtU49RRCuOjq6IHVEOP2nUqYvgB//LEiH896fhKNILuFm3WfT5hw6ifkQgs1qY1EUF+P1Cuy98T+0H3AXQb58M=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=aBO4N94e; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=cc/apqdT; arc=fail smtp.client-ip=205.220.165.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D0E6206F05
+	for <fstests@vger.kernel.org>; Mon,  7 Apr 2025 16:19:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1744042764; cv=none; b=B6WhZJ4DF8bffBgaJNoHk9XuFOMfkmFKLyuCjH4r0GrUAdHvFy5+WnUE71p1GevANKZMwm6cBpL/crQXJvQbyeD3q2DuQut7Eoc7LBjsrAhTQFfBTP8i8vnqStL9rwiObe3Gz1hkzIr7/K1T/vKrHhvaDZlXsU8DsUODahQwBa8=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1744042764; c=relaxed/simple;
+	bh=vLFaSyk6sWXjYEwkM9T5XG3vYHT5MtPUPXEdSHtKDyk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=oQpB3UzEgyaWvRUQOfyKH0UOGEqHlbZ3hxwzI6zm9ZKmiSw6gJM6pB5q+AC4ArPYWt+q48cUjE/mpcnqVaKQrBPqHIAdJqVSTodBkEzDH9QnXYWLkwguy5y7CpOONX/xBVzE5/dpnKF06gDZClCQDXQpnFDYVpfs+h082ZCYvmo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fSL+iPv3; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="aBO4N94e";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="cc/apqdT"
-Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5371MB1p028184;
-	Mon, 7 Apr 2025 03:49:55 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=
-	corp-2023-11-20; bh=GqWqe6tXAyLLVqJB1yto8mk4kYzkAizpVAPnI0qkP/c=; b=
-	aBO4N94e/h9v8tunC5W4k/z8XuTZgZIAnEV4LwGJGO0AkMEwSrQ95eeie+blbIAV
-	jhpqv5xZ1OqjyU0+PCUDKzED3H6cOk6sVEnFo71TQVb5VUCMR6BPLA341gIJCLS/
-	rerPEooay37tMOKghfAuzlIBcHAyhxHcJtpZrHr/qpMQm4m0VilNPy4xuQoi0d81
-	RU5cwSwQBreqCSPeaQF9xhKsdcCWLG/HU+FN5TUyOzL8Rfb+KABA6i+lyugb3onS
-	bTdT7hdelaILAwTNGiuMLZvr9L/dztyOntqxWwaf265sCrjRv5gF8H3qPbU5i6HK
-	jqSrRHHzXlrVzlIcpSieSQ==
-Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 45tw2thp3t-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 07 Apr 2025 03:49:55 +0000 (GMT)
-Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 5372tFd1013700;
-	Mon, 7 Apr 2025 03:49:53 GMT
-Received: from nam04-bn8-obe.outbound.protection.outlook.com (mail-bn8nam04lp2044.outbound.protection.outlook.com [104.47.74.44])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 45ttydf0qp-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 07 Apr 2025 03:49:53 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=lcXoeKo0JKYbSmcobrwWtg7TP0deWCO4Uis9zYS42Iv65Hqgsw6x78pK21G67/ZsRFKe5asxFQe1ytQR+ldl64JRwu8P3DwJFFRb81qMTnm7o+GGeopxco4EJrutbjnVb4aW0c6Xgn9gUkGTprcHAF1mI/Cu35+oCN+e1spK5Cktozm8NDFVKKonVWYK1sLkzGmsYShw7UQ82aRTkrrKUicRR8TKTjZZBqUPWtmyagFREsgWphVda2eSYTpt+HkDHCT0BiaCzxDwLgh/RhjVevnB5XUR6r1yylpb7Yrm2wbE/vlj9llOg6HAF4jeYbOLZrHkM6OUiKUdLSzQyvE28Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=GqWqe6tXAyLLVqJB1yto8mk4kYzkAizpVAPnI0qkP/c=;
- b=b/8cNSi2GqGCsjsZALIfZ6GiBQagFPqI7eEo/gkFv6SIZ0mts5kX2kah2CG/zor4tAYyo324/Wz9Ejs4ZwANao9x6ySWex8VrPe3y6qPVrDCHdjxerQopePh/thIQRj0oNn+tVVplioAj+poca5SGlVhMlA1Veve1GycU+lk7uYiuY278s9LnFywQrqCSN9IY9Oj/Srw1anCACmELcsG6Ptts0M1+QKnKDa/bQoTemkfkzmDXiy6HIKRlNJfLSUQRqZnyho2PIlaq2C30A9iB8Ygjqpurm5OXABC36xGHlo/Ymy/h4u6BKjVkveI/nHZa0w7l77TPY9ipmOrh2ZyTA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=GqWqe6tXAyLLVqJB1yto8mk4kYzkAizpVAPnI0qkP/c=;
- b=cc/apqdT8R8ciFSxf2qQASfTAKlYELutUo3f+mdYRBpf6xFJMeZwfbVMb+wZNGz/l6zQ6ujxi4KPj+Td50lhtJo5DlGuJxtaFaX3hr/Mpj7T6dijVJ7prmCxW7TDPfnaewlJLBidAPgR0og9TiINN6l3vpymjCUfQtBOOCqLGC8=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by DS7PR10MB7131.namprd10.prod.outlook.com (2603:10b6:8:e4::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8606.32; Mon, 7 Apr
- 2025 03:49:52 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65%5]) with mapi id 15.20.8606.027; Mon, 7 Apr 2025
- 03:49:52 +0000
-From: Anand Jain <anand.jain@oracle.com>
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, zlang@redhat.com
-Subject: [PATCH v5 6/6] fstests: btrfs: testcase for sysfs chunk_size attribute validation
-Date: Mon,  7 Apr 2025 11:48:20 +0800
-Message-ID: <a3cfe616dc7ede9987c18698f1692a6d3c158b6d.1743996408.git.anand.jain@oracle.com>
-X-Mailer: git-send-email 2.47.0
-In-Reply-To: <cover.1743996408.git.anand.jain@oracle.com>
-References: <cover.1743996408.git.anand.jain@oracle.com>
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: SG2PR02CA0032.apcprd02.prod.outlook.com
- (2603:1096:3:18::20) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fSL+iPv3"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1744042761;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=/O5U86Y3WW6mgW47JNbSK3ilKTH03qmJFfErR0X+qvM=;
+	b=fSL+iPv31+HyUOWE20gIulKYKY2DyzjPQFhIjIA2+zDp68K4EnpLH+qIsEbf2iD2NwZnPd
+	X4BpVBJuqU4vPMkva9I0Rcw430U/Fz0XKQv1p32v2EY28Q0c2+VcCvakvDPGeplpRiGokz
+	V9iFUU/zecD5bYMtA5SjX4hoMZ9VYiM=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-120-_aGc7BWhM46x9X4K4bb32A-1; Mon, 07 Apr 2025 12:19:20 -0400
+X-MC-Unique: _aGc7BWhM46x9X4K4bb32A-1
+X-Mimecast-MFC-AGG-ID: _aGc7BWhM46x9X4K4bb32A_1744042759
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-225429696a9so65945325ad.1
+        for <fstests@vger.kernel.org>; Mon, 07 Apr 2025 09:19:20 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744042759; x=1744647559;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=/O5U86Y3WW6mgW47JNbSK3ilKTH03qmJFfErR0X+qvM=;
+        b=SM5RlQfhWYTz9dMegjDMiXKgw9E9R6jmMOkeCvOQPP4d6ko0d2urC/sk0r4kIPabu5
+         cZcCzEj3wSvdO/ZKICproXQejUR5cBD/ZSGn+B2GOmy3zof0aWE4bcnNFE6xFKj6N3KD
+         ihongDF0wHBMy0+PiiYh97wpQg4KPgYn3qwMdm+mT+nkvThyiAoO+llFbnqR4lq1BBmd
+         v2BpjsPm5x9lxC1gdFgUkMu0C3i7Y734PmSGHN14MBdqS4V+oEayfe0yTT0+raCoXZQ5
+         6wQdKQufLld2gmpG24XV/4TJ33ijF+8VosLM8yQ5XmpjoOb/eAR87Jv2+kai0EZOIS+O
+         BCzQ==
+X-Forwarded-Encrypted: i=1; AJvYcCV6szTSjmfckyRup1OAHK5GXj7OjN2dHE8IEmpxaKFvH9iQTVwSK/YFJa8xbRwr7XbRCdhc6Arh@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxzll1bMzK5PiIWfhlSnrudPWSJfHkOh53NKTR5YjxwupLFsiXy
+	LZ2XUwBDWn1QQXt1y6789cmUMoZ9O97rYUYVeSGtKbn2QSe/2GtRKVlsx0IHKYnwaN4RY+Hd1Se
+	zRvlVugfMvZ+5WW7aMtKnJ513P8INIptgeicA7w5radJHyf/cwfE+XBs=
+X-Gm-Gg: ASbGncuXDxbMSO3e6pdoPCuMim72FiNQoiuyRWQ46swSxd6UywyfODDbplXpgAEddaW
+	4RY/JfvePUoTiHzUxzQ4Z+DdzoJBs/yEVV4YsfEyZzewjzHOtArvfPG0HQT8teTdOavfnqDS+qe
+	cYlp6Phqq+JqwTtcOQoifd7gFI49VYGBPrsDXRh4UePKJEffA0YlNBgsD/GOfmjkXei0MeEJ29l
+	p2jp4YOYWHpO7e2RcH2habSlfmwHP8zoOASwVMyKzib+WgBxmO5ylZge0OjOwHwWF0uxgtABPFF
+	af/o8HwLatDgeNHXrSQbiAgIrXoM7FPY1W9D0HL2+SxMUOKv/w0J9Q/z
+X-Received: by 2002:a17:902:e952:b0:223:37ec:63d5 with SMTP id d9443c01a7336-22a8a0659fcmr191658655ad.28.1744042759146;
+        Mon, 07 Apr 2025 09:19:19 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEGlSRbRg+QrM0+xuEKWs08wLJNL1lp/YtXP90VI/LkeBCTUHnPXB/060ATzEC3fv57TY60fw==
+X-Received: by 2002:a17:902:e952:b0:223:37ec:63d5 with SMTP id d9443c01a7336-22a8a0659fcmr191658295ad.28.1744042758753;
+        Mon, 07 Apr 2025 09:19:18 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-229785ad84csm83572285ad.44.2025.04.07.09.19.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 07 Apr 2025 09:19:18 -0700 (PDT)
+Date: Tue, 8 Apr 2025 00:19:14 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Ritesh Harjani <ritesh.list@gmail.com>
+Cc: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>,
+	fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org, ojaswin@linux.ibm.com, djwong@kernel.org,
+	zlang@kernel.org, david@fromorbit.com
+Subject: Re: [PATCH v2 5/5] common: exit --> _exit
+Message-ID: <20250407161914.mfnqef2vqghgy3c2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1743487913.git.nirjhar.roy.lists@gmail.com>
+ <f6c7e5647d5839ff3a5c7d34418ec56aba22bbc1.1743487913.git.nirjhar.roy.lists@gmail.com>
+ <87mscwv7o0.fsf@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|DS7PR10MB7131:EE_
-X-MS-Office365-Filtering-Correlation-Id: 42b09e9a-2d49-4987-09c6-08dd75874050
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|376014|1800799024;
-X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?mEyrOZbS3Hm8rOfiaBABH0XuIOxSR936YSqBcJO/TqdM9YQ3xCtuXPYrqNNW?=
- =?us-ascii?Q?sM2+acsz36o9M1cZ1VPtP2+879BkmOcC0hqtkaiswb4QhNi1a5wWw8B6Un1i?=
- =?us-ascii?Q?Frg1a+r9Z0h3DqAGDcSfxXq+DyWXNw3Ks0TjUrEH/0HTkYrC33CeFZ5Ojdye?=
- =?us-ascii?Q?b67onVo/ztlmDhfWxaTurqlNemPWxwlGeDM6pxqbdBmklmT40guIk3KZJGdM?=
- =?us-ascii?Q?GSYBcwQWAoZU3YGtzFYVmnZAHUeffSIuxwV+TCHKMVOp/5TJMPiVAXbphYSQ?=
- =?us-ascii?Q?EboYswBKmJhmlmEMKZAYBWZl1BeV30RCGHobhp/W7GXsLDOb75A6N4nu9TyF?=
- =?us-ascii?Q?IE6JesXDThJEfsXexTcni56ILhhxFHZzVDgQ534qpC8yGcUf1F7v/Albrm2o?=
- =?us-ascii?Q?Us56bDmp3vkOImwhBzyZyty6eNorbf9KlXwP2odHcGL5M0rYQzSPzLl+f46I?=
- =?us-ascii?Q?zc6HI+C5V30oqhKMJgvAPdgetPHuwhwLd3CV2cqL91eo6fy8Qc1LFqGZcZFS?=
- =?us-ascii?Q?98IAUIv68ihk3QtvDtDm+UkK3sCOaayB/PfpFvNz0Omxibnsyb680O55aBSN?=
- =?us-ascii?Q?UaceBpmxwUqEuYzkejF7I8trNgCehbVNZw8OV/wYTGleZzIy3NKo4lUUF+G6?=
- =?us-ascii?Q?R8HAeCmEjvwxoueLEy0gxYO8iQCoA41EE+kw/6CIGeilte2i2aR4Qx5l8KdN?=
- =?us-ascii?Q?h6/IgDjnZsIgUP7kfhCAo+Qb+JZ9I/DstqYR/Tiq2u8BgS5Wb79Q07J30aC0?=
- =?us-ascii?Q?laMnkvhXXrDZQtS5L73o4InM3QDUCyXXLkFf8eBXtp0Lfgdm0bPAEcfGDN7a?=
- =?us-ascii?Q?TL0h2YE8hmBHonyKeZIzliKhuTqM0QHqvDJRHZH7TmAeRKpBCQZwQqOqcp4v?=
- =?us-ascii?Q?Rxad1IHktz26pL/KZ4nrArdUrgrIwzho0R7h0zBLaaSln4DuzVIOA45XtAQ3?=
- =?us-ascii?Q?CSTlmCmuKOwFKEMcfrXSTUGxhBJ/dN5SEJRJEDxe3x/kv8Cd4KRD/5eTYhEe?=
- =?us-ascii?Q?ZXqmMsn8jPt5ev7N71oFuEsvRpUAyATvl84ceUogbwz6dgW5/aB0xFO6L+I4?=
- =?us-ascii?Q?IY9TZk04oicwLfyVGrlgzyiwuC99ELUvSwIsuEUhF9fvr1i1uDf1UetRaICy?=
- =?us-ascii?Q?XbGY8eU+bTsCLgkzlWwheU1EoDqOaCKsHh8XpW0dEHEy5jHfAUAj5CqWR1Dg?=
- =?us-ascii?Q?hoUaKz5j7s0aou9SSzlMacgf9NGynvjXfqlFkESYn1TBTJ/EbYUZ93qjh1St?=
- =?us-ascii?Q?CO7tMviKNd95iBNoK1/a8i87gCCgmjdwCNFFTgNUS6jz9XPqo3IrcO4rLxQj?=
- =?us-ascii?Q?xQ5PA3REtHKc+nkm2A9GQJLyeSAtXjF5//EoyPNPHKCCLoY/Z5IJ8i0piuyx?=
- =?us-ascii?Q?pOjFHjC6EpCfK1KE18oCVSBVLtAi?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?bNlMykjzD4OStpJGHvz7dT7BdLtxB9gru6UC+CRPv+HtSC5zmwsk+TK6TD0C?=
- =?us-ascii?Q?SZHl2Oz33kOt+KzDo18P0H0x3aX2JnGN5C5lwo3/RPNji++s0wWq8WdQGSE5?=
- =?us-ascii?Q?SAa9JGYncFaInW3wOjxJfmvOUux9uC+mckATy+mJLq/NJ+lja+sxNy3MGJSW?=
- =?us-ascii?Q?NTHrnziYB2o9GVU045QQqQlUOVz2giXZhWueNCHlYYDH/WQOBJkTswoc19YZ?=
- =?us-ascii?Q?uHuMHZMy+xrxtSe6LeuZVnFAHgmGZhDHkqHh4TWV3ZS2oWICRDpqpwRW+PHJ?=
- =?us-ascii?Q?oCycTgyy9ZVCZbQEm4DXI1rP5mR19iPE7Z6VM7ggXPWqMsNVUp0ESmmpvoM/?=
- =?us-ascii?Q?oM1ZN3ZIXpV+q4xSQqXPECypNtcM0jSGOiJqqHP2xd1yKJpxWK5ldZZ0Qrk2?=
- =?us-ascii?Q?wSHdWCnDfgAJu0sHgL4u7tQybX8gUECaIc9HQFjUPjMKj0I65Fx94py9IHPm?=
- =?us-ascii?Q?f3IMUKZ7LNoM6f8TzTpcp1CjqNc3JN5IJj7BnN8T7w74oa0Nnf7A42idPc8A?=
- =?us-ascii?Q?9Ia7qNaLooIflVaFI/inErkatmhUBU9T40QP3X9yovqzvnWaiegW6/J3kwxg?=
- =?us-ascii?Q?Nxh1hnpNU8c0nbi2NwqPtJxb3hHTuMhyfVsIy1Hygff3JlgaFDjz6mVDB+eH?=
- =?us-ascii?Q?pDTmgzwh6ev2GmpQ62rHbC0v/6yCE726mOzRmDcEjATlqWQ+XPotUUxvp8vY?=
- =?us-ascii?Q?G4Z0XyNljvdtNC0twJfEAzfdysNNOeCcwXfwc5RJeGFqY0hRVshnfVVcfxKk?=
- =?us-ascii?Q?mv8Qc+mSYc0s1mKE6MdajJ3PkUlvVT0rv94iD+hWgf9a5qLFYlYhvic6Vszg?=
- =?us-ascii?Q?avbMhjXtTmIo7/9HdwYwfNpn3LDdalx3+V2gCwN/sNSDqs+q8OjlAMVkUJkZ?=
- =?us-ascii?Q?9PpVBApZ5HjGVS6P7WPtfOfOkazhMBzjOYP2rd6RZNpNVbIQWxBIIIh/Nx0y?=
- =?us-ascii?Q?sxEj8wvq0jXhNYUZKHb+l6Mlh2yT/Nje5l+fkMHfx2yEv6Su0Gckxkh/HuJU?=
- =?us-ascii?Q?6GWGtudxuTF4yx0Y0GzL1RT/lmfHrRP4Sf9KTcl5C0HkMwUYDnbjcZiU3eB/?=
- =?us-ascii?Q?FZk4gC282/8jI51yKGHEsHO0IeNqw/6fVhhCY4h20kSMu6or7leyzGIXpb/e?=
- =?us-ascii?Q?yPxfjSM8ZzKzdUObeHm7Z7zaRIOvkmjRPg0c9hfyXGn5u2rklQKencGgea1J?=
- =?us-ascii?Q?2TzFAo1Sfhbc8KP9+aS0cfi3SYuzaYgyXkoXFLuwt120rsyzIcnbgITkweok?=
- =?us-ascii?Q?x+XPFlW9FWk7GB0i/maAKzExoFWxaE1K1f9lsbxUkQkPNAvQDNR46U3dwMEp?=
- =?us-ascii?Q?4SsvtqbaZb5rPVDhS+XgjRx/guz42whkk8uSN5XRZre/vORi5NKotfz/fzSK?=
- =?us-ascii?Q?jX5Uil9amzNfdmEfHy74/ApYhH2qmqjy/98YXuSYtrVM8bvjBUEd+goe99gc?=
- =?us-ascii?Q?e3lPhnVq0PNYNLQzb+detRJiDMOs6lq8PKJMOLOla5dAW3P8z+IkpWyZ4LzD?=
- =?us-ascii?Q?dvkkzAHIAI/j2aR4CABoLNa7Rz5E15YDIQrmpgmvwuPtkRaGCd8kYtZqVVxt?=
- =?us-ascii?Q?SMtrU51RjcDvTBf/55wm24MdK8Rj5XUEvbbZ0MXC?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	Lz01zFCdD3YMhjhyP7eAhXkhVDFttrWQ/wLl1Kk2Nxgl1mY5SS1uF/7bqYQE97Znr4FlotP0xuVf30xJ9uRgHcZ86+Xw1lIOwzS36ERKGeixNpYSIUYd29A+qiLGTPb8r+zNHEp5x0wYXnIY7o0FeXsKRSxCfzSA11KEqh8+dSGnGv1pAnxxvczTcAWKxQyzziNgZ+PKGZEXuc6hjJGkyrjIyJ/BoBxFf9nDse9mNf/o7IEO7swghn2I6y9HqJaiTGNJ5pLtBzQ94xSPLXalX4QF8qJP/5mNTE3rxe7iKG3y8Qd7308fEoGrgjd79h5dVyVtY4qjDIU197vvhNXP9WApbo07OJkutm2mJrfOS3/HwBDi+O1p8AJXHBb80dRyEbKXKyrUtPLGgk7j3i1DKFY1hvn5nJ51xQJM08YfC5tL01jNZTgTwucGBCUFoeCyxUQggxSL9WvhIw9rS2oLC0XY8LAT7+SP1WPU9AIuRPYgBTa3xh+OpNOmA+Tr5pEVrAjmEseYh30NhGLfgBonL1MLae25+D+1DTXyTPLYi/zoMSTINEl9SLiMdrIVzoQlQ3x9AsJPuzsJwF089UHs7zYUOLnmcBRGR0SHw8L/ilA=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 42b09e9a-2d49-4987-09c6-08dd75874050
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Apr 2025 03:49:52.0079
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 7Soa4V1zEfotGVUbl129LjyeJ8pQetE1NTN6fCdP0QWDl+Jd6IiyFa5QvqtlUbImSddH5YEMiBuvw7y2AA18aQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS7PR10MB7131
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1095,Hydra:6.0.680,FMLib:17.12.68.34
- definitions=2025-04-07_01,2025-04-03_03,2024-11-22_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 adultscore=0
- mlxlogscore=999 bulkscore=0 suspectscore=0 mlxscore=0 spamscore=0
- phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2502280000 definitions=main-2504070025
-X-Proofpoint-ORIG-GUID: bYpIUPZAASZmkIocofrD_k1oyQfHloqF
-X-Proofpoint-GUID: bYpIUPZAASZmkIocofrD_k1oyQfHloqF
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <87mscwv7o0.fsf@gmail.com>
 
-Checks if the sysfs attribute sanitizes arguments and verifies
-input syntax allocation/data/chunk_size.
+On Fri, Apr 04, 2025 at 10:34:47AM +0530, Ritesh Harjani wrote:
+> "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
+> 
+> > Replace exit <return-val> with _exit <return-val> which
+> > is introduced in the previous patch.
+> >
+> > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> > ---
+> >  common/btrfs    |   6 +--
+> >  common/ceph     |   2 +-
+> >  common/config   |   7 ++--
+> >  common/ext4     |   2 +-
+> >  common/populate |   2 +-
+> >  common/preamble |   2 +-
+> >  common/punch    |  12 +++---
+> >  common/rc       | 103 +++++++++++++++++++++++-------------------------
+> >  common/xfs      |   8 ++--
+> >  9 files changed, 70 insertions(+), 74 deletions(-)
+> >
+> > diff --git a/common/btrfs b/common/btrfs
+> > index a3b9c12f..3725632c 100644
+> > --- a/common/btrfs
+> > +++ b/common/btrfs
+> > @@ -80,7 +80,7 @@ _require_btrfs_mkfs_feature()
+> >  {
+> >  	if [ -z $1 ]; then
+> >  		echo "Missing feature name argument for _require_btrfs_mkfs_feature"
+> > -		exit 1
+> > +		_exit 1
+> >  	fi
+> >  	feat=$1
+> >  	$MKFS_BTRFS_PROG -O list-all 2>&1 | \
+> > @@ -104,7 +104,7 @@ _require_btrfs_fs_feature()
+> >  {
+> >  	if [ -z $1 ]; then
+> >  		echo "Missing feature name argument for _require_btrfs_fs_feature"
+> > -		exit 1
+> > +		_exit 1
+> >  	fi
+> >  	feat=$1
+> >  	modprobe btrfs > /dev/null 2>&1
+> > @@ -214,7 +214,7 @@ _check_btrfs_filesystem()
+> >  	if [ $ok -eq 0 ]; then
+> >  		status=1
+> >  		if [ "$iam" != "check" ]; then
+> > -			exit 1
+> > +			_exit 1
+> >  		fi
+> >  		return 1
+> >  	fi
+> > diff --git a/common/ceph b/common/ceph
+> > index d6f24df1..df7a6814 100644
+> > --- a/common/ceph
+> > +++ b/common/ceph
+> > @@ -14,7 +14,7 @@ _ceph_create_file_layout()
+> >  
+> >  	if [ -e $fname ]; then
+> >  		echo "File $fname already exists."
+> > -		exit 1
+> > +		_exit 1
+> >  	fi
+> >  	touch $fname
+> >  	$SETFATTR_PROG -n ceph.file.layout \
+> > diff --git a/common/config b/common/config
+> > index eb6af35a..4c5435b7 100644
+> > --- a/common/config
+> > +++ b/common/config
+> > @@ -123,8 +123,7 @@ set_mkfs_prog_path_with_opts()
+> >  _fatal()
+> >  {
+> >      echo "$*"
+> > -    status=1
+> > -    exit 1
+> > +    _exit 1
+> >  }
+> >  
+> >  export MKFS_PROG="$(type -P mkfs)"
+> > @@ -868,7 +867,7 @@ get_next_config() {
+> >  		echo "Warning: need to define parameters for host $HOST"
+> >  		echo "       or set variables:"
+> >  		echo "       $MC"
+> > -		exit 1
+> > +		_exit 1
+> >  	fi
+> >  
+> >  	_check_device TEST_DEV required $TEST_DEV
+> > @@ -879,7 +878,7 @@ get_next_config() {
+> >  	if [ ! -z "$SCRATCH_DEV_POOL" ]; then
+> >  		if [ ! -z "$SCRATCH_DEV" ]; then
+> >  			echo "common/config: Error: \$SCRATCH_DEV ($SCRATCH_DEV) should be unset when \$SCRATCH_DEV_POOL ($SCRATCH_DEV_POOL) is set"
+> > -			exit 1
+> > +			_exit 1
+> >  		fi
+> >  		SCRATCH_DEV=`echo $SCRATCH_DEV_POOL | awk '{print $1}'`
+> >  		export SCRATCH_DEV
+> > diff --git a/common/ext4 b/common/ext4
+> > index e1b336d3..f88fa532 100644
+> > --- a/common/ext4
+> > +++ b/common/ext4
+> > @@ -182,7 +182,7 @@ _require_scratch_ext4_feature()
+> >  {
+> >      if [ -z "$1" ]; then
+> >          echo "Usage: _require_scratch_ext4_feature feature"
+> > -        exit 1
+> > +        _exit 1
+> >      fi
+> >      $MKFS_EXT4_PROG -F $MKFS_OPTIONS -O "$1" \
+> >  		    $SCRATCH_DEV 512m >/dev/null 2>&1 \
+> > diff --git a/common/populate b/common/populate
+> > index 7352f598..50dc75d3 100644
+> > --- a/common/populate
+> > +++ b/common/populate
+> > @@ -1003,7 +1003,7 @@ _fill_fs()
+> >  
+> >  	if [ $# -ne 4 ]; then
+> >  		echo "Usage: _fill_fs filesize dir blocksize switch_user"
+> > -		exit 1
+> > +		_exit 1
+> >  	fi
+> >  
+> >  	if [ $switch_user -eq 0 ]; then
+> > diff --git a/common/preamble b/common/preamble
+> > index c92e55bb..ba029a34 100644
+> > --- a/common/preamble
+> > +++ b/common/preamble
+> > @@ -35,7 +35,7 @@ _begin_fstest()
+> >  {
+> >  	if [ -n "$seq" ]; then
+> >  		echo "_begin_fstest can only be called once!"
+> > -		exit 1
+> > +		_exit 1
+> >  	fi
+> >  
+> >  	seq=`basename $0`
+> > diff --git a/common/punch b/common/punch
+> > index 43ccab69..6567b9d1 100644
+> > --- a/common/punch
+> > +++ b/common/punch
+> > @@ -172,16 +172,16 @@ _filter_fiemap_flags()
+> >  	$AWK_PROG -e "$awk_script" | _coalesce_extents
+> >  }
+> >  
+> > -# Filters fiemap output to only print the 
+> > +# Filters fiemap output to only print the
+> >  # file offset column and whether or not
+> >  # it is an extent or a hole
+> >  _filter_hole_fiemap()
+> >  {
+> >  	$AWK_PROG '
+> >  		$3 ~ /hole/ {
+> > -			print $1, $2, $3; 
+> > +			print $1, $2, $3;
+> >  			next;
+> > -		}   
+> > +		}
+> >  		$5 ~ /0x[[:xdigit:]]+/ {
+> >  			print $1, $2, "extent";
+> >  		}' |
+> > @@ -225,7 +225,7 @@ _filter_bmap()
+> >  die_now()
+> >  {
+> >  	status=1
+> > -	exit
+> > +	_exit
+> 
+> Why not remove status=1 too and just do _exit 1 here too?
+> Like how we have done at other places?
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
- tests/btrfs/334     | 19 +++++++++++++++++++
- tests/btrfs/334.out | 14 ++++++++++++++
- 2 files changed, 33 insertions(+)
- create mode 100755 tests/btrfs/334
- create mode 100644 tests/btrfs/334.out
+Yeah, nice catch! As the defination of _exit:
 
-diff --git a/tests/btrfs/334 b/tests/btrfs/334
-new file mode 100755
-index 000000000000..fd1ac67f9000
---- /dev/null
-+++ b/tests/btrfs/334
-@@ -0,0 +1,19 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test 334
-+#
-+# Verify sysfs knob input syntax for allocation/data/chunk_size
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+. ./common/sysfs
-+. ./common/filter
-+
-+_require_fs_sysfs_attr $TEST_DEV allocation/data/chunk_size
-+_verify_sysfs_syntax $TEST_DEV allocation/data/chunk_size 256m
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/334.out b/tests/btrfs/334.out
-new file mode 100644
-index 000000000000..f64f9ac09499
---- /dev/null
-+++ b/tests/btrfs/334.out
-@@ -0,0 +1,14 @@
-+QA output created by 334
-+Invalid argument
-+Invalid argument
-+Invalid argument
-+Invalid argument
-+Invalid argument
-+Invalid argument
-+Invalid argument
-+Invalid argument
-+Invalid argument
-+Invalid argument
-+Invalid argument
-+Invalid argument
-+Invalid argument
--- 
-2.47.0
+  _exit()
+  {
+       status="$1"
+       exit "$status"
+  }
+
+The
+  "
+  status=1
+  exit
+  "
+should be equal to:
+  "
+  _exit 1
+  "
+
+And "_exit" looks not make sense, due to it gives null to status.
+
+Same problem likes below:
+
+
+@@ -3776,7 +3773,7 @@ _get_os_name()
+                echo 'linux'
+        else
+                echo Unknown operating system: `uname`
+-               exit
++               _exit
+
+
+The "_exit" without argument looks not make sense.
+
+Thanks,
+Zorro
+
+> 
+> Rest looks good to me. 
+> 
+> -ritesh
+> 
 
