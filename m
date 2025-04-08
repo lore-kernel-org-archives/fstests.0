@@ -1,83 +1,48 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DEE522ACEE
-	for <fstests@vger.kernel.org>; Tue,  8 Apr 2025 14:27:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35C4D1DBB0C;
+	Tue,  8 Apr 2025 14:33:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744122479; cv=none; b=tLJX/rngDj6Aw8m3FwERaY41ebXM1cXpY9jkqZIqv+jT9dp5IlIILD2ahOMDZ/cQ7v6jIPXSGAxzCpJrVqrv8A6+ZWJodUwsO8DxvNMkjxoIQgMkGguvDUEUq4zqzaMaJNQSFqYnYLYSXae5929jZX5UdpV6ifZDFRo9vhIxw+8=
+	t=1744122827; cv=none; b=PvcaKZ6lYNA2Mv4UTI1yUBXH0nAH8PhFgaFn3ubxOgjZ24/nnKP62LHaptnGu2xZ0EyWxmDp6Qacph2MtivzeXkTE+GK6WpJ7GVe2B8j86U9G7g4hOU/QnpnV8MAgFVs+xRgluk1f9uKfTvUxNZGdnnmWtNfp8UbUj8Phh6p3Co=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744122479; c=relaxed/simple;
-	bh=8sVTW6TceJNB34RYjY9n6ubg4DVVdtoWsa7Sh4zjrSA=;
+	s=arc-20240116; t=1744122827; c=relaxed/simple;
+	bh=aEfx6RkU/Tu2k8S2tBQr8QBzC2LFzW6gVbGKB908vOw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=jSL1kNF433NxBmRID3OUqduqNXV1CYGzTzDxlOSH0xC8vhrSrMGSSEAEnoNsJjQyYMTE4BAZZcbaizXod6YiqcwcZ6NRrEI+DGy0n1MaR59Ftz7VZ0c4Phlcp1G3VlhTavBrmjxi4JOw7yR7xJ66LCOkPnEyLiscP5/5y1/VOkQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=UMlmBo/V; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=duuQsJi67HDhotY8GYWC7+65mF3oXq9Ry9kRtJnMyxD9bSplA9AKWI4aGhZ8RKHE0H2qQvIGRtyuyRprpUE66XC6VlAz+a/vvD02vrG7SmWX49ozQAZO9ePlTytXWA/LQTYx/mGpQ/4KR1uM1fWFYRZXnm5p2aGwbqRjc8LGfDQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Y+Wsd4uF; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="UMlmBo/V"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1744122476;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=8RFZ7s3rxzl+Ts3s9RalLsIVjWLHrI7+8FF2waxdV8s=;
-	b=UMlmBo/Va5211E5YuTyigYQairEMEX6tdxOla0xvf7yJezF9whPkZOfHPR/oe0fMOWWzVT
-	nY13qB2mFIXPKgsbxqN3Xd/ogMG6b9X3tMKQdyv/K0QU1pSJsbdlhuQoJ1yjHznrfwhLNc
-	l95e4w5q6SmYTpQi7aWbc13Rci/W6kM=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-696-ScCWlfRWNUis1-Q6IDZwWg-1; Tue, 08 Apr 2025 10:27:54 -0400
-X-MC-Unique: ScCWlfRWNUis1-Q6IDZwWg-1
-X-Mimecast-MFC-AGG-ID: ScCWlfRWNUis1-Q6IDZwWg_1744122473
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2262051205aso41345885ad.3
-        for <fstests@vger.kernel.org>; Tue, 08 Apr 2025 07:27:54 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744122473; x=1744727273;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=8RFZ7s3rxzl+Ts3s9RalLsIVjWLHrI7+8FF2waxdV8s=;
-        b=rwicVathiU82KEYnpwqO3BDFQOnnwjSPeNkRZrmxHxFBtQb2/IZ6KOM0+pde9yYVvt
-         ic/bvArJ86YRbnSEsLAoKeoa2JOcUJLcWvBW8E28L9aNa95zk32sCvXiRAfk0VPNUKXg
-         dwgEifOpwZ86qOUsc7nCLqsxq81Z2UAfTOcQSugRvj2DSrQmWqxzGmDcTZfb13gHHGHk
-         bHdUC6eChm2DwN3kImLUoNYxiMyiG4fkksFVOqU5jw+5xUN+9j0OtCHWntRx9K71rzge
-         CClffA9+dYJGegawx+OqrB/q9B17EvrXWciud8z4s5c+aVubH5+yqP04Lx4RuM285BUk
-         DTFQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXyWu9okhpnEYTR0inA1dD+lEvnRXW5j/YE3Yuoqmq+daCKyJLiPijO08ybTrcVUOspx8o2VLJ6@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx1GS7djqA7jWf/tdec02t/3fVF93Bjs4RBWXxAvvFCZy1nnkOF
-	t4V7u5RTgccFuGNGmcC0hTo9Y0dOegNlbMyyYHMLkiKBHbRLM675aSzFKx08QvEGl4OqH+C0GU1
-	9T7hdAirDWenYoVM7xzveqrbFudC6hAYOwA3/St+GxQ86MJndhYs12eU4x7VM6QBNjg==
-X-Gm-Gg: ASbGncs07rkhZcy7XjiG5tv4Pv9EBr0zS5NGq8npuCiT2sV9KY1SnkEa2SArTbod4H8
-	GoEPkYvjTJFgN7XEEiZvTjKZdvo8B7wJQlHga7/E0UZfGZ7XmIQnbAEFErZCX7q0zY7RF/Dk5BZ
-	zHlZwJ7x5RD3+DPakmkFPDLvI5Yo6I1P97bguZ1RLUombB6/aYIwv14qMDv2efRsWbNmVGZCnJz
-	6slMQa0quR+f2uArdghdrZ1EZtrbU+xmOFUQAgesT8GxUv6qIQfHvybrz/yFrSJf8DWzZ2PTm/7
-	Mi4bplX4J9shPUd60NX/u/CjYrSxIcoZWqipdql6zzCJPqWlAUoOLGGk
-X-Received: by 2002:a17:902:d4ca:b0:223:5e76:637a with SMTP id d9443c01a7336-22a95539beamr160554625ad.23.1744122473107;
-        Tue, 08 Apr 2025 07:27:53 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEgjgb0MlkszrbH2eNw4gben2vOMbEpUncigfF9I1M6mhJaVYcdLSb8ZfEimongz+/9tzu4Rg==
-X-Received: by 2002:a17:902:d4ca:b0:223:5e76:637a with SMTP id d9443c01a7336-22a95539beamr160554245ad.23.1744122472750;
-        Tue, 08 Apr 2025 07:27:52 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-739d9ea0801sm10573244b3a.119.2025.04.08.07.27.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 08 Apr 2025 07:27:52 -0700 (PDT)
-Date: Tue, 8 Apr 2025 22:27:48 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-Cc: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>, fstests@vger.kernel.org,
-	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
-	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org,
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Y+Wsd4uF"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9D5F8C4CEE5;
+	Tue,  8 Apr 2025 14:33:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1744122826;
+	bh=aEfx6RkU/Tu2k8S2tBQr8QBzC2LFzW6gVbGKB908vOw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Y+Wsd4uFxkefVyM0Rcp0TuN+gwpTIMtSSLaIkCzk3iWbn0P8QFMm7P1NPsk+p+QNr
+	 RwUEbiSOVsUTPgY/llpADBQ4LKVgPwpmXVVbe2e7jgl7BtL7MJX8wE3DFUawDZ5HBu
+	 8RQUGaGkPeKbw1+QPjGRIuDzGjWVOjUCSuTjYA7RSriBP1jIc9BRvF4EhSb8ZHemCF
+	 6KcjqcO39DD+3bdMSbkosN9MnLa7y6sV4TxGx90TJWqRkYTJtpZNBfH3Mhr+xzHGlg
+	 p+/KV8rF6vmQUsLgBLeIfJzuT07evGopX/iLESfrlA9xA2AXJwWWz5fuvYWsM1iSXe
+	 MKoEgI7CJzU2w==
+Date: Tue, 8 Apr 2025 07:33:46 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>,
+	"Ritesh Harjani (IBM)" <ritesh.list@gmail.com>,
+	fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org, ojaswin@linux.ibm.com, zlang@kernel.org,
 	david@fromorbit.com
 Subject: Re: [PATCH v2 5/5] common: exit --> _exit
-Message-ID: <20250408142747.tojq7dhv3ad2mzaq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Message-ID: <20250408143346.GD6274@frogsfrogsfrogs>
 References: <cover.1743487913.git.nirjhar.roy.lists@gmail.com>
  <f6c7e5647d5839ff3a5c7d34418ec56aba22bbc1.1743487913.git.nirjhar.roy.lists@gmail.com>
  <87mscwv7o0.fsf@gmail.com>
  <20250407161914.mfnqef2vqghgy3c2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
  <877c3vzu5p.fsf@gmail.com>
  <3c1d608d-4ea0-4e24-9abc-95eb226101c2@gmail.com>
+ <20250408142747.tojq7dhv3ad2mzaq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -86,87 +51,96 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <3c1d608d-4ea0-4e24-9abc-95eb226101c2@gmail.com>
+In-Reply-To: <20250408142747.tojq7dhv3ad2mzaq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Tue, Apr 08, 2025 at 12:43:32AM +0530, Nirjhar Roy (IBM) wrote:
-> 
-> On 4/8/25 00:16, Ritesh Harjani (IBM) wrote:
-> > Zorro Lang <zlang@redhat.com> writes:
+On Tue, Apr 08, 2025 at 10:27:48PM +0800, Zorro Lang wrote:
+> On Tue, Apr 08, 2025 at 12:43:32AM +0530, Nirjhar Roy (IBM) wrote:
 > > 
-> > > On Fri, Apr 04, 2025 at 10:34:47AM +0530, Ritesh Harjani wrote:
-> > > > "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
-> > > > 
-> > > > > Replace exit <return-val> with _exit <return-val> which
-> > > > > is introduced in the previous patch.
+> > On 4/8/25 00:16, Ritesh Harjani (IBM) wrote:
+> > > Zorro Lang <zlang@redhat.com> writes:
+> > > 
+> > > > On Fri, Apr 04, 2025 at 10:34:47AM +0530, Ritesh Harjani wrote:
+> > > > > "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
 > > > > > 
-> > > > > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-> > <...>
-> > > > > ---
-> > > > > @@ -225,7 +225,7 @@ _filter_bmap()
-> > > > >   die_now()
-> > > > >   {
-> > > > >   	status=1
-> > > > > -	exit
-> > > > > +	_exit
-> > > > Why not remove status=1 too and just do _exit 1 here too?
-> > > > Like how we have done at other places?
-> > > Yeah, nice catch! As the defination of _exit:
-> > > 
-> > >    _exit()
-> > >    {
-> > >         status="$1"
-> > >         exit "$status"
-> > >    }
-> > > 
-> > > The
-> > >    "
-> > >    status=1
-> > >    exit
-> > >    "
-> > > should be equal to:
-> > >    "
-> > >    _exit 1
-> > >    "
-> > > 
-> > > And "_exit" looks not make sense, due to it gives null to status.
-> > > 
-> > > Same problem likes below:
-> > > 
-> > > 
-> > > @@ -3776,7 +3773,7 @@ _get_os_name()
-> > >                  echo 'linux'
-> > >          else
-> > >                  echo Unknown operating system: `uname`
-> > > -               exit
-> > > +               _exit
-> > > 
-> > > 
-> > > The "_exit" without argument looks not make sense.
-> > > 
-> > That's right. _exit called with no argument could make status as null.
-> Yes, that is correct.
-> > To prevent such misuse in future, should we add a warning/echo message
-> 
-> Yeah, the other thing that we can do is 'status=${1:-0}'. In that case, for
-                                           ^^^^^^^^^^^^^^
-That's good to me, I'm just wondering if the default value should be "1", to
-tell us "hey, there's an unknown exit status" :)
-
-Thanks,
-Zorro
-
-> cases where the return value is a success, we simply use "_exit". Which one
-> do you think adds more value and flexibility to the usage?
-> 
-> --NR
-> 
-> > if the no. of arguments passed to _exit() is not 1?
+> > > > > > Replace exit <return-val> with _exit <return-val> which
+> > > > > > is introduced in the previous patch.
+> > > > > > 
+> > > > > > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> > > <...>
+> > > > > > ---
+> > > > > > @@ -225,7 +225,7 @@ _filter_bmap()
+> > > > > >   die_now()
+> > > > > >   {
+> > > > > >   	status=1
+> > > > > > -	exit
+> > > > > > +	_exit
+> > > > > Why not remove status=1 too and just do _exit 1 here too?
+> > > > > Like how we have done at other places?
+> > > > Yeah, nice catch! As the defination of _exit:
+> > > > 
+> > > >    _exit()
+> > > >    {
+> > > >         status="$1"
+> > > >         exit "$status"
+> > > >    }
+> > > > 
+> > > > The
+> > > >    "
+> > > >    status=1
+> > > >    exit
+> > > >    "
+> > > > should be equal to:
+> > > >    "
+> > > >    _exit 1
+> > > >    "
+> > > > 
+> > > > And "_exit" looks not make sense, due to it gives null to status.
+> > > > 
+> > > > Same problem likes below:
+> > > > 
+> > > > 
+> > > > @@ -3776,7 +3773,7 @@ _get_os_name()
+> > > >                  echo 'linux'
+> > > >          else
+> > > >                  echo Unknown operating system: `uname`
+> > > > -               exit
+> > > > +               _exit
+> > > > 
+> > > > 
+> > > > The "_exit" without argument looks not make sense.
+> > > > 
+> > > That's right. _exit called with no argument could make status as null.
+> > Yes, that is correct.
+> > > To prevent such misuse in future, should we add a warning/echo message
 > > 
-> > -ritesh
-> 
-> -- 
-> Nirjhar Roy
-> Linux Kernel Developer
-> IBM, Bangalore
-> 
+> > Yeah, the other thing that we can do is 'status=${1:-0}'. In that case, for
+>                                            ^^^^^^^^^^^^^^
+> That's good to me, I'm just wondering if the default value should be "1", to
+> tell us "hey, there's an unknown exit status" :)
 
+I think status=1 usually means failure...
+
+/usr/include/stdlib.h:92:#define        EXIT_FAILURE    1       /* Failing exit status.  */
+/usr/include/stdlib.h:93:#define        EXIT_SUCCESS    0       /* Successful exit status.  */
+
+--D
+
+> Thanks,
+> Zorro
+> 
+> > cases where the return value is a success, we simply use "_exit". Which one
+> > do you think adds more value and flexibility to the usage?
+> > 
+> > --NR
+> > 
+> > > if the no. of arguments passed to _exit() is not 1?
+> > > 
+> > > -ritesh
+> > 
+> > -- 
+> > Nirjhar Roy
+> > Linux Kernel Developer
+> > IBM, Bangalore
+> > 
+> 
+> 
