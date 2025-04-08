@@ -1,789 +1,398 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D14722DF9F
-	for <fstests@vger.kernel.org>; Tue,  8 Apr 2025 15:45:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744127118; cv=none; b=eJxKdFvaMRPQL6obkaYT5c4BKxmFAJ+vS2VdC9/3zyGpB/+KebUqQkwyI4XChThlDNhNB0Fj2G9hr+Yg5F/JeMxbJEkgPB97BPcRA6WHEyiVEJI9JzgRv5wwfAz6qAllxMD4kDj0Qt+oY3eZxbAL/Nicv+4gtAjMPAoY3KyDyZY=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744127118; c=relaxed/simple;
-	bh=gWY4qYVuXQYpPu6DnRt5fyW/q+BaOUkelmZHAk9QMdY=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=aynhqTetbquZZp+huV+UAJ9yn9FHahvRhvVkZrfTv8ccKO25CuElM41VnKGPcR/w3qSNlea2P9P1Fi3cPaD+ksKIvvhr3Yzt9ey/V2xTMEE5G2mzSgpooh22/ZVhcKfNA8piyqhgKU+GcSbA7YihQJHKe0u/NAqsQGWeBsZe0c0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=gpjZfva9; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC14722FE13;
+	Tue,  8 Apr 2025 16:05:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1744128333; cv=fail; b=Y4tvq9dhFA6uPo2MRTn50vTUMOgBAsxX5EAOmwDaHWcSZeeRb+Dm5DqttHbzbkiwwEkLCgZ6eNp0Na0Mdmk3QS/iJ8f010ot6yiynt7JhoNitUpfWLfDyv3UMGVCjHLYE++5BSA937f/2MYbnzS660ChMg9jVfjcJlbSBh8v/Q4=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1744128333; c=relaxed/simple;
+	bh=iv8tUdubpJqzMdwqSJ/21mRZ9v90cExm1paE1fa+BoA=;
+	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=JvcAWgqRD4ec70Am5962fSiy3rGz0ZKWg7t5NoUsKaY/PrrRQ7UJYdwYs8wLfF6APK6mW/tqbm7Yda7CAam0UJ7zQalQAAKjlGvhBHhAi2KUZJNE+cHHZPeJEdi/jaUk/LqWZgJsiiFUksNgnEUVqVRttTI7XrmCGAv/0i+Dxdo=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=Lpr9iG4U; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=yXRlh1nH; arc=fail smtp.client-ip=205.220.165.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gpjZfva9"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1744127114;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=IrZXw4h7RzYFuAaDUglqcvWIlh71sQKcQYaM+0JCMGE=;
-	b=gpjZfva9x1eunVOAlYMiQGLZGUvgcc+XAnteLE7U+cBG6ZAJwKveQa2SWyx/Qjkz70nLoM
-	EUwJpiRM+PN63URWGgJs/7kXUVcfIrNxZBgaQnJdMSwygEdk99TgfrJzEzGz/cdvhvr7ya
-	ReZufWMB041N2iVlEh6FTv3PG0EU6GI=
-Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
- [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-61-bQMm1MZ4Od2tGBnnbOuy3A-1; Tue, 08 Apr 2025 11:45:13 -0400
-X-MC-Unique: bQMm1MZ4Od2tGBnnbOuy3A-1
-X-Mimecast-MFC-AGG-ID: bQMm1MZ4Od2tGBnnbOuy3A_1744127112
-Received: by mail-ej1-f71.google.com with SMTP id a640c23a62f3a-ab68fbe53a4so815832466b.2
-        for <fstests@vger.kernel.org>; Tue, 08 Apr 2025 08:45:13 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744127112; x=1744731912;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=IrZXw4h7RzYFuAaDUglqcvWIlh71sQKcQYaM+0JCMGE=;
-        b=BXdYNMw1Zty+lBZjnqOO1OhZKLjTcy6Apfcus+SvKAy26Ogb53Vlh4kZLoCKvo+1xm
-         hSJ3dNxP9s6/NAt+9MXlB4no4qGWrb6BSopKHS61CendZvQHSvFboRqPyvDaSGyS9Wb5
-         5r+adUbOFduqTj4GVSR27XvfyyXoyKVyhlRCY0B+2AgeFUmuc0Ce59E1E1je/R09DoIX
-         RJ72M5dyTGtydxr6KAezycjsP60qvbgSK1CTRY7TgG5jDlki8WtTGD6OgAMACNsQRUvW
-         jCG3n/8Fbxjd8neGs7lyVg8HWxAewJeXD+BQXxNAi3vroWNNKbzBFMoXUNY6t1p5ANvq
-         cTsA==
-X-Gm-Message-State: AOJu0YwgW9J2hWuOOeUNPJbb62T03MpE1UMnqZ2j+5oaOTo1zGcw3KtV
-	oxZ0jLMWSFXRWNLg+fk/yK+RtEFZsVDwCiwpdOGlq4Dl6rg8yiUWJovwofdr236KrFJe7JK4Vly
-	La+DcbQ3YzRN/dEOdLPoBrUY2zKYumo0yf242PSaYCQb9R69AWgzrZBGczCyBOgCUR6mlnt0TJp
-	j7VsKcdVDVPwW5loGl5FlBVaH7DuBR9CdVWIpiqFs=
-X-Gm-Gg: ASbGncv34PCLrei/VE0ufbqy4jMJfwLqlbx+lSxxIHLzjQSf7amdWPAvpNSRZhsCLsR
-	Oez/xRgdkJKoqCY8HmAltfcm4gG5Ar1LjfKzQ+3UZRqz/l8bGnqvVTqgkBRDNklv0f9VtdMt04a
-	l8uAzUthoqs3lFKYOU3XeiJj9QnGeqNN6vvirljlHsS2lplle0pm3GY/XuAL9WuqPvd5TZoP068
-	hynhIktLmsInEqSYMVERj3styE1VnMotGZkRLZQ84HKvg91lHT5s/jx18pL1KXKiG74jr9oRoKb
-	jsYAXU13wPjANA7XvUsTw+bPfzgyLwAPN2Ylqhba0KGImowfVY0JCYaiiNSroCP1/0Wssxax
-X-Received: by 2002:a17:906:d269:b0:ac7:971b:ffd with SMTP id a640c23a62f3a-ac7d185cf4cmr1668860766b.10.1744127111504;
-        Tue, 08 Apr 2025 08:45:11 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGDc6EzCTSkM9P/vQ+vGwy/jjsGfTUHUm6bbSMoWasW+rQPa2zAsD/FTj4XJmfMvcIznGslTQ==
-X-Received: by 2002:a17:906:d269:b0:ac7:971b:ffd with SMTP id a640c23a62f3a-ac7d185cf4cmr1668856666b.10.1744127110932;
-        Tue, 08 Apr 2025 08:45:10 -0700 (PDT)
-Received: from maszat.piliscsaba.szeredi.hu (193-226-212-63.pool.digikabel.hu. [193.226.212.63])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ac7c01c20f1sm949630666b.177.2025.04.08.08.45.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 08 Apr 2025 08:45:10 -0700 (PDT)
-From: Miklos Szeredi <mszeredi@redhat.com>
-To: fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org,
-	Amir Goldstein <amir73il@gmail.com>,
-	linux-fsdevel@vger.kernel.org,
-	Giuseppe Scrivano <gscrivan@redhat.com>,
-	Alexander Larsson <alexl@redhat.com>
-Subject: [PATCH] overlay/08[89]: add tests for data-only redirect with userxattr
-Date: Tue,  8 Apr 2025 17:45:09 +0200
-Message-ID: <20250408154509.674118-1-mszeredi@redhat.com>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="Lpr9iG4U";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="yXRlh1nH"
+Received: from pps.filterd (m0246627.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 538G5CsQ014546;
+	Tue, 8 Apr 2025 16:05:21 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
+	:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=
+	corp-2023-11-20; bh=V4sOPKxTto4SbrNHoI6B0Wo/hSNUeMBNXtLhNI6NJ7Y=; b=
+	Lpr9iG4Utx/wabHZI/H2CftPP1V28dOU7Rdwu60WQrGYX8jjEcl86vzSxs8UZmxm
+	KaxNaIFYv8LOcaS7kfr/ysFo4LiD+sw8BS+u7DcwSUdcr5BqjBYc7zSyYdF/KzxM
+	exh1dv6uDdRTgvUV3S3gMmswjC3RWKWpucL9Y+604xuEihXoAAHQSr36qv8jAyCI
+	qZDznJWz20xTwXiJhQPBRFbc7DUKzw1fG1gVd6uMyxbgA9PlGbwFO2Rl0VjvhUAB
+	iimey0qErPuYmmcGWt/pkgrnnNSgVaq/cVjgbpFxD0YE/ZMED738w5a7YVurPmlp
+	a7QKen3NtSXIVAqSvkRCdQ==
+Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 45tu41d6w1-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 08 Apr 2025 16:05:20 +0000 (GMT)
+Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 538FpeGK015897;
+	Tue, 8 Apr 2025 16:05:19 GMT
+Received: from cy3pr05cu001.outbound.protection.outlook.com (mail-westcentralusazlp17013074.outbound.protection.outlook.com [40.93.6.74])
+	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 45ttyfta8x-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 08 Apr 2025 16:05:19 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=JF/sokLuCJnICHdVkNyFDOseGrgvR+6Rz3Gb17yxCdRsDmCaVDGTRUaJqNv/EIrwNk91tB95ybEB2dWre8cFdUX+TFbhUYQuu2W8U+92ss3hXmLAaO3VbBs1adXSB2SrXVfEogaLyfmDfNC+IWnBT5AUppk/1A/YtajfIOWVdPmZ2aAkWxC7IgNgS5hmRZp9JkIS8dwqubuK7Vm7LCbO4TWRBwqZ51O7eCNil6f9Uafpur7MYtTyfadxTJsKn56gqK0lUy23WdMwhiGWsP5zITJ1vw5h5qoiPnyfv1YkGO7gizHUaNP9iYeB2PdIWMewtj/fWVG/476bjmbRUwIybw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=V4sOPKxTto4SbrNHoI6B0Wo/hSNUeMBNXtLhNI6NJ7Y=;
+ b=UJDV8aVZd35ajSkquGKFh0i1AmvmMth7lU5dmqHjhWN/USdF4xM1l4wiu8jw9q4jDXs0w/CcrKH7t4YOssnFMZ2/QYvki1//blebNn7ndfBKn7DLkAnQJEs9TJP0LKrob7Obb7JKADCWuirsDZBi3HFUAMAbJqOu4hDOntZCR0LsSWsXl8nlENfRCy5+9YZu0DVzBRjz8lHN5LqmJ8fceCSmOrmqmQd/almMVuXa6ADaAoPOJjhP3aDYKIQCyY2HETdXr+AhN61BVdQHenfJLaNcmN/E7/yk6i4h4+GLOu/9al/bJCgB/OgrevPM7cQQrZ29VeTnqWj8VAdiXcAiUQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=V4sOPKxTto4SbrNHoI6B0Wo/hSNUeMBNXtLhNI6NJ7Y=;
+ b=yXRlh1nHm6mlNn081xacIQWGESIhCAOVgwT7EWj6QDaQwZr0/GR58NUfC9qJM7gJFR5EfdJLn2MH816cER1OqSiS4dmDanZTynQxwsRVCg9BBrJxaO9kcqvvYr5HoI1ed0HO7eDmN46DavQ7H8txNhHDH0nk/G8+WMEHlrwIapg=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by MN2PR10MB4303.namprd10.prod.outlook.com (2603:10b6:208:1d8::19) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8606.32; Tue, 8 Apr
+ 2025 16:05:15 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::fea:df00:2d94:cb65%5]) with mapi id 15.20.8606.027; Tue, 8 Apr 2025
+ 16:05:15 +0000
+Message-ID: <ff900cdc-2e43-4929-aff7-a59b0185d628@oracle.com>
+Date: Wed, 9 Apr 2025 00:05:11 +0800
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 4/6] fstests: common/sysfs: add new file sysfs and
+ helpers
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, zlang@redhat.com
+References: <cover.1743996408.git.anand.jain@oracle.com>
+ <ae857de1a41a1b2946c6ca83165308a13c043bba.1743996408.git.anand.jain@oracle.com>
+ <20250407172249.GA6274@frogsfrogsfrogs>
+Content-Language: en-US
+From: Anand Jain <anand.jain@oracle.com>
+In-Reply-To: <20250407172249.GA6274@frogsfrogsfrogs>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: SG2PR04CA0156.apcprd04.prod.outlook.com (2603:1096:4::18)
+ To PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|MN2PR10MB4303:EE_
+X-MS-Office365-Filtering-Correlation-Id: d02843c1-3eb8-4a42-bc9b-08dd76b7266b
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|376014|366016|1800799024;
+X-Microsoft-Antispam-Message-Info:
+	=?utf-8?B?MXBjNWZ3VUhtMlhRTEl2YUYydWthVzZudzZmNHZpUGVKRkw0Q3hVbzNjRFI4?=
+ =?utf-8?B?WGRvWXNPZUplV0syNTlEYVN6UWNMVjFSbTYrYWZtcjZiQmluZFFFSUJtSThO?=
+ =?utf-8?B?Zm9KZmxDTTBheno1RVpNb29mUlN3MjZGenlLTzFGdjVKem1xVDdjYjh0ZnVX?=
+ =?utf-8?B?NlNpS0Iwekd2QkhveDVuSmhtdlB3MEQzc09lRENzQXJ3VE1Od0ZyRnBKellG?=
+ =?utf-8?B?N2JWcTRPT3NCa3hSS1A2V05WZ2YySGhHZC85TndIeTRiYkh2VzMvWXRMWDNk?=
+ =?utf-8?B?WHUvUEtJaTVTdnpheGZkSS9jd3JSdHhNVjZmRThUWWdtVVV4KzAvTzhybGpY?=
+ =?utf-8?B?bzJtb1JIWlJEOWNIVWZFejAxRzFUeVBwazgzMG9iUWhUbW5NSmdWRnpKWloz?=
+ =?utf-8?B?ZzNtNGtPa1lSZUl5cUVXcDBvTkVtS3RkSzNBYUNhc2FRVWdJWDhoQ2JPZTlY?=
+ =?utf-8?B?YWp1NTZWc05CKzNlM1NYOXNiZGhxT29EeUpGa3BrUHRzcmlUODRiQm1kczcr?=
+ =?utf-8?B?VGl2TTUrUDh6ZmttS2FOV2dDOTJVclk0WXRYdnFOeE9xNlJYR094Qkc3VEVF?=
+ =?utf-8?B?MWhlcXVqek9yZk1YS2Y4aTJTS1hENDVsSkhPcjl4eTZPRC9QaituWGp3MVhD?=
+ =?utf-8?B?T1hyVFM2a0hGWlZCZWd5U09ERE1ZSmhidGlJUi9Ma3J3TDQyZ3RIRWZpdGdp?=
+ =?utf-8?B?TVBndXdSeEF6MUhJMmk2dzEzSHpGNitVQUEwV2VCUTZIc1NabXBpYklndXdU?=
+ =?utf-8?B?dE53TGdYWCtFNHl3SXMwZnZXYUNFMm1LSWU3YW5zT1EzanhGTnZiN0NnL0Vy?=
+ =?utf-8?B?c1pFa0xteXlRSkpHbTlJZnV4SjU4SHB0SWVHZjR0b3RNN3hpc0tvUjQ3UXpR?=
+ =?utf-8?B?cU0vdGduQmo2VllXd2hsOEx6dlhOaHMxTWNoTG9SVmZHUGQ3bkMxdEdjeGd3?=
+ =?utf-8?B?MDk0UFNDcWdoaWpjbWdnV2tLeDFGb25yaHlTZXI3eHpucnZXMFpiUWpTSDlm?=
+ =?utf-8?B?SG9NM3hOZUc3dnJINDZ4bnRONWUyVmEvNFJGb2xvekRCVUp4S3pXb1VOdGNH?=
+ =?utf-8?B?ZXhycXBmcTR3QzNXbU83KzFQK3JqOXVlSmVwZThEbE1raS9HREpwZkZFa0M3?=
+ =?utf-8?B?VkNyODhMaFVWQzc1aFA3RVBNWUtaZU9rc2RDbmdYZFNwU2F5NUxnZ1Z6QzhT?=
+ =?utf-8?B?TDFMMVA0VXc3b05jcVcvOG9UaTF3S2tFWEVvalg0SXVpNHJxMW1tZGEyeWRZ?=
+ =?utf-8?B?TUZvdC9aVWdDM2NLaXN1bnlxNlFwTzhmT0k4ZnI4eDBiTVJDc1ljc1dlcTJy?=
+ =?utf-8?B?aWtBWVpNL1ZrcE1lMVpkaGdLc0FaanJldk9xTGtUSndMZTdtYjRLMzBvbDlU?=
+ =?utf-8?B?VlBuQUEzR21GNTYvTE9TVS91aTlqR1dBOUMzeTA4RVRySUUyL21MQ0JpZ1pu?=
+ =?utf-8?B?UDhaL1J0UFdYRzFrMlR2cXpmdVdnNmtzc2IxdFZ3ajNHamsrZEZFbUR1L0la?=
+ =?utf-8?B?eEFoVUJEWGd3bDNoTzNNWEJ0OVRmM21Obmw3OTBVUERsSlRlZlhET0ZpUUlR?=
+ =?utf-8?B?dk9RNC9rbCszY1F0aUFKTTQ2dWdmYVRJUTl0WGYwN0VaSkRVWm5XeCtpUWc1?=
+ =?utf-8?B?NzNHZ1NOdk9QOWZwekgxNEtUQy9TVlFzMnh5WHZ5SUhWQTd0QTQ1azJ6YWVE?=
+ =?utf-8?B?YjNWeWxyUUZ0ZkdGODVNd3pwRVg5OStTME9PZUZmYUlhR0dJS1JhN1FBNlJM?=
+ =?utf-8?B?b2hRTzBkazR0Y2NzeUpLNmp1TXEwZmNXZnVqNmlGUkRBc3pXV1NwaUVuUm1E?=
+ =?utf-8?B?L0s5MVMrNnF4YVgxdWl5S05uSmE4dDZSWVQ5cDJ1ZXB3bkZpeE91KzUzbktE?=
+ =?utf-8?B?bGV4ZnV0eDBFUitWTmxIY0EwOFMrVWhsWllobm1IY29GM0V2WDEycjNXMEow?=
+ =?utf-8?Q?P6W5ARRgcfU=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(366016)(1800799024);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?Y2JLSGMyVlI4RGY4YkhqKzhib0Zwbk5pSVRxM2xEUXpDWGJXb2Y5djRhbEg4?=
+ =?utf-8?B?QUVlZkRQdjFLUGNBNlp3ZzUxNTRybG10RXB4cytaNThSRmUxQTd5QXhNU0N5?=
+ =?utf-8?B?anZwQTUyNU1QSzlvZG9oSjdNUEZzcEY4eGI5NmhCdGV0TUUvbXdGcTdndVR0?=
+ =?utf-8?B?M1U1aFhHUnlTZWh6UFFmV3dYUHU2Vm43Wkp0bStwaW9YSnlhWWlJWkNtQzMy?=
+ =?utf-8?B?MklQWW52QXFSL2FOZThDZnFjNEMyeUllTTBteVhpalowSjlYTHVvWldKL1dL?=
+ =?utf-8?B?WEcxSFA4NitiRTh0MjRnVXlKYzNoSDc2bHRtZEludjk2TXN4SG5oeUN4VGhy?=
+ =?utf-8?B?Q29EcWdUdDBJa2JQeFRnNDZ3V0Qyc2NTdS9VQnhTdDNVUElIdG94TmNuWm5w?=
+ =?utf-8?B?N0EzaEpISFJPS3IvdHBVSHdvSFVjSGVOU3ZuTTREY1BaNlMvTE81UWNGME51?=
+ =?utf-8?B?eHNJeVNxbHNjQ3V4UGVXZitxUzd2MlI0RE1QSmxEN3VHcHpPZTMyUWlQWGRR?=
+ =?utf-8?B?dmh4VFIwQ2FBRzZRTlc2d1JSSjJSYnd3dENlWG9rWHpjUVdVREdqQkF5VGVh?=
+ =?utf-8?B?REZBaUFEY3NFTVI2TlRaWWhyRDg5NjRKWlJuWnJRRlhmUHovejVFVmZWSjNX?=
+ =?utf-8?B?VU5tcmhGZ1ZmaXA5WXlYejkxbTlZeVdFNlcxaytlaXNrd05FcmtWaUlzc3R1?=
+ =?utf-8?B?aEZiV0lKL2g5aWVESldSMlpPY1VuNVJhQmRvRXloOVowZmd1d0F6UzRWeXpD?=
+ =?utf-8?B?VjkwUVBYejRDbmFJeFo3S1NiaHpjQWt2WFUyUHJpYTJQbGlRVkp1M1EzZHRV?=
+ =?utf-8?B?QTc1MzFOeG5LazlyVW1vOURaWWdNNWUwcDNsZkF0K2NaNnFXNG41emdlY1Rz?=
+ =?utf-8?B?SXdYSzlmaGNWaWFmSmNpRHZrT09sUmFaMisrQnE3U3F6cjgxTDBHbDJTejN3?=
+ =?utf-8?B?cXJuWVJTN09TNGxTSVVENTVhdTRpbmY5ODNKMitFZ2NWQTBLYTB3RHdFQjRS?=
+ =?utf-8?B?V1NXVHZvc25tNUwzMGttUFh0Um5VRjZHMjZzbEdJbno3MDlLamtnTUIrVnd1?=
+ =?utf-8?B?aEpiNktqb3VabWZjTVNjbFVwRlp1bEU5K2dzYTZHY3NaTm5RUC95Q3hwUEoz?=
+ =?utf-8?B?WUhoa1ovVGZZUmJSRnJtd21ZZWM0NlVyMHJrNXpSRG1nalNiUkljaXB3bEVh?=
+ =?utf-8?B?NUhmWnVIa1BlRStLMWhRN21BWWxwWWNtbSt3Tm04Qk1zLzU2QVM2U1FRd1dS?=
+ =?utf-8?B?Y3FBUTZ1b2pWZ0QvaEN1SHZkRzljNS92M0cyNEFwT2hFOXUwMldjR3FVMVYv?=
+ =?utf-8?B?Y0kzVWF6TWpBZEI3VWt1S0tNWGVzUXNDWWhINU1iRGEzNXF5OXQrb2wzUG1Y?=
+ =?utf-8?B?UE9MTE9Sa0srT0hmaS9RTEZtNWZKM1pabGlUc0hvNHAvUGhkUlhCdE1qYmhJ?=
+ =?utf-8?B?ay9UQ1RvbGhWa0p0d2I0ZEE2cVQwUDVZbGltYkVySHRZd3p3Vmd5YkRHN0F5?=
+ =?utf-8?B?dWV0ZlkvT1lHWGpOb1dtelpCeWlOU0E4cGxudUFoWUk1YTE0bFZwNFVoQ0hl?=
+ =?utf-8?B?U0d1SnRBUmQ1aU0vQysrb3RkMlFOWGlXVThBRHFuVFRiOUJYamlDTkNaT2dM?=
+ =?utf-8?B?V2R1d1hFYmFuS0VhazF0Yk5qUmEydFhML0RnNlh3ZS9BVDB1b0t4SHprTUVW?=
+ =?utf-8?B?OU93M1E5RTVweGVLQ1ZPbGlVUHZ5emt5ejBRbXVGWmlaZFdtTXkweEZaK0RN?=
+ =?utf-8?B?K3ZRTEtxa2Y4VDJtamVHVVNTTWxaS04xZStoRURBaFZESEQ5VWVRMEJoVnhK?=
+ =?utf-8?B?WVl1dHUwWnBxUWJUZVNrQjN2YndYa2lOVWNXRjRMSWxVVWxIYW5SbTRMa1lT?=
+ =?utf-8?B?NDVzajNWYmNqbXVMbjYwUVhGdjc5UkZGSmVZMmgrOHBTNE0zZTRsY0V5TGJU?=
+ =?utf-8?B?eC9aYmZQYmVReElGanF0VFZqYUZPUDE1bjFEcmZhQ25CTjhvY0YrWHg2VEZ2?=
+ =?utf-8?B?cDZkRzRUVVNPeDVtR0NzbitjNUdIZjlhVHRUNDlVVUlla3hmM2tpdk9vakVF?=
+ =?utf-8?B?aHJhRUR1UW1YODl4N0NWajl2YzI0a0Jpd3ArS2VKZ2JPY0tpOXNXNUtjR0ZZ?=
+ =?utf-8?Q?HS6nR8ghoWgRrOidYaP/x+v9p?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	hUbpk3KY4y90Hl0vujhkr40u4Z/MXZ9GCUau7EM/bUNPLw7J8ABrVJ3Gf05YFvhd2iTroHhAXA7uhTpkvNUF9atji7yMEt4yUH5TlfAYI4/yL8hBq3ILxOW+h+oGIN0wfBwOh7daCIczZ4ULA5hb+l39jBHTTrnaDXQoRAUryrN4Agd2Eu3HOUkN//Pnl47Qt+XUlTHsHAeKfc+EpMAz/nBu/LDMlV3xysQ3bTAwobqVxZt8beC8js04JL0tW0GS0G5fMMuTD04Pp7CvOynQnrq3UfL3dLDxuAXmXAkfT5I7wf5PgkvrM4wnUCkgAAbV6IXC4u8ytx1RrvH1ZkC7qycnWfxm6SR280J360kfCNRkk5BzlC7mLmwsXqRwM2sqgM7QYeiB3IHJ3Lpj8Zq0x+CkLxgSWzZsjZrtU/ouRHEhfNR2qtkCXeqhmZxw329gut9OI8wxQ0IDL9c8GsxJh5y+RarZU7/7/qp+gFsxPQL03+/qRRDXi3WsaUhvN9Iq57HiGyvr4nzoHuxOdc4ExgBTflrSVh29Fe8NiViAIrh9hAv7U9EYBR2X3QGJIANwmuFkSAqz05B6u4fHjKK0DtOO9diSs6Pawj0eCWElwFs=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: d02843c1-3eb8-4a42-bc9b-08dd76b7266b
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Apr 2025 16:05:15.5227
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: iNeoXPGdeDd84AvEQo4ofx3kY4d+7yUK+WNBRz8nlmF6KtT2w7NcJ+ua8ROQeaL6z/m0BT4YmgZwjY+jVH6a9w==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR10MB4303
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1095,Hydra:6.0.680,FMLib:17.12.68.34
+ definitions=2025-04-08_06,2025-04-08_03,2024-11-22_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 adultscore=0
+ mlxlogscore=999 bulkscore=0 suspectscore=0 mlxscore=0 spamscore=0
+ phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2502280000 definitions=main-2504080111
+X-Proofpoint-ORIG-GUID: 7kiKKjGsuW4wyy4lvXMIJ6KKH-ZU2iix
+X-Proofpoint-GUID: 7kiKKjGsuW4wyy4lvXMIJ6KKH-ZU2iix
 
-New kernel feature (target release is v6.16) allows data-only redirect to
-be enabled without metacopy and redirect_dir turned on.  This works with or
-without verity enabled.
 
-Tests are done with the userxattr option, to verify that it will work in a
-user namespace.
 
-Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
----
- common/overlay        |  29 +++++
- tests/overlay/088     | 296 ++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/088.out |  39 ++++++
- tests/overlay/089     | 272 ++++++++++++++++++++++++++++++++++++++
- tests/overlay/089.out |   5 +
- 5 files changed, 641 insertions(+)
- create mode 100755 tests/overlay/088
- create mode 100644 tests/overlay/088.out
- create mode 100755 tests/overlay/089
- create mode 100644 tests/overlay/089.out
+On 8/4/25 01:22, Darrick J. Wong wrote:
+> On Mon, Apr 07, 2025 at 11:48:18AM +0800, Anand Jain wrote:
+>> Introduce `verify_sysfs_syntax()` and `_require_fs_sysfs_attr_policy()`
+>> to verify whether a sysfs attribute rejects invalid input arguments
+>> during writes.
+>>
+>> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+>> ---
+>>   common/sysfs | 141 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>>   1 file changed, 141 insertions(+)
+>>   create mode 100644 common/sysfs
+>>
+>> diff --git a/common/sysfs b/common/sysfs
+>> new file mode 100644
+>> index 000000000000..9f2d77c6b1f5
+>> --- /dev/null
+>> +++ b/common/sysfs
+>> @@ -0,0 +1,141 @@
+>> +##/bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0+
+>> +# Copyright (c) 2025 Oracle.  All Rights Reserved.
+>> +#
+>> +# Common/sysfs file for the sysfs related helper functions.
+>> +
+>> +# Test for the existence of a policy at /sys/fs/$FSTYP/$DEV/$ATTR
+>> +#
+>> +# All arguments are necessary, and in this order:
+>> +#  - dev: device name, e.g. $SCRATCH_DEV
+>> +#  - attr: path name under /sys/fs/$FSTYP/$dev
+>> +#  - policy: policy within /sys/fs/$FSTYP/$dev
+>> +#
+>> +# Usage example:
+>> +#   _has_fs_sysfs_attr_policy /dev/mapper/scratch-dev read_policy round-robin
+>> +_has_fs_sysfs_attr_policy()
+>> +{
+>> +	local dev=$1
+>> +	local attr=$2
+>> +	local policy=$3
+>> +
+>> +	if [ ! -b "$dev" -o -z "$attr" -o -z "$policy" ]; then
+>> +		_fail \
+>> +	     "Usage: _has_fs_sysfs_attr_policy <mounted_device> <attr> <policy>"
+>> +	fi
+> 
+> Shouldn't this return 1 if the parameters are not fully specified?
+> 
 
-diff --git a/common/overlay b/common/overlay
-index 01b6622f5573..a6d37a933e6b 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -268,6 +268,22 @@ _require_scratch_overlay_lowerdir_add_layers()
- 	_scratch_unmount
- }
- 
-+# Check kernel support for datadir+=<datadir> without "metacopy=on" option
-+_require_scratch_overlay_datadir_without_metacopy()
-+{
-+	local lowerdir="$OVL_BASE_SCRATCH_MNT/$OVL_UPPER"
-+	local datadir="$OVL_BASE_SCRATCH_MNT/$OVL_LOWER"
-+
-+	_scratch_mkfs > /dev/null 2>&1
-+	_overlay_scratch_mount_opts \
-+		-o"lowerdir+=$lowerdir,datadir+=$datadir" > /dev/null 2>&1 || \
-+	        _notrun "overlay datadir+ without metacopy not supported on ${SCRATCH_DEV}"
-+
-+	_scratch_unmount
-+
-+}
-+
-+
- # Helper function to check underlying dirs of overlay filesystem
- _overlay_fsck_dirs()
- {
-@@ -467,6 +483,19 @@ _require_unionmount_testsuite()
- 		_notrun "newer version of unionmount testsuite required to support OVERLAY_MOUNT_OPTIONS."
- }
- 
-+# transform overlay xattrs (trusted.overlay -> user.overlay)
-+_overlay_trusted_to_user()
-+{
-+	local dir=$1
-+
-+	for file in `find $dir`; do
-+		_getfattr --absolute-names -d -m '^trusted.overlay.(redirect|metacopy)$' $file  | sed 's/^trusted/user/' | setfattr --restore=-
-+		for xattr in `_getfattr --absolute-names -d -m '^trusted.overlay.' $file  | tail -n +2 | cut -d= -f1`; do
-+			setfattr -x $xattr $file;
-+		done
-+	done
-+}
-+
- _unionmount_testsuite_run()
- {
- 	[ "$FSTYP" = overlay ] || \
-diff --git a/tests/overlay/088 b/tests/overlay/088
-new file mode 100755
-index 000000000000..05944e71b3d5
---- /dev/null
-+++ b/tests/overlay/088
-@@ -0,0 +1,296 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2018 Red Hat, Inc. All Rights Reserved.
-+# Copyright (C) 2023 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test No. 088
-+#
-+# Test data-only layers functionality.
-+# This is a variant of test overlay/085 with userxattr and without
-+# redirect_dir/metacopy options
-+#
-+. ./common/preamble
-+_begin_fstest auto quick metacopy redirect prealloc
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/attr
-+
-+# We use non-default scratch underlying overlay dirs, we need to check
-+# them explicity after test.
-+_require_scratch_nocheck
-+_require_scratch_overlay_features redirect_dir metacopy
-+_require_scratch_overlay_lowerdir_add_layers
-+_require_scratch_overlay_datadir_without_metacopy
-+_require_xfs_io_command "falloc"
-+
-+# remove all files from previous tests
-+_scratch_mkfs
-+
-+# File size on lower
-+dataname="datafile"
-+sharedname="shared"
-+datacontent="data"
-+dataname2="datafile2"
-+datacontent2="data2"
-+datasize="4096"
-+
-+# Number of blocks allocated by filesystem on lower. Will be queried later.
-+datarblocks=""
-+datarblocksize=""
-+estimated_datablocks=""
-+
-+udirname="pureupper"
-+ufile="upperfile"
-+
-+
-+# Check redirect xattr
-+check_redirect()
-+{
-+	local target=$1
-+	local expect=$2
-+
-+	value=$(_getfattr --absolute-names --only-values -n \
-+		user.overlay.redirect $target)
-+
-+	[[ "$value" == "$expect" ]] || echo "Redirect xattr incorrect. Expected=\"$expect\", actual=\"$value\""
-+}
-+
-+# Check size
-+check_file_size()
-+{
-+	local target=$1 expected_size=$2 actual_size
-+
-+	actual_size=$(_get_filesize $target)
-+
-+	[ "$actual_size" == "$expected_size" ] || echo "Expected file size $expected_size but actual size is $actual_size"
-+}
-+
-+check_file_blocks()
-+{
-+	local target=$1 expected_blocks=$2 nr_blocks
-+
-+	nr_blocks=$(stat -c "%b" $target)
-+
-+	[ "$nr_blocks" == "$expected_blocks" ] || echo "Expected $expected_blocks blocks but actual number of blocks is ${nr_blocks}."
-+}
-+
-+check_file_contents()
-+{
-+	local target=$1 expected=$2
-+	local actual target_f
-+
-+	target_f=`echo $target | _filter_scratch`
-+
-+	read actual<$target
-+
-+	[ "$actual" == "$expected" ] || echo "Expected file $target_f contents to be \"$expected\" but actual contents are \"$actual\""
-+}
-+
-+check_no_file_contents()
-+{
-+	local target=$1
-+	local actual target_f out_f
-+
-+	target_f=`echo $target | _filter_scratch`
-+	out_f=`cat $target 2>&1 | _filter_scratch`
-+	msg="cat: $target_f: No such file or directory"
-+
-+	[ "$out_f" == "$msg" ] && return
-+
-+	echo "$target_f unexpectedly has content"
-+}
-+
-+
-+check_file_size_contents()
-+{
-+	local target=$1 expected_size=$2 expected_content=$3
-+
-+	check_file_size $target $expected_size
-+	check_file_contents $target $expected_content
-+}
-+
-+mount_overlay()
-+{
-+	local _lowerdir=$1 _datadir2=$2 _datadir=$3
-+
-+	_overlay_scratch_mount_opts \
-+		-o"lowerdir+=$_lowerdir,datadir+=$_datadir2,datadir+=$_datadir" \
-+		-o"upperdir=$upperdir,workdir=$workdir" \
-+		-o userxattr
-+}
-+
-+mount_ro_overlay()
-+{
-+	local _lowerdir=$1 _datadir2=$2 _datadir=$3
-+
-+	_overlay_scratch_mount_opts \
-+		-o"lowerdir+=$_lowerdir,datadir+=$_datadir2,datadir+=$_datadir" \
-+		-o userxattr
-+}
-+
-+umount_overlay()
-+{
-+	$UMOUNT_PROG $SCRATCH_MNT
-+}
-+
-+test_no_access()
-+{
-+	local _target=$1
-+
-+	mount_ro_overlay "$lowerdir" "$datadir2" "$datadir"
-+
-+	stat $SCRATCH_MNT/$_target >> $seqres.full 2>&1 || \
-+		echo "No access to lowerdata layer $_target"
-+
-+	echo "Unmount and Mount rw"
-+	umount_overlay
-+	mount_overlay "$lowerdir" "$datadir2" "$datadir"
-+	stat $SCRATCH_MNT/$_target >> $seqres.full 2>&1 || \
-+		echo "No access to lowerdata layer $_target"
-+	umount_overlay
-+}
-+
-+test_common()
-+{
-+	local _lowerdir=$1 _datadir2=$2 _datadir=$3
-+	local _target=$4 _size=$5 _blocks=$6 _data="$7"
-+	local _redirect=$8
-+
-+	echo "Mount ro"
-+	mount_ro_overlay $_lowerdir $_datadir2 $_datadir
-+
-+	# Check redirect xattr to lowerdata
-+	[ -n "$_redirect" ] && check_redirect $lowerdir/$_target "$_redirect"
-+
-+	echo "check properties of metadata copied up file $_target"
-+	check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
-+	check_file_blocks $SCRATCH_MNT/$_target $_blocks
-+
-+	# Do a mount cycle and check size and contents again.
-+	echo "Unmount and Mount rw"
-+	umount_overlay
-+	mount_overlay $_lowerdir $_datadir2 $_datadir
-+	echo "check properties of metadata copied up file $_target"
-+	check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
-+	check_file_blocks $SCRATCH_MNT/$_target $_blocks
-+
-+	# Trigger metadata copy up and check absence of metacopy xattr.
-+	chmod 400 $SCRATCH_MNT/$_target
-+	umount_overlay
-+	check_file_size_contents $upperdir/$_target $_size "$_data"
-+}
-+
-+test_lazy()
-+{
-+	local _target=$1
-+
-+	mount_overlay "$lowerdir" "$datadir2" "$datadir"
-+
-+	# Metadata should be valid
-+	check_file_size $SCRATCH_MNT/$_target $datasize
-+	check_file_blocks $SCRATCH_MNT/$_target $estimated_datablocks
-+
-+	# But have no content
-+	check_no_file_contents $SCRATCH_MNT/$_target
-+
-+	umount_overlay
-+}
-+
-+create_basic_files()
-+{
-+	_scratch_mkfs
-+	mkdir -p $datadir/subdir $datadir2/subdir $lowerdir $lowerdir2 $upperdir $workdir $workdir2
-+	mkdir -p $upperdir/$udirname
-+	echo "$datacontent" > $datadir/$dataname
-+	chmod 600 $datadir/$dataname
-+	echo "$datacontent2" > $datadir2/$dataname2
-+	chmod 600 $datadir2/$dataname2
-+
-+	echo "$datacontent" > $datadir/$sharedname
-+	echo "$datacontent2" > $datadir2/$sharedname
-+	chmod 600 $datadir/$sharedname  $datadir2/$sharedname
-+
-+	# Create files of size datasize.
-+	for f in $datadir/$dataname $datadir2/$dataname2 $datadir/$sharedname $datadir2/$sharedname; do
-+		$XFS_IO_PROG -c "falloc 0 $datasize" $f
-+		$XFS_IO_PROG -c "fsync" $f
-+	done
-+
-+	# Query number of block
-+	datablocks=$(stat -c "%b" $datadir/$dataname)
-+
-+	# For lazy lookup file the block count is estimated based on size and block size
-+	datablocksize=$(stat -c "%B" $datadir/$dataname)
-+	estimated_datablocks=$(( ($datasize + $datablocksize - 1)/$datablocksize ))
-+}
-+
-+prepare_midlayer()
-+{
-+	local _redirect=$1
-+
-+	_scratch_mkfs
-+	create_basic_files
-+	if [ -n "$_redirect" ]; then
-+		mv "$datadir/$dataname" "$datadir/$_redirect"
-+		mv "$datadir2/$dataname2" "$datadir2/$_redirect.2"
-+		mv "$datadir/$sharedname" "$datadir/$_redirect.shared"
-+		mv "$datadir2/$sharedname" "$datadir2/$_redirect.shared"
-+	fi
-+	# Create midlayer
-+	_overlay_scratch_mount_dirs $datadir2:$datadir $lowerdir $workdir2 -o redirect_dir=on,index=on,metacopy=on
-+	# Trigger a metacopy with or without redirect
-+	if [ -n "$_redirect" ]; then
-+		mv "$SCRATCH_MNT/$_redirect" "$SCRATCH_MNT/$dataname"
-+		mv "$SCRATCH_MNT/$_redirect.2" "$SCRATCH_MNT/$dataname2"
-+		mv "$SCRATCH_MNT/$_redirect.shared" "$SCRATCH_MNT/$sharedname"
-+	else
-+		chmod 400 $SCRATCH_MNT/$dataname
-+		chmod 400 $SCRATCH_MNT/$dataname2
-+		chmod 400 $SCRATCH_MNT/$sharedname
-+	fi
-+	umount_overlay
-+
-+	_overlay_trusted_to_user $lowerdir
-+}
-+
-+# Create test directories
-+datadir=$OVL_BASE_SCRATCH_MNT/data
-+datadir2=$OVL_BASE_SCRATCH_MNT/data2
-+lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-+upperdir=$OVL_BASE_SCRATCH_MNT/upper
-+workdir=$OVL_BASE_SCRATCH_MNT/workdir
-+workdir2=$OVL_BASE_SCRATCH_MNT/workdir2
-+
-+echo -e "\n== Check no follow to lowerdata layer without redirect =="
-+prepare_midlayer
-+test_no_access "$dataname"
-+test_no_access "$dataname2"
-+test_no_access "$sharedname"
-+
-+echo -e "\n== Check no follow to lowerdata layer with relative redirect =="
-+prepare_midlayer "$dataname.renamed"
-+test_no_access "$dataname"
-+test_no_access "$dataname2"
-+test_no_access "$sharedname"
-+
-+echo -e "\n== Check follow to lowerdata layer with absolute redirect =="
-+prepare_midlayer "/subdir/$dataname"
-+test_common "$lowerdir" "$datadir2" "$datadir" "$dataname" $datasize $datablocks \
-+		"$datacontent" "/subdir/$dataname"
-+test_common "$lowerdir" "$datadir2" "$datadir" "$dataname2" $datasize $datablocks \
-+		"$datacontent2" "/subdir/$dataname.2"
-+# Shared file should be picked from upper datadir
-+test_common "$lowerdir" "$datadir2" "$datadir" "$sharedname" $datasize $datablocks \
-+		"$datacontent2" "/subdir/$dataname.shared"
-+
-+echo -e "\n== Check lazy follow to lowerdata layer =="
-+
-+prepare_midlayer "/subdir/$dataname"
-+rm $datadir/subdir/$dataname
-+test_lazy $dataname
-+
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/overlay/088.out b/tests/overlay/088.out
-new file mode 100644
-index 000000000000..c85c998d503a
---- /dev/null
-+++ b/tests/overlay/088.out
-@@ -0,0 +1,39 @@
-+QA output created by 088
-+
-+== Check no follow to lowerdata layer without redirect ==
-+No access to lowerdata layer datafile
-+Unmount and Mount rw
-+No access to lowerdata layer datafile
-+No access to lowerdata layer datafile2
-+Unmount and Mount rw
-+No access to lowerdata layer datafile2
-+No access to lowerdata layer shared
-+Unmount and Mount rw
-+No access to lowerdata layer shared
-+
-+== Check no follow to lowerdata layer with relative redirect ==
-+No access to lowerdata layer datafile
-+Unmount and Mount rw
-+No access to lowerdata layer datafile
-+No access to lowerdata layer datafile2
-+Unmount and Mount rw
-+No access to lowerdata layer datafile2
-+No access to lowerdata layer shared
-+Unmount and Mount rw
-+No access to lowerdata layer shared
-+
-+== Check follow to lowerdata layer with absolute redirect ==
-+Mount ro
-+check properties of metadata copied up file datafile
-+Unmount and Mount rw
-+check properties of metadata copied up file datafile
-+Mount ro
-+check properties of metadata copied up file datafile2
-+Unmount and Mount rw
-+check properties of metadata copied up file datafile2
-+Mount ro
-+check properties of metadata copied up file shared
-+Unmount and Mount rw
-+check properties of metadata copied up file shared
-+
-+== Check lazy follow to lowerdata layer ==
-diff --git a/tests/overlay/089 b/tests/overlay/089
-new file mode 100755
-index 000000000000..2259f917ecf8
---- /dev/null
-+++ b/tests/overlay/089
-@@ -0,0 +1,272 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2023 Red Hat, Inc. All Rights Reserved.
-+# Copyright (C) 2023 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test No. 089
-+#
-+# Test fs-verity functionallity
-+# This is a variant of test overlay/080 with userxattr and without
-+# redirect_dir/metacopy options
-+#
-+. ./common/preamble
-+_begin_fstest auto quick metacopy redirect verity
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/attr
-+. ./common/verity
-+
-+# We use non-default scratch underlying overlay dirs, we need to check
-+# them explicity after test.
-+_require_scratch_nocheck
-+_require_scratch_overlay_features redirect_dir metacopy
-+_require_scratch_overlay_lowerdata_layers
-+_require_scratch_overlay_datadir_without_metacopy
-+_require_scratch_overlay_verity
-+
-+# remove all files from previous tests
-+_scratch_mkfs
-+
-+verityname="verityfile"
-+noverityname="noverityfile"
-+wrongverityname="wrongverityfile"
-+missingverityname="missingverityfile"
-+lowerdata="data1"
-+lowerdata2="data2"
-+lowerdata3="data3"
-+lowerdata4="data4"
-+lowersize="5"
-+
-+# Create test directories
-+lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-+lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-+upperdir=$OVL_BASE_SCRATCH_MNT/upper
-+workdir=$OVL_BASE_SCRATCH_MNT/workdir
-+workdir2=$OVL_BASE_SCRATCH_MNT/workdir2
-+
-+# Check metacopy xattr
-+check_metacopy()
-+{
-+	local target=$1 exist=$2 dataonlybase=$3
-+	local out_f target_f
-+	local msg
-+
-+	out_f=$( { _getfattr --absolute-names --only-values -n \
-+		"user.overlay.metacopy" $target 2>&3 | od -A n -t x1 -w256 ; } 3>&1 | _filter_scratch)
-+        has_version0=`echo $out_f | awk 'NR==1{print $1 == 0}'`
-+
-+	if [ "$exist" == "y" ];then
-+		[ "$out_f" == "" -o "$has_version0" == "1" ] && return
-+		echo "Metacopy xattr does not exist on ${target}. stdout=$out_f"
-+		return
-+	fi
-+
-+	if [ "$out_f" == ""  -o "$has_version0" == "1" ];then
-+		echo "Metacopy xattr exists on ${target} unexpectedly."
-+		return
-+	fi
-+
-+	target_f=`echo $target | _filter_scratch`
-+	msg="$target_f: user.overlay.metacopy: No such attribute"
-+
-+	[ "$out_f" == "$msg" ] && return
-+
-+	echo "Error while checking xattr on ${target}. stdout=$out"
-+}
-+
-+# Check verity set in metacopy
-+check_verity()
-+{
-+	local target=$1 exist=$2
-+	local out_f target_f
-+	local msg
-+
-+	out_f=$( { _getfattr --absolute-names --only-values -n "user.overlay.metacopy" $target 2>&3 | od -A n -t x1 -w256 ; } 3>&1 | _filter_scratch)
-+
-+	target_f=`echo $target | _filter_scratch`
-+	msg="$target_f: user.overlay.metacopy: No such attribute"
-+	has_digest=`echo $out_f | awk 'NR==1{print $4 == 1}'`
-+
-+	if [ "$exist" == "y" ]; then
-+		[ "$out_f" == "$msg" -o "$has_digest" == "0" ] && echo "No verity on ${target}. stdout=$out_f"
-+		return
-+	fi
-+
-+	[ "$out_f" == "$msg" -o "$has_digest" == "0" ] && return
-+	echo "Verity xattr exists on ${target} unexpectedly. stdout=$out_f"
-+}
-+
-+# Check redirect xattr
-+check_redirect()
-+{
-+	local target=$1
-+	local expect=$2
-+
-+	value=$(_getfattr --absolute-names --only-values -n \
-+		"user.overlay.redirect" $target)
-+
-+	[[ "$value" == "$expect" ]] || echo "Redirect xattr incorrect. Expected=\"$expect\", actual=\"$value\""
-+}
-+
-+# Check size
-+check_file_size()
-+{
-+	local target=$1 expected_size=$2 actual_size
-+
-+	actual_size=$(_get_filesize $target)
-+
-+	[ "$actual_size" == "$expected_size" ] || echo "Expected file size of $target $expected_size but actual size is $actual_size"
-+}
-+
-+check_file_contents()
-+{
-+	local target=$1 expected=$2
-+	local actual target_f
-+
-+	target_f=`echo $target | _filter_scratch`
-+
-+	read actual<$target
-+
-+	[ "$actual" == "$expected" ] || echo "Expected file $target_f contents to be \"$expected\" but actual contents are \"$actual\""
-+}
-+
-+check_file_size_contents()
-+{
-+	local target=$1 expected_size=$2 expected_content=$3
-+
-+	check_file_size $target $expected_size
-+	check_file_contents $target $expected_content
-+}
-+
-+check_io_error()
-+{
-+	local target=$1
-+	local actual target_f out_f
-+
-+	target_f=`echo $target | _filter_scratch`
-+	out_f=`cat $target 2>&1 | _filter_scratch`
-+	msg="cat: $target_f: Input/output error"
-+
-+	[ "$out_f" == "$msg" ] && return
-+
-+	echo "$target_f unexpectedly has no I/O error"
-+}
-+
-+create_basic_files()
-+{
-+	local subdir=$1
-+
-+	_scratch_mkfs
-+	mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir2
-+
-+	if [ "$subdir" != "" ]; then
-+	    mkdir $lowerdir/$subdir
-+	fi
-+
-+	echo -n "$lowerdata" > $lowerdir/$subdir$verityname
-+	echo -n "$lowerdata2" > $lowerdir/$subdir$noverityname
-+	echo -n "$lowerdata3" > $lowerdir/$subdir$wrongverityname
-+	echo -n "$lowerdata4" > $lowerdir/$subdir$missingverityname
-+
-+	for f in $verityname $noverityname $wrongverityname $missingverityname; do
-+		chmod 600 $lowerdir/$subdir$f
-+
-+		if [ "$f" != "$noverityname" ]; then
-+			_fsv_enable $lowerdir/$subdir$f
-+		fi
-+        done
-+}
-+
-+prepare_midlayer()
-+{
-+	subdir="base/"
-+
-+	create_basic_files "$subdir"
-+	# Create midlayer
-+	_overlay_scratch_mount_dirs $lowerdir $lowerdir2 $workdir2 -o redirect_dir=on,index=on,verity=on,metacopy=on
-+	for f in $verityname $noverityname $wrongverityname $missingverityname; do
-+		mv $SCRATCH_MNT/base/$f $SCRATCH_MNT/$f
-+	done
-+	umount_overlay
-+
-+	_overlay_trusted_to_user $lowerdir2
-+
-+	rm -rf $lowerdir2/base
-+
-+	for f in $verityname $noverityname $wrongverityname $missingverityname; do
-+		# Ensure we have right metacopy and verity xattrs
-+		check_metacopy $lowerdir2/$f "y"
-+
-+		if [ "$f" == "$noverityname" ]; then
-+		    check_verity $lowerdir2/$f "n"
-+		else
-+		    check_verity $lowerdir2/$f "y"
-+		fi
-+
-+		check_redirect $lowerdir2/$f "/base/$f"
-+
-+		check_file_size_contents $lowerdir2/$f $lowersize ""
-+	done
-+
-+	# Fixup missing and wrong verity in lowerdir
-+	rm -f $lowerdir/$subdir$wrongverityname $lowerdir/$subdir$missingverityname
-+	echo -n "changed" > $lowerdir/$subdir$wrongverityname
-+	_fsv_enable $lowerdir/$subdir$wrongverityname
-+	echo "$lowerdata4" > $lowerdir/$subdir$missingverityname
-+}
-+
-+test_common()
-+{
-+	local verity=$1
-+
-+	mount_overlay "$lowerdir2::$lowerdir" $verity
-+
-+	check_file_size_contents $SCRATCH_MNT/$verityname $lowersize "$lowerdata"
-+
-+	if [ "$verity" == "require" ]; then
-+		check_io_error $SCRATCH_MNT/$noverityname
-+	else
-+		check_file_size_contents $SCRATCH_MNT/$noverityname $lowersize "$lowerdata2"
-+	fi
-+
-+	if [ "$verity" == "off" ]; then
-+		check_file_size_contents $SCRATCH_MNT/$wrongverityname $lowersize "changed"
-+		check_file_size_contents $SCRATCH_MNT/$missingverityname $lowersize "$lowerdata4"
-+	else
-+		check_io_error $SCRATCH_MNT/$missingverityname
-+		check_io_error $SCRATCH_MNT/$wrongverityname
-+	fi
-+
-+	umount_overlay
-+}
-+
-+mount_overlay()
-+{
-+	local _lowerdir=$1
-+	local _verity=$2
-+
-+	_overlay_scratch_mount_dirs "$_lowerdir" $upperdir $workdir -o userxattr,verity=$_verity
-+}
-+
-+umount_overlay()
-+{
-+	$UMOUNT_PROG $SCRATCH_MNT
-+}
-+
-+
-+echo -e "\n== Check fsverity validation =="
-+
-+prepare_midlayer
-+test_common "off"
-+prepare_midlayer
-+test_common "on"
-+
-+echo -e "\n== Check fsverity require =="
-+
-+prepare_midlayer
-+test_common "require"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/overlay/089.out b/tests/overlay/089.out
-new file mode 100644
-index 000000000000..0c3eee7103b1
---- /dev/null
-+++ b/tests/overlay/089.out
-@@ -0,0 +1,5 @@
-+QA output created by 089
-+
-+== Check fsverity validation ==
-+
-+== Check fsverity require ==
--- 
-2.49.0
+Do you mean, instead of using _fail, just echo "Usage" and return 1?
+
+>> +
+>> +	local dname=$(_fs_sysfs_dname $dev)
+>> +	test -e /sys/fs/${FSTYP}/${dname}/${attr}
+> 
+> What is the point of testing path existence here if the function doesn't
+> actually change its behavior?
+> 
+
+
+Ah, I missed the `if`—updated it locally now.
+
+@@ -25,7 +25,9 @@ _has_fs_sysfs_attr_policy()
+         fi
+
+         local dname=$(_fs_sysfs_dname $dev)
+-       test -e /sys/fs/${FSTYP}/${dname}/${attr}
++       if test -e /sys/fs/${FSTYP}/${dname}/${attr}; then
++               return 1
++       fi
+
+         cat /sys/fs/${FSTYP}/${dname}/${attr} | grep -q ${policy}
+  }
+
+
+>> +
+>> +	cat /sys/fs/${FSTYP}/${dname}/${attr} | grep -q ${policy}
+>> +}
+>> +
+>> +# Require the existence of a sysfs entry at /sys/fs/$FSTYP/$DEV/$ATTR
+>> +# and value in it contains $policy
+>> +# All arguments are necessary, and in this order:
+>> +#  - dev: device name, e.g. $SCRATCH_DEV
+>> +#  - attr: path name under /sys/fs/$FSTYP/$dev
+>> +#  - policy: mentioned in /sys/fs/$FSTYP/$dev/$attr
+>> +#
+>> +# Usage example:
+>> +#   _require_fs_sysfs_attr_policy /dev/mapper/scratch-dev read_policy round-robin
+>> +_require_fs_sysfs_attr_policy()
+>> +{
+>> +	_has_fs_sysfs_attr_policy "$@" && return
+>> +
+>> +	local dev=$1
+>> +	local attr=$2
+>> +	local policy=$3
+>> +	local dname=$(_fs_sysfs_dname $dev)
+>> +
+>> +	_notrun "This test requires /sys/fs/${FSTYP}/${dname}/${attr} ${policy}"
+>> +}
+>> +
+>> +_set_sysfs_policy()
+>> +{
+>> +	local dev=$1
+>> +	local attr=$2
+>> +	shift
+>> +	shift
+>> +	local policy=$@
+>> +
+>> +	_set_fs_sysfs_attr $dev $attr ${policy}
+>> +
+>> +	case "$FSTYP" in
+>> +	btrfs)
+>> +		_get_fs_sysfs_attr $dev $attr | grep -q "[${policy}]"
+>> +		if [[ $? != 0 ]]; then
+>> +			echo "Setting sysfs $attr $policy failed"
+>> +		fi
+>> +		;;
+>> +	*)
+>> +		_fail \
+>> +"sysfs syntax verification for '${attr}' '${policy}' for '${FSTYP}' is not implemented"
+>> +		;;
+>> +	esac
+>> +}
+>> +
+>> +_set_sysfs_policy_must_fail()
+>> +{
+>> +	local dev=$1
+>> +	local attr=$2
+>> +	shift
+>> +	shift
+>> +	local policy=$@
+>> +
+>> +	_set_fs_sysfs_attr $dev $attr ${policy} | _filter_sysfs_error \
+>> +							   | tee -a $seqres.full
+>> +}
+>> +
+>> +# Verify sysfs attribute rejects invalid input.
+>> +# Usage syntax:
+>> +#   _verify_sysfs_syntax <$dev> <$attr> <$policy> [$value]
+>> +# Examples:
+>> +#   _verify_sysfs_syntax $TEST_DEV read_policy pid
+>> +#   _verify_sysfs_syntax $TEST_DEV read_policy round-robin 4k
+>> +# Note:
+>> +#  Process must call . ./common/filter
+>> +_verify_sysfs_syntax()
+>> +{
+>> +	local dev=$1
+>> +	local attr=$2
+>> +	local policy=$3
+>> +	local value=$4
+>> +
+>> +	# Do this in the test case so that we know its prerequisites.
+>> +	# '_require_fs_sysfs_attr_policy $TEST_DEV $attr $policy'
+> 
+> But it's commented out ... ?
+
+Yeah, I commented it out since it's just an example.
+I think I need to rephrase the comment.
+
+Thanks, Anand
+
+> 
+> --D
+> 
+>> +
+>> +	# Test policy specified wrongly. Must fail.
+>> +	_set_sysfs_policy_must_fail $dev $attr "'$policy $policy'"
+>> +	_set_sysfs_policy_must_fail $dev $attr "'$policy t'"
+>> +	_set_sysfs_policy_must_fail $dev $attr "' '"
+>> +	_set_sysfs_policy_must_fail $dev $attr "'${policy} n'"
+>> +	_set_sysfs_policy_must_fail $dev $attr "'n ${policy}'"
+>> +	_set_sysfs_policy_must_fail $dev $attr "' ${policy}'"
+>> +	_set_sysfs_policy_must_fail $dev $attr "' ${policy} '"
+>> +	_set_sysfs_policy_must_fail $dev $attr "'${policy} '"
+>> +	_set_sysfs_policy_must_fail $dev $attr _${policy}
+>> +	_set_sysfs_policy_must_fail $dev $attr ${policy}_
+>> +	_set_sysfs_policy_must_fail $dev $attr _${policy}_
+>> +	_set_sysfs_policy_must_fail $dev $attr ${policy}:
+>> +	# Test policy longer than 32 chars fails stable.
+>> +	_set_sysfs_policy_must_fail $dev $attr 'jfdkkkkjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjffjfjfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+>> +
+>> +	# Test policy specified correctly. Must pass.
+>> +	_set_sysfs_policy $dev $attr $policy
+>> +
+>> +	# If the policy has no value return
+>> +	if [[ -z $value ]]; then
+>> +		return
+>> +	fi
+>> +
+>> +	# Test value specified wrongly. Must fail.
+>> +	_set_sysfs_policy_must_fail $dev $attr "'$policy: $value'"
+>> +	_set_sysfs_policy_must_fail $dev $attr "'$policy:$value '"
+>> +	_set_sysfs_policy_must_fail $dev $attr "'$policy:$value typo'"
+>> +	_set_sysfs_policy_must_fail $dev $attr "'$policy:${value}typo'"
+>> +	_set_sysfs_policy_must_fail $dev $attr "'$policy :$value'"
+>> +
+>> +	# Test policy and value all specified correctly. Must pass.
+>> +	_set_sysfs_policy $dev $attr $policy:$value
+>> +}
+>> -- 
+>> 2.47.0
+>>
+>>
 
