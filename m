@@ -1,142 +1,119 @@
-Received: from mail-pf1-f180.google.com (mail-pf1-f180.google.com [209.85.210.180])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 296673C2F;
-	Tue,  8 Apr 2025 05:45:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0647216605;
+	Tue,  8 Apr 2025 06:52:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744091126; cv=none; b=G7PM73RwtxAcg8FBFQbMoVgSJNBpWMtWsHWhBIIBDp322aWoGJKh8z/xv3EvQi1I39J0jVHzIy/IUfJUQMt63GLYg07s0Pd1TNE8tJuj8mH1xLUEdicWwMtdTPBuscRFS7xiFPbTo+yAoiXAEgOHWXC6mhH+A7Sl7Df2eI0d0Tc=
+	t=1744095153; cv=none; b=eurRuYX4pzl6wnd+NV6vr8uKMdxOTxarg+GF90q83owIoMYX9T9lgdUfy5XGDRC7PAifn+fNnw8jqX2BlW4vZCYlOdfk5nKpLEoJDan8VsL9k1EnWNvAwRbFHFWaPoBS/EcC5kxe0I/2+YU/cIMgKnZ4zuhhfzBNCbqfMnADlGk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744091126; c=relaxed/simple;
-	bh=lHC5FGT9o6+gcFknOCxXniSijFnfdZ4aJIQynyBc72U=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Mb4C6Kg67N2WF84JhC+05IGzlnzkKy3MYiLSToOkh/RnZcbqpf8/zMwVmgzuohIiytul/0aPEWErw809Wl9LgFuF5OdWlGggdJEH5NAwUQfU6zbrQ4qIt3IyIVMjWj65GYL02Dt8Qj2SPDiP7sibtpBaqq7OQx3SFGD1T6uNsi4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TZlpIkcJ; arc=none smtp.client-ip=209.85.210.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1744095153; c=relaxed/simple;
+	bh=qWaw4Ph1MOMUGD43PfrSRuCHT88olaoQRDsLhvJwew4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=lYjZXxwJwhoqya2+uctoMyVLFPtS3DUfomj5jxNruWwDeRU3viprZ2LaVF2ADjXaj8Whl1kmmCbHrk6vkzIi/63M6N53XlLXwuju9ZHThY8s+clbb23XSnGTEwIexb/vZae0j5XzGKEmRrPW/WDnJkiUM4x4dIbSCCdzwJRmS7U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=vtvAAlq6; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TZlpIkcJ"
-Received: by mail-pf1-f180.google.com with SMTP id d2e1a72fcca58-7340e6f3ce1so3968605b3a.0;
-        Mon, 07 Apr 2025 22:45:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1744091124; x=1744695924; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=oLBk5n0ltL8xAxyv+Wj+u9dmKp4IIoRT8qTdS3qbDJA=;
-        b=TZlpIkcJzXWu2YkFn3daw59afxhBuqhO3ujm1yktLun4uvj/8lDtNbJxnCGOSxL9nM
-         PrK2YelWT4FqZds3ei7L4MGhCKnCm2E8Dn59/VVIfaZrVFuPtH7VdPZe9K3M6rpjnlaY
-         pa5+fTMhRY3EMssz63pgmig53LRXfCP3wp6tilzNMyUaSnCJAxvdmRzOf/MPD1qQkdYb
-         bTSOsIrUMmxh0wq0uBttSvD+XDpMeTWjmsWIWqYqDyGV3Jo16MUO0uyfAzCFaGjGpGcM
-         x9tKdWRdsOecvAFWfwp21KKZjOYTgxZte//u3DO896r7HHs7yERETrASRN7EhwDRdVa+
-         Bhjw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744091124; x=1744695924;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=oLBk5n0ltL8xAxyv+Wj+u9dmKp4IIoRT8qTdS3qbDJA=;
-        b=b4zWIXF37P3qw/revC4Q+mPN9khD3LiC1GeNDb8xQGQKapAcM/C+6W6bKmuCxvVlEL
-         /pG72bIMztjbmcUL2BQ7XGc6MmZ4X/meI0x1ZRUmiCOkVsA7e3crhbfK0Igfn1JAThTu
-         jJKFGS8M+OlxFUwYdp80GFsLODUEjd04CniBlKDN9aYNZmNUafXLIUznuvOpeOYu3hqx
-         uaMuzhZpQXfqF35VZTpdQikUDcxTrgmk3Jvinj8kV4XbuHoFcC7hpdp5eBb6Wr6CZXlJ
-         BDeMFteXnjhINl4NeT+ISOsWIkAup/SQiBRBhRqovK18JWtsCEX31kfoRrT/ZZ87rUvN
-         6dmg==
-X-Forwarded-Encrypted: i=1; AJvYcCVsMrZMwAUCPQHyLuzMHJ1NiIPb7LFTEqsHwLhkoLTOsaPuW4rdRUjg2Cv/foBxkJkf1nBoAJ+8bhvt@vger.kernel.org, AJvYcCWiPQnF+VnMKO79EA5W8F9yhiH7cD8CEY7PJIHcv2oypVYOPZ0jPV+DAaBQhQlRVSTlOZbm+sKU@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw1TF15KAZs7g38OpjxS4TDLAh6AMdgKXkXBUC+7+zgyEU9nhtS
-	QwXQ4CQjGVi1w4frt7gexmvLpojEU/jqz+H1GD8ChgT4rUXsGbb7
-X-Gm-Gg: ASbGncsN/q7c6Bj7GMlWvApW7HtML3v9d0PO9x8aE5K8Q24Ux/FXLXp2Qsv3MlGjQSx
-	OyUS79vrz6NkjriIahtz3XHcfzpl6AOxXopYMUoDFa4Zo+WYc287alEw8iBwTVgfPn9CvBstmZG
-	JnLq+S1UlJnLJr9eefe+i8JfELk9dhKmtE4t4GrP+C1GDjmb1RxAuHYqgKXUtFSF/QlKK1Q3NUO
-	ICHaOFeUs85eMgWZnnMln2EfNE0k3gwW3rgmiUFDpSGCsp/9cpCFGOlWjqZ/dcqdXj8j37gtr8p
-	mXCeBzBTE3lxaFPRRVH1F9d3JdBipzzZtY+RfbSl51KVT8sdCB8heZE=
-X-Google-Smtp-Source: AGHT+IE6SxuWI8vXyH1z69PewnGRINL8FTVGsbyZxIlmKpdT+YD7k+O1yokLEw1daBiHU9JWFrsv8g==
-X-Received: by 2002:a05:6a00:3906:b0:736:b402:533a with SMTP id d2e1a72fcca58-739e48d58admr19602624b3a.1.1744091124272;
-        Mon, 07 Apr 2025 22:45:24 -0700 (PDT)
-Received: from [192.168.0.120] ([49.205.34.162])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-739da0deddfsm9638591b3a.162.2025.04.07.22.45.21
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 07 Apr 2025 22:45:23 -0700 (PDT)
-Message-ID: <aeb7dd52-58a4-49fd-874c-540ae87cbc36@gmail.com>
-Date: Tue, 8 Apr 2025 11:15:19 +0530
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="vtvAAlq6"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=WWA6k+XdUT4CX1cvecQllTxRdR69UJww7w97TjJiJsE=; b=vtvAAlq6VoaC1/H688xhP2vm1r
+	tEvrrjbhuHdCMLJokh2Z685Vy72rVxkuw7WZsf29REp/kk6yZHw9IrvZMkRHYw+nTlVMylCyp/a6J
+	A6xxqLe4xPOAlKdNQzTf1wtL/j/EaN8Um+LKChwx2fIVA0vqMuaxdN0Yjqv+mOKCYxyRUW2EVzYQu
+	2Q94UfO4hVlofJBWs5+QfwI5Rhahti3cEQ4viEGiopOUw2optMTf0GAWfMM4qfdUeUa2Saj59QNtu
+	5WS9nzj3x5X6IU7kq7kQZt4eD/2JMu3ztY6kXxM3gTnQQExmnrLi7y0W03Pwxme6GDP1BmduRRc+U
+	CwT9EMAw==;
+Received: from 2a02-8389-2341-5b80-f320-f588-da2a-f4ef.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:f320:f588:da2a:f4ef] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.98.1 #2 (Red Hat Linux))
+	id 1u22ox-00000002xdt-0TCH;
+	Tue, 08 Apr 2025 06:52:31 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: zlang@kernel.org
+Cc: djwong@kernel.org,
+	linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH, resend] xfs: remove the post-EOF prealloc tests from the auto and quick groups
+Date: Tue,  8 Apr 2025 08:51:55 +0200
+Message-ID: <20250408065228.3212479-1-hch@lst.de>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 2/5] check: Remove redundant _test_mount in check
-Content-Language: en-US
-To: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>, fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
- ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org,
- david@fromorbit.com
-References: <cover.1743487913.git.nirjhar.roy.lists@gmail.com>
- <6a8a7c590e9631c0bc6499e9d2986a6d638c582a.1743487913.git.nirjhar.roy.lists@gmail.com>
- <87semovbrk.fsf@gmail.com>
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <87semovbrk.fsf@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
+These fail for various non-default configs like DAX, alwayscow and
+small block sizes.
 
-On 4/4/25 09:06, Ritesh Harjani (IBM) wrote:
-> "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
->
->> init_rc already does a _test_mount. Hence removing the additional
->> _test_mount call when OLD_TEST_FS_MOUNT_OPTS != TEST_FS_MOUNT_OPTS.
->>
->> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
->> ---
->>   check | 6 ------
->>   1 file changed, 6 deletions(-)
->>
->> diff --git a/check b/check
->> index 32890470..16bf1586 100755
->> --- a/check
->> +++ b/check
->> @@ -792,12 +792,6 @@ function run_section()
->>   		_prepare_test_list
->>   	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
->>   		_test_unmount 2> /dev/null
-> Would have been nicer if there was a small comment here like:
->
->    	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
->          # Unmount TEST_DEV to apply the updated mount options.
->          # It will be mounted again by init_rc(), called shortly after.
->          _test_unmount 2> /dev/null
->      fi
->
->      init_rc
->
-> But either ways, no strong preference for adding comments here.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
 
-Addressed in 
-https://lore.kernel.org/all/fa1bfd04d6b592f4d812a90039c643a02d7e1033.1744090313.git.nirjhar.roy.lists@gmail.com/ 
-. Please ignore the previous link. I mistakenly gave the link to patch 2/6.
+Resend.  Last time Darrick said he's working on an autodetection, but that
+didn't get finished.
 
---NR
+ tests/xfs/629 | 2 +-
+ tests/xfs/630 | 2 +-
+ tests/xfs/631 | 2 +-
+ tests/xfs/632 | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
 
->
-> Feel free to add -
-> Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
->
->
->> -		if ! _test_mount
->> -		then
->> -			echo "check: failed to mount $TEST_DEV on $TEST_DIR"
->> -			status=1
->> -			exit
->> -		fi
->>   	fi
->>   
->>   	init_rc
->> -- 
->> 2.34.1
-
+diff --git a/tests/xfs/629 b/tests/xfs/629
+index a2f345571ca3..bb59e421e43a 100755
+--- a/tests/xfs/629
++++ b/tests/xfs/629
+@@ -8,7 +8,7 @@
+ #
+ 
+ . ./common/preamble
+-_begin_fstest auto quick prealloc rw
++_begin_fstest prealloc rw
+ 
+ . ./common/filter
+ 
+diff --git a/tests/xfs/630 b/tests/xfs/630
+index 79dcb44bc066..0a3fce10c68f 100755
+--- a/tests/xfs/630
++++ b/tests/xfs/630
+@@ -8,7 +8,7 @@
+ #
+ 
+ . ./common/preamble
+-_begin_fstest auto quick prealloc rw
++_begin_fstest prealloc rw
+ 
+ . ./common/filter
+ 
+diff --git a/tests/xfs/631 b/tests/xfs/631
+index 319995f816fe..ece491722557 100755
+--- a/tests/xfs/631
++++ b/tests/xfs/631
+@@ -13,7 +13,7 @@
+ # from the extent size hint.
+ 
+ . ./common/preamble
+-_begin_fstest auto quick prealloc rw unreliable_in_parallel
++_begin_fstest prealloc rw unreliable_in_parallel
+ 
+ . ./common/filter
+ 
+diff --git a/tests/xfs/632 b/tests/xfs/632
+index 61041d45a706..3b1c61fdc129 100755
+--- a/tests/xfs/632
++++ b/tests/xfs/632
+@@ -9,7 +9,7 @@
+ #
+ 
+ . ./common/preamble
+-_begin_fstest auto prealloc rw
++_begin_fstest prealloc rw
+ 
+ . ./common/filter
+ 
 -- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+2.47.2
 
