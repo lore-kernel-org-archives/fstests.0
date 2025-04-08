@@ -1,265 +1,182 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f176.google.com (mail-pf1-f176.google.com [209.85.210.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0727522CBC8;
-	Tue,  8 Apr 2025 16:11:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B6B322A7F1;
+	Tue,  8 Apr 2025 16:15:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744128717; cv=none; b=tBp8+z/nNK44HbTa3An0+FvIWaS0CyYTbrbergvnOig+CeXChvrxJpWaxaDoB0hcSPFZbl0Ca3DO+LhO5oYWgoOlRlAE/f5W9UTYzb3q6V2KKf4ps3CST09cpoai63Tkv7veE6CCwsd0YGylT2PSKlD3HcosdD0pgw4fBFGFKXQ=
+	t=1744128960; cv=none; b=gh7z+Jl1gNbJC/UWC9GKft+38ya7Dbb/ZnPTvV9Dg409O43gQzQamfKnwuHc+uWCdRrYpFJHfIS1WRfZdhYKREz7IyL0ebuKqPEh6s8oV1mRwkbIbyBHebC2o8RNGWxuZvtPk18qaDv6xOA3kRMuWTipV2c73D4XbIxbrsFzg4M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744128717; c=relaxed/simple;
-	bh=a/xFIjU7wudl8/Bytp3d6bGVlVj3LkY+6F1rAaQ+z6Y=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZF2AHPHs/g9cjiI+J0FRnlcyG/ZwPsujsUx/ib9R86X2Dw4mOAT7tcRcSJRG+V0Qs3SP0xiVnEev139jaPu9pO2BOCf+TSmYH0MIKdCaNYvE//VbTPoS2NfS41ICEqTvBdds88V5PpjWGI7VLpOX3JMVhbr25/WTCUkcG31efVw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DezNeeKf; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1744128960; c=relaxed/simple;
+	bh=jMbAUfVzSNQk5Ihi8vbFiGB8kuJXsshSh1t5APcKqF4=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=m+4pKSs51TjTeJPiJ497FCYs+Alv+lbWPk8HuRT8AGOp3ikdkQr23c796RTWKxd+l5GdkR3BxETeAc8EZEUemB2NlFavb3F+WzYuaqDh/BGE21/XmbXtHUv/+yNlAnka26Vwm1FDLht2VDC1DiWFdJGoXVFtqHkEoYZW5VUWYEw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=IT4LFHV3; arc=none smtp.client-ip=209.85.210.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DezNeeKf"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 70AA6C4CEEC;
-	Tue,  8 Apr 2025 16:11:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1744128716;
-	bh=a/xFIjU7wudl8/Bytp3d6bGVlVj3LkY+6F1rAaQ+z6Y=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=DezNeeKfeLfWRYbT0bUSl2Vl1eInrDbeyfnqFPKS7AXogGDM4FP14cETMHV5Gmlwk
-	 AIuRwmdUpffsM91iJQP5gNCjDjPL4gF/KtDkC/O2TqJsj+46ib8kJZo5x51iGwO6Ty
-	 zF6Sq/vFB6XwnP67jqhjXWpNe3VREKrFJbO9FpUrUOG5J27T0+GQLhv9WKajE/NO+l
-	 pS6VjMhs8y10z1NcPUjHAVyANyu0EbuU78PiCjAxaifGEKq09c72o8agB/vUG/4Dba
-	 DEFBt6OzcNd/mlW/qPJ1f1dmWIAn5QCKlcA2uUed0AhpZseZhkS43+CpgfKd4xQgzW
-	 0vlQuq+tD7v7w==
-Date: Tue, 8 Apr 2025 09:11:55 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, zlang@redhat.com
-Subject: Re: [PATCH v5 4/6] fstests: common/sysfs: add new file sysfs and
- helpers
-Message-ID: <20250408161155.GF6274@frogsfrogsfrogs>
-References: <cover.1743996408.git.anand.jain@oracle.com>
- <ae857de1a41a1b2946c6ca83165308a13c043bba.1743996408.git.anand.jain@oracle.com>
- <20250407172249.GA6274@frogsfrogsfrogs>
- <ff900cdc-2e43-4929-aff7-a59b0185d628@oracle.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IT4LFHV3"
+Received: by mail-pf1-f176.google.com with SMTP id d2e1a72fcca58-736a72220edso5917374b3a.3;
+        Tue, 08 Apr 2025 09:15:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1744128958; x=1744733758; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=2o2VWJn8/GbhyPU/E3WQ4qOkPcUXW8Wy0LE0pd3784w=;
+        b=IT4LFHV3UspBHKuLZ+Jkj5tf+hNQOIgQut0oDcQewZ+C8Bv7HTFvJDjIhGqjFLv9kI
+         533REH4DUfgxNeGof0c9rGH6NWrXLs7w4aWFDsEgjn6pMgE0cfvyz+NWIt8PUnFHCsct
+         cE5yUZmOPgSUQMLKgKwzIy/LH+WypNrFIgZ6+0TAfhjNdXGp/IqOeQpPOiRgeZSKNAH5
+         MSWK1mDCKKdzo5j9hDpe2wAow4hotbq9f+GGhnGDHDZxccsmB0Xn99w+Ky4/vc1WSsQH
+         CPd2AQcXNVWcxnMQX3jtYOVAxrrDLTKtF6BvlZjuVXoJGDOiIchvSoTNgxEa2aJ5J4rm
+         OZzg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744128958; x=1744733758;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=2o2VWJn8/GbhyPU/E3WQ4qOkPcUXW8Wy0LE0pd3784w=;
+        b=UquXNqvMnVwUNJXmZJ6oA6J+kw+NS6iHyQmueKB4aJi4fOK5w9jTlp7L7ch2ORkzK+
+         eqnZvLxhfy0QJQnYnB12SXNKQoxCXNjkXTsMM8kd4ltE+KGzhjnzWoMCcCeLVRIyEEdR
+         kNt1CKrdAv+WtEYdaUQz3sitzdBBOpMcKzBMMyyzMq7dNIbGSIp+ntV3s/KrX9/TZ6/T
+         saUtknHh51VqSg1VszOJeLwCOnr01XtjBcfPHUgKlqvmarbZ85md70rYuJxdfTzvsIGu
+         X/WR8Q2m2uZixr90m7uQOhOtgzI8v7utwMp1efm789KbGWdmhxAhw47NZGYOxoqYmSSY
+         JZmA==
+X-Forwarded-Encrypted: i=1; AJvYcCU3dA5Fkd9Le4wpI1/LgnpApo3trMA7VkT+vvyteWJwEw8Kp+POuJS334esE8YaBdpFxAIJ4mWxKlWm@vger.kernel.org, AJvYcCXeffgNksFNWKuKe7K24WrgRL6qDv6+zUv9SVefZ3qWChw+b6bu6djcIGqNcn2sRdnQ91wB/llt@vger.kernel.org
+X-Gm-Message-State: AOJu0YwjOLPOp1cCPNbmX1di9DtCAf2ROi6LHOC1kvHjvxSbQhoxaKRQ
+	lV2jEclVv+3XcsBTqkBcubzHaogF8QknoFpGTcxF6hhDrAQA+6VA
+X-Gm-Gg: ASbGncu/0J2w2rDGmGnlaOBeURppwTrtDQWKxosnkOzcNEbQpr+g7uMSG3B+cL5ZlCd
+	XXJ65Bwa6Ca0ZCE5g99s1k7XOiABkqF1UWYKTKYU+waB83cvE3dhsebpQpWymLWFDWWOgQfyoES
+	5H/3Zfomi29M1+hbJFkVCAdvAdv5PFIqBhfrziQgGg3FEpNueCmOPUGqSdc5spJqJLXi49Kq/8N
+	qXuKMmXkcXMGFMubYmYPFD2K98RAJRlpx/JHk+9VZXiFTXBrCgd8LVx+AByvaYHcnP8mO0NxrtL
+	h++HIjYGbrSvoKecu79orP7+xVXrpVtMB4gtFNbzAN7jjp6bD430qm0hzTaJvjZHr1tcvNcAamN
+	PmwgsfPqWX6INXk5j4R2M5zfmy59H
+X-Google-Smtp-Source: AGHT+IHTY9jipPKHFJfXmSpBFz5laTCTHFJUNflsN2udZWTKkJT9r/HCR/cPmM5KIBGov338noS8nA==
+X-Received: by 2002:a05:6a00:ccc:b0:736:6202:3530 with SMTP id d2e1a72fcca58-73b6b8f7617mr15959480b3a.22.1744128958164;
+        Tue, 08 Apr 2025 09:15:58 -0700 (PDT)
+Received: from ?IPV6:2401:4900:1f2a:4b1d:fee1:8dac:3556:836f? ([2401:4900:1f2a:4b1d:fee1:8dac:3556:836f])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-739d97d17absm11095522b3a.17.2025.04.08.09.15.55
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 08 Apr 2025 09:15:57 -0700 (PDT)
+Message-ID: <0e4817b5-bd20-4ea6-93f4-ec0bee9bf833@gmail.com>
+Date: Tue, 8 Apr 2025 21:45:53 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 5/6] common/config: Introduce _exit wrapper around exit
+ command
+Content-Language: en-US
+To: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>, fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
+ ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org,
+ david@fromorbit.com
+References: <cover.1744090313.git.nirjhar.roy.lists@gmail.com>
+ <352a430ecbcb4800d31dc5a33b2b4a9f97fc810a.1744090313.git.nirjhar.roy.lists@gmail.com>
+ <87y0wbj9ru.fsf@gmail.com>
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+In-Reply-To: <87y0wbj9ru.fsf@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <ff900cdc-2e43-4929-aff7-a59b0185d628@oracle.com>
 
-On Wed, Apr 09, 2025 at 12:05:11AM +0800, Anand Jain wrote:
-> 
-> 
-> On 8/4/25 01:22, Darrick J. Wong wrote:
-> > On Mon, Apr 07, 2025 at 11:48:18AM +0800, Anand Jain wrote:
-> > > Introduce `verify_sysfs_syntax()` and `_require_fs_sysfs_attr_policy()`
-> > > to verify whether a sysfs attribute rejects invalid input arguments
-> > > during writes.
-> > > 
-> > > Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> > > ---
-> > >   common/sysfs | 141 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >   1 file changed, 141 insertions(+)
-> > >   create mode 100644 common/sysfs
-> > > 
-> > > diff --git a/common/sysfs b/common/sysfs
-> > > new file mode 100644
-> > > index 000000000000..9f2d77c6b1f5
-> > > --- /dev/null
-> > > +++ b/common/sysfs
-> > > @@ -0,0 +1,141 @@
-> > > +##/bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0+
-> > > +# Copyright (c) 2025 Oracle.  All Rights Reserved.
-> > > +#
-> > > +# Common/sysfs file for the sysfs related helper functions.
-> > > +
-> > > +# Test for the existence of a policy at /sys/fs/$FSTYP/$DEV/$ATTR
-> > > +#
-> > > +# All arguments are necessary, and in this order:
-> > > +#  - dev: device name, e.g. $SCRATCH_DEV
-> > > +#  - attr: path name under /sys/fs/$FSTYP/$dev
-> > > +#  - policy: policy within /sys/fs/$FSTYP/$dev
-> > > +#
-> > > +# Usage example:
-> > > +#   _has_fs_sysfs_attr_policy /dev/mapper/scratch-dev read_policy round-robin
-> > > +_has_fs_sysfs_attr_policy()
-> > > +{
-> > > +	local dev=$1
-> > > +	local attr=$2
-> > > +	local policy=$3
-> > > +
-> > > +	if [ ! -b "$dev" -o -z "$attr" -o -z "$policy" ]; then
-> > > +		_fail \
-> > > +	     "Usage: _has_fs_sysfs_attr_policy <mounted_device> <attr> <policy>"
-> > > +	fi
-> > 
-> > Shouldn't this return 1 if the parameters are not fully specified?
-> > 
-> 
-> Do you mean, instead of using _fail, just echo "Usage" and return 1?
 
-Doh, I missed that it was _fail and not echo.  Please ignore my
-comment.
+On 4/8/25 14:43, Ritesh Harjani (IBM) wrote:
+> "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
+>
+>> We should always set the value of status correctly when we are exiting.
+>> Else, "$?" might not give us the correct value.
+>> If we see the following trap
+>> handler registration in the check script:
+>>
+>> if $OPTIONS_HAVE_SECTIONS; then
+>>       trap "_kill_seq; _summary; exit \$status" 0 1 2 3 15
+>> else
+>>       trap "_kill_seq; _wrapup; exit \$status" 0 1 2 3 15
+>> fi
+>>
+>> So, "exit 1" will exit the check script without setting the correct
+>> return value. I ran with the following local.config file:
+>>
+>> [xfs_4k_valid]
+>> FSTYP=xfs
+>> TEST_DEV=/dev/loop0
+>> TEST_DIR=/mnt1/test
+>> SCRATCH_DEV=/dev/loop1
+>> SCRATCH_MNT=/mnt1/scratch
+>>
+>> [xfs_4k_invalid]
+>> FSTYP=xfs
+>> TEST_DEV=/dev/loop0
+>> TEST_DIR=/mnt1/invalid_dir
+>> SCRATCH_DEV=/dev/loop1
+>> SCRATCH_MNT=/mnt1/scratch
+>>
+>> This caused the init_rc() to catch the case of invalid _test_mount
+>> options. Although the check script correctly failed during the execution
+>> of the "xfs_4k_invalid" section, the return value was 0, i.e "echo $?"
+>> returned 0. This is because init_rc exits with "exit 1" without
+>> correctly setting the value of "status". IMO, the correct behavior
+>> should have been that "$?" should have been non-zero.
+>>
+>> The next patch will replace exit with _exit.
+>>
+>> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+>> Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+>> Reviewed-by: Dave Chinner <dchinner@redhat.com>
+>> ---
+>>   common/config | 8 ++++++++
+>>   1 file changed, 8 insertions(+)
+>>
+>> diff --git a/common/config b/common/config
+>> index 79bec87f..eb6af35a 100644
+>> --- a/common/config
+>> +++ b/common/config
+>> @@ -96,6 +96,14 @@ export LOCAL_CONFIGURE_OPTIONS=${LOCAL_CONFIGURE_OPTIONS:=--enable-readline=yes}
+>>   
+>>   export RECREATE_TEST_DEV=${RECREATE_TEST_DEV:=false}
+>>   
+>> +# This functions sets the exit code to status and then exits. Don't use
+>> +# exit directly, as it might not set the value of "status" correctly.
+> ...as it might not set the value of "$status" correctly, which is used
+> as an exit code in the trap handler routine set up by the check script.
+>
+>> +_exit()
+>> +{
+>> +	status="$1"
+>> +	exit "$status"
+>> +}
+>> +
+> I agree with Darrick’s suggestion here. It’s safer to update status only
+> when an argument is passed - otherwise, it’s easy to trip over this.
+>
+> Let’s also avoid defaulting status to 0 inside _exit(). That way, if the
+> caller forgets to pass an argument but has explicitly set status
+> earlier, we preserve the intended value.
+>
+> We should update _exit() with...
+>
+> test -n "$1" && status="$1"
 
-> > > +
-> > > +	local dname=$(_fs_sysfs_dname $dev)
-> > > +	test -e /sys/fs/${FSTYP}/${dname}/${attr}
-> > 
-> > What is the point of testing path existence here if the function doesn't
-> > actually change its behavior?
-> > 
-> 
-> 
-> Ah, I missed the `if`—updated it locally now.
-> 
-> @@ -25,7 +25,9 @@ _has_fs_sysfs_attr_policy()
->         fi
-> 
->         local dname=$(_fs_sysfs_dname $dev)
-> -       test -e /sys/fs/${FSTYP}/${dname}/${attr}
-> +       if test -e /sys/fs/${FSTYP}/${dname}/${attr}; then
-> +               return 1
-> +       fi
+Okay, so in that case if someone does "status=<value>;_exit", we should 
+end up with the "<value>" instead of something else, right?
 
-<nod>
+--NR
 
->         cat /sys/fs/${FSTYP}/${dname}/${attr} | grep -q ${policy}
->  }
-> 
-> 
-> > > +
-> > > +	cat /sys/fs/${FSTYP}/${dname}/${attr} | grep -q ${policy}
-> > > +}
-> > > +
-> > > +# Require the existence of a sysfs entry at /sys/fs/$FSTYP/$DEV/$ATTR
-> > > +# and value in it contains $policy
-> > > +# All arguments are necessary, and in this order:
-> > > +#  - dev: device name, e.g. $SCRATCH_DEV
-> > > +#  - attr: path name under /sys/fs/$FSTYP/$dev
-> > > +#  - policy: mentioned in /sys/fs/$FSTYP/$dev/$attr
-> > > +#
-> > > +# Usage example:
-> > > +#   _require_fs_sysfs_attr_policy /dev/mapper/scratch-dev read_policy round-robin
-> > > +_require_fs_sysfs_attr_policy()
-> > > +{
-> > > +	_has_fs_sysfs_attr_policy "$@" && return
-> > > +
-> > > +	local dev=$1
-> > > +	local attr=$2
-> > > +	local policy=$3
-> > > +	local dname=$(_fs_sysfs_dname $dev)
-> > > +
-> > > +	_notrun "This test requires /sys/fs/${FSTYP}/${dname}/${attr} ${policy}"
-> > > +}
-> > > +
-> > > +_set_sysfs_policy()
-> > > +{
-> > > +	local dev=$1
-> > > +	local attr=$2
-> > > +	shift
-> > > +	shift
-> > > +	local policy=$@
-> > > +
-> > > +	_set_fs_sysfs_attr $dev $attr ${policy}
-> > > +
-> > > +	case "$FSTYP" in
-> > > +	btrfs)
-> > > +		_get_fs_sysfs_attr $dev $attr | grep -q "[${policy}]"
-> > > +		if [[ $? != 0 ]]; then
-> > > +			echo "Setting sysfs $attr $policy failed"
-> > > +		fi
-> > > +		;;
-> > > +	*)
-> > > +		_fail \
-> > > +"sysfs syntax verification for '${attr}' '${policy}' for '${FSTYP}' is not implemented"
-> > > +		;;
-> > > +	esac
-> > > +}
-> > > +
-> > > +_set_sysfs_policy_must_fail()
-> > > +{
-> > > +	local dev=$1
-> > > +	local attr=$2
-> > > +	shift
-> > > +	shift
-> > > +	local policy=$@
-> > > +
-> > > +	_set_fs_sysfs_attr $dev $attr ${policy} | _filter_sysfs_error \
-> > > +							   | tee -a $seqres.full
-> > > +}
-> > > +
-> > > +# Verify sysfs attribute rejects invalid input.
-> > > +# Usage syntax:
-> > > +#   _verify_sysfs_syntax <$dev> <$attr> <$policy> [$value]
-> > > +# Examples:
-> > > +#   _verify_sysfs_syntax $TEST_DEV read_policy pid
-> > > +#   _verify_sysfs_syntax $TEST_DEV read_policy round-robin 4k
-> > > +# Note:
-> > > +#  Process must call . ./common/filter
-> > > +_verify_sysfs_syntax()
-> > > +{
-> > > +	local dev=$1
-> > > +	local attr=$2
-> > > +	local policy=$3
-> > > +	local value=$4
-> > > +
-> > > +	# Do this in the test case so that we know its prerequisites.
-> > > +	# '_require_fs_sysfs_attr_policy $TEST_DEV $attr $policy'
-> > 
-> > But it's commented out ... ?
-> 
-> Yeah, I commented it out since it's just an example.
-> I think I need to rephrase the comment.
+>
+> -ritesh
+>
+>
+>>   # Handle mkfs.$fstyp which does (or does not) require -f to overwrite
+>>   set_mkfs_prog_path_with_opts()
+>>   {
+>> -- 
+>> 2.34.1
 
-Ok.
+-- 
+Nirjhar Roy
+Linux Kernel Developer
+IBM, Bangalore
 
---D
-
-> Thanks, Anand
-> 
-> > 
-> > --D
-> > 
-> > > +
-> > > +	# Test policy specified wrongly. Must fail.
-> > > +	_set_sysfs_policy_must_fail $dev $attr "'$policy $policy'"
-> > > +	_set_sysfs_policy_must_fail $dev $attr "'$policy t'"
-> > > +	_set_sysfs_policy_must_fail $dev $attr "' '"
-> > > +	_set_sysfs_policy_must_fail $dev $attr "'${policy} n'"
-> > > +	_set_sysfs_policy_must_fail $dev $attr "'n ${policy}'"
-> > > +	_set_sysfs_policy_must_fail $dev $attr "' ${policy}'"
-> > > +	_set_sysfs_policy_must_fail $dev $attr "' ${policy} '"
-> > > +	_set_sysfs_policy_must_fail $dev $attr "'${policy} '"
-> > > +	_set_sysfs_policy_must_fail $dev $attr _${policy}
-> > > +	_set_sysfs_policy_must_fail $dev $attr ${policy}_
-> > > +	_set_sysfs_policy_must_fail $dev $attr _${policy}_
-> > > +	_set_sysfs_policy_must_fail $dev $attr ${policy}:
-> > > +	# Test policy longer than 32 chars fails stable.
-> > > +	_set_sysfs_policy_must_fail $dev $attr 'jfdkkkkjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjffjfjfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-> > > +
-> > > +	# Test policy specified correctly. Must pass.
-> > > +	_set_sysfs_policy $dev $attr $policy
-> > > +
-> > > +	# If the policy has no value return
-> > > +	if [[ -z $value ]]; then
-> > > +		return
-> > > +	fi
-> > > +
-> > > +	# Test value specified wrongly. Must fail.
-> > > +	_set_sysfs_policy_must_fail $dev $attr "'$policy: $value'"
-> > > +	_set_sysfs_policy_must_fail $dev $attr "'$policy:$value '"
-> > > +	_set_sysfs_policy_must_fail $dev $attr "'$policy:$value typo'"
-> > > +	_set_sysfs_policy_must_fail $dev $attr "'$policy:${value}typo'"
-> > > +	_set_sysfs_policy_must_fail $dev $attr "'$policy :$value'"
-> > > +
-> > > +	# Test policy and value all specified correctly. Must pass.
-> > > +	_set_sysfs_policy $dev $attr $policy:$value
-> > > +}
-> > > -- 
-> > > 2.47.0
-> > > 
-> > > 
-> 
-> 
