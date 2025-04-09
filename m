@@ -1,114 +1,125 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A0FCA1D88A4
-	for <fstests@vger.kernel.org>; Wed,  9 Apr 2025 05:04:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15EE8219A9B;
+	Wed,  9 Apr 2025 07:01:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744175101; cv=none; b=uGmWc1lpLcx+o/W3cpCxZJSIb3HEpC1vp6myjGZd46MMhyK4TJeftJpIig2MCSNxOyBzCmWfooGYgYtd9HZ3swI8CP8cbT5PHQuQYcX4E+4QeIJrlfDo2YEJ/GEY4g41eYAGBCZ6c49mlVaTMnmFvytohf2Ui21b+NULLpT5JAk=
+	t=1744182122; cv=none; b=mcg8rbWWHLEwel5IyxLGR+VW6/0xVbCadmwbmCpk31unCk9jcDX8fpzVdl0e9eseNrzux8q7J8CGu1IzqSNulbUaWUx9osQU2fDhJ3Gs+2L2qeKkUEUcPBnvXy2G9UC4e+7eBjwcsmpkw2A6gP917nXqp3JCtk3vj5vvY7eVe9s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744175101; c=relaxed/simple;
-	bh=UqMD5apIFlDteCOIyX/lwa0HCAXVdzeqy/bejU0wBtQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=UM0DWXGJ7auvj5p6T7v44OBLqIXyPx/FWsRoSfm5rTzoytDhHRCTiVTOIHH3G+3rjxy69N/vcssLXdNMeXSiqKrcbfJWp+CWMPcwYNgICmZ+lYV7zTRloKxOtwDbhxVQHuSd5LMS31Vd99Od7fpeUZj4Ne9jK/YjvTgHiK8TLO4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=OUf5AQm/; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1744182122; c=relaxed/simple;
+	bh=Zfz+3GQSUx55Fql1HqhFv5XdXMjkvfseM7DgBQeZuI0=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=JPDdVHI8guO1jZvyWjvKLXb8SxAdy5Aupf3c84J2eEkOzmoHUYg4FIKcIyDPuHhQALLp5j90DgiWhNVBkyJ00MiuYtRh3K1zBeghRsRS8LGA1RotrQ9obTnWyPKR6vtmLCh4cJpzxoH+xdTOa38/3ujCpyN7ejZuiYvV9jNcUWM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=STPJetic; arc=none smtp.client-ip=209.85.214.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OUf5AQm/"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1744175098;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=1y3iAg9Agds/Ogx11q6UpGaQVkkfD7b35TZnTxtdUOA=;
-	b=OUf5AQm/rud5i4xRWtwXfQjG7+q1nmBulEHErVzSnSnSPCMfNNGN1/YZvKOJYXzu1bjrnR
-	bxoOpr/QZIdxZFjCLIhdCM2Qysip76ySu3vGItsuxl2qVo30tZbRo8Ma1VAm6Rr//0j+CX
-	DObQFH65iZOrzjrZiRCs3MCvF7qqVCo=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-392-Bo1_pqRlNYWr4AaP1e5L5g-1; Wed, 09 Apr 2025 01:04:57 -0400
-X-MC-Unique: Bo1_pqRlNYWr4AaP1e5L5g-1
-X-Mimecast-MFC-AGG-ID: Bo1_pqRlNYWr4AaP1e5L5g_1744175096
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-306b51e30ffso3450600a91.1
-        for <fstests@vger.kernel.org>; Tue, 08 Apr 2025 22:04:56 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="STPJetic"
+Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-22a976f3131so37485285ad.3;
+        Wed, 09 Apr 2025 00:01:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1744182117; x=1744786917; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=NcmqWxmZelBCo9/5Sxwzv6mON4DviBmxND7KxmMmmJ8=;
+        b=STPJetic86GymVDaN92rcToJSJF9i6v2SeQJff/0EBbfqvTHmxTb48YTgys/g+t4N5
+         jc2bTcLIUzXGwnnx8CkFwOJkiZl9KbETqGPx8LBUWSjFS5UDaEIpJcgfTlaOtETTylYr
+         fYVHROe+0ySjMwX2Z27jbe8LjtYja1NVhwND77eAsIjZ/VF8b0oFc5poYBsHtHJk1mak
+         xmQr/49dUsTfWx0/1p+8HNI5aERaksYNFU1/Z35M9GIZX4CijyNxfePjO/oOFJxxDA1q
+         yOGgBLTTsuPeXkRZNa0U/zse5JKHnt6sT9CrkBu7keLauwd0BkJ3vS1FF+HAgKUXsUoJ
+         0LbA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744175096; x=1744779896;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=1y3iAg9Agds/Ogx11q6UpGaQVkkfD7b35TZnTxtdUOA=;
-        b=DGMZI29KGGD7TAWH+KTr3vwwVEGCwu3tXeVokg+z6YIWrBqk7BsN3WGi7IMN88WDRt
-         kwPMBqA/zsp1FFcuesc7WgQnKztQhSdwKfiq3RSLn1KuauUfwhhL4ut54J2WMS+l56t+
-         ZPf+sl8zNuRLg6UApyW/OIJbOGgffgxoXiqxm1fm8DQAZldkhTCOIsT2rvGferL/ovtb
-         d6EakTv/DG1b/otbZY58Kxo7cLw5gF5D9+ncoAgL3xFmJSp4aPIZAe3FEahhsr4An7bz
-         NfjcrqzORidSo3STvtLvKBg2rw0gZAR9yjn1DfhVPkQr2ParlHasnv+IgblHMsrz+Xkl
-         8nig==
-X-Gm-Message-State: AOJu0YxPSVV7j53HvYfskry098GBx8FN2a7HPilxPtUulDNXwQfimi7q
-	jaQYBG55xY4cPyaU4qcL4VIYv6VS73EmveP2Kc8YONp7hA1F6rPZr+J4JKVXciRhJtmGVSZWNzx
-	bS9Bjv7dNApNePqlRAzNpppebGUbc/2clv1SlqhvRpn2HW5G1xv0zHGI=
-X-Gm-Gg: ASbGncuCHaP8nHR6nubVJzYuo40fHv00Fge/ewYQHFv0qSiy8LPbyA8bP3a/Bc1fG8n
-	ySUQf7EV/nwmpw8A8pqDtOUwK/1iNgAax4q7GoNnaYPmu7YxFrRbX3wHp8bEYyQ+cuWbJrzdbLl
-	TuwfixPQmPcspcRvP+4ZXwXsyJxhPvG74SZhWy7idiAugVOAWtOUXb58MXPCOT33Z4MAA+jriAF
-	5EnN1LNjyb5So3esKrBo/l134oJPtxZC+BHE+BtMDV4KrpmYqi8pbWh3u12RxK+oeCc8YNKd72z
-	gFnn/JZdk+49zrwhozhC9pUNOWR5JCM0SiKT0jM6UgoshNgnACtIPVuB
-X-Received: by 2002:a17:90b:5488:b0:2ff:6488:e01c with SMTP id 98e67ed59e1d1-306dbc390e9mr2115570a91.29.1744175096036;
-        Tue, 08 Apr 2025 22:04:56 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFDcrE2k0N742zHbBe7oI20IFqxVkjJZoXi1LOt1Rkg6ayMeaOnkhcBhB907+V8zBE2CUb15g==
-X-Received: by 2002:a17:90b:5488:b0:2ff:6488:e01c with SMTP id 98e67ed59e1d1-306dbc390e9mr2115544a91.29.1744175095663;
-        Tue, 08 Apr 2025 22:04:55 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22ac7cb544csm2383045ad.167.2025.04.08.22.04.53
+        d=1e100.net; s=20230601; t=1744182117; x=1744786917;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=NcmqWxmZelBCo9/5Sxwzv6mON4DviBmxND7KxmMmmJ8=;
+        b=Koz+tbdHLmiHkbJSkIl6ftGrhoLFTy5F+bPHBKLIjT+26+tfw7gozKLN7BFhYvJwBd
+         GvjIf7sKW4eQev9A3iU8xcTAdi3qdWG5tygry4Ykost1uTBJSj+myQu/nheGlzuFx7mt
+         oRBZJ1P+h0DYy3juKO4bMGS6wENhXSd0qwyYI829Y/jsTJYQ5bnHShK+VEhXEMMiUG2v
+         0BGnJ5lVOxWh7Rs2U2OjIOORa4Y6UU4FojRIED49z7W5hBOZM1zO4V/O+ZrlVXCnl4n0
+         edpPiDQY/Z9ZSnMBaFaMfEw8EimewVt5YzN8fDaV7KAeJ7mGP/okYEI3oQ2BTzXNiNbp
+         HXTg==
+X-Forwarded-Encrypted: i=1; AJvYcCWfkzRgQFfuK3egKf+IgejjQ5ih/ZofiFwoSmChHCsrsYdP7O6Yi6Ijh8B057n1a0hQlNrIb8sf05k=@vger.kernel.org
+X-Gm-Message-State: AOJu0YznmayWi5okVufqLyi7uh+OAyBnXcCnQ6LPfbT4kGdgegSPgHVW
+	QjQVW9DVGKI76sgerjPaS9pFhmWblsXx214vh/zatn++I2+P0RdK+jq3hQ==
+X-Gm-Gg: ASbGncvx2nIFLxUuy75B/A8xEILbjzp7Ckj71YgvpveV3EjK+j8dfpI0XuLO/8FysCQ
+	0ub9NNJIK9Wj4+uteRIhpfxEh7X5hycokY+smAo9q934wyZX/izYkQJqS94epdUqgrnwAv4Jdwb
+	7Y14CqrfBiVxIn5zROWkcZrJpa49is+tyqOSjU+fHaatjp7rV212k34lt+uBt7jMiFY7phmQVEP
+	/LANitQoGjg/KhiAm6D7h9Gowd5jVP+Z1DDjL9vQEKMqezPVYGZnR5QkmKpL4wJe4J20WIppEIu
+	3BJSQtgS52xMrbXp/So5G1snn31T9+B5JpHFFc4HDOWY
+X-Google-Smtp-Source: AGHT+IE3Im/mxkuLYznSvBBlgg6VTKUMGbzeKUcY/MHtp7VK63y0OaauU8eXQCuNSB7L2TeAcZ9fpQ==
+X-Received: by 2002:a17:902:c944:b0:224:162:a3e0 with SMTP id d9443c01a7336-22ac2c2f25cmr25823925ad.49.1744182117010;
+        Wed, 09 Apr 2025 00:01:57 -0700 (PDT)
+Received: from citest-1.. ([122.164.80.96])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22ac7c939a3sm4491985ad.117.2025.04.09.00.01.54
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 08 Apr 2025 22:04:55 -0700 (PDT)
-Date: Wed, 9 Apr 2025 13:04:51 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org,
-	david@fromorbit.com
-Subject: Re: [PATCH v3 2/6] generic/367: Remove redundant sourcing if
- common/config
-Message-ID: <20250409050451.tzw5e2g5fpk3ktne@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cover.1744090313.git.nirjhar.roy.lists@gmail.com>
- <ffefbe485f71206dd2a0a27256d1101d2b0c7a64.1744090313.git.nirjhar.roy.lists@gmail.com>
+        Wed, 09 Apr 2025 00:01:56 -0700 (PDT)
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org,
+	ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com,
+	djwong@kernel.org,
+	zlang@kernel.org,
+	david@fromorbit.com,
+	nirjhar.roy.lists@gmail.com
+Subject: [PATCH v4 0/6] Minor cleanups in common/
+Date: Wed,  9 Apr 2025 07:00:46 +0000
+Message-Id: <cover.1744181682.git.nirjhar.roy.lists@gmail.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ffefbe485f71206dd2a0a27256d1101d2b0c7a64.1744090313.git.nirjhar.roy.lists@gmail.com>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Apr 08, 2025 at 05:37:18AM +0000, Nirjhar Roy (IBM) wrote:
-> common/config will be source by _begin_fstest
-> 
-> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-> ---
+This patch series removes some unnecessary sourcing of common/rc
+and decouples the call to init_rc() from the sourcing of common/rc.
+This is proposed in [1] and [2]. It also removes direct usage of exit command
+with a _exit wrapper. The individual patches have the details.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+[v3] --> v4
+ 1. Added R.Bs from Zorro and Ritesh in patch 2 of [v3]
+ 2. Updated the definition of _exit() - explicitly set the value "status" only if it is passed.
+ 3. Updated the description comment for _exit().
 
->  tests/generic/367 | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/tests/generic/367 b/tests/generic/367
-> index ed371a02..567db557 100755
-> --- a/tests/generic/367
-> +++ b/tests/generic/367
-> @@ -11,7 +11,6 @@
->  # check if the extsize value and the xflag bit actually got reflected after
->  # setting/re-setting the extsize value.
->  
-> -. ./common/config
->  . ./common/filter
->  . ./common/preamble
->  
-> -- 
-> 2.34.1
-> 
-> 
+[1] https://lore.kernel.org/all/20250206155251.GA21787@frogsfrogsfrogs/
+[2] https://lore.kernel.org/all/20250210142322.tptpphdntglsz4eq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/
+[3] https://lore.kernel.org/all/Z-xcne3f5Klvuxcq@dread.disaster.area/
+
+[v1] https://lore.kernel.org/all/cover.1741248214.git.nirjhar.roy.lists@gmail.com/
+[v2] https://lore.kernel.org/all/cover.1743487913.git.nirjhar.roy.lists@gmail.com/
+[v3] https://lore.kernel.org/all/cover.1744090313.git.nirjhar.roy.lists@gmail.com/
+
+Nirjhar Roy (IBM) (6):
+  generic/749: Remove redundant sourcing of common/rc
+  generic/367: Remove redundant sourcing of common/config
+  check: Remove redundant _test_mount in check
+  check,common{rc,preamble}: Decouple init_rc() call from sourcing
+    common/rc
+  common/config: Introduce _exit wrapper around exit command
+  common: exit --> _exit
+
+ check             |  10 ++---
+ common/btrfs      |   6 +--
+ common/ceph       |   2 +-
+ common/config     |  16 +++++--
+ common/dump       |  11 +++--
+ common/ext4       |   2 +-
+ common/populate   |   2 +-
+ common/preamble   |   3 +-
+ common/punch      |  13 +++---
+ common/rc         | 107 ++++++++++++++++++++++------------------------
+ common/repair     |   4 +-
+ common/xfs        |   8 ++--
+ tests/generic/367 |   1 -
+ tests/generic/749 |   1 -
+ 14 files changed, 92 insertions(+), 94 deletions(-)
+
+--
+2.34.1
 
