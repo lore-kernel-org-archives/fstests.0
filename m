@@ -1,274 +1,178 @@
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFB21259C;
-	Wed,  9 Apr 2025 07:52:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.177.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744185148; cv=fail; b=cEIDHt/iRLeSGFmsc/tdK7FW4DjGqYq6lDgD9K+3qOKFGmaJQd4zWllVXMXjLxkLt1eHepc8plBOkvEmxwHhcEk1oVFDW+isE4KSVmxHps674HDz2ULWjHyP6UDHdV4JTJ224ZJpN02XJdKpUgGsFBNVUihvIdHtwegNIi/77/w=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744185148; c=relaxed/simple;
-	bh=H+lq3JT6RY6U2XLWu7ZCIbxt/BWiHLUtPNLEh6INnco=;
-	h=Message-ID:Date:Subject:To:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=deBGkQdB30PBZ3zKRzIlVuyHc13ul6h7fFFg3io6F0GO4MQ7mtX0Lu7ZWY9Ge/K9/HWmt5cBC7U5zR9eLu2tZQzlBDXPnOE8e0wqhqqwzfPRh0OR59PbllMhy2bz93dToy3LVeaYVeT9ljcdZPBAWZ7OMpm0a67KCjZkgIj10FI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=InONl0Ic; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=Z1/njE59; arc=fail smtp.client-ip=205.220.177.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A809B25B667;
+	Wed,  9 Apr 2025 08:19:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.50
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1744186798; cv=none; b=j3uxer97DF7cwyN76iCJVt80Lj4wYygTJ93sM0aXKZoOjn3aYXtt6WaVeZHz70MmAdPfTF8diPvhIPHvZ3tQE9inaGhx8tfxSM53MeJvuCGSUaUsTF2S0CUp7P4N1OlIUAtUTfcNSDTcmoQNjeMKd/maVoXUbBDXBaW/fAM+2pE=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1744186798; c=relaxed/simple;
+	bh=fTe0hhI0fBQiFBtDWwd392yYDUZHI1O6YilvDVmyYPk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=jgscawjacTDg9ZZsS6n8NcSEoidv3Zx6WTLTlxPFU284X3jAgPiMaBC1iaA9xZeIItbbdV0GIC6RAfuj4eUQKtHDQHaaNstwrDzX0iulAJae6OoMuOwN0aII+MqqRh2kL10xBdCSr1d8GM0EG0GOwQPzgzspxWXO8lQs/SmbhQA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GUxyQti9; arc=none smtp.client-ip=209.85.208.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="InONl0Ic";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="Z1/njE59"
-Received: from pps.filterd (m0246632.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 538L9xLs023896;
-	Wed, 9 Apr 2025 07:52:23 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=
-	content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=
-	corp-2023-11-20; bh=qbmuW7yAxdtP7dAdHKv3rBa+EQiYTY+99XIIfBeKuYg=; b=
-	InONl0IcLRGgY+5Wk/RhCQ2fEgxGAelzv2lEeZOV2wlMFkOvOSnXIdaj0wBdc/Sn
-	XpwW/1DOZTjLS1jWOvkdrCpBjf1oaxfi1uH8+70uv2OCrv6lSdpBLjd3IV5QEpjJ
-	cG7jS5K7SAnjWlSRJjq4vaPp6fhU02R8xNy6K2hCu2wNm8fZBv/r6rOF7BCo4UBG
-	3W3tKh2URnHKsCYQef5aMj5W4eila4Oil1mZaRgSzTKufP5DMqtUwLJMtKKPbsdo
-	vqlaLlmaR5VuF5MSGwDtS1hISSBIgB2NQfo9B8nL1DezuMl76miC8A9hmAN3ojUV
-	onR6Au8fe/UKIUEWgh2G4w==
-Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 45tv4sxgmr-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 09 Apr 2025 07:52:23 +0000 (GMT)
-Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 5397ijMv013788;
-	Wed, 9 Apr 2025 07:52:22 GMT
-Received: from sj2pr03cu002.outbound.protection.outlook.com (mail-westusazlp17013075.outbound.protection.outlook.com [40.93.1.75])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 45ttygs3dm-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 09 Apr 2025 07:52:22 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=eSzH6bNahctNpBiNVOR8ZjmVCBMVQNtt/3Dd+RaK29e9lekkJCfDHHt+p0XlRdDMPBmHO9HT5FmYZ6vtEg3OmBDmHRhJaYewvZ3DWaIfzMA+spKXpQTEWgeRtOt7CQh9g/Q2lH7wei/cq2irtp1/IpBy/XyIyxJVPkn45qj7I8UfgxaJXDPgkdqPlBCMEqbuQdR6p9u0vN/hRZZPKAtRgCOaR88BB7uDmgVNy7GSbjVxdjsWcX1Tu7KDRqfcOEOAW5gG3gCBVs/V0BMfOMd9BX5oUW1tHCA94FH886xthMEUFE8lX3GAgYYiSLL9FH8de0CTli9RQzAaFBk51ZWRLw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=qbmuW7yAxdtP7dAdHKv3rBa+EQiYTY+99XIIfBeKuYg=;
- b=NlEYxUh3rO2pe5ulGVxA5pysfgqjNWcNZ72Pb7Ftp+uBtO5UdlxjQ6qo+rQ9xJCOLDhgSixKrVn0FgW4kcvtFnghH+IL2L7mTp35vr/4ZYNCkOiC2JM71qqTBXapwlvPHRjVmrLBTwDVGn58hPI3qABfHY7D0jUkk6YwZP4P384QURTM5mk2qNYhx5bPo+uSa66zwgxIpfRJ6HFvugEwlcr6I7u9ecRys5XpQ/GqvZ0chyGUDVxVirKbMskdtSY1uxcL2wFDup2tbiRGsDylbnqWjhDDIt8DSOj9D5ECwj7udwyWJYNzdO0nSDCDkZ3QxBpkR59PULlh9vHA0QErIQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GUxyQti9"
+Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-5e5e63162a0so10132719a12.3;
+        Wed, 09 Apr 2025 01:19:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=qbmuW7yAxdtP7dAdHKv3rBa+EQiYTY+99XIIfBeKuYg=;
- b=Z1/njE598mZ5fo/99GkU5h0hoNDK61YPGFP2RG+Qm3weZQnYTllQrihIOjr3D47YLwnLdXu7r5hnsLZso+m9gd2GPo//5l+mb9lSwxRzc+XCdT5InytWysiBbS2xX5qxIxpluGohM4Xx6aUhWLsigHASaCaGI6XDpL/XEnuj0eA=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by IA0PR10MB7641.namprd10.prod.outlook.com (2603:10b6:208:484::11) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8606.33; Wed, 9 Apr
- 2025 07:52:20 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65%5]) with mapi id 15.20.8606.027; Wed, 9 Apr 2025
- 07:52:20 +0000
-Message-ID: <76fc21a2-045a-4f72-94c6-5f03932415aa@oracle.com>
-Date: Wed, 9 Apr 2025 15:52:15 +0800
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] fstests: add btrfs standard configuration
-To: fstests@vger.kernel.org, Zorro Lang <zlang@redhat.com>,
-        linux-btrfs@vger.kernel.org, David Sterba <dsterba@suse.com>
-References: <cfb8c19533ac3c764edc1fe62b7fde75e76579a4.1743137470.git.anand.jain@oracle.com>
-Content-Language: en-US
-From: Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <cfb8c19533ac3c764edc1fe62b7fde75e76579a4.1743137470.git.anand.jain@oracle.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: SI2PR04CA0004.apcprd04.prod.outlook.com
- (2603:1096:4:197::22) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+        d=gmail.com; s=20230601; t=1744186795; x=1744791595; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=onEh1vXtzWmAcc40knx0PkKQCXNJ+i5/An428jCeSG4=;
+        b=GUxyQti9tyJtfhZ7y7C4SgkdYW6wt89ZE3TkIgvsXWOBLzp9LMhLreM5q8dXNLV40q
+         2bJI1gKDmohHSpmjNQ2zzdK/TnBAucN0vsSQyFyH6ufyoBivGknabiNBffT5C7ERBLrg
+         RNwDaGvM6YDQ7iziuOGNQRSNWbczu1zvHxiTdg48te5Zx+CWfPaY1n2yu/LEUVz2RMRs
+         NwUDOG1fL2LbXcYwtB0OOQ18cihEAVOTNs73PtdzYlL8f3+ijwknDLrVGyIenNb0av7J
+         KblufU8oTBP4nbVKO2UPqw1OzOelmTiMkrMzRaACUvassLFL8uM7LM4lSJuhBU9sMk7d
+         7jVw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744186795; x=1744791595;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=onEh1vXtzWmAcc40knx0PkKQCXNJ+i5/An428jCeSG4=;
+        b=XlKgu0mjHtJsc8Ta6dnW8LwhXEV6OymxE1e0cNvqdCpt2/3RgwkrWAF7EGzL8AmdAO
+         j4m7L8HmPmGt44h3r2P4Fpoad+JnzGK69Eh2qi0hFGneM9Es4KiiN/wx3D2HqZwlmu0o
+         LpLR4Jeqx2fMGeebZzMz897ywyw1gQRnCh7oA8BkvsJNZLZs5da6nsro3I8/w4IQnix3
+         H87YvXv+9n+I82v4m0eN85vMyxaEzD1I9Esm7xoW/KLb2ZGGzjXtYO2u7dr17DqZTyID
+         +J7NdWL9bU3NKowoFgAblJYr5vdNL7DKjsF8A8akCE/t8eZq0+KsgqWCXfaPWqYNmzU6
+         Zoeg==
+X-Forwarded-Encrypted: i=1; AJvYcCXaEbH39+J4Kd5zojPT3ECXK8gpTc2MdVcvlC5meYagCwSIT1hkXUhrI1/oPPQWgSfPcv3//nAa87v0TR04WA==@vger.kernel.org, AJvYcCXrLt5MhFWrtrSKwwfopRMOz+YAEXlSJeOqyeWnT4jK73AOFD0TC7aWq88rlDSW9mzl2qWjEwKsmv4QlLZb@vger.kernel.org
+X-Gm-Message-State: AOJu0YyUaMp3hd3JmlKG44bEWbpRm92NfoSXRuEOPCzmZWcPlT8slTJz
+	qedjtUt3isHUCKsh5pXEg8zy8lwULOk2ljeF4jhmF/H9FjLmtOL0UW/P+5vY5EDIKnBIJAHYLbz
+	Fq5tp5IYG/VxQldb4YY/KaBIEtQZ1/4wnZRI=
+X-Gm-Gg: ASbGncuYgRzTM6OteDJbzdwwtJJoeiOwkIeedKzd5usV2sx/Xiol8hafLxSkf5k1zU/
+	tFpLGzzKHUVTjVRAna6OgXDjGh7p43fmnVQGnWmFtQmtgW3LGjNZ7DnEHhJ6OR7HEuUnL4b4AU3
+	DUNIubvkskeUHELY903wU/iw==
+X-Google-Smtp-Source: AGHT+IECxdRqM+TIETam97Lz4fnsImtOwfcMsB4TsfxzeWtioMP8nsrnSh2qSZbliqH3odD5xCEMRmB9PM0alv7aX0E=
+X-Received: by 2002:a17:907:2da2:b0:ac6:e33e:9ef8 with SMTP id
+ a640c23a62f3a-aca9b64d7edmr191692766b.2.1744186794464; Wed, 09 Apr 2025
+ 01:19:54 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|IA0PR10MB7641:EE_
-X-MS-Office365-Filtering-Correlation-Id: b9cfcb8e-1f8f-40ef-8bab-08dd773b7487
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|366016|376014;
-X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?OUQya1pZdW9RNC96YlFMMy9WdGtFT3lsV3VRT0NjclNGVWRRQURaSDQ5L2Nw?=
- =?utf-8?B?UjRaNW5pMEtHRExWZkx3dzF2OUh0azVrVW9RSnEwQ2pVL3dTTng0UkdEcnBm?=
- =?utf-8?B?TFhJeG5ESkFWcm4rWDFUMmRid1l2MEF1YmR0cjBKNUM4ZGsxYjNtSWtIcGp5?=
- =?utf-8?B?TW9aT1FCMDg5aFNOOUg1WExwbGJHdVFRVjRZM2J0aUFXQ2hDL2VwMWozVzB0?=
- =?utf-8?B?dFhtbUozQ29QVUFxQWMvclhHdk92TWdKZVlxOU1teFFKVnBjVXBidThBcVpK?=
- =?utf-8?B?L28vazhuVXBnSVdyVnk0Q2pFeXVBWjhoREFqdTBxa0Y1Zzhkd3puS0FtcnNs?=
- =?utf-8?B?c1R0dTBCNlgyS3VCclZHeUxPOHMyeDMrY0d1eHB2UkRJcTlqeEJUOW16OTdu?=
- =?utf-8?B?VTJaL2xPdGNUWC9nNjBiSk9ReUFacmY0cktWL0dKdm1QNFVmYzArYjNxT1Fq?=
- =?utf-8?B?Z2dGdkwwV1NYeSszVUVXaFdDcko5eTFVSUt0MksyeG41MHZoS3lmUlErcVRD?=
- =?utf-8?B?TDdjLzdUTktNM2RPQXhXNkp1L3lBcGFSVUl5dVJnbzUwZGhuUUM4US9IanlM?=
- =?utf-8?B?UkJnclk1ekNHSDM0UEJjanhUSE5QenVHVGUwTDY5cTZWSG9hUXloTWdVc2RY?=
- =?utf-8?B?WkdsamVvWSs4eGhLdVFqdWhibkRnNnJVakl1M0g0M1FTOFN0b2I5ZEN3RXc2?=
- =?utf-8?B?MGZZeWF2MWJ5UmlFOXFVTFpxR0x3ZDBtRFRzUEFRVUxzYTBmY3NKNmpUNlpo?=
- =?utf-8?B?TGZrY2NVclgxNXd6VU1HbUZGZTR6S09HRldvcXR3ZnZJM2xSc2lUWFdqRGRn?=
- =?utf-8?B?Vm1jSmh0dWxKMXJLT2kvN3oxV0FNanhKeDdoLzNxR1U5c2hpQVhJVFpYVUdv?=
- =?utf-8?B?eVdsNmxZcmc3THpQK2hxSmZFa1VkS3hqejRsNlpicGFqQjl4QVdDNHNCYjVG?=
- =?utf-8?B?MHllNWVwM1RuRDRpSUlyczlYMmZUT0p2L0d1L2I5dTBJbFppSS9oWTM5ZjJq?=
- =?utf-8?B?ZWFNamd0Rmp0aXNsUmF0UlYveFJMV1Jub2FobVZSMkUxRXVuaUFxenMvenpO?=
- =?utf-8?B?bW92cGVHMENpNlFWZlFrQ2x2UmhYN3BLNjFyd05Qa2pCVm96NERoTHU4OXQ2?=
- =?utf-8?B?ekEvWjRtL21Bem93TDlWMjZQUjh2M2hxc29EamFxVzdoV3BjemlZeENaMUp3?=
- =?utf-8?B?ZUIzVkdSVnFXYXZDK2d1T1ROMUtNR1lPL2NoNG5BVzFWWElIR3pCSDMvcUg3?=
- =?utf-8?B?U0dKQnFoUUwvd1FKUVRxeHFvbWhpL2NHdEk1b3AwNWVEMVpFL2JNeWJtL3Jx?=
- =?utf-8?B?T3JaMXhYZ0JTZVN5NjVFR2U5MW5hSmI0SnpXM1VhU1pXVm1IM1NFTWpGdnlu?=
- =?utf-8?B?S1o0dXptK1ZtQ2NKVE9BUWxwRW4wOG5DczR0N0hYN3YyWXlTRzBxTUVhdElv?=
- =?utf-8?B?ekJEWWtSanA1djR5ZGY3b2crMEF2MTZjR3NXa2Fvd3BhbTNWZGdoa1BLalRt?=
- =?utf-8?B?Sno0NG1rbnFxbnR2SVo0enBidWkvRXc0cXRjeGlSS2JuRUpDNit2V0hYYy95?=
- =?utf-8?B?emZCUUsxYWdqR2Q4Y0pWWWhOUWdhckFqdHNRY0lDVDFScnE5aXFpR2h0b1hS?=
- =?utf-8?B?YVB5Mjl5ODdDR3dHMUlncW5sZnk4cERvMS9nRkgxc2FuMUZLWFlOV0JzMnkx?=
- =?utf-8?B?d3hBNG5Oa3d5cjBjZ1ZsaktIelhQcHo2Q3hCWWg1Zk5MWllkR0FkcU94clM4?=
- =?utf-8?B?R0NFOElDa3VIbmRRb2U3YVFPVnA4c3lvUWc0MXJ6c2J1M0t6VlRlWFU1SnBj?=
- =?utf-8?B?UmFnV1E0YlRDS2V6dHZSNE1qVjY3c2FRWWppUUQxSkZWM0VTOThnVnBzWXFG?=
- =?utf-8?Q?w12t9dkflu4h/?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?a0R5SjNKbEIrVldRdkYwOHk3L3gxM0kvSE5oUWIva2Q0aEI1cXNFbFZ0Vjlr?=
- =?utf-8?B?N1crQURWQkVBa05UWHhjaUNCTEtVS0RFNmZCVFFXMFhMMHN1U2Q1WWxRMDEz?=
- =?utf-8?B?bEhPNzIrVmpiVzBHZ2ZiMUxQazlhOHhseWdzWHIxaDM0N0VDK09RYlhoYStW?=
- =?utf-8?B?bzJsSGE4RGxmSzVLN01ZN1hqc3Q1OGJzQmF1KzZ6VzJBNTRFUGhFZTVPSkUz?=
- =?utf-8?B?QXlRVG1jOWw5MFBzWDBpNUI0SXBQL2ZOZ2FLdE5kd2pxcDdKcFd2dU5DYzJy?=
- =?utf-8?B?R3d6WVA5R0lRcDFqbFBEeElhL2Q1azVWNHFOWlVzazROSjZZbTZra1pBdG43?=
- =?utf-8?B?WUJ6UVdoZGh5T3hFdTdHd2huWnkvVDdVZFlSY1dpYSs2VnVIR2hxcUMvQWhy?=
- =?utf-8?B?RktJbmlIZzZyYkpaYUVoU1YwVi9lZE1kRnlyK3FtcktFL3Zhd1lKS3BzTEgx?=
- =?utf-8?B?Wm1tMHpXMVRRTUVNeWROMUZGVmtROXREbzh6aXZoWEFKMktpb0pTb0hXdzZT?=
- =?utf-8?B?c2lRd1RqRzg5eWxmRnZNa05la2hRdGNqbEdiK0w4WXppQmVsdE5WL0ZWelRo?=
- =?utf-8?B?L2s0WEt6RXNZQjA2NnRuMkU1Uy9UZnJvU3VoL2NYSTYxcXpac08vWXJCNVBn?=
- =?utf-8?B?dmtmOEdtckxXZ3RzYjJ5RmtPUWlUb3VOM080UXRRTDdRS05keE43eDhPbVZl?=
- =?utf-8?B?QXptSDhvRm1qUjl3bzVRSjFSNVNROGtuRTcrMTRPZDFoTGZaWVc4ZWtjdkl1?=
- =?utf-8?B?cEZQVDFoUWJtU2d2dFZsY0d1YjBFN2NIYTR2ZmpUM0hhSHAyZUZvc0ZtZzBy?=
- =?utf-8?B?MjdSd3F6MmxyNVlYMkF2VkpOR3ZnZnZKc1ZGY0N6QlpTVW42S3Z3VlI4Z3RB?=
- =?utf-8?B?bnQ4dzlieWcyWWxFUllxSWUzTjNtcStwdXhYWUhlYnVTRlpyMVBQYy9CcVYy?=
- =?utf-8?B?ZDhFNGtpVnZIaXczd1dhTVZ3d2R2ZXgzanZtbElsQ1V5eW9sQjVIMDBybDFt?=
- =?utf-8?B?eWhsdlRoSklwTGxXZEZJcnpWWERJUkRZRUVSbkhsQldtd1hRMWhLUWFwQUQz?=
- =?utf-8?B?elNVdk8yZm0rSCs2cjIrTzUwU2Z4OTM1eDF1UmM0Q2lUSFQwakg1WU1jUkZR?=
- =?utf-8?B?cUQ1bVB2NGc2alVoUE85YStJNWtNblhScTBLQmhlQU0vUllpOGNlMnFjekJp?=
- =?utf-8?B?cm1pQ3FYV2lFeExlWit3VDY2c29BQ0RkTCtVRHZVVTR3MUdCVHJBRGpWL1Fy?=
- =?utf-8?B?eE5iT29aNjh6TUZOeFlIMTJ1NHQwME41QlpzT3czSUtGV1pTd25aZ2xGVCth?=
- =?utf-8?B?bFdnQVFPdzVBdVpnZzVZUmdkcWhkNWg5Z3hPamhmQkthSDczS3YrT3MwV2JP?=
- =?utf-8?B?eWdpbjgxMjFjeFB6dTBpZnJjQ21QZGIwMlp2ZUxTckRBYjdSWEpNL09GSi82?=
- =?utf-8?B?cWNtNSt6NFJKd2VIOGJwYmhTSnRJMjRhNzJTak5qcmZpTXo1eFFLaWEvMFc5?=
- =?utf-8?B?MkUxZjBVWTZDMG8xcUlnNmg0ekRtS0tBaUNHNWV1c2hDY0JKd2VzTnBpZFZG?=
- =?utf-8?B?aEFYN2t6NmtnZ3NEdDhaZVljNnFWV044NC9BQjZNQ0Z1Yy9YcWdLbG52eEtL?=
- =?utf-8?B?T3dPRlRoU1dENHNib0NseFBnc0FFZEViV1NUb0JZblozSVhPaDZLRzRjQjVV?=
- =?utf-8?B?UmNEY0Rmd2VxUVZva0M1dkVKRVh0YUdnVE13ZU8vUDJycHZ0Mm4wZlNGTFIr?=
- =?utf-8?B?YnJSQWhyaVl6Yjg4bzU0akY5OXE0NW5menArK2hUb1FsbVgyWHNIMVJHRUxi?=
- =?utf-8?B?MjkydFltRVVSdERGc3lxSTdBaGZEKzJpS1h2NVpCdW84TTM1Qjkzazl5SGQ1?=
- =?utf-8?B?NHc4ZDVUYmdKM2FNemV4akZmVzY4NDF4SElBOWZuMWhkZXNURFdqOVlLTTY4?=
- =?utf-8?B?Qy9WQWJDaGxpMEtLWWZJVVJvS0R1Si9ZSk5lTHEvMmtRNDZuVHAyZUFPMUow?=
- =?utf-8?B?bHRHVjdPMWZzbTVWV1Y0QkcyQ3p4WVpmb0lqUWNoaXh5aU9zTzNYMmVmazBE?=
- =?utf-8?B?bTY5a2U5QmZPSk1JMnBZK1o4RUw2YWNrMU9WbHpjbVRSWit3cGNoTDVsZEx2?=
- =?utf-8?Q?N49YsASUSt9VB4rhwmn0GB2uy?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	grjVYioN7jtbj0oMKBHEt4QCAL4EVe1QE/SMu3v/8Px/Gg9asoZ41LBuTMEV1chus1xHk8lX371BuntMDMeoXVcWYZMC+Zz9jRpVh2FxKscyiZ1xYGaZ6uXlCpRaJ4oK/9WEpZyTa0j4xzhOan/giKZ0tPBITQf2HYx5DJ30Z0bhR8l2t9R1IGrcRB7qTVwF6MJKrjaQXqi62sPS9tVgdxO/pITkPXAMBQuYGoWtNnajSiC13da7A5q0vkMKwzI7dc0hiSlUo0K2F03/51oiYsaU2w31uXPHVbZ3NYSz+soyFJgUSQzJL8Iq+sMYXsQEHb6BVFyXon/nydp+AxXCqtM6BL65u92Bpj0F33VilnPPKjJ4aIeJbuD6hB6Gkd0O3g332VpobsUQQ0hw07Xlx8MPG0LT0bcPJFtjHiLkZLZU5D4u7ZSGIksF1iwWdHO+wguNEcfT/tpCraSv0asDU9P28jc4+OhXX7t0WfjsgjYDi79V16Egzdo4u7SXsw/bnKTy88p34fWbc1Vp3JGrtI5tLMHjZufBEYLQCswuZvb8Nbe6X7ieUNUl50ZAUfJQWYYwyK5Wi452oGKFY88Ghsuyh87XXacTbYiG0Armny4=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b9cfcb8e-1f8f-40ef-8bab-08dd773b7487
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Apr 2025 07:52:20.1503
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: HoOYKvp8tedbq20C9YWuORaiBFj6EpvOAsff0figa9LcY0zSwx8wwiQOvOFqize1/jSb7Xey+rVjBlZ72XpoRA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA0PR10MB7641
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1095,Hydra:6.0.680,FMLib:17.12.68.34
- definitions=2025-04-09_02,2025-04-08_04,2024-11-22_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 adultscore=0
- mlxlogscore=999 bulkscore=0 suspectscore=0 mlxscore=0 spamscore=0
- phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2502280000 definitions=main-2504090036
-X-Proofpoint-ORIG-GUID: BKORgTmcnW0PmwE3779f4PiBFZqYtRUQ
-X-Proofpoint-GUID: BKORgTmcnW0PmwE3779f4PiBFZqYtRUQ
+References: <20250408154509.674118-1-mszeredi@redhat.com>
+In-Reply-To: <20250408154509.674118-1-mszeredi@redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 9 Apr 2025 10:19:43 +0200
+X-Gm-Features: ATxdqUH7-_iG0H2lxZQz-y0KtzQagIJQEb18ZkRPFQ03ooWVMqRyUlFkjt8vNOc
+Message-ID: <CAOQ4uxhvm5Xi79vfdc_qmVV8WR-zaoUcQ8ruf6wrEZbQV7UggQ@mail.gmail.com>
+Subject: Re: [PATCH] overlay/08[89]: add tests for data-only redirect with userxattr
+To: Miklos Szeredi <mszeredi@redhat.com>
+Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, 
+	linux-fsdevel@vger.kernel.org, Giuseppe Scrivano <gscrivan@redhat.com>, 
+	Alexander Larsson <alexl@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
+On Tue, Apr 8, 2025 at 5:45=E2=80=AFPM Miklos Szeredi <mszeredi@redhat.com>=
+ wrote:
+>
+> New kernel feature (target release is v6.16) allows data-only redirect to
+> be enabled without metacopy and redirect_dir turned on.  This works with =
+or
+> without verity enabled.
+>
+> Tests are done with the userxattr option, to verify that it will work in =
+a
+> user namespace.
+>
+> Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
 
-Gentle ping for the review and rvb.
+With some minor nits below fixed, you may add:
 
-Thanks! Anand
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
 
-On 28/3/25 12:51, Anand Jain wrote:
-> Here's a standard configuration for quick, regular checks, commonly used
-> during development to verify Btrfs.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
 > ---
-> v2:
-> - Renamed config file to `configs/btrfs-devel.config`
-> - global section renamed to `generic-config`
-> - Section names now use hyphens
-> - Added `RECREATE_TEST_DEV=true`
-> - Removed `MKFS_OPTIONS="--nodiscard"` from `generic-config`
-> 
->   .gitignore                 |  2 ++
->   configs/btrfs-devel.config | 40 ++++++++++++++++++++++++++++++++++++++
->   2 files changed, 42 insertions(+)
->   create mode 100644 configs/btrfs-devel.config
-> 
-> diff --git a/.gitignore b/.gitignore
-> index 4fd817243dca..9a9351644278 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -44,6 +44,8 @@ tags
->   
->   # custom config files
->   /configs/*.config
-> +# Do not ignore the btrfs devel config for testing
-> +!/configs/btrfs-devel.config
->   
->   # ltp/ binaries
->   /ltp/aio-stress
-> diff --git a/configs/btrfs-devel.config b/configs/btrfs-devel.config
-> new file mode 100644
-> index 000000000000..3a07b731abd9
-> --- /dev/null
-> +++ b/configs/btrfs-devel.config
-> @@ -0,0 +1,40 @@
-> +# Modify as required
-> +[generic-config]
-> +TEST_DIR=/mnt/test
-> +TEST_DEV=/dev/sda
-> +SCRATCH_MNT=/mnt/scratch
-> +SCRATCH_DEV_POOL="/dev/sdb /dev/sdc /dev/sdd /dev/sde"
-> +LOGWRITES_DEV=/dev/sdf
-> +RECREATE_TEST_DEV=true
+>  common/overlay        |  29 +++++
+>  tests/overlay/088     | 296 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/088.out |  39 ++++++
+>  tests/overlay/089     | 272 ++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/089.out |   5 +
+>  5 files changed, 641 insertions(+)
+>  create mode 100755 tests/overlay/088
+>  create mode 100644 tests/overlay/088.out
+>  create mode 100755 tests/overlay/089
+>  create mode 100644 tests/overlay/089.out
+>
+...
+> +test_common()
+> +{
+> +       local _lowerdir=3D$1 _datadir2=3D$2 _datadir=3D$3
+> +       local _target=3D$4 _size=3D$5 _blocks=3D$6 _data=3D"$7"
+> +       local _redirect=3D$8
 > +
-> +[btrfs-compress]
-> +MKFS_OPTIONS="--nodiscard"
-> +MOUNT_OPTIONS="-o compress"
+> +       echo "Mount ro"
+> +       mount_ro_overlay $_lowerdir $_datadir2 $_datadir
 > +
-> +[btrfs-holes-spacecache]
-> +MKFS_OPTIONS="--nodiscard -O ^no-holes,^free-space-tree"
-> +MOUNT_OPTIONS=" "
+> +       # Check redirect xattr to lowerdata
+> +       [ -n "$_redirect" ] && check_redirect $lowerdir/$_target "$_redir=
+ect"
 > +
-> +[btrfs-holes-spacecache-compress]
-> +MKFS_OPTIONS="--nodiscard -O ^no-holes,^free-space-tree"
-> +MOUNT_OPTIONS="-o compress"
-> +
-> +[btrfs-block-group-tree]
-> +MKFS_OPTIONS="--nodiscard -O block-group-tree"
-> +MOUNT_OPTIONS=" "
-> +
-> +[btrfs-raid-stripe-tree]
-> +MKFS_OPTIONS="--nodiscard -O raid-stripe-tree"
-> +MOUNT_OPTIONS=" "
-> +
-> +[btrfs-squota]
-> +MKFS_OPTIONS="--nodiscard -O squota"
-> +MOUNT_OPTIONS=" "
-> +
-> +[btrfs-subpage-normal]
-> +MKFS_OPTIONS="--nodiscard --nodesize 4k --sectorsize 4k"
-> +MOUNT_OPTIONS=" "
-> +
-> +[btrfs-subpage-compress]
-> +MKFS_OPTIONS="--nodiscard --nodesize 4k --sectorsize 4k"
-> +MOUNT_OPTIONS="-o compress"
+> +       echo "check properties of metadata copied up file $_target"
 
+Remove "metadata"
+
+> +       check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
+> +       check_file_blocks $SCRATCH_MNT/$_target $_blocks
+> +
+> +       # Do a mount cycle and check size and contents again.
+> +       echo "Unmount and Mount rw"
+> +       umount_overlay
+> +       mount_overlay $_lowerdir $_datadir2 $_datadir
+> +       echo "check properties of metadata copied up file $_target"
+
+Remove "metadata"
+
+> +       check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
+> +       check_file_blocks $SCRATCH_MNT/$_target $_blocks
+> +
+> +       # Trigger metadata copy up and check absence of metacopy xattr.
+
+Wrong description. maybe
+       # Trigger copy up and check upper file properties.
+
+> +       chmod 400 $SCRATCH_MNT/$_target
+> +       umount_overlay
+> +       check_file_size_contents $upperdir/$_target $_size "$_data"
+> +}
+> +
+...
+> diff --git a/tests/overlay/088.out b/tests/overlay/088.out
+> new file mode 100644
+> index 000000000000..c85c998d503a
+> --- /dev/null
+> +++ b/tests/overlay/088.out
+> @@ -0,0 +1,39 @@
+> +QA output created by 088
+> +
+...
+
+> +
+> +=3D=3D Check follow to lowerdata layer with absolute redirect =3D=3D
+> +Mount ro
+> +check properties of metadata copied up file datafile
+> +Unmount and Mount rw
+> +check properties of metadata copied up file datafile
+> +Mount ro
+> +check properties of metadata copied up file datafile2
+> +Unmount and Mount rw
+> +check properties of metadata copied up file datafile2
+> +Mount ro
+> +check properties of metadata copied up file shared
+> +Unmount and Mount rw
+> +check properties of metadata copied up file shared
+> +
+
+For all of the above - remove "metadata"
+
+Thanks,
+Amir.
