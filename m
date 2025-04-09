@@ -1,151 +1,105 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55E3025B691
-	for <fstests@vger.kernel.org>; Wed,  9 Apr 2025 10:23:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB63025D1ED;
+	Wed,  9 Apr 2025 11:52:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744194228; cv=none; b=c6EY7K6lZcLl/P/4WwhmSjjT+byBMLdvUtCZqkLlgKDgTDusaOzLjS/REii7u/CgzBWyTdJHfXWXiivTpW6kNZYdDb1LUC+u5ygfrZ/kbnNewdi48x0vsDo+NMUickU01HUD3yJxSp78mIFZT42wOv2mDcUFfXdYbKuX0Peo6vM=
+	t=1744199550; cv=none; b=DmVujrCtTUKC0+S5/aUDeP0tKsblXqAgCLcal3QOlCAWeS8oHnlO2aUPhGr/W/kuGsZgZIARBnhpwg054ZsgEZ96/3hPjDPBoHG2scKH57ATvkhcWgzrpsktDt1udrNc45hGQurbQtZ+M7C9QU7i6Cbh2jvLLtq15LbCmXaT+i4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744194228; c=relaxed/simple;
-	bh=pyeFoEm78Vu7hsKXBNymqLj471vUb8RdNTwN5jdedmw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TS+/9piLK0koleg7EiZwZAsi++FRMVY4TtlQy+GaQGDZO3KyI6L/DZPASTCsWWnXO2eCRIJhlhKw5+ezZ8fiWkwtRtQxV8L2aMWIVlefVcOMeSjhkBMiu0Ng6AIm0OlcL6kMKlstgjlEG4gbJZ5N6V2V6gFuD4lnaqwZLAOrKBA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XuvS/P24; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1744199550; c=relaxed/simple;
+	bh=8i6W2NOBKBye+iUdjeGX9so/WQUawCrPnsTv1t26ShM=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Nyj4iA91s/5Yg7rjuBpYabcAVgZXnnUOgcMGiAacvEaJgvSirDIDaFrMIbMB4URmBD/pNoksK3NMRpPwbsHp99QRFbpMNcWwWIG+XOLpW8oJ7ly977wBMjWNVv0vu2JuH4K7jk7oMUHnlQ3D86FsCLm28tcW0tx9+QJ8nBaakd8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=AXYFNs/C; arc=none smtp.client-ip=209.85.128.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XuvS/P24"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1744194226;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=K0k7F4odglZY3WVlCzU+CBDzfgce9j8xtA/EUvRCkJc=;
-	b=XuvS/P24YaiVYJE/Hr4bZaOA3rgJh+hCl3cuvCAzSXvDhaOr7tUa6xC9iU5xtjNDBkRU/k
-	FkFfrxChh3M+hwUYSutngO9OZWPptjRnwnZyFqk+cbeh50ONlxpz4BXp/7fTLPNCru3FtD
-	HSJM9EaOrz0TG9EUiXweE3TdrREIo/c=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-418-XGaOtiAbMSK88Tsti7NIyw-1; Wed, 09 Apr 2025 06:23:45 -0400
-X-MC-Unique: XGaOtiAbMSK88Tsti7NIyw-1
-X-Mimecast-MFC-AGG-ID: XGaOtiAbMSK88Tsti7NIyw_1744194224
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-73720b253fcso5239312b3a.2
-        for <fstests@vger.kernel.org>; Wed, 09 Apr 2025 03:23:44 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="AXYFNs/C"
+Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-43ce71582e9so46927715e9.1;
+        Wed, 09 Apr 2025 04:52:28 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1744199547; x=1744804347; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=y4jhLZrqk3vr32c/8xm38WO72gDBvOfap1yATJtkGTg=;
+        b=AXYFNs/CtAwNhfi944+MNW4xj9qgjuz1YDIo3Qk6Qak3CIk8DROUwIO/aMDROY5lHG
+         jUAXYH2GYuH6vWy0JRdHpZcR28qvR9+DBx8t10SgHjtZgZYf926ARI59VCWoovjf+9IC
+         mHciMX4Dbzjj+G61ekdEj7qJLHLtBUjHli8wTptz1MxFjaic0dcUCsPiPSmXQsCTCOv4
+         dXgpLB5NaPq7ycoNhjEyuxdzycx6x8gMvbEBxBa93XaT285IlCmLdXbG7WMygNVHZlDF
+         ugfrPsn8jyf2EuR/RTLSFNV2UiJ8NldPzy7CBYhjrqMSkOq+LSf6DKx6iTKKO/eya0y3
+         8JiA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744194224; x=1744799024;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=K0k7F4odglZY3WVlCzU+CBDzfgce9j8xtA/EUvRCkJc=;
-        b=JgrRIpwqtec0cmV6YyVN/dtk49skSagW0BuMzpFLJdWGC3iSYx2SiiRqkTP6b4s2I4
-         7slXX75XBkCOZ2dBaNVspWNJJ5z3h2GKweaWXJnAoORXmjec9CDxg95LFF/SjSCVAaSb
-         qcq3LE/ajufBW30GG0csgAvlfyHfoLiC3QTuLBue9HR/y0I+hoNPtsg5bDTJvZkE78Wg
-         1d6cwOqn9nj/LGt7loXohSWXQrwlrRfJfSrZNE02/ERmpmqpTnyiSI9gCvVecr/VEJtp
-         AfvpCoLDCY9+KMjtmnCkeRCidXAXVMxzs1cUgt3T8WO057BdkpEbRfQsBYrascqc+ADg
-         vHMQ==
-X-Gm-Message-State: AOJu0YxC6Ob/BNksqaPLLPZ39rck0ycEsp3iO0bRp/sixY4Ve98/JT+Q
-	jqntio9jJ6+cO54CRbwT7/wP8fWvfT6Wc3bi23CRc+7ZkBfeDTzJAOtNWoAm6UWnyJiyry0ztN2
-	7Tl9y9uumL/iYwDbiu3x1lZbFmV4bfJLryT8Q1XxQtLWQuVpObcsNBjFlel9YLITj+A==
-X-Gm-Gg: ASbGncuywQrcO7qjo79lb4GiWn3FU6pkDA06LzHHnxc90ebjlYXa8kUqF+KipNuQFnL
-	I2Z8B7YbpQfh+RFkoKw491Ao7BagBTjb/rzSNas2PkXOnLu9kgHouk6ETM0Mq3/bEi0dQX6YMcq
-	ekrCGhbUS9PQ0QOfAXzwKOOJGmd9Go+fJi71oN1XuWMcdtwTH325ZtuT9HajWXMNcEQGdybt6Hk
-	J2M51IJO+2pS90Z6/3+ZB9DCA/Vc6AkG+99r/PAwkEEML6af6xdUiiX6TRyZYWhPpJrHRNZsYmd
-	VOr0Vf3wRtOrMuPEgP1igXxVLOa78v4/KDIKNJbgst2sC/hKWduN
-X-Received: by 2002:a05:6a00:2292:b0:730:95a6:375f with SMTP id d2e1a72fcca58-73bae490ff7mr2917718b3a.3.1744194223662;
-        Wed, 09 Apr 2025 03:23:43 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEnGrfx8aEqkXH+Rsu2T9l6BMFNcFL/SeTDqH3+NG+bKZxq+tjV1K9cz8WsTBYSRErlRIx4ug==
-X-Received: by 2002:a05:6a00:2292:b0:730:95a6:375f with SMTP id d2e1a72fcca58-73bae490ff7mr2917692b3a.3.1744194223278;
-        Wed, 09 Apr 2025 03:23:43 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73bb1d6af12sm930692b3a.80.2025.04.09.03.23.41
+        d=1e100.net; s=20230601; t=1744199547; x=1744804347;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=y4jhLZrqk3vr32c/8xm38WO72gDBvOfap1yATJtkGTg=;
+        b=CERsNDz18MyDRH5h3xbU8SN3CXbYe4OBJkVdUEGcqM2IZJ1Pwaoc8PQdlWwF0joOiX
+         gV1WepaWbxlGM0dnN9gVSchjQE+4zdd6RG9JX4yRUuoBPAZsTpVjWGZ7WdB3OBo07ETI
+         uw/OA5hnEEUbQqRHpea7XbE5mwBiYLJbzeDETBgGLq83QIV2bJYTuSE1wA7NqPIQ5QOH
+         ETG9qspFbjEwNx/OtKjI+rPUZsSVlCHDltF4QHnRLoqmP93JYaObof+3AfazF5ZLVi05
+         J9ohzddUVuFzMyW+/ByBe45LzfeqWQvQ5GBd1qXPu0fHx1++2UKzpX4iMx56y2r0/PP4
+         yE3g==
+X-Forwarded-Encrypted: i=1; AJvYcCXXGwx9ZqRzXxC8IpDJxGVCdcJ5cMDpN53bqpUOIQdm3gJZ3pNhqChOcbYxDIE/2/CF/Fy2+MyZ@vger.kernel.org, AJvYcCXnh8takiaCzHDaKIhBRlDfD7X57beSb11f3wob+j9/oQYDLwCZKoWEujqg/UdKP/Vp8dwZCY92msRTu0GH7g==@vger.kernel.org
+X-Gm-Message-State: AOJu0YyfOLu7THRxAcu839WE0TMb9HfV0iP5c+8HGp2m1P6EYiiufCN1
+	6LaAGdU9N3BCWFvljcIFuT4z3fJPQYslyvHTbvbFjuDjRDxccZFj
+X-Gm-Gg: ASbGncuZ4gyPsjnpd+JqoZ1QSpLunKdIiKBw2a66poqdxAZrZq6KuQziidh/luP1oWv
+	jqKcMZ+NmOEbBb6lLj2QxnGSwpNW8IFyK/5RbM8dJAnTxpjwE761byNWsTKvOFP5UWy8Xf2/rKw
+	4yn4K0ztu3aatW5cnYWzCeW4NEOrDmPFG6uU9WqtiYCBq8A/SQuIQ+NfvLPxiLiMyea7nirUFvi
+	ziAyy32NCnUrHe8gokA1R0xtvQlpz7hYFbw5noI+gdtisJRWbg3jpk5sDp6nohp58R1oEvPtuML
+	DGJew3MYqr8tLEk/srpj5dz0pchm6KJmunoNv1hL19R0D6wsNaCydhzYGlr8dHvczy54yvWNQHc
+	zVb7d9nzYxbDNXZ8nNAsFz7Hp6bVDVP62AmH6Fw==
+X-Google-Smtp-Source: AGHT+IEi7PGyuS4sM84LLpIoWErz/ip0QGHDG4AOBK+bSPl2iXWxuo/6d1PGPXJ36+2fGpYFBXICzQ==
+X-Received: by 2002:a05:600c:1992:b0:43d:160:cd97 with SMTP id 5b1f17b1804b1-43f1ed4b5e0mr20869005e9.25.1744199546828;
+        Wed, 09 Apr 2025 04:52:26 -0700 (PDT)
+Received: from amir-ThinkPad-T480.arnhem.chello.nl (92-109-99-123.cable.dynamic.v4.ziggo.nl. [92.109.99.123])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-43f2066d069sm17786815e9.17.2025.04.09.04.52.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 09 Apr 2025 03:23:43 -0700 (PDT)
-Date: Wed, 9 Apr 2025 18:23:39 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, djwong@kernel.org
-Subject: Re: [PATCH v6 6/6] fstests: btrfs: testcase for sysfs chunk_size
- attribute validation
-Message-ID: <20250409102339.s2akqjndh25hqkjr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cover.1744183008.git.anand.jain@oracle.com>
- <a53aa65a639bd7906c28418bee14ee4d006700e4.1744183008.git.anand.jain@oracle.com>
+        Wed, 09 Apr 2025 04:52:23 -0700 (PDT)
+From: Amir Goldstein <amir73il@gmail.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Aleksa Sarai <cyphar@cyphar.com>,
+	Christian Brauner <brauner@kernel.org>,
+	Jan Kara <jack@suse.cz>,
+	Chuck Lever <chuck.lever@oracle.com>,
+	Jeff Layton <jlayton@kernel.org>,
+	fstests@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org
+Subject: [PATCH 0/2] Tests for AT_HANDLE_CONNECTABLE
+Date: Wed,  9 Apr 2025 13:52:18 +0200
+Message-Id: <20250409115220.1911467-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <a53aa65a639bd7906c28418bee14ee4d006700e4.1744183008.git.anand.jain@oracle.com>
+Content-Transfer-Encoding: 8bit
 
-On Wed, Apr 09, 2025 at 03:43:18PM +0800, Anand Jain wrote:
-> Checks if the sysfs attribute sanitizes arguments and verifies
-> input syntax allocation/data/chunk_size.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
+Hi Zorro,
 
-This version is good to me,
+This is a test for new flag AT_HANDLE_CONNECTABLE from v6.13.
+I've had this test for a while, but apparently I forgot to post it.
+See man page update of this flag here [1].
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Thanks,
+Amir.
 
->  tests/btrfs/334     | 21 +++++++++++++++++++++
->  tests/btrfs/334.out | 14 ++++++++++++++
->  2 files changed, 35 insertions(+)
->  create mode 100755 tests/btrfs/334
->  create mode 100644 tests/btrfs/334.out
-> 
-> diff --git a/tests/btrfs/334 b/tests/btrfs/334
-> new file mode 100755
-> index 000000000000..d81ec921f1f2
-> --- /dev/null
-> +++ b/tests/btrfs/334
-> @@ -0,0 +1,21 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 334
-> +#
-> +# Verify sysfs knob input syntax for allocation/data/chunk_size
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +. ./common/sysfs
-> +. ./common/filter
-> +
-> +_require_test
-> +_require_fs_sysfs_attr $TEST_DEV allocation/data/chunk_size
-> +
-> +_verify_sysfs_syntax $TEST_DEV allocation/data/chunk_size 256m
-> +
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/334.out b/tests/btrfs/334.out
-> new file mode 100644
-> index 000000000000..f64f9ac09499
-> --- /dev/null
-> +++ b/tests/btrfs/334.out
-> @@ -0,0 +1,14 @@
-> +QA output created by 334
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
-> +Invalid argument
-> -- 
-> 2.47.0
-> 
+[1] https://lore.kernel.org/linux-fsdevel/20250330163502.1415011-1-amir73il@gmail.com/
+
+Amir Goldstein (2):
+  open_by_handle: add support for testing connectable file handles
+  open_by_handle: add a test for connectable file handles
+
+ common/rc             | 16 +++++++--
+ src/open_by_handle.c  | 44 +++++++++++++++++++-----
+ tests/generic/777     | 79 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/777.out | 15 ++++++++
+ 4 files changed, 142 insertions(+), 12 deletions(-)
+ create mode 100755 tests/generic/777
+ create mode 100644 tests/generic/777.out
+
+-- 
+2.34.1
 
