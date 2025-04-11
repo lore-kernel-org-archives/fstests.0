@@ -1,839 +1,208 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6E27B1EF0B2;
-	Thu, 10 Apr 2025 16:29:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744302546; cv=none; b=EMw/dz2UkC/sDRMYj4JKG8ynkp1KNqwSGWZCv/d9mGCcK0nhXPj4ggIdpD9b1IDz6JkqBCkT03vj+6hElSfN1C9YgUEJkff5hX9itocgZu+8QqxBF15a8ZmvUfkhAj9ODck9j5FjCEv1JEW0w3fMnnrmF6OC1HfGHjtcwZ2zOfk=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744302546; c=relaxed/simple;
-	bh=Lun6RiSMNBaNW52m7lM6HPv6l/DVww0wcbRwXkJvZLc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=WH1Klmqb6ti1kxMsaI9Qj95aXy3uR1CHoJ5HiGLCRAW9yYvoakFmhuaJKmr8p6nJWd7Cc4PapQ3EgN3LLLT/KpeUoncxV/Dx40JoC5t8AKtTuWMGgwmpgpBFX1aEdetlCxuTVjqfPRJhesvwKEc0CBOI4ohSE9ALhyUq4JJ6VQ8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=AaZC/Zc8; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8295B6FB9;
+	Fri, 11 Apr 2025 03:11:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.177.32
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1744341107; cv=fail; b=D8NF2VuEiT1JOs9/vCYZ66kH5c80wlSNnBYl5XDK7FFw5Tx1/d7FhbY91iY9+9QmX9S+7+E5k6RX9BmJXEs2V+SB8Y/jwb7xXSgO/22WKuLQdV6nAgSvk884bNvhLc2IO/jVl+QEQ0batNjyFU9+t58yV7zeT6S40n4twNSxonc=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1744341107; c=relaxed/simple;
+	bh=iQPUVj8yDAI+QaJiWtPJrtrM5VxMJW4Fzpyqd7hDLtU=;
+	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=Xd9GQz2I5vP/7OWGl05Ot0sjR4q2YXKXP+6TsP9Hh8M3P1VFRKXDczGN+BHIA4lIFIfNc4NMF5SEjQuyfZwKrtL3iD6c/lU2Lx0i0TZWX5yOulL4mEKr8RRasFu+hyYbjrHt9ZPeodLNKrs00wRFnqojgvHzszGgWYhCe0YsOdQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=Zd3uqqR5; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=oQGnvrnq; arc=fail smtp.client-ip=205.220.177.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AaZC/Zc8"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DAFA2C4CEE9;
-	Thu, 10 Apr 2025 16:29:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1744302544;
-	bh=Lun6RiSMNBaNW52m7lM6HPv6l/DVww0wcbRwXkJvZLc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=AaZC/Zc8ht81C6YbKt17wRU85C2O2hqF9JjtDYExloxt3CgaRaDrXRICEt5oXiCYG
-	 8S32VWFCv/NcpDxDIGyxnf4k+ZSdporsf9HX53vmizSPRrvKFJAgfYFplq7Lc7kuMJ
-	 5BzFDv+HPZgHju+LgOjZ9DvIkZEmDxnoKbiDd9Y6o77GhSL7RzHKC9rdjZ9XnWFjK7
-	 C0amLiwcG+qXlN7kLr4HUKanGByqAP6N6tMBvf3iTAKrit1f6O7oF/LoaUGEF3mexW
-	 qY94S/LV1jPxNUh0+Pf6XJMha3+ekP5/DWQFfK/pURSrP9b3oX9O/ylsJUIVVIwl5n
-	 QfGvhsuo08KPg==
-Date: Thu, 10 Apr 2025 09:29:04 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@redhat.com>
-Cc: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>,
-	fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com, zlang@kernel.org, david@fromorbit.com
-Subject: Re: [PATCH v4 6/6] common: exit --> _exit
-Message-ID: <20250410162904.GW6283@frogsfrogsfrogs>
-References: <cover.1744181682.git.nirjhar.roy.lists@gmail.com>
- <48dacdf636be19ae8bff66cc3852d27e28030613.1744181682.git.nirjhar.roy.lists@gmail.com>
- <20250409152452.GQ6283@frogsfrogsfrogs>
- <20250410143157.gifj2fksbn7rwmeh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="Zd3uqqR5";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="oQGnvrnq"
+Received: from pps.filterd (m0246632.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 53B2qWtB001750;
+	Fri, 11 Apr 2025 03:11:43 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
+	:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=corp-2023-11-20; bh=1qdXY/rdh6cuSTjQ
+	yCWf4g/Q5I7IGA5UTLnvLfXHD+A=; b=Zd3uqqR5yq3zLYdM89XrFCIFacZ3gJxJ
+	848av3HadVfQ1WQ+45LkALmQLz9YhNoAOsdMQ2IV/pNXLsUuuvFaMQxaKqI03F99
+	4Bay5rpGugYd1xWkyxFFc4Aa/yPVLLJD8MhS+PJkXosV/JuXpmdZjMG/XUiYl3ZT
+	sD64FLoo41Kk43Bx/QoHyKkWcJA4IOrxrBfmwDK9KKfGUGSUJPUlNW5zR3bCL/ls
+	VMWuG2WMDGdyRZwQx4LfGO7Rr4WsdlhbpZ0QcussKNxX8RAVGgS4uxW9LBfg9XeG
+	8aWW4DMSEgVY64WMRCZRMjvzNBymNS7pT/aq9jdp/+msHwnrvvq4+g==
+Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 45xtny80ew-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Fri, 11 Apr 2025 03:11:42 +0000 (GMT)
+Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 53B0ShMf023928;
+	Fri, 11 Apr 2025 03:11:42 GMT
+Received: from nam02-sn1-obe.outbound.protection.outlook.com (mail-sn1nam02lp2049.outbound.protection.outlook.com [104.47.57.49])
+	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 45ttykfasm-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Fri, 11 Apr 2025 03:11:42 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=vGR/J10hVYn9p5zkbdHDEjcpR0I+bMG8mTb9wUHTcV4HfZUiCkE+BzvQZ9E19ChCd6sw9AZM0smeuypxocmID3Miqqzq0l9OYx2TtcnNAVH9Zo0QABiZQUATuqGl9b+vHeM8I7orq2kB/5nO/TmkduDvSi5Cre4ehtGVt2ZKdF6i0DUkj/xS2y29ZuYAGxMci2GZ1c8spQ7OjfRUlcRWP79qhQDwWurCXX6E5plK2cyD2MGlRh+NG3j6x8L/xL4Qix+c6dMJBZ7MJP6aB6VOpxrNvEL7wcxidAWPktS/V66ESOUhB7EmM0FnJc3ciU7ZseS/jh+s0L58rxouCxEhBQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=1qdXY/rdh6cuSTjQyCWf4g/Q5I7IGA5UTLnvLfXHD+A=;
+ b=bhjr0kPYU6b7ZkfKiTG2vwD2I5M6npoKls2Q75Q284968YIKEMWlC48r3ZY5QLcAvtmJA5qJRueBiwgJQlWk9TffUlN7ukeuzYHeuJTuzkSCKwuySlBqUooI8+/Df7a4kvFxg84fmSce9OnS1JUQ2OmXhVT5ue0kzcm4vcYCKlJTuZN6gkvSqlwML94qwEpDY/3nILbuB2mVvujNBjsmH5kGZEHtpznCqvtevtqLe8SZIhY7HBDCql/C2dZn10iRcpluw4uQPiaZMI1wNknVZEcq/4hChC0X0c5zEihVSsSFNsiDpklUe1Vj37ApymS3Iy2v3upKiQJoplruatAr1A==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=1qdXY/rdh6cuSTjQyCWf4g/Q5I7IGA5UTLnvLfXHD+A=;
+ b=oQGnvrnqbhGbwAMFknEfPArqv+Hzd67XnuSgaTDE/xeqm9d+MUIGyg0fMVtVBrCTov5SdhN7Ds+Oxi7LekI6Zm6NxMIXi8dv646Kr2JOvW61ZV655zbnleVavreuLb8LegxVywhv/XG7TW9NHf2AjKLahk3cTXU7HDHbC/KoFxo=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by SJ0PR10MB5802.namprd10.prod.outlook.com (2603:10b6:a03:426::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8606.33; Fri, 11 Apr
+ 2025 03:11:39 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::fea:df00:2d94:cb65%5]) with mapi id 15.20.8632.021; Fri, 11 Apr 2025
+ 03:11:39 +0000
+From: Anand Jain <anand.jain@oracle.com>
+To: zlang@redhat.com
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: [GIT PULL] fstests: btrfs changes for for-next staged-20250411
+Date: Fri, 11 Apr 2025 11:11:26 +0800
+Message-ID: <20250411031131.751835-1-anand.jain@oracle.com>
+X-Mailer: git-send-email 2.47.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SG2PR04CA0206.apcprd04.prod.outlook.com
+ (2603:1096:4:187::21) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250410143157.gifj2fksbn7rwmeh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|SJ0PR10MB5802:EE_
+X-MS-Office365-Filtering-Correlation-Id: b7015e8d-9d5c-43bf-158b-08dd78a6935d
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|1800799024|376014;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?hi9NeRjDoE0SESdNWV0bgwqiO5I2TyKpFEaPbeH/BTTYwX+O/jziDKZhH1Zv?=
+ =?us-ascii?Q?WHI8SE0zecpGBN+YOX7UU9+axBkHrUTJAIkf+YafwZxz8+ButfrfkNtVnfPB?=
+ =?us-ascii?Q?vN/8hXEOQjH9Eb95tp+lKQX63KKXDzhUi9yRKXxzvZtq/wwFbyvDCnyPO2MY?=
+ =?us-ascii?Q?eH/bNmQQlzMCxhRgodeb2IC3JsWiwB4RWNpTT6C+gtR1cOty99U7m0Dbh4K9?=
+ =?us-ascii?Q?2m6rA5bI+ViykY/qKEWjPnAqpDfou1eWk5RR8UxN73pjr+89X47P0IXO5Ml9?=
+ =?us-ascii?Q?3pebH2p31lbAizALRihN5bHCgSd2K3RYQULL9Wvb5da1DUgQ3L7unTYPEdbV?=
+ =?us-ascii?Q?eogmesRqynTb6zSss77vQS+A1Lrn84pmxdOpN/jPNL9o2koXow3Jbj7lI8gX?=
+ =?us-ascii?Q?q/Yt891lOaFJtkfFkCNJ88+cL7TgtFLIQDPtjdg9OQ/A0KaenL6E5MJsdFR6?=
+ =?us-ascii?Q?SKn9XjQIgprdmySXSzNohIa3nAMqvjouPirGV5an0jMDQY02ityTeSw29X6l?=
+ =?us-ascii?Q?URTumb5+3V/LFpzEwRpFpz6kxTE1zSdfn+Gr/0FazBVnp59fOCHUazC36ans?=
+ =?us-ascii?Q?vT0fXpQlnYZPKHdf8bYyGAXuZHtGUhKBKPJh0fjpmoqCZcs1SXTzmg9DM8Du?=
+ =?us-ascii?Q?NFO2XCL2EbLi0q1Jhq6IhwQjPnLORvxvBsbL+7Pk3YHm6BzOPc8iQdJXIY1d?=
+ =?us-ascii?Q?YhFlVX0dlishns0nWBAhC1XiYUFSSSXaqbJN0afCAjxlY33h7SIYxasvz1h9?=
+ =?us-ascii?Q?OMh6JhuwZN2fn3RlfeK98xSGsNA7aB/YID1+XfRm9jSyaefGMqlzzCVHh6Pv?=
+ =?us-ascii?Q?R38BFttOW3y0yR0Jx7ncna/k8wBd4g3s2eILbX5WUSsHvvDbA7lLlL70L7wM?=
+ =?us-ascii?Q?R06BstebvdW+SVlDUb/ia6AcXZuflpf4o27MQMk4qxAcMe8TZi0TB0jxImAs?=
+ =?us-ascii?Q?azv+Sg7qyKSxDMIM9TTNZr33OR3mz+3NiWrB6UQ4vFzhM3Zco5+QlfEtxGt4?=
+ =?us-ascii?Q?U/9Ax3L5n9ovQrEpV3wtB3qnUxVfR6hVkuEu6A/whyLK4q3qmF24eLGU+WfC?=
+ =?us-ascii?Q?bdEVxLGpj+ZgaV3mAwgO5CmL8jBrGxpCzBj1Z0Qsd0Nff+5kzrmtLxmBSnNs?=
+ =?us-ascii?Q?6O90NTsQ5jBZeDxs5kEKewrQdSdpnH+ij2rz/hMMNNSAvbAFCbunhJDZoP9Q?=
+ =?us-ascii?Q?eHNyoEbjUQ57dGwjPKYfYbzW+qWG+hIi6MGrUDY5GOKXRVXcv6KqdARXE4gQ?=
+ =?us-ascii?Q?/M4194F3NEyVnGdrEtSdPqOFg1SQMHU0vZxU6PbQX0TWEr/M2sdErE6ZQfH0?=
+ =?us-ascii?Q?GC7T2XsDyDYwQ3wIyikwcLBdLQzyLoQ+s7ZmF6rZKuocGHXCPgDRDCbefTO0?=
+ =?us-ascii?Q?dJ1REU4=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?xSKCTSCl6ZV976aOMb/Ihsk0t6mi8tFfNewrobJu3j+Y0Ulp4mzhVobgtb0L?=
+ =?us-ascii?Q?d5mvS96w0huYbeqTb/SW85ptc7ez2vn1OjrxtAXWLdDTWVJbYuzdyblILHQ9?=
+ =?us-ascii?Q?E+I7D7iAzGhVDrAGmPmFNgNl+Qu8+9OSgWQMaiE37swxpUqa+ME+wQ76ofEb?=
+ =?us-ascii?Q?mf5UUI52HUii0KJUXkJCBKx4dzkA8nwflA8Pcz9W25M0AtokF+OborKZ6Hhw?=
+ =?us-ascii?Q?AkQanAH6gADQdcXx4WAXanzX8vj1OY6bl+PNes+8AYyPPomverPk+6QfHDsr?=
+ =?us-ascii?Q?pb5Kc7KPrPTfpVTBEbbl6bKyvaZiVV01nnygK5DAmO77y/LqiS9nitqF9YCS?=
+ =?us-ascii?Q?hyYvjYeodmAYGXekX0oFC9nNzw1u7XYMLw/Y7KLk7Iu9AtrxeXQcrlNBYZN1?=
+ =?us-ascii?Q?8UJL1IoUR13G4LgdJPWB6Nf8+vP+zE9RULNxdrDprWqNRw9h2lwSesnO/Zvy?=
+ =?us-ascii?Q?TejnvEfQIybX1g3mVdErVLgcMZyan/ePTwhzftkmEKHlGCRNVfjjUWfdzIJF?=
+ =?us-ascii?Q?/Tf8jPdOffZEqxHLtEJiqsS7vAXU/3Cu8fHH9KY1F1VK3pe7gbw6lwKenNxo?=
+ =?us-ascii?Q?OlE+UWPg3cRdzX6vXmlCnUz2hTuEpELU5FzP1k1lHgHWKy32nJKT/yf3OoJN?=
+ =?us-ascii?Q?VZq/gwz7+M8gme2jsSaymtNlVZK9McPi8zX+JIClpO5pzivamC4NJ+PkqTC0?=
+ =?us-ascii?Q?QfuVe68IczZGq4l6dazjrj4fzenhIn2B+iVeap78GNDKoPmXboQdPLdE+h3q?=
+ =?us-ascii?Q?uNvzH9lEVkPM3n8AFpGXab6CAIPsUrf0icjCjhQeYC8+zspuftKx4iWfunyL?=
+ =?us-ascii?Q?ilsLZQ7ya9Bqtv6J8T1vTkwV+42RnYb24vnHgFX1Oa+3u1xG6bSYi3sBowNt?=
+ =?us-ascii?Q?XjlUhsJW48n6xmGUHpBPImKJ+rLjV4efaxMRmJnTbK9Kd+zJOuKvo0u/VAmX?=
+ =?us-ascii?Q?xcHFQMUDrzYTyPz64TAm7VHJEOgI5ULW7OdSFganf4MmhFIYxIP/KnxRhCtG?=
+ =?us-ascii?Q?GVKv0Bp1KFtOUfOB2EFJeBFjR8oTETEAN7+qI4Z0AFESBZ3vtitVJReuONTd?=
+ =?us-ascii?Q?bAanJoUCLp9ZcLPsCLCgrR1S13vAuSHOf5kMWzhHNg2X8VFtYNWorKQaKGLY?=
+ =?us-ascii?Q?qEa/cawIDegwewzWfL5AmAYzn7XBJnrtUkYeEYc4pANkUGjmhGu65R0SZ8m0?=
+ =?us-ascii?Q?xak5Vi+8JbbqGFt6BI74g1fHajckUhAuaGVxrIJNSvJsOnJQ5n/BIA/E3Vv8?=
+ =?us-ascii?Q?Nd+vcoS6upxPTce5ymPHqy1YeyNAqnM3s+j5MpEhqkrou01FLDcRRVkArebj?=
+ =?us-ascii?Q?vttoN4SsMe9zDBKV1ljuaU7TlRgwA1JlwrDDFHEQTBZX33wZL6bG7w9pI5Cn?=
+ =?us-ascii?Q?6bktERRDoq/INjWIYkGVikdqTy1OHxHY9nGPY864QA/3HcEvRwAkYbUmha5Z?=
+ =?us-ascii?Q?bCkbkjRz1yq+0wI+5Z0WjFBm9hP69lP4K0jyMieOq4E0rJZNESnqVY5UFY+A?=
+ =?us-ascii?Q?kZp7RK56rzWZy5B8WpW7jBF1W3bKMqXf4hANh0EDGS0K6WEWZlXYdxA0LEWR?=
+ =?us-ascii?Q?GM6gRY3MLLoU0ksJKVG+DFuHNIS1ejd3N+N6TRda?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	Ykx31yjjL+1OTAabmSw5i/zMK7q4APnU2bV2Enw86kCxOuL3JG1GoGLT61twOhzoyOX4kUeXZ5RCc52miKowCVLZxszUhIvT2gNJuaZHiMtJdcDk+1IEllZXyFNIjVRxJsOq45xjG8e+R4PyVOy3dDEJlg8P1RllkA9S0zjwQZJHBWcV04TQPEAzNm7U/NRHnY9ZKLEjF3hrLuNkjoh22SGIIAeFODQVJUWvlJnxdl8IblGdl8LmSBYcqxFM1PNVuo4sHS7S8WPfmt7GzSocaK28CX2dXn3QUJivCXRaFOp+bgDKjyNEXx+kkx5pFvVKmHTv0+Rzy+bRDqmgobRy9EeapkmYv/7ZVD5Ty6ApLHYIXbGmG9il8VYgjJUaPPBbblH1CqqRTq3KJJzvtUJSgGm8dsgRc4LJLAWBJj6JrkX6MbZtSScB9uAlpxqW3eFv8VN6h4a733w+WTi//BsTWbwRmp2rwPaYt6rD4RA371umvHKD4SAgyHH6Ca6jVwGc31ZpEweDLxsHcNl8yYVBclpuxx8b6Z4ln2hO+Sw0fnjm0PC73xVO/u16Ihw3wow9XuKxPAxOBUGfmCcQBpgZcZlZJ7ZDMy9Ku73vJbt3XM0=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: b7015e8d-9d5c-43bf-158b-08dd78a6935d
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 11 Apr 2025 03:11:39.2857
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: cjQ0HPZ7HfCgwSpILCNA4RAdfpawt8v9qOnXmopqNaxzlgoEq0/dCL9X/k5aMR/hoqfaxCRsJAni5VXGBfurWQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ0PR10MB5802
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1095,Hydra:6.0.680,FMLib:17.12.68.34
+ definitions=2025-04-11_01,2025-04-10_01,2024-11-22_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 bulkscore=0 mlxscore=0
+ mlxlogscore=996 suspectscore=0 adultscore=0 spamscore=0 phishscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2502280000
+ definitions=main-2504110022
+X-Proofpoint-GUID: UmMXI3WZ4bF9DH8TBzRVQFCW3MEGnZKH
+X-Proofpoint-ORIG-GUID: UmMXI3WZ4bF9DH8TBzRVQFCW3MEGnZKH
 
-On Thu, Apr 10, 2025 at 10:31:57PM +0800, Zorro Lang wrote:
-> On Wed, Apr 09, 2025 at 08:24:52AM -0700, Darrick J. Wong wrote:
-> > On Wed, Apr 09, 2025 at 07:00:52AM +0000, Nirjhar Roy (IBM) wrote:
-> > > Replace exit <return-val> with _exit <return-val> which
-> > > is introduced in the previous patch.
-> > > 
-> > > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-> > > Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-> > > Reviewed-by: Dave Chinner <dchinner@redhat.com>
-> > 
-> > Not sure why _filter_hole_fiemap gets whitespace cleanups in this patch,
-> > but I don't care to make Nirjhar rev the whole series just for
-> > whitespace so
-> 
-> Yeah, that doesn't make sense to this patch, but I don't mind merging that
-> anyway. If you hope to revert that part, I can help too :)
+Zorro,
 
-Nah, just let it go in, it's not a major change.
+Please pull this branch containing test cases for sysfs verification for btrfs.
 
---D
+Thank you.
 
-> Thanks,
-> Zorro
-> 
-> > 
-> > Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
-> > 
-> > --D
-> > 
-> > > ---
-> > >  common/btrfs    |   6 +--
-> > >  common/ceph     |   2 +-
-> > >  common/config   |   7 ++--
-> > >  common/dump     |  11 +++--
-> > >  common/ext4     |   2 +-
-> > >  common/populate |   2 +-
-> > >  common/preamble |   2 +-
-> > >  common/punch    |  13 +++---
-> > >  common/rc       | 105 +++++++++++++++++++++++-------------------------
-> > >  common/repair   |   4 +-
-> > >  common/xfs      |   8 ++--
-> > >  11 files changed, 78 insertions(+), 84 deletions(-)
-> > > 
-> > > diff --git a/common/btrfs b/common/btrfs
-> > > index a3b9c12f..3725632c 100644
-> > > --- a/common/btrfs
-> > > +++ b/common/btrfs
-> > > @@ -80,7 +80,7 @@ _require_btrfs_mkfs_feature()
-> > >  {
-> > >  	if [ -z $1 ]; then
-> > >  		echo "Missing feature name argument for _require_btrfs_mkfs_feature"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	feat=$1
-> > >  	$MKFS_BTRFS_PROG -O list-all 2>&1 | \
-> > > @@ -104,7 +104,7 @@ _require_btrfs_fs_feature()
-> > >  {
-> > >  	if [ -z $1 ]; then
-> > >  		echo "Missing feature name argument for _require_btrfs_fs_feature"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	feat=$1
-> > >  	modprobe btrfs > /dev/null 2>&1
-> > > @@ -214,7 +214,7 @@ _check_btrfs_filesystem()
-> > >  	if [ $ok -eq 0 ]; then
-> > >  		status=1
-> > >  		if [ "$iam" != "check" ]; then
-> > > -			exit 1
-> > > +			_exit 1
-> > >  		fi
-> > >  		return 1
-> > >  	fi
-> > > diff --git a/common/ceph b/common/ceph
-> > > index d6f24df1..df7a6814 100644
-> > > --- a/common/ceph
-> > > +++ b/common/ceph
-> > > @@ -14,7 +14,7 @@ _ceph_create_file_layout()
-> > >  
-> > >  	if [ -e $fname ]; then
-> > >  		echo "File $fname already exists."
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	touch $fname
-> > >  	$SETFATTR_PROG -n ceph.file.layout \
-> > > diff --git a/common/config b/common/config
-> > > index 7dd78dbe..eada3971 100644
-> > > --- a/common/config
-> > > +++ b/common/config
-> > > @@ -124,8 +124,7 @@ set_mkfs_prog_path_with_opts()
-> > >  _fatal()
-> > >  {
-> > >      echo "$*"
-> > > -    status=1
-> > > -    exit 1
-> > > +    _exit 1
-> > >  }
-> > >  
-> > >  export MKFS_PROG="$(type -P mkfs)"
-> > > @@ -869,7 +868,7 @@ get_next_config() {
-> > >  		echo "Warning: need to define parameters for host $HOST"
-> > >  		echo "       or set variables:"
-> > >  		echo "       $MC"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  
-> > >  	_check_device TEST_DEV required $TEST_DEV
-> > > @@ -880,7 +879,7 @@ get_next_config() {
-> > >  	if [ ! -z "$SCRATCH_DEV_POOL" ]; then
-> > >  		if [ ! -z "$SCRATCH_DEV" ]; then
-> > >  			echo "common/config: Error: \$SCRATCH_DEV ($SCRATCH_DEV) should be unset when \$SCRATCH_DEV_POOL ($SCRATCH_DEV_POOL) is set"
-> > > -			exit 1
-> > > +			_exit 1
-> > >  		fi
-> > >  		SCRATCH_DEV=`echo $SCRATCH_DEV_POOL | awk '{print $1}'`
-> > >  		export SCRATCH_DEV
-> > > diff --git a/common/dump b/common/dump
-> > > index 6dcd6250..09859006 100644
-> > > --- a/common/dump
-> > > +++ b/common/dump
-> > > @@ -280,8 +280,7 @@ _create_dumpdir_stress_num()
-> > >      rm -rf $dump_dir
-> > >      if ! mkdir $dump_dir; then
-> > >          echo "    failed to mkdir $dump_dir"
-> > > -        status=1
-> > > -        exit
-> > > +        _exit 1
-> > >      fi
-> > >  
-> > >      # Remove fsstress commands that aren't supported on all xfs configs so that
-> > > @@ -480,7 +479,7 @@ _do_create_dumpdir_fill()
-> > >  		else
-> > >  		    $verbose && echo
-> > >  		    echo "Error: cannot mkdir \"$dir\""
-> > > -		    exit 1
-> > > +		    _exit 1
-> > >  		fi
-> > >  	    fi
-> > >  	else
-> > > @@ -496,7 +495,7 @@ _do_create_dumpdir_fill()
-> > >  		    else
-> > >  			$verbose && echo
-> > >  			echo "Error: cannot mkdir \"$dir\""
-> > > -			exit 1
-> > > +			_exit 1
-> > >  		    fi
-> > >  		fi
-> > >  	    fi
-> > > @@ -507,7 +506,7 @@ _do_create_dumpdir_fill()
-> > >  	    else
-> > >  		$verbose && echo
-> > >  		echo "Error: cannot create \"$file\""
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	    fi
-> > >  	fi
-> > >  	if [ -n "$owner" -a -n "$group" ]; then
-> > > @@ -649,7 +648,7 @@ _do_create_dump_symlinks()
-> > >  		else
-> > >  		    $verbose && echo
-> > >  		    echo "Error: cannot mkdir \"$dir\""
-> > > -		    exit 1
-> > > +		    _exit 1
-> > >  		fi
-> > >  	    fi
-> > >  	fi
-> > > diff --git a/common/ext4 b/common/ext4
-> > > index e1b336d3..f88fa532 100644
-> > > --- a/common/ext4
-> > > +++ b/common/ext4
-> > > @@ -182,7 +182,7 @@ _require_scratch_ext4_feature()
-> > >  {
-> > >      if [ -z "$1" ]; then
-> > >          echo "Usage: _require_scratch_ext4_feature feature"
-> > > -        exit 1
-> > > +        _exit 1
-> > >      fi
-> > >      $MKFS_EXT4_PROG -F $MKFS_OPTIONS -O "$1" \
-> > >  		    $SCRATCH_DEV 512m >/dev/null 2>&1 \
-> > > diff --git a/common/populate b/common/populate
-> > > index 7352f598..50dc75d3 100644
-> > > --- a/common/populate
-> > > +++ b/common/populate
-> > > @@ -1003,7 +1003,7 @@ _fill_fs()
-> > >  
-> > >  	if [ $# -ne 4 ]; then
-> > >  		echo "Usage: _fill_fs filesize dir blocksize switch_user"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  
-> > >  	if [ $switch_user -eq 0 ]; then
-> > > diff --git a/common/preamble b/common/preamble
-> > > index c92e55bb..ba029a34 100644
-> > > --- a/common/preamble
-> > > +++ b/common/preamble
-> > > @@ -35,7 +35,7 @@ _begin_fstest()
-> > >  {
-> > >  	if [ -n "$seq" ]; then
-> > >  		echo "_begin_fstest can only be called once!"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  
-> > >  	seq=`basename $0`
-> > > diff --git a/common/punch b/common/punch
-> > > index 43ccab69..64d665d8 100644
-> > > --- a/common/punch
-> > > +++ b/common/punch
-> > > @@ -172,16 +172,16 @@ _filter_fiemap_flags()
-> > >  	$AWK_PROG -e "$awk_script" | _coalesce_extents
-> > >  }
-> > >  
-> > > -# Filters fiemap output to only print the 
-> > > +# Filters fiemap output to only print the
-> > >  # file offset column and whether or not
-> > >  # it is an extent or a hole
-> > >  _filter_hole_fiemap()
-> > >  {
-> > >  	$AWK_PROG '
-> > >  		$3 ~ /hole/ {
-> > > -			print $1, $2, $3; 
-> > > +			print $1, $2, $3;
-> > >  			next;
-> > > -		}   
-> > > +		}
-> > >  		$5 ~ /0x[[:xdigit:]]+/ {
-> > >  			print $1, $2, "extent";
-> > >  		}' |
-> > > @@ -224,8 +224,7 @@ _filter_bmap()
-> > >  
-> > >  die_now()
-> > >  {
-> > > -	status=1
-> > > -	exit
-> > > +	_exit 1
-> > >  }
-> > >  
-> > >  # test the different corner cases for zeroing a range:
-> > > @@ -276,7 +275,7 @@ _test_generic_punch()
-> > >  		u)	unwritten_tests=
-> > >  		;;
-> > >  		?)	echo Invalid flag
-> > > -		exit 1
-> > > +		_exit 1
-> > >  		;;
-> > >  		esac
-> > >  	done
-> > > @@ -552,7 +551,7 @@ _test_block_boundaries()
-> > >  		d)	sync_cmd=
-> > >  		;;
-> > >  		?)	echo Invalid flag
-> > > -		exit 1
-> > > +		_exit 1
-> > >  		;;
-> > >  		esac
-> > >  	done
-> > > diff --git a/common/rc b/common/rc
-> > > index 038c22f6..3b21eb27 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -909,8 +909,7 @@ _mkfs_dev()
-> > >  	# output stored mkfs output
-> > >  	cat $tmp.mkfserr >&2
-> > >  	cat $tmp.mkfsstd
-> > > -	status=1
-> > > -	exit 1
-> > > +	_exit 1
-> > >      fi
-> > >      rm -f $tmp.mkfserr $tmp.mkfsstd
-> > >  }
-> > > @@ -1575,7 +1574,7 @@ _get_pids_by_name()
-> > >      if [ $# -ne 1 ]
-> > >      then
-> > >  	echo "Usage: _get_pids_by_name process-name" 1>&2
-> > > -	exit 1
-> > > +	_exit 1
-> > >      fi
-> > >  
-> > >      # Algorithm ... all ps(1) variants have a time of the form MM:SS or
-> > > @@ -1609,7 +1608,7 @@ _df_device()
-> > >      if [ $# -ne 1 ]
-> > >      then
-> > >  	echo "Usage: _df_device device" 1>&2
-> > > -	exit 1
-> > > +	_exit 1
-> > >      fi
-> > >  
-> > >      # Note that we use "==" here so awk doesn't try to interpret an NFS over
-> > > @@ -1641,7 +1640,7 @@ _df_dir()
-> > >      if [ $# -ne 1 ]
-> > >      then
-> > >  	echo "Usage: _df_dir device" 1>&2
-> > > -	exit 1
-> > > +	_exit 1
-> > >      fi
-> > >  
-> > >      $DF_PROG $1 2>/dev/null | $AWK_PROG -v what=$1 '
-> > > @@ -1667,7 +1666,7 @@ _used()
-> > >      if [ $# -ne 1 ]
-> > >      then
-> > >  	echo "Usage: _used device" 1>&2
-> > > -	exit 1
-> > > +	_exit 1
-> > >      fi
-> > >  
-> > >      _df_device $1 | $AWK_PROG '{ sub("%", "") ; print $6 }'
-> > > @@ -1680,7 +1679,7 @@ _fs_type()
-> > >      if [ $# -ne 1 ]
-> > >      then
-> > >  	echo "Usage: _fs_type device" 1>&2
-> > > -	exit 1
-> > > +	_exit 1
-> > >      fi
-> > >  
-> > >      #
-> > > @@ -1705,7 +1704,7 @@ _fs_options()
-> > >      if [ $# -ne 1 ]
-> > >      then
-> > >  	echo "Usage: _fs_options device" 1>&2
-> > > -	exit 1
-> > > +	_exit 1
-> > >      fi
-> > >  
-> > >      $AWK_PROG -v dev=$1 '
-> > > @@ -1720,7 +1719,7 @@ _is_block_dev()
-> > >      if [ $# -ne 1 ]
-> > >      then
-> > >  	echo "Usage: _is_block_dev dev" 1>&2
-> > > -	exit 1
-> > > +	_exit 1
-> > >      fi
-> > >  
-> > >      local dev=$1
-> > > @@ -1739,7 +1738,7 @@ _is_char_dev()
-> > >  {
-> > >  	if [ $# -ne 1 ]; then
-> > >  		echo "Usage: _is_char_dev dev" 1>&2
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  
-> > >  	local dev=$1
-> > > @@ -1772,7 +1771,7 @@ _do()
-> > >  	echo -n "$note... "
-> > >      else
-> > >  	echo "Usage: _do [note] cmd" 1>&2
-> > > -	status=1; exit
-> > > +	_exit 1
-> > >      fi
-> > >  
-> > >      (eval "echo '---' \"$cmd\"") >>$seqres.full
-> > > @@ -1793,7 +1792,7 @@ _do()
-> > >      then
-> > >  	[ $# -ne 2 ] && echo
-> > >  	eval "echo \"$cmd\" failed \(returned $ret\): see $seqres.full"
-> > > -	status=1; exit
-> > > +	_exit 1
-> > >      fi
-> > >  
-> > >      return $ret
-> > > @@ -1809,8 +1808,7 @@ _notrun()
-> > >      rm -f ${RESULT_DIR}/require_test*
-> > >      rm -f ${RESULT_DIR}/require_scratch*
-> > >  
-> > > -    status=0
-> > > -    exit
-> > > +    _exit 0
-> > >  }
-> > >  
-> > >  # just plain bail out
-> > > @@ -1819,8 +1817,7 @@ _fail()
-> > >  {
-> > >      echo "$*" | tee -a $seqres.full
-> > >      echo "(see $seqres.full for details)"
-> > > -    status=1
-> > > -    exit 1
-> > > +    _exit 1
-> > >  }
-> > >  
-> > >  #
-> > > @@ -2049,14 +2046,14 @@ _require_scratch_nocheck()
-> > >  
-> > >      _check_mounted_on SCRATCH_DEV $SCRATCH_DEV SCRATCH_MNT $SCRATCH_MNT
-> > >      local err=$?
-> > > -    [ $err -le 1 ] || exit 1
-> > > +    [ $err -le 1 ] || _exit 1
-> > >      if [ $err -eq 0 ]
-> > >      then
-> > >          # if it's mounted, unmount it
-> > >          if ! _scratch_unmount
-> > >          then
-> > >              echo "failed to unmount $SCRATCH_DEV"
-> > > -            exit 1
-> > > +            _exit 1
-> > >          fi
-> > >      fi
-> > >      rm -f ${RESULT_DIR}/require_scratch "$RESULT_DIR/.skip_orebuild" "$RESULT_DIR/.skip_rebuild"
-> > > @@ -2273,13 +2270,13 @@ _require_test()
-> > >  
-> > >      _check_mounted_on TEST_DEV $TEST_DEV TEST_DIR $TEST_DIR
-> > >      local err=$?
-> > > -    [ $err -le 1 ] || exit 1
-> > > +    [ $err -le 1 ] || _exit 1
-> > >      if [ $err -ne 0 ]
-> > >      then
-> > >  	if ! _test_mount
-> > >  	then
-> > >  		echo "!!! failed to mount $TEST_DEV on $TEST_DIR"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >      fi
-> > >      touch ${RESULT_DIR}/require_test
-> > > @@ -2391,7 +2388,7 @@ _require_block_device()
-> > >  {
-> > >  	if [ -z "$1" ]; then
-> > >  		echo "Usage: _require_block_device <dev>" 1>&2
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	if [ "`_is_block_dev "$1"`" == "" ]; then
-> > >  		_notrun "require $1 to be valid block disk"
-> > > @@ -2404,7 +2401,7 @@ _require_local_device()
-> > >  {
-> > >  	if [ -z "$1" ]; then
-> > >  		echo "Usage: _require_local_device <dev>" 1>&2
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	if [ "`_is_block_dev "$1"`" != "" ]; then
-> > >  		return 0
-> > > @@ -2512,7 +2509,7 @@ _zone_type()
-> > >  	local target=$1
-> > >  	if [ -z $target ]; then
-> > >  		echo "Usage: _zone_type <device>"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	local sdev=`_short_dev $target`
-> > >  
-> > > @@ -2528,7 +2525,7 @@ _require_zoned_device()
-> > >  	local target=$1
-> > >  	if [ -z $target ]; then
-> > >  		echo "Usage: _require_zoned_device <device>"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  
-> > >  	local type=`_zone_type ${target}`
-> > > @@ -2668,7 +2665,7 @@ _run_aiodio()
-> > >      if [ -z "$1" ]
-> > >      then
-> > >          echo "usage: _run_aiodio command_name" 2>&1
-> > > -        status=1; exit 1
-> > > +        _exit 1
-> > >      fi
-> > >  
-> > >      _require_aiodio $1
-> > > @@ -2880,7 +2877,7 @@ _require_xfs_io_command()
-> > >  	if [ -z "$1" ]
-> > >  	then
-> > >  		echo "Usage: _require_xfs_io_command command [switch]" 1>&2
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	local command=$1
-> > >  	shift
-> > > @@ -3364,7 +3361,7 @@ _is_dev_mounted()
-> > >  
-> > >  	if [ $# -lt 1 ]; then
-> > >  		echo "Usage: _is_dev_mounted <device> [fstype]" 1>&2
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  
-> > >  	findmnt -rncv -S $dev -t $fstype -o TARGET | head -1
-> > > @@ -3378,7 +3375,7 @@ _is_dir_mountpoint()
-> > >  
-> > >  	if [ $# -lt 1 ]; then
-> > >  		echo "Uasge: _is_dir_mountpoint <dir> [fstype]" 1>&2
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  
-> > >  	findmnt -rncv -t $fstype -o TARGET $dir | head -1
-> > > @@ -3391,7 +3388,7 @@ _remount()
-> > >      if [ $# -ne 2 ]
-> > >      then
-> > >  	echo "Usage: _remount device ro/rw" 1>&2
-> > > -	exit 1
-> > > +	_exit 1
-> > >      fi
-> > >      local device=$1
-> > >      local mode=$2
-> > > @@ -3399,7 +3396,7 @@ _remount()
-> > >      if ! mount -o remount,$mode $device
-> > >      then
-> > >          echo "_remount: failed to remount filesystem on $device as $mode"
-> > > -        exit 1
-> > > +        _exit 1
-> > >      fi
-> > >  }
-> > >  
-> > > @@ -3417,7 +3414,7 @@ _umount_or_remount_ro()
-> > >      if [ $# -ne 1 ]
-> > >      then
-> > >  	echo "Usage: _umount_or_remount_ro <device>" 1>&2
-> > > -	exit 1
-> > > +	_exit 1
-> > >      fi
-> > >  
-> > >      local device=$1
-> > > @@ -3435,7 +3432,7 @@ _mount_or_remount_rw()
-> > >  {
-> > >  	if [ $# -ne 3 ]; then
-> > >  		echo "Usage: _mount_or_remount_rw <opts> <dev> <mnt>" 1>&2
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	local mount_opts=$1
-> > >  	local device=$2
-> > > @@ -3516,7 +3513,7 @@ _check_generic_filesystem()
-> > >      if [ $ok -eq 0 ]; then
-> > >  	status=1
-> > >  	if [ "$iam" != "check" ]; then
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	return 1
-> > >      fi
-> > > @@ -3582,7 +3579,7 @@ _check_udf_filesystem()
-> > >      if [ $# -ne 1 -a $# -ne 2 ]
-> > >      then
-> > >  	echo "Usage: _check_udf_filesystem device [last_block]" 1>&2
-> > > -	exit 1
-> > > +	_exit 1
-> > >      fi
-> > >  
-> > >      if [ ! -x $here/src/udf_test ]
-> > > @@ -3776,7 +3773,7 @@ _get_os_name()
-> > >  		echo 'linux'
-> > >  	else
-> > >  		echo Unknown operating system: `uname`
-> > > -		exit
-> > > +		_exit 1
-> > >  	fi
-> > >  }
-> > >  
-> > > @@ -3837,7 +3834,7 @@ _link_out_file()
-> > >  _die()
-> > >  {
-> > >          echo $@
-> > > -        exit 1
-> > > +        _exit 1
-> > >  }
-> > >  
-> > >  # convert urandom incompressible data to compressible text data
-> > > @@ -3994,7 +3991,7 @@ _require_scratch_dev_pool()
-> > >  		if _mount | grep -q $i; then
-> > >  			if ! _unmount $i; then
-> > >  		            echo "failed to unmount $i - aborting"
-> > > -		            exit 1
-> > > +		            _exit 1
-> > >  		        fi
-> > >  		fi
-> > >  		# To help better debug when something fails, we remove
-> > > @@ -4403,7 +4400,7 @@ _require_batched_discard()
-> > >  {
-> > >  	if [ $# -ne 1 ]; then
-> > >  		echo "Usage: _require_batched_discard mnt_point" 1>&2
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	_require_fstrim
-> > >  
-> > > @@ -4630,7 +4627,7 @@ _require_chattr()
-> > >  {
-> > >  	if [ -z "$1" ]; then
-> > >  		echo "Usage: _require_chattr <attr>"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	local attribute=$1
-> > >  
-> > > @@ -4649,7 +4646,7 @@ _get_total_inode()
-> > >  {
-> > >  	if [ -z "$1" ]; then
-> > >  		echo "Usage: _get_total_inode <mnt>"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	local nr_inode;
-> > >  	nr_inode=`$DF_PROG -i $1 | tail -1 | awk '{print $3}'`
-> > > @@ -4660,7 +4657,7 @@ _get_used_inode()
-> > >  {
-> > >  	if [ -z "$1" ]; then
-> > >  		echo "Usage: _get_used_inode <mnt>"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	local nr_inode;
-> > >  	nr_inode=`$DF_PROG -i $1 | tail -1 | awk '{print $4}'`
-> > > @@ -4671,7 +4668,7 @@ _get_used_inode_percent()
-> > >  {
-> > >  	if [ -z "$1" ]; then
-> > >  		echo "Usage: _get_used_inode_percent <mnt>"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	local pct_inode;
-> > >  	pct_inode=`$DF_PROG -i $1 | tail -1 | awk '{ print $6 }' | \
-> > > @@ -4683,7 +4680,7 @@ _get_free_inode()
-> > >  {
-> > >  	if [ -z "$1" ]; then
-> > >  		echo "Usage: _get_free_inode <mnt>"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	local nr_inode;
-> > >  	nr_inode=`$DF_PROG -i $1 | tail -1 | awk '{print $5}'`
-> > > @@ -4696,7 +4693,7 @@ _get_available_space()
-> > >  {
-> > >  	if [ -z "$1" ]; then
-> > >  		echo "Usage: _get_available_space <mnt>"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	$DF_PROG -B 1 $1 | tail -n1 | awk '{ print $5 }'
-> > >  }
-> > > @@ -4707,7 +4704,7 @@ _get_total_space()
-> > >  {
-> > >  	if [ -z "$1" ]; then
-> > >  		echo "Usage: _get_total_space <mnt>"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	$DF_PROG -B 1 $1 | tail -n1 | awk '{ print $3 }'
-> > >  }
-> > > @@ -4952,7 +4949,7 @@ init_rc()
-> > >  	if [ "$TEST_DEV" = ""  ]
-> > >  	then
-> > >  		echo "common/rc: Error: \$TEST_DEV is not set"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  
-> > >  	# if $TEST_DEV is not mounted, mount it now as XFS
-> > > @@ -4966,20 +4963,20 @@ init_rc()
-> > >  			if ! _test_mount
-> > >  			then
-> > >  				echo "common/rc: could not mount $TEST_DEV on $TEST_DIR"
-> > > -				exit 1
-> > > +				_exit 1
-> > >  			fi
-> > >  		fi
-> > >  	fi
-> > >  
-> > >  	# Sanity check that TEST partition is not mounted at another mount point
-> > >  	# or as another fs type
-> > > -	_check_mounted_on TEST_DEV $TEST_DEV TEST_DIR $TEST_DIR $FSTYP || exit 1
-> > > +	_check_mounted_on TEST_DEV $TEST_DEV TEST_DIR $TEST_DIR $FSTYP || _exit 1
-> > >  	if [ -n "$SCRATCH_DEV" ]; then
-> > >  		# Sanity check that SCRATCH partition is not mounted at another
-> > >  		# mount point, because it is about to be unmounted and formatted.
-> > >  		# Another fs type for scratch is fine (bye bye old fs type).
-> > >  		_check_mounted_on SCRATCH_DEV $SCRATCH_DEV SCRATCH_MNT $SCRATCH_MNT
-> > > -		[ $? -le 1 ] || exit 1
-> > > +		[ $? -le 1 ] || _exit 1
-> > >  	fi
-> > >  
-> > >  	# Figure out if we need to add -F ("foreign", deprecated) option to xfs_io
-> > > @@ -5029,7 +5026,7 @@ _get_file_block_size()
-> > >  {
-> > >  	if [ -z $1 ] || [ ! -d $1 ]; then
-> > >  		echo "Missing mount point argument for _get_file_block_size"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  
-> > >  	case "$FSTYP" in
-> > > @@ -5076,7 +5073,7 @@ _get_block_size()
-> > >  {
-> > >  	if [ -z $1 ] || [ ! -d $1 ]; then
-> > >  		echo "Missing mount point argument for _get_block_size"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	stat -f -c %S $1
-> > >  }
-> > > @@ -5146,14 +5143,14 @@ _run_hugepage_fsx() {
-> > >  	fi
-> > >  	cat $tmp.hugepage_fsx
-> > >  	rm -f $tmp.hugepage_fsx
-> > > -	test $res -ne 0 && exit 1
-> > > +	test $res -ne 0 && _exit 1
-> > >  	return 0
-> > >  }
-> > >  
-> > >  # run fsx or exit the test
-> > >  run_fsx()
-> > >  {
-> > > -	_run_fsx "$@" || exit 1
-> > > +	_run_fsx "$@" || _exit 1
-> > >  }
-> > >  
-> > >  _require_statx()
-> > > @@ -5318,7 +5315,7 @@ _get_max_file_size()
-> > >  {
-> > >  	if [ -z $1 ] || [ ! -d $1 ]; then
-> > >  		echo "Missing mount point argument for _get_max_file_size"
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  
-> > >  	local mnt=$1
-> > > diff --git a/common/repair b/common/repair
-> > > index a79f9b2b..fd206f8e 100644
-> > > --- a/common/repair
-> > > +++ b/common/repair
-> > > @@ -16,7 +16,7 @@ _zero_position()
-> > >  		}'`
-> > >  	if [ -z "$offset" -o -z "$length" ]; then
-> > >  		echo "cannot calculate offset ($offset) or length ($length)"
-> > > -		exit
-> > > +		_exit 1
-> > >  	fi
-> > >  	length=`expr $length / 512`
-> > >  	$here/src/devzero -v $value -b 1 -n $length -o $offset $SCRATCH_DEV \
-> > > @@ -113,7 +113,7 @@ _filter_dd()
-> > >  }
-> > >  
-> > >  # do some controlled corrupting & ensure repair recovers us
-> > > -# 
-> > > +#
-> > >  _check_repair()
-> > >  {
-> > >  	value=$1
-> > > diff --git a/common/xfs b/common/xfs
-> > > index 81d568d3..96c15f3c 100644
-> > > --- a/common/xfs
-> > > +++ b/common/xfs
-> > > @@ -553,7 +553,7 @@ _require_xfs_db_command()
-> > >  {
-> > >  	if [ $# -ne 1 ]; then
-> > >  		echo "Usage: _require_xfs_db_command command" 1>&2
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	command=$1
-> > >  
-> > > @@ -789,7 +789,7 @@ _check_xfs_filesystem()
-> > >  
-> > >  	if [ $# -ne 3 ]; then
-> > >  		echo "Usage: _check_xfs_filesystem device <logdev>|none <rtdev>|none" 1>&2
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  
-> > >  	extra_mount_options=""
-> > > @@ -1014,7 +1014,7 @@ _check_xfs_filesystem()
-> > >  	if [ $ok -eq 0 ]; then
-> > >  		status=1
-> > >  		if [ "$iam" != "check" ]; then
-> > > -			exit 1
-> > > +			_exit 1
-> > >  		fi
-> > >  		return 1
-> > >  	fi
-> > > @@ -1379,7 +1379,7 @@ _require_xfs_spaceman_command()
-> > >  {
-> > >  	if [ -z "$1" ]; then
-> > >  		echo "Usage: _require_xfs_spaceman_command command [switch]" 1>&2
-> > > -		exit 1
-> > > +		_exit 1
-> > >  	fi
-> > >  	local command=$1
-> > >  	shift
-> > > -- 
-> > > 2.34.1
-> > > 
-> > > 
-> > 
-> 
-> 
+The following changes since commit 0e33d528cf8940d8e40f2a252e2d2853f9249794:
+
+  xfs/235: add to the auto group (2025-03-28 09:23:59 +0800)
+
+are available in the Git repository at:
+
+  https://github.com/asj/fstests.git staged-20250411
+
+for you to fetch changes up to 98dcc7d4f1b441fa37ba234bd4ca98e078f439f2:
+
+  fstests: btrfs: testcase for sysfs chunk_size attribute validation (2025-04-10 17:07:00 +0800)
+
+----------------------------------------------------------------
+Anand Jain (5):
+      fstests: common/rc: set_fs_sysfs_attr: redirect errors to stdout
+      fstests: filter: helper for sysfs error filtering
+      fstests: common/sysfs: add new file sysfs and helpers
+      fstests: btrfs: testcase for sysfs policy syntax verification
+      fstests: btrfs: testcase for sysfs chunk_size attribute validation
+
+ common/filter       |   9 ++++
+ common/rc           |   3 +-
+ common/sysfs        | 145 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/329     |  21 ++++++++
+ tests/btrfs/329.out |  19 +++++++
+ tests/btrfs/334     |  21 ++++++++
+ tests/btrfs/334.out |  14 +++++
+ 7 files changed, 231 insertions(+), 1 deletion(-)
+ create mode 100644 common/sysfs
+ create mode 100755 tests/btrfs/329
+ create mode 100644 tests/btrfs/329.out
+ create mode 100755 tests/btrfs/334
+ create mode 100644 tests/btrfs/334.out
