@@ -1,36 +1,36 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE17E18A95A
-	for <fstests@vger.kernel.org>; Sun, 13 Apr 2025 13:20:31 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A38D1B3935
+	for <fstests@vger.kernel.org>; Sun, 13 Apr 2025 13:27:49 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744550432; cv=none; b=Ax2NzGQkg3Zxl1qW9aNHQ1RDEJkC3P9uqL89a0yuB3I1LKDD7CEbwxP+I2E4P5U9laF+J+OboPGQvtERKzNGdXYrjHHH/UZpeUTjfEXikAh0EyUtw8OLQV3vMjk/juzCFMvHgiJvOde2VQFlGMy9HIhy4Ll/hkyKTD1aABKPsik=
+	t=1744550869; cv=none; b=fQZjTPLc6S/OM2Ff9z9yDmeDcMahX6Z9j6sGHHQbZ8G7c+qqmAIt23GcshgwbyLjxR5qCZFZ58xcSWL41NHH2/Y1fhJGI+IPja1fMt0M3yw0xYmuyixhmGGse2tJVpTwETo4UZt1nSYOs0VNYPntjHHtHWw3MzqSMilSeNsXApg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744550432; c=relaxed/simple;
-	bh=Eqduiq3uTFr+Y+c65/eYbgtTxIxmNeoMB9MQqT+jZMk=;
+	s=arc-20240116; t=1744550869; c=relaxed/simple;
+	bh=hcn4FGJp70ivM+yNksLmjemXik6DsMr+FeMAQzhyxAk=;
 	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=eabubHOGPl83PozMJTk9/QWvKZbUEK/zsN4OShwlyNYpmnu35HtLaBy5DWgnP0djfG2T9NcbHj6Uxup0KVj0P1rXI6dBv8gqzj/nTqFcvy19EVa5A7dziTD4H2fD4JQWdcH2Dmi4wFMfkaZUyYFSpNMZj5SWti3XmPBu1g+xkno=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tpP1nD7C; arc=none smtp.client-ip=10.30.226.201
+	 Content-Disposition; b=SHNPVCVgVq3sDNpy8eTZyjXEkYcdxhlM3buA/1yMtrcW4tzmaTRVI8pITbySfY5AMjljU+NT7LWtL81ErsVBu3iJZf6mW7it8NAZzU3rIYIly2ttYnEjIfsPt7KklWxybDSJUGM2FWWO24mvA/ppXIPW8BGqaGiabYm4ZkNv6Yc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XIh4kj7k; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tpP1nD7C"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B252FC4CEDD;
-	Sun, 13 Apr 2025 13:20:30 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XIh4kj7k"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F8FEC4CEDD;
+	Sun, 13 Apr 2025 13:27:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1744550431;
-	bh=Eqduiq3uTFr+Y+c65/eYbgtTxIxmNeoMB9MQqT+jZMk=;
+	s=k20201202; t=1744550869;
+	bh=hcn4FGJp70ivM+yNksLmjemXik6DsMr+FeMAQzhyxAk=;
 	h=Date:From:To:Subject:From;
-	b=tpP1nD7CdMTMcfjE304l4EDEsbRSsIj8gjrJY+3aZ+iehc4zO/j2qr9swLyaY8Kdj
-	 gC+KzqwWF158Zv+sv13sK+a/nPWrAo1dQJd9A6ji2v/FOKd/pn6QDzFW/QCVrhMCne
-	 k7c/j7Nin/GEjkpwtr5HJE0ggUwdfHA7VepkIHbYthwGwiBvr01fYfyJkPjGM8zf0e
-	 t9LIPOxAnA2ALKr/a3qwpRytB2V1mddrfBOVuhBa/MDit7LH8lSw02/lwVRigwIWp6
-	 EMvswSCt94EE903gMuZgqAw11EqhFMA5b6E4HZicPhvbhfeOn/EZNzEtjtPSb9vQdq
-	 +/ai4FxXfTtzQ==
-Date: Sun, 13 Apr 2025 21:20:27 +0800
-Message-ID: <06046144b202a37027b7987d6df8527f@kernel.org>>
+	b=XIh4kj7kyDBp4RrfoH4Q/95bYJvgC6FK1ZWfU2EZDtJswMdEgDuNE/seIyH/c0fEs
+	 w2lEz/dTwMNmw3pNRPZpBoA1cIifKrrD6BfwayX6W54SoxWadF9sZV0/cUarr8/Bb1
+	 KXHtZVTadeJ7Zwf3d7rmCk46YzcNV8PdVfKEcUgVnJNho8CDUQ8V+YjBWB/W55O8u4
+	 K6a9MTXbiUHltgeuIzP4e/jBH/HMtIcQHiODqqAsZQJMy9dUU+fkg+DVB6amGqMFqJ
+	 A46brtQesjsggTfbWPHcY/Lsv1rVEzVEktAuNA3b9TDpziyfp5w0dXn1CQzBfCSufv
+	 gdZETfCnl1YXw==
+Date: Sun, 13 Apr 2025 21:27:46 +0800
+Message-ID: <edd2224618169707c37d1c35bdcb0e05@kernel.org>>
 From: Zorro Lang <zlang@kernel.org>
 To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2025.03.30 onto master branch
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2025.04.13
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -38,149 +38,128 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="74y213tzgmPS"
+	protocol="application/pgp-signature"; boundary="Bc2qNJlz2K8Q"
 Content-Disposition: inline
 
 
---74y213tzgmPS
+--Bc2qNJlz2K8Q
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2025.03.30 version
+has just been updated and tagged as v2025.04.13 release.
+
+Release Notes:
+1) There 3 new test cases in this release, include generic/765, btrfs/329
+   and btrfs/334.
+2) x/629 ~ x/632 have been removed from auto and quick groups, please note
+   that, if it affects your test plan.
+3) Cleanup some codes in common/ and check.
+
+More updates and fixes refer to below, thanks for all these contributions!
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-0e33d528cf89 xfs/235: add to the auto group
+2cc8c822f864 fstests: btrfs: testcase for sysfs chunk_size attribute validation
 
 New commits:
 
-Chao Yu (7):
-      [d3053a227494] common/config: remove redundant export variables
-      [bf36679ee712] common/config: export F2FS_INJECT_PROG
-      [b2c469debb76] common/config: export F2FS_FSCK_PROG
-      [520d651ee9cc] common/rc: use -f for mkfs.f2fs by default
-      [b9d1c36bcce4] common/rc: introduce _check_f2fs_filesystem()
-      [82d0ff759c67] f2fs: new test to detect and repair nlink corruption
-      [32272b1e895e] f2fs: test dirty status handling on database file
+Anand Jain (5):
+      [0a9011ae6a36] fstests: common/rc: set_fs_sysfs_attr: redirect errors to stdout
+      [afdb10ee1853] fstests: filter: helper for sysfs error filtering
+      [03adc99ef11c] fstests: common/sysfs: add new file sysfs and helpers
+      [f5cb79fb0f10] fstests: btrfs: testcase for sysfs policy syntax verification
+      [2cc8c822f864] fstests: btrfs: testcase for sysfs chunk_size attribute validation
 
-Christoph Hellwig (14):
-      [415846d433df] xfs/177: force a small file system size
-      [5f57ee3ad4f1] xfs/419: use _scratch_mkfs_xfs
-      [332dd50da02b] xfs/540: use _scratch_mkfs_xfs
-      [21810ac207c3] common: extend the zoned device checks in _require_dm_target
-      [4d2283f87ed2] common: allow _require_non_zoned_device without an argument
-      [9b6b461417ab] xfs: add helpers to require zoned/non-zoned file systems
-      [2dbbf5debad1] xfs: handle zoned file systems in _scratch_xfs_force_no_metadir
-      [8d221e7be774] xfs: no quota support with internal rtdev
-      [54cabdaa03e6] xfs: xfs_copy doesn't like RT sections
-      [9ec7d058eb92] xfs: skip filestreams tests on internal RT devices
-      [ea888a5571e0] xfs: skip various tests when using the zoned allocator
-      [283339e65cc7] xfs/049: skip on zoned devices
-      [8893b54c0a60] xfs/206: filter out the zoned line from mkfs output
-      [0e33d528cf89] xfs/235: add to the auto group
+Catherine Hoang (1):
+      [d90ee3b64963] generic: add a test for atomic writes
 
-Darrick J. Wong (6):
-      [3e73e52ad931] xfs: test filesystem recovery with rdump
-      [5efe0accdc55] generic/45[34]: add colored emoji variants to unicode tests
-      [8e4282818e57] xfs/614: determine the sector size of the fs image by doing a test format
-      [768c74f45422] generic/537: disable quota mount options for pre-metadir rt filesystems
-      [eff1baf42a79] common/populate: drop fallocate mode 0 requirement
-      [faa0190b363d] xfs/818: fix some design issues
+Christoph Hellwig (1):
+      [ad048ff62f50] xfs: remove the post-EOF prealloc tests from the auto and quick groups
 
-Eric Sandeen (1):
-      [cd4ca5ac3512] fstests: test for CONFIG_QFMT_V2 in _require_quota
+Darrick J. Wong (4):
+      [7ff687d85747] common/rc: fix dumping of corrupt ext* filesystems
+      [68e9620be4a6] xfs/801: provide missing sysfs-dump function
+      [bc7f79bd13d8] xfs/792: skip test if rextsize isn't congruent with operation length
+      [8d1447890a8c] generic/275: fix on 32k fsblock filesystems
 
-Filipe Manana (2):
-      [6542628fc958] generic: test fsync of file with no more hard links
-      [b8cbda37d9ce] btrfs/058: fix test to actually have an open tmpfile during the send operation
+Nirjhar Roy (IBM) (7):
+      [83e1f4c43817] xfs/539: Ignore remount failures on v5 xfs
+      [a758e467c24a] generic/749: Remove redundant sourcing of common/rc
+      [fb15457efd0f] generic/367: Remove redundant sourcing of common/config
+      [491eddb2699f] check: Remove redundant _test_mount in check
+      [69bdf04c98c3] check,common{rc,preamble}: Decouple init_rc() call from sourcing common/rc
+      [1c2f3da49c5d] common/config: Introduce _exit wrapper around exit command
+      [f14f2a885954] common: exit --> _exit
 
-Johannes Thumshirn (1):
-      [4368c82e2a7e] fstests: btrfs: zoned: verify RAID conversion with write pointer mismatch
-
-Zorro Lang (2):
-      [0acf53d6d9d3] fstests: remove privatens test way from check
-      [b6ccf1272734] fstests: remove run_setsid test way from check
+Swarna Prabhu (1):
+      [3be9add6d1d3] generic/750 : add missing _fixed_by_git_commit line to the test
 
 
 Code Diffstat:
 
- check                   |  72 +++++------------------
- common/config           |   4 +-
- common/filestreams      |   5 ++
- common/populate         |   1 -
- common/quota            |   1 +
- common/rc               |  75 +++++++++++++++++++-----
- common/xfs              |  47 ++++++++++++++-
- src/multi_open_unlink.c |  24 +++++++-
- tests/btrfs/058         |  28 +++++++--
- tests/btrfs/335         |  62 ++++++++++++++++++++
- tests/btrfs/335.out     |   7 +++
- tests/ext4/053          |   1 -
- tests/ext4/055          |   2 +
- tests/f2fs/009          | 138 +++++++++++++++++++++++++++++++++++++++++++
- tests/f2fs/009.out      |   2 +
- tests/f2fs/010          |  69 ++++++++++++++++++++++
- tests/f2fs/010.out      |   2 +
- tests/generic/453       |  55 +++++++++++++++++
- tests/generic/454       |  55 +++++++++++++++++
- tests/generic/537       |  17 ++++++
- tests/generic/764       |  50 ++++++++++++++++
- tests/generic/764.out   |   2 +
- tests/xfs/015           |   7 +++
- tests/xfs/041           |   5 ++
- tests/xfs/049           |   2 +
- tests/xfs/177           |   4 +-
- tests/xfs/206           |   1 +
- tests/xfs/235           |   2 +-
- tests/xfs/272           |   5 ++
- tests/xfs/276           |   5 ++
- tests/xfs/306           |   4 ++
- tests/xfs/419           |   5 +-
- tests/xfs/449           |   3 +
- tests/xfs/521           |   3 +
- tests/xfs/524           |   4 ++
- tests/xfs/540           |   5 +-
- tests/xfs/541           |   3 +
- tests/xfs/556           |  13 ++++
- tests/xfs/596           |   3 +
- tests/xfs/614           |  13 ++--
- tests/xfs/633           | 153 ++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/633.out       |   6 ++
- tests/xfs/818           |  19 +++++-
- tools/Makefile          |   1 -
- tools/run_setsid        |  22 -------
- 45 files changed, 890 insertions(+), 117 deletions(-)
+ check                 |  10 ++-
+ common/btrfs          |   6 +-
+ common/ceph           |   2 +-
+ common/config         |  16 +++--
+ common/dump           |  11 ++-
+ common/ext4           |   2 +-
+ common/filter         |   9 +++
+ common/populate       |   2 +-
+ common/preamble       |   3 +-
+ common/punch          |  13 ++--
+ common/rc             | 163 +++++++++++++++++++++++++++----------------
+ common/repair         |   4 +-
+ common/sysfs          | 145 ++++++++++++++++++++++++++++++++++++++
+ common/xfs            |   8 +--
+ tests/btrfs/329       |  21 ++++++
+ tests/btrfs/329.out   |  19 +++++
+ tests/btrfs/334       |  21 ++++++
+ tests/btrfs/334.out   |  14 ++++
+ tests/generic/275     |   3 +
+ tests/generic/367     |   1 -
+ tests/generic/749     |   1 -
+ tests/generic/750     |   6 +-
+ tests/generic/765     | 188 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/765.out |   2 +
+ tests/xfs/539         |   2 +-
+ tests/xfs/629         |   2 +-
+ tests/xfs/630         |   2 +-
+ tests/xfs/631         |   2 +-
+ tests/xfs/632         |   2 +-
+ tests/xfs/792         |   1 +
+ tests/xfs/801         |  12 ++++
+ 31 files changed, 590 insertions(+), 103 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
 
---74y213tzgmPS
+--Bc2qNJlz2K8Q
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmf7ufYACgkQlNbPkfr2
-tMxJYQ/+NgiVwZdoMh6o/5F5quvnBP2+4RQyrvGDxx1uXmwERPOD0jI6USgOShY1
-Q3d+kqUooabctFHB7H2HwdOKpaFE0wq2V/cxBX/Ue0ZVKk2rVHjn0ISGSHolR5bh
-f3kDZTuRsh+bEUOkATuOXLDb+AgCqxcQOOVdjFgmjfiUAfpv/rm6wXiKlEMzXxQm
-dphXPGhd4kjF8Hytsuk6WaA+/Zy9NHJiA9UoeAge5BaddtmGTkVQ0u7xx5yx4AxZ
-jFugx5R3hZ+8/L8WW1HSHFC2SmFJCHfYCdTet/cH3pS0x82cm9JzQqm5Dk1fJ7L9
-k0sJWOcPQJpyuoJGD0Vm4pgec7lSCX29SUKapyH51rZcwAA97TCpS+Jo5y8gc3az
-I53p18UjQTF0bBJholoIY8w/agcHLZcTrvjU/eYZO5HX6xzjelkIk/DLH4wpWFPZ
-56XzMruL2Wm19g8KrsFDfsu36YO9++w+EOfhL6LoaxOFaMIK5Gi+WGR/TFFr6qGW
-AhPHE8qoYe94TdoghIXItjbMjPUiWH/Au6dnN4zcXDSy9CiGpYt3mxlyMwnnGZ8F
-GsamVvH0H76XMjEqhqYAGBZgW4zJ2Q6G3fMGSGh96c6/LJC1Vv+8wP+uU7WfGO71
-4an3sKBFd+B0Qe1McuTIG+tOCIH+1CI14WGK5jmPng/OFPIBDVM=
-=hK/t
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmf7u7wACgkQlNbPkfr2
+tMxSOxAAldV+MFcKzyL2+k5r1/kuTbYAYPQ0KeAP7npXKKPp79Xqf5IOTlPxorUR
+t/eaP1MvU7d6rezc1wTTb5BesuKHpSYpkFHt+mLKq2LwF5de2D+PByii5DXeExsS
+FzoDviwRxHtCMnaUAqbe1DjiAiQa5cr2jMdAWlQyaolggftBf+Uupl+bWbyx2gNZ
+79fGZ5ERggGDWPWuj3hEQCjbXKI8jSbvLvNmVU/3k8UvD9qSBWGmOpmCz5Jk9fGb
+xK2myX+jYuTQByH21fqo79CIqWPTfdbvPbSMPo1zSBKuPyEK8KHbgJFeV/thGbLM
+aQx+QiURKsj9YJd+HnfK/v98tFPI/u0z/ZRctecGPYQpO/bvJqV0kGWB5mdAVOQN
+jHByxi63bk5hJcfE2nZKyixzj3oOtkLiZ+KAEiyAPhStcjqpYeMUjQrwfjWgn6q3
+mt0Qy03NhLQGnMEL8+l2y9CmyWjfwn3bNzIe/OOYFwFIbZkkWXSZznIlrTfpcJTU
+TJdV7uC/AsSXILFk9x3qcLok5lqT4YJ129xdj7KeJvQLf0aI8NcA+jJRkcFZdRg+
+XojHOuqglP0/3tCN9QdjzR/qlwM8OlhXulM7dlF8aqtFClAZDvkbA8UyqzpRiDpa
+E5ArcGJGFapsaopHSQOIx1fiVPnmBa0fGEVnkTnmOWuojyJ/qwA=
+=ZQvr
 -----END PGP SIGNATURE-----
 
---74y213tzgmPS--
+--Bc2qNJlz2K8Q--
