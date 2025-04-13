@@ -1,39 +1,39 @@
-Received: from out-179.mta1.migadu.com (out-179.mta1.migadu.com [95.215.58.179])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4811416C850
-	for <fstests@vger.kernel.org>; Sun, 13 Apr 2025 21:56:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72C224C6C
+	for <fstests@vger.kernel.org>; Mon, 14 Apr 2025 01:47:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744581378; cv=none; b=W0Gumvzr3CMFs7G1Hd/y3tOGlsGRTp7207wG3RyHx6p62YzcQs+Z+SJc67x6DXkodwicU72Z/OGStZ28R6fthcgajQF/5ccrjVgVc0nlQC0FTi+vQtXBaxLn25hkVI3qCARgJGfKIj0YleVSU+UrtkrJFn5AjZvtb5OYPprBaeU=
+	t=1744595270; cv=none; b=nPvR3KUZkglLaSpVs4eN8dPj1OdN9NmR151njvp3XRY5qetHL5zMY2DZu/2NiKysc/9VtdnCplvPvSJbyTSTDT1MQ+CtLs91PqMviqc5lQ/E+8b5h0QvECRyDMk6cv7X37fMJRwOYyDvjyQbDetEPA4/iTVOKbmRGft98gucLa8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744581378; c=relaxed/simple;
-	bh=ZGwyvhVohsHYoerb048m6P7e99+DhrhKFtPFNT1KHtA=;
+	s=arc-20240116; t=1744595270; c=relaxed/simple;
+	bh=5k+iwTuy+xrcUMLjSCP+Obud++46WTKcsMGcr7dqciE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=WNjusyu+AZqwQK4fWYayX0fWNBRB448EqpWbW9N4MrDXgxSOGE0hxzQQ/UljRsbqs18mPoj6fpgd8oq2E+t8YYTvwstQ9M23WePAI31yDGsRnpJbsHo1HKCPPx7DCl5b/x5G0EHYy63Y/5Cil8L0mH5omqCkwHgiLwQ59x0BejU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=Ot6XUn21; arc=none smtp.client-ip=95.215.58.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="Ot6XUn21"
-Date: Sun, 13 Apr 2025 17:56:08 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1744581372;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=x1yjFnQamiTjPe/VkGVTpXBnkVPJsiFAP2ZxRatOZeE=;
-	b=Ot6XUn212kRkyI4rE8E1lVquW03cGGsOKK68dkhGSdS6ywjQzeons1cfklzzdWPw9UPs7S
-	1BSwtBoNhrH9KUpI3fvev0Rm+zOhSAVdjE8mOMNaQJuL6G9pq6CnZZVansfw1gZBgSCYdY
-	vLUV3AWrjFhVC8IIhrnMpEwu2atCrpc=
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-From: Kent Overstreet <kent.overstreet@linux.dev>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org, David Sterba <dsterba@suse.com>, 
-	linux-fsdevel@vger.kernel.org
-Subject: Re: [PATCH v2] README: add supported fs list
-Message-ID: <u2pigq4tq5aj5qvjrf3idna7hfdl6b4ciko5jvorkyorg25dck@4ti6fjx55hda>
-References: <20250328164609.188062-1-zlang@kernel.org>
+	 Content-Type:Content-Disposition:In-Reply-To; b=TMaEWzhVlUpKKYnVpENOzuqUekeYecek7u0K38eX/TV62g4Jk+1RJ3DTUvWZMs5GWdmtAoMkmcSx9P2phAfa2PKjGhFTTwR+cbPnskkaVFoaolsCkYCG5MJ8DkyOf7C4qP/TGll9lJTerfeMqtEoEUeUIBjILstHzRVluqnr2gg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+Received: from macsyma.thunk.org (c-73-9-28-129.hsd1.il.comcast.net [73.9.28.129])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 53E1lLNq026151
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sun, 13 Apr 2025 21:47:23 -0400
+Received: by macsyma.thunk.org (Postfix, from userid 15806)
+	id BF5C0345F0A; Sun, 13 Apr 2025 17:48:58 -0400 (EDT)
+Date: Sun, 13 Apr 2025 17:48:58 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+        linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
+        ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org,
+        david@fromorbit.com
+Subject: Re: [PATCH v2 2/3] check: Add -q <n> option to support unconditional
+ looping.
+Message-ID: <20250413214858.GA3219283@mit.edu>
+References: <cover.1743670253.git.nirjhar.roy.lists@gmail.com>
+ <762d80d522724f975df087c1e92cdd202fd18cae.1743670253.git.nirjhar.roy.lists@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,117 +42,44 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250328164609.188062-1-zlang@kernel.org>
-X-Migadu-Flow: FLOW_OUT
+In-Reply-To: <762d80d522724f975df087c1e92cdd202fd18cae.1743670253.git.nirjhar.roy.lists@gmail.com>
 
-On Sat, Mar 29, 2025 at 12:46:09AM +0800, Zorro Lang wrote:
-> To clarify the supported filesystems by fstests, add a fs list to
-> README file.
+On Thu, Apr 03, 2025 at 08:58:19AM +0000, Nirjhar Roy (IBM) wrote:
+> This patch adds -q <n> option through which one can run a given test <n>
+> times unconditionally. It also prints pass/fail metrics at the end.
 > 
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
-> Acked-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
-> 
-> The v1 patch and review points:
-> https://lore.kernel.org/fstests/20250227200514.4085734-1-zlang@kernel.org/
-> 
-> V2 did below things:
-> 1) Fix some wrong english sentences
-> 2) Explain the meaning of "+" and "-".
-> 3) Add a link to btrfs comment.
-> 4) Split ext2/3/4 to 3 lines.
-> 5) Reorder the fs list by "Level".
-> 
-> Thanks,
-> Zorro
-> 
->  README | 90 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 90 insertions(+)
-> 
-> diff --git a/README b/README
-> index 024d39531..5ceaa0c1e 100644
-> --- a/README
-> +++ b/README
-> @@ -1,3 +1,93 @@
-> +_______________________
-> +SUPPORTED FS LIST
-> +_______________________
-> +
-> +History
-> +-------
-> +
-> +Firstly, xfstests is the old name of this project, due to it was originally
-> +developed for testing the XFS file system on the SGI's Irix operating system.
-> +When xfs was ported to Linux, so was xfstests, now it only supports Linux.
-> +
-> +As xfstests has many test cases that can be run on some other filesystems,
-> +we call them "generic" (and "shared", but it has been removed) cases, you
-> +can find them in tests/generic/ directory. Then more and more filesystems
-> +started to use xfstests, and contribute patches. Today xfstests is used
-> +as a file system regression test suite for lots of Linux's major file systems.
-> +So it's not "xfs"tests only, we tend to call it "fstests" now.
-> +
-> +Supported fs
-> +------------
-> +
-> +Firstly, there's not hard restriction about which filesystem can use fstests.
-> +Any filesystem can give fstests a try.
-> +
-> +Although fstests supports many filesystems, they have different support level
-> +by fstests. So mark it with 4 levels as below:
-> +
-> +L1: Fstests can be run on the specified fs basically.
-> +L2: Rare support from the specified fs list to fix some generic test failures.
-> +L3: Normal support from the specified fs list, has some own cases.
-> +L4: Active support from the fs list, has lots of own cases.
-> +
-> +("+" means a slightly higher than the current level, but not reach to the next.
-> +"-" is opposite, means a little bit lower than the current level.)
-> +
-> ++------------+-------+---------------------------------------------------------+
-> +| Filesystem | Level |                       Comment                           |
-> ++------------+-------+---------------------------------------------------------+
-> +| XFS        |  L4+  | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| Btrfs      |  L4   | https://btrfs.readthedocs.io/en/latest/dev/Development-\|
-> +|            |       | notes.html#fstests-setup                                |
-> ++------------+-------+---------------------------------------------------------+
-> +| Ext4       |  L4   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| Ext2       |  L3   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| Ext3       |  L3   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| overlay    |  L3   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| f2fs       |  L3-  | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| tmpfs      |  L3-  | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| NFS        |  L2+  | https://linux-nfs.org/wiki/index.php/Xfstests           |
-> ++------------+-------+---------------------------------------------------------+
-> +| Ceph       |  L2   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| CIFS       |  L2-  | https://wiki.samba.org/index.php/Xfstesting-cifs        |
-> ++------------+-------+---------------------------------------------------------+
-> +| ocfs2      |  L2-  | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| Bcachefs   |  L1+  | N/A                                                     |
+> The advantage of this over -L <n> and -i/-I <n> is that:
+>     a. -L <n> will not re-run a flakey test if the test passes for the first time.
+>     b. -I/-i <n> sets up devices during each iteration and hence slower.
+> Note -q <n> will override -L <n>.
 
-I heavily use xfstests and look at the test results every day - I
-believe that would indicate L3.
+I'm wondering if we need to keep the current behavior of -I/-i.  The
+primary difference between them and how your proposed -q works is that
+instead of iterating over the section, your proposed option iterates
+over each test.  So for example, if a section contains generic/001 and
+generic/002, iterating using -i 3 will do this:
 
-bcachefs specific tests are not generally in fstests beacuse there's
-lots of things that ktest can do that fstests can't, and I find it a bit
-more modern (i.e. tests that names, not numbers)
+generic/001
+generic/002
+generic/001
+generic/002
+generic/001
+generic/002
 
-Not all tests are passing (and won't be for awhile), but the remaining
-stuff is non critical (i.e. fsync() error behaviour when the filesystem
-has been shutdown, or certain device removal tests where the behaviour
-could probably use some discussion.
+While generic -q 3 would do this instead:
 
-But if you find e.g. a configuration that produces a generic/388 pop,
-that would go to the top of the pile.
+generic/001
+generic/001
+generic/001
+generic/002
+generic/002
+generic/002
 
-(I do have a few patches to the tests for bcachefs in my tree that I
-really ought to get upstream).
+
+At least for all of the use cases that I can think of where I might
+use -i 3, -q 3 is strictly better.  So instead of adding more options
+which change how we might do iterations, could we perhaps just replace
+-i with your new -q?  And change -I so that it also works like -q,
+except if any test fails, that we stop?
+
+					- Ted
