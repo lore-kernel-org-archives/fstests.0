@@ -1,165 +1,158 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from out-179.mta1.migadu.com (out-179.mta1.migadu.com [95.215.58.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A38D1B3935
-	for <fstests@vger.kernel.org>; Sun, 13 Apr 2025 13:27:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4811416C850
+	for <fstests@vger.kernel.org>; Sun, 13 Apr 2025 21:56:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744550869; cv=none; b=fQZjTPLc6S/OM2Ff9z9yDmeDcMahX6Z9j6sGHHQbZ8G7c+qqmAIt23GcshgwbyLjxR5qCZFZ58xcSWL41NHH2/Y1fhJGI+IPja1fMt0M3yw0xYmuyixhmGGse2tJVpTwETo4UZt1nSYOs0VNYPntjHHtHWw3MzqSMilSeNsXApg=
+	t=1744581378; cv=none; b=W0Gumvzr3CMFs7G1Hd/y3tOGlsGRTp7207wG3RyHx6p62YzcQs+Z+SJc67x6DXkodwicU72Z/OGStZ28R6fthcgajQF/5ccrjVgVc0nlQC0FTi+vQtXBaxLn25hkVI3qCARgJGfKIj0YleVSU+UrtkrJFn5AjZvtb5OYPprBaeU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744550869; c=relaxed/simple;
-	bh=hcn4FGJp70ivM+yNksLmjemXik6DsMr+FeMAQzhyxAk=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=SHNPVCVgVq3sDNpy8eTZyjXEkYcdxhlM3buA/1yMtrcW4tzmaTRVI8pITbySfY5AMjljU+NT7LWtL81ErsVBu3iJZf6mW7it8NAZzU3rIYIly2ttYnEjIfsPt7KklWxybDSJUGM2FWWO24mvA/ppXIPW8BGqaGiabYm4ZkNv6Yc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XIh4kj7k; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1744581378; c=relaxed/simple;
+	bh=ZGwyvhVohsHYoerb048m6P7e99+DhrhKFtPFNT1KHtA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=WNjusyu+AZqwQK4fWYayX0fWNBRB448EqpWbW9N4MrDXgxSOGE0hxzQQ/UljRsbqs18mPoj6fpgd8oq2E+t8YYTvwstQ9M23WePAI31yDGsRnpJbsHo1HKCPPx7DCl5b/x5G0EHYy63Y/5Cil8L0mH5omqCkwHgiLwQ59x0BejU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=Ot6XUn21; arc=none smtp.client-ip=95.215.58.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XIh4kj7k"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F8FEC4CEDD;
-	Sun, 13 Apr 2025 13:27:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1744550869;
-	bh=hcn4FGJp70ivM+yNksLmjemXik6DsMr+FeMAQzhyxAk=;
-	h=Date:From:To:Subject:From;
-	b=XIh4kj7kyDBp4RrfoH4Q/95bYJvgC6FK1ZWfU2EZDtJswMdEgDuNE/seIyH/c0fEs
-	 w2lEz/dTwMNmw3pNRPZpBoA1cIifKrrD6BfwayX6W54SoxWadF9sZV0/cUarr8/Bb1
-	 KXHtZVTadeJ7Zwf3d7rmCk46YzcNV8PdVfKEcUgVnJNho8CDUQ8V+YjBWB/W55O8u4
-	 K6a9MTXbiUHltgeuIzP4e/jBH/HMtIcQHiODqqAsZQJMy9dUU+fkg+DVB6amGqMFqJ
-	 A46brtQesjsggTfbWPHcY/Lsv1rVEzVEktAuNA3b9TDpziyfp5w0dXn1CQzBfCSufv
-	 gdZETfCnl1YXw==
-Date: Sun, 13 Apr 2025 21:27:46 +0800
-Message-ID: <edd2224618169707c37d1c35bdcb0e05@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2025.04.13
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="Ot6XUn21"
+Date: Sun, 13 Apr 2025 17:56:08 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
+	t=1744581372;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=x1yjFnQamiTjPe/VkGVTpXBnkVPJsiFAP2ZxRatOZeE=;
+	b=Ot6XUn212kRkyI4rE8E1lVquW03cGGsOKK68dkhGSdS6ywjQzeons1cfklzzdWPw9UPs7S
+	1BSwtBoNhrH9KUpI3fvev0Rm+zOhSAVdjE8mOMNaQJuL6G9pq6CnZZVansfw1gZBgSCYdY
+	vLUV3AWrjFhVC8IIhrnMpEwu2atCrpc=
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+From: Kent Overstreet <kent.overstreet@linux.dev>
+To: Zorro Lang <zlang@kernel.org>
+Cc: fstests@vger.kernel.org, David Sterba <dsterba@suse.com>, 
+	linux-fsdevel@vger.kernel.org
+Subject: Re: [PATCH v2] README: add supported fs list
+Message-ID: <u2pigq4tq5aj5qvjrf3idna7hfdl6b4ciko5jvorkyorg25dck@4ti6fjx55hda>
+References: <20250328164609.188062-1-zlang@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="Bc2qNJlz2K8Q"
-Content-Disposition: inline
-
-
---Bc2qNJlz2K8Q
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20250328164609.188062-1-zlang@kernel.org>
+X-Migadu-Flow: FLOW_OUT
 
-Hi all,
+On Sat, Mar 29, 2025 at 12:46:09AM +0800, Zorro Lang wrote:
+> To clarify the supported filesystems by fstests, add a fs list to
+> README file.
+> 
+> Signed-off-by: Zorro Lang <zlang@kernel.org>
+> Acked-by: "Darrick J. Wong" <djwong@kernel.org>
+> ---
+> 
+> The v1 patch and review points:
+> https://lore.kernel.org/fstests/20250227200514.4085734-1-zlang@kernel.org/
+> 
+> V2 did below things:
+> 1) Fix some wrong english sentences
+> 2) Explain the meaning of "+" and "-".
+> 3) Add a link to btrfs comment.
+> 4) Split ext2/3/4 to 3 lines.
+> 5) Reorder the fs list by "Level".
+> 
+> Thanks,
+> Zorro
+> 
+>  README | 90 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 90 insertions(+)
+> 
+> diff --git a/README b/README
+> index 024d39531..5ceaa0c1e 100644
+> --- a/README
+> +++ b/README
+> @@ -1,3 +1,93 @@
+> +_______________________
+> +SUPPORTED FS LIST
+> +_______________________
+> +
+> +History
+> +-------
+> +
+> +Firstly, xfstests is the old name of this project, due to it was originally
+> +developed for testing the XFS file system on the SGI's Irix operating system.
+> +When xfs was ported to Linux, so was xfstests, now it only supports Linux.
+> +
+> +As xfstests has many test cases that can be run on some other filesystems,
+> +we call them "generic" (and "shared", but it has been removed) cases, you
+> +can find them in tests/generic/ directory. Then more and more filesystems
+> +started to use xfstests, and contribute patches. Today xfstests is used
+> +as a file system regression test suite for lots of Linux's major file systems.
+> +So it's not "xfs"tests only, we tend to call it "fstests" now.
+> +
+> +Supported fs
+> +------------
+> +
+> +Firstly, there's not hard restriction about which filesystem can use fstests.
+> +Any filesystem can give fstests a try.
+> +
+> +Although fstests supports many filesystems, they have different support level
+> +by fstests. So mark it with 4 levels as below:
+> +
+> +L1: Fstests can be run on the specified fs basically.
+> +L2: Rare support from the specified fs list to fix some generic test failures.
+> +L3: Normal support from the specified fs list, has some own cases.
+> +L4: Active support from the fs list, has lots of own cases.
+> +
+> +("+" means a slightly higher than the current level, but not reach to the next.
+> +"-" is opposite, means a little bit lower than the current level.)
+> +
+> ++------------+-------+---------------------------------------------------------+
+> +| Filesystem | Level |                       Comment                           |
+> ++------------+-------+---------------------------------------------------------+
+> +| XFS        |  L4+  | N/A                                                     |
+> ++------------+-------+---------------------------------------------------------+
+> +| Btrfs      |  L4   | https://btrfs.readthedocs.io/en/latest/dev/Development-\|
+> +|            |       | notes.html#fstests-setup                                |
+> ++------------+-------+---------------------------------------------------------+
+> +| Ext4       |  L4   | N/A                                                     |
+> ++------------+-------+---------------------------------------------------------+
+> +| Ext2       |  L3   | N/A                                                     |
+> ++------------+-------+---------------------------------------------------------+
+> +| Ext3       |  L3   | N/A                                                     |
+> ++------------+-------+---------------------------------------------------------+
+> +| overlay    |  L3   | N/A                                                     |
+> ++------------+-------+---------------------------------------------------------+
+> +| f2fs       |  L3-  | N/A                                                     |
+> ++------------+-------+---------------------------------------------------------+
+> +| tmpfs      |  L3-  | N/A                                                     |
+> ++------------+-------+---------------------------------------------------------+
+> +| NFS        |  L2+  | https://linux-nfs.org/wiki/index.php/Xfstests           |
+> ++------------+-------+---------------------------------------------------------+
+> +| Ceph       |  L2   | N/A                                                     |
+> ++------------+-------+---------------------------------------------------------+
+> +| CIFS       |  L2-  | https://wiki.samba.org/index.php/Xfstesting-cifs        |
+> ++------------+-------+---------------------------------------------------------+
+> +| ocfs2      |  L2-  | N/A                                                     |
+> ++------------+-------+---------------------------------------------------------+
+> +| Bcachefs   |  L1+  | N/A                                                     |
 
-The for-next branch of the xfstests repository at:
+I heavily use xfstests and look at the test results every day - I
+believe that would indicate L3.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+bcachefs specific tests are not generally in fstests beacuse there's
+lots of things that ktest can do that fstests can't, and I find it a bit
+more modern (i.e. tests that names, not numbers)
 
-has just been updated and tagged as v2025.04.13 release.
+Not all tests are passing (and won't be for awhile), but the remaining
+stuff is non critical (i.e. fsync() error behaviour when the filesystem
+has been shutdown, or certain device removal tests where the behaviour
+could probably use some discussion.
 
-Release Notes:
-1) There 3 new test cases in this release, include generic/765, btrfs/329
-   and btrfs/334.
-2) x/629 ~ x/632 have been removed from auto and quick groups, please note
-   that, if it affects your test plan.
-3) Cleanup some codes in common/ and check.
+But if you find e.g. a configuration that produces a generic/388 pop,
+that would go to the top of the pile.
 
-More updates and fixes refer to below, thanks for all these contributions!
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-2cc8c822f864 fstests: btrfs: testcase for sysfs chunk_size attribute validation
-
-New commits:
-
-Anand Jain (5):
-      [0a9011ae6a36] fstests: common/rc: set_fs_sysfs_attr: redirect errors to stdout
-      [afdb10ee1853] fstests: filter: helper for sysfs error filtering
-      [03adc99ef11c] fstests: common/sysfs: add new file sysfs and helpers
-      [f5cb79fb0f10] fstests: btrfs: testcase for sysfs policy syntax verification
-      [2cc8c822f864] fstests: btrfs: testcase for sysfs chunk_size attribute validation
-
-Catherine Hoang (1):
-      [d90ee3b64963] generic: add a test for atomic writes
-
-Christoph Hellwig (1):
-      [ad048ff62f50] xfs: remove the post-EOF prealloc tests from the auto and quick groups
-
-Darrick J. Wong (4):
-      [7ff687d85747] common/rc: fix dumping of corrupt ext* filesystems
-      [68e9620be4a6] xfs/801: provide missing sysfs-dump function
-      [bc7f79bd13d8] xfs/792: skip test if rextsize isn't congruent with operation length
-      [8d1447890a8c] generic/275: fix on 32k fsblock filesystems
-
-Nirjhar Roy (IBM) (7):
-      [83e1f4c43817] xfs/539: Ignore remount failures on v5 xfs
-      [a758e467c24a] generic/749: Remove redundant sourcing of common/rc
-      [fb15457efd0f] generic/367: Remove redundant sourcing of common/config
-      [491eddb2699f] check: Remove redundant _test_mount in check
-      [69bdf04c98c3] check,common{rc,preamble}: Decouple init_rc() call from sourcing common/rc
-      [1c2f3da49c5d] common/config: Introduce _exit wrapper around exit command
-      [f14f2a885954] common: exit --> _exit
-
-Swarna Prabhu (1):
-      [3be9add6d1d3] generic/750 : add missing _fixed_by_git_commit line to the test
-
-
-Code Diffstat:
-
- check                 |  10 ++-
- common/btrfs          |   6 +-
- common/ceph           |   2 +-
- common/config         |  16 +++--
- common/dump           |  11 ++-
- common/ext4           |   2 +-
- common/filter         |   9 +++
- common/populate       |   2 +-
- common/preamble       |   3 +-
- common/punch          |  13 ++--
- common/rc             | 163 +++++++++++++++++++++++++++----------------
- common/repair         |   4 +-
- common/sysfs          | 145 ++++++++++++++++++++++++++++++++++++++
- common/xfs            |   8 +--
- tests/btrfs/329       |  21 ++++++
- tests/btrfs/329.out   |  19 +++++
- tests/btrfs/334       |  21 ++++++
- tests/btrfs/334.out   |  14 ++++
- tests/generic/275     |   3 +
- tests/generic/367     |   1 -
- tests/generic/749     |   1 -
- tests/generic/750     |   6 +-
- tests/generic/765     | 188 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/765.out |   2 +
- tests/xfs/539         |   2 +-
- tests/xfs/629         |   2 +-
- tests/xfs/630         |   2 +-
- tests/xfs/631         |   2 +-
- tests/xfs/632         |   2 +-
- tests/xfs/792         |   1 +
- tests/xfs/801         |  12 ++++
- 31 files changed, 590 insertions(+), 103 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---Bc2qNJlz2K8Q
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmf7u7wACgkQlNbPkfr2
-tMxSOxAAldV+MFcKzyL2+k5r1/kuTbYAYPQ0KeAP7npXKKPp79Xqf5IOTlPxorUR
-t/eaP1MvU7d6rezc1wTTb5BesuKHpSYpkFHt+mLKq2LwF5de2D+PByii5DXeExsS
-FzoDviwRxHtCMnaUAqbe1DjiAiQa5cr2jMdAWlQyaolggftBf+Uupl+bWbyx2gNZ
-79fGZ5ERggGDWPWuj3hEQCjbXKI8jSbvLvNmVU/3k8UvD9qSBWGmOpmCz5Jk9fGb
-xK2myX+jYuTQByH21fqo79CIqWPTfdbvPbSMPo1zSBKuPyEK8KHbgJFeV/thGbLM
-aQx+QiURKsj9YJd+HnfK/v98tFPI/u0z/ZRctecGPYQpO/bvJqV0kGWB5mdAVOQN
-jHByxi63bk5hJcfE2nZKyixzj3oOtkLiZ+KAEiyAPhStcjqpYeMUjQrwfjWgn6q3
-mt0Qy03NhLQGnMEL8+l2y9CmyWjfwn3bNzIe/OOYFwFIbZkkWXSZznIlrTfpcJTU
-TJdV7uC/AsSXILFk9x3qcLok5lqT4YJ129xdj7KeJvQLf0aI8NcA+jJRkcFZdRg+
-XojHOuqglP0/3tCN9QdjzR/qlwM8OlhXulM7dlF8aqtFClAZDvkbA8UyqzpRiDpa
-E5ArcGJGFapsaopHSQOIx1fiVPnmBa0fGEVnkTnmOWuojyJ/qwA=
-=ZQvr
------END PGP SIGNATURE-----
-
---Bc2qNJlz2K8Q--
+(I do have a few patches to the tests for bcachefs in my tree that I
+really ought to get upstream).
