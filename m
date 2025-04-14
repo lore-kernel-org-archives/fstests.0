@@ -1,104 +1,76 @@
-Received: from out-173.mta0.migadu.com (out-173.mta0.migadu.com [91.218.175.173])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC76A290088
-	for <fstests@vger.kernel.org>; Mon, 14 Apr 2025 11:09:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 95B2218DB1E
+	for <fstests@vger.kernel.org>; Mon, 14 Apr 2025 11:58:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744628998; cv=none; b=RthlGRf9qilEgWgnHo+Tz5CgtXCKgwFBb4vucysCm12F9h0EIesgIw3L8ZX2QTG1MWK/MlZ5hITYiKF9k8q4fZWwyD4DPD+vIXPm1r006oKdkqek+7ArvUmDq3TUHqRCYU2v2q4Mm293KFDmfYyvMC5w4KVmOLxDEtLDdbuAPC4=
+	t=1744631910; cv=none; b=ggwg9ytW0maXxw1vxSvIUYHuV4uB6+j5m2gtKG6uHyTZp34Lv6IfrrKAZ6cTbORGx0J9xULgykGA6xWL+XRaq9fu8VnmKaKNwNwNV/dxVU4yJZe/HUVpJMfOO8MuVQ0PgPqe65mOsuZ3u8x2eGxVwPLeWuaLsdutLuRPv8Ggg+E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744628998; c=relaxed/simple;
-	bh=q08922A4yKgEH82yvFth/K+0rlyEy0HZrUqvhFgN6pE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Vxny1/93QsfCG5r051aA/ox0ZTaoLuZNQ/HLMxblHf70qxEeimfM0qceST9eIYK8ZuWWT5w/uRdqn2jKIiKLlMHjrLnwlU93GTZDY3F4e4JFppzA5OtIu+jXxCEDueVUENNwtLGj9JFhnj/Zkg/nlmlrz5CY5/OUwINkQ1fisDk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=uuqOhQnz; arc=none smtp.client-ip=91.218.175.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	s=arc-20240116; t=1744631910; c=relaxed/simple;
+	bh=d9oINBvcYRIsvuPu1mHIsMe9RNkL8NFVLsreN8q4TT0=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=VtlVuK6U4sJoZNSjY1WEdvFVZHvZr7cOQ8xb4ZQdckd/rKqInNjAchaza5FzI+MkfTLwXMXccYL0tnThtiN87F+mATW+nx1hqqehdo3FKhmMtjDN9/1+6WWCbOG8APAKlkrWr8PFDxbt09bMbQTwk1yYoL676y9Es+gZaNQ/xiY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=artvMcyA; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="uuqOhQnz"
-Date: Mon, 14 Apr 2025 07:09:40 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1744628983;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=FQ3mkGGw8Px2MJlSAKgdSW9a06mMz6yRygMq5HG+vX8=;
-	b=uuqOhQnzDrweD6ONhFmlYBc8f2GebBEemmxwH6/rVmtv4I7ZHJaxuX05Yr8EQfK8wzogbG
-	8Tm9hF2Mop+rQfoWsoDwPZZ1f71Bj6lY59IMNQ8CptTB07b8DDQykSdBmZZ1zhUNOLTnMr
-	EjmY0Y+4nIOa5VhSjOQar4BGwI7+K5c=
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-From: Kent Overstreet <kent.overstreet@linux.dev>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org, 
-	David Sterba <dsterba@suse.com>, linux-fsdevel@vger.kernel.org
-Subject: Re: [PATCH v2] README: add supported fs list
-Message-ID: <rh6l7ugjga6xj22wipaxrpveyxthpgngntdhp3czgatccdkz7w@sqbph4huj7fr>
-References: <20250328164609.188062-1-zlang@kernel.org>
- <u2pigq4tq5aj5qvjrf3idna7hfdl6b4ciko5jvorkyorg25dck@4ti6fjx55hda>
- <20250414055857.w2zvapp3mjintgar@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="artvMcyA"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=+Zic7NO4a8Bhfqvj9nzu2243yHCg/1NgxL1EawD5pEE=; b=artvMcyAqUounvdjs+qZDCX/hx
+	UTDG8atBKzywR8Hh30kgDzttR3aSh3NgNjgfcNQJhOu/hD6E2ZeqwSIfdDjh29/0taZomvQdrl18V
+	RsJA9Wodmj2pSYeY5oI9H+Jf2igA7DaMOA8+iF4BeAJxfTiPCl7/3viAuE6nBWmQh15+uIyzvFrnh
+	pAAKFqwlEEPSV9j1hr1HM+ta2Hy5DK6UHpBHvZ3T3YSk0PEdXVrNnCJP+kyMxXT1jSMfREHjbzhrB
+	IbMjjHL/S8pH1CwCMM2VQgbXadiOnQKWQmE7LPXhwauM9zLO9Fn8lvHuob0ILDMGBYcVQ6Z6dHqRX
+	FfvzBUjw==;
+Received: from 213-147-166-27.nat.highway.webapn.at ([213.147.166.27] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1u4ISJ-00000001rPd-2zoA;
+	Mon, 14 Apr 2025 11:58:28 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: zlang@kernel.org
+Cc: djwong@kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] generic/233: use relative path to invoke fsstress
+Date: Mon, 14 Apr 2025 13:58:20 +0200
+Message-ID: <20250414115820.399980-1-hch@lst.de>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250414055857.w2zvapp3mjintgar@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-X-Migadu-Flow: FLOW_OUT
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Mon, Apr 14, 2025 at 01:58:57PM +0800, Zorro Lang wrote:
-> On Sun, Apr 13, 2025 at 05:56:08PM -0400, Kent Overstreet wrote:
-> > I heavily use xfstests and look at the test results every day - I
-> > believe that would indicate L3.
-> 
-> Glad to receive the response from bcachefs :) L3 means there're enough fs specific
-> test cases in tests/$FSTYP besides generic cases, e.g. tests/overlay, or f2fs (although
-> it only has a few currently, but it's increasing).
+This test uses su to run fsstress as $qa_user.  Because the shell calling
+fsstress is run as $qa_user it might not be able to access the xfstests
+or parent directory which might only be accessible to the user xfstests
+is run as (e.g. root).  Switch back to calling fsstress using a relative
+path, partially reverting the effects of commit c475ff6ff6d7
+("common/config: add $here to FSSTRESS_PROG").
 
-Active support for existing tests, or writing new tests?
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ tests/generic/233 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-To be blunt, fstests is not a great environment for writing tests, the
-'golden master' model of pass/failure means debugging test failures is
-archaic.
+diff --git a/tests/generic/233 b/tests/generic/233
+index df67b39092b7..91dc554d3478 100755
+--- a/tests/generic/233
++++ b/tests/generic/233
+@@ -43,7 +43,7 @@ _fsstress()
+ 	# temporarily.
+ 	ulimit -l unlimited
+ 	echo "fsstress $args" >> $seqres.full
+-	if ! _su $qa_user -c "$FSSTRESS_PROG $args" | tee -a $seqres.full | _filter_num
++	if ! _su $qa_user -c "ltp/fsstress $args" | tee -a $seqres.full | _filter_num
+ 	then
+ 		echo "    fsstress $args returned $?"
+ 		cat $tmp.out | tee -a $seqres.full
+-- 
+2.47.2
 
-But those tests do get run and used, with active support.
-
-> > bcachefs specific tests are not generally in fstests beacuse there's
-> > lots of things that ktest can do that fstests can't, and I find it a bit
-> > more modern (i.e. tests that names, not numbers)
-> 
-> ktest? linux/tools/testing/ktest/ ? I'm glad to learn about more test suites,
-> I run fstests and LTP and some others too, fstests can't cover everything :)
-> Hmm... about the names... fstests supports to append a name to the ID number,
-> but the developers (looks like) prefer using number only all the time, then
-> it become a "tradition" now.
-
-No, not that. Does anyone even use that thing?
-
-https://evilpiepirate.org/git/ktest.git/
-
-It's a full CI - https://evilpiepirate.org/~testdashboard/ci
-
-> 
-> > 
-> > Not all tests are passing (and won't be for awhile), but the remaining
-> > stuff is non critical (i.e. fsync() error behaviour when the filesystem
-> > has been shutdown, or certain device removal tests where the behaviour
-> > could probably use some discussion.
-> > 
-> > But if you find e.g. a configuration that produces a generic/388 pop,
-> > that would go to the top of the pile.
-> > 
-> > (I do have a few patches to the tests for bcachefs in my tree that I
-> > really ought to get upstream).
-> 
-> Sure, warm welcome your patches. And don't worry, you can send patch to
-> update the level part anytime when you think fstests supports becachefs
-> more :)
-> 
-> Thanks,
-> Zorro
-> 
-> > 
-> 
