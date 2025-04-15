@@ -1,147 +1,197 @@
-Received: from mail-pj1-f44.google.com (mail-pj1-f44.google.com [209.85.216.44])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E4F22417C8;
-	Tue, 15 Apr 2025 07:32:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BBB64288CB3
+	for <fstests@vger.kernel.org>; Tue, 15 Apr 2025 09:38:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744702380; cv=none; b=qI+JmfFE3adXw3lh/v35ZSdZs1kYUyXqul5M6kuWFf251CQ/ZNF36Yn91XmZpaO504x2ydJ0Y1ymAQvXnJXKYoubtkata/cr1HPWOEojIKu3hanyUIbnqi8z0gRj5RL3luy1ju8UwAZ8L7q3DH56FPh8rRv7hznyyv6zsQeeamc=
+	t=1744709913; cv=none; b=uYtvUyyYOqwHWjnJvDj9wZQbPDEDkFBPzT5/u7biGVG2ybOHUxXam1P/MkLOGK/JvHbIRJW2gaNqPuenBY4QhehuQIlm86bRK0lI+I7c5e431bDaYa7CUG9MGTOzKA0K/++q07dJ1gKW/BaYsZgq1A6qhjLHi6e3kd+Shi3wJ+g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744702380; c=relaxed/simple;
-	bh=dRa7U50k7zlGiFNhGjsL8BiwV/iToruZ/EK4vr7CDcM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Nle7206zEk49H9fK7ebp/J4s97Vf1meKQsJjLF8am7Hm+Mi7PwAcGk3hsbzbu5QjLIhJy40qSCdAnS8YJRvH2pAH+n8Jh8uvvfRZmBy6mFAt1SNK1a4WRfOxDm6GG8diCQUi3VPvqxpaFacuV0DrO4vaV+MoyHqVeB1GXThdyHk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=NhFtvdQk; arc=none smtp.client-ip=209.85.216.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1744709913; c=relaxed/simple;
+	bh=u0EytPYWMSeIqaz6DAmJzDvepXrVjSRMwN12Ddna4Ys=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=IsiwUzfUS44ZKlWoRvYj1+Pik1Rino+yKD7tUFUWht2dXTlLkqYlCmiTA4h3MxGfYJxdx3evMPFtcTNHP8t3n02Jko1L8XhqWq9A6K7Oek6/jKEbWiIeTfTmgWZgA45gY9GxfCNZrWcpSwYoxEKCeg6GrqKjALzxs0gT8xioIqc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iDeDXkAt; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="NhFtvdQk"
-Received: by mail-pj1-f44.google.com with SMTP id 98e67ed59e1d1-301302a328bso5095860a91.2;
-        Tue, 15 Apr 2025 00:32:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1744702379; x=1745307179; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=WI6WVR10Hp7er7JtN8anSpyRNsNLQ+CYvMTaV0pTxcY=;
-        b=NhFtvdQksSzcq04PpPqID9clBSLUnXs1v9vSdCaruH9Sm5o1mTiZOFgOsuuAXjnJMb
-         qEew1mbulpQ53uBSyek+QIfgsUgYofUFSFbtzm/IMHMI7i9zretEzP/TROcMqOJpt15c
-         DHkUhq9w0ovcJMdRK9zTacOxxoHYJ6eFPiWuWHNtfComTWoCStIvIHVreO1E7qHIToSi
-         fHRo8OBRBDlZyDSM8lphImLBu4Y4WJV0kYrpaxDqzqYg2IyHgvorgZTfqMS6JkjcYbBb
-         G9iBwIObF1GvR/5NeHGkYs2kdLKio5S61zKGRaepy4kpjRPsLFNSIHnu/V8AyaNlvz0X
-         RNSA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744702379; x=1745307179;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=WI6WVR10Hp7er7JtN8anSpyRNsNLQ+CYvMTaV0pTxcY=;
-        b=bFVawmIx9jaheyRTUm8t4b0wo/JvShb4h2eQXEZoJdv3VYdE74rjn/U+tedD3jp/E1
-         WvprOzCJXnOkIqUlk6XqFaZwNnIBfk+o3egXpdH1PeqrxsmuMDiGZwXKuh+7mb/ctNqw
-         vA5FYO61dmEQjORHYWcNgjm4nmFxEDtFazmJcdFOCXPu3a2JXkVBuWVzaYHKgDRA3s/4
-         A90qXXFapfOgnhDPPhhqC9UGjmYJjuGUR6eX2jqSHbuzTWoEgZVE50cys625BCvny0i+
-         Kp29QscClKLwmo17atFxTkPmPfkgS6/m5dP5qVjCPf2jmBKg0EaZu9vRqJonS1i9bT7e
-         l4Og==
-X-Forwarded-Encrypted: i=1; AJvYcCUruJt8zcQKx4MJM6U5JOyjDfKdEYzYe6wk3zcxiGWbhZy8Jq9QKNRB8e0W3NDqYQzVcgH9jcnW5nb6@vger.kernel.org, AJvYcCXmPglsj0Ma+ykCvaitTCHLLmv+8sLKZIOySsVH+lq4+3cmidvqu2e80l0wzn/gZXnVUjAxqLt4KXhU@vger.kernel.org
-X-Gm-Message-State: AOJu0YxIP1Q/dT6JcFfhEYJQ6OfDN6jTZ7o+/aFYuXJOvFnT9gET1Bvp
-	SpVki/B3YaOIvONu3V3Mv8OkCp+rEea7vyozVUOoKNtmbN9LRcnTwnGULA==
-X-Gm-Gg: ASbGncuBhH0OpWTnnpNPKntI6ug+5M5aR27FmvO9bN5zkd+3Ce4TioKm+9kYO6q6gfP
-	ZCGSeG/hTyksD7k0nPFEd9MVti69pqYiSJNBUL8uOjmSWNeGv7NUJ2FwIObLAUBfaJv4DRNcSfJ
-	8EOS+AJIj84ZhEmto2RZ02Za2vAaM/493t7Wvx7yEOAcL0WCp0mpBHH+ssKN6wp6e6wuHIknvgz
-	mtGoVIO14X81oWWUqdGB1hbAmQGYbTnululWS8HTk1jFcOXB/FnGvDOcZaUFBQaqYFkhAMquww6
-	WbYgu2ZebRKlLfuIZjdvSKRzCgoEvoVbwG4rWweTM0CLQaZZ
-X-Google-Smtp-Source: AGHT+IGITOXsdb6/to2gllPINuVI05qRfT0qiJ3rKWP2gX2cZW92Y05w/SZ/NdIA2iIb6eqK6T+7UQ==
-X-Received: by 2002:a17:90b:254d:b0:2fa:137f:5c61 with SMTP id 98e67ed59e1d1-30823639ca2mr28839546a91.12.1744702378682;
-        Tue, 15 Apr 2025 00:32:58 -0700 (PDT)
-Received: from [192.168.1.13] ([60.243.3.154])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22ac7ce503dsm110402365ad.259.2025.04.15.00.32.55
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 15 Apr 2025 00:32:58 -0700 (PDT)
-Message-ID: <9619fb07-1d2c-4f23-8a62-3c73ca37bec3@gmail.com>
-Date: Tue, 15 Apr 2025 13:02:49 +0530
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iDeDXkAt"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DC2F0C4CEDD;
+	Tue, 15 Apr 2025 09:38:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1744709913;
+	bh=u0EytPYWMSeIqaz6DAmJzDvepXrVjSRMwN12Ddna4Ys=;
+	h=From:To:Cc:Subject:Date:From;
+	b=iDeDXkAtZ22AmwKMg1lzAiIVoSgjhgDm2WwARAZahJ+d2vFOQscrHu5kZBHJbN2Zj
+	 lJi4TZoEH5TUmS7VWb3XJonCZaZJbolVV1bjLmKPQEcEW/mLptlK5M+ABHc2QA1B8k
+	 5ra5RMeayJ55GMpZAEiLop54cC+hAM4yE2/uUouua7pydGM6xy5gIkWEOdQpfen12V
+	 IkHn+CsaDXACfqL3q6T+oy6ep2LdsTRLbFT7iXv/0BTxR2ck4Sh41guDEBDwPX/xc8
+	 PrKIFYA8S/phEx5stCQN4gDD02dQ+GzWCviMMSKxDu1ye2OnHCssK6qtouPHI41urE
+	 c7zJj+XwxChUA==
+From: Chao Yu <chao@kernel.org>
+To: Zorro Lang <zlang@kernel.org>,
+	fstests@vger.kernel.org
+Cc: jaegeuk@kernel.org,
+	linux-f2fs-devel@lists.sourceforge.net,
+	Chao Yu <chao@kernel.org>,
+	Daniel Lee <chullee@google.com>
+Subject: [PATCH v2] f2fs/012: test red heart lookup
+Date: Tue, 15 Apr 2025 17:38:22 +0800
+Message-ID: <20250415093822.1100476-1-chao@kernel.org>
+X-Mailer: git-send-email 2.49.0.604.gff1f9ca942-goog
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 2/3] check: Add -q <n> option to support unconditional
- looping.
-Content-Language: en-US
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
- linux-xfs@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
- djwong@kernel.org, zlang@kernel.org, david@fromorbit.com
-References: <cover.1743670253.git.nirjhar.roy.lists@gmail.com>
- <762d80d522724f975df087c1e92cdd202fd18cae.1743670253.git.nirjhar.roy.lists@gmail.com>
- <20250413214858.GA3219283@mit.edu>
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <20250413214858.GA3219283@mit.edu>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
+As Han Qi reported in bugzilla [1], commit 5c26d2f1d3f5 ("unicode: Don't
+special case ignorable code points") changes logic to handle ignorable
+code points, when we handle filename which has special unicode charactor
+like red heart ❤️, utf8_casefold() may return different length than in the
+past, result in that f2fs cacluates hash code incorreclty, eventually,
+filename w/ special unicode charactor will not be found w/ the wrong hash
+code.
 
-On 4/14/25 03:18, Theodore Ts'o wrote:
-> On Thu, Apr 03, 2025 at 08:58:19AM +0000, Nirjhar Roy (IBM) wrote:
->> This patch adds -q <n> option through which one can run a given test <n>
->> times unconditionally. It also prints pass/fail metrics at the end.
->>
->> The advantage of this over -L <n> and -i/-I <n> is that:
->>      a. -L <n> will not re-run a flakey test if the test passes for the first time.
->>      b. -I/-i <n> sets up devices during each iteration and hence slower.
->> Note -q <n> will override -L <n>.
-> I'm wondering if we need to keep the current behavior of -I/-i.  The
-> primary difference between them and how your proposed -q works is that
-> instead of iterating over the section, your proposed option iterates
-> over each test.  So for example, if a section contains generic/001 and
-> generic/002, iterating using -i 3 will do this:
+f2fs has introduces a linear lookup fallback w/ commit 91b587ba79e1
+("f2fs: Introduce linear search for dentries"), once hash-based lookup
+fails, it tries linear lookup as a fallback.
 
-Yes, the motivation to introduce -q was to:
+This patch can help to check whether linear lookup fallback works well
+or not.
 
-1. Make the re-run faster and not re-format the device. -i re-formats 
-the device and hence is slightly slower.
+Firstly, we use below testcase to check how hash code changes:
 
-2. To unconditionally loop a test - useful for scenarios when a flaky 
-test doesn't fail for the first time (something that -L) does.
+mkfs.f2fs -f -O casefold -C utf8 /dev/vda
+mount /dev/vda /mnt/f2fs
+mkdir /mnt/f2fs/dir/
+f2fs_io setflags casefold /mnt/f2fs/dir
+touch /mnt/f2fs/dir/$'\u2764\ufe0f'
+umount /mnt/f2fs
+dump.f2fs -i 4 -d 3 /dev/vda
+dump.f2fs -b $blkaddr_of_dir -d 3 /dev/vda
 
-So, are saying that re-formatting a disk on every run, something that -i 
-does, doesn't have much value and can be removed?
+w/o ("unicode: Don't special case ignorable code points")
+[dump_dirent: 991] bitmap pos[0x2] name[❤️] len[0x6] hash[0x19dd7132] ino[0x5] type[0x1]
+[dump_dirent: 998] name(hex)[0xe2 0x9d 0xa4 0xef 0xb8 0x8f 0x0]
 
->
-> generic/001
-> generic/002
-> generic/001
-> generic/002
-> generic/001
-> generic/002
->
-> While generic -q 3 would do this instead:
->
-> generic/001
-> generic/001
-> generic/001
-> generic/002
-> generic/002
-> generic/002
->
->
-> At least for all of the use cases that I can think of where I might
-> use -i 3, -q 3 is strictly better.  So instead of adding more options
-> which change how we might do iterations, could we perhaps just replace
-> -i with your new -q?  And change -I so that it also works like -q,
-> except if any test fails, that we stop?
+w/ ("unicode: Don't special case ignorable code points")
+[dump_dirent: 991] bitmap pos[0x2] name[❤️] len[0x6] hash[0x9a2ea068] ino[0x5] type[0x1]
+[dump_dirent: 998] name(hex)[0xe2 0x9d 0xa4 0xef 0xb8 0x8f 0x0]
 
-So -I won't re-format the devices during the loop? is that what your 
-suggestion is?
+Correct hash code:	0x19dd7132
+Wrong hash code:	0x9a2ea068
 
---NR
+So, we can test as below:
 
->
-> 					- Ted
+1. create file w/ red heart as its filename
+2. inject wrong hash code to the file
+3. disable linear lookup, expect lookup failure
+4. enable linear lookup, expect lookup succeed
 
+[1] https://bugzilla.kernel.org/show_bug.cgi?id=219586
+
+Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+Cc: Daniel Lee <chullee@google.com>
+Signed-off-by: Chao Yu <chao@kernel.org>
+---
+v2:
+- tune linear_lookup feature before fault injection
+- check status after tuning linear_lookup feature
+- clean up codes
+ tests/f2fs/012     | 73 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/f2fs/012.out |  2 ++
+ 2 files changed, 75 insertions(+)
+ create mode 100755 tests/f2fs/012
+ create mode 100644 tests/f2fs/012.out
+
+diff --git a/tests/f2fs/012 b/tests/f2fs/012
+new file mode 100755
+index 00000000..38a63f2e
+--- /dev/null
++++ b/tests/f2fs/012
+@@ -0,0 +1,73 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
++#
++# FS QA Test No. f2fs/012
++#
++# This testcase checks whether linear lookup fallback works well
++# or not as below:
++# 1.create file w/ red heart as its filename
++# 2.inject wrong hash code to the file
++# 3.disable linear lookup, expect lookup failure
++# 4.enable linear lookup, expect lookup succeed
++#
++. ./common/preamble
++_begin_fstest auto quick casefold
++
++_fixed_by_kernel_commit 91b587ba79e1 \
++	"f2fs: Introduce linear search for dentries"
++
++export LC_ALL=C.UTF-8
++_require_scratch
++_require_command "$F2FS_IO_PROG" f2fs_io
++_require_command "$F2FS_INJECT_PROG" inject.f2fs
++
++check_lookup()
++{
++	local nolinear_lookup=$1
++	local dir=$SCRATCH_MNT/dir
++	# red heart charactor in unicode format
++	local redheart=$dir/$'\u2764\ufe0f'
++
++	_scratch_mkfs -O casefold -C utf8 >> $seqres.full
++	_scratch_mount
++
++	mkdir $dir
++	$F2FS_IO_PROG setflags casefold $dir >> $seqres.full
++	touch $redheart
++	ino=`stat -c '%i' $redheart`
++	_scratch_unmount
++
++	# should tune nolinear_lookup feature before fault injection
++	$F2FS_FSCK_PROG --nolinear-lookup=$nolinear_lookup $SCRATCH_DEV >> $seqres.full
++
++	# check whether linear_lookup is changed as expected
++	if [ $nolinear_lookup == "1" ]; then
++		$F2FS_FSCK_PROG $SCRATCH_DEV | grep -q "linear_lookup \[disable\]" ||	\
++					_fail "linear_lookup is not disabled"
++	else
++		$F2FS_FSCK_PROG $SCRATCH_DEV | grep -q "linear_lookup \[enable\]" ||	\
++					_fail "linear_lookup is not enabled"
++	fi
++
++	$F2FS_INJECT_PROG --dent --mb d_hash --nid $ino --val 0x9a2ea068 $SCRATCH_DEV >> $seqres.full
++
++	_scratch_mount
++	if [ $nolinear_lookup == "1" ]; then
++		[ -f $redheart ] && _fail "red heart file should not exist"
++	else
++		[ -f $redheart ] || _fail "red heart file should exist"
++	fi
++	_scratch_unmount
++
++	# to avoid _check_filesystems failure in the end of test
++	_repair_scratch_fs >> $seqres.full
++}
++
++check_lookup 1
++check_lookup 0
++
++echo "Silence is golden"
++
++status=0
++exit
+diff --git a/tests/f2fs/012.out b/tests/f2fs/012.out
+new file mode 100644
+index 00000000..3afeca2f
+--- /dev/null
++++ b/tests/f2fs/012.out
+@@ -0,0 +1,2 @@
++QA output created by 012
++Silence is golden
 -- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+2.49.0
 
