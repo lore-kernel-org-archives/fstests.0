@@ -1,74 +1,75 @@
-Received: from mail-pg1-f171.google.com (mail-pg1-f171.google.com [209.85.215.171])
+Received: from mail-pf1-f174.google.com (mail-pf1-f174.google.com [209.85.210.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B5A52DFA36
-	for <fstests@vger.kernel.org>; Tue, 15 Apr 2025 23:36:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2836A253B41
+	for <fstests@vger.kernel.org>; Tue, 15 Apr 2025 23:38:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744760207; cv=none; b=Extc3WXemZuZ8gu1zFTlN2lhJ6tXDfFp/nFFNPt/c6v3GJuuVA6k5qJrnENK17tlutxmaUBAwCoJkDXQlrope0La4E69NXVKRcscv+LZF7RE9S2J+EzxdbnHnLfqm0FnyJi2KzDN1mjR0MnqogKqZ87RHIqkVjB7zIIqvdz7Wr0=
+	t=1744760324; cv=none; b=bvy9Ilm9QtlGGcwHrIuWVe0Tn/AupEEdnAwhFGkRqbUFnhZuta3txHZ9Qjzuf54s4DFKOz1/yN5KfChy1c94UDvoMXstRKnSqpj7giSxojFY/F9Es1okW+ACpV6qbOjeYYXUDgX5O4wHIEZpd7QrZsKGKWNsZsj28Un/Ivs7g1c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744760207; c=relaxed/simple;
-	bh=2eD+e+Gkgfa3+iC+m53ODqWHhNzh+/uSSsCY3/smqRU=;
+	s=arc-20240116; t=1744760324; c=relaxed/simple;
+	bh=R+EQXz9EaaJ5nmZF1v0kHrTrolPYealYIAsKGPLU6Q4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=DPtMkKeElcve/ZyRuIeIxZb6N7Q+ZwiUybAkofkjsCZ9ByNXmkpMYbFeOfU4kUIDtgYMU1CmuKN5lsvnGhN49sxO55YJczE4y78jFN2Hua5BF1+BP03ABcImVV0VJKZF9ATRF/KNY1RbPG/5h/Ga3Bsj4goPtE0uv1ybUrmxa84=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=agkioEpg; arc=none smtp.client-ip=209.85.215.171
+	 Content-Type:Content-Disposition:In-Reply-To; b=Zz8YfE+pi9ytgyDTa+bzcaD5mqwQLESkGOlqW/Gc9d2uJ0qL0botnWZQ2zdk3UNPKi4HSBKkRQQO7TvW3lWQd4cnKf9jr8uWSENg3nGiuleZUodUoYT87KPYfVL1H+11hiQSClGY6dRFaLzHoYISTSw4GWPEAGwlGjZjaTl3LV8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=sGwHcE/R; arc=none smtp.client-ip=209.85.210.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="agkioEpg"
-Received: by mail-pg1-f171.google.com with SMTP id 41be03b00d2f7-af579e46b5dso4457209a12.3
-        for <fstests@vger.kernel.org>; Tue, 15 Apr 2025 16:36:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="sGwHcE/R"
+Received: by mail-pf1-f174.google.com with SMTP id d2e1a72fcca58-7399a2dc13fso8153198b3a.2
+        for <fstests@vger.kernel.org>; Tue, 15 Apr 2025 16:38:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1744760206; x=1745365006; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1744760320; x=1745365120; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=s+OMw6IT7RHvpGFrBvPfdlWEgNAsFgA/CYElM1NFdIY=;
-        b=agkioEpgNE0F/jK+MRIoqx0NAVYTeoUPUJKQRlODSQy3AFMPuZMB73xKd2/RxQLxKK
-         Y0niKFsBmw26KPhqcuwteAzlGVzzMcFD5KaYNVVnui1OqIEMvOvAC3aQMWwbJFD6PAym
-         lHGP3YdG7MPAxfAt+TvDxoSG2IxY1cdjJ2S/2Kivy42UMED9elnThDNRSmwjE8LOJyP5
-         sIcGZTYxBXFgBZp6za8L59mlUNpp7nrBK5oIVvvY13i/71crxwf9oIGWjXH+GVkseFg4
-         zP5y0t4esMXcBtAHcwAHBMujuOnI3A5mqSAOafCzwRiz+uEbeuzCZ+NIC1hvwHYbmTkX
-         /gFA==
+        bh=EpM4EYhinbZUnOqyrMXMayNGRnxZN7y4BbC9ozLOlx8=;
+        b=sGwHcE/RQFxEif8PxH4a0Hq8nU6CUS4KKAFoWVz3gir2IPji8XEXJXlnMK5KYDjXF1
+         k/NF0pyd7XOFgMLxF7nVhXG0eCaNyagvmf0TVnwf313H8XKuFEVVBhZ7k3F5wKtJCz3y
+         AhWo+RJKbykig/TbxfT+lkmUaSWGVrGsUzH3r3uy2EelZcVKGbf8yHUU5g4pv/THzZP2
+         0oaGmBQhOdFJ4Xe6vPlt4451bjk3vdk2NpKLwsMPG9dF2a/Vw1nvW0Nsmdg3cXj6MnHq
+         H5rI1vx1lvVxF/BypjAD/hkA7sL9G0i/ryp8EzuYa1f+DvTCLWtPbGj3UoCqNwhdqBWf
+         Azlg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744760206; x=1745365006;
+        d=1e100.net; s=20230601; t=1744760320; x=1745365120;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=s+OMw6IT7RHvpGFrBvPfdlWEgNAsFgA/CYElM1NFdIY=;
-        b=S0/7Nh/y8odNOiryYQmrbL3t/cTRWd5b8MbrRxoGH5acpn7SuW+uqV1dug+7DimCUw
-         MQXjzkfTxEbh/z4SQyp5T4WA/YPhEvDbAU6pEzYMTcD8NKlDZIA2qu7gQgWgYKyIP7nF
-         x3X7vcWkRZMT80jlLtmb7aUu6ORSL3IUtPLjCGEcp4NpOD2jR6NWWhn2yFmEXHtybavS
-         KR2Gl/SzC2bL67apY8PC+36xMIRaRiOz2c4GQwTAnUol2MkKIKndGcS5eL8mDKLvJrNW
-         pwsUvrCoJ+0VVqOsnn+jBn3CUwEhj0xrypGBgUf07wVdJKhlw8hjIEL71PdExrndA6Cb
-         GKzA==
-X-Forwarded-Encrypted: i=1; AJvYcCXZdPyrY6eZtaBGna3KV1i/tWqcdO9+KmX2iDLSb69CUmf0/5WqQTN7DJ0Tgw9gT3AgToXhY3N1@vger.kernel.org
-X-Gm-Message-State: AOJu0YwZk/d9J87QR7GF9MPGzI4jXNu2DIUUogASUdNZeA4+bDIjLGJy
-	EeIUa16+f4qZpkJWcrBIl2iQi/y5emu6tEGKCIksJZFWkMmm8rkEZ5Z/oQSFlUqoC3V+Le+ML27
-	4
-X-Gm-Gg: ASbGnctTQut71yHxx4xsR5n6a7Zc8BpXyNhi59JE2tVtV8yTd1dQDnQIX2x+/1I07vr
-	u2Ioum4CA0hqsas50Wd9eeZhRgVd0pjh5xnPjcDyr6T+1NsWzp20Y0tLYkyBIove51LFAo5zmj3
-	P1X/j8WRSTIkflo/kLNw5TxM5Zine8luiAQXm2iapGMc874UffBy53oZ23jGmBzdC/90VqZ1MWg
-	iG6iU4Yi9c8PX3Au4UNNKZM88J12tyeeUzcZKydbkDy3GYuBNMNzzXcbH4Yz1uy7Mb7hbSONHRm
-	cJhth/yKZai6pNT6gkEZ+px3pNarjQn5hNqWD3El3cAdW4MAz0lB2yT6wcPyK912/RQ9OrEzzG/
-	LjMl9ewrGg2YIxQ==
-X-Google-Smtp-Source: AGHT+IGT6/zZzWQq7U30e4Mav9AFMxOMf9Upt4/koNxvykTkSnfdOa8SPwd7SKuV1um3ZKHXSwIMTA==
-X-Received: by 2002:a17:90b:3c90:b0:2ff:5ec1:6c6a with SMTP id 98e67ed59e1d1-3085ef17d3dmr1638762a91.18.1744760205808;
-        Tue, 15 Apr 2025 16:36:45 -0700 (PDT)
+        bh=EpM4EYhinbZUnOqyrMXMayNGRnxZN7y4BbC9ozLOlx8=;
+        b=PLjZpfbGQPQSULBxaZs2GNcSaOTRWuWnVAYBJFJQ/8KYM/N12ET573je8H+A3hh4yK
+         My85rYB8rV6dfhZ7XQA1RtMTIGSGniHFNPlboUAWqWVSNUE6cOJwMp3ZrU0VYJPD2iqW
+         X/jb39Y+4cGMlymVHI1LZsYlKl7bm2RUmPP2bMVYr5VqlsuzqOHs0LTQrc7DEHgLClfB
+         Z2EkPJ3BWbv7yNb58+75ptcbO2dsZXT7GXmJhCPD+w53xoN2xvL3FqPIOznIrDWcn+x6
+         hDHBJV330IsnEe24YtER44pc9PCbo0UEg1IeSeeoQU7x+EWTWYmtSjST6IJVBQnlJqOK
+         dBsw==
+X-Forwarded-Encrypted: i=1; AJvYcCVIP+jvkbIFwQSmwFYyG951QM8q2gTIdPwTt/R969QElEUpPfUecN2oVWxFh6ocRTiUsW4DZwaA@vger.kernel.org
+X-Gm-Message-State: AOJu0YxKfT8dyS15Wvmtmr63hQDNI+c6CdTUtOkEnXNY5GD+Q4PSsi97
+	sVTgkEasjuCYj+5CaBxz8LZfqn1JrwSYbAoh9ajd2pNwIfFedCOiSJFwbu7zBrY=
+X-Gm-Gg: ASbGncvTRtOBu37EDlOXR9vWThimZoZ/IIP7grfuYO0d3TE5UYdD7TpGoIvbq3lmtZE
+	tKbcIcI0wUGrLk/2+HM6FpfPbFZU7ARnAvCl7O0DzKMX5NkY0L2U2WcFMCrnhXXrfEcfKIjgPrP
+	tzOVVnv3PEoTW3Ka/Metvlo7muDwlWB+nRQ7SXfjlnXxaKu2K5rHCHr/WaNHt1nu7KBMDwxPymO
+	cxT0sFpGJDhho3ek+ZCqFb5TLLHBo/gL2gUmTUdpUtCUq7GOUpMy6Ev4sXuq+sQAHhDhguA59nD
+	HPO09v2BGy61fUxdvG4FcvE70XY3czFDbXko2ooExE3NBkjJpyt4yCpRLw/EeUGyK3rdyYDSv6/
+	NeU8AIf/aIlWd2g==
+X-Google-Smtp-Source: AGHT+IGNO2Ue2ds5cZZ5nqUeIMkjzsWEzJz65ELSNC02DEQ3gbhoOr1LcC6h7r5RennInGd6igBPLQ==
+X-Received: by 2002:a05:6a00:1409:b0:73b:9be4:e64a with SMTP id d2e1a72fcca58-73c1fb48cdamr1709757b3a.23.1744760320344;
+        Tue, 15 Apr 2025 16:38:40 -0700 (PDT)
 Received: from dread.disaster.area (pa49-181-60-96.pa.nsw.optusnet.com.au. [49.181.60.96])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-308613b3849sm173097a91.38.2025.04.15.16.36.45
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73bd22f1259sm9148215b3a.119.2025.04.15.16.38.39
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 15 Apr 2025 16:36:45 -0700 (PDT)
+        Tue, 15 Apr 2025 16:38:39 -0700 (PDT)
 Received: from dave by dread.disaster.area with local (Exim 4.98)
 	(envelope-from <david@fromorbit.com>)
-	id 1u4ppa-000000095Ld-1az4;
-	Wed, 16 Apr 2025 09:36:42 +1000
-Date: Wed, 16 Apr 2025 09:36:42 +1000
+	id 1u4prR-000000095N1-0pge;
+	Wed, 16 Apr 2025 09:38:37 +1000
+Date: Wed, 16 Apr 2025 09:38:37 +1000
 From: Dave Chinner <david@fromorbit.com>
-To: Christoph Hellwig <hch@lst.de>
-Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@lst.de>, zlang@kernel.org,
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 Subject: Re: [PATCH] common: remove USE_EXTERNAL
-Message-ID: <Z_7tirRVx9Bt60si@dread.disaster.area>
+Message-ID: <Z_7t_SKirTrStXEi@dread.disaster.area>
 References: <20250414054205.361383-1-hch@lst.de>
+ <20250415004452.GO25675@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -77,31 +78,39 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250414054205.361383-1-hch@lst.de>
+In-Reply-To: <20250415004452.GO25675@frogsfrogsfrogs>
 
-On Mon, Apr 14, 2025 at 07:42:05AM +0200, Christoph Hellwig wrote:
-> The USE_EXTERNAL variable indicates that dedicated log or RT devices are
-> in use for the scratch and possibly test device.  It gets automatically
-> set when needed
-
-No it isn't - it's explicitly controlled by config file parsing
-and/or config env variable setup.
-
-> and generally does not provide any benefit over simply
-> testing the SCRATCH_LOGDEV and SCRATCH_RTDEV variables.
+On Mon, Apr 14, 2025 at 05:44:52PM -0700, Darrick J. Wong wrote:
+> On Mon, Apr 14, 2025 at 07:42:05AM +0200, Christoph Hellwig wrote:
+> > The USE_EXTERNAL variable indicates that dedicated log or RT devices are
+> > in use for the scratch and possibly test device.  It gets automatically
+> > set when needed and generally does not provide any benefit over simply
+> > testing the SCRATCH_LOGDEV and SCRATCH_RTDEV variables.
+> > 
+> > Remove it and replace that test with test for SCRATCH_LOGDEV and
+> > SCRATCH_RTDEV, using the more readable if-based syntaxt for all tests
+> > touched by this change.
+> > 
+> > Signed-off-by: Christoph Hellwig <hch@lst.de>
 > 
-> Remove it and replace that test with test for SCRATCH_LOGDEV and
-> SCRATCH_RTDEV, using the more readable if-based syntaxt for all tests
-> touched by this change.
+> I like this change, but it leaves me wondering why USE_EXTERNAL even
+> exists in the first place?  Is that so that you could add
+> TEST/SCRATCH_RTDEV to the top of a config file and set
+> USE_EXTERNAL={yes,no} as a per-section variable?  e.g.
+> 
+> [default]
+> TEST_RTDEV=/dev/sde
+> SCRATCH_RTDEV=/dev/sdf
+> 
+> [rtstuff]
+> USE_EXTERNAL=yes
+> 
+> [simple]
+> USE_EXTERNAL=no
 
-This breaks the way I've set up check-parallel devices. I always
-create the external devices, and then trigger where they are in use
-by config sections that define USE_EXTERNAL.
-
-Hence changing all this code to check if SCRATCH_LOGDEV and/or
-SCRATCH_RTDEV are defined instead of gating them on USE_EXTERNAL
-breaks any test environment that has those devices defined but does
-not set USE_EXTERNAL....
+Right, that's the way I've been using for a few years, and it is
+explicitly the way check-parallel expects external device
+enablement in config sections to work....
 
 -Dave.
 -- 
