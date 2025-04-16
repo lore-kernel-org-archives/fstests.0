@@ -1,118 +1,81 @@
-Received: from mail-pf1-f174.google.com (mail-pf1-f174.google.com [209.85.210.174])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2836A253B41
-	for <fstests@vger.kernel.org>; Tue, 15 Apr 2025 23:38:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC9E21E5B75
+	for <fstests@vger.kernel.org>; Wed, 16 Apr 2025 04:51:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744760324; cv=none; b=bvy9Ilm9QtlGGcwHrIuWVe0Tn/AupEEdnAwhFGkRqbUFnhZuta3txHZ9Qjzuf54s4DFKOz1/yN5KfChy1c94UDvoMXstRKnSqpj7giSxojFY/F9Es1okW+ACpV6qbOjeYYXUDgX5O4wHIEZpd7QrZsKGKWNsZsj28Un/Ivs7g1c=
+	t=1744779083; cv=none; b=nZ3gyXlcsIYfZ1/KXD8qRizKdX+cJ8q4nqrclAwpW3pYI0aciIG5E/ZoFkKVzAJtpnn2izMoEZXbSb7tyGA/5XI3YQQm1cIfOO5m5Ggel5ZDh2gzykUJWEW9EG1+ieQhEP0dSUck8JYJXAqBM/KoCCKAQW+tQVL3/hdBX9pGNyk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744760324; c=relaxed/simple;
-	bh=R+EQXz9EaaJ5nmZF1v0kHrTrolPYealYIAsKGPLU6Q4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Zz8YfE+pi9ytgyDTa+bzcaD5mqwQLESkGOlqW/Gc9d2uJ0qL0botnWZQ2zdk3UNPKi4HSBKkRQQO7TvW3lWQd4cnKf9jr8uWSENg3nGiuleZUodUoYT87KPYfVL1H+11hiQSClGY6dRFaLzHoYISTSw4GWPEAGwlGjZjaTl3LV8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=sGwHcE/R; arc=none smtp.client-ip=209.85.210.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
+	s=arc-20240116; t=1744779083; c=relaxed/simple;
+	bh=6lKVJY1muXsbfGsez5S3WFaKdj3VGMg0rfRbktSHCLU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=HrCZarH0sL1ZRSpscnjubWKnPwkk9CBcPTSQfEx1tRaFxWgeYcI4g6ia/F5Ws75l9TbLGq18DQQyRIei6T7iiD7zBcroDuxUrBFkxrK6cuqs+YJYJbMBeEMvhxcgkZKiRJcn/LyuU9BF8LEd0KSOQydLCt9N4XIyRzK7P5QEGUo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=q30ZQZHn; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="sGwHcE/R"
-Received: by mail-pf1-f174.google.com with SMTP id d2e1a72fcca58-7399a2dc13fso8153198b3a.2
-        for <fstests@vger.kernel.org>; Tue, 15 Apr 2025 16:38:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1744760320; x=1745365120; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=EpM4EYhinbZUnOqyrMXMayNGRnxZN7y4BbC9ozLOlx8=;
-        b=sGwHcE/RQFxEif8PxH4a0Hq8nU6CUS4KKAFoWVz3gir2IPji8XEXJXlnMK5KYDjXF1
-         k/NF0pyd7XOFgMLxF7nVhXG0eCaNyagvmf0TVnwf313H8XKuFEVVBhZ7k3F5wKtJCz3y
-         AhWo+RJKbykig/TbxfT+lkmUaSWGVrGsUzH3r3uy2EelZcVKGbf8yHUU5g4pv/THzZP2
-         0oaGmBQhOdFJ4Xe6vPlt4451bjk3vdk2NpKLwsMPG9dF2a/Vw1nvW0Nsmdg3cXj6MnHq
-         H5rI1vx1lvVxF/BypjAD/hkA7sL9G0i/ryp8EzuYa1f+DvTCLWtPbGj3UoCqNwhdqBWf
-         Azlg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744760320; x=1745365120;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=EpM4EYhinbZUnOqyrMXMayNGRnxZN7y4BbC9ozLOlx8=;
-        b=PLjZpfbGQPQSULBxaZs2GNcSaOTRWuWnVAYBJFJQ/8KYM/N12ET573je8H+A3hh4yK
-         My85rYB8rV6dfhZ7XQA1RtMTIGSGniHFNPlboUAWqWVSNUE6cOJwMp3ZrU0VYJPD2iqW
-         X/jb39Y+4cGMlymVHI1LZsYlKl7bm2RUmPP2bMVYr5VqlsuzqOHs0LTQrc7DEHgLClfB
-         Z2EkPJ3BWbv7yNb58+75ptcbO2dsZXT7GXmJhCPD+w53xoN2xvL3FqPIOznIrDWcn+x6
-         hDHBJV330IsnEe24YtER44pc9PCbo0UEg1IeSeeoQU7x+EWTWYmtSjST6IJVBQnlJqOK
-         dBsw==
-X-Forwarded-Encrypted: i=1; AJvYcCVIP+jvkbIFwQSmwFYyG951QM8q2gTIdPwTt/R969QElEUpPfUecN2oVWxFh6ocRTiUsW4DZwaA@vger.kernel.org
-X-Gm-Message-State: AOJu0YxKfT8dyS15Wvmtmr63hQDNI+c6CdTUtOkEnXNY5GD+Q4PSsi97
-	sVTgkEasjuCYj+5CaBxz8LZfqn1JrwSYbAoh9ajd2pNwIfFedCOiSJFwbu7zBrY=
-X-Gm-Gg: ASbGncvTRtOBu37EDlOXR9vWThimZoZ/IIP7grfuYO0d3TE5UYdD7TpGoIvbq3lmtZE
-	tKbcIcI0wUGrLk/2+HM6FpfPbFZU7ARnAvCl7O0DzKMX5NkY0L2U2WcFMCrnhXXrfEcfKIjgPrP
-	tzOVVnv3PEoTW3Ka/Metvlo7muDwlWB+nRQ7SXfjlnXxaKu2K5rHCHr/WaNHt1nu7KBMDwxPymO
-	cxT0sFpGJDhho3ek+ZCqFb5TLLHBo/gL2gUmTUdpUtCUq7GOUpMy6Ev4sXuq+sQAHhDhguA59nD
-	HPO09v2BGy61fUxdvG4FcvE70XY3czFDbXko2ooExE3NBkjJpyt4yCpRLw/EeUGyK3rdyYDSv6/
-	NeU8AIf/aIlWd2g==
-X-Google-Smtp-Source: AGHT+IGNO2Ue2ds5cZZ5nqUeIMkjzsWEzJz65ELSNC02DEQ3gbhoOr1LcC6h7r5RennInGd6igBPLQ==
-X-Received: by 2002:a05:6a00:1409:b0:73b:9be4:e64a with SMTP id d2e1a72fcca58-73c1fb48cdamr1709757b3a.23.1744760320344;
-        Tue, 15 Apr 2025 16:38:40 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-60-96.pa.nsw.optusnet.com.au. [49.181.60.96])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73bd22f1259sm9148215b3a.119.2025.04.15.16.38.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 15 Apr 2025 16:38:39 -0700 (PDT)
-Received: from dave by dread.disaster.area with local (Exim 4.98)
-	(envelope-from <david@fromorbit.com>)
-	id 1u4prR-000000095N1-0pge;
-	Wed, 16 Apr 2025 09:38:37 +1000
-Date: Wed, 16 Apr 2025 09:38:37 +1000
-From: Dave Chinner <david@fromorbit.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, zlang@kernel.org,
-	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] common: remove USE_EXTERNAL
-Message-ID: <Z_7t_SKirTrStXEi@dread.disaster.area>
-References: <20250414054205.361383-1-hch@lst.de>
- <20250415004452.GO25675@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="q30ZQZHn"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=pUvUzC5Xg1oM9y1RcWXtnuQVBWOZNviejZQddiofZQw=; b=q30ZQZHnhgXSQeHVJ9xQG56i6g
+	g+xpvgDl3Oao8LRpAcAiO9Pu8BXtzjiOPAzK06VimWou5fFM43cKJV3KG2wXLNNUkUWHBGJ/uWscD
+	iO8ukmCJUNPQGAIrSVHnlEYYo60HctbaBCASkxtHz8a3/PCS4EXyc1UxFSEA6uctXQZnZLnLTNzRm
+	Pi+FNoMe2o2Ll6iP2ziNnLKVPDPWPl5WnPnF1wldcaIe8U86Kya+boh5Jt/xUW3kUuE5yCtB7Lody
+	YAxtmO28qOROy0w12AxkVIvBvj2ZVh3X4mJ1KPmT0Glmt/YtjaBwzbK7pmfqW8k2jqplMXWJoIL9S
+	15CaT0Hw==;
+Received: from 213-147-164-187.nat.highway.webapn.at ([213.147.164.187] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1u4uk4-00000008C35-3wXx;
+	Wed, 16 Apr 2025 04:51:21 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: zlang@kernel.org
+Cc: djwong@kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH 1/2] generic/231: use relative path to invoke fsx
+Date: Wed, 16 Apr 2025 06:51:11 +0200
+Message-ID: <20250416045112.617815-1-hch@lst.de>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250415004452.GO25675@frogsfrogsfrogs>
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Mon, Apr 14, 2025 at 05:44:52PM -0700, Darrick J. Wong wrote:
-> On Mon, Apr 14, 2025 at 07:42:05AM +0200, Christoph Hellwig wrote:
-> > The USE_EXTERNAL variable indicates that dedicated log or RT devices are
-> > in use for the scratch and possibly test device.  It gets automatically
-> > set when needed and generally does not provide any benefit over simply
-> > testing the SCRATCH_LOGDEV and SCRATCH_RTDEV variables.
-> > 
-> > Remove it and replace that test with test for SCRATCH_LOGDEV and
-> > SCRATCH_RTDEV, using the more readable if-based syntaxt for all tests
-> > touched by this change.
-> > 
-> > Signed-off-by: Christoph Hellwig <hch@lst.de>
-> 
-> I like this change, but it leaves me wondering why USE_EXTERNAL even
-> exists in the first place?  Is that so that you could add
-> TEST/SCRATCH_RTDEV to the top of a config file and set
-> USE_EXTERNAL={yes,no} as a per-section variable?  e.g.
-> 
-> [default]
-> TEST_RTDEV=/dev/sde
-> SCRATCH_RTDEV=/dev/sdf
-> 
-> [rtstuff]
-> USE_EXTERNAL=yes
-> 
-> [simple]
-> USE_EXTERNAL=no
+This test uses su to run fsx as $qa_user.  Because the shell calling
+fsx is run as $qa_user it might not be able to access the xfstests or
+parent directory which might only be accessible to the user xfstests
+is run as (e.g. root).  Switch back to calling fsx using a relative
+path, partially reverting commit 1c67e8b191fe
+("config: add FSX_PROG variable").
 
-Right, that's the way I've been using for a few years, and it is
-explicitly the way check-parallel expects external device
-enablement in config sections to work....
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+---
+ tests/generic/231 | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
--Dave.
+diff --git a/tests/generic/231 b/tests/generic/231
+index b598a5d568bd..ce7e62ea1886 100755
+--- a/tests/generic/231
++++ b/tests/generic/231
+@@ -23,8 +23,10 @@ _fsx()
+ 	echo "=== FSX Standard Mode, Memory Mapping, $tasks Tasks ==="
+ 	for (( i = 1; i <= $tasks; i++ )); do
+ 		SEED=$RANDOM
+-		echo "$FSX_PROG $FSX_ARGS -S $SEED $SCRATCH_MNT/fsx_file$i" >>$seqres.full
+-		_su $qa_user -c "$FSX_PROG $FSX_ARGS -S $SEED \
++		# The absolute path $here might not be traversable (+x) for
++		# $qa_user, so supply a relative path to fsx here.
++		echo "ltp/fsx $FSX_ARGS -S $SEED $SCRATCH_MNT/fsx_file$i" >>$seqres.full
++		_su $qa_user -c "ltp/fsx $FSX_ARGS -S $SEED \
+ 			$FSX_AVOID $SCRATCH_MNT/fsx_file$i" >$tmp.output$i 2>&1 &
+ 	done
+ 
 -- 
-Dave Chinner
-david@fromorbit.com
+2.47.2
+
