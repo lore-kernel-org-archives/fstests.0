@@ -1,84 +1,101 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f175.google.com (mail-pf1-f175.google.com [209.85.210.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1AFC5229B3C
-	for <fstests@vger.kernel.org>; Wed, 16 Apr 2025 04:51:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5D03148830
+	for <fstests@vger.kernel.org>; Wed, 16 Apr 2025 05:02:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744779086; cv=none; b=IME9vOJEJAl66VJk43Z1+0FkQnICKaSztWcFfzPbIRUVRQjUbSWurhqDhC5tJChW0z6I11K5E1rKX8G9Sns9AUWzCQsg2r2vb4M5yGiC6GdKGPM30ho8F+kN7QJcdxOafnoKDcrURGWuOhuA4Eix3I9KI0odC7Xqwc8UJvVaScg=
+	t=1744779758; cv=none; b=soxdcA8yc2zWhAEBOt1Y31woJsWQj3Ap5UMQkz+b6FltEcVyR13hpx1ZG5drQttcP5m4wiSnisvVxZEtgWKjgRHBMYSu4nq0pAWtgeren6rPGn1IKn6vIjZsIZiCS/amEBGHk3WvabZEu3d2JHfGhWT9tiSErxOH1gO2g/2H8Zg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744779086; c=relaxed/simple;
-	bh=+Cv6z8rA4klCwmr5cRIX4GDyeDUPq+uVOcD4eAdbdik=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=JRXM1VJzbYWV57iQpicOgALn2nAY+inCSce22UcQfenKu8xBrW7ITtZdolhwlw1I6EsV+QLeYZhS9g7hqXgAYBeRluxG9bQ7Rd645RxtbIldG9+X2itOqMAf3/oAHhSTTFVNVXcY92GxhC25nHh3X6L9/PyHKV/aYbcrPViaSPg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=0x3KGoXE; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1744779758; c=relaxed/simple;
+	bh=9oxlFvjwY29lWinAzE+6WdLCl/ugyvGCUTcuqnq++xQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ODJ7aSfUUGhehA1rUkRvnDexnZf4PkOZ5SfgeS/sXAhi/IKPATjTG5kn6QCuDte+AEXbS+PtdiPNGW4pZii+Suq98kdnhWoqi6++0corJjKOlW1cMpXIioRp9U8yaDlBjNVuWDOCipevLTJNY0ooILNk7bqcLJfkwXA8pyYR6o8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=LehSVY8X; arc=none smtp.client-ip=209.85.210.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="0x3KGoXE"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender
-	:Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=mmfZtHzWXUflqoodbYlhSM0XgoRm0G7amNjWpZP9Xyw=; b=0x3KGoXEVlUyqp6IpCZw5C9Asp
-	Lfjo3nQptsF38IwzpNdX/oFPA7ld1Gv4B9YBucf0Wc4KVFeqlhQz80yDZp1DhOLAXk7Fym4KIdqot
-	t6n7Q9riloobZhjV/547KVWh46ORZuQ+Ot4S2MB5ODPRpQIQWWXpSnQXgh+He41+coGDosJjflw+b
-	fuBiYoSW3o4fJdLcMPxpr/sBHXIA5lmaiAtlkREnPlmkPWUZWnvYcNbT7fabAxM1Bwu9pVvA4YhmH
-	PLScM+rkSTzYuamdlDXpWm9xbqmH2yWD3qTI/YYUF2kAfO+7pxq6CgIOzvgHSvzbsAAQbe5oOSSno
-	bzCxKwbg==;
-Received: from 213-147-164-187.nat.highway.webapn.at ([213.147.164.187] helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1u4uk8-00000008C3G-107O;
-	Wed, 16 Apr 2025 04:51:24 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: zlang@kernel.org
-Cc: djwong@kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH 2/2] generic/233: use relative path to invoke fsstress
-Date: Wed, 16 Apr 2025 06:51:12 +0200
-Message-ID: <20250416045112.617815-2-hch@lst.de>
-X-Mailer: git-send-email 2.47.2
-In-Reply-To: <20250416045112.617815-1-hch@lst.de>
-References: <20250416045112.617815-1-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="LehSVY8X"
+Received: by mail-pf1-f175.google.com with SMTP id d2e1a72fcca58-7376dd56f60so4317123b3a.3
+        for <fstests@vger.kernel.org>; Tue, 15 Apr 2025 22:02:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1744779756; x=1745384556; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=TQwRCsFxhYU0f9dtRKCSUjLf46o930dlr7rW2dkxJ5g=;
+        b=LehSVY8Xg/FCMjkuhWL3B/ODsVhjtD56wVQbGU9xMrSWJVkzD3bozJ4w9OVDDB8vk7
+         1/nO/NOXpJ3z9DCkJAHyvNVbuur12n+5tDuGlsMHWFFO3xEV2QzhP8pmg1XF2anT1k1t
+         yQ9dg+g7FDSU4J/pwLWT2NyXAYcFX+MyWMjVKkxupa17PtSppVsz107QfYJPZ9kjTSCl
+         ouasYt2e7kc8r5Qkd14KnidZtnUp7qM2A1ApqIHP+AogZiqxytVmLN0m0frcf/ni3Sob
+         uIrxlqKQnNLYlYLoZFMJGtZqyMx1W98ZkpXAd8dLL7thiDqT5E+QRG1TwqVn0DIFzBSo
+         LKTg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744779756; x=1745384556;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=TQwRCsFxhYU0f9dtRKCSUjLf46o930dlr7rW2dkxJ5g=;
+        b=YcrAJz94eY9NAoRsFevecYNa7Sh5PZ/O8nY3UWL5AXsYrs4uUwlnThxiSBN0ya9IUm
+         6spDSmqVeKG3ngtdKDSJYnqCVLGkUf+0T2DI5lqyTFl1Tc4o/GoXtZnhwthqaCZoToOt
+         aW5wxuBZnJyxEPqmcXBnO0HtCsKaDJkwBsJNr55FnQ1OqZbNZb7YV/b868pHceDZ+foS
+         TOzRvovQNImd15+DGAYBA9QTXRnM8LHMEbDP1Ywxr6NWYw6Vi6tLJwsAjqfhAOxDLfVg
+         7Y5MKofBlTIdyxTGTyy9YaCC+5HJ81wtvStYhi4dcAqvaajjUC8gMbXpkqY8Mb0hVjNO
+         UTrw==
+X-Forwarded-Encrypted: i=1; AJvYcCWNJA6UvGNxkSoEbFTQoPqPt+8ai46jS15gjKlJmYpp+sISSNJ7UjwMUBulg4Wae7PZDV94K1rR@vger.kernel.org
+X-Gm-Message-State: AOJu0Yysz5s/Ynsgz6MrOJGuroFqR/f3TdiOUqXIf/MmSRDuXQGEwumT
+	x3g49lLcil6+r7u8oxWcv+fwKmSlAFRbiz/rzm/3ZdxQsS5W6aFcZ2IGRo/18/qGjhNGPMCCVd1
+	M
+X-Gm-Gg: ASbGncsFq+FhglsRKhlI2gCum5g36QlcW9T+zDswxQ2NR3KQ0K0yIZGCU0JKE3Nd2Oc
+	wnNmr9EaGLBQs7+nK/uByobTizbsLMg3v3mFqLqxz0G7YEym8ZGXWmjZs4vkUoNbAHnU0MBn50D
+	5MVCmkM3678/Mk/MtSgOM//nyH+yQLVlVOr3SQK3RQFg07TbhvvzTbxgZAqH12PKAOporrV5k5l
+	zYBKrQL/9X/xrMwknkJnPLM3TpQDJt4F+crIY6PXMOXqUQbui/mqiBSLXkt31L1We5R/cTrntmE
+	++RaziB+A77swlhxB6akqwma7jSjwPqztBYztjBLdDcHLnAQTmHLUpxG8Nx0jmGo3QwbVVU3Kuu
+	K35I=
+X-Google-Smtp-Source: AGHT+IGGxQ6DNnEYHL1oFzXX/o+xzzz30fP3L8lYAS1xM9DtqUClNv64u8ArIBAFnvaQ+XpdDJGJTg==
+X-Received: by 2002:a05:6300:4041:b0:1ee:ce5b:853d with SMTP id adf61e73a8af0-203b40026d6mr438997637.39.1744779755873;
+        Tue, 15 Apr 2025 22:02:35 -0700 (PDT)
+Received: from dread.disaster.area (pa49-181-60-96.pa.nsw.optusnet.com.au. [49.181.60.96])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b0b22205b94sm425017a12.51.2025.04.15.22.02.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 15 Apr 2025 22:02:35 -0700 (PDT)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1u4uuu-00000009B1f-3KJt;
+	Wed, 16 Apr 2025 15:02:32 +1000
+Date: Wed, 16 Apr 2025 15:02:32 +1000
+From: Dave Chinner <david@fromorbit.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, dchinner@redhat.com, fstests@vger.kernel.org
+Subject: Re: [PATCH, RFC] rename check-parallel to parallel-check
+Message-ID: <Z_856KJvJSn2n0q6@dread.disaster.area>
+References: <20250410075731.3800342-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250410075731.3800342-1-hch@lst.de>
 
-This test uses su to run fsstress as $qa_user.  Because the shell calling
-fsstress is run as $qa_user it might not be able to access the xfstests
-or parent directory which might only be accessible to the user xfstests
-is run as (e.g. root).  Switch back to calling fsstress using a relative
-path, partially reverting the effects of commit c475ff6ff6d7
-("common/config: add $here to FSSTRESS_PROG").
+On Thu, Apr 10, 2025 at 09:57:26AM +0200, Christoph Hellwig wrote:
+> Having two files that start with check is really annoying for tab
+> completion.  Rename the new check-parallel helper to parallel-check.
+> Or maybe pcheck might be a better name?
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
----
- tests/generic/233 | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+I don't care about the name, but I do care about how we change it.
+changing it in the upstream repo will mean I have to do a major
+rebase of my patch stack, so if we are going to do this, I'll put it
+in my stack where it causes me the least issues.
 
-diff --git a/tests/generic/233 b/tests/generic/233
-index df67b39092b7..3fc1b63abb24 100755
---- a/tests/generic/233
-+++ b/tests/generic/233
-@@ -42,8 +42,11 @@ _fsstress()
- 	# io_uring_queue_init fail on ENOMEM, set max locked memory to unlimited
- 	# temporarily.
- 	ulimit -l unlimited
-+
-+	# The absolute path $here might not be traversable (+x) for $qa_user, so
-+	# supply a relative path to fsstress here.
- 	echo "fsstress $args" >> $seqres.full
--	if ! _su $qa_user -c "$FSSTRESS_PROG $args" | tee -a $seqres.full | _filter_num
-+	if ! _su $qa_user -c "ltp/fsstress $args" | tee -a $seqres.full | _filter_num
- 	then
- 		echo "    fsstress $args returned $?"
- 		cat $tmp.out | tee -a $seqres.full
+> Or just fork off from
+> check with a --parallel option?
+
+No, that just makes things really difficult with handling CLI
+parameters, default env variable values, etc.
+
+-Dave.
 -- 
-2.47.2
-
+Dave Chinner
+david@fromorbit.com
