@@ -1,131 +1,118 @@
-Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
+Received: from mail-pf1-f170.google.com (mail-pf1-f170.google.com [209.85.210.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26646161310;
-	Wed, 16 Apr 2025 07:35:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E67C1EAE7
+	for <fstests@vger.kernel.org>; Thu, 17 Apr 2025 03:12:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744788954; cv=none; b=bZIH74lXkEy0n5jr5URTAXAQMypP9H3vLVQljJqnwRgX85geH1nAS9Fbp3ZGyBy66FnEboBlVR5V9qqqcZgEtTRnM/8H7n09VqVwb4Y8Nh0fKLWFBNJUX6SxISdt7kanVWE3nvJ3amM3o97fIixtTVKuARcgWXeFZePS69ST3rg=
+	t=1744859536; cv=none; b=J0WYnf2+UR/5oGrp7YPOOOBarmjjjpOTcQyuw8mz2Yod1bfxAtCAiCVbzqupL0nXEE8PDCWXydcITeauOf+NbQxGgKgHFs3DBvBVJHIlloMcm3QksWgsNCqbSkuzFSI9cvPrl2TvN103KFdtJO/BFMadtN2kOneUFRHVSPlCQ6E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744788954; c=relaxed/simple;
-	bh=72yUJb7RdMsw4+VnjzHEvdX+ZprYqA99eCCrCzzrX7M=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=m2djKkzRc9CmTlscv5V/LI4C+Ppmei5V08xAFJGpCPsyQ8DeyIa8OIrbIcEj7s/nKzACyPHVoYaAt8RiRijE+ynS3M6URSvjHMr2Cc0u/R7t/m1AAwchNcgo9ApyUKDVo+TMFF9UY83rQ0ueGv8e9V2FKoaPX3KBinO6o1rqFYw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JuSBEBt4; arc=none smtp.client-ip=209.85.214.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1744859536; c=relaxed/simple;
+	bh=z4nEoMXt4RtmRYOAnKqZq2ny/Y2j58Ci9lLaG54QgOw=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=Y8ysCMzukkthYzBAGHD4tgU34jlzA/QAqqjI4AWd+7y9M1gX6ZdwBfQ8djpaU9a3vjGSSyyMb1Rrqa+7FwRgtYa8/CLqrlw8MmWAqqGnZR6IqVMoFtBRz0Oe0U7ixOWgl6UOxJCsWFIGaFYW9R7iE4ioMPJvVL7TtcsSo6Q38Y8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=2maoMXpD; arc=none smtp.client-ip=209.85.210.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JuSBEBt4"
-Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-223fd89d036so78315385ad.1;
-        Wed, 16 Apr 2025 00:35:52 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="2maoMXpD"
+Received: by mail-pf1-f170.google.com with SMTP id d2e1a72fcca58-736c062b1f5so217211b3a.0
+        for <fstests@vger.kernel.org>; Wed, 16 Apr 2025 20:12:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1744788952; x=1745393752; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=jDfwfDLF7UaEj/4Wi7KJzal6TyvbnmewVDjx4xgGdIU=;
-        b=JuSBEBt46KeXEJ6PiC3i+Dl6PdlDaa+Q5kN4O0v9giLd3G7DWaQ6cxlQu6RlWVV99W
-         uZrfNO+vXe30ZCDkc3UbFjbWbCUkA9mKEjwx8EPKAyykOI7I/944DQNE+Hw80+JqS1vd
-         noRBHlul9mv3GzMSLlOApdpB1+ijRi4PJtutRombKNO7Xzq3eLn5C4l+FM8RFlP1P5fj
-         eKqK3qkY5ldxJKJBFUZP1PhVPcdfT3ausW+i+0sL0SAmHcCXmxYeROr5AWcQO1Va90yM
-         IFWlQQwjJ4uXes+U7oGAfeo5sGBuIpAlgZFGWjRqWtnAV/pXPoFM8oZhxEBFiC13tkV5
-         1qew==
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1744859534; x=1745464334; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=QYc8jSHhiJjjA2jV4a98jESgDC20bwS2vHiSSh2Hazc=;
+        b=2maoMXpDFOLWMw055AkLPcME5cNHABJJTjHxIhZelQsAHY210mo8hcKpVcr/TyI70w
+         TdvxjdA5f0sXXLT6mY1GNHLHNZVCGmYRDp3hvgz+pza+tZQEasbfjA+/s9LIuVN5c3ep
+         2LUfUPiy8Rplc3cErec93tevLiKRWdPWHmH2WYfpGgEvrN7xDJBt0HkoXcPgcFM51t5o
+         lmaUVa5vVh/fNLC55fb82FDar5hSpvKgmbmhedn3TKiyWV0p2yO3d+xmGHe3PldRLdhs
+         FJmaKlDJJBqcLKXfKj4kbUiYCE8tmnb5MBBJJuf3Y9gygz8aYIa/ylS7SU9genG/sYCN
+         gOvg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744788952; x=1745393752;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=jDfwfDLF7UaEj/4Wi7KJzal6TyvbnmewVDjx4xgGdIU=;
-        b=Pxg1jHUXBvWlcw634PumrG1oOxlNyX7Q8inXvwjZtvpuiyyztpYIF6AasS37j/fnMK
-         iLPJ26zQPsigPJQ6s5MRFuiqazmrDCjA/sp4FQVq5Fw6j+chu0eWtbLtuYpNb/IRo3gz
-         QYQe8olzmtbovTjx4NrpPjw1hYG4bD6VX4qmDxTSxN5gsUXsDhmAvvRuTXrdtg5hDtrZ
-         CPBhTuy7LvLtafwLq7LA90geXfUBSal/U0HLAZMJ9uz5vtVfx4JFsvyKlr+jpWGT6TcY
-         I9EcQ9C6zmpWgtdsTB+W+4vAkx4fptENov9N/FciNJwApdjjVuf7BHWwLiLXMIjKxnIp
-         rsKw==
-X-Forwarded-Encrypted: i=1; AJvYcCUyk+6UvqwHd1y2z9phDK8JPBedUrTbV69d6ozSrzktUhBMN4g9Xwl28wR1rsDLCm+eVB8kBr+YshnDAw==@vger.kernel.org, AJvYcCWFaRfOr5LHO22Q3H3FIPFHAhN+OkUxPUP+RRfqCefJBgFoaa6mmznEZRqNDgym0zonvpq6Cs6w@vger.kernel.org
-X-Gm-Message-State: AOJu0YyUPrHptpMNI2ZAqKp4yRFshXOG0bE9GTqwzemcpjSO1SXikExG
-	Y+MO9snkDrXCjcepd3cUhe79xpWoXbBnFeeRx6KNlMmNJRdNjBN4
-X-Gm-Gg: ASbGncsFU96xvwiDxAPmHAMtC3ZjS8D/QtFcEhoGOHSK4bfFMPIfOBL8EpS4Jyl2/ds
-	V7qS9Hr9hrmo437o5Lz9+NF0va5xyQA4wg0/qyeE/QfZ6Y5x8jOy8N3fHuOScgU9fF17F4EsO/K
-	/Zv/rU6HWEjo58wu4uflGlvzamVSoafpCOvHpuOIE/Z4HOplBh6qAcWcQukTz60985piFpng16e
-	2/auuBq0KiaUmCkMApCoftKRgOrcEbOAT8MHFEeGhvRS/KTOQcnsm0UGB2YnmyJuLwM0+Deph79
-	+AO1KX6yJbrPwsyRFU5fUJBzR/lnCLcS6zuOijp5JdxFV5cBcOYQx8IxVpA=
-X-Google-Smtp-Source: AGHT+IG1R9ZuXGRtn9Z22H8Rc1bNg7jkLlB5jiU1Zy7I9rarVH0DXscpO2o2xOzkatmQtCImX0vuhg==
-X-Received: by 2002:a17:903:40c6:b0:224:f12:3746 with SMTP id d9443c01a7336-22c359172e3mr13791155ad.30.1744788952326;
-        Wed, 16 Apr 2025 00:35:52 -0700 (PDT)
-Received: from [192.168.1.13] ([60.243.3.154])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22c33fe6e1dsm7380395ad.236.2025.04.16.00.35.49
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 16 Apr 2025 00:35:51 -0700 (PDT)
-Message-ID: <757190c8-f7e4-404b-88cd-772e0b62dea5@gmail.com>
-Date: Wed, 16 Apr 2025 13:05:46 +0530
+        d=1e100.net; s=20230601; t=1744859534; x=1745464334;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=QYc8jSHhiJjjA2jV4a98jESgDC20bwS2vHiSSh2Hazc=;
+        b=YMMfIcLWyGwc6k5QahHgJendkBNa+l9GICmgxV5SozjiFyfyjKxwrI/06C1M7fV5R6
+         ESPNwb3OySOy2UzDSXmVZ4IDfP0MBugIa9X0s+GmFDKb/bOtgz4UvcpuMQoQYSk1PzXB
+         qrg320iUgommpvHZNv0IG3e9AbApjFTyIplMU4+s44AcLEwVxrprkEY1Fy/dtA43quih
+         u8ONo6BJRKEKC8g4xAzk7tRrydA5XuXpPTDBXvJxCAy1+KL/IQQTuiRgEo6S8yVRVo1l
+         22FMnSibCzsPvTp0X9Q0BBV2hk25LkFOkFj3t4GvVg7JjSr0xEkSllWR4IFp720KYWLK
+         Pi8Q==
+X-Gm-Message-State: AOJu0YyKBzQ6WHLohdoqlsTLrYl0wqEARATFBYePcTChqIDqFt/QfV8Z
+	9NP+GF0DsAXEifSc7bel2KHkqmpCFnNKK8wGpfwAxu774JA9dALzJPecKt/vwENQaNkUsf+uSaC
+	o
+X-Gm-Gg: ASbGncuCWpsL52DZZRSphKJD8Vgou2tSMR/t0NTySUwyK172Xy18byrCdGAHWlQ8F2r
+	ThJP57QYIfKsRZSbSDNPyqF/BLOcAOcMq7Btu90wGoXaM74WpwnVDv1lQH5YmLhf/QGvS4n+0Zp
+	IXU92qwAc8SG1N5wF2Gslid8V2i3fZbPbvWPA1hafITAkCPtzf+44sdVkwf13cPkwS1qbjBkKPX
+	GFBEPj+4MPrvhrjOAT2m6we89P41x+PZwOHXLSYG5aAS+8QSqEMUbJJw0figLYmZUxhKYJPkita
+	MpYFQyGck8tZzqjhW9296Yh2nlJt1UXcenpk6JjD3P7xiag4gtcbUmGAGNmu8hSty9jM6KLky4L
+	VgySt3AltCnxy
+X-Google-Smtp-Source: AGHT+IFbTfjocc1QZWzA5w/yAYgbY7O2SWzKu6YHJ9TSt6lSObdP7e0m9wYgnQvuuTmWznA1nqAGBw==
+X-Received: by 2002:a05:6a00:3001:b0:732:5611:cbb5 with SMTP id d2e1a72fcca58-73c2671557bmr5409906b3a.11.1744859534115;
+        Wed, 16 Apr 2025 20:12:14 -0700 (PDT)
+Received: from dread.disaster.area (pa49-181-60-96.pa.nsw.optusnet.com.au. [49.181.60.96])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73bd22fa730sm11544341b3a.94.2025.04.16.20.12.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 16 Apr 2025 20:12:13 -0700 (PDT)
+Received: from [192.168.253.23] (helo=devoid.disaster.area)
+	by dread.disaster.area with esmtp (Exim 4.98)
+	(envelope-from <dave@fromorbit.com>)
+	id 1u5Ffe-00000009Y9X-05Za;
+	Thu, 17 Apr 2025 13:12:10 +1000
+Received: from dave by devoid.disaster.area with local (Exim 4.98)
+	(envelope-from <dave@devoid.disaster.area>)
+	id 1u5Ffe-00000007mE9-0sYb;
+	Thu, 17 Apr 2025 13:12:10 +1000
+From: Dave Chinner <david@fromorbit.com>
+To: fstests@vger.kernel.org
+Cc: zlang@kernel.org
+Subject: [PATCH 04/28] check-parallel: report how many tests were _notrun
+Date: Thu, 17 Apr 2025 13:00:45 +1000
+Message-ID: <20250417031208.1852171-5-david@fromorbit.com>
+X-Mailer: git-send-email 2.45.2
+In-Reply-To: <20250417031208.1852171-1-david@fromorbit.com>
+References: <20250417031208.1852171-1-david@fromorbit.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1] xfs: Fail remount with noattr2 on a v5 xfs with
- CONFIG_XFS_SUPPORT_V4=y
-Content-Language: en-US
-To: Christoph Hellwig <hch@infradead.org>
-Cc: linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org,
- fstests@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
- djwong@kernel.org, zlang@kernel.org, david@fromorbit.com
-References: <7c4202348f67788db55c7ec445cbe3f2d587daf2.1744394929.git.nirjhar.roy.lists@gmail.com>
- <Z_yhpwBQz7Xs4WLI@infradead.org>
- <0d1d7e6f-d2b9-4c38-9c8e-a25671b6380c@gmail.com>
- <Z_9JmaXJJVJFJ2Yl@infradead.org>
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <Z_9JmaXJJVJFJ2Yl@infradead.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 
+From: Dave Chinner <dchinner@redhat.com>
 
-On 4/16/25 11:39, Christoph Hellwig wrote:
-> On Tue, Apr 15, 2025 at 12:48:39PM +0530, Nirjhar Roy (IBM) wrote:
->> condition(noattr2 on v5) is not caught in xfs_fs_validate_params() because
->> the superblock isn't read yet and "struct xfs_mount    *mp" is still not
->> aware of whether the underlying filesystem is v5 or v4 (i.e, whether crc=0
->> or crc=1). So, even if the underlying filesystem is v5, xfs_has_attr2() will
->> return false, because the m_features isn't populated yet.
-> Yes.
->
->> However, once
->> xfs_readsb() is done, m_features is populated (mp->m_features |=
->> xfs_sb_version_to_features(sbp); called at the end of xfs_readsb()). After
->> that, when xfs_finish_flags() is called, the invalid mount option (i.e,
->> noattr2 with crc=1) is caught, and the mount fails correctly. So, m_features
->> is partially populated while xfs_fs_validate_params() is getting executed, I
->> am not sure if that is done intentionally.
-> As you pointed out above it can't be fully populated becaue we don't
-> have all the information.  And that can't be fixed because some of the
-> options are needed to even get to reading the superblock.
->
-> So we do need a second pass of verification for everything that depends
+We already count tests "run" and tests that failed, but there is no
+indication of how many tests were _notrun. With tests actually
+failing to run because of things like bugs in _scratch_mkfs_sized
+being reported as "_notrun" instead of failing, visibility of
+changing numbers of _notrun tests is needed.
 
-Yes, we need a second pass and I think that is already being done by 
-xfs_finish_flags() in xfs_fs_fill_super(). However, in 
-xfs_fs_reconfigure(), we still need a check to make a transition from /* 
-attr2 -> noattr2 */ and /* noattr2 -> attr2 */ (only if it is permitted 
-to) and update mp->m_features accordingly, just like it is being done 
-for inode32 <-> inode64, right? Also, in your previous reply[1], you did 
-suggest moving the crc+noattr2 check to xfs_fs_validate_params() - Are 
-you suggesting to add another optional (NULLable) parameter "new_mp" 
-to xfs_fs_validate_params() and then moving the check to 
-xfs_fs_validate_params()?
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
+---
+ check-parallel | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-[1] https://lore.kernel.org/all/Z_yhpwBQz7Xs4WLI@infradead.org/
-
---NR
-
-> on informationtion from the superblock.  The fact that m_features
-> mixes user options and on-disk feature bits is unfortunately not very
-> helpful for a clear structure here.
->
+diff --git a/check-parallel b/check-parallel
+index c85437252..d68d76e55 100755
+--- a/check-parallel
++++ b/check-parallel
+@@ -188,7 +188,10 @@ done;
+ wait
+ 
+ echo -n "Tests run: "
+-grep Ran /mnt/xfs/*/log | sed -e 's,^.*:,,' -e 's, ,\n,g' | sort | uniq | wc -l
++grep Ran $basedir/*/log | sed -e 's,^.*:,,' -e 's, ,\n,g' | sort | uniq | wc -l
++
++echo -n "Tests _notrun: "
++grep "^Not run" $basedir/*/log | uniq | sed -e 's,^.*:,,' -e 's, ,\n,g' -e 's,^\n,,' | wc -l
+ 
+ echo -n "Failure count: "
+ grep Failures: $basedir/*/log | uniq | sed -e "s/^.*Failures://" -e "s,\([0-9]\) \([gx]\),\1\n \2,g" |wc -l
 -- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+2.45.2
 
