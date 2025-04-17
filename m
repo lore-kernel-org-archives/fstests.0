@@ -1,81 +1,77 @@
-Received: from mail-pl1-f172.google.com (mail-pl1-f172.google.com [209.85.214.172])
+Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAC4A1C3BEA
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B1E41C863C
 	for <fstests@vger.kernel.org>; Thu, 17 Apr 2025 03:12:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.172
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744859538; cv=none; b=qqnmH9dNnmQKJPAnFeovUtLmigTPvm1pw+m0cy79Lw55S8Ce+2wfme5wR+PVz0fVHuyxCTA+0PRfsHWUKefl5oM0tXGP+6gl8EBLE9yt0FRdwxLqYBiWJTpsSWltIGOIzUaP2WGYdC9hECH7rA984vc6qA5tBhM4byW4Acs8mO0=
+	t=1744859538; cv=none; b=mhhYp0i/wamYtFL+6wV1XvVQNLVpOKzUHNXh03DTxLo/JAfh2ocsZjCgPx+DPKFg6wM/3sTqVI+ziqlNP1/9c6qSqjyTUXLNWL9P8T0SkSEHN6No6AUIkDwRCM4aGRN/F+w+4GaldlMPzEXx+878KxieZv5o7OF/Sx3gvomWoh8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1744859538; c=relaxed/simple;
-	bh=FQf6ZbR5oGnjGaJykUjHaiheJKCLxlahRk2GdoX86N0=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=iD6RZwSFQpRGgzsTERD7+4wGEGv/Xnw5pJxXNrqueZNiUU9UboJQuyHaA1fVOgz32p2Edczw8Xyo9kFUXiB2CE2rNIcQ+qrn8qUNcb+G/auBq5xsnfZQu9HhXzXw6Qbg0vUnHGz4nTBPM6JMLkf0d6MTUKK3QP6O+2oO0Llh4Lc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=ArB1hsJR; arc=none smtp.client-ip=209.85.214.172
+	bh=hgTSmTre2NvYZJ+/9JA+o8iyiRFoEFjnGXZ6nnsNyBk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Dh3UqsftREtoj4YCf13Fsa4WM09/ZM8la96p0PBUY/2V6aaf2qxOxfDxPjkMJc8nfUpBfkH6okPE9n02zppy5eQsWrIvIHiBqWq5dr/go4bFoqofiYWlFJr0JxVDNLicbCDGTdtRx0e/i1vALF4d4MpKcZqDAmC3lMA3a0za7cQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=n6AUaJIT; arc=none smtp.client-ip=209.85.214.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="ArB1hsJR"
-Received: by mail-pl1-f172.google.com with SMTP id d9443c01a7336-22401f4d35aso3786245ad.2
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="n6AUaJIT"
+Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-2295d78b433so3264905ad.2
         for <fstests@vger.kernel.org>; Wed, 16 Apr 2025 20:12:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1744859536; x=1745464336; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=RfJthm8Uu8PJ32WCYaxE34zlYJMvw55OU9t/8Diso4o=;
-        b=ArB1hsJR5c/QaT2GVqrAF+INu+k6aX7eKW7thhdt2H9yS9KRMh2DVsKSkW+7RDc0nF
-         GJfcdOZ9Xs7iGcZAzJ/mYur3wUq79rZlq4hsMCha5CJmh/8Fty+pyvzLq14uxP2Me+yV
-         74lejkKjUOXDuisBijQUzi8ETKDpx1l7CwKNBWjbO9W6Rt1ga860VynW4UubWbynvF8t
-         n+AImYc+mK1Y8azLv//PX/XYBVAb52lYgh1z5pmjIQz9Yobox4Hv8QC67zXtPpiK6kDd
-         +IvMYsD5dVLUtzCZoZFxcpawUotXT1LbTOcp3zy0BHCoLJqkvk+nV/AHCMnszBDBn+Rk
-         iK2g==
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=nCYmFdvLrtVzQSRwACgXKT2fugUZmonwz0mWtOlS/5c=;
+        b=n6AUaJIT4cn114bXYJ8AvieWdDanP07nNqgBwAXrO4CNGROynclSE+obF64Ss8e6ny
+         qAaa3x3GG3GVZ0/qV/eExxfh7oaJ2+4lYJg7BhBKB9osqB5hEssHOhEuOMmxx5NLh6kT
+         jH1zDjIh+d3Qp1BlcN7kQUv31DXan8nf+JYXHdLBRjSERsG2m1tpwDaVdJRXoiEPZEf1
+         as1KggiQCv3Ms/J6toiiXJJTNPICa4+pgPvHXrF3Yfx+b9hc9zTbx8myN+2FCC+jwVqw
+         G7yrpD5Hw6751OvuxulrSgOIiIBJicBL3xQtH+8+2J8qdE0ZoGueYQ3of1XmBSsaVrBE
+         VxqQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20230601; t=1744859536; x=1745464336;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=RfJthm8Uu8PJ32WCYaxE34zlYJMvw55OU9t/8Diso4o=;
-        b=ioCUmjqsF4VCtAeV/rbeI8UvmDwh66q9fF0ui2bWAhsctXVIgBSnVIERfxp6/n9+hn
-         tKNMstQHk0RI4ocXSuHhIa5DWGWRP1tC7GpptNn6wo4zmTn6OoLXhi7Ten27IboRA6hh
-         6b4mHTV0ICJoaOjPZ+DBzg7kD0kBd5gSRypbcQL8AazfUcIDkrycWu7EFTQRN1uVL9FW
-         wub0UGheeMIlt1aAVuwSsLiUjtYnyOiZ4Wcg3Gm5W4Yr5iqICe2SIg7tQrp9cYjMyOxz
-         y6Rwif4ukP5BudHUui5hrwDq27XdDD0ZzxuIjMol9EX2CPHBatToFETZdZszXYyOd8pJ
-         YP0A==
-X-Gm-Message-State: AOJu0YxOk+Ltyu9jCnufDJ371TuaxdP98Ihfcb9ZLFRl3cIWVJEr9wWa
-	5DGkXPNZ4ccg9pmoU1278E+VKzgti9zbEVwXm8r9zADD5xFGrh6iAe/jFsfi+nF6CcVw211K7jS
-	k
-X-Gm-Gg: ASbGncvKd5eQR5u6opKLhjX3qDwRDPU2SQ+6C5RTnc80lgJHgtpOYr0Cha9PgxjUyHq
-	ijUFZ9Wn6piMFWMzw2RO6m0MMSsTd5WoC++2x+vRVUxEBKWjPVlm1L0BK4HOe+RcBkMEPZQ71Xv
-	abPCo0jl6M0iQr7wvzxO54Zq+E0mnCX0l9HF6ApiyXARqwr0dZqsPrHZZC/i5bC4OtgZJbq90Ox
-	B7Dews4mffOWYt0dV60kUez3faYZtAg1/n7BHLAeUPirrIO9CeYFuYWie6/amr2+e9aYq3of3/6
-	FaJcOz9cAXj4nf/3g9JAeyfpopCleYg9MCPbxmsLadiRH5gbsQwP2BpZ8nLZNicICwYvCzVIp6M
-	tCh7pBdXzZ0UZ
-X-Google-Smtp-Source: AGHT+IEUrCAe7kJ8i1jG+mZrmTUa5Tbd4tnlsplxshNkTt2K3dDcPX8vbSlZvF7J249u0m46CGtopQ==
-X-Received: by 2002:a17:903:2345:b0:224:1ec0:8a0c with SMTP id d9443c01a7336-22c359114b0mr58295165ad.29.1744859535694;
-        Wed, 16 Apr 2025 20:12:15 -0700 (PDT)
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=nCYmFdvLrtVzQSRwACgXKT2fugUZmonwz0mWtOlS/5c=;
+        b=W/O/mYWDUQ0OKLsqfskGcGrkDJXJDx3oOsA1R9ys/2lSAJjmIQxEuHDgEYtLIQDEd8
+         OFC5CnDUFdPwLME8MwjgNKzwr2ctY6GsgZHVVBSLJeuU53d4eaq5UhwXhP2rvWRbC1mZ
+         HwU9VbUNOfSBEFq+OYH5jxVpaqNP5+q74SZkRphePLuRlNAPFlG9aStS+eQ3WrD1xQVb
+         nNevJW3HsPLEMtwLqhmyl6ZwxjfLm0TJ2/Os/r8dCcaMCk5nnsWDfSVX1+lD3O0vcL0C
+         bNWSALQeFE+dalZL92st+u0HpTG1OZ+CYrNWeowEczj8oc9tzuPnvTVTaH40/vHWiG/7
+         OiAg==
+X-Gm-Message-State: AOJu0Yx4IYlTiyi76+GR7KNvfsiTEWuWevZREiaFv5B/Xlmd8PLplmS/
+	Mpw7Tf5mHYcQwmLRAO+nSaS5BFDWWJeGgZpkcGCnTKgnaJBKm8jaQMkXSsqlS2A7XH1XUhtD/Ma
+	d
+X-Gm-Gg: ASbGnctZxZHn6y4/6COaHOAb4ue2pb9fWgY/Hp+s9qs9/zdO1WN/BpHk7ms8GLIeSXG
+	IctYlmPGtwjDnlYjBjtJgePQLaHoHm+7zgqFVnZTkTN8HAbBWcFEuU3H2JHuqahh8tUxj4X9w2W
+	Um1Q3S2/9DiqvFEGlKk2Q4dzKSi9E9FrrtpXate7tZRB6fgvfiZzpbkdXg9exNXqiyzRW322q2Z
+	uV2YzqQkYwRmQbc/y3t8f7a2cXaC6+EY9yfbaPjtV/rP566u9j6aFEwN8oxU+E3QUfzzarmB2mk
+	K6PG3WcUdPKfxvPJKAIStdypQvJH1+cotnNBaGncszfUTA3gRxHtqVl+srFx43SK5rbdECskd/s
+	dsqeq1iUI7SPX
+X-Google-Smtp-Source: AGHT+IG1QLH6MEe2XfgoAP+7Tv5yt91R0GzcOhO239YeptLGcIbVi7v9OM5sLkOph7E8O+Jl9rLH7A==
+X-Received: by 2002:a17:902:ef44:b0:215:8d49:e2a7 with SMTP id d9443c01a7336-22c35990b95mr66862445ad.50.1744859536103;
+        Wed, 16 Apr 2025 20:12:16 -0700 (PDT)
 Received: from dread.disaster.area (pa49-181-60-96.pa.nsw.optusnet.com.au. [49.181.60.96])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22c33fa5e9esm22306495ad.132.2025.04.16.20.12.12
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22c33f1d199sm22349845ad.90.2025.04.16.20.12.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Wed, 16 Apr 2025 20:12:13 -0700 (PDT)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1u5Ffe-00000009YAM-1lVe;
+	id 1u5Ffd-00000009Y9K-3ffy;
 	Thu, 17 Apr 2025 13:12:10 +1000
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1u5Ffe-00000007mF9-2Zge;
+	id 1u5Ffe-00000007mDu-0Dwh;
 	Thu, 17 Apr 2025 13:12:10 +1000
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
 Cc: zlang@kernel.org
-Subject: [PATCH 16/28] check-parallel: run sections directly
-Date: Thu, 17 Apr 2025 13:00:57 +1000
-Message-ID: <20250417031208.1852171-17-david@fromorbit.com>
+Subject: [PATCH 00/28] check-parallel: Running tests without check
+Date: Thu, 17 Apr 2025 13:00:41 +1000
+Message-ID: <20250417031208.1852171-1-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
-In-Reply-To: <20250417031208.1852171-1-david@fromorbit.com>
-References: <20250417031208.1852171-1-david@fromorbit.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -84,239 +80,141 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: Dave Chinner <dchinner@redhat.com>
+Hi folks,
 
-Currently we pass the section through to check for it to apply and
-run. However, we do not reconfigure the test or external devices in
-check-parallel after the initial setup, so thie results in devices
-that may be incorrectly configured for the given section config we
-want to run.
+This set of patches is intended to move check-parallel away from
+using check to execute tests.
 
-To fix this, we need to iterate the sections directly in
-check-parallel and reconfigure the runner device setup between each
-section that is run. This allows the test device and external
-devices to be set up correctly for each section config.
+To do this, we need to share a bunch of check code between check and
+check-parallel. This is mainly the code that parses and builds the
+test list, the config section parsing and iteration, and the test
+execution loop itself.
 
-As the test list is consumed as we walk it, we need to reset the
-test list for each section that we run.
+To do this, test list parsing and building is factored out of check
+into common/test_list. check is converted to use the test list
+functions at the same time, and then check-parallel is converted to
+use the factored code to directly build it's test list rather than
+the open coded grep hack it currently uses.  This allows
+check-parallel CLI to use the same group selection interface as
+check.
 
-We still pass the config section through to check so that it can
-also source the correct config from the section we are running.
+The next change is to factor the config section parsing out of
+common/config and move it to common/config-section. This allows
+check-parallel to parse and implement section iteration itself
+without needing to run all the environment setup code in
+common/config. This also allows check-parallel to implement it's own
+config section to define the device sizes that it will use
+independently of the sections that run tests.
 
-We also add section exclusion support so that we skip sections the
-same way that check currently does.
+Next, we change check-parallel to use a global test list that runner
+scripts can safely dequeue the next test to run. This uses a test
+list file and a lock file to serialise access to the file. Hence a
+runner can dequeue the next test and remove it from the test list
+file without racing with any other runner trying to dequeue the next
+test to run. This means we get rid of the static per-runner test
+lists that result in many runners finishing and going idle while
+other test runners have pending tests still to run. i.e. all test
+runners keep executing tests until there are no tests left in the
+queue, hence keeping utilisation as high as possible across the test
+run.
 
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
----
- check-parallel         | 118 ++++++++++++++++++++++++++++-------------
- common/config-sections |   3 ++
- 2 files changed, 84 insertions(+), 37 deletions(-)
+Then we factor the test execution loop out of check and put it in
+common/test_exec. This abstraction makes the results array part of
+the test execution, as well using a context defined helper
+"_run_seq" to do the actual execution of the test. This allows the
+test execution loop to be completely generic, whilst allowing check
+and check-parallel to do completely independent things with
+individual test execution and overall results reporting.
 
-diff --git a/check-parallel b/check-parallel
-index e2cf2c8d0..23d29c7a8 100755
---- a/check-parallel
-+++ b/check-parallel
-@@ -15,6 +15,7 @@ runner_list=()
- runtimes=()
- show_test_list=
- run_section=""
-+exclude_section=""
- iam="check-parallel"
- 
- tmp=/tmp/check-parallel.$$
-@@ -119,7 +120,8 @@ while [ $# -gt 0 ]; do
- 
- 	-f)	is_supported_fstype $2 ; export FSTYP=$2; shift ;;
- 
--	-s)	run_section="$run_section -s $2"; shift ;;
-+	-s)	run_section="$run_section $2"; shift ;;
-+	-S)	exclude_section="$exclude_section $2"; shift ;;
- 
- 	-*)	usage ;;
- 	*)	# not an argument, we've got tests now.
-@@ -202,11 +204,12 @@ fi
- # each other.
- get_next_test()
- {
-+	local test_file="$test_list.$1"
- 	local test=
- 
- 	flock 99
--	test=$(tail -1 $test_list)
--	sed -i "\,$test,d" $test_list
-+	test=$(tail -1 $test_file)
-+	sed -i "\,$test,d" $test_file
- 	flock -u 99
- 	echo $test
- }
-@@ -236,10 +239,34 @@ _destroy_loop_device()
-         losetup -d $dev || _fail "Cannot destroy loop device $dev"
- }
- 
--runner_go()
-+run_tests()
- {
-+	local section="$1"
-+
- 	exec 99<>$tmp.test_list_lock
- 
-+	local test_to_run=$(get_next_test $section)
-+
-+	# Run the tests in it's own mount namespace, as per the comment below
-+	# that precedes making the basedir a private mount.
-+	#
-+	# Similarly, we need to run check in it's own PID namespace so that
-+	# operations like pkill only affect the runner instance, not globally
-+	# kill processes from other check instances.
-+	while [ -n "$test_to_run" ]; do
-+		echo -n " $test_to_run "
-+		unset FSTESTS_ISOL
-+		if ! _tl_expunge_test $test_to_run; then
-+			tools/run_privatens ./check -s $section $test_to_run >> $me/log 2>&1
-+		fi
-+
-+		test_to_run=$(get_next_test $section)
-+	done
-+}
-+
-+runner_go()
-+{
-+
- 	local id=$1
- 	local me=$basedir/runner-$id
- 	local _test=$me/test.img
-@@ -250,7 +277,7 @@ runner_go()
- 	local _scratch_log=$me/scratch-log.img
- 	local _logwrites=$me/logwrites.img
- 	local _results=$me/results-$2
--	local test_to_run=$(get_next_test)
-+	local section=$3
- 
- 	mkdir -p $me
- 
-@@ -286,21 +313,7 @@ runner_go()
- 
- #	export DUMP_CORRUPT_FS=1
- 
--	# Run the tests in it's own mount namespace, as per the comment below
--	# that precedes making the basedir a private mount.
--	#
--	# Similarly, we need to run check in it's own PID namespace so that
--	# operations like pkill only affect the runner instance, not globally
--	# kill processes from other check instances.
--	while [ -n "$test_to_run" ]; do
--		echo "Runner $id: running test $test_to_run"
--		unset FSTESTS_ISOL
--		if ! _tl_expunge_test $test_to_run; then
--			tools/run_privatens ./check $run_section $test_to_run >> $me/log 2>&1
--		fi
--
--		test_to_run=$(get_next_test)
--	done
-+	run_tests $section
- 
- 	wait
- 	sleep 1
-@@ -322,6 +335,44 @@ runner_go()
- 
- }
- 
-+run_section()
-+{
-+	local section="$1"
-+	local now="$2"
-+	local i
-+
-+	echo $run_section |grep -qw $section || return
-+	echo $exclude_section |grep -qw $section && return
-+
-+	echo
-+	echo Running section: $section
-+	echo
-+
-+	parse_config_section $section
-+
-+	# set up consumable test list first
-+	cp $test_list $test_list.$section
-+	for ((i = 0; i < $runners; i++)); do
-+		runner_go $i $now $section &
-+	done
-+	wait
-+
-+	echo
-+	echo Section: $section
-+	echo -n "Tests run: "
-+	grep Ran $basedir/*/log | sed -e 's,^.*:,,' -e 's, ,\n,g' | sort | uniq | wc -l
-+
-+	echo -n "Tests _notrun: "
-+	grep "^Not run" $basedir/*/log | uniq | sed -e 's,^.*:,,' -e 's, ,\n,g' -e 's,^\n,,' | wc -l
-+
-+	echo -n "Failure count: "
-+	grep Failures: $basedir/*/log | uniq | sed -e "s/^.*Failures://" -e "s,\([0-9]\) \([gx]\),\1\n \2,g" |wc -l
-+	echo
-+
-+	echo Ten slowest tests - runtime in seconds:
-+	cat $basedir/*/results-$now/check.time | sort -k 2 -nr | head -10
-+}
-+
- cleanup()
- {
- 	killall -INT -q check
-@@ -336,6 +387,8 @@ trap "cleanup; exit" HUP INT QUIT TERM
- 
- _config_setup_parallel
- 
-+run_section=${run_section:="$HOST_OPTIONS_SECTIONS"}
-+
- _tl_setup_exclude_group "unreliable_in_parallel"
- _tl_prepare_test_list
- _tl_strip_test_list
-@@ -369,23 +422,14 @@ fi
- mount --make-private $basedir
- 
- now=`date +%Y-%m-%d-%H:%M:%S`
--for ((i = 0; i < $runners; i++)); do
--	runner_go $i $now &
--done;
--wait
--
--echo -n "Tests run: "
--grep Ran $basedir/*/log | sed -e 's,^.*:,,' -e 's, ,\n,g' | sort | uniq | wc -l
--
--echo -n "Tests _notrun: "
--grep "^Not run" $basedir/*/log | uniq | sed -e 's,^.*:,,' -e 's, ,\n,g' -e 's,^\n,,' | wc -l
--
--echo -n "Failure count: "
--grep Failures: $basedir/*/log | uniq | sed -e "s/^.*Failures://" -e "s,\([0-9]\) \([gx]\),\1\n \2,g" |wc -l
--echo
--
--echo Ten slowest tests - runtime in seconds:
--cat $basedir/*/results-$now/check.time | sort -k 2 -nr | head -10
-+for section in $HOST_OPTIONS_SECTIONS; do
-+	run_section $section $now
-+	if [ "$sum_bad" != 0 ] && [ "$istop" = true ]; then
-+		interrupt=false
-+		status=`expr $sum_bad != 0`
-+		exit
-+	fi
-+done
- 
- echo
- echo Cleanup on Aisle 5?
-diff --git a/common/config-sections b/common/config-sections
-index 28bd11bab..c0ea097e8 100644
---- a/common/config-sections
-+++ b/common/config-sections
-@@ -436,6 +436,9 @@ _config_setup_parallel()
- 		exit 1
- 	fi
- 
-+	# strip check-parallel from the sections to run
-+	export HOST_OPTIONS_SECTIONS=`echo $HOST_OPTIONS_SECTIONS | sed -e "s/$iam//"`
-+
- 	grep DEV $HOST_OPTIONS |grep -qv SIZE
- 	if [ $? -ne 1 ]; then
- 		echo "$iam config file has devices defined"
--- 
-2.45.2
+Finally, we change check-parallel to run tests directly via the
+common/test_exec infrastructure rather than executing them via
+check. This requires a new helper function that does the test
+environment setup in the private mount+pid namespace, but this is
+much simpler and faster than using check itself to execute
+individual tests. This last bit of functionality is still a work in
+progress, so this specific patch is still tagged with [RFC].
+
+There are lots of other bits of changes. The way common/rc and
+common/config are used is changed. common/config only sets up the
+execution environment now, and should not contain any code that
+needs to be executed outside of environment setup. It should only be
+sourced once at the highest level to set up the environment, and
+never called again.
+
+common/rc is similar - all directly executed code has been removed
+from it, and that is now called from the high level code that needs
+initialisation work done.  It no longer sources common/config,
+either. The test preamble does not need to run init_rc() any more;
+they just need to source the generic and fs specific functions the
+tests may run. Also, because check does some weird things and lots
+of _requires....() functions assume the TEST_DEV is mounted without
+first running _require_test(), it also needs to ensure the TEST_DEV
+is mounted...
+
+check-parallel can now take a "-t N" parameter to specify how many
+execution threads it will use. If this is not specified, it will
+default to the number of CPUs in the machine. Testing with 4p
+restrictions show that check-parallel will run the quick group 3.5x
+faster on a 4p system with 8 execution threads than it will with a
+single execution thread. IOWs, even on small test systems,
+check-parallel can result in dramatic reductions in test runtime
+over check.
+
+On a 64 p machine, testing XFS with the quick group drops from 61
+minutes to just under 4 minutes. Testing XFS with the auto group
+drops from 246 minutes to just under 8 minutes.
+
+Other miscellaneous stuff in the series:
+
+	- kill non-numeric test name support
+	- creating common/exit for all the general test exit
+	  functions to fix circular dependencies between common/rc
+	  and common/config
+	- fix iscratch_mkfs_sized to make USE_EXTERNAL on XFS work
+	  the same as ext4.
+	- dm-logwrites devices are now created by check-parallel
+	- several test conversions from sync() to syncfs()
+	- removal of a could of stale .c test source files.
+	- address poor CPU count scaling in a couple of tests
+
+I have tried not to cause any regressions for people running plain
+check. I've tested that a bit with XFS and ext4, but I can't
+guarantee that there aren't issues I haven't uncovered. e.g. btrfs,
+as yet, is untested. It is unfortunate that the problem I seek to
+address - running exhaustive check testing across many filesystem
+types and configurations is prohibitively expensive in terms of time
+- is the very reason I can't really adequately test check for
+regressions as I develop check-parallel functionality...
+
+Thoughts, comments and code review all welcome!
+
+-Dave.
+
+ .gitignore                          |   1 -
+ check                               | 727 ++++--------------------------------
+ check-parallel                      | 351 ++++++++++++++---
+ common/config                       | 612 +-----------------------------
+ common/config-sections              | 461 +++++++++++++++++++++++
+ common/dmlogwrites                  |   5 +-
+ common/exit                         |  48 +++
+ common/preamble                     |  19 +-
+ common/rc                           | 253 +++++++++++--
+ common/report                       |   2 +-
+ common/test_exec                    | 377 +++++++++++++++++++
+ common/test_list                    | 308 +++++++++++++++
+ common/test_names                   |   8 +-
+ new                                 |  24 --
+ src/Makefile                        |   4 +-
+ src/bulkstat_unlink_test.c          |  12 +-
+ src/bulkstat_unlink_test_modified.c | 193 ----------
+ src/fsync-tester.c                  |   2 +-
+ src/open_by_handle.c                |   6 +-
+ src/scaleread.c                     | 224 -----------
+ src/scaleread.sh                    |  64 ----
+ src/stale_handle.c                  |  15 +-
+ tests/generic/531                   |   8 +-
+ tests/xfs/259                       |   1 -
+ tests/xfs/271                       |   2 -
+ tools/run_test.sh                   | 116 ++++++
+ 26 files changed, 1954 insertions(+), 1889 deletions(-)
 
