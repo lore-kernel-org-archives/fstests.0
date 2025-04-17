@@ -1,78 +1,78 @@
 Received: from mail-pl1-f172.google.com (mail-pl1-f172.google.com [209.85.214.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAC9E1C8628
-	for <fstests@vger.kernel.org>; Thu, 17 Apr 2025 03:12:15 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAC4A1C3BEA
+	for <fstests@vger.kernel.org>; Thu, 17 Apr 2025 03:12:16 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744859538; cv=none; b=FfRiPT4eAWx7WHw1UuNbvZDv/KE5Ap6KXUIVFZa6saAZna9gCj2ha1o12VBv+RfbfaL/AurGr4jJ6kDbzLNDlscjRHYzKAMYONscIQKXTz/fLfbfuJ2z3oDedjGUpvayN8THLEc86bRF22BFUKXGa6T+4zNSzLpFVW5ieT6Yw5w=
+	t=1744859538; cv=none; b=qqnmH9dNnmQKJPAnFeovUtLmigTPvm1pw+m0cy79Lw55S8Ce+2wfme5wR+PVz0fVHuyxCTA+0PRfsHWUKefl5oM0tXGP+6gl8EBLE9yt0FRdwxLqYBiWJTpsSWltIGOIzUaP2WGYdC9hECH7rA984vc6qA5tBhM4byW4Acs8mO0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1744859538; c=relaxed/simple;
-	bh=t3yOMBHI5hM9QtZl6rp6tAAW93Tf4IjrurDoXBiqK0M=;
+	bh=FQf6ZbR5oGnjGaJykUjHaiheJKCLxlahRk2GdoX86N0=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=kCGGq2Hm9Ha01H963ePCx1cAjj2iJrjcA+6zWbxzLl7535wv2yWOG8jVTk0vcZvzjqz5do6r5apK1/qPCeAHFj8kp9Ro3eLeAq7DYhdU4A3mRDsWBYnyPulalyzmyzlZvbySI8giDIO4TGRRpenm5o6WAx3LMHX66z2vUbI4W0c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=oAJQVT5b; arc=none smtp.client-ip=209.85.214.172
+	 MIME-Version; b=iD6RZwSFQpRGgzsTERD7+4wGEGv/Xnw5pJxXNrqueZNiUU9UboJQuyHaA1fVOgz32p2Edczw8Xyo9kFUXiB2CE2rNIcQ+qrn8qUNcb+G/auBq5xsnfZQu9HhXzXw6Qbg0vUnHGz4nTBPM6JMLkf0d6MTUKK3QP6O+2oO0Llh4Lc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=ArB1hsJR; arc=none smtp.client-ip=209.85.214.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="oAJQVT5b"
-Received: by mail-pl1-f172.google.com with SMTP id d9443c01a7336-22c33677183so3551955ad.2
-        for <fstests@vger.kernel.org>; Wed, 16 Apr 2025 20:12:15 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="ArB1hsJR"
+Received: by mail-pl1-f172.google.com with SMTP id d9443c01a7336-22401f4d35aso3786245ad.2
+        for <fstests@vger.kernel.org>; Wed, 16 Apr 2025 20:12:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1744859535; x=1745464335; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1744859536; x=1745464336; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=qHn4iJxogQuMh/ahDhm/alvnR/vDGleiBZtOn+tJ4VI=;
-        b=oAJQVT5bMG22Iob5wGqakHnFhU0roTfpmqGs+WLBunkw6bwEGIiRlecfKTKc5GwQSX
-         7z36baDaAe+WEeMRpCZe3k//MWcrHHVUhNJjGIQrj5zRuWb26OpyfNDX4yPo0hKpRcpN
-         7oJgbBLmesG6eQ9CqEbKWMjkwWlpuKjSN3Wsbrj9FwmVu6VisVTvGwl+qIak2rPjJpVz
-         feVvecPpDRVcXfkFJP3dCYJ9w3FqVel7I4VXLocWA2wIecQz2LZHmpGqPHbsQv80YjDu
-         RL8Utlj66z1gdb5f7ivBM8TpNHKpXluy69YmzwZBlJGc+qHhg4ldls/z0wO2+oB6zT1+
-         V91w==
+        bh=RfJthm8Uu8PJ32WCYaxE34zlYJMvw55OU9t/8Diso4o=;
+        b=ArB1hsJR5c/QaT2GVqrAF+INu+k6aX7eKW7thhdt2H9yS9KRMh2DVsKSkW+7RDc0nF
+         GJfcdOZ9Xs7iGcZAzJ/mYur3wUq79rZlq4hsMCha5CJmh/8Fty+pyvzLq14uxP2Me+yV
+         74lejkKjUOXDuisBijQUzi8ETKDpx1l7CwKNBWjbO9W6Rt1ga860VynW4UubWbynvF8t
+         n+AImYc+mK1Y8azLv//PX/XYBVAb52lYgh1z5pmjIQz9Yobox4Hv8QC67zXtPpiK6kDd
+         +IvMYsD5dVLUtzCZoZFxcpawUotXT1LbTOcp3zy0BHCoLJqkvk+nV/AHCMnszBDBn+Rk
+         iK2g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744859535; x=1745464335;
+        d=1e100.net; s=20230601; t=1744859536; x=1745464336;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=qHn4iJxogQuMh/ahDhm/alvnR/vDGleiBZtOn+tJ4VI=;
-        b=D13sIYxx22Hxffey4xsCfinzQSgj3SNn5N4EY2N3zSwhKUJWBTDODHqrPiGDjwGymf
-         IByYTEAuQYZ5SVSrq6ZoOGuZkowJMXEsHXFD4yts8VjGjaoWuW7INXTcGbcOYaL8qqIV
-         2qH9W0yScsBWuJQznfw+YuXdcrN+HIbCq5T1KOhH4hpphEimQMBdYsggGWIv31ZfwCYs
-         pVdz5btvFlmiVoQxJfGgN4dqX7uwsUJlD2wTAvhp+vFe3ME8nkZbxNrrdUolmASts1Oz
-         9SoNqgRgLPuhyJ6OjTfLm6Qg+fZHgLwFObKYX449o5y7sZIDZ1S3q2pK+224vjNurSgQ
-         UPBQ==
-X-Gm-Message-State: AOJu0YxnwxkM1FnnhR0aJwPVsf/FIT6aBhACc9iVfihRJWYkCiqo2P7x
-	pA7QDzTIbM1S44U3iZQb8pWHzYINAYqBGGJKTlfS02XU7We+M0O0GbPzXl319G8jD+DKf7kT+gc
-	t
-X-Gm-Gg: ASbGncsuRzHnxZbsw46GB70IKpCKvlhJu+4Cy2pc4iCvYqSn2fGCDP+TMCQ+YUtjagl
-	9cvEIt+C8hk3LGR8U/iK0RgynQl3s0hHClrat2Zb9gE+YrwBP7NtQ7MFWplWxsofiufuv9Dumfi
-	FpnPzu/dCM6LM6ToBWwQJO+jPURdNAWN34bl5JNcXjcz2iUvTl58m37LX8qcDF67OtYiB68j6GO
-	Qeb1bco/VZU9bnCZGiiKHrIHXwpxMiTzj+pjyp1ufECvA4UJVyIg0YH8EDOtl8ZdscQ+Nzl+Dun
-	RUVXPCawYjEhKdXh/oV3xQKj7Py7+3iSAK3OiiZR2MKMorStYGWOz+KthCA1+4dQU1s1AZ529qO
-	jkxll37c4vWKL
-X-Google-Smtp-Source: AGHT+IGOkvZKpnidJ3XbojxwtvIyOA/jEkG51ys0Us6l0MjbyIrJKcSy1lj23EkCyjB6Eh+hlfEQUA==
-X-Received: by 2002:a17:902:cec5:b0:21f:61a9:be7d with SMTP id d9443c01a7336-22c35983aa0mr54753705ad.49.1744859535294;
+        bh=RfJthm8Uu8PJ32WCYaxE34zlYJMvw55OU9t/8Diso4o=;
+        b=ioCUmjqsF4VCtAeV/rbeI8UvmDwh66q9fF0ui2bWAhsctXVIgBSnVIERfxp6/n9+hn
+         tKNMstQHk0RI4ocXSuHhIa5DWGWRP1tC7GpptNn6wo4zmTn6OoLXhi7Ten27IboRA6hh
+         6b4mHTV0ICJoaOjPZ+DBzg7kD0kBd5gSRypbcQL8AazfUcIDkrycWu7EFTQRN1uVL9FW
+         wub0UGheeMIlt1aAVuwSsLiUjtYnyOiZ4Wcg3Gm5W4Yr5iqICe2SIg7tQrp9cYjMyOxz
+         y6Rwif4ukP5BudHUui5hrwDq27XdDD0ZzxuIjMol9EX2CPHBatToFETZdZszXYyOd8pJ
+         YP0A==
+X-Gm-Message-State: AOJu0YxOk+Ltyu9jCnufDJ371TuaxdP98Ihfcb9ZLFRl3cIWVJEr9wWa
+	5DGkXPNZ4ccg9pmoU1278E+VKzgti9zbEVwXm8r9zADD5xFGrh6iAe/jFsfi+nF6CcVw211K7jS
+	k
+X-Gm-Gg: ASbGncvKd5eQR5u6opKLhjX3qDwRDPU2SQ+6C5RTnc80lgJHgtpOYr0Cha9PgxjUyHq
+	ijUFZ9Wn6piMFWMzw2RO6m0MMSsTd5WoC++2x+vRVUxEBKWjPVlm1L0BK4HOe+RcBkMEPZQ71Xv
+	abPCo0jl6M0iQr7wvzxO54Zq+E0mnCX0l9HF6ApiyXARqwr0dZqsPrHZZC/i5bC4OtgZJbq90Ox
+	B7Dews4mffOWYt0dV60kUez3faYZtAg1/n7BHLAeUPirrIO9CeYFuYWie6/amr2+e9aYq3of3/6
+	FaJcOz9cAXj4nf/3g9JAeyfpopCleYg9MCPbxmsLadiRH5gbsQwP2BpZ8nLZNicICwYvCzVIp6M
+	tCh7pBdXzZ0UZ
+X-Google-Smtp-Source: AGHT+IEUrCAe7kJ8i1jG+mZrmTUa5Tbd4tnlsplxshNkTt2K3dDcPX8vbSlZvF7J249u0m46CGtopQ==
+X-Received: by 2002:a17:903:2345:b0:224:1ec0:8a0c with SMTP id d9443c01a7336-22c359114b0mr58295165ad.29.1744859535694;
         Wed, 16 Apr 2025 20:12:15 -0700 (PDT)
 Received: from dread.disaster.area (pa49-181-60-96.pa.nsw.optusnet.com.au. [49.181.60.96])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22c33f1cdf7sm22497265ad.72.2025.04.16.20.12.12
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22c33fa5e9esm22306495ad.132.2025.04.16.20.12.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Wed, 16 Apr 2025 20:12:13 -0700 (PDT)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1u5Ffd-00000009Y9R-40lV;
+	id 1u5Ffe-00000009YAM-1lVe;
 	Thu, 17 Apr 2025 13:12:10 +1000
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1u5Ffe-00000007mE5-0l08;
+	id 1u5Ffe-00000007mF9-2Zge;
 	Thu, 17 Apr 2025 13:12:10 +1000
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
 Cc: zlang@kernel.org
-Subject: [PATCH 03/28] fstests: move test exit functions to common/exit
-Date: Thu, 17 Apr 2025 13:00:44 +1000
-Message-ID: <20250417031208.1852171-4-david@fromorbit.com>
+Subject: [PATCH 16/28] check-parallel: run sections directly
+Date: Thu, 17 Apr 2025 13:00:57 +1000
+Message-ID: <20250417031208.1852171-17-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20250417031208.1852171-1-david@fromorbit.com>
 References: <20250417031208.1852171-1-david@fromorbit.com>
@@ -86,187 +86,237 @@ Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-Functions like _fatal() and _exit() need to be called from
-common/config as well as general common and test code. Having some
-of these test exit functions defined in common/config requires all
-contexts to source this file and run all the environment setup
-just to gain access to these functions.
+Currently we pass the section through to check for it to apply and
+run. However, we do not reconfigure the test or external devices in
+check-parallel after the initial setup, so thie results in devices
+that may be incorrectly configured for the given section config we
+want to run.
 
-There is a catch-22 with these functions - they cannot be defined in
-common/rc for all contexts to pick up automatically, because
-common/config needs them and some functions in common/rc depend on
-common/config being sourced first. And we can't define them all in
-common/config, because there are contexts where that hasn't been
-sourced that need a specific test exit function.
+To fix this, we need to iterate the sections directly in
+check-parallel and reconfigure the runner device setup between each
+section that is run. This allows the test device and external
+devices to be set up correctly for each section config.
 
-Solve this by move all the test exit functions to a new common/exit
-file and source that explicitly in the contexts that need it, hence
-removing the circular dependency between common/config and common/rc
-for defining these functions...
+As the test list is consumed as we walk it, we need to reset the
+test list for each section that we run.
+
+We still pass the config section through to check so that it can
+also source the correct config from the section we are running.
+
+We also add section exclusion support so that we skip sections the
+same way that check currently does.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- check           |  2 ++
- common/config   | 16 +---------------
- common/exit     | 48 ++++++++++++++++++++++++++++++++++++++++++++++++
- common/preamble |  1 +
- common/rc       | 22 ----------------------
- 5 files changed, 52 insertions(+), 37 deletions(-)
- create mode 100644 common/exit
+ check-parallel         | 118 ++++++++++++++++++++++++++++-------------
+ common/config-sections |   3 ++
+ 2 files changed, 84 insertions(+), 37 deletions(-)
 
-diff --git a/check b/check
-index d6bab8b5f..69866b14b 100755
---- a/check
-+++ b/check
-@@ -52,6 +52,8 @@ rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.report.* $tmp.arglist
- SRC_GROUPS="generic"
- export SRC_DIR="tests"
+diff --git a/check-parallel b/check-parallel
+index e2cf2c8d0..23d29c7a8 100755
+--- a/check-parallel
++++ b/check-parallel
+@@ -15,6 +15,7 @@ runner_list=()
+ runtimes=()
+ show_test_list=
+ run_section=""
++exclude_section=""
+ iam="check-parallel"
  
-+. ./common/exit
+ tmp=/tmp/check-parallel.$$
+@@ -119,7 +120,8 @@ while [ $# -gt 0 ]; do
+ 
+ 	-f)	is_supported_fstype $2 ; export FSTYP=$2; shift ;;
+ 
+-	-s)	run_section="$run_section -s $2"; shift ;;
++	-s)	run_section="$run_section $2"; shift ;;
++	-S)	exclude_section="$exclude_section $2"; shift ;;
+ 
+ 	-*)	usage ;;
+ 	*)	# not an argument, we've got tests now.
+@@ -202,11 +204,12 @@ fi
+ # each other.
+ get_next_test()
+ {
++	local test_file="$test_list.$1"
+ 	local test=
+ 
+ 	flock 99
+-	test=$(tail -1 $test_list)
+-	sed -i "\,$test,d" $test_list
++	test=$(tail -1 $test_file)
++	sed -i "\,$test,d" $test_file
+ 	flock -u 99
+ 	echo $test
+ }
+@@ -236,10 +239,34 @@ _destroy_loop_device()
+         losetup -d $dev || _fail "Cannot destroy loop device $dev"
+ }
+ 
+-runner_go()
++run_tests()
+ {
++	local section="$1"
 +
- usage()
- {
-     echo "Usage: $0 [options] [testlist]"'
-diff --git a/common/config b/common/config
-index eada39717..5081c300a 100644
---- a/common/config
-+++ b/common/config
-@@ -40,6 +40,7 @@
- #
+ 	exec 99<>$tmp.test_list_lock
  
- . common/test_names
-+. common/exit
++	local test_to_run=$(get_next_test $section)
++
++	# Run the tests in it's own mount namespace, as per the comment below
++	# that precedes making the basedir a private mount.
++	#
++	# Similarly, we need to run check in it's own PID namespace so that
++	# operations like pkill only affect the runner instance, not globally
++	# kill processes from other check instances.
++	while [ -n "$test_to_run" ]; do
++		echo -n " $test_to_run "
++		unset FSTESTS_ISOL
++		if ! _tl_expunge_test $test_to_run; then
++			tools/run_privatens ./check -s $section $test_to_run >> $me/log 2>&1
++		fi
++
++		test_to_run=$(get_next_test $section)
++	done
++}
++
++runner_go()
++{
++
+ 	local id=$1
+ 	local me=$basedir/runner-$id
+ 	local _test=$me/test.img
+@@ -250,7 +277,7 @@ runner_go()
+ 	local _scratch_log=$me/scratch-log.img
+ 	local _logwrites=$me/logwrites.img
+ 	local _results=$me/results-$2
+-	local test_to_run=$(get_next_test)
++	local section=$3
  
- # all tests should use a common language setting to prevent golden
- # output mismatches.
-@@ -96,15 +97,6 @@ export LOCAL_CONFIGURE_OPTIONS=${LOCAL_CONFIGURE_OPTIONS:=--enable-readline=yes}
+ 	mkdir -p $me
  
- export RECREATE_TEST_DEV=${RECREATE_TEST_DEV:=false}
+@@ -286,21 +313,7 @@ runner_go()
  
--# This functions sets the exit code to status and then exits. Don't use
--# exit directly, as it might not set the value of "$status" correctly, which is
--# used as an exit code in the trap handler routine set up by the check script.
--_exit()
--{
--	test -n "$1" && status="$1"
--	exit "$status"
--}
+ #	export DUMP_CORRUPT_FS=1
+ 
+-	# Run the tests in it's own mount namespace, as per the comment below
+-	# that precedes making the basedir a private mount.
+-	#
+-	# Similarly, we need to run check in it's own PID namespace so that
+-	# operations like pkill only affect the runner instance, not globally
+-	# kill processes from other check instances.
+-	while [ -n "$test_to_run" ]; do
+-		echo "Runner $id: running test $test_to_run"
+-		unset FSTESTS_ISOL
+-		if ! _tl_expunge_test $test_to_run; then
+-			tools/run_privatens ./check $run_section $test_to_run >> $me/log 2>&1
+-		fi
 -
- # Handle mkfs.$fstyp which does (or does not) require -f to overwrite
- set_mkfs_prog_path_with_opts()
+-		test_to_run=$(get_next_test)
+-	done
++	run_tests $section
+ 
+ 	wait
+ 	sleep 1
+@@ -322,6 +335,44 @@ runner_go()
+ 
+ }
+ 
++run_section()
++{
++	local section="$1"
++	local now="$2"
++	local i
++
++	echo $run_section |grep -qw $section || return
++	echo $exclude_section |grep -qw $section && return
++
++	echo
++	echo Running section: $section
++	echo
++
++	parse_config_section $section
++
++	# set up consumable test list first
++	cp $test_list $test_list.$section
++	for ((i = 0; i < $runners; i++)); do
++		runner_go $i $now $section &
++	done
++	wait
++
++	echo
++	echo Section: $section
++	echo -n "Tests run: "
++	grep Ran $basedir/*/log | sed -e 's,^.*:,,' -e 's, ,\n,g' | sort | uniq | wc -l
++
++	echo -n "Tests _notrun: "
++	grep "^Not run" $basedir/*/log | uniq | sed -e 's,^.*:,,' -e 's, ,\n,g' -e 's,^\n,,' | wc -l
++
++	echo -n "Failure count: "
++	grep Failures: $basedir/*/log | uniq | sed -e "s/^.*Failures://" -e "s,\([0-9]\) \([gx]\),\1\n \2,g" |wc -l
++	echo
++
++	echo Ten slowest tests - runtime in seconds:
++	cat $basedir/*/results-$now/check.time | sort -k 2 -nr | head -10
++}
++
+ cleanup()
  {
-@@ -121,12 +113,6 @@ set_mkfs_prog_path_with_opts()
+ 	killall -INT -q check
+@@ -336,6 +387,8 @@ trap "cleanup; exit" HUP INT QUIT TERM
+ 
+ _config_setup_parallel
+ 
++run_section=${run_section:="$HOST_OPTIONS_SECTIONS"}
++
+ _tl_setup_exclude_group "unreliable_in_parallel"
+ _tl_prepare_test_list
+ _tl_strip_test_list
+@@ -369,23 +422,14 @@ fi
+ mount --make-private $basedir
+ 
+ now=`date +%Y-%m-%d-%H:%M:%S`
+-for ((i = 0; i < $runners; i++)); do
+-	runner_go $i $now &
+-done;
+-wait
+-
+-echo -n "Tests run: "
+-grep Ran $basedir/*/log | sed -e 's,^.*:,,' -e 's, ,\n,g' | sort | uniq | wc -l
+-
+-echo -n "Tests _notrun: "
+-grep "^Not run" $basedir/*/log | uniq | sed -e 's,^.*:,,' -e 's, ,\n,g' -e 's,^\n,,' | wc -l
+-
+-echo -n "Failure count: "
+-grep Failures: $basedir/*/log | uniq | sed -e "s/^.*Failures://" -e "s,\([0-9]\) \([gx]\),\1\n \2,g" |wc -l
+-echo
+-
+-echo Ten slowest tests - runtime in seconds:
+-cat $basedir/*/results-$now/check.time | sort -k 2 -nr | head -10
++for section in $HOST_OPTIONS_SECTIONS; do
++	run_section $section $now
++	if [ "$sum_bad" != 0 ] && [ "$istop" = true ]; then
++		interrupt=false
++		status=`expr $sum_bad != 0`
++		exit
++	fi
++done
+ 
+ echo
+ echo Cleanup on Aisle 5?
+diff --git a/common/config-sections b/common/config-sections
+index 28bd11bab..c0ea097e8 100644
+--- a/common/config-sections
++++ b/common/config-sections
+@@ -436,6 +436,9 @@ _config_setup_parallel()
+ 		exit 1
  	fi
- }
  
--_fatal()
--{
--    echo "$*"
--    _exit 1
--}
--
- export MKFS_PROG="$(type -P mkfs)"
- [ "$MKFS_PROG" = "" ] && _fatal "mkfs not found"
- 
-diff --git a/common/exit b/common/exit
-new file mode 100644
-index 000000000..16777507a
---- /dev/null
-+++ b/common/exit
-@@ -0,0 +1,48 @@
-+##/bin/bash
-+# SPDX-License-Identifier: GPL-2.0+
-+# Copyright (c) 2000-2006 Silicon Graphics, Inc.  All Rights Reserved.
-+#
-+# Test termination functions that need to be independent of the context that the
-+# test is running in. This must not have any dependencies on common/config or
-+# common/rc, as they both require these functions to be defined before they are
-+# sourced.
++	# strip check-parallel from the sections to run
++	export HOST_OPTIONS_SECTIONS=`echo $HOST_OPTIONS_SECTIONS | sed -e "s/$iam//"`
 +
-+# Exit a context, setting up the test exit status if appropriate.
-+#
-+# "$status" is the exit code for the trap handler routine set up by the check
-+# script, hence we cannot call exit directly from contexts that require $status
-+# to be set.
-+_exit()
-+{
-+	test -n "$1" && status="$1"
-+	exit "$status"
-+}
-+
-+# Bail out of a test context, setting up .notrun file. Need to kill the
-+# filesystem check files here, otherwise they are set incorrectly for the next
-+# test.
-+_notrun()
-+{
-+    echo "$*" > $seqres.notrun
-+    echo "$seq not run: $*"
-+    rm -f ${RESULT_DIR}/require_test*
-+    rm -f ${RESULT_DIR}/require_scratch*
-+
-+    _exit 0
-+}
-+
-+# Exit a test immediately with a fatal error.
-+_fail()
-+{
-+    echo "$*" | tee -a $seqres.full
-+    echo "(see $seqres.full for details)"
-+    _exit 1
-+}
-+
-+# Exit any context with a fatal error.
-+_fatal()
-+{
-+    echo "$*"
-+    _exit 1
-+}
-+
-diff --git a/common/preamble b/common/preamble
-index ba029a347..0b684cc33 100644
---- a/common/preamble
-+++ b/common/preamble
-@@ -49,6 +49,7 @@ _begin_fstest()
- 
- 	_register_cleanup _cleanup
- 
-+	. ./common/exit
- 	. ./common/rc
- 	init_rc
- 
-diff --git a/common/rc b/common/rc
-index 12a05cb96..94c00d890 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1798,28 +1798,6 @@ _do()
-     return $ret
- }
- 
--# bail out, setting up .notrun file. Need to kill the filesystem check files
--# here, otherwise they are set incorrectly for the next test.
--#
--_notrun()
--{
--    echo "$*" > $seqres.notrun
--    echo "$seq not run: $*"
--    rm -f ${RESULT_DIR}/require_test*
--    rm -f ${RESULT_DIR}/require_scratch*
--
--    _exit 0
--}
--
--# just plain bail out
--#
--_fail()
--{
--    echo "$*" | tee -a $seqres.full
--    echo "(see $seqres.full for details)"
--    _exit 1
--}
--
- #
- # Tests whether $FSTYP should be exclude from this test.
- #
+ 	grep DEV $HOST_OPTIONS |grep -qv SIZE
+ 	if [ $? -ne 1 ]; then
+ 		echo "$iam config file has devices defined"
 -- 
 2.45.2
 
