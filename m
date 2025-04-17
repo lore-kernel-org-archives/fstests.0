@@ -1,78 +1,78 @@
-Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
+Received: from mail-pf1-f182.google.com (mail-pf1-f182.google.com [209.85.210.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B83651B393D
-	for <fstests@vger.kernel.org>; Thu, 17 Apr 2025 03:12:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D68BA1BBBD4
+	for <fstests@vger.kernel.org>; Thu, 17 Apr 2025 03:12:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744859537; cv=none; b=nGQRHexCzI371QMaXfIrYqPnm2bTu9VUwjslHXTr/6UpnXXNBTka4/daVKp7fk9X1KcXCgepIQpmea9SksPVSI/J9L4WN4NGFSKIhcqPox/6HGN0qxGIbwP1G3h0n8sH6HWGTZRj6K49ybNblxmv0Ue5918I6Mdad/lHCLrw4ds=
+	t=1744859537; cv=none; b=geVVrlRgmBt3LjzXJG107zInnuM9J5W7x99XMGdrYcpNSRAGfzyCiuCyN8oAVsiSO1ydwgNHrzRlB3GU9V8nfbmwEP+rtbjYX1F7C5GX3bWrkt2n6h46VoXFNa9fFR8Dt+PBAbFgB1TZH2egBISLCitHr7iHQQyYDA5YMFqmTuI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1744859537; c=relaxed/simple;
-	bh=3+DyxpX2nkoW4MKE5n0o/Gcilcl4B80tjl1FMubaJEg=;
+	bh=VJLz1F2baILgaQ3tcxoFOkHMtwUPiOQ98bG3BH4owzk=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=XL8Xu2+SFk+Nji11TIz+YRteiXqEBSzHGw6qocb0v3QR7o3XcnwUxcFZJniTao+ye0MDNMLgdx+tXLMiPrYO5Q9vX5/LVCU/J42zdlEsPSJl+PbbdFppGszbKWb9c1m2QVtbJKIbtGLJmnUFq4YB8F/jyz7lnSuFHQ/15Muylkw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=TjvmrxVQ; arc=none smtp.client-ip=209.85.214.181
+	 MIME-Version; b=ftSMivwgNa/3nfRH3X83iH0Gb3w+jQc3j87D/UUcvTBI0JmgV28nQ5RU8qxxNaRGmwuRYQDKXD1l7C0RHbYOpGzY2bFTOcK9ZEkayVpLVSCwGT2/VEzNcT1PTtU417587i2Qa8tibfVB0FWRApCfqXFdKKbP86DyVLke6i13kYU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=CfLvUB0P; arc=none smtp.client-ip=209.85.210.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="TjvmrxVQ"
-Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-22423adf751so3666255ad.2
-        for <fstests@vger.kernel.org>; Wed, 16 Apr 2025 20:12:15 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="CfLvUB0P"
+Received: by mail-pf1-f182.google.com with SMTP id d2e1a72fcca58-736bfa487c3so207434b3a.1
+        for <fstests@vger.kernel.org>; Wed, 16 Apr 2025 20:12:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1744859535; x=1745464335; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1744859534; x=1745464334; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=k1f5PaAiM3/o9MBO+2dWyYZe0kMsen24Kl4YPM7oALY=;
-        b=TjvmrxVQIvTtir//4FJ94Uf5cwGUNETlEuUmSmZmUAssoxCmZRR8vWOuYR86Wim83l
-         1HbKMXptiqZt2X9peLFnC6IPEBk4kiGMTA5y5c6Wgq6N5/6HxLa12ozHLsRCo6xcoIB5
-         QkqLVzWExpO4Ik8zdibddrAffSpQgQtAbQdGPS+u3hRBIwA0TCwa4Divf6YrEyyLn8R4
-         duNGtFmK3afcUNeB3sEjqfo81vyccLTKc15JwwRLClzw1iVR9krV4uYA3txLPHPr3Xdk
-         7nN921mFJSjyuwEiGK2GY3iCqxkt+HSmlT03q0I7wfIbBeTQE2sCc3moCEi4yQ/9ok9t
-         vKfw==
+        bh=ekCTygUa+sBXB5CK222bi+0rZwTf3JmYIotRRdR5V1s=;
+        b=CfLvUB0Pca64LZ5rqEGeLMHzHSntKP3/yJAxrW0B17WNq3lwh4aDDMpCUeb4wjsff9
+         vdMLFw1UZHqbm8ge83rQjF1RlLEx6p4XmMXfGq2gLXLzA7k4+eDmk3ea/qxqxZ4vvwGC
+         KzNJfJfU8AB/CvnuBFMPkUr4IH4U6+khTFkxcL/ev1FOsyaBrxtrQ6yY0rJJUMksMZoT
+         I/5NAyhEdayT50GyCqgeSFmd/MgSXSRI1nObZGwSJy4WkL2zyL7pTC1HwdaO13RPMaHz
+         UVYVUbSDBcJykwWacsznjsiyZoAyojJ9ffCI8pnGLdkZpCqpJ+uKXDFedtSOSLJdptO1
+         TiBg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744859535; x=1745464335;
+        d=1e100.net; s=20230601; t=1744859534; x=1745464334;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=k1f5PaAiM3/o9MBO+2dWyYZe0kMsen24Kl4YPM7oALY=;
-        b=HvUAl/9scGgqIbL6s37Kt5Tt9fXWdQ3AQgMFdpqxfEmFyDjQtPIcfi3aT7KbQAdKxk
-         zVjokLfZT34KvK/+PuQxqBnBWzCV5rdNDBZTrZeR5ma3nY997wboGbN7dOtnvpNrrjhb
-         BO87277NqoRfyo1dxvKEjVQIXmdB0K5Gz6ltVSup79bCEgU8lfA1hcEiNhKObsPbrK46
-         +S7nf1k13t6V+XvLck2CzossXjafYyA5suspEABdOnhr6F/x2Y4NOSAEWZ2W9I5IgfZq
-         0g1+zwK+hxIAcLhJu1QG+YvKKnCNR+O/9j98BTa08xrDrVwtHGM1T7AS39fsWj2zXDRS
-         txAQ==
-X-Gm-Message-State: AOJu0Yzfxm/vFysN/pR4zBiI0LjuegTeA5LPMnC1thqiTBxkDYy2d+m6
-	Q/z/jLDXtaYiOOM46ITrY9oKDd00L6o65VvA+ajen1jjByt6Fut4h6A1AVwWfhFhkO2k+8duE0B
-	r
-X-Gm-Gg: ASbGncs3Hv1Zzkeu5LManbxNwYz7d433kL8Dbbw6bVZkX7LGg/mUOF94rIRCusdSoZr
-	RsNGYxnXLNPOhrpJvH5z+8ekmd2JxccMKSB2RhHqEFb5hkKfct1ZnpcbYWeJksc3Vt/a/J1F40w
-	Qtrl/1iU635WoAEk64/3EC4ejIREWu9nFHOJ0SMDel+0ErTrwk7QyPM/nDUnQB8LSbLjw3qN+jz
-	HdSy46ZYm3eNQYK/neJ+YSRz4FeyUC2Ta5tjKxJNw6/MQePZv2VJoAhxWPbl9HjkPlD4zRe9KGG
-	+tyl1ve5smlRA/CoWmeaYH6BP072OKWH0rpUVnm3s5JT0tWNDowGpzQ/hMyZX9l4Vheh8M+tRPk
-	vSHNttBIEO9we
-X-Google-Smtp-Source: AGHT+IE1tanE8nDI10aO4hw2NuUVWia2prbfyjqr5uBda7kOZZLAUmx3h0aIxdelag4vfyBrYdDOfQ==
-X-Received: by 2002:a17:903:2383:b0:229:1717:8826 with SMTP id d9443c01a7336-22c358fd48bmr71172615ad.28.1744859534880;
-        Wed, 16 Apr 2025 20:12:14 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-60-96.pa.nsw.optusnet.com.au. [49.181.60.96])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22c33fe6aa0sm22423955ad.222.2025.04.16.20.12.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        bh=ekCTygUa+sBXB5CK222bi+0rZwTf3JmYIotRRdR5V1s=;
+        b=nlEr3JrI3gjG+jUJaeh4MPCXhj1kFI649TrJfdH2sarL6I3VOI1VJS2To38YcUR/w4
+         2NyqUt2dWPw+2wsDlAx45FjZBYSITsb+U8SgGKX/nukcVaWSbZx6Ga472cAs1aIeoi0A
+         XyC5j/CC1/i0B2aiOw9btEvZagzT1Sc3gvNkFJm8szN6yj9jdbn2+bFY7oCeFgN5bBPZ
+         illh4J4Kh3biBec+Ux+7b7nTgUD+kspOJvKfDg+D20x1buB1Qxed83xey3jIiK6AOHyY
+         MnSVomzkcZfa3pntq9DYFGan9FrrfGZBDSBJEaoF8//tk6aUST5XCy8kMSsrztV5xMYL
+         Fyqw==
+X-Gm-Message-State: AOJu0YzuiCYeriENx2EtOYcwf5zYZWSJoOIptjq358yHRvc2MAlcu+oU
+	yPlQvqGQ4oCcAoKhOWP8xE3f+32Zf4OWnZm8B+oCrVqL1Ma/JRtzaPKMfn3WqCMM5vSHtERGUc0
+	b
+X-Gm-Gg: ASbGncsEkE0okAp06FefCyfE2dHVxYP3/jkDKxKYuBjQmrYlmGT08bP31eB/1gC4ut4
+	VBJ1q3aCaGAItTyp9uSJ68d+ljjqn+32+eMC7j7QX354JXx2qHvUWqzOvLphLSvf53kGb5x375K
+	+p+eJqKzIAjPnfAzX6FeR37ArCZpAiQVed3dHnWSsEiPZzg2KzeHpqaw1Cn9tjCg6QlogiqIQIq
+	gIqfSzXxxu/unX+ufKGSjc7ydoow/M9G7a1D71RVeKjxnKnQeLa9JTmxXuP3lDLL2l1DmO/5eNQ
+	VH7gXUk6ldERUYZ1UNOAQKLZock1t0m/I0WqGMfmRVzFN036sRnFXAiG8TBhoJIXihqzPxSLsaC
+	B72LpEFf9LvVW
+X-Google-Smtp-Source: AGHT+IH5981QQw6vY22SEHM+4UKD2tOobn8iOl2wdyjJhiB2GecGo+n2t+79KMichkfOJQT+P0eDdA==
+X-Received: by 2002:a05:6a00:ac0b:b0:73c:b86:b47f with SMTP id d2e1a72fcca58-73c266ba584mr6319812b3a.4.1744859533668;
         Wed, 16 Apr 2025 20:12:13 -0700 (PDT)
+Received: from dread.disaster.area (pa49-181-60-96.pa.nsw.optusnet.com.au. [49.181.60.96])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73bd230e31dsm11535522b3a.141.2025.04.16.20.12.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 16 Apr 2025 20:12:12 -0700 (PDT)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1u5Ffe-00000009YA1-10cm;
+	id 1u5Ffe-00000009Y9t-0jRW;
 	Thu, 17 Apr 2025 13:12:10 +1000
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1u5Ffe-00000007mEj-1qfY;
+	id 1u5Ffe-00000007mEa-1afJ;
 	Thu, 17 Apr 2025 13:12:10 +1000
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
 Cc: zlang@kernel.org
-Subject: [PATCH 11/28] check-parallel: initial support for specifying device sizes
-Date: Thu, 17 Apr 2025 13:00:52 +1000
-Message-ID: <20250417031208.1852171-12-david@fromorbit.com>
+Subject: [PATCH 09/28] check-parallel: allow FSTYP selection from the CLI
+Date: Thu, 17 Apr 2025 13:00:50 +1000
+Message-ID: <20250417031208.1852171-10-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20250417031208.1852171-1-david@fromorbit.com>
 References: <20250417031208.1852171-1-david@fromorbit.com>
@@ -86,109 +86,126 @@ Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-Rather than hard coding loop device sizes, abstract them out into
-environment variables with defined default values. This allows
-a check-parallel wrapper to specify sizes or, in future, for them
-to be read from a config file. Sizes are specified in human readable
-values using M/G/T suffixes to indicate the units being specified
+Add a CLI option to specify the initial FSTYP to test. If this is
+not specified the the default of "xfs" will be used. This option is
+different to the way check has FSTYP specified as check-parallel
+has no infrastructure to support non block device based filesystems
+and hence we have to reject virtual or network based filesysetms
+are this point in time.
 
-Whilst doing this also add support for creating all the external
-devices that XFS uses during fstests execution. A typical setup
-will be something like:
-
-TEST_DEV_SIZE=10G
-TEST_RTDEV_SIZE=10G
-TEST_LOGDEV_SIZE=128M
-SCRATCH_DEV_SIZE=20G
-SCRATCH_RTDEV_SIZE=20G
-SCRATCH_LOGDEV_SIZE=512M
-LOGWRITES_DEV_SIZE=2G
+Note: This patch only implements default mkfs parameter support for
+the test device. Config sections can be used to override this as
+check will then format the test device when the section that defines
+non-default test device mkfs options is selected.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- check-parallel | 35 ++++++++++++++++++++++++++++++-----
- 1 file changed, 30 insertions(+), 5 deletions(-)
+ check-parallel | 44 +++++++++++++++++++++++++++++++++++++-------
+ 1 file changed, 37 insertions(+), 7 deletions(-)
 
 diff --git a/check-parallel b/check-parallel
-index aa88c681e..5bb44b6a5 100755
+index 5fee62f37..19f2d2b0c 100755
 --- a/check-parallel
 +++ b/check-parallel
-@@ -18,6 +18,14 @@ run_section=""
+@@ -18,7 +18,7 @@ run_section=""
  
  tmp=/tmp/check-parallel.$$
  
-+TEST_DEV_SIZE=${TEST_DEV_SIZE:=10G}
-+TEST_RTDEV_SIZE=${TEST_RTDEV_SIZE:=10G}
-+TEST_LOGDEV_SIZE=${TEST_LOGDEV_SIZE:=128M}
-+SCRATCH_DEV_SIZE=${SCRATCH_DEV_SIZE:=20G}
-+SCRATCH_RTDEV_SIZE=${SCRATCH_RTDEV_SIZE:=20G}
-+SCRATCH_LOGDEV_SIZE=${SCRATCH_LOGDEV_SIZE:=512M}
-+LOGWRITES_DEV_SIZE=${LOGWRITES_DEV_SIZE:=2G}
-+
- FSTYP=
+-export FSTYP=xfs
++FSTYP=
  
  . ./common/exit
-@@ -116,7 +124,7 @@ while [ $# -gt 0 ]; do
+ . ./common/test_names
+@@ -35,6 +35,7 @@ check options
+     -r			randomize test order
+     --exact-order	run tests in the exact order specified
+     -s section		run only specified section from config file
++    -f <FSTYPE>		specify the filesystem type to test
+ 
+ testlist options
+     -g group[,group...]	include tests from these groups
+@@ -66,16 +67,39 @@ external_file argument is a path to a single file containing a list of tests
+ to exclude in the form of <test dir>/<test name>.
+ 
+ examples:
+- check-parallel -D /mnt xfs/001
+- check-parallel -D /mnt -g quick
++ check-parallel -f xfs -D /mnt xfs/001
++ check-parallel -f ext4 -D /mnt -g quick
+  check-parallel -D /mnt -g xfs/quick
+  check-parallel -D /mnt -x stress xfs/*
+- check-parallel -D /mnt -X .exclude -g auto
+- check-parallel -D /mnt -E ~/.xfstests.exclude
++ check-parallel -f btrfs -D /mnt -X .exclude -g auto
++ check-parallel -f udf -D /mnt -E ~/.xfstests.exclude
+ '
+ 	    exit 1
+ }
+ 
++# Only support block device based filesystems with generic mkfs support
++# at the moment.
++is_supported_fstype()
++{
++	local fstype=$1
++
++	case $fstype in
++	xfs)		;;
++	ext2|ext3|ext4)	;;
++	udf)		;;
++	jfs)		;;
++	f2fs)		;;
++	btrfs)		;;
++	bcachefs)	;;
++	gfs2)		;;
++	ocfs2)		;;
++	*)
++		echo "unsupported FSTYPE: $fstype"
++		usage
++		;;
++	esac
++}
++
+ # Process command arguments first.
+ while [ $# -gt 0 ]; do
+ 	case "$1" in
+@@ -92,6 +116,8 @@ while [ $# -gt 0 ]; do
  	--exact-order) _tl_setup_ordered ;;
  	-n)	show_test_list="yes" ;;
  
--	-f)	is_supported_fstype $2 ; FSTYP=$2; shift ;;
-+	-f)	is_supported_fstype $2 ; export FSTYP=$2; shift ;;
- 
++	-f)	is_supported_fstype $2 ; FSTYP=$2; shift ;;
++
  	-s)	run_section="$run_section -s $2"; shift ;;
  
-@@ -243,22 +251,35 @@ runner_go()
- 	local id=$1
- 	local me=$basedir/runner-$id
- 	local _test=$me/test.img
-+	local _test_rt=$me/test-rt.img
-+	local _test_log=$me/test-log.img
- 	local _scratch=$me/scratch.img
-+	local _scratch_rt=$me/scratch-rt.img
-+	local _scratch_log=$me/scratch-log.img
- 	local _logwrites=$me/logwrites.img
- 	local _results=$me/results-$2
+ 	-*)	usage ;;
+@@ -109,6 +135,8 @@ while [ $# -gt 0 ]; do
+ 	shift
+ done
  
- 	mkdir -p $me
++export FSTYP=${FSTYP:=xfs}
++
+ if [ ! -d "$basedir" ]; then
+ 	echo "Invalid basedir specification"
+ 	usage
+@@ -225,8 +253,6 @@ runner_go()
+ 	xfs_io -f -c 'truncate 8g' $_scratch
+ 	xfs_io -f -c 'truncate 1g' $_logwrites
  
--	xfs_io -f -c 'truncate 2g' $_test
--	xfs_io -f -c 'truncate 8g' $_scratch
--	xfs_io -f -c 'truncate 1g' $_logwrites
-+	xfs_io -f -c "truncate $TEST_DEV_SIZE" $_test
-+	xfs_io -f -c "truncate $TEST_RTDEV_SIZE" $_test_rt
-+	xfs_io -f -c "truncate $TEST_LOGDEV_SIZE" $_test_log
-+	xfs_io -f -c "truncate $SCRATCH_DEV_SIZE" $_scratch
-+	xfs_io -f -c "truncate $SCRATCH_RTDEV_SIZE" $_scratch_rt
-+	xfs_io -f -c "truncate $SCRATCH_LOGDEV_SIZE" $_scratch_log
-+	xfs_io -f -c "truncate $LOGWRITES_DEV_SIZE" $_logwrites
- 
+-	mkfs.xfs -f $_test > /dev/null 2>&1
+-
  	export TEST_DEV=$(_create_loop_device $_test)
-+	export TEST_RTDEV=$(_create_loop_device $_test_rt)
-+	export TEST_LOGDEV=$(_create_loop_device $_test_log)
  	export TEST_DIR=$me/test
-+
  	export SCRATCH_DEV=$(_create_loop_device $_scratch)
-+	export SCRATCH_RTDEV=$(_create_loop_device $_scratch_rt)
-+	export SCRATCH_LOGDEV=$(_create_loop_device $_scratch_log)
- 	export SCRATCH_MNT=$me/scratch
+@@ -240,6 +266,10 @@ runner_go()
+ 	mkdir -p $RESULT_BASE
+ 	rm -f $RESULT_BASE/check.*
+ 
++	# Only supports default mkfs parameters right now
++	wipefs -a $TEST_DEV > /dev/null 2>&1
++	yes | mkfs -t $FSTYP $TEST_MKFS_OPTS $TEST_DEV > /dev/null 2>&1
 +
- 	export LOGWRITES_DEV=$(_create_loop_device $_logwrites)
--	export FSTYP=xfs
- 	export RESULT_BASE=$_results
+ #	export DUMP_CORRUPT_FS=1
  
- 	mkdir -p $TEST_DIR
-@@ -285,7 +306,11 @@ runner_go()
- 	umount -R $TEST_DIR 2> /dev/null
- 	umount -R $SCRATCH_MNT 2> /dev/null
- 	_destroy_loop_device $TEST_DEV
-+	_destroy_loop_device $TEST_RTDEV
-+	_destroy_loop_device $TEST_LOGDEV
- 	_destroy_loop_device $SCRATCH_DEV
-+	_destroy_loop_device $SCRATCH_RTDEV
-+	_destroy_loop_device $SCRATCH_LOGDEV
- 	_destroy_loop_device $LOGWRITES_DEV
- 
- 	grep -q Failures: $me/log
+ 	# Run the tests in it's own mount namespace, as per the comment below
 -- 
 2.45.2
 
