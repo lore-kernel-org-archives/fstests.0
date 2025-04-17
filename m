@@ -1,39 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F2EBB1CD205;
-	Thu, 17 Apr 2025 15:48:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 22236111A8;
+	Thu, 17 Apr 2025 16:18:59 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744904900; cv=none; b=rNzxhKWeuPl2q9pG1foH7XgdtaAwYsYsA8EcAi3R2TdPF7LtK+0CGbtzclvqmOnCquArUkgAX/tUmlGTJ8MttvnBptM8CnqwIR3OrvgoRYB6E2indmYy1T16Hl59dDYTcID96d4fw/zOA3fbVp608jrEab5gUCjxT8gY9QjOlqw=
+	t=1744906740; cv=none; b=adEBcyQBMAUc23PiilujJtQB17AY/FXQYtmuycQzQKwuIGD6CvskvT2xs7Fi2xDufnQmgkBLTZMN5cb6WBAMziXWyFvJawKf571FDR7J7+QVV/SJ3DKQkSbGHgAngAmmAB9mbHsvJCUDBAMRV5wqfdAR5n8HpdOQxZPRc9ZuMSo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744904900; c=relaxed/simple;
-	bh=ZwVYgKdr2RE91rC1R5qigp5HxTXGNwu22jwtN1mprkk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=PuzTtZ9U2ATZur8mn+8FyPtgLXuO6AtPV1y4TZOnSjtsOIlyzM/tq+TAvwn2M56b9bvpaJp4MCiGllwghrtPS9TCkTYvdGTV5IY+DHlkPqu+1x4YMfjkfk9XXeg56GUhZBdCYt1MUvQ38yLvMrP9ATFcVGaou7aZ9gPu+A68WeI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bF9MliCv; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1744906740; c=relaxed/simple;
+	bh=dB9mozrOqyBcD7MjHjwTfrA+t24nximWt/ZvoATeJ24=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=Nk6pZAw2j142pyBu7ueeQuX6qnj0jKe0wh6SG8W/EAwQLszaVbnrL7z1Xk92qbvXpuoxzbnh15ucYPEfib4179KG/ApGECnz64VMq2W+Hpon1cxoOtNbTu22VSr/WkoDF0m7gzviIP9aUuUYWB1BkUcGyhRHHK5wbI50hbYQMNc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JaR1rCDz; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bF9MliCv"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51474C4CEE4;
-	Thu, 17 Apr 2025 15:48:19 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JaR1rCDz"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6022DC4CEE4;
+	Thu, 17 Apr 2025 16:18:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1744904899;
-	bh=ZwVYgKdr2RE91rC1R5qigp5HxTXGNwu22jwtN1mprkk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=bF9MliCvONE7sz+OOwWBoXb+2QG2ErMu7VezFK+oqFyTjD/h9o+REmITJe2H+w0hT
-	 iOTG0/ygTp9Y4Wx2GKC9tBjiKj6NgA88VpboSEaUFbWhJMonm5SRilvSEm/zSmc2vg
-	 x1JkEskf6+H1fdhzNOCGJVLyWaXWAhFlAAMxBUyD7fYLV+fKO2/ycTg0rxhM3CydNd
-	 vDUsNQNG12aO5tJYNddMcOhrWfGPbuE6rF2LDICoTVe2BE4dCAQMCxNMJRShcYd+ob
-	 vY3KsbfAIOSF7XM5HAo1r4qnNHzh0uh5T3i/AZWns+HoqF05UqsEaIpvH3U8UgdwYO
-	 tEBTbNm0svpPw==
-Date: Thu, 17 Apr 2025 08:48:17 -0700
+	s=k20201202; t=1744906739;
+	bh=dB9mozrOqyBcD7MjHjwTfrA+t24nximWt/ZvoATeJ24=;
+	h=Date:From:To:Cc:Subject:From;
+	b=JaR1rCDzoM6JAfNB0MxydWg+Y0HulEirgf3tnbnDHnD4Twk7UpwvNrdjIQoYiXKkY
+	 S2c5YlyzzYRLsyv09KLKkh7r123N3ZJzUEXveb14gvcYnKvL5+N1uNVpO5svRsxjaG
+	 3PGfOa6rbiaoc2bdB4onGfYsEEDS7mhVnyHIZfgQ5YOtSjzDcwd3PJwR0k85gCwl7d
+	 m0uzuGh0at7oQ2GrUdJXzc5Ky8R+AcMqlA1LtnfN3jrhKgJZbinBRKr4Kx816YpA5l
+	 WEphdEqOrL0YHa06n3443TAQEPFYZ44nxcysqyqVEbW5Z5AkqWcCT2V0/NlYBMMT1R
+	 0noGfI2alis1A==
+Date: Thu, 17 Apr 2025 09:18:57 -0700
 From: Luis Chamberlain <mcgrof@kernel.org>
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: btrfs/271: specify "-m raid1" to avoid false
- alerts
-Message-ID: <aAEiwc5QxO1J_DSE@bombadil.infradead.org>
-References: <20250417102623.8638-1-wqu@suse.com>
+To: Linux FS Devel <linux-fsdevel@vger.kernel.org>
+Cc: Luis Chamberlain <mcgrof@kernel.org>, Tso Ted <tytso@mit.edu>,
+	kdevops@lists.linux.dev, fstests <fstests@vger.kernel.org>
+Subject: Automation of parsing of fstests xunit xml to kicdb kernel-ci
+Message-ID: <aAEp8Z6VIXBluMbB@bombadil.infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,14 +41,20 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250417102623.8638-1-wqu@suse.com>
 
-On Thu, Apr 17, 2025 at 07:56:23PM +0930, Qu Wenruo wrote:
-> Reported-by: Luis Chamberlain <mcgrof@kernel.org>
+We're at the point that we're going to start enablish automatic push
+of tests for a few filesystems with kdevops. We now have automatic
+collection of results, parsing of them, etc. And so the last step
+really, is to just send results out to kicdb [0].
 
-I would prefer: kdevops <kdevops@lists.linux.dev>
+Since we have the xml file, I figured I'd ask if anyone has already
+done the processing of this file to kicdb, because it would be easier
+to share the same code rather than re-invent. We then just need to
+describe the source, kdevops, version, etc.
 
-As this will just be automated and kdevops is not just me, its a
-community now. I just nudge it forward when I can.
+If no one has done this yet, we can give it a shot and we can post
+here the code once ready.
+
+[0] https://docs.kernelci.org/kcidb/submitter_guide/
 
   Luis
