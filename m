@@ -1,78 +1,78 @@
-Received: from mail-pf1-f182.google.com (mail-pf1-f182.google.com [209.85.210.182])
+Received: from mail-pl1-f172.google.com (mail-pl1-f172.google.com [209.85.214.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D68BA1BBBD4
-	for <fstests@vger.kernel.org>; Thu, 17 Apr 2025 03:12:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAC9E1C8628
+	for <fstests@vger.kernel.org>; Thu, 17 Apr 2025 03:12:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744859537; cv=none; b=geVVrlRgmBt3LjzXJG107zInnuM9J5W7x99XMGdrYcpNSRAGfzyCiuCyN8oAVsiSO1ydwgNHrzRlB3GU9V8nfbmwEP+rtbjYX1F7C5GX3bWrkt2n6h46VoXFNa9fFR8Dt+PBAbFgB1TZH2egBISLCitHr7iHQQyYDA5YMFqmTuI=
+	t=1744859538; cv=none; b=FfRiPT4eAWx7WHw1UuNbvZDv/KE5Ap6KXUIVFZa6saAZna9gCj2ha1o12VBv+RfbfaL/AurGr4jJ6kDbzLNDlscjRHYzKAMYONscIQKXTz/fLfbfuJ2z3oDedjGUpvayN8THLEc86bRF22BFUKXGa6T+4zNSzLpFVW5ieT6Yw5w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744859537; c=relaxed/simple;
-	bh=VJLz1F2baILgaQ3tcxoFOkHMtwUPiOQ98bG3BH4owzk=;
+	s=arc-20240116; t=1744859538; c=relaxed/simple;
+	bh=t3yOMBHI5hM9QtZl6rp6tAAW93Tf4IjrurDoXBiqK0M=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=ftSMivwgNa/3nfRH3X83iH0Gb3w+jQc3j87D/UUcvTBI0JmgV28nQ5RU8qxxNaRGmwuRYQDKXD1l7C0RHbYOpGzY2bFTOcK9ZEkayVpLVSCwGT2/VEzNcT1PTtU417587i2Qa8tibfVB0FWRApCfqXFdKKbP86DyVLke6i13kYU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=CfLvUB0P; arc=none smtp.client-ip=209.85.210.182
+	 MIME-Version; b=kCGGq2Hm9Ha01H963ePCx1cAjj2iJrjcA+6zWbxzLl7535wv2yWOG8jVTk0vcZvzjqz5do6r5apK1/qPCeAHFj8kp9Ro3eLeAq7DYhdU4A3mRDsWBYnyPulalyzmyzlZvbySI8giDIO4TGRRpenm5o6WAx3LMHX66z2vUbI4W0c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=oAJQVT5b; arc=none smtp.client-ip=209.85.214.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="CfLvUB0P"
-Received: by mail-pf1-f182.google.com with SMTP id d2e1a72fcca58-736bfa487c3so207434b3a.1
-        for <fstests@vger.kernel.org>; Wed, 16 Apr 2025 20:12:14 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="oAJQVT5b"
+Received: by mail-pl1-f172.google.com with SMTP id d9443c01a7336-22c33677183so3551955ad.2
+        for <fstests@vger.kernel.org>; Wed, 16 Apr 2025 20:12:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1744859534; x=1745464334; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1744859535; x=1745464335; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ekCTygUa+sBXB5CK222bi+0rZwTf3JmYIotRRdR5V1s=;
-        b=CfLvUB0Pca64LZ5rqEGeLMHzHSntKP3/yJAxrW0B17WNq3lwh4aDDMpCUeb4wjsff9
-         vdMLFw1UZHqbm8ge83rQjF1RlLEx6p4XmMXfGq2gLXLzA7k4+eDmk3ea/qxqxZ4vvwGC
-         KzNJfJfU8AB/CvnuBFMPkUr4IH4U6+khTFkxcL/ev1FOsyaBrxtrQ6yY0rJJUMksMZoT
-         I/5NAyhEdayT50GyCqgeSFmd/MgSXSRI1nObZGwSJy4WkL2zyL7pTC1HwdaO13RPMaHz
-         UVYVUbSDBcJykwWacsznjsiyZoAyojJ9ffCI8pnGLdkZpCqpJ+uKXDFedtSOSLJdptO1
-         TiBg==
+        bh=qHn4iJxogQuMh/ahDhm/alvnR/vDGleiBZtOn+tJ4VI=;
+        b=oAJQVT5bMG22Iob5wGqakHnFhU0roTfpmqGs+WLBunkw6bwEGIiRlecfKTKc5GwQSX
+         7z36baDaAe+WEeMRpCZe3k//MWcrHHVUhNJjGIQrj5zRuWb26OpyfNDX4yPo0hKpRcpN
+         7oJgbBLmesG6eQ9CqEbKWMjkwWlpuKjSN3Wsbrj9FwmVu6VisVTvGwl+qIak2rPjJpVz
+         feVvecPpDRVcXfkFJP3dCYJ9w3FqVel7I4VXLocWA2wIecQz2LZHmpGqPHbsQv80YjDu
+         RL8Utlj66z1gdb5f7ivBM8TpNHKpXluy69YmzwZBlJGc+qHhg4ldls/z0wO2+oB6zT1+
+         V91w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744859534; x=1745464334;
+        d=1e100.net; s=20230601; t=1744859535; x=1745464335;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=ekCTygUa+sBXB5CK222bi+0rZwTf3JmYIotRRdR5V1s=;
-        b=nlEr3JrI3gjG+jUJaeh4MPCXhj1kFI649TrJfdH2sarL6I3VOI1VJS2To38YcUR/w4
-         2NyqUt2dWPw+2wsDlAx45FjZBYSITsb+U8SgGKX/nukcVaWSbZx6Ga472cAs1aIeoi0A
-         XyC5j/CC1/i0B2aiOw9btEvZagzT1Sc3gvNkFJm8szN6yj9jdbn2+bFY7oCeFgN5bBPZ
-         illh4J4Kh3biBec+Ux+7b7nTgUD+kspOJvKfDg+D20x1buB1Qxed83xey3jIiK6AOHyY
-         MnSVomzkcZfa3pntq9DYFGan9FrrfGZBDSBJEaoF8//tk6aUST5XCy8kMSsrztV5xMYL
-         Fyqw==
-X-Gm-Message-State: AOJu0YzuiCYeriENx2EtOYcwf5zYZWSJoOIptjq358yHRvc2MAlcu+oU
-	yPlQvqGQ4oCcAoKhOWP8xE3f+32Zf4OWnZm8B+oCrVqL1Ma/JRtzaPKMfn3WqCMM5vSHtERGUc0
-	b
-X-Gm-Gg: ASbGncsEkE0okAp06FefCyfE2dHVxYP3/jkDKxKYuBjQmrYlmGT08bP31eB/1gC4ut4
-	VBJ1q3aCaGAItTyp9uSJ68d+ljjqn+32+eMC7j7QX354JXx2qHvUWqzOvLphLSvf53kGb5x375K
-	+p+eJqKzIAjPnfAzX6FeR37ArCZpAiQVed3dHnWSsEiPZzg2KzeHpqaw1Cn9tjCg6QlogiqIQIq
-	gIqfSzXxxu/unX+ufKGSjc7ydoow/M9G7a1D71RVeKjxnKnQeLa9JTmxXuP3lDLL2l1DmO/5eNQ
-	VH7gXUk6ldERUYZ1UNOAQKLZock1t0m/I0WqGMfmRVzFN036sRnFXAiG8TBhoJIXihqzPxSLsaC
-	B72LpEFf9LvVW
-X-Google-Smtp-Source: AGHT+IH5981QQw6vY22SEHM+4UKD2tOobn8iOl2wdyjJhiB2GecGo+n2t+79KMichkfOJQT+P0eDdA==
-X-Received: by 2002:a05:6a00:ac0b:b0:73c:b86:b47f with SMTP id d2e1a72fcca58-73c266ba584mr6319812b3a.4.1744859533668;
-        Wed, 16 Apr 2025 20:12:13 -0700 (PDT)
+        bh=qHn4iJxogQuMh/ahDhm/alvnR/vDGleiBZtOn+tJ4VI=;
+        b=D13sIYxx22Hxffey4xsCfinzQSgj3SNn5N4EY2N3zSwhKUJWBTDODHqrPiGDjwGymf
+         IByYTEAuQYZ5SVSrq6ZoOGuZkowJMXEsHXFD4yts8VjGjaoWuW7INXTcGbcOYaL8qqIV
+         2qH9W0yScsBWuJQznfw+YuXdcrN+HIbCq5T1KOhH4hpphEimQMBdYsggGWIv31ZfwCYs
+         pVdz5btvFlmiVoQxJfGgN4dqX7uwsUJlD2wTAvhp+vFe3ME8nkZbxNrrdUolmASts1Oz
+         9SoNqgRgLPuhyJ6OjTfLm6Qg+fZHgLwFObKYX449o5y7sZIDZ1S3q2pK+224vjNurSgQ
+         UPBQ==
+X-Gm-Message-State: AOJu0YxnwxkM1FnnhR0aJwPVsf/FIT6aBhACc9iVfihRJWYkCiqo2P7x
+	pA7QDzTIbM1S44U3iZQb8pWHzYINAYqBGGJKTlfS02XU7We+M0O0GbPzXl319G8jD+DKf7kT+gc
+	t
+X-Gm-Gg: ASbGncsuRzHnxZbsw46GB70IKpCKvlhJu+4Cy2pc4iCvYqSn2fGCDP+TMCQ+YUtjagl
+	9cvEIt+C8hk3LGR8U/iK0RgynQl3s0hHClrat2Zb9gE+YrwBP7NtQ7MFWplWxsofiufuv9Dumfi
+	FpnPzu/dCM6LM6ToBWwQJO+jPURdNAWN34bl5JNcXjcz2iUvTl58m37LX8qcDF67OtYiB68j6GO
+	Qeb1bco/VZU9bnCZGiiKHrIHXwpxMiTzj+pjyp1ufECvA4UJVyIg0YH8EDOtl8ZdscQ+Nzl+Dun
+	RUVXPCawYjEhKdXh/oV3xQKj7Py7+3iSAK3OiiZR2MKMorStYGWOz+KthCA1+4dQU1s1AZ529qO
+	jkxll37c4vWKL
+X-Google-Smtp-Source: AGHT+IGOkvZKpnidJ3XbojxwtvIyOA/jEkG51ys0Us6l0MjbyIrJKcSy1lj23EkCyjB6Eh+hlfEQUA==
+X-Received: by 2002:a17:902:cec5:b0:21f:61a9:be7d with SMTP id d9443c01a7336-22c35983aa0mr54753705ad.49.1744859535294;
+        Wed, 16 Apr 2025 20:12:15 -0700 (PDT)
 Received: from dread.disaster.area (pa49-181-60-96.pa.nsw.optusnet.com.au. [49.181.60.96])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73bd230e31dsm11535522b3a.141.2025.04.16.20.12.12
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22c33f1cdf7sm22497265ad.72.2025.04.16.20.12.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 16 Apr 2025 20:12:12 -0700 (PDT)
+        Wed, 16 Apr 2025 20:12:13 -0700 (PDT)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1u5Ffe-00000009Y9t-0jRW;
+	id 1u5Ffd-00000009Y9R-40lV;
 	Thu, 17 Apr 2025 13:12:10 +1000
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1u5Ffe-00000007mEa-1afJ;
+	id 1u5Ffe-00000007mE5-0l08;
 	Thu, 17 Apr 2025 13:12:10 +1000
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
 Cc: zlang@kernel.org
-Subject: [PATCH 09/28] check-parallel: allow FSTYP selection from the CLI
-Date: Thu, 17 Apr 2025 13:00:50 +1000
-Message-ID: <20250417031208.1852171-10-david@fromorbit.com>
+Subject: [PATCH 03/28] fstests: move test exit functions to common/exit
+Date: Thu, 17 Apr 2025 13:00:44 +1000
+Message-ID: <20250417031208.1852171-4-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20250417031208.1852171-1-david@fromorbit.com>
 References: <20250417031208.1852171-1-david@fromorbit.com>
@@ -86,126 +86,187 @@ Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-Add a CLI option to specify the initial FSTYP to test. If this is
-not specified the the default of "xfs" will be used. This option is
-different to the way check has FSTYP specified as check-parallel
-has no infrastructure to support non block device based filesystems
-and hence we have to reject virtual or network based filesysetms
-are this point in time.
+Functions like _fatal() and _exit() need to be called from
+common/config as well as general common and test code. Having some
+of these test exit functions defined in common/config requires all
+contexts to source this file and run all the environment setup
+just to gain access to these functions.
 
-Note: This patch only implements default mkfs parameter support for
-the test device. Config sections can be used to override this as
-check will then format the test device when the section that defines
-non-default test device mkfs options is selected.
+There is a catch-22 with these functions - they cannot be defined in
+common/rc for all contexts to pick up automatically, because
+common/config needs them and some functions in common/rc depend on
+common/config being sourced first. And we can't define them all in
+common/config, because there are contexts where that hasn't been
+sourced that need a specific test exit function.
+
+Solve this by move all the test exit functions to a new common/exit
+file and source that explicitly in the contexts that need it, hence
+removing the circular dependency between common/config and common/rc
+for defining these functions...
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- check-parallel | 44 +++++++++++++++++++++++++++++++++++++-------
- 1 file changed, 37 insertions(+), 7 deletions(-)
+ check           |  2 ++
+ common/config   | 16 +---------------
+ common/exit     | 48 ++++++++++++++++++++++++++++++++++++++++++++++++
+ common/preamble |  1 +
+ common/rc       | 22 ----------------------
+ 5 files changed, 52 insertions(+), 37 deletions(-)
+ create mode 100644 common/exit
 
-diff --git a/check-parallel b/check-parallel
-index 5fee62f37..19f2d2b0c 100755
---- a/check-parallel
-+++ b/check-parallel
-@@ -18,7 +18,7 @@ run_section=""
+diff --git a/check b/check
+index d6bab8b5f..69866b14b 100755
+--- a/check
++++ b/check
+@@ -52,6 +52,8 @@ rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.report.* $tmp.arglist
+ SRC_GROUPS="generic"
+ export SRC_DIR="tests"
  
- tmp=/tmp/check-parallel.$$
++. ./common/exit
++
+ usage()
+ {
+     echo "Usage: $0 [options] [testlist]"'
+diff --git a/common/config b/common/config
+index eada39717..5081c300a 100644
+--- a/common/config
++++ b/common/config
+@@ -40,6 +40,7 @@
+ #
  
--export FSTYP=xfs
-+FSTYP=
+ . common/test_names
++. common/exit
  
- . ./common/exit
- . ./common/test_names
-@@ -35,6 +35,7 @@ check options
-     -r			randomize test order
-     --exact-order	run tests in the exact order specified
-     -s section		run only specified section from config file
-+    -f <FSTYPE>		specify the filesystem type to test
+ # all tests should use a common language setting to prevent golden
+ # output mismatches.
+@@ -96,15 +97,6 @@ export LOCAL_CONFIGURE_OPTIONS=${LOCAL_CONFIGURE_OPTIONS:=--enable-readline=yes}
  
- testlist options
-     -g group[,group...]	include tests from these groups
-@@ -66,16 +67,39 @@ external_file argument is a path to a single file containing a list of tests
- to exclude in the form of <test dir>/<test name>.
+ export RECREATE_TEST_DEV=${RECREATE_TEST_DEV:=false}
  
- examples:
-- check-parallel -D /mnt xfs/001
-- check-parallel -D /mnt -g quick
-+ check-parallel -f xfs -D /mnt xfs/001
-+ check-parallel -f ext4 -D /mnt -g quick
-  check-parallel -D /mnt -g xfs/quick
-  check-parallel -D /mnt -x stress xfs/*
-- check-parallel -D /mnt -X .exclude -g auto
-- check-parallel -D /mnt -E ~/.xfstests.exclude
-+ check-parallel -f btrfs -D /mnt -X .exclude -g auto
-+ check-parallel -f udf -D /mnt -E ~/.xfstests.exclude
- '
- 	    exit 1
+-# This functions sets the exit code to status and then exits. Don't use
+-# exit directly, as it might not set the value of "$status" correctly, which is
+-# used as an exit code in the trap handler routine set up by the check script.
+-_exit()
+-{
+-	test -n "$1" && status="$1"
+-	exit "$status"
+-}
+-
+ # Handle mkfs.$fstyp which does (or does not) require -f to overwrite
+ set_mkfs_prog_path_with_opts()
+ {
+@@ -121,12 +113,6 @@ set_mkfs_prog_path_with_opts()
+ 	fi
  }
  
-+# Only support block device based filesystems with generic mkfs support
-+# at the moment.
-+is_supported_fstype()
-+{
-+	local fstype=$1
+-_fatal()
+-{
+-    echo "$*"
+-    _exit 1
+-}
+-
+ export MKFS_PROG="$(type -P mkfs)"
+ [ "$MKFS_PROG" = "" ] && _fatal "mkfs not found"
+ 
+diff --git a/common/exit b/common/exit
+new file mode 100644
+index 000000000..16777507a
+--- /dev/null
++++ b/common/exit
+@@ -0,0 +1,48 @@
++##/bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2000-2006 Silicon Graphics, Inc.  All Rights Reserved.
++#
++# Test termination functions that need to be independent of the context that the
++# test is running in. This must not have any dependencies on common/config or
++# common/rc, as they both require these functions to be defined before they are
++# sourced.
 +
-+	case $fstype in
-+	xfs)		;;
-+	ext2|ext3|ext4)	;;
-+	udf)		;;
-+	jfs)		;;
-+	f2fs)		;;
-+	btrfs)		;;
-+	bcachefs)	;;
-+	gfs2)		;;
-+	ocfs2)		;;
-+	*)
-+		echo "unsupported FSTYPE: $fstype"
-+		usage
-+		;;
-+	esac
++# Exit a context, setting up the test exit status if appropriate.
++#
++# "$status" is the exit code for the trap handler routine set up by the check
++# script, hence we cannot call exit directly from contexts that require $status
++# to be set.
++_exit()
++{
++	test -n "$1" && status="$1"
++	exit "$status"
 +}
 +
- # Process command arguments first.
- while [ $# -gt 0 ]; do
- 	case "$1" in
-@@ -92,6 +116,8 @@ while [ $# -gt 0 ]; do
- 	--exact-order) _tl_setup_ordered ;;
- 	-n)	show_test_list="yes" ;;
- 
-+	-f)	is_supported_fstype $2 ; FSTYP=$2; shift ;;
++# Bail out of a test context, setting up .notrun file. Need to kill the
++# filesystem check files here, otherwise they are set incorrectly for the next
++# test.
++_notrun()
++{
++    echo "$*" > $seqres.notrun
++    echo "$seq not run: $*"
++    rm -f ${RESULT_DIR}/require_test*
++    rm -f ${RESULT_DIR}/require_scratch*
 +
- 	-s)	run_section="$run_section -s $2"; shift ;;
- 
- 	-*)	usage ;;
-@@ -109,6 +135,8 @@ while [ $# -gt 0 ]; do
- 	shift
- done
- 
-+export FSTYP=${FSTYP:=xfs}
++    _exit 0
++}
 +
- if [ ! -d "$basedir" ]; then
- 	echo "Invalid basedir specification"
- 	usage
-@@ -225,8 +253,6 @@ runner_go()
- 	xfs_io -f -c 'truncate 8g' $_scratch
- 	xfs_io -f -c 'truncate 1g' $_logwrites
++# Exit a test immediately with a fatal error.
++_fail()
++{
++    echo "$*" | tee -a $seqres.full
++    echo "(see $seqres.full for details)"
++    _exit 1
++}
++
++# Exit any context with a fatal error.
++_fatal()
++{
++    echo "$*"
++    _exit 1
++}
++
+diff --git a/common/preamble b/common/preamble
+index ba029a347..0b684cc33 100644
+--- a/common/preamble
++++ b/common/preamble
+@@ -49,6 +49,7 @@ _begin_fstest()
  
--	mkfs.xfs -f $_test > /dev/null 2>&1
+ 	_register_cleanup _cleanup
+ 
++	. ./common/exit
+ 	. ./common/rc
+ 	init_rc
+ 
+diff --git a/common/rc b/common/rc
+index 12a05cb96..94c00d890 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1798,28 +1798,6 @@ _do()
+     return $ret
+ }
+ 
+-# bail out, setting up .notrun file. Need to kill the filesystem check files
+-# here, otherwise they are set incorrectly for the next test.
+-#
+-_notrun()
+-{
+-    echo "$*" > $seqres.notrun
+-    echo "$seq not run: $*"
+-    rm -f ${RESULT_DIR}/require_test*
+-    rm -f ${RESULT_DIR}/require_scratch*
 -
- 	export TEST_DEV=$(_create_loop_device $_test)
- 	export TEST_DIR=$me/test
- 	export SCRATCH_DEV=$(_create_loop_device $_scratch)
-@@ -240,6 +266,10 @@ runner_go()
- 	mkdir -p $RESULT_BASE
- 	rm -f $RESULT_BASE/check.*
- 
-+	# Only supports default mkfs parameters right now
-+	wipefs -a $TEST_DEV > /dev/null 2>&1
-+	yes | mkfs -t $FSTYP $TEST_MKFS_OPTS $TEST_DEV > /dev/null 2>&1
-+
- #	export DUMP_CORRUPT_FS=1
- 
- 	# Run the tests in it's own mount namespace, as per the comment below
+-    _exit 0
+-}
+-
+-# just plain bail out
+-#
+-_fail()
+-{
+-    echo "$*" | tee -a $seqres.full
+-    echo "(see $seqres.full for details)"
+-    _exit 1
+-}
+-
+ #
+ # Tests whether $FSTYP should be exclude from this test.
+ #
 -- 
 2.45.2
 
