@@ -1,60 +1,146 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39A9821D3EF;
-	Fri, 18 Apr 2025 19:28:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAD1735893
+	for <fstests@vger.kernel.org>; Sat, 19 Apr 2025 07:17:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745004484; cv=none; b=Oim2RsoEKaVUkPf2T0qGXjCKXFr7mLAsxhUj5m226aHZPGAa7DcdvgkmYGwDQ0kYzY7pC3/PWLNFHNDuQ3VR7RD5AJmdB5o1z6xVsqWq9TH6Z5a8F6SpjP7iOWpZqhYe9ffUzJrHCV2nnBQovvnxxLp5qP9weZ/Zf904oTOR3Ak=
+	t=1745047062; cv=none; b=MYT0d9kyIXuEoQYYAk7m5TYucdeWHf6hQie7U1l/TtKWP07ksG0FtV8l9sDB9Yowi8nWImsJO6oiQFOhtRrh+OjsXNt239zbH9Fp6sz1iB8rv1ye5Ku+Zi6vA3bYHV6GoLR089aVC7eIN8pUrz9Q6KRHP0YCgMmKbpyNKTHgLxE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745004484; c=relaxed/simple;
-	bh=uO4bGsFgiDo9hGv9uHqmKwNnaBmfTXIRQpj+YFlQtns=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=POsidwSK0ndVNildHgh8OrZ73DD5IEAPRXluIK/6j4kzFj/1eLbCS9Jumd6G9LPCwuETaT6zWW3FRSphNhcEpWat4UulaSJHwhbRUwLQdxJ28Q05NxgNxF2CeiOs2fVp0ojjzFhZyUHUMkH8FJKIe2nRtncLPsXWm19WlXOIfI4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fbtOo8tc; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1745047062; c=relaxed/simple;
+	bh=GJ5pliwkOmg1SCliifv4NJ1an5j9+mIx8W+uOawrpMo=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=esNPtR+WbkR0LmQEEVAK+Z9oWVAEgptVaVqW1vg42DKgFjqENm4DcfKnoceTIEFXfJIO4icpoyXCSNXpTxsuli4bADr8/ZfnGpraqDhxlU/m+IvbUbOT3XLNHi8wyj5VY5C7fLOwQE2QdfM3CxHBG8uank5fuIwBazN3On0uKRE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=Mo/uY/M8; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=Mo/uY/M8; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fbtOo8tc"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 81C15C4CEE2;
-	Fri, 18 Apr 2025 19:28:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1745004483;
-	bh=uO4bGsFgiDo9hGv9uHqmKwNnaBmfTXIRQpj+YFlQtns=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=fbtOo8tc8APFcu6gcBG2FpRw0JycmU8rEZigk0WCx34mW8deiAVK7n6JX/NrM/bMU
-	 B0bFK+YqHEbCYej/Ht+u3m77cJym6E5GhnpqBDwM71yeUAKAKFHzpAXob2J2hQSrJu
-	 V8gmi3OM8l+yBUrW1r+ylrA9/fc9aNMC1NlmMM5ONpmjrrEYKhsWtck3sa+ug+HrVz
-	 KIjTiljCbGW7rAUsErmvmAob7bWMqDilgpeSnqX1Wh6WL4UYIr3YY6LSjaXL6XY4rO
-	 jhxBQqs8aa8XTKTn7euGBJ3PHmJ0NwsVpdVsZOPbGwyXXE6iatm0s/jlf31IiGmWlJ
-	 r+k9WXXYNAmlg==
-Date: Fri, 18 Apr 2025 12:28:02 -0700
-From: Luis Chamberlain <mcgrof@kernel.org>
-To: Gustavo Padovan <gus@collabora.com>
-Cc: Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tso Ted <tytso@mit.edu>,
-	kdevops <kdevops@lists.linux.dev>,
-	fstests <fstests@vger.kernel.org>,
-	"kernelci lists.linux.dev" <kernelci@lists.linux.dev>
-Subject: Re: Automation of parsing of fstests xunit xml to kicdb kernel-ci
-Message-ID: <aAKnwgdSPGGj_6aM@bombadil.infradead.org>
-References: <aAEp8Z6VIXBluMbB@bombadil.infradead.org>
- <aAEyNxkMyJEVHRhR@bombadil.infradead.org>
- <1964964d3f7.10a86724c62742.5510698901836310404@collabora.com>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Mo/uY/M8";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Mo/uY/M8"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 1A08F2120A;
+	Sat, 19 Apr 2025 07:17:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1745047058; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=2dWi2PXZ2zzCaKXdqaHQTeizWZiqgOQPpyIDxul5gLs=;
+	b=Mo/uY/M8YkEo8veyq5yjMZyPWZlf3uh0MoTfqv/XsN+XGoCQA/LyBX/XLG/9ROuUxGFzAw
+	Eq4quExzRZD9cY4DP4TLJZvCfh9wXWoeGsELUvDF18/gjJfNSpgGvItHIlX2mGxMYrFhOO
+	tfz6c30Fwzo2ji/bM/qWvyyBo4ssUS0=
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1745047058; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=2dWi2PXZ2zzCaKXdqaHQTeizWZiqgOQPpyIDxul5gLs=;
+	b=Mo/uY/M8YkEo8veyq5yjMZyPWZlf3uh0MoTfqv/XsN+XGoCQA/LyBX/XLG/9ROuUxGFzAw
+	Eq4quExzRZD9cY4DP4TLJZvCfh9wXWoeGsELUvDF18/gjJfNSpgGvItHIlX2mGxMYrFhOO
+	tfz6c30Fwzo2ji/bM/qWvyyBo4ssUS0=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 1D0FB13942;
+	Sat, 19 Apr 2025 07:17:36 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id 8lwbNBBOA2jSSQAAD6G6ig
+	(envelope-from <wqu@suse.com>); Sat, 19 Apr 2025 07:17:36 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH v2 0/8] btrfs: do not poking into the implementation details of bio_vec
+Date: Sat, 19 Apr 2025 16:47:07 +0930
+Message-ID: <cover.1745024799.git.wqu@suse.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1964964d3f7.10a86724c62742.5510698901836310404@collabora.com>
+Content-Transfer-Encoding: 8bit
+X-Spam-Level: 
+X-Spamd-Result: default: False [-2.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-0.999];
+	MIME_GOOD(-0.10)[text/plain];
+	RCPT_COUNT_TWO(0.00)[2];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_TLS_ALL(0.00)[]
+X-Spam-Score: -2.80
+X-Spam-Flag: NO
 
-On Fri, Apr 18, 2025 at 11:54:26AM -0300, Gustavo Padovan wrote:
-> maybe we could go as far as having an endpoint in the new KCIDB api
-> that consumes the xml directly and do the translation internally.
+- Fix a crash caused by incorrectly index sector_ptrs
+  The 5th patch, caused by missing increasement of the @offset variable.
 
-Yeap, that would be better. It can enable different fstests runners as
-they likely already collect these. And for the kdevops-ci pipeline
-its a simple ansible task for us to do this. It would complete the CI loop
-for us.
+- Use physical addresses instead of virtual addresses to handle HIGHMEM
+  The 6th patch, as we can still get sector_ptr from bio_sectors[] which
+  is using pages from the bio, and that can be highmem.
 
-  Luis
+  However I can not do a proper test on this, as the latest kernel has
+  already rejected HIGHMEM64G option, thus even if my VM has extra 3GB
+  for HIGHMEM (total 6GB), I'm not sure if the kernel can really utilize
+  those high memories.
+
+  Furthermore there seems to be other bugs in mm layer related to
+  HIGHMEM + PAGE, resulting zswap crash when try compressing a page to
+  be swapped out.
+  But at least several scrub/balance related test cases passed on x86
+  32bit with HIGHMEM and PAGE.
+
+  I have tested with x86_64 (64 bit, no HIGHMEM), aarch64 (64bit, 64K
+  page size, no HIGHMEM) with no regression.
+
+- Fix a incorrect __bio_add_page() usage in scrub_bio_add_sector()
+  The 6th patch, as bio_add_page() do extra bvec merging before
+  allocating a new bvec, but __bio_add_page() does not.
+
+  This triggers WARN_ON_ONCE() in __bio_add_page() checking if the bio
+  is full.
+
+  Fixing it by do the old bio_add_page() and ASSERT(), with extra
+  comment on we can not use __bio_add_page().
+
+- Various minor commit message update
+  And full proper test runs.
+
+Christoph Hellwig (8):
+  btrfs: remove the alignment checks in end_bbio_data_read
+  btrfs: track the next file offset in struct btrfs_bio_ctrl
+  btrfs: pass a physical address to btrfs_repair_io_failure
+  btrfs: move kmapping out of btrfs_check_sector_csum
+  btrfs: simplify bvec iteration in index_one_bio
+  btrfs: raid56: store a physical address in structure sector_ptr
+  btrfs: scrub: use virtual addresses directly
+  btrfs: use bvec_kmap_local in btrfs_decompress_buf2page
+
+ fs/btrfs/bio.c         |   9 +-
+ fs/btrfs/bio.h         |   3 +-
+ fs/btrfs/btrfs_inode.h |   4 +-
+ fs/btrfs/compression.c |   9 +-
+ fs/btrfs/disk-io.c     |   7 +-
+ fs/btrfs/extent_io.c   |  60 ++++---------
+ fs/btrfs/inode.c       |  20 ++---
+ fs/btrfs/raid56.c      | 189 ++++++++++++++++++++++-------------------
+ fs/btrfs/scrub.c       |  93 +++++++++-----------
+ 9 files changed, 184 insertions(+), 210 deletions(-)
+
+-- 
+2.49.0
+
