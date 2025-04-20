@@ -1,68 +1,60 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 84353142659
-	for <fstests@vger.kernel.org>; Sat, 19 Apr 2025 07:18:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C2771917D6
+	for <fstests@vger.kernel.org>; Sun, 20 Apr 2025 08:38:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745047095; cv=none; b=ZsJCnZO91TeYs8uPYQcU8Q+umVEKKTjbEVrPJrCHIAJ6FJBZi7l7WU7QiagAOy4u64ktG5GvUEY4hFzj4ABcxz7LtHR3pmZ39LzKufLh6aLcXtV2ZBmcG+pGe7iFAN1JQBIcGqNjG+IdZN5lxuX4W+aYBlA7sgdfETodhRMcDUI=
+	t=1745138329; cv=none; b=ePZEWSsXc9e+HGoGF6WmWZTgXTwNIKAPX1CBMVIGN8Ud+yyJdEDi3Remxn68v1t6hdsRm49Qdu7lsge7Up1yuKDWd7o9owLpiPuD5h0C7kJzU8XwUfnUKKXxaBw0gQMNtbXAfr1Knk0rL9ovuk/YaNubDQzNL7ZkhWwGAJaexuQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745047095; c=relaxed/simple;
-	bh=/xTYWEDVtfGBdiDdQgFYTHcJQ82O5lgtM/UgSYPuLxo=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=SvM42or9n7v7sMLuCYyBZZk06MV6AuOgqLrdNJal20mVvUg1tL0bYh4Nlzns4/L6/DB4Jp0367Vz9Ac7xkpfgYuVWZbp+JUVFKfNZNS/kWWdzaMbZIO905uyespNytLUhlOBVZtGk5w9GrpMqGkj58PNE63v1nWlKgsIQaAx0Vk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=c1XcJOam; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=c1XcJOam; arc=none smtp.client-ip=195.135.223.130
+	s=arc-20240116; t=1745138329; c=relaxed/simple;
+	bh=7SacXj0ppJHrd3JqbZ3wcg5uhpKyxM6dtqOh2hLXuKg=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=o4pl3Rk1C/WWNpL9g8aaNxtRcTbCoHovlqOJjnLo65xvhPl3Y+gJJyCx1TAxVcTkstdBHfW2d+54DtTDZy9/lCgOUOVDwp6Ajk6xHyMBdIuOESwr9IAvEWaGAMt5/RjjeUe4BCBx2WwHiSbOhW3tJ5H4d7OpxUcSYqS1GglEWc0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=X7fntLqk; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=X7fntLqk; arc=none smtp.client-ip=195.135.223.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="c1XcJOam";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="c1XcJOam"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="X7fntLqk";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="X7fntLqk"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id BCE9A2120F;
-	Sat, 19 Apr 2025 07:17:49 +0000 (UTC)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 7292F1F388;
+	Sun, 20 Apr 2025 08:38:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1745047069; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=j+GLoDA3BQ2J9VhwNTwRMKEdltKTFVOGahyh33vLDq8=;
-	b=c1XcJOamMgA10EV66u/zlgf+NzRVL+xJkEKOWTEyWRSo7DlDxPaPbd/A6rryapPUydOkSf
-	IB/UsKUfgh6T/E8+O+YJFCV3RnzQE6El9PJev3Q/E+SbNWbGbbFhDD9TYcUh72pe1/s5yk
-	5OllQ+NFq9PsA/RvSYWz66KEIKjfKjE=
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=c1XcJOam
+	t=1745138324; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=wwIJfCHL2yx0A2NlFBraGo4Z2wQTFJNk1UyTGy00cU0=;
+	b=X7fntLqklFcD63rAjyI6xOeIHsej8eSV5Xd1mehJEoR0pAkq/71FK9PmX3U66ic4X4i/gX
+	gZxJyBjEtjD26NZ0QfAcoEzQ/2F4JECmhCHq5yHuzSeByEsv7N0UFgZjhFd9K5lrwypby1
+	Lzm53/onn6RUSd78HRvvdFapRPWY+QA=
+Authentication-Results: smtp-out2.suse.de;
+	none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1745047069; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=j+GLoDA3BQ2J9VhwNTwRMKEdltKTFVOGahyh33vLDq8=;
-	b=c1XcJOamMgA10EV66u/zlgf+NzRVL+xJkEKOWTEyWRSo7DlDxPaPbd/A6rryapPUydOkSf
-	IB/UsKUfgh6T/E8+O+YJFCV3RnzQE6El9PJev3Q/E+SbNWbGbbFhDD9TYcUh72pe1/s5yk
-	5OllQ+NFq9PsA/RvSYWz66KEIKjfKjE=
+	t=1745138324; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=wwIJfCHL2yx0A2NlFBraGo4Z2wQTFJNk1UyTGy00cU0=;
+	b=X7fntLqklFcD63rAjyI6xOeIHsej8eSV5Xd1mehJEoR0pAkq/71FK9PmX3U66ic4X4i/gX
+	gZxJyBjEtjD26NZ0QfAcoEzQ/2F4JECmhCHq5yHuzSeByEsv7N0UFgZjhFd9K5lrwypby1
+	Lzm53/onn6RUSd78HRvvdFapRPWY+QA=
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 8800713A79;
-	Sat, 19 Apr 2025 07:17:48 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 79235137CF;
+	Sun, 20 Apr 2025 08:38:43 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id oCcHExxOA2jSSQAAD6G6ig
-	(envelope-from <wqu@suse.com>); Sat, 19 Apr 2025 07:17:48 +0000
+	id lFJeD5OyBGgrIAAAD6G6ig
+	(envelope-from <wqu@suse.com>); Sun, 20 Apr 2025 08:38:43 +0000
 From: Qu Wenruo <wqu@suse.com>
 To: linux-btrfs@vger.kernel.org,
 	fstests@vger.kernel.org
-Cc: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH v2 7/8] btrfs: scrub: use virtual addresses directly
-Date: Sat, 19 Apr 2025 16:47:14 +0930
-Message-ID: <e0050f1ffef5f17cde772f40f18056f5af90a60e.1745024799.git.wqu@suse.com>
+Subject: [PATCH] fstests: btrfs/253: fix false alert due to _set_fs_sysfs_attr changes
+Date: Sun, 20 Apr 2025 18:08:17 +0930
+Message-ID: <20250420083817.231610-1-wqu@suse.com>
 X-Mailer: git-send-email 2.49.0
-In-Reply-To: <cover.1745024799.git.wqu@suse.com>
-References: <cover.1745024799.git.wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -70,272 +62,83 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Rspamd-Queue-Id: BCE9A2120F
-X-Spam-Score: -3.01
-X-Rspamd-Action: no action
-X-Spamd-Result: default: False [-3.01 / 50.00];
+X-Spam-Score: -2.80
+X-Spamd-Result: default: False [-2.80 / 50.00];
 	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
 	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
 	R_MISSING_CHARSET(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	NEURAL_HAM_SHORT(-0.20)[-0.999];
 	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[lst.de:email,suse.com:dkim,suse.com:mid,suse.com:email];
+	RCPT_COUNT_TWO(0.00)[2];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
 	ARC_NA(0.00)[];
 	RCVD_VIA_SMTP_AUTH(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	TO_DN_SOME(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	RCVD_TLS_ALL(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	FROM_EQ_ENVFROM(0.00)[];
 	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	RCPT_COUNT_THREE(0.00)[3];
-	DKIM_TRACE(0.00)[suse.com:+]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:email];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_TLS_ALL(0.00)[]
 X-Spam-Flag: NO
 X-Spam-Level: 
 
-From: Christoph Hellwig <hch@lst.de>
+[FALSE FAILURE]
+Test btrfs/253 now fails like the following:
 
-Instead of the old @page and @page_offset pair inside scrub, here we can
-directly use the virtual address for a sector.
+btrfs/253 2s ... - output mismatch (see ~/xfstests/results//btrfs/253.out.bad)
+    --- tests/btrfs/253.out	2022-05-11 11:25:30.753333331 +0930
+    +++ ~/xfstests/results//btrfs/253.out.bad	2025-04-20 17:28:39.139180394 +0930
+    @@ -5,6 +5,7 @@
+     Calculate request size so last memory allocation cannot be completely fullfilled.
+     Third allocation.
+     Force allocation of system block type must fail.
+    +./common/rc: line 5213: echo: write error: No space left on device
+     Verify first allocation.
+     Verify second allocation.
+     Verify third allocation.
+    ...
+    (Run 'diff -u ~/xfstests/tests/btrfs/253.out ~/xfstests/results//btrfs/253.out.bad'  to see the entire diff)
 
-This has the following benefit:
+[CAUSE]
+Since commit 0a9011ae6a36 ("fstests: common/rc: set_fs_sysfs_attr:
+redirect errors to stdout") the function _set_fs_sysfs_attr() always
+output everything into stdout, thus the stderr redirection makes no
+sense anymore.
 
-- Simplified parameters
-  A single @kaddr will repair @page and @page_offset.
+And the expected failure will cause output difference and fail the test.
 
-- No more unnecessary kmap/kunmap calls
-  Since all pages utilized by scrub is allocated by scrub, and no
-  highmem is allowed, we do not need to do any kmap/kunmap.
+[FIX]
+Instead of the useless re-direct of stderr, save the stdout and check if
+it contains the word "error" to determine if it failed.
 
-  And add an ASSERT() inside the new scrub_stripe_get_kaddr() to
-  catch any unexpected highmem page.
-
-Reviewed-by: Qu Wenruo <wqu@suse.com>
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+Fixes: 0a9011ae6a36 ("fstests: common/rc: set_fs_sysfs_attr: redirect errors to stdout")
 Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- fs/btrfs/scrub.c | 94 ++++++++++++++++++++----------------------------
- 1 file changed, 38 insertions(+), 56 deletions(-)
+ tests/btrfs/253 | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-diff --git a/fs/btrfs/scrub.c b/fs/btrfs/scrub.c
-index 49021765c17b..4ff3465c430c 100644
---- a/fs/btrfs/scrub.c
-+++ b/fs/btrfs/scrub.c
-@@ -579,20 +579,16 @@ static int fill_writer_pointer_gap(struct scrub_ctx *sctx, u64 physical)
- 	return ret;
- }
- 
--static struct page *scrub_stripe_get_page(struct scrub_stripe *stripe, int sector_nr)
-+static void *scrub_stripe_get_kaddr(struct scrub_stripe *stripe, int sector_nr)
- {
- 	struct btrfs_fs_info *fs_info = stripe->bg->fs_info;
--	int page_index = (sector_nr << fs_info->sectorsize_bits) >> PAGE_SHIFT;
-+	u32 offset = sector_nr << fs_info->sectorsize_bits;
-+	const struct page *page = stripe->pages[offset >> PAGE_SHIFT];
- 
--	return stripe->pages[page_index];
--}
--
--static unsigned int scrub_stripe_get_page_offset(struct scrub_stripe *stripe,
--						 int sector_nr)
--{
--	struct btrfs_fs_info *fs_info = stripe->bg->fs_info;
--
--	return offset_in_page(sector_nr << fs_info->sectorsize_bits);
-+	/* stripe->pages[] is allocated by us and no highmem is allowed. */
-+	ASSERT(!PageHighMem(page));
-+	ASSERT(page);
-+	return page_address(page) + offset_in_page(offset);
- }
- 
- static void scrub_verify_one_metadata(struct scrub_stripe *stripe, int sector_nr)
-@@ -600,19 +596,17 @@ static void scrub_verify_one_metadata(struct scrub_stripe *stripe, int sector_nr
- 	struct btrfs_fs_info *fs_info = stripe->bg->fs_info;
- 	const u32 sectors_per_tree = fs_info->nodesize >> fs_info->sectorsize_bits;
- 	const u64 logical = stripe->logical + (sector_nr << fs_info->sectorsize_bits);
--	const struct page *first_page = scrub_stripe_get_page(stripe, sector_nr);
--	const unsigned int first_off = scrub_stripe_get_page_offset(stripe, sector_nr);
-+	void *first_kaddr = scrub_stripe_get_kaddr(stripe, sector_nr);
- 	SHASH_DESC_ON_STACK(shash, fs_info->csum_shash);
- 	u8 on_disk_csum[BTRFS_CSUM_SIZE];
- 	u8 calculated_csum[BTRFS_CSUM_SIZE];
--	struct btrfs_header *header;
-+	struct btrfs_header *header = first_kaddr;
- 
- 	/*
- 	 * Here we don't have a good way to attach the pages (and subpages)
- 	 * to a dummy extent buffer, thus we have to directly grab the members
- 	 * from pages.
- 	 */
--	header = (struct btrfs_header *)(page_address(first_page) + first_off);
- 	memcpy(on_disk_csum, header->csum, fs_info->csum_size);
- 
- 	if (logical != btrfs_stack_header_bytenr(header)) {
-@@ -648,14 +642,11 @@ static void scrub_verify_one_metadata(struct scrub_stripe *stripe, int sector_nr
- 	/* Now check tree block csum. */
- 	shash->tfm = fs_info->csum_shash;
- 	crypto_shash_init(shash);
--	crypto_shash_update(shash, page_address(first_page) + first_off +
--			    BTRFS_CSUM_SIZE, fs_info->sectorsize - BTRFS_CSUM_SIZE);
-+	crypto_shash_update(shash, first_kaddr + BTRFS_CSUM_SIZE,
-+			fs_info->sectorsize - BTRFS_CSUM_SIZE);
- 
- 	for (int i = sector_nr + 1; i < sector_nr + sectors_per_tree; i++) {
--		struct page *page = scrub_stripe_get_page(stripe, i);
--		unsigned int page_off = scrub_stripe_get_page_offset(stripe, i);
--
--		crypto_shash_update(shash, page_address(page) + page_off,
-+		crypto_shash_update(shash, scrub_stripe_get_kaddr(stripe, i),
- 				    fs_info->sectorsize);
- 	}
- 
-@@ -691,10 +682,8 @@ static void scrub_verify_one_sector(struct scrub_stripe *stripe, int sector_nr)
- 	struct btrfs_fs_info *fs_info = stripe->bg->fs_info;
- 	struct scrub_sector_verification *sector = &stripe->sectors[sector_nr];
- 	const u32 sectors_per_tree = fs_info->nodesize >> fs_info->sectorsize_bits;
--	struct page *page = scrub_stripe_get_page(stripe, sector_nr);
--	unsigned int pgoff = scrub_stripe_get_page_offset(stripe, sector_nr);
-+	void *kaddr = scrub_stripe_get_kaddr(stripe, sector_nr);
- 	u8 csum_buf[BTRFS_CSUM_SIZE];
--	void *kaddr;
- 	int ret;
- 
- 	ASSERT(sector_nr >= 0 && sector_nr < stripe->nr_sectors);
-@@ -738,9 +727,7 @@ static void scrub_verify_one_sector(struct scrub_stripe *stripe, int sector_nr)
- 		return;
- 	}
- 
--	kaddr = kmap_local_page(page) + pgoff;
- 	ret = btrfs_check_sector_csum(fs_info, kaddr, csum_buf, sector->csum);
--	kunmap_local(kaddr);
- 	if (ret < 0) {
- 		set_bit(sector_nr, &stripe->csum_error_bitmap);
- 		set_bit(sector_nr, &stripe->error_bitmap);
-@@ -769,8 +756,7 @@ static int calc_sector_number(struct scrub_stripe *stripe, struct bio_vec *first
- 	int i;
- 
- 	for (i = 0; i < stripe->nr_sectors; i++) {
--		if (scrub_stripe_get_page(stripe, i) == first_bvec->bv_page &&
--		    scrub_stripe_get_page_offset(stripe, i) == first_bvec->bv_offset)
-+		if (scrub_stripe_get_kaddr(stripe, i) == bvec_virt(first_bvec))
- 			break;
- 	}
- 	ASSERT(i < stripe->nr_sectors);
-@@ -817,6 +803,25 @@ static int calc_next_mirror(int mirror, int num_copies)
- 	return (mirror + 1 > num_copies) ? 1 : mirror + 1;
- }
- 
-+static void scrub_bio_add_sector(struct btrfs_bio *bbio,
-+		struct scrub_stripe *stripe, int sector_nr)
-+{
-+	void *kaddr = scrub_stripe_get_kaddr(stripe, sector_nr);
-+	int ret;
+diff --git a/tests/btrfs/253 b/tests/btrfs/253
+index adbc6bfb..ad69dfe1 100755
+--- a/tests/btrfs/253
++++ b/tests/btrfs/253
+@@ -228,7 +228,12 @@ alloc_size "Data" FOURTH_DATA_SIZE_MB
+ # Force chunk allocation of system block type must fail.
+ #
+ echo "Force allocation of system block type must fail."
+-_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/system/force_chunk_alloc 1 2>/dev/null
++output=$(_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/system/force_chunk_alloc 1)
 +
-+	ret = bio_add_page(&bbio->bio, virt_to_page(kaddr),
-+			   bbio->fs_info->sectorsize, offset_in_page(kaddr));
-+	/*
-+	 * Caller should ensure the bbio has enough size.
-+	 * And we can not use __bio_add_page(), which doesn't do any merge.
-+	 *
-+	 * Meanwhile for scrub_submit_initial_read() we fully rely on the merge
-+	 * to create the minimal amount of bio vectors, for fs block size < page
-+	 * size cases.
-+	 */
-+	ASSERT(ret == bbio->fs_info->sectorsize);
-+}
-+
- static void scrub_stripe_submit_repair_read(struct scrub_stripe *stripe,
- 					    int mirror, int blocksize, bool wait)
- {
-@@ -829,13 +834,6 @@ static void scrub_stripe_submit_repair_read(struct scrub_stripe *stripe,
- 	ASSERT(atomic_read(&stripe->pending_io) == 0);
++if ! echo "$output" | grep -q "error" ; then
++	echo "Force allocation succeeded unexpectedly."
++	echo "$output" >> $seqres.full
++fi
  
- 	for_each_set_bit(i, &old_error_bitmap, stripe->nr_sectors) {
--		struct page *page;
--		int pgoff;
--		int ret;
--
--		page = scrub_stripe_get_page(stripe, i);
--		pgoff = scrub_stripe_get_page_offset(stripe, i);
--
- 		/* The current sector cannot be merged, submit the bio. */
- 		if (bbio && ((i > 0 && !test_bit(i - 1, &stripe->error_bitmap)) ||
- 			     bbio->bio.bi_iter.bi_size >= blocksize)) {
-@@ -854,8 +852,7 @@ static void scrub_stripe_submit_repair_read(struct scrub_stripe *stripe,
- 				(i << fs_info->sectorsize_bits)) >> SECTOR_SHIFT;
- 		}
- 
--		ret = bio_add_page(&bbio->bio, page, fs_info->sectorsize, pgoff);
--		ASSERT(ret == fs_info->sectorsize);
-+		scrub_bio_add_sector(bbio, stripe, i);
- 	}
- 	if (bbio) {
- 		ASSERT(bbio->bio.bi_iter.bi_size);
-@@ -1202,10 +1199,6 @@ static void scrub_write_sectors(struct scrub_ctx *sctx, struct scrub_stripe *str
- 	int sector_nr;
- 
- 	for_each_set_bit(sector_nr, &write_bitmap, stripe->nr_sectors) {
--		struct page *page = scrub_stripe_get_page(stripe, sector_nr);
--		unsigned int pgoff = scrub_stripe_get_page_offset(stripe, sector_nr);
--		int ret;
--
- 		/* We should only writeback sectors covered by an extent. */
- 		ASSERT(test_bit(sector_nr, &stripe->extent_sector_bitmap));
- 
-@@ -1221,8 +1214,7 @@ static void scrub_write_sectors(struct scrub_ctx *sctx, struct scrub_stripe *str
- 				(sector_nr << fs_info->sectorsize_bits)) >>
- 				SECTOR_SHIFT;
- 		}
--		ret = bio_add_page(&bbio->bio, page, fs_info->sectorsize, pgoff);
--		ASSERT(ret == fs_info->sectorsize);
-+		scrub_bio_add_sector(bbio, stripe, sector_nr);
- 	}
- 	if (bbio)
- 		scrub_submit_write_bio(sctx, stripe, bbio, dev_replace);
-@@ -1675,9 +1667,6 @@ static void scrub_submit_extent_sector_read(struct scrub_stripe *stripe)
- 	atomic_inc(&stripe->pending_io);
- 
- 	for_each_set_bit(i, &stripe->extent_sector_bitmap, stripe->nr_sectors) {
--		struct page *page = scrub_stripe_get_page(stripe, i);
--		unsigned int pgoff = scrub_stripe_get_page_offset(stripe, i);
--
- 		/* We're beyond the chunk boundary, no need to read anymore. */
- 		if (i >= nr_sectors)
- 			break;
-@@ -1730,7 +1719,7 @@ static void scrub_submit_extent_sector_read(struct scrub_stripe *stripe)
- 			bbio->bio.bi_iter.bi_sector = logical >> SECTOR_SHIFT;
- 		}
- 
--		__bio_add_page(&bbio->bio, page, fs_info->sectorsize, pgoff);
-+		scrub_bio_add_sector(bbio, stripe, i);
- 	}
- 
- 	if (bbio) {
-@@ -1768,15 +1757,8 @@ static void scrub_submit_initial_read(struct scrub_ctx *sctx,
- 
- 	bbio->bio.bi_iter.bi_sector = stripe->logical >> SECTOR_SHIFT;
- 	/* Read the whole range inside the chunk boundary. */
--	for (unsigned int cur = 0; cur < nr_sectors; cur++) {
--		struct page *page = scrub_stripe_get_page(stripe, cur);
--		unsigned int pgoff = scrub_stripe_get_page_offset(stripe, cur);
--		int ret;
--
--		ret = bio_add_page(&bbio->bio, page, fs_info->sectorsize, pgoff);
--		/* We should have allocated enough bio vectors. */
--		ASSERT(ret == fs_info->sectorsize);
--	}
-+	for (unsigned int cur = 0; cur < nr_sectors; cur++)
-+		scrub_bio_add_sector(bbio, stripe, cur);
- 	atomic_inc(&stripe->pending_io);
- 
- 	/*
+ #
+ # Verification of initial allocation.
 -- 
-2.49.0
+2.47.1
 
