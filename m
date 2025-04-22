@@ -1,118 +1,115 @@
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa5.hc1455-7.c3s2.iphmx.com (esa5.hc1455-7.c3s2.iphmx.com [68.232.139.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21F30264A9E
-	for <fstests@vger.kernel.org>; Mon, 21 Apr 2025 13:29:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 366201E5B71;
+	Tue, 22 Apr 2025 09:51:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.139.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745242151; cv=none; b=sLceHGv6125EuT4DNT//OGQfVllIRALeHWuPqOinJi3wpsl7JColtNzByB3kITeaedM2qSvUx8lKAX1OdhuIciwNRgki0UQBP9KbqaxxEWBhTy2Go4/8CSAyFaKFtewJcGGh1o+6FqPaqi9Xt+JZ04W3rIXYWtHo4c0eV9qxjHk=
+	t=1745315500; cv=none; b=tkGX16CfOY7rahGwEnyHhvrhbe1RC2uDpKh9/gZ0rq71SbQsDlERvNZ1wAEX5BPUCi8hcI/DY/DcrX9Pn1BQ7XSZXAzg7ehf7Yq/Z8Zn4Lmns18h+XGNw6JPJ/CuLsK5E6sFZuz+w1U2iFEFNwIkEYloZUURGWMAaFd1l6LaLeQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745242151; c=relaxed/simple;
-	bh=UWUJ2SK8CIIbWWwD7CLFIC6pUMBqbKNHCfE0uGMrGM4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GedSOVcJ3LWd3xa82EN07YcHJ0oW/ZoDLp4iX6an57kBJySJbuksgZt8EQe5yDKj7fNLoc2W3Po5FhW/22hPERrg8yOO5qdbRJTQNYcF4cB2lLkd8QxdBmmj7G3lTRob5+tstROq+ljlfUQtSulq7jfabtjLauTyJ1ly+e7OnEk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=2wdKWh2Y; arc=none smtp.client-ip=209.85.128.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
+	s=arc-20240116; t=1745315500; c=relaxed/simple;
+	bh=YAgiqX24EF1IChRDH7Q+iWlTconGy/9CB6eVKSr0bgg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=s5sgXTC/WkzypDJQlI8npZb8/yJmDyOYu6DAL5GG3Y6XuQCKf8621wOeKge1arHb+HxR/JbtcbPamrlIzehJgK8Xn9JniIOXqoOCLihT+nMHJwZN3v09Q4vzvhjcrfPPnfcJSWkZwUhpgUcnd/ZHtN+AA3ExhjVLmjIsOGHD+eM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fujitsu.com; spf=pass smtp.mailfrom=fujitsu.com; dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b=jg6gHvN+; arc=none smtp.client-ip=68.232.139.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fujitsu.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="2wdKWh2Y"
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-6fda22908d9so26998707b3.1
-        for <fstests@vger.kernel.org>; Mon, 21 Apr 2025 06:29:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1745242149; x=1745846949; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=xnrv6M3qGNWmiyy4mcQNYGOX8aPRJC6tFYttvLfN+DM=;
-        b=2wdKWh2YFv2uRtGBBAuAx/mMdR/kjTa4n8qtlXRXjEVOlON7y5xCbjAMUg5NkwJ/cq
-         1S8PxsaaoNxiFNkzIg4Z4bkSW7uaOwTOplJn2sNzQlMNTPEwtca+sM0q8/bam9Tfhu/E
-         oISCGXsujA97vOFeuQrsmu+6VoJjImTyZOpnH3+hgqhglkf7bf/adnBhG5fo9Tt6lad7
-         LETKKdKvCStwfWNYuwGPdJzP/bmwrx9oU2jNL8/G5QqogPRVhat1FurXn2GDzDqUtw/M
-         QBpulW7XlOLEo+BQdCIKz3C/hOADUdzFFsDuaJsxi8jug4opLUG1FcK851ljDBFTWlri
-         hDeQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745242149; x=1745846949;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=xnrv6M3qGNWmiyy4mcQNYGOX8aPRJC6tFYttvLfN+DM=;
-        b=r7u46x/xeCO8hfFKYuXXsfLgaSznM/u2NSP9jRP3e/YPzWtMhwAbygIW/r94h8laFU
-         NeKD1ZnB0e+C5gl9wZwjj/MMAyxCKVxOwxhxzgqtZrTELe7Y50/EmGAsokJPZB6Pujv+
-         iGslxRGvi2YfyUErm0/USmdIQWJK20Iwynad8GwjNH2lucpoHyUdvLF4OaiOleq8Paef
-         WuUonA4tNx8pNh8xQvWeBoY/1VhbOgRGgZ4XCF19WEOUa0Ms0w7Ls9SjoQL3l0m1O1Gi
-         9lLKQnDj2adbWAtR53XcJl2+rJta3he1gPSUNb1+w5VTtfe9n4sXXFTNHC+xC+WTLymK
-         KQ+Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWYa0FQsEjxj8nMb6k3UrcOX/pwRDAcCEBDmjwBJxYhGOb3BmFUHNRudkxTJau61r2QR2EsiGqf@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzxq4jojcAzBo06HzMt1mQryyIMsTWdTo4qnU0byzu4UsJS0pUw
-	9q6shTayDagchVS2J/I2fVSdQkzD7x0/NQk/Rp0u5cAfZE1urHislFX5ufiRDr8=
-X-Gm-Gg: ASbGncsbPC2Bp8rybCn7eIHoJN1AlWOIJZkH1g17fUCVIVzNTm7yE0d0xQF1GpFl3Qe
-	1ljnWL9wcwTsCFsOhhrKEp3X1Ahyq5oiwSMSVyh2F/E1dVr/54Ye9QetqRID/QhJqZA3Xfezf6R
-	7mCFwqCzHSEieEwKXuTZIb2CI/+O0TMLuvioCvvZUeU35HDHIbGOH53i4ne+Q8UKV7FFAfeifgG
-	bh4Dj+OUOJPmAJ9Fh9Uhs4IjFOkrXJ2sRj3PTQ8RcRlPMsP+CN1w/dKiD3r4oGn4tbqbXlH0ukt
-	R4gbJzmwyinNurk6GsC+DizCenn2qqV6HYKm+R9ZAmpBfHueDL76TOBWCzdTC/ALYhZQ9QMxcel
-	x/g==
-X-Google-Smtp-Source: AGHT+IHUPLRzsMvTGG6DjTpC5SK1gq3/jW3qEfZHb6t7huW6ypf+zkmaSK9c4867GNEx6JiRvdQQ+Q==
-X-Received: by 2002:a05:690c:9a0a:b0:705:5ab0:ea07 with SMTP id 00721157ae682-706ccc8e67dmr166681727b3.2.1745242148958;
-        Mon, 21 Apr 2025 06:29:08 -0700 (PDT)
-Received: from localhost (syn-076-182-020-124.res.spectrum.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-706ca46b09dsm18942657b3.42.2025.04.21.06.29.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 21 Apr 2025 06:29:08 -0700 (PDT)
-Date: Mon, 21 Apr 2025 09:29:06 -0400
-From: Josef Bacik <josef@toxicpanda.com>
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v2 0/8] btrfs: do not poking into the implementation
- details of bio_vec
-Message-ID: <20250421132906.GA4175772@perftesting>
-References: <cover.1745024799.git.wqu@suse.com>
+	dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b="jg6gHvN+"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj2;
+  t=1745315498; x=1776851498;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=YAgiqX24EF1IChRDH7Q+iWlTconGy/9CB6eVKSr0bgg=;
+  b=jg6gHvN+9TFcab4x5RDYA79aIyNUMEfl8c86FMwM0mEITQW8mxVoUz9q
+   M9YSGkLmVlVr/ABy7KAm9PCuCNSu5/xEEy59b+TiX5oIzQSnCBWqgebuN
+   85IU6oZvfauqe3imGfdh/fSf9ZArtOCHC3JwFPmGBc3PrA5n/gZkrc7Ed
+   8tESzTYx7BrWKNEURo/JEoVO28w2bsN/iiBWQX5bjwhJTTbKpaiCzUHk+
+   AjJeOpgzuF9ZjFDD5iCqWRBcZnOciVcmVeVG4X0UzDq1yLN9FOMmWXiWz
+   72xTCUXUkvOEFlbJ7tVwDuZoq3GIG95v4mHyBh41DqXpA2RucYQsor6Wf
+   Q==;
+X-CSE-ConnectionGUID: nzk2TeBdSouXvbalIdRdeQ==
+X-CSE-MsgGUID: ALzpD9VNTm+0S5nk2G3obQ==
+X-IronPort-AV: E=McAfee;i="6700,10204,11410"; a="196490730"
+X-IronPort-AV: E=Sophos;i="6.15,230,1739804400"; 
+   d="scan'208";a="196490730"
+Received: from unknown (HELO oym-r4.gw.nic.fujitsu.com) ([210.162.30.92])
+  by esa5.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Apr 2025 18:50:26 +0900
+Received: from oym-m4.gw.nic.fujitsu.com (oym-nat-oym-m4.gw.nic.fujitsu.com [192.168.87.61])
+	by oym-r4.gw.nic.fujitsu.com (Postfix) with ESMTP id B6FDCDBB80;
+	Tue, 22 Apr 2025 18:50:23 +0900 (JST)
+Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
+	by oym-m4.gw.nic.fujitsu.com (Postfix) with ESMTP id 6D80ED4BDD;
+	Tue, 22 Apr 2025 18:50:23 +0900 (JST)
+Received: from localhost.localdomain (unknown [10.167.135.94])
+	by edo.cn.fujitsu.com (Postfix) with ESMTP id 9EB9E1A0078;
+	Tue, 22 Apr 2025 17:50:22 +0800 (CST)
+From: Ma Xinjian <maxj.fnst@fujitsu.com>
+To: fstests@vger.kernel.org
+Cc: zlang@redhat.com,
+	linux-xfs@vger.kernel.org,
+	Ma Xinjian <maxj.fnst@fujitsu.com>
+Subject: [PATCH] xfs/083: fix the judgment of the number of content lines in $ROUND2_LOG
+Date: Tue, 22 Apr 2025 17:49:25 +0800
+Message-ID: <20250422094925.7921-1-maxj.fnst@fujitsu.com>
+X-Mailer: git-send-email 2.47.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <cover.1745024799.git.wqu@suse.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Sat, Apr 19, 2025 at 04:47:07PM +0930, Qu Wenruo wrote:
-> - Fix a crash caused by incorrectly index sector_ptrs
->   The 5th patch, caused by missing increasement of the @offset variable.
-> 
-> - Use physical addresses instead of virtual addresses to handle HIGHMEM
->   The 6th patch, as we can still get sector_ptr from bio_sectors[] which
->   is using pages from the bio, and that can be highmem.
-> 
->   However I can not do a proper test on this, as the latest kernel has
->   already rejected HIGHMEM64G option, thus even if my VM has extra 3GB
->   for HIGHMEM (total 6GB), I'm not sure if the kernel can really utilize
->   those high memories.
-> 
->   Furthermore there seems to be other bugs in mm layer related to
->   HIGHMEM + PAGE, resulting zswap crash when try compressing a page to
->   be swapped out.
->   But at least several scrub/balance related test cases passed on x86
->   32bit with HIGHMEM and PAGE.
-> 
->   I have tested with x86_64 (64 bit, no HIGHMEM), aarch64 (64bit, 64K
->   page size, no HIGHMEM) with no regression.
-> 
-> - Fix a incorrect __bio_add_page() usage in scrub_bio_add_sector()
->   The 6th patch, as bio_add_page() do extra bvec merging before
->   allocating a new bvec, but __bio_add_page() does not.
-> 
->   This triggers WARN_ON_ONCE() in __bio_add_page() checking if the bio
->   is full.
-> 
->   Fixing it by do the old bio_add_page() and ASSERT(), with extra
->   comment on we can not use __bio_add_page().
-> 
-> - Various minor commit message update
->   And full proper test runs.
-> 
+Commit 8973af00e ("fstests: cleanup fsstress process management") forces
+the stdout of fsstress process to be redirected to the file $seqres.full,
+so that there are only 7 lines of content in $ROUND2_LOG now.
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+The following is the content in $ROUND2_LOG before commit 8973af00e:
+```
+++ mount image (2)
+++ chattr -R -i
++++ test scratch
++++ modify scratch
++++ stressing filesystem
+seed = 1744949451
++++ xfs realtime not configured
+++ umount
+```
 
-Thanks,
+The following is the content in $ROUND2_LOG after commit 8973af00e:
+```
+++ mount image (2)
+++ chattr -R -i
++++ test scratch
++++ modify scratch
++++ stressing filesystem
++++ xfs realtime not configured
+++ umount
+```
 
-Josef
+"seed = 1744949451" is redirected to the file $seqres.full since commit
+8973af00e.
+
+Signed-off-by: Ma Xinjian <maxj.fnst@fujitsu.com>
+---
+ tests/xfs/083 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/xfs/083 b/tests/xfs/083
+index 9291c8c0..76f52df0 100755
+--- a/tests/xfs/083
++++ b/tests/xfs/083
+@@ -142,7 +142,7 @@ echo "++ check fs (2)" >> $seqres.full
+ _repair_scratch_fs >> $seqres.full 2>&1
+ 
+ grep -E -q '(did not fix|makes no progress)' $seqres.full && echo "xfs_repair failed" | tee -a $seqres.full
+-if [ "$(wc -l < "$ROUND2_LOG")" -ne 8 ]; then
++if [ "$(wc -l < "$ROUND2_LOG")" -ne 7 ]; then
+ 	echo "xfs_repair did not fix everything" | tee -a $seqres.full
+ fi
+ echo "finished fuzzing" | tee -a "$seqres.full"
+-- 
+2.47.0
+
