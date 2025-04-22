@@ -1,115 +1,146 @@
-Received: from esa5.hc1455-7.c3s2.iphmx.com (esa5.hc1455-7.c3s2.iphmx.com [68.232.139.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 366201E5B71;
-	Tue, 22 Apr 2025 09:51:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.139.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8130427C146
+	for <fstests@vger.kernel.org>; Tue, 22 Apr 2025 11:32:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745315500; cv=none; b=tkGX16CfOY7rahGwEnyHhvrhbe1RC2uDpKh9/gZ0rq71SbQsDlERvNZ1wAEX5BPUCi8hcI/DY/DcrX9Pn1BQ7XSZXAzg7ehf7Yq/Z8Zn4Lmns18h+XGNw6JPJ/CuLsK5E6sFZuz+w1U2iFEFNwIkEYloZUURGWMAaFd1l6LaLeQ=
+	t=1745321522; cv=none; b=ZTOhYYbS3tMCJNzyePkU4cVQDMRpHIfFBsSQnSFMy5TxPvlYJdwvUMhMn4aNIQ8RN8LTd4Ui2/T97tXLcZu6YoTyDVmyUcR8E2sPPpugCZrxRAcW9NyQyls7AqsAm+J2Nt+vmEqM/c7rGMuvCkBt2cojPqaY60XvSLVq2hg+JhI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745315500; c=relaxed/simple;
-	bh=YAgiqX24EF1IChRDH7Q+iWlTconGy/9CB6eVKSr0bgg=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=s5sgXTC/WkzypDJQlI8npZb8/yJmDyOYu6DAL5GG3Y6XuQCKf8621wOeKge1arHb+HxR/JbtcbPamrlIzehJgK8Xn9JniIOXqoOCLihT+nMHJwZN3v09Q4vzvhjcrfPPnfcJSWkZwUhpgUcnd/ZHtN+AA3ExhjVLmjIsOGHD+eM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fujitsu.com; spf=pass smtp.mailfrom=fujitsu.com; dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b=jg6gHvN+; arc=none smtp.client-ip=68.232.139.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fujitsu.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
+	s=arc-20240116; t=1745321522; c=relaxed/simple;
+	bh=B8sN7UNPWZgbsFVLtvXFdjOCRU2SCn4Rlhg2vx+Qxvw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=lVdZE6XFypO01IAxF1qzV5UmZp8zcuZWhIWjgRVEFcMpsiLayZ3g+cKZieQ4keaN1OKuMhbyOhWVDS3L9UovcVzuEhvuKYAV+VY+3CT5QWHITool7hHMg+YP8THAr/A0q4QU2KTScdSRVQREDHW94GLboxnxS2VMZyGMELwljOU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=ZnmYKxOa; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=b3+WT80e; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=ZnmYKxOa; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=b3+WT80e; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b="jg6gHvN+"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj2;
-  t=1745315498; x=1776851498;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=YAgiqX24EF1IChRDH7Q+iWlTconGy/9CB6eVKSr0bgg=;
-  b=jg6gHvN+9TFcab4x5RDYA79aIyNUMEfl8c86FMwM0mEITQW8mxVoUz9q
-   M9YSGkLmVlVr/ABy7KAm9PCuCNSu5/xEEy59b+TiX5oIzQSnCBWqgebuN
-   85IU6oZvfauqe3imGfdh/fSf9ZArtOCHC3JwFPmGBc3PrA5n/gZkrc7Ed
-   8tESzTYx7BrWKNEURo/JEoVO28w2bsN/iiBWQX5bjwhJTTbKpaiCzUHk+
-   AjJeOpgzuF9ZjFDD5iCqWRBcZnOciVcmVeVG4X0UzDq1yLN9FOMmWXiWz
-   72xTCUXUkvOEFlbJ7tVwDuZoq3GIG95v4mHyBh41DqXpA2RucYQsor6Wf
-   Q==;
-X-CSE-ConnectionGUID: nzk2TeBdSouXvbalIdRdeQ==
-X-CSE-MsgGUID: ALzpD9VNTm+0S5nk2G3obQ==
-X-IronPort-AV: E=McAfee;i="6700,10204,11410"; a="196490730"
-X-IronPort-AV: E=Sophos;i="6.15,230,1739804400"; 
-   d="scan'208";a="196490730"
-Received: from unknown (HELO oym-r4.gw.nic.fujitsu.com) ([210.162.30.92])
-  by esa5.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Apr 2025 18:50:26 +0900
-Received: from oym-m4.gw.nic.fujitsu.com (oym-nat-oym-m4.gw.nic.fujitsu.com [192.168.87.61])
-	by oym-r4.gw.nic.fujitsu.com (Postfix) with ESMTP id B6FDCDBB80;
-	Tue, 22 Apr 2025 18:50:23 +0900 (JST)
-Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
-	by oym-m4.gw.nic.fujitsu.com (Postfix) with ESMTP id 6D80ED4BDD;
-	Tue, 22 Apr 2025 18:50:23 +0900 (JST)
-Received: from localhost.localdomain (unknown [10.167.135.94])
-	by edo.cn.fujitsu.com (Postfix) with ESMTP id 9EB9E1A0078;
-	Tue, 22 Apr 2025 17:50:22 +0800 (CST)
-From: Ma Xinjian <maxj.fnst@fujitsu.com>
-To: fstests@vger.kernel.org
-Cc: zlang@redhat.com,
-	linux-xfs@vger.kernel.org,
-	Ma Xinjian <maxj.fnst@fujitsu.com>
-Subject: [PATCH] xfs/083: fix the judgment of the number of content lines in $ROUND2_LOG
-Date: Tue, 22 Apr 2025 17:49:25 +0800
-Message-ID: <20250422094925.7921-1-maxj.fnst@fujitsu.com>
-X-Mailer: git-send-email 2.47.0
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="ZnmYKxOa";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="b3+WT80e";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="ZnmYKxOa";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="b3+WT80e"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 846791F38D;
+	Tue, 22 Apr 2025 11:31:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1745321518;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=p/nK6cKy3307rm0aUSsXL5OynB3y4/jFUEyl42C9oUg=;
+	b=ZnmYKxOaq3pNIUGCRhPn6xKBPf7ei4t24eEjFkBsgv7Z1oFmitZA8e3GNEUq4k665h/gQw
+	NhYSe+xcVtUbXczcpyi1mijMLK5PEW2KBOR1njpo6Q2QdUM6pRo4xKb5dObxpenkE/5hnZ
+	7fGNI/a2y/h+Bt/CFRez3t3CtZTvkoQ=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1745321518;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=p/nK6cKy3307rm0aUSsXL5OynB3y4/jFUEyl42C9oUg=;
+	b=b3+WT80eFQ1kj2whuEykjfpt7hhQZ3LuFA9gUV9F2p+MmtbLeSzSyoMvaTKtxjHVY4KDj/
+	Z4p9G6IxMTvXz+Ag==
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=ZnmYKxOa;
+	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=b3+WT80e
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1745321518;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=p/nK6cKy3307rm0aUSsXL5OynB3y4/jFUEyl42C9oUg=;
+	b=ZnmYKxOaq3pNIUGCRhPn6xKBPf7ei4t24eEjFkBsgv7Z1oFmitZA8e3GNEUq4k665h/gQw
+	NhYSe+xcVtUbXczcpyi1mijMLK5PEW2KBOR1njpo6Q2QdUM6pRo4xKb5dObxpenkE/5hnZ
+	7fGNI/a2y/h+Bt/CFRez3t3CtZTvkoQ=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1745321518;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=p/nK6cKy3307rm0aUSsXL5OynB3y4/jFUEyl42C9oUg=;
+	b=b3+WT80eFQ1kj2whuEykjfpt7hhQZ3LuFA9gUV9F2p+MmtbLeSzSyoMvaTKtxjHVY4KDj/
+	Z4p9G6IxMTvXz+Ag==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 689F1139D5;
+	Tue, 22 Apr 2025 11:31:58 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id nlJaGS5+B2hDDgAAD6G6ig
+	(envelope-from <dsterba@suse.cz>); Tue, 22 Apr 2025 11:31:58 +0000
+Date: Tue, 22 Apr 2025 13:31:57 +0200
+From: David Sterba <dsterba@suse.cz>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH v2 6/8] btrfs: raid56: store a physical address in
+ structure sector_ptr
+Message-ID: <20250422113157.GC3659@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+References: <cover.1745024799.git.wqu@suse.com>
+ <03dbeaa8ac424885402a6590e393a15d5ae67c82.1745024799.git.wqu@suse.com>
+ <20250421114416.GA23431@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250421114416.GA23431@lst.de>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+X-Rspamd-Queue-Id: 846791F38D
+X-Spam-Score: -4.21
+X-Rspamd-Action: no action
+X-Spamd-Result: default: False [-4.21 / 50.00];
+	BAYES_HAM(-3.00)[99.99%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	HAS_REPLYTO(0.30)[dsterba@suse.cz];
+	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	FROM_HAS_DN(0.00)[];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	ARC_NA(0.00)[];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	TO_DN_SOME(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	REPLYTO_DOM_NEQ_TO_DOM(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	REPLYTO_ADDR_EQ_FROM(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	DKIM_TRACE(0.00)[suse.cz:+];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	ASN(0.00)[asn:25478, ipnet:::/0, country:RU];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	RCPT_COUNT_THREE(0.00)[4];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo]
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Spam-Flag: NO
+X-Spam-Level: 
 
-Commit 8973af00e ("fstests: cleanup fsstress process management") forces
-the stdout of fsstress process to be redirected to the file $seqres.full,
-so that there are only 7 lines of content in $ROUND2_LOG now.
+On Mon, Apr 21, 2025 at 01:44:16PM +0200, Christoph Hellwig wrote:
+> On Sat, Apr 19, 2025 at 04:47:13PM +0930, Qu Wenruo wrote:
+> > Signed-off-by: Christoph Hellwig <hch@lst.de>
+> > [ Use physical addresses instead to handle highmem. ]
+> > Signed-off-by: Qu Wenruo <wqu@suse.com>
+> 
+> I think you should take full credit and authorship here as this is quite
+> different from what I posted.
+> 
+> The changes look good to me, though:
+> 
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
 
-The following is the content in $ROUND2_LOG before commit 8973af00e:
-```
-++ mount image (2)
-++ chattr -R -i
-+++ test scratch
-+++ modify scratch
-+++ stressing filesystem
-seed = 1744949451
-+++ xfs realtime not configured
-++ umount
-```
-
-The following is the content in $ROUND2_LOG after commit 8973af00e:
-```
-++ mount image (2)
-++ chattr -R -i
-+++ test scratch
-+++ modify scratch
-+++ stressing filesystem
-+++ xfs realtime not configured
-++ umount
-```
-
-"seed = 1744949451" is redirected to the file $seqres.full since commit
-8973af00e.
-
-Signed-off-by: Ma Xinjian <maxj.fnst@fujitsu.com>
----
- tests/xfs/083 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tests/xfs/083 b/tests/xfs/083
-index 9291c8c0..76f52df0 100755
---- a/tests/xfs/083
-+++ b/tests/xfs/083
-@@ -142,7 +142,7 @@ echo "++ check fs (2)" >> $seqres.full
- _repair_scratch_fs >> $seqres.full 2>&1
- 
- grep -E -q '(did not fix|makes no progress)' $seqres.full && echo "xfs_repair failed" | tee -a $seqres.full
--if [ "$(wc -l < "$ROUND2_LOG")" -ne 8 ]; then
-+if [ "$(wc -l < "$ROUND2_LOG")" -ne 7 ]; then
- 	echo "xfs_repair did not fix everything" | tee -a $seqres.full
- fi
- echo "finished fuzzing" | tee -a "$seqres.full"
--- 
-2.47.0
-
+For the record, Qu added the patches to for-next with you as the author,
+so I'll change it and mention it's based on your patches instead.
