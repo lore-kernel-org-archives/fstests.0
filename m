@@ -1,88 +1,173 @@
-Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
+Received: from mail-pf1-f176.google.com (mail-pf1-f176.google.com [209.85.210.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A55727BF7F
-	for <fstests@vger.kernel.org>; Tue, 22 Apr 2025 15:56:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 195B114900B;
+	Wed, 23 Apr 2025 06:02:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745337406; cv=none; b=rTYfeQMaVgDJl3llJ4cQgde6VRDZR4TEjsXUIW44R0D/gO3d2Kq2zuK7MuJLXRETjus6Ca+COpP/nAw3GJ57iQ38FDRqWYoKW86fT8S9Bn/OBL/eGe6OIGD6m1mw7zcPNxNPNLHbxbhEJ4HmhhiQCu64Nf8O7FumHnkV0pf7OX0=
+	t=1745388176; cv=none; b=amrtOzpBlpiba1j6VNm2GGe2ZJrd3aLWKuTOePg/0iKph2VXp0JQXn0MEHQmpil5BcZDP6B7RVrjbsobrpkF6U/Azf8nglxHuI7OjQkaPMDfabwlGkJe3rWgYGYXgc7EptINHrwdwGdlDUDFyPyZMyZC8uN98dfOaOD7qLQp/Gs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745337406; c=relaxed/simple;
-	bh=YzbW6YmwLGxAGAwTfuFxnztEoc9iq66tR3gHscveKYg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pXPSWxrktgfudzELTJnN8/K+ODMldnatqrO4hRZ0SQQQyDaTCXn1iJvVwl9gJVACT+bRXmkVOttg9bW62ex+94ZIoIXtrSKyMu5NU/zi7ZNGR3xr27LPU/cWZ9vr5I0uO8CeehebRhkuPdLeiI2betmqeAruNDbV/tBaUy31EDY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=iAoGAWE8; arc=none smtp.client-ip=209.85.219.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
+	s=arc-20240116; t=1745388176; c=relaxed/simple;
+	bh=rY6PqrHqGzIE6R8mrMi04HII8o5r81P/XprkeaGWQwI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=No4obpKSR3nsIz7MB955+rb43KDbqkCd3n92fodor+2u01ABsuZkaBXiPEzTgPFAUxbtlAEVjrs+gOiZhhuSTqeXkAmjZrd7mJNFCLrtQMyvtLbypYZr0K6o7QoxvKw0NlnJamYVMNPhTo8AGIR0Tu/FPRLJqvSAQ+1ceThAyZM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=X9Cye0xD; arc=none smtp.client-ip=209.85.210.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="iAoGAWE8"
-Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-e643f235a34so4057277276.1
-        for <fstests@vger.kernel.org>; Tue, 22 Apr 2025 08:56:44 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="X9Cye0xD"
+Received: by mail-pf1-f176.google.com with SMTP id d2e1a72fcca58-736aa9d0f2aso7468521b3a.0;
+        Tue, 22 Apr 2025 23:02:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1745337404; x=1745942204; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=Ud0elHOnGc7hP9hnXKYDw9mCfGJKR0aC5uZ6ImIK2S0=;
-        b=iAoGAWE8lNloIU9hl8Ncnm/5fR5NLd/6uELd/MWp6ydgE+Ct/6oGEM5UnbzSpD3e0z
-         baLMCR50P3IfS7Img3OuiqQhH/5vicmDL0hg0gCGUtrQvqiJutnyewxLg/iNudGdSTPR
-         AUDeKLHVYrVTH0ad2a7zPN9SG96KABTXDlunIdujm8BlE6snvqWnz7vb/dfGhh4aCyrm
-         2tVdX+MEaozGW9s2JwdQB/GtzHtZSNVaMMZ5GJLr8gQPjHoref88d0z4HxsVXVZhe7Dl
-         u8eZh4ZbWyy4S809acLdAceFUy+hsU9wd12/ZLDlF2Oey6zndl3GRHQ/CFC4henlXHWz
-         qzDw==
+        d=gmail.com; s=20230601; t=1745388174; x=1745992974; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=gXZ5TRaDdNFNR1l8MfvxYLddFq49FbInV9BwUmDWSDc=;
+        b=X9Cye0xDehqXRbKwtlGb3EPgoBXq7CCYSlcSLM9r5A2yJVEvkbjDBsZnsFGX4wUMWA
+         hMarXUzcISbyd6FqK1Z9VR/7VjuYe+Vkc56zYPEsb/wPGNocz7WotP350OZFb2iBIz66
+         4Mevc3MAUB5V8axFxgOW7sBEkgdxTF92U4A6WA41Z7EbBWUTtdJpLuPZwJME8UmEVpO6
+         vki8bL1qcVpwgzfqtRXyT8YP12QMrTTCIEQqybXSzwrGzXPUUZ9jMsk3c9rwdadRI0wS
+         nIac37nTfwBKKIPerTO7IHmF1Mlfu1mQF7oXDFX8PecDESFeI8nj1UGr2x0gdHEZ4/Ov
+         TS0A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745337404; x=1745942204;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Ud0elHOnGc7hP9hnXKYDw9mCfGJKR0aC5uZ6ImIK2S0=;
-        b=FUb0ybLp7TX248ALEbW9JfTg5yaS2zzKpQUpBx6EHiIXv3SVv0P6+19IWNzybl4wnQ
-         Stq1N/nyF17EYxe1HoSvYeqJKOd5NG3I8FjAxsi6g0DRd3bpAggFnCR57TmyQgxjLexc
-         DLg/FOilFvZsJDTZ7Z1O6Gs/MgidKON3/KgTR8yhO9cPh849kOGlX8aJ6o6WfAxmhTna
-         mZIzG+JBK9kLlLFNS1+csiXpMYIfKbRChnpyYIHUQDUOmPSUgo/kzDUm+rIOnOmV7vgW
-         JXJm5JE1LkuF2EmLEJIrc2VtiKskJDHocrguvNc+OKEfhJlt5yJI119ITC6aM7BSunJf
-         //CQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWhVx4IFI/8db4tZuCCswTKjH3KOjEoOHuIO1/NBlu1IhN+/kpbC4nnMWAavy5t/5ikTY95yy/X@vger.kernel.org
-X-Gm-Message-State: AOJu0YzHe5tUv5QD5QEdF9/1vmrxwY8ogbyYxV8b1cu+OK20S63GhegV
-	/OctloO2B+pskN4UMJEQH6KWnxhg+c4RM2Me0AtRzE6vR3FGdAlUqtPRMjiGd9o=
-X-Gm-Gg: ASbGncuQD5Yq4DqbS8Ns1GN9fYFnjpWqOPesdf7u+9nOoySYxdlS/a1dhYkvgQBbZMV
-	EZgWWq2bTEiPGX0dfI9WLiQILXefIqCatr1gTARpO43P76NYPUS6iJHcnR2LSJtvDzp8yCxUZKi
-	8pWfznm6ozeEoQX+gju4sZt+5DLLA2YkI7BFtfpvQvXnHvhUkJ79W8GFa0Tj3WGQ0rZCqoaNvUI
-	QiAgWHPmL8tfplg5MfEkMyCl/mVRzCtwWAEgdrtNRdskiWiNc9OA+/0J/Bw9WSKVcg9nlJjnUbe
-	kl1e4/mVDsE7DJvm62x2lmhrI9wfd7az3SScS24Q4BT/Etn+DuC4W41FDai3m7v5aCjYUpThIFM
-	b4w==
-X-Google-Smtp-Source: AGHT+IEVuPY/rK8JO2Vk49NdcNgfrjqZx5Fv7Hn4PhE64NkJ4mffngGAbhnWdxGX8THzU67W/mWEGw==
-X-Received: by 2002:a05:6902:4484:b0:e72:b231:7b6d with SMTP id 3f1490d57ef6-e72b2317c4dmr12766694276.34.1745337403998;
-        Tue, 22 Apr 2025 08:56:43 -0700 (PDT)
-Received: from localhost (syn-076-182-020-124.res.spectrum.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id 3f1490d57ef6-e72959e0fd5sm2440290276.55.2025.04.22.08.56.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Apr 2025 08:56:43 -0700 (PDT)
-Date: Tue, 22 Apr 2025 11:56:42 -0400
-From: Josef Bacik <josef@toxicpanda.com>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: common/btrfs: add _ prefix to temp fsid helper
- functions
-Message-ID: <20250422153220.GA258462@perftesting>
-References: <6097a2fd8b587ccc5982106142421f472861e949.1744892813.git.anand.jain@oracle.com>
+        d=1e100.net; s=20230601; t=1745388174; x=1745992974;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=gXZ5TRaDdNFNR1l8MfvxYLddFq49FbInV9BwUmDWSDc=;
+        b=OPayfq0UCocvOIJ6RJFUWCAQCoEPoaDKPfs6fdx33w3J4MsekQBLvm13xThyNxUXMS
+         8kJMbEH0N3cCSAaaFE2Z4cNrRbAjd6mmgcGjcNWy/Sf3bs5DB7m0mL46kyegyESmftyG
+         t8IqUAraWA/mpqZDGn0UMl7zJRy7UA7idFNxkOm3cTY+GbCxEpLhOOOVKDIROrSuLxLP
+         aK2j1xL8rouytYyDmWIAFYctWHJSJ/VFwfQIMZH4aqqCnfkCYAUG8M7TDX3Ih0ptULqo
+         IazYVnEqHpiGX4TKC0vVqeyUAltqozxd1GYQRORaJEAJSwv/bDFW14clAT1RbYexTUWS
+         0TwA==
+X-Forwarded-Encrypted: i=1; AJvYcCUSS7OpCqSJYQQhp2Bst3/2tjWtH0FanbK4nW8MhyBzByumPnygZgSBnAFBm2eYvxS/6KKYJIKQ@vger.kernel.org, AJvYcCVKLCZuUpzvK0pjX4KBW8coNsSRX1i5v32cG+OIz4Eryk+tIYtggQ8AWnTX4XCfnlGL8dO97nGay7khsA==@vger.kernel.org, AJvYcCW1y8fiRvRS04aDlwK3SB/2i2th5sWWeLFk/xZEFq4tFQVZxcH3NDG7a4+3ZQ4P319EsuNm7o69f842@vger.kernel.org
+X-Gm-Message-State: AOJu0YzCvJIvKe2mGnP+j5OXr4LP+0zYtdJNQcqcE8qFsJq6+fnGgeNO
+	zouulZKlbmkodUwgsC6XhYBcHTNvASQllH5SNVCGOCQiIf9mXHSJ
+X-Gm-Gg: ASbGncs+DUSmG5Ok8GV6gIPJkZH+H/TcTMThirx76UqYUQ9kLLJYVHUVQ1EVYcsdGgR
+	tSEsI6Br8haPTeGxcFYpaIKtWABnadDHyJ52Eoy4zlVIZ4Dr3ND5EN98JKJldUri64vkWeo86mu
+	Le8vcuthCMh7MibvsDqF0sAilzQPzQpM/6K1LNdLpY0frtTJY3ufq1cUzHieowY3Yy4ai3qN3DY
+	7EtBpVSOmzFbxxi7sqGztRFy7IuuDvw/apMc1JtWONH16hUkheSMQkfuXo6iZlIjCSDXidsdG8B
+	UD9SZV8zauzjakYU9G/0v08KJkRw7XQ3/6RrE+ox+NRhbdEi6Wg=
+X-Google-Smtp-Source: AGHT+IGbpb2C4BoZVgWkMH7mSKy8EpASdLJRRqOzZfJIkWnLm5PxEM26mimNlHgM48JvE9hXUJbpLg==
+X-Received: by 2002:a05:6a21:9987:b0:1ee:efa5:6573 with SMTP id adf61e73a8af0-203cbbee8a9mr27678918637.8.1745388174246;
+        Tue, 22 Apr 2025 23:02:54 -0700 (PDT)
+Received: from [192.168.0.120] ([49.205.34.162])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b0db1590cb1sm8266560a12.78.2025.04.22.23.02.51
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 22 Apr 2025 23:02:53 -0700 (PDT)
+Message-ID: <b15906c4-3cd0-481f-8f8b-3dc3e581d817@gmail.com>
+Date: Wed, 23 Apr 2025 11:32:47 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <6097a2fd8b587ccc5982106142421f472861e949.1744892813.git.anand.jain@oracle.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 2/3] check: Add -q <n> option to support unconditional
+ looping.
+To: Dave Chinner <david@fromorbit.com>
+Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org,
+ linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
+ ritesh.list@gmail.com, ojaswin@linux.ibm.com, djwong@kernel.org,
+ zlang@kernel.org
+References: <cover.1743670253.git.nirjhar.roy.lists@gmail.com>
+ <762d80d522724f975df087c1e92cdd202fd18cae.1743670253.git.nirjhar.roy.lists@gmail.com>
+ <20250413214858.GA3219283@mit.edu>
+ <9619fb07-1d2c-4f23-8a62-3c73ca37bec3@gmail.com>
+ <Z_7rqLbQCLAY5zbN@dread.disaster.area>
+Content-Language: en-US
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+In-Reply-To: <Z_7rqLbQCLAY5zbN@dread.disaster.area>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Thu, Apr 17, 2025 at 08:27:22PM +0800, Anand Jain wrote:
-> Just adding a _ prefix to the two temp fsid helper functions and
-> a rename in common/btrfs to keep the coding style consistent.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+On 4/16/25 04:58, Dave Chinner wrote:
+> On Tue, Apr 15, 2025 at 01:02:49PM +0530, Nirjhar Roy (IBM) wrote:
+>> On 4/14/25 03:18, Theodore Ts'o wrote:
+>>> On Thu, Apr 03, 2025 at 08:58:19AM +0000, Nirjhar Roy (IBM) wrote:
+>>>> This patch adds -q <n> option through which one can run a given test <n>
+>>>> times unconditionally. It also prints pass/fail metrics at the end.
+>>>>
+>>>> The advantage of this over -L <n> and -i/-I <n> is that:
+>>>>       a. -L <n> will not re-run a flakey test if the test passes for the first time.
+>>>>       b. -I/-i <n> sets up devices during each iteration and hence slower.
+>>>> Note -q <n> will override -L <n>.
+>>> I'm wondering if we need to keep the current behavior of -I/-i.  The
+>>> primary difference between them and how your proposed -q works is that
+>>> instead of iterating over the section, your proposed option iterates
+>>> over each test.  So for example, if a section contains generic/001 and
+>>> generic/002, iterating using -i 3 will do this:
+>> Yes, the motivation to introduce -q was to:
+>>
+>> 1. Make the re-run faster and not re-format the device. -i re-formats the
+>> device and hence is slightly slower.
+> Why does -i reformat the test device on every run in your setup?
+> i.e. if the FSTYP is not changing from iteration to iteration, then
+> each iteration should not reformat the test device at all. Unless, of
+> course, you have told it to do so via the RECREATE_TEST_DEV env
+> variable....
 
-Thanks,
+No, it doesn't re-format the test device. It re-formats the scratch 
+device. With -q, there will be no re-formatting of the scratch device too.
 
-Josef
+>
+> Hence it seems to me like this is working around some other setup or
+> section iteration problem here...
+>
+>> 2. To unconditionally loop a test - useful for scenarios when a flaky test
+>> doesn't fail for the first time (something that -L) does.
+> That's what -i does. it will unconditionally loop over the specified
+> tests N times regardless of success or failure.
+>
+> OTOH, -I will abort on first failure. i.e. to enable flakey tests
+> to be run until it eventually fails and leave the corpse behind for
+> debugging.
+>
+>> So, are saying that re-formatting a disk on every run, something that -i
+>> does, doesn't have much value and can be removed?
+> -i does not imply that the test device should be reformatted on
+> every loop. If that is happening, that is likely a result of test
+> config or environment conditions.
+>
+> Can you tell us why the test device is getting reformatted on every
+> iteration in your setup?
+
+As mentioned above, -i isn't reformatting our test device. It is 
+re-formatting scratch device and we introduced -q to unconditionally 
+loop without even reformatting the scratch device, and hence making the 
+re-runs faster.
+
+--NR
+
+>
+>>> generic/001
+>>> generic/002
+>>> generic/001
+>>> generic/002
+>>> generic/001
+>>> generic/002
+>>>
+>>> While generic -q 3 would do this instead:
+>>>
+>>> generic/001
+>>> generic/001
+>>> generic/001
+>>> generic/002
+>>> generic/002
+>>> generic/002
+> There are arguments both for and against the different iteration
+> orders. However, if there is no overriding reason to change the
+> existing order of test execution, then we should not change the
+> order or test execution....
+>
+> -Dave.
+
+-- 
+Nirjhar Roy
+Linux Kernel Developer
+IBM, Bangalore
+
