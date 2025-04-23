@@ -1,236 +1,166 @@
-Received: from mail-pg1-f175.google.com (mail-pg1-f175.google.com [209.85.215.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C60C264602;
-	Wed, 23 Apr 2025 06:42:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7AB3B262FC2;
+	Wed, 23 Apr 2025 09:40:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.20
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745390547; cv=none; b=iZZI8d4VvmoUWh+XZepNZ5AFbZdkT7FTi+cTe5CdnBoSZnPoOyV6+As1an6rnHNv4qmYuTAW+TBKcQauw0bzExb+ngkMSqgYQALZyR6g6ibynl6bQsV8JynWXBanQjw2f8nK08ALXbAJYvvQvamw03FAfwXjVthU2+018FNYuuA=
+	t=1745401224; cv=none; b=PK2TGZ/X7/NAkupeT0i5W+0/tJ9SVSMhi0wix7zUn+6im2BUr+Yr43Le3rZKkMBz+gZTYcCJQkGSHsWF2zNOlD8XEXQMvwbvB/4NojNMxkzwbFStZ1kpgFcG5zhvSWOvyAPhOAUZ53GUwpF5v92sr20VA3ZlEHX6vN7x6lZdrtc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745390547; c=relaxed/simple;
-	bh=3sHmtH/fcuqr6uhoWuT2SST1v+xQWAtds51Od6RXPck=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=ekIpW8cyvgpQrZm3MhVJJS35JH96uFUrgu0Bw8W9NFqA2J1WZE9Z7iA17Hex9YLfZ3b46ZPF1oTbiTwFa4TH2RdYtXW+uHm5mXlmwyXDcsnFDzVGaaUjW/R+CMMHEOt6bgM28A99xfRHhCQJKHZsb47krtPXxX9jLpINZ+whqug=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PeMdjVTt; arc=none smtp.client-ip=209.85.215.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1745401224; c=relaxed/simple;
+	bh=JzKCzSjUnIoCXgwwd/OzD77S8a2DTLwoIPm20vLrLtw=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=tvwSDvDJVpdkPsJsDd9N/0LAkomG1KZHfyjC2KTlv9IxhJyTXFiErfg1HqOGY4GxuSbdpqDW0WofXzQS+w2OWIBDKKRwWV7yLe0ZV8LsHGfF03ND4PIsioNOioRzXrxSG782nB7ql9na7WiQYjfiO1E0k/Dr/B1fDIvDR10l+z8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=NNQBn5Zc; arc=none smtp.client-ip=212.227.17.20
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PeMdjVTt"
-Received: by mail-pg1-f175.google.com with SMTP id 41be03b00d2f7-b0b2d0b2843so4807101a12.2;
-        Tue, 22 Apr 2025 23:42:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1745390545; x=1745995345; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=g27k7RYdORpTeRKrTufSRWiTfEwEp85jDt+1SSkTjiM=;
-        b=PeMdjVTtUGLByPJ12PKsIAK4SLa7wFWBvRhRLOIJeFjggoLO2IPVTzgQmOIJItL4B/
-         kacpqQkzYo5fRVNVLVgVUUe5MkWrXf7JFeqkGqanzByaVrjZ8t15g6Ib4RZBf51LAXWA
-         DNHxWJORngZP9ecYjmBQJ0ZY9e2Sroeycsdwyrmm1GznW7xW4AF9rFKsxcSKmUzij+Ux
-         qys/TN/FK0PUGIo0Om9r5P2WG65DMFsvXKgoM902tktpwwxy0R86lXOweS2HCRshUQfm
-         +Ws24ULhr9vSOEtR2RWLZg1aVGvuuUFdPrWF+ptoXJ5XG8PDsCQ79yMzvfmbMvopkL9s
-         CK1Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745390545; x=1745995345;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=g27k7RYdORpTeRKrTufSRWiTfEwEp85jDt+1SSkTjiM=;
-        b=IWusN9RxE9eAz/1VhET4lTSFAOh8gdyAdCgvlxJbHxBq6SnZtfc71CbsLa4VsD7L0B
-         Cl+FvK7RjbjtxUW+zm5KJa+uyJ7YM/pRDrswOUJ90etLDi4ijz5ZQpPR2mSo3QkZusqc
-         xkM4TTO2MjftERHgJkTtFFZaOKOxCus3mjSmpjghE+3a1Jj3/L/1uPLJPXHXuRf5vSVN
-         u1xBAmqQICEavphdt5ZVGxy1tr/pEPR5r/77qppccuv97RHsu1pbGm+3Y6T0Si3PzHxS
-         giiOoR9O6gVpEM9nfZTs1Z6ahH8gFJETuLofvw6Gg/mnKETiztQEopvn5JcghXP2eEfF
-         578A==
-X-Forwarded-Encrypted: i=1; AJvYcCX+qvusd8JbRdBXH6scilzMcIYF8ouFPgIKCRXfD1+/2p9DSMXd4s3S2w+lLBiKikRHY1CHBKDUC/4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyWZ1dTwXxprgY+OilzQobnzMQeAd/Kql2jweg/NEYn4wQYmas1
-	m5UkcroQhu+aRN2GqikyR1L+/rtWTJr2qibw3KH6TFiwiDMgUNLPCwzBXQ==
-X-Gm-Gg: ASbGncuoIFPVphrCbyUzIJz0h65nl4F+rN4OdSjgxufb8PliOm8OR7zaGSnpOUj9MJF
-	pRZQVc2reErWMr73j6ejqrG5ZED8Fhz8uPrxSQTjCogzdmzjbYetAHLL313LJYMgetQnLQ5vQS+
-	kjsJ7MNkYlUkyTXb72V2cNEdxEZCCdKhyxCwHm0BBF7AesV/OLqiaQv7rWjxlXjOc+oP4cNQEng
-	nV20urEX3QizeMTUXFatmgrQf+exOF5lZH6KgbO1DGPzCg6kXOmdhVRqcXymnErWspr8bUqBwZb
-	kLzXMBgeTeYeTsAXCq3qOJJTllnJpprCwa99nf0h5JBo
-X-Google-Smtp-Source: AGHT+IE2ksOZAMjPFCRblotYyVZE5eWd+S7wBhFabH0fFByfxwyBRPweOnKrkOiigeFyVvafceLVqg==
-X-Received: by 2002:a17:90b:51d1:b0:2ff:6788:cc67 with SMTP id 98e67ed59e1d1-3087bbbb5damr21865487a91.34.1745390545005;
-        Tue, 22 Apr 2025 23:42:25 -0700 (PDT)
-Received: from citest-1.. ([49.205.34.162])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-309df9f051csm897705a91.4.2025.04.22.23.42.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Apr 2025 23:42:24 -0700 (PDT)
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org,
-	ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com,
-	djwong@kernel.org,
-	zlang@kernel.org,
-	david@fromorbit.com,
-	nirjhar.roy.lists@gmail.com
-Subject: [PATCH v1 2/2] check: Replace exit with _exit in check
-Date: Wed, 23 Apr 2025 06:41:35 +0000
-Message-Id: <7d8587b8342ee2cbe226fb691b372ac7df5fdb71.1745390030.git.nirjhar.roy.lists@gmail.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <cover.1745390030.git.nirjhar.roy.lists@gmail.com>
-References: <cover.1745390030.git.nirjhar.roy.lists@gmail.com>
+	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="NNQBn5Zc"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
+	s=s31663417; t=1745401217; x=1746006017; i=quwenruo.btrfs@gmx.com;
+	bh=JzKCzSjUnIoCXgwwd/OzD77S8a2DTLwoIPm20vLrLtw=;
+	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
+	 References:From:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding:cc:content-transfer-encoding:
+	 content-type:date:from:message-id:mime-version:reply-to:subject:
+	 to;
+	b=NNQBn5ZcrkcRvPllP4AxTh91rGP/tfLRqmV9G1ciZP7QJULvN46z2BLCYrKXzfhu
+	 0Oyf38mUieZmDww7/0A1to4Mq7W+Bb0b98vRHtDkkCwnSstxU8H9AwqedhNwf4GgS
+	 7N03aVyMnz2kMCvZ6sF5U0Y0mDSd0RieqDlhJOIu1pxAWEy1zYv4HxWUbh5hK1Ede
+	 vUMSRJFa250IuT+tGTeB6UQcy48Cb/nwgcF+2HSfV+b5r9WJFEGpG7mbeN78zUkT5
+	 r5Dw3/LvUBCgn77+87hYBpCvKxZVeB1MZJlr6HKlN6Cg+Ohkrg4UK2yxOWuPnve7a
+	 u7Xiio7zpmy4Jk7SbQ==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from [172.16.0.229] ([159.196.52.54]) by mail.gmx.net (mrgmx105
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1MV67y-1uZbbK3pFG-00VkiD; Wed, 23
+ Apr 2025 11:40:17 +0200
+Message-ID: <290a2979-4fea-4b17-bb82-1d26d0217037@gmx.com>
+Date: Wed, 23 Apr 2025 19:10:11 +0930
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 6/8] btrfs: raid56: store a physical address in
+ structure sector_ptr
+To: dsterba@suse.cz, Christoph Hellwig <hch@lst.de>
+Cc: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
+ fstests@vger.kernel.org
+References: <cover.1745024799.git.wqu@suse.com>
+ <03dbeaa8ac424885402a6590e393a15d5ae67c82.1745024799.git.wqu@suse.com>
+ <20250421114416.GA23431@lst.de> <20250422113157.GC3659@twin.jikos.cz>
+Content-Language: en-US
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
+ BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
+ sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
+ xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
+ naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
+ tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
+ 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
+ VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
+ CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
+ /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
+ GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
+ q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
+ ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
+ CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
+ B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
+ Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
+ +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
+ HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
+In-Reply-To: <20250422113157.GC3659@twin.jikos.cz>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:7H/Y6tbRgcbq2Ln3O+CRzeKJ2DPptB5VJg43huBgVti+zC78sbc
+ nYXHQVXxj+xePTD4WW5w3ToYxrMyeMdx3KheVu12qLGmxCPV+QMhJGCKSqq7pDzQP5gZirH
+ ILBt12xBoqy3ubYCGGtTn/SHGpsOBWQZahdhZPWzat2O7Quhpu42nm3qbPJJO/oMmTGpHp7
+ pCFVo6dEzENn6Vj21ta4g==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:lkJQ67Db3qk=;8+PWF2A7WC7r0YUqbSSer7MB1uL
+ vBfzt0zu/FgwbJpq5Ftw9G2qDl8hMbQUYO2RkpIf/P7jSVfb61XnDY1wW+1aRPx6UHIUMknS+
+ dXCDQQRpm6B094z99G2wzRYkYff4Nhq+Eli5NV6xMzh6w06PE4F3lhoNNnmrIxtyiIps9yf7K
+ UcnkISKqSJvka74M2ZY04j84fgQicdoZcqKyozdftUra6LBlhcmo17JRhA9auslat/2DqG6l9
+ arvfGl0W0VRPPB+0WgnuCVGxJoeMRr007juOaVk6BvbI55b8U4klCMxZEMgIKw0umg+hvLrmm
+ 1fIO6EuIGnlJGSLczXAZSqkdl6MPoWy7ctxoeHu+jKkWlKPyCprcTXkYS7UsysJQemwrXA4DZ
+ aazfrWOexXkvpTp1sY2JJ/tKUhJi9sOOSQ70WWgx0S2SXJ2zAUDx6hL/Z9gA5d55sm6rLZ8My
+ JubBoZSAyY0GVLW4i/MtaOjjWaf0eRbyUsDQMikcyFeTPJJY4C0sgKVVMY154ovEKQTCkfZkQ
+ gLvDW3x/l9v5rQvc8UqcYDdUn7W+S9/8lQ8C5j9x8ExV+HDsSBgV+HzOw3bQldLVxubjcYC7l
+ EB3spzzf8jTmufYmX337NB4v97Ga5/tkIL4cvhKwAv+N40CUQ8lMfOvsYkeRAXJSks5ONmlyk
+ PX/SOUZWAnsv2vj8uGOxyDXGIk1l6z3c+R/ePs+NaTPz5W6Hw+uDP+QI3wWZ5scbqZ5B+d2vO
+ E5Bpb3fnjxV3mc4HvzJJIyeq5ddjsoyWm4d7d7ETGJBMdZ8D+rQgfkvB/RoUmwfM0FZOqMXhj
+ 5MtBN+PXMYNO7tw/VPWH8MIsHBq+F3a38Cu0E+5x5JizIC5PftCYdq1jk/zkPFeXA+q1N55i6
+ /ucDNyhz4g5e5AaserFDrPymVTB/tvSkBnHPf6r+cgo7NfzJ9zAwIZh+jlLhrj1JVa8SWJWIK
+ 8X2I4L/yrn5rb+tkvoRTI+KV5w3+sgWqoyovPXT0Kgsm3QHS49Q2HDG1YHqAyc0RFlCI5aQIu
+ RMCkXicTMAPF5L2a/w6iwen0m9QMqbHJAKt5Oz4xckzIUXrJAcqR3G0t9DdyRTgP678EfBwAt
+ NG1FXxoBxTKwIdv8grFW/7lzl8TX4XlcQ+Tj8Ham3S3NU4G5RBYUHs9da8a/rHdtqN34AN4TU
+ lBgxBeh7YL/fqcdMxw76zryXlt9YYOwjpat3urNoWBLQ47om6V8bTLdYYq6mf3hIywyK/OwDq
+ EkhyujxH8eAGe3ej8zb04/RgTtXYLcncKWRifl5HUQXR79sTRFiDtWpXyuobt4m4Zjk6Et//F
+ ScON61yyAzon6UgEgA3N0XusWeF+s5odjDPDPVsHL7L2yGkm5wagkajJ6ntOl5iemPHt/Qi2S
+ FQPOOJao0l2w1jDrbXmC0bVlInWzgSz9Gi0bQJCDCiVEYgdSFq+SRYeL2Vc1s2NAbpmXV+z4G
+ 6swvJWlRGAoLjwx9do9TbtYtWjr4WMzFsOTYpCj6NZz3N8tpvN5j3FTjGJ70Wr3a4ml28/yrF
+ JnoJP0lyBBsguK/Jnf5qdSNW3aiqr351TLFXdGvpqFDzBUSXvcj5TT5hztqTgi+qHZmYI81wH
+ c/RWocbEd4t5lbQZy1PW9FucgctZXNSSNDu7mRrmewjns4of9KJz8ozV3+u7kbknZVyOXz7+i
+ oeyghQi4MnRQaYrubkaRrn4a29OFSOk2IBgQQQH+5chdeZkd2H3Huu31lZXaFmB6Y3sl/UcdP
+ J331DxCxOaZJUq+fRF0KEaKDPnkm3ZxmLlIs32Gtml2wH12jZMyKrmas1AJ08u9kUvZFtt1TU
+ x2ACG0JC2tO/IF6Mg0zAM1bYzcba9UQjVogsxPTI7KwFmmpmHTg8qtBi1mFefYWKLIuyvWTeJ
+ rupUvOy5p+EFwhThpd/qf4YAiAlukx6ZPKogMe0Eb1U5o8linhH3n5CGAi3RfLUXfsHkFS6wc
+ W169fB94sBhLX0zHOYDCIfFT5TaJblds+Tx6tjWFS64b38WRGPAEZEKeK3xUyT+dZcFjRpvuc
+ FhzSYZuLhB+sNMj+fSAyhAJzIjFL1bMM+LBaVa0t9CHa0JXIid3UtPxQ6WeDinp77VfL5k5eP
+ t7yPAfHbjVgiKcLOkZ2X6c7/ohnuLRweRA4nLPA7H+1U78MlD51xaA5FAt625uCywwewqGt3M
+ 9IdR1BvweffqbhGFUA+NUbkt3jS4rk2h+fejUOF0hSHJPD3WubSpfIipUyNOywGqSqZ2y/gvM
+ ApBLzWknzK54RXcj/8qgddfThUvRTyMj0ecKaEc2nymbEbhsqdI1QoLeXauwqO8NuUgY8NPDD
+ 1MFu7zxLv7UpJFvbEtYKlXw4sabaBgh3dwslxepCsdka6/x+lVNUToEMzgQv/S3m5svOjObbp
+ huRiXgis9EcXf8X0jtcp0K4E678M0LrnVoCY3huochdcCiAbyPplKwrX+DK0PL8yGd16a3DWE
+ fH/McevY0UwdesGznYrMaro82GBfZBNIg+zsHgMGQw888TAh8eDsdZrrqHvU/K+gGz8BIjud1
+ IYVyW0L1uHnqV4N+hd6l5m8ht+v4YcIYgDg6+PsDA0BZGZVTz710tmRPhsUMPJA4ZdKj4OlDI
+ SElEDYADcOxB7LcqDTErIklCcA7wSmEJHGf7H3Ii+v+/KLoAECuyYZaTgNUnnizAyogEbX5EQ
+ Eo6hvUbiOsF3IDglO2t4GdHhNaw6yQ0Z9e38IPaatLhvJfvXqkEvwsXRIofPAH9CVhVKx/qGn
+ wMzvKdX950fGT8rZ6CZvqDqUV995FipKP/yOVlBUCTTtw0XTSyevVrtoyKzK/z4fSIFEtMjkb
+ DY+L0PJ2B+mSb2Lo6VDWl19eC/yjeR/IM8qa5ks9TiV/g1Eok8FCW3gmrzu0RPj7867ap4zQP
+ SOD7HPbjZK+nRdcMCOXaRV40cRVsXgSQmIuiLGMyY6m9PrQ+NjX8mAn8kko6MzA4b4mBmovQc
+ A6FbSBJ3L8cQnioUqs6g49qk1WRbqRofM6hOgT81kepOSXjcKNnaiOoi13KYe8g3vSfXW+Bnf
+ A==
 
-Some of the "status=<val>;exit" and "exit <val>" were not
-replace with _exit <val>. Doing it now.
 
-Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
----
- check | 39 +++++++++++++++------------------------
- 1 file changed, 15 insertions(+), 24 deletions(-)
 
-diff --git a/check b/check
-index 67355c52..30d44c0e 100755
---- a/check
-+++ b/check
-@@ -122,7 +122,7 @@ examples:
-  check -X .exclude -g auto
-  check -E ~/.xfstests.exclude
- '
--	    exit 1
-+	    _exit 1
- }
- 
- get_sub_group_list()
-@@ -232,7 +232,7 @@ _prepare_test_list()
- 			list=$(get_group_list $group)
- 			if [ -z "$list" ]; then
- 				echo "Group \"$group\" is empty or not defined?"
--				exit 1
-+				_exit 1
- 			fi
- 
- 			for t in $list; do
-@@ -317,14 +317,14 @@ while [ $# -gt 0 ]; do
- 	-r)
- 		if $exact_order; then
- 			echo "Cannot specify -r and --exact-order."
--			exit 1
-+			_exit 1
- 		fi
- 		randomize=true
- 		;;
- 	--exact-order)
- 		if $randomize; then
- 			echo "Cannnot specify --exact-order and -r."
--			exit 1
-+			_exit 1
- 		fi
- 		exact_order=true
- 		;;
-@@ -362,7 +362,7 @@ done
- # after processing args, overlay needs FSTYP set before sourcing common/config
- if ! . ./common/rc; then
- 	echo "check: failed to source common/rc"
--	exit 1
-+	_exit 1
- fi
- 
- init_rc
-@@ -374,8 +374,7 @@ if [ -n "$SOAK_DURATION" ]; then
- 		sed -e 's/^\([.0-9]*\)\([a-z]\)*/\1 \2/g' | \
- 		$AWK_PROG -f $here/src/soak_duration.awk)"
- 	if [ $? -ne 0 ]; then
--		status=1
--		exit 1
-+		_exit 1
- 	fi
- fi
- 
-@@ -386,8 +385,7 @@ if [ -n "$FUZZ_REWRITE_DURATION" ]; then
- 		sed -e 's/^\([.0-9]*\)\([a-z]\)*/\1 \2/g' | \
- 		$AWK_PROG -f $here/src/soak_duration.awk)"
- 	if [ $? -ne 0 ]; then
--		status=1
--		exit 1
-+		_exit 1
- 	fi
- fi
- 
-@@ -405,8 +403,7 @@ if $have_test_arg; then
- 	while [ $# -gt 0 ]; do
- 		case "$1" in
- 		-*)	echo "Arguments before tests, please!"
--			status=1
--			exit $status
-+			_exit 1
- 			;;
- 		*)	# Expand test pattern (e.g. xfs/???, *fs/001)
- 			list=$(cd $SRC_DIR; echo $1)
-@@ -439,7 +436,7 @@ fi
- if [ `id -u` -ne 0 ]
- then
-     echo "check: QA must be run as root"
--    exit 1
-+    _exit 1
- fi
- 
- _wipe_counters()
-@@ -768,8 +765,7 @@ function run_section()
- 	mkdir -p $RESULT_BASE
- 	if [ ! -d $RESULT_BASE ]; then
- 		echo "failed to create results directory $RESULT_BASE"
--		status=1
--		exit
-+		_exit 1
- 	fi
- 
- 	if $OPTIONS_HAVE_SECTIONS; then
-@@ -785,8 +781,7 @@ function run_section()
- 			echo "our local _test_mkfs routine ..."
- 			cat $tmp.err
- 			echo "check: failed to mkfs \$TEST_DEV using specified options"
--			status=1
--			exit
-+			_exit 1
- 		fi
- 		# Previous FSTYP derived from TEST_DEV could be changed, source
- 		# common/rc again with correct FSTYP to get FSTYP specific configs,
-@@ -830,8 +825,7 @@ function run_section()
- 	      echo "our local _scratch_mkfs routine ..."
- 	      cat $tmp.err
- 	      echo "check: failed to mkfs \$SCRATCH_DEV using specified options"
--	      status=1
--	      exit
-+	      _exit 1
- 	  fi
- 
- 	  # call the overridden mount - make sure the FS mounts with
-@@ -841,8 +835,7 @@ function run_section()
- 	      echo "our local mount routine ..."
- 	      cat $tmp.err
- 	      echo "check: failed to mount \$SCRATCH_DEV using specified options"
--	      status=1
--	      exit
-+	      _exit 1
- 	  else
- 	      _scratch_unmount
- 	  fi
-@@ -1105,12 +1098,10 @@ for ((iters = 0; iters < $iterations; iters++)) do
- 		run_section $section
- 		if [ "$sum_bad" != 0 ] && [ "$istop" = true ]; then
- 			interrupt=false
--			status=`expr $sum_bad != 0`
--			exit
-+			_exit `expr $sum_bad != 0`
- 		fi
- 	done
- done
- 
- interrupt=false
--status=`expr $sum_bad != 0`
--exit
-+_exit `expr $sum_bad != 0`
--- 
-2.34.1
+=E5=9C=A8 2025/4/22 21:01, David Sterba =E5=86=99=E9=81=93:
+> On Mon, Apr 21, 2025 at 01:44:16PM +0200, Christoph Hellwig wrote:
+>> On Sat, Apr 19, 2025 at 04:47:13PM +0930, Qu Wenruo wrote:
+>>> Signed-off-by: Christoph Hellwig <hch@lst.de>
+>>> [ Use physical addresses instead to handle highmem. ]
+>>> Signed-off-by: Qu Wenruo <wqu@suse.com>
+>>
+>> I think you should take full credit and authorship here as this is quit=
+e
+>> different from what I posted.
+>>
+>> The changes look good to me, though:
+>>
+>> Reviewed-by: Christoph Hellwig <hch@lst.de>
+>=20
+> For the record, Qu added the patches to for-next with you as the author,
+> so I'll change it and mention it's based on your patches instead.
+>=20
 
+I'm OK with this author change, but to be honest, I didn't dig deep=20
+enough into the page frame number/physical/virtual address things=20
+before, and all the existing bio_add_folio/page() interfaces require=20
+page/folio with an offset thus I never considered anything else.
+
+Thus although this one patch changed a lot, without HCH's initial patch=20
+the bulb will never be lit.
+
+So I do not care that much who the author is, especially I'm mostly for=20
+the patch 3 to prepare for large folios support.
+
+Thanks,
+Qu
