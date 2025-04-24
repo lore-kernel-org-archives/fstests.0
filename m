@@ -1,217 +1,185 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21E4817555
-	for <fstests@vger.kernel.org>; Wed, 23 Apr 2025 14:29:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 920641B0F19
+	for <fstests@vger.kernel.org>; Thu, 24 Apr 2025 06:06:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745418566; cv=none; b=ig3WxVAeSdxwtGdZi4DihNSa0f7WX/5TZjVKxfe5HIJk1JXcj2t6RRNt4SgPrgplcpTXkmvj/sO8pFPZa5Z/00hzpPe9StcF2SXciq00Z94RS48GjiqamHnFwNmjDCSrtYZusqTWYuNtLTBaBYCO/dL2xk+MdQfOdH7m0ui9EvI=
+	t=1745474801; cv=none; b=QH1Md9BizQE3zKRbMegJOPDfljucsP2MRnuN4XOonQ3UQocfOogprUK6/qMvUq5xoYxBS7yIvL61Veq5aqiBO9Cx9CShcBFQ+UXIHBhpgOUbio/vDp7Qj+Zo1iUjhDy5fglta78d+n886AI81xcdKjBI+OAZQPoRnS7hCcjfwMU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745418566; c=relaxed/simple;
-	bh=wamB6f7rHvIfraz+xiKUWZd2kPDxqvOuOt60iZUIKjk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=sb3+bnkCBQib5i2tax8CQj/uaMKYPXgfDwnUsGPHL+dwasIbQWuIHIJpxumtgb32n5SXwWkixELn2P1FFOwZ//bgQv0kLw7wWId4Xu9SCi3V+y27ZN0oxcVaWPn8BkS+94YXyTKS1u6b5Qv79nSMhPigU71yno/biB7XxIoNwLM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NAhedvRl; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1745474801; c=relaxed/simple;
+	bh=/cMDIczxFpyd1UElTwiBmQ+5L4E6hxErREUbnzbyxc4=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=L9t1gTRCUMzLwDJZFIyfK3t3CjvEPVJ7/dq31NOlWS5dVsT5ssPUxykvJ0tVHieK4ZWnyUCSe1TcPrYCkASBOM19aepA5jDAM8M9u76Uq3eS2/V0AjKPOibnJtBgKjuXQx1Yqf+iZRWe67BK0A9rhJuSkAB0pZ3e+/N404AOZso=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=qxSWNqiF; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=qxSWNqiF; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NAhedvRl"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1745418563;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=yNqnmucRpbmwE/zuPcrjopQ96l/AJdyQ/b8kAiFjTIo=;
-	b=NAhedvRlwjkomqraX3GWdsawMeFD40uBrDaYCSYtad9jjHMTOcOgrrmtQU3G4NS0N5IVee
-	Qf8fWRrLS+Quf7RL3jBcnedqzARkq7JBOxlK0uSueUVlMINggTSe3ttIi4Td1Iiy2RgCHj
-	3nnPXuCtDCp6cE2etmR5h2PQW81k2gM=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-112-LnHxdfWXN3O_WQwmKoA1Bg-1; Wed, 23 Apr 2025 10:29:21 -0400
-X-MC-Unique: LnHxdfWXN3O_WQwmKoA1Bg-1
-X-Mimecast-MFC-AGG-ID: LnHxdfWXN3O_WQwmKoA1Bg_1745418561
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-736c7d0d35aso8145343b3a.1
-        for <fstests@vger.kernel.org>; Wed, 23 Apr 2025 07:29:21 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745418560; x=1746023360;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=yNqnmucRpbmwE/zuPcrjopQ96l/AJdyQ/b8kAiFjTIo=;
-        b=HHLho/mme9Epq4lAriN6c1WLiOte7rtB5A31tCxIGalOQWQvn0VGe4dLqNdr4za1Mb
-         3/znhf4qxuaXRiGr/6kFZAD4lnNfQWHydlfRv8KH/IrhLSkbCLOXQk2A0ZisYyGmb5Rv
-         FJnIGTobd9efWXp9EvCaOUmTsABDiJNNo9y16AhnGv4SQb0FY2icgU3xYi+AKeKiHR3k
-         oOkJcVMmv5NchmU+6xnFLJZh6TTguR9sS/knnbPEXwFn8NlMz9fA6XO8QHUwmT3BJh4b
-         lawI/KAo8aPgWLMltHkyxaGr8o+LeAb41KvzDXw8zNlz28umQ3vPHxU+YPQseqVeWy8O
-         Rbwg==
-X-Gm-Message-State: AOJu0YxiGi5YPirBbMY88jACDPV/Fz6g8XveZs9o6EH5gD5i3FwXZkN+
-	Z4L/OQO44AC+ZDeszo90tu1x0S143GLiToOaREPQzybbiAnbmiH7Da2UnapVrsKHUFzEwRpPAWJ
-	MfjMENzhS+x+rXiTuzZesks4ksuH+n7eczv98fbsDKSK9G1GRZ+16Q9jlEoR1JTiPkw==
-X-Gm-Gg: ASbGncuQLs4icGFfNgjPx+bg1gq5+1QmqqD6arQwEO+12NsonWDs/re26YvcQVFR53N
-	7qVMgBmcQEfTxhuHyfo3Wp3Y92iMKPbOwv7XOSt2ns9Tl0A9k3uVg0pqW/C7/eYVELozthNlGvI
-	zKF0n27UQPqvadmB2tCB8JrqiXCWEqGzPTF/ptN3d/u/3T1OtAlhMYOVDbvsnxwd6fZoLj/O8bS
-	EVtF9vOWwzhEiKOYbUhkUHmB6qpwiaOMN5Hxer8Zm1EE78ooJxL6zZg78NXKqfvEsQp88OXBnsC
-	ksL7bBufHmt3DG7YjFaekFj4BtBzCasgIj36rSLiJqO5Lxleetx1
-X-Received: by 2002:a05:6a20:12cb:b0:1f5:67c2:e3eb with SMTP id adf61e73a8af0-203cbd27a82mr33978455637.41.1745418560503;
-        Wed, 23 Apr 2025 07:29:20 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHEPYYUQ5lFG8PO2fZ/UA7t3UKYgG7O+c1ukYkJIuy74s9vloMUn0SjyLgnQ0ZyXhQO0fyHBg==
-X-Received: by 2002:a05:6a20:12cb:b0:1f5:67c2:e3eb with SMTP id adf61e73a8af0-203cbd27a82mr33978420637.41.1745418560109;
-        Wed, 23 Apr 2025 07:29:20 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b0db148591fsm7249092a12.70.2025.04.23.07.29.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 23 Apr 2025 07:29:19 -0700 (PDT)
-Date: Wed, 23 Apr 2025 22:29:16 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: common/btrfs: add _ prefix to temp fsid helper
- functions
-Message-ID: <20250423142916.p55223lw7qgbz3iq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <6097a2fd8b587ccc5982106142421f472861e949.1744892813.git.anand.jain@oracle.com>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="qxSWNqiF";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="qxSWNqiF"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 44D9D210F9;
+	Thu, 24 Apr 2025 06:06:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1745474795; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=GIo9TBe0g0RntxsYpQuKbiIUi+SG2CAW8MQOEj5SGRA=;
+	b=qxSWNqiFvqN6kmvfGGAh18yKtgjPTUUYQQk6Q5ie7IswZxCGMiQxHFNUFQJqdL2/l0fCUA
+	x67c51UCSPbW8Ixutmoi+2UnR6D3SyH05Jh6sDwKsUf3+vDUVjKWQcw/Xe4HTcamseRkun
+	CeBTF7eQ+AQ37S40/cBFLO6xbWbKREY=
+Authentication-Results: smtp-out1.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=qxSWNqiF
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1745474795; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=GIo9TBe0g0RntxsYpQuKbiIUi+SG2CAW8MQOEj5SGRA=;
+	b=qxSWNqiFvqN6kmvfGGAh18yKtgjPTUUYQQk6Q5ie7IswZxCGMiQxHFNUFQJqdL2/l0fCUA
+	x67c51UCSPbW8Ixutmoi+2UnR6D3SyH05Jh6sDwKsUf3+vDUVjKWQcw/Xe4HTcamseRkun
+	CeBTF7eQ+AQ37S40/cBFLO6xbWbKREY=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 479081393C;
+	Thu, 24 Apr 2025 06:06:34 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id zI2WAurUCWioXgAAD6G6ig
+	(envelope-from <wqu@suse.com>); Thu, 24 Apr 2025 06:06:34 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] fstests: btrfs/315: fix golden output mismatch caused by newer util-linux
+Date: Thu, 24 Apr 2025 15:36:08 +0930
+Message-ID: <20250424060608.251847-1-wqu@suse.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <6097a2fd8b587ccc5982106142421f472861e949.1744892813.git.anand.jain@oracle.com>
+Content-Transfer-Encoding: 8bit
+X-Rspamd-Queue-Id: 44D9D210F9
+X-Spam-Level: 
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	DNSWL_BLOCKED(0.00)[2a07:de40:b281:106:10:150:64:167:received,2a07:de40:b281:104:10:150:64:97:from];
+	TO_DN_NONE(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	FROM_EQ_ENVFROM(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:dkim,suse.com:mid,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns];
+	RCVD_TLS_ALL(0.00)[];
+	RCPT_COUNT_TWO(0.00)[2];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	DKIM_TRACE(0.00)[suse.com:+]
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Rspamd-Action: no action
+X-Spam-Score: -3.01
+X-Spam-Flag: NO
 
-On Thu, Apr 17, 2025 at 08:27:22PM +0800, Anand Jain wrote:
-> Just adding a _ prefix to the two temp fsid helper functions and
-> a rename in common/btrfs to keep the coding style consistent.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
+[BUG]
+With util-linux v2.41.0 and newer, test case btrfs/315 will fail like
+the following:
 
-Looks good to me, I'm just wondering if the _mkfs_clone should be
-_btrfs_mkfs_clone, due to it looks like a btrfs specific helpers
-and this kind of helpers nearly all have a "_btrfs" prefix.
+btrfs/315 1s ... - output mismatch (see /home/adam/xfstests-dev/results//btrfs/315.out.bad)
+    --- tests/btrfs/315.out	2025-04-24 15:31:28.684112371 +0930
+    +++ /home/adam/xfstests-dev/results//btrfs/315.out.bad	2025-04-24 15:31:31.854883557 +0930
+    @@ -1,7 +1,7 @@
+     QA output created by 315
+     ---- seed_device_must_fail ----
+     mount: SCRATCH_MNT: WARNING: source write-protected, mounted read-only.
+    -mount: TEST_DIR/315/tempfsid_mnt:  system call failed: File exists.
+    +mount: TEST_DIR/315/tempfsid_mnt: () failed: File exists.
+     ---- device_add_must_fail ----
+     wrote 9000/9000 bytes at offset 0
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+[CAUSE]
 
->  common/btrfs    | 6 +++---
->  tests/btrfs/311 | 4 ++--
->  tests/btrfs/313 | 6 +++---
->  tests/btrfs/314 | 2 +-
->  tests/btrfs/315 | 4 ++--
->  5 files changed, 11 insertions(+), 11 deletions(-)
-> 
-> diff --git a/common/btrfs b/common/btrfs
-> index 3725632cc420..44c9d6a6777d 100644
-> --- a/common/btrfs
-> +++ b/common/btrfs
-> @@ -942,7 +942,7 @@ _has_btrfs_sysfs_feature_attr()
->  # Print the fsid and metadata uuid replaced with constant strings FSID and
->  # METADATA_UUID. Compare temp_fsid with fsid and metadata_uuid, then echo what
->  # it matches to or TEMP_FSID. This helps in comparing with the golden output.
-> -check_fsid()
-> +_check_temp_fsid()
->  {
->  	local dev1=$1
->  	local fsid
-> @@ -979,7 +979,7 @@ check_fsid()
->  	cat /sys/fs/btrfs/$tempfsid/temp_fsid
->  }
->  
-> -mkfs_clone()
-> +_mkfs_clone()
->  {
->  	local fsid
->  	local uuid
-> @@ -990,7 +990,7 @@ mkfs_clone()
->  	_require_btrfs_mkfs_uuid_option
->  
->  	[[ -z $dev1 || -z $dev2 ]] && \
-> -		_fail "mkfs_clone requires two devices as arguments"
-> +		_fail "_mkfs_clone requires two devices as arguments"
->  
->  	_mkfs_dev -fq $dev1
->  
-> diff --git a/tests/btrfs/311 b/tests/btrfs/311
-> index 51147c59f49b..9ac997dbba61 100755
-> --- a/tests/btrfs/311
-> +++ b/tests/btrfs/311
-> @@ -47,7 +47,7 @@ same_dev_mount()
->  	md5sum $SCRATCH_MNT/foo | _filter_scratch
->  	md5sum $mnt1/bar | _filter_test_dir
->  
-> -	check_fsid $SCRATCH_DEV
-> +	_check_temp_fsid $SCRATCH_DEV
->  }
->  
->  same_dev_subvol_mount()
-> @@ -69,7 +69,7 @@ same_dev_subvol_mount()
->  	md5sum $SCRATCH_MNT/subvol/foo | _filter_scratch
->  	md5sum $mnt1/bar | _filter_test_dir
->  
-> -	check_fsid $SCRATCH_DEV
-> +	_check_temp_fsid $SCRATCH_DEV
->  }
->  
->  same_dev_mount
-> diff --git a/tests/btrfs/313 b/tests/btrfs/313
-> index 5a9e98dea1bb..d55667f733ee 100755
-> --- a/tests/btrfs/313
-> +++ b/tests/btrfs/313
-> @@ -30,15 +30,15 @@ mnt1=$TEST_DIR/$seq/mnt1
->  mkdir -p $mnt1
->  
->  echo ---- clone_uuids_verify_tempfsid ----
-> -mkfs_clone ${SCRATCH_DEV_NAME[0]} ${SCRATCH_DEV_NAME[1]}
-> +_mkfs_clone ${SCRATCH_DEV_NAME[0]} ${SCRATCH_DEV_NAME[1]}
->  
->  echo Mounting original device
->  _mount ${SCRATCH_DEV_NAME[0]} $SCRATCH_MNT
-> -check_fsid ${SCRATCH_DEV_NAME[0]}
-> +_check_temp_fsid ${SCRATCH_DEV_NAME[0]}
->  
->  echo Mounting cloned device
->  _mount ${SCRATCH_DEV_NAME[1]} $mnt1
-> -check_fsid ${SCRATCH_DEV_NAME[1]}
-> +_check_temp_fsid ${SCRATCH_DEV_NAME[1]}
->  
->  $XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' $SCRATCH_MNT/foo | _filter_xfs_io
->  echo cp reflink must fail
-> diff --git a/tests/btrfs/314 b/tests/btrfs/314
-> index d931da8f0293..659a85d39886 100755
-> --- a/tests/btrfs/314
-> +++ b/tests/btrfs/314
-> @@ -36,7 +36,7 @@ send_receive_tempfsid()
->  	local dst=$2
->  
->  	# Use first 2 devices from the SCRATCH_DEV_POOL
-> -	mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
-> +	_mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
->  	_scratch_mount
->  	_mount $(_common_dev_mount_options) ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
->  
-> diff --git a/tests/btrfs/315 b/tests/btrfs/315
-> index e6589abec08c..90f77413bedb 100755
-> --- a/tests/btrfs/315
-> +++ b/tests/btrfs/315
-> @@ -51,7 +51,7 @@ seed_device_must_fail()
->  {
->  	echo ---- $FUNCNAME ----
->  
-> -	mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
-> +	_mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
->  
->  	$BTRFS_TUNE_PROG -S 1 ${SCRATCH_DEV}
->  	$BTRFS_TUNE_PROG -S 1 ${SCRATCH_DEV_NAME[1]}
-> @@ -64,7 +64,7 @@ device_add_must_fail()
->  {
->  	echo ---- $FUNCNAME ----
->  
-> -	mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
-> +	_mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
->  	_scratch_mount
->  	_mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
->  
-> -- 
-> 2.47.0
-> 
+With util-linux v2.41.0, the mount failure error message changed to the following:
+
+  mount: /mnt/test/315/tempfsid_mnt: fsconfig() failed: File exists.
+
+Thus the existing filter only striped the "fsconfig" part, leaving the
+"()" without changing it to " system call".
+
+[FIX]
+The existing filter on error message is doomed from day one.
+I'm fed up with the stupid catch-up game depending on util-linux, so
+let's just stripe everything between "mount" and " failed", just leaving
+the golden output to:
+
+  mount failed: File exists.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/315     | 14 +++++++++-----
+ tests/btrfs/315.out |  2 +-
+ 2 files changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/tests/btrfs/315 b/tests/btrfs/315
+index e6589abe..9b5bc789 100755
+--- a/tests/btrfs/315
++++ b/tests/btrfs/315
+@@ -30,9 +30,8 @@ tempfsid_mnt=$TEST_DIR/$seq/tempfsid_mnt
+ 
+ _filter_mount_error()
+ {
+-	# There are two different errors that occur at the output when
+-	# mounting fails; as shown below, pick out the common part. And,
+-	# remove the dmesg line.
++	# There are different errors that occur at the output when
++	# mounting fails:
+ 
+ 	# mount: <mnt-point>: mount(2) system call failed: File exists.
+ 
+@@ -41,10 +40,15 @@ _filter_mount_error()
+ 
+ 	# For util-linux v2.4 and later:
+ 	# mount: <mountpoint>: mount system call failed: File exists.
++	#
++	# For util-linux v2.41 and later:
++	# mount: <mountpoint>: fsconfig() failed: File exists.
++	#
++	# Instead of playing the stupid catchup game, removed everything
++	# between ":" and "failed:".
+ 
+ 	grep -v dmesg | _filter_test_dir | \
+-		sed -e "s/mount(2)\|fsconfig//g" \
+-		    -e "s/mount\( system call failed:\)/\1/"
++		sed -e "s/: TEST_DIR\/315\/tempfsid_mnt: .* failed:/ failed:/g"
+ }
+ 
+ seed_device_must_fail()
+diff --git a/tests/btrfs/315.out b/tests/btrfs/315.out
+index 3ea7a35a..fb493e90 100644
+--- a/tests/btrfs/315.out
++++ b/tests/btrfs/315.out
+@@ -1,7 +1,7 @@
+ QA output created by 315
+ ---- seed_device_must_fail ----
+ mount: SCRATCH_MNT: WARNING: source write-protected, mounted read-only.
+-mount: TEST_DIR/315/tempfsid_mnt:  system call failed: File exists.
++mount failed: File exists.
+ ---- device_add_must_fail ----
+ wrote 9000/9000 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-- 
+2.49.0
 
