@@ -1,271 +1,420 @@
-Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C99BA231A57;
-	Fri, 25 Apr 2025 09:03:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.153.141
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745571810; cv=fail; b=hXBbpoQjh28DcWMa8dhXdAH7Win7u6IukILjmL+8pnG90FrWW4K01xjSpIilDhzeUi7S1RUJIs/xynMBspI4dqU1tIf4jKdcwds/EQdvkbRKLXsTnCprYh1FswM4/Z9vt6PrTes93byUCxAucYp13fIyo8VqutQ4kq4sHhw+WOo=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745571810; c=relaxed/simple;
-	bh=oUwbIVpvkeAeEgOD7gUZZV5JEzNWOrrCEszI1WhSgyc=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=Gk6xDtUcgkjTCX3ohFCnqmW6jFQCJaM0FjeBw47zWfZC6+MI0/0tk9N6gYtcXCgqFq5vkKRczByQbE5Gc0llXj43S0CgrxsQWgRCUK1BIDimHtpVZTCh4JqCPPPmYdQc5Xbz6CT5yPvYfqcvk60AJ4IC1stV3xm5Eo9P5c304bo=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=V2LPFsSE; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=BonBwBuJ; arc=fail smtp.client-ip=216.71.153.141
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9C252459D0
+	for <fstests@vger.kernel.org>; Fri, 25 Apr 2025 11:27:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1745580476; cv=none; b=UZMkkYZMuD6ck+DVsySksddY2IGrvHGwj0QHYRelqM5hScIEb3TMMP7mBV7jqlv2k+nQqFCuwf8XZJO2OZ7Eu3Ioret7nF9UWzKgRKUCQip87CAXrsgYpw0ebnfcnTYvncJRf4UnegNiRO+VmIm8aTj78cG4IVMoAve1TnJUlkk=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1745580476; c=relaxed/simple;
+	bh=i5Z+Lgt1EtCl9VHgJ6j1ptib2pceIv4cpi1Hcvb9NwA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=RZquQet2VLGbxvbg65UNY9DDmqbkbdTrelcT+VJu31C63n5O51JJCAw3s6E3BfmhbiMxslpFusppzJYVFpsUaVpGVVpgkEZII7j0qn/8wUCcyM/CnJtZTOCMnRC8MjTTKm/NbIIzPWHhnf53OJ+Nsg96661/WBaGEBiD2mYbcTE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Fc3XbYEq; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="V2LPFsSE";
-	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="BonBwBuJ"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1745571808; x=1777107808;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=oUwbIVpvkeAeEgOD7gUZZV5JEzNWOrrCEszI1WhSgyc=;
-  b=V2LPFsSEX2Hnn6nfY8eDoOB//Al1+eWvOCsbNqJdLPzYu8ltObghBopG
-   cyJR6PE2vZT0H5qYMLo/JCbCDHAGVvH13vdlyRY+OjsinKi4JSulSvVOJ
-   w3gCugJgIwBPaMNm1jdxoNj6mu1Cywmx7B1TqT/9FANqCOlrbrz5aAOZb
-   H0JQ15XwGlt2Njcsd6D5sOT78TZUFbsQE6xwncWzqFGnpKJ9WSTqE4Tn7
-   p4R9wqxhK4lLcdaCgUpXrKxl/0qK/WUQQB1lOsU1qw3ulmoyunZdJrsht
-   drwmS9qWp0qlXwpzft6TvdDC0CRNnB7J3oiQmYUyOXuabX+MK6IyjLxaM
-   Q==;
-X-CSE-ConnectionGUID: Y+UzbiX7RmerJe2tuB4TSA==
-X-CSE-MsgGUID: phzNUjI6TfKohhJvVWJ02Q==
-X-IronPort-AV: E=Sophos;i="6.15,238,1739808000"; 
-   d="scan'208";a="77775078"
-Received: from mail-westusazlp17012037.outbound.protection.outlook.com (HELO SJ2PR03CU001.outbound.protection.outlook.com) ([40.93.1.37])
-  by ob1.hgst.iphmx.com with ESMTP; 25 Apr 2025 17:03:27 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=vz/FSklrYCwmIlWBTAIPaappFZnteTydFZvDr5La+AGhOHdxSjNQFXvtIXgA9s3D40O4WHubRYkSDlLefcrEnvL69bYLKw4c1MJgI6Xnz4Jbx20cl0u3JYlEAftVDyxkNYDuyDY5xKScUNpTvwESs2nRi7GP0FtocCdaLppdU+vEgdajVVijBWMzsj4naHQN0ExE0CVcAbctoDk+hRSgGENAmJH23KFhDUgNjq1X/AcLgBIPmAizxxw//ypPpgyw6IuPGM+h2PYaPHMtJjVT/ee64H6gOXtxZP3jO/1DLikGUYbpJ3iqVzK4A7mCqejs4HJrzJ7WNLD+gXecQzzx0g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=NzBaImZAwtpitTw5Rzq0lfnTHfI3Mlfay5HFkJx+BUM=;
- b=CK4ZW0GiN+HaEoOstyRXD/kAFs6pvew3/FnqYSD2e0GgxYVm84nQAHZ2GyiabQ71SEk6cT8ZyJ3sfzTeZ/hkqJS3Y2N/X58cPPEqvyT6g2n0QxCLu9TO7XcO1PIN2QDtAP6JWaS6DHzHmyjnDbts7y4e5iAj60V/f2IUlK+9TnoskcPQsY0l8MKkaUD3lbEdeDAKgk/1O//2WaZASST9AqDDcoUhX7IwB20sZ6xJ5sLzeoctJpWgAP1D87VNvv+Atyh4jKW0DSxHorKGQPKtjFQnZIloEyyLXP/3DkJhcpczVgFBvq+n0yjgHWDdfjwutiPud9rzIWkIQlCGlKXgug==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=NzBaImZAwtpitTw5Rzq0lfnTHfI3Mlfay5HFkJx+BUM=;
- b=BonBwBuJ3OpHg34TLF+Z7JIR5ZHgMdn7LAinN8T6cm733tVsvjKKpPSj5sCJZCWySCnjVKRC+mI/SDvVNeWU6+NYbzC+wHJByBcSdrync5hZEp/WJHC7xfYmJlm4SkIay4sq0Gp4/WN+ng/LSNE+ClS9hKwGtThN9cYNpc6UeXw=
-Received: from PH7PR04MB8755.namprd04.prod.outlook.com (2603:10b6:510:236::8)
- by CH0PR04MB8131.namprd04.prod.outlook.com (2603:10b6:610:fc::24) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8678.26; Fri, 25 Apr
- 2025 09:03:23 +0000
-Received: from PH7PR04MB8755.namprd04.prod.outlook.com
- ([fe80::4372:e8cb:5341:9a9b]) by PH7PR04MB8755.namprd04.prod.outlook.com
- ([fe80::4372:e8cb:5341:9a9b%5]) with mapi id 15.20.8678.025; Fri, 25 Apr 2025
- 09:03:23 +0000
-From: Hans Holmberg <Hans.Holmberg@wdc.com>
-To: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-CC: "zlang@kernel.org" <zlang@kernel.org>, "linux-xfs@vger.kernel.org"
-	<linux-xfs@vger.kernel.org>, Carlos Maiolino <cem@kernel.org>,
-	"djwong@kernel.org" <djwong@kernel.org>, "david@fromorbit.com"
-	<david@fromorbit.com>, hch <hch@lst.de>, Hans Holmberg
-	<Hans.Holmberg@wdc.com>
-Subject: [PATCH 2/2] xfs: add mount test for read only log devices
-Thread-Topic: [PATCH 2/2] xfs: add mount test for read only log devices
-Thread-Index: AQHbtcDlALwMj9CgvEO6QaqlIzHfhg==
-Date: Fri, 25 Apr 2025 09:03:23 +0000
-Message-ID: <20250425090259.10154-3-hans.holmberg@wdc.com>
-References: <20250425090259.10154-1-hans.holmberg@wdc.com>
-In-Reply-To: <20250425090259.10154-1-hans.holmberg@wdc.com>
-Accept-Language: en-GB, en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-mailer: git-send-email 2.47.0
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: PH7PR04MB8755:EE_|CH0PR04MB8131:EE_
-x-ms-office365-filtering-correlation-id: 51d01354-69d3-48b5-68d0-08dd83d8088e
-x-ld-processed: b61c8803-16f3-4c35-9b17-6f65f441df86,ExtAddr
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|1800799024|366016|376014|38070700018;
-x-microsoft-antispam-message-info:
- =?iso-8859-1?Q?DllcbblUHP9ci/xCZJ39qKbD80WO6wWqV0/w92jOLk/CrV+aXMmt7+TAnm?=
- =?iso-8859-1?Q?e3UMBj62zZ4qfkSgOxcqu3oQtEofuoRmaSyU1Fl2XNCn6QkuuFuGLVyGm4?=
- =?iso-8859-1?Q?WFOu/mya98D5kJ2Rns/5h7jMQCaUCgy68e92WwgQY5KOkEXgi9OvRJpkg2?=
- =?iso-8859-1?Q?od2sBPnTqGiOXkMFfW0NsOJzFMltNG6yMd8ddvYCATJzOZgVppUDBBxBX8?=
- =?iso-8859-1?Q?evKdyq14IfLUHogmDCBt2nYaEBWATvSiP748VWl7abNiYvH5MabnfmJzyJ?=
- =?iso-8859-1?Q?R/vcOxtWMfIEUYjcnhhDlRP4EBgx7k0Dt69b2XZEuKEn2jlYTZzAVUNELU?=
- =?iso-8859-1?Q?x+g0pynk4DB+KqGIoh7/FjJfVErPwlEssQ5UbU13uD9/kPbmr+HbC1qgcs?=
- =?iso-8859-1?Q?6xPcZBcKljZxHDxd9lIC2OIPYrSvT7awyHER3qpiHGhk6HAuvknLEQ81Lf?=
- =?iso-8859-1?Q?Bt4svvhoJ4QD7atRmpxj5EC1pWSNEswaTzmUlOOEOIHwayPVwxgDFH/nzJ?=
- =?iso-8859-1?Q?a92anvppfW14/V0w7LI56QI14yXkys89Guw5X8dkJiHvrxnSXqnisOxsGp?=
- =?iso-8859-1?Q?0oNi+o57BEa93iKNTvF6YQXvHMluciUTC49b3L6WrNRN2ikUs2s98iA68N?=
- =?iso-8859-1?Q?pSTc5Co2EiRcO4Ulr/tphzzTqDfpVKQT/q27SEiuWfGpvsg1XJZgZvgkFn?=
- =?iso-8859-1?Q?oPgc0pFeQxFolWqL+zzXvoMn1j4uCYEB5XJZCy5c8dnpBudomOajt6e8zW?=
- =?iso-8859-1?Q?i5fJuFhnpbgzGcw7DtWt1TULtjZ8sWi5oilgb73ZjJTyxjZYBjJLIbjV+W?=
- =?iso-8859-1?Q?0Nsrh6IF14/UT615uXMBK90LGYKJyDHL8EMe+ozSk0UV9ofjtBewzbprGA?=
- =?iso-8859-1?Q?gDeSunilBpva+ot1Xy8yDYwSmzuUe15rnRmGi2a8WcxIQXA8g7CgZQEgYK?=
- =?iso-8859-1?Q?sKQvBgZTnpi6R5+sAIoHw1qGN98hLp8AM6RRzng03Ea3kFYFMtefV4WY/o?=
- =?iso-8859-1?Q?C6S/S05nvgV9k8i8q28JuZgODMm59wz8VtPYQ2RTMJ+2xjkkj4uhW98m0D?=
- =?iso-8859-1?Q?pMIyTn8WjbJigpr+N26cfvDCyJ5BCeNjp3XFAAmMeJKGsIXLFL30Jpg0JZ?=
- =?iso-8859-1?Q?4qzyUltVnRTerDn6p54qA7gQHUG8okAOmkSEYpHD9KiouFozipEI86TYRZ?=
- =?iso-8859-1?Q?wgsrQMvVdUH0XZFVklHlWW9ytLYn4OPjhvZuURUKK9jvMiqYFc65rxgMOA?=
- =?iso-8859-1?Q?s4m9KkukmBBMjiBs6XcDAX5rzdRSGHI0pTi8DNAq4Y17s+w0iwdjQoCGIi?=
- =?iso-8859-1?Q?LRnCc/ObNhsk9xR3U6BF+o2jB+QOsAoyv1hGZAsN5qwng4JJAiiAYkAkCQ?=
- =?iso-8859-1?Q?DgCtpqGcmmK1mifkyEeP7jGWqMFmTa3tlJ0Kp2J6Q1RtIUqlUEt/e5pzPD?=
- =?iso-8859-1?Q?hGNCXwHhsIGTGa6uGl4aXFnERPzWRoX+Vb1jlSlVc8leowbQ83a77tylBx?=
- =?iso-8859-1?Q?cOjFRU9FrfE7dbuvboNCpRgy8ml85MGcXudkJNzIq3xKj4sRGzY9yCTsaf?=
- =?iso-8859-1?Q?+0edMwU=3D?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH7PR04MB8755.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(38070700018);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?iso-8859-1?Q?H64bbekZMIM8QGjY8U1M+zOhcWNHXvUy0hY72JDEKF7+9QSR+aHZr6AX2E?=
- =?iso-8859-1?Q?a+cey4uJIrITUAGmydFdSEwYU4VyUAGgdwz4gh6FLJCX+DWTA4Ko8M3HJr?=
- =?iso-8859-1?Q?nGnmD0plapuJnsah8Rmp2hUibYGolZHMXWpJ3U1+hhZHmVPhkuiUbFGWaV?=
- =?iso-8859-1?Q?zZ5xKmlEghwAVBaN6rkEl2fjW7xDy76n0c0GtIirP7Oj9vu2IIQyF+NvoK?=
- =?iso-8859-1?Q?AKRvUaKdp2v7J7Sa69req34o+waOPEpEvvP5FupgdqUz/I9Ho1UJhw/21B?=
- =?iso-8859-1?Q?BnnbkByrftqkCn/Ub/pao72A3DB6ucVqGGfzTtMWLcefcJogRwsJ792eTa?=
- =?iso-8859-1?Q?Ocifj1w7HF1LyzKdE1xU+q6v8JW2IVHEwu8VPJXHhBBmwnHwNNHWD9w1Rd?=
- =?iso-8859-1?Q?FDlwiPdYcCYa5rMKAoNQX+VN+0+ycmfigj2dJMBK+ytX5ADcvvzVJ1AC6r?=
- =?iso-8859-1?Q?3Sijudun2KDW2HNblaDOAsVDXy5YuFETIyXQ+QwqUeEeSCs64Rys3Z/37B?=
- =?iso-8859-1?Q?rvZ2YIdeP5i9/FO4lrRT4Ymp81bR5u1ZEIMmncKt6/bj4UpO6vRSbHrCVe?=
- =?iso-8859-1?Q?zT1698d1+vrjZTzbRHTid9cX5teO9+d3J3iPkB1xsfvCkaYrPgo5QJGcli?=
- =?iso-8859-1?Q?D430Sj2BX1pCWPp8QuGc9GXy7luigSBNOEYxhtXn/LRtSqA6KkhCpygFC/?=
- =?iso-8859-1?Q?da5yT+/ejmPPWcdclVsCCsKZoW4nWvfjDpkyZD79l9DnzioIDZFubKs9WY?=
- =?iso-8859-1?Q?EuLH48QWdVmxaDc32eLERyfIlb7MuzYMoFgcHBnwv3AGKXJagIc9Wf0gmu?=
- =?iso-8859-1?Q?qp0hAZIA7IDc9vloYb2wlvOvJdfhiKjcuWYihTarBp99jwQreslO/G/xz0?=
- =?iso-8859-1?Q?krrLyRPe5rOgyZiEQHMJ9P2shxVELJoyJLcizJ9NL4bxel5PQjAZ2X8m6j?=
- =?iso-8859-1?Q?DHBn6oASf/m4Qm3/NgJC9VXCOdcAfa+qlD7N7FWvyYKm1ON0+9d3aitZgS?=
- =?iso-8859-1?Q?TyLNbGyi60cZs7uCevp0pIs08TqNnfst7vAcgT139eTFDDX6GtM/yQozy6?=
- =?iso-8859-1?Q?5hpUg+CLE6KjK2bH/Oj3sQoePnlkioJ6X19Ry5AeCMDLvXJFUc+s/PD1tv?=
- =?iso-8859-1?Q?HTFrk+fU2HVQbD3rEsVUjwnttctOeLNurYgeIsASwINtfPocKcE0FRcQmz?=
- =?iso-8859-1?Q?IHG0/u6sUqlCI8GpL2315k2f8RmQPmC4Y6adGwxGIfRk0JL8dYOOKOsdFf?=
- =?iso-8859-1?Q?xH+qrU4DpC32p1qUlaiCi6/2M7osMXrbVwO5QNbsKwvfmgc0NWk5DarvAz?=
- =?iso-8859-1?Q?H88AIfVS7sOsHOYxabqLGyufY+g47Ue9m5a2Z2arpXDkctoxceGlJZVox1?=
- =?iso-8859-1?Q?MHk5MCZcDnOXuYRYUNQ3WOTaE/5utuHPQ2DGVt1SE57MO/UdEdtd9DQNNp?=
- =?iso-8859-1?Q?dHMZfhiQJNdF9TkxoJ+LubBmJTnSlrMm6W4we45h59keq6ibb2fBSa3bWD?=
- =?iso-8859-1?Q?w0R2DZevI8Q2kb8kbzqZ67De+ed+v4+hS/qeZW/cu8R1C9m4hOQX8wKQff?=
- =?iso-8859-1?Q?CUu93sULsIml0OrGvdBrx53nSNRUl7r2qrgUdMjZx/NIt7FIzRP/fJYQRs?=
- =?iso-8859-1?Q?5ebnGNccLdh/ObRl9yDbEg+uo0KDhADjg/xwSXJYf3RFPuyJt5bWk4bw?=
- =?iso-8859-1?Q?=3D=3D?=
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Fc3XbYEq"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1745580473;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=XPQIDfg7C6O1v8/d8MzIb298k2Hd1bakTq6r3C3OXZk=;
+	b=Fc3XbYEqj14eHuCJ8Sb5wNWmdCTOC1r0NG6xqlhnQGDS67yAroE3ZBgRFqV1fhUP5AYO0a
+	pL4qXwRZ+ncA6PDwMWhfSEK84/Uo0x784shtxVyj8hrd24Y6q2Nm4vot2DUK86MZffcyWB
+	8FoVtxtmDI36fvXYEy4rN8P35zhBi2g=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-620-sT5Ux_M7OHabCik4Pggulw-1; Fri, 25 Apr 2025 07:27:52 -0400
+X-MC-Unique: sT5Ux_M7OHabCik4Pggulw-1
+X-Mimecast-MFC-AGG-ID: sT5Ux_M7OHabCik4Pggulw_1745580471
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-227ea16b03dso33373585ad.3
+        for <fstests@vger.kernel.org>; Fri, 25 Apr 2025 04:27:52 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1745580471; x=1746185271;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=XPQIDfg7C6O1v8/d8MzIb298k2Hd1bakTq6r3C3OXZk=;
+        b=s50oFZrKsNzcoNj2wuxQnt2n/6oxof4XtpGsRnifzIB0o40N3sVnD1fWidB1NvANuS
+         ls0oPkoz0ra9zQrfyA1s8NJEpVQY5UJ/tdXgIfNvH3GmYl3F0NIbNkz6t0HxFOVxOXd3
+         +m0ioLYMX7lw2f3Xc5sp6Vcsqj3WBBy49dsJkdFHztFiDQgjWRAkv8ZMSfyXX9JQbyFz
+         zr5lNgicXfHV3L3dkRuulfaGychnHI4liKjuiLfONKXV3UFgW8n0bv4HiHvWe3r80rIP
+         bn2WcppPGSDLtJXAZSzspFSDyoUaPHlR3mzkpa5RbU4b4p3KuUHskAXubi2oN6n2cm4s
+         TmVQ==
+X-Gm-Message-State: AOJu0YxERGbkZKq8Z+xVnbtrUyW+zSuk/Ogv5Ka4TWpOKWBYCutEYf2k
+	7ODgqJ97ab32ojP3U+flMoPItneV8TxdAWFRna+0mZPIBL66A1mB023qH6ktqpJtJdrcxF4b62v
+	dWsyYwpZduPdCx6FsYEz+ZkRzN9DZDDpciax6+m0U0J9av/e/OKNJzOE=
+X-Gm-Gg: ASbGncsHrgTRnK8ajmGBmXdGxd54FfxA8skKEERr+H5KkQnkLcSdOgK2/rLQ+5zklWd
+	YBPsLhC2/BgjSstL2cQJO5e/FzbFR+EpTiEaFXwtzvCMd/J7ibINRf7y7/4Muba6GUZf9pNFA2S
+	4FsHWno8ExCw+/b8qmq+aT4BnVagcMQaGgcB80H5J13qV6xdB6IuoFglRYuTIGb3NQjWGZVyCEp
+	CFUoJ1LaPEgbNBRTFyVVn3pQXbFJpOxKlkgx0UdG98rGlCsc7zKYOU1kiWTEaSksYe4sxFwsllB
+	qGCKRlj4ys5NtCKkZNiIlgjPjXtd62enCi6f8LnJFb9GdL5mIofF
+X-Received: by 2002:a17:903:3bcb:b0:22c:36d1:7a49 with SMTP id d9443c01a7336-22dbf742db5mr35128175ad.53.1745580471230;
+        Fri, 25 Apr 2025 04:27:51 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFwa8yD8eyCINBxOeRT1//BwZSAK6zkP857DMUhERB9O9vU028ZHcG+2dFDnEfzrJ3ix00EIA==
+X-Received: by 2002:a17:903:3bcb:b0:22c:36d1:7a49 with SMTP id d9443c01a7336-22dbf742db5mr35127795ad.53.1745580470793;
+        Fri, 25 Apr 2025 04:27:50 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22db50e7a1dsm29777615ad.140.2025.04.25.04.27.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 25 Apr 2025 04:27:50 -0700 (PDT)
+Date: Fri, 25 Apr 2025 19:27:45 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org,
+	david@fromorbit.com
+Subject: Re: [PATCH v1 1/2] common: Move exit related functions to a
+ common/exit
+Message-ID: <20250425112745.aaamjdvhqtlx7vpd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1745390030.git.nirjhar.roy.lists@gmail.com>
+ <d0b7939a277e8a16566f04e449e9a1f97da28b9d.1745390030.git.nirjhar.roy.lists@gmail.com>
+ <20250423141808.2qdmacsyxu3rtrwh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <054fa772-360e-4f90-bc4d-ea7ef954d5a2@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	QkdALPORXiwgey9ehteRAzJpc5F/GWBVOz1+/tghCOg8xSI3ymisq5rTv8C46QyQJN1zP9IwAYLoc5l0zqSP5sBcYT49Fw4JpwEEk5AFDntsUPYx8KQoa8vLo2qJplfNHJnaCQ9umqEsNmo3HSkr4MIgN9MWtIyARYffL9sMkolaxrlsMu0nEUlbNogJbjuR19Tq4W+Hy6P8DAJDg/VhvdESati9vOXxqC1JS/KD5MVJWBS//53nVS4Haxm89Vp4uKrLI7Unv3SkkqmBS+AyFY6MGKz3EtHVqpkDf/0BRCo1rppMHvY5CN4BJuh6DS2dz+Tf+JgyetHo8KYqpDOYN1PguAB+7xXDrGc1/7bw9Se4rN/7BOQ9xfK2+mLvr+GPgwrZLxekQxoNlN3TqLUk61P4SRpvOk7axBlMDLJbxaNP0ur6P2QeRl6KqEtcQgHqdVWL9pmlL2EfRAOvqYFpHm/3o+eVFUR6Rhd6HAoaCCTWIqLsWL8CxY+4/xbWjwvhKt+GjXdS9OVZa3/BtiLj922nvLHvB82OaT28+xKON21ybUH0P685zn0HXxIwU5tcVSXi2xsQ8okFnEyXCEpihE3qWBo9PlPeAXbvbIsG+F4uUFq6t74yvrRSQ6nKGyUh
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: PH7PR04MB8755.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 51d01354-69d3-48b5-68d0-08dd83d8088e
-X-MS-Exchange-CrossTenant-originalarrivaltime: 25 Apr 2025 09:03:23.3493
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: HQIPBhVhSRF9NMfYWFfrh8WJndIhh7UcEwFn2WsueI4gCetD1GIKPbhLeCC1zbCHqfn1MK3gnenropb2DwhwMg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH0PR04MB8131
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <054fa772-360e-4f90-bc4d-ea7ef954d5a2@gmail.com>
 
-Make sure that we can mount log devices read-only if them themselves
-are marked as read-only.
+On Thu, Apr 24, 2025 at 02:39:39PM +0530, Nirjhar Roy (IBM) wrote:
+> 
+> On 4/23/25 19:48, Zorro Lang wrote:
+> > On Wed, Apr 23, 2025 at 06:41:34AM +0000, Nirjhar Roy (IBM) wrote:
+> > > Introduce a new file common/exit that will contain all the exit
+> > > related functions. This will remove the dependencies these functions
+> > > have on other non-related helper files and they can be indepedently
+> > > sourced. This was suggested by Dave Chinner[1].
+> > > 
+> > > [1] https://lore.kernel.org/linux-xfs/Z_UJ7XcpmtkPRhTr@dread.disaster.area/
+> > > Suggested-by: Dave Chinner <david@fromorbit.com>
+> > > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> > > ---
+> > >   check           |  1 +
+> > >   common/btrfs    |  2 +-
+> > >   common/ceph     |  2 ++
+> > >   common/config   | 17 +----------------
+> > >   common/dump     |  1 +
+> > >   common/exit     | 50 +++++++++++++++++++++++++++++++++++++++++++++++++
+> > >   common/ext4     |  2 +-
+> > >   common/populate |  2 +-
+> > >   common/preamble |  1 +
+> > >   common/punch    |  6 +-----
+> > >   common/rc       | 29 +---------------------------
+> > >   common/repair   |  1 +
+> > >   common/xfs      |  1 +
+> > I think if you define exit helpers in common/exit, and import common/exit
+> > in common/config, then you don't need to source it(common/exit) in other
+> > common files (.e.g common/xfs, common/rc, etc). Due to when we call the
+> > helpers in these common files, the process should already imported
+> > common/rc -> common/config -> common/exit. right?
+> 
+> Oh, right. I can remove the redundant imports from
+> common/{btrfs,ceph,dump,ext4,populate,preamble,punch,rc,repair,xfs} in v2. I
+> will keep ". common/exit" only in common/config and check. The reason for me
+> to keep it in check is that before common/rc is sourced in check, we might
+> need _exit() (which is present is common/exit). Do you agree?
 
-Also make sure that rw re-mounts are not allowed if the device is
-marked as read-only.
+I thought "check" might not need that either. I didn't give it a test, but I found
+before importing common/rc, there're only command arguments initialization, and
+"check" calls "exit" directly if the initialization fails (except you want to call
+_exit, but I didn't see you change that).
 
-Based on generic/050.
+Thanks,
+Zorro
 
-Signed-off-by: Hans Holmberg <hans.holmberg@wdc.com>
----
- tests/xfs/838     | 55 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/838.out | 10 +++++++++
- 2 files changed, 65 insertions(+)
- create mode 100755 tests/xfs/838
- create mode 100644 tests/xfs/838.out
+> 
+> --NR
+> 
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > >   13 files changed, 63 insertions(+), 52 deletions(-)
+> > >   create mode 100644 common/exit
+> > > 
+> > > diff --git a/check b/check
+> > > index 9451c350..67355c52 100755
+> > > --- a/check
+> > > +++ b/check
+> > > @@ -51,6 +51,7 @@ rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.report.* $tmp.arglist
+> > >   SRC_GROUPS="generic"
+> > >   export SRC_DIR="tests"
+> > > +. common/exit
+> > >   usage()
+> > >   {
+> > > diff --git a/common/btrfs b/common/btrfs
+> > > index 3725632c..9e91ee71 100644
+> > > --- a/common/btrfs
+> > > +++ b/common/btrfs
+> > > @@ -1,7 +1,7 @@
+> > >   #
+> > >   # Common btrfs specific functions
+> > >   #
+> > > -
+> > > +. common/exit
+> > >   . common/module
+> > >   # The recommended way to execute simple "btrfs" command.
+> > > diff --git a/common/ceph b/common/ceph
+> > > index df7a6814..89e36403 100644
+> > > --- a/common/ceph
+> > > +++ b/common/ceph
+> > > @@ -2,6 +2,8 @@
+> > >   # CephFS specific common functions.
+> > >   #
+> > > +. common/exit
+> > > +
+> > >   # _ceph_create_file_layout <filename> <stripe unit> <stripe count> <object size>
+> > >   # This function creates a new empty file and sets the file layout according to
+> > >   # parameters.  It will exit if the file already exists.
+> > > diff --git a/common/config b/common/config
+> > > index eada3971..6a60d144 100644
+> > > --- a/common/config
+> > > +++ b/common/config
+> > > @@ -38,7 +38,7 @@
+> > >   # - this script shouldn't make any assertions about filesystem
+> > >   #   validity or mountedness.
+> > >   #
+> > > -
+> > > +. common/exit
+> > >   . common/test_names
+> > >   # all tests should use a common language setting to prevent golden
+> > > @@ -96,15 +96,6 @@ export LOCAL_CONFIGURE_OPTIONS=${LOCAL_CONFIGURE_OPTIONS:=--enable-readline=yes}
+> > >   export RECREATE_TEST_DEV=${RECREATE_TEST_DEV:=false}
+> > > -# This functions sets the exit code to status and then exits. Don't use
+> > > -# exit directly, as it might not set the value of "$status" correctly, which is
+> > > -# used as an exit code in the trap handler routine set up by the check script.
+> > > -_exit()
+> > > -{
+> > > -	test -n "$1" && status="$1"
+> > > -	exit "$status"
+> > > -}
+> > > -
+> > >   # Handle mkfs.$fstyp which does (or does not) require -f to overwrite
+> > >   set_mkfs_prog_path_with_opts()
+> > >   {
+> > > @@ -121,12 +112,6 @@ set_mkfs_prog_path_with_opts()
+> > >   	fi
+> > >   }
+> > > -_fatal()
+> > > -{
+> > > -    echo "$*"
+> > > -    _exit 1
+> > > -}
+> > > -
+> > >   export MKFS_PROG="$(type -P mkfs)"
+> > >   [ "$MKFS_PROG" = "" ] && _fatal "mkfs not found"
+> > > diff --git a/common/dump b/common/dump
+> > > index 09859006..4701a956 100644
+> > > --- a/common/dump
+> > > +++ b/common/dump
+> > > @@ -3,6 +3,7 @@
+> > >   # Copyright (c) 2000-2002,2005 Silicon Graphics, Inc.  All Rights Reserved.
+> > >   #
+> > >   # Functions useful for xfsdump/xfsrestore tests
+> > > +. common/exit
+> > >   # --- initializations ---
+> > >   rm -f $seqres.full
+> > > diff --git a/common/exit b/common/exit
+> > > new file mode 100644
+> > > index 00000000..ad7e7498
+> > > --- /dev/null
+> > > +++ b/common/exit
+> > > @@ -0,0 +1,50 @@
+> > > +##/bin/bash
+> > > +
+> > > +# This functions sets the exit code to status and then exits. Don't use
+> > > +# exit directly, as it might not set the value of "$status" correctly, which is
+> > > +# used as an exit code in the trap handler routine set up by the check script.
+> > > +_exit()
+> > > +{
+> > > +	test -n "$1" && status="$1"
+> > > +	exit "$status"
+> > > +}
+> > > +
+> > > +_fatal()
+> > > +{
+> > > +    echo "$*"
+> > > +    _exit 1
+> > > +}
+> > > +
+> > > +_die()
+> > > +{
+> > > +        echo $@
+> > > +        _exit 1
+> > > +}
+> > > +
+> > > +die_now()
+> > > +{
+> > > +	_exit 1
+> > > +}
+> > > +
+> > > +# just plain bail out
+> > > +#
+> > > +_fail()
+> > > +{
+> > > +    echo "$*" | tee -a $seqres.full
+> > > +    echo "(see $seqres.full for details)"
+> > > +    _exit 1
+> > > +}
+> > > +
+> > > +# bail out, setting up .notrun file. Need to kill the filesystem check files
+> > > +# here, otherwise they are set incorrectly for the next test.
+> > > +#
+> > > +_notrun()
+> > > +{
+> > > +    echo "$*" > $seqres.notrun
+> > > +    echo "$seq not run: $*"
+> > > +    rm -f ${RESULT_DIR}/require_test*
+> > > +    rm -f ${RESULT_DIR}/require_scratch*
+> > > +
+> > > +    _exit 0
+> > > +}
+> > > +
+> > > diff --git a/common/ext4 b/common/ext4
+> > > index f88fa532..ab566c41 100644
+> > > --- a/common/ext4
+> > > +++ b/common/ext4
+> > > @@ -1,7 +1,7 @@
+> > >   #
+> > >   # ext4 specific common functions
+> > >   #
+> > > -
+> > > +. common/exit
+> > >   __generate_ext4_report_vars() {
+> > >   	__generate_blockdev_report_vars TEST_LOGDEV
+> > >   	__generate_blockdev_report_vars SCRATCH_LOGDEV
+> > > diff --git a/common/populate b/common/populate
+> > > index 50dc75d3..a17acc9e 100644
+> > > --- a/common/populate
+> > > +++ b/common/populate
+> > > @@ -4,7 +4,7 @@
+> > >   #
+> > >   # Routines for populating a scratch fs, and helpers to exercise an FS
+> > >   # once it's been fuzzed.
+> > > -
+> > > +. common/exit
+> > >   . ./common/quota
+> > >   _require_populate_commands() {
+> > > diff --git a/common/preamble b/common/preamble
+> > > index ba029a34..0f306412 100644
+> > > --- a/common/preamble
+> > > +++ b/common/preamble
+> > > @@ -3,6 +3,7 @@
+> > >   # Copyright (c) 2021 Oracle.  All Rights Reserved.
+> > >   # Boilerplate fstests functionality
+> > > +. common/exit
+> > >   # Standard cleanup function.  Individual tests can override this.
+> > >   _cleanup()
+> > > diff --git a/common/punch b/common/punch
+> > > index 64d665d8..637f463f 100644
+> > > --- a/common/punch
+> > > +++ b/common/punch
+> > > @@ -3,6 +3,7 @@
+> > >   # Copyright (c) 2007 Silicon Graphics, Inc.  All Rights Reserved.
+> > >   #
+> > >   # common functions for excersizing hole punches with extent size hints etc.
+> > > +. common/exit
+> > >   _spawn_test_file() {
+> > >   	echo "# spawning test file with $*"
+> > > @@ -222,11 +223,6 @@ _filter_bmap()
+> > >   	_coalesce_extents
+> > >   }
+> > > -die_now()
+> > > -{
+> > > -	_exit 1
+> > > -}
+> > > -
+> > >   # test the different corner cases for zeroing a range:
+> > >   #
+> > >   #	1. into a hole
+> > > diff --git a/common/rc b/common/rc
+> > > index 9bed6dad..945f5134 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -2,6 +2,7 @@
+> > >   # SPDX-License-Identifier: GPL-2.0+
+> > >   # Copyright (c) 2000-2006 Silicon Graphics, Inc.  All Rights Reserved.
+> > > +. common/exit
+> > >   . common/config
+> > >   BC="$(type -P bc)" || BC=
+> > > @@ -1798,28 +1799,6 @@ _do()
+> > >       return $ret
+> > >   }
+> > > -# bail out, setting up .notrun file. Need to kill the filesystem check files
+> > > -# here, otherwise they are set incorrectly for the next test.
+> > > -#
+> > > -_notrun()
+> > > -{
+> > > -    echo "$*" > $seqres.notrun
+> > > -    echo "$seq not run: $*"
+> > > -    rm -f ${RESULT_DIR}/require_test*
+> > > -    rm -f ${RESULT_DIR}/require_scratch*
+> > > -
+> > > -    _exit 0
+> > > -}
+> > > -
+> > > -# just plain bail out
+> > > -#
+> > > -_fail()
+> > > -{
+> > > -    echo "$*" | tee -a $seqres.full
+> > > -    echo "(see $seqres.full for details)"
+> > > -    _exit 1
+> > > -}
+> > > -
+> > >   #
+> > >   # Tests whether $FSTYP should be exclude from this test.
+> > >   #
+> > > @@ -3835,12 +3814,6 @@ _link_out_file()
+> > >   	_link_out_file_named $seqfull.out "$features"
+> > >   }
+> > > -_die()
+> > > -{
+> > > -        echo $@
+> > > -        _exit 1
+> > > -}
+> > > -
+> > >   # convert urandom incompressible data to compressible text data
+> > >   _ddt()
+> > >   {
+> > > diff --git a/common/repair b/common/repair
+> > > index fd206f8e..db6a1b5c 100644
+> > > --- a/common/repair
+> > > +++ b/common/repair
+> > > @@ -3,6 +3,7 @@
+> > >   # Copyright (c) 2000-2002 Silicon Graphics, Inc.  All Rights Reserved.
+> > >   #
+> > >   # Functions useful for xfs_repair tests
+> > > +. common/exit
+> > >   _zero_position()
+> > >   {
+> > > diff --git a/common/xfs b/common/xfs
+> > > index 96c15f3c..c236146c 100644
+> > > --- a/common/xfs
+> > > +++ b/common/xfs
+> > > @@ -1,6 +1,7 @@
+> > >   #
+> > >   # XFS specific common functions.
+> > >   #
+> > > +. common/exit
+> > >   __generate_xfs_report_vars() {
+> > >   	__generate_blockdev_report_vars TEST_RTDEV
+> > > -- 
+> > > 2.34.1
+> > > 
+> -- 
+> Nirjhar Roy
+> Linux Kernel Developer
+> IBM, Bangalore
+> 
 
-diff --git a/tests/xfs/838 b/tests/xfs/838
-new file mode 100755
-index 000000000000..93a39a7ec8e9
---- /dev/null
-+++ b/tests/xfs/838
-@@ -0,0 +1,55 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2009 Christoph Hellwig.
-+# Copyright (c) 2025 Western Digital Corporation.
-+#
-+# FS QA Test No. 838
-+#
-+# Check out various mount/remount/unmount scenarious on a read-only logdev
-+# Based on generic/050
-+#
-+. ./common/preamble
-+_begin_fstest mount auto quick
-+
-+_cleanup_setrw()
-+{
-+	cd /
-+	blockdev --setrw $SCRATCH_LOGDEV
-+}
-+
-+# Import common functions.
-+. ./common/filter
-+
-+_require_logdev
-+_require_local_device $SCRATCH_LOGDEV
-+_register_cleanup "_cleanup_setrw"
-+
-+_scratch_mkfs >/dev/null 2>&1
-+
-+#
-+# Mark the log device read-only
-+#
-+echo "setting device read-only"
-+blockdev --setro $SCRATCH_LOGDEV
-+
-+#
-+# Mount and make sure it can't be written to.
-+#
-+echo "mounting read-only log block device:"
-+_scratch_mount 2>&1 | _filter_ro_mount | _filter_scratch
-+if [ "${PIPESTATUS[0]}" -eq 0 ]; then
-+	echo "writing to file on read-only filesystem:"
-+	dd if=3D/dev/zero of=3D$SCRATCH_MNT/foo bs=3D1M count=3D1 oflag=3Ddirect =
-2>&1 | _filter_scratch
-+else
-+	_fail "failed to mount"
-+fi
-+
-+echo "remounting read-write:"
-+_scratch_remount rw 2>&1 | _filter_scratch | _filter_ro_mount
-+
-+echo "unmounting read-only filesystem"
-+_scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
-+
-+# success, all done
-+echo "*** done"
-+status=3D0
-diff --git a/tests/xfs/838.out b/tests/xfs/838.out
-new file mode 100644
-index 000000000000..673b48f42a4e
---- /dev/null
-+++ b/tests/xfs/838.out
-@@ -0,0 +1,10 @@
-+QA output created by 838
-+setting device read-only
-+mounting read-only log block device:
-+mount: device write-protected, mounting read-only
-+writing to file on read-only filesystem:
-+dd: failed to open 'SCRATCH_MNT/foo': Read-only file system
-+remounting read-write:
-+mount: cannot remount device read-write, is write-protected
-+unmounting read-only filesystem
-+*** done
---=20
-2.34.1
