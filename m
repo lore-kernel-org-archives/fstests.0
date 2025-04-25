@@ -1,76 +1,43 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7284B24DFF4
-	for <fstests@vger.kernel.org>; Fri, 25 Apr 2025 14:13:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28FEB22F01;
+	Fri, 25 Apr 2025 15:03:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745590405; cv=none; b=AuI1kQWPpNzbZu/p3FcPTDe8ZPmapuHq0m3mT+KX0pij96SsDer+zFIT7Vux40fKmzwGT4blqrx88Xn1xodtbXR6cyPL7WW9FvmZ3j59ZfVoSis/eb/v9VQda9+S9mq8K/snZKYy8QR5O/NIqjNSQPzxJUGN4GGqL23/0WjoF/A=
+	t=1745593416; cv=none; b=hbpHrtQhXEhsf4Es/9GXy9ykSq5FMlpvRoe+zEqVggcO/7etTNxYNPn3Ozv16ikk7g/MJPr5T7JaA78Wi4VZexFZQRLSeXVwMes9iF8KjsJoxVw6LMCT2Z9L/NN0XVUjHFpNolk0OVObFz7J5Ng+INfApD+TzPqZ/GR+udtCLo4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745590405; c=relaxed/simple;
-	bh=ofqAgE9W5miGhP1Rom91NkxCtUrwZ0yImFbNd5Bu+7w=;
+	s=arc-20240116; t=1745593416; c=relaxed/simple;
+	bh=dsAeXpODhfvgYAgmSXOzBPWfAs2TBbND1cpcJ7Lkhgw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=caDgFxnpp4+gNUnxNGAchLhm48CMhM9jSB4lKPWwLqidAgY11Ach5Wvt1nVJV0MThyV4kcVLB9zfUyQGH9fIo7r2ZehhsjkT07Sc50tFlIL1Kru2uydQzUjDnNjLuAk/6eHfhX5how0OzRsuv3rLp75/Z3CF+1BQOoqBdvjdtRY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=W9DX1zeB; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=dOXTYMlTmWj0wYgnT+5PobefWHlFO+LNy5PgdsFOnXvUiz9T8FPSgXrIWJUFDGIGonXOkQl4xmfnCx9zxhvq41sBN6QKDbVViOll43uxsM5vhgLqisCkW50ROc9HXc37kzZMTt19f3Q7gF5poS7/KI1ScG2S/w11JuVwBydCXLU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ds+1Ci/F; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="W9DX1zeB"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1745590402;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=+56DXeTRhlNEKH15kYjYN9CkoAbVGHVIzlTJdE9juGM=;
-	b=W9DX1zeBH3YrlXvZkxrhZ0c+I6VSF/DVHDkSYBRJS9O0zH8m87pRAdi6/Wqzu/qqmZR48G
-	3bzsoYQJZhy3KEXaPyr5RiQL0g0RRORpPGO0prXkFKlcLLDJ7Umovt+j3mvCRRtau6zk6x
-	JGMnu2Lv3b+AW8JFcDXrzovAlFT9U+E=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-28-xdvcmpXoMUezen5GBkOAlQ-1; Fri, 25 Apr 2025 10:13:18 -0400
-X-MC-Unique: xdvcmpXoMUezen5GBkOAlQ-1
-X-Mimecast-MFC-AGG-ID: xdvcmpXoMUezen5GBkOAlQ_1745590397
-Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-b0e5f28841dso1356305a12.2
-        for <fstests@vger.kernel.org>; Fri, 25 Apr 2025 07:13:17 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745590397; x=1746195197;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=+56DXeTRhlNEKH15kYjYN9CkoAbVGHVIzlTJdE9juGM=;
-        b=m/wvHrmLf2oh37s6uyhDj7J2Vhi0sFy+E+q+eB431aVDEglH+O/+FxLoAzH0KElX+O
-         1t1fmtzR7PWxyVOCn6TK/3ulvJmEAO+gbqzXkavtf64NgKZoaXXEP3D9pvQcToBJ5w1M
-         NkEB4lIhFx/mDKUfNhXhYjGHjrgT4SqYakoE0cW5aJ0WT28jj4hKJ/cEtLbv1RYLH6kQ
-         uD0x9823dZGhTZrK5UgEXgXBLfjHqNpvh0f9PR+tIjVYFJDx1JHSSdjg+fUsaqi7LhDY
-         W/Ma9+ZO6Q31yaNUPVSqoTvzHPbcgd7P/7bsL5kX7g+D/UrcIxHci2orudKx461AN/Ln
-         pkNA==
-X-Forwarded-Encrypted: i=1; AJvYcCWhQFs3jy4KGNz5X1x9O5fL2KVjo998BOD1XmL7vG3FPS1jl6wgONyH1kzF/x5xlQwiTxiTjTPE@vger.kernel.org
-X-Gm-Message-State: AOJu0YzHqek2eYJ0eZi6JBR/FpjkUtbUFZggOzhq2/DhzLdAg3fw9rxk
-	xJIH34S0+PA3bw1cIaETJi2h+Ttw7g66343F1KO5AI3uOm01jarCSGX0SOCK/KDVOwBUDNSuv9j
-	aHO1TyqCCWxULVDIkK8/5uCQyu7oS54oL8ZORhw7HYxDvP+eGb9dTCQc=
-X-Gm-Gg: ASbGncuhu57n+IXh7QnMkjWbf6XxLDIQoMXRw4hVLlZDb7flnBnVEPqOE74Q7D5pG5R
-	VDeRmO03daC0U907r5jZD/EV0z4Unxbg9h1aROVt2UGzpC6rEfLQCg4H/gEiUj+PxfK4tzUzWt4
-	YtTUlWn9ofvCyZ/7zkJ2T6QmEz/pe7o3HFV2lf8RnPpHranogu6H0Z/jmwZBTVUSKf5aCB1CrDM
-	BlJNxj5H+FKvW6opNBak0Zd5S9PZ4QiBhO5hIlF630qMrWFMacdkJPlDWWZp6RoSFvIK1hcdUqq
-	ikR8mtxcnrdT/VemLybC/6m7Tq+1eFPgUup90hj4et7cY0iHLC+2
-X-Received: by 2002:a05:6a20:e18a:b0:1f5:8605:9530 with SMTP id adf61e73a8af0-2045b99adb4mr3830318637.28.1745590396908;
-        Fri, 25 Apr 2025 07:13:16 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFgvgTGq3g0gY77ie1PKeHiig1FtrvzCFz6cgKQ+lBDFCUMDkGrIrMmrFN45D5f6+SS26z8iQ==
-X-Received: by 2002:a05:6a20:e18a:b0:1f5:8605:9530 with SMTP id adf61e73a8af0-2045b99adb4mr3830283637.28.1745590396565;
-        Fri, 25 Apr 2025 07:13:16 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73e25a6a66dsm3269847b3a.102.2025.04.25.07.13.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 25 Apr 2025 07:13:16 -0700 (PDT)
-Date: Fri, 25 Apr 2025 22:13:11 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Chao Yu <chao@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v2] f2fs/011: test to check out-of-space issue
-Message-ID: <20250425141311.kgwsazvt6r65yfod@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250327055051.3827735-1-chao@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ds+1Ci/F"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 85CA3C4CEE4;
+	Fri, 25 Apr 2025 15:03:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1745593415;
+	bh=dsAeXpODhfvgYAgmSXOzBPWfAs2TBbND1cpcJ7Lkhgw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Ds+1Ci/FlzUPO17PswcpR39smLrSiDjFGRBIYOARtmDmufzczdkPSu247J2DFBPJ+
+	 6KkpZTENK4Kh+iZw9SW5JURXMpSoznIHoqxH8RcoinzTVWir8AmoJ75qNGoHAEzji5
+	 nGSz47lyGgpxfk2OgNR8Q/7isVshb4MWmYKGK3NEJ/PzlwdV6kz7sJXAucosqi8I6Y
+	 /Eea2S0cdWO6XBvtbrHEUaS74+3POUqETVOD8nH+O+iy7bS0UPWPerqZVIhenB4f8m
+	 D7zWDlItSy0rvjjFy5//0WdVoljtzX/Qf9O0buPXMSYFdsy3p6Zjmu4t4BjYiMXFxb
+	 y7TQeT5yoTBXA==
+Date: Fri, 25 Apr 2025 08:03:31 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Hans Holmberg <Hans.Holmberg@wdc.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	"zlang@kernel.org" <zlang@kernel.org>,
+	"linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
+	Carlos Maiolino <cem@kernel.org>,
+	"david@fromorbit.com" <david@fromorbit.com>, hch <hch@lst.de>
+Subject: Re: [PATCH 1/2] xfs: add mount test for read only rt devices
+Message-ID: <20250425150331.GG25667@frogsfrogsfrogs>
+References: <20250425090259.10154-1-hans.holmberg@wdc.com>
+ <20250425090259.10154-2-hans.holmberg@wdc.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -79,112 +46,111 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250327055051.3827735-1-chao@kernel.org>
+In-Reply-To: <20250425090259.10154-2-hans.holmberg@wdc.com>
 
-On Thu, Mar 27, 2025 at 01:50:51PM +0800, Chao Yu wrote:
-> This is a regression testcase to check whether we will handle
-> out-of-space case correctly during fallocate() on pinned file
-> once we disable checkpoint.
+On Fri, Apr 25, 2025 at 09:03:22AM +0000, Hans Holmberg wrote:
+> Make sure that we can mount rt devices read-only if them themselves
+> are marked as read-only.
 > 
-> Testcase:
-> 1. mount f2fs w/ checkpoint=disable option
-> 2. create fragmented file data
-> 3. set flag w/ pinned flag
-> 4. fallocate space for pinned file, expects panic due to running
-> out of space.
+> Also make sure that rw re-mounts are not allowed if the device is
+> marked as read-only.
 > 
-> We should apply both commit ("f2fs: fix to avoid panic once
-> fallocation fails for pinfile") and commit ("f2fs: fix to avoid
-> running out of free segments") to avoid system panic.
-> Note that w/ these two commit, we fixed such issue in both
-> convential and zoned block device.
+> Based on generic/050.
 > 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Signed-off-by: Chao Yu <chao@kernel.org>
+> Signed-off-by: Hans Holmberg <hans.holmberg@wdc.com>
 > ---
-> v2:
-> - clean up codes suggested by Zorro
-> - change output to expect ENOSPC error if we have applied fixes
-
-Sorry I missed this V2, this version looks good to me. As there's not
-more review points from f2fs list, so I'd like to merge it:
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
->  tests/f2fs/011     | 53 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/f2fs/011.out |  2 ++
->  2 files changed, 55 insertions(+)
->  create mode 100755 tests/f2fs/011
->  create mode 100644 tests/f2fs/011.out
+>  tests/xfs/837     | 55 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/837.out | 10 +++++++++
+>  2 files changed, 65 insertions(+)
+>  create mode 100755 tests/xfs/837
+>  create mode 100644 tests/xfs/837.out
 > 
-> diff --git a/tests/f2fs/011 b/tests/f2fs/011
+> diff --git a/tests/xfs/837 b/tests/xfs/837
 > new file mode 100755
-> index 00000000..ec3d39ec
+> index 000000000000..b20e9c5f33f2
 > --- /dev/null
-> +++ b/tests/f2fs/011
-> @@ -0,0 +1,53 @@
+> +++ b/tests/xfs/837
+> @@ -0,0 +1,55 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
+> +# Copyright (c) 2009 Christoph Hellwig.
+> +# Copyright (c) 2025 Western Digital Corporation
 > +#
-> +# FS QA Test No. f2fs/011
+> +# FS QA Test No. 837
 > +#
-> +# This is a regression testcase to check whether we will handle
-> +# out-of-space case correctly during fallocate() on pinned file
-> +# once we disable checkpoint.
-> +# 1. mount f2fs w/ checkpoint=disable option
-> +# 2. create fragmented file data
-> +# 3. set flag w/ pinned flag
-> +# 4. fallocate space for pinned file, expects panic due to running
-> +# out of space
-> +# We should apply both commit ("f2fs: fix to avoid panic once
-> +# fallocation fails for pinfile") and commit ("f2fs: fix to avoid
-> +# running out of free segments") to avoid system panic.
-> +# Note that w/ these two commit, we fixed such issue in both
-> +# convential and zoned block device.
+> +# Check out various mount/remount/unmount scenarious on a read-only rtdev
+> +# Based on generic/050
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto quick
+> +_begin_fstest mount auto quick
 > +
-> +_fixed_by_kernel_commit 48ea8b200414 \
-> +	"f2fs: fix to avoid panic once fallocation fails for pinfile"
-> +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"f2fs: fix to avoid running out of free segments"
+> +_cleanup_setrw()
+> +{
+> +	cd /
+> +	blockdev --setrw $SCRATCH_RTDEV
+> +}
 > +
-> +_require_scratch
-> +_require_command "$F2FS_IO_PROG" f2fs_io
+> +# Import common functions.
+> +. ./common/filter
 > +
-> +_scratch_mkfs_sized $((1*1024*1024*1024)) >> $seqres.full
-> +_scratch_mount -o checkpoint=disable:10%
-> +
-> +pinfile=$SCRATCH_MNT/file
-> +
-> +# simulate fragment status in f2fs
-> +for ((i=0;i<256;i++)) do
-> +	$XFS_IO_PROG -f -c "pwrite 0 1m" $SCRATCH_MNT/$i >>$seqres.full
-> +done
-> +sync
-> +
-> +for ((i=0;i<256;i+=2)) do
-> +	rm -f $SCRATCH_MNT/$i
-> +done
-> +sync
-> +
-> +touch $pinfile
-> +$F2FS_IO_PROG pinfile set $pinfile >> $seqres.full
-> +$XFS_IO_PROG -c "falloc 0 $((3*256*1024*1024))" $pinfile
-> +
-> +status=0
-> +exit
-> diff --git a/tests/f2fs/011.out b/tests/f2fs/011.out
-> new file mode 100644
-> index 00000000..559c3fdf
-> --- /dev/null
-> +++ b/tests/f2fs/011.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 011
-> +fallocate: No space left on device
-> -- 
-> 2.49.0
-> 
+> +_require_realtime
+> +_require_local_device $SCRATCH_RTDEV
 
+I suspect this is copy-pasted from generic/050, but I wonder when
+SCRATCH_RTDEV could be a character device, but maybe that's a relic of
+Irix (and Solaris too, IIRC)?
+
+The rest of the test looks fine to me though.
+
+--D
+
+> +_register_cleanup "_cleanup_setrw"
+> +
+> +_scratch_mkfs "-d rtinherit" > /dev/null 2>&1
+> +
+> +#
+> +# Mark the rt device read-only.
+> +#
+> +echo "setting device read-only"
+> +blockdev --setro $SCRATCH_RTDEV
+> +
+> +#
+> +# Mount it and make sure it can't be written to.
+> +#
+> +echo "mounting read-only rt block device:"
+> +_scratch_mount 2>&1 | _filter_ro_mount | _filter_scratch
+> +if [ "${PIPESTATUS[0]}" -eq 0 ]; then
+> +	echo "writing to file on read-only filesystem:"
+> +	dd if=/dev/zero of=$SCRATCH_MNT/foo bs=1M count=1 oflag=direct 2>&1 | _filter_scratch
+> +else
+> +	_fail "failed to mount"
+> +fi
+> +
+> +echo "remounting read-write:"
+> +_scratch_remount rw 2>&1 | _filter_scratch | _filter_ro_mount
+> +
+> +echo "unmounting read-only filesystem"
+> +_scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
+> +
+> +# success, all done
+> +echo "*** done"
+> +status=0
+> diff --git a/tests/xfs/837.out b/tests/xfs/837.out
+> new file mode 100644
+> index 000000000000..0a843a0ba398
+> --- /dev/null
+> +++ b/tests/xfs/837.out
+> @@ -0,0 +1,10 @@
+> +QA output created by 837
+> +setting device read-only
+> +mounting read-only rt block device:
+> +mount: device write-protected, mounting read-only
+> +writing to file on read-only filesystem:
+> +dd: failed to open 'SCRATCH_MNT/foo': Read-only file system
+> +remounting read-write:
+> +mount: cannot remount device read-write, is write-protected
+> +unmounting read-only filesystem
+> +*** done
+> -- 
+> 2.34.1
+> 
