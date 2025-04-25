@@ -1,81 +1,78 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9C252459D0
-	for <fstests@vger.kernel.org>; Fri, 25 Apr 2025 11:27:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D0A4424466C
+	for <fstests@vger.kernel.org>; Fri, 25 Apr 2025 11:44:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745580476; cv=none; b=UZMkkYZMuD6ck+DVsySksddY2IGrvHGwj0QHYRelqM5hScIEb3TMMP7mBV7jqlv2k+nQqFCuwf8XZJO2OZ7Eu3Ioret7nF9UWzKgRKUCQip87CAXrsgYpw0ebnfcnTYvncJRf4UnegNiRO+VmIm8aTj78cG4IVMoAve1TnJUlkk=
+	t=1745581459; cv=none; b=XUNzkrD0RCx8c+f3G18TBxSxZs/ED19PZQqBwOwjsdJfYo+owT6OP7D8Db7r4ror9EdyI6wfOTBzIyIfBIw9ZkPFWtsv38zbWVVOS3bQNU9rfXfByPMccHjj0u6wV6dz/ncfuB20SP5w31A5zZcejFq3fl+RJ81kwgx8442Y9y0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745580476; c=relaxed/simple;
-	bh=i5Z+Lgt1EtCl9VHgJ6j1ptib2pceIv4cpi1Hcvb9NwA=;
+	s=arc-20240116; t=1745581459; c=relaxed/simple;
+	bh=IToxjMZYjvM9lNH3mw7yJTeT6jPRrkYp/rwx6SFhAEM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=RZquQet2VLGbxvbg65UNY9DDmqbkbdTrelcT+VJu31C63n5O51JJCAw3s6E3BfmhbiMxslpFusppzJYVFpsUaVpGVVpgkEZII7j0qn/8wUCcyM/CnJtZTOCMnRC8MjTTKm/NbIIzPWHhnf53OJ+Nsg96661/WBaGEBiD2mYbcTE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Fc3XbYEq; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=fT55l7JBsSgaIL5WRsXvpAiYZ+0MC6LKogHv64Rnzyiy9zhMfhXOul1U2veCOs0TmOEfsbvI0eDnxOBNjcL83XsPILYFL7n30m5TDix2s7LsZKDPSvLty3+v82IogyWWQVmM0a2EuRzmLovR8lPsn+Ukv3FuG+pR9gr86VCBOT8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=EeIu7Tfx; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Fc3XbYEq"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="EeIu7Tfx"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1745580473;
+	s=mimecast20190719; t=1745581455;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=XPQIDfg7C6O1v8/d8MzIb298k2Hd1bakTq6r3C3OXZk=;
-	b=Fc3XbYEqj14eHuCJ8Sb5wNWmdCTOC1r0NG6xqlhnQGDS67yAroE3ZBgRFqV1fhUP5AYO0a
-	pL4qXwRZ+ncA6PDwMWhfSEK84/Uo0x784shtxVyj8hrd24Y6q2Nm4vot2DUK86MZffcyWB
-	8FoVtxtmDI36fvXYEy4rN8P35zhBi2g=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=AdrKxOfuyOBnEuSmdyhh/BphGoP5d55HS+klRx6Y7IU=;
+	b=EeIu7Tfx8WbZ8gm/av6Yukur4o3SXlndoIjRrSC7xTs3MEQq7oWP8cx7prfll5tL5l+xRu
+	cDDE5oA1+Y9tsuBa5VR7KutKgQHkH65Kv0lO9RqacSuMO9EDXRR/fm1Q41ahQK7d3bCvxJ
+	ChrdTJX12WFjX5tcLSlyZY0HcWS9JgQ=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-620-sT5Ux_M7OHabCik4Pggulw-1; Fri, 25 Apr 2025 07:27:52 -0400
-X-MC-Unique: sT5Ux_M7OHabCik4Pggulw-1
-X-Mimecast-MFC-AGG-ID: sT5Ux_M7OHabCik4Pggulw_1745580471
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-227ea16b03dso33373585ad.3
-        for <fstests@vger.kernel.org>; Fri, 25 Apr 2025 04:27:52 -0700 (PDT)
+ us-mta-483-j6yLL00xNBGEWkrHXKvCDA-1; Fri, 25 Apr 2025 07:44:12 -0400
+X-MC-Unique: j6yLL00xNBGEWkrHXKvCDA-1
+X-Mimecast-MFC-AGG-ID: j6yLL00xNBGEWkrHXKvCDA_1745581451
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-30870e7e4fcso1701749a91.0
+        for <fstests@vger.kernel.org>; Fri, 25 Apr 2025 04:44:12 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745580471; x=1746185271;
+        d=1e100.net; s=20230601; t=1745581451; x=1746186251;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=XPQIDfg7C6O1v8/d8MzIb298k2Hd1bakTq6r3C3OXZk=;
-        b=s50oFZrKsNzcoNj2wuxQnt2n/6oxof4XtpGsRnifzIB0o40N3sVnD1fWidB1NvANuS
-         ls0oPkoz0ra9zQrfyA1s8NJEpVQY5UJ/tdXgIfNvH3GmYl3F0NIbNkz6t0HxFOVxOXd3
-         +m0ioLYMX7lw2f3Xc5sp6Vcsqj3WBBy49dsJkdFHztFiDQgjWRAkv8ZMSfyXX9JQbyFz
-         zr5lNgicXfHV3L3dkRuulfaGychnHI4liKjuiLfONKXV3UFgW8n0bv4HiHvWe3r80rIP
-         bn2WcppPGSDLtJXAZSzspFSDyoUaPHlR3mzkpa5RbU4b4p3KuUHskAXubi2oN6n2cm4s
-         TmVQ==
-X-Gm-Message-State: AOJu0YxERGbkZKq8Z+xVnbtrUyW+zSuk/Ogv5Ka4TWpOKWBYCutEYf2k
-	7ODgqJ97ab32ojP3U+flMoPItneV8TxdAWFRna+0mZPIBL66A1mB023qH6ktqpJtJdrcxF4b62v
-	dWsyYwpZduPdCx6FsYEz+ZkRzN9DZDDpciax6+m0U0J9av/e/OKNJzOE=
-X-Gm-Gg: ASbGncsHrgTRnK8ajmGBmXdGxd54FfxA8skKEERr+H5KkQnkLcSdOgK2/rLQ+5zklWd
-	YBPsLhC2/BgjSstL2cQJO5e/FzbFR+EpTiEaFXwtzvCMd/J7ibINRf7y7/4Muba6GUZf9pNFA2S
-	4FsHWno8ExCw+/b8qmq+aT4BnVagcMQaGgcB80H5J13qV6xdB6IuoFglRYuTIGb3NQjWGZVyCEp
-	CFUoJ1LaPEgbNBRTFyVVn3pQXbFJpOxKlkgx0UdG98rGlCsc7zKYOU1kiWTEaSksYe4sxFwsllB
-	qGCKRlj4ys5NtCKkZNiIlgjPjXtd62enCi6f8LnJFb9GdL5mIofF
-X-Received: by 2002:a17:903:3bcb:b0:22c:36d1:7a49 with SMTP id d9443c01a7336-22dbf742db5mr35128175ad.53.1745580471230;
-        Fri, 25 Apr 2025 04:27:51 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFwa8yD8eyCINBxOeRT1//BwZSAK6zkP857DMUhERB9O9vU028ZHcG+2dFDnEfzrJ3ix00EIA==
-X-Received: by 2002:a17:903:3bcb:b0:22c:36d1:7a49 with SMTP id d9443c01a7336-22dbf742db5mr35127795ad.53.1745580470793;
-        Fri, 25 Apr 2025 04:27:50 -0700 (PDT)
+        bh=AdrKxOfuyOBnEuSmdyhh/BphGoP5d55HS+klRx6Y7IU=;
+        b=srPBNXSRmZxXIkrbjSQnKqdHDLaz6eL96RHAXGyzYtohB4MpUPTqe6OUAKOujoHlMp
+         w7Vow4t6IMZeWPOfB2LK3txTRmBjjXccvE5JyxQqWeIoqb+YX7+j0Xa+zQG80LgbOamP
+         KoPO5GF8Ez1GMz6nuJkj2nxzwu0ZGk/fpw4og9lF4KNOTPT+T6QZ6/ztQ8zA2Q9T3PhE
+         ZCg387L8cIaZGQ1Tcs04e9fxtQ/y4ItWfWDz3jlH5IFRnRUjiJVtc7WoWZ927xDMnOW2
+         VESrcrigJmTDTYwlntfKwBgfST11VZyonYkqgiN0Zvl6AXW12gNWHPY/AWMRjrJa1Wu0
+         I6AQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVU34F8JMgXd1or0SnDJutIfIHUiTC81xyjwEH1z2NLRzHPCym3qX9A72kGHKC0yRFs/rwPQivK@vger.kernel.org
+X-Gm-Message-State: AOJu0YwrQkBMEnFtMS0eG07lMRzTOHECif3jmljlhPJ1agxQAOMYjyHm
+	kdi6iSsZ9FjQ487IQbM2HmkHh0A9a5WuI/juaVAzbfhH00ltoE92I3y7Yf7b2fxIUVgMeOr7Tg7
+	NKOZFXB+2AWvyg1a4DsYnRcrA82Q05a5T9TXuXfw6TgfzUiD88a4VhqQ=
+X-Gm-Gg: ASbGncsSOku3xohYQg82PSV90UWqaqt5rC4Nnk2RlkuOXB1xkKwoAlUf++hEI7OxD+9
+	C8YX8OI4vvu1O8vDpZgCOJeFjEW3LtAzZNy6XFTdZJUAXZglnwujY2kLYOO1/3iEfG3jtL+Gevz
+	FsqngW6DHIpBHK1tEtYZLocEr62PJuXdJJxz0FNJHTfmoNr//WGN0tcbvoj/cB7Z3MgMpnVuxMz
+	q051ywQ1BorKV7YtRFnNTpf163LwtGzmMbksgjrPbKjgE5+W5k0SFm1H8L1Eb98dWqFrqpGewtW
+	RUSPvIzGOxJkdXA6M0H4PfKFrye5iSjJEDS3Ttkfbq2QqhY1+Zvm
+X-Received: by 2002:a17:90a:d603:b0:2fb:fe21:4841 with SMTP id 98e67ed59e1d1-309ee37cae3mr9834698a91.8.1745581451305;
+        Fri, 25 Apr 2025 04:44:11 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGEyQ03516MLicuEbsvFpC6tMOzPwTVFh2zMJJAA3nJDMBcj7+bnYTxQVxGkWGF1gSpnnClFQ==
+X-Received: by 2002:a17:90a:d603:b0:2fb:fe21:4841 with SMTP id 98e67ed59e1d1-309ee37cae3mr9834679a91.8.1745581450840;
+        Fri, 25 Apr 2025 04:44:10 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22db50e7a1dsm29777615ad.140.2025.04.25.04.27.47
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22db4d76db1sm30033755ad.13.2025.04.25.04.44.08
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 25 Apr 2025 04:27:50 -0700 (PDT)
-Date: Fri, 25 Apr 2025 19:27:45 +0800
+        Fri, 25 Apr 2025 04:44:10 -0700 (PDT)
+Date: Fri, 25 Apr 2025 19:44:06 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org,
-	david@fromorbit.com
-Subject: Re: [PATCH v1 1/2] common: Move exit related functions to a
- common/exit
-Message-ID: <20250425112745.aaamjdvhqtlx7vpd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cover.1745390030.git.nirjhar.roy.lists@gmail.com>
- <d0b7939a277e8a16566f04e449e9a1f97da28b9d.1745390030.git.nirjhar.roy.lists@gmail.com>
- <20250423141808.2qdmacsyxu3rtrwh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <054fa772-360e-4f90-bc4d-ea7ef954d5a2@gmail.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Anna Schumaker <anna@kernel.org>, linux-nfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/033: Check that the 'fzero' operations supports
+ KEEP_SIZE
+Message-ID: <20250425114406.nybdc6witc33kiae@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250424195730.342846-1-anna@kernel.org>
+ <20250424213607.GF25667@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -84,337 +81,63 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <054fa772-360e-4f90-bc4d-ea7ef954d5a2@gmail.com>
+In-Reply-To: <20250424213607.GF25667@frogsfrogsfrogs>
 
-On Thu, Apr 24, 2025 at 02:39:39PM +0530, Nirjhar Roy (IBM) wrote:
+On Thu, Apr 24, 2025 at 02:36:07PM -0700, Darrick J. Wong wrote:
+> On Thu, Apr 24, 2025 at 03:57:30PM -0400, Anna Schumaker wrote:
+> > From: Anna Schumaker <anna.schumaker@oracle.com>
+> > 
+> > Otherwise this test will fail on filesystems that implement
+> > FALLOC_FL_ZERO_RANGE but not the optional FALLOC_FL_KEEP_SIZE flag.
+> > 
+> > Signed-off-by: Anna Schumaker <anna.schumaker@oracle.com>
+> > ---
+> >  tests/generic/033 | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/tests/generic/033 b/tests/generic/033
+> > index a9a9ff5a3431..a33f6add67bf 100755
+> > --- a/tests/generic/033
+> > +++ b/tests/generic/033
+> > @@ -20,7 +20,7 @@ _begin_fstest auto quick rw zero
+> >  
+> >  # Modify as appropriate.
+> >  _require_scratch
+> > -_require_xfs_io_command "fzero"
+> > +_require_xfs_io_command "fzero" "-k"
 > 
-> On 4/23/25 19:48, Zorro Lang wrote:
-> > On Wed, Apr 23, 2025 at 06:41:34AM +0000, Nirjhar Roy (IBM) wrote:
-> > > Introduce a new file common/exit that will contain all the exit
-> > > related functions. This will remove the dependencies these functions
-> > > have on other non-related helper files and they can be indepedently
-> > > sourced. This was suggested by Dave Chinner[1].
-> > > 
-> > > [1] https://lore.kernel.org/linux-xfs/Z_UJ7XcpmtkPRhTr@dread.disaster.area/
-> > > Suggested-by: Dave Chinner <david@fromorbit.com>
-> > > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-> > > ---
-> > >   check           |  1 +
-> > >   common/btrfs    |  2 +-
-> > >   common/ceph     |  2 ++
-> > >   common/config   | 17 +----------------
-> > >   common/dump     |  1 +
-> > >   common/exit     | 50 +++++++++++++++++++++++++++++++++++++++++++++++++
-> > >   common/ext4     |  2 +-
-> > >   common/populate |  2 +-
-> > >   common/preamble |  1 +
-> > >   common/punch    |  6 +-----
-> > >   common/rc       | 29 +---------------------------
-> > >   common/repair   |  1 +
-> > >   common/xfs      |  1 +
-> > I think if you define exit helpers in common/exit, and import common/exit
-> > in common/config, then you don't need to source it(common/exit) in other
-> > common files (.e.g common/xfs, common/rc, etc). Due to when we call the
-> > helpers in these common files, the process should already imported
-> > common/rc -> common/config -> common/exit. right?
-> 
-> Oh, right. I can remove the redundant imports from
-> common/{btrfs,ceph,dump,ext4,populate,preamble,punch,rc,repair,xfs} in v2. I
-> will keep ". common/exit" only in common/config and check. The reason for me
-> to keep it in check is that before common/rc is sourced in check, we might
-> need _exit() (which is present is common/exit). Do you agree?
+> I wonder, does this test even need KEEP_SIZE?  It writes 64MB to the
+> file, then it fzeros every other 4k up to (64M-4k), then fzeroes
+> everything else.  AFAICT the fzero commands never exceed the file
+> size...though I could be wrong.
 
-I thought "check" might not need that either. I didn't give it a test, but I found
-before importing common/rc, there're only command arguments initialization, and
-"check" calls "exit" directly if the initialization fails (except you want to call
-_exit, but I didn't see you change that).
+Hmm... I think you're right, the code logic is:
+
+  bytes=$((64 * 1024))
+  $XFS_IO_PROG -f -c "pwrite 0 $bytes" $file
+  endoff=$((bytes - 4096))
+  for i in $(seq 0 8192 $endoff); do
+          $XFS_IO_PROG -c "fzero -k $i 4k" $file
+  done
+  for i in $(seq 4096 8192 $endoff); do
+          $XFS_IO_PROG -c "fzero -k $i 4k" $file
+  done
+
+So looks like the offset+len isn't greater than the file size. So we
+might can remove the "-k" directly. What do you think ?
 
 Thanks,
 Zorro
 
 > 
-> --NR
+> --D
 > 
+> >  
+> >  _scratch_mkfs >/dev/null 2>&1
+> >  _scratch_mount
+> > -- 
+> > 2.49.0
 > > 
-> > Thanks,
-> > Zorro
 > > 
-> > >   13 files changed, 63 insertions(+), 52 deletions(-)
-> > >   create mode 100644 common/exit
-> > > 
-> > > diff --git a/check b/check
-> > > index 9451c350..67355c52 100755
-> > > --- a/check
-> > > +++ b/check
-> > > @@ -51,6 +51,7 @@ rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.report.* $tmp.arglist
-> > >   SRC_GROUPS="generic"
-> > >   export SRC_DIR="tests"
-> > > +. common/exit
-> > >   usage()
-> > >   {
-> > > diff --git a/common/btrfs b/common/btrfs
-> > > index 3725632c..9e91ee71 100644
-> > > --- a/common/btrfs
-> > > +++ b/common/btrfs
-> > > @@ -1,7 +1,7 @@
-> > >   #
-> > >   # Common btrfs specific functions
-> > >   #
-> > > -
-> > > +. common/exit
-> > >   . common/module
-> > >   # The recommended way to execute simple "btrfs" command.
-> > > diff --git a/common/ceph b/common/ceph
-> > > index df7a6814..89e36403 100644
-> > > --- a/common/ceph
-> > > +++ b/common/ceph
-> > > @@ -2,6 +2,8 @@
-> > >   # CephFS specific common functions.
-> > >   #
-> > > +. common/exit
-> > > +
-> > >   # _ceph_create_file_layout <filename> <stripe unit> <stripe count> <object size>
-> > >   # This function creates a new empty file and sets the file layout according to
-> > >   # parameters.  It will exit if the file already exists.
-> > > diff --git a/common/config b/common/config
-> > > index eada3971..6a60d144 100644
-> > > --- a/common/config
-> > > +++ b/common/config
-> > > @@ -38,7 +38,7 @@
-> > >   # - this script shouldn't make any assertions about filesystem
-> > >   #   validity or mountedness.
-> > >   #
-> > > -
-> > > +. common/exit
-> > >   . common/test_names
-> > >   # all tests should use a common language setting to prevent golden
-> > > @@ -96,15 +96,6 @@ export LOCAL_CONFIGURE_OPTIONS=${LOCAL_CONFIGURE_OPTIONS:=--enable-readline=yes}
-> > >   export RECREATE_TEST_DEV=${RECREATE_TEST_DEV:=false}
-> > > -# This functions sets the exit code to status and then exits. Don't use
-> > > -# exit directly, as it might not set the value of "$status" correctly, which is
-> > > -# used as an exit code in the trap handler routine set up by the check script.
-> > > -_exit()
-> > > -{
-> > > -	test -n "$1" && status="$1"
-> > > -	exit "$status"
-> > > -}
-> > > -
-> > >   # Handle mkfs.$fstyp which does (or does not) require -f to overwrite
-> > >   set_mkfs_prog_path_with_opts()
-> > >   {
-> > > @@ -121,12 +112,6 @@ set_mkfs_prog_path_with_opts()
-> > >   	fi
-> > >   }
-> > > -_fatal()
-> > > -{
-> > > -    echo "$*"
-> > > -    _exit 1
-> > > -}
-> > > -
-> > >   export MKFS_PROG="$(type -P mkfs)"
-> > >   [ "$MKFS_PROG" = "" ] && _fatal "mkfs not found"
-> > > diff --git a/common/dump b/common/dump
-> > > index 09859006..4701a956 100644
-> > > --- a/common/dump
-> > > +++ b/common/dump
-> > > @@ -3,6 +3,7 @@
-> > >   # Copyright (c) 2000-2002,2005 Silicon Graphics, Inc.  All Rights Reserved.
-> > >   #
-> > >   # Functions useful for xfsdump/xfsrestore tests
-> > > +. common/exit
-> > >   # --- initializations ---
-> > >   rm -f $seqres.full
-> > > diff --git a/common/exit b/common/exit
-> > > new file mode 100644
-> > > index 00000000..ad7e7498
-> > > --- /dev/null
-> > > +++ b/common/exit
-> > > @@ -0,0 +1,50 @@
-> > > +##/bin/bash
-> > > +
-> > > +# This functions sets the exit code to status and then exits. Don't use
-> > > +# exit directly, as it might not set the value of "$status" correctly, which is
-> > > +# used as an exit code in the trap handler routine set up by the check script.
-> > > +_exit()
-> > > +{
-> > > +	test -n "$1" && status="$1"
-> > > +	exit "$status"
-> > > +}
-> > > +
-> > > +_fatal()
-> > > +{
-> > > +    echo "$*"
-> > > +    _exit 1
-> > > +}
-> > > +
-> > > +_die()
-> > > +{
-> > > +        echo $@
-> > > +        _exit 1
-> > > +}
-> > > +
-> > > +die_now()
-> > > +{
-> > > +	_exit 1
-> > > +}
-> > > +
-> > > +# just plain bail out
-> > > +#
-> > > +_fail()
-> > > +{
-> > > +    echo "$*" | tee -a $seqres.full
-> > > +    echo "(see $seqres.full for details)"
-> > > +    _exit 1
-> > > +}
-> > > +
-> > > +# bail out, setting up .notrun file. Need to kill the filesystem check files
-> > > +# here, otherwise they are set incorrectly for the next test.
-> > > +#
-> > > +_notrun()
-> > > +{
-> > > +    echo "$*" > $seqres.notrun
-> > > +    echo "$seq not run: $*"
-> > > +    rm -f ${RESULT_DIR}/require_test*
-> > > +    rm -f ${RESULT_DIR}/require_scratch*
-> > > +
-> > > +    _exit 0
-> > > +}
-> > > +
-> > > diff --git a/common/ext4 b/common/ext4
-> > > index f88fa532..ab566c41 100644
-> > > --- a/common/ext4
-> > > +++ b/common/ext4
-> > > @@ -1,7 +1,7 @@
-> > >   #
-> > >   # ext4 specific common functions
-> > >   #
-> > > -
-> > > +. common/exit
-> > >   __generate_ext4_report_vars() {
-> > >   	__generate_blockdev_report_vars TEST_LOGDEV
-> > >   	__generate_blockdev_report_vars SCRATCH_LOGDEV
-> > > diff --git a/common/populate b/common/populate
-> > > index 50dc75d3..a17acc9e 100644
-> > > --- a/common/populate
-> > > +++ b/common/populate
-> > > @@ -4,7 +4,7 @@
-> > >   #
-> > >   # Routines for populating a scratch fs, and helpers to exercise an FS
-> > >   # once it's been fuzzed.
-> > > -
-> > > +. common/exit
-> > >   . ./common/quota
-> > >   _require_populate_commands() {
-> > > diff --git a/common/preamble b/common/preamble
-> > > index ba029a34..0f306412 100644
-> > > --- a/common/preamble
-> > > +++ b/common/preamble
-> > > @@ -3,6 +3,7 @@
-> > >   # Copyright (c) 2021 Oracle.  All Rights Reserved.
-> > >   # Boilerplate fstests functionality
-> > > +. common/exit
-> > >   # Standard cleanup function.  Individual tests can override this.
-> > >   _cleanup()
-> > > diff --git a/common/punch b/common/punch
-> > > index 64d665d8..637f463f 100644
-> > > --- a/common/punch
-> > > +++ b/common/punch
-> > > @@ -3,6 +3,7 @@
-> > >   # Copyright (c) 2007 Silicon Graphics, Inc.  All Rights Reserved.
-> > >   #
-> > >   # common functions for excersizing hole punches with extent size hints etc.
-> > > +. common/exit
-> > >   _spawn_test_file() {
-> > >   	echo "# spawning test file with $*"
-> > > @@ -222,11 +223,6 @@ _filter_bmap()
-> > >   	_coalesce_extents
-> > >   }
-> > > -die_now()
-> > > -{
-> > > -	_exit 1
-> > > -}
-> > > -
-> > >   # test the different corner cases for zeroing a range:
-> > >   #
-> > >   #	1. into a hole
-> > > diff --git a/common/rc b/common/rc
-> > > index 9bed6dad..945f5134 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -2,6 +2,7 @@
-> > >   # SPDX-License-Identifier: GPL-2.0+
-> > >   # Copyright (c) 2000-2006 Silicon Graphics, Inc.  All Rights Reserved.
-> > > +. common/exit
-> > >   . common/config
-> > >   BC="$(type -P bc)" || BC=
-> > > @@ -1798,28 +1799,6 @@ _do()
-> > >       return $ret
-> > >   }
-> > > -# bail out, setting up .notrun file. Need to kill the filesystem check files
-> > > -# here, otherwise they are set incorrectly for the next test.
-> > > -#
-> > > -_notrun()
-> > > -{
-> > > -    echo "$*" > $seqres.notrun
-> > > -    echo "$seq not run: $*"
-> > > -    rm -f ${RESULT_DIR}/require_test*
-> > > -    rm -f ${RESULT_DIR}/require_scratch*
-> > > -
-> > > -    _exit 0
-> > > -}
-> > > -
-> > > -# just plain bail out
-> > > -#
-> > > -_fail()
-> > > -{
-> > > -    echo "$*" | tee -a $seqres.full
-> > > -    echo "(see $seqres.full for details)"
-> > > -    _exit 1
-> > > -}
-> > > -
-> > >   #
-> > >   # Tests whether $FSTYP should be exclude from this test.
-> > >   #
-> > > @@ -3835,12 +3814,6 @@ _link_out_file()
-> > >   	_link_out_file_named $seqfull.out "$features"
-> > >   }
-> > > -_die()
-> > > -{
-> > > -        echo $@
-> > > -        _exit 1
-> > > -}
-> > > -
-> > >   # convert urandom incompressible data to compressible text data
-> > >   _ddt()
-> > >   {
-> > > diff --git a/common/repair b/common/repair
-> > > index fd206f8e..db6a1b5c 100644
-> > > --- a/common/repair
-> > > +++ b/common/repair
-> > > @@ -3,6 +3,7 @@
-> > >   # Copyright (c) 2000-2002 Silicon Graphics, Inc.  All Rights Reserved.
-> > >   #
-> > >   # Functions useful for xfs_repair tests
-> > > +. common/exit
-> > >   _zero_position()
-> > >   {
-> > > diff --git a/common/xfs b/common/xfs
-> > > index 96c15f3c..c236146c 100644
-> > > --- a/common/xfs
-> > > +++ b/common/xfs
-> > > @@ -1,6 +1,7 @@
-> > >   #
-> > >   # XFS specific common functions.
-> > >   #
-> > > +. common/exit
-> > >   __generate_xfs_report_vars() {
-> > >   	__generate_blockdev_report_vars TEST_RTDEV
-> > > -- 
-> > > 2.34.1
-> > > 
-> -- 
-> Nirjhar Roy
-> Linux Kernel Developer
-> IBM, Bangalore
 > 
 
