@@ -1,124 +1,167 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BFA94A1E
-	for <fstests@vger.kernel.org>; Sat, 26 Apr 2025 12:48:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BC1A1CAA85
+	for <fstests@vger.kernel.org>; Sun, 27 Apr 2025 08:20:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745671725; cv=none; b=VszJKZxnzYIhi4RD3g1x13IHNMPaVUznfwj8Z2Q87+xPGuoSr6VPVshPKZTWaPwSVZObP7pjerJTbJknLteHYzlvPKcPex2PaXio/EmlbcKXbyxIFsy/ABL/XFgfn0I2QA8O7T8KttIWB82r6j32s91NB9e+qGPzSW+1DwqHdvc=
+	t=1745742055; cv=none; b=X39fHmn+dMreH+MVB9HelopvxBrhrjkB4RCH8hny0uPychnbIeuUIrMGkrYrbNu50c2qtfhfCuC/IVZCVoZpp50r4FZFx1dT1BDgEmNNiq9ExM7DgsnymTt1KKnHWGHfHZZSsxVucgP3FEaktq3NYyiTj9bHEHKin8GTcaS50Wk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745671725; c=relaxed/simple;
-	bh=VYqtbLRH/K/iE1LXZ2kNAahJLPEgGpqpa/nRjfps2+M=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=NzsBThVB7u/UExtvk7kgpmduvJpacUREJVOvZRGQ0tZdvW6j2YDSZqZOFupsBtXuZu1g4qbJJujOExHiXUees+RCewhqzl45w5O0Q+tQgs98YWeVMiYWBsXQrOBIg1I0ZFfHLm1oULlm/ajSR2kfEEpHX4C9nfLzM3+7EHIWYPc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=hI/ZKjTB; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1745742055; c=relaxed/simple;
+	bh=fyOAcxErM964eVJSIxAeMZVFc+VzMfbujPvLX1vy89c=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=CaALw/JBSSC7gra9URNVqVqHP8ZFl8z8w6Ouy0Uq6oe1l0j5z6auBKBGcuZZ0ngTiW+sKPg4VtBYbEkwEOalxjs63aB1XFbwPxMG5URYkIuDwToT9qlIdfwTIro1Il9wBU0WRu+3lx6H0bK8oPm3yKm9WnPSYau3/5enGgMRWe8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Uduejj0U; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hI/ZKjTB"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1745671720;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=yPzJiUd4vRbO+EoINHayAlTW+OknUYWyhdkX/Y6xRqY=;
-	b=hI/ZKjTBmYaAHRCjsUJ78ScTN7oaDV2BCqZ8VNNwv5u42Lhvt3gG0RediWBvcodbsVrsvR
-	tVd0GngZhB2l6J5DujrwRGi+RukFuOrA1+U+Mun9oN/iNWfnsCmcxMBvcusD0JuFQqCF5e
-	H6N94ALyIq7kYQgl68SwKf0xc9KesHA=
-Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
- [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-614-hckkkmIANTWHlMVbwOlB-w-1; Sat, 26 Apr 2025 08:48:38 -0400
-X-MC-Unique: hckkkmIANTWHlMVbwOlB-w-1
-X-Mimecast-MFC-AGG-ID: hckkkmIANTWHlMVbwOlB-w_1745671718
-Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-af8f28f85a7so1925967a12.2
-        for <fstests@vger.kernel.org>; Sat, 26 Apr 2025 05:48:38 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745671717; x=1746276517;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=yPzJiUd4vRbO+EoINHayAlTW+OknUYWyhdkX/Y6xRqY=;
-        b=WQQGx0kSjmfTejv6LFoGcGE9ofuzL4ijS4HdCEky5jtGF5UhTz2uhmBQBhz9GYLijx
-         IwOiyfUJr3w7Sdl0UIWXKLwSDU/IQdGLV60J+a99W89TgAW/mZeoChAJz8gYxuSTQafZ
-         KflYEnSQNO+dhco80fC9KGFfhgFqtWefh/kuB/b+iT31XumGwt9KlBWrIlroWXeUkaT5
-         ZVPFDIUYE9eXDcbf5QjCqdGEOVUzvIKk0inyEZdeNInkcNc8ZyF0gbEV5y1TyXTcbd2t
-         77syCspHoXRrBpGde0t9TVbq3j0ahAwcrhe+UpMLJZDET3smTvKXhNSPL1KASFc7DcxP
-         E+RA==
-X-Forwarded-Encrypted: i=1; AJvYcCV7bNK7h2QkuLxtEoeh+ucE9JbXN+8IdEHRsR65Y+w847HyLPjIqS1hPgkHgtWx5c33dn/W7lEJ@vger.kernel.org
-X-Gm-Message-State: AOJu0YzOVvNFzqvx880POUIORoBxXx9jNOQgSWri5yoaASk1o3UGryd2
-	W/zJKvxjShiSULFDC4Js5j3ZaXHe6Fa1i8KcnvNizoPe/+6m/BNgcsV5NDe2jpVIReKL2IdCiZp
-	f7J3jtBRWX4ZO0WmgoVnpmTSpXAVz4ry/EhDfCM0iQ4AD1wyYx9WR0VsoTN7kXHY=
-X-Gm-Gg: ASbGnctlkpaa4w36TZMRxL56lbHHhXmGLBVcCAg+swBNS1jevPnw0Q1p///Sz4wfgb2
-	baCpr6ScoIBIfIR023ezt/cuEHvYgp4RfWAxE+nfUcp7G+a1uGgdo6GPENGb6ydxj8xqwxS95f/
-	rZ4Xm6ypfsYTRL29H7d5+FLF9tCPCkZ6AXnrB7nJdzTJT38QzUCSTtlu9xQ0Y1oIHL1GFjXzW7Y
-	6AKLDSYbpGkiwuHXKeN+OvU94YkVuXiBciYS7pmT/nuOlL/xm59RUCFnqpUV5RQ4VZfhNPT1Qp0
-	b/bprJYisZPZXdHxdVdy3AqeKWt9eWlUf+sV57fHAw6WrsjPwGLF
-X-Received: by 2002:a05:6a21:2d0b:b0:1f5:59e5:8adb with SMTP id adf61e73a8af0-2046a1c0d16mr3957602637.0.1745671717355;
-        Sat, 26 Apr 2025 05:48:37 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IE+3tXq3X4/E+08Yc+LbbUeVUjZ13YxvblI7A+3qInc+gOPxUUVstiqoWPgm6VZKUvX1Wg+ag==
-X-Received: by 2002:a05:6a21:2d0b:b0:1f5:59e5:8adb with SMTP id adf61e73a8af0-2046a1c0d16mr3957586637.0.1745671717016;
-        Sat, 26 Apr 2025 05:48:37 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73e25a9a58bsm4912934b3a.143.2025.04.26.05.48.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 26 Apr 2025 05:48:36 -0700 (PDT)
-Date: Sat, 26 Apr 2025 20:48:33 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Anna Schumaker <anna@kernel.org>
-Cc: linux-nfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v2] generic/033: Don't call 'fzero' with the KEEP_SIZE
- flag
-Message-ID: <20250426124833.jopyhhzdr6zgal6t@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250425152452.105188-1-anna@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Uduejj0U"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51DACC4CEE3;
+	Sun, 27 Apr 2025 08:20:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1745742054;
+	bh=fyOAcxErM964eVJSIxAeMZVFc+VzMfbujPvLX1vy89c=;
+	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
+	b=Uduejj0USms0iyuxE2gNsfO3zmU6gOmFoYqAwIBH4EMndLiWtPp7G5gi4k8a02UIL
+	 H7oB3Uz5huu6LXRPyVrPN8yxj5aKkOC+FUEhowZVwh5iZSb29G9YVcaJiCMAcrmXdt
+	 l+DryPVvs6D1+NDaGKeAoZH4gOPIyaNpKc0CaO4H0R7m6a+Y1jJBSXdnSW2FDZ+oUC
+	 dIioKwicoKHM4gd22ZgP3aGP7T55mWI8umImVDf3kEwVyTWJi5fYt3WO7FcadEiKyU
+	 PhXGTcQcK97+3LpSDtKUkgUt2jx3CGw5+JoZ9u8VID18XlZACjrEUVBYevenGsxXfI
+	 nuzQ4FUSEG8eg==
+Message-ID: <90d349b5-5866-4486-8d93-a73f11ae2f9e@kernel.org>
+Date: Sun, 27 Apr 2025 16:20:50 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250425152452.105188-1-anna@kernel.org>
+User-Agent: Mozilla Thunderbird
+Cc: chao@kernel.org, Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+ jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH v2] f2fs/011: test to check out-of-space issue
+To: Zorro Lang <zlang@redhat.com>
+References: <20250327055051.3827735-1-chao@kernel.org>
+ <20250425141311.kgwsazvt6r65yfod@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <20250425141311.kgwsazvt6r65yfod@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Fri, Apr 25, 2025 at 11:24:52AM -0400, Anna Schumaker wrote:
-> From: Anna Schumaker <anna.schumaker@oracle.com>
+On 4/25/25 22:13, Zorro Lang wrote:
+> On Thu, Mar 27, 2025 at 01:50:51PM +0800, Chao Yu wrote:
+>> This is a regression testcase to check whether we will handle
+>> out-of-space case correctly during fallocate() on pinned file
+>> once we disable checkpoint.
+>>
+>> Testcase:
+>> 1. mount f2fs w/ checkpoint=disable option
+>> 2. create fragmented file data
+>> 3. set flag w/ pinned flag
+>> 4. fallocate space for pinned file, expects panic due to running
+>> out of space.
+>>
+>> We should apply both commit ("f2fs: fix to avoid panic once
+>> fallocation fails for pinfile") and commit ("f2fs: fix to avoid
+>> running out of free segments") to avoid system panic.
+>> Note that w/ these two commit, we fixed such issue in both
+>> convential and zoned block device.
+>>
+>> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+>> Signed-off-by: Chao Yu <chao@kernel.org>
+>> ---
+>> v2:
+>> - clean up codes suggested by Zorro
+>> - change output to expect ENOSPC error if we have applied fixes
 > 
-> None of the fzero calls in this test end up writing past the end of the
-> file, so this flag is unnecessary and can cause the test to fail on
-> filesystems that don't implement FALLOC_FL_KEEP_SIZE.
-> 
-> Signed-off-by: Anna Schumaker <anna.schumaker@oracle.com>
-> ---
+> Sorry I missed this V2, this version looks good to me. As there's not
+> more review points from f2fs list, so I'd like to merge it:
 
-This version is good to me,
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Thank you, Zorro.
 
+Could you please take a look at this new testcase?
 
->  tests/generic/033 | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+https://lore.kernel.org/fstests/20250415093822.1100476-1-chao@kernel.org
+
+Thanks,
+
 > 
-> diff --git a/tests/generic/033 b/tests/generic/033
-> index a9a9ff5a3431..b7df56b82619 100755
-> --- a/tests/generic/033
-> +++ b/tests/generic/033
-> @@ -37,12 +37,12 @@ $XFS_IO_PROG -f -c "pwrite 0 $bytes" $file >> $seqres.full 2>&1
->  # delalloc blocks and convert the ranges to unwritten.
->  endoff=$((bytes - 4096))
->  for i in $(seq 0 8192 $endoff); do
-> -	$XFS_IO_PROG -c "fzero -k $i 4k" $file >> $seqres.full 2>&1
-> +	$XFS_IO_PROG -c "fzero $i 4k" $file >> $seqres.full 2>&1
->  done
->  
->  # now zero the opposite set to remove remaining delalloc extents
->  for i in $(seq 4096 8192 $endoff); do
-> -	$XFS_IO_PROG -c "fzero -k $i 4k" $file >> $seqres.full 2>&1
-> +	$XFS_IO_PROG -c "fzero $i 4k" $file >> $seqres.full 2>&1
->  done
->  
->  _scratch_cycle_mount
-> -- 
-> 2.49.0
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
 > 
+>>  tests/f2fs/011     | 53 ++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/f2fs/011.out |  2 ++
+>>  2 files changed, 55 insertions(+)
+>>  create mode 100755 tests/f2fs/011
+>>  create mode 100644 tests/f2fs/011.out
+>>
+>> diff --git a/tests/f2fs/011 b/tests/f2fs/011
+>> new file mode 100755
+>> index 00000000..ec3d39ec
+>> --- /dev/null
+>> +++ b/tests/f2fs/011
+>> @@ -0,0 +1,53 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
+>> +#
+>> +# FS QA Test No. f2fs/011
+>> +#
+>> +# This is a regression testcase to check whether we will handle
+>> +# out-of-space case correctly during fallocate() on pinned file
+>> +# once we disable checkpoint.
+>> +# 1. mount f2fs w/ checkpoint=disable option
+>> +# 2. create fragmented file data
+>> +# 3. set flag w/ pinned flag
+>> +# 4. fallocate space for pinned file, expects panic due to running
+>> +# out of space
+>> +# We should apply both commit ("f2fs: fix to avoid panic once
+>> +# fallocation fails for pinfile") and commit ("f2fs: fix to avoid
+>> +# running out of free segments") to avoid system panic.
+>> +# Note that w/ these two commit, we fixed such issue in both
+>> +# convential and zoned block device.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick
+>> +
+>> +_fixed_by_kernel_commit 48ea8b200414 \
+>> +	"f2fs: fix to avoid panic once fallocation fails for pinfile"
+>> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+>> +	"f2fs: fix to avoid running out of free segments"
+>> +
+>> +_require_scratch
+>> +_require_command "$F2FS_IO_PROG" f2fs_io
+>> +
+>> +_scratch_mkfs_sized $((1*1024*1024*1024)) >> $seqres.full
+>> +_scratch_mount -o checkpoint=disable:10%
+>> +
+>> +pinfile=$SCRATCH_MNT/file
+>> +
+>> +# simulate fragment status in f2fs
+>> +for ((i=0;i<256;i++)) do
+>> +	$XFS_IO_PROG -f -c "pwrite 0 1m" $SCRATCH_MNT/$i >>$seqres.full
+>> +done
+>> +sync
+>> +
+>> +for ((i=0;i<256;i+=2)) do
+>> +	rm -f $SCRATCH_MNT/$i
+>> +done
+>> +sync
+>> +
+>> +touch $pinfile
+>> +$F2FS_IO_PROG pinfile set $pinfile >> $seqres.full
+>> +$XFS_IO_PROG -c "falloc 0 $((3*256*1024*1024))" $pinfile
+>> +
+>> +status=0
+>> +exit
+>> diff --git a/tests/f2fs/011.out b/tests/f2fs/011.out
+>> new file mode 100644
+>> index 00000000..559c3fdf
+>> --- /dev/null
+>> +++ b/tests/f2fs/011.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 011
+>> +fallocate: No space left on device
+>> -- 
+>> 2.49.0
+>>
 > 
 
