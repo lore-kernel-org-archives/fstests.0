@@ -1,167 +1,156 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BC1A1CAA85
-	for <fstests@vger.kernel.org>; Sun, 27 Apr 2025 08:20:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF7411A8F8A
+	for <fstests@vger.kernel.org>; Sun, 27 Apr 2025 14:40:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745742055; cv=none; b=X39fHmn+dMreH+MVB9HelopvxBrhrjkB4RCH8hny0uPychnbIeuUIrMGkrYrbNu50c2qtfhfCuC/IVZCVoZpp50r4FZFx1dT1BDgEmNNiq9ExM7DgsnymTt1KKnHWGHfHZZSsxVucgP3FEaktq3NYyiTj9bHEHKin8GTcaS50Wk=
+	t=1745764803; cv=none; b=oGlgaAZzR4h4RbVa0NacmxoAPkEELm8PBKhhBRveuIyUl+V67xQ9v+Bfe17rtlNxVuiqSFs7z0QOzTVovRzYbZEKlFj0FVSp+U5AAAW7+X52mD1Zza4RJSjwAcofjdFRkN5GEr5fxF7nISSQJXmkIO2+JXOaOTeM9hxa60Mpfx4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745742055; c=relaxed/simple;
-	bh=fyOAcxErM964eVJSIxAeMZVFc+VzMfbujPvLX1vy89c=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=CaALw/JBSSC7gra9URNVqVqHP8ZFl8z8w6Ouy0Uq6oe1l0j5z6auBKBGcuZZ0ngTiW+sKPg4VtBYbEkwEOalxjs63aB1XFbwPxMG5URYkIuDwToT9qlIdfwTIro1Il9wBU0WRu+3lx6H0bK8oPm3yKm9WnPSYau3/5enGgMRWe8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Uduejj0U; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1745764803; c=relaxed/simple;
+	bh=GzXx4vOouSqQGShistPwhU8/Hqp+bTC0iAhV1DBuAAg=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=Cq/qrNnvVKneiM80+SFX42S5qukhY0SN4ICNw/UkqwFkvh5RUUe1FbR21KjkdaZtEDGOyWPwY1u9PxruRhs00/9ctGp9rwm6IhRBTMndaVmkzpQR6hSEeg7HKxn3tw8kmTvefY4s1GMsOwZw8Avaxdr8D7CqFPmzimF6pZAtvh0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=V7XfPhXu; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Uduejj0U"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51DACC4CEE3;
-	Sun, 27 Apr 2025 08:20:53 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="V7XfPhXu"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4382EC4CEE3;
+	Sun, 27 Apr 2025 14:40:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1745742054;
-	bh=fyOAcxErM964eVJSIxAeMZVFc+VzMfbujPvLX1vy89c=;
-	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
-	b=Uduejj0USms0iyuxE2gNsfO3zmU6gOmFoYqAwIBH4EMndLiWtPp7G5gi4k8a02UIL
-	 H7oB3Uz5huu6LXRPyVrPN8yxj5aKkOC+FUEhowZVwh5iZSb29G9YVcaJiCMAcrmXdt
-	 l+DryPVvs6D1+NDaGKeAoZH4gOPIyaNpKc0CaO4H0R7m6a+Y1jJBSXdnSW2FDZ+oUC
-	 dIioKwicoKHM4gd22ZgP3aGP7T55mWI8umImVDf3kEwVyTWJi5fYt3WO7FcadEiKyU
-	 PhXGTcQcK97+3LpSDtKUkgUt2jx3CGw5+JoZ9u8VID18XlZACjrEUVBYevenGsxXfI
-	 nuzQ4FUSEG8eg==
-Message-ID: <90d349b5-5866-4486-8d93-a73f11ae2f9e@kernel.org>
-Date: Sun, 27 Apr 2025 16:20:50 +0800
+	s=k20201202; t=1745764802;
+	bh=GzXx4vOouSqQGShistPwhU8/Hqp+bTC0iAhV1DBuAAg=;
+	h=Date:From:To:Subject:From;
+	b=V7XfPhXuhffUHZr2a1cd1Z86d+VYYOoFRWbbFZrPPi0DQpl8vYOtug6cljA1S0i2X
+	 K2GoqCqowX+BsHjLnvz8N9FI+tZvxHZqRN2S5y1XMM0M49MNlIQftiRLTe8fuJ9Qm+
+	 9572dLl8CJbjUK7xWkdLD2bYf6WSfNDN1DVDnGv6e4GqPTlhI6EV4KDxXROrFiPDbz
+	 XmFjY8+R21V+HtxTRKpe8WJKnZq0/3V/RXzbvd1yvuK/STlCz0xWzrRXEOlKjOa1Is
+	 z+VpFMQrHbIUqYxLUpAbdAH46/zn1xsYpUGY6Pn88x/nv7PbCIlFh5nGwjl31kR3ac
+	 R6Q1WOBsltlqg==
+Date: Sun, 27 Apr 2025 22:39:59 +0800
+Message-ID: <65ad391455ff30f78a10f41fca908217@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2025.04.13 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: chao@kernel.org, Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
- jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v2] f2fs/011: test to check out-of-space issue
-To: Zorro Lang <zlang@redhat.com>
-References: <20250327055051.3827735-1-chao@kernel.org>
- <20250425141311.kgwsazvt6r65yfod@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Chao Yu <chao@kernel.org>
-In-Reply-To: <20250425141311.kgwsazvt6r65yfod@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="vFwFZRhUGmiJ"
+Content-Disposition: inline
 
-On 4/25/25 22:13, Zorro Lang wrote:
-> On Thu, Mar 27, 2025 at 01:50:51PM +0800, Chao Yu wrote:
->> This is a regression testcase to check whether we will handle
->> out-of-space case correctly during fallocate() on pinned file
->> once we disable checkpoint.
->>
->> Testcase:
->> 1. mount f2fs w/ checkpoint=disable option
->> 2. create fragmented file data
->> 3. set flag w/ pinned flag
->> 4. fallocate space for pinned file, expects panic due to running
->> out of space.
->>
->> We should apply both commit ("f2fs: fix to avoid panic once
->> fallocation fails for pinfile") and commit ("f2fs: fix to avoid
->> running out of free segments") to avoid system panic.
->> Note that w/ these two commit, we fixed such issue in both
->> convential and zoned block device.
->>
->> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
->> Signed-off-by: Chao Yu <chao@kernel.org>
->> ---
->> v2:
->> - clean up codes suggested by Zorro
->> - change output to expect ENOSPC error if we have applied fixes
-> 
-> Sorry I missed this V2, this version looks good to me. As there's not
-> more review points from f2fs list, so I'd like to merge it:
 
-Thank you, Zorro.
+--vFwFZRhUGmiJ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Could you please take a look at this new testcase?
+Hi all,
 
-https://lore.kernel.org/fstests/20250415093822.1100476-1-chao@kernel.org
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated to v2025.04.13 version.
 
 Thanks,
+Zorro
 
-> 
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
-> 
->>  tests/f2fs/011     | 53 ++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/f2fs/011.out |  2 ++
->>  2 files changed, 55 insertions(+)
->>  create mode 100755 tests/f2fs/011
->>  create mode 100644 tests/f2fs/011.out
->>
->> diff --git a/tests/f2fs/011 b/tests/f2fs/011
->> new file mode 100755
->> index 00000000..ec3d39ec
->> --- /dev/null
->> +++ b/tests/f2fs/011
->> @@ -0,0 +1,53 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
->> +#
->> +# FS QA Test No. f2fs/011
->> +#
->> +# This is a regression testcase to check whether we will handle
->> +# out-of-space case correctly during fallocate() on pinned file
->> +# once we disable checkpoint.
->> +# 1. mount f2fs w/ checkpoint=disable option
->> +# 2. create fragmented file data
->> +# 3. set flag w/ pinned flag
->> +# 4. fallocate space for pinned file, expects panic due to running
->> +# out of space
->> +# We should apply both commit ("f2fs: fix to avoid panic once
->> +# fallocation fails for pinfile") and commit ("f2fs: fix to avoid
->> +# running out of free segments") to avoid system panic.
->> +# Note that w/ these two commit, we fixed such issue in both
->> +# convential and zoned block device.
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick
->> +
->> +_fixed_by_kernel_commit 48ea8b200414 \
->> +	"f2fs: fix to avoid panic once fallocation fails for pinfile"
->> +_fixed_by_kernel_commit xxxxxxxxxxxx \
->> +	"f2fs: fix to avoid running out of free segments"
->> +
->> +_require_scratch
->> +_require_command "$F2FS_IO_PROG" f2fs_io
->> +
->> +_scratch_mkfs_sized $((1*1024*1024*1024)) >> $seqres.full
->> +_scratch_mount -o checkpoint=disable:10%
->> +
->> +pinfile=$SCRATCH_MNT/file
->> +
->> +# simulate fragment status in f2fs
->> +for ((i=0;i<256;i++)) do
->> +	$XFS_IO_PROG -f -c "pwrite 0 1m" $SCRATCH_MNT/$i >>$seqres.full
->> +done
->> +sync
->> +
->> +for ((i=0;i<256;i+=2)) do
->> +	rm -f $SCRATCH_MNT/$i
->> +done
->> +sync
->> +
->> +touch $pinfile
->> +$F2FS_IO_PROG pinfile set $pinfile >> $seqres.full
->> +$XFS_IO_PROG -c "falloc 0 $((3*256*1024*1024))" $pinfile
->> +
->> +status=0
->> +exit
->> diff --git a/tests/f2fs/011.out b/tests/f2fs/011.out
->> new file mode 100644
->> index 00000000..559c3fdf
->> --- /dev/null
->> +++ b/tests/f2fs/011.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 011
->> +fallocate: No space left on device
->> -- 
->> 2.49.0
->>
-> 
+The new head of the master branch is commit:
 
+2cc8c822f864 fstests: btrfs: testcase for sysfs chunk_size attribute validation
+
+New commits:
+
+Anand Jain (5):
+      [0a9011ae6a36] fstests: common/rc: set_fs_sysfs_attr: redirect errors to stdout
+      [afdb10ee1853] fstests: filter: helper for sysfs error filtering
+      [03adc99ef11c] fstests: common/sysfs: add new file sysfs and helpers
+      [f5cb79fb0f10] fstests: btrfs: testcase for sysfs policy syntax verification
+      [2cc8c822f864] fstests: btrfs: testcase for sysfs chunk_size attribute validation
+
+Catherine Hoang (1):
+      [d90ee3b64963] generic: add a test for atomic writes
+
+Christoph Hellwig (1):
+      [ad048ff62f50] xfs: remove the post-EOF prealloc tests from the auto and quick groups
+
+Darrick J. Wong (4):
+      [7ff687d85747] common/rc: fix dumping of corrupt ext* filesystems
+      [68e9620be4a6] xfs/801: provide missing sysfs-dump function
+      [bc7f79bd13d8] xfs/792: skip test if rextsize isn't congruent with operation length
+      [8d1447890a8c] generic/275: fix on 32k fsblock filesystems
+
+Nirjhar Roy (IBM) (7):
+      [83e1f4c43817] xfs/539: Ignore remount failures on v5 xfs
+      [a758e467c24a] generic/749: Remove redundant sourcing of common/rc
+      [fb15457efd0f] generic/367: Remove redundant sourcing of common/config
+      [491eddb2699f] check: Remove redundant _test_mount in check
+      [69bdf04c98c3] check,common{rc,preamble}: Decouple init_rc() call from sourcing common/rc
+      [1c2f3da49c5d] common/config: Introduce _exit wrapper around exit command
+      [f14f2a885954] common: exit --> _exit
+
+Swarna Prabhu (1):
+      [3be9add6d1d3] generic/750 : add missing _fixed_by_git_commit line to the test
+
+
+Code Diffstat:
+
+ check                 |  10 ++-
+ common/btrfs          |   6 +-
+ common/ceph           |   2 +-
+ common/config         |  16 +++--
+ common/dump           |  11 ++-
+ common/ext4           |   2 +-
+ common/filter         |   9 +++
+ common/populate       |   2 +-
+ common/preamble       |   3 +-
+ common/punch          |  13 ++--
+ common/rc             | 163 +++++++++++++++++++++++++++----------------
+ common/repair         |   4 +-
+ common/sysfs          | 145 ++++++++++++++++++++++++++++++++++++++
+ common/xfs            |   8 +--
+ tests/btrfs/329       |  21 ++++++
+ tests/btrfs/329.out   |  19 +++++
+ tests/btrfs/334       |  21 ++++++
+ tests/btrfs/334.out   |  14 ++++
+ tests/generic/275     |   3 +
+ tests/generic/367     |   1 -
+ tests/generic/749     |   1 -
+ tests/generic/750     |   6 +-
+ tests/generic/765     | 188 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/765.out |   2 +
+ tests/xfs/539         |   2 +-
+ tests/xfs/629         |   2 +-
+ tests/xfs/630         |   2 +-
+ tests/xfs/631         |   2 +-
+ tests/xfs/632         |   2 +-
+ tests/xfs/792         |   1 +
+ tests/xfs/801         |  12 ++++
+ 31 files changed, 590 insertions(+), 103 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--vFwFZRhUGmiJ
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmgOQZwACgkQlNbPkfr2
+tMwSaBAAp6YnxEXjP926ndimEbxibk69MYxujFGG3o3hBwva6pZLuUHvOt4/Zini
+ytQ+IKnvFinTNSUpxldtuchr/rdkEumgiBch5Tipaz6RqtqSQ5eFTPyFoIZ9wdCN
+aDguE5YIGQouTLegOOssBqwyHKGSFsJruUygPrXLX0H1ud9E7pdZAf7GDbvpl4X8
+aedd9wr+PCDzjPngIkpBt2ULIJpLzIPOjz4zA/IQTUmc0DjOZfMzP9cobyLj96rn
+eDZKlMPmRzqt3g0X5H7+dZv/nc9o15pB/h/t7mmFtxmgNqZzNwuGLK5nZhW9lQ9B
+C1T7sAQsGONJ/VF5wzTlRuzOvN4vysJ6QJAVVIyUni845yNqIDKnPeqTTUlke4Jw
+GA1bMD6WyivFRwb19jKxEmyULt0HJY7FaldAJW0h4wAJ0Ow1KLF8h0AZNJargZG7
+7xdEZLnXcPl1NdKmriDPB8YWL58SWUWAwV7UwwmOBFJLec5QLVFdFvW5xZluePB+
+IAlYSEUUZCoEeDpfUdJq7qlRancpdZHKgXtft7bFP7rHezh6hWwCNYSoAqXuQSJ3
+fgz/enO2EMiM3Od/HF9IWGgpYWZ22aURnnfY4Cf2udlDFNr6e1Jkb2000xEVAKh4
+LwNAv2Pf16fUcBowmoNbMXE6v+42ayeLdsLdQklprV0eIYYz738=
+=1FB8
+-----END PGP SIGNATURE-----
+
+--vFwFZRhUGmiJ--
