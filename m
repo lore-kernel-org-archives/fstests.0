@@ -1,193 +1,103 @@
-Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
+Received: from mail-pf1-f181.google.com (mail-pf1-f181.google.com [209.85.210.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 357832D8699;
-	Tue, 29 Apr 2025 14:11:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 601721BF37;
+	Tue, 29 Apr 2025 14:48:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745935897; cv=none; b=YJeDqK4Ftxcsl4PD/I94cWyhe1YZyYuPRXWEMDaTN0RKgMSv2ZfV7szuYh95I6eC3ULi3gBI8J8bwa0fNeylTz9qWVvZQKEtTejqbNeufBovteuwSSD3gm5PfttdUE+kTKhoZYvWNw2ZBJQPVmNm+UvOS15pvbuuUCG4ZWPi6Jc=
+	t=1745938123; cv=none; b=XSspZQusnyz6N86PrkUgcWHbOplgePKj+TfcsNuJ/L8jwMvnuANPDC4V50SqKWqCTmU75e4zkRvuzCMlkvlN47rrZnFgQ8EfpvYnYKw5EGDjlXDsz8/m4HEudm8wZAA2pJMVDPNcE6tADQgArRTGOc/2g46b5s25KfhUjiy5d8s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745935897; c=relaxed/simple;
-	bh=9kD6OTSweYA7XlA7mugMcF+Qvv4vk6XLfcm6Nry/sNI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=CktJ3ByNDhxMSq01jVvCZHraG1vz3uM7YvIRR87kp9gjV6ExOnBUUG0gj7ja6E5fEgs+Ajns4ZH1awGSVrtQr6i7o0qoFZsKy3lwOLkm6dyppW/zGCdzHYWgtakPkuTFkq7PFOCIo8NRW0Ld1x6MBpZQvXQ4aRRNB7v/uEljipE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Vd7RnTHW; arc=none smtp.client-ip=209.85.214.176
+	s=arc-20240116; t=1745938123; c=relaxed/simple;
+	bh=2li+pG4xWjvoh5hk5Z470gKd/rrpN/Ym3/G+Y2snvFQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=fxOpIFb5YM15SypAIpsthd7FHUqX+eQ0p/XK+1FpvKXxaNoA95zfV+oaERpONAOo1XNf5SzpQwG1wzmk+dXghQzrjEJSrzFcJCRPbWJFY5ZQb2Kc3bfkX6dSVT37yIpA6Wd6s3vZuOW5jt8AQIUbA3MF1JPZ64/PAIjDOLNp3mI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hroiqGQo; arc=none smtp.client-ip=209.85.210.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Vd7RnTHW"
-Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-2240b4de12bso88939805ad.2;
-        Tue, 29 Apr 2025 07:11:35 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hroiqGQo"
+Received: by mail-pf1-f181.google.com with SMTP id d2e1a72fcca58-7376dd56eccso6490410b3a.0;
+        Tue, 29 Apr 2025 07:48:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1745935895; x=1746540695; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=txPRzhp6owC64zhJPSR3NsfLXXGLxGN3jwUZX74lVQI=;
-        b=Vd7RnTHWS8+kv0TJCLaarPE+20T7h6l5GJEi4hMKxRcFDI+XiXtQUUDLFM0AyL4q2L
-         YouZjj76/9z54Z0r5xuZYoENQEXhvkYuBJ6zIz11eU4ANBemczEaEIFbaBIuafSRNdOC
-         V8oA5M98Z/qhLoiGsG3HYypojjnNyqZIUikjB86tSHIvQe3w/+HoRtUAsFOfj01ZAZth
-         jBISdgBI/KEzur/DD4gXPO5SAJt6CSWgPDakgKI5AQR2Vn9ZzFB9/iWIpefRzTVTQQHD
-         vxa/xo6xFZuS0BkAEQCgBXqjvzj0oI7CJWQTIfbYzrX+wDFLLxlJmNyI6evW8t7pFI+K
-         Ot9A==
+        d=gmail.com; s=20230601; t=1745938120; x=1746542920; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=930PJI09Qq1lKsA2QjAv28oAp9sjlL/yYLXf00Mt0Y0=;
+        b=hroiqGQo9PoVaU/SwciUdTvDADYhVGhzeEUslLVqO9XJfzak8L6GSzoDYlTl0U11rh
+         OHPoGocY/cg8sJUWiqai3mAY3fC+6oCK6E4ys3goZSz16qhnJB6UnqINlLh94tblekNK
+         XY/zXZblnDmmXYF92RK/vEODhS9uW0sgL+nnW+XWbU3pf0mHMJmh2VD0pHgFVBXfrSq+
+         bA/bW3PQAWAYRmVrT+wAFxlSKti5AF+h0SwI4nza8K+WyB73+TG/+VFgXjkCJvyTIoWh
+         2m68Taxax8Jw0sa3W3fTfTZqwwF/COK3Y0uB0JYpQ1RS4Ho6Rw56uHpWQW2o8hfAeN/y
+         q9gg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745935895; x=1746540695;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=txPRzhp6owC64zhJPSR3NsfLXXGLxGN3jwUZX74lVQI=;
-        b=FB2DH/1c2waa/zTawDlxnBSjFL5acHixN5NmymouwTCiaIg6dQ+fTaSclUXWC9XInV
-         sz7Hp8K3mLSWJuWYcZORLOYqZ8SyRBJCkYFObMhWEngCyTJCk8ckcCBt3Pa8IoTyK/pl
-         HY2Ldm7aNwBNlvctKR4PO6OxmuCNte6QVRJDcnO+iBOZfdH72pX1a2kv3afDBy2wj0DT
-         +U6fdTzOnLGjYdFohzXhN3Unr4Cm+0VTEMUewhenPyq38xNpfkebqOHXGmoQ65Fux6iH
-         fAyMKKlgva+rtnVwFsR+IaHmDBANphlO6QyT/Zx7peoqoOtdOFcmTQzSw2iA1SobqdIk
-         BURA==
-X-Forwarded-Encrypted: i=1; AJvYcCV+rSJH9CJIsW3VLu0F/Zh5TbzREENTX6CfkaHE9Xsz7srE/oHrCKeaA64IifbVC/sxZ2tRuUi0@vger.kernel.org, AJvYcCVuPP4xQQApmljUEFEwYegrONzHny13AlJl/QbwGMAaxlBHL0Um3w+9abPHTRUlCW2oNo3g9/TAZd6MYA==@vger.kernel.org
-X-Gm-Message-State: AOJu0YwFxhJAiYaLXTunWnj1wZWwykk050CZe24N/0Jw94coc8QVWf5Z
-	MjyXbs8eQtOdyyEbawzDFiff/3/n9xkqGWzRZ95dF0hRHIyKX5Yu
-X-Gm-Gg: ASbGncsK3+Iy/5FJcZFbMj5switEDWp4dXqLV3FsHW4IZCCCCc8SVDGTy2uzcpGfJYa
-	TDp7gzFfa256ZlUBO3PSR/DxiVtdlvd+yATgpfzksQPq9mKCYj+Bk0ex8hgYGhrAyvntx2HZ/FO
-	YLSupR7nzp3Ce/BQvoHA8BPg6/LPhya91kld4Y19Cfy6X0u4tPSBjCJ/yIkqAobjX2EUs0vICsD
-	a8R/yNk9S+ZdmgyCKNH2h0xPv/h6jds5tm/TDCrX2d1hGDJBwqwmQ2UbPZ/rYWc/HkKNixE4PXO
-	UZ11E2QjigYXyHUOGmuGs2WkaXOueIivXg1I6GCDQxeHX+ZBB/Q=
-X-Google-Smtp-Source: AGHT+IFv4KIsYUSPZZOOZVF88qVqaN0hNIRkI1c8bjq/7DjATV6y7VJJBTEDB5dSQZlS8cOm15wjvg==
-X-Received: by 2002:a17:902:da91:b0:22c:33b2:e420 with SMTP id d9443c01a7336-22dc69f82bbmr170471705ad.7.1745935895223;
-        Tue, 29 Apr 2025 07:11:35 -0700 (PDT)
-Received: from [192.168.0.120] ([49.205.34.162])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22db4dbe328sm102822365ad.88.2025.04.29.07.11.32
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 29 Apr 2025 07:11:34 -0700 (PDT)
-Message-ID: <f1fda2ca-5531-4bba-aaea-8edc15430244@gmail.com>
-Date: Tue, 29 Apr 2025 19:41:30 +0530
+        d=1e100.net; s=20230601; t=1745938120; x=1746542920;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=930PJI09Qq1lKsA2QjAv28oAp9sjlL/yYLXf00Mt0Y0=;
+        b=ogC4sgX4tD/Np8gIAr+MPomTLsjPxGmUGU56F10Cl62E1QfV1ujwdwGiJvXKyxowS4
+         bDwXjQpjttL9bXAFjJBdaD7sjuWHOMBcahcKC5tRR4YbeNnBUvL+9qLjm7KpCMkZaQOq
+         T2MgqwDea4VekXL/kwnMOuPWoBy958MllS/2sYmSf9vQ10o245peF1lIRG79yTfhg9Ix
+         vKntsi80/yziq6VG07Xt1e1rU8rytIKyBDiRT6lqbZMrfc0unCjlPLUfvJUNfJJWA3MK
+         2ndi3TFE2kGbyCkzJzfL1s84mhQSRvF7TC7tFtBWrKYhPRokWDVFEnMCaoRd3tj/d6Ui
+         Xhww==
+X-Forwarded-Encrypted: i=1; AJvYcCVQR/KCeAkkblEXKCEKZVyqnyeRe2BjG2voaE8Mezz/JNkr5lkNLQ9AgaZ7WxclTvS+tBMXpCrY@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy5C7ftbkJeV+k9mZAdcxPXLwts1QqkpXHDBUnmKR8PJjdhq6eP
+	Sk5ZVjDZNODMQQlqtkt4pkqBTm8ls0kHY3yEvW6REeUpvbOtzRBZGG2D+Q==
+X-Gm-Gg: ASbGncsFYX6KoY5HIV8dMLEitapd7a/uXVNV0jlcvMnDhU7HXqwdaOhaLxDaO/L/DYz
+	B27ybsPIYxzZ5cdHAqFKjbczbfz0dR7VY1BTNF1FYEHUpFpXWHkzVmWiigyxJrCfS+MqftNriB3
+	CDRJLuA+lNoCSlqw6bHGmtSD57RSfRoSt5gEwWJT2j5l4Shocjb5bcqUFIoUsMQhw1WkYmRYYUy
+	Dvs0MajSSM/0f2dLnywDbvjxPrN0/1uWJ8EjSN8oULaOXIY+E4jQePWg0Zj6zIRgxXlQYdbPJD4
+	yWqesERmdV9UCX83e8yXIWrEC+bOI/7k6PY2DSwNzBaZfQdMo2OyhlQwUXkM73f3rilk/tX5fJ4
+	coERqkqYaVjsjKnihiRxegOjTOggt
+X-Google-Smtp-Source: AGHT+IEZd63J22dKQINTXD10WExEEM0ROT0NSMjXnBdM/AY0O7BUHc3SjfpwqJvBnEKh7qPkspaGmA==
+X-Received: by 2002:a05:6a00:2446:b0:736:73ad:365b with SMTP id d2e1a72fcca58-7402716b4f7mr5421706b3a.14.1745938120124;
+        Tue, 29 Apr 2025 07:48:40 -0700 (PDT)
+Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com ([49.205.34.162])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73e25a9fd26sm9954222b3a.151.2025.04.29.07.48.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 29 Apr 2025 07:48:39 -0700 (PDT)
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+To: linux-xfs@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org,
+	fstests@vger.kernel.org,
+	ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com,
+	djwong@kernel.org,
+	zlang@kernel.org,
+	david@fromorbit.com,
+	hch@infradead.org,
+	nirjhar.roy.lists@gmail.com
+Subject: [PATCH v3 0/1] xfs: Fail remount with noattr2 on a v5 xfs with v4 enabled kernel.
+Date: Tue, 29 Apr 2025 20:17:58 +0530
+Message-ID: <cover.1745937794.git.nirjhar.roy.lists@gmail.com>
+X-Mailer: git-send-email 2.43.5
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/1] xfs: Fail remount with noattr2 on a v5 with v4
- enabled
-Content-Language: en-US
-To: Christoph Hellwig <hch@infradead.org>
-Cc: linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org,
- fstests@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
- djwong@kernel.org, zlang@kernel.org, david@fromorbit.com
-References: <cover.1745916682.git.nirjhar.roy.lists@gmail.com>
- <94a5d92139aef3a42929325bc61584437957190e.1745916682.git.nirjhar.roy.lists@gmail.com>
- <aBDDmDymL8yMxloN@infradead.org>
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <aBDDmDymL8yMxloN@infradead.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 
+This patch fixes an issue where remount with noattr2 doesn't fail explicitly
+on v5 xfs with CONFIG_XFS_SUPPORT_V4=y. Details are there in the commit message
+of the patch.
 
-On 4/29/25 17:48, Christoph Hellwig wrote:
-> On Tue, Apr 29, 2025 at 02:32:08PM +0530, Nirjhar Roy (IBM) wrote:
->> Bug: When we compile the kernel with CONFIG_XFS_SUPPORT_V4=y,
->> remount with "-o remount,noattr2" on a v5 XFS does not
->> fail explicitly.
->>
->> Reproduction:
->> mkfs.xfs -f /dev/loop0
->> mount /dev/loop0 /mnt/scratch
->> mount -o remount,noattr2 /dev/loop0 /mnt/scratch
->>
->> However, with CONFIG_XFS_SUPPORT_V4=n, the remount
->> correctly fails explicitly. This is because the way the
->> following 2 functions are defined:
->>
->> static inline bool xfs_has_attr2 (struct xfs_mount *mp)
->> {
->> 	return !IS_ENABLED(CONFIG_XFS_SUPPORT_V4) ||
->> 		(mp->m_features & XFS_FEAT_ATTR2);
->> }
->> static inline bool xfs_has_noattr2 (const struct xfs_mount *mp)
->> {
->> 	return mp->m_features & XFS_FEAT_NOATTR2;
->> }
->>
->> xfs_has_attr2() returns true when CONFIG_XFS_SUPPORT_V4=n
->> and hence, the the following if condition in
->> xfs_fs_validate_params() succeeds and returns -EINVAL:
->>
->> /*
->>   * We have not read the superblock at this point, so only the attr2
->>   * mount option can set the attr2 feature by this stage.
->>   */
->>
->> if (xfs_has_attr2(mp) && xfs_has_noattr2(mp)) {
->> 	xfs_warn(mp, "attr2 and noattr2 cannot both be specified.");
->> 	return -EINVAL;
->> }
->>
->> With CONFIG_XFS_SUPPORT_V4=y, xfs_has_attr2() always return
->> false and hence no error is returned.
->>
->> Fix: Check if the existing mount has crc enabled(i.e, of
->> type v5 and has attr2 enabled) and the
->> remount has noattr2, if yes, return -EINVAL.
->>
->> I have tested xfs/{189,539} in fstests with v4
->> and v5 XFS with both CONFIG_XFS_SUPPORT_V4=y/n and
->> they both behave as expected.
->>
->> This patch also fixes remount from noattr2 -> attr2 (on a v4 xfs).
->>
->> Related discussion in [1]
->>
->> [1] https://lore.kernel.org/all/Z65o6nWxT00MaUrW@dread.disaster.area/
->>
->> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
->> ---
->>   fs/xfs/xfs_super.c | 25 +++++++++++++++++++++++++
->>   1 file changed, 25 insertions(+)
->>
->> diff --git a/fs/xfs/xfs_super.c b/fs/xfs/xfs_super.c
->> index b2dd0c0bf509..1fd45567ae00 100644
->> --- a/fs/xfs/xfs_super.c
->> +++ b/fs/xfs/xfs_super.c
->> @@ -2114,6 +2114,22 @@ xfs_fs_reconfigure(
->>   	if (error)
->>   		return error;
->>   
->> +	/* attr2 -> noattr2 */
->> +	if (xfs_has_noattr2(new_mp)) {
->> +		if (xfs_has_crc(mp)) {
->> +			xfs_warn(mp, "attr2 and noattr2 cannot both be specified.");
-> Nit: normal xfs style is to move the message to a new line when іt
-> overflows 80 characters:
->
-> 		if (xfs_has_crc(mp)) {
-> 			xfs_warn(mp,
-> 	"attr2 and noattr2 cannot both be specified.");
->
->> +			return -EINVAL;
->> +		}
->> +		else {
-> No need for an else after a return.  And for cases where there is an
-> else the kernel coding style keeps it on the same line as the closing
-> brace.
->
->> +	/* Now that mp has been modified according to the remount options, we do a
->> +	 * final option validation with xfs_finish_flags() just like it is done
->> +	 * during mount. We cannot use xfs_finish_flags() on new_mp as it contains
->> +	 * only the user given options.
->> +	 */
-> Please keep comments to 80 characters.  Also the kernel coding style
-> keeps the
->
-> 	/*
->
-> at the beginning of a comment on a separate line.
+Related discussion in [1].
 
-Sure, I will address the above coding style related issues. Thank you.
+[v2] --> v3
+ - Mostly some coding style related changes.
 
---NR
+[v1] https://lore.kernel.org/all/7c4202348f67788db55c7ec445cbe3f2d587daf2.1744394929.git.nirjhar.roy.lists@gmail.com/
+[v2] https://lore.kernel.org/all/cover.1745916682.git.nirjhar.roy.lists@gmail.com/
+[1] https://lore.kernel.org/all/Z65o6nWxT00MaUrW@dread.disaster.area/
 
->
--- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+Nirjhar Roy (IBM) (1):
+  xfs: Fail remount with noattr2 on a v5 with v4 enabled
+
+ fs/xfs/xfs_super.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+--
+2.43.5
 
