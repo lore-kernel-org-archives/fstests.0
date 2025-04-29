@@ -1,79 +1,110 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4FBF32528EB;
-	Mon, 28 Apr 2025 15:58:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 82B751E515;
+	Tue, 29 Apr 2025 06:53:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745855923; cv=none; b=Hg0vUTURgBmkvF4Pf7VmVfIRic0AHyRwxAgJruntrZ5kYmF7nw/vkKvfoJjKgW+78gxXAvr1uWafd49HlkvvsQEIVE8Y8lej1ewIHrfA250NKay9b9BNXUyjyDfBnqYi265a+9Q3gAWAyUUh5tKveWaFS5gpVq9lTKBA4q1q4xQ=
+	t=1745909597; cv=none; b=e5wl9KfFtl9LNr1bSUGHzYte6o4Nnr3QwDIe53eoMO+Bu0I6M9/h3u9tvtulCCRP9F1gjC1xdo12YKcDs0RVbuH3C7m12//5VVMNofJwkc0Ifx/iJTNmJ4xl9iMeufCN3o5bfmcbIQDDVp6Hd0IP8RlEuVsDUtQr6F/kGtYY6po=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745855923; c=relaxed/simple;
-	bh=XfaW1XIB46Rmz8mNYMd28IIelp5Xrplwugru0kMZdhU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=BOSY9yz0gwY7kMs/Rv9W8psuDeynwBeS9V2mW6/6qLexC7oXZUgxAEZk3MBTpifxhNxjEvRNs7EPwWb2kom3/YcjCa2s9Lzg2HMZ7lm4GcOrMBslgZy03bBAnbVGsihPjS13TpLr1l3UYOGcCZNMu4gKAwYUE2W6dSrmEahW4go=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hTrWuvQN; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1745909597; c=relaxed/simple;
+	bh=H0DxWQxT/vt6vtTmMMkLS4orhiBpJnW0Wwz/Aaj2jJY=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=L/T0UsetEPY9ZXtVSi07awx5YmX2HxnH7mqA6pLhogOZEmkG3X2dsyKDA5GG+E8jRjJkLzA63+T2qO7qOOTh5JbshFc1x2suwy25d0p4RZLTx7+SapMH1qOvdQ2FUlb2CyzbiGRQsJHrVuMvBHKX8HfA0VuAQ0BHN+Zrin2vKRw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=naJv4z5E; arc=none smtp.client-ip=209.85.214.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hTrWuvQN"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC263C4CEE4;
-	Mon, 28 Apr 2025 15:58:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1745855922;
-	bh=XfaW1XIB46Rmz8mNYMd28IIelp5Xrplwugru0kMZdhU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=hTrWuvQNVcCfjP22SZ6Km1w53TfkxkihkMVfPBGsFe63FT/c68GUbHHmBSI8B8b77
-	 iSy2iBMhOQDSnDXz0XwanazgH5Tp0iql7H2HZ/jL+M2sntXL0aqaZ/QiAxt3iEuIpY
-	 mwdicHPVmV2qSlqNhvspXpWgKZOeRTc0JKqwAabJw/P/3huBO6oz0p2O6ogGQ40/IP
-	 8TQjNG1E9dm/olccwOinddrGt7BzmnhAkp+wf6G5VSYYv60sJ+hwaieHao9qAwwcuT
-	 ROQuoQO1hOgW7s482O4C+U6e+6ip8hCdimrYJYHEicikV2Gq2wYQamkCFU1mIMt9gl
-	 usZKG9SE7glLQ==
-Date: Mon, 28 Apr 2025 08:58:42 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Hans Holmberg <Hans.Holmberg@wdc.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	"zlang@kernel.org" <zlang@kernel.org>,
-	"linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-	Carlos Maiolino <cem@kernel.org>,
-	"david@fromorbit.com" <david@fromorbit.com>, hch <hch@lst.de>
-Subject: Re: [PATCH 2/2] xfs: add mount test for read only log devices
-Message-ID: <20250428155842.GR25675@frogsfrogsfrogs>
-References: <20250425090259.10154-1-hans.holmberg@wdc.com>
- <20250425090259.10154-3-hans.holmberg@wdc.com>
- <20250425150504.GH25667@frogsfrogsfrogs>
- <1c313919-f6ca-4f53-be69-21fe93e97b0e@wdc.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="naJv4z5E"
+Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-224341bbc1dso60265605ad.3;
+        Mon, 28 Apr 2025 23:53:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1745909594; x=1746514394; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=PWytkNwNq3JbjY0CzfguN3i2miVxpmHE2yuThu/jf84=;
+        b=naJv4z5ECL4CKFfzuDp08xaOlwcz5LzS6h+m/tR5M8UY1nAJnGgIquVm7G1n4R+8yH
+         JCIlR+nGjGel31zCwNQ/jfeoJBFiTwayoeQpVPGvL7H9C2uEcXqaXfPZYIRsPdJ3KW6M
+         rZKl4RepNpSzw3mneCgswpK4qQxlBqXpiBBotDjDyqBUPCR1fo3Guli7luEm1NRxG2ii
+         E+0L1tfSh0ps0//2mQc0Mq5BlygLh5E4IZUVBGNAaBuhQFml8fhUYqec7CEMFsMbn5Gt
+         rBdNzctxGpTKiWBwlGjyy4Zg6/DzA6B6IXr09NE/CWazJMMjy6BiSH87l4n6f/JmePwr
+         6f1A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1745909594; x=1746514394;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=PWytkNwNq3JbjY0CzfguN3i2miVxpmHE2yuThu/jf84=;
+        b=tO2UgGssjnDdfmfC/RsnvBd6WR1lr4EhZssuHrQON80lNTUxc9gctRXJ6r1gHnn4Wu
+         /a/vz+VddUParSP1WsMoAgrzLwAqck7tUa7zNeA97b6x/hgV/R6Snn4cqnXK2Ketax44
+         QMxkSG8M+DDM4pf+fqH0cdQeLMZu8hGEPVuxSXgcTYQx6wiD3325LtpuaPtdUROPHMtz
+         DOGXMBNZTPkAbMVStgxN2nQS+kphwrVn3twxOh5gzrJcCXsG6q5LZFS0YjeBbLcVRe52
+         P1x8Tl10Dlzjmuvd0ONoHeiQIWZwvoSnHtKuZ+JIMCXnkLHB6yF8uoj3oGPW5hoT9tMP
+         nvZQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWC7H7dDMvjYP9/yJbF+xYkmWbuTsWEE+BlZom65WfK7dZuojTN5+LpbTHcMY6Hm2OOW7DUagugyVM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzcfEap83+B+kl8xjVqG7zscqC0eNEJWjxSEmYWqCL1JwvJfvKM
+	5BPku/+A/b8iWG/BcBBhAyX3LddKG1VksEwelpdveDsNVAiaqbaSKW4jJw==
+X-Gm-Gg: ASbGnctMMYquOtD5NnjekbW2uT84mVq485vO9CKyz5rop0/7emqzST2FcdWsGgmK8qG
+	iiUycxGF+dFwEEMoo/WHFW3c6Y7PmCDz20obOVOZ1SbGUD+x3F9gEnnBYmQ/PoLbQEhELv86Ohm
+	RBZj0HFA2Os0rMYGJpujPwTlVhQQ4rBr6dyTqAAa7fe5PV9oI7NWjz41cb9g8OaoCbhIgB3vkTr
+	aL3H1eGb+oP4JsEQb1J/Jcmg3S6//WUK7Dl5jhntrRB4pUVKAcP75Tt+B1IyS5h0okmQLxvr8q9
+	SbDmwkiPhOaK2qplPWCzeQ/fRpy/bwiL1a2MqERlgGVo
+X-Google-Smtp-Source: AGHT+IE5/Q1OZ08KMNBNop+c4JGIRcQl4Da8KTZnPr6fDqtmFjDF67AMcykFCJvEcqdubEj37lslfA==
+X-Received: by 2002:a17:902:d4c3:b0:220:e156:63e0 with SMTP id d9443c01a7336-22de7009e81mr24101555ad.8.1745909593699;
+        Mon, 28 Apr 2025 23:53:13 -0700 (PDT)
+Received: from citest-1.. ([49.205.34.162])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22ddf3c9d1dsm24149805ad.244.2025.04.28.23.53.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 28 Apr 2025 23:53:13 -0700 (PDT)
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org,
+	ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com,
+	djwong@kernel.org,
+	zlang@kernel.org,
+	david@fromorbit.com,
+	nirjhar.roy.lists@gmail.com
+Subject: [PATCH v2 0/2] common: Move exit related functions to common/exit
+Date: Tue, 29 Apr 2025 06:52:52 +0000
+Message-Id: <cover.1745908976.git.nirjhar.roy.lists@gmail.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1c313919-f6ca-4f53-be69-21fe93e97b0e@wdc.com>
+Content-Transfer-Encoding: 8bit
 
-On Mon, Apr 28, 2025 at 12:16:34PM +0000, Hans Holmberg wrote:
-> On 25/04/2025 17:05, Darrick J. Wong wrote:
-> > ps this test should check
-> > that a readonly log device results in a norecovery mount and that
-> > pending changes don't show up if the mount succeeds?
-> > 
-> > Also, ext4 supports external log devices, should this be in
-> > tests/generic?
-> 
-> Doh!, actually ext4 has a test for this already, ext4/002
-> (also based on generic/050)
-> 
-> With my fix, ext4/002 passes for xfs Should/can we turn that into a
-> generic test?
+This patch series moves all the exit related functions to a separate file -
+common/exit. This will remove the dependency to source non-related files to use
+these exit related functions. Thanks to Dave for suggesting this[1]. The second
+patch replaces exit with _exit in check file - I missed replacing them in [2].
 
-Yeah, it looks like ext4/002 already does most of what you want.  Though
-I'd amend it to check that SCRATCH_MNT/00-99 aren't visible in the
-norecovery mounts and only appear after recovery actually runs.
+[v1] -> v2
+ - Removed redundant sourcing of common/exit from common/{btrfs,ceph,dump,ext4,populate,punch,rc,repair,xfs}. Thanks to Zorro for pointing this out.
+ - Moved the sourcing of common/exit in common/preamble from the beginning of the file to inside the function _begin_fstest()
+ - Moved the sourcing of common/exit in check script from the patch 1 to patch 2 since patch 2 uses _exit().
+ - Replaced exit() with _exit in the trap handler registration in the check script. Thanks to Zorro for pointing this out.
 
-> The test makes sure that a filesystem will mount ro,norecovery if
-> the log device is ro but does not do any real checks if recovery is
-> prevented (or done once the log device is rw again).
-> That could be added though.
+[v1] https://lore.kernel.org/all/cover.1745390030.git.nirjhar.roy.lists@gmail.com/
+[1] https://lore.kernel.org/all/Z_UJ7XcpmtkPRhTr@dread.disaster.area/
+[2] https://lore.kernel.org/all/48dacdf636be19ae8bff66cc3852d27e28030613.1744181682.git.nirjhar.roy.lists@gmail.com/
 
-<nod>
+Nirjhar Roy (IBM) (2):
+  common: Move exit related functions to a common/exit
+  check: Replace exit with _exit in check
 
---D
+ check           | 44 ++++++++++++++++++-------------------------
+ common/config   | 17 +----------------
+ common/exit     | 50 +++++++++++++++++++++++++++++++++++++++++++++++++
+ common/preamble |  1 +
+ common/punch    |  5 -----
+ common/rc       | 28 ---------------------------
+ 6 files changed, 70 insertions(+), 75 deletions(-)
+ create mode 100644 common/exit
+
+--
+2.34.1
+
