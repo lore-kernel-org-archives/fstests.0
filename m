@@ -1,45 +1,77 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f172.google.com (mail-pl1-f172.google.com [209.85.214.172])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D04F219307;
-	Tue, 29 Apr 2025 14:52:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A60D289E2E
+	for <fstests@vger.kernel.org>; Tue, 29 Apr 2025 23:51:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745938343; cv=none; b=G6Z0QJOH1DiwAnaPuVhX3PzRoX7YmTix4/gEotLpqOAQ8f2Iz/caP19wlTtv98I/mmTS7IFpELZaJYxnakZhoJHBaxsehZfHteFpAP1203nB8DLluRQW6MmIDfy0atb1FInzUA64XheWMMYFR2Ja7JGqnK/R6CWUnQNyg5Kf76k=
+	t=1745970686; cv=none; b=N78YsOj54z6Ki/7F7jz0k0Fq0WrnjkDY0iw+HrmyVrPP3olKqMHT5OHCSLY2NBRGYbCIi9i6VpsnuSd9Rik9KcRNK//bpFA+hSgZFNtYxOIvXkG0IPiy8UufV+GiDYMwYW2sifS2tTBStREnakPaIzUeGDw9klwqkIKzL4rzero=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745938343; c=relaxed/simple;
-	bh=2KKHNkYhxe1N7/a2M1dbUCZhDAf2dqm9QoC+G9Jmil0=;
+	s=arc-20240116; t=1745970686; c=relaxed/simple;
+	bh=8neD6MWQfw+EyFFux2CEmOhjmwenh3NYJpAggAD9C10=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=jfIV4iZpTLBL0qceAd/KFzUMKSHxo9N8f5tWjIMt3yXN/zRBmcO3RUnvZ8Acg7T/sGBR+WHeC01WYB6BGewpN9wyGJvoUSD3rcD+z0U9lN4hlwcn4XGW4jo0M4eEf4m69SEP+9NyJD35/Tq999+V+flmjg4vYk3QWweBSc3lRsc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jXULj9Ni; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=Cww1TP20IYnC3NVDH/BUfz7VHIXCEDig2BBy4+4yLpRGlS30rnQSA+a86MW8TLlfRumeaSL9AUSfmWAfAipqgfHn2bg6dTwXkh2N3BGJBsVxohZaOJcXDOU3QNgqFCbdgb9YjeCn3XXkQQGxeUsUao8Qrajhl1SXIoB92jhNiLg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=jICrypSr; arc=none smtp.client-ip=209.85.214.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jXULj9Ni"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B5F45C4CEE3;
-	Tue, 29 Apr 2025 14:52:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1745938342;
-	bh=2KKHNkYhxe1N7/a2M1dbUCZhDAf2dqm9QoC+G9Jmil0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=jXULj9NiNdluEGzQ7A+/5AbohWF+3XzABOK/9tFZRLm914XUI1zCR60KnqA2ci+AQ
-	 8tcle+8Gfn97wv9EWys6NpbvUSZ5IM8NJ9auP4kqoGQj32fmGVxIa1sCnn4Y8bubNM
-	 wRu9GhtBcgSvjBgnVK7q5HR+++6zWMalevFsjbzTwskzFJMoF4QOa1Xedc1SxZ4d/u
-	 NDN9XDHjDjKttuKUC0cKk2aSOWf/6uTSfawgYfpVKS+2o5+GzySAcgc2ytu5AXl/cF
-	 rU28TNI6E6lDJzBfTV+il1HU6QXE10IJz8KRp0CwqL2dhGWwdQOoW/i715sHAm4G/X
-	 zLWLOM200BjZg==
-Date: Tue, 29 Apr 2025 07:52:21 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Hans Holmberg <Hans.Holmberg@wdc.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	"zlang@kernel.org" <zlang@kernel.org>,
-	"linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-	Carlos Maiolino <cem@kernel.org>,
-	"david@fromorbit.com" <david@fromorbit.com>, hch <hch@lst.de>
-Subject: Re: [PATCH 1/2] xfs: add mount test for read only rt devices
-Message-ID: <20250429145220.GU25675@frogsfrogsfrogs>
-References: <20250425090259.10154-1-hans.holmberg@wdc.com>
- <20250425090259.10154-2-hans.holmberg@wdc.com>
- <20250425150331.GG25667@frogsfrogsfrogs>
- <7079f6ce-e218-426a-9609-65428bbdfc99@wdc.com>
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="jICrypSr"
+Received: by mail-pl1-f172.google.com with SMTP id d9443c01a7336-224019ad9edso99948295ad.1
+        for <fstests@vger.kernel.org>; Tue, 29 Apr 2025 16:51:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1745970684; x=1746575484; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=DQB7I1cCDGP31Ffgc304vw5DAP8c3CZYgZKW54rrDxM=;
+        b=jICrypSrSlUI0uNGsY4hr6lYY5WvpZ2GGe7xE8zmy2GsspQpY9N4wSUN/ITzWXx2+N
+         5/1w4PYJY4Hy5gWu0bETa7nE1o6lwOIKoAr7CMFMb14kOnFMW4eBPo/ya11a9NrvPnnG
+         h4pJpAtcIbsb2D1oiGiPDMmHZ6UTYWmHvlTKgtzsez1Tq1vVmFQwwkg8TlVNHm7XBANc
+         8zmLVffMra3OQbJwdHGkw+PHXOusK1RBJJISyc//7wBCqxI9GZR/CS2CvoqnMr4NBkKn
+         IVY4D0c+X/pcMxSytZWpT5mJ1iH4qPbmDcPsU7mdqEFE/zvobFsK0RXnJVa6qLm9xJp4
+         bItQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1745970684; x=1746575484;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=DQB7I1cCDGP31Ffgc304vw5DAP8c3CZYgZKW54rrDxM=;
+        b=GPDNLzZ9iSMbZGm3xZTeDblHdoA+XA6P+E/sg7cGWEhlEHFcnIY83z5U+KXXuT9Ti5
+         BikR2dTudIZ/CIJrqfmHVeJdBubprPmW044LEiTRFiJs8f6CJ+s0x658oN6j0iGKAzLP
+         XxPWfi8mMNMPOyA/no6BTxd9ZjaN/h8bKnhhpyUssBgg3hbYb6H+6YfB9IZ8pgdWMuQQ
+         sYF5VoYTviHIf7zJbrdUSGqny55r5Zd/+UmmAGJc+LjRxBOsaRgNCohS3RfcW8zU5+FC
+         ZC529IrOovIOHmEU2Hr1V0fOrZBJC16QNb8vuJDK+ghBmSSLOQqq0qcrzqJ6ooqXA40O
+         dF2g==
+X-Gm-Message-State: AOJu0YwhBgmWVq+EwZ9SDERVzMBWL85pWePjRmrbEXrQtYEA0m/VTMJH
+	FkKNV2jfCeysbZeP2nSxdKgdidFi67E5b6KjsFD6yA4FcPNEjH+nVcrcZpH9jLKVdMcMOP8ROAb
+	f
+X-Gm-Gg: ASbGncuMlNW7ddA7vJGVBC2xi9uKW9Y60qrtV7ItKZlEGaunU/h3IiMPJoxRcdI/dpE
+	krA/vz/x/pUSG4DzAPF/BYeWk5EGajb6XHrK7LOHFAz56vsasstS8FHld1EvKuDkjMORZT1p2xr
+	SkVfkJRQB+M0sN6ebZp4fMLYI70ihCKPCqm7bDBVxdimHp9XFZOM8kR69TQ2ezihLXH7kaEvtah
+	vbmp4MG8kqwM/wSN1yilgsPl8EPy/BLZlYTYVYNiDQUnomV/TXmcY8EkGi2l3IWHOdePSVNtgiS
+	NzJcvUoAyqs++CofgIP6LuqhM7CbXttrio79KtZtsXlf288C4vbbt9dOl/cZs4SZMJuUW5JLCtG
+	q90o=
+X-Google-Smtp-Source: AGHT+IGnw8oR5NQn26f2EFS9oWO/RFCD5rSfC11L3dAtCqKaPeKK28nVDtSMdG8CZUfJ9vzhi5Hg2w==
+X-Received: by 2002:a17:903:1c4:b0:21f:b483:2ad5 with SMTP id d9443c01a7336-22df350d4d0mr15944745ad.20.1745970684135;
+        Tue, 29 Apr 2025 16:51:24 -0700 (PDT)
+Received: from dread.disaster.area (pa49-181-60-96.pa.nsw.optusnet.com.au. [49.181.60.96])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22db4d76ce1sm109571705ad.40.2025.04.29.16.51.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 29 Apr 2025 16:51:23 -0700 (PDT)
+Received: from dave by dread.disaster.area with local (Exim 4.98.2)
+	(envelope-from <david@fromorbit.com>)
+	id 1u9ujR-0000000F0V9-0vM9;
+	Wed, 30 Apr 2025 09:51:21 +1000
+Date: Wed, 30 Apr 2025 09:51:21 +1000
+From: Dave Chinner <david@fromorbit.com>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
+Subject: Re: [PATCH v2 1/2] common: Move exit related functions to a
+ common/exit
+Message-ID: <aBFl-eKBBwG-QxCm@dread.disaster.area>
+References: <cover.1745908976.git.nirjhar.roy.lists@gmail.com>
+ <a2e20e1d74360a76fd2a1ef553cac6094897bff2.1745908976.git.nirjhar.roy.lists@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -48,134 +80,114 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <7079f6ce-e218-426a-9609-65428bbdfc99@wdc.com>
+In-Reply-To: <a2e20e1d74360a76fd2a1ef553cac6094897bff2.1745908976.git.nirjhar.roy.lists@gmail.com>
 
-On Tue, Apr 29, 2025 at 12:03:20PM +0000, Hans Holmberg wrote:
-> On 25/04/2025 17:04, Darrick J. Wong wrote:
-> > On Fri, Apr 25, 2025 at 09:03:22AM +0000, Hans Holmberg wrote:
-> >> Make sure that we can mount rt devices read-only if them themselves
-> >> are marked as read-only.
-> >>
-> >> Also make sure that rw re-mounts are not allowed if the device is
-> >> marked as read-only.
-> >>
-> >> Based on generic/050.
-> >>
-> >> Signed-off-by: Hans Holmberg <hans.holmberg@wdc.com>
-> >> ---
-> >>  tests/xfs/837     | 55 +++++++++++++++++++++++++++++++++++++++++++++++
-> >>  tests/xfs/837.out | 10 +++++++++
-> >>  2 files changed, 65 insertions(+)
-> >>  create mode 100755 tests/xfs/837
-> >>  create mode 100644 tests/xfs/837.out
-> >>
-> >> diff --git a/tests/xfs/837 b/tests/xfs/837
-> >> new file mode 100755
-> >> index 000000000000..b20e9c5f33f2
-> >> --- /dev/null
-> >> +++ b/tests/xfs/837
-> >> @@ -0,0 +1,55 @@
-> >> +#! /bin/bash
-> >> +# SPDX-License-Identifier: GPL-2.0
-> >> +# Copyright (c) 2009 Christoph Hellwig.
-> >> +# Copyright (c) 2025 Western Digital Corporation
-> >> +#
-> >> +# FS QA Test No. 837
-> >> +#
-> >> +# Check out various mount/remount/unmount scenarious on a read-only rtdev
-> >> +# Based on generic/050
-> >> +#
-> >> +. ./common/preamble
-> >> +_begin_fstest mount auto quick
-> >> +
-> >> +_cleanup_setrw()
-> >> +{
-> >> +	cd /
-> >> +	blockdev --setrw $SCRATCH_RTDEV
-> >> +}
-> >> +
-> >> +# Import common functions.
-> >> +. ./common/filter
-> >> +
-> >> +_require_realtime
-> >> +_require_local_device $SCRATCH_RTDEV
-> > 
-> > I suspect this is copy-pasted from generic/050, but I wonder when
-> > SCRATCH_RTDEV could be a character device, but maybe that's a relic of
-> > Irix (and Solaris too, IIRC)?
+On Tue, Apr 29, 2025 at 06:52:53AM +0000, Nirjhar Roy (IBM) wrote:
+> Introduce a new file common/exit that will contain all the exit
+> related functions. This will remove the dependencies these functions
+> have on other non-related helper files and they can be indepedently
+> sourced. This was suggested by Dave Chinner[1].
 > 
-> Yeah, this was carried over from generic/050, and I can just drop it
-> unless there is a good reason for keeping it?
+> [1] https://lore.kernel.org/linux-xfs/Z_UJ7XcpmtkPRhTr@dread.disaster.area/
+> Suggested-by: Dave Chinner <david@fromorbit.com>
+> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> ---
+>  common/config   | 17 +----------------
+>  common/exit     | 50 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  common/preamble |  1 +
+>  common/punch    |  5 -----
+>  common/rc       | 28 ---------------------------
+>  5 files changed, 52 insertions(+), 49 deletions(-)
+>  create mode 100644 common/exit
 
-I think you still need the _require_local_device call itself.
+Neither of my replys to v1 made it to the list [1], so I'll have to
+repeat what I said here.
 
-And come to think of it, weren't there supposed to be pmem filesystems
-which would run entirely off a pmem character device and not have a
-block interface available at all?
+I did point out that I had already sent this out here:
 
-Though for an xfs-specific test we'll blow up pretty fast if
-SCRATCH_RTDEV isn't a bdev so <shrug>.
+https://lore.kernel.org/fstests/20250417031208.1852171-4-david@fromorbit.com/
 
-> <pardon replying again Darrick, forgot to reply-all yesterday>
+but now this version is mostly the same (except for things noted
+below) so I'm good with this.
 
-(I seriously didn't even notice.)
-
---D
-
-> > 
-> > The rest of the test looks fine to me though.
-> > 
-> > --D
-> > 
-> >> +_register_cleanup "_cleanup_setrw"
-> >> +
-> >> +_scratch_mkfs "-d rtinherit" > /dev/null 2>&1
-> >> +
-> >> +#
-> >> +# Mark the rt device read-only.
-> >> +#
-> >> +echo "setting device read-only"
-> >> +blockdev --setro $SCRATCH_RTDEV
-> >> +
-> >> +#
-> >> +# Mount it and make sure it can't be written to.
-> >> +#
-> >> +echo "mounting read-only rt block device:"
-> >> +_scratch_mount 2>&1 | _filter_ro_mount | _filter_scratch
-> >> +if [ "${PIPESTATUS[0]}" -eq 0 ]; then
-> >> +	echo "writing to file on read-only filesystem:"
-> >> +	dd if=/dev/zero of=$SCRATCH_MNT/foo bs=1M count=1 oflag=direct 2>&1 | _filter_scratch
-> >> +else
-> >> +	_fail "failed to mount"
-> >> +fi
-> >> +
-> >> +echo "remounting read-write:"
-> >> +_scratch_remount rw 2>&1 | _filter_scratch | _filter_ro_mount
-> >> +
-> >> +echo "unmounting read-only filesystem"
-> >> +_scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
-> >> +
-> >> +# success, all done
-> >> +echo "*** done"
-> >> +status=0
-> >> diff --git a/tests/xfs/837.out b/tests/xfs/837.out
-> >> new file mode 100644
-> >> index 000000000000..0a843a0ba398
-> >> --- /dev/null
-> >> +++ b/tests/xfs/837.out
-> >> @@ -0,0 +1,10 @@
-> >> +QA output created by 837
-> >> +setting device read-only
-> >> +mounting read-only rt block device:
-> >> +mount: device write-protected, mounting read-only
-> >> +writing to file on read-only filesystem:
-> >> +dd: failed to open 'SCRATCH_MNT/foo': Read-only file system
-> >> +remounting read-write:
-> >> +mount: cannot remount device read-write, is write-protected
-> >> +unmounting read-only filesystem
-> >> +*** done
-> >> -- 
-> >> 2.34.1
-> >>
-> > 
 > 
+> diff --git a/common/config b/common/config
+> index eada3971..6a60d144 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -38,7 +38,7 @@
+>  # - this script shouldn't make any assertions about filesystem
+>  #   validity or mountedness.
+>  #
+> -
+> +. common/exit
+>  . common/test_names
+
+This isn't needed. Include it in check and other high level scripts
+(which need to include this, anyway) before including common/config.
+
+> diff --git a/common/exit b/common/exit
+> new file mode 100644
+> index 00000000..ad7e7498
+> --- /dev/null
+> +++ b/common/exit
+> @@ -0,0 +1,50 @@
+> +##/bin/bash
+> +
+> +# This functions sets the exit code to status and then exits. Don't use
+> +# exit directly, as it might not set the value of "$status" correctly, which is
+> +# used as an exit code in the trap handler routine set up by the check script.
+> +_exit()
+> +{
+> +	test -n "$1" && status="$1"
+> +	exit "$status"
+> +}
+> +
+> +_fatal()
+> +{
+> +    echo "$*"
+> +    _exit 1
+> +}
+> +
+> +_die()
+> +{
+> +        echo $@
+> +        _exit 1
+> +}
+
+This should be removed and replaced with _fatal
+
+> +die_now()
+> +{
+> +	_exit 1
+> +}
+
+And this should be removed as well. 
+
+i.e. These two functions are only used by common/punch, so change
+them to use _fatal and _exit rather than duplicating the wrappers.
+
+> diff --git a/common/preamble b/common/preamble
+> index ba029a34..9b6b4b26 100644
+> --- a/common/preamble
+> +++ b/common/preamble
+> @@ -33,6 +33,7 @@ _register_cleanup()
+>  # explicitly as a member of the 'all' group.
+>  _begin_fstest()
+>  {
+> +	. common/exit
+>  	if [ -n "$seq" ]; then
+>  		echo "_begin_fstest can only be called once!"
+>  		_exit 1
+
+Please leave a blank line between includes and unrelated code.
+
+-Dave.
+
+[1] Thanks Google, for removing mail auth methods without any
+warning and not reporting permanent delivery failure on attempts
+to send mail an unsupported auth method.
+
+-- 
+Dave Chinner
+david@fromorbit.com
