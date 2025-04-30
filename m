@@ -1,72 +1,72 @@
-Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com [209.85.210.172])
+Received: from mail-pf1-f182.google.com (mail-pf1-f182.google.com [209.85.210.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80D1421ABC9
-	for <fstests@vger.kernel.org>; Wed, 30 Apr 2025 09:09:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA5FD78F44
+	for <fstests@vger.kernel.org>; Wed, 30 Apr 2025 09:17:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746004143; cv=none; b=uHefcCkfoj8H8L1vh1y7+w0nC7m3g85+rZzapBEpfeMXWCXMcoFydQu3ttpJY/p8AEM8NOo1+AqWVvPgzmNT7iokzZGPwwoKXYl42L8/jcfHzIszsUkMzqpM+bI6llSmvZ+iPPG736LkUlVoJzMVBCT17aE9zFsjuaeATb2J2go=
+	t=1746004626; cv=none; b=IBXYjsu96lQA45WLW5IeS6VoJVFomvLvfueXrquen/U//ylmNQ0de0QpgGLlJCJj8fuQrsCIhhznHTnNhNcg61bHis+dq6THfP001b6bpdBmBiVw6IbhANK4ps1w1WqbfobHvo0F4JHIrZeL1GzswdvdmTdEPndGMBhvfPUiSS4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746004143; c=relaxed/simple;
-	bh=EkJucvsjI/fUPZOYbASge8ItAKTuM4rQfeoGZul+wAk=;
+	s=arc-20240116; t=1746004626; c=relaxed/simple;
+	bh=TviIf7Eh+XquJszXj7RnSC4af6OOK8FYtsnxa/KBWjU=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:Mime-Version; b=bNl2Vvjv8+gWwANdeCvXLYoAWc4lWzxl9UAVroh/bD05+QQ1duWBHQ5GiBFF5Sw56L7PcJl/DhFZ1qSQ8SKIR5ZsTgwI+NKqZ0yqsLY5Z/mtmyi2orgN0Ns6HLMWt+pAxBpYrwwb4ENpobFTFqjLrGWeRDUSNStqLQdq6IEJL1E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=UumOb2HM; arc=none smtp.client-ip=209.85.210.172
+	 Content-Type:Mime-Version; b=MrSZrLo/U50xIgVvp6goWZCoGF4p3upCbmSrGTH64drPmdMJKv/Lr8MIEVUsF+nM7AWHTSl2lKCZ0zxPNM5x2BjJQEKEoBiAx3le83p0FZtf0LIu7pcDP+rO1KWw7hkjSFrSTg3LJq8jn6RsOlIQQ4+KeyuaI5XqlU0fxIHn5NU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Z9pb0r9K; arc=none smtp.client-ip=209.85.210.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UumOb2HM"
-Received: by mail-pf1-f172.google.com with SMTP id d2e1a72fcca58-736c277331eso689907b3a.1
-        for <fstests@vger.kernel.org>; Wed, 30 Apr 2025 02:09:02 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Z9pb0r9K"
+Received: by mail-pf1-f182.google.com with SMTP id d2e1a72fcca58-736c1138ae5so7162184b3a.3
+        for <fstests@vger.kernel.org>; Wed, 30 Apr 2025 02:17:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1746004142; x=1746608942; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1746004624; x=1746609424; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to:date
          :cc:to:from:subject:message-id:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=9wlua+SQQv1mavH2Yh4qlNrYi93Jbis7D2G6f9wVldI=;
-        b=UumOb2HMQHPsUxooMINwHd9TyyZ0DFakcNxqLk8B48qzsfbVVOk/MFQ5VtjqDENCXa
-         CFaF0FaBEmm6khSqpN6vzRh9EMuWRYCs76n9pOfrxO8nVlEwhpaggEcps/BrE22b65wF
-         QuAt/Zc0EUtC9YNDsaMjJOMn/onlZYa+8RAhQoOazeKrlL7UaQV+hVCzXKAVWHqUSqGr
-         zVEQ6VgTaYcwZz432N19HbiXyCJnoFKhlMv/m42OaRPml9huvROE98XtV9KgL2raCsH7
-         rJFo46V8Xb4B6usdnLXdo4zOg0FDJRQP/w1/2lkOgbxaxEZRQbgnY004WO8QanXfhAPC
-         q+og==
+        bh=Ft+edlQ3al0MG4OrOqxwHyW7Szb9ajqakrFYl8p7hvA=;
+        b=Z9pb0r9KG4CCb0QYQpyRVIqo4dFMxRv+6cwOXX9g/QnccZBfGxDNNIvoaaEcm+cw4D
+         4n7iw1lA/ObUHKLVNbKTbfskhczPEO6w8LhthfprsmPLbJYtzxpZW52UpywUCPhd0+N9
+         m2TzWWQ2MrUlkIcBti040QVwrgf7krnZtJBYcU7ddY4YgdiEnXskXAs5mdK0Vwt28ELO
+         d2aoSXu4BoYC8I5gXkuAmNvOwuJhXohoSSNUrj5DsdUOSKQQ5GJW6sykKGG6oUOAwPll
+         56LCpxK4ZzjEzic5WaWde56IHBUhv8hkHP7bhTEZ7VFCIaooNkZeHS8Gu/5jq5GMJLcE
+         2Wlw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746004142; x=1746608942;
+        d=1e100.net; s=20230601; t=1746004624; x=1746609424;
         h=content-transfer-encoding:mime-version:references:in-reply-to:date
          :cc:to:from:subject:message-id:x-gm-message-state:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=9wlua+SQQv1mavH2Yh4qlNrYi93Jbis7D2G6f9wVldI=;
-        b=gZLVHXa3yiyIH+KEDjlFkrlnnovPmPpMqfTrs3jB/YFp7gk5ODyqb8F/gBJeBn1qK+
-         KLRz2YnthXc2XLSBBLqGptZR2il/HOTaQT7ErtvDLXh5eVBU5XSrGjRR8OSU6QAhPLIG
-         BbMScONYOhdDTYhbnolwFEruZ5zgyr8s83wVyG0r1iu7XvgL8P3DLU4O/FOq302kvLsl
-         /zieCxWrq8/ihOhv6ILrSb1M+1kcD4MepaargIc3E/GQNPqTiQRKKRy4azDfnUBHu8gR
-         y8760dKuHPXu+qtB4HWFvl76RswRIIOlBZzIUQ7x/F7BcfhW24RE0fJ9DJnWrSnu4XIg
-         ylDg==
-X-Forwarded-Encrypted: i=1; AJvYcCXOhCWf+hmxO/jOORarkt65MiLmXZa+iGzNLZvDEhes0TjOw5sc3sbOissa9EtQQrn1UFktSkeE@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyng60p3pHMhHoO/sGs1PfPv3qtGRfkXhkpwbRyQwYCCBjL0UAR
-	GATiB6nPj1dEMXoBFDutGvZz0mdjcS44KgmPAnrKrZc0OKW/WG+E
-X-Gm-Gg: ASbGncsGIBzKXnZ2MJchPqA7CsrWk+VuQd7R9POFN098vBvGpHd6BEx8+Ai9xSDxbtG
-	4XHWJnXuarftrhvFLIwjSL+l1kiab7PP4rciFLJcGkN2mvEKyfWRbuhgkrwhA+gtkVkWvkARdxZ
-	OF8POfAp8ihAreSMsnmNXE1a1EQ9lFs7s+lJJZwAfp4qCQ+rOtLevdUdwY9s+bl+A0v99cxTdiO
-	FJkptRRXoN2Hmr/jzXauPCtk0mIvbDefr7D95cLYTfdJ7J1F7hWBxhgvBvraddX0HJm4J2VUT0X
-	T4UfnUQzP9huIJ9wu8naZj162Gd70t/P1aIWqkxgDq1XJx1YEIv7E1XzRnp5qNXgoO2bQw33pRC
-	mAfLKka6KTWAXOw5EQg==
-X-Google-Smtp-Source: AGHT+IENZsyhfHf7amKwbA56ZqhD3FwGDM6SJTgNuiuK0DPnTBKXN193zYYWEEdpQPCFv/89Kod+Ng==
-X-Received: by 2002:a05:6a21:920e:b0:1fe:61a4:7210 with SMTP id adf61e73a8af0-20a8e17220amr3010937637.2.1746004141645;
-        Wed, 30 Apr 2025 02:09:01 -0700 (PDT)
+        bh=Ft+edlQ3al0MG4OrOqxwHyW7Szb9ajqakrFYl8p7hvA=;
+        b=CcmZKtii+gpV7tQmP6nkWqnr4ngm6MBYJMhn679EvAXwcESUXkLwgKgh+YqxNGd2hU
+         p+ROfia62Ys+9STnCc+8DSkdfuXwmvWYr3kMsOgfBcX0AgNUjjUZDNnP29WcoPuLObM5
+         JkBEZeoC6+1Fhm2X3z/UjEvhRwrvQfp9gxpid0hAAHZHEqJOgeRfveKM2SFEQxfy/Ql0
+         4MDmOG5Ox8HCZ4NFMStzjGlEownGkPkvUkJ0Kg2tRGtJ63aiTdhd/ajsXmVZBkT8BBXC
+         Rzoh+8kdZc5Y9k6k+8SlNLhH4sdxFDjiw2G5AZARbfT7ID5d2B51bQH2KfekokmDHHQ5
+         QIZw==
+X-Forwarded-Encrypted: i=1; AJvYcCUJcBIamAuUEVy2M5lNmeRY2aCchmC7LW6ykqNtpc4nBEPgHTTGTJGzfb2cG+6FtRpIN2akO0bw@vger.kernel.org
+X-Gm-Message-State: AOJu0YyKscDzCt4OgAv1iIDS0vO/9b/MJIbUQfBjfKPWiK7XQ+uD+puW
+	p8NRjj/O1kx5qccUU+V+luIXGUKEp8SliQhBJlT6uYCGVtxu2zOiAQBCtQ==
+X-Gm-Gg: ASbGncv+Mjz+5C18byiYbc8WNVTr0Hn2F+u5/z/r0+YH8X5S5cZ0XDik/wonOUtDhYx
+	FITtdgyyztr/vuh4eDIjYLVj/1Pov8Ouk581YPFtWCHZZDkBzatSnpYpqSwt/y41beMYSv7hu9m
+	fe1Fi0YJZMSgtzaeN33MkxPAsFoiiDE/hewBogikyMnXfbhv/eXSOo8IEVdyurDPPN5KfNO1DgY
+	VlpTGaI7mIvvTSPSUt//q/5jWf48mMYVzcJ5IicagP3XvkYH+z7xX9s6Q4bg5tmE0jX2dAKj5zX
+	hwPsWdqCXjopRjZaOsBfi1HdBAsv7SgjKphYlvPOGd19lDy+q1Lf8ddYYadRgXlSKq3k0Lr/Hv1
+	qYlYBzjVNyLPFn0/woQ==
+X-Google-Smtp-Source: AGHT+IHZUdhHlx8Gz5N6FX5SVtut2Edcr6AqRZKVGduMU/rEt8PRd4WW63fiD50fzOOwaM6FEXwMzg==
+X-Received: by 2002:a05:6a21:1788:b0:1f5:837b:1868 with SMTP id adf61e73a8af0-20aa4380499mr3121411637.29.1746004624062;
+        Wed, 30 Apr 2025 02:17:04 -0700 (PDT)
 Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com ([49.205.34.162])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b15f76f4680sm10205669a12.14.2025.04.30.02.09.00
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b15faded690sm10370480a12.71.2025.04.30.02.17.02
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 30 Apr 2025 02:09:01 -0700 (PDT)
-Message-ID: <53f79f8f27a0d99de336fca50d9028b92769e6d2.camel@gmail.com>
-Subject: Re: [PATCH 22/28] fsync-tester.c: use syncfs() rather than sync()
+        Wed, 30 Apr 2025 02:17:03 -0700 (PDT)
+Message-ID: <0b040e1d9f7157614067850ca662ee47f68872ca.camel@gmail.com>
+Subject: Re: [PATCH 01/28] fstests: remove support for non-numeric test names
 From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
 To: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
 Cc: zlang@kernel.org
-Date: Wed, 30 Apr 2025 14:38:58 +0530
-In-Reply-To: <20250417031208.1852171-23-david@fromorbit.com>
+Date: Wed, 30 Apr 2025 14:47:00 +0530
+In-Reply-To: <20250417031208.1852171-2-david@fromorbit.com>
 References: <20250417031208.1852171-1-david@fromorbit.com>
-	 <20250417031208.1852171-23-david@fromorbit.com>
+	 <20250417031208.1852171-2-david@fromorbit.com>
 Content-Type: text/plain; charset="UTF-8"
 X-Mailer: Evolution 3.28.5 (3.28.5-27.el8_10) 
 Precedence: bulk
@@ -77,51 +77,121 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 
-On Thu, 2025-04-17 at 13:01 +1000, Dave Chinner wrote:
+On Thu, 2025-04-17 at 13:00 +1000, Dave Chinner wrote:
 > From: Dave Chinner <dchinner@redhat.com>
 > 
-> generic/311 runs each fsync-tester unit test 4 times, and there are
-> 20 separate tests. At least 9 of those unit tests run sync() to
-> flush dirty data periodically.
+> We haven't had any tests using the "999-the-mark-of-fstests" name
+> format for a long time. Th eonly test that used this format was
+> xfs/191-input-validation, and that got removed in 2022 by commit
+> c1941d6f5 ("xfs/191: remove broken test").
 > 
-> When running check-parallel, sync() can take a -long- time to
-> run as there can be dozens of filesystems that need to be synced,
-> not to mention sync getting hung up behind all the mount and
-> unmounts that are also being run. This results in:
-> 
-> Ten slowest tests - runtime in seconds:
-> generic/311 419
-> 
-> This test running for a really long time.
-> 
-> Convert the sync() calls to syncfs() so that they only try to sync
-> the filesystem under test and not the entire system. This avoids
-> interactions and delays with other tests and mount/unmount
-> operations, hence allowing both the test and the overall
-> check-parallel operation to run faster:
-> 
-> generic/311        166s
+> However, the infrastructure for this naming convention still exists,
+> so lets get rid of that dead code so we don't have to carry it
+> anymore.
+Any other reason why we are planning to remove this convention apart
+from the fact that it is not being used for a long time? But yes,I
+agree that only numeric names are easier to refer and we can also use
+some one liner shell script tricks to run several tests - something
+like 
+./check xfs/{1...100} to run all the tests from xfs/1 xfs/2 ... xfs/100
+(ofcourse assuming all these tests with these numbers exist).
 > 
 > Signed-off-by: Dave Chinner <dchinner@redhat.com>
 > ---
->  src/fsync-tester.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  check             | 15 ---------------
+>  common/test_names |  8 +-------
+>  new               | 24 ------------------------
+>  3 files changed, 1 insertion(+), 46 deletions(-)
 > 
-> diff --git a/src/fsync-tester.c b/src/fsync-tester.c
-> index 417187491..048cb4853 100644
-> --- a/src/fsync-tester.c
-> +++ b/src/fsync-tester.c
-> @@ -131,7 +131,7 @@ static int test_three(int *max_blocks, int
-> prealloc, int rand_fsync,
->  		/* Force a transaction commit in between just for fun
-> */
->  		if (blocks == sync_block && (do_sync || drop_caches)) {
->  			if (do_sync)
-> -				sync();
-> +				syncfs(test_fd);
-Feel free to add 
-Reviewed-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
->  			else
->  				sync_file_range(test_fd, 0, 0,
->  						SYNC_FILE_RANGE_WRITE|
+> diff --git a/check b/check
+> index 9451c350b..d6bab8b5f 100755
+> --- a/check
+> +++ b/check
+> @@ -856,21 +856,6 @@ function run_section()
+>  	for ((ix = 0; ix < ${#_list[*]}; !${#loop_status[*]} && ix++));
+> do
+>  		seq="${_list[$ix]}"
+>  
+> -		if [ ! -f $seq ]; then
+> -			# Try to get full name in case the user
+> supplied only
+> -			# seq id and the test has a name. A bit of
+> hassle to
+> -			# find really the test and not its sample
+> output or
+> -			# helping files.
+> -			bname=$(basename $seq)
+> -			full_seq=$(find $(dirname $seq) -name $bname*
+> -executable |
+> -				awk '(NR == 1 || length <
+> length(shortest)) { shortest = $0 }\
+> -				     END { print shortest }')
+> -			if [ -f $full_seq ] && \
+> -			   [ x$(echo $bname | grep -o
+> "^$VALID_TEST_ID") != x ]; then
+> -				seq=$full_seq
+> -			fi
+> -		fi
+> -
+>  		# the filename for the test and the name output are
+> different.
+>  		# we don't include the tests/ directory in the name
+> output.
+>  		export seqnum=${seq#$SRC_DIR/}
+> diff --git a/common/test_names b/common/test_names
+> index 98af40cdb..b18fc9e36 100644
+> --- a/common/test_names
+> +++ b/common/test_names
+> @@ -2,11 +2,5 @@
+>  
+>  # Valid test names start with 3 digits "NNN":
+>  #  "[0-9]\{3\}"
+> -# followed by an optional "-":
+> -#  "-\?"
+> -# followed by an optional combination of alphanumeric and "-" chars:
+> -#  "[[:alnum:]-]*"
+> -# e.g. 999-the-mark-of-fstests
+> -#
+>  VALID_TEST_ID="[0-9]\{3\}"
+> -VALID_TEST_NAME="$VALID_TEST_ID-\?[[:alnum:]-]*"
+> +VALID_TEST_NAME="$VALID_TEST_ID"
+> diff --git a/new b/new
+> index 6b50ffeda..c786a9dbb 100755
+> --- a/new
+> +++ b/new
+> @@ -50,30 +50,6 @@ export AWK_PROG="$(type -P awk)"
+>  echo "Next test id is $id"
+>  shift
+>  
+> -read -p "Append a name to the ID? Test name will be $id-\$name.
+> y,[n]: " -r
+> -if [[ $REPLY = [Yy] ]]; then
+> -	# get the new name from user
+> -	name=""
+> -	while [ "$name" = "" ]; do
+> -		read -p "Enter the name: "
+> -		if [ "$REPLY" = "" ]; then
+> -			echo "For canceling, use ctrl+c."
+> -		elif echo "$id-$REPLY" | grep -q "^$VALID_TEST_NAME$";
+> then
+> -			if [ -e "$tdir/$id-$REPLY" ]; then
+> -				echo "File '$id-$REPLY' already exists,
+> use another one."
+> -				echo
+> -			else
+> -				name="$REPLY"
+> -			fi
+> -		else
+> -			echo "A name can contain only alphanumeric
+> symbols and dash!"
+> -			echo
+> -		fi
+> -	done
+> -
+> -	id="$id-$name"
+> -fi
+> -
+>  echo "Creating test file '$id'"
+>  
+>  if [ -f $tdir/$id ]
 
