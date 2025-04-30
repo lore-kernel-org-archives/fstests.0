@@ -1,47 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 48693B640;
-	Wed, 30 Apr 2025 14:52:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 586182DC791
+	for <fstests@vger.kernel.org>; Wed, 30 Apr 2025 14:53:21 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746024732; cv=none; b=JTZRg6ape+l0jTGwhJNXQR0MscOiQxMBmM0Razq08K//Et6EUlm7nsAFUxSdPI5qOpDzsI2As86E26GomEjsF0g4xV0f58stCMBIdpEdPtxpmAqVlsjywzb1W9wZiPJrMz3kKfbfBWtw9PpfTiigG3zaReibm82xWvDc/hJ9Y+4=
+	t=1746024801; cv=none; b=aplMsSjbV5nueXfMp6yyfx7dUO0iaUfNc+aXIQlHMkXEIYWbC+vFoemTFq4Jx0nK93OHSjsd2xCTEiBMUazeuQza6brmzBmh3uq2lxfoqkG7oVUemol+x4lihLLWwi6dW+ZQeKRb26CuCmbxr/oca9MbCHN4s+vs5zpufJJp3BE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746024732; c=relaxed/simple;
-	bh=7oH08iBbhWeaVEAX3Nz5oGAjBUUzwzZ4pRTL2mgqUvI=;
+	s=arc-20240116; t=1746024801; c=relaxed/simple;
+	bh=v8Ag9DYlkamLpUU2vBBW7riyL3IX70ye0mtSKFp7kD4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qEz1WsJjux7vl4SwyLHvlnl1ZjX8DObTXirRlx3WWz0mM02BZaZ1ruGWSPwkXnkWfLkb53prMjve1E/N6zqnYvwurfd5d0NKoa74IcJnJ4qHlQLTGnedCISAb1ZE8a3kucJbpulRDRZX+JHqzeiJ5u67viAqMTYca5rMrOK8e6w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kLzf5bmt; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=PfOxHpxrzj8K+qiYt+Ux/Rx5z4R0yQNCMcCKrjFlz17j0WluTSjnuNsmhFcZnUwN7j1jtUkW7SfzW7vpMbz8JaRN1pl3eN6RL9hL+aUEJvS2VMlH82vuOzETxpqQnvqKNmy3eXNBy9RCgFA3wbMldY0iINOsFKiC10u6f0Y8su4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TIGBN5BK; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kLzf5bmt"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B3933C4CEE7;
-	Wed, 30 Apr 2025 14:52:11 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TIGBN5BK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2428BC4CEE7;
+	Wed, 30 Apr 2025 14:53:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1746024731;
-	bh=7oH08iBbhWeaVEAX3Nz5oGAjBUUzwzZ4pRTL2mgqUvI=;
+	s=k20201202; t=1746024801;
+	bh=v8Ag9DYlkamLpUU2vBBW7riyL3IX70ye0mtSKFp7kD4=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=kLzf5bmtRpsv3BmY3l9hygoGP/QZchNmxd911TyjQa7q73wNkU7kQTQggt6g1Zl5T
-	 JEa0YRIj6SO1R1ZnrTQoSlWceOfUZZ/bbEVuUMB8WpqErCwHn2fcuEa+x3TR4xzYeQ
-	 uYG/idWBC6MKTTQdsX0KI2Jp6rtCPqfJedgEhTQtn5abV0R9FRWxAHDd3PPv+yjTL4
-	 67P8AybBYYVLBiXrRaCYjR7RDH+Wne+ECPFFp9VMrFB5LxVvIPtw9RQRw0DCUhCpl7
-	 kiMArpmYj7tuOe9p9RnrBtE4fx8mwqIl7OwnOnpIMx0+9jbVwrZNlze31O7wx/5t/U
-	 yX9lqyWqr91wg==
-Date: Wed, 30 Apr 2025 07:52:11 -0700
+	b=TIGBN5BKeKPSg2DTTenHdJUNtD15sDCioeM6d8woJAfOnLtKpzlTHm+D81ybThLet
+	 kjtTK072d+8I62L+8lLQrlI8Tl8htbP+xgwtIpu397yGv44m5NMshtzmUTDFcdDscE
+	 dvBH1spf0D4MiVzvLrQGs65s13632CQb9YkD/CzZcIcZ81JSlM9Pk8j1AQCE0COl4N
+	 AG7qQeHOi588Yuj1gvTa9RdqtozfU/cKAWM7yJZ/gx0gYdKx1i7Ms6Lm+8C98Jpt7T
+	 9D/JMF/Fhffjkvjs/ojl1GubdLu5wL8zDLF048rIib7POK22+HadJtl/rYKOjm19r4
+	 KkSNPKItDGnKw==
+Date: Wed, 30 Apr 2025 07:53:20 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Hans Holmberg <Hans.Holmberg@wdc.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	"zlang@kernel.org" <zlang@kernel.org>,
-	"linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-	Carlos Maiolino <cem@kernel.org>,
-	"david@fromorbit.com" <david@fromorbit.com>, hch <hch@lst.de>
-Subject: Re: [PATCH 2/2] xfs: add mount test for read only log devices
-Message-ID: <20250430145211.GL25667@frogsfrogsfrogs>
-References: <20250425090259.10154-1-hans.holmberg@wdc.com>
- <20250425090259.10154-3-hans.holmberg@wdc.com>
- <20250425150504.GH25667@frogsfrogsfrogs>
- <1c313919-f6ca-4f53-be69-21fe93e97b0e@wdc.com>
- <20250428155842.GR25675@frogsfrogsfrogs>
- <99b99047-a24d-4a75-aa5c-066b92b3a940@wdc.com>
+To: Anthony Iliopoulos <ailiop@suse.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] fstests/MAINTAINERS: update ocfs2 mailing list address
+Message-ID: <20250430145320.GM25667@frogsfrogsfrogs>
+References: <20250430122342.157170-1-ailiop@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -50,48 +41,39 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <99b99047-a24d-4a75-aa5c-066b92b3a940@wdc.com>
+In-Reply-To: <20250430122342.157170-1-ailiop@suse.com>
 
-On Wed, Apr 30, 2025 at 08:26:00AM +0000, Hans Holmberg wrote:
-> On 28/04/2025 17:58, Darrick J. Wong wrote:
-> > On Mon, Apr 28, 2025 at 12:16:34PM +0000, Hans Holmberg wrote:
-> >> On 25/04/2025 17:05, Darrick J. Wong wrote:
-> >>> ps this test should check
-> >>> that a readonly log device results in a norecovery mount and that
-> >>> pending changes don't show up if the mount succeeds?
-> >>>
-> >>> Also, ext4 supports external log devices, should this be in
-> >>> tests/generic?
-> >>
-> >> Doh!, actually ext4 has a test for this already, ext4/002
-> >> (also based on generic/050)
-> >>
-> >> With my fix, ext4/002 passes for xfs Should/can we turn that into a
-> >> generic test?
-> > 
-> > Yeah, it looks like ext4/002 already does most of what you want.  Though
-> > I'd amend it to check that SCRATCH_MNT/00-99 aren't visible in the
-> > norecovery mounts and only appear after recovery actually runs.
-> > 
+On Wed, Apr 30, 2025 at 02:23:42PM +0200, Anthony Iliopoulos wrote:
+> Bring the ocfs2 mailing list address up to date, following the upstream
+> change in kernel commit a57b4b7f0557 ("MAINTAINERS: update ocfs2-devel
+> mailing list address").
 > 
-> So I added this check to ext4/002 and while this works for xfs - the
-> touched files are not visible until log recovery has completed, it does
-> not for ext3/4.
-> 
-> For ext3/4 the files are visible after the first successful (norecovery)
-> mount, so even though we did a shutdown, a log recovery does not seem
-> required (dmesg tells me that the log recovery is done in the end after
-> the log device is set back to rw)
-> 
-> ..and I presume this is fine - for a generic test can we really assume
-> that a log recovery is required to see the files?
+> Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
 
-Nope.  I guess that's an implementation dependent behavior.  TBH I'm not
-even sure we can 100% rely on it for xfs, since it's theoretically
-possible for the log to flush and checkpoint in the very small window
-between the creat and the shutdown call.
+It's definitely not hosted at oracle anymore ;)
 
-If hoisting ext4/002 to generic works for the three main filesystems
-then I'm fine with just doing that without the extra tests.
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
 --D
+
+> ---
+>  MAINTAINERS | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index bc31572902bf..a0f50f3d98b4 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -157,7 +157,7 @@ F:	tests/nfs/
+>  F:	common/nfs
+>  
+>  OCFS2
+> -L:	ocfs2-devel@oss.oracle.com
+> +L:	ocfs2-devel@lists.linux.dev
+>  S:	Supported
+>  F:	tests/ocfs2/
+>  
+> -- 
+> 2.49.0
+> 
+> 
