@@ -1,72 +1,72 @@
-Received: from mail-pf1-f180.google.com (mail-pf1-f180.google.com [209.85.210.180])
+Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com [209.85.210.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7AAB2DC771
-	for <fstests@vger.kernel.org>; Wed, 30 Apr 2025 09:02:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80D1421ABC9
+	for <fstests@vger.kernel.org>; Wed, 30 Apr 2025 09:09:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746003759; cv=none; b=WNXsFtBqGPZEuR4Z3jgTfAxuxk5LF+uSBx8eNrB56dnHh5JXoUF9bKaWBAr3q16xeKtgGy5Y631QdSjy1MOoqGKw3r4x84qQCM9H5ucaE3Bo7wkfERFJ/nyChKFvzZ9DJQjkkiudORyw1UEEDD9xx+0fkA2dyTJdVEd9m2XL1bY=
+	t=1746004143; cv=none; b=uHefcCkfoj8H8L1vh1y7+w0nC7m3g85+rZzapBEpfeMXWCXMcoFydQu3ttpJY/p8AEM8NOo1+AqWVvPgzmNT7iokzZGPwwoKXYl42L8/jcfHzIszsUkMzqpM+bI6llSmvZ+iPPG736LkUlVoJzMVBCT17aE9zFsjuaeATb2J2go=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746003759; c=relaxed/simple;
-	bh=/GQ63ZR3SFEHdmtk09lfW+F3O9bODpFnRkBO8Ok8jRE=;
+	s=arc-20240116; t=1746004143; c=relaxed/simple;
+	bh=EkJucvsjI/fUPZOYbASge8ItAKTuM4rQfeoGZul+wAk=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:Mime-Version; b=W70l//bSKBAyBcDZhQluOUqgzobTXmnrWK2sK7ybr2IiHaDiBsA9gpyA16G+Qyr620oxasw933mTED7cO/k2yfY/SFKT7Y5rxHZFRNyqVNYEnKapbGVkbWKsca2yCFPnkFApDdNuAVHzF2p6YcWxoj5o70ky5ADhp0AR+vTw2RA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=J7MplapV; arc=none smtp.client-ip=209.85.210.180
+	 Content-Type:Mime-Version; b=bNl2Vvjv8+gWwANdeCvXLYoAWc4lWzxl9UAVroh/bD05+QQ1duWBHQ5GiBFF5Sw56L7PcJl/DhFZ1qSQ8SKIR5ZsTgwI+NKqZ0yqsLY5Z/mtmyi2orgN0Ns6HLMWt+pAxBpYrwwb4ENpobFTFqjLrGWeRDUSNStqLQdq6IEJL1E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=UumOb2HM; arc=none smtp.client-ip=209.85.210.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="J7MplapV"
-Received: by mail-pf1-f180.google.com with SMTP id d2e1a72fcca58-7398d65476eso619103b3a.1
-        for <fstests@vger.kernel.org>; Wed, 30 Apr 2025 02:02:37 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UumOb2HM"
+Received: by mail-pf1-f172.google.com with SMTP id d2e1a72fcca58-736c277331eso689907b3a.1
+        for <fstests@vger.kernel.org>; Wed, 30 Apr 2025 02:09:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1746003757; x=1746608557; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1746004142; x=1746608942; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to:date
          :cc:to:from:subject:message-id:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=56WHi38L13gnYGozxFX0hu9jqqPpzXl/GiAn8vDfkkc=;
-        b=J7MplapVhJuJs1YBSdUda63yAA4F+3x8IF9uf9YRUkTnE/x64099/lO5idV9hsSxvR
-         lfjLURY6A+mnyvox0cF36vpRS8ChNSoq5gAwtr5O4std72WSeeIRa3KCF/pU+yM/SrJW
-         CyozJrlkvhu/n3hzXP0hqatR5qVjDG8VJyhUn5TL8d2kI7HbuxfMfYwriXLJm3kvM2V/
-         jHFa+t+EoK1eyYsnrb99YaTHOPf35tgt+5rSYq9Ce2RVrkhAl4R0UcsDjGF0vIXSO6aL
-         vnCJM3GgGLscD/a+lmh1Y9430PfZ2YoXSoTqwxRIvE9GFtquerFDAXcGZzKHi756uYYf
-         44cg==
+        bh=9wlua+SQQv1mavH2Yh4qlNrYi93Jbis7D2G6f9wVldI=;
+        b=UumOb2HMQHPsUxooMINwHd9TyyZ0DFakcNxqLk8B48qzsfbVVOk/MFQ5VtjqDENCXa
+         CFaF0FaBEmm6khSqpN6vzRh9EMuWRYCs76n9pOfrxO8nVlEwhpaggEcps/BrE22b65wF
+         QuAt/Zc0EUtC9YNDsaMjJOMn/onlZYa+8RAhQoOazeKrlL7UaQV+hVCzXKAVWHqUSqGr
+         zVEQ6VgTaYcwZz432N19HbiXyCJnoFKhlMv/m42OaRPml9huvROE98XtV9KgL2raCsH7
+         rJFo46V8Xb4B6usdnLXdo4zOg0FDJRQP/w1/2lkOgbxaxEZRQbgnY004WO8QanXfhAPC
+         q+og==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746003757; x=1746608557;
+        d=1e100.net; s=20230601; t=1746004142; x=1746608942;
         h=content-transfer-encoding:mime-version:references:in-reply-to:date
          :cc:to:from:subject:message-id:x-gm-message-state:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=56WHi38L13gnYGozxFX0hu9jqqPpzXl/GiAn8vDfkkc=;
-        b=iltbrKp7L9CCpvmJSjqu/9Dcag+pHFOsMbcWMJahM8ihNLxwhYPol5VQ3okzDCoOGO
-         dPhf6tTBxsuG0rDGIUy3JN0UfCDF1xAYBH/THzDJr/TWfs86p0f7k6o9U3WoEuuVYrZr
-         ZDQpbHsfgmQhsHZ13VldxCz3RIkI7XT2GJiJNgU9Cpu1ydnZp/OdiynbXlE9AwxicvwG
-         /m1F1ZONy3zy/VXyZd7DloSIFdyKtYLsdVNcgl2HpfMURNSl/WMfU7KU1JmxnK2e4LFs
-         bLnkACiTDs+hTCj0jeI3HNi1XW4FK8PfJbiMVJU4sd/bOm52xfagta1PTKcQaegEeD4T
-         aeYg==
-X-Forwarded-Encrypted: i=1; AJvYcCUvribfeE/9MXIa53UPKn5VeM4/XZm++jIsyVltWPiyjRxVSu+FfgWB4BQOIz9X7bxacJJu+fX/@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyb10iTcBd5Oi0CAKGpfYFsVv1avDKSqGHwUtHRF5fcsP9CRXmE
-	LyGfiNFv57GGtoKy2G8xBQGRexw/mVPzqFmuwMWi3mg0aENHuEmvmCql0g==
-X-Gm-Gg: ASbGncukEmVanq2ui4gEn7jPsUR2IhXVAv6BbSUIs8lJRKPJX2wRIH0uBU7hes5QULa
-	7UnPcGimKNzuu9yFBVb4p+3f1Pi69Dd9MwYf5cqsaVnX0/4aRqjRUekMakU68t0X3H0rxECNV0r
-	EEAAAJecr8RQn4Wy6W7nNCpooZA4HUFrJNkrkZZVYxH+DBuuj5DCJzaNvtQqpMfSHFitPgoZ1T5
-	fqkvT/dpCWN4+keXDicRYEug71XRvbzQlHww4bvhsIVd9wYgx9huaqn2QB8RBhPTCgWeKTrR76V
-	eNIlu0VvOeuwEzJOmCmfXzfyhXq79gpPEm2qFRNoWNsYHYuDM0hCJf5VS4kcWDwpIFGnBnEc8rq
-	J/H8qf5APKAnlzuTEsw==
-X-Google-Smtp-Source: AGHT+IHFySA8RCC1ztMBqnQx0CI0vZCgbes1tIVolxZC9lGiJKeQvrIy8ew1nM1ZiYanTWtfWSSQyA==
-X-Received: by 2002:a05:6a00:888:b0:736:4e14:8ec5 with SMTP id d2e1a72fcca58-74039ba2194mr3063992b3a.11.1746003756807;
-        Wed, 30 Apr 2025 02:02:36 -0700 (PDT)
+        bh=9wlua+SQQv1mavH2Yh4qlNrYi93Jbis7D2G6f9wVldI=;
+        b=gZLVHXa3yiyIH+KEDjlFkrlnnovPmPpMqfTrs3jB/YFp7gk5ODyqb8F/gBJeBn1qK+
+         KLRz2YnthXc2XLSBBLqGptZR2il/HOTaQT7ErtvDLXh5eVBU5XSrGjRR8OSU6QAhPLIG
+         BbMScONYOhdDTYhbnolwFEruZ5zgyr8s83wVyG0r1iu7XvgL8P3DLU4O/FOq302kvLsl
+         /zieCxWrq8/ihOhv6ILrSb1M+1kcD4MepaargIc3E/GQNPqTiQRKKRy4azDfnUBHu8gR
+         y8760dKuHPXu+qtB4HWFvl76RswRIIOlBZzIUQ7x/F7BcfhW24RE0fJ9DJnWrSnu4XIg
+         ylDg==
+X-Forwarded-Encrypted: i=1; AJvYcCXOhCWf+hmxO/jOORarkt65MiLmXZa+iGzNLZvDEhes0TjOw5sc3sbOissa9EtQQrn1UFktSkeE@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyng60p3pHMhHoO/sGs1PfPv3qtGRfkXhkpwbRyQwYCCBjL0UAR
+	GATiB6nPj1dEMXoBFDutGvZz0mdjcS44KgmPAnrKrZc0OKW/WG+E
+X-Gm-Gg: ASbGncsGIBzKXnZ2MJchPqA7CsrWk+VuQd7R9POFN098vBvGpHd6BEx8+Ai9xSDxbtG
+	4XHWJnXuarftrhvFLIwjSL+l1kiab7PP4rciFLJcGkN2mvEKyfWRbuhgkrwhA+gtkVkWvkARdxZ
+	OF8POfAp8ihAreSMsnmNXE1a1EQ9lFs7s+lJJZwAfp4qCQ+rOtLevdUdwY9s+bl+A0v99cxTdiO
+	FJkptRRXoN2Hmr/jzXauPCtk0mIvbDefr7D95cLYTfdJ7J1F7hWBxhgvBvraddX0HJm4J2VUT0X
+	T4UfnUQzP9huIJ9wu8naZj162Gd70t/P1aIWqkxgDq1XJx1YEIv7E1XzRnp5qNXgoO2bQw33pRC
+	mAfLKka6KTWAXOw5EQg==
+X-Google-Smtp-Source: AGHT+IENZsyhfHf7amKwbA56ZqhD3FwGDM6SJTgNuiuK0DPnTBKXN193zYYWEEdpQPCFv/89Kod+Ng==
+X-Received: by 2002:a05:6a21:920e:b0:1fe:61a4:7210 with SMTP id adf61e73a8af0-20a8e17220amr3010937637.2.1746004141645;
+        Wed, 30 Apr 2025 02:09:01 -0700 (PDT)
 Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com ([49.205.34.162])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7404192f7e5sm79658b3a.135.2025.04.30.02.02.35
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b15f76f4680sm10205669a12.14.2025.04.30.02.09.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 30 Apr 2025 02:02:36 -0700 (PDT)
-Message-ID: <15e09df3ecf75b4b7da58fd2e00d5f72aab2d493.camel@gmail.com>
-Subject: Re: [PATCH 23/28] open-by-handle.c: use syncfs() rather than sync()
+        Wed, 30 Apr 2025 02:09:01 -0700 (PDT)
+Message-ID: <53f79f8f27a0d99de336fca50d9028b92769e6d2.camel@gmail.com>
+Subject: Re: [PATCH 22/28] fsync-tester.c: use syncfs() rather than sync()
 From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
 To: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
 Cc: zlang@kernel.org
-Date: Wed, 30 Apr 2025 14:32:33 +0530
-In-Reply-To: <20250417031208.1852171-24-david@fromorbit.com>
+Date: Wed, 30 Apr 2025 14:38:58 +0530
+In-Reply-To: <20250417031208.1852171-23-david@fromorbit.com>
 References: <20250417031208.1852171-1-david@fromorbit.com>
-	 <20250417031208.1852171-24-david@fromorbit.com>
+	 <20250417031208.1852171-23-david@fromorbit.com>
 Content-Type: text/plain; charset="UTF-8"
 X-Mailer: Evolution 3.28.5 (3.28.5-27.el8_10) 
 Precedence: bulk
@@ -80,8 +80,9 @@ Content-Transfer-Encoding: 7bit
 On Thu, 2025-04-17 at 13:01 +1000, Dave Chinner wrote:
 > From: Dave Chinner <dchinner@redhat.com>
 > 
-> generic/467 runs open_by_handle at least 15 times. Each
-> execution runs sync() at least once, sometimes three times.
+> generic/311 runs each fsync-tester unit test 4 times, and there are
+> 20 separate tests. At least 9 of those unit tests run sync() to
+> flush dirty data periodically.
 > 
 > When running check-parallel, sync() can take a -long- time to
 > run as there can be dozens of filesystems that need to be synced,
@@ -89,8 +90,7 @@ On Thu, 2025-04-17 at 13:01 +1000, Dave Chinner wrote:
 > unmounts that are also being run. This results in:
 > 
 > Ten slowest tests - runtime in seconds:
-> generic/467 442
-> .....
+> generic/311 419
 > 
 > This test running for a really long time.
 > 
@@ -100,46 +100,28 @@ On Thu, 2025-04-17 at 13:01 +1000, Dave Chinner wrote:
 > operations, hence allowing both the test and the overall
 > check-parallel operation to run faster:
 > 
-> generic/467        6s
+> generic/311        166s
 > 
 > Signed-off-by: Dave Chinner <dchinner@redhat.com>
 > ---
->  src/open_by_handle.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  src/fsync-tester.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/src/open_by_handle.c b/src/open_by_handle.c
-> index a99cce4b3..816bb5d12 100644
-> --- a/src/open_by_handle.c
-> +++ b/src/open_by_handle.c
-> @@ -430,7 +430,7 @@ int main(int argc, char **argv)
->  	}
->  
->  	/* sync to get the new inodes to hit the disk */
-> -	sync();
-> +	syncfs(mount_fd);
->  
->  	/*
->  	 * encode the file handles or read them from file (-i) and
-> maybe store
-> @@ -563,10 +563,10 @@ int main(int argc, char **argv)
->  	}
->  
->  	/* sync to get log forced for unlink transactions to hit the
-> disk */
-> -	sync();
-> +	syncfs(mount_fd);
->  
->  	/* sync once more FTW */
-> -	sync();
-> +	syncfs(mount_fd);
-I don't see mount_fd being closed at the end. Maybe all the file
-descriptors are closed after the program finishes execution?
-Other than this:
+> diff --git a/src/fsync-tester.c b/src/fsync-tester.c
+> index 417187491..048cb4853 100644
+> --- a/src/fsync-tester.c
+> +++ b/src/fsync-tester.c
+> @@ -131,7 +131,7 @@ static int test_three(int *max_blocks, int
+> prealloc, int rand_fsync,
+>  		/* Force a transaction commit in between just for fun
+> */
+>  		if (blocks == sync_block && (do_sync || drop_caches)) {
+>  			if (do_sync)
+> -				sync();
+> +				syncfs(test_fd);
 Feel free to add 
 Reviewed-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-
->  
->  	/*
->  	 * now drop the caches so that unlinked inodes are reclaimed
-> and
+>  			else
+>  				sync_file_range(test_fd, 0, 0,
+>  						SYNC_FILE_RANGE_WRITE|
 
