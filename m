@@ -1,46 +1,75 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C02AF1C173F
-	for <fstests@vger.kernel.org>; Wed, 30 Apr 2025 12:24:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70B8C20E313;
+	Wed, 30 Apr 2025 12:45:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746015877; cv=none; b=AVqyRINg/PhzM29Nkbj0LHDBYn7fqY/uT35vVnuTM5Ips1t7HpuKVaqh2Mjy4buwJvueC9fUHlLAWyOtOlB+1KtFBra+pvjT17qlK1AliIunfE8LpXFb8GuUIZJiQ8rhMnvj0yaei2vZuhELNAW/hH+Jcfg9988MZF3bHPazlLs=
+	t=1746017154; cv=none; b=I4C1clrayhhcZzf9aL41N7D7veRVpk5i1iJF0hxedrDfACQtcXyqz2USQUxgIPW5GPV3mxpsmpEtXRg5YoAbBV3KFm8qYDZmp4wNsE/rxP3owAwhAhBv6fLfAQUKIHvJ1IUu4hoJ3SZKUI0ZmTAg//wsTCrhF1mt9YetmoG4Cd0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746015877; c=relaxed/simple;
-	bh=SVuKp4RKGTxQmIFVtpAWoH05QYTWyK9E0YvWWjgo5Qw=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=AnvOJPM8aaLkybUqfePJRKrENFdqGMuPusncx0lkid2BxXeksrqcMwgE1FsZp/3GDzkOgCPXT/zFjJzvFCUeAQ6yJPdFSdXTR8SHroQ2ziyu2s5pATm6AYFAxsJFHxGv7bRoIx1YrFRt/aXnvzakli1OqXHhCb+sUb7iQRrCjpM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=VL2Bz84a; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=HhEDbBKE; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1746017154; c=relaxed/simple;
+	bh=NVsE7hVO1uf/H77ZqlptvdKDlPPMyRDz00KnnlFwi10=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Aj5WG8nCdCQ55x8RE+DOLtzh3b9nMkhLTdLSDogorG0+xnPsOyolrQW6KyJKpdHaO2SZUMm2u23z3H8M+EXSQvbeHzPX88a63GBp7EfvbX99v5ZvKgdRE2WGpx+DRZduRW2/q6rCORv0S5qKuZvz1zx/0GLyPJyhITeMtTOKFZY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Wi1ssARG; arc=none smtp.client-ip=209.85.214.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="VL2Bz84a";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="HhEDbBKE"
-Received: from kunlun.arch.suse.cz (unknown [10.100.128.76])
-	by smtp-out1.suse.de (Postfix) with ESMTP id DA17F211FD
-	for <fstests@vger.kernel.org>; Wed, 30 Apr 2025 12:24:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1746015874; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=SzJEYRVRVxqfXutjFSkelEvLUdm6S3Clv1RwZShrXTA=;
-	b=VL2Bz84alg1Ov3Sg75RNSKFCHM6Qk+mqNbBZbuUBEC/K7Y6jN1zrO3z9UnKDWWu4F6VadT
-	yzoCcwf/qaMPOtOQKK0rCjPufnne6amfslps8eVbznaf6w8JsmBAjnM1v0g9se8ykTMbcg
-	ml+ikBRKrfTl6WGOjD6/Uv5DTQy6ENI=
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1746015873; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=SzJEYRVRVxqfXutjFSkelEvLUdm6S3Clv1RwZShrXTA=;
-	b=HhEDbBKEAbmXUQqkCIwgT5LUyRDFu5N5zMEAhw9whmpRMBQZ3kYiUbUvXVq0Yg1dk7F9tZ
-	7+AHnLuM/879T7WqMoi4k84oQY9K0ozjvav8IbRouqMIo21K3sWbMMMuQE8GXedcd07BpM
-	sojc3P4l2WLQVKW9nP9J1E4QFZM0tUQ=
-From: Anthony Iliopoulos <ailiop@suse.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Wi1ssARG"
+Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-22c33e5013aso84745015ad.0;
+        Wed, 30 Apr 2025 05:45:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1746017152; x=1746621952; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=pphjIsaRNNTibmTJwncIJ2OEg6A9gFCoZbB7xdVwvQI=;
+        b=Wi1ssARGr1tkPWwxYXoW3MCIdDMAEf1GzhfbiHRbiT3aL9p5O/vSmG6GDLlZYrwsuS
+         OMViw5jm/Lq3vJ2pZ6Ih80XBTuNGU0LIKAl+1bRQ13fr7ZMVcqE5IPH0Tjixet71jQqQ
+         a0cMsvPVkhBk9+YpABfoQ2nueGfi1EKmtXEj3elnTsBbFaqagbaUYTVBQy8Ev9f+SIlD
+         1cqKWFAksrv0i3sCEy4j7pqoGydxZKoZpVz29QDtAZcbc9hA9nwOmeHSjlnJ0vv0dned
+         Woq400dnI8KAFqKMPMCpVR9vsHfad+Cjr4Z+KE1BP/co1qffqMEV86CsUC/1U1WpECrf
+         iMFw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1746017152; x=1746621952;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=pphjIsaRNNTibmTJwncIJ2OEg6A9gFCoZbB7xdVwvQI=;
+        b=B+Qc+Nwv22ouDZuzAy/auo83uR6F2AuuFNEc9kTAgZO3lDtIdtgFZz5VVI2ajTuBUl
+         HUmXKOlGaZx4ANy7kUAhOpck8Oa+Vnp4MXwRKrWpzrLmgrYIv2E8qkKUKdjp9UqobOCG
+         jJDbVjWKaq2D81VfQDRZxrADrpUPlnlrqibN838TlXINZ/gzwEAcGqakiTWDxo05Hjty
+         nxfZmiIxRXmOzEDetkoWtZpwvmHigek6ixKprGMxEGN+7A4tsWq2CyauFK+GdxOfdxW2
+         W2drqAgb5n3TV7AM2JEpFbQm1SZRvw9FHQE3YN/kzkvVTpRfZpxP0ZtjJz7f61yF8O7e
+         R7aw==
+X-Forwarded-Encrypted: i=1; AJvYcCU/nq8njHbz6iL/oLy/Hy4AN0KLJbwMNJ6xKonBgs2fmM1esfVDxoJ76bYriEzFoKzI/A6s+PSrKoE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxiiPbZ247ggLPhq7reUTcBxUbJS5jd2RnaX5EWF5+ro0Sep9Az
+	dF3rb7gzbGkuJTYs/tk7J9jQsnvtQSWYz5GxKdKKMqXC9O0LhUcXeP7bcw==
+X-Gm-Gg: ASbGncsXE9c41lVSgJX/IDC2uw1UsdnaPokwPbCGNQ33kEh3+4rTeGpuR/w8RV4DE+M
+	RRvrRnrpyU+ECbTKlSqbhgkgequbfWSS65hFj3+YH69kRF/9ON8G+MMKkQShxXjUD7M9nuPUsfO
+	vkdYXvJqQVcuVUQ+UP+7Ael7F+gRdhNzEvK+fJdebwLHsYqsfmxAwhXvmMDZP8tTSXzBfpLp6jc
+	wwdx8AKACRxGMxuzYzOK/cxKrJQ4YxSVYcuMvCBhb5nhNRpPdRjs5r68B0TXWbOjqcFNtZJAGGD
+	p56KEBiwX/gQSQLx5u6ITdM6VyIkTj9eetUMMXP4GTeE
+X-Google-Smtp-Source: AGHT+IG+OALfSwEuAsoPaGzdpFstbT4tZat7x2pcrASYiRCK1bcsaEGCg6Kk9RaUyGo2hqtB3Xj0VA==
+X-Received: by 2002:a17:90b:4ad2:b0:2ff:5e4e:864 with SMTP id 98e67ed59e1d1-30a34464a19mr3708560a91.25.1746017152041;
+        Wed, 30 Apr 2025 05:45:52 -0700 (PDT)
+Received: from citest-1.. ([49.205.34.162])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-30a349e4a40sm1476540a91.6.2025.04.30.05.45.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 30 Apr 2025 05:45:51 -0700 (PDT)
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
 To: fstests@vger.kernel.org
-Subject: [PATCH] fstests/MAINTAINERS: update ocfs2 mailing list address
-Date: Wed, 30 Apr 2025 14:23:42 +0200
-Message-ID: <20250430122342.157170-1-ailiop@suse.com>
-X-Mailer: git-send-email 2.49.0
+Cc: linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org,
+	ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com,
+	djwong@kernel.org,
+	zlang@kernel.org,
+	david@fromorbit.com,
+	hch@infradead.org,
+	nirjhar.roy.lists@gmail.com
+Subject: [PATCH v3 0/2] common: Move exit related functions to common/exit
+Date: Wed, 30 Apr 2025 12:45:21 +0000
+Message-Id: <cover.1746015588.git.nirjhar.roy.lists@gmail.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -48,50 +77,48 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spam-Score: -2.80
-X-Spamd-Result: default: False [-2.80 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-0.999];
-	MIME_GOOD(-0.10)[text/plain];
-	RCPT_COUNT_ONE(0.00)[1];
-	RCVD_COUNT_ZERO(0.00)[0];
-	ARC_NA(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	FROM_EQ_ENVFROM(0.00)[];
-	TO_DN_NONE(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:email]
-X-Spam-Flag: NO
-X-Spam-Level: 
 
-Bring the ocfs2 mailing list address up to date, following the upstream
-change in kernel commit a57b4b7f0557 ("MAINTAINERS: update ocfs2-devel
-mailing list address").
+This patch series moves all the exit related functions to a separate file -
+common/exit. This will remove the dependency to source non-related files to use
+these exit related functions. Thanks to Dave for suggesting this[1]. The second
+patch replaces exit with _exit in check file - I missed replacing them in [2].
 
-Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
----
- MAINTAINERS | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+[v2] -> v3
+ Addressed Dave's feedbacks.
+ In patch [1/2]
+  - Removed _die() and die_now() from common/exit
+  - Replaced die_now() with _fatal in common/punch
+  - Removed sourcing of common/exit and common/test_names from common/config
+    and moved them to the beginning of check.
+  - Added sourcing of common/test_names in _begin_fstest() since common/config
+    is no more sourcing common/test_names.
+  - Added a blank line in _begin_fstest() after sourcing common/{exit,test_names}
+ In patch [2/2]
+  - Replaced "_exit 1" with _fatal and "echo <error message>; _exit 1" with
+   _fatal <error message>.
+  - Reverted to "exit \$status" in the trap handler registration in check - just
+    to make it more obvious to the reader that we are capturing $status as the
+    final exit value.
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index bc31572902bf..a0f50f3d98b4 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -157,7 +157,7 @@ F:	tests/nfs/
- F:	common/nfs
- 
- OCFS2
--L:	ocfs2-devel@oss.oracle.com
-+L:	ocfs2-devel@lists.linux.dev
- S:	Supported
- F:	tests/ocfs2/
- 
--- 
-2.49.0
+[v1] https://lore.kernel.org/all/cover.1745390030.git.nirjhar.roy.lists@gmail.com/
+[v2] https://lore.kernel.org/all/cover.1745908976.git.nirjhar.roy.lists@gmail.com/
+[1] https://lore.kernel.org/all/Z_UJ7XcpmtkPRhTr@dread.disaster.area/
+[2] https://lore.kernel.org/all/48dacdf636be19ae8bff66cc3852d27e28030613.1744181682.git.nirjhar.roy.lists@gmail.com/
+
+
+Nirjhar Roy (IBM) (2):
+  common: Move exit related functions to a common/exit
+  check: Replace exit with _fatal and _exit in check
+
+ check           | 54 ++++++++++++++++++-------------------------------
+ common/config   | 17 ----------------
+ common/exit     | 39 +++++++++++++++++++++++++++++++++++
+ common/preamble |  3 +++
+ common/punch    | 39 ++++++++++++++++-------------------
+ common/rc       | 28 -------------------------
+ 6 files changed, 79 insertions(+), 101 deletions(-)
+ create mode 100644 common/exit
+
+--
+2.34.1
 
