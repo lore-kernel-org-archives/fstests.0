@@ -1,273 +1,158 @@
-Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71B3F246784
-	for <fstests@vger.kernel.org>; Tue, 29 Apr 2025 23:59:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D6B52111
+	for <fstests@vger.kernel.org>; Wed, 30 Apr 2025 02:47:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745971183; cv=none; b=E2IpSIB0+pLbhbqCQO62yh28U9rNGxoYjud0PpVFXFDMpg7qGw1b9OdJEnyC+GGcU9i0OrjZJmvB3Phxi98cBGBSJwXXDoKNw3Qvw9zDPkRqvZFNLy1cwRECQ3QuGHXosLtrZND7Z6SOugRBD2U8ER5RsI7OGWqC3H4n1R4dcQ4=
+	t=1745981264; cv=none; b=DgzJZFiAt1UfFi6ndVS9qq57CnyzNjTwhBLAm88md+gEI9d2nlljkk0Ww8faEKyWawJUx/N+50UWU/avOWZnjIyuvzcWTgqSjvXsPUaq0cwXYif94ARwhWRjZhymyk0Zs/45SVsVeKahLn3PJqn5iJxTmkXMJYkPSnhSOl93pRg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745971183; c=relaxed/simple;
-	bh=zYPtI3bHKiFeKZGAqAvYP78ecZbSnxjIXDnbtWFJEDg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=eMr58byZlXppGt/svOLiLSZRvxT/mghAwpxZpFuXGtcOU4k0HLAF1Ao3RvcZzAGzdZM5Eo8+JgDsrbdQel+aziZVsCdYdpDxw+Iew7wVJyYZ9RW4NZ9zjqDd+KzCQm+aYobDBUaCR2BC6sNDlBm6rZrDW3RbnYYv0jgt936PVNc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=QK6NHCjD; arc=none smtp.client-ip=209.85.214.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
+	s=arc-20240116; t=1745981264; c=relaxed/simple;
+	bh=gB8TAfuLxAG4wGF7EWMpCAyhqDp8zUiaMWtFctDP+0c=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=qyweXPLrA7ikReuGpJBEsymT2FPs743AwBCmf9B+NZS8HhkkaJ5nW2K5EnwN4HsrR38Cr8joxx2S/Wj1J6EGF6r3d1871xEtVwzdHvPyncyIJeo/kHIV8yHoLP5Y92NHlYKdju2jByHDAxPO/99tnWeQbyvY7LR1Yt6VCy3poOk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XLYm9qei; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="QK6NHCjD"
-Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-224191d92e4so72547835ad.3
-        for <fstests@vger.kernel.org>; Tue, 29 Apr 2025 16:59:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1745971181; x=1746575981; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=YVw92qdDBpSeLoYhqTmkn3e/ekyDNEnwi+AVc5uI+WE=;
-        b=QK6NHCjDhStnGLgzRBbAyQTE8qrCPrUFIQK7pniEq+JR9DwHxRrPrffCGJBUtMt6DZ
-         9/sECpe6dQqK5X29j69YcAXT3KI7FaTmsNPzfxDE69FHZq8+YapYtsLHSD0e0CTezjSF
-         HYWHexF1BMulVF8YbVbIao9XnR/IxcMZoOVW3nEBjyfJS3zTClj8QjZezY8SbHIZE+Y0
-         /Ts5V3KbVLcMrFZ04reW+3WUUwi442J326XnfP7VL8AluQ/oKpKiJorKdk4x/LGNgvQp
-         nl1n2j16tpy4FJ43rWI41IH8bH8NC1fCXfg4vk5u4nFmemz9CH+sPZp0/Xq36iCq7JMY
-         MvnQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745971181; x=1746575981;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=YVw92qdDBpSeLoYhqTmkn3e/ekyDNEnwi+AVc5uI+WE=;
-        b=kUxq7tU+JzuHjtdAiNryJ5+Jlgw7w2ospqUPO4kMacxCfsUIrtm/o66RX16NyxBuZ5
-         PB8OU4nWVQiREibgmRO4+8U3Qwthw82NKE+2iv28DzboAzYfDCkmrkA4GGFN/FR9ihuA
-         yYFGK3Bi3uez4EXZ9LYdZaIAQhhC3oiNGRidj+SHHoXUoLsSo27mZc68SrWdPdpe3rNX
-         SgeBsvhD9iuDvH3Kswzrw1Q8W7041axYcHaNx8fCnEXnSKU3GIxzxiNsiKXgTVft5ITo
-         EKioryqyjTMvmsztChOY5lcuADCUIIaJsm8jNgd/CTCJ+xlYMiu9Q+APaKciRSdlCV0w
-         yYIQ==
-X-Gm-Message-State: AOJu0YxGV3RQOmCcbqOKilLXEcGsI10DyDs8wKvaEhLjUZrAvF9jLPDg
-	s0XcQeMGuPdyClnLoAVFcH7vfhq3/s32Hg7Y/52otk6bEO9wuzMRSPBUt5y1sd6tBm0q3c53QiT
-	g
-X-Gm-Gg: ASbGncu83A/73vN6030Eumh9oSCrTnD5BMEicdgA1VmBr87T0JMXPgLwC062+92QMM1
-	8ht7vgJ+SIbnVGMCDPCgjNloaR+JFyb2x/JJdjWX5/ppVGBd6BUZw5zjiQ7sbCco5GcnpSaUTwO
-	hePCjQnk/K/XsigKJgypBVSXiT6dwvgpthMwK4YZnUSzYrkxVviWf33a+1Ag+F0kwNTdqySglpR
-	pcJXvwMhP4R57cbMcXRc6UMxKGcWV70XRVlCgLbqm1dcnjL8vq7X7YBnd9Kb7BYZhzm4FvNZMAW
-	khr8BO4ZRdyF3mIHTYRpwJm2Ki1qI1gGpAvmQZOyDjvO3b8oufSP35l0jwkD9n+Ot6+HDW2YfAa
-	mOrbMeszq3LWBEA==
-X-Google-Smtp-Source: AGHT+IHsH/8X6UP9tikizlY4psmrzOQStlrdrC7h0vwhF7x6aWzUfoYr97UdhdbC1d7CvYyLD0W2VQ==
-X-Received: by 2002:a17:902:ccc3:b0:215:9bc2:42ec with SMTP id d9443c01a7336-22df5838ce0mr5785565ad.47.1745971180608;
-        Tue, 29 Apr 2025 16:59:40 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-60-96.pa.nsw.optusnet.com.au. [49.181.60.96])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22db4dbbf8dsm109681655ad.65.2025.04.29.16.59.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 29 Apr 2025 16:59:40 -0700 (PDT)
-Received: from dave by dread.disaster.area with local (Exim 4.98.2)
-	(envelope-from <david@fromorbit.com>)
-	id 1u9urR-0000000F0ny-2iHa;
-	Wed, 30 Apr 2025 09:59:37 +1000
-Date: Wed, 30 Apr 2025 09:59:37 +1000
-From: Dave Chinner <david@fromorbit.com>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
-Subject: Re: [PATCH v2 2/2] check: Replace exit with _exit in check
-Message-ID: <aBFn6YL3vHpb09yB@dread.disaster.area>
-References: <cover.1745908976.git.nirjhar.roy.lists@gmail.com>
- <de352e171003ab91fab2328652f8b1990a2d8cce.1745908976.git.nirjhar.roy.lists@gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XLYm9qei"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8A8FDC4CEE3;
+	Wed, 30 Apr 2025 02:47:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1745981264;
+	bh=gB8TAfuLxAG4wGF7EWMpCAyhqDp8zUiaMWtFctDP+0c=;
+	h=From:To:Cc:Subject:Date:From;
+	b=XLYm9qei+IO6/5Algq5QOx+NGqO07aIh8bF+DNlegqWxufhX2Vou3lQ+lzDi3tbzQ
+	 q6cYjaZnodBXNBs5TpMu2MoE4aiQVNfKFrIOepgKAM8IoYEUyP/GEA98cdIqtR477t
+	 yrcBFkV4bArcNwqTUiQt2O41xbV3e6QGLR7Ubl7pQjMtb1NoO2tKNR/7ndTVfR0tcU
+	 qFa9gz1flnF/PJVN62EnQ85h+pi5yHqLEopcA/G1XI6YY85njnOfebLbqN6jQpU0kw
+	 HvFFLEVMT1K0eHdCJN0Rft0VSsXwZbtBp6xUXP4prZ+Q6wYAhwaKZ66GP6RGP00Pwm
+	 CvD0n7mIjAEJw==
+From: Chao Yu <chao@kernel.org>
+To: Zorro Lang <zlang@kernel.org>,
+	fstests@vger.kernel.org
+Cc: jaegeuk@kernel.org,
+	linux-f2fs-devel@lists.sourceforge.net,
+	Chao Yu <chao@kernel.org>,
+	Daeho Jeong <daehojeong@google.com>
+Subject: [PATCH] f2fs/013: test to check potential corruption on atomic_write file
+Date: Wed, 30 Apr 2025 10:47:31 +0800
+Message-ID: <20250430024731.2722027-1-chao@kernel.org>
+X-Mailer: git-send-email 2.49.0.901.g37484f566f-goog
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <de352e171003ab91fab2328652f8b1990a2d8cce.1745908976.git.nirjhar.roy.lists@gmail.com>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Apr 29, 2025 at 06:52:54AM +0000, Nirjhar Roy (IBM) wrote:
-> Some of the "status=<val>;exit" and "exit <val>" were not
-> replace with _exit <val>. Doing it now.
-> 
-> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-> ---
->  check | 44 ++++++++++++++++++--------------------------
->  1 file changed, 18 insertions(+), 26 deletions(-)
-> 
-> diff --git a/check b/check
-> index 9451c350..99d38492 100755
-> --- a/check
-> +++ b/check
-> @@ -47,6 +47,7 @@ export DIFF_LENGTH=${DIFF_LENGTH:=10}
->  # by default don't output timestamps
->  timestamp=${TIMESTAMP:=false}
->  
-> +. common/exit
->  rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.report.* $tmp.arglist
->  
->  SRC_GROUPS="generic"
-> @@ -121,7 +122,7 @@ examples:
->   check -X .exclude -g auto
->   check -E ~/.xfstests.exclude
->  '
-> -	    exit 1
-> +	    _exit 1
->  }
->  
->  get_sub_group_list()
-> @@ -231,7 +232,7 @@ _prepare_test_list()
->  			list=$(get_group_list $group)
->  			if [ -z "$list" ]; then
->  				echo "Group \"$group\" is empty or not defined?"
-> -				exit 1
-> +				_exit 1
->  			fi
->  
->  			for t in $list; do
+This is a regression testcase to check whether we will handle database
+inode dirty status correctly:
+1. make sure disk quota is enabled
+2. create a regular file, and write data into the file
+3. start transaction on the file (via F2FS_IOC_START_ATOMIC_WRITE)
+4. write transaction data to the file
+5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
+6. meanwhile loop call fsync in parallel
+Before f098aeba04c9 ("f2fs: fix to avoid atomicity corruption of atomic
+file"), database file may become corrupted after atomic write while
+there is concurrent dirty inode flush in background.
 
-This is now:
+Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+Cc: Daeho Jeong <daehojeong@google.com>
+Signed-off-by: Chao Yu <chao@kernel.org>
+---
+ tests/f2fs/013     | 73 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/f2fs/013.out |  2 ++
+ 2 files changed, 75 insertions(+)
+ create mode 100755 tests/f2fs/013
+ create mode 100644 tests/f2fs/013.out
 
-	_fatal "Group \"$group\" is empty or not defined?"
-
-> @@ -316,14 +317,14 @@ while [ $# -gt 0 ]; do
->  	-r)
->  		if $exact_order; then
->  			echo "Cannot specify -r and --exact-order."
-> -			exit 1
-> +			_exit 1
->  		fi
->  		randomize=true
->  		;;
->  	--exact-order)
->  		if $randomize; then
->  			echo "Cannnot specify --exact-order and -r."
-> -			exit 1
-> +			_exit 1
->  		fi
->  		exact_order=true
->  		;;
-
-Same.
-
-> @@ -361,7 +362,7 @@ done
->  # after processing args, overlay needs FSTYP set before sourcing common/config
->  if ! . ./common/rc; then
->  	echo "check: failed to source common/rc"
-> -	exit 1
-> +	_exit 1
->  fi
->  
->  init_rc
-
-Same.
-
-> @@ -373,8 +374,7 @@ if [ -n "$SOAK_DURATION" ]; then
->  		sed -e 's/^\([.0-9]*\)\([a-z]\)*/\1 \2/g' | \
->  		$AWK_PROG -f $here/src/soak_duration.awk)"
->  	if [ $? -ne 0 ]; then
-> -		status=1
-> -		exit 1
-> +		_exit 1
->  	fi
->  fi
->  
-> @@ -385,8 +385,7 @@ if [ -n "$FUZZ_REWRITE_DURATION" ]; then
->  		sed -e 's/^\([.0-9]*\)\([a-z]\)*/\1 \2/g' | \
->  		$AWK_PROG -f $here/src/soak_duration.awk)"
->  	if [ $? -ne 0 ]; then
-> -		status=1
-> -		exit 1
-> +		_exit 1
->  	fi
->  fi
->  
-> @@ -404,8 +403,7 @@ if $have_test_arg; then
->  	while [ $# -gt 0 ]; do
->  		case "$1" in
->  		-*)	echo "Arguments before tests, please!"
-> -			status=1
-> -			exit $status
-> +			_exit 1
-
-_fatal
-
->  			;;
->  		*)	# Expand test pattern (e.g. xfs/???, *fs/001)
->  			list=$(cd $SRC_DIR; echo $1)
-> @@ -438,7 +436,7 @@ fi
->  if [ `id -u` -ne 0 ]
->  then
->      echo "check: QA must be run as root"
-> -    exit 1
-> +    _exit 1
->  fi
-
-Same
-
->  
->  _wipe_counters()
-> @@ -721,9 +719,9 @@ _prepare_test_list
->  fstests_start_time="$(date +"%F %T")"
->  
->  if $OPTIONS_HAVE_SECTIONS; then
-> -	trap "_summary; exit \$status" 0 1 2 3 15
-> +	trap "_summary; _exit" 0 1 2 3 15
->  else
-> -	trap "_wrapup; exit \$status" 0 1 2 3 15
-> +	trap "_wrapup; _exit" 0 1 2 3 15
->  fi
-
-Please add a comment explaining that _exit will capture $status
-that has been previously set as the exit value.
-
-Realistically, though, I think 'exit $status' is much better here
-because it clearly documents that we are capturing $status as the
-exit value from the trap rather than having to add a comment to make
-it clear that $status is the exit value of the trap...
-
->  function run_section()
-> @@ -767,8 +765,7 @@ function run_section()
->  	mkdir -p $RESULT_BASE
->  	if [ ! -d $RESULT_BASE ]; then
->  		echo "failed to create results directory $RESULT_BASE"
-> -		status=1
-> -		exit
-> +		_exit 1
->  	fi
-
-_fatal
-
->  	if $OPTIONS_HAVE_SECTIONS; then
-> @@ -784,8 +781,7 @@ function run_section()
->  			echo "our local _test_mkfs routine ..."
->  			cat $tmp.err
->  			echo "check: failed to mkfs \$TEST_DEV using specified options"
-> -			status=1
-> -			exit
-> +			_exit 1
->  		fi
->  		# Previous FSTYP derived from TEST_DEV could be changed, source
->  		# common/rc again with correct FSTYP to get FSTYP specific configs,
-> @@ -829,8 +825,7 @@ function run_section()
->  	      echo "our local _scratch_mkfs routine ..."
->  	      cat $tmp.err
->  	      echo "check: failed to mkfs \$SCRATCH_DEV using specified options"
-> -	      status=1
-> -	      exit
-> +	      _exit 1
->  	  fi
->  
->  	  # call the overridden mount - make sure the FS mounts with
-> @@ -840,8 +835,7 @@ function run_section()
->  	      echo "our local mount routine ..."
->  	      cat $tmp.err
->  	      echo "check: failed to mount \$SCRATCH_DEV using specified options"
-> -	      status=1
-> -	      exit
-> +	      _exit 1
->  	  else
->  	      _scratch_unmount
->  	  fi
-
-Same for all these.
-
--Dave.
+diff --git a/tests/f2fs/013 b/tests/f2fs/013
+new file mode 100755
+index 00000000..3db8448c
+--- /dev/null
++++ b/tests/f2fs/013
+@@ -0,0 +1,73 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
++#
++# FS QA Test No. f2fs/013
++#
++# This is a regression testcase to check whether we will handle database
++# inode dirty status correctly:
++# 1. make sure disk quota is enabled
++# 2. create a regular file, and write data into the file
++# 3. start transaction on the file (via F2FS_IOC_START_ATOMIC_WRITE)
++# 4. write transaction data to the file
++# 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
++# 6. meanwhile loop call fsync in parallel
++# Before f098aeba04c9 ("f2fs: fix to avoid atomicity corruption of atomic
++# file"), database file may become corrupted after atomic write while
++# there is concurrent dirty inode flush in background.
++#
++. ./common/preamble
++_begin_fstest auto quick
++
++_cleanup()
++{
++	[ -n "$atomic_write_pid" ] && kill -9 $atomic_write_pid
++	wait
++	cd /
++	rm -r -f $tmp.*
++}
++
++_fixed_by_kernel_commit f098aeba04c9 \
++	"f2fs: fix to avoid atomicity corruption of atomic file"
++
++_require_scratch
++
++_scratch_mkfs >> $seqres.full
++# note that it relis on FAULT_TIMEOUT fault injection support in f2fs
++_scratch_mount "-o fault_injection=1,fault_type=4194304" >> $seqres.full
++
++dbfile=$SCRATCH_MNT/file.db
++
++# initialize database file
++$XFS_IO_PROG -c "pwrite 0 4k" -c "fsync" -f $dbfile >> $seqres.full
++
++# sync filesystem to clear dirty inode
++sync
++
++# start atomic_write on src.db database file and commit transaction
++$F2FS_IO_PROG write 1 0 2 zero atomic_commit $dbfile >> $seqres.full &
++atomic_write_pid=$!
++
++# call fsync to flush dirty inode of database file in parallel
++for ((j=0;j<1000;j++)) do
++	$F2FS_IO_PROG fsync $dbfile >> $seqres.full
++done
++
++wait $atomic_write_pid
++unset atomic_write_pid
++
++# flush dirty data and drop cache
++sync
++echo 3 > /proc/sys/vm/drop_caches
++
++newsize=`stat $dbfile -c %s`
++if [ "$newsize" != "8192" ]; then
++	_fail "filesize is inconsistent:"$newsize
++fi
++rm $dbfile
++sync
++
++echo "Silence is golden"
++
++status=0
++exit
+diff --git a/tests/f2fs/013.out b/tests/f2fs/013.out
+new file mode 100644
+index 00000000..3e66423b
+--- /dev/null
++++ b/tests/f2fs/013.out
+@@ -0,0 +1,2 @@
++QA output created by 013
++Silence is golden
 -- 
-Dave Chinner
-david@fromorbit.com
+2.49.0
+
