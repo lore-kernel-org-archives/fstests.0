@@ -1,160 +1,155 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from fhigh-b7-smtp.messagingengine.com (fhigh-b7-smtp.messagingengine.com [202.12.124.158])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E5A679C0
-	for <fstests@vger.kernel.org>; Thu,  1 May 2025 09:11:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D47C443169
+	for <fstests@vger.kernel.org>; Thu,  1 May 2025 13:27:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.158
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746090665; cv=none; b=J/kZKEFslrYcgmyUweUybQzpv6eBqts3Fa+TUsreGVexR2gGt1VboML4LLDBPKsFaPDVSM0u+fQe30l9XjtFchSvqmPafm4y8962kCmwii6hN/3vCpD6mE5GXtHoNWSuQI0q6S6wOyFO6rW2EdHX8Goi73Lwr3u4FGhLOl5vFKA=
+	t=1746106025; cv=none; b=qKIamXv8j8qWKQV2DfWQo3IQCFX7ESEDMuxWqsA0wGcN1mOITLA+Ld8Yro2L8D0sZLYf3Lci/tpL8KzkV943ZsHdKKY9OftYnstR5m62Ti0JCrzalMWoBsDoZciZ6fdTSgxLq/oPXACZarbAutd9cGaRW01TQhBnDXP2pDyMT6M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746090665; c=relaxed/simple;
-	bh=QEmXOiaRmXnU0Pvpj2r5Tc5dFQl/2TPO2eRzIxZTpSY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=loXEotHMAzA3eDEYgBTpFhWviwQvRjT6OpEUn5W72xpGctAZ+h7lD4csWlqamlSbf/tXwXgQfFxFtAjRi1BlCLWxNA2oBFc/IKo2gBzYWLD2LEP8/RWfXTfPWbPb5u7dUTMtYQ8DxopYDo3EZuNpMvhdjmOfpe4Y8T5m1VGprBI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=UGfiMCbr; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1746106025; c=relaxed/simple;
+	bh=qOU+THKGYsrY4YMTTE1H5Tw2Rt8ppWKM+/yndfaaoOA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=EaV6I+PgQnmQ1jFBMf2iQGUX0bBWUW4qlRURwSWEMGWdsptiYbjSlKnJSuq8Zj99C5CJD02Ljr0kb0rF9fVUIQpdtq98FMEuFCM2R7E2WvFYoybSQHGofjGaZvK1eCR4VwrQSmd5XKDPmU4b/wn1tdA5gLOGAo13/Cjnmuo0N0M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net; spf=pass smtp.mailfrom=sandeen.net; dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b=GqNXPi14; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=feYCgTRf; arc=none smtp.client-ip=202.12.124.158
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandeen.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="UGfiMCbr"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1746090662;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=QxhIn1Sw5963uslvOW25nDRRIDUs0PbP3KlVBu7IStA=;
-	b=UGfiMCbrscUxrsZ84gCm94Hpb35IQcjOF6doNElFdEfPzOiPD/qJRwRwsuJ7tkQCIfDat5
-	HXlg391WoFdPUePnbELHiiYhiRxaaE9wZcvYCZeyGRBfpfN6ADNMBT4XZN17FVMgiFmQip
-	eWdjaoSU9B8NavJPN1QRxNFyqCfldbU=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-635-4RrnSKD2NtqYUg52wfgiCA-1; Thu, 01 May 2025 05:11:01 -0400
-X-MC-Unique: 4RrnSKD2NtqYUg52wfgiCA-1
-X-Mimecast-MFC-AGG-ID: 4RrnSKD2NtqYUg52wfgiCA_1746090660
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-736cb72efd5so752132b3a.3
-        for <fstests@vger.kernel.org>; Thu, 01 May 2025 02:11:00 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746090660; x=1746695460;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=QxhIn1Sw5963uslvOW25nDRRIDUs0PbP3KlVBu7IStA=;
-        b=dl5W0KM8I/ALKwNWGiBtKGyiACATcQOwoGkkj1rCfoNMun0ftQayorC2iI4krljtxb
-         DNa0PLFqQB42NFPY0JdesukmuXu0zMJSNsLaf+uEMFxLlXiMCyh5r/8nQr4B4zWaTx8r
-         BT72ZXuZYV3jnQBAQ5xo7ISHAixk+sTy4E2UL9yOh1OwX8QrGFicgxnlSLsktiEHj2Rw
-         zq58jH+zuskWkNz2JiS+gCvLHIKAHMEpqCSQKAYpwF+CrkvQ4PyKFDJUnb71m1oSkq58
-         8uO4/tF0jkfwj3BriWMRy+7twm1FYh1SGelDhMOIM3xT7R2ad9Cup+/hduyHvYQjETS+
-         +riw==
-X-Forwarded-Encrypted: i=1; AJvYcCVu7kpy2jdM+/6sMkVFj4J4fPrwjJYZ+hueK8ktqg2evsBssz84V1c5ZtYcLr6Om2HEo0Al+BXc@vger.kernel.org
-X-Gm-Message-State: AOJu0YxNM9YkG6bhpOfO1WA+9V5oUtd3t+mqKKcwgXXXt8JGITGyN9IN
-	dl4b7upREoKhkDUwlFmeXm3DpQjtdA2g7WHHI8F1snO72Cd1Wd/9MCAOUhb9ZuhkCCYv9UR4VXU
-	v0ghFtGzqOb6NJ0mBPKimFGA2E/rbHyXSjAKVsH/gNJD5ZJdXbAgAjEw=
-X-Gm-Gg: ASbGncvw85kBcFnr6RbMaADY/yGF058espFSDqzO+HvTnIne+t5VrWNI1rpmOoRMRzx
-	Q2Qyf35wy8opB7WXtQYhd8qvmcF0r0nnOQ02i3tsNhenh3kQozSs3Gyi1Tx0VTXRssbWhko0480
-	S/jrXuDAtg3tVid9GUoezbNL6hQ/rBaPtyWe+v+8PCLJb9F+6peBQpnibvHm8IE9w+1q4jHrL1Y
-	mtgb5U8FfKYByKpXn+gHe1emQ20EkklCieJA7xXENO+Ff00DbPOHrZLnYNo7wSbCzaFMl9EOv2P
-	b37WMXOVO077omXg3GwvmO6TSj8nfSFjYBVMoVDt4cnekAUkuOmY
-X-Received: by 2002:a05:6a00:399f:b0:736:b9f5:47c6 with SMTP id d2e1a72fcca58-74049254c95mr2293523b3a.16.1746090659932;
-        Thu, 01 May 2025 02:10:59 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFb5/7x8ZBKSA+i2VN4Rh2/jV2SOh0H2mngKBWWKI7BKImnX6gIaLln1uDeV0hnSozdCGsAzw==
-X-Received: by 2002:a05:6a00:399f:b0:736:b9f5:47c6 with SMTP id d2e1a72fcca58-74049254c95mr2293497b3a.16.1746090659522;
-        Thu, 01 May 2025 02:10:59 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7404fa42fb0sm353535b3a.166.2025.05.01.02.10.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 01 May 2025 02:10:59 -0700 (PDT)
-Date: Thu, 1 May 2025 17:10:53 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Ritesh Harjani <ritesh.list@gmail.com>
-Cc: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>,
-	fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org, ojaswin@linux.ibm.com, djwong@kernel.org,
-	zlang@kernel.org, david@fromorbit.com, hch@infradead.org
-Subject: Re: [PATCH v3 1/2] common: Move exit related functions to a
- common/exit
-Message-ID: <20250501091053.ghovsgjb52yvb7rj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cover.1746015588.git.nirjhar.roy.lists@gmail.com>
- <7363438118ab8730208ba9f35e81449b2549f331.1746015588.git.nirjhar.roy.lists@gmail.com>
- <87cyctqasl.fsf@gmail.com>
+	dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b="GqNXPi14";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="feYCgTRf"
+Received: from phl-compute-03.internal (phl-compute-03.phl.internal [10.202.2.43])
+	by mailfhigh.stl.internal (Postfix) with ESMTP id D963125401D4;
+	Thu,  1 May 2025 09:27:01 -0400 (EDT)
+Received: from phl-mailfrontend-02 ([10.202.2.163])
+  by phl-compute-03.internal (MEProxy); Thu, 01 May 2025 09:27:01 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm3; t=1746106021;
+	 x=1746192421; bh=k7fM3fv92OcrYO6Tbquuitug+2SYEXqjrTKqj++o7Y8=; b=
+	GqNXPi14ZWX63kR9ipX6p0hoGBP4IZnOG2sr7ryEQV79ecIn45DG+XPjnhczP7sK
+	K+f/bTJIYp59EEsPn5aX+7YRFuu+EDi/3LDlj173EsviWk37voiU4DX09wV0KIO6
+	TP3oiyxaQyVpdCqwW3PHoRfz45soePJzMz9XtEEHTRzDYVE3Aw5SbLoYI0j3nql6
+	AgBg/LUMT730hauNWpk4kA0INrXZaWghV9TEOADa0cN2QKGHENaLfMM6RTBsMPZo
+	Wacwbyd8e/UpkjN/AQzjSP7Zs9zxLwkXyBdqGTCpGsBSWu4G+RcI9PkooHO/MISW
+	9aEguROjSoIEttGb9Cf8jA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1746106021; x=
+	1746192421; bh=k7fM3fv92OcrYO6Tbquuitug+2SYEXqjrTKqj++o7Y8=; b=f
+	eYCgTRfmA/8s7J8MD6epTsj0ZdZ6it8fQXFQBkl+2aR0TiNBb98reuIS/e6pz8MD
+	E+0vlgZhjstxz/o7DBIasRBugL3TPM+6mG+QEubwMmTWJygH/iK5S9iJZaY5yKtJ
+	TYfL4wOYUwoQlz/Kkdf8PnXobXQd6tgcYD7OdsoAvP0KZr6wAreHi+L7vQzUtyo2
+	U4iY8zez1g7y7a0jjh+ci3fNS76qe1TcVkmRHFbfjuAbMY4DnYDysD1dMent15w1
+	OHMLL4ytKFyDlmqHY2E28b3r7XXX4dLbxGgpGYWixUgQQJT9KFRj3ZQqyjuimE2a
+	WbE4Ybi0Vj+79osEqg5xA==
+X-ME-Sender: <xms:pXYTaAlGBsyXcMo0tQUJr-7YOSw2AzXlXHDcsL0hUReXRznaf_BwCw>
+    <xme:pXYTaP0D2icWsfjo_YTmx8N9onxUFmTOwuUaPo-CC9gxyI_c1mLTLv2qWewicClo8
+    dgfvhl0N5bENDkYsEQ>
+X-ME-Received: <xmr:pXYTaOpYBeK1UUmLIeAuseMp6e5DOnrn0fC_JLzF--qJkxvKB98lcx6xs1K89Q>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefvddrtddtgddvieelieelucetufdoteggodetrf
+    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdggtfgfnhhsuhgsshgtrhhisggv
+    pdfurfetoffkrfgpnffqhgenuceurghilhhouhhtmecufedttdenucesvcftvggtihhpih
+    gvnhhtshculddquddttddmnecujfgurhepkfffgggfuffvvehfhfgjtgfgsehtjeertddt
+    vdejnecuhfhrohhmpefgrhhitgcuufgrnhguvggvnhcuoehsrghnuggvvghnsehsrghnug
+    gvvghnrdhnvghtqeenucggtffrrghtthgvrhhnpeevieekueetfeeujedtheeffedvgeff
+    iedvjeejleffhfeggeejuedtjeeulefhvdenucevlhhushhtvghrufhiiigvpedtnecurf
+    grrhgrmhepmhgrihhlfhhrohhmpehsrghnuggvvghnsehsrghnuggvvghnrdhnvghtpdhn
+    sggprhgtphhtthhopeefpdhmohguvgepshhmthhpohhuthdprhgtphhtthhopeiilhgrnh
+    hgsehrvgguhhgrthdrtghomhdprhgtphhtthhopehfshhtvghsthhssehvghgvrhdrkhgv
+    rhhnvghlrdhorhhgpdhrtghpthhtohepjhhmohihvghrsehrvgguhhgrthdrtghomh
+X-ME-Proxy: <xmx:pXYTaMmDxDJAiZf7f5hQfwFS48uEA6xz7jDLzEej58mYER3e05j-Dg>
+    <xmx:pXYTaO12ojMIxC4wWUB_glZxTpEyEqnJa6TR2ILNdf_E-bKS70T1hg>
+    <xmx:pXYTaDstaJx89_D1O34qK9zSDRrIfh6hrYZ1z1B5zzmDH0t0zZbd4g>
+    <xmx:pXYTaKXV_3-Ww9w-nRIC9kESy7j2-sp6DRTUYbsVppN4oX-4M75jJA>
+    <xmx:pXYTaHW2KXVXpmivrJENBbVxbSnfSWuA00AbkpWbDYl80hg1W7PyRr1a>
+Feedback-ID: i2b59495a:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
+ 1 May 2025 09:27:01 -0400 (EDT)
+Message-ID: <c23fd44e-e07e-4dd9-8641-c94a5935d9df@sandeen.net>
+Date: Thu, 1 May 2025 08:27:00 -0500
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <87cyctqasl.fsf@gmail.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] generic/126: Do not run if TEST_DIR is sticky and
+ fs.protected_regular enabled
+To: Zorro Lang <zlang@redhat.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+ Jeff Moyer <jmoyer@redhat.com>
+References: <51ac35ec-1f3f-45d9-9cef-1ee424a9f9fe@sandeen.net>
+ <20250501090136.r46dwhzg3eshupkl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Language: en-US
+From: Eric Sandeen <sandeen@sandeen.net>
+In-Reply-To: <20250501090136.r46dwhzg3eshupkl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Thu, May 01, 2025 at 08:47:46AM +0530, Ritesh Harjani wrote:
-> "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
+On 5/1/25 4:01 AM, Zorro Lang wrote:
+> On Wed, Apr 30, 2025 at 05:10:36PM -0500, Eric Sandeen wrote:
+>> generic/126 fails in somewhat mysterious ways when run on tmpfs on
+>> systems that have the fs.protected_regular sysctl set > 0, because
+>> tmpfs defaults to having the sticky bit set, and this causes
+>> may_create_in_sticky to fail when the test tries to create writable
+>> files.
+>>
+>> To fix this, _notrun the test if TEST_DIR is sticky, and the protection
+>> is enabled.
+>>
+>> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+>> ---
 > 
-> > Introduce a new file common/exit that will contain all the exit
-> > related functions. This will remove the dependencies these functions
-> > have on other non-related helper files and they can be indepedently
-> > sourced. This was suggested by Dave Chinner[1].
-> > While moving the exit related functions, remove _die() and die_now()
-> > and replace die_now with _fatal(). It is of no use to keep the
-> > unnecessary wrappers.
-> >
-> > [1] https://lore.kernel.org/linux-xfs/Z_UJ7XcpmtkPRhTr@dread.disaster.area/
-> > Suggested-by: Dave Chinner <david@fromorbit.com>
-> > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-> > ---
-> >  check           |  2 ++
-> >  common/config   | 17 -----------------
-> >  common/exit     | 39 +++++++++++++++++++++++++++++++++++++++
-> >  common/preamble |  3 +++
-> >  common/punch    | 39 +++++++++++++++++----------------------
-> >  common/rc       | 28 ----------------------------
-> >  6 files changed, 61 insertions(+), 67 deletions(-)
-> >  create mode 100644 common/exit
-> >
-> > diff --git a/check b/check
-> > index 9451c350..bd84f213 100755
-> > --- a/check
-> > +++ b/check
-> > @@ -46,6 +46,8 @@ export DIFF_LENGTH=${DIFF_LENGTH:=10}
-> >  
-> >  # by default don't output timestamps
-> >  timestamp=${TIMESTAMP:=false}
-> > +. common/exit
-> > +. common/test_names
+> Hi Eric :)
 > 
-> So this gets sourced at the beginning of check script here.
-> 
-> >  
-> >  rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.report.* $tmp.arglist
-> >  
-> <...>
-> > diff --git a/common/preamble b/common/preamble
-> > index ba029a34..51d03396 100644
-> > --- a/common/preamble
-> > +++ b/common/preamble
-> > @@ -33,6 +33,9 @@ _register_cleanup()
-> >  # explicitly as a member of the 'all' group.
-> >  _begin_fstest()
-> >  {
-> > +	. common/exit
-> > +	. common/test_names
-> > +
-> 
-> Why do we need to source these files here again? 
-> Isn't check script already sourcing both of this in the beginning
-> itself?
+>>
+>> diff --git a/tests/generic/126 b/tests/generic/126
+>> index 142d2bb9..007e4433 100755
+>> --- a/tests/generic/126
+>> +++ b/tests/generic/126
+>> @@ -21,6 +21,13 @@ _cleanup()
+>>  _require_test
+>>  _require_chown
+>>  
+>> +# If the TEST_DIR has the sticky bit (like tmpfs) and this has restrictions,
+>> +# skip this test, because fs.protected_regular changes expected behavior.
+>> +PROT=n=$(sysctl -n fs.protected_regular 2>/dev/null)
+>         ^^
+>      What's this for? Do you hope to have PROT="n=1"?
 
-The _begin_fstest is called at the beginning of each test case (e.g. generic/001).
-And "check" run each test cases likes:
-
-  cmd="generic/001"
-  ./$cmd
-
-So the imported things (by "check") can't help sub-case running
-
-Thanks,
-Zorro
+dumb cut and paste but it worked...
 
 > 
-> -ritesh
+>> +if [[ -k "$TEST_DIR" && "$PROT" -gt "0" ]]; then
+>> +	_notrun "test dir has sticky bit and fs.protected_regular enabled"
+>> +fi
+> 
+> And didn't below commit fix the issue you hit?
+> 
+> commit bd6e01c81e2160ce660ad993091f30e6f718079a
+> Author: Jeff Layton <jlayton@kernel.org>
+> Date:   Thu Feb 20 06:26:38 2025 -0500
+> 
+>     generic/126: run it inside its own subdirectory
+
+*sigh* yes it did, I guess the internal reporter ran an older xfstests
+and then I did too, without thinking. I'm sorry for the noise.
+
+-Eric
+
+> Thanks,
+> Zorro
+> 
+>> +
+>>  QA_FS_PERMS=$here/src/fs_perms
+>>  
+>>  cd $TEST_DIR
+>>
+> 
 > 
 
