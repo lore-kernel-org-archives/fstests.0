@@ -1,39 +1,39 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C1AA20127D;
-	Thu,  1 May 2025 15:02:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B240C1A38E1;
+	Thu,  1 May 2025 21:55:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746111770; cv=none; b=WAk85SttfMSCSx55J2r3zm6OIs/Zp18M++sm894RTQ8g3d1jfSldTrSSSgS3PIhzciE4pIVFb8C+1z8Dx0ETTDLXdieMKwgEDfwz1caimOxDlReVY1oAkUZ1U0CW9RGwQZA/9iEsYlS1C75xj+bnTLYpqEZmPDxtDU5t4ceB7gM=
+	t=1746136554; cv=none; b=NXDZjXNUOp10fECX6Gv4wGnWv2p4B04+ANObGuWW9lHThzT3YDSKIIt6iDyX7JBdOMppKKEJQNpvuuw23/CaGGxCma8QyCZDmo0JJG5tCmDn/a08mBuLwuVbY6DYlhUitafn3u9dY1V8Q5egYyo5Y2MKhTEdUxO4T+rUNJfRxe0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746111770; c=relaxed/simple;
-	bh=lISCMhmMFm7JrXmVTOzkdrxJOfIqoUMImxdgZCY08/U=;
+	s=arc-20240116; t=1746136554; c=relaxed/simple;
+	bh=4fgsn7pAUO+9L+iT4ApL/JqbmEdOo0vND9xLsdAVBIc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=hfAwyu8RMsmQJtqBbOTBGfaIwOIGfx4u/KEbpEQfbl8K1suEdy/yqZSUyesnRnZQ6+ZjK7ydUPogQnny0BjRSVkrzas11n4k62KGbu/rsBBVgT88oM52GpBiAhZRCnsOIJ9dhWALnIbaRJdEV7AhxK6YEz5g8zyPN57b2Ooe0OQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=F45TMQmp; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=cK5QUt4JkE7Rk+1O/+jB3ZFx2Ye52/R3FK/p6C+USHPudLHQoY8J3ffAtmhV1W99oW7ozJNaawY/P+6gmrJBMlj2woIeaz9E/Md5aVaS8ceawor107pBe+ZPjHoEHQEpBhCz0+ZCPYzwYr9PoaviJMXoU/HNyzqdTf9nQW7ZfBM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rgjqiu4/; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="F45TMQmp"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 075F1C4CEE3;
-	Thu,  1 May 2025 15:02:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rgjqiu4/"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1DA97C4CEE3;
+	Thu,  1 May 2025 21:55:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1746111770;
-	bh=lISCMhmMFm7JrXmVTOzkdrxJOfIqoUMImxdgZCY08/U=;
+	s=k20201202; t=1746136554;
+	bh=4fgsn7pAUO+9L+iT4ApL/JqbmEdOo0vND9xLsdAVBIc=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=F45TMQmp/U5SCQUymxwpmFtv+ZXcFqHnHHILmodnEiIGQN1aqN5CUPJp4VePjP1V2
-	 YCAb606VIwr+AlvVT8FIesmNInUqqaPCkztHV7LHJV9C3BtUl5S3y+G+YwCmvK1aRI
-	 HmDRrU8f5IzS2lVR8q3YD3hiXjvkZZ7COy+BqBMETlHrUnZxy3qMoghhRYjtrsRo+n
-	 nSQxlx4bGZSX5Y+pqEHUL7N37P5EVNGh5ZIJ3A414AebkUxAlGpVIccIUd4oOkv8qP
-	 1d2b9bxCA4arQ/AIBJcB4W+dy803okQK2oltvwpOP+V6/04QkvpiUld5/W2iQZbQrY
-	 +WZelauFFBJtg==
-Date: Thu, 1 May 2025 08:02:49 -0700
+	b=rgjqiu4/4d6sJS0wOPPyM6gjODD+cMZpIlImr4g4GT7wXWvMxsiMcW7crvHFUWTvs
+	 BUYQvMJwDKGPF+wlQaG2oilpM7oSxCAEA+MRc87JSqWnQpfYbmL6ildMI3UJSNIwbe
+	 ClxSwZNpSf5e3iRmvzr/QG+qmFWfYKufpJWxDEY1YI99E3t5dXK2LVdZtOmy0GCtIj
+	 V6/AJugFcFTyW6/e/F5fr9GK/Zo2Upjr/RuIruNF1tco4yo5UYQxGaNVHJAX/AHQ9w
+	 Gfq9rLEm7F3CAw5I5Ji5E3gZ6N14LSSqS9ts/DbW0sQSn5p+W+I3hpCqiKqq4cQTTH
+	 DquqeQxYhB4Dg==
+Date: Thu, 1 May 2025 14:55:53 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: Christoph Hellwig <hch@lst.de>
 Cc: Zorro Lang <zlang@kernel.org>, Hans Holmberg <hans.holmberg@wdc.com>,
 	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: finishe xfstests support for zoned XFS
-Message-ID: <20250501150249.GN25667@frogsfrogsfrogs>
-References: <20250501133900.2880958-1-hch@lst.de>
+Subject: Re: new tests for zoned xfs
+Message-ID: <20250501215553.GI25675@frogsfrogsfrogs>
+References: <20250501134302.2881773-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,19 +42,22 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250501133900.2880958-1-hch@lst.de>
+In-Reply-To: <20250501134302.2881773-1-hch@lst.de>
 
-On Thu, May 01, 2025 at 08:38:54AM -0500, Christoph Hellwig wrote:
+On Thu, May 01, 2025 at 08:42:37AM -0500, Christoph Hellwig wrote:
 > Hi all,
 > 
-> this series adds the remaining core bits to support zoned XFS file
-> systems, to go along with the kernel code in 6.15-rc and the xfsprogs
-> series on the list.  It does not include several newly developed
-> test cases which will be sent separately.
+> this series adds the various new tests for zoned xfs, including testing
+> data placement.
 
-The series looks ok (by which I mean I've been running this for weeks
-with no issues) so
+The first 14 patches I think I've already been running for a few weeks
+against software/hardware zoned support and haven't seen many problems.
+I will have a few fixups to apply after this, though.
+
+So for patches 1-14,
 Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+
+(Will go look at #15 separately)
 
 --D
 
