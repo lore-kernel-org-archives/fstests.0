@@ -1,109 +1,114 @@
-Received: from mail-pj1-f48.google.com (mail-pj1-f48.google.com [209.85.216.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB672194080;
-	Thu,  1 May 2025 03:50:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BBE9413CA97
+	for <fstests@vger.kernel.org>; Thu,  1 May 2025 08:39:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746071402; cv=none; b=fRiamRx2ExOioUUHhaLIwaO2edPSBTDqpdkoViXRxvPMYgUznrR3Q0jUXx27Dln4hh91XYMAScHffQ33HbdDhcnNM/JsIVIF150aOGyOX5PdZVfFvEV9b4pyIDGZNQVn+zAqx1cZKUNN49cs+skjRTYtQWHRdqZesqBM0AVEKBA=
+	t=1746088746; cv=none; b=cvYaQv2+RGL79V7STOEZH2G4JQthyxx3+fRaCZpCdcrZ/iUrpYNEB77cst9uLNpjLGUEUaJS+SlIOFp9TY6C1FHlpi6FYBfh6FEs7vVhvY8QxLJW7SCO+gNHj9qUMH1MKHdoAQmEHm4reMgorKxA77JWdRKyeFoMacbH+LdqTl8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746071402; c=relaxed/simple;
-	bh=k7viiHkPEK4VIEk9V7gGTim/AadW8OZyPLUc4oy/g9w=;
-	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=RBDeEM3xwAaWPUdoheBgrFkQBegSA5tUCbMEWJ2smshgX8ysPRpXNfsNep9Pz1pHXy6WdEJVpFx5OoghCV9V9x67r5P1eJ7iOzGEB6X9h4+945Dz2JI00pL6jCk9pI+azgvMgkM1OZl1tDUEipLbO3EpcD3RiHjIOQL97QH+wWI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=X3tnDNIl; arc=none smtp.client-ip=209.85.216.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1746088746; c=relaxed/simple;
+	bh=UiDNqUQ4x+I6cDl+Wf9F3An8nAnKrPqL5RcCG6E1xy4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=tWEeXGkGTKL7EnOV1WUD9gWgDImZS2aLspyfc/CHGyr0a/MUmf0UP9IG9e+yGw5FVbzxT/fRsBgQUqEkQhRa6jSairwh4e8huQyRYT5WQlouERWj9cDIabvzHMutsCeQiFE9x9QSpQ8ZYeogG2f9mmws4fgRT68HbCPH8ZpD38w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=i7STYH6w; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="X3tnDNIl"
-Received: by mail-pj1-f48.google.com with SMTP id 98e67ed59e1d1-2ff799d99dcso631832a91.1;
-        Wed, 30 Apr 2025 20:50:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1746071400; x=1746676200; darn=vger.kernel.org;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=mFwyU/iq1Hx41pNqiSoEgwo1J6ylITQGtBMxO5TAzq4=;
-        b=X3tnDNIldGjOEoM1n8Mpw5JSZqy6MgJ294CqnAMScEb085EljDxrGxFkcK5Va/9ma7
-         FQVdYhnWJk+MThBx7K4YSGa3vU29vRcUvUxF0nYEw+wFnbtKlRgE6zkgnZpbe9tKfQ92
-         4uXqv3RJI/npjedO+wHeZFbJ6Won8hEKcgoBNOWoe1qrDnwThPU+cVwhzfAwNq9QAn+A
-         qwOvax4Iup/rBcNx7QaKqn+bVrYQsV/QJ9EVXPbRXPrY04A5OdV2WTWcdlCuzMooh8Gb
-         9ZG91QUsUbzzlRMm+Ks428AeUasiapc9wQ/nzWBnGb2/OqA4JzjXXwrDzxDBj0yLVPF3
-         eJLw==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="i7STYH6w"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1746088743;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=m1hJcso6iq9NYt8ZpukInEEBt1bRoH8yb/JXyxZ6WrU=;
+	b=i7STYH6w1bBiY+YXTiD5TLHlrzFSc95YBelG9CSHYDlTys3xCFZDJJu7y+C0Mt5i6CUw7A
+	WkY8K6jQKsVXej2l1M/7z8tx40ebkST+UWjyhsxzKv1tugbx2jPCXogqkON9jgV5Yvqm52
+	UaJlBATP273eA579lGnIPM0Fc4PJoj0=
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
+ [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-501-aZ8pmjRwMN2BtAbQCHBDyA-1; Thu, 01 May 2025 04:39:02 -0400
+X-MC-Unique: aZ8pmjRwMN2BtAbQCHBDyA-1
+X-Mimecast-MFC-AGG-ID: aZ8pmjRwMN2BtAbQCHBDyA_1746088741
+Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-739764217ecso756109b3a.0
+        for <fstests@vger.kernel.org>; Thu, 01 May 2025 01:39:02 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746071400; x=1746676200;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=mFwyU/iq1Hx41pNqiSoEgwo1J6ylITQGtBMxO5TAzq4=;
-        b=WJqbxV3uopqGGabQARTdgoasOME5Q0QhbKz69FJDoDupdBssLRyfV/UIeBvX5PiCX9
-         hcY0dvfsFx6UFA/Da7O6CHjcMCvYPI8jMhSYXMRj1c3/A2X81hi7iRR1lw5YhLCgDfs1
-         512rehP9tDelpw+rB94Frq1ui4x7e2U3BMIVsTVAl24zwzuPAUIAKi6iY7mEA1kEUFO9
-         7zee7DZpr9q7L3ReP1Z5O4/bpyVjRZu3ByMAsO52DLcapktkyTWrhYwOklu7dXa1RFJk
-         wNs/o6rLyraFUZN6CZNJAnyQyo7xpeCCr/EbnsCHGPyEromZuhRspPiQw7IwaziAVXC+
-         PPSA==
-X-Forwarded-Encrypted: i=1; AJvYcCVHNYNmO9o5zOcgqnWddteJZD4D8tXlc3nmRuA07+0L9PxgWU7gswOFojv7Z2LMOJ82IU4WSjEObGuF@vger.kernel.org, AJvYcCVIR2fMBIsvPGFPZHXLUqPQTjf2owxTgm9Vqahu2OCcvH350bWLzdJDmlNAyyFM4f7ObIibXmph@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzc430OBGNdZ5Yja87ldnJdSUosTOQ2wjxp3AIYqTtqHESDw4yb
-	dYXw9YkbQnsjukiwKUi6ejnNtHxVlRdjbF3/f8bQkYival/04ulh
-X-Gm-Gg: ASbGncthen2h/r8/jPJBlBpUUlH7bpR35up3nUFo59m9xTMPbYSV4n/nvwQNASl8Z31
-	C9JOAptIbI4J2BcaCALMU3joN3aDTqSkwdM0rfuxKVGRVXM1lzyoV9uKFuBQSQmoUA+/tXgQaX8
-	vulBaMlmfl7gd3iwcPUP+NEsY6fk+OxwDg6dpAkPVjfZtjpltYaMSrGhTuirTiYDa3AloNNMfIK
-	F+q2BB+qHvL26M3fRsGiNZNy9FGrScgkwzJ6s+o6tscYIVrfZKoLEVcXo3Me1BruIKd45L8Vpl7
-	kGafY0BHwhlgpjcMF6FNhaD/wQs20e/HQVbOq2KOQ2yW
-X-Google-Smtp-Source: AGHT+IHRUNQww33YA6tiY5J4BDQ4w5fPKPDywLJntG7QPBmku/bA3YnPed8z6tNUeuJY8hOip2hA6w==
-X-Received: by 2002:a17:90b:520f:b0:2f4:4003:f3d4 with SMTP id 98e67ed59e1d1-30a41eeb91amr1991558a91.30.1746071399869;
-        Wed, 30 Apr 2025 20:49:59 -0700 (PDT)
-Received: from dw-tp ([49.205.218.89])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-30a34a11adcsm2519774a91.26.2025.04.30.20.49.56
+        d=1e100.net; s=20230601; t=1746088741; x=1746693541;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=m1hJcso6iq9NYt8ZpukInEEBt1bRoH8yb/JXyxZ6WrU=;
+        b=I6H87xLhD5X7l7Lk2TUMygDMM9sAvy1xlYVwzEf2fmKZ2iJyg87I6eYpRT5/vs0uym
+         CPfqb9zNRubOWvZyheiHcjhrbW/biNVSRnd9CCEfT4HeBV6mgaR2X8gRpaeWzw3+5GWc
+         hLBfDIIrBY0W2d9jMd+STlC5J89k6AeXdwhxvaDCzyU/tBZ2drtbOl3Nn7vXPY6gfSh8
+         19oy7e3e7u6Sq9T+yAKU4HJP3V233PCtqOrmx2rFDtCBmEMpOSulkEINa9DpZkg6Kjpt
+         Ha2v8pCP7bN9Sf28ROSNp3tnih1NLNIHZOyCWmWYY7FTILQ37uH0szThV23x/Bjkks92
+         jnSQ==
+X-Gm-Message-State: AOJu0YxC423VnWKLE4BTAF8+1dD0p2upOTHdoyXoxGydvieCk+XJoaw1
+	ABtQYVjDLCk5HWekFSnIxjEfXJlfd1TIweEm1kkQC88kZu2k95dpTNJd31TC/cy+stv+mTZwxK3
+	r86ZfHkhP113/ZszPpBGMc8Xm4EO7OFNBjGzk2aTp6NnNg7mYLgi8U5JEVQTLnLw=
+X-Gm-Gg: ASbGnctZlQ1jWcUr9I+QtW5GEaqkIrCAJ9rOQP0sBLhCTRZd3CtvQ+5GWvNjlEhz5dS
+	lPczMCZsreTlOo57Ha5o352m8pEHuTzmIjuI1+wI6HlD9GqHYyuFnb4Lvm9kmO/X5SYAGpSQdAl
+	LweZhkzsPLQ/XI8JNIt6NVWYo02sG68bt73c1UtFLX4Rxu7JsO53R80cqmEPjQhlbuzgd/y02ga
+	oost7q2OVrrwjLlag0Kw1MMS3q6BiqMo03lq7lXaah80p7TLX6Utn0R+N/TdKkVIjtiYCbgypS7
+	6sGHp1qFbiuN5cs3v4GA02y0yUdmbIZrqZiMewmVS+Dxpkr/4+CJ
+X-Received: by 2002:a05:6a00:2e9d:b0:734:26c6:26d3 with SMTP id d2e1a72fcca58-74049198213mr3148594b3a.5.1746088740999;
+        Thu, 01 May 2025 01:39:00 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGGtA2KB/rtnzETiR9KtxF45gwvbjHq3/RtLqe39bcC1elbHyLcTpTdVoyATqp46w7CRq60BQ==
+X-Received: by 2002:a05:6a00:2e9d:b0:734:26c6:26d3 with SMTP id d2e1a72fcca58-74049198213mr3148564b3a.5.1746088740630;
+        Thu, 01 May 2025 01:39:00 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7404fa2246esm318319b3a.136.2025.05.01.01.38.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 30 Apr 2025 20:49:59 -0700 (PDT)
-From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>, fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org, ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org, david@fromorbit.com, hch@infradead.org, nirjhar.roy.lists@gmail.com
-Subject: Re: [PATCH v3 2/2] check: Replace exit with _fatal and _exit in check
-In-Reply-To: <34273527dab73c9e03415a7c3d6d118980929396.1746015588.git.nirjhar.roy.lists@gmail.com>
-Date: Thu, 01 May 2025 09:01:22 +0530
-Message-ID: <87bjsdqa5x.fsf@gmail.com>
-References: <cover.1746015588.git.nirjhar.roy.lists@gmail.com> <34273527dab73c9e03415a7c3d6d118980929396.1746015588.git.nirjhar.roy.lists@gmail.com>
+        Thu, 01 May 2025 01:39:00 -0700 (PDT)
+Date: Thu, 1 May 2025 16:38:56 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Anthony Iliopoulos <ailiop@suse.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] fstests/MAINTAINERS: update ocfs2 mailing list address
+Message-ID: <20250501083856.fmf6cjgnccyhl43n@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250430122342.157170-1-ailiop@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250430122342.157170-1-ailiop@suse.com>
 
-"Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
+On Wed, Apr 30, 2025 at 02:23:42PM +0200, Anthony Iliopoulos wrote:
+> Bring the ocfs2 mailing list address up to date, following the upstream
+> change in kernel commit a57b4b7f0557 ("MAINTAINERS: update ocfs2-devel
+> mailing list address").
+> 
+> Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
+> ---
+>  MAINTAINERS | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index bc31572902bf..a0f50f3d98b4 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -157,7 +157,7 @@ F:	tests/nfs/
+>  F:	common/nfs
+>  
+>  OCFS2
+> -L:	ocfs2-devel@oss.oracle.com
+> +L:	ocfs2-devel@lists.linux.dev
 
-> Some of the "status=<val>;exit" and "exit <val>" were not
-> replaced with _exit <val> and _fatal. Doing it now.
->
+Sure, thanks!
 
-Indeed a nice cleanup. The changes in this patch looks good to me. 
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Please feel free to add: 
-Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+>  S:	Supported
+>  F:	tests/ocfs2/
+>  
+> -- 
+> 2.49.0
+> 
+> 
 
-
-So I guess these couple of series was to cleanup exit routines from
-common bash scripts. Do we plan to update the tests/ as well where
-we call...
-    status=X
-    exit
-
-...or updating tests/ is not needed since we didn't find any wrong usage of
-"exit X" routines there?
-
-
-Either ways - I think we might need to update the README at some point
-in time which carries this snip. You might need to add that there are
-helper routines like  _exit() and _fatal() perhaps for use in common
-scripts.
-
-<snip>
-    To force a non-zero exit status use:
-	status=1
-	exit
-
-    Note that:
-	exit 1
-    won't have the desired effect because of the way the exit trap
-    works.
-
-
--ritesh
