@@ -1,40 +1,41 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ADA84251782
-	for <fstests@vger.kernel.org>; Fri,  2 May 2025 13:33:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33B7B146A68;
+	Fri,  2 May 2025 16:04:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746192813; cv=none; b=GNW2LTk0C0OXU2Eci8mrjtW4V1d3S3ujAvBkfrbXwMVavMCv4a+3+OKIPa31oximBLr6LwshTM9u5U5m40lH7U4BXQtbhjF/sKSQ1VVoACvoabyVCAPehPcb12sFMUh/sjseaNmO+dQ0PZxBjJvqiIAg4jX+AuZIjvMnJiyQlSU=
+	t=1746201877; cv=none; b=PHDjinjKpiPbop7xv7AI52JfAUEpdCvmmRp4w1gASo+CrXLwZaBMCdvH57oIq4REYTtf3TNJhrD6p4mllB6DPGHM1cL4s1kjtCQu/7Mzklyb7qrPg5aRRY/bJU724pvugqY+gPxep7SUdh+aXv5POJGKjsKPEm+HKUIhqdi53PE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746192813; c=relaxed/simple;
-	bh=YX3L0lHArVa4cEVT5SxJ3DOMDbZYRO/IgKsEnba4x6A=;
+	s=arc-20240116; t=1746201877; c=relaxed/simple;
+	bh=nhGZIU8WtEYbI08rPQrrzzbVSkaBssDIf0ptL5oncEk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EkFo8NYXDq6IPSwvgwIHX7hXNXh4FVniU+7E9ZpMY3PN/sHVfXo2fWL1ORQN37IWCgnGBzRfv5h9SnSZaJGdSe+CBwao0d36Q1NzhNSy1DCYXw/GMwH5fTc6nDt+Ne1+EQKYk7RUkBu0EDg2x1LsRz76PNZKydUIOncQ3LBAB20=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
-Received: from trampoline.thunk.org (pool-173-48-82-148.bstnma.fios.verizon.net [173.48.82.148])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 542DXAYE000384
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 2 May 2025 09:33:12 -0400
-Received: by trampoline.thunk.org (Postfix, from userid 15806)
-	id E2FE62E00E9; Fri, 02 May 2025 09:33:09 -0400 (EDT)
-Date: Fri, 2 May 2025 09:33:09 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: Hans Holmberg <Hans.Holmberg@wdc.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "zlang@kernel.org" <zlang@kernel.org>,
-        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-        Carlos Maiolino <cem@kernel.org>,
-        "djwong@kernel.org" <djwong@kernel.org>, hch <hch@lst.de>,
-        "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>,
-        "adilger.kernel@dilger.ca" <adilger.kernel@dilger.ca>
-Subject: Re: [PATCH] ext4/002: make generic to support xfs
-Message-ID: <20250502133309.GB29583@mit.edu>
-References: <20250502113415.14882-1-hans.holmberg@wdc.com>
+	 Content-Type:Content-Disposition:In-Reply-To; b=r4tYN2/R17vZyuYh7jAhxHnGFLLhuRIZUtrrMPyHXsJca+1KYIL0CXwlbtzUwUAAMR4FZqy67YkZLjwxKT9ac3wXYOE1UTNe3a2USYUovGUS9DsGKVnrNfGDiJCq516AAutgMKMhNOvxtpcNGGImxsKJxD/JFJfy/ho6cWXursg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KsQ1hReP; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KsQ1hReP"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 99382C4CEE4;
+	Fri,  2 May 2025 16:04:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1746201876;
+	bh=nhGZIU8WtEYbI08rPQrrzzbVSkaBssDIf0ptL5oncEk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=KsQ1hRePlKqHvW10A3xJWu7V4qwDa57kt2/8x53dkyEIvvkKcbS4sHMzcspnbgA46
+	 OqTkKHeeSL11R4KrH3IepsoeAB1eWl+kq0/uDltlDwuEVXkkVfBIibDRcT6FkAd50B
+	 6tzPjVgWYF0FN1+Y+cfzlrnKPgaR7/d4oNjaPIgHQ4yqLNBc7duEvo8a2QBye0oAQT
+	 7r2eENEskJ/tBYYfjz6YdR6aUpz9TnSHwkL8lyqImROwecm/LTu8Lns+0cCZLWGXja
+	 Kl8Kz3BTKm91IxFltrKfx/fq6mhEANsXbL7RK3Hu/WsP6HuLgKW/33UwyzYy1owUJV
+	 x/3E/yZ07Y72g==
+Date: Fri, 2 May 2025 09:04:36 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, Hans Holmberg <hans.holmberg@wdc.com>,
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 15/15] xfs: test that we can handle spurious zone wp
+ advancements
+Message-ID: <20250502160436.GO25667@frogsfrogsfrogs>
+References: <20250501134302.2881773-1-hch@lst.de>
+ <20250501134302.2881773-16-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,24 +44,113 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250502113415.14882-1-hans.holmberg@wdc.com>
+In-Reply-To: <20250501134302.2881773-16-hch@lst.de>
 
-On Fri, May 02, 2025 at 11:35:01AM +0000, Hans Holmberg wrote:
-> xfs supports separate log devices and as this test now passes, share
-> it by turning it into a generic test.
+On Thu, May 01, 2025 at 08:42:52AM -0500, Christoph Hellwig wrote:
+> From: Hans Holmberg <Hans.Holmberg@wdc.com>
+> 
+> Test that we can gracefully handle spurious zone write pointer
+> advancements while unmounted.
+> 
+> Any space covered by the wp unexpectedly moving forward should just
+> be treated as unused space, so check that we can still mount the file
+> system and that the zone will be reset when all used blocks have been
+> freed.
+> 
+> Signed-off-by: Hans Holmberg <hans.holmberg@wdc.com>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/xfs/4214     | 61 ++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/4214.out |  2 ++
+>  2 files changed, 63 insertions(+)
+>  create mode 100755 tests/xfs/4214
+>  create mode 100644 tests/xfs/4214.out
+> 
+> diff --git a/tests/xfs/4214 b/tests/xfs/4214
+> new file mode 100755
+> index 000000000000..3e73a54614d5
+> --- /dev/null
+> +++ b/tests/xfs/4214
+> @@ -0,0 +1,61 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 Western Digital Corporation.  All Rights Reserved.
+> +#
+> +# FS QA Test 4214
+> +#
+> +# Test that we can gracefully handle spurious zone write pointer
+> +# advancements while unmounted.
+> +#
+> +
+> +. ./common/preamble
+> +_begin_fstest auto quick zone
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/zoned
+> +
+> +_require_scratch
 
-Was this fixed by a kernel commit to the XFS tree?  If so, could you
-add a _fixed_by_kernel_commit pointing at the fix?  And while you're
-at it, could you add:
+Needs _require_realtime so that the next command doesn't fail on
+undefined SCRATCH_RTDEV
 
+> +_require_zoned_device $SCRATCH_RTDEV
+> +_require_command "$BLKZONE_PROG" blkzone
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+> +_scratch_mount
+> +blksz=$(_get_file_block_size $SCRATCH_MNT)
+> +
+> +test_file=$SCRATCH_MNT/test.dat
+> +dd if=/dev/zero of=$test_file bs=1M count=16 >> $seqres.full 2>&1 \
+> +	oflag=direct || _fail "file creation failed"
+> +
+> +_scratch_unmount
+> +
+> +#
+> +# Figure out which zone was opened to store the test file and where
+> +# the write pointer is in that zone
+> +#
+> +open_zone=$($BLKZONE_PROG report $SCRATCH_RTDEV | \
+> +	$AWK_PROG '/oi/ { print $2 }' | sed 's/,//')
+> +open_zone_wp=$($BLKZONE_PROG report $SCRATCH_RTDEV | \
+> +       	grep "start: $open_zone" | $AWK_PROG '{ print $8 }')
 
-[ $FSTYP == "ext4" ] && \
-	_fixed_by_kernel_commit 273108fa5015 \
-	"ext4: handle read only external journal device"
+   ^ spaces here before a tab
 
-to the test?  This will make it easier for people using LTS kernels to
-know which commits they need to backport.
+--D
 
-Many thanks!
-
-						- Ted
+> +wp=$(( $open_zone + $open_zone_wp ))
+> +
+> +# Advance the write pointer manually by one block
+> +dd if=/dev/zero of=$SCRATCH_RTDEV bs=$blksz count=1 seek=$(($wp * 512 / $blksz))\
+> +	oflag=direct >> $seqres.full 2>&1 || _fail "wp advancement failed"
+> +
+> +_scratch_mount
+> +_scratch_unmount
+> +
+> +# Finish the open zone
+> +$BLKZONE_PROG finish -c 1 -o $open_zone $SCRATCH_RTDEV
+> +
+> +_scratch_mount
+> +rm $test_file
+> +_scratch_unmount
+> +
+> +# The previously open zone, now finished and unused, should have been reset
+> +nr_open=$($BLKZONE_PROG report $SCRATCH_RTDEV | grep -wc "oi")
+> +echo "Number of open zones: $nr_open"
+> +
+> +status=0
+> +exit
+> diff --git a/tests/xfs/4214.out b/tests/xfs/4214.out
+> new file mode 100644
+> index 000000000000..a746546bc8f6
+> --- /dev/null
+> +++ b/tests/xfs/4214.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 4214
+> +Number of open zones: 0
+> -- 
+> 2.47.2
+> 
+> 
