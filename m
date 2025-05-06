@@ -1,208 +1,113 @@
-Received: from mail-vk1-f180.google.com (mail-vk1-f180.google.com [209.85.221.180])
+Received: from mail-ed1-f54.google.com (mail-ed1-f54.google.com [209.85.208.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA2416FC5
-	for <fstests@vger.kernel.org>; Tue,  6 May 2025 20:25:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2AE4194A60;
+	Tue,  6 May 2025 21:08:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746563137; cv=none; b=uyOHTJuhwk5EvZyRm0tvQM+kXHh3n7cyau40kHDil/+myORshicEBA3yKp/6xZBsbqaQPP4kH4+meiABExrWIDsA5Z02mMLmIuPii0kCsg/RZRaz6ySagr+N3fywhqJK3RWWDDPpOtKc7slHznMa0cunnJQB1E3h3hxvhihnb3U=
+	t=1746565701; cv=none; b=Jf/rRiWc7w+4ihj7wGtejhnBnR9+fFGNI4ZsVSe3sjAMH02vfnBj6AE5+6eVfOKq4PkAkbg6ENpjn88B5aHG6pe9j1GOB2XGkGC+ls1ug7LalCvdrG066DxHUd8NxdcOj1qBkCUo1k0mueubQheqM4IkXpaXMLv4NuTSUDSQPmU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746563137; c=relaxed/simple;
-	bh=/VB8GJr7llVErbHR+qiSjkkTJovJDH9k0RlaSI5ggJA=;
+	s=arc-20240116; t=1746565701; c=relaxed/simple;
+	bh=kvU0M3Cv572otDuJ6BH+Gsl7s7e0YVi+e6/DEjMHlXA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=YHLbsDWUDsEkkKrx/SUAUmgfZ0b91Fg0ROFuVX96ykOY2jmfUfiVsxCpwlyVD9/ZpOrrQEZ1I/WFJLojvuABpoJ9uyJQTFOPHU2ihZ2o/KmW7t5OtFsTK9UQQAHp4vYpjmFMLBG7/mG4h5Zklz3ACnwaqf3OHl7TW60TEqe2s34=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=S2lY0ufM; arc=none smtp.client-ip=209.85.221.180
+	 To:Cc:Content-Type; b=c31AhLHlL9UHcfdwWZJKPMUpq0U8MWzYgolcTMDrg9wSWAPd2ns/LFm0TAazMiH3N82ITVv++YTwK7XvjPo5or6RcDtOPC7zb8e79KlLsoYfnNpYJO26/OXZhvGka86IZlr02MuZoco5JH0Abrbf7YW98/+pm7Ku8SQdT0C80po=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=K97v1piy; arc=none smtp.client-ip=209.85.208.54
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="S2lY0ufM"
-Received: by mail-vk1-f180.google.com with SMTP id 71dfb90a1353d-523de538206so1620711e0c.2
-        for <fstests@vger.kernel.org>; Tue, 06 May 2025 13:25:34 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="K97v1piy"
+Received: by mail-ed1-f54.google.com with SMTP id 4fb4d7f45d1cf-5fafcdac19aso4536250a12.0;
+        Tue, 06 May 2025 14:08:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1746563133; x=1747167933; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1746565698; x=1747170498; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=IlnfEmpHUY8kY2niHLOjtjnv0D8DMZABGlYqrDQFq7A=;
-        b=S2lY0ufMCivdFgKhHhuuh7EBQ4qngKTh92GE+oVQVrdPHVxE3wPKS9mQJb21dX2Jjh
-         9SMyA/5wSCNEKfAHQi/oItLZEF43oWV040qIfSPvYPuNPwmJFV6YCe+8GhKnhl8x0O1T
-         MziQxIqDlNEDPRYMOHPLDcZzt87/6Z/tWjiCb8pmh4HC/b7wTYp6sgKb9+t4Nis+uE9C
-         34xWzMKf5YfQXsgGQnBxNoHl/AvP1/P8glCIeFnh/2J/8nlpwdKlq++b1u69iZhimoRD
-         bH5RTv9poR+SzirrOr1dyQtcuWRL40MB8cyrX3qhTb1mGVg8g3SCwYR+xLj5+SIfUuN2
-         ulvQ==
+        bh=X2t5JRxFE+HQpTdAAeFVzf4Cz4oAsGT6YuCamH2R9TM=;
+        b=K97v1piy6XKKi023vpv96KQECGNzyy8Y2QSdix3IrdFxHbss97pZHWl/0eYcvxGK2g
+         jo8B0wMWA9TfEAKeDQGCPCKG/cRPFcqI0UZG6JKgz+V+zGq2+2TFf7PFAVtnA4c2Gd9t
+         wCW3476odmDxhb1os+YWwNJP0mCevbPoO/elK914R100XKx6etypC084HW9Q2qjSdicR
+         2I2VzehZZ7zhlJ0n5TBiUOGDL4aSsB5COngNv1K6YWMCG98L7jfWYoxzkDtmH4I9tdRC
+         F+tvDXYL+RLRY4nV0QJZndJQ96QgDm1o7cbiiYx8nmifwys3gXXNk3m9kNB7lXUkv1OE
+         2jjQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746563133; x=1747167933;
+        d=1e100.net; s=20230601; t=1746565698; x=1747170498;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=IlnfEmpHUY8kY2niHLOjtjnv0D8DMZABGlYqrDQFq7A=;
-        b=BM86PWo0VFGbXoyC09FLhLi6yojFk/9Y8oe1yk4RJY6wbDxenusHJuBwV8BH2X+p+V
-         TT9glZkL9tE3bwfyZMcPfQPLRzitpIh0x/uD6G25z+0EV+bIeuLTABbzQEfieDY428ni
-         q6YkK+reFA2pIzJ6o7ASvUkDraW49WQsaun3uITL3fg4jPj9rrrtrO2C3WSR/DH4SEAw
-         /MEKnuD31O5Vqcbp4l6zGWglGpRhwAYhxD4W78VmO5dslehjAsor7UogzgcVYZ5WKKIK
-         DviA3p0RSoQY/RIKfU0sojdvUGWue4nKTsIFIMXSu0Tqpwv0zJ0nDSoJ/vSPmKTgzun6
-         qD0Q==
-X-Forwarded-Encrypted: i=1; AJvYcCXYE5YJ4A6dYfxDYquPIDcBJ8pn1yveknjK8s0Fx4OjO3nyS4ODDS57Sf+IHG2m1mC84Roy19F1@vger.kernel.org
-X-Gm-Message-State: AOJu0YzoIpuEAbxCmvUrs7/SqqfYBmX7e9jh0phkCiGCeZhnY3rWbwAf
-	ngy1bP5bloM9+1h+Sao/xCn4onah8VsNjzqjPy99eePALMWXICUP20eHA6ztdtuZayEnDWzkleW
-	NyfcJFsipHrhSfx2aewvdZWNnm/w=
-X-Gm-Gg: ASbGncuTumgHVeXwvY9dYL9ua50PaileHXZYw9rvS79KSdC/Busxu71tRDOGs1+er/8
-	ClKfYoxHZ0sbM7D9vH5aZ+NRtIQ3nXlQLeT07IUuuPErQAGn8yqwDaxOOnDy51E8vlytgo0JXjd
-	OPerq4fxcsyAiVSKKtd3LpbQGpfCq/Wmb5AD9XB+YQSpYi8siK
-X-Google-Smtp-Source: AGHT+IHUvIzlPkIU7lOI+Feh/5YuaNt7AJXOfDBPYz1qRlXtoG5cae2jMdSP6YFru2DlNtUqWV0P5rbJ9Ps2z7xhNgU=
-X-Received: by 2002:a05:6102:80a2:b0:4c1:9780:3830 with SMTP id
- ada2fe7eead31-4dc738d3f53mr925470137.23.1746563133428; Tue, 06 May 2025
- 13:25:33 -0700 (PDT)
+        bh=X2t5JRxFE+HQpTdAAeFVzf4Cz4oAsGT6YuCamH2R9TM=;
+        b=Y87nlSvp0sVYFXMredt+ZbLiWGpBDXEMK5Ll1oApZ35dxHvh++W1/qLdtHBz6z/21i
+         TmFvYg3lzIRREqlwxXLUebigdVACAD4NeTjlt448jMX5jAOMB3GR2k7TZ937Ls8xc11s
+         82SJ9c+8fvk0b9OPK1kS8OLnnFqAsTcbvQSiT2mrE+KxloiWaEwPpssovR/WO68WcTey
+         86mg7HjL7+8Sp2tYGUw/go2Dp0KlxULlG7wjlxV1AFuZTaMcWydUwe9jV7Fvkdb7dPnP
+         RDAdsKbomEVrioXb4DCqzjl7AtQoOIUZok091AHGLIxxwkQoZX/BPNPOSZdEYhDTglXX
+         33yw==
+X-Forwarded-Encrypted: i=1; AJvYcCWXuAFSPjGwUxtgBOalPWHfsZYU8PAkVpfd5OcssQ+srkDHIWQ2Uu/6ufGOpWroFicpw8F/pZhup8SzBqphtA==@vger.kernel.org, AJvYcCXQQrYR2Y94og5v9+S2Fx/HzV8vBPyqTIUktFu2bTv0ty+aLIJHrld9NEIh4TyzkU4snV1VnEMa@vger.kernel.org
+X-Gm-Message-State: AOJu0YwExzp0Ej5TeMa8mExzB+pYDxfuLN9TT4WNlNv09DXzZ3bON+WQ
+	vnf2vJ1dIuuwk4Y3u16nn4+kI4iQkok6rv0t07wQVVIdm1HHazsoTp3CQHETIlrORNaNGZIZrCn
+	W7AZZGPd3+vlgczkBQUEOKqs+o/o=
+X-Gm-Gg: ASbGnctJLfUdcInBDdBxQqHDZIU+tXykNGBHJUdyO1eUiLDvKpEnGdWuYMdexVgEjYL
+	NdTd3kG4sps4bnqLhryGdISJj2vrpoaLVkn0FseIVonYwSjtDV/I4itRlMJRAyG3PTKax7tf81f
+	Cx/+84f3fOZAaL3ACiFHfV4Q==
+X-Google-Smtp-Source: AGHT+IH9cDxb2sjnz/NCYfRkYAsRXJ1XuhBSw5BLmZmVO9GNO+nxVkdEUk0dplAzfjPlkXnx4JRFuPO+iEERSp3fYug=
+X-Received: by 2002:a17:907:60cc:b0:ace:3ede:9d22 with SMTP id
+ a640c23a62f3a-ad1e8c8fb2cmr91705566b.27.1746565697733; Tue, 06 May 2025
+ 14:08:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250506070210.539539-1-chao@kernel.org>
-In-Reply-To: <20250506070210.539539-1-chao@kernel.org>
-From: Daeho Jeong <daeho43@gmail.com>
-Date: Tue, 6 May 2025 13:25:21 -0700
-X-Gm-Features: ATxdqUFE0T50OHEB5NC2BsFQavHycvybb8rxlNatv2Iuqz594NYNiCR7SYQk1pc
-Message-ID: <CACOAw_xzP+dfhhFsOLTOagU-QPeUUOzSpyZLO7dArvAe4F8H8g@mail.gmail.com>
-Subject: Re: [f2fs-dev] [PATCH v2] f2fs/013: test to check potential
- corruption on atomic_write file
-To: Chao Yu <chao@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org, jaegeuk@kernel.org, 
-	Daeho Jeong <daehojeong@google.com>, linux-f2fs-devel@lists.sourceforge.net
+References: <20250409115220.1911467-1-amir73il@gmail.com>
+In-Reply-To: <20250409115220.1911467-1-amir73il@gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 6 May 2025 23:08:04 +0200
+X-Gm-Features: ATxdqUFNrsJ5wJ6mE5vEWGHggA_jj-u7slc8hb2fSOGUUbnNescwuKrmVaf51Qc
+Message-ID: <CAOQ4uxgG_TfXW9p37oZ-SCYkjXcQ1LaRXFVr=p=btwUTqkoc6A@mail.gmail.com>
+Subject: Re: [PATCH 0/2] Tests for AT_HANDLE_CONNECTABLE
+To: Zorro Lang <zlang@redhat.com>
+Cc: Aleksa Sarai <cyphar@cyphar.com>, Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, 
+	Chuck Lever <chuck.lever@oracle.com>, Jeff Layton <jlayton@kernel.org>, fstests@vger.kernel.org, 
+	linux-fsdevel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, May 6, 2025 at 12:05=E2=80=AFAM Chao Yu via Linux-f2fs-devel
-<linux-f2fs-devel@lists.sourceforge.net> wrote:
+On Wed, Apr 9, 2025 at 1:52=E2=80=AFPM Amir Goldstein <amir73il@gmail.com> =
+wrote:
 >
-> This is a regression testcase to check whether we will handle database
-> inode dirty status correctly:
-> 1. mount f2fs image w/ timeout fault injection option
-> 2. create a regular file, and write data into the file
-> 3. start transaction on the file (via F2FS_IOC_START_ATOMIC_WRITE)
-> 4. write transaction data to the file
-> 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
-> 6. meanwhile loop call fsync in parallel
-> Before f098aeba04c9 ("f2fs: fix to avoid atomicity corruption of atomic
-> file"), database file may become corrupted after atomic write while
-> there is concurrent dirty inode flush in background.
+> Hi Zorro,
 >
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Cc: Daeho Jeong <daehojeong@google.com>
-> Signed-off-by: Chao Yu <chao@kernel.org>
-> ---
-> v2:
-> - fix description of test steps
-> - add missing "_require_kernel_config CONFIG_F2FS_FAULT_INJECTION"
-> - add missing "_require_command "$F2FS_IO_PROG" f2fs_io"
-> - put correct filesize in the golden output
->  tests/f2fs/013     | 71 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/f2fs/013.out |  2 ++
->  2 files changed, 73 insertions(+)
->  create mode 100755 tests/f2fs/013
->  create mode 100644 tests/f2fs/013.out
+> This is a test for new flag AT_HANDLE_CONNECTABLE from v6.13.
+> I've had this test for a while, but apparently I forgot to post it.
+> See man page update of this flag here [1].
 >
-> diff --git a/tests/f2fs/013 b/tests/f2fs/013
-> new file mode 100755
-> index 00000000..4cf56840
-> --- /dev/null
-> +++ b/tests/f2fs/013
-> @@ -0,0 +1,71 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
-> +#
-> +# FS QA Test No. f2fs/013
-> +#
-> +# This is a regression testcase to check whether we will handle database
-> +# inode dirty status correctly:
-> +# 1. mount f2fs image w/ timeout fault injection option
-> +# 2. create a regular file, and write data into the file
-> +# 3. start transaction on the file (via F2FS_IOC_START_ATOMIC_WRITE)
-> +# 4. write transaction data to the file
-> +# 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
-> +# 6. meanwhile loop call fsync in parallel
-> +# Before f098aeba04c9 ("f2fs: fix to avoid atomicity corruption of atomi=
-c
-> +# file"), database file may become corrupted after atomic write while
-> +# there is concurrent dirty inode flush in background.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +_require_kernel_config CONFIG_F2FS_FAULT_INJECTION
-> +_require_command "$F2FS_IO_PROG" f2fs_io
-> +
-> +_cleanup()
-> +{
-> +       [ -n "$atomic_write_pid" ] && kill -9 $atomic_write_pid
-> +       wait
-> +       cd /
-> +       rm -r -f $tmp.*
-> +}
-> +
-> +_fixed_by_kernel_commit f098aeba04c9 \
-> +       "f2fs: fix to avoid atomicity corruption of atomic file"
-> +
-> +_require_scratch
-> +
-> +_scratch_mkfs >> $seqres.full
-> +# note that it relis on FAULT_TIMEOUT fault injection support in f2fs
 
-relis -> relies
+Ping.
 
-> +_scratch_mount "-o fault_injection=3D1,fault_type=3D4194304" >> $seqres.=
-full
-> +
-> +dbfile=3D$SCRATCH_MNT/file.db
-> +
-> +# initialize database file
-> +$XFS_IO_PROG -c "pwrite 0 4k" -c "fsync" -f $dbfile >> $seqres.full
-> +
-> +# sync filesystem to clear dirty inode
-> +sync
-> +
-> +# start atomic_write on src.db database file and commit transaction
-> +$F2FS_IO_PROG write 1 0 2 zero atomic_commit $dbfile >> $seqres.full &
+Zorro,
 
-I think we might have some timing issues here like background f2fs_io
-ends earlier than foreground fsync() loop.
+Can you take these patches which add one new test?
 
-> +atomic_write_pid=3D$!
-> +
-> +# call fsync to flush dirty inode of database file in parallel
-> +for ((j=3D0;j<1000;j++)) do
-> +       $F2FS_IO_PROG fsync $dbfile >> $seqres.full
-> +done
-> +
-> +wait $atomic_write_pid
-> +unset atomic_write_pid
-> +
-> +# flush dirty data and drop cache
-> +sync
-> +echo 3 > /proc/sys/vm/drop_caches
-> +
-> +stat $dbfile -c %s
-> +
-> +rm $dbfile
-> +sync
-> +
-> +status=3D0
-> +exit
-> diff --git a/tests/f2fs/013.out b/tests/f2fs/013.out
-> new file mode 100644
-> index 00000000..d9271f75
-> --- /dev/null
-> +++ b/tests/f2fs/013.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 013
-> +8192
+Thanks,
+Amir.
+
+>
+> [1] https://lore.kernel.org/linux-fsdevel/20250330163502.1415011-1-amir73=
+il@gmail.com/
+>
+> Amir Goldstein (2):
+>   open_by_handle: add support for testing connectable file handles
+>   open_by_handle: add a test for connectable file handles
+>
+>  common/rc             | 16 +++++++--
+>  src/open_by_handle.c  | 44 +++++++++++++++++++-----
+>  tests/generic/777     | 79 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/777.out | 15 ++++++++
+>  4 files changed, 142 insertions(+), 12 deletions(-)
+>  create mode 100755 tests/generic/777
+>  create mode 100644 tests/generic/777.out
+>
 > --
-> 2.49.0
+> 2.34.1
 >
->
->
-> _______________________________________________
-> Linux-f2fs-devel mailing list
-> Linux-f2fs-devel@lists.sourceforge.net
-> https://lists.sourceforge.net/lists/listinfo/linux-f2fs-devel
