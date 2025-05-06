@@ -1,79 +1,79 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 130741C5D44
-	for <fstests@vger.kernel.org>; Tue,  6 May 2025 19:32:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E5B91EB182
+	for <fstests@vger.kernel.org>; Tue,  6 May 2025 19:36:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746559978; cv=none; b=XnUgYayenX0oQq56OJR/UYJvivVttau3UGjqnm/B7DSje/j3bHFno/SV5Nj1HxvCMmcWtzb2NrjXE0OgFZ3784IJxNFdtGQFYphzikAgurJH8oyrOxIdIYiErGWPaGB5Wzh+7vYvjbi8s+KZLMFXKvOMnj5b5M3mzN8CBy//eIE=
+	t=1746560165; cv=none; b=CheQNJ7YdBz/nMI1rs8n1gCaWlnELQtw+M0/ePJEkh5rUu99i3UM4kI7OZBpJUslPWJGviNAfcNzK35NeWu4kBUlBYFvysYy5bfftizQ5PcND6V86nlVP3VgnKGE58KkaWh4KN9cCzsSKWv6dL8YDq80Pq2UGnQgSOmkl4iX+qQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746559978; c=relaxed/simple;
-	bh=LvObEHWsQF7hF5FIl1fkRgo6awFX8wq3UZYuzJX8o1Y=;
+	s=arc-20240116; t=1746560165; c=relaxed/simple;
+	bh=0eIysUF5njc4VkshtwO4iAeDnr7fqlNJmozempjgDg0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=nCHOM30GvezqznR0y4vrKw4Idso7FGIMi+OUJOOb/2RTujxfANgHyefIlu7SjSQrc5LFYZ12cH/NvvShjKL5fISdFiGyalQNB/J0R0AH0QBagtBWIPmuYZvNwZqCDwMsNgT8wqps4TzjLH6NoulM08LeySI3hzUbhcku99wMBAU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=OmsOvY7+; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=VJd7HLM3CPPxNOQ1Vycb/n6LCsHkr49W770VrrAMAo8xLZyViOSb/B4JReJylQWOzadnvoaTgGxE3lF/BgSyy5b5PrVJ+3yWgTdbHOh+OgtcW561qGl5M1DGvY2SGaCzyO1NoEiTUXFdLRv1XOsPjDDHzrtjd3IiyWeHuOF8Aqo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=TGKrp4Oj; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OmsOvY7+"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="TGKrp4Oj"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1746559976;
+	s=mimecast20190719; t=1746560162;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=1rS96Ut7wQKZkL1iY8HQWTUupzrZlbLDUMN2/a/FXfg=;
-	b=OmsOvY7+4z2TEYTgW3sXeft1Lz9H6W+sxTjFFqL+tBj8e8O5s1B1D2WQFzFloJl8svZr6A
-	iUznuiuGJlf9V7YFpvRHRpVEbJ2QZkQlX6af3l0gLZ9FmfTiqeozqgwT2qXdPmFrwW86tr
-	HTKwCo5qE/ptTJ7xzX5Hz/1V2P4+FBE=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=KlccjetcOiFoNBMq1PHkU/DMSj79dwUFrKyd+ujZry8=;
+	b=TGKrp4OjEK46fnoLYr2T1zN6Fzg0G7gg74loNAIQZ/puTpVfVOoFnulmEzCyogO/rlReMm
+	fDs6g4ezS10k40qaRxwJTikeKoMBfYvy0gem6ODEm4+atmb1Hy+kcyuxBFzaxbJiKz04Rx
+	7so2w3AbX+j9Dv666jmHWsafN4G0WAg=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-631-PMaOBZm3OiOwscxGBcaG1w-1; Tue, 06 May 2025 15:32:52 -0400
-X-MC-Unique: PMaOBZm3OiOwscxGBcaG1w-1
-X-Mimecast-MFC-AGG-ID: PMaOBZm3OiOwscxGBcaG1w_1746559972
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-736b431ee0dso4452656b3a.0
-        for <fstests@vger.kernel.org>; Tue, 06 May 2025 12:32:52 -0700 (PDT)
+ us-mta-6-h3u9LZmOOOS5iltFuZ9-Wg-1; Tue, 06 May 2025 15:35:59 -0400
+X-MC-Unique: h3u9LZmOOOS5iltFuZ9-Wg-1
+X-Mimecast-MFC-AGG-ID: h3u9LZmOOOS5iltFuZ9-Wg_1746560158
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-22e40e747a3so8365865ad.0
+        for <fstests@vger.kernel.org>; Tue, 06 May 2025 12:35:59 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746559971; x=1747164771;
+        d=1e100.net; s=20230601; t=1746560158; x=1747164958;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=1rS96Ut7wQKZkL1iY8HQWTUupzrZlbLDUMN2/a/FXfg=;
-        b=pP6IlYbmReBhjpCgVC90EDaf/zeb/UMVArPeKscDEulBNc5lbji5xIUXVhoyMZR7ju
-         4XIA7kRyyke5yKfxb/6zFuGkhzZHv4n6FF8nsiRU0ul0ZVWGxdOe/E396xZI7so+jQUA
-         uWJCE/C0YHUHV3Ue36v5IfzYCwChRkgqpaPz0xePIndUod61zcJExqxQH1bEtFaC8dpV
-         K32ZCIR29WjTwSFMFl5nD3jM57+TrxRH1ZqhFG6ZHk1nmgjnFkMBSy2+Xv1W8qejGF+V
-         OcHNpKDgxFHPeVYVjMnevcGTzopqlzpu83hRkcvyTQZwvJgtXdRwVH1gSv9WPn2AaITV
-         WCPw==
-X-Forwarded-Encrypted: i=1; AJvYcCV2aBRkni2BCEdmFdjeXfM05y3XE8sUlgVEdkBlk0dGKPmRk9vYYsDWZtIwd3VGbQaV2VKkrAdA@vger.kernel.org
-X-Gm-Message-State: AOJu0YwcM9B7x6bPW+m732i5surHCQ8wC7jI/pIRjGVCxU1gbhcBcODW
-	YwUf+xvc4q9mt9Ua5c2uiohK5fFahj7/28vvbClDsVPNDW6ccIWThSkIN2tQwxaUp1QX/epV+uE
-	thCYvUHMlACHhWKACR5/oMHbsWVqYpEDlPJmKZ/9I6nWnI1oMor8uzz0=
-X-Gm-Gg: ASbGncvSIm3PmXzXh1xsr3GKwrB5WZUt3Eo0I83G47LWpXQbnH/e3bCl2BmDvwvILVI
-	iYkbyiuoYi48qW3S/95B5RT2KZWr+A6FmjzTOan+lVrtrbbzJtlAzvtmzXkWlpDpSZtvzUiugI/
-	JWCQPviA6TCkYXF8V5H83+HsHjTIdSJkJalVLnuhVVWevI8z2ivKHZqD8EVzoJ0zwwkW0GILABI
-	IoK3vbnwMqWh0IWzPldOnvoHy5zhvZQoE0MpwbZaBwLTY7IcBwHxpBjo2cIbNV3cZKieY4I7UV/
-	9kNRei7PiBdizfcaWdSB1KliuTkEtfmT7uP5IxKBzyyI6dcZih+O
-X-Received: by 2002:a05:6a20:438d:b0:1f5:6e71:e45 with SMTP id adf61e73a8af0-2148d01196emr582953637.27.1746559971708;
-        Tue, 06 May 2025 12:32:51 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGg0YCgxHV0BEAyMABjhQdsZGlqhgZpNpKUUikDx04PLugplHWPn9yp+GvNCpQXlk7HvoLoMQ==
-X-Received: by 2002:a05:6a20:438d:b0:1f5:6e71:e45 with SMTP id adf61e73a8af0-2148d01196emr582925637.27.1746559971296;
-        Tue, 06 May 2025 12:32:51 -0700 (PDT)
+        bh=KlccjetcOiFoNBMq1PHkU/DMSj79dwUFrKyd+ujZry8=;
+        b=bTCv7sMLMx65xZC0JM4nq6k/jsi82b3V3eXOZkcPKK9UsBxIvakxcmv5yFwWx/IeCz
+         fJJBz5jx/XcTOCgrhs+z1IU9lQfKJoWebUMD1mNq2aCsW3cQ6LoMk8MO1v7x2J3X8bpy
+         KakCXE0iqHgV+xbn+Xf92xg8X2C5jvD/O8Enb8KpOqXGl7hE8jSToLIjEleJfFVBgqED
+         IsjRN+FwMMe7ituxRv5ZNbcS576YbLxYfzuTxnqza2AKfaJ5n8wAsPZK7uYBltowl1VP
+         B7RQtwreJ8OwzwJDHsLpXj1rFVikA5zawZcH1BuIugSyvkx2awha27Nd2wlFR5++nH78
+         iSDg==
+X-Forwarded-Encrypted: i=1; AJvYcCVSE1mB17zX7Pkz60Jkg9OJPR1TshCA+DmZBl+jxi6wJBWAwNsytcAWSiSsVF+nKuziow69Jc5H@vger.kernel.org
+X-Gm-Message-State: AOJu0YyEc7tkibmVkOnS9lGuxjwRfJCX98sxMjWlPE2wglTvjGAZfbFj
+	LBoXPg0LFCJO/inf2Nv++bG2Spdk0EhSlNhQK1Homd+T1mF4MdokAO1DOuBubGNDhH5ib/vKWUM
+	Yp/oA1OYbW0715iPwPQDrOvyiC+LkZWhGfO3Dat4OkjUEqHo3f9fPfxw=
+X-Gm-Gg: ASbGnctnAsn0O3F2V6lLg4mH3wMbhQ54louMg/lyDAupWPzkZmPAOXGtdO5vU2nfCIn
+	JSmrDmx0tA0xa+4x1SsHwIFRHOgTGgcQ4Z8qDaPqoDUoVg+ex4gJBzwe43mLcTsv3TQCI+NtMY/
+	0ANh5pYfqjqB6D8dHBVTYeIK0DH4+1Jgk3nVPqDbeYtw3Y0lGxQGKvAOB79aspnZLXM5gIclHp+
+	sCELWC0HSLx6QfUXjQQypdVejpG7QfRntZkzY4RFEnrdE0fF8jm5I5OLZwWxL7BYuZgsSVZ6bvd
+	q5x6LLLC+u3725maehFxaE7+6bcbBUwWFAI3Gd7RHDFO58H4tE6q
+X-Received: by 2002:a17:903:22cd:b0:224:26fd:82e5 with SMTP id d9443c01a7336-22e5ee1d5a3mr6443005ad.48.1746560158229;
+        Tue, 06 May 2025 12:35:58 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFXaUkmzIX6ISVVuvM3v2socpRCWj+mgNkNuzGiAMiabk68CslL2FyQ383GcQbS1Rc8G8xVKQ==
+X-Received: by 2002:a17:903:22cd:b0:224:26fd:82e5 with SMTP id d9443c01a7336-22e5ee1d5a3mr6442695ad.48.1746560157815;
+        Tue, 06 May 2025 12:35:57 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-74058b7e30esm9338522b3a.0.2025.05.06.12.32.48
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22e151e9dc9sm78239945ad.87.2025.05.06.12.35.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 06 May 2025 12:32:50 -0700 (PDT)
-Date: Wed, 7 May 2025 03:32:46 +0800
+        Tue, 06 May 2025 12:35:57 -0700 (PDT)
+Date: Wed, 7 May 2025 03:35:53 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Christoph Hellwig <hch@lst.de>
 Cc: Zorro Lang <zlang@kernel.org>, "Darrick J. Wong" <djwong@kernel.org>,
 	Hans Holmberg <hans.holmberg@wdc.com>, fstests@vger.kernel.org,
 	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 02/15] xfs: add a test for zoned block accounting after
- remount
-Message-ID: <20250506193246.hc2xtgxibh7osztb@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH 04/15] xfs: add a test to check that data growfs fails
+ with internal rt device
+Message-ID: <20250506193553.fxwtsheijvvwdh5f@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20250501134302.2881773-1-hch@lst.de>
- <20250501134302.2881773-3-hch@lst.de>
+ <20250501134302.2881773-5-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -82,100 +82,73 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250501134302.2881773-3-hch@lst.de>
+In-Reply-To: <20250501134302.2881773-5-hch@lst.de>
 
-On Thu, May 01, 2025 at 08:42:39AM -0500, Christoph Hellwig wrote:
-> Test for a problem with an earlier version of the zoned XFS mount code
-> where freeded blocks in an open zone weren't properly accounted for.
+On Thu, May 01, 2025 at 08:42:41AM -0500, Christoph Hellwig wrote:
+> The internal RT device directly follows the data device on the same
+> block device.  This implies the data device can't be grown, and growfs
+> should handle this gracefully.
 > 
 > Signed-off-by: Christoph Hellwig <hch@lst.de>
 > ---
->  tests/xfs/4201     | 47 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/4201.out |  6 ++++++
->  2 files changed, 53 insertions(+)
->  create mode 100755 tests/xfs/4201
->  create mode 100644 tests/xfs/4201.out
+>  tests/xfs/4204     | 33 +++++++++++++++++++++++++++++++++
+>  tests/xfs/4204.out |  3 +++
+>  2 files changed, 36 insertions(+)
+>  create mode 100755 tests/xfs/4204
+>  create mode 100644 tests/xfs/4204.out
 > 
-> diff --git a/tests/xfs/4201 b/tests/xfs/4201
+> diff --git a/tests/xfs/4204 b/tests/xfs/4204
 > new file mode 100755
-> index 000000000000..5367291f3e87
+> index 000000000000..0b73cee23ba5
 > --- /dev/null
-> +++ b/tests/xfs/4201
-> @@ -0,0 +1,47 @@
+> +++ b/tests/xfs/4204
+> @@ -0,0 +1,33 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +# Copyright (c) 2024 Christoph Hellwig.
 > +#
-> +# FS QA Test No. 4201
+> +# FS QA Test No. 4204
 > +#
-> +# Regression test for mount time accounting of an open zone with freed blocks.
+> +# Check that trying to grow a data device followed by the internal RT device
+> +# fails gracefully with EINVAL.
 > +#
-> +
 > +. ./common/preamble
-> +_begin_fstest auto quick zone
-> +
-> +_require_scratch
-> +_require_odirect
-> +
-> +tmp=`mktemp -d`
-
-Why not use "$tmp" directly, it's defined in _begin_fstest?
-
+> +_begin_fstest quick auto growfs ioctl zone
 > +
 > +_cleanup()
 > +{
-> +	rm -rf $tmp
+> +	cd /
+> +	_scratch_unmount
 
-Then we can save this specific _cleanup.
+Won't $SCRATCH_DEV be unmounted after each test case done. Is there any reason
+we must do this in a specific _cleanup?
 
 > +}
 > +
-> +#
-> +# Create a 256MB file system.  This is picked as the lowest common zone size
-> +# to ensure both files are placed into the same zone.
-> +#
-> +_scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +_require_scratch
+> +_require_zoned_device $SCRATCH_DEV
+> +
+> +echo "Creating file system"
+> +_scratch_mkfs_xfs >>$seqres.full 2>&1
 > +_scratch_mount
 > +
-> +dd if=/dev/zero of=$SCRATCH_MNT/test1 oflag=direct conv=fsync bs=1M count=32
-> +dd if=/dev/zero of=$SCRATCH_MNT/test2 oflag=direct conv=fsync bs=1M count=32
-> +rm $SCRATCH_MNT/test1
-> +
-> +# let delayed inode deactivate do its work
-> +sleep 1
-> +df -h $SCRATCH_MNT > $tmp/df.old
-
-then use $tmp.df.old and ..
-
-> +
-> +_scratch_cycle_mount
-> +
-> +echo "Check that df output matches after remount"
-> +df -h $SCRATCH_MNT > $tmp/df.new
-> +diff -u $tmp/df.old $tmp/df.new
-
-$tmp.df.new
-
-Thanks,
-Zorro
-
-> +
-> +_scratch_unmount
+> +echo "Trying to grow file system (should fail)"
+> +$XFS_GROWFS_PROG -d $SCRATCH_MNT >>$seqres.full 2>&1
 > +
 > +status=0
 > +exit
-> diff --git a/tests/xfs/4201.out b/tests/xfs/4201.out
+> diff --git a/tests/xfs/4204.out b/tests/xfs/4204.out
 > new file mode 100644
-> index 000000000000..4cff86d90b0f
+> index 000000000000..b3593cf60d16
 > --- /dev/null
-> +++ b/tests/xfs/4201.out
-> @@ -0,0 +1,6 @@
-> +QA output created by 4201
-> +32+0 records in
-> +32+0 records out
-> +32+0 records in
-> +32+0 records out
-> +Check that df output matches after remount
+> +++ b/tests/xfs/4204.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 4204
+> +Creating file system
+> +Trying to grow file system (should fail)
 > -- 
 > 2.47.2
 > 
