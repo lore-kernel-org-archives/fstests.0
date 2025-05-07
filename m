@@ -1,250 +1,215 @@
-Received: from mail-oa1-f48.google.com (mail-oa1-f48.google.com [209.85.160.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2E2620298C
-	for <fstests@vger.kernel.org>; Wed,  7 May 2025 10:05:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.48
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746612347; cv=none; b=e9/ZR83ioEsUdFs1yQV3jEBK7eBXfekkDVHBIo+tDxymgBOvffLwD941gRvFn/pJ9kYWKT6gKfisRl+8s1uP/3lv2ChXtScWo547n/qFO67VQcJn03ngbemSO6Pax9EVLrdfPh8x/8hexiAOFxTmUTz9Z5CKD56h8y3AAi9DLv4=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746612347; c=relaxed/simple;
-	bh=Yn+a745qix5ZX0/lig1QZbbfxgXBV8FhrUUK8xpzeE4=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:Mime-Version; b=Qar87Xybzzn6NLI+U1sY1P7C4FiPbPH2gWGYFoawjekchj5j6T88jxLIWcMyi4zlX1y14KXf5jT667fPPxavRimvV2dpkFDtU3nSMgL/Pd2T5WB87pdWfATzw3IjT6zy/XFy+kGg4ZRzhWzgIvz7z6SzIwY94igSMUTPL07RWS8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gKTL15R7; arc=none smtp.client-ip=209.85.160.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EDD43205ABA;
+	Wed,  7 May 2025 10:24:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.154.42
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1746613447; cv=fail; b=BsoNtnssNd/o1n8mDOz8v6CH7+KIgUCks4m6J143EoU/dnDTYavOfJM5wNocIJleq8DAVkQPslD4LKa60j6z/FFtxQKpwwkmAmEDzD6ZjgIPS52q4+YruzMwn5dBY9ICDCLJM6dALUCUPCXstAPbnCAny1sqRPRPqotbBh7VSyQ=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1746613447; c=relaxed/simple;
+	bh=EJuH31XNauGaDs/jYyw4lpnqRtXCBDDFoHZ6+iS5fE0=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=AfV3lbf0UbpQU0faxYfRkjtMzP+JeOl4mLmkpfvJwQfLP+BQBASqYocxbZ4YF0XhYoSR13D1UhfCzivQAOwMmXfzX6Tj0Rp7/ma99d0xfguqR5L5FMAYs+B6Hwk4VkDrOv0Biis50yd30ilTz8+ZOMCDF9SYd6nWE31N/WSd3cs=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=J4s2bprS; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=h7oN45MD; arc=fail smtp.client-ip=216.71.154.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gKTL15R7"
-Received: by mail-oa1-f48.google.com with SMTP id 586e51a60fabf-2c2ada8264aso5392811fac.2
-        for <fstests@vger.kernel.org>; Wed, 07 May 2025 03:05:45 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="J4s2bprS";
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="h7oN45MD"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1746613446; x=1778149446;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-id:content-transfer-encoding:
+   mime-version;
+  bh=EJuH31XNauGaDs/jYyw4lpnqRtXCBDDFoHZ6+iS5fE0=;
+  b=J4s2bprSVuYIurlu8gIchqWt/2GWP5+p9ygG027xugn00azZwJuCWCfU
+   wPbwHzAe0b9n13LkePiGqk+//Q5cjd1Ce8MrqsJTIyxAI521VmH9BsClf
+   NAVTOnBevIv+hs3qYuxcrxEpvjwMVTe+MHzxEZC7tu1yHj5HHOeLMG6/u
+   9DL16h18rMAL/Ki/b+3/5dp+1UoraS3hgFZyUUYEu7kYErIKyen4Sj116
+   y0Y54xQTQRPPpcazJ1F6ySj8mggtPr0AYHZdbmmt4vOu5hgkKot/0Solx
+   /17WTir8wcBTGHoLxt6LLkU9inzduatv8CtdvTUGg2erC1rSqTU+NJ8c7
+   A==;
+X-CSE-ConnectionGUID: izh777SATUye0WmvQkVFYA==
+X-CSE-MsgGUID: yeChbqUJRFu+4zhWsHcWOg==
+X-IronPort-AV: E=Sophos;i="6.15,269,1739808000"; 
+   d="scan'208";a="81429669"
+Received: from mail-westcentralusazlp17013074.outbound.protection.outlook.com (HELO CY3PR05CU001.outbound.protection.outlook.com) ([40.93.6.74])
+  by ob1.hgst.iphmx.com with ESMTP; 07 May 2025 18:24:04 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=V+uQ8LPbB2cZ10JkeOAc7pgN2aD4iK2Ev12KZNhKBDP5f9UeJAUOKH0gY8CsTNXOXF4JO1QH1DMGkqqtCdDcnLuZkgxOZPbJNJ7WAFyRBF1FFAj3wygDTCHKmp5SYopKeP4D42S2PTC75ZXMchEaZyswS81AkeRYED0hhNolUGF2WEt3jAdygZDGf7b5z+MEHfo/MYZvMhGqXnRtgiCoNOfezVjR+5zxOXF3aZRim5cZKE3tdb5F7rDBqin4Xs4M8OEW7XYtMsCiexnRTOwofMqVqji7SRwKL9JkKtoLyWN5GGhy1myrq4+amhkb0ioPiFVNdBe7OZyKfTDBroeOXw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=EJuH31XNauGaDs/jYyw4lpnqRtXCBDDFoHZ6+iS5fE0=;
+ b=r7hNS61+njcgq71outwQXe2avE5SLz1Nig7O1O7qwDU5olXcAElZeSWu8s/QTg69ydLdIjw02sLvJLC1yq8vMoJ8pMn/AtQfcE9bBBETQic/MQcQlE4rR/uA8BKXR7cWqOtlppejlQVrcp4YV29Lt+1BrdCcuijisJu7rNAk5kD0wPDCsDczCIXNKes3WfCjBm/cOYiiRWGOYcEGgroEAsi+vOMamlDs8zAdHBEHobB3yVPKknNLSq6dkPvKNvoNh6q4ScfvL/J7UtDTtVCsNebeTLrK2z4UofBskly5FXj+z5llqyeHB2fw8L9s6WNy0+Ap/BgEXSpnmb2W2Oc3gQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1746612345; x=1747217145; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to:date
-         :cc:to:from:subject:message-id:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=YWhSdsdv6LHreCrYWhWckHRtwnAsxoHVouii6z2EgYU=;
-        b=gKTL15R7PNvoQlwrtK2DEtZwOJcETm8zKwASMJXP8xxzVFjTUdRNlg1M1tBxq8neMh
-         d/gGMQgMv12iCnYcj5ulh47/uXq1u+rLd4MzJTM1jGah5NhFj1zz1OpxRQHYCLzOD99p
-         XV0Yorj3QNbIEk8EENu5qbu8Y6iq8zspsA+zXHa7Tyxc7M64UzjJCB4F2YO21mAJjCP7
-         LPbZxzL5zFtHcwcPyd/Dh8K64AlFDbuO4xw8zGe9c4ZzQkOTILIYYYWo9ZDmbkSw10tl
-         RpPuicLATAd4uU57yqkN+EaFDCpftEKmViyi1zXQ9RMQ6MQU8k6k1/uME3qbCMnCquUV
-         I0yg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746612345; x=1747217145;
-        h=content-transfer-encoding:mime-version:references:in-reply-to:date
-         :cc:to:from:subject:message-id:x-gm-message-state:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=YWhSdsdv6LHreCrYWhWckHRtwnAsxoHVouii6z2EgYU=;
-        b=GdOXsUqx/8foqn4cutWV7G70YmgsR1Iwm2zTPxxDk+aqflfA/5SNWvx54jjtiX2eEg
-         hfnYVDifd6kWbikZVY9EvHQuFTs5GjiFp1oYXKS+CU55h/mrh91BdsVyBMGgQMPpmNN5
-         zHe3x723AXGpeMWvX1rWJB2n74P8YzYEa0xDZGb5FmcrqfpBjAqavjTjJE4YOOgFgCg9
-         f9wd5v1pnWbkuY/v8i29dyaaCl7FhG0UVDJ6NI0xGDV2m/N5CSx5ctx5AaxEu4aCd8tE
-         P+2mtss5bwsOiWd8BJvd1TKCKxY1/2EekrIGHkL/Hgzx9tZCc/agUyFm2cBOFJPvWTkI
-         jurA==
-X-Forwarded-Encrypted: i=1; AJvYcCXMmzSnuCA94M88ZDny38KjGwNM+gKtpsg6k9NDtfAuyRZHt1YGmm0xqqt0AG8Ov4Bv2U9Wr6vx@vger.kernel.org
-X-Gm-Message-State: AOJu0YzeygkS02TRm8+JGIpZKzl2tuFh1plGcfT/omA9Wz7Dj40ewfFp
-	BqqiRBqfGdstgER8nKZ+AqgJ6pTH8hEii0jmsqM6IC9dV6CInZBoWF9Aig==
-X-Gm-Gg: ASbGncusZUVb1CqP8vNIR2JA5z5mOrf57c4DhMfX+aa4orRMM0eB8UXDBIgYNnp8BVP
-	BzGn7A+8VTo3LBtGa1xVRxBWCZ34Uhv2HasmFIKI/hWQ7/j3R5G5rENYFAmRvCMq59gC2CxNP+3
-	zHvjG0x9rygqD+jLr2pDy4rnZFu7UZEWbmvTg5HxP7rHgTvBLnpxiDYloLpm14D1PvSf7m+0/1T
-	zgn3T+KP7XgvIaXqYBdTqrBUwxjPvuCtLaRg9hvtRf/by2ezq2Lne1OJJZ2T8j417CrWarSYS4F
-	I884jePR4Ad9QOxKSJbpTbVwOyw+oxm2PeMtcBiuplrkOrBstAHQQWT4uCwONwJuK6OVnxGMtJT
-	kg6IeiBIiRIfQsEJtNg==
-X-Google-Smtp-Source: AGHT+IFGGKDuwgD3usBpPmonpihADCI133cIPRIcoz5JcGG9fojcnIFCzFceoAKJMIt9ZRMn16A61w==
-X-Received: by 2002:a17:90b:3a85:b0:30a:4c44:cc05 with SMTP id 98e67ed59e1d1-30aac183aefmr4811514a91.10.1746612334362;
-        Wed, 07 May 2025 03:05:34 -0700 (PDT)
-Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com ([49.205.34.162])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-30aaec170eesm1569734a91.31.2025.05.07.03.05.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 07 May 2025 03:05:33 -0700 (PDT)
-Message-ID: <c63cadb8922f591e6bc3a528db35e96ebc6e9949.camel@gmail.com>
-Subject: Re: [PATCH 11/28] check-parallel: initial support for specifying
- device sizes
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-To: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
-Cc: zlang@kernel.org
-Date: Wed, 07 May 2025 15:35:29 +0530
-In-Reply-To: <20250417031208.1852171-12-david@fromorbit.com>
-References: <20250417031208.1852171-1-david@fromorbit.com>
-	 <20250417031208.1852171-12-david@fromorbit.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5 (3.28.5-27.el8_10) 
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=EJuH31XNauGaDs/jYyw4lpnqRtXCBDDFoHZ6+iS5fE0=;
+ b=h7oN45MDhqM8MsJjgGWTvaPnpO4teC7/f3+5mVqWYLsmy4keX9s2+qpg2NjdcJN9vP4+Gx5p8Ejx/dkX5Xe+qEr8pUNc8iwK0nVoEuoz/ZiB/rxhiL5Sx5ksRsPunvdwj4ughzsvBx/K4waB3OnKdPJfdP7AZYUsvLv47V8RIY8=
+Received: from PH7PR04MB8755.namprd04.prod.outlook.com (2603:10b6:510:236::8)
+ by BY5PR04MB6550.namprd04.prod.outlook.com (2603:10b6:a03:1db::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8722.20; Wed, 7 May
+ 2025 10:23:58 +0000
+Received: from PH7PR04MB8755.namprd04.prod.outlook.com
+ ([fe80::4372:e8cb:5341:9a9b]) by PH7PR04MB8755.namprd04.prod.outlook.com
+ ([fe80::4372:e8cb:5341:9a9b%6]) with mapi id 15.20.8699.033; Wed, 7 May 2025
+ 10:23:58 +0000
+From: Hans Holmberg <Hans.Holmberg@wdc.com>
+To: "Darrick J. Wong" <djwong@kernel.org>, hch <hch@lst.de>
+CC: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, "zlang@kernel.org"
+	<zlang@kernel.org>, "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
+	Carlos Maiolino <cem@kernel.org>, "david@fromorbit.com" <david@fromorbit.com>
+Subject: Re: [PATCH 1/2] xfs: add mount test for read only rt devices
+Thread-Topic: [PATCH 1/2] xfs: add mount test for read only rt devices
+Thread-Index:
+ AQHbtcDlQOxnpwBoYku+VcbjviMnX7O0euiAgAYW+wCAAC86gIABcegAgAAfroCACp3+AIAAGBYA
+Date: Wed, 7 May 2025 10:23:58 +0000
+Message-ID: <f7834928-82cb-47b8-a3b5-28cab36cc7c5@wdc.com>
+References: <20250425090259.10154-1-hans.holmberg@wdc.com>
+ <20250425090259.10154-2-hans.holmberg@wdc.com>
+ <20250425150331.GG25667@frogsfrogsfrogs>
+ <7079f6ce-e218-426a-9609-65428bbdfc99@wdc.com>
+ <20250429145220.GU25675@frogsfrogsfrogs> <20250430125618.GA834@lst.de>
+ <20250430144941.GK25667@frogsfrogsfrogs>
+ <cd061e60-bb7e-46be-8b8c-31956e3ad255@wdc.com>
+In-Reply-To: <cd061e60-bb7e-46be-8b8c-31956e3ad255@wdc.com>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+user-agent: Mozilla Thunderbird
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: PH7PR04MB8755:EE_|BY5PR04MB6550:EE_
+x-ms-office365-filtering-correlation-id: 64f7ca46-d65b-438b-8384-08dd8d51475c
+x-ld-processed: b61c8803-16f3-4c35-9b17-6f65f441df86,ExtAddr
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;ARA:13230040|376014|1800799024|366016|38070700018;
+x-microsoft-antispam-message-info:
+ =?utf-8?B?ZXlvSzdkY3RJL2EyOGdRaVk5Y2VRUFRLbzZLaDdDOSttbFJVSWxKUlE5L2ZR?=
+ =?utf-8?B?a1pYeUdrVGV6aU1LVy9oc1h2bW1JWlVZNUoxVDVyNkFzSDZMc0prYm1ldE1a?=
+ =?utf-8?B?eDNVOHg5Q05xSXF3a216RngxTHBwRXI4VjBKYnVDT1R4Z0gyc0xCWG9rNnJC?=
+ =?utf-8?B?Rno5OE9IQU96aUFjMm5Lb0JDWTNUU2FKODI4VkVycWlHa0xxbGRIbWljRUVC?=
+ =?utf-8?B?YndBbkRRRk5vSHo2bXoyNm9oRXp4dXNqdk5USHNiQU5YRE50TDh2THU5bjR1?=
+ =?utf-8?B?dGFXenJtRkZUckxsR203cFRIZ2x5b25tSmFHT3dXRnJrSlZuOE9OaVdwc3hZ?=
+ =?utf-8?B?MVFKeGtIMnRkZm5qMGhXRDhzT2FSUENrTFhVcHRGZ1VXOWpSamxGVE03U1Fw?=
+ =?utf-8?B?MExlVHBjMXBUVjl1Z2VCQjBWS25mdSt4MUROam5aQTFHekpndXVqT2YrSnNs?=
+ =?utf-8?B?ZVEyVHFZNzM0RE5VN2NwWllINjBEWTFsOXROR2EwSm5ZcHFNTlh0YUhYeDh0?=
+ =?utf-8?B?RXpXd012ZzFWMFhtaXFCTkhqTjZVcFZQREYrU3FKMnppSnNGKzZWb0hubVNz?=
+ =?utf-8?B?SEdReXhUUERDZ3BON3FzZTNOazdBWFk0d0VGbnJiZXBYYzhlN2V6OHhXOU5x?=
+ =?utf-8?B?TWN0RGxhNmJnczFkNnQ4SGV0UDJpQUo5dEdLamRpTjJteVk3TlZDeGpQYUo1?=
+ =?utf-8?B?akFUdjREekd4YVNRNjFQb1RLQTgzaTRkeitmeFR3Um5YTkpmQ0dhTVBVRzVW?=
+ =?utf-8?B?enhRZzBHRFVFQ1VSdWlZeENvYkh6WGIzTEp2UGl5QWJUSzBRMDhxYktHelUw?=
+ =?utf-8?B?MWd0Sm9ubGVUaHEvTXZib1gzeWNNdEU0ZnNsR0FVL05JV0NqcUhndUJwVDRG?=
+ =?utf-8?B?MG9XbE9kdDAzWG9kVjE3Uytad1VtQ2I0amV0YkVqdmJ1Z1cvL1d3b0swT2cr?=
+ =?utf-8?B?cFg1TmVYUWgzUjViUnRvMWVoWkZGS2FZR3ZXVjlmVFdMY1dzSzREdzdzbXV2?=
+ =?utf-8?B?N0lmZUp3anE1Ui8zamNlTktOdXJYQ3VpRjhBVktlVUhQWFJVSFcvZ1M2VVNz?=
+ =?utf-8?B?UTlnY3N5YWRMQ2MxcThpWTBHaGNVYVd4eHpJNjY2UDQ1b055dXc4QzF1SkhI?=
+ =?utf-8?B?d1VUTWNYeDc3cVNETW5UYjVHS0Jjc1RsZmhrY1IxWlo3NWZxbjdCUklNOCtw?=
+ =?utf-8?B?bmU3Wm1LNmcrWThDQnNabkNnWWZobm90UzNlNlBXbmg1QmFRa3BLUGowTTQ5?=
+ =?utf-8?B?TjFzbWJNYXRIcWxKaFVab2FuUTNmTVFvd2t4SHlPWGFPd2tBSmFjVFJjbUJD?=
+ =?utf-8?B?c1RZS05KcUFpZ0xlR0RQQkRZTC91N2JtTUl0dXZUVmJBZEhUTkJUVG5YOE9x?=
+ =?utf-8?B?MUtlUHFPNFh3QklZc3hraGdxbGMzV085NDJpTVhVQlptMG5wTEpGNi8rNmVW?=
+ =?utf-8?B?QUVaZ3ROWUZOT1AxNjc3TEZYN1pIeFpuZ28yS1dMZWk0bXNRZXM1Q0gvYldC?=
+ =?utf-8?B?c21Qa1FMWFBGNG1JcFRaVHBsSGJSZmsxQWlleHVDTmw3c1hUcXJBQk05VTJK?=
+ =?utf-8?B?bUwzZ0xUV0pob1JSeXBNMzhoOFgrRHJYUUVnOGFoRThpVytHbklGd29QRExU?=
+ =?utf-8?B?MC9EVDlJbXp0MjhEZGo1R1ZzVWtTQlRCOEcyQWVJS0RrbDBTOWp6cjdwc3Fx?=
+ =?utf-8?B?TnpKOUVFcXRaUDlxTjBCY2ZXNWErOVpYRW5ua2J0V2RXOXhlODNSZ2tXTjFP?=
+ =?utf-8?B?cld5MlJVZE5iRCtuQ3ZwbkxWZFY4UllrenU3ZTZ2aEF4K1BCc3M2VWVxcGN1?=
+ =?utf-8?B?TUY3OVBncVlZVlhVNThCZHFpNStjSDdNNGJTRTJ4RFJMZm50VzFhNnphNmF4?=
+ =?utf-8?B?eG94UVFLR1ErUVVBWUdyLzFuRmtueGNQWGs5ejF6V2dOY1JUN1Vra1NCc1B4?=
+ =?utf-8?B?L3BsTE96ZHNDQXd1VStoR1p0bmQvYVVpdW1UN0hEek10MFpmU1NnNXJsYWwx?=
+ =?utf-8?Q?iqZRxTEldGwt2zz45mp64330S5UALM=3D?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH7PR04MB8755.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(366016)(38070700018);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?MmlTK2VoK1V6UzNtR1Jld0ZQTjZnNXVGdGZhRWl1SU9YaHZRYXQ5ZlRZOFJL?=
+ =?utf-8?B?eHJtd2h4U3VFR3JXRnZaaVZSQjk2S25vOUlMMkIyaUhRbDJTemlLZys2dnI3?=
+ =?utf-8?B?NHJwamsxbVFFSUd3d2YwYkFkbFJXYUVITHFWUjFsS2ZUOW9Jc3dYaTJHTFNV?=
+ =?utf-8?B?UHBDNXhjRzQ0UFNVTWpCclJLVGVpaHVJelZsMmFOWWFNL1UxNFNtWTJoOEk1?=
+ =?utf-8?B?YVRCU2YycXFtS3hJbzFFZDJEL0dWYmtDd01La1Z1L1ZsMkR3Sjc3YnhraytX?=
+ =?utf-8?B?cTNkYTZ1dUxvTGJ0RTBobktFTHMrSUVQaEFEaEtvZkx0Mi9VdnpzUnMrZFVC?=
+ =?utf-8?B?N2c0Wm9uajlQZGZZeFQrSHVuQm54Y3VlM2hJZkZVTUpxSVp5Y1ZWOXFpMDZN?=
+ =?utf-8?B?R254bTdqYmY1VUd2WnBJYndZUlk5Y3V5NVFCZmxrczRvQ2FxMkxmeWVqeFp6?=
+ =?utf-8?B?cHRrSk5WL0JrQXFxcU83aTBzd0YwWjlia3B5L3NsWUxlYW11RlcwcVNqQmsy?=
+ =?utf-8?B?clNlVFoyNm1pRWVJOFBKaGRoKzNUdjF6UTRGR2FpVVdlblFqRXN4NnUrZU1j?=
+ =?utf-8?B?WDJqZVZVMkVyMzZEWGJnRzRsSll6bGhBRG5sUUUxWXd2VERiNXRMVEovcmF6?=
+ =?utf-8?B?TGNMQkRLYXdmYU53bjdqTzduZFFmbDFxcFk0MTB5ZS9rVUMzSWFZV04vMWpr?=
+ =?utf-8?B?S3lHK3I2WVRMWTRZcmw4RUZWSE50UEd1eGtWWXR5bDBiNXpUM0pMbGx1MDhn?=
+ =?utf-8?B?bEFUbERqVHpNVWlvNDllcE8xbHYwK0NHT3JDZzcyYkhvcVlvdUdUMGJ3T0I1?=
+ =?utf-8?B?bUp1VE1oT0YyNnArL1IyY2E2MGoyVFh6dlpLN1pGSlN5UHhRc0E3U09HOTlu?=
+ =?utf-8?B?U3NxLzcwZVNobktRdGY2RnRybFJqOGJQbFZZUm1oWkh5NHJsRlpKaXlBSW1o?=
+ =?utf-8?B?VGNodkJtVEN0YkdOdFl2VDZuOG5jaERua3hnTm1MbWVhZ3lDT2RISHFNenl0?=
+ =?utf-8?B?UEo3RmJ5aEpFTy96ZXJWNXBZazhhUWdLRDh0QmYrRFltc0hPVll4UmRoRjFL?=
+ =?utf-8?B?bk45Y2tIbS9nV2kvNTNyVW05NHdKd1NYbnJPTEs0eWZYaDB2ODRySGU3eW1m?=
+ =?utf-8?B?QVcrYWlUb2ZNWTNRRWQ4MUE4OFFtNXU4T0RZcEs2ek1mcWlndnhjdVJRUDRh?=
+ =?utf-8?B?Z25xdTZGVDU3cmJxaWp2ajNVQlVqZFNCTDdoamxqZlBSWVYyMStLUGV3YzZB?=
+ =?utf-8?B?VStzS1B1SzhOZ3ovWW1mbWNIWjlPZGt1aWRZcUZBanFQOE51VXNTd05TSlcz?=
+ =?utf-8?B?UHVIQzAvUUthRjJHUDlVNUFBbGJwdklpVjcweFJzdzZiSURCQzA2WWlCUWMz?=
+ =?utf-8?B?dG9aKy95TUcvalloSVFvYnBIanpVd3BLSVFpV056WnA1aHBQa3JtbEhENmxW?=
+ =?utf-8?B?RjArYnBJQUN6VXlkdW9MTWlWdGVmclkwVU1tQ2tqL1g3UTRnNzVVcndvckNK?=
+ =?utf-8?B?V0lWK2FTa1NYbXhORjJFMFNFMXBIVFh4OFlOV0poQUNrUm5vQU1oenVsd3N0?=
+ =?utf-8?B?cjFYOTNmeGpBZktwT1R1RmhtbzdydTcrZi84TitoVTlNT3M5V1U2OVZnYnJv?=
+ =?utf-8?B?MUJGaCtkQnA1RWRZcDJkSW4yNjY2eVdDQzZqdUorODRjWVh1MzNIeFlYMG9n?=
+ =?utf-8?B?Vk9HK1U3cElJSTl1ZWdiMXlBeWJSSlhRVThibjlvMkRzUzJWUE1DdnV5Q1hs?=
+ =?utf-8?B?T2t6bHJrakRFcWxkZG16eU1OWVpxWnZSTU56UGpZNjFMS2h3OVlOb3FPUk05?=
+ =?utf-8?B?eE9aSUVyWnkyUVRzOW14dlp5U3phN1JZWGNSOWcydmRDSWV3RmNCVHZhWnhp?=
+ =?utf-8?B?dVd2Tzd5aEYvcVJSWXd4LzRNbnhjcXZabzNzbEdvTEt1QXBEL0YwVTFyVk14?=
+ =?utf-8?B?YmdPckNTOTYxK29BaU0vL0ZxbTBuNUVYaGlwcis4QUZ6SnhuY2NLSU1jczIv?=
+ =?utf-8?B?UUQ1M3NKa2pUeTNtV1ZtS3RhV001dGhTYXZGa1FHRVAxMG1BYm1KZEFVNEZL?=
+ =?utf-8?B?WW1mWW5IZ0hqOW5oTTFFbzNZZDAzaStRNFVrcDdXMVBTNWdDVW9LWGRHSkRv?=
+ =?utf-8?B?ZDFob0k4KzZiaDZxODVhSFdiT3FmNVpBbHRBcHlLRkNSSm1VZXNYV0tsS3dG?=
+ =?utf-8?B?dVE9PQ==?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <27913659C838674E932D657DEE2272C7@namprd04.prod.outlook.com>
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	E3f9ro/IC5SQzjubnAlgCy5scFkvlcov8JaHOYv5lYkoZfZutmKSWTvdgdkXsOGn4p7kv69btrlcjhrm32H8IBlhUFXSl6qoiVUJTSEB77EvtR7W3W34eyAFKtL+BdTYUgMUGUMhrarSAifsXg7c5kIXgRr8AcWFh2Ff3T7Ah6z+ro+8JhtvEKBElfV/m66/cJ52LNVxCJODD4TO3JhzPJ5nEDsuGS4fZKr0Uo91VhyE1aN4VldWgGOeGJpCfxIYnEXd18hlLmQHsEoBN/AS8pxlqkZK2/WjcZfYXBAonZ/zia4eBoE0DQMsVswxrDneurufv84I4ojpNUtd7M+vh7RP2B3+/7Htod2SSTxzhAI6rKxj5+a4lnaljfdKJwF//nn8WiLg+CnffbliGhi3zkpHT8GpMuJtLkucCqGxn5gjB9tBSigtelNwoh/JD3UAu4MrOq6oF060otq8G2PboOB7oZCldCt7zaSbIXVnywfCDa5Cg/ZsgknvuBg7kv9S9pJwsULGQO4Mits+bJeXfrYcViU1/dYVGNZ/JU7Rw2G6EnuLzn0g+OhtaABJuf2eddcUi3kGz6or5z034wAMBNTzl3ywKJDvLl78ajtwXCuTpn67+FTrlCljzpxQerfK
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: PH7PR04MB8755.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 64f7ca46-d65b-438b-8384-08dd8d51475c
+X-MS-Exchange-CrossTenant-originalarrivaltime: 07 May 2025 10:23:58.5331
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: b0ODFN/fjHo0Sa9ELB4UCdUlQSQ3bfsddKtFvcLjh1kbTw0SoxbPSbZ85I2nT50+iXxoXeUQXXtWB23VX6NeLQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR04MB6550
 
-On Thu, 2025-04-17 at 13:00 +1000, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
-> 
-> Rather than hard coding loop device sizes, abstract them out into
-> environment variables with defined default values. This allows
-> a check-parallel wrapper to specify sizes or, in future, for them
-> to be read from a config file. Sizes are specified in human readable
-> values using M/G/T suffixes to indicate the units being specified
-> 
-> Whilst doing this also add support for creating all the external
-> devices that XFS uses during fstests execution. A typical setup
-> will be something like:
-> 
-> TEST_DEV_SIZE=10G
-> TEST_RTDEV_SIZE=10G
-> TEST_LOGDEV_SIZE=128M
-> SCRATCH_DEV_SIZE=20G
-> SCRATCH_RTDEV_SIZE=20G
-> SCRATCH_LOGDEV_SIZE=512M
-> LOGWRITES_DEV_SIZE=2G
-Should we document these new variables in README?
-
-The functionality looks fine to me. I have some refactoring suggestions
-below (nothing functional). 
-> 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> ---
->  check-parallel | 35 ++++++++++++++++++++++++++++++-----
->  1 file changed, 30 insertions(+), 5 deletions(-)
-> 
-> diff --git a/check-parallel b/check-parallel
-> index aa88c681e..5bb44b6a5 100755
-> --- a/check-parallel
-> +++ b/check-parallel
-> @@ -18,6 +18,14 @@ run_section=""
->  
->  tmp=/tmp/check-parallel.$$
->  
-> +TEST_DEV_SIZE=${TEST_DEV_SIZE:=10G}
-> +TEST_RTDEV_SIZE=${TEST_RTDEV_SIZE:=10G}
-> +TEST_LOGDEV_SIZE=${TEST_LOGDEV_SIZE:=128M}
-> +SCRATCH_DEV_SIZE=${SCRATCH_DEV_SIZE:=20G}
-> +SCRATCH_RTDEV_SIZE=${SCRATCH_RTDEV_SIZE:=20G}
-> +SCRATCH_LOGDEV_SIZE=${SCRATCH_LOGDEV_SIZE:=512M}
-> +LOGWRITES_DEV_SIZE=${LOGWRITES_DEV_SIZE:=2G}
-> +
->  FSTYP=
->  
->  . ./common/exit
-> @@ -116,7 +124,7 @@ while [ $# -gt 0 ]; do
->  	--exact-order) _tl_setup_ordered ;;
->  	-n)	show_test_list="yes" ;;
->  
-> -	-f)	is_supported_fstype $2 ; FSTYP=$2; shift ;;
-> +	-f)	is_supported_fstype $2 ; export FSTYP=$2; shift ;;
->  
->  	-s)	run_section="$run_section -s $2"; shift ;;
->  
-> @@ -243,22 +251,35 @@ runner_go()
->  	local id=$1
->  	local me=$basedir/runner-$id
->  	local _test=$me/test.img
-> +	local _test_rt=$me/test-rt.img
-> +	local _test_log=$me/test-log.img
->  	local _scratch=$me/scratch.img
-> +	local _scratch_rt=$me/scratch-rt.img
-> +	local _scratch_log=$me/scratch-log.img
->  	local _logwrites=$me/logwrites.img
->  	local _results=$me/results-$2
->  
->  	mkdir -p $me
->  
-> -	xfs_io -f -c 'truncate 2g' $_test
-> -	xfs_io -f -c 'truncate 8g' $_scratch
-> -	xfs_io -f -c 'truncate 1g' $_logwrites
-> +	xfs_io -f -c "truncate $TEST_DEV_SIZE" $_test
-> +	xfs_io -f -c "truncate $TEST_RTDEV_SIZE" $_test_rt
-> +	xfs_io -f -c "truncate $TEST_LOGDEV_SIZE" $_test_log
-> +	xfs_io -f -c "truncate $SCRATCH_DEV_SIZE" $_scratch
-> +	xfs_io -f -c "truncate $SCRATCH_RTDEV_SIZE" $_scratch_rt
-> +	xfs_io -f -c "truncate $SCRATCH_LOGDEV_SIZE" $_scratch_log
-> +	xfs_io -f -c "truncate $LOGWRITES_DEV_SIZE" $_logwrites
-Do you like the following refactoring:
-
-
-declare -a devices_map=(
-	"$TEST_DEV_SIZE:$_test:TEST_DEV"
-	"$TEST_RTDEV_SIZE:$_test_rt:TEST_RTDEV"
-	"$TEST_LOGDEV_SIZE:$_test_log:TEST_LOGDEV"
-	"$SCRATCH_DEV_SIZE:$_scratch:SCRATCH_DEV"
-	"$SCRATCH_RTDEV_SIZE:$_scratch_rt:SCRATCH_RTDEV"
-	"$SCRATCH_LOGDEV_SIZE:$_scratch_log:SCRATCH_LOGDEV"
-	"$LOGWRITES_DEV_SIZE:$_logwrites:LOGWRITES_DEV"
-)
-create_dev_images devices_map
-
-create_dev_images() {
-    # this executes commands like 
-    # xfs_io -f -c "truncate 10G  <test-file.img>"
-    # for all the devices
-    local  -n dev_list="$1"  
-    for entry in "${dev_list[@]}"; do
-        IFS=':' read -r -a tuple <<< "$entry"
-        xfs_io -f -c "truncate ${tuple[0]}  ${tuple[1]}"
-    done
-}
-
->  
->  	export TEST_DEV=$(_create_loop_device $_test)
-> +	export TEST_RTDEV=$(_create_loop_device $_test_rt)
-> +	export TEST_LOGDEV=$(_create_loop_device $_test_log)
->  	export TEST_DIR=$me/test
-> +
->  	export SCRATCH_DEV=$(_create_loop_device $_scratch)
-> +	export SCRATCH_RTDEV=$(_create_loop_device $_scratch_rt)
-> +	export SCRATCH_LOGDEV=$(_create_loop_device $_scratch_log)
->  	export SCRATCH_MNT=$me/scratch
-> +
->  	export LOGWRITES_DEV=$(_create_loop_device $_logwrites)
-Something similar as above:
-
-create_devices()
-{
-    # This exports all the device related environment variables
-    # like TEST_DEV, SCRATCH_DEV etc.
- 
-    local -n dev_list="$1" 
-    IFS=':' read -r -a tuple <<< "$entry"
-    eval "export ${tuple[2]}=\$(_create_loop_device ${tuple[1]})"
-	
-}
-and then simply call
-create_devices devices_map
-export TEST_DIR=$me/test
-export SCRATCH_MNT=$me/scratch
-
-
-> -	export FSTYP=xfs
->  	export RESULT_BASE=$_results
->  
->  	mkdir -p $TEST_DIR
-> @@ -285,7 +306,11 @@ runner_go()
->  	umount -R $TEST_DIR 2> /dev/null
->  	umount -R $SCRATCH_MNT 2> /dev/null
->  	_destroy_loop_device $TEST_DEV
-> +	_destroy_loop_device $TEST_RTDEV
-> +	_destroy_loop_device $TEST_LOGDEV
->  	_destroy_loop_device $SCRATCH_DEV
-> +	_destroy_loop_device $SCRATCH_RTDEV
-> +	_destroy_loop_device $SCRATCH_LOGDEV
->  	_destroy_loop_device $LOGWRITES_DEV
-destroy_devices()
-{
-    # This destroys all the loop devices that were created. 
-
-    local -n dev_list="$1"
-    IFS=':' read -r -a tuple <<< "$entry"
-    eval "_destroy_loop_device \$${tuple[2]}"
-}
-and then call
-destroy_devices devices_map. 
-IMO, this reduces the number of lines of code and adding an entry to
-devices_map automatically does the devices creation, removal and
-setting of environment variables without having to manually add them.
-This is just a suggestion - please let me know what do you think about
-this.
---NR
->  
->  	grep -q Failures: $me/log
-
+T24gMDcvMDUvMjAyNSAxMDo1NywgSGFucyBIb2xtYmVyZyB3cm90ZToNCj4gT24gMzAvMDQvMjAy
+NSAxNjo0OSwgRGFycmljayBKLiBXb25nIHdyb3RlOg0KPj4gT24gV2VkLCBBcHIgMzAsIDIwMjUg
+YXQgMDI6NTY6MThQTSArMDIwMCwgaGNoIHdyb3RlOg0KPj4+IE9uIFR1ZSwgQXByIDI5LCAyMDI1
+IGF0IDA3OjUyOjIxQU0gLTA3MDAsIERhcnJpY2sgSi4gV29uZyB3cm90ZToNCj4+Pj4gQW5kIGNv
+bWUgdG8gdGhpbmsgb2YgaXQsIHdlcmVuJ3QgdGhlcmUgc3VwcG9zZWQgdG8gYmUgcG1lbSBmaWxl
+c3lzdGVtcw0KPj4+PiB3aGljaCB3b3VsZCBydW4gZW50aXJlbHkgb2ZmIGEgcG1lbSBjaGFyYWN0
+ZXIgZGV2aWNlIGFuZCBub3QgaGF2ZSBhDQo+Pj4+IGJsb2NrIGludGVyZmFjZSBhdmFpbGFibGUg
+YXQgYWxsPw0KPj4+DQo+Pj4gVGhhdCBzdXBwb3J0IG5ldmVyIG1hdGVyaWFsaXplZCwgYW5kIGlm
+IGl0IGF0IHNvbWUgZG9lcyBpdCB3aWxsIG5lZWQgYQ0KPj4+IGZldyBjaGFuZ2VzIGFsbCBvdmVy
+IHhmc3RldHMsIHNvIG5vIG5lZWQgdG8gd29ycnkgbm93Lg0KPj4NCj4+IEhlaCwgb2suICBJIHRo
+aW5rIEknbSBvayB3aXRoIHRoaXMgdGVzdCAod2hpY2ggc3BlY2lmaWNhbGx5IHBva2VzIGF0IHJ0
+DQo+PiBkZXZpY2VzKSBub3csIHNvDQo+Pg0KPj4gUmV2aWV3ZWQtYnk6ICJEYXJyaWNrIEouIFdv
+bmciIDxkandvbmdAa2VybmVsLm9yZz4NCj4+DQo+PiAtLUQNCj4+DQo+Pg0KPiANCj4gSSBqdXN0
+IHJlYWxpemVkIHRoYXQgd2UgbmVlZCB0byBfbm90cnVuIHRoaXMgdGVzdCB3aGVuIHdlIGhhdmUg
+aW50ZXJuYWwNCj4gcnQgZGV2aWNlcywgc28gaSdsbCBzZW5kIGEgdjIgc2VwYXJhdGVseS4NCj4g
+DQoNClBsZWFzZSBpZ25vcmUgbXkgY29uZnVzaW9uIGhlcmUuIFdlIGhhdmUgX3JlcXVpcmVfbG9j
+YWxfZGV2aWNlIGZvciB0aGUNCnNjcmF0Y2ggcnQgZGV2IGFscmVhZHkgaW4gdGhlIHRlc3Qgc28g
+d2UncmUgZ29vZC4NCg0K
