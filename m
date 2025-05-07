@@ -1,171 +1,231 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ua1-f54.google.com (mail-ua1-f54.google.com [209.85.222.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA3D828BAAF;
-	Wed,  7 May 2025 17:01:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28D707263D
+	for <fstests@vger.kernel.org>; Wed,  7 May 2025 19:28:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746637266; cv=none; b=rc+3A0KcVDVtUYX97//+H+iVZnSxgQe0o3ytO3xYy+C41JLWmCqaj5qNDt8KBsEjA29tAF2g+1JPotYCJ3rk2caAFkK/lADEvZInstyhFn8XvTDfZMNsM1C9SKLEv59lIjJY1HDrm08FCADi6lya3mseCUHIMVXWc6bjgZ+jBxE=
+	t=1746646128; cv=none; b=YiS7C6UuzRsOMi4bNdZsyGUfh3r2s8rP2jecysvD+eI+Oh0hpKF7HPUSy7dpZPV6peljO3kcYlKw4siztJtzhKIEpdEMm1c3tYk6Mq0cMfHBTVai7Rl37sleINV1X/qOdH2BWCrKaIufvIridKRAH5fFczTOW1AKzuIsXf54skQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746637266; c=relaxed/simple;
-	bh=u6AZ6kU59/7hxI5Dn9KpiI190gICF70koF26H8PzqhY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=U2Gf60VLUEIRdxc7gZrB2CrVbW4tZTFrlV0TNFwHsdFpiLxCZnFeK7SeFfl82nk1w/lTLtQMSPyma6GmB9IlcEFXItWHkMLd1srtO5i4fujZmEerNMkv+1PUTsngba4MlF8F2bFTdSE1aMgReyxcqMhRoRD/1/amRqQkEUUxbT4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PQOBkUqz; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1746646128; c=relaxed/simple;
+	bh=0vhJzVS/YjW/+YHPRWICRWG6763NSWBcnMwJtfpl2pw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=En0NBP76XaR8WZNFQMv07UrAQzXY5g++ZtaGjuVCMMRi8v6GUjiqeHGQXPS3jWpbUtqUt2T/Jmu5fVlHDegLZZSncnLx8Fud8lhTMN2vB2HWvkDnO/R74yJt/8DHS0fGRWO4XGCq3GtDTdY9n1cvot7ZHDbYult8qsO6rBiD8aw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=M/EgnbDE; arc=none smtp.client-ip=209.85.222.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PQOBkUqz"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1BED2C4CEE9;
-	Wed,  7 May 2025 17:01:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1746637266;
-	bh=u6AZ6kU59/7hxI5Dn9KpiI190gICF70koF26H8PzqhY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=PQOBkUqznN8zfjPAjmnC0yTCzjwFdJC+KxmUWPMdmRREaU77XEoDN2J8rmPseg+X1
-	 VfEQG7WIYOeVm2goFu67hGZjtn+J2CIMInjx8KJMwsMCbYsz/C6u5/6O9Kx+w1ZJGO
-	 vM4m/gIE3sWf+hqHOKMoAKXTOsIMerKBSxxhB3g5LchQ+M+NH/85jeZxaVYoCmiJ0i
-	 gB46eHbk1gUe2tIsXJlv9mp/ISRVbZRWmHAWaVJ/2KoPkwH9ohF5xjzSRWW47hJlDt
-	 6ng2aeiSRosof8+LUd37nTezh6bSb/MTzQdVzcpvqgGvtqlBJbwcZtRSQMXAn/dqVH
-	 6RvS8akyjBYxw==
-Date: Wed, 7 May 2025 10:01:05 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Hans Holmberg <Hans.Holmberg@wdc.com>
-Cc: Zorro Lang <zlang@kernel.org>,
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	"linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-	hch <hch@lst.de>
-Subject: Re: [PATCH v3] xfs: test that we can handle spurious zone wp
- advancements
-Message-ID: <20250507170105.GF25675@frogsfrogsfrogs>
-References: <20250507102913.13759-1-hans.holmberg@wdc.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="M/EgnbDE"
+Received: by mail-ua1-f54.google.com with SMTP id a1e0cc1a2514c-86d5e3ddb66so64931241.2
+        for <fstests@vger.kernel.org>; Wed, 07 May 2025 12:28:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1746646126; x=1747250926; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=tI5e2s/ZqBLSFNyrrFhzwS6FBaHtvh3ICndpotrAyzY=;
+        b=M/EgnbDEbRZC27XXqnU+9mM1M68T6vTPnVpikO3rL3LtMnsJBOHju5TCoLbLqAMpwf
+         8go0HYjnX6M8ZRRR6PXMm2g93TbYeIZbLsC3Q2RtmTzauPKJSk3Yff5EUPBA5I7mnnkr
+         I02kV+dz00l9MZPuhi9/2Iqc1eLD2bBt3paorTKVkfh7mv0GUgI6Xkx9WXGwSbUyr1gk
+         a7MEeJCEieMkZuA7kjEOkfgmS3mb6aoUCGyy/Oqi8dGRKvWc6yen9meyO0tk//ZWhCkB
+         giFPGEs9XLcmThijx+7Ex76pYnycrMQpE6Tj1h0CHKfMvLSyFbWw+Q0aEDe/uMi2+vd3
+         acKg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1746646126; x=1747250926;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=tI5e2s/ZqBLSFNyrrFhzwS6FBaHtvh3ICndpotrAyzY=;
+        b=tSMhYSkv77JVcZYUzyzp/x+o13E4cyXTrpWjkGNXo23f7BCTwGonfadds/ZkSHxnuu
+         K6DgHlzMRVVhj9Q55W1/tziH6dAwpp0Y3hN5yMwl2DnJw+fbpldntSCCB3RnnKrG1PH3
+         ubfCNFcl2Q5Zw4fpALNUbLteb6g3/RcgfMlOjX9d91y6OgvVnJRkc1p0Pd6Ec47/c7AJ
+         7ZpQpz+X2sPk8DijpELG+mvbQAf9lhS0WT4zmEtRY0QKA0VuOB27o0v3tyjJXv2SUfmD
+         s/jNYBUiD4qW9wGGU672q/JvklJ5uytBPIE8Y2SG3N4O9bRmY5W+4jkruqT2VtgEnzgb
+         cS3Q==
+X-Forwarded-Encrypted: i=1; AJvYcCVJ1Xfx+65SUkGSonS+slvQ+pyHv6l1Sf8YZWvzseX7CQpf3dLZVSkpddED0Sdql1EQiZInTPzl@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx2RXsIrUSM62fbrLn/PEVzkhtFIgP//ZwhgftBL8re4QqToiRe
+	rIgyIoI98vYbM0YcIeFlVJcTKX2CoCWYCw2VM2TZ1CUMfKdZWr6yYDztZrzqWL8OuvWQUu//2Mu
+	IXLkrxjUVUSmtazmRWWxOgnCNeRQ=
+X-Gm-Gg: ASbGnctd1A2rAaTxMshfYLNBzraSR4lFxfMTUW5Q0see0S+OJzN5YN+p0lZjLgZnmvZ
+	OAvW0CnVNHOCTjPcDNe8uaJ8w9PX4dxemDeY1Xcb6/HpMq10z5i1jdLYE/1/hkuN82FGWlh50Ks
+	bSet8fnPaqQuFThdx9bGUPbUYPa2KaOHG9RU/pST3uOy0CudJbbO/D
+X-Google-Smtp-Source: AGHT+IGTUur5Z1uwjuuUSgp15UO1ErZBv/7v8MDPUx2hO/xulNe5fbZcC3efnFYzh6Vu5u8+bpdgmbt9WcyuaqXtPp0=
+X-Received: by 2002:a05:6102:3e08:b0:4c5:904d:f358 with SMTP id
+ ada2fe7eead31-4ddad0ea95amr943468137.23.1746646125763; Wed, 07 May 2025
+ 12:28:45 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250507102913.13759-1-hans.holmberg@wdc.com>
+References: <20250506070210.539539-1-chao@kernel.org> <CACOAw_xzP+dfhhFsOLTOagU-QPeUUOzSpyZLO7dArvAe4F8H8g@mail.gmail.com>
+ <041198dd-c6b5-4c7e-baa2-89a9f1297317@kernel.org>
+In-Reply-To: <041198dd-c6b5-4c7e-baa2-89a9f1297317@kernel.org>
+From: Daeho Jeong <daeho43@gmail.com>
+Date: Wed, 7 May 2025 12:28:33 -0700
+X-Gm-Features: ATxdqUFqcDDlERVoUm3dNGNJ9toEIMWGLyphRgWOnRxEaFX4BIrOyfk2WIa1-lc
+Message-ID: <CACOAw_xDWjS-MzUMOaMSZ-XhiE3rEbonipzS63b8bZNA+NhLuw@mail.gmail.com>
+Subject: Re: [f2fs-dev] [PATCH v2] f2fs/013: test to check potential
+ corruption on atomic_write file
+To: Chao Yu <chao@kernel.org>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org, jaegeuk@kernel.org, 
+	Daeho Jeong <daehojeong@google.com>, linux-f2fs-devel@lists.sourceforge.net
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, May 07, 2025 at 10:30:14AM +0000, Hans Holmberg wrote:
-> From: Hans Holmberg <Hans.Holmberg@wdc.com>
-> 
-> Test that we can gracefully handle spurious zone write pointer
-> advancements while unmounted.
-> 
-> Any space covered by the wp unexpectedly moving forward should just
-> be treated as unused space, so check that we can still mount the file
-> system and that the zone will be reset when all used blocks have been
-> freed.
-> 
-> Signed-off-by: Hans Holmberg <hans.holmberg@wdc.com>
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+On Tue, May 6, 2025 at 8:17=E2=80=AFPM Chao Yu <chao@kernel.org> wrote:
+>
+> On 5/7/25 04:25, Daeho Jeong wrote:
+> > On Tue, May 6, 2025 at 12:05=E2=80=AFAM Chao Yu via Linux-f2fs-devel
+> > <linux-f2fs-devel@lists.sourceforge.net> wrote:
+> >>
+> >> This is a regression testcase to check whether we will handle database
+> >> inode dirty status correctly:
+> >> 1. mount f2fs image w/ timeout fault injection option
+> >> 2. create a regular file, and write data into the file
+> >> 3. start transaction on the file (via F2FS_IOC_START_ATOMIC_WRITE)
+> >> 4. write transaction data to the file
+> >> 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
+> >> 6. meanwhile loop call fsync in parallel
+> >> Before f098aeba04c9 ("f2fs: fix to avoid atomicity corruption of atomi=
+c
+> >> file"), database file may become corrupted after atomic write while
+> >> there is concurrent dirty inode flush in background.
+> >>
+> >> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+> >> Cc: Daeho Jeong <daehojeong@google.com>
+> >> Signed-off-by: Chao Yu <chao@kernel.org>
+> >> ---
+> >> v2:
+> >> - fix description of test steps
+> >> - add missing "_require_kernel_config CONFIG_F2FS_FAULT_INJECTION"
+> >> - add missing "_require_command "$F2FS_IO_PROG" f2fs_io"
+> >> - put correct filesize in the golden output
+> >>  tests/f2fs/013     | 71 +++++++++++++++++++++++++++++++++++++++++++++=
++
+> >>  tests/f2fs/013.out |  2 ++
+> >>  2 files changed, 73 insertions(+)
+> >>  create mode 100755 tests/f2fs/013
+> >>  create mode 100644 tests/f2fs/013.out
+> >>
+> >> diff --git a/tests/f2fs/013 b/tests/f2fs/013
+> >> new file mode 100755
+> >> index 00000000..4cf56840
+> >> --- /dev/null
+> >> +++ b/tests/f2fs/013
+> >> @@ -0,0 +1,71 @@
+> >> +#! /bin/bash
+> >> +# SPDX-License-Identifier: GPL-2.0
+> >> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
+> >> +#
+> >> +# FS QA Test No. f2fs/013
+> >> +#
+> >> +# This is a regression testcase to check whether we will handle datab=
+ase
+> >> +# inode dirty status correctly:
+> >> +# 1. mount f2fs image w/ timeout fault injection option
+> >> +# 2. create a regular file, and write data into the file
+> >> +# 3. start transaction on the file (via F2FS_IOC_START_ATOMIC_WRITE)
+> >> +# 4. write transaction data to the file
+> >> +# 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE=
+)
+> >> +# 6. meanwhile loop call fsync in parallel
+> >> +# Before f098aeba04c9 ("f2fs: fix to avoid atomicity corruption of at=
+omic
+> >> +# file"), database file may become corrupted after atomic write while
+> >> +# there is concurrent dirty inode flush in background.
+> >> +#
+> >> +. ./common/preamble
+> >> +_begin_fstest auto quick
+> >> +_require_kernel_config CONFIG_F2FS_FAULT_INJECTION
+> >> +_require_command "$F2FS_IO_PROG" f2fs_io
+> >> +
+> >> +_cleanup()
+> >> +{
+> >> +       [ -n "$atomic_write_pid" ] && kill -9 $atomic_write_pid
+> >> +       wait
+> >> +       cd /
+> >> +       rm -r -f $tmp.*
+> >> +}
+> >> +
+> >> +_fixed_by_kernel_commit f098aeba04c9 \
+> >> +       "f2fs: fix to avoid atomicity corruption of atomic file"
+> >> +
+> >> +_require_scratch
+> >> +
+> >> +_scratch_mkfs >> $seqres.full
+> >> +# note that it relis on FAULT_TIMEOUT fault injection support in f2fs
+> >
+> > relis -> relies
+>
+> Will fix.
+>
+> >
+> >> +_scratch_mount "-o fault_injection=3D1,fault_type=3D4194304" >> $seqr=
+es.full
+> >> +
+> >> +dbfile=3D$SCRATCH_MNT/file.db
+> >> +
+> >> +# initialize database file
+> >> +$XFS_IO_PROG -c "pwrite 0 4k" -c "fsync" -f $dbfile >> $seqres.full
+> >> +
+> >> +# sync filesystem to clear dirty inode
+> >> +sync
+> >> +
+> >> +# start atomic_write on src.db database file and commit transaction
+> >> +$F2FS_IO_PROG write 1 0 2 zero atomic_commit $dbfile >> $seqres.full =
+&
+> >
+> > I think we might have some timing issues here like background f2fs_io
+> > ends earlier than foreground fsync() loop.
+>
+> What about adding a sysfs entry to control timeout, by default it's
+> 1 second, we can tune it to 5 second for this case?
 
-Looks good now,
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+Ah, so TIMEOUT fault will induce 1 second delay in the kernel path?
+Then, I am okay with that.
 
---D
-
-> ---
-> Changes since v1:
->  Added _require_realtime and fixed a white space error based
->  on Darrick's review comments.
-> 
-> Changes since v2:
->  Make sure we don't fail when the rt section is internal
->  Dropped inclusion of common filters and fixed dd parameter ordering
-> 
->  tests/xfs/4214     | 71 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/4214.out |  2 ++
->  2 files changed, 73 insertions(+)
->  create mode 100755 tests/xfs/4214
->  create mode 100644 tests/xfs/4214.out
-> 
-> diff --git a/tests/xfs/4214 b/tests/xfs/4214
-> new file mode 100755
-> index 000000000000..f5262a40b229
-> --- /dev/null
-> +++ b/tests/xfs/4214
-> @@ -0,0 +1,71 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Western Digital Corporation.  All Rights Reserved.
-> +#
-> +# FS QA Test 4214
-> +#
-> +# Test that we can gracefully handle spurious zone write pointer
-> +# advancements while unmounted.
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick zone
-> +
-> +# Import common functions.
-> +. ./common/zoned
-> +
-> +_require_scratch
-> +_require_realtime
-> +
-> +#
-> +# Figure out if the rt section is internal or not
-> +#
-> +if [ -z "$SCRATCH_RTDEV" ]; then
-> +	zdev=$SCRATCH_DEV
-> +else
-> +	zdev=$SCRATCH_RTDEV
-> +fi
-> +
-> +_require_zoned_device $zdev
-> +_require_command "$BLKZONE_PROG" blkzone
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-> +_scratch_mount
-> +blksz=$(_get_file_block_size $SCRATCH_MNT)
-> +
-> +test_file=$SCRATCH_MNT/test.dat
-> +dd if=/dev/zero of=$test_file bs=1M count=16 oflag=direct >> $seqres.full 2>&1 \
-> +	|| _fail "file creation failed"
-> +
-> +_scratch_unmount
-> +
-> +#
-> +# Figure out which zone was opened to store the test file and where
-> +# the write pointer is in that zone
-> +#
-> +open_zone=$($BLKZONE_PROG report $zdev | \
-> +	$AWK_PROG '/oi/ { print $2 }' | sed 's/,//')
-> +open_zone_wp=$($BLKZONE_PROG report $zdev | \
-> +	grep "start: $open_zone" | $AWK_PROG '{ print $8 }')
-> +wp=$(( $open_zone + $open_zone_wp ))
-> +
-> +# Advance the write pointer manually by one block
-> +dd if=/dev/zero of=$zdev bs=$blksz count=1 seek=$(($wp * 512 / $blksz)) \
-> +	oflag=direct >> $seqres.full 2>&1 || _fail "wp advancement failed"
-> +
-> +_scratch_mount
-> +_scratch_unmount
-> +
-> +# Finish the open zone
-> +$BLKZONE_PROG finish -c 1 -o $open_zone $zdev
-> +
-> +_scratch_mount
-> +rm $test_file
-> +_scratch_unmount
-> +
-> +# The previously open zone, now finished and unused, should have been reset
-> +nr_open=$($BLKZONE_PROG report $zdev | grep -wc "oi")
-> +echo "Number of open zones: $nr_open"
-> +
-> +status=0
-> +exit
-> diff --git a/tests/xfs/4214.out b/tests/xfs/4214.out
-> new file mode 100644
-> index 000000000000..a746546bc8f6
-> --- /dev/null
-> +++ b/tests/xfs/4214.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 4214
-> +Number of open zones: 0
-> -- 
-> 2.34.1
-> 
+>
+> Thanks,
+>
+> >
+> >> +atomic_write_pid=3D$!
+> >> +
+> >> +# call fsync to flush dirty inode of database file in parallel
+> >> +for ((j=3D0;j<1000;j++)) do
+> >> +       $F2FS_IO_PROG fsync $dbfile >> $seqres.full
+> >> +done
+> >> +
+> >> +wait $atomic_write_pid
+> >> +unset atomic_write_pid
+> >> +
+> >> +# flush dirty data and drop cache
+> >> +sync
+> >> +echo 3 > /proc/sys/vm/drop_caches
+> >> +
+> >> +stat $dbfile -c %s
+> >> +
+> >> +rm $dbfile
+> >> +sync
+> >> +
+> >> +status=3D0
+> >> +exit
+> >> diff --git a/tests/f2fs/013.out b/tests/f2fs/013.out
+> >> new file mode 100644
+> >> index 00000000..d9271f75
+> >> --- /dev/null
+> >> +++ b/tests/f2fs/013.out
+> >> @@ -0,0 +1,2 @@
+> >> +QA output created by 013
+> >> +8192
+> >> --
+> >> 2.49.0
+> >>
+> >>
+> >>
+> >> _______________________________________________
+> >> Linux-f2fs-devel mailing list
+> >> Linux-f2fs-devel@lists.sourceforge.net
+> >> https://lists.sourceforge.net/lists/listinfo/linux-f2fs-devel
+>
