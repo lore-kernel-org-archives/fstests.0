@@ -1,98 +1,72 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0853F195FE8
-	for <fstests@vger.kernel.org>; Thu,  8 May 2025 07:41:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1268E279330;
+	Thu,  8 May 2025 14:47:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746690069; cv=none; b=uRhJ2ypna8l5NSgvzpupcfPxtG989lVbvGOyiXnkAnba3+Kdzanj9eLohF715WGVvw3uYIVyBspkDJnfLRXwmolLN/hdLYEhvnq/Q8bDB/Ubvnm5l3sPIqs7/xp8jLnLbSc9xPa0jhDrFL4/0DYTxrZ/yOJzqLTpaJXgjNlWcMs=
+	t=1746715659; cv=none; b=t/kb3rvqaMMS/vNgphFE7nCjmmKnbxel7b90PWXF+I4fjFMFFa7PtIO5LQGwlT08NrmhMoLM1cj5zGgSxyZ1Ot7hdWj4TUSxSk12zZsX2IS8i9TVOhAP8AaXFzIXWWWUeJLhVIlER3UwaWL5RveSAit93VGm1N5ERt0Sn8+s/Tk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746690069; c=relaxed/simple;
-	bh=VmRyIkZhsENLcG9rhJFQee56cwAJ2WMmDLChNr6gTDk=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=L4Hio64D/CSWdJOkKhCGtLq7vmi0sUBwqUBYyDMPA/pE1UDIAPiO9I5JlIttBfrmn5mDxG+UmNyuFkiXKVyADwzleQv+7Vr56qsfJUrp3P/NDsH55T1ewHGgEslpjdBcUOre2czpJeqASYrpCFDmzPqfrpFEBiYzG8g6+H9gzdw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=bEW53Ayt; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=hEUL+JxH; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1746715659; c=relaxed/simple;
+	bh=2fHnOfv3sUG9E2WcocPQ98+8dRURRo9/vIj7UUS9FV0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=UMEIImtUF8Uxr6lCMNYeXgZ+bcGdadcJDNuJTVq4g0/Ni7wrWsNghLDx0QQi9d2K2r0ZTqDeedyCNkRCedBZi7yJ/vLHAJW1M4fxyz169k6EX6RBdcCv1TOSmezWszYOLToU3rUhx577HjNzQMm0DQWHsDjBc61xLuaWEJUFqu0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rQjhFns3; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="bEW53Ayt";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="hEUL+JxH"
-Received: from kunlun.arch.suse.cz (unknown [10.100.128.76])
-	by smtp-out2.suse.de (Postfix) with ESMTP id EE4D61F385
-	for <fstests@vger.kernel.org>; Thu,  8 May 2025 07:41:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1746690065; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=O8YIKxXec31C2zdGbHed9842BJBZJ+A0LHuhkcNeoK4=;
-	b=bEW53AytVj0N/TCnq2OjV5ltYXOcogDucT2TfRRH4ZnuqZrfioCrxcnVvf8hYnA8qwkvet
-	/Dn9JCtdqjMiisbm/CY70EMMu3lDRN/SjjAIHxMhoYFZgdTh0dyZzJqZqUEWcoamRBrX9R
-	IbBN4XosXWlZkNGpwyH/DjHIETzfLic=
-Authentication-Results: smtp-out2.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1746690064; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=O8YIKxXec31C2zdGbHed9842BJBZJ+A0LHuhkcNeoK4=;
-	b=hEUL+JxHts85TTKZgzqO3CXNaKPZGVxPGhJLjqHkfjHDbJ9MhXMivYYV+vSIQlqW4M3vdF
-	n7AhYh166NW/6Yc8OYlztGT6HbXzMRYfTZSmFq3tJit1NG8L3k8Ybbh2WFm9nYIl7g6glI
-	yfnbOxYgu5h9VkUIQKjIEgrFl8IWOmM=
-From: Anthony Iliopoulos <ailiop@suse.com>
-To: fstests@vger.kernel.org
-Subject: [PATCH] xfs/008: fix golden output for 512 fsblock size
-Date: Thu,  8 May 2025 09:41:02 +0200
-Message-ID: <20250508074102.125013-1-ailiop@suse.com>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rQjhFns3"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7B737C4CEE7;
+	Thu,  8 May 2025 14:47:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1746715658;
+	bh=2fHnOfv3sUG9E2WcocPQ98+8dRURRo9/vIj7UUS9FV0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=rQjhFns3BXl8zBOnabHKqwI3u+yqkvq4RgL27ZHVOwqLQBO1SFBvjGsrNlJ+wYZYk
+	 +LVUuxLNnJJ/BxiR85P1TXrm9xK5ivA79m9SjuyHPVWgPeNKL13yS6kR/OURB6ZGbs
+	 h9VBtgfyYZN3QXYp0mQHHxc7I5P4JjzDOQiLroML7gu0QNg7oIyjzd9un6moBouYOU
+	 itKhznTqr93IpR5OKhoJuZif6YaZfdVpxGqFl8q3CGse3X7K2/SGJYY/wSzWef/EO4
+	 WhJbMCTe2edy6IeEQGfyKGSxaO2uaYJ86fUnCBV/0ObxKw6e+TjilA4PhpCTh4KNoA
+	 0CpURYMtddcFg==
+Date: Thu, 8 May 2025 07:47:37 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/2] fsstress: fix attr_set naming
+Message-ID: <20250508144737.GA2701446@frogsfrogsfrogs>
+References: <174665480800.2706436.6161696852401894870.stgit@frogsfrogsfrogs>
+ <174665480825.2706436.15433477670941336936.stgit@frogsfrogsfrogs>
+ <aBwwykf7xaGXHnVD@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Spam-Level: 
-X-Spam-Flag: NO
-X-Spamd-Result: default: False [-2.80 / 50.00];
-	BAYES_HAM(-3.00)[99.98%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-0.999];
-	MIME_GOOD(-0.10)[text/plain];
-	RCPT_COUNT_ONE(0.00)[1];
-	RCVD_COUNT_ZERO(0.00)[0];
-	ARC_NA(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	FROM_EQ_ENVFROM(0.00)[];
-	TO_DN_NONE(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:email]
-X-Spam-Score: -2.80
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <aBwwykf7xaGXHnVD@infradead.org>
 
-commit 97989c9839dd ("xfs/008: use block size instead of the pagesize")
-changed the test filter, which causes nocrc/512b fsblock configurations
-to fail due to mismatch of the golden output. Update it to match the
-expected output.
+On Wed, May 07, 2025 at 09:19:22PM -0700, Christoph Hellwig wrote:
+> On Wed, May 07, 2025 at 02:54:07PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Back in 2020 I converted attr_set to lsetxattr, but neglected to notice
+> > that the attr name now has to have the prefix "user." which attr_set
+> > used to append for us.  Unfortunately nobody runs fsstress in verbose
+> > mode so I didn't notice until now, and even then only because fuse2fs
+> > stupidly accepts any name, even if that corrupts the filesystem.
+> 
+> Looks good
+> 
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
+> 
+> I wonde if this creates a fallout somewhere else now that we actually
+> do xattr ops that don't fail..
 
-Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
----
- tests/xfs/008.out | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Yes, generic/753 now fails when xfs_repair complains about INCOMPLETE
+xattrs and blows out the entire attr fork.  I tried the stupid fix of
+downgrading the warning to leave the incomplete attr behind, but then
+incomplete remote attr entries have a valueblk==0 and later I saw
+corruption of block 0 of the attr fork with the remote block magic so
+clearly something else is wrong there too.
 
-diff --git a/tests/xfs/008.out b/tests/xfs/008.out
-index 0941e218c7d0..dc999156dab5 100644
---- a/tests/xfs/008.out
-+++ b/tests/xfs/008.out
-@@ -8,7 +8,7 @@ randholes.2 : -l FSIZE -c 100 -b BLKSIZE
- ------------------------------------------
- holes is in range
- 
--randholes.3 : -l FSIZE -c 100 -b 512
-+randholes.3 : -l FSIZE -c 100 -b BLKSIZE
- ------------------------------------------
- holes is in range
- 
--- 
-2.49.0
-
+--D
