@@ -1,40 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1268E279330;
-	Thu,  8 May 2025 14:47:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 98E5F27AC41;
+	Thu,  8 May 2025 15:12:24 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746715659; cv=none; b=t/kb3rvqaMMS/vNgphFE7nCjmmKnbxel7b90PWXF+I4fjFMFFa7PtIO5LQGwlT08NrmhMoLM1cj5zGgSxyZ1Ot7hdWj4TUSxSk12zZsX2IS8i9TVOhAP8AaXFzIXWWWUeJLhVIlER3UwaWL5RveSAit93VGm1N5ERt0Sn8+s/Tk=
+	t=1746717144; cv=none; b=D0ZzdhoeXHCfXC7wuXh9BrLi7GNuoWJdCM8LvedoqweTT3ySEQvJVwB8d6QyGw1d6b7/TDDX5sMxPq8uTEyEpdHNvfADnLTYEHiOPG+UEsQoSxdtpRSOzHFpM5Qpnm5VynyFdX5pbV4OnTYbfrptz4squvfl5rJfnlguSUvdV9E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746715659; c=relaxed/simple;
-	bh=2fHnOfv3sUG9E2WcocPQ98+8dRURRo9/vIj7UUS9FV0=;
+	s=arc-20240116; t=1746717144; c=relaxed/simple;
+	bh=FllKGQAxhHWtuNc5mc2Ei6wdpIA+0MEAIItk+A8ICtI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=UMEIImtUF8Uxr6lCMNYeXgZ+bcGdadcJDNuJTVq4g0/Ni7wrWsNghLDx0QQi9d2K2r0ZTqDeedyCNkRCedBZi7yJ/vLHAJW1M4fxyz169k6EX6RBdcCv1TOSmezWszYOLToU3rUhx577HjNzQMm0DQWHsDjBc61xLuaWEJUFqu0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rQjhFns3; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=tcpDs0DpB5W/2htpeaFhRxKxp0gcp+KHeVWtwTN1mYFfg089jmD8MHyolpzXZwrK/TfLI7vky0LPNwHBSDPgPijExe2Zv4uwhuDak9Ij9c2U4TsNB3j7BpmYZZZZiN3xk1iSuIRpE6A/YQ/pzeuSgT86bbMlMeBL54LP+EmE8uk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XbRbsS3c; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rQjhFns3"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7B737C4CEE7;
-	Thu,  8 May 2025 14:47:38 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XbRbsS3c"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 08855C4CEE7;
+	Thu,  8 May 2025 15:12:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1746715658;
-	bh=2fHnOfv3sUG9E2WcocPQ98+8dRURRo9/vIj7UUS9FV0=;
+	s=k20201202; t=1746717144;
+	bh=FllKGQAxhHWtuNc5mc2Ei6wdpIA+0MEAIItk+A8ICtI=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=rQjhFns3BXl8zBOnabHKqwI3u+yqkvq4RgL27ZHVOwqLQBO1SFBvjGsrNlJ+wYZYk
-	 +LVUuxLNnJJ/BxiR85P1TXrm9xK5ivA79m9SjuyHPVWgPeNKL13yS6kR/OURB6ZGbs
-	 h9VBtgfyYZN3QXYp0mQHHxc7I5P4JjzDOQiLroML7gu0QNg7oIyjzd9un6moBouYOU
-	 itKhznTqr93IpR5OKhoJuZif6YaZfdVpxGqFl8q3CGse3X7K2/SGJYY/wSzWef/EO4
-	 WhJbMCTe2edy6IeEQGfyKGSxaO2uaYJ86fUnCBV/0ObxKw6e+TjilA4PhpCTh4KNoA
-	 0CpURYMtddcFg==
-Date: Thu, 8 May 2025 07:47:37 -0700
+	b=XbRbsS3cyaTZzAQ/dx9q5EPz8BotakWgnkLYR1rqF2xiV4UH1NAWhzNQH2C1mWlSX
+	 dKQHQMdytL5px1XQ51FAvIo8f+s1HIVIrY3VvyDnhPs+vsp7YYTMAkvs3eqEOFQx7P
+	 dFhvo2f2umAdL/HDV1sRTe7FvyRVqcCQtcattGUFTZyxgEcXk5GBjBd7I2jBSBi+8q
+	 ormZWpgTSWHzKpBCT1Lrlczwzj9sYLsE6I/2eYkZhSS6P6vhD4KONL+I4I8hE86N8x
+	 Z1XrYddgUIx8H2B667f+4Z2dRTBCnBupSvML1bBQ3HBUjTwgoDcJMc0K+19hpJ4BXA
+	 mg+7rgKnHno8w==
+Date: Thu, 8 May 2025 08:12:23 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 1/2] fsstress: fix attr_set naming
-Message-ID: <20250508144737.GA2701446@frogsfrogsfrogs>
-References: <174665480800.2706436.6161696852401894870.stgit@frogsfrogsfrogs>
- <174665480825.2706436.15433477670941336936.stgit@frogsfrogsfrogs>
- <aBwwykf7xaGXHnVD@infradead.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, Hans Holmberg <hans.holmberg@wdc.com>,
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 01/16] common: generalize _filter_agno
+Message-ID: <20250508151223.GP25667@frogsfrogsfrogs>
+References: <20250508053454.13687-1-hch@lst.de>
+ <20250508053454.13687-2-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,30 +43,68 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aBwwykf7xaGXHnVD@infradead.org>
+In-Reply-To: <20250508053454.13687-2-hch@lst.de>
 
-On Wed, May 07, 2025 at 09:19:22PM -0700, Christoph Hellwig wrote:
-> On Wed, May 07, 2025 at 02:54:07PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > Back in 2020 I converted attr_set to lsetxattr, but neglected to notice
-> > that the attr name now has to have the prefix "user." which attr_set
-> > used to append for us.  Unfortunately nobody runs fsstress in verbose
-> > mode so I didn't notice until now, and even then only because fuse2fs
-> > stupidly accepts any name, even if that corrupts the filesystem.
+On Thu, May 08, 2025 at 07:34:30AM +0200, Christoph Hellwig wrote:
+> Rename and move to common/xfs so that it can be reused for rgnos in new
+> zoned tests.
 > 
-> Looks good
-> 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> 
-> I wonde if this creates a fallout somewhere else now that we actually
-> do xattr ops that don't fail..
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Yes, generic/753 now fails when xfs_repair complains about INCOMPLETE
-xattrs and blows out the entire attr fork.  I tried the stupid fix of
-downgrading the warning to leave the incomplete attr behind, but then
-incomplete remote attr entries have a valueblk==0 and later I saw
-corruption of block 0 of the attr fork with the remote block magic so
-clearly something else is wrong there too.
+Looks good,
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
 --D
+
+> ---
+>  common/filestreams | 11 +----------
+>  common/xfs         | 10 ++++++++++
+>  2 files changed, 11 insertions(+), 10 deletions(-)
+> 
+> diff --git a/common/filestreams b/common/filestreams
+> index bb8459405b3e..ace8f3b74de6 100644
+> --- a/common/filestreams
+> +++ b/common/filestreams
+> @@ -42,19 +42,10 @@ _do_stream()
+>  	done
+>  }
+>  
+> -_filter_agno()
+> -{
+> -        # the ag number is in column 4 of xfs_bmap output
+> -        perl -ne '
+> -                $ag = (split /\s+/)[4] ;
+> -		if ($ag =~ /\d+/) {print "$ag "} ;
+> -        '
+> -}
+> -
+>  _get_stream_ags()
+>  {
+>          local directory_name=$1
+> -        local stream_ags=`xfs_bmap -vp ${directory_name}/* | _filter_agno`
+> +        local stream_ags=`xfs_bmap -vp ${directory_name}/* | _filter_bmap_gno`
+>          echo $stream_ags
+>  }
+>  
+> diff --git a/common/xfs b/common/xfs
+> index 39650bac6c23..061ca586c84f 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -2274,3 +2274,13 @@ _scratch_find_rt_metadir_entry() {
+>  
+>  	return 1
+>  }
+> +
+> +# extract the AG/RTG number from xfs_bmap output
+> +_filter_bmap_gno()
+> +{
+> +	# The AG/RG number is in column 4 of xfs_bmap output
+> +        perl -ne '
+> +                $ag = (split /\s+/)[4] ;
+> +		if ($ag =~ /\d+/) {print "$ag "} ;
+> +        '
+> +}
+> -- 
+> 2.47.2
+> 
+> 
