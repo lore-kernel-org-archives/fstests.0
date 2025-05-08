@@ -1,72 +1,66 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 630BA230272;
-	Wed,  7 May 2025 21:54:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 067E778F37;
+	Thu,  8 May 2025 04:19:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746654864; cv=none; b=LnDq++tplUrX8Bpe6ube+XQZqUD4E6ekrIC+xFqV/YzQGU+qjPyCt7sDv8beM4LlLzkJWx8bcjhObx2jULeZFKiHmxpxJNqz9AVARW77uywDCekbRwMEsrhVlnlcFgd8KTEieP9iI70J16JMCUmmz2QotAg8Fyg9itZVq5k/AIQ=
+	t=1746677964; cv=none; b=Wmfw76WX0s3s0pq/lJK31urQCb434sUhadM7a1eSN5NwpWsR4kx39kvDHy8pLy9iRVGwZ8sOWF7SwwBG6vjkRLJHOZ7xvZ8OwK5SdX87aiNnY/EQt53zVizB2k4kMogLissgGe7oYfAFtpOcpqn5PUSfQE3KS5sFsav3jnIVF4I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746654864; c=relaxed/simple;
-	bh=5sE2l/4MbXmsGI0lx5ensgoQf778s1MpFnfEndtg3ek=;
-	h=Date:Subject:From:To:Cc:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=YVLY2Y9C7S+bkRH77e1q5zjASG5TveP7dTLuXWdFrIZ1Dn9nvX9bRWgIywYO7qrPlKQ8kfAXaKXnKPYZkSsfDJu8jfnzYPrLsMgk0hqBhoHj4K8zwc6gdjTtPdvweFjjj8YUjW+ajwYEakAzMWlHZ5uDO6vUCjNvsQR9JvDwUk4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KEBZ/d2u; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1746677964; c=relaxed/simple;
+	bh=SHYmoMiH/tDcEeEr3FDheswgZZ4C/dn+2QghPF1XOPg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=jQfcw9u7edIG5er2oFpxU/zbg7BNPkszfqCxOtnU9aukh48XpdQiIvPmj7mSveBLZnJtgTpGkjMQoZKu0Xxd27iG4J0ysIyoLQM9sBwkVdAQEwKpNrlrar0Oezmti3RPuPqKhh0xOThOVUzEJCGsZMLv/GIjrPGavh1t4V3WZAo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=FrD2QJR2; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KEBZ/d2u"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CCB68C4CEE2;
-	Wed,  7 May 2025 21:54:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1746654863;
-	bh=5sE2l/4MbXmsGI0lx5ensgoQf778s1MpFnfEndtg3ek=;
-	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
-	b=KEBZ/d2ufP3dyGZzGF9Wcb7dt4e/Vl1eGOhv5cKNVwTulRqJ6YUvF9Il/OM4LVh7D
-	 lRglC5jCFMxS5B0ijwS9uOn6PA7N2fD25GHF9lm4F8I/89ZXnpZSsanOJ50zUkonbo
-	 pG60l2AChYj1+loeGIcVlLHl5+WwP4OordvijVp4MROQk7SkQLDAKQDq34IV7J5OaB
-	 /+2Tjvn1VDvFNEpyQZHKmfI4Bb/Nau9ClJvB/Jc3iXPEnjf5QGW0Xe/KsGELHdghgH
-	 5h/hjDsCW/EmtVD1f4F3Ma/4bQ+e6Ik5K9xQUYh5oL4qQNmruKBdoC6Up6i1qzAko8
-	 11Jijizl2i/QQ==
-Date: Wed, 07 May 2025 14:54:23 -0700
-Subject: [PATCH 2/2] xfs/349: don't run on kernels that don't support scrub
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: djwong@kernel.org, zlang@redhat.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Message-ID: <174665480844.2706436.14436465458967400507.stgit@frogsfrogsfrogs>
-In-Reply-To: <174665480800.2706436.6161696852401894870.stgit@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="FrD2QJR2"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=rWMqtnGLrbtnDgEZgXncbKFThDZXKtwzGSyoV0fIRJY=; b=FrD2QJR2yvaHD8Nco3d8Hepl51
+	3He2tXjrKlo7J105vZErpjmIZAh4mP4yrfypW5EM6IUGpx8KkOtDiXhtYa13CCY+HvOwMESjg4183
+	TFVijH4v1uPveAMgrq84Wxkj+dNEHTq2LgG6/owmxP0v8104IeLopkLksLsqxdFOPri6ly949PFXi
+	vG7LVk2i43lr3C2sgmoCf5M6hVD7eM8d1w6puEbKJ4ywaf68z7LeOacaA8kISOTTZ8BOs+bavkJb6
+	atDOdaBbkkB6nMoxAzZv48z9EDa6KywYi2SP3qKHJXgDDMHRy/oApO+vlMcT+qXFVZ29lAuiA/0nV
+	woPzfEog==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1uCsjC-0000000HHCN-2fhl;
+	Thu, 08 May 2025 04:19:22 +0000
+Date: Wed, 7 May 2025 21:19:22 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/2] fsstress: fix attr_set naming
+Message-ID: <aBwwykf7xaGXHnVD@infradead.org>
 References: <174665480800.2706436.6161696852401894870.stgit@frogsfrogsfrogs>
+ <174665480825.2706436.15433477670941336936.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <174665480825.2706436.15433477670941336936.stgit@frogsfrogsfrogs>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Wed, May 07, 2025 at 02:54:07PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> Back in 2020 I converted attr_set to lsetxattr, but neglected to notice
+> that the attr name now has to have the prefix "user." which attr_set
+> used to append for us.  Unfortunately nobody runs fsstress in verbose
+> mode so I didn't notice until now, and even then only because fuse2fs
+> stupidly accepts any name, even if that corrupts the filesystem.
 
-Don't run this scrub test if the kernel doesn't support scrub.
+Looks good
 
-Fixes: f5f0c11a67a8f5 ("xfs: fuzz every field of every structure")
-Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
----
- tests/xfs/349 |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Reviewed-by: Christoph Hellwig <hch@lst.de>
 
-
-diff --git a/tests/xfs/349 b/tests/xfs/349
-index a68bfee579ac41..a03ab812dc9ec6 100755
---- a/tests/xfs/349
-+++ b/tests/xfs/349
-@@ -16,9 +16,9 @@ _register_cleanup "_cleanup" BUS
- . ./common/populate
- . ./common/fuzzy
- 
--
- _require_scratch
- _require_scrub
-+_require_xfs_stress_scrub
- _require_populate_commands
- 
- echo "Format and populate"
+I wonde if this creates a fallout somewhere else now that we actually
+do xattr ops that don't fail..
 
