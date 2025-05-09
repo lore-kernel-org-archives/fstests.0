@@ -1,67 +1,67 @@
 Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 06677290BBE
-	for <fstests@vger.kernel.org>; Fri,  9 May 2025 13:16:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D9BEEAC7
+	for <fstests@vger.kernel.org>; Fri,  9 May 2025 14:03:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746796616; cv=none; b=YcrnHkqicDzn7KhmznLIyzDrdfPjDpZuAzcegw2Vr9yEQfqKzO/IUXpYCzBZ2o6OWD2GXI1Lq8gjhWxAV7wPbseSYkdw0ky0I9t8khtKnzFmgmbQWaRQEhddw0zK6VS+xBGrsYTJFFpaRPVCjs1Ber1iBevOeE8Cn+rPJ8LZ+CY=
+	t=1746799420; cv=none; b=UA/t1OLMJlAggJYcI5Aj/hMpoXy+VVnhNQZTRVi+UY756fgqVCyp2SZ/YKd667HdudKwGef5xD6NbdlzoBJOE4uHVjlD8d2aMWYb7B+hICu34dX2joEu8XW/bDiq5cXQnRNa0Osqn9xnLo5ielCUcD0dAgA9RG41n3cod7CmMoE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746796616; c=relaxed/simple;
-	bh=hVS5k5WqP3tRFP5rJvHI1zuheItERHdYmgGwylMLZRY=;
+	s=arc-20240116; t=1746799420; c=relaxed/simple;
+	bh=WVKOHxTWlb9glGJSuVnm1yqXBph+FDBil/JGNrxZZKE=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:Mime-Version; b=UGA7y5Ohk08MWCICM1MyG/cyg1wHqxy8kuiOJLeQ8q8R5Kfe4QFuUtpqhDyfFwt0ZF0bgJwRDVXKP1rVJ8D0XfPEnZ5Ss38gqwHydD+OCq3GZM/xAvpmyLh8BBkp4CwJQpkHplEQ3f0YnqhAnwF0/wQvYO/NVEWw5ueYDP7vwLY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=pZwxlrl6; arc=none smtp.client-ip=148.163.158.5
+	 Content-Type:Mime-Version; b=FiL4z5U/F8376uc+bx4+aXnrm0hI7LT8s7amMwejoq2OMboZ2YIPV9p9whvGP/SDnXZV1DEQOVSKC4yoww18pbxq0NJIp77h+V+VG6JMGyDSRzO8yKa1y6FxigMVyityzHp/5Fr0zbN4vIc23q+K0DpL1m8JMzIB+Ebh4/vmM3s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=b4ZvMq29; arc=none smtp.client-ip=148.163.158.5
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="pZwxlrl6"
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="b4ZvMq29"
 Received: from pps.filterd (m0360072.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5494Bvf2031517;
-	Fri, 9 May 2025 13:16:51 GMT
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 549DOdkq031577;
+	Fri, 9 May 2025 14:03:33 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
 	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pp1; bh=YI0MUh
-	mpGh9iOP0ihX9sKUBrajBSNYanc6ertczZ3Xg=; b=pZwxlrl6F4yFnznPZTLSoQ
-	Br1Ne12qxrcILpv0S1n9N1660qKx3ZToivxTuL6VES+FcooRuVxcTYrcDLLnXVZ8
-	vLyvjZBmLj3EgrSxIxJP6xchfQ/jD6HDunnrw7ZEdCpvAdVQ/uA07QLmYcNM0Sqb
-	nNnM77WqhNOdKV4YB2TvxiJIqdGSblzDuEILD3wD/Td6X0vKa6mAyq0gmgC3Fs4Q
-	Z2h7aAQTUZVQavUwcQrYY28EETGRKxrWNxjMXXQIeRxtR1/6Tr90zUlm3e5w2mtP
-	7YBV5JYRRlotDHyJKwhwnRb1wF2BC9H7vApda3NwRw1yP/CVkLyWeDTNgMSGVUrA
+	:message-id:mime-version:references:subject:to; s=pp1; bh=/gH1qo
+	pWX8F8dK8tyC8uMJDIoh7aq2CH2Rz52mEUG/M=; b=b4ZvMq29LWKClcMvQwHjvT
+	7CXvq6w+CuCaEqVxAievrh7X9qoFRqDhDSYM+jvh/awe6RwAvIScpne1Dkl5tjM1
+	VZ02qnhfAOx54kIGgc5pLVqVKZiGk28QjcjNpFMwOsZIHaEdBXOFr4qkNXHnf8lK
+	qz9xhsCWTqgRo90igni/AGP17I5EXlfoQBDG02VrijbVbIiBqWgqxPbdiAzkj6UQ
+	RkDWHsgtSXXs2+N+B43eHmh8vV4HZvFVgaNhGq9RD1xuTi5Isaw1MpMIox/IvDXh
+	VxKOGv0HGwDn1/tq7IOATiM8RIakwVbr8Jz8/5SmXUbkxM30DtiZUJ5VHofiGeGg
 	==
-Received: from ppma12.dal12v.mail.ibm.com (dc.9e.1632.ip4.static.sl-reverse.com [50.22.158.220])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 46h4rwbuqy-1
+Received: from ppma21.wdc07v.mail.ibm.com (5b.69.3da9.ip4.static.sl-reverse.com [169.61.105.91])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 46h4rwc2cw-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 09 May 2025 13:16:50 +0000 (GMT)
-Received: from pps.filterd (ppma12.dal12v.mail.ibm.com [127.0.0.1])
-	by ppma12.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 549B6lFD001304;
-	Fri, 9 May 2025 13:16:50 GMT
-Received: from smtprelay05.fra02v.mail.ibm.com ([9.218.2.225])
-	by ppma12.dal12v.mail.ibm.com (PPS) with ESMTPS id 46dwftumvx-1
+	Fri, 09 May 2025 14:03:32 +0000 (GMT)
+Received: from pps.filterd (ppma21.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma21.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 549Cqfmx002729;
+	Fri, 9 May 2025 14:03:31 GMT
+Received: from smtprelay06.fra02v.mail.ibm.com ([9.218.2.230])
+	by ppma21.wdc07v.mail.ibm.com (PPS) with ESMTPS id 46dxfpbksh-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 09 May 2025 13:16:49 +0000
+	Fri, 09 May 2025 14:03:31 +0000
 Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
-	by smtprelay05.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 549DGmo051773860
+	by smtprelay06.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 549E3Tdq22217110
 	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 9 May 2025 13:16:48 GMT
+	Fri, 9 May 2025 14:03:29 GMT
 Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 4295120072;
-	Fri,  9 May 2025 13:16:48 +0000 (GMT)
+	by IMSVA (Postfix) with ESMTP id 8CC69200BA;
+	Fri,  9 May 2025 14:03:29 +0000 (GMT)
 Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 53F0B20071;
-	Fri,  9 May 2025 13:16:47 +0000 (GMT)
+	by IMSVA (Postfix) with ESMTP id A4BF8200BD;
+	Fri,  9 May 2025 14:03:28 +0000 (GMT)
 Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com (unknown [9.39.25.103])
 	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Fri,  9 May 2025 13:16:47 +0000 (GMT)
-Message-ID: <e8cfb210bc518c1a4295de556283fc354fbfeea9.camel@linux.ibm.com>
-Subject: Re: [PATCH 15/28] check-parallel: de-batch test execution
+	Fri,  9 May 2025 14:03:28 +0000 (GMT)
+Message-ID: <a569622c6609a3f154f259f0ae12a3751eab7a3d.camel@linux.ibm.com>
+Subject: Re: [PATCH 16/28] check-parallel: run sections directly
 From: Nirjhar Roy <nirjhar@linux.ibm.com>
 To: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
 Cc: zlang@kernel.org
-Date: Fri, 09 May 2025 18:46:46 +0530
-In-Reply-To: <20250417031208.1852171-16-david@fromorbit.com>
+Date: Fri, 09 May 2025 19:33:17 +0530
+In-Reply-To: <20250417031208.1852171-17-david@fromorbit.com>
 References: <20250417031208.1852171-1-david@fromorbit.com>
-	 <20250417031208.1852171-16-david@fromorbit.com>
+	 <20250417031208.1852171-17-david@fromorbit.com>
 Content-Type: text/plain; charset="UTF-8"
 X-Mailer: Evolution 3.28.5 (3.28.5-27.el8_10) 
 Precedence: bulk
@@ -72,12 +72,12 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 X-TM-AS-GCONF: 00
-X-Authority-Analysis: v=2.4 cv=QIxoRhLL c=1 sm=1 tr=0 ts=681e0042 cx=c_pps a=bLidbwmWQ0KltjZqbj+ezA==:117 a=bLidbwmWQ0KltjZqbj+ezA==:17 a=IkcTkHD0fZMA:10 a=dt9VzEwgFbYA:10 a=20KFwNOVAAAA:8 a=pGLkceISAAAA:8 a=T_4lWRM-uSXc7GhnJfIA:9 a=QEXdDO2ut3YA:10
-X-Proofpoint-GUID: HJmFRZOo5h3XTo1T7BzjQKq3eZxYhC-d
-X-Proofpoint-ORIG-GUID: HJmFRZOo5h3XTo1T7BzjQKq3eZxYhC-d
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNTA5MDEyOCBTYWx0ZWRfX0+4aWYog+d6q REWftT7CEST5DRr47n973UB1uzXzrqYLrdFeecid4zRz3bBzVEHVBAtWFENdK2PPSKmwOqCR1Ec SX8/a7bS2LXn0LUTrycYdXVMWneMPyrJnKcnTtDJdAmza8tVSmSWrfTiloUfTgv5fkJsY//SIlL
- GwxWGXi3yLB0qb4MNcnAWwlLfai4hKrcFIuXKRyXUXBceH0IG1FI0/Zj/usH6Q4o+AYIqBJBZ2m GVQrXtqMjYsNjWl0MBgSefwaKjoqIf0rwc96hCOtlhjdaD/ySCE/oQv2IshlbjckHCZN8QczXTi Nc44u0YZacsyGOy6RC167xEJEC7wYkqqxL+DkSHL3WxUdRJoP2oPbQ31Yf+3JTi+c3MAqOPIl/n
- jhDKnZQ8V8ace4oUn9mPwpeoS3BrT+qaKAjgM2NUg5sswKt7j2DVsfJzrHdv6Z5QT3IhZqqH
+X-Authority-Analysis: v=2.4 cv=QIxoRhLL c=1 sm=1 tr=0 ts=681e0b34 cx=c_pps a=GFwsV6G8L6GxiO2Y/PsHdQ==:117 a=GFwsV6G8L6GxiO2Y/PsHdQ==:17 a=IkcTkHD0fZMA:10 a=dt9VzEwgFbYA:10 a=20KFwNOVAAAA:8 a=sQHciJR6UTdDH_00TMEA:9 a=QEXdDO2ut3YA:10
+X-Proofpoint-GUID: 2IJV855iPxpwfgRhvrTjD7x1w0edgpNt
+X-Proofpoint-ORIG-GUID: 2IJV855iPxpwfgRhvrTjD7x1w0edgpNt
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNTA5MDEyOCBTYWx0ZWRfXx2at/c811ZQ+ YrvRoerd2mOH5stUwugqzahQK8cAwrPMYz2qmcigSLO2Y6siWQO37MM6XlL1muGfFsXkgzsq415 C5eUy3bMJ3Lm5hhEeebhczR8qxaUQNNf4Q0xBS22wVmbqjxOe8ES4Bodk7MK5ORaDMI9qH0zIXB
+ 7VKcBjvQr5jvcZ6cOeR9s9H7X+ItRibRXpWPYN1jS5qpe3B2lGO2iALNuBpM/W3SOYia86pJIcX x+HInWeF+hCxL0QgCses7C/xaf+//1UM1NBIfJNEttpr3M7+ukx/JNGHvzHLuAIkECh+7etMbqG J0KpKRLaY00fvffk1lD2upiNYuHTFfYzArmIXS/yJRD5yxgguDbBkOuQG2bunLfKzdgkjGbvWQ8
+ ZPuuoSaDGmLUbSJ5jnT7DWcbf8EwqwnyDpyJUFjSQbmOxkXiM7LzdmKEEQBVKo3mbsYV8QBa
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
  definitions=2025-05-09_05,2025-05-08_04,2025-02-21_01
@@ -91,205 +91,242 @@ X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 imposto
 On Thu, 2025-04-17 at 13:00 +1000, Dave Chinner wrote:
 > From: Dave Chinner <dchinner@redhat.com>
 > 
-> To improve how check-parallel runs tests, it needs to run tests
-> directly from the runner threads. We currently batch them based on
-> runtime before we execture any tests, but this results in runner 0
-> always having a test list with runtime longer than the test list for
-> runner N.
+> Currently we pass the section through to check for it to apply and
+> run. However, we do not reconfigure the test or external devices in
+If we are passing ./check -s <s1> -s <s2>, the devices will be reconfigured, right?
+I was able to understand the implementation in this patch but I am not able to figure out the
+reason. Could please explain "results in devices that may be incorrectly configured for the given
+section config we want to run." 
+Basically instead of check issuing multiple ./check -s <s1> -s <s2> ..., what we are doing is we are
+issuing ./check -s <s1> # one section to ./check and each such ./check invocation is being made in
+parallel - but what is wrong with multiple ./check -s <s1> -s <s2> in parallel?
+> check-parallel after the initial setup, so thie results in devices
+> that may be incorrectly configured for the given section config we
+> want to run.
 > 
-> As a result, we can end up with higher numbered runners finishing
-> all their tests before runner 0 has even finished the first test it
-> was given to run. Hence we end up with check-parallel starting with
-> maximum concurrency, but the test concurrency reduces as the run
-> goes on.
+> To fix this, we need to iterate the sections directly in
+> check-parallel and reconfigure the runner device setup between each
+> section that is run. This allows the test device and external
+> devices to be set up correctly for each section config.
 > 
-> To fix this, we need a dynamic test list such that each runner only
-> needs to be scheduled to run a single test at a time. When they have
-> finished the current test, they can pop the next test to run off the
-> time ordered stack and execute that. Hence test runners won't stop
-> running until there are no more tests to run, hence maximising
-> concurrency across the entire test run.
+> As the test list is consumed as we walk it, we need to reset the
+> test list for each section that we run.
 > 
-> To do this, we first need a test list mechanism that is safe for
-> concurrent destacking from multiple test runners. We place the
-> test list in a temporary file, then use file locks to serialise
-> access to the temporary file.
+> We still pass the config section through to check so that it can
+> also source the correct config from the section we are running.
 > 
-> We order the list in the test file from lowest runtime to
-> highest. This means that running tests from longest to shortest
-> runtime destacks from the end fo the file. This means that the next
-> test to run is always the last line fo the file and we can simply
-> use truncation based mechanisms to consume the test during
-> destacking.
-> 
-> Running tests individually via check like this is inefficient as
-> there is a lot of check setup and initialisation overhead.  However,
-> by increasing the utilisation of the test runner threads, overall
-> runtime of check-parallel does not increase with this change.
-> Reduction of this repeated overhead will also be addressed in future
-> patches.
+> We also add section exclusion support so that we skip sections the
+> same way that check currently does.
 > 
 > Signed-off-by: Dave Chinner <dchinner@redhat.com>
 > ---
->  check-parallel | 75 +++++++++++++++++++++++++++++---------------------
->  1 file changed, 43 insertions(+), 32 deletions(-)
+>  check-parallel         | 118 ++++++++++++++++++++++++++++-------------
+>  common/config-sections |   3 ++
+>  2 files changed, 84 insertions(+), 37 deletions(-)
 > 
 > diff --git a/check-parallel b/check-parallel
-> index 6fc86fb92..e2cf2c8d0 100755
+> index e2cf2c8d0..23d29c7a8 100755
 > --- a/check-parallel
 > +++ b/check-parallel
-> @@ -18,6 +18,7 @@ run_section=""
+> @@ -15,6 +15,7 @@ runner_list=()
+>  runtimes=()
+>  show_test_list=
+>  run_section=""
+> +exclude_section=""
 >  iam="check-parallel"
 >  
 >  tmp=/tmp/check-parallel.$$
-> +test_list="$tmp.test_list"
+> @@ -119,7 +120,8 @@ while [ $# -gt 0 ]; do
 >  
->  . ./common/exit
->  . ./common/test_names
-> @@ -150,9 +151,6 @@ if [ -d "$basedir/runner-0/" ]; then
->  	prev_results=`ls -tr $basedir/runner-0/ | grep results | tail -1`
->  fi
+>  	-f)	is_supported_fstype $2 ; export FSTYP=$2; shift ;;
 >  
-> -_tl_prepare_test_list
-> -_tl_strip_test_list
-> -
->  # grab all previously run tests and order them from highest runtime to lowest
->  # We are going to try to run the longer tests first, hopefully so we can avoid
->  # massive thundering herds trying to run lots of really short tests in parallel
-> @@ -198,22 +196,22 @@ if ! $_tl_randomise -a ! $_tl_exact_order; then
->  	fi
->  fi
+> -	-s)	run_section="$run_section -s $2"; shift ;;
+> +	-s)	run_section="$run_section $2"; shift ;;
+> +	-S)	exclude_section="$exclude_section $2"; shift ;;
 >  
-> -# split the list amongst N runners
-> -split_runner_list()
-> +# Grab the next test to be run from the tail of the file.
-> +# Returns an empty string if there is no tests remaining to run.
-> +# File operations are run under flock so concurrent gets are serialised against
-> +# each other.
-> +get_next_test()
+>  	-*)	usage ;;
+>  	*)	# not an argument, we've got tests now.
+> @@ -202,11 +204,12 @@ fi
+>  # each other.
+>  get_next_test()
 >  {
-> -	local ix
-> -	local rx
-> -	local -a _list=( $_tl_tests )
-> -	for ((ix = 0; ix < ${#_list[*]}; ix++)); do
-> -		seq="${_list[$ix]}"
-> -		rx=$((ix % $runners))
-> -		if ! _tl_expunge_test $seq; then
-> -			runner_list[$rx]+="${_list[$ix]} "
-> -		fi
-> -		#echo $seq
-> -	done
-> +	local test=
-> +
-> +	flock 99
-> +	test=$(tail -1 $test_list)
-> +	sed -i "\,$test,d" $test_list
-> +	flock -u 99
-> +	echo $test
+> +	local test_file="$test_list.$1"
+>  	local test=
+>  
+>  	flock 99
+> -	test=$(tail -1 $test_list)
+> -	sed -i "\,$test,d" $test_list
+> +	test=$(tail -1 $test_file)
+> +	sed -i "\,$test,d" $test_file
+>  	flock -u 99
+>  	echo $test
+>  }
+> @@ -236,10 +239,34 @@ _destroy_loop_device()
+>          losetup -d $dev || _fail "Cannot destroy loop device $dev"
 >  }
 >  
+> -runner_go()
+> +run_tests()
+>  {
+> +	local section="$1"
 > +
->  _create_loop_device()
->  {
->          local file=$1 dev
-> @@ -240,6 +238,8 @@ _destroy_loop_device()
+>  	exec 99<>$tmp.test_list_lock
 >  
->  runner_go()
->  {
-> +	exec 99<>$tmp.test_list_lock
+> +	local test_to_run=$(get_next_test $section)
+> +
+> +	# Run the tests in it's own mount namespace, as per the comment below
+> +	# that precedes making the basedir a private mount.
+> +	#
+> +	# Similarly, we need to run check in it's own PID namespace so that
+> +	# operations like pkill only affect the runner instance, not globally
+> +	# kill processes from other check instances.
+> +	while [ -n "$test_to_run" ]; do
+> +		echo -n " $test_to_run "
+> +		unset FSTESTS_ISOL
+> +		if ! _tl_expunge_test $test_to_run; then
+> +			tools/run_privatens ./check -s $section $test_to_run >> $me/log 2>&1
+> +		fi
+> +
+> +		test_to_run=$(get_next_test $section)
+> +	done
+> +}
+> +
+> +runner_go()
+> +{
 > +
 >  	local id=$1
 >  	local me=$basedir/runner-$id
 >  	local _test=$me/test.img
-> @@ -250,6 +250,7 @@ runner_go()
+> @@ -250,7 +277,7 @@ runner_go()
 >  	local _scratch_log=$me/scratch-log.img
 >  	local _logwrites=$me/logwrites.img
 >  	local _results=$me/results-$2
-> +	local test_to_run=$(get_next_test)
+> -	local test_to_run=$(get_next_test)
+> +	local section=$3
 >  
 >  	mkdir -p $me
 >  
-> @@ -291,7 +292,15 @@ runner_go()
->  	# Similarly, we need to run check in it's own PID namespace so that
->  	# operations like pkill only affect the runner instance, not globally
->  	# kill processes from other check instances.
-> -	tools/run_privatens ./check $run_section -x unreliable_in_parallel --exact-order ${runner_list[$id]} >> $me/log 2>&1
-> +	while [ -n "$test_to_run" ]; do
-> +		echo "Runner $id: running test $test_to_run"
-> +		unset FSTESTS_ISOL
-> +		if ! _tl_expunge_test $test_to_run; then
-> +			tools/run_privatens ./check $run_section $test_to_run >> $me/log 2>&1
-> +		fi
-> +
-> +		test_to_run=$(get_next_test)
-> +	done
+> @@ -286,21 +313,7 @@ runner_go()
+>  
+>  #	export DUMP_CORRUPT_FS=1
+>  
+> -	# Run the tests in it's own mount namespace, as per the comment below
+> -	# that precedes making the basedir a private mount.
+> -	#
+> -	# Similarly, we need to run check in it's own PID namespace so that
+> -	# operations like pkill only affect the runner instance, not globally
+> -	# kill processes from other check instances.
+> -	while [ -n "$test_to_run" ]; do
+> -		echo "Runner $id: running test $test_to_run"
+> -		unset FSTESTS_ISOL
+> -		if ! _tl_expunge_test $test_to_run; then
+> -			tools/run_privatens ./check $run_section $test_to_run >> $me/log 2>&1
+> -		fi
+> -
+> -		test_to_run=$(get_next_test)
+> -	done
+> +	run_tests $section
 >  
 >  	wait
 >  	sleep 1
-> @@ -320,20 +329,32 @@ cleanup()
->  	umount -R $basedir/*/test 2> /dev/null
->  	umount -R $basedir/*/scratch 2> /dev/null
->  	losetup --detach-all
-> +	rm -rf $tmp.*
+> @@ -322,6 +335,44 @@ runner_go()
+>  
 >  }
 >  
->  trap "cleanup; exit" HUP INT QUIT TERM
+> +run_section()
+> +{
+> +	local section="$1"
+> +	local now="$2"
+> +	local i
+> +
+> +	echo $run_section |grep -qw $section || return
+> +	echo $exclude_section |grep -qw $section && return
+> +
+> +	echo
+> +	echo Running section: $section
+> +	echo
+> +
+> +	parse_config_section $section
+> +
+> +	# set up consumable test list first
+> +	cp $test_list $test_list.$section
+> +	for ((i = 0; i < $runners; i++)); do
+> +		runner_go $i $now $section &
+> +	done
+> +	wait
+> +
+> +	echo
+> +	echo Section: $section
+> +	echo -n "Tests run: "
+> +	grep Ran $basedir/*/log | sed -e 's,^.*:,,' -e 's, ,\n,g' | sort | uniq | wc -l
+> +
+> +	echo -n "Tests _notrun: "
+> +	grep "^Not run" $basedir/*/log | uniq | sed -e 's,^.*:,,' -e 's, ,\n,g' -e 's,^\n,,' | wc -l
+> +
+> +	echo -n "Failure count: "
+> +	grep Failures: $basedir/*/log | uniq | sed -e "s/^.*Failures://" -e "s,\([0-9]\) \([gx]\),\1\n \2,g" |wc -l
+> +	echo
+> +
+> +	echo Ten slowest tests - runtime in seconds:
+> +	cat $basedir/*/results-$now/check.time | sort -k 2 -nr | head -10
+> +}
+> +
+>  cleanup()
+>  {
+>  	killall -INT -q check
+> @@ -336,6 +387,8 @@ trap "cleanup; exit" HUP INT QUIT TERM
 >  
 >  _config_setup_parallel
 >  
-> -split_runner_list
-> +_tl_setup_exclude_group "unreliable_in_parallel"
-> +_tl_prepare_test_list
-> +_tl_strip_test_list
+> +run_section=${run_section:="$HOST_OPTIONS_SECTIONS"}
 > +
-> +if ! $_tl_randomise -a ! $_tl_exact_order; then
-> +	if [ -f $basedir/runner-0/$prev_results/check.time ]; then
-> +		time_order_test_list
-> +	fi
-> +fi
-> +
-> +# reverse the order of tests so that the get_next_test() can pull from the file
-> +# tail rather than the head.
-> +echo $_tl_tests |sed -e 's/ /\n/g' | tac > $test_list
->  if [ -n "$show_test_list" ]; then
->  	echo Time ordered test list:
-> -	echo $_tl_tests
-> -	echo
-> +	cat $test_list
-> +	exit 0
-_exit 0?
-
-Looks good otherwise. I think this change will extract the maximum concurrency since we are kind of
-uniformly distrubuting the long running tests instead of flooding runner-0 with the top n slow
-running tests.
-Reviewed-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
---NR
->  fi
->  
-> -
->  # Each parallel test runner needs to only see it's own mount points. If we
->  # leave the basedir as shared, then all tests see all mounts and then we get
->  # mount propagation issues cropping up. For example, cloning a new mount
-> @@ -349,20 +370,10 @@ mount --make-private $basedir
+>  _tl_setup_exclude_group "unreliable_in_parallel"
+>  _tl_prepare_test_list
+>  _tl_strip_test_list
+> @@ -369,23 +422,14 @@ fi
+>  mount --make-private $basedir
 >  
 >  now=`date +%Y-%m-%d-%H:%M:%S`
->  for ((i = 0; i < $runners; i++)); do
+> -for ((i = 0; i < $runners; i++)); do
+> -	runner_go $i $now &
+> -done;
+> -wait
 > -
-> -	if [ -n "$show_test_list" ]; then
-> -		echo "Runner $i: ${runner_list[$i]}"
-> -	else
-> -		runner_go $i $now &
-> -	fi
+> -echo -n "Tests run: "
+> -grep Ran $basedir/*/log | sed -e 's,^.*:,,' -e 's, ,\n,g' | sort | uniq | wc -l
 > -
-> +	runner_go $i $now &
->  done;
->  wait
+> -echo -n "Tests _notrun: "
+> -grep "^Not run" $basedir/*/log | uniq | sed -e 's,^.*:,,' -e 's, ,\n,g' -e 's,^\n,,' | wc -l
+> -
+> -echo -n "Failure count: "
+> -grep Failures: $basedir/*/log | uniq | sed -e "s/^.*Failures://" -e "s,\([0-9]\) \([gx]\),\1\n \2,g" |wc -l
+> -echo
+> -
+> -echo Ten slowest tests - runtime in seconds:
+> -cat $basedir/*/results-$now/check.time | sort -k 2 -nr | head -10
+> +for section in $HOST_OPTIONS_SECTIONS; do
+> +	run_section $section $now
+> +	if [ "$sum_bad" != 0 ] && [ "$istop" = true ]; then
+> +		interrupt=false
+> +		status=`expr $sum_bad != 0`
+> +		exit
+> +	fi
+> +done
 >  
-> -if [ -n "$show_test_list" ]; then
-> -	exit 0
-> -fi
-> -
->  echo -n "Tests run: "
->  grep Ran $basedir/*/log | sed -e 's,^.*:,,' -e 's, ,\n,g' | sort | uniq | wc -l
+>  echo
+>  echo Cleanup on Aisle 5?
+> diff --git a/common/config-sections b/common/config-sections
+> index 28bd11bab..c0ea097e8 100644
+> --- a/common/config-sections
+> +++ b/common/config-sections
+> @@ -436,6 +436,9 @@ _config_setup_parallel()
+>  		exit 1
+>  	fi
 >  
+> +	# strip check-parallel from the sections to run
+> +	export HOST_OPTIONS_SECTIONS=`echo $HOST_OPTIONS_SECTIONS | sed -e "s/$iam//"`
+> +
+>  	grep DEV $HOST_OPTIONS |grep -qv SIZE
+>  	if [ $? -ne 1 ]; then
+>  		echo "$iam config file has devices defined"
 
