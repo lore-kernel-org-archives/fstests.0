@@ -1,63 +1,61 @@
-Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
+Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A164A18DB01;
-	Fri,  9 May 2025 17:00:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B0162356C9;
+	Fri,  9 May 2025 17:05:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746810041; cv=none; b=RVtGMEy4XqyucNOnfm680MhhVxuZ4YLLSJGoJ0y57hDUfVE8AJMgOa53kLs9xgj6iybdoMR50m5MT1Zs77okEqpzXd3ZzqBeJrTlyttxWrZuxzFfj5xE74wEfJLOB9yGiFgZqoC1mLBDOEvFWqRQgxpviYUZamJg9vuMdZzm6Ks=
+	t=1746810304; cv=none; b=FxhqkRN8xdGUMHUwmlozUqVQjMtVWYVctKYyXtZKGZiJg1CfJzAoFLUAzOBPHpeYr7CunVkC5ExR1iLld0ZygDe6agdScxgJSpCzNly1efYThUb8fLiHy23lYC6bNIMuUu26cLYr/zMmfUtHZInbK8I8cCzS+cyB/PgtP+YpGVs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746810041; c=relaxed/simple;
-	bh=iPkQ+ecjDOtXEZ3Zpsc2iAj7hmoA21GF7Dx7dVZUYjs=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=Fp5hhRtCHYTC7K+H05GKTJEQlDzG9kFmQLtc0+pr3v3VRCcrSAOEKTP8r/2H025l8O1rXS+JSJTDuKHpHBvd2ohZG4UNnJsVkL1TzKG74QoDgfE/riTpFrZG0ntmt/psb4HoHADB+nF3aoKdZf/fHRmdHQTgA/oPc75eeVtvT48=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=bVre9uNT; arc=none smtp.client-ip=209.85.128.52
+	s=arc-20240116; t=1746810304; c=relaxed/simple;
+	bh=8tW+WuS1p5FHuL3ccTwj5DVOuzBg2D5n++L5sVCUNWE=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=VblDKRGHHD+gkqyQ7zGtD0lTmmww6nLR4394F+Kt5AfjIAu3Wo9UFVAtl67fPZISRjc+SMCbaHBbPxRHpJvKt0xtYmAPRZI1EiXG9+F5Ivx95GtlX6EuZsfKVCs0wXGlaytPFiY/FUmQ2F24+BvHBcz/LE1VkjkHN3puC4DewR4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PIxkQsK8; arc=none smtp.client-ip=209.85.221.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bVre9uNT"
-Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-43cfba466b2so25956095e9.3;
-        Fri, 09 May 2025 10:00:39 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PIxkQsK8"
+Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-3a0b291093fso2164253f8f.0;
+        Fri, 09 May 2025 10:05:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1746810038; x=1747414838; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=yAVKoix/cndXPJw98uEZedanCP215D5wDUnhJjpQjGM=;
-        b=bVre9uNT8nfVrtiVrNUIuW63ddqFTWrbfSka7k4caHfVdI02RW7HGRrG8YLE5McByU
-         8hGGmzpSQi4ZSoWS7eIjNPWj9Kmm6buzXZJ6Jwc1wsMy12Sm691kEMMnb0GDwzufuWvH
-         4q5zpzxUwCCsXlQMPZHUtt3NWp16K+WlUrKoqc36Qx83jHSUeYd1QfbAnjGn77e7UfRp
-         4pHNT6VpVBDBwYVAvd3IIUTQOLx9UFcmrNMJvhiC1AGRdQWmbH0kkiKBswloY5ZXiTge
-         AgyjO/ka6TvOeIxWM7jxmB75iyJcLhuklhm+Ol/Dqq2Pxa9ZTpufTU5Q6rM1UbGD0jx0
-         Ix/w==
+        d=gmail.com; s=20230601; t=1746810300; x=1747415100; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=mqSUkN2e/EmFg95ho5ANyLZCoYV4Bj2CBTrvqkkXVwc=;
+        b=PIxkQsK8vIWdoad9mZYOu0mbd+z4xV8d2jn4Z+Q44EofG4KFSvSU2SDM9f8IuS21wz
+         qV54hTT6J6rWht9IxvZOVj58PLMQkqjgDd5q0GNLfXpqHsODo7lwhSt8VlOyhdDQ1Q6q
+         tLNRgpoUtTm3yUE+vnrxbfRn/OTYIF5e5FidkV0d1B3S2dgriO8KPseApd3DIhLfWTtN
+         AlCu0D/0NA2cc7GGUHV3HiP2K+XeFCETxn6ndPAObHvNzAqEQQNsH0uxqEmfNtuj+Lyn
+         FtipLr8oFfimwoS9gyozX9U/bHhpS2EJK1RdfRRQoECgC9n4V9tm2EnWRubXB054UWDQ
+         wAiw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746810038; x=1747414838;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=yAVKoix/cndXPJw98uEZedanCP215D5wDUnhJjpQjGM=;
-        b=bhIsR4Q6JEYYIsBQWZhgsvzUg5hGdDs05+LzwCxdVD22q9IiR3Bf7ZlmR6SFdvtraA
-         8PIIyvcSq/axxKNeMFyNnyMq/VYFhpuBQ6W8fWI2EEE7C+eWGkHONarF9xvTEti2oflL
-         AR5h2qs0o8aVm7i0rwBLqeRTrQTBGjy1eDDVDDQ9pOC6h3JM+XneU+sM2f9u2BoWiM2J
-         aG/3vtY4irRoe5WnGPxaJIc3YzWN/mjRzH4c8QdqpLCncNTEx9B5qbwUqS7+l9CinKgO
-         QjSymMfNXtoLh2awSYyOqnqs22KeNvu+8LcN9eCyUYAmUBwgbx2LT9xxLlyEBLVH8SA1
-         kJ4Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWInurnC+RlWHK7OQpYlfm8GEuFVuAlcRkWn8OfD/o752nVlBuvGpm0QrLgBQm36NP4Yk84gU6ZsR6sAlZEGg==@vger.kernel.org, AJvYcCWUHl6x+GxO65V5ZHczjszFL0N1e6ugrteITNp9ExxquM5YKvrHC6DMEs1bvR0sW4GVcXDImhhg@vger.kernel.org
-X-Gm-Message-State: AOJu0YzBZR+9Sz/koeT80H+jK2uyipGsQDIsb0A/8qxKDi1iuKJAJnuX
-	LDzUqqQkzNcLliPkSvRAvbJobFf7szHropbTqWJnlYMe5+XUryvx
-X-Gm-Gg: ASbGncuHTU1SejTYXy7Z4MaiYU5onnwl3ulyo1zmKSm6lY2gKjcxXH2DryHQ7PwX1jz
-	bglLmuY4KWFs5Z4w1sX886vX11BshOo2eEooA9Z0FQ369RCjr81jbzkp4q6SyicMhkuSlbzlUco
-	HeyCrWw2CatCBgJBiVQ0LMMrATLXutq0Bdci5nJO4Kr6kCbclTxNmrEJVu0T5HeQVbxHP9fXtGe
-	s1tVkaCpEUoyzNNuisnOxPqLbwOfFLPP6glB6bQyvHYY/2MTIdWguEBOsdGWntQ/f3GCtt2Ht8/
-	BixrQe9Ngdw54AQ1Olh+SXV7EON/FD7PrLCsA/vwhjo67cMB/53/EDtJ6fEBRywCFDE+4gfm3WJ
-	fPM1bjiMiB7c7I9YBJ3hUYRfAGSlyU51DnhdgNSvPfmdNcdeS
-X-Google-Smtp-Source: AGHT+IGNFnkbzgtBaeriOgL6J6+3z6Dx+GvTBMqJFMEXrMybGif0JeyppcT1BLcbmOlnGoegr78Buw==
-X-Received: by 2002:a05:600c:3e08:b0:442:dcdc:41c8 with SMTP id 5b1f17b1804b1-442dcdc420amr1087285e9.19.1746810037615;
-        Fri, 09 May 2025 10:00:37 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1746810300; x=1747415100;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=mqSUkN2e/EmFg95ho5ANyLZCoYV4Bj2CBTrvqkkXVwc=;
+        b=nyPtmmVz/O5q4KJ/L8Mg9pD+lhcvxi+JaMZVd4dN4NRwA+hDJHV3BzZsZ9X6/p1mss
+         3LfRxVDgWdXk/d8eT5B/niN9bG7vC0HWSyE5NHrioKonT9j482DQkSTm8CB072oKUHew
+         gf6LmMo0jXpeNNlY8LOaFXLLpwiHBoaDjzZPqmTJVx69RZK2hH8A6ZFLEJZRnUAIXkZ6
+         2FiI0vQVQTRIo09iRUdLqrLNTPWw2nbAOAz8A9NW6XcmwxpGgOhPon8AalZkQaoPnt9o
+         dvjkOds9lvbya5HMp0+jt0rILKFLdNMShUDJgd5dEVArRj6TL8SHJtW3E9CaBMdjbHJf
+         j0BQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUjvYAZrP67r0gHjxIZlMcqCbYq2AhsNkuXpE71dmsEnyDxuhHmLj8BYY0ULaOXEVEzWxenFUMD@vger.kernel.org, AJvYcCVNRuLgDMxWay9jhcDcFaZ/5zwjmYCHIfPUgaL+yCw0h/mHTfiqqe5Aapotfp1Oc3rZj644QiYA8a2BAvZsUw==@vger.kernel.org
+X-Gm-Message-State: AOJu0YyzjzsGYQZhCyU/anteFjGsJaxqPeJqddLb/JlM/osaqOEYiTy6
+	8z0euHTZwlQe68nQL52lyohz71IrLyVyjxOF6JksiX3OpgiocZUB
+X-Gm-Gg: ASbGnctULpJXV5PttJ1mIAxOa/Fi8AQkvi4G0Ko8srQSkewyJxjJIGFyGSZyLPxK/qU
+	Tb3LON1qPNeOnofKP1KunYTJzTsuOfEN5o/gMxqCHeUkvBD+JqSO28laVYp6mhAXu1optWV2bW+
+	rNvBHQ0QnF/NEULpya5OziVf453ZdAqVOcE/Z6dnKxF656d6zDaPEYavUiqNiUa1x227EfWrfGk
+	zDyEfbK0I7mBW7vjYP+1SuRSF/sgqQlWFw+4uZ3TdOmfKJG44use1g/MVD5eBTlH1D44pFfc5BV
+	jFaWY5sdk5w3JfgONvKilF7raaqdjVHUKUoWB6I+QPJwz4Qg18qBDogRegrZgXmi9PePvzmKczy
+	Wi+kytRRxsviBjfrAqPGJTYc150QbXHjAq3c8fA==
+X-Google-Smtp-Source: AGHT+IGSHvQRpcyScWvopVlTgV8BNEm0pDp9ltDuZKynvfwB5OPlM1MHWlCOB67AD0cm7FPg8YjvIg==
+X-Received: by 2002:a05:6000:1789:b0:3a0:8c01:d463 with SMTP id ffacd0b85a97d-3a1f6a1b3a7mr3063898f8f.9.1746810300189;
+        Fri, 09 May 2025 10:05:00 -0700 (PDT)
 Received: from amir-ThinkPad-T480.arnhem.chello.nl (92-109-99-123.cable.dynamic.v4.ziggo.nl. [92.109.99.123])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-442cd3b7d2bsm78469245e9.36.2025.05.09.10.00.37
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3a1f5a2ce36sm3813080f8f.71.2025.05.09.10.04.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 09 May 2025 10:00:37 -0700 (PDT)
+        Fri, 09 May 2025 10:04:59 -0700 (PDT)
 From: Amir Goldstein <amir73il@gmail.com>
 To: Zorro Lang <zlang@redhat.com>
 Cc: Aleksa Sarai <cyphar@cyphar.com>,
@@ -67,12 +65,10 @@ Cc: Aleksa Sarai <cyphar@cyphar.com>,
 	Jeff Layton <jlayton@kernel.org>,
 	fstests@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org
-Subject: [PATCH v2 2/2] open_by_handle: add a test for connectable file handles
-Date: Fri,  9 May 2025 19:00:33 +0200
-Message-Id: <20250509170033.538130-3-amir73il@gmail.com>
+Subject: [PATCH RESEND v2 2/2] open_by_handle: add a test for connectable file handles
+Date: Fri,  9 May 2025 19:04:56 +0200
+Message-Id: <20250509170456.538501-1-amir73il@gmail.com>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20250509170033.538130-1-amir73il@gmail.com>
-References: <20250509170033.538130-1-amir73il@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -92,8 +88,8 @@ do not really get unmounted in mount cycle like tmpfs, so skip this test.
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
  tests/generic/777     | 70 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/777.out |  5 ++++
- 2 files changed, 75 insertions(+)
+ tests/generic/777.out |  4 +++
+ 2 files changed, 74 insertions(+)
  create mode 100755 tests/generic/777
  create mode 100644 tests/generic/777.out
 
@@ -175,15 +171,14 @@ index 00000000..d8d33e55
 +exit
 diff --git a/tests/generic/777.out b/tests/generic/777.out
 new file mode 100644
-index 00000000..c0617681
+index 00000000..f2dd33c3
 --- /dev/null
 +++ b/tests/generic/777.out
-@@ -0,0 +1,5 @@
+@@ -0,0 +1,4 @@
 +QA output created by 777
 +test_file_handles after cycle mount
 +test_file_handles after rename parent
 +test_file_handles after rename grandparent
-+test_file_handles after move to new parent
 -- 
 2.34.1
 
