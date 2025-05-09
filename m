@@ -1,343 +1,196 @@
-Received: from mail-ej1-f47.google.com (mail-ej1-f47.google.com [209.85.218.47])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38C1F21D5B6;
-	Thu,  8 May 2025 20:38:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF5A979FE
+	for <fstests@vger.kernel.org>; Fri,  9 May 2025 05:37:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746736736; cv=none; b=PqyXEJrE5ODM/PZUaJZbpQsD184zNlvy5jBi9FBIU0mSIafAdm+QaazxxgPvwMNP5azETFSPNbGQyy0vWe73/ZyOGfUJ1IzgpOosxRoRdT+/F1EfO196t0tyQC5+QsvzLpVGUwlN9lJjoeXgcLmqswYhXroWwh2bgFk+3rJ5RM0=
+	t=1746769038; cv=none; b=cSpcFKUt/FqX5pfIzSaiFuF/3kV1Ojd7HVr9y0fQhGfdF11YMoxuKcz4OOlRJh9IHGYf4MNQUt/qGMDbp7N4djBivfHToPU8n65MWvYAU4qqsemq5sWzoWzfc3xRqrWP100CVie4Rh+D/d8Y2b/QJOf0ltL540dnhN9pwjcY+9o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746736736; c=relaxed/simple;
-	bh=/NhTmPsq03LOU2Ndupk1HqnkO92bDtzORaW6K8VXNHg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=iNfpMFaruQm+I/RkEG1G7k/1pAuBA2tMpVUPRWAPv/dVX2rH9WwACZRr9q/Hslmok6Vmnc1pYk2OtZdZGPJZWBi6pblLzuyjrQc3M/slVKmMSMpn/5YIlMyzEVwmYaQF0pkdxYVovkjGSEaARB3HUkwPiTjCUnOmDdBueS6R0MQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=EKFYvyKz; arc=none smtp.client-ip=209.85.218.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1746769038; c=relaxed/simple;
+	bh=OztqAdof0+4d44BR5LJBLQgw7G0EwuTpechlDVXSr7Y=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=BFMzpE57Ax/7txvvQR1NmaJdjqQ6Kg+OzpDxKbrgq5h6+J0yp1G7BAL3UofkmfwNqGAhKn0brcMDKl8J8dFl9SL9r8SFulzVYNdTdQRt/+MG88/c+P9n76UoQ8DHk2fv66cABo3204Rvc/n9W7L0VOYlFuiZ5ymr0v7OlmTieRk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=tenmgMZl; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=tenmgMZl; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EKFYvyKz"
-Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-ad216a5a59cso56669566b.3;
-        Thu, 08 May 2025 13:38:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1746736732; x=1747341532; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=XI451Xqo7kLwNWLFULFzz06ciaAE0AGPeH3OCBsLZVw=;
-        b=EKFYvyKzxNY6lMVaki+pdVNONqvXLhHU1MnHGaYBoxKDXu32N/TrhbH9dMh2H7R5cK
-         6D0oidxHm+iH99eWu+iyoHq0+Xhpx9+OE+vNRidw6fbQ3fHx8ayXubtMTrNELCEGvsK+
-         LVODFO4qmLrzcIK8G25AeSv2n3cZk8GZTQyFDbYfmW3lpK3ttxOMKRfkwUPaArYG8NBD
-         MpsRe+bV5wBcB2WPajvizacwFFz4CiNrLweZ8KifaKe8Fcc/MdSxEYQlH+iDwpUvjiyX
-         gtQkT8366emhc1x/29mYJR8PsxdW8SgCnH8nNAEnbCL9rbCURty9KgQhqAE6RGf9LDkY
-         lmLQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746736732; x=1747341532;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=XI451Xqo7kLwNWLFULFzz06ciaAE0AGPeH3OCBsLZVw=;
-        b=PTuasNMSOaKIHl1Kvyngv97E9UzMZ/leD/5RdhxF4h2A31OulA8CJv8rR3FwF2Bwjx
-         G/uwxY/D0KID/sWk289BLGvPMZSj0mqcmHxbrPqLctq6UW7JRl59tCmt160k9vTz9KQC
-         riy6geKMaLSX1dKuUq3t4lbN9alMJMzFnHJqxZMO4YLcp4zyPplDpseTLPRqLjLKpfXL
-         rZiENXDlmW8hmLfvsZn2YfWLoYaaW1Y3CG90BiCMtksx94SdXlx2dVqEIdvr9X22rvIb
-         nuOdOnWZi/he5Rd7Vt3BPYyIdxJSk0VnecCeYhfkm+NlYIbTfC5O2PB4h4lXLrmvxojH
-         LBOw==
-X-Forwarded-Encrypted: i=1; AJvYcCWEV86LPXs8Q7GeJGp8hBU/QcwWrkdmVf93TNlbOSFSs1rogZZ1KQ9FMoUOAg8ClfX6IPbIvJHmwTioVByBcQ==@vger.kernel.org, AJvYcCWaAonQr+ZqXLf1Wp1s0mvR5W1vRlz3rX035WIJ04LZbcXUXYmUHH50KbGefkDLCZSBXPnhzwvT@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw8AIGOZdlpnm2xYRy986jpaENThlTVD7ZH+h5Yu3fzW966dnAt
-	dALZ5wnYOzv9fTq7wMFRDvjjOZViWcA0ZBORIMNIvIhIEgXz47eq/+/KLaTC9CcOWilEjRv4xHW
-	go5TethueFgEHWlX+ZFp3QrX1IRU=
-X-Gm-Gg: ASbGnctxMEks2eZd0rrM6193rFe03DjWpy9XsrarEPS8CFiM/O0mHqSNRDq7Qsqv9DE
-	LeAc4xzA6J619v8hR85ihZ6piTZOnAoICuWvOV6/kVGKywGYz6gR6tb4oBjVoy1Edi8iif8hg4Q
-	uLvYXIdW1phxgnK5VLMLJ6Wg==
-X-Google-Smtp-Source: AGHT+IFzFrHX1p4irUKiYxOsN96aNfbOuXxlA3s7oefQoP35vL7h5Ns3xHMcXI/JqE3JAzZppvSCzyGCFvh3/CvnQW0=
-X-Received: by 2002:a17:907:7f21:b0:ac1:ea29:4e63 with SMTP id
- a640c23a62f3a-ad219002422mr86746566b.26.1746736731947; Thu, 08 May 2025
- 13:38:51 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="tenmgMZl";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="tenmgMZl"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 7DEB31F38A;
+	Fri,  9 May 2025 05:37:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1746769033; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=epVwbicIwOBla5zRcwbqv8Ew4j6OkHnF9FuOJuDUv1Q=;
+	b=tenmgMZlO/GLZ8lex9CdFeO7guWMJi2pWWOkWUi3eZNrV+lG52b67MhdgpgyQpFoWK1Xuc
+	Xw4PdBn8DjAjPD4ViXLem8jA6JqXnu+NA0xEXXkUdnqS9urbDwmAxUXCZHNcsW74Km+15e
+	NTff0GiPORmTpWNSOybuqkLfSDphuNE=
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1746769033; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=epVwbicIwOBla5zRcwbqv8Ew4j6OkHnF9FuOJuDUv1Q=;
+	b=tenmgMZlO/GLZ8lex9CdFeO7guWMJi2pWWOkWUi3eZNrV+lG52b67MhdgpgyQpFoWK1Xuc
+	Xw4PdBn8DjAjPD4ViXLem8jA6JqXnu+NA0xEXXkUdnqS9urbDwmAxUXCZHNcsW74Km+15e
+	NTff0GiPORmTpWNSOybuqkLfSDphuNE=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 77C8A13515;
+	Fri,  9 May 2025 05:37:12 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id qznoDoiUHWhKKAAAD6G6ig
+	(envelope-from <wqu@suse.com>); Fri, 09 May 2025 05:37:12 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] fstests: btrfs/020: use device pool to avoid busy TEST_DEV
+Date: Fri,  9 May 2025 15:07:09 +0930
+Message-ID: <20250509053709.100446-1-wqu@suse.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250409115220.1911467-1-amir73il@gmail.com> <20250409115220.1911467-3-amir73il@gmail.com>
- <20250508193800.q2s4twfldlctre34@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To: <20250508193800.q2s4twfldlctre34@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 8 May 2025 22:38:39 +0200
-X-Gm-Features: ATxdqUGH2WWhBzVn6NbMbi0wtRICdDMPY6DRDExoBEHr7eR4DcgZmkxKEa45ZCQ
-Message-ID: <CAOQ4uxjZnL5AMwwc06tiGJGbkjjW+88jDGudtp-MLkkPdzHT0g@mail.gmail.com>
-Subject: Re: [PATCH 2/2] open_by_handle: add a test for connectable file handles
-To: Zorro Lang <zlang@redhat.com>
-Cc: Aleksa Sarai <cyphar@cyphar.com>, Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, 
-	Chuck Lever <chuck.lever@oracle.com>, Jeff Layton <jlayton@kernel.org>, fstests@vger.kernel.org, 
-	linux-fsdevel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-Spam-Level: 
+X-Spam-Flag: NO
+X-Spamd-Result: default: False [-2.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_CONTAINS_FROM(1.00)[];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	RCPT_COUNT_TWO(0.00)[2];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:email,imap1.dmz-prg2.suse.org:helo];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_TLS_ALL(0.00)[]
+X-Spam-Score: -2.80
 
-On Thu, May 8, 2025 at 9:38=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote:
->
-> On Wed, Apr 09, 2025 at 01:52:20PM +0200, Amir Goldstein wrote:
-> > This is a variant of generic/477 with connectable file handles.
-> > This test uses load and store of file handles from a temp file to test
-> > decoding connectable file handles after cycle mount and after renames.
-> > Decoding connectable file handles after being moved to a new parent
-> > is expected to fail.
-> >
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > ---
->
-> Hi Amir,
->
-> This test case fails on some filesystems, e.g. nfs [1] and tmpfs [2].
-> Is this as your expected?
+[BUG]
+There is an internal report about btrfs/020 failure, the 020.full looks
+like this:
 
-No. I will look into this failure.
-Thanks for testing!
+  ERROR: ioctl(DEV_REPLACE_START) failed on "/opt/test/020.5968.mnt": Read-only file system
 
-Amir.
+  Performing full device TRIM /dev/loop8 (256.00MiB) ...
+  _check_btrfs_filesystem: filesystem on /dev/loop0 is inconsistent
+  *** fsck.btrfs output ***
+  ERROR: /dev/loop0 is currently mounted, use --force if you really intend to check the filesystem
+  Opening filesystem to check...
+  *** end fsck.btrfs output
+  *** mount output ***
+  [...]
+  /dev/loop0 on /opt/test type btrfs (rw,relatime,seclabel,ssd,discard=async,space_cache=v2,subvolid=5,subvol=/)
+  *** end mount output
 
->
-> Thanks,
-> Zorro
->
-> [1]
-> generic/777 fails on nfs:
->
-> --- /dev/fd/63  2025-05-07 02:44:24.150560533 -0400
-> +++ generic/777.out.bad 2025-05-07 02:44:23.999734558 -0400
-> @@ -1,7 +1,37 @@
->  QA output created by 777
->  test_file_handles after cycle mount
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000000) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000001) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000002) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000003) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000004) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000005) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000006) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000007) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000008) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000009) returned 116=
- incorrectly on a linked file!
->  test_file_handles after rename parent
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000000) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000001) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000002) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000003) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000004) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000005) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000006) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000007) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000008) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000009) returned 116=
- incorrectly on a linked file!
->  test_file_handles after rename grandparent
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000000) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000001) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000002) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000003) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000004) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000005) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000006) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000007) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000008) returned 116=
- incorrectly on a linked file!
-> +open_by_handle(/mnt/fstests/TEST_DIR/nfs-client/file000009) returned 116=
- incorrectly on a linked file!
->  test_file_handles after move to new parent
->  open_by_handle(TEST_DIR/file000000) returned 116 incorrectly on a linked=
- file!
->  open_by_handle(TEST_DIR/file000001) returned 116 incorrectly on a linked=
- file!
->
-> [2]
-> generic/777 fails on tmpfs:
->
-> --- /dev/fd/63  2025-05-07 07:53:26.265453903 -0400
-> +++ generic/777.out.bad 2025-05-07 07:53:25.536434660 -0400
-> @@ -3,13 +3,3 @@
->  test_file_handles after rename parent
->  test_file_handles after rename grandparent
->  test_file_handles after move to new parent
-> -open_by_handle(TEST_DIR/file000000) returned 116 incorrectly on a linked=
- file!
-> -open_by_handle(TEST_DIR/file000001) returned 116 incorrectly on a linked=
- file!
-> -open_by_handle(TEST_DIR/file000002) returned 116 incorrectly on a linked=
- file!
-> -open_by_handle(TEST_DIR/file000003) returned 116 incorrectly on a linked=
- file!
-> -open_by_handle(TEST_DIR/file000004) returned 116 incorrectly on a linked=
- file!
-> -open_by_handle(TEST_DIR/file000005) returned 116 incorrectly on a linked=
- file!
-> -open_by_handle(TEST_DIR/file000006) returned 116 incorrectly on a linked=
- file!
-> -open_by_handle(TEST_DIR/file000007) returned 116 incorrectly on a linked=
- file!
-> -open_by_handle(TEST_DIR/file000008) returned 116 incorrectly on a linked=
- file!
-> -open_by_handle(TEST_DIR/file000009) returned 116 incorrectly on a linked=
- file!
->
->
-> >  tests/generic/777     | 79 +++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/777.out | 15 ++++++++
-> >  2 files changed, 94 insertions(+)
-> >  create mode 100755 tests/generic/777
-> >  create mode 100644 tests/generic/777.out
-> >
-> > diff --git a/tests/generic/777 b/tests/generic/777
-> > new file mode 100755
-> > index 00000000..52a461c3
-> > --- /dev/null
-> > +++ b/tests/generic/777
-> > @@ -0,0 +1,79 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (C) 2018-2025 CTERA Networks. All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 777
-> > +#
-> > +# Check open by connectable file handle after cycle mount.
-> > +#
-> > +# This is a variant of test 477 with connectable file handles.
-> > +# This test uses load and store of file handles from a temp file to te=
-st
-> > +# decoding file handles after cycle mount and after directory renames.
-> > +# Decoding connectable file handles after being moved to a new parent
-> > +# is expected to fail.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick exportfs
-> > +
-> > +# Import common functions.
-> > +. ./common/filter
-> > +
-> > +
-> > +# Modify as appropriate.
-> > +_require_test
-> > +# Require connectable file handles support
-> > +_require_open_by_handle -N
-> > +
-> > +NUMFILES=3D10
-> > +testroot=3D$TEST_DIR/$seq-dir
-> > +testdir=3D$testroot/testdir
-> > +
-> > +# Create test dir and test files, encode connectable file handles and =
-store to tmp file
-> > +create_test_files()
-> > +{
-> > +     rm -rf $testdir
-> > +     mkdir -p $testdir
-> > +     $here/src/open_by_handle -N -cwp -o $tmp.handles_file $testdir $N=
-UMFILES
-> > +}
-> > +
-> > +# Decode connectable file handles loaded from tmp file
-> > +test_file_handles()
-> > +{
-> > +     local opt=3D$1
-> > +     local when=3D$2
-> > +
-> > +     echo test_file_handles after $when
-> > +     $here/src/open_by_handle $opt -i $tmp.handles_file $TEST_DIR $NUM=
-FILES
-> > +}
-> > +
-> > +# Decode file handles of files/dir after cycle mount
-> > +create_test_files
-> > +_test_cycle_mount
-> > +test_file_handles -rp "cycle mount"
-> > +
-> > +# Decode file handles of files/dir after rename of parent and cycle mo=
-unt
-> > +create_test_files $testdir
-> > +rm -rf $testdir.renamed
-> > +mv $testdir $testdir.renamed/
-> > +_test_cycle_mount
-> > +test_file_handles -rp "rename parent"
-> > +
-> > +# Decode file handles of files/dir after rename of grandparent and cyc=
-le mount
-> > +create_test_files $testdir
-> > +rm -rf $testroot.renamed
-> > +mv $testroot $testroot.renamed/
-> > +_test_cycle_mount
-> > +test_file_handles -rp "rename grandparent"
-> > +
-> > +# Decode file handles of files/dir after move to new parent and cycle =
-mount
-> > +# This is expected to fail because the conectable file handle encodes =
-the
-> > +# old parent.
-> > +create_test_files $testdir
-> > +rm -rf $testdir.new
-> > +mkdir -p $testdir.new
-> > +mv $testdir/* $testdir.new/
-> > +_test_cycle_mount
-> > +test_file_handles -r "move to new parent" | _filter_test_dir
-> > +
-> > +status=3D0
-> > +exit
-> > diff --git a/tests/generic/777.out b/tests/generic/777.out
-> > new file mode 100644
-> > index 00000000..648c480c
-> > --- /dev/null
-> > +++ b/tests/generic/777.out
-> > @@ -0,0 +1,15 @@
-> > +QA output created by 777
-> > +test_file_handles after cycle mount
-> > +test_file_handles after rename parent
-> > +test_file_handles after rename grandparent
-> > +test_file_handles after move to new parent
-> > +open_by_handle(TEST_DIR/file000000) returned 116 incorrectly on a link=
-ed file!
-> > +open_by_handle(TEST_DIR/file000001) returned 116 incorrectly on a link=
-ed file!
-> > +open_by_handle(TEST_DIR/file000002) returned 116 incorrectly on a link=
-ed file!
-> > +open_by_handle(TEST_DIR/file000003) returned 116 incorrectly on a link=
-ed file!
-> > +open_by_handle(TEST_DIR/file000004) returned 116 incorrectly on a link=
-ed file!
-> > +open_by_handle(TEST_DIR/file000005) returned 116 incorrectly on a link=
-ed file!
-> > +open_by_handle(TEST_DIR/file000006) returned 116 incorrectly on a link=
-ed file!
-> > +open_by_handle(TEST_DIR/file000007) returned 116 incorrectly on a link=
-ed file!
-> > +open_by_handle(TEST_DIR/file000008) returned 116 incorrectly on a link=
-ed file!
-> > +open_by_handle(TEST_DIR/file000009) returned 116 incorrectly on a link=
-ed file!
-> > --
-> > 2.34.1
-> >
->
+[CAUSE]
+Unfortunately I can not reproduce the situation here, but it looks like
+by somehow we didn't unmount the TEST_DEV before checking it.
+
+This may or may not be caused by the fact we're using loop back devices
+on TEST_MNT.
+
+[FIX]
+For this particluar test case, we really do not need to use TEST_MNT and
+create complex loopback devices.
+
+We can just ask for 3 devices from the device pool, use 2 for the raid1
+fs, and then use the spare one for dev replace.
+
+This should greately simplify the test case setup and cleanup, thus
+avoid the above busy TEST_DEV and false test failure.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/020 | 51 +++++++++++++++++--------------------------------
+ 1 file changed, 17 insertions(+), 34 deletions(-)
+
+diff --git a/tests/btrfs/020 b/tests/btrfs/020
+index 7e5c6fd7..8c05196b 100755
+--- a/tests/btrfs/020
++++ b/tests/btrfs/020
+@@ -12,44 +12,27 @@
+ . ./common/preamble
+ _begin_fstest auto quick replace volume
+ 
+-# Override the default cleanup function.
+-_cleanup()
+-{
+-	cd /
+-	rm -f $tmp.*
+-	$UMOUNT_PROG $loop_mnt
+-	_destroy_loop_device $loop_dev1
+-	losetup -d $loop_dev2 >/dev/null 2>&1
+-	_destroy_loop_device $loop_dev3
+-	rm -rf $loop_mnt
+-	rm -f $fs_img1 $fs_img2 $fs_img3
+-}
+-
+ . ./common/filter
+ 
+-_require_test
+-_require_loop
++_require_scratch_dev_pool 3
++
++_fixed_by_kernel_commit bbb651e469d9 \
++	"Btrfs: don't allow the replace procedure on read only filesystems"
++
++_scratch_dev_pool_get 2
++_spare_dev_get
++
++_scratch_pool_mkfs -m raid1 -d raid1 >> $seqres.full 2>&1
++_scratch_mount -o ro
++
++$BTRFS_UTIL_PROG replace start -B 2 $SPARE_DEV $SCRATCH_MNT >> $seqres.full 2>&1 && \
++	echo "FAIL: Device replaced on RO btrfs"
++
++_scratch_unmount
++_spare_dev_put
++_scratch_dev_pool_put
+ 
+ echo "Silence is golden"
+ 
+-loop_mnt=$TEST_DIR/$seq.$$.mnt
+-fs_img1=$TEST_DIR/$seq.$$.img1
+-fs_img2=$TEST_DIR/$seq.$$.img2
+-fs_img3=$TEST_DIR/$seq.$$.img3
+-mkdir $loop_mnt
+-$XFS_IO_PROG -f -c "truncate 256m" $fs_img1 >>$seqres.full 2>&1
+-$XFS_IO_PROG -f -c "truncate 256m" $fs_img2 >>$seqres.full 2>&1
+-$XFS_IO_PROG -f -c "truncate 256m" $fs_img3 >>$seqres.full 2>&1
+-
+-loop_dev1=`_create_loop_device $fs_img1`
+-loop_dev2=`_create_loop_device $fs_img2`
+-loop_dev3=`_create_loop_device $fs_img3`
+-
+-_mkfs_dev -m raid1 -d raid1 $loop_dev1 $loop_dev2 >>$seqres.full 2>&1
+-_mount -o ro $loop_dev1 $loop_mnt
+-
+-$BTRFS_UTIL_PROG replace start -B 2 $loop_dev3 $loop_mnt >>$seqres.full 2>&1 && \
+-_fail "FAIL: Device replaced on RO btrfs"
+-
+ status=0
+ exit
+-- 
+2.47.1
+
