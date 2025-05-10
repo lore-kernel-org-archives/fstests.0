@@ -1,189 +1,114 @@
-Received: from mail-ej1-f46.google.com (mail-ej1-f46.google.com [209.85.218.46])
+Received: from mail-pj1-f47.google.com (mail-pj1-f47.google.com [209.85.216.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 27D132222BD;
-	Fri,  9 May 2025 17:06:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 846A7A94F
+	for <fstests@vger.kernel.org>; Sat, 10 May 2025 00:43:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746810378; cv=none; b=eK0NrvxEJKmjbXbKdKYjuTR2+XZ5JJzSfhe8DjDfS1BiiurwxPkBD3zjim/3yfzYf8teYDjXFZdn310R3M7ue037lExs6aHWPEOeDiCrS1WIgW++EPLVvuI22c9SjPJh83d8JSbuZt/INcjs6Mkqnxc+4z3PH9B6bipalRZwWG8=
+	t=1746837782; cv=none; b=ubCsa/jIWVhDzTUzbMfN/qXeJ8Da9tk96RWtdQpb68UAo1m0wJ6nt4ygQkoBW8L51kaIFuDB8FfnaCkmglPIMt78oyiHirHiWkbPotqG5a2zGBkWEEYGYD5mfakmY+PUXznEe7TKiH+GWLFgPvpf7xRvD6/wFnjIu33aDflc3DM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746810378; c=relaxed/simple;
-	bh=9NoAtyv0QTFlw0+Wvi9ySMNjb3Y06NTLdkGhH7ASppM=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=KRnxkkNXijzhP5tARoT+wCl0dLpK7yfdpJRdluY3hL9TXMdXYpcmkugfEQLDQV7YhNkAViR8prRzt81YwHlGWDaEk2cE1LG5DIgNTXIj+LkomtCG8jmfeMijVixa6jfbRMCqK+o2ll/O/JdX7yX/zypAQ0X6b1MgugIQapqJFQ8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=E+NY4tWN; arc=none smtp.client-ip=209.85.218.46
+	s=arc-20240116; t=1746837782; c=relaxed/simple;
+	bh=JGrbBSEp5lCQJeyHe2uOG+abiBSlpo9H+CrV3ySJ9Yo=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=T8d5b84jnvaRBgteHID/IOjDUHo67dKvvHlS5UO1DDfZl6huicvpO3l6Sg6Hirs0hGJ06AQPs2MhaiFwHQ5XTWxk2M8KyupEbiWy2Phu1redeYxLT/88IOv550gRmy1YV51fZqplMued0pU3Yd7suhza2TFfu8k5vYHkn5XFqdk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=b1d3ylSr; arc=none smtp.client-ip=209.85.216.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="E+NY4tWN"
-Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-acb615228a4so655147566b.0;
-        Fri, 09 May 2025 10:06:16 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="b1d3ylSr"
+Received: by mail-pj1-f47.google.com with SMTP id 98e67ed59e1d1-30c3a038acfso2112050a91.3
+        for <fstests@vger.kernel.org>; Fri, 09 May 2025 17:43:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1746810375; x=1747415175; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=B5ps/sOtt7pD8Pm8DpHgdsdm3C2ywQuYhYtGKQKr4S0=;
-        b=E+NY4tWNLzHeYqtXeh52WBmqIdfO2AjA66PtWqoLcnHAUfuEk4T5yhm/YPBGzzj/MG
-         Pvr+Y3RVpz8OhtpJHQTAMnw8yCPAvtwAkdBaEyRxCXlrLTGGObw+qXIZBp1VGeoIvSvS
-         m0mVhcQeQv3lsFPkJlEdj/hk/eaHBeWcCrSAqJqAB81OtZkrhNrfXzuGVqiiplJ7efwz
-         cmvuOdkcznZGyZunOSFJG4Btqd0rs3jF3JS5u2o3qLYBRc0Qcfvh6wo8w2qBa9VrmPQx
-         3yFaCAXGhQQfWoDqoHhYuSi98So3qJvO0KMLw32ccbbdqkIc8SavMn1rhAM6u0hbz196
-         vgUQ==
+        d=gmail.com; s=20230601; t=1746837780; x=1747442580; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=cl7MI0VU2olpgkyRKwZzAa4T/sHV4NpTWashWquXczo=;
+        b=b1d3ylSrVuEVNDX2wCrR6fd25zma7FSQQevDSbw4fRRHgqtf4Q8gtO59FA9Aau9qwX
+         0KWaEulGUtUdyYE5ib7As0gMbLZ+P3rfWUf8sGYDhu22uQB+RoX9pdqiQC+Cmqvqjtzi
+         8SUN4503a7OpFjc9HJnNDZ1VxDPU/Nh+2g56B/JzL4gPNKHEusCE3VIuppaD1BIu/i82
+         m5MsmJyjcut/gpFzd1IYrxJRibtYZtvRnZQN/HN3SooFLKcki7fe9u76I13OS5s+DFEf
+         hB0AshY9nA3CRkeYGMdTpb8wbEjRwRUAJvT59UrIpMS64vckbes7ewIptmJ9gRi6xCLc
+         01HA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746810375; x=1747415175;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=B5ps/sOtt7pD8Pm8DpHgdsdm3C2ywQuYhYtGKQKr4S0=;
-        b=oHrzMXyEPzGMLDojbD/0fsM7IinKZxpLkq100L6kS3ebbY/Gfn//6qoSJ34B4Mxeba
-         uorEmwnH5qXmSI6Ogn6YyQmoyLbycdPLN54r0BBoWa4YOEXIxum2DJiNtH1OucZoJzAC
-         jlnyV/pjuzlPDX9ZrPPj333OuislrXTFxmzrvLyTuNe60YGEBYFx7nksrW3Beg1Eq9dJ
-         Krk8LZiI2JZt5InjNI+870k0N8r5Kk8PN6rVReuUPozyXVFQ9/TAaALW6Pe6uQ1HNCqw
-         lKZwqYavmsNHp90jZmYB1mGGmHDFCkIlLltwU/2D5BCkVOu6pa2es20Mfx61CWCL0Rn7
-         kVow==
-X-Forwarded-Encrypted: i=1; AJvYcCXeTxPJ7bqFHkHnWDmQALq+5Op25tlsFR8Rt0wlkDMq5WjwF2rT/6aC+eJZO9mo+Zs3Rc/bzvX3@vger.kernel.org, AJvYcCXooUsK0JFASptfAWWgyhEyH8jbkeOiZZntsXmSbJO5uNC5rK5NTKLLiptbWKSdzTsf+1s8Mh0cRkXTMSHWBg==@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx/WI0wGSbINM2hy0s46SZwCytwMgahKaDuusCTw79ryFvW9NMD
-	PkXfzJQB2OwO7pjqh6DYkUCxPukC5vUrQhVqegkHN36EWvPPajr5yTnqefhXAgRudJD0+zc6MDT
-	7wBiJPk9XopZY9z8+k1jld8yKsjM=
-X-Gm-Gg: ASbGncuBzSI5SHT+rtvGbGvQg99+J1FwqMx+c2d5UUGlAv7mXrZEHsk0irPhfKodZvo
-	RKzOD8+swKy5LSu4iroOb1CEtTXunUjH4WbzT7fgSKI9ZIDRErrttsl0iT6N0dYd54ePwlPPp24
-	PGQlx7Kjx13rJmOv80egPIxw==
-X-Google-Smtp-Source: AGHT+IFjlivJr5fD0JvOrWDcxV+SiEGAxrMcBDsju+fsgjlHREZxCW+2jHDRQC0iYjRmpmttizilIFSt6kBkL6tga7I=
-X-Received: by 2002:a17:907:a4ca:b0:acb:aa43:e82d with SMTP id
- a640c23a62f3a-ad21b14c5a8mr463937766b.3.1746810374896; Fri, 09 May 2025
- 10:06:14 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1746837780; x=1747442580;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=cl7MI0VU2olpgkyRKwZzAa4T/sHV4NpTWashWquXczo=;
+        b=ToF/9Ns350bchsqxzLjuKKDIwl0gXf3CwUcN+e+OA2KoytaPoULW+jhvUNrQUAehls
+         WS2aISJWjWCf+hz1AQtS3bEabElkyAqK2Dmk8aoboAvc+rhq7dHqgiO0z6/zt/vmZvE7
+         c4TTEyqvl75wA2iNcaycXrvwTZWUCu1IiFrNLAcIr+7T0uSjxO9DYhujU3hr4ELYIeTg
+         WkkOcqgoTsA56QFY+ZrAvqIquKTPoAil6BuKt0jfeyLXxd4QqKNgs+eJJphwYFFL5qFj
+         DWbCWQFLnx5U2DLUhd6VOfj64RIvC3J6EsYjcVIOeShdcA8uPe+pkQYpFxB/NPG/97lc
+         /+TQ==
+X-Gm-Message-State: AOJu0Yy2WFoASoxZSDGQloOgVl6ZAa04AzAqniduvmp/IZ/a00KC0pTC
+	H5xCxBxS4ST/pO0Zl+qRLr9TfI8leC23yoIKwDqrLdn/eRjhL22EXCZz0A==
+X-Gm-Gg: ASbGncvqcdS8bD0DFYquNgYnG/KNdDL8ULAmuZJcnPi9DNeqD7zsXtr3vcF/O9rXeJQ
+	dVESGhM4JsmQpCUjq3K75tSXtrpaE9DekJSmljUP3kgbzxCLzTg6pjv/NjPdYCHGSd027451f66
+	YIwR/E3C41sPimQiSUY9iBncEK6d3LMOmR9HwVrDo7OPZslnXma0uHaYAw9g+3b42s3tpGagkdo
+	fK6w6Uw7rQDw3xUmPXvglnLtoA8imh0a+qOq8uVIh4Iehafgc7qQST+LdKk5mtgFpfTmbQ7kBgR
+	fY0PVCCqxguzXLiPpvxg72XyfNOKlAdIoX5kk60QRT0qXegbPDc2jzf/2Mf/dTEEXWmyXVZwTnJ
+	okew=
+X-Google-Smtp-Source: AGHT+IH9tgPkp/dc35A7uOyq9Ai4sYPNHOyf+hv+mdJt77MxuUS+YuOSoar8I/YIxJdfEH7kO5PbWA==
+X-Received: by 2002:a17:90b:558f:b0:2ee:5958:828 with SMTP id 98e67ed59e1d1-30c3ce050edmr10287402a91.9.1746837780436;
+        Fri, 09 May 2025 17:43:00 -0700 (PDT)
+Received: from lrumancik.svl.corp.google.com ([2620:15c:2c5:11:4309:48b4:b5fe:5557])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-30ad4ffb4a0sm4701865a91.46.2025.05.09.17.42.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 09 May 2025 17:43:00 -0700 (PDT)
+From: Leah Rumancik <leah.rumancik@gmail.com>
+To: fstests@vger.kernel.org
+Cc: Leah Rumancik <leah.rumancik@gmail.com>
+Subject: [PATCH] selftest: add a test that flakes
+Date: Fri,  9 May 2025 17:42:55 -0700
+Message-ID: <20250510004256.451058-1-leah.rumancik@gmail.com>
+X-Mailer: git-send-email 2.49.0.1045.g170613ef41-goog
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250509170033.538130-1-amir73il@gmail.com> <20250509170033.538130-3-amir73il@gmail.com>
-In-Reply-To: <20250509170033.538130-3-amir73il@gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 9 May 2025 19:06:03 +0200
-X-Gm-Features: ATxdqUEb-IZs5lpNG8fbW7uazGIwJxvToq8btQxAr_o4GWZvhPVnZ7ZIgsvIuKs
-Message-ID: <CAOQ4uxhd7YLYndF0fgSkM53NuqUMkqghM0Vra-d0OYpTqT0tBA@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] open_by_handle: add a test for connectable file handles
-To: Zorro Lang <zlang@redhat.com>
-Cc: Aleksa Sarai <cyphar@cyphar.com>, Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, 
-	Chuck Lever <chuck.lever@oracle.com>, Jeff Layton <jlayton@kernel.org>, fstests@vger.kernel.org, 
-	linux-fsdevel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Fri, May 9, 2025 at 7:00=E2=80=AFPM Amir Goldstein <amir73il@gmail.com> =
-wrote:
->
-> This is a variant of generic/477 with connectable file handles.
-> This test uses load and store of file handles from a temp file to test
-> decoding connectable file handles after cycle mount and after renames.
->
-> Decoding connectable file handles after being moved to a new parent
-> is expected to fail on some filesystems, but not on filesystems that
-> do not really get unmounted in mount cycle like tmpfs, so skip this test.
->
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
->  tests/generic/777     | 70 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/777.out |  5 ++++
->  2 files changed, 75 insertions(+)
->  create mode 100755 tests/generic/777
->  create mode 100644 tests/generic/777.out
->
-> diff --git a/tests/generic/777 b/tests/generic/777
-> new file mode 100755
-> index 00000000..d8d33e55
-> --- /dev/null
-> +++ b/tests/generic/777
-> @@ -0,0 +1,70 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2018-2025 CTERA Networks. All Rights Reserved.
-> +#
-> +# FS QA Test No. 777
-> +#
-> +# Check open by connectable file handle after cycle mount.
-> +#
-> +# This is a variant of test 477 with connectable file handles.
-> +# This test uses load and store of file handles from a temp file to test
-> +# decoding file handles after cycle mount and after directory renames.
-> +# Decoding connectable file handles after being moved to a new parent
-> +# is expected to fail on some filesystems, but not on filesystems that
-> +# do not really get unmounted in mount cycle like tmpfs, so skip this te=
-st.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick exportfs
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +
-> +
-> +# Modify as appropriate.
-> +_require_test
-> +# Require connectable file handles support
-> +_require_open_by_handle -N
-> +
-> +NUMFILES=3D10
-> +testroot=3D$TEST_DIR/$seq-dir
-> +testdir=3D$testroot/testdir
-> +
-> +# Create test dir and test files, encode connectable file handles and st=
-ore to tmp file
-> +create_test_files()
-> +{
-> +       rm -rf $testdir
-> +       mkdir -p $testdir
-> +       $here/src/open_by_handle -N -cwp -o $tmp.handles_file $testdir $N=
-UMFILES
-> +}
-> +
-> +# Decode connectable file handles loaded from tmp file
-> +test_file_handles()
-> +{
-> +       local opt=3D$1
-> +       local when=3D$2
-> +
-> +       echo test_file_handles after $when
-> +       $here/src/open_by_handle $opt -i $tmp.handles_file $TEST_DIR $NUM=
-FILES
-> +}
-> +
-> +# Decode file handles of files/dir after cycle mount
-> +create_test_files
-> +_test_cycle_mount
-> +test_file_handles -rp "cycle mount"
-> +
-> +# Decode file handles of files/dir after rename of parent and cycle moun=
-t
-> +create_test_files $testdir
-> +rm -rf $testdir.renamed
-> +mv $testdir $testdir.renamed/
-> +_test_cycle_mount
-> +test_file_handles -rp "rename parent"
-> +
-> +# Decode file handles of files/dir after rename of grandparent and cycle=
- mount
-> +create_test_files $testdir
-> +rm -rf $testroot.renamed
-> +mv $testroot $testroot.renamed/
-> +_test_cycle_mount
-> +test_file_handles -rp "rename grandparent"
-> +
-> +status=3D0
-> +exit
-> diff --git a/tests/generic/777.out b/tests/generic/777.out
-> new file mode 100644
-> index 00000000..c0617681
-> --- /dev/null
-> +++ b/tests/generic/777.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 777
-> +test_file_handles after cycle mount
-> +test_file_handles after rename parent
-> +test_file_handles after rename grandparent
-> +test_file_handles after move to new parent
+Add selftest/007 which should fail about half of the time.
 
-OOPS this line was supposed to be removed - resending
+Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+---
+ tests/selftest/007     | 14 ++++++++++++++
+ tests/selftest/007.out |  3 +++
+ 2 files changed, 17 insertions(+)
+ create mode 100755 tests/selftest/007
+ create mode 100644 tests/selftest/007.out
+
+diff --git a/tests/selftest/007 b/tests/selftest/007
+new file mode 100755
+index 00000000..0e983b37
+--- /dev/null
++++ b/tests/selftest/007
+@@ -0,0 +1,14 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++#
++# FS QA Test No. 007
++#
++# A test that flakes due to occasional output mismatch
++#
++. ./common/preamble
++_begin_fstest selftest
++
++echo "I am intentionally flaky"
++echo $((RANDOM % 2))
++status=0
++exit
+diff --git a/tests/selftest/007.out b/tests/selftest/007.out
+new file mode 100644
+index 00000000..0b5e439a
+--- /dev/null
++++ b/tests/selftest/007.out
+@@ -0,0 +1,3 @@
++QA output created by 007
++I am intentionally flaky
++0
+-- 
+2.49.0.1045.g170613ef41-goog
+
