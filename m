@@ -1,61 +1,77 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+Received: from mail-pj1-f41.google.com (mail-pj1-f41.google.com [209.85.216.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 27A382571C1
-	for <fstests@vger.kernel.org>; Mon, 12 May 2025 09:39:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 16EAE25A64C;
+	Mon, 12 May 2025 09:57:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747042773; cv=none; b=HbvCrCJ8yV/N1J8CsxT5Vmc8E8xID1n/iJtJxgDuS0G4RCjTgDZ93ixSv/XrLZ5LMCxWpq1zvXnIiYGQGo+mJl12b32Xd7sJmQJEJVlZtjpHRUqKDcSPMsSFG0mCiCYvWaOLjNIUfinVMrTt5p5UsM6ti1IzqBoUfEKAtJycqcE=
+	t=1747043859; cv=none; b=tcRmCPaZxCkCnInuM3T/s93dZ5U07YRm4+47VEhAPoNT6Irxqp6+I1HFGdH7Gkuxv+1vnTzBgQPnmvtzXmCu+7PV5U5NJh8vNR1gTPjmNLbyY/4g9Mt1d5/cm09aDxaB17WF3PRGIqIuuguR97nJOOf6h/kHOaV+K1KoFSLhY+c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747042773; c=relaxed/simple;
-	bh=0U/6r77ztBk40ItNqYITD5/h9UDzZBN6JmgWs3ackuU=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Zs+yVekqycQeXkO0zcr47IQtJewMGccxXaYyBKhC3a4ZXY1WKWREGLak9S4/Drgmg5DQeIU151FPaLCtY/uZt6xQpLpIieZqAJqRIL5jG3Uvwdh6ySeb9DZg0CE3vBa0c8VwnWQfqREVNSiBncxPSEb9mZ2HPc/tdO4O7egRwBM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=D7rPGHZ+; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=D7rPGHZ+; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1747043859; c=relaxed/simple;
+	bh=Bd6yxwD6kvN73DPrWsmOtuMjHP9LS2gPZxDyeA8mbFI=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=jowjv88jrSjTiTI8iAiqBmP6fbRou9u0cdFQzUL2cO6CP0u0iSHKnbbo90ef3PYKzZ+YDeplwwVBg/wtXncoXBFjyg4yCrem8Wo0uzPl2/zg6VZZGa3a+2nijHPiGx7CfAonT0PkjvB1Ycc8fdGqogejYJlIrr/CAlkzCIyfQb4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=KbGI/1oE; arc=none smtp.client-ip=209.85.216.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="D7rPGHZ+";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="D7rPGHZ+"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 3EEDC21184;
-	Mon, 12 May 2025 09:39:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1747042769; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=hRcmQVsUFRLP87p1BSv7HcogrgPbJQ/TuFr3mIaMYf8=;
-	b=D7rPGHZ+jxm6trm+iQhT+KjC0+KgGo0EfFq9ID7igHbme8jxxyblBjeMBHS8XBw4vqnmtQ
-	vrUI/r06I1MN7AlV9rYtnXi3gpo2bLMTsaCcp9XVAmBZgITCGwk603ClMD5QPfExw73JK8
-	CCyeTffJwl6Z80DoStFE78z2s3dy4Ao=
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1747042769; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=hRcmQVsUFRLP87p1BSv7HcogrgPbJQ/TuFr3mIaMYf8=;
-	b=D7rPGHZ+jxm6trm+iQhT+KjC0+KgGo0EfFq9ID7igHbme8jxxyblBjeMBHS8XBw4vqnmtQ
-	vrUI/r06I1MN7AlV9rYtnXi3gpo2bLMTsaCcp9XVAmBZgITCGwk603ClMD5QPfExw73JK8
-	CCyeTffJwl6Z80DoStFE78z2s3dy4Ao=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 0AB80137D2;
-	Mon, 12 May 2025 09:39:27 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id C3L5L8/BIWhMPQAAD6G6ig
-	(envelope-from <wqu@suse.com>); Mon, 12 May 2025 09:39:27 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Cc: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Subject: [PATCH v2] fstests: btrfs: a new test case to verify scrub and rescue=idatacsums
-Date: Mon, 12 May 2025 19:09:10 +0930
-Message-ID: <20250512093910.390688-1-wqu@suse.com>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KbGI/1oE"
+Received: by mail-pj1-f41.google.com with SMTP id 98e67ed59e1d1-30a9cd61159so3875699a91.1;
+        Mon, 12 May 2025 02:57:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1747043857; x=1747648657; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=cHlG7q9JzoOjjM7u4Bvq8zhN5q0u2c7ZeCjBfPannWo=;
+        b=KbGI/1oEkxmSmIoUXy5FftANoDzkVkIfD3Z9LzC3UXtd1NBiEj/1jnFH9LtMZJe70Z
+         iyiNgjyJIGXAdiiPbzHeAsoZO2Y1TXs5eL5RhJ+H2m+JBMFtngNOMgp6Wen8o+6iKm/k
+         2pwSrbLZC/b+TC9x5zfNrl2nkLQNBECw/mEfC4PeOhxecrVxQJY7xC+/RQjUhRtO/51f
+         U8os15zt0PDrYhvb5hpkeTiy0m1WPWb33uiFA6abvMk1omYal0AJ4VaQg8q4KpSiiM4Y
+         kuU+w0G5Jd3MJGxqCwG9YtDf84TG8/CZ1NLXCmppDwBWYrOE5eT3WSuRCyEG46ivua9S
+         HELw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1747043857; x=1747648657;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=cHlG7q9JzoOjjM7u4Bvq8zhN5q0u2c7ZeCjBfPannWo=;
+        b=fAQI8k30nzwexgAGIFXBfIrRUucyklk1lNcZ6G/udMhp8m78dOunC0pILIIlBInbJH
+         VsZI6D6p6EQPJODQwNU4KCaBK0nGdyramSWbdTcyYYBlWUUpbqkUAeWs5YgF4LILY0Xg
+         82B/swvK2htFjVktVtnWg+YUp5JMO28tynBrlgDjmWKOBQM/tuRPWnTyZiUEV+serSSs
+         O9FpfS0IiATiGYXCq4ujIJcyj/4F9KOLq6ZMJbZw5rCAsItkKSJJ3ammNt+O3hAVC2ta
+         /1BGUAMUCW2FTiP7kWQT6LANNAN1fiwu6BSX2w1zK6q2UIAFyQi0itjNmobWc+vDiqM0
+         6hYg==
+X-Forwarded-Encrypted: i=1; AJvYcCWh5z+wwYBLEy1kdsjDCUY32xGlhxjTeBRynGi6BgbUD2w0bNT43HzyuK8Nl4HVXXFSGYC6SAaL@vger.kernel.org
+X-Gm-Message-State: AOJu0YyVnXWRTEoUJAE4J2zLGNDUMa3c91HpTqtfyPgce+1l3+Ygfcru
+	mKXf1gwjK37GelRCT69Do6/M2do8dPHZYETBJdBOwM20ma0iovaUVy7xhA==
+X-Gm-Gg: ASbGncuaQAX4g1G29U48TELbR5ZJ/JtqiEb58gs+Z0Y1QV/aXf9k3ltC8zgLCbsuLuB
+	BuPCjxyR+pQNOjorgpTgKFFABTnWjHQdoPRi0mamMkghExmyytQlSluvArohXaf3Jr95xw9T6HU
+	mSc5VFRS6GgzVI/rFGDSB9muRCXTPDTR7Rk+pqBYyIfKLlaMswi4EFuNFQHHl1rEXg5jUQwYrkv
+	cseW5XJdyIJdGNEoG1spA2J/RkZ8qjSRvbEFPKYO6ZkJVvjnRruGl9dAqaXKtzBU8Zkx9RWSXk1
+	ykt3W9ElMbuslam1sS/jKbfUzZR2Tq1g0m+Rkk+85rMoZ7Q+kLVds/PgL2dBfK6AtkXcVA/m5k4
+	x+UMd4aMbYcQjGDg7ckn8GjxTugRT/RAMRGQMN4Vm
+X-Google-Smtp-Source: AGHT+IE4vl/+ycjPv007CP7xDLqyemuKhIlfOyqvxS4qFvD3foHco38poD+7BNOM0ygASikBnhvPyQ==
+X-Received: by 2002:a17:90b:520d:b0:30a:9cd5:5932 with SMTP id 98e67ed59e1d1-30c4000fa4emr19936646a91.13.1747043856663;
+        Mon, 12 May 2025 02:57:36 -0700 (PDT)
+Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.in.ibm.com ([129.41.58.0])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-30ad4fe213bsm8366974a91.34.2025.05.12.02.57.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 12 May 2025 02:57:36 -0700 (PDT)
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+To: linux-xfs@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org,
+	fstests@vger.kernel.org,
+	ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com,
+	djwong@kernel.org,
+	zlang@kernel.org,
+	david@fromorbit.com,
+	hch@infradead.org,
+	nirjhar.roy.lists@gmail.com,
+	cem@kernel.org
+Subject: [PATCH v5 0/1] xfs: Fail remount with noattr2 on a v5 xfs with v4 enabled kernel.
+Date: Mon, 12 May 2025 15:27:13 +0530
+Message-ID: <cover.1747043272.git.nirjhar.roy.lists@gmail.com>
+X-Mailer: git-send-email 2.43.5
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -63,99 +79,29 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spam-Flag: NO
-X-Spam-Score: -2.80
-X-Spam-Level: 
-X-Spamd-Result: default: False [-2.80 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	MIME_TRACE(0.00)[0:+];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	ARC_NA(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	RCVD_TLS_ALL(0.00)[];
-	RCPT_COUNT_THREE(0.00)[3];
-	FROM_HAS_DN(0.00)[];
-	TO_DN_SOME(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.com:email,suse.com:mid]
 
-There is a kernel bug report that scrub will trigger a NULL pointer
-dereference when rescue=idatacsums mount option is provided.
+This patch fixes an issue where remount with noattr2 doesn't fail explicitly
+on v5 xfs with CONFIG_XFS_SUPPORT_V4=y. Details are there in the commit message
+of the patch.
 
-Add a test case for such situation, to verify kernel can gracefully
-reject scrub when  there is no csum tree.
+Related discussion in [1].
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
-Reviewed-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
----
-Changelog:
-v2:
-- Strictly require the scrub to fail
-  Suggested by Filipe
----
- tests/btrfs/336     | 35 +++++++++++++++++++++++++++++++++++
- tests/btrfs/336.out |  2 ++
- 2 files changed, 37 insertions(+)
- create mode 100755 tests/btrfs/336
- create mode 100644 tests/btrfs/336.out
+[v4] --> v5
+ - Modified the error message in xfs_fs_reconfigure().
 
-diff --git a/tests/btrfs/336 b/tests/btrfs/336
-new file mode 100755
-index 00000000..f6691bae
---- /dev/null
-+++ b/tests/btrfs/336
-@@ -0,0 +1,35 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2025 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 336
-+#
-+# Make sure read-only scrub won't cause NULL pointer dereference with
-+# rescue=idatacsums mount option
-+#
-+. ./common/preamble
-+_begin_fstest auto scrub quick
-+
-+_fixed_by_kernel_commit 6aecd91a5c5b \
-+	"btrfs: avoid NULL pointer dereference if no valid extent tree"
-+
-+_require_scratch
-+_scratch_mkfs >> $seqres.full
-+
-+_try_scratch_mount "-o ro,rescue=ignoredatacsums" > /dev/null 2>&1 ||
-+	_notrun "rescue=ignoredatacsums mount option not supported"
-+
-+# For unpatched kernel this will cause NULL pointer dereference and crash the kernel.
-+$BTRFS_UTIL_PROG scrub start -Br $SCRATCH_MNT >> $seqres.full 2>&1
-+# For patched kernel scrub will be gracefully rejected.
-+if [ $? -eq 0 ]; then
-+	echo "read-only scrub should fail but didn't"
-+fi
-+
-+_scratch_unmount
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/336.out b/tests/btrfs/336.out
-new file mode 100644
-index 00000000..9263628e
---- /dev/null
-+++ b/tests/btrfs/336.out
-@@ -0,0 +1,2 @@
-+QA output created by 336
-+Silence is golden
--- 
-2.47.1
+[v1] https://lore.kernel.org/all/7c4202348f67788db55c7ec445cbe3f2d587daf2.1744394929.git.nirjhar.roy.lists@gmail.com/
+[v2] https://lore.kernel.org/all/cover.1745916682.git.nirjhar.roy.lists@gmail.com/
+[v3] https://lore.kernel.org/all/cover.1745937794.git.nirjhar.roy.lists@gmail.com/
+[v4] https://lore.kernel.org/all/cover.1746600966.git.nirjhar.roy.lists@gmail.com/
+[1] https://lore.kernel.org/all/Z65o6nWxT00MaUrW@dread.disaster.area/
+[2] https://lore.kernel.org/all/aBRt2SNUxb6WuMO-@infradead.org/
+
+Nirjhar Roy (IBM) (1):
+  xfs: Fail remount with noattr2 on a v5 with v4 enabled
+
+ fs/xfs/xfs_super.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+--
+2.43.5
 
