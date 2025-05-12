@@ -1,134 +1,152 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ED66A2905
-	for <fstests@vger.kernel.org>; Sun, 11 May 2025 19:02:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D223B2576
+	for <fstests@vger.kernel.org>; Mon, 12 May 2025 05:26:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746990134; cv=none; b=mYpvVZfoDC7cprXMnhTYe6ddHgaKIArkX7prhlHlw74C1FBpUvinWGphSyK0VhVvz18tGEr+a8XpSHvmxsIxX1h004oGMPl/WwOCpsN0SPJyXGn/oeN6QKZVw27byolLKk1+v+3GtXv5hdwP55qiv5hiYAI6n4vQD5z+fXXNwak=
+	t=1747027578; cv=none; b=DOCtXkoh1x+p9EtBI/ktFE4XW38ixGvX+aB7FULeGDzNK46BCa/hFjP9yYVcrHPdHO3MNnsQwJ95++mQOCqnS1wFpvX4PJ1zRtAADsUoUHghfGuOIPWzrVPYKqv4f2uMbaM9LiBwUm7dPEfB4hUHc++5DXxdOvjt8LmS4mPjXKc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746990134; c=relaxed/simple;
-	bh=5N72qniG4Y/amh2M4JiSHVkGnoJ7QApxwxdd+jRAWmk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=tY8YgMnTq5egRcml43IX+WXNxTNu8qaPuvWvdaT3nHitnrV+JdaJeBgDhEyRluJvls99ST93zvx5QbmqNf1+4EcckHf06a3ZZwAV2cwKQX0l+2W0UPa+mniKpGVHP8Tlc5ujtlDYOEF6FeRbMsqRS96APwwlMu4zTNWnyKBqbXs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=OLI0fTne; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=OLI0fTne; arc=none smtp.client-ip=195.135.223.131
+	s=arc-20240116; t=1747027578; c=relaxed/simple;
+	bh=Rbrr0n251goTD3DT/M6Bh89cPYf3x6faRWZfdmYLYTo=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=UFNsDDfljz3OPPOrT9XgQr4PUqfKvCpiU5P8KcgdXP2ddzih9RO3jYDTvR/eIBGaib9PTs4GaFKQ1lLAt2/jV5osFlyoHpp3i7SX3OplAV6zX4GvVJY2dkR8q6KBEu+9LtfiGHOAQe0uNIYu+OgvZdhevdRJ87VkgS/2p0Ms1Ug=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=RjUJwPoD; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=RjUJwPoD; arc=none smtp.client-ip=195.135.223.130
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="OLI0fTne";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="OLI0fTne"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="RjUJwPoD";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="RjUJwPoD"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 7F5A01F399;
-	Sun, 11 May 2025 19:02:07 +0000 (UTC)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 0D44421197;
+	Mon, 12 May 2025 05:26:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1746990127; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=IeTirzCDeUpiqhI5zG7SfGedHM30yVCluzFT4XRJWcw=;
-	b=OLI0fTneKvfc0jlsu1MWVbEWfqqJWsoN2opMgiqdN0lXEKY2/HwiFc4/uaZXRKOaoP6/PL
-	o/JuInfYoPO4zo0T2qpk+x+eYoXSDOELudpSCQfDBHGd1exekhGpnOZxJPuuqhMS1SpaQl
-	GjHG4FXH2WPkdEt0Da/QY6CuBY7gnJk=
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=OLI0fTne
+	t=1747027574; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=1hRMK3laAUEJXwPmiG9PM3q4Qdn/Xmd/GOu9Ia225aQ=;
+	b=RjUJwPoDHeaHBNiJuRvRrXh3O7f47HCeCdvv2phmpI/mo7rr78TknZlzwR/N5zaFG2IElh
+	rZrO0kkkTFFottSNkB3Y7fuxurBZy+17AMj3iYeGONhuDsYZqABrcn9L8Xo081deR0JXRU
+	Mt7UJucr6UVTVplfHWoEoy2z0XzeYMU=
+Authentication-Results: smtp-out1.suse.de;
+	none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1746990127; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=IeTirzCDeUpiqhI5zG7SfGedHM30yVCluzFT4XRJWcw=;
-	b=OLI0fTneKvfc0jlsu1MWVbEWfqqJWsoN2opMgiqdN0lXEKY2/HwiFc4/uaZXRKOaoP6/PL
-	o/JuInfYoPO4zo0T2qpk+x+eYoXSDOELudpSCQfDBHGd1exekhGpnOZxJPuuqhMS1SpaQl
-	GjHG4FXH2WPkdEt0Da/QY6CuBY7gnJk=
+	t=1747027574; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=1hRMK3laAUEJXwPmiG9PM3q4Qdn/Xmd/GOu9Ia225aQ=;
+	b=RjUJwPoDHeaHBNiJuRvRrXh3O7f47HCeCdvv2phmpI/mo7rr78TknZlzwR/N5zaFG2IElh
+	rZrO0kkkTFFottSNkB3Y7fuxurBZy+17AMj3iYeGONhuDsYZqABrcn9L8Xo081deR0JXRU
+	Mt7UJucr6UVTVplfHWoEoy2z0XzeYMU=
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 4117E137E8;
-	Sun, 11 May 2025 19:02:07 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 15480137D2;
+	Mon, 12 May 2025 05:26:12 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id eoxKDC/0IGgwMgAAD6G6ig
-	(envelope-from <ailiop@suse.com>); Sun, 11 May 2025 19:02:07 +0000
-Date: Sun, 11 May 2025 21:01:58 +0200
-From: Anthony Iliopoulos <ailiop@suse.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/008: fix golden output for 512 fsblock size
-Message-ID: <aCD0Jmx_V5bS3klb@technoir>
-References: <20250508074102.125013-1-ailiop@suse.com>
- <20250511142954.swhxnifhxvvkg3ty@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	id y5u1MnSGIWhdZgAAD6G6ig
+	(envelope-from <wqu@suse.com>); Mon, 12 May 2025 05:26:12 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] fstests: btrfs: a new test case to verify scrub and rescue=idatacsums
+Date: Mon, 12 May 2025 14:55:51 +0930
+Message-ID: <20250512052551.236243-1-wqu@suse.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250511142954.swhxnifhxvvkg3ty@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Rspamd-Queue-Id: 7F5A01F399
-X-Spam-Flag: NO
-X-Spam-Score: -4.01
+Content-Transfer-Encoding: 8bit
 X-Spam-Level: 
-X-Spamd-Result: default: False [-4.01 / 50.00];
+X-Spam-Flag: NO
+X-Spamd-Result: default: False [-2.80 / 50.00];
 	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
 	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_RHS_NOT_FQDN(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-0.999];
 	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	MISSING_XM_UA(0.00)[];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	TO_DN_SOME(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
+	RCPT_COUNT_TWO(0.00)[2];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
 	ARC_NA(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	RCVD_COUNT_TWO(0.00)[2];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:email];
+	URIBL_BLOCKED(0.00)[suse.com:mid,suse.com:email,imap1.dmz-prg2.suse.org:helo];
 	FROM_EQ_ENVFROM(0.00)[];
 	FROM_HAS_DN(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo,suse.com:email,suse.com:dkim];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_COUNT_TWO(0.00)[2];
 	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RCPT_COUNT_TWO(0.00)[2];
-	DKIM_TRACE(0.00)[suse.com:+]
-X-Rspamd-Action: no action
+	TO_DN_NONE(0.00)[];
+	RCVD_TLS_ALL(0.00)[]
+X-Spam-Score: -2.80
 
-On Sun, May 11, 2025 at 10:29:54PM +0800, Zorro Lang wrote:
-> On Thu, May 08, 2025 at 09:41:02AM +0200, Anthony Iliopoulos wrote:
-> > commit 97989c9839dd ("xfs/008: use block size instead of the pagesize")
-> > changed the test filter, which causes nocrc/512b fsblock configurations
-> > to fail due to mismatch of the golden output. Update it to match the
-> > expected output.
-> > 
-> > Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
-> > ---
-> >  tests/xfs/008.out | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > 
-> > diff --git a/tests/xfs/008.out b/tests/xfs/008.out
-> > index 0941e218c7d0..dc999156dab5 100644
-> > --- a/tests/xfs/008.out
-> > +++ b/tests/xfs/008.out
-> > @@ -8,7 +8,7 @@ randholes.2 : -l FSIZE -c 100 -b BLKSIZE
-> >  ------------------------------------------
-> >  holes is in range
-> >  
-> > -randholes.3 : -l FSIZE -c 100 -b 512
-> > +randholes.3 : -l FSIZE -c 100 -b BLKSIZE
-> 
-> This change fix the failure on nocrc/512b fsblock, but it causes xfs/008
-> fail on all other blocksize xfs.
+There is a kernel bug report that scrub will trigger a NULL pointer
+dereference when rescue=idatacsums mount option is provided.
 
-Indeed, thanks for catching this, I'll send a v2 with the corresponding
-filter fix.
+Add a test case for such situation, to verify kernel can gracefully
+reject scrub when  there is no csum tree.
 
-Regards,
-Anthony
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/336     | 32 ++++++++++++++++++++++++++++++++
+ tests/btrfs/336.out |  2 ++
+ 2 files changed, 34 insertions(+)
+ create mode 100755 tests/btrfs/336
+ create mode 100644 tests/btrfs/336.out
+
+diff --git a/tests/btrfs/336 b/tests/btrfs/336
+new file mode 100755
+index 00000000..f76a8e21
+--- /dev/null
++++ b/tests/btrfs/336
+@@ -0,0 +1,32 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2025 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 336
++#
++# Make sure read-only scrub won't cause NULL pointer dereference with
++# rescue=idatacsums mount option
++#
++. ./common/preamble
++_begin_fstest auto scrub quick
++
++_fixed_by_kernel_commit 6aecd91a5c5b \
++	"btrfs: avoid NULL pointer dereference if no valid extent tree"
++
++_require_scratch
++_scratch_mkfs >> $seqres.full
++
++_try_scratch_mount "-o ro,rescue=ignoredatacsums" > /dev/null 2>&1 ||
++	_notrun "rescue=ignoredatacsums mount option not supported"
++
++# For unpatched kernel this will cause NULL pointer dereference and crash the kernel.
++# For patched kernel scrub will be gracefully rejected.
++$BTRFS_UTIL_PROG scrub start -Br $SCRATCH_MNT >> $seqres.full 2>&1
++
++_scratch_unmount
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/336.out b/tests/btrfs/336.out
+new file mode 100644
+index 00000000..9263628e
+--- /dev/null
++++ b/tests/btrfs/336.out
+@@ -0,0 +1,2 @@
++QA output created by 336
++Silence is golden
+-- 
+2.47.1
+
