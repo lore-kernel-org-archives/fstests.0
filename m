@@ -1,173 +1,139 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8598617555;
-	Mon, 12 May 2025 11:10:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FC0F1A317E;
+	Mon, 12 May 2025 11:17:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747048253; cv=none; b=V9cuCmsEZSQSoy6D7xsJ/Tq5LUf/J5MJ1CtDpH1BZz3ZG0vgvfrjf0qZrW2rT4ZotYPQ30DsutpMaFoL/VRiTGM+hkxtfwiKBzwdHgPjJ5bAzns0kkFwpr33nzJatiFxNZAOIG3DeAG2hMoIQWTCnSvK+w4fT5ZzJp3Poij0KJ8=
+	t=1747048647; cv=none; b=c1BP47imMf2Kb3XXOexMms6jSdoGm2XF0Wq2/DWhXzEg73LJMDu1kLwrvYUXeXWjSB3T+tGWdENXc4ShlgrQW9F3os1Mu6uy0bwZvOlUVyGdZ1CdpBkkVxE5CFXEH/iNU5GcaUUMBL5K51/0APYypzOKZwFKGYfbAypeELPSDlw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747048253; c=relaxed/simple;
-	bh=wqh9HZy0k6PHTnNj+aTG+u6pBD6Q5cSG8VSQ2zyYTzo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=g2I3nIWeHyjb/bdFP/SqvObugFy4lO0gMchnwYUbi35/zwJME4qOmboKz4LPcte2HbOco5VmMGZAywdjev8ssvY3FnoK4a2zPAqtAmR7fMy/FacmTGtOBzwQeUwiMR9Tx4B21sshmJLC775TUMQlHuSpJmpoAqU8KLfTkAc8DBI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Xa9e4Q/O; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1747048647; c=relaxed/simple;
+	bh=xSWldtXKYPXsY9pWZlXTaliyoXBXdImsAv6dkFdB2T4=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=L7Eu8s0ooLNJjn5TKJnOFLqv06AAUcpUkISsd3wbqIk4fcY8o75moGZK5XKHLrhJfPVkrhztCIUEKYUweeH2CD30IljLoI225M3LyVW0qVReBlzBaXm8GSekmTXJ+r/NwucxlFO0grb9XfWO7EFEDcUkdFuQSuG3AQ8jDvjHj50=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=P7rz9oJ9; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Xa9e4Q/O"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 28888C4CEE7;
-	Mon, 12 May 2025 11:10:49 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="P7rz9oJ9"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E1CF3C4CEEF;
+	Mon, 12 May 2025 11:17:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1747048253;
-	bh=wqh9HZy0k6PHTnNj+aTG+u6pBD6Q5cSG8VSQ2zyYTzo=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Xa9e4Q/OqCFDMljrde1+ciIyetJEu9n7Y4nwR96dtLVlH+OuknDI9olbnMmU0wPe2
-	 TvTeRZGOIPgvfrMYlDLQjwihrQ2+fbFXenipbToQ7Pe1HhF/SLkTSZptOojPO3vzdZ
-	 sEYSdICBJ/IKLh+aFP0sxR0g/K/D+EHYBZJxwkG9vdgK7TjS/3xUTH/RZkZkYgON7z
-	 OGUbQSOaGR1/0YT4g0fg14fJ/KgTuUZ5+mf9166nXniPN7ZmURWBD46z/mv+NAyukZ
-	 5C73K7XQOEBhxCZp7VtNEfeNFkUL7RMF6GdYsfvR/1/Brj7NvzF8X+yK8IRplbjL0i
-	 vwEOCOcjOkUVQ==
-Date: Mon, 12 May 2025 13:10:47 +0200
-From: Carlos Maiolino <cem@kernel.org>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-Cc: linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, 
-	fstests@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com, djwong@kernel.org, 
-	zlang@kernel.org, david@fromorbit.com, hch@infradead.org
-Subject: Re: [PATCH v5 1/1] xfs: Fail remount with noattr2 on a v5 with v4
- enabled
-Message-ID: <xwx4pyblttfkrxfq3wlorwz743oathzvjdigehgke4gsu6vona@xfftyhxmzr22>
-References: <cover.1747043272.git.nirjhar.roy.lists@gmail.com>
- <uvQIPMIpyNU1GgrBWDuyTQvD6gJNGgIBfFc0qRZt-ehl_bRnVMTBNcfYRxRqjgkUSJVXaltU7eN1HGLqi4Vp1w==@protonmail.internalid>
- <e03b24e6194c96deb6f74cd8b5e5d61490d539f6.1747043272.git.nirjhar.roy.lists@gmail.com>
+	s=k20201202; t=1747048646;
+	bh=xSWldtXKYPXsY9pWZlXTaliyoXBXdImsAv6dkFdB2T4=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=P7rz9oJ9q+L1tAH2myUxCiv2S49eMNeJ66UDPgemJHvhk3quSBNZYVYTDvrQEyemc
+	 6KcpKA7e6U+yX4ypBF3dS9VtgE94suL3MoU6RFQJ4XF747sDiK2oz5tBLyfyAS5f7Y
+	 Vb1pVWZcWA/yVyFolRvF3HarTZf6YuRhiBdY69XiQhvBeCYnKQsOEZiLjj0eZFpVIk
+	 oXhDM7zEka/vESJ5ZuiG2UTaGk9K/K1yORydrmpdjN78J+Ab97rAxBRktWFfcy8hul
+	 zY7SFV9eF+qmtuqmz++9sNW1xwkb6Wv0qI5k+BC+kHvoXCpZ7OPvPalDLttY2aoAJo
+	 0ttoQqc8MHw/Q==
+Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-ad21a5466f6so574086466b.1;
+        Mon, 12 May 2025 04:17:26 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCWzz6Psw2xIgcrLcOQ9Nm72p3kJraGKGvW9yL/QftuxWLPPWwdm1+lZF1xY6vOi/S7BzxxiW9mp@vger.kernel.org
+X-Gm-Message-State: AOJu0Yykq/C7qbedupwQHp7SgSz/jChrh+x+j2tTJePzj1cGBSWnLagI
+	kOLY1n3NUzhMJWF8ASC42MitPSaQ0ipD/h5XwAu9fTtLzNTcykV57tkdv1CSMKDoACH3/55CLm5
+	q3AcHgDTMGyhmEG0fnYedpNzCYAM=
+X-Google-Smtp-Source: AGHT+IHeLSE8bYLDzwBoGmmh+6DEkXn3N4Tg5NzViWTKKBJLM6GB7bUiLSYmdS7U5haJi8D3ilK2m5qZ8xBKF8Pj0Gg=
+X-Received: by 2002:a17:907:8689:b0:ace:dc05:b186 with SMTP id
+ a640c23a62f3a-ad21b426337mr1145244066b.21.1747048645519; Mon, 12 May 2025
+ 04:17:25 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <e03b24e6194c96deb6f74cd8b5e5d61490d539f6.1747043272.git.nirjhar.roy.lists@gmail.com>
+References: <20250512093910.390688-1-wqu@suse.com>
+In-Reply-To: <20250512093910.390688-1-wqu@suse.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Mon, 12 May 2025 12:16:48 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H5i2ua1dT-aAfpcdybY2ifL71Mk=ENa-WiOmAX-Qd+8Gg@mail.gmail.com>
+X-Gm-Features: AX0GCFt-DHitqQuC_f6b14VTifUs6zkKCzndncz_dTZp-cGnT_k2prmSHpGvGE4
+Message-ID: <CAL3q7H5i2ua1dT-aAfpcdybY2ifL71Mk=ENa-WiOmAX-Qd+8Gg@mail.gmail.com>
+Subject: Re: [PATCH v2] fstests: btrfs: a new test case to verify scrub and rescue=idatacsums
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, 
+	Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, May 12, 2025 at 03:27:14PM +0530, Nirjhar Roy (IBM) wrote:
-> Bug: When we compile the kernel with CONFIG_XFS_SUPPORT_V4=y,
-> remount with "-o remount,noattr2" on a v5 XFS does not
-> fail explicitly.
-> 
-> Reproduction:
-> mkfs.xfs -f /dev/loop0
-> mount /dev/loop0 /mnt/scratch
-> mount -o remount,noattr2 /dev/loop0 /mnt/scratch
-> 
-> However, with CONFIG_XFS_SUPPORT_V4=n, the remount
-> correctly fails explicitly. This is because the way the
-> following 2 functions are defined:
-> 
-> static inline bool xfs_has_attr2 (struct xfs_mount *mp)
-> {
-> 	return !IS_ENABLED(CONFIG_XFS_SUPPORT_V4) ||
-> 		(mp->m_features & XFS_FEAT_ATTR2);
-> }
-> static inline bool xfs_has_noattr2 (const struct xfs_mount *mp)
-> {
-> 	return mp->m_features & XFS_FEAT_NOATTR2;
-> }
-> 
-> xfs_has_attr2() returns true when CONFIG_XFS_SUPPORT_V4=n
-> and hence, the following if condition in
-> xfs_fs_validate_params() succeeds and returns -EINVAL:
-> 
-> /*
->  * We have not read the superblock at this point, so only the attr2
->  * mount option can set the attr2 feature by this stage.
->  */
-> 
-> if (xfs_has_attr2(mp) && xfs_has_noattr2(mp)) {
-> 	xfs_warn(mp, "attr2 and noattr2 cannot both be specified.");
-> 	return -EINVAL;
-> }
-> 
-> With CONFIG_XFS_SUPPORT_V4=y, xfs_has_attr2() always return
-> false and hence no error is returned.
-> 
-> Fix: Check if the existing mount has crc enabled(i.e, of
-> type v5 and has attr2 enabled) and the
-> remount has noattr2, if yes, return -EINVAL.
-> 
-> I have tested xfs/{189,539} in fstests with v4
-> and v5 XFS with both CONFIG_XFS_SUPPORT_V4=y/n and
-> they both behave as expected.
-> 
-> This patch also fixes remount from noattr2 -> attr2 (on a v4 xfs).
-> 
-> Related discussion in [1]
-> 
-> [1] https://lore.kernel.org/all/Z65o6nWxT00MaUrW@dread.disaster.area/
-> 
-> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
+On Mon, May 12, 2025 at 10:40=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
+>
+> There is a kernel bug report that scrub will trigger a NULL pointer
+> dereference when rescue=3Didatacsums mount option is provided.
+>
+> Add a test case for such situation, to verify kernel can gracefully
+> reject scrub when  there is no csum tree.
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> Reviewed-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+
+Looks good now, thanks.
+
 > ---
->  fs/xfs/xfs_super.c | 26 ++++++++++++++++++++++++++
->  1 file changed, 26 insertions(+)
-> 
-> diff --git a/fs/xfs/xfs_super.c b/fs/xfs/xfs_super.c
-> index b2dd0c0bf509..606a95ac816f 100644
-> --- a/fs/xfs/xfs_super.c
-> +++ b/fs/xfs/xfs_super.c
-> @@ -2114,6 +2114,21 @@ xfs_fs_reconfigure(
->  	if (error)
->  		return error;
-> 
-> +	/* attr2 -> noattr2 */
-> +	if (xfs_has_noattr2(new_mp)) {
-> +		if (xfs_has_crc(mp)) {
-> +			xfs_warn(mp,
-> +			"attr2 is always enabled for a V5 filesystem - can't be changed.");
-> +			return -EINVAL;
-
-This looks good to me now:
-
-Reviewed-by: Carlos Maiolino <cmaiolino@redhat.com>
-
-I still wish hch's opinion here though before merging it. Giving his was the
-first RwB, I want to make sure he still keeps his RwB with the above change.
-
-
-FWIW, for a next patch, there is no need to copy ext4 list for a code change
-that is totally unrelated to ext4. This just generates unnecessary extra
-traffic.
-
-
-> +		}
-> +		mp->m_features &= ~XFS_FEAT_ATTR2;
-> +		mp->m_features |= XFS_FEAT_NOATTR2;
-> +	} else if (xfs_has_attr2(new_mp)) {
-> +		/* noattr2 -> attr2 */
-> +		mp->m_features &= ~XFS_FEAT_NOATTR2;
-> +		mp->m_features |= XFS_FEAT_ATTR2;
-> +	}
+> Changelog:
+> v2:
+> - Strictly require the scrub to fail
+>   Suggested by Filipe
+> ---
+>  tests/btrfs/336     | 35 +++++++++++++++++++++++++++++++++++
+>  tests/btrfs/336.out |  2 ++
+>  2 files changed, 37 insertions(+)
+>  create mode 100755 tests/btrfs/336
+>  create mode 100644 tests/btrfs/336.out
+>
+> diff --git a/tests/btrfs/336 b/tests/btrfs/336
+> new file mode 100755
+> index 00000000..f6691bae
+> --- /dev/null
+> +++ b/tests/btrfs/336
+> @@ -0,0 +1,35 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2025 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 336
+> +#
+> +# Make sure read-only scrub won't cause NULL pointer dereference with
+> +# rescue=3Didatacsums mount option
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto scrub quick
 > +
->  	/* inode32 -> inode64 */
->  	if (xfs_has_small_inums(mp) && !xfs_has_small_inums(new_mp)) {
->  		mp->m_features &= ~XFS_FEAT_SMALL_INUMS;
-> @@ -2126,6 +2141,17 @@ xfs_fs_reconfigure(
->  		mp->m_maxagi = xfs_set_inode_alloc(mp, mp->m_sb.sb_agcount);
->  	}
-> 
-> +	/*
-> +	 * Now that mp has been modified according to the remount options,
-> +	 * we do a final option validation with xfs_finish_flags()
-> +	 * just like it is done during mount. We cannot use
-> +	 * xfs_finish_flags()on new_mp as it contains only the user
-> +	 * given options.
-> +	 */
-> +	error = xfs_finish_flags(mp);
-> +	if (error)
-> +		return error;
+> +_fixed_by_kernel_commit 6aecd91a5c5b \
+> +       "btrfs: avoid NULL pointer dereference if no valid extent tree"
 > +
->  	/* ro -> rw */
->  	if (xfs_is_readonly(mp) && !(flags & SB_RDONLY)) {
->  		error = xfs_remount_rw(mp);
+> +_require_scratch
+> +_scratch_mkfs >> $seqres.full
+> +
+> +_try_scratch_mount "-o ro,rescue=3Dignoredatacsums" > /dev/null 2>&1 ||
+> +       _notrun "rescue=3Dignoredatacsums mount option not supported"
+> +
+> +# For unpatched kernel this will cause NULL pointer dereference and cras=
+h the kernel.
+> +$BTRFS_UTIL_PROG scrub start -Br $SCRATCH_MNT >> $seqres.full 2>&1
+> +# For patched kernel scrub will be gracefully rejected.
+> +if [ $? -eq 0 ]; then
+> +       echo "read-only scrub should fail but didn't"
+> +fi
+> +
+> +_scratch_unmount
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/336.out b/tests/btrfs/336.out
+> new file mode 100644
+> index 00000000..9263628e
+> --- /dev/null
+> +++ b/tests/btrfs/336.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 336
+> +Silence is golden
 > --
-> 2.43.5
-> 
-> 
+> 2.47.1
+>
+>
