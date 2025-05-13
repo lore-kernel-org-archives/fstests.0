@@ -1,163 +1,224 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69E142BF98C
-	for <fstests@vger.kernel.org>; Tue, 13 May 2025 16:34:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BEEB1E51FF
+	for <fstests@vger.kernel.org>; Tue, 13 May 2025 23:03:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747154095; cv=none; b=c3T2Rfb2ezM8VjIC38FcLfekQ1jPuEpVpifDoHyN3i2V0rm+xLW3tAta+XMlTCkzzpL5MsMner45e/zt21qBq/IfdwCekgDibkvEk7xH53woMc8lBQJ+eCcz75vj5Q7NO3GhW5HqXGaQbxNWTvYDh32WvTW8qPN+meG7UD0Td84=
+	t=1747177408; cv=none; b=nQah5sndsUPDyhITxxyuNB7RT/yDhkIh/+ETELiPX8yAz4OwvPwf6TIWwjubFyTCSZ+XQKbx1d903zdkPWLnJsz14pziYxyltu3hFdnvVKGBlDhSRfqULOw/dpQAH4lVlzf8t/ARqX9Hmo+1SK0otWAC25T/QMR9yacReLzr+dA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747154095; c=relaxed/simple;
-	bh=mmWvqiv2nM0rEUMNW0yFAypeCdb7CvFMus/oUjQEJvk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OM9wpO3zam8plomKF9pmtm8aGfj7NisJxqnvBOWdvg22R/BsoZLzIRx6s4MXbbO8yVkGJNcVg5eCjXJZX+T9LrJI9a5u8oxzh3WYho89BrWgKdFDCn33ssJyITgvsbEVOTfANrvv3+1jJ6aujwGxqQNvCG3xJStCuqf/HKghCyo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=eRS4WeX+; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=9Alw44li; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=eRS4WeX+; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=9Alw44li; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	s=arc-20240116; t=1747177408; c=relaxed/simple;
+	bh=QfpYBqEgZXQUfAPkRyz7ayZgD/ReGr8O3T/wEukouGA=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=IR9NrAf1j56FrwEPxuVgDuE9K35Uvtic4nlVP3y2sngnxz8+Io74Lb+Tbo7SLfhAq8MmJmKh9AQHDdOjIF0Y4wv9o/XyWcFvhp9J+b5VMSymw0mcDXZ3sHhKnkJyO3BfxTsmtV6LNMh2OWiKk5Ol0vadm4lxfIcP4Vw4O0BozbQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=Ak6UjYlt; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=Ak6UjYlt; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="eRS4WeX+";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="9Alw44li";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="eRS4WeX+";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="9Alw44li"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Ak6UjYlt";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Ak6UjYlt"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 88C091F385;
-	Tue, 13 May 2025 16:34:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1747154091;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=BRjAqM3vN4NnbQDdgaCpQJnHRF5Y0RZhHuTwlo3xMno=;
-	b=eRS4WeX+W9OwGsFYc+3t2Y/F8B46Ki1tuS6f65BYTGatTlJdW9xgas8JlMdPzHMq06Ds94
-	GVLt5mQl96+CY8CJj2dCttTvNBRe9b8g4mygfHk4sTnPmednm5n1zyqWeaXyArwfSsgV9k
-	IgkZHtaAAI9p6aQD+eyAH0lHqZPkDIE=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1747154091;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=BRjAqM3vN4NnbQDdgaCpQJnHRF5Y0RZhHuTwlo3xMno=;
-	b=9Alw44lisqNgyFt0GWUgJeDxBReRsvAGoo2z9NISPS4YeC3rhdvRRZu/ShheCMLSBIeRhd
-	61Cbu0nVBOJFFRAQ==
-Authentication-Results: smtp-out2.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1747154091;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=BRjAqM3vN4NnbQDdgaCpQJnHRF5Y0RZhHuTwlo3xMno=;
-	b=eRS4WeX+W9OwGsFYc+3t2Y/F8B46Ki1tuS6f65BYTGatTlJdW9xgas8JlMdPzHMq06Ds94
-	GVLt5mQl96+CY8CJj2dCttTvNBRe9b8g4mygfHk4sTnPmednm5n1zyqWeaXyArwfSsgV9k
-	IgkZHtaAAI9p6aQD+eyAH0lHqZPkDIE=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1747154091;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=BRjAqM3vN4NnbQDdgaCpQJnHRF5Y0RZhHuTwlo3xMno=;
-	b=9Alw44lisqNgyFt0GWUgJeDxBReRsvAGoo2z9NISPS4YeC3rhdvRRZu/ShheCMLSBIeRhd
-	61Cbu0nVBOJFFRAQ==
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 66193211E0;
+	Tue, 13 May 2025 23:03:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1747177404; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=ZEvNSYzTHXxy3yyJGsnfgBPn+Qb2sFShi2xTrl2y7k4=;
+	b=Ak6UjYltn1v9Ig4T0zb3en3kyT+ArfTPwjf5Uc8ThpW0T7xOeJGQO9tB6xlwPVc3gJBvJX
+	PdUJbVGhnu7nqMqiJ0KBjXsqd+xEIX9siJKbwC5awueHlmjnXFqGnSpjn7/1PyZJBNHGq/
+	+QAvw20ZsoHrk0AWCvk8nXkiJYnXrro=
+Authentication-Results: smtp-out1.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=Ak6UjYlt
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1747177404; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=ZEvNSYzTHXxy3yyJGsnfgBPn+Qb2sFShi2xTrl2y7k4=;
+	b=Ak6UjYltn1v9Ig4T0zb3en3kyT+ArfTPwjf5Uc8ThpW0T7xOeJGQO9tB6xlwPVc3gJBvJX
+	PdUJbVGhnu7nqMqiJ0KBjXsqd+xEIX9siJKbwC5awueHlmjnXFqGnSpjn7/1PyZJBNHGq/
+	+QAvw20ZsoHrk0AWCvk8nXkiJYnXrro=
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 6180C137E8;
-	Tue, 13 May 2025 16:34:51 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 67BAB137E8;
+	Tue, 13 May 2025 23:03:23 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id vysZF6t0I2jqGwAAD6G6ig
-	(envelope-from <dsterba@suse.cz>); Tue, 13 May 2025 16:34:51 +0000
-Date: Tue, 13 May 2025 18:34:46 +0200
-From: David Sterba <dsterba@suse.cz>
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: Anand Jain <anand.jain@oracle.com>, Qu Wenruo <wqu@suse.com>,
-	linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: btrfs/220: do not use nologreplay when possible
-Message-ID: <20250513163446.GB9140@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <20250513070749.265519-1-wqu@suse.com>
- <22cdcf91-92af-45f9-ab5b-dc08455f0ba9@oracle.com>
- <05ac7288-ca4a-4da4-8cb4-54389021640f@suse.com>
- <760d5562-a9d2-4e64-9032-dd4008aeaf0e@oracle.com>
- <beee9078-8d6b-4788-9cb1-0d7ee6a6b78e@gmx.com>
+	id 5fq3CrvPI2jMAQAAD6G6ig
+	(envelope-from <wqu@suse.com>); Tue, 13 May 2025 23:03:23 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH v2] fstests: btrfs/020: use device pool to avoid busy TEST_DEV
+Date: Wed, 14 May 2025 08:33:01 +0930
+Message-ID: <20250513230301.69503-1-wqu@suse.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <beee9078-8d6b-4788-9cb1-0d7ee6a6b78e@gmx.com>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Rspamd-Queue-Id: 66193211E0
 X-Spam-Flag: NO
-X-Spam-Score: -4.00
+X-Spam-Score: -3.01
 X-Spam-Level: 
-X-Spamd-Result: default: False [-4.00 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
 	NEURAL_HAM_LONG(-1.00)[-1.000];
-	HAS_REPLYTO(0.30)[dsterba@suse.cz];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
 	NEURAL_HAM_SHORT(-0.20)[-1.000];
 	MIME_GOOD(-0.10)[text/plain];
-	FREEMAIL_TO(0.00)[gmx.com];
-	RCVD_TLS_ALL(0.00)[];
+	MX_GOOD(-0.01)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
 	ARC_NA(0.00)[];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
 	MIME_TRACE(0.00)[0:+];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	TO_DN_SOME(0.00)[];
-	FREEMAIL_ENVRCPT(0.00)[gmx.com];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	RCPT_COUNT_FIVE(0.00)[5];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	RCPT_COUNT_TWO(0.00)[2];
+	RCVD_TLS_ALL(0.00)[];
+	DKIM_TRACE(0.00)[suse.com:+];
+	RCVD_COUNT_TWO(0.00)[2];
 	FROM_EQ_ENVFROM(0.00)[];
 	FROM_HAS_DN(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	REPLYTO_ADDR_EQ_FROM(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	REPLYTO_DOM_NEQ_TO_DOM(0.00)[]
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	TO_DN_NONE(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	ASN(0.00)[asn:25478, ipnet:::/0, country:RU];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:dkim,suse.com:mid,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo]
+X-Rspamd-Action: no action
 
-On Tue, May 13, 2025 at 08:23:54PM +0930, Qu Wenruo wrote:
-> 
-> 
-> 在 2025/5/13 19:46, Anand Jain 写道:
-> > On 13/5/25 16:56, Qu Wenruo wrote:
-> [...]
-> >> I'd say, if some option is deprecated, we should not use it at all.
-> >>
-> > 
-> > It's marked as deprecated, but the code still needs testing.
-> > Also, since fstests runs on stable LTS kernels too, it's better
-> > not to remove it yet.
-> 
-> For older kernels without "rescue=" alias, it will not cause any problem 
-> at all, because it will set "enable_rescue_nologreplay" to false and 
-> completely skip anything related to "rescue=nologreplay"
-> 
-> But different vice-verse, as "rescue=nologreplay" still touches the 
-> older one.
-> I do not think we will keep the "nologreplay" support in the future very 
-> soon.
-> 
-> In the past we had some problem relateds to "norecovery" mount option, 
-> deprecated it and reverted back (some other projects still relies on 
-> this mount option, and all other fses have exactly the same named one).
-> 
-> But "nologreplay" is btrfs specific, we can remove it any time in the 
-> future.
-> 
-> I think this is the perfect time to considering removing "nologreplay" 
-> completely.
+[BUG]
+There is an internal report about btrfs/020 failure, the 020.full looks
+like this:
 
-Standalone 'nologreplay' yes. The warning has been there since
-74ef00185eb86425215 5.9 from 2020, which is 5.10 stable. This should be
-enough time.
+  ERROR: ioctl(DEV_REPLACE_START) failed on "/opt/test/020.5968.mnt": Read-only file system
+
+  Performing full device TRIM /dev/loop8 (256.00MiB) ...
+  _check_btrfs_filesystem: filesystem on /dev/loop0 is inconsistent
+  *** fsck.btrfs output ***
+  ERROR: /dev/loop0 is currently mounted, use --force if you really intend to check the filesystem
+  Opening filesystem to check...
+  *** end fsck.btrfs output
+  *** mount output ***
+  [...]
+  /dev/loop0 on /opt/test type btrfs (rw,relatime,seclabel,ssd,discard=async,space_cache=v2,subvolid=5,subvol=/)
+  *** end mount output
+
+[CAUSE]
+Unfortunately I can not reproduce the situation here, but it looks like
+by somehow we didn't unmount the TEST_DEV before checking it.
+
+This may or may not be caused by the fact we're using loop back devices
+on TEST_MNT.
+
+[FIX]
+For this particluar test case, we really do not need to use TEST_MNT and
+create complex loopback devices.
+
+We can just ask for 3 devices from the device pool, use 2 for the raid1
+fs, and then use the spare one for dev replace.
+
+This should greately simplify the test case setup and cleanup, thus
+avoid the above busy TEST_DEV and false test failure.
+
+Furthermore use the golden output to match the error message, and since
+we're here also handle a bug in btrfs-progs where the error message is
+incorrectly split into two lines.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+Changelog:
+v2:
+- Use golden output to match the error
+- Add a filter to filter out the unexpected new line
+  Btrfs-progs will also get a fix for the incorrect line break.
+---
+ tests/btrfs/020     | 47 +++++++++++++++------------------------------
+ tests/btrfs/020.out |  2 +-
+ 2 files changed, 17 insertions(+), 32 deletions(-)
+
+diff --git a/tests/btrfs/020 b/tests/btrfs/020
+index 7e5c6fd7..3b5f9f2f 100755
+--- a/tests/btrfs/020
++++ b/tests/btrfs/020
+@@ -12,44 +12,29 @@
+ . ./common/preamble
+ _begin_fstest auto quick replace volume
+ 
+-# Override the default cleanup function.
+-_cleanup()
+-{
+-	cd /
+-	rm -f $tmp.*
+-	$UMOUNT_PROG $loop_mnt
+-	_destroy_loop_device $loop_dev1
+-	losetup -d $loop_dev2 >/dev/null 2>&1
+-	_destroy_loop_device $loop_dev3
+-	rm -rf $loop_mnt
+-	rm -f $fs_img1 $fs_img2 $fs_img3
+-}
+-
+ . ./common/filter
+ 
+-_require_test
+-_require_loop
++_require_scratch_dev_pool 3
+ 
+-echo "Silence is golden"
++_fixed_by_kernel_commit bbb651e469d9 \
++	"Btrfs: don't allow the replace procedure on read only filesystems"
+ 
+-loop_mnt=$TEST_DIR/$seq.$$.mnt
+-fs_img1=$TEST_DIR/$seq.$$.img1
+-fs_img2=$TEST_DIR/$seq.$$.img2
+-fs_img3=$TEST_DIR/$seq.$$.img3
+-mkdir $loop_mnt
+-$XFS_IO_PROG -f -c "truncate 256m" $fs_img1 >>$seqres.full 2>&1
+-$XFS_IO_PROG -f -c "truncate 256m" $fs_img2 >>$seqres.full 2>&1
+-$XFS_IO_PROG -f -c "truncate 256m" $fs_img3 >>$seqres.full 2>&1
++_scratch_dev_pool_get 2
++_spare_dev_get
+ 
+-loop_dev1=`_create_loop_device $fs_img1`
+-loop_dev2=`_create_loop_device $fs_img2`
+-loop_dev3=`_create_loop_device $fs_img3`
++_scratch_pool_mkfs -m raid1 -d raid1 >> $seqres.full 2>&1
++_scratch_mount -o ro
+ 
+-_mkfs_dev -m raid1 -d raid1 $loop_dev1 $loop_dev2 >>$seqres.full 2>&1
+-_mount -o ro $loop_dev1 $loop_mnt
++# The replace is expected to fail.
++#
++# There is an unexpected newline at the middle of the error message, filter it out
++# to handle older progs (unexpected new line) and newer ones (new line removed).
++$BTRFS_UTIL_PROG replace start -B 2 $SPARE_DEV $SCRATCH_MNT 2>&1 >> $seqres.full | \
++	sed -e "/^$/d" | _filter_scratch
+ 
+-$BTRFS_UTIL_PROG replace start -B 2 $loop_dev3 $loop_mnt >>$seqres.full 2>&1 && \
+-_fail "FAIL: Device replaced on RO btrfs"
++_scratch_unmount
++_spare_dev_put
++_scratch_dev_pool_put
+ 
+ status=0
+ exit
+diff --git a/tests/btrfs/020.out b/tests/btrfs/020.out
+index 20d7944e..a3ede235 100644
+--- a/tests/btrfs/020.out
++++ b/tests/btrfs/020.out
+@@ -1,2 +1,2 @@
+ QA output created by 020
+-Silence is golden
++ERROR: ioctl(DEV_REPLACE_START) failed on "SCRATCH_MNT": Read-only file system
+-- 
+2.49.0
+
