@@ -1,155 +1,160 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oa1-f43.google.com (mail-oa1-f43.google.com [209.85.160.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77E5628F3
-	for <fstests@vger.kernel.org>; Tue, 13 May 2025 03:47:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1DEC8F5C
+	for <fstests@vger.kernel.org>; Tue, 13 May 2025 05:01:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747108076; cv=none; b=GXhxvNWhv+DPfPwztevzKr8WvPPtzoJdYFC7PANBacxxpGb2UxDnh+BskRpS3RH7k1CM6CP3d+8DiEWNa84pl/8WphNWCYeD/zOtr+bOwSzTFLp/rLvEOeDr4L50jfS/XDJmPxA/zVzSFZzcg2qPhSYB0k1nquSXJ6fz9jHrRGM=
+	t=1747112488; cv=none; b=GZSOPpdaoKo9j3qj/wBbOFi6A864LhY7KvEVU4m4bSI2tio1HuOkkG4Iz51uGji9bT/Tvizh3qr//86UgN0WSFY1yjLJs2gAyQbZOtuOhGYKMkvggYZzafzhpAHZqQ2zF3WGXXI63hek4mN8+xtJb5WEUszrY/IAX9TGs9jEmaE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747108076; c=relaxed/simple;
-	bh=hRH+6aWhH21hs+2kU0RbjkWjO41F/xMKBMdOnJ3rnm8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=PNEDQn/fFxFN9YSF6R2Cr0y0IFBonTuYlREaTIijQtEVqIj5kEE39bjD42hJCZvswccy19r7vYXtNxCcJI5Zt5MUfj66UYFomNWI7s76NVvxtZIOYIPUqBlUyfSEp9/vHkv2bZB+7JsaYHT8o137ek/uPY+ZyEbYB/JXCzIHHCY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fQTvWbxQ; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1747112488; c=relaxed/simple;
+	bh=LLhB9DJoVIrHfc32PpK750Mk3TSOxKWWPlLObR1gJAU=;
+	h=Content-Type:From:Mime-Version:Subject:Date:Message-Id:References:
+	 Cc:In-Reply-To:To; b=Pkievi27tERJ3WPRl8ezlsE0wOzjQ+pLWBjAb55CI47yV8hIXkbBAIls2tZpf1LKZuJmZK1lpp7yYTXOuXxCvvgEMl9qN1FmgZjUxY5nEwdJLh6xWYZkI42aWZLlhVJkMkkTfI5GUm2Q4fDkI1XmUx8cL78Wa5+pHDN26Ir5xnk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kKgnn6Ln; arc=none smtp.client-ip=209.85.160.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fQTvWbxQ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1747108073;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=4dp+Me7leNaFPo8EMiSbqWzWf1Bq9HMOIH5exuvOFAc=;
-	b=fQTvWbxQJs3fA+5R894etZmZBtyfduBo8rM/jsVxrGXjIpwzNHnzaEsqcyDVQSkh4S8EQ5
-	qAcSJmd4Z19BsGKZl92+64tWgwcXNWvW5xszHd2cZGz1uqPAZcpy7HLLZlviFC6e3mLjLa
-	VUMlCHee+Ndtace8h8BH6gOK++I3LgE=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-425-sWwz7YVmOuGvc3ByeXEVvg-1; Mon, 12 May 2025 23:47:51 -0400
-X-MC-Unique: sWwz7YVmOuGvc3ByeXEVvg-1
-X-Mimecast-MFC-AGG-ID: sWwz7YVmOuGvc3ByeXEVvg_1747108071
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-22e3abea7e8so54302705ad.2
-        for <fstests@vger.kernel.org>; Mon, 12 May 2025 20:47:51 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kKgnn6Ln"
+Received: by mail-oa1-f43.google.com with SMTP id 586e51a60fabf-2d0920ce388so2704284fac.0
+        for <fstests@vger.kernel.org>; Mon, 12 May 2025 22:01:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1747112486; x=1747717286; darn=vger.kernel.org;
+        h=to:in-reply-to:cc:references:message-id:date:subject:mime-version
+         :from:content-transfer-encoding:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=igthEGHXr8o/mXK09jD+sScyXDFn+/Amne0ueFvtr8U=;
+        b=kKgnn6Ln/Km7kPrnNCftFSh4nE36tEU8knY/Gku/1OzVMLCz9zgzlBNPPW/rR7B2vh
+         vmipInAqMy9EKIMBGYv1ba/w9hfiXnkzj6SdkCAnbmt1cOTKgNlFu888S/lDMlaCbY1f
+         s3XTBNEJ6biylgzrVmnQkMee/JoFZ7FgedbTuBJ/OdRhAC6BcE/i0+8Y9fDHfJR0uZ9f
+         LuVGSNlsYxInDVIna0GOObCTa+g83Th4bbAh2VNym4G6FXadi2QCAZPcH9PiDRqO5Uyd
+         m9DwTnQJtyWoOhJ+JaQBg63QV+wQ1Wy8AJGT9tfy2ZtnR2HtcYEbisuDqbu7Iw3JdjpH
+         ywfg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747108071; x=1747712871;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=4dp+Me7leNaFPo8EMiSbqWzWf1Bq9HMOIH5exuvOFAc=;
-        b=sE/X/JzA/4CY90ePVDsLvgq/sex+T/KikEVPuMm/SKJS/drUjjsInBQKbij2UZzxJk
-         W3nalmvTh3lhrH4H7sd3X6z/vgy0V24bGYJ2WG3tb1dJw1ej7+rnsvEE0RCbfIj15hoa
-         YUJk5HsNyRVVZoqTEBNKnsLAVnznxY9wx1Tm4PN5rWj0BrVsTDD1rfpQe/Sqz2iqSoSK
-         rgJrriwX8DnDAgsGjpayk8mZdnLJgr5pMHskOfR4pNPVZ5EGSygiBwCQmu9lCRjo2WIi
-         iwudWRX8tH56azN/LDSJVWcHIcBJDg8kbtzBAJzn1doq0xfhNiDuCGnWku84KypgmaJD
-         U25A==
-X-Forwarded-Encrypted: i=1; AJvYcCVe63lEyQq9rHvaiJsIVuiCES6UZgsgT3zyqE624W5S5QXR78Ju/mdD1R/IXb9TstcDbj9ko7Jx@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywlse47kp7OeH+66zPxQHXJElMNIl09vN1rIX88A/aSYyET1MQh
-	yKld8SL/p89dZNk4TPTef5k2CSJXBLr3SENTjywEml8f685pR6vZahsXIKOoILAVhg506C17zWB
-	C7OzH9PGFzEKIfUvFsyoaoaAP3YSQtij8MFiF/cKcW4ax82GhGuxV8qM=
-X-Gm-Gg: ASbGncsV7YFNQxgWWdBV/jxLmdm4NTyvHC2B6fury5Jfy1PzmvtdsDuYlrujGDRDyE2
-	N7B87QgxvPdzQISaatahAWq7dkQKd3d9exPqqZCwFV+BwLRDUHNEGJ7lEB/JqkrnPIndWDLReGn
-	JBm8bvsuhAvpxCtCbCaeRWeCX/yuAgQu7TrDx3E49SrW82zzKMcaLWsnj48pJOfEyov3zccR4HA
-	e/JTkFmtP/nke5dBFmUoD23VqOA+MZXtFsHjMyhVHj5oE78royqW8JbKFiBmgau/CMi5TbOZY8H
-	5lqo+ZN8Ed4oDXjdwzGzOSnawsCUt1P99aFgTDqtwKhXsD0Ijm/q
-X-Received: by 2002:a17:903:2f88:b0:21f:988d:5758 with SMTP id d9443c01a7336-22fc8d98a75mr280449745ad.35.1747108070705;
-        Mon, 12 May 2025 20:47:50 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEn4SUh4CywVMmhVcV/nqkmdj9Gy9a7na0ooAGo3LbtuP+Ld6nTEEatIh8H2Q2WCI7LOaMktQ==
-X-Received: by 2002:a17:903:2f88:b0:21f:988d:5758 with SMTP id d9443c01a7336-22fc8d98a75mr280449495ad.35.1747108070334;
-        Mon, 12 May 2025 20:47:50 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22fc828b445sm70800205ad.181.2025.05.12.20.47.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 12 May 2025 20:47:49 -0700 (PDT)
-Date: Tue, 13 May 2025 11:47:46 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>,
-	Leah Rumancik <leah.rumancik@gmail.com>, fstests@vger.kernel.org
-Subject: Re: [PATCH] selftest: add a test that flakes
-Message-ID: <20250513034746.omeueunfdx7asgpp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250510004256.451058-1-leah.rumancik@gmail.com>
- <434c560c632558cdc32b45f2aef54c68ca6c0baa.camel@gmail.com>
- <20250512151949.GR25667@frogsfrogsfrogs>
+        d=1e100.net; s=20230601; t=1747112486; x=1747717286;
+        h=to:in-reply-to:cc:references:message-id:date:subject:mime-version
+         :from:content-transfer-encoding:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=igthEGHXr8o/mXK09jD+sScyXDFn+/Amne0ueFvtr8U=;
+        b=hmcKdh7Rnl0RDkq8a3SHwNBavnl5moWFkVQZ+nAmVoLJ+0yAKRafv/cKd5t1uuLxhk
+         ysMvr/1IRrfMMW/AaiGMSJMMsBagLzcNhtmXN/uCUw5zmvJM/gRzMbh0/h2j8eKLrTuj
+         S9SARPNDkTBuzHc5Pq6fizTrEqCTZeTGlZF54qSKpOuOHqa4hZrjQMThq0tuX6lKCIrQ
+         kpzES3jT51bAJRzoxQx2taneYhK8vUrees1JIU/CHep51C4qVQazgnV+FI8zfq/lJxTI
+         pR7yjCiUTh7SspkZCdnnDCAOvKvypufHCBgqKpD2jnJo0iQpWKG849YCBBseFtWHx9Wt
+         1hmA==
+X-Forwarded-Encrypted: i=1; AJvYcCVeNcIqKr60oYWiQknE10gWJTz7RyZ7K/GwtlUDnl3G1W6j56N6dWTI92pnApIaGKu873RPH9Jf@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz7f1O5rVcvoDaedXqusl8uB5KA1+Oys26MNbVgtigofU0vXIRn
+	qaICbbirQJGwQURQAzIXxXr06woh9FzU+rIqKlRsXtDbetabEIZe
+X-Gm-Gg: ASbGncvY6LwdsfMm1bwjbWkKI+q4seKWumI75vKS8Sxw1W0ydtCKnEMRMttGNuaaIWO
+	igcsykhUkyKDdX+4ei5gjDslJ0uY6GO8DT7ExBbY5LIPPS+GXMY+RGc/F3A0QA/4Ugx8i4EkOBW
+	s9kSXkB1dSiTMBJcDI7NhqplmqsCtvT62AiecpBDgiGa8oDA3wNHHSKV3HBot2CWP5O+p8I54A5
+	i8AgBqSF++mtU3sA9PPBl1HTsfu+j8FOugIy4hHQBmSuo8BKFL88NazS8LyAwJUuT2Fj/nfy2PZ
+	HaODXvu9f00slnUXk8aUS2OLQG/McWbglI10Nno8fyEpZ1Bke64RaeXReJrXmEi4M3CwEGDFP08
+	sZBHha6P0B+8N
+X-Google-Smtp-Source: AGHT+IFSnldnKwHJf9msT1ygua1yzLRyreThi1JW253rDXZDWTsBG01rKQGHUUTPUT9mSGW+OO6XhA==
+X-Received: by 2002:a05:6870:9114:b0:2b7:d3f1:dc72 with SMTP id 586e51a60fabf-2dba44cf72cmr10376219fac.29.1747112485606;
+        Mon, 12 May 2025 22:01:25 -0700 (PDT)
+Received: from smtpclient.apple ([2600:1700:3ec8:dd30:f837:792c:d08:e70c])
+        by smtp.gmail.com with ESMTPSA id 586e51a60fabf-2dba0797479sm2166243fac.21.2025.05.12.22.01.24
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 12 May 2025 22:01:25 -0700 (PDT)
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+From: Leah <leah.rumancik@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250512151949.GR25667@frogsfrogsfrogs>
+Mime-Version: 1.0 (1.0)
+Subject: Re: [PATCH] selftest: add a test that flakes
+Date: Mon, 12 May 2025 22:01:11 -0700
+Message-Id: <C7DC357D-55CC-4B29-8DF8-DAFC9B205F78@gmail.com>
+References: <20250513034746.omeueunfdx7asgpp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Cc: "Darrick J. Wong" <djwong@kernel.org>,
+ Nirjhar Roy <nirjhar.roy.lists@gmail.com>, fstests@vger.kernel.org
+In-Reply-To: <20250513034746.omeueunfdx7asgpp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+To: Lang Zorro <zlang@redhat.com>
+X-Mailer: iPhone Mail (22E252)
 
-On Mon, May 12, 2025 at 08:19:49AM -0700, Darrick J. Wong wrote:
-> On Mon, May 12, 2025 at 07:32:15PM +0530, Nirjhar Roy (IBM) wrote:
-> > On Fri, 2025-05-09 at 17:42 -0700, Leah Rumancik wrote:
-> > > Add selftest/007 which should fail about half of the time.
-> > 
-> > I have already posted something similar[1] a couple of months back. It got an approval didn't get
-> > picked up. 
-> > [1] https://lore.kernel.org/all/20250113164639.GG1251194@frogsfrogsfrogs/
-> 
-> Aha, I /was/ thinking "Gee , haven't I reviewed this before?"
+Great! Thanks everyone!
 
-Oh, that patchset is marked with RFC, and most of patches aren't acked (except
-the 1/5), so I didn't merge it and wait later updates.
+- leah
 
-> 
-> Zorro: any plans to merge
-> https://lore.kernel.org/all/03ba6c154c9e2cf3d68131b3af2ca12b96663d25.1736496620.git.nirjhar.roy.lists@gmail.com/ ?
-
-Sure, I'll pick up that single patch to merge at first, as it's gotten enough
-acks :)
-
-Thanks,
-Zorro
-
-> 
-> --D
-> 
-> > --NR
-> > > 
-> > > Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
-> > > ---
-> > >  tests/selftest/007     | 14 ++++++++++++++
-> > >  tests/selftest/007.out |  3 +++
-> > >  2 files changed, 17 insertions(+)
-> > >  create mode 100755 tests/selftest/007
-> > >  create mode 100644 tests/selftest/007.out
-> > > 
-> > > diff --git a/tests/selftest/007 b/tests/selftest/007
-> > > new file mode 100755
-> > > index 00000000..0e983b37
-> > > --- /dev/null
-> > > +++ b/tests/selftest/007
-> > > @@ -0,0 +1,14 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +#
-> > > +# FS QA Test No. 007
-> > > +#
-> > > +# A test that flakes due to occasional output mismatch
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest selftest
-> > > +
-> > > +echo "I am intentionally flaky"
-> > > +echo $((RANDOM % 2))
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/selftest/007.out b/tests/selftest/007.out
-> > > new file mode 100644
-> > > index 00000000..0b5e439a
-> > > --- /dev/null
-> > > +++ b/tests/selftest/007.out
-> > > @@ -0,0 +1,3 @@
-> > > +QA output created by 007
-> > > +I am intentionally flaky
-> > > +0
-> > 
-> > 
-> 
-
+> On May 12, 2025, at 8:47=E2=80=AFPM, Zorro Lang <zlang@redhat.com> wrote:
+>=20
+> =EF=BB=BFOn Mon, May 12, 2025 at 08:19:49AM -0700, Darrick J. Wong wrote:
+>>> On Mon, May 12, 2025 at 07:32:15PM +0530, Nirjhar Roy (IBM) wrote:
+>>> On Fri, 2025-05-09 at 17:42 -0700, Leah Rumancik wrote:
+>>>> Add selftest/007 which should fail about half of the time.
+>>>=20
+>>> I have already posted something similar[1] a couple of months back. It g=
+ot an approval didn't get
+>>> picked up.
+>>> [1] https://lore.kernel.org/all/20250113164639.GG1251194@frogsfrogsfrogs=
+/
+>>=20
+>> Aha, I /was/ thinking "Gee , haven't I reviewed this before?"
+>=20
+> Oh, that patchset is marked with RFC, and most of patches aren't acked (ex=
+cept
+> the 1/5), so I didn't merge it and wait later updates.
+>=20
+>>=20
+>> Zorro: any plans to merge
+>> https://lore.kernel.org/all/03ba6c154c9e2cf3d68131b3af2ca12b96663d25.1736=
+496620.git.nirjhar.roy.lists@gmail.com/ ?
+>=20
+> Sure, I'll pick up that single patch to merge at first, as it's gotten eno=
+ugh
+> acks :)
+>=20
+> Thanks,
+> Zorro
+>=20
+>>=20
+>> --D
+>>=20
+>>> --NR
+>>>>=20
+>>>> Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+>>>> ---
+>>>> tests/selftest/007     | 14 ++++++++++++++
+>>>> tests/selftest/007.out |  3 +++
+>>>> 2 files changed, 17 insertions(+)
+>>>> create mode 100755 tests/selftest/007
+>>>> create mode 100644 tests/selftest/007.out
+>>>>=20
+>>>> diff --git a/tests/selftest/007 b/tests/selftest/007
+>>>> new file mode 100755
+>>>> index 00000000..0e983b37
+>>>> --- /dev/null
+>>>> +++ b/tests/selftest/007
+>>>> @@ -0,0 +1,14 @@
+>>>> +#! /bin/bash
+>>>> +# SPDX-License-Identifier: GPL-2.0
+>>>> +#
+>>>> +# FS QA Test No. 007
+>>>> +#
+>>>> +# A test that flakes due to occasional output mismatch
+>>>> +#
+>>>> +. ./common/preamble
+>>>> +_begin_fstest selftest
+>>>> +
+>>>> +echo "I am intentionally flaky"
+>>>> +echo $((RANDOM % 2))
+>>>> +status=3D0
+>>>> +exit
+>>>> diff --git a/tests/selftest/007.out b/tests/selftest/007.out
+>>>> new file mode 100644
+>>>> index 00000000..0b5e439a
+>>>> --- /dev/null
+>>>> +++ b/tests/selftest/007.out
+>>>> @@ -0,0 +1,3 @@
+>>>> +QA output created by 007
+>>>> +I am intentionally flaky
+>>>> +0
+>>>=20
+>>>=20
+>>=20
+>=20
