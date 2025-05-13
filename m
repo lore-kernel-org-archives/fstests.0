@@ -1,138 +1,130 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 849261DD889
-	for <fstests@vger.kernel.org>; Tue, 13 May 2025 05:05:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4F3322EE5;
+	Tue, 13 May 2025 05:19:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747112703; cv=none; b=BbMfufy//5y5jbK1oWF6RGGZWaeE/GAn3SmSJyjznM9gho7Q5CmuEZyclh2/lCfYgABPC7DObr3EfcA3Sci8oOdsKKdAsKnHmimjnRDAd+q+QCStGjP9qopS+klDLlpau5T27mfidLZlmP5Gl/II3NRTOoYYP10Dof2p2p19dfU=
+	t=1747113581; cv=none; b=a6+d9CHWb9JLBkxXAL/gwUulw6kXgDqk1SXKVx6U49MfkBqJqLxdpaSoRpzV82BXNWIaTg4rv+wL+COXHZBDqRsw5yGmyOUo1A4wwj3vJ7/YZpQ7TPz9DfgpMpitRDD5+znWKowj86BlhevUJx71Gk23BiauCWjBJYB/3MJe240=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747112703; c=relaxed/simple;
-	bh=vqWWnLBxLJIKrnf+iT+a0vYzAHahcCSgLs4PjrCjrN4=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=KPuTftlnxhI2ooN7RLpn7ufOu2ssXk2oIpJrrx/pcZNr6NxvM08g9zQGphUsxDi62jWAr/BYhcyo6AafIWnGlbMN2MNddFynAKdEeY0d8i+/tAQVVP1Ngq1/NZF+yBkLzsWlcTfkiKY5sxhHkAQ8T3Rx1u0YLQQwmtRHpCqr7pw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=JyaTaMBA; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=EvCDBuOy; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=JyaTaMBA; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=EvCDBuOy; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	s=arc-20240116; t=1747113581; c=relaxed/simple;
+	bh=lfsESqOgoRwfBiHv60b9CNrEZOrAqxPrD0gPOpU19+U=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Z234IGW6SPiPAGge4Dq0jkqhmzVWblXoVqNPGCp06GkPc6Skm6sYeHegS7PBtUPulzHuuJRv5RlGhJukajkhCrKDdsoF1ORtzz1cE81eZQ7Fk/p05aiarQ3YoAeAiUmQJw++CGS2683IMjMHDjkFZqFYBHsCamD9G4IdGREBJH4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=Yn4/2bYe; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="JyaTaMBA";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="EvCDBuOy";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="JyaTaMBA";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="EvCDBuOy"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id A7BB61F387;
-	Tue, 13 May 2025 05:04:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1747112699; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=1w0nmxjfSTrHPkRrAIU4rBHDXg60KKtX6FQe4+/vpsw=;
-	b=JyaTaMBAr8UgiCtG5TXKyuD0ygVgrdyW21fCG64vncwJQHPyh276W3ftbpU9cl03qNHAru
-	p7dZL0yVCkEpLaAfTZn/UwOo2GITgzu8PUEAU1807u9Q3WL1rxc3lR9WpT9M0I7LC2piCS
-	gnT120gY8BGp0aJ/p++5d8zaJ1ke914=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1747112699;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=1w0nmxjfSTrHPkRrAIU4rBHDXg60KKtX6FQe4+/vpsw=;
-	b=EvCDBuOy22GeSrafV/M5tqGMSvpz3+q+Wz//0RpeFTH0kVyo81p9FUWJupj3Mrrf9GExvW
-	2w5Evof8uwwnpZCw==
-Authentication-Results: smtp-out2.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1747112699; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=1w0nmxjfSTrHPkRrAIU4rBHDXg60KKtX6FQe4+/vpsw=;
-	b=JyaTaMBAr8UgiCtG5TXKyuD0ygVgrdyW21fCG64vncwJQHPyh276W3ftbpU9cl03qNHAru
-	p7dZL0yVCkEpLaAfTZn/UwOo2GITgzu8PUEAU1807u9Q3WL1rxc3lR9WpT9M0I7LC2piCS
-	gnT120gY8BGp0aJ/p++5d8zaJ1ke914=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1747112699;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=1w0nmxjfSTrHPkRrAIU4rBHDXg60KKtX6FQe4+/vpsw=;
-	b=EvCDBuOy22GeSrafV/M5tqGMSvpz3+q+Wz//0RpeFTH0kVyo81p9FUWJupj3Mrrf9GExvW
-	2w5Evof8uwwnpZCw==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 511A81386D;
-	Tue, 13 May 2025 05:04:57 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id HDKSAvnSImhrLAAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Tue, 13 May 2025 05:04:57 +0000
-Date: Tue, 13 May 2025 15:04:47 +1000
-From: David Disseldorp <ddiss@suse.de>
-To: Chao Yu <chao@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
- jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net, Daeho Jeong
- <daehojeong@google.com>
-Subject: Re: [PATCH v3] f2fs/013: test to check potential corruption on
- atomic_write file
-Message-ID: <20250513150447.70f61c98.ddiss@suse.de>
-In-Reply-To: <20250509060754.1677062-1-chao@kernel.org>
-References: <20250509060754.1677062-1-chao@kernel.org>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="Yn4/2bYe"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=03K7m5a1W13fmTRWGaI0aim1lcedCpAINqDepMP0y3Y=; b=Yn4/2bYevrExt7x5XZ/qCZDZF0
+	O15YaYQMx8fkGLspHEp7mOM262yLmG8bps8nI7RcIqlNvO/o/1cF0gtVVLdAGpG3QKh7GEE3rBDvH
+	xrDbn0d3EuMlUVbX52I9pegPi/nvupTbFz/uus9dXKOVVED/nmVURdZCNmPIKcmMp+FPVpC4MlP7A
+	sGGk+LNYLxj1apv88I5AHj0rRCHw74y80+b3Q+u71Y4EdGIPUDvItGdvOOgq4KZ+A4YaAyq8DPPrv
+	r3MQKVwm/nbAzIn48iQ1bSbAiXF40BI28PS3UNChxUONGhEj/6RyRgZfl0D6vxgiGE3VwqjvXYPJw
+	pt0RM1ng==;
+Received: from 2a02-8389-2341-5b80-3c00-8f88-6e38-56f1.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:3c00:8f88:6e38:56f1] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1uEi3F-0000000BNPY-1mBN;
+	Tue, 13 May 2025 05:19:37 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: zlang@kernel.org
+Cc: djwong@kernel.org,
+	hans.holmberg@wdc.com,
+	linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] xfs: skip test that want to mdrestore to block devices on zoned devices
+Date: Tue, 13 May 2025 07:19:33 +0200
+Message-ID: <20250513051933.752414-1-hch@lst.de>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Spam-Flag: NO
-X-Spam-Score: -3.30
-X-Spam-Level: 
-X-Spamd-Result: default: False [-3.30 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	TO_DN_SOME(0.00)[];
-	MISSING_XM_UA(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	FROM_HAS_DN(0.00)[];
-	RCPT_COUNT_FIVE(0.00)[6];
-	FROM_EQ_ENVFROM(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email,suse.de:mid,imap1.dmz-prg2.suse.org:helo]
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Fri,  9 May 2025 14:07:54 +0800, Chao Yu wrote:
+mdrestore doesn't work on zoned device, so skip tests using to
+pre-populate a file system image.
 
-> This is a regression testcase to check whether we will handle database
-> inode dirty status correctly:
-> 1. mount f2fs image w/ timeout fault injection option
-> 2. create a regular file, and write data into the file
-> 3. start transaction on the file (via F2FS_IOC_START_ATOMIC_WRITE)
-> 4. write transaction data to the file
-> 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
-> 6. meanwhile loop call fsync in parallel
-> Before f098aeba04c9 ("f2fs: fix to avoid atomicity corruption of atomic
-> file"), database file may become corrupted after atomic write while
-> there is concurrent dirty inode flush in background.
-> 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Cc: Daeho Jeong <daehojeong@google.com>
-> Signed-off-by: Chao Yu <chao@kernel.org>
+This was previously papered over by requiring fallocate, which got
+removed in commit eff1baf42a79 ("common/populate: drop fallocate mode 0
+requirement").
 
-Looks good.
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ common/populate |  2 +-
+ common/xfs      | 14 ++++++++++++++
+ tests/xfs/284   |  1 +
+ tests/xfs/598   |  1 +
+ 4 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/common/populate b/common/populate
+index 50dc75d35259..1c0dd03e4ac7 100644
+--- a/common/populate
++++ b/common/populate
+@@ -19,7 +19,7 @@ _require_populate_commands() {
+ 	"xfs")
+ 		_require_command "$XFS_DB_PROG" "xfs_db"
+ 		_require_command "$WIPEFS_PROG" "wipefs"
+-		_require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
++		_require_scratch_xfs_mdrestore
+ 		;;
+ 	ext*)
+ 		_require_command "$DUMPE2FS_PROG" "dumpe2fs"
+diff --git a/common/xfs b/common/xfs
+index 96c15f3c7bb0..4ac29a95812b 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -772,6 +772,20 @@ _scratch_xfs_mdrestore()
+ 	_xfs_mdrestore "$metadump" "$SCRATCH_DEV" "$logdev" "$rtdev" "$@"
+ }
+ 
++# Check if mdrestore to the scratch device is supported
++_require_scratch_xfs_mdrestore() {
++	_require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
++
++	# mdrestore can't restore to zoned devices
++        _require_non_zoned_device $SCRATCH_DEV
++	if [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ]; then
++		_require_non_zoned_device $SCRATCH_LOGDEV
++	fi
++	if [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ]; then
++		_require_non_zoned_device $SCRATCH_RTDEV
++	fi
++}
++
+ # Do not use xfs_repair (offline fsck) to rebuild the filesystem
+ _xfs_skip_offline_rebuild() {
+ 	touch "$RESULT_DIR/.skip_rebuild"
+diff --git a/tests/xfs/284 b/tests/xfs/284
+index 91c17690cabe..79bf80842234 100755
+--- a/tests/xfs/284
++++ b/tests/xfs/284
+@@ -27,6 +27,7 @@ _require_xfs_copy
+ _require_test
+ _require_scratch
+ _require_no_large_scratch_dev
++_require_scratch_xfs_mdrestore
+ 
+ function filter_mounted()
+ {
+diff --git a/tests/xfs/598 b/tests/xfs/598
+index 20a80fcb6b91..82a9a79208ab 100755
+--- a/tests/xfs/598
++++ b/tests/xfs/598
+@@ -28,6 +28,7 @@ _require_test
+ _require_scratch
+ _require_xfs_mkfs_ciname
+ _require_xfs_ciname
++_require_scratch_xfs_mdrestore
+ 
+ _scratch_mkfs -n version=ci > $seqres.full
+ _scratch_mount
+-- 
+2.47.2
+
