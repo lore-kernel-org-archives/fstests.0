@@ -1,205 +1,179 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDBD57E9
-	for <fstests@vger.kernel.org>; Tue, 13 May 2025 06:30:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 491261EB5F0
+	for <fstests@vger.kernel.org>; Tue, 13 May 2025 07:08:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747117830; cv=none; b=WUImaRBD1nda4rae6oJ9128T/iqPGkVFdYLFUXZq1tZwwHeQRaNkEiWLxToFNbEzyzFJi5YXZIld6t9hDHbuzuihm6YjdtGSzg315TPWG9bd2R5l+El92Vwd1CuEO5F4VG5MZ3o/wYWtogphUN+BtxXcY626hnBTZchmAcEsHXk=
+	t=1747120101; cv=none; b=f/Yfb9csrT+jEE9DXEzN3+7jubbLZQeH+Q73o5F8m1dWpFgdR6XWcCSU+eHAqQ4N2NU+femdjxvz2yEIUoETDalUOO6QU7gGGSlsjEIcm4Vokfc9asU9lB8AXBhgk+WYE6WgflBp6CYALfQQOs1Y1071zmus9GOtYvTgwebtqAQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747117830; c=relaxed/simple;
-	bh=r2KFiQRVige9nDSW/WzYxuDzzgVwSSMbD/KuXsDmdMc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TaBJ/MZzF8ZQuszgL4ZoLiACNzx3kZzno6NxzD9bEqYEGm/b6GnwKeMk9cXMQ77qR6QORGZP7JlQzCqKWO4dJezh+7hWGOQipDvZLIIwqVPX7OBzdNRoyTHJt6CkbLLOroONjjNDKe1LE2dGZb4nD9dG6BUqsKtuOBWEFY4ao+8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=GsSHiJjD; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1747120101; c=relaxed/simple;
+	bh=ZeDCdwLdkT63CDdyO8M5Bi6iUIgmanmbiluPQDL3I/s=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=Zkc0bUSDsQiHK4AuGiI3qwdu2DkFuvkwIqiKh4XaI/9BKQdM6H+zTgApxW6E0kaXHA/7tPmlIeOvWxOGAvTIMOKSA+/WynM3MI7NGi8J10t+sSyuvh4rONEK/bngllBXSs12qBywIWviV9MsParm70feqXQV+kehOMNFLfzznkI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=hUoMFTPY; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=hUoMFTPY; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GsSHiJjD"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1747117827;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=dUV/Ffk7DVBmw0rYl7ApHOAXVBazwYa38LSpmJcHTsw=;
-	b=GsSHiJjDwVFwfu75vtYaKfVJsKsYvC+2J7TSKBQhB2Y3xcE8YBEI7CubqtQDkhFA+YIN2P
-	QUBS/T4EtGu2rIh7UxHM0hzWP4bCT30jeOloNI7JTsL4ULBaBrF2GQ1+o76D3fD0Vz6tfH
-	K869R7cJLhp4jHse2lc/Xe0J5G2LN0I=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-587-ODPP6vAkNR-TFZzJL6MYGw-1; Tue, 13 May 2025 02:30:26 -0400
-X-MC-Unique: ODPP6vAkNR-TFZzJL6MYGw-1
-X-Mimecast-MFC-AGG-ID: ODPP6vAkNR-TFZzJL6MYGw_1747117825
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-7375e2642b4so3867391b3a.2
-        for <fstests@vger.kernel.org>; Mon, 12 May 2025 23:30:26 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747117825; x=1747722625;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=dUV/Ffk7DVBmw0rYl7ApHOAXVBazwYa38LSpmJcHTsw=;
-        b=uFotI2krsFtKyqWE5Xfh5rE+Jz2LlEE58wAAksUypQTYAj7jNilpTw40uAUum/r3hm
-         gWLZVFYqW3Ck5l4kFlGDD/4PTsXJ5ZH8xo1L3Y6boecvKbSLf8yMNPDSc2tsqHg5DWlV
-         65WLTRpJiP19VQUY6AkfYQnRNAABGwgRrVDco9Iu0xvxLHbN4ImV+f0h7J0YNCRdkgw9
-         +j4He12Ysasi3bHppERxBc3+JKIzzbMPKWGQfJhBLvoUWOGDjR8N+l9smzwLDNR5be3F
-         j6Yjv1LRhFabB6l0SqxuwWAIHJj1kMX8Gm1xVHwL85Zxr3vHr3tH+NYVZZbzQQousj14
-         ScfQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUbLs36kApYIfRB6cOsLXvAlg9XXvQDsxFwIvY/CSX7C3S84DY2Gw69oXScTbSnAiOPCb65JU/M@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzy5yZM5rxqPKVRLmBuYjcvw7pHm/KXwO5+ZOPNd1K2EbsgqmH9
-	CmdFdccGlKn99sVZaoVuO41T9LlI0AAvE1bsscnL/RGuMcgKWEeGD+8Iat1BYWv3HP/nDENTxF3
-	mug5K5LvsVP3L/9T05QS+dyvAeyCylP73ngjYIrb7hYwjsilPrRyo4uE=
-X-Gm-Gg: ASbGncszhh9YH2f2UocpMNLmKuGS8PKjilCwVsUG2h39kv56NUnMO9PhJ7qPwrzxlE7
-	iJr7h4c0W5A8YbaHd69tfT609fzWvBwnVlzkiUyNSlcmVNu9l4P+j2PPG4RR49ZprKkBnrlPHyp
-	U+oQEqS2lgwC8ccK5kcUI1Mm6Dau4l7vhy/oCgJsyrB4k57s8TBMGBTc4UG9MckvLlAitzR/f1H
-	WPaMT2wVNDK+d8TyORH+C/hkKB1zPWtJUdKQ9v8Yoz/MUoe8hPzYp5OJt2RShnEr7a7MemIFPWD
-	Dxtqp15noevSDv+MV5XrzJVFd4rSo8/GNeamG6gxwYLPTUJQbx6I
-X-Received: by 2002:a05:6a00:450a:b0:740:41e4:e761 with SMTP id d2e1a72fcca58-7423c07be27mr20644003b3a.22.1747117825291;
-        Mon, 12 May 2025 23:30:25 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHDFuuZY2PwrySlH/2oK0Yn5HS5Wp2PGUYA4rNBV+IKvQrjNHdTw/yDK8BhopSSQasR4RMhFg==
-X-Received: by 2002:a05:6a00:450a:b0:740:41e4:e761 with SMTP id d2e1a72fcca58-7423c07be27mr20643961b3a.22.1747117824917;
-        Mon, 12 May 2025 23:30:24 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-74237704025sm7383795b3a.13.2025.05.12.23.30.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 12 May 2025 23:30:24 -0700 (PDT)
-Date: Tue, 13 May 2025 14:30:19 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Chao Yu <chao@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-	Daeho Jeong <daehojeong@google.com>
-Subject: Re: [PATCH v3] f2fs/013: test to check potential corruption on
- atomic_write file
-Message-ID: <20250513063019.afppmskz4nom54ua@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250509060754.1677062-1-chao@kernel.org>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="hUoMFTPY";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="hUoMFTPY"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 613B11F443;
+	Tue, 13 May 2025 07:08:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1747120096; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=fIij/+bT+V26uNWl+dCCFmIp52TkE6RltiM1T0pQGCk=;
+	b=hUoMFTPYD6M6O2Baadzgdm6P2LiGaBgh2xt1sOegi9WaYFDSlrH0bOy09PcqlUdZWe+via
+	k2IEFne0qUpfFNHZ/YzNssmOJvqLvZtf5BHSEnLxMQR0R7jlF7oI6LkLMIMW/STx0nb4xA
+	oFHeAy7Kg7SFx8RqXDDMWGT4Y1YAVng=
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=hUoMFTPY
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1747120096; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=fIij/+bT+V26uNWl+dCCFmIp52TkE6RltiM1T0pQGCk=;
+	b=hUoMFTPYD6M6O2Baadzgdm6P2LiGaBgh2xt1sOegi9WaYFDSlrH0bOy09PcqlUdZWe+via
+	k2IEFne0qUpfFNHZ/YzNssmOJvqLvZtf5BHSEnLxMQR0R7jlF7oI6LkLMIMW/STx0nb4xA
+	oFHeAy7Kg7SFx8RqXDDMWGT4Y1YAVng=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 598031365D;
+	Tue, 13 May 2025 07:08:15 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id aC1PB9/vImjDUwAAD6G6ig
+	(envelope-from <wqu@suse.com>); Tue, 13 May 2025 07:08:15 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] fstests: btrfs/220: do not use nologreplay when possible
+Date: Tue, 13 May 2025 16:37:49 +0930
+Message-ID: <20250513070749.265519-1-wqu@suse.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250509060754.1677062-1-chao@kernel.org>
+Content-Transfer-Encoding: 8bit
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Rspamd-Queue-Id: 613B11F443
+X-Spam-Flag: NO
+X-Spam-Score: -3.01
+X-Spam-Level: 
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	DNSWL_BLOCKED(0.00)[2a07:de40:b281:106:10:150:64:167:received,2a07:de40:b281:104:10:150:64:97:from];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	ARC_NA(0.00)[];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	RCPT_COUNT_TWO(0.00)[2];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:dkim,suse.com:mid,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo];
+	RCVD_TLS_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DKIM_TRACE(0.00)[suse.com:+]
+X-Rspamd-Action: no action
 
-On Fri, May 09, 2025 at 02:07:54PM +0800, Chao Yu wrote:
-> This is a regression testcase to check whether we will handle database
-> inode dirty status correctly:
-> 1. mount f2fs image w/ timeout fault injection option
-> 2. create a regular file, and write data into the file
-> 3. start transaction on the file (via F2FS_IOC_START_ATOMIC_WRITE)
-> 4. write transaction data to the file
-> 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
-> 6. meanwhile loop call fsync in parallel
-> Before f098aeba04c9 ("f2fs: fix to avoid atomicity corruption of atomic
-> file"), database file may become corrupted after atomic write while
-> there is concurrent dirty inode flush in background.
-> 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Cc: Daeho Jeong <daehojeong@google.com>
-> Signed-off-by: Chao Yu <chao@kernel.org>
-> ---
-> v3:
-> - fix typo: s/relis/relies
+[BUG]
+If the system is using mount from util-linux 2.41 or newer, the test
+case will fail with the following error:
 
-This version is good to me, thanks!
+  FSTYP         -- btrfs
+  PLATFORM      -- Linux/x86_64 btrfs-vm 6.15.0-rc5-custom+ #238 SMP PREEMPT_DYNAMIC Wed May  7 14:10:51 ACST 2025
+  MKFS_OPTIONS  -- /dev/mapper/test-scratch1
+  MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+  btrfs/220 6s ... - output mismatch (see /home/adam/xfstests/results//btrfs/220.out.bad)
+      --- tests/btrfs/220.out	2022-05-11 11:25:30.749999997 +0930
+      +++ /home/adam/xfstests/results//btrfs/220.out.bad	2025-05-13 16:26:18.068521503 +0930
+      @@ -1,2 +1,4 @@
+       QA output created by 220
+      +mount warning:
+      +      * btrfs: Deprecated parameter 'nologreplay'
+       Silence is golden
+      ...
+      (Run 'diff -u /home/adam/xfstests/tests/btrfs/220.out /home/adam/xfstests/results//btrfs/220.out.bad'  to see the entire diff)
+  Ran: btrfs/220
+  Failures: btrfs/220
+  Failed 1 of 1 tests
 
->  tests/f2fs/013     | 71 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/f2fs/013.out |  2 ++
->  2 files changed, 73 insertions(+)
->  create mode 100755 tests/f2fs/013
->  create mode 100644 tests/f2fs/013.out
-> 
-> diff --git a/tests/f2fs/013 b/tests/f2fs/013
-> new file mode 100755
-> index 00000000..80ed2702
-> --- /dev/null
-> +++ b/tests/f2fs/013
-> @@ -0,0 +1,71 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
-> +#
-> +# FS QA Test No. f2fs/013
-> +#
-> +# This is a regression testcase to check whether we will handle database
-> +# inode dirty status correctly:
-> +# 1. mount f2fs image w/ timeout fault injection option
-> +# 2. create a regular file, and write data into the file
-> +# 3. start transaction on the file (via F2FS_IOC_START_ATOMIC_WRITE)
-> +# 4. write transaction data to the file
-> +# 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
-> +# 6. meanwhile loop call fsync in parallel
-> +# Before f098aeba04c9 ("f2fs: fix to avoid atomicity corruption of atomic
-> +# file"), database file may become corrupted after atomic write while
-> +# there is concurrent dirty inode flush in background.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +_require_kernel_config CONFIG_F2FS_FAULT_INJECTION
-> +_require_command "$F2FS_IO_PROG" f2fs_io
-> +
-> +_cleanup()
-> +{
-> +	[ -n "$atomic_write_pid" ] && kill -9 $atomic_write_pid
-> +	wait
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +
-> +_fixed_by_kernel_commit f098aeba04c9 \
-> +	"f2fs: fix to avoid atomicity corruption of atomic file"
-> +
-> +_require_scratch
-> +
-> +_scratch_mkfs >> $seqres.full
-> +# note that it relies on FAULT_TIMEOUT fault injection support in f2fs
-> +_scratch_mount "-o fault_injection=1,fault_type=4194304" >> $seqres.full
-> +
-> +dbfile=$SCRATCH_MNT/file.db
-> +
-> +# initialize database file
-> +$XFS_IO_PROG -c "pwrite 0 4k" -c "fsync" -f $dbfile >> $seqres.full
-> +
-> +# sync filesystem to clear dirty inode
-> +sync
-> +
-> +# start atomic_write on src.db database file and commit transaction
-> +$F2FS_IO_PROG write 1 0 2 zero atomic_commit $dbfile >> $seqres.full &
-> +atomic_write_pid=$!
-> +
-> +# call fsync to flush dirty inode of database file in parallel
-> +for ((j=0;j<1000;j++)) do
-> +	$F2FS_IO_PROG fsync $dbfile >> $seqres.full
-> +done
-> +
-> +wait $atomic_write_pid
-> +unset atomic_write_pid
-> +
-> +# flush dirty data and drop cache
-> +sync
-> +echo 3 > /proc/sys/vm/drop_caches
-> +
-> +stat $dbfile -c %s
-> +
-> +rm $dbfile
-> +sync
-> +
-> +status=0
-> +exit
-> diff --git a/tests/f2fs/013.out b/tests/f2fs/013.out
-> new file mode 100644
-> index 00000000..d9271f75
-> --- /dev/null
-> +++ b/tests/f2fs/013.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 013
-> +8192
-> -- 
-> 2.49.0
-> 
-> 
+[CAUSE]
+The newer mount command provides the extra ability to show warning during
+mount.
+
+Although btrfs still supports "nologreplay" mount option to keep
+consistency with other filesystems, we will output a warning and
+encourage users to use "rescue=nologreplay" instead.
+
+During "nologreplay" mount option test, normally we will mount use
+the newer "rescue=nologreplay" mount option if the kernel supports.
+
+But the following two call sites are still unconditionally utilizing
+the deprecated "nologreplay" mount option directly:
+
+- Expected failure when using nologreplay and rw mount
+
+- Mount option verification that "nologreplay" is converted to
+  "rescue=nologreplay"
+
+The second call site caused the above mount warning message and fail the
+test case.
+
+[FIX]
+If the kernel supports "rescue=nologreplay" we should not utilized
+"nologreplay" at all.
+
+This will avoid the mount warning on the deprecated and discouraged
+"nologreplay" mount option.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/220 | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/tests/btrfs/220 b/tests/btrfs/220
+index 59d72a97..4e91b9a7 100755
+--- a/tests/btrfs/220
++++ b/tests/btrfs/220
+@@ -202,16 +202,13 @@ test_non_revertible_options()
+ {
+ 	test_mount_opt "degraded" "degraded"
+ 
+-	# nologreplay should be used only with readonly
+-	test_should_fail "nologreplay"
+-
+ 	if [ "$enable_rescue_nologreplay" = true ]; then
+ 		#rescue=nologreplay should be used only with readonly
+ 		test_should_fail "rescue=nologreplay"
+-
+-		test_mount_opt "nologreplay,ro" "ro,rescue=nologreplay"
+ 		test_mount_opt "rescue=nologreplay,ro" "ro,rescue=nologreplay"
+ 	else
++		# nologreplay should be used only with readonly
++		test_should_fail "nologreplay"
+ 		test_mount_opt "nologreplay,ro" "ro,nologreplay"
+ 	fi
+ 
+-- 
+2.49.0
 
