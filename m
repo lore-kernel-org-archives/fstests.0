@@ -1,307 +1,198 @@
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A306244691;
-	Tue, 13 May 2025 10:17:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.177.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747131423; cv=fail; b=gMw4RqJYOtzzKYo/+JgzAoSdZH58awN5ABXtyC6vW3x6E0AAxw362GAwVTMW8EUwF1jcE1A1f3zYXz/r4UOtwT7qQ2Yr2TOw6IAdQZh5YNDDYcSM5sVcxNZx70CNy/fYiVrr7akDEuf4nlIT3uvmUV+LU5+taspuVvm0pS9rBMU=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747131423; c=relaxed/simple;
-	bh=74E1dHMAr8HO4Evwfirc07Mm8qD0U+B6T5dWbaKjaEk=;
-	h=Message-ID:Date:Subject:To:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=hB60maUVEDnE64BT5bOP/0jd9PncnhfIL0yDeTSgk6rkbkpJO75hYXyC51G4iKGagtx2RlSRCPPUeEZpvVN4bdvR+UGibur82Irc3TUIj7VZ8RGhbvX06Xwr8SjCMTi933LEClXFqeSZeZNEsUaVM+O25I1eghkI/IEr63jrefY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=Op+iuN6h; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=E5Skl6vN; arc=fail smtp.client-ip=205.220.177.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F3831E501C;
+	Tue, 13 May 2025 10:54:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.20
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1747133643; cv=none; b=avWNDxwX55hRBcrePP1+9CAoRk9Utir63wb6BEjRdR7GI8xU9md0Y9IZBoQH2gmxTX457D2yBXuwJHg2trGY4tpld+rtdo0gsNP4Yg3R6IiMZiIqMv7i3/i04Mt4ooPFYe+BS802FTsrF/6lTZfswl2TcucZF0lpeFRvZr6XR5U=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1747133643; c=relaxed/simple;
+	bh=Nl/9lgYZEoD5DmJLfqkpiWEuaiXLbuaKDGdyY3rd9pU=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=HRYAfYHR/1dPz4dfBEsFK+FwBFWX2o/NFqvocnCfMP48xkPaN6x97dfJlAQ2FKzi3xeyi2dx48uGQsboqv2cFStJ8+MOwbEjfD4uFPPEthx/mc0vOoyJPx4ySj1OM04KgzfVT7BUJ+7V3cJrGPTBvnJO9T2fiXXdTMVNX4MCJn8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=gzgDtCOv; arc=none smtp.client-ip=212.227.17.20
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="Op+iuN6h";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="E5Skl6vN"
-Received: from pps.filterd (m0333520.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 54D1BppL027407;
-	Tue, 13 May 2025 10:16:59 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=
-	content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=
-	corp-2025-04-25; bh=pY1x2zRz7frDJyiGpxSqM6p4h0BtuNV2N3sjyDQlu/8=; b=
-	Op+iuN6hNlgUIrAbGhL0QC/Udy6f5JgkPrJlpbioFUe5jY6VPKSkgRC7M656Zebv
-	YtCafGOtNXBrRJNsp5iHUCpbLaAlokitOIBJ+hcXL3b5u+sDUM6txi0vl7N+koJE
-	Mmk+GvGqwSQ2PDvNf2ERWKMso7YEdhQxH1Q0xlbl8ahjyVQVy42f78MqZQek7RNu
-	T3QcsuPWLf8LcGVnFKonJtwtDwHgyHcjl0LrtTzqGQefwUD1p3hxsYkXhzL+rHM5
-	ykb1tism4T+WYIp1VzKJiA+ip2lpTj2P3aF3cJBMpHN2BwWgklTBMwEjT8JbNJmK
-	9JA4yFdZbtAY8S0l8DVNJA==
-Received: from phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta01.appoci.oracle.com [138.1.114.2])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 46j1jnmeq4-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 13 May 2025 10:16:59 +0000 (GMT)
-Received: from pps.filterd (phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
-	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 54D9gT90022301;
-	Tue, 13 May 2025 10:16:58 GMT
-Received: from sj2pr03cu001.outbound.protection.outlook.com (mail-westusazlp17012037.outbound.protection.outlook.com [40.93.1.37])
-	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 46hw89fet7-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 13 May 2025 10:16:58 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=aDIBL8fgxrJAGrF9ZX5q/wGe9yWfp0DbzfCOVLOlx2GVMvar3ybMnoYRp3Vfymut72svFBY18LqQuRyWWP5dVoZIERudhn3E14jX4UXOhDrAP3lxaxm7TqmKXSjODUI9UYuyxSSXLDJNYBwH464w+2JoQiOiGR7LTs8lMfm2XrsKm8ZGPWBAzFlhqlWBA188og3z6LIAqZsWzY2U4K63aMXNkze6B2mZ1L7dIzhsq+WHXN8W2p01EvT6gEpj9DwGTgHK7U3r52urnGMY8yzj3fMmMQswRgyk+vF2RxtDWY3LrAtMkUKkrnusuGjMBXbJ0sQ2QMyAKf1kdeHTueurwA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=pY1x2zRz7frDJyiGpxSqM6p4h0BtuNV2N3sjyDQlu/8=;
- b=nCKa0m8GoQ54+BmWsOmmHnhUpq/QbQk+dOnuTMyWBHroWETBPBe1DvJg+YjIaGLc2vcXUo4uha0MLJSX5Z9vaiUqg9GfsU2L/MNPItOyp/qfCPTv72ywYasxn4mYWqFdL99CMVXV9nZHE0AYkLbnqESAyXLEObYOE0DfmDLGOssvRrzvToUsug943S0MwIKCxvK67YcOjJesX16K7bwygu0uMauPjSWnXyUp2V2P6Q1XiU7el3DWvZxenpPTPIprMfMKt0cuQbd7uUuT+QvnvjN2QNqXXRrg4ireDUlvqWD13YSmlNXIng4Qyk5/YDeklW24ZmZGlvAVkfidc2YBXQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=pY1x2zRz7frDJyiGpxSqM6p4h0BtuNV2N3sjyDQlu/8=;
- b=E5Skl6vNx+BINVfwLs473+9jTYkYYgcSLZod2O9T3Olud7/slMHNVKmqsyE3CXv7AKlncBRx78Kxdguh7AzEnaJuoYHU8WAxKLeWsviZWbZHSsocXuBQ3GHXA7rOw819aVn5i/qxcul7PFCeUAqtp9dcf6POM1aveDwJOjXgqDY=
-Received: from IA4PR10MB8710.namprd10.prod.outlook.com (2603:10b6:208:569::5)
- by SA3PR10MB7094.namprd10.prod.outlook.com (2603:10b6:806:31b::14) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8722.29; Tue, 13 May
- 2025 10:16:55 +0000
-Received: from IA4PR10MB8710.namprd10.prod.outlook.com
- ([fe80::997b:17f9:80e3:b5]) by IA4PR10MB8710.namprd10.prod.outlook.com
- ([fe80::997b:17f9:80e3:b5%4]) with mapi id 15.20.8722.024; Tue, 13 May 2025
- 10:16:55 +0000
-Message-ID: <760d5562-a9d2-4e64-9032-dd4008aeaf0e@oracle.com>
-Date: Tue, 13 May 2025 18:16:49 +0800
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: btrfs/220: do not use nologreplay when possible
-To: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org
-References: <20250513070749.265519-1-wqu@suse.com>
- <22cdcf91-92af-45f9-ab5b-dc08455f0ba9@oracle.com>
- <05ac7288-ca4a-4da4-8cb4-54389021640f@suse.com>
-Content-Language: en-US
-From: Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <05ac7288-ca4a-4da4-8cb4-54389021640f@suse.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: SI2PR04CA0011.apcprd04.prod.outlook.com
- (2603:1096:4:197::10) To IA4PR10MB8710.namprd10.prod.outlook.com
- (2603:10b6:208:569::5)
+	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="gzgDtCOv"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
+	s=s31663417; t=1747133638; x=1747738438; i=quwenruo.btrfs@gmx.com;
+	bh=Tis3RHspPSqt5I21dRHFLNOlpRe7FGK2DZIOS1XVNsI=;
+	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:
+	 References:From:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding:cc:content-transfer-encoding:
+	 content-type:date:from:message-id:mime-version:reply-to:subject:
+	 to;
+	b=gzgDtCOvLHX2XDoWEgmzUPbsi2Lu788YtRxt5h9EnVk/Jhnq7m61LOJ0Lx8hH7X4
+	 HtKbSbEa5MSDmAzx9LrcCrpIFu/FbnTvhfG4tbEEvDZKbsVtRsKxFpc/Duy7GQISj
+	 wN7sG3CRv1J7e2mLa73mWRaJJfDnd3Hu/nHAFgf6cOi++1oejVC75niNlh/+yNyN8
+	 eP3nsGEtitTILe7KS1JSfOyjVOlvpbwjHzCmdcLp1sHKC9qOQ/fYFVPIsadyvMMng
+	 Twt1kkhn204iWDbVQgjkdm+y7KJi6+Fph7c1OCyW8utzwoVOXBHQnQX7pcBkrklJV
+	 obI+/dOXr7qWiIRFlw==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from [172.16.0.229] ([159.196.52.54]) by mail.gmx.net (mrgmx105
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1MfYPY-1uuknd3FEG-00mVc0; Tue, 13
+ May 2025 12:53:58 +0200
+Message-ID: <beee9078-8d6b-4788-9cb1-0d7ee6a6b78e@gmx.com>
+Date: Tue, 13 May 2025 20:23:54 +0930
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA4PR10MB8710:EE_|SA3PR10MB7094:EE_
-X-MS-Office365-Filtering-Correlation-Id: 9d22dbdb-5436-477c-48e3-08dd920748a2
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|1800799024|376014;
-X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?SkpMNkFKbis3TDZoVlo3ZFM2Ui8xRUxQcEpiaE0zaFBOeGRzeFhRR0x4TGhW?=
- =?utf-8?B?OVdPUWFPazQzMlBQYUtQU25Pdm03bExVbXBXUDhWS1lLVDM4MnVteHJRcEVv?=
- =?utf-8?B?ZGk3YzBmZ0hwZEdPeUFPNmE5b0RqU25NemZwai94cXNDMmYxUngzb09lUGVq?=
- =?utf-8?B?QStkalFUUWZkSzBEMFdYdVU3dFNOU3pUTWxiQkZ5NHMwVWFCUHcwL3ZsV0ti?=
- =?utf-8?B?MU5MTngzNmFZeEMzUWFFdUZQaWRXa0pkMWZMWjRTblROQUlIWUROdnNNYkdB?=
- =?utf-8?B?Mkg4T042N2pFb0h5enAzajVFY2NTQW5jRDd2cmZvTmV2VXZMRlVtZnZiejVJ?=
- =?utf-8?B?WmZMVjNKTWRIQzlneXg1MlF6ZlhLeDdlM1IvTXlla3VMZy9IZTVSMnRHVnph?=
- =?utf-8?B?eXlWL0NBZ3BuekpTQkw1YlQ5VTAxMDNPa3AxMWdpbW52Q3FpYU5HUlZDWjhi?=
- =?utf-8?B?a3JDdDhuTzNndWxpaTZMR011MUhFYWpYV0hUYzJtTW1TMmF6YnhFN3U1dlZW?=
- =?utf-8?B?Q1ErWktuWUpwNlgyNEdHRUs0RGlvODhXdkxXRkhlb3duazZmbDFVQkRRaThx?=
- =?utf-8?B?U0xUT2hDdmY2bzRMK3VXblcvUXFvQ0Y3QjA4disreURjdkhwckF0U2dlVldH?=
- =?utf-8?B?MVFRcWRrcE5XSUNwc2NTSnNyRFh0cmkzZllMa3hVN0FCMnpENDczenJqT05P?=
- =?utf-8?B?UDQvMjRjRDJQL0N1ZnJST3JQNW1oeVphbVhabkkybTFCbHR5aGFJSlJqVHNR?=
- =?utf-8?B?NUZyQUxicjlOd0s5WmcxSmZ2bUJmcUlUR09NVW1RS0pyNHQyNW52UmpWNE5a?=
- =?utf-8?B?bTh4QTl6cHpYaFdoR25JSHVqbjhSWHdYdFNHS0JyWjY0K29xbG81SG92dmFj?=
- =?utf-8?B?S1AwelpMYXpNQ0tpRXcreFJtVWNVVytCcklUZWFYM0Z6NDJNVnR4QWFmZkRp?=
- =?utf-8?B?anhoT3NpV2FNUEpKVmoybElqT2JGYmU4dU1YaThheXlyeTlieW45ck1rcFd5?=
- =?utf-8?B?R09UelJ3cUtqMzE5RkNXOENlNjhVZk5HcU5VbFJ5TFhyZnlRYjhrVUJZU3Rl?=
- =?utf-8?B?c2lGOHlIeHBrOG1LTlhaVW5WOEsxUlFzdUl3bEdtbVhaZHBsclczR3ZLMk5x?=
- =?utf-8?B?S1pqeEJjNXordjVyajd3dlUxOG9HaFROR0d6OGljWDNHUmtBdXF1cHNZZ3Zx?=
- =?utf-8?B?dTRaRnptWGdLNGd4d3lVMFpUUUJpVW9KTFhlb2pMcFBSYW1EY0lGNjUrZWNw?=
- =?utf-8?B?MXZiTTVRdmNVVnExQUV4SFE5MDlaRktoUzRyYWoydDh0YktzZWdEcitmNzNr?=
- =?utf-8?B?NWNyVjVSWEd0MVFwQzhHT2pnRDlpRStYZEJHVmRYVGViMm9ZREZZejJ6eTJa?=
- =?utf-8?B?cWtUYlkzQjJ2My9OU1h4MG04bFpIaTdONmIxaUVpUDFLcVMzWDEySzduRDNB?=
- =?utf-8?B?TkM1NUN0RzBpL0ZUemU5Y2VJQzFiemluMVAwU1kzSWQ1aXFNM01TOHI2RVp2?=
- =?utf-8?B?Zy9UdjJTdG9EQ1g3Z0VaQk01NUYzQVpWVi82NzJrNnBxZ2tqTXJDeHVHbHlV?=
- =?utf-8?B?d20yZjkyRkIzL0hkZ09jTzF2Vm9Dd2VWVWpLTmp4eGhmVHVVRjY5Q01UdmQv?=
- =?utf-8?B?S0xuSC9JemFsRko0WUZSMG9ob1h1aE5xQkJXaW5GQWFiaDRUWG9Ib0J1RERI?=
- =?utf-8?B?MlNPSnVsSFFXZlhmZGlSNnJkWXk3a2dOUkxoK2dsQ3Z4TTNWVmRYeTA3ekgx?=
- =?utf-8?B?MDU0bnBkRXZPQzd0MFFmZGhMaVd1d3kwRkd0dWptc2cxcVZRTFdEZVJNVWNz?=
- =?utf-8?B?NkpoMHJhV2ZTZVZVeEorWG0wdGV5enlYR2hkU2E1Z0FLcytZVVRIZTdEdDdr?=
- =?utf-8?B?OTM3Rk91Qk0yU3g1aVoxSU5IbFNNM0xTYXBSNWliQkZDcW8vNHlGRWJoMUFw?=
- =?utf-8?Q?ArojEEDpSPQ=3D?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA4PR10MB8710.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?QjQ2TW5RcGZleXR3NDRVQWJjSzIwS0ZlalRWQ2pvSVRmajR3ak5wQXhvUFoz?=
- =?utf-8?B?MUgzdWFXd0ZESlQ4N1BWWXVYWitkM1ZBeTNyM0t5VTZjU2Rwb3hQMitjNzdR?=
- =?utf-8?B?R2hhM3ZNN2JIRVM1Tm1SUVd2M29LZ3Bac1pBaVppY1F3YzY0YlBOTlRyNmJS?=
- =?utf-8?B?OTdVR2sxUHFsMUp0bjZEN2ZSSUdrbE9pdThyNUVWblpQTkh3WFFYc21FcVJw?=
- =?utf-8?B?SDRvaTRjUUR1NmVFenVrb3l1SE1McVBqd3RGbzJWc1A5bDAxKzYwVkNOVGNa?=
- =?utf-8?B?SmhOcVZEYlZqVlBhSVh2cUxWYURacnducThFZWJWYzZEN2NndWExYWttbmI4?=
- =?utf-8?B?ZnFFSkJzMm4rRVBQT0xhOVBpWGJnNEJoUkdiVmcxZXQySDlxaGlrNmJoOXFx?=
- =?utf-8?B?OXFLd3U5Q0ZOWnYwelVXUXBEeEtsWDhYdFA4QkJXek9zaU5XWU91MHBqUjJy?=
- =?utf-8?B?Yml5MS8xRmtzMThxcUtxZU9Tcnd2NGpBR29WMTVUN2cvSUllTU5XZmdjcGJz?=
- =?utf-8?B?OUZlOTB5eXAzSUxKNEhVdmVKWHMzdk5raTdScTVSa0JtVUJFMWtDb1BTODlh?=
- =?utf-8?B?eVBoT0NmTjZLSy9oQWFtT3h3QXdXcEJMaWkxbk43WGFPb1RLZVpTQTQ2TXJD?=
- =?utf-8?B?K29JWmlhVy9CbWQzcnZ6dm9BMFJLUDZHNWlsdmJ4dXZaWkxVNHN6KzkvYm9j?=
- =?utf-8?B?Q2MrSHRMSUowaXpQeGJkVWFRaTFmLysxd0VNSkhtb1JvYzEzcGtTd1dHMUNW?=
- =?utf-8?B?T0g1RC9sZ0ZQbGRwTkFxRUNDRnp1Q3RhSVA1enpMVURGMk1vQ3NNUUdsZGdv?=
- =?utf-8?B?K3dGZFZ6M0hPbXphT1ZkU3FOMlI5NHBYUkFaYmhUd1J1Nyt3bHBuWUFOZDR1?=
- =?utf-8?B?T2E2VjFUdm5VS3ExdTdkejZtNzVuVFVpUXdybnFLMmpIVnV1R0ZaWDR6WTZt?=
- =?utf-8?B?VEttTG42bmRFWEc2UDltU2xydXh3aW1SMGkvN1RhN0djbUNxZ0JTbUxWNXVT?=
- =?utf-8?B?T2MzaS9NcGdCc0xuR3F3bk9yMFRPYU1aMEZOb1VtQnpVYUY4VTFORjRiSUsr?=
- =?utf-8?B?WHZXQXIzUXE2d09wZlEyOHo0eVlVK0MzSGZkMlpKSit6cFVZckJRMzJBV1Fa?=
- =?utf-8?B?M1hubXJJR2lkWVl2L2FsT2IyblNUTzJhblBDMEwrbG54VExmWjliL1hmZmtl?=
- =?utf-8?B?L2pTeVVXWnkyWEtUVEpmMU5WeE1LaWlPYXpKYlA5MmIxZlFwVjFIVWlYTlFT?=
- =?utf-8?B?M2lSUk1iNTUwcGhrM3QyeGhwTSsvb21rTFFOSW9mZGlIVSs3enVaOXRDVk5Y?=
- =?utf-8?B?RkZsQ2NlNzY3YjdwTGw2SmNYRXpTWmJVV1B6aUt4MzJoZkEvU2R4QWtKak8r?=
- =?utf-8?B?cTUyZGJTV1JwdG5NN1RFS1pBQ1hEb1VRUGlGS0RnMHlaTkFtMFNHSHZ6ZEsz?=
- =?utf-8?B?ZjM0a0UrbHZmZGNaOVBxZUpTRTZHTzFPamtrVUpIWlo2MzhjSUtJY0hBK2s4?=
- =?utf-8?B?YmFibHhFaWc2WVpLUSt6d3ZyZnR1NEtLWHFUazlBaWVucXJIdUZ1OG1MeXVR?=
- =?utf-8?B?SmZ5dkx4ZHA3MGVMMURMTDNzUUNBQlcxWHppdzB0WWx4d3FzV3lBazlvWDNU?=
- =?utf-8?B?Q3BVeVZmR3h6VTJoRFE0dXpaUEZRM1BxNGNkelk5Ymd3Vk94UWpSOEZyeFUr?=
- =?utf-8?B?VVZObyt1cVhvYVpLYkZiRXhSYnY3L3d3d0I3S1ovTWNQOHBtdTJwaitRUXN5?=
- =?utf-8?B?dlpuQlpJSFJlUlZSUktsK1VzcHRlTFdrRDhoUkdrUFlFSTlPckhqWTdvM3Q4?=
- =?utf-8?B?ZDErQ3RhZE45UVlLUU1XN2xUWU1aQkVTL3Z4UUJuYVZpSVQ3RkxnTFhJd2lp?=
- =?utf-8?B?VzZUbVErOCtsbmhKQm15ZkRtaVhYY1kwRG14NzRtdEdaTXhWUDEyMnltb0hl?=
- =?utf-8?B?cDdKMStkM2VvbUREdXhxTGN2QVBFMXZvUk1tTXZCT1ZRVlZVSlc1bWIxSkJC?=
- =?utf-8?B?K01mSWt1cE1zQWRSaXBhblp0MFFxdkxyaERMYkhrbitQdnJOSUtRWUNSWXFC?=
- =?utf-8?B?b2IwMlZYTlN1UUw3d2tHN1J6dFVjTUcvZ2trWFBzeklBc3RuQVZ0cUxPeEMy?=
- =?utf-8?Q?diZqDz9asWGHxawo+UltA3yN+?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	C56NmNjtkflRCKrDxADaqC4/XUEelAG32ixJsP0+cJGN8xK877/hxA7ARUzkFE+nxgvO7Y04nR9qLGWR268HwbqBIAY3S3Q/QhkfnK57E+Qy5IwsUx142BIQ3rw+T5nUu4adOdTOnlBKwjL9ncGRoHb2aOgEPobN1v7rejwKi5T/3tQRCkzFmQTDH1CNI5RBwPlvPzZy+E27bUn1lQZUQGbVrVlhzinAqhLzulqSmCdKF3NVVjjKa3kbi+PHNr5qbWD+ylb1GUsCWzSHCfhlgCltF4xwASfv9JxxmZTIfdzawGNZsz58qCsckM0jHyAmi+2xd9m21v73+++QSAUiSF4NpxcXfwWgnSutgbvFLWSnQmBWnS++2k4KdI5Cixw8sxXZ8sWPgxWTMHYrbAbsmy1sKti+JmdC34A2a1zKFL1MSEU2+yj7gKwE+hTCiykLuhqUN7Y+OyYUFutetCu2qDT/BesA9EpIAF51qnrN1o3GMhJtT36gHhCEDbgjie2+wz9LSouq+0byefipPE+xosE1dnFyjVZvaJwQ2nDKucmkEva9CuCf87LMKNgggeLx8/EVdSrTYPFaoKMY7FiXIpKtY7o+bPRv0/TR3tOrqxM=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 9d22dbdb-5436-477c-48e3-08dd920748a2
-X-MS-Exchange-CrossTenant-AuthSource: IA4PR10MB8710.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 May 2025 10:16:54.7964
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: WXjaTDS6nCrvGHWy7k9wDJR+knhwANF38UWZrv+6o7jQBYdrTNz2TS0fII2ZLNGzQPgKj48Ljsczh3j8k1x2pg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA3PR10MB7094
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
- definitions=2025-05-12_07,2025-05-09_01,2025-02-21_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 adultscore=0
- spamscore=0 malwarescore=0 mlxscore=0 phishscore=0 suspectscore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2504070000 definitions=main-2505130097
-X-Proofpoint-GUID: RRtCzvhKq1LlcXQxvx93nMaClVKDszf5
-X-Authority-Analysis: v=2.4 cv=PeH/hjhd c=1 sm=1 tr=0 ts=68231c1b cx=c_pps a=XiAAW1AwiKB2Y8Wsi+sD2Q==:117 a=XiAAW1AwiKB2Y8Wsi+sD2Q==:17 a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=wKuvFiaSGQ0qltdbU6+NXLB8nM8=:19 a=Ol13hO9ccFRV9qXi2t6ftBPywas=:19 a=xqWC_Br6kY4A:10
- a=IkcTkHD0fZMA:10 a=dt9VzEwgFbYA:10 a=GoEa3M9JfhUA:10 a=jxzlEsld6jKlo1_wglIA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNTEzMDA5OCBTYWx0ZWRfX+R+HGCR6UPUb puULAM5sCIgFH4DU21WhIISgN5YGJMI58Lpe12p2Wj7kAG1CkxtF8eNIWVHdUvu6AMQQBUz7+fT zzvKPrvcTtezx204C0EZJ6eVV1pqPr0o3zFmw8kwWYVxDberkujB0u1y2OzDz+L07CWfU7Mxu2Z
- hcKl7ERVMk1SGE4BtQouHJxLrBPHGn1claEULaAz7+o01vxDJwEZBCcZQ8W+hlPwDyYOKilteKf fCKTfWnrR9Nsj2YOxOPZ6T7SyLM3fqMiL3xICu7v+vz/woq+kNpMUFVyJVWKjx8UZbbPvVNxIE4 gDTclyjdigZOp2eJhhVFlShBAHOeK94ri3eloRD74Pnh1TPPUpYIpGvr9SVCGxMBMg9YhGM0Lw1
- YB3KiwsnjwxBduGyoZqNcQTm2oVBhGx1AcXOBFIjg7u9/S7thdfMeEMgEm/DgZRizmFN4TZW
-X-Proofpoint-ORIG-GUID: RRtCzvhKq1LlcXQxvx93nMaClVKDszf5
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] fstests: btrfs/220: do not use nologreplay when possible
+To: Anand Jain <anand.jain@oracle.com>, Qu Wenruo <wqu@suse.com>,
+ linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+References: <20250513070749.265519-1-wqu@suse.com>
+ <22cdcf91-92af-45f9-ab5b-dc08455f0ba9@oracle.com>
+ <05ac7288-ca4a-4da4-8cb4-54389021640f@suse.com>
+ <760d5562-a9d2-4e64-9032-dd4008aeaf0e@oracle.com>
+Content-Language: en-US
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
+ BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
+ sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
+ xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
+ naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
+ tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
+ 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
+ VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
+ CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
+ /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
+ GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
+ q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
+ ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
+ CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
+ B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
+ Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
+ +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
+ HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
+In-Reply-To: <760d5562-a9d2-4e64-9032-dd4008aeaf0e@oracle.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:OYlzMOM5q1h3zpj5bP37qCR3GwxWj8MrNzg2xzBHIh/2f4h7lwJ
+ VBAQtgWYDekreLffEYNHAuDTEaJV8l6D8TNIQ5ZPdp3Qo7cZ6G1vwbqDr17GUTBjDABrudw
+ iOAVS8BrD8S0VH/skA47dKXgGaS4QXUeNNuzRWtmbykiMuyhoF699kKtco7A+ewRHB/B4qP
+ 2FFlDyyf3sTJ0bV8M58EQ==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:gHgzfvPUDkk=;CjK5ZVmmxsTMz3iHziA5sefvuR5
+ 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
+ ip6fU/3l3e4rMGVtjW8qroAMCY0/TFICBs
 
-On 13/5/25 16:56, Qu Wenruo wrote:
-> 
-> 
-> 在 2025/5/13 18:01, Anand Jain 写道:
->> On 13/5/25 15:07, Qu Wenruo wrote:
->>> [BUG]
->>> If the system is using mount from util-linux 2.41 or newer, the test
->>> case will fail with the following error:
->>>
->>>    FSTYP         -- btrfs
->>>    PLATFORM      -- Linux/x86_64 btrfs-vm 6.15.0-rc5-custom+ #238 SMP 
->>> PREEMPT_DYNAMIC Wed May  7 14:10:51 ACST 2025
->>>    MKFS_OPTIONS  -- /dev/mapper/test-scratch1
->>>    MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
->>>
->>>    btrfs/220 6s ... - output mismatch (see /home/adam/xfstests/ 
->>> results//btrfs/220.out.bad)
->>>        --- tests/btrfs/220.out    2022-05-11 11:25:30.749999997 +0930
->>>        +++ /home/adam/xfstests/results//btrfs/220.out.bad 2025-05-13 
->>> 16:26:18.068521503 +0930
->>>        @@ -1,2 +1,4 @@
->>>         QA output created by 220
->>>        +mount warning:
->>>        +      * btrfs: Deprecated parameter 'nologreplay'
->>>         Silence is golden
->>>        ...
->>>        (Run 'diff -u /home/adam/xfstests/tests/btrfs/220.out /home/ 
->>> adam/xfstests/results//btrfs/220.out.bad'  to see the entire diff)
->>>    Ran: btrfs/220
->>>    Failures: btrfs/220
->>>    Failed 1 of 1 tests
->>>
->>> [CAUSE]
->>> The newer mount command provides the extra ability to show warning 
->>> during
->>> mount.
->>>
->>> Although btrfs still supports "nologreplay" mount option to keep
->>> consistency with other filesystems, we will output a warning and
->>> encourage users to use "rescue=nologreplay" instead.
->>>
->>> During "nologreplay" mount option test, normally we will mount use
->>> the newer "rescue=nologreplay" mount option if the kernel supports.
->>>
->>> But the following two call sites are still unconditionally utilizing
->>> the deprecated "nologreplay" mount option directly:
->>>
->>> - Expected failure when using nologreplay and rw mount
->>>
+
+
+=E5=9C=A8 2025/5/13 19:46, Anand Jain =E5=86=99=E9=81=93:
+> On 13/5/25 16:56, Qu Wenruo wrote:
+[...]
+>> I'd say, if some option is deprecated, we should not use it at all.
 >>
->>
->>> - Mount option verification that "nologreplay" is converted to
->>>    "rescue=nologreplay"
->>>
->>> The second call site caused the above mount warning message and fail the
->>> test case.
->>>
->>> [FIX]
->>> If the kernel supports "rescue=nologreplay" we should not utilized
->>> "nologreplay" at all.
->>>
->>> This will avoid the mount warning on the deprecated and discouraged
->>> "nologreplay" mount option.
->>>
->>
->>      test_mount_opt "nologreplay,ro" "ro,rescue=nologreplay"
->>
->> validates that the old mount option `nologreply` doesn't break
->> on newer kernels that support `rescue=nologreply` and provides
->> a Warning.
->>
->> Why not keep this test line and filter out the deprecated parameter 
->> warning?
-> 
+>=20
+> It's marked as deprecated, but the code still needs testing.
+> Also, since fstests runs on stable LTS kernels too, it's better
+> not to remove it yet.
 
-> I'd say, if some option is deprecated, we should not use it at all.
-> 
+For older kernels without "rescue=3D" alias, it will not cause any problem=
+=20
+at all, because it will set "enable_rescue_nologreplay" to false and=20
+completely skip anything related to "rescue=3Dnologreplay"
 
-It's marked as deprecated, but the code still needs testing.
-Also, since fstests runs on stable LTS kernels too, it's better
-not to remove it yet.
+But different vice-verse, as "rescue=3Dnologreplay" still touches the=20
+older one.
+I do not think we will keep the "nologreplay" support in the future very=
+=20
+soon.
 
-> Filtering out the warning may ignore some other problems not related to 
-> the deprecated option, thus I do not think it's a good idea.
+In the past we had some problem relateds to "norecovery" mount option,=20
+deprecated it and reverted back (some other projects still relies on=20
+this mount option, and all other fses have exactly the same named one).
 
-why not something like:
+But "nologreplay" is btrfs specific, we can remove it any time in the=20
+future.
 
-(untested)
+I think this is the perfect time to considering removing "nologreplay"=20
+completely.
 
-_filter_deprecated_warning()
-{
-# mount warning:
-#    * btrfs: Deprecated parameter 'nologreplay'
-
-	grep -v "btrfs: Deprecated parameter 'nologreplay'" | grep -v "mount 
-warning:"
-}
-
-test_mount_opt "nologreplay,ro" "ro,rescue=nologreplay" 2>&1 | \
-					 _filter_deprecated_warning
-
-
-Thanks, Anand
-
-
-> Thanks,
-> Qu
+Thanks,
+Qu>
+>> Filtering out the warning may ignore some other problems not related=20
+>> to the deprecated option, thus I do not think it's a good idea.
+>=20
+> why not something like:
+>=20
+> (untested)
+>=20
+> _filter_deprecated_warning()
+> {
+> # mount warning:
+> #=C2=A0=C2=A0=C2=A0 * btrfs: Deprecated parameter 'nologreplay'
+>=20
+>  =C2=A0=C2=A0=C2=A0=C2=A0grep -v "btrfs: Deprecated parameter 'nologrepl=
+ay'" | grep -v=20
+> "mount warning:"
+> }
+>=20
+> test_mount_opt "nologreplay,ro" "ro,rescue=3Dnologreplay" 2>&1 | \
+>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 _filter_deprecated_war=
+ning
+>=20
+>=20
+> Thanks, Anand
+>=20
+>=20
+>> Thanks,
+>> Qu
+>=20
+>=20
 
