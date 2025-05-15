@@ -1,78 +1,38 @@
-Received: from mail-pf1-f169.google.com (mail-pf1-f169.google.com [209.85.210.169])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1603D10E5;
-	Thu, 15 May 2025 11:01:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 396DB2980AD;
+	Thu, 15 May 2025 11:50:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747306913; cv=none; b=PUGsBb0UWhNGImkWU+zvLxaXnA/2jEt79LUk9M8ale7ttiDXMAJo+BvoL2wkFOsm0/Vjq/KqdS2HrPGmY0cHl04i01SAaEhb/o+ilji7vIprCcSDRbY3LqpQ4fkqRx78jd7z8oqrz3c96adHJDALNNarR2XNDCdraUAYJhCS/j8=
+	t=1747309819; cv=none; b=pgQfzpES5c0cx4fgSN5wUbyHVVzDiMx9lo5sWhtlKTxIyoeoq3/Hg2xKsEH1ot8GTMl198sateq2Wey6dRa4E9LsyfIAK2DlYdMLiWk+4h1vBi4AWXUoAJGQM6XCWr4rDSsnKa3lmrgLa7LtlZpOewHIFs8xzLDbOb2rpy5CZcc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747306913; c=relaxed/simple;
-	bh=oF1I/e+0ZW/JAyWLqkT0Ey5HVUISop7fmzQEedssQwI=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=IdBqBt5MHL3GJCRjpG4X+DIGPmWdvjG8TMXUZGxFYMhWrzTL4YyEPX0mZjUWLrzZRL/BUMdF25q058wi8WDQeVhl+Fp3yrh2/7DGztLd9hj2tMYx/Uy4zl7668QFl1D+VABZGB3vPX7AG5Zb8nRlvD3KpUkWCADrr1QNEatuE/k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=LcCY+wrr; arc=none smtp.client-ip=209.85.210.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1747309819; c=relaxed/simple;
+	bh=Ogx4/bXvDLk2lj31tke9+ziPahiQoqxp1/egONG3x2U=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=m/7jp0VSQTtKAnZM1EwaQfv51TKfIOwAO4SoXHZF+XFOvE7NzSOb4Sf9y2R0ck0kTmtnAP1t9mhuaRuJtp+TXrn8tzk9LlbQjzblcB1Kx2GxRwTpSLPpslA+PsEcCnkXfuSUdvaFoxDE15UKtfo8RmLUAqaCEGQKpeawQsNMfGA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Zgl8zTFi; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LcCY+wrr"
-Received: by mail-pf1-f169.google.com with SMTP id d2e1a72fcca58-7399838db7fso767485b3a.0;
-        Thu, 15 May 2025 04:01:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1747306911; x=1747911711; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=UHJtB1q9Untov6MKY8w4xfneHkWOk4rUpt3L0nmtuKw=;
-        b=LcCY+wrrJ6I154SUkavFV9VXtBU1shQ/UheS/aMUpRP94BEz7/cIQNeBG3RuKILHlN
-         WjVY7bZ1L+7igVlMRtiwjhEujJC6FsssoZJC3HfsciChrGAY940yCQl6tREAKR3c/gWb
-         5XTXBxoFUvgTllZKgifVzdyThpHdKxmEG0b0KsZ3mYN31WK53+wLIu4oSNDTc9Wnni7h
-         XchWSCY6lQJxlChqPC848TDrj3OSY1h9dWE00m8qY+1ss+S6g27KUqYNosYiqpGIm3mV
-         7cZZxZWlVIGUsy3JYbBkN75tv6vTFRRNkM/xo26OlZMBLnKRsRttVz8JCFv0FkFGVfwd
-         Dofw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747306911; x=1747911711;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=UHJtB1q9Untov6MKY8w4xfneHkWOk4rUpt3L0nmtuKw=;
-        b=YpabdcCWeVdpk3ecjdgejEUL+Bl439GDz/9vtHbdH7dcomuieL/zUzrGmJDRfEQGKE
-         SXRfoM1D0U2xWj/mhh4ThInpHkmYo/+Cdp9ngds/2alm3n+JkLCj5mg5p33Hnh3kk08b
-         zkrrToD2X5hmP0A3G9pDlUYPTok1yaMA8mqy6hkL2tuvkcW2lJHLyBWiXgdoxZdRMVt1
-         uR9/nH6sxWdYJqzvNV7+thLjY53hoqz/9ZdpXekzL5EbuIa73zrplAtdRZrfG04K4Oaf
-         AfIJVBuCiIL8/2apOvQY6rSbfQ+SlN6ZyFuqh8TErN/oZ6j5SI1Dj4FWPOwouwZUiZsl
-         SY/Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWHwc6fJcJwArdMm5IT7m+q6MEAM+jaZAJ1IQWHWPg7Wt18h1a+FgRjgNCL9j9mWb+Lk45PJf0j6Iw=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxB47jMYxx4UDjcylCx7UkF5z7IoJ2THJ15ARHjM9YjgPfLgQnT
-	BDOEl7vygTyG3ToOTwaz0Rmk6TqRaAAospIXZ2Sy0nh7STn8Z8Uot0jE2g==
-X-Gm-Gg: ASbGncs9QW7IyzdA80A5qPJZgHoVYmI81vBMBYtJbQCA25YDVfvrP8QvoXsnB8L15He
-	TxsenaYsIpEMziSNIdsNKirb4NPxzS8GPjslsQdDpMj89lnfwgTIQ8MK21HxoUXu97UvQsN/R0n
-	cXtsdeAPjWhyxXdtoVifCnILXEcuNZ8AMAI5gXmkwvzuufHF5Vjx5t8X4t4QWvuBMIlRD8YZ03r
-	WiVwWXKqk557/5u4yoMkmXcWUebXkDFVhSrfYzwQwuMhy7HJ1Qh2Akx+5yEp7lW76shJgGYw0X1
-	Fd+rVcrpkCrT8HmiRi/HixB24GY7TLYOULihCTz/+lLsAghvU813lrs=
-X-Google-Smtp-Source: AGHT+IH+rzgDbrs0Ry3xGdFeeeapP8e8/+QlX+9iC9TNT5/AvEZESgvnjY+MPAUSCwRyN3uApOVq5w==
-X-Received: by 2002:a05:6a00:4b44:b0:73b:ac3d:9d6b with SMTP id d2e1a72fcca58-742961d4254mr4606678b3a.4.1747306910780;
-        Thu, 15 May 2025 04:01:50 -0700 (PDT)
-Received: from citest-1.. ([49.205.34.162])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7423772752csm10733673b3a.45.2025.05.15.04.01.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 15 May 2025 04:01:50 -0700 (PDT)
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Zgl8zTFi"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 28A72C4CEE7;
+	Thu, 15 May 2025 11:50:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1747309819;
+	bh=Ogx4/bXvDLk2lj31tke9+ziPahiQoqxp1/egONG3x2U=;
+	h=From:To:Cc:Subject:Date:From;
+	b=Zgl8zTFiSlHrAsmWLo2fxNZQV6IfmD4xTSPtI7p6isqOHXxoiQ+X9R19OCktvcLOu
+	 7NEy9p9WfRRRePhe2UJ85yP1cLqShCkbXscjEL19we5zpIVqhHBN1kAdR1ot1muQop
+	 AxRVUzVHZCK+kEDfxEr1d3R8QMlj5vlB+rmIqSxgOni20mpQiXYW/PY6nfjaF4+w0w
+	 SxSVQkkGSJ53T3zyex5toIpiESB+Tu++U02D8vdDdPbNfSxB5SW5RAZVSnGz9P+WcC
+	 2iysYayCF0Aq/ZdWLEY4lRxFWXJxEMtwibNZmdHSBRVEOgGDyunNI4V6QmZYeyEDjq
+	 1F0d7ag6/AlOA==
+From: fdmanana@kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org,
-	ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com,
-	djwong@kernel.org,
-	zlang@kernel.org,
-	david@fromorbit.com,
-	nirjhar.roy.lists@gmail.com
-Subject: [PATCH v2 2/2] new: Replace "status=0; exit 0" with _exit 0
-Date: Thu, 15 May 2025 11:00:17 +0000
-Message-Id: <463f1f99c7b9ced218f62ea9fc048c2e645227c5.1747306604.git.nirjhar.roy.lists@gmail.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <cover.1747306604.git.nirjhar.roy.lists@gmail.com>
-References: <cover.1747306604.git.nirjhar.roy.lists@gmail.com>
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH 0/2] fstests: btrfs: add some missing groups to tests
+Date: Thu, 15 May 2025 12:50:06 +0100
+Message-ID: <cover.1747309685.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -81,29 +41,67 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-We should now start using _exit 0 for every new test
-that we add.
+From: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-Reviewed-by: Zorro Lang <zlang@redhat.com>
----
- new | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+Some tests are missing some groups. Details in the change logs.
 
-diff --git a/new b/new
-index 636648e2..dff69265 100755
---- a/new
-+++ b/new
-@@ -176,8 +176,7 @@ exit
- #echo "If failure, check \$seqres.full (this) and \$seqres.full.ok (reference)"
- 
- # success, all done
--status=0
--exit
-+_exit 0
- End-of-File
- 
- sleep 2		# latency to read messages to this point
+Filipe Manana (2):
+  btrfs: add tests that exercise raid profiles to the raid group
+  btrfs/023: add to the quick group
+
+ tests/btrfs/003 | 2 +-
+ tests/btrfs/011 | 2 +-
+ tests/btrfs/020 | 2 +-
+ tests/btrfs/023 | 2 +-
+ tests/btrfs/027 | 2 +-
+ tests/btrfs/060 | 2 +-
+ tests/btrfs/061 | 2 +-
+ tests/btrfs/062 | 2 +-
+ tests/btrfs/063 | 2 +-
+ tests/btrfs/064 | 2 +-
+ tests/btrfs/065 | 2 +-
+ tests/btrfs/066 | 2 +-
+ tests/btrfs/067 | 2 +-
+ tests/btrfs/068 | 2 +-
+ tests/btrfs/069 | 2 +-
+ tests/btrfs/070 | 2 +-
+ tests/btrfs/071 | 2 +-
+ tests/btrfs/072 | 2 +-
+ tests/btrfs/073 | 2 +-
+ tests/btrfs/074 | 2 +-
+ tests/btrfs/100 | 2 +-
+ tests/btrfs/101 | 2 +-
+ tests/btrfs/124 | 2 +-
+ tests/btrfs/125 | 2 +-
+ tests/btrfs/140 | 2 +-
+ tests/btrfs/141 | 2 +-
+ tests/btrfs/142 | 2 +-
+ tests/btrfs/143 | 2 +-
+ tests/btrfs/146 | 2 +-
+ tests/btrfs/148 | 2 +-
+ tests/btrfs/150 | 2 +-
+ tests/btrfs/151 | 2 +-
+ tests/btrfs/160 | 2 +-
+ tests/btrfs/175 | 2 +-
+ tests/btrfs/184 | 2 +-
+ tests/btrfs/195 | 2 +-
+ tests/btrfs/197 | 2 +-
+ tests/btrfs/198 | 2 +-
+ tests/btrfs/223 | 2 +-
+ tests/btrfs/242 | 2 +-
+ tests/btrfs/249 | 2 +-
+ tests/btrfs/254 | 2 +-
+ tests/btrfs/265 | 2 +-
+ tests/btrfs/266 | 2 +-
+ tests/btrfs/267 | 2 +-
+ tests/btrfs/268 | 2 +-
+ tests/btrfs/269 | 2 +-
+ tests/btrfs/270 | 2 +-
+ tests/btrfs/286 | 2 +-
+ tests/btrfs/296 | 2 +-
+ tests/btrfs/335 | 2 +-
+ 51 files changed, 51 insertions(+), 51 deletions(-)
+
 -- 
-2.34.1
+2.47.2
 
