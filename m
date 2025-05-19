@@ -1,157 +1,118 @@
-Received: from mail-pf1-f169.google.com (mail-pf1-f169.google.com [209.85.210.169])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D1BC01EF38C;
-	Mon, 19 May 2025 05:21:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 756DD3595D
+	for <fstests@vger.kernel.org>; Mon, 19 May 2025 05:29:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747632108; cv=none; b=U/CxpZtH/FOM/jzXW3G9hdQJXBrMElAnmITJXjigOQLlLB4oDu8ydP4KOdXP4U2tZtj0R1LcmUgQykxa49lcepeMg+Jnaqn2Q6/WfWbZC/UXUvT4xUQizpYcumrYGtm8HpoQMNSu9iCMuSgzelj9vN+gZKJNl6xGJ9YRFRQoPZA=
+	t=1747632556; cv=none; b=lvHtc1WC5nSoRKBkZ8mHErJFvSvYKwjB6DhbK3QdOmW41S+XhpxhGAfHskrpbnppbhsgixjOOAscHcnMbEHQBVWCMF52vW/nHbElWZHtFXb2JSw/ERNYm3kl/vVTlP/Syaj0Z17P2/4P6VHlo4ut35CWc45c2pGY/n1BLOrexfc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747632108; c=relaxed/simple;
-	bh=hRSGTZ/TCqdXc/wHCs7bXw3k0TyKsAyUPjwx2yKa4lE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=TWzA3p21WaZDlcvERf35lkp6PjZx874DMre08GwkORq7o5hdymohNS67SoRqZQ2hqTKOKZTWqRcR0UvS9ZgCvp94LZMmbKp2+zyFr/fBNt5L+bBUrVsSiSX2yazGOGSVtXZ1O0fh75Jtoc/bvlxU6qfpizIj1F+yBwl7x78HNjY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TDTX4W0N; arc=none smtp.client-ip=209.85.210.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1747632556; c=relaxed/simple;
+	bh=IhLnIK8HYyn8QD7/qcVYRtcuWG5rpr7ecSoZZu3kWo8=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=bjrq5VuxUblDWoNEmXWZQki4uHWCuOmSvWz0O7XTHE0TUj+SaaZqnP8Q+gdZXprU+H2byYEMbxoo54JqLYaTrSg8RSPmc+wmh28XIkC8DMa2O3IcFNTFxaC4RKmA+Doz2c35O8wsp9ydxS/I1n9dDtMirIM5qPuALiSdVWyP3go=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=m2ecg5y3; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=JmqqVn6l; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TDTX4W0N"
-Received: by mail-pf1-f169.google.com with SMTP id d2e1a72fcca58-742c73f82dfso609640b3a.2;
-        Sun, 18 May 2025 22:21:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1747632106; x=1748236906; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=rp1k/HpI+Gv6FeFGvkOUZD9sHzNzRonAcKHbeMCNeWo=;
-        b=TDTX4W0NJWKnUKiHqjbO8AurtJEAjZUmXQPK8QaKF14jJKZd2D4O+5lwLaw9ouLH0r
-         HsnhM93uIBkwWOvVnuPMJWFoPJfqmgxSDqcde18VJFATzzfK1up3tkyHpEomDTBNx5cX
-         C9qT7pzJBzETftkNtPDZ+3EzOc6vGIrPXviJMVuSS2YN4UKY0BNXcY4Wqu0cxrFX78Is
-         5O7i6WAbs96PWUlLelyL2Xm6vu4KO738sZuT8U7CQNLwrctayN7poki0flL4B+US7cjm
-         NA8ZS1Ozyf8/oZzQkWSRSvG+v1KKloLAS49CZrv5OlynA6xKI0zWjDYdzbrzzLA8LHfW
-         MP0A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747632106; x=1748236906;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=rp1k/HpI+Gv6FeFGvkOUZD9sHzNzRonAcKHbeMCNeWo=;
-        b=PHOg7/Gf+HNTuzhb2+mco+rKGKiL75AOYe52uXHDKHAl6TNfV8zOyT6B4bgP0t6K2g
-         sC6eVint3YOUr8CpkuWcEFxFxFZ4GYTe9hMUQ/S44CjbSJ94xIVoQQ3+4Ae5nrzhCQbA
-         vxXA6CMMiyaEM5WJ8ukrwtfYNkRTlW+PQv+FaeMHtpLSecKNZZlrDkaPIJldqm8i+0En
-         kgLA3e4exEbFV1G4lE9EeHdM/VQHMdY5F8hcd3MWIC48Zu/FufDvDulOAHdC0J5Je8Qw
-         CePfSBsnuqWODY+hG0/ZeqpgxYLOLaQZzEk9XAzNuRp5Fzncz45+axV8Gybn4i1+jUYe
-         LiTw==
-X-Forwarded-Encrypted: i=1; AJvYcCV+DWiQdd1AE+YJp9fbWhfW5dZeHRGvRQSQBQRVQRkVpfdZqOg6yfmu0mSGbig6/DJ3WheutwTr@vger.kernel.org, AJvYcCXInxF3VLnbvLKcBL5XTXStWatBBddNhhFkcmhGu3+MFhxlUW4lPhNwD9e6W+JPKqC84fE7EP/0Xw00@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzd6zZRjcQ2zSDCNZuQCTrTEEUhWPWcxI1kyrZCJ6QmQ2CQtyaj
-	piYU7cxlZ/4lUG536RHLCoci/pukc8/nq/SmYXHiumBDUzVAXNVfpfMgF5l91Q==
-X-Gm-Gg: ASbGnctZdoZumQTicPCV//bf+/XRxRqG/Zn0AlPDMiInRee7O+gb6F0XNJVwl9Xr4wW
-	JA5HONv7uhqLO3vPE85A44seSBL0ITihXGQb2/lJ+d+oixdoNt48tcoNnYwfyClMpB2cytSAghY
-	53XwPB8FTQT3089P3O4p4oMcCtW2zegUyQ1V9qj7uUulPpN6Gt6SFNBitcGWSc3Bwrka8mWXA+y
-	PulLpdaXb6UF/cq7R+fZcZ80waDhVm/qbxMqumS8ihBAZuE58Wk9tXdVUIxBA87L4Tx68Sdfdx7
-	bfYsyrOuf7TqEWw3Y1Zt2Nd2ghLPyo6iKrT7sXVskmmyFuhZlED6TPTGMWvVq1+1ui+xnULm
-X-Google-Smtp-Source: AGHT+IEa9piqsycGr5dVtgMxUzC1ptzHLucSwtJh1qbjrNy10hMLozOg9bpfvgMKFIGeJAW2vtj6jA==
-X-Received: by 2002:a05:6a00:1824:b0:742:3cc1:9485 with SMTP id d2e1a72fcca58-742a97e0b31mr14879726b3a.12.1747632105924;
-        Sun, 18 May 2025 22:21:45 -0700 (PDT)
-Received: from [192.168.0.120] ([49.205.34.162])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-742a96defa1sm5513162b3a.12.2025.05.18.22.21.43
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 18 May 2025 22:21:45 -0700 (PDT)
-Message-ID: <4e66af48-686b-43b6-970a-91d927fbe5a3@gmail.com>
-Date: Mon, 19 May 2025 10:51:41 +0530
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="m2ecg5y3";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="JmqqVn6l"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 3826C201CF;
+	Mon, 19 May 2025 05:29:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1747632547; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=l+w6BCigPIrGW1IOQSUxzQH0EOjRlgKmejNBmOE11L0=;
+	b=m2ecg5y3+TtRXemt9Kr9GxQ7+6KZPUxviT/OAd/HpSBPzPS0Ei7TK084TKyoSkItQ+LRRd
+	u8O0/bxX3pj+TUL/pC2DGQb+pzq0ZGGcDj7yH2aK1YnnZd8uzu1G/9kaFbVPOMhYHNcLzq
+	pYHO80HlwjJfQyqaAGRwZ6f0o9Tq4Qg=
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1747632546; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=l+w6BCigPIrGW1IOQSUxzQH0EOjRlgKmejNBmOE11L0=;
+	b=JmqqVn6l8cZFUplWY2PxB3730DW9pdlCg8uitYXBqza6Ya2zzmz2CXBohWufqzNvLGg7By
+	75jcrMBIxNmxH3L4y5FQ9NdsJJfbC1R37gZKvvbApl+9zaSLpSjcWVbExv96KSe/c8M1na
+	msjm2vDJL3xOiM87e5YRc8t2/hDgZog=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 3C1B31372E;
+	Mon, 19 May 2025 05:29:05 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id lD0yAKHBKmgpPAAAD6G6ig
+	(envelope-from <wqu@suse.com>); Mon, 19 May 2025 05:29:04 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] fstests: generic/537: remove the btrfs specific mount option
+Date: Mon, 19 May 2025 14:58:39 +0930
+Message-ID: <20250519052839.148623-1-wqu@suse.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/2] new: Add a new parameter (name/emailid) in the
- "new" script
-Content-Language: en-US
-To: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>, fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
- ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org,
- david@fromorbit.com
-References: <cover.1747306604.git.nirjhar.roy.lists@gmail.com>
- <2df3e3af8eb607025707e120c1b824879e254a01.1747306604.git.nirjhar.roy.lists@gmail.com>
- <87jz6gvto1.fsf@gmail.com>
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <87jz6gvto1.fsf@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-Spam-Level: 
+X-Spam-Flag: NO
+X-Spam-Score: 0.20
+X-Spamd-Result: default: False [0.20 / 50.00];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-0.996];
+	MIME_GOOD(-0.10)[text/plain];
+	RCPT_COUNT_TWO(0.00)[2];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	ARC_NA(0.00)[];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:mid];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	FROM_EQ_ENVFROM(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	RCVD_TLS_ALL(0.00)[]
 
+Although btrfs deprecated "norecovery" mount option in upstream kernel
+commit a1912f712188 ("btrfs: remove code for inode_cache and recovery
+mount options"), later "norecovery" mount option is re-introduced for
+compatibility by commit 440861b1a03c ("btrfs: re-introduce 'norecovery'
+mount option").
 
-On 5/17/25 08:18, Ritesh Harjani (IBM) wrote:
-> "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
->
->> This patch another optional interactive prompt to enter the
->> author name and email id for each new test file that is
->> created using the "new" file.
->>
->> The sample output looks like something like the following:
->>
->> ./new selftest
->> Next test id is 007
->> Append a name to the ID? Test name will be 007-$name. y,[n]:
->> Creating test file '007'
->> Add to group(s) [auto] (separate by space, ? for list): selftest quick
->> Enter <author_name> <email-id>: Nirjhar Roy <nirjhar.roy.lists@gmail.com>
-> I don't see much of a value add in this change here, as folks or
-> atleast I prefer to quickly get into writing my test first and later
-> worry about these details :). But I guess I understand where you are
-> coming from, a lot of times people miss to update this and end up
-> sending a test with "YOUR NAME HERE" placeholder.
->
-> So, sure if we are doing this - then please fix the commit message too,
-> as it still shows <email-id> above.
+Instead the btrfs specific mount option "nologreplay" is already
+deprecated for a long time and is going to be removed soon.
 
-Sure. I will update the commit message in the next revision.
+So use the generic "norecovery" for all filesystems.
 
---NR
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/generic/537 | 1 -
+ 1 file changed, 1 deletion(-)
 
->
-> -ritesh
->
->> Creating skeletal script for you to edit ...
->>   done.
->>
->> ...
->> ...
->>
->> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
->> ---
->>   new | 5 ++++-
->>   1 file changed, 4 insertions(+), 1 deletion(-)
->>
->> diff --git a/new b/new
->> index 6b50ffed..636648e2 100755
->> --- a/new
->> +++ b/new
->> @@ -136,6 +136,9 @@ else
->>   	check_groups "${new_groups[@]}" || exit 1
->>   fi
->>   
->> +read -p "Enter <author_name>: " -r
->> +author_name="${REPLY:=YOUR NAME HERE}"
->> +
->>   echo -n "Creating skeletal script for you to edit ..."
->>   
->>   year=`date +%Y`
->> @@ -143,7 +146,7 @@ year=`date +%Y`
->>   cat <<End-of-File >$tdir/$id
->>   #! /bin/bash
->>   # SPDX-License-Identifier: GPL-2.0
->> -# Copyright (c) $year YOUR NAME HERE.  All Rights Reserved.
->> +# Copyright (c) $year $author_name.  All Rights Reserved.
->>   #
->>   # FS QA Test $id
->>   #
->> -- 
->> 2.34.1
-
+diff --git a/tests/generic/537 b/tests/generic/537
+index 3be743c4..77d38bbf 100755
+--- a/tests/generic/537
++++ b/tests/generic/537
+@@ -55,7 +55,6 @@ fi
+ 
+ echo "fstrim on ro mount with no log replay"
+ norecovery="norecovery"
+-test $FSTYP = "btrfs" && norecovery=nologreplay
+ _scratch_mount -o ro,$norecovery >> $seqres.full 2>&1
+ $FSTRIM_PROG -v $SCRATCH_MNT >> $seqres.full 2>&1 && \
+ 	echo "fstrim with unrecovered metadata just ate your filesystem"
 -- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+2.49.0
 
