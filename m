@@ -1,105 +1,157 @@
-Received: from mail-pf1-f171.google.com (mail-pf1-f171.google.com [209.85.210.171])
+Received: from mail-pf1-f169.google.com (mail-pf1-f169.google.com [209.85.210.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E751442C;
-	Sat, 17 May 2025 06:03:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D1BC01EF38C;
+	Mon, 19 May 2025 05:21:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747461822; cv=none; b=q7EQ9I6iw38vFhzfCkaTMocrKfvf9HDYqvtTdxkw/QQ7PQol4bKYgrrCte2+0p4V9my8XzUg16aPC4tg0ahQm8E9OQvbuYzZ403n19PEx1bhDC37v6w+4YFBSqHF3M1RebrR11jh2ZJyQZp9JdcwaDJW1s9ctJjevLTmhQLDJ+k=
+	t=1747632108; cv=none; b=U/CxpZtH/FOM/jzXW3G9hdQJXBrMElAnmITJXjigOQLlLB4oDu8ydP4KOdXP4U2tZtj0R1LcmUgQykxa49lcepeMg+Jnaqn2Q6/WfWbZC/UXUvT4xUQizpYcumrYGtm8HpoQMNSu9iCMuSgzelj9vN+gZKJNl6xGJ9YRFRQoPZA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747461822; c=relaxed/simple;
-	bh=HhqKG2jlcF1+YXWAPPqbx062HR24A2Br8qxNQA2XFkI=;
-	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=ckfFQ02UMHYBUEmtmuffXuPlMirVWL1faymXggVEPyMJ5h51TJBsQAo3Zo22dM0sQ1SJ+bBvoMADxYHNmMWCMndmKCfoCOosPcxzvjrE4dDmfhROWvHBo9X5xs4Xb03d6ujwH+Mug+wCWUuNg3+a9DVDOTBL29KqvfxYpTmJMUE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Yrz8ZkBQ; arc=none smtp.client-ip=209.85.210.171
+	s=arc-20240116; t=1747632108; c=relaxed/simple;
+	bh=hRSGTZ/TCqdXc/wHCs7bXw3k0TyKsAyUPjwx2yKa4lE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=TWzA3p21WaZDlcvERf35lkp6PjZx874DMre08GwkORq7o5hdymohNS67SoRqZQ2hqTKOKZTWqRcR0UvS9ZgCvp94LZMmbKp2+zyFr/fBNt5L+bBUrVsSiSX2yazGOGSVtXZ1O0fh75Jtoc/bvlxU6qfpizIj1F+yBwl7x78HNjY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TDTX4W0N; arc=none smtp.client-ip=209.85.210.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Yrz8ZkBQ"
-Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-73712952e1cso2823000b3a.1;
-        Fri, 16 May 2025 23:03:41 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TDTX4W0N"
+Received: by mail-pf1-f169.google.com with SMTP id d2e1a72fcca58-742c73f82dfso609640b3a.2;
+        Sun, 18 May 2025 22:21:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1747461821; x=1748066621; darn=vger.kernel.org;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=EB4fG5SiMy1qYs1t6MhkbWVdPLGff5wCkYdmjlBknLI=;
-        b=Yrz8ZkBQhXCrp45wBh/XgdEmfq5jyihLRDwT67O3mtbCGvNlR8sGPdCi/jU9tambC3
-         zXKkJc4pfGZZqdMO7VWcATjLNnp5G+TWLTxngt61sw4aeNeXoBfp9P9YOd4LnLUBfANw
-         7jVPm/RXB5LfvE1L/f5xkQW5BKK/jPX6WpGZhDXNEIV9jU3wfFSLjFfv79goCS/mzKWI
-         kD2zQ3VA152XIbOFEhiE9foUFBLzvVuioVfAJV5hkGkOYUo36K7VPO1645nPtemUlSfV
-         FJBX7hNGfZ/3FxZJnkQ2KtxVS5yfXstT2mQ9VyE8SNq4xTmIbyagftlyubZ27vyKQ1lH
-         F4rA==
+        d=gmail.com; s=20230601; t=1747632106; x=1748236906; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=rp1k/HpI+Gv6FeFGvkOUZD9sHzNzRonAcKHbeMCNeWo=;
+        b=TDTX4W0NJWKnUKiHqjbO8AurtJEAjZUmXQPK8QaKF14jJKZd2D4O+5lwLaw9ouLH0r
+         HsnhM93uIBkwWOvVnuPMJWFoPJfqmgxSDqcde18VJFATzzfK1up3tkyHpEomDTBNx5cX
+         C9qT7pzJBzETftkNtPDZ+3EzOc6vGIrPXviJMVuSS2YN4UKY0BNXcY4Wqu0cxrFX78Is
+         5O7i6WAbs96PWUlLelyL2Xm6vu4KO738sZuT8U7CQNLwrctayN7poki0flL4B+US7cjm
+         NA8ZS1Ozyf8/oZzQkWSRSvG+v1KKloLAS49CZrv5OlynA6xKI0zWjDYdzbrzzLA8LHfW
+         MP0A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747461821; x=1748066621;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from
+        d=1e100.net; s=20230601; t=1747632106; x=1748236906;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=EB4fG5SiMy1qYs1t6MhkbWVdPLGff5wCkYdmjlBknLI=;
-        b=jwNBg7tf92upEbn2k+utP3uCbBhRC6OVjhpHRmSHTpVovXVqWyos1sWm8jEIv1fxPo
-         JQC7vX3HLTYWowTW5pN2rbjqRbI5Wo5emxfm3Ut5HsyjPpLf25HkrrKQ8W3BagBNyp7q
-         rXAvXDZuMptReuAyToRuY4Xvfk9OZvG5EXGO+uraQnlfrBFGlXfP0iBULE4Rs2KmhGn4
-         qDN40VMOIL4Ek14NdhSts7LpFloGMvVGmzZqyd939B/h0zbQ1gChiMCggpf/Q0M72zC3
-         yC8UgHQe9iaAEfrHlNAZ9VFME5TLKHKAUidk4cVBmZj0jte4gCwwki5PSumR+g2bCPww
-         vgSQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWM9Y/wPFEiszZ/PivQPEQ/A962yoNFWHYuncI+XFExwsFflu7dqt+gCn4PHlohEIYEXAZDpO5NIYPZ@vger.kernel.org, AJvYcCWpsS1ocJNSg88gVevmdgU3MsjqTPLJqOt81UBnmcX0Znk9y3vIIj9YXhyP/i/uPyDmljhcRyRn@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw4RrbfaGhFk6wVbwIM9mRpN8iPfopIzZT+B24RE6T5BqIIcYYO
-	8Mxw9vItg5fycfkPnc7Lvd4mvnqmxihiQpWojKwj7lUqoDKgyLBzHGqF
-X-Gm-Gg: ASbGnctjHXdVTEMrIIS8SEZIBWEggUuk2McEZkjqUx2+GUWtQQxtEzsDkhArfyBHeQG
-	x7fKtgG/JNgIeBsPLZB6heRg8Qo5vjKi84ZGV2bQoI+0oiqLMKkEMbesqHRZPJq7UDmkv8t1dtR
-	ArqchEnNYtwnJeCGXNFn/RZAGGtj8WeC0BI4p/ZGjXicMApJu6cELFxthqcPF68Y6ONMiHk5J+4
-	n/bSyDS4I/evXhmu4eZeHrL4menU80wPC1+JiUWl5T0ZHielyOhzFcNcIHeJDHbzIKgxuySprsz
-	5xY2lnfiYqV5skPS8otgPRZInGZFbCQCCKYDJvWCLAU=
-X-Google-Smtp-Source: AGHT+IEKqqLD/cHqCdpenuJ2M5WKEFmsmY1QWaWWVNXhb+3Z59KhM/uOtWRFnunhWWfYceRwE+t+EQ==
-X-Received: by 2002:a05:6a20:1591:b0:1f1:432:f4a3 with SMTP id adf61e73a8af0-2170ccb2dccmr7923277637.23.1747461820683;
-        Fri, 16 May 2025 23:03:40 -0700 (PDT)
-Received: from dw-tp ([171.76.82.96])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b26eaf8db5csm2502662a12.34.2025.05.16.23.03.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 16 May 2025 23:03:40 -0700 (PDT)
-From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>, fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org, ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org, david@fromorbit.com, nirjhar.roy.lists@gmail.com
-Subject: Re: [PATCH v2 2/2] new: Replace "status=0; exit 0" with _exit 0
-In-Reply-To: <463f1f99c7b9ced218f62ea9fc048c2e645227c5.1747306604.git.nirjhar.roy.lists@gmail.com>
-Date: Sat, 17 May 2025 11:28:38 +0530
-Message-ID: <87cyc7wzg1.fsf@gmail.com>
-References: <cover.1747306604.git.nirjhar.roy.lists@gmail.com> <463f1f99c7b9ced218f62ea9fc048c2e645227c5.1747306604.git.nirjhar.roy.lists@gmail.com>
+        bh=rp1k/HpI+Gv6FeFGvkOUZD9sHzNzRonAcKHbeMCNeWo=;
+        b=PHOg7/Gf+HNTuzhb2+mco+rKGKiL75AOYe52uXHDKHAl6TNfV8zOyT6B4bgP0t6K2g
+         sC6eVint3YOUr8CpkuWcEFxFxFZ4GYTe9hMUQ/S44CjbSJ94xIVoQQ3+4Ae5nrzhCQbA
+         vxXA6CMMiyaEM5WJ8ukrwtfYNkRTlW+PQv+FaeMHtpLSecKNZZlrDkaPIJldqm8i+0En
+         kgLA3e4exEbFV1G4lE9EeHdM/VQHMdY5F8hcd3MWIC48Zu/FufDvDulOAHdC0J5Je8Qw
+         CePfSBsnuqWODY+hG0/ZeqpgxYLOLaQZzEk9XAzNuRp5Fzncz45+axV8Gybn4i1+jUYe
+         LiTw==
+X-Forwarded-Encrypted: i=1; AJvYcCV+DWiQdd1AE+YJp9fbWhfW5dZeHRGvRQSQBQRVQRkVpfdZqOg6yfmu0mSGbig6/DJ3WheutwTr@vger.kernel.org, AJvYcCXInxF3VLnbvLKcBL5XTXStWatBBddNhhFkcmhGu3+MFhxlUW4lPhNwD9e6W+JPKqC84fE7EP/0Xw00@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzd6zZRjcQ2zSDCNZuQCTrTEEUhWPWcxI1kyrZCJ6QmQ2CQtyaj
+	piYU7cxlZ/4lUG536RHLCoci/pukc8/nq/SmYXHiumBDUzVAXNVfpfMgF5l91Q==
+X-Gm-Gg: ASbGnctZdoZumQTicPCV//bf+/XRxRqG/Zn0AlPDMiInRee7O+gb6F0XNJVwl9Xr4wW
+	JA5HONv7uhqLO3vPE85A44seSBL0ITihXGQb2/lJ+d+oixdoNt48tcoNnYwfyClMpB2cytSAghY
+	53XwPB8FTQT3089P3O4p4oMcCtW2zegUyQ1V9qj7uUulPpN6Gt6SFNBitcGWSc3Bwrka8mWXA+y
+	PulLpdaXb6UF/cq7R+fZcZ80waDhVm/qbxMqumS8ihBAZuE58Wk9tXdVUIxBA87L4Tx68Sdfdx7
+	bfYsyrOuf7TqEWw3Y1Zt2Nd2ghLPyo6iKrT7sXVskmmyFuhZlED6TPTGMWvVq1+1ui+xnULm
+X-Google-Smtp-Source: AGHT+IEa9piqsycGr5dVtgMxUzC1ptzHLucSwtJh1qbjrNy10hMLozOg9bpfvgMKFIGeJAW2vtj6jA==
+X-Received: by 2002:a05:6a00:1824:b0:742:3cc1:9485 with SMTP id d2e1a72fcca58-742a97e0b31mr14879726b3a.12.1747632105924;
+        Sun, 18 May 2025 22:21:45 -0700 (PDT)
+Received: from [192.168.0.120] ([49.205.34.162])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-742a96defa1sm5513162b3a.12.2025.05.18.22.21.43
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 18 May 2025 22:21:45 -0700 (PDT)
+Message-ID: <4e66af48-686b-43b6-970a-91d927fbe5a3@gmail.com>
+Date: Mon, 19 May 2025 10:51:41 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 1/2] new: Add a new parameter (name/emailid) in the
+ "new" script
+Content-Language: en-US
+To: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>, fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
+ ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org,
+ david@fromorbit.com
+References: <cover.1747306604.git.nirjhar.roy.lists@gmail.com>
+ <2df3e3af8eb607025707e120c1b824879e254a01.1747306604.git.nirjhar.roy.lists@gmail.com>
+ <87jz6gvto1.fsf@gmail.com>
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+In-Reply-To: <87jz6gvto1.fsf@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-"Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
 
-> We should now start using _exit 0 for every new test
-> that we add.
+On 5/17/25 08:18, Ritesh Harjani (IBM) wrote:
+> "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
 >
-
-Right every test now sources common/exit in _begin_test() preamble.
-So we may as well start using _exit for new tests.
-
-Looks good to me. Please feel free to add:
-Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-
-
-> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
-> ---
->  new | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
+>> This patch another optional interactive prompt to enter the
+>> author name and email id for each new test file that is
+>> created using the "new" file.
+>>
+>> The sample output looks like something like the following:
+>>
+>> ./new selftest
+>> Next test id is 007
+>> Append a name to the ID? Test name will be 007-$name. y,[n]:
+>> Creating test file '007'
+>> Add to group(s) [auto] (separate by space, ? for list): selftest quick
+>> Enter <author_name> <email-id>: Nirjhar Roy <nirjhar.roy.lists@gmail.com>
+> I don't see much of a value add in this change here, as folks or
+> atleast I prefer to quickly get into writing my test first and later
+> worry about these details :). But I guess I understand where you are
+> coming from, a lot of times people miss to update this and end up
+> sending a test with "YOUR NAME HERE" placeholder.
 >
-> diff --git a/new b/new
-> index 636648e2..dff69265 100755
-> --- a/new
-> +++ b/new
-> @@ -176,8 +176,7 @@ exit
->  #echo "If failure, check \$seqres.full (this) and \$seqres.full.ok (reference)"
->  
->  # success, all done
-> -status=0
-> -exit
-> +_exit 0
->  End-of-File
->  
->  sleep 2		# latency to read messages to this point
-> -- 
-> 2.34.1
+> So, sure if we are doing this - then please fix the commit message too,
+> as it still shows <email-id> above.
+
+Sure. I will update the commit message in the next revision.
+
+--NR
+
+>
+> -ritesh
+>
+>> Creating skeletal script for you to edit ...
+>>   done.
+>>
+>> ...
+>> ...
+>>
+>> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+>> ---
+>>   new | 5 ++++-
+>>   1 file changed, 4 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/new b/new
+>> index 6b50ffed..636648e2 100755
+>> --- a/new
+>> +++ b/new
+>> @@ -136,6 +136,9 @@ else
+>>   	check_groups "${new_groups[@]}" || exit 1
+>>   fi
+>>   
+>> +read -p "Enter <author_name>: " -r
+>> +author_name="${REPLY:=YOUR NAME HERE}"
+>> +
+>>   echo -n "Creating skeletal script for you to edit ..."
+>>   
+>>   year=`date +%Y`
+>> @@ -143,7 +146,7 @@ year=`date +%Y`
+>>   cat <<End-of-File >$tdir/$id
+>>   #! /bin/bash
+>>   # SPDX-License-Identifier: GPL-2.0
+>> -# Copyright (c) $year YOUR NAME HERE.  All Rights Reserved.
+>> +# Copyright (c) $year $author_name.  All Rights Reserved.
+>>   #
+>>   # FS QA Test $id
+>>   #
+>> -- 
+>> 2.34.1
+
+-- 
+Nirjhar Roy
+Linux Kernel Developer
+IBM, Bangalore
+
