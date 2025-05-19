@@ -1,60 +1,74 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Received: from mail-pg1-f170.google.com (mail-pg1-f170.google.com [209.85.215.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 756DD3595D
-	for <fstests@vger.kernel.org>; Mon, 19 May 2025 05:29:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12968243374;
+	Mon, 19 May 2025 06:17:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747632556; cv=none; b=lvHtc1WC5nSoRKBkZ8mHErJFvSvYKwjB6DhbK3QdOmW41S+XhpxhGAfHskrpbnppbhsgixjOOAscHcnMbEHQBVWCMF52vW/nHbElWZHtFXb2JSw/ERNYm3kl/vVTlP/Syaj0Z17P2/4P6VHlo4ut35CWc45c2pGY/n1BLOrexfc=
+	t=1747635433; cv=none; b=sLOzyEJ+y7+EiomPdtsd55zqoP5ZOUE1ZdRwhJ9Em+Rlo1mZXDlTOWnUMUHEMfnHDuh/nK2zso3GRhrlsp/eGgASJ0SLKCg2ZJWrl8moRZ2oHVk1hH7aXvXXZ15A1WPiXWPCyyxilBZpWbYST5hP6m78Dm6L1xgPk8YGMwgKxuw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747632556; c=relaxed/simple;
-	bh=IhLnIK8HYyn8QD7/qcVYRtcuWG5rpr7ecSoZZu3kWo8=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=bjrq5VuxUblDWoNEmXWZQki4uHWCuOmSvWz0O7XTHE0TUj+SaaZqnP8Q+gdZXprU+H2byYEMbxoo54JqLYaTrSg8RSPmc+wmh28XIkC8DMa2O3IcFNTFxaC4RKmA+Doz2c35O8wsp9ydxS/I1n9dDtMirIM5qPuALiSdVWyP3go=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=m2ecg5y3; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=JmqqVn6l; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1747635433; c=relaxed/simple;
+	bh=d7dO60/1wbgHIvcSIPVvbisu9fIWON9zoH+EUQNB9u0=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=HZpcumK5u19U41gRKHMKJjQBqDL+MUikarHL3ALzITg14nRLXXCRLP8JUjEzZrNTdGPQ9/gIisBT3NihdRovN+8lrvYRMY3I+BwIyFcrKzA/HBgmuQrUMB23tfVG1H2W9ghoYmIWMxmQCg0nFJCGBtPfqIwea3umdPrmLrB8J0s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=eQKYst6M; arc=none smtp.client-ip=209.85.215.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="m2ecg5y3";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="JmqqVn6l"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 3826C201CF;
-	Mon, 19 May 2025 05:29:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1747632547; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=l+w6BCigPIrGW1IOQSUxzQH0EOjRlgKmejNBmOE11L0=;
-	b=m2ecg5y3+TtRXemt9Kr9GxQ7+6KZPUxviT/OAd/HpSBPzPS0Ei7TK084TKyoSkItQ+LRRd
-	u8O0/bxX3pj+TUL/pC2DGQb+pzq0ZGGcDj7yH2aK1YnnZd8uzu1G/9kaFbVPOMhYHNcLzq
-	pYHO80HlwjJfQyqaAGRwZ6f0o9Tq4Qg=
-Authentication-Results: smtp-out2.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1747632546; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=l+w6BCigPIrGW1IOQSUxzQH0EOjRlgKmejNBmOE11L0=;
-	b=JmqqVn6l8cZFUplWY2PxB3730DW9pdlCg8uitYXBqza6Ya2zzmz2CXBohWufqzNvLGg7By
-	75jcrMBIxNmxH3L4y5FQ9NdsJJfbC1R37gZKvvbApl+9zaSLpSjcWVbExv96KSe/c8M1na
-	msjm2vDJL3xOiM87e5YRc8t2/hDgZog=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 3C1B31372E;
-	Mon, 19 May 2025 05:29:05 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id lD0yAKHBKmgpPAAAD6G6ig
-	(envelope-from <wqu@suse.com>); Mon, 19 May 2025 05:29:04 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH] fstests: generic/537: remove the btrfs specific mount option
-Date: Mon, 19 May 2025 14:58:39 +0930
-Message-ID: <20250519052839.148623-1-wqu@suse.com>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eQKYst6M"
+Received: by mail-pg1-f170.google.com with SMTP id 41be03b00d2f7-b200047a6a5so4461435a12.0;
+        Sun, 18 May 2025 23:17:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1747635431; x=1748240231; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=xegv/gF/tQ6fF9VYglXwKgNt6/H0qj0lf6CHPVMVv/k=;
+        b=eQKYst6McBtc6boXw1j7HxH7mn6QqYGwBlo82/SgNF/K6nYsFtU3z6JwClAu9ubYn5
+         H4Pc6hFJgVF2F+33xUDywfm4WQZ1wfeBM+vvRGHcKchnHgm6Q8fUizalim3EgUomgPRj
+         LesyJZRSsFj1DsKNAL/CyQ07kpZmooZxVL8vEyxOVBHn3tDAjJaj4W0xzUzCQj7G9I/z
+         qQUS1h6JfUafkvsqAWiQtT6KbrFkgFp7ePBmyuGIuA6mcvHUr+jenYXktNRSTJR6P/j3
+         TcLrE+WtMiY4Dc4HQRdP42khmjeg5++HQPV2Pm54NwZJEFxQ8k5Z2q6wv0P5gpzscZ+Q
+         fK/Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1747635431; x=1748240231;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=xegv/gF/tQ6fF9VYglXwKgNt6/H0qj0lf6CHPVMVv/k=;
+        b=OxoO0cNk++Thkdjbz6Bjuh7goj53AIqQWD9fvGnefw9hWpYWVBBVr7xnSJrI2IQRPc
+         bSvAampPr0e6jZIfXHPW/SY9jrnPmpdZ6jxn12YJt/ISomTHn7GCxMF3CwM91IAi05b1
+         w/444yimMHFJ51MQ4KGaWbeR4e5K6MYKcOwZTc+8GpapdR2IM5wXRIWGDZj2iHpq3NeJ
+         SislJu+w6SfBq8maV5pdLa4ETkQIKDvwpoB+vDCvz9+jryOhJ6339LROGie79hsE2FFE
+         AwzJWpl3OGQd8G5/tBfiyEhettfsKsLo2dcTQqjFsBricJnPuil00i9ffjkdsLjDEm+l
+         t/2g==
+X-Forwarded-Encrypted: i=1; AJvYcCW7LD4Vujw5dz6LpFmo+kap3N9bvrcBG5ilGjKNV+hY8PZX6pZwlZw1SPgKp05DgBaAfTooDKceTvA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzqJ4s08kz8p1Fk7Dvtm7F4V7cOCWxo/A7pqMjPkxJ9da6lVgHN
+	8m+1/FfABSLexUfjasWkor78Rq4tcEnHr4bWDRjKtlUQ06JdCnE4RwugN/PWeQ==
+X-Gm-Gg: ASbGncv4MPHib8z8ksS4O9v4dG7PS+5VLFL8rLx1brzxtSBt01kRI4DZvHBeMn8vYdU
+	PTmZSjDPd7nOrho3kq8gZsBHkCEldTlYHMv3GZYZBoxOgaxmCshCJnmullLCENH1bM9BurFLelj
+	zOkbW5QrKSjlWe/jHzqMEopnXMvZ1L6qc6oQ+9wItTzqZ1a7P3EbDO5pPvVbEoqxrtU/AGAxQtg
+	xy/dgEhjjyGF1UuVdTCV/KoEEtkfDjgwFtSvssEY97W6ISqSiaiX/vJoYptd+TSoLCmV2HPPsRx
+	5yp2fLYf82ziWBqzJ8wY6kXOR+mPEnmZWt5HGdH281kovPhxAsbbWg0=
+X-Google-Smtp-Source: AGHT+IEl/K+LaezsJu2M/Nn8u3QAE77OIRh207aXSnzOEm0MMpg2FT/4mb2I10s4LG4mFzyAC5XvUg==
+X-Received: by 2002:a17:902:e5d1:b0:224:7a4:b31 with SMTP id d9443c01a7336-231d4b05b02mr116589025ad.6.1747635430576;
+        Sun, 18 May 2025 23:17:10 -0700 (PDT)
+Received: from citest-1.. ([49.205.34.162])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2325251da10sm6939385ad.42.2025.05.18.23.17.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 18 May 2025 23:17:10 -0700 (PDT)
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org,
+	ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com,
+	djwong@kernel.org,
+	zlang@kernel.org,
+	david@fromorbit.com,
+	nirjhar.roy.lists@gmail.com
+Subject: [PATCH v3 0/2] new: Improvements to new script
+Date: Mon, 19 May 2025 06:16:40 +0000
+Message-Id: <cover.1747635261.git.nirjhar.roy.lists@gmail.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -62,57 +76,30 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spam-Level: 
-X-Spam-Flag: NO
-X-Spam-Score: 0.20
-X-Spamd-Result: default: False [0.20 / 50.00];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-0.996];
-	MIME_GOOD(-0.10)[text/plain];
-	RCPT_COUNT_TWO(0.00)[2];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:mid];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	FROM_EQ_ENVFROM(0.00)[];
-	TO_DN_NONE(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	RCVD_TLS_ALL(0.00)[]
 
-Although btrfs deprecated "norecovery" mount option in upstream kernel
-commit a1912f712188 ("btrfs: remove code for inode_cache and recovery
-mount options"), later "norecovery" mount option is re-introduced for
-compatibility by commit 440861b1a03c ("btrfs: re-introduce 'norecovery'
-mount option").
+This series adds a couple of improvements to the "new" script.
+Patch-1/2 - Adds an optional name/email id parameter prompt to the new script while creating
+ a new test file using the "new" file.
+Patch 2/2 - Replace "status=0;exit 0" with _exit 0 in the skeleton file in "new".
 
-Instead the btrfs specific mount option "nologreplay" is already
-deprecated for a long time and is going to be removed soon.
+[v2] -> v3
+ - Modified the commit message to remove "email-id" from it (patch 1).
 
-So use the generic "norecovery" for all filesystems.
+[v1] -> [v2]
+ - Added RB of Zorro in patch 2 of [v1]
+ - Modified the prompt message for entering the author name (patch 1 of [v1])
+ - Removed patch 3 (Suggested by Zorro) of [v1]
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- tests/generic/537 | 1 -
- 1 file changed, 1 deletion(-)
+[v1] https://lore.kernel.org/all/cover.1747123422.git.nirjhar.roy.lists@gmail.com/
+[v2] https://lore.kernel.org/all/cover.1747306604.git.nirjhar.roy.lists@gmail.com/
 
-diff --git a/tests/generic/537 b/tests/generic/537
-index 3be743c4..77d38bbf 100755
---- a/tests/generic/537
-+++ b/tests/generic/537
-@@ -55,7 +55,6 @@ fi
- 
- echo "fstrim on ro mount with no log replay"
- norecovery="norecovery"
--test $FSTYP = "btrfs" && norecovery=nologreplay
- _scratch_mount -o ro,$norecovery >> $seqres.full 2>&1
- $FSTRIM_PROG -v $SCRATCH_MNT >> $seqres.full 2>&1 && \
- 	echo "fstrim with unrecovered metadata just ate your filesystem"
--- 
-2.49.0
+Nirjhar Roy (IBM) (2):
+  new: Add a new parameter (name) in the "new" script
+  new: Replace "status=0; exit 0" with _exit 0
+
+ new | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+--
+2.34.1
 
