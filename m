@@ -1,41 +1,77 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 627EC242D85
-	for <fstests@vger.kernel.org>; Tue, 20 May 2025 14:08:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 74248201266
+	for <fstests@vger.kernel.org>; Tue, 20 May 2025 23:31:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747750140; cv=none; b=b4dqeXoPYHVKsDwEni5dk3i+iZ/EwfHlcOmMMkjYJ2o1L0pdCbXIRCq5HRibaRXxImHV7emHdSLvjHzyAJnzpoa3tKek2r+mwofBu+qry2OIzcFOI9Dj79hKcvnsTg5DL0dJIPW8A9y4SXO7Vnay/h35slI3J5gKX4Bzfr0AwPI=
+	t=1747783902; cv=none; b=qTXogIToq5VAfQxaZNQ75HuaA4S6OY0CZ0qxU+5NdN/8TAFtQcjBTRoM92l+hm6WibyglfxwjDAaciPOzXD94VyJ1nFWK914c48DwSZeCE6gecklNJDXGdUoFKD321rgptGSnzICDZzm0c/50aYMoLDjBxdtwwdDEuPTeKDwq/o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747750140; c=relaxed/simple;
-	bh=dzrcAoSATR5IqT7A/EbJNdOLgUgJ9CEnV8VyLzDdmY8=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=BJErzNL5MmtolyqZV9+opqcw1ZCyHAG4yB/9PKQZQ+Q/2lcUn3FRRFI17QIX3raOM7A5NmlGDyMuFJ0gmQ+7NpXNP8+/XG3coCuouHVvU2IYIHz1WwmDqcEBVDbNLJ99ya3txsDiUp4XCxhMNWPACvJocgzQyjL75nBesgv7oHo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=bmj4azBl; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1747783902; c=relaxed/simple;
+	bh=b8XgE9OlyrmHMQZSDZMNj3oW7tUew6Qw/Jov+Gfma+Y=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=lm86OK0wA/V1A+Nq/CdcO3Gfnn2M58PwSj86aTzAReDyv5na7ZkneKCOS7V3jl3x8KLOGlPvZAav5neY+ocuxHQldQE5NdhW8h8Qd1a50DJGqXjm5wr5M7JOcW1CT3dS1EKxAgOkto+qiKpXIVHmusyTMmhnpgp6RVa4Bh27CYc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=B5WZsILc; arc=none smtp.client-ip=209.85.214.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="bmj4azBl"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Type:MIME-Version:Message-ID:
-	Subject:Cc:To:From:Date:Sender:Reply-To:Content-Transfer-Encoding:Content-ID:
-	Content-Description:In-Reply-To:References;
-	bh=atcbji7K8wVrrwGlTh94zn6jWdvwg2eM1Y3aBgSsH7o=; b=bmj4azBl3ryGQIcXNXUMnKpzI5
-	DZsE0KQrYEU4+XdMglQdphpCe94U0+jvw+2G2GYvzOQj77kFmBkqqyAq/On4jcg//GG/2jNKvaUq2
-	poK9dajNJMFsEMceOhvxtiaEErfttHY9GeKd86TlFHZn9LFTpvNuqwD+27/mJ/yc0iSdxk5fapElP
-	BmaEOH8Ds5Z4yrgJPxj70Zf8pwKNf6X+Fjjn3+AtdMBdNEkMBGqYEZm+pJyaU5W+LuCdt2/j2ieck
-	Vcv0BHV4jF5xjFUPR46gydLfY1Z9nXNq+1FODPXSXEIgaKmPqSgIkRrXklvMb+11e/ZejzjAqjrCR
-	oe6F3r9w==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1uHNeN-0000000D6zp-05Lr;
-	Tue, 20 May 2025 14:08:59 +0000
-Date: Tue, 20 May 2025 07:08:58 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests@vger.kernel.org,
-	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Subject: xfs/566 execution time
-Message-ID: <aCyM-p06c99rJ04g@infradead.org>
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="B5WZsILc"
+Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-231c86bffc1so62977315ad.0
+        for <fstests@vger.kernel.org>; Tue, 20 May 2025 16:31:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1747783900; x=1748388700; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=raeU9/iSwSH3dVD4TK1KXg4TW/IO69ywKHFHlZBC8gc=;
+        b=B5WZsILcPGTPMIBsACeYNEGf/UvWsMiYU7PvoDdXrUa4PZMVJ2WqB/XH0PK0NKGFa5
+         obiSXyoJPmZAGVCXQoboY3dZDetYqoWDv3w1PhvH1d0Vbb2DFOTEewGCVcfI8222gJeV
+         MkR8IFw17dGE3txVGJAjwG8XdhPJS/zTju1QLNS/k9Og65HecEbylv1pem36VQ9KXqRP
+         45Kw8RDg7ZtRDXwiOgbd0B8pwFz9OpZcOXS73AzaWLomibym3NJm465mf3lqNme007bC
+         H65kcAVs6H5QMeqnUDzj1LcYAit+eclnSASvsR/UM47XMm/gLDOe+ulcyHt08RguMj0w
+         AyjA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1747783900; x=1748388700;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=raeU9/iSwSH3dVD4TK1KXg4TW/IO69ywKHFHlZBC8gc=;
+        b=nm16ucZmjICT04OCNXj/qRP+ttsU42ZF/ztpvxtVpqSVEljjy44GeAubBl25/ZURCS
+         mENLmcRoz5cZfeYPUK7IfMGxYCOyGFKM2B6SASN1GRa+h0LafpFIgQdjixA2FbOnerli
+         nOeLm40rgBbP4Upq8bqz/kss6zqa1lIgeXwm6hO0YQLO0QogrqEpThOZK6rdXZ6OZjkH
+         jLa7P0azMqkE1XNJS8yy7TeYMopRTPQl1uPWN02S1lywyDMLda5/hFBQtefbZDE8IUzh
+         vhhX98rfjUhy04MmioFlXVRqnCb650YiaHxvSzqtAhCVFpdkCytec+2ildrKsj4SyCfn
+         Wo6g==
+X-Gm-Message-State: AOJu0Yy0pKzPZhOwfeW5SF5ua+3RXG0MsKSFgOnEcUqLY+5SQPp0kUHs
+	8aDsoz2EO2qicydFI57w7vdU2W3TO59QTKvpNMiAWb8k46NErMyYpp2b0DqfKXR8wep5KTVBseA
+	lngBu
+X-Gm-Gg: ASbGncsv6NHi0gOOcQ4MGeZP/7aO9m3bavu+KZ0m+YDH6N+XfAJ2qtjaAJp30NzBrVU
+	SeB78414IEgVjPHmQmRsb7vlhk10bnec+FpnM+uAvufouhWNte6lVVbVbaaZprW2tzE1F06Gss+
+	8hLU4ucyP44a1WocE6bLGCfp5RdR3qGue1kMgjX4tGoEk9rYn/rVAQPaUiDdbNnGfqNNEftDel5
+	pcmPujxMJXp5YhVz3AgBs5kbr8MDnlC0egaPntik7Hl26bnggox5U2R9dL9cf3yGTlI4t51fOV3
+	E0sHA31AIwIa30tp8fLNrMZWb+IAw8HF8KITSggwmfLxURgG6EmGyyoaHmHKS+TqArIg5aiO5ny
+	NIWBi8MD2DbOvfH3lS3WlXMbmNAk=
+X-Google-Smtp-Source: AGHT+IFohQp+DunNaW8Kj0BVCvcpMWTtFY/d7N401JRKMlw1+W74uZylrxvcop0Hae2G2aE7jNwAvg==
+X-Received: by 2002:a17:903:2582:b0:223:f408:c3e2 with SMTP id d9443c01a7336-231de35f14amr207654535ad.14.1747783899597;
+        Tue, 20 May 2025 16:31:39 -0700 (PDT)
+Received: from dread.disaster.area (pa49-180-184-88.pa.nsw.optusnet.com.au. [49.180.184.88])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-231d4ac9261sm82262585ad.1.2025.05.20.16.31.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 20 May 2025 16:31:38 -0700 (PDT)
+Received: from dave by dread.disaster.area with local (Exim 4.98.2)
+	(envelope-from <david@fromorbit.com>)
+	id 1uHWQq-000000065Jf-13TW;
+	Wed, 21 May 2025 09:31:36 +1000
+Date: Wed, 21 May 2025 09:31:36 +1000
+From: Dave Chinner <david@fromorbit.com>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
+Subject: Re: [PATCH v2 1/2] new: Add a new parameter (name/emailid) in the
+ "new" script
+Message-ID: <aC0Q2HIesHMXqVLG@dread.disaster.area>
+References: <cover.1747306604.git.nirjhar.roy.lists@gmail.com>
+ <2df3e3af8eb607025707e120c1b824879e254a01.1747306604.git.nirjhar.roy.lists@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,10 +80,62 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <2df3e3af8eb607025707e120c1b824879e254a01.1747306604.git.nirjhar.roy.lists@gmail.com>
 
-Hi Darrick,
+On Thu, May 15, 2025 at 11:00:16AM +0000, Nirjhar Roy (IBM) wrote:
+> This patch another optional interactive prompt to enter the
+> author name and email id for each new test file that is
+> created using the "new" file.
+> 
+> The sample output looks like something like the following:
+> 
+> ./new selftest
+> Next test id is 007
+> Append a name to the ID? Test name will be 007-$name. y,[n]:
+> Creating test file '007'
+> Add to group(s) [auto] (separate by space, ? for list): selftest quick
+> Enter <author_name> <email-id>: Nirjhar Roy <nirjhar.roy.lists@gmail.com>
+> Creating skeletal script for you to edit ...
+>  done.
+> 
+> ...
+> ...
+> 
+> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> ---
+>  new | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> 
+> diff --git a/new b/new
+> index 6b50ffed..636648e2 100755
+> --- a/new
+> +++ b/new
+> @@ -136,6 +136,9 @@ else
+>  	check_groups "${new_groups[@]}" || exit 1
+>  fi
+>  
+> +read -p "Enter <author_name>: " -r
+> +author_name="${REPLY:=YOUR NAME HERE}"
+> +
+>  echo -n "Creating skeletal script for you to edit ..."
+>  
+>  year=`date +%Y`
+> @@ -143,7 +146,7 @@ year=`date +%Y`
+>  cat <<End-of-File >$tdir/$id
+>  #! /bin/bash
+>  # SPDX-License-Identifier: GPL-2.0
+> -# Copyright (c) $year YOUR NAME HERE.  All Rights Reserved.
+> +# Copyright (c) $year $author_name.  All Rights Reserved.
 
-we regularly see execution times of more than half a day for xfs/566
-on a 30ish TB SMR HDD.  Do you think there might be a useful way to
-scale down the load on rotational devices?
+In many cases, this is incorrect.
+
+For people who are corporate employees, copyright for the code they
+write is typically owned by their employer, not the employee who
+wrote the code. i.e. this field generally contains something like
+"Red Hat, Inc", "Oracle, Inc", "IBM Corporation", etc in these
+cases, not the employee's name.
+
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
