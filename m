@@ -1,214 +1,132 @@
-Received: from TYPPR03CU001.outbound.protection.outlook.com (mail-japaneastazon11012055.outbound.protection.outlook.com [52.101.126.55])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 22728219EB
-	for <fstests@vger.kernel.org>; Wed, 21 May 2025 06:39:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.126.55
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747809560; cv=fail; b=bsbisoXfwh8ZQzhC10HCaccMKw3HdTHWCI0c/MKfV9zQ20RrPWlAJQ/3rpvIPJ4iPIWzBnuahN5YwNbM9ZA2I4iHHYv62PC0m85BtVNH4cvzkbdF7yi4+CeRNPtpoO517VyD3cbuoyCVEW9qB3uCzfuXV92yoh871CpFWwfPNi4=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747809560; c=relaxed/simple;
-	bh=EhMgzHx3Y1bK7LYIJ1TGbD3THispBn4FPVoX02/+ebo=;
-	h=From:To:Cc:Subject:Date:Message-Id:Content-Type:MIME-Version; b=pJ9+d301HaXnTNEzGO/jBKFteum3nMYejd5/1KA9q6eAYS3YeV8Qznky6ADXwZ6DzbXhgijqKN0UAQ8p4vEjqlqcIdj7SKgKACsdRd5bpI6f3WRQ03abip2Egcz1bWlTxBm6NOnQxakNS7GkHCNJ1wg2LlchuRPLOi3RB/3MODI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=vivo.com; spf=pass smtp.mailfrom=vivo.com; dkim=pass (2048-bit key) header.d=vivo.com header.i=@vivo.com header.b=R8LHaqkB; arc=fail smtp.client-ip=52.101.126.55
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=vivo.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=vivo.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EC4020D509
+	for <fstests@vger.kernel.org>; Wed, 21 May 2025 08:04:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1747814700; cv=none; b=ndgNCg4tY7XP3SYPl9v66dEABEmvDHcRwv6njC04MF9M9jeAPCD2YCZz4sMcKg7Tqn0boawIlRDahWnjnjGzX54LHbND/uj7nBglynBHBq3oqoRK4Pbi5Er8kWm1ADu2unUo5nvDG8QwMuOvSOnabEmkkoji96mwWpYqiwL+Ixk=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1747814700; c=relaxed/simple;
+	bh=539roYUUPN3pdqDCTq6rLSRcyDPVA5Foif7GPQH3jOY=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=sobVwq+1Tiv7oT6rCEwxUnM5fkhQIoBg0egyedTU7I9cuAMf4dz/rJ2e1Cs6tTxEVCRbiwEenKIVn802X5TS3CmuwFnDp5A9K0WY8uhtad6c0VuRcEYdPPJyqFolPeZDaYLgxaed84AoP1dUazEZSiNL6NdEPm+iMpP+UyV6D1M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PUnTsAAJ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=vivo.com header.i=@vivo.com header.b="R8LHaqkB"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=S+l+1RTO5iKmWbHhV5Gnn1ODM5kNJMCDQuhi8Gld+z4zkmGXMZJU1JB7c5N05kK1/Ppjg91DtFRrQQJlQQn/494MaGjF5QOdIRXAMFzVyya9Uupr2Kx2MLEp4cXNZqKAI827RXs/bpwOloclrTVQDC1gDi1RaF2vWqEROD0boMRXVoyiTyhb03uGvZ4haTWo5/oZodsOsWkje54N9sxg3Juvs1SMAQVOPXBuz2ziKeWJ+5Eweh3mroP9UT9V2DKD4m24ioHas1nmfLJd5aMATMjDHr9YJVY6Mv53GsUlqvoKaCHUIhZnDov2VtRslY3jYVh+Yxv5qRQ4bCTbgS0k5A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=/1wRcx9gKppfNFciHPQhj94Eez9wID1Qw8q5GU4ajm4=;
- b=kHVTtl/s8mnbcN8d6gDb+SP824lglOp3Y4Q0BLW/D2Jn6ey2/PSZV10PNAbrC9ScZhe1OpgAq8qO1ZBIyEa9oS03aV+035p4Mm1xGlDybI54hXD5bQbgfOVzzOuZLDuCuAbjeSHVPi05gJxkbe6I+gjgbRiFzb/FhrTncbYnxqzokWM2/9EJ986b+M7Lqy8FRxWCAPS+04U9Giohq9dSmW9HYguj0EVYbv8M9wXg7+Dg+DVqSBzOKbc5SJ6kB2T22QexB8+A0MxQz8o3/OJeRfMmdpIZ9eN43EDSKFJcqkJZPmEeAY7DG9DWJ2XCDjPkwALAcFxUODwRFN71NnpI2A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=vivo.com; dmarc=pass action=none header.from=vivo.com;
- dkim=pass header.d=vivo.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=vivo.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=/1wRcx9gKppfNFciHPQhj94Eez9wID1Qw8q5GU4ajm4=;
- b=R8LHaqkB1hVKEys7dTArhyZGWMQ4UVP+27LaPYLHr/XyWGW9CkLYgckbKLJguZBPlYBBEDrJlJIChwuyYFeKmNF7RRZLL+ok4jSxLuEEa2w8v2OaYvxgyTv+ZId44oxDu6F8JmE9VuAFSC/nzG3YHOZs+VkFbnTlv0/YoVFEnvs1YyccNDiD7Zd/8jZHWZ0+VZqHz1Usx+4NvISCJq0v5QMJelbM0e0A7JRs/RwCstCvsk84yONj9yL34+k7cBBizhg9knnd69iu9d02ND7zaJUMlb5ZMRFCM1DSwRvjoSSHf23o9zWG17/Gtx5zTTJ3MmCoNAt8NAJ4zLHe87Q4xA==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=vivo.com;
-Received: from PS1PPF5540628D6.apcprd06.prod.outlook.com (2603:1096:308::24e)
- by KL1PR06MB6427.apcprd06.prod.outlook.com (2603:1096:820:f6::5) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8746.30; Wed, 21 May
- 2025 06:39:12 +0000
-Received: from PS1PPF5540628D6.apcprd06.prod.outlook.com
- ([fe80::a57c:8e30:d8a3:54f1]) by PS1PPF5540628D6.apcprd06.prod.outlook.com
- ([fe80::a57c:8e30:d8a3:54f1%3]) with mapi id 15.20.8746.030; Wed, 21 May 2025
- 06:39:11 +0000
-From: Chunhai Guo <guochunhai@vivo.com>
-To: zlang@kernel.org,
-	fstests@vger.kernel.org
-Cc: chao@kernel.org,
-	jaegeuk@kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net,
-	Chunhai Guo <guochunhai@vivo.com>
-Subject: [PATCH] f2fs/012: test for missing 'trimmed' flag issue
-Date: Wed, 21 May 2025 00:49:52 -0600
-Message-Id: <20250521064952.1373690-1-guochunhai@vivo.com>
-X-Mailer: git-send-email 2.34.1
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: SG2PR01CA0148.apcprd01.prod.exchangelabs.com
- (2603:1096:4:8f::28) To PS1PPF5540628D6.apcprd06.prod.outlook.com
- (2603:1096:308::24e)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PUnTsAAJ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 99346C4CEE4;
+	Wed, 21 May 2025 08:04:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1747814699;
+	bh=539roYUUPN3pdqDCTq6rLSRcyDPVA5Foif7GPQH3jOY=;
+	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
+	b=PUnTsAAJfxMwrUAStyJNvRwVpinxb0AA/qGVNm3haDEVk7P5ChYx00b7aiuq+FgEq
+	 sEOPyvAdlxCM4qBRtjcklBplS4uOP1tpyxA58hrKYcNNEX45ML8+PViqd/SEV1G3EO
+	 0WrEPdZLxOPYXLZAMgdIL7BUFFATVWvyqYrki/b4JAMMISNr88miecQ3QYcMMbDr/F
+	 JYM5kEzbjx4AHayu70HBkOUCgHzcl/q/XGQk4w3CLC04ksZtRiW93fSRZZQ1x2M+c7
+	 NZ9a50qjZkFZboGlT+DMLtNuwDg/yRGzNAXfHV2Q0thS1SIy37415GjWMCMKMx34mk
+	 d+Hd1Lnw1YXGQ==
+Message-ID: <f734de12-bc68-4edd-bb8f-f07263878ad9@kernel.org>
+Date: Wed, 21 May 2025 16:04:56 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PS1PPF5540628D6:EE_|KL1PR06MB6427:EE_
-X-MS-Office365-Filtering-Correlation-Id: 360780a2-e446-4f5b-3145-08dd983231c6
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|1800799024|366016|376014|52116014|38350700014;
-X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?kxLk7l1gmPyvAYxXyeAN6ELvbLrHl3outcF3XYo8mHXgyP5kDsbgGXqSD87j?=
- =?us-ascii?Q?rAot/Yw9yND3qruvZsgwDIWK53A3c+K7VoVQrsRg2TqBD3h22VRIdPJtepNL?=
- =?us-ascii?Q?i7gIAWlTkwcwshaWBTHNBhkxOnXJzIHtJOF6MveM8ixSJNRY40sVueHLBwld?=
- =?us-ascii?Q?tlDMJRbHxwKqX9unr0b+4Q2LiNOac+xhzmXalYr6onLqeHutXx3GrMKAPWfV?=
- =?us-ascii?Q?ToSDk52A6bulPB7rA2ItWUKGi842wsWNIG7ceh7MBejJ9WhltRSn+H81yYyD?=
- =?us-ascii?Q?XxUezWsembdXGMHXeqAlI1MTh+IZf2JDLMKnD0n4SzYvxr/bB1rjDFW0zF1C?=
- =?us-ascii?Q?Bq7lbBdV4Dm/NML7FuR0nzkG2vrPuIg0JtmZ8scQGuR2MIjx8Nr4K4gQmpXb?=
- =?us-ascii?Q?pPKT8IAnZ/cd2bhPDD0uJeGfDFbzFRuT7zn7eyQKZ0EDkp8T4UYsxgItUiIE?=
- =?us-ascii?Q?CfcGUWZRM/aurOrGAzZhn3qJ68F85rYpBrlvjDeYsqVKWzprv7ZfjjH6asTB?=
- =?us-ascii?Q?NWyCuiPjh3s1o7kKXczPa7n11QpYxJWFAfpiZ5bMtsuADNSQCYsmKk87BBn4?=
- =?us-ascii?Q?C/cRmcLfIJpG4VaMrN/fy3M1cjdhKU3yIvX97fYV/8ZX4CD4TOHf94ErSe7G?=
- =?us-ascii?Q?PgOgcdWtyPMvJssHX1wJkkp2G/YsyNp4lSIAt+DX+clkXNKu10fl4AXZAVhr?=
- =?us-ascii?Q?0U5N2Pq5f4tMUFKLqpu4VC++E6iaKVE7E8oFCtSmA+JxjGmhMyHlMF5V0sFm?=
- =?us-ascii?Q?9gYpaBgzYK0SuL+kYSdhSLnJSyhbjYE13lWaD0mlm8hOb2jDJOth1nN5sgBg?=
- =?us-ascii?Q?MpZkazEhrJz8QzBY2/G5j994MdhQeCSrjyPL1lBXV7zxrB4H0Ye80eT1oRGo?=
- =?us-ascii?Q?oG40DEosI6Mu7gK4HGHpT8zmv55qCAR+WgX+tTFIL9YDwk46z7IWFFd5X0eS?=
- =?us-ascii?Q?nryMomKkkipECg9sqXYD2xBX9mE7EZcmOJ8FQ+SJoiftTN20Oa02k6kpkCWX?=
- =?us-ascii?Q?HCWqdCsyFtxjC8hTBh6cF0VwUeu9T6/1ik/zY9ePN2kQ/lVBYzsgURriRlf7?=
- =?us-ascii?Q?iq3p1iC8o5m2QQJFks9Qh160VLEBHdsnB5F0c8Ekehff+FBeGGT5hBcUD3Hr?=
- =?us-ascii?Q?diNhYDbQcIl2cvSUDA6g4JrHLZxEJlVPbXGETD4JJip3WU42YfjEjH9wgIkj?=
- =?us-ascii?Q?JQE44etLmVP20m29rBa+2/zbwKA1hDFUOceC44trePn1uhtq4aFX5vYvz5ao?=
- =?us-ascii?Q?vCqP4OXoxfA22enSgyqw9fJC6xQAj8Fp0dZddiLCnKq9d4NjaZ18NZnebzyZ?=
- =?us-ascii?Q?hg9W1xb+KsP53PAiW7dAyTQA4miFkA/ddFcun4PYj04oqnxCmoPJttvriuj0?=
- =?us-ascii?Q?wyba/6EerQZlUXfSW290Ou0wu/0XoIJ21EWo1cMuQMrOwMKm/f4LBaxKR2pu?=
- =?us-ascii?Q?0DcFF2swrpJ2B2++5i+H88XAKi2U3T5SgicQweKFm5vEKjwgYmEiag=3D=3D?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PS1PPF5540628D6.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(52116014)(38350700014);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?dTv9/m4LeQDD7bEKQOq1Y2mBIqCVOp+iIA0+0gzHpa54+Heox3paj4fYOrV3?=
- =?us-ascii?Q?k/Y+zIF7e4BNT8W4xjjVI7U5dBWbZ+C6heinHn/iueguheOF8TmLDmKJyPCY?=
- =?us-ascii?Q?XG/ePIkaQ+d82B69fBCQ3k2D3z8NYcrsLh5dvVWd/qDiWk9zWCTkYhOFCZS9?=
- =?us-ascii?Q?PuLKNe6+V5GksTS0Gg/kelVHpbq2HT2/nnkMtkaVOa/hk8yEpaOa4A35/PKs?=
- =?us-ascii?Q?kAEiJlFncdyITpS/WnbH2KNyzHAPf2pSNHGmXfkrf062c2JVZ95EzpBXmgnT?=
- =?us-ascii?Q?cH3oymh/QA3+gI4ontb2JJLPpQuhayc8m/AmgQB+DwWGhT0y0RHz+JT1S5ZL?=
- =?us-ascii?Q?3PRSf/x1wcVwLymx+LGzlxyRpfBLt/rVn8dhRpsOzg0UZUaod9st8kZ9WNY5?=
- =?us-ascii?Q?HeiFVTcAvtbhsdAaYLXWkuenlzc/G54EmoIlGXJsF7aA1kSnucaqjBRGXWvB?=
- =?us-ascii?Q?DeH/UvuhDIBdDjWY3hSUFzKY6ktL2/ElCXa8GpOJi0tOlsg/l34RosGZTnHc?=
- =?us-ascii?Q?I6hj/SNKyr2doM4nGGJJfkc8ogB2NbN1CBn9cuOUJYO+pJZ0fL2cf8dZ9t68?=
- =?us-ascii?Q?9mWPJjAFQ4WlZTObJ+wly1BTxcVvqD0hJrkLTBXjL+wRAuinTT35G3DpInWk?=
- =?us-ascii?Q?bULkThlgP4wR67TQjqWwoeDeMVHHsaGTp5yk3Yc3AbSG5BcAuYgvWTz3hBQV?=
- =?us-ascii?Q?PHrOJbpDAIoVsl9+gJ4v6o++26zpHfQ5yfxAaM5CFf+tF+gxEP51lbT5igO+?=
- =?us-ascii?Q?xC285nUstbGo1WtDrc3dxML8RUhNd61ykQV4kADHE39BdvW7J6sfPN9TOWyI?=
- =?us-ascii?Q?plE59fBN0Q/SZMmsSlV35tIUxVIbkF9a2ZiiKAJbByfKIBFsUfH1WZOnANXO?=
- =?us-ascii?Q?NGs7BURrTfBtXBfKztDZ+HCLoTWewfIn1t2bIKsXTgdfwe9PEozsY1GTe+kA?=
- =?us-ascii?Q?CMdXBmVDXgAByikwroWXv4p9Tleny7eMNd0xgY+n17sKYjAnZxEIsrsT8IPD?=
- =?us-ascii?Q?KVxKmWSEe8eBOTGzIoNZ1qBp3TfIITr9OSHY8/r51eIOfg/lZo5bwe44qBJZ?=
- =?us-ascii?Q?6DsVAE6VzITUP1jXnWfUiRSo/YMotrtS5gWxtz9aNd800l+cU74sEuuN5Acn?=
- =?us-ascii?Q?Ks7SF5VbbTDw4BXWrtGxPa/bMQrB31Dx+RJWdl76jmmN6JzYlcXPdmraZIo8?=
- =?us-ascii?Q?O99VufjH2QIx4MHUjuZo2VrCDMXtEZdTw9R+K72lSxOvIpGO7WuQ4YZ6h1RQ?=
- =?us-ascii?Q?9onXySpXq4OgwHWZAOddFWJmd7AJRyVfIV/17sz5QpmVHHzEBWXOXq4pbmQf?=
- =?us-ascii?Q?eMNjSIebpqO1RCarwHolW+FUx3FGDnROVf4//3Nj/be2+RTVdc7J647mNFLM?=
- =?us-ascii?Q?katIcb/ZNO/aXOEDep2Af2g8gJN7PaAcAxMG9zrPLYyFOmIpxdA3yWgh0THx?=
- =?us-ascii?Q?L6caidlcuFXdf31klVR7GzGBOV1du4krpnYDa5N42S13KrUpBi/cv1EjUARR?=
- =?us-ascii?Q?JUClca9E/272lMTlvLGIS3DBo9Cb/tY1l5tliqHdtqEHsmHO782RWFvL2d50?=
- =?us-ascii?Q?pQ3AdqL9H+9WZtw9mWhnTkL86JFpf7KxiPatlTgO?=
-X-OriginatorOrg: vivo.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 360780a2-e446-4f5b-3145-08dd983231c6
-X-MS-Exchange-CrossTenant-AuthSource: PS1PPF5540628D6.apcprd06.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 May 2025 06:39:11.4304
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 923e42dc-48d5-4cbe-b582-1a797a6412ed
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: Vj9gEdc+2j7Ldcr4TcbKCWFNfR5z61VleDB30Ll/pNUbWhozXq9o3+9pqYdQhJyMeUYBzKU5R0yxTEZ7Sqmi4w==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: KL1PR06MB6427
+User-Agent: Mozilla Thunderbird
+Cc: chao@kernel.org, jaegeuk@kernel.org,
+ linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH] f2fs/012: test for missing 'trimmed' flag issue
+To: Chunhai Guo <guochunhai@vivo.com>, zlang@kernel.org,
+ fstests@vger.kernel.org
+References: <20250521064952.1373690-1-guochunhai@vivo.com>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <20250521064952.1373690-1-guochunhai@vivo.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-This is a regression test case to verify whether the CP_TRIMMED_FLAG is
-properly set after performing the following steps:
-1. mount the f2fs filesystem
-2. create a file, write data to it, then delete the file
-3. unmount the filesystem
-4. verify that the 'trimmed' flag is set in the checkpoint state
+On 5/21/25 14:49, Chunhai Guo wrote:
+> This is a regression test case to verify whether the CP_TRIMMED_FLAG is
+> properly set after performing the following steps:
+> 1. mount the f2fs filesystem
+> 2. create a file, write data to it, then delete the file
+> 3. unmount the filesystem
+> 4. verify that the 'trimmed' flag is set in the checkpoint state
+> 
+> We should apply the commit ("f2fs: fix missing discard for active
+> segments") to resolve the issue where the 'trimmed' flag is missing.
 
-We should apply the commit ("f2fs: fix missing discard for active
-segments") to resolve the issue where the 'trimmed' flag is missing.
+Chunhai, thanks for working on this testcase!
 
-Signed-off-by: Chunhai Guo <guochunhai@vivo.com>
----
- tests/f2fs/012     | 39 +++++++++++++++++++++++++++++++++++++++
- tests/f2fs/012.out |  2 ++
- 2 files changed, 41 insertions(+)
- create mode 100755 tests/f2fs/012
- create mode 100644 tests/f2fs/012.out
+> 
+> Signed-off-by: Chunhai Guo <guochunhai@vivo.com>
 
-diff --git a/tests/f2fs/012 b/tests/f2fs/012
-new file mode 100755
-index 000000000000..b3486b730fd4
---- /dev/null
-+++ b/tests/f2fs/012
-@@ -0,0 +1,39 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 Guo Chunhai.  All Rights Reserved.
-+#
-+# FS QA Test No. f2fs/012
-+#
-+# This is a regression test case to verify whether the CP_TRIMMED_FLAG is
-+# properly set after performing the following steps:
-+# 1. mount the f2fs filesystem
-+# 2. create a file, write data to it, then delete the file
-+# 3. unmount the filesystem
-+# 4. verify that the 'trimmed' flag is set in the checkpoint state
-+# We should apply the commit ("f2fs: fix missing discard for active
-+# segments") to resolve the issue where the 'trimmed' flag is missing.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+_fixed_by_kernel_commit 21263d035ff2 \
-+	"f2fs: fix missing discard for active segments"
-+
-+_require_scratch
-+_require_xfs_io_command "pwrite"
-+_require_command "$DUMP_F2FS_PROG" dump.f2fs
-+
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount >> $seqres.full
-+
-+foo=$SCRATCH_MNT/foo
-+$XFS_IO_PROG -c "pwrite 0 1m" -c "fsync" -f $foo >> $seqres.full
-+sync
-+
-+rm $foo
-+_scratch_unmount >> $seqres.full 2>&1
-+
-+$DUMP_F2FS_PROG $SCRATCH_DEV | grep "checkpoint state" | grep -o trimmed
-+
-+status=0
-+exit
-diff --git a/tests/f2fs/012.out b/tests/f2fs/012.out
-new file mode 100644
-index 000000000000..00a061bb0ae4
---- /dev/null
-+++ b/tests/f2fs/012.out
-@@ -0,0 +1,2 @@
-+QA output created by 012
-+trimmed
--- 
-2.34.1
+Reviewed-by: Chao Yu <chao@kernel.org>
+
+Also, as I tested, it works as expected.
+
+Thanks,
+
+> ---
+>  tests/f2fs/012     | 39 +++++++++++++++++++++++++++++++++++++++
+>  tests/f2fs/012.out |  2 ++
+>  2 files changed, 41 insertions(+)
+>  create mode 100755 tests/f2fs/012
+>  create mode 100644 tests/f2fs/012.out
+> 
+> diff --git a/tests/f2fs/012 b/tests/f2fs/012
+> new file mode 100755
+> index 000000000000..b3486b730fd4
+> --- /dev/null
+> +++ b/tests/f2fs/012
+> @@ -0,0 +1,39 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 Guo Chunhai.  All Rights Reserved.
+> +#
+> +# FS QA Test No. f2fs/012
+> +#
+> +# This is a regression test case to verify whether the CP_TRIMMED_FLAG is
+> +# properly set after performing the following steps:
+> +# 1. mount the f2fs filesystem
+> +# 2. create a file, write data to it, then delete the file
+> +# 3. unmount the filesystem
+> +# 4. verify that the 'trimmed' flag is set in the checkpoint state
+> +# We should apply the commit ("f2fs: fix missing discard for active
+> +# segments") to resolve the issue where the 'trimmed' flag is missing.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +_fixed_by_kernel_commit 21263d035ff2 \
+> +	"f2fs: fix missing discard for active segments"
+> +
+> +_require_scratch
+> +_require_xfs_io_command "pwrite"
+> +_require_command "$DUMP_F2FS_PROG" dump.f2fs
+> +
+> +_scratch_mkfs >> $seqres.full
+> +_scratch_mount >> $seqres.full
+> +
+> +foo=$SCRATCH_MNT/foo
+> +$XFS_IO_PROG -c "pwrite 0 1m" -c "fsync" -f $foo >> $seqres.full
+> +sync
+> +
+> +rm $foo
+> +_scratch_unmount >> $seqres.full 2>&1
+> +
+> +$DUMP_F2FS_PROG $SCRATCH_DEV | grep "checkpoint state" | grep -o trimmed
+> +
+> +status=0
+> +exit
+> diff --git a/tests/f2fs/012.out b/tests/f2fs/012.out
+> new file mode 100644
+> index 000000000000..00a061bb0ae4
+> --- /dev/null
+> +++ b/tests/f2fs/012.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 012
+> +trimmed
 
