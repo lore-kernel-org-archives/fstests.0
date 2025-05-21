@@ -1,89 +1,107 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE77F1A317A;
-	Wed, 21 May 2025 22:42:55 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FF0E33EA
+	for <fstests@vger.kernel.org>; Wed, 21 May 2025 22:49:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747867375; cv=none; b=RapnRN9H/WiXkZ9KidhAU1wWZhl9BEP+xaeWvLpDmkv/Di9w3SUtwoMSEoMHP9uYSPA4jdfFJf9ENXJKxvgRnDIR3v37kCRDz2LvBWm6Y5lD7KjpupDGjOkWxfdCsfzyLhZeehrwJ2YF2jFGTTPGK63ywL3DepNjfOIu/cLfnPU=
+	t=1747867770; cv=none; b=rrNEm6a8ma2R30E5340ukgWkIYRz9u/OZKWMEVmUee49xmYlzFsSWYu1HGXfT722zCD1mh6adK1iXV5UtL57kXDez235/Mj0RLKiKlS4rE8tpN4nzXfcGNv0cdY+vq6abcwzsVV6IECHtgxMt2DRd/BIhKfgJE50EcvW8egASpk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747867375; c=relaxed/simple;
-	bh=HcPponYH94jEwm0Ptm/amqoYVg9GJe8kWxdsay/eVyQ=;
-	h=Date:Subject:From:To:Cc:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=V349KiybBpN0ZQeLj/sulSplPpgCj5QtPIGMuydqRU0qTBJQ1Vf65EnAGitG6Q9sCEMNzqeRQcM0o7L2g2RBJqF9QQuFX/rAT0ROgs5ZP/N9sFHoh4O0kAZRYd9pXj8MMUFaQyF3eqXS652HS40QATYp8/tVcSaRBlSNVur5Lu8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=d2IzCKGq; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1747867770; c=relaxed/simple;
+	bh=z/Ha3QTzkXWTQYlGceCYS2roBHx58M5dZcAShDw9J+M=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=I6abrhncOiXK78AUYlDcnebznNRPJq/RmsMo33ugf0Eq/kLZ+NNKBPdbrqR6GrmMaYuYOgaOSyR66/bPwbpFqLkGwk4huHsbwI+gWjUefAP8PSZ6uionJGJn0a9FTQrHf+hbWR+7o8bEY7sT+waraDE5XvoVblIU6fSufVD/9VM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=D6YqNUUc; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="d2IzCKGq"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 12288C4CEE4;
-	Wed, 21 May 2025 22:42:55 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="D6YqNUUc"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51A68C4CEE4;
+	Wed, 21 May 2025 22:49:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1747867375;
-	bh=HcPponYH94jEwm0Ptm/amqoYVg9GJe8kWxdsay/eVyQ=;
-	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
-	b=d2IzCKGqUKQ9poio9YDWJf9nZrPa0AGsY1sl6q4z5C3a/nvBOUmEWDsgbtXmRS9yq
-	 NAaK2YrPV8o+OE9kCi+i+QKJ6ZqJddOElM9/DDTx10e2kvL03y8RSQMdFeTQoWnf/f
-	 7b91hd8bh4WmylC//WdILv3wmvxqDX3InwfXRC6qJ2WuUhdghCB+XMxEh87PMzpY5d
-	 2zVJufKaL6l5pX46CKxo7xWKOAdDoGimfskCsmj0b/o9A88gZQ5lqa0OahnZBbfXnS
-	 R7zzCS8bE0+csnCMvXvIQWrtGb7PKULYSfastJlLLi2VNtAmwOt4uNcQPwb984F71O
-	 yX1c68qbxqaTA==
-Date: Wed, 21 May 2025 15:42:54 -0700
-Subject: [PATCH 4/4] check: check and fix the test filesystem after failed
- tests
+	s=k20201202; t=1747867770;
+	bh=z/Ha3QTzkXWTQYlGceCYS2roBHx58M5dZcAShDw9J+M=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=D6YqNUUce0h/czpm1d455BwVubR6qlHq3Fd/wrGzR5WVu9ddfnTAsZLhGYj3xsokF
+	 T3zWkolpw4ebxoGxXQfBOzIVdD+ixsr1If1pBTRdzTtHvvaMCfCCIEWyMfnfl2o8Dh
+	 coHbnEfClDxwCdng+l6RQoB7PXaKA0stdHWZbl5t1PXyTyAg12f6zGyeCsbsq2CclS
+	 baBcVL+DT34xVKvhybtMAAwZOrPsbEqVydTd49EGT/AFmQhj1yniclkZrto1cOWPeK
+	 S9y5We1dCuI/AUTWx1pAYztyjlO3X3Fwm9fCloPLqAgQYjvO2Hnpu7dlqUv+D2PFMS
+	 0hhi5L+ACfXBQ==
+Date: Wed, 21 May 2025 15:49:29 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: zlang@redhat.com, djwong@kernel.org
-Cc: fstests@vger.kernel.org, fstests@vger.kernel.org,
- linux-xfs@vger.kernel.org
-Message-ID: <174786719769.1398933.12370766699740321314.stgit@frogsfrogsfrogs>
-In-Reply-To: <174786719678.1398933.16005683028409620583.stgit@frogsfrogsfrogs>
-References: <174786719678.1398933.16005683028409620583.stgit@frogsfrogsfrogs>
+To: Shinichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+Cc: "hch@infradead.org" <hch@infradead.org>,
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: Re: xfs/566 execution time
+Message-ID: <20250521224929.GA3203850@frogsfrogsfrogs>
+References: <aCyM-p06c99rJ04g@infradead.org>
+ <20250521031940.GF9730@frogsfrogsfrogs>
+ <b7vls4sjlx556wax6uagfkey6y5u2t652qu5ne2a6sxpofowdt@3annzxxqdmwq>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <b7vls4sjlx556wax6uagfkey6y5u2t652qu5ne2a6sxpofowdt@3annzxxqdmwq>
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Wed, May 21, 2025 at 09:37:53AM +0000, Shinichiro Kawasaki wrote:
+> On May 20, 2025 / 20:19, Darrick J. Wong wrote:
+> > On Tue, May 20, 2025 at 07:08:58AM -0700, Christoph Hellwig wrote:
+> > > Hi Darrick,
+> > > 
+> > > we regularly see execution times of more than half a day for xfs/566
+> > > on a 30ish TB SMR HDD.  Do you think there might be a useful way to
+> > > scale down the load on rotational devices?
+> > 
+> > Hrmm.  Is that the only one that does that, or do the other scrub tests
+> > take a while too?
+> 
+> As to the test with SMR HDDs, I observed very long test run on two test cases:
+> xfs/566 and xfs/732.
+> 
+> > If it's just that one, and setting SOAK_DURATION=2m
+> > results in the test cutting off after 2min, then I'll craft some sort of
+> > fix to constrain the runtime.
+> 
+> I added,
+> 
+>  "export SOAK_DURATION=2m"
+> 
+> to local.config and ran xfs/566, but that setting does not look working.
+> The test case rusn more than a half an hour...
 
-Currently, ./check calls _check_filesystems after a test passes to make
-sure that the test and scratch filesystems are ok, and repairs the test
-filesystem if it's not ok.
+Huh, that's /very/ strange.  In the absence of a SOAK_DURATION, the test
+should only run itself for 30 seconds.  From common/fuzzy,
+_scratch_xfs_stress_scrub does this to set the end-time:
 
-However, we don't do this for failed tests.  If a test fails /and/
-corrupts the test filesystem, every subsequent passing test will be
-marked as a failure because of latent corruptions on the test
-filesystem.
+	if [ -n "$SOAK_DURATION" ]; then
+		end="$((start + SOAK_DURATION))"
+	else
+		end="$((start + (30 * TIME_FACTOR) ))"
+	fi
 
-This is a little silly, so let's call _check_filesystems on the test
-filesystem after a test fail so that the badness doesn't spread.
+and then __stress_scrub_fsx_loop does:
 
-Cc: <fstests@vger.kernel.org> # v2023.05.01
-Fixes: 4a444bc19a836f ("check: _check_filesystems for errors even if test failed")
-Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
----
- check |    7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+	while __stress_scrub_running "$end" "$runningfile"; do
+		# Need to recheck running conditions if we cleared anything
+		__stress_scrub_clean_scratch && continue
+		duration=$(___stress_scrub_duration "$end" "$remount_period")
+		___scrub_run_fsx $duration $d_args &
 
+which should be sufficient to exit the fsx loop.  Then we go back to
+_scratch_xfs_stress_scrub and:
 
-diff --git a/check b/check
-index 826641268f8b52..818ce44da28f65 100755
---- a/check
-+++ b/check
-@@ -986,8 +986,13 @@ function run_section()
- 			_dump_err_cont "[failed, exit status $sts]"
- 			_test_unmount 2> /dev/null
- 			_scratch_unmount 2> /dev/null
--			rm -f ${RESULT_DIR}/require_test*
- 			rm -f ${RESULT_DIR}/require_scratch*
-+
-+			# Make sure the test filesystem is ready to go since
-+			# we don't call _check_filesystems for failed tests
-+			(_adjust_oom_score 250; _check_filesystems) || tc_status="fail"
-+
-+			rm -f ${RESULT_DIR}/require_test*
- 			# Even though we failed, there may be something interesting in
- 			# dmesg which can help debugging.
- 			_check_dmesg
+	# Wait until the designated end time or fsstress dies, then kill all of
+	# our background processes.
+	while __stress_scrub_running "$end" "$runningfile"; do
+		sleep 1
+	done
+	_scratch_xfs_stress_scrub_cleanup
 
+which just waits for fsx and scrub to exit.  If you start this test and
+wait about 45 seconds or so, can you send me the ps output so I can try
+to figure out which component(s) aren't stopping in time?
+
+--D
