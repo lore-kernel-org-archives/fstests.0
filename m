@@ -1,152 +1,1271 @@
-Received: from mail-pf1-f179.google.com (mail-pf1-f179.google.com [209.85.210.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83C561EB39;
-	Wed, 21 May 2025 05:22:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8391822ACC6
+	for <fstests@vger.kernel.org>; Wed, 21 May 2025 05:28:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747804950; cv=none; b=HrXFSqPz3BsQ3W8+q+K0J6HL6V3qherJHw0rvZCjUMvnmORFig45Qs9tFEasolT+Lvllvrp64ZR+n3udkw6pomMUw4gVhpfKgEEgCMA62F58AK215FAgUmHnRMFyCob9LTGzOrzbBYjvtzL63gCU0AiOUYjeIYM/JICQOOTtifU=
+	t=1747805305; cv=none; b=Yu/emvjWMf5zRGdPcIS6qNftyhFnJModtv0Jl8N5jFlwMwc1nSD5pj//+XD/x23dJmFCkwLCSFT1BCdoSjD3fbb1kCi2CWg1XbxoVo7XBNg4LsDJRqOTuPvffhJdHfiQ0F9Z7m4KR1Bxs5lAKF3kjx1kIgujuR3XoEYBiFcs+54=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747804950; c=relaxed/simple;
-	bh=yS2FDzk2IyndOu/uLZqNGTmZqi7gABsUOkiEt0dzUuA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=MBbYpI+576HWKV6kAbwcv/ot+vfHXTNtBaXgutK/HQXWnQ9E9ZCFAkAywnemBaD2YS1xQIiYhBnP1rCuoejMxIzV9ckUqfbp3QKJQG751pVjFSxSJeA544cGumq4eGG6t3mC9qVEszQJteqHI/W9s6aDecmqNOdK/9wQ7HOe28c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=YfCbH8KQ; arc=none smtp.client-ip=209.85.210.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1747805305; c=relaxed/simple;
+	bh=s8uIUTfQPFJ5WljTEbA8++ahZTBfhIH9QmTBVkC6IIo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=XsXIKMOoN5J6ZQxLCONnL4IIJKSAPBS8fZ5jpI5UoqzZQJoxGIXM7sU0f85oMkV66Smd1FsjnAhWuUyOo2SE3WXUSNm4xDIcRNrqZNRnQIo/uNpsTxOINb35Cr9Vy5umTTDRmzOPOABQ1ChwqSIVRj2qhGh+kwb8Sb7Lboan7iA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fUD9+9fc; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YfCbH8KQ"
-Received: by mail-pf1-f179.google.com with SMTP id d2e1a72fcca58-7424ccbef4eso6366187b3a.2;
-        Tue, 20 May 2025 22:22:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1747804947; x=1748409747; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=8HzUgKYXn0LXczq8FLr2PjSn8E6VE0fAraKDRlzM6lw=;
-        b=YfCbH8KQB/aFoHZLfcDljUD7vwsKsqvkutBu2eTyE1N4ODZ5o5iSbhE18knmzPUYNK
-         xNolpcx/guvR7fZqNRsh6S205rJB1+WjTXeQcFBGPISBKAOUcD3xcAi4WfW3Jha97h1V
-         E6HwuaeH3OtqAyhUzl3Xo7Vorhty5u5PSthW/5ZsGhA9BD5iDJriCk+U+CPoQqhBPuBJ
-         bTeA5y/IZjFRDVfLOvum3tM1mzav3qkalV2y83Xn9VKWavHoK1pNjJxOGGsECChrI9Oe
-         29v5Le/6IbbFGWAYvd+c8V87j/+fwLjdMVWoPnCj5eWdFaUx8tD4Cd0oc1RzqbmUgLVM
-         EYBA==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fUD9+9fc"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1747805301;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=rd04QiFr2XWEMGdi7QqAY35KXEONQ9A4hRcIUbGjk9U=;
+	b=fUD9+9fcTMWY4PJpAiBIDiT/npXyHTBlbhypdfOLf8M1kYi9eOdRYR/mmOwOZCqVV7BOzg
+	KWc4u5m6dno8CuryDPhkpj4L/9gzcspQcydwP+EVCOmh0J4lwt06+u6K7XsqwSq8Q1wZaZ
+	U8K2folDN7nJ30rQIBX217o9yI8G/K8=
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
+ [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-528-iT3Rv1j3Nry0ev-XoXC6VA-1; Wed, 21 May 2025 01:28:19 -0400
+X-MC-Unique: iT3Rv1j3Nry0ev-XoXC6VA-1
+X-Mimecast-MFC-AGG-ID: iT3Rv1j3Nry0ev-XoXC6VA_1747805298
+Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-742c6140589so2614590b3a.1
+        for <fstests@vger.kernel.org>; Tue, 20 May 2025 22:28:19 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747804947; x=1748409747;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=8HzUgKYXn0LXczq8FLr2PjSn8E6VE0fAraKDRlzM6lw=;
-        b=j5MBunQlUqUjbYYZLRC5fs/x8FLvMG1xSfTyOPgzQkK1igcGSaNAVhtDvGNw1PmeKw
-         PdEPn2rVwkSYB4a3mUAY2P4qmzaKHh9fZIxZkW3LzMEcNhBRsdTeu52c5HjeJUs8tGGL
-         iz4O3FOLcreFa0Dp4fFPDEFjh5JaD/k6TY35K4c4RYdqnRu0oqKs2iuuinjWatub+GnQ
-         uqQOLFzi9RFuc8pgbDZf8PVhjWXutbPmv2Fp/ZBVFwDSfoV5L9mxzJzeAbUBPSYa7sZh
-         KG897Vu8Ahm5wgIks4iXbOvAgemwdvOH+F2zDG5BXkWEEoXdIcYmLV/XvKUgYjjwrqV8
-         gjAg==
-X-Forwarded-Encrypted: i=1; AJvYcCUo9tA2OYIap4APVKCKYyfmjaOB20FknCc6fjbx4I4lDWluVmJfme7fXnyG/Je6AmK9CsE1OcP+irUK@vger.kernel.org, AJvYcCWegZ9vpDOuCUPOouod36Gpa4wB72t/4NwDSlZUoVy+mOqn+B2vst/8jdd+ZLMPAKHLEkLgvwN+ZPyD@vger.kernel.org
-X-Gm-Message-State: AOJu0YwOA8gQF+Lnkc7lsheqb5izlQ9yY6LMgfa+1LxEaf7+HyWXgrrl
-	+GVOdsAM1aD8thwOMfLyRVzp+DaNV8iQunGAjFNkz6PVVi7wWDMf/1eH
-X-Gm-Gg: ASbGncuLx4a9xYCGANwcdALFkzLf9NGMIBbWtn6/jk2RJu0wQKsRlUZgrWtc+CcIGOI
-	qtK1nAIul/FWyEeqPTiZFI42EY8dldGlgu9nPmStVcyT4CuO+z7q4QtKpAqHmG+jmk+KC23etAC
-	TR0N3gx37DT7SkJJWkKJc73ucikzWRuyBD5qCEDcSEtzS+F75ghsLuIB3x9k2JAphr7XQkQHcT1
-	jkSU9gZ8U9ljM7Z526sU9UXfq0aHaptAcM87E+NqqwpDNPYZYkh8wCNQj/i95fEYOB7GqUaIg5r
-	fE7FvcExof63e/cwd0pswPEuOfI0OiZ2fAEZImqf+wfX7oSDS7rDv+tv0wVEag==
-X-Google-Smtp-Source: AGHT+IHCNMqflhS0sfYJP9Boe2PUxeOde4RtqgDA1rD1GUGqb7AJ4Z5YdnH6jJ/eJ/d9tbfqB0tS4Q==
-X-Received: by 2002:a17:90b:1dd1:b0:305:5f32:d9f5 with SMTP id 98e67ed59e1d1-30e7d4f9220mr33543530a91.7.1747804947456;
-        Tue, 20 May 2025 22:22:27 -0700 (PDT)
-Received: from [192.168.0.120] ([49.205.34.162])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-30f365e5b91sm2721207a91.39.2025.05.20.22.22.24
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 20 May 2025 22:22:27 -0700 (PDT)
-Message-ID: <12e307e0-2a28-4a42-a8b3-d2186c871be7@gmail.com>
-Date: Wed, 21 May 2025 10:52:22 +0530
+        d=1e100.net; s=20230601; t=1747805298; x=1748410098;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=rd04QiFr2XWEMGdi7QqAY35KXEONQ9A4hRcIUbGjk9U=;
+        b=qVnJG+DZNJIRO+GJoqOBopaEFFTVpDw/UOd5crWyQuCDDltPUt0fEdMM7Yv7ZDHFq7
+         nFmXgTodAYSVJEOafAk5l6AnyF1PcdCN0arRgJ0Vq0eMjEz7+mM3EdRqCI4YU7a2Lv2w
+         Xx8ouhGhStQol/pXc2Ww93ghks8ujEnEOi6x/mshQUT4nOZnI7J0QyGlLb8a/M/6Z3Eh
+         DkSURm9dwN3GRoBfyR+B1ZCbTg5xABgodGpWnWZYxbEvduxJpPLk8He/OhsUJLdV4bXT
+         F2nbMu/XaYumvdL3PbHnvN9B/dYs436/wN+yl6iL7yIWIulPiG6MP/HczPhpi0Nqjdlf
+         PgkA==
+X-Gm-Message-State: AOJu0YxDyR7Tls2Qr7BVKCJqR6Iau2HbiOC98iWknPGLhVOkqjevB6H/
+	XKwF1OcAN+a6tV6PbupUqdG2S15ZOns84YY5hlAgI8e1gAhmDqEABllALI4MdsZDC/f2/N8WuVs
+	QB3fZ5Y4h9OEvKMCj4Wcc+GKm31CuWZN//gvZSlk/XtgoxaZmKQG7lM8Q2og=
+X-Gm-Gg: ASbGncspAkNxo3OqdE21D1VGApTNRzVd9AlmfWVwh3p9KT9L+CaYImpSmFB7K+AQn5u
+	F+UJXNxYuvmZtfXXc34n4aPYHaHUrcJeTj9y0G64NC82/FigDlmFvjFsyPBBRX5D4dHJfpR+59P
+	lSrZLcCCTWZcw2Oa3QWUGgVkaEPmBTSDOFTp4f3QbZyQ+HqIpKMuegrs4q21t6VlKuNn9VQg30I
+	eH/ADn0GFWpOv7bWyNrKIxTB0+qZMeZZ8dREN+mqDc4M5XnNdY1e+Ns+hVYig+pY5XNxXTcT3oc
+	qV0TG1o4mwDttUXvTjaPQ1P6QnklYxvbd4HnTaVLxeb+Hq3Wini0
+X-Received: by 2002:a05:6a00:4293:b0:742:a628:f53c with SMTP id d2e1a72fcca58-742a628f703mr27314567b3a.10.1747805297977;
+        Tue, 20 May 2025 22:28:17 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEM1Pj8+/3jggUEEDWSRnuCDh/EquWXuCmAJiX43qXJ2MVZBo+pwmhhnd1GwrCCwgsR4h6//w==
+X-Received: by 2002:a05:6a00:4293:b0:742:a628:f53c with SMTP id d2e1a72fcca58-742a628f703mr27314533b3a.10.1747805297216;
+        Tue, 20 May 2025 22:28:17 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-742a9876dcdsm9107141b3a.138.2025.05.20.22.28.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 20 May 2025 22:28:16 -0700 (PDT)
+Date: Wed, 21 May 2025 13:28:12 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] fstests: add a mmap test group
+Message-ID: <20250521052812.my6lltriyp65hmde@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <617c0ddb1f4cc21442a9db8d7098d5e261d46b2a.1747242435.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/2] new: Add a new parameter (name/emailid) in the
- "new" script
-Content-Language: en-US
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
- linux-xfs@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
- djwong@kernel.org, zlang@kernel.org
-References: <cover.1747306604.git.nirjhar.roy.lists@gmail.com>
- <2df3e3af8eb607025707e120c1b824879e254a01.1747306604.git.nirjhar.roy.lists@gmail.com>
- <aC0Q2HIesHMXqVLG@dread.disaster.area>
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <aC0Q2HIesHMXqVLG@dread.disaster.area>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <617c0ddb1f4cc21442a9db8d7098d5e261d46b2a.1747242435.git.fdmanana@suse.com>
+
+On Wed, May 14, 2025 at 06:13:32PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Add a mmap group to tag tests that exercise memory mapped reads/writes, so
+> that it's easy to filter and run tests that exercise map:
+> 
+>    ./check -g mmap
+> 
+> Very useful during development to quickly test changes to a filesystem's
+> mmap implementation.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+
+Warm welcome to categorize xfstests sub-cases by group tags :)
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
 
-On 5/21/25 05:01, Dave Chinner wrote:
-> On Thu, May 15, 2025 at 11:00:16AM +0000, Nirjhar Roy (IBM) wrote:
->> This patch another optional interactive prompt to enter the
->> author name and email id for each new test file that is
->> created using the "new" file.
->>
->> The sample output looks like something like the following:
->>
->> ./new selftest
->> Next test id is 007
->> Append a name to the ID? Test name will be 007-$name. y,[n]:
->> Creating test file '007'
->> Add to group(s) [auto] (separate by space, ? for list): selftest quick
->> Enter <author_name> <email-id>: Nirjhar Roy <nirjhar.roy.lists@gmail.com>
->> Creating skeletal script for you to edit ...
->>   done.
->>
->> ...
->> ...
->>
->> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
->> ---
->>   new | 5 ++++-
->>   1 file changed, 4 insertions(+), 1 deletion(-)
->>
->> diff --git a/new b/new
->> index 6b50ffed..636648e2 100755
->> --- a/new
->> +++ b/new
->> @@ -136,6 +136,9 @@ else
->>   	check_groups "${new_groups[@]}" || exit 1
->>   fi
->>   
->> +read -p "Enter <author_name>: " -r
->> +author_name="${REPLY:=YOUR NAME HERE}"
->> +
->>   echo -n "Creating skeletal script for you to edit ..."
->>   
->>   year=`date +%Y`
->> @@ -143,7 +146,7 @@ year=`date +%Y`
->>   cat <<End-of-File >$tdir/$id
->>   #! /bin/bash
->>   # SPDX-License-Identifier: GPL-2.0
->> -# Copyright (c) $year YOUR NAME HERE.  All Rights Reserved.
->> +# Copyright (c) $year $author_name.  All Rights Reserved.
-> In many cases, this is incorrect.
->
-> For people who are corporate employees, copyright for the code they
-> write is typically owned by their employer, not the employee who
-> wrote the code. i.e. this field generally contains something like
-> "Red Hat, Inc", "Oracle, Inc", "IBM Corporation", etc in these
-> cases, not the employee's name.
-
-Yes. The existing placeholder is already "YOUR NAME HERE" (which I have 
-kept unchanged). The author can always use the company's name from read 
--p prompt or simply chose to fill it up later, right? Or are you saying 
-that the existing placeholder "YOUR NAME HERE" is incorrect?
-
---NR
-
->
-> -Dave.
-
--- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+>  doc/group-names.txt | 1 +
+>  tests/btrfs/209     | 2 +-
+>  tests/generic/019   | 2 +-
+>  tests/generic/029   | 2 +-
+>  tests/generic/030   | 2 +-
+>  tests/generic/068   | 2 +-
+>  tests/generic/074   | 2 +-
+>  tests/generic/080   | 2 +-
+>  tests/generic/095   | 2 +-
+>  tests/generic/127   | 2 +-
+>  tests/generic/140   | 2 +-
+>  tests/generic/141   | 2 +-
+>  tests/generic/173   | 2 +-
+>  tests/generic/215   | 2 +-
+>  tests/generic/219   | 2 +-
+>  tests/generic/246   | 2 +-
+>  tests/generic/247   | 2 +-
+>  tests/generic/248   | 2 +-
+>  tests/generic/279   | 2 +-
+>  tests/generic/281   | 2 +-
+>  tests/generic/282   | 2 +-
+>  tests/generic/283   | 2 +-
+>  tests/generic/325   | 2 +-
+>  tests/generic/340   | 2 +-
+>  tests/generic/344   | 2 +-
+>  tests/generic/345   | 2 +-
+>  tests/generic/346   | 2 +-
+>  tests/generic/413   | 2 +-
+>  tests/generic/428   | 2 +-
+>  tests/generic/437   | 2 +-
+>  tests/generic/438   | 2 +-
+>  tests/generic/446   | 2 +-
+>  tests/generic/462   | 2 +-
+>  tests/generic/469   | 2 +-
+>  tests/generic/470   | 2 +-
+>  tests/generic/499   | 2 +-
+>  tests/generic/503   | 2 +-
+>  tests/generic/511   | 2 +-
+>  tests/generic/567   | 2 +-
+>  tests/generic/569   | 2 +-
+>  tests/generic/570   | 2 +-
+>  tests/generic/574   | 2 +-
+>  tests/generic/578   | 2 +-
+>  tests/generic/605   | 2 +-
+>  tests/generic/614   | 2 +-
+>  tests/generic/623   | 2 +-
+>  tests/generic/630   | 2 +-
+>  tests/generic/638   | 2 +-
+>  tests/generic/647   | 2 +-
+>  tests/generic/651   | 2 +-
+>  tests/generic/652   | 2 +-
+>  tests/generic/653   | 2 +-
+>  tests/generic/654   | 2 +-
+>  tests/generic/655   | 2 +-
+>  tests/generic/657   | 2 +-
+>  tests/generic/658   | 2 +-
+>  tests/generic/659   | 2 +-
+>  tests/generic/660   | 2 +-
+>  tests/generic/661   | 2 +-
+>  tests/generic/662   | 2 +-
+>  tests/generic/663   | 2 +-
+>  tests/generic/664   | 2 +-
+>  tests/generic/665   | 2 +-
+>  tests/generic/666   | 2 +-
+>  tests/generic/669   | 2 +-
+>  tests/generic/670   | 2 +-
+>  tests/generic/671   | 2 +-
+>  tests/generic/672   | 2 +-
+>  tests/generic/708   | 3 ++-
+>  tests/generic/729   | 2 +-
+>  tests/generic/742   | 3 ++-
+>  tests/generic/743   | 2 +-
+>  tests/generic/749   | 2 +-
+>  tests/generic/758   | 2 +-
+>  tests/overlay/061   | 2 +-
+>  tests/xfs/090       | 2 +-
+>  tests/xfs/108       | 2 +-
+>  tests/xfs/166       | 2 +-
+>  tests/xfs/194       | 2 +-
+>  tests/xfs/550       | 2 +-
+>  tests/xfs/551       | 2 +-
+>  tests/xfs/552       | 2 +-
+>  tests/xfs/559       | 2 +-
+>  83 files changed, 85 insertions(+), 82 deletions(-)
+> 
+> diff --git a/doc/group-names.txt b/doc/group-names.txt
+> index f510bb82..58502131 100644
+> --- a/doc/group-names.txt
+> +++ b/doc/group-names.txt
+> @@ -77,6 +77,7 @@ metacopy		overlayfs metadata-only copy-up
+>  metadata		filesystem metadata update exercisers
+>  metadump		xfs_metadump/xfs_mdrestore functionality
+>  mkfs			filesystem formatting tools
+> +mmap			memory mapped reads/writes
+>  mount			mount option and functionality checks
+>  nested			nested overlayfs instances
+>  nfs4_acl		NFSv4 access control lists
+> diff --git a/tests/btrfs/209 b/tests/btrfs/209
+> index 5a5964a3..7318f8ae 100755
+> --- a/tests/btrfs/209
+> +++ b/tests/btrfs/209
+> @@ -10,7 +10,7 @@
+>  # only when not using the NO_HOLES feature.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick log
+> +_begin_fstest auto quick log mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/019 b/tests/generic/019
+> index 676ff27d..00badf6d 100755
+> --- a/tests/generic/019
+> +++ b/tests/generic/019
+> @@ -8,7 +8,7 @@
+>  # check filesystem consistency at the end.
+>  #
+>  . ./common/preamble
+> -_begin_fstest aio dangerous enospc rw stress recoveryloop
+> +_begin_fstest aio dangerous enospc rw stress recoveryloop mmap
+>  
+>  fio_config=$tmp.fio
+>  
+> diff --git a/tests/generic/029 b/tests/generic/029
+> index c6162b0b..1fee35f0 100755
+> --- a/tests/generic/029
+> +++ b/tests/generic/029
+> @@ -9,7 +9,7 @@
+>  # the block size is smaller than the page size.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw
+> +_begin_fstest auto quick rw mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/030 b/tests/generic/030
+> index b1b51469..e1674331 100755
+> --- a/tests/generic/030
+> +++ b/tests/generic/030
+> @@ -9,7 +9,7 @@
+>  # the block size is smaller than the page size.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw
+> +_begin_fstest auto quick rw mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/068 b/tests/generic/068
+> index 26c5ceea..c6319639 100755
+> --- a/tests/generic/068
+> +++ b/tests/generic/068
+> @@ -8,7 +8,7 @@
+>  # The fail case for this test is a hang on an xfs_freeze.
+>  #
+>  . ./common/preamble
+> -_begin_fstest other auto freeze stress
+> +_begin_fstest other auto freeze stress mmap
+>  
+>  status=0	# success is the default!
+>  
+> diff --git a/tests/generic/074 b/tests/generic/074
+> index 923bf36b..103d666b 100755
+> --- a/tests/generic/074
+> +++ b/tests/generic/074
+> @@ -7,7 +7,7 @@
+>  # fstest
+>  #
+>  . ./common/preamble
+> -_begin_fstest rw udf auto
+> +_begin_fstest rw udf auto mmap
+>  
+>  fstest_dir=$TEST_DIR/fstest
+>  status=0	# success is the default!
+> diff --git a/tests/generic/080 b/tests/generic/080
+> index 5c38cc20..f7d40543 100755
+> --- a/tests/generic/080
+> +++ b/tests/generic/080
+> @@ -7,7 +7,7 @@
+>  # Verify that mtime is updated when writing to mmap-ed pages
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick
+> +_begin_fstest auto quick mmap
+>  
+>  status=0
+>  
+> diff --git a/tests/generic/095 b/tests/generic/095
+> index 47e3b1e6..828274fd 100755
+> --- a/tests/generic/095
+> +++ b/tests/generic/095
+> @@ -7,7 +7,7 @@
+>  # Concurrent mixed I/O (buffer I/O, aiodio, mmap, splice) on the same files
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw stress
+> +_begin_fstest auto quick rw stress mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/127 b/tests/generic/127
+> index fcd535b4..431188ef 100755
+> --- a/tests/generic/127
+> +++ b/tests/generic/127
+> @@ -11,7 +11,7 @@
+>  #   - fsx_15_std_mmap
+>  #
+>  . ./common/preamble
+> -_begin_fstest rw auto
+> +_begin_fstest rw auto mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/140 b/tests/generic/140
+> index 8cbc23bb..98c1df24 100755
+> --- a/tests/generic/140
+> +++ b/tests/generic/140
+> @@ -10,7 +10,7 @@
+>  #   - Check that the files are now different where we say they're different.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone
+> +_begin_fstest auto quick clone mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/141 b/tests/generic/141
+> index d6fab33f..8f34f5b1 100755
+> --- a/tests/generic/141
+> +++ b/tests/generic/141
+> @@ -7,7 +7,7 @@
+>  # Test for xfs_io mmap read problem
+>  #
+>  . ./common/preamble
+> -_begin_fstest rw auto quick
+> +_begin_fstest rw auto quick mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/173 b/tests/generic/173
+> index a19ff807..5dc24bec 100755
+> --- a/tests/generic/173
+> +++ b/tests/generic/173
+> @@ -8,7 +8,7 @@
+>  # while copy-on-writing the file via mmap.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone
+> +_begin_fstest auto quick clone mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/215 b/tests/generic/215
+> index 6f51b26a..5948da48 100755
+> --- a/tests/generic/215
+> +++ b/tests/generic/215
+> @@ -9,7 +9,7 @@
+>  # Based on the testcase in http://bugzilla.kernel.org/show_bug.cgi?id=2645
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto metadata quick
+> +_begin_fstest auto metadata quick mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/219 b/tests/generic/219
+> index cc2ec119..64282385 100755
+> --- a/tests/generic/219
+> +++ b/tests/generic/219
+> @@ -8,7 +8,7 @@
+>  # Simple quota accounting test for direct/buffered/mmap IO.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quota quick
+> +_begin_fstest auto quota quick mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/246 b/tests/generic/246
+> index ee5afac6..8ef4da99 100755
+> --- a/tests/generic/246
+> +++ b/tests/generic/246
+> @@ -10,7 +10,7 @@
+>  # Marius Tolzmann <tolzmann@molgen.mpg.de>
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw
+> +_begin_fstest auto quick rw mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/247 b/tests/generic/247
+> index a758ae24..7ea52375 100755
+> --- a/tests/generic/247
+> +++ b/tests/generic/247
+> @@ -7,7 +7,7 @@
+>  # Test for race between direct I/O and mmap
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw
+> +_begin_fstest auto quick rw mmap
+>  
+>  _register_cleanup "_cleanup" BUS
+>  
+> diff --git a/tests/generic/248 b/tests/generic/248
+> index 49089534..ca37d649 100755
+> --- a/tests/generic/248
+> +++ b/tests/generic/248
+> @@ -7,7 +7,7 @@
+>  # Test for pwrite hang problem when writing from mmaped buffer of the same page 
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw
+> +_begin_fstest auto quick rw mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/279 b/tests/generic/279
+> index 599b4b6d..60204cdf 100755
+> --- a/tests/generic/279
+> +++ b/tests/generic/279
+> @@ -7,7 +7,7 @@
+>  # Test mmap CoW behavior when the write temporarily fails.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone eio
+> +_begin_fstest auto quick clone eio mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/281 b/tests/generic/281
+> index 474b8b73..d88d35f7 100755
+> --- a/tests/generic/281
+> +++ b/tests/generic/281
+> @@ -7,7 +7,7 @@
+>  # Test mmap CoW behavior when the write permanently fails.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone eio
+> +_begin_fstest auto quick clone eio mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/282 b/tests/generic/282
+> index 72797813..90b97e6d 100755
+> --- a/tests/generic/282
+> +++ b/tests/generic/282
+> @@ -7,7 +7,7 @@
+>  # Test mmap CoW behavior when the write temporarily fails and we unmount.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone eio
+> +_begin_fstest auto quick clone eio mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/283 b/tests/generic/283
+> index cdad47a2..99f3e94b 100755
+> --- a/tests/generic/283
+> +++ b/tests/generic/283
+> @@ -8,7 +8,7 @@
+>  # program writes again.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone eio
+> +_begin_fstest auto quick clone eio mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/325 b/tests/generic/325
+> index f8506633..932c18f1 100755
+> --- a/tests/generic/325
+> +++ b/tests/generic/325
+> @@ -16,7 +16,7 @@
+>  #     Btrfs: fix fsync data loss after a ranged fsync
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick data log
+> +_begin_fstest auto quick data log mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/340 b/tests/generic/340
+> index 631324f1..96c8884d 100755
+> --- a/tests/generic/340
+> +++ b/tests/generic/340
+> @@ -7,7 +7,7 @@
+>  # Test mmap writing races from racing threads
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto
+> +_begin_fstest auto mmap
+>  
+>  # get standard environment and checks
+>  
+> diff --git a/tests/generic/344 b/tests/generic/344
+> index e6a3a5fe..884e65ba 100755
+> --- a/tests/generic/344
+> +++ b/tests/generic/344
+> @@ -8,7 +8,7 @@
+>  # Test races between mmap and buffered writes when pages are prefaulted.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto
+> +_begin_fstest auto mmap
+>  
+>  # get standard environment and checks
+>  
+> diff --git a/tests/generic/345 b/tests/generic/345
+> index cc1080f3..a73903e2 100755
+> --- a/tests/generic/345
+> +++ b/tests/generic/345
+> @@ -7,7 +7,7 @@
+>  # Test races between mmap from racing processes with and without prefaulting.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto
+> +_begin_fstest auto mmap
+>  
+>  # get standard environment and checks
+>  
+> diff --git a/tests/generic/346 b/tests/generic/346
+> index 89652ea5..aaf4c28e 100755
+> --- a/tests/generic/346
+> +++ b/tests/generic/346
+> @@ -7,7 +7,7 @@
+>  # Test races between mmap and normal writes from racing threads
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw
+> +_begin_fstest auto quick rw mmap
+>  
+>  # get standard environment and checks
+>  
+> diff --git a/tests/generic/413 b/tests/generic/413
+> index c9274e44..8a81e901 100755
+> --- a/tests/generic/413
+> +++ b/tests/generic/413
+> @@ -7,7 +7,7 @@
+>  # mmap direct/buffered io between DAX and non-DAX mountpoints.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick dax prealloc
+> +_begin_fstest auto quick dax prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/428 b/tests/generic/428
+> index c2c78778..d35dcbe0 100755
+> --- a/tests/generic/428
+> +++ b/tests/generic/428
+> @@ -9,7 +9,7 @@
+>  # created by Ross Zwisler <ross.zwisler@linux.intel.com>
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick dax
+> +_begin_fstest auto quick dax mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/437 b/tests/generic/437
+> index afba4731..ce89d24f 100755
+> --- a/tests/generic/437
+> +++ b/tests/generic/437
+> @@ -10,7 +10,7 @@
+>  # created by Ross Zwisler <ross.zwisler@linux.intel.com>
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick dax
+> +_begin_fstest auto quick dax mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/438 b/tests/generic/438
+> index df9c23d2..2ed1e52e 100755
+> --- a/tests/generic/438
+> +++ b/tests/generic/438
+> @@ -14,7 +14,7 @@
+>  # Based on test program by Michael Zimmer <michael@swarm64.com>
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto
+> +_begin_fstest auto mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/446 b/tests/generic/446
+> index c0d32e4e..cfa28759 100755
+> --- a/tests/generic/446
+> +++ b/tests/generic/446
+> @@ -12,7 +12,7 @@
+>  # will trigger a BUG_ON().
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw punch
+> +_begin_fstest auto quick rw punch mmap
+>  
+>  # get standard environment and checks
+>  . ./common/filter
+> diff --git a/tests/generic/462 b/tests/generic/462
+> index 42f18ad2..49b0df40 100755
+> --- a/tests/generic/462
+> +++ b/tests/generic/462
+> @@ -12,7 +12,7 @@
+>  # which is configured in "memory mode", not in "raw mode".
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick dax
+> +_begin_fstest auto quick dax mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/469 b/tests/generic/469
+> index f7718185..c36544b0 100755
+> --- a/tests/generic/469
+> +++ b/tests/generic/469
+> @@ -14,7 +14,7 @@
+>  # the bug on XFS.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick punch zero prealloc
+> +_begin_fstest auto quick punch zero prealloc mmap
+>  
+>  file=$TEST_DIR/$seq.fsx
+>  
+> diff --git a/tests/generic/470 b/tests/generic/470
+> index aef262c8..96ccbab3 100755
+> --- a/tests/generic/470
+> +++ b/tests/generic/470
+> @@ -8,7 +8,7 @@
+>  # page faults.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick dax
+> +_begin_fstest auto quick dax mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/499 b/tests/generic/499
+> index 868413ba..eca9b3d3 100755
+> --- a/tests/generic/499
+> +++ b/tests/generic/499
+> @@ -8,7 +8,7 @@
+>  # eof to return nonzero contents.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw collapse zero prealloc
+> +_begin_fstest auto quick rw collapse zero prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/punch
+> diff --git a/tests/generic/503 b/tests/generic/503
+> index f9796e69..eb67c483 100755
+> --- a/tests/generic/503
+> +++ b/tests/generic/503
+> @@ -14,7 +14,7 @@
+>  # don't require the DAX mount option or a specific filesystem for the test.
+>  
+>  . ./common/preamble
+> -_begin_fstest auto quick dax punch collapse zero prealloc
+> +_begin_fstest auto quick dax punch collapse zero prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/511 b/tests/generic/511
+> index 66557ab9..296859c2 100755
+> --- a/tests/generic/511
+> +++ b/tests/generic/511
+> @@ -8,7 +8,7 @@
+>  # eof to return nonzero contents.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw zero prealloc
+> +_begin_fstest auto quick rw zero prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/punch
+> diff --git a/tests/generic/567 b/tests/generic/567
+> index fc109d0d..ee479e68 100755
+> --- a/tests/generic/567
+> +++ b/tests/generic/567
+> @@ -11,7 +11,7 @@
+>  # (generic/029 is a similar test but for truncate.)
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw punch
+> +_begin_fstest auto quick rw punch mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/569 b/tests/generic/569
+> index 345e4744..efc3710a 100755
+> --- a/tests/generic/569
+> +++ b/tests/generic/569
+> @@ -7,7 +7,7 @@
+>  # Check that we can't modify a file that's an active swap file.
+>  
+>  . ./common/preamble
+> -_begin_fstest auto quick rw swap prealloc
+> +_begin_fstest auto quick rw swap prealloc mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/570 b/tests/generic/570
+> index 6b50303c..5f33453f 100755
+> --- a/tests/generic/570
+> +++ b/tests/generic/570
+> @@ -7,7 +7,7 @@
+>  # Check that we can't modify a block device that's an active swap device.
+>  
+>  . ./common/preamble
+> -_begin_fstest auto quick rw swap
+> +_begin_fstest auto quick rw swap mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/574 b/tests/generic/574
+> index cf287d2b..ebe081e8 100755
+> --- a/tests/generic/574
+> +++ b/tests/generic/574
+> @@ -10,7 +10,7 @@
+>  # part of the contents is later read by any means.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick verity
+> +_begin_fstest auto quick verity mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/578 b/tests/generic/578
+> index 347f6f97..48e54f31 100755
+> --- a/tests/generic/578
+> +++ b/tests/generic/578
+> @@ -7,7 +7,7 @@
+>  # Make sure that we can handle multiple mmap writers to the same file.
+>  
+>  . ./common/preamble
+> -_begin_fstest auto quick rw clone fiemap
+> +_begin_fstest auto quick rw clone fiemap mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/605 b/tests/generic/605
+> index 2c372db7..017a72e2 100755
+> --- a/tests/generic/605
+> +++ b/tests/generic/605
+> @@ -7,7 +7,7 @@
+>  # Test per-inode DAX flag by mmap direct/buffered IO.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto attr quick dax prealloc
+> +_begin_fstest auto attr quick dax prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/614 b/tests/generic/614
+> index 2299c133..4ae4fc36 100755
+> --- a/tests/generic/614
+> +++ b/tests/generic/614
+> @@ -8,7 +8,7 @@
+>  # stat(2) reports a non-zero number of used blocks.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw
+> +_begin_fstest auto quick rw mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/623 b/tests/generic/623
+> index 9f41b5cc..b97e2adb 100755
+> --- a/tests/generic/623
+> +++ b/tests/generic/623
+> @@ -7,7 +7,7 @@
+>  # Test a write fault scenario on a shutdown fs.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick shutdown
+> +_begin_fstest auto quick shutdown mmap
+>  
+>  . ./common/filter
+>  
+> diff --git a/tests/generic/630 b/tests/generic/630
+> index b2cbdcf0..aa6ac965 100755
+> --- a/tests/generic/630
+> +++ b/tests/generic/630
+> @@ -9,7 +9,7 @@
+>  # are identical and we can therefore go ahead with the remapping.
+>  
+>  . ./common/preamble
+> -_begin_fstest auto quick rw dedupe clone
+> +_begin_fstest auto quick rw dedupe clone mmap
+>  
+>  # Import common functions.
+>  . ./common/reflink
+> diff --git a/tests/generic/638 b/tests/generic/638
+> index 3de9801c..a5616c90 100755
+> --- a/tests/generic/638
+> +++ b/tests/generic/638
+> @@ -20,7 +20,7 @@
+>  #   4f06dd92b5d0 ("fuse: fix write deadlock")
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw
+> +_begin_fstest auto quick rw mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/647 b/tests/generic/647
+> index 99b13b38..f50e0171 100755
+> --- a/tests/generic/647
+> +++ b/tests/generic/647
+> @@ -7,7 +7,7 @@
+>  # Trigger page faults in the same file during read and write
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick
+> +_begin_fstest auto quick mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/651 b/tests/generic/651
+> index 0d79f3f2..ff7a933e 100755
+> --- a/tests/generic/651
+> +++ b/tests/generic/651
+> @@ -10,7 +10,7 @@
+>  # the golden output; we can only compare to a check file.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone
+> +_begin_fstest auto quick clone mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/652 b/tests/generic/652
+> index e45dbbd2..7e156fc1 100755
+> --- a/tests/generic/652
+> +++ b/tests/generic/652
+> @@ -10,7 +10,7 @@
+>  # the golden output; we can only compare to a check file.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone prealloc
+> +_begin_fstest auto quick clone prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/653 b/tests/generic/653
+> index bd3896cb..32416dd1 100755
+> --- a/tests/generic/653
+> +++ b/tests/generic/653
+> @@ -10,7 +10,7 @@
+>  # the golden output; we can only compare to a check file.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone prealloc
+> +_begin_fstest auto quick clone prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/654 b/tests/generic/654
+> index 4b2986ec..05ef9e9c 100755
+> --- a/tests/generic/654
+> +++ b/tests/generic/654
+> @@ -10,7 +10,7 @@
+>  # the golden output; we can only compare to a check file.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone fiemap prealloc
+> +_begin_fstest auto quick clone fiemap prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/655 b/tests/generic/655
+> index e2a503b4..75f1c341 100755
+> --- a/tests/generic/655
+> +++ b/tests/generic/655
+> @@ -11,7 +11,7 @@
+>  # the golden output; we can only compare to a check file.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone fiemap prealloc
+> +_begin_fstest auto quick clone fiemap prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/657 b/tests/generic/657
+> index df45afcb..8e3d08e7 100755
+> --- a/tests/generic/657
+> +++ b/tests/generic/657
+> @@ -12,7 +12,7 @@
+>  #   - Check that the files are now different where we say they're different.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone
+> +_begin_fstest auto quick clone mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/658 b/tests/generic/658
+> index 03d5a7a1..7d326cb7 100755
+> --- a/tests/generic/658
+> +++ b/tests/generic/658
+> @@ -12,7 +12,7 @@
+>  #   - Check that the files are now different where we say they're different.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone prealloc
+> +_begin_fstest auto quick clone prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/659 b/tests/generic/659
+> index cef2b232..29f299bb 100755
+> --- a/tests/generic/659
+> +++ b/tests/generic/659
+> @@ -12,7 +12,7 @@
+>  #   - Check that the files are now different where we say they're different.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone prealloc
+> +_begin_fstest auto quick clone prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/660 b/tests/generic/660
+> index 650e5e83..5455b460 100755
+> --- a/tests/generic/660
+> +++ b/tests/generic/660
+> @@ -12,7 +12,7 @@
+>  #   - Check that the files are now different where we say they're different.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone prealloc
+> +_begin_fstest auto quick clone prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/661 b/tests/generic/661
+> index 74c080ab..70762cb1 100755
+> --- a/tests/generic/661
+> +++ b/tests/generic/661
+> @@ -13,7 +13,7 @@
+>  #   - Check that the files are now different where we say they're different.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone prealloc
+> +_begin_fstest auto quick clone prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/662 b/tests/generic/662
+> index 54405b98..c6d8ce96 100755
+> --- a/tests/generic/662
+> +++ b/tests/generic/662
+> @@ -17,7 +17,7 @@
+>  #   - Check that the files are now different where we say they're different.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone punch prealloc
+> +_begin_fstest auto quick clone punch prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/663 b/tests/generic/663
+> index 2129805c..05d1069c 100755
+> --- a/tests/generic/663
+> +++ b/tests/generic/663
+> @@ -13,7 +13,7 @@
+>  #   - Check that the files are now different where we say they're different.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone prealloc
+> +_begin_fstest auto quick clone prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/664 b/tests/generic/664
+> index fdedc486..711af8fa 100755
+> --- a/tests/generic/664
+> +++ b/tests/generic/664
+> @@ -15,7 +15,7 @@
+>  #   - Check that the files are now different where we say they're different.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone prealloc
+> +_begin_fstest auto quick clone prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/665 b/tests/generic/665
+> index b0676dc8..a4379099 100755
+> --- a/tests/generic/665
+> +++ b/tests/generic/665
+> @@ -15,7 +15,7 @@
+>  #   - Check that the files are now different where we say they're different.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone prealloc
+> +_begin_fstest auto quick clone prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/666 b/tests/generic/666
+> index 8575c06c..9fff8039 100755
+> --- a/tests/generic/666
+> +++ b/tests/generic/666
+> @@ -16,7 +16,7 @@
+>  #   - Check that the files are now different where we say they're different.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone prealloc
+> +_begin_fstest auto quick clone prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/669 b/tests/generic/669
+> index aa7b0d55..6ddd2ad7 100755
+> --- a/tests/generic/669
+> +++ b/tests/generic/669
+> @@ -16,7 +16,7 @@
+>  #   - Check that the files are now different where we say they're different.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone punch prealloc
+> +_begin_fstest auto quick clone punch prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/670 b/tests/generic/670
+> index f32199e7..034aa8a7 100755
+> --- a/tests/generic/670
+> +++ b/tests/generic/670
+> @@ -7,7 +7,7 @@
+>  # target file. (MMAP version of generic/164,165)
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto clone
+> +_begin_fstest auto clone mmap
+>  
+>  _register_cleanup "_cleanup" BUS
+>  
+> diff --git a/tests/generic/671 b/tests/generic/671
+> index 3abe1227..285e810e 100755
+> --- a/tests/generic/671
+> +++ b/tests/generic/671
+> @@ -7,7 +7,7 @@
+>  # the source of a reflink operation. (MMAP version of generic/167,166)
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto clone
+> +_begin_fstest auto clone mmap
+>  
+>  _register_cleanup "_cleanup" BUS
+>  
+> diff --git a/tests/generic/672 b/tests/generic/672
+> index a5e65042..aa63ec8e 100755
+> --- a/tests/generic/672
+> +++ b/tests/generic/672
+> @@ -7,7 +7,7 @@
+>  # the target of a reflink operation. (MMAP version of generic/168,170)
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto clone
+> +_begin_fstest auto clone mmap
+>  
+>  _register_cleanup "_cleanup" BUS
+>  
+> diff --git a/tests/generic/708 b/tests/generic/708
+> index 53bb0ee4..ec7e48a9 100755
+> --- a/tests/generic/708
+> +++ b/tests/generic/708
+> @@ -12,7 +12,8 @@
+>  # thus the iomap direct_io partial write codepath.
+>  #
+>  . ./common/preamble
+> -_begin_fstest quick auto
+> +_begin_fstest quick auto mmap
+> +
+>  [ $FSTYP == "btrfs" ] && \
+>  	_fixed_by_kernel_commit b73a6fd1b1ef \
+>  		"btrfs: split partial dio bios before submit"
+> diff --git a/tests/generic/729 b/tests/generic/729
+> index e0cd18d8..b206a196 100755
+> --- a/tests/generic/729
+> +++ b/tests/generic/729
+> @@ -14,7 +14,7 @@
+>  # with page faults disabled will never make any progress.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick
+> +_begin_fstest auto quick mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/742 b/tests/generic/742
+> index 68cf20e4..ceecbdf9 100755
+> --- a/tests/generic/742
+> +++ b/tests/generic/742
+> @@ -12,7 +12,8 @@
+>  # result in a deadlock if we page faulted.
+>  #
+>  . ./common/preamble
+> -_begin_fstest quick auto fiemap
+> +_begin_fstest quick auto fiemap mmap
+> +
+>  [ $FSTYP == "btrfs" ] && \
+>  	_fixed_by_kernel_commit b0ad381fa769 \
+>  		"btrfs: fix deadlock with fiemap and extent locking"
+> diff --git a/tests/generic/743 b/tests/generic/743
+> index efdeec82..4eebdc06 100755
+> --- a/tests/generic/743
+> +++ b/tests/generic/743
+> @@ -9,7 +9,7 @@
+>  # MADV_POPULATE_READ on the mapping to fault in the pages.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto rw eio
+> +_begin_fstest auto rw eio mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/749 b/tests/generic/749
+> index 451f283e..7af019dd 100755
+> --- a/tests/generic/749
+> +++ b/tests/generic/749
+> @@ -15,7 +15,7 @@
+>  # boundary and ensures we get a SIGBUS if we write to data beyond the system
+>  # page size even if the block size is greater than the system page size.
+>  . ./common/preamble
+> -_begin_fstest auto quick prealloc
+> +_begin_fstest auto quick prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/758 b/tests/generic/758
+> index ad08b83f..00b3658d 100755
+> --- a/tests/generic/758
+> +++ b/tests/generic/758
+> @@ -11,7 +11,7 @@
+>  # (generic/567 is a similar test but for punch hole.)
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw zero
+> +_begin_fstest auto quick rw zero mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/overlay/061 b/tests/overlay/061
+> index bf4ad6de..14586865 100755
+> --- a/tests/overlay/061
+> +++ b/tests/overlay/061
+> @@ -15,7 +15,7 @@
+>  # - process A reads old data from shared mmap
+>  #
+>  . ./common/preamble
+> -_begin_fstest posix copyup
+> +_begin_fstest posix copyup mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/xfs/090 b/tests/xfs/090
+> index dfc10d88..e2a5086c 100755
+> --- a/tests/xfs/090
+> +++ b/tests/xfs/090
+> @@ -7,7 +7,7 @@
+>  # Exercise IO on the realtime device (direct, buffered, mmapd)
+>  #
+>  . ./common/preamble
+> -_begin_fstest rw auto realtime
+> +_begin_fstest rw auto realtime mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/xfs/108 b/tests/xfs/108
+> index 8adc63d4..96621f65 100755
+> --- a/tests/xfs/108
+> +++ b/tests/xfs/108
+> @@ -7,7 +7,7 @@
+>  # Simple quota accounting test for direct/buffered/mmap IO.
+>  #
+>  . ./common/preamble
+> -_begin_fstest quota auto quick
+> +_begin_fstest quota auto quick mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/xfs/166 b/tests/xfs/166
+> index beb05031..57461d89 100755
+> --- a/tests/xfs/166
+> +++ b/tests/xfs/166
+> @@ -7,7 +7,7 @@
+>  # ->page-mkwrite test - unwritten extents and mmap
+>  #
+>  . ./common/preamble
+> -_begin_fstest rw metadata auto quick prealloc
+> +_begin_fstest rw metadata auto quick prealloc mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/xfs/194 b/tests/xfs/194
+> index 1f83d534..737ae482 100755
+> --- a/tests/xfs/194
+> +++ b/tests/xfs/194
+> @@ -7,7 +7,7 @@
+>  # Test mapping around/over holes for sub-page blocks
+>  #
+>  . ./common/preamble
+> -_begin_fstest rw auto
+> +_begin_fstest rw auto mmap
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/xfs/550 b/tests/xfs/550
+> index cecc2ea2..b283231f 100755
+> --- a/tests/xfs/550
+> +++ b/tests/xfs/550
+> @@ -7,7 +7,7 @@
+>  # Test memory failure mechanism when dax enabled
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick dax
+> +_begin_fstest auto quick dax mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/xfs/551 b/tests/xfs/551
+> index 72f71e25..4ba19633 100755
+> --- a/tests/xfs/551
+> +++ b/tests/xfs/551
+> @@ -7,7 +7,7 @@
+>  # Test memory failure mechanism when dax and reflink working together
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone dax
+> +_begin_fstest auto quick clone dax mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/xfs/552 b/tests/xfs/552
+> index facee8cd..c0656761 100755
+> --- a/tests/xfs/552
+> +++ b/tests/xfs/552
+> @@ -8,7 +8,7 @@
+>  #   test for partly reflinked file
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone dax
+> +_begin_fstest auto quick clone dax mmap
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/xfs/559 b/tests/xfs/559
+> index fb29d208..2d617d7e 100755
+> --- a/tests/xfs/559
+> +++ b/tests/xfs/559
+> @@ -8,7 +8,7 @@
+>  # buffered write routines.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw
+> +_begin_fstest auto quick rw mmap
+>  
+>  # Import common functions.
+>  . ./common/inject
+> -- 
+> 2.47.2
+> 
+> 
 
