@@ -1,161 +1,159 @@
-Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
+Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 29082139D
-	for <fstests@vger.kernel.org>; Thu, 22 May 2025 01:21:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D617F33985;
+	Thu, 22 May 2025 04:50:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747876893; cv=none; b=Ovg3yaiDFWbgovfE4A3bCImy5nomu78BbOV4Qz+pgLd9Hn3++Uo5OHFaavviHXsPd5wcP5erRosyExnz7lzY1H7IhoSyOigdtmJ1aex5Bhx/6nNvU9GtxQY8pP/6ZrZ4nFsC13j5vHaM2R0FlGRRlNlVJp4lLx9rq8IukTV/GUc=
+	t=1747889409; cv=none; b=Ck5VpO/f5LgADrV5Uh0cOk+UAaGWPNkNRShT0RrXWXZtAmPuW3NspQZsEryFWEsY70fJ1LKHpcSAwSWIE2sIxf9Bg7Ygn1I2X9tv+enIZxwj3wYMOdShRxeceWmsWNj5wtUFkoWkobWi/IkyKiCYHa+kp+IXNYIlwGqtHhb+CEU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747876893; c=relaxed/simple;
-	bh=mdihEtmmSw/HdsUV2hO/TYx6yugmHjTDRmcxARJ+gX8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=hkN5843uHATlcbWCIiXXrMBgih7V8islthZZ6xVwYxJHshqscC76p2GQqOx4k1228NXG7Rh2bWGBct76swNtAOg+MZ22tcW26xMDv0MPhVLLPDthY1Jj0tUTVb5Og3AVEIgdRgozmuNWOtkX+eHOYsADzopOvzlMm2hPQWw/oeE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=1ZQkzZRz; arc=none smtp.client-ip=209.85.214.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
+	s=arc-20240116; t=1747889409; c=relaxed/simple;
+	bh=/EeUPQ5pIqv9twthvvLocC6lcLHRN/Xzbnzccp7axqM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=AypH0Q3GVM5KEZPRok1/DrfPHBsdERJmiesa8/oy/6UatqGUKllZ/owux99uzkhj2Fww757UVbyU8GQ8IQiWuIggGplADLiavIRmaid2EAv0/la0dCyhBkfTtwwbvJg/2nPPc8PWffoo1YJgY96wJFOyWXHoCWssNhANwso+3Nk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GO/98sqo; arc=none smtp.client-ip=209.85.214.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="1ZQkzZRz"
-Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-2320d2a7852so39276335ad.3
-        for <fstests@vger.kernel.org>; Wed, 21 May 2025 18:21:30 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GO/98sqo"
+Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-22e033a3a07so75552445ad.0;
+        Wed, 21 May 2025 21:50:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1747876890; x=1748481690; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=WrQxKdEM/Zq30kTjdODCeXquXiL443EVNnmiydPOhsM=;
-        b=1ZQkzZRza/KKZ3+7fFxMJURrK9bnq7Jzv9WrYjHcoH9Wf9/bpzNsB6uV3drEEi8sim
-         VuMuAq0J2vfCH1JeXrpAnXaa+wNWYjkACsxO0IPSkGIL23CgRpHa+6736iODI7STtNlS
-         tF5naJlfF5ZYr+bv6EPf80s+y6KHFk6JOF72JBMU09gSkbesQqKMhLifwKysFvLKdX59
-         OhE+7JpD/dHn8Ht1EMY5VYV0Lrftkx6XO4w5n+C5/1eSucdTxhiOwk184KJQN8WLqGr1
-         oPzgeLh/9ysHzs1iTn1maU3qOfxjzRmmiYsumcJa3iXQ0wrF6aTFIwsAXPdIkZLSndP4
-         AJzw==
+        d=gmail.com; s=20230601; t=1747889407; x=1748494207; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=Y0pe6MxgRL+0gJYeT6ZvM46M+xztoIv4b0Ya8nisFxY=;
+        b=GO/98sqoc820putE4jb2eFqb3PgfyWIEMZHkfsx07srpDBTANwR23Bk4EMi2ntdcZL
+         7GV9WcQwxhogvHe5sYVhhSmswlhkkgL8FSWyMKl4Vs0dKiFu1atSBO3XfLFdyCkNW1gD
+         iw01Hl3+YlrZllEYlMv4iIZ8NBqDVtk0RJDze9yf4aWnUDrNYj/82402KjDPSDGaAOXo
+         j78d6xPsC+IU3iRDuvZY3Hxmtk9mUJ0C4aklY88vHJaPozLBZl660Zkhp2MosDkoGy3d
+         tu5vE1dpfJZTqcTPopJZb7zpERC1SwyI8Rc13I/+fytVZvZsWadMRtwGvwY/RACv2J1r
+         0WeQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747876890; x=1748481690;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=WrQxKdEM/Zq30kTjdODCeXquXiL443EVNnmiydPOhsM=;
-        b=g07gDlOrYp805e6yCoDkkKKZsL294VUZv/GoA/Qza+9RGxROAyj/0k5F2nDOSM7P7T
-         QxX/7lRYkGhxByAQQjfGuLaVcvp9vzc7VMAcjJ7x2Ngf6m0Gk2o7UEghNEZVllG32fCd
-         bCy8DqnFAb1TXwF8yf8dTPtFby4Z+Syt9KTsFu8FyPmQgqSjfvcetoCXv1N7YQttP/rc
-         ZoZe8wKquSRPopGPHxC3aidw5yvLbjHMWSnMAtPxCBNfXgBP1RqAo5a0DGeB+4cUoncd
-         Gwoms1dOMYohut8Bk3DHLYJIZo41NOMB47x3GoA5lJW107FbdioUOzAtCZrZpYJv/ghM
-         ceRw==
-X-Forwarded-Encrypted: i=1; AJvYcCUVvay+NgainQm8uKlyrKL1jxRehD5/GeNJAdvvA9EEUDcWVfz5B7hgAYseAMGJjqkglav/ibbY@vger.kernel.org
-X-Gm-Message-State: AOJu0YykUX39JGbeYLVZpg9V0VYVW75DUMlwHTqofKlxy8DJuwQZpsnO
-	y6Ti7YjYvyuUNu3TrtuGKPyMV+NuMFXtWw3pln+HPHENNJ5G1vt+rWkuIiSDkPOfkb4=
-X-Gm-Gg: ASbGncuCfoHxJj9mckH5THiT1gOhFm79YdnTkEaH+SxlXfWiyrmII1uJu64qcJwD4fg
-	GuvXRPH+ktumB8UKNkgWppdmxRlfNujGYTHg9gYWjNAVUjhb2ClcJ1bVrSyhLD6WdFF/kN6ugX7
-	ghVaJbashFyqQ7VmbMbIvsDdeYi8yGZTTWFvBbvaPEF+4E4u3mZTcs1oe6210Jcvxelmi4oy43C
-	rtvkSMUBJ1vWu2EU1q0D9ddcL+J7M+PVoQ6OosyZ9fLOXdJP081iugcid0QteEDSKzNyd9dBSyL
-	kqxNU+m6gHQN4elmz8OxbY49PwWzZwrpnXBsXBZ8MfMYWmU+yh16E3MdqFZ6Xl1d4oZLDTkm4jW
-	/ifd3toBCN1yT8lwf3AcJffCl5UY=
-X-Google-Smtp-Source: AGHT+IHFXgfHhNmecD00UDOVa1X9Fzo8Pcr7d8ZHq8vZmT2cCyx8Od/WStNeZN8ld4GjQBPIOK95Jw==
-X-Received: by 2002:a17:902:ce87:b0:220:e924:99dd with SMTP id d9443c01a7336-231de3ace9emr326814095ad.34.1747876890237;
-        Wed, 21 May 2025 18:21:30 -0700 (PDT)
-Received: from dread.disaster.area (pa49-180-184-88.pa.nsw.optusnet.com.au. [49.180.184.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-231d4ac95cbsm98575145ad.45.2025.05.21.18.21.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 21 May 2025 18:21:29 -0700 (PDT)
-Received: from dave by dread.disaster.area with local (Exim 4.98.2)
-	(envelope-from <david@fromorbit.com>)
-	id 1uHucg-00000006WxE-3bJx;
-	Thu, 22 May 2025 11:21:26 +1000
-Date: Thu, 22 May 2025 11:21:26 +1000
-From: Dave Chinner <david@fromorbit.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 3/4] xfs/259: try to force loop device block size
-Message-ID: <aC58FjhTGEDAQiGb@dread.disaster.area>
-References: <174786719374.1398726.14706438540221180099.stgit@frogsfrogsfrogs>
- <174786719445.1398726.2165923649877733743.stgit@frogsfrogsfrogs>
+        d=1e100.net; s=20230601; t=1747889407; x=1748494207;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=Y0pe6MxgRL+0gJYeT6ZvM46M+xztoIv4b0Ya8nisFxY=;
+        b=T6TrkGzJX2/kVC7BujBMXq/+VVevD8K+YS9y2hzSbe3ylOIqeWNj4dgEdeJG4TD7Rn
+         vfPVfkqByi+g/CzGnWXvg233/WO17XGlcs3SnrNK00G2WgZ767Vr/hbkk6DSL/+QeKKU
+         Mod0rs+1kBgWHxyEM4+E58kzzr34heckMFUC1BoWGrc1g2nhOvJSjxtj5CViDkQpwFop
+         nQLKm+LCPMW0FbV+nnenAgCsrAiOtkBQD3OK5MqxvLD7+eLzkqPs5R3zLqlHYwAOAee/
+         zk6qE6dq5wdkmIxFF+sdwOtpybFuk5V/wIRf5ys5eEPSiC4nBI0sd21qL+ss13gFVocX
+         G8Zg==
+X-Forwarded-Encrypted: i=1; AJvYcCX4jnnhsFt7/+eJJQ2fK7fU1IdcdJ6GJAWKp/TfVRWay7BEiDfxeti4wbt6EL9d3ecQnwhrA41/ssNg@vger.kernel.org, AJvYcCXUOeFI8abS1K8bCoN0N2v6ce6PgKcFnlihXLUA9etP+BGhHPO3rTgL7lq8gl728ac/iJmehcjomdAU@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzs3Os7B9FziDInHfd+Ckcn41B+IYZ77gSb33cfKizZOA5u03kv
+	40/W4ClwIhenwQKvuxqDEkTA9PyzFziuGmG+GXKnUah4HW/rJmLPVIBLAv2dsQ==
+X-Gm-Gg: ASbGncv38Jx9OsxX6u2Itzhthw+8tdKu83ERibBVj0lGxDU1C2620Oy/PsrYA/MK72x
+	TBP2pKl8uaP/EGMB3TZBM0ILR0O5vNMi2+xdQDBlzFj1aYbhPlu5iEM084VH5Y32QIyzo2DmbzY
+	gvoe8nhr4syNmuu1QSjJNoJabbLRFlfOUXdhLnwHQk+b/wNb4hfAUPs8WgaIW8oFigUYOAEDncM
+	Ug8mVqAibjdLAee7BCfqy8vL4iAk0aYlfP1HW+n/KF7zdrN6bO6YDekPjGWSjyZcjUfwuANeBF1
+	nolKfPzR8e6BNX1CfYdxc9SnJeaDoKUM5mguhuIpFeL7itLSXN8Azi/ReicZ+upFLQTITYBa
+X-Google-Smtp-Source: AGHT+IG1PaiNlAjWPBlE2EwlDf6MSAmKwBqsihY1yF4P8oJWPiBc0NJ9HSKIFrMXJSuRIH6lAsakOg==
+X-Received: by 2002:a17:903:2ec8:b0:224:1943:c65 with SMTP id d9443c01a7336-231d44e64e6mr343148555ad.14.1747889406867;
+        Wed, 21 May 2025 21:50:06 -0700 (PDT)
+Received: from [192.168.0.120] ([49.205.34.162])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-232053579d7sm81644965ad.80.2025.05.21.21.50.04
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 21 May 2025 21:50:06 -0700 (PDT)
+Message-ID: <663e86d5-4e79-4f37-b2af-9c671c8948ef@gmail.com>
+Date: Thu, 22 May 2025 10:20:02 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <174786719445.1398726.2165923649877733743.stgit@frogsfrogsfrogs>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 1/2] new: Add a new parameter (name/emailid) in the
+ "new" script
+Content-Language: en-US
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+ linux-xfs@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
+ djwong@kernel.org, zlang@kernel.org
+References: <cover.1747306604.git.nirjhar.roy.lists@gmail.com>
+ <2df3e3af8eb607025707e120c1b824879e254a01.1747306604.git.nirjhar.roy.lists@gmail.com>
+ <aC0Q2HIesHMXqVLG@dread.disaster.area>
+ <12e307e0-2a28-4a42-a8b3-d2186c871be7@gmail.com>
+ <aC509xXxgZJKKZVE@dread.disaster.area>
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+In-Reply-To: <aC509xXxgZJKKZVE@dread.disaster.area>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Wed, May 21, 2025 at 03:41:36PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Starting with 6.15-rc1, loop devices created with directio mode enabled
-> will set their logical block size to whatever STATX_DIO_ALIGN on the
-> host filesystem reports.  If you happen to be running a kernel that
-> always sets up loop devices in directio mode and TEST_DEV is a block
-> device with 4k sectors, this will cause conflicts with this test's usage
-> of mkfs with different block sizes.  Add a helper to force the loop
-> device block size to 512 bytes, which is implied by scenarios such as
-> "device size is 4T - 2048 bytes".
-> 
-> Also fix xfs/078 which simply needs the blocksize to be set.
-> 
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
->  common/rc         |   22 ++++++++++++++++++++++
->  tests/generic/563 |    1 +
->  tests/xfs/078     |    2 ++
->  tests/xfs/259     |    1 +
->  tests/xfs/613     |    1 +
->  5 files changed, 27 insertions(+)
-> 
-> 
-> diff --git a/common/rc b/common/rc
-> index 657772e73db86b..4e3917a298e072 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4526,6 +4526,28 @@ _create_loop_device()
->  	echo $dev
->  }
->  
-> +# Configure the loop device however needed to support the given block size.
-> +_force_loop_device_blocksize()
-> +{
-> +	local loopdev="$1"
-> +	local blksize="$2"
-> +	local is_dio
-> +	local logsec
-> +
-> +	if [ ! -b "$loopdev" ] || [ -z "$blksize" ]; then
-> +		echo "_force_loop_device_blocksize requires loopdev and blksize" >&2
-> +		return 1
-> +	fi
-> +
-> +	curr_blksize="$(losetup --list --output LOG-SEC --noheadings --raw "$loopdev")"
-> +	if [ "$curr_blksize" -gt "$blksize" ]; then
-> +		losetup --direct-io=off "$loopdev"
-> +		losetup --sector-size "$blksize" "$loopdev"
-> +	fi
-> +
-> +	#losetup --raw --list "$loopdev" >> $seqres.full
-> +}
 
-I think it would make more sense to use a
-_create_loop_device_blocksize() wrapper function and change the call
-sites to use it that to add this function that requires error
-checking of the parameters even though it is only called directly
-after loop device creation.
+On 5/22/25 06:21, Dave Chinner wrote:
+> On Wed, May 21, 2025 at 10:52:22AM +0530, Nirjhar Roy (IBM) wrote:
+>> On 5/21/25 05:01, Dave Chinner wrote:
+>>> On Thu, May 15, 2025 at 11:00:16AM +0000, Nirjhar Roy (IBM) wrote:
+>>>> This patch another optional interactive prompt to enter the
+>>>> author name and email id for each new test file that is
+>>>> created using the "new" file.
+>>>>
+>>>> The sample output looks like something like the following:
+>>>>
+>>>> ./new selftest
+>>>> Next test id is 007
+>>>> Append a name to the ID? Test name will be 007-$name. y,[n]:
+>>>> Creating test file '007'
+>>>> Add to group(s) [auto] (separate by space, ? for list): selftest quick
+>>>> Enter <author_name> <email-id>: Nirjhar Roy <nirjhar.roy.lists@gmail.com>
+>>>> Creating skeletal script for you to edit ...
+>>>>    done.
+>>>>
+>>>> ...
+>>>> ...
+>>>>
+>>>> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+>>>> ---
+>>>>    new | 5 ++++-
+>>>>    1 file changed, 4 insertions(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/new b/new
+>>>> index 6b50ffed..636648e2 100755
+>>>> --- a/new
+>>>> +++ b/new
+>>>> @@ -136,6 +136,9 @@ else
+>>>>    	check_groups "${new_groups[@]}" || exit 1
+>>>>    fi
+>>>> +read -p "Enter <author_name>: " -r
+>>>> +author_name="${REPLY:=YOUR NAME HERE}"
+>>>> +
+>>>>    echo -n "Creating skeletal script for you to edit ..."
+>>>>    year=`date +%Y`
+>>>> @@ -143,7 +146,7 @@ year=`date +%Y`
+>>>>    cat <<End-of-File >$tdir/$id
+>>>>    #! /bin/bash
+>>>>    # SPDX-License-Identifier: GPL-2.0
+>>>> -# Copyright (c) $year YOUR NAME HERE.  All Rights Reserved.
+>>>> +# Copyright (c) $year $author_name.  All Rights Reserved.
+>>> In many cases, this is incorrect.
+>>>
+>>> For people who are corporate employees, copyright for the code they
+>>> write is typically owned by their employer, not the employee who
+>>> wrote the code. i.e. this field generally contains something like
+>>> "Red Hat, Inc", "Oracle, Inc", "IBM Corporation", etc in these
+>>> cases, not the employee's name.
+>> Yes. The existing placeholder is already "YOUR NAME HERE" (which I have kept
+>> unchanged). The author can always use the company's name from read -p prompt
+>> or simply chose to fill it up later, right? Or are you saying that the
+>> existing placeholder "YOUR NAME HERE" is incorrect?
+> I'm noting that your prompt - <author_name> - is incorrect
+> for this "YOUR NAME HERE" field. That field is supposed to contain
+> the -copyright owner-, not the author of the patch. Sometimes they
+> are the same, but in many cases they are not.
 
-_create_loop_device_blocksize()
-{
-	local file=$1
-	local blksize=$2
+Oh, okay. I can change the prompt to "Enter <copyright-owner>: ".
 
-	dev=`losetup -f --show $file --sector-size=$blksize`
+--NR
 
-	# If the loop device sector size is incompatible with doing
-	# direct IO on the backing file, attempting to turn on
-	# direct-io will fail with an -EINVAL error. However, the
-	# device will still work correctly using buffered IO, so we
-	# ignore the error.
-	test -b "$dev" && losetup --direct-io=on $dev 2> /dev/null
-	echo $dev
-}
+>
+> -Dave.
 
--Dave.
 -- 
-Dave Chinner
-david@fromorbit.com
+Nirjhar Roy
+Linux Kernel Developer
+IBM, Bangalore
+
