@@ -1,41 +1,79 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f53.google.com (mail-pj1-f53.google.com [209.85.216.53])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FF0E33EA
-	for <fstests@vger.kernel.org>; Wed, 21 May 2025 22:49:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8EBEF3F9FB
+	for <fstests@vger.kernel.org>; Thu, 22 May 2025 00:51:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747867770; cv=none; b=rrNEm6a8ma2R30E5340ukgWkIYRz9u/OZKWMEVmUee49xmYlzFsSWYu1HGXfT722zCD1mh6adK1iXV5UtL57kXDez235/Mj0RLKiKlS4rE8tpN4nzXfcGNv0cdY+vq6abcwzsVV6IECHtgxMt2DRd/BIhKfgJE50EcvW8egASpk=
+	t=1747875071; cv=none; b=VtNXaIEQHD4fwKREFEcPPFSWIPX41qOdeW/km+xz5FmbWPK4WTAZStts8mdxYBRjZ+ZImrSY3LWi9oBM6uZqAbnD2Xbxndi/npbTo3XO1mxfQnCWBKVVBBoUSSzZn1wjN/yKGwfa7hH2IURJQg+5Xg+k+F+6YjJ53yYhx/JZKmc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747867770; c=relaxed/simple;
-	bh=z/Ha3QTzkXWTQYlGceCYS2roBHx58M5dZcAShDw9J+M=;
+	s=arc-20240116; t=1747875071; c=relaxed/simple;
+	bh=Rj6K4ROrMnzGhkR+BEROkzwz0ATU+50+nOs4dIgSHIU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=I6abrhncOiXK78AUYlDcnebznNRPJq/RmsMo33ugf0Eq/kLZ+NNKBPdbrqR6GrmMaYuYOgaOSyR66/bPwbpFqLkGwk4huHsbwI+gWjUefAP8PSZ6uionJGJn0a9FTQrHf+hbWR+7o8bEY7sT+waraDE5XvoVblIU6fSufVD/9VM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=D6YqNUUc; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=kNkIGuf7p0EiM4vB3J3ilR7RSBc6X1YHD6R3mEiZWHO8q5Nu32K9vvwSJsZkXvDz7q/o5iA8nYrGSqFI01OOCF33QFfIkGTmy2iQJYTWwTSPVFw9uVK8IJiC+56vgvwO7IQz4Ms12BS4GZXRsUWb5D5oHb8zEH6s3aqRAheYSoI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=X9R2BNBP; arc=none smtp.client-ip=209.85.216.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="D6YqNUUc"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51A68C4CEE4;
-	Wed, 21 May 2025 22:49:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1747867770;
-	bh=z/Ha3QTzkXWTQYlGceCYS2roBHx58M5dZcAShDw9J+M=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=D6YqNUUce0h/czpm1d455BwVubR6qlHq3Fd/wrGzR5WVu9ddfnTAsZLhGYj3xsokF
-	 T3zWkolpw4ebxoGxXQfBOzIVdD+ixsr1If1pBTRdzTtHvvaMCfCCIEWyMfnfl2o8Dh
-	 coHbnEfClDxwCdng+l6RQoB7PXaKA0stdHWZbl5t1PXyTyAg12f6zGyeCsbsq2CclS
-	 baBcVL+DT34xVKvhybtMAAwZOrPsbEqVydTd49EGT/AFmQhj1yniclkZrto1cOWPeK
-	 S9y5We1dCuI/AUTWx1pAYztyjlO3X3Fwm9fCloPLqAgQYjvO2Hnpu7dlqUv+D2PFMS
-	 0hhi5L+ACfXBQ==
-Date: Wed, 21 May 2025 15:49:29 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Shinichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Cc: "hch@infradead.org" <hch@infradead.org>,
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: xfs/566 execution time
-Message-ID: <20250521224929.GA3203850@frogsfrogsfrogs>
-References: <aCyM-p06c99rJ04g@infradead.org>
- <20250521031940.GF9730@frogsfrogsfrogs>
- <b7vls4sjlx556wax6uagfkey6y5u2t652qu5ne2a6sxpofowdt@3annzxxqdmwq>
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="X9R2BNBP"
+Received: by mail-pj1-f53.google.com with SMTP id 98e67ed59e1d1-30820167b47so5996233a91.0
+        for <fstests@vger.kernel.org>; Wed, 21 May 2025 17:51:09 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1747875069; x=1748479869; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=W9s0Ocr/rcF17F3DaJ0nz5ajfwkc6fT/gYdoWUk+45Q=;
+        b=X9R2BNBPPXMoENAmPna2fvi7CwxquWjYwfQ6Qxv7SZ/mLMDmMj2PXb5UShXGOkXzjd
+         0SyjIJw/tiD1qdTqYW3N51r7kh9eo82vMcJcqgByjF5RLPE3W1iu3EQGti5eLME7hl1d
+         cfIfNbE56MtekEdz0RBpZqrP4N39Zw2cF8FGmIvV2k0+e9H8GlDrSOIG6gYAM+H8wYCG
+         oXliTn6pGWsaDupoph0CveQH8eVF52RKc+gw2CAXm59K/eVIpCtVVbBzfK1G6UvjHiKl
+         daYanrpnQgV680IqpCPmNhgDeqHusYKwnJwY/zGTq3ojf5EySOfCGFWR4v65bCpNWjCc
+         ngsw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1747875069; x=1748479869;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=W9s0Ocr/rcF17F3DaJ0nz5ajfwkc6fT/gYdoWUk+45Q=;
+        b=TK0KeEJaWhSEyEzV8osDkmUDo4kmi/aO/jmSSiMz+VyWMQa7o9nFS6xOUTzeSKxSnb
+         CLpPFwvPWnQCAjMtLoIUEX9aLJwrDrWp+riRr6/7fXKUC1cDpdPMebRAtHs+wkaPjQly
+         MeT9WWGespKw8Nr0sGaPzKCWzpsCirb8hi59oxuYRyIlbVcSwcc5rnYhDBRz0YoEVYYY
+         8WCtozPLVMtwvr2Yqy0IFouIAX7nbAaV7nnoi8DXCVB+YvroHzDdxYD+elJVHwLCpFbn
+         n4ySdUvMdgDGVP+/M/HKPRWGXtvGTFCz/QCO4sr29MqJU7aQBxB8uF2tg6BX1ORXBa8C
+         CJsA==
+X-Gm-Message-State: AOJu0YwgLcsVc7qroonAVuG31CfUJLY5yaFJ5ihHR7g3vK0rCJ8gjSby
+	V9pz8xsu3QYXqUrrVrU9olFRRMDSKIZjTpOVxcFn0fpqXzqjBqa1DRtCMd8yI6R/ujLRyZnPNlr
+	BkCrb
+X-Gm-Gg: ASbGncv7TixEpqD0Jzb0JODygyG9OGNUPQn2Rwp4rOfyiQc2EbFg60nZ/Xs9Xt0MEf8
+	j0xh5FqyX+2aRNwPqVF9KEpemFypana1LMmAJ/58IXTY8WPaXpSSLJZrMDLrwZndLCGwukUOtnN
+	noHJ09lWd9r3VuG88WHWWCjAd7gnX70dgLfzbvLi/foHowxrEC/oxYXukD5a5s/7aCgQ0gIKfgV
+	8K4zYSi+NqlosyPBKWREOkpr35It7B6FyWv9A//ruPGpXLgxOKPXg14ExwtT/Fs3+GmKqG2n7tl
+	QsLzMTRn6qEXOrL6ja5qtHXTdbk9x1qJhG4S50OIHROwNmm3Q6CqYWQ0oBjKiPvNHjL36xFprDC
+	YWyz2qwO0abq5HPTvii1VIbROiuc=
+X-Google-Smtp-Source: AGHT+IGP/CEXCaGuQkCNk+FfpfP4/PxKrZ35x7SLbTy5h2U+tyAempmwH+hmFi9rXwNEsKJVKpY7Pw==
+X-Received: by 2002:a17:90a:d2ce:b0:30e:3737:7c87 with SMTP id 98e67ed59e1d1-30e7dc4ecb4mr32283593a91.5.1747875068659;
+        Wed, 21 May 2025 17:51:08 -0700 (PDT)
+Received: from dread.disaster.area (pa49-180-184-88.pa.nsw.optusnet.com.au. [49.180.184.88])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-30f365f7a32sm4265696a91.49.2025.05.21.17.51.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 21 May 2025 17:51:08 -0700 (PDT)
+Received: from dave by dread.disaster.area with local (Exim 4.98.2)
+	(envelope-from <david@fromorbit.com>)
+	id 1uHu9H-00000006WPt-2p6p;
+	Thu, 22 May 2025 10:51:03 +1000
+Date: Thu, 22 May 2025 10:51:03 +1000
+From: Dave Chinner <david@fromorbit.com>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
+Subject: Re: [PATCH v2 1/2] new: Add a new parameter (name/emailid) in the
+ "new" script
+Message-ID: <aC509xXxgZJKKZVE@dread.disaster.area>
+References: <cover.1747306604.git.nirjhar.roy.lists@gmail.com>
+ <2df3e3af8eb607025707e120c1b824879e254a01.1747306604.git.nirjhar.roy.lists@gmail.com>
+ <aC0Q2HIesHMXqVLG@dread.disaster.area>
+ <12e307e0-2a28-4a42-a8b3-d2186c871be7@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,64 +82,72 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <b7vls4sjlx556wax6uagfkey6y5u2t652qu5ne2a6sxpofowdt@3annzxxqdmwq>
+In-Reply-To: <12e307e0-2a28-4a42-a8b3-d2186c871be7@gmail.com>
 
-On Wed, May 21, 2025 at 09:37:53AM +0000, Shinichiro Kawasaki wrote:
-> On May 20, 2025 / 20:19, Darrick J. Wong wrote:
-> > On Tue, May 20, 2025 at 07:08:58AM -0700, Christoph Hellwig wrote:
-> > > Hi Darrick,
+On Wed, May 21, 2025 at 10:52:22AM +0530, Nirjhar Roy (IBM) wrote:
+> 
+> On 5/21/25 05:01, Dave Chinner wrote:
+> > On Thu, May 15, 2025 at 11:00:16AM +0000, Nirjhar Roy (IBM) wrote:
+> > > This patch another optional interactive prompt to enter the
+> > > author name and email id for each new test file that is
+> > > created using the "new" file.
 > > > 
-> > > we regularly see execution times of more than half a day for xfs/566
-> > > on a 30ish TB SMR HDD.  Do you think there might be a useful way to
-> > > scale down the load on rotational devices?
+> > > The sample output looks like something like the following:
+> > > 
+> > > ./new selftest
+> > > Next test id is 007
+> > > Append a name to the ID? Test name will be 007-$name. y,[n]:
+> > > Creating test file '007'
+> > > Add to group(s) [auto] (separate by space, ? for list): selftest quick
+> > > Enter <author_name> <email-id>: Nirjhar Roy <nirjhar.roy.lists@gmail.com>
+> > > Creating skeletal script for you to edit ...
+> > >   done.
+> > > 
+> > > ...
+> > > ...
+> > > 
+> > > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> > > ---
+> > >   new | 5 ++++-
+> > >   1 file changed, 4 insertions(+), 1 deletion(-)
+> > > 
+> > > diff --git a/new b/new
+> > > index 6b50ffed..636648e2 100755
+> > > --- a/new
+> > > +++ b/new
+> > > @@ -136,6 +136,9 @@ else
+> > >   	check_groups "${new_groups[@]}" || exit 1
+> > >   fi
+> > > +read -p "Enter <author_name>: " -r
+> > > +author_name="${REPLY:=YOUR NAME HERE}"
+> > > +
+> > >   echo -n "Creating skeletal script for you to edit ..."
+> > >   year=`date +%Y`
+> > > @@ -143,7 +146,7 @@ year=`date +%Y`
+> > >   cat <<End-of-File >$tdir/$id
+> > >   #! /bin/bash
+> > >   # SPDX-License-Identifier: GPL-2.0
+> > > -# Copyright (c) $year YOUR NAME HERE.  All Rights Reserved.
+> > > +# Copyright (c) $year $author_name.  All Rights Reserved.
+> > In many cases, this is incorrect.
 > > 
-> > Hrmm.  Is that the only one that does that, or do the other scrub tests
-> > take a while too?
+> > For people who are corporate employees, copyright for the code they
+> > write is typically owned by their employer, not the employee who
+> > wrote the code. i.e. this field generally contains something like
+> > "Red Hat, Inc", "Oracle, Inc", "IBM Corporation", etc in these
+> > cases, not the employee's name.
 > 
-> As to the test with SMR HDDs, I observed very long test run on two test cases:
-> xfs/566 and xfs/732.
-> 
-> > If it's just that one, and setting SOAK_DURATION=2m
-> > results in the test cutting off after 2min, then I'll craft some sort of
-> > fix to constrain the runtime.
-> 
-> I added,
-> 
->  "export SOAK_DURATION=2m"
-> 
-> to local.config and ran xfs/566, but that setting does not look working.
-> The test case rusn more than a half an hour...
+> Yes. The existing placeholder is already "YOUR NAME HERE" (which I have kept
+> unchanged). The author can always use the company's name from read -p prompt
+> or simply chose to fill it up later, right? Or are you saying that the
+> existing placeholder "YOUR NAME HERE" is incorrect?
 
-Huh, that's /very/ strange.  In the absence of a SOAK_DURATION, the test
-should only run itself for 30 seconds.  From common/fuzzy,
-_scratch_xfs_stress_scrub does this to set the end-time:
+I'm noting that your prompt - <author_name> - is incorrect
+for this "YOUR NAME HERE" field. That field is supposed to contain
+the -copyright owner-, not the author of the patch. Sometimes they
+are the same, but in many cases they are not.
 
-	if [ -n "$SOAK_DURATION" ]; then
-		end="$((start + SOAK_DURATION))"
-	else
-		end="$((start + (30 * TIME_FACTOR) ))"
-	fi
-
-and then __stress_scrub_fsx_loop does:
-
-	while __stress_scrub_running "$end" "$runningfile"; do
-		# Need to recheck running conditions if we cleared anything
-		__stress_scrub_clean_scratch && continue
-		duration=$(___stress_scrub_duration "$end" "$remount_period")
-		___scrub_run_fsx $duration $d_args &
-
-which should be sufficient to exit the fsx loop.  Then we go back to
-_scratch_xfs_stress_scrub and:
-
-	# Wait until the designated end time or fsstress dies, then kill all of
-	# our background processes.
-	while __stress_scrub_running "$end" "$runningfile"; do
-		sleep 1
-	done
-	_scratch_xfs_stress_scrub_cleanup
-
-which just waits for fsx and scrub to exit.  If you start this test and
-wait about 45 seconds or so, can you send me the ps output so I can try
-to figure out which component(s) aren't stopping in time?
-
---D
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
