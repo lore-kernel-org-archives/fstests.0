@@ -1,849 +1,352 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94E7B288503;
-	Thu, 22 May 2025 10:53:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747911201; cv=none; b=ES/kdRw/xatFlGcmVceFosg/rmpi6SDtTtGvPLnVUTosz649YXzE+ZF8rT6n3ThelxsmflkoP26H78FgvoG3Uq0WyxBgRhTJA29w5T0OAsjrZNbZEs/lUrsCKZekHtMz16nEwtrp8zYGsteUCuDZT99BoDuafFGe0LLyPRW91kk=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747911201; c=relaxed/simple;
-	bh=EobsxZRkLHONe22Zc6KI3dkaTz2w2mLwcG97oSWXCaE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=UtaxOmD8Uwb9VkNjoTWvatv0PPEvA5fmRTn2diYOncL0sqdAjXXXr1u6QpjCmn0lti/U0JriG2qFi8F5U4XAJi1pBpoJBUTvNmLidgpPNdCGWxLMbcLe9UYGkgFoMYR5kOjcih82shhe6c/WmHNxvqO3xns5e3aodjOYOpkDKc8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=jEtW5IhA; arc=none smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2DC320103A
+	for <fstests@vger.kernel.org>; Fri, 23 May 2025 00:59:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.153.141
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1747961951; cv=fail; b=D6UIhVg8EAd+QHqf8937ZT+ZpScvjdn+MWeT2ZJOCtghngdi3N74mLBm6lKAVcWHLiwg6MySlIPrfComxAQgC33YQGiGV+esV55McGmHLS5xtNZ3XMGTqR381CP+VRxPxo9pUen4P5vuLPKO9ppLOBkgM7iD3OPwYego15dwiLM=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1747961951; c=relaxed/simple;
+	bh=dWCkLAbkb5X0qAzj2AONk4ZM7wBl2wMKUWDGy9O1USI=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=b435qI2W6LNrqlYLI24uxk/OUidYC79sB/RxbAQmldc4knzU1w8iFPVPz6FeRludoY3TTPur9yLBCAIljZB99LRAHu+WboRln8N776EbDgvWqEoaqWwUsgaLmjyw4EcHBCskkK7gYN73e9dbfglZMgCzzCwJ1gqFlnjqCJ8q6Qo=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=CVygxk5z; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=aX2q2NXn; arc=fail smtp.client-ip=216.71.153.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="jEtW5IhA"
-Received: from pps.filterd (m0356516.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 54M9F1nW020923;
-	Thu, 22 May 2025 10:53:14 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=pp1; bh=uJMJp7DsKlI+tIFSP8CI3IyhdSduVE
-	fjwvChR8ahF28=; b=jEtW5IhAk18Pr2YbwzCR4n0faaiN7QtJMvjkASNrH2LM83
-	hk/jEemfVRDBDkb583scLXBJZ0w3EXo5sgsTAhH9r2FJ/8ePC6cNKOy3Dqb0xNeG
-	tyzP8yaZPBHOY94BvkyQhErvSV81DimtrKXpLKoUP+L7H2M0fhijrNBvMDnyEXeB
-	nClQFKKjO9ZbjIHWoGZoO38fmQekEOtgNVyF2AtrJaylk6b3kBBkbNksjNw2o3WK
-	e1Pj8ULmbx0CP37qZhuLag5iQeyWUf5fRd8BGxY8hjHauejKF+PW2TlH3rMDE9wm
-	61512FTxlCfKl+4MEh7gRkNepHI7Y85os2YyUcbg==
-Received: from pps.reinject (localhost [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 46t14jgem2-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 22 May 2025 10:53:13 +0000 (GMT)
-Received: from m0356516.ppops.net (m0356516.ppops.net [127.0.0.1])
-	by pps.reinject (8.18.0.8/8.18.0.8) with ESMTP id 54MAr8Nv009667;
-	Thu, 22 May 2025 10:53:13 GMT
-Received: from ppma23.wdc07v.mail.ibm.com (5d.69.3da9.ip4.static.sl-reverse.com [169.61.105.93])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 46t14jgekw-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 22 May 2025 10:53:13 +0000 (GMT)
-Received: from pps.filterd (ppma23.wdc07v.mail.ibm.com [127.0.0.1])
-	by ppma23.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 54M9IAfC032056;
-	Thu, 22 May 2025 10:53:12 GMT
-Received: from smtprelay07.fra02v.mail.ibm.com ([9.218.2.229])
-	by ppma23.wdc07v.mail.ibm.com (PPS) with ESMTPS id 46rwmq92rt-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 22 May 2025 10:53:12 +0000
-Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
-	by smtprelay07.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 54MArAbc42336642
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 22 May 2025 10:53:10 GMT
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 7005520043;
-	Thu, 22 May 2025 10:53:10 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id A30D720040;
-	Thu, 22 May 2025 10:53:08 +0000 (GMT)
-Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.109.219.249])
-	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
-	Thu, 22 May 2025 10:53:08 +0000 (GMT)
-Date: Thu, 22 May 2025 16:23:05 +0530
-From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To: Catherine Hoang <catherine.hoang@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, djwong@kernel.org,
-        john.g.garry@oracle.com, ritesh.list@gmail.com
-Subject: Re: [PATCH v2 6/6] generic: various atomic write tests with
- scsi_debug
-Message-ID: <aC8CETEDplUAwB5C@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
-References: <20250520013400.36830-1-catherine.hoang@oracle.com>
- <20250520013400.36830-7-catherine.hoang@oracle.com>
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="CVygxk5z";
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="aX2q2NXn"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1747961950; x=1779497950;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-id:content-transfer-encoding:
+   mime-version;
+  bh=dWCkLAbkb5X0qAzj2AONk4ZM7wBl2wMKUWDGy9O1USI=;
+  b=CVygxk5zW4I6VCC99MjVCOg7etggS768WE4Mdd9G+y+aVfbxMQ9Cw5Uc
+   mivZ06NCZuOM14vXS/d52krMta/7bEGNfDlbF8WoqawB6ArtMOqjfWXC8
+   k5n3MBzYQlivY0mtY2N2A5oo/tvh3vwcSnz++ihnXyWIM1RRAWIqmw4gy
+   wG3wlAShu9ET7PmzSH3ioD8QVUaV2xNU7BGc3paSHE1ycHLJLxf3JEbRT
+   IfeRwIsclS6+8JVy9zl5eT5yCr2Ad+ywrOSt3CffF4Wg6VH4BmQ0xjqu1
+   /l1hBrc3/eAPJ6brWBXOnOu5csnfD2NuR6kcMNyjeOpFZ5T1TvV/lRWpB
+   g==;
+X-CSE-ConnectionGUID: V9319euYSaOIoBGRYvab/w==
+X-CSE-MsgGUID: dj7oM4g6RnyFeSSnFvuQ0w==
+X-IronPort-AV: E=Sophos;i="6.15,307,1739808000"; 
+   d="scan'208";a="83619156"
+Received: from mail-westusazon11013015.outbound.protection.outlook.com (HELO SJ2PR03CU002.outbound.protection.outlook.com) ([52.101.44.15])
+  by ob1.hgst.iphmx.com with ESMTP; 23 May 2025 08:59:03 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=SYjKdU1Xf4r1bTmoZELl3R8r4oHbl71GFtlYNjJrgbzx+xqboS5lrkqmy4piWOnzFkL0/nBayf72wiIVsU8B3Ur2dzVMIPmUaWpUceMaRBbr/siH5v5meWegQ3N+Mmuyr5mexFsULlFpdgRoETYUi46xxKOTXTpVC/yA7KTjClsY7BpdWp4dCj3YG90AEy5tJyZj5vCa4u0trFvI/AJRqfOUrocj7x9ULOC4crT2iZ7IbA0Q//UbfFeeuJwFNfrcLT5ZBmPyFTSstlwackszVpvIUS3eXpPGruDGap8LDZBHwRIJTaTfSxu5fMggOGSK63cx1IKujPo7dfoZR26U1A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=wOTBEUFRRjMXdyW3Uy1YsuMf8R3w0CD6nSFrU7nD3TE=;
+ b=WtsbyEH+R7aIXnSpgdISlLKPJzdvvLkoJ2jlF3bXG6UqmlT55tWoiYIsJMkQvb+W5m/hJg1KnxebRJ1GW5oagn2JlgrK5Z6fC3utqCxpZDrskeiHipaWvSJWzEOjy5FZARAf80UcGXlC1Teonqj6OCWjTn5np1587bitPEirOH0g+H4l9nPuA56jVxsW5sRevNtCvn2TDMEQTgaSoqDBQ29TgkOYdzb/6oJc3fe5YSbwEoZViCFx5zya+Ua2EEBxm0shOn4TuVnMIIVEdV4K/dPrcKTKusnu0x3zYGV1y9VH5Wht6ffzZsTHW/HT5LDGUv6B4QldyYZ0MKOdvQ/MBw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=wOTBEUFRRjMXdyW3Uy1YsuMf8R3w0CD6nSFrU7nD3TE=;
+ b=aX2q2NXniLBDi+GxGNtQx8QMaG1eWC7ngyInVWke6Mf/yKIjl27PvBo3Ox7mM5jaJ7DjEe9Wcm3YupCE5nuNzhbWIRDMXqBxjI9vMHBNcT0bB8qchPdJ63K/rMrbRHNpCUlIx3MZxEiNQqKfxPDg4dzwNgDhCqYks7Ll/MUxp+Q=
+Received: from SN7PR04MB8532.namprd04.prod.outlook.com (2603:10b6:806:350::6)
+ by DM6PR04MB6558.namprd04.prod.outlook.com (2603:10b6:5:1b9::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8746.34; Fri, 23 May
+ 2025 00:59:01 +0000
+Received: from SN7PR04MB8532.namprd04.prod.outlook.com
+ ([fe80::4e14:94e7:a9b3:a4d4]) by SN7PR04MB8532.namprd04.prod.outlook.com
+ ([fe80::4e14:94e7:a9b3:a4d4%5]) with mapi id 15.20.8746.035; Fri, 23 May 2025
+ 00:59:00 +0000
+From: Shinichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+CC: "hch@infradead.org" <hch@infradead.org>, "fstests@vger.kernel.org"
+	<fstests@vger.kernel.org>
+Subject: Re: xfs/566 execution time
+Thread-Topic: xfs/566 execution time
+Thread-Index: AQHbyZC+Gs7KaBMRrE6eXuouWRW7RrPcaz4AgABpqwCAAN0tgIABtoSA
+Date: Fri, 23 May 2025 00:59:00 +0000
+Message-ID: <yflmdvih2566sh4db74psbmwyryme5gubn4kap5rsqmb7uatbn@zp5rjfyqwzri>
+References: <aCyM-p06c99rJ04g@infradead.org>
+ <20250521031940.GF9730@frogsfrogsfrogs>
+ <b7vls4sjlx556wax6uagfkey6y5u2t652qu5ne2a6sxpofowdt@3annzxxqdmwq>
+ <20250521224929.GA3203850@frogsfrogsfrogs>
+In-Reply-To: <20250521224929.GA3203850@frogsfrogsfrogs>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SN7PR04MB8532:EE_|DM6PR04MB6558:EE_
+x-ms-office365-filtering-correlation-id: c59e3d61-39ca-41c9-6eb9-08dd9995014e
+x-ld-processed: b61c8803-16f3-4c35-9b17-6f65f441df86,ExtAddr
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;ARA:13230040|366016|1800799024|376014|38070700018;
+x-microsoft-antispam-message-info:
+ =?us-ascii?Q?v05UySNq8ZLEejuuB0aFmt1B+MRtKaDGQZ3ojUEz2dGEGIfKEXjvUHpqIdUL?=
+ =?us-ascii?Q?JMiKveLAXSQU36zM2HGnCfSjd1VGfNfsISxwPMh533TCXu2wlxXRyEpbSmTt?=
+ =?us-ascii?Q?q9U/P/VTcHJV/g0/rJufyJkWNXuRQrzVnnfcmHXmcoIT1PaYCDzPZ357GwF7?=
+ =?us-ascii?Q?IrLYk1J7aUvzQn13SgkM6NAtDG3ZtqZKp5eGO8CBhTWsBTzGNjcPUOf+lDcd?=
+ =?us-ascii?Q?1fPR7fnLm+HQGX2rrWwBe9hxqN6pwO6WezcRsD6F5adYdHu2oL6xZSnHzogD?=
+ =?us-ascii?Q?TJwNG8xSL5SOcyv42tnOcgYGFwGXSu+WwRwAHSnOhZ0O9r/yCWzKqbLh2JXE?=
+ =?us-ascii?Q?tE3BxMYGTytaPt6HMsqUoDwCpGOpjEjnv3UmRbHfRG+FZIUwWUuaIE3KyB78?=
+ =?us-ascii?Q?mWQrbdpl5AwbW+Qc1J1ujszT10mr2SRO3C1z9DSO0sSaNnDS7gvB1hQ4Xl8b?=
+ =?us-ascii?Q?eFqDEFDXD0UCGVG8NWfOV86BCaWX9BFJLc+z9U/QWkU4G+d2zptR3cNyPEaQ?=
+ =?us-ascii?Q?w7dypQkvBabQbD37Z/kym5NwXB8Yrenlf83Rmdsaa5ocyXMoeDeg73ik8qf0?=
+ =?us-ascii?Q?i06tgXf4CjUnNA4tpfwmixEioYql9/SkKWP65K/GUCif5bqMUTtlqo5aAiGL?=
+ =?us-ascii?Q?3eJ4Pgs+mfLfFBUjcaDd8EV0gb15Zf4KE0YtaCn49kpCCR6f+ticDY3wjUlz?=
+ =?us-ascii?Q?HYgzz4r+w4jmeiiD4/dVVMuSfHMLLExcQMidOJ2G8s4tTixOKKGhtY8NuMqe?=
+ =?us-ascii?Q?Bj3Xs2zecMdHPn/BHmvMMCLa6AXV9WVeS76WI6FUQpqb5GOnRl5z8uLrE5kF?=
+ =?us-ascii?Q?4dl2U41JSaKADR+XWIoMuMIAPDlbXGR29/PwH1cwr5II2HeOc2GrzRzPJyMX?=
+ =?us-ascii?Q?SrOeFlNYLuneUxWyN9PiKcH8RzbIHQN7nga3N7aA0/T/vD6Dt3U8bn9zA9EG?=
+ =?us-ascii?Q?0z5KXo9+dpHBUm7xuT5V0ivcXlPjXwkoLAsUVmtSIaHY0MUzJ4KBiHLj9jUf?=
+ =?us-ascii?Q?a9cXeQxC9u/uDZyP8ghrabaSD11Fb7DayovrFX0bT4S0GZDZ1oLXyUOaBSPI?=
+ =?us-ascii?Q?nFy/uEKtVIRu47d01jVZ7zOeEICkgIUuYZO6a1JimSJL6Z7OHVFb/+C6B9Bq?=
+ =?us-ascii?Q?gOIk8n0q4KmAjV4J2nOZ+bydyceQqAqLvv9LncrNcQH8OeH1mx4Mc0BOyns2?=
+ =?us-ascii?Q?z1WZSJSt+5p1cdsRn92aDqPUsfuf8UwLpnGXDMojZUAgkWrtVstD8rVgVO9L?=
+ =?us-ascii?Q?2gsqoMz5dh5M7+g59f5e8gYJQY9fr7ReIEPiMgnNEx4v/T+qxKQAZ7Pvtixk?=
+ =?us-ascii?Q?NESeKNDg/feddLd/W5jiuWiX0X9ZQp1IFgdgdEvGIk7C8qQZ8W2BLOxc0fqV?=
+ =?us-ascii?Q?9UZggEFlAw5a3pdUi8BKLnV8A96Y1nBqupntxcjDUXGH/80YfZZUYKSCfnIq?=
+ =?us-ascii?Q?+kdErxnVr9gBHaYHb08QG88acZSsCx1U/bPRGlojoshpewq3iu+e0A=3D=3D?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN7PR04MB8532.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(38070700018);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?4ghSu+uOQKZC6jnrdDeDTALQ5nTr2Pzvd03VT4gT/Us80xCuv0v7DPOpzrxL?=
+ =?us-ascii?Q?PqBlsKME5MkFdhEAfL2IzV7ltJ9sEKgq02z4WD3VindXhR4Z0gvn6PEAGtIc?=
+ =?us-ascii?Q?g2BxQPz6pqfoOhCrSKNLZXw/2KlYnFRCSVMqke7wC1PSxjm4MPZtXMVXY/aS?=
+ =?us-ascii?Q?y+4bJGp6GqtXWTCALs0IeRl/yJ2S+q0DmbP7tTsTfkIDS3zNNsgp6rD7bOls?=
+ =?us-ascii?Q?+dY9COtW6Jga+Fhlj50I0bKANHHqQLcLQXmDZ0usGKD9MDjUNwAk3HPa5/d0?=
+ =?us-ascii?Q?dfnA2vWT6hEwvwgQAIhBIZy0C70upAkEzr3OTWt14HSjvZi1OKz69AcTAk2B?=
+ =?us-ascii?Q?mQWSS/VG6fp1xGzQblnpNqULI0IIqySsS1LgMWx/tUZTwX9SO5REvLRdLwe9?=
+ =?us-ascii?Q?ENpFzcJHx0v5xw4fOBYSQhP5NaVkLSS8vM6Syy1My4T4DnnY3cHn9Pv/2ZrG?=
+ =?us-ascii?Q?uJtjek9/VKJ0hIzuOldNZsAwBhFO0y8iHyk5ex3cPkdY1eMnflPFDe+iOzw4?=
+ =?us-ascii?Q?h0Zz9NkfrLV9Wylytkq9AG4GZUtOmYGagdJ4eQjbemRhxC8lyo6AD6P12lq5?=
+ =?us-ascii?Q?e0ddz87sKqcvWPK1yP1PHB5yQlKRFQ/nomLAINV5fDjl+bcodLoL1Hta6TrQ?=
+ =?us-ascii?Q?welbdoM9HNl66pU4Y5x30MUYgG/0NTzrvBX1xLxmwDwIqjeQRA1XUWo69ftd?=
+ =?us-ascii?Q?VE+bvFx18iJKYFP367IWe5xxUGz0LkJfZ5FeCKawTGmUIHVEa7/fSEx7zDYw?=
+ =?us-ascii?Q?1TATtrQ8u1gV2BSddrIE3XF884e8w5kyvpbPrCAZ/zIle0/T+1OQjmDRayxM?=
+ =?us-ascii?Q?3AFaDAcR1lFZQJBPNGvEysFv6XagOzykOMBMIRgaaAsxopX6JgSQFIMiHTx7?=
+ =?us-ascii?Q?RU92dB1s7L0AMWXSWa5y9Qmq8eoDYz9ICYpIqx8tIjA4UJUmBIOrOMvhAcN5?=
+ =?us-ascii?Q?OjjggQOwoC2WNEE7a1+ELbGldHbPmb93iKPtGQkMQL+/AXY1xMkjdpCCwMoo?=
+ =?us-ascii?Q?Ih2tUpkNQi/29vs3yLSIUdSYJq5Ef5ZuBreqDGgam7P48xhRgUAHdtPnzIcK?=
+ =?us-ascii?Q?/a5sYXcw5/r5HWtUwx1rtisTBgN5hLGqXljGUFgF4GEsN3jwNimJMkyr7cH0?=
+ =?us-ascii?Q?51njlAEjbO3k0LfpsYztTn3SeDxVE7/v0AK/jpCSz9Nfmn8bLQh1Nm0ItYI/?=
+ =?us-ascii?Q?7jdUK4khFXvYKuEOCnbW5NCxXByLfYJ9ZVogERumiZ47ZkKt1RuR7YiD8QfK?=
+ =?us-ascii?Q?qHt9enqGFx0ajVR7U+e9VKC6TYku0aQ5S7l4wetyVyywPxDNjPKKf3WNDBhL?=
+ =?us-ascii?Q?zbDwvb29vDUD8Mjl7Yu79oGYOQlzmUUugdZ0ym2FMO3hm659RDAa9RvfswDM?=
+ =?us-ascii?Q?amLUmfM7AXFdEhMvsjHlAyzaGyc1Adspsl/CltO9IzfXjwMvST3DX56bN+j5?=
+ =?us-ascii?Q?+NpRo8G/KUFCkRYuTMCoCi2A9iLDngwkg/PkXAqvByZzgzr13PYWFNzzwCAO?=
+ =?us-ascii?Q?n9NTCGo2cFZa7qHEBMrCNaamlteW9gr84pRlcro8GSq0QrxeMnXjgi1YxxhA?=
+ =?us-ascii?Q?wafoMdrknVd9uJZTN4AdZEDWS4YwQdZG1NQtDkaA3RB/jlBaEq8hRmeAYCIv?=
+ =?us-ascii?Q?kw=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <9A043F7DDCD76447A1FE2AA5603297CF@namprd04.prod.outlook.com>
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250520013400.36830-7-catherine.hoang@oracle.com>
-X-TM-AS-GCONF: 00
-X-Proofpoint-ORIG-GUID: piB33txCezfl_VwYa4J_FQKF-TJQejw0
-X-Authority-Analysis: v=2.4 cv=XOkwSRhE c=1 sm=1 tr=0 ts=682f0219 cx=c_pps a=3Bg1Hr4SwmMryq2xdFQyZA==:117 a=3Bg1Hr4SwmMryq2xdFQyZA==:17 a=kj9zAlcOel0A:10 a=dt9VzEwgFbYA:10 a=VwQbUJbxAAAA:8 a=yPCof4ZbAAAA:8 a=BZUj_GCgx7i1EvMinxoA:9 a=CjuIK1q_8ugA:10
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNTIyMDEwNyBTYWx0ZWRfX3nY0EZzCkQfH F2gxbMvkwTst1GHVGH/RfPnHa/3RXTyXEpwwKbVJMJFM0xdWlxXIM3eTiOKR5DUiL2IUhSMY1pE S6a3IDwPvqyZB1ti6TtzkL1k9iCJlLPkXSbOkjPaOav1Eo+c7A9SgWFCunSmKY1dTAZWQADAUSP
- 6KXVQRUcSZputVKrRAceS7I6dwYuh+YuJqCMUQH0RMTY2A9KsdAfRKGyp/K+dUY/T0sUfop1u5j 64cwWya4aedGrtTYNvjI7bpSfNyHmdeFrRBHJWTs+5H/0wtwB1juJQfZ6k1xQqmY7kAjbAnacKs Ctb0W+OfbedEFtzzdXPUIWS3SJc9W8x5l4zZO4jPUNQuJi2g+/Q7IKeaudkHBVZMturNva7gObi
- EkUBA5jQcxpBtgODAmSYTTlzR+z0wGbZM9zL8fxrZWClF1Hmf8B3W2GXgKOSdBptkqlHpSwF
-X-Proofpoint-GUID: QMep7Q0eS4ILcktXLStjNREYgFbuj20C
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
- definitions=2025-05-22_05,2025-05-22_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015 malwarescore=0
- mlxlogscore=999 bulkscore=0 mlxscore=0 lowpriorityscore=0 adultscore=0
- impostorscore=0 suspectscore=0 priorityscore=1501 spamscore=0 phishscore=0
- classifier=spam authscore=0 authtc=n/a authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.19.0-2505160000
- definitions=main-2505220107
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	lA+0KpultTGxNiuSJWNnXoOt3yCRQert0vrvnRkQtgwhxK+V36jgrfSx/80t+zlNtZPIjIKGXTawZJHrJT0sbNydD1R3aiLq4otI15vOkRO6I5tGWpBLKP6LN8xCa4tIYCP8sByIq5yiY6CMoI5rVKYd/V7DpZWYCsJ0jVnkw+ZgDGiLIWpNFOBkA/uZUQeaj3b+/uSsg1oHW3K+NYBq9vq/9cG+yMQmU0oPm+trcnzfetC7nhEQ/PLEPf5ei/O6QCBV79uckHdVALL1oI4gXNm8NvDjrV7wrIcGP3L0KfpLbwqtY4r/Ts8G7zZKMWOaDJorXnIlByKhM6qSWopkVul2vE3lUzpbTaAMXtry5cK2Ru4XInnGQzYEUO/BA58FWSBVPjCy9r87X6jJAMeJg5bwMZ0bI4rAGSt0dmbRlpxrz++8CmI+XNGRz5/2bDIbkhtOsDl33G/zopPO3tG9vae7TqmYbui8tzc9Pu6yMG6ihOfMzqSrMkrGEH+I/gdQSsAbPraV4E91ppTIyfDWbyxb03UjLcBxJoOm9c5LjJcMF82gBLACEjgfCVaVargxJ4myzyJ+GRGRRKAX9x89wWCTZtqJ6V4NXZmsaqIBINMf/sUHXfyHw88/bThuGJIb
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SN7PR04MB8532.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: c59e3d61-39ca-41c9-6eb9-08dd9995014e
+X-MS-Exchange-CrossTenant-originalarrivaltime: 23 May 2025 00:59:00.7215
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: wYWQNayuBcHQsvwIj9b+N/SLso8XKxo+F57NTfaCzafB23YMIgaqynZKzjmpQSs1uK+YALmUJZ9zT94AGpZfm1j9sgrabusPjELjxkaM8W8=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR04MB6558
 
-On Mon, May 19, 2025 at 06:34:00PM -0700, Catherine Hoang wrote:
-> From: "Darrick J. Wong" <djwong@kernel.org>
-> 
-> Simple tests of various atomic write requests and a (simulated) hardware
-> device.
+On May 21, 2025 / 15:49, Darrick J. Wong wrote:
+> On Wed, May 21, 2025 at 09:37:53AM +0000, Shinichiro Kawasaki wrote:
+> > On May 20, 2025 / 20:19, Darrick J. Wong wrote:
+> > > On Tue, May 20, 2025 at 07:08:58AM -0700, Christoph Hellwig wrote:
+> > > > Hi Darrick,
+> > > >=20
+> > > > we regularly see execution times of more than half a day for xfs/56=
+6
+> > > > on a 30ish TB SMR HDD.  Do you think there might be a useful way to
+> > > > scale down the load on rotational devices?
+> > >=20
+> > > Hrmm.  Is that the only one that does that, or do the other scrub tes=
+ts
+> > > take a while too?
+> >=20
+> > As to the test with SMR HDDs, I observed very long test run on two test=
+ cases:
+> > xfs/566 and xfs/732.
+> >=20
+> > > If it's just that one, and setting SOAK_DURATION=3D2m
+> > > results in the test cutting off after 2min, then I'll craft some sort=
+ of
+> > > fix to constrain the runtime.
+> >=20
+> > I added,
+> >=20
+> >  "export SOAK_DURATION=3D2m"
+> >=20
+> > to local.config and ran xfs/566, but that setting does not look working=
+.
+> > The test case rusn more than a half an hour...
+>=20
+> Huh, that's /very/ strange.  In the absence of a SOAK_DURATION, the test
+> should only run itself for 30 seconds.  From common/fuzzy,
+> _scratch_xfs_stress_scrub does this to set the end-time:
+>=20
+> 	if [ -n "$SOAK_DURATION" ]; then
+> 		end=3D"$((start + SOAK_DURATION))"
+> 	else
+> 		end=3D"$((start + (30 * TIME_FACTOR) ))"
+> 	fi
+>=20
+> and then __stress_scrub_fsx_loop does:
+>=20
+> 	while __stress_scrub_running "$end" "$runningfile"; do
+> 		# Need to recheck running conditions if we cleared anything
+> 		__stress_scrub_clean_scratch && continue
+> 		duration=3D$(___stress_scrub_duration "$end" "$remount_period")
+> 		___scrub_run_fsx $duration $d_args &
+>=20
+> which should be sufficient to exit the fsx loop.  Then we go back to
+> _scratch_xfs_stress_scrub and:
+>=20
+> 	# Wait until the designated end time or fsstress dies, then kill all of
+> 	# our background processes.
+> 	while __stress_scrub_running "$end" "$runningfile"; do
+> 		sleep 1
+> 	done
+> 	_scratch_xfs_stress_scrub_cleanup
+>=20
+> which just waits for fsx and scrub to exit.  If you start this test and
+> wait about 45 seconds or so, can you send me the ps output so I can try
+> to figure out which component(s) aren't stopping in time?
 
-Hey Catherine, Darrick,
+Please find the ps output [1]. It shows a xfs_scrub command is taking time.
+I did some investigation, and found the xfs_scrub command is started
+by the _scratch_scrub() call in _scratch_xfs_stress_scrub(). This xfs_scrub
+command starts before the 'end=3D"$((start + SOAK_DURATION))"' calculation.
 
-So while working on ext4 multi block we have also written some tests
-which we plan to upstream soon. Ofcourse some were sort of identical to
-the ones added here. So here and there while reviewing I might add a few
-things we did differently, which we can think of incorporating.
-> 
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
-> ---
->  common/atomicwrites    |  10 +++
->  tests/generic/1222     |  86 +++++++++++++++++++++++++
->  tests/generic/1222.out |  10 +++
->  tests/generic/1223     |  66 +++++++++++++++++++
->  tests/generic/1223.out |   9 +++
->  tests/generic/1224     | 140 +++++++++++++++++++++++++++++++++++++++++
->  tests/generic/1224.out |  17 +++++
->  tests/xfs/1216         |  67 ++++++++++++++++++++
->  tests/xfs/1216.out     |   9 +++
->  tests/xfs/1217         |  70 +++++++++++++++++++++
->  tests/xfs/1217.out     |   3 +
->  tests/xfs/1218         |  59 +++++++++++++++++
->  tests/xfs/1218.out     |  15 +++++
->  13 files changed, 561 insertions(+)
->  create mode 100755 tests/generic/1222
->  create mode 100644 tests/generic/1222.out
->  create mode 100755 tests/generic/1223
->  create mode 100644 tests/generic/1223.out
->  create mode 100644 tests/generic/1224
->  create mode 100644 tests/generic/1224.out
->  create mode 100755 tests/xfs/1216
->  create mode 100644 tests/xfs/1216.out
->  create mode 100755 tests/xfs/1217
->  create mode 100644 tests/xfs/1217.out
->  create mode 100644 tests/xfs/1218
->  create mode 100644 tests/xfs/1218.out
-> 
-> diff --git a/common/atomicwrites b/common/atomicwrites
-> index 391bb6f6..c75c3d39 100644
-> --- a/common/atomicwrites
-> +++ b/common/atomicwrites
-> @@ -115,3 +115,13 @@ _test_atomic_file_writes()
->      $XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 1 $bsize" $testfile 2>> $seqres.full && \
->          echo "atomic write requires offset to be aligned to bsize"
->  }
-> +
-> +_simple_atomic_write() {
-> +	local pos=$1
-> +	local count=$2
-> +	local file=$3
-> +	local directio=$4
-> +
-> +	echo "testing pos=$pos count=$count file=$file directio=$directio" >> $seqres.full
-> +	$XFS_IO_PROG $directio -c "pwrite -b $count -V 1 -A -D $pos $count" $file >> $seqres.full
-> +}
-> diff --git a/tests/generic/1222 b/tests/generic/1222
-> new file mode 100755
-> index 00000000..9d02bd70
-> --- /dev/null
-> +++ b/tests/generic/1222
-> @@ -0,0 +1,86 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 1222
-> +#
-> +# Validate multi-fsblock atomic write support with simulated hardware support
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick rw atomicwrites
-> +
-> +. ./common/scsi_debug
-> +. ./common/atomicwrites
-> +
-> +_cleanup()
-> +{
-> +	_scratch_unmount &>/dev/null
-> +	_put_scsi_debug_dev &>/dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +
-> +_require_scsi_debug
-> +_require_scratch_nocheck
-> +# Format something so that ./check doesn't freak out
-> +_scratch_mkfs >> $seqres.full
-> +
-> +# 512b logical/physical sectors, 512M size, atomic writes enabled
-> +dev=$(_get_scsi_debug_dev 512 512 0 512 "atomic_wr=1")
-> +test -b "$dev" || _notrun "could not create atomic writes scsi_debug device"
-> +
-> +export SCRATCH_DEV=$dev
-> +unset USE_EXTERNAL
-> +
-> +_require_scratch_write_atomic
+P.S. I found that "export SOAK_DURATION=3D2m" causes the bash error
+     "value too great for base". I think it should be
+     "export SOAK_DURATION=3D120", but this does not look important here.
 
-How about using a _require_scratch_write_atomic_multi_fsblock() helper.
-This will help _notrun tests which are not really relevant for kernels
-with single block aw support, like mixed mapping tests.
 
-> +_require_atomic_write_test_commands
-> +
-> +echo "scsi_debug atomic write properties" >> $seqres.full
-> +$XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $SCRATCH_DEV >> $seqres.full
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount
-> +test "$FSTYP" = "xfs" && _xfs_force_bdev data $SCRATCH_MNT
-> +
-> +testfile=$SCRATCH_MNT/testfile
-> +touch $testfile
-> +
-> +echo "filesystem atomic write properties" >> $seqres.full
-> +$XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $testfile >> $seqres.full
-> +
-> +sector_size=$(blockdev --getss $SCRATCH_DEV)
-> +min_awu=$(_get_atomic_write_unit_min $testfile)
-> +max_awu=$(_get_atomic_write_unit_max $testfile)
-> +
-> +$XFS_IO_PROG -f -c "falloc 0 $((max_awu * 2))" -c fsync $testfile
-> +
-> +# try outside the advertised sizes
-> +echo "two EINVAL for unsupported sizes"
-> +min_i=$((min_awu / 2))
-> +_simple_atomic_write $min_i $min_i $testfile -d
-> +max_i=$((max_awu * 2))
-> +_simple_atomic_write $max_i $max_i $testfile -d
-> +
-> +# try all of the advertised sizes
-> +echo "all should work"
-> +for ((i = min_awu; i <= max_awu; i *= 2)); do
-> +	$XFS_IO_PROG -f -c "falloc 0 $((max_awu * 2))" -c fsync $testfile
-> +	_test_atomic_file_writes $i $testfile
-> +	_simple_atomic_write $i $i $testfile -d
-Why do we need the _simple_atomic_write here?
-> +done
-> +
-> +# does not support buffered io
-> +echo "one EOPNOTSUPP for buffered atomic"
-> +_simple_atomic_write 0 $min_awu $testfile
-> +
-> +# does not support unaligned directio
-> +echo "one EINVAL for unaligned directio"
-> +_simple_atomic_write $sector_size $min_awu $testfile -d
-> +
-> +_scratch_unmount
-> +_put_scsi_debug_dev
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/generic/1222.out b/tests/generic/1222.out
-> new file mode 100644
-> index 00000000..158b52fa
-> --- /dev/null
-> +++ b/tests/generic/1222.out
-> @@ -0,0 +1,10 @@
-> +QA output created by 1222
-> +two EINVAL for unsupported sizes
-> +pwrite: Invalid argument
-> +pwrite: Invalid argument
-> +all should work
-> +one EOPNOTSUPP for buffered atomic
-> +pwrite: Operation not supported
-> +one EINVAL for unaligned directio
-> +pwrite: Invalid argument
-> +Silence is golden
-> diff --git a/tests/generic/1223 b/tests/generic/1223
-> new file mode 100755
-> index 00000000..8a77386e
-> --- /dev/null
-> +++ b/tests/generic/1223
-> @@ -0,0 +1,66 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 1223
-> +#
-> +# Validate multi-fsblock atomic write support with or without hw support
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick rw atomicwrites
-> +
-> +. ./common/atomicwrites
-> +
-> +_require_scratch
-> +_require_atomic_write_test_commands
-> +
-> +echo "scratch device atomic write properties" >> $seqres.full
-> +$XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $SCRATCH_DEV >> $seqres.full
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount
-> +test "$FSTYP" = "xfs" && _xfs_force_bdev data $SCRATCH_MNT
-> +
-> +testfile=$SCRATCH_MNT/testfile
-> +touch $testfile
-> +
-> +echo "filesystem atomic write properties" >> $seqres.full
-> +$XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $testfile >> $seqres.full
-> +
-> +sector_size=$(blockdev --getss $SCRATCH_DEV)
-> +min_awu=$(_get_atomic_write_unit_min $testfile)
-> +max_awu=$(_get_atomic_write_unit_max $testfile)
-> +
-> +$XFS_IO_PROG -f -c "falloc 0 $((max_awu * 2))" -c fsync $testfile
-> +
-> +# try outside the advertised sizes
-> +echo "two EINVAL for unsupported sizes"
-> +min_i=$((min_awu / 2))
-> +_simple_atomic_write $min_i $min_i $testfile -d
-> +max_i=$((max_awu * 2))
-> +_simple_atomic_write $max_i $max_i $testfile -d
-> +
-> +# try all of the advertised sizes
-> +for ((i = min_awu; i <= max_awu; i *= 2)); do
-> +	$XFS_IO_PROG -f -c "falloc 0 $((max_awu * 2))" -c fsync $testfile
-> +	_test_atomic_file_writes $i $testfile
-> +	_simple_atomic_write $i $i $testfile -d
-> +done
-> +
-> +# does not support buffered io
-> +echo "one EOPNOTSUPP for buffered atomic"
-> +_simple_atomic_write 0 $min_awu $testfile
-> +
-> +# does not support unaligned directio
-> +echo "one EINVAL for unaligned directio"
-> +if [ $sector_size -lt $min_awu ]; then
-> +	_simple_atomic_write $sector_size $min_awu $testfile -d
-> +else
-> +	# not supported, so fake the output
-> +	echo "pwrite: Invalid argument"
-> +fi
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/generic/1223.out b/tests/generic/1223.out
-> new file mode 100644
-> index 00000000..edf5bd71
-> --- /dev/null
-> +++ b/tests/generic/1223.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 1223
-> +two EINVAL for unsupported sizes
-> +pwrite: Invalid argument
-> +pwrite: Invalid argument
-> +one EOPNOTSUPP for buffered atomic
-> +pwrite: Operation not supported
-> +one EINVAL for unaligned directio
-> +pwrite: Invalid argument
-> +Silence is golden
-> diff --git a/tests/generic/1224 b/tests/generic/1224
-> new file mode 100644
-> index 00000000..fb178be4
-> --- /dev/null
-> +++ b/tests/generic/1224
-> @@ -0,0 +1,140 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 1224
-> +#
-> +# test large atomic writes with mixed mappings
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick rw atomicwrites
-> +
-> +. ./common/atomicwrites
-> +. ./common/filter
-> +. ./common/reflink
-> +
-> +_require_scratch
-> +_require_atomic_write_test_commands
-> +_require_xfs_io_command pwrite -A
-> +_require_cp_reflink
-> +
-> +_scratch_mkfs_sized $((500 * 1048576)) >> $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +file1=$SCRATCH_MNT/file1
-> +file2=$SCRATCH_MNT/file2
-> +file3=$SCRATCH_MNT/file3
-> +
-> +touch $file1
-> +
-> +max_awu=$(_get_atomic_write_unit_max $file1)
-> +test $max_awu -ge 262144 || _notrun "test requires atomic writes up to 256k"
+[1]
 
-I usually use a scsi_debug disk with 64kb max awu. I can always use 256k
-but any reason why we need to have it this high?
-> +
-> +min_awu=$(_get_atomic_write_unit_min $file1)
-> +test $min_awu -le 4096 || _notrun "test requires atomic writes down to 4k"
-> +
-> +bsize=$(_get_file_block_size $SCRATCH_MNT)
-> +test $max_awu -gt $((bsize * 2)) || \
-> +	_notrun "max atomic write $max_awu less than 2 fsblocks $bsize"
-> +
-> +# reflink tests (files with shared extents)
-> +
-> +# atomic write shared data and unshared+shared data
-> +dd if=/dev/zero of=$file1 bs=1M count=10 conv=fsync >>$seqres.full 2>&1
-> +cp --reflink=always $file1 $file2
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 0 32768" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 0 65536" $file1 >>$seqres.full 2>&1
-> +md5sum $file1 | _filter_scratch
-> +md5sum $file2 | _filter_scratch
-> +
-> +# atomic write shared data and shared+unshared data
-> +dd if=/dev/zero of=$file1 bs=1M count=10 conv=fsync >>$seqres.full 2>&1
-> +cp --reflink=always $file1 $file2
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 32768 32768" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 0 65536" $file1 >>$seqres.full 2>&1
-> +md5sum $file1 | _filter_scratch
-> +md5sum $file2 | _filter_scratch
-> +
-> +# atomic overwrite unshared data
-> +dd if=/dev/zero of=$file1 bs=1M count=10 conv=fsync >>$seqres.full 2>&1
-> +cp --reflink=always $file1 $file2
-> +$XFS_IO_PROG -dc "pwrite -D -V1 0 65536" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 0 65536" $file1 >>$seqres.full 2>&1
-> +md5sum $file1 | _filter_scratch
-> +md5sum $file2 | _filter_scratch
-> +
-> +# atomic write shared+unshared+shared data
-> +dd if=/dev/zero of=$file1 bs=1M count=10 conv=fsync >>$seqres.full 2>&1
-> +cp --reflink=always $file1 $file2
-> +$XFS_IO_PROG -dc "pwrite -D -V1 4096 4096" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 0 65536" $file1 >>$seqres.full 2>&1
-> +md5sum $file1 | _filter_scratch
-> +md5sum $file2 | _filter_scratch
-> +
-> +# atomic write interweaved hole+unwritten+written+reflinked
-> +dd if=/dev/zero of=$file1 bs=1M count=10 conv=fsync >>$seqres.full 2>&1
-> +blksz=4096
-> +nr=32
-> +_weave_reflink_rainbow $blksz $nr $file1 $file2 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 0 65536" $file1 >>$seqres.full 2>&1
-> +md5sum $file1 | _filter_scratch
-> +md5sum $file2 | _filter_scratch
-> +
-> +# non-reflink tests
-> +
-> +# atomic write hole+mapped+hole
-> +dd if=/dev/zero of=$file1 bs=1M count=10 conv=fsync >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -D -V1 4096000 4096" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -D -V1 4096 4096" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 0 65536" $file1 >>$seqres.full 2>&1
-> +md5sum $file1 | _filter_scratch
-> +
-> +# atomic write adjacent mapped+hole and hole+mapped
-> +dd if=/dev/zero of=$file1 bs=1M count=10 conv=fsync >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -D -V1 4096000 4096" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -D -V1 0 4096" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -D -V1 61440 4096" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 0 32768" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 32768 32768" $file1 >>$seqres.full 2>&1
-> +md5sum $file1 | _filter_scratch
-> +
-> +# atomic write mapped+hole+mapped
-> +dd if=/dev/zero of=$file1 bs=1M count=10 conv=fsync >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -D -V1 4096000 4096" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -D -V1 0 4096" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -D -V1 61440 4096" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 0 65536" $file1 >>$seqres.full 2>&1
-> +md5sum $file1 | _filter_scratch
-
-I think some combos for unwritten would be good as well.
-
-> +
-> +# atomic write at EOF
-> +dd if=/dev/zero of=$file1 bs=128K count=3 conv=fsync >>$seqres.full 2>&1
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 262144 262144" $file1 >>$seqres.full 2>&1
-> +md5sum $file1 | _filter_scratch
-> +
-> +# atomic write preallocated region
-> +fallocate -l 10M $file1
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 0 65536" $file1 >>$seqres.full 2>&1
-> +md5sum $file1 | _filter_scratch
-> +
-> +# atomic write max size
-> +dd if=/dev/zero of=$file1 bs=1M count=10 conv=fsync >>$seqres.full 2>&1
-> +aw_max=$(_get_atomic_write_unit_max $file1)
-> +cp $file1 $file1.chk
-> +$XFS_IO_PROG -dc "pwrite -D -V1 0 $aw_max" $file1 >>$seqres.full 2>&1
-> +$XFS_IO_PROG -c "pwrite 0 $aw_max" $file1.chk >>$seqres.full 2>&1
-> +cmp -s $file1 $file1.chk || echo "file1 doesnt match file1.chk"
-> +#md5sum $file1 | _filter_scratch
-> +
-> +# atomic write max size on fragmented fs
-> +avail=`_get_available_space $SCRATCH_MNT`
-> +filesizemb=$((avail / 1024 / 1024 - 1))
-> +fragmentedfile=$SCRATCH_MNT/fragmentedfile
-> +$XFS_IO_PROG -fc "falloc 0 ${filesizemb}m" $fragmentedfile
-> +$here/src/punch-alternating $fragmentedfile
-> +touch $file3
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 0 65536" $file3 >>$seqres.full 2>&1
-> +md5sum $file3 | _filter_scratch
-
-This will have a unwrit to hole sort of mapping.  Maybe we should stress
-with a more random layout. A rough snippet with multiple iterations to
-stress this a bit more:
-
-		operations=("W" "H" "U")
-
-    for ((iteration=1; iteration<=10; iteration++)); do
-        echo "=== Mixed Mapping Test Iteration $iteration ===" >> $seqres.full
-
-        $XFS_IO_PROG -c "truncate 0" $testfile >> $seqres.full
-
-        # Create a random mixed mapping for all blocks in the 64K region
-        echo "Random block mapping pattern:" >> $seqres.full
-        off=0
-        mapping=""
-
-        for ((i=0; i<num_blocks; i++)); do
-            # Randomly select an operation (W, H, or U)
-            index=$((RANDOM % ${#operations[@]}))
-            map="${operations[$index]}"
-            mapping="${mapping}${map}"
-
-            echo "Block $i: Operation $map at offset $off" >> $seqres.full
-
-            case "$map" in
-                "W")
-                    $XFS_IO_PROG -dc "pwrite -S 0x61 -b $blksz $off $blksz" $testfile >> $seqres.full
-                    ;;
-                "H")
-                    # No operation needed for hole
-                    ;;
-                "U")
-                    $XFS_IO_PROG -c "falloc $off $blksz" $testfile >> $seqres.full
-                    ;;
-            esac
-            off=$((off + blksz))
-        done
-
-        sync $testfile
-        echo "Full mapping pattern: $mapping" >> $seqres.full
-
-        # Now perform the atomic write over the entire region with O_SYNC
-        echo "Performing O_SYNC atomic write over the entire $awu_max region" >> $seqres.full
-        bytes_written=$($XFS_IO_PROG -dsc "pwrite -A -V1 -b $awu_max 0 $awu_max" $testfile | \
-                      grep wrote | awk -F'[/ ]' '{print $2}')
-
-        # Check if the atomic write was successful
-        test $bytes_written -eq $awu_max || echo "atomic write len=$awu_max failed"
-        check_data_integrity
-        echo "Iteration $iteration completed: OK" >> $seqres.full
-    done
-
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/1224.out b/tests/generic/1224.out
-> new file mode 100644
-> index 00000000..1c788420
-> --- /dev/null
-> +++ b/tests/generic/1224.out
-> @@ -0,0 +1,17 @@
-> +QA output created by 1224
-> +111ce6bf29d5b1dbfb0e846c42719ece  SCRATCH_MNT/file1
-> +f1c9645dbc14efddc7d8a322685f26eb  SCRATCH_MNT/file2
-> +111ce6bf29d5b1dbfb0e846c42719ece  SCRATCH_MNT/file1
-> +f1c9645dbc14efddc7d8a322685f26eb  SCRATCH_MNT/file2
-> +111ce6bf29d5b1dbfb0e846c42719ece  SCRATCH_MNT/file1
-> +f1c9645dbc14efddc7d8a322685f26eb  SCRATCH_MNT/file2
-> +111ce6bf29d5b1dbfb0e846c42719ece  SCRATCH_MNT/file1
-> +f1c9645dbc14efddc7d8a322685f26eb  SCRATCH_MNT/file2
-> +4edfbc469bed9965219ea80c9ae54626  SCRATCH_MNT/file1
-> +93243a293a9f568903485b0b2a895815  SCRATCH_MNT/file2
-> +9464b66461bc1d20229e1b71733539d0  SCRATCH_MNT/file1
-> +9464b66461bc1d20229e1b71733539d0  SCRATCH_MNT/file1
-> +9464b66461bc1d20229e1b71733539d0  SCRATCH_MNT/file1
-> +75572c4929fde8faf131e84df4c6a764  SCRATCH_MNT/file1
-> +27a248351cd540bc9ac2c2dc841abca2  SCRATCH_MNT/file1
-> +27c9068d1b51da575a53ad34c57ca5cc  SCRATCH_MNT/file3
-> diff --git a/tests/xfs/1216 b/tests/xfs/1216
-> new file mode 100755
-> index 00000000..04aa77fe
-> --- /dev/null
-> +++ b/tests/xfs/1216
-> @@ -0,0 +1,67 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 1216
-> +#
-> +# Validate multi-fsblock realtime file atomic write support with or without hw
-> +# support
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick rw atomicwrites
-> +
-> +. ./common/atomicwrites
-> +
-> +_require_realtime
-> +_require_scratch
-> +_require_atomic_write_test_commands
-> +
-> +echo "scratch device atomic write properties" >> $seqres.full
-> +$XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $SCRATCH_RTDEV >> $seqres.full
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount
-> +
-> +testfile=$SCRATCH_MNT/testfile
-> +touch $testfile
-> +
-> +echo "filesystem atomic write properties" >> $seqres.full
-> +$XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $testfile >> $seqres.full
-> +
-> +sector_size=$(blockdev --getss $SCRATCH_RTDEV)
-> +min_awu=$(_get_atomic_write_unit_min $testfile)
-> +max_awu=$(_get_atomic_write_unit_max $testfile)
-> +
-> +$XFS_IO_PROG -f -c "falloc 0 $((max_awu * 2))" -c fsync $testfile
-> +
-> +# try outside the advertised sizes
-> +echo "two EINVAL for unsupported sizes"
-> +min_i=$((min_awu / 2))
-> +_simple_atomic_write $min_i $min_i $testfile -d
-> +max_i=$((max_awu * 2))
-> +_simple_atomic_write $max_i $max_i $testfile -d
-> +
-> +# try all of the advertised sizes
-> +for ((i = min_awu; i <= max_awu; i *= 2)); do
-> +	$XFS_IO_PROG -f -c "falloc 0 $((max_awu * 2))" -c fsync $testfile
-> +	_test_atomic_file_writes $i $testfile
-> +	_simple_atomic_write $i $i $testfile -d
-> +done
-> +
-> +# does not support buffered io
-> +echo "one EOPNOTSUPP for buffered atomic"
-> +_simple_atomic_write 0 $min_awu $testfile
-> +
-> +# does not support unaligned directio
-> +echo "one EINVAL for unaligned directio"
-> +if [ $sector_size -lt $min_awu ]; then
-> +	_simple_atomic_write $sector_size $min_awu $testfile -d
-> +else
-> +	# not supported, so fake the output
-> +	echo "pwrite: Invalid argument"
-> +fi
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/1216.out b/tests/xfs/1216.out
-> new file mode 100644
-> index 00000000..51546082
-> --- /dev/null
-> +++ b/tests/xfs/1216.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 1216
-> +two EINVAL for unsupported sizes
-> +pwrite: Invalid argument
-> +pwrite: Invalid argument
-> +one EOPNOTSUPP for buffered atomic
-> +pwrite: Operation not supported
-> +one EINVAL for unaligned directio
-> +pwrite: Invalid argument
-> +Silence is golden
-> diff --git a/tests/xfs/1217 b/tests/xfs/1217
-> new file mode 100755
-> index 00000000..0816d05f
-> --- /dev/null
-> +++ b/tests/xfs/1217
-> @@ -0,0 +1,70 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 1217
-> +#
-> +# Check that software atomic writes can complete an operation after a crash.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick rw atomicwrites
-> +
-> +. ./common/atomicwrites
-> +. ./common/inject
-> +. ./common/filter
-> +
-> +_require_scratch
-> +_require_atomic_write_test_commands
-> +_require_xfs_io_error_injection "free_extent"
-> +_require_test_program "punch-alternating"
-> +
-> +echo "scratch device atomic write properties" >> $seqres.full
-> +$XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $SCRATCH_RTDEV >> $seqres.full
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount
-> +
-> +testfile=$SCRATCH_MNT/testfile
-> +touch $testfile
-> +
-> +echo "filesystem atomic write properties" >> $seqres.full
-> +$XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $testfile >> $seqres.full
-> +
-> +bsize=$(_get_file_block_size $SCRATCH_MNT)
-> +max_awu=$(_get_atomic_write_unit_max $testfile)
-> +
-> +test $max_awu -gt $((bsize * 2)) || \
-> +	_notrun "max atomic write $max_awu less than 2 fsblocks $bsize"
-> +
-> +# Create a fragmented file to force a software fallback
-> +$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $((max_awu * 2))" $testfile >> $seqres.full
-> +$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $((max_awu * 2))" $testfile.check >> $seqres.full
-> +$here/src/punch-alternating $testfile
-> +$here/src/punch-alternating $testfile.check
-> +$XFS_IO_PROG -c "pwrite -S 0xcd 0 $max_awu" $testfile.check >> $seqres.full
-> +$XFS_IO_PROG -c syncfs $SCRATCH_MNT
-> +
-> +# inject an error to force crash recovery on the second block
-> +_scratch_inject_error "free_extent"
-> +_simple_atomic_write 0 $max_awu $testfile -d >> $seqres.full
-> +
-> +# make sure we're shut down
-> +touch $SCRATCH_MNT/barf 2>&1 | _filter_scratch
-> +
-> +# check that recovery worked
-> +_scratch_cycle_mount
-> +
-> +test -e $SCRATCH_MNT/barf && \
-> +	echo "saw $SCRATCH_MNT/barf that should not exist"
-> +
-> +if ! cmp -s $testfile $testfile.check; then
-> +	echo "crash recovery did not work"
-> +	md5sum $testfile
-> +	md5sum $testfile.check
-> +
-> +	od -tx1 -Ad -c $testfile >> $seqres.full
-> +	od -tx1 -Ad -c $testfile.check >> $seqres.full
-> +fi
-> +
-> +status=0
-> +exit
-> diff --git a/tests/xfs/1217.out b/tests/xfs/1217.out
-> new file mode 100644
-> index 00000000..6e5b22be
-> --- /dev/null
-> +++ b/tests/xfs/1217.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 1217
-> +pwrite: Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/barf': Input/output error
-> diff --git a/tests/xfs/1218 b/tests/xfs/1218
-> new file mode 100644
-> index 00000000..f3682e42
-> --- /dev/null
-> +++ b/tests/xfs/1218
-> @@ -0,0 +1,59 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 1218
-> +#
-> +# hardware large atomic writes error inject test
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto rw quick atomicwrites
-> +
-> +. ./common/filter
-> +. ./common/inject
-> +. ./common/atomicwrites
-> +
-> +_require_scratch_write_atomic
-> +_require_xfs_io_command pwrite -A
-> +_require_xfs_io_error_injection "bmap_finish_one"
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +echo "Create files"
-> +file1=$SCRATCH_MNT/file1
-> +touch $file1
-> +
-> +max_awu=$(_get_atomic_write_unit_max $testfile)
-> +test $max_awu -ge 4096 || _notrun "cannot perform 4k atomic writes"
-> +
-> +file2=$SCRATCH_MNT/file2
-> +_pwrite_byte 0x66 0 64k $SCRATCH_MNT/file1 >> $seqres.full
-> +cp --reflink=always $file1 $file2
-> +
-> +echo "Check files"
-> +md5sum $SCRATCH_MNT/file1 | _filter_scratch
-> +md5sum $SCRATCH_MNT/file2 | _filter_scratch
-> +
-> +echo "Inject error"
-> +_scratch_inject_error "bmap_finish_one"
-> +
-> +echo "Atomic write to a reflinked file"
-> +$XFS_IO_PROG -dc "pwrite -A -D -V1 -S 0x67 0 4096" $file1
-> +
-> +echo "FS should be shut down, touch will fail"
-> +touch $SCRATCH_MNT/badfs 2>&1 | _filter_scratch
-> +
-> +echo "Remount to replay log"
-> +_scratch_remount_dump_log >> $seqres.full
-> +
-> +echo "Check files"
-> +md5sum $SCRATCH_MNT/file1 | _filter_scratch
-> +md5sum $SCRATCH_MNT/file2 | _filter_scratch
-> +
-> +echo "FS should be online, touch should succeed"
-> +touch $SCRATCH_MNT/goodfs 2>&1 | _filter_scratch
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/1218.out b/tests/xfs/1218.out
-> new file mode 100644
-> index 00000000..02800213
-> --- /dev/null
-> +++ b/tests/xfs/1218.out
-> @@ -0,0 +1,15 @@
-> +QA output created by 1218
-> +Create files
-> +Check files
-> +77e3a730e3c75274c9ce310d7e39f938  SCRATCH_MNT/file1
-> +77e3a730e3c75274c9ce310d7e39f938  SCRATCH_MNT/file2
-> +Inject error
-> +Atomic write to a reflinked file
-> +pwrite: Input/output error
-> +FS should be shut down, touch will fail
-> +touch: cannot touch 'SCRATCH_MNT/badfs': Input/output error
-> +Remount to replay log
-> +Check files
-> +0df1f61ed02a7e9bee2b8b7665066ddc  SCRATCH_MNT/file1
-> +77e3a730e3c75274c9ce310d7e39f938  SCRATCH_MNT/file2
-> +FS should be online, touch should succeed
-> -- 
-> 2.34.1
-> 
+$ ps axuw | grep xfs
+root         625  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfsalloc]
+root         626  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs_mru_cache]
+root         627  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-buf/sdc3]
+root         628  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-conv/sdc3]
+root         629  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-reclaim/sdc3]
+root         630  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-blockgc/sdc3]
+root         631  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-inodegc/sdc3]
+root         632  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-log/sdc3]
+root         633  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-cil/sdc3]
+root         634  0.0  0.0      0     0 ?        S    May19   1:07 [xfsaild=
+/sdc3]
+root         880  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-buf/sdc2]
+root         881  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-conv/sdc2]
+root         882  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-reclaim/sdc2]
+root         883  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-blockgc/sdc2]
+root         885  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-inodegc/sdc2]
+root         887  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-log/sdc2]
+root         888  0.0  0.0      0     0 ?        I<   May19   0:00 [kworker=
+/R-xfs-cil/sdc2]
+root         889  0.0  0.0      0     0 ?        S    May19   0:00 [xfsaild=
+/sdc2]
+root     1143452  0.0  0.0      0     0 ?        I<   May20   0:00 [kworker=
+/14:2H-xfs-log/dm-0]
+root     1143455  0.0  0.0      0     0 ?        I<   May20   0:03 [kworker=
+/1:0H-xfs-log/sdc3]
+root     1144000  0.0  0.0      0     0 ?        I<   May20   0:00 [kworker=
+/12:2H-xfs-log/dm-0]
+root     1147483  0.0  0.0      0     0 ?        I<   May20   0:00 [kworker=
+/15:0H-xfs-log/dm-0]
+root     1149262  0.0  0.0      0     0 ?        I<   May20   0:00 [kworker=
+/0:1H-xfs-log/dm-0]
+root     1149405  0.0  0.0      0     0 ?        I<   May20   0:00 [kworker=
+/11:2H-xfs-log/dm-0]
+root     1150253  0.0  0.0      0     0 ?        I<   May20   0:00 [kworker=
+/4:2H-xfs-log/dm-0]
+root     1655712  0.0  0.0      0     0 ?        I<   May21   0:01 [kworker=
+/5:0H-xfs-log/sdb]
+root     1669211  0.0  0.0      0     0 ?        I    05:37   0:00 [kworker=
+/1:1-xfs-buf/sdc3]
+root     1674988  0.0  0.0  20816  9188 pts/0    S+   09:36   0:00 sudo ./c=
+heck xfs/566
+root     1674991  0.0  0.0  20816  2940 pts/1    Ss   09:36   0:00 sudo ./c=
+heck xfs/566
+root     1674992  0.1  0.0  11464  7612 pts/1    S+   09:36   0:00 /bin/bas=
+h ./check xfs/566
+root     1675518  0.0  0.0      0     0 ?        I<   09:39   0:00 [kworker=
+/R-xfs-buf/sda]
+root     1675519  0.0  0.0      0     0 ?        I<   09:39   0:00 [kworker=
+/R-xfs-conv/sda]
+root     1675520  0.0  0.0      0     0 ?        I<   09:39   0:00 [kworker=
+/R-xfs-reclaim/sda]
+root     1675521  0.0  0.0      0     0 ?        I<   09:39   0:00 [kworker=
+/R-xfs-blockgc/sda]
+root     1675522  0.0  0.0      0     0 ?        I<   09:39   0:00 [kworker=
+/R-xfs-inodegc/sda]
+root     1675523  0.0  0.0      0     0 ?        I<   09:39   0:00 [kworker=
+/R-xfs-log/sda]
+root     1675524  0.0  0.0      0     0 ?        I<   09:39   0:00 [kworker=
+/R-xfs-cil/sda]
+root     1675525  0.0  0.0      0     0 ?        S    09:39   0:00 [xfsaild=
+/sda]
+root     1675526  0.0  0.0      0     0 ?        S    09:39   0:00 [xfs-zon=
+e-gc/sda]
+root     1675633  0.1  0.0   9180  8128 pts/1    S+   09:39   0:00 /bin/bas=
+h /home/kts/kernel-test-suite/src/xfstests/tests/xfs/566
+root     1675876  0.0  0.0      0     0 ?        I<   09:39   0:00 [kworker=
+/R-xfs-buf/sdb]
+root     1675877  0.0  0.0      0     0 ?        I<   09:39   0:00 [kworker=
+/R-xfs-conv/sdb]
+root     1675878  0.0  0.0      0     0 ?        I<   09:39   0:00 [kworker=
+/R-xfs-reclaim/sdb]
+root     1675879  0.0  0.0      0     0 ?        I<   09:39   0:00 [kworker=
+/R-xfs-blockgc/sdb]
+root     1675880  0.0  0.0      0     0 ?        I<   09:39   0:00 [kworker=
+/R-xfs-inodegc/sdb]
+root     1675888  0.0  0.0      0     0 ?        I<   09:40   0:00 [kworker=
+/R-xfs-log/sdb]
+root     1675889  0.0  0.0      0     0 ?        I<   09:40   0:00 [kworker=
+/R-xfs-cil/sdb]
+root     1675890  0.0  0.0      0     0 ?        S    09:40   0:00 [xfsaild=
+/sdb]
+root     1675891  0.0  0.0      0     0 ?        S    09:40   0:00 [xfs-zon=
+e-gc/sdb]
+root     1675933  195  0.1 171768 36296 pts/1    Sl+  09:40  16:46 /usr/loc=
+al/sbin/xfs_scrub -d -T -v -k /var/kts/scratch
+kts      1676000 50.0  0.0   6544  2388 pts/3    S+   09:48   0:00 grep --c=
+olor=3Dauto xfs
