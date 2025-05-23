@@ -1,112 +1,187 @@
-Received: from mail-ej1-f54.google.com (mail-ej1-f54.google.com [209.85.218.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B2CE114286;
-	Fri, 23 May 2025 14:20:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51FDA2DCC06
+	for <fstests@vger.kernel.org>; Fri, 23 May 2025 14:32:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748010045; cv=none; b=AMBvJ1K4A+uriD0ykyopbuc3HAZYZvisR6ZyiOWAH7L1SFYWfTf8F3TRFAY36jmgTw1qUhf4AAkkm+keyK166B0KQb3ayNT3h0CUD2klWk7FtQzdkaPQ5zGWDuFF/HvbDFqiHJwtCQxCs1NCp+lJDE4kuzZAHBbgBID7oo3ROXE=
+	t=1748010742; cv=none; b=TGMcT/FhijvMSULtDBk7XtNWt+67kXynoMAiloT/qncXtdcIMhSf81UEcnxmPYrdZ0QwIbupT4Nmffv5cmBCx04JctFdBpS/INAi9cPApBHxlcAsLbd2HYcOP85YUDNKh+opzNSoiE1TE7Kgxye3K3dJ2fgoHMvvQb7RuDCYYxc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748010045; c=relaxed/simple;
-	bh=xxROsMD/OCEeggk9mL1upW2o3jWleAHEZKATtIaBKK4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=cJZp1a2V7bSEJUBbzFtMjFnrpdhwLkTjEiPdGxRbof0FZrHtMZnPMoux9u1fPvcYZ7sV0E71sO65crXrLg6m1CtAQ3F8hcDh/pJ83NJInb1oUwrCrDa5IZy3fFL+zmKo5pAmMdm4h6F8JM13/uUFul2fyXTOTVUk10DzkTQvPbQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ire49FH8; arc=none smtp.client-ip=209.85.218.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1748010742; c=relaxed/simple;
+	bh=Uiu1qmMAaHWD6dTekwuV9gPxajMcCO8lGetlLAek/bE=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=h/B5KBa/sB085YIBguR4fPirvGf/qQuPgQQqXHV90hSB9jy8DitQVtuy4PLRFx/qcm+V0QwRe2LirKetVp8aXmzLeRuXsz1EsvA3KiDVOoHSYQRq6oc9eY0DnZNX9hv1ixGrUjAmdeNZdsYEIzSi/3cQfgPl5sEBD/kztnFDrUE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=OoxpfPeI; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ire49FH8"
-Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-ad53a96baf9so1210677866b.3;
-        Fri, 23 May 2025 07:20:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748010042; x=1748614842; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=4MleecG7+ZrOSvVscFl3wga8Daw1b0dP1WpsIlLpync=;
-        b=ire49FH8WWYPQBBzxGEbNcv2z1gxVdk08X5LHZRMohL7WPXveq1GMMnuZWvnxQwRHd
-         cf9tm9y8Z6GLUF4iJOrnuXO8ieS88NXhhOQvb2++wAHM5dvVTa10lq8A6V0Pih9t9BhD
-         fxXUiAXbaoEGdCGR1FNTWIuTeHz61s5h84neyfa88iz9gxg/yBN7m7CeSCUJjNhYZMcx
-         /nIfPVw+yEjEAD7u1oWKypcF4b4b/77Z0zoK9UYOF0T84SZ1tLwcgZERr/MhLHJG6Uw7
-         xcSMzlP9UsvdOlEh0PLexphxf/TNIEl6Rirp1mc3f1PMwqlViSnkJpJ7qrBjsisKkUbM
-         aRuQ==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OoxpfPeI"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1748010737;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=CsOrD6RccmXcmvSNUP2aWZDRJP25W6EDJHGI6Pg7wu8=;
+	b=OoxpfPeIrioM2IMPnlUlR+s0BzqzrqjnRKOenbR671+HmgMIgi9RZtoYfVH9lMypdpza6v
+	EnVh4n7uFiWTyJjvD213rfBwGqvj/CV2lfaA9batpFYSYnPJnzBINjbXYE+OYidk+SinY7
+	oNR9fpfmpW77rdycWtpKWHdXUsv16Co=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-246-1F-GJjJoNhe-QwdxkzRhVg-1; Fri, 23 May 2025 10:32:16 -0400
+X-MC-Unique: 1F-GJjJoNhe-QwdxkzRhVg-1
+X-Mimecast-MFC-AGG-ID: 1F-GJjJoNhe-QwdxkzRhVg_1748010735
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-742c620e236so8360b3a.1
+        for <fstests@vger.kernel.org>; Fri, 23 May 2025 07:32:16 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748010042; x=1748614842;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=4MleecG7+ZrOSvVscFl3wga8Daw1b0dP1WpsIlLpync=;
-        b=VJfSRDrUKx3F3ByyVFnhucXAQm1oFbv3G+V/t/OOVioNuhXpO/XXBi1tiX351vfh+w
-         1C7p1xdZsfGaTD6D3SOrOkvLbTYaS4+mG4F21OgeQwz5+xD2a20wCjJ0M4unyulF9Y1/
-         LuieD7Kn3fU65XErxgo14/Rf1ChLWshtbWRVrs9MghW2ubfEdhIOjQ5R8NX8jGBA9Ra6
-         gy3uBRSghSfJGj74FvpHOB98RNq0h9XIs/EnAU1w1WyQJ9J/MPL0hZ9ZbJcnCCzIaAdT
-         j6BoI+rx7zAAEneG+zshDJS38CfsfW0VbqPrZrfqE5ouo/J+XcMzooIGa8WQzmYFn6cG
-         SKzw==
-X-Forwarded-Encrypted: i=1; AJvYcCWUfLGCAwgQC/+fBOCMxiuobNxrfH9aI75BoR9qMjLgOIQPVg98HLKx+RT/7DedMbtsWu6OWbnt@vger.kernel.org, AJvYcCXbz8FXI5EtgZat7E8ieNOYEcPq3+F99psuiC18HRRz07IckGsqv25RJPWnzbFzgHRtfnLVPmPtKtCPK+cubA==@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzgdiylwgi/HRpv1tMXqjtlHBj6YSfWikfMtS5tJXtcUwVSsD/O
-	Tr/sgGXaQkePtBvQTr+07HQy+0FgaREe+oc772/Zsjg6CLRG4vZxdXEwVX384hlAlAEV2MXuPt/
-	wB1wsv+MyhytSqoE6l5mEj6lR6zHC24c=
-X-Gm-Gg: ASbGncs8mjvXofyjxzRWj9HHhaakN8H/AM+MVNnvB4TUpUFmIU0ifxD6or304iSWEVW
-	GLmmLTYxiY2tPSlmVeIxkgGiPVFlMdHcVgwT+Ux1PahHIRta0bgYog3sfJevE4WzC5KftvaV7zL
-	z35IXHIa8w1Vw6efZSilYXncL7vd4hM5Do
-X-Google-Smtp-Source: AGHT+IE1kdC/F1I3zxOFa4VkX1VLCRpkjqX3DJ/m7HvNlP7NnZscx/TmEQ5MyEI8Mky1iH0ht2ufqdulYcgILP7RdB4=
-X-Received: by 2002:a17:906:8d7:b0:ad5:372d:87e3 with SMTP id
- a640c23a62f3a-ad5372dbbb2mr2072822866b.27.1748010041659; Fri, 23 May 2025
- 07:20:41 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1748010735; x=1748615535;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=CsOrD6RccmXcmvSNUP2aWZDRJP25W6EDJHGI6Pg7wu8=;
+        b=O7DdcSe8vFDPxhtFLo7slCc6HuCzWiAeYObSWZ1gnrvvF8skpLXm+FISUHkgujKoQY
+         SyW4zz2a7R9bjAJ+kw2jAD8tYyUDxtsi6Rm26AgE3RgH8Hr9a4ejwHdlECebpkUEyZ+K
+         QL3yRs0QXsMl1TiP8argM9RIVtZ7GUcmY27EZhIpQsKvyWPdhoIDXP+EAzgX0K/HdLj7
+         WEg7aovhu3KwVk6NBjTgB17VwJtRYkMhii5WSeYRF8RMe5QIMRheKkNNXsteDf3BpSNR
+         PE6FxkK2Ck35mEgxo9rjRwPX6txrfOyF1wKgnCiXFIqyQPz8jnOlhqvwvMzD55hwiyhb
+         ZFFg==
+X-Forwarded-Encrypted: i=1; AJvYcCXoRo6TrRHkF4uRXLUebygGups7chbgGGaX2kjQ4kvIegjYCfhV8cqPhSTfPnAY+6mx83jjZpdN@vger.kernel.org
+X-Gm-Message-State: AOJu0YxW+/CvNNXRTLr7lrbxt6QiIfvEM98mXaPiPtmOhGOaFofnzqRf
+	72K+qk+7RfE7tn9nWsI5Y4fh+x3TW7Ppsu54y4tiVuUXGrzUc+9LmXGgjSOpOS/JAa7oniCZHpG
+	aCGuPmdb5Ur0hG6XS4cv06Lx1NtqVcFSW4KIC3ZImp/OHYYU5TZU/rmDSYWo=
+X-Gm-Gg: ASbGncuImfRi2MxcTTX4seW1nTkZapWT4kKOdzE0FzOmzjd1Kwt2qMjobUU6UA0uFDk
+	d14DhFvd7EZbXxPbS+zIg1WCTFEdAnoEypjXcW4r2gXi2sPbj3f6Z1Kr4LJAIoqdQfNnZFZKge2
+	nXRpUcycv4Pa2s3o67VZqzHKutRX5VPc74s7+9TaZ6uwXMYQEczhQRBKOTr0pD7VJYJLq9jqx43
+	jxmMQsieKWz999aUe00DzYFD6e0j4H1FARUI/23QcObs/xpEOoHqxa00ZYTvDhd6znv89PuI3wL
+	wgyMD+KhDW4i9yqQa869L1kGsHGF16Vg3+D7OdLm6hEaWqvEtmCo
+X-Received: by 2002:a05:6a21:3a88:b0:1fe:5921:44f2 with SMTP id adf61e73a8af0-2187a1e9a59mr4126336637.20.1748010735252;
+        Fri, 23 May 2025 07:32:15 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IERLFBCTWvy4eb9i8rksVbHGn7Ov3OtaO4PtznXFR9FSNiLkX8sQ5gs6+g8xhWnVirotFdSFw==
+X-Received: by 2002:a05:6a21:3a88:b0:1fe:5921:44f2 with SMTP id adf61e73a8af0-2187a1e9a59mr4126293637.20.1748010734863;
+        Fri, 23 May 2025 07:32:14 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-742a970b7b0sm13271884b3a.51.2025.05.23.07.32.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 23 May 2025 07:32:14 -0700 (PDT)
+Date: Fri, 23 May 2025 22:32:10 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Chunhai Guo <guochunhai@vivo.com>
+Cc: zlang@kernel.org, fstests@vger.kernel.org, chao@kernel.org,
+	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH v2] f2fs/014: test for missing 'trimmed' flag issue
+Message-ID: <20250523143210.zxrj3prdqbtizwou@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250522075706.1604641-1-guochunhai@vivo.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250509170033.538130-1-amir73il@gmail.com>
-In-Reply-To: <20250509170033.538130-1-amir73il@gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 23 May 2025 16:20:29 +0200
-X-Gm-Features: AX0GCFszVcYUFRF5U8BKODIwx7XvcNltOmSOdy5aGszyMzAqKiqBgvk2Bs33LrQ
-Message-ID: <CAOQ4uxht8zPuVn11Xfj4B-t8RF2VuSiK3xDJiXkX8zQs7BuxxA@mail.gmail.com>
-Subject: Re: [PATCH v2 0/2] Tests for AT_HANDLE_CONNECTABLE
-To: Zorro Lang <zlang@redhat.com>
-Cc: Aleksa Sarai <cyphar@cyphar.com>, Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, 
-	Chuck Lever <chuck.lever@oracle.com>, Jeff Layton <jlayton@kernel.org>, fstests@vger.kernel.org, 
-	linux-fsdevel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250522075706.1604641-1-guochunhai@vivo.com>
 
-Hi Zorro.
+On Thu, May 22, 2025 at 01:57:06AM -0600, Chunhai Guo wrote:
+> This is a regression test case to verify whether the CP_TRIMMED_FLAG is
+> properly set after performing the following steps:
+> 1. mount the f2fs filesystem
+> 2. create a file, write data to it, then delete the file
+> 3. unmount the filesystem
+> 4. verify that the 'trimmed' flag is set in the checkpoint state
+> 
+> We should apply the commit ("f2fs: fix missing discard for active
+> segments") to resolve the issue where the 'trimmed' flag is missing.
+> 
+> Signed-off-by: Chunhai Guo <guochunhai@vivo.com>
+> ---
 
-Ping.
+This test case looks good to me, just a few picky review points as below:
 
-On Fri, May 9, 2025 at 7:00=E2=80=AFPM Amir Goldstein <amir73il@gmail.com> =
-wrote:
->
-> This is a test for new flag AT_HANDLE_CONNECTABLE from v6.13.
-> See man page update of this flag here [1].
->
-> This v2 fixes the failures that you observed with tmpfs and nfs.
->
-> Thanks,
-> Amir.
->
-> [1] https://lore.kernel.org/linux-fsdevel/20250330163502.1415011-1-amir73=
-il@gmail.com/
->
-> Changes since v1:
-> - Remove unpredictable test case of open fh after move to new parent
-> - Add check that open fds are connected
->
-> Amir Goldstein (2):
->   open_by_handle: add support for testing connectable file handles
->   open_by_handle: add a test for connectable file handles
->
->  common/rc             | 16 ++++++++--
->  src/open_by_handle.c  | 53 ++++++++++++++++++++++++++------
->  tests/generic/777     | 70 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/777.out |  5 ++++
->  4 files changed, 132 insertions(+), 12 deletions(-)
->  create mode 100755 tests/generic/777
->  create mode 100644 tests/generic/777.out
->
-> --
+> v2:
+>   - Skip this test case if discard is not supported.
+>   - Renumber this test case from 012 to 014.
+> v1:
+>   https://lore.kernel.org/linux-f2fs-devel/20250521064952.1373690-1-guochunhai@vivo.com/
+> ---
+>  tests/f2fs/014     | 41 +++++++++++++++++++++++++++++++++++++++++
+>  tests/f2fs/014.out |  2 ++
+>  2 files changed, 43 insertions(+)
+>  create mode 100755 tests/f2fs/014
+>  create mode 100644 tests/f2fs/014.out
+> 
+> diff --git a/tests/f2fs/014 b/tests/f2fs/014
+> new file mode 100755
+> index 000000000000..f72d53e65292
+> --- /dev/null
+> +++ b/tests/f2fs/014
+> @@ -0,0 +1,41 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 Guo Chunhai.  All Rights Reserved.
+
+You're using a enterprise mail address -- @vivo.com, so I'm just wondering
+your the Copyright should be yourself or your company?
+
+> +#
+> +# FS QA Test No. f2fs/014
+> +#
+> +# This is a regression test case to verify whether the CP_TRIMMED_FLAG is
+> +# properly set after performing the following steps:
+> +# 1. mount the f2fs filesystem
+> +# 2. create a file, write data to it, then delete the file
+> +# 3. unmount the filesystem
+> +# 4. verify that the 'trimmed' flag is set in the checkpoint state
+> +# We should apply the commit ("f2fs: fix missing discard for active
+> +# segments") to resolve the issue where the 'trimmed' flag is missing.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+
+Do we need to add this case to "trim" test group, as you always metion
+"trimmed" in comment :)
+
+> +
+> +_fixed_by_kernel_commit 21263d035ff2 \
+> +	"f2fs: fix missing discard for active segments"
+> +
+> +_require_scratch
+> +_require_xfs_io_command "pwrite"
+
+This line isn't wrong, but I think you can save this line, due to the "pwrite"
+is always there.
+
+Others look good to me,
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+> +_require_command "$DUMP_F2FS_PROG" dump.f2fs
+> +
+> +_scratch_mkfs >> $seqres.full
+> +_scratch_mount >> $seqres.full
+> +
+> +_require_batched_discard $SCRATCH_MNT
+> +
+> +foo=$SCRATCH_MNT/foo
+> +$XFS_IO_PROG -c "pwrite 0 1m" -c "fsync" -f $foo >> $seqres.full
+> +sync
+> +
+> +rm $foo
+> +_scratch_unmount >> $seqres.full 2>&1
+> +
+> +$DUMP_F2FS_PROG $SCRATCH_DEV | grep "checkpoint state" | grep -o trimmed
+> +
+> +status=0
+> +exit
+> diff --git a/tests/f2fs/014.out b/tests/f2fs/014.out
+> new file mode 100644
+> index 000000000000..cb0c9447d675
+> --- /dev/null
+> +++ b/tests/f2fs/014.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 014
+> +trimmed
+> -- 
 > 2.34.1
->
+> 
+> 
+
