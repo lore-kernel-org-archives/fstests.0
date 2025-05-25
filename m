@@ -1,69 +1,69 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA6BE1A08A6
-	for <fstests@vger.kernel.org>; Sun, 25 May 2025 10:49:15 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B479A1487ED
+	for <fstests@vger.kernel.org>; Sun, 25 May 2025 10:49:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748170157; cv=none; b=B0p21+C7iT8KYka0N8NlfxI9+pxyVH8ANO9JCf/lRl1MG0nD02QaImVS+BFpjWOcouQQLVDhiPkYlbS34+2n2nt3fyNlQVeNzypVEuzCPRrt+oTQfndkEbxX3m7FhE3by2LSPKrKpqH+yh9rt8ZGVuT64tRITGuoGdqnU4Jrvhg=
+	t=1748170193; cv=none; b=hQX3iVNuxP8BQLn08ZkmX0AiriN9G4r0/ckREXZExhXu0iSRrO6cad0ig74+6LWZb+P2sY/QD79tEkSbuDX+kgzY0/EKLNE2kfbYAskQUk2sD/RJvgF/qIZCmoeVGoRdjw3p2tj43B+JTiddx8c1nuMffnWIORzVJDSl8wJM2Q0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748170157; c=relaxed/simple;
-	bh=fMsTsxceWIDjEEE58Qlav+biEOWyWAU3VNkqKqtOcEo=;
+	s=arc-20240116; t=1748170193; c=relaxed/simple;
+	bh=7yKbTv3gj8ctU0b67nCBA69euCAu2svDUYEd+GFonl0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=W4fzMaChuGtt84YAWP+DSZdBP6e7PN5A/5gR+azI9mRtgSgWlVZeeWOe6g3Ct6QWI7ETa00hEoG0aANOCjjXIDMlQumdYvmEWcSPM/fqJ9I4K5jtQVrIQxOtz1if9GCudru4XJLo2jmb6eYWEH/5MNNhDZ8OAxGAycokt/0yuXM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=hVF7HtZG; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=Jf+d9IfNQ7JI6YcEqLoW8IItduxcL7xXCwR/CD/4Tcme2w02gGzFrMX+bXNxdrRyf0pbQiGUc/VQyXmGPhg8o7kr2eE8c/Eh1Nd6tHFCa+rKpkc0JTwZk00g8tvqqC0/UZbMzg4pqc6PzAjlvauZfFerYNZESeh5IcahBWspBxo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ctCLdNaC; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hVF7HtZG"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ctCLdNaC"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1748170154;
+	s=mimecast20190719; t=1748170190;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=CJ84WdnaKTRXymPrxlPombcUu50o2LKGI0cBQfuNosc=;
-	b=hVF7HtZGBo8AsIgTLjg5Xi83YPmVtDkLM3ZMk0Xt7SB4oN0bxU7eoWfi2zzf0n+OgXdMi9
-	rE2NFNuiqSkmS/kVBZcslbkxXCB//2XFRZc3xOX0bcVTJSqMZ4EV8sR1fzhgmTYJO5ravX
-	MsInntIK4riBPYVpi71qRTZ3HSqCb6Y=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=Uz/E9IWdMOFr6BicHH50vsyvsKiWajN3DhCKTVNub3k=;
+	b=ctCLdNaCf4JPGblcM+vLmATU8Tg8yO8tvZHsdyd5Izxy7PUhQqRNFd+j1L4Bct65etXvRA
+	U49Bzqe21lptvmLiiWLPenJE3FP4nM2PHtsNRyou4/dykkROuS6Or36QsfzEpWRpEzjrAU
+	M9IGVKO6wp1f87QVEqkBDjrIeW2+LxE=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-241-Y4cH386_OVi8K_eg0a0e-g-1; Sun, 25 May 2025 06:49:13 -0400
-X-MC-Unique: Y4cH386_OVi8K_eg0a0e-g-1
-X-Mimecast-MFC-AGG-ID: Y4cH386_OVi8K_eg0a0e-g_1748170152
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2344f94f9e5so1215065ad.2
-        for <fstests@vger.kernel.org>; Sun, 25 May 2025 03:49:13 -0700 (PDT)
+ us-mta-501-gCguIjKQOFmEAUj94vXHWg-1; Sun, 25 May 2025 06:49:48 -0400
+X-MC-Unique: gCguIjKQOFmEAUj94vXHWg-1
+X-Mimecast-MFC-AGG-ID: gCguIjKQOFmEAUj94vXHWg_1748170188
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-22de54b0b97so10037375ad.2
+        for <fstests@vger.kernel.org>; Sun, 25 May 2025 03:49:48 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748170152; x=1748774952;
+        d=1e100.net; s=20230601; t=1748170188; x=1748774988;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=CJ84WdnaKTRXymPrxlPombcUu50o2LKGI0cBQfuNosc=;
-        b=laGl24K+g3mZInOIRZbl8DMtH+r8C+c5MWMRIG4KK1NnlZOTNdNHTXhzVUqoZXa9AH
-         9M0CXd53XfIeKLYCMCHitJ1yPHOoO93Zkg78sgPrLW+DbhfRipMzjz/G1VijOHAyTX8F
-         UGnEAG6tOIXC5MMvxiKoomeKlCC7pYJTPlJMnIeBnX6NCfRyR2loMf9i37OTL4ZAoodW
-         wHJqsFCNMfZmeX4PqkenPa/qOOViZUtkDpQi4n4MQXj7j+1aJcsCHGYmQXfy6qA4VYQ+
-         jqo1KrZcSOtuogwpKgmAOF6fNA9XWSmHap4x/dl770MAbFu/LmkUuSyluMTkfR4E8Eqp
-         8LQw==
-X-Forwarded-Encrypted: i=1; AJvYcCWSyZXYcuS1WNizXNBcGdSnCxKexgyphM/p9fIb9GwsmhIw01ziedGn/Mr6A+c+0MeI5FgHyaB8@vger.kernel.org
-X-Gm-Message-State: AOJu0YzeBRdZ5KNKkVD/ZINH1U7z4O75M4fjRoouZvVSlkGiqBzT49Kf
-	1OxAoTWNR7gSY810tWl0Ctn+kkZ1GxnHlJWHwxHXqX8qMd7Ta3yrBbNX8ckKRszFjZwybK2Supn
-	q0M1TH4Mqfndnu2L+VCdsUuPTmiulm0UXu+68UTBBABEgQgN1iOjQN9Sfk4c=
-X-Gm-Gg: ASbGncuIy9MNRuri5h6b3qgCsfPUwy8YqptcmrgEqFBQytAu2RbI+JkjBQnFNFYVu02
-	Vuz1stVNbG1cjMYXoAPiz5GiNq4YHyOJYgE5vxJYTVdClRl9SYyivyhHImRgu6ZTTMOTZW4L2ca
-	GxmCJyPznvLdQ8uXNvL7IPYjc9XdwJcWmeL2L0y8X+cU6POsVHoWduKdw+/Hut8QaK8ghYtylDy
-	mgCvW/c2ML6kOyWOpF4Ve5pym4k9N3CnIs+IJsX9haraHfELGnay2ZHW+j58qpL3Vr36mGO3Uku
-	TYJXm89PvkHNo+TZ0HdovAsx58s+01G/amPAEqYuLCrQcsljY6N/
-X-Received: by 2002:a17:902:e842:b0:22e:4a2e:8ae7 with SMTP id d9443c01a7336-23414f7d0ebmr98264775ad.22.1748170152100;
-        Sun, 25 May 2025 03:49:12 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHl/Vkjp7o36RBv/+MAmji1bFdSLGDh1AjMCmwCZ3Ds2i38mppqlK9uoC6KU9I6m5KbPBo5Ig==
-X-Received: by 2002:a17:902:e842:b0:22e:4a2e:8ae7 with SMTP id d9443c01a7336-23414f7d0ebmr98264595ad.22.1748170151739;
-        Sun, 25 May 2025 03:49:11 -0700 (PDT)
+        bh=Uz/E9IWdMOFr6BicHH50vsyvsKiWajN3DhCKTVNub3k=;
+        b=P2u3iROs9T2XomQ0fmhO6YaplRIjKpjs9Hz0XmPQ8lpv+IiTIO6XbtzwQnK+u213Zu
+         kcPeZAZF/b/7oeWHg5DgIU4XhpCAGB0OgICEySHaJu9VV8O/jtkMz4v347IvZSWr1QDG
+         qbS/Nd7RyJFqmQUf8jrZ0EpnEzfWBwi75OaY/NX4oT6ZU9+HnAMdefrG0Iakxr6diauU
+         yM7I97oI7ZGXRoHdfn2U82tJrVCwQ5IODvwIjw7duCi5611hECtc5XnVlZkuxf09sA18
+         LMogEdE1uxsUNPlHy4FD4fagi1H/2OKsA170Gl25eOIlzTHkc7kAhR/ay5D5MWPc3pZ6
+         K5Rw==
+X-Forwarded-Encrypted: i=1; AJvYcCWPlQKfQJI9dWbPXbyO1+9zmDhUX+o35TKyzPUG4MosPjML9UtlWKrp88mx/Dh11oJhYr4hiwi6@vger.kernel.org
+X-Gm-Message-State: AOJu0YzZeEhynx7Pwvr7kw/s7sSNY4GPZGhN5nl0gPlyvcmf7EePckC/
+	Wyt4iOvi4QkwgmypkkWl4vXNAyAzTDuIfq39GECTcg6lRl0DVilrdHULGQjiYGKwVDb7RfuIa/5
+	w3j7uot1HI/MvL8HPa8nZFd8YY5jkUhp2qHhHSkwVrR4SkHuenVuE+ypeYeY=
+X-Gm-Gg: ASbGncte0TXaHndQ1xu8fftN6tun57/xJzov55Epyj6Ds4OR9r5UQ+OspeOwDU1s6Cu
+	8P3taM7sTt6OWR8pqdrmNlVvo0N3+x+/N7WlOn7Ym158xOdBidKTFBSdrq6Jfzwzd3FI/7bJhOo
+	1aiFZz5DLZzUQ0xgyFzQA/TiLFxlwBxooXFfL4g1oWNsUCwSILCGXgjWp8kRuYET6kfq17OpaWc
+	B62ETTcobab9QRep3LEA2dQ0kilSFYvKzx9pefcgncQLZlG6MiJRKqk79MEvALYQL+hcRxAPlbd
+	JDoB6uN6iP9j0XsxiU+bYKOK/y4fDSQl35gUHjkoC2v/Hw19PLYX
+X-Received: by 2002:a17:903:19f0:b0:224:10a2:cae7 with SMTP id d9443c01a7336-23414fb2509mr97440545ad.40.1748170187723;
+        Sun, 25 May 2025 03:49:47 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEfbENn2ZeSNx6g8fBNFmQvjshZpRLDgWWDXIFrUQuZkXZ5Jj1/il0RzWBUhU4fO9SKEuFn9w==
+X-Received: by 2002:a17:903:19f0:b0:224:10a2:cae7 with SMTP id d9443c01a7336-23414fb2509mr97440425ad.40.1748170187359;
+        Sun, 25 May 2025 03:49:47 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2340c505ec8sm28282405ad.109.2025.05.25.03.49.08
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-23445ee77c8sm8451705ad.127.2025.05.25.03.49.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 25 May 2025 03:49:11 -0700 (PDT)
-Date: Sun, 25 May 2025 18:49:06 +0800
+        Sun, 25 May 2025 03:49:47 -0700 (PDT)
+Date: Sun, 25 May 2025 18:49:42 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Amir Goldstein <amir73il@gmail.com>
 Cc: Aleksa Sarai <cyphar@cyphar.com>,
@@ -71,11 +71,10 @@ Cc: Aleksa Sarai <cyphar@cyphar.com>,
 	Chuck Lever <chuck.lever@oracle.com>,
 	Jeff Layton <jlayton@kernel.org>, fstests@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org
-Subject: Re: [PATCH v2 1/2] open_by_handle: add support for testing
- connectable file handles
-Message-ID: <20250525104906.fnsphgcjvlzcl23z@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250509170033.538130-1-amir73il@gmail.com>
- <20250509170033.538130-2-amir73il@gmail.com>
+Subject: Re: [PATCH RESEND v2 2/2] open_by_handle: add a test for connectable
+ file handles
+Message-ID: <20250525104942.v66gb6kekfmwlbtp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250509170456.538501-1-amir73il@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -84,212 +83,114 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250509170033.538130-2-amir73il@gmail.com>
+In-Reply-To: <20250509170456.538501-1-amir73il@gmail.com>
 
-On Fri, May 09, 2025 at 07:00:32PM +0200, Amir Goldstein wrote:
-> Test for kernel and filesystem support for conenctable file handles.
+On Fri, May 09, 2025 at 07:04:56PM +0200, Amir Goldstein wrote:
+> This is a variant of generic/477 with connectable file handles.
+> This test uses load and store of file handles from a temp file to test
+> decoding connectable file handles after cycle mount and after renames.
 > 
-> With -N flag, encode connectable file handles and fail the test if the
-> kernel or filesystem do not support conenctable file handles.
-> 
-> Verify that decoding connectable file handles always results in a non
-> empty path of the fd.
+> Decoding connectable file handles after being moved to a new parent
+> is expected to fail on some filesystems, but not on filesystems that
+> do not really get unmounted in mount cycle like tmpfs, so skip this test.
 > 
 > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 > ---
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  common/rc            | 16 ++++++++++---
->  src/open_by_handle.c | 53 ++++++++++++++++++++++++++++++++++++--------
->  2 files changed, 57 insertions(+), 12 deletions(-)
+>  tests/generic/777     | 70 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/777.out |  4 +++
+>  2 files changed, 74 insertions(+)
+>  create mode 100755 tests/generic/777
+>  create mode 100644 tests/generic/777.out
 > 
-> diff --git a/common/rc b/common/rc
-> index 6592c835..6407b744 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3829,8 +3829,14 @@ _require_freeze()
->  }
->  
->  # Does NFS export work on this fs?
-> -_require_exportfs()
-> +_require_open_by_handle()
->  {
-> +	local what="NFS export"
-> +	local opts="$1"
-> +	if [ "$1" == "-N" ]; then
-> +		what="connectable file handles"
-> +	fi
+> diff --git a/tests/generic/777 b/tests/generic/777
+> new file mode 100755
+> index 00000000..d8d33e55
+> --- /dev/null
+> +++ b/tests/generic/777
+> @@ -0,0 +1,70 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2018-2025 CTERA Networks. All Rights Reserved.
+> +#
+> +# FS QA Test No. 777
+> +#
+> +# Check open by connectable file handle after cycle mount.
+> +#
+> +# This is a variant of test 477 with connectable file handles.
+> +# This test uses load and store of file handles from a temp file to test
+> +# decoding file handles after cycle mount and after directory renames.
+> +# Decoding connectable file handles after being moved to a new parent
+> +# is expected to fail on some filesystems, but not on filesystems that
+> +# do not really get unmounted in mount cycle like tmpfs, so skip this test.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick exportfs
 > +
->  	_require_test_program "open_by_handle"
->  
->  	# virtiofs doesn't support open_by_handle_at(2) yet, though the syscall
-> @@ -3841,10 +3847,14 @@ _require_exportfs()
->  		_notrun "$FSTYP doesn't support open_by_handle_at(2)"
->  
->  	mkdir -p "$TEST_DIR"/exportfs_test
-> -	$here/src/open_by_handle -c "$TEST_DIR"/exportfs_test 2>&1 \
-> -		|| _notrun "$FSTYP does not support NFS export"
-> +	$here/src/open_by_handle $opts -c "$TEST_DIR"/exportfs_test 2>&1 \
-> +		|| _notrun "$FSTYP does not support $what"
->  }
->  
-> +_require_exportfs()
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +
+> +# Modify as appropriate.
+> +_require_test
+> +# Require connectable file handles support
+> +_require_open_by_handle -N
+> +
+> +NUMFILES=10
+> +testroot=$TEST_DIR/$seq-dir
+> +testdir=$testroot/testdir
+> +
+> +# Create test dir and test files, encode connectable file handles and store to tmp file
+> +create_test_files()
 > +{
-> +	_require_open_by_handle
+> +	rm -rf $testdir
+> +	mkdir -p $testdir
+> +	$here/src/open_by_handle -N -cwp -o $tmp.handles_file $testdir $NUMFILES
 > +}
->  
->  # Does shutdown work on this fs?
->  _require_scratch_shutdown()
-> diff --git a/src/open_by_handle.c b/src/open_by_handle.c
-> index a99cce4b..7b664201 100644
-> --- a/src/open_by_handle.c
-> +++ b/src/open_by_handle.c
-> @@ -96,6 +96,9 @@ Examples:
->  #ifndef AT_HANDLE_MNT_ID_UNIQUE
->  #	define AT_HANDLE_MNT_ID_UNIQUE 0x001
->  #endif
-> +#ifndef AT_HANDLE_CONNECTABLE
-> +#	define AT_HANDLE_CONNECTABLE   0x002
-> +#endif
->  
->  #define MAXFILES 1024
->  
-> @@ -121,6 +124,7 @@ void usage(void)
->  	fprintf(stderr, "open_by_handle -d <test_dir> [N] - unlink test files and hardlinks, drop caches and try to open by handle\n");
->  	fprintf(stderr, "open_by_handle -m <test_dir> [N] - rename test files, drop caches and try to open by handle\n");
->  	fprintf(stderr, "open_by_handle -M <test_dir> [N] - do not silently skip the mount ID verifications\n");
-> +	fprintf(stderr, "open_by_handle -N <test_dir> [N] - encode connectable file handles\n");
->  	fprintf(stderr, "open_by_handle -p <test_dir>     - create/delete and try to open by handle also test_dir itself\n");
->  	fprintf(stderr, "open_by_handle -i <handles_file> <test_dir> [N] - read test files handles from file and try to open by handle\n");
->  	fprintf(stderr, "open_by_handle -o <handles_file> <test_dir> [N] - get file handles of test files and write handles to file\n");
-> @@ -130,14 +134,16 @@ void usage(void)
->  	fprintf(stderr, "open_by_handle -C <feature>      - check if <feature> is supported by the kernel.\n");
->  	fprintf(stderr, "  <feature> can be any of the following values:\n");
->  	fprintf(stderr, "  - AT_HANDLE_MNT_ID_UNIQUE\n");
-> +	fprintf(stderr, "  - AT_HANDLE_CONNECTABLE\n");
->  	exit(EXIT_FAILURE);
->  }
->  
-> -static int do_name_to_handle_at(const char *fname, struct file_handle *fh,
-> -				int bufsz, bool force_check_mountid)
-> +static int do_name_to_handle_at(const char *fname, struct file_handle *fh, int bufsz,
-> +				bool force_check_mountid, bool connectable)
->  {
->  	int ret;
->  	int mntid_short;
-> +	int at_flags;
->  
->  	static bool skip_mntid, skip_mntid_unique;
->  
-> @@ -181,18 +187,24 @@ static int do_name_to_handle_at(const char *fname, struct file_handle *fh,
->  		}
->  	}
->  
-> +	at_flags = connectable ? AT_HANDLE_CONNECTABLE : 0;
->  	fh->handle_bytes = bufsz;
-> -	ret = name_to_handle_at(AT_FDCWD, fname, fh, &mntid_short, 0);
-> +	ret = name_to_handle_at(AT_FDCWD, fname, fh, &mntid_short, at_flags);
->  	if (bufsz < fh->handle_bytes) {
->  		/* Query the filesystem required bufsz and the file handle */
->  		if (ret != -1 || errno != EOVERFLOW) {
->  			fprintf(stderr, "%s: unexpected result from name_to_handle_at: %d (%m)\n", fname, ret);
->  			return EXIT_FAILURE;
->  		}
-> -		ret = name_to_handle_at(AT_FDCWD, fname, fh, &mntid_short, 0);
-> +		ret = name_to_handle_at(AT_FDCWD, fname, fh, &mntid_short, at_flags);
->  	}
->  	if (ret < 0) {
-> -		fprintf(stderr, "%s: name_to_handle: %m\n", fname);
-> +		/* No filesystem support for encoding connectable file handles (e.g. overlayfs)? */
-> +		if (connectable)
-> +			fprintf(stderr, "%s: name_to_handle_at(AT_HANDLE_CONNECTABLE) not supported by %s\n",
-> +					fname, errno == EINVAL ? "kernel" : "filesystem");
-> +		else
-> +			fprintf(stderr, "%s: name_to_handle: %m\n", fname);
->  		return EXIT_FAILURE;
->  	}
->  
-> @@ -245,8 +257,17 @@ static int check_feature(const char *feature)
->  			return EXIT_FAILURE;
->  		}
->  		return 0;
-> +	} else if (!strcmp(feature, "AT_HANDLE_CONNECTABLE")) {
-> +		int ret = name_to_handle_at(AT_FDCWD, ".", NULL, NULL, AT_HANDLE_CONNECTABLE);
-> +		/* If AT_HANDLE_CONNECTABLE is supported, we get EFAULT. */
-> +		if (ret < 0 && errno == EINVAL) {
-> +			fprintf(stderr, "name_to_handle_at(AT_HANDLE_CONNECTABLE) not supported by running kernel\n");
-> +			return EXIT_FAILURE;
-> +		}
-> +		return 0;
->  	}
->  
 > +
->  	fprintf(stderr, "unknown feature name '%s'\n", feature);
->  	return EXIT_FAILURE;
->  }
-> @@ -270,13 +291,13 @@ int main(int argc, char **argv)
->  	int	create = 0, delete = 0, nlink = 1, move = 0;
->  	int	rd = 0, wr = 0, wrafter = 0, parent = 0;
->  	int	keepopen = 0, drop_caches = 1, sleep_loop = 0;
-> -	int	force_check_mountid = 0;
-> +	bool	force_check_mountid = 0, connectable = 0;
->  	int	bufsz = MAX_HANDLE_SZ;
->  
->  	if (argc < 2)
->  		usage();
->  
-> -	while ((c = getopt(argc, argv, "cC:ludmMrwapknhi:o:sz")) != -1) {
-> +	while ((c = getopt(argc, argv, "cC:ludmMNrwapknhi:o:sz")) != -1) {
->  		switch (c) {
->  		case 'c':
->  			create = 1;
-> @@ -313,6 +334,9 @@ int main(int argc, char **argv)
->  		case 'M':
->  			force_check_mountid = 1;
->  			break;
-> +		case 'N':
-> +			connectable = 1;
-> +			break;
->  		case 'p':
->  			parent = 1;
->  			break;
-> @@ -445,7 +469,8 @@ int main(int argc, char **argv)
->  				return EXIT_FAILURE;
->  			}
->  		} else {
-> -			ret = do_name_to_handle_at(fname, &handle[i].fh, bufsz, force_check_mountid);
-> +			ret = do_name_to_handle_at(fname, &handle[i].fh, bufsz,
-> +						   force_check_mountid, connectable);
->  			if (ret)
->  				return EXIT_FAILURE;
->  		}
-> @@ -475,7 +500,8 @@ int main(int argc, char **argv)
->  				return EXIT_FAILURE;
->  			}
->  		} else {
-> -			ret = do_name_to_handle_at(test_dir, &dir_handle.fh, bufsz, force_check_mountid);
-> +			ret = do_name_to_handle_at(test_dir, &dir_handle.fh, bufsz,
-> +						   force_check_mountid, connectable);
->  			if (ret)
->  				return EXIT_FAILURE;
->  		}
-> @@ -589,6 +615,15 @@ int main(int argc, char **argv)
->  		errno = 0;
->  		fd = open_by_handle_at(mount_fd, &handle[i].fh, wrafter ? O_RDWR : O_RDONLY);
->  		if ((nlink || keepopen) && fd >= 0) {
-> +			char linkname[PATH_MAX];
-> +			char procname[64];
-> +			sprintf(procname, "/proc/self/fd/%i", fd);
-> +			int n = readlink(procname, linkname, PATH_MAX);
+> +# Decode connectable file handles loaded from tmp file
+> +test_file_handles()
+> +{
+> +	local opt=$1
+> +	local when=$2
 > +
-> +			/* check that fd is "connected" - that is has a non empty path */
-> +			if (connectable && n <= 1) {
-> +				printf("open_by_handle(%s) returned a disconnected fd!\n", fname);
-> +			}
->  			if (rd) {
->  				char buf[4] = {0};
->  				int size = read(fd, buf, 4);
+> +	echo test_file_handles after $when
+> +	$here/src/open_by_handle $opt -i $tmp.handles_file $TEST_DIR $NUMFILES
+> +}
+> +
+> +# Decode file handles of files/dir after cycle mount
+> +create_test_files
+> +_test_cycle_mount
+> +test_file_handles -rp "cycle mount"
+> +
+> +# Decode file handles of files/dir after rename of parent and cycle mount
+> +create_test_files $testdir
+> +rm -rf $testdir.renamed
+> +mv $testdir $testdir.renamed/
+> +_test_cycle_mount
+> +test_file_handles -rp "rename parent"
+> +
+> +# Decode file handles of files/dir after rename of grandparent and cycle mount
+> +create_test_files $testdir
+> +rm -rf $testroot.renamed
+> +mv $testroot $testroot.renamed/
+> +_test_cycle_mount
+> +test_file_handles -rp "rename grandparent"
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/777.out b/tests/generic/777.out
+> new file mode 100644
+> index 00000000..f2dd33c3
+> --- /dev/null
+> +++ b/tests/generic/777.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 777
+> +test_file_handles after cycle mount
+> +test_file_handles after rename parent
+> +test_file_handles after rename grandparent
 > -- 
 > 2.34.1
 > 
