@@ -1,63 +1,63 @@
-Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com [209.85.210.172])
+Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1703C258A
-	for <fstests@vger.kernel.org>; Mon, 26 May 2025 04:56:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 257574A1D
+	for <fstests@vger.kernel.org>; Mon, 26 May 2025 05:11:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748235385; cv=none; b=pioUiMyN4XO4yYuWkeS2A4Yjsc53u2I9xKzh9XtYQOfB29zufqB8+Wa8wzwk6ujFlrPd8PyhagceaouJ3iWkIK1Br/skToGOC0jSU51kQWkCeTPGrHLv2ULJxgXi+rYu9y2kVB05nGjAIZ+QMTOgoB9SArsu+MWfXr0B0teGCKY=
+	t=1748236274; cv=none; b=TxbrBkZPn4NDj+B3k2Ykg2F5fGewgGvRKm8yMO+N2JtkGBS9zHowsVTrVk5ibOLMa1CaZO87leCwHOVwACjXOpy/Ew1wi1qu78mFAvuz9Myv4RNo07/ZFhL/Olf8Et+nJ1UF79gKhBBGIaI+5v3XkjTon4TDZF5VnU8zjtKN0cw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748235385; c=relaxed/simple;
-	bh=VXsYXgUCPb4zmotEASYVPyTjzx5J3pV1gio6PSJN5Xk=;
+	s=arc-20240116; t=1748236274; c=relaxed/simple;
+	bh=TpV50D2wJh7mtiWER2HplFwUnhJHx7+TwXAs/5qg0Bo=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=qijRJtYUuw9icYVbRYLR0JB/rreVZqLRChRDRb/BGSMwcytmCD22Bi2HFHxotUVTWvkLnKaLDx8/DCuJOlDp1svW2ii7W2obG3WBlx8bQ9ff5A/diVDEN5orYA67joHH5wXd+yxpo6nXEEC+nhjYzpqhQGl0u9C0OWrCRrJRlLQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WSOFDTty; arc=none smtp.client-ip=209.85.210.172
+	 In-Reply-To:Content-Type; b=dqMePTgm79YsJpyxvtGeD3Y9xgXwPQiiDINTMBQTN/NQ/qjLAj6fL6lTidITHPcypX7aRhtDPBEgeRRZ/aH+Nv8lzNLV0974Ix2hU2+Pk6wQKufPx9OCj8ak4CYQaQbH9CpNEZviMDiy1B5k5gKd0UpEJNSu1vx0m0VI8HUWdgI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kp3AFVRG; arc=none smtp.client-ip=209.85.214.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WSOFDTty"
-Received: by mail-pf1-f172.google.com with SMTP id d2e1a72fcca58-742c73f82dfso1222935b3a.2
-        for <fstests@vger.kernel.org>; Sun, 25 May 2025 21:56:22 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kp3AFVRG"
+Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-23278ce78efso9896325ad.2
+        for <fstests@vger.kernel.org>; Sun, 25 May 2025 22:11:12 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748235382; x=1748840182; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
+        d=gmail.com; s=20230601; t=1748236272; x=1748841072; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=6htVuCjw5Sd8UQqNGNOGe2AZpJUplE1eFceys0EW56g=;
-        b=WSOFDTtym1T95Kkr6vJBNrzp22o0+jD/m8nLOnq9NxrDfRL0TEAeV/yp/YWeAguPuT
-         ErbFqaCKXVT/nZ5zoSyQ+KT0KPrHvMo+m2RoPzibRAQf0ZqcqJwCXRddCpKVJYQyiCpv
-         Sq22NClxBaSWeO0ur+6JhTxuW+1TjD0btIHle4RiWPAvNU6Y0nhaEkM+8e1oa55DGRjI
-         vChTv3QzXNr7snm30cDr4hJsjgP9HiDKKoReRsSPoZfNKEKZagsdyex+u7SZV8kOSvz1
-         0Qng40v49bmU9wI6q3Zs5GwNNhiu7gZOZxhubKF0DHRwGmg6jLY0lYBuW2evuxSd3Kvd
-         TnGA==
+        bh=j/QKsIXf6U2vBi/PXJVhug4Bp3BSqVR/a8qI7P8v5/w=;
+        b=kp3AFVRG8ypF0dpHBq1yX5wFTBjygRhFTED1Ziqk1AWVvLYPnSSQltq5ORuM5cgUS+
+         EvyilyCEsRMvSfeFyPpM7XOmLRwzkngHL9zB3TgIAyiYYeDFI4TFk5c8aGJ8lRK/QUkr
+         ARQYj0F7C9wNhQDewSSZb/y0SKERbMDkDSRsTVAcGuiIIfvuMfgpQTATc2zg1bDUJuVp
+         Op1Z8zgZvPB1ofjs0jLXfv4kYDubTCCvm59BL4WfCCxuUNIak62UMoCRjl/6KZeeBH3F
+         XN++COhpSG3pW+hcBo6POcPpvacZ6XtPYpM0plU8MrM07rmEYmUgbQDD95O2iMWtGxf2
+         t9wQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748235382; x=1748840182;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
+        d=1e100.net; s=20230601; t=1748236272; x=1748841072;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=6htVuCjw5Sd8UQqNGNOGe2AZpJUplE1eFceys0EW56g=;
-        b=np2DQC5nnXjMJXCrCUX/sd6Qjf5Qf0EcQgLvbjMrhwzGd6B0G7YIsqK5cpWPL7JTqy
-         5vLRy5rI7XK2vTNGQtT4NZ91nvEb5wlT2QKVqJM7idjjTvu+bedwgxTeFBwmSt4bJKoc
-         6ErQSO2yd2blhXXo1aUrgz9XtjZ6uEWcEBzY4SBDtp+CpacAhGvKeetfzum4zM8P2Lw4
-         pMzg4ezCVUDRTKlVZMTKV6Q5Hcm7pDdujFbVp71vRQ0r7jqmZG4ngI2quUJlQa1dGY0e
-         IcAPj/gDE66HA56ZeQ5Fy32PJGOuy5tMBFUxB+d4uqXPC3A3/RU1irf8cP2DTZbkZvDh
-         x7AA==
-X-Gm-Message-State: AOJu0Yyg+G6aNbeSVHyw8AKliwWF16NP8drISHlncTOmxcv6FeqSRfo1
-	RDdFPbfMZsiyCohmLVNmdkkaWLQsDAboo5M5Rx02pV5qlej5KlOCHmBK
-X-Gm-Gg: ASbGncuzBw5yOBAP3LizoCGGsLUvl+6V0xgkxUcen2fLHCWgOfecatROjEBV2LEfVhx
-	R1t2z+S2vQb8SfP2h1ZslJniQv0hOuaGPUAs4xPVRW7lQ1O+mNi5L5fAPQWrJRWDFCmv3WDMjVh
-	N7KdU42WQh6K/j+qSKgnT4oIBJFA/LT+fuSSHkMnePi5gcqj1el5vCBNNZEgSc2t2rihgb0cWHd
-	ggrcXiISxlPiNNGoT5YW7jFbKnByVUpWKMvz3xK6VEvpncPATdJ7cFuV959JpIJJqSNDeZQzUyf
-	Uoh+9HA8AIZNCqzIemDX89ZPUIV+6nhHNtqQTwU9GgfdwLwA0lQVtEilVjotRA==
-X-Google-Smtp-Source: AGHT+IEz2FvlSuyr4PbxIZ02iCEVRjDgUithRvHplG3/RCOs9nauKpAFjjPHNX3xlVTnqoNcseWSYg==
-X-Received: by 2002:a05:6a21:710a:b0:216:1ea0:a526 with SMTP id adf61e73a8af0-2188c3bc363mr12044403637.40.1748235382140;
-        Sun, 25 May 2025 21:56:22 -0700 (PDT)
+        bh=j/QKsIXf6U2vBi/PXJVhug4Bp3BSqVR/a8qI7P8v5/w=;
+        b=vDpnNEfEzAPN6LzcE63pdAuGBhAk1ke6Ln+89UF6VP1oUtxe4nogrC4C3hEWfKnwF/
+         QHVGuoOPGLiOXB8d1+Cxjd1YFxA4WTO3Qr7c14N2dXb5BporqZjLs3Zt+ylcSJPLIjmo
+         UpBBIhG7/iOckE01pCA4ddmbuzykBpZf7EUNICupQYz25bgc9woxUpmBO0gYJZ6RagGy
+         m/XAKi99HXxGLmTeZRkWDvJMkGk3brJsTKE/VhnyLrG7+zGRobqJxPn8gDYz6WwToZUn
+         NqYeIcjx7/UJzQbx8kSnJdycnY9rsBnzTRqoXi+VlDosbJoUDl+/yGgSHiwfcDPjnpTf
+         U49g==
+X-Gm-Message-State: AOJu0Yx4JnIybc3daSa4EG/c6qUs7LvrJrT4b+pi9S30O4WK6XElHB8N
+	VXIJb2UNJJiUsUs05Jcl7IIYkdtgcT+KD/pFp01JMIyHVfrE+8z8mMgz
+X-Gm-Gg: ASbGncvahJsFJYCnVO+vnZOqyqzMY3iwOP3OA3uQBXiTT0AI2zlkJEPYh0zZJuxWonm
+	tT4+bUY2S8hVttE9wrG34LvKq/Cj/gzomIjnVvFbltDZU4VQw3kPN98PRZMdTYs0AaY3SJcUWsV
+	clNj/DKEVzaFa7EHoeh/NSFdRVwSlRjvzVra1bPdd7+m4YPGY4wqN3L8g6xNVf1l4YuuU0+6SDw
+	EYNlilDhkcNp0EQ3Xzf5FHkRFCPZHe+QXny+IAvuB2tVEiftuI8FPxkd3++fbOh3C+ft1LJMfDL
+	I03p94dyK7UmiEpr+m0jALCu/czFYiawBkrcpOFk6jsOAFAmgXzrw6X+eX80oQ==
+X-Google-Smtp-Source: AGHT+IGs83VjzhVgufQKdpt8JUX16D2ZKVLXifEjBYAQB74w5NI+5rJSjAzanDetBOQ2Tu/HykIImg==
+X-Received: by 2002:a17:903:2ce:b0:224:2207:5130 with SMTP id d9443c01a7336-23414fdb06amr121475685ad.45.1748236272280;
+        Sun, 25 May 2025 22:11:12 -0700 (PDT)
 Received: from [192.168.0.120] ([49.205.34.162])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-742a96e5f74sm16197001b3a.26.2025.05.25.21.56.20
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-234685b2f43sm7832335ad.198.2025.05.25.22.11.10
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 25 May 2025 21:56:21 -0700 (PDT)
-Message-ID: <8ad0483a-b597-4ac0-b23d-c55cfd37983d@gmail.com>
-Date: Mon, 26 May 2025 10:26:18 +0530
+        Sun, 25 May 2025 22:11:11 -0700 (PDT)
+Message-ID: <dd00260b-8662-4b0e-9543-2ac07792b4bc@gmail.com>
+Date: Mon, 26 May 2025 10:41:08 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -65,37 +65,38 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 24/28] open-by-handle.c: use syncfs() rather than sync()
+Subject: Re: [PATCH 23/28] open-by-handle.c: use syncfs() rather than sync()
+Content-Language: en-US
 To: Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org, zlang@kernel.org
 References: <20250417031208.1852171-1-david@fromorbit.com>
- <20250417031208.1852171-25-david@fromorbit.com>
- <31048aeecaf4cb1622fe3a2b18f6a7d921175fa8.camel@gmail.com>
- <aC06u4BelSuGE8iA@dread.disaster.area>
-Content-Language: en-US
+ <20250417031208.1852171-24-david@fromorbit.com>
+ <15e09df3ecf75b4b7da58fd2e00d5f72aab2d493.camel@gmail.com>
+ <aC07TfBnIPnDNrQN@dread.disaster.area>
 From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <aC06u4BelSuGE8iA@dread.disaster.area>
+In-Reply-To: <aC07TfBnIPnDNrQN@dread.disaster.area>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
 
-On 5/21/25 08:00, Dave Chinner wrote:
-> On Wed, Apr 30, 2025 at 02:26:28PM +0530, Nirjhar Roy (IBM) wrote:
+On 5/21/25 08:02, Dave Chinner wrote:
+> On Wed, Apr 30, 2025 at 02:32:33PM +0530, Nirjhar Roy (IBM) wrote:
 >> On Thu, 2025-04-17 at 13:01 +1000, Dave Chinner wrote:
 >>> From: Dave Chinner <dchinner@redhat.com>
 >>>
->>> xfs/183 runs bulkstat_unlink_test to create 100 inodes, unlink on
->>> and bulkstat them. It takes a ridiculously long time to run under
->>> check-parallel because it runs sync() multiple times per iteration:
->>>
->>> Ten slowest tests - runtime in seconds:
->>> .....
->>> xfs/183 328
+>>> generic/467 runs open_by_handle at least 15 times. Each
+>>> execution runs sync() at least once, sometimes three times.
 >>>
 >>> When running check-parallel, sync() can take a -long- time to
 >>> run as there can be dozens of filesystems that need to be synced,
 >>> not to mention sync getting hung up behind all the mount and
->>> unmounts that are also being run.
+>>> unmounts that are also being run. This results in:
+>>>
+>>> Ten slowest tests - runtime in seconds:
+>>> generic/467 442
+>>> .....
+>>>
+>>> This test running for a really long time.
 >>>
 >>> Convert the sync() calls to syncfs() so that they only try to sync
 >>> the filesystem under test and not the entire system. This avoids
@@ -103,42 +104,52 @@ On 5/21/25 08:00, Dave Chinner wrote:
 >>> operations, hence allowing both the test and the overall
 >>> check-parallel operation to run faster:
 >>>
->>> xfs/183        4s
+>>> generic/467        6s
 >>>
 >>> Signed-off-by: Dave Chinner <dchinner@redhat.com>
 >>> ---
->>>   src/bulkstat_unlink_test.c | 12 ++++++------
->>>   1 file changed, 6 insertions(+), 6 deletions(-)
+>>>   src/open_by_handle.c | 6 +++---
+>>>   1 file changed, 3 insertions(+), 3 deletions(-)
 >>>
->>> diff --git a/src/bulkstat_unlink_test.c b/src/bulkstat_unlink_test.c
->>> index d78cc2ac2..62e5bb978 100644
->>> --- a/src/bulkstat_unlink_test.c
->>> +++ b/src/bulkstat_unlink_test.c
->>> @@ -88,7 +88,7 @@ main(int argc, char *argv[])
->>>   		}
+>>> diff --git a/src/open_by_handle.c b/src/open_by_handle.c
+>>> index a99cce4b3..816bb5d12 100644
+>>> --- a/src/open_by_handle.c
+>>> +++ b/src/open_by_handle.c
+>>> @@ -430,7 +430,7 @@ int main(int argc, char **argv)
+>>>   	}
 >>>   
->>>   		if (chknb) { /* Get the original number of inodes
->>> (lazy) */
->>> -			sync();
->>> +			syncfs(fd[nfiles]);
->> This looks good to me.
->> Minor: Is it safe to use int fd[nfiles + 1];
-> Yes, it is. Variable size array declarations like this have
-> been supported by C and C compilers for a long time.
->
->> Isn't it better to use
->> malloc()?
-> See my previous comments about stack usage in userspace test code. :)
+>>>   	/* sync to get the new inodes to hit the disk */
+>>> -	sync();
+>>> +	syncfs(mount_fd);
+>>>   
+>>>   	/*
+>>>   	 * encode the file handles or read them from file (-i) and
+>>> maybe store
+>>> @@ -563,10 +563,10 @@ int main(int argc, char **argv)
+>>>   	}
+>>>   
+>>>   	/* sync to get log forced for unlink transactions to hit the
+>>> disk */
+>>> -	sync();
+>>> +	syncfs(mount_fd);
+>>>   
+>>>   	/* sync once more FTW */
+>>> -	sync();
+>>> +	syncfs(mount_fd);
+>> I don't see mount_fd being closed at the end. Maybe all the file
+>> descriptors are closed after the program finishes execution?
+> Yes, they are closed on exit. Again, simple test code that isn't
+> running out of open files, so there's not a lot of reason for this
+> patch series to care about such existing issues in the code right
+> now.
 
-Yes. I mostly meant in terms of stack overflow issues if "nfiles" is 
-large, but I checked C stack space in the userspace is around 8M so that 
-should be fine. Thanks.
+Yeah, makes sense.
 
 --NR
 
 >
 > -Dave.
->
+
 -- 
 Nirjhar Roy
 Linux Kernel Developer
