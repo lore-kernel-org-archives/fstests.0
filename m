@@ -1,63 +1,63 @@
-Received: from mail-pl1-f171.google.com (mail-pl1-f171.google.com [209.85.214.171])
+Received: from mail-pl1-f173.google.com (mail-pl1-f173.google.com [209.85.214.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 91B4613D8A4
-	for <fstests@vger.kernel.org>; Mon, 26 May 2025 06:48:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 077051C3C18
+	for <fstests@vger.kernel.org>; Mon, 26 May 2025 06:58:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748242118; cv=none; b=IRcmGL7kMJ/l0HbEq6AwPJuri55w71aNv5LTxwJL0vsuGyU2AjhJdz7w9W51fmZG7qkBMNzxkAhvyUpTIzjnG3yg48BdSh72KOfpyUhCyJAoLyeKlllI+S12R8ZqcOpauunneZDcBdDRuGIJwiK2ZWQH099pVZQ07WE/gr/MM6U=
+	t=1748242729; cv=none; b=f77aCET1BX5OU17AbUBfp99JHZzqfoCWi+s47R89EuDY10DBSHietHCd6JelJ4p4CnfPhnrTTTvP/PKkznliDyn5aZ6Hw25x/JP78Txeum+Omxd7ciU3hHTabKDEAyJrqrYx3reHmiSGxUwlKNcr2/HMEwAQiU890KfrRAn3C7o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748242118; c=relaxed/simple;
-	bh=fpA1Ja41nzKVd6QuLh3RvO0dO/pBQVxGP5MEjPX+WaY=;
+	s=arc-20240116; t=1748242729; c=relaxed/simple;
+	bh=P1+EeLY5IPhb4YU0+C1G3GmKrYzElyRQ9/JEaXlbFMg=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=BykzokKRxoDbhYn6sTXPN/2BvCiGlqCLcO1LD1sL8VvGF+KyS+CqoTIHtfgInyeqaftMGdVLaQeKqO/HMvA4BkiJme01zy0grhnCJa2XjU9jETa4ZBN3gEnOwbfb0e3qpdb04ufjQnq/bvgVIKO7g7VVh8N3WIoMlNFDcd6L7RI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ZC2cOrg6; arc=none smtp.client-ip=209.85.214.171
+	 In-Reply-To:Content-Type; b=toLzc/u0MjAAimPPYrlwFnnMokfYCZ8WOjH+xjiuudPBiaeNxHez7FWobWb6DGrsI2A5GG+2xbkUF+pMBGPa+3OspnBTaBsf4pXj/AkJHsl2CreaGZs7IUd0Ho+cbpYhVs7keeB3XxGvl4boujB4YnTl2bJxkLAdGGiizvbIfIs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=M0O3VbF4; arc=none smtp.client-ip=209.85.214.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZC2cOrg6"
-Received: by mail-pl1-f171.google.com with SMTP id d9443c01a7336-23229fdaff4so20504235ad.1
-        for <fstests@vger.kernel.org>; Sun, 25 May 2025 23:48:36 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="M0O3VbF4"
+Received: by mail-pl1-f173.google.com with SMTP id d9443c01a7336-2347d505445so1130115ad.2
+        for <fstests@vger.kernel.org>; Sun, 25 May 2025 23:58:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748242116; x=1748846916; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1748242727; x=1748847527; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=jvyVEqMaqqFV0V5jW8TPM0VkAqnSa9A78PbwPUjwIvI=;
-        b=ZC2cOrg6R6K3vNok96Sci0v7HjjjNWe/7GA/tanBCfo42twQozr0BuDoR/sXmt1W9H
-         U+Lp/XU5G9+njqebSc/zeXGDWtCVlFXKODG9fEaFKrQxHroquH+PgN02YmtZXAOCrnL5
-         CqU3RlN5rrQwGIPUTBTnpU36g1qbppiSn3KJ7Uo9o6+GtnHOMuMBYwYZA93MR8/RVPon
-         B/r4qwCzb6YOUciUx+B0fSe9OtyNscAEHgVrtqrTKXtA8EpZAp9g8oLRS+Vjo0rgvYDv
-         lIfTRaO52Q/0L3dD3bL90TAFbDjBbdFtPXN+cZ4axmxCnuoVnI92e5rWiVqvrNjgznpb
-         J4pA==
+        bh=jqxMwoDSNUAcqwcqD9TS7Bta59hVdB6bkDH08heUML8=;
+        b=M0O3VbF4eICDnwqwQoFBF6yEKOWvefFP2nGA5H1VtatspNmqf+5Wb8SE7dIx1k5ybt
+         IaCaQQN1lucIOgLMjSoHJE9zOZEdpcFQx8g+OcH+JvfXGcemQ++yLHUMSXZLGJfE1Ten
+         GuEYUauMmYEH3iAdVQWy/Bbk56IcchlPhGN54vlv8DteVhLRBP6f9FfC1p4DdZ8qvfDQ
+         pUO1uh883lZXtPGoVmsUneg7GLYxHJyXbc8QLQ8w+el+mFG6NU2cC0HiNYTEBHuBdZ1P
+         44sa8G+PWLmTpwunjVUDFh6HFCKWMxcI1GM9ihAt/6W59Ky+1oS4IypSKajKl58ct7ms
+         bUFA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748242116; x=1748846916;
+        d=1e100.net; s=20230601; t=1748242727; x=1748847527;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=jvyVEqMaqqFV0V5jW8TPM0VkAqnSa9A78PbwPUjwIvI=;
-        b=KdOXht4hWM6tk+3pNr8Fi55VnS5nSYc22VhwpZAwJvNl8krGWKNhxC6KKL/ShysK5Q
-         we/vA3t6MJLOC5eR0uBQQVJVM4EpNGyv60LRhd8dQs2lZzLm4gRNScf+rR8E9q2MguIH
-         bk41+AqdlLc8lx/N/a8Pgv0uIjux7Tr8F/I2BQKHZudmeG/Fze7B1CQYeyg4MwzU6TC8
-         uU1VexOqFChstavCumSS94W5+KVpOr8FiwINeo+ToeRWs+sMbq9kPiwmE4TKIihM3osx
-         N5mjizh4xpj8R94h4ykDSw/j5kyuTjbXqNGi3+2CRMUL+S7YcOPsSF/O41go+Aivxo9V
-         dTFQ==
-X-Gm-Message-State: AOJu0Yz+BbkV8xJtFcxy11/bu2kYxPjBmvFdX4+whGY710MRkVusBIXT
-	5JwSjZfAzijLO6rgiMVmmyWKSPs0dE6K6QM6LFXXjvt3pVk8D0Z0sVCa6C9Ehg==
-X-Gm-Gg: ASbGnctwgWEaavue918U8YAS8DbPoBDxoZ5VWwCZWjVw321g/dbcJPkahwKFPoZzSDK
-	uK66nefQUY9D1mHjmqzKNntvyJtfKj8eCXePAT+T76FdaNRqa7bYhQeZGLIvaUMmkS8p2+xV24s
-	ImF8JzWrvEj1QaDmeedye5dyl+prcDRzv8QxaXpHm1qYz6JbjtwLFBnPionH0ZwqyUqQAaM3Mql
-	4FJPaNcm0RDgxhPrTouwAvDkALMsIdV0mQ9/m6IWUEILlKEfjWLFQD1TiKZn8Yd3obfXGoiyFjL
-	luxQBhPKZQZ9Gb++wQj2Z/8LlfDSjpXhWXJp4FrAuo0NBtAr3E3GUNtF28ATzA==
-X-Google-Smtp-Source: AGHT+IENpDB6jP9fwr7AZVRtWa/jITgvmZV+fX0qdGLrwbB3hAqFCohN+3XBNq13U50LaMbQvxw3SQ==
-X-Received: by 2002:a17:903:44b:b0:234:4f8e:ed15 with SMTP id d9443c01a7336-2344f8eeec5mr39900035ad.29.1748242115674;
-        Sun, 25 May 2025 23:48:35 -0700 (PDT)
+        bh=jqxMwoDSNUAcqwcqD9TS7Bta59hVdB6bkDH08heUML8=;
+        b=fU87keYJwViY96q04cgcq20X0ivvbsKScnR/yj3b56Ri6bAqy7G5CCA5mJ43ibhZE7
+         4upEoHXeJr2t47pUqWAqpNSWZkpYWLmAEbH7HSInsnqYzwd0SXrgJN30C4Tul9cc0ivi
+         SOy3+7m63bggBVkBc7km5Io5SwKVnwly4yfTF0GWsPFoMTPjvX7jbf7F1Fy03IYGkBnv
+         qZHimyN4mAc8K6WaqdWT53WYJ+fBG8pm/Oknx7cWa15th5i5NVlBkZTldNuuq+d3OChd
+         k61seJVIj4YEwmkljy3s4iG1M24q+oS4RhsWDJgIjHtXJLl7byLkIFdSnMUoRcD624n8
+         p8jA==
+X-Gm-Message-State: AOJu0YwI/XPz7YpOW3LdgFsgEl9R7xTbIPvUlxwGQ/ZZDG9OR3pB0cWF
+	KPbjZK35feG4nwqfv2lVHi2s3sKFDCF6irAegpSFm13MTVmX1pWj8+p0eLfbnQ==
+X-Gm-Gg: ASbGncs1xomND8sUmvhovx/6hCSzoahVa9PEb+1woGQPwSxBi4jOhMEZf27mXwH/U4q
+	DjbW/dlIQUBZGiNjqehOhDR4wz/PgXWs+Qi1/oamxgZH8scE/+PZF1x5QwfGQ95hs+O7ljg+LVQ
+	aGJfcNzb3labIDbjTcoe6IqX5wP+wVB/9KN0HEidzfTsdJ0VR5gnzblQ2MV+qICcR5QBBBY9xu2
+	legsm7R15A6flwV4/vWtXSSPHO4xPYERkufBWMvwiNwjfUGWdpoYkFPzv5QJ/79qLgN15TX4+F0
+	tk87dIDUx+lKEvtRtRM8IbkgXV5GnqeZ8//EU7I662uXqchn3obWPOhw6hMT7Q==
+X-Google-Smtp-Source: AGHT+IFK8b8W2vWY8dVxh4L8QgdK12kpCaE7lEm0gqIZJp/D5icom+nWAj+LP9EFTGtFkVKZFEm59w==
+X-Received: by 2002:a17:902:fc44:b0:22c:35c5:e30e with SMTP id d9443c01a7336-23414f69078mr121028045ad.13.1748242727167;
+        Sun, 25 May 2025 23:58:47 -0700 (PDT)
 Received: from [192.168.0.120] ([49.205.34.162])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-23433b21e6csm24071465ad.70.2025.05.25.23.48.33
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-23411640a6fsm38048265ad.175.2025.05.25.23.58.45
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 25 May 2025 23:48:35 -0700 (PDT)
-Message-ID: <75181afe-33c7-47cb-8c6b-714fae45ddac@gmail.com>
-Date: Mon, 26 May 2025 12:18:32 +0530
+        Sun, 25 May 2025 23:58:46 -0700 (PDT)
+Message-ID: <19ab7ccb-65c9-45e7-bdb8-4cf38b9b2ae9@gmail.com>
+Date: Mon, 26 May 2025 12:28:43 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -65,227 +65,135 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 05/28] check: factor out test list building code
+Subject: Re: [PATCH 06/28] check-parallel: use common group list parsing code
 Content-Language: en-US
 To: Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org, zlang@kernel.org
 References: <20250417031208.1852171-1-david@fromorbit.com>
- <20250417031208.1852171-6-david@fromorbit.com>
- <3d2f07dc3291ab3e8a391e8909195a339240b16b.camel@gmail.com>
- <aC1Oym2XI_XuThUm@dread.disaster.area>
+ <20250417031208.1852171-7-david@fromorbit.com>
+ <39c2355dea38ef102f7a6c930f14f0cd14e6bbdc.camel@gmail.com>
+ <aC1S1c-YcOivGRVx@dread.disaster.area>
 From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <aC1Oym2XI_XuThUm@dread.disaster.area>
+In-Reply-To: <aC1S1c-YcOivGRVx@dread.disaster.area>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
 
-On 5/21/25 09:25, Dave Chinner wrote:
-> On Tue, May 06, 2025 at 05:02:54PM +0530, Nirjhar Roy (IBM) wrote:
+On 5/21/25 09:43, Dave Chinner wrote:
+> On Tue, May 06, 2025 at 09:26:37PM +0530, Nirjhar Roy (IBM) wrote:
 >> On Thu, 2025-04-17 at 13:00 +1000, Dave Chinner wrote:
 >>> From: Dave Chinner <dchinner@redhat.com>
 >>>
->>> Factor out all the test list parsing and building code to
->>> common/test_list so that it can be used by both check and
->>> check-parallel.
+>>> Build the test list directly from command line prompts, rather
+>>> than hard coding the tests and using the check infrastructure to
+>>> filter that list.
 >>>
->>> This also namespaces all the test list code to use _tl_ prefixes,
->>> and adds wrappers to set up test list parsing parameters.
+>>> We still pass exact test lists to check to execute the tests that
+>>> each runner needs to execute, but all other test list commands
+>>> are no longer passed to check.
 >>>
->>> Note: there is still some future work to convert externally visible
->>> parameters like SRC_DIR to the new namespace.
->> I have gone through this patch. I did some basic testing too with
->> ./check and I havent' found any obvious issues. There are some minor
->> feedback that I have given below:
-> Can you trim the stuff you aren't commenting on out? It makes it
-> much easier to find what you are commenting on....
-Yeah, sorry. I think there was some issue with the editor of my email 
-client.
->
-> ....
->>> diff --git a/common/test_list b/common/test_list
->>> new file mode 100644
->>> index 000000000..2432be6f7
->>> --- /dev/null
->>> +++ b/common/test_list
->>> @@ -0,0 +1,295 @@
->>> +##/bin/bash
->>> +# SPDX-License-Identifier: GPL-2.0+
->>> +# Copyright (c) 2000-2002,2006 Silicon Graphics, Inc.  All Rights Reserved.
->>> +# Copyright (c) 2024 Red Hat, Inc.  All Rights Reserved.
->>> +#
->>> +# Test list parsing and building functions
->>> +#
->>> +# Note: this file must stand alone and not be dependent on any other includes,
->> We can include common/exit, right? That file doesn't file only has a
->> couple of exit related functions (with no executable code) and no
->> further dependencies, correct?
-> I wrote that before common/exit was really a thing.
->
-> As it is, I don't think we should be sourcing files from sourced
-> files. it hides all the dependencies, and results in the same file
-> being sourced multiple times in the same process context.
-Yeah, right.
->
-> i.e. if the top level is doing:
->
-> . common/exit
+>>> As a result of this change, check-parallel no longer passes unknown
+>>> CLI parameters through to the internal check invocations. At this
+>>> point, the only non test-list related option is config file section
+>>> selection; more of the check options will be brought across as
+>>> needed in future patches.
+>>>
+>>> Signed-off-by: Dave Chinner <dchinner@redhat.com>
 > .....
-> . common/test_list
-> .....
->
-> Then we don't need to source common/exit from common/test_list
-> because it already has been sourced.
->
-> That's what the comment is trying to say, and when I wrote it I was
-> specifically thinking about the mess that common/rc and
-> common/config was causing.
-Okay.
->
->
->>> +# most especially common/rc and common/config. This is because we have to
->>> +# include this file before option parsing, whilst the rc/config includes need to
->>> +# be included -after- option parsing.
->>> +#
->>> +# Any function or variable that is public should have a "_tl_" prefix.
->>> +
->>> +export _tl_src_dir="tests"
->> Minor: There was a change[1] which converted some of global variables
->> in small case to upper case. Should we follow the same convention here,
->> i.e, _TL_SRC_DIR or maybe _tl_SRC_DIR?
-> I don't think so, I very much dislike the semi-random capitalisation
-> of namespace-less variables across fstests. I find coe full of upper
-> case variables much more difficult to read and follow than properly
-> namespaced lower case variables.
->
-> That's the other thing that is important - lots of the global scope
-> variables sourced from common files are namespaceless and it makes
-> it easy easy for tests to accidentally step on such variables. Once
-Yeah, accidental re-use and modification of global variable can happen. 
-I agree.
-> the varaibles are namespaced, there is no need for capitalisation
-> to indicate that it might be a global variable - the namespace
-> prefix tells you that as well as where it comes from.
->
->> [1]
->> https://web.git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?h=for-next&id=ab459c67c5e0347ab4a5c28eadfe5ee4e3fd2f01
-> Yeah, that was a case of choosing your battles.
->
-> It wasn't a bug, but it was buried in a long series of bug fixes and
-> at the time people were shouting and being really obnoxious about
-> the check-parallel changes. There was no point in dying on an
-> unimportant hill by objecting to that change.
->
-> I still do think it was the wrong thing to do because it makes that
-> code be inconsistent with every other local file loop device
-> variable. Those devices are not used outside of common/metadump -
-> it is internal implemenation variable that the code was written
-> specifically to be hidden from callers wanting to manipulate and
-> test metadumps...
-
-Okay, got it.
-
->
->>> +_SRC_GROUPS="generic"
->>> +_GROUP_LIST=
->>> +_XGROUP_LIST=
->>> +_tl_exact_order=false
->>> +_tl_randomise=false
->>> +_tl_have_test_args=false
->>> +_tl_file="$tmp.test_list"
->>> +_tl_exclude_tests=()
->>> +_tl_tests=
->> Similar comments for all the above lower cased global variables?
-> I didn't changed the GROUP names because they are internal to the
-> test list implementation. I was largely moving the code and didn't
-> want to change anything that was internal that I didn't need to
-> touch. I'll have a look at cleaning that up.
-Okay.
->
-> .....
->>> +	# Specified groups to include
->>> +	# Note that the CLI processing adds a leading space to the first group
->>> +	# parameter, so we have to catch that here checking for "all"
->>> +	if ! $_tl_have_test_args && [ "$_GROUP_LIST" == " all" ]; then
->>> +		# no test numbers, do everything
->>> +		get_all_tests
->>> +	else
->>> +		for group in $_GROUP_LIST; do
->>> +			list=$(get_group_list $group)
->>> +			if [ -z "$list" ]; then
->>> +				echo "Group \"$group\" is empty or not defined?"
->>> +				exit 1
->> _fatal "Group \"$group\" is empty or not defined?" ?
-> Remember that this was posted before those changes were made. This is
-> the sort of thing that gets fixed on rebase...
-Yeah, right.
->
->>> +_tl_setup_exclude_group()
+>>> +usage()
 >>> +{
->>> +	local xgroup="$1"
+>>> +    echo "Usage: $0 [options] [testlist]"'
 >>> +
->>> +	_XGROUP_LIST="$_XGROUP_LIST ${xgroup//,/ }"
->>> +}
+>>> +check options
+>>> +    -D <dir>		Directory to run in
+>>> +    -n			Output test list, do not run tests
+>>> +    -r			randomize test order
+>>> +    --exact-order	run tests in the exact order specified
+>>> +    -s section		run only specified section from config file
 >>> +
->>> +_tl_setup_group()
->>> +{
->>> +	local group="$1"
->> Minor: Since this function is public , do you think it is helpful to
->> have a quick sanitization that makes sure that $1 is not empty and
->> prints message otherwise? Similar comment for
->> _tl_setup_exclude_group().
->>
+>>> +testlist options
+>>> +    -g group[,group...]	include tests from these groups
+>>> +    -x group[,group...]	exclude tests from these groups
+>>> +    -X exclude_file	exclude individual tests
+>>> +    -e testlist         exclude a specific list of tests
+>>> +    -E external_file	exclude individual tests
+>>> +    [testlist]		include tests matching names in testlist
 >>> +
->>> +	_GROUP_LIST="$_GROUP_LIST ${group//,/ }"
->>> +}
-> I don't think it needs it. It should be checked by the caller
-> if necessary because it is the one doing option parsing to set up
-> the group.
-Okay.
+>>> +testlist argument is a list of tests in the form of <test dir>/<test name>.
+>>> +
+>>> +<test dir> is a directory under tests that contains a group file,
+>>> +with a list of the names of the tests in that directory.
+>>> +
+>>> +<test name> may be either a specific test file name (e.g. xfs/001) or
+>>> +a test file name match pattern (e.g. xfs/*).
+>>> +
+>>> +group argument is either a name of a tests group to collect from all
+>>> +the test dirs (e.g. quick) or a name of a tests group to collect from
+>>> +a specific tests dir in the form of <test dir>/<group name> (e.g. xfs/quick).
+>>> +If you want to run all the tests in the test suite, use "-g all" to specify all
+>>> +groups.
+>>> +
+>>> +exclude_file argument refers to a name of a file inside each test directory.
+>>> +for every test dir where this file is found, the listed test names are
+>>> +excluded from the list of tests to run from that test dir.
+>>> +
+>>> +external_file argument is a path to a single file containing a list of tests
+>>> +to exclude in the form of <test dir>/<test name>.
+>>> +
+>>> +examples:
+>>> + check-parallel -D /mnt xfs/001
+>>> + check-parallel -D /mnt -g quick
+>>> + check-parallel -D /mnt -g xfs/quick
+>>> + check-parallel -D /mnt -x stress xfs/*
+>>> + check-parallel -D /mnt -X .exclude -g auto
+>>> + check-parallel -D /mnt -E ~/.xfstests.exclude
+>>> +'
+>>> +	    exit 1
+>> _fatal ?
+> This is a common usage() function pattern in shell scripts. It's
+> clear that it exits with a non-zero error status when someone gets a
+> command line parameter wrong.
 >
->>> +
->>> +_tl_setup_cli()
->> Nit: This function mostly sets up test list related variables - so
->> maybe a name that suggests that. Maybe something like
->> _tl_setup_test_list_vars or _tl_setup_test_vars - just a suggestion, no
->> hard preferences here.
-> Ok, I'll come up with a new name for it, but keep in mind that this
-> function is actually parsing arguments that have come directly from
-> the CLI.
-Yes, I have got that.
->>> +{
->>> +	while [ $# -gt 0 ]; do
->>> +		case "$1" in
->>> +		-*)	echo "Arguments before tests, please!"
->>> +			status=1
->>> +			exit $status
->> use _fatal?
->>> +			;;
->>> +		*)	# Expand test pattern (e.g. xfs/???, *fs/001)
->>> +			local list=$(cd $_tl_src_dir; echo $1)
->>> +			local t
->>> +
->>> +			for t in $list; do
->>> +				t=${t#$_tl_src_dir/}
->>> +				local test_dir=${t%%/*}
->>> +				local test_name=${t##*/}
->>> +				local group_file=$_tl_src_dir/$test_dir/group.list
->>> +
->>> +				if grep -Eq "^$test_name" $group_file; then
->>> +					# in group file ... OK
->>> +					echo $_tl_src_dir/$test_dir/$test_name \
->>> +						>> $_tl_file
->>> +					_tl_have_test_args=true
->>> +				else
->>> +					# oops
->>> +					echo "$t - unknown test, ignored"
->> Minor: Sometimes it has happened with me that I have added a new test
->> (with ./new ) but forgot to run make and hence the test wasn't getting
->> run and was reported to be an invalid test. Should we add a suggestion
->> to run make, in case we encounter an unidentified test name?
-> Not in this patch set. If you want these sorts of process reminders,
-> please send them as separate feature additions.
+> Also, check-parallel does not have a status variable that needs to
+> be set to propagate exit values, nor does it have any traps set up
+> at this point to need exit value propagation.
+Oh, right. Yeah, check-parallel directly will exit from here, so yes 
+exit 1 should be fine. Thanks.
+>
+> Hence calling exit directly is really the right thing to do here.
+>
+>>> @@ -198,7 +310,7 @@ grep Failures: $basedir/*/log | uniq | sed -e "s/^.*Failures://" -e "s,\([0-9]\)
+>>>   echo
+>>>   
+>>>   echo Ten slowest tests - runtime in seconds:
+>>> -cat $basedir/*/results/check.time | sort -k 2 -nr | head -10
+>>> +cat $basedir/*/results-$now/check.time | sort -k 2 -nr | head -10
+>> Maybe have this default to top 10 list but make it parameterized, just
+>> like we do it for DIFF_LENGTH (# number of diff lines from a failed
+>> test, 0 for whole output)? Do you think that would be useful?
+> Not at this point in time. This is largely initial debug
+> information; it tells me which test(s) are consuming all the time,
+> and how close the overall runtime is to being bound by single test
+> runtime.  I only put this here because I was running that command on
+> the CLI after a test run frequently, and generally I was only
+> looking at the top 2 or 3 tests in the list....
+>
+> e.g. if the whole auto group test run takes 9 minutes, and the
+> longest test takes 8m30s, then it is clear that total runtime is
+> bound by the slowest test. Make that test run faster, and
+> overall auto group test time will run faster, too.
+>
+> This tells me what tests I need to focus on for runtime optimisation
+> (e.g. sync -> syncfs conversions). Once all the low hanging fruit is
+> gone, it won't tell us anything useful and I'll remove it...
 
-Yeah.
+Ah, okay. Now I get the reason for introducing the information of the 
+top slow running tests. However, we can still keep this feature - in 
+case someone writes a new test and uses some functionality or command 
+(like syncfs instead of sync) and slows it down, although that can be 
+caught in code reviews too. Anyway, no hard preferences here. But thanks 
+for pointing out the reason for introducing the top slow running tests 
+information.
 
 --NR
 
