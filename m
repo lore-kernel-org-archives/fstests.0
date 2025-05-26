@@ -1,148 +1,105 @@
-Received: from mail-pf1-f175.google.com (mail-pf1-f175.google.com [209.85.210.175])
+Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F9021E3762
-	for <fstests@vger.kernel.org>; Mon, 26 May 2025 09:04:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E87A28EB;
+	Mon, 26 May 2025 14:35:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748250301; cv=none; b=mDXXNp3QoGEiEvuX6IGtid803cQI9fOHdwzpS2F89+QlAKbFY8kYD9aFpNSImrynheAQxLiiG2uN9YHyFLLA7z6pfQR1e7zf5yn2H4Q3omhTSy0zkkMab+PccG6wnQ67XI0Y52j0Bm+9QRq4P2s3hLhFKIbVD8T7ZpRpluOuDs8=
+	t=1748270108; cv=none; b=PxFlQiUcG6k9x/fDzuBvqgg0/zbLR+tBiPjrN1PeUtEXv3aRL8h/UHTgTKmmcj62HVMt1wvssLgUjdQKb3FHI2C47FvywGBOMG94QOyUzc6Fo5AXZhe1/ik16zXvjTM9WKxMBYxFpKBhGkjY2uOdhf6qKLY6Ng01b5BmeOGQpJk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748250301; c=relaxed/simple;
-	bh=fS8KP1MGX+ni2IluJZSzV6/spdu7HbLDcmGqd0uEbos=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=ALzuVSdUO6iz/81rSshjHTbfGMmXqSduD/Iec78a1mHdwWpd0zO3yc5/jMTf19dJwNaG/5DN3HlF4yaTXPhTePVsTQjnBbTZBIYYYqCEpyMxvhCzbUhEJvoR08WgehEZ34n+DitP510lvf2dZPgJoAb8Z+VGw1G8443GNgx4Ex4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=E0teAeOm; arc=none smtp.client-ip=209.85.210.175
+	s=arc-20240116; t=1748270108; c=relaxed/simple;
+	bh=slUUX+Xfj1OSuhBELMtPg+bYXDlhloFKYqMrulkUoQ0=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=V3KWbquhXNsTjWBjPPeBOh33Ddg0IhwDje/Z563OQzzu1vyJMDqdTBGG/gFNtFm5l+kBPqMYJnV8Xx9UVl3IylE2NC5Op4vel/Ajk39Baxsq8ecdUnK6dvwFISSoxyKbnKfW5ygXEl/Aj9494SoBU5BUxmyhOAZTdTKIadthhEU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=i/PrbPlB; arc=none smtp.client-ip=209.85.128.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="E0teAeOm"
-Received: by mail-pf1-f175.google.com with SMTP id d2e1a72fcca58-7398d65476eso1261221b3a.1
-        for <fstests@vger.kernel.org>; Mon, 26 May 2025 02:04:59 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="i/PrbPlB"
+Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-442fda876a6so22266675e9.0;
+        Mon, 26 May 2025 07:35:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748250299; x=1748855099; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=V3DjUGTJVZXr+kHVsrZNgc5c0TtWDfBaE+YNjKc9nw0=;
-        b=E0teAeOmVRoOKeP8WquhzwBYPNqo+k2RROEKQneeCwmUhT5KU0OnkWgRZ5GfgCB5p/
-         Wfjsfgw8fGjOm4kQ0k4fSLzGRxmQULONsQusunIsNi8aa9GK3lXVWkrhL6qgLrKQ+TUf
-         CaPWayWp0EfhuuVaKhUsjd+tNGCAoo0dDOPkALXCeXS4/jV/wZnfJTtQWSrWxHKR5H7b
-         FBK0F/vk0rdipzNSCY57cRaQyucE2mIpuVsLluTUyHVi7w6AqV2gLTABP9zIQ41xdM+7
-         Fs7Jom7o2cuoDRwBWHze3r4RNjax63lbw6MhLs0HwteSDwb29qgXVsKdbDvcKzNGtvTi
-         oR/w==
+        d=gmail.com; s=20230601; t=1748270104; x=1748874904; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=FWLIefqv85YoaftSGJXTEq/4LX7sS5rmlanKHNxwp7A=;
+        b=i/PrbPlBe5+vCljCuTQbxPhhZuy1RjnkfwdonDRSN3535OhKNlDCHefOKOCgj7uOfq
+         lhaiETgrPjrx3RzSGONxI/UX0NrPd6sZ9/wyYi3kn0cPWwfNuQBrIknxWdqLcLNZ/r/8
+         a9MLAhl15GlNshw5RnkBXaLQmJZOedftLKVdk0gW0oonVarlorSb3UkRC4yWGU6Tww2M
+         Nl+K4pIdo1zIeve+VqqSG2e3vOuvGBf1jyYe3lQJcFrh59+tDL/0UiXQOvS0yK6AvIEz
+         INloR7fxD3f3cCV51+t8blUnJhYam+zx02QNXCfxoUm5+vxEEkGyDSUzAid330A6k+1F
+         3jMA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748250299; x=1748855099;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=V3DjUGTJVZXr+kHVsrZNgc5c0TtWDfBaE+YNjKc9nw0=;
-        b=KZTiODx5y6Dz8yF1CFofYJRWvsBa0TYfPy3V+z7Nfa+r6mJBHuySEC35XWNOVrpbaA
-         /pbz5cMcMsEPMqEnXkoufRo6GiNdlASc6fUZXShkYtmYJUmkn8b6jMnUEuo2MCm6JI+H
-         s4XVsvlM524D8Qv74ZeIeH6Ab9aDnDrmdDxQ566Tyj/Y+NgQ/rWBlfS2Jx8Up3H4qpxB
-         KI0HlTWAHiQv4mYyeLJfj4xJoKxk2XtH1kZG/gwgznOWSvjRmUyE5TvU9WunOvwuob1g
-         qZ9l/pc6U0xRipLlQ1CH3u3ALwQzwRO00CgIJT9y/1sYxs2mI+cFti8gB90XtooL42rS
-         5USA==
-X-Gm-Message-State: AOJu0Yw/m8YYUNL4G+kyj8NuUCPf9P8nW248CUNdLZYOMXfVWVXu9BVe
-	mTBd1IN0C3wOHxYmYkiRHIYuzWA3MScx2Joj+6jOFoq9YIdrSEl41YLrQt5+qA==
-X-Gm-Gg: ASbGncuafIC9RsJkeYFucUj77bXxcPhqGcfA2xwYstm36uYeNH7C4ZysODDlfVNb2by
-	zq/upIJ2+GjOBK/igb2MuhVwwdm25AF39xdo8dZYRMTDlvJZHwNHqVgWK1It79nXjbSqJdRn9Dr
-	IjfhJfFZxP6V1ykLu4raJujUcc+qusOdiFWpiiOJrCAt+0OejhiaxQPgATTr13DNdTEmqBCMrkZ
-	66O8E5UAQA+X6cllAgKoCjZJuC5fGABVQgXOWtX5ml6iw/2q0DsVim+wawHo1qVeN0WbmDF2qh/
-	Pn6DSfwJuoAJs3TJDBn45Jpaey9MvYRO2pkYmtb1cadITz6oof47NgvRCA==
-X-Google-Smtp-Source: AGHT+IEKVB5Xt7CNZPXd6UsLwXNPBS+kDSn0oZpvjMG7ApapC2uWcc96AZSlDVUnCwBTUeQO4yNSMw==
-X-Received: by 2002:a05:6a20:9f8e:b0:218:574e:830d with SMTP id adf61e73a8af0-2188b78d232mr13220453637.21.1748250299219;
-        Mon, 26 May 2025 02:04:59 -0700 (PDT)
-Received: from [9.109.247.80] ([129.41.58.0])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-742a9829a4dsm17283141b3a.107.2025.05.26.02.04.57
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 26 May 2025 02:04:58 -0700 (PDT)
-Message-ID: <9d89ac6d-bd90-4c09-9a86-196acbc37c9e@gmail.com>
-Date: Mon, 26 May 2025 14:34:55 +0530
+        d=1e100.net; s=20230601; t=1748270104; x=1748874904;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=FWLIefqv85YoaftSGJXTEq/4LX7sS5rmlanKHNxwp7A=;
+        b=sCAPEDXa9LhBu/b7Ir0n/EA6f47Ivmg+DzBQpa4i612+/d9GQ56+BauAuwoNJXVxwl
+         jPAmA8/kAGBmsexiNOXHfgeqMm4dolzWAstSBWPUphRkIn6wGrL0Lp4b2ejjLGAl1Yoh
+         EawLDewpeftUkjoLTfs82tY8NidMmwsYqL5U1ZG614/0VG0/xWmOmvXrDBaXnZAwwoWG
+         53CCX8qYmd/Xa9RUYKYwKDvxYIKGdP3DQuxnbhPGqmqjyvWINtd9VPp1rqdDVSoj2xZA
+         3aMSYlu/NCO5Xr6XuVz+4VL6xCTU2oCjqwDRuFrQ5mrvO2M8uwynUtkvfYFUJM3+LSeS
+         x5pw==
+X-Forwarded-Encrypted: i=1; AJvYcCUTkY5EvdQ3fQIZ09FZL2xXW66nkmcRfupqAhGrsn32ctaUbj4ccqLO7ac+r59TXjQhSQNDaMeFRWRW5/7c0A==@vger.kernel.org, AJvYcCVVewWM6xJhnrAmhqz07hfMvLCLzrGXK0lKlaXWIXrPbdL6SNtp6Ix8aOMNKuECj5cQsmItv/zg@vger.kernel.org
+X-Gm-Message-State: AOJu0YwdMTzMX5Tfw5iMz8Ly5N9Vyty4W2EW2c8OaSVmmkLc5TuqyAlT
+	kZ8CvY70W5srQodwXODZrjcM/xTTuynCsjKeqklwUOxifM3PLfde0W6T
+X-Gm-Gg: ASbGncsyqdHIzlfuOanSBUtDxk8k5cP67K3VVgWVFMlqb1HJktk5jm2yHF58uXboHl+
+	U7IX2olcHRHdxvK0n7RELNDiG0WF5jHZJclQqaez8cOCDtf/MsD8/KCxcpt+fzhMb9up9mt0lcP
+	FPNVB5bsAXTLXnjxW9WR5D6cpnL2qADr1E6kJ3O7ntthAmp+zCaE+HZL52aabFvLDqQzP21quxB
+	n5+KeHVIkkS22Ryy+044emMHFUUhS9fuolu/Y5W/ektv1OYANU45T+tOamJ87bdU1uUKePQwu0/
+	aTJ5HA94Str8/WaLWfmMXRYZd4RZbNb8y9+o1vZQe9IAHr8TLViW5xUPDhz125I8BBNO+6n4nht
+	na5zdc1KfKf5++5jKVsd/9n1LrjG1n74p6gwWPCuTfC8aRe0k
+X-Google-Smtp-Source: AGHT+IFBtLVic4k2k4SRpZWKOQq3ppAr5hunjB5pcf5wFvmLihjr9sdvVCADDe506ugXg3aQNCdY4g==
+X-Received: by 2002:a05:600c:1c27:b0:43c:eeee:b713 with SMTP id 5b1f17b1804b1-44c92f21e2amr63430855e9.20.1748270104163;
+        Mon, 26 May 2025 07:35:04 -0700 (PDT)
+Received: from amir-ThinkPad-T480.arnhem.chello.nl (92-109-99-123.cable.dynamic.v4.ziggo.nl. [92.109.99.123])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-447f1ef032esm245264865e9.9.2025.05.26.07.35.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 26 May 2025 07:35:03 -0700 (PDT)
+From: Amir Goldstein <amir73il@gmail.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>,
+	linux-unionfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH 0/4] fstests overlay fixes for v2025.05.25
+Date: Mon, 26 May 2025 16:34:55 +0200
+Message-Id: <20250526143500.1520660-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 10/28] check-parallel: use PID namespaces for runner
- process isolation
-Content-Language: en-US
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, zlang@kernel.org
-References: <20250417031208.1852171-1-david@fromorbit.com>
- <20250417031208.1852171-11-david@fromorbit.com>
- <0c40accd275f3fcdb9d00309159ecb9eb55335b9.camel@gmail.com>
- <aC2oxc6-f3J597f0@dread.disaster.area>
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <aC2oxc6-f3J597f0@dread.disaster.area>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
+Zorro,
 
-On 5/21/25 15:49, Dave Chinner wrote:
-> On Wed, May 07, 2025 at 02:32:29PM +0530, Nirjhar Roy (IBM) wrote:
->> On Thu, 2025-04-17 at 13:00 +1000, Dave Chinner wrote:
->>> From: Dave Chinner <dchinner@redhat.com>
->>>
->>> This provides isolation between individual runners so that they
->>> cannot see the processes that other test runners have created.
->>> This means tools like pkill will only find processes run by the test
->>> that is calling it, hence there is no danger that it might kill
->>> processes owned by a different test in a different runner context.
->>>
->>> This means we need to turn of private pid/mount namespaces inside
->>> check itself - nesting private namespaces causes all sorts of weird
->>> TEST_DIR mount issues with SELinux disallowing TEST_DIR mounts.
->>>
->>> Note that this also regresses generic/504 for check-parallel,
->>> because it triggers looking at the init namespace from
->>> FSTESTS_ISOL=privatens and this variable is not exported to test
->>> subprocesses anymore.
->>>
->>> Signed-off-by: Dave Chinner <dchinner@redhat.com>
->>> ---
->>>   check-parallel | 10 +++++++---
->>>   1 file changed, 7 insertions(+), 3 deletions(-)
->>>
->>> diff --git a/check-parallel b/check-parallel
->>> index 19f2d2b0c..aa88c681e 100755
->>> --- a/check-parallel
->>> +++ b/check-parallel
->>> @@ -267,14 +267,18 @@ runner_go()
->>>   	rm -f $RESULT_BASE/check.*
->>>   
->>>   	# Only supports default mkfs parameters right now
->>> -	wipefs -a $TEST_DEV > /dev/null 2>&1
->>> -	yes | mkfs -t $FSTYP $TEST_MKFS_OPTS $TEST_DEV > /dev/null 2>&1
->>> +	wipefs -a $TEST_DEV > $me/log 2>&1
->>> +	yes | mkfs -t $FSTYP $TEST_MKFS_OPTS $TEST_DEV >> $me/log 2>&1
->>>   
->>>   #	export DUMP_CORRUPT_FS=1
->>>   
->>>   	# Run the tests in it's own mount namespace, as per the comment below
->>>   	# that precedes making the basedir a private mount.
->>> -	./src/nsexec -m ./check $run_section -x unreliable_in_parallel --exact-order ${runner_list[$id]} > $me/log 2>&1
->>> +	#
->>> +	# Similarly, we need to run check in it's own PID namespace so that
->>> +	# operations like pkill only affect the runner instance, not globally
->>> +	# kill processes from other check instances.
->>> +	tools/run_privatens ./check $run_section -x unreliable_in_parallel --exact-order ${runner_list[$id]} >> $me/log 2>&1
->> Why aren't we using -s $section and only using $section with check?
-> It is already encoded in $run_section - the CLI parsing adds the -s
-> for each section that is specified on the command line:
->
->          -s)     run_section="$run_section -s $2"; shift ;;
+It's been a while since I upgraded my test machine.
+A recent quick run with overlay had some failed tests.
 
-Yeah, right. I realized that later. Thanks
+This fixes some of them and opts-out of some.
+The first patch is a re-post related to upgrade of my distro
+to a newer distro (trixie) using libmount v1.41.
 
--NR
+Thanks,
+Amir.
 
->
-> -Dave.
->
+Amir Goldstein (4):
+  overlay: workaround libmount failure to remount,ro
+  overlay: fix regression in _repair_overlay_scratch_fs
+  generic/604: do not run with overlayfs
+  generic/623: do not run with overlayfs
+
+ common/overlay    |  6 +++++-
+ common/rc         |  8 ++++++++
+ tests/generic/330 |  2 +-
+ tests/generic/604 | 11 ++++++-----
+ tests/generic/623 |  1 +
+ tests/overlay/035 |  2 +-
+ 6 files changed, 22 insertions(+), 8 deletions(-)
+
 -- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+2.34.1
 
