@@ -1,63 +1,63 @@
-Received: from mail-pl1-f180.google.com (mail-pl1-f180.google.com [209.85.214.180])
+Received: from mail-pl1-f172.google.com (mail-pl1-f172.google.com [209.85.214.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5594F1E500C
-	for <fstests@vger.kernel.org>; Mon, 26 May 2025 08:50:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 954A51F12E9
+	for <fstests@vger.kernel.org>; Mon, 26 May 2025 08:59:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748249417; cv=none; b=X3RQVfX+/7iEYU/bKbJjdqORzsGCE6iZGz8okmRLwpjhLwCh66uicLN8uxm5wGQh+ktYsFIA1C9hnGJDf+35VtNx+Csls2yYKo329kN9cHru3WtjLWlBbIoHHvJKr9MY+JDdpJB6OK7RQ2qBZ4E6kPpi1zgKPt0GD+zloUEhhnU=
+	t=1748249966; cv=none; b=hbvz3Axc/ARIZl3ln/WvCKUeEA/Xvv9bjrSTueW216hulCoZPFQEM5BTxS5p6m4trb11WF2SQmM8XqEaP2WCLnvYIJG10A3GAs6wj1ERCmlHmv4ZqB9efoYHiDgqlb4z28Klww5PDqOYaLmdK731ex1+FQ1ufoerUBvYA20jTpM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748249417; c=relaxed/simple;
-	bh=iKEdZJQrCaI+BEj623wv44tlu4LIUzMYAn3qrdw66x8=;
+	s=arc-20240116; t=1748249966; c=relaxed/simple;
+	bh=efX/tPG5CKUqXeBzzQUR5NMnxNjzn5a9zF4/rO+8+xQ=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=oEyYUhRC6/00ZWKuKaSjmq0haiiAidL0tv9TrbH6klEy1/U4eLacmabA1FVTFdmLq4md8CqAJ+tuk2iWdG+cUBxq/Y3P814jhAl0JzXw/WPgTZn/E7B9If5QxixlTX0LADOzxaleomDpArXddlFdwBel8UCSegVTPn+C5/AHD/4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=A4c/wpPG; arc=none smtp.client-ip=209.85.214.180
+	 In-Reply-To:Content-Type; b=OAjQhVWdcEI6FC9YG1ieuw80MWpGexQ73xjLmYlA1UT5lvSycTWWtpn9pnw804lGb8WoOyKz5LQNC4Ni/eYCSI95oYJJmTPwdxYUJNSQzfnPk0eUU17tDs70U5MhfN6yOVfE5kmtyoz6Bx3xmJqCahcNsPrmQTg6KU36F7c6CCA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ELa8PJ6a; arc=none smtp.client-ip=209.85.214.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="A4c/wpPG"
-Received: by mail-pl1-f180.google.com with SMTP id d9443c01a7336-23035b3edf1so12913915ad.3
-        for <fstests@vger.kernel.org>; Mon, 26 May 2025 01:50:15 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ELa8PJ6a"
+Received: by mail-pl1-f172.google.com with SMTP id d9443c01a7336-2301ac32320so15753365ad.1
+        for <fstests@vger.kernel.org>; Mon, 26 May 2025 01:59:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748249415; x=1748854215; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1748249964; x=1748854764; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=DOuwZBwLIWYX5a7NBSjB2FT0QaajGDb1mNBQRFwi8Gg=;
-        b=A4c/wpPGzHCPJp7naGvPhJDXNiFHEukupn8nB6CpPUrA7RkkOkehsNEN0uUlecGCzi
-         pEkZLGvFvZ2/YKn0ufA8DG5CWVA4dbovr+CKTI1tCm4yUrwUrV4+8hCVOG+hbHg44rsG
-         tyt3yai3oV559xzRVDhmAzpglPonz2HF5KoyJ7cLSKAFflHTK/ZIU5z06v/4ubfuH7SS
-         7q/4bnsGGPfoE7L4DfqC3djcpnnofNj5lnBLmYo9n6pie4dBdRatOctsnqRrhf6cU9xp
-         BzTjHQXyfPj0t23Y5heguAmHdleuC2spBoEPRN5WjhHrZ6v81nJ9FQVLfAKA6Og0c36G
-         x+VA==
+        bh=YEdcw/7/Ou/3N8RsZz5p9Bt0NhRDp4M+SCqt9Er8IQk=;
+        b=ELa8PJ6a6z+Ge+t8YymAxydKM3jBRz/BxPoCBl6xS1FMdYxDsd6wV/Hr2B6xUQV+jI
+         KGlAtHL1IT0LgcA80YhB2BETC0CGli7RoLRrb56bRBNetZ9Z5RGBhv5G9lIlQssYhYHN
+         v9W/PpaztPS84nkHyd9/P5iy1JBMmG9bFYukM9yB4dHxW7I0eAcmBbhlW4RrOWER8369
+         iBHGzLtyXBZ3krTOQr9Wt1b9lw44Suv0pkwM+Ozo4Wc4gMqY1pZ0JkerJX9no6rbuTMp
+         eJCedxRCRBywzxo5s7oTOJO7mrnQN7QChZhzWRokHoYGP/M5XvWiHvzFzaauhvqSC/WT
+         S88Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748249415; x=1748854215;
+        d=1e100.net; s=20230601; t=1748249964; x=1748854764;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=DOuwZBwLIWYX5a7NBSjB2FT0QaajGDb1mNBQRFwi8Gg=;
-        b=CjC5Hi/C37vSG1bY/mNt6elf7cYnHTBX6hoGe98qBcce6AIgR2BQ+58skikxWMB9CW
-         PYjiMfthNH1VfceeEBHFIfSv/iTYvooKgZv4U39R1rM54JkpFVS3UtVLkwLu+zCZsWKa
-         BcbaGYk5EieMR0rJPBGlCTO4YWtCgT22plf89m+qg3jBZIPf3sb2PuxK1xPBMXSSyK5G
-         la96QEaOuTzJtDW1DNlYPX0LKU6XDRRev3lA4QAE3x6caZ+W6JTcwYQc5ZK4XrQlPlp1
-         lXsBCdEgBB0CFpVw+6fGGxOzDE6q6QhMnx2acTq7eN2/fPSVm+OJLCDYL+A2tUtT9i+o
-         OwAg==
-X-Gm-Message-State: AOJu0Yzfq7sCVhO+t/0zgp+KL/ZUFlPbAiqLBLbjllv6sJ9XNlWNh9vY
-	yUktoPu29OMOv+mOwR5Sl5FbSHiFtDd3peEMdnymDbUBKueNivKyIAu0
-X-Gm-Gg: ASbGnctRNmJAphMf77QftAW5S4facpfUxmrRFv0kweIfRA53dc7ZqcPaW+MD2UQsHWP
-	4ALWHb3FBtYTnqkJAWGwxbcAGwiFXhpzfpBKJWryW+6hTCskKAzVI29c2K4NsKkoxGL0ejZt/RO
-	JjC90JvqeDjIf+pGWbuU/q3KQTylTD3I9qyYc3EjtcIl0vLBDGJc23AWYgSW1p95306Mwj2vBlP
-	6UX3lkaefUp5DsVB/Ma1M9H0QBD37qf5Tv+7/vSXSDUZl868iwQdUc6xuqWnTax5rbJAtBQMsWU
-	UsR9MIjiZTFiaetuSL9SeSIAXkcCtljecxUDSI9F1PmQ66Z12hJ5XU1cB1Jg+J4dw4R7
-X-Google-Smtp-Source: AGHT+IH7wOmKYVzuHKw+hiKqux0LP47FhPRTIRwq8KvliWYVw1Y3seiCOdatln5B6kqOtKuQPSiEvA==
-X-Received: by 2002:a17:902:e881:b0:223:65dc:4580 with SMTP id d9443c01a7336-23414fe65a9mr118636445ad.52.1748249415353;
-        Mon, 26 May 2025 01:50:15 -0700 (PDT)
+        bh=YEdcw/7/Ou/3N8RsZz5p9Bt0NhRDp4M+SCqt9Er8IQk=;
+        b=C3YG8VVbB0atPTJpfTlZkL+VpP2lseTGlTvQS2yBqqHSQ2PYqF6Srsue89P5WVCHLD
+         uo3TIQsvCF0JDYJVFB5e64JyxYkf0FcW8MhhOh9dGE95wIOfyyJqfw0JY5bVCfwc0eCD
+         CP8Rhwe60ld5PEOOTgm7B/5yCQBtVEYG26CkcCToCwgeSQZjZEDZlGKDD5byCEKBWnZw
+         hVCsUYPxxrn3oF9lHMZ9VbFNkxBG/lS4MMQggEBkHRmf1kZlQddxsfl7G2zRLxhlMm2O
+         fHGD8fJhZRjNXXbxCxjP+99PsLJHDahlaXpf72R59EC1SM180D+WR6Zaw7nQTdA8BJRh
+         o8Ag==
+X-Gm-Message-State: AOJu0YyzEyErZaDOe6rUMekgYNPbr8PwW5SFgg1mBMvPIaoagtop8oiq
+	009wNLL5HQcR71JinBkV+yacZQq4gEWVDAsc9ivcaRwLc1YQoAtxefkA4S892g==
+X-Gm-Gg: ASbGncsXpIi5DxmVZ3fdiUg41OHo+5X751BXyM7Xp6nHNDPe6PMHmTnP4iogCmQ1bXY
+	Zl9SwHqyGGr53uLW+EdEr/VOhsARUEP2Kb2JgbTZ4paVJNfDyfJNaAFu8dRY3OnzkUFtEaMtgCH
+	aT3wcfTJZNPSbwx/uHZZXFBdTjnkZ5svELHU52UeXuf5qbelzYcklm75udFb5yYqI3eWzopE6wr
+	OM8oWaJ/B9l0GHk2nwcn0C0O8/oEA+kVDEukL9ay2x6Dt0tz3RjML35tfqbaKaA44NM/bdEd7zP
+	zICUjY35Vo4ggUqxn6++3o86YOaUFnC4Vb6yVG1NTbGijxWN1hYoisoJVw==
+X-Google-Smtp-Source: AGHT+IHzJ3MmDkSr0o0WYPbAk6+2voQ67H7BVtdvBGGfJiOeCcwnpMRNstS3PLjbJBSUy7ErToMd3Q==
+X-Received: by 2002:a17:902:ef51:b0:223:47d9:1964 with SMTP id d9443c01a7336-23414fd3b2emr161803025ad.34.1748249963759;
+        Mon, 26 May 2025 01:59:23 -0700 (PDT)
 Received: from [9.109.247.80] ([129.41.58.0])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2343a00986dsm24183645ad.178.2025.05.26.01.50.13
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-310ffebb340sm4780570a91.16.2025.05.26.01.59.22
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 26 May 2025 01:50:14 -0700 (PDT)
-Message-ID: <fd136632-44f0-4690-be6f-3bfb3d3ba1b0@gmail.com>
-Date: Mon, 26 May 2025 14:20:11 +0530
+        Mon, 26 May 2025 01:59:23 -0700 (PDT)
+Message-ID: <db1e5383-3e8e-476e-a181-34d03bea1682@gmail.com>
+Date: Mon, 26 May 2025 14:29:20 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -65,120 +65,69 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 07/28] check-parallel: adjust concurrency according to CPU
- count
+Subject: Re: [PATCH 08/28] check-parallel: add logwrite device support
 Content-Language: en-US
 To: Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org, zlang@kernel.org
 References: <20250417031208.1852171-1-david@fromorbit.com>
- <20250417031208.1852171-8-david@fromorbit.com>
- <e434a271402602fa7ec5efbcd9d92329ecdd4614.camel@gmail.com>
- <aC1XWzTFPUa_7WS_@dread.disaster.area>
+ <20250417031208.1852171-9-david@fromorbit.com>
+ <3c71d313d13fab780425304c118bd86f534fefe6.camel@gmail.com>
+ <aC2l3D-mqGT2Ae_d@dread.disaster.area>
 From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <aC1XWzTFPUa_7WS_@dread.disaster.area>
+In-Reply-To: <aC2l3D-mqGT2Ae_d@dread.disaster.area>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
 
-On 5/21/25 10:02, Dave Chinner wrote:
-> On Wed, May 07, 2025 at 12:15:09PM +0530, Nirjhar Roy (IBM) wrote:
+On 5/21/25 15:37, Dave Chinner wrote:
+> On Wed, May 07, 2025 at 01:48:03PM +0530, Nirjhar Roy (IBM) wrote:
 >> On Thu, 2025-04-17 at 13:00 +1000, Dave Chinner wrote:
 >>> From: Dave Chinner <dchinner@redhat.com>
 >>>
->>> Concurrency is currently hard coded at 64 worker threads. This is
->>> too many for small CPU count machines; the idea is to create a
->>> sustained load of roughly one test per CPU as they are mostly single
->>> threaded/single process tests. The number "64" was chosen because
->>> I've been developing this functionality on a 64p VM.
+>>> Every logwrite test will use the same /dev/mapper/<dev>
+>>> name for the logwrites device, so we also need to convert
+>>> common/dmlogwrite to use per-test device names as we have done for
+>>> other dm devices.
+>>>
+>>> Then add a per-test-runner LOGWRITES_DEV so that all tests using
+>>> dm-logwrites now get run by check-parallel.
+>>>
+>>> Signed-off-by: Dave Chinner <dchinner@redhat.com>
 > .....
->>> diff --git a/check-parallel b/check-parallel
->>> index cb5d6aedf..0649a417f 100755
->>> --- a/check-parallel
->>> +++ b/check-parallel
->>> @@ -10,7 +10,7 @@
->>>   # the loop devices.
+>>> diff --git a/common/dmlogwrites b/common/dmlogwrites
+>>> index a27e1966a..7c3ad95c9 100644
+>>> --- a/common/dmlogwrites
+>>> +++ b/common/dmlogwrites
+>>> @@ -4,6 +4,9 @@
+>>>   #
+>>>   # common functions for setting up and tearing down a dm log-writes device
 >>>   
->>>   basedir=""
->>> -runners=64
->>> +runners=$(getconf _NPROCESSORS_CONF)
->> Minor: Not related to this change. Maybe we should have a _get_nproc()
->> just like
->> _get_page_size()
->> {
->> 	echo $(getconf PAGE_SIZE)
->> }
->> _get_nproc()
->> {
->> 	echo $(getconf _NPROCESSORS_CONF)
->> }
->> and replace all the $(getconf _NPROCESSORS_CONF) with $(_get_nproc)
-> I have thoughts on that.
+>>> +LOGWRITES_NAME=logwrites-$seq
+>> if 2 different runners are running tests with the same $seq, won't
+>> there be a conflict? For example runner-0 is running xfs/xyz and
+>> runner-1 is running generic/xyz ?
+> Yes, it could happen, but it won't happen right now as there is no
+> overlap in test numbers using dmlogwrites between different test
+> directories.
 >
-> I think determining test scaling based on the number of CPUs in the
-> machine is wrong. If I run in a cgroup that limits tests to 4p on a
-> 64p machine, then fstests will think it is running on a 64p machine
-> rahter than on 4p. That's ... not ideal.
+> I do need to solve this generically (i.e. for all the dm device
+> types) in the near future because I want to be able to run the same
+> test N times in parallel. e.g do flakey test profiling really
+> quickly over thousands of iterations by running 64 instances of the
+> test at the same time.
 >
-> I think there should be a global variable that defines the
-> concurrency that tests should use to scale load/processes rather
-> than use the CPU count. Then check/check-parallel can set the
-> concurrency as they desire and we no longer have to worry about
-> tests creating excesively huge loads on high CPU count machines
-> because they were sized to load a small, low concurrency test
-> system.
+> For this use case, the dm device name cannot rely on the test
+> name/sequence number at all, and so I'm going to have to come up
+> with a unique ID of some kind for this purpose. It may be as simple
+> as encoding the unique runner ID along with the test sequence number
+> into the device name - it's not a difficult issue to solve.
 >
-> i.e. I intend to separate the concurrency with which check-parallel
-> runs from the concurrency that individual tests use to scale. For
-> check-parallel, I am thinking of fixing test concurrency scaling at
-> something like min(nr_cpus, 8), whilst the check-parallel harness
-> itself uses nr_cpus to determine how many concurrent runners to
-> instantiate.
-Okay yes. That makes sense.
->
->>>   runtimes=()
->>>   show_test_list=
->>> @@ -30,6 +30,7 @@ usage()
->>>   
->>>   check options
->>>       -D <dir>		Directory to run in
->>> +    -t <n>		Number of concurrent tests to  run
->> Minor: Maybe we should mention the valid range of <n> i.e, 0 to 1024?
->>>       -n			Output test list, do not run tests
->> Nit: Maybe there is some spacing issue here? "Number of concurrent ..."
->> and "Output test..." don't begin together.
-> Not that I can see, I think this is just email quoting and tabs
-> doing funky stuff.
-Okay.
->>>       -r			randomize test order
->>>       --exact-order	run tests in the exact order specified
->>> @@ -81,6 +82,7 @@ while [ $# -gt 0 ]; do
->>>   	-\? | -h | --help) usage ;;
->>>   
->>>   	-D)	basedir=$2; shift ;;
->>> +	-t)	runners=$2; shift ;;
->>>   	-g)	_tl_setup_group $2 ; shift ;;
->>>   	-e)	_tl_setup_exclude_tests $2 ; shift ;;
->>>   	-E)	_tl_setup_exclude_file $2 ; shift ;;
->>> @@ -111,6 +113,11 @@ if [ ! -d "$basedir" ]; then
->>>   	echo "Invalid basedir specification"
->>>   	usage
->>>   fi
->>> +if [[ $runners -le 0 || $runners -gt 1024 ]]; then
->>> +	echo "Invalid thread specificaton: $runners"
->> Minor: Maybe we should mention the valid range of "runners" in this
->> error message (0 to 1024)?
-> /me shrugs.
->
-> It's an arbitrary "check-parallel won't ever scale past this" limit
-> because the diminishing returns from added concurrency that Amdahl's
-> Law define is already kicking in at 64 threads. If you are running
-> check-parallel on a >1024p machine, you already know enough to be
-> able to look at the source code to determine why the error is being
-> emitted. :)
+> Hence I haven't spent much more thought on it than that, because
+> I've answered the two main questions that were relevant: "can
+> I solve it?" (yes) and "do I need to solve it now?" (no).
 
-Yeah. Got it.
-
-This patch looks okay to me. Thanks for the clarifications.
+Okay. Yes, I just wanted to point this out and confirm if my 
+understanding is correct.
 
 --NR
 
