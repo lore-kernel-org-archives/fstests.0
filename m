@@ -1,63 +1,63 @@
-Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
+Received: from mail-pl1-f172.google.com (mail-pl1-f172.google.com [209.85.214.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 257574A1D
-	for <fstests@vger.kernel.org>; Mon, 26 May 2025 05:11:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD37F72601
+	for <fstests@vger.kernel.org>; Mon, 26 May 2025 05:14:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748236274; cv=none; b=TxbrBkZPn4NDj+B3k2Ykg2F5fGewgGvRKm8yMO+N2JtkGBS9zHowsVTrVk5ibOLMa1CaZO87leCwHOVwACjXOpy/Ew1wi1qu78mFAvuz9Myv4RNo07/ZFhL/Olf8Et+nJ1UF79gKhBBGIaI+5v3XkjTon4TDZF5VnU8zjtKN0cw=
+	t=1748236463; cv=none; b=AUtS92w/V9oakKYDSOWbikaguVo8Xt548KD0/q4DRmDT4mVd1GRSI1or+UNqsRwuYFynl07TjA+zF0O/dGbPp2xdi9sgEHYmnzsdxoVCgu0fNjt8SmrLwfFOF9YeAwP8SfuFdVs4RFNsbgakqhC2IQi6oCFJ0+Qw33BkEeZFaNY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748236274; c=relaxed/simple;
-	bh=TpV50D2wJh7mtiWER2HplFwUnhJHx7+TwXAs/5qg0Bo=;
+	s=arc-20240116; t=1748236463; c=relaxed/simple;
+	bh=GJAtokZxKSmMEPcgGa19X4Z/7TNcatnyK+5eMx6GNKQ=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=dqMePTgm79YsJpyxvtGeD3Y9xgXwPQiiDINTMBQTN/NQ/qjLAj6fL6lTidITHPcypX7aRhtDPBEgeRRZ/aH+Nv8lzNLV0974Ix2hU2+Pk6wQKufPx9OCj8ak4CYQaQbH9CpNEZviMDiy1B5k5gKd0UpEJNSu1vx0m0VI8HUWdgI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kp3AFVRG; arc=none smtp.client-ip=209.85.214.181
+	 In-Reply-To:Content-Type; b=sLlEXq0pl2aYugQk+PuCsqhdUi8w3LNIdPOAeBivATZBae5v0k4yFZM5R02Ip296+9nuwjh9y9uhytDL53C0hIEEk1MO7cyWA8fScB53t1jCKFI6i3gmWt1Ja93tLX08V0AhV6sGPgVkcXyV+BZkLXyDh5zl+D6gOM0X4WMeujE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WoxEQQ2J; arc=none smtp.client-ip=209.85.214.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kp3AFVRG"
-Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-23278ce78efso9896325ad.2
-        for <fstests@vger.kernel.org>; Sun, 25 May 2025 22:11:12 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WoxEQQ2J"
+Received: by mail-pl1-f172.google.com with SMTP id d9443c01a7336-23278ce78efso9909955ad.2
+        for <fstests@vger.kernel.org>; Sun, 25 May 2025 22:14:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748236272; x=1748841072; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1748236458; x=1748841258; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=j/QKsIXf6U2vBi/PXJVhug4Bp3BSqVR/a8qI7P8v5/w=;
-        b=kp3AFVRG8ypF0dpHBq1yX5wFTBjygRhFTED1Ziqk1AWVvLYPnSSQltq5ORuM5cgUS+
-         EvyilyCEsRMvSfeFyPpM7XOmLRwzkngHL9zB3TgIAyiYYeDFI4TFk5c8aGJ8lRK/QUkr
-         ARQYj0F7C9wNhQDewSSZb/y0SKERbMDkDSRsTVAcGuiIIfvuMfgpQTATc2zg1bDUJuVp
-         Op1Z8zgZvPB1ofjs0jLXfv4kYDubTCCvm59BL4WfCCxuUNIak62UMoCRjl/6KZeeBH3F
-         XN++COhpSG3pW+hcBo6POcPpvacZ6XtPYpM0plU8MrM07rmEYmUgbQDD95O2iMWtGxf2
-         t9wQ==
+        bh=K2NWtvW+69716zF/2pgHyf6Jsgv7AmpN3S1nwiCCkrw=;
+        b=WoxEQQ2JOf2ZHP1YmAlu4jA3cLtCS4u9nD6tddwIIJx2VunJyaIBlUDD2mgkYA7gr6
+         6XuXoQSFb9cZrjptbeuLdBCR93iSHgeu1DMuk6FOxiIMXUVeZDXv/H3sqHwifxwB8xyF
+         ltcltQYnOsdpGIyeORQ4lAUNgSmCpExunBctK44cWccB8Ra5EkQzb85UFfvWrdO71PLD
+         CSO3sWJpOeIyH2WUHlUi1k82Pfj+gfO+Bt/78xvTgeHJho13tIX3DEyYdlvHDhbxFQc9
+         Fj/QEBfJlsjBPQRxcHjOLHBsxYOa5h5aIRY0jms3jBwGQq6JQLTCR3STXhCTV+4iDVuP
+         s9uw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748236272; x=1748841072;
+        d=1e100.net; s=20230601; t=1748236458; x=1748841258;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=j/QKsIXf6U2vBi/PXJVhug4Bp3BSqVR/a8qI7P8v5/w=;
-        b=vDpnNEfEzAPN6LzcE63pdAuGBhAk1ke6Ln+89UF6VP1oUtxe4nogrC4C3hEWfKnwF/
-         QHVGuoOPGLiOXB8d1+Cxjd1YFxA4WTO3Qr7c14N2dXb5BporqZjLs3Zt+ylcSJPLIjmo
-         UpBBIhG7/iOckE01pCA4ddmbuzykBpZf7EUNICupQYz25bgc9woxUpmBO0gYJZ6RagGy
-         m/XAKi99HXxGLmTeZRkWDvJMkGk3brJsTKE/VhnyLrG7+zGRobqJxPn8gDYz6WwToZUn
-         NqYeIcjx7/UJzQbx8kSnJdycnY9rsBnzTRqoXi+VlDosbJoUDl+/yGgSHiwfcDPjnpTf
-         U49g==
-X-Gm-Message-State: AOJu0Yx4JnIybc3daSa4EG/c6qUs7LvrJrT4b+pi9S30O4WK6XElHB8N
-	VXIJb2UNJJiUsUs05Jcl7IIYkdtgcT+KD/pFp01JMIyHVfrE+8z8mMgz
-X-Gm-Gg: ASbGncvahJsFJYCnVO+vnZOqyqzMY3iwOP3OA3uQBXiTT0AI2zlkJEPYh0zZJuxWonm
-	tT4+bUY2S8hVttE9wrG34LvKq/Cj/gzomIjnVvFbltDZU4VQw3kPN98PRZMdTYs0AaY3SJcUWsV
-	clNj/DKEVzaFa7EHoeh/NSFdRVwSlRjvzVra1bPdd7+m4YPGY4wqN3L8g6xNVf1l4YuuU0+6SDw
-	EYNlilDhkcNp0EQ3Xzf5FHkRFCPZHe+QXny+IAvuB2tVEiftuI8FPxkd3++fbOh3C+ft1LJMfDL
-	I03p94dyK7UmiEpr+m0jALCu/czFYiawBkrcpOFk6jsOAFAmgXzrw6X+eX80oQ==
-X-Google-Smtp-Source: AGHT+IGs83VjzhVgufQKdpt8JUX16D2ZKVLXifEjBYAQB74w5NI+5rJSjAzanDetBOQ2Tu/HykIImg==
-X-Received: by 2002:a17:903:2ce:b0:224:2207:5130 with SMTP id d9443c01a7336-23414fdb06amr121475685ad.45.1748236272280;
-        Sun, 25 May 2025 22:11:12 -0700 (PDT)
+        bh=K2NWtvW+69716zF/2pgHyf6Jsgv7AmpN3S1nwiCCkrw=;
+        b=KoLM4hvJUSFj+y/5+G4m/kuBBbgHnifLRBQsiovf7qqZaVjvo6sx+MsJRmAvcvJeCH
+         vBTLb5gEu88y6TsT5ftCGPtjzEd/aEFK2zRIAHMInolIBqBh1avPID2im2OwNPAWb7XP
+         SeMcBloa9gwZ0RvXDiGil200mkv0U2B30FF+L9ccD0SJNBBuWZ4snTIfaJZJs8vYJvLe
+         ajolExpsMYzKCJAxXSffgwSX2vwDUJjANFOmQ8IgxfGWh24xYjuv6AjGGCWTq0s4gMwW
+         OOF4aCUL8Y/QVZcsYRHm88IEjC97QbYKX+1WUraY0EgeFZvVjYXvvFTXAK+8MHsRwwii
+         MyPQ==
+X-Gm-Message-State: AOJu0YxNwaPu2vRwQj9c35/kQxIX0SRjf0zOeQVz2h9qgvwM6hBwsmCn
+	/sUqtaMNiUDLKpzU49KXV+/Vd93jQ9DTlAAIIZN11fQ6phPT9819Xvj33Qj7Yg==
+X-Gm-Gg: ASbGncuXVcprTQhmzKYJvz743iDhaqjVklj9vGQDSpMvaNP6wirZiXOdlHy1YVG6nSE
+	uLU8D+NwhWvkFgDOMqrgcGbjjkwYPCtC0+VkdEVnChQmWhaKkbdSIt9lxgXV4FHkpyg4YL964km
+	iaFfSfL+HpnQFwBCSSseSLp7z2ms4w2j9FDfGUvzgTuLWUUCbpQ+cEABFgEi9Q/Yy0h/S6+g4wV
+	+demQKfTVdggeIlUp3FZ6YbX0VGJ+Cbq1RnW2Zt1UQ1PzShlbjCKcKokxOUjv72p0V6MwqIshTE
+	kSoWHlpf9RjqR9dsC16iff5Xaa8jVNspTDc9ROgouyWyDrrFOkmXeo/lrxoLGw==
+X-Google-Smtp-Source: AGHT+IGlTzD1kCyMMRWsUCe0rdEimlYeGmNxdt1OYi0vl5iJ4OewHKHspw29+uHNs4VVQ1dOf99B7g==
+X-Received: by 2002:a17:903:946:b0:215:b9a6:5cb9 with SMTP id d9443c01a7336-23414f490bdmr132961535ad.5.1748236457848;
+        Sun, 25 May 2025 22:14:17 -0700 (PDT)
 Received: from [192.168.0.120] ([49.205.34.162])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-234685b2f43sm7832335ad.198.2025.05.25.22.11.10
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-234488fde35sm16602745ad.225.2025.05.25.22.14.16
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 25 May 2025 22:11:11 -0700 (PDT)
-Message-ID: <dd00260b-8662-4b0e-9543-2ac07792b4bc@gmail.com>
-Date: Mon, 26 May 2025 10:41:08 +0530
+        Sun, 25 May 2025 22:14:17 -0700 (PDT)
+Message-ID: <7e8d7e21-215f-400f-a891-10eed06c53fc@gmail.com>
+Date: Mon, 26 May 2025 10:44:14 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -65,91 +65,65 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 23/28] open-by-handle.c: use syncfs() rather than sync()
+Subject: Re: [PATCH 01/28] fstests: remove support for non-numeric test names
 Content-Language: en-US
 To: Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org, zlang@kernel.org
 References: <20250417031208.1852171-1-david@fromorbit.com>
- <20250417031208.1852171-24-david@fromorbit.com>
- <15e09df3ecf75b4b7da58fd2e00d5f72aab2d493.camel@gmail.com>
- <aC07TfBnIPnDNrQN@dread.disaster.area>
+ <20250417031208.1852171-2-david@fromorbit.com>
+ <0b040e1d9f7157614067850ca662ee47f68872ca.camel@gmail.com>
+ <aC08zjbjWxcAlQZd@dread.disaster.area>
 From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <aC07TfBnIPnDNrQN@dread.disaster.area>
+In-Reply-To: <aC08zjbjWxcAlQZd@dread.disaster.area>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
 
-On 5/21/25 08:02, Dave Chinner wrote:
-> On Wed, Apr 30, 2025 at 02:32:33PM +0530, Nirjhar Roy (IBM) wrote:
->> On Thu, 2025-04-17 at 13:01 +1000, Dave Chinner wrote:
+On 5/21/25 08:09, Dave Chinner wrote:
+> On Wed, Apr 30, 2025 at 02:47:00PM +0530, Nirjhar Roy (IBM) wrote:
+>> On Thu, 2025-04-17 at 13:00 +1000, Dave Chinner wrote:
 >>> From: Dave Chinner <dchinner@redhat.com>
 >>>
->>> generic/467 runs open_by_handle at least 15 times. Each
->>> execution runs sync() at least once, sometimes three times.
+>>> We haven't had any tests using the "999-the-mark-of-fstests" name
+>>> format for a long time. Th eonly test that used this format was
+>>> xfs/191-input-validation, and that got removed in 2022 by commit
+>>> c1941d6f5 ("xfs/191: remove broken test").
 >>>
->>> When running check-parallel, sync() can take a -long- time to
->>> run as there can be dozens of filesystems that need to be synced,
->>> not to mention sync getting hung up behind all the mount and
->>> unmounts that are also being run. This results in:
->>>
->>> Ten slowest tests - runtime in seconds:
->>> generic/467 442
->>> .....
->>>
->>> This test running for a really long time.
->>>
->>> Convert the sync() calls to syncfs() so that they only try to sync
->>> the filesystem under test and not the entire system. This avoids
->>> interactions and delays with other tests and mount/unmount
->>> operations, hence allowing both the test and the overall
->>> check-parallel operation to run faster:
->>>
->>> generic/467        6s
->>>
->>> Signed-off-by: Dave Chinner <dchinner@redhat.com>
->>> ---
->>>   src/open_by_handle.c | 6 +++---
->>>   1 file changed, 3 insertions(+), 3 deletions(-)
->>>
->>> diff --git a/src/open_by_handle.c b/src/open_by_handle.c
->>> index a99cce4b3..816bb5d12 100644
->>> --- a/src/open_by_handle.c
->>> +++ b/src/open_by_handle.c
->>> @@ -430,7 +430,7 @@ int main(int argc, char **argv)
->>>   	}
->>>   
->>>   	/* sync to get the new inodes to hit the disk */
->>> -	sync();
->>> +	syncfs(mount_fd);
->>>   
->>>   	/*
->>>   	 * encode the file handles or read them from file (-i) and
->>> maybe store
->>> @@ -563,10 +563,10 @@ int main(int argc, char **argv)
->>>   	}
->>>   
->>>   	/* sync to get log forced for unlink transactions to hit the
->>> disk */
->>> -	sync();
->>> +	syncfs(mount_fd);
->>>   
->>>   	/* sync once more FTW */
->>> -	sync();
->>> +	syncfs(mount_fd);
->> I don't see mount_fd being closed at the end. Maybe all the file
->> descriptors are closed after the program finishes execution?
-> Yes, they are closed on exit. Again, simple test code that isn't
-> running out of open files, so there's not a lot of reason for this
-> patch series to care about such existing issues in the code right
-> now.
+>>> However, the infrastructure for this naming convention still exists,
+>>> so lets get rid of that dead code so we don't have to carry it
+>>> anymore.
+>> Any other reason why we are planning to remove this convention apart
+>> from the fact that it is not being used for a long time?
+> It hasn't been used because nobody has ever really seen much value in trying
+> to describe the test in the test filename. It would be used if
+> people valued it, right? Mostly, though, people complained about
+> that one test with a weird name....
+Yeah.
+>
+>> But yes,I
+>> agree that only numeric names are easier to refer and we can also use
+>> some one liner shell script tricks to run several tests - something
+>> like
+>> ./check xfs/{1...100} to run all the tests from xfs/1 xfs/2 ... xfs/100
+>> (ofcourse assuming all these tests with these numbers exist).
+> Right, that becomes more complex as soon as names have free-form
+> components.
+>
+> If you want to know what all the tests do, use the lsqa.pl to
+> extract the initial comment in the test that describes what the test
+> is exercising.
 
-Yeah, makes sense.
+Thanks. I wasn't aware of this. This is useful.
+
+I feel this change is useful. Feel free to add
+
+Reviewed-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
 
 --NR
 
 >
 > -Dave.
-
+>
 -- 
 Nirjhar Roy
 Linux Kernel Developer
