@@ -1,63 +1,63 @@
-Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
+Received: from mail-pf1-f175.google.com (mail-pf1-f175.google.com [209.85.210.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E1732CCDB
-	for <fstests@vger.kernel.org>; Mon, 26 May 2025 09:01:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F9021E3762
+	for <fstests@vger.kernel.org>; Mon, 26 May 2025 09:04:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748250067; cv=none; b=Dz2c+WqlNrzGBNePK2luPr2T0euchj/G6XPzaReIZd5qkAPJ4LLJnE+YFSOiSbKuKKHQ0lKklnNBAAf4aolF3HAOEYHkgm4gH7yXyNZnAa2P90CvMkyKsmaiwG1p3rpY45604UYKoYbvr+6O/dDc8Vr8+hWzz4/NFX94zxM1Ik0=
+	t=1748250301; cv=none; b=mDXXNp3QoGEiEvuX6IGtid803cQI9fOHdwzpS2F89+QlAKbFY8kYD9aFpNSImrynheAQxLiiG2uN9YHyFLLA7z6pfQR1e7zf5yn2H4Q3omhTSy0zkkMab+PccG6wnQ67XI0Y52j0Bm+9QRq4P2s3hLhFKIbVD8T7ZpRpluOuDs8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748250067; c=relaxed/simple;
-	bh=q/DlaN6sf15ffdu3MY215BfaTgDtT5Z9n97QKr3SrdU=;
+	s=arc-20240116; t=1748250301; c=relaxed/simple;
+	bh=fS8KP1MGX+ni2IluJZSzV6/spdu7HbLDcmGqd0uEbos=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=q72iV0uNJnITR4tKPNxhQ326qjVDvhygcUaBzkmBHX9J+YsRXHUKhdzEMXMw9g73vN9cUqUwbY44M/IlIvjBxXdnsfO1uwKVFOkHfoVNShZ+V2McwMcZrLprkkVsFsEREbtEVLEZHij5taRE+59nuhO4NVN5dKfTKX/CfUFjZME=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ZdHRvV6T; arc=none smtp.client-ip=209.85.214.179
+	 In-Reply-To:Content-Type; b=ALzuVSdUO6iz/81rSshjHTbfGMmXqSduD/Iec78a1mHdwWpd0zO3yc5/jMTf19dJwNaG/5DN3HlF4yaTXPhTePVsTQjnBbTZBIYYYqCEpyMxvhCzbUhEJvoR08WgehEZ34n+DitP510lvf2dZPgJoAb8Z+VGw1G8443GNgx4Ex4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=E0teAeOm; arc=none smtp.client-ip=209.85.210.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZdHRvV6T"
-Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-2320d06b728so13662905ad.1
-        for <fstests@vger.kernel.org>; Mon, 26 May 2025 02:01:02 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="E0teAeOm"
+Received: by mail-pf1-f175.google.com with SMTP id d2e1a72fcca58-7398d65476eso1261221b3a.1
+        for <fstests@vger.kernel.org>; Mon, 26 May 2025 02:04:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748250062; x=1748854862; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1748250299; x=1748855099; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=PfBTq+dhYp+QoQvjIh8RsaP51SHNuvm3h+JaJGwFm/U=;
-        b=ZdHRvV6TEfN5rc9n7PzTdLst6ryiHn5hLt1VEPtHZOi0A3DUNXfy5va21XayHBsiWb
-         L5Fg0gbdWtYWlOUeRfWQ1+1iuzDDdHC60U0v6rxhSEl5KtwRpxrXGLiZlBLYkXHT7J+4
-         fvjzxlUedAZry3Ne1W/I4lO2U6CG6PSjHpqp43nC6CBXN4W6tzlsHN4JWI4DiaKrUCu/
-         2xLwNKuYY+pFiRBYV4ag3/n4PQ59DSuCX23FItpBbtCijAY9avCcfmeQpmoYFsgtpl/I
-         J/xuqCk7qNTSUAena8lWIpJ+YbswtfwSqoakDDQYCblhzOqOje18AvXjcFXZW0O1OV9H
-         XMnA==
+        bh=V3DjUGTJVZXr+kHVsrZNgc5c0TtWDfBaE+YNjKc9nw0=;
+        b=E0teAeOmVRoOKeP8WquhzwBYPNqo+k2RROEKQneeCwmUhT5KU0OnkWgRZ5GfgCB5p/
+         Wfjsfgw8fGjOm4kQ0k4fSLzGRxmQULONsQusunIsNi8aa9GK3lXVWkrhL6qgLrKQ+TUf
+         CaPWayWp0EfhuuVaKhUsjd+tNGCAoo0dDOPkALXCeXS4/jV/wZnfJTtQWSrWxHKR5H7b
+         FBK0F/vk0rdipzNSCY57cRaQyucE2mIpuVsLluTUyHVi7w6AqV2gLTABP9zIQ41xdM+7
+         Fs7Jom7o2cuoDRwBWHze3r4RNjax63lbw6MhLs0HwteSDwb29qgXVsKdbDvcKzNGtvTi
+         oR/w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748250062; x=1748854862;
+        d=1e100.net; s=20230601; t=1748250299; x=1748855099;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=PfBTq+dhYp+QoQvjIh8RsaP51SHNuvm3h+JaJGwFm/U=;
-        b=sIiWbNTvW4P2VMFUJWyUp0EhqbnZOBzb+0TXb9iWFxl+ix0TbNklhb8zhJZexxzsyr
-         LUuI43sVDsvQQYqcilisT8XPdJ/rWAjHii1AeKBsCxXuOP8CA9QT01j9q+91WQ14wxvJ
-         QoczcFZ5CmBrJzu6T2KP8HwXyn7pLQakhIHCDvAFPwfOXriPMECghOmRAU7LcNipCjEL
-         bHeFEmOL59t9Fr53RGciVDikMXCeEmeT/Z1YgQFrpu5GK4eDUMkSvjzw4d0sHJafHNFC
-         L382s8vdEZ1NIwvB3X2+AAg9zxn76yigmdIrZVansT0XLRFTcaY73NXsP+07urNJe5ch
-         kggw==
-X-Gm-Message-State: AOJu0YyPgOPqmWdhtOF5G26VTGqQb1nGaYlpVvRNd6OwcmiwVpoBezo/
-	sX3uL4SQEnOS0KRk8wp5xccUVvvElwpbV3ZoF5H1tzlone/2RdZLz9tZSxNFgw==
-X-Gm-Gg: ASbGncup7BwnXwCpbNAt9aLd54b02Pdszwl17zL3inIc4uHzVVGRLqXKOY6i28hiSYD
-	8VG8iOJujH+Edc/gxg72UqzRYVv1iE+dgjJ1WYqOIym9EkrTYVVJc6OvtYbRChi0Aoz3tau9md/
-	IFBLZ7LdM6Au/9IILQtCbw7hJMSnILbu9AyKLhkDN8MPRUSW4jz8sdYxJH9FgFnn6zvBkTQfK10
-	2qzbYFTKWDI8iSyG8LiF3nMBAdtmy7qjtiY/2yiNpDJfZUt0m0gDy9cRlvBLbKsn+bJoZas7lXL
-	ZjPutBGA5GLttAk+U6RtEevyECBrxLNdijvs8bN4UIxMVYIewnq7240GZ3bHaKho1XJj
-X-Google-Smtp-Source: AGHT+IGV0q/iWDq3q052N/vT3xSaUHf1GU3/k5fSrGuk/EW542lOX3wU4s6PbxRQ5OxMLLUPY8MjHg==
-X-Received: by 2002:a17:903:4b0c:b0:223:5945:ffd5 with SMTP id d9443c01a7336-23414fc83ffmr141200815ad.32.1748250062172;
-        Mon, 26 May 2025 02:01:02 -0700 (PDT)
+        bh=V3DjUGTJVZXr+kHVsrZNgc5c0TtWDfBaE+YNjKc9nw0=;
+        b=KZTiODx5y6Dz8yF1CFofYJRWvsBa0TYfPy3V+z7Nfa+r6mJBHuySEC35XWNOVrpbaA
+         /pbz5cMcMsEPMqEnXkoufRo6GiNdlASc6fUZXShkYtmYJUmkn8b6jMnUEuo2MCm6JI+H
+         s4XVsvlM524D8Qv74ZeIeH6Ab9aDnDrmdDxQ566Tyj/Y+NgQ/rWBlfS2Jx8Up3H4qpxB
+         KI0HlTWAHiQv4mYyeLJfj4xJoKxk2XtH1kZG/gwgznOWSvjRmUyE5TvU9WunOvwuob1g
+         qZ9l/pc6U0xRipLlQ1CH3u3ALwQzwRO00CgIJT9y/1sYxs2mI+cFti8gB90XtooL42rS
+         5USA==
+X-Gm-Message-State: AOJu0Yw/m8YYUNL4G+kyj8NuUCPf9P8nW248CUNdLZYOMXfVWVXu9BVe
+	mTBd1IN0C3wOHxYmYkiRHIYuzWA3MScx2Joj+6jOFoq9YIdrSEl41YLrQt5+qA==
+X-Gm-Gg: ASbGncuafIC9RsJkeYFucUj77bXxcPhqGcfA2xwYstm36uYeNH7C4ZysODDlfVNb2by
+	zq/upIJ2+GjOBK/igb2MuhVwwdm25AF39xdo8dZYRMTDlvJZHwNHqVgWK1It79nXjbSqJdRn9Dr
+	IjfhJfFZxP6V1ykLu4raJujUcc+qusOdiFWpiiOJrCAt+0OejhiaxQPgATTr13DNdTEmqBCMrkZ
+	66O8E5UAQA+X6cllAgKoCjZJuC5fGABVQgXOWtX5ml6iw/2q0DsVim+wawHo1qVeN0WbmDF2qh/
+	Pn6DSfwJuoAJs3TJDBn45Jpaey9MvYRO2pkYmtb1cadITz6oof47NgvRCA==
+X-Google-Smtp-Source: AGHT+IEKVB5Xt7CNZPXd6UsLwXNPBS+kDSn0oZpvjMG7ApapC2uWcc96AZSlDVUnCwBTUeQO4yNSMw==
+X-Received: by 2002:a05:6a20:9f8e:b0:218:574e:830d with SMTP id adf61e73a8af0-2188b78d232mr13220453637.21.1748250299219;
+        Mon, 26 May 2025 02:04:59 -0700 (PDT)
 Received: from [9.109.247.80] ([129.41.58.0])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2341e8ca45dsm34810305ad.125.2025.05.26.02.01.00
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-742a9829a4dsm17283141b3a.107.2025.05.26.02.04.57
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 26 May 2025 02:01:01 -0700 (PDT)
-Message-ID: <571a2bfb-7a1e-4627-b97d-eead9b0f7260@gmail.com>
-Date: Mon, 26 May 2025 14:30:58 +0530
+        Mon, 26 May 2025 02:04:58 -0700 (PDT)
+Message-ID: <9d89ac6d-bd90-4c09-9a86-196acbc37c9e@gmail.com>
+Date: Mon, 26 May 2025 14:34:55 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -65,110 +65,82 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 09/28] check-parallel: allow FSTYP selection from the CLI
+Subject: Re: [PATCH 10/28] check-parallel: use PID namespaces for runner
+ process isolation
 Content-Language: en-US
 To: Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org, zlang@kernel.org
 References: <20250417031208.1852171-1-david@fromorbit.com>
- <20250417031208.1852171-10-david@fromorbit.com>
- <ed42bdd1d43dd856978e8dea5b6bbc736e182d8a.camel@gmail.com>
- <aC2oLzBppRVtLwV7@dread.disaster.area>
+ <20250417031208.1852171-11-david@fromorbit.com>
+ <0c40accd275f3fcdb9d00309159ecb9eb55335b9.camel@gmail.com>
+ <aC2oxc6-f3J597f0@dread.disaster.area>
 From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <aC2oLzBppRVtLwV7@dread.disaster.area>
+In-Reply-To: <aC2oxc6-f3J597f0@dread.disaster.area>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
 
-On 5/21/25 15:47, Dave Chinner wrote:
-> On Wed, May 07, 2025 at 02:19:31PM +0530, Nirjhar Roy (IBM) wrote:
+On 5/21/25 15:49, Dave Chinner wrote:
+> On Wed, May 07, 2025 at 02:32:29PM +0530, Nirjhar Roy (IBM) wrote:
 >> On Thu, 2025-04-17 at 13:00 +1000, Dave Chinner wrote:
 >>> From: Dave Chinner <dchinner@redhat.com>
 >>>
->>> Add a CLI option to specify the initial FSTYP to test. If this is
->>> not specified the the default of "xfs" will be used. This option is
->>> different to the way check has FSTYP specified as check-parallel
->>> has no infrastructure to support non block device based filesystems
->>> and hence we have to reject virtual or network based filesysetms
->>> are this point in time.
+>>> This provides isolation between individual runners so that they
+>>> cannot see the processes that other test runners have created.
+>>> This means tools like pkill will only find processes run by the test
+>>> that is calling it, hence there is no danger that it might kill
+>>> processes owned by a different test in a different runner context.
 >>>
->>> Note: This patch only implements default mkfs parameter support for
->>> the test device. Config sections can be used to override this as
->>> check will then format the test device when the section that defines
->>> non-default test device mkfs options is selected.
+>>> This means we need to turn of private pid/mount namespaces inside
+>>> check itself - nesting private namespaces causes all sorts of weird
+>>> TEST_DIR mount issues with SELinux disallowing TEST_DIR mounts.
+>>>
+>>> Note that this also regresses generic/504 for check-parallel,
+>>> because it triggers looking at the init namespace from
+>>> FSTESTS_ISOL=privatens and this variable is not exported to test
+>>> subprocesses anymore.
 >>>
 >>> Signed-off-by: Dave Chinner <dchinner@redhat.com>
 >>> ---
->>>   check-parallel | 44 +++++++++++++++++++++++++++++++++++++-------
->>>   1 file changed, 37 insertions(+), 7 deletions(-)
+>>>   check-parallel | 10 +++++++---
+>>>   1 file changed, 7 insertions(+), 3 deletions(-)
 >>>
 >>> diff --git a/check-parallel b/check-parallel
->>> index 5fee62f37..19f2d2b0c 100755
+>>> index 19f2d2b0c..aa88c681e 100755
 >>> --- a/check-parallel
 >>> +++ b/check-parallel
->>> @@ -18,7 +18,7 @@ run_section=""
+>>> @@ -267,14 +267,18 @@ runner_go()
+>>>   	rm -f $RESULT_BASE/check.*
 >>>   
->>>   tmp=/tmp/check-parallel.$$
+>>>   	# Only supports default mkfs parameters right now
+>>> -	wipefs -a $TEST_DEV > /dev/null 2>&1
+>>> -	yes | mkfs -t $FSTYP $TEST_MKFS_OPTS $TEST_DEV > /dev/null 2>&1
+>>> +	wipefs -a $TEST_DEV > $me/log 2>&1
+>>> +	yes | mkfs -t $FSTYP $TEST_MKFS_OPTS $TEST_DEV >> $me/log 2>&1
 >>>   
->>> -export FSTYP=xfs
->>> +FSTYP=
+>>>   #	export DUMP_CORRUPT_FS=1
 >>>   
->>>   . ./common/exit
->>>   . ./common/test_names
->>> @@ -35,6 +35,7 @@ check options
->>>       -r			randomize test order
->>>       --exact-order	run tests in the exact order specified
->>>       -s section		run only specified section from config file
->>> +    -f <FSTYPE>		specify the filesystem type to test
->>>   
->>>   testlist options
->>>       -g group[,group...]	include tests from these groups
->>> @@ -66,16 +67,39 @@ external_file argument is a path to a single file containing a list of tests
->>>   to exclude in the form of <test dir>/<test name>.
->>>   
->>>   examples:
->>> - check-parallel -D /mnt xfs/001
->>> - check-parallel -D /mnt -g quick
->>> + check-parallel -f xfs -D /mnt xfs/001
->>> + check-parallel -f ext4 -D /mnt -g quick
->>>    check-parallel -D /mnt -g xfs/quick
->>>    check-parallel -D /mnt -x stress xfs/*
->>> - check-parallel -D /mnt -X .exclude -g auto
->>> - check-parallel -D /mnt -E ~/.xfstests.exclude
->>> + check-parallel -f btrfs -D /mnt -X .exclude -g auto
->>> + check-parallel -f udf -D /mnt -E ~/.xfstests.exclude
->>>   '
->>>   	    exit 1
->>>   }
->>>   
->>> +# Only support block device based filesystems with generic mkfs support
->>> +# at the moment.
->>> +is_supported_fstype()
->>> +{
->>> +	local fstype=$1
->>> +
->>> +	case $fstype in
->>> +	xfs)		;;
->>> +	ext2|ext3|ext4)	;;
->>> +	udf)		;;
->>> +	jfs)		;;
->>> +	f2fs)		;;
->>> +	btrfs)		;;
->>> +	bcachefs)	;;
->>> +	gfs2)		;;
->>> +	ocfs2)		;;
->> Extremely minor: Maybe list the test in alphabetical order?
-> I copied the list from a case statement somewhere in common/rc that
-> was already in that order. I don't it's worth the time and brain
-> cells to order it, let alone require anyone to maintain that order
-> over the long term. It's just a simple string check....
+>>>   	# Run the tests in it's own mount namespace, as per the comment below
+>>>   	# that precedes making the basedir a private mount.
+>>> -	./src/nsexec -m ./check $run_section -x unreliable_in_parallel --exact-order ${runner_list[$id]} > $me/log 2>&1
+>>> +	#
+>>> +	# Similarly, we need to run check in it's own PID namespace so that
+>>> +	# operations like pkill only affect the runner instance, not globally
+>>> +	# kill processes from other check instances.
+>>> +	tools/run_privatens ./check $run_section -x unreliable_in_parallel --exact-order ${runner_list[$id]} >> $me/log 2>&1
+>> Why aren't we using -s $section and only using $section with check?
+> It is already encoded in $run_section - the CLI parsing adds the -s
+> for each section that is specified on the command line:
+>
+>          -s)     run_section="$run_section -s $2"; shift ;;
 
-Yes, that's fine.
+Yeah, right. I realized that later. Thanks
 
---NR
+-NR
 
 >
 > -Dave.
-
+>
 -- 
 Nirjhar Roy
 Linux Kernel Developer
