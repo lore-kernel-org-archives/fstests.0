@@ -1,128 +1,192 @@
-Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
+Received: from mail-pl1-f180.google.com (mail-pl1-f180.google.com [209.85.214.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EFE0013BC3F;
-	Mon, 26 May 2025 08:19:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5594F1E500C
+	for <fstests@vger.kernel.org>; Mon, 26 May 2025 08:50:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748247544; cv=none; b=YCaM4Yu9UBWXOnUt9x0OZ/Q24/UHlLlAGIx+slOQoCY8mtFIQpO8/IiqeVfgE+4WM/DjCsX0jn/UHwk2Lf2V7H/s/+HTgp7+6Xlx/I5XtgQZvchGRvTKyenwirtB62reCWZuuijqhzx8v5GuRBg7TriwadtwY5NzomRNCu0DcUA=
+	t=1748249417; cv=none; b=X3RQVfX+/7iEYU/bKbJjdqORzsGCE6iZGz8okmRLwpjhLwCh66uicLN8uxm5wGQh+ktYsFIA1C9hnGJDf+35VtNx+Csls2yYKo329kN9cHru3WtjLWlBbIoHHvJKr9MY+JDdpJB6OK7RQ2qBZ4E6kPpi1zgKPt0GD+zloUEhhnU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748247544; c=relaxed/simple;
-	bh=6KTxZRORE24DMXRZ2mhrBBbbjoCdiqpQhlZQcRo440w=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=ExYHpkHVu6XB9pppDUGeuhINkhKJv73dcaT+ELlKGx0UFFNcz9DcmgmNwH+S1gZtHLJhDJM1FTRbWPHY0fl0Tc4hEeOKfMlGf4HswMHdBwurs2p2psfKY2S9IoiZJ4BKi1nhri3cpPmKKeIZ8qMnxAU4SHHzOw7v511Hah4nxCU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=M8Ae8udc; arc=none smtp.client-ip=209.85.128.54
+	s=arc-20240116; t=1748249417; c=relaxed/simple;
+	bh=iKEdZJQrCaI+BEj623wv44tlu4LIUzMYAn3qrdw66x8=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=oEyYUhRC6/00ZWKuKaSjmq0haiiAidL0tv9TrbH6klEy1/U4eLacmabA1FVTFdmLq4md8CqAJ+tuk2iWdG+cUBxq/Y3P814jhAl0JzXw/WPgTZn/E7B9If5QxixlTX0LADOzxaleomDpArXddlFdwBel8UCSegVTPn+C5/AHD/4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=A4c/wpPG; arc=none smtp.client-ip=209.85.214.180
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="M8Ae8udc"
-Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-43cfa7e7f54so14497865e9.1;
-        Mon, 26 May 2025 01:19:02 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="A4c/wpPG"
+Received: by mail-pl1-f180.google.com with SMTP id d9443c01a7336-23035b3edf1so12913915ad.3
+        for <fstests@vger.kernel.org>; Mon, 26 May 2025 01:50:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748247541; x=1748852341; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=co37T9iUcEpQffRWWYdWqPmRfHkxueVbD+wJOJxC0ss=;
-        b=M8Ae8udcJ7r0Icuhq4YTSZ/D68mrzQSM4B/gsy36dHtRsZU7Envrt3Qr4FHlgOcKAF
-         dqql6Cd4vt74Amw6iBTL6odwOLWyXlPA900EQESDYXfI11vtg+WJpR10Myvvc7WCM544
-         tmj9XuvEje7fcmWLwGCfcLfon8Vd1E3ldBUsZhVS6LtkuZ5mXqNICXi3V1LKZwJBLZMz
-         TqMtlQU1wzjybgUcJMMhhdCuMiINxo+rkiRnHLnbDG2pKUraS0U4ldeLqG1K51FexUMZ
-         aUy0znw6PcdM51cgzeifJfiPglgwCGgHp7X+7wPhO6FNbyGsbU5zdb5PrF3J46VgH+2l
-         1tUQ==
+        d=gmail.com; s=20230601; t=1748249415; x=1748854215; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=DOuwZBwLIWYX5a7NBSjB2FT0QaajGDb1mNBQRFwi8Gg=;
+        b=A4c/wpPGzHCPJp7naGvPhJDXNiFHEukupn8nB6CpPUrA7RkkOkehsNEN0uUlecGCzi
+         pEkZLGvFvZ2/YKn0ufA8DG5CWVA4dbovr+CKTI1tCm4yUrwUrV4+8hCVOG+hbHg44rsG
+         tyt3yai3oV559xzRVDhmAzpglPonz2HF5KoyJ7cLSKAFflHTK/ZIU5z06v/4ubfuH7SS
+         7q/4bnsGGPfoE7L4DfqC3djcpnnofNj5lnBLmYo9n6pie4dBdRatOctsnqRrhf6cU9xp
+         BzTjHQXyfPj0t23Y5heguAmHdleuC2spBoEPRN5WjhHrZ6v81nJ9FQVLfAKA6Og0c36G
+         x+VA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748247541; x=1748852341;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=co37T9iUcEpQffRWWYdWqPmRfHkxueVbD+wJOJxC0ss=;
-        b=lTJNc13e+jhMpmjb8MNH3XZhipipg61f4MUt7IHWQeXvuoDqy944hQM4rHYl+e4atJ
-         C6uXTeg+LufG+4XhJ/ePnew1RG2XFU2PRu1kKkatQa3qQkFYioHXOAFo0a3EDkcE14tD
-         K3JgKvcYLUNpIX9NXOyeOl8p+n3JPYkaFwKrEv8Ho7ta9fqn1SDckE377j0Ds55qQsHH
-         JaszgFwnPpSmrGGSAs93krEw25UFFexhMkhz8WbTdWFpstFwC9JBF1AIAFWOMYgi3Y+z
-         MjTJz9VYJrKXPiT9J22S3DPSgHttmlgBJaeY+VLWRk6P1Ik9whr6R0Rnc+pQ/1sbp+7u
-         6Udw==
-X-Forwarded-Encrypted: i=1; AJvYcCVXZKf5RHsddhV/0VWzcKt7oOBaRK4khaZZYSe2rD6FOlvy84G/s4CtRT6NbCTiDisfSSvuobvA0VcuhCODnA==@vger.kernel.org, AJvYcCW6Tvohrmfx6Z33lkr7lb7FjnJveHNdeZsZwDoP+2UK4BTb5YzapN+fmy/nxwhC4qNX0/++m8t9@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzvl8pJcesSn8q3BaB/zviRYzJYzogGHI7i9rZOyxWc3E5WF7O4
-	lzZFQnwu7IVO2F1RBrKK5TJNrYJY6mQ0HFz8xiAoeBl4nzJFAvETNO4J
-X-Gm-Gg: ASbGnct8RWQAjCwus9iwO9ZSrJPu6AX8wALYXGC7fVOb+QpbuCN32pkhDAeef5/pgd/
-	vDQO+HkKUeWw4UJjDpuiiBdvdNJP6RnrSeoBw8044sSiNhEUTCLPeuP/ukIK7Oi1YZeNhA7uIWt
-	m3ySmpCAnJfSAiGiRvoF+ya+eyV+uZkxUtvHnvBJThWAANfxSC/UlAIarog4AQ74U8d9vplBl+6
-	iLzMpDkUcMj2UtotXoylP/QJGvbNxtH8O5h6O2Pbhrjjw6ISTA3rcClmrM8D5tNSw3FDcu6f6SQ
-	UPg7/XOWP06Pep0zjRPDSjT5XL/6H3gx1Rx65ho7aZ+fgaRj+3whi6FENUKKaMDojMF9sGXj8Lb
-	4XR85MbyX07/hzR6ZbtlOKN8InQEWOJl//GtAoxRvfUTKiE/xlxO5ONdP8Lo=
-X-Google-Smtp-Source: AGHT+IHHcHUMKqSREDvK+0fOtEsu3GbT0wjd0OxUpuOA1nN0dfMHwpS4OJ6eGd4JbrX58jwFOJ/Mkg==
-X-Received: by 2002:a05:600c:4189:b0:448:d54a:ca23 with SMTP id 5b1f17b1804b1-44b51f4c527mr75545185e9.8.1748247540648;
-        Mon, 26 May 2025 01:19:00 -0700 (PDT)
-Received: from amir-ThinkPad-T480.arnhem.chello.nl (92-109-99-123.cable.dynamic.v4.ziggo.nl. [92.109.99.123])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-442ffaa75cfsm208122315e9.1.2025.05.26.01.18.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 26 May 2025 01:19:00 -0700 (PDT)
-From: Amir Goldstein <amir73il@gmail.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Christian Brauner <brauner@kernel.org>,
-	Miklos Szeredi <miklos@szeredi.hu>,
-	linux-unionfs@vger.kernel.org,
-	fstests@vger.kernel.org,
-	=?UTF-8?q?Andr=C3=A9=20Almeida?= <andrealmeid@igalia.com>,
-	Karel Zak <kzak@redhat.com>
-Subject: [PATCH] overlay: workaround libmount failure to remount,ro
-Date: Mon, 26 May 2025 10:18:52 +0200
-Message-Id: <20250526081852.1505232-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.34.1
+        d=1e100.net; s=20230601; t=1748249415; x=1748854215;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=DOuwZBwLIWYX5a7NBSjB2FT0QaajGDb1mNBQRFwi8Gg=;
+        b=CjC5Hi/C37vSG1bY/mNt6elf7cYnHTBX6hoGe98qBcce6AIgR2BQ+58skikxWMB9CW
+         PYjiMfthNH1VfceeEBHFIfSv/iTYvooKgZv4U39R1rM54JkpFVS3UtVLkwLu+zCZsWKa
+         BcbaGYk5EieMR0rJPBGlCTO4YWtCgT22plf89m+qg3jBZIPf3sb2PuxK1xPBMXSSyK5G
+         la96QEaOuTzJtDW1DNlYPX0LKU6XDRRev3lA4QAE3x6caZ+W6JTcwYQc5ZK4XrQlPlp1
+         lXsBCdEgBB0CFpVw+6fGGxOzDE6q6QhMnx2acTq7eN2/fPSVm+OJLCDYL+A2tUtT9i+o
+         OwAg==
+X-Gm-Message-State: AOJu0Yzfq7sCVhO+t/0zgp+KL/ZUFlPbAiqLBLbjllv6sJ9XNlWNh9vY
+	yUktoPu29OMOv+mOwR5Sl5FbSHiFtDd3peEMdnymDbUBKueNivKyIAu0
+X-Gm-Gg: ASbGnctRNmJAphMf77QftAW5S4facpfUxmrRFv0kweIfRA53dc7ZqcPaW+MD2UQsHWP
+	4ALWHb3FBtYTnqkJAWGwxbcAGwiFXhpzfpBKJWryW+6hTCskKAzVI29c2K4NsKkoxGL0ejZt/RO
+	JjC90JvqeDjIf+pGWbuU/q3KQTylTD3I9qyYc3EjtcIl0vLBDGJc23AWYgSW1p95306Mwj2vBlP
+	6UX3lkaefUp5DsVB/Ma1M9H0QBD37qf5Tv+7/vSXSDUZl868iwQdUc6xuqWnTax5rbJAtBQMsWU
+	UsR9MIjiZTFiaetuSL9SeSIAXkcCtljecxUDSI9F1PmQ66Z12hJ5XU1cB1Jg+J4dw4R7
+X-Google-Smtp-Source: AGHT+IH7wOmKYVzuHKw+hiKqux0LP47FhPRTIRwq8KvliWYVw1Y3seiCOdatln5B6kqOtKuQPSiEvA==
+X-Received: by 2002:a17:902:e881:b0:223:65dc:4580 with SMTP id d9443c01a7336-23414fe65a9mr118636445ad.52.1748249415353;
+        Mon, 26 May 2025 01:50:15 -0700 (PDT)
+Received: from [9.109.247.80] ([129.41.58.0])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2343a00986dsm24183645ad.178.2025.05.26.01.50.13
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 26 May 2025 01:50:14 -0700 (PDT)
+Message-ID: <fd136632-44f0-4690-be6f-3bfb3d3ba1b0@gmail.com>
+Date: Mon, 26 May 2025 14:20:11 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 07/28] check-parallel: adjust concurrency according to CPU
+ count
+Content-Language: en-US
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, zlang@kernel.org
+References: <20250417031208.1852171-1-david@fromorbit.com>
+ <20250417031208.1852171-8-david@fromorbit.com>
+ <e434a271402602fa7ec5efbcd9d92329ecdd4614.camel@gmail.com>
+ <aC1XWzTFPUa_7WS_@dread.disaster.area>
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+In-Reply-To: <aC1XWzTFPUa_7WS_@dread.disaster.area>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-libmount v1.41 calls several unneeded fsconfig() calls to reconfigure
-lowerdir/upperdir when user requests only -o remount,ro.
 
-Those calls fail because overlayfs does not allow making any config
-changes with new mount api, besides MS_RDONLY.
+On 5/21/25 10:02, Dave Chinner wrote:
+> On Wed, May 07, 2025 at 12:15:09PM +0530, Nirjhar Roy (IBM) wrote:
+>> On Thu, 2025-04-17 at 13:00 +1000, Dave Chinner wrote:
+>>> From: Dave Chinner <dchinner@redhat.com>
+>>>
+>>> Concurrency is currently hard coded at 64 worker threads. This is
+>>> too many for small CPU count machines; the idea is to create a
+>>> sustained load of roughly one test per CPU as they are mostly single
+>>> threaded/single process tests. The number "64" was chosen because
+>>> I've been developing this functionality on a 64p VM.
+> .....
+>>> diff --git a/check-parallel b/check-parallel
+>>> index cb5d6aedf..0649a417f 100755
+>>> --- a/check-parallel
+>>> +++ b/check-parallel
+>>> @@ -10,7 +10,7 @@
+>>>   # the loop devices.
+>>>   
+>>>   basedir=""
+>>> -runners=64
+>>> +runners=$(getconf _NPROCESSORS_CONF)
+>> Minor: Not related to this change. Maybe we should have a _get_nproc()
+>> just like
+>> _get_page_size()
+>> {
+>> 	echo $(getconf PAGE_SIZE)
+>> }
+>> _get_nproc()
+>> {
+>> 	echo $(getconf _NPROCESSORS_CONF)
+>> }
+>> and replace all the $(getconf _NPROCESSORS_CONF) with $(_get_nproc)
+> I have thoughts on that.
+>
+> I think determining test scaling based on the number of CPUs in the
+> machine is wrong. If I run in a cgroup that limits tests to 4p on a
+> 64p machine, then fstests will think it is running on a 64p machine
+> rahter than on 4p. That's ... not ideal.
+>
+> I think there should be a global variable that defines the
+> concurrency that tests should use to scale load/processes rather
+> than use the CPU count. Then check/check-parallel can set the
+> concurrency as they desire and we no longer have to worry about
+> tests creating excesively huge loads on high CPU count machines
+> because they were sized to load a small, low concurrency test
+> system.
+>
+> i.e. I intend to separate the concurrency with which check-parallel
+> runs from the concurrency that individual tests use to scale. For
+> check-parallel, I am thinking of fixing test concurrency scaling at
+> something like min(nr_cpus, 8), whilst the check-parallel harness
+> itself uses nr_cpus to determine how many concurrent runners to
+> instantiate.
+Okay yes. That makes sense.
+>
+>>>   runtimes=()
+>>>   show_test_list=
+>>> @@ -30,6 +30,7 @@ usage()
+>>>   
+>>>   check options
+>>>       -D <dir>		Directory to run in
+>>> +    -t <n>		Number of concurrent tests to  run
+>> Minor: Maybe we should mention the valid range of <n> i.e, 0 to 1024?
+>>>       -n			Output test list, do not run tests
+>> Nit: Maybe there is some spacing issue here? "Number of concurrent ..."
+>> and "Output test..." don't begin together.
+> Not that I can see, I think this is just email quoting and tabs
+> doing funky stuff.
+Okay.
+>>>       -r			randomize test order
+>>>       --exact-order	run tests in the exact order specified
+>>> @@ -81,6 +82,7 @@ while [ $# -gt 0 ]; do
+>>>   	-\? | -h | --help) usage ;;
+>>>   
+>>>   	-D)	basedir=$2; shift ;;
+>>> +	-t)	runners=$2; shift ;;
+>>>   	-g)	_tl_setup_group $2 ; shift ;;
+>>>   	-e)	_tl_setup_exclude_tests $2 ; shift ;;
+>>>   	-E)	_tl_setup_exclude_file $2 ; shift ;;
+>>> @@ -111,6 +113,11 @@ if [ ! -d "$basedir" ]; then
+>>>   	echo "Invalid basedir specification"
+>>>   	usage
+>>>   fi
+>>> +if [[ $runners -le 0 || $runners -gt 1024 ]]; then
+>>> +	echo "Invalid thread specificaton: $runners"
+>> Minor: Maybe we should mention the valid range of "runners" in this
+>> error message (0 to 1024)?
+> /me shrugs.
+>
+> It's an arbitrary "check-parallel won't ever scale past this" limit
+> because the diminishing returns from added concurrency that Amdahl's
+> Law define is already kicking in at 64 threads. If you are running
+> check-parallel on a >1024p machine, you already know enough to be
+> able to look at the source code to determine why the error is being
+> emitted. :)
 
-force mount(8) to use mount(2) to remount ro/rw to workaround
-this issue, by setting LIBMOUNT_FORCE_MOUNT2=always.
+Yeah. Got it.
 
-Reported-by: André Almeida <andrealmeid@igalia.com>
-Cc: Karel Zak <kzak@redhat.com>
-Link: https://lore.kernel.org/linux-fsdevel/20250521-ovl_ro-v1-1-2350b1493d94@igalia.com/
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- common/overlay    | 4 +++-
- tests/overlay/035 | 2 +-
- 2 files changed, 4 insertions(+), 2 deletions(-)
+This patch looks okay to me. Thanks for the clarifications.
 
-diff --git a/common/overlay b/common/overlay
-index a6d37a93..5ee9f561 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -127,7 +127,9 @@ _overlay_base_scratch_mount()
- _overlay_scratch_mount()
- {
- 	if echo "$*" | grep -q remount; then
--		$MOUNT_PROG $SCRATCH_MNT $*
-+		# force mount(8) to use mount(2), to workaround libmount v1.41
-+		# failed fsconfig() calls to reconfigure lowerdir/upperdir
-+		LIBMOUNT_FORCE_MOUNT2=always $MOUNT_PROG $SCRATCH_MNT $*
- 		return
- 	fi
- 
-diff --git a/tests/overlay/035 b/tests/overlay/035
-index 0b3257c4..2a4df99a 100755
---- a/tests/overlay/035
-+++ b/tests/overlay/035
-@@ -42,7 +42,7 @@ mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
- # Verify that overlay is mounted read-only and that it cannot be remounted rw.
- _overlay_scratch_mount_opts -o"lowerdir=$lowerdir2:$lowerdir1"
- touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
--$MOUNT_PROG -o remount,rw $SCRATCH_MNT 2>&1 | _filter_ro_mount
-+_scratch_remount rw 2>&1 | _filter_ro_mount
- $UMOUNT_PROG $SCRATCH_MNT
- 
- # Make workdir immutable to prevent workdir re-create on mount
+--NR
+
+>
+> -Dave.
+
 -- 
-2.34.1
+Nirjhar Roy
+Linux Kernel Developer
+IBM, Bangalore
 
