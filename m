@@ -1,121 +1,81 @@
-Received: from mail-ej1-f43.google.com (mail-ej1-f43.google.com [209.85.218.43])
+Received: from mail-qt1-f171.google.com (mail-qt1-f171.google.com [209.85.160.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69B0E24E4AF;
-	Tue, 27 May 2025 09:11:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 041012CCC0
+	for <fstests@vger.kernel.org>; Tue, 27 May 2025 14:49:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748337088; cv=none; b=XlJFzZFYPwPxIxHElmcsvyCmgZWeuj5DX8w355pjr3P4+5pd3MEzQGs7su7yc8ot/JnpggnUl0eEuTnEgnqxmEy8hEgnrXMEo/xq81k+IDgPNkhE05TK6OD1noaNy/oGa3Jo1W1vtd2QZii2Q/BkLJsc2RrHPFEat9Xeitl1n1Y=
+	t=1748357352; cv=none; b=MTaxH4wZGn3qLM2wdm+S11epZ+P9YSUzocEp+lO0AqEoHC6ZyubyH9njPu3bV2/Bht9P06l5UtjrFRfvpR6kfOFC6UYXxRssVOKcsjBWB5NKi9Q91o24tMrgNI5xmhi8CjLYMBHc3lLtRGbMR1y2FtctHDflmPuUOEY19A2pkEE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748337088; c=relaxed/simple;
-	bh=pVUXiQk4mzFjM1ISXLY887xZssO3EaKjuSF36p+jEAU=;
+	s=arc-20240116; t=1748357352; c=relaxed/simple;
+	bh=sAiJI1O4JMXS3CTzVvXhahSMi3q9NSOWIzU1NDbfOSE=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=slFU4gcvwAdy2Djp9kK3K76bDuxHq446i0opwpyADJcEzxafX94hwc2sHxQtHmwW78i0Ojywe7Jdej93GV3cd6T2USnMQwssji6jVQDdqMSV4bUVX6HXPDOWZESrwjaUgbRPndPoRy1g5dbZOgaHHBcLmBW/eDGDowUf9/EO1b4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=c3FDe2jB; arc=none smtp.client-ip=209.85.218.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 To:Cc:Content-Type; b=sDzzBQIDdqaBVcZaYyyWONIKhFgQi74JbdV43c1I5HU/eMQ3okpQvazk9DdP1jaUW46pBAjvhbri1mjhtVzwiy4dYHnDLTdqR6HxFTwy5wZB0yX4YvEGGGB6hT7Hhv8/X+5GI8+mvX+tuOWKrxsyVkrQukn0Tgq9al1H6TscsJc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=szeredi.hu; spf=pass smtp.mailfrom=szeredi.hu; dkim=pass (1024-bit key) header.d=szeredi.hu header.i=@szeredi.hu header.b=iGEM0vPJ; arc=none smtp.client-ip=209.85.160.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=szeredi.hu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=szeredi.hu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="c3FDe2jB"
-Received: by mail-ej1-f43.google.com with SMTP id a640c23a62f3a-ad5273c1fd7so604835266b.1;
-        Tue, 27 May 2025 02:11:26 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=szeredi.hu header.i=@szeredi.hu header.b="iGEM0vPJ"
+Received: by mail-qt1-f171.google.com with SMTP id d75a77b69052e-47698757053so38773281cf.0
+        for <fstests@vger.kernel.org>; Tue, 27 May 2025 07:49:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748337085; x=1748941885; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=IcGm7f3bxDxYQOUxtAGzo7FJmxxWmSLjFYAvCe60WKA=;
-        b=c3FDe2jBkKgLYBnGLBXgDr939raxYt+b/t/3Q7oOUULmpOadtoBTMxHhQ47DsrHjZn
-         6chnrRgpdKLYLTvxFIPCsWBZnW9XAkB1JTzoRVCHhE2ka2zncWYR3FK3et6i2Jc6E6Rt
-         0U0JWivPm/n1pHgKj1EzaA9Se1mK7rvABvSNFRTTW7bgaVOZkSFbvQTzVkR/scmvDzkg
-         X8Eo5/EBUbjBYs+RhCnio92RvRRNx2hk04yZwTMcSCBpWJCVNR0KxBjeHDXk3tZecCvP
-         WbGTN0sG8GQJVs1l6KLI1/y7/rDr1MsCCgSdy0xWIk6M0KRVHuXsOMXX8WbbdYJdv8f/
-         Xd4A==
+        d=szeredi.hu; s=google; t=1748357349; x=1748962149; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=sAiJI1O4JMXS3CTzVvXhahSMi3q9NSOWIzU1NDbfOSE=;
+        b=iGEM0vPJmD4U7evlqR7S8a1CMzylkxnMdnBfO9XKzvO9UzGS9aMEYLT4YH/cbaxEq/
+         ICkpRNHzoDxELEQAE7GbVQk8nisy1vbIjtIU1tISofHinamqt7iW8rX2fqBJA5tG6S8p
+         3TuTzS984X0lru56Shial6sXOhsZk8/DyWwV8=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748337085; x=1748941885;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=IcGm7f3bxDxYQOUxtAGzo7FJmxxWmSLjFYAvCe60WKA=;
-        b=cCbOewll6C9rF76RCzThIcSWauRReoMgS7jAzVkJ7HN2RGC/UMt0xytBOqvaSR/dDd
-         RE5TXLlnaOcUymOyAbwdaBGmGEK7oLvsCWsaju0l/qSGR6h0goMrlBfrvbqL5DgvM7XZ
-         GrYXtIV/xwmcOff0/o/wRPte9QFxmoM7A2vDQBCrL2M8V7uvr/dq3VGnoP3ESbS1mfza
-         La2AKnKinuHukhKR4hw+8vjQSVFNkA7BYVX/gci8LWpBgy8YC8tyB8OggHvGTwvWL0oh
-         hhbrQdP2QT4tWOhUi/9fIopvWPnxEAvuNKa9SWwu7czWRipDT3KwvvBkA72+FgMWkHgQ
-         te/Q==
-X-Forwarded-Encrypted: i=1; AJvYcCU6y2A/wMbIjMMpCYFTPRNFOJ9UV8RzSMdlbe/7zL5hv4zJlPQsss/u+F3/NOq0ao3qzqQ3vuosu1NKwxRQrw==@vger.kernel.org, AJvYcCVT1VRzF5Loj5/JAFlmbz8NfVYMXQRJPVZfnRTppQ0Ev/2+7cHK0WxM6WyZ13O3a3El+34h2hIH@vger.kernel.org
-X-Gm-Message-State: AOJu0YxXIOXvi5u+hDI17SCEHIU68Mr82G8YEeVGznk56Jqqf0tpdz4r
-	0TnMQXSdXHBFen1LJkoo1D8aoAhS6D7eafmkN2y1jtT/5YKpRL1NAMk5SdKZXDmYYiKt/MHBWmz
-	9nUlzY4cMp/QYgNJLsfQtBsrCgytBH5T7pzniTedO3A==
-X-Gm-Gg: ASbGncufv7gxWNHFs49WESvc1A3lYWAf4ilKLI4i7E2cd/NjK6Fd0xj6GVNKuAuqHFw
-	/v8/FMSOIrUBv/AoRhPF/XbxhJyxGKNAEZoe3lEUwFLlY0PM1rGmUcJMAqUv/CNPFTwwGJh1QYf
-	ZR0Ghrgk4/cmst1vQc9fkOIqk4Pvg3BYtr
-X-Google-Smtp-Source: AGHT+IFnrsH8eLu2exr5rsvcicAetaj4rPjM28knUp23tM0hcEvrpssGNktptRaMU+yd6V13MVt5Z1Q6BYOVGsFXiMA=
-X-Received: by 2002:a17:907:7e9a:b0:ad4:fd7f:a4 with SMTP id
- a640c23a62f3a-ad85b20acb8mr946939466b.47.1748337084332; Tue, 27 May 2025
- 02:11:24 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1748357349; x=1748962149;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=sAiJI1O4JMXS3CTzVvXhahSMi3q9NSOWIzU1NDbfOSE=;
+        b=vjme1IV3zf0tt4CWqXJO52LDyY2bSNaNe9XmEhCDE75PWz7FPwm2O09LcwLmpbstnG
+         TdLRcNitk0ObdJBN4OAG2HG9BGMGkxlUzZVlogpSPBWtzTwIa5S07+sFpt2Tt3AuMxhh
+         okRDj2v2FfxYCOWaNBArhEMwgmWm6Rf1q6EN+tGd5qxeC0d5oes1ecWfsZVzE3DeG/NJ
+         Ol9gQtcdqW1pvlDQKp+whZeFEBxvG1wZxKOELMchPFQ9gDIdTSb8t/TsMbiKxyuRtVwn
+         Hbpdj79Nw4hFA82b1xLyOeN+NOW4sJg6PffFV6JDpuQFD6aVwSi870hcd6JXIpKr0Obh
+         +GYA==
+X-Forwarded-Encrypted: i=1; AJvYcCVC+Ns9eDkedK6N7yvaOghv6ZZwOvlF6gu6kTN1szGnYup7NKBt32zFNIsPrWjS2z74OdA9SKLJ@vger.kernel.org
+X-Gm-Message-State: AOJu0YxHcCRwu/m1RsERWgxyMeou3bc7StmWiDwuxKgFiRfVipVs07eU
+	cfHHRnF7qwhP+ww7PGM5X/d6qq8aim0CAQRrrKUVcetQ/sNfMqTQpjoBwCi67FGeV+xL9+Omr0V
+	JZIM8BHmL1XFXMn+NwIsUXxPnoRhmmyCoIaRD+lmIBQ==
+X-Gm-Gg: ASbGncsLWFNsyq+ACYTDLYblueNBqMGdigJTKQIVkcfiJqD7cLHDUPSxtJxX8UFc9nC
+	c7L7//3vCc0b2yIsay2QnX+mKZtlALWjqJBzCbx5DclZcBA4tu3svyT+mCoyqNVZPluvbngA0qL
+	sGvqBUZYFnMuBhjt1SQ+nVA+ivwwid+12zZrE=
+X-Google-Smtp-Source: AGHT+IFKdB9PF1d1KvdjvhT+vpEtaK2jXUaSke16US5DJQ6ZKruJPm+x+ZTCVDhpG+EeSm2Ngd+vuQwEm1YhT98hRqo=
+X-Received: by 2002:ac8:7dcc:0:b0:4a1:6656:16f6 with SMTP id
+ d75a77b69052e-4a166561786mr115084911cf.1.1748357348899; Tue, 27 May 2025
+ 07:49:08 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250526143500.1520660-1-amir73il@gmail.com> <0b4a524d-52e3-46e8-b119-255e3e134ef7@igalia.com>
-In-Reply-To: <0b4a524d-52e3-46e8-b119-255e3e134ef7@igalia.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 27 May 2025 11:11:11 +0200
-X-Gm-Features: AX0GCFsopirBCrI7cb3Ea9BRz8jNTUYeab_Cep5n3mCiSFkXzXyfCY5nyO_oXw8
-Message-ID: <CAOQ4uxjUTkjuyWEkFd1UeGcems43dPS2GMGRGZJERjuMGSxm=w@mail.gmail.com>
-Subject: Re: [PATCH 0/4] fstests overlay fixes for v2025.05.25
-To: =?UTF-8?Q?Andr=C3=A9_Almeida?= <andrealmeid@igalia.com>
-Cc: Zorro Lang <zlang@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, 
-	fstests@vger.kernel.org, kernel-dev@igalia.com
+References: <20250526143500.1520660-1-amir73il@gmail.com> <20250526143500.1520660-2-amir73il@gmail.com>
+In-Reply-To: <20250526143500.1520660-2-amir73il@gmail.com>
+From: Miklos Szeredi <miklos@szeredi.hu>
+Date: Tue, 27 May 2025 16:48:57 +0200
+X-Gm-Features: AX0GCFs3VA7UJtczZg8oDvYBTyu2JNhge9dyhvB1RX5a2h1bXGDJo5UYxG0WVm4
+Message-ID: <CAJfpegtYTpJXYOiyckcfQA=YTVXcLQZRGV4=sjueLenJpTp7Lw@mail.gmail.com>
+Subject: Re: [PATCH 1/4] overlay: workaround libmount failure to remount,ro
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Zorro Lang <zlang@redhat.com>, linux-unionfs@vger.kernel.org, 
+	fstests@vger.kernel.org, =?UTF-8?Q?Andr=C3=A9_Almeida?= <andrealmeid@igalia.com>, 
+	Karel Zak <kzak@redhat.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Mon, May 26, 2025 at 7:05=E2=80=AFPM Andr=C3=A9 Almeida <andrealmeid@iga=
-lia.com> wrote:
+On Mon, 26 May 2025 at 16:35, Amir Goldstein <amir73il@gmail.com> wrote:
 >
-> Hi Amir,
->
-> Thanks for the fixes!
->
-> First of all, you sent two patches for 3/4:
-> [PATCH 3/4] generic/604: do not run with overlayfs
-> [PATCH 3/4] generic/604: opt-out with overlayfs
+> libmount v1.41 calls several unneeded fsconfig() calls to reconfigure
+> lowerdir/upperdir when user requests only -o remount,ro.
 
-OOPS I meant to post the first one - it's just a change of
-wording in the title.
+Isn't this a libmount bug then?
 
->
-> I tested this with Linux 6.15 with the following command:
->    $ sudo FSTYPE=3Dext4 TEST_DIR=3D/tmp/dir1 TEST_DEV=3D/dev/vdb
-> SCRATCH_DEV=3D/dev/vdc SCRATCH_MNT=3D/tmp/dir2 ./check -overlay
->
-> These are the results before applying this patchset:
->
->    Failures: generic/294 generic/306 generic/452 generic/599 generic/623
-> overlay/019 overlay/035
->    Failed 7 of 859 tests
->
-> After applying:
->
->    Failures: generic/294 overlay/019
->    Failed 2 of 859 tests
->
+Working around it in xfstests just hides this, which seems counter productive.
 
-Those two tests pass for me on both xfs and ext4 base fs.
-
-I am running with trixie libmount v1.41
-with fstests tag v25.05.2025 (+my patches).
-
-Please analyse the failures so we know if I am missing
-something again.
-
-> So the tests that I reported in my thread are now working.
->
-> All patches are:
-> Tested-by: Andr=C3=A9 Almeida <andrealmeid@igalia.com>
->
-
-Thanks!
-Amir.
+Thanks,
+Miklos
