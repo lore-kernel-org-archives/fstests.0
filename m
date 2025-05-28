@@ -1,108 +1,94 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qt1-f170.google.com (mail-qt1-f170.google.com [209.85.160.170])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B35D84A3E;
-	Wed, 28 May 2025 11:42:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B8951B532F
+	for <fstests@vger.kernel.org>; Wed, 28 May 2025 11:47:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748432548; cv=none; b=fEOPs4pgyn1nwDhq+Wp8aOCm03Vavrs27Cc5L4+BZsonKhtoa+0Ed48eSj9bEpWm8LKejuwU5mPyEW2JAPd+74guOt9pDRTlLMs1X4M/RtZKbhqC332E2UnJdkeFFh9PeA+7LLvdF8KqvxVgwCtPRuQhMFXmeGi480RehCyFNIY=
+	t=1748432871; cv=none; b=CCNW5E4V3vrXxJn6rmqxNewtkiEN0XvyyCyTLYNver+8970vNoq4p+zIT3ChX9nbwTy1IMgU73sScj+mh9Uc6EnJoMMha4K81knF7+b51xGbwgdHjE2mzdxEp6yNIaFYRGmRggjj2xnVECO1eFbNFmolPfuiBX1Uvmoq6PZzC7A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748432548; c=relaxed/simple;
-	bh=itcKsvmYwrqflZ1s+3+cNkVKpxeVBDeBvRtfCi6xjqo=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=QbEn1O+TliGf1VSR9Y5C/2PbmFrml959jbSjnKx1Oxhvv4yXqsVXxby48yUFIygNdPb1QE2QJbfIkvzf8vwK0vK5CUccQ2GPeP1P6pJU6H91/62zTuCu7y8ecloeUdTzYlYfux9bFYZlEN9KEukCGj9sPlyEpOdZzxCRgQ89ZtM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=sPA6lSSV; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1748432871; c=relaxed/simple;
+	bh=TTy22rgWBPKbjZSTe4uWPN+pN85sITjqdiiRx8uuXRo=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=G0YGe4avjq7hqJXIh/z1TGlXXHB7ENZlSFqJD8eV3vFYgle2NTLTBdxEwQ6soFrDImRO3UGtK/7IUOZwUz1Qm4PmeD0gCpISRmVxDWFp0RY30cqQA1Ab9ZSgvuiEtdALR79DiNWG96vu7JPzLxEqWnoSBaVam7Fg1qbLTuA5+Tc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=szeredi.hu; spf=pass smtp.mailfrom=szeredi.hu; dkim=pass (1024-bit key) header.d=szeredi.hu header.i=@szeredi.hu header.b=DyWzg/NQ; arc=none smtp.client-ip=209.85.160.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=szeredi.hu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=szeredi.hu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sPA6lSSV"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D00DEC4CEE7;
-	Wed, 28 May 2025 11:42:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1748432547;
-	bh=itcKsvmYwrqflZ1s+3+cNkVKpxeVBDeBvRtfCi6xjqo=;
-	h=From:To:Cc:Subject:Date:From;
-	b=sPA6lSSVI17ydxdN1RzJEdeylnVv1HWB9YvgX16obm8WNjMnThQwACiwzoUGEzdBl
-	 44x+/ywwQtMu0p3/nMTrSEjQcSpswY1bQ6iZEqbr2UAYQhqMDeLr7Gh0WMcW5aMpN9
-	 bHZAlRoKTueItpSXPXKatrRPkkgTv7b0WzDCFBbmWszWWH/dk8NM9ztu7aNYBRi6zQ
-	 pdihJpOJmRsjQv9Kyu8blCI2q3dfKkYpc/Ad9Gx68U+xRT28acNKPnRrgSIqcRKoDm
-	 Awe+LBmBfKYZQCh4m4/KYz5EU35XzUWvBANXFx0tyhGcp330CvOT7rayjMEIVPPqqV
-	 PZRO+NCzc66Sw==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] generic/032: fix failure due to attempt to wait for non-child process
-Date: Wed, 28 May 2025 12:42:20 +0100
-Message-ID: <ad779afaef849e0febdce26cbcb5503beed87341.1748432418.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.47.2
+	dkim=pass (1024-bit key) header.d=szeredi.hu header.i=@szeredi.hu header.b="DyWzg/NQ"
+Received: by mail-qt1-f170.google.com with SMTP id d75a77b69052e-4947635914aso45934411cf.3
+        for <fstests@vger.kernel.org>; Wed, 28 May 2025 04:47:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=szeredi.hu; s=google; t=1748432868; x=1749037668; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=TTy22rgWBPKbjZSTe4uWPN+pN85sITjqdiiRx8uuXRo=;
+        b=DyWzg/NQryUaWnXZ1a9i97aiUzETKk9mCYJm4NokxCMBDndk3vAXcZq4UzPq0MdH6m
+         6Edi3Ya5b1of56EQNXx0Qq4rdrUwcNu+D4/eUvDyUnr89VtI6K0gzkROkHyWvWrMC7vR
+         3PSAgMLFlpKsZxl5X8kGUh803h/SWxBcxCRVA=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1748432868; x=1749037668;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=TTy22rgWBPKbjZSTe4uWPN+pN85sITjqdiiRx8uuXRo=;
+        b=H/1DjkjGMnzanyH50wi4WIU4PcZLlq2BmS/Vr29h5Xdh4933m7n7mMddk9sjJoAUbZ
+         j+tEU1a+txx4qyIXd54tW2KWiOyOeu83B0bztFM5XPdJkAV0O6rlsNKDFfWUiilJeC/n
+         yk8nKCof5e9Yua8UXqFszexTSiKhomPh2N87FzqR5W3lFwpYvzPz7pRhukv3IrQxUUTI
+         IWE3X1SlfFp7RmntUVa3+12JADtYWsNacof147cElvCwxtOt6jWeyB8Vd+zDtlfGfKTS
+         6xidY4B2toRt6UZzX2Bp2hS3XTL2oJYAyF0UdmIq/ybRen2twhkTfyVazjaKg7QiRe/d
+         jaTg==
+X-Forwarded-Encrypted: i=1; AJvYcCVZHotU9fC6I/Dlk63/veOq1lhq6nwFPbJwsuXyVm0jglYpmTUpCPhhtEDnMxYHoMun/Ez8yAyV@vger.kernel.org
+X-Gm-Message-State: AOJu0YyysJ3tA+J4qoapbdDIDjwd498H4mtiR87gkhJxR4FauPnJgeux
+	xupw406q5fa8rGDzp3t5LTB9fgerCB6QqsDoCYDhSVeKPDoHznYunWRWAYoP/4GF9DFkawDCYzt
+	U9nhcXgWaQmkzz9t0P7dlRbhgDQ/nRs90SJq52IpNRA==
+X-Gm-Gg: ASbGncsxoqx+JHUf/BpZ4xt25HxYhUFV1/1qlu4ATisZNvngmXEaphoZrYK/Gti+HJD
+	SFwBh1KLvy+2Az4nR+SEwub8Wfz82Kvbal6jOG/YkUAP4KUXOq1GvwB/X1tyhX0LPoLLvMLqIYP
+	pXxg1BAnOO0cdub3iIPmPIPpocj1yYQg71ajM=
+X-Google-Smtp-Source: AGHT+IE+3pNaJ+H5/u/9c4yjQaWkOWYwsiGhi+DlHJjO4epJsVha4CJwHyPCYXCzT0i6Nujm1AMi0Orm5s3x0tUFcW0=
+X-Received: by 2002:a05:622a:c87:b0:48e:1f6c:227b with SMTP id
+ d75a77b69052e-49f46e306ddmr293044501cf.26.1748432868268; Wed, 28 May 2025
+ 04:47:48 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20250526143500.1520660-1-amir73il@gmail.com> <20250526143500.1520660-2-amir73il@gmail.com>
+ <CAJfpegtYTpJXYOiyckcfQA=YTVXcLQZRGV4=sjueLenJpTp7Lw@mail.gmail.com>
+ <CAOQ4uxjh9u3DE_HKExa=kK08efzDsxVuCVuA0tUMjwSeLX=jnQ@mail.gmail.com>
+ <rjqagpvze4mwnil6tck6jnyqfbcgqszy5bjgu4fqzdtq7e3idq@uizmifogsqyf>
+ <CAJfpegtJ3SDKmC80B4AfWiC3JmtWdW2+78fRZVtsuhe-wSRPvg@mail.gmail.com> <urxghfhdccjg6v47h63btu77kyxnsxbrmxdbhb7kx3oiqz23og@plyznhi36omp>
+In-Reply-To: <urxghfhdccjg6v47h63btu77kyxnsxbrmxdbhb7kx3oiqz23og@plyznhi36omp>
+From: Miklos Szeredi <miklos@szeredi.hu>
+Date: Wed, 28 May 2025 13:47:37 +0200
+X-Gm-Features: AX0GCFvbR3_g0iNsB3oltQqJIifcokeo5YRw04-1DG41L2BTc5h2Moj8NrIcUV8
+Message-ID: <CAJfpegv9Evti_MmWR72Gg13s9XYsxJHQ3WSJRwLrBy5O8aVHaQ@mail.gmail.com>
+Subject: Re: [PATCH 1/4] overlay: workaround libmount failure to remount,ro
+To: Karel Zak <kzak@redhat.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, Zorro Lang <zlang@redhat.com>, linux-unionfs@vger.kernel.org, 
+	fstests@vger.kernel.org, =?UTF-8?Q?Andr=C3=A9_Almeida?= <andrealmeid@igalia.com>
+Content-Type: text/plain; charset="UTF-8"
 
-From: Filipe Manana <fdmanana@suse.com>
+On Wed, 28 May 2025 at 12:55, Karel Zak <kzak@redhat.com> wrote:
 
-Running generic/032 can sporadically fail like this:
+> Why is it fine for mount(2) but wrong for fsconfig()? This is the
+> question. There is an incompatibility between the APIs.
 
-  generic/032 11s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//generic/032.out.bad)
-      --- tests/generic/032.out   2023-03-02 21:47:53.884609618 +0000
-      +++ /home/fdmanana/git/hub/xfstests/results//generic/032.out.bad    2025-05-28 10:39:34.549499493 +0100
-      @@ -1,5 +1,6 @@
-       QA output created by 032
-       100 iterations
-      +/home/fdmanana/git/hub/xfstests/tests/generic/032: line 90: wait: pid 3708239 is not a child of this shell
-       000000 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  >................<
-       *
-       100000
-      ...
-      (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/generic/032.out /home/fdmanana/git/h
+Where is it documented that the fsconfig(2) shall have the same
+replace semantics as mount(2)?
 
-This is because we are attempting to wait for a process that is not a
-child process of the test process and it's instead a child of a process
-spawned by the test.
+When I reviewed the new API, I certainly didn't think that it should
+have these semantics, and I'm not even sure it did have it back then.
+But of course I may have missed it.
 
-To make sure that after we kill the process running _syncloop() there
-isn't any xfs_io process still running syncfs, add instead a trap to
-to _syncloop() that waits for xfs_io to finish before the process running
-that function exits.
+I think this is just a bad accident, and I'm wondering if this could
+still be fixed in a way that doesn't introduce more hackery.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/generic/032 | 13 ++++---------
- 1 file changed, 4 insertions(+), 9 deletions(-)
+One idea is to introduce a flag (e.g. FSPICK_REPLACE_ONLY) that makes
+the filesystem initialize the fs_context with the current options.
+That would work, no?
 
-diff --git a/tests/generic/032 b/tests/generic/032
-index 48d594fe..b04b84de 100755
---- a/tests/generic/032
-+++ b/tests/generic/032
-@@ -28,6 +28,10 @@ _cleanup()
- 
- _syncloop()
- {
-+	# Wait for any running xfs_io command running syncfs before we exit so
-+	# that unmount will not fail due to the mount being pinned by xfs_io.
-+	trap "wait; exit" SIGTERM
-+
- 	while [ true ]; do
- 		_scratch_sync
- 	done
-@@ -81,15 +85,6 @@ echo $iters iterations
- kill $syncpid
- wait
- 
--# The xfs_io instance started by _scratch_sync could be stuck in D state when
--# the subshell running _syncloop & is killed.  That xfs_io process pins the
--# mount so we must kill it and wait for it to die before cycling the mount.
--dead_syncfs_pid=$(_pgrep xfs_io)
--if [ -n "$dead_syncfs_pid" ]; then
--	_pkill xfs_io
--	wait $dead_syncfs_pid
--fi
--
- # clear page cache and dump the file
- _scratch_cycle_mount
- _hexdump $SCRATCH_MNT/file
--- 
-2.47.2
-
+Thanks,
+Miklos
