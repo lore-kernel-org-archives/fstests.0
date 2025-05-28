@@ -1,183 +1,76 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from jpms-ob01.noc.sony.co.jp (jpms-ob01.noc.sony.co.jp [211.125.140.164])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E40E5464E
-	for <fstests@vger.kernel.org>; Wed, 28 May 2025 08:47:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 084D82749C5
+	for <fstests@vger.kernel.org>; Wed, 28 May 2025 09:15:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.125.140.164
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748422072; cv=none; b=Yzc3LuncLr5NpxnhVukFYmI5P5Nwue8pdI/eCa/Rxs6r2kSvms7cHGdamUVDYUBakSuHQFqsRwRYsiM+Tmw4KBtSOdrlptx/Y0RaPwZqkNJNN3bDMzhMwglly3eZNGh0QU0TCr2mUOFSPGW0s33FiFXcXXaH0aQEtxMGFjcx0qU=
+	t=1748423741; cv=none; b=gr8hpQNlbtgdA1ePgarBJD47nOUcz0LqVzyEg3uBD2tx/ZnHXfw5W90glHkcWA+euahgfNBtk2JoGLxMZa+Ic1gVWBhEj+zZQilyfvRcRznY4V4pGBd22HP+LbY/ymOkNkUdWH75csdhZSeDHEmDdPocqQcBVbWhM1yUrkHIXo0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748422072; c=relaxed/simple;
-	bh=zCqV1rTgrW4eHVIuYE2IUuphjW6ivnFlzBmXNA+cKLQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Mo+k29Kr/ekjfX8D9fIqRz8R5QWpjzaS9tiBv98prRHxPInSicnXZhHIWZeYPLcxf8eNIn2eZ+nEWIqPx/9/hppjkkGAnJmoWDaUGwxWhfAcqtoTK8PgmnewtjP+wqwsQci26Gs06f2RkZV/QNH+6eYeAfXx1cnpUVDAjk9Jcz4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=IIkoCs71; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1748423741; c=relaxed/simple;
+	bh=73Wt2BAiOOK4eUKjX8jg4ShluQ+3Sb525Ei4QM4bTLg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=i9/cOP4q+lGrMbqHmoCZMureOVtv2M+kAJnnW688wVhMT3ZJkpDNDVJ0UJV4YdwC7wN/Ii83gqcUBTn3X2uTlFW9Y5I9NqYdhFRCH7ObsJ157WkzSamdH7BctlyeMUstgTQM3W7JYS2tK+J9xOYdKt0LNNY5pvdohUbPv/0zdOY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=PRqfAgbD; arc=none smtp.client-ip=211.125.140.164
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="IIkoCs71"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1748422069;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=o50dZP3QkVHpB3LosN+EWXcCuA0vClemDgJtmBkO/4E=;
-	b=IIkoCs71SGLQZI0XdfXHe8m5LgWKGjgFw2V3RVRY5+DqHxmbwYASD/rIp+z6Tb/ps7ipnh
-	sS3pPqKHXMiut+v0vUIgt1DJSnQ5a+QHkvmbMMqUq/pm2zvIe4NJi8HbsFr9vO5r9wJS0i
-	/2nDWvlyZ2LzEayjW6MKP/dvtknKQRI=
-Received: from mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-128-0WJI_lC_OgG93iS5D0Pimg-1; Wed,
- 28 May 2025 04:47:46 -0400
-X-MC-Unique: 0WJI_lC_OgG93iS5D0Pimg-1
-X-Mimecast-MFC-AGG-ID: 0WJI_lC_OgG93iS5D0Pimg_1748422065
-Received: from mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.93])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id AD7C81800368;
-	Wed, 28 May 2025 08:47:43 +0000 (UTC)
-Received: from ws.net.home (unknown [10.45.225.54])
-	by mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 3094918004A7;
-	Wed, 28 May 2025 08:47:40 +0000 (UTC)
-Date: Wed, 28 May 2025 10:47:37 +0200
-From: Karel Zak <kzak@redhat.com>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Zorro Lang <zlang@redhat.com>, 
-	linux-unionfs@vger.kernel.org, fstests@vger.kernel.org, 
-	=?utf-8?B?QW5kcsOp?= Almeida <andrealmeid@igalia.com>
-Subject: Re: [PATCH 1/4] overlay: workaround libmount failure to remount,ro
-Message-ID: <rjqagpvze4mwnil6tck6jnyqfbcgqszy5bjgu4fqzdtq7e3idq@uizmifogsqyf>
-References: <20250526143500.1520660-1-amir73il@gmail.com>
- <20250526143500.1520660-2-amir73il@gmail.com>
- <CAJfpegtYTpJXYOiyckcfQA=YTVXcLQZRGV4=sjueLenJpTp7Lw@mail.gmail.com>
- <CAOQ4uxjh9u3DE_HKExa=kK08efzDsxVuCVuA0tUMjwSeLX=jnQ@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="PRqfAgbD"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=sony.com; s=s1jp; t=1748423739; x=1779959739;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=YNFWdhmmD51HM54WGrM2i/UZhUlcR5x08K+8fZJiTOQ=;
+  b=PRqfAgbDNKFAo6nb4Q8c5oCjiEadfR/uaymQbj/kAAHTpim1c7TGjxps
+   IXX1j5CD0yNra4FkMLefQeT9Z0Hm9KxntpoR0XSJSoAiz/+MdGsVfP2qb
+   FlUtlWWnPG/yQ3Yp5xwjSzHznRYuzldRzXAKPzDMVvDLBlW6O9ysNs125
+   KfQzK6pk2uqkx349k+SkzhqjcHDwHNNteI7qVE9K/E5PUn+cR73H/309q
+   boOmMQZSu+xjwS2Otttp/87yAtJEidgKJfkCCeLegq5NW4vNrTAA+UOMW
+   mpeMKj+FIG6ScxpUq75ce5NiS7BkxcfGXWL7a7w/MUen9JOjO8ZbLjLGv
+   Q==;
+Received: from unknown (HELO jpmta-ob02.noc.sony.co.jp) ([IPv6:2001:cf8:0:6e7::7])
+  by jpms-ob01.noc.sony.co.jp with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 May 2025 18:15:31 +0900
+X-IronPort-AV: E=Sophos;i="6.15,320,1739804400"; 
+   d="scan'208";a="534970974"
+Received: from unknown (HELO cscsh-7000014390.ap.sony.com) ([43.82.111.225])
+  by jpmta-ob02.noc.sony.co.jp with ESMTP; 28 May 2025 18:15:31 +0900
+From: Yuezhang Mo <Yuezhang.Mo@sony.com>
+To: zlang@kernel.org
+Cc: fstests@vger.kernel.org,
+	friendy.su@sony.com
+Subject: [PATCH v1 0/7] add test requirements
+Date: Wed, 28 May 2025 17:15:23 +0800
+Message-ID: <20250528091530.1218188-1-Yuezhang.Mo@sony.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAOQ4uxjh9u3DE_HKExa=kK08efzDsxVuCVuA0tUMjwSeLX=jnQ@mail.gmail.com>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.93
 
-On Wed, May 28, 2025 at 08:54:51AM +0200, Amir Goldstein wrote:
-> On Tue, May 27, 2025 at 4:49 PM Miklos Szeredi <miklos@szeredi.hu> wrote:
-> >
-> > On Mon, 26 May 2025 at 16:35, Amir Goldstein <amir73il@gmail.com> wrote:
-> > >
-> > > libmount v1.41 calls several unneeded fsconfig() calls to reconfigure
-> > > lowerdir/upperdir when user requests only -o remount,ro.
-> >
-> > Isn't this a libmount bug then?
+These patches add test requirements to the following tests so that
+they do not run on filesystems that do not support these requirements,
+rather than causing the tests to fail.
 
-It's not just "only -o remount,ro"; the mount manual is quite explicit about it:
+Yuezhang Mo (7):
+  generic/696: add _require_chmod
+  generic/656: add _require_chown
+  generic/754: add _require_symlinks
+  generic/755: add _require_hardlinks
+  generic/730: add _require_scratch_shutdown
+  generic/645: add _require_chown
+  generic/633: add test requirements
 
-   The remount functionality follows the standard way the mount command works with
-   options from fstab. This means that mount does not read fstab (or mtab) only when
-   both device and dir are specified.
-
-        mount -o remount,rw /dev/foo /dir
-
-   After this call all old mount options are replaced and arbitrary stuff from fstab
-   (or mtab) is ignored, except the loop= option which is internally generated and
-   maintained by the mount command.
-
-        mount -o remount,rw /dir
-
-   After this call, mount reads fstab and merges these options with the options from
-   the command line (-o). If no mountpoint is found in fstab, then it defaults to
-   mount options from /proc/self/mountinfo.
-
-   ...
-
-   --options-mode mode
-           Controls how to combine options from fstab/mtab with options from the command line.
-           mode can be one of ignore, append, prepend or replace. For example, append means
-           that options from fstab are appended to options from the command line. The default
-           value is prepend — it means command line options are evaluated after fstab options.
-           Note that the last option wins if there are conflicting ones.
-
-
-Anyway, I agree that this semantics sucks, and from my point of view,
-the best approach would be to introduce a new mount(8) command line
-semantics to reflect the new kernel API, something like:
-
-   mount modify [--clear noexec] [--set nodev,ro] [--make-private] [--recursive] /mnt
-   mount reconfigure data=journal,errors=continue,foo,bar /mnt
-
-and do not include options from fstab in this by default.
-
-> > Working around it in xfstests just hides this, which seems counter productive.
-> >
-> 
-> Yes, to some extent, however, IMO the purpose of fstests is to test the
-> filesystem and the vfs and for very fs-specific tests it also tests the
-> *progs utils.
-> 
-> I do not think we can afford fstest being a test for libc+libmount and the
-> entire ecosystem. That's part of the reason that fstest implements
-> some of its own utilities to exercise syscalls.
-> 
-> If we leave the tests failing, we will loose test coverage from all
-> the people that are running with not-cutting-edge distro.
-> I don't think this is a desired outcome for us.
-> Test coverage for remount,ro is pretty important IMO.
-> 
-> FWIW, we already used LIBMOUNT_FORCE_MOUNT2 to workaround
-> another libmount bug I believe you were in the loop when we did that
-> (see blow).
-> 
-> Any other idea how to address those libmount bugs in the test suite
-> other than keeping the tests failing or not running for libmount >= v1.39?
-
-Why do you think it's a libmount bug? Do we really expect that
-userspace will parse filesystem-specific mount options and "if
-(overlayfs)" then it will exclude some options from fsconfig()?
-
-# LIBMOUNT_FORCE_MOUNT2=always strace -e mount mount -o remount,ro /mnt/merged
-mount("overlay", "/mnt/merged", 0x561d36355030, MS_RDONLY|MS_REMOUNT, "lowerdir=/mnt/low,upperdir=/mnt/"... ) = 0
-
-# strace -e fsconfig mount -o remount,ro /mnt/merged
-fsconfig(4, FSCONFIG_SET_STRING, "lowerdir", "/mnt/low", 0) = -1 EINVAL (Invalid argument)
-
-As you can see, mount(2) is absolutely fine with lowerdir=. Why not fsconfig()?
-
-I think the way libmount uses fsconfig() is exactly the same as how it
-uses the classic mount(2), just sending the mount options to the
-kernel. The difference is only that for the new mount kernel API, we
-differentiate between filesystem options (fsconfig()) and VFS
-attributes (mount_setattr()).
-
-Would it be better to ignore attempts to reconfigure the
-lowerdir/upperdir in the kernel?
-
-
-And example if you suppress fstab/mountinfo:
-
-# strace -e fsconfig mount --options-mode ignore -o remount,ro /mnt/merged
-fsconfig(4, FSCONFIG_SET_FLAG, "ro", NULL, 0) = 0
-fsconfig(4, FSCONFIG_CMD_RECONFIGURE, NULL, NULL, 0) = 0
-
-or if you specify both, source and target:
-
-# strace -e fsconfig mount  -o remount,ro overlay /mnt/merged
-fsconfig(4, FSCONFIG_SET_FLAG, "ro", NULL, 0) = 0
-fsconfig(4, FSCONFIG_CMD_RECONFIGURE, NULL, NULL, 0) = 0
-
-
-So, you do not need LIBMOUNT_FORCE_MOUNT2= workaround, use
-"--options-mode ignore" or source and target ;-)
-
-    Karel
-
+ tests/generic/633 | 6 ++++++
+ tests/generic/645 | 1 +
+ tests/generic/656 | 1 +
+ tests/generic/696 | 1 +
+ tests/generic/730 | 1 +
+ tests/generic/754 | 1 +
+ tests/generic/755 | 1 +
+ 7 files changed, 12 insertions(+)
 
 -- 
- Karel Zak  <kzak@redhat.com>
- http://karelzak.blogspot.com
+2.25.1
 
