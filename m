@@ -1,155 +1,130 @@
 Received: from mail-ej1-f48.google.com (mail-ej1-f48.google.com [209.85.218.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E20220296C
-	for <fstests@vger.kernel.org>; Wed, 28 May 2025 10:57:09 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9446019D071;
+	Wed, 28 May 2025 10:58:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748429831; cv=none; b=D2km/4rTqAwM5fhAVL0CFGm4ToDSn1BuFm8n8Mvp8yLKR9OlauWVWNSH48RZ0SCDufl/L0YsoW4keVGMjXFzPvbGzbhcmhXqhGTEmzF3OxUOhgKE3MRpzvsbWmO5LLafSPhP4+4fFlZDy9fbuEOqTJXIfaSNV4mPh4NS6ILWtlw=
+	t=1748429937; cv=none; b=ubyUNrVcKEiycN4ujpHHexTANI+eMYIRUhCoLJXl87gE84/7VQ4eKpt1wzxICm+xRute8soYkE5U8xatoyBf2sd+NkLRpjBJgnd0gG8p22ZkKcoZAsNR2OpVJ7mlukQB8Im92cATv0zBk6oRog80o1PYxjtjdAlpw/X+YrBg1Hc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748429831; c=relaxed/simple;
-	bh=zbTqDxOvVCT6lte5t1p4tLfofKPZIkU77mZFLaH9a3Y=;
+	s=arc-20240116; t=1748429937; c=relaxed/simple;
+	bh=C6ysBc+MPDOEWw9EEwaiQIBiSZ1Uc/oT0aNe+2bwsik=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=FNGPxV1U4pMB3siwa2/eFeHCa9Ut6C+H0GTMbvqc7zeReFAit71bsmYWhW+JkdWcZUxSjvZdpRD6rzIXt/9E2O9adZrMSC7lFJIgVxbdm1EPTVmpX3XviX/13TwXPRPYiYLsAr9O/IK2AKVk88sF+Q9cwtxpRN/ndDh4rt4k12Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Z1MV/cZT; arc=none smtp.client-ip=209.85.218.48
+	 To:Cc:Content-Type; b=XhVyUgcaIwPYJR1K++PMMDklOUb6VFcsitY6i5ocUmCf6QFW6U7ZA5zm0o7PjsvuuZ40rf8PmxuDg+q63eHutfT7XpkFx60nzmhcq/fcnqGGChTv5FZKI6umpFVhhFLM1v/kgkZNZ03j5hhc7SxSnAmI92kFe7QN1DIwMtw50GU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=jeAJg7br; arc=none smtp.client-ip=209.85.218.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Z1MV/cZT"
-Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-ad1b94382b8so739991066b.0
-        for <fstests@vger.kernel.org>; Wed, 28 May 2025 03:57:08 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jeAJg7br"
+Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-ad5740dd20eso667467866b.0;
+        Wed, 28 May 2025 03:58:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748429827; x=1749034627; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1748429934; x=1749034734; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=rd1GLBOHt9My0bNdPvfXvl81UuLXLpQU9wG4GcSf9M4=;
-        b=Z1MV/cZTp/jm7+U644+jPeNXKEVKqFdM9RGeG2nduAK9J8y9LzkRkU3ChoEMVT/6Ci
-         TNnUwbxU47KVRjP1LgaG9sbDkhLtQcFGQFUuPGlDBzHzSOfpgCjmkkwzO/8ZCDjL9Nn9
-         obJTjciGTxfSQQ1KeC2gFce04wchlH4vrm5EHt1EugTL2sRg83pPVfaHd0f5JzO4XwGD
-         irEfcv2sVa1rYHq3YsdmyMIAzAAa144JCUZ14EdgHQxzQSu1M4e0F7FYjn3XQFhtMbzC
-         aOZwc8fbNbGtfan4Ap8LENT1MvFkB24i4KVj63XNzYTzBC9hmNE1CZJI9E72JxZ6LeLP
-         Mu8Q==
+        bh=wNGm+XVL2Zfl7NbTSS+bsZrVa2OnUVpDRUOiJOgQUQ4=;
+        b=jeAJg7br0BtNMgnO4i+q8m6pxGv6xaL2hmd2QzfrtpqYrewUuhkLhZH5A4rYEizVMj
+         zIHbTKZ3v5D8g88lLvtkn5FlkWJ2QO4co2jscaUM9P2ggd1WpkowAdtGF/QLk72HemfJ
+         gyyQFxk63eN6dB6AbKR3d9A5FTBOaOvFOWfe0OMKtExCGNFj+1DJ7PL1x5qM4jBMRL0l
+         mv62l46iZDN4OvnCN1REHqsxYBlJ2KUOl0F2o26EUnmQvV+gmww/JBNvxn2tXz1+genS
+         F1xx8hQnBXB1YjEyEa/RKaN0zlO5POs7O9m0w8NZCi+AEEFn3QMV/GwQHMKksof9h7Oa
+         3PNg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748429827; x=1749034627;
+        d=1e100.net; s=20230601; t=1748429934; x=1749034734;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=rd1GLBOHt9My0bNdPvfXvl81UuLXLpQU9wG4GcSf9M4=;
-        b=q9L8WIo44GzV2UkkE8P9nEP6nQKfjZpGGgYrqWzZRQcIkyhtBmT2ZdC+RBQazb8rby
-         615rqrhnraFVpDQpGoqe6sPOhEZ8oev9GjML2mu4Mfnl5lnF3HDSK5ttQmim24r+jFAD
-         ukl6K7yFRvP9rUQ+ZHAcEvhScdipfJBp5SoeIES/CGFH5c3woxpEZE5IVmr1nZ0X8qht
-         2z8JI+S13a+nroOW2aZ0rn4PEZW6XDedhZFjwiXpxR0VFwr54ZRxjF42nHbRqxRSOfey
-         GQgPaM1ADH8gMYaEWgmVue7w6p5M+UDFRZIIYMcUB6EUnG2HWg/bMNcylTCJlXXAEJhf
-         45Iw==
-X-Forwarded-Encrypted: i=1; AJvYcCUBICgHfyulkMVnsIISBznh15V3/52W+d5gb+Qu+zlKD5PP0EXHWphNhIPa1DKD50jeS6xLtZoH@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx8uhIjYnH7W4oIVWeqKPn24rBAy2UFESXz78dCQ+BK72BlM+KH
-	fPmiRHW8vjThtUKTM8oW5ib+9g70vnCCGY7/yDnYlkHm+T3Oli1wS1Q60WiQf92W5ciWw03LRN6
-	xfocei46F+437qvODoKPgKhZ/mm7+PxU=
-X-Gm-Gg: ASbGncv0Uvcaz0Apm7zCEXCgSbRcRqVvAs7jlFO/z/9VGDUaAhbkLXDvkaKPKsyjX1U
-	CVzu76LkcZ0xtjd8j+Rs/rTjpYqCL4db9PE/4Kmz3/GwP6basiR3sQkX+NJPLiu+hmmuoVErqfS
-	OojzAQELDKAPV1CwO5Al39YvYy0E88OZj0ABgxieejzOg=
-X-Google-Smtp-Source: AGHT+IG568BEC0VHepwBzhsxbOWq4phy+By5tCLRgu0U4y6U2Q6N1zMMMoUCnRha4tFtl0mUtF5xZykMBp0zokOKGGg=
-X-Received: by 2002:a17:907:6e8d:b0:ad8:a935:b8f7 with SMTP id
- a640c23a62f3a-ad8a935c984mr29463866b.12.1748429827234; Wed, 28 May 2025
- 03:57:07 -0700 (PDT)
+        bh=wNGm+XVL2Zfl7NbTSS+bsZrVa2OnUVpDRUOiJOgQUQ4=;
+        b=HZ0HelzG3ryG0+RcnvzXR+s4h0pPrAxdQ/w2BwvOo7bjNNDQ2M+Gj8bzpqtCcMVfZ8
+         7/N6oXB0sqwv90pQTjmIuc/CuVNSE8xlZbVYDO0d3EJ6AfeR3Yuey8zOk6K9XXsK7KAy
+         pkVxG4DnokKe2khfpT/HLKDd5V6xr4K/Ecgp2so/nxbiMLqrYqqhcAj/SGT4EZWuxDvn
+         qYYGIqz+DElmj0zzYtBs1WB/Q2/8UvJ0jMIE7dNAJaTczZYiJiwDWrGKHYI4mEXvBeBv
+         VnUtRMjw2FyRzp7H8agAAEfDPZS05uhp+BBsupfGboOOkMdreFsm9XeNeTY1ZFoHi2f3
+         A+GA==
+X-Forwarded-Encrypted: i=1; AJvYcCV6O/76hg2QKx2Y0wLuAURRusWLG8n1jRVlKnUGwkzGicxrmas7Zb7sObp/h5dhoWz4BUSuaKhc@vger.kernel.org, AJvYcCXJIhb+tywMaaPV5iAhZA4wAiYb6PPV5+dlCWttflftlFjnNQTwNWsBRt8xbac6q0iO8mkxaprEktSD0Ov4DA==@vger.kernel.org
+X-Gm-Message-State: AOJu0YwywLBiEWknJNIdNkHZkV805JE87L41BrwVObKDsstysfjQYwzL
+	kvjxhmspm/WBfk4ja3qQqzdEqwl16HE+Uv23QY1Xw8ru834q+BdVELTNiWz0iXkp/zCKdfi7pNF
+	ojnDDi6JVkz2MxZLl59UtGdmMr1hnoncFXSNt2w0=
+X-Gm-Gg: ASbGnctXKYraOSZ8WssQ5cG+arJoLJ7sziQY8ltQFTg/8WQRo/vwOWzoNX/eGPqW6If
+	SBHqS/s85+PmrKOljAu0YQQaIiIxNtlNaPgSg75grCsbKdGjoTWnHSlVAyJpK0yd9hVTOvGOe3R
+	Au4r5c+bIm37fopd11w1bl6X9Io+/SgW5N
+X-Google-Smtp-Source: AGHT+IEWEc+aTjbATn+MWeDvxPGpQYWxE3FT9Qp+aPuGkXf+GOtXZcyVKIyrgwnrYZFruwElcKYBFkBbPGP4q6A4ecc=
+X-Received: by 2002:a17:907:25c7:b0:ad6:4e8e:1883 with SMTP id
+ a640c23a62f3a-ad85b0a7809mr1552755366b.3.1748429933592; Wed, 28 May 2025
+ 03:58:53 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250528091530.1218188-1-Yuezhang.Mo@sony.com> <20250528091530.1218188-8-Yuezhang.Mo@sony.com>
-In-Reply-To: <20250528091530.1218188-8-Yuezhang.Mo@sony.com>
+References: <20250526143500.1520660-1-amir73il@gmail.com> <20250526143500.1520660-2-amir73il@gmail.com>
+ <CAJfpegtYTpJXYOiyckcfQA=YTVXcLQZRGV4=sjueLenJpTp7Lw@mail.gmail.com>
+ <CAOQ4uxjh9u3DE_HKExa=kK08efzDsxVuCVuA0tUMjwSeLX=jnQ@mail.gmail.com>
+ <rjqagpvze4mwnil6tck6jnyqfbcgqszy5bjgu4fqzdtq7e3idq@uizmifogsqyf> <CAJfpegtJ3SDKmC80B4AfWiC3JmtWdW2+78fRZVtsuhe-wSRPvg@mail.gmail.com>
+In-Reply-To: <CAJfpegtJ3SDKmC80B4AfWiC3JmtWdW2+78fRZVtsuhe-wSRPvg@mail.gmail.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 28 May 2025 12:56:55 +0200
-X-Gm-Features: AX0GCFs8AoOMg8RXJ3-cBBLfR_COi3Wm8W0zu7lxhplhQbqpqFRJpnE9hU4OH5c
-Message-ID: <CAOQ4uxihwu9-rqFEUboDaDV9onaip4N5QsbdU_xTZQ7MnBDCzA@mail.gmail.com>
-Subject: Re: [PATCH v1 7/7] generic/633: add test requirements
-To: Yuezhang Mo <Yuezhang.Mo@sony.com>
-Cc: zlang@kernel.org, fstests@vger.kernel.org, friendy.su@sony.com, 
-	Christian Brauner <brauner@kernel.org>
+Date: Wed, 28 May 2025 12:58:40 +0200
+X-Gm-Features: AX0GCFvJzp-2padslxisj0BL98U_mizL0YISvumQhJokEjJTj2Mxd0sT_hFOq0Y
+Message-ID: <CAOQ4uxj45_DdENOxpbz68rBRTA-Crq7OwpJ5VqGs=DScSr9AQQ@mail.gmail.com>
+Subject: Re: [PATCH 1/4] overlay: workaround libmount failure to remount,ro
+To: Miklos Szeredi <miklos@szeredi.hu>
+Cc: Karel Zak <kzak@redhat.com>, Zorro Lang <zlang@redhat.com>, linux-unionfs@vger.kernel.org, 
+	fstests@vger.kernel.org, =?UTF-8?Q?Andr=C3=A9_Almeida?= <andrealmeid@igalia.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, May 28, 2025 at 11:15=E2=80=AFAM Yuezhang Mo <Yuezhang.Mo@sony.com>=
+On Wed, May 28, 2025 at 11:57=E2=80=AFAM Miklos Szeredi <miklos@szeredi.hu>=
  wrote:
 >
-> Since the following test requirements are required by the following
-> sub-tests, this commit adds them to this test to avoid failures on
-> filesystems that do not support them.
+> On Wed, 28 May 2025 at 10:47, Karel Zak <kzak@redhat.com> wrote:
 >
-> requirement | sub-tests
-> ------------+-------------------------------------------------------
-> hardlink    | hardlink_crossing_mounts tcore_fsids_mapped
->             | tcore_hardlink_crossing_idmapped_mounts
->             | tcore_hardlink_from_idmapped_mount
->             | tcore_hardlink_from_idmapped_mount_in_userns
-> ------------|-------------------------------------------------------
-> symlink     | protected_symlinks symlink_regular_mounts
->             | tcore_create_in_userns tcore_symlink_idmapped_mounts
->             | tcore_symlink_idmapped_mounts_in_userns
-> ------------|-------------------------------------------------------
-> chown       | hardlink_crossing_mounts rename_crossing_mounts
->             | setid_binaries sticky_bit_unlink
->             | symlink_regular_mounts tcore_acls
->             | tcore_hardlink_crossing_idmapped_mounts
->             | tcore_hardlink_from_idmapped_mount
->             | tcore_protected_symlinks_idmapped_mounts
->             | tcore_rename_crossing_idmapped_mounts
->             | tcore_rename_from_idmapped_mount
->             | tcore_setattr_truncate_idmapped_in_userns
->             | tcore_setid_binaries_idmapped_mounts
->             | tcore_setid_binaries_idmapped_mounts_in_userns
->             | tcore_setid_binaries_idmapped_mounts_in_userns_separate_use=
-rns
->             | tcore_sticky_bit_unlink_idmapped_mounts
->             | tcore_sticky_bit_unlink_idmapped_mounts_in_userns
->             | tcore_sticky_bit_rename_idmapped_mounts
->             | tcore_sticky_bit_rename_idmapped_mounts_in_userns
-> ------------|-------------------------------------------------------
-> chmod       | protected_symlinks
->             | tcore_protected_symlinks_idmapped_mounts_in_userns
-> ------------|-------------------------------------------------------
-> io_uring    | io_uring io_uring_userns tcore_io_uring_idmapped_userns
->             | tcore_io_uring_idmapped_unmapped
->             | tcore_io_uring_idmapped_unmapped_userns
-> ------------|-------------------------------------------------------
-> mknod       | tcore_expected_uid_gid_idmapped_mounts
+> > Anyway, I agree that this semantics sucks, and from my point of view,
+> > the best approach would be to introduce a new mount(8) command line
+> > semantics to reflect the new kernel API, something like:
+> >
+> >    mount modify [--clear noexec] [--set nodev,ro] [--make-private] [--r=
+ecursive] /mnt
+> >    mount reconfigure data=3Djournal,errors=3Dcontinue,foo,bar /mnt
+> >
+> > and do not include options from fstab in this by default.
 >
-> Signed-off-by: Yuezhang Mo <Yuezhang.Mo@sony.com>
-> Reviewed-by: Friendy Su <friendy.su@sony.com>
-> ---
->  tests/generic/633 | 6 ++++++
->  1 file changed, 6 insertions(+)
+> But there's no fstab entry in the testcase.  The no-fstab case likely
+> gets way more use in real life then remounting something in fstab.
+> And this should not need to get the current options from the kernel,
+> since the kernel is the source of the current options.
 >
-> diff --git a/tests/generic/633 b/tests/generic/633
-> index f58dbbf5..e19a2043 100755
-> --- a/tests/generic/633
-> +++ b/tests/generic/633
-> @@ -13,6 +13,12 @@ _begin_fstest auto quick atime attr cap idmapped io_ur=
-ing mount perms rw unlink
->  . ./common/filter
+> With the KISS principle in mind the non-fstab "mount -oremount,ro
+> /mnt/foo" should just be translated into:
 >
->  _require_idmapped_mounts
+> fd =3D fspick(AT_FDCWD, "/mnt/foo", 0);
+> fsconfig(fd, FSCONFIG_SET_FLAG, "ro", NULL, 0);
+> fsconfig(fd, FSCONFIG_CMD_RECONFIGURE, NULL, NULL, 0);
+>
 
-Please note that the requirement above is wrong:
++1
 
-https://lore.kernel.org/fstests/20250526175437.1528310-1-amir73il@gmail.com=
-/
+> and the kernel should take care of the rest.  I assume this doesn't
+> generally work, which is a pity, but I'd still think about salvaging
+> the concept.
+>
+> > So, you do not need LIBMOUNT_FORCE_MOUNT2=3D workaround, use
+> > "--options-mode ignore" or source and target ;-)
+>
+> Yeah, that's definitely a better workaround.
+>
 
-> +_require_hardlinks
-> +_require_symlinks
-> +_require_chown
-> +_require_chmod
-> +_require_io_uring
-> +_require_mknod
-
-I wonder if it makes more sense to have a collective check for all (or
-most) of the above,
-e.g. _require_vfstest, which is different than _require_idmapped_mounts,
-so that we do not have to add all of these for tests running
-other vfstests subtests in the future.
+Agree. I will use a different workaround for fstest.
 
 Thanks,
 Amir.
+
+
+> I wouldn't call it a fix, since "mount -oremount,ro /overlay" still
+> doesn't work the way it is supposed to, and the thought of adding code
+> to the kernel to work around the current libmount behavior makes me go
+> bleah.
+>
+> Thanks,
+> Miklos
