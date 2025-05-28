@@ -1,94 +1,114 @@
-Received: from mail-qt1-f170.google.com (mail-qt1-f170.google.com [209.85.160.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B8951B532F
-	for <fstests@vger.kernel.org>; Wed, 28 May 2025 11:47:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1710F2868A5
+	for <fstests@vger.kernel.org>; Wed, 28 May 2025 13:13:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748432871; cv=none; b=CCNW5E4V3vrXxJn6rmqxNewtkiEN0XvyyCyTLYNver+8970vNoq4p+zIT3ChX9nbwTy1IMgU73sScj+mh9Uc6EnJoMMha4K81knF7+b51xGbwgdHjE2mzdxEp6yNIaFYRGmRggjj2xnVECO1eFbNFmolPfuiBX1Uvmoq6PZzC7A=
+	t=1748438011; cv=none; b=PbL8nwUHAKvQ2yznbw4uX7CKQ5JotQDDs/a9dkXWGIFVhaHcBFQWLIcK9ZNc01nxIMUqCyZo+1PXkKSFKuJv6Ncho1TGPfbwC+bLR5/8B41d2ay3gz+WY6grdRq68JV5hO4Er8cUyy/jC6JgOW2QpuLKC4Xys1fkoP6CcYBTgUM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748432871; c=relaxed/simple;
-	bh=TTy22rgWBPKbjZSTe4uWPN+pN85sITjqdiiRx8uuXRo=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=G0YGe4avjq7hqJXIh/z1TGlXXHB7ENZlSFqJD8eV3vFYgle2NTLTBdxEwQ6soFrDImRO3UGtK/7IUOZwUz1Qm4PmeD0gCpISRmVxDWFp0RY30cqQA1Ab9ZSgvuiEtdALR79DiNWG96vu7JPzLxEqWnoSBaVam7Fg1qbLTuA5+Tc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=szeredi.hu; spf=pass smtp.mailfrom=szeredi.hu; dkim=pass (1024-bit key) header.d=szeredi.hu header.i=@szeredi.hu header.b=DyWzg/NQ; arc=none smtp.client-ip=209.85.160.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=szeredi.hu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=szeredi.hu
+	s=arc-20240116; t=1748438011; c=relaxed/simple;
+	bh=OHDm+BZLVGDxerXVngTYwRrLJRHqZOWH97NiVEZD5CY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=DXuL8tFcKseotcjUmdbTqyL85AWx8FT4MV/XbsRX8h6cKYweVlT9Ya1pVNKMRV/OSAmVl96X1jjX1RrbLrR6DvK5AjhBfLIxMuzOIM2hIa5ScLsSiFNi36Tm3YNVNedxdreSf2Ojtx+xVtX5o8+eoEtBsdYvPiz+Z+BFMmZ6KwA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XyU8HMAT; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=szeredi.hu header.i=@szeredi.hu header.b="DyWzg/NQ"
-Received: by mail-qt1-f170.google.com with SMTP id d75a77b69052e-4947635914aso45934411cf.3
-        for <fstests@vger.kernel.org>; Wed, 28 May 2025 04:47:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=szeredi.hu; s=google; t=1748432868; x=1749037668; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=TTy22rgWBPKbjZSTe4uWPN+pN85sITjqdiiRx8uuXRo=;
-        b=DyWzg/NQryUaWnXZ1a9i97aiUzETKk9mCYJm4NokxCMBDndk3vAXcZq4UzPq0MdH6m
-         6Edi3Ya5b1of56EQNXx0Qq4rdrUwcNu+D4/eUvDyUnr89VtI6K0gzkROkHyWvWrMC7vR
-         3PSAgMLFlpKsZxl5X8kGUh803h/SWxBcxCRVA=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748432868; x=1749037668;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=TTy22rgWBPKbjZSTe4uWPN+pN85sITjqdiiRx8uuXRo=;
-        b=H/1DjkjGMnzanyH50wi4WIU4PcZLlq2BmS/Vr29h5Xdh4933m7n7mMddk9sjJoAUbZ
-         j+tEU1a+txx4qyIXd54tW2KWiOyOeu83B0bztFM5XPdJkAV0O6rlsNKDFfWUiilJeC/n
-         yk8nKCof5e9Yua8UXqFszexTSiKhomPh2N87FzqR5W3lFwpYvzPz7pRhukv3IrQxUUTI
-         IWE3X1SlfFp7RmntUVa3+12JADtYWsNacof147cElvCwxtOt6jWeyB8Vd+zDtlfGfKTS
-         6xidY4B2toRt6UZzX2Bp2hS3XTL2oJYAyF0UdmIq/ybRen2twhkTfyVazjaKg7QiRe/d
-         jaTg==
-X-Forwarded-Encrypted: i=1; AJvYcCVZHotU9fC6I/Dlk63/veOq1lhq6nwFPbJwsuXyVm0jglYpmTUpCPhhtEDnMxYHoMun/Ez8yAyV@vger.kernel.org
-X-Gm-Message-State: AOJu0YyysJ3tA+J4qoapbdDIDjwd498H4mtiR87gkhJxR4FauPnJgeux
-	xupw406q5fa8rGDzp3t5LTB9fgerCB6QqsDoCYDhSVeKPDoHznYunWRWAYoP/4GF9DFkawDCYzt
-	U9nhcXgWaQmkzz9t0P7dlRbhgDQ/nRs90SJq52IpNRA==
-X-Gm-Gg: ASbGncsxoqx+JHUf/BpZ4xt25HxYhUFV1/1qlu4ATisZNvngmXEaphoZrYK/Gti+HJD
-	SFwBh1KLvy+2Az4nR+SEwub8Wfz82Kvbal6jOG/YkUAP4KUXOq1GvwB/X1tyhX0LPoLLvMLqIYP
-	pXxg1BAnOO0cdub3iIPmPIPpocj1yYQg71ajM=
-X-Google-Smtp-Source: AGHT+IE+3pNaJ+H5/u/9c4yjQaWkOWYwsiGhi+DlHJjO4epJsVha4CJwHyPCYXCzT0i6Nujm1AMi0Orm5s3x0tUFcW0=
-X-Received: by 2002:a05:622a:c87:b0:48e:1f6c:227b with SMTP id
- d75a77b69052e-49f46e306ddmr293044501cf.26.1748432868268; Wed, 28 May 2025
- 04:47:48 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XyU8HMAT"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1748438007;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=g9O/bnxtzeHjXuwYHhDVDwwVycr/Ty9A6s076ZqDm5A=;
+	b=XyU8HMATnRiKzfA8UrPorgseyCAt3WkGgcxHATGD9L4bmiaA6r4sEr8alT1hO5Ix+iIxmQ
+	nWJQkZnTjIjJJ/oxsXrCYUnqIfeeTNr9wrPqx9ndsrKQolEQpDVWRYiQ8kigLO30jcpIIs
+	eq4nD2kAuM+gDXTyXQ09Y9vdEI62VkU=
+Received: from mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-500-RnfcvIsCOY-z1mjNmEGIzw-1; Wed,
+ 28 May 2025 09:13:26 -0400
+X-MC-Unique: RnfcvIsCOY-z1mjNmEGIzw-1
+X-Mimecast-MFC-AGG-ID: RnfcvIsCOY-z1mjNmEGIzw_1748438005
+Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 0586B19560B1;
+	Wed, 28 May 2025 13:13:24 +0000 (UTC)
+Received: from ws.net.home (unknown [10.45.225.54])
+	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id DF85930001B1;
+	Wed, 28 May 2025 13:13:21 +0000 (UTC)
+Date: Wed, 28 May 2025 15:13:18 +0200
+From: Karel Zak <kzak@redhat.com>
+To: Miklos Szeredi <miklos@szeredi.hu>
+Cc: Amir Goldstein <amir73il@gmail.com>, Zorro Lang <zlang@redhat.com>, 
+	linux-unionfs@vger.kernel.org, fstests@vger.kernel.org, 
+	=?utf-8?B?QW5kcsOp?= Almeida <andrealmeid@igalia.com>
+Subject: Re: [PATCH 1/4] overlay: workaround libmount failure to remount,ro
+Message-ID: <u6gsk65mznw3gisnr4btpxvooa7czbhiei4exbsgc5swdbgtf7@c5hx27plyu6e>
+References: <20250526143500.1520660-1-amir73il@gmail.com>
+ <20250526143500.1520660-2-amir73il@gmail.com>
+ <CAJfpegtYTpJXYOiyckcfQA=YTVXcLQZRGV4=sjueLenJpTp7Lw@mail.gmail.com>
+ <CAOQ4uxjh9u3DE_HKExa=kK08efzDsxVuCVuA0tUMjwSeLX=jnQ@mail.gmail.com>
+ <rjqagpvze4mwnil6tck6jnyqfbcgqszy5bjgu4fqzdtq7e3idq@uizmifogsqyf>
+ <CAJfpegtJ3SDKmC80B4AfWiC3JmtWdW2+78fRZVtsuhe-wSRPvg@mail.gmail.com>
+ <urxghfhdccjg6v47h63btu77kyxnsxbrmxdbhb7kx3oiqz23og@plyznhi36omp>
+ <CAJfpegv9Evti_MmWR72Gg13s9XYsxJHQ3WSJRwLrBy5O8aVHaQ@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250526143500.1520660-1-amir73il@gmail.com> <20250526143500.1520660-2-amir73il@gmail.com>
- <CAJfpegtYTpJXYOiyckcfQA=YTVXcLQZRGV4=sjueLenJpTp7Lw@mail.gmail.com>
- <CAOQ4uxjh9u3DE_HKExa=kK08efzDsxVuCVuA0tUMjwSeLX=jnQ@mail.gmail.com>
- <rjqagpvze4mwnil6tck6jnyqfbcgqszy5bjgu4fqzdtq7e3idq@uizmifogsqyf>
- <CAJfpegtJ3SDKmC80B4AfWiC3JmtWdW2+78fRZVtsuhe-wSRPvg@mail.gmail.com> <urxghfhdccjg6v47h63btu77kyxnsxbrmxdbhb7kx3oiqz23og@plyznhi36omp>
-In-Reply-To: <urxghfhdccjg6v47h63btu77kyxnsxbrmxdbhb7kx3oiqz23og@plyznhi36omp>
-From: Miklos Szeredi <miklos@szeredi.hu>
-Date: Wed, 28 May 2025 13:47:37 +0200
-X-Gm-Features: AX0GCFvbR3_g0iNsB3oltQqJIifcokeo5YRw04-1DG41L2BTc5h2Moj8NrIcUV8
-Message-ID: <CAJfpegv9Evti_MmWR72Gg13s9XYsxJHQ3WSJRwLrBy5O8aVHaQ@mail.gmail.com>
-Subject: Re: [PATCH 1/4] overlay: workaround libmount failure to remount,ro
-To: Karel Zak <kzak@redhat.com>
-Cc: Amir Goldstein <amir73il@gmail.com>, Zorro Lang <zlang@redhat.com>, linux-unionfs@vger.kernel.org, 
-	fstests@vger.kernel.org, =?UTF-8?Q?Andr=C3=A9_Almeida?= <andrealmeid@igalia.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAJfpegv9Evti_MmWR72Gg13s9XYsxJHQ3WSJRwLrBy5O8aVHaQ@mail.gmail.com>
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
 
-On Wed, 28 May 2025 at 12:55, Karel Zak <kzak@redhat.com> wrote:
+On Wed, May 28, 2025 at 01:47:37PM +0200, Miklos Szeredi wrote:
+> On Wed, 28 May 2025 at 12:55, Karel Zak <kzak@redhat.com> wrote:
+> 
+> > Why is it fine for mount(2) but wrong for fsconfig()? This is the
+> > question. There is an incompatibility between the APIs.
+> 
+> Where is it documented that the fsconfig(2) shall have the same
+> replace semantics as mount(2)?
 
-> Why is it fine for mount(2) but wrong for fsconfig()? This is the
-> question. There is an incompatibility between the APIs.
+Okay, fair enough, but you understand that userspace needs to adapt to
+the new API, and ideally, changes should not be introduced to
+end-users.
 
-Where is it documented that the fsconfig(2) shall have the same
-replace semantics as mount(2)?
+Frankly, I already have a private TODO file for libmount2 because I
+feel we need to move forward, simplify things, move away from the
+mount(2) syscall, and fully adapt to the new kernel API, which
+provides features we do not yet support on the command line. The
+current mount(8) command line and semantics are based on the mount(2)
+era. The remount with all the obscure options (like MS_REMOUNT|MS_BIND)
+is the worst legacy.
 
-When I reviewed the new API, I certainly didn't think that it should
-have these semantics, and I'm not even sure it did have it back then.
-But of course I may have missed it.
+> I think this is just a bad accident, and I'm wondering if this could
+> still be fixed in a way that doesn't introduce more hackery.
 
-I think this is just a bad accident, and I'm wondering if this could
-still be fixed in a way that doesn't introduce more hackery.
+Why can't filesystems silently ignore fsconfig() requests that do not
+introduce a change? For example, if the current setting is foo=123 and
+fsconfig() is used to change it to foo=123, why is it reported as an
+error? It's stupid, but just no op.
 
-One idea is to introduce a flag (e.g. FSPICK_REPLACE_ONLY) that makes
-the filesystem initialize the fs_context with the current options.
-That would work, no?
+> One idea is to introduce a flag (e.g. FSPICK_REPLACE_ONLY) that makes
+> the filesystem initialize the fs_context with the current options.
+> That would work, no?
 
-Thanks,
-Miklos
+I'm not sure I understand how it will affect userspace. Do you mean
+that with the flag, the kernel will assume a completely new set of
+options from userspace, and the filesystem will adapt (if possible) to
+the new settings?
+
+    Karel
+
+-- 
+ Karel Zak  <kzak@redhat.com>
+ http://karelzak.blogspot.com
+
