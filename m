@@ -1,77 +1,95 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f73.google.com (mail-ed1-f73.google.com [209.85.208.73])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 016BB23A9;
-	Fri, 30 May 2025 05:31:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D1DDD1E2607
+	for <fstests@vger.kernel.org>; Fri, 30 May 2025 09:24:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748583115; cv=none; b=IRPnDB57f057m5X2Wj1nPXe1Pm0tsbkQZ5mKvm87fXdTDBE0G8jluoLedCHECucvKWj6uwfttnMi6R4Pkzf8jOQ/24tyo8toRRI4UWaLc9yGfL9iAE07N3Z/qGRreJFL6AwhBw3CUNcRKIy5o2Av4cOV0my1b6M56UNLWnX5CVo=
+	t=1748597043; cv=none; b=Eiw0qjmukJ1Dsr4wSXxsrqBZbk0k+aDcZ6BSlfiGbX2FcxZD4n7hlRCJlIes5tLdccgX83tSqLnR3SksdA36wRCmQ9Hx7F5MG2DubHJmpdVXhiHkEcPmL6Mrkg/dCzpVXmnMkdsAFRFqmynEPc20bcMihbUFJTU63Cxn515F/Gs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748583115; c=relaxed/simple;
-	bh=djAHV4ZcorKvepAx5cvLMQPKw2wbXB1abMOASLXT0P8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=AknIjU2H70m8LcfDuBx0EkpD/Z9ZqFHXL3OV/d818u6KB1SpFD05toyLfseFXSWdkb5eSmjdxANecJeMN9KWgnklbcoYVrOUmI6nAYUKxlV4tTeMuxcfi1EHSwYCpNLf6DVIbIDaeES4quiIKZlvRUM7WXKrSLn82i7hZ/p9LHw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fDJp1jkV; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1748597043; c=relaxed/simple;
+	bh=upks11UNb7Bj2+PIQfyKVyLkQHPpiiA0oWyo+RxAgWM=;
+	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=ikhSFNOn9ze7hI2lsD8y8UTXxvoMN0L0RKQmblBOh68UuZctDOKYeJbQ4o0E4kBPCCfyoKHJrSViBk/T0Jy4D7Gn+q5KCTIW93Q9u+QRphk6IYf2NLk9sqeZ1C6Mm+vFJlTuFhA5sJ/EggeY2uRnKrgqYTxlxJ5iSRp9ypag4U8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=usVFYk+c; arc=none smtp.client-ip=209.85.208.73
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fDJp1jkV"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B7A4DC4CEE9;
-	Fri, 30 May 2025 05:31:52 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1748583114;
-	bh=djAHV4ZcorKvepAx5cvLMQPKw2wbXB1abMOASLXT0P8=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=fDJp1jkVGR5On6urVTO15t6+aWD8cTaGrn9KYy2qX6PbUSbYsBqPf1bGH5uWOQ7aN
-	 SSikR6xaeyrPlmiWw8WAjqZbkqfXxUADl9iT6pTtdZI4quDX1SV4Au0y4wgS7egLji
-	 SVXkfncyCA45Ycn0Q9YGHkEiPXRjRR1bVnQLkQFo4XuJFSAsYrChUkOzGN3Kg5UI/h
-	 S53I0Zjx0kC1hLmv8ziIEqmy6Ilh7jAXrnW/e5e5lRrzdZZfxeU6oZRCi1m7bnI6zB
-	 oVqFwV8AdmaixRKmKcAXVSpQmaonh0FcAD5UgKax/YafhZyAt/1ETGT7jRna+Ggj7Y
-	 qd0gn2/WwFXYA==
-Date: Fri, 30 May 2025 07:31:50 +0200
-From: Christian Brauner <brauner@kernel.org>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Zorro Lang <zlang@redhat.com>, linux-fsdevel@vger.kernel.org, 
-	fstests@vger.kernel.org, Yang Xu <xuyang2018.jy@fujitsu.com>, 
-	Anthony Iliopoulos <ailiop@suse.com>, David Disseldorp <ddiss@suse.de>
-Subject: Re: [PATCH] generic: remove incorrect _require_idmapped_mounts checks
-Message-ID: <20250530-deklamieren-ehrung-1895eefd99f1@brauner>
-References: <20250526175437.1528310-1-amir73il@gmail.com>
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="usVFYk+c"
+Received: by mail-ed1-f73.google.com with SMTP id 4fb4d7f45d1cf-6021b8b2ab1so1731725a12.2
+        for <fstests@vger.kernel.org>; Fri, 30 May 2025 02:24:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20230601; t=1748597040; x=1749201840; darn=vger.kernel.org;
+        h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=kNsoQrbO6r0+t/N3UUDEwd5dEvoE0yv1vSMzQKLNhHg=;
+        b=usVFYk+chdQqYpQBuuAS7BFKexFVb3k5tHQdbNz/N57sJnbJb3l+FiKxbCryVWCQ0f
+         vBmE2nJGaww6rQL2Ofj+UA2fB3Z47BA/Qbfd8jZb0o3JXYYRDizpuILGROfN/w8h5Tnq
+         xsqyJLbrRg0yvLhgseGPVI48e027Dck4jae4hngYtsf0Jy/Ob/m91p5aAu69k7o0iW68
+         lzqKvJcnoshVbUbWYmB6vhZC6yXrO2c5VVnh/mFbHYjNKtVubdKeZVj00wTF+DbNSTya
+         ZkQaC17+I5PgcqLiNlQlzWLU+VgdzxbvnIFp9GfBqq9PWuEc9s52GeIuSAk2ZAbiFgiZ
+         sobg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1748597040; x=1749201840;
+        h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=kNsoQrbO6r0+t/N3UUDEwd5dEvoE0yv1vSMzQKLNhHg=;
+        b=Jw9NsfM6Nw2JoAkwL+a5Z2pMs+HC7+URk27YwMVo84q4SetQ1pNaaw7KvE+Snaim/j
+         G5JdYPpT7gHBNfwXjoZkGJ+s0AghL2MG71/sTPNA3X4hVVwJI9yJI5sfm/1L+kJOi2ih
+         tf8xb/gUoNAG5pMDTqLuGid9S1tolRPa03UbSW1PN6nmRoOBL578jsix/OpfLFfqNpah
+         SvYOboZoxajuNslA1/GQxsLyLFK1B07l3azB0QhoIQFiRxZcLV8g96VcMbZd9Z1hpGso
+         XFARji++MVzwrpYeHYv4J1xRjfSLqyCSeFpAYOx10XXCNGBWnby4kUxrCrrrzc7XkUfn
+         42GA==
+X-Forwarded-Encrypted: i=1; AJvYcCVDecW03AE2q/iI15E1epuB1q01DXxp6adcApVS5ccuWX7vbacvUUGV6I6IhizbeyvYJs5GvQKw@vger.kernel.org
+X-Gm-Message-State: AOJu0YyjGT3jG9zcE7QePslrEwHQBS0VpG+WSUcrnAArnvDygLiAkW7Y
+	/6ppPpSv19XdRmA5/m3JApUb51aDnY5DxyKLVWXGxAZRohP9oNP1z+RyI4+b5BpkX7jZ8rN8ZDM
+	OUNtWWoN6Bm/X4GKRZofmTW0LLIF1jg==
+X-Google-Smtp-Source: AGHT+IE72Av919IDDm4wEfbEzX4XfOKhpgZ1L0ybT1n1bbC7V6vlgXaojKI4rlGgqekrC/BSpb6havKaBqZVlhykYEQ=
+X-Received: from edbdg5.prod.google.com ([2002:a05:6402:1d05:b0:5dc:2205:e2ad])
+ (user=jprusakowski job=prod-delivery.src-stubby-dispatcher) by
+ 2002:a05:6402:26c6:b0:5fb:c126:12c9 with SMTP id 4fb4d7f45d1cf-6056e2586fbmr2079020a12.25.1748597040124;
+ Fri, 30 May 2025 02:24:00 -0700 (PDT)
+Date: Fri, 30 May 2025 09:23:49 +0000
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20250526175437.1528310-1-amir73il@gmail.com>
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.49.0.1204.g71687c7c1d-goog
+Message-ID: <20250530092349.3407742-1-jprusakowski@google.com>
+Subject: [PATCH v1] f2fs/004: avoid race condition in test
+From: Jan Prusakowski <jprusakowski@google.com>
+To: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Cc: jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net, 
+	Jan Prusakowski <jprusakowski@google.com>
+Content-Type: text/plain; charset="UTF-8"
 
-On Mon, May 26, 2025 at 07:54:37PM +0200, Amir Goldstein wrote:
-> commit f5661920 ("generic: add missed _require_idmapped_mounts check")
-> wrongly adds _require_idmapped_mounts to tests that do not require
-> idmapped mounts support.
-> 
-> The added _require_idmapped_mounts in test generic/633 goes against
-> commit d8dee122 ("idmapped-mounts: always run generic vfs tests")
-> that intentionally removed this requirement from the generic tests.
-> 
-> The added _require_idmapped_mounts in tests generic/69{6,7} causes
-> those tests not to run with overlayfs, which does not support idmapped
-> mounts. However, those tests are regression tests to kernel commit
-> 1639a49ccdce ("fs: move S_ISGID stripping into the vfs_*() helpers")
-> which is documented as also solving a correction issue with overlayfs,
-> so removing this test converage is very much undesired.
-> 
-> Remove the incorrectly added _require_idmapped_mounts checks.
-> Also fix the log in _require_idmapped_mounts to say that
-> "idmapped mounts not support by $FSTYP", which is what the helper
-> checks instead of "vfstests not support by $FSTYP" which is incorrect.
-> 
-> Cc: Yang Xu <xuyang2018.jy@fujitsu.com>
-> Cc: Anthony Iliopoulos <ailiop@suse.com>
-> Cc: David Disseldorp <ddiss@suse.de>
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
+In current implementation the atomic write may not start before
+the direct write and the test fails.
 
-Seems correct to me:
+The patch adds a delay after starting the atomic write process
+so it has a chance to actually start wrtiting data and set the
+internal state of the file correctly.
 
-Reviewed-by: Christian Brauner <brauner@kernel.org>
+Signed-off-by: Jan Prusakowski <jprusakowski@google.com>
+---
+ tests/f2fs/004 | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/tests/f2fs/004 b/tests/f2fs/004
+index e08cee11..ac824c43 100755
+--- a/tests/f2fs/004
++++ b/tests/f2fs/004
+@@ -40,6 +40,9 @@ touch $dbfile
+ $F2FS_IO_PROG write 1 0 32 zero atomic_commit $dbfile 3000 >> $seqres.full &
+ atomic_write_pid=$!
+ 
++# wait a bit to allow the atomic write to start
++sleep 2
++
+ # simulate concurrent direct read/write IO
+ $XFS_IO_PROG -d -c "pread 0 128k" $dbfile
+ $XFS_IO_PROG -d -c "pwrite 0 128k" $dbfile
+-- 
+2.49.0.1204.g71687c7c1d-goog
+
