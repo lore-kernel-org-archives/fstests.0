@@ -1,120 +1,77 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30A24290BCD;
-	Thu, 29 May 2025 11:33:24 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 016BB23A9;
+	Fri, 30 May 2025 05:31:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748518405; cv=none; b=AXj9grRfxKumE6ZSj7ET/KZNiovlRCWsLYy24nK47bscvRx2nf6e+8gVYefA38qEyxLku01vG36SHNnK/ReySsEhdpd/ka0uO/HfJhPrVF1xQ53FNEHgy9oESM2HXYaIs5XlWYFw8YYJqfHTcs6fZm5VDtcLPkvkae2CqPR4nao=
+	t=1748583115; cv=none; b=IRPnDB57f057m5X2Wj1nPXe1Pm0tsbkQZ5mKvm87fXdTDBE0G8jluoLedCHECucvKWj6uwfttnMi6R4Pkzf8jOQ/24tyo8toRRI4UWaLc9yGfL9iAE07N3Z/qGRreJFL6AwhBw3CUNcRKIy5o2Av4cOV0my1b6M56UNLWnX5CVo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748518405; c=relaxed/simple;
-	bh=bFsO9Grd7TM96dG8E8asP/7pn1Os9r6ScC0x2U8GEUY=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=iITtCXUsJ+YbTIxzkLWn7WqgnzB6DEddMdDe71s0baiMpA4fd6KUt79s/x9zhTnxMroydISAh+OQulILrv7rK6zTBJuckT9KAKDyAAlXyoebYskZ2ehz3p00PUlVud88xkiv+TXk0f39HNffsdxh4m14E6aZntS7zpFrZ2ikXsk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EvFKuExJ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1748583115; c=relaxed/simple;
+	bh=djAHV4ZcorKvepAx5cvLMQPKw2wbXB1abMOASLXT0P8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=AknIjU2H70m8LcfDuBx0EkpD/Z9ZqFHXL3OV/d818u6KB1SpFD05toyLfseFXSWdkb5eSmjdxANecJeMN9KWgnklbcoYVrOUmI6nAYUKxlV4tTeMuxcfi1EHSwYCpNLf6DVIbIDaeES4quiIKZlvRUM7WXKrSLn82i7hZ/p9LHw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fDJp1jkV; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EvFKuExJ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 95784C4CEEB;
-	Thu, 29 May 2025 11:33:23 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fDJp1jkV"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B7A4DC4CEE9;
+	Fri, 30 May 2025 05:31:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1748518404;
-	bh=bFsO9Grd7TM96dG8E8asP/7pn1Os9r6ScC0x2U8GEUY=;
-	h=From:To:Cc:Subject:Date:From;
-	b=EvFKuExJOoJ8VvptR9lBU3nM7Yo2ziu4aEMkOzOsC/3s9BPI1hZxglpBUZbvBIF1o
-	 E2wTABzQu7uNAQ2h1MCpvv6DqMm2KY9bOuNlDNnX/vOgaB8IMMbWeniuMjThigHTb3
-	 Mc9VewZfuxLJoorsrQm9m5qrI4E3yxODQUu76sbiV1Q8d3rD7WmLz5j/0+YV5DvAgV
-	 oy5bEDq8dzccWrLfq5hpV4Gmj7j8f5bmZkHn6Td67YSyld5uGRoqPQDH3ZB2IDvQNM
-	 cwvMoXa5JmIkZqvndlp1TXTABTPEt0/FsX8vMUzz8/NH0EKMfX69Sfdc3ZqIoyb8A9
-	 F2Vwg8XES4VjQ==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] generic/094: fix test ignoring failures
-Date: Thu, 29 May 2025 12:33:13 +0100
-Message-ID: <7425c940548e19ab996b8458717dd3c3c3c55630.1748518250.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.47.2
+	s=k20201202; t=1748583114;
+	bh=djAHV4ZcorKvepAx5cvLMQPKw2wbXB1abMOASLXT0P8=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=fDJp1jkVGR5On6urVTO15t6+aWD8cTaGrn9KYy2qX6PbUSbYsBqPf1bGH5uWOQ7aN
+	 SSikR6xaeyrPlmiWw8WAjqZbkqfXxUADl9iT6pTtdZI4quDX1SV4Au0y4wgS7egLji
+	 SVXkfncyCA45Ycn0Q9YGHkEiPXRjRR1bVnQLkQFo4XuJFSAsYrChUkOzGN3Kg5UI/h
+	 S53I0Zjx0kC1hLmv8ziIEqmy6Ilh7jAXrnW/e5e5lRrzdZZfxeU6oZRCi1m7bnI6zB
+	 oVqFwV8AdmaixRKmKcAXVSpQmaonh0FcAD5UgKax/YafhZyAt/1ETGT7jRna+Ggj7Y
+	 qd0gn2/WwFXYA==
+Date: Fri, 30 May 2025 07:31:50 +0200
+From: Christian Brauner <brauner@kernel.org>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Zorro Lang <zlang@redhat.com>, linux-fsdevel@vger.kernel.org, 
+	fstests@vger.kernel.org, Yang Xu <xuyang2018.jy@fujitsu.com>, 
+	Anthony Iliopoulos <ailiop@suse.com>, David Disseldorp <ddiss@suse.de>
+Subject: Re: [PATCH] generic: remove incorrect _require_idmapped_mounts checks
+Message-ID: <20250530-deklamieren-ehrung-1895eefd99f1@brauner>
+References: <20250526175437.1528310-1-amir73il@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20250526175437.1528310-1-amir73il@gmail.com>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Mon, May 26, 2025 at 07:54:37PM +0200, Amir Goldstein wrote:
+> commit f5661920 ("generic: add missed _require_idmapped_mounts check")
+> wrongly adds _require_idmapped_mounts to tests that do not require
+> idmapped mounts support.
+> 
+> The added _require_idmapped_mounts in test generic/633 goes against
+> commit d8dee122 ("idmapped-mounts: always run generic vfs tests")
+> that intentionally removed this requirement from the generic tests.
+> 
+> The added _require_idmapped_mounts in tests generic/69{6,7} causes
+> those tests not to run with overlayfs, which does not support idmapped
+> mounts. However, those tests are regression tests to kernel commit
+> 1639a49ccdce ("fs: move S_ISGID stripping into the vfs_*() helpers")
+> which is documented as also solving a correction issue with overlayfs,
+> so removing this test converage is very much undesired.
+> 
+> Remove the incorrectly added _require_idmapped_mounts checks.
+> Also fix the log in _require_idmapped_mounts to say that
+> "idmapped mounts not support by $FSTYP", which is what the helper
+> checks instead of "vfstests not support by $FSTYP" which is incorrect.
+> 
+> Cc: Yang Xu <xuyang2018.jy@fujitsu.com>
+> Cc: Anthony Iliopoulos <ailiop@suse.com>
+> Cc: David Disseldorp <ddiss@suse.de>
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
 
-The test is ignoring failures completely:
+Seems correct to me:
 
-1) If mounting the scratch device fails it redirects both stdout and
-   stderr to /dev/null, so it gets unnoticed and the test runs against
-   a different fs than expected (in my test environment $SCRATCH_MNT
-   points to a directory in an ext4 fs for example but I want to test
-   btrfs);
-
-2) We are redirecting the stdout and stderr of fiemap-tester to the
-   $seqres.full file, so if it fails it gets completely unnoticed and
-   the test succeeds.
-
-For the first issue fix this by not even using the scratch filesystem and
-use instead the test filesystem, since the test creates a 2M file which
-is small enough.
-
-For the second issue simply don't redirect the stdout and stderr, so that
-if the test program fails it causes a mismatch with the golden output,
-making the test fail.
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/generic/094 | 20 +++++++++++---------
- 1 file changed, 11 insertions(+), 9 deletions(-)
-
-diff --git a/tests/generic/094 b/tests/generic/094
-index c82efced..6ae417c3 100755
---- a/tests/generic/094
-+++ b/tests/generic/094
-@@ -9,18 +9,22 @@
- . ./common/preamble
- _begin_fstest auto quick prealloc fiemap
- 
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $tmp.*
-+	rm -f $fiemapfile
-+}
-+
- # Import common functions.
- . ./common/filter
- 
--_require_scratch
-+_require_test
- _require_odirect
- _require_xfs_io_command "fiemap"
- _require_xfs_io_command "falloc"
- 
--_scratch_mkfs > /dev/null 2>&1
--_scratch_mount > /dev/null 2>&1
--
--fiemapfile=$SCRATCH_MNT/$seq.fiemap
-+fiemapfile=$TEST_DIR/$seq.fiemap
- 
- _require_test_program "fiemap-tester"
- 
-@@ -29,12 +33,10 @@ seed=`date +%s`
- echo "using seed $seed" >> $seqres.full
- 
- echo "fiemap run with sync"
--$here/src/fiemap-tester -q -S -s $seed -r 200 $fiemapfile 2>&1 | \
--	tee -a $seqres.full
-+$here/src/fiemap-tester -q -S -s $seed -r 200 $fiemapfile
- 
- echo "fiemap run without sync"
--$here/src/fiemap-tester -q -s $seed -r 200 $fiemapfile 2>&1 | \
--	tee -a $seqres.full
-+$here/src/fiemap-tester -q -s $seed -r 200 $fiemapfile
- 
- status=0
- exit
--- 
-2.47.2
-
+Reviewed-by: Christian Brauner <brauner@kernel.org>
