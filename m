@@ -1,63 +1,63 @@
-Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
+Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71E031DC9BB;
-	Tue,  3 Jun 2025 10:07:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C87562288D5;
+	Tue,  3 Jun 2025 10:07:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748945279; cv=none; b=rLT5OzFk0Cb3CMXe3BRWQF4c1/voSjnqYu8DCwjCJhV4pt2PXlilTw5VkG7ub8BHT4R7jNQOVJHqyq1j5k4NbgSBOeKGdxe7+SV9vq9bpHSQBIcziP8F31MX5z11cZzGvuRRAU4+kLwX1ijfygxu58BDXUCtUimBZOSI6Iv1Es8=
+	t=1748945281; cv=none; b=Z0S3+qJQ81gsWUeMaeBcToOnVQvlh49FsBWsi46K3O6V3+wGdhMtEWFbO6iaeu2/v5jkuLV0tpcjCg01FG603OKzj6b8iy5egVlh2mcxutTOsoJ9U8/BQyn8g6cJkm7/9QziBJxIulEgGWEerXk8R9sz0YmoSJPuCl4bKd6ZWTs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748945279; c=relaxed/simple;
-	bh=Abi6+ksyMiOvnDtaHitx+7VyzwuUQ+TnG0w/e3HKSWo=;
+	s=arc-20240116; t=1748945281; c=relaxed/simple;
+	bh=kED8MuozkX0CG6L5Npp6pcP5W8jJUAtDd73XAKBUfyA=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=uD5hK/lANiJBe0AE62i8G4NMn6BS6yI9VPLC0918X6THZRmOGq/PqtyFccqJeK0lnhn3Lxwf7jQHX/SUVo3qWXYla2D5zFxeuJ7b7gVu8e8R0+1O8nMHuBNfisVlRhTiErj8lM/xMNSMYuCE2EiLQeI9WCbcnprw8JQdzXlotIw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=UavSurV4; arc=none smtp.client-ip=209.85.128.53
+	 MIME-Version:Content-Type; b=OXB+Cm3p/WrexDerBkdqrdTn5Lk4hlQT0hjDzKr3aqK1yFV2nHa7goJf0CIfWc015hjDdEF+DcO1Vqb6gdzC6E9KQ7V6KtanmnLgctfyDuVr4QW3KFSOM3s52+UhHhqR6u8nbJic35IKyk6GW6WK6RsIEusp47iD9BllFeEDkIM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PwdsO06l; arc=none smtp.client-ip=209.85.221.42
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UavSurV4"
-Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-450caff6336so32638435e9.3;
-        Tue, 03 Jun 2025 03:07:56 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PwdsO06l"
+Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-3a50956e5d3so1693730f8f.1;
+        Tue, 03 Jun 2025 03:07:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748945275; x=1749550075; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1748945276; x=1749550076; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=n0qKfF93hS7P9Jq+BBkHsjnvqg1VJ+dx+VpScwbQGeQ=;
-        b=UavSurV4K+iHsDX9VMe62SWmh68AVRmTm3Jg46hhcRGnFtUdmMoNelUxirM6CgQ0/3
-         kaFs5CgoLPh+O4Pn8wdYG+4U3Vm8qqDh6FL/og7wgkpqwkvxfyhtTT6A5TdTtMIrtdCI
-         tTyFSQF6prdvEkDQ1Gu8u+ktQHSvoupqprhlTmeejK4a3CDk19McYl5R0vumzPxf72vY
-         LDZYKWuEoRT7OW9tXFBcKO0YEMGZ/73IfWO2lq4sBa/77kFA98Eb6owoh1uutKjG+mvq
-         GO0JqU79dXgf8d4ZkYRnW+FzuZgCTPW7fV17PVrvZKuuKJ0ewDa3b5QLGugJRRea5LgQ
-         29nQ==
+        bh=oJMKSRLKMa5YCt+7AqT+Wg1Dq77KY4GJkgZwkY2T3xE=;
+        b=PwdsO06lOQsm+RI8wBR7LSOpHOxfQCxkBWWVnxSiEJIx2pMpsT/GzPkd7cFWKRxkd+
+         A1eUjsc0cFR7YtEk5pkmhTYjXCSeVCQbEtzKj6SfdwhK0ut1oJo/j9tMhE+fKHO0zG02
+         Vt5HuSZ48HmS35hY1LoV1AtuQbGWudsgfeBLxvmtspwZ6z0HQBX3Jq1SF+zWDmb7AG+m
+         ryHnFQ654cR8lhQxWw8jeQmfmQJduFtB5IpqDTTT/7C5MjJa784CDcM9phSsjCjtECbo
+         MHralmizfme2/ZeUeHmWW605EYXMccJXCUgcTyjgNFKSwYV5AHZL0lwk8BuA+9OmjE/r
+         cr2Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748945275; x=1749550075;
+        d=1e100.net; s=20230601; t=1748945276; x=1749550076;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=n0qKfF93hS7P9Jq+BBkHsjnvqg1VJ+dx+VpScwbQGeQ=;
-        b=ZC/zOO9vY8E2FheDnFei6ZPLhdz/brMGNQtv+W76ONIpcbfkQqkbgy1/qRAVcTcgki
-         19KBN7PR1W+PmC6TbgNzYJbyLaXXBiiE06sY3LkTxiBt3RuL1HXpZFuSCYo9dbyTGfRK
-         8i4ncwz40LmqAHK47aEl0mHFvhjQHI1mvjsM0uvJb5zDNe8Nz38ZNFGPWwmMJG8ValV3
-         k0Dz2+eS4apaAS5qdhuiFgOb6gy0xBJQzvCbOm5BmkDazlCHhYQpLWPgnP5sxBJrQOFp
-         syiDzlg/hlqNmbjeUeBAUq9wQlxuagFzzLEZ1t5z6llgM+J97Tdix3nkmdkDm1OwNyHu
-         C2dA==
-X-Forwarded-Encrypted: i=1; AJvYcCVYSWMUhLJQ4ieQz/eEtT3nM4ovBNAFU0GTU/M6v6hILabBq+M+BECsIJjFqtIoi7r+dzWaK7OhGbAYNbhqkA==@vger.kernel.org, AJvYcCWqkh6Xuttt+h2N+byicMkaCXlTEAMwp5T90740j6jkfX0OyXpsOtUC/ekoj1VXaX4gb/dsBXyJ@vger.kernel.org
-X-Gm-Message-State: AOJu0YzqI2bcBNzpldYCotOu+qef1UFmVLIXfRBgw2coeHXquGDghNcN
-	vKBMFSEh+GYw9FcaJs0cuiCZTikE43OZdHA18/sZF0P6qc2peu3yg/PZ
-X-Gm-Gg: ASbGncuRfGXS0FL1bz7ESALXbfoFgilMOgMdwFI2Il1heBem4THm0ta1QdwzevVaKit
-	vNCJw9U7MgZ02f2EeIFYsxSzkqvQOIeS+HOJX2TgtSCJRs+NRBZty+k+d7y6vKS1BZUWNBotTpv
-	tE3RRPVLM+zQdn89MgarG7/cyV63xCgOt9HYElLaQxP4ed4BCXS/tcNlE7XdvT2Jr2UXfMSa2St
-	8LGlUJ0NJfEeV3/ng93qGlMopBD9z3jEOlTJnHyTaS3l38IxTm2v6/j2bJxBEM57AB/COlw66n/
-	0j6N1tXA0jrMbekIFXNcNcbSsP2a1Z7duqtgAgN11c0PUX2LMhMS505EzIH6YLxuhf4C4FqRNEn
-	tzL9Xl6n08zZ/+pOzJHl0TuIEX0fHPlXzE/yeaQulIGROB/Hl2exCltnsmvs=
-X-Google-Smtp-Source: AGHT+IFrDtcoOrcGyeue/6ArMONifXbkFLkxDMJgD5K8Q304wc4Z45JtjcPvmMTWlNqzBzmoobuK6A==
-X-Received: by 2002:a05:600c:4fce:b0:450:d4a6:79ad with SMTP id 5b1f17b1804b1-450d887a68bmr130188335e9.23.1748945274234;
-        Tue, 03 Jun 2025 03:07:54 -0700 (PDT)
+        bh=oJMKSRLKMa5YCt+7AqT+Wg1Dq77KY4GJkgZwkY2T3xE=;
+        b=vQplnhm6bJ9gdNE6MKsrEescwaG+H7OiUjA/5Zfd8+ky8otT+Ze4cmgErEfspRo1VK
+         oGSiWdv6jX5rALjdH9Bt0vPlkDT/NklXmJ7XUOQp0sL00RE4e/kUYFYE6Fl9JjjheA/8
+         48jTltau7ejJJ/PpVVOpad9jA4s1DNbmMLVDKFExvg9Vb5S1WuBPyux2wbzkaHQiggHp
+         0LXDPa8gDSIvjv3FmB1H4sMuPlSP1RloQuPAdS6Dwny1f/A7k6i/Z+KnFKWd20tBxIGs
+         oM1o74DKLOS/1qBQrPpLQcC+mKYPSiX6LNEgUvXL/32O0ES/Zm0RkmIcHb7Rquk5rLkr
+         R1Eg==
+X-Forwarded-Encrypted: i=1; AJvYcCVojpy9XlYjpNLVev6Si0ZEWzMhcOholhgaoRHznTjMOXjVEttME22wE3QHW9PZf5554gHAM7HnsquSJxf68A==@vger.kernel.org, AJvYcCVwsVobYmAUL0CVfLyJcUgcpUbMP4sgk6W/f4YKK1uDVNVTbjwDzAR4g2pKXHTAplOlPQMlm2BI@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz7Z/2yW/RySyHECC5S0eWfzrfDHTV/2ENj3nTSa5gfDPkUKI6E
+	sy9Pwlq64CsAn4cyBfQwQOnP8cR/PKPKZjDqobvCfw90Vtf/F+yyM/It
+X-Gm-Gg: ASbGncvWIq3ZYHz7jj0W1RvL8VxWYfpAkjKI6QbQdmlW1th6RyppS03wM3FFZDAKPCD
+	Ojluzve+dQc1q42uGgjd3LoPfiGoh4NZOLHly5ros9l4BQbwwrODnP9vYlKVpm7RmRkTINexsWH
+	SIticHYY+qCRet1klNQq+WjFim9QPKnXzJJ0TniF59rHd1qGRzlqE49KCEaEhV8LDBNe5PA2xo3
+	UcRomxPadyibzzMTNT+5n8drHAXRDat85h98ThQC9KBlyodWzaFO0z5SgTqgJ2xDrL1ammHlKVD
+	R2TrZweNWuR5lU9/a+bYH55phb1Za2vnW4M3SGsbWcGhtAEs9qlT4r36yYrLRoAQO6zz4prz6CQ
+	PmBuAVJ6NNUe+7V11QnvxBt5PHz3gR3UROHfRI0bXRV6b/r9wDKxfVpwZBFg=
+X-Google-Smtp-Source: AGHT+IFkh+Dsusl7W0eZaZMeDrRwn+dS+RbgQkLCCUtH23wd4RV/h0puyQiwwz9U6vDWBLWzm6DZoA==
+X-Received: by 2002:a05:6000:250d:b0:3a1:fe77:9e1d with SMTP id ffacd0b85a97d-3a4f7a4d55amr13099447f8f.16.1748945275715;
+        Tue, 03 Jun 2025 03:07:55 -0700 (PDT)
 Received: from amir-ThinkPad-T480.arnhem.chello.nl (92-109-99-123.cable.dynamic.v4.ziggo.nl. [92.109.99.123])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-450d7fa24c6sm157191525e9.12.2025.06.03.03.07.53
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-450d7fa24c6sm157191525e9.12.2025.06.03.03.07.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 03 Jun 2025 03:07:53 -0700 (PDT)
+        Tue, 03 Jun 2025 03:07:55 -0700 (PDT)
 From: Amir Goldstein <amir73il@gmail.com>
 To: Zorro Lang <zlang@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>,
@@ -65,9 +65,9 @@ Cc: Miklos Szeredi <miklos@szeredi.hu>,
 	=?UTF-8?q?Andr=C3=A9=20Almeida?= <andrealmeid@igalia.com>,
 	linux-unionfs@vger.kernel.org,
 	fstests@vger.kernel.org
-Subject: [PATCH v2 2/6] overlay: fix regression in _repair_overlay_scratch_fs
-Date: Tue,  3 Jun 2025 12:07:41 +0200
-Message-Id: <20250603100745.2022891-3-amir73il@gmail.com>
+Subject: [PATCH v2 4/6] generic/623: do not run with overlayfs
+Date: Tue,  3 Jun 2025 12:07:43 +0200
+Message-Id: <20250603100745.2022891-5-amir73il@gmail.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20250603100745.2022891-1-amir73il@gmail.com>
 References: <20250603100745.2022891-1-amir73il@gmail.com>
@@ -80,58 +80,55 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-_repair_overlay_scratch_fs assumed that the base fs is mounted.
-This was a wrong assumption to make, and that was exposed by commit
-4c6bc456 ("fstests: clean up mount and unmount operations") that
-converted open coded umount in generic/332 to _scratch_unmount.
+This test performs shutdown via xfs_io -c shutdown.
 
-After this change, there errors were observed when running generic/332
-if fsck.overlay is installed:
+Overlayfs tests can use _scratch_shutdown, but they cannot use
+"-c shutdown" xfs_io command without jumping through hoops, so by
+default we do not support it.
 
-     Check for damage
-    +fsck.overlay:[Error]: Faile to resolve upperdir:/vdf/ovl-upper:
-                           No such file or directory
-    +fsck.overlay failed, err=8
-    +umount: /vdf: not mounted.
+Add this condition to _require_xfs_io_command and add the require
+statement to test generic/623 so it wont run with overlayfs.
 
-Fix this by making sure that base fs is mounted before running the
-layers check and fix test generic/330 to conform with the umount
-conversion patch.
-
-Fixes: 4c6bc456 ("fstests: clean up mount and unmount operations")
+Reported-by: André Almeida <andrealmeid@igalia.com>
 Tested-by: André Almeida <andrealmeid@igalia.com>
+Link: https://lore.kernel.org/linux-fsdevel/20250521-ovl_ro-v1-1-2350b1493d94@igalia.com/
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- common/overlay    | 2 ++
- tests/generic/330 | 2 +-
- 2 files changed, 3 insertions(+), 1 deletion(-)
+ common/rc         | 8 ++++++++
+ tests/generic/623 | 1 +
+ 2 files changed, 9 insertions(+)
 
-diff --git a/common/overlay b/common/overlay
-index 0fad6e70..0be943b1 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -434,6 +434,8 @@ _check_overlay_scratch_fs()
+diff --git a/common/rc b/common/rc
+index d8ee8328..bffd576a 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3033,6 +3033,14 @@ _require_xfs_io_command()
+ 		touch $testfile
+ 		testio=`$XFS_IO_PROG -c "syncfs" $testfile 2>&1`
+ 		;;
++	"shutdown")
++		if [ $FSTYP = "overlay" ]; then
++			# Overlayfs tests can use _scratch_shutdown, but they
++			# cannot use "-c shutdown" xfs_io command without jumping
++			# through hoops, so by default we do not support it.
++			_notrun "xfs_io $command not supported on $FSTYP"
++		fi
++		;;
+ 	*)
+ 		testio=`$XFS_IO_PROG -c "help $command" 2>&1`
+ 	esac
+diff --git a/tests/generic/623 b/tests/generic/623
+index b97e2adb..4e36daaf 100755
+--- a/tests/generic/623
++++ b/tests/generic/623
+@@ -16,6 +16,7 @@ _begin_fstest auto quick shutdown mmap
  
- _repair_overlay_scratch_fs()
- {
-+	# Base fs needs to be mounted for overlayfs check
-+	_overlay_base_scratch_mount
- 	_overlay_fsck_dirs $OVL_BASE_SCRATCH_MNT/$OVL_LOWER \
- 		$OVL_BASE_SCRATCH_MNT/$OVL_UPPER \
- 		$OVL_BASE_SCRATCH_MNT/$OVL_WORK -y
-diff --git a/tests/generic/330 b/tests/generic/330
-index c67defc4..901b17b1 100755
---- a/tests/generic/330
-+++ b/tests/generic/330
-@@ -61,7 +61,7 @@ md5sum $testdir/file1 | _filter_scratch
- md5sum $testdir/file2 | _filter_scratch
+ _require_scratch_nocheck
+ _require_scratch_shutdown
++_require_xfs_io_command "shutdown"
  
- echo "Check for damage"
--umount $SCRATCH_MNT
-+_scratch_unmount
- _repair_scratch_fs >> $seqres.full
- 
- # success, all done
+ _scratch_mkfs &>> $seqres.full
+ _scratch_mount
 -- 
 2.34.1
 
