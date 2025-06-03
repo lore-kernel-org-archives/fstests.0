@@ -1,111 +1,63 @@
-Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com [209.85.221.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ADD1B1A2381
-	for <fstests@vger.kernel.org>; Tue,  3 Jun 2025 04:10:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30BA814D283
+	for <fstests@vger.kernel.org>; Tue,  3 Jun 2025 06:29:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748923829; cv=none; b=qQp6Duqh9MEbUZgQdIaZEQn0seRrWjTlcE1fzc565Lspyq1WwPPCCRRXAPfPIieMGHX4FtSGQwMYqkTTnQblvHM9+0TY1jYBdKKZjGbq21TudhU69qgRbhIT43Lw9NItctP5yHdAuHVdEfldkeSdLMYW/KMxHGOGalbbyHilrRQ=
+	t=1748932176; cv=none; b=V4O1FMQ0VDQ0aD15fnCvVfRu4jF7wZHMXyIvEvuMUmO0DOnF6pDj19YDrCd9KtYvAMdETAYJND40U8WmH6yytl/sZYhHXZqWVg4mJWFBooBVReEaNI+1Denu1CfhIoqeglu9wZh5+zE0usePkeDtO+4hzPQVe5mN/cbG7YAs6zo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748923829; c=relaxed/simple;
-	bh=mWKW1BZiWQdg5ZGyvvansCbXzzKjs6P+f7nmIjIRSFs=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=f/lQPKrcH+It6+aaFGMim8wraSjy/ZM0GPY3nn78/h/K7Su4rHVcxzFsNiGE/eEpjgcrmyssx5EuBsDw4loZoZcgQCWoaIOJnvmP1kn/UeK/U/0tE9Tu+XanvV5laC37WYHFv1O1vAplDLRUMZDlJThAJGcgEVSSevrTCGGrPwA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Er3cHrxQ; arc=none smtp.client-ip=209.85.221.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1748932176; c=relaxed/simple;
+	bh=3I96r6+4zyZNWEX7sB8StbifoYEhS9ISxbgqSPX58fA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=r1ZQxXPm2sQPsit1xexofJi2uF+2ucnQRGQD5iEXRpmqRfZ5N591P14vsm2L5Inw21BemBdliD+5XUS8Zsn/+8PcTsQ6uwbnCamhxLGvYw0XaelTJx7REtE1JYXpMx2Mu2+r8u9jgpdozkEMfPDP+dm3X3i6hrJt/DeBE3NmT0k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=tk+F+joh; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Er3cHrxQ"
-Received: by mail-wr1-f49.google.com with SMTP id ffacd0b85a97d-3a4ef2c2ef3so4089997f8f.2
-        for <fstests@vger.kernel.org>; Mon, 02 Jun 2025 21:10:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1748923825; x=1749528625; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=Vsip5heoQfOlVVanshNnzNCVpVKbPMgYCx8wxtCCQPY=;
-        b=Er3cHrxQLFmP0IgZCQ00xoI7uXmAloMQ4Nj/cwUafwK3K0TtgO1SpeM/Dfr58O52sg
-         2v7HKzESWsFcukCE8nN1GuV8hiHCtCgw2AVzGSRAIpRNJ0kES5znfv0L+xlN3fDFDTWJ
-         Q5T7mUaFgg/ivWVvUafXyXZpA+xg0wE3/EUBPMzLQSqO6oUIIc9N8f9pbeois2qdL8en
-         8cSmqG08At2OUHHJpWr9yrIwlUu4E+thi8YlE0hh7qRm2BiMyjrSi2bisqgOsztCgOvb
-         BQ11Ypg1ShoKWq3MA001cAGRqoPAQfViq22aqlPOmG03/FJsyA+nCipwlY0lqEzMvYF5
-         aotA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748923825; x=1749528625;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Vsip5heoQfOlVVanshNnzNCVpVKbPMgYCx8wxtCCQPY=;
-        b=VsweiJe7Aq6e0FF2cYYqifd31oCGneXbymXvMEZW0oDDoU4EvLQy1vFNZ21XuYSTsj
-         /XMQu97qgE8xVI83lZbDHCl5DN2I6tZoVDM6XbJhogaz2fVN6hBunwX0fIq27F6Mwz9/
-         bZpq0bGT391AB2B+Lv0tcnj/eoaaf54XmO3Ql0fe3NYTxoPKjRLhhp2VAFOI3QLWg8pl
-         BQCRpVtxsg81kGy5CoW502nIxOaJRRI5GK6zcWLDFUnDHz6dbePucYkGtmjnztNJNCrL
-         AMHVwGy5TWw1ZV16fqIh0AdzuPxFzVDTLurazv1odZTSVHiJWqxDv4OFV5KuPnzxtUgL
-         G+0Q==
-X-Gm-Message-State: AOJu0YxZT1mDSebjB7cSfFeMAyx6aAHl/AfOkN8zDHjVrnj7CgvY+az8
-	xASnuV8bVj4xhd2EiVk7McoI7X28ju/eYMb1ROFCkHwGG8jsQ+xW8SmPYq6sGG0tXgBpoHx31yP
-	5Ek9YsV6kzB92
-X-Gm-Gg: ASbGnctJ1/h/60sKEFp3q8R8UXUFJcgI/ipz5yvPDfyXUIbCsA3aMTr9xLhJK7mCNNh
-	p4CmkiwWbZJzuGqG6sDPNEjf1bIyX+TZlQXAp+M2/XijRLbmuqtuNicC9U5tw//uJY5o4rPGEkG
-	wcnrzIlHxmpetsOvFosH2ng0hE/D2jXHE04hRYN9G7AvLPq+t1+Lewu01Puky2LOhsMBH50WCWU
-	3MBh7D0OjcyCi9POZpd5R9U93bbPEXqAcG12AWf4YhuwyWxzae4EJyoaRn+OJHBDIFiVqbeysH6
-	rXoW1KHorPsxaLbzCFjHPClKvxPqBXJ1fbchw/noDRnbWMtP7cw=
-X-Google-Smtp-Source: AGHT+IHXiNSm1xbktSoVTeEFqtz86yosyFGRGmS6MYGmA+3pl9em5SkbVzFGQnlHyudvGkSUlboU4g==
-X-Received: by 2002:a05:6000:1a85:b0:3a4:d367:c591 with SMTP id ffacd0b85a97d-3a4fe154d16mr8982375f8f.10.1748923824709;
-        Mon, 02 Jun 2025 21:10:24 -0700 (PDT)
-Received: from MacBookPro.lan ([5.255.111.168])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-23506cf47c0sm78297245ad.175.2025.06.02.21.10.19
-        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Mon, 02 Jun 2025 21:10:23 -0700 (PDT)
-From: Su Yue <glass.su@suse.com>
-To: fstests@vger.kernel.org
-Cc: l@damenly.org,
-	gfs2@lists.linux.dev,
-	Su Yue <glass.su@suse.com>
-Subject: [PATCH] common/quota: adjust _qmount_option for gfs2
-Date: Tue,  3 Jun 2025 12:10:09 +0800
-Message-Id: <20250603041009.59811-1-glass.su@suse.com>
-X-Mailer: git-send-email 2.39.5 (Apple Git-154)
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="tk+F+joh"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=EEedx2nT57MR1QtLi+AVQP4P+SM3cUo5HUMEqezgfW4=; b=tk+F+johEyHneovGulz0atYs0t
+	KcDE69tL39uVpK/MY8QUrsdDMFFAA0ot8xnfX4fRocrF26/pTe4tcROwOTkEV9VSJr/w5n+De/xGE
+	PKTg/hdaGE1c/9q4064Euff/AnaxeZl+6qtNZD3MNnK9naJmZ7VroSSgDSPyDzET6cOSAZfby6YKu
+	Khj77AWtsNRLFczCyqDh6lmqGy6iSpru3coCDBZlmt++Kgc48IgDzIegxbvivpwBNSwClZC7Qfemt
+	r/a062Qs5/gFz0o7e25wmG2iHVibqgqyquPDOuBIcTxqjHIvxI7VhgOuyj8GQSqjr9xiJxdaUvVw8
+	HbestVFA==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1uML9O-00000009xx5-318Q;
+	Tue, 03 Jun 2025 06:29:30 +0000
+Date: Mon, 2 Jun 2025 23:29:30 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: "Yuezhang.Mo@sony.com" <Yuezhang.Mo@sony.com>
+Cc: Christoph Hellwig <hch@infradead.org>,
+	"zlang@kernel.org" <zlang@kernel.org>,
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	"Friendy.Su@sony.com" <Friendy.Su@sony.com>
+Subject: Re: [PATCH v1 0/7] add test requirements
+Message-ID: <aD6WSkbLt7__Ohuq@infradead.org>
+References: <20250528091530.1218188-1-Yuezhang.Mo@sony.com>
+ <aDbs_Fr-8CVCxdxy@infradead.org>
+ <PUZPR04MB63163EFBDDF33FFC83B863008166A@PUZPR04MB6316.apcprd04.prod.outlook.com>
+ <aD0514qLBX-MSazZ@infradead.org>
+ <PUZPR04MB631648D55D06ADFEF408ABA9816DA@PUZPR04MB6316.apcprd04.prod.outlook.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <PUZPR04MB631648D55D06ADFEF408ABA9816DA@PUZPR04MB6316.apcprd04.prod.outlook.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-gfs2 supports mount options 'quota=[off/account/quiet/on]' but
-'usrquota' and 'grpquota' are unsupported.
-So in _qmount_option, transform $OPTS to 'quota=on' first.
+On Tue, Jun 03, 2025 at 02:35:04AM +0000, Yuezhang.Mo@sony.com wrote:
+> Yes, this patch set also for other file systems like exfat which do not support the
+> above features.
 
-Signed-off-by: Su Yue <glass.su@suse.com>
----
- common/quota | 7 +++++++
- 1 file changed, 7 insertions(+)
-
-diff --git a/common/quota b/common/quota
-index a51386b1dd24..4b8052e07dde 100644
---- a/common/quota
-+++ b/common/quota
-@@ -283,6 +283,12 @@ _qmount_option()
- {
- 	OPTS=$1
- 
-+	if [[ "$FSTYP" == gfs2 ]]; then
-+		OPTS=`echo $OPTS \
-+		| sed   -e 's/usrquota/quota=on/g' \
-+			-e 's/grpquota/quota=on/g'`
-+	fi
-+
- 	# Replace any user defined quota options
- 	# with the quota option that we want.
- 	# Simplest to do this rather than delete existing ones first because
-@@ -300,6 +306,7 @@ _qmount_option()
- 		-e 's/\bpquota/QUOTA/g'    \
- 		-e 's/prjquota/QUOTA/g'    \
- 		-e 's/noquota/QUOTA/g'     \
-+		-e 's/quota=[^, ]*/QUOTA/g' \
- 		-e 's/quota/QUOTA/g'       \
- 		-e 's/uqnoenforce/QUOTA/g' \
- 		-e 's/gqnoenforce/QUOTA/g' \
--- 
-2.48.1
+So is this for exfat or "other file systems".  How do the results from
+an auto run with exfat look with these patches?
 
