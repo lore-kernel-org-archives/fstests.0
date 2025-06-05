@@ -1,128 +1,110 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f50.google.com (mail-ej1-f50.google.com [209.85.218.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D9621F4701
-	for <fstests@vger.kernel.org>; Thu,  5 Jun 2025 17:03:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72F6A27603F;
+	Thu,  5 Jun 2025 17:09:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749143012; cv=none; b=eyaEBHR/cr1XBQUWBSAN2wtyazXYfYoDDApokCngwcqZ88cLPXDGylZLeEUJ1Aw3Dx17gMHwvsxiJrdBzp70ufF6q1MhW5EU4dmiSaUnsa16+CNVO7D55x7xFcCW1YhZF3IaiLDSq9eGygr3GF+nxxkOQJH8sJkWV3Px3noGV3Y=
+	t=1749143355; cv=none; b=rcbd26rCWLvJ0vcD/j3Woua07jwBWzyGhcqBWRCRyUp8viVJtHTwor6MpIAcKeVPxqs7+Sy2XOAfY4zRU01nxppKzhlHlf9oBMoCxMbsiySxl48qi2J6kAMdKb9Qt45rYM4UBGrD4wpOV+ai3MHgr9bbe8vrVcMVQHWonmbVuN8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749143012; c=relaxed/simple;
-	bh=uub5yAAUxua20JUrxMi+jZKpy1Tr98Zf23w32+mTc9k=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=q2Bg5mVsWOjcFHOSPVO79P9opg5sMrNy3KhQw0VxOWpaJy4euPdN5C/SJ+uxuUrdykfJ4TgjluRYGBXWjHNMol9dCrON7Ipw2t7Q9h89lNp9BTDkqmIzE5PVe2hJvxl6zBp+QdM0PHKMFiuNZpF4GyqKSw4r8asCy0+jDL35Ohg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NRjRPUAA; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1749143355; c=relaxed/simple;
+	bh=GLV2tOOxqglWSJvSK1xh0znF3fY/hvr8eWDI89/4hB4=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=UeOPA1T5AbKBTJwPkjbRaf5p3o7BziIJlNtiSdMbtwMJTKTVkuc+/0eXheut6cspK+bEDjBmCC5ylzP44ckgNK3yMFhYY/3RoElMNSiIYf7VFtS5yUN1Qr2c6L0oIh4dswWhbpwMrcVQQgn36mxC/zyVkF2syEFG2+0/vAGnimk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FNdjmgGV; arc=none smtp.client-ip=209.85.218.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NRjRPUAA"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1749143009;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Sjmn9AcgUBT/6b0VbQZa8X06zBbschQpRkWsCTXTpE4=;
-	b=NRjRPUAAF7Qp038snFpq2dwus763Rjwo69kHypKJyw6sDAfrylD2rOmsBJ32+IRaFOOfhB
-	zsaAIV3RSpWzi9t5KLMASI4aq5XPTUKJvpozovCYDfyBhMfSBPo9+opER7wTOZ494EHH68
-	eXFV7MXAQQrcUT7UiK0C7SXkWOAunUM=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-662-JObqG8H0Na-0bjJY7iJIgA-1; Thu, 05 Jun 2025 13:03:27 -0400
-X-MC-Unique: JObqG8H0Na-0bjJY7iJIgA-1
-X-Mimecast-MFC-AGG-ID: JObqG8H0Na-0bjJY7iJIgA_1749143007
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-745e89b0c32so1636105b3a.3
-        for <fstests@vger.kernel.org>; Thu, 05 Jun 2025 10:03:27 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749143006; x=1749747806;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FNdjmgGV"
+Received: by mail-ej1-f50.google.com with SMTP id a640c23a62f3a-addcea380eeso186957366b.0;
+        Thu, 05 Jun 2025 10:09:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1749143349; x=1749748149; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Sjmn9AcgUBT/6b0VbQZa8X06zBbschQpRkWsCTXTpE4=;
-        b=cN5D1IcYryQE8Jfn72UzwIw5HllcLPUlBRSTmvz6kbziV5uyolqngk4JLGMm/50OWz
-         gSfBcyt6i2aOd6401SvpQWdbOHMLJ9xdKKpjVZcSlmru46ogHokzOkgu5pggYjcG9HCx
-         aaWB053LE7OUsm6PlHwcruT5RYM43F/V6Bqwdfjg7Bk2nhZmidSbhQmS2vqGC6XlkKiJ
-         PIbgmqqZwZt8yGMfQGOg9yPFKvI1wSCT6BuYaxOiCCnz/nW3ivnvDbowdPtdoSsP5pYk
-         Lv5PMZHBwvd2q5hJOJ4wr22u68UpkApYISOUsJMv1PmY9sTrF/0V6OyzgOBOzVnvZoVy
-         ppiA==
-X-Gm-Message-State: AOJu0YwuTszag5Ug59hF+EvFBr+Dw/H8+37EF1tKqPXgeztAokn7/Ivx
-	1+Z0LvDyth35OaYLkISKuFlu07yf+CNH63nmF9+D5Z2N7w3SVzRWfMRLavSg+e/I7UdtQogfeQB
-	GAgTn6zKcBCx7wie0wJecjQE9DdKBVpO6likDDodDSgELaaDJjJCLKCN+i1erGrj5wi4=
-X-Gm-Gg: ASbGnctcFlCOq8Frshmmak2+u9C15k+g5D2uZcbmFbRU2N6qsrn5TcFsj15QGFNtrNt
-	jbb2e6CaYS3sAKGuxYmTwQHKXRJSuloUec00Z9rqfdaxMpEz/mKH1TGfXu4TPgeHoDZB1Yf8y1c
-	mf4NOuH9N33Cnehfx9XK3Kxjol5deNs2+oQwI5bDjbeP9Pd4wZNoexc9IYEe0AcrZUG436lcGTF
-	zkbJfaLswhQAXKYY3itJ6GKGtDnvlTtLF3KQxOjd4i572jJDfTJYGORxWY++Oyw1KoTepPI7a3A
-	hqyVJsW4q1HWWrjjC1eOhCGaOgtE6/DP8p+uxGfq5ANs2I0zi0Gg
-X-Received: by 2002:a05:6a20:7484:b0:201:b65:81ab with SMTP id adf61e73a8af0-21d22bb59f7mr11309824637.23.1749143006526;
-        Thu, 05 Jun 2025 10:03:26 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFEHSR5XCjojLivT4QhhlMa+stNM64sElBlP0EwbjudYFFqwstpJBrLf5TyjQ8nmuYMkB35jg==
-X-Received: by 2002:a05:6a20:7484:b0:201:b65:81ab with SMTP id adf61e73a8af0-21d22bb59f7mr11309798637.23.1749143006196;
-        Thu, 05 Jun 2025 10:03:26 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-747affafa42sm13460251b3a.92.2025.06.05.10.03.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 05 Jun 2025 10:03:25 -0700 (PDT)
-Date: Fri, 6 Jun 2025 01:03:22 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] fsstress: print syncfs() return value in verbose mode
-Message-ID: <20250605170322.a2dforp6mfxypwgu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <ef67a4bf8d93109a0493155252c9a3c903478388.1748020773.git.fdmanana@suse.com>
+        bh=GLV2tOOxqglWSJvSK1xh0znF3fY/hvr8eWDI89/4hB4=;
+        b=FNdjmgGVxPZWormoNHxx49hv78AByY5byH4twwJCudkQrAPumzWbhUwG/Ln8+n16ev
+         yTxuz+oBiQT0+rXWiK8zlvTnceeSBndBVIhgrZz+qYlp5p09VDGZeVmAKhKmA4dHcT0o
+         8xuCjgXdvTRzHETzC4bDRFCwq43Qsjeg/A2hCtgSmEg3jo26MbrcKm34Lckz3cXQ+kFu
+         LvTNaMLPJntZ/as7NUbNoCgvs45qVvti8ARaIQmc+oWVRFv8RbpypJ3GcEvc+vo//Oa8
+         1i9vzuHW0QFPFOObln9ROkQAAhD669vobLnmsumoXRxwvdZjFwbj8JX5gU7CrPjdShvC
+         2xdg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1749143349; x=1749748149;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=GLV2tOOxqglWSJvSK1xh0znF3fY/hvr8eWDI89/4hB4=;
+        b=T+xWuhocVPJFhYUP8RspV9ocl1O7ZN5XezoeNIDaMgrg4zUz1Zd8H3XDqTKlrY1q7x
+         ARiBW8hy6Fh2/wIq94wjZqGb95GOiG8D/osE3r1eDiNyOhAXS/la1h0dJ66tfMSw5i3y
+         0kVJnsQw1opxEyCwcY084d8Um1JJhRfstaW52xSzUP40oqZ3qaPxr7rbRHcEH3C7rfW3
+         Vg6xciOn26SmbEbK493hdJnxS2Zvlzz4K8bZpIdLigTK76pBC/0TqTbVlSeWIBr246xN
+         DwITpPZ7/uUFjbYlz9Gn+Z/jQQjePFQ2Bp5iOP/e8zgDUaVQhWLsuCjO4sA6hjZl+NmO
+         198A==
+X-Forwarded-Encrypted: i=1; AJvYcCVBZ+n3ZuO3eNiSA8Py2qkl6olhJ2zoeiD5+fN7Fj4TpPfC5O9Ub8BZqJGQ1P0/MpPm8gVr6JKf@vger.kernel.org, AJvYcCVsvJDT6KnjVaEMGBztxsvhXhJcZtZXZUsFYaG/raxq/VjpfridcUDAf/ML01BD6PHAbdm7SNvzAO1mLkTqHg==@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyc+kdXehYbOsWV0IKOQmCGqKbFRZpyS32pmGzTBVndKIna7JqS
+	fWjDA5t6GC1z7BC7lGfOXFjNYfugJ1JpO+dDK6tG3pJfqmEvowV7Xa2bhpWiLj/jyTGSk5SO2JJ
+	UcYV30+gqWaUgDv7VzWQiDp9gXOfKSEg=
+X-Gm-Gg: ASbGncsSyNYEpbx/rNWmT/QMVoLNYeQENT3IcVFkURDvVzQnMagLMav3qSkxpnbcv8F
+	S0YN+Ekq8aUQJM5uVi4HZewu2K8s908GmRXVHHifuvYXr6HbbYBmjKNZGhgPzpfXodzMEOy8Fp4
+	cYOmi+fkuwxdz63FFQLpSa0ORhbGrpM8mv
+X-Google-Smtp-Source: AGHT+IG6bGcf3YQXdGQ7nFcL0XQ5etG4x+15bbGTAPZnIO5w11KIhSUc5oys6z3PX0/JMY+bTLKyGGH1XYgx34miNxU=
+X-Received: by 2002:a17:907:1c0a:b0:ad8:97d8:a52e with SMTP id
+ a640c23a62f3a-addf8fd07f7mr775542666b.55.1749143349150; Thu, 05 Jun 2025
+ 10:09:09 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ef67a4bf8d93109a0493155252c9a3c903478388.1748020773.git.fdmanana@suse.com>
+References: <20250526081852.1505232-1-amir73il@gmail.com> <20250605170018.j5ocx6n3rujob2h5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20250605170018.j5ocx6n3rujob2h5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 5 Jun 2025 19:08:57 +0200
+X-Gm-Features: AX0GCFuUHGW4bQ6ELGJYcYBYSNRvLW2Cahi53GTHx9eQK8oTNQwCWzEFX65L5gM
+Message-ID: <CAOQ4uxgArinXr6Q2F=XTcN-mXHHUmPSkg+u__ojLU=CGUcgktw@mail.gmail.com>
+Subject: Re: [PATCH] overlay: workaround libmount failure to remount,ro
+To: Zorro Lang <zlang@redhat.com>
+Cc: Christian Brauner <brauner@kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, 
+	fstests@vger.kernel.org, =?UTF-8?Q?Andr=C3=A9_Almeida?= <andrealmeid@igalia.com>, 
+	Karel Zak <kzak@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, May 23, 2025 at 06:20:50PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> We aren't logging the syncfs() return value in case we are running in
-> verbose mode, which is useful and it would help me immediately figuring
-> out it was failing in a problem I was debugging with btrfs.
-> 
-> So log its return value, just like we do for every other fsstress command.
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
->  ltp/fsstress.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
-> 
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index ed9d5fa1..8dbfb81f 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -5326,14 +5326,15 @@ void
->  sync_f(opnum_t opno, long r)
->  {
->  	int	fd;
-> +	int	e;
->  
->  	fd = open(homedir, O_RDONLY|O_DIRECTORY);
->  	if (fd < 0)
->  		goto use_sync;
-> -	syncfs(fd);
-> +	e = syncfs(fd) < 0 ? errno : 0;
->  	close(fd);
->  	if (verbose)
-> -		printf("%d/%lld: syncfs\n", procid, opno);
-> +		printf("%d/%lld: syncfs %d\n", procid, opno, e);
+On Thu, Jun 5, 2025 at 7:00=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote:
+>
+> On Mon, May 26, 2025 at 10:18:52AM +0200, Amir Goldstein wrote:
+> > libmount v1.41 calls several unneeded fsconfig() calls to reconfigure
+> > lowerdir/upperdir when user requests only -o remount,ro.
+> >
+> > Those calls fail because overlayfs does not allow making any config
+> > changes with new mount api, besides MS_RDONLY.
+> >
+> > force mount(8) to use mount(2) to remount ro/rw to workaround
+> > this issue, by setting LIBMOUNT_FORCE_MOUNT2=3Dalways.
+> >
+> > Reported-by: Andr=C3=A9 Almeida <andrealmeid@igalia.com>
+> > Cc: Karel Zak <kzak@redhat.com>
+> > Link: https://lore.kernel.org/linux-fsdevel/20250521-ovl_ro-v1-1-2350b1=
+493d94@igalia.com/
+>
+> Is my bug report (a year ago) gotten fixed?
+> https://lore.kernel.org/linux-fsdevel/20241026180741.cfqm6oqp3frvasfm@del=
+l-per750-06-vm-08.rhts.eng.pek2.redhat.com/
+>
 
-OK, no objection from me,
+Please see v2 (this is v1):
+https://lore.kernel.org/fstests/20250603100745.2022891-2-amir73il@gmail.com=
+/
+The suggested workaround is exactly the same as suggested one year ago
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+> If this kernel fix works, do we still need this workaround?
+>
 
->  	return;
->  
->  use_sync:
-> -- 
-> 2.47.2
-> 
-> 
+Which kernel fix?
+There was no agreement on a kernel fix (yet).
 
+Thanks,
+Amir.
