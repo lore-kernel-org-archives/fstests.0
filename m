@@ -1,75 +1,75 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B8167462
-	for <fstests@vger.kernel.org>; Thu,  5 Jun 2025 16:04:55 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B2D9E26AD0
+	for <fstests@vger.kernel.org>; Thu,  5 Jun 2025 16:30:40 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749139498; cv=none; b=SqqzBGrnz7CBF0nYV1YQHiy5harVlKWs+RoYafNXMTvYJUui66Erh4YiaSYTL7hSaRdCvlueoDsHSQmnzIQM4FCs4B5d8aqegcG0A5FPL+NcKQn8eW0iirV+dORD7TSAjG+xp933J+o4sNMsvx2gWXL4shHp6QwEV1LfHvAi7YU=
+	t=1749141042; cv=none; b=WKhcCluK8EBUIYTMgrb1ov22yzE6vZyruXfqhmuR5jzqAu+X/G7+ZPtSuXrenihEPbvq1ZnCIOE5X8szHFziZvNiiEUnZ/w3iYv+XDNN3v8SpDDadhLvXAQ1dLyEqrMniXvqwXiKd7BmfAshcvzlH1q+7uuxRAtqYc8d6+RFBeM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749139498; c=relaxed/simple;
-	bh=1ZMYrUk6oQdoHZ84Une2mz68SYT78oTigBcDVF884Jo=;
+	s=arc-20240116; t=1749141042; c=relaxed/simple;
+	bh=oXYYDzTPGNs+ypmcj1eS5D+KOVWsyqBy1Q0BqMjYayk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pcf8RQWFpTMIhJgteUkTH5zRp5BIQaAm+omEx5ruZ9xWimQLY/8Oto6CNT1/UpGTJLIUNkLpwWJlq9BcJoPlcDGA+kxNrwbmP69Cj1Ifqy6LzZJQ8lpplj58z6CTWpZLF5/daveSh9+9NRs2JdI6zuRw8yHqvA/3Z8DGfH6KmqM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=SpI2UK0H; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=ZR99ROGLb6x0aLhxiuyPwNyiSJKlllPiEMVGG/kupN6syJw8vlnHrNZkbYUjXfnqLlT+p490pSelmjHaRggVYN+qacyX60atu+u00c28+K70L4ngdFuwCKhV1XAS2odYcf3l/K17361c6rJ6ADoA2ONTXhv2pf9BEdLyCSSk44o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=PbPHXwta; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SpI2UK0H"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PbPHXwta"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1749139486;
+	s=mimecast20190719; t=1749141039;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=il46EU6GFqNY2CbsWo+TEQFeQB0q8ljPTVtEK/gjjWI=;
-	b=SpI2UK0HD7nO5uI5bxBUJfXFSJx77qO3UrFGIVx9Z3oq0+e2Cah3z736gJ0thYY7YN3KhS
-	f2bKfgvCVUDMo6zq996GYdq3lH305b2pRBWJBIQ7Rh+wlTeDBgfLYM3smOw9GM9xIrxR11
-	Tcl9OPH77+SQBMyS+3lA1h3OFzuMBZM=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=L12XX5ma/UkaofRsTldbekTX43EjtYhEhxzfoIm0/dw=;
+	b=PbPHXwtacnYGRyZtaK+m4sbZE39ZRr7zHEn5trrR/vNEsCl7AHVXoLpHQfWgqbokCHxsvd
+	W20KID0wUVSeKXpNbixRZDFuavTguBu21/0CbDpdMujt9l2vIndRAsNo53eHZ5HWqjU8nc
+	Bo7BsdSyhbFvAH7i3L9v/pLOOfCXcGE=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-694-2uFK_MWjMouCPnvTRatCAw-1; Thu, 05 Jun 2025 12:04:11 -0400
-X-MC-Unique: 2uFK_MWjMouCPnvTRatCAw-1
-X-Mimecast-MFC-AGG-ID: 2uFK_MWjMouCPnvTRatCAw_1749139447
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2354ba59eb6so16604415ad.1
-        for <fstests@vger.kernel.org>; Thu, 05 Jun 2025 09:04:08 -0700 (PDT)
+ us-mta-538-PhedGFAnPCuUl4kMZUvy9w-1; Thu, 05 Jun 2025 12:30:38 -0400
+X-MC-Unique: PhedGFAnPCuUl4kMZUvy9w-1
+X-Mimecast-MFC-AGG-ID: PhedGFAnPCuUl4kMZUvy9w_1749141037
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-235e7550f7bso12081515ad.3
+        for <fstests@vger.kernel.org>; Thu, 05 Jun 2025 09:30:38 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749139444; x=1749744244;
+        d=1e100.net; s=20230601; t=1749141037; x=1749745837;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=il46EU6GFqNY2CbsWo+TEQFeQB0q8ljPTVtEK/gjjWI=;
-        b=S30eoJZNc2ZM42Tw1P9FDJCAY726bPS+LcsWM+bWUNivyMf+NmZW1gidnUugHGI8Ye
-         QJucqfeFO0/VV0pJblzSULqiFK8PpX7CXhkjG8q/EcCvUJ67TEy/X3Yg/cQioWx5nFnU
-         DBN8MD86MG0WbGgUwhPcHYo98oS2gFUcaPtEXS83NgYHavDZU/ytsGU6TyhWFlUPRKR/
-         A/zXfURG13eSFaM7hJbXlsZm7rhj8h98YpU9bSi0G/UFA0IN4Qw5GTWdZLo9XJgtsivh
-         B0JNk5EqugMuPfHsnRHxtjTGRkk3I4oQeDnU1TKoHIejzVVzaWUI64S8wvlq2DONcWWO
-         AoSQ==
-X-Gm-Message-State: AOJu0YzH/QAh/aJNwFCS0qg5/297w43aarhM06xwXnlv3UDo0pqnyamw
-	35j3FYMji90lviuGEZ+rIVMlRpwrYdUF3CfoiwMfETp5mULkcu72DRrfKAmp1CsPhBLqnCASZJ/
-	sjCC8SBvXh6iT9x7DPOK2+T5QHdomFTyh/VxI5hAeOvKtFTyXPZqyVTEh/CQ=
-X-Gm-Gg: ASbGncuZCqo3qKycVu6W9ZUvCFGL1xuPtCL1cDtKmPCvrFSNZkCiVz7oqLaEmdJ5wUE
-	SqVKU6PkdXT21JALf16lx35RfmkehoF9cTHsPTIlpeZLw1wBus84TtcudvxoXwccGOCmrXRscmr
-	3AYiVDTuXGFjSL394dgeBq4sOEmChB7kxLyok6EdvUCNhBNx24XFsk07X8ZMMeOwvRNoVsZgTMv
-	dbuqM5F/pyeR+eo1BxwLMoTtOIWVoLMEmmu9UG3UEitZEXn4E1QKXL6TU/P7Z1MrsiEUgLlkxfa
-	/wYaGEDBWWEq9j6yMQkeIAvBMbvNS5MRAhMud9P/HIAnj91yYKmE
-X-Received: by 2002:a17:903:2f85:b0:235:ecf2:397 with SMTP id d9443c01a7336-235ecf20ecemr74123475ad.33.1749139444427;
-        Thu, 05 Jun 2025 09:04:04 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFdCJEykVbcD5HaKtvN7OCNa3pPRicn1BpDHm8htfAy3SkEAt9RKtETG4E4kitKlE9Pv2uZNA==
-X-Received: by 2002:a17:903:2f85:b0:235:ecf2:397 with SMTP id d9443c01a7336-235ecf20ecemr74123055ad.33.1749139444019;
-        Thu, 05 Jun 2025 09:04:04 -0700 (PDT)
+        bh=L12XX5ma/UkaofRsTldbekTX43EjtYhEhxzfoIm0/dw=;
+        b=EEIh6LifJxdND3rbzmirLFbcCeql2rdXUvrxNKXngFoHt0zmZiJsLo3MMZFgb4x0E7
+         dh1SoJgd47Rs6t9ss6fR603aCa/dRIUtwg8z/r98WSb8F83OWZRXrcAI2GS78BSAS6a4
+         gOPB3zFETMNbu2FWf0/zawPcT6PHp2w6f3K/dcX1ml+AmMdbKahlC5CQZzopOepYu6hR
+         amLtn7lfS4th1oNJtB4oGBcQidPqNfOybBU0kumhD3LsWdtayeZ/DrhyCfcRjxr+ExNj
+         Y9hv3CLt6hXmGi0OPRBITp7ykZbM24ae1IvOg04O53d6/upWMHKZCKTbleMYCXTEpH1J
+         8Yqg==
+X-Gm-Message-State: AOJu0YwycGqArC0b48SNRtfm/THhepZJP0YTAEkxG0ZPJdHkaYAHQzyB
+	OtgMpoAbH1IOKOopHubkhBEAn+SeAMj8l7jsV3vcKpAbiczRV5eilFC20xq5GEUN7LPVo348yYk
+	h+n37pGBX17kTOl1dKkKwxU2EoB5VY2RtexV1AT159KLAHwvXXuO4TplpmIw=
+X-Gm-Gg: ASbGncsnLu2w2gEmq7hUhQRKVzGDPX/2TFBxc7brQIk2J15y4vY2Xha+nRQ0PcKEF7e
+	hxE8yPo0ruoJELzN1uJa3kc2EdNX6sn12FaHJgcr4kh0t3tR5rzDaAZdOj4viQ3nFmXxjszcVze
+	j5H3d6PsfS8R6jBvpKKkxmt+H4sbNzxxrvFwI263HO6inMJHuHvacG2lIH61hQypp2s+/S4ga4l
+	Oc22CFf129tp00A83xpQGaoUbKq9jr7Yuhr6Vxuj9ECbySr5/KTdbyYHaFoyUexrVCXVttRAR5j
+	+dhmJYQnzmwoXyWyyfygHdH1tNco3kQSYsYUKoFtShlkWym1gaKz
+X-Received: by 2002:a17:902:f602:b0:234:d7c5:a0f6 with SMTP id d9443c01a7336-23601d4ed01mr216225ad.31.1749141036975;
+        Thu, 05 Jun 2025 09:30:36 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGnt68u95749X80LDtx+XH9djrLQpxwmELcFErgZKaQ0qOXdRdzUH8UJYVv5Idd6yTk5GqTHg==
+X-Received: by 2002:a17:902:f602:b0:234:d7c5:a0f6 with SMTP id d9443c01a7336-23601d4ed01mr215185ad.31.1749141036266;
+        Thu, 05 Jun 2025 09:30:36 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-23506d14a85sm121578835ad.232.2025.06.05.09.04.02
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-23506bd949bsm121673255ad.91.2025.06.05.09.30.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 05 Jun 2025 09:04:03 -0700 (PDT)
-Date: Fri, 6 Jun 2025 00:03:59 +0800
+        Thu, 05 Jun 2025 09:30:35 -0700 (PDT)
+Date: Fri, 6 Jun 2025 00:30:32 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: fdmanana@kernel.org
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
 	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] fstests: add kernel commit IDs to some tests
-Message-ID: <20250605160359.xjo35wqku67yblsw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <df0a4c7749812f3dec49c2ec05c6da5c7b7e822f.1748517133.git.fdmanana@suse.com>
+Subject: Re: [PATCH] generic/094: fix test ignoring failures
+Message-ID: <20250605163032.kroyvzlhwjcdfgir@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <7425c940548e19ab996b8458717dd3c3c3c55630.1748518250.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -78,80 +78,96 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <df0a4c7749812f3dec49c2ec05c6da5c7b7e822f.1748517133.git.fdmanana@suse.com>
+In-Reply-To: <7425c940548e19ab996b8458717dd3c3c3c55630.1748518250.git.fdmanana@suse.com>
 
-On Thu, May 29, 2025 at 12:13:41PM +0100, fdmanana@kernel.org wrote:
+On Thu, May 29, 2025 at 12:33:13PM +0100, fdmanana@kernel.org wrote:
 > From: Filipe Manana <fdmanana@suse.com>
 > 
-> The kernel fixes exercised by some tests have already landed in Linus'
-> tree, so update the tests with the respective commit IDs.
+> The test is ignoring failures completely:
+> 
+> 1) If mounting the scratch device fails it redirects both stdout and
+>    stderr to /dev/null, so it gets unnoticed and the test runs against
+>    a different fs than expected (in my test environment $SCRATCH_MNT
+>    points to a directory in an ext4 fs for example but I want to test
+>    btrfs);
+
+Yeah, I really don't recommend redirecting all outputs of _scratch_mkfs
+to /dev/null. Some old cases might still do that.
+
+> 
+> 2) We are redirecting the stdout and stderr of fiemap-tester to the
+>    $seqres.full file, so if it fails it gets completely unnoticed and
+>    the test succeeds.
+
+I'm surprised that this test case neither check the test output nor
+check the return value of src/fiemap-tester.
+
+> 
+> For the first issue fix this by not even using the scratch filesystem and
+> use instead the test filesystem, since the test creates a 2M file which
+> is small enough.
+> 
+> For the second issue simply don't redirect the stdout and stderr, so that
+> if the test program fails it causes a mismatch with the golden output,
+> making the test fail.
 > 
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > ---
 
-Thanks for this update.
+This change makes sense to me,
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  tests/f2fs/011    | 2 +-
->  tests/generic/370 | 2 +-
->  tests/generic/761 | 3 ++-
->  tests/generic/764 | 2 +-
->  4 files changed, 5 insertions(+), 4 deletions(-)
+>  tests/generic/094 | 20 +++++++++++---------
+>  1 file changed, 11 insertions(+), 9 deletions(-)
 > 
-> diff --git a/tests/f2fs/011 b/tests/f2fs/011
-> index ec3d39ec..c21cb586 100755
-> --- a/tests/f2fs/011
-> +++ b/tests/f2fs/011
-> @@ -23,7 +23,7 @@ _begin_fstest auto quick
+> diff --git a/tests/generic/094 b/tests/generic/094
+> index c82efced..6ae417c3 100755
+> --- a/tests/generic/094
+> +++ b/tests/generic/094
+> @@ -9,18 +9,22 @@
+>  . ./common/preamble
+>  _begin_fstest auto quick prealloc fiemap
 >  
->  _fixed_by_kernel_commit 48ea8b200414 \
->  	"f2fs: fix to avoid panic once fallocation fails for pinfile"
-> -_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +_fixed_by_kernel_commit f7f8932ca6bb \
->  	"f2fs: fix to avoid running out of free segments"
->  
->  _require_scratch
-> diff --git a/tests/generic/370 b/tests/generic/370
-> index cbc18644..d9ba6c57 100755
-> --- a/tests/generic/370
-> +++ b/tests/generic/370
-> @@ -21,7 +21,7 @@ _cleanup()
->  
->  [ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit 03018e5d8508 \
->      "btrfs: fix swap file activation failure due to extents that used to be shared"
-> -[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit XXXXXXXXXXXX \
-> +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 2d873efd174b \
->  	"xfs: flush inodegc before swapon"
->  
->  _require_scratch_swapfile
-> diff --git a/tests/generic/761 b/tests/generic/761
-> index 9406a4b8..bd7b02a9 100755
-> --- a/tests/generic/761
-> +++ b/tests/generic/761
-> @@ -18,7 +18,8 @@ _begin_fstest auto quick
->  _require_scratch
->  _require_odirect
->  _require_test_program dio-writeback-race
-> -_fixed_by_kernel_commit XXXXXXXX \
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -fr $tmp.*
+> +	rm -f $fiemapfile
+> +}
 > +
-> +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit 968f19c5b1b7 \
->  	"btrfs: always fallback to buffered write if the inode requires checksum"
+>  # Import common functions.
+>  . ./common/filter
 >  
->  _scratch_mkfs > $seqres.full 2>&1
-> diff --git a/tests/generic/764 b/tests/generic/764
-> index 1b21bc02..55937fc0 100755
-> --- a/tests/generic/764
-> +++ b/tests/generic/764
-> @@ -20,7 +20,7 @@ _cleanup()
+> -_require_scratch
+> +_require_test
+>  _require_odirect
+>  _require_xfs_io_command "fiemap"
+>  _require_xfs_io_command "falloc"
 >  
->  . ./common/dmflakey
+> -_scratch_mkfs > /dev/null 2>&1
+> -_scratch_mount > /dev/null 2>&1
+> -
+> -fiemapfile=$SCRATCH_MNT/$seq.fiemap
+> +fiemapfile=$TEST_DIR/$seq.fiemap
 >  
-> -[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-> +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit 5e85262e542d \
->  	"btrfs: fix fsync of files with no hard links not persisting deletion"
+>  _require_test_program "fiemap-tester"
 >  
->  _require_scratch
+> @@ -29,12 +33,10 @@ seed=`date +%s`
+>  echo "using seed $seed" >> $seqres.full
+>  
+>  echo "fiemap run with sync"
+> -$here/src/fiemap-tester -q -S -s $seed -r 200 $fiemapfile 2>&1 | \
+> -	tee -a $seqres.full
+> +$here/src/fiemap-tester -q -S -s $seed -r 200 $fiemapfile
+>  
+>  echo "fiemap run without sync"
+> -$here/src/fiemap-tester -q -s $seed -r 200 $fiemapfile 2>&1 | \
+> -	tee -a $seqres.full
+> +$here/src/fiemap-tester -q -s $seed -r 200 $fiemapfile
+>  
+>  status=0
+>  exit
 > -- 
 > 2.47.2
 > 
