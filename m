@@ -1,76 +1,79 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD07317FAC2
-	for <fstests@vger.kernel.org>; Thu,  5 Jun 2025 14:53:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B7741917FB
+	for <fstests@vger.kernel.org>; Thu,  5 Jun 2025 14:59:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749135207; cv=none; b=dT/Hh3wWAoYMMALhSBT6ls7KxFym7a67w8KJk3FUGwUGIv5SWNqEU86l39x2zVd3CI3eSm+a+SBd244IWWOj+3QHZFx4Mka1FB0xpizgF8XHVPG/i8woSykj897UGTfs6a1VRooq9ZHgu4EjRWd9AfqhHAYH6rJTpGK3MB8hhbU=
+	t=1749135555; cv=none; b=EEi04OfVrxklOTSxS5PIYOQSSAXccGGhIPMspxU/+elMTgsP2fhQ9V81IgBtmTKY2QuOulnpMCb64YF+oEgjhHP6q60Xnggj41n9pQVKpUN1Hfjc/Ho24eKDXzyR5tkeLqVX7xJpJ1TWUXJGadV6sQs43WhWV9CzGhEA+FS0gNc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749135207; c=relaxed/simple;
-	bh=DnzmyU3JB821Y4iWKSzFv/n7X5Dp4GSFP6HQky1VZ0g=;
+	s=arc-20240116; t=1749135555; c=relaxed/simple;
+	bh=A6zwAq8PsCy6ogTByByU9y43j+DOEWrTK1iW/IwzYtA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=n+bSe9vx/1hX4YUJH0+0p3I3qSw3u0B1ILba0yzNrxbpJT2l1zNAaXmZm7mB1fcbOrWJlNuJiOXZTir0EzDdIo2IEe30dxIu8LiW+TdAqDjlpGu+yNV0jbFweq/AMCV0Ma2qexQLOsdG0km7W4b0MuAdNTdo9ntZrcFyxSyu5lQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=bMpZ9LJw; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=XMrh1qWmZYeSzmaVk6i8/JhHCnIdSiQ1xZGlU0XnkbRA3sLVhy7zx87L/aDCOVT404SfNOiRY80K5d8oCAw2V/E1eDogqmRsMlQoB/P7grjjydXUD93yLDtlrx/gFNBNyMNaNdnS68gFe6NAENt/WTFkPrbAwEZIugdjOQKLIDM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MpGkSYgp; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bMpZ9LJw"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MpGkSYgp"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1749135204;
+	s=mimecast20190719; t=1749135552;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=XWV4KD+k9LM73/d+Ftvbhwvq5xMQqgwsW6O26577zAQ=;
-	b=bMpZ9LJwgctOGnsH5LnvCR7MxPf/cC18+qUX40orXL4nJxgTEMe6m4qwMkREONREp2CbHj
-	Y/OgJlEKSu/3b22iJZBZN5goZW5HzZ6Mr+dCxxKrJOIGZLMSMsDuzE78TKbz1/5jus7VWS
-	8L9IZtPRKvfIOrmnnmBTSLSHxEzFIUo=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=LtJegDZZpvVJrHoSgPDrcL8lIN1kexbI8yNtAPoFmGQ=;
+	b=MpGkSYgp0l5o2fdBjBRRm6Y1stWrt5Q4jrgekay7t+aC9QMsYGpELFbmoXG5KmPdnk67VH
+	duhGKgjo0w3ND1OOyzu8+URIIpPk0IoWkaqPvETt/Yaz1vfXBGX32Fka0+AsEA1xQu2cBA
+	lm0vqUogC5zQ+O3sPxRrqePm4ErfW8I=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-570--qeH-KA8OQCOShHAzclcsw-1; Thu, 05 Jun 2025 10:53:23 -0400
-X-MC-Unique: -qeH-KA8OQCOShHAzclcsw-1
-X-Mimecast-MFC-AGG-ID: -qeH-KA8OQCOShHAzclcsw_1749135202
-Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-742c03c0272so1614036b3a.1
-        for <fstests@vger.kernel.org>; Thu, 05 Jun 2025 07:53:23 -0700 (PDT)
+ us-mta-519-YVeEUqCnNTS1PJPRJrsSzA-1; Thu, 05 Jun 2025 10:59:11 -0400
+X-MC-Unique: YVeEUqCnNTS1PJPRJrsSzA-1
+X-Mimecast-MFC-AGG-ID: YVeEUqCnNTS1PJPRJrsSzA_1749135551
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-7398d70abbfso1831325b3a.2
+        for <fstests@vger.kernel.org>; Thu, 05 Jun 2025 07:59:11 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749135202; x=1749740002;
+        d=1e100.net; s=20230601; t=1749135550; x=1749740350;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=XWV4KD+k9LM73/d+Ftvbhwvq5xMQqgwsW6O26577zAQ=;
-        b=c6Fg7BTtXH3pF45iaG6EZd0HELq7G5k8Btwvh98n8/DmPGcmrCIGmGVfDTvYQ+EP3+
-         YOOpVJn4MgOQrcWTPLRI/eE36wHcFJYIZXP2NI9g2566x+UtM5xeJugcxNEDlq2+zOX2
-         79LXo6Zbs2/eYwBBZNs4Njgms83qJbJLge3dBmfBvZXebDn+EGJAibvXaP8qSWew3cdv
-         8v1QSyDbqZAe2+F+VVSYrfAvO8gZJ2/21i2daPAadWPa+lbHWI5+ClKBnMWiOFqSmGGN
-         aNLQKU3HExhr1iNtV60/zaAb0ojotUKKTerZKWkGe5JkeOK7LCSdW0osFQg3+7N3KWrE
-         0oMQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXGweGSwzwaOJIfvS63qt2hh74JlX36/U9dE/nRYClePunyP1lz+OUVh7Qt4V6Lt2RnbfoE5GXg@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzi+0S7+mTjUIX9DQSBsjY5whDgKNhXxVm+VuYLdW2TJ08MYphk
-	ckXOdJvlY8k6f38El4glBYX+zM/0d2upvTkYeFVWI+TaHqGiUjgUazy0ClnheuToAG3rEn5BA48
-	ysOcLkiuS7WCn1d2YwotsouzNGZPqiK1DiKEBkGNYpf0srH7rIGWBL/8+oDs=
-X-Gm-Gg: ASbGnctoDglmJuCFiM3GZaEMZSOS+RNMaxtVrrAbhd6GclHr/kdAfIonyPC5O3gib/r
-	V9GDdUWTvyi5m1EcDCqr9JpntsxZ8MFtenSw/T5iAOv1NjQeD7Dmjc/bpXlNORLUkMf3Jp9mbvv
-	U8tw/2KrgREBa8H3bMA00s9l4YOVIea8mjFAKAd2pw/PJ5JkAd2RI19+BX2d456s88qXrh+9xtl
-	RBzN0YsInOlgBYyCqL8DUvGusXQ1tficIb4camWozJvsTRKgDOIzqo2IfIlJFVolE8sQhSvPT1b
-	jkI1WAmvFj2fsLJZJrG9gllmc+6B6bLOXhFQB2lQ+Avke7NEEjSV
-X-Received: by 2002:a05:6a00:14d1:b0:740:a52f:9652 with SMTP id d2e1a72fcca58-74827e7e8f7mr53489b3a.6.1749135202299;
-        Thu, 05 Jun 2025 07:53:22 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHXM7rPbjWgk5G/wk0KzTdGuorqXonjTlB84aGSRDAJvTVwTQXWvO048S2FkRhUY/d35fLVcg==
-X-Received: by 2002:a05:6a00:14d1:b0:740:a52f:9652 with SMTP id d2e1a72fcca58-74827e7e8f7mr53463b3a.6.1749135201913;
-        Thu, 05 Jun 2025 07:53:21 -0700 (PDT)
+        bh=LtJegDZZpvVJrHoSgPDrcL8lIN1kexbI8yNtAPoFmGQ=;
+        b=YHl2r0wLyaqKiO9Kcw4Tu8PgMuD0lNZS5GdHY/oj2+S2pMNlM/E98LMiQdiMqz1QBY
+         RYK42jCIPQsCIktgnO1Cbo7EGaBj47TFEytXb3XVNUsmkawdfGscHCGAopTUPpaolesp
+         qiqqSgVpacevp0pYafuKCm0LvaDj7Je/wnBgi+Qkatv1sI5bu2y+xXTU3hLE8s0oKQqh
+         dWCaH3H4ewH45A6E/p8lcPmfSLXi7AyOmXFZXm+8Ptv/o8uhSYfkcgH8LnJyv24z1kHp
+         0TYyYO8xjXpursBoDg7zSxlDUWkfBxdyYwHJ+7V5tdJsrcrw4+W/R8HVwfsoM/546B/v
+         q7XQ==
+X-Forwarded-Encrypted: i=1; AJvYcCX4j+HuEn7k/1b9ejfTKBCDfTsDsrjoq0R7Boh9JsY2+0DnSJWCooKEOKA21Pnpeai7DwoAOlpC@vger.kernel.org
+X-Gm-Message-State: AOJu0YxFyB+sOcTrlUjtst51QqVlCVHEjrbQuZ7wrZdVcESa2f13YoMj
+	u+j3M4w9rE6AqEQHxiXMp8MyNJbKCZ693IOcdOFJA4xf/XwlcCXZaUptujwG/HJad/hxNY5+U5K
+	L7xzru+tb45seS0ocXwibaYSD88IKhHKMAV2vb3NKvQp7el4W3+zmpw5DqwkmDXSHz9g=
+X-Gm-Gg: ASbGncstA0Qez/uimMa8AiGwvRIO0HSkBjN8LWNRin6X/QR+yXaHxS+oaQdFE1UUkXN
+	hVLQ/6xZPFQjgAfIDa7znSs6bO7NP2LOs2Ke02To2bnIbagSdfyMbyYgw2VZzsU5nfsSGeMNItV
+	35ZC1Bu8XG7MfFtTK/yt7qRG0FXwHPa1m6EjYnfsxkudtwmsT8Z9WBmIPExPWtbsuhPw64gxLEF
+	aVS5fGhVaIEGiFDsbeBqy4PiYCKlPnGJoCbJDoN69xS//GiU/uj7JWQK9qtGdrAWqyEh3cci/KY
+	C/QFP9hGvbLRDBtitvBBlR+mKX2rfvdXKNNsG1CuHLpxcLURxr1BFH6Mh9jIgpU=
+X-Received: by 2002:a05:6a00:3cc8:b0:746:25d1:b711 with SMTP id d2e1a72fcca58-74827f159a3mr51651b3a.17.1749135550685;
+        Thu, 05 Jun 2025 07:59:10 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHGc6FRa6YE95lQ3ghCbEFt0U2trev0i+0bQQuGFH/Mrk0+lNEo9HaABKHOJskJqjfucrNAtw==
+X-Received: by 2002:a05:6a00:3cc8:b0:746:25d1:b711 with SMTP id d2e1a72fcca58-74827f159a3mr51628b3a.17.1749135550341;
+        Thu, 05 Jun 2025 07:59:10 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-747afeaad78sm12843357b3a.46.2025.06.05.07.53.20
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b2eceb35702sm8981296a12.33.2025.06.05.07.59.08
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 05 Jun 2025 07:53:21 -0700 (PDT)
-Date: Thu, 5 Jun 2025 22:53:17 +0800
+        Thu, 05 Jun 2025 07:59:10 -0700 (PDT)
+Date: Thu, 5 Jun 2025 22:59:06 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Yuezhang Mo <Yuezhang.Mo@sony.com>
-Cc: zlang@kernel.org, fstests@vger.kernel.org, friendy.su@sony.com
-Subject: Re: [PATCH v1 5/7] generic/730: add _require_scratch_shutdown
-Message-ID: <20250605145317.4gnj3phueo4bfxpq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250528091530.1218188-1-Yuezhang.Mo@sony.com>
- <20250528091530.1218188-6-Yuezhang.Mo@sony.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/740: add _require_scratch
+Message-ID: <20250605145906.d6pfxngrgfjdtpkm@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250604131922.848228-1-hch@lst.de>
+ <20250605135210.zrezswl6qgc62mmq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20250605135443.GA2669@lst.de>
+ <20250605140646.xzjyzkp3vkcbos4m@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20250605141201.GA3986@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -79,54 +82,41 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250528091530.1218188-6-Yuezhang.Mo@sony.com>
+In-Reply-To: <20250605141201.GA3986@lst.de>
 
-On Wed, May 28, 2025 at 05:15:28PM +0800, Yuezhang Mo wrote:
-> Before testing for shutdown, check whether the file system
-> supports it with _require_scratch_shutdown.
+On Thu, Jun 05, 2025 at 04:12:01PM +0200, Christoph Hellwig wrote:
+> On Thu, Jun 05, 2025 at 10:06:46PM +0800, Zorro Lang wrote:
+> > On Thu, Jun 05, 2025 at 03:54:43PM +0200, Christoph Hellwig wrote:
+> > > On Thu, Jun 05, 2025 at 09:52:10PM +0800, Zorro Lang wrote:
+> > > > > +_require_scratch
+> > > > 
+> > > > There's a "_require_scratch_nocheck" in this test case, but it's called
+> > > > after the "_require_block_device".
+> > > 
+> > > Yes.  But I looked at _require_scratch_nocheck and despite the name
+> > > it doesn't seem to imply _require_scratch.
+> > 
+> > Due to _require_scratch calls _require_scratch_nocheck, not converse :)
 > 
-> Signed-off-by: Yuezhang Mo <Yuezhang.Mo@sony.com>
-> Reviewed-by: Friendy Su <friendy.su@sony.com>
-> ---
->  tests/generic/730 | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/tests/generic/730 b/tests/generic/730
-> index 6251980e..1dce547f 100755
-> --- a/tests/generic/730
-> +++ b/tests/generic/730
-> @@ -25,6 +25,7 @@ _cleanup()
->  _require_test
->  _require_block_device $TEST_DEV
->  _require_scsi_debug
-> +_require_scratch_shutdown
+> Oh, I guess I should have looked deeper..
 
-Hmm... although this test case really does "shutdown", but this _require_scratch_shutdown
-looks weird, due to the g/730 doesn't has _require_scratch, that means there might be not
-SCRATCH_DEV. So...(see below)
+I saw you did below change in commit 3ae8a19f97d0 :
 
->  
->  size=$(_small_fs_size_mb 256)
->  SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 $size`
+  -_require_scratch_nocheck
+  -_require_no_large_scratch_dev
+  +_require_block_device "${SCRATCH_DEV}"
+   # not all the FS support zoned block device
+   _require_non_zoned_device "${SCRATCH_DEV}"
+ 
+  -# mkfs.btrfs did not have overwrite detection at first
+  -if [ "$FSTYP" == "btrfs" ]; then
+  -       grep -q 'force overwrite' `echo $MKFS_BTRFS_PROG | awk '{print $1}'` || \
+  -               _notrun "Installed mkfs.btrfs does not support -f option"
+  -fi
+  +_require_scratch_nocheck
+  +_require_no_large_scratch_dev
 
-... how about
+I don't know why you moved these two lines here, how about move them back :)
 
-diff --git a/tests/generic/730 b/tests/generic/730
-index 6251980e..6b5d3196 100755
---- a/tests/generic/730
-+++ b/tests/generic/730
-@@ -29,6 +29,7 @@ _require_scsi_debug
- size=$(_small_fs_size_mb 256)
- SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 $size`
- test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
-+SCRATCH_DEV=$SCSI_DEBUG_DEV _require_scratch_shutdown
- echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
-
-Thanks,
-Zorro
-
-> -- 
-> 2.25.1
-> 
 > 
 
