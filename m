@@ -1,79 +1,76 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B7741917FB
-	for <fstests@vger.kernel.org>; Thu,  5 Jun 2025 14:59:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5422B145355
+	for <fstests@vger.kernel.org>; Thu,  5 Jun 2025 15:06:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749135555; cv=none; b=EEi04OfVrxklOTSxS5PIYOQSSAXccGGhIPMspxU/+elMTgsP2fhQ9V81IgBtmTKY2QuOulnpMCb64YF+oEgjhHP6q60Xnggj41n9pQVKpUN1Hfjc/Ho24eKDXzyR5tkeLqVX7xJpJ1TWUXJGadV6sQs43WhWV9CzGhEA+FS0gNc=
+	t=1749135982; cv=none; b=FXT9YUT4NU1oFJfdWh2//uz4mONdNGyy/YO99yzayERrn6w3+gr0cEq4NI3uPlsl/MYJSrSaP+uNQyF68KjV9rhjOj06Dl4KBMkA8bbAGIhYYmul45e3LynI214oQVlbkmKN02WZnb81ddQ63Avy7x099NiT4H3irtELAlBXpoI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749135555; c=relaxed/simple;
-	bh=A6zwAq8PsCy6ogTByByU9y43j+DOEWrTK1iW/IwzYtA=;
+	s=arc-20240116; t=1749135982; c=relaxed/simple;
+	bh=zLeL9Zy8HUJlpftgA8juBAFIJd3hB74Lnf2rHujOZYU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=XMrh1qWmZYeSzmaVk6i8/JhHCnIdSiQ1xZGlU0XnkbRA3sLVhy7zx87L/aDCOVT404SfNOiRY80K5d8oCAw2V/E1eDogqmRsMlQoB/P7grjjydXUD93yLDtlrx/gFNBNyMNaNdnS68gFe6NAENt/WTFkPrbAwEZIugdjOQKLIDM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MpGkSYgp; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=qpa8Av5vcaccDoov01jEw+nzKbudfYrHlRojq0NSTBlGY6LnTUqERMFkY+PvKuLybbxHaj+qCYJGseP/Q5ir/2B2K/z0uQHy6I3ieWjw/KWe+b6vTOWmgf3KuDXYUwgWrC2CZIvWb/PGFH5Hz1ezdK8BVf7FForjmHD50p+XSl8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=INBZm75P; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MpGkSYgp"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="INBZm75P"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1749135552;
+	s=mimecast20190719; t=1749135978;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=LtJegDZZpvVJrHoSgPDrcL8lIN1kexbI8yNtAPoFmGQ=;
-	b=MpGkSYgp0l5o2fdBjBRRm6Y1stWrt5Q4jrgekay7t+aC9QMsYGpELFbmoXG5KmPdnk67VH
-	duhGKgjo0w3ND1OOyzu8+URIIpPk0IoWkaqPvETt/Yaz1vfXBGX32Fka0+AsEA1xQu2cBA
-	lm0vqUogC5zQ+O3sPxRrqePm4ErfW8I=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=nvlwCv5XzZ4LOTqAk1EKfRfSoskhki7OQEcWAA0ueGk=;
+	b=INBZm75P1hBFL4tX9JKIjQnnKnuGZKlMNGSPat01r1JOfTnapYJdKXlGAE9KFi8yrFWwmU
+	qcX3mBY+eM4dxe7QvZ8i7pZ5QAhJSIZ8pniUa4mxcn90Ok8Cp9isiTGp4h7GmyUUG1B0Mq
+	LlUNoPhmv0A2lOWfymtZE0Lb++B1pxQ=
+Received: from mail-yb1-f198.google.com (mail-yb1-f198.google.com
+ [209.85.219.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-519-YVeEUqCnNTS1PJPRJrsSzA-1; Thu, 05 Jun 2025 10:59:11 -0400
-X-MC-Unique: YVeEUqCnNTS1PJPRJrsSzA-1
-X-Mimecast-MFC-AGG-ID: YVeEUqCnNTS1PJPRJrsSzA_1749135551
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-7398d70abbfso1831325b3a.2
-        for <fstests@vger.kernel.org>; Thu, 05 Jun 2025 07:59:11 -0700 (PDT)
+ us-mta-602-J6FsOmacM2iW8gjYrLAevg-1; Thu, 05 Jun 2025 11:06:16 -0400
+X-MC-Unique: J6FsOmacM2iW8gjYrLAevg-1
+X-Mimecast-MFC-AGG-ID: J6FsOmacM2iW8gjYrLAevg_1749135976
+Received: by mail-yb1-f198.google.com with SMTP id 3f1490d57ef6-e72ecef490dso1597832276.0
+        for <fstests@vger.kernel.org>; Thu, 05 Jun 2025 08:06:16 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749135550; x=1749740350;
+        d=1e100.net; s=20230601; t=1749135976; x=1749740776;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=LtJegDZZpvVJrHoSgPDrcL8lIN1kexbI8yNtAPoFmGQ=;
-        b=YHl2r0wLyaqKiO9Kcw4Tu8PgMuD0lNZS5GdHY/oj2+S2pMNlM/E98LMiQdiMqz1QBY
-         RYK42jCIPQsCIktgnO1Cbo7EGaBj47TFEytXb3XVNUsmkawdfGscHCGAopTUPpaolesp
-         qiqqSgVpacevp0pYafuKCm0LvaDj7Je/wnBgi+Qkatv1sI5bu2y+xXTU3hLE8s0oKQqh
-         dWCaH3H4ewH45A6E/p8lcPmfSLXi7AyOmXFZXm+8Ptv/o8uhSYfkcgH8LnJyv24z1kHp
-         0TYyYO8xjXpursBoDg7zSxlDUWkfBxdyYwHJ+7V5tdJsrcrw4+W/R8HVwfsoM/546B/v
-         q7XQ==
-X-Forwarded-Encrypted: i=1; AJvYcCX4j+HuEn7k/1b9ejfTKBCDfTsDsrjoq0R7Boh9JsY2+0DnSJWCooKEOKA21Pnpeai7DwoAOlpC@vger.kernel.org
-X-Gm-Message-State: AOJu0YxFyB+sOcTrlUjtst51QqVlCVHEjrbQuZ7wrZdVcESa2f13YoMj
-	u+j3M4w9rE6AqEQHxiXMp8MyNJbKCZ693IOcdOFJA4xf/XwlcCXZaUptujwG/HJad/hxNY5+U5K
-	L7xzru+tb45seS0ocXwibaYSD88IKhHKMAV2vb3NKvQp7el4W3+zmpw5DqwkmDXSHz9g=
-X-Gm-Gg: ASbGncstA0Qez/uimMa8AiGwvRIO0HSkBjN8LWNRin6X/QR+yXaHxS+oaQdFE1UUkXN
-	hVLQ/6xZPFQjgAfIDa7znSs6bO7NP2LOs2Ke02To2bnIbagSdfyMbyYgw2VZzsU5nfsSGeMNItV
-	35ZC1Bu8XG7MfFtTK/yt7qRG0FXwHPa1m6EjYnfsxkudtwmsT8Z9WBmIPExPWtbsuhPw64gxLEF
-	aVS5fGhVaIEGiFDsbeBqy4PiYCKlPnGJoCbJDoN69xS//GiU/uj7JWQK9qtGdrAWqyEh3cci/KY
-	C/QFP9hGvbLRDBtitvBBlR+mKX2rfvdXKNNsG1CuHLpxcLURxr1BFH6Mh9jIgpU=
-X-Received: by 2002:a05:6a00:3cc8:b0:746:25d1:b711 with SMTP id d2e1a72fcca58-74827f159a3mr51651b3a.17.1749135550685;
-        Thu, 05 Jun 2025 07:59:10 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHGc6FRa6YE95lQ3ghCbEFt0U2trev0i+0bQQuGFH/Mrk0+lNEo9HaABKHOJskJqjfucrNAtw==
-X-Received: by 2002:a05:6a00:3cc8:b0:746:25d1:b711 with SMTP id d2e1a72fcca58-74827f159a3mr51628b3a.17.1749135550341;
-        Thu, 05 Jun 2025 07:59:10 -0700 (PDT)
+        bh=nvlwCv5XzZ4LOTqAk1EKfRfSoskhki7OQEcWAA0ueGk=;
+        b=Du2P6kl8IowB1OHniqfojeOT8qPaJK7KvzbUgKoum+F471VrQkWBq6huqTonAgn7Yn
+         jHmvIV1AnDq1yCi4upsdYfhRyJGGqiSDpdBG/gVZkojLP0pbR2OC8OFuaGNJPyNfH5Wb
+         UF1yV9LX+3oMV4+fYALrrBxwGzBbtAd9GfTicgb3vrVI2TWxGiLxrzUxViiIPS3rx9Hr
+         vdLDEFfpduLycm5hQCVlW0j5jikYLmmtDTvE65gNInQeevcF4fSStX2gSUoPOjqH6RNJ
+         s/+gCeBdh5lf3VBC/K9o96xjWGKq3dHSKP9dHr/1zWp2VLixk9TIrCuCn9jD9+G7hX2I
+         DNlw==
+X-Forwarded-Encrypted: i=1; AJvYcCWOiWYzzOHH85MwktXKZnY2paTgoDwvckr7/OYeZg8NKb7uAqxluJJxupLxA1D06E9a1CU116zW@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw9W3TO2jeTMULeplGX/cTTQVa9UC7JUXGDmHtXFW0t2sYJ7eOj
+	1CCMF5igJr6NUYXYDZFBeHba9Cm6EaOHnBYy2lmzFZTx5AmHdmvrdZbUAV6MCf50wUyn6gWHGD4
+	WNzoSXi/gUTc6u6wSyalvhA7XU0/ADG8fPhasFoCjsB3/p7HZJA/YdnHmeYOzaiutFOY=
+X-Gm-Gg: ASbGnctywwuXlOFXzrkBD7VwdQvHX8mSwXELCf2nX1+5BpLmCTdF2t0hz4ntivP1T15
+	YkbkfPDSs7fkSIH/nUELvhiMShn5NaQwcv78C1as9KwtAbey3n7xVvRmdbV5qPXEFx4NyMsJI6g
+	ONoweQwOJFAM6v9rn+hhHPFbevIQZIAfD0GM0Me+m7USPvqJ0j6FUwKlHLP5McRfIhNLG2F496N
+	ia01SWp8/qyqd6+Dw2jNEyHBrK8c6+cAMwOmmI+YOycHpW+h71sWu218nZdKqPLcK8EjF8wGOJG
+	XtW1zfBVhmIqDrW/cZoITztB8oweuweZ9pDi/DP2Ykn0vvtsqRdT
+X-Received: by 2002:a05:6902:2e10:b0:e81:a1d7:5f78 with SMTP id 3f1490d57ef6-e81a20d3b75mr151870276.8.1749135964638;
+        Thu, 05 Jun 2025 08:06:04 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFNZfEUv14Zls0cdtwm8wWBtSTLpm+3uIo406hAu5oNYhQj+2Gx9831A+R+fIU6+K+RXAZFPg==
+X-Received: by 2002:a17:903:2305:b0:235:91a:31 with SMTP id d9443c01a7336-235e110ddd2mr83941405ad.8.1749135953372;
+        Thu, 05 Jun 2025 08:05:53 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b2eceb35702sm8981296a12.33.2025.06.05.07.59.08
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-23506cd75d6sm120950315ad.123.2025.06.05.08.05.51
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 05 Jun 2025 07:59:10 -0700 (PDT)
-Date: Thu, 5 Jun 2025 22:59:06 +0800
+        Thu, 05 Jun 2025 08:05:53 -0700 (PDT)
+Date: Thu, 5 Jun 2025 23:05:49 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Christoph Hellwig <hch@lst.de>
-Cc: zlang@kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/740: add _require_scratch
-Message-ID: <20250605145906.d6pfxngrgfjdtpkm@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250604131922.848228-1-hch@lst.de>
- <20250605135210.zrezswl6qgc62mmq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20250605135443.GA2669@lst.de>
- <20250605140646.xzjyzkp3vkcbos4m@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20250605141201.GA3986@lst.de>
+To: Yuezhang Mo <Yuezhang.Mo@sony.com>
+Cc: zlang@kernel.org, fstests@vger.kernel.org, friendy.su@sony.com
+Subject: Re: [PATCH v1 1/7] generic/696: add _require_chmod
+Message-ID: <20250605150549.ek6zkott6n72vmsc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250528091530.1218188-1-Yuezhang.Mo@sony.com>
+ <20250528091530.1218188-2-Yuezhang.Mo@sony.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -82,41 +79,40 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250605141201.GA3986@lst.de>
+In-Reply-To: <20250528091530.1218188-2-Yuezhang.Mo@sony.com>
 
-On Thu, Jun 05, 2025 at 04:12:01PM +0200, Christoph Hellwig wrote:
-> On Thu, Jun 05, 2025 at 10:06:46PM +0800, Zorro Lang wrote:
-> > On Thu, Jun 05, 2025 at 03:54:43PM +0200, Christoph Hellwig wrote:
-> > > On Thu, Jun 05, 2025 at 09:52:10PM +0800, Zorro Lang wrote:
-> > > > > +_require_scratch
-> > > > 
-> > > > There's a "_require_scratch_nocheck" in this test case, but it's called
-> > > > after the "_require_block_device".
-> > > 
-> > > Yes.  But I looked at _require_scratch_nocheck and despite the name
-> > > it doesn't seem to imply _require_scratch.
-> > 
-> > Due to _require_scratch calls _require_scratch_nocheck, not converse :)
+On Wed, May 28, 2025 at 05:15:24PM +0800, Yuezhang Mo wrote:
+> This test uses chmod to set the S_ISGID bit, which requires chmod
+> support, so add _require_chmod to check for chmod support.
 > 
-> Oh, I guess I should have looked deeper..
+> Signed-off-by: Yuezhang Mo <Yuezhang.Mo@sony.com>
+> Reviewed-by: Friendy Su <friendy.su@sony.com>
+> ---
+>  tests/generic/696 | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/tests/generic/696 b/tests/generic/696
+> index d2e86c96..8731cad2 100755
+> --- a/tests/generic/696
+> +++ b/tests/generic/696
+> @@ -20,6 +20,7 @@ _begin_fstest auto quick cap idmapped mount perms rw unlink
+>  _require_idmapped_mounts
+>  _require_test
+>  _require_scratch
+> +_require_chmod
 
-I saw you did below change in commit 3ae8a19f97d0 :
+OK, this make sense to me, due to I hit below error too:
 
-  -_require_scratch_nocheck
-  -_require_no_large_scratch_dev
-  +_require_block_device "${SCRATCH_DEV}"
-   # not all the FS support zoned block device
-   _require_non_zoned_device "${SCRATCH_DEV}"
- 
-  -# mkfs.btrfs did not have overwrite detection at first
-  -if [ "$FSTYP" == "btrfs" ]; then
-  -       grep -q 'force overwrite' `echo $MKFS_BTRFS_PROG | awk '{print $1}'` || \
-  -               _notrun "Installed mkfs.btrfs does not support -f option"
-  -fi
-  +_require_scratch_nocheck
-  +_require_no_large_scratch_dev
+    +vfstest.c: 1781: setgid_create_umask - Success - failure: is_setgid
+    +vfstest.c: 2418: run_test - Success - failure: create operations in directories with setgid bit set under umask
 
-I don't know why you moved these two lines here, how about move them back :)
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
+>  _fixed_by_kernel_commit ac6800e279a2 \
+>  	"fs: Add missing umask strip in vfs_tmpfile" \
+>  1639a49ccdce "fs: move S_ISGID stripping into the vfs_*() helpers"
+> -- 
+> 2.25.1
+> 
 > 
 
