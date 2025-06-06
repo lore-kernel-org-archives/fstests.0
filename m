@@ -1,80 +1,83 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 95F0EDF5C
-	for <fstests@vger.kernel.org>; Fri,  6 Jun 2025 01:06:41 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59BF17261E
+	for <fstests@vger.kernel.org>; Fri,  6 Jun 2025 01:12:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749172003; cv=none; b=Yf4ob+ZpgBk2i91mRz647cwLFBs3Cl8qlZHMjnUlOcfb2hipOyxFSrBvPtO48T5ELkL4mb70/n08TH6ZV7cRipuC8WA4cOp9ZQVjBiInJHT0CDxn1AfjT8dkoR4K0PvDpq33fBTOubHlIWxUjq10vmVw+aGdYNbnlw01plSAvuI=
+	t=1749172354; cv=none; b=ZmxtUlwHkdh2kOUUzecZVsDS46HzjE6bkuZLvK7I4EE2ra6v4YvFsyaInW15SxHkykIkO9pYGP/RJ0ElgdG8+DV4axgxwMOScCvSGHUfglM5pAQsbjQxELq61QyZMCfhgM0gxsPs0BP6e72fYYPjGM++Q3o3iEZ4IxRw7zRz8uA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749172003; c=relaxed/simple;
-	bh=WHiRYQVzpF/lN2vRCzWbGZycny0BE1b7Qf7hG/Pz0lo=;
+	s=arc-20240116; t=1749172354; c=relaxed/simple;
+	bh=3ooHI6FPJCMRAm0ovcKFxMkkwTrgKIpsMgehJU/U3vs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HFltbG4PFPA2qocrif60YvOS/cAWcv19D4e6Ts2lilmqiLybwf0oBrZDIo3X93HXRyzHIHK8jFk8S5dfzjSZxSARS5JgehJ8veWJgqbH2/BYfuPqiIo4lzFRFy+dmi2DUMhdN2T5vNkRKKB5qi1cM1r2A3a2EUlqRfRp+3ZThz4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Tt9mH5Ka; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=Ib5EsUkKC/YFhXlNGa0B6zAuFpBjIGLOaRNj1aWaL1mxtsVtaSJDoGonytyzURZ/lbRfk9m+Cydj52ySCaJ/zuF8dxDAD7eaZOFEXAtev8by6aScZMaPzQoVUeShDQK1tDf0X0ioLxXZz+ZvRtvPj0dG+YaBD0aJRG3KmQf88mM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fvx8g/yb; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Tt9mH5Ka"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fvx8g/yb"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1749172000;
+	s=mimecast20190719; t=1749172351;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=oMqwuMMmnYZ789XHUBu0zSaDdKty5JzMfz62cv6P90Q=;
-	b=Tt9mH5Ka6CRAh61uMgwEL0XB/MXxSOy20xmAUYBDDfkvJ5LU7o+5soOz88aIzlLKOWJkmV
-	PWMSeuJoHH0lNejOF57qoJVXTxj78IOawfjTeRvspAzBSOWdNDGIBTcByNjzZd8NaE43AJ
-	hjkB03T1j4CWYD/DXdw72ZZ/NZgjxLY=
-Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
- [209.85.219.70]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=HX95HB5ptWt/448FfKgC0KXRWGbuJEkBSek2hhmcx6c=;
+	b=fvx8g/ybzakescWhbWpYMKz/i812Jm224ejmvd9Cq9+pwxLNvXVqerZw8mvr2b+0yPlEeI
+	Uj+6u3nYlV68l1x3zeWOdmJ6Jju7kiaCe+DOSlWLJ5L+v8O6j7i58JLvb/M8oXtI38Bovf
+	wYuJlh/Zp2RuFWUBcmxVthlkq3A8EjQ=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-487-KDe1saPiP8-mElzNNHN6mQ-1; Thu, 05 Jun 2025 21:06:39 -0400
-X-MC-Unique: KDe1saPiP8-mElzNNHN6mQ-1
-X-Mimecast-MFC-AGG-ID: KDe1saPiP8-mElzNNHN6mQ_1749171999
-Received: by mail-qv1-f70.google.com with SMTP id 6a1803df08f44-6fac216872cso29226106d6.2
-        for <fstests@vger.kernel.org>; Thu, 05 Jun 2025 18:06:39 -0700 (PDT)
+ us-mta-623-6sqjTiT1OS2_KtjzVfof3w-1; Thu, 05 Jun 2025 21:12:30 -0400
+X-MC-Unique: 6sqjTiT1OS2_KtjzVfof3w-1
+X-Mimecast-MFC-AGG-ID: 6sqjTiT1OS2_KtjzVfof3w_1749172349
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2323bd7f873so13451225ad.1
+        for <fstests@vger.kernel.org>; Thu, 05 Jun 2025 18:12:29 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749171999; x=1749776799;
+        d=1e100.net; s=20230601; t=1749172349; x=1749777149;
         h=in-reply-to:content-transfer-encoding:content-disposition
          :mime-version:references:message-id:subject:cc:to:from:date
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=oMqwuMMmnYZ789XHUBu0zSaDdKty5JzMfz62cv6P90Q=;
-        b=XuVrl6ybFj6wri4WPDw4ZPBsr4/rPT1YwPTBkuGkgFJvkVNQgA6o0Mr4FON8m1Sa31
-         cLLdj/k0UUNGILFg9g7eufh4pzmvGhtbS5Guls2gmCJZ3wwxMsDRKXSA/9nQKw9Z88WF
-         4nUi+q+VvNg3fq5Dk39xVqVh8WcfCA2cJeHcDinh3tPq3/3kPEKPnYI9MH3FaVTMfBiH
-         yM6EyzVDASF+Qq/6KKmcQjCwab397zlUrHpo27d2GDVS3+7jjSeSKJiV26RdEOujIf0k
-         I9EnsW6HWerr/oohp4Kqcj7mVPdEJq69QRf8AsOjbvfaybX/qEFyyZP9HJZENiqkx4py
-         3MvA==
-X-Forwarded-Encrypted: i=1; AJvYcCXk1OYRG2CbCBXtB3TogrE3Th0SoKMSjM3GGlOVIyR+mSKzD1UfV02RJavVw1Gffvh1Y7fsWFBf@vger.kernel.org
-X-Gm-Message-State: AOJu0YzLnzP55jT5xbYO7tfJ32xE7DgZMPKoznw02HNQKr3ssa14QP7p
-	96sy4B3TqMop6KLngNzwN1cXPHb1JprB0mW4NCMQICASnt2cz/uoTRIdDdtny+i1V/684UHmeWa
-	KXULJosfl9HMGj5qsW9BZ2g7sAoykhjE7xUlPfd8ZWB5dcsx5Zfema78x0IKQVmEaI6w=
-X-Gm-Gg: ASbGncsvh4d92e6ceZ8BnX1Z9nA4UiY94nzviRdBzy5OCAgj+PiiRJTY98THqikQmO4
-	RkmRXANV3H6fD+5y3SC7BIEbkmW3bKEH8+CGiOKZw004XQdtvkT1Xkdu94hIR1/Ae0YTWuwrWQX
-	CB7gFwEHuiLFOqcObDx22cR+t1IB3dqpa1yU5s++6WkAexOOSSEfcQwLyNXCKln8oxMIGctcBUN
-	4vAEdryeTFjb9kl3n+99EmijCLElFiiQvh3Oza/OpKEIr8pfLnRuhRNBN6VmQiO9wjEzgWkeXBa
-	ZD+cgGGPut6gkWwdcTyYuNoEE59uvCb1rIv177Vw8cuKrkKDVxi7
-X-Received: by 2002:a0c:f94c:0:b0:6fa:c67f:5e66 with SMTP id 6a1803df08f44-6fb08fe4ab1mr19337756d6.39.1749171998694;
-        Thu, 05 Jun 2025 18:06:38 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHUhlY4zDEpsR++g5fzNRPqdPHGUK1mUpVUReGtVIuRYAak2rp1JJRU3qVIYCO4Dn59JG1SPg==
-X-Received: by 2002:a05:6a21:999c:b0:1f5:72eb:8b62 with SMTP id adf61e73a8af0-21ee68c8addmr1690400637.20.1749171987254;
-        Thu, 05 Jun 2025 18:06:27 -0700 (PDT)
+        bh=HX95HB5ptWt/448FfKgC0KXRWGbuJEkBSek2hhmcx6c=;
+        b=D+1c7W7NHcWnj/JOJoq5YLMycU8cO8zEOHoQ0dX3gA36NDmgyZG0FvA7E/9G+vwWh9
+         +/WCOP7zeVD4Z5jWjHWJB9C20wWZmFQFkr7YFQR2emKOHRkioMoyy66DSvsLVkUXwoSE
+         n1D4JtjJCeCuRI/MCFZBfbj/LFoIIx3MP6kDROGXkXZTerbQJHXgZ/sBEC0mEdmQZd4Q
+         W1SGEuwkKB9+qftnbwJApWURjMZ05w5wZwYgidJ37tEvjNJ3mPdv6bOBstse0YuK49Qq
+         HVYk8LlDJqkO22V88Oyc/6CWMUfl4+uD+i+B8MCqx3kaNMj6MUVKdh3bOqgPWkvVduav
+         aw0w==
+X-Forwarded-Encrypted: i=1; AJvYcCWff1fyWGL3GhMENA0degHQQj1IaYpO8qMXHeRIXmqZ3Ru6wAheZsi66Yzr5hj+nfFhlNce80Dn@vger.kernel.org
+X-Gm-Message-State: AOJu0YxupbIcIjvPDFQ14QkCHq+hpU82VqrUPCqIz+i7k4UfReiU+kJX
+	s42KiHieYedLMirg0uxlk5RkcdljY5SaA8s3HQTheS7FswCi2gKiB9q/I54GFwq6Vzy9OwaVczw
+	m4Nt1eDDx2tviWfB71/+nsGM2gUbPKTzNs51xCPBlF32gPX2MKB+iicu9sOs=
+X-Gm-Gg: ASbGncvcr7q/j584BR5VMWTjpNRpunvvdTLE+ocJsuXdEZcVgtES3c7mMQXG/tQBb6i
+	kmTG76zdHJ3BCV2xWuMnTy9Xa+toWOEnHdd9i0nMAahQhZ9sS3S7b8/gHwavPLDIqgT0waUV6kT
+	L6PFOsNWjGcsIMaEwvPble3s7O3EZ1PBQdKNnwk4X9YS7Q0a99wWTVTCndNX7455B3vvy0FQlxd
+	qSevWa6RmSi/WFWVkxPhUuQ227xTQruxdgsUtuFXpHKWwiRjqVMquiqC8xKshNBNu5sd2FJto+X
+	/qBwUYmlJPV87dL/VjOkEuWO2LuTgYdAoPIDjPXjYp05Lap1N8U3VniDyf21hfQ=
+X-Received: by 2002:a17:903:244e:b0:235:f3e6:4680 with SMTP id d9443c01a7336-23601cfddb7mr19419115ad.21.1749172348990;
+        Thu, 05 Jun 2025 18:12:28 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFRZTPON9QJBicej79aRZ7HeLcdoBXyrItjBPAYiGaQ/jSTv7WXBpAacXCL7dgvaln1F4t4QA==
+X-Received: by 2002:a17:903:244e:b0:235:f3e6:4680 with SMTP id d9443c01a7336-23601cfddb7mr19418915ad.21.1749172348671;
+        Thu, 05 Jun 2025 18:12:28 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7482b0eaa1csm260243b3a.162.2025.06.05.18.06.25
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3134968358bsm361111a91.0.2025.06.05.18.12.26
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 05 Jun 2025 18:06:26 -0700 (PDT)
-Date: Fri, 6 Jun 2025 09:06:22 +0800
+        Thu, 05 Jun 2025 18:12:28 -0700 (PDT)
+Date: Fri, 6 Jun 2025 09:12:23 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: generic/741: make cleanup to handle test
- failure properly
-Message-ID: <20250606010622.imrfexkypzq5zpm6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250604235524.26356-1-wqu@suse.com>
- <20250605171047.vl3u6j7yojbw6pfe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <dbf243a2-ac0e-437c-a308-9832f89ca274@gmx.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>,
+	Christian Brauner <brauner@kernel.org>,
+	=?utf-8?B?QW5kcsOp?= Almeida <andrealmeid@igalia.com>,
+	linux-unionfs@vger.kernel.org, fstests@vger.kernel.org,
+	Karel Zak <kzak@redhat.com>
+Subject: Re: [PATCH v2 1/6] overlay: workaround libmount failure to remount,ro
+Message-ID: <20250606011223.gx6xearyoqae5byp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250603100745.2022891-1-amir73il@gmail.com>
+ <20250603100745.2022891-2-amir73il@gmail.com>
+ <20250605175129.oqqzr5qluxv52m6b@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxg2D-ED3vy=jedEKbpEJvWBLD=QYtfp=DCU3pQGGCaGog@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -84,122 +87,50 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <dbf243a2-ac0e-437c-a308-9832f89ca274@gmx.com>
+In-Reply-To: <CAOQ4uxg2D-ED3vy=jedEKbpEJvWBLD=QYtfp=DCU3pQGGCaGog@mail.gmail.com>
 
-On Fri, Jun 06, 2025 at 07:39:56AM +0930, Qu Wenruo wrote:
-> 
-> 
-> 在 2025/6/6 02:40, Zorro Lang 写道:
-> > On Thu, Jun 05, 2025 at 09:25:24AM +0930, Qu Wenruo wrote:
-> > > [BUG]
-> > > When I was tinkering the bdev open holder parameter, it caused a bug
-> > > that it no longer rejects mounting the underlying device of a
-> > > device-mapper.
-> > > 
-> > > And the test case properly detects the regression:
-> > > 
-> > > generic/741 1s ... umount: /mnt/test: target is busy.
-> > > _check_btrfs_filesystem: filesystem on /dev/mapper/test-test is inconsistent
-> > > (see /home/adam/xfstests/results//generic/741.full for details)
-> > > Trying to repair broken TEST_DEV file system
-> > > _check_btrfs_filesystem: filesystem on /dev/mapper/test-scratch1 is inconsistent
-> > > (see /home/adam/xfstests/results//generic/741.full for details)
-> > > - output mismatch (see /home/adam/xfstests/results//generic/741.out.bad)
-> > >      --- tests/generic/741.out	2024-04-06 08:10:44.773333344 +1030
-> > >      +++ /home/adam/xfstests/results//generic/741.out.bad	2025-06-05 09:18:03.675049206 +0930
-> > >      @@ -1,3 +1,2 @@
-> > >       QA output created by 741
-> > >      -mount: TEST_DIR/extra_mnt: SCRATCH_DEV already mounted or mount point busy
-> > >      -mount: TEST_DIR/extra_mnt: SCRATCH_DEV already mounted or mount point busy
-> > >      +rm: cannot remove '/mnt/test/extra_mnt': Device or resource busy
-> > >      ...
-> > >      (Run 'diff -u /home/adam/xfstests/tests/generic/741.out /home/adam/xfstests/results//generic/741.out.bad'  to see the entire diff)
-> > > 
-> > > The problem is, all later test will fail, because the $SCRATCH_DEV is
-> > > still mounted at $extra_mnt:
-> > > 
-> > >   TEST_DEV=/dev/mapper/test-test is mounted but not on TEST_DIR=/mnt/test - aborting
-> > >   Already mounted result:
-> > >   /dev/mapper/test-test /mnt/test /dev/mapper/test-test /mnt/test
-> > > 
-> > > [CAUSE]
-> > > The test case itself is doing two expected-to-fail mounts, but the
-> > > cleanup function is only doing unmount once, if the mount succeeded
-> > > unexpectedly, the $SCRATCH_DEV will be mounted at $extra_mnt forever.
-> > > 
-> > > [ENHANCEMENT]
-> > > To avoid screwing up later test cases, do the $extra_mnt cleanup twice
-> > > to handle the unexpected mount success.
-> > > 
-> > > Signed-off-by: Qu Wenruo <wqu@suse.com>
+On Thu, Jun 05, 2025 at 08:30:53PM +0200, Amir Goldstein wrote:
+> On Thu, Jun 5, 2025 at 7:51 PM Zorro Lang <zlang@redhat.com> wrote:
+> >
+> > On Tue, Jun 03, 2025 at 12:07:40PM +0200, Amir Goldstein wrote:
+> > > libmount >= v1.39 calls several unneeded fsconfig() calls to reconfigure
+> > > lowerdir/upperdir when user requests only -o remount,ro.
+> > >
+> > > Those calls fail because overlayfs does not allow making any config
+> > > changes with new mount api, besides MS_RDONLY.
+> > >
+> > > We workaround this problem with --options-mode ignore.
+> > >
+> > > Reported-by: André Almeida <andrealmeid@igalia.com>
+> > > Suggested-by: Karel Zak <kzak@redhat.com>
+> > > Link: https://lore.kernel.org/linux-fsdevel/20250521-ovl_ro-v1-1-2350b1493d94@igalia.com/
+> > > Link: https://lore.kernel.org/fstests/CAJfpegtJ3SDKmC80B4AfWiC3JmtWdW2+78fRZVtsuhe-wSRPvg@mail.gmail.com/
+> > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 > > > ---
-> > >   tests/generic/741 | 4 ++++
-> > >   1 file changed, 4 insertions(+)
-> > > 
-> > > diff --git a/tests/generic/741 b/tests/generic/741
-> > > index cac7045e..c15dc434 100755
-> > > --- a/tests/generic/741
-> > > +++ b/tests/generic/741
-> > > @@ -13,6 +13,10 @@ _begin_fstest auto quick volume tempfsid
-> > >   # Override the default cleanup function.
-> > >   _cleanup()
-> > >   {
-> > > +	# If by somehow the fs mounted the underlying device (twice), we have
-> > > +	# to  make sure $extra_mnt is not mounted, or TEST_DEV can not be
-> > > +	# unmounted for fsck.
-> > > +	_unmount $extra_mnt &> /dev/null
-> > 
-> > Hmm... I'm not sure a "double" (even treble) umount is good solution for
-> > temporary "Device or resource busy" after umount. Many other cases might
-> > hit this problem sometimes.
-> > Maybe we can have a helper to do a certain umount which make sure the fs
-> > is truely umounted before returning :)
+> > >
+> > > Changes since v1 [1]:
+> > > - Change workaround from LIBMOUNT_FORCE_MOUNT2 to --options-mode=ignore
+> > >
+> > > [1] https://lore.kernel.org/fstests/20250526143500.1520660-1-amir73il@gmail.com/
+> >
+> > I'm not sure if I understand clearly. Does overlay list are fixing this issue
+> > on kernel side, then providing a workaround to fstests to avoid the issue be
+> > triggered too?
+> >
 > 
-> This is not about the umount after EBUSY.
-> 
-> The problem is, the test case itself is expecting two mounts to fail.
-> But if the mount succeeded, it will mount twice and need to be unmounted
-> twice.
-> 
-> It's to make the cleanup to match the test case's worst scenario.
+> Noone agreed to fix it on the kernel side.
+> At least not yet.
 
-Oh, sorry I didn't get your point. If so, how about _fail the case directly if
-the first mount (which should be failed) passed, e.g.
-
-  diff --git a/tests/generic/741 b/tests/generic/741
-  index cac7045eb..5538b3a1b 100755
-  --- a/tests/generic/741
-  +++ b/tests/generic/741
-  @@ -44,6 +44,9 @@ mkdir -p $extra_mnt
-   # Filters alter the return code of the mount.
-   _mount $SCRATCH_DEV $extra_mnt 2>&1 | \
-                          _filter_testdir_and_scratch | _filter_error_mount
-  +if [ ${PIPESTATUS[0]} -eq 0 ];then
-  +       _fail "Unexpected mount pass"
-  +fi
-
-Anyway, I can't say which way is better, both are good to me, depends on your
-choice :)
+If so, I have two questions:)
+1) Will overlay fix it on kernel or mount util side?
+2) Do you plan to keep this workaround until the issue be fixed in one day?
+   Then revert this workaround?
 
 Thanks,
 Zorro
 
 > 
 > Thanks,
-> Qu
-> 
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > >   	_unmount $extra_mnt &> /dev/null
-> > >   	rm -rf $extra_mnt
-> > >   	_unmount_flakey
-> > > -- 
-> > > 2.49.0
-> > > 
-> > > 
-> > 
-> > 
+> Amir.
 > 
 
