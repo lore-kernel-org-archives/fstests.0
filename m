@@ -1,265 +1,272 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com [209.85.208.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A747724DD0E;
-	Fri,  6 Jun 2025 06:01:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9331D24EABC;
+	Fri,  6 Jun 2025 07:23:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749189671; cv=none; b=ijMAvH/kmIl+fxmgvRfiyQKXnV9JpkYrbqWxoLWmRvgVif+Jmckwfv0HNDW/BCJHgTXZ0Ime8yUicMWrtFkuEfXdu+N1C8iC+nF02QONW4Xuba9nfLS+RZq5s98bnx4OkXb1iLxqx9AkK1llOkcYCjqSQSCDR/jhzOz8tx2U8cg=
+	t=1749194622; cv=none; b=czVcvvBECfrLmwhVgiPlXnKMkr3jdHkhIAI5TGjxUactlrG0zUZuN+KOxb0y4gbD9ZSyLFVTk7azHLGx6Sr/1QeZCF4oQI8hzAP8IgwzHy7Rik5T563sIq//vSqUzrnEHItDkAd4dvAmMh0DMgPsDKq7VfGaVCKKZcJeTFPEl3Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749189671; c=relaxed/simple;
-	bh=jiFF3Itfxy4xCY3odOQIM7SjqWLExZZZml+T9HR3t8s=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=soTCw/NSSDmLKDrGF2xSODAnwT3WcrWA3IOLzc51dCUAfwElGVbir0jM5PQk4fNrHu1hDOQ9iz9mTOu+py4lcqTh/3ZuaaOJtsyu55F+Gk5Cq6rD8fPvTq2fkchgZNCoUmh3DXUjE1gbIv8zSJjvYnx0TFXRfi2U5YNZH7DvPjc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=DrRhJW8t; arc=none smtp.client-ip=212.227.17.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1749194622; c=relaxed/simple;
+	bh=oxhqFwSDTF8M4a6vNQ7DguBA5noSoiOQBslF2mArsOc=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ib881Wme0LjNenswX4KA/Vff5BCqlwWj+GtBT34kGfzBEyuMec41n1CiPDuArYqfsblhIQM+1PR0xov6WTEi2v99UGLbsMJXLlTHR98hMWKW5oRsFt/KuMlu8p1zie9yepAoXf5OA3gZEkYeUwG8tlTEh5d65xa/jsLBkJOKnP0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Gu2EpcZn; arc=none smtp.client-ip=209.85.208.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="DrRhJW8t"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1749189662; x=1749794462; i=quwenruo.btrfs@gmx.com;
-	bh=VsvDKFT8kZsAt4DmdzN3tWgY5mr7+SbmF/CLpsCJeUI=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=DrRhJW8tiEMiKM22wL0WlADmaky+qvZJmw145A8kslJsR8vSmQOGP+W/sUbiJKKe
-	 0/njdQROZGlc4jR6qabgfZy7SMl9kxXhFe/9GWCs6Q4rANyFGj1qOKJyT4g2BykSN
-	 o8ZiVkFThITGpiH3UerIk/TVNG6jyC0DX9U3lDILKu5/iCr2m7tKOoHttBta21g+D
-	 M6eOKfmXSj/E55F6/CtqzcRZh6F2sTZWGug0Ehq9v4Yo1zRG6+4DV6OxRtBnsm3UV
-	 R4DpnLVBWjs7vaA/nPcGI5YvoHZTsv6SP2NahV1W6geXUD2WY87YH1G6qQ1nMNt2S
-	 sv1lcy6WDsUm74dYOA==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.229] ([159.196.52.54]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MrhQC-1vApNh1sn6-00lk4T; Fri, 06
- Jun 2025 08:01:01 +0200
-Message-ID: <c966cbd6-3016-4735-9853-91a75144e429@gmx.com>
-Date: Fri, 6 Jun 2025 15:30:58 +0930
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Gu2EpcZn"
+Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-60766191202so1261108a12.1;
+        Fri, 06 Jun 2025 00:23:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1749194619; x=1749799419; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=V8/7ikf28rMiVd/A+RTwj3YheLrl5lqUjWzBM5dHf7A=;
+        b=Gu2EpcZnEPh/gcxXEsMEecRR9gT+yxe+6eeClHOyfzffjIhl/BqibWcAjYc9Qm7GXj
+         zqTPtsoZc8a9X5tcTs9nlV2lkIrHD3eCf/lxtgPOeIb+cMFpdZdj9T51Y/hfqpAMghHL
+         LIK1TIU/3ZWFDsBt44imr2bEhflzdvc0DAJLOY2L7unIcD+uOATw55J2tAt5Viju1BB6
+         mGbTusPKHsFObm3FFWdVtuKZuhpdyKFY9UNGCjeex9Hn+ekhmLcYjjwpyKuC6LfXHsyu
+         i+etMG1+lqUNnfbi4D3c1Kvj+ZwZfNau8n/5Sa7K+2u5X96wey+2LyddR9mR0gmWHyp9
+         29bw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1749194619; x=1749799419;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=V8/7ikf28rMiVd/A+RTwj3YheLrl5lqUjWzBM5dHf7A=;
+        b=QrMGR1bM9nNs8M0oMWMTj0oVbw56VUZcxUoP6r8gUeUml9ysgK0JeKz/bV18BhoEfk
+         oVKiB5/WkKxBsg1vk8G0f1akD1Fksu4EU6W3hmpWohKTf/TIdjHlNvb/E4ni0FyxrFo8
+         +L3DYHixSJU+tekuE/Nz/4SLxM6YPv+DFQarrYzCwgqxHOv3r4q4dCtoMafVbqweVZU3
+         XG2XTCEOP2Hh0wmFkkTF9/hpQZRcLL3lwfZ/3Z9vCx6Sed+NZRQVPYgkhpmzjurgOAvO
+         +5yU2YLY+894zAF8tYf8VRe44fbOQ07SimvTagXpIrWuu1uDXoHGPFIvaK2JVt1H+H7P
+         ctnQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWZ6BSotNHnbsYQ1jJ6dmhmXIJywp+dppiyxo9QJX1Wx+PZdh8BJAEJIGqJ3Sk4m6DSTcldCV8b@vger.kernel.org, AJvYcCXy2I87Bc9vZsdgBUIPEl0pUNiNyF4Yt91AMPwodfpSgw+rFUx1PScLzBSLGiUexgikFLseLDpbhk6o1vk6Uw==@vger.kernel.org
+X-Gm-Message-State: AOJu0YwyN41tEvfUi6RGRLWnTEwsjoxljp4BplaI2nXq8wXhDpwaYmgQ
+	FctcmVta8GsJF4uCfUVhHSwHaW3474qoa7huDWz7SY0WuDt2xFVOMwYcm0UnLsXzpdTeaM1/5pS
+	5sxv7YhY2s4A4QPp6y88fgnNib+td4jg=
+X-Gm-Gg: ASbGncu4cxiJX7eQ/518bHy1T650sgBQCVbbJBmRPkaMePXYGfLpf5u+qnC0BnqFPvO
+	9HsHiXtifhPWdde3j9yZ680NTHMDx8T3zhIxEEueQvZgOERGdFWTZD5IfZ8tcIfaUmiu8x/KbpI
+	jcZ9OUnVhNs9cCJfr/NS9/SL9LPU39OVLsr+sdssTWZnI=
+X-Google-Smtp-Source: AGHT+IFkL1gqjXw9SGtwmJkYISz6AkEJnRogJCUpO4pq7FaNisj2ilSlCr59jzPTr0IjlkcCg2yYgvmSP5sMjHzpXkw=
+X-Received: by 2002:a17:907:3f24:b0:ad5:43eb:d927 with SMTP id
+ a640c23a62f3a-ade1a909706mr201675766b.23.1749194618269; Fri, 06 Jun 2025
+ 00:23:38 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: generic/741: make cleanup to handle test failure
- properly
+References: <20250603100745.2022891-1-amir73il@gmail.com> <20250603100745.2022891-5-amir73il@gmail.com>
+ <20250605173233.ndqsjo77ds3e35p5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxgQi6ciXtoKV7Nrw5_ECBOwS_m8h2KXT-ieJ4x4t04qag@mail.gmail.com> <20250606014531.d5t4gwx4iymqiqlo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20250606014531.d5t4gwx4iymqiqlo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 6 Jun 2025 09:23:26 +0200
+X-Gm-Features: AX0GCFt0B9iYGgBFTZsNmG-xQD_zmMHOYmh1ZZ_3O-DtM-ImXF9q_FAGtt13tJI
+Message-ID: <CAOQ4uxj_rshiLUUrCVS6RO+KhCeLrrgxNH+me3K38Nhc0Byqzw@mail.gmail.com>
+Subject: Re: [PATCH v2 4/6] generic/623: do not run with overlayfs
 To: Zorro Lang <zlang@redhat.com>
-Cc: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
- fstests@vger.kernel.org
-References: <20250604235524.26356-1-wqu@suse.com>
- <20250605171047.vl3u6j7yojbw6pfe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <dbf243a2-ac0e-437c-a308-9832f89ca274@gmx.com>
- <20250606010622.imrfexkypzq5zpm6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
- sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
- xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
- naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
- tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
- 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
- VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
- CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
- B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
- Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
- +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
- HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
-In-Reply-To: <20250606010622.imrfexkypzq5zpm6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Christian Brauner <brauner@kernel.org>, 
+	=?UTF-8?Q?Andr=C3=A9_Almeida?= <andrealmeid@igalia.com>, 
+	linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Type: multipart/mixed; boundary="000000000000ddb7350636e21b9b"
+
+--000000000000ddb7350636e21b9b
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:kgz/mtdcCurxIi1MUEJX2QDgP70/AlAtk9FgXjmAZyP5L+iUwxt
- xdZF/tkdx+iS7HuXHXqqo8JQpfWGsWMmpmN/1wQmgtVqTi0IFs6Cl7IQj62BN97BR+PVRn6
- PNpAjLbfktO1MemYVTK7dJyYBS8pvI6zl5RO5KT71aCzyy/m4VRTcBurQBMPzidb9oQMzIU
- h35XyHkS6QhxNVpv++qWA==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:8iK6+NwBlgk=;P8q2wPFlbiiSNzmJkmh9LhY1bAD
- /7Ky+k5eP3Da5/s5n8DyBX8aRuvpYhrOmSAwXdHOHGXTyTQmx508dXacCBCF4tnL9/b/VPw3P
- 72QyH/F9G1+9luf8sdaH5sWYRV3iael3NUyavJiBQriGjxtOlLcyKKuH4tcdVPS933+R+y3ZQ
- bA+tXhYB80zEk+Q28LOcHj+RMkLOsSbCqpO948wY9UkCOzX+DquItVAnHElcu2yHJ53MB4QXz
- Uru4ELa84iPKbM+ec07RgOGJ1IsX+8o7M8IUWEVMfmoxZLyK7hETQGZKqnu1nk5zatArGrQAO
- z9mnqLktZopGyqREovKLn9EdEyXqyPLNCRAUR7OEyWfnelDELLoEc8DVxl55NpAOwDXRos/bM
- lXe1F6mXV2Quxg7Wf9X+F+GUp35IL+fGksfx8yJ8u3DYsrSupelc2CU1UeUfT/696kYiDpD+M
- Fa3Tba1SnqiKGhHybUJ6uje8bK8Dr+QtXdiSx7e92T92NRCi3ElM3RQX3vLD90HJcZro8LcTy
- yQFFGl5K2vF6qetjW/j2CVsteYWXyQhZrHu0Tl5D0eCUvDFup8nb0TS+MOtDC+RvZiZl+RuQh
- 00mdGgR49h4uCqx1/Z4OTxgXogHBxESi/JtWtu0h+qKhrIqyq/O+dIltRD/d9ekGvHRRZ/qA0
- 6IOX3E7FTYAa11ggi+FuilkoBgNTj3Vxgcndt5js0LXgbaAAuW+jiC/M7fTYs8OOMOJj5EZuj
- am9a1stDWMt8q002AQioZ2tEfvQBX+2LnA7y4YzqzidgVMXttXkQoWuUUo5lCtqpje/5BCcsF
- SPVnN5ZaUTzp/BnNrW7Pc3YtkiCQGCuH8ayqfeWdaZwbwc0W3P9SkQw+/K0mauMd7UD5TtVef
- 2j0dLdChnCtdQqLpOqWuWNFSyDAU2P/1CUgutufpZ/nzIwH3kelG76JObZMahJNu8t9s0W00/
- We53uw8ov7goW+qJ9/w58NZgMSv8NcZQ7KfkUudU6VRkvP6McpYYaltrK9HchLbN4RiaXxP9V
- MV+kOYTE2fKGuysR56Retc7RdhrONXxww1lFjqVnWprafHFB6rg37VbXf5vfiHOg1cWsm2x3c
- kwUubr7SaVe4LycbXbC8RPldaZ6np0KfNy1MLqqqSyezDvc5VRZkKCMbgYm1P9ybDflMXe4dD
- M/cHwQZ/OMK7KAw8vVZsrdIZnmQozw5QAAB+wXRjKf2g5/zqiQp1PSjy5WyFOFB0qjAH6VR+R
- qmJvXzPC2BJG0+VGldY1hAcVJVQY4Lr8hSLve1dBfelQd9L79p8Xpa97Ue/HNJtQooTC/cXrM
- IVYfkMZ08nmv3lhyGRsTC67WD2EJnU4Zm0xwshtQw98JM+sjQ7/6WwxAuRZLFys3D75dBbnqo
- ZvR0XUyPQPJEnhwkCzi7lZy1djmmTtJ/Gh0igf3oE7X16iOZnzvkeURZR4SvpsE+wCPZKs+OK
- gW1rBSxCkenbDmfLQgZVZ0UKRCMgm0ucOatSLG1urmquVb7cZGFh7vMF3Iqq9MGWqVz4lEfh+
- 9g2B+qUdqIBfuU4XW2xV4lMq0++v4m83Y1lEtxUqmnuMpnN28bRB72sP8mnWlxVBJZZM8q9Gd
- YvJ978K8Ybh6P4d5T6sRS5M22uo/c8OA8dnRnF+afs6+8WZr/YUgMOsVvrzG2/vHs7tn8EAjH
- uHE5P487i+38dH8KA26Pbp+DjmxNK4+zvk+O3nN05pYA==
 
+On Fri, Jun 6, 2025 at 3:45=E2=80=AFAM Zorro Lang <zlang@redhat.com> wrote:
+>
+> On Thu, Jun 05, 2025 at 08:38:30PM +0200, Amir Goldstein wrote:
+> > On Thu, Jun 5, 2025 at 7:32=E2=80=AFPM Zorro Lang <zlang@redhat.com> wr=
+ote:
+> > >
+> > > On Tue, Jun 03, 2025 at 12:07:43PM +0200, Amir Goldstein wrote:
+> > > > This test performs shutdown via xfs_io -c shutdown.
+> > > >
+> > > > Overlayfs tests can use _scratch_shutdown, but they cannot use
+> > > > "-c shutdown" xfs_io command without jumping through hoops, so by
+> > > > default we do not support it.
+> > > >
+> > > > Add this condition to _require_xfs_io_command and add the require
+> > > > statement to test generic/623 so it wont run with overlayfs.
+> > > >
+> > > > Reported-by: Andr=C3=A9 Almeida <andrealmeid@igalia.com>
+> > > > Tested-by: Andr=C3=A9 Almeida <andrealmeid@igalia.com>
+> > > > Link: https://lore.kernel.org/linux-fsdevel/20250521-ovl_ro-v1-1-23=
+50b1493d94@igalia.com/
+> > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > > > ---
+> > > >  common/rc         | 8 ++++++++
+> > > >  tests/generic/623 | 1 +
+> > > >  2 files changed, 9 insertions(+)
+> > > >
+> > > > diff --git a/common/rc b/common/rc
+> > > > index d8ee8328..bffd576a 100644
+> > > > --- a/common/rc
+> > > > +++ b/common/rc
+> > > > @@ -3033,6 +3033,14 @@ _require_xfs_io_command()
+> > > >               touch $testfile
+> > > >               testio=3D`$XFS_IO_PROG -c "syncfs" $testfile 2>&1`
+> > > >               ;;
+> > > > +     "shutdown")
+> > > > +             if [ $FSTYP =3D "overlay" ]; then
+> > > > +                     # Overlayfs tests can use _scratch_shutdown, =
+but they
+> > > > +                     # cannot use "-c shutdown" xfs_io command wit=
+hout jumping
+> > > > +                     # through hoops, so by default we do not supp=
+ort it.
+> > > > +                     _notrun "xfs_io $command not supported on $FS=
+TYP"
+> > > > +             fi
+> > > > +             ;;
+> > >
+> > > Hmm... I'm not sure this's a good way.
+> > > For example, overlay/087 does xfs_io shutdown too,
+> >
+> > Yes it does but look at the effort needed to do that properly:
+> >
+> > $XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f
+> > ' -c close -c syncfs $SCRATCH_MNT | \
+> >         grep -vF '[00'
+> >
+> > > generally it should calls
+> > > _require_xfs_io_command "shutdown" although it doesn't. If someone ov=
+erlay
+> > > test case hope to test as o/087 does, and it calls _require_xfs_io_co=
+mmand "shutdown",
+> > > then it'll be _notrun.
+> >
+> > If someone knows enough to perform the dance above with _scratch_shutdo=
+wn_handle
+> > then that someone should know enough not to call
+> > _require_xfs_io_command "shutdown".
+> > OTOH, if someone doesn't know then default is to not run.
+>
+> Sure, I can understand that, just this logic is a bit *obscure* :) It sou=
+nds like:
+> "If an overlay test case wants to do xfs_io shutdown, it shouldn't call
+> _require_xfs_io_command "shutdown". Or call that to skip a shutdown test
+> on overlay :)"
+>
+> And the expected result of _require_xfs_io_command "shutdown" will be tot=
+ally
+> opposite with _require_scratch_shutdown on overlay, that might be confuse=
+d.
+> Can we have a clearer way to deal with that?
+>
 
+I don't really understand the confusion.
 
-=E5=9C=A8 2025/6/6 10:36, Zorro Lang =E5=86=99=E9=81=93:
-> On Fri, Jun 06, 2025 at 07:39:56AM +0930, Qu Wenruo wrote:
->>
->>
->> =E5=9C=A8 2025/6/6 02:40, Zorro Lang =E5=86=99=E9=81=93:
->>> On Thu, Jun 05, 2025 at 09:25:24AM +0930, Qu Wenruo wrote:
->>>> [BUG]
->>>> When I was tinkering the bdev open holder parameter, it caused a bug
->>>> that it no longer rejects mounting the underlying device of a
->>>> device-mapper.
->>>>
->>>> And the test case properly detects the regression:
->>>>
->>>> generic/741 1s ... umount: /mnt/test: target is busy.
->>>> _check_btrfs_filesystem: filesystem on /dev/mapper/test-test is incon=
-sistent
->>>> (see /home/adam/xfstests/results//generic/741.full for details)
->>>> Trying to repair broken TEST_DEV file system
->>>> _check_btrfs_filesystem: filesystem on /dev/mapper/test-scratch1 is i=
-nconsistent
->>>> (see /home/adam/xfstests/results//generic/741.full for details)
->>>> - output mismatch (see /home/adam/xfstests/results//generic/741.out.b=
-ad)
->>>>       --- tests/generic/741.out	2024-04-06 08:10:44.773333344 +1030
->>>>       +++ /home/adam/xfstests/results//generic/741.out.bad	2025-06-05=
- 09:18:03.675049206 +0930
->>>>       @@ -1,3 +1,2 @@
->>>>        QA output created by 741
->>>>       -mount: TEST_DIR/extra_mnt: SCRATCH_DEV already mounted or moun=
-t point busy
->>>>       -mount: TEST_DIR/extra_mnt: SCRATCH_DEV already mounted or moun=
-t point busy
->>>>       +rm: cannot remove '/mnt/test/extra_mnt': Device or resource bu=
-sy
->>>>       ...
->>>>       (Run 'diff -u /home/adam/xfstests/tests/generic/741.out /home/a=
-dam/xfstests/results//generic/741.out.bad'  to see the entire diff)
->>>>
->>>> The problem is, all later test will fail, because the $SCRATCH_DEV is
->>>> still mounted at $extra_mnt:
->>>>
->>>>    TEST_DEV=3D/dev/mapper/test-test is mounted but not on TEST_DIR=3D=
-/mnt/test - aborting
->>>>    Already mounted result:
->>>>    /dev/mapper/test-test /mnt/test /dev/mapper/test-test /mnt/test
->>>>
->>>> [CAUSE]
->>>> The test case itself is doing two expected-to-fail mounts, but the
->>>> cleanup function is only doing unmount once, if the mount succeeded
->>>> unexpectedly, the $SCRATCH_DEV will be mounted at $extra_mnt forever.
->>>>
->>>> [ENHANCEMENT]
->>>> To avoid screwing up later test cases, do the $extra_mnt cleanup twic=
-e
->>>> to handle the unexpected mount success.
->>>>
->>>> Signed-off-by: Qu Wenruo <wqu@suse.com>
->>>> ---
->>>>    tests/generic/741 | 4 ++++
->>>>    1 file changed, 4 insertions(+)
->>>>
->>>> diff --git a/tests/generic/741 b/tests/generic/741
->>>> index cac7045e..c15dc434 100755
->>>> --- a/tests/generic/741
->>>> +++ b/tests/generic/741
->>>> @@ -13,6 +13,10 @@ _begin_fstest auto quick volume tempfsid
->>>>    # Override the default cleanup function.
->>>>    _cleanup()
->>>>    {
->>>> +	# If by somehow the fs mounted the underlying device (twice), we ha=
-ve
->>>> +	# to  make sure $extra_mnt is not mounted, or TEST_DEV can not be
->>>> +	# unmounted for fsck.
->>>> +	_unmount $extra_mnt &> /dev/null
->>>
->>> Hmm... I'm not sure a "double" (even treble) umount is good solution f=
-or
->>> temporary "Device or resource busy" after umount. Many other cases mig=
-ht
->>> hit this problem sometimes.
->>> Maybe we can have a helper to do a certain umount which make sure the =
-fs
->>> is truely umounted before returning :)
->>
->> This is not about the umount after EBUSY.
->>
->> The problem is, the test case itself is expecting two mounts to fail.
->> But if the mount succeeded, it will mount twice and need to be unmounte=
-d
->> twice.
->>
->> It's to make the cleanup to match the test case's worst scenario.
->=20
-> Oh, sorry I didn't get your point. If so, how about _fail the case direc=
-tly if
-> the first mount (which should be failed) passed, e.g.
->=20
->    diff --git a/tests/generic/741 b/tests/generic/741
->    index cac7045eb..5538b3a1b 100755
->    --- a/tests/generic/741
->    +++ b/tests/generic/741
->    @@ -44,6 +44,9 @@ mkdir -p $extra_mnt
->     # Filters alter the return code of the mount.
->     _mount $SCRATCH_DEV $extra_mnt 2>&1 | \
->                            _filter_testdir_and_scratch | _filter_error_m=
-ount
->    +if [ ${PIPESTATUS[0]} -eq 0 ];then
->    +       _fail "Unexpected mount pass"
->    +fi
->=20
-> Anyway, I can't say which way is better, both are good to me, depends on=
- your
-> choice :)
+_require_xfs_io_command "shutdown"
 
-I thought it was recommended to let the test continue and rely on the=20
-golden output to detect errors.
+Like any other _require statement
+requires support for what this test does -
+meaning that a test does xfs_io -c shutdown, just like test generic/623 doe=
+s
 
-I'm fine either way. This is only triggered because I did cause a=20
-regression during my development.
+and _require_scratch_shutdown implies that the test does
+_scratch_shutdown
 
-There is no real world hit (yet), so it's not that urgent.
+FSTYP overlay happens to be able to do _scratch_shutdown
+but not able to do xfs_io -c shutdown $SCRATCH_MNT
+
+The different _require statements simply reflect reality as it is.
+
+We can solve the confused about o/087 not having
+_require_xfs_io_command "shutdown"
+by moving the special hand crafted xfs_io command in o/087
+to a helper _scratch_shutdown_and_syncfs to hide those internal
+implementation details from test writers.
+See attached patch.
 
 Thanks,
-Qu
+Amir.
 
->=20
-> Thanks,
-> Zorro
->=20
->>
->> Thanks,
->> Qu
->>
->>>
->>> Thanks,
->>> Zorro
->>>
->>>>    	_unmount $extra_mnt &> /dev/null
->>>>    	rm -rf $extra_mnt
->>>>    	_unmount_flakey
->>>> --=20
->>>> 2.49.0
->>>>
->>>>
->>>
->>>
->>
->=20
+--000000000000ddb7350636e21b9b
+Content-Type: text/x-patch; charset="US-ASCII"; 
+	name="0001-fstests-add-helper-_scratch_shutdown_and_syncfs.patch"
+Content-Disposition: attachment; 
+	filename="0001-fstests-add-helper-_scratch_shutdown_and_syncfs.patch"
+Content-Transfer-Encoding: base64
+Content-ID: <f_mbkh9qf20>
+X-Attachment-Id: f_mbkh9qf20
 
+RnJvbSAzYjRkNmZmM2NlOTA5ZmE0YjM4NWE4ZDA3NWJiYWMxZjMyYjgyY2I4IE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBBbWlyIEdvbGRzdGVpbiA8YW1pcjczaWxAZ21haWwuY29tPgpE
+YXRlOiBGcmksIDYgSnVuIDIwMjUgMDk6MTE6MTcgKzAyMDAKU3ViamVjdDogW1BBVENIXSBmc3Rl
+c3RzOiBhZGQgaGVscGVyIF9zY3JhdGNoX3NodXRkb3duX2FuZF9zeW5jZnMKClRlc3QgeGZzLzU0
+NiBoYXMgdG8gY2hhaW4gc3luY2ZzIGFmdGVyIHNodXRkb3duIGFuZCBjYW5ub3QKdXNlIHRoZSBf
+c2NyYXRjaF9zaGl0ZG93biBoZWxwZXIsIGJlY2F1c2UgYWZ0ZXIgc2h1dGRvd24gYSBmZApjYW5u
+b3QgYmUgb3BlbmVkIHRvIGV4ZWN1dGUgc3luY2ZzIG9uLgoKVGhlIHhmc19pbyBjb21tYW5kIG9m
+IGNoYWluaW5nIHN5bmNmcyBhZnRlciBzaHV0ZG93biBpcyByYXRoZXIKbW9yZSBjb21wbGV4IHRv
+IGV4ZWN1dGUgaW4gdGhlIGRlcml2ZWQgb3ZlcmxheWZzIHRlc3Qgb3ZlcmxheS8wODcuCgpBZGQg
+YSBoZWxwZXIgdG8gYWJzdHJhY3QgdGhpcyBjb21wbGV4aXR5IGZyb20gdGVzdCB3cml0ZXJzLgpB
+ZGQgYSBfcmVxdWlyZSBzdGF0ZW1lbnQgdG8gbWF0Y2guCgpTaWduZWQtb2ZmLWJ5OiBBbWlyIEdv
+bGRzdGVpbiA8YW1pcjczaWxAZ21haWwuY29tPgotLS0KIGNvbW1vbi9yYyAgICAgICAgIHwgMjcg
+KysrKysrKysrKysrKysrKysrKysrKysrKysrCiB0ZXN0cy9vdmVybGF5LzA4NyB8IDEzICsrKy0t
+LS0tLS0tLS0KIHRlc3RzL3hmcy81NDYgICAgIHwgIDUgKystLS0KIDMgZmlsZXMgY2hhbmdlZCwg
+MzIgaW5zZXJ0aW9ucygrKSwgMTMgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvY29tbW9uL3Jj
+IGIvY29tbW9uL3JjCmluZGV4IDk2ZDY1ZDFjLi43NzY4M2I4MiAxMDA2NDQKLS0tIGEvY29tbW9u
+L3JjCisrKyBiL2NvbW1vbi9yYwpAQCAtNTk1LDYgKzU5NSwyNyBAQCBfc2NyYXRjaF9zaHV0ZG93
+bl9oYW5kbGUoKQogCWZpCiB9CiAKK19zY3JhdGNoX3NodXRkb3duX2FuZF9zeW5jZnMoKQorewor
+CWlmIFsgJEZTVFlQID0gIm92ZXJsYXkiIF07IHRoZW4KKwkJIyBJbiBsYWdhY3kgb3ZlcmxheSB1
+c2FnZSwgaXQgbWF5IHNwZWNpZnkgZGlyZWN0b3J5IGFzCisJCSMgU0NSQVRDSF9ERVYsIGluIHRo
+aXMgY2FzZSBPVkxfQkFTRV9TQ1JBVENIX0RFVgorCQkjIHdpbGwgYmUgbnVsbCwgc28gY2hlY2sg
+T1ZMX0JBU0VfU0NSQVRDSF9ERVYgYmVmb3JlCisJCSMgcnVubmluZyBzaHV0ZG93biB0byBhdm9p
+ZCBzaHV0dGluZyBkb3duIGJhc2UgZnMgYWNjaWRlbnRseS4KKwkJaWYgWyAteiAkT1ZMX0JBU0Vf
+U0NSQVRDSF9ERVYgXTsgdGhlbgorCQkJX2ZhaWwgIl9zY3JhdGNoX3NodXRkb3duOiBjYWxsIF9y
+ZXF1aXJlX3NjcmF0Y2hfc2h1dGRvd24gZmlyc3QgaW4gdGVzdCIKKwkJZmkKKwkJIyBUaGlzIGNv
+bW1hbmQgaXMgY29tcGxpY2F0ZWQgYSBiaXQgYmVjYXVzZSBpbiB0aGUgY2FzZSBvZiBvdmVybGF5
+ZnMgdGhlCisJCSMgc3luY2ZzIGZkIG5lZWRzIHRvIGJlIG9wZW5lZCBiZWZvcmUgc2h1dGRvd24g
+YW5kIGl0IGlzIGRpZmZlcmVudCBmcm9tIHRoZQorCQkjIHNodXRkb3duIGZkLCBzbyB3ZSBjYW5u
+b3QgdXNlIHRoZSBfc2NyYXRjaF9zaHV0ZG93bigpIGhlbHBlci4KKwkJIyBGaWx0ZXIgb3V0IHhm
+c19pbyBvdXRwdXQgb2YgYWN0aXZlIGZkcy4KKwkJJFhGU19JT19QUk9HIC14IC1jICJvcGVuICQo
+X3NjcmF0Y2hfc2h1dGRvd25faGFuZGxlKSIgLWMgJ3NodXRkb3duIC1mICcgXAorCQkJCS1jIGNs
+b3NlIC1jIHN5bmNmcyAkU0NSQVRDSF9NTlQgfCBncmVwIC12RiAnWzAwJworCWVsc2UKKwkJJFhG
+U19JT19QUk9HIC14IC1jICdzaHV0ZG93biAtZiAnIC1jIHN5bmNmcyAkU0NSQVRDSF9NTlQKKwlm
+aQorfQorCiBfbW92ZV9tb3VudCgpCiB7CiAJbG9jYWwgbW50PSQxCkBAIC00MTEwLDYgKzQxMzEs
+MTIgQEAgX3JlcXVpcmVfc2NyYXRjaF9zaHV0ZG93bigpCiAJX3NjcmF0Y2hfdW5tb3VudAogfQog
+CitfcmVxdWlyZV9zY3JhdGNoX3NodXRkb3duX2FuZF9zeW5jZnMoKQoreworCV9yZXF1aXJlX3hm
+c19pb19jb21tYW5kIHN5bmNmcworCV9yZXF1aXJlX3NjcmF0Y2hfc2h1dGRvd24KK30KKwogX2No
+ZWNrX3NfZGF4KCkKIHsKIAlsb2NhbCB0YXJnZXQ9JDEKZGlmZiAtLWdpdCBhL3Rlc3RzL292ZXJs
+YXkvMDg3IGIvdGVzdHMvb3ZlcmxheS8wODcKaW5kZXggYTVhZmIwZDUuLjJhZDA2OWRiIDEwMDc1
+NQotLS0gYS90ZXN0cy9vdmVybGF5LzA4NworKysgYi90ZXN0cy9vdmVybGF5LzA4NwpAQCAtMzIs
+OSArMzIsOCBAQCBfYmVnaW5fZnN0ZXN0IGF1dG8gcXVpY2sgbW91bnQgc2h1dGRvd24KIAogCiAj
+IE1vZGlmeSBhcyBhcHByb3ByaWF0ZS4KLV9yZXF1aXJlX3hmc19pb19jb21tYW5kIHN5bmNmcwog
+X3JlcXVpcmVfc2NyYXRjaF9ub2NoZWNrCi1fcmVxdWlyZV9zY3JhdGNoX3NodXRkb3duCitfcmVx
+dWlyZV9zY3JhdGNoX3NodXRkb3duX2FuZF9zeW5jZnMKIAogWyAiJE9WTF9CQVNFX0ZTVFlQIiA9
+PSAieGZzIiBdIHx8IFwKIAlfbm90cnVuICJiYXNlIGZzICRPVkxfQkFTRV9GU1RZUCBoYXMgdW5r
+bm93biBiZWhhdmlvciB3aXRoIHN5bmNmcyBhZnRlciBzaHV0ZG93biIKQEAgLTQzLDE5ICs0Miwx
+MyBAQCBfcmVxdWlyZV9zY3JhdGNoX3NodXRkb3duCiAjIGJvdGhlciBjaGVja2luZyB0aGUgZmls
+ZXN5c3RlbSBhZnRlcndhcmRzIHNpbmNlIHdlIG5ldmVyIHdyb3RlIGFueXRoaW5nLgogZWNobyAi
+PT09IHN5bmNmcyBhZnRlciBzaHV0ZG93biIKIF9zY3JhdGNoX21vdW50Ci0jIFRoaXMgY29tbWFu
+ZCBpcyBjb21wbGljYXRlZCBhIGJpdCBiZWNhdXNlIGluIHRoZSBjYXNlIG9mIG92ZXJsYXlmcyB0
+aGUKLSMgc3luY2ZzIGZkIG5lZWRzIHRvIGJlIG9wZW5lZCBiZWZvcmUgc2h1dGRvd24gYW5kIGl0
+IGlzIGRpZmZlcmVudCBmcm9tIHRoZQotIyBzaHV0ZG93biBmZCwgc28gd2UgY2Fubm90IHVzZSB0
+aGUgX3NjcmF0Y2hfc2h1dGRvd24oKSBoZWxwZXIuCi0jIEZpbHRlciBvdXQgeGZzX2lvIG91dHB1
+dCBvZiBhY3RpdmUgZmRzLgotJFhGU19JT19QUk9HIC14IC1jICJvcGVuICQoX3NjcmF0Y2hfc2h1
+dGRvd25faGFuZGxlKSIgLWMgJ3NodXRkb3duIC1mICcgLWMgY2xvc2UgLWMgc3luY2ZzICRTQ1JB
+VENIX01OVCB8IFwKLQlncmVwIC12RiAnWzAwJworX3NjcmF0Y2hfc2h1dGRvd25fYW5kX3N5bmNm
+cwogCiAjIE5vdyByZXBlYXQgdGhlIHNhbWUgdGVzdCB3aXRoIGEgdm9sYXRpbGUgb3ZlcmxheWZz
+IG1vdW50IGFuZCBleHBlY3Qgbm8gZXJyb3IKIF9zY3JhdGNoX3VubW91bnQKIGVjaG8gIj09PSBz
+eW5jZnMgYWZ0ZXIgc2h1dGRvd24gKHZvbGF0aWxlKSIKIF9zY3JhdGNoX21vdW50IC1vIHZvbGF0
+aWxlCi0kWEZTX0lPX1BST0cgLXggLWMgIm9wZW4gJChfc2NyYXRjaF9zaHV0ZG93bl9oYW5kbGUp
+IiAtYyAnc2h1dGRvd24gLWYgJyAtYyBjbG9zZSAtYyBzeW5jZnMgJFNDUkFUQ0hfTU5UIHwgXAot
+CWdyZXAgLXZGICdbMDAnCitfc2NyYXRjaF9zaHV0ZG93bl9hbmRfc3luY2ZzCiAKICMgc3VjY2Vz
+cywgYWxsIGRvbmUKIHN0YXR1cz0wCmRpZmYgLS1naXQgYS90ZXN0cy94ZnMvNTQ2IGIvdGVzdHMv
+eGZzLzU0NgppbmRleCAzMTZmZmM1MC4uYzUwZDQxYTYgMTAwNzU1Ci0tLSBhL3Rlc3RzL3hmcy81
+NDYKKysrIGIvdGVzdHMveGZzLzU0NgpAQCAtMjcsMTQgKzI3LDEzIEBAIF9iZWdpbl9mc3Rlc3Qg
+YXV0byBxdWljayBzaHV0ZG93bgogCiAKICMgTW9kaWZ5IGFzIGFwcHJvcHJpYXRlLgotX3JlcXVp
+cmVfeGZzX2lvX2NvbW1hbmQgc3luY2ZzCiBfcmVxdWlyZV9zY3JhdGNoX25vY2hlY2sKLV9yZXF1
+aXJlX3NjcmF0Y2hfc2h1dGRvd24KK19yZXF1aXJlX3NjcmF0Y2hfc2h1dGRvd25fYW5kX3N5bmNm
+cwogCiAjIFJldXNlIHRoZSBmcyBmb3JtYXR0ZWQgd2hlbiB3ZSBjaGVja2VkIGZvciB0aGUgc2h1
+dGRvd24gaW9jdGwsIGFuZCBkb24ndAogIyBib3RoZXIgY2hlY2tpbmcgdGhlIGZpbGVzeXN0ZW0g
+YWZ0ZXJ3YXJkcyBzaW5jZSB3ZSBuZXZlciB3cm90ZSBhbnl0aGluZy4KIF9zY3JhdGNoX21vdW50
+Ci0kWEZTX0lPX1BST0cgLXggLWMgJ3NodXRkb3duIC1mICcgLWMgc3luY2ZzICRTQ1JBVENIX01O
+VAorX3NjcmF0Y2hfc2h1dGRvd25fYW5kX3N5bmNmcwogCiAjIHN1Y2Nlc3MsIGFsbCBkb25lCiBz
+dGF0dXM9MAotLSAKMi4zNC4xCgo=
+--000000000000ddb7350636e21b9b--
