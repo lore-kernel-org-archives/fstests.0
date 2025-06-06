@@ -1,235 +1,209 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2C17720D4F9;
-	Thu,  5 Jun 2025 22:10:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.22
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 181113C465
+	for <fstests@vger.kernel.org>; Fri,  6 Jun 2025 00:53:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749161408; cv=none; b=uTxuzZ/VWYSKFup7wI/vPIQQnrhX4tOGgztqxwd2/3o22AKxK1T4ek06ctTM8EjwRNjNYljZC/qNllIJvLy4Fdq1fB0xT0m9mI7EjZNG57uxzVhS8D//WmM/zlVcc6LGtqp6ir0VrD+03mbJ8m/822vmzQjHomLDVv+terfTjV8=
+	t=1749171194; cv=none; b=UMKgSaRiqAZjSVjqer6JFklYMeDn3sDkcBeZPplvB9OwN00ErQViJTVvCniZblEviQTy6cPgs4GDQWb7r4LWKJceUg8sWD9zwnkIjwd/0hRpre/ScCUlpA2zLO7b4w32D9WKXBvx8CnuAXbvyLm2yTSRrfS6qmf522YcF8Olh5g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749161408; c=relaxed/simple;
-	bh=01DHrbsbfqzEN+JO6nMGP0dhkq5zQsr7FMS4NM5IPZk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=gZKOWLHihDomudwOZEAjFUYbbAYHFW9wS1cCbGI6vLjxrKTBSz5Lyv4hPidgCaiVk2CShQhq2eqkkOeWiFEin0zm4qEr0oFDgwjFLnfL/NdGs3p/9xSq2YAzPjDbfXI0diFd2P3POOPedd1PvWCFa4Qg6cxNDQg7xmFVgn3PKIE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=l0AXc5GN; arc=none smtp.client-ip=212.227.17.22
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1749171194; c=relaxed/simple;
+	bh=q7Dvx4CG0RnexWO91J4oJDH6lHiISM1Me3lDpSwX4SY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=STxuoxxf3OpUfKzTeGWgKUJVZbgnhNxamA0SQRglyJFEUkBZJ2kER3QBXRLMjq4DWCVUAO6XtKi17qtMdKejuV8ajSeD8gOlVde7wHI5wvLdRh51BZUk/rTjD0kwkOcmnB3L2zaV7tCtb/9nmZDZ6Op5PRXdRFd/UzK37pQb91Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=R2D0oT7i; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="l0AXc5GN"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1749161401; x=1749766201; i=quwenruo.btrfs@gmx.com;
-	bh=0TU4HnyPR1GIstRt9DcbiC91bgpPFAbdtsDJr0jCKy4=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=l0AXc5GNKsB4C2WKYK2NORYArKoiwvEoh58a600JPFDIi+aIcWP41WVxuxLJ8MHR
-	 PjaSrkbfQY0EGi/5QuvfQKzTlk8Zaa4GaAFA43Vu+kDBr1f0q2wFcxOnxkb+hkmiV
-	 AXs14H6qntjJ7JoMWV0fUnGHYPg0/2R1ruMnKQVkEWBPrwSm5qP49GEg1ILp44N9I
-	 EfiuCrEuTfFy7FWXdmkLDLDH0PZwHkFO+ceUucrEwZmcyDvGF4plttgICaj6bXhWm
-	 b5WR0cfQMIJzD92SLWAODl6bBrYNegky+9PayPfZwc259vLee/SmsGBRvzoTUVGsO
-	 UzLvUzNXPIIsZiwLBw==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.229] ([159.196.52.54]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MqaxU-1v9qw41YLQ-00kdUI; Fri, 06
- Jun 2025 00:10:00 +0200
-Message-ID: <dbf243a2-ac0e-437c-a308-9832f89ca274@gmx.com>
-Date: Fri, 6 Jun 2025 07:39:56 +0930
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="R2D0oT7i"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1749171192;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=HsFQl8sr8n30OqS4v5DdSHOD+ukUcT8jWVTD0i0oygk=;
+	b=R2D0oT7i63Hnjt/JHaF8jXxYE/pKwyBNaWZGZjTYwICuQnokBSb5wD+bp7gn3Tc0SgFtJu
+	JZ4rfM5QDzqmc69ajg4yPkgKutFFDztnZLTXlLbIqCYP6claiKLPIEDCSxtRAFf8pw0b8W
+	P3F97/UYRMp7BebhzRZKlykd1zr6jd8=
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
+ [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-621-EQaiqHa3NHq8sla_TuGOng-1; Thu, 05 Jun 2025 20:53:10 -0400
+X-MC-Unique: EQaiqHa3NHq8sla_TuGOng-1
+X-Mimecast-MFC-AGG-ID: EQaiqHa3NHq8sla_TuGOng_1749171190
+Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-7480d44e6f9so1492609b3a.2
+        for <fstests@vger.kernel.org>; Thu, 05 Jun 2025 17:53:10 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1749171190; x=1749775990;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=HsFQl8sr8n30OqS4v5DdSHOD+ukUcT8jWVTD0i0oygk=;
+        b=bYIjlHsJsCh2SVmYJMIKYYlgfWWO3TLXgELL2F0/896tNFKcLbGut0kf55zfPFuozD
+         lULcPlGH5l3w0gNcAfNvA1hHcWzV+qnKEnBFE41KQMG9IRqbMcTkSl1ocb+eFgZKwwxx
+         BKm726PmuSpggdYsHl6zyEk9tW34jltugjEnHiX22yG74GbqPn/8aqiWPfj4Fj5Z3OFr
+         WTT65vI+GtaZBaloQio+Np4BgUNETTvBU67SVfMCrfvQkZ5glXeoUW3JiCFvzxNf0gUR
+         l0pg/jc3Fnh0p52muAwGPytEh6Eh7xixkImDmyjv6LFYi4OCMW98ydbj4rNX5K/8d0yH
+         ISTw==
+X-Forwarded-Encrypted: i=1; AJvYcCWSgIirMkiz9q84dByhB3R+o52n/+BDhK4RbYRsdmkFJk+w5ygIWxskx6n4DPwUFYslylwEgQll@vger.kernel.org
+X-Gm-Message-State: AOJu0YyFJByj7WxXoc2T0rznt7oHFr4u+m+BB3Dk9Ey3bZ2iWPLy1aOk
+	NOESho1N+7J2cVGiiJpawL+YCLMbE1t44V75LzN56PVVejHb9BEwhhbSjIQFu9C7P8OZirrSHtI
+	uU0K9fvZNJTla9kHpjyY6GlFFHgls36nsjhZ5g0J6EwmTSc/kTFVdMlZR4Bs=
+X-Gm-Gg: ASbGnctjTmnzg29ygQsgFZdy6vTPaGLKxPtdo4d5mKGr4yJd6hNqZZa2WPfFmAiGT3+
+	0vBs0LRzQXJGWoxSCElKUpORRvvBh1GNKVwVCmkFS8Yicc/4MyOuYWePA82/nwDrTau6jNLQ31P
+	6IEyUqfi2IhNj/Q6JEhc/0KhXQe53JG6hCLgyEE8SSmAtONH3hnUZSv5cARYACaRZ160tMKaBPA
+	VYq1yYf9DB8o2+AufMRYHej9eC0yMoUI+rTPmN74vhQHMclWEz0DC5dPWpht6nqctBIZ3KWcUBy
+	RqW1AYndixgaxa0rsclpPqnV8bf2Ls/M71ZkIWprmbm2UI9esyBDKyRoi+NGPTw=
+X-Received: by 2002:a05:6a00:806:b0:737:9b:582a with SMTP id d2e1a72fcca58-74827f3dab7mr2316532b3a.24.1749171189606;
+        Thu, 05 Jun 2025 17:53:09 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGhuxf44JkfMsS77q5YopkK2jKVaIaGt4qLF9JgjzWMXCZwCKbi9NDscO6soj+5oZzAbA+TlQ==
+X-Received: by 2002:a05:6a00:806:b0:737:9b:582a with SMTP id d2e1a72fcca58-74827f3dab7mr2316513b3a.24.1749171189202;
+        Thu, 05 Jun 2025 17:53:09 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7482af38386sm263376b3a.6.2025.06.05.17.53.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 05 Jun 2025 17:53:08 -0700 (PDT)
+Date: Fri, 6 Jun 2025 08:53:04 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Filipe Manana <fdmanana@kernel.org>
+Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] generic/032: fix failure due to attempt to wait for
+ non-child process
+Message-ID: <20250606005304.p36cjy23ekdlg53u@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <ad779afaef849e0febdce26cbcb5503beed87341.1748432418.git.fdmanana@suse.com>
+ <20250605165225.fajg7aj3btuejhnp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAL3q7H6h98w--8=-TUridEaOt03v70J3gvLA_g=72iL9hFYL1w@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: generic/741: make cleanup to handle test failure
- properly
-To: Zorro Lang <zlang@redhat.com>, Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-References: <20250604235524.26356-1-wqu@suse.com>
- <20250605171047.vl3u6j7yojbw6pfe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
- sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
- xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
- naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
- tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
- 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
- VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
- CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
- B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
- Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
- +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
- HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
-In-Reply-To: <20250605171047.vl3u6j7yojbw6pfe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:pFaXEGKuOnJyjswuBmje5x2c5UucdBc9KNytEz7RfTD+SEdgkLX
- LKFjpMDq7nyPQcKuenDFaM1ZUkostlI2wvAIMDvvVskwxiqFcltw2didxYcbMVLoVjHerE/
- bSfRmEh6A+NBITCj/w2HGe0+RD9+vGBIVWs8Rf5h6/OB+O1XLMwfYwutaQVHn4Tscv1R7Aq
- 4wVYAU2EA+8AzHA88cOHw==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:3WzDT+Ra+b8=;BwFJiVPxRm1wXlT8pg1T7gw1l/k
- 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
- Nx5PrywJNC9loKgaJ7I+x2HxNKyMnTLDvYrIRg==
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAL3q7H6h98w--8=-TUridEaOt03v70J3gvLA_g=72iL9hFYL1w@mail.gmail.com>
 
+On Thu, Jun 05, 2025 at 08:37:35PM +0100, Filipe Manana wrote:
+> On Thu, Jun 5, 2025 at 5:52 PM Zorro Lang <zlang@redhat.com> wrote:
+> >
+> > On Wed, May 28, 2025 at 12:42:20PM +0100, fdmanana@kernel.org wrote:
+> > > From: Filipe Manana <fdmanana@suse.com>
+> > >
+> > > Running generic/032 can sporadically fail like this:
+> > >
+> > >   generic/032 11s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//generic/032.out.bad)
+> > >       --- tests/generic/032.out   2023-03-02 21:47:53.884609618 +0000
+> > >       +++ /home/fdmanana/git/hub/xfstests/results//generic/032.out.bad    2025-05-28 10:39:34.549499493 +0100
+> > >       @@ -1,5 +1,6 @@
+> > >        QA output created by 032
+> > >        100 iterations
+> > >       +/home/fdmanana/git/hub/xfstests/tests/generic/032: line 90: wait: pid 3708239 is not a child of this shell
+> > >        000000 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  >................<
+> > >        *
+> > >        100000
+> > >       ...
+> > >       (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/generic/032.out /home/fdmanana/git/h
+> > >
+> > > This is because we are attempting to wait for a process that is not a
+> > > child process of the test process and it's instead a child of a process
+> > > spawned by the test.
+> > >
+> > > To make sure that after we kill the process running _syncloop() there
+> > > isn't any xfs_io process still running syncfs, add instead a trap to
+> > > to _syncloop() that waits for xfs_io to finish before the process running
+> > > that function exits.
+> > >
+> > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > > ---
+> >
+> > Oh... I didn't remove the _pgrep when I reverted those "setsid" things.
+> >
+> > CC Darrick, what do you think if I remove the _pgrep from common/rc
+> > and generic/032 :) On the other words, revert the:
+> >
+> >   commit 1bb15a27573eea1df493d4b7223ada2e6c04a07a
+> >   Author: Darrick J. Wong <djwong@kernel.org>
+> >   Date:   Mon Feb 3 14:00:29 2025 -0800
+> >
+> >       generic/032: fix pinned mount failure
+> 
+> Reverting that commit won't fix anything. One still needs a mechanism
+> to ensure that we don't attempt to unmount the scratch device while
+> xfs_io from sync_pid is still running. The mechanism implemented in
+> that commit is buggy and the trap based one from this patch should
+> always work (and we do this trap based approach on several other tests
+> to solve this same problem).
 
+Sure, don't worry, I didn't try to Nack your patch:) Just due to you remove
+the _pgrep() in your patch, then I thought it can be removed from common/rc
+totally, looks like nothing need that function. So I tried to confirm that
+with Darrick (who brought in this function:)
 
-=E5=9C=A8 2025/6/6 02:40, Zorro Lang =E5=86=99=E9=81=93:
-> On Thu, Jun 05, 2025 at 09:25:24AM +0930, Qu Wenruo wrote:
->> [BUG]
->> When I was tinkering the bdev open holder parameter, it caused a bug
->> that it no longer rejects mounting the underlying device of a
->> device-mapper.
->>
->> And the test case properly detects the regression:
->>
->> generic/741 1s ... umount: /mnt/test: target is busy.
->> _check_btrfs_filesystem: filesystem on /dev/mapper/test-test is inconsi=
-stent
->> (see /home/adam/xfstests/results//generic/741.full for details)
->> Trying to repair broken TEST_DEV file system
->> _check_btrfs_filesystem: filesystem on /dev/mapper/test-scratch1 is inc=
-onsistent
->> (see /home/adam/xfstests/results//generic/741.full for details)
->> - output mismatch (see /home/adam/xfstests/results//generic/741.out.bad=
-)
->>      --- tests/generic/741.out	2024-04-06 08:10:44.773333344 +1030
->>      +++ /home/adam/xfstests/results//generic/741.out.bad	2025-06-05 09=
-:18:03.675049206 +0930
->>      @@ -1,3 +1,2 @@
->>       QA output created by 741
->>      -mount: TEST_DIR/extra_mnt: SCRATCH_DEV already mounted or mount p=
-oint busy
->>      -mount: TEST_DIR/extra_mnt: SCRATCH_DEV already mounted or mount p=
-oint busy
->>      +rm: cannot remove '/mnt/test/extra_mnt': Device or resource busy
->>      ...
->>      (Run 'diff -u /home/adam/xfstests/tests/generic/741.out /home/adam=
-/xfstests/results//generic/741.out.bad'  to see the entire diff)
->>
->> The problem is, all later test will fail, because the $SCRATCH_DEV is
->> still mounted at $extra_mnt:
->>
->>   TEST_DEV=3D/dev/mapper/test-test is mounted but not on TEST_DIR=3D/mn=
-t/test - aborting
->>   Already mounted result:
->>   /dev/mapper/test-test /mnt/test /dev/mapper/test-test /mnt/test
->>
->> [CAUSE]
->> The test case itself is doing two expected-to-fail mounts, but the
->> cleanup function is only doing unmount once, if the mount succeeded
->> unexpectedly, the $SCRATCH_DEV will be mounted at $extra_mnt forever.
->>
->> [ENHANCEMENT]
->> To avoid screwing up later test cases, do the $extra_mnt cleanup twice
->> to handle the unexpected mount success.
->>
->> Signed-off-by: Qu Wenruo <wqu@suse.com>
->> ---
->>   tests/generic/741 | 4 ++++
->>   1 file changed, 4 insertions(+)
->>
->> diff --git a/tests/generic/741 b/tests/generic/741
->> index cac7045e..c15dc434 100755
->> --- a/tests/generic/741
->> +++ b/tests/generic/741
->> @@ -13,6 +13,10 @@ _begin_fstest auto quick volume tempfsid
->>   # Override the default cleanup function.
->>   _cleanup()
->>   {
->> +	# If by somehow the fs mounted the underlying device (twice), we have
->> +	# to  make sure $extra_mnt is not mounted, or TEST_DEV can not be
->> +	# unmounted for fsck.
->> +	_unmount $extra_mnt &> /dev/null
->=20
-> Hmm... I'm not sure a "double" (even treble) umount is good solution for
-> temporary "Device or resource busy" after umount. Many other cases might
-> hit this problem sometimes.
-> Maybe we can have a helper to do a certain umount which make sure the fs
-> is truely umounted before returning :)
+Due to commit 1bb15a27573 does two things:
+1) create a new function _pgrep
+2) call _pgrep in g/032
 
-This is not about the umount after EBUSY.
+You've removed the 2) in this patch, so I'm wondering how about removing
+the 1) and 2) totally. As you can see, g/032 is the only one place uses
+_pgrep:
 
-The problem is, the test case itself is expecting two mounts to fail.
-But if the mount succeeded, it will mount twice and need to be unmounted=
-=20
-twice.
-
-It's to make the cleanup to match the test case's worst scenario.
+$ grep -rsn _pgrep .
+./common/rc:40:_pgrep()
+./tests/generic/032:87:dead_syncfs_pid=$(_pgrep xfs_io)
 
 Thanks,
-Qu
+Zorro
 
->=20
-> Thanks,
-> Zorro
->=20
->>   	_unmount $extra_mnt &> /dev/null
->>   	rm -rf $extra_mnt
->>   	_unmount_flakey
->> --=20
->> 2.49.0
->>
->>
->=20
->=20
+
+> 
+> Thanks.
+> 
+> 
+> >
+> > Thanks,
+> > Zorro
+> >
+> > >  tests/generic/032 | 13 ++++---------
+> > >  1 file changed, 4 insertions(+), 9 deletions(-)
+> > >
+> > > diff --git a/tests/generic/032 b/tests/generic/032
+> > > index 48d594fe..b04b84de 100755
+> > > --- a/tests/generic/032
+> > > +++ b/tests/generic/032
+> > > @@ -28,6 +28,10 @@ _cleanup()
+> > >
+> > >  _syncloop()
+> > >  {
+> > > +     # Wait for any running xfs_io command running syncfs before we exit so
+> > > +     # that unmount will not fail due to the mount being pinned by xfs_io.
+> > > +     trap "wait; exit" SIGTERM
+> > > +
+> > >       while [ true ]; do
+> > >               _scratch_sync
+> > >       done
+> > > @@ -81,15 +85,6 @@ echo $iters iterations
+> > >  kill $syncpid
+> > >  wait
+> > >
+> > > -# The xfs_io instance started by _scratch_sync could be stuck in D state when
+> > > -# the subshell running _syncloop & is killed.  That xfs_io process pins the
+> > > -# mount so we must kill it and wait for it to die before cycling the mount.
+> > > -dead_syncfs_pid=$(_pgrep xfs_io)
+> > > -if [ -n "$dead_syncfs_pid" ]; then
+> > > -     _pkill xfs_io
+> > > -     wait $dead_syncfs_pid
+> > > -fi
+> > > -
+> > >  # clear page cache and dump the file
+> > >  _scratch_cycle_mount
+> > >  _hexdump $SCRATCH_MNT/file
+> > > --
+> > > 2.47.2
+> > >
+> > >
+> >
+> 
 
