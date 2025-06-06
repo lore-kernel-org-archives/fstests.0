@@ -1,196 +1,187 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com [209.85.208.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3582F18641;
-	Fri,  6 Jun 2025 10:55:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB6EA28751B;
+	Fri,  6 Jun 2025 10:58:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749207323; cv=none; b=o2clJCWRKqtoUHSpbO4b5In6XRFedJrsuL9aroxM2KxZ7yz6iJ0ZxAb845/91K7g+3UrUghIjVp1nfjkNJ8/X3u9BEeQ4kDvbrXEQiaa3qjjQ32F5Wn0/mrwa8PN3C9HHWmo439Isd4K5cbqUGjGQmnPBZYGIKUgJUr1EVyAPqk=
+	t=1749207519; cv=none; b=r+PrFU7eOs4JgZRm8avYb4hAa+y3MWXEW/IGoCyWoKk9V5UWafVwF5lXRo/K5R+ahR9LpK5ZClQ1/kLKrLshJuuVoBytzcQzwDQ/qTr9fO66jKMUPuQAGJ4tT72eYzabpCc5gxQKDhfaVTpVnks64FTZnbkBMA5oPgsK4Z0CXms=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749207323; c=relaxed/simple;
-	bh=udVf2+XQTcFTxc6avKMBobryghl9MGh33ozR0ADGJtA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=XDFejoZMKOzOw7MbYNnxlMZSdy9tqYqiERi0rvTs20/aLXJu1OUK5w+Yt5Tp6GTpzQ8EC6I7z0U3mTpRrU8oY7dUN0sbid0PwN4XYqauuPeGuSKDc8H2oWB8xavLOF5RtQS9N9Lg/mizfuKlAp049lciZnCJyn7M9vXt/3xdVRA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=jtb0rTcc; arc=none smtp.client-ip=212.227.17.20
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1749207519; c=relaxed/simple;
+	bh=Nm857/l/4UIU5StLSYE3JtsXcNbXCVf/EhxDzPr225M=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=OTOUSTAys9PWSGxRErJclBDWO2bw187XFfQ8AXyD85GkTWPv9tBr+OCQXvvmE7cqzG2OlUPefCce6frNDR4nN5ZcQ4dOrwWYtBUNALd1pXbb9Ue9WUmJMzJS3ZaZidVqREhRaWvI1Td4E1Jfu523MfsqLdI4VpuzGg/iOb3GxVU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=g2uYOYHe; arc=none smtp.client-ip=209.85.208.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="jtb0rTcc"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1749207318; x=1749812118; i=quwenruo.btrfs@gmx.com;
-	bh=SqYYPh2fm091x9WbWaB+ZN3g6yaRKG7c6eCLTsIHyPA=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=jtb0rTccWMar7LVw94oArXj2PONVlZcK6BQdP0GinfuPHWeDvqVPCnTGR4gWwCLk
-	 dZoAy5OANiveFJcMyZ8R1HhYWdJ7XiPUZjEsndhAZ+aCUYIbF6hzW/GBg06m5OoGz
-	 jcoElqXnqKriFpQpjwXTsdwC3gUHC7+orOh6Izg5fJiLz25PGYfxS81F1ltIDrcpG
-	 4C98QYqtLGKNhenPVqMj6t/D9kBE1nY+Tr+PZJXgQOmY1aYeNCG6Awmvg8XD++YBT
-	 A5NjfILsLmRbNcHCk0ZZNn4VagEU44N+883G6VwMGM8o52K/Pdh1JhXamavafEWAe
-	 eFD2PrMp+ZtES4qd/A==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.229] ([159.196.52.54]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1M2wKq-1uQn3B0IW4-00A8q1; Fri, 06
- Jun 2025 12:55:18 +0200
-Message-ID: <0a94ae69-8d1b-48bf-8af0-9bfad801e038@gmx.com>
-Date: Fri, 6 Jun 2025 20:25:11 +0930
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="g2uYOYHe"
+Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-60780d74c85so651942a12.2;
+        Fri, 06 Jun 2025 03:58:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1749207516; x=1749812316; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=pp97G/YUdaRNLQUeb4BjSwygsZdYbIgkdZd/4ExypFw=;
+        b=g2uYOYHeMez7e+8/llOZgwy1jXdEJ6M43d7ZImHFlPgyNYfnIs08fSOcsqhVk/JUrk
+         UrFahw6ldGWD8R7wfNFE+XdaLmvw4X/1/s/oV/2r6Cyg2ENwn0/KkJuoNzhlbr+JZrAC
+         0JZu5btUFK8jFQFdcIN2TlsJVcebeEcsArq5Ac31YjsCNB+ExaV86aoOaWkQht6PD3Kq
+         wFdYAKBjhUMDb3IE5mrHYC3REF85RujdiwfZUpr3oZMXxN0RoG9GfzJjA0iVAVQAn4C+
+         c46biD/Vg66lJPQ4ASsfISsvw+6ekCZaxhdirVEvUcmWyGoByxcKOsG1nA1PJNGHE+n6
+         l88w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1749207516; x=1749812316;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=pp97G/YUdaRNLQUeb4BjSwygsZdYbIgkdZd/4ExypFw=;
+        b=FP4j+vIl0+gTXPFbS883FtFROwcb5rGub/84em9rGr/OB0wSxBVHJI0zekQabcS0my
+         WL9Qyhhb9BNQXgfRcy8LnNcK4jVkaqMP0md9x+j+vjF4F0pa3AJn2ONfiX7h/WQOPvDW
+         troizJsaXWs4DWtlgcF8FdRi5BvYAu0zkvLuK7UC9Rw3fv3lTcOov1IYn996iyu/KnM2
+         5G5XKP8Z3e1QPCJddJ0orMhcFvHI6NqwrINOksp2OQQNLMvQAcbZGxhdXFgAxlKQIC+v
+         Aa3O02Wsfyq0xlGHwPbkamqMNL5xPPKpPwh+jLozmjX3HOc40I5vo8lNUrOW33EJQr+9
+         z+Gg==
+X-Forwarded-Encrypted: i=1; AJvYcCV+jNFjFd4uNffaa/NnBigu7oBunw4Zx06IzKqOHrQejJXzYFPl02eKbHCZ3XjeoUI/vbDF7COCBWvYJ5Z7BA==@vger.kernel.org, AJvYcCVG3xN+S7YPYuHBg3qW2LeUUuM3b9KSm7q/YSYvHDbd07dd26wZbZS1VklYeXLNB5YiXl8mC/B5@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz3zldaX73I/77yHHB6QqOaAIU5rjmIdJl/Qciar+66o3ko5ahV
+	A+MEh6NbYY7UIZaIROH+ETA5DfRfEng78jfebx/qN9VJZOfy9pfupRe0x7C1oVIs8Ivc31iy4rD
+	K06SlZ+Y+vqSoqCu3uw3QH2UCtvelG2A=
+X-Gm-Gg: ASbGncv9lCRyBXqZQMtiMtkEObzR7vCZQab7UMuKy1Eh4hSTbfIf4igsu3ozWyiaG9y
+	haP4En58c+KULAZCgaBMybrKlZMR1XckW4gRsMLBQHCEyXrTDnK3Pu+MjGTE4FhwCjleUYmasf1
+	dH6erubYQ1M1A0n3ha1Hy0mDEgx20fv6qoKPcQxt71yq8=
+X-Google-Smtp-Source: AGHT+IFKTmqzuCMvQULKCTIaSpKd6wX5fuEeygLCqZDNw8UYvtVzXARMbiCrJYUztU9EJ2eXmmNRf22+tOKGKBI9h84=
+X-Received: by 2002:a17:907:94c8:b0:ad8:8a46:f156 with SMTP id
+ a640c23a62f3a-ade1a9c825emr261982566b.6.1749207515534; Fri, 06 Jun 2025
+ 03:58:35 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: generic/730: exclude btrfs for now
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
- fstests@vger.kernel.org
-References: <20250604062509.227462-1-wqu@suse.com>
- <aEAC5WTF_tGh_RpN@infradead.org>
- <76226c51-78c5-4113-a04d-694a50b98557@gmx.com>
- <aEBJCG1_VRDggo6N@infradead.org>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
- sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
- xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
- naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
- tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
- 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
- VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
- CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
- B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
- Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
- +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
- HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
-In-Reply-To: <aEBJCG1_VRDggo6N@infradead.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+References: <20250603100745.2022891-1-amir73il@gmail.com> <20250603100745.2022891-2-amir73il@gmail.com>
+ <20250605175129.oqqzr5qluxv52m6b@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxg2D-ED3vy=jedEKbpEJvWBLD=QYtfp=DCU3pQGGCaGog@mail.gmail.com>
+ <20250606011223.gx6xearyoqae5byp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxh9b285dnw+SO2h6HqtNC5Xog0TQSqhFAQaV1brBnVxVQ@mail.gmail.com> <20250606103518.c3xklsm2ksjl5w4u@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20250606103518.c3xklsm2ksjl5w4u@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 6 Jun 2025 12:58:24 +0200
+X-Gm-Features: AX0GCFu4mlQyFodXBBc4Umc5eqT1NMOvC89FkX36A4BDmNV5wqsnftDdV0nzoYk
+Message-ID: <CAOQ4uxi-ZTzatP-iVbWjzYVnv7_JA1F7WjTfjjBUTCmhoWCr-g@mail.gmail.com>
+Subject: Re: [PATCH v2 1/6] overlay: workaround libmount failure to remount,ro
+To: Zorro Lang <zlang@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Christian Brauner <brauner@kernel.org>, 
+	=?UTF-8?Q?Andr=C3=A9_Almeida?= <andrealmeid@igalia.com>, 
+	linux-unionfs@vger.kernel.org, fstests@vger.kernel.org, 
+	Karel Zak <kzak@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:4j3MvDu3sI8PU5RXnqEUpFu059MroqYKk6vm/Ql74W3k2MyD+Pl
- nfUb8rQGHEbHbHas3qKSS+DCCb2rhDLy57lhidwqw/LLqkwCRf8dEKsEUG4bmpfUwoOdPjx
- zYjzMduS7XVjcIrdE66fBY18eledPyBfvV/Wl8P+W1u4xNaLfRXya2W984xvCYr8vZBS29d
- euwASMj3zDI2d2xkLXrFA==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:3aWtCpZbqv4=;Ae57Lgu41va3Ql32Q3G+reOKZji
- 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
- KUiQ=
 
+On Fri, Jun 6, 2025 at 12:35=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote=
+:
+>
+> On Fri, Jun 06, 2025 at 09:35:36AM +0200, Amir Goldstein wrote:
+> > On Fri, Jun 6, 2025 at 3:12=E2=80=AFAM Zorro Lang <zlang@redhat.com> wr=
+ote:
+> > >
+> > > On Thu, Jun 05, 2025 at 08:30:53PM +0200, Amir Goldstein wrote:
+> > > > On Thu, Jun 5, 2025 at 7:51=E2=80=AFPM Zorro Lang <zlang@redhat.com=
+> wrote:
+> > > > >
+> > > > > On Tue, Jun 03, 2025 at 12:07:40PM +0200, Amir Goldstein wrote:
+> > > > > > libmount >=3D v1.39 calls several unneeded fsconfig() calls to =
+reconfigure
+> > > > > > lowerdir/upperdir when user requests only -o remount,ro.
+> > > > > >
+> > > > > > Those calls fail because overlayfs does not allow making any co=
+nfig
+> > > > > > changes with new mount api, besides MS_RDONLY.
+> > > > > >
+> > > > > > We workaround this problem with --options-mode ignore.
+> > > > > >
+> > > > > > Reported-by: Andr=C3=A9 Almeida <andrealmeid@igalia.com>
+> > > > > > Suggested-by: Karel Zak <kzak@redhat.com>
+> > > > > > Link: https://lore.kernel.org/linux-fsdevel/20250521-ovl_ro-v1-=
+1-2350b1493d94@igalia.com/
+> > > > > > Link: https://lore.kernel.org/fstests/CAJfpegtJ3SDKmC80B4AfWiC3=
+JmtWdW2+78fRZVtsuhe-wSRPvg@mail.gmail.com/
+> > > > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > > > > > ---
+> > > > > >
+> > > > > > Changes since v1 [1]:
+> > > > > > - Change workaround from LIBMOUNT_FORCE_MOUNT2 to --options-mod=
+e=3Dignore
+> > > > > >
+> > > > > > [1] https://lore.kernel.org/fstests/20250526143500.1520660-1-am=
+ir73il@gmail.com/
+> > > > >
+> > > > > I'm not sure if I understand clearly. Does overlay list are fixin=
+g this issue
+> > > > > on kernel side, then providing a workaround to fstests to avoid t=
+he issue be
+> > > > > triggered too?
+> > > > >
+> > > >
+> > > > Noone agreed to fix it on the kernel side.
+> > > > At least not yet.
+> > >
+> > > If so, I have two questions:)
+> > > 1) Will overlay fix it on kernel or mount util side?
+> >
+> > This is not known at this time.
+>
+> Oh, I thought it's getting fix :-D
+>
+> >
+> > > 2) Do you plan to keep this workaround until the issue be fixed in on=
+e day?
+> > >    Then revert this workaround?
+> >
+> > Maybe, but keep in mind that the workaround is simply
+> > telling the library what we want to do.
+> >
+> > We want to remount overlay ro and nothing else and that is exactly
+> > what  "--options-mode ignore" tells the library to do.
+> >
+> > I could have just as well written a test helper src/remount_rdonly.c
+> > and not have to deal with the question of which libmount version
+> > the test machine is using.
+> >
+> > Note that the tests in question are not intended to test the remount,ro
+> > functionality itself, they are intended to test the behavior of fs in
+> > some scenarios involving a rdonly mount.
+> >
+> > I do not want to lose important test coverage of these scenarios
+> > because of regressions in the kernel/libmount API.
+> >
+> > We can add a new test that ONLY tests remount,ro and let that
+> > test fail on overlayfs to keep us reminded of the real regresion that
+> > needs to be fixed, but the "workaround" or as I prefer to call it
+> > "using the right tool for the test case" has to stay for those other te=
+sts.
+>
+> OK, I just tried to figure out if "hide this error output on new mount AP=
+Is"
+> is what overlay list wants. If overlay list (or vfs) acks this patch, and
+> will track this issue. I'm good to merge this workaround for testing :)
+>
 
+This workaround in v2 was suggested by libmount maintainer
+and approved by overlayfs maintainer:
 
-=E5=9C=A8 2025/6/4 22:54, Christoph Hellwig =E5=86=99=E9=81=93:
-> On Wed, Jun 04, 2025 at 06:47:41PM +0930, Qu Wenruo wrote:
->> Right, the ext4/xfs can go a superblock shutdown because they are singl=
-e
->> device fs (except the external journal device),
->=20
-> XFS also has a RT device in addition to that.
->=20
->> and fs_holder_ops handles
->> the single device failure by calling back into the super block shutdown=
- call
->> back.
->>
->> For a multi-device fs, it should go through the blk_holder_ops, which b=
-trfs
->> doesn't provide when opening the devices.
->=20
-> Yes, btrfs would need it's own fs_ops.  Alternatively we could add a new
-> ->devloss super_operations method and change fs_bdev_mark_dead to
-> something like:
->=20
-> 	if (sb->s_op->devloss && sb->s_op->devloss(sb, bdev, surprise))
-> 		goto done;
->=20
-> 	<sync fs and stuff)
-> 	if (sb->s_op->shutdown)
-> 		sb->s_op->shutdown(sb);
-> done:
-> 	super_unlock_shared(sb);
->=20
-> so that btrfs or other multi-device file systems don't have to duplicate
-> the logic.
+"> So, you do not need LIBMOUNT_FORCE_MOUNT2=3D workaround, use
+> "--options-mode ignore" or source and target ;-)
 
-I learnt this the hard way.
+Yeah, that's definitely a better workaround.
 
-I tried to implement a btrfs specific blk_holder_ops, and just use=20
-btrfs_fs_info as the holder.
-
-Test case generic/085 easily crash the kernel with freeze/thaw and=20
-mount/unmount races.
-
-
-Bcachefs is doing its own blk_holder_ops but with extra protection with=20
-similar refcount and locks.
-
-Considering btrfs doesn't got through the regular setup_bdev_super()=20
-patch, I guess for now we have to duplicate the logic for now.
+I wouldn't call it a fix, since "mount -oremount,ro /overlay" still
+doesn't work the way it is supposed to, and the thought of adding code
+to the kernel to work around the current libmount behavior makes me go
+bleah."
 
 Thanks,
-Qu
+Amir.
 
->=20
->> I guess it means, if a fs supports per-bdev shutdown, it won't hurt to =
-also
->> provide a full-fs shutdown ioctl?
->=20
-> Supporting it is a good idea in general as it enables a lot of good test
-> coverage in xfstests.
->=20
-
+[1] https://lore.kernel.org/linux-unionfs/CAJfpegtJ3SDKmC80B4AfWiC3JmtWdW2+=
+78fRZVtsuhe-wSRPvg@mail.gmail.com/
