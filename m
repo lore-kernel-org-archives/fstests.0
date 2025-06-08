@@ -1,139 +1,231 @@
-Received: from mail-ej1-f51.google.com (mail-ej1-f51.google.com [209.85.218.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A133D13D52F;
-	Fri,  6 Jun 2025 15:21:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D8CF1DE89B
+	for <fstests@vger.kernel.org>; Sun,  8 Jun 2025 12:14:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749223281; cv=none; b=phG4Q7hAsBNaAFvrPIAV5Duu+QOh2o/EyUDOlJAGS5XbE6KRaMaC1zLxIt7VdGrgaTd/qjzGOKEYrHfKa7GCa4r7zVC5Dzhpd5p5t2yqT0KFGNNHci4QGeXv/dlfvZFs8vg1H0Dj3U7N/LPajSmZNARMBZp6g5skye2R1pcWi2g=
+	t=1749384844; cv=none; b=dE9FiQMMTIh83WWINU/3G1T/VUPCykWNX4MiI70YqtTQfG9ykLav3TF5/Fp5vIh8hynsn7t0oAQuFN7HK4vzt+iYNnK6a+cTWnlPC6xkFfyWagLKy9oSgVTDWPRBlGxB1ous4imR5mlqtcnkuycCCtGrjioEdbEAK+SHdv0aVzI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749223281; c=relaxed/simple;
-	bh=Eo60iPlJ1+P8iDdJIwyPfRXW8PCg2JHJVB0bmhwR9Os=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=oJAu9Tsfhwri/JXGBO90sFGiX/1LCbCz9D5JxsMRCDERylrgwAkYhiPd5kQfpVLTxy1w8R0GtA9kkOPJPtbTqxHQHY+RhyW358NcbYkluT+GAujUIIRsxHlpEtY7RUH2StWEZlk6aprL+p4KqTBJiVi6BQdFDUJc3e2O/slPrOk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=AFtmVzGu; arc=none smtp.client-ip=209.85.218.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1749384844; c=relaxed/simple;
+	bh=oVuRnXNqj89eT9fDXrnTTRsoIsCkWPZ0ygTWAyPcnao=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=tH6YnBCEzt5sFIealtnjtZjK1flSE0w7de0JjfpKM57gkKEQS6x9RceT4EwQq0fs8teruW8kWjLGBG1lxzR78w+Jeppexsb2wLzArWd/XlC45mkxC3MzbgYnMNtvjgjalHSyUNwKFjj90QNb0bmujn0SgqjYc/hKxedZ+FP+GbY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=cQJQUcUi; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="AFtmVzGu"
-Received: by mail-ej1-f51.google.com with SMTP id a640c23a62f3a-ad51ef2424bso441733166b.0;
-        Fri, 06 Jun 2025 08:21:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1749223278; x=1749828078; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Eo60iPlJ1+P8iDdJIwyPfRXW8PCg2JHJVB0bmhwR9Os=;
-        b=AFtmVzGu2VXDKdK9c0Y0Yy1sR0glz0bcXbJSGIA+eTiMWnk7qZjohEF5k0UIAgh2PT
-         sBtcpcUMzJsWh/xx9//m9R+1u51SYDTIzFMARaXRTFxMr0CRuoOMJ59pHzvjVMvtRsfW
-         +49JFIhBqB7x3e2hZYYedtgrjQmpiNcIAi6tEn4KZyTroIhcI7DU1k3iBlapPAV1+QG4
-         YanVTaGXR9MM4NjGSAXNFdXmt10A6N+fyzveR089CUWEOJJbGKpI4XVBsIGdnoMRy+wu
-         al0VMRGO1u665trMpjsazkhCKrYJ73C3LR1jWrJnCAAIqlRrq9/EswxiZiuAuvlkH9v6
-         NQew==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cQJQUcUi"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1749384841;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=gBaXOCUDiP13canSq8dpJc7uc2pQjYPYOxVlcevllo4=;
+	b=cQJQUcUi5yOh77dyCFOTIrbDh8rKqXqeHA72B1xDaV2Ff52Cl9/9HWh3Y5t2DlMYipteus
+	puWbtEuT0ByKTvohNtJ6TE8h1M05d5UFyIOas+fi12oFe8Ij1qcW75o9VGY0Pw4sXC8rLQ
+	NekHBwC/Yo24PEcsZhll084000BVaw0=
+Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
+ [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-662-pIyKQ34JMbS-gZ3KW32pxA-1; Sun, 08 Jun 2025 08:14:00 -0400
+X-MC-Unique: pIyKQ34JMbS-gZ3KW32pxA-1
+X-Mimecast-MFC-AGG-ID: pIyKQ34JMbS-gZ3KW32pxA_1749384839
+Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-b2fa1a84568so491682a12.1
+        for <fstests@vger.kernel.org>; Sun, 08 Jun 2025 05:13:59 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749223278; x=1749828078;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Eo60iPlJ1+P8iDdJIwyPfRXW8PCg2JHJVB0bmhwR9Os=;
-        b=XsbFMDqgbqDKbPuujJR26fi1NbF2oaXAFTvfKlEpWEqSB8sdeIAqvjX43ePCmoqzcl
-         ltnngUCXJ3wL7Iqc/hFitUIwdRo8ktkTwpkrCsyN5i8jlGQt6kFv1aFASkkcjEFfv2Wn
-         +cn4MBx7wZH0Ex6jSvwcrn0QtMxA/7O5tx0vUvOnDcY98j3BV8jkC4I75uuPhC9lOXdZ
-         5bGjpwH07Rj7yfKBlJZ5h/dTRd1aLieoiPoD1gdhiuim735w9reTy6JjXONodCmZVQIp
-         625HBBYMsz8p5/yxhPtjsMTDshlpqvT20wZIrMJO8xTJ5DaiWkuYwL4vwuwzsvuinFHl
-         6HBg==
-X-Forwarded-Encrypted: i=1; AJvYcCUC7EOcIck8nvKRPYmWRZdDe0bcOp2sG+Cl6wthWBsmQgADC5KAcNlR+W2mBUCVnyGGvAgQl2Ir@vger.kernel.org, AJvYcCWNuOVJLm5RfHrvp6ZQfgrG6exEctsxAlJ0d7qL4L94p0n1FyvIpyD1g1YS+6Xa2ak2NujbACJ5iWrJ0OtVSA==@vger.kernel.org
-X-Gm-Message-State: AOJu0Yye0jKm6MucTLMay8IpX5+NQ0Ces3Dp6ZeNF+ouPrPPIHdr2WEq
-	F4YZVBXAYqcczHeYhycnHXixHL9fbX8fOvEl2+z7UvhSpQdQ0ildSn2Og2oDyA70MDqUQKKLgdQ
-	Xtyzva9+mLwqYk4BCnOMOtaF1kgLqcyyF3dhD
-X-Gm-Gg: ASbGncttXErogcTRdv9BbH7VYnk2l9V5Ebw8ozzE1e/FiBvE4+uIpuwQtVV1ls/Xct6
-	HS7+cO2l8aKMUD7MH82VvOq7IDBpNHK8NdOnjHWFAT+1KBxnFrJZRlrONb+CF/XIv7JQSWW9TIi
-	Di/kBYSfiym/d8N0q9FNewl211GvKYPcVKnWfu2wBHTDA=
-X-Google-Smtp-Source: AGHT+IGTfsMUjZDtAo08Hv0b3VXPQQa2ORk6VZbTCKH1Scvdt0rSXpONrRYPUhMU1fe942bHXyTGPxbdOa5pycLZ0+E=
-X-Received: by 2002:a17:907:97d6:b0:ad5:c463:8d42 with SMTP id
- a640c23a62f3a-ade1a9164acmr389040566b.12.1749223277531; Fri, 06 Jun 2025
- 08:21:17 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1749384839; x=1749989639;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=gBaXOCUDiP13canSq8dpJc7uc2pQjYPYOxVlcevllo4=;
+        b=quYGrYqInoWdtZ11rroA2A1GwJQwz+m+hTht4z7Ez5JdDo16ev6brrBBAninoxfsRa
+         K2Qe+VXxowAekUd6igbGPJDcAGeUUA0OPbr9drnvv0nf2nTPfSGl3DD5nmxJRMSM14UD
+         0Bf6c+CqXJJJRMrVmIngvoCWZ+sEJJ8zQHBZ81ODVTNCrtX1kHRr1OLp8NGzpSvGwhIw
+         Y2AsQn+l7DH8AGXmawfHYURRaffIYTUTMYty90meDg0lSkX84NFQR9t/fUZ/PjqUVRM6
+         kZTqJ+uYns6Zyb7vDqS166b3BDguRS2ORjesgyuSKywSCvycHZlEhv91EYM8kvpOHOlf
+         N00Q==
+X-Forwarded-Encrypted: i=1; AJvYcCXvUqDCovBaTp3ydKVhV2uU3mV6yTTXmoK22Q7iGgqRjjuQJBeleQdEaIkZcra9H3d+iV2A7tLn@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz5bnIF25ugdSl2CC/fvWPlHcHHr4em0FbjzqjvM9Vk1lqSS+4j
+	HZrAegNsnBSF3CN7UVv84M7eUgZgQLZzyGLpCE56W9XZVUnDXQGM5nTE473XywgA1N+JGflx8IJ
+	7AubMtV8gygD0qCV5/TvC1Q6R+m7ICc5y1nFP55aA8zvhQnNDTvmwglT0ABs=
+X-Gm-Gg: ASbGncvU8d/xC25G+T+OuL2v1g+HhlxbUgDFlaT18VKX/yQUuEa3CWE4im6rVUgaACW
+	3p+qiOxNhhvD4z8bxwbFNuHVxhkdBhQxfw/48o0OR+juWkJig+1LKDhhpNaaSDHz2vU/CyGdw/w
+	f4bme8yEigC3tniV6bIE1KdBBUSDd6/l8VU9j/h267yRwY6lQWnOOlOMMTtAg170hK6zqhpG36E
+	GY5P24jndW/aHTJesf/p/5h8+3iV4spVi69cyCSCXLzdpHt6lrfFH0GX/v5+bh3K3eHPCSD05P+
+	/gRXcZbI90h3IrIDdBl2WLsfGbZjAH/PWSNAlAdZ4fBE4jdSzKh/JmEP3Wm2zC4=
+X-Received: by 2002:a05:6a21:6da0:b0:21f:56d0:65dc with SMTP id adf61e73a8af0-21f56d06839mr3172510637.13.1749384839023;
+        Sun, 08 Jun 2025 05:13:59 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHpNncbX0lV7YcYVl+1NdzBR4pEAqUL4jnqrMJ+X48TmDCPeCrrHuZyreiPVFWLkGqrqhcTZg==
+X-Received: by 2002:a05:6a21:6da0:b0:21f:56d0:65dc with SMTP id adf61e73a8af0-21f56d06839mr3172493637.13.1749384838645;
+        Sun, 08 Jun 2025 05:13:58 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b2f5ee70090sm3712571a12.28.2025.06.08.05.13.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 08 Jun 2025 05:13:58 -0700 (PDT)
+Date: Sun, 8 Jun 2025 20:13:54 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH] fstests: generic/741: make cleanup to handle test
+ failure properly
+Message-ID: <20250608121354.krwybs6scn5ovj7w@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250604235524.26356-1-wqu@suse.com>
+ <20250605171047.vl3u6j7yojbw6pfe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <dbf243a2-ac0e-437c-a308-9832f89ca274@gmx.com>
+ <20250606010622.imrfexkypzq5zpm6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <c966cbd6-3016-4735-9853-91a75144e429@gmx.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250603100745.2022891-1-amir73il@gmail.com> <20250603100745.2022891-2-amir73il@gmail.com>
- <20250605175129.oqqzr5qluxv52m6b@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAOQ4uxg2D-ED3vy=jedEKbpEJvWBLD=QYtfp=DCU3pQGGCaGog@mail.gmail.com>
- <20250606011223.gx6xearyoqae5byp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAOQ4uxh9b285dnw+SO2h6HqtNC5Xog0TQSqhFAQaV1brBnVxVQ@mail.gmail.com> <bdd067c5-6115-4190-9e64-019607e9cc30@igalia.com>
-In-Reply-To: <bdd067c5-6115-4190-9e64-019607e9cc30@igalia.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 6 Jun 2025 17:21:06 +0200
-X-Gm-Features: AX0GCFvSpr_S-9LvKVn-6cm7_FJlJnRw4mstzFf13W3j49wChPL7yJvUocIwLzo
-Message-ID: <CAOQ4uxj1Xte5VoHK-XwqttbU17Ou82BJ+uP75UMCXFN0=h12vg@mail.gmail.com>
-Subject: Re: [PATCH v2 1/6] overlay: workaround libmount failure to remount,ro
-To: =?UTF-8?Q?Andr=C3=A9_Almeida?= <andrealmeid@igalia.com>
-Cc: Zorro Lang <zlang@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, 
-	Christian Brauner <brauner@kernel.org>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org, 
-	Karel Zak <kzak@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <c966cbd6-3016-4735-9853-91a75144e429@gmx.com>
 
-On Fri, Jun 6, 2025 at 4:23=E2=80=AFPM Andr=C3=A9 Almeida <andrealmeid@igal=
-ia.com> wrote:
->
-> Hi Amir,
->
-> On 6/6/25 09:35, Amir Goldstein wrote:
-> > On Fri, Jun 6, 2025 at 3:12=E2=80=AFAM Zorro Lang <zlang@redhat.com> wr=
-ote:
-> >> On Thu, Jun 05, 2025 at 08:30:53PM +0200, Amir Goldstein wrote:
-> >>> On Thu, Jun 5, 2025 at 7:51=E2=80=AFPM Zorro Lang <zlang@redhat.com> =
-wrote:
-> >>>> On Tue, Jun 03, 2025 at 12:07:40PM +0200, Amir Goldstein wrote:
-> >>>>> libmount >=3D v1.39 calls several unneeded fsconfig() calls to reco=
-nfigure
-> >>>>> lowerdir/upperdir when user requests only -o remount,ro.
-> >>>>>
-> >>>>> Those calls fail because overlayfs does not allow making any config
-> >>>>> changes with new mount api, besides MS_RDONLY.
-> >>>>>
-> >>>>> We workaround this problem with --options-mode ignore.
-> >>>>>
-> >>>>> Reported-by: Andr=C3=A9 Almeida <andrealmeid@igalia.com>
-> >>>>> Suggested-by: Karel Zak <kzak@redhat.com>
-> >>>>> Link: https://lore.kernel.org/linux-fsdevel/20250521-ovl_ro-v1-1-23=
-50b1493d94@igalia.com/
-> >>>>> Link: https://lore.kernel.org/fstests/CAJfpegtJ3SDKmC80B4AfWiC3JmtW=
-dW2+78fRZVtsuhe-wSRPvg@mail.gmail.com/
-> >>>>> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> >>>>> ---
-> >>>>>
-> >>>>> Changes since v1 [1]:
-> >>>>> - Change workaround from LIBMOUNT_FORCE_MOUNT2 to --options-mode=3D=
-ignore
-> >>>>>
-> >>>>> [1] https://lore.kernel.org/fstests/20250526143500.1520660-1-amir73=
-il@gmail.com/
-> >>>> I'm not sure if I understand clearly. Does overlay list are fixing t=
-his issue
-> >>>> on kernel side, then providing a workaround to fstests to avoid the =
-issue be
-> >>>> triggered too?
-> >>>>
-> >>> Noone agreed to fix it on the kernel side.
-> >>> At least not yet.
-> >> If so, I have two questions:)
-> >> 1) Will overlay fix it on kernel or mount util side?
-> > This is not known at this time.
->
-> Do you know how calling fsconfig() in a "redundant" way behaves in other
-> filesystems? Do they allow to call fsconfig() calls that doesn't change
-> the state, like a noop?
->
+On Fri, Jun 06, 2025 at 03:30:58PM +0930, Qu Wenruo wrote:
+> 
+> 
+> 在 2025/6/6 10:36, Zorro Lang 写道:
+> > On Fri, Jun 06, 2025 at 07:39:56AM +0930, Qu Wenruo wrote:
+> > > 
+> > > 
+> > > 在 2025/6/6 02:40, Zorro Lang 写道:
+> > > > On Thu, Jun 05, 2025 at 09:25:24AM +0930, Qu Wenruo wrote:
+> > > > > [BUG]
+> > > > > When I was tinkering the bdev open holder parameter, it caused a bug
+> > > > > that it no longer rejects mounting the underlying device of a
+> > > > > device-mapper.
+> > > > > 
+> > > > > And the test case properly detects the regression:
+> > > > > 
+> > > > > generic/741 1s ... umount: /mnt/test: target is busy.
+> > > > > _check_btrfs_filesystem: filesystem on /dev/mapper/test-test is inconsistent
+> > > > > (see /home/adam/xfstests/results//generic/741.full for details)
+> > > > > Trying to repair broken TEST_DEV file system
+> > > > > _check_btrfs_filesystem: filesystem on /dev/mapper/test-scratch1 is inconsistent
+> > > > > (see /home/adam/xfstests/results//generic/741.full for details)
+> > > > > - output mismatch (see /home/adam/xfstests/results//generic/741.out.bad)
+> > > > >       --- tests/generic/741.out	2024-04-06 08:10:44.773333344 +1030
+> > > > >       +++ /home/adam/xfstests/results//generic/741.out.bad	2025-06-05 09:18:03.675049206 +0930
+> > > > >       @@ -1,3 +1,2 @@
+> > > > >        QA output created by 741
+> > > > >       -mount: TEST_DIR/extra_mnt: SCRATCH_DEV already mounted or mount point busy
+> > > > >       -mount: TEST_DIR/extra_mnt: SCRATCH_DEV already mounted or mount point busy
+> > > > >       +rm: cannot remove '/mnt/test/extra_mnt': Device or resource busy
+> > > > >       ...
+> > > > >       (Run 'diff -u /home/adam/xfstests/tests/generic/741.out /home/adam/xfstests/results//generic/741.out.bad'  to see the entire diff)
+> > > > > 
+> > > > > The problem is, all later test will fail, because the $SCRATCH_DEV is
+> > > > > still mounted at $extra_mnt:
+> > > > > 
+> > > > >    TEST_DEV=/dev/mapper/test-test is mounted but not on TEST_DIR=/mnt/test - aborting
+> > > > >    Already mounted result:
+> > > > >    /dev/mapper/test-test /mnt/test /dev/mapper/test-test /mnt/test
+> > > > > 
+> > > > > [CAUSE]
+> > > > > The test case itself is doing two expected-to-fail mounts, but the
+> > > > > cleanup function is only doing unmount once, if the mount succeeded
+> > > > > unexpectedly, the $SCRATCH_DEV will be mounted at $extra_mnt forever.
+> > > > > 
+> > > > > [ENHANCEMENT]
+> > > > > To avoid screwing up later test cases, do the $extra_mnt cleanup twice
+> > > > > to handle the unexpected mount success.
+> > > > > 
+> > > > > Signed-off-by: Qu Wenruo <wqu@suse.com>
+> > > > > ---
+> > > > >    tests/generic/741 | 4 ++++
+> > > > >    1 file changed, 4 insertions(+)
+> > > > > 
+> > > > > diff --git a/tests/generic/741 b/tests/generic/741
+> > > > > index cac7045e..c15dc434 100755
+> > > > > --- a/tests/generic/741
+> > > > > +++ b/tests/generic/741
+> > > > > @@ -13,6 +13,10 @@ _begin_fstest auto quick volume tempfsid
+> > > > >    # Override the default cleanup function.
+> > > > >    _cleanup()
+> > > > >    {
+> > > > > +	# If by somehow the fs mounted the underlying device (twice), we have
+> > > > > +	# to  make sure $extra_mnt is not mounted, or TEST_DEV can not be
+> > > > > +	# unmounted for fsck.
+> > > > > +	_unmount $extra_mnt &> /dev/null
+> > > > 
+> > > > Hmm... I'm not sure a "double" (even treble) umount is good solution for
+> > > > temporary "Device or resource busy" after umount. Many other cases might
+> > > > hit this problem sometimes.
+> > > > Maybe we can have a helper to do a certain umount which make sure the fs
+> > > > is truely umounted before returning :)
+> > > 
+> > > This is not about the umount after EBUSY.
+> > > 
+> > > The problem is, the test case itself is expecting two mounts to fail.
+> > > But if the mount succeeded, it will mount twice and need to be unmounted
+> > > twice.
+> > > 
+> > > It's to make the cleanup to match the test case's worst scenario.
+> > 
+> > Oh, sorry I didn't get your point. If so, how about _fail the case directly if
+> > the first mount (which should be failed) passed, e.g.
+> > 
+> >    diff --git a/tests/generic/741 b/tests/generic/741
+> >    index cac7045eb..5538b3a1b 100755
+> >    --- a/tests/generic/741
+> >    +++ b/tests/generic/741
+> >    @@ -44,6 +44,9 @@ mkdir -p $extra_mnt
+> >     # Filters alter the return code of the mount.
+> >     _mount $SCRATCH_DEV $extra_mnt 2>&1 | \
+> >                            _filter_testdir_and_scratch | _filter_error_mount
+> >    +if [ ${PIPESTATUS[0]} -eq 0 ];then
+> >    +       _fail "Unexpected mount pass"
+> >    +fi
+> > 
+> > Anyway, I can't say which way is better, both are good to me, depends on your
+> > choice :)
+> 
+> I thought it was recommended to let the test continue and rely on the golden
+> output to detect errors.
+> 
+> I'm fine either way. This is only triggered because I did cause a regression
+> during my development.
+> 
+> There is no real world hit (yet), so it's not that urgent.
 
-I don't know. didn't do a survey.
-"We did this until now"
-Is not a good enough reason to keep doing the same workarounds
-in the kernel IMO.
+OK, this patch is good to me:
 
-Thanks,
-Amir.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+> 
+> Thanks,
+> Qu
+> 
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > > 
+> > > Thanks,
+> > > Qu
+> > > 
+> > > > 
+> > > > Thanks,
+> > > > Zorro
+> > > > 
+> > > > >    	_unmount $extra_mnt &> /dev/null
+> > > > >    	rm -rf $extra_mnt
+> > > > >    	_unmount_flakey
+> > > > > -- 
+> > > > > 2.49.0
+> > > > > 
+> > > > > 
+> > > > 
+> > > > 
+> > > 
+> > 
+> 
+> 
+
