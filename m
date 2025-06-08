@@ -1,82 +1,83 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D8CF1DE89B
-	for <fstests@vger.kernel.org>; Sun,  8 Jun 2025 12:14:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 36BBCB66E
+	for <fstests@vger.kernel.org>; Sun,  8 Jun 2025 12:35:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749384844; cv=none; b=dE9FiQMMTIh83WWINU/3G1T/VUPCykWNX4MiI70YqtTQfG9ykLav3TF5/Fp5vIh8hynsn7t0oAQuFN7HK4vzt+iYNnK6a+cTWnlPC6xkFfyWagLKy9oSgVTDWPRBlGxB1ous4imR5mlqtcnkuycCCtGrjioEdbEAK+SHdv0aVzI=
+	t=1749386146; cv=none; b=OLFn/+/QTmJwspj91A+MFUA3GUgtWrM+lP1Ay7dx7Hc/Gr6AOyVNnRq5MD5XB50SNa774RvDK+GvYMobhLla/ZY7wRodEwmChrWX44FqgXlXb28UBFOSxtEZsNEoteGXpPizZ+kKRiq258FAg6b7gqjUPuHO/KQRGNbnWXOCKD4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749384844; c=relaxed/simple;
-	bh=oVuRnXNqj89eT9fDXrnTTRsoIsCkWPZ0ygTWAyPcnao=;
+	s=arc-20240116; t=1749386146; c=relaxed/simple;
+	bh=/dXDwD9c9e8K4uD6TABY7VOGZAKQiSYHFHx66rJnTcc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=tH6YnBCEzt5sFIealtnjtZjK1flSE0w7de0JjfpKM57gkKEQS6x9RceT4EwQq0fs8teruW8kWjLGBG1lxzR78w+Jeppexsb2wLzArWd/XlC45mkxC3MzbgYnMNtvjgjalHSyUNwKFjj90QNb0bmujn0SgqjYc/hKxedZ+FP+GbY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=cQJQUcUi; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=jr6XchNRYBX2k2RJM/WPC/Siso0QFub28/fCSLnYxbHr4YdNV9SBeCzbYXi6pdxKts+MI28+j0NIb2ja3R3x0OQoxDacnFiE+BwoRucneU41B/3WxlRXy0FnSpdnBodcHXPdbMaP5LDsgHB0Ja4IbNhlweah5Qtnoa7+Gft0Ook=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=IQ8Ksmdh; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cQJQUcUi"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="IQ8Ksmdh"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1749384841;
+	s=mimecast20190719; t=1749386143;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=gBaXOCUDiP13canSq8dpJc7uc2pQjYPYOxVlcevllo4=;
-	b=cQJQUcUi5yOh77dyCFOTIrbDh8rKqXqeHA72B1xDaV2Ff52Cl9/9HWh3Y5t2DlMYipteus
-	puWbtEuT0ByKTvohNtJ6TE8h1M05d5UFyIOas+fi12oFe8Ij1qcW75o9VGY0Pw4sXC8rLQ
-	NekHBwC/Yo24PEcsZhll084000BVaw0=
-Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
- [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=Nyh101ASlbwECNUhgUeKqsoWEBRRF+mEQ1Rp5ar6Jlo=;
+	b=IQ8KsmdhVrxoxcP73roFVrqeF+huM96EK7Pgg9ybjbR9xDuzbA5H3qTyUCmQbIyiY5YX0O
+	XGNqUynIsjx38M/+zv4yETcGxF9qn3m62LvWtCjBv3f8oZGnVX8ZzfGhONAEs9EsJN1Gh/
+	omSzAmRyDkOfEb4DQ6jszN0B6g4nutM=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-662-pIyKQ34JMbS-gZ3KW32pxA-1; Sun, 08 Jun 2025 08:14:00 -0400
-X-MC-Unique: pIyKQ34JMbS-gZ3KW32pxA-1
-X-Mimecast-MFC-AGG-ID: pIyKQ34JMbS-gZ3KW32pxA_1749384839
-Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-b2fa1a84568so491682a12.1
-        for <fstests@vger.kernel.org>; Sun, 08 Jun 2025 05:13:59 -0700 (PDT)
+ us-mta-479-Al1MpH-GNa222UAAG8p9CQ-1; Sun, 08 Jun 2025 08:35:39 -0400
+X-MC-Unique: Al1MpH-GNa222UAAG8p9CQ-1
+X-Mimecast-MFC-AGG-ID: Al1MpH-GNa222UAAG8p9CQ_1749386139
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-31315427249so4125828a91.1
+        for <fstests@vger.kernel.org>; Sun, 08 Jun 2025 05:35:39 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749384839; x=1749989639;
+        d=1e100.net; s=20230601; t=1749386139; x=1749990939;
         h=in-reply-to:content-transfer-encoding:content-disposition
          :mime-version:references:message-id:subject:cc:to:from:date
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=gBaXOCUDiP13canSq8dpJc7uc2pQjYPYOxVlcevllo4=;
-        b=quYGrYqInoWdtZ11rroA2A1GwJQwz+m+hTht4z7Ez5JdDo16ev6brrBBAninoxfsRa
-         K2Qe+VXxowAekUd6igbGPJDcAGeUUA0OPbr9drnvv0nf2nTPfSGl3DD5nmxJRMSM14UD
-         0Bf6c+CqXJJJRMrVmIngvoCWZ+sEJJ8zQHBZ81ODVTNCrtX1kHRr1OLp8NGzpSvGwhIw
-         Y2AsQn+l7DH8AGXmawfHYURRaffIYTUTMYty90meDg0lSkX84NFQR9t/fUZ/PjqUVRM6
-         kZTqJ+uYns6Zyb7vDqS166b3BDguRS2ORjesgyuSKywSCvycHZlEhv91EYM8kvpOHOlf
-         N00Q==
-X-Forwarded-Encrypted: i=1; AJvYcCXvUqDCovBaTp3ydKVhV2uU3mV6yTTXmoK22Q7iGgqRjjuQJBeleQdEaIkZcra9H3d+iV2A7tLn@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz5bnIF25ugdSl2CC/fvWPlHcHHr4em0FbjzqjvM9Vk1lqSS+4j
-	HZrAegNsnBSF3CN7UVv84M7eUgZgQLZzyGLpCE56W9XZVUnDXQGM5nTE473XywgA1N+JGflx8IJ
-	7AubMtV8gygD0qCV5/TvC1Q6R+m7ICc5y1nFP55aA8zvhQnNDTvmwglT0ABs=
-X-Gm-Gg: ASbGncvU8d/xC25G+T+OuL2v1g+HhlxbUgDFlaT18VKX/yQUuEa3CWE4im6rVUgaACW
-	3p+qiOxNhhvD4z8bxwbFNuHVxhkdBhQxfw/48o0OR+juWkJig+1LKDhhpNaaSDHz2vU/CyGdw/w
-	f4bme8yEigC3tniV6bIE1KdBBUSDd6/l8VU9j/h267yRwY6lQWnOOlOMMTtAg170hK6zqhpG36E
-	GY5P24jndW/aHTJesf/p/5h8+3iV4spVi69cyCSCXLzdpHt6lrfFH0GX/v5+bh3K3eHPCSD05P+
-	/gRXcZbI90h3IrIDdBl2WLsfGbZjAH/PWSNAlAdZ4fBE4jdSzKh/JmEP3Wm2zC4=
-X-Received: by 2002:a05:6a21:6da0:b0:21f:56d0:65dc with SMTP id adf61e73a8af0-21f56d06839mr3172510637.13.1749384839023;
-        Sun, 08 Jun 2025 05:13:59 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHpNncbX0lV7YcYVl+1NdzBR4pEAqUL4jnqrMJ+X48TmDCPeCrrHuZyreiPVFWLkGqrqhcTZg==
-X-Received: by 2002:a05:6a21:6da0:b0:21f:56d0:65dc with SMTP id adf61e73a8af0-21f56d06839mr3172493637.13.1749384838645;
-        Sun, 08 Jun 2025 05:13:58 -0700 (PDT)
+        bh=Nyh101ASlbwECNUhgUeKqsoWEBRRF+mEQ1Rp5ar6Jlo=;
+        b=VJ65U6i7QmZevmcBxVxuDqr6+wNPy0jztgy/R0mvK7ybgRY9IczJ3CupmK4zF4PYzj
+         14vLttHzgeA8KBObTuMGPcchS9XGZ8psB/zs+10dowgjVZ1Co+n3cGl05gy+HFqbERWu
+         fy6XiIvsqRT3V+v/TmWH9n4nssFxwR3GrpyDbS+7RjuGoElSxWSlyWbXbGVLUfJBoW44
+         ehkWJ8K7GpGB4oqwTWeirsmr6QW8yilI/p23TojRzfYonmWLNKH9u/SRtYF9MJ49jMj5
+         e6U6/7NXtvtCSX3pOeag6EOwJ6K8CHXGLqQso+xvMWNXFmYWZ1O3CCheFr+ZE2b0wOS7
+         ck3g==
+X-Forwarded-Encrypted: i=1; AJvYcCXf6FlhLM3f61ykeggcYykzR+mvonky4zfBpRCBo4CtdSK/0bqGMAFfDK4e81yfeh/srCYDx/39@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy5cnLvVTer/p0SD4nmY7j0FJzYcLmO4CMrkYDSHSMh2UFFlu7Z
+	XXmf1774Dsl2vuBW3S/ugmUKHYE+3FrXR7Q8U1qmUnhAQg+LAjgjnHfZSMZER6X6S/l0ENrlWzN
+	kR3/lsxrtX0RUUhK952QtlE6yVu+bTqgfVVw3eMjnGwYIlmZ+ukhdzmvfids=
+X-Gm-Gg: ASbGncuZ8te6rz7rYRgo63Ik5gxNNOGBm6MJ7ahfn60zin8CtBOYTnRlg5xkcJRuKkk
+	vvVghgKvuaY383Yf/K9r6RO+/2yYklGI7MEGcVqdZuLCA+G3ztARSd9fudx/ia9iQCh2B/6xbY/
+	3PmPZDaMtYGayqIus/ne+FI/HDi4ndGpRjeWWScnazt0nUfly03jZ438eKZD/ShsZxRHglSaQB7
+	RXPnSpjVl0Gvyed3VrkYFPpBJHndmZYSfM1IFELNRNZZHwgTrbGCkH1/inDAzhmiUmvRmU5qcl0
+	aJ1yAdDnbu1Xrt4IBaWZY61Y8Ryuo3no1/pUjSQ4Zxs56I5dRf58DZTw3M0q8Ss=
+X-Received: by 2002:a17:90b:164a:b0:301:9f62:a944 with SMTP id 98e67ed59e1d1-3134769f73dmr14967409a91.33.1749386138795;
+        Sun, 08 Jun 2025 05:35:38 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGgRvnPyG9BoTqzDIt/6nRk1DxN+1hhnE8n1De8r7EAlZn6BDSUVuHtJEh2F4Szeyv8HKjqdQ==
+X-Received: by 2002:a17:90b:164a:b0:301:9f62:a944 with SMTP id 98e67ed59e1d1-3134769f73dmr14967386a91.33.1749386138422;
+        Sun, 08 Jun 2025 05:35:38 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b2f5ee70090sm3712571a12.28.2025.06.08.05.13.56
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3134b13b45dsm4360147a91.37.2025.06.08.05.35.36
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 08 Jun 2025 05:13:58 -0700 (PDT)
-Date: Sun, 8 Jun 2025 20:13:54 +0800
+        Sun, 08 Jun 2025 05:35:37 -0700 (PDT)
+Date: Sun, 8 Jun 2025 20:35:33 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: generic/741: make cleanup to handle test
- failure properly
-Message-ID: <20250608121354.krwybs6scn5ovj7w@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250604235524.26356-1-wqu@suse.com>
- <20250605171047.vl3u6j7yojbw6pfe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <dbf243a2-ac0e-437c-a308-9832f89ca274@gmx.com>
- <20250606010622.imrfexkypzq5zpm6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <c966cbd6-3016-4735-9853-91a75144e429@gmx.com>
+To: "Yuezhang.Mo@sony.com" <Yuezhang.Mo@sony.com>
+Cc: Amir Goldstein <amir73il@gmail.com>,
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	"Friendy.Su@sony.com" <Friendy.Su@sony.com>,
+	Christian Brauner <brauner@kernel.org>
+Subject: Re: [PATCH v1 7/7] generic/633: add test requirements
+Message-ID: <20250608123533.zdl4ehn265alpqei@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250528091530.1218188-1-Yuezhang.Mo@sony.com>
+ <20250528091530.1218188-8-Yuezhang.Mo@sony.com>
+ <CAOQ4uxihwu9-rqFEUboDaDV9onaip4N5QsbdU_xTZQ7MnBDCzA@mail.gmail.com>
+ <20250605141757.wx45cw2f5ets7hpr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <PUZPR04MB63167B990F5D144392C67EDD816EA@PUZPR04MB6316.apcprd04.prod.outlook.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -86,146 +87,125 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <c966cbd6-3016-4735-9853-91a75144e429@gmx.com>
+In-Reply-To: <PUZPR04MB63167B990F5D144392C67EDD816EA@PUZPR04MB6316.apcprd04.prod.outlook.com>
 
-On Fri, Jun 06, 2025 at 03:30:58PM +0930, Qu Wenruo wrote:
-> 
-> 
-> 在 2025/6/6 10:36, Zorro Lang 写道:
-> > On Fri, Jun 06, 2025 at 07:39:56AM +0930, Qu Wenruo wrote:
-> > > 
-> > > 
-> > > 在 2025/6/6 02:40, Zorro Lang 写道:
-> > > > On Thu, Jun 05, 2025 at 09:25:24AM +0930, Qu Wenruo wrote:
-> > > > > [BUG]
-> > > > > When I was tinkering the bdev open holder parameter, it caused a bug
-> > > > > that it no longer rejects mounting the underlying device of a
-> > > > > device-mapper.
-> > > > > 
-> > > > > And the test case properly detects the regression:
-> > > > > 
-> > > > > generic/741 1s ... umount: /mnt/test: target is busy.
-> > > > > _check_btrfs_filesystem: filesystem on /dev/mapper/test-test is inconsistent
-> > > > > (see /home/adam/xfstests/results//generic/741.full for details)
-> > > > > Trying to repair broken TEST_DEV file system
-> > > > > _check_btrfs_filesystem: filesystem on /dev/mapper/test-scratch1 is inconsistent
-> > > > > (see /home/adam/xfstests/results//generic/741.full for details)
-> > > > > - output mismatch (see /home/adam/xfstests/results//generic/741.out.bad)
-> > > > >       --- tests/generic/741.out	2024-04-06 08:10:44.773333344 +1030
-> > > > >       +++ /home/adam/xfstests/results//generic/741.out.bad	2025-06-05 09:18:03.675049206 +0930
-> > > > >       @@ -1,3 +1,2 @@
-> > > > >        QA output created by 741
-> > > > >       -mount: TEST_DIR/extra_mnt: SCRATCH_DEV already mounted or mount point busy
-> > > > >       -mount: TEST_DIR/extra_mnt: SCRATCH_DEV already mounted or mount point busy
-> > > > >       +rm: cannot remove '/mnt/test/extra_mnt': Device or resource busy
-> > > > >       ...
-> > > > >       (Run 'diff -u /home/adam/xfstests/tests/generic/741.out /home/adam/xfstests/results//generic/741.out.bad'  to see the entire diff)
-> > > > > 
-> > > > > The problem is, all later test will fail, because the $SCRATCH_DEV is
-> > > > > still mounted at $extra_mnt:
-> > > > > 
-> > > > >    TEST_DEV=/dev/mapper/test-test is mounted but not on TEST_DIR=/mnt/test - aborting
-> > > > >    Already mounted result:
-> > > > >    /dev/mapper/test-test /mnt/test /dev/mapper/test-test /mnt/test
-> > > > > 
-> > > > > [CAUSE]
-> > > > > The test case itself is doing two expected-to-fail mounts, but the
-> > > > > cleanup function is only doing unmount once, if the mount succeeded
-> > > > > unexpectedly, the $SCRATCH_DEV will be mounted at $extra_mnt forever.
-> > > > > 
-> > > > > [ENHANCEMENT]
-> > > > > To avoid screwing up later test cases, do the $extra_mnt cleanup twice
-> > > > > to handle the unexpected mount success.
-> > > > > 
-> > > > > Signed-off-by: Qu Wenruo <wqu@suse.com>
-> > > > > ---
-> > > > >    tests/generic/741 | 4 ++++
-> > > > >    1 file changed, 4 insertions(+)
-> > > > > 
-> > > > > diff --git a/tests/generic/741 b/tests/generic/741
-> > > > > index cac7045e..c15dc434 100755
-> > > > > --- a/tests/generic/741
-> > > > > +++ b/tests/generic/741
-> > > > > @@ -13,6 +13,10 @@ _begin_fstest auto quick volume tempfsid
-> > > > >    # Override the default cleanup function.
-> > > > >    _cleanup()
-> > > > >    {
-> > > > > +	# If by somehow the fs mounted the underlying device (twice), we have
-> > > > > +	# to  make sure $extra_mnt is not mounted, or TEST_DEV can not be
-> > > > > +	# unmounted for fsck.
-> > > > > +	_unmount $extra_mnt &> /dev/null
-> > > > 
-> > > > Hmm... I'm not sure a "double" (even treble) umount is good solution for
-> > > > temporary "Device or resource busy" after umount. Many other cases might
-> > > > hit this problem sometimes.
-> > > > Maybe we can have a helper to do a certain umount which make sure the fs
-> > > > is truely umounted before returning :)
-> > > 
-> > > This is not about the umount after EBUSY.
-> > > 
-> > > The problem is, the test case itself is expecting two mounts to fail.
-> > > But if the mount succeeded, it will mount twice and need to be unmounted
-> > > twice.
-> > > 
-> > > It's to make the cleanup to match the test case's worst scenario.
+On Fri, Jun 06, 2025 at 02:31:52AM +0000, Yuezhang.Mo@sony.com wrote:
+> > On Wed, May 28, 2025 at 12:56:55PM +0200, Amir Goldstein wrote:
+> > > On Wed, May 28, 2025 at 11:15 AM Yuezhang Mo <Yuezhang.Mo@sony.com> wrote:
+> > > >
+> > > > Since the following test requirements are required by the following
+> > > > sub-tests, this commit adds them to this test to avoid failures on
+> > > > filesystems that do not support them.
+> > > >
+> > > > requirement | sub-tests
+> > > > ------------+-------------------------------------------------------
+> > > > hardlink    | hardlink_crossing_mounts tcore_fsids_mapped
+> > > >             | tcore_hardlink_crossing_idmapped_mounts
+> > > >             | tcore_hardlink_from_idmapped_mount
+> > > >             | tcore_hardlink_from_idmapped_mount_in_userns
+> > > > ------------|-------------------------------------------------------
+> > > > symlink     | protected_symlinks symlink_regular_mounts
+> > > >             | tcore_create_in_userns tcore_symlink_idmapped_mounts
+> > > >             | tcore_symlink_idmapped_mounts_in_userns
+> > > > ------------|-------------------------------------------------------
+> > > > chown       | hardlink_crossing_mounts rename_crossing_mounts
+> > > >             | setid_binaries sticky_bit_unlink
+> > > >             | symlink_regular_mounts tcore_acls
+> > > >             | tcore_hardlink_crossing_idmapped_mounts
+> > > >             | tcore_hardlink_from_idmapped_mount
+> > > >             | tcore_protected_symlinks_idmapped_mounts
+> > > >             | tcore_rename_crossing_idmapped_mounts
+> > > >             | tcore_rename_from_idmapped_mount
+> > > >             | tcore_setattr_truncate_idmapped_in_userns
+> > > >             | tcore_setid_binaries_idmapped_mounts
+> > > >             | tcore_setid_binaries_idmapped_mounts_in_userns
+> > > >             | tcore_setid_binaries_idmapped_mounts_in_userns_separate_userns
+> > > >             | tcore_sticky_bit_unlink_idmapped_mounts
+> > > >             | tcore_sticky_bit_unlink_idmapped_mounts_in_userns
+> > > >             | tcore_sticky_bit_rename_idmapped_mounts
+> > > >             | tcore_sticky_bit_rename_idmapped_mounts_in_userns
+> > > > ------------|-------------------------------------------------------
+> > > > chmod       | protected_symlinks
+> > > >             | tcore_protected_symlinks_idmapped_mounts_in_userns
+> > > > ------------|-------------------------------------------------------
+> > > > io_uring    | io_uring io_uring_userns tcore_io_uring_idmapped_userns
+> > > >             | tcore_io_uring_idmapped_unmapped
+> > > >             | tcore_io_uring_idmapped_unmapped_userns
+> > > > ------------|-------------------------------------------------------
+> > > > mknod       | tcore_expected_uid_gid_idmapped_mounts
+> > > >
+> > > > Signed-off-by: Yuezhang Mo <Yuezhang.Mo@sony.com>
+> > > > Reviewed-by: Friendy Su <friendy.su@sony.com>
+> > > > ---
+> > > >  tests/generic/633 | 6 ++++++
+> > > >  1 file changed, 6 insertions(+)
+> > > >
+> > > > diff --git a/tests/generic/633 b/tests/generic/633
+> > > > index f58dbbf5..e19a2043 100755
+> > > > --- a/tests/generic/633
+> > > > +++ b/tests/generic/633
+> > > > @@ -13,6 +13,12 @@ _begin_fstest auto quick atime attr cap idmapped io_uring mount perms rw unlink
+> > > >  . ./common/filter
+> > > >
+> > > >  _require_idmapped_mounts
+> > >
+> > > Please note that the requirement above is wrong:
+> > >
+> > > https://lore.kernel.org/fstests/20250526175437.1528310-1-amir73il@gmail.com/
+> > >
+> > > > +_require_hardlinks
+> > > > +_require_symlinks
+> > > > +_require_chown
+> > > > +_require_chmod
+> > > > +_require_io_uring
+> > > > +_require_mknod
+> > >
+> > > I wonder if it makes more sense to have a collective check for all (or
+> > > most) of the above,
+> > > e.g. _require_vfstest, which is different than _require_idmapped_mounts,
+> > > so that we do not have to add all of these for tests running
+> > > other vfstests subtests in the future.
 > > 
-> > Oh, sorry I didn't get your point. If so, how about _fail the case directly if
-> > the first mount (which should be failed) passed, e.g.
+> > Yeah, and some _require_ looks optional, e.g. _require_io_uring, why is it a
+> > necessary requirement, we even run xfstests with io_uring. If so, we don't do
+> > vfstest if io_uring isn't supported?
+> 
+> OK, I will removed '_require_io_uring'.
+> 
 > > 
-> >    diff --git a/tests/generic/741 b/tests/generic/741
-> >    index cac7045eb..5538b3a1b 100755
-> >    --- a/tests/generic/741
-> >    +++ b/tests/generic/741
-> >    @@ -44,6 +44,9 @@ mkdir -p $extra_mnt
-> >     # Filters alter the return code of the mount.
-> >     _mount $SCRATCH_DEV $extra_mnt 2>&1 | \
-> >                            _filter_testdir_and_scratch | _filter_error_mount
-> >    +if [ ${PIPESTATUS[0]} -eq 0 ];then
-> >    +       _fail "Unexpected mount pass"
-> >    +fi
-> > 
-> > Anyway, I can't say which way is better, both are good to me, depends on your
-> > choice :)
+> > Although we can add as many as possible _require_* checks to a test case, but
+> > more _require_* take more time to run. So I think we'd better to add "missed"
+> > _require_* for specific test failure on someone fs, not only "I reviewed the
+> > code, so I feel all of these are needed"
 > 
-> I thought it was recommended to let the test continue and rely on the golden
-> output to detect errors.
+> Do you mean we should check these requirements only for some specific fs?
+> Like this.
 > 
-> I'm fine either way. This is only triggered because I did cause a regression
-> during my development.
-> 
-> There is no real world hit (yet), so it's not that urgent.
+> if [ "${FSTYP}" == "exfat" ]; then
+>       _require_hardlinks
+>       _require_symlinks
+>       _require_chown
+>       _require_chmod
+>      _require_mknod
+> fi
 
-OK, this patch is good to me:
+No, of course not :)
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+I mean if one case *can* have 100 _require_ conditions in theory, we don't need to
+write all 100 _require_ conditions.
+
+As you've removed _require_io_uring, I hope you can make sure if there're more
+"optional" _require_ conditions. On the other words, if there're some tests
+might be run or might not (likes io_uring).
+
+Thanks,
+Zorro
 
 > 
-> Thanks,
-> Qu
+> I think this is not good, firstly because it is hard to maintain(other fs may also
+> need these checks), and secondly because checking these requirements does
+> not take much time (in my environment it takes less than a second).
 > 
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > Thanks,
-> > > Qu
-> > > 
-> > > > 
-> > > > Thanks,
-> > > > Zorro
-> > > > 
-> > > > >    	_unmount $extra_mnt &> /dev/null
-> > > > >    	rm -rf $extra_mnt
-> > > > >    	_unmount_flakey
-> > > > > -- 
-> > > > > 2.49.0
-> > > > > 
-> > > > > 
-> > > > 
-> > > > 
-> > > 
-> > 
 > 
 > 
 
