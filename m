@@ -1,334 +1,283 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33EC32451F3
-	for <fstests@vger.kernel.org>; Sun,  8 Jun 2025 13:16:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A6AA019EEC2
+	for <fstests@vger.kernel.org>; Sun,  8 Jun 2025 13:54:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749388587; cv=none; b=UXOmW9/Nfm3M54SwEr/HgP2V09U27G5sQdNK5tgzxPR3yvf3qwfotyIYeIf+BK9ccdMeJnUBCO9/jJ1UpWobA4TF6wfAS+p6v+TXHltmw8M3AOogrkKcx/QDoE5LK9d8ukKdXApkZ41VFl70dNzxXqx1FE48Tpm3eHV3Crr0Gpg=
+	t=1749390841; cv=none; b=GOaIslQGWYipWuPHsIEd05Ou8Akt1u5G9OLZ9fIVcuays6tk6gLhGx8RQB7HpihHbXg5Kt46W0MHwK00WugbD/ziMzdUg/oigeLgLi4pyE6bRyo8NPNzMpvhvufby77krUJKQTQDyRqMPVHiyUISuJjbwWfV0Rbc7vmhU4EHOGw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749388587; c=relaxed/simple;
-	bh=z5Rb9NaOorelcpOOmYbHt5U2BUKoUix67idI9T/2vJc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=bxZz2YW9LVkchqh26zCk1LGRMMRmeslffSHmcNu75gHyB5kATFt9xsq4+HQUnK1bZV7sQX4FWk08IQ5q7v5bnxmMvtAlCGzBpcrcNaUu3PuIoZQCSKcFC9YjCL+izx9Ug1+hDIY7ymTijqMQz82dM91Mmcwi8kypICF3uJo48Zs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=OJhqPumQ; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1749390841; c=relaxed/simple;
+	bh=a+xiqmE8RFRV0JnRKGkrAPFw7NsQq60GLUxYvfhBgaw=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=cZdKKE3GHCDnWIHME/tfGzIFcJN+DTl98e86H5DPjKRekxciVZ1662CK+GLT2yfG52vy3qYw7QkTa6ahqxDSo9mPkGQbzvF17fK8d7blDcEuhralvVfC6xV7IdAqEITOIi61nrbCydiDJZwvuZxl9xmmStj21zrQWH5g39YN4NU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=H5blWJE1; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OJhqPumQ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1749388584;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=TFburNEhInKXG/A3BJhU5nsx+v2WT6nnYGCasvpEeTw=;
-	b=OJhqPumQcKHRx1YlJhlq+0yRDEClUjDWx5/l5c3RmrKuLp9U8chFCWIg84+76FobmEy83J
-	eOT0zAkWFLNPGfU0FrJL0IIO8faI0iobEJVUN0aP+ebyTbUel1BU3pSsEZ8MNMSmubUzik
-	HStFa2fjpZvz8+THRxCV7Tbuo/Ismwg=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-185-fB7n9LL8OKqZaYVrCvt8pA-1; Sun, 08 Jun 2025 09:16:22 -0400
-X-MC-Unique: fB7n9LL8OKqZaYVrCvt8pA-1
-X-Mimecast-MFC-AGG-ID: fB7n9LL8OKqZaYVrCvt8pA_1749388582
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-747d29e90b4so2603160b3a.0
-        for <fstests@vger.kernel.org>; Sun, 08 Jun 2025 06:16:22 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749388581; x=1749993381;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=TFburNEhInKXG/A3BJhU5nsx+v2WT6nnYGCasvpEeTw=;
-        b=kiE0IqXCthWxh3XyVo2Qzw4Mhiw+7yrbQsqTLb4qBFKlVWFmW4oXunv1D/h8W5Dh/B
-         aCS86IcEsYUgTXR4I7Eyds8utCaOpgTfrJeLqNoao69ijlmRUt/160zB3TUCu7heUO6j
-         JJLOBeg4yVBl5uOfhelI0IWelTbffqar2HRsnZl6bNDT9BILrkRnuMEOjcyet1UB3JyT
-         C0EaPr8I87cRW2EKajVz1iz0+o3uwhjVFTqsl4DAJzwjfLa92RgH0YBo47NUK2IRwSm6
-         s60qF4LDdOo5z435MsBvFN7EAfXXTlOqnyKXo7XA9RIcQ/bXtbU4+H+DrWAVSR56k6WM
-         u2KQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWkuJhV3YwzdMnX8DECYu7KqAs0nVmrEKfbiCs0ey2BF+ICITAwOlNmtiRjHzE6KsJxxAhJNrUm@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx/+HL69Ihu8O+LX5JX2zvfxTF9ivBSHsfVEawDjqH44nviadb+
-	ZDtJw2LttioVe6RDcuCglZPFKpsfr6em7k73Fidc9j6kP+cgbMvV5XckiIueomVaO89F5+hVFeF
-	TyRoqrdZgMhI4ryw73qT5K/83E55DpWRfV3td/JumitHl7O8RO3OHOnJAiuEInKQfPbM=
-X-Gm-Gg: ASbGncudr8m1mbsz9RrznHocA5Oa38KLSKdEgXdUu/GMSKKIvUbYAet6YP/oHtyV0su
-	8y96ncQswB4ND3Ttk+Ks4UesTvJIZAn/W+udIM3kjV2fPTM7lOPJF7oW/GlNoWlu7lSzButyt4Q
-	T3VB5BvlqGg2V64Muo00x/wjKi2XpREgzaKrcr3AmG5ISO/fPDVgIOSLEemDGjNf6UiSjSD2HPQ
-	AC6YKA39k1+SW8tM/XC7Ku9jpIM6H41ytjZAzM/phx2SIQ/HLLz4pN4frdGpQS9N2TuqDwPnE5q
-	q8OtcpeAPS2Wvsg1FbGype2Kvx512gViGN+shxFSRvCiNHVEROfJ
-X-Received: by 2002:a05:6a20:d80d:b0:1f5:8a1d:3904 with SMTP id adf61e73a8af0-21ee684e093mr15456110637.7.1749388581387;
-        Sun, 08 Jun 2025 06:16:21 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IF7meP8uCoSTs1izDHbmybR1fOFujEYC9T171jMFXC1gGgc/31j4hZBqlOEC3LQvQNc285TBw==
-X-Received: by 2002:a05:6a20:d80d:b0:1f5:8a1d:3904 with SMTP id adf61e73a8af0-21ee684e093mr15456077637.7.1749388581003;
-        Sun, 08 Jun 2025 06:16:21 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7482af7ab1fsm4175922b3a.54.2025.06.08.06.16.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 08 Jun 2025 06:16:20 -0700 (PDT)
-Date: Sun, 8 Jun 2025 21:16:16 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>,
-	Christian Brauner <brauner@kernel.org>,
-	=?utf-8?B?QW5kcsOp?= Almeida <andrealmeid@igalia.com>,
-	linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v2 4/6] generic/623: do not run with overlayfs
-Message-ID: <20250608131616.xf4dx2zwcwbapya3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250603100745.2022891-1-amir73il@gmail.com>
- <20250603100745.2022891-5-amir73il@gmail.com>
- <20250605173233.ndqsjo77ds3e35p5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAOQ4uxgQi6ciXtoKV7Nrw5_ECBOwS_m8h2KXT-ieJ4x4t04qag@mail.gmail.com>
- <20250606014531.d5t4gwx4iymqiqlo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAOQ4uxj_rshiLUUrCVS6RO+KhCeLrrgxNH+me3K38Nhc0Byqzw@mail.gmail.com>
- <20250606102909.77jj6txkqii7erpn@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAOQ4uxhwi9qF-j_XiTQCCy-OH77X2SG6_CGngUqUFfXz1X-SuA@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="H5blWJE1"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A1475C4CEEE;
+	Sun,  8 Jun 2025 13:54:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1749390841;
+	bh=a+xiqmE8RFRV0JnRKGkrAPFw7NsQq60GLUxYvfhBgaw=;
+	h=Date:From:To:Subject:From;
+	b=H5blWJE1pxF8Upz6dlfWBlT2qMyWhKavGtzCCjBm5XG0L4Y2qEJ/0IRdUEKJFRnl8
+	 V9Dhu4MBfFLCM452oKY/tEX68NGc7DL4vbfAYjSmy0ruF9n+qlsLVLymBSgIE1+npF
+	 Br8maqjNv2zCCfYkZYWlkn0LFk7uOnAhg9A89pzB6BOMq2sXLaUThVra6WnskomCbu
+	 eEaunYkmh5KBA1Y5ngxaerEEZzkMLk3cUkr1QW3zrt303ReOpy2e++zycUmlV7ZpoF
+	 ymYjPm1X+L2dfl730YtD7Uxs5wofLZoKY0Aq0K/pg8QJ2LpJ19Hnx2WDpi0zJ1spUO
+	 5bjwDLgC9ELGQ==
+Date: Sun, 08 Jun 2025 21:53:58 +0800
+Message-ID: <f1858d877638a8bffad5c90cecbf1fac@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2025.05.25 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="yBAsQh6zFXJm"
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAOQ4uxhwi9qF-j_XiTQCCy-OH77X2SG6_CGngUqUFfXz1X-SuA@mail.gmail.com>
 
-On Fri, Jun 06, 2025 at 02:12:21PM +0200, Amir Goldstein wrote:
-> On Fri, Jun 6, 2025 at 12:29 PM Zorro Lang <zlang@redhat.com> wrote:
-> >
-> > On Fri, Jun 06, 2025 at 09:23:26AM +0200, Amir Goldstein wrote:
-> > > On Fri, Jun 6, 2025 at 3:45 AM Zorro Lang <zlang@redhat.com> wrote:
-> > > >
-> > > > On Thu, Jun 05, 2025 at 08:38:30PM +0200, Amir Goldstein wrote:
-> > > > > On Thu, Jun 5, 2025 at 7:32 PM Zorro Lang <zlang@redhat.com> wrote:
-> > > > > >
-> > > > > > On Tue, Jun 03, 2025 at 12:07:43PM +0200, Amir Goldstein wrote:
-> > > > > > > This test performs shutdown via xfs_io -c shutdown.
-> > > > > > >
-> > > > > > > Overlayfs tests can use _scratch_shutdown, but they cannot use
-> > > > > > > "-c shutdown" xfs_io command without jumping through hoops, so by
-> > > > > > > default we do not support it.
-> > > > > > >
-> > > > > > > Add this condition to _require_xfs_io_command and add the require
-> > > > > > > statement to test generic/623 so it wont run with overlayfs.
-> > > > > > >
-> > > > > > > Reported-by: André Almeida <andrealmeid@igalia.com>
-> > > > > > > Tested-by: André Almeida <andrealmeid@igalia.com>
-> > > > > > > Link: https://lore.kernel.org/linux-fsdevel/20250521-ovl_ro-v1-1-2350b1493d94@igalia.com/
-> > > > > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > > > > > > ---
-> > > > > > >  common/rc         | 8 ++++++++
-> > > > > > >  tests/generic/623 | 1 +
-> > > > > > >  2 files changed, 9 insertions(+)
-> > > > > > >
-> > > > > > > diff --git a/common/rc b/common/rc
-> > > > > > > index d8ee8328..bffd576a 100644
-> > > > > > > --- a/common/rc
-> > > > > > > +++ b/common/rc
-> > > > > > > @@ -3033,6 +3033,14 @@ _require_xfs_io_command()
-> > > > > > >               touch $testfile
-> > > > > > >               testio=`$XFS_IO_PROG -c "syncfs" $testfile 2>&1`
-> > > > > > >               ;;
-> > > > > > > +     "shutdown")
-> > > > > > > +             if [ $FSTYP = "overlay" ]; then
-> > > > > > > +                     # Overlayfs tests can use _scratch_shutdown, but they
-> > > > > > > +                     # cannot use "-c shutdown" xfs_io command without jumping
-> > > > > > > +                     # through hoops, so by default we do not support it.
-> > > > > > > +                     _notrun "xfs_io $command not supported on $FSTYP"
-> > > > > > > +             fi
-> > > > > > > +             ;;
-> > > > > >
-> > > > > > Hmm... I'm not sure this's a good way.
-> > > > > > For example, overlay/087 does xfs_io shutdown too,
-> > > > >
-> > > > > Yes it does but look at the effort needed to do that properly:
-> > > > >
-> > > > > $XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f
-> > > > > ' -c close -c syncfs $SCRATCH_MNT | \
-> > > > >         grep -vF '[00'
-> > > > >
-> > > > > > generally it should calls
-> > > > > > _require_xfs_io_command "shutdown" although it doesn't. If someone overlay
-> > > > > > test case hope to test as o/087 does, and it calls _require_xfs_io_command "shutdown",
-> > > > > > then it'll be _notrun.
-> > > > >
-> > > > > If someone knows enough to perform the dance above with _scratch_shutdown_handle
-> > > > > then that someone should know enough not to call
-> > > > > _require_xfs_io_command "shutdown".
-> > > > > OTOH, if someone doesn't know then default is to not run.
-> > > >
-> > > > Sure, I can understand that, just this logic is a bit *obscure* :) It sounds like:
-> > > > "If an overlay test case wants to do xfs_io shutdown, it shouldn't call
-> > > > _require_xfs_io_command "shutdown". Or call that to skip a shutdown test
-> > > > on overlay :)"
-> > > >
-> > > > And the expected result of _require_xfs_io_command "shutdown" will be totally
-> > > > opposite with _require_scratch_shutdown on overlay, that might be confused.
-> > > > Can we have a clearer way to deal with that?
-> > > >
-> > >
-> > > I don't really understand the confusion.
-> > >
-> > > _require_xfs_io_command "shutdown"
-> > >
-> > > Like any other _require statement
-> > > requires support for what this test does -
-> > > meaning that a test does xfs_io -c shutdown, just like test generic/623 does
-> > >
-> > > and _require_scratch_shutdown implies that the test does
-> > > _scratch_shutdown
-> > >
-> > > FSTYP overlay happens to be able to do _scratch_shutdown
-> > > but not able to do xfs_io -c shutdown $SCRATCH_MNT
-> > >
-> > > The different _require statements simply reflect reality as it is.
-> > >
-> > > We can solve the confused about o/087 not having
-> > > _require_xfs_io_command "shutdown"
-> > > by moving the special hand crafted xfs_io command in o/087
-> > > to a helper _scratch_shutdown_and_syncfs to hide those internal
-> > > implementation details from test writers.
-> > > See attached patch.
-> >
-> > Hmm... give me a moment to order my thoughts step by step :)
-> >
-> > There're only 2 cases tend to do xfs_io shutdown on overlay currently
-> > (others are xfs specific test cases):
-> >
-> >   $ grep -rsn shutdown tests/|grep -- "-c"
-> >   tests/generic/623:29:$XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k" -c shutdown -c fsync \
-> >   tests/overlay/087:50:$XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f ' -c close -c syncfs $SCRATCH_MNT | \
-> >   tests/overlay/087:57:$XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f ' -c close -c syncfs $SCRATCH_MNT | \
-> >   ...
-> >
-> > others shutdown cases nearly all use *_scratch_shutdown* with
-> > *_require_scratch_shutdown*, these two functions are consistent in
-> > code logic. And no one calls "_require_xfs_io_command shutdown" currently.
-> >
-> > So g/623 and o/087 are specifal, actually they call _require_scratch_shutdown
-> > too, that makes sense for o/087. Now only g/623 doesn't make sense. Now we
-> > need to help it to make sense.
-> >
-> > I think the key is in _require_scratch_shutdown function [1], how about add an
-> > argument to clearly tell it we need to check shutdown "only on the top layer
-> > $SCRATCH_MNT" or "try the lowest layer $BASE_SCRATCH_MNT if there is".
-> >
-> > For example:
-> >
-> > diff --git a/common/rc b/common/rc
-> > index c3af8485c..5f30143e4 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -4075,15 +4075,17 @@ _require_exportfs()
-> >         _require_open_by_handle
-> >  }
-> >
-> > -# Does shutdown work on this fs?
-> > +# Does shutdown work on this [lower|top] layer fs?
-> >  _require_scratch_shutdown()
-> >  {
-> > +       local layer="${1:-lower}"
-> > +
-> >         [ -x $here/src/godown ] || _notrun "src/godown executable not found"
-> >
-> >         _scratch_mkfs > /dev/null 2>&1 || _notrun "_scratch_mkfs failed on $SCRATCH_DEV"
-> >         _scratch_mount
-> >
-> > -       if [ $FSTYP = "overlay" ]; then
-> > +       if [ $FSTYP = "overlay" -a "$level" = "lower" ]; then
-> >                 if [ -z $OVL_BASE_SCRATCH_DEV ]; then
-> >                         # In lagacy overlay usage, it may specify directory as
-> >                         # SCRATCH_DEV, in this case OVL_BASE_SCRATCH_DEV
-> > diff --git a/tests/generic/623 b/tests/generic/623
-> > index b97e2adbe..af0f55397 100755
-> > --- a/tests/generic/623
-> > +++ b/tests/generic/623
-> > @@ -15,7 +15,7 @@ _begin_fstest auto quick shutdown mmap
-> >         "xfs: restore shutdown check in mapped write fault path"
-> >
-> >  _require_scratch_nocheck
-> > -_require_scratch_shutdown
-> > +_require_scratch_shutdown top
-> 
-> Sorry I find this utterly confusing.
-> 
-> Think of all the 95% of fstests developers that do not care about overlayfs
-> what does this top mean to them and why should they use it for tests
-> that do xfs_io -c shutdown and not for tests that do _scratch_shutdown?
-> 
-> The test author and reviewers should be able to look at the tests and
-> easily derive what the test requirements should be according to simple rules.
-> For example:
-> 
-> 1. A test that calls _scrash_shutdown needs to _require_scratch_shutdown
-> 2. A test that calls _scratch_shutdown_and_syncfs needs to
-> _require_scratch_shutdown_and_syncfs
-> 3. A test that calls xfs_io -c shutdown needs to _require_xfs_io_shutdown
-> 
-> I completely understand why you do not like my hack of
-> _require_xfs_io_command "shutdown"
-> 
-> Would you approve if it was an explicit _require_xfs_io_shutdown helper?
-> 
-> # Requirements for tests that call xfs_io -c shutdown instead of using the
-> # _scratch_shutdown helper
 
-OK, but you might metion that it's better not be used if _scratch_shutdown_handle
-is called for xfs_io, as we hope the lower layer fs supports shutdown at that time:)
+--yBAsQh6zFXJm
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Actually I'm wondering if we should help xfstests to support BASE_FSTYP and FSTYP
-for more upper layer fs, likes nfs, cifs, and so on. If so, overlay will not be
-the only one fs who uses BASE_FSTYP and BASE_SCRATCH_DEV things, then we need to
-differentiate if a feature (e.g. shutdown) is needed by upper layer fs or underlying
-fs in a case.
+Hi all,
 
-...
-BTW, a question which isn't belong to this patch:)  There're also some failures
-from those xfstests overlay cases which run unionmount-testsuite (can't rememember
-all, maybe o/102~109, o/144~117). The error (diff) output are similar as [1].
-Is there a fix for that too? Or I missed the fix?
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated to v2025.05.25 version.
 
 Thanks,
 Zorro
 
-[1]
---- /dev/fd/63	2025-06-07 05:16:59.489929312 -0400
-+++ overlay/103.out.bad	2025-06-07 05:16:59.445716549 -0400
-@@ -1,2 +1,17 @@
- QA output created by 103
-+mount: /mnt/fstests/SCRATCH_DIR/union/m: wrong fs type, bad option, bad superblock on overlay, missing codepage or helper program, or other error.
-+       dmesg(1) may have more information after failed mount system call.
-+Traceback (most recent call last):
-+  File "/mnt/tests/gitlab.cee.redhat.com/kernel-qe/kernel/-/archive/master/kernel-master.tar.bz2/filesystems/xfstests/unionmount-testsuite/./run", line 362, in <module>
-+    func(ctx)
-+  File "/mnt/tests/gitlab.cee.redhat.com/kernel-qe/kernel/-/archive/master/kernel-master.tar.bz2/filesystems/xfstests/unionmount-testsuite/tests/rename-file.py", line 71, in subtest_5
-+    ctx.rename(f, f2)
-+  File "/mnt/tests/gitlab.cee.redhat.com/kernel-qe/kernel/-/archive/master/kernel-master.tar.bz2/filesystems/xfstests/unionmount-testsuite/context.py", line 1254, in rename
-+    remount_union(self, rotate_upper=True)
-+  File "/mnt/tests/gitlab.cee.redhat.com/kernel-qe/kernel/-/archive/master/kernel-master.tar.bz2/filesystems/xfstests/unionmount-testsuite/remount_union.py", line 35, in remount_union
-+    system(cmd)
-+  File "/mnt/tests/gitlab.cee.redhat.com/kernel-qe/kernel/-/archive/master/kernel-master.tar.bz2/filesystems/xfstests/unionmount-testsuite/tool_box.py", line 25, in system
-+    raise RuntimeError("Command failed: " + command)
-+RuntimeError: Command failed: mount -t overlay overlay /mnt/fstests/SCRATCH_DIR/union/m -orw,xino=on -olowerdir=/mnt/fstests/SCRATCH_DIR/union/6/u:/mnt/fstests/SCRATCH_DIR/union/5/u:/mnt/fstests/SCRATCH_DIR/union/4/u:/mnt/fstests/SCRATCH_DIR/union/3/u:/mnt/fstests/SCRATCH_DIR/union/2/u:/mnt/fstests/SCRATCH_DIR/union/1/u:/mnt/fstests/SCRATCH_DIR/union/0/u:/mnt/fstests/SCRATCH_DIR/union/l,upperdir=/mnt/fstests/SCRATCH_DIR/union/7/u,workdir=/mnt/fstests/SCRATCH_DIR/union/7/w
-+unionmount testsuite failed! see /var/lib/xfstests/results//overlay/103.full for details.
- Silence is golden
+The new head of the master branch is commit:
 
-> _require_xfs_io_shutdown()
-> {
->                 if [ $FSTYP = "overlay" ]; then
->                         # Overlayfs tests can use _scratch_shutdown, but they
->                         # cannot use "xfs_io -c shutdown"  command
-> without jumping
->                         # through hoops, so by default we do not support it.
->                         _notrun "xfs_io -c shutdown not supported on $FSTYP"
->                 fi
->                 _require_xfs_io_command "shutdown"
->                 _require_scratch_shutdown
-> }
+b7680adf9ff7 open_by_handle: add a test for connectable file handles
+
+New commits:
+
+Amir Goldstein (2):
+      [67b823d4a832] open_by_handle: add support for testing connectable file handles
+      [b7680adf9ff7] open_by_handle: add a test for connectable file handles
+
+Chao Yu (1):
+      [75372b7617a2] f2fs/013: test to check potential corruption on atomic_write file
+
+Christoph Hellwig (1):
+      [0e88b42adfbc] xfs: skip test that want to mdrestore to block devices on zoned devices
+
+Darrick J. Wong (4):
+      [c0de6df76100] generic/251: fix infinite looping if fstrim_loop configuration fails
+      [34d0c55a92b5] generic/251: skip this test if fstrim geometry detection fails
+      [cc0dcbf48849] check: unbreak iam
+      [68fa350e1e77] check: check and fix the test filesystem after failed tests
+
+Filipe Manana (3):
+      [aac2e9fee68b] fstests: add a mmap test group
+      [3c21ae673e70] btrfs: add tests that exercise raid profiles to the raid group
+      [282e4fe8cf47] btrfs/023: add to the quick group
+
+Johannes Thumshirn (1):
+      [1e1d98c85d73] fstests: btrfs: add git commit ID to btrfs/335
+
+Nirjhar Roy (IBM) (3):
+      [f0477f43d203] tests/selftest: Add a new pseudo flaky test.
+      [359cb24a11d8] new: Add a new parameter (copyright-owner) in the "new" script
+      [7e41a4a04bdf] new: Replace "status=0; exit 0" with _exit 0
+
+Qu Wenruo (4):
+      [f405f5f6cc8e] fstests: generic/537: remove the btrfs specific mount option
+      [3bbdf4241a5f] fstests: btrfs: a new test case to verify scrub and rescue=idatacsums
+      [49170253afef] fstests: btrfs/220: do not use nologreplay when possible
+      [22cc9e29bdf8] fstests: btrfs/020: use device pool to avoid busy TEST_DEV
 
 
+Code Diffstat:
 
-> 
-> Thanks,
-> Amir
-> 
+ check                  |  9 +++++--
+ common/populate        |  2 +-
+ common/rc              | 16 +++++++++---
+ common/xfs             | 14 ++++++++++
+ doc/group-names.txt    |  1 +
+ new                    |  8 +++---
+ src/open_by_handle.c   | 53 ++++++++++++++++++++++++++++++-------
+ tests/btrfs/003        |  2 +-
+ tests/btrfs/011        |  2 +-
+ tests/btrfs/020        | 51 +++++++++++++-----------------------
+ tests/btrfs/020.out    |  2 +-
+ tests/btrfs/023        |  2 +-
+ tests/btrfs/027        |  2 +-
+ tests/btrfs/060        |  2 +-
+ tests/btrfs/061        |  2 +-
+ tests/btrfs/062        |  2 +-
+ tests/btrfs/063        |  2 +-
+ tests/btrfs/064        |  2 +-
+ tests/btrfs/065        |  2 +-
+ tests/btrfs/066        |  2 +-
+ tests/btrfs/067        |  2 +-
+ tests/btrfs/068        |  2 +-
+ tests/btrfs/069        |  2 +-
+ tests/btrfs/070        |  2 +-
+ tests/btrfs/071        |  2 +-
+ tests/btrfs/072        |  2 +-
+ tests/btrfs/073        |  2 +-
+ tests/btrfs/074        |  2 +-
+ tests/btrfs/100        |  2 +-
+ tests/btrfs/101        |  2 +-
+ tests/btrfs/124        |  2 +-
+ tests/btrfs/125        |  2 +-
+ tests/btrfs/140        |  2 +-
+ tests/btrfs/141        |  2 +-
+ tests/btrfs/142        |  2 +-
+ tests/btrfs/143        |  2 +-
+ tests/btrfs/146        |  2 +-
+ tests/btrfs/148        |  2 +-
+ tests/btrfs/150        |  2 +-
+ tests/btrfs/151        |  2 +-
+ tests/btrfs/160        |  2 +-
+ tests/btrfs/175        |  2 +-
+ tests/btrfs/184        |  2 +-
+ tests/btrfs/195        |  2 +-
+ tests/btrfs/197        |  2 +-
+ tests/btrfs/198        |  2 +-
+ tests/btrfs/209        |  2 +-
+ tests/btrfs/220        |  7 ++---
+ tests/btrfs/223        |  2 +-
+ tests/btrfs/242        |  2 +-
+ tests/btrfs/249        |  2 +-
+ tests/btrfs/254        |  2 +-
+ tests/btrfs/265        |  2 +-
+ tests/btrfs/266        |  2 +-
+ tests/btrfs/267        |  2 +-
+ tests/btrfs/268        |  2 +-
+ tests/btrfs/269        |  2 +-
+ tests/btrfs/270        |  2 +-
+ tests/btrfs/286        |  2 +-
+ tests/btrfs/296        |  2 +-
+ tests/btrfs/335        |  4 +--
+ tests/btrfs/336        | 35 +++++++++++++++++++++++++
+ tests/btrfs/336.out    |  2 ++
+ tests/f2fs/013         | 71 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/f2fs/013.out     |  2 ++
+ tests/generic/019      |  2 +-
+ tests/generic/029      |  2 +-
+ tests/generic/030      |  2 +-
+ tests/generic/068      |  2 +-
+ tests/generic/074      |  2 +-
+ tests/generic/080      |  2 +-
+ tests/generic/095      |  2 +-
+ tests/generic/127      |  2 +-
+ tests/generic/140      |  2 +-
+ tests/generic/141      |  2 +-
+ tests/generic/173      |  2 +-
+ tests/generic/215      |  2 +-
+ tests/generic/219      |  2 +-
+ tests/generic/246      |  2 +-
+ tests/generic/247      |  2 +-
+ tests/generic/248      |  2 +-
+ tests/generic/251      | 29 ++++++++++++---------
+ tests/generic/279      |  2 +-
+ tests/generic/281      |  2 +-
+ tests/generic/282      |  2 +-
+ tests/generic/283      |  2 +-
+ tests/generic/325      |  2 +-
+ tests/generic/340      |  2 +-
+ tests/generic/344      |  2 +-
+ tests/generic/345      |  2 +-
+ tests/generic/346      |  2 +-
+ tests/generic/413      |  2 +-
+ tests/generic/428      |  2 +-
+ tests/generic/437      |  2 +-
+ tests/generic/438      |  2 +-
+ tests/generic/446      |  2 +-
+ tests/generic/462      |  2 +-
+ tests/generic/469      |  2 +-
+ tests/generic/470      |  2 +-
+ tests/generic/499      |  2 +-
+ tests/generic/503      |  2 +-
+ tests/generic/511      |  2 +-
+ tests/generic/537      |  1 -
+ tests/generic/567      |  2 +-
+ tests/generic/569      |  2 +-
+ tests/generic/570      |  2 +-
+ tests/generic/574      |  2 +-
+ tests/generic/578      |  2 +-
+ tests/generic/605      |  2 +-
+ tests/generic/614      |  2 +-
+ tests/generic/623      |  2 +-
+ tests/generic/630      |  2 +-
+ tests/generic/638      |  2 +-
+ tests/generic/647      |  2 +-
+ tests/generic/651      |  2 +-
+ tests/generic/652      |  2 +-
+ tests/generic/653      |  2 +-
+ tests/generic/654      |  2 +-
+ tests/generic/655      |  2 +-
+ tests/generic/657      |  2 +-
+ tests/generic/658      |  2 +-
+ tests/generic/659      |  2 +-
+ tests/generic/660      |  2 +-
+ tests/generic/661      |  2 +-
+ tests/generic/662      |  2 +-
+ tests/generic/663      |  2 +-
+ tests/generic/664      |  2 +-
+ tests/generic/665      |  2 +-
+ tests/generic/666      |  2 +-
+ tests/generic/669      |  2 +-
+ tests/generic/670      |  2 +-
+ tests/generic/671      |  2 +-
+ tests/generic/672      |  2 +-
+ tests/generic/708      |  3 ++-
+ tests/generic/729      |  2 +-
+ tests/generic/742      |  3 ++-
+ tests/generic/743      |  2 +-
+ tests/generic/749      |  2 +-
+ tests/generic/758      |  2 +-
+ tests/generic/777      | 70 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/777.out  |  4 +++
+ tests/overlay/061      |  2 +-
+ tests/selftest/007     | 21 +++++++++++++++
+ tests/selftest/007.out |  2 ++
+ tests/xfs/090          |  2 +-
+ tests/xfs/108          |  2 +-
+ tests/xfs/166          |  2 +-
+ tests/xfs/194          |  2 +-
+ tests/xfs/284          |  1 +
+ tests/xfs/550          |  2 +-
+ tests/xfs/551          |  2 +-
+ tests/xfs/552          |  2 +-
+ tests/xfs/559          |  2 +-
+ tests/xfs/598          |  1 +
+ 154 files changed, 467 insertions(+), 203 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
 
+--yBAsQh6zFXJm
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmhFldYACgkQlNbPkfr2
+tMyXaxAAo70iZDv8waya0yZ2Oo6V8C27u9c4wnp8tV8RxhNc8+Z12zY4Nb3d5uI8
+RuCDiWGCLj6rDfzfZ/KIbTyFmYwE3Lq00j1xSboXgA+0CFRp5UnOGfJhossphZd/
+6YfAq7JLV4xShwSZ6m1xUINLV0OU4jhGU4tjfn/0Gb+1yd5R6Vj3RYir5iaXHF0x
+QY1Zeehd/zY55vHSz4x9OJFoama90nhWCOyJ42kCC1zh69nJY9yQFswNzhfBT4tV
+ZPGaoRs7rkZu7rA4vWOW1Qa5ZfkEvGwWA7IEcf2kiTtJptvs73umwDRQfZgG5aPt
+lPTIbBYlASELCtBazcD/S15Vl1Nxsy+SgymYe0L+5PnwRhuZbXcOUMr5DnQyQMSt
+GoTWvWOISPrFuV9qUVFtl3M0TwcHs+RTDGqhht+J7NlkglUl3AGS4dPo9znfx3OJ
+I4Skl1wgG0RuvRm5G1BDjg2j0bHeKXGjO109f9qZ+HnHHSg7b80TNA7uybWS9xxp
+oGeF/JQnE6ulq7caqjauLfTA2pDVS9E2GnapuwQawOB7+tx+/4Xbrh+5GKmYemp/
+1V505tsHyCASswRzfOXZypwuosaPBLR+cthQ8v8YjBiQ6d76I0a8EnkQPmZ3T8AO
+QWrjBGwl2LWbzqdhHU+HZxxvcAssTEc6hajs6X/BEUgFUnnSRVs=
+=gNzi
+-----END PGP SIGNATURE-----
+
+--yBAsQh6zFXJm--
