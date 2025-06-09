@@ -1,167 +1,113 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f173.google.com (mail-pf1-f173.google.com [209.85.210.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C88B417741
-	for <fstests@vger.kernel.org>; Sun,  8 Jun 2025 14:10:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A31203D544;
+	Mon,  9 Jun 2025 04:24:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749391858; cv=none; b=tPsxE4TtcBIWtoFGVN4qpmaYNKQEQ6+iycXcUi7on19yNDLjD/fQTSx9vero3h+Y1kW//W815pv9aRoP8a192B9X5SLuWi2/RH+SrMCSUcIejiXRSZuCklusqmSDS8p2kJSuxSIfFBHy7DTRe1TI9IrkLbn+bbQgOdM/oVlZMQg=
+	t=1749443090; cv=none; b=P6HTNG4MNvbcOgl0FvfpTM54hPH1yp4Sejt2PFhW9v8PYLATCrJvEadxWJJo5hb7evlRWh8tJ0vCG8ZKkpjCZ0L79V69Ia4h9QhILp8teS7tvPIlxxNbSwCUd2ub0Pu70Un43Z0pJcTeMmiZStMN8a4Qi6G+SJIRyJPwCLQUlfA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749391858; c=relaxed/simple;
-	bh=886IVPIHOwY/6Xy3tyNO+MfKGB6m1+dU7faui9KqN0g=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=EhRLo7kbZ/GbOkMkRi46DfFos8G/BYchotL+jwvwXU0bQQX6xLUAL10nrWs2EUbvqdQIfgZdiJfWzsvSwqTtHFyhiu+6WDDEiSyfsAn3WP6EVYjzx7sg+6ecTmQDjQIuM9zmVCx083Zg0m9yadbjmhYBFfDbCOiBJGeLrKquLi0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eotCeMNF; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1749443090; c=relaxed/simple;
+	bh=l2L6GHlrWoPBibQkBWsIpHpOXT/8limu298tzfvvLwU=;
+	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=cyVczVObk9eNE1oBoZx1ZQNRCBdSVo5vWNB+LUERgDWLEnrydKsE/cEwNzqEtjI2z+pZDcfQZjNUBxL0lRpxfqIftLWhxBHx8sUgy+gNT4RYRK4os79Ux6C/HeMb0UqH0U745HytFYAgIEi8fb2QNk/Get+He19ry/p7BKn0XKA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BX4ie98m; arc=none smtp.client-ip=209.85.210.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eotCeMNF"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 00EB4C4CEEE;
-	Sun,  8 Jun 2025 14:10:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1749391858;
-	bh=886IVPIHOwY/6Xy3tyNO+MfKGB6m1+dU7faui9KqN0g=;
-	h=Date:From:To:Subject:From;
-	b=eotCeMNFT7WKR9Kz/jVXfv4z/bTNCwjMnLB6iOGxqn3Q/ECUay/PuYXuI5q6DfPiO
-	 2mc9TEG/4nHGKMAknuY9jOyLM1DGV8D2WYrcSkmb4jHj4y4tOF3jlse03ITROYUIlJ
-	 wz2on78NRJ+2h63CwOcG6Sb0zx2ZPCEYnWwea46U3Sl/gNYD8CMX4B/4PiWT/NU2j+
-	 4zcy7BY0W/2xWO1VB4Jnlt0L/9FoAx0y+sHt+Pf+vB0AC3Sk6ldyXsEzj9F8D99aEI
-	 dVVQIl3N1hOh48NlFli9L38cXPXjyXRJs3Ztn8/RcelWFzPi59q8gt878ZEaXRP6ou
-	 hC/BbQs2PpnHg==
-Date: Sun, 08 Jun 2025 22:10:55 +0800
-Message-ID: <9d41e21f9c196d110779c5d4f15ab84f@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2025.06.08
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BX4ie98m"
+Received: by mail-pf1-f173.google.com with SMTP id d2e1a72fcca58-74264d1832eso4454569b3a.0;
+        Sun, 08 Jun 2025 21:24:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1749443088; x=1750047888; darn=vger.kernel.org;
+        h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=h5hw1X/Bp3Ok5p6bqNmTa1I9H//Ca5M5727JN2HKSqw=;
+        b=BX4ie98mw4CYyJaQ7XxnA6hjvze5yUNbg3v0xuetFCOtlek1zeZ+36IJDcFcq/Dr4E
+         42PksFGR/h2M0wXmmkwcfGxiy11hW8OoeedvuX/HtWmo4KExJlUD98p07l6h/Es74Di9
+         pHNL0iWwCe1umBhvw9/8OuxeHbtFwO+RlMLYH6XicRw3O5M1bCxWkzI5stqRoV8V97YH
+         ajfhPS9sKXUEJx3J3FeDpxn54vGMdW2ZuIide1fk91zeqpqX/SsU9DkcdiR+T0pWiUPy
+         8RWQNiuHcrv20AEx9prAxqFZ5Sjg9rgK8n/K176ssgq4aeZ2+lu4zmveN+tx3OTl1WAm
+         JTpQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1749443088; x=1750047888;
+        h=references:message-id:date:in-reply-to:subject:cc:to:from
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=h5hw1X/Bp3Ok5p6bqNmTa1I9H//Ca5M5727JN2HKSqw=;
+        b=L8AF6aOAFmt93dq5X5GxVbfaAH1loKYx+nrhFk5R+7e4ciCFF7NN9UpdyG+cuJQugg
+         4h6kRu5VUtkHMGEP9zfteUjfnnIH95fYMSdtSWg6TeJalsn5yLmf/w990aXOdtudRGZ4
+         YOqTQcoBr7iJJRg/FiMMHFN5ff46Ya3bmVEA3Zg77bBv13uJMJkuq0fs41bTkoIe3eM7
+         AEHclTK4ul3uo121E59KIH0K0OT474bFzXU+HDzmB6l2warFmyroA5iS7vSvT+RQpzWk
+         K734hog6bVnRp/yTpob/+YbF7IOfVq8q6O+XyW20iHVWVknd8mBwhd+gvT5oOIYO4qGH
+         Blmg==
+X-Forwarded-Encrypted: i=1; AJvYcCUDf4EuehVqAvNrLomheyqyv0zC7eHXrREorDxRhjRyqly1dHyC0GlOVU0/Da6r+ZvkGawAjhZw@vger.kernel.org, AJvYcCUwNg0w+1FvgSvZrQULPgYap9wbQKxtNVKpeyZOD8ktaeiX5OlHDVyO/0lYteKCzqjSH5vsv2P5GNOU@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw1d69pRe9V8UcPw6FLzZZ7d84PEgBOKQlo24NOMvP3rlbMmIjU
+	jc8C5+txJ0LdH5AJlABR6Q55+DqTIY04YJ+aBocg946TkKOKDieiuQR8
+X-Gm-Gg: ASbGnct0WNEmFXASrS61czbINP7dPKcEInylWiell8lhPDntZnIbA51jWF+1kJQ1NK5
+	F1/L8P/mbQBNKk0/Nn1Wh57QZH0LKu+aOjOTEkANrAdzQG7C3TyxgXCL8IBKv2z3UhO2HmsAUXW
+	iVHjUDRaMY/wr9hgQssD88HpUXClxEHDl0EuX9QhW5XLRqmBfYenaRuRI0WQr9ETZ2HE2zwDpwL
+	r2cD+Un3kFpBfBryYda86BLz+MTWP60MbMg0AuM9Lrhc2xzsSa7r0hWw5s78fDw9baVcRdOD9E1
+	35ZEdBXKjkUHV8ZSpNQLXWktfA0vbgwRtv1tdOwMM7gpmVIOOShG1A==
+X-Google-Smtp-Source: AGHT+IHIpX9hMqg8kwh8CODPzrjTeZKsfj3+sVvLgdoxG45tf4H6Bpxgl/LHPmoMafUNmeUXZGdahw==
+X-Received: by 2002:a05:6a00:18a1:b0:742:b3a6:db16 with SMTP id d2e1a72fcca58-74827f3315amr16614371b3a.20.1749443087900;
+        Sun, 08 Jun 2025 21:24:47 -0700 (PDT)
+Received: from dw-tp ([171.76.83.10])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7482b083a9bsm4814137b3a.77.2025.06.08.21.24.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 08 Jun 2025 21:24:47 -0700 (PDT)
+From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+To: Catherine Hoang <catherine.hoang@oracle.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: djwong@kernel.org, john.g.garry@oracle.com, ojaswin@linux.ibm.com
+Subject: Re: [PATCH v3 1/3] common/atomicwrites: add helper for multi block atomic writes
+In-Reply-To: <20250605040122.63131-2-catherine.hoang@oracle.com>
+Date: Mon, 09 Jun 2025 09:53:25 +0530
+Message-ID: <87ecvt4k76.fsf@gmail.com>
+References: <20250605040122.63131-1-catherine.hoang@oracle.com> <20250605040122.63131-2-catherine.hoang@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="vXMhymchYxo2"
-Content-Disposition: inline
 
+Catherine Hoang <catherine.hoang@oracle.com> writes:
 
---vXMhymchYxo2
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+> Add a helper to check that we can perform multi block atomic writes.
+>
+> Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
+> ---
+>  common/atomicwrites | 21 +++++++++++++++++++++
+>  1 file changed, 21 insertions(+)
+>
+> diff --git a/common/atomicwrites b/common/atomicwrites
+> index 391bb6f6..88f49a1a 100644
+> --- a/common/atomicwrites
+> +++ b/common/atomicwrites
+> @@ -24,6 +24,27 @@ _get_atomic_write_segments_max()
+>          grep -w atomic_write_segments_max | grep -o '[0-9]\+'
+>  }
+>  
+> +_require_scratch_write_atomic_multi_fsblock()
+> +{
+> +    _require_scratch
+> +
+> +    _scratch_mkfs > /dev/null 2>&1 || \
+> +        _notrun "cannot format scratch device for atomic write checks"
+> +    _try_scratch_mount || \
+> +        _notrun "cannot mount scratch device for atomic write checks"
+> +
+> +    local testfile=$SCRATCH_MNT/testfile
+> +    touch $testfile
+> +
+> +    local bsize=$(_get_file_block_size $SCRATCH_MNT)
+> +    local awu_max_fs=$(_get_atomic_write_unit_max $testfile)
+> +
+> +    _scratch_unmount
+> +
+> +    test $awu_max_fs -ge $((bsize * 2)) || \
+> +        _notrun "multi-block atomic writes not supported by this filesystem"
+> +}
+> +
 
-Hi all,
+Looks good. Please feel free to add:
+Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
 
-The for-next branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2025.06.08 release.
-
-Release Notes:
-1) There's 1 new test case in this release -- f2fs/014.
-2) A workaround patch from overlay list to avoid some test failures to
-   remount,ro on new libmount (enable new mount APIs by default).
-3) A new common file -- common/atomicwrites for atomic write testing.
-4) More bug fixes on overlay, exfat, xfs and btrfs.
-
-More updates and fixes refer to below, thanks for all these fixes to
-help xfstests to be more stable.
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-b3da4865e80d fstests: generic/741: make cleanup to handle test failure properly
-
-New commits:
-
-Amir Goldstein (5):
-      [e6fc42f16c77] overlay: workaround libmount failure to remount,ro
-      [d235c7eef1d8] overlay: fix regression in _repair_overlay_scratch_fs
-      [3b385bf1e90f] generic/604: do not run with overlayfs
-      [3d339199525f] generic: remove incorrect _require_idmapped_mounts checks
-      [3563fda0140f] generic/699: fix failure with MOUNT_OPTIONS
-
-Chunhai Guo (1):
-      [09ab269c0419] f2fs/014: test for missing 'trimmed' flag issue
-
-Darrick J. Wong (5):
-      [b9666a70cb85] generic/765: fix a few issues
-      [01b46074f237] generic/765: adjust various things
-      [909ee4c8a75b] generic/765: move common atomic write code to a library file
-      [fce21ab7afff] common/atomicwrites: adjust a few more things
-      [4f2e4be4a632] common/atomicwrites: fix _require_scratch_write_atomic
-
-Filipe Manana (3):
-      [d866af976999] fstests: add kernel commit IDs to some tests
-      [5ca2b3450351] generic/094: fix test ignoring failures
-      [2f635d075e10] fsstress: print syncfs() return value in verbose mode
-
-Jan Prusakowski (1):
-      [389d34f0ab02] f2fs/004: avoid race condition in test
-
-Qu Wenruo (1):
-      [b3da4865e80d] fstests: generic/741: make cleanup to handle test failure properly
-
-Yuezhang Mo (6):
-      [4b12c46aa728] generic/696: add _require_chmod
-      [2d9dac4ef763] generic/656: add _require_chown
-      [2f14ca462c65] generic/754: add _require_symlinks
-      [bb77b42ba80f] generic/755: add _require_hardlinks
-      [68c9ac2ad74b] generic/730: add _require_scratch_shutdown
-      [a75c1aae9f93] generic/645: add _require_chown
-
-
-Code Diffstat:
-
- common/atomicwrites | 117 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- common/overlay      |   7 +++-
- common/rc           |  51 +----------------------
- doc/group-names.txt |   1 +
- ltp/fsstress.c      |   5 ++-
- tests/f2fs/004      |   3 ++
- tests/f2fs/011      |   2 +-
- tests/f2fs/014      |  40 ++++++++++++++++++
- tests/f2fs/014.out  |   2 +
- tests/generic/094   |  20 +++++----
- tests/generic/330   |   2 +-
- tests/generic/370   |   2 +-
- tests/generic/604   |  11 ++---
- tests/generic/633   |   1 -
- tests/generic/645   |   1 +
- tests/generic/656   |   1 +
- tests/generic/696   |   2 +-
- tests/generic/697   |   1 -
- tests/generic/699   |  17 ++++----
- tests/generic/730   |   1 +
- tests/generic/741   |   4 ++
- tests/generic/754   |   1 +
- tests/generic/755   |   1 +
- tests/generic/761   |   3 +-
- tests/generic/764   |   2 +-
- tests/generic/765   |  84 ++++++++++++++-----------------------
- tests/overlay/035   |   2 +-
- 27 files changed, 248 insertions(+), 136 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---vXMhymchYxo2
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmhFmcMACgkQlNbPkfr2
-tMxuJw//VYinMpsmo1rdFgoJqbEizJSyq78gZJTJE+62TxC1ZD8Yfw/Yh8mnANYU
-5JmewMUMHE9E02qy2Q3MWevL+RrBHLlToREIDXBgWOsFPzxrr01UhZty9xznwe/X
-GG0c9990K0fiehhx1ZHvGeiRsBpKe8T2iGniofus4zzDA5qWPDiHJbzyvsf+99O5
-Bkk9nMb7ED74bHMLODxan/AiJ/nzZquSKKLNunUcpojk5V2mVvzqc0Yu1Fussqbf
-rvCmsUMHnxjdbztnFfgBKLbjbmYhlBGx0P/wNbD5MAVOXAu0xede2NYar9B7/0HI
-Byb4BPac8BtnISO/U5CyQNNKupgDDV+E3ZjkLDqPMU9QGWGvLH8YpXIaD1IuXW69
-814JuP9S6HMZpgRVwbWk5bkmIm+7bJl+8RdweV8t0Fr5BzaeZHeA1j2MJRUgVmza
-pJ30QP2XtTJbsHMmLMuHcHHgBctrALFr7/0ymDRpl9o9mylL4adz2ywblb0dB7Cd
-/wV27mlq8G2dxqdnMQUDR35Auvw4lxQUmHQB3wo6nWlGffpJYmwFsxgfzAN2qT9h
-dSJLOwJpC57Sw482HmnsHDfq5SJmAvnLu6wMLsqu6fKrt9s0WN0ptOFvKCd4+UwK
-LBtEuT/xihF6x9ydUzVZNKYFlqF4n2U9JLkIuZLKC0Vzy8o2HGk=
-=aL6Z
------END PGP SIGNATURE-----
-
---vXMhymchYxo2--
+-ritesh
