@@ -1,113 +1,407 @@
-Received: from mail-pf1-f173.google.com (mail-pf1-f173.google.com [209.85.210.173])
+Received: from mail-ej1-f46.google.com (mail-ej1-f46.google.com [209.85.218.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A31203D544;
-	Mon,  9 Jun 2025 04:24:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB78E17A2EF;
+	Mon,  9 Jun 2025 11:01:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749443090; cv=none; b=P6HTNG4MNvbcOgl0FvfpTM54hPH1yp4Sejt2PFhW9v8PYLATCrJvEadxWJJo5hb7evlRWh8tJ0vCG8ZKkpjCZ0L79V69Ia4h9QhILp8teS7tvPIlxxNbSwCUd2ub0Pu70Un43Z0pJcTeMmiZStMN8a4Qi6G+SJIRyJPwCLQUlfA=
+	t=1749466913; cv=none; b=qghWIMIcSq0TligG1IylqeLmPlw9BkrFww2o1675EwHCrKoK6TCC32WwkamzfuDaiVJQkgIlTGZ0H1Glo0LZSPYUor3YdrN4xQDSc445H10vSKcisXmL8vBjsolSBgqAlwn/qNsoX1ias03xuyxgex8xw++8v6TLLJD+Yg4GLjU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749443090; c=relaxed/simple;
-	bh=l2L6GHlrWoPBibQkBWsIpHpOXT/8limu298tzfvvLwU=;
-	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=cyVczVObk9eNE1oBoZx1ZQNRCBdSVo5vWNB+LUERgDWLEnrydKsE/cEwNzqEtjI2z+pZDcfQZjNUBxL0lRpxfqIftLWhxBHx8sUgy+gNT4RYRK4os79Ux6C/HeMb0UqH0U745HytFYAgIEi8fb2QNk/Get+He19ry/p7BKn0XKA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BX4ie98m; arc=none smtp.client-ip=209.85.210.173
+	s=arc-20240116; t=1749466913; c=relaxed/simple;
+	bh=erCnHpnStqHrlRih0vIPjB5H+oqOheDrL+9MLlWq3+o=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=YaCLxhOQB8cGZk+araiWPjJ5d4okJi3tZdzAFPo5ZyHM5xADsfy+sMG+JAKjkDKI+oKtX2HavxxBCFEQHf+uafO1iA0tqDE9r9mJoOFnolN2dGUmBKbcQOEJkfRO0HP4brYBP21ZX8h2fxbKvIZwyWPdsqCtl3J+v9c6XJNeoLM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RygJ7r6U; arc=none smtp.client-ip=209.85.218.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BX4ie98m"
-Received: by mail-pf1-f173.google.com with SMTP id d2e1a72fcca58-74264d1832eso4454569b3a.0;
-        Sun, 08 Jun 2025 21:24:48 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RygJ7r6U"
+Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-ad89333d603so717499266b.2;
+        Mon, 09 Jun 2025 04:01:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1749443088; x=1750047888; darn=vger.kernel.org;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=h5hw1X/Bp3Ok5p6bqNmTa1I9H//Ca5M5727JN2HKSqw=;
-        b=BX4ie98mw4CYyJaQ7XxnA6hjvze5yUNbg3v0xuetFCOtlek1zeZ+36IJDcFcq/Dr4E
-         42PksFGR/h2M0wXmmkwcfGxiy11hW8OoeedvuX/HtWmo4KExJlUD98p07l6h/Es74Di9
-         pHNL0iWwCe1umBhvw9/8OuxeHbtFwO+RlMLYH6XicRw3O5M1bCxWkzI5stqRoV8V97YH
-         ajfhPS9sKXUEJx3J3FeDpxn54vGMdW2ZuIide1fk91zeqpqX/SsU9DkcdiR+T0pWiUPy
-         8RWQNiuHcrv20AEx9prAxqFZ5Sjg9rgK8n/K176ssgq4aeZ2+lu4zmveN+tx3OTl1WAm
-         JTpQ==
+        d=gmail.com; s=20230601; t=1749466910; x=1750071710; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=EeaWqE4JpJEuDJkTnO67jvfTXtbag+KhPZAZxYA+Ywg=;
+        b=RygJ7r6UR784zs5FZl4AasVOO6DsPQ28+B9xi9+EqItCU66t22dipV1X/pTLFffhAq
+         lxzs5mCBQpDHwiQlrUSG1CgIZJhwj7sVEcgXvIX32h7hvPvVKI5j3kd0IweEClvwBQxd
+         Hc0dV2qQRQnah6OJ4AUwpAreobHyDU3rw4lNZ3zkEhOsWSbj1gakSHRtZ8FUrn9bIgpe
+         C10cH4ULnHrhdzlGnSx/VCnz/V2gTurzzFLiVTTTsT7xEVlFsFs9co+1hGrzPZL00WAa
+         B1fUuA3EqZ5wlRDDyNpBro3qIAScvucW8H4cxmrXty728bX90CZ2avc8r187Ys79oTl0
+         kb2A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749443088; x=1750047888;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=h5hw1X/Bp3Ok5p6bqNmTa1I9H//Ca5M5727JN2HKSqw=;
-        b=L8AF6aOAFmt93dq5X5GxVbfaAH1loKYx+nrhFk5R+7e4ciCFF7NN9UpdyG+cuJQugg
-         4h6kRu5VUtkHMGEP9zfteUjfnnIH95fYMSdtSWg6TeJalsn5yLmf/w990aXOdtudRGZ4
-         YOqTQcoBr7iJJRg/FiMMHFN5ff46Ya3bmVEA3Zg77bBv13uJMJkuq0fs41bTkoIe3eM7
-         AEHclTK4ul3uo121E59KIH0K0OT474bFzXU+HDzmB6l2warFmyroA5iS7vSvT+RQpzWk
-         K734hog6bVnRp/yTpob/+YbF7IOfVq8q6O+XyW20iHVWVknd8mBwhd+gvT5oOIYO4qGH
-         Blmg==
-X-Forwarded-Encrypted: i=1; AJvYcCUDf4EuehVqAvNrLomheyqyv0zC7eHXrREorDxRhjRyqly1dHyC0GlOVU0/Da6r+ZvkGawAjhZw@vger.kernel.org, AJvYcCUwNg0w+1FvgSvZrQULPgYap9wbQKxtNVKpeyZOD8ktaeiX5OlHDVyO/0lYteKCzqjSH5vsv2P5GNOU@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw1d69pRe9V8UcPw6FLzZZ7d84PEgBOKQlo24NOMvP3rlbMmIjU
-	jc8C5+txJ0LdH5AJlABR6Q55+DqTIY04YJ+aBocg946TkKOKDieiuQR8
-X-Gm-Gg: ASbGnct0WNEmFXASrS61czbINP7dPKcEInylWiell8lhPDntZnIbA51jWF+1kJQ1NK5
-	F1/L8P/mbQBNKk0/Nn1Wh57QZH0LKu+aOjOTEkANrAdzQG7C3TyxgXCL8IBKv2z3UhO2HmsAUXW
-	iVHjUDRaMY/wr9hgQssD88HpUXClxEHDl0EuX9QhW5XLRqmBfYenaRuRI0WQr9ETZ2HE2zwDpwL
-	r2cD+Un3kFpBfBryYda86BLz+MTWP60MbMg0AuM9Lrhc2xzsSa7r0hWw5s78fDw9baVcRdOD9E1
-	35ZEdBXKjkUHV8ZSpNQLXWktfA0vbgwRtv1tdOwMM7gpmVIOOShG1A==
-X-Google-Smtp-Source: AGHT+IHIpX9hMqg8kwh8CODPzrjTeZKsfj3+sVvLgdoxG45tf4H6Bpxgl/LHPmoMafUNmeUXZGdahw==
-X-Received: by 2002:a05:6a00:18a1:b0:742:b3a6:db16 with SMTP id d2e1a72fcca58-74827f3315amr16614371b3a.20.1749443087900;
-        Sun, 08 Jun 2025 21:24:47 -0700 (PDT)
-Received: from dw-tp ([171.76.83.10])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7482b083a9bsm4814137b3a.77.2025.06.08.21.24.45
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 08 Jun 2025 21:24:47 -0700 (PDT)
-From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-To: Catherine Hoang <catherine.hoang@oracle.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Cc: djwong@kernel.org, john.g.garry@oracle.com, ojaswin@linux.ibm.com
-Subject: Re: [PATCH v3 1/3] common/atomicwrites: add helper for multi block atomic writes
-In-Reply-To: <20250605040122.63131-2-catherine.hoang@oracle.com>
-Date: Mon, 09 Jun 2025 09:53:25 +0530
-Message-ID: <87ecvt4k76.fsf@gmail.com>
-References: <20250605040122.63131-1-catherine.hoang@oracle.com> <20250605040122.63131-2-catherine.hoang@oracle.com>
+        d=1e100.net; s=20230601; t=1749466910; x=1750071710;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=EeaWqE4JpJEuDJkTnO67jvfTXtbag+KhPZAZxYA+Ywg=;
+        b=VHjhtbi6MRbmOHgdqY2pBK7Xd3UID2zC0X1IG0doORZb2VpNagDWAR4zcGvXFcxPak
+         wdJULNO4qVvT3K7cpWpE2jhMcfNSfzb4y/ndeSYOJBHpm1hnaGKE6mJn7AA1rgNiioD4
+         Z7UzgshyTK9BEPOZQvIktGl277130ldVVU5CGmbwIV8oGYObJyr8MbQ7fC+lGOo8hLxa
+         peGzHbZOiwMlxdyYx1Zu17lf53AE7R7KTvgQuBffbuZDZw+/DmVaSld/4l84hiCi7NkB
+         laAR+UztT5aJPNI54D6hswVGpLPWqfZQ0nsXw1FgBM4M4u+I0pFJkdjbi+bIddv6Nd7B
+         TKAQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUYI2DwlNSIV3tcIoMHTFLmFODgHQPdSTWNhWLKUx+wbKACzP/3HqnJgkiMYEdZ7MPmSB9q1P8uFjv3tqgUDw==@vger.kernel.org, AJvYcCXBo8Vgt8GWMoBxNJGApEKiNL3TnIyeEtjrB2GQviYZZDNHb/3JOLKbktaZ5AXsiKl6YY87CqI6@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw02o0DGAHpWClUwkZiNvRJEC4dPMIW8s98nADIYLSSyYO/ZtAz
+	GF84JJbXYHwmtdwjsAWso0K+BbmMHjtC8IeTU6oSYtvrOaqJDIhg1VKpqiczq2xGILhoi2t/w/t
+	1JIYEKcTYfg9iMr1suC18iryb7vNF2P8=
+X-Gm-Gg: ASbGncthW+2xtoNMDr/I0Ct4CW571kC3oHxli0XvN9igfQ7Wmy5BFXkt8ycE9+1Pof3
+	zAvbz/1y+NbmYCbHu0sqaTOH3ZYQnrg4SsaZvChoNsrAuOKv0lAcoWuxFstG7bj9nItNm2xq5m9
+	is6t45YREq4ZYpW6C8otMJy71vCrrmSHfH7xR5sL5ddDE=
+X-Google-Smtp-Source: AGHT+IHDVFVY6ltuHbjDrblMsBCxcUPAXruUgxffwoGjpo7rlMagCbDLgKSnRRXemC7BYMT4Akl2fUFeKiKktjSi7Pk=
+X-Received: by 2002:a17:907:1c2a:b0:aca:c507:a4e8 with SMTP id
+ a640c23a62f3a-ade1a90995dmr1139238766b.21.1749466909285; Mon, 09 Jun 2025
+ 04:01:49 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+References: <20250603100745.2022891-1-amir73il@gmail.com> <20250603100745.2022891-5-amir73il@gmail.com>
+ <20250605173233.ndqsjo77ds3e35p5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxgQi6ciXtoKV7Nrw5_ECBOwS_m8h2KXT-ieJ4x4t04qag@mail.gmail.com>
+ <20250606014531.d5t4gwx4iymqiqlo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxj_rshiLUUrCVS6RO+KhCeLrrgxNH+me3K38Nhc0Byqzw@mail.gmail.com>
+ <20250606102909.77jj6txkqii7erpn@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxhwi9qF-j_XiTQCCy-OH77X2SG6_CGngUqUFfXz1X-SuA@mail.gmail.com> <20250608131616.xf4dx2zwcwbapya3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20250608131616.xf4dx2zwcwbapya3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Mon, 9 Jun 2025 13:01:37 +0200
+X-Gm-Features: AX0GCFtAAGkc60hv39qeGiBOhCDZ_G0rhp19BUn3e792vTkDVPghQSQar9bsTCI
+Message-ID: <CAOQ4uxgKmgUroEQfXHz9estFxVqSDbLbYZu3Y7WGWVX_kJ9sBw@mail.gmail.com>
+Subject: Re: [PATCH v2 4/6] generic/623: do not run with overlayfs
+To: Zorro Lang <zlang@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Christian Brauner <brauner@kernel.org>, 
+	=?UTF-8?Q?Andr=C3=A9_Almeida?= <andrealmeid@igalia.com>, 
+	linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Catherine Hoang <catherine.hoang@oracle.com> writes:
-
-> Add a helper to check that we can perform multi block atomic writes.
+On Sun, Jun 8, 2025 at 3:16=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote:
 >
-> Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
-> ---
->  common/atomicwrites | 21 +++++++++++++++++++++
->  1 file changed, 21 insertions(+)
+> On Fri, Jun 06, 2025 at 02:12:21PM +0200, Amir Goldstein wrote:
+> > On Fri, Jun 6, 2025 at 12:29=E2=80=AFPM Zorro Lang <zlang@redhat.com> w=
+rote:
+> > >
+> > > On Fri, Jun 06, 2025 at 09:23:26AM +0200, Amir Goldstein wrote:
+> > > > On Fri, Jun 6, 2025 at 3:45=E2=80=AFAM Zorro Lang <zlang@redhat.com=
+> wrote:
+> > > > >
+> > > > > On Thu, Jun 05, 2025 at 08:38:30PM +0200, Amir Goldstein wrote:
+> > > > > > On Thu, Jun 5, 2025 at 7:32=E2=80=AFPM Zorro Lang <zlang@redhat=
+.com> wrote:
+> > > > > > >
+> > > > > > > On Tue, Jun 03, 2025 at 12:07:43PM +0200, Amir Goldstein wrot=
+e:
+> > > > > > > > This test performs shutdown via xfs_io -c shutdown.
+> > > > > > > >
+> > > > > > > > Overlayfs tests can use _scratch_shutdown, but they cannot =
+use
+> > > > > > > > "-c shutdown" xfs_io command without jumping through hoops,=
+ so by
+> > > > > > > > default we do not support it.
+> > > > > > > >
+> > > > > > > > Add this condition to _require_xfs_io_command and add the r=
+equire
+> > > > > > > > statement to test generic/623 so it wont run with overlayfs=
+.
+> > > > > > > >
+> > > > > > > > Reported-by: Andr=C3=A9 Almeida <andrealmeid@igalia.com>
+> > > > > > > > Tested-by: Andr=C3=A9 Almeida <andrealmeid@igalia.com>
+> > > > > > > > Link: https://lore.kernel.org/linux-fsdevel/20250521-ovl_ro=
+-v1-1-2350b1493d94@igalia.com/
+> > > > > > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > > > > > > > ---
+> > > > > > > >  common/rc         | 8 ++++++++
+> > > > > > > >  tests/generic/623 | 1 +
+> > > > > > > >  2 files changed, 9 insertions(+)
+> > > > > > > >
+> > > > > > > > diff --git a/common/rc b/common/rc
+> > > > > > > > index d8ee8328..bffd576a 100644
+> > > > > > > > --- a/common/rc
+> > > > > > > > +++ b/common/rc
+> > > > > > > > @@ -3033,6 +3033,14 @@ _require_xfs_io_command()
+> > > > > > > >               touch $testfile
+> > > > > > > >               testio=3D`$XFS_IO_PROG -c "syncfs" $testfile =
+2>&1`
+> > > > > > > >               ;;
+> > > > > > > > +     "shutdown")
+> > > > > > > > +             if [ $FSTYP =3D "overlay" ]; then
+> > > > > > > > +                     # Overlayfs tests can use _scratch_sh=
+utdown, but they
+> > > > > > > > +                     # cannot use "-c shutdown" xfs_io com=
+mand without jumping
+> > > > > > > > +                     # through hoops, so by default we do =
+not support it.
+> > > > > > > > +                     _notrun "xfs_io $command not supporte=
+d on $FSTYP"
+> > > > > > > > +             fi
+> > > > > > > > +             ;;
+> > > > > > >
+> > > > > > > Hmm... I'm not sure this's a good way.
+> > > > > > > For example, overlay/087 does xfs_io shutdown too,
+> > > > > >
+> > > > > > Yes it does but look at the effort needed to do that properly:
+> > > > > >
+> > > > > > $XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutd=
+own -f
+> > > > > > ' -c close -c syncfs $SCRATCH_MNT | \
+> > > > > >         grep -vF '[00'
+> > > > > >
+> > > > > > > generally it should calls
+> > > > > > > _require_xfs_io_command "shutdown" although it doesn't. If so=
+meone overlay
+> > > > > > > test case hope to test as o/087 does, and it calls _require_x=
+fs_io_command "shutdown",
+> > > > > > > then it'll be _notrun.
+> > > > > >
+> > > > > > If someone knows enough to perform the dance above with _scratc=
+h_shutdown_handle
+> > > > > > then that someone should know enough not to call
+> > > > > > _require_xfs_io_command "shutdown".
+> > > > > > OTOH, if someone doesn't know then default is to not run.
+> > > > >
+> > > > > Sure, I can understand that, just this logic is a bit *obscure* :=
+) It sounds like:
+> > > > > "If an overlay test case wants to do xfs_io shutdown, it shouldn'=
+t call
+> > > > > _require_xfs_io_command "shutdown". Or call that to skip a shutdo=
+wn test
+> > > > > on overlay :)"
+> > > > >
+> > > > > And the expected result of _require_xfs_io_command "shutdown" wil=
+l be totally
+> > > > > opposite with _require_scratch_shutdown on overlay, that might be=
+ confused.
+> > > > > Can we have a clearer way to deal with that?
+> > > > >
+> > > >
+> > > > I don't really understand the confusion.
+> > > >
+> > > > _require_xfs_io_command "shutdown"
+> > > >
+> > > > Like any other _require statement
+> > > > requires support for what this test does -
+> > > > meaning that a test does xfs_io -c shutdown, just like test generic=
+/623 does
+> > > >
+> > > > and _require_scratch_shutdown implies that the test does
+> > > > _scratch_shutdown
+> > > >
+> > > > FSTYP overlay happens to be able to do _scratch_shutdown
+> > > > but not able to do xfs_io -c shutdown $SCRATCH_MNT
+> > > >
+> > > > The different _require statements simply reflect reality as it is.
+> > > >
+> > > > We can solve the confused about o/087 not having
+> > > > _require_xfs_io_command "shutdown"
+> > > > by moving the special hand crafted xfs_io command in o/087
+> > > > to a helper _scratch_shutdown_and_syncfs to hide those internal
+> > > > implementation details from test writers.
+> > > > See attached patch.
+> > >
+> > > Hmm... give me a moment to order my thoughts step by step :)
+> > >
+> > > There're only 2 cases tend to do xfs_io shutdown on overlay currently
+> > > (others are xfs specific test cases):
+> > >
+> > >   $ grep -rsn shutdown tests/|grep -- "-c"
+> > >   tests/generic/623:29:$XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k=
+" -c shutdown -c fsync \
+> > >   tests/overlay/087:50:$XFS_IO_PROG -x -c "open $(_scratch_shutdown_h=
+andle)" -c 'shutdown -f ' -c close -c syncfs $SCRATCH_MNT | \
+> > >   tests/overlay/087:57:$XFS_IO_PROG -x -c "open $(_scratch_shutdown_h=
+andle)" -c 'shutdown -f ' -c close -c syncfs $SCRATCH_MNT | \
+> > >   ...
+> > >
+> > > others shutdown cases nearly all use *_scratch_shutdown* with
+> > > *_require_scratch_shutdown*, these two functions are consistent in
+> > > code logic. And no one calls "_require_xfs_io_command shutdown" curre=
+ntly.
+> > >
+> > > So g/623 and o/087 are specifal, actually they call _require_scratch_=
+shutdown
+> > > too, that makes sense for o/087. Now only g/623 doesn't make sense. N=
+ow we
+> > > need to help it to make sense.
+> > >
+> > > I think the key is in _require_scratch_shutdown function [1], how abo=
+ut add an
+> > > argument to clearly tell it we need to check shutdown "only on the to=
+p layer
+> > > $SCRATCH_MNT" or "try the lowest layer $BASE_SCRATCH_MNT if there is"=
+.
+> > >
+> > > For example:
+> > >
+> > > diff --git a/common/rc b/common/rc
+> > > index c3af8485c..5f30143e4 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -4075,15 +4075,17 @@ _require_exportfs()
+> > >         _require_open_by_handle
+> > >  }
+> > >
+> > > -# Does shutdown work on this fs?
+> > > +# Does shutdown work on this [lower|top] layer fs?
+> > >  _require_scratch_shutdown()
+> > >  {
+> > > +       local layer=3D"${1:-lower}"
+> > > +
+> > >         [ -x $here/src/godown ] || _notrun "src/godown executable not=
+ found"
+> > >
+> > >         _scratch_mkfs > /dev/null 2>&1 || _notrun "_scratch_mkfs fail=
+ed on $SCRATCH_DEV"
+> > >         _scratch_mount
+> > >
+> > > -       if [ $FSTYP =3D "overlay" ]; then
+> > > +       if [ $FSTYP =3D "overlay" -a "$level" =3D "lower" ]; then
+> > >                 if [ -z $OVL_BASE_SCRATCH_DEV ]; then
+> > >                         # In lagacy overlay usage, it may specify dir=
+ectory as
+> > >                         # SCRATCH_DEV, in this case OVL_BASE_SCRATCH_=
+DEV
+> > > diff --git a/tests/generic/623 b/tests/generic/623
+> > > index b97e2adbe..af0f55397 100755
+> > > --- a/tests/generic/623
+> > > +++ b/tests/generic/623
+> > > @@ -15,7 +15,7 @@ _begin_fstest auto quick shutdown mmap
+> > >         "xfs: restore shutdown check in mapped write fault path"
+> > >
+> > >  _require_scratch_nocheck
+> > > -_require_scratch_shutdown
+> > > +_require_scratch_shutdown top
+> >
+> > Sorry I find this utterly confusing.
+> >
+> > Think of all the 95% of fstests developers that do not care about overl=
+ayfs
+> > what does this top mean to them and why should they use it for tests
+> > that do xfs_io -c shutdown and not for tests that do _scratch_shutdown?
+> >
+> > The test author and reviewers should be able to look at the tests and
+> > easily derive what the test requirements should be according to simple =
+rules.
+> > For example:
+> >
+> > 1. A test that calls _scrash_shutdown needs to _require_scratch_shutdow=
+n
+> > 2. A test that calls _scratch_shutdown_and_syncfs needs to
+> > _require_scratch_shutdown_and_syncfs
+> > 3. A test that calls xfs_io -c shutdown needs to _require_xfs_io_shutdo=
+wn
+> >
+> > I completely understand why you do not like my hack of
+> > _require_xfs_io_command "shutdown"
+> >
+> > Would you approve if it was an explicit _require_xfs_io_shutdown helper=
+?
+> >
+> > # Requirements for tests that call xfs_io -c shutdown instead of using =
+the
+> > # _scratch_shutdown helper
 >
-> diff --git a/common/atomicwrites b/common/atomicwrites
-> index 391bb6f6..88f49a1a 100644
-> --- a/common/atomicwrites
-> +++ b/common/atomicwrites
-> @@ -24,6 +24,27 @@ _get_atomic_write_segments_max()
->          grep -w atomic_write_segments_max | grep -o '[0-9]\+'
->  }
->  
-> +_require_scratch_write_atomic_multi_fsblock()
-> +{
-> +    _require_scratch
-> +
-> +    _scratch_mkfs > /dev/null 2>&1 || \
-> +        _notrun "cannot format scratch device for atomic write checks"
-> +    _try_scratch_mount || \
-> +        _notrun "cannot mount scratch device for atomic write checks"
-> +
-> +    local testfile=$SCRATCH_MNT/testfile
-> +    touch $testfile
-> +
-> +    local bsize=$(_get_file_block_size $SCRATCH_MNT)
-> +    local awu_max_fs=$(_get_atomic_write_unit_max $testfile)
-> +
-> +    _scratch_unmount
-> +
-> +    test $awu_max_fs -ge $((bsize * 2)) || \
-> +        _notrun "multi-block atomic writes not supported by this filesystem"
-> +}
-> +
+> OK, but you might metion that it's better not be used if _scratch_shutdow=
+n_handle
+> is called for xfs_io, as we hope the lower layer fs supports shutdown at =
+that time:)
+>
 
-Looks good. Please feel free to add:
-Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+Sure I'll add that
 
--ritesh
+> Actually I'm wondering if we should help xfstests to support BASE_FSTYP a=
+nd FSTYP
+> for more upper layer fs, likes nfs, cifs, and so on.
+
+I think that could be very useful, but will require cifs/nfs to implement
+more complicated _mount/umount/remount helpers like overlay.
+
+> If so, overlay will not be
+> the only one fs who uses BASE_FSTYP and BASE_SCRATCH_DEV things, then we =
+need to
+> differentiate if a feature (e.g. shutdown) is needed by upper layer fs or=
+ underlying
+> fs in a case.
+>
+
+First of all, terminology. Many get this wrong.
+In overlayfs, the "upper" and "lower" refer to the different underlying lay=
+ers.
+In fstests BASE_SCRATCH_DEV is always the same for both OVL_UPPER and
+OVL_LOWER layers.
+
+Referring to the BASE_SCRATCH_DEV as "underlying" or "base" fs is
+unambiguous in all cases of overlay/nfs/cifs.
+
+I do not have a good terminology to offer for referring to the "fs under te=
+st"
+be it overlay/cifs/nfs. You are welcome to offer your suggestions.
+
+> ...
+> BTW, a question which isn't belong to this patch:)  There're also some fa=
+ilures
+> from those xfstests overlay cases which run unionmount-testsuite (can't r=
+ememember
+> all, maybe o/102~109, o/144~117). The error (diff) output are similar as =
+[1].
+> Is there a fix for that too? Or I missed the fix?
+
+I do not get these errors.
+I suppose you are using the latest unionmount-testsuite,
+although it hasn't been changed for a while anyway.
+
+>
+> Thanks,
+> Zorro
+>
+> [1]
+> --- /dev/fd/63  2025-06-07 05:16:59.489929312 -0400
+> +++ overlay/103.out.bad 2025-06-07 05:16:59.445716549 -0400
+> @@ -1,2 +1,17 @@
+>  QA output created by 103
+> +mount: /mnt/fstests/SCRATCH_DIR/union/m: wrong fs type, bad option, bad =
+superblock on overlay, missing codepage or helper program, or other error.
+> +       dmesg(1) may have more information after failed mount system call=
+.
+
+Reason for failure to mount is likely to be found in dmesg.
+Please try to see if it is there.
+
+> +Traceback (most recent call last):
+> +  File "/mnt/tests/gitlab.cee.redhat.com/kernel-qe/kernel/-/archive/mast=
+er/kernel-master.tar.bz2/filesystems/xfstests/unionmount-testsuite/./run", =
+line 362, in <module>
+> +    func(ctx)
+> +  File "/mnt/tests/gitlab.cee.redhat.com/kernel-qe/kernel/-/archive/mast=
+er/kernel-master.tar.bz2/filesystems/xfstests/unionmount-testsuite/tests/re=
+name-file.py", line 71, in subtest_5
+> +    ctx.rename(f, f2)
+> +  File "/mnt/tests/gitlab.cee.redhat.com/kernel-qe/kernel/-/archive/mast=
+er/kernel-master.tar.bz2/filesystems/xfstests/unionmount-testsuite/context.=
+py", line 1254, in rename
+> +    remount_union(self, rotate_upper=3DTrue)
+> +  File "/mnt/tests/gitlab.cee.redhat.com/kernel-qe/kernel/-/archive/mast=
+er/kernel-master.tar.bz2/filesystems/xfstests/unionmount-testsuite/remount_=
+union.py", line 35, in remount_union
+> +    system(cmd)
+> +  File "/mnt/tests/gitlab.cee.redhat.com/kernel-qe/kernel/-/archive/mast=
+er/kernel-master.tar.bz2/filesystems/xfstests/unionmount-testsuite/tool_box=
+.py", line 25, in system
+> +    raise RuntimeError("Command failed: " + command)
+> +RuntimeError: Command failed: mount -t overlay overlay /mnt/fstests/SCRA=
+TCH_DIR/union/m -orw,xino=3Don -olowerdir=3D/mnt/fstests/SCRATCH_DIR/union/=
+6/u:/mnt/fstests/SCRATCH_DIR/union/5/u:/mnt/fstests/SCRATCH_DIR/union/4/u:/=
+mnt/fstests/SCRATCH_DIR/union/3/u:/mnt/fstests/SCRATCH_DIR/union/2/u:/mnt/f=
+stests/SCRATCH_DIR/union/1/u:/mnt/fstests/SCRATCH_DIR/union/0/u:/mnt/fstest=
+s/SCRATCH_DIR/union/l,upperdir=3D/mnt/fstests/SCRATCH_DIR/union/7/u,workdir=
+=3D/mnt/fstests/SCRATCH_DIR/union/7/w
+
+Nothing looks obviously wrong in the mount command above.
+Was this a regression for you?
+with kernel upgrade? libmount upgrade?
+
+Thanks,
+Amir.
