@@ -1,141 +1,175 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8EC51EE035;
-	Tue, 10 Jun 2025 14:42:07 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4FF5A20E034;
+	Tue, 10 Jun 2025 14:43:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749566527; cv=none; b=mcCN7M8FKW91zplCDpACRA6tAX+ywMneBeH6tWxndSXuul/qND1azw59p0qN8eTxQFqFxGLqJ2qPHS1OHGrk0t0rMc0p/RV9blFw2Xj9KNRoRgx+Rbomm/RCgGSh68rTIdMhjAhHMAvgZe+DrAnS0o5zYcBi+m5qk8/NKLURQpw=
+	t=1749566618; cv=none; b=Hg6gdndwzQ6+/6eBNDOseW8Q31GkAOF7Klfu6iXtkupaAhIWfj4y22YPY3jk9XulLb1MGOpwB2efTaMMyI1QonWKG0EePJ4fJp3c44SgxrHL1AatHHKNDtO1z+KspR9fCgxGBANpwLR9cPzUqmbvf1rEeJK1Flj++fhePhk7bsU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749566527; c=relaxed/simple;
-	bh=+g0XEWwuPwctdzcvl8k+BacFQzDW/UYnV7SRJvt9SYU=;
+	s=arc-20240116; t=1749566618; c=relaxed/simple;
+	bh=kJScALIcaZaahWIzaDjdqDQ2xqLKvVvLgUpiCUAaWHc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ml2AF51pXc2+xpBi6sllqRjlDBQBtzrwaLMwc9Qd7qufwyixRpMoruUHKdgsA5U7KeK6L96/rppgpVMtr6YUGTEVTh3VY368EKOPSrl+OU6hOKNIdjI9/W7ocrDyYnHN1OqnSAKNTLP853Av5zp73/a4AmlQEC127aifoThnhog=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EzAUytbz; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=tmN1bUor0SWrEVwtBqYktEZm06m/fiNgbYXOFEAG/TxNtfsDt6MiDixreFH0GapUUsgB5tp7Qi8CVJF0uM+AC9xgJdfifWZPqKIClx7Nnw8/V/6IsgvNYjTJHI8uSgqFp7mqq68hK4lZU+B/8DpiI46rJR7kswuBpSwT08qOJVI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RsWGgpin; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EzAUytbz"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 48418C4CEED;
-	Tue, 10 Jun 2025 14:42:07 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RsWGgpin"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 96154C4CEED;
+	Tue, 10 Jun 2025 14:43:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1749566527;
-	bh=+g0XEWwuPwctdzcvl8k+BacFQzDW/UYnV7SRJvt9SYU=;
+	s=k20201202; t=1749566615;
+	bh=kJScALIcaZaahWIzaDjdqDQ2xqLKvVvLgUpiCUAaWHc=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=EzAUytbzsXXEEt46ujQDH4UEjTpM2r54Aiz+7E2WVb6b1zKOFx17lv2JMCgsvoE1D
-	 jbp0d0YgE8yVFPjEdrM3X8yuUkQoCxzaKEqzkoUBE7JukuZDvZ8ceV3P+gANU0AzLV
-	 3YIgS5ab1l8jbl2BK63Kbey4lDRpsOf9W8n50UFlDkjBi6h+nmEWm2p0ZWAqdRoPTG
-	 c+1gJx7MoF0bJVjGWs/l310GPKAcNAKzymF1EK75Ft/xFAhgIrOEGwQZQ8R8ofhxsL
-	 5ApXFlZc3fMZ6m1pkz7CAVuuYz4tk3GZVGU7eXZeOXpVnvyq++obfuBTZHDc36o2tI
-	 XyA+ONoCDTJNQ==
-Date: Tue, 10 Jun 2025 07:42:06 -0700
+	b=RsWGgpinyYnOWqyB1afVCm9f8LGYyJRnymPtL076ZRkF/pRsqEvdrtYtejVydQMbz
+	 N5Vw3j9/SJja1ET+RSZS9RwDGS5c7FX97S7gzFtIcDvwtOrGxgfHIhq0Hy1pf7y2D4
+	 X2Wq1szdt9U3M/Ly5BtkY2u7LcUQi3sYWyTblagnGU8DFdJYhijriaPeWd+sgrRWTd
+	 GJXtDzc0wfHLBIw0cJ1Nzy43ydvtZZpwtjcpb21EGL/eGZrcmmFhUmAFNqED5DwEeo
+	 6S5Ipj4sSjnPKw2gibk+1okO0UCr6aFnaiYY9L9VOVr0H9tbEY27m5uTkbj2rL3Hys
+	 RC4oEup/og3KA==
+Date: Tue, 10 Jun 2025 07:43:34 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Zorro Lang <zlang@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>,
-	Christian Brauner <brauner@kernel.org>,
-	=?iso-8859-1?Q?Andr=E9?= Almeida <andrealmeid@igalia.com>,
-	linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/3] fstests: add helper _require_xfs_io_shutdown
-Message-ID: <20250610144206.GB6143@frogsfrogsfrogs>
-References: <20250609151915.2638057-1-amir73il@gmail.com>
- <20250609151915.2638057-3-amir73il@gmail.com>
+To: Li Chen <me@linux.beauty>
+Cc: Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>,
+	linux-xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH V2] generic/738 : add missing _fixed_by_git_commit line
+ to the test
+Message-ID: <20250610144334.GC6143@frogsfrogsfrogs>
+References: <20250610025242.11403-1-me@linux.beauty>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20250609151915.2638057-3-amir73il@gmail.com>
+In-Reply-To: <20250610025242.11403-1-me@linux.beauty>
 
-On Mon, Jun 09, 2025 at 05:19:14PM +0200, Amir Goldstein wrote:
-> Requirements for tests that shutdown fs using "xfs_io -c shutdown".
-> The requirements are stricter than the requirement for tests that
-> shutdown fs using _scratch_shutdown helper.
+On Tue, Jun 10, 2025 at 10:52:42AM +0800, Li Chen wrote:
+> From: Li Chen <chenl311@chinatelecom.cn>
 > 
-> Generally, with overlay fs, tests can do _scratch_shutdown, but not
-> xfs_io -c shutdown.
+> Add the usual  _fixed_by_kernel_commit  line so the user can find
+> that the hang is cured by
 > 
-> Encode this stricter requirement in helper _require_xfs_io_shutdown
-> and use it in test generic/623, to express that it cannot run on
-> overalyfs.
+>     ab23a7768739  ("xfs: per-cpu deferred inode inactivation queues")
 > 
-> Reported-by: André Almeida <andrealmeid@igalia.com>
-> Link: https://lore.kernel.org/linux-fsdevel/20250521-ovl_ro-v1-1-2350b1493d94@igalia.com/
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> The hung task call trace would be as below:
+> [   20.535519]       Not tainted 5.14.0-rc4+ #27
+> [   20.537855] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> [   20.539420] task:738             state:D stack:14544 pid: 7124 ppid:   753 flags:0x00004002
+> [   20.540892] Call Trace:
+> [   20.541424]  __schedule+0x22d/0x6c0
+> [   20.542128]  schedule+0x3f/0xa0
+> [   20.542751]  percpu_rwsem_wait+0x100/0x130
+> [   20.543516]  ? percpu_free_rwsem+0x30/0x30
+> [   20.544259]  __percpu_down_read+0x44/0x50
+> [   20.545002]  xfs_trans_alloc+0x19a/0x1f0
+> [   20.545747]  xfs_free_eofblocks+0x47/0x100
+> [   20.546519]  xfs_inode_mark_reclaimable+0x115/0x160
+> [   20.547398]  destroy_inode+0x36/0x70
+> [   20.548077]  prune_icache_sb+0x79/0xb0
+> [   20.548789]  super_cache_scan+0x159/0x1e0
+> [   20.549536]  shrink_slab.constprop.0+0x1b1/0x370
+> [   20.550363]  drop_slab_node+0x1d/0x40
+> [   20.551041]  drop_slab+0x30/0x70
+> [   20.551600]  drop_caches_sysctl_handler+0x6b/0x80
+> [   20.552311]  proc_sys_call_handler+0x12b/0x250
+> [   20.552931]  new_sync_write+0x117/0x1b0
+> [   20.553462]  vfs_write+0x1bd/0x250
+> [   20.553914]  ksys_write+0x5a/0xd0
+> [   20.554381]  do_syscall_64+0x3b/0x90
+> [   20.554854]  entry_SYSCALL_64_after_hwframe+0x44/0xae
+> [   20.555481] RIP: 0033:0x7f90928d3300
+> [   20.555946] RSP: 002b:00007ffc2b50b998 EFLAGS: 00000202 ORIG_RAX: 0000000000000001
+> [   20.556853] RAX: ffffffffffffffda RBX: 0000000000000002 RCX: 00007f90928d3300
+> [   20.557686] RDX: 0000000000000002 RSI: 000055a5d6c47750 RDI: 0000000000000001
+> [   20.558524] RBP: 000055a5d6c47750 R08: 0000000000000007 R09: 0000000000000073
+> [   20.559335] R10: 0000000000000000 R11: 0000000000000202 R12: 0000000000000002
+> [   20.560154] R13: 00007f90929ae760 R14: 0000000000000002 R15: 00007f90929a99e0
+> 
+> localhost login: [   30.773559] INFO: task 738:7124 blocked for more than 20 seconds.
+> [   30.775236]       Not tainted 5.14.0-rc4+ #27
+> [   30.777449] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> [   30.779729] task:738             state:D stack:14544 pid: 7124 ppid:   753 flags:0x00004002
+> [   30.781267] Call Trace:
+> [   30.781850]  __schedule+0x22d/0x6c0
+> [   30.782618]  schedule+0x3f/0xa0
+> [   30.783297]  percpu_rwsem_wait+0x100/0x130
+> [   30.784110]  ? percpu_free_rwsem+0x30/0x30
+> [   30.785085]  __percpu_down_read+0x44/0x50
+> [   30.786071]  xfs_trans_alloc+0x19a/0x1f0
+> [   30.786877]  xfs_free_eofblocks+0x47/0x100
+> [   30.787727]  xfs_inode_mark_reclaimable+0x115/0x160
+> [   30.788708]  destroy_inode+0x36/0x70
+> [   30.789395]  prune_icache_sb+0x79/0xb0
+> [   30.790056]  super_cache_scan+0x159/0x1e0
+> [   30.790712]  shrink_slab.constprop.0+0x1b1/0x370
+> [   30.791381]  drop_slab_node+0x1d/0x40
+> [   30.791924]  drop_slab+0x30/0x70
+> [   30.792469]  drop_caches_sysctl_handler+0x6b/0x80
+> [   30.793328]  proc_sys_call_handler+0x12b/0x250
+> [   30.793948]  new_sync_write+0x117/0x1b0
+> [   30.794471]  vfs_write+0x1bd/0x250
+> [   30.794941]  ksys_write+0x5a/0xd0
+> [   30.795414]  do_syscall_64+0x3b/0x90
+> [   30.795928]  entry_SYSCALL_64_after_hwframe+0x44/0xae
+> [   30.796595] RIP: 0033:0x7f90928d3300
+> [   30.797090] RSP: 002b:00007ffc2b50b998 EFLAGS: 00000202 ORIG_RAX: 0000000000000001
+> [   30.798033] RAX: ffffffffffffffda RBX: 0000000000000002 RCX: 00007f90928d3300
+> [   30.798852] RDX: 0000000000000002 RSI: 000055a5d6c47750 RDI: 0000000000000001
+> [   30.799703] RBP: 000055a5d6c47750 R08: 0000000000000007 R09: 0000000000000073
+> [   30.800833] R10: 0000000000000000 R11: 0000000000000202 R12: 0000000000000002
+> [   30.801764] R13: 00007f90929ae760 R14: 0000000000000002 R15: 00007f90929a99e0
+> [   30.802628] INFO: task xfs_io:7130 blocked for more than 10 seconds.
+> [   30.803421]       Not tainted 5.14.0-rc4+ #27
+> [   30.803985] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> [   30.804979] task:xfs_io          state:D stack:13712 pid: 7130 ppid:  7127 flags:0x00000002
+> [   30.806013] Call Trace:
+> [   30.806399]  __schedule+0x22d/0x6c0
+> [   30.806867]  schedule+0x3f/0xa0
+> [   30.807334]  rwsem_down_write_slowpath+0x1d8/0x510
+> [   30.808018]  thaw_super+0xd/0x20
+> [   30.808748]  __x64_sys_ioctl+0x5d/0xb0
+> [   30.809292]  do_syscall_64+0x3b/0x90
+> [   30.809797]  entry_SYSCALL_64_after_hwframe+0x44/0xae
+> [   30.810454] RIP: 0033:0x7ff1b48c5d1b
+> [   30.810943] RSP: 002b:00007fff0bf88ac0 EFLAGS: 00000246 ORIG_RAX: 0000000000000010
+> [   30.811874] RAX: ffffffffffffffda RBX: 000055b93ae5fc40 RCX: 00007ff1b48c5d1b
+> [   30.812743] RDX: 00007fff0bf88b2c RSI: ffffffffc0045878 RDI: 0000000000000003
+> [   30.813583] RBP: 000055b93ae60fe0 R08: 0000000000000000 R09: 0000000000000000
+> [   30.814497] R10: 0000000000000000 R11: 0000000000000246 R12: 0000000000000001
+> [   30.815413] R13: 000055b93a3a94e9 R14: 0000000000000000 R15: 000055b93ae61150
+> 
+> Signed-off-by: Li Chen <chenl311@chinatelecom.cn>
 
-Makes sense to me, assuming you don't want to try to integrate the 'open
-shutdown handle' dance into this test.
+Looks good, though ab23a7768739 is a bit of a backport ;)
 
-ioargs=(-x -c "mmap 0 4k" -c "mwrite 0 4k")
-case "$FSTYP" in
-overlayfs)
-	ioargs+=(-c "open $(_scratch_shutdown_handle)" -c 'shutdown -f ' -c close)
-	;;
-*)
-	ioargs+=(-c shutdown)
-	;;
-esac
-ioargs+=(-c fsync -c "mwrite 0 4k" $file)
-
-$XFS_IO_PROG "${ioargs[@]}" | _filter_xfs_io
-
-(Though I don't know if you actually tried that and it didn't work, or
-maybe overlayfs mmap is weird, etc...)
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
 --D
 
 > ---
->  common/rc         | 21 +++++++++++++++++++++
->  tests/generic/623 |  2 +-
->  2 files changed, 22 insertions(+), 1 deletion(-)
+> Changes since v1: use _fixed_by_kernel_commit helper as suggested by
+> Zorro
 > 
-> diff --git a/common/rc b/common/rc
-> index d9a8b52e..21899a4a 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -616,6 +616,27 @@ _scratch_shutdown_and_syncfs()
->  	fi
->  }
+>  tests/generic/738 | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/tests/generic/738 b/tests/generic/738
+> index 6f1ea7f8..b0503025 100755
+> --- a/tests/generic/738
+> +++ b/tests/generic/738
+> @@ -9,6 +9,9 @@
+>  . ./common/preamble
+>  _begin_fstest auto quick freeze
 >  
-> +# Requirements for tests that shutdown fs using "xfs_io -c shutdown".
-> +# The requirements are stricter than the requirement for tests that
-> +# shutdown fs using _scratch_shutdown helper.
-> +# Generally, with overlay fs, test can do _scratch_shutdown, but not
-> +# xfs_io -c shutdown.
-> +# It is possible, but not trivial, to execute "xfs_io -c shutdown" as part
-> +# of a command sequence when shutdown ioctl is to be performed on the base fs
-> +# (i.e. on an alternative _scratch_shutdown_handle path) as the example code
-> +# in _scratch_shutdown_and_syncfs() does.
-> +# A test that open codes this pattern can relax the _require_xfs_io_shutdown
-> +# requirement down to _require_scratch_shutdown.
-> +_require_xfs_io_shutdown()
-> +{
-> +	if [ _scratch_shutdown_handle != $SCRATCH_MNT ]; then
-> +		# Most likely overlayfs
-> +		_notrun "xfs_io -c shutdown not supported on $FSTYP"
-> +	fi
-> +	_require_xfs_io_command "shutdown"
-> +	_require_scratch_shutdown
-> +}
+> +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit ab23a7768739 \
+> +	"xfs: per-cpu deferred inode inactivation queues"
 > +
->  _move_mount()
+>  _cleanup()
 >  {
->  	local mnt=$1
-> diff --git a/tests/generic/623 b/tests/generic/623
-> index b97e2adb..f546d529 100755
-> --- a/tests/generic/623
-> +++ b/tests/generic/623
-> @@ -15,7 +15,7 @@ _begin_fstest auto quick shutdown mmap
->  	"xfs: restore shutdown check in mapped write fault path"
->  
->  _require_scratch_nocheck
-> -_require_scratch_shutdown
-> +_require_xfs_io_shutdown
->  
->  _scratch_mkfs &>> $seqres.full
->  _scratch_mount
+>  	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
 > -- 
-> 2.34.1
+> 2.49.0
 > 
 > 
