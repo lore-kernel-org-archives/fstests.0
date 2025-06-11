@@ -1,41 +1,41 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 716131C6FF6
-	for <fstests@vger.kernel.org>; Wed, 11 Jun 2025 15:35:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 621461A8404
+	for <fstests@vger.kernel.org>; Wed, 11 Jun 2025 15:36:24 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749656139; cv=none; b=FW+tb6lrpauD+VpvVFWffeUlgz6xSEOABpYdz3RyqltWJWejr+q4m+TK8jXANl9sETmewD8oqqIG8Drsem+izzcMLdGsd0VBV42yZaS02OLdxilEvXbwyBtAHNfnlJhjWEUW6jK46v8GtzKSNxCBBwyioPPW+G+79zgKJwLkEGc=
+	t=1749656184; cv=none; b=ePTwsiy2od5pEkB7g23jNUBl3no4q7IpNyFJxJaCrkgjSkw2B8rb1opeiIEvOMg/21vW+VMq+Ql3grBcnwY25q+bhfbT+x6R3clmg5T/8VOL2Ban9PLG00kBl7hNacQNqp58OJDUHMTczlpwKUY/0Zx1CxBed4putUd2HV5VndA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749656139; c=relaxed/simple;
-	bh=ya5ev4K9uEsmDRQg2pIjq7qUsou0aaMwbAYL1Yq4qtU=;
+	s=arc-20240116; t=1749656184; c=relaxed/simple;
+	bh=RZQhaUrLXsvOdDqDKGVrXX4ijnmnOc+ad59Kmcvgm2U=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=S3H474kMB6EcrZ939LAb555hUP62YMy1Ih2e8OzHVc+Vx4NZaHgB9KHHT5yss2MB+7yV10vyUILY7HgFA9ptVTPskZqjSOQ4jinbGW+dyyCJxEhO6igul6iWaELyjnyB6E8+xLg44Gu6fRYc8/u0XCjPg665CWakU2saJvZ5slA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=r6sIZhYL; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=PZkbwVBLqWRVP5JLb9/4q2o3+v23ORItqAkjA2zBlzZ1lnpRsB5i42O3MvmkJbSjPGWhN9rEudoN9TJvv7CqsSGOslbIhnUJ0X9yADsz7rUveBgZ6Eh7KBF/g0Ci8tOuGZtrA0JoMHX4KCuaeAeHs7gkQ5/xhDSWR9ArxWAhEAk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fM1mLTS2; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="r6sIZhYL"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DA7DDC4CEF1;
-	Wed, 11 Jun 2025 15:35:38 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fM1mLTS2"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D9664C4CEE3;
+	Wed, 11 Jun 2025 15:36:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1749656138;
-	bh=ya5ev4K9uEsmDRQg2pIjq7qUsou0aaMwbAYL1Yq4qtU=;
+	s=k20201202; t=1749656183;
+	bh=RZQhaUrLXsvOdDqDKGVrXX4ijnmnOc+ad59Kmcvgm2U=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=r6sIZhYLA/K9gH5YHUfi8xOFfpVekrgZgYQU1kZwVHju7BLGKOjJR6s7QAlua3lJ/
-	 2HQ3telBCTDzt8rcxN/ksLdpltQcSfAWJ3npIrLRX6AKGQZIPpvYU4XBLUhvyQV7BI
-	 fGvyMMb4lj64XI4CGjS5jlKdd12MSpt7K5pRjs04BO8NpYYVrYW/EpG5/A3NuayzRt
-	 OtaLmZIT3eT079ZZdFr7ABPRI1Meu4KRYiY01+u2sdaf2e5KXmXzd8BkryW56OOJiF
-	 L5xVv1cHgqtPU1/+cN1QVTYPMqeEGm+2zC+FQQ8rxQ63ImOWzOKAQZbUAcM8hZsQEw
-	 wMe3WoPdoUv2Q==
-Date: Wed, 11 Jun 2025 08:35:38 -0700
+	b=fM1mLTS28ZoaZrNMbeHs2RBjo+WgwY7uaug+3UpdlLfYNI6TwHnqr6IgkShQr/P27
+	 9UrY8SHCl0ep0JWa1CaBwEKVg2qXBsvDhqtO+dMvpMI3cafw5t4dRbWetf8U4mhrxZ
+	 P71kFvFHeANzfFXlvuRx9s5apdfoQaOIilDAukp9e2Mpy29g9luILZOq9rEXMZTCki
+	 eIH6lVNdZ+jy/NUia3OuNmvRgiOwPgPgBb/umKfK1DPaJp7Q/DP8Xo/abgzk/YoilB
+	 SUrZCTyWcng8cJ6A/GO57eS3RDWwGrCsJw2xkYNaWlA0KEYfS9tR0LjQK832o8/PTP
+	 MgQrfdhl0YFJQ==
+Date: Wed, 11 Jun 2025 08:36:23 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
 	john.g.garry@oracle.com
-Subject: Re: [RFC 05/12] generic/769: Add atomic write test using fio verify
- on file mixed mappings
-Message-ID: <20250611153538.GL6143@frogsfrogsfrogs>
+Subject: Re: [RFC 06/12] generic/770: Add atomic write multi-fsblock
+ O_[D]SYNC tests
+Message-ID: <20250611153623.GM6143@frogsfrogsfrogs>
 References: <cover.1749629233.git.ojaswin@linux.ibm.com>
- <15c49ab581996987e060ee44cda4c58c4ceac1f8.1749629233.git.ojaswin@linux.ibm.com>
+ <5503061a800eaff9fc182e68c3030c1ef07410f3.1749629233.git.ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,146 +44,201 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <15c49ab581996987e060ee44cda4c58c4ceac1f8.1749629233.git.ojaswin@linux.ibm.com>
+In-Reply-To: <5503061a800eaff9fc182e68c3030c1ef07410f3.1749629233.git.ojaswin@linux.ibm.com>
 
-On Wed, Jun 11, 2025 at 03:04:48PM +0530, Ojaswin Mujoo wrote:
-> From: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
+On Wed, Jun 11, 2025 at 03:04:49PM +0530, Ojaswin Mujoo wrote:
+> This adds various atomic write multi-fsblock stresst tests
+> with mixed mappings and O_SYNC, to ensure the data and metadata
+> is atomically persisted even if there is a shutdown.
 > 
-> This tests uses fio to first create a file with mixed mappings. Then it
-> does atomic writes using aio dio with parallel jobs to the same file
-> with mixed mappings. This forces the filesystem allocator to allocate
-> extents over mixed mapping regions to stress FS block allocators.
-> 
-> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> Suggested-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
 > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 > ---
->  tests/generic/769     | 101 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/769.out |   2 +
->  2 files changed, 103 insertions(+)
->  create mode 100755 tests/generic/769
->  create mode 100644 tests/generic/769.out
+>  tests/generic/770     | 161 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/770.out |   2 +
+>  2 files changed, 163 insertions(+)
+>  create mode 100755 tests/generic/770
+>  create mode 100644 tests/generic/770.out
 > 
-> diff --git a/tests/generic/769 b/tests/generic/769
+> diff --git a/tests/generic/770 b/tests/generic/770
 > new file mode 100755
-> index 00000000..469d6344
+> index 00000000..2b98b3b3
 > --- /dev/null
-> +++ b/tests/generic/769
-> @@ -0,0 +1,101 @@
+> +++ b/tests/generic/770
+> @@ -0,0 +1,161 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +# Copyright (c) 2025 IBM Corporation. All Rights Reserved.
 > +#
-> +# FS QA Test 769
+> +# FS QA Test 770
 > +#
-> +# Validate FS atomic write using fio crc check verifier on mixed mappings
-> +# of a file.
+> +# Atomic write multi-fsblock data integrity tests with mixed mappings
+> +# and O_SYNC
 > +#
 > +. ./common/preamble
 > +. ./common/atomicwrites
-> +
-> +_begin_fstest auto aio rw atomicwrites
+> +_begin_fstest auto quick rw atomicwrites
 > +
 > +_require_scratch_write_atomic_multi_fsblock
-> +_require_odirect
-> +_require_aio
-> +
-> +function max()
-> +{
-> +	if (( $1 > $2 )); then
-> +		echo "$1"
-> +	else
-> +		echo "$2"
-> +	fi
-> +}
+> +_require_atomic_write_test_commands
 
-Yeah, there's that function again.
-
-The rest of the test looks fine.
+_require_shutdown?
 
 --D
 
 > +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +_scratch_mount
+> +_scratch_mkfs >> $seqres.full
+> +_scratch_mount >> $seqres.full
 > +
-> +touch "$SCRATCH_MNT/f1"
-> +awu_min_write=$(_get_atomic_write_unit_min "$SCRATCH_MNT/f1")
-> +awu_max_write=$(_get_atomic_write_unit_max "$SCRATCH_MNT/f1")
-> +aw_bsize=$(max "$awu_min_write" "$((awu_max_write/4))")
+> +check_data_integrity() {
+> +	actual=$(_hexdump $testfile)
+> +	if [[ "$expected" != "$actual" ]]
+> +	then
+> +		echo "Integrity check failed"
+> +		echo "Integrity check failed" >> $seqres.full
+> +		echo "# Expected file contents:" >> $seqres.full
+> +		echo "$expected" >> $seqres.full
+> +		echo "# Actual file contents:" >> $seqres.full
+> +		echo "$actual" >> $seqres.full
+> +	fi
+> +}
 > +
-> +fsbsize=$(_get_block_size $SCRATCH_MNT)
+> +testfile=$SCRATCH_MNT/testfile
+> +touch $testfile
 > +
-> +fio_config=$tmp.fio
-> +fio_out=$tmp.fio.out
+> +awu_max=$(_get_atomic_write_unit_max $testfile)
+> +blksz=$(_get_block_size $SCRATCH_MNT)
 > +
-> +FIO_LOAD=$(($(nproc) * 2 * LOAD_FACTOR))
-> +SIZE=$((128 * 1024 * 1024))
+> +# Create an expected pattern to compare with
+> +$XFS_IO_PROG -tc "pwrite -b $awu_max 0 $awu_max" $testfile >> $seqres.full
+> +expected=$(_hexdump $testfile)
+> +echo "# Expected file contents:" >> $seqres.full
+> +echo "$expected" >> $seqres.full
 > +
-> +cat >$fio_config <<EOF
-> +[global]
-> +ioengine=libaio
-> +fallocate=none
-> +filename=$SCRATCH_MNT/test-file
-> +filesize=$SIZE
-> +bs=$fsbsize
-> +direct=1
-> +verify=0
-> +group_reporting=1
+> +echo "# Test 1: Do O_DSYNC atomic write on random mixed mapping (10 iterations):" >> $seqres.full
+> +# Calculate how many blocks (e.g. 4K) fit in awu_max (e.g. 64K)
+> +num_blocks=$((awu_max / blksz))
+> +echo "Testing $num_blocks blocks of $blksz size within $awu_max region" >> $seqres.full
 > +
-> +# Create written extents
-> +[written_blocks]
-> +stonewall
-> +ioengine=libaio
-> +rw=randwrite
-> +io_size=$((SIZE/3))
-> +random_generator=lfsr
+> +operations=("W" "H" "U")
 > +
-> +# Create unwritten extents
-> +[unwritten_blocks]
-> +stonewall
-> +ioengine=falloc
-> +rw=randwrite
-> +io_size=$((SIZE/3))
-> +random_generator=lfsr
+> +# Run 10 iterations of the test
+> +for ((iteration=1; iteration<=10; iteration++)); do
+> +	echo "=== Mixed Mapping Test Iteration $iteration ===" >> $seqres.full
 > +
-> +# atomic write to mixed mappings of written/unwritten/holes
-> +[atomic_write_aio_dio_job]
-> +stonewall
-> +direct=1
-> +ioengine=libaio
-> +rw=randwrite
-> +bs=$aw_bsize
-> +iodepth=$FIO_LOAD
-> +numjobs=$FIO_LOAD
-> +size=$SIZE
-> +random_generator=lfsr
-> +verify_state_save=0
-> +verify=crc32c
-> +verify_fatal=1
-> +verify_dump=0
-> +verify_backlog=1024
-> +verify_async=4
-> +verify_write_sequence=0
-> +atomic=1
-> +EOF
+> +	$XFS_IO_PROG -c "truncate 0" $testfile >> $seqres.full
+> +	off=0
+> +	mapping=""
 > +
-> +_require_fio $fio_config
+> +	for ((i=0; i<num_blocks; i++)); do
+> +		index=$((RANDOM % ${#operations[@]}))
+> +		map="${operations[$index]}"
+> +		mapping="${mapping}${map}"
 > +
-> +cat $fio_config >> $seqres.full
-> +$FIO_PROG $fio_config --output=$fio_out
-> +cat $fio_out >> $seqres.full
+> +		case "$map" in
+> +			"W")
+> +				$XFS_IO_PROG -dc "pwrite -S 0x61 -b $blksz $off $blksz" $testfile > /dev/null
+> +				;;
+> +			"H")
+> +				# No operation needed for hole
+> +				;;
+> +			"U")
+> +				$XFS_IO_PROG -c "falloc $off $blksz" $testfile >> /dev/null
+> +				;;
+> +		esac
+> +		off=$((off + blksz))
+> +	done
+> +
+> +	echo "Mixed mapping preparation complete. Full mapping pattern: $mapping" >> $seqres.full
+> +
+> +	sync $testfile
+> +
+> +	echo "Performing O_DSYNC atomic write over the entire $awu_max region" >> $seqres.full
+> +	bytes_written=$($XFS_IO_PROG -dc "pwrite -DA -V1 -b $awu_max 0 $awu_max" $testfile | \
+> +				  grep wrote | awk -F'[/ ]' '{print $2}')
+> +
+> +	test $bytes_written -eq $awu_max || echo "atomic write len=$awu_max failed"
+> +	check_data_integrity
+> +	echo "Iteration $iteration completed: OK" >> $seqres.full
+> +	echo >> $seqres.full
+> +done
+> +echo "# Test 1: Do O_SYNC atomic write on random mixed mapping (10 iterations): OK" >> $seqres.full
+> +
+> +echo >> $seqres.full
+> +echo "# Test 2: Do extending O_SYNC atomic writes: " >> $seqres.full
+> +bytes_written=$($XFS_IO_PROG -dstc "pwrite -A -V1 -b $awu_max 0 $awu_max" $testfile | \
+> +                grep wrote | awk -F'[/ ]' '{print $2}')
+> +test $bytes_written -eq $awu_max || echo "atomic write len=$awu_max failed"
+> +_scratch_shutdown -v >> $seqres.full
+> +_scratch_cycle_mount >>$seqres.full 2>&1 || _fail "remount failed for Test-2"
+> +check_data_integrity
+> +echo "# Test 2: Do extending O_SYNC atomic writes: OK" >> $seqres.full
+> +
+> +echo >> $seqres.full
+> +echo "# Test 3: Do O_DSYNC atomic write on random mixed mapping with sudden fs shutdown (10 iterations):" >> $seqres.full
+> +num_blocks=$((awu_max / blksz))
+> +echo "Testing $num_blocks blocks of $blksz size within $awu_max region" >> $seqres.full
+> +
+> +operations=("W" "H" "U")
+> +
+> +for ((iteration=1; iteration<=10; iteration++)); do
+> +	echo "=== Mixed Mapping Shutdown Test Iteration $iteration ===" >> $seqres.full
+> +
+> +	$XFS_IO_PROG -c "truncate 0" $testfile >> $seqres.full
+> +
+> +	off=0
+> +	mapping=""
+> +
+> +	for ((i=0; i<num_blocks; i++)); do
+> +		index=$((RANDOM % ${#operations[@]}))
+> +		map="${operations[$index]}"
+> +		mapping="${mapping}${map}"
+> +
+> +		case "$map" in
+> +			"W")
+> +				$XFS_IO_PROG -dc "pwrite -S 0x61 -b $blksz $off $blksz" $testfile > /dev/null
+> +				;;
+> +			"H")
+> +				# No operation needed for hole
+> +				;;
+> +			"U")
+> +				$XFS_IO_PROG -c "falloc $off $blksz" $testfile > /dev/null
+> +				;;
+> +		esac
+> +		off=$((off + blksz))
+> +	done
+> +
+> +	echo "Mixed mapping preparation complete. Full mapping pattern: $mapping" >> $seqres.full
+> +
+> +	sync $testfile
+> +
+> +	echo "Performing O_DSYNC atomic write over the entire $awu_max region" >> $seqres.full
+> +	bytes_written=$($XFS_IO_PROG -dc "pwrite -DA -V1 -b $awu_max 0 $awu_max" $testfile | \
+> +				  grep wrote | awk -F'[/ ]' '{print $2}')
+> +
+> +	test $bytes_written -eq $awu_max || echo "atomic write len=$awu_max failed"
+> +
+> +	echo "Shutting down filesystem" >> $seqres.full
+> +	_scratch_shutdown -v >> $seqres.full
+> +	_scratch_cycle_mount >>$seqres.full 2>&1 || _fail "remount failed for Test-3"
+> +	check_data_integrity
+> +	echo "Iteration $iteration completed: OK" >> $seqres.full
+> +	echo >> $seqres.full
+> +done
+> +echo "# Test 3: Do O_SYNC atomic write on random mixed mapping with sudden fs shutdown (10 iterations): OK" >> $seqres.full
 > +
 > +# success, all done
-> +echo Silence is golden
+> +echo "Silence is golden"
 > +status=0
 > +exit
-> diff --git a/tests/generic/769.out b/tests/generic/769.out
+> +
+> diff --git a/tests/generic/770.out b/tests/generic/770.out
 > new file mode 100644
-> index 00000000..1512b439
+> index 00000000..17994ed5
 > --- /dev/null
-> +++ b/tests/generic/769.out
+> +++ b/tests/generic/770.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 769
+> +QA output created by 770
 > +Silence is golden
 > -- 
 > 2.49.0
