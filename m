@@ -1,40 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FFB527466
-	for <fstests@vger.kernel.org>; Wed, 11 Jun 2025 14:31:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3738D1865FA
+	for <fstests@vger.kernel.org>; Wed, 11 Jun 2025 14:35:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749652299; cv=none; b=cMhnX13pE99vCXgBj0CDivrp5DBPQeh6rUNiqDWZVEPWyUPsu+f92v0wKeErV56EYqLKi+MLZ5nvrCt3dNXVVjWUsc3IxGZzcKdKURv6I98Z+1R6kvQuPmMfvJE/C2JZJnPODYSErCQPOkN2GYD/OhFvXFJebAqcLPHqySqRkpQ=
+	t=1749652555; cv=none; b=WCHNhKY29hP9lzWEzt82ihjUvFH7WRX8g4lfCMi/sENz0SY/Sor8ddH6AFF08AwRUq5sgnXPSEY/CeQJASJYel3WIxg5Fngn3RqKuN2YnoqT/+JW1LICgAAlz4gJRQm8GA+8GLA7wYaM9+gFjSmF4ReHMLywZgVGHqyk/0SRmlQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749652299; c=relaxed/simple;
-	bh=sdyhR/c37YyoFAEyNG4mGNHZ9PVW+D9oE7T1pnwh2OA=;
+	s=arc-20240116; t=1749652555; c=relaxed/simple;
+	bh=HbBi0E3AaJvfJ5RjY933mJJF4tIESA6x0RhtVxrNvYc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=H4XtNfHeaiH9qDj4LwHRPK49EessLuShniIJcIUC4UID8dTjq0yg3qIaFKEJwpP/E4Sb2Ft+yN7FNf5ARj7KSQnCumFE4bDLvSJp3yUATtLTpSGh5HcFnRPX2cJ+uLDpexU+YTXA/ICh9WNCTGnu2Hyn/inz30FNGalORsS7Utc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iv3J/WEx; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=uUzJyTR+2nDNL/+ne6S58i9Esdf1hhuhGg2vAM5DdyeAbLeti3WBnQ6DeLjM+bEfBa/JZRwaOC61MgKWAtI/Q5pJfr0pZcb2yZDrGijctyH6IH/khGs4XpjNYFZmqaZWA3gTgOl7TbN1/ka8KoIK7n03IOir+GTEkUHxvKGZ9ws=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YUf25rV2; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iv3J/WEx"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 27D39C4CEE3;
-	Wed, 11 Jun 2025 14:31:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YUf25rV2"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9723EC4CEE3;
+	Wed, 11 Jun 2025 14:35:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1749652299;
-	bh=sdyhR/c37YyoFAEyNG4mGNHZ9PVW+D9oE7T1pnwh2OA=;
+	s=k20201202; t=1749652554;
+	bh=HbBi0E3AaJvfJ5RjY933mJJF4tIESA6x0RhtVxrNvYc=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=iv3J/WExoh1wlMiOuCJbwpaoVlq3iXYIzyrZNsw+2/fFSL3rm+NwttTkw2UtYSsfE
-	 v8Hg8jlxiLtRQwT52zHBoQmJFcllK8tS8zkl+UOf2czCcdurTP/xGRCG0EN1CajsJz
-	 UM9dQ4y06wdom+iFKX9oRt/SIqHndisooqlwgsXsHP8TFZcdrVCHByRjFodesZsu+p
-	 h7qpEvZu//VYGnpOhg6USRgzGWBO6T8Gra7a24KwdR73AfoIbNM97VEGT8odLHhx+h
-	 T5dpMCCGX/N6Ib38+qs0Z8Zt+bpNANuaQXpGct1h/1FUhlt2jAsEnVO4Z2lTiPXA42
-	 rHJfTe7mJosWg==
-Date: Wed, 11 Jun 2025 07:31:38 -0700
+	b=YUf25rV2+64AXk0oJx5v5ELPzD/MKWiNTf9QJwHotBBwNEQzpw4ZE0NrqBd/fAnhd
+	 zQdspjicXVgvkB9pUUZmn5iQT0DiNhHHdQ78CBbdIn7W+Joe5kQEhB5XvUHTTP8m8b
+	 jD/VGuN+c+654lUqF6ZA2sMNfMKGjNGWJpUDslbOWPuShTEDnAzK8QEAKUrYGEDu62
+	 T0F2D+x83595vcMTviAVv/0TMaErGMXxnZOkimWcGKgjZ5JhHccKBz8+cloksOD3a7
+	 iokFlw04+QqSHqz5lZnYGM54emDRNsZIhNnrP+iM7w2ADISsJCEGuZA9Bis58P/7Ji
+	 sMoLRxv+qb1vw==
+Date: Wed, 11 Jun 2025 07:35:54 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
 	john.g.garry@oracle.com
-Subject: Re: [RFC 02/12] common/rc: Add a helper to run fsx on a given file
-Message-ID: <20250611143138.GG6143@frogsfrogsfrogs>
+Subject: Re: [RFC 03/12] ltp/fsx.c: Add atomic writes support to fsx
+Message-ID: <20250611143554.GH6143@frogsfrogsfrogs>
 References: <cover.1749629233.git.ojaswin@linux.ibm.com>
- <0a0604215a992f0aaa4d8d6821b8c8051a0f8d80.1749629233.git.ojaswin@linux.ibm.com>
+ <07d5d00e4ebc24b4dd4c718b29dd14867fefdd70.1749629233.git.ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,73 +43,256 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <0a0604215a992f0aaa4d8d6821b8c8051a0f8d80.1749629233.git.ojaswin@linux.ibm.com>
+In-Reply-To: <07d5d00e4ebc24b4dd4c718b29dd14867fefdd70.1749629233.git.ojaswin@linux.ibm.com>
 
-On Wed, Jun 11, 2025 at 03:04:45PM +0530, Ojaswin Mujoo wrote:
-> Currently run_fsx is hardcoded to run on a file in $TEST_DIR.
-> Add a helper _run_fsx_on_file so that we can run fsx on any
-> given file including in $SCRATCH_MNT. Also, refactor _run_fsx
-> to use this helper.
+On Wed, Jun 11, 2025 at 03:04:46PM +0530, Ojaswin Mujoo wrote:
+> Implement atomic write support to help fuzz atomic writes
+> with fsx.
 > 
-> No functional change is intended in this patch.
-> 
+> Suggested-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
 > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 > ---
->  common/rc | 21 ++++++++++++++++++---
->  1 file changed, 18 insertions(+), 3 deletions(-)
+>  ltp/fsx.c | 105 +++++++++++++++++++++++++++++++++++++++++++++++++++---
+>  1 file changed, 100 insertions(+), 5 deletions(-)
 > 
-> diff --git a/common/rc b/common/rc
-> index cfbe2a5f..a5d811a1 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -5115,13 +5115,22 @@ _require_hugepage_fsx()
->  		_notrun "fsx binary does not support MADV_COLLAPSE"
+> diff --git a/ltp/fsx.c b/ltp/fsx.c
+> index 163b9453..9353fe6f 100644
+> --- a/ltp/fsx.c
+> +++ b/ltp/fsx.c
+> @@ -40,6 +40,7 @@
+>  #include <liburing.h>
+>  #endif
+>  #include <sys/syscall.h>
+> +#include "statx.h"
+>  
+>  #ifndef MAP_FILE
+>  # define MAP_FILE 0
+> @@ -49,6 +50,10 @@
+>  #define RWF_DONTCACHE	0x80
+>  #endif
+>  
+> +#ifndef RWF_ATOMIC
+> +#define RWF_ATOMIC	0x40
+> +#endif
+> +
+>  #define NUMPRINTCOLUMNS 32	/* # columns of data to print on each line */
+>  
+>  /* Operation flags (bitmask) */
+> @@ -110,6 +115,7 @@ enum {
+>  	OP_READ_DONTCACHE,
+>  	OP_WRITE,
+>  	OP_WRITE_DONTCACHE,
+> +	OP_WRITE_ATOMIC,
+>  	OP_MAPREAD,
+>  	OP_MAPWRITE,
+>  	OP_MAX_LITE,
+> @@ -200,6 +206,11 @@ int	uring = 0;
+>  int	mark_nr = 0;
+>  int	dontcache_io = 1;
+>  int	hugepages = 0;                  /* -h flag */
+> +int	do_atomic_writes = 0;		/* -a flag */
+> +
+> +/* User for atomic writes */
+> +int awu_min = 0;
+> +int awu_max = 0;
+>  
+>  /* Stores info needed to periodically collapse hugepages */
+>  struct hugepages_collapse_info {
+> @@ -288,6 +299,7 @@ static const char *op_names[] = {
+>  	[OP_READ_DONTCACHE] = "read_dontcache",
+>  	[OP_WRITE] = "write",
+>  	[OP_WRITE_DONTCACHE] = "write_dontcache",
+> +	[OP_WRITE_ATOMIC] = "write_atomic",
+>  	[OP_MAPREAD] = "mapread",
+>  	[OP_MAPWRITE] = "mapwrite",
+>  	[OP_TRUNCATE] = "truncate",
+> @@ -422,6 +434,7 @@ logdump(void)
+>  				prt("\t***RRRR***");
+>  			break;
+>  		case OP_WRITE_DONTCACHE:
+> +		case OP_WRITE_ATOMIC:
+>  		case OP_WRITE:
+>  			prt("WRITE    0x%x thru 0x%x\t(0x%x bytes)",
+>  			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+> @@ -1073,6 +1086,25 @@ update_file_size(unsigned offset, unsigned size)
+>  	file_size = offset + size;
 >  }
 >  
-> -_run_fsx()
-> +_run_fsx_on_file()
+> +static int is_power_of_2(unsigned n) {
+> +	return ((n & (n - 1)) == 0);
+> +}
+> +
+> +/*
+> + * Round down n to nearest power of 2.
+> + * If n is already a power of 2, return n;
+> + */
+> +static int rounddown_pow_of_2(int n) {
+> +	int i = 0;
+> +
+> +	if (is_power_of_2(n))
+> +		return n;
+> +
+> +	for (; (1 << i) < n; i++);
+> +
+> +	return 1 << (i - 1);
+> +}
+> +
+>  void
+>  dowrite(unsigned offset, unsigned size, int flags)
 >  {
-> +	local testfile=$1
-> +	shift
+> @@ -1081,6 +1113,27 @@ dowrite(unsigned offset, unsigned size, int flags)
+>  	offset -= offset % writebdy;
+>  	if (o_direct)
+>  		size -= size % writebdy;
+> +	if (flags & RWF_ATOMIC) {
+> +		/* atomic write len must be inbetween awu_min and awu_max */
+> +		if (size < awu_min)
+> +			size = awu_min;
+> +		if (size > awu_max)
+> +			size = awu_max;
 > +
-> +	if ! [ -f $testfile ]
-> +	then
-> +		echo "_run_fsx_on_file: $testfile doesn't exist. Creating" >> $seqres.full
-> +		touch $testfile
-> +	fi
+> +		/* atomic writes need power-of-2 sizes */
+> +		size = rounddown_pow_of_2(size);
 > +
->  	echo "fsx $*"
->  	local args=`echo $@ | sed -e "s/ BSIZE / $bsize /g" -e "s/ PSIZE / $psize /g"`
-> -	set -- $FSX_PROG $args $FSX_AVOID $TEST_DIR/junk
-> +	set -- $FSX_PROG $args $FSX_AVOID $testfile
+> +		/* atomic writes need naturally aligned offsets */
+> +		offset -= offset % size;
+> +
+> +		/* Skip the write if we are crossing max filesize */
+> +		if ((offset + size) > maxfilelen) {
+> +			if (!quiet && testcalls > simulatedopcount)
+> +				prt("skipping atomic write past maxfilelen\n");
+> +			log4(OP_WRITE_ATOMIC, offset, size, FL_SKIPPED);
+> +			return;
+> +		}
+> +	}
+>  	if (size == 0) {
+>  		if (!quiet && testcalls > simulatedopcount && !o_direct)
+>  			prt("skipping zero size write\n");
+> @@ -1088,7 +1141,10 @@ dowrite(unsigned offset, unsigned size, int flags)
+>  		return;
+>  	}
+>  
+> -	log4(OP_WRITE, offset, size, FL_NONE);
+> +	if (flags & RWF_ATOMIC)
+> +		log4(OP_WRITE_ATOMIC, offset, size, FL_NONE);
+> +	else
+> +		log4(OP_WRITE, offset, size, FL_NONE);
+>  
+>  	gendata(original_buf, good_buf, offset, size);
+>  	if (offset + size > file_size) {
+> @@ -1108,8 +1164,9 @@ dowrite(unsigned offset, unsigned size, int flags)
+>  		       (monitorstart == -1 ||
+>  			(offset + size > monitorstart &&
+>  			(monitorend == -1 || offset <= monitorend))))))
+> -		prt("%lld write\t0x%x thru\t0x%x\t(0x%x bytes)\tdontcache=%d\n", testcalls,
+> -		    offset, offset + size - 1, size, (flags & RWF_DONTCACHE) != 0);
+> +		prt("%lld write\t0x%x thru\t0x%x\t(0x%x bytes)\tdontcache=%d atomic_wr=%d\n", testcalls,
+> +		    offset, offset + size - 1, size, (flags & RWF_DONTCACHE) != 0,
+> +		    (flags & RWF_ATOMIC) != 0);
+>  	iret = fsxwrite(fd, good_buf + offset, size, offset, flags);
+>  	if (iret != size) {
+>  		if (iret == -1)
+> @@ -1785,6 +1842,30 @@ do_dedupe_range(unsigned offset, unsigned length, unsigned dest)
+>  }
+>  #endif
+>  
+> +int test_atomic_writes(void) {
+> +	int ret;
+> +	struct statx stx;
+> +
+> +	ret = xfstests_statx(AT_FDCWD, fname, 0, STATX_WRITE_ATOMIC, &stx);
+> +	if (ret < 0) {
+> +		fprintf(stderr, "main: Statx failed with %d."
+> +			" Failed to determine atomic write limits, "
+> +			" disabling!\n", ret);
+> +		return 0;
+> +	}
+> +
+> +	if (stx.stx_attributes & STATX_ATTR_WRITE_ATOMIC &&
+> +	    stx.stx_atomic_write_unit_min > 0) {
+> +		awu_min = stx.stx_atomic_write_unit_min;
+> +		awu_max = stx.stx_atomic_write_unit_max;
+> +		return 1;
+> +	}
+> +
+> +	fprintf(stderr, "main: IO Stack does not support"
+> +			"atomic writes, disabling!\n");
+> +	return 0;
+> +}
+> +
+>  #ifdef HAVE_COPY_FILE_RANGE
+>  int
+>  test_copy_range(void)
+> @@ -2385,6 +2466,14 @@ have_op:
+>  			dowrite(offset, size, 0);
+>  		break;
+>  
+> +	case OP_WRITE_ATOMIC:
+> +		TRIM_OFF_LEN(offset, size, maxfilelen);
+> +		if (do_atomic_writes)
+> +			dowrite(offset, size, RWF_ATOMIC);
+> +		else
+> +			dowrite(offset, size, 0);
 
-	local testfile="${1:-$TEST_DIR/junk}"
-	...
-	set -- $FSX_PROG $args $FSX_AVOID $testfile
+Er.... shouldn't we skip OP_ATOMIC_WRITE if !do_atomic_writes?
+There's a whole switch statement further up in test() that does things
+like:
 
-Then you don't need the extra helper.
+	case OP_COPY_RANGE:
+		if (!copy_range_calls) {
+			log5(op, offset, size, offset2, FL_SKIPPED);
+			goto out;
+		}
+		break;
+
+to break out early.
 
 --D
 
->  	echo "$@" >>$seqres.full
-> -	rm -f $TEST_DIR/junk
-> +	rm -f $testfile
->  	"$@" 2>&1 | tee -a $seqres.full >$tmp.fsx
->  	local res=${PIPESTATUS[0]}
->  	if [ $res -ne 0 ]; then
-> @@ -5133,6 +5142,12 @@ _run_fsx()
->  	return 0
->  }
->  
-> +_run_fsx()
-> +{
-> +	_run_fsx_on_file $TEST_DIR/junk $@
-> +	return $?
-> +}
+> +		break;
 > +
->  # Run fsx with -h(ugepage buffers).  If we can't set up a hugepage then skip
->  # the test, but if any other error occurs then exit the test.
->  _run_hugepage_fsx() {
+>  	case OP_MAPREAD:
+>  		TRIM_OFF_LEN(offset, size, file_size);
+>  		domapread(offset, size);
+> @@ -2511,13 +2600,14 @@ void
+>  usage(void)
+>  {
+>  	fprintf(stdout, "usage: %s",
+> -		"fsx [-dfhknqxyzBEFHIJKLORWXZ0]\n\
+> +		"fsx [-adfhknqxyzBEFHIJKLORWXZ0]\n\
+>  	   [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid]\n\
+>  	   [-l flen] [-m start:end] [-o oplen] [-p progressinterval]\n\
+>  	   [-r readbdy] [-s style] [-t truncbdy] [-w writebdy]\n\
+>  	   [-A|-U] [-D startingop] [-N numops] [-P dirpath] [-S seed]\n\
+>  	   [--replay-ops=opsfile] [--record-ops[=opsfile]] [--duration=seconds]\n\
+>  	   ... fname\n\
+> +	-a: enable atomic writes if IO stack supports it\n\
+>  	-b opnum: beginning operation number (default 1)\n\
+>  	-c P: 1 in P chance of file close+open at each op (default infinity)\n\
+>  	-d: debug output for all operations\n\
+> @@ -3059,9 +3149,12 @@ main(int argc, char **argv)
+>  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
+>  
+>  	while ((ch = getopt_long(argc, argv,
+> -				 "0b:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+> +				 "0ab:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+>  				 longopts, NULL)) != EOF)
+>  		switch (ch) {
+> +		case 'a':
+> +			do_atomic_writes = 1;
+> +			break;
+>  		case 'b':
+>  			simulatedopcount = getnum(optarg, &endp);
+>  			if (!quiet)
+> @@ -3475,6 +3568,8 @@ main(int argc, char **argv)
+>  		exchange_range_calls = test_exchange_range();
+>  	if (dontcache_io)
+>  		dontcache_io = test_dontcache_io();
+> +	if (do_atomic_writes)
+> +		do_atomic_writes = test_atomic_writes();
+>  
+>  	while (keep_running())
+>  		if (!test())
 > -- 
 > 2.49.0
 > 
