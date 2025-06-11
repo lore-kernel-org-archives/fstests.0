@@ -1,40 +1,41 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3738D1865FA
-	for <fstests@vger.kernel.org>; Wed, 11 Jun 2025 14:35:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4237A26A0A8
+	for <fstests@vger.kernel.org>; Wed, 11 Jun 2025 14:42:25 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749652555; cv=none; b=WCHNhKY29hP9lzWEzt82ihjUvFH7WRX8g4lfCMi/sENz0SY/Sor8ddH6AFF08AwRUq5sgnXPSEY/CeQJASJYel3WIxg5Fngn3RqKuN2YnoqT/+JW1LICgAAlz4gJRQm8GA+8GLA7wYaM9+gFjSmF4ReHMLywZgVGHqyk/0SRmlQ=
+	t=1749652946; cv=none; b=SkPYbljZWwqoMFKpWwUNwIzG373c8r/ZdR2a5ypljmRIMzVq2t7B74ncZyERaxvGJcb+NLdib+O9oZC10RPSZNDV/BpXOF1fV7/+MfYxtDGvSbqpogSVhnfbqULf79iytVx21exP01ZaWgInYlXnbxxHDLENnTabESx+o00/2zo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749652555; c=relaxed/simple;
-	bh=HbBi0E3AaJvfJ5RjY933mJJF4tIESA6x0RhtVxrNvYc=;
+	s=arc-20240116; t=1749652946; c=relaxed/simple;
+	bh=i0Tr5U0IAxQcA8NWf5zNWoiuAnZ4MmJDXKtQhCsWqzk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uUzJyTR+2nDNL/+ne6S58i9Esdf1hhuhGg2vAM5DdyeAbLeti3WBnQ6DeLjM+bEfBa/JZRwaOC61MgKWAtI/Q5pJfr0pZcb2yZDrGijctyH6IH/khGs4XpjNYFZmqaZWA3gTgOl7TbN1/ka8KoIK7n03IOir+GTEkUHxvKGZ9ws=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YUf25rV2; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=MLcVoy580UdTFqgIl81Bnyjo6gE/jXw1gYgluiLt/au4SEcx1JtcF20Ne8hdZdANJzl+OWYhH8nVBuay/Oh+Ic+HO6i4A+wPgzy8gjdETEQ1qKzyHENJa7z+ZrakwODISliUSHotlA1uL1SDIAO0BtinHWKeDE7sgwi7wGj+nWc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=R03Njb47; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YUf25rV2"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9723EC4CEE3;
-	Wed, 11 Jun 2025 14:35:54 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="R03Njb47"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BFD10C4CEE3;
+	Wed, 11 Jun 2025 14:42:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1749652554;
-	bh=HbBi0E3AaJvfJ5RjY933mJJF4tIESA6x0RhtVxrNvYc=;
+	s=k20201202; t=1749652945;
+	bh=i0Tr5U0IAxQcA8NWf5zNWoiuAnZ4MmJDXKtQhCsWqzk=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=YUf25rV2+64AXk0oJx5v5ELPzD/MKWiNTf9QJwHotBBwNEQzpw4ZE0NrqBd/fAnhd
-	 zQdspjicXVgvkB9pUUZmn5iQT0DiNhHHdQ78CBbdIn7W+Joe5kQEhB5XvUHTTP8m8b
-	 jD/VGuN+c+654lUqF6ZA2sMNfMKGjNGWJpUDslbOWPuShTEDnAzK8QEAKUrYGEDu62
-	 T0F2D+x83595vcMTviAVv/0TMaErGMXxnZOkimWcGKgjZ5JhHccKBz8+cloksOD3a7
-	 iokFlw04+QqSHqz5lZnYGM54emDRNsZIhNnrP+iM7w2ADISsJCEGuZA9Bis58P/7Ji
-	 sMoLRxv+qb1vw==
-Date: Wed, 11 Jun 2025 07:35:54 -0700
+	b=R03Njb47vKnetLeQua3+kELkJBWajbEg34Qkjc7QEMJpFCor7oS5DdDy6j+Eme3mh
+	 FPg2VqYtEnTiEuCLCkjuKGLtUHZWj6Tr+s/98UWmiX217usyT392f3YxabyGCSCxqY
+	 u1fPRshXVXOx4YV90YtzXME+rgoo3lW7LGO55xr420JbNfjpUQpxzIem6cZ8PC7F9R
+	 3ktQNpi5bTeFV45xYDS7JbtZSa4r1Xwpci9JCX+3WJiszs/0SIZWKCIno8u7zNfIhP
+	 3sonaYKBMuUel1xE9a3GMXWzZotQuRtfNI/iCqr1JkdvA8vWT4DMr8IN4Xc/yf75qv
+	 0Uuxuw2HM+nGg==
+Date: Wed, 11 Jun 2025 07:42:25 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
 	john.g.garry@oracle.com
-Subject: Re: [RFC 03/12] ltp/fsx.c: Add atomic writes support to fsx
-Message-ID: <20250611143554.GH6143@frogsfrogsfrogs>
+Subject: Re: [RFC 04/12] generic/767: Add atomic write test using fio crc
+ check verifier
+Message-ID: <20250611144225.GI6143@frogsfrogsfrogs>
 References: <cover.1749629233.git.ojaswin@linux.ibm.com>
- <07d5d00e4ebc24b4dd4c718b29dd14867fefdd70.1749629233.git.ojaswin@linux.ibm.com>
+ <9cb914eacd9d7825f2903410948d2a1d4a1a8800.1749629233.git.ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,256 +44,147 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <07d5d00e4ebc24b4dd4c718b29dd14867fefdd70.1749629233.git.ojaswin@linux.ibm.com>
+In-Reply-To: <9cb914eacd9d7825f2903410948d2a1d4a1a8800.1749629233.git.ojaswin@linux.ibm.com>
 
-On Wed, Jun 11, 2025 at 03:04:46PM +0530, Ojaswin Mujoo wrote:
-> Implement atomic write support to help fuzz atomic writes
-> with fsx.
+On Wed, Jun 11, 2025 at 03:04:47PM +0530, Ojaswin Mujoo wrote:
+> From: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
 > 
-> Suggested-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> This adds atomic write test using fio based on it's crc check verifier.
+> fio adds a crc for each data block. If the underlying device supports atomic
+> write then it is guaranteed that we will never have a mix data from two
+> threads writing on the same physical block.
+> 
+> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
 > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 > ---
->  ltp/fsx.c | 105 +++++++++++++++++++++++++++++++++++++++++++++++++++---
->  1 file changed, 100 insertions(+), 5 deletions(-)
+>  tests/generic/767     | 84 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/767.out |  2 ++
+>  2 files changed, 86 insertions(+)
+>  create mode 100755 tests/generic/767
+>  create mode 100644 tests/generic/767.out
 > 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 163b9453..9353fe6f 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -40,6 +40,7 @@
->  #include <liburing.h>
->  #endif
->  #include <sys/syscall.h>
-> +#include "statx.h"
->  
->  #ifndef MAP_FILE
->  # define MAP_FILE 0
-> @@ -49,6 +50,10 @@
->  #define RWF_DONTCACHE	0x80
->  #endif
->  
-> +#ifndef RWF_ATOMIC
-> +#define RWF_ATOMIC	0x40
-> +#endif
+> diff --git a/tests/generic/767 b/tests/generic/767
+> new file mode 100755
+> index 00000000..4f80e7b6
+> --- /dev/null
+> +++ b/tests/generic/767
+> @@ -0,0 +1,84 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 IBM Corporation. All Rights Reserved.
+> +#
+> +# FS QA Test 767
+> +#
+> +# Validate FS atomic write using fio crc check verifier.
+> +#
+> +. ./common/preamble
+> +. ./common/atomicwrites
 > +
->  #define NUMPRINTCOLUMNS 32	/* # columns of data to print on each line */
->  
->  /* Operation flags (bitmask) */
-> @@ -110,6 +115,7 @@ enum {
->  	OP_READ_DONTCACHE,
->  	OP_WRITE,
->  	OP_WRITE_DONTCACHE,
-> +	OP_WRITE_ATOMIC,
->  	OP_MAPREAD,
->  	OP_MAPWRITE,
->  	OP_MAX_LITE,
-> @@ -200,6 +206,11 @@ int	uring = 0;
->  int	mark_nr = 0;
->  int	dontcache_io = 1;
->  int	hugepages = 0;                  /* -h flag */
-> +int	do_atomic_writes = 0;		/* -a flag */
+> +_begin_fstest auto aio rw atomicwrites
 > +
-> +/* User for atomic writes */
-> +int awu_min = 0;
-> +int awu_max = 0;
->  
->  /* Stores info needed to periodically collapse hugepages */
->  struct hugepages_collapse_info {
-> @@ -288,6 +299,7 @@ static const char *op_names[] = {
->  	[OP_READ_DONTCACHE] = "read_dontcache",
->  	[OP_WRITE] = "write",
->  	[OP_WRITE_DONTCACHE] = "write_dontcache",
-> +	[OP_WRITE_ATOMIC] = "write_atomic",
->  	[OP_MAPREAD] = "mapread",
->  	[OP_MAPWRITE] = "mapwrite",
->  	[OP_TRUNCATE] = "truncate",
-> @@ -422,6 +434,7 @@ logdump(void)
->  				prt("\t***RRRR***");
->  			break;
->  		case OP_WRITE_DONTCACHE:
-> +		case OP_WRITE_ATOMIC:
->  		case OP_WRITE:
->  			prt("WRITE    0x%x thru 0x%x\t(0x%x bytes)",
->  			    lp->args[0], lp->args[0] + lp->args[1] - 1,
-> @@ -1073,6 +1086,25 @@ update_file_size(unsigned offset, unsigned size)
->  	file_size = offset + size;
->  }
->  
-> +static int is_power_of_2(unsigned n) {
-> +	return ((n & (n - 1)) == 0);
-> +}
+> +_require_scratch_write_atomic
+> +_require_odirect
+> +_require_aio
 > +
-> +/*
-> + * Round down n to nearest power of 2.
-> + * If n is already a power of 2, return n;
-> + */
-> +static int rounddown_pow_of_2(int n) {
-> +	int i = 0;
-> +
-> +	if (is_power_of_2(n))
-> +		return n;
-> +
-> +	for (; (1 << i) < n; i++);
-> +
-> +	return 1 << (i - 1);
-> +}
-> +
->  void
->  dowrite(unsigned offset, unsigned size, int flags)
->  {
-> @@ -1081,6 +1113,27 @@ dowrite(unsigned offset, unsigned size, int flags)
->  	offset -= offset % writebdy;
->  	if (o_direct)
->  		size -= size % writebdy;
-> +	if (flags & RWF_ATOMIC) {
-> +		/* atomic write len must be inbetween awu_min and awu_max */
-> +		if (size < awu_min)
-> +			size = awu_min;
-> +		if (size > awu_max)
-> +			size = awu_max;
-> +
-> +		/* atomic writes need power-of-2 sizes */
-> +		size = rounddown_pow_of_2(size);
-> +
-> +		/* atomic writes need naturally aligned offsets */
-> +		offset -= offset % size;
-> +
-> +		/* Skip the write if we are crossing max filesize */
-> +		if ((offset + size) > maxfilelen) {
-> +			if (!quiet && testcalls > simulatedopcount)
-> +				prt("skipping atomic write past maxfilelen\n");
-> +			log4(OP_WRITE_ATOMIC, offset, size, FL_SKIPPED);
-> +			return;
-> +		}
-> +	}
->  	if (size == 0) {
->  		if (!quiet && testcalls > simulatedopcount && !o_direct)
->  			prt("skipping zero size write\n");
-> @@ -1088,7 +1141,10 @@ dowrite(unsigned offset, unsigned size, int flags)
->  		return;
->  	}
->  
-> -	log4(OP_WRITE, offset, size, FL_NONE);
-> +	if (flags & RWF_ATOMIC)
-> +		log4(OP_WRITE_ATOMIC, offset, size, FL_NONE);
+> +function max()
+> +{
+> +	if (( $1 > $2 )); then
+> +		echo "$1"
 > +	else
-> +		log4(OP_WRITE, offset, size, FL_NONE);
->  
->  	gendata(original_buf, good_buf, offset, size);
->  	if (offset + size > file_size) {
-> @@ -1108,8 +1164,9 @@ dowrite(unsigned offset, unsigned size, int flags)
->  		       (monitorstart == -1 ||
->  			(offset + size > monitorstart &&
->  			(monitorend == -1 || offset <= monitorend))))))
-> -		prt("%lld write\t0x%x thru\t0x%x\t(0x%x bytes)\tdontcache=%d\n", testcalls,
-> -		    offset, offset + size - 1, size, (flags & RWF_DONTCACHE) != 0);
-> +		prt("%lld write\t0x%x thru\t0x%x\t(0x%x bytes)\tdontcache=%d atomic_wr=%d\n", testcalls,
-> +		    offset, offset + size - 1, size, (flags & RWF_DONTCACHE) != 0,
-> +		    (flags & RWF_ATOMIC) != 0);
->  	iret = fsxwrite(fd, good_buf + offset, size, offset, flags);
->  	if (iret != size) {
->  		if (iret == -1)
-> @@ -1785,6 +1842,30 @@ do_dedupe_range(unsigned offset, unsigned length, unsigned dest)
->  }
->  #endif
->  
-> +int test_atomic_writes(void) {
-> +	int ret;
-> +	struct statx stx;
-> +
-> +	ret = xfstests_statx(AT_FDCWD, fname, 0, STATX_WRITE_ATOMIC, &stx);
-> +	if (ret < 0) {
-> +		fprintf(stderr, "main: Statx failed with %d."
-> +			" Failed to determine atomic write limits, "
-> +			" disabling!\n", ret);
-> +		return 0;
-> +	}
-> +
-> +	if (stx.stx_attributes & STATX_ATTR_WRITE_ATOMIC &&
-> +	    stx.stx_atomic_write_unit_min > 0) {
-> +		awu_min = stx.stx_atomic_write_unit_min;
-> +		awu_max = stx.stx_atomic_write_unit_max;
-> +		return 1;
-> +	}
-> +
-> +	fprintf(stderr, "main: IO Stack does not support"
-> +			"atomic writes, disabling!\n");
-> +	return 0;
+> +		echo "$2"
+> +	fi
 > +}
 > +
->  #ifdef HAVE_COPY_FILE_RANGE
->  int
->  test_copy_range(void)
-> @@ -2385,6 +2466,14 @@ have_op:
->  			dowrite(offset, size, 0);
->  		break;
->  
-> +	case OP_WRITE_ATOMIC:
-> +		TRIM_OFF_LEN(offset, size, maxfilelen);
-> +		if (do_atomic_writes)
-> +			dowrite(offset, size, RWF_ATOMIC);
-> +		else
-> +			dowrite(offset, size, 0);
+> +function min()
+> +{
+> +	if (( $1 > $2 )); then
+> +		echo "$2"
+> +	else
+> +		echo "$1"
+> +	fi
+> +}
 
-Er.... shouldn't we skip OP_ATOMIC_WRITE if !do_atomic_writes?
-There's a whole switch statement further up in test() that does things
-like:
+Should these be common/rc helpers?
 
-	case OP_COPY_RANGE:
-		if (!copy_range_calls) {
-			log5(op, offset, size, offset2, FL_SKIPPED);
-			goto out;
-		}
-		break;
+Or, since bash is ... uh fun with arguments...
 
-to break out early.
+_min() {
+	local ret
+
+	for arg in "$@"; do
+		if [ -z "$ret" ] || (( $arg < $ret )); then
+			ret="$arg"
+		fi
+	done
+	echo $ret
+}
+
+and then you can pass as many arguments as you like.  The only downside
+is that you can pass stringly typed crap "_min cow frog" and it still
+returns "cow".  As if.
+
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +touch "$SCRATCH_MNT/f1"
+> +awu_min_write=$(_get_atomic_write_unit_min "$SCRATCH_MNT/f1")
+> +awu_max_write=$(_get_atomic_write_unit_max "$SCRATCH_MNT/f1")
+> +blocksize=$(max "$awu_min_write" "$((awu_max_write/2))")
+> +
+> +# XFS can have high awu_max_write due to software fallback. Cap it at 64k
+> +blocksize=$(min "$blocksize" "65536")
+> +
+> +fio_config=$tmp.fio
+> +fio_out=$tmp.fio.out
+> +
+> +FIO_LOAD=$(($(nproc) * 2 * LOAD_FACTOR))
+
+What program is nproc?
 
 --D
 
-> +		break;
+> +SIZE=$((100 * 1024 * 1024))
 > +
->  	case OP_MAPREAD:
->  		TRIM_OFF_LEN(offset, size, file_size);
->  		domapread(offset, size);
-> @@ -2511,13 +2600,14 @@ void
->  usage(void)
->  {
->  	fprintf(stdout, "usage: %s",
-> -		"fsx [-dfhknqxyzBEFHIJKLORWXZ0]\n\
-> +		"fsx [-adfhknqxyzBEFHIJKLORWXZ0]\n\
->  	   [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid]\n\
->  	   [-l flen] [-m start:end] [-o oplen] [-p progressinterval]\n\
->  	   [-r readbdy] [-s style] [-t truncbdy] [-w writebdy]\n\
->  	   [-A|-U] [-D startingop] [-N numops] [-P dirpath] [-S seed]\n\
->  	   [--replay-ops=opsfile] [--record-ops[=opsfile]] [--duration=seconds]\n\
->  	   ... fname\n\
-> +	-a: enable atomic writes if IO stack supports it\n\
->  	-b opnum: beginning operation number (default 1)\n\
->  	-c P: 1 in P chance of file close+open at each op (default infinity)\n\
->  	-d: debug output for all operations\n\
-> @@ -3059,9 +3149,12 @@ main(int argc, char **argv)
->  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
->  
->  	while ((ch = getopt_long(argc, argv,
-> -				 "0b:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
-> +				 "0ab:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
->  				 longopts, NULL)) != EOF)
->  		switch (ch) {
-> +		case 'a':
-> +			do_atomic_writes = 1;
-> +			break;
->  		case 'b':
->  			simulatedopcount = getnum(optarg, &endp);
->  			if (!quiet)
-> @@ -3475,6 +3568,8 @@ main(int argc, char **argv)
->  		exchange_range_calls = test_exchange_range();
->  	if (dontcache_io)
->  		dontcache_io = test_dontcache_io();
-> +	if (do_atomic_writes)
-> +		do_atomic_writes = test_atomic_writes();
->  
->  	while (keep_running())
->  		if (!test())
+> +cat >$fio_config <<EOF
+> +[aio-dio-aw-verify]
+> +direct=1
+> +ioengine=libaio
+> +rw=randwrite
+> +bs=$blocksize
+> +fallocate=native
+> +filename=$SCRATCH_MNT/test-file
+> +size=$SIZE
+> +iodepth=$FIO_LOAD
+> +numjobs=$FIO_LOAD
+> +group_reporting=1
+> +verify_state_save=0
+> +verify=crc32c
+> +verify_fatal=1
+> +verify_dump=0
+> +verify_backlog=1024
+> +verify_async=4
+> +verify_write_sequence=0
+> +atomic=1
+> +EOF
+> +
+> +_require_fio $fio_config
+> +
+> +cat $fio_config >> $seqres.full
+> +$FIO_PROG $fio_config --output=$fio_out
+> +cat $fio_out >> $seqres.full
+> +
+> +# success, all done
+> +echo Silence is golden
+> +status=0
+> +exit
+> diff --git a/tests/generic/767.out b/tests/generic/767.out
+> new file mode 100644
+> index 00000000..2bf7f989
+> --- /dev/null
+> +++ b/tests/generic/767.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 767
+> +Silence is golden
 > -- 
 > 2.49.0
 > 
