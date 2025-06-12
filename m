@@ -1,162 +1,103 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1971C27511A
-	for <fstests@vger.kernel.org>; Thu, 12 Jun 2025 15:14:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B19B2737E7
+	for <fstests@vger.kernel.org>; Thu, 12 Jun 2025 19:05:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749741277; cv=none; b=pYL6wTupF8tRrGhiu/umW5UbVSt89wJ2DWc7YDgYqLV+kmKjy+2skfoS3CeGPEofrAD5IBIaDU+LC4sM6hGRsaDAA6xxkGSqSVx9jk4bCN9DL9anaHW5Y+ajKXWRy3Wkwma7mvHv5w0g9/5dPcO5ETZezIAsBaAPDQeXy26IAIo=
+	t=1749755127; cv=none; b=neYckL6FcvXt31KgHQSGCnPyzt/DuYqkXc72Duqg0wOSlusZAvQE80VZzsSLgxEirswXlnA4zeV+CiNOQyPpRnMWPO4Sp1PGqLM2XTCfSZyrOEvfmszEgYF1d6Y9WtItLFJ7/V4pJLUmNPmCPf2cAGTotSXSV+fHXp2C85T+5Vk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749741277; c=relaxed/simple;
-	bh=aFPffuXeIlWTFok7DUQOkl0grOvv4v5SdRY9SVRBYwU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=tXZkrKdcs7ftmfSgY9g41/GZiScnHVWKghXs3kTIZBqbOMbrLf/EUW07Rqu5EpfKSu6c6gjPUt/J4x/71IEWM1YO0GalBl8w/LWpEgO9aoozB8UNIahiWqMFxKzSdUzwyCAOmlbe3EaHTz4tU/886tAOUdzD7UWvg1R2gL5epcs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TFtYFth+; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1749755127; c=relaxed/simple;
+	bh=9DTYqjGgPk4xaq7d7L+b/dNHyIg8P6aqV5M9ubUY2/k=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=raKuORxdKVobnQ8C2z6th7ZjdWe3I1TJ2qie/COAxCfH1ELmJhUCBlsgYimg3QT6LoPZAZG/OBop9xyiX+kkMsvnpsPo4VEUbu4wcBLIMGA/wQM0YsSwd3Q/EiE+ZZfFhMM+sk53F6zbdf3q1md1hSLGEd4N82lAmitfIN4AGVk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=FIUsbv25; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=FIUsbv25; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TFtYFth+"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 88DEFC4CEEA;
-	Thu, 12 Jun 2025 15:14:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1749741276;
-	bh=aFPffuXeIlWTFok7DUQOkl0grOvv4v5SdRY9SVRBYwU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=TFtYFth+Nc+Z/3WG1ucy5Oa8gOHUz+YgwbKWO6u1suywsmHpQjSD3vADYf8D8YNQ8
-	 AEysIrc/t3H2d4zxSA5IBYmsYEKhOF/rwYoegd4Xzy5o4lJ0D1Ne2p6tPRt+ug7ef6
-	 LVrgfWjpudLWMxekE6essaD4a1ilHtgcj1pzdic5NV5CTLu4Nr5pNlGx06Dys0DUh8
-	 vQousKWJ3avVEygRHEYgFXGJbgr/H9BrLduImTmMplNgtfhquX97b7XBzit7JWoNQE
-	 u22x2ei6LxJnhESyFtW94bVSjWhx7aaraeQnxGt91Kb5BVN02SlHTlfXI0d2lnsshO
-	 uWqBHVjEOUzTA==
-Date: Thu, 12 Jun 2025 08:14:35 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
-	john.g.garry@oracle.com
-Subject: Re: [RFC 07/12] generic/771: Stress fsx with atomic writes enabled
-Message-ID: <20250612151435.GT6143@frogsfrogsfrogs>
-References: <cover.1749629233.git.ojaswin@linux.ibm.com>
- <136feebfb52701ecd7c85e4f4bd805ce97763e50.1749629233.git.ojaswin@linux.ibm.com>
- <20250611144558.GJ6143@frogsfrogsfrogs>
- <aEpzYbXmPf1X4-MI@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="FIUsbv25";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="FIUsbv25"
+Received: from localhost.localdomain (unknown [10.100.128.76])
+	by smtp-out1.suse.de (Postfix) with ESMTP id 9641C21188
+	for <fstests@vger.kernel.org>; Thu, 12 Jun 2025 19:05:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1749755122; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=ptAEXJ8AZ/qBuYov0kiw0KQVNkroF/oqNaT1qDScAus=;
+	b=FIUsbv25a/XPkxxnBrgicAjoBLQ3ePmtYi9T0b4AUxvXJaM/PriwRIMlhZYnmzFEcWWsol
+	L7ilVWJAAyeaXuNKcfQP/HT9MZus3nqegWrCBW99J71PBBq6W6ttpzVkXnsPa+wZFHhkj/
+	odwZJhxQfWSRjdrH78hZXF5CqNsCPZ0=
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1749755122; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=ptAEXJ8AZ/qBuYov0kiw0KQVNkroF/oqNaT1qDScAus=;
+	b=FIUsbv25a/XPkxxnBrgicAjoBLQ3ePmtYi9T0b4AUxvXJaM/PriwRIMlhZYnmzFEcWWsol
+	L7ilVWJAAyeaXuNKcfQP/HT9MZus3nqegWrCBW99J71PBBq6W6ttpzVkXnsPa+wZFHhkj/
+	odwZJhxQfWSRjdrH78hZXF5CqNsCPZ0=
+From: Anthony Iliopoulos <ailiop@suse.com>
+To: fstests@vger.kernel.org
+Subject: [PATCH] src/fill2: fix segfault during fopen error cleanup
+Date: Thu, 12 Jun 2025 21:05:13 +0200
+Message-ID: <20250612190513.8669-1-ailiop@suse.com>
+X-Mailer: git-send-email 2.44.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aEpzYbXmPf1X4-MI@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+Content-Transfer-Encoding: 8bit
+X-Spam-Flag: NO
+X-Spam-Score: -2.80
+X-Spamd-Result: default: False [-2.80 / 50.00];
+	BAYES_HAM(-3.00)[99.98%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	RCPT_COUNT_ONE(0.00)[1];
+	RCVD_COUNT_ZERO(0.00)[0];
+	ARC_NA(0.00)[];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	FROM_EQ_ENVFROM(0.00)[];
+	TO_DN_NONE(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:email,localhost.localdomain:helo]
+X-Spam-Level: 
 
-On Thu, Jun 12, 2025 at 11:57:45AM +0530, Ojaswin Mujoo wrote:
-> On Wed, Jun 11, 2025 at 07:45:58AM -0700, Darrick J. Wong wrote:
-> > On Wed, Jun 11, 2025 at 03:04:50PM +0530, Ojaswin Mujoo wrote:
-> > > Stress file with atomic writes to ensure we excercise codepaths
-> > > where we are mixing different FS operations with atomic writes
-> > > 
-> > > Suggested-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-> > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> > > ---
-> > >  tests/generic/771     | 49 +++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/771.out |  2 ++
-> > >  2 files changed, 51 insertions(+)
-> > >  create mode 100755 tests/generic/771
-> > >  create mode 100644 tests/generic/771.out
-> > > 
-> > > diff --git a/tests/generic/771 b/tests/generic/771
-> > > new file mode 100755
-> > > index 00000000..690dfa0a
-> > > --- /dev/null
-> > > +++ b/tests/generic/771
-> > > @@ -0,0 +1,49 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2025 IBM Corporation. All Rights Reserved.
-> > > +#
-> > > +# FS QA Test 771
-> > > +#
-> > > +# fuzz fsx with atomic writes
-> > > +#
-> > > +. ./common/preamble
-> > > +. ./common/atomicwrites
-> > > +_begin_fstest rw auto quick atomicwrites
-> > > +
-> > > +# Import common functions.
-> > > +. ./common/filter
-> > > +
-> > > +_require_test
-> > > +_require_odirect
-> > > +_require_scratch_write_atomic
-> > > +
-> > > +_scratch_mkfs >> $seqres.full 2>&1
-> > > +_scratch_mount  >> $seqres.full 2>&1
-> > > +
-> > > +testfile=$SCRATCH_MNT/testfile
-> > > +touch $testfile
-> > > +
-> > > +awu_max=$(_get_atomic_write_unit_max $testfile)
-> > > +blksz=$(_get_block_size $SCRATCH_MNT)
-> > > +bsize=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
-> > > +
-> > > +# fsx usage:
-> > > +#
-> > > +# -N numops: total # operations to do
-> > > +# -l flen: the upper bound on file size
-> > > +# -o oplen: the upper bound on operation size (64k default)
-> > > +# -w writebdy: $psize would make writes page aligned (on i386)
-> > > +# -Z: O_DIRECT (use -R, -W, -r and -w too)
-> > > +# -W: mapped write operations DISabled
-> > > +
-> > > +_run_fsx_on_file $testfile -N 10000 -a -o $awu_max  -l 500000 -r $bsize -w $bsize -Z -W $FSX_AVOID >> $seqres.full
-> > 
-> > Don't we already get fsx stress testing RWF_ATOMIC through generic/521
-> > and generic/522?
-> 
-> So for RWF_ATOMIC we need to pass the -a flag to fsx which the other tests
-> don't do. This test specifically passes -a to make sure we stress the
-> RWF_ATOMIC code path intermixed with other operations. Further, other
-> tests run FSX on test device whereas for our atomic write tests we
-> generally assume the scratch dev is the one with atomic capabilities.
+When fill2 fails to open the output file (e.g. due to ENOSPC), it jumps
+into the cleanup code where it attempts to call fclose, and this causes
+a segfault within the glibc fclose code as it attempts to deref a null
+pointer.
 
-Oh, I overlooked the part where it's not enabled by default if its
-presence can be detected by fsx.  Can we flip the polarity of -a, that
-way RWF_ATOMIC will get tested with all the other fsx soak tests?
+Fix it by conditionally calling fclose on the file pointer only when
+non-null.
 
-> > Also why is mmap write disabled?
-> 
-> I thought it'd be better to not mix mmap writes with direct writes but I
-> can add it back if that's preferred.
+This is consistently reproducible with xfs/041.
 
-It's not unreasonable that some dumb program is going to try that some
-day, even though we all scream for ice crea^W^W^Wnot to mix the two IO
-paths.
+Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
+---
+ src/fill2.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---D
+diff --git a/src/fill2.c b/src/fill2.c
+index 4cc1c3d79a98..37ed00b1d9b1 100644
+--- a/src/fill2.c
++++ b/src/fill2.c
+@@ -307,7 +307,7 @@ main(int argc, char **argv)
+  cleanup:
+ 
+     /* close file and flush buffers - check if this fails */
+-    if (fclose(f) != 0) {
++    if (f && fclose(f) != 0) {
+ 	fprintf(stderr, "fill2: fclose() on \"%s\" failed: %s\n",
+ 		dfile, strerror(errno));
+ 	status = 1;
+-- 
+2.44.0
 
-> Regards,
-> ojaswin
-> > 
-> > --D
-> > 
-> > > +status=$?
-> > > +
-> > > +if [[ "$status" != "0" ]]
-> > > +then
-> > > +	echo "Somthing went wrong, check $seqres.full"
-> > > +fi
-> > > +
-> > > +echo "Silence is golden"
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/771.out b/tests/generic/771.out
-> > > new file mode 100644
-> > > index 00000000..c2345c7b
-> > > --- /dev/null
-> > > +++ b/tests/generic/771.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 771
-> > > +Silence is golden
-> > > -- 
-> > > 2.49.0
-> > > 
-> > > 
-> 
