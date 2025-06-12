@@ -1,42 +1,42 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D1C2142048
-	for <fstests@vger.kernel.org>; Thu, 12 Jun 2025 14:35:01 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39E55246BC9
+	for <fstests@vger.kernel.org>; Thu, 12 Jun 2025 14:36:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749738901; cv=none; b=eeyquVLfQcjrvE9TTcJR27LIN/nrtH40qQmVuPfDpiGG9zcYXE63hea6fmcfs+l4C5V2hg+G03dH/jJAXGvGQFgdVThj2TDGkfC5vd6Ahwm1tTesrNMLrkWGkn10nkwJG8Zch2AhzBzaQ96Qhn/kwPeoaLhLLKT0KeQA2gAFllE=
+	t=1749738975; cv=none; b=lHnu51h1FKTJJh7Fd/Bs60yfE2PHh12PX+ZhBljPBKivfRdz8bNC4CjSUt0FOoXGCuSr1DXEe1VJHjolzeD5yuerSWTMEpLQy4rg7pc7V1iFxmaFzjBh7WNsHtxeujKnS9u6sZVxSVCl2SMdG4bvVE+aHUxr9j0K3KsRxfYGUI4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749738901; c=relaxed/simple;
-	bh=dtRcv47nBWE9GN89I0Da7ttW/YLemwk/5qP87+dq/dw=;
+	s=arc-20240116; t=1749738975; c=relaxed/simple;
+	bh=Mhuz5mjYep4eLYa8CpChCwixa78dRVFsnRXcz97sjMA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=dnoAIr8Op8Kgv6qW8/xvUtoJ6fv1Yngd5CaoLg1Z0NpMaUGPjcYg7WNgRJJbcoEktiGqrwhpxCcPOn6lcw+t5ArbybBGaXSzqe5O43GZFbEUBqNH/sh23A/52gJetny4IYgtfcu8zFV8hhG8HrPhyE6WT0C+TojeTmRiaGS5oZQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hWoRa4rd; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=pAu4Ae4i8mxnUa9smt6+rcg/xRjPxXBxuUDapBiogDfGQzZXG8lZWaEjS0FnUT+c1ZRYSjDiwVRZaHJp9PQm0tVo7Gp7o4Hf9mD7QgO/BhKWsHpfyMgsZ1HnEN+tnyP/kZNmD8VKNAz2BHjZS8LUVnE6hjIKkcCi1LHGHwz624k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RZTLarPX; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hWoRa4rd"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 58C09C4CEEB;
-	Thu, 12 Jun 2025 14:35:01 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RZTLarPX"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B998EC4CEEA;
+	Thu, 12 Jun 2025 14:36:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1749738901;
-	bh=dtRcv47nBWE9GN89I0Da7ttW/YLemwk/5qP87+dq/dw=;
+	s=k20201202; t=1749738974;
+	bh=Mhuz5mjYep4eLYa8CpChCwixa78dRVFsnRXcz97sjMA=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=hWoRa4rdi48b29NKAivmlL9BPrHmUkCXQmfZqgwVVHO52CJduzHW9u07mSztRaJiw
-	 CH7vWPDzOGhti4x4oAS52PzMsYS4XwlYAd0KhjsGbIS93OC+9/tU7pLn+TCKEnPQov
-	 scpwlUx8eramlTQ0rxYdi7hpx3gdtdWKd3HhKqoF8CdWmMd6y3OWMJ7Q9t0kghtquT
-	 7xT+bHXYGcUh6IBBqWQOVQvLfj7kYXWjfORgddWlkE92SlWXiBB/COJLjMw5GSal9e
-	 yB70CXI74CFF8pSwcwAL2UqkJRbuOb0CQy2AbDpr+MDZBjbb42NRLVu+sU2jW2DgKw
-	 8W2BR45387GRA==
-Date: Thu, 12 Jun 2025 07:35:00 -0700
+	b=RZTLarPXym1YALaaN6uQH09rusnzUueKhN92m1ox6JCmuCwQ3mj4AKaw7G+wCP7CS
+	 UdV+0OuJV2svupd93kDuhP6zgxGht7yigLVvCDnVSisTRDQbNpSar9z1VcK8+sGNF2
+	 6aAamhe3g9SwG/+seZpc4a2UFVRSStrCXvjAxvOBOF8SV2gWoT4NP2ReN46ILeKDx3
+	 DkaEqk3ChL7thIRz8Wis5RUa7MJflv9xxkDRDbrIph103b/9iCV5wCWtTDbQHNOblm
+	 x4XOEeEhW3g+fMSn3vEB02wG5NqHZ+nTz9rInlyPDaexraFAxYz+lhr3iJNcdKW3g/
+	 SWKA/ctMUbCMQ==
+Date: Thu, 12 Jun 2025 07:36:14 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
-	john.g.garry@oracle.com
-Subject: Re: [RFC 02/12] common/rc: Add a helper to run fsx on a given file
-Message-ID: <20250612143500.GQ6143@frogsfrogsfrogs>
+	john.g.garry@oracle.com, tytso@mit.edu
+Subject: Re: [RFC 01/12] common/preamble: Fix fsx for ext4 with bigalloc
+Message-ID: <20250612143614.GR6143@frogsfrogsfrogs>
 References: <cover.1749629233.git.ojaswin@linux.ibm.com>
- <0a0604215a992f0aaa4d8d6821b8c8051a0f8d80.1749629233.git.ojaswin@linux.ibm.com>
- <20250611143138.GG6143@frogsfrogsfrogs>
- <aEpw_TTDNW8KnBLl@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <2568ed1e9d1c47d0fdb357f0e10c5ed341a72379.1749629233.git.ojaswin@linux.ibm.com>
+ <20250611143005.GF6143@frogsfrogsfrogs>
+ <aEpvhNjDHXvFXSIJ@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,105 +45,85 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aEpw_TTDNW8KnBLl@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+In-Reply-To: <aEpvhNjDHXvFXSIJ@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 
-On Thu, Jun 12, 2025 at 11:47:33AM +0530, Ojaswin Mujoo wrote:
-> On Wed, Jun 11, 2025 at 07:31:38AM -0700, Darrick J. Wong wrote:
-> > On Wed, Jun 11, 2025 at 03:04:45PM +0530, Ojaswin Mujoo wrote:
-> > > Currently run_fsx is hardcoded to run on a file in $TEST_DIR.
-> > > Add a helper _run_fsx_on_file so that we can run fsx on any
-> > > given file including in $SCRATCH_MNT. Also, refactor _run_fsx
-> > > to use this helper.
+On Thu, Jun 12, 2025 at 11:41:16AM +0530, Ojaswin Mujoo wrote:
+> On Wed, Jun 11, 2025 at 07:30:05AM -0700, Darrick J. Wong wrote:
+> > On Wed, Jun 11, 2025 at 03:04:44PM +0530, Ojaswin Mujoo wrote:
+> > > From: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
 > > > 
-> > > No functional change is intended in this patch.
-> > > 
-> > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> > > ---
-> > >  common/rc | 21 ++++++++++++++++++---
-> > >  1 file changed, 18 insertions(+), 3 deletions(-)
-> > > 
-> > > diff --git a/common/rc b/common/rc
-> > > index cfbe2a5f..a5d811a1 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -5115,13 +5115,22 @@ _require_hugepage_fsx()
-> > >  		_notrun "fsx binary does not support MADV_COLLAPSE"
-> > >  }
-> > >  
-> > > -_run_fsx()
-> > > +_run_fsx_on_file()
-> > >  {
-> > > +	local testfile=$1
-> > > +	shift
-> > > +
-> > > +	if ! [ -f $testfile ]
-> > > +	then
-> > > +		echo "_run_fsx_on_file: $testfile doesn't exist. Creating" >> $seqres.full
-> > > +		touch $testfile
-> > > +	fi
-> > > +
-> > >  	echo "fsx $*"
-> > >  	local args=`echo $@ | sed -e "s/ BSIZE / $bsize /g" -e "s/ PSIZE / $psize /g"`
-> > > -	set -- $FSX_PROG $args $FSX_AVOID $TEST_DIR/junk
-> > > +	set -- $FSX_PROG $args $FSX_AVOID $testfile
+> > > Insert range and collapse range only works with bigalloc in case
+> > > the range is cluster size aligned, which fsx doesnt take care. To
+> > > work past this, disable insert range and collapse range on ext4, if
+> > > bigalloc is enabled.
 > > 
-> > 	local testfile="${1:-$TEST_DIR/junk}"
-> > 	...
-> > 	set -- $FSX_PROG $args $FSX_AVOID $testfile
-> > 
-> > Then you don't need the extra helper.
-> Hi Darrick,
+> > Hmmm, insert/collapse-range have the same behavior on xfs realtime,
+> > maybe we should amend test() in fsx to round to the allocation unit
+> > size?
+> Hey Darrick,
 > 
-> I originally added the extra helper so that we won't need to change the
-> existing run_fsx calls. For example, with the change you suggested,
-> generic/263 would need to be changed from:
-> 
-> run_fsx -N 10000  -o 8192   -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z
-> 
-> to 
-> 
-> run_fsx $TEST_DIR/junk -N 10000  -o 8192   -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z
-> 
-> because otherwise, the $1 would actually be "-N" and run_fsx would get
-> confused. 
-> 
-> However, if you would prefer to drop the helper and rather modify
-> run_fsx and the call sites to pass a filename, that should be doable as
-> well. Please let me know your preference on this.
+> Yes makes sense but as you mentioned, I'm not sure if there
+> is a way to programatically detect the bigalloc cluster size (or
+> allocation unit in general) like we do for xfs. 
 
-Ah, right.  I forgot that the function filters its arguments but then
-passes them on to fsx.  Ignore this comment, then. :)
+I don't either, but maybe we should have a way reveal the allocation
+unit size for a given file?  Yet another statx field? :P
 
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+(It /would/ be useful for programs that use collapse/insert range)
 
 --D
 
-> 
-> Regards,
-> ojaswin
-> 
+> (Adding Ted to CC in case he has some idea)
+> > 
+> > Querying that programmatically might be ... interesting though.  Is
+> > there a good way to do that for ext4 bigalloc?
+> > 
+> > (See detect_xfs_alloc_unit in punch-alternating.c)
 > > 
 > > --D
 > > 
-> > >  	echo "$@" >>$seqres.full
-> > > -	rm -f $TEST_DIR/junk
-> > > +	rm -f $testfile
-> > >  	"$@" 2>&1 | tee -a $seqres.full >$tmp.fsx
-> > >  	local res=${PIPESTATUS[0]}
-> > >  	if [ $res -ne 0 ]; then
-> > > @@ -5133,6 +5142,12 @@ _run_fsx()
-> > >  	return 0
+> > > This is achieved by defining a new function _setup_fs_options
+> > > which can serve as a mechanism to apply FS-wide options to
+> > > the tests.
+> > > 
+> > > Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> > > ---
+> > >  common/preamble | 16 ++++++++++++++++
+> > >  1 file changed, 16 insertions(+)
+> > > 
+> > > diff --git a/common/preamble b/common/preamble
+> > > index ba029a34..2bccff74 100644
+> > > --- a/common/preamble
+> > > +++ b/common/preamble
+> > > @@ -24,6 +24,20 @@ _register_cleanup()
+> > >  	trap "${cleanup}exit \$status" EXIT HUP INT QUIT TERM $*
 > > >  }
 > > >  
-> > > +_run_fsx()
-> > > +{
-> > > +	_run_fsx_on_file $TEST_DIR/junk $@
-> > > +	return $?
+> > > +# setup FS options only to be available for each test run
+> > > +_setup_fs_options() {
+> > > +	case "$FSTYP" in
+> > > +	"ext4")
+> > > +		if [[ "$MKFS_OPTIONS" =~ bigalloc ]]; then
+> > > +			export FSX_AVOID="-I -C"
+> > > +		fi
+> > > +		;;
+> > > +	# Add other filesystem types here as needed
+> > > +	*)
+> > > +		;;
+> > > +	esac
 > > > +}
 > > > +
-> > >  # Run fsx with -h(ugepage buffers).  If we can't set up a hugepage then skip
-> > >  # the test, but if any other error occurs then exit the test.
-> > >  _run_hugepage_fsx() {
+> > >  # Prepare to run a fstest by initializing the required global variables to
+> > >  # their defaults, sourcing common functions, registering a cleanup function,
+> > >  # and removing the $seqres.full file.
+> > > @@ -55,4 +69,6 @@ _begin_fstest()
+> > >  	# remove previous $seqres.full before test
+> > >  	rm -f $seqres.full $seqres.hints
+> > >  
+> > > +	# setup filesystem options for a given test execution
+> > > +	_setup_fs_options
+> > >  }
 > > > -- 
 > > > 2.49.0
 > > > 
