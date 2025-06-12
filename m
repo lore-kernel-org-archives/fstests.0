@@ -1,42 +1,43 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39E55246BC9
-	for <fstests@vger.kernel.org>; Thu, 12 Jun 2025 14:36:14 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C855D8F5C
+	for <fstests@vger.kernel.org>; Thu, 12 Jun 2025 14:55:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749738975; cv=none; b=lHnu51h1FKTJJh7Fd/Bs60yfE2PHh12PX+ZhBljPBKivfRdz8bNC4CjSUt0FOoXGCuSr1DXEe1VJHjolzeD5yuerSWTMEpLQy4rg7pc7V1iFxmaFzjBh7WNsHtxeujKnS9u6sZVxSVCl2SMdG4bvVE+aHUxr9j0K3KsRxfYGUI4=
+	t=1749740120; cv=none; b=cX+9zUqte2zCNNJ4Uq17IqllMh55RRHWHlXAZerkBlArCAVls40P+YmWdheKvNdTosadpgdkajatHVij9fHsfOWkWJ2CVQp3h0ADWmNzpAU+N5ckVTFEt7n9XcLlObQGf666qDo3qPSKdPVXFLHYoeRGPz5qdMysWx/0r/Uevv4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749738975; c=relaxed/simple;
-	bh=Mhuz5mjYep4eLYa8CpChCwixa78dRVFsnRXcz97sjMA=;
+	s=arc-20240116; t=1749740120; c=relaxed/simple;
+	bh=h9XIfDyNCX6G913On//2nPPyBsVyporV20HGL7Ut/gQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pAu4Ae4i8mxnUa9smt6+rcg/xRjPxXBxuUDapBiogDfGQzZXG8lZWaEjS0FnUT+c1ZRYSjDiwVRZaHJp9PQm0tVo7Gp7o4Hf9mD7QgO/BhKWsHpfyMgsZ1HnEN+tnyP/kZNmD8VKNAz2BHjZS8LUVnE6hjIKkcCi1LHGHwz624k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RZTLarPX; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=r5s5FFX/rEJWihhZ1QCAUYi5aeXrDOlQ0KJHRzV8Ajp+q9fP0NiaBri+gWKuveHh5BjP9njzBWdjTJhlAzkH5Mvp6m545zYuA6QrLCfabefPU5b1ZdGhkZcJFf4DU5iWETtTN5s0FQTkmd+QPbBMf2x6reyAnRu8PP7Wd57vDsQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=efoqCETv; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RZTLarPX"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B998EC4CEEA;
-	Thu, 12 Jun 2025 14:36:14 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="efoqCETv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A006FC4CEEA;
+	Thu, 12 Jun 2025 14:55:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1749738974;
-	bh=Mhuz5mjYep4eLYa8CpChCwixa78dRVFsnRXcz97sjMA=;
+	s=k20201202; t=1749740120;
+	bh=h9XIfDyNCX6G913On//2nPPyBsVyporV20HGL7Ut/gQ=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=RZTLarPXym1YALaaN6uQH09rusnzUueKhN92m1ox6JCmuCwQ3mj4AKaw7G+wCP7CS
-	 UdV+0OuJV2svupd93kDuhP6zgxGht7yigLVvCDnVSisTRDQbNpSar9z1VcK8+sGNF2
-	 6aAamhe3g9SwG/+seZpc4a2UFVRSStrCXvjAxvOBOF8SV2gWoT4NP2ReN46ILeKDx3
-	 DkaEqk3ChL7thIRz8Wis5RUa7MJflv9xxkDRDbrIph103b/9iCV5wCWtTDbQHNOblm
-	 x4XOEeEhW3g+fMSn3vEB02wG5NqHZ+nTz9rInlyPDaexraFAxYz+lhr3iJNcdKW3g/
-	 SWKA/ctMUbCMQ==
-Date: Thu, 12 Jun 2025 07:36:14 -0700
+	b=efoqCETvrtf4lH4es1R/FIDQ+0CRFZ1Ks9GxghJvot07ZGwyIYYPlP+oWWfu4ZbVX
+	 gT61T2PJxx3IlxRJFECxBYW2lQ+Znrd0kTLGlQuarmjTt/nXGatANfFQ4dO2imTiu/
+	 TR0ANoX+hKfWIO2XITS0kNkx+ZLyrPvFTRe4oSuB5OLVeZh4t/KrjH0pzaopG2S8xa
+	 bX2DbuZHsH96mCvj2E9wc2etJvYhpDz6C9GdEIYBj33eDaxJyB08C1uw+xt3fkXiGz
+	 oIV/hgZrvyay3elHJDq0meslNPlUXR4i79srr3+VZ1FEFQtLUt7ZJQwFDA96uS1LRw
+	 A7O2B7Q0NbdFw==
+Date: Thu, 12 Jun 2025 07:55:20 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
-	john.g.garry@oracle.com, tytso@mit.edu
-Subject: Re: [RFC 01/12] common/preamble: Fix fsx for ext4 with bigalloc
-Message-ID: <20250612143614.GR6143@frogsfrogsfrogs>
+	john.g.garry@oracle.com
+Subject: Re: [RFC 04/12] generic/767: Add atomic write test using fio crc
+ check verifier
+Message-ID: <20250612145520.GS6143@frogsfrogsfrogs>
 References: <cover.1749629233.git.ojaswin@linux.ibm.com>
- <2568ed1e9d1c47d0fdb357f0e10c5ed341a72379.1749629233.git.ojaswin@linux.ibm.com>
- <20250611143005.GF6143@frogsfrogsfrogs>
- <aEpvhNjDHXvFXSIJ@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <9cb914eacd9d7825f2903410948d2a1d4a1a8800.1749629233.git.ojaswin@linux.ibm.com>
+ <20250611144225.GI6143@frogsfrogsfrogs>
+ <aEpyOHL-K-ErQOrV@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,85 +46,166 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aEpvhNjDHXvFXSIJ@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+In-Reply-To: <aEpyOHL-K-ErQOrV@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 
-On Thu, Jun 12, 2025 at 11:41:16AM +0530, Ojaswin Mujoo wrote:
-> On Wed, Jun 11, 2025 at 07:30:05AM -0700, Darrick J. Wong wrote:
-> > On Wed, Jun 11, 2025 at 03:04:44PM +0530, Ojaswin Mujoo wrote:
+On Thu, Jun 12, 2025 at 11:52:48AM +0530, Ojaswin Mujoo wrote:
+> On Wed, Jun 11, 2025 at 07:42:25AM -0700, Darrick J. Wong wrote:
+> > On Wed, Jun 11, 2025 at 03:04:47PM +0530, Ojaswin Mujoo wrote:
 > > > From: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
 > > > 
-> > > Insert range and collapse range only works with bigalloc in case
-> > > the range is cluster size aligned, which fsx doesnt take care. To
-> > > work past this, disable insert range and collapse range on ext4, if
-> > > bigalloc is enabled.
-> > 
-> > Hmmm, insert/collapse-range have the same behavior on xfs realtime,
-> > maybe we should amend test() in fsx to round to the allocation unit
-> > size?
-> Hey Darrick,
-> 
-> Yes makes sense but as you mentioned, I'm not sure if there
-> is a way to programatically detect the bigalloc cluster size (or
-> allocation unit in general) like we do for xfs. 
-
-I don't either, but maybe we should have a way reveal the allocation
-unit size for a given file?  Yet another statx field? :P
-
-(It /would/ be useful for programs that use collapse/insert range)
-
---D
-
-> (Adding Ted to CC in case he has some idea)
-> > 
-> > Querying that programmatically might be ... interesting though.  Is
-> > there a good way to do that for ext4 bigalloc?
-> > 
-> > (See detect_xfs_alloc_unit in punch-alternating.c)
-> > 
-> > --D
-> > 
-> > > This is achieved by defining a new function _setup_fs_options
-> > > which can serve as a mechanism to apply FS-wide options to
-> > > the tests.
+> > > This adds atomic write test using fio based on it's crc check verifier.
+> > > fio adds a crc for each data block. If the underlying device supports atomic
+> > > write then it is guaranteed that we will never have a mix data from two
+> > > threads writing on the same physical block.
 > > > 
 > > > Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
 > > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 > > > ---
-> > >  common/preamble | 16 ++++++++++++++++
-> > >  1 file changed, 16 insertions(+)
+> > >  tests/generic/767     | 84 +++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/generic/767.out |  2 ++
+> > >  2 files changed, 86 insertions(+)
+> > >  create mode 100755 tests/generic/767
+> > >  create mode 100644 tests/generic/767.out
 > > > 
-> > > diff --git a/common/preamble b/common/preamble
-> > > index ba029a34..2bccff74 100644
-> > > --- a/common/preamble
-> > > +++ b/common/preamble
-> > > @@ -24,6 +24,20 @@ _register_cleanup()
-> > >  	trap "${cleanup}exit \$status" EXIT HUP INT QUIT TERM $*
-> > >  }
-> > >  
-> > > +# setup FS options only to be available for each test run
-> > > +_setup_fs_options() {
-> > > +	case "$FSTYP" in
-> > > +	"ext4")
-> > > +		if [[ "$MKFS_OPTIONS" =~ bigalloc ]]; then
-> > > +			export FSX_AVOID="-I -C"
-> > > +		fi
-> > > +		;;
-> > > +	# Add other filesystem types here as needed
-> > > +	*)
-> > > +		;;
-> > > +	esac
+> > > diff --git a/tests/generic/767 b/tests/generic/767
+> > > new file mode 100755
+> > > index 00000000..4f80e7b6
+> > > --- /dev/null
+> > > +++ b/tests/generic/767
+> > > @@ -0,0 +1,84 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2025 IBM Corporation. All Rights Reserved.
+> > > +#
+> > > +# FS QA Test 767
+> > > +#
+> > > +# Validate FS atomic write using fio crc check verifier.
+> > > +#
+> > > +. ./common/preamble
+> > > +. ./common/atomicwrites
+> > > +
+> > > +_begin_fstest auto aio rw atomicwrites
+> > > +
+> > > +_require_scratch_write_atomic
+> > > +_require_odirect
+> > > +_require_aio
+> > > +
+> > > +function max()
+> > > +{
+> > > +	if (( $1 > $2 )); then
+> > > +		echo "$1"
+> > > +	else
+> > > +		echo "$2"
+> > > +	fi
 > > > +}
 > > > +
-> > >  # Prepare to run a fstest by initializing the required global variables to
-> > >  # their defaults, sourcing common functions, registering a cleanup function,
-> > >  # and removing the $seqres.full file.
-> > > @@ -55,4 +69,6 @@ _begin_fstest()
-> > >  	# remove previous $seqres.full before test
-> > >  	rm -f $seqres.full $seqres.hints
-> > >  
-> > > +	# setup filesystem options for a given test execution
-> > > +	_setup_fs_options
-> > >  }
+> > > +function min()
+> > > +{
+> > > +	if (( $1 > $2 )); then
+> > > +		echo "$2"
+> > > +	else
+> > > +		echo "$1"
+> > > +	fi
+> > > +}
+> > 
+> > Should these be common/rc helpers?
+> > 
+> > Or, since bash is ... uh fun with arguments...
+> > 
+> > _min() {
+> > 	local ret
+> > 
+> > 	for arg in "$@"; do
+> > 		if [ -z "$ret" ] || (( $arg < $ret )); then
+> > 			ret="$arg"
+> > 		fi
+> > 	done
+> > 	echo $ret
+> > }
+> > 
+> > and then you can pass as many arguments as you like.  The only downside
+> > is that you can pass stringly typed crap "_min cow frog" and it still
+> > returns "cow".  As if.
+> 
+> Yes this makes sense (sans the cow vs frog part :p) . I'll make the change in v2.
+> 
+> > 
+> > > +_scratch_mkfs >> $seqres.full 2>&1
+> > > +_scratch_mount
+> > > +
+> > > +touch "$SCRATCH_MNT/f1"
+> > > +awu_min_write=$(_get_atomic_write_unit_min "$SCRATCH_MNT/f1")
+> > > +awu_max_write=$(_get_atomic_write_unit_max "$SCRATCH_MNT/f1")
+> > > +blocksize=$(max "$awu_min_write" "$((awu_max_write/2))")
+> > > +
+> > > +# XFS can have high awu_max_write due to software fallback. Cap it at 64k
+> > > +blocksize=$(min "$blocksize" "65536")
+> > > +
+> > > +fio_config=$tmp.fio
+> > > +fio_out=$tmp.fio.out
+> > > +
+> > > +FIO_LOAD=$(($(nproc) * 2 * LOAD_FACTOR))
+> > 
+> > What program is nproc?
+> 
+> It returns the number of CPUs so we can scale the load based on CPUs we
+> have. It comes from coreutils so I think the distros should have it.
+
+Ah, another variant on getconf _NPROCESSORS_ONLN.  Though looking at the
+strace I guess its benefit is that it looks at the cpu affinity mask to
+compute the number of processors that can actually be used.  Hrm, maybe
+that would be a good cleanup for another day...
+
+--D
+
+> 
+> Thanks,
+> ojaswin
+> > 
+> > --D
+> > 
+> > > +SIZE=$((100 * 1024 * 1024))
+> > > +
+> > > +cat >$fio_config <<EOF
+> > > +[aio-dio-aw-verify]
+> > > +direct=1
+> > > +ioengine=libaio
+> > > +rw=randwrite
+> > > +bs=$blocksize
+> > > +fallocate=native
+> > > +filename=$SCRATCH_MNT/test-file
+> > > +size=$SIZE
+> > > +iodepth=$FIO_LOAD
+> > > +numjobs=$FIO_LOAD
+> > > +group_reporting=1
+> > > +verify_state_save=0
+> > > +verify=crc32c
+> > > +verify_fatal=1
+> > > +verify_dump=0
+> > > +verify_backlog=1024
+> > > +verify_async=4
+> > > +verify_write_sequence=0
+> > > +atomic=1
+> > > +EOF
+> > > +
+> > > +_require_fio $fio_config
+> > > +
+> > > +cat $fio_config >> $seqres.full
+> > > +$FIO_PROG $fio_config --output=$fio_out
+> > > +cat $fio_out >> $seqres.full
+> > > +
+> > > +# success, all done
+> > > +echo Silence is golden
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/generic/767.out b/tests/generic/767.out
+> > > new file mode 100644
+> > > index 00000000..2bf7f989
+> > > --- /dev/null
+> > > +++ b/tests/generic/767.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 767
+> > > +Silence is golden
 > > > -- 
 > > > 2.49.0
 > > > 
