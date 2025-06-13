@@ -1,38 +1,39 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5661D15199A
-	for <fstests@vger.kernel.org>; Fri, 13 Jun 2025 14:56:55 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87A122E11DC
+	for <fstests@vger.kernel.org>; Fri, 13 Jun 2025 15:01:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749826616; cv=none; b=oFEsduCfEuRjDbDhB6sC5+kKxUhY6mGB8r94mB7FoPlChIyq30qE2zoqtCHBQ/EBJ43Yg5Auy3iB6JsTyIL72qb6TEXqVu/MbMnyJcpeC9yoDDsorOzP5orKCLi6zFJUkWHlRkrRjg40Q3C0QE5UHuXagSEEf3dGQChpRdj9lD4=
+	t=1749826893; cv=none; b=b0S6hEl1vkLgU8rZvDhVu5ybQpKrw8QsgLkZwHZruBZS4KY3bV32ZPjUyTWVx827oGC5tp82qG6DZoKxHNyS7PHk2zgxGAnBnChHvxY0KUU1wNZ8uZIRZqABBKBf7Swo7vUKedA5jQMC7bYWp/ItU65pWbOaQ+R1S3aMK4ZPBac=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749826616; c=relaxed/simple;
-	bh=OnyH9fVTe7eveGb62N8qAhSYYFq1CjIuLgnPGabaIC4=;
+	s=arc-20240116; t=1749826893; c=relaxed/simple;
+	bh=VcAatDr/bhaDHkz36NFkVSWn8SnnAxiyXfK2nz1oOMc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=LqBTpxSc07MmhN9LaxLr4az/sZcDFttletrv+uhHoye9h75zMoCkite9FI/B9zANFh4PZuH3RLY2mPSfj4TeUVfd4vMPjAOJoQfxlY7Tasl6/+AUGoC1xhAepk5s1yWoxUoAKi48Cz+UM4d9thzOluPemmDfuPoxK0n39xvUOwE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Zc1NXOkC; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=e73XYQY6xNcoiAfiYtkYU+W33h7O/OVOTXy5R8YoMmdHkH+PqGO29Z+ejhmwH0HQrnbZZFcLwusfPPZhSRuq5Fxtnujas4qYbRpfICnThCbdwYCWkHmd2GdoT7ozBwYx/i9QA1rrfFMOem07w4mKUTVrDDk1I1JsXbPuiYbEcVM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XGzUORI8; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Zc1NXOkC"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BA972C4CEE3;
-	Fri, 13 Jun 2025 14:56:55 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XGzUORI8"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 56F95C4CEED;
+	Fri, 13 Jun 2025 15:01:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1749826615;
-	bh=OnyH9fVTe7eveGb62N8qAhSYYFq1CjIuLgnPGabaIC4=;
+	s=k20201202; t=1749826893;
+	bh=VcAatDr/bhaDHkz36NFkVSWn8SnnAxiyXfK2nz1oOMc=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Zc1NXOkCqhRpglv9RL+WL+IbxCXtWf7QCauANj1CrWQ0w0oAaek9Eiq2fw9bQwDjt
-	 CMjvz5nPn2fuq1mJhRYNWrliLyxfeWXW1q28c1Dumwl4wCFIbykmy+N626qOk0xZKs
-	 Qd1ovjXufzoJ8XoBKNQndlv2H3biLg4iCnjJHWsIz9ZcJsGLJnkrCnmQG+UBOVOn7W
-	 S042CX1QRoRuNHUCSvi+XKcsdY9o+2GaoAYWG1VreOPN939sHzIcUHaOlJYGWLRchc
-	 KwmpoZiDsPbH1COz6ESPreJGFdJogDhPxj8ytd6GMSWK19AEWY/krjc8oUhoUONM4A
-	 c3M7Chc7kyS5w==
-Date: Fri, 13 Jun 2025 07:56:55 -0700
+	b=XGzUORI85v8S48bkZDsSg8dCox04nhcg2Z79Wk/QS2gpMqlYPNVQArtGpKdalqFIa
+	 avFeKosra017b2A4hMCIkNMX+bumYWoxnj3ZIYwfJ6/IGn7nQflzl3Wy4P3qhp9Ucc
+	 p9Gn3H13/LjXVf7opObraisNJmdQuAHWxq5OmYWsZnQ18ZDfHZZzDRZenyKdtGzUvj
+	 hBZJpzeaok/CI1zL/j2sj9WPKmdbQFbkjyrCMmznRKVswxmlpTiza93K2kZZGbay5D
+	 6fK/HKY7kr4EolvU7dlJNTIaS7tldUVLh5D6O5md35tmseo/Wet5BHV1xC40PWLYNx
+	 9yYPsiR6ZQu5Q==
+Date: Fri, 13 Jun 2025 08:01:32 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: zlang@kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/740: move checking for a scratch device up
-Message-ID: <20250613145655.GV6143@frogsfrogsfrogs>
-References: <20250613061417.2794099-1-hch@lst.de>
+To: Yuezhang Mo <Yuezhang.Mo@sony.com>
+Cc: zlang@kernel.org, fstests@vger.kernel.org,
+	Friendy Su <friendy.su@sony.com>
+Subject: Re: [PATCH] generic/633: add _require_chown
+Message-ID: <20250613150132.GW6143@frogsfrogsfrogs>
+References: <20250613135209.645818-2-Yuezhang.Mo@sony.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -41,46 +42,45 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250613061417.2794099-1-hch@lst.de>
+In-Reply-To: <20250613135209.645818-2-Yuezhang.Mo@sony.com>
 
-On Fri, Jun 13, 2025 at 08:14:17AM +0200, Christoph Hellwig wrote:
-> Commit 3ae8a19f97d0 ("generic/740: enable by default") moved these checks
-> down accidentally.  Move them back up to make the test exit gracefully
-> when no scratch device is provided.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+On Fri, Jun 13, 2025 at 09:52:10PM +0800, Yuezhang Mo wrote:
+> For file systems that do not support chown, such as exfat,
+> running this test does not make sense and should be skipped.
 
-Looks fine,
+/me scans the test, only sees stuff about idmap...
+
+If I read this correctly, exfat doesn't assign individual files a
+user/group id, so idmapping (which is what this test really does) has
+very little meaning, because every file is "owned" either by the value
+provided by the uid= mount option, or the uid of the mount(8) process.
+Therefore g/633 can't test remapping of select uids.
+
+If that's the case then
 Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
 --D
 
+
+> Signed-off-by: Yuezhang Mo <Yuezhang.Mo@sony.com>
+> Reviewed-by: Friendy Su <friendy.su@sony.com>
 > ---
->  tests/generic/740 | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  tests/generic/633 | 1 +
+>  1 file changed, 1 insertion(+)
 > 
-> diff --git a/tests/generic/740 b/tests/generic/740
-> index c0a634f2302b..ce55200f7bc3 100755
-> --- a/tests/generic/740
-> +++ b/tests/generic/740
-> @@ -21,13 +21,13 @@ _exclude_fs jfs
->  _exclude_fs ocfs2
->  _exclude_fs udf
+> diff --git a/tests/generic/633 b/tests/generic/633
+> index b683c427..d75d4dc8 100755
+> --- a/tests/generic/633
+> +++ b/tests/generic/633
+> @@ -13,6 +13,7 @@ _begin_fstest auto quick atime attr cap idmapped io_uring mount perms rw unlink
+>  . ./common/filter
 >  
-> +_require_scratch_nocheck
-> +_require_no_large_scratch_dev
-> +
->  _require_block_device "${SCRATCH_DEV}"
->  # not all the FS support zoned block device
->  _require_non_zoned_device "${SCRATCH_DEV}"
+>  _require_test
+> +_require_chown
 >  
-> -_require_scratch_nocheck
-> -_require_no_large_scratch_dev
-> -
->  echo "Silence is golden."
->  for fs in `echo ${MKFS_PROG}.* | sed -e "s:${MKFS_PROG}.::g"`
->  do
+>  echo "Silence is golden"
+>  
 > -- 
-> 2.47.2
+> 2.25.1
 > 
 > 
