@@ -1,76 +1,156 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94B6F1F4192;
-	Wed, 18 Jun 2025 18:59:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C368719E96D
+	for <fstests@vger.kernel.org>; Wed, 18 Jun 2025 19:13:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750273177; cv=none; b=toSqFiRLW02LbHPlaeS7cyf9h1mEtJYJaQpAwb3T3sk7GLTVljG0Jq8AiAQxfEVnj95xLrv3qCm6MYCNK4CxVxXl0IBzoQcmB54AtPVx1fNyCqC/BC4ZLaJtpMtiM2g6Tpfj10CBGwng7R9UCW3smr7vJfFbPINv10gz4rMSe8k=
+	t=1750274015; cv=none; b=ky9PZGlbO4m3heyhkVIUx8j5odPW+gNBRgVUY/Q6hgtQQJAyVt8j25mvPn4BHaRM+F3ZDbchQ+pi6eWUyBO1ssNr2ZVEQxwrDSIa1iiJnudFulpGIaTCiryrNTWNMKtQXs8hwVTx1osCwq6NPZCcddvf7KZHd4/GxjKj9PVxGAQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750273177; c=relaxed/simple;
-	bh=qiQLJxl7h5T2ZLklfM8AjfZOPq6OO2w9se1+es+oDv0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Ag2KUhxLEw9oCX0PkhIO9JU062R9Ieek8Ck5b5+UMlChY6KMR/TgTnrrL+GVBP+Gwpp3Bgx6HFWmrL8l7IX5cddoj+mQPZs6VSURdGoezs3eV98K6tZzKqV3Qomxc7UxlZAoaJB0VWAOiY4MRIwZmAvkAH3JGrobYtXCXI5BWJI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DVblkuai; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1750274015; c=relaxed/simple;
+	bh=qRwep9XAM7Zn2ps+BVB4GITmsRJ61Ufct97ZvwpDBMg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=seBwhyg3AZ15x31Mi6wjV0tgVZhiHjvCmyXLIj+lokJ9SLqP01jsKIMhUjedQUTzQHc4MmBvQZcRkdNOIufbn1+uN6iODEjtPdNTjDt9WUmdf096uGxmp/fHzKd2oRGiSloEvN2T37gD1CkyAXyNvdTGvt+Fs9D0vDvaq7Epv+o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=R6cE9MxW; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DVblkuai"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 98036C4CEED;
-	Wed, 18 Jun 2025 18:59:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1750273177;
-	bh=qiQLJxl7h5T2ZLklfM8AjfZOPq6OO2w9se1+es+oDv0=;
-	h=Date:Reply-To:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=DVblkuai8S3pWNKCTPY0Klk06+9KLa6UJ9s1BJzYgkkkZzx30IWlTAowSvNQzoasj
-	 TQ6JVUqbBh8gO53buIkH3e1DAYnkBRagZ9NUr28FEE13ZiUvmSzRb2iFzb8OkV9cdw
-	 AsXVJilo7BlIkGfNdG1egVGRuXj5aItNqjbXISpSj3nTfWcXyPKRzFYl197yx4y+dA
-	 uwdgShD/nul6MwsOR+MzRHTYGbfzc+fvyoVBz8yUHvKQWWsKEbbbCUmQIda0WzgWx/
-	 bUUJQfudh8yVmIzjUn/pBT96Hz1TgZJ3Q7UZatJoShlb7gtQFDSFy8LRUhgyVyQkC5
-	 XuEudaPsFc2sw==
-Message-ID: <bb6b7187-1671-4a90-bfc3-6e4100e615b0@kernel.org>
-Date: Wed, 18 Jun 2025 20:59:33 +0200
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="R6cE9MxW"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1750274012;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=B2vSDRxa894tXJCn4Fj5oVUc47J42gyRIxuocPUBGVc=;
+	b=R6cE9MxWuEy9vz2R1rUqTEbola17E3IWqmJG+JskdGrmFQd7RE8hOrcJ/A1u6mFOFziHEJ
+	KL0Hihpm0HDob5r+xHc6QLz+oa8wdZp+QhM6YWgQ/WTV4J2Aq1xg50cY6ZlEINTJLfK8MS
+	wU8hZT7TAhY6gst+3k4Qo9Hps87MAlI=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-251-IJ3sJFGJNz6VUBB_e2n0uw-1; Wed, 18 Jun 2025 15:13:31 -0400
+X-MC-Unique: IJ3sJFGJNz6VUBB_e2n0uw-1
+X-Mimecast-MFC-AGG-ID: IJ3sJFGJNz6VUBB_e2n0uw_1750274010
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-748d96b974cso2047855b3a.2
+        for <fstests@vger.kernel.org>; Wed, 18 Jun 2025 12:13:30 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1750274010; x=1750878810;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=B2vSDRxa894tXJCn4Fj5oVUc47J42gyRIxuocPUBGVc=;
+        b=j2/0rAmaN0NVsXNss0YcLkOPcVSfub9fOIF2G8dVGg1Gsgfdxyp9u/ewsE1r/2qrNc
+         RENEvFKprh7uN80v7MrtbA6UVeSsdVHkX49kRDsLdzBdcT1RyuC64OCmk3ox13HRS8qz
+         dW7gjwjNltch29Xspj3d4EYcuDFr7dWFHEZmAaHAHx97gTttcqcQy6dZRqez2oiZDA3b
+         rxtAZnptNp5GrkbGidzOZX0UFa8SK3yu5Q4QYyimrboJ1flEWSzUpXReBjHo9u+7/Q6Q
+         V5+EtQxOOI1L8qFQK4heg8IskufVxWJ+ALztQpVO6FxHFLzCmFn0dUQHmNpdP1csrjh1
+         LlwQ==
+X-Gm-Message-State: AOJu0YwnY3AaTM7uB7ORZHT0iV+/dfcgPU2mQ9ZnBNarjia8m3KsNKJ+
+	XT32gf9ADnasR+iFn1VG4uwvFuPDA3JstkK/8F3crF5oHF37dbJxv0p4r2b3mhcp0od2q3R4PPa
+	M2cfyGijZ2stq/4FmN5Fdph8LOqhNfllbVA69Vakyklx7kjq5JECFNzAheJ8=
+X-Gm-Gg: ASbGncvOuRElQXBJWhAamO0fAM5iwUDZYowTjbSWzLJ/jv59sXAraXzh0KYsgU/7WXH
+	Ak0wQd4Sn/hoHApGK8Wwp/xi+QNDzDNzfv4yLrfPMSK6/XI7tBCLJcbr5RVZyQjjrj6NqDQL1Ro
+	8LMXuiEE9d1uY08ad6iKy659Yx779BMNsVy5tmwMaI8ElOmtf5jSmhi6vHWReztCHiHbxPKZBKO
+	Xf4wrMxBKoPkfPR2HfwOpIrOGVrImZY6e2jedSgNTrNDJ1qJ7/cxBP2V75wOvTiGMjqkAWfmWsS
+	OpFzPqyJ2Cxm9a2HaFllBrRa+aWKFl0ixCUg6j3Zfe/1OCcm6ZoItGg3d8l4Uz4=
+X-Received: by 2002:a05:6a00:148a:b0:736:b101:aed3 with SMTP id d2e1a72fcca58-7489cdeef7emr24370156b3a.1.1750274009965;
+        Wed, 18 Jun 2025 12:13:29 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IE4PpK67//HdCQjKuOtU3n0Jm9SeUXLNOJyngMOtYmGVZufN8Mwd1OqczRq/KalUicz9vgeUw==
+X-Received: by 2002:a05:6a00:148a:b0:736:b101:aed3 with SMTP id d2e1a72fcca58-7489cdeef7emr24370133b3a.1.1750274009647;
+        Wed, 18 Jun 2025 12:13:29 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-748900b0599sm11489678b3a.111.2025.06.18.12.13.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 18 Jun 2025 12:13:29 -0700 (PDT)
+Date: Thu, 19 Jun 2025 03:13:24 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
+	djwong@kernel.org, john.g.garry@oracle.com
+Subject: Re: [RFC 01/12] common/preamble: Fix fsx for ext4 with bigalloc
+Message-ID: <20250618191324.fpwyi6acobodmyit@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1749629233.git.ojaswin@linux.ibm.com>
+ <2568ed1e9d1c47d0fdb357f0e10c5ed341a72379.1749629233.git.ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Reply-To: Daniel Gomez <da.gomez@kernel.org>
-Subject: Re: [PATCH] generic/551: prevent OOM when running on tmpfs with low
- memory
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, Hugh Dickins <hughd@google.com>,
- Luis Chamberlain <mcgrof@kernel.org>, kdevops@lists.linux.dev,
- Chuck Lever <chuck.lever@oracle.com>, gost.dev@samsung.com,
- Daniel Gomez <da.gomez@samsung.com>
-References: <20250618-fix-tmpfs-generic-551-v1-1-271027c36dfc@samsung.com>
- <20250618184744.a7tzgv4dofrqheq6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Daniel Gomez <da.gomez@kernel.org>
-Organization: kernel.org
-In-Reply-To: <20250618184744.a7tzgv4dofrqheq6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <2568ed1e9d1c47d0fdb357f0e10c5ed341a72379.1749629233.git.ojaswin@linux.ibm.com>
 
->> diff --git a/tests/generic/551 b/tests/generic/551
->> index 4a7f0a638235e272ef55ffeb3b3e548707568379..6a7376d7a8e3580bee0a5c98eacdaf93c60c8d5c 100755
->> --- a/tests/generic/551
->> +++ b/tests/generic/551
->> @@ -38,6 +38,7 @@ do_test()
->>  	local truncsize
->>  	local total_size=0
->>  	local avail_mem=`_available_memory_bytes`
->> +	[ "$FSTYP" = "tmpfs" ] && avail_mem=$((avail_mem - free_size_k * 1024))
+On Wed, Jun 11, 2025 at 03:04:44PM +0530, Ojaswin Mujoo wrote:
+> From: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
 > 
-> This makes sense to me. But better to have a comment for this. If you don't
-> have more suggestions, I'll add below comment when I merge this patch.
+> Insert range and collapse range only works with bigalloc in case
+> the range is cluster size aligned, which fsx doesnt take care. To
+> work past this, disable insert range and collapse range on ext4, if
+> bigalloc is enabled.
 > 
-> # To avoid OOM on tmpfs, subtract the amount of available memory allocated
-> # for the tmpfs
-
-Looks good to me.
-
+> This is achieved by defining a new function _setup_fs_options
+> which can serve as a mechanism to apply FS-wide options to
+> the tests.
 > 
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
+> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> ---
+>  common/preamble | 16 ++++++++++++++++
+>  1 file changed, 16 insertions(+)
+> 
+> diff --git a/common/preamble b/common/preamble
+> index ba029a34..2bccff74 100644
+> --- a/common/preamble
+> +++ b/common/preamble
+> @@ -24,6 +24,20 @@ _register_cleanup()
+>  	trap "${cleanup}exit \$status" EXIT HUP INT QUIT TERM $*
+>  }
+>  
+> +# setup FS options only to be available for each test run
+> +_setup_fs_options() {
 
-Thanks
+If this's a function for fsx only, better to name it with "fsx", e.g.
+_setup_default_fsx_avoid (or some other names).
+
+> +	case "$FSTYP" in
+> +	"ext4")
+> +		if [[ "$MKFS_OPTIONS" =~ bigalloc ]]; then
+> +			export FSX_AVOID="-I -C"
+
+Hmm... I'm also wondering if this's an issue should be fixed in fstests. How about
+let the testers who tests ext4 with MKFS_OPTIONS="-O bigalloc" write local.config
+as below?
+
+[ext4-bigalloc]
+...
+MKFS_OPTIONS="-O bigalloc"
+FSX_AVOID="-I -C"
+
+Thanks,
+Zorro
+
+
+> +		fi
+> +		;;
+> +	# Add other filesystem types here as needed
+> +	*)
+> +		;;
+> +	esac
+> +}
+> +
+>  # Prepare to run a fstest by initializing the required global variables to
+>  # their defaults, sourcing common functions, registering a cleanup function,
+>  # and removing the $seqres.full file.
+> @@ -55,4 +69,6 @@ _begin_fstest()
+>  	# remove previous $seqres.full before test
+>  	rm -f $seqres.full $seqres.hints
+>  
+> +	# setup filesystem options for a given test execution
+> +	_setup_fs_options
+>  }
+> -- 
+> 2.49.0
+> 
+> 
+
