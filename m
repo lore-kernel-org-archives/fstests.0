@@ -1,76 +1,77 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C368719E96D
-	for <fstests@vger.kernel.org>; Wed, 18 Jun 2025 19:13:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 332ED3085A0
+	for <fstests@vger.kernel.org>; Wed, 18 Jun 2025 19:34:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750274015; cv=none; b=ky9PZGlbO4m3heyhkVIUx8j5odPW+gNBRgVUY/Q6hgtQQJAyVt8j25mvPn4BHaRM+F3ZDbchQ+pi6eWUyBO1ssNr2ZVEQxwrDSIa1iiJnudFulpGIaTCiryrNTWNMKtQXs8hwVTx1osCwq6NPZCcddvf7KZHd4/GxjKj9PVxGAQ=
+	t=1750275287; cv=none; b=bMiXW649+YsV+ueF7xxLt+l2OXsesHdcMn+P7cAz26H5Ser+SQZcF3sGlzaVplBt4tBiBGW50lqQ36fNat9uHi7xJQwUkUmVHmK6Cfm7Qo6heVPsR3y94rVm2RNA/bJU8xmatO1+m/3PWw7u0E+Pb7SS4s3PbySwH3ugOdBvOoo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750274015; c=relaxed/simple;
-	bh=qRwep9XAM7Zn2ps+BVB4GITmsRJ61Ufct97ZvwpDBMg=;
+	s=arc-20240116; t=1750275287; c=relaxed/simple;
+	bh=1Yn0U+d7UWVFLWHsCeqtBZPrhV1WRIXCbgqX+NVfG2U=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=seBwhyg3AZ15x31Mi6wjV0tgVZhiHjvCmyXLIj+lokJ9SLqP01jsKIMhUjedQUTzQHc4MmBvQZcRkdNOIufbn1+uN6iODEjtPdNTjDt9WUmdf096uGxmp/fHzKd2oRGiSloEvN2T37gD1CkyAXyNvdTGvt+Fs9D0vDvaq7Epv+o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=R6cE9MxW; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=mWpnFmFWN8DLEit+gveTXhbo4/+7wQ11NL3v2ftNy+Gjf8n6OHgw8C/jJREcg49ufwJ+Du/ZC/FA6Hd4UGkgLLYKTCmWZr0q77Q/FFR1iNEQXhtgj3wlEHzlHgF87S3NxYn9GaDE0rBAuRVC9ESYLxJCXUVIpPDlitJvdIUMBtk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Rw3VdeoM; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="R6cE9MxW"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Rw3VdeoM"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1750274012;
+	s=mimecast20190719; t=1750275282;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=B2vSDRxa894tXJCn4Fj5oVUc47J42gyRIxuocPUBGVc=;
-	b=R6cE9MxWuEy9vz2R1rUqTEbola17E3IWqmJG+JskdGrmFQd7RE8hOrcJ/A1u6mFOFziHEJ
-	KL0Hihpm0HDob5r+xHc6QLz+oa8wdZp+QhM6YWgQ/WTV4J2Aq1xg50cY6ZlEINTJLfK8MS
-	wU8hZT7TAhY6gst+3k4Qo9Hps87MAlI=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=SCXW/AbdOgm2CjUzl6KnAoAo8/BpYXxpoS5MIWgbgps=;
+	b=Rw3VdeoMdG9R/5z1e+rc2itiQud3R3xmptZ01fgBCNY5bn+jdbo/7JTi1LJZLGxHkwaClW
+	xnS+7YXnhPMCxAQML075dogvdT7N9Zz1OfO0hpGlEeQJ5zNJV0mm6rXTh3YABiArC0MsMI
+	6hz0jwIvWy4XE3hDmfRfAgoze36ZjxQ=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-251-IJ3sJFGJNz6VUBB_e2n0uw-1; Wed, 18 Jun 2025 15:13:31 -0400
-X-MC-Unique: IJ3sJFGJNz6VUBB_e2n0uw-1
-X-Mimecast-MFC-AGG-ID: IJ3sJFGJNz6VUBB_e2n0uw_1750274010
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-748d96b974cso2047855b3a.2
-        for <fstests@vger.kernel.org>; Wed, 18 Jun 2025 12:13:30 -0700 (PDT)
+ us-mta-588-wJIJkyhtOnK16m50iga-SQ-1; Wed, 18 Jun 2025 15:34:40 -0400
+X-MC-Unique: wJIJkyhtOnK16m50iga-SQ-1
+X-Mimecast-MFC-AGG-ID: wJIJkyhtOnK16m50iga-SQ_1750275280
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2349498f00eso80865ad.0
+        for <fstests@vger.kernel.org>; Wed, 18 Jun 2025 12:34:40 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1750274010; x=1750878810;
+        d=1e100.net; s=20230601; t=1750275279; x=1750880079;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=B2vSDRxa894tXJCn4Fj5oVUc47J42gyRIxuocPUBGVc=;
-        b=j2/0rAmaN0NVsXNss0YcLkOPcVSfub9fOIF2G8dVGg1Gsgfdxyp9u/ewsE1r/2qrNc
-         RENEvFKprh7uN80v7MrtbA6UVeSsdVHkX49kRDsLdzBdcT1RyuC64OCmk3ox13HRS8qz
-         dW7gjwjNltch29Xspj3d4EYcuDFr7dWFHEZmAaHAHx97gTttcqcQy6dZRqez2oiZDA3b
-         rxtAZnptNp5GrkbGidzOZX0UFa8SK3yu5Q4QYyimrboJ1flEWSzUpXReBjHo9u+7/Q6Q
-         V5+EtQxOOI1L8qFQK4heg8IskufVxWJ+ALztQpVO6FxHFLzCmFn0dUQHmNpdP1csrjh1
-         LlwQ==
-X-Gm-Message-State: AOJu0YwnY3AaTM7uB7ORZHT0iV+/dfcgPU2mQ9ZnBNarjia8m3KsNKJ+
-	XT32gf9ADnasR+iFn1VG4uwvFuPDA3JstkK/8F3crF5oHF37dbJxv0p4r2b3mhcp0od2q3R4PPa
-	M2cfyGijZ2stq/4FmN5Fdph8LOqhNfllbVA69Vakyklx7kjq5JECFNzAheJ8=
-X-Gm-Gg: ASbGncvOuRElQXBJWhAamO0fAM5iwUDZYowTjbSWzLJ/jv59sXAraXzh0KYsgU/7WXH
-	Ak0wQd4Sn/hoHApGK8Wwp/xi+QNDzDNzfv4yLrfPMSK6/XI7tBCLJcbr5RVZyQjjrj6NqDQL1Ro
-	8LMXuiEE9d1uY08ad6iKy659Yx779BMNsVy5tmwMaI8ElOmtf5jSmhi6vHWReztCHiHbxPKZBKO
-	Xf4wrMxBKoPkfPR2HfwOpIrOGVrImZY6e2jedSgNTrNDJ1qJ7/cxBP2V75wOvTiGMjqkAWfmWsS
-	OpFzPqyJ2Cxm9a2HaFllBrRa+aWKFl0ixCUg6j3Zfe/1OCcm6ZoItGg3d8l4Uz4=
-X-Received: by 2002:a05:6a00:148a:b0:736:b101:aed3 with SMTP id d2e1a72fcca58-7489cdeef7emr24370156b3a.1.1750274009965;
-        Wed, 18 Jun 2025 12:13:29 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IE4PpK67//HdCQjKuOtU3n0Jm9SeUXLNOJyngMOtYmGVZufN8Mwd1OqczRq/KalUicz9vgeUw==
-X-Received: by 2002:a05:6a00:148a:b0:736:b101:aed3 with SMTP id d2e1a72fcca58-7489cdeef7emr24370133b3a.1.1750274009647;
-        Wed, 18 Jun 2025 12:13:29 -0700 (PDT)
+        bh=SCXW/AbdOgm2CjUzl6KnAoAo8/BpYXxpoS5MIWgbgps=;
+        b=eblNCdW7LpgPXAPoUskPCOw9plh8bHYY5yQAgSvGfJzf+TchSFO17ck7PQyGPHhATB
+         zxlUDTwwgSeOBM115EHoGTQF/apeW+y7n0h78BPHcdsVKQfjb4GsHi96k1Tso2LhbuAK
+         4IC66JcGA1KoMc7u3UF4kzsmqn7uMN/NHRVWkDxK67HShNC8ksQjv9EOkEMj6diWWYuv
+         NrXJ+15I5CUWUhKiF2Tak1/the+6Qck7O7fbD4l1svrPsKhe25T7Xta9YSXLlClJ3E+1
+         1I7D+VNKaQPbh7yYOKn7iyyvfjcuvfqitpipb15lISOJv7f4ko8huVny71LIoeamY2mP
+         BRwQ==
+X-Gm-Message-State: AOJu0YyjjMd9uUTd/PnWJb+/g0MHz5NVzag3LXCwGjG6qn+S9MxbJy/4
+	KbhVqBOHG3QZLULY/JztACFTm50SStj6+U1hH817wEOJPI66HHh4GUz+u/WMbznXBLlMQnqJWYY
+	SfSQ5IEVqOBBE/HSr4Y939xYFxjOptekwKwbV7DJF067lOegAdO+dBVYNsjA=
+X-Gm-Gg: ASbGnctWYdrgAi8jb7ap+rvpGWBi+66rT8wUrZzzWal+Gm71xhVhc8YReZoiUykeVr4
+	qVfP6cv1SAEJ8pyhEh4THJdLT0hjuxce5tsDGRgG5D3muehQaQja2NOKOMCyzvOwMic7tUlp0Zi
+	I1AMIINtz0CHke99B9t7vqn7zit9IEGgF38RItGEqIEK1l4IbfBOsbvvKsPAKLAMObdLfmGQeB9
+	MksrOC/H7+RCtEul5nlzUnm9rNrcLd4FRLBGuZ2Omw4ufD2hA8+1BOZ/6qWwvqMMUHl04Na9qVT
+	c8JMfBLlbI+wIaAHP6iTmAyDt6rgE0mTeTrPEbaw+QO//g8uWGHWO9BIAbizpnU=
+X-Received: by 2002:a17:902:f542:b0:234:8a4a:ad89 with SMTP id d9443c01a7336-237cbe9b579mr12188035ad.1.1750275279541;
+        Wed, 18 Jun 2025 12:34:39 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGdv0dFn3PaKK7Jad7HLLx+K/Qn9HHPyRH2wc447D9YdA7xKUX61kFelOjAah63DFAsHMdewg==
+X-Received: by 2002:a17:902:f542:b0:234:8a4a:ad89 with SMTP id d9443c01a7336-237cbe9b579mr12187755ad.1.1750275279149;
+        Wed, 18 Jun 2025 12:34:39 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-748900b0599sm11489678b3a.111.2025.06.18.12.13.27
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2365de783b3sm104248415ad.119.2025.06.18.12.34.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Jun 2025 12:13:29 -0700 (PDT)
-Date: Thu, 19 Jun 2025 03:13:24 +0800
+        Wed, 18 Jun 2025 12:34:38 -0700 (PDT)
+Date: Thu, 19 Jun 2025 03:34:34 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
 	djwong@kernel.org, john.g.garry@oracle.com
-Subject: Re: [RFC 01/12] common/preamble: Fix fsx for ext4 with bigalloc
-Message-ID: <20250618191324.fpwyi6acobodmyit@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [RFC 04/12] generic/767: Add atomic write test using fio crc
+ check verifier
+Message-ID: <20250618193434.yhi2gjgusgula5bj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <cover.1749629233.git.ojaswin@linux.ibm.com>
- <2568ed1e9d1c47d0fdb357f0e10c5ed341a72379.1749629233.git.ojaswin@linux.ibm.com>
+ <9cb914eacd9d7825f2903410948d2a1d4a1a8800.1749629233.git.ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -79,76 +80,140 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <2568ed1e9d1c47d0fdb357f0e10c5ed341a72379.1749629233.git.ojaswin@linux.ibm.com>
+In-Reply-To: <9cb914eacd9d7825f2903410948d2a1d4a1a8800.1749629233.git.ojaswin@linux.ibm.com>
 
-On Wed, Jun 11, 2025 at 03:04:44PM +0530, Ojaswin Mujoo wrote:
+On Wed, Jun 11, 2025 at 03:04:47PM +0530, Ojaswin Mujoo wrote:
 > From: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
 > 
-> Insert range and collapse range only works with bigalloc in case
-> the range is cluster size aligned, which fsx doesnt take care. To
-> work past this, disable insert range and collapse range on ext4, if
-> bigalloc is enabled.
-> 
-> This is achieved by defining a new function _setup_fs_options
-> which can serve as a mechanism to apply FS-wide options to
-> the tests.
+> This adds atomic write test using fio based on it's crc check verifier.
+> fio adds a crc for each data block. If the underlying device supports atomic
+> write then it is guaranteed that we will never have a mix data from two
+> threads writing on the same physical block.
 > 
 > Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
 > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 > ---
->  common/preamble | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
+>  tests/generic/767     | 84 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/767.out |  2 ++
+
+I'd like to recommend using a bigger case number for this RFC test case (and others
+in this patchset), to help you to rebase on later fstests easily :)
+
+>  2 files changed, 86 insertions(+)
+>  create mode 100755 tests/generic/767
+>  create mode 100644 tests/generic/767.out
 > 
-> diff --git a/common/preamble b/common/preamble
-> index ba029a34..2bccff74 100644
-> --- a/common/preamble
-> +++ b/common/preamble
-> @@ -24,6 +24,20 @@ _register_cleanup()
->  	trap "${cleanup}exit \$status" EXIT HUP INT QUIT TERM $*
->  }
->  
-> +# setup FS options only to be available for each test run
-> +_setup_fs_options() {
+> diff --git a/tests/generic/767 b/tests/generic/767
+> new file mode 100755
+> index 00000000..4f80e7b6
+> --- /dev/null
+> +++ b/tests/generic/767
+> @@ -0,0 +1,84 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 IBM Corporation. All Rights Reserved.
+> +#
+> +# FS QA Test 767
+> +#
+> +# Validate FS atomic write using fio crc check verifier.
+> +#
+> +. ./common/preamble
+> +. ./common/atomicwrites
+> +
+> +_begin_fstest auto aio rw atomicwrites
+> +
+> +_require_scratch_write_atomic
+> +_require_odirect
+> +_require_aio
+> +
+> +function max()
+> +{
+> +	if (( $1 > $2 )); then
+> +		echo "$1"
+> +	else
+> +		echo "$2"
+> +	fi
+> +}
+> +
+> +function min()
+> +{
+> +	if (( $1 > $2 )); then
+> +		echo "$2"
+> +	else
+> +		echo "$1"
+> +	fi
+> +}
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +touch "$SCRATCH_MNT/f1"
+> +awu_min_write=$(_get_atomic_write_unit_min "$SCRATCH_MNT/f1")
+> +awu_max_write=$(_get_atomic_write_unit_max "$SCRATCH_MNT/f1")
+> +blocksize=$(max "$awu_min_write" "$((awu_max_write/2))")
+> +
+> +# XFS can have high awu_max_write due to software fallback. Cap it at 64k
+> +blocksize=$(min "$blocksize" "65536")
+> +
+> +fio_config=$tmp.fio
+> +fio_out=$tmp.fio.out
+> +
+> +FIO_LOAD=$(($(nproc) * 2 * LOAD_FACTOR))
 
-If this's a function for fsx only, better to name it with "fsx", e.g.
-_setup_default_fsx_avoid (or some other names).
+This's the first time I learn about this command :-D
 
-> +	case "$FSTYP" in
-> +	"ext4")
-> +		if [[ "$MKFS_OPTIONS" =~ bigalloc ]]; then
-> +			export FSX_AVOID="-I -C"
-
-Hmm... I'm also wondering if this's an issue should be fixed in fstests. How about
-let the testers who tests ext4 with MKFS_OPTIONS="-O bigalloc" write local.config
-as below?
-
-[ext4-bigalloc]
-...
-MKFS_OPTIONS="-O bigalloc"
-FSX_AVOID="-I -C"
+[root@dell-per750-41 xfstests]# nproc 
+112
+[root@dell-per750-41 xfstests]# type -P nproc
+/usr/bin/nproc
+[root@dell-per750-41 xfstests]# rpm -qf `type -P nproc`
+coreutils-9.7-3.fc43.x86_64
 
 Thanks,
 Zorro
 
-
-> +		fi
-> +		;;
-> +	# Add other filesystem types here as needed
-> +	*)
-> +		;;
-> +	esac
-> +}
+> +SIZE=$((100 * 1024 * 1024))
 > +
->  # Prepare to run a fstest by initializing the required global variables to
->  # their defaults, sourcing common functions, registering a cleanup function,
->  # and removing the $seqres.full file.
-> @@ -55,4 +69,6 @@ _begin_fstest()
->  	# remove previous $seqres.full before test
->  	rm -f $seqres.full $seqres.hints
->  
-> +	# setup filesystem options for a given test execution
-> +	_setup_fs_options
->  }
+> +cat >$fio_config <<EOF
+> +[aio-dio-aw-verify]
+> +direct=1
+> +ioengine=libaio
+> +rw=randwrite
+> +bs=$blocksize
+> +fallocate=native
+> +filename=$SCRATCH_MNT/test-file
+> +size=$SIZE
+> +iodepth=$FIO_LOAD
+> +numjobs=$FIO_LOAD
+> +group_reporting=1
+> +verify_state_save=0
+> +verify=crc32c
+> +verify_fatal=1
+> +verify_dump=0
+> +verify_backlog=1024
+> +verify_async=4
+> +verify_write_sequence=0
+> +atomic=1
+> +EOF
+> +
+> +_require_fio $fio_config
+> +
+> +cat $fio_config >> $seqres.full
+> +$FIO_PROG $fio_config --output=$fio_out
+> +cat $fio_out >> $seqres.full
+> +
+> +# success, all done
+> +echo Silence is golden
+> +status=0
+> +exit
+> diff --git a/tests/generic/767.out b/tests/generic/767.out
+> new file mode 100644
+> index 00000000..2bf7f989
+> --- /dev/null
+> +++ b/tests/generic/767.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 767
+> +Silence is golden
 > -- 
 > 2.49.0
 > 
