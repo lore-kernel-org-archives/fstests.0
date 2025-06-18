@@ -1,77 +1,76 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF7243085BA
-	for <fstests@vger.kernel.org>; Wed, 18 Jun 2025 20:17:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 731D71D63C2
+	for <fstests@vger.kernel.org>; Wed, 18 Jun 2025 20:27:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750277841; cv=none; b=Toxl1LuXFnS9fo2veJPTb5t1slH+T7//XpfRq/cLzOZJ3nPdGplqyIhER8mUpnFPNPACuPLy0qdpK1/Q9bRQlVqCLhY1xtoe/TYG6wg5K3dyLzJajGK9lGPXeXvoGhO0n1y9SYsghspaaR8kWMKKBDB3hDINX57y38VLk8Q7MaA=
+	t=1750278472; cv=none; b=pGVISlCDPT/P2u0A3iR3pBEWr0/5b2iMmlUtxfTUudqSY7XszId2ffnOyZ2ftWvBVCXWPyLBq2e+CtH+AQCcUptTb8Y1QrY7jBE0zNwuU5kJXgtsMnYSsm8QIfatkWb3qiZKEF0mB6k1u2cVnvugkBujq+BjhgwFX9+eGYNjgMo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750277841; c=relaxed/simple;
-	bh=Q/MaXLBtzzln43lghbD8oT8gug4K7wobKAwpmPtg+hQ=;
+	s=arc-20240116; t=1750278472; c=relaxed/simple;
+	bh=tPvsw6IQ1wdxi7IsP6D5Qv8d2rjiAb75FJ5OwcdSANU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=RQpPuEz8M0/+Fg1rlkClBPnFeUlYvfGAYE1P/rgaWN0GAFz/TL2xPFzatpYB/Just7dxd6HsPR9TBYa7VitnXy5XdHAM4nFEwZt6s9pVnm5LooO9D+k8Xn7FYcMFfAcjenJxxEHrkHqkKunD5zd173ZLvsDj3dGzVuWO1IT/tAo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WP96Kkdt; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=Y/0yIL0rQYp97826m2Dwk/uHtZ5todoGpCh4rGIzgOp6eRwogpXJIUYTjRmI8KOuHVKN2WFxUWPQmx77RUtX/gTKyaCCFb4zlUeUs+PX9R2smGm0W0cCHyec7h96JHIMkd0vu5ISarCW+X+yUpfC2TwuhS3xmitYv0LN7NZZURM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=d1VTFxx2; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WP96Kkdt"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="d1VTFxx2"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1750277838;
+	s=mimecast20190719; t=1750278469;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=rTpSukZ6jU8ypmFpV1ZqIFWHUmoI19CzJbFvtJKyT5g=;
-	b=WP96Kkdt3bqX57Y26/tmgM+iOOzqJ7/P9xcggn6qwvT0eXvkRShESYQ5MIQnCLYRLSP2zP
-	cYQuQKcJCaXTywCmMRPptzZUTvbu4MwgcPB0jy3XmqW8J8shhL/G/fBLMFtkG3IJPFotp4
-	of7DjgYufm/TSairJZaA2yc0ZKFib/0=
+	bh=Bv/FEAhuDX73FTKSiqZ3j1+IvMaDUfQ5VJy1iOE15vE=;
+	b=d1VTFxx2R2xR8paPI7NeNsns+e4Njrykt5wP7NPNDWzGMxy5w9koFBkmJqDxj1oMif/+Kq
+	9m0ffT3fLQa/eHeLAoNhV1Xj63d3sAMJvVQ2PyfzR++RFZb1cIX8D16cscVq10/Cvpnozo
+	aUTFpLNjSYBnl9dDsctY4xipwOKLUsA=
 Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
  [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-277-K2LzhCatNzmR8F2GvxAKAQ-1; Wed, 18 Jun 2025 16:17:17 -0400
-X-MC-Unique: K2LzhCatNzmR8F2GvxAKAQ-1
-X-Mimecast-MFC-AGG-ID: K2LzhCatNzmR8F2GvxAKAQ_1750277837
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-b2f4c436301so30603a12.0
-        for <fstests@vger.kernel.org>; Wed, 18 Jun 2025 13:17:17 -0700 (PDT)
+ us-mta-453-tv2R7DENOKW9GQmk33jieQ-1; Wed, 18 Jun 2025 16:27:47 -0400
+X-MC-Unique: tv2R7DENOKW9GQmk33jieQ-1
+X-Mimecast-MFC-AGG-ID: tv2R7DENOKW9GQmk33jieQ_1750278467
+Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-af59547f55bso63643a12.0
+        for <fstests@vger.kernel.org>; Wed, 18 Jun 2025 13:27:47 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1750277836; x=1750882636;
+        d=1e100.net; s=20230601; t=1750278467; x=1750883267;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=rTpSukZ6jU8ypmFpV1ZqIFWHUmoI19CzJbFvtJKyT5g=;
-        b=fQ3TMBNDVGfirgH4jTYB+gEyRwvK4LORSjt5PnkuBl32LpBMPoOC8pHsY6oGi1rC3W
-         RjLWDXkQUR8v2vIn4Xx7qJzZstZyblkjR0ddYBCoh9zf/xzCjuwU2zvupzeUZAa9PiTm
-         r446iCoTI+z7XVlqnkus6ci6ilZZGaajsAXaF+Ti6tFPt5u0qu+Ztax0GMNVZp+7erF3
-         mzk7f/GkrpLPeoguUYhEx8fRtnlpIyfchkSxprr7BH/vOdbspvQ6rm35eoOOcqP2FBqJ
-         CeSdGAapLaI/n12tu/y/kwtr4mJY02w5RSsC1xqBsmGXHsZA4Z4iQ2K1f+jX2gDPkJZv
-         U4lg==
-X-Gm-Message-State: AOJu0YwkqOmvclF+BV2tdXjTV7mhEJaWTZEZnK2ncrzmmZsQaGw1o9Y4
-	wJ4VtzrQ8nESvv7L1LIrC20oUc2mTPk2wyzEZKu53cd/UhuSDEb76pZDPM3ykHKx48XTNSSkZQW
-	3VHFSIx31SQ15cwr5p1b4FgDSM7wLYEJ0wz8b2Lc6RSGTPuo18rU9me/1R4d1s5RlBVs=
-X-Gm-Gg: ASbGncvGGfnIPRLd3B2/tzmcB718l50IUZebNQ126/HDYghEZ56EsiSoevE2EStIEAU
-	DxbEvdgwmWggJAiDv9q/TJ1PsYorMj3SMsZWKiBi/S14PVxBmMe24IhRMv7CldIQEHHN38oeWPL
-	oh6aEtPENGZ81EkJ6EzgcpJ9LiX05ljqIIOh1heTdPapS7Ctxdb+hnYRowb+IBryGGXNMNU75wH
-	We/vTQRkY8Vj77rVFmo6CaQfGTPLvb6hH4wXGuHVBBkQC14hWwmGyCxaAE2aAJkd/qPGKWz1jCa
-	YK72AICrLx6rTb+1KFmB77CRXD50LQ4pkcR4jES1HMSUFDaAkfNgFuklI/R/72k=
-X-Received: by 2002:a05:6a21:6d97:b0:218:17a2:4421 with SMTP id adf61e73a8af0-2201125ffa2mr1495246637.10.1750277836357;
-        Wed, 18 Jun 2025 13:17:16 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGXQ8eWcLL70c3YB9ysHRyR1qW938aHl+TtC/Sa88xuwBw16NnzNuV58q9unjiECWRXDbuVxA==
-X-Received: by 2002:a05:6a21:6d97:b0:218:17a2:4421 with SMTP id adf61e73a8af0-2201125ffa2mr1495207637.10.1750277835893;
-        Wed, 18 Jun 2025 13:17:15 -0700 (PDT)
+        bh=Bv/FEAhuDX73FTKSiqZ3j1+IvMaDUfQ5VJy1iOE15vE=;
+        b=ElkhMZjH9KAzFH9Y3j7oBF2IkApjYNcMgsjkLK1qPv6rveRceQotbLX7g+MH0NyKvJ
+         3YbNU/TSLOVjsDZPPHlEAHTIH6cfdb0guBW0pY2aGcxRI6Sfly2sb3ukfU1J0SP24Y+N
+         os6GJumQn6z+ofImZYXUWgLUSSMroi7v96HOH/syCiqjX+EXv4e7U+3IDyqY8a80AXCK
+         ZNWmASBouFvnk5gr3OB/lxxltaAa24iLGaQL6A1MAsdcprXHJzRWfaBdksdlyx+BDgT9
+         Y6QVZS28j1+HwFPypYmbbViFRJ1f15qfzn5XCix0kVlsrV7D2/t/SpFnmKvleT9GrPmY
+         /Upw==
+X-Gm-Message-State: AOJu0YwiB0khbGmk3/IHw1IPPJ9Cb7+SjE4wk73gAYUuLWpSjOKwmdTz
+	wPyyP53p2z+oineROtEPWYmkkUoNWhIls2uMxizYURic9aMVkgNTOk27mwqY7PnS4dB0udSWPox
+	fMiMj7bnWdmUYwpMis3WHNtwM19nwnztxbQtfTTVrI0KAK+8rs3grsvmNPvI=
+X-Gm-Gg: ASbGncs8yIizzHKUTL9FrcoLGdRekrLWAXbWe/YKnvuxeoHb8gBQQdtbizcgPqfkeQY
+	KqQCn0yYP3zSFT/XD9gDAVm5lTG9TxwNXANROPFCkNu4fh1LcCORmu7EHNei7OH4U9gN3rFSFd5
+	x7bOfQcfe9WsqTTh2zo+/IjQ8AGB8rRnK6hu5jN0zknDwKhUMeBFCta96HJJ3i0mXyZhGOtbS2s
+	sniQwXESdez0kIh5s1vUVBdKrJk8yTWs0Lbo9PsJcE/rq1fG0dIzBuzINfLQ+9zjHusyoN5kv4a
+	x7513+4lhDruVu43i7aEHY5ltKsSG12cO7HY/4GaMCGqwLpyjHaX3Vwb4mL2rbA=
+X-Received: by 2002:a05:6a21:648b:b0:21f:53e4:1925 with SMTP id adf61e73a8af0-21fbd523a1dmr24989558637.10.1750278466780;
+        Wed, 18 Jun 2025 13:27:46 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IERURdLUVTZcJ3+mtv1dlXX2O4HbHHWgm60DxE/XZhkakzgG0KtFk+jTT+Ks0SIETls45F4eA==
+X-Received: by 2002:a05:6a21:648b:b0:21f:53e4:1925 with SMTP id adf61e73a8af0-21fbd523a1dmr24989540637.10.1750278466444;
+        Wed, 18 Jun 2025 13:27:46 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b31d731ab20sm676546a12.77.2025.06.18.13.17.13
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-748e2c21dc5sm2744409b3a.132.2025.06.18.13.27.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Jun 2025 13:17:15 -0700 (PDT)
-Date: Thu, 19 Jun 2025 04:17:11 +0800
+        Wed, 18 Jun 2025 13:27:45 -0700 (PDT)
+Date: Thu, 19 Jun 2025 04:27:41 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
 	djwong@kernel.org, john.g.garry@oracle.com
-Subject: Re: [RFC 06/12] generic/770: Add atomic write multi-fsblock
- O_[D]SYNC tests
-Message-ID: <20250618201711.2d6xuv6pztoj4pbn@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [RFC 07/12] generic/771: Stress fsx with atomic writes enabled
+Message-ID: <20250618202741.dziguhshlq2cqj5b@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <cover.1749629233.git.ojaswin@linux.ibm.com>
- <5503061a800eaff9fc182e68c3030c1ef07410f3.1749629233.git.ojaswin@linux.ibm.com>
+ <136feebfb52701ecd7c85e4f4bd805ce97763e50.1749629233.git.ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -80,213 +79,105 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <5503061a800eaff9fc182e68c3030c1ef07410f3.1749629233.git.ojaswin@linux.ibm.com>
+In-Reply-To: <136feebfb52701ecd7c85e4f4bd805ce97763e50.1749629233.git.ojaswin@linux.ibm.com>
 
-On Wed, Jun 11, 2025 at 03:04:49PM +0530, Ojaswin Mujoo wrote:
-> This adds various atomic write multi-fsblock stresst tests
-> with mixed mappings and O_SYNC, to ensure the data and metadata
-> is atomically persisted even if there is a shutdown.
+On Wed, Jun 11, 2025 at 03:04:50PM +0530, Ojaswin Mujoo wrote:
+> Stress file with atomic writes to ensure we excercise codepaths
+> where we are mixing different FS operations with atomic writes
 > 
 > Suggested-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
 > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 > ---
->  tests/generic/770     | 161 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/770.out |   2 +
->  2 files changed, 163 insertions(+)
->  create mode 100755 tests/generic/770
->  create mode 100644 tests/generic/770.out
+>  tests/generic/771     | 49 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/771.out |  2 ++
+>  2 files changed, 51 insertions(+)
+>  create mode 100755 tests/generic/771
+>  create mode 100644 tests/generic/771.out
 > 
-> diff --git a/tests/generic/770 b/tests/generic/770
+> diff --git a/tests/generic/771 b/tests/generic/771
 > new file mode 100755
-> index 00000000..2b98b3b3
+> index 00000000..690dfa0a
 > --- /dev/null
-> +++ b/tests/generic/770
-> @@ -0,0 +1,161 @@
+> +++ b/tests/generic/771
+> @@ -0,0 +1,49 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +# Copyright (c) 2025 IBM Corporation. All Rights Reserved.
 > +#
-> +# FS QA Test 770
+> +# FS QA Test 771
 > +#
-> +# Atomic write multi-fsblock data integrity tests with mixed mappings
-> +# and O_SYNC
+> +# fuzz fsx with atomic writes
 > +#
 > +. ./common/preamble
 > +. ./common/atomicwrites
-> +_begin_fstest auto quick rw atomicwrites
+> +_begin_fstest rw auto quick atomicwrites
 > +
-> +_require_scratch_write_atomic_multi_fsblock
-> +_require_atomic_write_test_commands
+> +# Import common functions.
+> +. ./common/filter
+
+I think this's useless for this case.
+
 > +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount >> $seqres.full
+> +_require_test
+
+Do you use TEST_DEV or TEST_MNT ?
+
+> +_require_odirect
+> +_require_scratch_write_atomic
 > +
-> +check_data_integrity() {
-> +	actual=$(_hexdump $testfile)
-> +	if [[ "$expected" != "$actual" ]]
-> +	then
-> +		echo "Integrity check failed"
-> +		echo "Integrity check failed" >> $seqres.full
-> +		echo "# Expected file contents:" >> $seqres.full
-> +		echo "$expected" >> $seqres.full
-> +		echo "# Actual file contents:" >> $seqres.full
-> +		echo "$actual" >> $seqres.full
-> +	fi
-> +}
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount  >> $seqres.full 2>&1
 > +
 > +testfile=$SCRATCH_MNT/testfile
 > +touch $testfile
 > +
 > +awu_max=$(_get_atomic_write_unit_max $testfile)
 > +blksz=$(_get_block_size $SCRATCH_MNT)
-> +
-> +# Create an expected pattern to compare with
-> +$XFS_IO_PROG -tc "pwrite -b $awu_max 0 $awu_max" $testfile >> $seqres.full
-> +expected=$(_hexdump $testfile)
-> +echo "# Expected file contents:" >> $seqres.full
-> +echo "$expected" >> $seqres.full
-> +
-> +echo "# Test 1: Do O_DSYNC atomic write on random mixed mapping (10 iterations):" >> $seqres.full
-> +# Calculate how many blocks (e.g. 4K) fit in awu_max (e.g. 64K)
-> +num_blocks=$((awu_max / blksz))
-> +echo "Testing $num_blocks blocks of $blksz size within $awu_max region" >> $seqres.full
-> +
-> +operations=("W" "H" "U")
-> +
-> +# Run 10 iterations of the test
-> +for ((iteration=1; iteration<=10; iteration++)); do
-> +	echo "=== Mixed Mapping Test Iteration $iteration ===" >> $seqres.full
-> +
-> +	$XFS_IO_PROG -c "truncate 0" $testfile >> $seqres.full
-> +	off=0
-> +	mapping=""
-> +
-> +	for ((i=0; i<num_blocks; i++)); do
-> +		index=$((RANDOM % ${#operations[@]}))
-> +		map="${operations[$index]}"
-> +		mapping="${mapping}${map}"
-> +
-> +		case "$map" in
-> +			"W")
-> +				$XFS_IO_PROG -dc "pwrite -S 0x61 -b $blksz $off $blksz" $testfile > /dev/null
-> +				;;
-> +			"H")
-> +				# No operation needed for hole
-> +				;;
-> +			"U")
-> +				$XFS_IO_PROG -c "falloc $off $blksz" $testfile >> /dev/null
+> +bsize=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
 
-_require_xfs_io_command falloc
+Do you need _require_block_device? Or is nfs, cifs or overlay... good for this test?
 
-> +				;;
-> +		esac
-> +		off=$((off + blksz))
-> +	done
 > +
-> +	echo "Mixed mapping preparation complete. Full mapping pattern: $mapping" >> $seqres.full
+> +# fsx usage:
+> +#
+> +# -N numops: total # operations to do
+> +# -l flen: the upper bound on file size
+> +# -o oplen: the upper bound on operation size (64k default)
+> +# -w writebdy: $psize would make writes page aligned (on i386)
+> +# -Z: O_DIRECT (use -R, -W, -r and -w too)
+> +# -W: mapped write operations DISabled
 > +
-> +	sync $testfile
-> +
-> +	echo "Performing O_DSYNC atomic write over the entire $awu_max region" >> $seqres.full
-> +	bytes_written=$($XFS_IO_PROG -dc "pwrite -DA -V1 -b $awu_max 0 $awu_max" $testfile | \
+> +_run_fsx_on_file $testfile -N 10000 -a -o $awu_max  -l 500000 -r $bsize -w $bsize -Z -W $FSX_AVOID >> $seqres.full
+> +status=$?
 
-_require_xfs_io_command pwrite -A
+Generally we _exit directly after changing $status.
 
+> +
+> +if [[ "$status" != "0" ]]
+> +then
+> +	echo "Somthing went wrong, check $seqres.full"
+> +fi
 
-> +				  grep wrote | awk -F'[/ ]' '{print $2}')
-> +
-> +	test $bytes_written -eq $awu_max || echo "atomic write len=$awu_max failed"
-> +	check_data_integrity
-> +	echo "Iteration $iteration completed: OK" >> $seqres.full
-> +	echo >> $seqres.full
-> +done
-> +echo "# Test 1: Do O_SYNC atomic write on random mixed mapping (10 iterations): OK" >> $seqres.full
-> +
-> +echo >> $seqres.full
-> +echo "# Test 2: Do extending O_SYNC atomic writes: " >> $seqres.full
-> +bytes_written=$($XFS_IO_PROG -dstc "pwrite -A -V1 -b $awu_max 0 $awu_max" $testfile | \
-> +                grep wrote | awk -F'[/ ]' '{print $2}')
-> +test $bytes_written -eq $awu_max || echo "atomic write len=$awu_max failed"
-> +_scratch_shutdown -v >> $seqres.full
+but you don't _exit ...
 
-_require_scratch_shutdown
+> +
+> +echo "Silence is golden"
+> +status=0
 
-> +_scratch_cycle_mount >>$seqres.full 2>&1 || _fail "remount failed for Test-2"
-> +check_data_integrity
-> +echo "# Test 2: Do extending O_SYNC atomic writes: OK" >> $seqres.full
-> +
-> +echo >> $seqres.full
-> +echo "# Test 3: Do O_DSYNC atomic write on random mixed mapping with sudden fs shutdown (10 iterations):" >> $seqres.full
-> +num_blocks=$((awu_max / blksz))
-> +echo "Testing $num_blocks blocks of $blksz size within $awu_max region" >> $seqres.full
-> +
-> +operations=("W" "H" "U")
-> +
-> +for ((iteration=1; iteration<=10; iteration++)); do
-> +	echo "=== Mixed Mapping Shutdown Test Iteration $iteration ===" >> $seqres.full
-> +
-> +	$XFS_IO_PROG -c "truncate 0" $testfile >> $seqres.full
-> +
-> +	off=0
-> +	mapping=""
-> +
-> +	for ((i=0; i<num_blocks; i++)); do
-> +		index=$((RANDOM % ${#operations[@]}))
-> +		map="${operations[$index]}"
-> +		mapping="${mapping}${map}"
-> +
-> +		case "$map" in
-> +			"W")
-> +				$XFS_IO_PROG -dc "pwrite -S 0x61 -b $blksz $off $blksz" $testfile > /dev/null
-> +				;;
-> +			"H")
-> +				# No operation needed for hole
-> +				;;
-> +			"U")
-> +				$XFS_IO_PROG -c "falloc $off $blksz" $testfile > /dev/null
-> +				;;
-> +		esac
-> +		off=$((off + blksz))
-> +	done
-> +
-> +	echo "Mixed mapping preparation complete. Full mapping pattern: $mapping" >> $seqres.full
-> +
-> +	sync $testfile
-> +
-> +	echo "Performing O_DSYNC atomic write over the entire $awu_max region" >> $seqres.full
-> +	bytes_written=$($XFS_IO_PROG -dc "pwrite -DA -V1 -b $awu_max 0 $awu_max" $testfile | \
-> +				  grep wrote | awk -F'[/ ]' '{print $2}')
-> +
-> +	test $bytes_written -eq $awu_max || echo "atomic write len=$awu_max failed"
-> +
-> +	echo "Shutting down filesystem" >> $seqres.full
-> +	_scratch_shutdown -v >> $seqres.full
-> +	_scratch_cycle_mount >>$seqres.full 2>&1 || _fail "remount failed for Test-3"
-> +	check_data_integrity
-> +	echo "Iteration $iteration completed: OK" >> $seqres.full
-> +	echo >> $seqres.full
-> +done
-
-Looks like there're two iterations (loop running codes), the code looks much similar, can we
-move them to one function then call it twice?
+Then the status will be set to 0 again. So above "status=$?" is useless.
+You can check "$?" directly, or exit directly if _run_fsx fails.
 
 Thanks,
 Zorro
 
-> +echo "# Test 3: Do O_SYNC atomic write on random mixed mapping with sudden fs shutdown (10 iterations): OK" >> $seqres.full
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=0
 > +exit
-> +
-> diff --git a/tests/generic/770.out b/tests/generic/770.out
+> diff --git a/tests/generic/771.out b/tests/generic/771.out
 > new file mode 100644
-> index 00000000..17994ed5
+> index 00000000..c2345c7b
 > --- /dev/null
-> +++ b/tests/generic/770.out
+> +++ b/tests/generic/771.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 770
+> +QA output created by 771
 > +Silence is golden
 > -- 
 > 2.49.0
