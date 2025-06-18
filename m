@@ -1,188 +1,211 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 425EF2E719D;
-	Wed, 18 Jun 2025 13:00:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 567FC27F01C
+	for <fstests@vger.kernel.org>; Wed, 18 Jun 2025 14:18:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750251621; cv=none; b=HOFEI5YK/XMcjhQA7WPie8xjQXyo5oRypRCZl9cGficXTzFYPPfnI3hqb5Rki+DRvgze1ChGH08eZkRZnf/uwwH0IizzMi8b0EXLOQj4nqi/RvKMDG3dfjar9Q7vZIzT1cFZ2ox/OwNGPKi9fL/MvRzIFbSQREH3Te8Qhk1Mg7I=
+	t=1750256342; cv=none; b=dpP+uaQT3PTDCHqIw4hAIiYdTZPZUf8tw5644RXPBEFuzYc4bn/UyUJKIz4CV+ID34BdFkE6E1xcEeX7wlj2N+4YZFLOEy8xVQVLKuIkMV4d79H6dSS8wsuQvZo6PTlX+DtJO9XSFvP4E/GP/FYpGJZwitP9Y1Pq70ZClRfO5Do=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750251621; c=relaxed/simple;
-	bh=USacO9OTdPr4qCz3iJ+RKMELFRIMSvBKG/O8EN/eqCE=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=GRWOr3PJeZ8tLac2uAy8xJoxrP/c42v55D44s1nT5IxO+k3sXVr5Y3VxZDCiBw1pwouen/NSQIEumels6vK6v6E1b+1PqoeqQYE+KTD1MTRyEgX+rKCWhs57ElBMDiUOHWtET9FXrizHFBg00H/uLKsX8pbmv7FZa2qlAzIyDEU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tvIJyf5N; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1750256342; c=relaxed/simple;
+	bh=0f+rmzaAkH9vjTXa0tLD6ZFmzZw13ZrIv5Job/CTy4U=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=fxkgwvHHvOgDEM0xJpGUGa6f+Zu7qqO2IX8T8iGsQT47ooYhBFZEcWqgxb+ReWOLmMw3wyIbk9ZWW1yu+bXhJ82gW4Dtyd9M0P7ZKoEH+Wc2d+siqZMfDjSYTYrJiNpxowh+6Wc89pERFpGrB0mr6/EFCvM7WbxBcr81I8Ya41A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=dvTvogE9; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tvIJyf5N"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4F35CC4CEE7;
-	Wed, 18 Jun 2025 13:00:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1750251619;
-	bh=USacO9OTdPr4qCz3iJ+RKMELFRIMSvBKG/O8EN/eqCE=;
-	h=From:Date:Subject:To:Cc:From;
-	b=tvIJyf5NahCGyy6QVon/RgyFFVKFMW23jEkKe4/u3t/aWpK4CIeUJB9wGKweHrUkj
-	 XyQ6/usXWNVbkctv0b3H1gbTajXg9jlH8G6JSay6q2EFnfLmJ5sb6Zl93z/B3G8aik
-	 7nCqdd9jDf4hBL/0XqJjozwQRIM+F9o+bcd/HS/TnRT/aR7RJjghc4uBDHNBvl4nzf
-	 xrYZwYDqbGxG6k3yyk6o8NMbTQIWLoeia/OsEWx47c0Iowe8pxTDoCFRUs+tbYP6Zc
-	 WVXt+p6Ilw9MA1msP1bP3dXHpmxzxa5axEfvKHLzqryk5YxcjYSNlK2joEZQnCq9my
-	 8MmG4nivQ9h1w==
-From: Daniel Gomez <da.gomez@kernel.org>
-Date: Wed, 18 Jun 2025 15:00:12 +0200
-Subject: [PATCH] generic/551: prevent OOM when running on tmpfs with low
- memory
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dvTvogE9"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1750256338;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=5QxgEdsQTQIPRLxVEAqRLJKO8ewOZ9/dUburkW2EBcQ=;
+	b=dvTvogE9+lyQucGhaSgFPXuG5+MotDAFkLRoVkSzvnXZpTFTDUeTxNq2J/kE26iXBzez9s
+	eHkHGMj8QIkzHkeZ/MTuPgE4chCnfCSAl4rM1VkiNk3RECCIK+ZeF53DzZMOR/sf/rWli0
+	aU3XV1ShGNYD2yMPePnXSs38IYJWdRQ=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-553-6dSzO_HQNcWGo_eg8bqwqA-1; Wed, 18 Jun 2025 10:18:57 -0400
+X-MC-Unique: 6dSzO_HQNcWGo_eg8bqwqA-1
+X-Mimecast-MFC-AGG-ID: 6dSzO_HQNcWGo_eg8bqwqA_1750256336
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-311ae2b6647so6005127a91.0
+        for <fstests@vger.kernel.org>; Wed, 18 Jun 2025 07:18:57 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1750256336; x=1750861136;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=5QxgEdsQTQIPRLxVEAqRLJKO8ewOZ9/dUburkW2EBcQ=;
+        b=YeJ0M2By92PUNZsUOO56C7V/0EbV0gksz/lxfyGGzDQXq7VaYqHm4PBto3GryayeeY
+         L4TcrxvOdERri4/g0Kjn5PXcp03nn4f6rQ4wXlsJlOFg2OzjOZ7rMBoRFiJOE/V2Wd7M
+         c1C5uM/GbGmM7trrWH98NTl38ehhsTEhmui/l8h82Ft1u1eSwfIeG3MgnMwla7Q/vlVY
+         pt4DHIXS82S3JWsC28HKBd50xUOchfWG9+y2iUEwHAJXIqVBEuaFK0phtJx244/fb5tt
+         lEr+9asXwMmPoybt/JRxAsT7Bcx13eNO6nlJgBdi7DxRtYvjyrAdn8cMXORtRZ0Ivy0t
+         FVVw==
+X-Forwarded-Encrypted: i=1; AJvYcCVpUBfPZhEzeQ9+Rq20S9pQwLURFAtfwnl6EntwNj0UlVfHRPtWeYud3y35zGKkIdM/XhMQO4xu@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzj6KGOMGM+mBMvCAHh9PDmD+1J0qTu7ArvVLZhhqTkVfThD5Ed
+	1ysYtzLCDxzDq9Yl0F9/LVRoJA6VO80IaWtbjJLg4W4iyuV8J6t4qwFIRN3L5u9mOPh2D8P3vpR
+	C09R14fXJU9un8xAa9EJmm73rU3/bSgpXxQFGsYzlbr5gF4Z4m8qNk1OPLtM=
+X-Gm-Gg: ASbGncv7ItLW3QwBuir8/GmGnIh0vBL8uRXs0Rj9KFA4qbRS6c7c+q7gb8AiSG65H4Y
+	j/z7TsDaeaarHyW+y/t0QdX0qbxZEyRY9Gnt63tIvhokt0+KEFR9zjtu2Po5chdqyB+JCPSqNiS
+	vtvnfrZ/wIIPdVOf5Y/seUjJKtPUrzncJdu1XVNuDxGh0nRRs5dOpCzktsLKO6jGFhiqyY2lebR
+	/ldbwtZqBNo5n75htRQWXGQ7tBUEs89BajragU+fbhHMiapeREHGO25LaC3V9sdC401jsdAByop
+	IUy4QhRLGSStALIx8nZ9BGVbT3rXaJXlKy4GT5kYw4SkyZdP8qNF/hKrLgS4VhU=
+X-Received: by 2002:a17:90b:3cce:b0:315:6f2b:ce53 with SMTP id 98e67ed59e1d1-3156f2bcfccmr4842763a91.25.1750256336194;
+        Wed, 18 Jun 2025 07:18:56 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHCe1i3E0Bx7XwW7x5n4p4GoWfzlINHlJrzmaufkTIOSb6G0Dppb7K0ZonwlI2o/7109xyOnQ==
+X-Received: by 2002:a17:90b:3cce:b0:315:6f2b:ce53 with SMTP id 98e67ed59e1d1-3156f2bcfccmr4842715a91.25.1750256335786;
+        Wed, 18 Jun 2025 07:18:55 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-313c19cd5a6sm12877479a91.12.2025.06.18.07.18.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 18 Jun 2025 07:18:55 -0700 (PDT)
+Date: Wed, 18 Jun 2025 22:18:51 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Li Chen <me@linux.beauty>
+Cc: "Darrick J. Wong" <djwong@kernel.org>,
+	fstests <fstests@vger.kernel.org>,
+	linux-xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH V2] generic/738 : add missing _fixed_by_git_commit line
+ to the test
+Message-ID: <20250618141851.p3qgjw53ynnuwrfz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250610025242.11403-1-me@linux.beauty>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Message-Id: <20250618-fix-tmpfs-generic-551-v1-1-271027c36dfc@samsung.com>
-X-B4-Tracking: v=1; b=H4sIAFu4UmgC/x2MQQqAMAzAviI9W3BjVfEr4kFn1R6csokIsr9bP
- AaSvJA4Cifoihci35LkCAqmLMBvY1gZZVYGW1mqatPiIg9e+7kkXDlo65HIoPONmwzNzlsCbc/
- IKv7ffsj5A+IlxHRnAAAA
-X-Change-ID: 20250618-fix-tmpfs-generic-551-4c74b15d4c25
-To: fstests@vger.kernel.org, Hugh Dickins <hughd@google.com>
-Cc: Luis Chamberlain <mcgrof@kernel.org>, kdevops@lists.linux.dev, 
- Daniel Gomez <da.gomez@kernel.org>, Chuck Lever <chuck.lever@oracle.com>, 
- gost.dev@samsung.com, Daniel Gomez <da.gomez@samsung.com>
-X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4720; i=da.gomez@samsung.com;
- h=from:subject:message-id; bh=ojgdiifY9VvMiz2xw1FjEsGCEmrhfvJ7zzliXmLZE5w=;
- b=owEBbQKS/ZANAwAIAYX1bqTp6BOPAcsmYgBoUrhewUahjURdRBzEwLRlVXNjtU0DPgpLZrlXo
- iI/fCfYxdyJAjMEAAEIAB0WIQSyp6nP3QO1QP9YsnGF9W6k6egTjwUCaFK4XgAKCRCF9W6k6egT
- jyYSD/9oRGHHOCIquHEgwPXrGbt0tW/PkVfMby5sqaXJJ+yYfwqgX0nsImih77GAprwEUkTXUdW
- bp3Xz5snPaYA7yl3I9ts2V8a+UF2H40xRqBnS0pnMlHhspcNUvTS+4pSblAt0E8VvNFG9j+9hIe
- QSh2mTLAnlLahEC0TV5XPM/3iLUrpZNOe6QCGOqAJ6J9jKIGO/6MEPtWegndVbpf5L9FjUcCJYV
- 01W527S2PgAh4zjS8ggG3MaAgJ2iDZI2pYuzRvugF/pr+FQaOdxGoAy7Un8eYieIg6hEfhYi/Hd
- nxqhKw2nkxgSPWPzTOydKOfmjakXyG7xLSTsnQuc86ikv6wPLXruKWASOZSks3PTDIxD8u8t/MJ
- x6f6sb8LfP/L3I994MLAuHtPxnyt/8UjPfbnkyCHyduQQYpJdy6LMrKMbbxJ6jNBCXPgWk81M3c
- LpiHkas66RHHXpn0D0kkCpgzz//evAY0FkKVVrSrDSwiv367hpQXAJFV70RS0ufg3xLkEovlFfH
- WJ9kT1Oof4pfd/1agC1urKv0ZU4HBYz7uUtA3SQ9SRk9eWI0Im0Q4t0uaRmOPDnpRsbn9WDqSRW
- 0DByMelTuAeMA1ZyUTmftgHcE85dyWmIP5KAzSfuT92ri3lEedTEEfjQRADoeJSE/FlWEaWnnmn
- tQODd/rcIdLXmKg==
-X-Developer-Key: i=da.gomez@samsung.com; a=openpgp;
- fpr=B2A7A9CFDD03B540FF58B27185F56EA4E9E8138F
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250610025242.11403-1-me@linux.beauty>
 
-From: Daniel Gomez <da.gomez@samsung.com>
+On Tue, Jun 10, 2025 at 10:52:42AM +0800, Li Chen wrote:
+> From: Li Chen <chenl311@chinatelecom.cn>
+> 
+> Add the usual  _fixed_by_kernel_commit  line so the user can find
+> that the hang is cured by
+> 
+>     ab23a7768739  ("xfs: per-cpu deferred inode inactivation queues")
+> 
+> The hung task call trace would be as below:
+> [   20.535519]       Not tainted 5.14.0-rc4+ #27
+> [   20.537855] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> [   20.539420] task:738             state:D stack:14544 pid: 7124 ppid:   753 flags:0x00004002
+> [   20.540892] Call Trace:
+> [   20.541424]  __schedule+0x22d/0x6c0
+> [   20.542128]  schedule+0x3f/0xa0
+> [   20.542751]  percpu_rwsem_wait+0x100/0x130
+> [   20.543516]  ? percpu_free_rwsem+0x30/0x30
+> [   20.544259]  __percpu_down_read+0x44/0x50
+> [   20.545002]  xfs_trans_alloc+0x19a/0x1f0
+> [   20.545747]  xfs_free_eofblocks+0x47/0x100
+> [   20.546519]  xfs_inode_mark_reclaimable+0x115/0x160
+> [   20.547398]  destroy_inode+0x36/0x70
+> [   20.548077]  prune_icache_sb+0x79/0xb0
+> [   20.548789]  super_cache_scan+0x159/0x1e0
+> [   20.549536]  shrink_slab.constprop.0+0x1b1/0x370
+> [   20.550363]  drop_slab_node+0x1d/0x40
+> [   20.551041]  drop_slab+0x30/0x70
+> [   20.551600]  drop_caches_sysctl_handler+0x6b/0x80
+> [   20.552311]  proc_sys_call_handler+0x12b/0x250
+> [   20.552931]  new_sync_write+0x117/0x1b0
+> [   20.553462]  vfs_write+0x1bd/0x250
+> [   20.553914]  ksys_write+0x5a/0xd0
+> [   20.554381]  do_syscall_64+0x3b/0x90
+> [   20.554854]  entry_SYSCALL_64_after_hwframe+0x44/0xae
+> [   20.555481] RIP: 0033:0x7f90928d3300
+> [   20.555946] RSP: 002b:00007ffc2b50b998 EFLAGS: 00000202 ORIG_RAX: 0000000000000001
+> [   20.556853] RAX: ffffffffffffffda RBX: 0000000000000002 RCX: 00007f90928d3300
+> [   20.557686] RDX: 0000000000000002 RSI: 000055a5d6c47750 RDI: 0000000000000001
+> [   20.558524] RBP: 000055a5d6c47750 R08: 0000000000000007 R09: 0000000000000073
+> [   20.559335] R10: 0000000000000000 R11: 0000000000000202 R12: 0000000000000002
+> [   20.560154] R13: 00007f90929ae760 R14: 0000000000000002 R15: 00007f90929a99e0
+> 
+> localhost login: [   30.773559] INFO: task 738:7124 blocked for more than 20 seconds.
+> [   30.775236]       Not tainted 5.14.0-rc4+ #27
+> [   30.777449] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> [   30.779729] task:738             state:D stack:14544 pid: 7124 ppid:   753 flags:0x00004002
+> [   30.781267] Call Trace:
+> [   30.781850]  __schedule+0x22d/0x6c0
+> [   30.782618]  schedule+0x3f/0xa0
+> [   30.783297]  percpu_rwsem_wait+0x100/0x130
+> [   30.784110]  ? percpu_free_rwsem+0x30/0x30
+> [   30.785085]  __percpu_down_read+0x44/0x50
+> [   30.786071]  xfs_trans_alloc+0x19a/0x1f0
+> [   30.786877]  xfs_free_eofblocks+0x47/0x100
+> [   30.787727]  xfs_inode_mark_reclaimable+0x115/0x160
+> [   30.788708]  destroy_inode+0x36/0x70
+> [   30.789395]  prune_icache_sb+0x79/0xb0
+> [   30.790056]  super_cache_scan+0x159/0x1e0
+> [   30.790712]  shrink_slab.constprop.0+0x1b1/0x370
+> [   30.791381]  drop_slab_node+0x1d/0x40
+> [   30.791924]  drop_slab+0x30/0x70
+> [   30.792469]  drop_caches_sysctl_handler+0x6b/0x80
+> [   30.793328]  proc_sys_call_handler+0x12b/0x250
+> [   30.793948]  new_sync_write+0x117/0x1b0
+> [   30.794471]  vfs_write+0x1bd/0x250
+> [   30.794941]  ksys_write+0x5a/0xd0
+> [   30.795414]  do_syscall_64+0x3b/0x90
+> [   30.795928]  entry_SYSCALL_64_after_hwframe+0x44/0xae
+> [   30.796595] RIP: 0033:0x7f90928d3300
+> [   30.797090] RSP: 002b:00007ffc2b50b998 EFLAGS: 00000202 ORIG_RAX: 0000000000000001
+> [   30.798033] RAX: ffffffffffffffda RBX: 0000000000000002 RCX: 00007f90928d3300
+> [   30.798852] RDX: 0000000000000002 RSI: 000055a5d6c47750 RDI: 0000000000000001
+> [   30.799703] RBP: 000055a5d6c47750 R08: 0000000000000007 R09: 0000000000000073
+> [   30.800833] R10: 0000000000000000 R11: 0000000000000202 R12: 0000000000000002
+> [   30.801764] R13: 00007f90929ae760 R14: 0000000000000002 R15: 00007f90929a99e0
+> [   30.802628] INFO: task xfs_io:7130 blocked for more than 10 seconds.
+> [   30.803421]       Not tainted 5.14.0-rc4+ #27
+> [   30.803985] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> [   30.804979] task:xfs_io          state:D stack:13712 pid: 7130 ppid:  7127 flags:0x00000002
+> [   30.806013] Call Trace:
+> [   30.806399]  __schedule+0x22d/0x6c0
+> [   30.806867]  schedule+0x3f/0xa0
+> [   30.807334]  rwsem_down_write_slowpath+0x1d8/0x510
+> [   30.808018]  thaw_super+0xd/0x20
+> [   30.808748]  __x64_sys_ioctl+0x5d/0xb0
+> [   30.809292]  do_syscall_64+0x3b/0x90
+> [   30.809797]  entry_SYSCALL_64_after_hwframe+0x44/0xae
+> [   30.810454] RIP: 0033:0x7ff1b48c5d1b
+> [   30.810943] RSP: 002b:00007fff0bf88ac0 EFLAGS: 00000246 ORIG_RAX: 0000000000000010
+> [   30.811874] RAX: ffffffffffffffda RBX: 000055b93ae5fc40 RCX: 00007ff1b48c5d1b
+> [   30.812743] RDX: 00007fff0bf88b2c RSI: ffffffffc0045878 RDI: 0000000000000003
+> [   30.813583] RBP: 000055b93ae60fe0 R08: 0000000000000000 R09: 0000000000000000
+> [   30.814497] R10: 0000000000000000 R11: 0000000000000246 R12: 0000000000000001
+> [   30.815413] R13: 000055b93a3a94e9 R14: 0000000000000000 R15: 000055b93ae61150
+> 
+> Signed-off-by: Li Chen <chenl311@chinatelecom.cn>
+> ---
+> Changes since v1: use _fixed_by_kernel_commit helper as suggested by
+> Zorro
 
-Running generic/551 on a tmpfs filesystem with less than 10 GB (ish)
-of RAM can lead to the system running out of memory, triggering the
-kernel's OOM killer and terminating the aio-dio-write-v process.
+Thanks, good to me now
 
-Fix generic/551 by substracting the amount of available memory allocated
-for the tmpfs scratch device to the total available free memory.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Reported-by: Chuck Lever <chuck.lever@oracle.com>
-Signed-off-by: Daniel Gomez <da.gomez@samsung.com>
----
-While integrating tmpfs support for xfstests in kdevops CI [1], we noticed
-that generic/551 could trigger the OOM killer when the scratch device
-is tmpfs, due to not properly accounting for available system memory.
-Fix the test for tmpfs by subtracting the memory allocated to the
-scratch tmpfs mount from the total available memory, ensuring the test
-runs within safe limits.
-
-[1]
-https://lore.kernel.org/all/20250615-ci-workflow-v1-0-53b267cd2f0a@samsung.com/
-
-These are the kernel oom-killer logs for generic/551 run on a system
-with less than 10G of RAM:
-
-run fstests generic/551 at 2025-06-18 11:42:44
-aio-dio-write-v invoked oom-killer:
-gfp_mask=0x140cca(GFP_HIGHUSER_MOVABLE|__GFP_COMP), order=0,
-oom_score_adj=250
-CPU: 5 UID: 0 PID: 1717 Comm: aio-dio-write-v Not tainted
-6.16.0-rc2-00049-g52da431bf03b #10 PREEMPT(full)
-Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 2025.02-6
-04/08/2025
-{...}
-Tasks state (memory values in pages):
-[  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem
-pgtables_bytes swapents oom_score_adj name
-{...}
-[   1717]     0  1717   876600   875978   875945       33         0
-7065600        0           250 aio-dio-write-v
-oom-kill:constraint=CONSTRAINT_NONE,nodemask=(null),cpuset=/,mems_allowe
-d=0,global_oom,task_memcg=/system.slice/fstests-generic-551.scope,task=a
-io-dio-write-v,pid=1717,uid=0
-Out of memory: Killed process 1717 (aio-dio-write-v) total-vm:3506400kB,
-anon-rss:3503780kB, file-rss:132kB, shmem-rss:0kB, UID:0 pgtables:6900kB
-oom_score_adj:250
-
-Results collected with kdevops on the following tmpfs profiles
-(before/after the changes):
-
-diff --git a/workflows/fstests/results/last-run/
-6.16.0-rc2-00049-g52da431bf03b/xunit_results.txt
-b/workflows/fstests/results/last-run/
-6.16.0-rc2-00049-g52da431bf03b/xunit_results.txt
-index 02a1f09..0229294 100644
---- a/workflows/fstests/results/last-run/
-6.16.0-rc2-00049-g52da431bf03b/xunit_results.txt
-+++ b/workflows/fstests/results/last-run/
-6.16.0-rc2-00049-g52da431bf03b/xunit_results.txt
-@@ -1,21 +1,21 @@
- KERNEL:    6.16.0-rc2-00049-g52da431bf03b
- CPUS:      8
-
--tmpfs_noswap_huge_never: 1 tests, 1 failures, 9 seconds
--  generic/551  Failed   8s
--tmpfs_default: 1 tests, 1 failures, 5 seconds
--  generic/551  Failed   4s
--tmpfs_noswap_huge_within_size: 1 tests, 1 failures, 8 seconds
--  generic/551  Failed   8s
--tmpfs_huge_always: 1 tests, 1 failures, 11 seconds
--  generic/551  Failed   11s
--tmpfs_huge_within_size: 1 tests, 1 failures, 8 seconds
--  generic/551  Failed   8s
--tmpfs_noswap_huge_always: 1 tests, 1 failures, 6 seconds
--  generic/551  Failed   6s
--tmpfs_noswap_huge_advise: 1 tests, 1 failures, 8 seconds
--  generic/551  Failed   7s
--tmpfs_huge_advise: 1 tests, 1 failures, 8 seconds
--  generic/551  Failed   7s
--Totals: 8 tests, 0 skipped, 8 failures, 0 errors, 59s
-+tmpfs_noswap_huge_advise: 1 tests, 134 seconds
-+  generic/551  Pass     134s
-+tmpfs_noswap_huge_never: 1 tests, 141 seconds
-+  generic/551  Pass     141s
-+tmpfs_huge_advise: 1 tests, 142 seconds
-+  generic/551  Pass     142s
-+tmpfs_default: 1 tests, 139 seconds
-+  generic/551  Pass     139s
-+tmpfs_noswap_huge_always: 1 tests, 109 seconds
-+  generic/551  Pass     108s
-+tmpfs_noswap_huge_within_size: 1 tests, 116 seconds
-+  generic/551  Pass     115s
-+tmpfs_huge_within_size: 1 tests, 112 seconds
-+  generic/551  Pass     111s
-+tmpfs_huge_always: 1 tests, 145 seconds
-+  generic/551  Pass     145s
-+Totals: 8 tests, 0 skipped, 0 failures, 0 errors, 1035s
----
- tests/generic/551 | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/tests/generic/551 b/tests/generic/551
-index 4a7f0a638235e272ef55ffeb3b3e548707568379..6a7376d7a8e3580bee0a5c98eacdaf93c60c8d5c 100755
---- a/tests/generic/551
-+++ b/tests/generic/551
-@@ -38,6 +38,7 @@ do_test()
- 	local truncsize
- 	local total_size=0
- 	local avail_mem=`_available_memory_bytes`
-+	[ "$FSTYP" = "tmpfs" ] && avail_mem=$((avail_mem - free_size_k * 1024))
- 
- 	# the number of AIO write operation
- 	num_oper=$((RANDOM % 64 + 1))
-
----
-base-commit: b7680adf9ff7bdc962fb95b5cbd304abd3137b69
-change-id: 20250618-fix-tmpfs-generic-551-4c74b15d4c25
-
-Best regards,
--- 
-Daniel Gomez <da.gomez@samsung.com>
+> 
+>  tests/generic/738 | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/tests/generic/738 b/tests/generic/738
+> index 6f1ea7f8..b0503025 100755
+> --- a/tests/generic/738
+> +++ b/tests/generic/738
+> @@ -9,6 +9,9 @@
+>  . ./common/preamble
+>  _begin_fstest auto quick freeze
+>  
+> +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit ab23a7768739 \
+> +	"xfs: per-cpu deferred inode inactivation queues"
+> +
+>  _cleanup()
+>  {
+>  	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
+> -- 
+> 2.49.0
+> 
 
