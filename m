@@ -1,77 +1,77 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B7E53085DB
-	for <fstests@vger.kernel.org>; Thu, 19 Jun 2025 07:52:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C0AA22D79F
+	for <fstests@vger.kernel.org>; Thu, 19 Jun 2025 07:58:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750319557; cv=none; b=cbS69/OAcIy/BO+7Fbz4nYwnu4QbeOuMpjfVGWBHP1Y1C3c5oQdOhRaNnv8sfv/p3ml6UcWkn+Al0n5tq1XW0wlp96SzZTs7ixEJQubZMnor1JC+VSzHvohe3kQSWiotURtU+XEm7bY5we0Kxdx6Y1D2K/7pslZ+qn8lP4LFWPA=
+	t=1750319915; cv=none; b=gIN5sK+CIwQeQt7qWCi3a8szSA+fbPhpGgFgLUUQ+NOdaZd4fCeFCLdETvdDoc5E49P+YswZJi2MEdK/NkFDmLPOk+4kIHM8jyAtFmne3fCNYOcQGS9A7F0l4VO8Bezr090NrkDWGZaO69YJ6uJkBeZhtVbuztbrS4kgEql1rQ4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750319557; c=relaxed/simple;
-	bh=2ISg654CeHGt8eKjSuUXTbRWJNOFyAM9wGL+CBXG+yc=;
+	s=arc-20240116; t=1750319915; c=relaxed/simple;
+	bh=69S7s/gMK3/kq+D9zBGtSXp92k8m92sRoVNxC4kIIUk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=WwcUr67Y26JcaIBIW707gLFABoi1CLSWqygLYHX3Puu2YXOMTtjJYY/Q7dWy76uI3Qfof5pH60DQ1vlT6t56qms5k92S+pmUto4a74zaiJ77gMkeQIJs7RaVOlle01Avwz58+BJh6KuptbEJEkSqseam1favDoVRJ6LM4Z7Bmkg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=AJAyYVTo; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=obmpHpUbExWNgCQZ1zKHXWlJ6+xRpoMPzvBHvn4CmNFO2QNt4yLzkX9EFafbdX9Iw8ZFA5QyDXrE9rNtBlV2OYY+ZM+9Qtb9QyzWAGLLIv2+925OTQIGhS6MfhJcaiSIzw1x8zvBGhWVW0NG2NJgtq++eIMDsU8wQ69AO1Dbejg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=OL2RYdzF; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AJAyYVTo"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OL2RYdzF"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1750319554;
+	s=mimecast20190719; t=1750319912;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=fBMQNFX9tRoMCm9/DMBgKcogKH0RvSpLMkHtoQr2m1M=;
-	b=AJAyYVToPJhZt3QqZS33t3u10GTURJqm4iNqknFkcWJ3hu5yR87hRoiewJDTwd3Ys03f2x
-	rf9b6zuPGFURXXTJyS3Vk6TeCYhM6/KgB0pq6V4MxpfFwHxBgfiL3aFIzXqK8JM2DZj16J
-	FpWXkGRK25YxkUJE0B0IkCDbVep1R7g=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=O+iG89nZsXRr+M5YfaA9nYawnYrSq4Yc0MsrlgGzqFc=;
+	b=OL2RYdzFz+5YGOimVe/mVvp016JN+Ld7NkVd0/aaPRrBh7YNaoHkdgj6YJTpudjdgQBfw4
+	2qRkKeZhZVLRlsLRxKUjEVpkpCrxF2h1bxXyr6InxeOSU4SqmEuHXdsYsLUz8xMQ9/jyKv
+	O9AXVFr/R/srbj64cGr5F1x9TcghWXc=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-628-LOc0f1v0NzugQXs5k7qV-w-1; Thu, 19 Jun 2025 03:52:32 -0400
-X-MC-Unique: LOc0f1v0NzugQXs5k7qV-w-1
-X-Mimecast-MFC-AGG-ID: LOc0f1v0NzugQXs5k7qV-w_1750319551
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-748e1e474f8so808369b3a.2
-        for <fstests@vger.kernel.org>; Thu, 19 Jun 2025 00:52:32 -0700 (PDT)
+ us-mta-384-SGbsaLa2MsuSHyzNrv2qVQ-1; Thu, 19 Jun 2025 03:58:30 -0400
+X-MC-Unique: SGbsaLa2MsuSHyzNrv2qVQ-1
+X-Mimecast-MFC-AGG-ID: SGbsaLa2MsuSHyzNrv2qVQ_1750319910
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-313fb0ec33bso524329a91.2
+        for <fstests@vger.kernel.org>; Thu, 19 Jun 2025 00:58:30 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1750319551; x=1750924351;
+        d=1e100.net; s=20230601; t=1750319909; x=1750924709;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=fBMQNFX9tRoMCm9/DMBgKcogKH0RvSpLMkHtoQr2m1M=;
-        b=Zwius7RRfyJ6sYDapDcyDyTgSHs2EXJ4RMxUwngVHRkPuQLaA6yvb0FwiRJLXUSw+H
-         savT426ReF0hC9Sa5gn0ale/FH4eVMJ1lT8VfZxKGSOX1ulhWcEX8H2MVdJBDr7qvxTj
-         gG5hS9doShQ16gBc5xjZozTEsgChe9cTGOmSZnpDMiQQVmkT/2jj5QHP4MmK2G1Oic5m
-         pADXvplRsAIsfczPZLgYQrF8XEUgbSTGuXZwSqYI4ozWDhvPAks8Gt9sfVfR8Ay71lvY
-         xfTozm6N+AV6MQ9OSQIXhOZC8NLxe3x9KrAVOS/OyM0oU8Ch1cShM3WWY1xnOYlb1k8A
-         tUCw==
-X-Gm-Message-State: AOJu0YyER3wg7Kp/QfgSE/cdB0Z9q2CUmFDtDSGyVmbbQ43dnATaDJ91
-	6xUqBtmGcCgv2dxMltG4dpW53Qyn0OlG6gu714AKhXXmQdyKrReXzDeCRiPjCfBHNDtzes24CDr
-	recCXERIssjMkgfnFufmpNvhPaFHc+PHrgxCxaVOTp+lh7uYBGm9A5HYLM4ZL7foX5A4=
-X-Gm-Gg: ASbGncu56iVXQzh0Qbx3FoJ02sHfw+vlqiuNl8tc/S2sCvHhitXZSiWw0mGpZ6H0PUc
-	dN9xAzGKglObePhcKnnZ9zCg5Fs5MhkoJd9+OEtIEw+T3ixoYRi4v04tEygiR8Z5NmHuRs5XSBK
-	zBPcasFLetwuVjCnfIS6xMNdnS9m/LK1APuF8DkObC0de2Joi7ohSZZcbXWbEe7yRQPg0ALv18V
-	a5WyQ2g9Ma8YezGp0BRO1x2axiVElVShlKYXMuhx6/k30UOmVzcwTqac5dSJ6GibMdtnhygF1Rj
-	mlZkcUoPat99mF6xmMxcLVGJ76r4x4k/KH5DbOz242n1lshwo4zgFy4gD4sbq9Y=
-X-Received: by 2002:a05:6a21:2d4b:b0:215:e60b:3bcf with SMTP id adf61e73a8af0-21fbd57acf8mr38204228637.30.1750319551062;
-        Thu, 19 Jun 2025 00:52:31 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGWtWU51syGDU+d230jrJ4V+jzn09kCTMph/cAyDYUpqpBOO62zppjmoLwF9Caxu61OfTR9/A==
-X-Received: by 2002:a05:6a21:2d4b:b0:215:e60b:3bcf with SMTP id adf61e73a8af0-21fbd57acf8mr38204197637.30.1750319550632;
-        Thu, 19 Jun 2025 00:52:30 -0700 (PDT)
+        bh=O+iG89nZsXRr+M5YfaA9nYawnYrSq4Yc0MsrlgGzqFc=;
+        b=NDK1ldIcF3dgfAVIT1w7OQqt/KavvhzyzQP4w2GGj35fSLMrqRbzwyChY3n3YWADEx
+         7sEkif4el5TssF0PVxtTJSAYm3BMVFTygS6VXrT3KfthqOn7fbfA8hHXLnSUSzhE2fRz
+         h5ZNKPRnGjlqJ/J6HFHq5to2/Yt2tCG4PsblU13Qj2xIp3l0vQ7Cez0/mY8RgHE3gLfh
+         VfowWJh4OCgqfJ0uE274PPTeOIGonNmpkFgmfB7iEKF5AK+MYtCf4N/+NQo/o9rVGR9u
+         9BCoddbFdfh+uq1RQn7/PYeJZ4k852k9Ae5JErtsF7IfXKSE3kCqPhDYf9Mi7xLLUwIe
+         6Qkg==
+X-Gm-Message-State: AOJu0YynXMxL4HKEHpd0dmSLKGKRErTZLo8ApnOeExWZ2QDsPzmeZzAn
+	cRDtexVGSG0AhrpfySgbugmfef2HoBrIePytRB72MmPwfD+MODV/Gd8AuFndFDnJ8zaVMHyUqEj
+	BVbgoN5Y7AofPapsJ5bc5OCmN6qF3EScQ9Hb93d6B/ZboFCpy1vk0sk9sTC8=
+X-Gm-Gg: ASbGncsoMpyCIp0OT8vqBdnOBwAeUXHT4bKBftw70+KXSGlBrnBEMUcbkNwk+psofOo
+	Yp5RbYb+W88s8XYbit7tTo6MbbiIbKfH7b3Jxy4dp1hPb4ShC6DqdoOM1+W5mxphhOc2VINpsYq
+	CRBKsz4X36lG6tdwjV31AgLF/Pc05L/A+KA/bqA8hneaG6ITeb3+rGyDeH59C+yLAe+hPaAyoqE
+	LPdC3l/uuSkkQEVDJ5h0iewhPN5+ek+WJCfAkJVu/0X2sKGia29l4wwa5sNn+W4xS4BZ8HOJZFV
+	lsrgcQbWQYEo/3BVSffXrDvjUK7wmfCjQhrefFdjMzVYye2+CEf5YstGNoY+vHk=
+X-Received: by 2002:a17:90b:3e4d:b0:311:ea13:2e6e with SMTP id 98e67ed59e1d1-313f1db9fd3mr30794827a91.28.1750319909509;
+        Thu, 19 Jun 2025 00:58:29 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGFxkhCucIBtAR1U1WGowwdWAYzIIR/RIGxqnRDFe1835QVEmVmLx8Dfb1/5HZkLqeaNQg+fA==
+X-Received: by 2002:a17:90b:3e4d:b0:311:ea13:2e6e with SMTP id 98e67ed59e1d1-313f1db9fd3mr30794803a91.28.1750319909094;
+        Thu, 19 Jun 2025 00:58:29 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-748900d24c6sm12519294b3a.168.2025.06.19.00.52.28
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3158a2245d0sm1506716a91.3.2025.06.19.00.58.26
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Jun 2025 00:52:30 -0700 (PDT)
-Date: Thu, 19 Jun 2025 15:52:25 +0800
+        Thu, 19 Jun 2025 00:58:28 -0700 (PDT)
+Date: Thu, 19 Jun 2025 15:58:24 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
 	djwong@kernel.org, john.g.garry@oracle.com
-Subject: Re: [RFC 11/12] ext4/063: Atomic write test for extent split across
- leaf nodes
-Message-ID: <20250619075225.wtkol3bxdhsqszdi@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [RFC 12/12] ext4/064: Add atomic write tests for journal credit
+ calculation
+Message-ID: <20250619075824.cdmk322j6ynxrb5m@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <cover.1749629233.git.ojaswin@linux.ibm.com>
- <8b7208ab292e7a2df7a2142d189448cfe11fcee6.1749629233.git.ojaswin@linux.ibm.com>
+ <62f2d373b7ac8f1a5f49013ff64ca3051f7f803c.1749629233.git.ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -80,178 +80,123 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <8b7208ab292e7a2df7a2142d189448cfe11fcee6.1749629233.git.ojaswin@linux.ibm.com>
+In-Reply-To: <62f2d373b7ac8f1a5f49013ff64ca3051f7f803c.1749629233.git.ojaswin@linux.ibm.com>
 
-On Wed, Jun 11, 2025 at 03:04:54PM +0530, Ojaswin Mujoo wrote:
-> In ext4, even if an allocated range is physically and logically
-> contiguous, it can still be split into 2 extents. This is because ext4
-> does not merge extents across leaf nodes. This is an issue for atomic
-> writes since even for a continuous extent the map block could (in rare
-> cases) return a shorter map, hence tearning the write. This test creates
-> such a file and ensures that the atomic write handles this case
-> correctly
+On Wed, Jun 11, 2025 at 03:04:55PM +0530, Ojaswin Mujoo wrote:
+> Test atomic writes with journal credit calculation. We take 2 cases
+> here:
 > 
+> 1. Atomic writes on single mapping causing tree to collapse into
+>    the inode
+> 2. Atomic writes on mixed mapping causing tree to collapse into the
+>    inode
+> 
+> This test is inspired by ext4/034.
+> 
+> Suggested-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
 > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 > ---
->  tests/ext4/063     | 125 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/063.out |   2 +
->  2 files changed, 127 insertions(+)
->  create mode 100755 tests/ext4/063
->  create mode 100644 tests/ext4/063.out
+>  tests/ext4/064     | 75 ++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/064.out |  2 ++
+>  2 files changed, 77 insertions(+)
+>  create mode 100755 tests/ext4/064
+>  create mode 100644 tests/ext4/064.out
 > 
-> diff --git a/tests/ext4/063 b/tests/ext4/063
+> diff --git a/tests/ext4/064 b/tests/ext4/064
 > new file mode 100755
-> index 00000000..b4759990
+> index 00000000..12e48ae3
 > --- /dev/null
-> +++ b/tests/ext4/063
-> @@ -0,0 +1,125 @@
+> +++ b/tests/ext4/064
+> @@ -0,0 +1,75 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +# Copyright (c) 2025 IBM Corporation. All Rights Reserved.
 > +#
-> +# In ext4, even if an allocated range is physically and logically contiguous,
-> +# it can still be split into 2 extents. This is because ext4 does not merge
-> +# extents across leaf nodes. This is an issue for atomic writes since even for
-> +# a continuous extent the map block could (in rare cases) return a shorter map,
-> +# hence tearning the write. This test creates such a file and ensures that the
-> +# atomic write handles this case correctly
+> +# FS QA Test 034
+> +#
+> +# Test proper credit reservation is done when performing
+> +# tree collapse during an aotmic write based allocation
 > +#
 > +. ./common/preamble
 > +. ./common/atomicwrites
-> +_begin_fstest auto atomicwrites
+> +_begin_fstest auto quick quota fiemap prealloc atomicwrites
 > +
+> +# Import common functions.
+> +
+> +
+> +# Modify as appropriate.
+> +_exclude_fs ext2
+> +_exclude_fs ext3
+> +_require_xfs_io_command "falloc"
+> +_require_xfs_io_command "fiemap"
+
+Great, this case notes the falloc and fiemap commands, and adds fiemap
+and prealloc test groups. Other test patches refer to this.
+
+> +_require_xfs_io_command "syncfs"
 > +_require_scratch_write_atomic_multi_fsblock
 > +_require_atomic_write_test_commands
 > +
-> +prep() {
-> +	local bs=`_get_block_size $SCRATCH_MNT`
-> +	local ex_hdr_bytes=12
-> +	local ex_entry_bytes=12
-> +	local entries_per_blk=$(( (bs - ex_hdr_bytes) / ex_entry_bytes ))
+> +echo "----- Testing with atomi write on non-mixed mapping -----" >> $seqres.full
 > +
-> +	# fill the extent tree leaf which bs len extents at alternate offsets. For example,
-> +	# for 4k bs the tree should look as follows
-> +	#
-> +	#                  +---------+---------+
-> +	#                  | index 1 | index 2 |
-> +	#                  +-----+---+-----+---+
-> +	#               +--------+         +-------+
-> +	#               |                          |
-> +	#    +----------+--------------+     +-----+-----+
-> +	#    | ex 1 | ex 2 |... | ex n |     |  ex n + 1 |
-> +	#    +-------------------------+     +-----------+
-> +	#    0      2            680          682
-> +	for i in $(seq 0 $entries_per_blk)
-> +	do
-> +		$XFS_IO_PROG -fc "pwrite -b $bs $((i * 2 * bs)) $bs" $testfile > /dev/null
-> +	done
-> +	sync $testfile
+> +echo "Format and mount" >> $seqres.full
+> +_scratch_mkfs  > $seqres.full 2>&1
+> +_scratch_mount > $seqres.full 2>&1
 > +
-> +	echo >> $seqres.full
-> +	echo "Create file with extents spanning 2 leaves. Extents:">> $seqres.full
-> +	echo "...">> $seqres.full
-> +	$DEBUGFS_PROG -R "ex `basename $testfile`" $SCRATCH_DEV |& tail >> $seqres.full
-
-_require_command "$DEBUGFS_PROG" debugfs
-
+> +echo "Create the original file" >> $seqres.full
+> +touch $SCRATCH_MNT/foobar >> $seqres.full
 > +
-> +	# Now try to insert a new extent ex(new) between ex(n) and ex(n+1). Since
-> +	# this is a new FS the allocator would find continuous blocks such that
-> +	# ex(n) ex(new) ex(n+1) are physically(and logically) contiguous. However,
-> +	# since we dont merge extents across leaf we will end up with a tree as:
-> +	#
-> +	#                  +---------+---------+
-> +	#                  | index 1 | index 2 |
-> +	#                  +-----+---+-----+---+
-> +	#               +--------+         +-------+
-> +	#               |                          |
-> +	#    +----------+--------------+     +-----+-----+
-> +	#    | ex 1 | ex 2 |... | ex n |     | ex merged |
-> +	#    +-------------------------+     +-----------+
-> +	#    0      2            680          681  682  684
-> +	#
-> +	echo >> $seqres.full
-> +	torn_ex_offset=$((((entries_per_blk * 2) - 1) * bs))
-> +	$XFS_IO_PROG -c "pwrite $torn_ex_offset $bs" $testfile >> /dev/null
-> +	sync $testfile
+> +echo "Create 2 level extent tree (btree) for foobar with a unwritten extent" >> $seqres.full
+> +$XFS_IO_PROG -f -c "pwrite 0 4k" -c "falloc 4k 4k" -c "pwrite 8k 4k" \
+> +	     -c "pwrite 20k 4k"  -c "pwrite 28k 4k" -c "pwrite 36k 4k" \
+> +	     -c "fsync" $SCRATCH_MNT/foobar >> $seqres.full
 > +
-> +	echo >> $seqres.full
-> +	echo "Perform 1 block write at $torn_ex_offset to create torn extent. Extents:">> $seqres.full
-> +	echo "...">> $seqres.full
-> +	$DEBUGFS_PROG -R "ex `basename $testfile`" $SCRATCH_DEV |& tail >> $seqres.full
+> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar >> $seqres.full
 > +
-> +	_scratch_cycle_mount
-> +}
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount >> $seqres.full
-> +
-> +testfile=$SCRATCH_MNT/testfile
-> +touch $testfile
-> +awu_max=$(_get_atomic_write_unit_max $testfile)
-> +
-> +echo >> $seqres.full
-> +echo "# Prepping the file" >> $seqres.full
-> +prep
-> +
-> +torn_aw_offset=$((torn_ex_offset - (torn_ex_offset % awu_max)))
-> +
-> +echo >> $seqres.full
-> +echo "# Performing atomic IO on the torn extent range. Command: " >> $seqres.full
-> +echo $XFS_IO_PROG -c "open -fsd $testfile" -c "pwrite -S 0x61 -DA -V1 -b $awu_max $torn_aw_offset $awu_max" >> $seqres.full
+> +echo "Convert unwritten extent to written and collapse extent tree to inode" >> $seqres.full
+> +$XFS_IO_PROG -dc "pwrite -A -V1 4k 4k" $SCRATCH_MNT/foobar >> $seqres.full
 
 _require_xfs_io_command pwrite -A
 
-> +$XFS_IO_PROG -c "open -fsd $testfile" -c "pwrite -S 0x61 -DA -V1 -b $awu_max $torn_aw_offset $awu_max" >> $seqres.full
 > +
-> +echo >> $seqres.full
-> +echo "Extent state after atomic write:">> $seqres.full
-> +echo "...">> $seqres.full
-> +$DEBUGFS_PROG -R "ex `basename $testfile`" $SCRATCH_DEV |& tail >> $seqres.full
+> +echo "Create a new file and do fsync to force a jbd2 commit" >> $seqres.full
+> +$XFS_IO_PROG -f -c "pwrite 0 4k" -c "fsync" $SCRATCH_MNT/dummy >> $seqres.full
 > +
-> +echo >> $seqres.full
-> +echo "# Checking data integrity" >> $seqres.full
+> +echo "sync $SCRATCH_MNT to writeback" >> $seqres.full
+> +$XFS_IO_PROG -c "syncfs" $SCRATCH_MNT >> $seqres.full
 > +
-> +# create a dummy file with expected data
-> +$XFS_IO_PROG -fc "pwrite -S 0x61 -b $awu_max 0 $awu_max" $testfile.exp >> /dev/null
-> +expected_data=$(xxd -s 0 -l $awu_max -p $testfile.exp)
-
-xxd isn't a necessary running dependence of xfstests, please use common/rc:_hexdump()
-or other commands in coreutils.
-
+> +echo "----- Testing with atomi write on mixed mapping -----" >> $seqres.full
 > +
-> +# We ensure that the data after atomic writes should match the expected data
-> +actual_data=$(xxd -s $torn_aw_offset -l $awu_max -p $testfile)
-> +if [[ "$actual_data" != "$expected_data" ]]
-> +then
-> +	echo "Checksum match failed at off: $torn_aw_offset size: $awu_max"
-> +	echo
-> +	echo "Expected: "
-> +	echo "$expected_data"
-> +	echo
-> +	echo "Actual contents: "
-> +	echo "$actual_data"
+> +echo "Create the original file" >> $seqres.full
+> +touch $SCRATCH_MNT/foobar2 >> $seqres.full
 > +
-
-
-> +	status=1
-> +	exit
-
-_exit 1
-
-> +fi
+> +echo "Create 2 level extent tree (btree) for foobar2 with a unwritten extent" >> $seqres.full
+> +$XFS_IO_PROG -f -c "pwrite 0 4k" -c "falloc 4k 4k" -c "pwrite 8k 4k" \
+> +	     -c "pwrite 20k 4k"  -c "pwrite 28k 4k" -c "pwrite 36k 4k" \
+> +	     -c "fsync" $SCRATCH_MNT/foobar2 >> $seqres.full
 > +
-> +echo -n "Data verification at offset $torn_aw_offset suceeded!" >> $seqres.full
+> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar2 >> $seqres.full
+> +
+> +echo "Convert unwritten extent to written and collapse extent tree to inode" >> $seqres.full
+> +$XFS_IO_PROG -dc "pwrite -A -V1 0k 12k" $SCRATCH_MNT/foobar2 >> $seqres.full
+> +
+> +echo "Create a new file and do fsync to force a jbd2 commit" >> $seqres.full
+> +$XFS_IO_PROG -f -c "pwrite 0 4k" -c "fsync" $SCRATCH_MNT/dummy2 >> $seqres.full
+> +
+> +echo "sync $SCRATCH_MNT to writeback" >> $seqres.full
+> +$XFS_IO_PROG -c "syncfs" $SCRATCH_MNT >> $seqres.full
+> +
+> +# success, all done
 > +echo "Silence is golden"
 > +status=0
 > +exit
-> diff --git a/tests/ext4/063.out b/tests/ext4/063.out
+> diff --git a/tests/ext4/064.out b/tests/ext4/064.out
 > new file mode 100644
-> index 00000000..de35fc52
+> index 00000000..d9076546
 > --- /dev/null
-> +++ b/tests/ext4/063.out
+> +++ b/tests/ext4/064.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 063
+> +QA output created by 064
 > +Silence is golden
 > -- 
 > 2.49.0
