@@ -1,94 +1,191 @@
-Received: from mail-ed1-f74.google.com (mail-ed1-f74.google.com [209.85.208.74])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F07F2376F7
-	for <fstests@vger.kernel.org>; Fri, 20 Jun 2025 08:29:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.74
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F6F4280A35
+	for <fstests@vger.kernel.org>; Fri, 20 Jun 2025 09:59:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750408163; cv=none; b=eVASwaJv5VVU/ZhB7WnzUKsspatXfw1JvU++OPXt/+QrY8uRif6GYOwiBIJfCy19/99vylW/ayiv9K1UMCnHYTlwazFfqz8SM4i8YVEgCZKWfwg/eHkpNux8pFhtJ/10fwG0943k5ZqYgzMQUtHFMgj6dN3C3wUJyGwBE6A5xPg=
+	t=1750413567; cv=none; b=HR9u1JTt2KZqfJlkEOTprTsWRTEaEycJib+lHv8dOtOV7TGbGnCjuKERVXOdtk42Xca7bIwMBN/DnXQBskpH78629oOP4evivDRa3Tx/mOWEEY3tZvBbfIhLVhD1pc7Lw9TbQmc+ha4Om0oU/EsY6OpBZJI9ODQMOG6AIKIDHME=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750408163; c=relaxed/simple;
-	bh=dBHZHKZDMlSACPQlcHnbVPp8QNE+P079+gtjCgDg2hQ=;
-	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=bY/2iKyw26Vj/o9RNqheLBAXk6zQMiFgpCBQ+w7eldsr1ZXzRPeysnjmz8mHa4ohp7SzyFG0aCRnXP1oOyet9qMpLslzBzzN568UUNejEwqH6wgKTZyyABi8Rnwr1+oHSOF2NAbqw1hQ88rMaSEsuvicXMGwgNSkSNBIx5cCav8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=u3DQXgdK; arc=none smtp.client-ip=209.85.208.74
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com
+	s=arc-20240116; t=1750413567; c=relaxed/simple;
+	bh=OzVbpjI8C6JTha7ddFw5nS3D/50BZY32rnlkq7C43LM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=SdhhjjGpNyYQCbyVjCzfzhJaSSQ+XSc3h97K/n92M8iqNY31+Wc0MlkrBu8YqDXcBWh5dEF53XTGXM96oikVydQ9v7WUTIXuqYrzSs4Qkutd7NyeG5zjrPpG3xYhBrVYSVP7xrKaDl7SgMfIgqufAZAVp14FPNuTZCW6dwpgojo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MTe0N6uQ; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="u3DQXgdK"
-Received: by mail-ed1-f74.google.com with SMTP id 4fb4d7f45d1cf-606f504f228so1291108a12.3
-        for <fstests@vger.kernel.org>; Fri, 20 Jun 2025 01:29:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1750408159; x=1751012959; darn=vger.kernel.org;
-        h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
-         :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=4CL1bQlA742vza1ucSKTw1PY9KB+oxRzPkNlh4M4pto=;
-        b=u3DQXgdKqvp68Kn6wHIqV/EpsHpI18666s0HJRwTQXIiynxcM5y4VK6ekPp+is/qTD
-         wx+fIe/coubpcV08x9POCzDrOX7LixH4DMsGxsAsuX4dyWAeqBcrsFKg125hnrbIrCOf
-         85/YHSKtZij0IpjVi9GCbcM3/82iQ0gNdZRrQwGgCBEVaGsaqXUwPO1qSafCeC/KV7Lj
-         50y8U/q6xzu0R8H5BkY5q4e/6dhzzEqSoYPAftD7bMKobeAE9QU0o2SCb0wL5w9kuSsM
-         jymG13N26CfN0iQAdHnOFxchjyk6AyDhSqpsOucyZvihdrfAhgZKvBU0wRJKEq9ABJcc
-         1xVw==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MTe0N6uQ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1750413564;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Dfszn5yGEBNpQXiNBQPNMo3E2l6PzQ3VV8xBzk6sGCk=;
+	b=MTe0N6uQxWgEN0P/oKxzuYzTxJIS1muwF/pMutV6dVnq/WiRykgDsb5w2vSCC2v6ncWqH7
+	EN+p2j+u0I++HfbfGpCw0JAaffjZdcGKcq9fcTinOGr8JQ0ZArkwsGR9CzZWmrys2qmCkH
+	elLOqwnBi2Ck6E5tehA9+QOQjQj61Zw=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-27-KuaSOyY7NgiAwKnU2UAGIw-1; Fri, 20 Jun 2025 05:59:23 -0400
+X-MC-Unique: KuaSOyY7NgiAwKnU2UAGIw-1
+X-Mimecast-MFC-AGG-ID: KuaSOyY7NgiAwKnU2UAGIw_1750413562
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-235dd77d11fso17802945ad.0
+        for <fstests@vger.kernel.org>; Fri, 20 Jun 2025 02:59:22 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1750408159; x=1751012959;
-        h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
-         :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=4CL1bQlA742vza1ucSKTw1PY9KB+oxRzPkNlh4M4pto=;
-        b=r1dYUvqEcMz5ERsjnwsRdBcsX2xMAIUXiVUk9zhkB2QCBfQ39W9wsPAMiPifT61fPP
-         bcnjMPaKVr9Hrfs6CIQ05dtDIDSPdJ/8ez3GmOuJh/vrJztzOKa/UqdZBBjLFDMdgiyQ
-         +hYDqAPVRiHy4ZzCg2/3WICh7B5CN5O8vYtwZ/GAiCpp0DVsV1NQJt3iFhs25ijBwS+x
-         RqyfBX3RU/+jD9cO17LaX8Kh7uFriT/C1vd+XnHaykpDsrygQuP/hjomD1iy6exreH3f
-         yd8qEUfi6HcVsHRz3T2ldii2W+EmNITGsgjraIkPrMZDLVvVyp4Sk6eS5YBmoYYh3hKu
-         N+3A==
-X-Forwarded-Encrypted: i=1; AJvYcCX9T3a5SZQBuBwan8XqO0N03PVLb4e+fD7E0UwelVOY2Nj9gyO0dm5Ddf/5Sxdl3Jodm87mCmAL@vger.kernel.org
-X-Gm-Message-State: AOJu0YyDf0D11L1701KhSCxev3KVJHOfTDbQyemzKWj9ntf1NuaRZ0/T
-	efQGAIHpqbaslRkK1maOHrINj7ymJy5hhEUZHTZaPFOxj0l1io4Z2km4WPtrDRYfWhfUP1HaqM7
-	nSX/o5hzH2OyNyXiVHfzX1fcqBfDmOg==
-X-Google-Smtp-Source: AGHT+IF4tZG0Isf803il3uovoSlgHM3LPmKA/KM/U7e2VBzmiMXZSp5i1opvLOvcgFCthTxn4/E2EVjFrZOkLICoe/I=
-X-Received: from edbeg40.prod.google.com ([2002:a05:6402:28a8:b0:608:faa3:8a99])
- (user=jprusakowski job=prod-delivery.src-stubby-dispatcher) by
- 2002:a05:6402:4415:b0:607:f31f:26de with SMTP id 4fb4d7f45d1cf-60a1ccad8femr1597328a12.1.1750408159572;
- Fri, 20 Jun 2025 01:29:19 -0700 (PDT)
-Date: Fri, 20 Jun 2025 08:29:06 +0000
-In-Reply-To: <20250620082906.2122560-1-jprusakowski@google.com>
+        d=1e100.net; s=20230601; t=1750413562; x=1751018362;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Dfszn5yGEBNpQXiNBQPNMo3E2l6PzQ3VV8xBzk6sGCk=;
+        b=eCHVZo93SYa46zOcjMuA5l2naiLSLqQz0kOQ9jodz83OZHNUduaGiBMykrNgrtfUqV
+         uWPG2pEAi5mgzRcBn6g2l89tN3ki7b4ebiMS0kWxgUksrYsMWVjnrmnU0K7V8UTe/j5P
+         IPZWarYTj/sOnYI9lID3caPv/knPpyRCI2GKZYwUn+N/iTIWWhhjX3l4hTtDfIg45sJK
+         AuQtDtI+Fzvk3apjAEEM+nN8+u2TbtmiGasZbuQ0iEPhyFQBI7FEo0UvWMlhbK446bFk
+         KxxhgIh2/4Q9ApCw9JdoTui7LTDTw23J2sDXL/TEjMA1jh5E9/M1eVkP4UDuurbBUvRp
+         4g3A==
+X-Gm-Message-State: AOJu0YxNj+0IyKPSK8KLIgtsNUPYqt86KxtCBL87m0TgEKtg5umX0V7a
+	42Das2/B/CD3CukNMirxeOupAafZ7z1kcWh0kFhQlZNf1oW3j0i3nXI3eEppY8g75BkLDzgH/4R
+	0juJ1bP/ZNf/b1Z+KDL8wEOvtkt2tuXPXChZ/m7X/S/DY2gRuS1MM9zzkWTo=
+X-Gm-Gg: ASbGnctoTOhkLUQIgzxNnVpEF5b98B0++6p6O4650Guze6BDYNnqIxy7qUCT3L6oNUn
+	DtKc79TuGkWTceTL5BwTcyl+X727ektK//9jdKn8TtFesqmOKLtGsGKG21H6a3USwpwFOBpmob0
+	78wO4ZPEPvpRM5eQCYTyECD26OMceo16hAjcLfngRTMyuzTg8/EE8orEYBbG+QI2T19J19h2YWH
+	nqwz30fAfxKFurGBSTgdyiWfJwISfZb1AB84Kzv41LuSKPrqAA5dEtNG4euj3WJy5SIiEB4sAv5
+	Se09QnMAgTg3QD1nAN5tDtGEmRIzg4fbLsOrk6WDjdwTyyjLbzFN5mu02nEocAk=
+X-Received: by 2002:a17:902:f546:b0:235:1171:6d1d with SMTP id d9443c01a7336-237d9778c44mr31617055ad.9.1750413561928;
+        Fri, 20 Jun 2025 02:59:21 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHe6z1jCt9P29nd5bUp1KMM+UoUc1b4iN34jdhHXF/ipj6Fp8eU7N6oZJoYF8siY9bRNwkuGw==
+X-Received: by 2002:a17:902:f546:b0:235:1171:6d1d with SMTP id d9443c01a7336-237d9778c44mr31616645ad.9.1750413561369;
+        Fri, 20 Jun 2025 02:59:21 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-237d861061dsm14099045ad.118.2025.06.20.02.59.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 20 Jun 2025 02:59:20 -0700 (PDT)
+Date: Fri, 20 Jun 2025 17:59:16 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
+	djwong@kernel.org, john.g.garry@oracle.com,
+	linux-ext4@vger.kernel.org
+Subject: Re: [RFC 01/12] common/preamble: Fix fsx for ext4 with bigalloc
+Message-ID: <20250620095916.j4vybkssyglixae7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1749629233.git.ojaswin@linux.ibm.com>
+ <2568ed1e9d1c47d0fdb357f0e10c5ed341a72379.1749629233.git.ojaswin@linux.ibm.com>
+ <20250618191324.fpwyi6acobodmyit@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <aFT9soHgXs1Yb5Jw@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-References: <20250620082906.2122560-1-jprusakowski@google.com>
-X-Mailer: git-send-email 2.50.0.rc2.701.gf1e915cc24-goog
-Message-ID: <20250620082906.2122560-2-jprusakowski@google.com>
-Subject: [PATCH v1 1/1] generic/018: do not run the test if a compressed
- filesystem is used
-From: Jan Prusakowski <jprusakowski@google.com>
-To: Zorro Lang <zlang@kernel.org>, Chao Yu <chao@kernel.org>, fstests@vger.kernel.org
-Cc: jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net, 
-	Jan Prusakowski <jprusakowski@google.com>
-Content-Type: text/plain; charset="UTF-8"
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <aFT9soHgXs1Yb5Jw@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 
-fiemap does not support compressed extents correctly and the defragmentation
-check fails.
+On Fri, Jun 20, 2025 at 11:51:07AM +0530, Ojaswin Mujoo wrote:
+> On Thu, Jun 19, 2025 at 03:13:24AM +0800, Zorro Lang wrote:
+> > On Wed, Jun 11, 2025 at 03:04:44PM +0530, Ojaswin Mujoo wrote:
+> > > From: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
+> > > 
+> > > Insert range and collapse range only works with bigalloc in case
+> > > the range is cluster size aligned, which fsx doesnt take care. To
+> > > work past this, disable insert range and collapse range on ext4, if
+> > > bigalloc is enabled.
+> > > 
+> > > This is achieved by defining a new function _setup_fs_options
+> > > which can serve as a mechanism to apply FS-wide options to
+> > > the tests.
+> > > 
+> > > Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> > > ---
+> > >  common/preamble | 16 ++++++++++++++++
+> > >  1 file changed, 16 insertions(+)
+> > > 
+> > > diff --git a/common/preamble b/common/preamble
+> > > index ba029a34..2bccff74 100644
+> > > --- a/common/preamble
+> > > +++ b/common/preamble
+> > > @@ -24,6 +24,20 @@ _register_cleanup()
+> > >  	trap "${cleanup}exit \$status" EXIT HUP INT QUIT TERM $*
+> > >  }
+> > >  
+> > > +# setup FS options only to be available for each test run
+> > > +_setup_fs_options() {
+> > 
+> > If this's a function for fsx only, better to name it with "fsx", e.g.
+> > _setup_default_fsx_avoid (or some other names).
+> > 
+> > > +	case "$FSTYP" in
+> > > +	"ext4")
+> > > +		if [[ "$MKFS_OPTIONS" =~ bigalloc ]]; then
+> > > +			export FSX_AVOID="-I -C"
+> > 
+> > Hmm... I'm also wondering if this's an issue should be fixed in fstests. How about
+> > let the testers who tests ext4 with MKFS_OPTIONS="-O bigalloc" write local.config
+> > as below?
+> > 
+> > [ext4-bigalloc]
+> > ...
+> > MKFS_OPTIONS="-O bigalloc"
+> > FSX_AVOID="-I -C"
+> > 
+> > Thanks,
+> > Zorro
+> 
+> Hey Zorro, 
+> 
+> Basically the idea is that _setup_fs_options is a generic function that
+> can be used to do any fs specific modifications to the global options.
+> 
+> This way we can set options to avoid known issues with different FSes,
+> which can otherwise confuse the user if they are not aware of such
+> issues. 
+> 
+> Does that sound okay?
 
-Signed-off-by: Jan Prusakowski <jprusakowski@google.com>
----
- tests/generic/018 | 2 ++
- 1 file changed, 2 insertions(+)
+I think we should give this choice to the user or the test case who wants
+to test ext4 bigalloc feature. And MKFS_OPTIONS isn't the only way to
+enable bigalloc, some test cases can do _scratch_mkfs "-O bigalloc".
 
-diff --git a/tests/generic/018 b/tests/generic/018
-index 501960d7..52b48dca 100755
---- a/tests/generic/018
-+++ b/tests/generic/018
-@@ -13,6 +13,8 @@ _begin_fstest auto fsr quick defrag
- . ./common/filter
- . ./common/defrag
- 
-+# Fiemap doesn't work well with compressed extents
-+_require_no_compress
- 
- # We require scratch so that we'll have free contiguous space
- _require_scratch
--- 
-2.50.0.rc2.701.gf1e915cc24-goog
+**But, if *ext4 list* really hope to force set FSX_AVOID="-I -C" for
+"$MKFS_OPTIONS" =~ bigalloc, then better to do this in _run_fsx* function at
+first, I don't think it's worth having a global _setup_fs_options, and call
+it at the beginning of each case running for now.
+
+Thanks,
+Zorro
+
+> 
+> Regards,
+> ojaswin
+> 
+> > 
+> > 
+> > > +		fi
+> > > +		;;
+> > > +	# Add other filesystem types here as needed
+> > > +	*)
+> > > +		;;
+> > > +	esac
+> > > +}
+> > > +
+> > >  # Prepare to run a fstest by initializing the required global variables to
+> > >  # their defaults, sourcing common functions, registering a cleanup function,
+> > >  # and removing the $seqres.full file.
+> > > @@ -55,4 +69,6 @@ _begin_fstest()
+> > >  	# remove previous $seqres.full before test
+> > >  	rm -f $seqres.full $seqres.hints
+> > >  
+> > > +	# setup filesystem options for a given test execution
+> > > +	_setup_fs_options
+> > >  }
+> > > -- 
+> > > 2.49.0
+> > > 
+> > > 
+> > 
+> 
 
