@@ -1,77 +1,79 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5288D136988
-	for <fstests@vger.kernel.org>; Fri, 20 Jun 2025 16:49:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D952F2E6106
+	for <fstests@vger.kernel.org>; Fri, 20 Jun 2025 16:53:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750438179; cv=none; b=vAwFiJAtOqIMWKohdniKj825p2/sAOhk9Qwr7v4/l8sQMQzTOcW/lwjLlupsiNqEq/Ovn9nvGoKVn2nAcVDqtL6qiKhal8CGMJnbxYqNQCk2Kshu7/d5ya4zLSSGoxKVsuMi2aXL5HlQCg5x6GSrEti5XYAvbq2uh4uJ4Hx8tqw=
+	t=1750438401; cv=none; b=X5FeQ3+25gA3VGDx7cif9DPV5SA07FPDtizTCqK4RHcFEdIFvas1z9at7vUgZaGH61aL3ax5RdxOc4DmFm6UVlQviyXkS8s8GjDSF8spobFMos7ktHZAh8/BqixHbWwlSOLy9SPUgLmPyidmSAQwCBebh48QvF/2SArZ+kPGr7A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750438179; c=relaxed/simple;
-	bh=Xv79lwKSI4OzX/j4/UnsTLxA6NTw7gocqa3bx6rVOB4=;
+	s=arc-20240116; t=1750438401; c=relaxed/simple;
+	bh=1jVLi3S5e19TpmXKxD6UgYR4cw/Ec1svf3y1EQwGUAU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=oqvErU9N50B4gV4KnHbcf406UIODUPNY/JhXG16QBVsGLKNVWPcPx/QGU/Ua/HJOLoHeakMGgRS0R2SEAnnc8L0JqnAA0YTS4jjpEWBb2km0y9vMppvo5gYyZBFy/yJxHHOTa5mUZxn1eN+v4gNvYgveDixwajFTEs2MdQ6lBdY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=dIlSDF2V; arc=none smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=IQ3MmwFImE68EM8ddrR5Uqrn5kwFUTXNrNhwHE7oXMs/5gWxPrrehyVK6/bldoLKlqmkt7AB1CABcLwaSM4f3eD5TlQBF0bDgh++1kKWOVRSNBL8TMaCMw5J8clitQwX7M6ufR8/RBk/toZUkp7E73LFVNtPKmQecoqMq9lAvkk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=iKiZdLjB; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="dIlSDF2V"
-Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55KDvlDd016161;
-	Fri, 20 Jun 2025 16:49:27 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=pp1; bh=vSpDmXwRE17y/R/r79PRvL0V4BwTbr
-	dqCRLpWZIVNyk=; b=dIlSDF2VxBBkeU5NAGmcsh081R+tEhtJ6e+6c5d5At7TOk
-	tBU/ambczTZi1vCH/qffNke2hdQjiqqX442hoHBRIU2vF8TH3uXZSymeh4eTnl6W
-	iiDfViZ8juWzt6m8sdw1hUouEe+jzZU1+tiifE8mKuxzKxd5w+XAysvcs+vaclse
-	WeMrCX4+Km7ikfR1KB8B6Sh0QzS575nXor2Trewkf1PG6TN8+WeDT7Qbelh2ZF2x
-	qp3ylBvfJfIl5lZTMI+O91C7Iek1PXvwZAfLBU8G0j5REr5rjE3PSf18vha89Ksx
-	QWkCwFU657p1eh+lNfWXGlYsp6Ox5cJJs7AWv5sA==
-Received: from pps.reinject (localhost [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 478ygnvguh-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 20 Jun 2025 16:49:27 +0000 (GMT)
-Received: from m0353725.ppops.net (m0353725.ppops.net [127.0.0.1])
-	by pps.reinject (8.18.0.8/8.18.0.8) with ESMTP id 55KGlssY001829;
-	Fri, 20 Jun 2025 16:49:26 GMT
-Received: from ppma13.dal12v.mail.ibm.com (dd.9e.1632.ip4.static.sl-reverse.com [50.22.158.221])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 478ygnvgud-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 20 Jun 2025 16:49:26 +0000 (GMT)
-Received: from pps.filterd (ppma13.dal12v.mail.ibm.com [127.0.0.1])
-	by ppma13.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 55KGWseP021600;
-	Fri, 20 Jun 2025 16:49:25 GMT
-Received: from smtprelay02.fra02v.mail.ibm.com ([9.218.2.226])
-	by ppma13.dal12v.mail.ibm.com (PPS) with ESMTPS id 47cahwg0p3-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 20 Jun 2025 16:49:25 +0000
-Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
-	by smtprelay02.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 55KGnNYl45809996
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 20 Jun 2025 16:49:23 GMT
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id A81C120043;
-	Fri, 20 Jun 2025 16:49:23 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 3D06020040;
-	Fri, 20 Jun 2025 16:49:22 +0000 (GMT)
-Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.124.222.79])
-	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
-	Fri, 20 Jun 2025 16:49:21 +0000 (GMT)
-Date: Fri, 20 Jun 2025 22:19:19 +0530
-From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To: John Garry <john.g.garry@oracle.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="iKiZdLjB"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1750438397;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=dYAPPNTXeSvPI88IQL8BbpWdegPcTOfSi43106pMmQU=;
+	b=iKiZdLjBxEIxLFRsMzOTEB3YTPJzDzwYGc8lJhPwmrb9mCgZT3hBY4nRdck11MBPf/BqPX
+	sBjYJlKRgNCFb8V31uJtxcy/SqGiSPHf3MYoiPQAz8KC7lMiqYVdNN7MCAmUGBBo5rnWGv
+	Ays/Le/7Bop8mpxrinoKydaEoiOZAZM=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-253-ltT7WqT8N5-EHzG9DEz0uA-1; Fri, 20 Jun 2025 12:53:16 -0400
+X-MC-Unique: ltT7WqT8N5-EHzG9DEz0uA-1
+X-Mimecast-MFC-AGG-ID: ltT7WqT8N5-EHzG9DEz0uA_1750438395
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-231d13ac4d4so28723245ad.3
+        for <fstests@vger.kernel.org>; Fri, 20 Jun 2025 09:53:16 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1750438395; x=1751043195;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=dYAPPNTXeSvPI88IQL8BbpWdegPcTOfSi43106pMmQU=;
+        b=jYGoNw6TdfyUY4ipza+GroIVeb58L6Vg+PUB1MW9C+2yA1gCRs5FCK6tFP1uv2KBxS
+         T1nCH7rH7IG+X/AdIu3FF+jnKVTp338x+ZPUzKXO7x0ctW3rPzSx3QlKvV25cILGwAMz
+         fjqgOlzGh+bYMMTpu6hTBF+qBI9LUNT4eTVMYPc1g5nSY9l0mpUAfDzTKt2uQ4eHvMML
+         ho5kXMkmvVQOXovUNrXidSM7dGO2nyn9A55G7Qh/QCo2dar5zU7qDJ+qFAKMzpUfozik
+         I/Yfk0uD7p1Fiaeq6E/4JxDbHdTmQ6fg0UAf59pxG8y0qJbD4d1JNfXLlJqjUVn5R94O
+         JenQ==
+X-Gm-Message-State: AOJu0YzVKI4kcIy7RKM+QEE1xTypyHlg3VMLvPzfy1eogrv4Yv+lq0OG
+	HfLbJ6pyzN5t02h61T9xejE45sQ2FqIvvydghX6b65FJUggjBLMpj//F3udAahY9/37UpI7yVZd
+	/wOdp5gLQmmxmzrvqvyZ2y4utVP0yn5cjaxl5rEgYnoiMpY7XWzobyHhzADU=
+X-Gm-Gg: ASbGncs2q3QXoRK3GyG1hQAVmLvca9PuIDO+UVv2FEGhpnquc8IT70IalPNpp+eSN54
+	lf8aEYV2B9nfF5lq13dr4wmhx0+jKPodBzQVHv0itRNDDwP6OhMWMaoAwqBhs20okelPlrITahY
+	nmN/3ne16LF7kwgQPQKsCjwrtC4QxFOSaF1cY2eEG5KLK+7l2nTx8+Lk/UEV6vai8wCDUSi9zSD
+	rdFFsfg/Xz4ukrFelDARdGlLWkKRbLESXp9gSU5tzCX/g6DXmepLKTRvVru/CAg1Y2oXPhSTmUG
+	UrjO/sHmCxaMX7q5hz6k7L5S055WbEosL3sNDwZOAzNWGs2npDACxdw4ny+VDEs=
+X-Received: by 2002:a17:902:e844:b0:235:e96b:191c with SMTP id d9443c01a7336-237d9917055mr64994375ad.29.1750438395184;
+        Fri, 20 Jun 2025 09:53:15 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IECGhN+KvjMlvCEWsCbPj4v44fQAOBvznmrjgMDwEMnpR/GWISeiVMuKyj2ab35vDMwAGvZng==
+X-Received: by 2002:a17:902:e844:b0:235:e96b:191c with SMTP id d9443c01a7336-237d9917055mr64993995ad.29.1750438394773;
+        Fri, 20 Jun 2025 09:53:14 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-237d860a36dsm21698885ad.126.2025.06.20.09.53.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 20 Jun 2025 09:53:14 -0700 (PDT)
+Date: Sat, 21 Jun 2025 00:53:10 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
-        djwong@kernel.org
-Subject: Re: [RFC 10/12] ext4/062: Atomic writes test for bigalloc using fio
- crc verifier on multiple files
-Message-ID: <aFWRD14piqQxSL38@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+	djwong@kernel.org, john.g.garry@oracle.com
+Subject: Re: [RFC 09/12] ext4/061: Atomic writes stress test for bigalloc
+ using fio crc verifier
+Message-ID: <20250620165310.g3qv46n7ai257cem@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <cover.1749629233.git.ojaswin@linux.ibm.com>
- <9b0512d4063c2dc421e3e72e8c899460dd0c2644.1749629233.git.ojaswin@linux.ibm.com>
- <05005921-517b-4286-be24-eeef625e488f@oracle.com>
- <aEu5KcCAkOrjiLDb@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
- <87a683a7-9e81-4495-94e7-675627397c16@oracle.com>
+ <1fb9171017c601c3a1e1da1581d5da41746ca813.1749629233.git.ojaswin@linux.ibm.com>
+ <20250619074351.6tyynxkbzkzjmjub@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <aFV5RCqvEylNTOVt@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -80,81 +82,204 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <87a683a7-9e81-4495-94e7-675627397c16@oracle.com>
-X-TM-AS-GCONF: 00
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjIwMDExOCBTYWx0ZWRfX2ydzzoNkk9RD CbZP+VSDOJzgeNF2ZNk3jxx3gJS0hP+aWJ1SdmEtOGQmolvgT8Zrg4wQTr7jRNqFwfU7121Aeer bnGAAjA8JRy6icv54tDrz2ZAv191S9HxEJ9btc/hh9hVcto6rwYAgro7gZN2fcknbb+GMPtheD1
- d/c5kVev1NzfCI3cZGiFwocnFBJbl+F0qtlTWlGU5qeGWjgtOZome7gojg+jVGiryO6wW2E6npx q4HX0xFnqbiXtnq9yYSdMbpiw2jq8ZN1++ZvVTPJPknX0jsuj9xK1+DQpU7WZHrJsZQdappWhgj 1NZJuiWRMqkTr8d+cG7x3kK9T2jGL71bntiLH/3BQPUic0TdfNV8AXlu5c8vMjgHKPMcDh3HRdb
- 2NqWzLkYs3ix3mJbDU6cJoWfgAfiuFF9NuRW4W9emziFousleOQnKGAaI431FA3UXaaANmRb
-X-Authority-Analysis: v=2.4 cv=fYSty1QF c=1 sm=1 tr=0 ts=68559117 cx=c_pps a=AfN7/Ok6k8XGzOShvHwTGQ==:117 a=AfN7/Ok6k8XGzOShvHwTGQ==:17 a=kj9zAlcOel0A:10 a=6IFa9wvqVegA:10 a=pGLkceISAAAA:8 a=VnNF1IyMAAAA:8 a=G6eapHUxyhEpgTMLOpgA:9 a=CjuIK1q_8ugA:10
-X-Proofpoint-ORIG-GUID: pcRrZ2ac5PBCGbRFlyutdsfzeuXC2y0C
-X-Proofpoint-GUID: EClcIJmjXqGX2Z64ZCadWIba7Ynb2aBY
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
- definitions=2025-06-20_07,2025-06-20_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 suspectscore=0
- spamscore=0 mlxlogscore=999 lowpriorityscore=0 adultscore=0 mlxscore=0
- impostorscore=0 bulkscore=0 phishscore=0 clxscore=1015 priorityscore=1501
- classifier=spam authscore=0 authtc=n/a authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.19.0-2505280000
- definitions=main-2506200118
+In-Reply-To: <aFV5RCqvEylNTOVt@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 
-On Fri, Jun 20, 2025 at 03:01:40PM +0100, John Garry wrote:
-> On 13/06/2025 06:37, Ojaswin Mujoo wrote:
-> > On Thu, Jun 12, 2025 at 11:26:17AM +0100, John Garry wrote:
-> > > On 11/06/2025 10:34, Ojaswin Mujoo wrote:
-> > > > From: "Ritesh Harjani (IBM)"<ritesh.list@gmail.com>
-> > > > 
-> > > > Brute force all possible blocksize clustersize combination on a bigalloc
-> > > > filesystem for stressing atomic write using fio data crc verifier. We run
-> > > > multiple threads in parallel with each job writing to its own file. The
-> > > > parallel jobs running on a constrained filesystem size ensure that we stress
-> > > > the ext4 allocator to allocate contiguous extents.
-> > > > 
-> > > > Signed-off-by: Ritesh Harjani (IBM)<ritesh.list@gmail.com>
-> > > > Signed-off-by: Ojaswin Mujoo<ojaswin@linux.ibm.com>
+On Fri, Jun 20, 2025 at 08:38:40PM +0530, Ojaswin Mujoo wrote:
+> On Thu, Jun 19, 2025 at 03:43:51PM +0800, Zorro Lang wrote:
+> > On Wed, Jun 11, 2025 at 03:04:52PM +0530, Ojaswin Mujoo wrote:
+> > > From: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
 > > > 
-> > > RWF_ATOMIC does not guarantee that racing atomic writes and reads are
-> > > serialised. That is what you are testing here, right?
+> > > We brute force all possible blocksize & clustersize combinations on
+> > > a bigalloc filesystem for stressing atomic write using fio data crc
+> > > verifier. We run nproc * $LOAD_FACTOR threads in parallel writing to
+> > > a single $SCRATCH_MNT/test-file. With atomic writes this test ensures
+> > > that we never see the mix of data contents from different threads on
+> > > a given bsrange.
 > > > 
-> > > NVMe and SCSI do guarantee this (serialisation). However, reads in the block
-> > > layer may be split into multiple requests, even though unlikely.
-> > 
-> > Hey John,
-> > 
-> > We are not really testing the serialization here
-> > (verify_write_sequence=0) but rather that multiple threads atomically
-> > writing to the same file should never tear the write.
-> > 
-> > In the test, for each job, multiple threads are doing the write on the
-> > same file with the same iosize so they should always overwrite each
-> > other completely.  The verifier then ensures that the whole iosize chunk
-> > written matches the checksum, which will only happen if the write is not
-> > torn. That way we are able to ensure that even with multiple threads
-> > writing the same ranges, we don't break the writes (the sequence doesn't
-> > matter as long as it is not breaking)
+> > > Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> > > ---
+> > >  tests/ext4/061     | 107 +++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/ext4/061.out |   2 +
+> > >  2 files changed, 109 insertions(+)
+> > >  create mode 100755 tests/ext4/061
+> > >  create mode 100644 tests/ext4/061.out
+> > > 
 > 
-> So the threads are overwriting the same data range, right?
+> <snip>
 > 
-> If so, as an experiment, try setting /sys/block/DEV/queue/max_sectors_kb
-> lower than the bsize and see what happens...
+> > > +function max()
+> > > +{
+> > > +	if (( $1 > $2 )); then
+> > > +		echo "$1"
+> > > +	else
+> > > +		echo "$2"
+> > > +	fi
+> > > +}
+> > > +
+> > > +function min()
+> > > +{
+> > > +	if (( $1 < $2 )); then
+> > > +		echo "$1"
+> > > +	else
+> > > +		echo "$2"
+> > > +	fi
+> > > +}
+> > 
+> > I've seen these two functions many times, please make them to be common helpers.
+> 
+> Yes I will do this in v2.
+> 
+> > 
+> > > +
+> > > +FS_MAX_CLUSTER_SIZE=$((128*1024))
+> > > +FIO_LOAD=$(($(nproc) * 2 * LOAD_FACTOR))
+> > > +SIZE=$((100*1024*1024))
+> > > +fiobsize=4096
+> > > +
+> > > +# Calculate fsblocksize and FS_MAX_CLUSTER_SIZE as per bdev atomic write units.
+> > > +bdev_awu_min=$(_get_atomic_write_unit_min $SCRATCH_DEV)
+> > > +bdev_awu_max=$(_get_atomic_write_unit_max $SCRATCH_DEV)
+> > > +fsblocksize=$(max 4096 "$bdev_awu_min")
+> > > +FS_MAX_CLUSTER_SIZE=$(min "$FS_MAX_CLUSTER_SIZE" "$bdev_awu_max")
+> > > +
+> > > +function create_fio_config()
+> > > +{
+> > > +cat >$fio_config <<EOF
+> > > +	[aio-dio-aw-verify]
+> > > +	direct=1
+> > > +	ioengine=libaio
+> > 
+> > _require_aiodio
+> 
+> Got it, thanks
+> > 
+> > > +	rw=randwrite
+> > > +	bs=$fiobsize
+> > > +	fallocate=native
+> > > +	filename=$SCRATCH_MNT/test-file
+> > > +	size=$SIZE
+> > > +	iodepth=$FIO_LOAD
+> > > +	numjobs=$FIO_LOAD
+> > > +	group_reporting=1
+> > > +	verify_state_save=0
+> > > +	verify=crc32c
+> > > +	verify_fatal=1
+> > > +	verify_dump=0
+> > > +	verify_backlog=1024
+> > > +	verify_async=4
+> > > +	verify_write_sequence=0
+> > > +	atomic=1
+> > > +EOF
+> > > +}
+> > > +
+> > > +# Let's create a sample fio config to check whether fio supports all options.
+> > > +fio_config=$tmp.fio
+> > > +create_fio_config
+> > > +_require_fio $fio_config
+> > > +
+> > > +for ((fsblocksize=$fsblocksize; fsblocksize <= $(_get_page_size); fsblocksize = $fsblocksize << 1)); do
+> > > +	for ((fsclustersize=$fsblocksize; fsclustersize <= $FS_MAX_CLUSTER_SIZE; fsclustersize = $fsclustersize << 1)); do
+> > > +		for ((fiobsize = $fsblocksize; fiobsize <= $fsclustersize; fiobsize = $fiobsize << 1)); do
+> > 
+> > Wow, 3 for loops...
+> 
+> Yes :) We want to test all the combinations. Since the IO is less, it
+> usually finishes within a reasonable time (~5 mins)
+> 
+> > 
+> > > +			MKFS_OPTIONS="-O bigalloc -b $fsblocksize -C $fsclustersize"
+> > > +			_scratch_mkfs_ext4 "$MKFS_OPTIONS" >> $seqres.full 2>&1 || continue
+> > 
+> > MKFS_OPTIONS is used in _scratch_mkfs_ext4 by default, you don't need to use it as
+> > an argument.
+> > 
+> > Or do you want to do:
+> > 
+> > _scratch_mkfs_ext4 "-O bigalloc -b $fsblocksize -C $fsclustersize" ?
+> 
+> Yes we want to explicitly run these options so various block and cluster
+> sizes get tested irrespective of what the user passes in MKFS_OPTIONS.
+> 
+> However, looking at _scratch_mkfs_ext4() > _scratch_do_mkfs() we seem
+> to try mkfs.ext4 $MKFS_OPTIONS $extra_mkfs_options first and if that fails we 
+> anyways try mkfs $extra_mkfs_options.
+> 
+> That being said, I'm a bit unsure whether something like:
+> 
+> mkfs.ext4 $MKFS_OPTIONS -O bigalloc -b $fsblocksize -C $fsclustersize
+> 
+> would produce reliable results always so:
+> 
+> 		MKFS_OPTIONS="-O bigalloc -b $fsblocksize -C $fsclustersize"
+> 		_scratch_mkfs_ext4
+> 
+> seems better approach. Thoughts?
 
-Okay so I tried this flow:
+Sure, this's good to me:)
 
-1. mount ext4 FS
-2. max_sectors_kb = 4
-3. Do a fio atomic write of 64k (awu_max = 64k in this case)
+Thanks,
+Zorro
 
-And I'm able to see checksum issues that means the write is getting
-torn. I'm not sure of the exact block layer code around max_sectors_kb, but
-I do see max_sectors_kb -- sets --> max_user_sectors --> max_sectors
-But then get_max_io_size() ignores max_sectors for atomic writes and
-uses atomic_write_max_sectors, which should be correctly set.
-
-Hmm.. I must be missing something, what is splitting the bio?
-
-Regards,
-ojaswin
-
+> 
+> > 
+> > > +			if _try_scratch_mount >> $seqres.full 2>&1; then
+> > > +				touch $SCRATCH_MNT/f1
+> > > +				echo "== FIO test for fsblocksize=$fsblocksize fsclustersize=$fsclustersize fiobsize=$fiobsize ==" >> $seqres.full
+> > > +				fio_config=$tmp.fio
+> > 
+> > Do you change the "$tmp"? If not, you don't need to set fio_config=$tmp.fio
+> > everytime, you've set fio_config above this for loop.
+> > 
+> > > +				fio_out=$tmp.fio.out
+> > 
+> > If you don't change "$tmp", you can set fio_out once, before the
+> > for loop running.
+> > 
+> > > +				create_fio_config
+> > > +				_require_fio $fio_config
+> > 
+> > I think only $fiobsize will be changed in $fio_config at here, so you're trying
+> > to check "bs=$fiobsize"? If so, that doesn't make sense, due to _require_fio accepts
+> > any "bs" number, except bs <= 0. So you don't need to call _require_fio
+> > at here everytime, especially you've called it before the loop running.
+> > 
+> 
+> Makes sense, I'll clean this up.
 > 
 > Thanks,
-> John
+> ojaswin
+> 
+> > Thanks,
+> > Zorro
+> > 
+> > > +				cat $fio_config >> $seqres.full
+> > > +				$FIO_PROG $fio_config --output=$fio_out
+> > > +				ret=$?
+> > > +				cat $fio_out >> $seqres.full
+> > > +				_scratch_unmount
+> > > +				[[ $ret -eq 0 ]] || break;
+> > > +			fi
+> > > +		done
+> > > +	done
+> > > +done
+> > > +
+> > > +# success, all done
+> > > +echo Silence is golden
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/ext4/061.out b/tests/ext4/061.out
+> > > new file mode 100644
+> > > index 00000000..273be9e0
+> > > --- /dev/null
+> > > +++ b/tests/ext4/061.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 061
+> > > +Silence is golden
+> > > -- 
+> > > 2.49.0
+> > > 
+> > > 
+> > 
+> 
+
