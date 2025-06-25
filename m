@@ -1,68 +1,60 @@
-Received: from mail-pl1-f171.google.com (mail-pl1-f171.google.com [209.85.214.171])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0D1D20F098;
-	Wed, 25 Jun 2025 21:20:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 391FF2F3C0A
+	for <fstests@vger.kernel.org>; Wed, 25 Jun 2025 23:20:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750886434; cv=none; b=ItZFLUXeeSs0CNGDe0V23A0bPx7LhJBijafXLMfmbzrNyjW056CHYRG2ekxwLPraAFpczCzMVJYC3NLWGro8opT5kI8NF2UANc5WTgpXx0Zx0Dw18ruSK0pA9bCpXgIe23VlzT7JZLYCvQA+Quj18Iph0xf2GQ4v+JI1b12V40w=
+	t=1750893644; cv=none; b=LYAHedfwIs4TRtkyxvIOGLfsNPk+KfJcdHvSqC7sdPOIFwUKfL7Zfwrz1fWjxbCqdDutb++dZZWrGpF88+G0Ekd8A312UWQX9eXyrwy/cNmj8juei6vu0vdZtwWufpmPhQsk0NGClPH+kBMzHWk+/u0PrLI7rGHvfcfQlNFSLvI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750886434; c=relaxed/simple;
-	bh=lYEbVtIZ5apraP5Qn9iZLzQoxaPaWKjXLNkMLeJFy+c=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=CI1MnXncY7IBls5cYkZoqlF1e8W/R+43RqHl6XsI02cT2Zsxru4BVu1qZgnBW95tJqNWqD8/gs625GULbAbOF1we/kyMJx7zJGTsb88HDD4fLk+tAIoKa+mYMFziCLr47sOPhRR/yC0OR7UqA+Wi4SgrkL4eAFjfqWvmBlEoFBA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=azj26jP9; arc=none smtp.client-ip=209.85.214.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1750893644; c=relaxed/simple;
+	bh=FbezXqHmvRkXm8c0a1yC09gQ9MAOPKwdaaVhBTylqi0=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=YuR/bBZ/h3aWMlOMhrk1FYfHsR3v5aQxqT1ByhwKKvAho5UrwdaZ3Pu9ier4rfY3piJZtnFclDuJvQzf3F9qytZr3iAIrGwbWlr6tp6MET9MAJsmhY8dp/RXDevolx2wv7i7sdmARW4k/7+ecM2euJMb1iPm02oObWF4gVtgPKU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=AtBuBfwN; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=AtBuBfwN; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="azj26jP9"
-Received: by mail-pl1-f171.google.com with SMTP id d9443c01a7336-23649faf69fso3401565ad.0;
-        Wed, 25 Jun 2025 14:20:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1750886432; x=1751491232; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=iW6u+Sgg1vD8cAHzEXN3xoQ0okqnfAinfVypYDAO4WA=;
-        b=azj26jP92fuelxyrjBcmsnNZM2f+Dg0qjH1jjDiQsg34JImjM3NRnFp98iwZyRIREk
-         OmlfOCNnLWsoLMV1sVVHMtF49ObxVm+7bk+nJQhyfyE0mQ3QaDQ4HjpfYcmglHUVozTZ
-         rEEGtus+b7zvwCLRHDVfStbZjwLQZjNM9p+88NR8m318rLErurrI3aBM0+kq6GaPIrna
-         z1okVdOCQZsWN9D5qL8jb905YEmqT2+LZTvQ5I7joAN0yao/kE1lhn1x5z2qa4tZwT6y
-         iZZbzEf8uSjrVHaBp0Q2cliYxlUt77tCVKdN7AIZM8N51tGBVIhwNa+SlBkjYbppS9SB
-         maFA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1750886432; x=1751491232;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=iW6u+Sgg1vD8cAHzEXN3xoQ0okqnfAinfVypYDAO4WA=;
-        b=LqK160Pf2jYDfLj4teXVriYAt3gtXE0VqcSRMXQjmlUoHvszuX9D7h4FH9/xZMSCLl
-         bhdZ5HFxS38A9/LRSVimlkm2E5MS7fVogXWCh2rCeSseaxFWrB0Ai3cQSRg6Qi4jD0Fr
-         ytH/pswrWdc/Tqwig6BbwBoTFmXErTFnBB96gZYXBtdT6u6Tf3vJAkJ5MIvg2R4rXfCc
-         FueeX6lfsFpXgqrikeklZ/OWKDXBf+QPzLZENcH9mfyhc7Luflo7cXfOKG3TDELnc+Cw
-         IDRvJ0iRJA16GpmmgnQq99pd8+Zrrmfu9p8d0BH2GVYN1Q4wETPwbHHQJtE377QBggAZ
-         pYMA==
-X-Gm-Message-State: AOJu0YzEYnWwuly3H/qjViIdRhTlLiCkdUhp4CSwvvQFuN1BW5lWLQiE
-	UUoC+22a3AoP0IKuG4h6gVbkuzgGunFbYmSf6yaFitppCH3RZkqcw5+FfQ4xig==
-X-Gm-Gg: ASbGnctMD9oVR73/SshA5oYcd271KcA0f340vWurfPxievCBoLssL795zvwcI/CZKTl
-	BtTq1c3gXfxC4trhQqpCoeA/uSFCvfjEIWswfniatxoJ50XFYJhTQ6o5NujMrz9D3lFfzix9LFr
-	+YAj6Tuc7CDcQWTKjRRm0aitzkRGS5xDGcaZdNpQmwlTRjVtbRBzHbnFEhUa/oaCHFHjnigR+yf
-	/kwP8cCpLtiIuBNb6PXFlXHqV64QxCZrLdBIK/+51h+6pwHfar7WOTjhB4lX3ufYttyexyN64IH
-	fwN2rXIxlbR9bfmlBL6vz7scPA9xF4Ga+B2SFqYgjEnel9oVLb5sU5K83bm4gtNohsH3fNh5/VG
-	J7LMnU7k5+KYF
-X-Google-Smtp-Source: AGHT+IFa3gFYAsnMShe/zZk3DUlD3AXAnrw/EtOC3S2vrUTtvf4XtwCpZ8TX/wG2lHHeeV3C+84bcQ==
-X-Received: by 2002:a17:902:dacf:b0:234:8c52:1f9b with SMTP id d9443c01a7336-2382406e8abmr74882745ad.43.1750886431819;
-        Wed, 25 Jun 2025 14:20:31 -0700 (PDT)
-Received: from lrumancik.svl.corp.google.com ([2620:15c:2c5:11:3d0c:1f2c:9cf:9054])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-237d869b89bsm141128035ad.188.2025.06.25.14.20.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 25 Jun 2025 14:20:31 -0700 (PDT)
-From: Leah Rumancik <leah.rumancik@gmail.com>
-To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org,
-	Leah Rumancik <leah.rumancik@gmail.com>
-Subject: [PATCH v2] common/rc: add repair fsck flag -f for ext4
-Date: Wed, 25 Jun 2025 14:20:22 -0700
-Message-ID: <20250625212022.35111-1-leah.rumancik@gmail.com>
-X-Mailer: git-send-email 2.50.0.727.gbf7dc18ff4-goog
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="AtBuBfwN";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="AtBuBfwN"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 424341F460;
+	Wed, 25 Jun 2025 23:20:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1750893640; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=tk29JGE7sdQz5KRIrs3zcifYS9tbBeHLehEwSSYzD4c=;
+	b=AtBuBfwNIypcrmR3uvFM4WfVbyOfe4HLEyDDY29d6wXPYRKCB7nE4XGCkjPtIG6I3slqoo
+	GcY+KmbKaGm8fwO1cz5ml6or+1c3DbdcFcwFDIbTGhwTh2qDU33x34cyRyX10i6PGwgIS5
+	mNPMR5n+GFQ+Qa2vRXpZSAIOHVrLb6U=
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=AtBuBfwN
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1750893640; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=tk29JGE7sdQz5KRIrs3zcifYS9tbBeHLehEwSSYzD4c=;
+	b=AtBuBfwNIypcrmR3uvFM4WfVbyOfe4HLEyDDY29d6wXPYRKCB7nE4XGCkjPtIG6I3slqoo
+	GcY+KmbKaGm8fwO1cz5ml6or+1c3DbdcFcwFDIbTGhwTh2qDU33x34cyRyX10i6PGwgIS5
+	mNPMR5n+GFQ+Qa2vRXpZSAIOHVrLb6U=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 432A313485;
+	Wed, 25 Jun 2025 23:20:39 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id YuzrAUeEXGhhKAAAD6G6ig
+	(envelope-from <wqu@suse.com>); Wed, 25 Jun 2025 23:20:39 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] common/rc: add btrfs support for _small_fs_size_mb()
+Date: Thu, 26 Jun 2025 08:50:21 +0930
+Message-ID: <20250625232021.69787-1-wqu@suse.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -70,72 +62,98 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Rspamd-Queue-Id: 424341F460
+X-Rspamd-Action: no action
+X-Spam-Flag: NO
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	DNSWL_BLOCKED(0.00)[2a07:de40:b281:104:10:150:64:97:from,2a07:de40:b281:106:10:150:64:167:received];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:dkim,suse.com:email];
+	RCPT_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	RCVD_TLS_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	DKIM_TRACE(0.00)[suse.com:+]
+X-Spam-Score: -3.01
+X-Spam-Level: 
 
-There is a descrepancy between the fsck flags for ext4 during
-filesystem repair and filesystem checking which causes occasional test
-failures. In particular, _check_generic_filesystems uses -f for force
-checking, but _repair_scratch_fs does not. In some tests, such as
-generic/441, we sometimes exit fsck repair early with the filesystem
-being deemed "clean" but then _check_generic_filesystems finds issues
-during the forced full check. Bringing these flags in sync fixes the
-flakes.
+[FAILURE]
+With the incoming shutdown ioctl and remove_bdev callback support, btrfs
+is able to run the shutdown group.
 
-Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+However test case like generic/042 fails on btrfs:
+
+generic/042 9s ... [failed, exit status 1]- output mismatch (see /home/adam/xfstests/results//generic/042.out.bad)
+    --- tests/generic/042.out	2022-05-11 11:25:30.763333331 +0930
+    +++ /home/adam/xfstests/results//generic/042.out.bad	2025-06-26 08:43:56.078509452 +0930
+    @@ -1,10 +1 @@
+     QA output created by 042
+    -falloc -k
+    -wrote 65536/65536 bytes at offset 0
+    -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+    -fpunch
+    -wrote 65536/65536 bytes at offset 0
+    -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+    ...
+    (Run 'diff -u /home/adam/xfstests/tests/generic/042.out /home/adam/xfstests/results//generic/042.out.bad'  to see the entire diff)
+Ran: generic/042
+Failures: generic/042
+Failed 1 of 1 tests
+
+[CAUSE]
+The full output shows the reason directly:
+
+  ERROR: '/mnt/scratch/042.img' is too small to make a usable filesystem
+  ERROR: minimum size for each btrfs device is 114294784
+
+And the helper _small_fs_size_mb() doesn't support btrfs, thus the small
+25M file is not large enough to support a btrfs.
+
+[FIX]
+Fix the false alert by adding btrfs support in _small_fs_size_mb().
+
+The btrfs minimal size is depending on the profiles even on a single
+device, e.g. DUP data will cost extra space.
+
+So here we go safe by using 512MiB as the minimal size for btrfs.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
-
-v2: update to fix for ext2/3 as well
-
- common/rc | 13 +++++++++++--
- 1 file changed, 11 insertions(+), 2 deletions(-)
+ common/rc | 5 +++++
+ 1 file changed, 5 insertions(+)
 
 diff --git a/common/rc b/common/rc
-index daf62c92..ddced1b7 100644
+index d8ee8328..2d8e7167 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -1496,19 +1496,24 @@ _repair_scratch_fs()
- 	_check_scratch_fs
- 	;;
-     *)
- 	local dev=$SCRATCH_DEV
- 	local fstyp=$FSTYP
-+	local fsopts=
- 	if [ $FSTYP = "overlay" -a -n "$OVL_BASE_SCRATCH_DEV" ]; then
- 		_repair_overlay_scratch_fs
- 		# Fall through to repair base fs
- 		dev=$OVL_BASE_SCRATCH_DEV
- 		fstyp=$OVL_BASE_FSTYP
- 		_unmount $OVL_BASE_SCRATCH_MNT
- 	fi
-+	if [ $FSTYP = "ext4" ] || [ $FSTYP = "ext3" ] || [ $FSTYP = "ext2" ]; then
-+		fsopts="-f"
-+	fi
-+
- 	# Let's hope fsck -y suffices...
--	fsck -t $fstyp -y $dev 2>&1
-+	fsck -t $fstyp -y ${fsopts} $dev 2>&1
- 	local res=$?
- 	case $res in
- 	$FSCK_OK|$FSCK_NONDESTRUCT|$FSCK_REBOOT)
- 		res=0
+@@ -1195,6 +1195,11 @@ _small_fs_size_mb()
+ 		# it will change again. So just set it 128M.
+ 		fs_min_size=128
  		;;
-@@ -1548,12 +1553,16 @@ _repair_test_fs()
- 	yes | $BTRFS_UTIL_PROG check --repair --force "$TEST_DEV" >> \
- 								$tmp.repair 2>&1
- 		res=$?
- 		;;
- 	*)
-+		local fsopts=
-+		if [ $FSTYP = "ext4" ] || [ $FSTYP = "ext3" ] || [ $FSTYP = "ext2" ]; then
-+			fsopts="-f"
-+		fi
- 		# Let's hope fsck -y suffices...
--		fsck -t $FSTYP -y $TEST_DEV >$tmp.repair 2>&1
-+		fsck -t $FSTYP -y ${fsopts} $TEST_DEV >$tmp.repair 2>&1
- 		res=$?
- 		if test "$res" -lt 4 ; then
- 			res=0
- 		fi
- 		;;
++	btrfs)
++		# Minimal btrfs size depends on the profiles, for single device
++		# case, 512M should be enough.
++		fs_min_size=512
++		;;
+ 	esac
+ 	(( size < fs_min_size )) && size="$fs_min_size"
+ 
 -- 
-2.50.0.727.gbf7dc18ff4-goog
+2.49.0
 
