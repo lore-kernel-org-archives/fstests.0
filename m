@@ -1,206 +1,141 @@
-Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com [209.85.221.54])
+Received: from mail-pl1-f171.google.com (mail-pl1-f171.google.com [209.85.214.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ABDE23FE7
-	for <fstests@vger.kernel.org>; Tue, 24 Jun 2025 01:39:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0D1D20F098;
+	Wed, 25 Jun 2025 21:20:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750729157; cv=none; b=sxpAx1tZkWIj/W3G6IykA+tPzu8S3RoFwbR8A4KzAQO5kqap3bq/WnEL6GKnScthvWQL+NJN9sCrxEwHKpbHtiGdqlQINKxh06pdrj2hYruVlQY0WsYHlGuIsVUJidFAmBJTvwPOl5oP8lIeuGYPpkD9iwsXPtBAi+BsMG6f5eI=
+	t=1750886434; cv=none; b=ItZFLUXeeSs0CNGDe0V23A0bPx7LhJBijafXLMfmbzrNyjW056CHYRG2ekxwLPraAFpczCzMVJYC3NLWGro8opT5kI8NF2UANc5WTgpXx0Zx0Dw18ruSK0pA9bCpXgIe23VlzT7JZLYCvQA+Quj18Iph0xf2GQ4v+JI1b12V40w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750729157; c=relaxed/simple;
-	bh=bOzpy65BOZh3D67d6CY6iBPHUQjT/pCSkk9+ic74Tcc=;
-	h=Content-Type:Mime-Version:Subject:From:In-Reply-To:Date:Cc:
-	 Message-Id:References:To; b=Dszci4imvuG7Koq4Yw9MaiHjm6/I9gi9g4Yl/Y4d0K/AxaUesyMN9Jdrr/vur+zIH4uuTQiNCvLB1zZ7Hl5mqKNYYgYgBBD7k54wItutO0nBJmnvlWADB2X0UMVVqKS547lSsvlY2AGZxN2oGo/x7MeoLFCHzIJ84YwfucWMUUM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=eSjhJDjT; arc=none smtp.client-ip=209.85.221.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1750886434; c=relaxed/simple;
+	bh=lYEbVtIZ5apraP5Qn9iZLzQoxaPaWKjXLNkMLeJFy+c=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=CI1MnXncY7IBls5cYkZoqlF1e8W/R+43RqHl6XsI02cT2Zsxru4BVu1qZgnBW95tJqNWqD8/gs625GULbAbOF1we/kyMJx7zJGTsb88HDD4fLk+tAIoKa+mYMFziCLr47sOPhRR/yC0OR7UqA+Wi4SgrkL4eAFjfqWvmBlEoFBA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=azj26jP9; arc=none smtp.client-ip=209.85.214.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="eSjhJDjT"
-Received: by mail-wr1-f54.google.com with SMTP id ffacd0b85a97d-3a575a988f9so2364067f8f.0
-        for <fstests@vger.kernel.org>; Mon, 23 Jun 2025 18:39:15 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="azj26jP9"
+Received: by mail-pl1-f171.google.com with SMTP id d9443c01a7336-23649faf69fso3401565ad.0;
+        Wed, 25 Jun 2025 14:20:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1750729154; x=1751333954; darn=vger.kernel.org;
-        h=to:references:message-id:content-transfer-encoding:cc:date
-         :in-reply-to:from:subject:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=SQWtGoCA4F9Cme0HwKmpNkAbwOyi18VR+a9Tpa9HcUA=;
-        b=eSjhJDjTGBbtfzBt34ysMC+pDnG0G5+aYprnwoEKvL8rG/k4anWQ9pTanpm/Xpiwhh
-         ZnjRPEXLDysq9RwpxozsfDNQKZ8axLX8pmapI75hjznpi5xiROuUFUf0W4BKCYt7NSSg
-         BiJ4WFNYPVinLEGQYjpBLiLu498aVB7hYiLLvqzD/LCdlSC8aWp7OuRIHv8zMSzvhEyF
-         RnY3Xn8VBMbWvDgam3v7b9aDxlR6eTUXxSjnVS8Q14Q+Y1NK7n2tNd1dMZiSt0DMI4Aq
-         shTPex81biUy8Z0J4Htj7FvVxDpy3wyfMWyXkW5ihQy8bkReE6zBJ4RsBGnFPwSZdkgw
-         pxyw==
+        d=gmail.com; s=20230601; t=1750886432; x=1751491232; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=iW6u+Sgg1vD8cAHzEXN3xoQ0okqnfAinfVypYDAO4WA=;
+        b=azj26jP92fuelxyrjBcmsnNZM2f+Dg0qjH1jjDiQsg34JImjM3NRnFp98iwZyRIREk
+         OmlfOCNnLWsoLMV1sVVHMtF49ObxVm+7bk+nJQhyfyE0mQ3QaDQ4HjpfYcmglHUVozTZ
+         rEEGtus+b7zvwCLRHDVfStbZjwLQZjNM9p+88NR8m318rLErurrI3aBM0+kq6GaPIrna
+         z1okVdOCQZsWN9D5qL8jb905YEmqT2+LZTvQ5I7joAN0yao/kE1lhn1x5z2qa4tZwT6y
+         iZZbzEf8uSjrVHaBp0Q2cliYxlUt77tCVKdN7AIZM8N51tGBVIhwNa+SlBkjYbppS9SB
+         maFA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1750729154; x=1751333954;
-        h=to:references:message-id:content-transfer-encoding:cc:date
-         :in-reply-to:from:subject:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=SQWtGoCA4F9Cme0HwKmpNkAbwOyi18VR+a9Tpa9HcUA=;
-        b=wvHD7GpdGMJaDT8YZsj3x2Oo6nHal3FQDy06Fk5igQsiPnVn8rpPVCWDO2pvAmcS0J
-         j59knGNtLhA3qtrnVBhaED7iA1Oqm7hz1m37dLjtUAvZ6VAAORJ26nY42aSFqk7AOiZS
-         gDSipSmnJZGjWoeC7Kr62DuBgcUi6pTnpiozOM2Q6Y2BvcbD2etM31n6yaa+Ies7Jk5C
-         bb2EsUM6AAINOUhDjmCKUe3nKDjI4QWQIxDIoBPyFZ8RikZ2y6RmQGkz5oQ9nlAqnbyz
-         6qWCTLizgjKTgqsiAkfru/wyWsG+Mu2g6hlStw9MD6806yxyQ33amvUaWvpFGxkeBpww
-         Oq3g==
-X-Gm-Message-State: AOJu0YzSd/iHAT5Ye2wy5KbqsGTSymyfd4AgoXGUOFYwReBiBIs+bIje
-	SdRS+S1F7oMuL4funwUqGnlK+nxQmAqdKpO8HHErZA6LAs/8YqxPCuSNbn8IPOrDMo16a1+fBQz
-	ZfuqSeFmstw==
-X-Gm-Gg: ASbGncsHXy/I/TCpKuWTSlcOIrmMkRZIWz6fHYZlhZXd1INNvW69N/5+3wvZ/tNWaKW
-	eYRZYrGnKxUdWjP0HN0PzhVqc4a+kYP3EX1ChbL/U6niFmk/Tvzx4cFcbK2A3pbZZEVZXJwGptS
-	Euc03i5ael4gFE59AGQ6Inc01XSGYdiIL9EUHrpq8IioPONiX37voQPyJKvzv+5sUW7jGs/nma0
-	gTs9OLwPXRFvtNpdHS6Vg1cag7ea+msVF+5WdXoYc+DF1mspx5hNkDfW4JnXFowJrndrCE18XGH
-	TUKjcoaavBmqmj903JCiyO5QicMd9eJaJSIBWYE2FNQoGA4QnQq9FaxuUOlHa7bXq02c7S+Uk4V
-	BP5DR7w==
-X-Google-Smtp-Source: AGHT+IHeE8iiYRLuE/2O29proc0r8PlcXTKwdvUBim7baWNWIht9aBMqwa5S5l08ltCnuYfMowPmOg==
-X-Received: by 2002:a05:6000:1aca:b0:3a5:2465:c0c8 with SMTP id ffacd0b85a97d-3a6d119291fmr11852450f8f.7.1750729153930;
-        Mon, 23 Jun 2025 18:39:13 -0700 (PDT)
-Received: from smtpclient.apple ([137.184.246.83])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-237f7579cddsm37854095ad.202.2025.06.23.18.39.11
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 23 Jun 2025 18:39:13 -0700 (PDT)
-Content-Type: text/plain;
-	charset=utf-8
+        d=1e100.net; s=20230601; t=1750886432; x=1751491232;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=iW6u+Sgg1vD8cAHzEXN3xoQ0okqnfAinfVypYDAO4WA=;
+        b=LqK160Pf2jYDfLj4teXVriYAt3gtXE0VqcSRMXQjmlUoHvszuX9D7h4FH9/xZMSCLl
+         bhdZ5HFxS38A9/LRSVimlkm2E5MS7fVogXWCh2rCeSseaxFWrB0Ai3cQSRg6Qi4jD0Fr
+         ytH/pswrWdc/Tqwig6BbwBoTFmXErTFnBB96gZYXBtdT6u6Tf3vJAkJ5MIvg2R4rXfCc
+         FueeX6lfsFpXgqrikeklZ/OWKDXBf+QPzLZENcH9mfyhc7Luflo7cXfOKG3TDELnc+Cw
+         IDRvJ0iRJA16GpmmgnQq99pd8+Zrrmfu9p8d0BH2GVYN1Q4wETPwbHHQJtE377QBggAZ
+         pYMA==
+X-Gm-Message-State: AOJu0YzEYnWwuly3H/qjViIdRhTlLiCkdUhp4CSwvvQFuN1BW5lWLQiE
+	UUoC+22a3AoP0IKuG4h6gVbkuzgGunFbYmSf6yaFitppCH3RZkqcw5+FfQ4xig==
+X-Gm-Gg: ASbGnctMD9oVR73/SshA5oYcd271KcA0f340vWurfPxievCBoLssL795zvwcI/CZKTl
+	BtTq1c3gXfxC4trhQqpCoeA/uSFCvfjEIWswfniatxoJ50XFYJhTQ6o5NujMrz9D3lFfzix9LFr
+	+YAj6Tuc7CDcQWTKjRRm0aitzkRGS5xDGcaZdNpQmwlTRjVtbRBzHbnFEhUa/oaCHFHjnigR+yf
+	/kwP8cCpLtiIuBNb6PXFlXHqV64QxCZrLdBIK/+51h+6pwHfar7WOTjhB4lX3ufYttyexyN64IH
+	fwN2rXIxlbR9bfmlBL6vz7scPA9xF4Ga+B2SFqYgjEnel9oVLb5sU5K83bm4gtNohsH3fNh5/VG
+	J7LMnU7k5+KYF
+X-Google-Smtp-Source: AGHT+IFa3gFYAsnMShe/zZk3DUlD3AXAnrw/EtOC3S2vrUTtvf4XtwCpZ8TX/wG2lHHeeV3C+84bcQ==
+X-Received: by 2002:a17:902:dacf:b0:234:8c52:1f9b with SMTP id d9443c01a7336-2382406e8abmr74882745ad.43.1750886431819;
+        Wed, 25 Jun 2025 14:20:31 -0700 (PDT)
+Received: from lrumancik.svl.corp.google.com ([2620:15c:2c5:11:3d0c:1f2c:9cf:9054])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-237d869b89bsm141128035ad.188.2025.06.25.14.20.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 25 Jun 2025 14:20:31 -0700 (PDT)
+From: Leah Rumancik <leah.rumancik@gmail.com>
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org,
+	Leah Rumancik <leah.rumancik@gmail.com>
+Subject: [PATCH v2] common/rc: add repair fsck flag -f for ext4
+Date: Wed, 25 Jun 2025 14:20:22 -0700
+Message-ID: <20250625212022.35111-1-leah.rumancik@gmail.com>
+X-Mailer: git-send-email 2.50.0.727.gbf7dc18ff4-goog
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3826.600.51.1.1\))
-Subject: Re: [PATCH] common/quota: adjust _qmount_option for gfs2
-From: Glass Su <glass.su@suse.com>
-In-Reply-To: <20250620173839.q735lweoglone5cp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Date: Tue, 24 Jun 2025 09:38:59 +0800
-Cc: fstests@vger.kernel.org,
- Su Yue <l@damenly.org>,
- gfs2@lists.linux.dev
-Content-Transfer-Encoding: quoted-printable
-Message-Id: <089C8762-DDC0-45F6-8769-FD52A75CA626@suse.com>
-References: <20250603041009.59811-1-glass.su@suse.com>
- <20250620173839.q735lweoglone5cp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-To: Zorro Lang <zlang@redhat.com>
-X-Mailer: Apple Mail (2.3826.600.51.1.1)
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
+There is a descrepancy between the fsck flags for ext4 during
+filesystem repair and filesystem checking which causes occasional test
+failures. In particular, _check_generic_filesystems uses -f for force
+checking, but _repair_scratch_fs does not. In some tests, such as
+generic/441, we sometimes exit fsck repair early with the filesystem
+being deemed "clean" but then _check_generic_filesystems finds issues
+during the forced full check. Bringing these flags in sync fixes the
+flakes.
 
+Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+---
 
-> On Jun 21, 2025, at 01:38, Zorro Lang <zlang@redhat.com> wrote:
->=20
-> On Tue, Jun 03, 2025 at 12:10:09PM +0800, Su Yue wrote:
->> gfs2 supports mount options 'quota=3D[off/account/quiet/on]' but
->> 'usrquota' and 'grpquota' are unsupported.
->> So in _qmount_option, transform $OPTS to 'quota=3Don' first.
->>=20
->> Signed-off-by: Su Yue <glass.su@suse.com>
->> ---
->> common/quota | 7 +++++++
->> 1 file changed, 7 insertions(+)
->>=20
->> diff --git a/common/quota b/common/quota
->> index a51386b1dd24..4b8052e07dde 100644
->> --- a/common/quota
->> +++ b/common/quota
->> @@ -283,6 +283,12 @@ _qmount_option()
->> {
->> OPTS=3D$1
->>=20
->> + if [[ "$FSTYP" =3D=3D gfs2 ]]; then
->> + OPTS=3D`echo $OPTS \
->> + | sed   -e 's/usrquota/quota=3Don/g' \
->> + -e 's/grpquota/quota=3Don/g'`
->> + fi
->=20
-> There's not response from gfs list. I'm not familiar with gfs2, so I =
-have to
-> ask some questions about your patch...
+v2: update to fix for ext2/3 as well
 
-Feel free to communicate : )
->=20
-> =46rom the manual of gfs2:
->  quota=3D[off/account/on]
->  Turns quotas on or off for a filesystem. Setting the quotas to be in =
-the "account" state causes the per UID/GID usage statistics to be =
-correctly maintained by the filesystem, limit and warn values are =
-ignored. The default value is "off".
->=20
-> Looks like there's only one mount option "quota=3D..." for gfs2. And I =
-didn't
-> find a description about project quota, so
-> 1. What will gfs2 do if there's a "prjquota" or "pquota"?
+ common/rc | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
 
-The mount will fail if prjquota/pquota is in mount options.
-_require_prjquota() should be modified.
-
-> 2. Do you need to replace "noquota" with "quota=3Doff"?
-
-Yes.. I forgot the case.
-
-> 3. And "quota" to "quota=3Don" ?
-
-The only case "_qmount_option =E2=80=98quota=E2=80=99=E2=80=9D is =
-tests/xfs/820, not in generic group.
-
-> 4. Have you tried your patch on gfs2, can all quota related generic =
-cases pass/notrun
->   on gfs2?
->=20
-
-TBH, not all quota tests run well on gfs2
-There was a bug which can cause kernel hang in gfs2 fixed by kernel =
-commit 5a90f8d49922 ("gfs2: Don't start unnecessary transactions during =
-log flush=E2=80=9D)
-In v6.16-rc1.
-
-> BTW, in this function you can see:
->        # ext4 doesn't _do_ "-o pquota/prjquota" because reasons
->        # Switch it to "quota" to enable mkfs-time pquota
-
-The comment is confusing to me. ext[234] support =E2=80=98-o prjquota=E2=80=
-=99 if  MKFS_OPTIONS=3D"-O quota -E =
-quotatype=3Dusrquota:grpquota:prjquota=E2=80=9D.
-
->        if [[ "$FSTYP" =3D=3D ext[234] ]]; then
->                OPTS=3D`echo $OPTS \
->                | sed   -e 's/\bpquota/quota/g' \
->                        -e 's/prjquota/quota/g'`
->        # ocfs2 doesn't support "-o projquota"
->        elif [[ "$FSTYP" =3D=3D ocfs2 ]]; then
->                OPTS=3D`echo $OPTS | sed -e 's/prjquota//g'`
->        fi
->=20
-> please move your gfs2 specific codes here ^^, and give it enough =
-comments.
-
-There is one question from me about the _qmount_option() and _qmount()
-
-Not all tests of qgroup use _qmount, some of them call _scratch_mount() =
-directly.
-Is this intentional to avoid influenced by other mount options? If =
-It=E2=80=99s not IMO it=E2=80=99s feasible
-to convert them to _qmount?
-
->=20
->> +
->> # Replace any user defined quota options
->> # with the quota option that we want.
->> # Simplest to do this rather than delete existing ones first because
->> @@ -300,6 +306,7 @@ _qmount_option()
->> -e 's/\bpquota/QUOTA/g'    \
->> -e 's/prjquota/QUOTA/g'    \
->> -e 's/noquota/QUOTA/g'     \
->> + -e 's/quota=3D[^, ]*/QUOTA/g' \
->=20
-> I think you might need a word boundary, e.g. "\bquota=3D..."
-
-Right.
-=E2=80=94=20
-Su
->=20
-> Thanks,
-> Zorro
->=20
->> -e 's/quota/QUOTA/g'       \
->> -e 's/uqnoenforce/QUOTA/g' \
->> -e 's/gqnoenforce/QUOTA/g' \
->> --=20
->> 2.48.1
-
+diff --git a/common/rc b/common/rc
+index daf62c92..ddced1b7 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1496,19 +1496,24 @@ _repair_scratch_fs()
+ 	_check_scratch_fs
+ 	;;
+     *)
+ 	local dev=$SCRATCH_DEV
+ 	local fstyp=$FSTYP
++	local fsopts=
+ 	if [ $FSTYP = "overlay" -a -n "$OVL_BASE_SCRATCH_DEV" ]; then
+ 		_repair_overlay_scratch_fs
+ 		# Fall through to repair base fs
+ 		dev=$OVL_BASE_SCRATCH_DEV
+ 		fstyp=$OVL_BASE_FSTYP
+ 		_unmount $OVL_BASE_SCRATCH_MNT
+ 	fi
++	if [ $FSTYP = "ext4" ] || [ $FSTYP = "ext3" ] || [ $FSTYP = "ext2" ]; then
++		fsopts="-f"
++	fi
++
+ 	# Let's hope fsck -y suffices...
+-	fsck -t $fstyp -y $dev 2>&1
++	fsck -t $fstyp -y ${fsopts} $dev 2>&1
+ 	local res=$?
+ 	case $res in
+ 	$FSCK_OK|$FSCK_NONDESTRUCT|$FSCK_REBOOT)
+ 		res=0
+ 		;;
+@@ -1548,12 +1553,16 @@ _repair_test_fs()
+ 	yes | $BTRFS_UTIL_PROG check --repair --force "$TEST_DEV" >> \
+ 								$tmp.repair 2>&1
+ 		res=$?
+ 		;;
+ 	*)
++		local fsopts=
++		if [ $FSTYP = "ext4" ] || [ $FSTYP = "ext3" ] || [ $FSTYP = "ext2" ]; then
++			fsopts="-f"
++		fi
+ 		# Let's hope fsck -y suffices...
+-		fsck -t $FSTYP -y $TEST_DEV >$tmp.repair 2>&1
++		fsck -t $FSTYP -y ${fsopts} $TEST_DEV >$tmp.repair 2>&1
+ 		res=$?
+ 		if test "$res" -lt 4 ; then
+ 			res=0
+ 		fi
+ 		;;
+-- 
+2.50.0.727.gbf7dc18ff4-goog
 
