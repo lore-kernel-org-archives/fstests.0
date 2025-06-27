@@ -1,88 +1,88 @@
 Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB832155A25
-	for <fstests@vger.kernel.org>; Fri, 27 Jun 2025 14:48:41 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAA132E973C
+	for <fstests@vger.kernel.org>; Fri, 27 Jun 2025 16:11:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751035724; cv=fail; b=kBg6ez/C+B0s//coeYaGl/FLbEgVFqChncOJJ1BQ/l4H8+ReF28HT5eCtKUhjWXkgD4YiLEVrygJJgHcwdj4Gg7SabrUFePHeBsSFRz4BJxZZUBlJeXbVHEkWF5UGGelMkQFlUkXlKIvEgkp2yyQzAwFWc78TKGcNwgYra8oiJM=
+	t=1751040691; cv=fail; b=HTkVhOzAqQe4157VoJ4bJdn/ABPYvgpwqauNUgAuA3JxOuf3Lusi5UtAWkKIrVw7dXIulH2F2PiMOiiTA9Q91LIS4Zay5rvnkSDkevUV1IfrDe+FXMra6t2Hl8ui5E8nI/yNTpzENgre8cMW48j1xdJo+NpV4WypqGk/Oyvv7ag=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751035724; c=relaxed/simple;
-	bh=m+gLo2ij1FhU9QxTd9a94hwT4Eskq+RtMXLIcFtsov0=;
+	s=arc-20240116; t=1751040691; c=relaxed/simple;
+	bh=lNqPgDwplt8FZqyw2wA1EJCOKIF39/i2P15dDYFHlBc=;
 	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=s8QHsH+9c2oD+8+ju+Ldz47B+SYLBj7G2/rBOpNcNBC/NjXHkRiAaX77qg27CzK7k5Sy/Ka9bRB7ucmC/VFbP6ZTDBHj09DNiENnCN1agK5z+MDWRCVfBfkeoOqrP6ysEKk07v+QMEGrCGy1dLi4uPBaUPPHSqBXhpA5bhEqWzE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=Zwj+o8Eh; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=HouHbogi; arc=fail smtp.client-ip=205.220.165.32
+	 Content-Type:MIME-Version; b=AJgprKfKda5NzV9n0hvDQ66LLh3lERAwLoj3qDC2pRpFWgfRNfyoLBYe5nINnD02R5Q2RW1RKcMb4OcBkay3g50pFpSdyEigTgo/DcePRQPK7GxaeL3i3U6vE/OJCqlPjnxyJ7Fjyj1rJwo0BxsdqpNznYta/s6bevq0t4lVhVI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=AAE1D0UQ; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=r67xMYlI; arc=fail smtp.client-ip=205.220.165.32
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="Zwj+o8Eh";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="HouHbogi"
-Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55REMlfa006513;
-	Fri, 27 Jun 2025 14:48:32 GMT
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="AAE1D0UQ";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="r67xMYlI"
+Received: from pps.filterd (m0246627.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55RFdruD018560;
+	Fri, 27 Jun 2025 16:11:21 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
 	:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=
-	corp-2025-04-25; bh=SrtHgzUoF8Ns10NMwwHTWAD2hV8PVXM8CWk1a6XvyqM=; b=
-	Zwj+o8EhmFdGVXB48vNDr8Xstb3BoUmpwRwHgVm1UvZSvGuueYkFnH12bsn97W+e
-	1H3XrFOzdrGuNlhXJS5fxJwAMdQGFr840OWTXwsBgZpNPLGJvJSKA3y8vJiqDctM
-	zlM0iDWUFMF+D+HviwHH/LwlkDCPl1PpnTOCOiwXriSW/1dTZ8XCfs/t8/seZRsQ
-	vLgad7eFNVKBnchssaIJtF6bwVeR7zuJhFAFlYUTtbNn+AtCqfXXc143UOMbTMzS
-	cF88QzbQrPxfkAYtpEr9cF1Voo9pWHF2sfe/MQWtSt/DOJ/tCqKDRT6nt+84dGQt
-	E/WYT9pHZfIgHXaSz1HXCw==
-Received: from phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta02.appoci.oracle.com [147.154.114.232])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 47ds8yc37c-1
+	corp-2025-04-25; bh=bXeSe/exDx1lnG/sE9thsx4zWmhTfHfDAk8J1rCmwIo=; b=
+	AAE1D0UQy7jcYjOgPxGFUo21lk/FFmyHQKyQ1gcWWRwWA5QkPVgkNlWuy0bUiJSV
+	Rl2iQ1EeluhSL47Fdbzn3pZs1Q+w4DcZk9zeopS384COuxQ+VHNqy/7eAxPNmmkp
+	uqKxbhgRixfbcg4zqxC33KrVLbm0bCdrEYc+2f4jAxdW1kfCE5z79N38dqNwwpkI
+	TkcEWv7ijd8uA2sV/prFEbgN55rMdn6sVMynHoIObJXYcXhGB7xkWSpWbJCBC7ks
+	aIabWsHEeU54Pw330QkM/+nuj2imOuE1Ha0H1vmt0gMu1440M2tRSyC/5LNjm3Ze
+	PBBj/DDlGZyFKoTx9eRupg==
+Received: from phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta01.appoci.oracle.com [138.1.114.2])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 47ds7v4bmq-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 27 Jun 2025 14:48:32 +0000 (GMT)
-Received: from pps.filterd (phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
-	by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 55REkpm5003244;
-	Fri, 27 Jun 2025 14:48:31 GMT
-Received: from nam12-dm6-obe.outbound.protection.outlook.com (mail-dm6nam12on2061.outbound.protection.outlook.com [40.107.243.61])
-	by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 47ehq7xf62-1
+	Fri, 27 Jun 2025 16:11:21 +0000 (GMT)
+Received: from pps.filterd (phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 55RF7wI8034129;
+	Fri, 27 Jun 2025 16:11:20 GMT
+Received: from nam04-bn8-obe.outbound.protection.outlook.com (mail-bn8nam04on2089.outbound.protection.outlook.com [40.107.100.89])
+	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 47ehpuh2jy-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 27 Jun 2025 14:48:31 +0000
+	Fri, 27 Jun 2025 16:11:20 +0000
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=tXNjk39O59iYfnql9fQD8bB9t9EhkN6E0BSmIiMrMZGinn8L91aHKvBtXKZCFA03dCB43fbYGHKjsw9kCzrYTemSlfNwzHokNGSlmcXTDerrxKhhLzglfMjcB50/aJ9Dd6sPje2bNMMQPt5Inkluo4zkF6USFPeQdm+O9CrKdAmeB4PnlHaQ/sfjc1y6DRtLvFo6Gxczu7g4Evswkc3OZY3J1LHO1so+eoM0YxxvwZIytzgq7AFtpRLBxyqb82ZHAOhbd+ggly8MkZYiq2NUGmih+cyFcCGe5miQ/DqLkobgZ37CqQ/BZXm/kmJ002alyk2kjbaJAyf2lUKq80t6vw==
+ b=r305DySHZ3gSSPzXTpHgpXxpZ8z/+HD34thJse/YhigJ0gXkgqC3siS50fp5djfMZBvyb/FBxS+nAOufebHBVmMRfwKqz/RKwn85fsjEIwU5DKPWNs+m4hSUo/iOcbTwkuRTKL1jGh11NhpnbUP5oprDGlCfwbObS0XpxaUEkyiEAkUdW9y1m78QqVZp8XNnkYv32BgFuuDqvoyX7bWyT1RzLxSO+M0V21mOH4ei0lcG5QMsv4MWrU1XfgNTcguKheFE4bazPQ+OILZiTJDb4aaKBkrXAt9+ztax3fRqf7ea3NqzZtiWgXUjKsrhUFrtnrUpMwoZaCMOkj3bkQDqMA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=SrtHgzUoF8Ns10NMwwHTWAD2hV8PVXM8CWk1a6XvyqM=;
- b=iLVQAuRkAr+GJSC9jxSiS6hbm48GzjlA8SPlf++Y3HcOFOFRJCOq0LQcWXdoYxfw0vpqZK+AMr95T3PwkitAoCv1rNsVu9EBSgzU64Crq7UUhW344uAIjiuB31v3OyGT409fghLzZj8qwIVeDKVhMKTNqKi4GgAe9XoVNcgj5LknNeVKVipIfLj6K9W72Aw+votQ5DBWUDlBImK9RV/84LWhL/dvZYI+ZXe47SO7+TUVCNvEb5NPkskNszeD6UsV/2nTZJbkeIuEc8PTLNKOHzfJu4KpgZWMZHctq8ibF4m7v+CiEfrCprJtxqg1lKEzvN7yM/gzzK+c0pMaFyZxeA==
+ bh=bXeSe/exDx1lnG/sE9thsx4zWmhTfHfDAk8J1rCmwIo=;
+ b=VCr98P7kk4Ug3IHkmQJmb4TSDl4q1SNm9Sj1vfSw/wW5zIPI/4kBxCEV1WWPO/oEKHKfs8SMtPGW4nQUrpSjsQh3exLNUa96BOwl5X8sqIaQc9e2CGsNqSebKYDaD4svGaPhUiR2D199mRneXx/SX0EPvDIMix2Z/FtGzm6ch0xiKhOLAlxrLXcKT+RH2ZwYabgqOm3ckHYaWCzGX6iVOYfDaZut+cz0nnRdpHIeJenyVrX1+Fp6wyOaBKcE3x7q4t26kJPiBeScmmFnyOCmhYI+TpPDA6OMlVb177egMQe57VRK0kyb5nIo4kAvizK9uOehjy9clNtoFgOoBxbLeA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
  dkim=pass header.d=oracle.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=SrtHgzUoF8Ns10NMwwHTWAD2hV8PVXM8CWk1a6XvyqM=;
- b=HouHbogijKf84rtIG9xcZkAhCEyulFX9npWsUKa0vkTM2mMxa+7ccn2Pd10zMz3PO+wRSppIR2ra0WzGUj+MkAYtGb3DaeWQpukISTBOtE/zOLt7S11Hgh5nAfWTCDKNtjmcjvqkJfHPAXPnWzxw2D7Wg8K3S26rSFUbmLkikDA=
+ bh=bXeSe/exDx1lnG/sE9thsx4zWmhTfHfDAk8J1rCmwIo=;
+ b=r67xMYlI+V1FgasxLRBAJM6+VZEgvLucK2BJThm5pwjV/tSi3mIx0J6IXdWrJmQCLlqNGpIvT9aal9kRhQiXkLmcQaHmzaJuQ+QWwLcw58pc06lDaU3RADC6u+MqA1Zkt8PmJeYwBg5ugze/VbvUR3hdmCIOUtbFrjKuElLwT44=
 Received: from CH2PR10MB4312.namprd10.prod.outlook.com (2603:10b6:610:7b::9)
- by MN6PR10MB8045.namprd10.prod.outlook.com (2603:10b6:208:4fb::16) with
+ by PH0PR10MB4661.namprd10.prod.outlook.com (2603:10b6:510:42::14) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8880.21; Fri, 27 Jun
- 2025 14:48:29 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8857.26; Fri, 27 Jun
+ 2025 16:11:16 +0000
 Received: from CH2PR10MB4312.namprd10.prod.outlook.com
  ([fe80::fd5e:682a:f1ac:d0a2]) by CH2PR10MB4312.namprd10.prod.outlook.com
  ([fe80::fd5e:682a:f1ac:d0a2%3]) with mapi id 15.20.8880.015; Fri, 27 Jun 2025
- 14:48:29 +0000
-Message-ID: <d765ac05-98f2-4f30-b80e-2b61346f98b6@oracle.com>
-Date: Fri, 27 Jun 2025 15:48:25 +0100
+ 16:11:16 +0000
+Message-ID: <b8bd60eb-c926-44f4-a0ff-b5de75803d85@oracle.com>
+Date: Fri, 27 Jun 2025 17:11:12 +0100
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 06/13] generic/1227: Add atomic write test using fio
- verify on file mixed mappings
+Subject: Re: [PATCH v2 09/13] generic/1230: Add sudden shutdown tests for
+ multi block atomic writes
 To: Ojaswin Mujoo <ojaswin@linux.ibm.com>, Zorro Lang <zlang@redhat.com>,
         fstests@vger.kernel.org
 Cc: Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org, tytso@mit.edu
 References: <cover.1750924903.git.ojaswin@linux.ibm.com>
- <7aa00f0480eef14f269ad28e5e3003e7c32590ee.1750924903.git.ojaswin@linux.ibm.com>
+ <eabfa4691ac822af276c900f0cc7502ad62ea768.1750924903.git.ojaswin@linux.ibm.com>
 Content-Language: en-US
 From: John Garry <john.g.garry@oracle.com>
 Organization: Oracle Corporation
-In-Reply-To: <7aa00f0480eef14f269ad28e5e3003e7c32590ee.1750924903.git.ojaswin@linux.ibm.com>
+In-Reply-To: <eabfa4691ac822af276c900f0cc7502ad62ea768.1750924903.git.ojaswin@linux.ibm.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: AS4P191CA0001.EURP191.PROD.OUTLOOK.COM
- (2603:10a6:20b:5d5::14) To CH2PR10MB4312.namprd10.prod.outlook.com
+X-ClientProxiedBy: AM0PR02CA0129.eurprd02.prod.outlook.com
+ (2603:10a6:20b:28c::26) To CH2PR10MB4312.namprd10.prod.outlook.com
  (2603:10b6:610:7b::9)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -91,138 +91,303 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: CH2PR10MB4312:EE_|MN6PR10MB8045:EE_
-X-MS-Office365-Filtering-Correlation-Id: 1120a207-307a-4557-3079-08ddb589adbd
+X-MS-TrafficTypeDiagnostic: CH2PR10MB4312:EE_|PH0PR10MB4661:EE_
+X-MS-Office365-Filtering-Correlation-Id: a37aa821-ca53-408e-cbca-08ddb5953e83
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|1800799024|376014|7053199007;
 X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?UGJJS2IrVGgwK3VKcitVbSswQzFFQjNITGVNRFFyVm9YU0dQbHVmUTk3bVpq?=
- =?utf-8?B?YzBDN0NONFBWd09raFZBVFFmek5NVmdjM280RUQ2MTdZYzdPN0lJL0s0OHk3?=
- =?utf-8?B?UjRXWTNUSTVSMkVMdXkrcTVGN1ZFajIwckczSCtyL2RZZFBDY1NwVDJuVnp6?=
- =?utf-8?B?a2IzNTN4d1I0SkVNMXdkRTF0MTd1aFZsa25BdHZ3LzNyQ0hLZEU1UnY4TmN1?=
- =?utf-8?B?cUpFaHlMWllvdlFFN2ErZnNzc1dCMzF0b3l4MzQxTnB4OEIwb0dDQTg1NzND?=
- =?utf-8?B?RmtKNW9IU2xLODVDWlZVamRVaGhEcVdIZ2lQVkZaSUF4R0JCdnhjU2l6TEs5?=
- =?utf-8?B?S3BDUjdXMTJ5M2wxMnhMTldqL1hKZE4wZXBXbzh1Mjd6S0NXODA2bno5aDFE?=
- =?utf-8?B?WUhHKzZrVHd5MWIvQlhYa0gwak9sMm9sdHVsQ3ZwbGtrZVg2ck1udDFlZ0xQ?=
- =?utf-8?B?SDE3eHo1UFV0UFlHTHBoWFUxbjlsUEMrVnZDZDMwN2ZvNENISkRDTCt4U0hH?=
- =?utf-8?B?L0R5Q3dnV0l1Ty9GaC85emUrMndwRjN0dUNBbzh0ZnpPbnNwUklUbitKdFpC?=
- =?utf-8?B?ZWlQa1BzMVk2bUh2RGVOY1FuMkJSMWR4YjJWZU9ZRy9scStGdWV3N0dPQU9z?=
- =?utf-8?B?SGtyQ0VBQXJoY0wwbmM1Y3VLVFRaYnpxUHdpRnV3QldaYlFreGM5aGdZQmZC?=
- =?utf-8?B?bVhMRHozL2NITjZhT2hQdkFnRjVDRk9oeFNLVVFRNmNDVGVXZzRpakdSSWpl?=
- =?utf-8?B?TElwSk9iNWdmMXVvN2s2Um9iUHEzcjRvekdJcjZkaU1IdlJ2MGorWEM3YkFY?=
- =?utf-8?B?N0U2d2ZYQ0w1RWlocUgzSDRCMkxncHVYVFdrYkdrTE9XZkNXS1BVRHZSS241?=
- =?utf-8?B?RkxPZCtXWDlzcEVURHVTb0VacStVd1k0VDJ2eThhSkhtWExSYVdQaXY3WWxN?=
- =?utf-8?B?cmRtc0xwdUkyMmJuTm12Tk9IZjhlQ1QzalFzZldFZ2hjK0tyNllNTXJyS1hy?=
- =?utf-8?B?bktjbGUzRmp0dlJIcDRVMVJWbkk4QWdvU0dacGc1RlhNU0ZpNENRL0JENHRa?=
- =?utf-8?B?R1phUUkwODBMRjIvVTFtYW9OUVdTSEdXUGlSdG4yRUdCdE40YjhpSnNVcUNh?=
- =?utf-8?B?Wjh5dnpPejlHWHM2ektyR01CZTdSVEE4RDVETDF2RHk2MlVVaWplMEp6cndW?=
- =?utf-8?B?YXo2d3R4bk5NS09lK3BBcFF5YnJqNVVHVUJKcS9LM25yc29lZFhSaHk2Wkdp?=
- =?utf-8?B?S3RvMGU5aldxRXQ0djV5U1Bhdkc2bW5ZWWpEcWlyRnhQREE3anI2ZXhDRmJY?=
- =?utf-8?B?VWJ5alo4K3JmMzFEbkpaRy9OSjJiYkNiYW1kWmphRllMVUVXYU51WFYzaXRh?=
- =?utf-8?B?QllFUlR6QlFFbmltOU14aGM1VHhuSnRPamhSNFFNRDdadzlaNEtzWmdPYy9w?=
- =?utf-8?B?MTFKRGk2K0c2TFphdDVHOXc3V1RWeFJXOEhEY29OcFVmaS9rbml2SHkzMUFh?=
- =?utf-8?B?TTF1Z3d5dXUvWW9YVDludjlBNGJzZjYvVU9JY29NNExqcGZzOUFqdklBQUNX?=
- =?utf-8?B?d3B2OWNMd1NpM3djTkh6Tm9OaXFLd3pCbytneXZzZEp6ZnBpZ1NTRVVxZmxt?=
- =?utf-8?B?d1RRMWVRK2hzdmRwUmY1dms4MngxVVhic2lEOHR3S0xkWUJwQjdvMUF6MFlr?=
- =?utf-8?B?VUIyWUxPREVYSWlab1FtTUN6NWlSVTNDVmp6aDRjQVoxQyswaGFQSUljTGFu?=
- =?utf-8?B?Z0pWcFJxRU8wcG5FUmRMNlJzcVF6MUJzWVpKVkRBWXR4NU9mOCsrRXhyakVE?=
- =?utf-8?B?RlVEczZRN2o2bnJjaWplZ1FxbDlQMFFzamszT1ZjUUhSVENqVW00NlFMMTBn?=
- =?utf-8?B?a0wxNXFXNjJNQ3FSOUFkQzl3bWdnZDRWQmp4MnQxZU9oRHBvNnBBb0llaGFq?=
- =?utf-8?Q?SkPtW/Ox1gA=3D?=
+	=?utf-8?B?YitvS0tVNWZpYm9lNmNwT0xsOWhuT2NtblB0YnJxaXBiTWk0eXU2WVZyZVFZ?=
+ =?utf-8?B?NU94YUJ3ckU5dmsvZFBJVkUzOWQ1ODlhN0dGTHUwaG9xVk1lQ3kwVGtJd0Mr?=
+ =?utf-8?B?dFlnNlVXNkwzVmxKR29tQTc4blJiaFc0ZVVuVGlxOU9WNDlzQ29CcFErT05i?=
+ =?utf-8?B?S2crbjZjOHBvd3JRMnV3L0lPUTFoRm9hSzI1alNzSFFUMjN6czZJVG8xWHJx?=
+ =?utf-8?B?TW5ERkJNUkF6dWJEMTNUTXlYWkgxYXJDd25pc1JpTFcyWkVXSEhlZFBpWDN4?=
+ =?utf-8?B?L3A2SmZsUjFjbGZTd2E5UGEvSWVJZVBhS29zREJaMzFOMEZHVXg4YUJnaTVr?=
+ =?utf-8?B?by9IU0d3M1VqS3hlbk9IL1F3dEpBZHV5em1PTlZ5QkhGMEFkV3lvU0cwcG90?=
+ =?utf-8?B?TXFveElSK3RXcGxMd2V5TVRZM1hQbDJyVFhPTWkyRElCelBJYkxzN2hjNkVF?=
+ =?utf-8?B?QU5RZXVkNk1OOUNFQXN0UG5vazdnZWJJUERHTDRYeDQ2ODZkMExkLzJ3WG5q?=
+ =?utf-8?B?QmE0d0NRb0w1SmhjOTF5SSt3emRoMVdMM0lTVFdNaUNHUnpUM0RtcmczdXpU?=
+ =?utf-8?B?VVp4Q2FPM3dsVUo3Y01kMitvMGJMZDd6YlJxRXdzRUgvNXdZZ0NVcFk0TE8w?=
+ =?utf-8?B?UDRicHdiVXJPL3ZZa0txNEk3RnRQWThLTHFmb0JUNUJRQVV0anFpQ0d3WDlt?=
+ =?utf-8?B?ZjhvMXAvRGl1NkNJa3lTdGppUEc1NTNWS2xDSGgyTXJqY01pQkhxZWpTYUR2?=
+ =?utf-8?B?K1h0SGFsNGVWYWZseks5NG1rOEYyQXkyeWlGV3NKVFFRZVBkV2tvMlQvY1NB?=
+ =?utf-8?B?UGFJUnNYTHJCL3kvT2dHNklZei9OUjZXcFYwS3FlRG04RUNiVTc2dUVBc0xh?=
+ =?utf-8?B?UUFDY1A1MFBPeVdxaU5ZYkdIMThXUXBMMnJwRldmS3lrV0FwU2NyaE9vNlJw?=
+ =?utf-8?B?VkpZQ2VQZEtTUG9aTThBNWFPc2F6d1pwQVI5N1Y3dzZrdHB3U1JET2Vrdy9s?=
+ =?utf-8?B?blFQQXdzbFRMeHpVRWI1dmhaejk2SDdFUkREVk84b1dVbDBER1o0d0dMdGtB?=
+ =?utf-8?B?MUtvNytkQm81YkZKRHJzVmxjUEJxcjVneVFNRW5VWnRvUVpsMDBFVWFoclJi?=
+ =?utf-8?B?b2pCY1MzYTREZVNVVmppczNjVmIrSzdsU1VISjkrYWJobDdCSzRBUlhEc1Iy?=
+ =?utf-8?B?N3hyVmoxaFdpQ095ZXhNQlpjeFNJQk92TVcxa0JFWUNMQWVQL3ZUZVVEQjFZ?=
+ =?utf-8?B?QXJoMGp0WjVycW01endWdDJRZ3VrZllHQUlBeWFPTThoR0NDc05YTlhQYzU5?=
+ =?utf-8?B?U3RmbFF5emJqWG1xTG9NbkJMRk1hZ0lhOHczMlNjNTFmVEhQZjQ4TlYyd1l1?=
+ =?utf-8?B?SnhGUDF4Mm1rclNrUnF5YkRvOHBsVjRYTVFnSXRkeHVSSWFMVE5NcjNJNGp1?=
+ =?utf-8?B?N3ZRTEVGbWc5NWxqKzlKMlFHVEdNK2NkQ0RMb0VrTU9jdVM3QUNYRmZvM3Ja?=
+ =?utf-8?B?Tmg1amk2SHJRRVdWWFdRZnI2elNQVnJvNVJOYllWT0pWaFFienNsOUpDbnZW?=
+ =?utf-8?B?YTQyQmFVMGFpeUExbi9lQ2RFZ096bXhwUDMzV3Iza0Q4NVlSelA5R0kvQmg0?=
+ =?utf-8?B?Lyt4QmF4Y2lQUDk3dit4VEFJb2VMbkFvaXNGWGZkS0c1c3lZblRyeWZ4QkZY?=
+ =?utf-8?B?Nndzdk04bUlrMGNhTUE5d0hUdk5SSTZlSzVwbGk4eFJ5aVZKdnpDZ0xJTEdT?=
+ =?utf-8?B?dWk2QVF2bytpcFUvSDA0WG1jUXJiYWRRLzhOSDZkSHVBbUNvZ1hQWVhKZjRD?=
+ =?utf-8?B?bTd0ZzU5L2xiajBxWUp5YmhDdmNLaVdoYVNNY3pabEdrZWtzSUxBTVZ0Z05x?=
+ =?utf-8?B?MW01c3JDcGpCbjM5UVBkNHhSSklLK0tiaitJUXNkREJmRG9TQ1dyVENJZ1Vx?=
+ =?utf-8?Q?cT91kQq0Xa4=3D?=
 X-Forefront-Antispam-Report:
 	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CH2PR10MB4312.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(7053199007);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?S0g5MTllTGRianJzTXk1Y1V6VVZtT2YzQ1NEWDc5VHg3bXc5ZStZUFo3NzVG?=
- =?utf-8?B?OTA1REN5V3h3ZW9XYWpPK2tuZXRqMjBqSXp6c1NvL0N4czFXWlNlYkVYcitl?=
- =?utf-8?B?Y2lSbHJCd2xCMS9EbWdQMktUeXMxUjRCNVdKSkRPcndHRGNVTWhqTUxtc3I4?=
- =?utf-8?B?LzV2VUJIVEtvNlV6TDJDY25BcUpIMk10UTViaEpiTE9rL0NzM01UVUZTNnk3?=
- =?utf-8?B?UmdRWG5aSy9jaW8yVlFjQWVXanlCVFR1R3I5SCtOMUYzd29iS0tRRGgyUnhM?=
- =?utf-8?B?WjVGOVYzZU9Sek81VEwvTnB1bVFIdnVZa3Vwb1BPVnRqRC8ranludi9ENEU2?=
- =?utf-8?B?bGFUc3EvWkJYR2h5cmpxdHNmdzNKbW8zN2JDTW1hZmJLVndyR2E5aWx6b21j?=
- =?utf-8?B?V2NXMyt1MmRtdzExekxCUTR3L2lRZU1qMEtVSUpTaFZZOFZoRHlrRC9GWlFw?=
- =?utf-8?B?YU5OSVhqU2drTGhGYVdUK3QyNW9IZHZGNm5YdXU3U01ib1Q4bnlwRzVuQjMr?=
- =?utf-8?B?Z1d5WGF2RFRQazZ5UDJZdjhyZ0xYcmRFdWVQVFl0NFEzL0k5YkpadDIrRFR6?=
- =?utf-8?B?TlNtOUN0aGdTeEd2am1wZ2N2L1V1Y1dPMENYSGNwUjQzYm1rM3VaOVdWMUJn?=
- =?utf-8?B?MWdyR1ZtNURvNXhWMktWMjB6U0FpcVByVXhtU1JYdlhmTHRRVmFuSUxCTGJS?=
- =?utf-8?B?R041cisrNnJ1TWVMZ0hHRlJjNUhxb1RVSXBqVXBWU29ydm1NdnNqK1VqenAw?=
- =?utf-8?B?UTU4aEVlTWVCMUZjVXNQOElFMks3SEdkS3d0N1RrQ2NINWhjSldNWFkybGtH?=
- =?utf-8?B?b2lBRXE0TUVlZnozRmJNclJoeG5nbEkwOFVtM05SdXl1c2c2QUtwVHhUMWVK?=
- =?utf-8?B?aUdRQzJucit3azhmbW5FU0RRV2QxY2xhc241T1V6OS9oVHM1b2tkQ1RIT3Vm?=
- =?utf-8?B?TTBoZTdjYm9HMHp3clFEL0JxMk1PRmhVQjFRcHY2RkhnOEJUQmVZNm9wVDJn?=
- =?utf-8?B?R0o0dzY5SE1iZlY1Rlh2d0ZaRWtJZlNxdlcvSHZXaUV4WWhWSGtJL2tvRGZU?=
- =?utf-8?B?dmtXeHR3Z3huNDJrOFN4ZHVXT2RtYU9SWVYwd3loVFRzSGtSd1BUQVU4Mitq?=
- =?utf-8?B?M2o3U3BKaHFTaGlhWUIwN0lMZ3hnNXJQZHBsSzhwMEJkMnhDeHU5clUvMUdB?=
- =?utf-8?B?UmZJUG5lTGdWYUJaMFN2d1BMWDN2UXh5T0FTYVY1aWxlMkswK1JJaWl3dVp3?=
- =?utf-8?B?ampmRGl6NUNYYmdnTDdoUU5ZMzk5VmdLWDZrY0VSc0R0dnJtcFFrU0IzWEV3?=
- =?utf-8?B?SVZiODMxYS9lR3Jia1pPTHcySmxGOFQ2b3AwUVJzdm1rdXZvVFlreXdhb0VW?=
- =?utf-8?B?MGhFTUxmcjBwL1NtZEhEcEJMR3BJQXJOV29iNUdyblhZVVdHZHU2ZFdkK0lr?=
- =?utf-8?B?bHRxUmFiTXBNcmVUVkdqOGwzWWV1WFM3TFB4YmtEZTF2emhrS1luYnZFL01u?=
- =?utf-8?B?NVRLNkYxcDljUEg2RHVVU0tscjI4SlVJQk1ERE1WSU5Ta3EvYWtJTk41aTk2?=
- =?utf-8?B?b3pOdEVjaHBhRmFoRnB6bnRObWdOd1dHTkFXSXMxaWFMMWR5K2c5eGxycytC?=
- =?utf-8?B?R0llemNHaC8yZTY1WVFPQ2g5QXpWVXhrVjY1K3RHTTQxOFdZUEE1cWhWRW9B?=
- =?utf-8?B?ZTZ5Zm1XdnF5ZHIrRlQvR0t4WUdRNEc0ODRvRi9RemdWOGFRRnh0K1pQbGps?=
- =?utf-8?B?RVZudXpvK1FoZHcwZ3o0TTNvMlBVVUpzK012bTQ0MWlrU0hpR0tsOTZEL3Zh?=
- =?utf-8?B?YjdlSlFDeFdJcEEwTVpGNUZucnEvYWRyYUVtbHJSSkI0Ulp3dFlNOFB1cytq?=
- =?utf-8?B?L2JLenlaekZrczcrNVFnQVliZUdmS1ZqYjRmMlg0cmM3SktIaDAwMWtPYVB1?=
- =?utf-8?B?MlI1a0NsbHJvTG9BKzNWRzR5RThDRkhCNmtiQlgwY3hrNHhHK3N4RExzbGYw?=
- =?utf-8?B?WHRLNnhiOCtBeElCWXJsYk1XTkRhZTJHRkk0blgvbk5kNWNkc1cvTGlXVUhO?=
- =?utf-8?B?dEYrNnQyYXZtRUNVNURRU0xOMlJkdXdSREsxMnNDVWwwc0VCZ1daRklRSUgz?=
- =?utf-8?Q?Lsda9kX60WQu2F+stRjryRLKR?=
+	=?utf-8?B?T0wzV1M4MndpL0VjM2N6OC91aFBRaG1BVzA0cVk5SHZ4YzFQbjZESUpIOXhY?=
+ =?utf-8?B?Q2hNbWhmZ1VVazhzbUxzb3cvS0g1VTZQN1U4ZU9HVFAxTFNrckdEMlFKc0xa?=
+ =?utf-8?B?UnFpUVQvbnZvVlRuVkRlNm9JSFYySDB2Q0JqQ0hOZ045eEVpVzJqazRNc2Fn?=
+ =?utf-8?B?V3k3dHVCNGd4MkdvUXNhSCtjZXN5RGFBSE1yVGFjQ2JmK21kQk1ucmxML3cw?=
+ =?utf-8?B?bWlXUmhnRzRxSmNkdng4ajhUTVEzditnZ0FwcjBNWGJlek1DQ0cyL0ZrTFQ2?=
+ =?utf-8?B?QXkxNitRUThtL1hYYlhRK3V3SGNsYWpIaTFGRWFHQ0N6UVlRUWozSE5UZHhV?=
+ =?utf-8?B?SHRqbnJvNENMcGJUZGFkb1AySTdqUTNDZlVrRlNhT2gwWVlQQy9MVVBJTyta?=
+ =?utf-8?B?bWsyS25Yd0RCUzBQMDRzWm5WZmMrVTFlYkNhbnhtUlZBUW02RG5OOWFQY0E5?=
+ =?utf-8?B?eC9uVVBlRTIreU1aZVpHV3RMNmlJWGxjYjQyR3NzYjRVUm13Tm8rNUh4VkJs?=
+ =?utf-8?B?d3puQWpndnhDWk94bkdaaXpqOEozU3hHQU1vcTJBYW15NmplVmZWQjJBUFkz?=
+ =?utf-8?B?NlNjM1RtSHhIN2lmYktTdG1xb1FMK1dDd3Y2UlB1NVVLWXZFZjc4R1gzWFZL?=
+ =?utf-8?B?Vk54R2lQeWVKRXd3ZENDTm1WdXh6NXlKQ1MvYkczbEsyZHRXMXN4UmwrUjlC?=
+ =?utf-8?B?YXZCdjNsaDJIdk9Zd1ErUTRQSTErdVNGaklFRlowVE5jSVNlUEVSUEthM3Rw?=
+ =?utf-8?B?Mnh2RGRadFE0S0ZzQjlURndSR2RNYXN0ZHpKRWErQU5uaW5EdElqdzlzemZp?=
+ =?utf-8?B?eXpVR1FkVXF5N2NJMkdJYkRuYzBvaTFmWkNwc3NnaXFqMVYyQUVCUXgybzBn?=
+ =?utf-8?B?dTRnSEZvdnFkRllrRDkxZzdrWGIwR3huaExsZkdIV1J5TFBSaVJlUTZZamxW?=
+ =?utf-8?B?R0c1MjdYTGNubW9KZjcyYllnNWFvZWhnRE5WWGJuTUpFMjdoVU90Q3JWNUJG?=
+ =?utf-8?B?Y25MaVdyVUZBV1BQVWhPeXhnSU04Y1d2UHVBNjRTQmtVbzE5U0ZRbzdKTEdv?=
+ =?utf-8?B?VkdIdVF5bWU4UFh6VmJHM0o1TkZ0czJPelJpUFQ4K25TWXR4ZG5QUFk4NzBl?=
+ =?utf-8?B?c01SRWJBMmFMUWdkOHR6M0hGcEtPQjFvMEt3RGJYRXhmRVhZa2x0aWxzMk9L?=
+ =?utf-8?B?ZDBERGZ6SnFqNVJvU09Ga2UwWFpKN2FLaFBQR2R2Y3grcHBPbW5UM0lXM2h4?=
+ =?utf-8?B?U1dTOGhtTHptWHpQWXZ2MnBpNXlSTjVDYXE0elh5Ly9PNDI1Q3ZOUDVJcE9R?=
+ =?utf-8?B?RVBTVXo0M29UQ21CUEo0bE44SVJIelp6UmVGK0Jma3JXa2Z6cGxMYVdrUlc4?=
+ =?utf-8?B?MkpoVnR1dURCeURFQnYreTlXaitzbUFiUjBpcnNoNkNBQy9PcUY4Z01WNzlq?=
+ =?utf-8?B?YUFDQWFrU0tBbWVBZy9pdloybHJNNnpiRk5GSFVPcW01OHRBK0pnQis1UjRp?=
+ =?utf-8?B?UWJSSnUxUkhZVW45WXFFYlhham5zSXJDK2ZTV0hUb2pJZlN5VWV2SldVaVIv?=
+ =?utf-8?B?RmJnY0FoQlQrYWJoeWUrMUJ5bU9IVDJZSzRuc1UrZFQxTVlqaDVYbHFlZDFL?=
+ =?utf-8?B?blJvNitzYWtZN2pManF5TC9TbHJ6RWUrL215aVh1QmNyOGRiWlFCa1JzR0g4?=
+ =?utf-8?B?cWVvRXh0SkRWRU1YWm5pa1FCOGtLL01zVVNMdVRkampKTnZjS0EyajdsTlhK?=
+ =?utf-8?B?Q2RRVWphMHJuOEQxL2pHNHNZWGpXRThOWTRBOW5YZVUrL1Yxb1Z5U2tLeWpy?=
+ =?utf-8?B?V3p1d0kwZkZUZW1kcTRQQ1g4UDI2STRhTG1CbVJZcW80aUhpSXhXTjBxeXc1?=
+ =?utf-8?B?dWQydGpGNzdHSWxhcVFVak9Ldjk1WXR0WURpa0daZ2RnaEpXUU52emhHcVhN?=
+ =?utf-8?B?TG16L3JwdHluK2lRcTRJZUZTS0tXb01NU2FmN1FmaGxVSlJKOXRCdnhhZWxS?=
+ =?utf-8?B?ZHIyUGVKa2ZVMnpMZTBSckVtY3d6VVdLL2x6VnNhWW80QXRRZmU5NCtlVlRD?=
+ =?utf-8?B?QlFXZkRhYkt1QlFCMkFQQTQyT2UzR1k2MnMvaFJSYlpSQVRJbGMwTkExN2Za?=
+ =?utf-8?Q?+HDSaIP1+EvuTci6NNw0/xJEf?=
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	lO/GAmvLXI3vKUNM7Ev99avzaLHIpODmrvc/n+TI+4gVIswA8qzeCMsOfytdie8m9Inoc8XAKMNmQpHBRZBMP/NnhzROu7V1a27dOqd48Sr9g62DesD7WYKA5irSFQrR7J0faXDGyz8UY9Y4JABS97aBQRYDxT16yRmnLcxcYAiPfJL2sfANH8z7bl1g8cQT8tlc4/l6BR2AakFaSoUoX+nfRCSG9/ZOwDsKLvhJEaYgwVsbPj7FB1ctq1zJuFJm0gFOaUrbcgkmK23lhD2H56uAhEi4665TMbhncoKyI9vMi9iVK7yBDd8DE1uuDKPvBj/2xzAOZJcgLyCEaJnwG96DiUE3VvJtD8mEKbz0z6QvdeN23ktkV+43aajG9vFDSbqUovqOLwgDWTu++0Au/ze/2fyn1TQZn92HWoiFMVNKOsB1dXc5vwrdQjUqtVo7D6TPtHC/90BzCvUszbMAbuzi1xqf9x3KG6v2mz/0hB6rNa5HtMbi7tgcVueAINQRAI2c3/M72n/1XC8v4X/HPsPTkF/Zb0iHzhW2bfhsveRMYxXpVdNjEGmwNmB1qTsWN6RvMCsA3jZn6YFrON/l8403rshXlYDgEHKJ1rufoF8=
+	NzP+mBQB+ut/dsRVi0xz5Ubaos83GYUnbsHbYxuHZTwHF3E+TlxTzgc0hDnqOvTww47a6lxBzNSWCPAjK/Ey1zP2nUm3DVXgfRHzF/CabKP4r67BDLJMogFJMXHgqlWWkPYB51KCslkk0D5Ld+DTKNjcklQ27+IaVuFHN0hccv+w3n47/Ts2aOHwMSz+TS3ks2D/FV1B+t8kCNCT0dOKV6C9l7/jn25Rhr+VQr3mKY7p69FJV4Oyw1ECoH+MlY/J4O42KIiyU8iI/uT5WMmfyOTxn/Txm2RJZVPbUBjH4iN4xGe4Q17ULFU7X+GyzllFu7QfX6lhGXqHBTHdk234Qmhwe5LRq368OkX0OO+OI1sOJBKQB+iSXXPNvSWnpVXmg2XwSKQGMVAoWjDmhpgZXJ5Aet/SV3EgJnPdwMismfpF9pK3Ok4WRroi4s0JJocq9dCLW6SpItSsrSKX0hdN+MqgQfawQk9E5NaRAvlk5iMmltDEisK8CFTIL6p5k3x80kVPCwz+uUgICO7pQifRIL7vY2BFs9Cj+xVJ9FpvoFmhgIDnv0K9lXxj3g8Q17CJ3aApMp42wM5QjZEs2grlkyc9zX7OlkB0EDaooHwz11U=
 X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 1120a207-307a-4557-3079-08ddb589adbd
+X-MS-Exchange-CrossTenant-Network-Message-Id: a37aa821-ca53-408e-cbca-08ddb5953e83
 X-MS-Exchange-CrossTenant-AuthSource: CH2PR10MB4312.namprd10.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Jun 2025 14:48:29.4210
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Jun 2025 16:11:16.2431
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: A+TIex3Zh2pMaUQGiwtuOg6jiDfiyDHF0Zhpzb7yNC0Q0JkLaSHfl5aIxebDk4LltcMa4nPoTP0Lti86Nfrw6A==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN6PR10MB8045
+X-MS-Exchange-CrossTenant-UserPrincipalName: A70NR3hkxqxt2m45oVmRK01QZeNo3G83Km7DKG2NheLV6HdlY6s5lFn965WAT0dZNVo65PWEHDGZSfJBJqPZfQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR10MB4661
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
- definitions=2025-06-27_04,2025-06-26_05,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 mlxlogscore=999
- spamscore=0 malwarescore=0 suspectscore=0 mlxscore=0 bulkscore=0
- phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2505160000 definitions=main-2506270121
-X-Proofpoint-ORIG-GUID: uyYxtT2y4KuIdRFiY2x8gi1JqHbAU3PS
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjI3MDEyMCBTYWx0ZWRfX6EXs+ttrbdkY Q3c38TzFDzwm7RbMGGgUKOyLSAJ4VFDx4oxUcXVjeQqLEjbAF+a5InKWYBQk57jm3T7SHK+84iS AorOpoYEPNN3BVQFRYCVCZ4+RbjB32wL4QFP+PZ0hW+05Ln6aK68tAYCCS1WriqML2lqgVpg+F0
- KIdRYjdald5YRkCsJo3VLQDq0gMgqCbW4wJwCpGU7jW06/vfsvXwCpzqFfTSOJGAlIY+OuOUrCT EMm0zj93fd2xGVQwshxqRBEHSirNi9Ry2Zpw6hBj8TI2XfDQLBN6E0CusNLy2mFb7YNWB/mDD/D 9AphjNQ0tMdAfKUWhtz2qoSg0mwYh9mFKlz245WpJOK+lZaw1lufJtFmAEIFUT7HUZvXZ4fYV7L
- skF1xxE5nF0tGiebIOTtryVC88svAKuIKZpl2zRRP4DknO0uxI6lGJ/qTpvEJn/k8CNDI2zm
-X-Proofpoint-GUID: uyYxtT2y4KuIdRFiY2x8gi1JqHbAU3PS
-X-Authority-Analysis: v=2.4 cv=PqSTbxM3 c=1 sm=1 tr=0 ts=685eaf40 cx=c_pps a=OOZaFjgC48PWsiFpTAqLcw==:117 a=OOZaFjgC48PWsiFpTAqLcw==:17 a=6eWqkTHjU83fiwn7nKZWdM+Sl24=:19 a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=wKuvFiaSGQ0qltdbU6+NXLB8nM8=:19
- a=Ol13hO9ccFRV9qXi2t6ftBPywas=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10 a=6IFa9wvqVegA:10 a=GoEa3M9JfhUA:10 a=pGLkceISAAAA:8 a=VnNF1IyMAAAA:8 a=-Fdvg-oBZ4mtiJ2j1YoA:9 a=QEXdDO2ut3YA:10
+ definitions=2025-06-27_05,2025-06-26_05,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 spamscore=0 bulkscore=0
+ malwarescore=0 phishscore=0 suspectscore=0 adultscore=0 mlxlogscore=901
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2505160000
+ definitions=main-2506270131
+X-Proofpoint-GUID: 26FeAh4uzo2XW1RH77uztT59banIEJMp
+X-Authority-Analysis: v=2.4 cv=CeII5Krl c=1 sm=1 tr=0 ts=685ec2a9 cx=c_pps a=XiAAW1AwiKB2Y8Wsi+sD2Q==:117 a=XiAAW1AwiKB2Y8Wsi+sD2Q==:17 a=6eWqkTHjU83fiwn7nKZWdM+Sl24=:19 a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=wKuvFiaSGQ0qltdbU6+NXLB8nM8=:19
+ a=Ol13hO9ccFRV9qXi2t6ftBPywas=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10 a=6IFa9wvqVegA:10 a=GoEa3M9JfhUA:10 a=pGLkceISAAAA:8 a=VnNF1IyMAAAA:8 a=LctOniYhYpxmoBfWMj8A:9 a=QEXdDO2ut3YA:10
+X-Proofpoint-ORIG-GUID: 26FeAh4uzo2XW1RH77uztT59banIEJMp
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjI3MDEzMSBTYWx0ZWRfX4DGDnh2ua1X4 Pkl6OeNncW25sUHYZjTcnKvTu9bLO74l8gOgBXIcbTcLXlXw+QKH4dBAnSDRTi1J5eybOMO9Kt5 oaHLiwKvQAMT/NicIWlIjdave/U2+jZoYbFc+yPhqR7CdcqEzeXyjvOuu8tFmBf/usfuMM5sXRB
+ 9kRxGdawi5SQ5cTZHA9Aw5tz8lrdOOBen/AUyI8IewMiGGj7ArkrPLbjnisvX8JZZWzSa7KK57j ctToRJI6dbUTtpOa1SLd0/MRpdT7LB7Pk8o8fMlcXJqV+AaXoByYXZxcB29dC2yC29njxGjJkDp 3aT4Tpe4/2DxmOcEH/cAoih0GbzVZHILNXtFQEgkkyYgTZ7ezyCUw5v/NJMgyrEzY66noILheH6
+ tkcdOfqhurHWTlGnuxB4B+jjt3wwEsjrLEXnqyET8hcwl2m5p3C6ZeHzMB/4A0FJH3+NB1RO
 
-On 26/06/2025 12:58, Ojaswin Mujoo wrote:
-> From: "Ritesh Harjani (IBM)"<ritesh.list@gmail.com>
+On 26/06/2025 12:59, Ojaswin Mujoo wrote:
+> This test is intended to ensure that multi blocks atomic writes
+> maintain atomic guarantees across sudden FS shutdowns.
 > 
-> This tests uses fio to first create a file with mixed mappings. Then it
-> does atomic writes using aio dio with parallel jobs to the same file
-> with mixed mappings. This forces the filesystem allocator to allocate
-> extents over mixed mapping regions to stress FS block allocators.
+> The way we work is that we lay out a file with random mix of written,
+> unwritten and hole extents. Then we start performing atomic writes
+> sequentially on the file while we parallely shutdown the FS. Then we
+> note the last offset where the atomic write happened just before shut
+> down and then make sure blocks around it either have completely old
+> data or completely new data, ie the write was not torn during shutdown.
 > 
-> Signed-off-by: Ritesh Harjani (IBM)<ritesh.list@gmail.com>
+> We repeat the same with completely written, completely unwritten and completely
+> empty file to ensure these cases are not torn either.  Finally, we have a
+> similar test for append atomic writes
+> 
+> Suggested-by: Ritesh Harjani (IBM)<ritesh.list@gmail.com>
 > Signed-off-by: Ojaswin Mujoo<ojaswin@linux.ibm.com>
 
-The think that the same comments I had for 1226 apply here, but I also 
-get this error on xfs:
+this seems to work ok for xfs, as I get data verify errors when I remove 
+the -A arg to xfs_io when doing the atomic writes.
 
-[root@jgarry-ol9new xfstests-dev]# diff -u 
-/home/opc/xfstests-dev/tests/generic/1227.out 
-/home/opc/xfstests-dev/results//generic/1227.out.bad
---- /home/opc/xfstests-dev/tests/generic/1227.out       2025-06-27 
-11:26:58.411121674 +0000
-+++ /home/opc/xfstests-dev/results//generic/1227.out.bad 
-2025-06-27 14:46:24.931649292 +0000
-@@ -1,2 +1,3 @@
-  QA output created by 1227
-+/home/opc/xfstests-dev/tests/generic/1227: line 15: 
+But I see this (always):
+
+@@ -1,2 +1,83 @@
+  QA output created by 1230
++/home/opc/xfstests-dev/tests/generic/1230: line 13: 
 _require_scratch_write_atomic_multi_fsblock: command not found
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (535173) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (535256) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (535339) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (535419) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (560146) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (560229) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (560312) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (560392) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (585304) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (585387) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (585470) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (585550) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (610300) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (610384) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (610468) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (610548) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (635276) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (635359) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (635442) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (635523) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (660400) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (660483) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (660566) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (660646) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (685377) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (685460) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (685543) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (685624) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (710361) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (710444) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (710527) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (710607) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (735333) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (735417) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (735500) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (735580) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (760306) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (760390) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (760473) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (760553) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (785276) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (785359) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (785442) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (785522) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (810249) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (810332) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (810415) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (810495) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (835221) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (835304) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (835388) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (835469) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (860199) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (860282) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (860365) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (860445) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (885169) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (885253) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (885336) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (885416) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (910140) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (910223) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (910307) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (910387) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (935110) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (935193) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (935276) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (935356) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (960079) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (960162) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (960245) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (960326) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (985052) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (985135) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (985218) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (985299) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (1010026) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (1010109) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 149: kill: (1010192) - 
+No such process
++/home/opc/xfstests-dev/tests/generic/1230: line 247: kill: (1010272) - 
+No such process
   Silence is golden
+[root@jgarry-ol9new xfstests-dev]#
 
+
+any idea (apart from _require_scratch_write_atomic_multi_fsblock)?
