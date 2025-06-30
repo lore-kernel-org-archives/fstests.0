@@ -1,68 +1,60 @@
-Received: from mail-pg1-f172.google.com (mail-pg1-f172.google.com [209.85.215.172])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 78891215783
-	for <fstests@vger.kernel.org>; Fri, 27 Jun 2025 18:42:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D221E173
+	for <fstests@vger.kernel.org>; Mon, 30 Jun 2025 01:03:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751049760; cv=none; b=ZnHpTbemOZnZlYc42a1q3XHRoiM2Qi+Rt7Bt1DVn400/a/JdCQ8tIN/IPCrYaAdQZp2fi3XFPdUnHQvOpW/4YTyfZ5Xz4AAUE8ElIlpB/vusyb+jxAjjeBhu68CoUp0Yt6xnBHVkhDP52XeyNkArvCekdt4kWotWHZ5tIcPvf80=
+	t=1751245400; cv=none; b=J/EY3bQbGe4KxKQtChFpxFmYY03nmMuxwz9fxaRjNMdmMVZZrJhrvWvu8B2MAg5Eor+uHdcht8XjMpZXQVyKe2/MTPORowd/ufJVMDTr4sG4vPRvk2rCy+28UuS+KV1DHnFS64MxtB051JlU6V8l+YJaLApgR7lQG/+/Kr3jcyQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751049760; c=relaxed/simple;
-	bh=TFuT6y53VKXj3SaphfLIbrv7DtIxTxDgJ+V3hK3PEkI=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=aWvX/0nVtmlFfnT7Mz6VEG4ZQrf0Hc3cmI4mOfbEnYK6oWUQwNhL+6W5sz63wUFgYt8l4SaQM/mq0Qw7GWy60SJEaYBhGBans783NLMwzT4g7cv0hrexfaI+DJstbXENqQhSt2pw/ELRJ6qKzGRwiYhVdgFP9fAQl7DTZjVTsoY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=versity.com; spf=pass smtp.mailfrom=versity.com; dkim=pass (2048-bit key) header.d=versity.com header.i=@versity.com header.b=e1yX11GM; arc=none smtp.client-ip=209.85.215.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=versity.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=versity.com
+	s=arc-20240116; t=1751245400; c=relaxed/simple;
+	bh=SEa/0c+X9U0vG+KH4a7y7+yoeAX4p+rS7xCm6TQo1Os=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=dw01mEkgkmQfm/osSUSaDTPOOCYnLM9DTjnbR8YomwwE/ZX4qkKHkhkaDdqrNAjLuaruFdl5SdxcpRq36nmzQsDfAbJH/YlcSBJhigYbn5E0vneU63vAN4A39hlFlaz5ABfJYQcuTTFo8qPLy2ujCW9u6tYrHkzxUqB1iA20kYE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=jegJijsS; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=hdMWUY0S; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=versity.com header.i=@versity.com header.b="e1yX11GM"
-Received: by mail-pg1-f172.google.com with SMTP id 41be03b00d2f7-b170c99aa49so2112851a12.1
-        for <fstests@vger.kernel.org>; Fri, 27 Jun 2025 11:42:37 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=versity.com; s=google; t=1751049756; x=1751654556; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=+a7KlzOE25KfvqV67csK4Q9jUgOx2xFzqbWFuaVfuts=;
-        b=e1yX11GMrsnutYWsRD0Zrdpgej5iqVbCtrGAQdEjCwPhg4ZuYGppztmfdV3fWCzIit
-         haENmRdS5vc7gHFp0C9la0c8IU5U1p0Bgo5EZLw+BUocm/v47tmBvct54alyZGjnXjU+
-         e0S6qN8I1EVAeYzlawnOMqTWBQt6I06shCXShlse+nv3hHaVgCAvqeun8H5SEGdzzmcn
-         fssofIBFDSf5twb9HNobjv7wy+dPJmX6mkkqwk/l4251sSw1wAT3eLhQ2sbc4AvMX6eP
-         8q8XW6lAbUNB/ESxGjCteaqHIc0dWNhxmZVqc9BHSI96lnuehM2pDSvZSf0C4OpOW3tn
-         RyXg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751049756; x=1751654556;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=+a7KlzOE25KfvqV67csK4Q9jUgOx2xFzqbWFuaVfuts=;
-        b=eUhcnWDlk/tPg2SrKjvQdsm8z/8f3UDzNN6K5wSMI07lsVtp7kyUW4DsJVgwIantfL
-         CwTTg2UR40KdnmgQKwn3qagdCywk8HASs9mENHDL+xidWm0VjpnYK2cGo+55ayr33AsA
-         h51/+073s0Wz+I+TTXWXVzXSpiZ58M4mZUavO9SvNkEA9gyx1uboXXBzK69grOrptNgE
-         yu9+gfrVvxnA+c9LJ1ZFHW6VYCKE5TaJgomnRk99bEidSlgxN7gfHoXjT/MfuLS2jH3Z
-         wMceg/iD7cRf53R6y5ys8AOo33P4WwT+tSCe8Wfczc4qBe3ZIA3EhP2EfW766u0vkYNx
-         sB1A==
-X-Gm-Message-State: AOJu0Yw1RZ24qkNMf22NP7bwRq8wsLdpIpQWtOWIq6MZddfSnRqvpZu1
-	LHkT8oxzepSByaauTtTm/3lI5XxzmLcad64p3NHYhH59zvFb/ehr0gSJfPt+Lw2fcX1DqEcSFs0
-	Cz7FF0W0=
-X-Gm-Gg: ASbGncv1d9pkn5xuynMGiUZONjLgN6oFH+eEkd5ORoXomLlZeEm6Tm4MqwA38dlSdKu
-	V078nnhdGzqsmwA3lJBsE3g+qSa+ebwiFYqmTIj7RuSGHWhkeCF8ayOuRfOk7P2f+LazAj6rbQF
-	RnVKr1UeYB8iFY+Mp+gYeAu18vTEb5SWJjZxE53XQsw4+3UrmtmpwjVpQO/4MriOUxl/Ca2BERU
-	EVkj7GQGzEm9AUF9Qk4RKYznJ2tQrz9apSQ7a40XgPBSMw5JIZt76NowXSOQGoaw/oR249QrLDO
-	5kDXEJBeOroziS2U0CUbbz1W/5FHdDWTN1NhflKB6iT9WpkLz6CBGfqcFNtZ2YHZabpCMsOW+Os
-	=
-X-Google-Smtp-Source: AGHT+IH/x8UcnkCAYF8iU/fWo7UrSjoi+3kuT5CnLxkM/Ij6cBcTMousgj1r9QWhGjJAKscXBysmjw==
-X-Received: by 2002:a17:902:cecf:b0:22e:421b:49b1 with SMTP id d9443c01a7336-23ac487c9f8mr67219885ad.48.1751049756146;
-        Fri, 27 Jun 2025 11:42:36 -0700 (PDT)
-Received: from pc-versity-test.lan ([2605:59c8:474:a100:82ee:73ff:fee4:d15])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-23acb3b7a47sm21612005ad.166.2025.06.27.11.42.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 27 Jun 2025 11:42:35 -0700 (PDT)
-From: Auke Kok <auke.kok@versity.com>
-To: fstests@vger.kernel.org
-Cc: Auke Kok <auke.kok@versity.com>
-Subject: [PATCH] common: add scoutfs support.
-Date: Fri, 27 Jun 2025 11:42:20 -0700
-Message-ID: <20250627184220.114746-1-auke.kok@versity.com>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="jegJijsS";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="hdMWUY0S"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id D36201F390;
+	Mon, 30 Jun 2025 01:03:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1751245396; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=1Msxn02wfSYghSKw3RVk1xzcWgP/tRxhG+du95QF1p0=;
+	b=jegJijsSE5K5Hu+P/UrMcry4e+hvoBUy6TJ7q5lWLlgzq2nNvyhTfCsO85OVJQOteA8cty
+	Hi8TQB6fcb4dUvvQodQvu4i9Ti51HCo4uoqKG/+mWZqWM+EPGfgHiSiQbYRXmVJNcuxWJl
+	RQuLHyZR6V1NJBX4KNAgBoXBUAuG8CQ=
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=hdMWUY0S
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1751245395; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=1Msxn02wfSYghSKw3RVk1xzcWgP/tRxhG+du95QF1p0=;
+	b=hdMWUY0Saq0v2+wvUp822bDQt/ABttOgWSRkW5zcsvGX9jaU/zQwx/jF9URjCVXsWg8dOW
+	x+qEqwMuFWKQi3Qrk0Lr9RV5KAnSA7WKm/m0kv28OOcLXJEb/Vr2/tk33tu3+DlAJp1Ux4
+	KXicaMc7m/jFwNZqFwWWf5TGpfJWpgU=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id CFD111369C;
+	Mon, 30 Jun 2025 01:03:14 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id pRGjI1LiYWjCCAAAD6G6ig
+	(envelope-from <wqu@suse.com>); Mon, 30 Jun 2025 01:03:14 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] common: add proper btrfs log tree detection to _has_metadata_journaling
+Date: Mon, 30 Jun 2025 10:32:53 +0930
+Message-ID: <20250630010253.30075-1-wqu@suse.com>
+X-Mailer: git-send-email 2.50.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -70,115 +62,112 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Rspamd-Queue-Id: D36201F390
+X-Rspamd-Action: no action
+X-Spam-Flag: NO
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	MIME_TRACE(0.00)[0:+];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCPT_COUNT_TWO(0.00)[2];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	ARC_NA(0.00)[];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	RCVD_TLS_ALL(0.00)[];
+	DKIM_TRACE(0.00)[suse.com:+];
+	RCVD_COUNT_TWO(0.00)[2];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	TO_DN_NONE(0.00)[];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	DNSWL_BLOCKED(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo,suse.com:mid,suse.com:dkim,suse.com:email]
+X-Spam-Score: -3.01
+X-Spam-Level: 
 
-Basic scoutfs support: scoutfs uses 2 devices for a filesystem, one for
-metadata, and one for data. This requires that we pass a metadev_path
-argument to every mount call, as well as a quorum_slot option.
+[BUG]
+With the incoming btrfs shutdown ioctl/remove_bdev callback support,
+btrfs can be tested with the shutdown group.
 
-To run any of these tests on scoutfs, you'll need to build and
-install the out-of-tree kernel module `scoutfs.ko`, and the `scoutfs`
-userspace utility, which can `mkfs` a scoutfs filesystem. The tests
-themselves are unmodified - many of them will be skipped due to
-unsupported features.
+But test case generic/050 still fails on btrfs with shutdown support:
 
-Signed-off-by: Auke Kok <auke.kok@versity.com>
+generic/050 1s ... - output mismatch (see /home/adam/xfstests/results//generic/050.out.bad)
+    --- tests/generic/050.out	2022-05-11 11:25:30.763333331 +0930
+    +++ /home/adam/xfstests/results//generic/050.out.bad	2025-06-30 10:22:21.752068622 +0930
+    @@ -13,9 +13,7 @@
+     setting device read-only
+     mounting filesystem that needs recovery on a read-only device:
+     mount: device write-protected, mounting read-only
+    -mount: cannot mount device read-only
+     unmounting read-only filesystem
+    -umount: SCRATCH_DEV: not mounted
+     mounting filesystem with -o norecovery on a read-only device:
+    ...
+    (Run 'diff -u /home/adam/xfstests/tests/generic/050.out /home/adam/xfstests/results//generic/050.out.bad'  to see the entire diff)
+Ran: generic/050
+
+[CAUSE]
+The test case generic/050 has several different golden output depending
+on the fs features.
+
+For fses which requires data write (e.g. replay the journal) during
+mount, mounting a read-only block device should fail.
+And that is the default golden output.
+
+However there are cases that the fs doesn't need to write anything, e.g.
+the fs has no metadata journal support at all, or the fs has no dirty
+journal to replay.
+
+In that case, there is the generic/050.nojournal golden output.
+
+The test case is using the helper _has_metadata_journaling() to
+determine the feature.
+
+Unfortunately that helper doesn't support btrfs, thus the default
+behavior is to assume the fs has journal to replay, thus for btrfs it
+always assume there is a journal to replay and results the wrong golden
+output to be used.
+
+[FIX]
+Add btrfs specific log tree check into _has_metadata_journaling(), so
+that if there is no log tree to replay, expose the "nojournal" feature
+correctly to pass generic/050.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- common/config |  1 +
- common/rc     | 26 ++++++++++++++++++++++++++
- 2 files changed, 27 insertions(+)
+ common/rc | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/common/config b/common/config
-index 22b52432..5273790d 100644
---- a/common/config
-+++ b/common/config
-@@ -228,6 +228,7 @@ export BTRFS_MAP_LOGICAL_PROG=$(type -P btrfs-map-logical)
- export PARTED_PROG="$(type -P parted)"
- export XFS_PROPERTY_PROG="$(type -P xfs_property)"
- export FSCRYPTCTL_PROG="$(type -P fscryptctl)"
-+export SCOUTFS_PROG="$(type -P scoutfs)"
- 
- # udev wait functions.
- #
 diff --git a/common/rc b/common/rc
-index f71cc8f0..47aac12b 100644
+index 2d8e7167..a78b779a 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -361,6 +361,9 @@ _scratch_options()
-     ext2|ext3|ext4)
- 	_scratch_ext4_options "$@"
- 	;;
-+    scoutfs)
-+	SCRATCH_OPTIONS=$SCOUTFS_SCRATCH_MOUNT_OPTIONS_META_DEV
-+	;;
-     esac
- }
- 
-@@ -396,7 +399,14 @@ _test_options()
- # hosted on $SCRATCH_DEV, so can't use external scratch devices).
- _common_dev_mount_options()
- {
-+    case "$FSTYPE" in
-+    scoutfs)
-+	echo $MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS $SCOUTFS_MOUNT_OPTIONS_META_DEV $*
-+	;;
-+    *)
- 	echo $MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS $*
-+	;;
-+    esac
- }
- 
- _scratch_mount_options()
-@@ -851,6 +861,9 @@ _test_mkfs()
-     bcachefs)
- 	$MKFS_BCACHEFS_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
- 	;;
-+    scoutfs)
-+	$SCOUTFS_PROG mkfs $MKFS_OPTIONS $* $TEST_DEV
-+	;;
-     *)
- 	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
- 	;;
-@@ -896,6 +909,9 @@ _try_mkfs_dev()
-     xfs)
- 	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $*
- 	;;
-+    scoutfs)
-+	$SCOUTFS_PROG mkfs $MKFS_OPTIONS $*
-+	;;
-     *)
- 	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $*
- 	;;
-@@ -1003,6 +1019,10 @@ _scratch_mkfs()
- 		mkfs_cmd="$MKFS_BCACHEFS_PROG"
- 		mkfs_filter="cat"
+@@ -4283,6 +4283,14 @@ _has_metadata_journaling()
+ 			return 1
+ 		fi
  		;;
-+     scoutfs)
-+		mkfs_cmd="$SCOUTFS_PROG mkfs $MKFS_OPTIONS $MKFS_SCRATCH_OPTIONS $* $SCRATCH_META_DEV"
-+		mkfs_filter="cat"
++	btrfs)
++		_require_btrfs_command inspect-internal dump-super
++		if "$BTRFS_UTIL_PROG" inspect-internal dump-super $dev | \
++		   grep -q "log_root\s\+0" ; then
++			echo "$FSTYPE on $dev has empty log tree"
++			return 1
++		fi
 +		;;
  	*)
- 		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
- 		mkfs_filter="cat"
-@@ -3670,6 +3690,9 @@ _check_test_fs()
-     f2fs)
-         _check_f2fs_filesystem $TEST_DEV
-         ;;
-+    scoutfs)
-+	# currently not checking
-+	;;
-     *)
- 	_check_generic_filesystem $TEST_DEV
- 	;;
-@@ -3729,6 +3752,9 @@ _check_scratch_fs()
-     f2fs)
-         _check_f2fs_filesystem $device
-         ;;
-+    scoutfs)
-+	# currently not checking
-+	;;
-     *)
- 	_check_generic_filesystem $device
- 	;;
+ 		# by default we pass; if you need to, add your fs above!
+ 		;;
 -- 
-2.49.0
+2.50.0
 
