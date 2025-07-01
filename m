@@ -1,75 +1,76 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2A39125B2
-	for <fstests@vger.kernel.org>; Tue,  1 Jul 2025 14:28:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C97F027A127
+	for <fstests@vger.kernel.org>; Tue,  1 Jul 2025 14:56:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751380094; cv=none; b=AUTcZBiIZIS+GEwMd3tsIDIrMbKHldCtJuT6G9bvCzISnBUBdMX9PvRQOL1sliD0Cxh+DYo2AVc1u9tMxxjehbRieJnyriAI6SarDw+hnGDhhdOJPQPlkR5kBLSHWeQffvc72rJWm9jmQdXlmcUG8hnWKcTCaB1FZXEvvONKTho=
+	t=1751381778; cv=none; b=oANT5Hz9P9CgEb11pHbxzYdaZerXikSCCLR7wRxzTeGT7iB/670+YZv9R91kC2gUPuMNzykJzQ+XmkKJSscOCRgvRk5/NK3vYcPe32zl3tdJEafzdDMNd+k4gb8F2vsKqtdCpNEOXs2EJjonqKyI11DgqtQZZgYllmD242GWCF0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751380094; c=relaxed/simple;
-	bh=FfWNlt0sTvazmmf8FeKea/5UbR8UES/3TauQo/EeSf4=;
+	s=arc-20240116; t=1751381778; c=relaxed/simple;
+	bh=jvuexJOYZveqFgLJvIMrTzr0AD/7v+WwKZtlFKufrEA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qQdqNSH/FQt6Qt9z8e1Uj0Wt+zaRHES6IzMPRVjCmJcxRZ4j8ubzRAy0CIx76qhRTYAImZDIj1abTOAHKPvkvwOF9tu79iiQdtt8ssqoXB5kPVYyhRelUVHfRkgs9cZ3NtlU9dpMZIkOhl8KXzXB0wM5vNyq3f+YPN6iS0EMBBg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=hVumTctL; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=FeVf2BjGR5qKhNrUaQyBzERf4bDj8fNU22hBHqlTpSsMMq1JeB/6sdnbolfmGBaBtMdNuO/6OE3LfGMCi2FnxOvRCm7LSeEVO9ZRPA3SztzEeKRjJh8oplOi9n979IChRzOykDO0YGftYAbmBByKHUKfKSsvVPGZ5dY0EvCGo6k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=bU9WipkO; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hVumTctL"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bU9WipkO"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1751380091;
+	s=mimecast20190719; t=1751381775;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=aqHNejLTu5OmdI4y6XzLz4N8WLe44NOczvGEBwpMpFg=;
-	b=hVumTctL94jINcX5Y3R4y7DuIdT+UcatF6ASoimGlVzhn9vY0QZeDbhvDInSPw/ssD2DLi
-	v2S3Dbq52HBolSvNSf43ZzeypX0oU3jL6V30jm2PMtLW+LGi1S+lXWH2wsWzM9AKstQJdY
-	Q3qLc4lBUfyf6b3AQc4U5Irw2MK1zl8=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=nXPDzUcvqq06M77VS5WtNkCRVrYbBSSbiWNXP2vd97c=;
+	b=bU9WipkOlhJm+wWdM1bOLHzshuLPv3LfgINGMYUUY40G/Gia1XRHh9LJrk9JDFunSPTbR9
+	zN0YQyCIoAYaTmTDRprScEZl+S9Ni5+b0Ok6k0xKm+MJ0XFff8f1qhrr4TiRGRgluMWHOH
+	sAdNjqEYNFXDvj+irsvo+sE6nGOxzck=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-113--DdoLFF0MB6u4SnA4ahk5Q-1; Tue, 01 Jul 2025 10:28:10 -0400
-X-MC-Unique: -DdoLFF0MB6u4SnA4ahk5Q-1
-X-Mimecast-MFC-AGG-ID: -DdoLFF0MB6u4SnA4ahk5Q_1751380090
-Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-313ff01d2a6so5480804a91.3
-        for <fstests@vger.kernel.org>; Tue, 01 Jul 2025 07:28:10 -0700 (PDT)
+ us-mta-286-Zb4jjgpWM3eXa2OPak2_uA-1; Tue, 01 Jul 2025 10:56:12 -0400
+X-MC-Unique: Zb4jjgpWM3eXa2OPak2_uA-1
+X-Mimecast-MFC-AGG-ID: Zb4jjgpWM3eXa2OPak2_uA_1751381772
+Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-b31814efd1cso4351887a12.3
+        for <fstests@vger.kernel.org>; Tue, 01 Jul 2025 07:56:12 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751380089; x=1751984889;
+        d=1e100.net; s=20230601; t=1751381771; x=1751986571;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=aqHNejLTu5OmdI4y6XzLz4N8WLe44NOczvGEBwpMpFg=;
-        b=w9lHx+HutEosaNcO26rR12FgBjeDxEPZjlN87f5fdZ36et6vNApRFnSIR1J72HNyvk
-         8iLf8YuRzPnfah1He3YwJGLqCAVf2zC7bvX8VtqBGLDahyFyEW+fATmNkE3XMSVJmUhO
-         xexqzPCP93AAXZGEjbwbTF/kT52ccW4le4ngvGE0FmT8sxzEa9tTsbEDhXeWZjPavqQn
-         8GozG6M9AHwcgh6lBeQLqkkto01b24QqB+nzkj53WrYjIIdyPAQTzWmqQqCJWtfBYN8s
-         1sjRFy7boMWKN20dtGMgscDs4R9+vz7FSp0Us+3Aaf0JVeV15D2FwQn/Kls6Ss4okfjT
-         jzWA==
-X-Gm-Message-State: AOJu0Yzlq5qjWerHuV7Z5r447cjbQHdy8Z5dgsw6MsLsSY9AW6ATCrm2
-	OIEaZG4Urs7LcZAJNEykzuwYK70Ej/qIED/X/FzEBYHH9gWVKP4tjCB1xjVauuQBnBZy33zohfS
-	wQhSCMDaKpuQMnY0kH+wjWvG36FKaTS7nvSAvuY71bJwe6/sW3ou8MD27/LaWAokp0+k=
-X-Gm-Gg: ASbGnct8lGXPEyaRGfsyLjpyfRjIsWy66muNfdB3xrqNI+2Avh73mUhs3EbdLxM6Yu7
-	bs8Wjp2r3Bq8hKQxussPYDuLoYF4midxeHsv7dJ1X1kdh3v5ufYlRz/zwt3m5HE4lAHGPzp5sAI
-	Nt6Q0X7XjXWucXlO0i5Sd0NBcmzv/BOihMd2RIVTmjEnP3RQkYTr9P8oujdJH1AojZojIc6V2ec
-	kNv9GISEeULG1bnIZwL2O65ReZ7U0Iw0Cu9C6Vs1mBQL5c/2f2lSkp7S5tqlhfFpjVrndpjIRRP
-	3Dk4U4Il2GQA4aec5DMywJDidnEnWm3ZlHAU12B+GK1jl/PQbvVm5t+7dfiesDQ=
-X-Received: by 2002:a17:90b:2e07:b0:313:28e7:af14 with SMTP id 98e67ed59e1d1-318c92a33f1mr21670717a91.19.1751380089246;
-        Tue, 01 Jul 2025 07:28:09 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEJG7AxAZVuPp084miQi4ypOjwn2m18XooM4pwIZ4HD3FB/NDkjhWdSDdcwuAmtqWE8T7BjKw==
-X-Received: by 2002:a17:90b:2e07:b0:313:28e7:af14 with SMTP id 98e67ed59e1d1-318c92a33f1mr21670678a91.19.1751380088787;
-        Tue, 01 Jul 2025 07:28:08 -0700 (PDT)
+        bh=nXPDzUcvqq06M77VS5WtNkCRVrYbBSSbiWNXP2vd97c=;
+        b=IapxusskDaLg2e/RDOoV2lFNcGXMY+RsgeK+xL8nLvhQtsIsuVl/Y5mXLiKfSKtKTs
+         r6DE9LbtQUsj/fUFPLRU8xTBfXyB8pX66K4la1hC5cg3XZt1c78w4KQzCVESdR+9bTRB
+         z5sFOgQaYt1qgxpUaz0xyBzWf9+OATb/sK0YHH6o2T//a+A+91Soi7cPaqwu7gKbPjdG
+         oIzx95LeGDM895XFP4lEDiEk8/N0xFkE3mnQUoCxxaSPA40d0fo5iMyUocHi1b3+VMbm
+         bUVl1gP/FFhTPm+7uneze14ea6dDR0nHT5c8JY3vLxFGH/uwS7fKZ1qbHYmXwDREJGg7
+         19dg==
+X-Forwarded-Encrypted: i=1; AJvYcCWn3a54ndF+mgh8GkFbAFDEEYqArdmWp0AC/owoOjapAXnPL0GV44OzFGhezemoYx3CmVHi8kte@vger.kernel.org
+X-Gm-Message-State: AOJu0YzF3Wk2hsUKCRIgL7tXmjhGKF71Rc0CtLRTgoJAoJe1dE8Jaub7
+	jQqSQly7W0bI54CAWo3rz8ZJczrt6zyirb4v+marDjwofLl6u5yrhCh9yOAwFGVdx+xqkeoSZhJ
+	gxLQVhrHnJQ5R1kIsy4C6rfhFezb9gl8wO5VJOEHKbhcKvDTrR2Z+KdtZtEzYgKJ8aRY=
+X-Gm-Gg: ASbGncsBDiEROaU2iRQC8sCsOCOFYfQoXm6dLzhzbkf1uBoSUFjlIyhO3ThsLTs9Fv3
+	SKLOBjw5iw9OBsi++9kuynTy+iHpb2SosF0Btau6oVDA5tYi5hpN93oHvecoW1goERPOGEOYReu
+	DbQxmYlKv3Ma8igoBkDeGBg9MSgIe8d8fUR+l/RdBandOalw2VZZ+Md+0NYCmr+waa1KFJA7dBs
+	Yopetrq874zyv+mzRc2BPOYdQrM+vi4TDPEOtVPa5fDg1Fyvs/wmy1d6p1GBq+bTUGPcBD2KCA2
+	m88uEHpcRslTJGJZGruPSbspZTEpz3KIvk+FsDYj5CWxCi0e3aRXm8Roh2/xbzE=
+X-Received: by 2002:a17:902:e78f:b0:235:e8da:8d1 with SMTP id d9443c01a7336-23ac2d8635cmr261455985ad.8.1751381771338;
+        Tue, 01 Jul 2025 07:56:11 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFLkmB1wAhsIlceWu1ONxBQU/fOi/8NgTjc2Er0ditpvgRC51YYj9gFkUkUu5tHV8iAgrVRCQ==
+X-Received: by 2002:a17:902:e78f:b0:235:e8da:8d1 with SMTP id d9443c01a7336-23ac2d8635cmr261455725ad.8.1751381770920;
+        Tue, 01 Jul 2025 07:56:10 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-315f5382e7csm16969392a91.2.2025.07.01.07.28.06
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-23acb3d11b4sm109306405ad.254.2025.07.01.07.56.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 01 Jul 2025 07:28:08 -0700 (PDT)
-Date: Tue, 1 Jul 2025 22:28:04 +0800
+        Tue, 01 Jul 2025 07:56:10 -0700 (PDT)
+Date: Tue, 1 Jul 2025 22:56:06 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, djwong@kernel.org
-Subject: Re: [PATCH 2/2] fstests: check: fix unset seqres in run_section()
-Message-ID: <20250701142804.pdc4ibftng4qoizc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cover.1748058175.git.anand.jain@oracle.com>
- <8d691171e1bb1b0be98a0ca79e50f9839073d2ac.1748058175.git.anand.jain@oracle.com>
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] common: add proper btrfs log tree detection to
+ _has_metadata_journaling
+Message-ID: <20250701145606.2mxdnldtcp7hcur2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250630010253.30075-1-wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -78,52 +79,89 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <8d691171e1bb1b0be98a0ca79e50f9839073d2ac.1748058175.git.anand.jain@oracle.com>
+In-Reply-To: <20250630010253.30075-1-wqu@suse.com>
 
-On Sat, May 24, 2025 at 11:57:14AM +0800, Anand Jain wrote:
-> While testing, I saw that ".full" is created by _scratch_unmount(), called here:
+On Mon, Jun 30, 2025 at 10:32:53AM +0930, Qu Wenruo wrote:
+> [BUG]
+> With the incoming btrfs shutdown ioctl/remove_bdev callback support,
+> btrfs can be tested with the shutdown group.
 > 
->  725 function run_section()
->  ::
->  815         if [ ! -z "$SCRATCH_DEV" ]; then
->  816           _scratch_unmount 2> /dev/null
->  817           # call the overridden mkfs - make sure the FS is built
+> But test case generic/050 still fails on btrfs with shutdown support:
 > 
-> Ensure seqres is set early in run_section() as a fix.
+> generic/050 1s ... - output mismatch (see /home/adam/xfstests/results//generic/050.out.bad)
+>     --- tests/generic/050.out	2022-05-11 11:25:30.763333331 +0930
+>     +++ /home/adam/xfstests/results//generic/050.out.bad	2025-06-30 10:22:21.752068622 +0930
+>     @@ -13,9 +13,7 @@
+>      setting device read-only
+>      mounting filesystem that needs recovery on a read-only device:
+>      mount: device write-protected, mounting read-only
+>     -mount: cannot mount device read-only
+>      unmounting read-only filesystem
+>     -umount: SCRATCH_DEV: not mounted
+>      mounting filesystem with -o norecovery on a read-only device:
+>     ...
+>     (Run 'diff -u /home/adam/xfstests/tests/generic/050.out /home/adam/xfstests/results//generic/050.out.bad'  to see the entire diff)
+> Ran: generic/050
 > 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> [CAUSE]
+> The test case generic/050 has several different golden output depending
+> on the fs features.
+> 
+> For fses which requires data write (e.g. replay the journal) during
+> mount, mounting a read-only block device should fail.
+> And that is the default golden output.
+> 
+> However there are cases that the fs doesn't need to write anything, e.g.
+> the fs has no metadata journal support at all, or the fs has no dirty
+> journal to replay.
+> 
+> In that case, there is the generic/050.nojournal golden output.
+> 
+> The test case is using the helper _has_metadata_journaling() to
+> determine the feature.
+> 
+> Unfortunately that helper doesn't support btrfs, thus the default
+> behavior is to assume the fs has journal to replay, thus for btrfs it
+> always assume there is a journal to replay and results the wrong golden
+> output to be used.
+> 
+> [FIX]
+> Add btrfs specific log tree check into _has_metadata_journaling(), so
+> that if there is no log tree to replay, expose the "nojournal" feature
+> correctly to pass generic/050.
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 > ---
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-> This patch was sent earlier; it now addresses review comments and includes
-> an updated git commit log, no code changes.
->   https://patchwork.kernel.org/project/linux-btrfs/patch/12a741fc7606f1b1e13524b9ee745456feade656.1744183008.git.anand.jain@oracle.com/
+>  common/rc | 8 ++++++++
+>  1 file changed, 8 insertions(+)
 > 
->  check | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/check b/check
-> index ede54f6987bc..93d8a6cd3237 100755
-> --- a/check
-> +++ b/check
-> @@ -794,6 +794,7 @@ function run_section()
->  
->  	seq="check.$$"
->  	check="$RESULT_BASE/check"
-> +	seqres="$check"
->  
->  	# don't leave old full output behind on a clean run
->  	rm -f $check.full
-> @@ -835,7 +836,6 @@ function run_section()
->  	  fi
->  	fi
->  
-> -	seqres="$check"
->  	_check_test_fs
->  
->  	loop_status=()	# track rerun-on-failure state
+> diff --git a/common/rc b/common/rc
+> index 2d8e7167..a78b779a 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4283,6 +4283,14 @@ _has_metadata_journaling()
+>  			return 1
+>  		fi
+>  		;;
+> +	btrfs)
+> +		_require_btrfs_command inspect-internal dump-super
+> +		if "$BTRFS_UTIL_PROG" inspect-internal dump-super $dev | \
+> +		   grep -q "log_root\s\+0" ; then
+> +			echo "$FSTYPE on $dev has empty log tree"
+                               ^^^^^^
+                               FSTYP
+
+
+
+
+> +			return 1
+> +		fi
+> +		;;
+>  	*)
+>  		# by default we pass; if you need to, add your fs above!
+>  		;;
 > -- 
-> 2.49.0
+> 2.50.0
+> 
 > 
 
