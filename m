@@ -1,76 +1,76 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C97F027A127
-	for <fstests@vger.kernel.org>; Tue,  1 Jul 2025 14:56:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5B3331F4CBF
+	for <fstests@vger.kernel.org>; Tue,  1 Jul 2025 16:18:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751381778; cv=none; b=oANT5Hz9P9CgEb11pHbxzYdaZerXikSCCLR7wRxzTeGT7iB/670+YZv9R91kC2gUPuMNzykJzQ+XmkKJSscOCRgvRk5/NK3vYcPe32zl3tdJEafzdDMNd+k4gb8F2vsKqtdCpNEOXs2EJjonqKyI11DgqtQZZgYllmD242GWCF0=
+	t=1751386698; cv=none; b=iZ8s5HQ/+goPWVJxM4EX2q+RPvr6Z+awNt4LFzfaGfoIpAjekFNTdnVLhBFp3v0Y75tvoKgfDA/qQLff42lwao3RN2GfdRBos08ydKfDdHqkckWg188KPvttOnHEhyXeSNxHc40MGkcwlHDgl5ef6GbOcqDVnjRzTT0AXZY46JQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751381778; c=relaxed/simple;
-	bh=jvuexJOYZveqFgLJvIMrTzr0AD/7v+WwKZtlFKufrEA=;
+	s=arc-20240116; t=1751386698; c=relaxed/simple;
+	bh=TqzzDicEbK4zYvloxnj7a3N0kjRaTXtgzihHmBCgAok=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=FeVf2BjGR5qKhNrUaQyBzERf4bDj8fNU22hBHqlTpSsMMq1JeB/6sdnbolfmGBaBtMdNuO/6OE3LfGMCi2FnxOvRCm7LSeEVO9ZRPA3SztzEeKRjJh8oplOi9n979IChRzOykDO0YGftYAbmBByKHUKfKSsvVPGZ5dY0EvCGo6k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=bU9WipkO; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=bL2xmWimIG3Z4FkhwPrxMGvJk+698QSR1aixS6nT+99+0OiNcUHjHz5zDfilVRxC2yKpXo9VWcxFY0TmH+5THN4wTAptr3DTtRLjyVxDj0OI9hcE8x671n0ERNcW1i+eBDEERHY1tVCJ16oJ0Y4S0oTkXkUmeJmZ8ghUSAk6Ie0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=e33B87sA; arc=none smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bU9WipkO"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1751381775;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=nXPDzUcvqq06M77VS5WtNkCRVrYbBSSbiWNXP2vd97c=;
-	b=bU9WipkOlhJm+wWdM1bOLHzshuLPv3LfgINGMYUUY40G/Gia1XRHh9LJrk9JDFunSPTbR9
-	zN0YQyCIoAYaTmTDRprScEZl+S9Ni5+b0Ok6k0xKm+MJ0XFff8f1qhrr4TiRGRgluMWHOH
-	sAdNjqEYNFXDvj+irsvo+sE6nGOxzck=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-286-Zb4jjgpWM3eXa2OPak2_uA-1; Tue, 01 Jul 2025 10:56:12 -0400
-X-MC-Unique: Zb4jjgpWM3eXa2OPak2_uA-1
-X-Mimecast-MFC-AGG-ID: Zb4jjgpWM3eXa2OPak2_uA_1751381772
-Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-b31814efd1cso4351887a12.3
-        for <fstests@vger.kernel.org>; Tue, 01 Jul 2025 07:56:12 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751381771; x=1751986571;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=nXPDzUcvqq06M77VS5WtNkCRVrYbBSSbiWNXP2vd97c=;
-        b=IapxusskDaLg2e/RDOoV2lFNcGXMY+RsgeK+xL8nLvhQtsIsuVl/Y5mXLiKfSKtKTs
-         r6DE9LbtQUsj/fUFPLRU8xTBfXyB8pX66K4la1hC5cg3XZt1c78w4KQzCVESdR+9bTRB
-         z5sFOgQaYt1qgxpUaz0xyBzWf9+OATb/sK0YHH6o2T//a+A+91Soi7cPaqwu7gKbPjdG
-         oIzx95LeGDM895XFP4lEDiEk8/N0xFkE3mnQUoCxxaSPA40d0fo5iMyUocHi1b3+VMbm
-         bUVl1gP/FFhTPm+7uneze14ea6dDR0nHT5c8JY3vLxFGH/uwS7fKZ1qbHYmXwDREJGg7
-         19dg==
-X-Forwarded-Encrypted: i=1; AJvYcCWn3a54ndF+mgh8GkFbAFDEEYqArdmWp0AC/owoOjapAXnPL0GV44OzFGhezemoYx3CmVHi8kte@vger.kernel.org
-X-Gm-Message-State: AOJu0YzF3Wk2hsUKCRIgL7tXmjhGKF71Rc0CtLRTgoJAoJe1dE8Jaub7
-	jQqSQly7W0bI54CAWo3rz8ZJczrt6zyirb4v+marDjwofLl6u5yrhCh9yOAwFGVdx+xqkeoSZhJ
-	gxLQVhrHnJQ5R1kIsy4C6rfhFezb9gl8wO5VJOEHKbhcKvDTrR2Z+KdtZtEzYgKJ8aRY=
-X-Gm-Gg: ASbGncsBDiEROaU2iRQC8sCsOCOFYfQoXm6dLzhzbkf1uBoSUFjlIyhO3ThsLTs9Fv3
-	SKLOBjw5iw9OBsi++9kuynTy+iHpb2SosF0Btau6oVDA5tYi5hpN93oHvecoW1goERPOGEOYReu
-	DbQxmYlKv3Ma8igoBkDeGBg9MSgIe8d8fUR+l/RdBandOalw2VZZ+Md+0NYCmr+waa1KFJA7dBs
-	Yopetrq874zyv+mzRc2BPOYdQrM+vi4TDPEOtVPa5fDg1Fyvs/wmy1d6p1GBq+bTUGPcBD2KCA2
-	m88uEHpcRslTJGJZGruPSbspZTEpz3KIvk+FsDYj5CWxCi0e3aRXm8Roh2/xbzE=
-X-Received: by 2002:a17:902:e78f:b0:235:e8da:8d1 with SMTP id d9443c01a7336-23ac2d8635cmr261455985ad.8.1751381771338;
-        Tue, 01 Jul 2025 07:56:11 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFLkmB1wAhsIlceWu1ONxBQU/fOi/8NgTjc2Er0ditpvgRC51YYj9gFkUkUu5tHV8iAgrVRCQ==
-X-Received: by 2002:a17:902:e78f:b0:235:e8da:8d1 with SMTP id d9443c01a7336-23ac2d8635cmr261455725ad.8.1751381770920;
-        Tue, 01 Jul 2025 07:56:10 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-23acb3d11b4sm109306405ad.254.2025.07.01.07.56.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 01 Jul 2025 07:56:10 -0700 (PDT)
-Date: Tue, 1 Jul 2025 22:56:06 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] common: add proper btrfs log tree detection to
- _has_metadata_journaling
-Message-ID: <20250701145606.2mxdnldtcp7hcur2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250630010253.30075-1-wqu@suse.com>
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="e33B87sA"
+Received: from pps.filterd (m0356517.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 561ElYGk002907;
+	Tue, 1 Jul 2025 16:18:11 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=pp1; bh=A4fnL4ZQ6KXFORKFPdFlwrVJP0Zmc8
+	joMZxeiWhl/vE=; b=e33B87sAam9+Bvd7rJSr3B0Y6Btk1sjGgD/s8ugOE+BIJW
+	/3yCbZ+LS+DyxVUBpK528OsGSBi0j9El5XWTabb00dlkJuAEaZz64khWzwycWlnS
+	H5hy8DyNLxO/0ScCc7QYHClL+OahaDz2YIDNmX8jOVldb8aq/umXyWmjVKfHmQX6
+	4M7Y4v+DuyPqKDetKqPf8D4Hr6nUZoLO2Yb8OPIL3HcNI5wJkDcjIYfK9MtJDr6W
+	P3ezIHVr8Wn3NjddjP7pZ3AvTtQ0BLc1F0XAJCqOPZvLEi3G2JCDOyP7eyj5HAwz
+	/hXtYlUK4wd+JlO8K7cQMKqUwgKpmN9h83Nltp8Q==
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 47j84d8fxf-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 01 Jul 2025 16:18:11 +0000 (GMT)
+Received: from m0356517.ppops.net (m0356517.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.0.8/8.18.0.8) with ESMTP id 561GC216006728;
+	Tue, 1 Jul 2025 16:18:10 GMT
+Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 47j84d8fxb-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 01 Jul 2025 16:18:10 +0000 (GMT)
+Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma11.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 561DlopO021371;
+	Tue, 1 Jul 2025 16:18:09 GMT
+Received: from smtprelay05.fra02v.mail.ibm.com ([9.218.2.225])
+	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 47jwe3b3nh-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 01 Jul 2025 16:18:09 +0000
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay05.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 561GI8cg41746924
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 1 Jul 2025 16:18:08 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 04CBD20043;
+	Tue,  1 Jul 2025 16:18:08 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 8FD0520040;
+	Tue,  1 Jul 2025 16:18:06 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.124.213.100])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Tue,  1 Jul 2025 16:18:06 +0000 (GMT)
+Date: Tue, 1 Jul 2025 21:48:03 +0530
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: John Garry <john.g.garry@oracle.com>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+        Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
+        tytso@mit.edu
+Subject: Re: [PATCH v2 05/13] generic/1226: Add atomic write test using fio
+ crc check verifier
+Message-ID: <aGQKO3E_kwZzSy_0@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+References: <cover.1750924903.git.ojaswin@linux.ibm.com>
+ <227ca6650cf5ef5a9a3383a06cd08c0c2b9f43c3.1750924903.git.ojaswin@linux.ibm.com>
+ <0430bd73-e6c2-4ce9-af24-67b1e1fa9b5b@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -79,89 +79,97 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250630010253.30075-1-wqu@suse.com>
+In-Reply-To: <0430bd73-e6c2-4ce9-af24-67b1e1fa9b5b@oracle.com>
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: 1mRx4vqSiHHwadBgg_y_c0FBMEBKRsle
+X-Proofpoint-GUID: K2VAgcJtaRMXzgRRdmC3dyEp1Er3Jhjy
+X-Authority-Analysis: v=2.4 cv=Ib6HWXqa c=1 sm=1 tr=0 ts=68640a43 cx=c_pps a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17 a=kj9zAlcOel0A:10 a=Wb1JkmetP80A:10 a=Hoszrk23Et-Q2lSgiigA:9 a=CjuIK1q_8ugA:10
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzAxMDExMCBTYWx0ZWRfXyobQvS493I/g 21sFC/0R6MyRkIV4lcvNm4qbsJlWdXSPsG99LLRt+TF2H+tku+qZx785aL8+8AL89hI12g+7UMq 63NvhAEtNHtoVuQQDCn85Ht+Z9s0NbtEuZjBL8P3VBzJ5ktPdoLHIQ508kqap4hKQu7luxW7pCH
+ xNr967Fw5+4OCmUewezK7rzmWWL0ZHxBI7lW6R3042TP8EgjFrkvegRV/VW3Nf3rabPml3fm1Hl pGBlud7aWN/xmKpdHWPFBSQy+S+CynvADtMDm9rG5vL1E4FMXSNw5lDksMawyTgw5KynEHozf+R Ir6G3ewKEKwrOMPT+YzTW2L1pEftVomokiN9V86QxQFERMvgX9M3674KIzl2EUAankq8VBtFeC7
+ s2XzpVi6iTrCvsfz5Vz9G2W4LXHIvqw/2zdouq5LpxnmIRLYTYVEAZgXptLwB9c72ACyauez
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
+ definitions=2025-07-01_02,2025-06-27_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 suspectscore=0
+ clxscore=1015 mlxlogscore=999 lowpriorityscore=0 impostorscore=0
+ mlxscore=0 malwarescore=0 spamscore=0 priorityscore=1501 adultscore=0
+ bulkscore=0 classifier=spam authscore=0 authtc=n/a authcc= route=outbound
+ adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
+ definitions=main-2507010110
 
-On Mon, Jun 30, 2025 at 10:32:53AM +0930, Qu Wenruo wrote:
-> [BUG]
-> With the incoming btrfs shutdown ioctl/remove_bdev callback support,
-> btrfs can be tested with the shutdown group.
+On Fri, Jun 27, 2025 at 03:09:09PM +0100, John Garry wrote:
 > 
-> But test case generic/050 still fails on btrfs with shutdown support:
+> > +touch "$SCRATCH_MNT/f1"
+> > +awu_min_write=$(_get_atomic_write_unit_min "$SCRATCH_MNT/f1")
+> > +awu_max_write=$(_get_atomic_write_unit_max "$SCRATCH_MNT/f1")
+> > +blocksize=$(_max "$awu_min_write" "$((awu_max_write/2))")
+> > +
+> > +# XFS can have high awu_max_write due to software fallback. Cap it at 64k
 > 
-> generic/050 1s ... - output mismatch (see /home/adam/xfstests/results//generic/050.out.bad)
->     --- tests/generic/050.out	2022-05-11 11:25:30.763333331 +0930
->     +++ /home/adam/xfstests/results//generic/050.out.bad	2025-06-30 10:22:21.752068622 +0930
->     @@ -13,9 +13,7 @@
->      setting device read-only
->      mounting filesystem that needs recovery on a read-only device:
->      mount: device write-protected, mounting read-only
->     -mount: cannot mount device read-only
->      unmounting read-only filesystem
->     -umount: SCRATCH_DEV: not mounted
->      mounting filesystem with -o norecovery on a read-only device:
+> This test fails on xfs due for this reason. software fallback -based atomic
+> writes have no serialization against reads or other writes.
+
+Okay so Im still not understanding why serialization is affecting
+anything here? Lets assume the IO never breaks, from what I understand
+in fio code, we do the write and then once it is complete we try to read
+it back and verify it.
+
+Why serialization matters here, because even if device reorders our read
+before the atomic write, we still fetch an older $blocksize chunk which
+should have the data and the header. The data crc should match the
+header because it would have gone atomically. What am I missing?
+
+(Or do you mean that max_sectors_kb is not big enough to support
+reads after software atomic writes and thats the issue?)
+
+> 
+> Can you cap at atomic write unit max opt? That will mean that we get
+> serialization from atomic write HW support.
+> 
+> BTW, to repeat what I said before, it can also fail for atomic write bios
+> using HW support, as reads may be split.
+
+This one I can understand, the fio's read is split causing a short read
+and seems like fio is not requeing short read properly for the verify
+step(?) so it tries to verify against short read itself.
+> 
+> See this sample output:
+> 
+> generic/1226 68s ... - output mismatch (see
+> /home/opc/xfstests-dev/results//generic/1226.out.bad)
+>     --- tests/generic/1226.out  2025-06-27 11:26:58.411121674 +0000
+>     +++ /home/opc/xfstests-dev/results//generic/1226.out.bad 2025-06-27
+> 14:03:08.933811064 +0000
+>     @@ -1,2 +1,104 @@
+>      QA output created by 1226
+>     +crc32c: verify failed at file /home/opc/mnt/scratch/test-file offset
+> 16457728, length 8192 (requested block: offset=16457728, length=8192,
+> flags=84)
+>     +       Expected CRC: 712de900
+>     +       Received CRC: f872a18d
+>     +crc32c: verify failed at file /home/opc/mnt/scratch/test-file offset
+> 88104960, length 8192 (requested block: offset=88104960, length=8192,
+> flags=84)
+>     +       Expected CRC: 4aaaf009
+>     +       Received CRC: 2a5770cf
 >     ...
->     (Run 'diff -u /home/adam/xfstests/tests/generic/050.out /home/adam/xfstests/results//generic/050.out.bad'  to see the entire diff)
-> Ran: generic/050
+>     (Run 'diff -u /home/opc/xfstests-dev/tests/generic/1226.out
+> /home/opc/xfstests-dev/results//generic/1226.out.bad'  to see the entire
+> diff)
+> Ran: generic/1226
+> Failures: generic/1226
+> Failed 1 of 1 tests
 > 
-> [CAUSE]
-> The test case generic/050 has several different golden output depending
-> on the fs features.
+> [root@jgarry-ol9new xfstests-dev]# cat /sys/block/sdi/queue/max_sectors_kb
+> 4
+> [root@jgarry-ol9new xfstests-dev]#
 > 
-> For fses which requires data write (e.g. replay the journal) during
-> mount, mounting a read-only block device should fail.
-> And that is the default golden output.
-> 
-> However there are cases that the fs doesn't need to write anything, e.g.
-> the fs has no metadata journal support at all, or the fs has no dirty
-> journal to replay.
-> 
-> In that case, there is the generic/050.nojournal golden output.
-> 
-> The test case is using the helper _has_metadata_journaling() to
-> determine the feature.
-> 
-> Unfortunately that helper doesn't support btrfs, thus the default
-> behavior is to assume the fs has journal to replay, thus for btrfs it
-> always assume there is a journal to replay and results the wrong golden
-> output to be used.
-> 
-> [FIX]
-> Add btrfs specific log tree check into _has_metadata_journaling(), so
-> that if there is no log tree to replay, expose the "nojournal" feature
-> correctly to pass generic/050.
-> 
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->  common/rc | 8 ++++++++
->  1 file changed, 8 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index 2d8e7167..a78b779a 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4283,6 +4283,14 @@ _has_metadata_journaling()
->  			return 1
->  		fi
->  		;;
-> +	btrfs)
-> +		_require_btrfs_command inspect-internal dump-super
-> +		if "$BTRFS_UTIL_PROG" inspect-internal dump-super $dev | \
-> +		   grep -q "log_root\s\+0" ; then
-> +			echo "$FSTYPE on $dev has empty log tree"
-                               ^^^^^^
-                               FSTYP
-
-
-
-
-> +			return 1
-> +		fi
-> +		;;
->  	*)
->  		# by default we pass; if you need to, add your fs above!
->  		;;
-> -- 
-> 2.50.0
+> However, nobody should fiddle with max_sectors_kb, so the test still has
+> value.
 > 
 > 
-
+> > +blocksize=$(_min "$blocksize" "65536")
+> > +
+> > +fio_config=$tmp.fio
+> > +fio_out=$tmp.fio.out
+> > +
