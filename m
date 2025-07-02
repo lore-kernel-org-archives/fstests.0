@@ -1,163 +1,243 @@
-Received: from mail-qv1-f54.google.com (mail-qv1-f54.google.com [209.85.219.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A0C2241CB7
-	for <fstests@vger.kernel.org>; Tue,  1 Jul 2025 23:19:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2837F1531C1;
+	Wed,  2 Jul 2025 04:21:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751411986; cv=none; b=AXzZUmQmFTPTE0O8AbV+TvkNeFPcKdRZ9Uq2UsMMcMZ6Ci8t8s3EFDdpjKq1Q3y/EJJk5jeKaBjEo52PNx7rMXQEE6BFTUNF0+KvxSyKdAqiOcbSvSvcabXBIECtg/6tIpBxrNjc1blWiRtfgtyURxKcQoDVS1XFFIncdRWnPpg=
+	t=1751430072; cv=none; b=BjGC/N0PSVL4ivcnW1+fag5UP8dKTQ6zy1oq8QEK+IuGUhyjcUm9Ibi3otcyNYbm0l63chiob+2MmoynHjvGQoz4QzBPbpPt94I8J1A+DDpNbZ52RRbEkZjQ2jZI+2KJgJ2Sy0e37HVkeuJGLC3Ue++AtQQ4E+rMqW90V4w7D+I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751411986; c=relaxed/simple;
-	bh=L4jnORSIn9OGJAUIAFa+ocd3bjyL8SlZBhk71Re5zO8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Content-Type; b=As3zS0EosbRktc6r7GnzmMwhZ08WEwbvrClBYuBNDm/5bOII4vfJXR6N3m/1Z8S2oz0FTzPbvzh8R4WikFQ9iezTgx3KIgdYyziuXhLS1jZ7ZqQUlg42uAPR7KjOXLIcHHUmFXqPPQGkl8TGKNHGz1hw/Usr03LFdKc8ECE6RoM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RAAbD3JT; arc=none smtp.client-ip=209.85.219.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1751430072; c=relaxed/simple;
+	bh=Zd7ViOPdLYQ/xCKX3FG8i9HuC9++ssNPbnlkmyXqde4=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=d/VDlfIJgaziSZG7Ho7V21PfNVB4h4iOZT0TV1fo090+hvwFY4xIwfn7QTg06Z/l74kI+ZfEMkT5ICzdLitnGHMRRa6Qrh4Jh9IFabG/ZFbptCo260/kVEi3bY4tMBlmH0HN6Sy21dK/1+RzNTgGx64+dIgDDql6Uk8rg8N03ec=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=ct8i7XSz; arc=none smtp.client-ip=212.227.17.21
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RAAbD3JT"
-Received: by mail-qv1-f54.google.com with SMTP id 6a1803df08f44-6fad3400ea3so56588586d6.0
-        for <fstests@vger.kernel.org>; Tue, 01 Jul 2025 16:19:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1751411984; x=1752016784; darn=vger.kernel.org;
-        h=content-transfer-encoding:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=WjBVDWpuvSEy3/dtjwop0nID6wOC7zTXvrLlXFYZZGk=;
-        b=RAAbD3JTYKbfcjASgEEP++nYIjAiEfE77JZssooU7NN8a5vNnLvbAynxKI4J+P298d
-         2OoKJA7Ux1uPm6oviYM7UgCHl+3P3apS/qbFdAfItaVjKlKCG4XUDpjOK9ew3uu6eTeA
-         vHdVwF5mVK6vQAnCwIYscFXuB0VQuF8ZbUW7K5hRrwaY3G2+I1cVrUrd4k1DPL0FX9hP
-         AWlcsGBNoznflOt/ca1ZBYeiyAr5J6Da481y6KQPvK2DygoBj6fE2XKoZ8pJxYGh3Yog
-         AD3rZ7sezczGRnZqSL1yyq2o8wIfbkTmTpP2+yNF/ZYVOLtSHodCMqv8W1o4KdnZmsGX
-         yi0w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751411984; x=1752016784;
-        h=content-transfer-encoding:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=WjBVDWpuvSEy3/dtjwop0nID6wOC7zTXvrLlXFYZZGk=;
-        b=L3HzjnhhcoRZR18t/qM9Mgh/zuho2+rF6VHCaL3SdKfaNQHV9fJlR79/PayXEUyyAJ
-         xy7JDTDSNhnf02Er20MQsyA0hU3PkpwloelUamq4OBZrPu+vy7wcd8dA7SIoshqig7EZ
-         dY1NkTWXG2LUe/Vx8w2vFo2LVyUWQh3Q5K/hUR9JnIchwKO47WlsJ41vdGrWUwefbwHZ
-         tu1EbNKu4FX2mg6msRz86qGAW29sLNIdgXONBgcdtCLrD1fX8iP5fiPLpBPEBeuZb4V7
-         J8m+V2GDoD8os6OFOE8n2OsTkEzu3M9wdkjeDw604626spQ1nIgoeZWW34w3Yo3qKSxB
-         bm/g==
-X-Gm-Message-State: AOJu0Yy7n0x2SF4S6kg9UAYjSLFwclfDPNcHBJk4qpdnw6EbCOpY7S0E
-	/HhUTHPCuqcTDQ6olfuOsO2g3x1CP/v4yAZ2ChEVSVYwN65kUWaLxO2l0vQc9+T/7n0B3+ZEJIO
-	fI4UAAhOeh9Wwx36GhrBEyBOX2IAjYWfM0w==
-X-Gm-Gg: ASbGnctRUUNlQe2oFBZjHWMJdjBBZQvQQ1hXgk9xcSAruBjutKekuFZte2W8hUO+p3Y
-	GwrUh85DqRsAFeWPwLIbzQbqR49P+X6XtuL3muR9W4jVnPjQQdWLb7Zqy0ZzBDDKLpbNfkq2xzL
-	6aRXk0ZQI3eAHJzn/RfkGBnQV1ksEqVH33cu0HqA9/YMXcApyE+4CSD3QVMmHp+Se6kdkM/RiaF
-	XiR
-X-Google-Smtp-Source: AGHT+IFx+VrEdfp1vNG3+qrSpyywEVUjc6lcd0ltxvGkNuzO2keqMTIK4xFLsTgzs7xeSZhWX18rV9+LCQZVzBtiNsE=
-X-Received: by 2002:ad4:5968:0:b0:6e6:5bd5:f3a8 with SMTP id
- 6a1803df08f44-702b1beaeb6mr6323396d6.29.1751411983885; Tue, 01 Jul 2025
- 16:19:43 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="ct8i7XSz"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
+	s=s31663417; t=1751430063; x=1752034863; i=quwenruo.btrfs@gmx.com;
+	bh=lpgfCkjFN47SizZtLhoXB0PAE/eFCsqiHrjuZgPB4Zg=;
+	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
+	 References:From:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding:cc:content-transfer-encoding:
+	 content-type:date:from:message-id:mime-version:reply-to:subject:
+	 to;
+	b=ct8i7XSzyZo7UdIzT2wqV5vqBKL0jrsB+UY8JHeFk91ONxUxj2oI8A25Y9YFi9L0
+	 T++GGq+lLuloLMBv6CkgOWLO//erROz5hB4C5mQ5Ta3eMr6CYD2iAWjqbG1C3weX8
+	 YA75Qw1QvqfYv1+9Qxx5AAqsRpnmgp6QzyPjgWM/+J/fjdZORCw4wiPnYXXF0E0gs
+	 aEXlRZfoh9Q2G+/p8LeUOurLtfhnfrFHsFkaAx9LyAwVbCaqHlA+ofHoChrOgWu8R
+	 E+gv7FjMvHfeFl3AvHg87bd1zzZQNJTrzxoOjdXs00nyolw1NFni8216eVpAjrEza
+	 5Qtca4xT/w5n+XsKiA==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from [172.16.0.229] ([159.196.52.54]) by mail.gmx.net (mrgmx105
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1N63VY-1um6kw1kPw-00vtd3; Wed, 02
+ Jul 2025 06:21:02 +0200
+Message-ID: <c9d298da-c7f6-4c1d-8870-78b6c7145282@gmx.com>
+Date: Wed, 2 Jul 2025 13:50:59 +0930
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAH2r5msYMeEaaKKT1mEG7bCjFYExFCRUdL6ShimoK0g1AEdERQ@mail.gmail.com>
- <CAH2r5mtrM0_+x2jzxoRoNq6c3e5rS_7s7QT-=S5fDA06XoFNvw@mail.gmail.com> <CAH2r5mvE0R_npJgiA2+OuDHwa60EGxeC=LU7Z8FDA0X_AFYeNQ@mail.gmail.com>
-In-Reply-To: <CAH2r5mvE0R_npJgiA2+OuDHwa60EGxeC=LU7Z8FDA0X_AFYeNQ@mail.gmail.com>
-From: Steve French <smfrench@gmail.com>
-Date: Tue, 1 Jul 2025 18:19:32 -0500
-X-Gm-Features: Ac12FXwU-W8aUoqXdTqOF9MvfB5aehyzX2twr8g1OPsBhGz5IGvxHzKlbV2-Cs4
-Message-ID: <CAH2r5mu2Y41qW14CiRde_hqeVvy=-mSnOR8XWvQF5ChN1M+BYA@mail.gmail.com>
-Subject: Re: Build errors with current xfstests
-To: fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] common: add proper btrfs log tree detection to
+ _has_metadata_journaling
+To: Zorro Lang <zlang@redhat.com>, Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+References: <20250630010253.30075-1-wqu@suse.com>
+ <20250701145606.2mxdnldtcp7hcur2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Language: en-US
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
+ BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
+ sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
+ xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
+ naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
+ tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
+ 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
+ VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
+ CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
+ /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
+ GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
+ q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
+ ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
+ CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
+ B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
+ Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
+ +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
+ HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
+In-Reply-To: <20250701145606.2mxdnldtcp7hcur2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: quoted-printable
-
-Must be a problem with debris left over when updating the master
-branch.   Works now
-
-I deleted the repo from the local system, git cloned again (identical
-master branch head) and it now built.
-
-upgrading the branch must have had problems from old files left around
-
-On Tue, Jul 1, 2025 at 2:40=E2=80=AFPM Steve French <smfrench@gmail.com> wr=
-ote:
->
-> nevermind - was on the wrong branch.   Now on updated master branch I
-> get a different error, will retry on current for-next branch
->
-> Building shared
-> gmake[3]: *** No targets specified and no makefile found.  Stop.
-> gmake[3]: *** No targets specified and no makefile found.  Stop.
-> gmake[2]: *** [../include/buildrules:31: shared] Error 2
-> gmake[1]: *** [include/buildrules:31: tests] Error 2
-> make: *** [Makefile:65: default] Error 2
->
-> On Tue, Jul 1, 2025 at 2:23=E2=80=AFPM Steve French <smfrench@gmail.com> =
-wrote:
-> >
-> > I haven't had a problem building it before on Ubuntu, but perhaps due
-> > to upgrade to Ubuntu 24.04 this line in acinclude.m4 breaks (which is
-> > supposed to set HAVE_FALLOCATE but won't if this line fails).  Any
-> > thoughts?
-> >
-> > #include <fcntl.h>
-> > #include <linux/falloc.h> ]], [[ fallocate(0, 0, 0, 0); ]])],[
-> > have_fallocate=3Dtrue; AC_MSG_RESULT(yes) ],[ have_fallocate=3Dfalse;
-> > AC_MSG_RESULT(no) ])
-> >
-> > On Tue, Jul 1, 2025 at 2:15=E2=80=AFPM Steve French <smfrench@gmail.com=
-> wrote:
-> > >
-> > > I am getting the following build error with current xfstests on
-> > > Ubuntu.  Any thoughts?
-> > >
-> > > Building src
-> > >     [CC]    iogen
-> > > iogen.c: In function 'create_file':
-> > > iogen.c:996:3: error: #error Dont know how to (pre)allocate space!
-> > >   996 | # error Dont know how to (pre)allocate space!
-> > >       |   ^~~~~
-> > > iogen.c: In function 'main':
-> > > iogen.c:280:9: warning: ignoring return value of 'write' declared wit=
-h
-> > > attribute 'warn_unused_result' [-Wunused-result]
-> > >   280 |         write(outfd, (char *)&req, sizeof(req));
-> > >       |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> > > iogen.c: In function 'parse_cmdline':
-> > > iogen.c:1535:17: warning: ignoring return value of 'getcwd' declared
-> > > with attribute 'warn_unused_result' [-Wunused-result]
-> > >  1535 |                 getcwd(fptr->f_path,
-> > >       |                 ^~~~~~~~~~~~~~~~~~~~
-> > >  1536 |                        sizeof(fptr->f_path)-1);
-> > >       |                        ~~~~~~~~~~~~~~~~~~~~~~~
-> > > gmake[2]: *** [Makefile:51: iogen] Error 1
-> > > gmake[1]: *** [include/buildrules:31: ltp] Error 2
-> > > make: *** [Makefile:51: default] Error 2
-> > >
-> > >
-> > >
-> > > --
-> > > Thanks,
-> > >
-> > > Steve
-> >
-> >
-> >
-> > --
-> > Thanks,
-> >
-> > Steve
->
->
->
-> --
-> Thanks,
->
-> Steve
+X-Provags-ID: V03:K1:8sWi6hZ1Vnrixix+4RRyh5Cg7PTQjQEhID/suRfDcDEfQfmHvCA
+ v0/ZqnaYL5q/3YbU/AHmTkxbsTsJjTj8jUVOHLa1z67RIE5wQ+eyIGhjhjSXs4fP8L6u4SY
+ 6BVMkbTkddIED1OLhWg6yVBTLymcXo+O2S2lkaf25tqLnm9+/jGhEeGGIqksP/CpWj45BUO
+ +617Wib6ZoO/z6pA8IaRg==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:CD4q+4m9P0I=;bK++KnQRcKmaj8Dzrer/q6IGhpu
+ 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
 
 
 
---=20
+=E5=9C=A8 2025/7/2 00:26, Zorro Lang =E5=86=99=E9=81=93:
+> On Mon, Jun 30, 2025 at 10:32:53AM +0930, Qu Wenruo wrote:
+>> [BUG]
+>> With the incoming btrfs shutdown ioctl/remove_bdev callback support,
+>> btrfs can be tested with the shutdown group.
+>>
+>> But test case generic/050 still fails on btrfs with shutdown support:
+>>
+>> generic/050 1s ... - output mismatch (see /home/adam/xfstests/results//=
+generic/050.out.bad)
+>>      --- tests/generic/050.out	2022-05-11 11:25:30.763333331 +0930
+>>      +++ /home/adam/xfstests/results//generic/050.out.bad	2025-06-30 10=
+:22:21.752068622 +0930
+>>      @@ -13,9 +13,7 @@
+>>       setting device read-only
+>>       mounting filesystem that needs recovery on a read-only device:
+>>       mount: device write-protected, mounting read-only
+>>      -mount: cannot mount device read-only
+>>       unmounting read-only filesystem
+>>      -umount: SCRATCH_DEV: not mounted
+>>       mounting filesystem with -o norecovery on a read-only device:
+>>      ...
+>>      (Run 'diff -u /home/adam/xfstests/tests/generic/050.out /home/adam=
+/xfstests/results//generic/050.out.bad'  to see the entire diff)
+>> Ran: generic/050
+>>
+>> [CAUSE]
+>> The test case generic/050 has several different golden output depending
+>> on the fs features.
+>>
+>> For fses which requires data write (e.g. replay the journal) during
+>> mount, mounting a read-only block device should fail.
+>> And that is the default golden output.
+>>
+>> However there are cases that the fs doesn't need to write anything, e.g=
+.
+>> the fs has no metadata journal support at all, or the fs has no dirty
+>> journal to replay.
+>>
+>> In that case, there is the generic/050.nojournal golden output.
+>>
+>> The test case is using the helper _has_metadata_journaling() to
+>> determine the feature.
+>>
+>> Unfortunately that helper doesn't support btrfs, thus the default
+>> behavior is to assume the fs has journal to replay, thus for btrfs it
+>> always assume there is a journal to replay and results the wrong golden
+>> output to be used.
+>>
+>> [FIX]
+>> Add btrfs specific log tree check into _has_metadata_journaling(), so
+>> that if there is no log tree to replay, expose the "nojournal" feature
+>> correctly to pass generic/050.
+>>
+>> Signed-off-by: Qu Wenruo <wqu@suse.com>
+>> ---
+>>   common/rc | 8 ++++++++
+>>   1 file changed, 8 insertions(+)
+>>
+>> diff --git a/common/rc b/common/rc
+>> index 2d8e7167..a78b779a 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -4283,6 +4283,14 @@ _has_metadata_journaling()
+>>   			return 1
+>>   		fi
+>>   		;;
+>> +	btrfs)
+>> +		_require_btrfs_command inspect-internal dump-super
+>> +		if "$BTRFS_UTIL_PROG" inspect-internal dump-super $dev | \
+>> +		   grep -q "log_root\s\+0" ; then
+>> +			echo "$FSTYPE on $dev has empty log tree"
+>                                 ^^^^^^
+>                                 FSTYP
+
+Despite the typo, this change is causing other test cases to be skipped.
+
+As _require_metadata_journaling() relies on _has_metadata_journaling()=20
+to check if the fs has metadata journal support.
+
+I'll need to find a way to tell the test case that even a fs support=20
+metadata journaling, the fs can still be mounted RO when there is no=20
+dirty journal.
+
+This will be more complex than just modifying _has_metadata_journaling().
+
 Thanks,
+Qu
 
-Steve
+>=20
+>=20
+>=20
+>=20
+>> +			return 1
+>> +		fi
+>> +		;;
+>>   	*)
+>>   		# by default we pass; if you need to, add your fs above!
+>>   		;;
+>> --=20
+>> 2.50.0
+>>
+>>
+>=20
+>=20
+
