@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 74EB2262FE9
-	for <fstests@vger.kernel.org>; Mon,  7 Jul 2025 09:00:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B5CC28B7E9
+	for <fstests@vger.kernel.org>; Mon,  7 Jul 2025 09:05:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751878852; cv=none; b=PutvvyeJ4jnwJKUJ2CgKvZhiDfOnNeSiRBjU/xyFulr0IhPjKMbuJbnT6dD7G+hrDbI104Dk4cPT1kmI4JnbZgEHMfOV0aOJQoB9cTmzdmd2ZqUL854tjcZ2KL+kjpj6FIIr1Q3Ayv4Yrb+AdgxNhorynSf/8rO7xSJf2ldntQY=
+	t=1751879135; cv=none; b=rYybgnFMzcOIT/kupNS393xt/dO02Jix7KmNJ1BFrVBIUQwDr4qWPrHZK0/vd1xksWDmHXOoEoPzxQdbC4kkkziREdwT4zzO42B6HQqK93uMsRDnzaOuvn12AkNYTWG8LA42sO+pJp8MzVw8NJ/Ef87UIBBRxrR7pvRHkwDNvyk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751878852; c=relaxed/simple;
-	bh=Xv2rJSzNJSj3ggO0CjQWx5YrkQKIOumkNOeWyfujl6U=;
+	s=arc-20240116; t=1751879135; c=relaxed/simple;
+	bh=C+Lzbru5LF7v6HOZyD+YXLL+EGyiHDmq2tWeTZcdDsw=;
 	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=p4t4Y0952vEEaLJjO7YgwKpYJ+wsMj+RkrcAotirNA9wRQmsw9e+Q3uAIRVH/uj3mD3vdxMZiGd23Pz8Kmy+sNSKJzsh3flJBrJl1jnHY94DHLzdBSLyUf1NfMHIkW9QtoMgZmdvNqA/ubzRoDT7imvWDgNjzATYMYfJNoVQsMA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Q7rvgb0Z; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=ucIY0togrJ7elQ3X0zHebL9hH3ktH0quTxgZ/R3qgLjYeGyPeamdWS+fVnbDuzmREvVUyEc8dXAVnihRPCeQG7YJKD08IhsUj2CyEp2eGRiB6gnKnaPa6/VRykpHqoaIk9qfJwfYIqhKeaS4Fr0MO47OX84peAga/nqisBPUnxg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tBm99eSj; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Q7rvgb0Z"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C5B20C4CEE3;
-	Mon,  7 Jul 2025 09:00:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tBm99eSj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 71D8FC4CEE3;
+	Mon,  7 Jul 2025 09:05:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1751878852;
-	bh=Xv2rJSzNJSj3ggO0CjQWx5YrkQKIOumkNOeWyfujl6U=;
+	s=k20201202; t=1751879134;
+	bh=C+Lzbru5LF7v6HOZyD+YXLL+EGyiHDmq2tWeTZcdDsw=;
 	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
-	b=Q7rvgb0ZDYxDs+MhJE5qQnxDygNIk7/Ew6loXJCOt6QIpguI9lAQU5LxE1gFbjQp4
-	 U+qdYz2TZg/J2cENyL8d3leARO9h956rdYhiNFslCjWOSIHjzvFNilzg/TjcUzDCYR
-	 Mg20CUm682MyeSGjUgcyQk5wHHrkRHANtsn8E5POVdS1ujmYNzfElo+LWsySD7G6dd
-	 Gk0oVVGCoiU/DzLdEtIA+vLRkyeNZLDn93BP4Ob4tnLUd+HYEcMVP+8vEEpv3CHLB5
-	 0upVi+gr5CPpX9Pok5PJXYvxGx/lrTAl3SRmFekciWlY8O9pYfw8hoY3/280sp0ZfV
-	 PgAuUAbXjAKGQ==
-Message-ID: <d7331a1b-cfa1-4689-8781-59d1ed12954f@kernel.org>
-Date: Mon, 7 Jul 2025 17:00:48 +0800
+	b=tBm99eSjceeOBBzTsV1Tg0HPFRJd+SSFxKhf4a2DnfyAratM2SN2PkfXtRBNLRlmf
+	 fedvMugO7hFZAKPGoMqQR1TT88o5UvRAl/dJzS4yr2x5s86HAKtvJM1zNQWvUbcTKH
+	 CwQFH0Yyq4nAbb3F+ncBfAFQmg+gvAG5qMLb0vRR5Pj+t9pfejlpf4pr3vsuuABW5Z
+	 QZ9Ox0nHjZ9E3jolOd9OYqCvOXCK/RD8BhY9J1UMeO4G4haXU62B1AXeKJKNOP+On1
+	 Kkeu7incf3/sDag6FKYZCdxsG7KjeShUxVDKjOXUDWPcyHOQj5DLLf+FoCQGHpWvnX
+	 4daiLVyTauedw==
+Message-ID: <09aa0620-a2ab-4460-b511-3d4537237b5d@kernel.org>
+Date: Mon, 7 Jul 2025 17:05:31 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -37,18 +37,18 @@ MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 Cc: chao@kernel.org, Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
  jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH] f2fs/015: test mount options
+Subject: Re: [PATCH v2] f2fs/015: test mount options
 To: Zorro Lang <zlang@redhat.com>
-References: <20250702110204.1063796-1-chao@kernel.org>
- <20250704181044.5v5a3xxv5dixd43a@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250704114818.1878294-1-chao@kernel.org>
+ <20250704181446.pum4b7zp2xqvotzx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Content-Language: en-US
 From: Chao Yu <chao@kernel.org>
-In-Reply-To: <20250704181044.5v5a3xxv5dixd43a@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20250704181446.pum4b7zp2xqvotzx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 7/5/25 02:10, Zorro Lang wrote:
-> On Wed, Jul 02, 2025 at 07:02:04PM +0800, Chao Yu wrote:
+On 7/5/25 02:14, Zorro Lang wrote:
+> On Fri, Jul 04, 2025 at 07:48:18PM +0800, Chao Yu wrote:
 >> As f2fs changes to use new mount APIs, let's add a new testcase
 >> to check mount result for all f2fs supported mount options and
 >> their combinations, in order to detect any inconsistency during
@@ -57,18 +57,35 @@ On 7/5/25 02:10, Zorro Lang wrote:
 >> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
 >> Signed-off-by: Chao Yu <chao@kernel.org>
 >> ---
->>  tests/f2fs/015     | 141 ++++++++++++++++++++++++++++++
->>  tests/f2fs/015.out | 207 +++++++++++++++++++++++++++++++++++++++++++++
->>  2 files changed, 348 insertions(+)
+>> v2:
+>> - allow to check mount options w/ zoned device
+>>  common/rc          |   3 +
+>>  tests/f2fs/015     | 159 ++++++++++++++++++++++++++++++++
+>>  tests/f2fs/015.out | 225 +++++++++++++++++++++++++++++++++++++++++++++
+>>  3 files changed, 387 insertions(+)
 >>  create mode 100755 tests/f2fs/015
 >>  create mode 100644 tests/f2fs/015.out
 >>
+>> diff --git a/common/rc b/common/rc
+>> index f71cc8f0..94fdce7e 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -844,6 +844,9 @@ _test_mkfs()
+>>      ext2|ext3|ext4)
+>>  	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
+>>  	;;
+>> +    f2fs)
+>> +	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $* $TEST_DEV
+>> +	;;
+>>      xfs)
+>>  	_test_options mkfs
+>>  	$MKFS_PROG -t $FSTYP -- -f $TEST_OPTIONS $MKFS_OPTIONS $* $TEST_DEV
 >> diff --git a/tests/f2fs/015 b/tests/f2fs/015
 >> new file mode 100755
->> index 00000000..86f0ef9e
+>> index 00000000..746e79de
 >> --- /dev/null
 >> +++ b/tests/f2fs/015
->> @@ -0,0 +1,141 @@
+>> @@ -0,0 +1,159 @@
 >> +#! /bin/bash
 >> +# SPDX-License-Identifier: GPL-2.0
 >> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
@@ -80,12 +97,6 @@ On 7/5/25 02:10, Zorro Lang wrote:
 >> +#
 >> +. ./common/preamble
 >> +_begin_fstest auto quick
->                             ^^^^^
-> 			    mount
-
-Will update.
-
-> 
 >> +_require_kernel_config CONFIG_F2FS_FS_XATTR
 >> +_require_kernel_config CONFIG_F2FS_FS_POSIX_ACL
 >> +_require_kernel_config CONFIG_F2FS_FAULT_INJECTION
@@ -95,23 +106,34 @@ Will update.
 >> +_require_kernel_config CONFIG_F2FS_FS_LZ4
 >> +_require_kernel_config CONFIG_F2FS_FS_LZ4HC
 >> +_require_kernel_config CONFIG_F2FS_FS_ZSTD
+>> +
+>> +_require_zoned_device "$TEST_DEV"
 > 
-> Hmm... I think these requirements might cause this test case be _notrun
-> from lots of Linux distributions, except the kernel is built for testing
-> manually :)
+> This requirement limit this test case only on zoned device...
+> Maybe you can slip this test case to 2~3 cases, let some common
+> mount options can be tested at first, some unimportant mount
+> options can be tested in another case, then zoned device related
+> mount options be tested in a seperated case ?
 
-Yeah, but this testcase just relies on those options, and it will be
-too trivial to split them to separated testcases? :P
+Good idea, do you want to uplift common mount option testcase to
+generic/ directory? or is it fine to leave it in f2fs/ now?
+
+Thanks,
 
 > 
->> +_require_scratch
+> Thanks,
+> Zorro
+> 
+>> +_test_unmount >> $seqres.full 2>&1
 >> +
 >> +options=(
 >> +#	mount_option			mkfs_option
 >> +	"background_gc=on"		""			\
 >> +	"background_gc=off"		""			\
->> +	"background_gc=off"		""			\
 >> +	"background_gc=sync"		""			\
+>> +	"background_gc=on"		"blkzone"		\
+>> +	"background_gc=off"		"blkzone"		\
+>> +	"background_gc=sync"		"blkzone"		\
 >> +	"disable_roll_forward"		""			\
 >> +	"norecovery"			""			\
 >> +	"discard"			""			\
@@ -151,6 +173,10 @@ too trivial to split them to separated testcases? :P
 >> +	"mode=lfs"			""			\
 >> +	"mode=fragment:segment"		""			\
 >> +	"mode=fragment:block"		""			\
+>> +	"mode=adaptive"			"blkzone"		\
+>> +	"mode=lfs"			"blkzone"		\
+>> +	"mode=fragment:segment"		"blkzone"		\
+>> +	"mode=fragment:block"		"blkzone"		\
 >> +	"usrquota"			""			\
 >> +	"grpquota"			""			\
 >> +	"prjquota"			""			\
@@ -185,7 +211,7 @@ too trivial to split them to separated testcases? :P
 >> +	"compress_algorithm=zstd"	"extra,compression"	\
 >> +	"compress_algorithm=lzo-rle"	"extra,compression"	\
 >> +	"compress_algorithm=lz4:3"	"extra,compression"	\
->> +	"compress_algorithm=ztsd:1"	"extra,compression"	\
+>> +	"compress_algorithm=zstd:1"	"extra,compression"	\
 >> +	"compress_log_size=8"		"extra,compression"	\
 >> +	"compress_extension=so"		"extra,compression"	\
 >> +	"nocompress_extension=so"	"extra,compression"	\
@@ -201,6 +227,9 @@ too trivial to split them to separated testcases? :P
 >> +	"discard_unit=block"		""			\
 >> +	"discard_unit=segment"		""			\
 >> +	"discard_unit=section"		""			\
+>> +	"discard_unit=block"		"blkzone"		\
+>> +	"discard_unit=segment"		"blkzone"		\
+>> +	"discard_unit=section"		"blkzone"		\
 >> +	"memory=normal"			""			\
 >> +	"memory=low"			""			\
 >> +	"age_extent_cache"		""			\
@@ -217,241 +246,251 @@ too trivial to split them to separated testcases? :P
 >> +for ((i=0;i<${#options[@]};i=i+2))
 >> +do
 >> +	echo "Option#$i: ${options[$i]} : ${options[$((i+1))]}"
->> +	_scratch_mkfs "-O ${options[$((i+1))]}" >> $seqres.full
-> 
-> _scratch_mkfs just return non-zero if it fails, so...
-
-Oh, thanks for your reminder, I guess we need to stop here if mkfs
-fails.
-
-Thanks,
-
-> 
->> +	_try_scratch_mount "-o ${options[$i]}" >> $seqres.full 2>&1
-> 
-> ...do you still hope to try mount if mkfs fails?
-> 
-> Thanks,
-> Zorro
-> 
->> +	echo $?
->> +	_scratch_unmount
+>> +	if [ "${options[$((i+1))]}" == "blkzone" ]; then
+>> +		_test_mkfs "-m" >> $seqres.full
+>> +		_test_mount "-o ${options[$i]}" >> $seqres.full 2>&1
+>> +		echo $?
+>> +		_test_unmount >> $seqres.full 2>&1
+>> +	else
+>> +		_scratch_mkfs "-O ${options[$((i+1))]}" >> $seqres.full
+>> +		_try_scratch_mount "-o ${options[$i]}" >> $seqres.full 2>&1
+>> +		echo $?
+>> +		_scratch_unmount >> $seqres.full 2>&1
+>> +	fi
 >> +done
 >> +
 >> +status=0
 >> +exit
 >> diff --git a/tests/f2fs/015.out b/tests/f2fs/015.out
 >> new file mode 100644
->> index 00000000..83e6ad51
+>> index 00000000..d7f4e62a
 >> --- /dev/null
 >> +++ b/tests/f2fs/015.out
->> @@ -0,0 +1,207 @@
+>> @@ -0,0 +1,225 @@
 >> +QA output created by 015
 >> +Option#0: background_gc=on : 
 >> +0
 >> +Option#2: background_gc=off : 
 >> +0
->> +Option#4: background_gc=off : 
+>> +Option#4: background_gc=sync : 
 >> +0
->> +Option#6: background_gc=sync : 
+>> +Option#6: background_gc=on : blkzone
 >> +0
->> +Option#8: disable_roll_forward : 
->> +0
->> +Option#10: norecovery : 
+>> +Option#8: background_gc=off : blkzone
 >> +32
->> +Option#12: discard : 
+>> +Option#10: background_gc=sync : blkzone
 >> +0
->> +Option#14: nodiscard : 
+>> +Option#12: disable_roll_forward : 
 >> +0
->> +Option#16: no_heap : 
+>> +Option#14: norecovery : 
+>> +32
+>> +Option#16: discard : 
 >> +0
->> +Option#18: heap : 
+>> +Option#18: nodiscard : 
 >> +0
->> +Option#20: user_xattr : 
+>> +Option#20: no_heap : 
 >> +0
->> +Option#22: nouser_xattr : 
+>> +Option#22: heap : 
 >> +0
->> +Option#24: acl : 
+>> +Option#24: user_xattr : 
 >> +0
->> +Option#26: noacl : 
+>> +Option#26: nouser_xattr : 
 >> +0
->> +Option#28: active_logs=2 : 
+>> +Option#28: acl : 
 >> +0
->> +Option#30: active_logs=4 : 
+>> +Option#30: noacl : 
 >> +0
->> +Option#32: active_logs=6 : 
+>> +Option#32: active_logs=2 : 
 >> +0
->> +Option#34: disable_ext_identify : 
+>> +Option#34: active_logs=4 : 
 >> +0
->> +Option#36: inline_xattr : 
+>> +Option#36: active_logs=6 : 
 >> +0
->> +Option#38: noinline_xattr : 
+>> +Option#38: disable_ext_identify : 
 >> +0
->> +Option#40: inline_xattr_size=400 : extra,flexible_inline_xattr
+>> +Option#40: inline_xattr : 
 >> +0
->> +Option#42: inline_xattr_size=400 : 
+>> +Option#42: noinline_xattr : 
 >> +0
->> +Option#44: inline_data : 
->> +0
->> +Option#46: noinline_dentry : 
->> +0
->> +Option#48: inline_dentry : 
+>> +Option#44: inline_xattr_size=400 : extra,flexible_inline_xattr
+>> +32
+>> +Option#46: inline_xattr_size=400 : 
+>> +32
+>> +Option#48: inline_data : 
 >> +0
 >> +Option#50: noinline_dentry : 
 >> +0
->> +Option#52: flush_merge : 
+>> +Option#52: inline_dentry : 
 >> +0
->> +Option#54: noflush_merge : 
+>> +Option#54: noinline_dentry : 
 >> +0
->> +Option#56: barrier : 
+>> +Option#56: flush_merge : 
 >> +0
->> +Option#58: nobarrier : 
+>> +Option#58: noflush_merge : 
 >> +0
->> +Option#60: fastboot : 
+>> +Option#60: barrier : 
 >> +0
->> +Option#62: extent_cache : 
+>> +Option#62: nobarrier : 
 >> +0
->> +Option#64: noextent_cache : 
+>> +Option#64: fastboot : 
 >> +0
->> +Option#66: data_flush : 
+>> +Option#66: extent_cache : 
 >> +0
->> +Option#68: reserve_root=32768 : 
+>> +Option#68: noextent_cache : 
 >> +0
->> +Option#70: resuid=1000 : 
+>> +Option#70: data_flush : 
 >> +0
->> +Option#72: resgid=1000 : 
+>> +Option#72: reserve_root=32768 : 
 >> +0
->> +Option#74: fault_injection=100 : 
+>> +Option#74: resuid=1000 : 
 >> +0
->> +Option#76: fault_type=4095 : 
+>> +Option#76: resgid=1000 : 
 >> +0
->> +Option#78: mode=adaptive : 
+>> +Option#78: fault_injection=100 : 
 >> +0
->> +Option#80: mode=lfs : 
+>> +Option#80: fault_type=4095 : 
 >> +0
->> +Option#82: mode=fragment:segment : 
+>> +Option#82: mode=adaptive : 
 >> +0
->> +Option#84: mode=fragment:block : 
+>> +Option#84: mode=lfs : 
 >> +0
->> +Option#86: usrquota : 
+>> +Option#86: mode=fragment:segment : 
 >> +0
->> +Option#88: grpquota : 
+>> +Option#88: mode=fragment:block : 
 >> +0
->> +Option#90: prjquota : 
+>> +Option#90: mode=adaptive : blkzone
 >> +32
->> +Option#92: usrjquota=ausrquota : 
+>> +Option#92: mode=lfs : blkzone
+>> +0
+>> +Option#94: mode=fragment:segment : blkzone
 >> +32
->> +Option#94: grpjquota=agrpquota : 
+>> +Option#96: mode=fragment:block : blkzone
 >> +32
->> +Option#96: prjjquota=aprjquota : 
+>> +Option#98: usrquota : 
+>> +0
+>> +Option#100: grpquota : 
+>> +0
+>> +Option#102: prjquota : 
 >> +32
->> +Option#98: jqfmt=vfsold : 
->> +0
->> +Option#100: jqfmt=vfsv0 : 
->> +0
->> +Option#102: jqfmt=vfsv1 : 
->> +0
->> +Option#104: usrjquota= : 
->> +0
->> +Option#106: grpjquota= : 
->> +0
->> +Option#108: prjjquota= : 
->> +0
->> +Option#110: quota : 
->> +0
->> +Option#112: noquota : 
->> +0
->> +Option#114: alloc_mode=reuse : 
->> +0
->> +Option#116: alloc_mode=default : 
->> +0
->> +Option#118: fsync_mode=posix : 
->> +0
->> +Option#120: fsync_mode=strict : 
->> +0
->> +Option#122: fsync_mode=nobarrier : 
->> +0
->> +Option#124: test_dummy_encryption : 
->> +0
->> +Option#126: test_dummy_encryption=v1 : 
->> +0
->> +Option#128: test_dummy_encryption=v2 : 
->> +0
->> +Option#130: checkpoint=enable : 
->> +0
->> +Option#132: checkpoint=disable : 
->> +0
->> +Option#134: checkpoint=disable:32768 : 
->> +0
->> +Option#136: checkpoint=disable:50% : 
->> +0
->> +Option#138: checkpoint_merge : 
->> +0
->> +Option#140: nocheckpoint_merge : 
->> +0
->> +Option#142: compress_algorithm=lzo : 
->> +0
->> +Option#144: compress_algorithm=lzo : extra,compression
->> +0
->> +Option#146: compress_algorithm=lz4 : extra,compression
->> +0
->> +Option#148: compress_algorithm=zstd : extra,compression
->> +0
->> +Option#150: compress_algorithm=lzo-rle : extra,compression
->> +0
->> +Option#152: compress_algorithm=lz4:3 : extra,compression
->> +0
->> +Option#154: compress_algorithm=ztsd:1 : extra,compression
+>> +Option#104: usrjquota=ausrquota : 
 >> +32
->> +Option#156: compress_log_size=8 : extra,compression
->> +0
->> +Option#158: compress_extension=so : extra,compression
->> +0
->> +Option#160: nocompress_extension=so : extra,compression
->> +0
->> +Option#162: nocompress_extension=* : extra,compression
+>> +Option#106: grpjquota=agrpquota : 
 >> +32
->> +Option#164: compress_extension=so,nocompress_extension=so : extra,compression
+>> +Option#108: prjjquota=aprjquota : 
 >> +32
->> +Option#166: compress_chksum : extra,compression
+>> +Option#110: jqfmt=vfsold : 
 >> +0
->> +Option#168: compress_mode=fs : extra,compression
+>> +Option#112: jqfmt=vfsv0 : 
 >> +0
->> +Option#170: compress_mode=user : extra,compression
+>> +Option#114: jqfmt=vfsv1 : 
 >> +0
->> +Option#172: compress_cache : extra,compression
+>> +Option#116: usrjquota= : 
 >> +0
->> +Option#174: inlinecrypt : 
+>> +Option#118: grpjquota= : 
 >> +0
->> +Option#176: atgc : 
+>> +Option#120: prjjquota= : 
 >> +0
->> +Option#178: discard_unit=block : 
+>> +Option#122: quota : 
 >> +0
->> +Option#180: discard_unit=segment : 
+>> +Option#124: noquota : 
 >> +0
->> +Option#182: discard_unit=section : 
+>> +Option#126: alloc_mode=reuse : 
 >> +0
->> +Option#184: memory=normal : 
+>> +Option#128: alloc_mode=default : 
 >> +0
->> +Option#186: memory=low : 
+>> +Option#130: fsync_mode=posix : 
 >> +0
->> +Option#188: age_extent_cache : 
+>> +Option#132: fsync_mode=strict : 
 >> +0
->> +Option#190: errors=panic : 
+>> +Option#134: fsync_mode=nobarrier : 
 >> +0
->> +Option#192: errors=continue : 
->> +0
->> +Option#194: errors=remount-ro : 
->> +0
->> +Option#196: nat_bits : 
->> +0
->> +Option#198: atgc,mode=lfs : 
+>> +Option#136: test_dummy_encryption : 
 >> +32
->> +Option#200: ro,flush_merge : 
+>> +Option#138: test_dummy_encryption=v1 : 
 >> +32
->> +Option#202: rw : ro
+>> +Option#140: test_dummy_encryption=v2 : 
+>> +32
+>> +Option#142: checkpoint=enable : 
 >> +0
->> +Option#204: norecovery,ro : 
+>> +Option#144: checkpoint=disable : 
+>> +0
+>> +Option#146: checkpoint=disable:32768 : 
+>> +0
+>> +Option#148: checkpoint=disable:50% : 
+>> +0
+>> +Option#150: checkpoint_merge : 
+>> +0
+>> +Option#152: nocheckpoint_merge : 
+>> +0
+>> +Option#154: compress_algorithm=lzo : 
+>> +0
+>> +Option#156: compress_algorithm=lzo : extra,compression
+>> +0
+>> +Option#158: compress_algorithm=lz4 : extra,compression
+>> +0
+>> +Option#160: compress_algorithm=zstd : extra,compression
+>> +0
+>> +Option#162: compress_algorithm=lzo-rle : extra,compression
+>> +0
+>> +Option#164: compress_algorithm=lz4:3 : extra,compression
+>> +0
+>> +Option#166: compress_algorithm=zstd:1 : extra,compression
+>> +0
+>> +Option#168: compress_log_size=8 : extra,compression
+>> +0
+>> +Option#170: compress_extension=so : extra,compression
+>> +0
+>> +Option#172: nocompress_extension=so : extra,compression
+>> +0
+>> +Option#174: nocompress_extension=* : extra,compression
+>> +0
+>> +Option#176: compress_extension=so,nocompress_extension=so : extra,compression
+>> +0
+>> +Option#178: compress_chksum : extra,compression
+>> +0
+>> +Option#180: compress_mode=fs : extra,compression
+>> +0
+>> +Option#182: compress_mode=user : extra,compression
+>> +0
+>> +Option#184: compress_cache : extra,compression
+>> +0
+>> +Option#186: inlinecrypt : 
+>> +0
+>> +Option#188: atgc : 
+>> +0
+>> +Option#190: discard_unit=block : 
+>> +0
+>> +Option#192: discard_unit=segment : 
+>> +0
+>> +Option#194: discard_unit=section : 
+>> +0
+>> +Option#196: discard_unit=block : blkzone
+>> +0
+>> +Option#198: discard_unit=segment : blkzone
+>> +0
+>> +Option#200: discard_unit=section : blkzone
+>> +0
+>> +Option#202: memory=normal : 
+>> +0
+>> +Option#204: memory=low : 
+>> +0
+>> +Option#206: age_extent_cache : 
+>> +0
+>> +Option#208: errors=panic : 
+>> +0
+>> +Option#210: errors=continue : 
+>> +0
+>> +Option#212: errors=remount-ro : 
+>> +0
+>> +Option#214: nat_bits : 
+>> +0
+>> +Option#216: atgc,mode=lfs : 
+>> +32
+>> +Option#218: ro,flush_merge : 
+>> +32
+>> +Option#220: rw : ro
+>> +0
+>> +Option#222: norecovery,ro : 
 >> +0
 >> -- 
 >> 2.49.0
