@@ -1,212 +1,287 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB3383596B
-	for <fstests@vger.kernel.org>; Fri,  4 Jul 2025 18:30:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751653828; cv=none; b=uH9Ig43HQ/5PnM5DGzZfIwRvltYTF7vveckOHT1rQor4/XG/WCfiFRmHeMtSp9D0QtAtFofOiE0MhLka1haXIhDYQhipVNu1eCkI9dLna4+6WCeXBrmaUsF6u/p35HbJzNdwSTMcsIRNMfeYpAtk6tLYuUdvcC2zH/6cQUBCll0=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751653828; c=relaxed/simple;
-	bh=vVHA5joY6IcGy7tC7wV6vefYzCBMz0qLNhnYoagx0xo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=F5bwoJUBRgjZwbfhygzUrC6NwOugZXmA9YwwZ7a24oiCRzun0ere9cr8KOowU0WiMTlD51ycmeICO+CLqvnd3x09WAglONYkuSGiJ6+inY15LWBXjWSO5ZLxjkDSWyKnrb10fGF8IPuzgocfJxxRRTRK0VtSuUHG+T/KxCs15Wc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Yd0voYw0; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BBFD728A3EF
+	for <fstests@vger.kernel.org>; Mon,  7 Jul 2025 08:02:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.177.32
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1751875374; cv=fail; b=TTC8niUKhaClHsecTUEZrd2g3annZ2RUhNUA4BsU8uqOWM0fXlGA0SvSeT21UCy4DUBOeWMBFlyst5LUypQ8ZCKe8LD+7FgMU/IsNvclsBuaKcq4RiMB5EdsKrkKgp6h9jAIKMzJfW8vS8lT+Q11xHRERpKcnn490slQD9RxmH0=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1751875374; c=relaxed/simple;
+	bh=KYN//NyxjBcFcTghzzXI4Fr0Z47GlNVAFjdruE7rRvA=;
+	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=sdlV+nCcFO6h8MNslDUh1U07EHL+MSQrGMAHWvOGa+cAl5e4EoQfEjRTNlKVqjE4gPG3975wH8l4I5VgPjV/X5Wnf+/8J1Vb3On0QbuV/Nu5IEc85j+wMzTiLMlswcz4n+HhzGMMUfnQzR7Hld6KEC60mXS9AX/ZDM1CoNPxZok=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=a5PEDtl4; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=KsDb0Tie; arc=fail smtp.client-ip=205.220.177.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Yd0voYw0"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1751653825;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=ZbhYGUKt21vSsvrvlY5/+X1CqwX2FHTTRQfj9BKsHGw=;
-	b=Yd0voYw0rKY7aIqQmClaxdYYRz23o9gXrzW9Jxi46MxcFGFTwSLaAeCkaA2GHuRJptYZZX
-	wwSjMTu/zrFN1nb4C46+30TAi49XD1vudX50u4rtQIdH3BVmdu0C8GIfT+2OE3WHx3qOlX
-	GOXnTHxkjch8dmA+UdaH4c1TuguTiRw=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-584-l28HLaHJNQyMO5DFjdrCaQ-1; Fri, 04 Jul 2025 14:30:22 -0400
-X-MC-Unique: l28HLaHJNQyMO5DFjdrCaQ-1
-X-Mimecast-MFC-AGG-ID: l28HLaHJNQyMO5DFjdrCaQ_1751653822
-Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-b2c37558eccso994783a12.1
-        for <fstests@vger.kernel.org>; Fri, 04 Jul 2025 11:30:22 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751653821; x=1752258621;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=ZbhYGUKt21vSsvrvlY5/+X1CqwX2FHTTRQfj9BKsHGw=;
-        b=HTQsliAhvJh43dEog3IzcM1ScRmizzYF6WCTGX3kG7HpnTilCc33zWs6/6ka/JQ7K2
-         A1+X9JtBAnX981SJjGVk8QuVjMeusaiiZH9ut98bKBBgytKyTiCBeNr1tpbv+dOu5Fln
-         l6Z0tkmD4lcRu3Phf5QdOBD0CfU3NF+lIer7HYhOBb+59mDNfvzJMSz11sWQwrDIntwv
-         CuRkUDFnWU0ZAbho3ZHmtvMYi5GX6PP+bCMvrpMZQSzCEvlMpeVmpGQCFku2N2vdhUqL
-         UK4PW50jrhsTzxJJAkxD5/UiX/y0EqIt4tODsPlfTfMo6JRngqp/u+YKqvUvtjzCSaId
-         fZTQ==
-X-Gm-Message-State: AOJu0YyUUrhkQOBkKpfKwVOiIamSk0Mq9Mf3anLxVlKX5XkpXsPI6P4U
-	aoiiFulAWo7ALWScPc0AOmBDQemsiXTxGIw4j2JSa/zfv00ezeXR8J4RKQ+ZZxP8lqV5rieRhmB
-	7oVTxhmycPrFWeisDCTLWXMgAd8BmuJjleh2YKivdl9TlFe+cwYcbaL8+R97D9BUXOFY=
-X-Gm-Gg: ASbGncvTCiZN5caUSnIKHnn0GgsiPW45zcQBa57YcNJxRUrTabTMC0oCtl8K/azyZGn
-	JbL8m+Va9sUe7X/0a9YZD1q8xoYMMCEZBihNFCRQqgSS0VhSlu7N9ww1hrw3RSrs/WhG32aG/Rt
-	X2vmFfmwJ5uffgOwmSPQ2M/JK9SQ5yOTXBGzRG7s/wzV6FQ+/fqYzyHlVluUEaXCUcMKDnAQRe+
-	hxw126XO8xByn9xEg+EUCl5Zhy5h9Q4Kcc43EVHQrTQoPA2c0+OPGvz+azbr1m+5xD69heoUspf
-	qiJi8lQB9iJ7v6RDCOj6vODkL6605LKcvHhLu5QkqdJELT2D4meI2Je/h9DGnOA=
-X-Received: by 2002:a17:90a:e18c:b0:311:c970:c9bc with SMTP id 98e67ed59e1d1-31aac53e092mr5110129a91.30.1751653821512;
-        Fri, 04 Jul 2025 11:30:21 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGP2Y0eWmCqueC8tDvUEnjDevhuNatGJ+2lvHHUenAh9gh4jAfLhteOmz1cOYIyag5h9l2T2A==
-X-Received: by 2002:a17:90a:e18c:b0:311:c970:c9bc with SMTP id 98e67ed59e1d1-31aac53e092mr5110107a91.30.1751653821073;
-        Fri, 04 Jul 2025 11:30:21 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-31aaae81c0esm2639666a91.22.2025.07.04.11.30.19
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 04 Jul 2025 11:30:20 -0700 (PDT)
-Date: Sat, 5 Jul 2025 02:30:16 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Glass Su <glass.su@suse.com>
-Cc: fstests@vger.kernel.org, Su Yue <l@damenly.org>, gfs2@lists.linux.dev
-Subject: Re: [PATCH] common/quota: adjust _qmount_option for gfs2
-Message-ID: <20250704183016.ib2a7c22g4amcywf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250603041009.59811-1-glass.su@suse.com>
- <20250620173839.q735lweoglone5cp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <089C8762-DDC0-45F6-8769-FD52A75CA626@suse.com>
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="a5PEDtl4";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="KsDb0Tie"
+Received: from pps.filterd (m0246631.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 566LbxLZ032523;
+	Mon, 7 Jul 2025 08:02:44 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
+	:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=
+	corp-2025-04-25; bh=9IY5AEDHIiLZmI7Cva5gPyFe44qaoQYMLGV5X2gS/MU=; b=
+	a5PEDtl4jvfpmXBZ/dCY2P7u6LOwM0lulRqiLuc1qnkjjCQk32lMZ6rxRYU43nmL
+	d5ELRQ4I8AHiJIJxveVKVGgTuKB7e2DbMXGyWk9E2jo7B7enVxyOYpM9NvUF6vQ7
+	SLhWwL4tm7uHDDMoWjQ54g8B36H+egD57jHotqTZGbda8BfRL0/478Qg9DZnfFyN
+	ggKyfVej7EDN7fHTt3/7ATHm5klFSwSHuu8eSViGQuINCo6UwInXQXZW3m2T7qrc
+	xJCNHrIo6yABqHlxGhZitPf++6pFbJTvhIPUsjLXj/GdvTjTKMooMk+SsRBnHKUZ
+	ef3iXMssYSQwsVvRqHzRyg==
+Received: from phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta01.appoci.oracle.com [138.1.114.2])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 47ptu7j87n-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Mon, 07 Jul 2025 08:02:43 +0000 (GMT)
+Received: from pps.filterd (phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 56762Q5M040477;
+	Mon, 7 Jul 2025 08:02:42 GMT
+Received: from nam11-co1-obe.outbound.protection.outlook.com (mail-co1nam11on2082.outbound.protection.outlook.com [40.107.220.82])
+	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 47ptg86eqf-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Mon, 07 Jul 2025 08:02:42 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=b4K9B/ig5T/CPnn1z2ivS47h/eR7uSKGcdcV6NqqpRjSik6e/dda1A/wrDwQgRdS+gsqxgguzQRK8/Yfw/4ZSaNR1soc0/cL5bC044UWVoa0WDWdnyb0ZaxQH0fAXpNZGAIxVqeCxVwvJM5GTAj51nwyP/WhFI3YlbHKdzN5KGKsw4jvQLuw7atliNnhUwnIicpcpAjq3RDonvzGw8x5Wj8pjSc/yhbpdabs+JQYD70VGbiUbqcgV5iZ9s+/OsEIXYIVgQhEZVfx17h9P08Fh5yvv5KrC9G510sKUjpIQMsiao6HYdK/Is6T5iqEE6J4KF/6TlcTKsBYUfefhUvYrw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=9IY5AEDHIiLZmI7Cva5gPyFe44qaoQYMLGV5X2gS/MU=;
+ b=xYsSULXZ/QTIiOcaq3Uz7u+omjc/6KFfCxCbiyUDNM4uqOSdRGt4R1mlfbYb7LmV//cJNKzaAhOPLKg/qivqg7U7icmgtqOtBAjDEtH8PKNTnS5YosbTKQZUwcNbjeoXF9jZhEKyzdOTT3F7gcOML1ugifdoM0kp04XGOTTDHDiC+JzMZRz6kNKvLxqeFHVTg9lk9U+K7Z5/anePmJhPK+b0+BZl4RPBoHIa3wNEsVxVJ1CNSxe6zwEh7HgQzvJH/ZgIIh5qo+ypphzlToYkuq4r2nQY4gSCEAGj/gd6s5vDEL9YKGkhoRYDOQt6zPPZsxhdB78TGERrdj+HtgYChg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=9IY5AEDHIiLZmI7Cva5gPyFe44qaoQYMLGV5X2gS/MU=;
+ b=KsDb0TieLoRc5D+lMQSrDi43J4KYf4Am0KJuCYSQQDNcAmtPNSRcYY5HOwyNmQytD8VgMKCzkDLE0STniOaLBJRgYku1awBA9PD/fFevfpcenfpUPVNmBVGMk9jRhtOK7i4w+UlszcHuJJNszC5YpsrV7Yf+h4kGZR7t5Kw3aTA=
+Received: from MN2PR10MB4320.namprd10.prod.outlook.com (2603:10b6:208:1d5::16)
+ by CYXPR10MB7976.namprd10.prod.outlook.com (2603:10b6:930:df::22) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8901.25; Mon, 7 Jul
+ 2025 08:02:39 +0000
+Received: from MN2PR10MB4320.namprd10.prod.outlook.com
+ ([fe80::42ec:1d58:8ba8:800c]) by MN2PR10MB4320.namprd10.prod.outlook.com
+ ([fe80::42ec:1d58:8ba8:800c%3]) with mapi id 15.20.8901.024; Mon, 7 Jul 2025
+ 08:02:39 +0000
+Message-ID: <ea53b415-7f54-4e96-a9a2-43c71e2b722d@oracle.com>
+Date: Mon, 7 Jul 2025 09:02:38 +0100
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 05/13] generic/1226: Add atomic write test using fio
+ crc check verifier
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+        Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
+        tytso@mit.edu
+References: <cover.1750924903.git.ojaswin@linux.ibm.com>
+ <227ca6650cf5ef5a9a3383a06cd08c0c2b9f43c3.1750924903.git.ojaswin@linux.ibm.com>
+ <0430bd73-e6c2-4ce9-af24-67b1e1fa9b5b@oracle.com>
+ <aGQKO3E_kwZzSy_0@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <8effd5bb-9dcd-4150-8694-36bc493a3b59@oracle.com>
+ <aGYmQtQN2GsVRQ31@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <a0d241f9-0070-488a-b330-5b93339fbb03@oracle.com>
+ <aGfmUrj9HDrnwOyX@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+Content-Language: en-US
+From: John Garry <john.g.garry@oracle.com>
+Organization: Oracle Corporation
+In-Reply-To: <aGfmUrj9HDrnwOyX@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: LO6P123CA0059.GBRP123.PROD.OUTLOOK.COM
+ (2603:10a6:600:310::17) To MN2PR10MB4320.namprd10.prod.outlook.com
+ (2603:10b6:208:1d5::16)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <089C8762-DDC0-45F6-8769-FD52A75CA626@suse.com>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: MN2PR10MB4320:EE_|CYXPR10MB7976:EE_
+X-MS-Office365-Filtering-Correlation-Id: c2c6356a-ef1d-4f35-bafc-08ddbd2ca48a
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|366016|376014;
+X-Microsoft-Antispam-Message-Info:
+	=?utf-8?B?K05SOW5ITEVvZ1p2dVJoT0hEQjhPWWJTeS9HUWtVTjk5aGpVZjQzT29LaHRY?=
+ =?utf-8?B?R3F5WWRMbXFZSEpUQUtTU1NXeDR3V0ZCckE3cVhaTU4xdGZNeDUvNFpRdW5h?=
+ =?utf-8?B?VTg3N05PVjZFK2Rmc1UrbHJxSGZobUZJajMvSUIzQ2ZjTnZlUjMxTlhFaUk3?=
+ =?utf-8?B?K3NzYWI0bS8rcTlTMnc0c3kxKzJqeXRYS1Z6aFBlRWxXQjZzRkdTVWMrM0RZ?=
+ =?utf-8?B?SDlYUzVGNU02OE5peGZmckd1RjFtS2pLSWVzL0xNeC9JNU5EaHN5bGNscWVK?=
+ =?utf-8?B?RjZpejNuU1UwMzA2Yy9HcGdpTlltSUFrUFk1aTRadjcvVTBjMXpwWkRPS1dH?=
+ =?utf-8?B?N0NIMVhrTjlld0NKbGNwVVYzUGhONFl4MWNBN21IOE41ckpqa2QwRTJwdkJt?=
+ =?utf-8?B?TEY0QlRMdUhmNS96S0NRODEwTTc3RlRXOVI2SURtdTJMNTlSckxSckJJY05l?=
+ =?utf-8?B?U2p4a0VjRklkRGFObDkvZDNCcDZIVnJMWUlvNTdkSklEcUZYL0s3cVRPS3FM?=
+ =?utf-8?B?ODVwL2hsakY3OXYrWXZ1ZEFrZWZHR2NiK0FDeS9ucHNEbDlxRTk4YnNTUDFW?=
+ =?utf-8?B?T29UWFJpNUZXTkRWT1NOeFNGNm5rSmJHV3Vkb0lacWdUbCt3OUpNR29aQ2hz?=
+ =?utf-8?B?ZGVEd1htVHRiNy9yZWtyeUlYcEMzSWlxOUk4Y1d3NmxnREwwcnQvVDd4Q1A3?=
+ =?utf-8?B?QWNEeitVV0dDbjhlRjJ1KzhnNTgrYS9UL0k3TG9PaUtCT3kwRzdHR2p5SFpn?=
+ =?utf-8?B?MzF6dmZjcXJmdzk1UXorSTJISmJEbmFLa3hZOU50NnFQRFdXam9zaGNWeXVW?=
+ =?utf-8?B?N0VsY3ZtWWxXVGtVeEJzdHBMTTNLRERERFNraVlwRTRmNlUyVjdWcnlQWG0r?=
+ =?utf-8?B?eXQ5NU9YbW1mbXo2c3lWdVBVeEFSN2FCRWFmVkZSVWlCdTVlTTVTUXdDdkc0?=
+ =?utf-8?B?UnplY3cyWkJoVVZOQjdINGs0Q2JIRWQrcGNTbzlUelB3aDZvd2dIRHBIUGFk?=
+ =?utf-8?B?S2NFR2x5eFZlakU2WFkySVAvYkZXdjEvRjBkQnFnYXJkN1BoR05ONGFZRTFv?=
+ =?utf-8?B?bldvTjllRTZybnFjbFYrUTBHZFhBL0VHOW40bWw5SlVUdXRPVXA2Q2ZTWVVV?=
+ =?utf-8?B?aDU1S2h3djdNVG1GVmI3RmE0Z251bVlXb2JUOEJOUXE1MUt6eS8xdWFGRFVt?=
+ =?utf-8?B?dSttSSs3cHJibERLVzIxbWNkbnRpY1NzOS9xL2Q3ZkFkMy9GZ2hYZGNZbmJF?=
+ =?utf-8?B?Z3dGUXpSKzhlcy9COFlWWUxTWTBsNTUyb3VJNUY4cDlsb0J6ZUZmR0J5dmpz?=
+ =?utf-8?B?N3JzTTBOZFQrM3dqVmRMdHdaZ0cyMnFkUmkrMm1xd3RZcnB5WWo4aUVTTy84?=
+ =?utf-8?B?Zkxrbm1ibDBPZlFKNDlhQ0xpWitQR000U2JnQ1RmTXN6eHd6YWZvZmxvNFRl?=
+ =?utf-8?B?bUxEd09rakJmVGtnUFpxUURqRVBSL0h6RHZrbWYvTExUWXhDelo3QWwzVllr?=
+ =?utf-8?B?cDRCajRNRXZaVDE4TVRCZG1ZNE5ieTRaTFZmQUZ2bEtGWHNWMk1RS2Y2ejZG?=
+ =?utf-8?B?M2dCTS9meUlJcmdBaWZUTmsvWklQZ2dLWmpWM0NtZk02eUs2TUZSM3ZRTWRa?=
+ =?utf-8?B?UUgrTVRRSEpHNFdGM1djeGk1SkhOaFhjanNGa1ZKSUZSTCtSNTVVcUZyTHpq?=
+ =?utf-8?B?eWtZdHlDSWUvSmRPT2dLdlJJYWpGcFVWZTVZNWd0Y0NGcjhRWEU0L3RKNHRK?=
+ =?utf-8?B?UGxPOXRlamcwdG1GU0lnRzFweVd6eFZhbEpSL2RtR2VDb3oza0QyY0ZUcDV3?=
+ =?utf-8?B?TjNhTHFnbWI2VEdyV1l3d0MxNW9jazNZVnM5Q1hrU09hc0xuamJhSW5ONkpM?=
+ =?utf-8?B?TWZQUTFNOHdIcU9zWnM2bW0waTFYOE13OWg5cHMzS1E1N2xlYlB0b2U4Yk5N?=
+ =?utf-8?Q?gFhIyonCX9w=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MN2PR10MB4320.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?VVUzVWJYWHlhbXNMeWcvZUtmazNsMHBrSE9CVFdjcUdPZDUvdGtGd1V2R04w?=
+ =?utf-8?B?VFNqZFZHQXNubWJaNnFWY1dGWGxxYkRvZm9mMEZBZUtibFVFaGlMMkZzT2Jx?=
+ =?utf-8?B?bVJ3SE5XZVZlMk9iSE95RmpLZDJobGFGNEM2SVhnZEJTd0RXVkNnTVAwZGx0?=
+ =?utf-8?B?SlBMc25idVhQdHNOS0dzSTFQbzc3MGo4WnlRWDMyQ2w5c0NWbHZtbkZ4WGFC?=
+ =?utf-8?B?amMrUEVEQjFYYlg3Q056WU41QUxlSVBoVWRVUHRNbjA5c0dPbFRZMWUzZmNQ?=
+ =?utf-8?B?dG5jejVDZ1E4VEVNN0p6K1QvYVZYSlhpUVg2RnpmU3ovSFBDRGZ5Y2g5ZkFs?=
+ =?utf-8?B?SjZRV29EKzFhTFF4N1FpVytyYk1HL1VDeEdnQ1V5UDR1R2lqSDIvOUZWbTV1?=
+ =?utf-8?B?eWNNaENhcVBUQ253MTVRVDVoV1VSaTF0cGRIdXM1QVlkWEdvTU9ZT3FKWFNH?=
+ =?utf-8?B?V1hsaWNTOVpCSmtFclg2OHMyQkJjdDRoUXlncUFZcCt0YVJ6SlJLWmREUGg4?=
+ =?utf-8?B?czR6NEg2aCs0QlR6WWtrRFNHVk5XeVNKbDlGd2k5NklkSTVQaWRUb0hMVWMx?=
+ =?utf-8?B?NWM5VHRybnNnZnZsdlBNUzkvTEh0MHFSRit1bEU3cENkWmQxMHgyN2FoWWVp?=
+ =?utf-8?B?ZDFhM3JTVFFyMFgwZVJ3TTR4TkVROWh4cFZuL05wR2VyRGJEc25JanVNNzNz?=
+ =?utf-8?B?Zm82TjVxVTJNUmRrb3BVZ0swTjJjYWRGL25VSzFPakJZWTZkOWo3UXpMdEtJ?=
+ =?utf-8?B?dW5YODhweGM1V0cyVTY1R1lYdXhPdkwweXV3WkVJcmtpMDl6dWUwZWVuVTkv?=
+ =?utf-8?B?dHU5eG9nd0hmNkp2dnpuN1g4TEVUT0c5S1pqZHpWRTR6cml1R3lmekN2ZjVH?=
+ =?utf-8?B?dGlUMDRGSTNtbEtzWkw2Q0FZQi84ZHl3OUxoMU9VZ0N5NXJMRjBkK0lPbW1H?=
+ =?utf-8?B?aUNLekpqb3hUODNPSUIzNnlMM0FRV3owWHp1M29mYmRFWXpuenBLSmFCaWNo?=
+ =?utf-8?B?UFUvODduL0kxL1V5eC96bk0zTDFpRVJFR1VpZnF0bWVoOWxvTVdTVWtDUVNw?=
+ =?utf-8?B?TlFEU2FtK2dHY3BKa2tZOVNLNDJXNnRyUUVtVjJ6QkFVdTRYc3d3K2FZK3dT?=
+ =?utf-8?B?NytWQmJ0Qm5sdytuK1FCMVlsQTVhdnZzdjl1S3RLejl3SzZ6VG1Tem5wWktk?=
+ =?utf-8?B?a0FlS1Q0ZENuMHdMY24zejdSQWVEMm5jOEh1K01lSDZhanh3QmJkMnlsajZV?=
+ =?utf-8?B?RmREZlY3MTcrZUZja2RBQ01aKzcvaEswdVRBUEtaMnJGNW5QeldQanl0K0cy?=
+ =?utf-8?B?aWpkR1F3WjdtbVQzRWxQK0NGZkZJbjNYV01JdElhdWNiZ2c0eUNIZk1oVDhz?=
+ =?utf-8?B?ZnVlR0NJT3VMUytVNlFHV2crLzAwVkZNZFcwYy9tek9IUG1PVDgzc2w4azZp?=
+ =?utf-8?B?RXdmS0tTTGd5akFyVGViMTVmY0hidm0rRHh5b01uL1BEUTRKeUgyL2FrRGNI?=
+ =?utf-8?B?SVVBZGNadTF2eEdONEdVTm1taEhOTFpOUzhjQ3F4R1pJVmUyUXpZdlRURG5n?=
+ =?utf-8?B?RzF4Vk9aa0ZJRktNbzlUdy9FZ3lNZUFsdjloSEl1MEFETDlCc1lRTHBXdmJP?=
+ =?utf-8?B?aStyWVpSbzQyVmlwRDhibnRSemk4UTBGK2U0R01jNmpwRnJLWGE3azlGL3dP?=
+ =?utf-8?B?cExnY21DTm1pRGhpck1MTTZxT0JXcHlNK3U0bFFRUlpPbXBqOThHdmJGRCtC?=
+ =?utf-8?B?S2FTcjVtcTdjU1hjcDdyZkM0SnFzTUcxajhoWkRrS2V6R0RRZHpjRG54Zy9L?=
+ =?utf-8?B?YlpxMTlMMmFRWjlLQnVSOGUxTUxQVEFqbTFPNjl5Mit3SUhNeWxEMUIxdGxw?=
+ =?utf-8?B?Nzd6TE93cGlvQWZQaEFBVGR0bkpYY0RuRmVpVE04SG9KSG01ckhIWFhBajl3?=
+ =?utf-8?B?amZ4UnJFS3Q3MWpXKzNOS0NnRzlKWk4xZitWTWdxbFVFTTdCNXlRcDlheExE?=
+ =?utf-8?B?R2hXdjZoeWRyd04rMFkxK0pmMXh6MHh1NnZsclhUV2Fwdnp2MGZERGU3ckJK?=
+ =?utf-8?B?TGhVVFQyRms3dmg5QzhTblBFelJFbE14dkg0Kzg4YjllRCtFbFVZcjh2cGxG?=
+ =?utf-8?B?Wi84M2ZrRklJa1QvUXZtNHJLS09vekVxTjJ2a3E0aDdMVmRhODFjS04rdGFH?=
+ =?utf-8?B?Z0E9PQ==?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	zsvfhydP4dBs6R31vKWLtHHndj+8PFd4yZoxvoEUcTe9DhtZO3bAuEVwrSpUA/aZHz+sbJl2FqC83ZS7qT0cRBntdkboYP2axfSsryLnE1Sk5tYPUXaO3RWSrrmAUi+LUoUxZ5Tac6LSbYmdaQAyG6nnjkuO9ebROWSK8CNGkTl3C4ETN7WfCGUxHrD9nHx+tl84WMXhmH2MiIzYPTPdc38/CLeujfCRT8bD7yAM7mY6lTMKLEZJe1+vKRY7/Pzr3ujwSni7gtyvEsl6vmNuZswDFGit5j7xIp6fAa46TqhJVBTVYo4KZP/IWmzt0jZCoOqJ6+WoCQZcrhAQ8XAeMwuxOC8abYEspg9s3Kfd5XF/yEaz/fMlNDrTL3NRHW1Mdch1rNd6EQ1bj6xeNRogDtpNR8jB6uUN3OgANYU+CoVUgZWIi+4M3qBO7SYBnttjAaTD7XxjOrmRHLlrwq2px/c2t5BSBzsUGm6AiiE6Q3NaIt5Z7GVZzsN/EM76SZimydwZA0rYE8gJkefxov7KSq3t+4Rcn+4i9c/RbM8qjEmuPb+6dt1w2me/m+9ro/41PT21uySqYbExub+aQ7msRh7Z5u6sp6ZQcIovMf/KYy0=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: c2c6356a-ef1d-4f35-bafc-08ddbd2ca48a
+X-MS-Exchange-CrossTenant-AuthSource: MN2PR10MB4320.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Jul 2025 08:02:39.6172
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: Im3CbScLSUhKwZDiwsLOvVPwU9E8S0RfHPccF86jEcMhublXw8tqo6J0v9rj8PTdNPiW28GFg5eM4C4hTU/++A==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CYXPR10MB7976
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
+ definitions=2025-07-07_01,2025-07-07_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 bulkscore=0 malwarescore=0
+ mlxlogscore=999 spamscore=0 phishscore=0 mlxscore=0 suspectscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2505160000
+ definitions=main-2507070045
+X-Proofpoint-ORIG-GUID: Xa07aQ0G9uz2nSqXrhUDAc9vpwsWBDGe
+X-Proofpoint-GUID: Xa07aQ0G9uz2nSqXrhUDAc9vpwsWBDGe
+X-Authority-Analysis: v=2.4 cv=IMQCChvG c=1 sm=1 tr=0 ts=686b7f23 cx=c_pps a=XiAAW1AwiKB2Y8Wsi+sD2Q==:117 a=XiAAW1AwiKB2Y8Wsi+sD2Q==:17 a=6eWqkTHjU83fiwn7nKZWdM+Sl24=:19 a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=wKuvFiaSGQ0qltdbU6+NXLB8nM8=:19
+ a=Ol13hO9ccFRV9qXi2t6ftBPywas=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10 a=Wb1JkmetP80A:10 a=GoEa3M9JfhUA:10 a=NqNPGJmPfv112A-HmbIA:9 a=QEXdDO2ut3YA:10
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzA3MDA0NSBTYWx0ZWRfX2/aoK3dTwd8v k6nlk+9mMn+nDn4Ep9RLXty9jV6v9QnbR2r4fzU65xYY/ljJpNwuBL77pAY0B9xP2qMe20RYcWO XEmoEZSCdrT67ToogxU9gy7Vti3CK3VXzAHVYyNiBk42e0aH7ZhV9fyLQcIJuu/TK7f3bTP0gG3
+ 7nh5Q9dQaJU0FET/rqkPp0T2mfr32hyZqq+IDC/zLZWLPq/1DB8YaMTVGrJk5tUH3nJntBZ+2rz 7J3OMqMg3BuQqhzg4qyGLKUUgnkEJEmh1kCS1BxNzXlV9Shy6qfy5aiBcaf3cooL4z8QQZtx7rc +yaaxBzWRRMhzckBLh7/1DlkDTQMw8UZkZzMCS8QvZcun/KD7iYm+YmToQ+dOGk3CArKwPytm7l
+ 8Dh6S7epGybbtvyfiqXfiJzXnfPsog4jOo0hmrmb9nyVCmrC245XCQNZpldV6qy7CXJovvUV
 
-On Tue, Jun 24, 2025 at 09:38:59AM +0800, Glass Su wrote:
+On 04/07/2025 15:35, Ojaswin Mujoo wrote:
+> On Thu, Jul 03, 2025 at 05:26:49PM +0100, John Garry wrote:
+>> On 03/07/2025 07:42, Ojaswin Mujoo wrote:
+>>>>> Why serialization matters here, because even if device reorders our read
+>>>>> before the atomic write, we still fetch an older $blocksize chunk which
+>>>>> should have the data and the header.
+>>>> Yes, we fetch $blocksize, but it may be as multiple read requests,
+>>>> so we can have:
+>>>>
+>>>> partial read $blocksize request, atomic write request, partial read
+>>>> $blocksize request
+>>> Ahh now I get the picture. Since software atomic writes might have a
+>>> value way higher than the max_sectors that the bio may split at, this
+>>> causes the reads to split which is the issue happnes, as you mentioned.
+>>
+>> This issue also exists for atomic writes based on REQ_ATOMIC.
+> 
+> Yep got it now, thanks.
 > 
 > 
-> > On Jun 21, 2025, at 01:38, Zorro Lang <zlang@redhat.com> wrote:
-> > 
-> > On Tue, Jun 03, 2025 at 12:10:09PM +0800, Su Yue wrote:
-> >> gfs2 supports mount options 'quota=[off/account/quiet/on]' but
-> >> 'usrquota' and 'grpquota' are unsupported.
-> >> So in _qmount_option, transform $OPTS to 'quota=on' first.
-> >> 
-> >> Signed-off-by: Su Yue <glass.su@suse.com>
-> >> ---
-> >> common/quota | 7 +++++++
-> >> 1 file changed, 7 insertions(+)
-> >> 
-> >> diff --git a/common/quota b/common/quota
-> >> index a51386b1dd24..4b8052e07dde 100644
-> >> --- a/common/quota
-> >> +++ b/common/quota
-> >> @@ -283,6 +283,12 @@ _qmount_option()
-> >> {
-> >> OPTS=$1
-> >> 
-> >> + if [[ "$FSTYP" == gfs2 ]]; then
-> >> + OPTS=`echo $OPTS \
-> >> + | sed   -e 's/usrquota/quota=on/g' \
-> >> + -e 's/grpquota/quota=on/g'`
-> >> + fi
-> > 
-> > There's not response from gfs list. I'm not familiar with gfs2, so I have to
-> > ask some questions about your patch...
+>>
+>>>
+>>>>> The data crc should match the
+>>>>> header because it would have gone atomically. What am I missing?
+>>>>>
+>>>>> (Or do you mean that max_sectors_kb is not big enough to support
+>>>>> reads after software atomic writes and thats the issue?)
+>>>>>
+>>>>>> Can you cap at atomic write unit max opt? That will mean that we get
+>>>>>> serialization from atomic write HW support.
+>>>>>>
+>>>>>> BTW, to repeat what I said before, it can also fail for atomic write bios
+>>>>>> using HW support, as reads may be split.
+>>>>> This one I can understand, the fio's read is split causing a short read
+>>>>> and seems like fio is not requeing short read properly for the verify
+>>>>> step(?) so it tries to verify against short read itself.
+>>>> this is not an fio problem, as above.
+>>> Yep got it, its the block layer splitting the reads.
+>>>
+>>> So as a solution, do you think it is okay to cap  $blocksize to
+>>> max_sectors_kb or would you suggest it would be better to just stick to
+>>> awu max opt?
+>>
+>> I tend to think that it is better to cap at awu max opt. If zero, then don't
+>> do the test.
 > 
-> Feel free to communicate : )
-> > 
-> > From the manual of gfs2:
-> >  quota=[off/account/on]
-> >  Turns quotas on or off for a filesystem. Setting the quotas to be in the "account" state causes the per UID/GID usage statistics to be correctly maintained by the filesystem, limit and warn values are ignored. The default value is "off".
-> > 
-> > Looks like there's only one mount option "quota=..." for gfs2. And I didn't
-> > find a description about project quota, so
-> > 1. What will gfs2 do if there's a "prjquota" or "pquota"?
-> 
-> The mount will fail if prjquota/pquota is in mount options.
-> _require_prjquota() should be modified.
-> 
-> > 2. Do you need to replace "noquota" with "quota=off"?
-> 
-> Yes.. I forgot the case.
-> 
-> > 3. And "quota" to "quota=on" ?
-> 
-> The only case "_qmount_option ‘quota’” is tests/xfs/820, not in generic group.
-> 
-> > 4. Have you tried your patch on gfs2, can all quota related generic cases pass/notrun
-> >   on gfs2?
-> > 
-> 
-> TBH, not all quota tests run well on gfs2
-> There was a bug which can cause kernel hang in gfs2 fixed by kernel commit 5a90f8d49922 ("gfs2: Don't start unnecessary transactions during log flush”)
-> In v6.16-rc1.
-> 
-> > BTW, in this function you can see:
-> >        # ext4 doesn't _do_ "-o pquota/prjquota" because reasons
-> >        # Switch it to "quota" to enable mkfs-time pquota
-> 
-> The comment is confusing to me. ext[234] support ‘-o prjquota’ if  MKFS_OPTIONS="-O quota -E quotatype=usrquota:grpquota:prjquota”.
-> 
-> >        if [[ "$FSTYP" == ext[234] ]]; then
-> >                OPTS=`echo $OPTS \
-> >                | sed   -e 's/\bpquota/quota/g' \
-> >                        -e 's/prjquota/quota/g'`
-> >        # ocfs2 doesn't support "-o projquota"
-> >        elif [[ "$FSTYP" == ocfs2 ]]; then
-> >                OPTS=`echo $OPTS | sed -e 's/prjquota//g'`
-> >        fi
-> > 
-> > please move your gfs2 specific codes here ^^, and give it enough comments.
-> 
-> There is one question from me about the _qmount_option() and _qmount()
-> 
-> Not all tests of qgroup use _qmount, some of them call _scratch_mount() directly.
-> Is this intentional to avoid influenced by other mount options? If It’s not IMO it’s feasible
-> to convert them to _qmount?
+> Hmm yep this makes sense but seems like we don't expose it yet in
+> xfs_io. Will need to add that support as well.
 
-Except some xfs specific cases, I think only g/537 and g/230 don't use _qmount
-directly.
+Darrick sent a patch for that.
 
-$ for f in `grep -rsnl _qmount_option tests/`;do grep -wq _qmount $f||echo $f;done|grep -v xfs
-tests/generic/537
-tests/generic/230
+> 
+>>
+>> What awu max opt is reported for ext4 (for awu max > FS block size)? Is
+>> min(bigalloc size, bdev awu max)?
+> 
+> For awu_max_opt is returned as 0 for ext4, since 0 indicates there
+> is no such slow fallback. From commit
+> 
+>    5d894321c49e fs: add atomic write unit max opt to statx
+> 
+>    ...
+>    When zero, it means that there is no such performance boundary.
+> 	...
+> 
 
-By checking these two cases, I think their code logic can work well without
-_qmount currently. But if you find some cases fail on gfs2, please feel free
-to convert them to _qmount or fix them in your way :)
+Sure, but I think that for 1x FS block size atomic write unit max,
+
+you can make atomic write unit max opt == atomic write unit max.
+
+Or just always make atomic write unit max opt == atomic write unit max
+always. I don't think that anyone will care.
+
+BTW, you seem to have weird line endings configured in your client.
 
 Thanks,
-Zorro
-
-> 
-> > 
-> >> +
-> >> # Replace any user defined quota options
-> >> # with the quota option that we want.
-> >> # Simplest to do this rather than delete existing ones first because
-> >> @@ -300,6 +306,7 @@ _qmount_option()
-> >> -e 's/\bpquota/QUOTA/g'    \
-> >> -e 's/prjquota/QUOTA/g'    \
-> >> -e 's/noquota/QUOTA/g'     \
-> >> + -e 's/quota=[^, ]*/QUOTA/g' \
-> > 
-> > I think you might need a word boundary, e.g. "\bquota=..."
-> 
-> Right.
-> — 
-> Su
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> >> -e 's/quota/QUOTA/g'       \
-> >> -e 's/uqnoenforce/QUOTA/g' \
-> >> -e 's/gqnoenforce/QUOTA/g' \
-> >> -- 
-> >> 2.48.1
-> 
-> 
+John
 
