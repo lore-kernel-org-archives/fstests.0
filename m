@@ -1,549 +1,201 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0A3D20B80D
-	for <fstests@vger.kernel.org>; Tue,  8 Jul 2025 14:29:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751984991; cv=none; b=p4IoPpRb029epLskQ+++XuNPPoktve4ETBKnllGcTmpK3KzrT1QSZof9r+cott4xX5H0tCeE7VCK2E2URX+ljPpWxDYsc+Wqb+VjVvckjuO0Y73jNQaHW9nkrAjuM+4AZwBsQSBYuSBaSyMJrm3TRIjgjirQx/7bCvR2TfTnSac=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751984991; c=relaxed/simple;
-	bh=2E5bpavAjPIIhgfK1pohEF/rz71BK9xhRGXP1I6fpx8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KiwkRHomQGMWVO3rWBtZUcjWEIY7OoRde9xFB9yge2hH1op1FYGYp9Oi6yBByaDErtaaAhfD3WTW+bLyBP7P+KSOzlJQMxncAoQPdo/CTHa89BSXW5kyOB10XfmFqKAhcMsozGP+/qnlLHYtF+axNBzfM6jbznnVd8tioqHMJkE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=U6P+YHwA; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 394352E06D2;
+	Tue,  8 Jul 2025 14:48:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1751986084; cv=fail; b=QmGdDV1j5awfTxf0uDRwGwxAb7hslIc/5D3ECj3rz/0/3+FZ09It9N1Ozz1H3aqJ70+Vf3j2ir2SvDpTnqUYofInZJgQUgskWJkQ15qwApf2fj/a04SZVfB4NPFxoxOXjvoAY3AT6q0UBO4OoTZ3qJUAqtbaCuQKUdL+Dt9iGqo=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1751986084; c=relaxed/simple;
+	bh=jPcboOlTx4KvHleAI0dBp9M9k4FG4dn6lXhANGNchq8=;
+	h=Message-ID:Date:Subject:To:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=g/0r9UG6u7IhoH1RynIIR/G6HIXmSz03fEz9TZJ0H7N+dCiEBYMkRWIiN7xvHoT21usffWe5K0LwZ698enDZj+Nxa5C+nHVtweTVIWqHTp/PE+B5wB7qxH93WAMnOE4kEPcndQkjaS2FCNaGUOvMI074qrFpNTAJz9RKrRWAYHI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=APHCB1F8; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=Sl+eNbRI; arc=fail smtp.client-ip=205.220.165.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="U6P+YHwA"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1751984988;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Sl5esMCPOhRW/Y/mNmYnaPwOY/jEh6l8PMCPHS740jU=;
-	b=U6P+YHwA8j8fpIZ2Ay6D4STOhd+fBF9U1ewlk6EnGzB/AxmZNs4gnGnI7ZcoWeoJYz0ceL
-	Sj6qM3+lyJ5IyrBNMA0XbGKlHp3y2Bqi9qhonhRpU9GYu6x9NJqQBZC8+sQZjIn078tzri
-	O5LrRIN9ErxNyDROoc+B2fIK0v9T1XI=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-85-QN2qhck3Ob6XbxZ05-GKyA-1; Tue, 08 Jul 2025 10:29:47 -0400
-X-MC-Unique: QN2qhck3Ob6XbxZ05-GKyA-1
-X-Mimecast-MFC-AGG-ID: QN2qhck3Ob6XbxZ05-GKyA_1751984986
-Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-b350d850677so2842559a12.2
-        for <fstests@vger.kernel.org>; Tue, 08 Jul 2025 07:29:47 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751984986; x=1752589786;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Sl5esMCPOhRW/Y/mNmYnaPwOY/jEh6l8PMCPHS740jU=;
-        b=W6vVTXQRUZgrYI4FqVya3b4ILERBWYFPYKwRnPngZ+CzLR3QYAgoNdo2lBanij5693
-         vP8Lm6169fT+eHcPO57FQr7hjWXih13wWgSNszofOIy8mJibwBwsVFfyM2o5DArrxLjm
-         IO+Ugvw/GvD8oCopZIRDg5YvjKYA4MpuyZDJZPVpubnkT0SdExGC4fzLlbjnZE+kTHq1
-         L29gMZkAwJcu4A3vjQjkUYY63+UEJl/JrPxi8BTAl/j8a0vuhkG8SFJoMbvaZS/SOMsm
-         enA42Y5oHKrJ3sb2pp7VV8o8q8oDSrlzIjaO31RRs+MvImtuFTLqnVMHtpMHKPlQd4gO
-         QHxA==
-X-Forwarded-Encrypted: i=1; AJvYcCUFCQHH4qHBDIcB84A79V4odf98lhbOgReD/CukRUB9twbuFPxVg3m8GfwIQqusMV16wdnak529@vger.kernel.org
-X-Gm-Message-State: AOJu0YwklEMXDGFd/p4v67DCud8aZgafbCznuyoB03OwoeFLyQFh6au7
-	VKx03M5kFOU1UNDeC9l05gfv1uz2Dwjp9hVUf9Sz4vRPr5KdbbNVJG0MHwqvDw0tEmugEBB3Ske
-	IeMsR5Fs5ogLmkCx1N/9b8igN2OkaptEGztTMGCtm7JauLy9OUBxXZGEe+6I=
-X-Gm-Gg: ASbGncvKyKCHsbQBBonLpFCuPrx4nJI2EjOaIzOPGTk3tFaDWf7MzuAER/MD162U4s5
-	iwX8qj4idl0toJ9NdJb6iTWqvYwh3UOtTOvipg0YVfDahbNe272IjnhxN1GcVZHh2JSr1+0Tcus
-	Cu/WUpIBie8w0FjkabHRlWTcS6rPyohiuNUnIHW5eVO6KaNtqfhSet9ZS2JlYop2Sfc2iwVx1uO
-	j9ZbIw8zRsvbpLeoGXNI9tb7uJ2uqzGee3swNSHK7stegn2kpx0kGqDHjMKxG+oHzpd3Ot7jn1X
-	a696u88cB4v85OPsg+fXE/SOFR2fuTXamO4K5qNa7v48ObwEkfIYMX6zeMAU1oE=
-X-Received: by 2002:a05:6a20:9f45:b0:1f5:8622:5ecb with SMTP id adf61e73a8af0-22b1e08737fmr7335453637.34.1751984986048;
-        Tue, 08 Jul 2025 07:29:46 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEBF1qyGFAfKN9l8C2RsthxWvqhKrUEIz1pb3pNlbOdrtJOWf2lDXxsDcNEntMMuhSiBR0mlQ==
-X-Received: by 2002:a05:6a20:9f45:b0:1f5:8622:5ecb with SMTP id adf61e73a8af0-22b1e08737fmr7335394637.34.1751984985478;
-        Tue, 08 Jul 2025 07:29:45 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b38ee45154fsm11615510a12.14.2025.07.08.07.29.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 08 Jul 2025 07:29:44 -0700 (PDT)
-Date: Tue, 8 Jul 2025 22:29:40 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Chao Yu <chao@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v2] f2fs/015: test mount options
-Message-ID: <20250708142940.gdfgwrrfszlxuc4g@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250704114818.1878294-1-chao@kernel.org>
- <20250704181446.pum4b7zp2xqvotzx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <09aa0620-a2ab-4460-b511-3d4537237b5d@kernel.org>
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="APHCB1F8";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="Sl+eNbRI"
+Received: from pps.filterd (m0246629.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 568Eftj1020292;
+	Tue, 8 Jul 2025 14:48:01 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=
+	content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=
+	corp-2025-04-25; bh=jPcboOlTx4KvHleAI0dBp9M9k4FG4dn6lXhANGNchq8=; b=
+	APHCB1F8VVzNoOrQyfZuoOHcXYmK1evmsHZoykEjw6eAdWYv0Y+4Onycv6P2Sjz7
+	P1NnvUvtuWqdO7KNmRKdoXwr9a1NmVvE44skgEUcxTxDYjysHElCzFkm5Ro1jQAU
+	Ln3Vh8tsAKeR3pQ5Nmnujy8hH5spvys2juLDZztudOhsk39R1fPolEuZQjSg/uqS
+	mTEz2b7tPTuqGhZNEjNWZQkQFFpP82YQHuQToO4+u+hZYOiBSrYKL0rZtP2PVeeH
+	DCKNhZj/6iCQVSi2HEsXBEXh61cls2iSweOA0JUu8gSBP234LKnL8Va8CAxCn7nI
+	KnWMrYCjeXNf2LWBu6G+1Q==
+Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 47s5aq80jf-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 08 Jul 2025 14:48:01 +0000 (GMT)
+Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 568Ele0n014002;
+	Tue, 8 Jul 2025 14:47:59 GMT
+Received: from nam11-dm6-obe.outbound.protection.outlook.com (mail-dm6nam11on2055.outbound.protection.outlook.com [40.107.223.55])
+	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 47ptg9qpcc-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 08 Jul 2025 14:47:59 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=cLpfhFRgewyD9ZY60XXMa/2Wfq9qyS97sgYE+NP8OJ30xZddWhdcL5JmV8Lp17HupuNffBZ1sqaMRBgEe7TbNHQ4Ika2AmnC3ViIN0SoNO9Fp0vVAykwWj8Pa/bOCH+ul5BqnBzD8VXfKTHdD5zTfnwinrGAI2Ilm9lb0JX32xSvpgl+qKcngApySxsIm4euDwL6hVPApTy8Iw8Dm8kcqUrH+BizmHgoA44A8VBcFUnYATqgs6K8Mc0XtzR6oDO39hvMVTryT9JLGtRmAOmRvW+8dibu1MmwC4J6vyo86CairFZ0Py+CHcTAkBYMnRvORZkF89r1GS14I3wnN6+lfw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=jPcboOlTx4KvHleAI0dBp9M9k4FG4dn6lXhANGNchq8=;
+ b=wzyhkF2vY0BVVEZVCNfJqbX5UPs+ndT51VMD4SbZ1qCrcCkOx/O4ZJwOVMBhR2wBJyJoEb0Cr5nC1C5IUPEj2D0+MM1tJzNhYmP4WljRDDSVFrAJVfIyNheVV59z8SxNXONVrR5kkdbJRer/9X2RuXGzTGmqWZ7pkRDLxoLTwGeDh27CuEIou+3fvM2Z7qyosUs5fBufuGubkN97gox9uSzuqfu+Tcvqa3yxlUifSSfQsXL/hIf3tbukTsEbfXmszF5IgGnwhdLzXb3JmyLNOTvHC066L3w5Zv6jjFQY1x1kX1fXrDG0QnVWUjgr5zOoHCiH4tq23QEa33V/F3kYDQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=jPcboOlTx4KvHleAI0dBp9M9k4FG4dn6lXhANGNchq8=;
+ b=Sl+eNbRIldj6fQ47q84zOcsZvnfSXCcTGlrV7/j4zUIwLsdZwRwwzZ3QooW407KV1D5vfpQzmPqkWuk9b5sGfESXVMh5tty7IXDruCC8R4Gz1DQdfW2DzwjVEq7LUl4xBoltqi3ldQ7Gya8QEGMf7rWKkxNgjBpC4FSaBM7XYYU=
+Received: from DS0PR10MB6078.namprd10.prod.outlook.com (2603:10b6:8:ca::5) by
+ DS0PR10MB6103.namprd10.prod.outlook.com (2603:10b6:8:c8::6) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.8901.23; Tue, 8 Jul 2025 14:47:57 +0000
+Received: from DS0PR10MB6078.namprd10.prod.outlook.com
+ ([fe80::edc1:7c2:8fe8:a6b]) by DS0PR10MB6078.namprd10.prod.outlook.com
+ ([fe80::edc1:7c2:8fe8:a6b%4]) with mapi id 15.20.8901.024; Tue, 8 Jul 2025
+ 14:47:57 +0000
+Message-ID: <7bf66624-5be5-4f8c-9496-681a594a26ff@oracle.com>
+Date: Tue, 8 Jul 2025 22:47:52 +0800
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] generic/050: add a workaround for btrfs
+To: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
+        fstests@vger.kernel.org
+References: <20250702045312.59995-1-wqu@suse.com>
+Content-Language: en-GB
+From: Anand Jain <anand.jain@oracle.com>
+In-Reply-To: <20250702045312.59995-1-wqu@suse.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: MA1PR01CA0178.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:a01:d::7) To DS0PR10MB6078.namprd10.prod.outlook.com
+ (2603:10b6:8:ca::5)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <09aa0620-a2ab-4460-b511-3d4537237b5d@kernel.org>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: DS0PR10MB6078:EE_|DS0PR10MB6103:EE_
+X-MS-Office365-Filtering-Correlation-Id: bb1efe6d-a726-4907-cf3c-08ddbe2e6d92
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|366016|376014|10070799003;
+X-Microsoft-Antispam-Message-Info:
+	=?utf-8?B?cFdxUDRVdFo5VXhQMGVHVGR1QThmUTQ3MnZyKzcyckoveFFISGlxVVR6UVVt?=
+ =?utf-8?B?R0VFTDFTcmtTNnliV0FJSEtERllNak5na3g1UjJIV2NqazJZMTc4aU1tV0x0?=
+ =?utf-8?B?ck9KYnFrZi94MFhVbDRnQW1GUWlua1lSM1habWN4dkorZlhsdnF6a0ZpZVpv?=
+ =?utf-8?B?ZnkycjFHWTdBWXBTMXlvWS9YdC96aWdLTEZESWVnZzdxSkxWZzllMWVERHhV?=
+ =?utf-8?B?NmxqdmVhUFhMcEtMeDgzdFFvSHlQeVpnM1dTWGVWazRZOHZQSlN3QkFvV1U5?=
+ =?utf-8?B?S0E4akxjc3laNDd1SnRMS0o2bEIwcXYrbzlqUTFJdjIzM3ZEQnR6RHhFaHR2?=
+ =?utf-8?B?cFVmdDViRFZUWjkzQWxhNFl6UG9DR2xhallzeE5FZmJVcmJ0MHp3SW5UNWFI?=
+ =?utf-8?B?c1c3anB5c1JTZHh1SlZBME9DQlFyaVU2czRGMFk5ZUtGbDlQRlhDdzRyZzIv?=
+ =?utf-8?B?VThhN0RweVNZUlEyT0JnQW5EcjAwTEpjT09rN1FMT2JrQWJESnQvenBzdzlq?=
+ =?utf-8?B?b1Q0MWU2U0R4Q0NnUXJoYXNKUGtFNHk0MzlkcWhzNnBJVlppZ3ZaODBoSDZ2?=
+ =?utf-8?B?Smw5VUJnNEFqZ1dDSEplVUZHemNQZlgvYW12YUd4VCt2emhRZ3J0S1hqS3lM?=
+ =?utf-8?B?dXh3Z3BGZHJJT3F2QzQzSWxlbUY1TWx1N3lTbEdaWVhvb1dhRWpmUkJ3MEZi?=
+ =?utf-8?B?TWJhY25xSlF0MHdQSk5uSnpPc2RNaW5xT3g5WUkrUDRLUFdmN1ZPRjQyaW5H?=
+ =?utf-8?B?WXBIN2dadUV6UGhzb3RjdEw0TmZpRTZobjA1S1czUHhBeEtEUnNpMFUxOGxK?=
+ =?utf-8?B?WVVIaDJBOGZhWGVrNHUwUEpicWNidW5kOEdkcENLeVdzT2VpdktnUThuY3pE?=
+ =?utf-8?B?bnZaREpJaldTSWEvWlp2Slo5ekFTWW5pRStseFN2L1dORkRFQ05KdFdRdlFP?=
+ =?utf-8?B?dTJEL3I0cHk2bEJEd0x1K0NreC9UTTdsQ0VYaUtHcisyQyt1WUNJcnRHazk0?=
+ =?utf-8?B?UzljdkZtS1pRb3dnVDRPajliT245M3JUREFzYXZMTkpJcUxzbW5ud3VlcHlw?=
+ =?utf-8?B?VXZXOGpJU3hib1ZRTWFpY3FDU3VoWnVYSlE0bTZrWkNsM3NoOTdRWGtKSG45?=
+ =?utf-8?B?ZktkMnBNZ2JNc2k5dFhSY1FBd2VvZkwxRlZ0MkNMV0FRd0IwdWJ3d1orc0c2?=
+ =?utf-8?B?RXBHTUI1S0dNb3ZrYkxRZlA4Y0MvNEpqdzRKcDByYkptOUdMQlBnUmYxRFI3?=
+ =?utf-8?B?dFZSaE90VFB3UktwTDN2MyszVWtKSnZPbU5WZE5Ea1Uwc2VYTDFFckZ2bDFk?=
+ =?utf-8?B?YUZhQTJGcXUrMkNwNlFuNWpuNUpVajNhVmZYclprZzI3VktiRXM2N016ZDdz?=
+ =?utf-8?B?VzJmNGtBQmVXcFNhdjJzcndibS9TL1dSeXcvL1lES3VrQzVUTysrWnhvcktZ?=
+ =?utf-8?B?cHNFaXIxRUQ0cGI3TU4yODZFbDlpckhPZU02TWNsVit1cFBRaXpBdnNxZTNy?=
+ =?utf-8?B?eldYZ2NSbGRvZEpVVzdKbUpPR04yVXdBcGFrck01M013UmJEaVpCbTZ5dDQx?=
+ =?utf-8?B?cFhxRkptbytYNndQR3BNU2VwZ3lWdGJkOUtCbXlRaVZOd013WGV0M0NMUFk4?=
+ =?utf-8?B?RmZYcXZnZWJzUWZQU0NGWlUvUVlJVW9LSHovRDB4eks2aUxqMFE5RnlkdTg0?=
+ =?utf-8?B?ODZBZnBSeHFOWFNseG1PZjNEU2NmSEc3elBmQ2ZMTVlJZ0VpNG1mTFcySTV3?=
+ =?utf-8?B?SVBEVjd5SmVWRFdybUhUL3ZUQWtpSi9vZzBDRWJDYjRyTnJMa3dmeVJ0YkIw?=
+ =?utf-8?B?RGQ3K0lYZG9VOEJDU0N4RnFqWWZ6TUJyRDN5VmZJbTlxYUcraHI4RXY2Q2hY?=
+ =?utf-8?B?S3hyUFhXV1VZaW16UHBJNmVrb2VKQ1JCR2F2NkN6VUpFMGNIOHFzVzNjOE1l?=
+ =?utf-8?Q?feCN2Xs1ZF0=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DS0PR10MB6078.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(10070799003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?b3pmbStmTHhXdVdSOUpydys1Vk1qTHBVb2Mxd2J2bTlPV2l4QWVWRnBLYjFw?=
+ =?utf-8?B?b1h4QVlJUmxrN3NkTStjWldyMGdRTndYRThyS2JEd2I1TGhaRGt3aU44S095?=
+ =?utf-8?B?bDRtU1lKRFZiQlRST2hKNU12MGJKZkwvZzJmRXJ3Y3FOajgybjRwQytxSW9n?=
+ =?utf-8?B?TTVHcjk5K2ZYQlZaK0swSWwyNVhDazBsWHF5MGdtTzlrTFB2WEFlQTAxNHVv?=
+ =?utf-8?B?cG5qQ0syKzZNaFZsOFZuUEN4aEpOUEFVT3VqdkkzTnVLQkNVd3pwNkVDY0lj?=
+ =?utf-8?B?alVaaWJESTJDemEveXh3aHkyV0x0VGIxSWlPQjZ2QVducHRGZ1lqTGU0Q2RW?=
+ =?utf-8?B?TkpWa2t3dXVvUHlJbWRyVEhlMGVZMTA4bzMvd2hoa2UvejlacGlPbW5lcDQz?=
+ =?utf-8?B?dmhCckU2Nll4NW5jazhSMEV5VHRtRUxCUWdGV0tDMEJKZFNJUTZ5UkF1NHV4?=
+ =?utf-8?B?OGZVY1YrdlU2aU9hVDlJTUlDRzZiYjFFQURhSlJML2JOZVZSOHpIbGVaWmlU?=
+ =?utf-8?B?S045Qzk0czBmR0dDT0IzeUhaVTcwMEorRGxyRUNTRFZuZndGK1dnbk14VVV5?=
+ =?utf-8?B?UVB3VXBWRnFEaGZpd0dkQlNMbG9aNjBTUkp4MFVLazBMeU03M1N3NEtiRDJV?=
+ =?utf-8?B?b09QR25nU3BzMC9SVnI3WWZsdFVWSW9jaXFBT0ZuTHQ0SVI3K3hjQ2VzRDdy?=
+ =?utf-8?B?WnZ0MXpHVGhBaFowZ241aDNPb1d3SXpISmZ5SDJsTmZHZkY5cnFzUkdDcC96?=
+ =?utf-8?B?N1JhZEtOYXRGNC9KUUJCQ21LSExNTTJYb1IyVDVUdkNsLzE1TWhISmdGR05k?=
+ =?utf-8?B?M1RCVmYvV0FCdlByVCtNS1lYTEY1Qmk0bTVYMW1vNkNpQzdHalYzdXVYUjRv?=
+ =?utf-8?B?d095VWtPOUdEWjJBRWdaa1Q4d2p6aUMzamh0NmUrcEVmeGJiWTRsazRMWmF3?=
+ =?utf-8?B?OWNSY0NRS0U3dXlFUU1ib09tdVkxQUxmQm8xek16NEV6Y25UUnp4bzNOVnVw?=
+ =?utf-8?B?cXJuM1JpMXZTQVhxdnFORXJsS2tkeWIwYVZQQmErMEhuaUloK2xEb2d6QUVZ?=
+ =?utf-8?B?Uzh1NXpIZ01ReVJCTHdNQlpGelA3RUQ2V2lGS1NuL3hPdlJwZTNtb25LY3RN?=
+ =?utf-8?B?UkdRU2JCeHNJQzZCZHpkV2VXcXhFOXBWZExsN3o4WEJLM01SeGdEckMxYnVq?=
+ =?utf-8?B?ZldwVURsMTlFTXFmNCtHTGNyenhrYzE2elVITDM0KzZmeUZaaVFWekhOMDhn?=
+ =?utf-8?B?Y0Npa3MxcHFraDNyalhpa2ZOdW4wa1EyaHFZc2Rhb3E5Ymx0YlY5UzlkZTFw?=
+ =?utf-8?B?d2dHWDdaMFFKMHR5NHF2R3ZrR24rTnA4YWhLRW1MMjBDeWRJZVhkMldydjgz?=
+ =?utf-8?B?KzZBaHMwVzlWcVZ1UEJVSTRUS0FpMWtFZTdZandsbUZBQSsvdERFNDNYTkZz?=
+ =?utf-8?B?RDVEMUlGb3BqRU5Ud3p2N1hHWTdtNWNvT0lzWHQ5YlA3NWc0ZmlLeXQ0YmFj?=
+ =?utf-8?B?WVRHYVp3WDJtbXFacVQzVFM5QWFBK0gwNDZZYTBJckx6NVJVb2NtUGk3djBF?=
+ =?utf-8?B?emtJdVJ5b0dvbm1lYVBhaUl1aHk5a0FBUlFoNlRtaFlySC8wSHJVZU1EVkJF?=
+ =?utf-8?B?amtMbDVVOUNXK2MrSUhsQllrdUNSU1NWUzdXQnJtMWJvcTk5c3FHMytCdFk2?=
+ =?utf-8?B?VWtndlZCTFZKWUNoalo5MW8zMDFUTHNMSWhKZDlJSE9WcEQ3M1VhNyt5VHcw?=
+ =?utf-8?B?cDhIUktmcDNvb2hiM2QrR2ZsLzloL2o4dFJwdlRmZEdKMWJJbXc3cXh2YUJv?=
+ =?utf-8?B?YThaYnFsZ1JCdG56em1wczdkMjZaSWFpQnZGVkpBZFBSd0U2NkFIMnpWcFlP?=
+ =?utf-8?B?NXd0cGVCYXM0S0FMN3VQRXdpVktZdTdyWGRBRWFJdzdhZVYwN2srWWh0N1JH?=
+ =?utf-8?B?RmtNU1VMdzJiYmFaaHZiTjMydkllU1RnNzVYZWRVYloxdEFENHhLWVN6dytm?=
+ =?utf-8?B?MnBqaHRZWXVsRzdMUDV5WkxnOFBENXhGQ0pzcGpwVklqUEVKZUQxZXgydzQ0?=
+ =?utf-8?B?WjBVS3J4bExhb1dvd0YrS05UYXRqS3pnNnV4SXdCejFKMGVJbUlNTXNiTCtL?=
+ =?utf-8?B?bHdjQUZoNjRQR29BWnN5MmhYY1pqNlVkbkN4d0tsajE2YnFUZDhJU1ZaVHFh?=
+ =?utf-8?Q?pIIOyC4OgjK3EsdulXpWB6oHoVB+YWxb6QG3H5iGhapk?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	tZeMzsw3Se3oBL8CHCSb1r0xyvHAZ39CX34HrbycZM30Yt+dfTtVIKg+qldsL89Nr/mdXn5EoU3vaWtPYi43LThelHI7AHydeWgBIGSOv3URx9UXPez/RDy+StpX/1vfovypX2d6ynk8PjDBFhuTmgoluFwXhO6ZRRW6OvkrpUXFa/azJqmakZ7bYJyw13o9rCV5Q4F492yensis3UOQlbWI3Y6Pq7d93bOX6zDsk+I2cIA8zHJvk/d2OKUiRaZD0tEkpwzjYASevzNxk4APhZirF3gRJ0SPnqmd8JogcAU2uu9xT6TuXFQXiNaWlXrNV48CIZXZPnwK1ttzGjrpANjn4LqE4JOMHZaLYw/flMWP6/RB6/8icf4H7mdT5h7pWQS6JwvtZVpxaFPbQ21BBnEyAppRB5poznKlZd4L1KFeF4SMFtdq/XKvCPNwVrfjusss2DdQhtOMGws5F3i4l7TjkVRiUaZbRoFfjnjG3EAEtCJFb/P4Fwtk93+C5g769+tBY2f6+tO0c18o6ZRiOz+1ZzMNsBFyVotjf5pA0A+KcJ8+lwwcCx75gIbHFA/+3ZS+xoMdDW97+Ihzw2FhdcUP0w3x6OhJ94M0pix1+Vk=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: bb1efe6d-a726-4907-cf3c-08ddbe2e6d92
+X-MS-Exchange-CrossTenant-AuthSource: DS0PR10MB6078.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Jul 2025 14:47:57.4407
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 8ewhZqGer3cCd5fH2oxnJI3c5seBD1hCEHQZBGT1ZpGFf85T6yHKTginv6IED261SnbeddJIgWabP42mukA3iw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR10MB6103
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
+ definitions=2025-07-08_04,2025-07-07_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 adultscore=0
+ suspectscore=0 malwarescore=0 bulkscore=0 mlxlogscore=999 spamscore=0
+ mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2505160000 definitions=main-2507080123
+X-Proofpoint-GUID: k60_JBUv-EWpth8YvIedLhjmumiENAE6
+X-Proofpoint-ORIG-GUID: k60_JBUv-EWpth8YvIedLhjmumiENAE6
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzA4MDEyNCBTYWx0ZWRfXyX9SkK5ciuI4 mEQzBFejmT66rgL6tU5wOb4WfYrO5M9v1qfDF3SGpFmzfDdXgkspAqFdhDcRrM6wBsFa3AfMMDw NS02N7eHMK+yUbsHbmOmrjQsoGYq1WRQ5qVb/0DsxAY5HCdkmO3FTwM6prUOl9jlbBu1vyNt8iq
+ 840zyf8V3ptjuB62hZpwNYYhHjTmlSfE+03OJ2vlPM2bOuSqr1NzJ0nLOPlCHPPt+HU6Yauby1b qVJR52oGmALzM9Vdl2aeylDZV+6sT8Z20iXU92t6xq9FAX77LcKIzhZoz5+GG43oKOMsW6ioq3T 6BG7wr+nEv8eGu0Bd0GGCD6TdrtyeyXs9oxurYLQiYfxLBuTXlqLGqLeoYqtYEzS9lnZvcaH3An
+ FZyxjjtAurKV9D7gU7ddews2Sgf05jozb6FECr53eoEHIfBlU70HOd559vjwkFMFVPCkUIFd
+X-Authority-Analysis: v=2.4 cv=eag9f6EH c=1 sm=1 tr=0 ts=686d2fa1 b=1 cx=c_pps a=qoll8+KPOyaMroiJ2sR5sw==:117 a=qoll8+KPOyaMroiJ2sR5sw==:17 a=6eWqkTHjU83fiwn7nKZWdM+Sl24=:19 a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=wKuvFiaSGQ0qltdbU6+NXLB8nM8=:19
+ a=Ol13hO9ccFRV9qXi2t6ftBPywas=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10 a=Wb1JkmetP80A:10 a=GoEa3M9JfhUA:10 a=yPCof4ZbAAAA:8 a=v_2VbwHWFUbEMxz5hlYA:9 a=QEXdDO2ut3YA:10 a=_Xro0x9tv8kA:10 cc=ntf awl=host:12058
 
-On Mon, Jul 07, 2025 at 05:05:31PM +0800, Chao Yu wrote:
-> On 7/5/25 02:14, Zorro Lang wrote:
-> > On Fri, Jul 04, 2025 at 07:48:18PM +0800, Chao Yu wrote:
-> >> As f2fs changes to use new mount APIs, let's add a new testcase
-> >> to check mount result for all f2fs supported mount options and
-> >> their combinations, in order to detect any inconsistency during
-> >> mount.
-> >>
-> >> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> >> Signed-off-by: Chao Yu <chao@kernel.org>
-> >> ---
-> >> v2:
-> >> - allow to check mount options w/ zoned device
-> >>  common/rc          |   3 +
-> >>  tests/f2fs/015     | 159 ++++++++++++++++++++++++++++++++
-> >>  tests/f2fs/015.out | 225 +++++++++++++++++++++++++++++++++++++++++++++
-> >>  3 files changed, 387 insertions(+)
-> >>  create mode 100755 tests/f2fs/015
-> >>  create mode 100644 tests/f2fs/015.out
-> >>
-> >> diff --git a/common/rc b/common/rc
-> >> index f71cc8f0..94fdce7e 100644
-> >> --- a/common/rc
-> >> +++ b/common/rc
-> >> @@ -844,6 +844,9 @@ _test_mkfs()
-> >>      ext2|ext3|ext4)
-> >>  	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
-> >>  	;;
-> >> +    f2fs)
-> >> +	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $* $TEST_DEV
-> >> +	;;
-> >>      xfs)
-> >>  	_test_options mkfs
-> >>  	$MKFS_PROG -t $FSTYP -- -f $TEST_OPTIONS $MKFS_OPTIONS $* $TEST_DEV
-> >> diff --git a/tests/f2fs/015 b/tests/f2fs/015
-> >> new file mode 100755
-> >> index 00000000..746e79de
-> >> --- /dev/null
-> >> +++ b/tests/f2fs/015
-> >> @@ -0,0 +1,159 @@
-> >> +#! /bin/bash
-> >> +# SPDX-License-Identifier: GPL-2.0
-> >> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
-> >> +#
-> >> +# FS QA Test No. f2fs/015
-> >> +#
-> >> +# This testcase tries to check stability of mount result
-> >> +# w/ all f2fs supported mount option and their combination.
-> >> +#
-> >> +. ./common/preamble
-> >> +_begin_fstest auto quick
-> >> +_require_kernel_config CONFIG_F2FS_FS_XATTR
-> >> +_require_kernel_config CONFIG_F2FS_FS_POSIX_ACL
-> >> +_require_kernel_config CONFIG_F2FS_FAULT_INJECTION
-> >> +_require_kernel_config CONFIG_F2FS_FS_COMPRESSION
-> >> +_require_kernel_config CONFIG_F2FS_FS_LZO
-> >> +_require_kernel_config CONFIG_F2FS_FS_LZORLE
-> >> +_require_kernel_config CONFIG_F2FS_FS_LZ4
-> >> +_require_kernel_config CONFIG_F2FS_FS_LZ4HC
-> >> +_require_kernel_config CONFIG_F2FS_FS_ZSTD
-> >> +
-> >> +_require_zoned_device "$TEST_DEV"
-> > 
-> > This requirement limit this test case only on zoned device...
-> > Maybe you can slip this test case to 2~3 cases, let some common
-> > mount options can be tested at first, some unimportant mount
-> > options can be tested in another case, then zoned device related
-> > mount options be tested in a seperated case ?
-> 
-> Good idea, do you want to uplift common mount option testcase to
-> generic/ directory? or is it fine to leave it in f2fs/ now?
 
-If you'd like to write a test case for mount(8) "COMMAND-LINE OPTIONS"
-and "FILESYSTEM-INDEPENDENT MOUNT OPTIONS", that's good too :)
+Reviewed-by: Anand Jain <anand.jain@oracle.com>
 
-For this case I think it's fine to leave it in f2fs. Since new-mount
-APIs were brought in, more and more filesystems have their own xfs mount
-options test cases as what you are doing for f2fs now. These cases are
-$FSTYP specific test mostly.
-
-Thanks,
-Zorro
-
-> 
-> Thanks,
-> 
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> >> +_test_unmount >> $seqres.full 2>&1
-> >> +
-> >> +options=(
-> >> +#	mount_option			mkfs_option
-> >> +	"background_gc=on"		""			\
-> >> +	"background_gc=off"		""			\
-> >> +	"background_gc=sync"		""			\
-> >> +	"background_gc=on"		"blkzone"		\
-> >> +	"background_gc=off"		"blkzone"		\
-> >> +	"background_gc=sync"		"blkzone"		\
-> >> +	"disable_roll_forward"		""			\
-> >> +	"norecovery"			""			\
-> >> +	"discard"			""			\
-> >> +	"nodiscard"			""			\
-> >> +	"no_heap"			""			\
-> >> +	"heap"				""			\
-> >> +	"user_xattr"			""			\
-> >> +	"nouser_xattr"			""			\
-> >> +	"acl"				""			\
-> >> +	"noacl"				""			\
-> >> +	"active_logs=2"			""			\
-> >> +	"active_logs=4"			""			\
-> >> +	"active_logs=6"			""			\
-> >> +	"disable_ext_identify"		""			\
-> >> +	"inline_xattr"			""			\
-> >> +	"noinline_xattr"		""			\
-> >> +	"inline_xattr_size=400"		"extra,flexible_inline_xattr"\
-> >> +	"inline_xattr_size=400"		""			\
-> >> +	"inline_data"			""			\
-> >> +	"noinline_dentry"		""			\
-> >> +	"inline_dentry"			""			\
-> >> +	"noinline_dentry"		""			\
-> >> +	"flush_merge"			""			\
-> >> +	"noflush_merge"			""			\
-> >> +	"barrier"			""			\
-> >> +	"nobarrier"			""			\
-> >> +	"fastboot"			""			\
-> >> +	"extent_cache"			""			\
-> >> +	"noextent_cache"		""			\
-> >> +	"data_flush"			""			\
-> >> +	"reserve_root=32768"		""			\
-> >> +	"resuid=1000"			""			\
-> >> +	"resgid=1000"			""			\
-> >> +	"fault_injection=100"		""			\
-> >> +	"fault_type=4095"		""			\
-> >> +	"mode=adaptive"			""			\
-> >> +	"mode=lfs"			""			\
-> >> +	"mode=fragment:segment"		""			\
-> >> +	"mode=fragment:block"		""			\
-> >> +	"mode=adaptive"			"blkzone"		\
-> >> +	"mode=lfs"			"blkzone"		\
-> >> +	"mode=fragment:segment"		"blkzone"		\
-> >> +	"mode=fragment:block"		"blkzone"		\
-> >> +	"usrquota"			""			\
-> >> +	"grpquota"			""			\
-> >> +	"prjquota"			""			\
-> >> +	"usrjquota=ausrquota"		""			\
-> >> +	"grpjquota=agrpquota"		""			\
-> >> +	"prjjquota=aprjquota"		""			\
-> >> +	"jqfmt=vfsold"			""			\
-> >> +	"jqfmt=vfsv0"			""			\
-> >> +	"jqfmt=vfsv1"			""			\
-> >> +	"usrjquota="			""			\
-> >> +	"grpjquota="			""			\
-> >> +	"prjjquota="			""			\
-> >> +	"quota"				""			\
-> >> +	"noquota"			""			\
-> >> +	"alloc_mode=reuse"		""			\
-> >> +	"alloc_mode=default"		""			\
-> >> +	"fsync_mode=posix"		""			\
-> >> +	"fsync_mode=strict"		""			\
-> >> +	"fsync_mode=nobarrier"		""			\
-> >> +	"test_dummy_encryption"		""			\
-> >> +	"test_dummy_encryption=v1"	""			\
-> >> +	"test_dummy_encryption=v2"	""			\
-> >> +	"checkpoint=enable"		""			\
-> >> +	"checkpoint=disable"		""			\
-> >> +	"checkpoint=disable:32768"	""			\
-> >> +	"checkpoint=disable:50%"	""			\
-> >> +	"checkpoint_merge"		""			\
-> >> +	"nocheckpoint_merge"		""			\
-> >> +	"compress_algorithm=lzo"	""			\
-> >> +	"compress_algorithm=lzo"	"extra,compression"	\
-> >> +	"compress_algorithm=lz4"	"extra,compression"	\
-> >> +	"compress_algorithm=zstd"	"extra,compression"	\
-> >> +	"compress_algorithm=lzo-rle"	"extra,compression"	\
-> >> +	"compress_algorithm=lz4:3"	"extra,compression"	\
-> >> +	"compress_algorithm=zstd:1"	"extra,compression"	\
-> >> +	"compress_log_size=8"		"extra,compression"	\
-> >> +	"compress_extension=so"		"extra,compression"	\
-> >> +	"nocompress_extension=so"	"extra,compression"	\
-> >> +	"nocompress_extension=*"	"extra,compression"	\
-> >> +	"compress_extension=so,nocompress_extension=so"		\
-> >> +					"extra,compression"	\
-> >> +	"compress_chksum"		"extra,compression"	\
-> >> +	"compress_mode=fs"		"extra,compression"	\
-> >> +	"compress_mode=user"		"extra,compression"	\
-> >> +	"compress_cache"		"extra,compression"	\
-> >> +	"inlinecrypt"			""			\
-> >> +	"atgc"				""			\
-> >> +	"discard_unit=block"		""			\
-> >> +	"discard_unit=segment"		""			\
-> >> +	"discard_unit=section"		""			\
-> >> +	"discard_unit=block"		"blkzone"		\
-> >> +	"discard_unit=segment"		"blkzone"		\
-> >> +	"discard_unit=section"		"blkzone"		\
-> >> +	"memory=normal"			""			\
-> >> +	"memory=low"			""			\
-> >> +	"age_extent_cache"		""			\
-> >> +	"errors=panic"			""			\
-> >> +	"errors=continue"		""			\
-> >> +	"errors=remount-ro"		""			\
-> >> +	"nat_bits"			""			\
-> >> +	"atgc,mode=lfs"			""			\
-> >> +	"ro,flush_merge"		""			\
-> >> +	"rw"				"ro"			\
-> >> +	"norecovery,ro"			""			\
-> >> +)
-> >> +
-> >> +for ((i=0;i<${#options[@]};i=i+2))
-> >> +do
-> >> +	echo "Option#$i: ${options[$i]} : ${options[$((i+1))]}"
-> >> +	if [ "${options[$((i+1))]}" == "blkzone" ]; then
-> >> +		_test_mkfs "-m" >> $seqres.full
-> >> +		_test_mount "-o ${options[$i]}" >> $seqres.full 2>&1
-> >> +		echo $?
-> >> +		_test_unmount >> $seqres.full 2>&1
-> >> +	else
-> >> +		_scratch_mkfs "-O ${options[$((i+1))]}" >> $seqres.full
-> >> +		_try_scratch_mount "-o ${options[$i]}" >> $seqres.full 2>&1
-> >> +		echo $?
-> >> +		_scratch_unmount >> $seqres.full 2>&1
-> >> +	fi
-> >> +done
-> >> +
-> >> +status=0
-> >> +exit
-> >> diff --git a/tests/f2fs/015.out b/tests/f2fs/015.out
-> >> new file mode 100644
-> >> index 00000000..d7f4e62a
-> >> --- /dev/null
-> >> +++ b/tests/f2fs/015.out
-> >> @@ -0,0 +1,225 @@
-> >> +QA output created by 015
-> >> +Option#0: background_gc=on : 
-> >> +0
-> >> +Option#2: background_gc=off : 
-> >> +0
-> >> +Option#4: background_gc=sync : 
-> >> +0
-> >> +Option#6: background_gc=on : blkzone
-> >> +0
-> >> +Option#8: background_gc=off : blkzone
-> >> +32
-> >> +Option#10: background_gc=sync : blkzone
-> >> +0
-> >> +Option#12: disable_roll_forward : 
-> >> +0
-> >> +Option#14: norecovery : 
-> >> +32
-> >> +Option#16: discard : 
-> >> +0
-> >> +Option#18: nodiscard : 
-> >> +0
-> >> +Option#20: no_heap : 
-> >> +0
-> >> +Option#22: heap : 
-> >> +0
-> >> +Option#24: user_xattr : 
-> >> +0
-> >> +Option#26: nouser_xattr : 
-> >> +0
-> >> +Option#28: acl : 
-> >> +0
-> >> +Option#30: noacl : 
-> >> +0
-> >> +Option#32: active_logs=2 : 
-> >> +0
-> >> +Option#34: active_logs=4 : 
-> >> +0
-> >> +Option#36: active_logs=6 : 
-> >> +0
-> >> +Option#38: disable_ext_identify : 
-> >> +0
-> >> +Option#40: inline_xattr : 
-> >> +0
-> >> +Option#42: noinline_xattr : 
-> >> +0
-> >> +Option#44: inline_xattr_size=400 : extra,flexible_inline_xattr
-> >> +32
-> >> +Option#46: inline_xattr_size=400 : 
-> >> +32
-> >> +Option#48: inline_data : 
-> >> +0
-> >> +Option#50: noinline_dentry : 
-> >> +0
-> >> +Option#52: inline_dentry : 
-> >> +0
-> >> +Option#54: noinline_dentry : 
-> >> +0
-> >> +Option#56: flush_merge : 
-> >> +0
-> >> +Option#58: noflush_merge : 
-> >> +0
-> >> +Option#60: barrier : 
-> >> +0
-> >> +Option#62: nobarrier : 
-> >> +0
-> >> +Option#64: fastboot : 
-> >> +0
-> >> +Option#66: extent_cache : 
-> >> +0
-> >> +Option#68: noextent_cache : 
-> >> +0
-> >> +Option#70: data_flush : 
-> >> +0
-> >> +Option#72: reserve_root=32768 : 
-> >> +0
-> >> +Option#74: resuid=1000 : 
-> >> +0
-> >> +Option#76: resgid=1000 : 
-> >> +0
-> >> +Option#78: fault_injection=100 : 
-> >> +0
-> >> +Option#80: fault_type=4095 : 
-> >> +0
-> >> +Option#82: mode=adaptive : 
-> >> +0
-> >> +Option#84: mode=lfs : 
-> >> +0
-> >> +Option#86: mode=fragment:segment : 
-> >> +0
-> >> +Option#88: mode=fragment:block : 
-> >> +0
-> >> +Option#90: mode=adaptive : blkzone
-> >> +32
-> >> +Option#92: mode=lfs : blkzone
-> >> +0
-> >> +Option#94: mode=fragment:segment : blkzone
-> >> +32
-> >> +Option#96: mode=fragment:block : blkzone
-> >> +32
-> >> +Option#98: usrquota : 
-> >> +0
-> >> +Option#100: grpquota : 
-> >> +0
-> >> +Option#102: prjquota : 
-> >> +32
-> >> +Option#104: usrjquota=ausrquota : 
-> >> +32
-> >> +Option#106: grpjquota=agrpquota : 
-> >> +32
-> >> +Option#108: prjjquota=aprjquota : 
-> >> +32
-> >> +Option#110: jqfmt=vfsold : 
-> >> +0
-> >> +Option#112: jqfmt=vfsv0 : 
-> >> +0
-> >> +Option#114: jqfmt=vfsv1 : 
-> >> +0
-> >> +Option#116: usrjquota= : 
-> >> +0
-> >> +Option#118: grpjquota= : 
-> >> +0
-> >> +Option#120: prjjquota= : 
-> >> +0
-> >> +Option#122: quota : 
-> >> +0
-> >> +Option#124: noquota : 
-> >> +0
-> >> +Option#126: alloc_mode=reuse : 
-> >> +0
-> >> +Option#128: alloc_mode=default : 
-> >> +0
-> >> +Option#130: fsync_mode=posix : 
-> >> +0
-> >> +Option#132: fsync_mode=strict : 
-> >> +0
-> >> +Option#134: fsync_mode=nobarrier : 
-> >> +0
-> >> +Option#136: test_dummy_encryption : 
-> >> +32
-> >> +Option#138: test_dummy_encryption=v1 : 
-> >> +32
-> >> +Option#140: test_dummy_encryption=v2 : 
-> >> +32
-> >> +Option#142: checkpoint=enable : 
-> >> +0
-> >> +Option#144: checkpoint=disable : 
-> >> +0
-> >> +Option#146: checkpoint=disable:32768 : 
-> >> +0
-> >> +Option#148: checkpoint=disable:50% : 
-> >> +0
-> >> +Option#150: checkpoint_merge : 
-> >> +0
-> >> +Option#152: nocheckpoint_merge : 
-> >> +0
-> >> +Option#154: compress_algorithm=lzo : 
-> >> +0
-> >> +Option#156: compress_algorithm=lzo : extra,compression
-> >> +0
-> >> +Option#158: compress_algorithm=lz4 : extra,compression
-> >> +0
-> >> +Option#160: compress_algorithm=zstd : extra,compression
-> >> +0
-> >> +Option#162: compress_algorithm=lzo-rle : extra,compression
-> >> +0
-> >> +Option#164: compress_algorithm=lz4:3 : extra,compression
-> >> +0
-> >> +Option#166: compress_algorithm=zstd:1 : extra,compression
-> >> +0
-> >> +Option#168: compress_log_size=8 : extra,compression
-> >> +0
-> >> +Option#170: compress_extension=so : extra,compression
-> >> +0
-> >> +Option#172: nocompress_extension=so : extra,compression
-> >> +0
-> >> +Option#174: nocompress_extension=* : extra,compression
-> >> +0
-> >> +Option#176: compress_extension=so,nocompress_extension=so : extra,compression
-> >> +0
-> >> +Option#178: compress_chksum : extra,compression
-> >> +0
-> >> +Option#180: compress_mode=fs : extra,compression
-> >> +0
-> >> +Option#182: compress_mode=user : extra,compression
-> >> +0
-> >> +Option#184: compress_cache : extra,compression
-> >> +0
-> >> +Option#186: inlinecrypt : 
-> >> +0
-> >> +Option#188: atgc : 
-> >> +0
-> >> +Option#190: discard_unit=block : 
-> >> +0
-> >> +Option#192: discard_unit=segment : 
-> >> +0
-> >> +Option#194: discard_unit=section : 
-> >> +0
-> >> +Option#196: discard_unit=block : blkzone
-> >> +0
-> >> +Option#198: discard_unit=segment : blkzone
-> >> +0
-> >> +Option#200: discard_unit=section : blkzone
-> >> +0
-> >> +Option#202: memory=normal : 
-> >> +0
-> >> +Option#204: memory=low : 
-> >> +0
-> >> +Option#206: age_extent_cache : 
-> >> +0
-> >> +Option#208: errors=panic : 
-> >> +0
-> >> +Option#210: errors=continue : 
-> >> +0
-> >> +Option#212: errors=remount-ro : 
-> >> +0
-> >> +Option#214: nat_bits : 
-> >> +0
-> >> +Option#216: atgc,mode=lfs : 
-> >> +32
-> >> +Option#218: ro,flush_merge : 
-> >> +32
-> >> +Option#220: rw : ro
-> >> +0
-> >> +Option#222: norecovery,ro : 
-> >> +0
-> >> -- 
-> >> 2.49.0
-> >>
-> > 
-> 
-
+added to preview.
