@@ -1,499 +1,187 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B5CC28B7E9
-	for <fstests@vger.kernel.org>; Mon,  7 Jul 2025 09:05:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D5620226D0F
+	for <fstests@vger.kernel.org>; Tue,  8 Jul 2025 06:51:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751879135; cv=none; b=rYybgnFMzcOIT/kupNS393xt/dO02Jix7KmNJ1BFrVBIUQwDr4qWPrHZK0/vd1xksWDmHXOoEoPzxQdbC4kkkziREdwT4zzO42B6HQqK93uMsRDnzaOuvn12AkNYTWG8LA42sO+pJp8MzVw8NJ/Ef87UIBBRxrR7pvRHkwDNvyk=
+	t=1751957463; cv=none; b=n3q8W5djfILWkpc2vNw8FkJf4jAbQufF5AHCYQVhUCQXfzAT7tdAYZOy+qf9sUOGlDGKJUb936GVE09v6wmRNKytg/ylwqd2IrNp1qdOwMuARCg5+/r+58BWEToIzEpjyI46VMQ4lRSiMGiTwQ9FP2lRhYtURZvlk06Dzo+jaPQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751879135; c=relaxed/simple;
-	bh=C+Lzbru5LF7v6HOZyD+YXLL+EGyiHDmq2tWeTZcdDsw=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=ucIY0togrJ7elQ3X0zHebL9hH3ktH0quTxgZ/R3qgLjYeGyPeamdWS+fVnbDuzmREvVUyEc8dXAVnihRPCeQG7YJKD08IhsUj2CyEp2eGRiB6gnKnaPa6/VRykpHqoaIk9qfJwfYIqhKeaS4Fr0MO47OX84peAga/nqisBPUnxg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tBm99eSj; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1751957463; c=relaxed/simple;
+	bh=vLQ2zOgnjrAKDsoa6JXWP0ojVyU8V+F9EcUmjccjC70=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=NF7PjB7BRbQdFneoL1kRoY+NhDrdXi76DOpTrRXpHLQ1j2WsyNrebRsnaDWxaXThp5ucRmC4QjcyfkTrzMGYFjxgLozodjFRKJyFQOiBgsm+v+SxXc0oM+XgucILn/qGm1SqcQ6bZrkk0w2Nm2QvFji1w0qCcXXVd/WN2l9D6Ls=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=ksHPRrei; arc=none smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tBm99eSj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 71D8FC4CEE3;
-	Mon,  7 Jul 2025 09:05:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1751879134;
-	bh=C+Lzbru5LF7v6HOZyD+YXLL+EGyiHDmq2tWeTZcdDsw=;
-	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
-	b=tBm99eSjceeOBBzTsV1Tg0HPFRJd+SSFxKhf4a2DnfyAratM2SN2PkfXtRBNLRlmf
-	 fedvMugO7hFZAKPGoMqQR1TT88o5UvRAl/dJzS4yr2x5s86HAKtvJM1zNQWvUbcTKH
-	 CwQFH0Yyq4nAbb3F+ncBfAFQmg+gvAG5qMLb0vRR5Pj+t9pfejlpf4pr3vsuuABW5Z
-	 QZ9Ox0nHjZ9E3jolOd9OYqCvOXCK/RD8BhY9J1UMeO4G4haXU62B1AXeKJKNOP+On1
-	 Kkeu7incf3/sDag6FKYZCdxsG7KjeShUxVDKjOXUDWPcyHOQj5DLLf+FoCQGHpWvnX
-	 4daiLVyTauedw==
-Message-ID: <09aa0620-a2ab-4460-b511-3d4537237b5d@kernel.org>
-Date: Mon, 7 Jul 2025 17:05:31 +0800
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="ksHPRrei"
+Received: from pps.filterd (m0360083.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5685BZFb006198;
+	Tue, 8 Jul 2025 06:50:54 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=pp1; bh=plyf8xn73f8rtp9NWnNK7QjR3hjqdN
+	HAjDLdiOFfySo=; b=ksHPRreigm7qlk1a+MucTwLFegG/93NwnzSHT1VGU/HNqv
+	oL/doR4pYLq01IyzYYFplKWpPNKkftdQlMNQEymzTWF0V3uHZVvgFTMD+iCg02x7
+	hf0cRkXkNZxhnUPKzFaUJiM1TZ6Buw6wcpAFKbyRDln88NjQkWbRj26vlhNBM1tT
+	jaBIecTkTSgFUUNM/D33Z15CZZHa6ncEReYvLY9K9mS0OwSwC8GAYFK8v/b61Yim
+	U0k+saJzeLaljqQ0S7WU8JoBb6iVcUKDd9WdDns50xLgpFqcBvVYlDgemppWZPo1
+	5FTMRSAQ2q7Q9GKlMY0o52IQZqTtqIiDaS5B7t0w==
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 47puk3x6gn-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 08 Jul 2025 06:50:53 +0000 (GMT)
+Received: from m0360083.ppops.net (m0360083.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.0.8/8.18.0.8) with ESMTP id 5686hSZG015109;
+	Tue, 8 Jul 2025 06:50:53 GMT
+Received: from ppma23.wdc07v.mail.ibm.com (5d.69.3da9.ip4.static.sl-reverse.com [169.61.105.93])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 47puk3x6gk-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 08 Jul 2025 06:50:53 +0000 (GMT)
+Received: from pps.filterd (ppma23.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma23.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 5682QawK002865;
+	Tue, 8 Jul 2025 06:50:52 GMT
+Received: from smtprelay06.fra02v.mail.ibm.com ([9.218.2.230])
+	by ppma23.wdc07v.mail.ibm.com (PPS) with ESMTPS id 47qfvm9kyp-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 08 Jul 2025 06:50:51 +0000
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay06.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 5686oo8L32375414
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 8 Jul 2025 06:50:50 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 05AEE2004B;
+	Tue,  8 Jul 2025 06:50:50 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 9240920043;
+	Tue,  8 Jul 2025 06:50:48 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.109.219.249])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Tue,  8 Jul 2025 06:50:48 +0000 (GMT)
+Date: Tue, 8 Jul 2025 12:20:45 +0530
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: John Garry <john.g.garry@oracle.com>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+        Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
+        tytso@mit.edu
+Subject: Re: [PATCH v2 05/13] generic/1226: Add atomic write test using fio
+ crc check verifier
+Message-ID: <aGy_xT5powRmYzjY@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+References: <cover.1750924903.git.ojaswin@linux.ibm.com>
+ <227ca6650cf5ef5a9a3383a06cd08c0c2b9f43c3.1750924903.git.ojaswin@linux.ibm.com>
+ <0430bd73-e6c2-4ce9-af24-67b1e1fa9b5b@oracle.com>
+ <aGQKO3E_kwZzSy_0@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <8effd5bb-9dcd-4150-8694-36bc493a3b59@oracle.com>
+ <aGYmQtQN2GsVRQ31@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <a0d241f9-0070-488a-b330-5b93339fbb03@oracle.com>
+ <aGfmUrj9HDrnwOyX@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <aGfx6d-lSnhwnKsq@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <e1896e36-3291-4b54-ab66-5568e4086fa7@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: chao@kernel.org, Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
- jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v2] f2fs/015: test mount options
-To: Zorro Lang <zlang@redhat.com>
-References: <20250704114818.1878294-1-chao@kernel.org>
- <20250704181446.pum4b7zp2xqvotzx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Chao Yu <chao@kernel.org>
-In-Reply-To: <20250704181446.pum4b7zp2xqvotzx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <e1896e36-3291-4b54-ab66-5568e4086fa7@oracle.com>
+X-TM-AS-GCONF: 00
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzA4MDA0OSBTYWx0ZWRfX6vyLIAfsbLag QAoQ3vBXTzVTm2q6Guhwbrm6/U8WUephROm2PMvYIjfk0qG0swqojV3NgS+uinRfI8wIpwARXjE vElrSYIdBup0dyjtFFzj/9rJsYD2w8QL8eIw7iQBuwlpVBnyQCaWGv93l3ZF8fEOC8EWZ82Wup1
+ 9cX15GLHZ5+q4URsFkfYvHFpIk+Y8QI0I8iq4wOpvwmERx8JMt1YSmBjLVnnHm1JKJxOh7uKATB Gjc8b5SEu5/Z6xNQD4oJHvyb504GgzvBFuKvIouEyBG2EsW5DF/amOLQKwofmdFYOwmLsr9XI6R Re5m4eSiYR4mPcv7OPbTC36uBtXe1kRJcdljiaxA1q5OIMzg7aIMLwKln2uAPKH6MYpp4+cQXkz
+ V/zUf9GFVnE4l6MMWn4prYTTP0vvwQ7z2zh8J44eFJ2dznZfl+lxjqPNIkRQqZDhKx0yUq4c
+X-Authority-Analysis: v=2.4 cv=XYeJzJ55 c=1 sm=1 tr=0 ts=686cbfcd cx=c_pps a=3Bg1Hr4SwmMryq2xdFQyZA==:117 a=3Bg1Hr4SwmMryq2xdFQyZA==:17 a=kj9zAlcOel0A:10 a=Wb1JkmetP80A:10 a=MvcmooJZj5Oy0QVXVwkA:9 a=CjuIK1q_8ugA:10
+X-Proofpoint-ORIG-GUID: DIomeSErV4wZ4cQIhQcNXvpPRY9zObCX
+X-Proofpoint-GUID: dC9GdYm1flS4dBrRR6aJxLLrrg41THCl
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
+ definitions=2025-07-08_02,2025-07-07_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0
+ lowpriorityscore=0 adultscore=0 priorityscore=1501 suspectscore=0
+ mlxscore=0 impostorscore=0 phishscore=0 bulkscore=0 clxscore=1015
+ spamscore=0 mlxlogscore=999 classifier=spam authscore=0 authtc=n/a authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
+ definitions=main-2507080049
 
-On 7/5/25 02:14, Zorro Lang wrote:
-> On Fri, Jul 04, 2025 at 07:48:18PM +0800, Chao Yu wrote:
->> As f2fs changes to use new mount APIs, let's add a new testcase
->> to check mount result for all f2fs supported mount options and
->> their combinations, in order to detect any inconsistency during
->> mount.
->>
->> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
->> Signed-off-by: Chao Yu <chao@kernel.org>
->> ---
->> v2:
->> - allow to check mount options w/ zoned device
->>  common/rc          |   3 +
->>  tests/f2fs/015     | 159 ++++++++++++++++++++++++++++++++
->>  tests/f2fs/015.out | 225 +++++++++++++++++++++++++++++++++++++++++++++
->>  3 files changed, 387 insertions(+)
->>  create mode 100755 tests/f2fs/015
->>  create mode 100644 tests/f2fs/015.out
->>
->> diff --git a/common/rc b/common/rc
->> index f71cc8f0..94fdce7e 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -844,6 +844,9 @@ _test_mkfs()
->>      ext2|ext3|ext4)
->>  	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
->>  	;;
->> +    f2fs)
->> +	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $* $TEST_DEV
->> +	;;
->>      xfs)
->>  	_test_options mkfs
->>  	$MKFS_PROG -t $FSTYP -- -f $TEST_OPTIONS $MKFS_OPTIONS $* $TEST_DEV
->> diff --git a/tests/f2fs/015 b/tests/f2fs/015
->> new file mode 100755
->> index 00000000..746e79de
->> --- /dev/null
->> +++ b/tests/f2fs/015
->> @@ -0,0 +1,159 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
->> +#
->> +# FS QA Test No. f2fs/015
->> +#
->> +# This testcase tries to check stability of mount result
->> +# w/ all f2fs supported mount option and their combination.
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick
->> +_require_kernel_config CONFIG_F2FS_FS_XATTR
->> +_require_kernel_config CONFIG_F2FS_FS_POSIX_ACL
->> +_require_kernel_config CONFIG_F2FS_FAULT_INJECTION
->> +_require_kernel_config CONFIG_F2FS_FS_COMPRESSION
->> +_require_kernel_config CONFIG_F2FS_FS_LZO
->> +_require_kernel_config CONFIG_F2FS_FS_LZORLE
->> +_require_kernel_config CONFIG_F2FS_FS_LZ4
->> +_require_kernel_config CONFIG_F2FS_FS_LZ4HC
->> +_require_kernel_config CONFIG_F2FS_FS_ZSTD
->> +
->> +_require_zoned_device "$TEST_DEV"
+On Mon, Jul 07, 2025 at 09:18:04AM +0100, John Garry wrote:
+> On 04/07/2025 16:23, Ojaswin Mujoo wrote:
+> > > Hmm yep this makes sense but seems like we don't expose it yet in
+> > > xfs_io. Will need to add that support as well.
+> > Okay so thinking about it a bit more, Im not sure if capping to
+> > awu_max_opt is the right thing to do.
+> > 
+> > There is no guarantee in kernel that awu_max_opt or even awu_max would
+> > be smaller than lim->max_sectors so why to derive our io size based on
+> > that.
 > 
-> This requirement limit this test case only on zoned device...
-> Maybe you can slip this test case to 2~3 cases, let some common
-> mount options can be tested at first, some unimportant mount
-> options can be tested in another case, then zoned device related
-> mount options be tested in a seperated case ?
+> Absolutely. There is no guarantee. But generally it would not be less than
+> lim->max_sectors. But lim->max_sectors kernel default is 1280KB, which is
+> quite large. However, there are other reasons why splits could be broken. I
+> am just giving the simple example in lim->max_sectors, as that is
+> configurable from userspace (so useful for experimenting).
 
-Good idea, do you want to uplift common mount option testcase to
-generic/ directory? or is it fine to leave it in f2fs/ now?
+Got it.
+> 
+> > Further, handling awu_max vs awu_max_opt and their different
+> > interpretations for XFS vs EXT4 etc are adding uneccessary complexity.
+> 
+> You could assume awu max opt == awu max for ext4, as we no there are no
+> software-based atomic writes. That could be simpler than my previous
+> suggestion, which involves a kernel change.
 
-Thanks,
+I want to avoid adding something like 
 
+iosize = FSTYP == "ext4" ? awu_max : awu_max_opt
+
+in the test iteslf, because it is a bit difficult to remember changing
+this in case things change in the kernel later, eg if ext4 gets a
+fallback.
+
+Im not sure if returning non-zero for ext4 is also correct as per the
+documented behavior from 5d894321c49e613.
+
+   When zero, it means that there is no such performance boundary.
+
+Anyways, I think there might be a simpler solution...
+> 
+> > 
+> > The simplest way seems to be to just limit the $blocksize to
+> > something like $(_min 16KB awu_max) and hope that 16KB is small enough
+> > to not be split during reads. We anyways have other tests like
+> > generic/1230 that can be used to test larger atomic write sizes
+> > 
+> > Thoughts?
+> 
+> As I said at the start, we never had guarantees of serialization of reads
+> and atomic writes.
+> 
+> However I still think that this is a useful test. It's just it is
+> theoretically possible to give false positives.
+> 
+> You could get the test to read max_sectors_kb, and check whether it is
+> greater than the bs. Again, more complexity.
+
+I think this might work. So i can set the iosize as 16kb which is
+already low enought. Incase the max_sectors is < than 16kb then we bail
+out. (but then maybe there is a very small chance of read split still)
+
+OR another approach is to do the verify at the very end when all threads
+are done writing so the reads don't race. The tradeoff is that this
+will reduce the effictiveness of the test though to some extent.
+
+> 
+> As an alternative, maybe it's better to maintain this test out-of-tree. I'm
+> not sure.
+That'll be a hassle for everyone :p Does any of the above 2 approaches
+seem acceptable for upstreaming this test?
+
+Thanks for the reviews,
+ojaswin
+
+P.S: I'm not seeing anything weird with the line endings, but thanks,
+i'll try to look into it.
 > 
 > Thanks,
-> Zorro
+> John
 > 
->> +_test_unmount >> $seqres.full 2>&1
->> +
->> +options=(
->> +#	mount_option			mkfs_option
->> +	"background_gc=on"		""			\
->> +	"background_gc=off"		""			\
->> +	"background_gc=sync"		""			\
->> +	"background_gc=on"		"blkzone"		\
->> +	"background_gc=off"		"blkzone"		\
->> +	"background_gc=sync"		"blkzone"		\
->> +	"disable_roll_forward"		""			\
->> +	"norecovery"			""			\
->> +	"discard"			""			\
->> +	"nodiscard"			""			\
->> +	"no_heap"			""			\
->> +	"heap"				""			\
->> +	"user_xattr"			""			\
->> +	"nouser_xattr"			""			\
->> +	"acl"				""			\
->> +	"noacl"				""			\
->> +	"active_logs=2"			""			\
->> +	"active_logs=4"			""			\
->> +	"active_logs=6"			""			\
->> +	"disable_ext_identify"		""			\
->> +	"inline_xattr"			""			\
->> +	"noinline_xattr"		""			\
->> +	"inline_xattr_size=400"		"extra,flexible_inline_xattr"\
->> +	"inline_xattr_size=400"		""			\
->> +	"inline_data"			""			\
->> +	"noinline_dentry"		""			\
->> +	"inline_dentry"			""			\
->> +	"noinline_dentry"		""			\
->> +	"flush_merge"			""			\
->> +	"noflush_merge"			""			\
->> +	"barrier"			""			\
->> +	"nobarrier"			""			\
->> +	"fastboot"			""			\
->> +	"extent_cache"			""			\
->> +	"noextent_cache"		""			\
->> +	"data_flush"			""			\
->> +	"reserve_root=32768"		""			\
->> +	"resuid=1000"			""			\
->> +	"resgid=1000"			""			\
->> +	"fault_injection=100"		""			\
->> +	"fault_type=4095"		""			\
->> +	"mode=adaptive"			""			\
->> +	"mode=lfs"			""			\
->> +	"mode=fragment:segment"		""			\
->> +	"mode=fragment:block"		""			\
->> +	"mode=adaptive"			"blkzone"		\
->> +	"mode=lfs"			"blkzone"		\
->> +	"mode=fragment:segment"		"blkzone"		\
->> +	"mode=fragment:block"		"blkzone"		\
->> +	"usrquota"			""			\
->> +	"grpquota"			""			\
->> +	"prjquota"			""			\
->> +	"usrjquota=ausrquota"		""			\
->> +	"grpjquota=agrpquota"		""			\
->> +	"prjjquota=aprjquota"		""			\
->> +	"jqfmt=vfsold"			""			\
->> +	"jqfmt=vfsv0"			""			\
->> +	"jqfmt=vfsv1"			""			\
->> +	"usrjquota="			""			\
->> +	"grpjquota="			""			\
->> +	"prjjquota="			""			\
->> +	"quota"				""			\
->> +	"noquota"			""			\
->> +	"alloc_mode=reuse"		""			\
->> +	"alloc_mode=default"		""			\
->> +	"fsync_mode=posix"		""			\
->> +	"fsync_mode=strict"		""			\
->> +	"fsync_mode=nobarrier"		""			\
->> +	"test_dummy_encryption"		""			\
->> +	"test_dummy_encryption=v1"	""			\
->> +	"test_dummy_encryption=v2"	""			\
->> +	"checkpoint=enable"		""			\
->> +	"checkpoint=disable"		""			\
->> +	"checkpoint=disable:32768"	""			\
->> +	"checkpoint=disable:50%"	""			\
->> +	"checkpoint_merge"		""			\
->> +	"nocheckpoint_merge"		""			\
->> +	"compress_algorithm=lzo"	""			\
->> +	"compress_algorithm=lzo"	"extra,compression"	\
->> +	"compress_algorithm=lz4"	"extra,compression"	\
->> +	"compress_algorithm=zstd"	"extra,compression"	\
->> +	"compress_algorithm=lzo-rle"	"extra,compression"	\
->> +	"compress_algorithm=lz4:3"	"extra,compression"	\
->> +	"compress_algorithm=zstd:1"	"extra,compression"	\
->> +	"compress_log_size=8"		"extra,compression"	\
->> +	"compress_extension=so"		"extra,compression"	\
->> +	"nocompress_extension=so"	"extra,compression"	\
->> +	"nocompress_extension=*"	"extra,compression"	\
->> +	"compress_extension=so,nocompress_extension=so"		\
->> +					"extra,compression"	\
->> +	"compress_chksum"		"extra,compression"	\
->> +	"compress_mode=fs"		"extra,compression"	\
->> +	"compress_mode=user"		"extra,compression"	\
->> +	"compress_cache"		"extra,compression"	\
->> +	"inlinecrypt"			""			\
->> +	"atgc"				""			\
->> +	"discard_unit=block"		""			\
->> +	"discard_unit=segment"		""			\
->> +	"discard_unit=section"		""			\
->> +	"discard_unit=block"		"blkzone"		\
->> +	"discard_unit=segment"		"blkzone"		\
->> +	"discard_unit=section"		"blkzone"		\
->> +	"memory=normal"			""			\
->> +	"memory=low"			""			\
->> +	"age_extent_cache"		""			\
->> +	"errors=panic"			""			\
->> +	"errors=continue"		""			\
->> +	"errors=remount-ro"		""			\
->> +	"nat_bits"			""			\
->> +	"atgc,mode=lfs"			""			\
->> +	"ro,flush_merge"		""			\
->> +	"rw"				"ro"			\
->> +	"norecovery,ro"			""			\
->> +)
->> +
->> +for ((i=0;i<${#options[@]};i=i+2))
->> +do
->> +	echo "Option#$i: ${options[$i]} : ${options[$((i+1))]}"
->> +	if [ "${options[$((i+1))]}" == "blkzone" ]; then
->> +		_test_mkfs "-m" >> $seqres.full
->> +		_test_mount "-o ${options[$i]}" >> $seqres.full 2>&1
->> +		echo $?
->> +		_test_unmount >> $seqres.full 2>&1
->> +	else
->> +		_scratch_mkfs "-O ${options[$((i+1))]}" >> $seqres.full
->> +		_try_scratch_mount "-o ${options[$i]}" >> $seqres.full 2>&1
->> +		echo $?
->> +		_scratch_unmount >> $seqres.full 2>&1
->> +	fi
->> +done
->> +
->> +status=0
->> +exit
->> diff --git a/tests/f2fs/015.out b/tests/f2fs/015.out
->> new file mode 100644
->> index 00000000..d7f4e62a
->> --- /dev/null
->> +++ b/tests/f2fs/015.out
->> @@ -0,0 +1,225 @@
->> +QA output created by 015
->> +Option#0: background_gc=on : 
->> +0
->> +Option#2: background_gc=off : 
->> +0
->> +Option#4: background_gc=sync : 
->> +0
->> +Option#6: background_gc=on : blkzone
->> +0
->> +Option#8: background_gc=off : blkzone
->> +32
->> +Option#10: background_gc=sync : blkzone
->> +0
->> +Option#12: disable_roll_forward : 
->> +0
->> +Option#14: norecovery : 
->> +32
->> +Option#16: discard : 
->> +0
->> +Option#18: nodiscard : 
->> +0
->> +Option#20: no_heap : 
->> +0
->> +Option#22: heap : 
->> +0
->> +Option#24: user_xattr : 
->> +0
->> +Option#26: nouser_xattr : 
->> +0
->> +Option#28: acl : 
->> +0
->> +Option#30: noacl : 
->> +0
->> +Option#32: active_logs=2 : 
->> +0
->> +Option#34: active_logs=4 : 
->> +0
->> +Option#36: active_logs=6 : 
->> +0
->> +Option#38: disable_ext_identify : 
->> +0
->> +Option#40: inline_xattr : 
->> +0
->> +Option#42: noinline_xattr : 
->> +0
->> +Option#44: inline_xattr_size=400 : extra,flexible_inline_xattr
->> +32
->> +Option#46: inline_xattr_size=400 : 
->> +32
->> +Option#48: inline_data : 
->> +0
->> +Option#50: noinline_dentry : 
->> +0
->> +Option#52: inline_dentry : 
->> +0
->> +Option#54: noinline_dentry : 
->> +0
->> +Option#56: flush_merge : 
->> +0
->> +Option#58: noflush_merge : 
->> +0
->> +Option#60: barrier : 
->> +0
->> +Option#62: nobarrier : 
->> +0
->> +Option#64: fastboot : 
->> +0
->> +Option#66: extent_cache : 
->> +0
->> +Option#68: noextent_cache : 
->> +0
->> +Option#70: data_flush : 
->> +0
->> +Option#72: reserve_root=32768 : 
->> +0
->> +Option#74: resuid=1000 : 
->> +0
->> +Option#76: resgid=1000 : 
->> +0
->> +Option#78: fault_injection=100 : 
->> +0
->> +Option#80: fault_type=4095 : 
->> +0
->> +Option#82: mode=adaptive : 
->> +0
->> +Option#84: mode=lfs : 
->> +0
->> +Option#86: mode=fragment:segment : 
->> +0
->> +Option#88: mode=fragment:block : 
->> +0
->> +Option#90: mode=adaptive : blkzone
->> +32
->> +Option#92: mode=lfs : blkzone
->> +0
->> +Option#94: mode=fragment:segment : blkzone
->> +32
->> +Option#96: mode=fragment:block : blkzone
->> +32
->> +Option#98: usrquota : 
->> +0
->> +Option#100: grpquota : 
->> +0
->> +Option#102: prjquota : 
->> +32
->> +Option#104: usrjquota=ausrquota : 
->> +32
->> +Option#106: grpjquota=agrpquota : 
->> +32
->> +Option#108: prjjquota=aprjquota : 
->> +32
->> +Option#110: jqfmt=vfsold : 
->> +0
->> +Option#112: jqfmt=vfsv0 : 
->> +0
->> +Option#114: jqfmt=vfsv1 : 
->> +0
->> +Option#116: usrjquota= : 
->> +0
->> +Option#118: grpjquota= : 
->> +0
->> +Option#120: prjjquota= : 
->> +0
->> +Option#122: quota : 
->> +0
->> +Option#124: noquota : 
->> +0
->> +Option#126: alloc_mode=reuse : 
->> +0
->> +Option#128: alloc_mode=default : 
->> +0
->> +Option#130: fsync_mode=posix : 
->> +0
->> +Option#132: fsync_mode=strict : 
->> +0
->> +Option#134: fsync_mode=nobarrier : 
->> +0
->> +Option#136: test_dummy_encryption : 
->> +32
->> +Option#138: test_dummy_encryption=v1 : 
->> +32
->> +Option#140: test_dummy_encryption=v2 : 
->> +32
->> +Option#142: checkpoint=enable : 
->> +0
->> +Option#144: checkpoint=disable : 
->> +0
->> +Option#146: checkpoint=disable:32768 : 
->> +0
->> +Option#148: checkpoint=disable:50% : 
->> +0
->> +Option#150: checkpoint_merge : 
->> +0
->> +Option#152: nocheckpoint_merge : 
->> +0
->> +Option#154: compress_algorithm=lzo : 
->> +0
->> +Option#156: compress_algorithm=lzo : extra,compression
->> +0
->> +Option#158: compress_algorithm=lz4 : extra,compression
->> +0
->> +Option#160: compress_algorithm=zstd : extra,compression
->> +0
->> +Option#162: compress_algorithm=lzo-rle : extra,compression
->> +0
->> +Option#164: compress_algorithm=lz4:3 : extra,compression
->> +0
->> +Option#166: compress_algorithm=zstd:1 : extra,compression
->> +0
->> +Option#168: compress_log_size=8 : extra,compression
->> +0
->> +Option#170: compress_extension=so : extra,compression
->> +0
->> +Option#172: nocompress_extension=so : extra,compression
->> +0
->> +Option#174: nocompress_extension=* : extra,compression
->> +0
->> +Option#176: compress_extension=so,nocompress_extension=so : extra,compression
->> +0
->> +Option#178: compress_chksum : extra,compression
->> +0
->> +Option#180: compress_mode=fs : extra,compression
->> +0
->> +Option#182: compress_mode=user : extra,compression
->> +0
->> +Option#184: compress_cache : extra,compression
->> +0
->> +Option#186: inlinecrypt : 
->> +0
->> +Option#188: atgc : 
->> +0
->> +Option#190: discard_unit=block : 
->> +0
->> +Option#192: discard_unit=segment : 
->> +0
->> +Option#194: discard_unit=section : 
->> +0
->> +Option#196: discard_unit=block : blkzone
->> +0
->> +Option#198: discard_unit=segment : blkzone
->> +0
->> +Option#200: discard_unit=section : blkzone
->> +0
->> +Option#202: memory=normal : 
->> +0
->> +Option#204: memory=low : 
->> +0
->> +Option#206: age_extent_cache : 
->> +0
->> +Option#208: errors=panic : 
->> +0
->> +Option#210: errors=continue : 
->> +0
->> +Option#212: errors=remount-ro : 
->> +0
->> +Option#214: nat_bits : 
->> +0
->> +Option#216: atgc,mode=lfs : 
->> +32
->> +Option#218: ro,flush_merge : 
->> +32
->> +Option#220: rw : ro
->> +0
->> +Option#222: norecovery,ro : 
->> +0
->> -- 
->> 2.49.0
->>
-> 
-
