@@ -1,40 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB96E17A303
-	for <fstests@vger.kernel.org>; Thu, 10 Jul 2025 16:15:16 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F79817A303;
+	Thu, 10 Jul 2025 16:16:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752164117; cv=none; b=WqMiqMjb67iuxRwLwZfEIZgvzU50jpqDe7FWWGlzzuKcOYUUGsBr6icJxmQu6+8CczEmES38m2EcdiLJRVjDNeWlcQGdidiJojj4wizl2Xcg8eUqTJmHGgekwBep+WvEYLl0LxAeATltmwUMYMg/nFJLTD++Ssz3u7FwZKmG/uk=
+	t=1752164171; cv=none; b=s6sV+1F03N5jhBNkoi95Cxi1dMk20rnzgzyKVswgKXhTT3BYuyltuOx7ANIOnmoNMN+u5OGh/sHSVHEBPE72DXZec7tCUUUTZAN/T1mnR1J92nytSb7867pDXbylmzTD+R3q1WDw1SDW42HFvTybpZyNiYGOH1J0HLXY9kAYEuU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752164117; c=relaxed/simple;
-	bh=tX92deriQhNMPgmXRC6foloZVAcOxW7QAC/Hh9ISJek=;
+	s=arc-20240116; t=1752164171; c=relaxed/simple;
+	bh=JNlbxAfssVbYCCGEfdzTOOOT9o6B9UNRsQ6TyLc+ISE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=tU0hXOf3xbVv5kd3fvuFeFTBbQMZpkJiBD2AVkoXoxKYF6ML6SWysBrwOQxCfREu0fGTFZ+EpIgAUpS9OSWeno8Ja36GBE14+UUXSXl+YjXcYzofIA4YUfyDQCWgnJpsTN39XPYJlIh++bHhcRF8tUxWhFkaf+Sowc3Uxn2dYM0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YbGXOnFe; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=gCSflDpIdDYojk/m0P3GNasu7v+HjN6lPp0wMpiDLzoS89WSY0EwYKTcptYP01zhckHxOxP6bJnneJ1vEMGCH46kaa5yYGYfKdE//Y4Ux5NI/ldDZcX0BDVLZiuT0V9q8aJZPKfWT7yzkfXy/C4tIFnREe67XXttDWb5zzxfxQ4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iQpSlLPK; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YbGXOnFe"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 72A8CC4CEE3;
-	Thu, 10 Jul 2025 16:15:16 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iQpSlLPK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3561DC4CEE3;
+	Thu, 10 Jul 2025 16:16:11 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1752164116;
-	bh=tX92deriQhNMPgmXRC6foloZVAcOxW7QAC/Hh9ISJek=;
+	s=k20201202; t=1752164171;
+	bh=JNlbxAfssVbYCCGEfdzTOOOT9o6B9UNRsQ6TyLc+ISE=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=YbGXOnFewPzT0H+eMxvdaVrhc1Fa+TlekH9QzGpf9x+My2UWAgPE7Z75ou5WRdN39
-	 c4uaxtuYVdPPo4ZDvVEbd2jU0dzgMxRE13t8tb+fVO84H2qx1F2eJoiXyxIaDV5edf
-	 Qxal9FZPJiqB7snvkKxuDHBvjLABb01jjkNCfaMf+cKGLovwuV5eQ/ZfnRrRJwGSdY
-	 W+k3oysaXvvc2a+ryY6O+9HyMtpSG4z8CYngtULtKMfgUqbyIS5v2cOg+XoooFI02v
-	 r0Uv+BCmscj13NGa2b4IpASEb723rMEP2W5OUhbwdJlCaGgXEw5IRO/7GhHJXpCh7L
-	 Js30pn7pfhc6A==
-Date: Thu, 10 Jul 2025 09:15:15 -0700
+	b=iQpSlLPKNpnBuw1e2L1EhmHuWt7dQUP4a/E8W+3AQppC7GWH59BNVQ+VjCSEg+1Nl
+	 jp3XzKfuLlEA4EaC5iWQqOHj+Iitv1RdwBQpEZImKBNIHYO2htVLMbcM0vBrpf3++0
+	 ozDyLobciRe1JEHdM0GZErVGkmlMETV7EwJ779vdCBmhJp2OUPwrXTqivxvVrsMGnK
+	 V0wbMBCVhheJn3pkN4rOdZCj91cDSKO7YM2pd42+cmfqhtT13oZWiPXXyWZsyaHMg6
+	 OLWH/7oz90ByI2v2+QQlGxdpI15k88y3Oa6DedONMbvr/0n+kOGobnXegOCLgeVN85
+	 pY6S1s0KWKKaA==
+Date: Thu, 10 Jul 2025 09:16:10 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] common/rc: _add_dmesg_filter returns when RESULT_DIR
- is null
-Message-ID: <20250710161515.GB2672039@frogsfrogsfrogs>
-References: <20250622203947.797199-1-zlang@kernel.org>
- <20250622203947.797199-2-zlang@kernel.org>
+To: zlang@redhat.com
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCHSET 1/2] fstests: check new 6.15 behaviors
+Message-ID: <20250710161610.GC2672039@frogsfrogsfrogs>
+References: <174786719374.1398726.14706438540221180099.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,54 +41,44 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250622203947.797199-2-zlang@kernel.org>
+In-Reply-To: <174786719374.1398726.14706438540221180099.stgit@frogsfrogsfrogs>
 
-On Mon, Jun 23, 2025 at 04:39:47AM +0800, Zorro Lang wrote:
-> I always hit below error on a system with readonly rootfs:
+On Wed, May 21, 2025 at 03:40:53PM -0700, Darrick J. Wong wrote:
+> Hi all,
 > 
->   ++ _xfs_prepare_for_eio_shutdown /dev/loop0
->   ...
->   ++ _add_dmesg_filter 'Internal error'
->   ++ local 'regexp=Internal error'
->   ++ local filter_file=/dmesg_filter
->   ++ '[' '!' -e /dmesg_filter ']'
->   ++ echo 'Internal error'
->   ./common/rc: line 4716: /dmesg_filter: Read-only file system
+> Adjust fstests to check for new behaviors introduced in 6.15.
 > 
-> The RESULT_DIR is null, due to xfstests/check calls _test_mount and
-> _scratch_mount before RESULT_DIR creation. And _test_mount does
-> _prepare_for_eio_shutdown -> _xfs_prepare_for_eio_shutdown ->
-> _add_dmesg_filter "Internal error" when RESULT_DIR is null.
+> If you're going to start using this code, I strongly recommend pulling
+> from my git trees, which are linked below.
 > 
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
+> With a bit of luck, this should all go splendidly.
+> Comments and questions are, as always, welcome.
 
-Looks good,
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+Hrm, can we get the first two patches into for-next, please?
+
+I'll work on the last two and repost when they're ready.
 
 --D
 
-> ---
->  common/rc | 6 ++++++
->  1 file changed, 6 insertions(+)
+> --D
 > 
-> diff --git a/common/rc b/common/rc
-> index a27f87a0b..549f42135 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4800,6 +4800,12 @@ _check_dmesg_filter()
->  # Add a simple expression to the default dmesg filter
->  _add_dmesg_filter()
->  {
-> +	# This function might be called before having RESULT_DIR, do nothing
-> +	# if RESULT_DIR isn't created
-> +	if [ ! -d "${RESULT_DIR}" ];then
-> +		return 1
-> +	fi
-> +
->  	local regexp="$1"
->  	local filter_file="${RESULT_DIR}/dmesg_filter"
->  
-> -- 
-> 2.47.1
+> fstests git tree:
+> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=linux-6.15-sync
+> ---
+> Commits in this patchset:
+>  * xfs/273: fix test for internal zoned filesystems
+>  * xfs/259: drop the 512-byte fsblock logic from this test
+>  * xfs/259: try to force loop device block size
+>  * xfs/432: fix metadump loop device blocksize problems
+> ---
+>  common/metadump   |   12 ++++++++++--
+>  common/rc         |   29 +++++++++++++++++++++++++++++
+>  tests/generic/563 |    1 +
+>  tests/xfs/078     |    2 ++
+>  tests/xfs/259     |   25 +++++++++----------------
+>  tests/xfs/259.out |    7 -------
+>  tests/xfs/273     |    5 +++++
+>  tests/xfs/613     |    1 +
+>  8 files changed, 57 insertions(+), 25 deletions(-)
 > 
 > 
