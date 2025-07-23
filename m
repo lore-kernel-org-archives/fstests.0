@@ -1,40 +1,44 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CC7F2F49FC;
-	Wed, 23 Jul 2025 14:49:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D26F2FC3AE;
+	Wed, 23 Jul 2025 14:50:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753282160; cv=none; b=pnJ9Z36MCOu+ZbbEu3xqXACGyrWJbB3LEmuha6KIWHm57VDb83wvH2JtFrMtoVwLZVRuGuZXQa9gTwhOo1QNLb8sdYM2hwgbMih/lK/NFDt3uMe6bA0ZfLTgBK9MCZOqIKek64qqntJ6EB73SFeIBFga3c7xUNbFG8CwrCUswyY=
+	t=1753282223; cv=none; b=u4kJay8qooVrDggfxeYOJkb13NlDjDjEYL39HF9tBGVlM8c9Y8rvalX7bfm7yvCWO8hKji+aSYd+EGPAhXHvvgx5h2Yjh9Ix7EAB/tGFOn3R7ufT+e9tA0EL0rR7n+w5bF04Aj7nmgZeE9v7QJ5NDNfBulQAeJ+ih5SxBGjOnqI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753282160; c=relaxed/simple;
-	bh=uJNb0J1C5TY2VvN8jY4X8ugBBiIqaVX1ecgp4EbJ9r8=;
+	s=arc-20240116; t=1753282223; c=relaxed/simple;
+	bh=aZqQBj3Q0MLO38xOs+l/KAa78pTbHFsmu7NSuwSazTA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EUowdDB4BfexeatRRm5Pnv/7t4Lx/FPTtl0GhB2lNQzRH4kfTIz2E6kfmANwxAIHy2ZO2arIhxSIXeJCPFYxW3d1uB0HxgyXaOxrCiY1FRfqZdqYNjPk37a/zxdsM4kVUbxp+XUjCpWvQjn9kSE5uP5D+4YzuxkbSVuV37EB1qU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mfkmP10r; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=rJJSuHTkZYWBrLWdLod2HTBwsca+gfYdOeEZF5nTP3dsYdSrDzCm4P16K86l4jhNX9XGhrL+o4OSUDcmIb3xOkwaTNXGvigs93R0F3iwE4PzDNEj7YLuvVnIFge2CuYTI0BCXitm7YbCxMC3JdIk07IlrRDtBY7pbtwkG3Gw71w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ajICN4Ku; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mfkmP10r"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 673F6C2BD04;
-	Wed, 23 Jul 2025 14:49:18 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ajICN4Ku"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DA051C4CEF8;
+	Wed, 23 Jul 2025 14:50:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1753282158;
-	bh=uJNb0J1C5TY2VvN8jY4X8ugBBiIqaVX1ecgp4EbJ9r8=;
+	s=k20201202; t=1753282221;
+	bh=aZqQBj3Q0MLO38xOs+l/KAa78pTbHFsmu7NSuwSazTA=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=mfkmP10rDSe+Z9fIhKInnrDo/oHC/3N/n0JgDyzGs8QZcz85TbmbQn978sAS0Yzzl
-	 ebFEYezr4JwBxAJJbkh3NeEiGAMd8nOG7/7Xt6EsC/95yhPDrc3Li077mcWmEYOaj5
-	 Pn8NfCAGZ/CvgP42/8xsOoCysAnv2suYvyT4ASs3QwC+ClFff242KfjbYhdwtReMjT
-	 9n/BhzWO3fpHjpFJfyhS0vwDa3z/njwH3EcU0aZN9fG9dbTcIA4QgIGp9aovurrjmD
-	 Yrw8uRKSrQVTV7aCJqFzsIinnRf7OYtB1PMii48n4IyT4IBzQmLW4Ahe1DvN2vFr8S
-	 F3Fi/b4ZN3/yg==
-Date: Wed, 23 Jul 2025 07:49:17 -0700
+	b=ajICN4KuGGGlV0yyQlHAdIDFz8bj43GXCAH4ORyaBqwi6xArAHsIiJ/uP4vZcLTWY
+	 eKKMBCIbM6URY8c1VsiZpUfbnt8SHn/EkX+mJQ0NEEptOnHPOycaM6l5Nsw38w9748
+	 LHmZk5PZfoKKV7AZA6QLYKp6w/L8a/DFxmeJOaMFEQDoHKPLTTD6yjzMqWMJSDD5Vz
+	 GdnIQ0yCpTVS6CguD86wWbYUafG+38CZM0WWl/+/A0sMrbXE6EhZ10VAp8sQ2aqi7a
+	 SoCZtPkgAjw+KYRh1j0WJbois5N0yIKHDAFyZp8yQuszOv5Zvf6bxvB/Cs5VASLeoJ
+	 pJcuzt8141LSg==
+Date: Wed, 23 Jul 2025 07:50:21 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] generic/211: verify if the filesystem being tested
- supports in place writes
-Message-ID: <20250723144917.GL2672039@frogsfrogsfrogs>
-References: <7ba7d315e60388593ccef0353cff58c4b5795615.1753272216.git.fdmanana@suse.com>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+	Ritesh Harjani <ritesh.list@gmail.com>, john.g.garry@oracle.com,
+	tytso@mit.edu, linux-xfs@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v3 02/13] common/rc: Fix fsx for ext4 with bigalloc
+Message-ID: <20250723145021.GM2672039@frogsfrogsfrogs>
+References: <cover.1752329098.git.ojaswin@linux.ibm.com>
+ <84a1820482419a1f1fb599bc35c2b7dcc1abbcb9.1752329098.git.ojaswin@linux.ibm.com>
+ <20250717161154.GF2672039@frogsfrogsfrogs>
+ <aH9ffl7-2ri2Exgv@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,122 +47,108 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <7ba7d315e60388593ccef0353cff58c4b5795615.1753272216.git.fdmanana@suse.com>
+In-Reply-To: <aH9ffl7-2ri2Exgv@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 
-On Wed, Jul 23, 2025 at 01:04:06PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Tue, Jul 22, 2025 at 03:23:02PM +0530, Ojaswin Mujoo wrote:
+> On Thu, Jul 17, 2025 at 09:11:54AM -0700, Darrick J. Wong wrote:
+> > On Sat, Jul 12, 2025 at 07:42:44PM +0530, Ojaswin Mujoo wrote:
+> > > Insert range and collapse range only works with bigalloc in case
+> > > the range is cluster size aligned, which fsx doesnt take care. To
+> > > work past this, disable insert range and collapse range on ext4, if
+> > > bigalloc is enabled.
+> > > 
+> > > This is achieved by defining a new function _set_default_fsx_avoid
+> > > called via run_fsx helper. This can be used to selectively disable
+> > > fsx options based on the configuration.
+> > > 
+> > > Co-developed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> > > Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> > > ---
+> > >  common/rc | 27 +++++++++++++++++++++++++++
+> > >  1 file changed, 27 insertions(+)
+> > > 
+> > > diff --git a/common/rc b/common/rc
+> > > index 9a9d3cc8..218cf253 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -5113,10 +5113,37 @@ _require_hugepage_fsx()
+> > >  		_notrun "fsx binary does not support MADV_COLLAPSE"
+> > >  }
+> > >  
+> > > +_set_default_fsx_avoid() {
+> > > +	local file=$1
+> > > +
+> > > +	case "$FSTYP" in
+> > > +	"ext4")
+> > > +		local dev=$(findmnt -n -o SOURCE --target $file)
+> > > +
+> > > +		# open code instead of _require_dumpe2fs cause we don't
+> > > +		# want to _notrun if dumpe2fs is not available
+> > > +		if [ -z "$DUMPE2FS_PROG" ]; then
+> > > +			echo "_set_default_fsx_avoid: dumpe2fs not found, skipping bigalloc check." >> $seqres.full
+> > > +			return
+> > > +		fi
+> > 
+> > I hate to be the guy who says one thing and then another, but ...
+> > 
+> > If we extended _get_file_block_size to report the ext4 bigalloc cluster
+> > size, would that be sufficient to keep testing collapse/insert range?
+> > 
+> > I guess the tricky part here is that bigalloc allows sub-cluster
+> > mappings and we might not want to do all file IO testing in such big
+> > units.
 > 
-> The test currently assumes the filesystem can do in place writes (no
-> Copy-On-Write, no allocation of new extents) when overwriting a file.
-> While that is the case for most filesystems in most configurations, there
-> are exceptions such as zoned xfs where overwriting results in allocating
-> new extents for the new data.
+> Hmm, so maybe a better way is to just add a parameter like alloc_unit in
+> fsx where we can pass the cluster_size to which INSERT/COLLAPSE range be
+> aligned to. For now we can pass it explicitly in the tests if needed.
 > 
-> So make the test check that in place writes are supported and skip the
-> test if they are not supported.
+> I do plan on working on your suggestion of exposing alloc unit via
+> statx(). Once we have that in the kernel, fsx can use that as well.
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> If this approach sounds okay I can try to maybe send the whole "fixing
+> of insert/collpase range in fsx" as a patchset separate from atomic
+> writes.
 
-This is a smarter sollution than the fugly hack that I came up with:
-
-# Don't run on mounted filesystems that only support out of place writes
-if [ "$FSTYP" = "xfs" ]; then
-	_require_no_xfs_always_cow
-	_require_xfs_scratch_non_zoned
-fi
-
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+Yeah, that sounds like a good longer-term solution to me. :)
 
 --D
 
-> ---
->  common/rc         | 59 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/211 |  1 +
->  2 files changed, 60 insertions(+)
+> > 
+> > > +
+> > > +		$DUMPE2FS_PROG -h $dev 2>&1 | grep -q bigalloc && {
+> > > +			export FSX_AVOID+=" -I -C"
+> > 
+> > No need to export FSX_AVOID to subprocesses.
+> > 
+> > --D
 > 
-> diff --git a/common/rc b/common/rc
-> index 96578d15..52aade10 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -5873,6 +5873,65 @@ _require_program() {
->  	_have_program "$1" || _notrun "$tag required"
->  }
->  
-> +# Test that a filesystem can do writes to a file in place (without allocating
-> +# new extents, without Copy-On-Write semantics).
-> +_require_inplace_writes()
-> +{
-> +	_require_xfs_io_command "fiemap"
-> +
-> +	local target=$1
-> +	local test_file="${target}/test_inplace_writes"
-> +	local fiemap_before
-> +	local fiemap_after
-> +
-> +	if [ -z "$target" ]; then
-> +		_fail "Usage: _require_inplace_writes <filesystem path>"
-> +	fi
-> +
-> +	rm -f "$test_file"
-> +	touch "$test_file"
-> +
-> +	# Set the file to NOCOW mode on btrfs, which must be done while the file
-> +	# is empty, otherwise it fails.
-> +	if [ "$FSTYP" == "btrfs" ]; then
-> +		_require_chattr C
-> +		$CHATTR_PROG +C "$test_file"
-> +	fi
-> +
-> +	$XFS_IO_PROG -f -c "pwrite 0 128K" -c "fsync" "$test_file" &> /dev/null
-> +	if [ $? -ne 0 ]; then
-> +		rm -f "$test_file"
-> +		_fail "_require_inplace_writes failed to write to test file"
-> +	fi
-> +
-> +	# Grab fiemap output before overwriting.
-> +	fiemap_before=$($XFS_IO_PROG -c "fiemap" "$test_file")
-> +	if [ $? -ne 0 ]; then
-> +		rm -f "$test_file"
-> +		_fail "_require_inplace_writes first fiemap call failed"
-> +	fi
-> +
-> +	$XFS_IO_PROG -c "pwrite 0 128K" -c "fsync" "$test_file" &> /dev/null
-> +	if [ $? -ne 0 ]; then
-> +		rm -f "$test_file"
-> +		_fail "_require_inplace_writes failed to overwrite test file"
-> +	fi
-> +
-> +	fiemap_after=$($XFS_IO_PROG -c "fiemap" "$test_file")
-> +	if [ $? -ne 0 ]; then
-> +		rm -f "$test_file"
-> +		_fail "_require_inplace_writes second fiemap call failed"
-> +	fi
-> +
-> +	rm -f "$test_file"
-> +
-> +	# If the filesystem supports inplace writes, then the extent mapping is
-> +	# the same before and after overwriting.
-> +	if [ "${fiemap_after}" != "${fiemap_before}" ]; then
-> +		_notrun "inplace writes not supported"
-> +	fi
-> +}
-> +
->  ################################################################################
->  # make sure this script returns success
->  /bin/true
-> diff --git a/tests/generic/211 b/tests/generic/211
-> index e87d1e01..ed426db2 100755
-> --- a/tests/generic/211
-> +++ b/tests/generic/211
-> @@ -27,6 +27,7 @@ fs_size=$(_small_fs_size_mb 512)
->  _try_scratch_mkfs_sized $((fs_size * 1024 * 1024)) >>$seqres.full 2>&1 || \
->  	_fail "mkfs failed"
->  _scratch_mount
-> +_require_inplace_writes "${SCRATCH_MNT}"
->  
->  touch $SCRATCH_MNT/foobar
->  
-> -- 
-> 2.47.2
+> Got it, will fix. Thanks for review!
 > 
+> 
+> Regards,
+> ojaswin
+> > 
+> > > +		}
+> > > +		;;
+> > > +	# Add other filesystem types here as needed
+> > > +	*)
+> > > +		;;
+> > > +	esac
+> > > +}
+> > > +
+> > >  _run_fsx()
+> > >  {
+> > >  	echo "fsx $*"
+> > >  	local args=`echo $@ | sed -e "s/ BSIZE / $bsize /g" -e "s/ PSIZE / $psize /g"`
+> > > +
+> > > +	_set_default_fsx_avoid $testfile
+> > > +
+> > >  	set -- $FSX_PROG $args $FSX_AVOID $TEST_DIR/junk
+> > >  	echo "$@" >>$seqres.full
+> > >  	rm -f $TEST_DIR/junk
+> > > -- 
+> > > 2.49.0
+> > > 
+> > > 
 > 
