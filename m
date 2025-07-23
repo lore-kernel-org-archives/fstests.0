@@ -1,91 +1,93 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C29D288528;
-	Tue, 22 Jul 2025 10:28:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67648248191;
+	Wed, 23 Jul 2025 05:48:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753180095; cv=none; b=NLgwkcBDSz+98B9K7pTlAux/DHyO0wCfh1AjqJDqHDDVjlmuQJc80HLZCVVILr/n2sDiGWrCZCRHU24YngFEM0ZZ/RhlwpIjZ9KuLFkMidg0C8aCXzOwC0Xuvkp/NPYO9lzReCV4v0VKKoR7nQzi0ZhVzMtAPpe73eeVV26qvjA=
+	t=1753249718; cv=none; b=NhfC/B4HuvTlH5W9poCHHNLDKaFNGyFTAq7PRvSxDWEylwGy2NuYH0a98LEReSM7kw+lKTkXK9neapQL6X4+DJjBwMT+VWU7AxOgrMsGRhvIVoRnGjr9SU4PGgpoFIt2u3eTZlTwOjXbGcVUft05qw0ZZWK/HLysqn1ZpUpebD4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753180095; c=relaxed/simple;
-	bh=wAQp4UJPt1k6OlL+SfPFcrPM2o5kvsPngTLM2IfRLuE=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ldvMcn/kOOmRDTHMSoVJOhHLKB9Nv5P1TNp3DoqonwIc/YR5VmTBaRv7GqBMOXaqqswHdXeXsiXwKhuFpPyUezCa7eUsjZXlpjVbqDt1JtSPd6OEj3SBkk9HP6btJboHJCG+oZvs2IEiXFdqBd+Q5b8sAg9Mhlh+AhqTlOrVVkg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=pz2ofdMc; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1753249718; c=relaxed/simple;
+	bh=GCCdN+4xXs5pyJ3ICNKfeKo0nGQua79dkNsvR4PDyHw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Zm9bmJ+o3DeX7cfPqTs/b3Tp2JUjh/t89gduI/fzky/gbKCftFbUdqn5mKI1nJz1fZMj8D+Ct1xVg6lYLw91c/jsMaKIpeMvDdQBrhPh06ibgLX5+E5f2Ug0VCdcEB2lT0eO2M4Ql0WTBf7vSE2p4d3pMyUnN7RnTF+Xmtq91U0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=YES4dGLh; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pz2ofdMc"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 11CA7C4CEF4;
-	Tue, 22 Jul 2025 10:28:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1753180094;
-	bh=wAQp4UJPt1k6OlL+SfPFcrPM2o5kvsPngTLM2IfRLuE=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=pz2ofdMcxzqXDXtUkVA5VQRbKINhlIbS0XGYcxEunv+nFo3g09ayCftjR+vpoKfVv
-	 M1U+Ovd2RSxrVRJsBUxNNj7tZ3YK0tx5tFjf+lmjkBAwDjdfGzPFe+FRpjmViHHoAQ
-	 bVgiMun94vA40pPWYFWEqpI+tdCoiL9uh9wWz9GKxYJYNAQ76KMC6ufngY6BzS3CUE
-	 o8wnsO1NVemhCr66N+H2R1JtESDaYLxvIhWaaHZZ9ctN1XJ8Rl0DDUujtLaimmQ/t2
-	 HLKGa+YS0EyTrIDqWYGopnO/sgfTOway4i0upV+rdmVOuXLj2/ZOEZ3uGdMrTyAX+O
-	 kPfrW2WHcALjg==
-Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-60867565fb5so8294472a12.3;
-        Tue, 22 Jul 2025 03:28:13 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCVHe6q0I+RM963sAuWl9w/jWVVu/b/HKK5QH+Ldl4VoH0MBkiTw03fZY4R0/qEcLsM1tPy7DqHVYSrn@vger.kernel.org, AJvYcCWsz3aeb3nop2+5XzmANBoJ1tMa0bqdP+NQQrIGaDtaKA/h2Jn7c8K1tcYy9cv/aMI0IrDY0r97Xh4XBA==@vger.kernel.org
-X-Gm-Message-State: AOJu0YwauVXg6bt6dl3ZJYte1b8oF6DTew4plmz3u8uJ7EeAwq2uuXRR
-	kVJtPpp/bV6K9wLrWgkTEuusaygXWShXAb7XuwJjsExVdETt9YsNiZGZjciyw5EFwub6Ejf3PzE
-	AHruLWJ7KQ/r3ok2BURSDGpO3wnqr2mk=
-X-Google-Smtp-Source: AGHT+IEPSjUrslGSRpOWvpB1GW/LCK/sbMGWwMUpcChwJ3pu+iv1FYXXHDi1+GVwsbFQKOIypBLCYViInLQpRAHb/IY=
-X-Received: by 2002:a17:907:9617:b0:ae0:ca8e:5561 with SMTP id
- a640c23a62f3a-ae9c998730cmr2209096066b.13.1753180092691; Tue, 22 Jul 2025
- 03:28:12 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="YES4dGLh"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=5KeNhxScBa51TRCYXf2rX8zFv3I4AcNdg+aKuejBzKQ=; b=YES4dGLhJYdD+tlHhjvdv6jMwd
+	/pFBS1ErLEaH62R328Lsb8lfSdwGsWQbsH6mDgHsE7CtAkMdUphb5u1jqLidMAZO/47yn/8fPcPZW
+	U70Xq14DMYgvIQoVQq102WhdapmQwtIr/yD2DUPj6S+nIOo3NpdoBRBIK/1Ltjml40ofF7x9tLgdM
+	rD4xidfYUQU0dSWWZY+nUjZxwfQNdR8SVb+jgEdsB8PjwsHgW0lAEY/tiGBkvsp87QJ5HlAd/F8+Z
+	TnHrXNy7O8CDhUOvyAqXNKSar7csgXtTFTLvsjtxWoYmnbppZGBo0ZhdyzWj6RCxHFNKJpXLtwBrR
+	5VujQKig==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1ueSLD-000000044yA-3CZJ;
+	Wed, 23 Jul 2025 05:48:35 +0000
+Date: Tue, 22 Jul 2025 22:48:35 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: Filipe Manana <fdmanana@kernel.org>
+Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>,
+	linux-xfs@vger.kernel.org, johannes.thumshirn@wdc.com,
+	naohiro.aota@wdc.com
+Subject: Re: [PATCH v2] generic: test overwriting file with mmap on a full
+ filesystem
+Message-ID: <aIB3s2z84mjGGAQM@infradead.org>
+References: <f28ef5098ed18d53df6f94faded1b352bb833527.1752049536.git.fdmanana@suse.com>
+ <681c9dcaca0bf16a694d8f56449618001cf20df6.1752166696.git.fdmanana@suse.com>
+ <aH81_3bxZZrG4R2b@infradead.org>
+ <CAL3q7H4_Pc8F6QA4qY420MZzpF8gyEXsr8Dg83UksSBG2mmWCw@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <f28ef5098ed18d53df6f94faded1b352bb833527.1752049536.git.fdmanana@suse.com>
- <681c9dcaca0bf16a694d8f56449618001cf20df6.1752166696.git.fdmanana@suse.com> <aH81_3bxZZrG4R2b@infradead.org>
-In-Reply-To: <aH81_3bxZZrG4R2b@infradead.org>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Tue, 22 Jul 2025 11:27:35 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H4_Pc8F6QA4qY420MZzpF8gyEXsr8Dg83UksSBG2mmWCw@mail.gmail.com>
-X-Gm-Features: Ac12FXzq_Sj-K7fr1Dp3rldndlCEdCE0U4TWo9FctGqXM0uq9DMTzNZdRyFwnOs
-Message-ID: <CAL3q7H4_Pc8F6QA4qY420MZzpF8gyEXsr8Dg83UksSBG2mmWCw@mail.gmail.com>
-Subject: Re: [PATCH v2] generic: test overwriting file with mmap on a full filesystem
-To: Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
-	Filipe Manana <fdmanana@suse.com>, linux-xfs@vger.kernel.org, johannes.thumshirn@wdc.com, 
-	naohiro.aota@wdc.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAL3q7H4_Pc8F6QA4qY420MZzpF8gyEXsr8Dg83UksSBG2mmWCw@mail.gmail.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Tue, Jul 22, 2025 at 7:56=E2=80=AFAM Christoph Hellwig <hch@infradead.or=
-g> wrote:
->
-> I just noticed this test failing on zoned xfs in current for-next.
->
-> That's because for out of place overwrite file systems writing at
-> ENOSPC will obviously fail, and I think the test acknowledges that
-> by forcing nocow for btrfs.
->
-> But that leaves "real" out of place write file systems affected, which
-> should also include zone btrfs, but the test actually fails there
-> in mkfs already due to some reason.
+On Tue, Jul 22, 2025 at 11:27:35AM +0100, Filipe Manana wrote:
+> > Can you please rework the patch to see that setting the nocow flag
+> > works first and only try with that or something like that?
+> 
+> Reworking it is late as it's already in for-next, but we can add a
+> patch to skip it on zoned xfs:
 
-If the mkfs fails, it's probably _small_fs_size_mb that needs to be
-updated with a sane size for zoned btrfs.
-Johannes at Aota could give some advice there.
+It though I explained it before, but let me try again.
 
->
-> Can you please rework the patch to see that setting the nocow flag
-> works first and only try with that or something like that?
+This is not about zoned xfs, zoned xfs is just the canary in the coal
+mine.
 
-Reworking it is late as it's already in for-next, but we can add a
-patch to skip it on zoned xfs:
+The test fundamentally assumes file systems can overwrite without
+space allocations.  And then noticed that this isn't true with a weird
+btrfs hack.
 
-1) The quickest way would be to add to the test:
-_require_non_zoned_device $SCRATCH_DEV
+It needs to be reworked to only run when that is known to be true.
 
-2) Or add a "_require_nocow_data_writes" helper to check we can write
-in place and skip the test if not, as you suggest, as it's more
-generic in case there are other filesystems or configurations where
-data writes are always COWed.
+> 
+> 1) The quickest way would be to add to the test:
+> _require_non_zoned_device $SCRATCH_DEV
+
+That test is not relevant here.  While zoned device require out of place
+updates, they are also common for many other cases.
+
+> 2) Or add a "_require_nocow_data_writes" helper to check we can write
+> in place and skip the test if not, as you suggest, as it's more
+> generic in case there are other filesystems or configurations where
+> data writes are always COWed.
+
+That's the only thing that works.  Only run on file systems that are
+known to do in-place updates, or in the odd btrfs case can be forced to
+even if they don't normally do it.
+
+To be honest the hardcoded btrfs hack should have been a big red flag,
+those almost always means the test is fishy.
+
