@@ -1,42 +1,42 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25DD522DA06
-	for <fstests@vger.kernel.org>; Thu, 24 Jul 2025 07:25:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F44824FBFF;
+	Thu, 24 Jul 2025 12:06:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753341923; cv=none; b=Z6zft2bgeAwOdwQsSJSLpHSe2MKbuFx6X1NvTu18TkNh/xi8lKkYU6Nr0L346sYjOsDdGK3DLOHf6oDekpRee4/jT5c6CebnPmM5ZFUfK3UtaGUUg/mZN2fGPQ6Tfm7oD5DdXVODnLAD+3OfODo9yuJG5uErh3jrQAbBY3WZ480=
+	t=1753358777; cv=none; b=kOPQECQso87RbXMoV0U8fXqo5XdV6XyhuKPQnu7vL3zkhy6kiEwQMoS7n49KYkfJqAcLDyYT6Aapf6qjOuYFWlrlkXu1ms++GVeCByOMMDsuoyz3TS48+bt5sfD9RSkc1hamaWT+wRsSt0NboTdleaxqG9SSsKLZ3naG1bsJ7JI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753341923; c=relaxed/simple;
-	bh=myvHVi2+uv1mHeMiAeouDOX+6kVJmYtVLhXddLnfZI4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=W7jQLHQa61EGUsRN5e+5nXl6eO1O5HanIqLewG6YZMkZew4jF1PX1P6L04HxxwO1Ds9Pa+0X/dp14uTcrU1Nwt+0SdqQ4BqQs9AYZSZ2bM73wbbCN2lqU/x+7M3OHKS2SVcFwoPEsAsAz7gJYsya7sZ+7NaG1qA84pOXVW5IkNg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=gIGXMiw1; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1753358777; c=relaxed/simple;
+	bh=wpTRfhswvEYLuUaYXN3pjMPzMI2yUJLddELcEpZRAdo=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=u3yxNQRjSrUb7kZiX4pvfxr0X6O5kyMZAK0Qk/Dl9VBunP3OhxSQGawu8SXM+Sjt/Bs7QGk2Z6VuOeIayZwgXempQj5N4CcYQ5ECebruFEB3dvWvB20eBgM8GVJuBI4iXs4bDBx0VqE33CTdU0HkgKz/uuCnBdPZODTWK+D29XE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=L8AOwC0K; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="gIGXMiw1"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-	Content-ID:Content-Description:In-Reply-To:References;
-	bh=SAKRVDUA4jnhky0Fl248C0ImBGdMxCWzyzgrlMlQifA=; b=gIGXMiw1mCksATWH4uIm8oVq1V
-	bhKRgTBUig1bqkymvtG2iRnnAf5qApvQHQIa9vnyO0q0fIAy57EykkLji/1hs605TCP49Mh1KFPBO
-	BR/MZvKQOTmV/9fkQ4dwR5UCmvCDJ9nkPYOywUpXQPTk+/pqIXhaNHkxKTd+IkX0WpLiCxi1RDrOv
-	Y0tLPadRhZnneGEi7L9ke3euiUO9317WCPk8EIEWEEq+pLC7TD2RUicWwmwh41Vb3IO7MwN/PwfnV
-	ihcp4kZ0ebH94j6W0TqpHGls9ZkoSCCx0XwlCzgL+dZe6qx5ygGEWPuVkyuEcyW98AZYOcYSM3OMv
-	Bfx1Hmzw==;
-Received: from [2001:4bb8:2a7:db10:26f5:37a8:33a9:27cb] (helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1ueqKM-00000006hDT-0P28;
-	Thu, 24 Jul 2025 07:25:18 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: zlang@kernel.org
-Cc: Yuezhang.Mo@sony.com,
-	fstests@vger.kernel.org
-Subject: [PATCH] Revert "generic/730: add _require_scratch_shutdown"
-Date: Thu, 24 Jul 2025 09:25:14 +0200
-Message-ID: <20250724072514.3313006-1-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="L8AOwC0K"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E214AC4CEED;
+	Thu, 24 Jul 2025 12:06:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1753358777;
+	bh=wpTRfhswvEYLuUaYXN3pjMPzMI2yUJLddELcEpZRAdo=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=L8AOwC0K4H5yg9CDq706g9ahFp4fnaqEAH9pCQgVGhXhzZCyHEedZYc/ZYPd7Xf1r
+	 APPttWxCUdiDWsNWlpR3Ao6wNncW7zThuPrbY3ZDwIMXvzsMHhbhekBhZ38wPxB6vv
+	 yhlkyLzEIWELEygBaFishNPLYJ+Qh/YBMxXkdf7LY7lm8nZrusag59wFyMVMx05402
+	 bHe6QDNcnKtW+h4kzBMT7QnsyshVj8w04ul9PekBx9CFXuqtsoDaQHHBFnGhPljnZz
+	 lwkORDeGfAw0B/r6rRuNM1Vo57GHtUpkzB8yVE0Ib/uUqVOKrARTZX0d6MoIrXDd42
+	 CF4Piz2/zpXcA==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>,
+	"Darrick J. Wong" <djwong@kernel.org>
+Subject: [PATCH v2] generic/211: verify if the filesystem being tested supports in place writes
+Date: Thu, 24 Jul 2025 13:05:59 +0100
+Message-ID: <16f6bbbb4422cdb2b5ff0b29dc5d7d45ebff5dcf.1753358594.git.fdmanana@suse.com>
 X-Mailer: git-send-email 2.47.2
+In-Reply-To: <7ba7d315e60388593ccef0353cff58c4b5795615.1753272216.git.fdmanana@suse.com>
+References: <7ba7d315e60388593ccef0353cff58c4b5795615.1753272216.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,31 +44,133 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-This reverts commit 68c9ac2ad74ba31c02275fcbb11d1cf90f0435b1.
+From: Filipe Manana <fdmanana@suse.com>
 
-The test does not actually use the xfs_io shutdown functionality,
-and it does not use the scatch device.  Adding this checks causes
-it to fail for setups that do not use SCRATCH_DEV at all.
+The test currently assumes the filesystem can do in place writes (no
+Copy-On-Write, no allocation of new extents) when overwriting a file.
+While that is the case for most filesystems in most configurations, there
+are exceptions such as zoned xfs where overwriting results in allocating
+new extents for the new data.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+So make the test check that in place writes are supported and skip the
+test if they are not supported.
+
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/generic/730 | 1 -
- 1 file changed, 1 deletion(-)
 
-diff --git a/tests/generic/730 b/tests/generic/730
-index 6b5d319675f7..6251980e33e1 100755
---- a/tests/generic/730
-+++ b/tests/generic/730
-@@ -29,7 +29,6 @@ _require_scsi_debug
- size=$(_small_fs_size_mb 256)
- SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 $size`
- test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
--SCRATCH_DEV=$SCSI_DEBUG_DEV _require_scratch_shutdown
- echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
+V2: Move chattr +C logic into a helper.
+    Change "inplace" to "in-place" in a message.
+
+ common/rc         | 71 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/211 |  9 ++----
+ 2 files changed, 73 insertions(+), 7 deletions(-)
+
+diff --git a/common/rc b/common/rc
+index 96578d15..b9292a78 100644
+--- a/common/rc
++++ b/common/rc
+@@ -5873,6 +5873,77 @@ _require_program() {
+ 	_have_program "$1" || _notrun "$tag required"
+ }
  
- run_check _mkfs_dev $SCSI_DEBUG_DEV
++_force_inplace_writes()
++{
++	local file=$1
++
++	if [ -z "$file" ]; then
++		_fail "Usage: _force_inplace_writes <file path>"
++	fi
++
++	case "$FSTYP" in
++	"btrfs")
++		# Set the file to NOCOW mode on btrfs, which must be done while
++		# the file is empty, otherwise it fails with -EINVAL.
++		_require_chattr C
++		$CHATTR_PROG +C "$file"
++		;;
++	esac
++}
++
++# Test that a filesystem can do writes to a file in place (without allocating
++# new extents, without Copy-On-Write semantics).
++_require_inplace_writes()
++{
++	_require_xfs_io_command "fiemap"
++
++	local target=$1
++	local test_file="${target}/test_inplace_writes"
++	local fiemap_before
++	local fiemap_after
++
++	if [ -z "$target" ]; then
++		_fail "Usage: _require_inplace_writes <filesystem path>"
++	fi
++
++	rm -f "$test_file"
++	touch "$test_file"
++	_force_inplace_writes "$test_file"
++
++	$XFS_IO_PROG -c "pwrite 0 128K" -c "fsync" "$test_file" &> /dev/null
++	if [ $? -ne 0 ]; then
++		rm -f "$test_file"
++		_fail "_require_inplace_writes failed to write to test file"
++	fi
++
++	# Grab fiemap output before overwriting.
++	fiemap_before=$($XFS_IO_PROG -c "fiemap" "$test_file")
++	if [ $? -ne 0 ]; then
++		rm -f "$test_file"
++		_fail "_require_inplace_writes first fiemap call failed"
++	fi
++
++	$XFS_IO_PROG -c "pwrite 0 128K" -c "fsync" "$test_file" &> /dev/null
++	if [ $? -ne 0 ]; then
++		rm -f "$test_file"
++		_fail "_require_inplace_writes failed to overwrite test file"
++	fi
++
++	fiemap_after=$($XFS_IO_PROG -c "fiemap" "$test_file")
++	if [ $? -ne 0 ]; then
++		rm -f "$test_file"
++		_fail "_require_inplace_writes second fiemap call failed"
++	fi
++
++	rm -f "$test_file"
++
++	# If the filesystem supports inplace writes, then the extent mapping is
++	# the same before and after overwriting.
++	if [ "${fiemap_after}" != "${fiemap_before}" ]; then
++		_notrun "in-place writes not supported"
++	fi
++}
++
+ ################################################################################
+ # make sure this script returns success
+ /bin/true
+diff --git a/tests/generic/211 b/tests/generic/211
+index e87d1e01..6eda1608 100755
+--- a/tests/generic/211
++++ b/tests/generic/211
+@@ -27,15 +27,10 @@ fs_size=$(_small_fs_size_mb 512)
+ _try_scratch_mkfs_sized $((fs_size * 1024 * 1024)) >>$seqres.full 2>&1 || \
+ 	_fail "mkfs failed"
+ _scratch_mount
++_require_inplace_writes $SCRATCH_MNT
+ 
+ touch $SCRATCH_MNT/foobar
+-
+-# Set the file to NOCOW mode on btrfs, which must be done while the file is
+-# empty, otherwise it fails.
+-if [ $FSTYP == "btrfs" ]; then
+-	_require_chattr C
+-	$CHATTR_PROG +C $SCRATCH_MNT/foobar
+-fi
++_force_inplace_writes $SCRATCH_MNT/foobar
+ 
+ # Add initial data to the file we will later overwrite with mmap.
+ $XFS_IO_PROG -c "pwrite -S 0xab 0 1M" $SCRATCH_MNT/foobar | _filter_xfs_io
 -- 
 2.47.2
 
