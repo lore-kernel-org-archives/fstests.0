@@ -1,77 +1,84 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2F782327A3;
-	Mon, 28 Jul 2025 09:28:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E2E01E379B;
+	Mon, 28 Jul 2025 13:35:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753694887; cv=none; b=XAU99Mozz3WPTrPcBXuuf7Weq3pVk85YHb801MAryupdI5jFxNs3OKlv1TywqKMCxK61FCRWgoeb8n1V3CU5O/rpsgHVmQ74kIE17syfRSNUhTXc3yA52jw+i623mjG6NIzXv1GQzFxK9vVcWAzVJ2sYyLHbUpuVwuWXlb83QkM=
+	t=1753709746; cv=none; b=KXtsuFQNCZSff4CrAMjA9T8iwyDjHS0QkvhtczfeU81njdiPkNDO60UYZI5Y0rXr0otVa2k5alYYOt2GNF9JG+NAXlawu4FRZWGxpgG0VCFJ7pk18JtBeW3iNQfmPaVwHOrGfXln/agD6xFXMfx34JTigb5jC5rv3kTRZy13ePg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753694887; c=relaxed/simple;
-	bh=CZztvEBOuWTUFsVJ+SgZuF1TKLAMvk8pdthyCh8jm7g=;
+	s=arc-20240116; t=1753709746; c=relaxed/simple;
+	bh=N27HXBEzvQXtZkUG2ThJBE42npuQlTJWfiCf1fMZL2o=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=BBHQRfY0IS2K6ANWGIHv2m0PaGSmzISAOGvwHlxVim4d3pLw81gSajDNmp8a1LZ7q3JPYrTpHHAxrXCuxaq5GQwRa5avgvO1Y1/93MFVT0NLYVUzFQVKzYWt9I5cITmHSevTWxWYxRGnqvbC+glvzS+R59n2vYolXHBm6f/RkqU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=JAdjIL5i; arc=none smtp.client-ip=148.163.158.5
+	 Content-Type:Content-Disposition:In-Reply-To; b=sa6AvX/6mb3PxhRSSyEUmH8/w53kIl0jfLl2RLOPeHez295TEijm8MsdFdX8PxNTQd+i0NEB02EdTzsqyBgS7V3jfkSAh1FYAFvUofUkIv7vlWj0TSL9/H5VdZ8aYikdLjGodvPsffXqODNUIiZ1xZD/xWa61CCDiBkuOI1e/BI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=NTLOSU8N; arc=none smtp.client-ip=148.163.156.1
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="JAdjIL5i"
-Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56RKEgMd018791;
-	Mon, 28 Jul 2025 09:27:58 GMT
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="NTLOSU8N"
+Received: from pps.filterd (m0353729.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56S6uS4Z028623;
+	Mon, 28 Jul 2025 13:35:37 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
 	:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=pp1; bh=HDCX7nDeRDVxcRMYL3E+nIsT0huRc0
-	lyhrUsIeB8CdM=; b=JAdjIL5isd85TpbCWTKx1t2DKSR0hFZP3rp/8bn4Viw68u
-	4ZYEpnlDYJYVQOLFKBoTEYZHQRT+7PjzKTRtEJ5S+6pDpyA/U577eBOTZa5P1zQ6
-	O3lD2cNKax7++TG9UcqQ04l9RDsYZ6LdYmD8Pd91+k4tqSfkBYiooEuubUl1nv8q
-	OXHDPfLgpAhTUNS6TrSEfCVdCiQ7gIhXQE1OWhi50EI4Teslq+XwnMibtDcrfVeY
-	44EVlnba90LkeJo8qBB3ABcG3V6EzqgoS4yNQyMj/VMJwZjX4knei3Brl59Jezo+
-	DqqrqcwfUN2uqe9eZf52FvApUedntu+hvrxq6Lig==
+	:references:subject:to; s=pp1; bh=5vWPhuadNCO0vBQG5RokFgmoB0VxYq
+	gq1a/XnaHMcJM=; b=NTLOSU8NaPDqMP9WIu+kBypn7u+Fz0PaLWMMiXn5u0IsVF
+	RYRHtQ2PXFZP0P7lY+0PQDLMv3M/NoFNEN8tk4isE/Y2tlykw+sXp5pOkmjnLSvP
+	zed8o4hy0+aKV8HT+JzeqO2xXgF2mgs6aBtgVYUNP0XBtHllO4iyBUMjq5J5HSWG
+	67/7CZvXb1Tdm7NHF8eOCr7QGBX7SG4cmN/ATGemy6y6kVU3ajLJ1e4Vl931FZg5
+	cjGDMLKh1/UQQ3mG5QNkUjHKorF0W77t4ogrpEKb0nQTNV4L3sIWLcrsy7U8HRZ/
+	1K5d040pmW6mcf+ATIrUc1BTLLZVVOAAfDBTkZaA==
 Received: from pps.reinject (localhost [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 484qd585cy-1
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 484qfqh8pf-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 28 Jul 2025 09:27:57 +0000 (GMT)
-Received: from m0353725.ppops.net (m0353725.ppops.net [127.0.0.1])
-	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 56S9N57R025085;
-	Mon, 28 Jul 2025 09:27:57 GMT
-Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 484qd585cw-1
+	Mon, 28 Jul 2025 13:35:37 +0000 (GMT)
+Received: from m0353729.ppops.net (m0353729.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 56SDTSPB016926;
+	Mon, 28 Jul 2025 13:35:37 GMT
+Received: from ppma12.dal12v.mail.ibm.com (dc.9e.1632.ip4.static.sl-reverse.com [50.22.158.220])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 484qfqh8pd-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 28 Jul 2025 09:27:57 +0000 (GMT)
-Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
-	by ppma11.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 56S79Mod028782;
-	Mon, 28 Jul 2025 09:27:56 GMT
-Received: from smtprelay06.fra02v.mail.ibm.com ([9.218.2.230])
-	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 485c22cv20-1
+	Mon, 28 Jul 2025 13:35:36 +0000 (GMT)
+Received: from pps.filterd (ppma12.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma12.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 56S9XBcZ017944;
+	Mon, 28 Jul 2025 13:35:35 GMT
+Received: from smtprelay05.fra02v.mail.ibm.com ([9.218.2.225])
+	by ppma12.dal12v.mail.ibm.com (PPS) with ESMTPS id 4859bte4tt-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 28 Jul 2025 09:27:56 +0000
+	Mon, 28 Jul 2025 13:35:35 +0000
 Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
-	by smtprelay06.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 56S9RsFc18874648
+	by smtprelay05.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 56SDZYn240829352
 	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 28 Jul 2025 09:27:54 GMT
+	Mon, 28 Jul 2025 13:35:34 GMT
 Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 98C3D2004B;
-	Mon, 28 Jul 2025 09:27:54 +0000 (GMT)
+	by IMSVA (Postfix) with ESMTP id 3FE882004B;
+	Mon, 28 Jul 2025 13:35:34 +0000 (GMT)
 Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id CECB620040;
-	Mon, 28 Jul 2025 09:27:52 +0000 (GMT)
-Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.109.219.158])
+	by IMSVA (Postfix) with ESMTP id 1213520040;
+	Mon, 28 Jul 2025 13:35:32 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.124.211.198])
 	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
-	Mon, 28 Jul 2025 09:27:52 +0000 (GMT)
-Date: Mon, 28 Jul 2025 14:57:50 +0530
+	Mon, 28 Jul 2025 13:35:31 +0000 (GMT)
+Date: Mon, 28 Jul 2025 19:05:29 +0530
 From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
-        djwong@kernel.org, john.g.garry@oracle.com, tytso@mit.edu,
-        linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
+To: John Garry <john.g.garry@oracle.com>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+        Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
+        tytso@mit.edu, linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-ext4@vger.kernel.org
-Subject: Re: [PATCH v3 06/13] generic/1227: Add atomic write test using fio
- verify on file mixed mappings
-Message-ID: <aIdClh24QRu6mzcm@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
-References: <cover.1752329098.git.ojaswin@linux.ibm.com>
- <f2d4a366f32ca56e1d47897dc5cf6cc8d85328b4.1752329098.git.ojaswin@linux.ibm.com>
- <20250728085851.i3rqef5zssralmvl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH v3 05/13] generic/1226: Add atomic write test using fio
+ crc check verifier
+Message-ID: <aId8oZGXSg5DW48X@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+References: <aHkAJJkvaWYJu7gC@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <b270bb66-721e-4433-adaf-fe5ae100ca6e@oracle.com>
+ <aH9PwFm06n9KQ0mE@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <7fc0f04e-dcec-47a4-b522-eb5a8b90637c@oracle.com>
+ <aIDozETJ8aLparYV@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <9b9ed959-bda5-4a92-90c7-a621ffe58240@oracle.com>
+ <aIMjrunlU04jI2lF@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <0af205d9-6093-4931-abe9-f236acae8d44@oracle.com>
+ <aIccCgrCuQ4Wf1OH@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <2ae4bb04-fbf7-4a53-b498-ea6361cdab3e@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -80,59 +87,77 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250728085851.i3rqef5zssralmvl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <2ae4bb04-fbf7-4a53-b498-ea6361cdab3e@oracle.com>
 X-TM-AS-GCONF: 00
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzI4MDA2OCBTYWx0ZWRfXxSAZMkZOJobD
- eOZTtY2Yq5HeY2wRnUdnZ4IO4t//F6RtiHgymJEgL+7G8GXkT9lgEtaw38vFdO+McxM/U34AIL1
- vEzwib2ICP05FLc9scJyRWk92fus1ae5uwFYmuAXb1xB6M/rl0soqKFXDKGagz1mMD98xI3hyCV
- 4LMXp9VBmJ1q8HwCqmCOqyrECOGTNTHUIM9vgm+7RZzYxPvHyGsxO6vbV560x8FlD6glnBsVhSQ
- 7qRvB97EzzVvmVeudeutIGEVnZQ/JrJwUyW4aGiHuYWPTjUg/Qsom7zc/Avdg0x2crJNHNZ2qO1
- UA74sEOaVr+lyEURxeXLesczy8Cme7Cx9+kC0sxK4WbMMWhUk4JQ25bHrM5nCQqtnWZfDY1FLUZ
- sCRf/kv7EMqhqX2hSHyqnMhvwFGAN3DeczJ4pyKDi/0RW4UANUR4AaI9E5DRS9tWJ6Ehpx9/
-X-Proofpoint-ORIG-GUID: lrK2P6grwbxr7KbrfJhsZW8ameibfw9B
-X-Authority-Analysis: v=2.4 cv=B9q50PtM c=1 sm=1 tr=0 ts=6887429d cx=c_pps
- a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17
- a=kj9zAlcOel0A:10 a=Wb1JkmetP80A:10 a=pGLkceISAAAA:8 a=VnNF1IyMAAAA:8
- a=20KFwNOVAAAA:8 a=o97Vj5sRf2UnNAzqRT0A:9 a=CjuIK1q_8ugA:10
-X-Proofpoint-GUID: nXy_P4_aX6Bqiym-X9oeU0Ivt_VwgxHr
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzI4MDA5NyBTYWx0ZWRfX8FHSpQB0fPSe
+ DW67Q79P5q7EcHq99sM0pQ+lf7QbK/9hJdAQ+WtYbQ1P+S0mL5uw9O/gHMZKqHETj4YFJ1NNFC1
+ gU2qc1DK8sLOsgJTOiagm71t3Lgi04oiYl41RECaVnrcRMr9E+C2KsHPiVcfXwxJNbcx/qWkD+r
+ 8GleRJ8bWR/VGU5VPsmZzWfFh4YhRIHmsd9fEwDjKbbxqKJM8ZQWdB0/ICbaeX0YFT+yhf5a2Yo
+ OmWvIO6i9g6UAZqS0cH+YSa8ngFdGxEoVvZGVzzPZYkntGMyO0pDjkh9SgmN7wsozGrEkcRkW20
+ fq+0sVZsgcmbqJU7Re1CoGnT720bZNkPsTp4vW6RvDqBdPjnw0fe257+gotMCI+RZAe5EEIJgJ1
+ aMjT9i6LDTEMVT5O6tmItMBFrjOeNm4msvO0+HyhNGsGS9kUXAwSVmxiKuA1MgV/ih4wlZif
+X-Authority-Analysis: v=2.4 cv=Je28rVKV c=1 sm=1 tr=0 ts=68877ca9 cx=c_pps
+ a=bLidbwmWQ0KltjZqbj+ezA==:117 a=bLidbwmWQ0KltjZqbj+ezA==:17
+ a=kj9zAlcOel0A:10 a=Wb1JkmetP80A:10 a=BC5zkRbKPiWmCkXho8YA:9
+ a=CjuIK1q_8ugA:10
+X-Proofpoint-GUID: eZSxbq1WPG1OrXLSjOB1sztUpmiQnvPH
+X-Proofpoint-ORIG-GUID: agxN6CJ_XmFFj5Jlza3316IEkBaaMAAy
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-07-28_03,2025-07-24_01,2025-03-28_01
+ definitions=2025-07-28_03,2025-07-28_01,2025-03-28_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 priorityscore=1501 mlxscore=0 spamscore=0 mlxlogscore=999
- suspectscore=0 clxscore=1015 impostorscore=0 bulkscore=0 lowpriorityscore=0
- malwarescore=0 adultscore=0 classifier=spam authscore=0 authtc=n/a authcc=
+ mlxlogscore=999 clxscore=1015 lowpriorityscore=0 spamscore=0 adultscore=0
+ suspectscore=0 bulkscore=0 malwarescore=0 priorityscore=1501 phishscore=0
+ mlxscore=0 impostorscore=0 classifier=spam authscore=0 authtc=n/a authcc=
  route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
- definitions=main-2507280068
+ definitions=main-2507280097
 
-On Mon, Jul 28, 2025 at 04:58:51PM +0800, Zorro Lang wrote:
-> On Sat, Jul 12, 2025 at 07:42:48PM +0530, Ojaswin Mujoo wrote:
-> > From: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
+On Mon, Jul 28, 2025 at 10:09:47AM +0100, John Garry wrote:
+> On 28/07/2025 07:43, Ojaswin Mujoo wrote:
+> > > > What do you mean by not safe?
+> > > Multiple threads issuing atomic writes may trample over one another.
+> > > 
+> > > It is due to the steps used to issue an atomic write in xfs by software
+> > > method. Here we do 3x steps:
+> > > a. allocate blocks for out-of-place write
+> > > b. do write in those blocks
+> > > c. atomically update extent mapping.
+> > > 
+> > > In this, threads wanting to atomic write to the same address will use the
+> > > new blocks and can trample over one another before we atomically update the
+> > > mapping.
+> > So iiuc, w/ software fallback, a thread atomically writing to a range
+> > will use a new block A. Another parallel thread trying to atomically
+> > write to the same range will also use A, and there is no serialization
+> > b/w the 2 so A could end up with a mix of data from both threads.
+> 
+> right
+> 
 > > 
-> > This tests uses fio to first create a file with mixed mappings. Then it
-> > does atomic writes using aio dio with parallel jobs to the same file
-> > with mixed mappings. This forces the filesystem allocator to allocate
-> > extents over mixed mapping regions to stress FS block allocators.
-> > 
-> > Co-developed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-> > Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-> > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> > ---
+> > If this is true, aren't we violating the atomic guarantees. Nothing
+> > prevents the userspace from doing overlapping parallel atomic writes and
+> > it is kernels duty to error out if the write could get torn.
 > 
-> This patch looks good to me, just the subject:
->  "generic/1227: Add atomic write test using fio verify on file mixed mappings"
+> Correct, but simply userspace should not do this. Direct I/O applications
+> are responsible for ordering.
 > 
-> generally if we write a new test case, we don't use a temporary case number
-> in commit subject, you can just write as "generic: add atomic write test using ..."
+> We guarantee that the write is committed all-or-nothing, but do rely on
+> userspace not issuing racing atomic writes or racing regular writes.
 > 
-> Other patches (with new test cases) refer to this.
-> 
-> With this change,
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
+> I can easily change this, as I mentioned, but I am not convinced that it is
+> a must.
 
-Hi Zorro, thanks for pointing it out. I'll make the change in next
-revision.
+Purely from a design point of view, I feel we are breaking atomicity and
+hence we should serialize or just stop userspace from doing this (which
+is a bit extreme).
+
+I know userspace should ideally not do overwriting atomic writes but if
+it is something we are allowing (which we do) then it is
+kernel's responsibility to ensure atomicity. Sure we can penalize them
+by serializing the writes but not by tearing it. 
+
+With that reasoning, I don't think the test should accomodate for this
+particular scenario.
 
 Regards,
-Ojaswin
-
+ojaswin
