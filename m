@@ -1,76 +1,84 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 941C41A705C
-	for <fstests@vger.kernel.org>; Fri, 25 Jul 2025 13:38:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21689221F38;
+	Mon, 28 Jul 2025 06:43:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753450684; cv=none; b=d0Ow8siSNth51AqCt7+kG5t2V8eTfbx4bda0/fYJ7uigXSV8993EyJw6shPT8MpH9z8h0yuoziixnGwGPJknYXUvN63Pyk2FG+75fgXi3sQk4W96p7u1fFdbrJgtGBBIq7O28b9l1Y2Ay78ROxB5Xy/jJ+11uYMSt0Fl7Md0dvU=
+	t=1753685020; cv=none; b=sVBcoRNjFPIU7xcxjgo3yyiMe7vLoz2XJ1FlcK/Jwj5Qk9GKJnKnB5G2ZFo427ab0mzAaZCcOUE0gaqsZdBN2Smn8LWIfUhjsL29E5mDMr/asMpXH2q4+UW1zvVrMo38F/eEvHZSfangUD3csyWsBT3wvqbKQ/0F1b3d63On2lw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753450684; c=relaxed/simple;
-	bh=/R/f1VnIiQ17ztgf2ziByjM8+xJu435UaKItLzM7cII=;
+	s=arc-20240116; t=1753685020; c=relaxed/simple;
+	bh=D/d9L9bXCgW6TpFJoDp032l3Gste1XPEGvq0CaQ9RFw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ODO/5nOHIBgmBQDNb8uhudFBtdT6OxqPVwVgymUOO496f2luirZu1ZgQ8c0J7G+NnwxXOkePOf/cm+KLlVZj51rGRRSSfOY2IaCvzFNYDZio2voE5FGhdR8N5uDkklfwfT+7eHng0OJWXwcGEz5NDrFeIfZ0bePr/OdIkbyW0gM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YoFfbe6n; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=EalcuvE4/Ae6nYchqanOp/4SY8BrQu1cK1ztS8pTwl2XdP7Fv0zeiliRvZZDSCGj7ZIf0j/onlv+QwUElzuGQye9YkbCXdtGdHGr3hLutwit8ggQgTwmPyPMSX9562sLQZzKRykNX520oDfd1YqYFgAc2mfKJCE+VxKRlpWk4yQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=XRMIkPuE; arc=none smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YoFfbe6n"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1753450681;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=a5JYyCeQr8lwVf5tBXRGsE5gJohtZrePfxB1grTkhOo=;
-	b=YoFfbe6npcx0DNf5b31QoISQ0l88qI1sXHsSnTrnI4yytS/pzvmwhDjEFGdPHN4yOfqSXu
-	v/MmDxztWzFuDm+1foVZ2kFP3soEEaQEH1XADjGGgCeQ7D281QSXwNo2HEYSs4/fmWcctA
-	f9NaNa5MJUWacGcrcNzs8kklWrXOYDc=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-489-1QJS7u6TNUKYaZw37a_yAw-1; Fri, 25 Jul 2025 09:38:00 -0400
-X-MC-Unique: 1QJS7u6TNUKYaZw37a_yAw-1
-X-Mimecast-MFC-AGG-ID: 1QJS7u6TNUKYaZw37a_yAw_1753450679
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-74943a7cd9aso3802690b3a.3
-        for <fstests@vger.kernel.org>; Fri, 25 Jul 2025 06:37:59 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753450679; x=1754055479;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=a5JYyCeQr8lwVf5tBXRGsE5gJohtZrePfxB1grTkhOo=;
-        b=JkbHyRgjqaZ8jaahSGEPi/5hehru6X9eOOaHEvOFeBGaYYCrcUFOa9Ysu4ddKEv+4G
-         JE95MCF3pJx7DN2BGy/KqL9Ex9gW1nDY2RIGSuKCTqylNU94FeEUCmKX2954rFjMlsLH
-         1yJq2u/Jrjv5QJbT2FXsP9nEUKYC2YZVEAClo4QV8Aew5gX4vq3iwLUT2huLU0beYHEn
-         OflypLqLYlPxVFsEJqFUZlu4eV/G/1yi+l/JoWIw3ntkJ1XhrHNt1ShKDI/QjmhbsJOX
-         yNeVqIPpS6IlsqXuJ4nxFP0qfkIbNNC8IwekvIfc1r47qaey/eP9RYfmAOB7IPotjOyI
-         lIUg==
-X-Forwarded-Encrypted: i=1; AJvYcCV/SVNnTIDJFWGODDk5iFlAxfcm5AdWsRUQUNrLhXmIfB01WoBrm8s/ZW9zhOAhdElt93JSiSYR@vger.kernel.org
-X-Gm-Message-State: AOJu0YxICe8vgw9YHnI5X+GJFEW7ZQrN3A5eevteZ7M0mULMBgkqbWEM
-	FG1/cCz6SA48gWhleZ7aav96+vb84+WMqFS3H5rIA0BEyxx0EldFB9HJJ0e99/QgnBzTYkegrVP
-	euFhHR6jR6q4MZOgpoLBZXgGSdao7hfVoKqKTGQK58tsKSONXNdOwuisB54M=
-X-Gm-Gg: ASbGncvo4SqIiQRWwGP0mh4xLs88QGGPtvYrlrPcpf63t1ehoJUJDkxy/kOLYM9qTVu
-	e+shxlZESDQGD8adpVOIP1X7C3daYgnBWzg3gP8yhf/bl3FKVMSxz3k6t/J90lMs0IXnfUgeh/a
-	Iq5zzK+6E23Q3TlySR/cKuOvnB9GXntTKhZc+kxWg4DqyEReoD2NWjhoqfE4u2qpy9Lj9iox2KI
-	hROTeXa13vNdfeHdzYP9FPGz8JnUVMHZ+bcybEL9y860+C1udpar0p7CSM8S+pdlemkgnnqXpfj
-	JptOayHMoyOqoH1iS8QIcLmKndiX03x6jwSGDzFHNbBeQ70AJYvbdOU6WZ1w84gYdjRBw8Oqpps
-	2eaBg
-X-Received: by 2002:a05:6a00:ac8:b0:730:95a6:3761 with SMTP id d2e1a72fcca58-763356295afmr3509977b3a.3.1753450679082;
-        Fri, 25 Jul 2025 06:37:59 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHdHJeyZQMYS18pi3cqnEtsPUEq8U8ViXrYZKdQs1WvIp0JMwrzaSIEKBUAi6M8oxr7MuJIww==
-X-Received: by 2002:a05:6a00:ac8:b0:730:95a6:3761 with SMTP id d2e1a72fcca58-763356295afmr3509933b3a.3.1753450678717;
-        Fri, 25 Jul 2025 06:37:58 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-761b04b501fsm3708366b3a.92.2025.07.25.06.37.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 25 Jul 2025 06:37:58 -0700 (PDT)
-Date: Fri, 25 Jul 2025 21:37:53 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Christoph Hellwig <hch@lst.de>
-Cc: zlang@kernel.org, Yuezhang.Mo@sony.com, fstests@vger.kernel.org
-Subject: Re: [PATCH] Revert "generic/730: add _require_scratch_shutdown"
-Message-ID: <20250725133753.f7vwtkvtxql4owl2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250724072514.3313006-1-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="XRMIkPuE"
+Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56RIOp1r019519;
+	Mon, 28 Jul 2025 06:43:31 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=pp1; bh=xQpnxJxh1krXVR5+57oDQtm476r2Vj
+	VwCatcfjg8ohk=; b=XRMIkPuERu0eAL1rVcQwUSyRBXg/Fn/l4FOYX5Lg1kboQk
+	BflEJ9Ofs0N/0682lIvW/nGWT7REFOIu/mnjCo4fgcRRvYkI6To9sOXP80PlKNKt
+	A+en5T9vU64bGRKrGTl8En46knTE2boIe6xphaurDH5evbhVSIvNA3EdKaZJDy/7
+	A79HUCun1Wo41G9p//2als9wl7HAJE8Zmk5epcLPyMFlUMB3JlBMA6oz44gWX/qf
+	c7kIvitPrDqhZzAZnYdqJOappYor51X0+6Z6BXgYTXNQU8YA5lBE8dzcRE4SzH5o
+	w1tRfG9LEEe1f93CA4Nm+u1+wQ7aDkSH8fvAkR/w==
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 484qd57ddy-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 28 Jul 2025 06:43:31 +0000 (GMT)
+Received: from m0353725.ppops.net (m0353725.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 56S6hVhM013988;
+	Mon, 28 Jul 2025 06:43:31 GMT
+Received: from ppma12.dal12v.mail.ibm.com (dc.9e.1632.ip4.static.sl-reverse.com [50.22.158.220])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 484qd57ddv-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 28 Jul 2025 06:43:31 +0000 (GMT)
+Received: from pps.filterd (ppma12.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma12.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 56S4S3tT017969;
+	Mon, 28 Jul 2025 06:43:30 GMT
+Received: from smtprelay03.fra02v.mail.ibm.com ([9.218.2.224])
+	by ppma12.dal12v.mail.ibm.com (PPS) with ESMTPS id 4859btcs97-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 28 Jul 2025 06:43:30 +0000
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay03.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 56S6hSVA57999622
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Mon, 28 Jul 2025 06:43:28 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 6FFF120043;
+	Mon, 28 Jul 2025 06:43:28 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id DAC4720040;
+	Mon, 28 Jul 2025 06:43:25 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.39.22.44])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Mon, 28 Jul 2025 06:43:25 +0000 (GMT)
+Date: Mon, 28 Jul 2025 12:13:22 +0530
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: John Garry <john.g.garry@oracle.com>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+        Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
+        tytso@mit.edu, linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v3 05/13] generic/1226: Add atomic write test using fio
+ crc check verifier
+Message-ID: <aIccCgrCuQ4Wf1OH@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+References: <1e6dad5f4bdc8107e670cc0bd3ce0fccd0c9037a.1752329098.git.ojaswin@linux.ibm.com>
+ <5211dff7-579b-48ea-8180-72d8c6083400@oracle.com>
+ <aHkAJJkvaWYJu7gC@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <b270bb66-721e-4433-adaf-fe5ae100ca6e@oracle.com>
+ <aH9PwFm06n9KQ0mE@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <7fc0f04e-dcec-47a4-b522-eb5a8b90637c@oracle.com>
+ <aIDozETJ8aLparYV@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <9b9ed959-bda5-4a92-90c7-a621ffe58240@oracle.com>
+ <aIMjrunlU04jI2lF@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <0af205d9-6093-4931-abe9-f236acae8d44@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -79,52 +87,123 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250724072514.3313006-1-hch@lst.de>
+In-Reply-To: <0af205d9-6093-4931-abe9-f236acae8d44@oracle.com>
+X-TM-AS-GCONF: 00
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzI4MDA0NiBTYWx0ZWRfX5iGI6l6t9FKw
+ EtmZ4rAphXwvvu8iQK9vBjjHcl5b8GWL9MZfsHSdZ3dxTMLSkeBcwhywouVvwN1Pa6kb+dFaVxe
+ SbhomVL2eylZmC8gOa0T6AKkcBlDJ8NPZMnaLGn90wRHit5yikDI4j+F8rXKeyh3k+T8Dtn9Gzv
+ c8n32QJk1xf1+24HShYhLQuUU2T9l07fpcFpKD+AZII8Lmcuuq3hEWkDvYCumcpD7eAKHknT1eA
+ vhFh05I4kmmySuCyQqwqR9rpRhvK9iKFUiwtsrkp4fbIjZbnFArqc8GsiB65kyLKOIhUTEmnic/
+ C2GtYnSpXPakuwacyIaaDGklVkrdXh5JzcPR31cX9GEXRH/AOytPi85HrFmYEIoHporI8/T55Mv
+ WQy1NSov0DB5djvxzVHb6gQSVV8NTDcKk0pAsq+duUPanH5yOYjS+QHDt10GxO/KQC89NcQB
+X-Proofpoint-ORIG-GUID: PNNte2esEmtSIruJ5eTeWwSHJmqpaUjV
+X-Authority-Analysis: v=2.4 cv=B9q50PtM c=1 sm=1 tr=0 ts=68871c13 cx=c_pps
+ a=bLidbwmWQ0KltjZqbj+ezA==:117 a=bLidbwmWQ0KltjZqbj+ezA==:17
+ a=kj9zAlcOel0A:10 a=Wb1JkmetP80A:10 a=-OdOtWGfYfkQm_KkuHIA:9
+ a=CjuIK1q_8ugA:10
+X-Proofpoint-GUID: aCCOUDraQ5Jm2OhXwQ-BkDAf5wMzq-29
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-07-28_02,2025-07-24_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ phishscore=0 priorityscore=1501 mlxscore=0 spamscore=0 mlxlogscore=999
+ suspectscore=0 clxscore=1015 impostorscore=0 bulkscore=0 lowpriorityscore=0
+ malwarescore=0 adultscore=0 classifier=spam authscore=0 authtc=n/a authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
+ definitions=main-2507280046
 
-On Thu, Jul 24, 2025 at 09:25:14AM +0200, Christoph Hellwig wrote:
-> This reverts commit 68c9ac2ad74ba31c02275fcbb11d1cf90f0435b1.
+On Fri, Jul 25, 2025 at 09:14:25AM +0100, John Garry wrote:
+> On 25/07/2025 07:27, Ojaswin Mujoo wrote:
+> > On Wed, Jul 23, 2025 at 05:25:41PM +0100, John Garry wrote:
+> > > On 23/07/2025 14:51, Ojaswin Mujoo wrote:
+> > > > > > No, its just something i hardcoded for that particular run. This patch
+> > > > > > doesn't enforce hardware only atomic writes
+> > > > > If we are to test this for XFS then we need to ensure that HW atomics are
+> > > > > available.
+> > > > Why is that? Now with the verification step happening after writes,
+> > > > software atomic writes should also pass this test since there are no
+> > > > racing writes to the verify reads.
+> > > Sure, but racing software atomic writes against other software atomic writes
+> > > is not safe.
+> > > 
+> > > Thanks,
+> > > John
+> > What do you mean by not safe?
 > 
-> The test does not actually use the xfs_io shutdown functionality,
-> and it does not use the scatch device.  Adding this checks causes
-> it to fail for setups that do not use SCRATCH_DEV at all.
+> Multiple threads issuing atomic writes may trample over one another.
 > 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/generic/730 | 1 -
->  1 file changed, 1 deletion(-)
+> It is due to the steps used to issue an atomic write in xfs by software
+> method. Here we do 3x steps:
+> a. allocate blocks for out-of-place write
+> b. do write in those blocks
+> c. atomically update extent mapping.
 > 
-> diff --git a/tests/generic/730 b/tests/generic/730
-> index 6b5d319675f7..6251980e33e1 100755
-> --- a/tests/generic/730
-> +++ b/tests/generic/730
-> @@ -29,7 +29,6 @@ _require_scsi_debug
->  size=$(_small_fs_size_mb 256)
->  SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 $size`
->  test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
-> -SCRATCH_DEV=$SCSI_DEBUG_DEV _require_scratch_shutdown
+> In this, threads wanting to atomic write to the same address will use the
+> new blocks and can trample over one another before we atomically update the
+> mapping.
 
-About why this case need "shutdown":
-  https://lore.kernel.org/fstests/PUZPR04MB63169A8C1008035BB2D104568166A@PUZPR04MB6316.apcprd04.prod.outlook.com/
+So iiuc, w/ software fallback, a thread atomically writing to a range
+will use a new block A. Another parallel thread trying to atomically
+write to the same range will also use A, and there is no serialization
+b/w the 2 so A could end up with a mix of data from both threads.
 
-So looks like we'd better to notrun if shutdown isn't supported by fs on
-SCSI_DEBUG_DEV. But if think "_require_scratch_shutdown" is a problem, maybe
-we can avoid using _scratch_ things, use a local function to check shutdown
-on SCSI_DEBUG_DEV manually, and notrun if it's not supported?
-
-
-BTW, can I ask why do you need to test with TEST_DEV only :) Although
-SCRATCH_DEV is optional (README says), I think nearly all testers test
-with SCRATCH_DEV.
-
-Thanks,
-Zorro
-
-
->  echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
->  
->  run_check _mkfs_dev $SCSI_DEBUG_DEV
-> -- 
-> 2.47.2
+If this is true, aren't we violating the atomic guarantees. Nothing
+prevents the userspace from doing overlapping parallel atomic writes and
+it is kernels duty to error out if the write could get torn.
+> 
+> So we do not guarantee serialization of atomic writes vs atomic writes. And
+> this is why I said that this test is never totally safe for xfs.
+> 
+> We could change this simply to have serialization of software-based atomic
+> writes against all other dio, like follows:
+> 
+> --- a/fs/xfs/xfs_file.c
+> +++ b/fs/xfs/xfs_file.c
+> @@ -747,6 +747,7 @@ xfs_file_dio_write_atomic(
+>        unsigned int            iolock = XFS_IOLOCK_SHARED;
+>        ssize_t                 ret, ocount = iov_iter_count(from);
+>        const struct iomap_ops  *dops;
+> +       unsigned int            dio_flags = 0;
+> 
+>        /*
+>         * HW offload should be faster, so try that first if it is already
+> @@ -766,15 +767,12 @@ xfs_file_dio_write_atomic(
+>        if (ret)
+>                goto out_unlock;
+> 
+> -       /* Demote similar to xfs_file_dio_write_aligned() */
+> -       if (iolock == XFS_IOLOCK_EXCL) {
+> -               xfs_ilock_demote(ip, XFS_IOLOCK_EXCL);
+> -               iolock = XFS_IOLOCK_SHARED;
+> -       }
+> +       if (dio_flags & IOMAP_DIO_FORCE_WAIT)
+> +               inode_dio_wait(VFS_I(ip));
+> 
+>        trace_xfs_file_direct_write(iocb, from);
+>        ret = iomap_dio_rw(iocb, from, dops, &xfs_dio_write_ops,
+> -                       0, NULL, 0);
+> +                       dio_flags, NULL, 0);
+> 
+>        /*
+>         * The retry mechanism is based on the ->iomap_begin method returning
+> @@ -785,6 +783,8 @@ xfs_file_dio_write_atomic(
+>        if (ret == -ENOPROTOOPT && dops == &xfs_direct_write_iomap_ops) {
+>                xfs_iunlock(ip, iolock);
+>                dops = &xfs_atomic_write_cow_iomap_ops;
+> +               iolock = XFS_IOLOCK_EXCL;
+> +               dio_flags = IOMAP_DIO_FORCE_WAIT;
+>                goto retry;
+>        }
 > 
 > 
+> But it may affect performance.
+> 
+> > Does it mean the test can fail?
+> 
+> Yes, but it is unlikely if we have HW atomics available. That is because we
+> will rarely be using software-based atomic method, as HW method should often
+> be possible.
 
+Yes, but having a chance to tear the write when it is not possible is
+not the right behavior.
+> 
