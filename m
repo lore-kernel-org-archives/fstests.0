@@ -1,38 +1,51 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E73244501A
-	for <fstests@vger.kernel.org>; Tue, 29 Jul 2025 14:29:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 78FE91E492;
+	Tue, 29 Jul 2025 14:45:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753799393; cv=none; b=l8EBvyMLKl2UPQRiTRByT7X7RPlOBWeopldAuXbnY4dLx1SUW45ArOxYPdCzWd5tDPoGk4ydyTA/+Ym9KIXKkdtpBxnnT7pG1CdZRq7WmmbNOuS/HkguiBqAfYd7/Z/9FbxmdSF4tVlrE03KXx4A1FXthW0oRWta0nA5YW0lW2M=
+	t=1753800327; cv=none; b=IW2O1wbFxrbZZcOCKfF6DMYcsysESh5jDMyH59TzrKFiVGS+JoyVoJmn+BQfwmD7vCXvpPwrYEhbGOu2ETubdq/iRnWtMJIbV6jjln001QWfs2dlL13q9FtkJM4cLffdxV1Q8nsNQ7RzBA1AkZYNHecLgXWJC7FAKwDlB3OwYgc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753799393; c=relaxed/simple;
-	bh=Mx0Adq1WF9Ydt2ynnvqY8rbbM10xYrjY0yzWUhQSBaQ=;
+	s=arc-20240116; t=1753800327; c=relaxed/simple;
+	bh=F/Bh+Ko7ppvbg/wnZKDwtyoTD+8mKkxRf3M7eQV81Rc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qeZ3J+dFy+xWeN10h4QtGeILWz1HW0RjUKHlLxSICXMdaRPPmCpTa8vjv4cbfEE+3e8yAtA0OX5X+wvEXZWjLbL9Y6m/rLJnugYW6gQ3j0f39QQ1OlXbxga3UU9hjnQNBGH5To/sK6FuFOe14tFRMGR5QMwbvMuFx9VtQEyIza8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YNM8CiOu; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=aQSGH4AyDtqHklkl0tGiPe8BorZLbQBQHa1hXdGNKECaezXc34huLYOpbhtsLHQQqLCtv/s9rVmpo+NlcpkvFyp8Zm+rW0Up5pMboMIaVemGKfpNaYHJTcjfqoYklNzdsG07NNo4jpV6HCBrNKHQoy5Sfz40WjGld4AVYzgrgek=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=uwk+hC9D; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YNM8CiOu"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 798EAC4CEEF;
-	Tue, 29 Jul 2025 14:29:52 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="uwk+hC9D"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0354FC4CEF4;
+	Tue, 29 Jul 2025 14:45:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1753799392;
-	bh=Mx0Adq1WF9Ydt2ynnvqY8rbbM10xYrjY0yzWUhQSBaQ=;
+	s=k20201202; t=1753800327;
+	bh=F/Bh+Ko7ppvbg/wnZKDwtyoTD+8mKkxRf3M7eQV81Rc=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=YNM8CiOupQtyXRhEJr1Afth9YQiIjE+Jb29T8MOiUCSzvnLOpXG4yJszhpWZNyOdY
-	 tGmkbyyL0SKj7YYeGORRYh7mDrPD54MqPo7kPu74MfkQowzp96ampgjOJmfbpYMgKL
-	 9+LYbRRQOqmjkroom6LSnPS6jQwKvsIIYwWvH3p0JcpqNDicr48sO/wy5XH8kGMWw5
-	 CJvs2oCphoZSDCjiuDGbrWIS+ApJu8DueDPPzH6CRI9+IZ8iJ03XJmXNjMq648E2BI
-	 zXnXDF2Fzc2lA/k2v9uHW0dOfVSxZMa0lCU2UFcY0kPSjc6XkLfx1+//mZb2Mpxk+3
-	 sSCEeuACQwX4Q==
-Date: Tue, 29 Jul 2025 07:29:51 -0700
+	b=uwk+hC9DrAJEjata9Hgdy5oewaZG9KXV8YmIkeUonkXlDl9Mo/ZaRNNAAFHmLlXIm
+	 KLHSpkAK72Q0nnZKayxuc8nOidM4LctrisYowwCVXZ0GcqvgP6CwEc2BrW49MlMhII
+	 QffzsvQNO4ow09OKUf8X1rnNUinMUPXjz63ccvCaoZRxTXxjy2neZm4rMNokYZhfSW
+	 2bPa/99E7L7WnnOlI1tOfD+ALfreLAq4WKutVmwVgktgg7u+4/vPIHsWJL/PYiNt9i
+	 c0OmBB5PYJXqf/iRUoposDzCl13gxxlfMU5R744HRzpyscXfbxBADBajxAfGIKc1j3
+	 NtG88owBSUi/A==
+Date: Tue, 29 Jul 2025 07:45:26 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org
-Subject: Re: lots of mounts/remounts of the test file system?
-Message-ID: <20250729142951.GR2672039@frogsfrogsfrogs>
-References: <aH87hl9NUmiqqvU-@infradead.org>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: John Garry <john.g.garry@oracle.com>, Zorro Lang <zlang@redhat.com>,
+	fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
+	tytso@mit.edu, linux-xfs@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v3 05/13] generic/1226: Add atomic write test using fio
+ crc check verifier
+Message-ID: <20250729144526.GB2672049@frogsfrogsfrogs>
+References: <7fc0f04e-dcec-47a4-b522-eb5a8b90637c@oracle.com>
+ <aIDozETJ8aLparYV@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <9b9ed959-bda5-4a92-90c7-a621ffe58240@oracle.com>
+ <aIMjrunlU04jI2lF@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <0af205d9-6093-4931-abe9-f236acae8d44@oracle.com>
+ <aIccCgrCuQ4Wf1OH@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <2ae4bb04-fbf7-4a53-b498-ea6361cdab3e@oracle.com>
+ <aId8oZGXSg5DW48X@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <3a4854ac-75ad-4783-acbd-048fe7c7fdb0@oracle.com>
+ <aIhmG-l4nWOAzz2I@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -41,23 +54,58 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aH87hl9NUmiqqvU-@infradead.org>
+In-Reply-To: <aIhmG-l4nWOAzz2I@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 
-On Tue, Jul 22, 2025 at 12:19:34AM -0700, Christoph Hellwig wrote:
-> Hi all,
+On Tue, Jul 29, 2025 at 11:41:39AM +0530, Ojaswin Mujoo wrote:
+> On Mon, Jul 28, 2025 at 03:00:40PM +0100, John Garry wrote:
+> > On 28/07/2025 14:35, Ojaswin Mujoo wrote:
+> > > > We guarantee that the write is committed all-or-nothing, but do rely on
+> > > > userspace not issuing racing atomic writes or racing regular writes.
+> > > > 
+> > > > I can easily change this, as I mentioned, but I am not convinced that it is
+> > > > a must.
+> > > Purely from a design point of view, I feel we are breaking atomicity and
+> > > hence we should serialize or just stop userspace from doing this (which
+> > > is a bit extreme).
+> > 
+> > If you check the man page description of RWF_ATOMIC, it does not mention
+> > serialization. The user should conclude that usual direct IO rules apply,
+> > i.e. userspace is responsible for serializing.
 > 
-> I've been hacking on some (XFS) code that in this state of development
-> requires a mount options to be passed for every mount, and I noticed
-> that even when running without a SCRATCH_DEV I have to add the required
-> option to MOUNT_OPTIONS and not just TEST_FS_MOUNT_OPTS, which is a bit
-> odd.  I've been trying to track it down and despite multiple attempts
-> failed to find my way through the bash code for it.
-> 
-> But what is even more odd is that when running just a single test (e.g.
-> generic/001), the test fs gets mounted four times, with the second
-> and fourth time failing to apply the mount options.
+> My mental model of serialization in context of atomic writes is that if
+> user does 64k atomic write A followed by a parallel overlapping 64kb
+> atomic write B then the user might see complete A or complete B (we
+> don't guarantee) but not a mix of A and B.
 
-Huh, I observe the same thing.  I wonder why it does that, but bash is
-pretty awful for tracing and there's no obvious explanation. :(
+Heh, here comes that feature naming confusing again.  This is my
+definition:
+
+RWF_ATOMIC means the system won't introduce new tearing when persisting
+file writes.  The application is allowed to introduce tearing by writing
+to overlapping ranges at the same time.  The system does not isolate
+overlapping reads from writes.
 
 --D
+
+> > 
+> > > 
+> > > I know userspace should ideally not do overwriting atomic writes but if
+> > > it is something we are allowing (which we do) then it is
+> > > kernel's responsibility to ensure atomicity. Sure we can penalize them
+> > > by serializing the writes but not by tearing it.
+> > > 
+> > > With that reasoning, I don't think the test should accomodate for this
+> > > particular scenario.
+> > 
+> > I can send a patch to the community for xfs (to provide serialization), like
+> > I showed earlier, to get opinion.
+> 
+> Thanks, that would be great.
+> 
+> Regards,
+> John
+> > 
+> > Thanks,
+> > John
+> > 
+> 
