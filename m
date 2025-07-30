@@ -1,126 +1,125 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7199E15853B;
-	Wed, 30 Jul 2025 14:55:10 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C32BF2DAFB4;
+	Wed, 30 Jul 2025 15:06:44 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753887310; cv=none; b=amlVgIRr6svo2z5Gzd1IsyF1pxRv9sZb4cwKUdzjlbH8hldrOU4o/934KVaXu/Xk0tkXeYgOrXk/hGwcE97TdQZ+S8Kdy0srRNKG4Mmt4xU8VTgXGVuQ0wXXONADBLirBD/pwe09xMdCzmJ1+o8i+svgwYj9J1giuKR6/bsqbHM=
+	t=1753888004; cv=none; b=OymzleAhRJ+WGCHwgY4YsXe6mpazc0eDZQWIlNjxOcipfJ7oZTSQBDIzmrEWggrp+R+ULzGA2n1AvLZTl/9i9YBIr3Yo7wE2LXRmo9L5t132h+sau1lMUee7HH2XaCu/QaSplWXr9osVLB8PS5BeSHBECKmk0k1yklP/Rp4vQBg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753887310; c=relaxed/simple;
-	bh=Is5SR4yjs0yXGmobo01WhgVR/Cx5zQf8yEdy2rG2+lk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=V1DxSF2RhhAIkffjtEeakfC0sW8uowCpbJ8JaJcSlbhsG9KL4OqHQRJHcu+GoKx8G83Ye3o2nXYml3Z18l9USJYFouaIB/TWAAmtTiyn+n807grUFeXjCzjf4zsGQbnGwlyWJQfHxvfeQwsm6Dey5E2/SIyQ+h9asyELf/3a0wA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Y34oZX3s; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1753888004; c=relaxed/simple;
+	bh=rUHhE4B5r/+RbL+7IXoPCmIBs8x7CEFdCaNUq5QQbqw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=iHFFlBoHOHh8Mz2k5OZqofXh6bSGT7wFMCUWAHpxcF08yqHSLQeuY1BkkseyCe0Vb7fvUOU/WGZ7PWhKUEMj25fy35md4NHMnavk7xiafwYm4+i81bLQFqa6dbMTxtgQqTnunsjoMsch5LFC4O/LuNNMdS7DnSXSOwyR43NQue0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ia50tixh; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Y34oZX3s"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3BFD5C4CEE3;
-	Wed, 30 Jul 2025 14:55:10 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ia50tixh"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9E2C9C4CEE3;
+	Wed, 30 Jul 2025 15:06:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1753887310;
-	bh=Is5SR4yjs0yXGmobo01WhgVR/Cx5zQf8yEdy2rG2+lk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Y34oZX3sVh+w1AMS27DbfFbqRZFjMA1nPPkr6GY9a+TUv2trfvxLyfw2HG/YtGVtP
-	 NC0btV8FIC0XxOEhSnYMGcVYQOta603mkfPK9UFqyXQvJvR8vZMzgRtsCqmSJ/GQ0I
-	 fOBmxqCFfX1X1mP6TTgOvm2aY3WfonHD4oof6vTt01FpFfkK2z2Q1i6UcuTYr4Hw+b
-	 MvfNTgaxcOUZSdgtfE9zxk956W+8qngH5Uyf5+Nmq85QUJbDFTc37KXp1BhO/OeoDu
-	 hQyeSbjn/QBOOhsTVp2gTz5RbE7YaFh63oX5mes1Q13K5TLDkJXd+ny0d88IcwhF3j
-	 DJP6fhoqdeAkg==
-Date: Wed, 30 Jul 2025 07:55:09 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 1/2] fsstress: don't abort when stat(".") returns EIO
-Message-ID: <20250730145509.GX2672039@frogsfrogsfrogs>
-References: <175381958396.3021194.15630936445319512317.stgit@frogsfrogsfrogs>
- <175381958421.3021194.16249782318690545446.stgit@frogsfrogsfrogs>
- <aIoq3LgL2ODgENFy@infradead.org>
+	s=k20201202; t=1753888004;
+	bh=rUHhE4B5r/+RbL+7IXoPCmIBs8x7CEFdCaNUq5QQbqw=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=Ia50tixhRQj9c+BUGwY3KMkL23tco6ri6u93cdyYQsaPRkqjAukDXSrzJTlNS6JxM
+	 ZKA1/sHTjfflwd06aJKEUqvFGyMRWtW0axnCEVagIPeWP8B4qnXbeZcn2mVdBjC6gn
+	 lpaXTHR+KZFjS/5Bdd4UwGifYPckc2dxrcp/f5ftviwhcSU6Fzjz51NV1Q6IHhNY4U
+	 Y2Gg8O+T8xGpxhUgyRo/g3H6Z5n4WFx/EJ7CbgyKjYmqzlBoJiOH/FUhmPTe2dDS79
+	 vHaI27yc1hyZb2F/z1JxGHQCX5jIUl5Tnzb57qrqiTQEKU1tvruoevK3R8hUJesu73
+	 /JbSfEL+Un4qA==
+Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-aec5a714ae9so999906066b.3;
+        Wed, 30 Jul 2025 08:06:44 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCWc7mSi79+f+pCovv1BP/F0X+hvNz+drF+NvJdToIDkA+mwYpFoLQ0iOWTu1oWdWw1YtNuRYlKmRnIJtg==@vger.kernel.org
+X-Gm-Message-State: AOJu0YxBITaPGZHksOi8JYCPfUUQczzYysrwlCsqO4ciGBaFWOMvRTll
+	9gsukEgV6k5VmPAkBy9eFzm7DCFdKsIM5+JGPhzWJ1DSCeQUiFTgdqCNGbFp2NlMMZ6zg6vMKwO
+	ALe/22FmgUHnbADPfkOvxE8myJtS6Nrk=
+X-Google-Smtp-Source: AGHT+IEn8XpVN7XoGU2N0dK72A8zMzzypO5tzrllComIF5dFbqu8o4P+IXWVuyuN3i2Ofkcjc/nGBy56St4/AEfL/3Y=
+X-Received: by 2002:a17:907:a909:b0:af3:af53:948c with SMTP id
+ a640c23a62f3a-af8fd9760f0mr462262366b.29.1753888003207; Wed, 30 Jul 2025
+ 08:06:43 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aIoq3LgL2ODgENFy@infradead.org>
+References: <cover.1753769382.git.nirjhar.roy.lists@gmail.com> <f48538de3ce4a98a2128f48aa0f005f51eb552ee.1753769382.git.nirjhar.roy.lists@gmail.com>
+In-Reply-To: <f48538de3ce4a98a2128f48aa0f005f51eb552ee.1753769382.git.nirjhar.roy.lists@gmail.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Wed, 30 Jul 2025 16:06:05 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H65RB6+91qxJsNfsUKeig0hqNEUTSx9ZuquFnri5RSh2Q@mail.gmail.com>
+X-Gm-Features: Ac12FXxLlFRHiROZ321AhaO2LpQkYU1qpPWobpgEzcqTKSZRolvEXemf96LEi1Q
+Message-ID: <CAL3q7H65RB6+91qxJsNfsUKeig0hqNEUTSx9ZuquFnri5RSh2Q@mail.gmail.com>
+Subject: Re: [PATCH 5/7] generic/563: Increase the write tolerance to 6% for
+ larger nodesize
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	ritesh.list@gmail.com, ojaswin@linux.ibm.com, djwong@kernel.org, 
+	zlang@kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Jul 30, 2025 at 07:23:24AM -0700, Christoph Hellwig wrote:
-> On Tue, Jul 29, 2025 at 01:10:50PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > First, start with the premise that fstests is run with a nonzero limit
-> > on the size of core dumps so that we can capture the state of
-> > misbehaving fs utilities like fsck and scrub if they crash.
-> 
-> Can you explain what this has to do with core dumping?
-> 
-> I'm just really confused between this patch content and the subject of
-> this patch and the entire series..
+On Tue, Jul 29, 2025 at 7:24=E2=80=AFAM Nirjhar Roy (IBM)
+<nirjhar.roy.lists@gmail.com> wrote:
+>
+> When tested with blocksize/nodesize 64K on powerpc
+> with 64k  pagesize on btrfs, then the test fails
+> with the folllowing error:
+>      QA output created by 563
+>      read/write
+>      read is in range
+>     -write is in range
+>     +write has value of 8855552
+>     +write is NOT in range 7969177.6 .. 8808038.4
+>      write -> read/write
+>     ...
+> The slight increase in the amount of bytes that
+> are written is because of the increase in the
+> the nodesize(metadata) and hence it exceeds the tolerance limit slightly.
+> Fix this by increasing the write tolerance limit from 5% from 6%
+> for 64k blocksize btrfs.
+>
+> Reported-by: Disha Goel <disgoel@linux.ibm.com>
+> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> ---
+>  tests/generic/563 | 17 ++++++++++++++++-
+>  1 file changed, 16 insertions(+), 1 deletion(-)
+>
+> diff --git a/tests/generic/563 b/tests/generic/563
+> index 89a71aa4..efcac1ec 100755
+> --- a/tests/generic/563
+> +++ b/tests/generic/563
+> @@ -119,7 +119,22 @@ $XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite -b $blk=
+size 0 $iosize" -c fsync \
+>         $SCRATCH_MNT/file >> $seqres.full 2>&1
+>  switch_cg $cgdir
+>  $XFS_IO_PROG -c fsync $SCRATCH_MNT/file
+> -check_cg $cgdir/$seq-cg $iosize $iosize 5% 5%
+> +blksz=3D`_get_block_size $SCRATCH_MNT`
 
-It's a bugfix ahead of new behaviors introduced in patch 2.  I clearly
-didn't explain this well enough, so I'll try again.
+Here the block size is captured, but then it's not used anywhere in the tes=
+t...
 
-Before abrt/systemd-coredump, FS_IOC_SHUTDOWN fsstress tests would do
-something like the following:
+Thanks.
 
-1. start fsstress, which chdirs to $TEST_DIR
-2. shut down the filesystem
-3. fsstress tries to stat($TEST_DIR), fails, and calls abort
-4. abort triggers coredump
-5. kernel fails to write "core" to $TEST_DIR (because fs is shut down)
-6. test finishes, no core files written to $here, test passes
-
-Once you install systemd-coredump, that changes to:
-
-same 1-4 above
-5. kernel pipes core file to coredumpctl, which writes it to /var/crash
-6. test finishes, no core files written to $here, test passes
-
-And then with patch 2 of this series, that becomes:
-
-same 1-4 above
-5. kernel pipes core file to coredumpctl, which writes it to /var/crash
-6. test finishes, ./check queries coredumpctl for any new coredumps,
-   and copies them to $here
-7. ./check finds core files written to $here, test fails
-
-Now we've caused a test failure where there was none before, simply
-because the crash reporting improved.
-
-Therefore this patch changes fsstress not to call abort() from check_cwd
-when it has a reasonable suspicion that the fs has died.
-
-(Did that help?  /me is still pre-coffee...)
-
-> > This is really silly, because basic stat requests for the current
-> > working directory can be satisfied from the inode cache without a disk
-> > access.  In this narrow situation, EIO only happens when the fs has shut
-> > down, so just exit the program.
-> 
-> If we think it's silly we can trivially drop the xfs_is_shutdown check
-> in xfs_vn_getattr.  But is it really silly?  We've tried to basically
-> make every file system operation consistently fail on shut down
-> file systems,
-
-No no, "really silly" refers to failing tests that we didn't used to
-fail.
-
-> > We really should have a way to query if a filesystem is shut down that
-> > isn't conflated with (possibly transient) EIO errors.  But for now this
-> > is what we have to do. :(
-> 
-> Well, a new STATX_ flag would work, assuming stat doesn't actually
-> fail :)  Otherwise a new ioctl/fcntl would make sense, especially as
-> the shutdown concept has spread beyond XFS.
-
-I think we ought to add a new ioctl or something so that callers can
-positively identify a shut down filesystem.  bfoster I think was asking
-about that for fstests some years back, and ended up coding a bunch of
-grep heuristics to work around the lack of a real call.
-
-I think we can't drop the "stat{,x} returns EIO on shutdown fs" behavior
-because I know of a few, uh, users whose heartbeat monitor periodically
-queries statx($PWD) and reboots the node if it returns errno.
-
---D
+> +
+> +# On higher node sizes on btrfs, we observed slightly more
+> +# writes, due to increased metadata sizes.
+> +# Hence have a higher write tolerance for btrfs and when
+> +# node size is greater than 4k.
+> +if [[ "$FSTYP" =3D=3D "btrfs" ]]; then
+> +       nodesz=3D$(_get_btrfs_node_size "$SCRATCH_DEV")
+> +       if [[ "$nodesz" -gt 4096 ]]; then
+> +               check_cg $cgdir/$seq-cg $iosize $iosize 5% 6%
+> +       else
+> +               check_cg $cgdir/$seq-cg $iosize $iosize 5% 5%
+> +       fi
+> +else
+> +       check_cg $cgdir/$seq-cg $iosize $iosize 5% 5%
+> +fi
+>
+>  # Write from one cgroup then read and write from a second. Writes are ch=
+arged to
+>  # the first group and nothing to the second.
+> --
+> 2.34.1
+>
