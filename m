@@ -1,57 +1,221 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F05C2DECC2
-	for <fstests@vger.kernel.org>; Wed, 30 Jul 2025 17:48:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D408B2BCFB;
+	Wed, 30 Jul 2025 19:21:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753897690; cv=none; b=VkJkjmEYshpm6LdqHNQ4osTZb5R2e9OJbyw92fil+bNJedBJWF8i8vjZEl26+Ief2rNNlqMwtJ2n0G/zFAqC7Z7Rj/tJmQVD1aRCukH5Bnn5I1ys75Yg4APLu061Ba87kKFLrOMmYTUD5rz1OQ0itL4NY0hNk0o00UQnnKnAOFo=
+	t=1753903307; cv=none; b=cTw1L9w5oPi7dGrNeanZ+cWEKkY406MzsruAuiRBWKEjglaDm5uiTd6ID3yBl/2SBqjMHs4KRvGKC9VFHJ6E6K8vnOCBNl5t8ch7XGQKrMGChJTeZquWw/lsFzjSzk8eK+l1gIlwCbZi7GOFlr73MRhg2vjhMJGcGIhf+tfZU+E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753897690; c=relaxed/simple;
-	bh=ulRi0vbyALT1crC0DQZIKv71CsHtoFc6/PVTT8GhxbY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qluoRNpqmKl5Zltx47rvyX0F83ssfrixYmgbx7JWVYa9i6+nltJaFhohuyyOPBWSKassyXQzmKg2QswkT56GJDbH78D1eYduTcU67mijoRuO2b8gBJ2iVaYH+TtqzKEfGXNpRclfxKgRtoAo6UhfwPNP4Q6r1dKF1HSihgtBFbU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=kY806Obn; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1753903307; c=relaxed/simple;
+	bh=LUytNnNoqkW0bz7uMHDai1bink9SfNHQfZgLgc49mM8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=sAVQO+JhomjGdScgmMTKtk4+9NI+3tUICN/ZgH/KhgtFQkhaaD8xQDnYwpNCwux/rY9+C9JWu8NVftZcaeXGPM6QHvzPg6lc4/DiT+NMrxNGesccY9BVgWvlqRCU9KVOiXSl65Mp2vPl1br1bp+cVerz8eulEqilqcMdM4mAvh4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=biZw80S9; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="kY806Obn"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=ulRi0vbyALT1crC0DQZIKv71CsHtoFc6/PVTT8GhxbY=; b=kY806ObnD8t0T9E/mp8F9Mwq9g
-	1ScCwGiMhSOC+e1nBLKppWX+QrxxMnzuCVN89Cmedj5H+YdbOnyTOLzWqfnd2ySMwoGX+8A+381FU
-	qVYoE/P+bzewsDSr9jmIwI8Zf3g3UleUeMwbylUGeG4QIKUjn8RxtFNVsdYSMLSIqVYSb+Q9SyTKO
-	W248EI4v3saYWuQSIe/gvz7D9ur0xdK1ujbcm88P6dCwtfj4OB0FnwUN9fM9UPIJNwnS4ZtfnCL2X
-	Bu9cEt1Lq2GngagYBAwcO8+73nQQV62dbqjh2YqB9CuQADnVsRfVBR2Fl6FSbfMH/Jhg9+I5U6RUh
-	IxflNcJQ==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1uhAuO-000000029Cn-3J3y;
-	Wed, 30 Jul 2025 17:48:08 +0000
-Date: Wed, 30 Jul 2025 10:48:08 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: Anthony Iliopoulos <ailiop@suse.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/189: fix remount barrier test failure
-Message-ID: <aIpa2BGrqVq1V4ce@infradead.org>
-References: <20250730172826.122130-1-ailiop@suse.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="biZw80S9"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 59360C4CEE3;
+	Wed, 30 Jul 2025 19:21:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1753903307;
+	bh=LUytNnNoqkW0bz7uMHDai1bink9SfNHQfZgLgc49mM8=;
+	h=From:To:Cc:Subject:Date:From;
+	b=biZw80S9WIsR3GghkU8vGXmmnJKOqsbuaqBGf5yNL2rSjONQ1sTm/3PHldOkq5hWs
+	 F7F5unanWuhShxibLp0zbuC0Z5bCL6i6pXjROV5rh8UsEY20dVStuHbdLlFL8DM9sf
+	 v3l9WLfBll6LtsDrgFry7j31dvqCnP1yOCiPIa1YTX9ho6PDio/zoq153dxF5Rc0Nw
+	 kRBGGZdg1TvP4I1jr8wSUJ4mOhlOadQ88exNE8QvnHmOcU6JJQYQvmRGwBfIK/u5Xk
+	 meUKyUUnWkmp/R5yBkueV11K++RtyQCuu5X2GKitb5iCfk6LwA7meIHeLP/A/leHFh
+	 aQGScBE0xd1Pw==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic: test fsync of file with 0 links and extents
+Date: Wed, 30 Jul 2025 20:21:41 +0100
+Message-ID: <ab95518f5483a2e23e0f3cdf1bc67258c0e71918.1753902704.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250730172826.122130-1-ailiop@suse.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Transfer-Encoding: 8bit
 
-On Wed, Jul 30, 2025 at 07:28:26PM +0200, Anthony Iliopoulos wrote:
-> _test_remount_barrier() is skipped on kernels newer than v4.19 where the
-> barrier options have been removed, and this is detected by matching the
-> mount command output for a "bad option" error.
+From: Filipe Manana <fdmanana@suse.com>
 
-I'd just drop the test given that it only works on very obsolete
-kernels.
+Create two files, the first one with some data, and then fsync both
+files. The first file is fsynced after removing its hardlink. After a
+power failure we expect the fs to be mountable and for only the second
+file to be present.
+
+This exercises an issue found in btrfs and fixed by the following patch:
+
+  btrfs: fix log tree replay failure due to file with 0 links and extents
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ .gitignore            |  1 +
+ src/Makefile          |  2 +-
+ src/unlink-fsync.c    | 45 ++++++++++++++++++++++++++++++++
+ tests/generic/771     | 60 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/771.out |  4 +++
+ 5 files changed, 111 insertions(+), 1 deletion(-)
+ create mode 100644 src/unlink-fsync.c
+ create mode 100755 tests/generic/771
+ create mode 100644 tests/generic/771.out
+
+diff --git a/.gitignore b/.gitignore
+index 58dc2a63..6948fd60 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -210,6 +210,7 @@ tags
+ /src/fiemap-fault
+ /src/min_dio_alignment
+ /src/dio-writeback-race
++/src/unlink-fsync
+ 
+ # Symlinked files
+ /tests/generic/035.out
+diff --git a/src/Makefile b/src/Makefile
+index 2cc1fb40..7080e348 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -21,7 +21,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
+ 	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test \
+ 	readdir-while-renames dio-append-buf-fault dio-write-fsync-same-fd \
+-	dio-writeback-race
++	dio-writeback-race unlink-fsync
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/unlink-fsync.c b/src/unlink-fsync.c
+new file mode 100644
+index 00000000..ce008c6b
+--- /dev/null
++++ b/src/unlink-fsync.c
+@@ -0,0 +1,45 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (c) 2025 SUSE Linux Products GmbH.  All Rights Reserved.
++ */
++
++/*
++ * Utility to open an existing file, unlink it while holding an open fd on it
++ * and then fsync the file before closing the fd.
++ */
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <fcntl.h>
++
++int main(int argc, char *argv[])
++{
++	int fd;
++	int ret;
++
++	if (argc != 2) {
++		fprintf(stderr, "Use: %s <file path>\n", argv[0]);
++		return 1;
++	}
++
++	fd = open(argv[1], O_WRONLY, 0666);
++	if (fd == -1) {
++		perror("failed to open file");
++		exit(1);
++	}
++
++	ret = unlink(argv[1]);
++	if (ret == -1) {
++		perror("unlink failed");
++		exit(2);
++	}
++
++	ret = fsync(fd);
++	if (ret == -1) {
++		perror("fsync failed");
++		exit(3);
++	}
++
++	return 0;
++}
+diff --git a/tests/generic/771 b/tests/generic/771
+new file mode 100755
+index 00000000..ad30cc0a
+--- /dev/null
++++ b/tests/generic/771
+@@ -0,0 +1,60 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 SUSE Linux Products GmbH.  All Rights Reserved.
++#
++# FS QA Test 771
++#
++# Create two files, the first one with some data, and then fsync both files.
++# The first file is fsynced after removing its hardlink. After a power failure
++# we expect the fs to be mountable and for only the second file to be present.
++#
++. ./common/preamble
++_begin_fstest auto quick log
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -r -f $tmp.*
++}
++
++. ./common/filter
++. ./common/dmflakey
++
++_require_scratch
++_require_test_program unlink-fsync
++_require_dm_target flakey
++
++[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: fix log tree replay failure due to file with 0 links and extents"
++
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# Create our first test file with some data.
++mkdir $SCRATCH_MNT/testdir
++$XFS_IO_PROG -f -c "pwrite 0K 64K" $SCRATCH_MNT/testdir/foo | _filter_xfs_io
++
++# fsync our first test file after unlinking it - we keep an fd open for the
++# file, unlink it and then fsync the file using that fd, so that we log/journal
++# a file with 0 hard links.
++$here/src/unlink-fsync $SCRATCH_MNT/testdir/foo
++
++# Create another test file and fsync it.
++touch $SCRATCH_MNT/testdir/bar
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir/bar
++
++# Simulate a power failure and replay the log/journal.
++# On btrfs we had a bug where the replay procedure failed, causing the fs mount
++# to fail, because the first test file has extents and the second one, which has
++# an higher inode number, has a non-zero (1) link count - the replay code got
++# confused and thought the extents belonged to the second file and then it
++# failed when trying to open a non-existing inode to replay the extents.
++_flakey_drop_and_remount
++
++# File foo should not exist and file bar should exist.
++ls -1 $SCRATCH_MNT/testdir
++
++_exit 0
+diff --git a/tests/generic/771.out b/tests/generic/771.out
+new file mode 100644
+index 00000000..e40d7091
+--- /dev/null
++++ b/tests/generic/771.out
+@@ -0,0 +1,4 @@
++QA output created by 771
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++bar
+-- 
+2.47.2
 
