@@ -1,216 +1,187 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51601236A9C;
-	Wed, 30 Jul 2025 23:30:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0CBC03595A;
+	Thu, 31 Jul 2025 04:19:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753918205; cv=none; b=IqGI7NljsaeawXQQ9DTQa87B8IfWK1YfxYvTtZoLohfIS5LNFwkTUzBTunnuLFmPO8J3F5oZ8NgAJJJoCwK6LLgXTWEhLvHsJqPsDkbsSj9tmOlecJSabmkTUpjXtnrb2i5jnaoL8faVwe4E8zcuZLJ4M2MKZ1rmQHjHkeGfxys=
+	t=1753935556; cv=none; b=i9fcnPJsvWpWCymQLt+7cMyclWNHIyU//OrVe/nyjT65uQo7CxBSCV+TA/TEe9HNI2LpvYRH4EH52AM9Qb814Ncsk8qLc7eU77GsRHZFZE7NxLSGtRWz7yCi1VUfk3dmKRluytv022tCuwN2mDe46qCXkkyHlYe/CE8/Az092Yc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753918205; c=relaxed/simple;
-	bh=1v6AwnuCbj1sm3t1gBOWBrdEAMzAe7A3+mVQJnmsa8U=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=Jnsua0Opn1ame2RdtXUBR8LI4ZxV7iR8mUssp0SysYHbjcgEcU62eUT7oaLjJ8PcVMfkcEgOhE3PrGMRxBT732CTXGPwWeDgLkVwm8dvcOWvuTtZAy2rY5BpStapCL2H+BzzOWn3AfpiaSnAoipr9vIsPOuwVJg2j7ILoa0zAZw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=r7m+6TDP; arc=none smtp.client-ip=212.227.17.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1753935556; c=relaxed/simple;
+	bh=ZobzzWDPHAD9iDOxIRA8aGYpMqwZmAtJ7mpGWwmVqUQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=fyyBpene8CAzG5uNe1rlDgywqAzGWltD7yriIYUiQlmhXOv4VK5Z/kl4Cd059rqC5JTD1SIobYqm9YxfN/hCOwslAJB0f0Y3VvJsKNpF/bPK215cH0LJ/D9zEk3vWp11+aHnFZYu2UbfAzu5AsIDEf2iyZfm+ma+A0pZBEymPOc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=UYCpVP/r; arc=none smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="r7m+6TDP"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1753918197; x=1754522997; i=quwenruo.btrfs@gmx.com;
-	bh=AnRSaqYsOL4mCKVFqxEaDZN2YYX9lVH/7DOZOCTdl6U=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=r7m+6TDPgn4uWtCY6mYLyNxpm1g4lvooH0a2JDs633HClOynIUw9EOd1JFBfY50i
-	 fw+b4BNdhsBccYVfzMm1xXFzsgJXrHePbnkmbtDZSzs1ewnXLZCz6PB6Ri4fyzc+l
-	 znXrSD+eYmi7cgBP6jG1ga20HQadoVBoLEvUJsc5zW/pfJhMtligbx4xrIaabrVDG
-	 EoxK1ROZfKsBFa4vFq9vamRB8NzltlhArldnj4cUf6wDpzgMoue2OoAvR4P32PMXZ
-	 k+asnILvEwMxCBDf9aP0+MJzgxSdEXmD1i85/VbdHQ2Sm6a7NSaGHv1IWmon759NB
-	 7oECIqU8Mz/1FRCd+g==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.229] ([159.196.52.54]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1Mo6ux-1uIcet3doR-00kkRt; Thu, 31
- Jul 2025 01:29:57 +0200
-Message-ID: <04558d2c-ef60-4355-af0f-e3a493608805@gmx.com>
-Date: Thu, 31 Jul 2025 08:59:53 +0930
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="UYCpVP/r"
+Received: from pps.filterd (m0356517.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56UKaon8002269;
+	Thu, 31 Jul 2025 04:19:07 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=pp1; bh=24saaRAd20Rcx3NGxaTql+x92yY5ct
+	ngtm1W4oKLSFk=; b=UYCpVP/rPwRFYLUF22vCcyJeAZ2MzkkRMZjdbU8rBtHbJ3
+	gp2mafmQvxKVvhhv6AeomLj3tVi8tmHUk50SQsp/zB/IV345DDiO6cUop+B27VF7
+	LBbxoUoBcyfD479merkaldgPcK+ld+0J+lpt2kviOo8dXcjOmz68/amGqpjkTuPL
+	vSsfU/BQLyhZTo7lZmTPLazWVX+Gd6cFci7SkutyfObDEjOrZZBqAhJ+6n+fFcGS
+	BhM9kka4T+ynW++tStTRbTIL0C5X2Eic9kHBYDGF2TJebYpG0Odw2WulG8mUW+Yv
+	4SEkig666L9+JGyqTf1nfxe9cNYNLu5R2hCXsW3w==
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 486c6hxgjd-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 31 Jul 2025 04:19:07 +0000 (GMT)
+Received: from m0356517.ppops.net (m0356517.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 56V48Eh9007887;
+	Thu, 31 Jul 2025 04:19:06 GMT
+Received: from ppma22.wdc07v.mail.ibm.com (5c.69.3da9.ip4.static.sl-reverse.com [169.61.105.92])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 486c6hxgj8-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 31 Jul 2025 04:19:06 +0000 (GMT)
+Received: from pps.filterd (ppma22.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma22.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 56V2TJx3017282;
+	Thu, 31 Jul 2025 04:19:05 GMT
+Received: from smtprelay04.fra02v.mail.ibm.com ([9.218.2.228])
+	by ppma22.wdc07v.mail.ibm.com (PPS) with ESMTPS id 4859r0autp-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 31 Jul 2025 04:19:05 +0000
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay04.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 56V4J32820316596
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Thu, 31 Jul 2025 04:19:03 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 6E4A420043;
+	Thu, 31 Jul 2025 04:19:03 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 61AA120040;
+	Thu, 31 Jul 2025 04:19:01 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.109.219.158])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Thu, 31 Jul 2025 04:19:01 +0000 (GMT)
+Date: Thu, 31 Jul 2025 09:48:39 +0530
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: John Garry <john.g.garry@oracle.com>, Zorro Lang <zlang@redhat.com>,
+        fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
+        tytso@mit.edu, linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v3 05/13] generic/1226: Add atomic write test using fio
+ crc check verifier
+Message-ID: <aIrun9794W0eZA8d@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+References: <aIDozETJ8aLparYV@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <9b9ed959-bda5-4a92-90c7-a621ffe58240@oracle.com>
+ <aIMjrunlU04jI2lF@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <0af205d9-6093-4931-abe9-f236acae8d44@oracle.com>
+ <aIccCgrCuQ4Wf1OH@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <2ae4bb04-fbf7-4a53-b498-ea6361cdab3e@oracle.com>
+ <aId8oZGXSg5DW48X@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <3a4854ac-75ad-4783-acbd-048fe7c7fdb0@oracle.com>
+ <aIhmG-l4nWOAzz2I@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <20250729144526.GB2672049@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] btrfs/301: enhance nested simple quotas test
-To: Boris Burkov <boris@bur.io>, linux-btrfs@vger.kernel.org,
- kernel-team@fb.com, fstests@vger.kernel.org
-References: <5b4103224ad0a5f26f3856b7333e7efff8575296.1753916569.git.boris@bur.io>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
- sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
- xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
- naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
- tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
- 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
- VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
- CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
- B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
- Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
- +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
- HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
-In-Reply-To: <5b4103224ad0a5f26f3856b7333e7efff8575296.1753916569.git.boris@bur.io>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:RsEfWSltNeXArSQ0tiw+U5kqzpQnGRdQ0LnA7HkjuA+iiM7G22A
- BIXEdfN6hfn3lQ+KIfGs61en8QQRdJx7XlhQ75FVuxoLbm6nXbCRL2dcuEU9IXF2Lu2g/O1
- D6ZvfR6uwV/av4FDJDZeyyiyBRwbiISgEi3raQzHJ3VZcAx1DvnGZ/J3inuKBjXrlsrZj8p
- GWV60S33Nig3dbAsN8CWw==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:AL5B7gF5vJ4=;cPKZvXoXvCB1fAYnINHo8FdJWeG
- ipvT8mOJS/8FMK494Yp6puPms01SceZJvrQinZH92Uim21H4GbJp43VKW/ZaJRl4Lf+2IhPqF
- 2lPyF1nK+MJR9JucYcm6Hwt1O6cZxuSEuC+QuR1OTLPY8bRzbDzsV78w8FwRdbp9gnKcaHoqq
- 7EaER2do2tvlgCzpgavSIHQAeLjb17Js0sEqbA5lYvMv/Gb7Rt6yDOxbQ+9PPT3AMEMNVWqkF
- gUGEHwu1BHVkyXLfJb+TFWaGPi82pgzUxw99CWJI8vxkyGiQ+NG8OKk9s0lvFPX0e+o03SfoS
- QW0CfDqCIRnV2ULgJfIluNdS+jWvHxx5ZGrpyHNljdbEaYVeQVytlnQzxb+xX7nKvZEiyYFRR
- mTOwWeR0H4JzBHdibfCXctdvZmwpw3Y8pfQ+lwe62HhqZC8L9W3RBRCuExdDvWRNq2pnPyaeD
- Q2lUEZ0GbRKWTo2ijGFAhCSgPpSu01pAtaO9aGl+VqEo6ChBgnLnr93BM0Lfw+NCTO0aQOJ+R
- e8g4cJ4qmGVda7mlVOI+1TxM2r1+12Acoos4zOXUN86c+HbeZOHgm2isaFX78JR/3L9a+RUXb
- xFRK34svBB4GWGwVL+wB7Q3tsUPUEzAYcTGrmp8YZqXIVEJFKc+jVLMOEav1gSM3avGiz8W5o
- 4Y7W4Q3lX82QZ6yosHaaj8K9bVtwn+rKaH1c8T6B+09RyHZ17Z9KS4D+j/3cDSAM2b6Sym7EG
- eyqLEIrQMjEYbkbugghasRI1MT/rBzf3GBQG/NqA6L2yd4tMnmwvJSPAPe2P96vmD80ndJZe3
- r2TUN77cjIFcoiv1F2TwSkFTD4ekt0LFEDgUmf+A5cJkBQP2bKn19p0mB6CrezBSwjv5+UctG
- xAUNCFSiRIpHt7iEa3YUS5yoSwxkDkKs/PLx8LwR0E7vhAyBE5WQ01YJtMVGcn/k2VfDzskn9
- aA4gSDKzDnJIertD0yz5UGcxOCxLv1qMWHk5QO8f1UXG5mmTRi/JfM2r89jTBsDlN6/xsArrl
- 7mYDEvamGFKl3N1wKEQQUoaQ8GzzY5TfkVuyPmjP4UlCw09gbC0OST/UApM0M0A8oi3rpjKWB
- VLUK710U+7bFvWupkjqDt8VFc1+zrRW6noAfGj71waaLMdSpHpi+akaUHP+FJ6Gia2v6mAMCt
- EkrBqQ0m1z8NYIta0CI5+uPz2YBCkmqOx3QXpXB4LZP1HhVh5AYI3qNp6whwUvkfB4Ewhl6A0
- SDkI0EUUYoETkr2OP+BFhFHwkrIBRhQiyGLlTPYgYORyFpkrSchYUGtkyGELbZDLv1utb47w6
- Bg+vatkWLojLaOa6GSp9XKWm9fwVO9tsYZgf2aUI1E9cLSVM8KlnomWlQWuBI1BIEqsdbz2ou
- mjKzaCGfTdmSnWvTCZ8Elh1amOiRq+53olsLED2u1DH3LF92C0ahRMAGkk+2C6yDlctptfgfj
- +hwwFPnhRkzA4mqHmWzuqefsvORxU8x/FM31pDSevcArvvV9g/88wg+VOVBViEZzMVpSaPjsp
- m5GcwcC0J2503mmJAXxyxudfjTzbE9kkV0fIZrwbcQT7x489f4RG/hecthGd3y4o8ohEEXHIr
- BjEDVj++LnY5QCiMGRk7lm58FKpNWlXJiEwf5WpDej8kGbO6wgosnW2tCM4MqUD+43Yld7rDk
- 84+DuYidwF4idzEWYX4aAs4FTBBg6NPv4dnYseVxuxs5XxiaGVJllhyKmlZuzBjLub4C21epC
- 0ngcpZFqLXflvqZ3b9g+coByi4g27Dhu9JdRf+LI3JmhKAY3d+kCtc5D5z5aGyiUi6G+h9WxF
- jDVAuVH0NDUIRtNFp+7iP0gKgTecNHgiw3/sec8pVKJ8+kw4tUyZQtxXNrSjcJ9WQaZ1mVC4d
- IcDb6lrI7oqWCZK+3gTR2jskzmdH1V2QDDbDEmWrrP4e5dYjfvjm9rcRI14lk3Ja8aZ+qpUH5
- Bs8ZUFRYIao019E3OiU/BV1jTT0DQ75FtX0Ok7kMcQPdrJzYBkjsWs5U13MoB9MYjTIb6qeKA
- aFQjuRDhIRFQeD7jJL0wE7VJBzw51jJS92HciRI9Eb3Ucjq7W75jChxFaqqn+ZZnFy+OiK92D
- Hi3sgFlVtuaQCEZkYDQEUlXTDsK6ExFaay8QQ08jOlcJWgM0fJuvmnQG+y6uB7t6SjTUH1WfQ
- Lu4EzWBA6XH8PC0K4VfdIN5sXVoTtTi4aZ1cS6Jp51N20mQGXtf4cpCBAT5nPjtOvQaGs5cz6
- PwqMhO5Z/rRvhVe+8ylGzlW50U6xIU+w/uA2Sd16aedqevsitfrrm6hoH2Jozh5qcEux1P1GE
- gEFatL3yN028ZrDCcjr/JIUTlxrIuhvHeia9t1t/Rr27C01G02M2CBepteT2A2UiUSSbZBdyO
- RxIqWhnYQvIdMCl39GI/xy+zrw8PTCQjtaDaRLeSfcv+io9s8gKCi8nQzGAV72t/m4HeT8eP4
- npmwDRP6PyoE4RgjIA2o7DxXlCHvFDD2z1RuZAy4Qitf4dOHJbFNMYiqX3pJWqLc6v/VysTtN
- NHQp0FYaiRlrQfanZ4UcoBGjfnLGeQPJopYeM6gsc9Rar0qJ3r+DaQeOJB0YiIOPg8Ge88FC+
- 7vZD6LVw7ooCGGMhQvTs3wb6xO0OKNUH9dEbvU1xHw3U1CaOjvsEtNpTGfINGaGlPj95r2kQu
- tPcTqIQqRjmlpRvGsHJkfWVbUUrqVfqOVJryPtL7dKDKxsq5tMgTSk4Kk51dG7L3n+0dgu7v7
- N5ckh8kInreiDacUS29KAWJ7k+EuPTV7a77rQTVl5puZAWSyDgIbwlQ4jk4Irk75fRtZRiawe
- nVcsf9cDwcmNvpdsybCnR9nZhevPeXY06deMpykWRfOENGyf4hM3MxmYhSuQrZnNwhD9NPNjt
- qplyAsYkmJZzqXAwCsCCVBXRNZeU8/9ip2ioKkkWyMWpiShiC/FdqtczpMe1njvAk1cHZj707
- 8worgtgge9rizaIJ3amN2yU6aCweNBALe1KFWHp4BmTUjN8Qjf73jAMeliCLxAHK97mCEqI9S
- +rSwD0YKIBTK1mqFaZJ1nDU1/oDEpb8gzV+0nCvRxEKqRPtPjSjwVEgUHjR98WNHHnIRPSJIu
- iQRHDCdPn6f+VoOTZhzhU1xFM7kcE5RaYZataChECk3jByDQO4imFE/BEBEouA6IsaeRMdTpD
- ISv268/lIMLiXpI91YyX1GwoCzDC/71+zyZm6h8YEu4z6vYm8gHlAWNnoik+AGg5ENKd0Hvh6
- +bTzclyVHKuJVzPwxpdqSYBKFA0HDMpmRSOo0Vo6+4DH9jTwcYUdGaL4viLdq8w2OfdlErH4K
- zXp61oXRzlk4G8AfesTxh2/AychIyL8WXXqm92ylby9Pr25yXIPO0w8sgWXbU3RpPmtvTWAb1
- G796sfdHdAWd9NnXFa/BKOrSJGhW1Gb3N+cMygbbdXf6OxkEYRvC1pDTI9AlkQagoXE/xG/kH
- 6bxabEnCVvo/FPpgP3Z/3ExeIaHWEc6SfIKRA1FCNsN7JRmt7c2KVjAUyjD4BhiVYEVSyvoGX
- Xg==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250729144526.GB2672049@frogsfrogsfrogs>
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: 4PWYWbVGZxeDrCpgxLYz3gJ80VRDsaat
+X-Authority-Analysis: v=2.4 cv=Mbtsu4/f c=1 sm=1 tr=0 ts=688aeebb cx=c_pps
+ a=5BHTudwdYE3Te8bg5FgnPg==:117 a=5BHTudwdYE3Te8bg5FgnPg==:17
+ a=kj9zAlcOel0A:10 a=Wb1JkmetP80A:10 a=qJOP-70rnzrkdBoURO8A:9
+ a=CjuIK1q_8ugA:10
+X-Proofpoint-ORIG-GUID: G6s53CesWX-etCc6c8gPHuLjdTYWa7Rk
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzMxMDAyNyBTYWx0ZWRfX0//iNkX16i25
+ jT8xMwUzbl7tYYABaBpm2mQseSYmrkRRz2h65bs0GxvJRkW4v94Xi5Q/zJihuC2oZ29ru3pR1lx
+ YYzAfAcQ0PP4sU149hctWPx8coik6JQ/dvBTxeoRFzY/fIK8t69rtM+npvrWQCOqp/o7U9MQ2av
+ SCs1d4uuJJFmKfqQ/x7w9ePBohoBH7RPk+5fz4B4mA1bIqxb5ipTlwj+alaUo/QMsrsSv9nDpwt
+ 8CluOvumim6GueFJSUtLsya1+6pp+ycUN9IcYSKjgxTR+Eg6RF2lCyXupf2lNvw18BDC201OyNA
+ ogbwDgmAogDwFKXIRpR2WgPF0/kld6CxNYAd7CWvZQsAJ/PaZMBVISmX5aYw2SHvg6mzm1d2Swl
+ Nhg8gSQqfPW81CCF/jaJaeCFRluo2OZ7pfDWHctwY9hlpGeUy1YcytcszcxY2swj5t/wJoXs
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-07-31_01,2025-07-30_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ clxscore=1015 adultscore=0 bulkscore=0 suspectscore=0 priorityscore=1501
+ spamscore=0 mlxscore=0 impostorscore=0 phishscore=0 mlxlogscore=999
+ lowpriorityscore=0 malwarescore=0 classifier=spam authscore=0 authtc=n/a
+ authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2505280000 definitions=main-2507310027
 
+On Tue, Jul 29, 2025 at 07:45:26AM -0700, Darrick J. Wong wrote:
+> On Tue, Jul 29, 2025 at 11:41:39AM +0530, Ojaswin Mujoo wrote:
+> > On Mon, Jul 28, 2025 at 03:00:40PM +0100, John Garry wrote:
+> > > On 28/07/2025 14:35, Ojaswin Mujoo wrote:
+> > > > > We guarantee that the write is committed all-or-nothing, but do rely on
+> > > > > userspace not issuing racing atomic writes or racing regular writes.
+> > > > > 
+> > > > > I can easily change this, as I mentioned, but I am not convinced that it is
+> > > > > a must.
+> > > > Purely from a design point of view, I feel we are breaking atomicity and
+> > > > hence we should serialize or just stop userspace from doing this (which
+> > > > is a bit extreme).
+> > > 
+> > > If you check the man page description of RWF_ATOMIC, it does not mention
+> > > serialization. The user should conclude that usual direct IO rules apply,
+> > > i.e. userspace is responsible for serializing.
+> > 
+> > My mental model of serialization in context of atomic writes is that if
+> > user does 64k atomic write A followed by a parallel overlapping 64kb
+> > atomic write B then the user might see complete A or complete B (we
+> > don't guarantee) but not a mix of A and B.
+> 
+> Heh, here comes that feature naming confusing again.  This is my
+> definition:
+> 
+> RWF_ATOMIC means the system won't introduce new tearing when persisting
+> file writes.  The application is allowed to introduce tearing by writing
+> to overlapping ranges at the same time.  The system does not isolate
+> overlapping reads from writes.
+> 
+> --D
 
+Hey Darrick, John,
 
-=E5=9C=A8 2025/7/31 08:33, Boris Burkov =E5=86=99=E9=81=93:
-> We had a bug with qgroup accounting with 2+ layers, which was most
-> easily detected with a slightly more complex nested squota hierarchy.
-> Make the nested squota test case a tiny bit more complex to capture this
-> test as well.
->=20
-> The kernel patch that this change exercises is:
->          btrfs: fix iteration bug in __qgroup_excl_accounting()
->=20
-> Signed-off-by: Boris Burkov <boris@bur.io>
+So seems like my expectations of RWF_ATOMIC were a bit misplaced. I
+understand now that we don't really guarantee much when there are
+overlapping parallel writes going on. Even 2 overlapping RWF_ATOMIC
+writes can get torn. Seems like there are some edge cases where this
+might happen with hardware atomic writes as well.
 
-Reviewed-by: Qu Wenruo <wqu@suse.com>
+In that sense, if this fio test is doing overlapped atomic io and
+expecting them to be untorn, I don't think that's the correct way to
+test it since that is beyond what RWF_ATOMIC guarantees. 
 
-Thanks,
-Qu
+I'll try to check if we can modify the tests to write on non-overlapping
+ranges in a file.
 
-> ---
->   tests/btrfs/301 | 10 +++++++++-
->   1 file changed, 9 insertions(+), 1 deletion(-)
->=20
-> diff --git a/tests/btrfs/301 b/tests/btrfs/301
-> index 6b59749d..7f676001 100755
-> --- a/tests/btrfs/301
-> +++ b/tests/btrfs/301
-> @@ -19,6 +19,9 @@ _require_xfs_io_command "falloc"
->   _require_scratch_enable_simple_quota
->   _require_no_compress
->  =20
-> +_fixed_by_kernel_commit XXXXXXXXXXXX \
-> +	"btrfs: fix iteration bug in __qgroup_excl_accounting()"
-> +
->   subv=3D$SCRATCH_MNT/subv
->   nested=3D$SCRATCH_MNT/subv/nested
->   snap=3D$SCRATCH_MNT/snap
-> @@ -49,7 +52,7 @@ get_qgroup_usage()
->   	local output
->  =20
->   	output=3D$($BTRFS_UTIL_PROG qgroup show --sync --raw $SCRATCH_MNT | \
-> -		 grep "$qgroupid" | $AWK_PROG '{print $3}')
-> +		 grep -a "^$qgroupid" | $AWK_PROG '{print $3}')
->   	# The qgroup is auto-removed, this can only happen if its numbers are
->   	# already all zeros, so here we only need to explicitly echo "0".
->   	if [ -z "$output" ]; then
-> @@ -218,7 +221,9 @@ prepare_nested()
->   	prepare
->   	local subvid=3D$(get_subvid)
->   	$BTRFS_UTIL_PROG qgroup create 1/100 $SCRATCH_MNT
-> +	$BTRFS_UTIL_PROG qgroup create 2/100 $SCRATCH_MNT
->   	$BTRFS_UTIL_PROG qgroup limit $limit 1/100 $SCRATCH_MNT
-> +	$BTRFS_UTIL_PROG qgroup assign 1/100 2/100 $SCRATCH_MNT >> $seqres.ful=
-l
->   	$BTRFS_UTIL_PROG qgroup assign 0/$subvid 1/100 $SCRATCH_MNT >> $seqre=
-s.full
->   	$BTRFS_UTIL_PROG subvolume create $nested >> $seqres.full
->   	local nestedid=3D$(get_nestedid)
-> @@ -228,6 +233,7 @@ prepare_nested()
->   	local subv_usage=3D$(get_subvol_usage $subvid)
->   	local nested_usage=3D$(get_subvol_usage $nestedid)
->   	check_qgroup_usage 1/100 $(($subv_usage + $nested_usage))
-> +	check_qgroup_usage 2/100 $(($subv_usage + $nested_usage))
->   }
->  =20
->   # Write in a single subvolume, including going over the limit.
-> @@ -377,12 +383,14 @@ nested_accounting()
->   	local subv_usage=3D$(get_subvol_usage $subvid)
->   	local nested_usage=3D$(get_subvol_usage $nestedid)
->   	check_qgroup_usage 1/100 $(($subv_usage + $nested_usage))
-> +	check_qgroup_usage 2/100 $(($subv_usage + $nested_usage))
->   	rm $nested/f
->   	check_subvol_usage $subvid $total_fill
->   	check_subvol_usage $nestedid 0
->   	subv_usage=3D$(get_subvol_usage $subvid)
->   	nested_usage=3D$(get_subvol_usage $nestedid)
->   	check_qgroup_usage 1/100 $(($subv_usage + $nested_usage))
-> +	check_qgroup_usage 2/100 $(($subv_usage + $nested_usage))
->   	do_enospc_falloc $nested/large_falloc 2G
->   	do_enospc_write $nested/large 2G
->   	_scratch_unmount
+Thanks and sorry for the confusion :)
+Ojaswin
 
+> 
+> > > 
+> > > > 
+> > > > I know userspace should ideally not do overwriting atomic writes but if
+> > > > it is something we are allowing (which we do) then it is
+> > > > kernel's responsibility to ensure atomicity. Sure we can penalize them
+> > > > by serializing the writes but not by tearing it.
+> > > > 
+> > > > With that reasoning, I don't think the test should accomodate for this
+> > > > particular scenario.
+> > > 
+> > > I can send a patch to the community for xfs (to provide serialization), like
+> > > I showed earlier, to get opinion.
+> > 
+> > Thanks, that would be great.
+> > 
+> > Regards,
+> > John
+> > > 
+> > > Thanks,
+> > > John
+> > > 
+> > 
