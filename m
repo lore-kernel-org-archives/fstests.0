@@ -1,274 +1,150 @@
-Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87E3A221733;
-	Thu, 31 Jul 2025 09:19:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753953569; cv=fail; b=jJTsOSeMLsVSgt0FFDOBxDcvIKTMs10jaqyNZvvZpcuaWdlxqGmq/+Z3HJTIBTI7afax7Kc6JDf8VCtNWFTveJhzLuHCHabjvPaNTHvfuHy7Sl1AK/6xUd/Q4R9aaRx06cGw3s2KPBpS7Be1TRNRlB1gadHclikRtUlyd4qxkcU=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753953569; c=relaxed/simple;
-	bh=nZoWS81Hw8jgsZAi5PE7PIDmoopoQYGmgbtAsCnnjck=;
-	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=fQTo/ChD9kOdxGm4HW5mF4G0s0R3P+hnkFqG+seY2BBXJMHxjOS2zKNi+V7Xjf3u+4HNp4T29zq4IT8DttoN4zYeN8peXfmGmllJk2ve0upjCW3QgWHHH37ZcQVhyp2XTnEcWZ/HgQ8roDxwrfGbkTMa2fXfnMsvaU8HVr9bW1Q=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=mFXeK/4s; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=Sfuevjo3; arc=fail smtp.client-ip=205.220.165.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E2DDC13D
+	for <fstests@vger.kernel.org>; Thu, 31 Jul 2025 10:21:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1753957290; cv=none; b=VxFwRLmmN/F4IaJcVrT9X9S0uJ61a8u2h3ha+V6cQUs545lwc0i3C9+/Fjp34KIOokWt4jTBpNVltms58xLqe/JIPtQpekV5qLtFD8IbWcOnhuPQlF7n7PAIqgyfYL+jTqyOTrbRInGvIbORbhE9dRmKV3lKbsSrR2PLawV4fHA=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1753957290; c=relaxed/simple;
+	bh=QYwHQ2K71dnmvtOfsyMDstzFHOeZmcYar5B/lhiB2Uk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=t5uCKCI2lH79GnZFKcwPNFNzFFVR8I8NI9HyaASxv3tu3pTvxEwQrQfKt2YErFSFiIzr3FyIQ7t5gNrpKIEsbxvs6facsl7hJ1APA5pGBtM93ZleW2W7OlWCOee9gYcZxL0mqGX8IYQUNcVEBN9Dg7ZRKCG1m0dEQIrjKZjpFvE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VGAJJOO0; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="mFXeK/4s";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="Sfuevjo3"
-Received: from pps.filterd (m0333521.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56V7C3Ju009438;
-	Thu, 31 Jul 2025 09:19:15 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
-	:content-transfer-encoding:content-type:date:from:message-id
-	:mime-version:subject:to; s=corp-2025-04-25; bh=pjBk5LjkuEykSEK5
-	VxddCAyNUScjp6PJv2pj5Dk/Xa8=; b=mFXeK/4sKT2euiTCgOfu6lRUoC/7iPRj
-	X9pHooXJ/ku6kCUJQNAIocftPXLqWW7eaEB6RnT2oYX+8TfomCUqqfV1XV8qIhaV
-	De2d0jnxd99ZuR8VLfPgiEuF/U58954cOzh1YC/D8pUkPPALd2HarySUC9UPTZW5
-	4jid1BqmDaDngDpmjzQD4XRAmCYUGcNPsdyXUMzMWdWrQRa1sNzZFparjXqkJ9tc
-	9Q2SymR3VPwPnRP44Ts70OYYh7oSj4d6YrDheW+w2fB/KPGDZihWB7llqF46A3Ty
-	jyBRCWIc0aCznbuPqEP90i74JTgW219q5tfaDicd7vadxDDsSGzO+Q==
-Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 484q4ebu2a-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 31 Jul 2025 09:19:15 +0000 (GMT)
-Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 56V71RWc020374;
-	Thu, 31 Jul 2025 09:19:13 GMT
-Received: from nam11-dm6-obe.outbound.protection.outlook.com (mail-dm6nam11on2069.outbound.protection.outlook.com [40.107.223.69])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 484nfjjpn2-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 31 Jul 2025 09:19:13 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=dvltwy0Hgwk12lbkUnMhZeIQquvukl3/nyft3xnXkfWU47VHbFPSyprSR5ytQ3Hb1vwEXpmtnHDWEAM4m2skApkiqmzzbap1RZ8SXH3Kh37k3LAP6zV496HQ1AAiB1MHEB6wCWq1Oc2+WAFXS015dyYk1uK9TvxRgnjj/Uua7PQakvR/5HTXnmFxJ0lvjgMidZsrSQxhAFMMsqVklHu3Go+4zrutFPBwOqU09vpm49uNnodERsDBTLzblB3+KH8qj7gxHWvs22eQ96MqRqdge64IaFXIWmFrO/QxopcWbV2rMrJW534pYwRn/iQZoN8Y/zGOTqeeB/WU13r835FLog==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=pjBk5LjkuEykSEK5VxddCAyNUScjp6PJv2pj5Dk/Xa8=;
- b=E4zQmLxz+zahcfa9i76JFPc65SPGlw9lUW6bo/87n6e5BoJefIvnifd8Hnn6RnzNkB5NBr3L3JuhcThN2/pcF9U6NFcD1PK1poBWteEtYuiqGHP1RqzRgLtIgYBB9AFtuQ+1UevGLOqlm0xNrURC37qRSHCRNrmTEnGCUY8WVGjBWn2L9u3WS9dypJK5e+wEqb+y7z+ZazRqJ7IHNxrykQjEfL5r8oAbphxveXmIwUKUHGp8E5OQO4WnK7YGqeumz8yfTMlz3hPv4lm2tP60ZZ2zEF5u844TDmbxMnQ/CxBC1SV4rnWuIGqtKmyik5W3wnWdP7cvZrEszBOxnZmc6A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=pjBk5LjkuEykSEK5VxddCAyNUScjp6PJv2pj5Dk/Xa8=;
- b=Sfuevjo3ROrqvSIOAqggiOUaHo2Q8FwYvleklWH+wFeoLqsxhmXtbAwQJw+gQ/LgG/5FqGdOXnKXYYA1ftjGRmxcPL5xOh14QeuVXpYHPixI4DqRJ8yRhaZLNIdxWf4YFRKA+O/TKOKDMjqEAB8xiDOlWl1qBN81JiaUzhYMV7I=
-Received: from MN2PR10MB4320.namprd10.prod.outlook.com (2603:10b6:208:1d5::16)
- by CH2PR10MB4232.namprd10.prod.outlook.com (2603:10b6:610:a4::19) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8964.27; Thu, 31 Jul
- 2025 09:18:41 +0000
-Received: from MN2PR10MB4320.namprd10.prod.outlook.com
- ([fe80::42ec:1d58:8ba8:800c]) by MN2PR10MB4320.namprd10.prod.outlook.com
- ([fe80::42ec:1d58:8ba8:800c%7]) with mapi id 15.20.8989.013; Thu, 31 Jul 2025
- 09:18:41 +0000
-From: John Garry <john.g.garry@oracle.com>
-To: zlang@redhat.com
-Cc: djwong@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        ojaswin@linux.ibm.com, linux-ext4@vger.kernel.org,
-        catherine.hoang@oracle.com, John Garry <john.g.garry@oracle.com>
-Subject: [PATCH] generic/765: modify some steps to fix test
-Date: Thu, 31 Jul 2025 09:18:13 +0000
-Message-ID: <20250731091813.2462058-1-john.g.garry@oracle.com>
-X-Mailer: git-send-email 2.43.5
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: SJ0PR03CA0185.namprd03.prod.outlook.com
- (2603:10b6:a03:2ef::10) To MN2PR10MB4320.namprd10.prod.outlook.com
- (2603:10b6:208:1d5::16)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VGAJJOO0"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1753957287;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=cU/mlk4+cjmiO8gLxsuVy22IbNZYIuo83j9UVNANkxs=;
+	b=VGAJJOO0R5ok/5NwjhW6IVpNQBSiVTUwufCUkJ35PUy7KAnudrwdtkauq98UpLB6+bss1i
+	Wc27eLn2JEEKfidI0ELuClLqTyZycIuKk+VyMPy6iamHG14tuLtngufflSt8f7IQ1GtvZO
+	AVU574KIt+XigwXj2OWP1gXsC6L/CmY=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-654-IUfiNpvKMUGwQPfRxaGjoA-1; Thu, 31 Jul 2025 06:21:26 -0400
+X-MC-Unique: IUfiNpvKMUGwQPfRxaGjoA-1
+X-Mimecast-MFC-AGG-ID: IUfiNpvKMUGwQPfRxaGjoA_1753957285
+Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-b3f38d3cabeso209961a12.3
+        for <fstests@vger.kernel.org>; Thu, 31 Jul 2025 03:21:26 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1753957285; x=1754562085;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=cU/mlk4+cjmiO8gLxsuVy22IbNZYIuo83j9UVNANkxs=;
+        b=NNUa5QwhTtCyb4+YzFLSnXpvn71JM/V6kmu20gGCMQXUapEYQLAhR4tW1WO7Rl1ZuB
+         l1BJ5ce9GrVjpLHh9q9e+cZKHgAVv61Zi+wVllN+iMT8az1081St73osWlrnP4zQUzb4
+         NNdyjK7THATxnQ8uATf1Bjr0eHEqrO462nagiU8Y2vcuAw2MXTbmTP7+Oyk6wqrwE10n
+         EN6p4iEFDs1di1s+dGH2ulPE1cAEGAhu7gF0L0Y2ekS9qqR8K/MhK0IFwvwDiwcATB65
+         6jFfSm3dBAIR+79Mdr5AoEiVdIojyeYfrKM3bcKkm7ISwIqISZuWUqK+vIP3ojThELSt
+         GjwA==
+X-Forwarded-Encrypted: i=1; AJvYcCVMc4zWMlDvZURTHrblLFhtKp9+NJgn3QaFG3ebzm4p80uJvo4mUDeQOeEUkI5BtpaHg104Xhs2@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz9mNrM7WvBFVK7++Is7CmXqov2PLXFOJB+XJvuAVicA29oe5cd
+	vlXajn7ngAQNuASxXV5Lwf498mu4CQRRyER51ATrJHSQ3eFTYLINNn1PFg0xiyX5DHqFk9VGyIZ
+	xuIv8ar4yJ7XV8B5e8sOcwVIu0UKvJpOvLhO9SwraJ732q+AUtahlTEQu3Rw=
+X-Gm-Gg: ASbGncsPHm2s1eQ0BESeTneUeJmqTLs7SDcdvKmkfjzHKaCiOpr7VkaZZSCk2d8mEyt
+	4LcYqRZT5usMqhwfQhpjXYWN6ZQW3HXdjwbq6FLcy645yXN8iqQO+S8RiR9jNEABSemnabPye7r
+	SOZvy9QmD8Xueeug33PvZiaGdKiqHRbi7/bahGrBWKh/iLE2Aik+GuD6NqNzlzjakByGBmnWYp/
+	QoSk5gy7OK5OBunI8xKmpiQy4UFEVJvGSYgvtvpr8ar5lcoX+ZR/PA19x9N/BUwQufAYhv+sfAP
+	mNlF2sCvlE1MQOiI1bRpgPIw0W6LzSFv4X/EjoEJH6aXKd9ojc8AuyQLraYaIEp6bJANzECHSuh
+	E+nwi
+X-Received: by 2002:a05:6a20:72a6:b0:21c:f778:6736 with SMTP id adf61e73a8af0-23dc0ff8ec8mr11986622637.27.1753957285308;
+        Thu, 31 Jul 2025 03:21:25 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFm7kTadKIUZ98WHXFMjADbVfxzuxVYjdYVhZQ2wd3MAOo33eJmn1Jd5U+julIwWsBOCv3Orw==
+X-Received: by 2002:a05:6a20:72a6:b0:21c:f778:6736 with SMTP id adf61e73a8af0-23dc0ff8ec8mr11986593637.27.1753957284946;
+        Thu, 31 Jul 2025 03:21:24 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-76bcce6f907sm1256844b3a.8.2025.07.31.03.21.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 31 Jul 2025 03:21:24 -0700 (PDT)
+Date: Thu, 31 Jul 2025 18:21:20 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org
+Subject: Re: lots of mounts/remounts of the test file system?
+Message-ID: <20250731102120.evnmx33me5hl7hnq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <aH87hl9NUmiqqvU-@infradead.org>
+ <20250729142951.GR2672039@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: MN2PR10MB4320:EE_|CH2PR10MB4232:EE_
-X-MS-Office365-Filtering-Correlation-Id: 5b98e5e5-3572-4ca4-7083-08ddd0133d72
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|376014|366016;
-X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?rYCCqUCVGZPtPiuzCy9lGDMieuHyHYvW/NWZ2195UQA036a8HKLB3eDnJVFU?=
- =?us-ascii?Q?TuTy/gYANU3xSbzkEMFbNhlhafMKUDEDwvEJYTbJskrROD/oxNnbTGlFe3Lu?=
- =?us-ascii?Q?KIW6JSuB1U9525kCj783wv1xv5t24ZwcMFSb3erIwXrtiQrQW/dRf7RNT4li?=
- =?us-ascii?Q?CwH3w3eSP+NivlaFu8R9rbF7hDBSdXgqq8mLYHTABELYGkmMRZsKRzYBQ077?=
- =?us-ascii?Q?YTMPl8YrVCkXOMxvXbp4oSBz0ebU6fc16kDXWS32VjuCQWO1Jy9buqSYchlB?=
- =?us-ascii?Q?zI10k+HY4HvAe6UK+3UwSl7W4xAvSZe6jHvzHn/rC5c/0TqtKmSlF3ilMfAq?=
- =?us-ascii?Q?veuAhE+HdktOijicNOc5btTGzU1tTkgsWzXh/BRA+UjU5IJCG+OTo6W15M8I?=
- =?us-ascii?Q?80E1tF+tIlienk8I2VrYAL8QhSpXG2zT3DPS+OBeVw+AcBGGSO408RvAAXN/?=
- =?us-ascii?Q?gMGR7024FLIqF/RYPibZAJqY7UwNpOWUxIfmia5DAJbAn1TWtK7GMtn5Kn2e?=
- =?us-ascii?Q?XBVU0svRjdnl591RPeL//8A+WKL8Xw/6Tlf0rH3xwUgdBowMgI50JrbZcBqS?=
- =?us-ascii?Q?aEUyYDcbNy7gvcOY93rQkwvKLlM6Yratq/x3jLgtrZaePwDOc3vayFKOa0Yc?=
- =?us-ascii?Q?oO93FXRw0+yXf/i4pYXZesBDy3CkA07IDZx5nfYm+GEQh8fM99f2xDMNGKtn?=
- =?us-ascii?Q?3Uk6lhKCgMBr8nSZKTwP8IyJ3CXFmDOtgxW3Lf1mgPFDVEKP5m+JjXDcsfWv?=
- =?us-ascii?Q?ZuXtc01EV59CQFSHu8ww0L0PZ618T6BhQ6XXJO0JL1J3lgsw9OAy46EIvPJ5?=
- =?us-ascii?Q?P04AJ0vifxh8aHINH2CLb6jWcATgmcxfshe+3tffo2EgURNs+DT6q8ZvOAbL?=
- =?us-ascii?Q?13mBx2H78UcT1bINf8NCXeWvNSMtCiPLJACe6Fec4B9BkBfdJLypwFXaJXtA?=
- =?us-ascii?Q?f3UyTimOc0L+gI7yRAJ5Sf+OWgXprrZElW8HgI3YviQH3d2D4Utv0k0Xj3pt?=
- =?us-ascii?Q?C5YCnDssLsYnZWJvIqhRtriuIIgyFUFWiDcbhZCWKhWfOhjclQaqJUX7vsH0?=
- =?us-ascii?Q?K75VvjQcMyX5/pC8CUbJ0EpEBsWavUZHKc5U7QOhMWrC27Xs7kANRKSL3tXA?=
- =?us-ascii?Q?lHwEGhE1ItgUZLPTJxCxsIb2jOeKTe33SvVCN+ID0ELK45Og7danOFb4KatI?=
- =?us-ascii?Q?fUOquSAtpxtIaEmq/mP5L4/iNo5tCjtjg+BRG25vzP9Vd+0Vk607xp6jFnT7?=
- =?us-ascii?Q?y9BtLudQDeTBOslwTPfG27h575kCuYz/tVs2zTxqFhU/VNz9WL9qh3tpNRyf?=
- =?us-ascii?Q?HzCELwGZVxRFLodzMn4ReXq3g5VZhIQ0+RVynsSvjQE9y0LqBeInOX2aAZxV?=
- =?us-ascii?Q?MCwQY4uHZNjCieYhWnDupqOGR9ukhxjtbF68gElh/uv3sblKxUsaNRMFztUD?=
- =?us-ascii?Q?Esyxusz35VA=3D?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MN2PR10MB4320.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(366016);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?o0zlooQy9Fya/ab/Aun7Q5foDGYPYJrRKYDeTVDUNOVohZLIt0j1NUHgu5uE?=
- =?us-ascii?Q?I6CN1jiJqse3qlcsGMPsoGt6Of3PECtrOhNCaM1yVT7ya6ZLiTEOpInO+qdE?=
- =?us-ascii?Q?uKRerjbjHZOIvRa4YGqnkKI8rFirZDDU4v4LPtjCahYrCt8MirbYqoF6xgtQ?=
- =?us-ascii?Q?RUJ13ux5qWLNePlw/MOSSmrAEW6UNnuJ7g+4J7W1hNZrbqIb6Uhjy7PvOM/t?=
- =?us-ascii?Q?zWpwiNrp3RIqRjQMIlktYbuxxmk7P3yRADvLyZvOM75Ht1U7xevGi1JD5C4e?=
- =?us-ascii?Q?OuaZCXmyBXFcECVFKuU1EJrQLHIB4JMNBolBc4R0ZkKDK2UyO/WcEp9XCN+2?=
- =?us-ascii?Q?Pvb7pz5lzwyFerELD9Vq4iEl+d+kz3E24k4SKcelSmMLKi98KpK5asPbIx17?=
- =?us-ascii?Q?GgoAeudIRDEcBxa66YyiM4q7L70mvXhg0qmjEG2UnqprsstFr2eZPI583C4P?=
- =?us-ascii?Q?xhYemeV4EFnpNO6pKk7zrCYS6QWnmonzh/1cOtzgUfE04gZyaMsScONV7Y7H?=
- =?us-ascii?Q?ANdxLw7D1XA/fhTNQ+2UrTn4+X4RgZg6jPlueNbFIOeTxoIj7BGLzTJbRJKR?=
- =?us-ascii?Q?HGmSCXTGPlGEd0uWhDm4SIS7g5xJyQ6livqEVlDcw8FRQhDvMRGdgrmOl/ZF?=
- =?us-ascii?Q?uADNEoC8uVLS5MhfyDkg1+o7Aelq8v4rc8cRdZ9Sh+OYg9p8AxVfTAs1lTGa?=
- =?us-ascii?Q?us4cKQgavWcnfLFHBK+3YZLeLuw4Am2DzmCj1dnAqMgt6FHLuq07XgD6KVF3?=
- =?us-ascii?Q?yYDTF2bKmHO65WorBW7OWRVgakc+lr3RMNAuezLN28jN5Gv7lZmne4jE0Bu3?=
- =?us-ascii?Q?kwutiGWGO6bHUkcy+rO7nEN+V+7D+5So76Bbsp6j1VPnT7O6oVaeOcXyc+T1?=
- =?us-ascii?Q?j2K55WuWv+Oemuw4ZCtaOPedaCOT1CmrEQZtHZhMscp21WVS8xpC4H82WMAM?=
- =?us-ascii?Q?cFS5g8C+Se2bOQZKt3oImNtaudOdv1WgB8bEfeF0Mu/psdpLnXSkQHURciMH?=
- =?us-ascii?Q?LRKX8b/bYOs4EokT3fdJmJFINU/UdhSnIOBOa0Atge0kqajM75Cg5n8AjADf?=
- =?us-ascii?Q?CoP72ycjfK+6HHzlGjmdxyXHubrtVFLeS6nE6yOrjLkTaH9o1L4nxyyqP/nw?=
- =?us-ascii?Q?tN76kuHfeV1f+xlgEIru0PPGkeBlk81IOuXGF8JmVfCrTI3xXNmePambWr0M?=
- =?us-ascii?Q?rSfR3nuWTAPyaMQBOIe6FpdWpRatYeFnVSBQ34aXEoWsn8BP3uKsUtNsiH59?=
- =?us-ascii?Q?clg9oPOUHIec30KGzpUChFvcLj6Rfn3ZfNSLFMUHq5ea3Arx32lNbq5azFBE?=
- =?us-ascii?Q?HOuxJ80n0WqV49YF+1TL2Ef0lRykd19hNM1I6Gy3SaUu4ky3DWVqWY7tReIV?=
- =?us-ascii?Q?+DjOaLJcZeV4Mlrpfz4O1kTtW0rZnHlKM63doDa7uBzqzVV8PoHo7hAl8p+W?=
- =?us-ascii?Q?LtK6K7/xJSn7rMtWSKdZ9Kvczy1qq7gtI/RaQDI2YidHrBgJrO9AYIkr6Ly6?=
- =?us-ascii?Q?TAEo0uU2Qzz5Y5+K4wvKXGPJ6aY92SOPKJPEcZNRarPg3/gMogpsRosDEd4/?=
- =?us-ascii?Q?sl2493CvLDvLOptGOj5AMfJwEwYxczjPddlRQBbIi0gicgHTI3lsCgHPf+hw?=
- =?us-ascii?Q?jA=3D=3D?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	SlWTydT/CyjPbmVt3Hu3wXFegsXN6LStQTeILmcdrYOoBoCm164qoNYeMI1DL/MdG8uthZp9i8pqT5HkscUN5O+ccvFeilKdcvX9q3aeO5dczXW50KowIyxJts06ui3BZmlkk2PSBOsT5+jzmuovLaEu1Kdt7rIWr9kxVyOaNDMaYhPfiXhGO27r2JELpqVumtE71qEdHNLLZkAAVQRngWRF9T85zIFqE04EqzkO77cyrOQglvzyEbqMB0JBFREHvye3IyZU4zW0NpgEoPHKTI8uKKhh1oWKRb+EFjUe4GEgCLiXe2dfP6PZFQmh8FTGpuA1TFyUFPL5EUDSXATR3wXwXbKVnuZRNbqJpZzXAxCuiHFEC2VqZwhKa+QTftdn9Njc058UbG3wo2BDAEZSIJFtOuENy+3fbjXzQ54nOHwWi4XsK5s/fDYA+S8zvKeZZGuZzh1qHgXlcrpeA9zV70VREpO721smdPoExcBEKADw84XUexxBXantjxDTG5TM602RB3buKJR+qhb4XyUnYYoK+mou2nTfWa0wL5c2twts30GKl4wch54erFbuEQ/gDEPL6p8Gt40YGA6R01c0F9rC5KpZZk5AkMtpmeM0kgU=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 5b98e5e5-3572-4ca4-7083-08ddd0133d72
-X-MS-Exchange-CrossTenant-AuthSource: MN2PR10MB4320.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 31 Jul 2025 09:18:41.2020
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 7gY3BrXbcQjI+fX4E5x112VtODBprBTmnLFLQyvxHBLVHLa7/ovtzbtbshjux9JwriqI+mXveOixrf8NNWZg/A==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH2PR10MB4232
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-07-31_01,2025-07-31_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 suspectscore=0 bulkscore=0
- malwarescore=0 mlxscore=0 adultscore=0 mlxlogscore=999 spamscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2505160000
- definitions=main-2507310064
-X-Proofpoint-ORIG-GUID: OwfkVQ473k5Bq5XL_wtdUhF_bU9ClbyG
-X-Proofpoint-GUID: OwfkVQ473k5Bq5XL_wtdUhF_bU9ClbyG
-X-Authority-Analysis: v=2.4 cv=QZtmvtbv c=1 sm=1 tr=0 ts=688b3513 b=1 cx=c_pps
- a=qoll8+KPOyaMroiJ2sR5sw==:117 a=qoll8+KPOyaMroiJ2sR5sw==:17
- a=6eWqkTHjU83fiwn7nKZWdM+Sl24=:19 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
- a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=wKuvFiaSGQ0qltdbU6+NXLB8nM8=:19
- a=Ol13hO9ccFRV9qXi2t6ftBPywas=:19 a=xqWC_Br6kY4A:10 a=Wb1JkmetP80A:10
- a=GoEa3M9JfhUA:10 a=yPCof4ZbAAAA:8 a=LtZAGE1ReaBs-9uQQ1sA:9 cc=ntf
- awl=host:12071
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzMxMDA2MyBTYWx0ZWRfX49t/4vmaRije
- KOCv1RUkOVwabrzNtYH0zngkPuLM7IbfcBqnee8DLzB6w+mT6IcEOBt+Rcs8Y2FxTwPUmiI84Tq
- vnilyarqlLa48bZecekO/Dz4A90/ftVN1Zw7qutfHfTv+VJGo2h8i5Xj5q8eF2WdVaXNm6GniiG
- 2UK2SIWT814+F+014yEntJyLqH1u7jUDE5islSkSViSHjmuOzW6ubgpw8eU8j1l+M1zOoqAtCEF
- +Il5JbUJptzBVYOTQyyfNi2SbUT9UmstkoIPsb2Yzzc5jIIH3B6Z9kJ5pzGUtKmba10QGPvUCMl
- n0Tqw3shChsW+cSdk1QIjMYCLytE8IPAgBJ3eFzHrji68cu29KoBM2rIrC1GoCKeLim3cVpouud
- y1azEBfskEkqmyaT3ZCwHu/86U76hK3rs2mCGSmz9hV9qB5jpl1xSqiLskxZyheR15EYZ3Ut
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250729142951.GR2672039@frogsfrogsfrogs>
 
-Now that multi-block atomics writes are supported, some of the test steps
-are failing. Those steps relied on supporting single-block atomic writes
-only.
+On Tue, Jul 29, 2025 at 07:29:51AM -0700, Darrick J. Wong wrote:
+> On Tue, Jul 22, 2025 at 12:19:34AM -0700, Christoph Hellwig wrote:
+> > Hi all,
+> > 
+> > I've been hacking on some (XFS) code that in this state of development
+> > requires a mount options to be passed for every mount, and I noticed
+> > that even when running without a SCRATCH_DEV I have to add the required
+> > option to MOUNT_OPTIONS and not just TEST_FS_MOUNT_OPTS, which is a bit
+> > odd.  I've been trying to track it down and despite multiple attempts
+> > failed to find my way through the bash code for it.
+> > 
+> > But what is even more odd is that when running just a single test (e.g.
+> > generic/001), the test fs gets mounted four times, with the second
+> > and fourth time failing to apply the mount options.
+> 
+> Huh, I observe the same thing.  I wonder why it does that, but bash is
+> pretty awful for tracing and there's no obvious explanation. :(
 
-The current test steps are as follows:
-a. Ensure statx for bdev returns same awu_min/max as from sysfs
-b. test mkfs for each size of bdev atomic writes capabilities and supported
-   FS block size
-c. Ensure atomic limits for file match block size for each in b.
-d. Ensure that we can atomic write block size for each in b.
-e. Ensure that we cannot write file for 2* bdev awu_max or bdev awu_max /2
+I tried to run generic/001 on xfs, then I got below dmesg output:
 
-Make test pass again by:
-1. Modify c. to ensure file awu_max >= block size
-2. dropping e. We already have tests to ensure that we can only write a
-   size >= awu_min and <= awu_max in generic/767
+->[2252223.939937] XFS (sda5): Mounting V5 Filesystem 364c2734-5bec-4d6a-8057-6ced2ea53e95
+  [2252223.963840] XFS (sda5): Ending clean mount
+  [2252224.892093] XFS (dm-3): Mounting V5 Filesystem 1de154c4-41cd-4b49-a09c-a55532f58ee9
+  [2252224.910117] XFS (dm-3): Ending clean mount
+  [2252224.950702] XFS (dm-3): Unmounting Filesystem 1de154c4-41cd-4b49-a09c-a55532f58ee9
+  [2252226.047099] XFS (sda5): Unmounting Filesystem 364c2734-5bec-4d6a-8057-6ced2ea53e95
+->[2252226.168554] XFS (sda5): Mounting V5 Filesystem 364c2734-5bec-4d6a-8057-6ced2ea53e95
+  [2252226.190181] XFS (sda5): Ending clean mount
 
-Signed-off-by: John Garry <john.g.garry@oracle.com>
+  [2252226.208104] run fstests generic/001 at 2025-07-31 17:18:04
 
-diff --git a/tests/generic/765 b/tests/generic/765
-index 71604e5e..8c4e0bd0 100755
---- a/tests/generic/765
-+++ b/tests/generic/765
-@@ -84,8 +84,8 @@ test_atomic_writes()
-     # Check that atomic min/max = FS block size
-     test $file_min_write -eq $bsize || \
-         echo "atomic write min $file_min_write, should be fs block size $bsize"
--    test $file_max_write -eq $bsize || \
--        echo "atomic write max $file_max_write, should be fs block size $bsize"
-+    test $file_max_write -ge $bsize || \
-+        echo "atomic write max $file_max_write, should be at least fs block size $bsize"
-     test $file_max_segments -eq 1 || \
-         echo "atomic write max segments $file_max_segments, should be 1"
- 
-@@ -94,34 +94,6 @@ test_atomic_writes()
-     _scratch_unmount
- }
- 
--test_atomic_write_bounds()
--{
--    local bsize=$1
--
--    get_mkfs_opts $bsize
--    _scratch_mkfs $mkfs_opts >> $seqres.full
--    _scratch_mount
--
--    test "$FSTYP" = "xfs" && _xfs_force_bdev data $SCRATCH_MNT
--
--    testfile=$SCRATCH_MNT/testfile
--    touch $testfile
--
--    file_min_write=$(_get_atomic_write_unit_min $testfile)
--    file_max_write=$(_get_atomic_write_unit_max $testfile)
--    file_max_segments=$(_get_atomic_write_segments_max $testfile)
--
--    echo "test awb $bsize --------------" >> $seqres.full
--    echo "file awu_min $file_min_write" >> $seqres.full
--    echo "file awu_max $file_max_write" >> $seqres.full
--    echo "file awu_segments $file_max_segments" >> $seqres.full
--
--    $XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 0 $bsize" $testfile 2>> $seqres.full && \
--        echo "atomic write should fail when bsize is out of bounds"
--
--    _scratch_unmount
--}
--
- sys_min_write=$(cat "/sys/block/$(_short_dev $SCRATCH_DEV)/queue/atomic_write_unit_min_bytes")
- sys_max_write=$(cat "/sys/block/$(_short_dev $SCRATCH_DEV)/queue/atomic_write_unit_max_bytes")
- 
-@@ -150,14 +122,6 @@ for ((bsize=$bdev_min_write; bsize<=bdev_max_write; bsize*=2)); do
-     fi
- done;
- 
--# Check that atomic write fails if bsize < bdev min or bsize > bdev max
--if [ $((bdev_min_write / 2)) -ge "$min_bsize" ]; then
--    test_atomic_write_bounds $((bdev_min_write / 2))
--fi
--if [ $((bdev_max_write * 2)) -le "$max_bsize" ]; then
--    test_atomic_write_bounds $((bdev_max_write * 2))
--fi
--
- # success, all done
- echo Silence is golden
- status=0
--- 
-2.43.5
+  [2252230.614153] XFS (sda5): Unmounting Filesystem 364c2734-5bec-4d6a-8057-6ced2ea53e95
+->[2252230.755666] XFS (sda5): Mounting V5 Filesystem 364c2734-5bec-4d6a-8057-6ced2ea53e95
+  [2252230.776979] XFS (sda5): Ending clean mount
+  [2252230.820463] XFS (sda5): Unmounting Filesystem 364c2734-5bec-4d6a-8057-6ced2ea53e95
+
+Some lines are outputed before "run fstests generic/001", some lines after it.
+
+------
+Before that line, my testing (./check generic/001) tried to mount TEST_DEV (sda5) twice,
+tried to mount SCRATCH_DEV (dm-3) once. Let's focus on TEST_DEV. By enable bash
+DEBUG_XTRACE (bash -x) in check and generic/001, I found these two places which
+mount $TEST_DEV in check:
+
+1) _test_mount
+2) _check_test_fs -> _check_xfs_filesystem -> _mount_or_remount_rw
+------
+
+------
+After that line, my testing tried to mount TEST_DEV once, that comes from:
+
+1) _check_filesystems -> _check_test_fs
+------
+
+So the "_check_xfs_filesystem" set ok=1 by default, then does $XFS_REPAIR_PROG,
+and set ok=0 if it returns non-zero. Then if "ok isn't 0 and type=xfs", calls
+_mount_or_remount_rw to mount. This generates extra mount operations.
+
+Thanks,
+Zorro
+
+
+> 
+> --D
+> 
 
