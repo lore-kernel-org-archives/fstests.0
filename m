@@ -1,74 +1,85 @@
-Received: from mail-pf1-f175.google.com (mail-pf1-f175.google.com [209.85.210.175])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1E8C208CA;
-	Thu, 31 Jul 2025 12:36:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B87591A01C6
+	for <fstests@vger.kernel.org>; Thu, 31 Jul 2025 15:00:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753965372; cv=none; b=isVDyiZF+gnQLRJythA7O2urGJXz0OPSyLXZ4RrPNFcDcPTMcrtYns1gPPu3ztAB/Wvu9ecOtuex9PfX5TAoM5S6m9XK80lYOtm3fh6abSBTr6CqKkLkY5hTfkM9tSX8qKgF2x57rpfMQea8Pi+QvZm3pTjyJbmDFHCuzcy//vc=
+	t=1753974034; cv=none; b=AC2DNmY5wIX9D6677c4fynvwVexvK+rvTFwZGQAih7ENBSwWXHT/+aO6nzYgQEhg2pMm3ArKtr26Qm0N72muZ1rwrij4V3B0ekGnsmY/OS1QQvFgGjJm693TeG62HISfN6dK4hzwkWWBAdZBjsFIbahUTw37hbKXAHvng2haH64=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753965372; c=relaxed/simple;
-	bh=2sKQ7zGiP1fWhhQs9dtMi8Y2XcZPKOcGmEE/KwYWB4Y=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=QXU0EEa7ZVDqkFqkyBcskUR+1SbpgK4cAPExDiSH+nhjbXKI9P2naoCj+KpTPNCMIfwtZka9RDmTlQH4Mi1F8v6TJSdBI/zKT//UgphWxlTLyon3zYUraY2J0iM2pWz83+GjUAl4UeCy7DNeN6D2B+L1HsbUohQ80MRBQpdcnLA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=UlSCoFXO; arc=none smtp.client-ip=209.85.210.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1753974034; c=relaxed/simple;
+	bh=8iBsCXSMxFp3Z/rGX3sNPO2dPgydWh+KZVQ3cFcbulU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=iqpqe89VOsmfDJ8jBUamIm3F6eEqoWQtpNysWoz8F40TNsvhPU9te/4WgonLckhqGJJO2cSuJe5hXx+xt+6By3eIxXDS+3RC0K3TpDIiszae3VaRCZgT3pZR7vD+MroamfN5CNu/NnXE8x7FBi9UBNX6/xpfCqbVw9TMojUudic=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=XBIyAI53; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=NjKsRzi0; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=vyBODI4Z; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=h/g63xHM; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UlSCoFXO"
-Received: by mail-pf1-f175.google.com with SMTP id d2e1a72fcca58-769a21bd4d5so344507b3a.0;
-        Thu, 31 Jul 2025 05:36:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1753965370; x=1754570170; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=siK6qYT/BzYO6bFUr8CySnhWmI/+PQjMjfrdUUdh684=;
-        b=UlSCoFXOFdnmBWqSAmXrBdIYLkk4AZEj8kKPrUQM7sXCyGD+1ybiQM3tdKCXnToVc/
-         t9naon9G7b59/xPZsDkvX6SACwZM+zStvHuwmyzBwf6THXaZre3IMavDj/rr1n77JPx5
-         61iSvAZBs9xdOG5vncS0DCabSIAM6LnfutcNbVkDN7Qp2pSbRRSwe46ECtrOKMTkTjxG
-         aaQAX4WPgrMakbVa10GQsQ2PtDipJjrDPKUOh66t/0U1zWv7UyiU1kHaMOsmO4Iqhett
-         omQzY9B67vX4uF5I1jtbLxXJlTco12gKM/ub45vDGXyecfYM98X5trvkigCpKIBWe1gH
-         FZqg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753965370; x=1754570170;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=siK6qYT/BzYO6bFUr8CySnhWmI/+PQjMjfrdUUdh684=;
-        b=uHg63AfOyQMJThK/7n7DAXlVv5U9kSCNWX8pDgwpso8zuP9cGW32m+VglGaiDEQkRQ
-         0xP1T/mooQ/+ghAxaOuoXAt88lPvjf88GllcyW8AiooUo0A54m/860Fj0Fc4+Vx7sZ0q
-         i2PQQJJAhtXcZ5DQq05cmIvBFtVp954g8UyM6T+lxPcoSz7bXssO2oMTF4qxRC5cXONn
-         3oel9KMxH8UOzSuGZRs7WK8PtQqolm0OqmCjt0/sofm0F3lKpaDfIEVHVIE2mezhjFL2
-         c4pAUPP+tteNUpVvpJBqcNNGrnpytncHBkTqtJeshvs92AAGDgBThIJzueBDSNeDq4Mh
-         iKMQ==
-X-Gm-Message-State: AOJu0YzgWpqYpRWLRXvkv60kALweWUvHXY+soD8fvzqyedXOLUxqC61s
-	l16koUwULMD+s/52nVZ5A6A6Bfjfd84y/buftClQk2UhqmSzEPPBD8lvyLJCkMkt
-X-Gm-Gg: ASbGnct7aWQXaH2jV4NiLWLnkynLlxK5k5nDGidkX+6RuwUyHB9rvPNmkNv/k0KJmUQ
-	tuif31xKd7L3hyLDYEijGgNLZCd6dSBUzyRoLhfihZBGq7HBSMIEeSn94RgelqTe7YBEHQ7akOm
-	sGySfZ5Bw5xU504LgzgPsaS/V2hu7hZj4Y74467rrndGJSkXpYrjCKoUr9GD+IcEauNq1tF76hl
-	9L3JjRsqO5xAqCVf+P+NSS/lB6jSyX3bb96KdAzXwsjou/SQ6aAUP83xdWED+XzpTdC72OzsIJQ
-	R/fn81nwkEG7rzdw+CwDn+b+Ftiz9cFJvtWnqVjyQmyb8qu+wsB+8z+whJvvWmmSeNR+0q2Ei3C
-	i7aCShEEnrqZFybc5YNqZ7G0biYJJ
-X-Google-Smtp-Source: AGHT+IHjy02xFArT4HymvONwq8PTP5mJd+hT33JQXK8hVkPzy0Sr0tU6f8DlT2klpiBKvU8Ml+Fjsg==
-X-Received: by 2002:a05:6a00:3a15:b0:732:2484:e0ce with SMTP id d2e1a72fcca58-76ab309af3cmr9212790b3a.17.1753965369474;
-        Thu, 31 Jul 2025 05:36:09 -0700 (PDT)
-Received: from dw-tp.ibmuc.com ([49.205.218.89])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-76bccfd0e78sm1510625b3a.99.2025.07.31.05.36.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 31 Jul 2025 05:36:08 -0700 (PDT)
-From: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
-To: fstests@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org,
-	Jan Kara <jack@suse.cz>,
-	"Darrick J . Wong" <djwong@kernel.org>,
-	John Garry <john.g.garry@oracle.com>,
-	"Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
-Subject: [RFC 2/2] generic: Add integrity tests for O_DSYNC and RWF_DSYNC writes
-Date: Thu, 31 Jul 2025 18:05:55 +0530
-Message-ID: <9b2427b42e8716c359a36624fd6363f71583941b.1753964363.git.ritesh.list@gmail.com>
-X-Mailer: git-send-email 2.49.0
-In-Reply-To: <28abb8a0c4031ce07b475bf9026eedc23892868b.1753964363.git.ritesh.list@gmail.com>
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="XBIyAI53";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="NjKsRzi0";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="vyBODI4Z";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="h/g63xHM"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id BCFCC1F813;
+	Thu, 31 Jul 2025 15:00:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1753974030; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=AbyXKL6HQV1X+cVz8ZhvI4n3efWkggHWZs0n6HYR1QY=;
+	b=XBIyAI53DOXNI6entUsH9ymjzostaKVYJBfPnjBKyiUtMTrZ3V1/eShXtGbKWq9NV/Ij/7
+	F1Rp2ZQeOBG35rZ+fo2/JmfIOWqKAHGTuGbMwdDri6wzPtlxtZVVQATR4YiycSWGDsdGje
+	KysdAMyKeZdTaO2xp6JqC9ZQKfxoXWM=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1753974030;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=AbyXKL6HQV1X+cVz8ZhvI4n3efWkggHWZs0n6HYR1QY=;
+	b=NjKsRzi0tj2F4CPPA3nrVjB0UvNq4CyHyuroECRbpZXojqVfT8wnq5fwlBWu0s2nJTItwN
+	qUCq04GiLGctlqDw==
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=vyBODI4Z;
+	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b="h/g63xHM"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1753974029; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=AbyXKL6HQV1X+cVz8ZhvI4n3efWkggHWZs0n6HYR1QY=;
+	b=vyBODI4ZHQC1KoN75OrPqBU1UGQr/0JzkHoUeoDdadLH36PbgHTk+QXilebcwJ7gMoROUk
+	pzeSFS1oxY17Chj7Na2spmSQ7CZJRq+z/yYHzfD3tGV/rZuKTiYUgRRGQcbM6XBHUW8cwc
+	xAPbu0yZuMtI6gzJDe3xMcHuGmu3oOY=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1753974029;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=AbyXKL6HQV1X+cVz8ZhvI4n3efWkggHWZs0n6HYR1QY=;
+	b=h/g63xHMS4BDuyzhlwaaJ4lZqzLbSpwBKx1MpMKUhACYpc7/muDwrIdZxyY4n7vQe1PVri
+	7LQoNsJK+ZqAaPCA==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id AF92D13876;
+	Thu, 31 Jul 2025 15:00:29 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id 68fWKg2Fi2jmCwAAD6G6ig
+	(envelope-from <jack@suse.cz>); Thu, 31 Jul 2025 15:00:29 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+	id 39ABBA0A02; Thu, 31 Jul 2025 17:00:29 +0200 (CEST)
+Date: Thu, 31 Jul 2025 17:00:29 +0200
+From: Jan Kara <jack@suse.cz>
+To: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+	Jan Kara <jack@suse.cz>, "Darrick J . Wong" <djwong@kernel.org>, 
+	John Garry <john.g.garry@oracle.com>
+Subject: Re: [RFC 1/2] aio-dio-write-verify: Add O_DSYNC option
+Message-ID: <rmevgqdu6jqphqgxx35oye7ukhakijvalgbbn24zxblajaf75m@ag3t4ksa4wv6>
 References: <28abb8a0c4031ce07b475bf9026eedc23892868b.1753964363.git.ritesh.list@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -76,113 +87,101 @@ List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <28abb8a0c4031ce07b475bf9026eedc23892868b.1753964363.git.ritesh.list@gmail.com>
+X-Spamd-Result: default: False [-2.51 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	SUSPICIOUS_RECIPS(1.50)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_RHS_NOT_FQDN(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	FREEMAIL_TO(0.00)[gmail.com];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com];
+	ARC_NA(0.00)[];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	TO_DN_SOME(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_COUNT_THREE(0.00)[3];
+	RCVD_TLS_LAST(0.00)[];
+	RCPT_COUNT_FIVE(0.00)[6];
+	TAGGED_RCPT(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DKIM_TRACE(0.00)[suse.cz:+];
+	MISSING_XM_UA(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.cz:email,suse.cz:dkim,suse.com:email]
+X-Spam-Flag: NO
+X-Spam-Level: 
+X-Rspamd-Queue-Id: BCFCC1F813
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Rspamd-Action: no action
+X-Spam-Score: -2.51
 
-This test verifies the data & required metadata (e.g. inode i_size for extending
-writes) integrity when using O_DSYNC and RWF_DSYNC during writes operations,
-across buffered-io, aio-dio and dio, in the event of a sudden filesystem
-shutdown after write completion.
+On Thu 31-07-25 18:05:54, Ritesh Harjani (IBM) wrote:
+> This patch adds -D for O_DSYNC open flag to aio-dio-write-verify test.
+> We will use this in later patch for integrity verification test with
+> aio-dio.
+> 
+> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
 
-Man page of open says that -
-O_DSYNC provides synchronized I/O data integrity completion, meaning
-write operations will flush data to the underlying hardware, but will
-only flush metadata updates that are required to allow a subsequent read
-operation to complete successfully.
+Cool. Both patches look good to me and they fail without the iomap fix I've
+submitted so feel free to add:
 
-Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
----
- tests/generic/737     | 30 +++++++++++++++++++++++++++++-
- tests/generic/737.out | 21 +++++++++++++++++++++
- 2 files changed, 50 insertions(+), 1 deletion(-)
+Reviewed-by: Jan Kara <jack@suse.cz>
 
-diff --git a/tests/generic/737 b/tests/generic/737
-index 99ca1f39..0f27c82b 100755
---- a/tests/generic/737
-+++ b/tests/generic/737
-@@ -4,7 +4,8 @@
- #
- # FS QA Test No. 737
- #
--# Integrity test for O_SYNC with buff-io, dio, aio-dio with sudden shutdown.
-+# Integrity test for O_[D]SYNC and/or RWF_DSYNC with buff-io, dio, aio-dio with
-+# sudden shutdown.
- # Based on a testcase reported by Gao Xiang <hsiangkao@linux.alibaba.com>
- #
+and
 
-@@ -21,6 +22,15 @@ _require_aiodio aio-dio-write-verify
- _scratch_mkfs > $seqres.full 2>&1
- _scratch_mount
+Tested-by: Jan Kara <jack@suse.cz>
 
-+echo "T-0: Create a 1M file using buff-io & RWF_DSYNC"
-+$XFS_IO_PROG -f -c "pwrite -V 1 -D -S 0x5a 0 1M" $SCRATCH_MNT/testfile.t1 > /dev/null 2>&1
-+echo "T-0: Shutdown the fs suddenly"
-+_scratch_shutdown
-+echo "T-0: Cycle mount"
-+_scratch_cycle_mount
-+echo "T-0: File contents after cycle mount"
-+_hexdump $SCRATCH_MNT/testfile.t1
-+
- echo "T-1: Create a 1M file using buff-io & O_SYNC"
- $XFS_IO_PROG -fs -c "pwrite -S 0x5a 0 1M" $SCRATCH_MNT/testfile.t1 > /dev/null 2>&1
- echo "T-1: Shutdown the fs suddenly"
-@@ -48,5 +58,23 @@ _scratch_cycle_mount
- echo "T-3: File contents after cycle mount"
- _hexdump $SCRATCH_MNT/testfile.t3
+								Honza
 
-+echo "T-4: Create a 1M file using DIO & RWF_DSYNC"
-+$XFS_IO_PROG -fdc "pwrite -V 1 -S 0x5a -D 0 1M" $SCRATCH_MNT/testfile.t4 > /dev/null 2>&1
-+echo "T-4: Shutdown the fs suddenly"
-+_scratch_shutdown
-+echo "T-4: Cycle mount"
-+_scratch_cycle_mount
-+echo "T-4: File contents after cycle mount"
-+_hexdump $SCRATCH_MNT/testfile.t4
-+
-+echo "T-5: Create a 1M file using AIO-DIO & O_DSYNC"
-+$AIO_TEST -a size=1048576 -D -N $SCRATCH_MNT/testfile.t5 > /dev/null 2>&1
-+echo "T-5: Shutdown the fs suddenly"
-+_scratch_shutdown
-+echo "T-5: Cycle mount"
-+_scratch_cycle_mount
-+echo "T-5: File contents after cycle mount"
-+_hexdump $SCRATCH_MNT/testfile.t5
-+
- status=0
- exit
-diff --git a/tests/generic/737.out b/tests/generic/737.out
-index efe6ff1f..2bafeefa 100644
---- a/tests/generic/737.out
-+++ b/tests/generic/737.out
-@@ -1,4 +1,11 @@
- QA output created by 737
-+T-0: Create a 1M file using buff-io & RWF_DSYNC
-+T-0: Shutdown the fs suddenly
-+T-0: Cycle mount
-+T-0: File contents after cycle mount
-+000000 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  >ZZZZZZZZZZZZZZZZ<
-+*
-+100000
- T-1: Create a 1M file using buff-io & O_SYNC
- T-1: Shutdown the fs suddenly
- T-1: Cycle mount
-@@ -20,3 +27,17 @@ T-3: File contents after cycle mount
- 000000 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  >ZZZZZZZZZZZZZZZZ<
- *
- 100000
-+T-4: Create a 1M file using DIO & RWF_DSYNC
-+T-4: Shutdown the fs suddenly
-+T-4: Cycle mount
-+T-4: File contents after cycle mount
-+000000 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  >ZZZZZZZZZZZZZZZZ<
-+*
-+100000
-+T-5: Create a 1M file using AIO-DIO & O_DSYNC
-+T-5: Shutdown the fs suddenly
-+T-5: Cycle mount
-+T-5: File contents after cycle mount
-+000000 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  >ZZZZZZZZZZZZZZZZ<
-+*
-+100000
---
-2.49.0
-
+> ---
+>  src/aio-dio-regress/aio-dio-write-verify.c | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+> 
+> diff --git a/src/aio-dio-regress/aio-dio-write-verify.c b/src/aio-dio-regress/aio-dio-write-verify.c
+> index 513a338b..0cf14a2a 100644
+> --- a/src/aio-dio-regress/aio-dio-write-verify.c
+> +++ b/src/aio-dio-regress/aio-dio-write-verify.c
+> @@ -40,6 +40,7 @@ void usage(char *progname)
+>  	        "\t\tsize=N: AIO write size\n"
+>  	        "\t\toff=M:  AIO write startoff\n"
+>  	        "\t-S: uses O_SYNC flag for open. By default O_SYNC is not used\n"
+> +	        "\t-D: uses O_DSYNC flag for open. By default O_DSYNC is not used\n"
+>  	        "\t-N: no_verify: means no write verification. By default noverify is false\n"
+>  	        "e.g: %s -t 4608 -a size=4096,off=512 -a size=4096,off=4608 filename\n"
+>  	        "e.g: %s -t 1048576 -a size=1048576 -S -N filename\n",
+> @@ -298,7 +299,7 @@ int main(int argc, char *argv[])
+>  	int o_sync = 0;
+>  	int no_verify = 0;
+>  
+> -	while ((c = getopt(argc, argv, "a:t:SN")) != -1) {
+> +	while ((c = getopt(argc, argv, "a:t:SND")) != -1) {
+>  		char *endp;
+>  
+>  		switch (c) {
+> @@ -316,6 +317,9 @@ int main(int argc, char *argv[])
+>  		case 'S':
+>  			o_sync = O_SYNC;
+>  			break;
+> +		case 'D':
+> +			o_sync = O_DSYNC;
+> +			break;
+>  		case 'N':
+>  			no_verify = 1;
+>  			break;
+> -- 
+> 2.49.0
+> 
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
