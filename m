@@ -1,235 +1,192 @@
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45A6C22B8A5;
-	Sat,  2 Aug 2025 13:07:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 486D820CCE5
+	for <fstests@vger.kernel.org>; Sat,  2 Aug 2025 13:47:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754140037; cv=none; b=MIu5gLEYLxT3LYJVMLxwt59YNIWoLftLyEkv/5+sm+ROAE6wC4BJZbiAVZdZkUUozRDA2Ow0PCX7rDhQzArG2WypW6g4H78F0cI4eZh6zdQEQc0Vddf+8EoMlxeCdahiiKIHLMF2tBpV9vp2Cp1fnTSKD1AE6Wqm7UVyAtvGOu0=
+	t=1754142431; cv=none; b=FpDrXs00ufRi6deRTB9bxDE10LZlNVoF2yjfFo+mh2V7+FIQaHq8/4ccqIWCU2SDBwmubpoZMgzuoKzMxobAZUAouiPU4i5NLCzVY0Q+MumLYXYpO0vLU9xRlVi2YHjZ0IXPKwGi3WaEHAlo1hUPe12MH2l5aKKzEQrWuVgVz1Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754140037; c=relaxed/simple;
-	bh=eSwVj2anjL6uavRReSp+I2T7GtFd9V6n0Ns5L3SOmB4=;
+	s=arc-20240116; t=1754142431; c=relaxed/simple;
+	bh=5W1UMp9g72pw9RPEvfzCxPIKYaFpk6jFq1tK1OHHrdY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cA/aOcy9YanhG0M1OdgHXcGyBkoFIQN4y0sxF2ttArS52Fz1K2ZX6IbIYx0WBbh8vj7lo0aov26yWEb9LuF49rZYFdxzVn6+Cj6tsJ4LZEZHuzM18yczPv6a1yfVgWGVTt4pxRnoXpCK58T0N7aRp/AJIPQLbiS30uA3oAZY0u0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=e/NjgStH; arc=none smtp.client-ip=148.163.156.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=RXgHr8Mfo+A/pdfEYKBNgnUyPb1euY4BLV9beoB8COWhldDCbELZ/HMxKEEV01j7/18peCiCxq4+F86Bb4cC/+qgl1xl/YrzWmMT+RJTV4LGBkULW+AJf2UPKka7yjnwmaF0Lpnf0W4VjPAxlN+O7fqxPB2x96Ym2F5ZzWODfjM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Km2JPvKW; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="e/NjgStH"
-Received: from pps.filterd (m0356517.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5729DdSc007522;
-	Sat, 2 Aug 2025 13:07:13 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pp1; bh=tfnkIB
-	+EhAVz28BXzs+l0nfD+GV6VQ8YHQ+DGuchJ6w=; b=e/NjgStHtfvMgc/3RMykD2
-	8mzOvAGxWxXxRprtIqKLN23wZ/UjxINJg0KXrjMEhQOhsfw1sN4XhLtv7BGV3WjM
-	f5zEB4ZAYIs6WmxvOVuxxSMO9DNK/1tzxd1sCMSa19d2at1jjGnspK401jgU6H7Y
-	/AgFvAXNA+E8P62ESnrkZB9Ymfw8XEXpLc0eg/xmp/3yH1+qVY0+Kl07kOrNOwKf
-	vGEBEXCH/T1jfWpPvbiG319JirvpGqihzFCVgkMScWj80/skco16pdKR1zuh+AqY
-	Lu0bRA6Fky2GoO2e2k0Lg1kXkDkVYQb/m8r98gwHgGj46FX+KIXYt4xDAULqeplw
-	==
-Received: from pps.reinject (localhost [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 489ade1crt-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Sat, 02 Aug 2025 13:07:13 +0000 (GMT)
-Received: from m0356517.ppops.net (m0356517.ppops.net [127.0.0.1])
-	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 572D7C3x028923;
-	Sat, 2 Aug 2025 13:07:12 GMT
-Received: from ppma23.wdc07v.mail.ibm.com (5d.69.3da9.ip4.static.sl-reverse.com [169.61.105.93])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 489ade1crs-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Sat, 02 Aug 2025 13:07:12 +0000 (GMT)
-Received: from pps.filterd (ppma23.wdc07v.mail.ibm.com [127.0.0.1])
-	by ppma23.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 5729cFTk032546;
-	Sat, 2 Aug 2025 13:07:11 GMT
-Received: from smtprelay03.fra02v.mail.ibm.com ([9.218.2.224])
-	by ppma23.wdc07v.mail.ibm.com (PPS) with ESMTPS id 489b0j1c3x-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Sat, 02 Aug 2025 13:07:11 +0000
-Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
-	by smtprelay03.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 572D79YC39387528
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Sat, 2 Aug 2025 13:07:09 GMT
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 5954920040;
-	Sat,  2 Aug 2025 13:07:09 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 084D620043;
-	Sat,  2 Aug 2025 13:07:08 +0000 (GMT)
-Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.39.23.72])
-	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
-	Sat,  2 Aug 2025 13:07:07 +0000 (GMT)
-Date: Sat, 2 Aug 2025 18:37:04 +0530
-From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH v2] btrfs/282: use timed writes to make sure scrub has
- enough run time
-Message-ID: <aI4NePrCRM1ax5uy@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
-References: <20250711084305.183675-1-wqu@suse.com>
- <aI3LmZVbl5H--QJ8@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
- <88c659f6-b0a6-4ca3-bbc7-8064ec608c32@gmx.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Km2JPvKW"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1754142428;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=KCPzhhRIiZOBK75Gntdckoh4PTRzWtWZ6zcvlf0GwqQ=;
+	b=Km2JPvKWEgZVAdQApb0KG0MfezdXMBg2fxihSwgZwtfkMgbvz++C09f+TV4SZACxD8wmyk
+	cse0bILmBZEUvEqHWlAgumKdYXmealx6BF11tvaPRu0+jBClOFyrSkFQmCA1wWMIq9SRAp
+	GQ0jYp52zqOBQ07TRlA6b9Vhg22NwcI=
+Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
+ [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-141-PMvQthBMNYivYUZuJkrLfQ-1; Sat, 02 Aug 2025 09:47:06 -0400
+X-MC-Unique: PMvQthBMNYivYUZuJkrLfQ-1
+X-Mimecast-MFC-AGG-ID: PMvQthBMNYivYUZuJkrLfQ_1754142426
+Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-b423aba05feso1596791a12.3
+        for <fstests@vger.kernel.org>; Sat, 02 Aug 2025 06:47:06 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1754142425; x=1754747225;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=KCPzhhRIiZOBK75Gntdckoh4PTRzWtWZ6zcvlf0GwqQ=;
+        b=TMaLsPeChWe6v9fMX9r3nBXBtJXxhKvyPmztJpEQKOmlgDI7oAZsts0DAEl/uQdRJl
+         yjoPlwmh1+3z9NfyBZhcjGweFAn0ga2aWzW18eLzoImjk0jANyw8qX3jEJ6auhcmsmso
+         +vU8H/d0zfMZH+rJdm7FZzipIfEJuabnRY/vYM/pIDBKmJz1X1CEHzzNrTuOGElgnN3r
+         polPLe+dvzxZCYZfqDU8dqu1jyjbxbx0lIc51nWD/qC2ft+7SYBYqqJDBQ6RnARNNCWV
+         31v4Mwi/4GsXJ89A+7PkyqbKEGeQdUJDiG1w9v7UiaWrlRR5qXEDGmGvi8+k2K0+1VDC
+         Kgmg==
+X-Gm-Message-State: AOJu0Yw4EtjJKPOOP5ecl573vkbFE8Awp0BWtlkgRF8HOyle4FkhF0io
+	917JliuwvTpSh54mNEdF0SPhyJeieR1trX/yD4y8Lj+ly5rUJYqMz4HByoq2S/gIhRepd42w1yX
+	WuRLKXY93WWnORj5albL/3ZFjaL8dTM7S/avRMxKsGxeSdPvyVPvsLt+XkoOn1fPKvhA=
+X-Gm-Gg: ASbGncviSIBOb1oy8MBZ2vNHTiJk6QLWrxO1+u7wbbwG+fr56lgXv2YXyHcDFRRMtRu
+	gSBjM6K12J1IaR5slr60sJGn6sjDLb7uuluEax9ewHkfpuv+vZT/+UctRuAYh9bfJuP2RH16aSp
+	rlPedHUPmFlrMH6dBjt+yy0mWWhX4pyI5xqDNzo/aY8zIlq2dsIeu0LE/SHDKTEG19Xpv8xlsBI
+	vicqoGKk5Hq10uyYP1fyhHyfKSqRZsN2fPrLoH0kNOBr7ggnnE20CtMj6fnDzMAKX4LApQZz/tG
+	EKebQiAz5dDkG45SW/QaDnaiVzC3axs8W4MWEF5Yv5oaXrRzZI16pUmFNVrysJIt246yfjkj8s2
+	6MtSh
+X-Received: by 2002:a05:6a20:7d86:b0:233:c703:d4bf with SMTP id adf61e73a8af0-23df8fd290cmr4709661637.19.1754142425450;
+        Sat, 02 Aug 2025 06:47:05 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGP5eOgAqRjUOjwxsaNNr36B04elCmmGnD7lGj7JhewdjfOMgaQ2Fvz/dX0pJuJV3Cm7jYtCw==
+X-Received: by 2002:a05:6a20:7d86:b0:233:c703:d4bf with SMTP id adf61e73a8af0-23df8fd290cmr4709636637.19.1754142425036;
+        Sat, 02 Aug 2025 06:47:05 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-76bccfe9003sm6447391b3a.125.2025.08.02.06.47.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 02 Aug 2025 06:47:04 -0700 (PDT)
+Date: Sat, 2 Aug 2025 21:47:00 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 2/2] check: collect core dumps from systemd-coredump
+Message-ID: <20250802134700.khtlw7thzqyclfnt@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <175381958396.3021194.15630936445319512317.stgit@frogsfrogsfrogs>
+ <175381958439.3021194.17530499480231032752.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <88c659f6-b0a6-4ca3-bbc7-8064ec608c32@gmx.com>
-X-TM-AS-GCONF: 00
-X-Authority-Analysis: v=2.4 cv=NqLRc9dJ c=1 sm=1 tr=0 ts=688e0d81 cx=c_pps
- a=3Bg1Hr4SwmMryq2xdFQyZA==:117 a=3Bg1Hr4SwmMryq2xdFQyZA==:17
- a=IkcTkHD0fZMA:10 a=2OwXVqhp2XgA:10 a=VwQbUJbxAAAA:8 a=7YfXLusrAAAA:8
- a=iox4zFpeAAAA:8 a=XGp00KZF7QKn5TESG2IA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
- a=SLz71HocmBbuEhFRYD3r:22 a=WzC6qhA0u3u7Ye7llzcV:22
-X-Proofpoint-ORIG-GUID: auBCz5kiMDV0l8a-azQ1Wk0sWheywKNA
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODAyMDEwOCBTYWx0ZWRfX5mWNzAP9iX4h
- i9tcEgZPEG/j5j7BQB2BUk1rucd+hL6t6/Q1bTo4EEfetxZrgNIZDk1Mnu9ChHSwx24yOsrPgs2
- lRHZ9LlrkdcPCnR3KylSm6LRZ9WC57H0Sh9xVb8RuvASWKN2vMhvsvREcgZjFVKkR6Gvfj/S0a7
- bylWaDggVcu2T3ijlbQ6WPp9OgnN5c4C2aanzPkJoat2kdotRe01nH5k4W472Bd3DgxKzfXulwB
- 8aeh7Hl8NnwIpbEjjwV+b1mePV0XzzWNRcPZgxqeUlsleIZ96pJwiOKpbuG1SUDZOSPFIAeor/k
- F+WgD95As4ZI4MvlprFWdTUL5BCn9G0f8MLlefwPkMWiOnuS6Ex4eNyKvIlnuI4k2eqkyjQCtg5
- I0ullsCLvDcmuPZFjLHiP87NZZY9Vh9CN+9VLeoEjE53jINMX4XP8hapzZos8AzKFdDUgZb8
-X-Proofpoint-GUID: S7Sk4l3T2ISjC3Kd1gG_Uz26sqNBjF13
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-08-01_08,2025-08-01_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- priorityscore=1501 malwarescore=0 suspectscore=0 mlxlogscore=999
- clxscore=1015 spamscore=0 bulkscore=0 phishscore=0 mlxscore=0
- lowpriorityscore=0 impostorscore=0 adultscore=0 classifier=spam authscore=0
- authtc=n/a authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.19.0-2505280000 definitions=main-2508020108
+In-Reply-To: <175381958439.3021194.17530499480231032752.stgit@frogsfrogsfrogs>
 
-On Sat, Aug 02, 2025 at 06:20:20PM +0930, Qu Wenruo wrote:
+On Tue, Jul 29, 2025 at 01:11:06PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> On modern RHEL (>=8) and Debian KDE systems, systemd-coredump can be
+> installed to capture core dumps from crashed programs.  If this is the
+> case, we would like to capture core dumps from programs that crash
+> during the test.  Set up an (admittedly overwrought) pipeline to extract
+> dumps created during the test and then capture them the same way that we
+> pick up "core" and "core.$pid" files.
+> 
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> ---
+>  check     |    2 ++
+>  common/rc |   44 ++++++++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 46 insertions(+)
 > 
 > 
-> 在 2025/8/2 18:12, Ojaswin Mujoo 写道:
-> > On Fri, Jul 11, 2025 at 06:13:05PM +0930, Qu Wenruo wrote:
-> > > [FAILURE]
-> > > Test case btrfs/282 still fails on some setup:
-> > > 
-> > >      output mismatch (see /opt/xfstests/results//btrfs/282.out.bad)
-> > >      --- tests/btrfs/282.out	2025-06-27 22:00:35.000000000 +0200
-> > >      +++ /opt/xfstests/results//btrfs/282.out.bad	2025-07-08 20:40:50.042410321 +0200
-> > >      @@ -1,3 +1,4 @@
-> > >       QA output created by 282
-> > >       wrote 2147483648/2147483648 bytes at offset 0
-> > >       XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > >      +scrub speed 2152038400 Bytes/s is not properly throttled, target is 1076019200 Bytes/s
-> > >      ...
-> > >      (Run diff -u /opt/xfstests/tests/btrfs/282.out /opt/xfstests/results//btrfs/282.out.bad  to see the entire diff)
-> > > 
-> > > [CAUSE]
-> > > Checking the full output, it shows the scrub is running too fast:
-> > > 
-> > > Starting scrub on devid 1
-> > > scrub done for c45c8821-4e55-4d29-8172-f1bf30b7182c
-> > > Scrub started:    Tue Jul  8 20:40:47 2025
-> > > Status:           finished
-> > > Duration:         0:00:00 <<<
-> > > Total to scrub:   2.00GiB
-> > > Rate:             2.00GiB/s
-> > > Error summary:    no errors found
-> > > Starting scrub on devid 1
-> > > scrub done for c45c8821-4e55-4d29-8172-f1bf30b7182c
-> > > Scrub started:    Tue Jul  8 20:40:48 2025
-> > > Status:           finished
-> > > Duration:         0:00:01
-> > > Total to scrub:   2.00GiB
-> > > Rate:             2.00GiB/s
-> > > Error summary:    no errors found
-> > > 
-> > > The original run takes less than 1 seconds, making the scrub rate
-> > > calculation very unreliable, no wonder the speed limit is not able to
-> > > properly work.
-> > > 
-> > > [FIX]
-> > > Instead of using fixed 2GiB file size, let the test create a filler for
-> > > 4 seconds with direct IO, this would more or less ensure the scrub will
-> > > take 4 seconds to run.
-> > > 
-> > > With 4 seconds as run time, the scrub rate can be calculated more or
-> > > less reliably.
-> > > 
-> > > Furthermore since btrfs-progs currently only reports scrub duration in
-> > > seconds, to prevent problems due to 1 second difference, enlarge the
-> > > tolerance to +/- 25%, to be extra safe.
-> > > 
-> > > On my testing VM, the result looks like this:
-> > > 
-> > > Starting scrub on devid 1
-> > > scrub done for b542bdfb-7be4-44b3-add0-ad3621927e2b
-> > > Scrub started:    Fri Jul 11 09:13:31 2025
-> > > Status:           finished
-> > > Duration:         0:00:04
-> > > Total to scrub:   2.72GiB
-> > > Rate:             696.62MiB/s
-> > > Error summary:    no errors found
-> > > Starting scrub on devid 1
-> > > scrub done for b542bdfb-7be4-44b3-add0-ad3621927e2b
-> > > Scrub started:    Fri Jul 11 09:13:35 2025
-> > > Status:           finished
-> > > Duration:         0:00:08
-> > > Total to scrub:   2.72GiB
-> > > Rate:             348.31MiB/s
-> > > Error summary:    no errors found
-> > > 
-> > > However this exposed a new failure mode, that if the storage is too
-> > > fast, like the original report, that the initial 4 seconds write can
-> > > fill the fs and exit early.
-> > > 
-> > > In that case we have no other solution but skipping the test case.
-> > 
-> > Hi Qu,
-> > 
-> > Thanks for tuning the test, we have also been facing intermittent failures
-> > on btrfs/282.
-> > 
-> > I was just wondering if for faster devices, would it make sense to use
-> > the io cgroup controller, eg:
-> > 
-> >    echo "252:0 rbps=1048576 wbps=1048576" > /sys/fs/cgroup/io_limit/io.max
-> > 
-> > To limit the throughput so we have >= 4s scrub runs. Or does that also have
-> > some undesired effects like you mentioned for dm_delay here [1]
-> 
-> If cgroup works, it will be the best solution, we can fix the throughput to
-> 512MiB/s, and use a 2GiB file to ensure 4s of scrub runtime.
-> 
-> This will get rid of the speed test part.
-> 
-> The only problem is I'm not familiar with the cgroup infrastructure, if you
-> can enhance the test case to use cgroup, it would be awesome.
-> 
-> Thanks,
-> Qu
+> diff --git a/check b/check
+> index ce7eacb7c45d9e..77581e438c46b9 100755
+> --- a/check
+> +++ b/check
+> @@ -924,6 +924,7 @@ function run_section()
+>  		     $1 == "'$seqnum'" {lasttime=" " $2 "s ... "; exit} \
+>  		     END {printf "%s", lasttime}' "$check.time"
+>  		rm -f core $seqres.notrun
+> +		_start_coredumpctl_collection
+>  
+>  		start=`_wallclock`
+>  		$timestamp && _timestamp
+> @@ -957,6 +958,7 @@ function run_section()
+>  		# just "core".  Use globbing to find the most common patterns,
+>  		# assuming there are no other coredump capture packages set up.
+>  		local cores=0
+> +		_finish_coredumpctl_collection
+>  		for i in core core.*; do
+>  			test -f "$i" || continue
+>  			if ((cores++ == 0)); then
+> diff --git a/common/rc b/common/rc
+> index 04b721b7318a7e..e4c4d05387f44e 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -5034,6 +5034,50 @@ _check_kmemleak()
+>  	fi
+>  }
+>  
+> +# Current timestamp, in a format that systemd likes
+> +_systemd_now() {
+> +	timedatectl show --property=TimeUSec --value
+> +}
+> +
+> +# Do what we need to do to capture core dumps from coredumpctl
+> +_start_coredumpctl_collection() {
+> +	command -v coredumpctl &>/dev/null || return
+> +	command -v timedatectl &>/dev/null || return
+> +	command -v jq &>/dev/null || return
+> +
+> +	sysctl kernel.core_pattern | grep -q systemd-coredump || return
 
-Hi Qu,
+# rpm -qf `which coredumpctl`
+systemd-udev-252-53.el9.x86_64
+# rpm -qf `which timedatectl`
+systemd-252-53.el9.x86_64
+# rpm -qf `which jq`
+jq-1.6-17.el9.x86_64
+# rpm -qf /usr/lib/systemd/systemd-coredump 
+systemd-udev-252-53.el9.x86_64
 
-So the command I pasted above did help me limit the dd throughput to 1MB/s
-so it does seem to be doing what it advertises :) 
-
-I don't know much about cgroups either but sure I can spend some time
-understanding the io controller better and try to incorporate it in the
-test. Will try to send a separate patch for it.
+So we have 3 optional running dependences, how about metion that in README?
 
 Thanks,
-Ojaswin
+Zorro
 
+> +	COREDUMPCTL_START_TIMESTAMP="$(_systemd_now)"
+> +}
+> +
+> +# Capture core dumps from coredumpctl.
+> +#
+> +# coredumpctl list only supports json output as a machine-readable format.  The
+> +# human-readable format intermingles spaces from the timestamp with actual
+> +# column separators, so we cannot parse that sanely.  The json output is an
+> +# array of:
+> +#        {
+> +#                "time" : 1749744847150926,
+> +#                "pid" : 2297,
+> +#                "uid" : 0,
+> +#                "gid" : 0,
+> +#                "sig" : 6,
+> +#                "corefile" : "present",
+> +#                "exe" : "/run/fstests/e2fsprogs/fuse2fs",
+> +#                "size" : 47245
+> +#        },
+> +# So we use jq to filter out lost corefiles, then print the pid and exe
+> +# separated by a pipe and hope that nobody ever puts a pipe in an executable
+> +# name.
+> +_finish_coredumpctl_collection() {
+> +	test -n "$COREDUMPCTL_START_TIMESTAMP" || return
+> +
+> +	coredumpctl list --since="$COREDUMPCTL_START_TIMESTAMP" --json=short 2>/dev/null | \
+> +	jq --raw-output 'map(select(.corefile == "present")) | map("\(.pid)|\(.exe)") | .[]' | while IFS='|' read pid exe; do
+> +		test -e "core.$pid" || coredumpctl dump --output="core.$pid" "$pid" "$exe" &>> $seqres.full
+> +	done
+> +	unset COREDUMPCTL_START_TIMESTAMP
+> +}
+> +
+>  # don't check dmesg log after test
+>  _disable_dmesg_check()
+>  {
 > 
-> > 
-> > Regards,
-> > Ojaswin
-> > 
-> > [1] https://lore.kernel.org/all/103e1b45-19d9-4438-b70d-892757f695fc@gmx.com/
-> > > 
-> > > Signed-off-by: Qu Wenruo <wqu@suse.com>
-> > > ---
-> > 
-> 
+
