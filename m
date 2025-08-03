@@ -1,217 +1,153 @@
-Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com [209.85.210.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CE441917FB;
-	Sun,  3 Aug 2025 05:38:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9291C23AD
+	for <fstests@vger.kernel.org>; Sun,  3 Aug 2025 16:52:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754199538; cv=none; b=SREXuX/VkHN9S/6hglw2OYrLuNjL/GMJ4Oe0AP7a+b9nSVuYvrjGp7cNYHutIupicyngUXbydvGkBfoSVs20G7pKVNafTlzubXewV+923Luu6sz1mQS7TTVJDeWFDc+eTy/hkOqXcHvoJ0nmKPXppTZgAApqmufpNlD/bPLkH0o=
+	t=1754239932; cv=none; b=QED0AOn0tO00v2VkTtsFXX3Zr1BmdZxBgjmmriXW4sU0wu1F0UuMGkFCIaUr2zWoKvzEFUaryuq2bJfq6eT5MNQRM725qJBVujxzBO7e0rtkXdKVOw8tMXanXg6d82e8u7NgihJdbwb80VCg7BuqUN/dASAKmF/rNW99txs3ehg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754199538; c=relaxed/simple;
-	bh=W9TTyWGs1q2BZhLwkdfFdq0dLqTBJ9IqGNsWQ4BNynk=;
-	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=Qm06dvv4+BBOd6tvJHaDnamRUy/kMUqRuhREoCH+Yy8E3h96UB9LFnQJciAuLCGISya7wqs54zCTaKWCKyXpK4/He5o5Zphs8xqHU4RKyice0VNTNkU4dQQoBiDjre+/VcfmPNbBRiHFNAvkPlwZdQLO4UsDM1ejoRCKXz2Dr+c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GKAbUNQL; arc=none smtp.client-ip=209.85.210.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1754239932; c=relaxed/simple;
+	bh=LhFy1kDRau1MECaJrd7P3H6S9Omh+fN3eS/a2yakcf4=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=k3y/stkzp+At6ojcKaOu3nzKYtOEyrPWV8XqcSF0CJ9BcYqMUzwodvWPcv5XbkxsHojL60BHyThpPZjRPTOVjco2fdotAKv4ihy8ZdAePKECTzyByhDEZSAPV0OqIZZwt5MdSER7P/yi+4K5W/Xwxay/a26yUUltz0xYZVQJsqw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=huekI6dF; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GKAbUNQL"
-Received: by mail-pf1-f172.google.com with SMTP id d2e1a72fcca58-76aea119891so4023708b3a.1;
-        Sat, 02 Aug 2025 22:38:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1754199536; x=1754804336; darn=vger.kernel.org;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=NVpBhuZ96L+Fro8BPUL7qY4FAsCSj97IVu5e+UaR5SI=;
-        b=GKAbUNQLn9IqyuLadRWgM1lOiIPQIZJavEoL5EOFm6JDaDA19SiUQX5NA63Jn/fKNG
-         9M77V6a53Qr1nkxUcHqug52uaKdFM3WxtT3XpXvCKIeErVRj5OW3WxjtT0KzxLrDk/sz
-         nYrnOysAXszBfJncoAGbF92Egnuv70zodzQ8n+M5EH7MHuW+LjxCTGGfaPybZu7s7GyD
-         Hl/nP+bnohHzi7uIYM3bucIiwPrVSZFUIkSy68afddFYiFungle8AH5g4k9LqMog7ygd
-         W7LNOiOTNPkkSv5a+Yx7V95SKGMxTCZcsZ+zOevuO1GVa631sOBaPJD05+h5xUmX5q30
-         UJ9g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1754199536; x=1754804336;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=NVpBhuZ96L+Fro8BPUL7qY4FAsCSj97IVu5e+UaR5SI=;
-        b=Nc8Lq4ccR+jj9H7+7HyGbuCiq2bRR34MFCS36XwBWZR0ECvHciDugfP79/QMsfoT3f
-         svrpkCVzNp5fs/IzmwhpzNknOQdpHmXVdtPDP6R0OVwwEC3qjVBUgE6/NdBGs5jEMqv2
-         n4zBpmpRfimNZaRokvzXbq7homCrX/olYj9o/vyQIckCUUhxbY4GkWbzDAJLBdWt9DNO
-         YwPpCktghgAQ9Uga+pqrVNIo+fyPmr2xq847zZ4Qb1Jz7hPQL43vi0h/ALI3pEBgAkW8
-         0xoEKYidP1WWy/FmzCYFlT7noGhnVneYmUDBZPtqKvFtCpBCuV63vdJPcTP8VUEDCB3a
-         6T+Q==
-X-Forwarded-Encrypted: i=1; AJvYcCXifDbb4XgbfHrI6vtpsFC6NviJvc9izt1rclpzKMpgMgteZzpT5axTtdGWFW4BIMHfsUW5kDy8FCsRfZXI@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz9M4l0X/aNXbLzuOuFqv+TOFebZfs6YR990tGzlKmVwhZj2H5Z
-	gDrlDD8YDv9RCI6GTWHRNKfydpzzJ/kT4goD2VsAt50/9C6I4JM0tpXw
-X-Gm-Gg: ASbGncvNqYaiE9ZFpXStKG2e2md73gs0zShzST8G0IyGlS1dD2/gbuhkouS6jdNNOND
-	2XODiOxe5KqDhNkl3gkTFDesDTUP+jFIv+JmJcIfFR77W6ZzeaItFkrKfMXCctIt6ZWjFdgbplP
-	eSs3xIGul2l0o4ubkY17gbSDn4xg/EJ3T4yMbUzOe4A6VgI7DQ1I7AJn4qmX8szMyE3yKXO5Vy5
-	eQVZzdXGM9kIB4PUJ9bCk2G+qRV7X3l3vC6zyObUowiobkACYrAzlsSmlBX0tNWQpfO/2uR7lDz
-	dVeH3hA+YBanAO8ckCJVgGjpm1D7NRl6vbaUIvTKzPNDxf8hbPreFuqkDtl2I5YqmbBFQ/kkgKS
-	F0pTk8QQ+4+4L2OmzzLPAk6TxjQ==
-X-Google-Smtp-Source: AGHT+IGMrCXQA4XQIYqdtJ3XkKjlUl1VECW3D92BcLK0+Fy/6NdSANbtW+bkEpp810mWlK5oXAXXRw==
-X-Received: by 2002:a05:6a20:958f:b0:234:4f73:e657 with SMTP id adf61e73a8af0-23dd7929619mr21536940637.0.1754199536418;
-        Sat, 02 Aug 2025 22:38:56 -0700 (PDT)
-Received: from dw-tp ([49.205.218.89])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b422bac16c9sm6654608a12.36.2025.08.02.22.38.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 02 Aug 2025 22:38:55 -0700 (PDT)
-From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, Jan Kara <jack@suse.cz>, "Darrick J . Wong" <djwong@kernel.org>, John Garry <john.g.garry@oracle.com>
-Subject: Re: [RFC 2/2] generic: Add integrity tests for O_DSYNC and RWF_DSYNC writes
-In-Reply-To: <20250802081719.qrmme5jvwliwlgcg@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Date: Sun, 03 Aug 2025 10:53:27 +0530
-Message-ID: <87o6sxq8q8.fsf@gmail.com>
-References: <28abb8a0c4031ce07b475bf9026eedc23892868b.1753964363.git.ritesh.list@gmail.com> <9b2427b42e8716c359a36624fd6363f71583941b.1753964363.git.ritesh.list@gmail.com> <20250801201805.6h7sa2oyrvhnalph@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com> <87plderdk1.fsf@gmail.com> <20250802081719.qrmme5jvwliwlgcg@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="huekI6dF"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A0AFEC4CEEB;
+	Sun,  3 Aug 2025 16:52:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1754239932;
+	bh=LhFy1kDRau1MECaJrd7P3H6S9Omh+fN3eS/a2yakcf4=;
+	h=Date:From:To:Subject:From;
+	b=huekI6dF9pMwDC78nYEO4/q2F/vnhPvMaAjlkW00wtsxAX8zNAomrRece4L/Uuyj2
+	 gc9O1UjevqmK4NFtUsECEl9FZUYM4CJWCBQB3SgoOWm8nOrNvmX2qxkGYTb7enEfVX
+	 SfXEinXt5hn4kT4mcGuMVm1XtJfFKFE9nn4Gy3nh8nWVd0n2FPTjgUm6xf/Ss1xdeU
+	 uyFRkQbCu+flQtF1YThDM3h2/sdqTh0USdkLVmFyRQrKmRJyGXB0piLpYAtEd/7Kzt
+	 YeX8IY3iqhOPGfVFUEXXzHHQG2Vxcv2728vC7TkR1AgUnd8LohYticx5CBIfLY9skm
+	 WRhLjB8XCH32g==
+Date: Mon, 04 Aug 2025 00:52:08 +0800
+Message-ID: <8bcc82c0fc3c5a853620b2b21fc941db@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2025.07.13 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-
-Zorro Lang <zlang@redhat.com> writes:
-
-> On Sat, Aug 02, 2025 at 01:59:18AM +0530, Ritesh Harjani wrote:
->> Zorro Lang <zlang@redhat.com> writes:
->> 
->> > On Thu, Jul 31, 2025 at 06:05:55PM +0530, Ritesh Harjani (IBM) wrote:
->> >> This test verifies the data & required metadata (e.g. inode i_size for extending
->> >> writes) integrity when using O_DSYNC and RWF_DSYNC during writes operations,
->> >> across buffered-io, aio-dio and dio, in the event of a sudden filesystem
->> >> shutdown after write completion.
->> >> 
->> >> Man page of open says that -
->> >> O_DSYNC provides synchronized I/O data integrity completion, meaning
->> >> write operations will flush data to the underlying hardware, but will
->> >> only flush metadata updates that are required to allow a subsequent read
->> >> operation to complete successfully.
->> >> 
->> >> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
->> >> ---
->> >>  tests/generic/737     | 30 +++++++++++++++++++++++++++++-
->> >>  tests/generic/737.out | 21 +++++++++++++++++++++
->
-> BTW, as you change a testcase with known case number, your subject can be
-> "generic/737: ..." (instead of "generic: ...").
->
-
-Make sense. I will fix in v2.
-
->> >>  2 files changed, 50 insertions(+), 1 deletion(-)
->> >> 
->> >> diff --git a/tests/generic/737 b/tests/generic/737
->> >> index 99ca1f39..0f27c82b 100755
->> >> --- a/tests/generic/737
->> >> +++ b/tests/generic/737
->> >> @@ -4,7 +4,8 @@
->> >>  #
->> >>  # FS QA Test No. 737
->> >>  #
->> >> -# Integrity test for O_SYNC with buff-io, dio, aio-dio with sudden shutdown.
->> >> +# Integrity test for O_[D]SYNC and/or RWF_DSYNC with buff-io, dio, aio-dio with
->> >> +# sudden shutdown.
->> >>  # Based on a testcase reported by Gao Xiang <hsiangkao@linux.alibaba.com>
->> >>  #
->> >> 
->> >> @@ -21,6 +22,15 @@ _require_aiodio aio-dio-write-verify
->> >>  _scratch_mkfs > $seqres.full 2>&1
->> >>  _scratch_mount
->> >> 
->> >> +echo "T-0: Create a 1M file using buff-io & RWF_DSYNC"
->> >> +$XFS_IO_PROG -f -c "pwrite -V 1 -D -S 0x5a 0 1M" $SCRATCH_MNT/testfile.t1 > /dev/null 2>&1
->> >> +echo "T-0: Shutdown the fs suddenly"
->> >> +_scratch_shutdown
->> >> +echo "T-0: Cycle mount"
->> >> +_scratch_cycle_mount
->> >> +echo "T-0: File contents after cycle mount"
->> >> +_hexdump $SCRATCH_MNT/testfile.t1
->> >> +
->> >>  echo "T-1: Create a 1M file using buff-io & O_SYNC"
->> >>  $XFS_IO_PROG -fs -c "pwrite -S 0x5a 0 1M" $SCRATCH_MNT/testfile.t1 > /dev/null 2>&1
->> >>  echo "T-1: Shutdown the fs suddenly"
->> >> @@ -48,5 +58,23 @@ _scratch_cycle_mount
->> >>  echo "T-3: File contents after cycle mount"
->> >>  _hexdump $SCRATCH_MNT/testfile.t3
->> >> 
->> >> +echo "T-4: Create a 1M file using DIO & RWF_DSYNC"
->> >> +$XFS_IO_PROG -fdc "pwrite -V 1 -S 0x5a -D 0 1M" $SCRATCH_MNT/testfile.t4 > /dev/null 2>&1
->> >> +echo "T-4: Shutdown the fs suddenly"
->> >> +_scratch_shutdown
->> >> +echo "T-4: Cycle mount"
->> >> +_scratch_cycle_mount
->> >> +echo "T-4: File contents after cycle mount"
->> >> +_hexdump $SCRATCH_MNT/testfile.t4
->> >> +
->> >> +echo "T-5: Create a 1M file using AIO-DIO & O_DSYNC"
->> >> +$AIO_TEST -a size=1048576 -D -N $SCRATCH_MNT/testfile.t5 > /dev/null 2>&1
->> >> +echo "T-5: Shutdown the fs suddenly"
->> >> +_scratch_shutdown
->> >> +echo "T-5: Cycle mount"
->> >> +_scratch_cycle_mount
->> >> +echo "T-5: File contents after cycle mount"
->> >> +_hexdump $SCRATCH_MNT/testfile.t5
->> >
->> > I always hit "No such file or directory" [1], is this an expected test failure
->> > which you hope to uncover?
->> 
->> Yes, we will need this fix [1] from Jan. Sorry I missed to add that in the commit
->> message. Could you please give it a try with the fix maybe?
->
-> Sure, with this patch, this test passed on my side:
->   FSTYP         -- xfs (debug)
->   PLATFORM      -- Linux/x86_64 dell-per750-41 6.16.0-mainline+ #9 SMP PREEMPT_DYNAMIC Sat Aug  2 16:01:22 CST 2025
->   MKFS_OPTIONS  -- -f /dev/mapper/testvg-scratch--devA
->   MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/testvg-scratch--devA /mnt/scratch
->
->   generic/737 4s ...  9s
->   Ran: generic/737
->   Passed all 1 tests
->
-> So this "No such file or directory" failure is a known bug, and this patch trys to
-> uncover it. You didn't metion that, so I thought you just try to write a
-> new integrity test (rather than a regression test) :-D
-
-Your understanding is correct. Sorry, I missed to add the fix details.
-I posted the test before the fix got merged. But yes, I will add the
-necessary details in v2.
-
-> If this change uncover a known fix, please feel free to add _fixed_by_kernel_commit.
-
-The commit isn't yet showing up in the VFS tree. Once it gets in I will
-share the v2 with the following changes.
-
-diff --git a/tests/generic/737 b/tests/generic/737
-index 0f27c82b..a51e9623 100755
---- a/tests/generic/737
-+++ b/tests/generic/737
-@@ -18,6 +18,9 @@ _require_aiodio aio-dio-write-verify
-
- [[ "$FSTYP" =~ ext[0-9]+ ]] && _fixed_by_kernel_commit 91562895f803 \
-        "ext4: properly sync file size update after O_SYNC direct IO"
-+# which is further fixed by
-+_fixed_by_kernel_commit 16f206eebbf8 \
-+       "iomap: Fix broken data integrity guarantees for O_SYNC writes"
-
- _scratch_mkfs > $seqres.full 2>&1
- _scratch_mount
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="Qv05EtTJEf1D"
+Content-Disposition: inline
 
 
-> BTW, I saw you mark this patchset with "RFC", do you need to change it more?
-> Generally I won't merge RFC patches directly, although this patch looks good to
-> me. So when you think you've gotten enough review points, please feel free to
-> remove the "RFC" label and resend it :) Then ...
->
+--Qv05EtTJEf1D
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Right. I will drop RFC and will resend it with above mentioned points
-(once the fix appears in VFS tree).
+Hi all,
 
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
->
+The master branch of the xfstests repository at:
 
-Thanks!
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
--ritesh
+has just been updated to v2025.07.13 version.
 
-> Thanks,
-> Zorro
->
+Thanks,
+Zorro
+
+The new head of the master branch is commit:
+
+2e00b85742d6 generic/365: Add fix hint for ext4
+
+New commits:
+
+Anand Jain (2):
+      [eb0191edd4a5] fstests: remove duplicate initialization in the testcase
+      [b964de2119d5] fstests: check: fix unset seqres in run_section()
+
+Catherine Hoang (1):
+      [8d87273e43f1] common/atomicwrites: add helper for multi block atomic writes
+
+Darrick J. Wong (4):
+      [fa8694c823d8] generic: various atomic write tests with hardware and scsi_debug
+      [7ca990e22e0d] xfs: more multi-block atomic writes tests
+      [a9dc5ac46476] xfs/273: fix test for internal zoned filesystems
+      [eb0d2b299ded] xfs/259: drop the 512-byte fsblock logic from this test
+
+Filipe Manana (1):
+      [5408cc794fe6] generic: test overwriting file with mmap on a full filesystem
+
+Leah Rumancik (1):
+      [a7b5d6b38296] common/rc: add repair fsck flag -f for ext4
+
+Ojaswin Mujoo (1):
+      [2e00b85742d6] generic/365: Add fix hint for ext4
+
+Qu Wenruo (3):
+      [de07c1558ce0] common/rc: add btrfs support for _small_fs_size_mb()
+      [9615d021e95e] generic/050: add a workaround for btrfs
+      [43128a0c543b] btrfs/282: use timed writes to make sure scrub has enough run time
+
+Zorro Lang (2):
+      [d06bd62c4c42] common/rc: remove useless _pgrep funcion
+      [a673bfe9fb06] common/rc: _add_dmesg_filter returns when RESULT_DIR is null
+
+
+Code Diffstat:
+
+ check                 |   2 +-
+ common/atomicwrites   |  31 ++++++++++++
+ common/rc             |  36 ++++++++------
+ tests/btrfs/253       |   3 --
+ tests/btrfs/282       |  60 +++++++++++++++++++----
+ tests/btrfs/282.out   |   3 +-
+ tests/ext4/053        |  10 ----
+ tests/generic/050     |  12 +++++
+ tests/generic/211     |  63 ++++++++++++++++++++++++
+ tests/generic/211.out |   6 +++
+ tests/generic/365     |   3 ++
+ tests/generic/767     |  93 ++++++++++++++++++++++++++++++++++++
+ tests/generic/767.out |  10 ++++
+ tests/generic/768     |  68 ++++++++++++++++++++++++++
+ tests/generic/768.out |   9 ++++
+ tests/generic/769     |  88 ++++++++++++++++++++++++++++++++++
+ tests/generic/769.out |  16 +++++++
+ tests/generic/770     | 129 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/770.out |  21 ++++++++
+ tests/xfs/259         |  24 ++++------
+ tests/xfs/259.out     |   7 ---
+ tests/xfs/273         |   5 ++
+ tests/xfs/838         |  69 +++++++++++++++++++++++++++
+ tests/xfs/838.out     |   9 ++++
+ tests/xfs/839         |  72 ++++++++++++++++++++++++++++
+ tests/xfs/839.out     |   3 ++
+ tests/xfs/840         |  64 +++++++++++++++++++++++++
+ tests/xfs/840.out     |  15 ++++++
+ 28 files changed, 870 insertions(+), 61 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--Qv05EtTJEf1D
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmiPk1AACgkQlNbPkfr2
+tMxq1A/9GFJvDRq3hlJORRxBsusgjCObUzFTqnezrT3BJnh53z5i2hr6CqMIuw2C
+vs7p04ewt+/dZ/b+Zvf0lAPdDJMoyWoNr60Er2MlDMG9sslot0VkH/nr+5DY3E/e
+tsOymCGFhblzVxdPEdcdeOztGm40cIPoBhV3PV5qRWvJmb/+DHKo/0xVMZbPBi++
+QOe1Q9GD81LEUO/Fd0qTEJdCO8y+ArkopcGBnpjiLoNOiM5BVsG9INRIDBOHeeD8
+cBykniT+o4+lAcpp9zuQKFmOA/cazwBApY6Mecv58O235RVPmemhbMMdajil45m9
+2VnssmPmIJV51sasdk53m9PKt/DEvhuGlwJrke93Kejr8t/KG8VKhC7D9QBpy766
+PlSDtINCEmOEhfXiR3Cri5yOWOfBbqj9aB/owihmEOov/gqhuFErLOQ1smO9sSe0
+CJODiUSS5GVwu5T3Ff6YUq/2Sf5k+0IJ71RlEdjlrdnV+LGBW1pWsJaeaJvAsyjP
+BpGmU/hHNEKveZTBeDQwaASSjmAO/geKX2MgE/OwUT7mCs4ETZaNbqfa/sJR4+0f
+BCJRpGAoROGUgpBT8WybybKQu5Sy18dlAVKblkPfRTKj08ntG0hxjaklrYByCPv4
+eC0D8+eERFLPkIIEBuoi/yPWa9+Tifn0ea/ymh3WWBdmr38vRgk=
+=1POc
+-----END PGP SIGNATURE-----
+
+--Qv05EtTJEf1D--
