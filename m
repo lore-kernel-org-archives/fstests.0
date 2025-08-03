@@ -1,192 +1,217 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com [209.85.210.172])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 486D820CCE5
-	for <fstests@vger.kernel.org>; Sat,  2 Aug 2025 13:47:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CE441917FB;
+	Sun,  3 Aug 2025 05:38:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754142431; cv=none; b=FpDrXs00ufRi6deRTB9bxDE10LZlNVoF2yjfFo+mh2V7+FIQaHq8/4ccqIWCU2SDBwmubpoZMgzuoKzMxobAZUAouiPU4i5NLCzVY0Q+MumLYXYpO0vLU9xRlVi2YHjZ0IXPKwGi3WaEHAlo1hUPe12MH2l5aKKzEQrWuVgVz1Q=
+	t=1754199538; cv=none; b=SREXuX/VkHN9S/6hglw2OYrLuNjL/GMJ4Oe0AP7a+b9nSVuYvrjGp7cNYHutIupicyngUXbydvGkBfoSVs20G7pKVNafTlzubXewV+923Luu6sz1mQS7TTVJDeWFDc+eTy/hkOqXcHvoJ0nmKPXppTZgAApqmufpNlD/bPLkH0o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754142431; c=relaxed/simple;
-	bh=5W1UMp9g72pw9RPEvfzCxPIKYaFpk6jFq1tK1OHHrdY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=RXgHr8Mfo+A/pdfEYKBNgnUyPb1euY4BLV9beoB8COWhldDCbELZ/HMxKEEV01j7/18peCiCxq4+F86Bb4cC/+qgl1xl/YrzWmMT+RJTV4LGBkULW+AJf2UPKka7yjnwmaF0Lpnf0W4VjPAxlN+O7fqxPB2x96Ym2F5ZzWODfjM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Km2JPvKW; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1754199538; c=relaxed/simple;
+	bh=W9TTyWGs1q2BZhLwkdfFdq0dLqTBJ9IqGNsWQ4BNynk=;
+	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=Qm06dvv4+BBOd6tvJHaDnamRUy/kMUqRuhREoCH+Yy8E3h96UB9LFnQJciAuLCGISya7wqs54zCTaKWCKyXpK4/He5o5Zphs8xqHU4RKyice0VNTNkU4dQQoBiDjre+/VcfmPNbBRiHFNAvkPlwZdQLO4UsDM1ejoRCKXz2Dr+c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GKAbUNQL; arc=none smtp.client-ip=209.85.210.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Km2JPvKW"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1754142428;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=KCPzhhRIiZOBK75Gntdckoh4PTRzWtWZ6zcvlf0GwqQ=;
-	b=Km2JPvKWEgZVAdQApb0KG0MfezdXMBg2fxihSwgZwtfkMgbvz++C09f+TV4SZACxD8wmyk
-	cse0bILmBZEUvEqHWlAgumKdYXmealx6BF11tvaPRu0+jBClOFyrSkFQmCA1wWMIq9SRAp
-	GQ0jYp52zqOBQ07TRlA6b9Vhg22NwcI=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-141-PMvQthBMNYivYUZuJkrLfQ-1; Sat, 02 Aug 2025 09:47:06 -0400
-X-MC-Unique: PMvQthBMNYivYUZuJkrLfQ-1
-X-Mimecast-MFC-AGG-ID: PMvQthBMNYivYUZuJkrLfQ_1754142426
-Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-b423aba05feso1596791a12.3
-        for <fstests@vger.kernel.org>; Sat, 02 Aug 2025 06:47:06 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GKAbUNQL"
+Received: by mail-pf1-f172.google.com with SMTP id d2e1a72fcca58-76aea119891so4023708b3a.1;
+        Sat, 02 Aug 2025 22:38:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1754199536; x=1754804336; darn=vger.kernel.org;
+        h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=NVpBhuZ96L+Fro8BPUL7qY4FAsCSj97IVu5e+UaR5SI=;
+        b=GKAbUNQLn9IqyuLadRWgM1lOiIPQIZJavEoL5EOFm6JDaDA19SiUQX5NA63Jn/fKNG
+         9M77V6a53Qr1nkxUcHqug52uaKdFM3WxtT3XpXvCKIeErVRj5OW3WxjtT0KzxLrDk/sz
+         nYrnOysAXszBfJncoAGbF92Egnuv70zodzQ8n+M5EH7MHuW+LjxCTGGfaPybZu7s7GyD
+         Hl/nP+bnohHzi7uIYM3bucIiwPrVSZFUIkSy68afddFYiFungle8AH5g4k9LqMog7ygd
+         W7LNOiOTNPkkSv5a+Yx7V95SKGMxTCZcsZ+zOevuO1GVa631sOBaPJD05+h5xUmX5q30
+         UJ9g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1754142425; x=1754747225;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=KCPzhhRIiZOBK75Gntdckoh4PTRzWtWZ6zcvlf0GwqQ=;
-        b=TMaLsPeChWe6v9fMX9r3nBXBtJXxhKvyPmztJpEQKOmlgDI7oAZsts0DAEl/uQdRJl
-         yjoPlwmh1+3z9NfyBZhcjGweFAn0ga2aWzW18eLzoImjk0jANyw8qX3jEJ6auhcmsmso
-         +vU8H/d0zfMZH+rJdm7FZzipIfEJuabnRY/vYM/pIDBKmJz1X1CEHzzNrTuOGElgnN3r
-         polPLe+dvzxZCYZfqDU8dqu1jyjbxbx0lIc51nWD/qC2ft+7SYBYqqJDBQ6RnARNNCWV
-         31v4Mwi/4GsXJ89A+7PkyqbKEGeQdUJDiG1w9v7UiaWrlRR5qXEDGmGvi8+k2K0+1VDC
-         Kgmg==
-X-Gm-Message-State: AOJu0Yw4EtjJKPOOP5ecl573vkbFE8Awp0BWtlkgRF8HOyle4FkhF0io
-	917JliuwvTpSh54mNEdF0SPhyJeieR1trX/yD4y8Lj+ly5rUJYqMz4HByoq2S/gIhRepd42w1yX
-	WuRLKXY93WWnORj5albL/3ZFjaL8dTM7S/avRMxKsGxeSdPvyVPvsLt+XkoOn1fPKvhA=
-X-Gm-Gg: ASbGncviSIBOb1oy8MBZ2vNHTiJk6QLWrxO1+u7wbbwG+fr56lgXv2YXyHcDFRRMtRu
-	gSBjM6K12J1IaR5slr60sJGn6sjDLb7uuluEax9ewHkfpuv+vZT/+UctRuAYh9bfJuP2RH16aSp
-	rlPedHUPmFlrMH6dBjt+yy0mWWhX4pyI5xqDNzo/aY8zIlq2dsIeu0LE/SHDKTEG19Xpv8xlsBI
-	vicqoGKk5Hq10uyYP1fyhHyfKSqRZsN2fPrLoH0kNOBr7ggnnE20CtMj6fnDzMAKX4LApQZz/tG
-	EKebQiAz5dDkG45SW/QaDnaiVzC3axs8W4MWEF5Yv5oaXrRzZI16pUmFNVrysJIt246yfjkj8s2
-	6MtSh
-X-Received: by 2002:a05:6a20:7d86:b0:233:c703:d4bf with SMTP id adf61e73a8af0-23df8fd290cmr4709661637.19.1754142425450;
-        Sat, 02 Aug 2025 06:47:05 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGP5eOgAqRjUOjwxsaNNr36B04elCmmGnD7lGj7JhewdjfOMgaQ2Fvz/dX0pJuJV3Cm7jYtCw==
-X-Received: by 2002:a05:6a20:7d86:b0:233:c703:d4bf with SMTP id adf61e73a8af0-23df8fd290cmr4709636637.19.1754142425036;
-        Sat, 02 Aug 2025 06:47:05 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-76bccfe9003sm6447391b3a.125.2025.08.02.06.47.03
+        d=1e100.net; s=20230601; t=1754199536; x=1754804336;
+        h=references:message-id:date:in-reply-to:subject:cc:to:from
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=NVpBhuZ96L+Fro8BPUL7qY4FAsCSj97IVu5e+UaR5SI=;
+        b=Nc8Lq4ccR+jj9H7+7HyGbuCiq2bRR34MFCS36XwBWZR0ECvHciDugfP79/QMsfoT3f
+         svrpkCVzNp5fs/IzmwhpzNknOQdpHmXVdtPDP6R0OVwwEC3qjVBUgE6/NdBGs5jEMqv2
+         n4zBpmpRfimNZaRokvzXbq7homCrX/olYj9o/vyQIckCUUhxbY4GkWbzDAJLBdWt9DNO
+         YwPpCktghgAQ9Uga+pqrVNIo+fyPmr2xq847zZ4Qb1Jz7hPQL43vi0h/ALI3pEBgAkW8
+         0xoEKYidP1WWy/FmzCYFlT7noGhnVneYmUDBZPtqKvFtCpBCuV63vdJPcTP8VUEDCB3a
+         6T+Q==
+X-Forwarded-Encrypted: i=1; AJvYcCXifDbb4XgbfHrI6vtpsFC6NviJvc9izt1rclpzKMpgMgteZzpT5axTtdGWFW4BIMHfsUW5kDy8FCsRfZXI@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz9M4l0X/aNXbLzuOuFqv+TOFebZfs6YR990tGzlKmVwhZj2H5Z
+	gDrlDD8YDv9RCI6GTWHRNKfydpzzJ/kT4goD2VsAt50/9C6I4JM0tpXw
+X-Gm-Gg: ASbGncvNqYaiE9ZFpXStKG2e2md73gs0zShzST8G0IyGlS1dD2/gbuhkouS6jdNNOND
+	2XODiOxe5KqDhNkl3gkTFDesDTUP+jFIv+JmJcIfFR77W6ZzeaItFkrKfMXCctIt6ZWjFdgbplP
+	eSs3xIGul2l0o4ubkY17gbSDn4xg/EJ3T4yMbUzOe4A6VgI7DQ1I7AJn4qmX8szMyE3yKXO5Vy5
+	eQVZzdXGM9kIB4PUJ9bCk2G+qRV7X3l3vC6zyObUowiobkACYrAzlsSmlBX0tNWQpfO/2uR7lDz
+	dVeH3hA+YBanAO8ckCJVgGjpm1D7NRl6vbaUIvTKzPNDxf8hbPreFuqkDtl2I5YqmbBFQ/kkgKS
+	F0pTk8QQ+4+4L2OmzzLPAk6TxjQ==
+X-Google-Smtp-Source: AGHT+IGMrCXQA4XQIYqdtJ3XkKjlUl1VECW3D92BcLK0+Fy/6NdSANbtW+bkEpp810mWlK5oXAXXRw==
+X-Received: by 2002:a05:6a20:958f:b0:234:4f73:e657 with SMTP id adf61e73a8af0-23dd7929619mr21536940637.0.1754199536418;
+        Sat, 02 Aug 2025 22:38:56 -0700 (PDT)
+Received: from dw-tp ([49.205.218.89])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b422bac16c9sm6654608a12.36.2025.08.02.22.38.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 02 Aug 2025 06:47:04 -0700 (PDT)
-Date: Sat, 2 Aug 2025 21:47:00 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 2/2] check: collect core dumps from systemd-coredump
-Message-ID: <20250802134700.khtlw7thzqyclfnt@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <175381958396.3021194.15630936445319512317.stgit@frogsfrogsfrogs>
- <175381958439.3021194.17530499480231032752.stgit@frogsfrogsfrogs>
+        Sat, 02 Aug 2025 22:38:55 -0700 (PDT)
+From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, Jan Kara <jack@suse.cz>, "Darrick J . Wong" <djwong@kernel.org>, John Garry <john.g.garry@oracle.com>
+Subject: Re: [RFC 2/2] generic: Add integrity tests for O_DSYNC and RWF_DSYNC writes
+In-Reply-To: <20250802081719.qrmme5jvwliwlgcg@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Date: Sun, 03 Aug 2025 10:53:27 +0530
+Message-ID: <87o6sxq8q8.fsf@gmail.com>
+References: <28abb8a0c4031ce07b475bf9026eedc23892868b.1753964363.git.ritesh.list@gmail.com> <9b2427b42e8716c359a36624fd6363f71583941b.1753964363.git.ritesh.list@gmail.com> <20250801201805.6h7sa2oyrvhnalph@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com> <87plderdk1.fsf@gmail.com> <20250802081719.qrmme5jvwliwlgcg@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <175381958439.3021194.17530499480231032752.stgit@frogsfrogsfrogs>
 
-On Tue, Jul 29, 2025 at 01:11:06PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> On modern RHEL (>=8) and Debian KDE systems, systemd-coredump can be
-> installed to capture core dumps from crashed programs.  If this is the
-> case, we would like to capture core dumps from programs that crash
-> during the test.  Set up an (admittedly overwrought) pipeline to extract
-> dumps created during the test and then capture them the same way that we
-> pick up "core" and "core.$pid" files.
-> 
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
->  check     |    2 ++
->  common/rc |   44 ++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 46 insertions(+)
-> 
-> 
-> diff --git a/check b/check
-> index ce7eacb7c45d9e..77581e438c46b9 100755
-> --- a/check
-> +++ b/check
-> @@ -924,6 +924,7 @@ function run_section()
->  		     $1 == "'$seqnum'" {lasttime=" " $2 "s ... "; exit} \
->  		     END {printf "%s", lasttime}' "$check.time"
->  		rm -f core $seqres.notrun
-> +		_start_coredumpctl_collection
->  
->  		start=`_wallclock`
->  		$timestamp && _timestamp
-> @@ -957,6 +958,7 @@ function run_section()
->  		# just "core".  Use globbing to find the most common patterns,
->  		# assuming there are no other coredump capture packages set up.
->  		local cores=0
-> +		_finish_coredumpctl_collection
->  		for i in core core.*; do
->  			test -f "$i" || continue
->  			if ((cores++ == 0)); then
-> diff --git a/common/rc b/common/rc
-> index 04b721b7318a7e..e4c4d05387f44e 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -5034,6 +5034,50 @@ _check_kmemleak()
->  	fi
->  }
->  
-> +# Current timestamp, in a format that systemd likes
-> +_systemd_now() {
-> +	timedatectl show --property=TimeUSec --value
-> +}
-> +
-> +# Do what we need to do to capture core dumps from coredumpctl
-> +_start_coredumpctl_collection() {
-> +	command -v coredumpctl &>/dev/null || return
-> +	command -v timedatectl &>/dev/null || return
-> +	command -v jq &>/dev/null || return
-> +
-> +	sysctl kernel.core_pattern | grep -q systemd-coredump || return
+Zorro Lang <zlang@redhat.com> writes:
 
-# rpm -qf `which coredumpctl`
-systemd-udev-252-53.el9.x86_64
-# rpm -qf `which timedatectl`
-systemd-252-53.el9.x86_64
-# rpm -qf `which jq`
-jq-1.6-17.el9.x86_64
-# rpm -qf /usr/lib/systemd/systemd-coredump 
-systemd-udev-252-53.el9.x86_64
+> On Sat, Aug 02, 2025 at 01:59:18AM +0530, Ritesh Harjani wrote:
+>> Zorro Lang <zlang@redhat.com> writes:
+>> 
+>> > On Thu, Jul 31, 2025 at 06:05:55PM +0530, Ritesh Harjani (IBM) wrote:
+>> >> This test verifies the data & required metadata (e.g. inode i_size for extending
+>> >> writes) integrity when using O_DSYNC and RWF_DSYNC during writes operations,
+>> >> across buffered-io, aio-dio and dio, in the event of a sudden filesystem
+>> >> shutdown after write completion.
+>> >> 
+>> >> Man page of open says that -
+>> >> O_DSYNC provides synchronized I/O data integrity completion, meaning
+>> >> write operations will flush data to the underlying hardware, but will
+>> >> only flush metadata updates that are required to allow a subsequent read
+>> >> operation to complete successfully.
+>> >> 
+>> >> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+>> >> ---
+>> >>  tests/generic/737     | 30 +++++++++++++++++++++++++++++-
+>> >>  tests/generic/737.out | 21 +++++++++++++++++++++
+>
+> BTW, as you change a testcase with known case number, your subject can be
+> "generic/737: ..." (instead of "generic: ...").
+>
 
-So we have 3 optional running dependences, how about metion that in README?
+Make sense. I will fix in v2.
 
-Thanks,
-Zorro
+>> >>  2 files changed, 50 insertions(+), 1 deletion(-)
+>> >> 
+>> >> diff --git a/tests/generic/737 b/tests/generic/737
+>> >> index 99ca1f39..0f27c82b 100755
+>> >> --- a/tests/generic/737
+>> >> +++ b/tests/generic/737
+>> >> @@ -4,7 +4,8 @@
+>> >>  #
+>> >>  # FS QA Test No. 737
+>> >>  #
+>> >> -# Integrity test for O_SYNC with buff-io, dio, aio-dio with sudden shutdown.
+>> >> +# Integrity test for O_[D]SYNC and/or RWF_DSYNC with buff-io, dio, aio-dio with
+>> >> +# sudden shutdown.
+>> >>  # Based on a testcase reported by Gao Xiang <hsiangkao@linux.alibaba.com>
+>> >>  #
+>> >> 
+>> >> @@ -21,6 +22,15 @@ _require_aiodio aio-dio-write-verify
+>> >>  _scratch_mkfs > $seqres.full 2>&1
+>> >>  _scratch_mount
+>> >> 
+>> >> +echo "T-0: Create a 1M file using buff-io & RWF_DSYNC"
+>> >> +$XFS_IO_PROG -f -c "pwrite -V 1 -D -S 0x5a 0 1M" $SCRATCH_MNT/testfile.t1 > /dev/null 2>&1
+>> >> +echo "T-0: Shutdown the fs suddenly"
+>> >> +_scratch_shutdown
+>> >> +echo "T-0: Cycle mount"
+>> >> +_scratch_cycle_mount
+>> >> +echo "T-0: File contents after cycle mount"
+>> >> +_hexdump $SCRATCH_MNT/testfile.t1
+>> >> +
+>> >>  echo "T-1: Create a 1M file using buff-io & O_SYNC"
+>> >>  $XFS_IO_PROG -fs -c "pwrite -S 0x5a 0 1M" $SCRATCH_MNT/testfile.t1 > /dev/null 2>&1
+>> >>  echo "T-1: Shutdown the fs suddenly"
+>> >> @@ -48,5 +58,23 @@ _scratch_cycle_mount
+>> >>  echo "T-3: File contents after cycle mount"
+>> >>  _hexdump $SCRATCH_MNT/testfile.t3
+>> >> 
+>> >> +echo "T-4: Create a 1M file using DIO & RWF_DSYNC"
+>> >> +$XFS_IO_PROG -fdc "pwrite -V 1 -S 0x5a -D 0 1M" $SCRATCH_MNT/testfile.t4 > /dev/null 2>&1
+>> >> +echo "T-4: Shutdown the fs suddenly"
+>> >> +_scratch_shutdown
+>> >> +echo "T-4: Cycle mount"
+>> >> +_scratch_cycle_mount
+>> >> +echo "T-4: File contents after cycle mount"
+>> >> +_hexdump $SCRATCH_MNT/testfile.t4
+>> >> +
+>> >> +echo "T-5: Create a 1M file using AIO-DIO & O_DSYNC"
+>> >> +$AIO_TEST -a size=1048576 -D -N $SCRATCH_MNT/testfile.t5 > /dev/null 2>&1
+>> >> +echo "T-5: Shutdown the fs suddenly"
+>> >> +_scratch_shutdown
+>> >> +echo "T-5: Cycle mount"
+>> >> +_scratch_cycle_mount
+>> >> +echo "T-5: File contents after cycle mount"
+>> >> +_hexdump $SCRATCH_MNT/testfile.t5
+>> >
+>> > I always hit "No such file or directory" [1], is this an expected test failure
+>> > which you hope to uncover?
+>> 
+>> Yes, we will need this fix [1] from Jan. Sorry I missed to add that in the commit
+>> message. Could you please give it a try with the fix maybe?
+>
+> Sure, with this patch, this test passed on my side:
+>   FSTYP         -- xfs (debug)
+>   PLATFORM      -- Linux/x86_64 dell-per750-41 6.16.0-mainline+ #9 SMP PREEMPT_DYNAMIC Sat Aug  2 16:01:22 CST 2025
+>   MKFS_OPTIONS  -- -f /dev/mapper/testvg-scratch--devA
+>   MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/testvg-scratch--devA /mnt/scratch
+>
+>   generic/737 4s ...  9s
+>   Ran: generic/737
+>   Passed all 1 tests
+>
+> So this "No such file or directory" failure is a known bug, and this patch trys to
+> uncover it. You didn't metion that, so I thought you just try to write a
+> new integrity test (rather than a regression test) :-D
 
-> +	COREDUMPCTL_START_TIMESTAMP="$(_systemd_now)"
-> +}
-> +
-> +# Capture core dumps from coredumpctl.
-> +#
-> +# coredumpctl list only supports json output as a machine-readable format.  The
-> +# human-readable format intermingles spaces from the timestamp with actual
-> +# column separators, so we cannot parse that sanely.  The json output is an
-> +# array of:
-> +#        {
-> +#                "time" : 1749744847150926,
-> +#                "pid" : 2297,
-> +#                "uid" : 0,
-> +#                "gid" : 0,
-> +#                "sig" : 6,
-> +#                "corefile" : "present",
-> +#                "exe" : "/run/fstests/e2fsprogs/fuse2fs",
-> +#                "size" : 47245
-> +#        },
-> +# So we use jq to filter out lost corefiles, then print the pid and exe
-> +# separated by a pipe and hope that nobody ever puts a pipe in an executable
-> +# name.
-> +_finish_coredumpctl_collection() {
-> +	test -n "$COREDUMPCTL_START_TIMESTAMP" || return
-> +
-> +	coredumpctl list --since="$COREDUMPCTL_START_TIMESTAMP" --json=short 2>/dev/null | \
-> +	jq --raw-output 'map(select(.corefile == "present")) | map("\(.pid)|\(.exe)") | .[]' | while IFS='|' read pid exe; do
-> +		test -e "core.$pid" || coredumpctl dump --output="core.$pid" "$pid" "$exe" &>> $seqres.full
-> +	done
-> +	unset COREDUMPCTL_START_TIMESTAMP
-> +}
-> +
->  # don't check dmesg log after test
->  _disable_dmesg_check()
->  {
-> 
+Your understanding is correct. Sorry, I missed to add the fix details.
+I posted the test before the fix got merged. But yes, I will add the
+necessary details in v2.
 
+> If this change uncover a known fix, please feel free to add _fixed_by_kernel_commit.
+
+The commit isn't yet showing up in the VFS tree. Once it gets in I will
+share the v2 with the following changes.
+
+diff --git a/tests/generic/737 b/tests/generic/737
+index 0f27c82b..a51e9623 100755
+--- a/tests/generic/737
++++ b/tests/generic/737
+@@ -18,6 +18,9 @@ _require_aiodio aio-dio-write-verify
+
+ [[ "$FSTYP" =~ ext[0-9]+ ]] && _fixed_by_kernel_commit 91562895f803 \
+        "ext4: properly sync file size update after O_SYNC direct IO"
++# which is further fixed by
++_fixed_by_kernel_commit 16f206eebbf8 \
++       "iomap: Fix broken data integrity guarantees for O_SYNC writes"
+
+ _scratch_mkfs > $seqres.full 2>&1
+ _scratch_mount
+
+
+> BTW, I saw you mark this patchset with "RFC", do you need to change it more?
+> Generally I won't merge RFC patches directly, although this patch looks good to
+> me. So when you think you've gotten enough review points, please feel free to
+> remove the "RFC" label and resend it :) Then ...
+>
+
+Right. I will drop RFC and will resend it with above mentioned points
+(once the fix appears in VFS tree).
+
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
+>
+
+Thanks!
+
+-ritesh
+
+> Thanks,
+> Zorro
+>
