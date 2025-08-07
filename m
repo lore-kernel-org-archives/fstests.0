@@ -1,98 +1,125 @@
-Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12677272E53
-	for <fstests@vger.kernel.org>; Tue,  5 Aug 2025 15:39:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FA50204F93
+	for <fstests@vger.kernel.org>; Thu,  7 Aug 2025 14:52:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754408363; cv=none; b=O+kMFmq5J+mb7d8j9woP0JCs8KEhumnUoe00y3HmR9hlsbQnPnKl2rM+InFUBlQ/D9GrNFC4pq0qkMnXhz64DSDu22QgQMNDQsaMHNr/UfkGp4XJVxtT7XarjdrlRvpgVDhS41w5AmdnE3TTxd22CaFHxBFwDzWNnRFo/wrPbOQ=
+	t=1754578357; cv=none; b=F65MJIxFlzsQxlFRfrRruDKqNFtw3dMW22bHgggUtVBH7t3BbkwOYqJvRmRmSqKxCqEUOVr7DYJV5bF3wAV0UobQyHNUVNPFWXmJ51cpbBidRqWprlgy5UA7j9xIZ3KWibCG8L3nulwVRE69B3qKcP1ASexe5dBC5XkD5e0nRbg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754408363; c=relaxed/simple;
-	bh=XhV1u7yAOmq3DL2/aVsLsL2XCiKiICT3mTnvT5JMjLA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=IkJ/s8M1fKkgn1rxFC34CGc9iDeLox+YGp40woK3lgO+B+qEQZLpT40oOaF7wlql5mxuJvUKrNExG5ZyCfxHAIWBJ4/IIEup1bvJBJOyhHc9wraR0enBTxozrFnGvVnJzT62iQkgliAXKyD5iDpd6BqPASVr2u2l0XJVg2LFPAA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=a6NAnFps; arc=none smtp.client-ip=209.85.214.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
+	s=arc-20240116; t=1754578357; c=relaxed/simple;
+	bh=1/V8AF0w6kbcPGw3x+zZ+qNok/I3kfNH4+VDj+1di68=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type; b=CdqrsCcQXN0qny+npxhvTwbdwq54tzSyyUPkJSv8lB75TZocjPkpKLxZuswl83XNrBeZmdq1FkgSmyCdyTG3v5eCRCtCxTPk0x25S8odwH2RHNJlvuGa8++Sog1A75o58NxTdoK69FbLR8FB6g5eWsSLBAfTOJRahbdCDxqPPY8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=W1ub0xxL; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="a6NAnFps"
-Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-2401248e4aaso73572345ad.0
-        for <fstests@vger.kernel.org>; Tue, 05 Aug 2025 08:39:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1754408361; x=1755013161; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=/gde3Z4lrKVpxofexKal4NMiLTMCt2/suB8AyXkEBFg=;
-        b=a6NAnFpsdljR3uSHeRZpnZxskTkO5XVAQAk3RTQtsll5Yyqp4Aqprawt7IWMTia7W1
-         FtU+QkkZxAnxWnmQXankT7J8Vq/dy2rpoTrit5lF5UDKDb6eQy1UaD0zQ9Bc/Gd4TczA
-         /1zsF4uYB+eyVTJbtEsOfCJnYBZ5VR1BQlkPfwn4r60VypX2hGY9o8siY6geb2RrxEsP
-         rJc1Ub7rJ/n+jYCXcaXPTpVwv4XBCKsQTIp72oZTdLZwsKOp64dsyOTC/vfDH3fNx+zw
-         uv5QPLbvAAWVMkDVAz6C17/pFcZ4LnLCN9kfFLtHzLYHjW4EMzsNOBs5jFB1rjjIO6Fi
-         no9A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1754408361; x=1755013161;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=/gde3Z4lrKVpxofexKal4NMiLTMCt2/suB8AyXkEBFg=;
-        b=swPmZUQdpD75dQBAHxv+vyYxtviA40FskYV1GQuduGcPYtoiOWvV5tcfKYrNeT+97u
-         G4qApnwmmXeh4AAno1y8zRSH3abIXRZAcyFfE/k8hocC4S45o4flFo6cEAEVzz8kdCg6
-         IrNAIgOaVbVUqCnxf06ULLM59Py8i4rd4PEsx5F0+yoyd1X05CCK/zuDeFlkbgs+RPgB
-         oqrqRS6aNGoa0ElM3Zr6buTpozpySRffH11ZzI56am/mP5y5GiYi4jAjUTaUCNIpxVFA
-         6tRbxu4JiyTirz6Xdu1JHF4/ojbczLodfgCQwczgzEdVR4avm+nTCFBIB/hJnQKg4kmN
-         9v2g==
-X-Forwarded-Encrypted: i=1; AJvYcCUm+XxWSacU0AZCH6/yvsiJpA35+DWiN4dVsGXFQGFOvVatUrSr6KBilfwakaiF41sXqj5wO6zu@vger.kernel.org
-X-Gm-Message-State: AOJu0YzKIUJ1G/3e8ImQYb8p3NR05/ytrNmy1ZsDwvqLxSVXx2BnLZh0
-	yogZwDzn4XaHG9Bl0++8xDaIa+e9xOl7GqgRHmfU9ZV9qw6q9mXjG2sFZLf8svDCeFM=
-X-Gm-Gg: ASbGncu7C76GCa3Pufwcx4elAe3xeOzZoYZ79FuxHS5g6HlJEhSS/NwYU95Jstp9wQi
-	8RxkNOSsZrmYP+Vi1GUR6xRZVDh/PHk7sE1Y1DKfOQb8+hbZ/qmEegSKlJRrt+RsDHL1Wqmt755
-	2RsZVFr6OgEX12jauTAd8SDc+bH45SgWTdhOSMclSdDLRHd3hpChC1pQju5Shn4LbWDVH+KkXbn
-	UBPKVFEC/qOQWTyx1FTwh4vQdEIeO28lv4ANJaz1XfPFXA/5uhTu+OKlueemoRKXSKZEs3HFFBS
-	KS5LLoN8aw5+7v7zyhVFO46Q+xLZKPIUmEfKx2LdHKeqj58u347s/ReeZRAin2DE58vBAeul5LR
-	zGFet1BvIr3UDtGdu3K0i
-X-Google-Smtp-Source: AGHT+IHyJbB5vULpWYjYzw+lS+gJrZWcinJIio9c1ZSVIIxX106/OKELIJZN8higRiwuS7NP5k30qQ==
-X-Received: by 2002:a17:902:d482:b0:235:e9fe:83c0 with SMTP id d9443c01a7336-24246fefe69mr189311545ad.27.1754408361181;
-        Tue, 05 Aug 2025 08:39:21 -0700 (PDT)
-Received: from [192.168.1.150] ([198.8.77.157])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-241d1ef7c30sm135562665ad.37.2025.08.05.08.39.20
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 05 Aug 2025 08:39:20 -0700 (PDT)
-Message-ID: <a96768ed-ae71-47e3-b5e6-229d9b431923@kernel.dk>
-Date: Tue, 5 Aug 2025 09:39:19 -0600
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="W1ub0xxL"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1754578353;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=9CH5CEQ7wX0+qXi+FYSzNutPc7SuyEZM/TA0JNT/aGQ=;
+	b=W1ub0xxLY1LIszCuWfH8MckaMlUU0ECxQILY6zpC/LYaRQbjvr0dMnGqXF7X4kcSLRkjHk
+	CuHHBi6GfIdCQvSbewQkN8c5ViXq9anBZURtOerHGyw/qHOWRxIk0M+QLaGTwrjPQNSo8m
+	flKPc+U/ayE2QFawnh3cZO1XUHGwzLs=
+Received: from mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-342-YCu4hEL5OwCzohoS9pk0HQ-1; Thu,
+ 07 Aug 2025 10:52:32 -0400
+X-MC-Unique: YCu4hEL5OwCzohoS9pk0HQ-1
+X-Mimecast-MFC-AGG-ID: YCu4hEL5OwCzohoS9pk0HQ_1754578351
+Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 449D319560B1
+	for <fstests@vger.kernel.org>; Thu,  7 Aug 2025 14:52:31 +0000 (UTC)
+Received: from bfoster.redhat.com (unknown [10.22.88.68])
+	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id C1F073001456
+	for <fstests@vger.kernel.org>; Thu,  7 Aug 2025 14:52:30 +0000 (UTC)
+From: Brian Foster <bfoster@redhat.com>
+To: fstests@vger.kernel.org
+Subject: [PATCH] xfs/131: test iomap zero range via fsx and error tag
+Date: Thu,  7 Aug 2025 10:56:26 -0400
+Message-ID: <20250807145626.564764-1-bfoster@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fsx: check pwritev2(,RWF_DONTCACHE)in test_dontcache_io
- as well
-To: Chao Yu <chao@kernel.org>, Zorro Lang <zlang@kernel.org>,
- fstests@vger.kernel.org
-Cc: jaegeuk@kernel.org
-References: <20250805014538.2935061-1-chao@kernel.org>
-Content-Language: en-US
-From: Jens Axboe <axboe@kernel.dk>
-In-Reply-To: <20250805014538.2935061-1-chao@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
 
-On 8/4/25 7:45 PM, Chao Yu wrote:
-> filesystem like XFS or ext4 has supported dontcache in both read&write
-> side, so we can know whether filesystem can support dontcache by only
-> checking w/ preadv2(,RWF_DONTCACHE).
-> 
-> However, filesystem can decide only support in read side or write side,
-> not sure, all filesystems will support this feature in both read&write
-> side later.
-> 
-> Let's add a check condition for write path as well.
+iomap supports a zero range operation based on buffered writes. This
+mechanism is used in limited spots, such as partial block zeroing,
+etc., because usually for larger zeroing ops it is more efficient to
+punch a hole and allocate unwritten extents.
 
-Once more:
+This means iomap zero range has limited production test coverage
+even though it has some particular corner cases that warrant test
+coverage. XFS supports an error injection knob to force use of iomap
+zero range on fallocate zero range operations. Add a test to run fsx
+with this knob enabled to provide more zeroing test coverage.
 
-https://lore.kernel.org/lkml/587aaee2-8d84-4eb5-9b87-22947abd0752@kernel.dk/T/#t
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+---
 
+FYI, this test is intended to go along with this patch[1] that
+introduces the errortag.
+
+[1] https://lore.kernel.org/linux-fsdevel/20250807144711.564137-8-bfoster@redhat.com/
+
+ tests/xfs/131     | 26 ++++++++++++++++++++++++++
+ tests/xfs/131.out |  2 ++
+ 2 files changed, 28 insertions(+)
+ create mode 100755 tests/xfs/131
+ create mode 100644 tests/xfs/131.out
+
+diff --git a/tests/xfs/131 b/tests/xfs/131
+new file mode 100755
+index 00000000..eb8882a3
+--- /dev/null
++++ b/tests/xfs/131
+@@ -0,0 +1,26 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 Red Hat, Inc..  All Rights Reserved.
++#
++# FS QA Test 131
++#
++# Run fsx with XFS force_zero_range error injection enabled. This is a proxy
++# test for iomap zero range. Zero range is used in limited cases by default,
++# such as EOF zeroing on file extension, etc. This error tag forces use of iomap
++# zero range for fallocate zero range operations.
++#
++. ./common/preamble
++_begin_fstest auto quick zero
++
++# Import common functions.
++. ./common/inject
++
++# Modify as appropriate.
++_require_test
++_require_xfs_io_error_injection "force_zero_range"
++
++_test_inject_error "force_zero_range"
++run_fsx "-q -S 0 -N 100000"
++
++# success, all done
++_exit 0
+diff --git a/tests/xfs/131.out b/tests/xfs/131.out
+new file mode 100644
+index 00000000..2ca0d932
+--- /dev/null
++++ b/tests/xfs/131.out
+@@ -0,0 +1,2 @@
++QA output created by 131
++fsx -q -S 0 -N 100000
 -- 
-Jens Axboe
+2.50.1
+
