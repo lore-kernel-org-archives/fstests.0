@@ -1,218 +1,171 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7F982882B8
-	for <fstests@vger.kernel.org>; Fri,  8 Aug 2025 19:32:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4FC948BEE;
+	Sun, 10 Aug 2025 09:41:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754681543; cv=none; b=amz9mM+AFcjN8fbqhA2LiOrLwUlx2HH7fjek5Gu6kULEJboPM01n1wUgm64ZeQdOPhMqm7auYeg6n/UjsbeesGNPj5gf2S62Shg5XNkCu+k0UbRCEB7DZBBDv6CA0ysbeJo+e/Bk1kx0eWgBWSGvjpkkwo/hbG367BtMhikapUY=
+	t=1754818918; cv=none; b=PjYk5PafGF7bX456Thvid9ROUhIY3YZGw9OT5RrB97CtMVKS2L/bvDGD9vGDZQQfIhJbwHcU5gxfv9b7keOiBccsysiVdeTLANyTagMwJHHAlYmH68A7rNwIjR4uhIj6R8QSoQpW9C9bVh9Zk/pknXpaly+F0z6JT/zowa+diXg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754681543; c=relaxed/simple;
-	bh=rd0gHPs9r3n1uqaeogh6lISRfiKMIbMIwGCvZPqFvjY=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=QWJ8ePgYM1D/o8O4irXcERYmkFFDAgv15jHp5ugBC/bpNcmJG7OFJjWK/GQOKu5BKDIrainpJCRVKk056pkn+sDRkUs20Ef9R/OYjxIriD8FblGdWVw3m4kvR49V8f8Rozt3ncZzueBxXWrR5SBHFYWTdDofGfjW9dAUQHWRGt4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Rwi8hDZU; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1754818918; c=relaxed/simple;
+	bh=HxXKid4gzZk4f/k8yE6zqulz1MKpGqJC7x8XQetKVoY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=llGajP773Hva7wf2ArwFUzn6AjuRSEjx7fUKEe9tDObjlu6yzAdjiHStRpovRD/JoXH53tDCV8r9J8+ZChuOcNSi6DioV3hZ+WsHFBtm+pJRhP6VjWl8jt0SRUsZk7Xui7xuxmPGLD8YWJwIJ53jhltsv0rvdtH+g592bOWtjQ8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=CoWHlNtN; arc=none smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Rwi8hDZU"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1754681540;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=4DY1Hu90O7055hYQlq+ozgQX5TkAPtJWGsG/dYblQRY=;
-	b=Rwi8hDZUXb8hKN1FxkNPOre6NxASH3e8pPmEeVU4DJtZY99Z60k61BahEDSd9E/oMQh0F1
-	JTlnTLTV4CKnviFg//ETsTx8vnEUia4WXQqjOrLCCRhOMS+BM+yqTv7orveNIk+3hEtBEj
-	pFyNv2f4TGM6Xldf6kVm1Zhu97KZig8=
-Received: from mail-wm1-f71.google.com (mail-wm1-f71.google.com
- [209.85.128.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-475-mA3s0xNWOIeJGI8Fqm6qJA-1; Fri, 08 Aug 2025 15:32:19 -0400
-X-MC-Unique: mA3s0xNWOIeJGI8Fqm6qJA-1
-X-Mimecast-MFC-AGG-ID: mA3s0xNWOIeJGI8Fqm6qJA_1754681538
-Received: by mail-wm1-f71.google.com with SMTP id 5b1f17b1804b1-458f710f364so16660015e9.0
-        for <fstests@vger.kernel.org>; Fri, 08 Aug 2025 12:32:18 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1754681537; x=1755286337;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=4DY1Hu90O7055hYQlq+ozgQX5TkAPtJWGsG/dYblQRY=;
-        b=cXI1lbl5h/bXZx3w9yOo7MF0TSCkurt7BnpDFVDyu2ANFrAh+Yf3yA12mQ8/bFAvXQ
-         LzGY1wJXCyyc8FMpfl5suqzyzVCCKkXPw0i5BW67tH11a7sASDkWpUXqj/8IZsnytux1
-         ohV8rKfVnv6lcrjX0j8eAEtyz4eLP6zf2uqRUpeKBgcGhLWvVG4qHUExG/U8NVqToHOS
-         DTH0DZO1PMDnfFejEr1ovo/wMeSg7bazLJumIYPtIzP2ZO4XAKwTETg+3TBz4VxTkC8p
-         doIQZhiGSND+/TrtWkzXNaVKuA7QL+gGncWpVgv7ukwbdYFttrZHatDwdjjwKST+ztkc
-         dETw==
-X-Gm-Message-State: AOJu0YxT3xvzNqk/bgiYOYKq1Pwh11q40QaO3/nmNPy3syV5FRvZoQQq
-	SQ/gGLyjLVm2/JS1WW4AQHbt4TRH+qZKyblQ+LwNwMSPlpgre7aAeydVQ2woxTRyRmyVUYIb5+s
-	M7t1s5UD1VAxacpaNMusdnPe7/w3Ow7pkIGOJJnczrLsYokpP4cuqmeBGyAX6zWIRFsx1qqNIfy
-	GzdyRs5A6Rjw/KXFFvKWoRJt2/l+6beiMTXl3MunUO9Q==
-X-Gm-Gg: ASbGncsE0EkkrYzoxiE622Edt/JhrjBqdz2It5FKoHwjF5nStXv/1RpkXQyp63SDQBn
-	5WKht4FtlDq34Lk8ht1afPKXoJl/y6MyvITFgpNiRJrYuskS6cY7ynqogvWyidbnEaf0YpE8h5c
-	taxEebhrOPsRiE32tM7gNwU8kFa7AnlEcDKZ6QlXSJcH+SfYespAosrSj5CJ+xs1Q9/I/Vih8GT
-	qlZS2FMKtLUPNApoHQPM9fPlBHVkXitYcLoCFwLQQBIQFNpqNXNB9kTEeMdRZiP89DLL4Qr3coJ
-	30ANEfJJz2W0i+4o3NeRCBtDC+c21vZdodORmOpkPrHNQw==
-X-Received: by 2002:a05:600c:1988:b0:456:214f:f78d with SMTP id 5b1f17b1804b1-459f4f0f55bmr33822105e9.22.1754681537463;
-        Fri, 08 Aug 2025 12:32:17 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IH4Zzp0+e8x86fu4vkp2zl133cRaxb2jV1ttAjta9TTzPN3gXe0PibXkLKt2GjRw6aWnewDbg==
-X-Received: by 2002:a05:600c:1988:b0:456:214f:f78d with SMTP id 5b1f17b1804b1-459f4f0f55bmr33821805e9.22.1754681536917;
-        Fri, 08 Aug 2025 12:32:16 -0700 (PDT)
-Received: from [127.0.0.2] (ip-217-030-074-039.aim-net.cz. [217.30.74.39])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-459e5869cccsm164906135e9.17.2025.08.08.12.32.15
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 08 Aug 2025 12:32:15 -0700 (PDT)
-From: Andrey Albershteyn <aalbersh@redhat.com>
-X-Google-Original-From: Andrey Albershteyn <aalbersh@kernel.org>
-Date: Fri, 08 Aug 2025 21:31:58 +0200
-Subject: [PATCH 3/3] xfs: test quota's project ID on special files
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="CoWHlNtN"
+Received: from pps.filterd (m0360083.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 57A9UafY032244;
+	Sun, 10 Aug 2025 09:41:49 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=pp1; bh=eUIR9POZpK7ETPFvmtBrWE7qW4mYsu
+	7xez1pExehzP4=; b=CoWHlNtNMMgM5y6tSJwAKdnDkuiAO1MUkmkZErW9DvM5+M
+	xKYVsUAK4e01ObzL6O1vyYWQ/xpXeIOSwH2Y4MYeRdDHv5MQjCcbhcIfTEfCnry9
+	01kXXcCMxfJrdPwwbYO/MXLAhNnzWkFEJMak8w07WNA/p2q8wepCKoklugb+C7Ue
+	y6b0UOKiNlRlJoYbtF8eq41wQnMoJNvsubOitJ9j5+eFuGs3mUwu5qtlnFuI3QgH
+	53bIGSgAyDTcPJ90Vx2beSFf2sprUaCBWRh9V8VBnzAaQgAHoxIP1d/XsDHT/eHC
+	x3PJM9L3R6Xfs7sDnEyPfBggy0YOJXs4vJ7irG4g==
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48dwucvss0-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sun, 10 Aug 2025 09:41:49 +0000 (GMT)
+Received: from m0360083.ppops.net (m0360083.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 57A9fmao020659;
+	Sun, 10 Aug 2025 09:41:48 GMT
+Received: from ppma12.dal12v.mail.ibm.com (dc.9e.1632.ip4.static.sl-reverse.com [50.22.158.220])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48dwucvsrw-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sun, 10 Aug 2025 09:41:48 +0000 (GMT)
+Received: from pps.filterd (ppma12.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma12.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 57A6F3df010622;
+	Sun, 10 Aug 2025 09:41:47 GMT
+Received: from smtprelay04.fra02v.mail.ibm.com ([9.218.2.228])
+	by ppma12.dal12v.mail.ibm.com (PPS) with ESMTPS id 48egnu9hmf-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sun, 10 Aug 2025 09:41:47 +0000
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay04.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 57A9fkRQ16122242
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Sun, 10 Aug 2025 09:41:46 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id F0E5F20043;
+	Sun, 10 Aug 2025 09:41:45 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id B276520040;
+	Sun, 10 Aug 2025 09:41:43 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.124.216.43])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Sun, 10 Aug 2025 09:41:43 +0000 (GMT)
+Date: Sun, 10 Aug 2025 15:11:41 +0530
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+        Ritesh Harjani <ritesh.list@gmail.com>, john.g.garry@oracle.com,
+        tytso@mit.edu, linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v3 07/13] generic/1228: Add atomic write multi-fsblock
+ O_[D]SYNC tests
+Message-ID: <aJhpVROJPYlz2gNB@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+References: <cover.1752329098.git.ojaswin@linux.ibm.com>
+ <ae247b8d0a9b1309a2e4887f8dd30c1d6e479848.1752329098.git.ojaswin@linux.ibm.com>
+ <20250717163510.GJ2672039@frogsfrogsfrogs>
+ <aIDpdg_SibBYFAPy@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <20250723145423.GN2672039@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20250808-xattrat-syscall-v1-3-6a09c4f37f10@kernel.org>
-References: <20250808-xattrat-syscall-v1-0-6a09c4f37f10@kernel.org>
-In-Reply-To: <20250808-xattrat-syscall-v1-0-6a09c4f37f10@kernel.org>
-To: fstests@vger.kernel.org
-Cc: zlang@redhat.com, linux-fsdevel@vger.kernel.org, 
- linux-xfs@vger.kernel.org, Andrey Albershteyn <aalbersh@kernel.org>, 
- Andrey Albershteyn <aalbersh@redhat.com>
-X-Mailer: b4 0.15-dev
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4286; i=aalbersh@kernel.org;
- h=from:subject:message-id; bh=JD0ZSorQ60c/tMR/lOTbqcoU/0PVcdELTNmMcs0rJ7M=;
- b=owJ4nJvAy8zAJea2/JXEGuOHHIyn1ZIYMqYF7FViWNvIkifo6s3Npn1Hz4jnjZxTQ3eLxI+b5
- zt7y2p+fukoZWEQ42KQFVNkWSetNTWpSCr/iEGNPMwcViaQIQxcnAIwkTfPGBn+f+J2+3uDyXPH
- a1udjV7H2LL+X92rfUxulsSJqSFlu74UMDLM9tvkIrfvc/3r775Lz/JNfHV2JYMahzcfo6PifKa
- PhZXsAGntRho=
-X-Developer-Key: i=aalbersh@kernel.org; a=openpgp;
- fpr=AE1B2A9562721A6FC4307C1F46A7EA18AC33E108
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250723145423.GN2672039@frogsfrogsfrogs>
+X-TM-AS-GCONF: 00
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODEwMDA2NyBTYWx0ZWRfXz39s8cURrgEA
+ hMLMtVU+/ycloGFupQZzV1rY3fMQ8uHkr6h9JQMmJmk1h+tPeso25SlRGwVZ8LLcXHn5iDuUJkJ
+ gTeuHpkRJSAMqCpfu8PhPbX0OnQ+wLKnXHMlWI05KphMT0GlwbPam/o7f/mSV+a7kgQLjIwO/Hb
+ IDTf5nqD3ddVzWxdgYP5dnxrluZYQoQQwlQTdv888Y0Cy20+rqHLomBXc3FpeOX84jSBsGEx2Sm
+ LmbixJQ/Ty6ksoDzQ1aX5awokMa9wsc2hrCFVuc6PJDhBDpiDi2u0iuDxhjtcdckX4sy/XgjDTf
+ Lx5DXFZwVepLDWTBhc5x8Aza8qBHYNBAm7g/bbm+ZReHtsM3lyhqiTQmlkDaZp44GUd82Elq02H
+ 2vjr6xJ24SjrxoaiWFQ0esZ2R5XOAlclv3ZsWk228R3czc2ivrZKdGbJfGIV/V+Q9eOJrfS1
+X-Authority-Analysis: v=2.4 cv=d/31yQjE c=1 sm=1 tr=0 ts=6898695d cx=c_pps
+ a=bLidbwmWQ0KltjZqbj+ezA==:117 a=bLidbwmWQ0KltjZqbj+ezA==:17
+ a=kj9zAlcOel0A:10 a=2OwXVqhp2XgA:10 a=VwQbUJbxAAAA:8 a=pGLkceISAAAA:8
+ a=duHtkgBDHVnZg8uZmhQA:9 a=CjuIK1q_8ugA:10
+X-Proofpoint-GUID: ZbLsdEtLJCQDBvxTd_-8e38Bz4S3Gc4d
+X-Proofpoint-ORIG-GUID: alXEItiCxgwqTKVMwi_sBksvfkFIGd28
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-08-10_03,2025-08-06_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ clxscore=1015 mlxscore=0 suspectscore=0 impostorscore=0 priorityscore=1501
+ mlxlogscore=980 phishscore=0 lowpriorityscore=0 adultscore=0 spamscore=0
+ bulkscore=0 malwarescore=0 classifier=spam authscore=0 authtc=n/a authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2507300000
+ definitions=main-2508100067
 
-From: Andrey Albershteyn <aalbersh@redhat.com>
+On Wed, Jul 23, 2025 at 07:54:23AM -0700, Darrick J. Wong wrote:
+> On Wed, Jul 23, 2025 at 07:23:58PM +0530, Ojaswin Mujoo wrote:
+> > On Thu, Jul 17, 2025 at 09:35:10AM -0700, Darrick J. Wong wrote:
+> > 
+> > <snip>
+> > 
+> > > > +verify_atomic_write() {
+> > > > +	if [[ "$1" == "shutdown" ]]
+> > > > +	then
+> > > > +		local do_shutdown=1
+> > > > +	fi
+> > > > +
+> > > > +	test $bytes_written -eq $awu_max || _fail "atomic write len=$awu_max assertion failed"
+> > > > +
+> > > > +	if [[ $do_shutdown -eq "1" ]]
+> > > > +	then
+> > > > +		echo "Shutting down filesystem" >> $seqres.full
+> > > > +		_scratch_shutdown >> $seqres.full
+> > > > +		_scratch_cycle_mount >>$seqres.full 2>&1 || _fail "remount failed for Test-3"
+> > > > +	fi
+> > > > +
+> > > > +	check_data_integrity
+> > > > +}
+> > > > +
+> > > > +mixed_mapping_test() {
+> > > > +	prep_mixed_mapping
+> > > > +
+> > > > +	echo "+ + Performing O_DSYNC atomic write from 0 to $awu_max" >> $seqres.full
+> > > > +	bytes_written=$($XFS_IO_PROG -dc "pwrite -DA -V1 -b $awu_max 0 $awu_max" $testfile | \
+> > > > +		        grep wrote | awk -F'[/ ]' '{print $2}')
+> > > > +
+> > > > +	verify_atomic_write $1
+> > > 
+> > > The shutdown happens after the synchronous write completes?  If so, then
+> > > what part of recovery is this testing?
+> > > 
+> > > --D
+> > 
+> > Right, it is mostly inspired by [1] where sometimes isize update could
+> > be lost after dio completion. Although this might not exactly be
+> > affected by atomic writes, we added it here out of caution.
+> > 
+> > [1] https://lore.kernel.org/fstests/434beffaf18d39f898518ea9eb1cea4548e77c3a.1695383715.git.ritesh.list@gmail.com/
+> 
+> Ah, so we're racing with background log flush then.  Would it improve
+> the potential failure detection rate to call shutdown right after the
+> pwrite, e.g.
+> 
+> $XFS_IO_PROG -dxc "pwrite -DA..." -c 'shutdown' $testfile
+> 
+> It can take a few milliseconds to walk down the bash functions and
+> fork/exec another child process.
 
-With addition of file_getattr() and file_setattr(), xfs_quota now can
-set project ID on filesystem inodes behind special files. Previously,
-quota reporting didn't count inodes of special files created before
-project initialization. Only new inodes had project ID set.
+Sounds good, I can make that change.
 
-Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
----
- tests/xfs/2000     | 77 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/2000.out | 17 ++++++++++++
- 2 files changed, 94 insertions(+)
-
-diff --git a/tests/xfs/2000 b/tests/xfs/2000
-new file mode 100755
-index 000000000000..26a0093c1da1
---- /dev/null
-+++ b/tests/xfs/2000
-@@ -0,0 +1,77 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2024 Red Hat.  All Rights Reserved.
-+#
-+# FS QA Test No. 2000
-+#
-+# Test that XFS can set quota project ID on special files
-+#
-+. ./common/preamble
-+_begin_fstest auto quota
-+
-+# Import common functions.
-+. ./common/quota
-+. ./common/filter
-+
-+_wants_kernel_commit xxxxxxxxxxx \
-+	"xfs: allow setting file attributes on special files"
-+_wants_git_commit xfsprogs xxxxxxxxxxx \
-+	"xfs_quota: utilize file_setattr to set prjid on special files"
-+
-+# Modify as appropriate.
-+_require_scratch
-+_require_xfs_quota
-+_require_test_program "af_unix"
-+_require_symlinks
-+_require_mknod
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_qmount_option "pquota"
-+_scratch_mount
-+
-+create_af_unix () {
-+	$here/src/af_unix $* || echo af_unix failed
-+}
-+
-+filter_quota() {
-+	_filter_quota | sed "s~$tmp.projects~PROJECTS_FILE~"
-+}
-+
-+projectdir=$SCRATCH_MNT/prj
-+id=42
-+
-+mkdir $projectdir
-+mkfifo $projectdir/fifo
-+mknod $projectdir/chardev c 1 1
-+mknod $projectdir/blockdev b 1 1
-+create_af_unix $projectdir/socket
-+touch $projectdir/foo
-+ln -s $projectdir/foo $projectdir/symlink
-+touch $projectdir/bar
-+ln -s $projectdir/bar $projectdir/broken-symlink
-+rm -f $projectdir/bar
-+
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -sp $projectdir $id" $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "limit -p isoft=20 ihard=20 $id " $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -cp $projectdir $id" $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "report -inN -p" $SCRATCH_DEV
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -Cp $projectdir $id" $SCRATCH_DEV | filter_quota
-+
-+# Let's check that we can recreate the project (flags were cleared out)
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -sp $projectdir $id" $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "limit -p isoft=20 ihard=20 $id " $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "report -inN -p" $SCRATCH_DEV
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -Cp $projectdir $id" $SCRATCH_DEV | filter_quota
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/2000.out b/tests/xfs/2000.out
-new file mode 100644
-index 000000000000..dd3918f1376d
---- /dev/null
-+++ b/tests/xfs/2000.out
-@@ -0,0 +1,17 @@
-+QA output created by 2000
-+Setting up project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-+Checking project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-+#0                   3          0          0     00 [--------]
-+#42                  8         20         20     00 [--------]
-+
-+Clearing project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-+Setting up project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-+#0                   3          0          0     00 [--------]
-+#42                  8         20         20     00 [--------]
-+
-+Clearing project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-
--- 
-2.49.0
-
+Thanks!
+> 
+> --D
+> 
+> > > > +}
+> > > > +
+> > 
