@@ -1,78 +1,75 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F7FF2E3AED
-	for <fstests@vger.kernel.org>; Mon, 11 Aug 2025 18:21:37 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DCBBF2E0923
+	for <fstests@vger.kernel.org>; Mon, 11 Aug 2025 18:25:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754936499; cv=none; b=RtB1i471taEvh2cwh7oV0RsAa0nYKWeMjlqQu1fcq9TofGF9WiQXA+6ETswiS8WYfVtzMpDSEHpMrp5FT3sLclwAWBHNSvZuKnGR5JlLd7Cd4mbONFm9qonKhgeA+FuSO47Mg19K9TTk0mbs/jC1+qCVcMj7JSSSuz3rAPzVWUw=
+	t=1754936707; cv=none; b=Uzb5cEodFl0/yUIOEDTsXbScghy6iE67qy4a/fR+3YRg0iLoeb7qIaevE5Hqkxh9It596fh3rIV4i754sCqFu0wsZ2tZpJlgMjtV3nGBFnq7ES1a4wADzdGxgLPBHTLUjE7lYMSRnUgEfvQmoxits7JEiD0Z/2dQuF//aPWniYo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754936499; c=relaxed/simple;
-	bh=s2bacoZ80gq553nMZNXudTEIwsP2I7+dIcU0QZgpf6o=;
+	s=arc-20240116; t=1754936707; c=relaxed/simple;
+	bh=lKAhW4oiHl3o6zVOe4zh++Nbw0JVLKK22FIHVU1HZDU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=LWm95/Hw/3Aopd80hBgzseElPbZ+h6O/zYzjy8JHuoqBUtyijWVkWlea9prDTa2ETKQh/7AnCSuHJFqTKLYaY+t192VVfL/3Q/nd4jvdACcdsbZf4dzOdHoHLsTEY4UjunHPYPwlolKYnPuHvY0IA/n38TrCcNenloxAgknAfKw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=dKaSY2eB; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=l4SZQEK3OQ71Dg0+hr+u+brnXezFoUB/UpD4JIpGo4XKbPdwqD/0UTHhYPaZhIsoImUUSYjtAU8dKYfiH+tR2QABnG4uxfGqHaG4NjB0H3qOebs1FrBjnCWCHL9ikOI6tEjXEIulZ30cbj1oLUflh82Pn/sB6IMPScsqQcTQF5g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XjKwdgpE; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dKaSY2eB"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XjKwdgpE"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1754936496;
+	s=mimecast20190719; t=1754936704;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=fwTrd0+dO6n2K9dOFuwOVngF2++TGNcYuAwM4GZHZDU=;
-	b=dKaSY2eBOzEOOZwhOnvWOyuXj/A20PV+q1xGCa40qnqznCncYHuMNHRKylRZHeSfuX1P07
-	n6IuG4dsVkK/8nqx5sgqkN8B+mGvc2+0dD6r/g0L/GiKnietTcjNOLK1vQrYjugIGwbDIk
-	rnjBcqLgx3E2np1gMLGC7TgkuaOHJ4U=
-Received: from mail-wr1-f72.google.com (mail-wr1-f72.google.com
- [209.85.221.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=KG/nLK6ly9NVbJ7Ikn2khZYZtxxzIyf5Tj5gpFjXeHk=;
+	b=XjKwdgpE3hROl7U3AZYRxWitPKI5XVufh75TINw9nkcpz3fmE0k/3vr6oCkTOtoQFOprqU
+	Jce9Ia02OMGn8jTT07dLIMeb2FnTyvheU7QJrZLXSkX12a9JtfHug74/x/D6rX+PCcS2xf
+	eRWvePkZam18VTIv8V8jMMCT7nGdVF0=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-693-Ln6xIUVbMGWdn9LxC9Sqfg-1; Mon, 11 Aug 2025 14:21:35 -0400
-X-MC-Unique: Ln6xIUVbMGWdn9LxC9Sqfg-1
-X-Mimecast-MFC-AGG-ID: Ln6xIUVbMGWdn9LxC9Sqfg_1754936494
-Received: by mail-wr1-f72.google.com with SMTP id ffacd0b85a97d-3b780da0ab6so2352874f8f.0
-        for <fstests@vger.kernel.org>; Mon, 11 Aug 2025 11:21:35 -0700 (PDT)
+ us-mta-629-16YJduqpMrOyIhqpQcr_jQ-1; Mon, 11 Aug 2025 14:25:03 -0400
+X-MC-Unique: 16YJduqpMrOyIhqpQcr_jQ-1
+X-Mimecast-MFC-AGG-ID: 16YJduqpMrOyIhqpQcr_jQ_1754936702
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-23fe26e5a33so70456985ad.3
+        for <fstests@vger.kernel.org>; Mon, 11 Aug 2025 11:25:03 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1754936494; x=1755541294;
+        d=1e100.net; s=20230601; t=1754936702; x=1755541502;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=fwTrd0+dO6n2K9dOFuwOVngF2++TGNcYuAwM4GZHZDU=;
-        b=v0QwX/GtPxPSzkEcPKViO+GxalnQHPr7Ub+Q7B0XjfuOOFyd+n67Bkj33Ns4HprSnc
-         lYOeutXXIYws/r+LeDlxIeKaSzaJH1EVMcSXo9m2EWMedom6CLgBlLnS6PjBux76lNpZ
-         RGFbyiKFTtBfD7b/McnaaPRVfpA6QjtN1XJwju8p02F5NhYqD0lM/ZfQB9NZhx+5yLn8
-         Q9zajuxF3kxJJ9unTvEGfx/onx6toSuofs/tsRKffyl1v5tlIRGDYWQGHcV3JU5/yKD3
-         TYSlVkOe4GpEg30nv4x+DarU1Mw5LdVSFloyaKwpAtZIKRtAK88QQIQaYKne66Ay4hBa
-         /Ddg==
-X-Gm-Message-State: AOJu0YwEY+zwPFtmhsIqrJ4H3ljO2Y4enC0ii3y5XtkydMUqDEp59bBp
-	nwkfWTa+y76waNy0eVoXtaioRcjYdpyp8iQnh67QmIWkaLgtzoLSGFKKIpCREoco61Ga18lOLtb
-	zK+p/I/IzBu+WscMW0QVL+5wGsy0H5yqHcw2Q3CO9HNaCV02STWqdyjk+vQ==
-X-Gm-Gg: ASbGncvfWB40Anttah3v0rjR7/nLj6himlOTVRejIWbX0GeiI1Pk6/vv2Npb23o3/Oz
-	OQ7h12oOyv6yXATS83bDJCFc6m2UL1see2qkGo6yICMYRbfBM3ys8UicHgo4m6EPdLkKVpm+Jly
-	3zSzFvFA2j5IWmN5jwQMN5hRgolmpWijcTDALpueJuVBrVeNB1nSpXQ0nP2k2pyDsO1o+NKpsZS
-	k911UP9bNZXygePOP5c/wQqiWeX8/77mB98pXzVaM8tacH5sGWEp8NXJWKnkrgd2jvhtSTIMYaT
-	3HJ/7xifEyAo1/sMF4UIp+wCnWr72R+dNRHLMcR80QXPhR1EUPe66hIDZGo=
-X-Received: by 2002:a05:6000:2f86:b0:3a5:39bb:3d61 with SMTP id ffacd0b85a97d-3b911007af1mr404472f8f.27.1754936493845;
-        Mon, 11 Aug 2025 11:21:33 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGB8j2u3EX4ITM1fOLXGqpgPLkv5CcVqBQNtd//Kju257Gmpgop9iCOpmn/23WDZQFXeta5Ng==
-X-Received: by 2002:a05:6000:2f86:b0:3a5:39bb:3d61 with SMTP id ffacd0b85a97d-3b911007af1mr404458f8f.27.1754936493441;
-        Mon, 11 Aug 2025 11:21:33 -0700 (PDT)
-Received: from thinky (ip-217-030-074-039.aim-net.cz. [217.30.74.39])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-459e5852e28sm260580235e9.9.2025.08.11.11.21.32
+        bh=KG/nLK6ly9NVbJ7Ikn2khZYZtxxzIyf5Tj5gpFjXeHk=;
+        b=wkDAtewIUwQeU+ZGwVUa8r5Tt6jMQYPoc9CmcG8GXsGs4gkfhWG1tF/2FOSCytT0Eo
+         wKMPkZAdlZdj5f1BUllC62Cd28SC3QZEcvt077VqZFzW6Twd5Zu3MCzbytEh/aIQClP1
+         NA/gA+fQy47kgbyf2yLh09Nhju7KLY9QsZcUmGS26fPPl9CNuOx8RgmGTel98W8ojs1O
+         EIdIwZ8DZbWIsIjKV9ByML2FIFlSQbtRlwbciYBMj3Dc3pCQjMLGkNZ60mpK6BjwOUq/
+         PIj3KzBJTGXtrI6eCFOZPGQiWuz5eEPCPON3LYKqcuT4ESxi6JKilacZhE9/CNmZwm4v
+         RVbQ==
+X-Gm-Message-State: AOJu0Yy3lVQtA/NUP5l5im0RqX8+AruF/d8wb7jj+Rj4H14Rg0lcWjls
+	MUIXABOn8ckOxsbO5qmSSv8x6+emjzxnMgJDM8guRwJc4dSNLICYxCNSBcR/RIj+HjanLyV3i2L
+	3oxEvdxxVmvpryZv878BOi04/eATdCRJJErmRK3etkO04ZL+5nWXaPuUC6HI=
+X-Gm-Gg: ASbGncv46svytDXZjINWe13IFKMqVppRkV7PR9QUyRgpFV33oDz316bA2wYNy0n1YI6
+	bhXv2FpfcpBPpRAxRuRx2fbeqX+v4atn+oG9lRmAX7mtErB1d1JVnMz4372D5xOW7jdscZaqHMF
+	lKw1rNbMKjHY79PR5cRxwlzjsSH5XLR+4VnRS3FM4Xr9wlDF8xMYdBAgH+6N4p2qou4BvQIAQcF
+	GomZlF+FnAJ/abKUypgKjdExaUMov6Um5mcpOzuVedEHONiCKh+WLnc+jiKymSxTHTQsl2rzgY6
+	YDbXS9SK0UzAmZrSPf5ekKCvYLJdRt1zPGGzWJxTceH1Ro2T1RCDAzFgLPYwczmUZz0UdmwJWis
+	XbNl3
+X-Received: by 2002:a17:903:41c6:b0:240:8cec:4823 with SMTP id d9443c01a7336-242fc34e3ecmr7987915ad.41.1754936701997;
+        Mon, 11 Aug 2025 11:25:01 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHC4uEYssl0T3sEZlEcBU5zREjO9k8JzDvY0+CcBMv910P229k+uZoqhZa4zGS8AUmGLSrS1g==
+X-Received: by 2002:a17:903:41c6:b0:240:8cec:4823 with SMTP id d9443c01a7336-242fc34e3ecmr7987645ad.41.1754936701611;
+        Mon, 11 Aug 2025 11:25:01 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-241e8aac9a6sm281741335ad.157.2025.08.11.11.25.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Aug 2025 11:21:33 -0700 (PDT)
-Date: Mon, 11 Aug 2025 20:21:32 +0200
-From: Andrey Albershteyn <aalbersh@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests@vger.kernel.org, zlang@redhat.com, 
-	linux-fsdevel@vger.kernel.org, linux-xfs@vger.kernel.org, 
-	Andrey Albershteyn <aalbersh@kernel.org>
-Subject: Re: [PATCH 3/3] xfs: test quota's project ID on special files
-Message-ID: <gyajh6rvjyqq5z4acrk2um4bwkarxztu5ptuyyehrh3xqcffwg@q3nh34dkdpwo>
-References: <20250808-xattrat-syscall-v1-0-6a09c4f37f10@kernel.org>
- <20250808-xattrat-syscall-v1-3-6a09c4f37f10@kernel.org>
- <20250811152109.GF7965@frogsfrogsfrogs>
+        Mon, 11 Aug 2025 11:25:01 -0700 (PDT)
+Date: Tue, 12 Aug 2025 02:24:57 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs/131: test iomap zero range via fsx and error tag
+Message-ID: <20250811182457.z5cvwecd6yyvfges@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250807145626.564764-1-bfoster@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -81,57 +78,86 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250811152109.GF7965@frogsfrogsfrogs>
+In-Reply-To: <20250807145626.564764-1-bfoster@redhat.com>
 
-On 2025-08-11 08:21:09, Darrick J. Wong wrote:
-> On Fri, Aug 08, 2025 at 09:31:58PM +0200, Andrey Albershteyn wrote:
-> > From: Andrey Albershteyn <aalbersh@redhat.com>
-> > 
-> > With addition of file_getattr() and file_setattr(), xfs_quota now can
-> > set project ID on filesystem inodes behind special files. Previously,
-> > quota reporting didn't count inodes of special files created before
-> > project initialization. Only new inodes had project ID set.
-> > 
-> > Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
-> > ---
-> >  tests/xfs/2000     | 77 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/2000.out | 17 ++++++++++++
-> >  2 files changed, 94 insertions(+)
-> > 
-> > diff --git a/tests/xfs/2000 b/tests/xfs/2000
-> > new file mode 100755
-> > index 000000000000..26a0093c1da1
-> > --- /dev/null
-> > +++ b/tests/xfs/2000
-> > @@ -0,0 +1,77 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2024 Red Hat.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 2000
-> > +#
-> > +# Test that XFS can set quota project ID on special files
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quota
-> > +
-> > +# Import common functions.
-> > +. ./common/quota
-> > +. ./common/filter
-> > +
-> > +_wants_kernel_commit xxxxxxxxxxx \
-> > +	"xfs: allow setting file attributes on special files"
-> > +_wants_git_commit xfsprogs xxxxxxxxxxx \
-> > +	"xfs_quota: utilize file_setattr to set prjid on special files"
+On Thu, Aug 07, 2025 at 10:56:26AM -0400, Brian Foster wrote:
+> iomap supports a zero range operation based on buffered writes. This
+> mechanism is used in limited spots, such as partial block zeroing,
+> etc., because usually for larger zeroing ops it is more efficient to
+> punch a hole and allocate unwritten extents.
 > 
-> These syscalls aren't going to be backported to old kernels, so I think
-> these two tests are going to need a _require_file_getattr to skip them.
+> This means iomap zero range has limited production test coverage
+> even though it has some particular corner cases that warrant test
+> coverage. XFS supports an error injection knob to force use of iomap
+> zero range on fallocate zero range operations. Add a test to run fsx
+> with this knob enabled to provide more zeroing test coverage.
 > 
-> --D
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> ---
 > 
+> FYI, this test is intended to go along with this patch[1] that
+> introduces the errortag.
+> 
+> [1] https://lore.kernel.org/linux-fsdevel/20250807144711.564137-8-bfoster@redhat.com/
+> 
+>  tests/xfs/131     | 26 ++++++++++++++++++++++++++
+>  tests/xfs/131.out |  2 ++
+>  2 files changed, 28 insertions(+)
+>  create mode 100755 tests/xfs/131
+>  create mode 100644 tests/xfs/131.out
+> 
+> diff --git a/tests/xfs/131 b/tests/xfs/131
+> new file mode 100755
+> index 00000000..eb8882a3
+> --- /dev/null
+> +++ b/tests/xfs/131
+> @@ -0,0 +1,26 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 Red Hat, Inc..  All Rights Reserved.
+> +#
+> +# FS QA Test 131
+> +#
+> +# Run fsx with XFS force_zero_range error injection enabled. This is a proxy
+> +# test for iomap zero range. Zero range is used in limited cases by default,
+> +# such as EOF zeroing on file extension, etc. This error tag forces use of iomap
+> +# zero range for fallocate zero range operations.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick zero
+> +
+> +# Import common functions.
+> +. ./common/inject
+> +
+> +# Modify as appropriate.
+> +_require_test
+> +_require_xfs_io_error_injection "force_zero_range"
+> +
+> +_test_inject_error "force_zero_range"
+> +run_fsx "-q -S 0 -N 100000"
 
-will replace it here and in generic/ test
+Just a picky review point:
 
--- 
-- Andrey
+As run_fsx() function use "$@", so the double quotation marks ("-q -S 0 -N 100000")
+don't make sense I think, although it works. I'll help to remove it when I merge this
+patch.
+
+Thanks,
+Zorro
+
+> +
+> +# success, all done
+> +_exit 0
+> diff --git a/tests/xfs/131.out b/tests/xfs/131.out
+> new file mode 100644
+> index 00000000..2ca0d932
+> --- /dev/null
+> +++ b/tests/xfs/131.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 131
+> +fsx -q -S 0 -N 100000
+> -- 
+> 2.50.1
+> 
+> 
 
