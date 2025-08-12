@@ -1,153 +1,164 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 351D71FDA
-	for <fstests@vger.kernel.org>; Mon, 11 Aug 2025 19:15:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D5FF62DFA3B;
+	Tue, 12 Aug 2025 06:22:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754939751; cv=none; b=leN7tZ5XOXyFKTE5HM1Y58W4WJt36ll/KH7C/tneQrebEYArVr6f+C59MZ4mw5zphKCAbHTk5TgLSSQYgkK8FF07w3I4QjCH1ismccwtMzSLdSuaV71/NQIH29qC1dka0g9RQ3/JRDdBWm7opquM6uCUIdAyliw/xTrZa0sRGuw=
+	t=1754979760; cv=none; b=UUMioDJac0gEERS5KfmF/PCNNgHU8buucT+peenp3+fupSmOYAWbj6pmztacmyYi9jfnv6G3KzSg6gqYWIPwinaaAueRx7uaPDj03lVlij2JX1Ee9ChjrZ4TzFFiCNrFUk+vy04j1VUYSQIU3x8TMTPCpEOK4I2aLAf/H7WdQg0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754939751; c=relaxed/simple;
-	bh=/a4lRrxxaMx5+NSNtiBA4lZ0j+y0OhTRw4rNb3zfqnE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KZfGJD5WXVQnyf5oO+ejMksBlxH4rk58zeWGmA5B1W/FCF0bswRvxrXhK07VEn7UolgwjJJMwx7NRqQ3DyeQB5eamVp/bYBfIrFBMEH5MbkN/hwAlzqWc7hrHeiCkTIyaH3VIJmJrka33SC/j031zOzPs5XZgOx7bGiYyCVaHP8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YsMjhVo7; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1754979760; c=relaxed/simple;
+	bh=zFAGRrwuwWB5HJl+9EwiGvBXdn70IvxXPFhQq2EEYsU=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=ckJqEGnEbZAQ4J+XNgwTX9pVgHAKEFxEpzr2tzdIcqEgsCaalHn7JJSLT86zulmEN5pLmhZercuMD1ZssH4XdtKa/RtN7mQlqvisc6HL8Md4zAm1ls9D9I1q7GrA/r1lrfyFCcL28JtHRIh2067GJMKhAfrD+ih4npSrUkaGCWg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BkofZ5yy; arc=none smtp.client-ip=209.85.214.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YsMjhVo7"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1754939749;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Wvm1ldWUx7kJ56vM8s68ygTxFiJPAQHw34i423yl0wY=;
-	b=YsMjhVo7B88PqK7XMo6jiA5n3hXpD4yFdg0G/0j8TiynNl96zxN3cKSuDPo3wNx8zFqYOg
-	OHDj/vAl0om1QtsPLzod+AtXLBrB5CoLIrAo8Fsr9398/9Wr7NFIJORH5IbGz0faCWiUtB
-	DNN0k2q7ATPCCL11hxuF4W+6sngjtGc=
-Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-611-2-p0uzAMM3G0-w91slJ7sA-1; Mon,
- 11 Aug 2025 15:15:47 -0400
-X-MC-Unique: 2-p0uzAMM3G0-w91slJ7sA-1
-X-Mimecast-MFC-AGG-ID: 2-p0uzAMM3G0-w91slJ7sA_1754939747
-Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id EE4F319560BD
-	for <fstests@vger.kernel.org>; Mon, 11 Aug 2025 19:15:46 +0000 (UTC)
-Received: from bfoster (unknown [10.22.88.68])
-	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 56407300145D;
-	Mon, 11 Aug 2025 19:15:46 +0000 (UTC)
-Date: Mon, 11 Aug 2025 15:19:40 -0400
-From: Brian Foster <bfoster@redhat.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/131: test iomap zero range via fsx and error tag
-Message-ID: <aJpCTGS3bdYkVP2n@bfoster>
-References: <20250807145626.564764-1-bfoster@redhat.com>
- <20250811181908.xmzp5wpqg5w3tgyb@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BkofZ5yy"
+Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-242d8dff9deso25088235ad.2;
+        Mon, 11 Aug 2025 23:22:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1754979757; x=1755584557; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=aG5zr+MTtgDNpu4lXKuxczvNiLElW1aH6m8gqjR8YtU=;
+        b=BkofZ5yyuPd7/JZ9YMAi3UEtJJXNVGagaO6EduWYWyrIhGE3QVKoGdQPT+WdjePxsL
+         8QSeZ2iyjPh/9XMqQATJecFu0ig42ZWPehs4rqedaBJBEU2e0vsfr+TfxMV455zLR5YD
+         vmRsCZ7gPty3MwycoEQaR7QDXA6/fP2tJyOQsXB4NpVpqIYezkzOQ6bQCQQuZA2CGqfp
+         vR586QnJOKD2wLftof3fL2+L5wCH8hpXUsoIKTDbgrXJDlNj+5pw1T2Qj+x1ZNtnIU6n
+         t/ZwpIfczNa94ZxKRkbTqKqpzXPH5Cn8+FyEeJep1rmbo3ZsICWkU0keJNXhLPTrcZAh
+         JzBw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1754979757; x=1755584557;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=aG5zr+MTtgDNpu4lXKuxczvNiLElW1aH6m8gqjR8YtU=;
+        b=fzfrQqLVuaiV6GFx15oayIWXIacZYHmf0AFTJeryOnGFbInAODqSVjzeppkR+eAZjj
+         Q8GKSijODKqj7AoyVBZkVmzyCZ58x219bnzgwn2UXV87Xn/jUakDJNKy8zFqsmSb9TWT
+         t7wtegWSTtfNRKe1VjOib9TSD5BXyjgVadfvAH0eXoS54hIilqDcBkrFOiQzLY0u8tHx
+         TwS2fT63MfrdamBDJdEHFAMfBsUa3f0tQhNCFI4uBkqhhrLBMHZAwWtNqRMDCpj0bXFY
+         6lshuwkVOHHnR/jQ8XVFD9Ah0MUQLd6c0XpJJ/CXpYq8pb/120ix4E0quXtVoSGCSrBY
+         yRFQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXChWK2NLAvrMRbdJGpBzQoQBLAZk8ynPRWFroBvmumOJvAVtQyxjEZBESh5ak8govXnrYdR+P/@vger.kernel.org
+X-Gm-Message-State: AOJu0YzGuxVnlkd6neM9VMghOdmVA7fipxTk8vxY2igUNGVX1oUNuHJo
+	YgB0j0H/h9I3j+cT5ydr2ysYlZjj5fWJ/I0jZWxHs+Qv9c8scN4hLjVjkzInYA==
+X-Gm-Gg: ASbGnctwMmJIrhMbd4/EhYoqtzAEhrSSYaYdENRMaPEMYeOTuA7g76n24hCYjlkUaph
+	RZGpCoUUNiUZ+Hj+ijy7iXFPkDzEB+7LmfkQsyp9PzEkz/gFja4nsGzPxvkeuogtPimIPc+qn1E
+	mfYx277NK4n54gjmcXImQOmCZAQygzA9/gULqMk9FoJ9CSdzvYOAvTdDt/5OIcpTMoXZX8nVrcR
+	yBntFmts2ouCoNFu8IdLVsw35jgqoGULadc1KaTER/GXt7LjNBVcY96vd4JPk9H/K8sAHxAuteb
+	z9Z3slWkwcKGL+oI7tq0ZJu8m2OfeGQqV/Wh6nxV02HmOL7pxJsRJ0RTbr712gCW6W9Y/YfVllV
+	8vltTPy3sHC9lfARkCf8dFBIqB/828cms
+X-Google-Smtp-Source: AGHT+IEhv/3Obwg8nbzWtzGYWth66QSTLwod1boZkrgeuclBY6e1ov7BO4kx6oGAa+tGDIF217HF/Q==
+X-Received: by 2002:a17:902:f706:b0:237:f76f:ce34 with SMTP id d9443c01a7336-242fc228a6emr31561655ad.15.1754979756941;
+        Mon, 11 Aug 2025 23:22:36 -0700 (PDT)
+Received: from [192.168.0.120] ([49.207.198.59])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-241d1ef48fbsm290936605ad.36.2025.08.11.23.22.34
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 11 Aug 2025 23:22:36 -0700 (PDT)
+Message-ID: <9b8a35b7-0531-480a-a833-3844d048937b@gmail.com>
+Date: Tue, 12 Aug 2025 11:52:32 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250811181908.xmzp5wpqg5w3tgyb@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 3/7] btrfs/137: Make this compatible with all block sizes
+To: Qu Wenruo <quwenruo.btrfs@gmx.com>, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, ritesh.list@gmail.com,
+ ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org,
+ fdmanana@kernel.org
+References: <cover.1753769382.git.nirjhar.roy.lists@gmail.com>
+ <991278fd7cf9ea0d5eed18843e3fb96b5c4a3cac.1753769382.git.nirjhar.roy.lists@gmail.com>
+ <c1feb41e-608b-4578-b7f7-bf9dd0801836@gmx.com>
+Content-Language: en-US
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+In-Reply-To: <c1feb41e-608b-4578-b7f7-bf9dd0801836@gmx.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On Tue, Aug 12, 2025 at 02:19:08AM +0800, Zorro Lang wrote:
-> On Thu, Aug 07, 2025 at 10:56:26AM -0400, Brian Foster wrote:
-> > iomap supports a zero range operation based on buffered writes. This
-> > mechanism is used in limited spots, such as partial block zeroing,
-> > etc., because usually for larger zeroing ops it is more efficient to
-> > punch a hole and allocate unwritten extents.
-> > 
-> > This means iomap zero range has limited production test coverage
-> > even though it has some particular corner cases that warrant test
-> > coverage. XFS supports an error injection knob to force use of iomap
-> > zero range on fallocate zero range operations. Add a test to run fsx
-> > with this knob enabled to provide more zeroing test coverage.
-> > 
-> > Signed-off-by: Brian Foster <bfoster@redhat.com>
-> > ---
-> > 
-> > FYI, this test is intended to go along with this patch[1] that
-> > introduces the errortag.
-> > 
-> > [1] https://lore.kernel.org/linux-fsdevel/20250807144711.564137-8-bfoster@redhat.com/
-> > 
-> >  tests/xfs/131     | 26 ++++++++++++++++++++++++++
-> >  tests/xfs/131.out |  2 ++
-> >  2 files changed, 28 insertions(+)
-> >  create mode 100755 tests/xfs/131
-> >  create mode 100644 tests/xfs/131.out
-> > 
-> > diff --git a/tests/xfs/131 b/tests/xfs/131
-> > new file mode 100755
-> > index 00000000..eb8882a3
-> > --- /dev/null
-> > +++ b/tests/xfs/131
-> > @@ -0,0 +1,26 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2025 Red Hat, Inc..  All Rights Reserved.
-> > +#
-> > +# FS QA Test 131
-> > +#
-> > +# Run fsx with XFS force_zero_range error injection enabled. This is a proxy
-> > +# test for iomap zero range. Zero range is used in limited cases by default,
-> > +# such as EOF zeroing on file extension, etc. This error tag forces use of iomap
-> > +# zero range for fallocate zero range operations.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick zero
-> > +
-> > +# Import common functions.
-> > +. ./common/inject
-> > +
-> > +# Modify as appropriate.
-> > +_require_test
-> > +_require_xfs_io_error_injection "force_zero_range"
-> > +
-> > +_test_inject_error "force_zero_range"
-> > +run_fsx "-q -S 0 -N 100000"
-> 
-> Just check with you, if you hope to have a $TIME_FACTOR with -N at here.
-> 
 
-So do you just mean to make it 100000 * $TIME_FACTOR so the runtime can
-be increased via configuration, if desired? If so, that sounds
-reasonable to me (same for your tweak in the other email as well).
+On 8/4/25 09:28, Qu Wenruo wrote:
+>
+>
+> 在 2025/7/29 15:51, Nirjhar Roy (IBM) 写道:
+>> For large blocksizes like 64k on powerpc with 64k pagesize
+>> it failed simply because this test was written with 4k
+>> block size in mind.
+>> The first few lines of the error logs are as follows:
+>>
+>>       d3dc847171f9081bd75d7a2d3b53d322  SCRATCH_MNT/snap2/bar
+>>
+>>       File snap1/foo fiemap results in the original filesystem:
+>>      -0: [0..7]: data
+>>      +0: [0..127]: data
+>>
+>>       File snap1/bar fiemap results in the original filesystem:
+>>      ...
+>>
+>> Fix this by making the test choose offsets based on
+>> the blocksize.
+>
+> I'm wondering, why not just use a fixed 64K block size?
 
-> This test case looks good to me with this patch:
-> https://lore.kernel.org/linux-xfs/20250807144711.564137-8-bfoster@redhat.com/
-> 
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
-> 
+Sorry for delayed response. Yes, if you feel keeping it simple by 
+keeping the values aligned to 64k, I can make the change.
 
-Thanks!
+>
+> So that all supported btrfs block sizes can result the same file 
+> contents.
+>
+>> Also, now that the file hashes and
+>> the extent/block numbers will change depending on the
+>> blocksize, calculate the hashes and the block mappings,
+>> store them in temporary files and then calculate their diff
+>> between the new and the original filesystem.
+>> This allows us to remove all the block mapping and hashes
+>> from the .out file.
+>
+> Although I agree we should remove the block mappings from the golden 
+> output, as compression can add extra flags and pollute the golden output.
+>
+> But that can also be done with _require_btrfs_no_compress() helper.
 
-Brian
+Okay. In that case, I will have the above pre-condition too.
 
-> > +
-> > +# success, all done
-> > +_exit 0
-> > diff --git a/tests/xfs/131.out b/tests/xfs/131.out
-> > new file mode 100644
-> > index 00000000..2ca0d932
-> > --- /dev/null
-> > +++ b/tests/xfs/131.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 131
-> > +fsx -q -S 0 -N 100000
-> > -- 
-> > 2.50.1
-> > 
-> > 
-> 
+>
+>>
+>> Reported-by: Disha Goel <disgoel@linux.ibm.com>
+>> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+>> ---
+>>   tests/btrfs/137     | 135 +++++++++++++++++++++++++++++---------------
+>>   tests/btrfs/137.out |  59 ++-----------------
+>>   2 files changed, 94 insertions(+), 100 deletions(-)
+>>
+>> diff --git a/tests/btrfs/137 b/tests/btrfs/137
+>> index 7710dc18..61e983cb 100755
+>> --- a/tests/btrfs/137
+>> +++ b/tests/btrfs/137
+>> @@ -27,53 +27,74 @@ _require_xfs_io_command "fiemap"
+>>   send_files_dir=$TEST_DIR/btrfs-test-$seq
+>>     rm -fr $send_files_dir
+>> -mkdir $send_files_dir
+>> +mkdir $send_files_dir $tmp
+>
+> Just a small nitpick, it's more common to use $tmp.<suffix>, that's 
+> why the default _cleanup() template goes with "rm -f $tmp.*"
+
+Noted. Thanks.
+
+--NR
+
+>
+> Thanks,
+> Qu
+>
+-- 
+Nirjhar Roy
+Linux Kernel Developer
+IBM, Bangalore
 
