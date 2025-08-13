@@ -1,46 +1,76 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B9691EDA0E;
-	Wed, 13 Aug 2025 05:15:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1CE801E835B;
+	Wed, 13 Aug 2025 05:45:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755062158; cv=none; b=S+x2LjYSmQPByMyIbY5b4D9ciH2L0WYD4A8cLyxdrM5yrqhYRY8KELkVRlNcS/eHP5nGRLs0cXcvCZqV1+TZ1rkdeZVla2428bOrPzE+YCXeD3utoRLhpr4PEWSD32b//9UjOi5P3YlbVvZ9pg+PikiILIQtpsCFs6PoZ0QgtU8=
+	t=1755063947; cv=none; b=tiJ5tdSZdOdP1uAX6HxbMeJe7O2/2sQEpd/167FauS5V6gE9urUbS8FSR1oAfxGCOeG/+XkFfEwsnw1DthCoRvUnsSMuhQrw+1+yTzAzWkbNLU2dixut81IQfucxsHaVuXjKcSnABkZfmnCF4TvLuQJHi00/vDUPu3Jg4xG5jfg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755062158; c=relaxed/simple;
-	bh=kVd0IT2jy/J5py6+56KwHHnsVfjNirfAl67tXgH9FH0=;
+	s=arc-20240116; t=1755063947; c=relaxed/simple;
+	bh=ZPLGVBS25zRlO7euIJVNlJ3x6vVqODmsvGIo7YwRq8s=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=sIiO3lPoBvpsZ6Z6YCLpMr3cu7fYeh6AiNL68vBSVfGoZn1BvkD3dyo+diTTwheFArYSYom2vCQt2zSvIKS91Iqp6UcnQKTFI2CfmqGj2CQ6Bt8E+9T/dcz+Iq76uAtsjRZbxnOoHOXY0zWTpReqkUfjohpLiimxcW9HiPU48ag=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=T6HBLa6A; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=GH7clUGxGJlEoCSYZPtl4ge28HU/RhlhADubosTiv+wO3wcI1P8rDhtz4VJyRhfIgoUclU6zlV8GzMEjou1wRxlO4qUhEs+padguAptvKzW3qmM79tzHthxTmfhiPWaxX5vH+FR5a4Vz7ZHe60FxMsysS6avgUF94/gsIeKo8WE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=DSF/xzQ2; arc=none smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="T6HBLa6A"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=pvEUdbXoO1liZTN5YgYmpKxCtx/zUVKAu3N1LIpPO7E=; b=T6HBLa6AtHAREhHsVPnGFO7JLV
-	YXhFCtLb0HoSzliTRHmQuT0lB0/yckpjYY89mgmz4VXQkMG4G5S6vLzurqawd77D3eYzFW/lPfLW4
-	NXY1ZZ5kFeu9YsTvZ/EbV0r1VKnGau/5HbFnkqvt9Jm73OO+YO4Bcf1t2uLzpa8gHhRnU4ERN+C3z
-	F2+UvKwNRMQw/wwED3Z+4jYx0dJ45U9oclZbr9oThrubmPHMF9UOu9q6mA+iBi4SKXbrvjW7s6wfW
-	KU5d1+IvYPPC2w6odeGxGmkSt766cgcOFb5cTnxo3aMuZVvqRdDpuc/7DEWENkNh6a5/YQ5Cn3R95
-	iVdfEEvw==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1um3q7-0000000Cdsv-1yvq;
-	Wed, 13 Aug 2025 05:15:55 +0000
-Date: Tue, 12 Aug 2025 22:15:55 -0700
-From: Christoph Hellwig <hch@infradead.org>
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="DSF/xzQ2"
+Received: from pps.filterd (m0360072.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 57CNQEe8025034;
+	Wed, 13 Aug 2025 05:45:20 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=pp1; bh=v/khMXsjNIxOrq06K4z/fPAhMAv1P8
+	UcC6BkmouROm4=; b=DSF/xzQ2wL47J2eTsz/TEdgaxre4OiCTWgmwxf+1lH8N4N
+	nJcfYmDx+18D4G9nIw95xPQSBsjMViefk9w5GKOBnn65pbdj4KAShk5sbPGgc/Sz
+	YXmJJMbYx2s8QWbJ1XriiVDDgadQ8FrMGuAPji9XWqfLbc1BJrxJVa6yNQLBPWlv
+	TdriEEThqpNdi/RvzgQSPwf/KoSjT4oNB7BiqP5GP0pYo4AnmDGhhuUXr8vwnh0S
+	VY8hyAe22qCcFFLtbzzBoERY1ObjOxSe8MOZfKzmeWeSMBawNuRaA6DQh++5Dnr9
+	Fa/J+hbCT/dmuwZ/6odvaPVqQYblDMuKEFSLH/ig==
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48ehaa7031-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 13 Aug 2025 05:45:20 +0000 (GMT)
+Received: from m0360072.ppops.net (m0360072.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 57D5jJ8X019474;
+	Wed, 13 Aug 2025 05:45:19 GMT
+Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48ehaa702y-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 13 Aug 2025 05:45:19 +0000 (GMT)
+Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma11.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 57D4NHHZ017588;
+	Wed, 13 Aug 2025 05:45:18 GMT
+Received: from smtprelay06.fra02v.mail.ibm.com ([9.218.2.230])
+	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 48ekc3nhj7-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 13 Aug 2025 05:45:18 +0000
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay06.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 57D5jHZ217039666
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Wed, 13 Aug 2025 05:45:17 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 03E412004B;
+	Wed, 13 Aug 2025 05:45:17 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 398C120040;
+	Wed, 13 Aug 2025 05:45:15 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.124.214.209])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Wed, 13 Aug 2025 05:45:15 +0000 (GMT)
+Date: Wed, 13 Aug 2025 11:15:07 +0530
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@infradead.org>, zlang@redhat.com,
-	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 2/7] generic/427: try to ensure there's some free space
- before we do the aio test
-Message-ID: <aJwfiw9radbDZq-p@infradead.org>
-References: <175381957865.3020742.6707679007956321815.stgit@frogsfrogsfrogs>
- <175381957936.3020742.7058031120679185727.stgit@frogsfrogsfrogs>
- <aIopyOh1TDosDK1m@infradead.org>
- <20250812185459.GB7952@frogsfrogsfrogs>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+        Ritesh Harjani <ritesh.list@gmail.com>, john.g.garry@oracle.com,
+        tytso@mit.edu, linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v4 07/11] generic: Stress fsx with atomic writes enabled
+Message-ID: <aJwmY8_RLBVuTkDk@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+References: <cover.1754833177.git.ojaswin@linux.ibm.com>
+ <50487b2e8a510598a93888c2674df7357d371da8.1754833177.git.ojaswin@linux.ibm.com>
+ <20250812171855.GC7938@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -49,41 +79,143 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250812185459.GB7952@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <20250812171855.GC7938@frogsfrogsfrogs>
+X-TM-AS-GCONF: 00
+X-Authority-Analysis: v=2.4 cv=KPRaDEFo c=1 sm=1 tr=0 ts=689c2670 cx=c_pps
+ a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17
+ a=kj9zAlcOel0A:10 a=2OwXVqhp2XgA:10 a=pGLkceISAAAA:8 a=VnNF1IyMAAAA:8
+ a=VwQbUJbxAAAA:8 a=jlC_BfiipCRRyT0oD4EA:9 a=CjuIK1q_8ugA:10
+X-Proofpoint-ORIG-GUID: 1AcaNN8oXjNCYzZdyV3HhzvKX1JUrX7n
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODEyMDIyNCBTYWx0ZWRfX5RZa3th2M3FD
+ kwqZcEl7ECHJ8Fm7SmmQwD3yCnf6z0HPuBc3oFwYMSF/Xjm+oTZHX7CccvQ2SAh3AKse0FnP/gZ
+ IpiECUfJe94XxjhASm51c5TIaS74rfEpnY/X7eMmV6F67ZDUkVyjYAtPCssli0K9LVDxXDiUy2a
+ bWWLddSly9ta6nf+EevZke+0QQKjmnQBmTHFvkrjGRNhvxxcrZiceDnYqfN3hQClAaEVn4bv4us
+ gcAc9n/ut1fE6Y1Wd4AaG1CIVpR/vzUZVkqUa/SrAud/clBvNQkfB5vWrpFO00Ltd5NK2YN2cZE
+ TH5hBq32zKp8op3KJRlGlOz5oir0bWjv41DK+mQPj22uOC10NUId/G+zAcl9RVDLMl3Y+xB95AL
+ 6j/14BXW
+X-Proofpoint-GUID: XuoKy--lu1DNLl5Qz4xqtYufTYbb4nD2
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-08-12_08,2025-08-11_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ phishscore=0 impostorscore=0 bulkscore=0 adultscore=0 priorityscore=1501
+ malwarescore=0 spamscore=0 clxscore=1015 suspectscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2507300000 definitions=main-2508120224
 
-On Tue, Aug 12, 2025 at 11:54:59AM -0700, Darrick J. Wong wrote:
-> On Wed, Jul 30, 2025 at 07:18:48AM -0700, Christoph Hellwig wrote:
-> > On Tue, Jul 29, 2025 at 01:08:46PM -0700, Darrick J. Wong wrote:
-> > > The pwrite failure comes from the aio-dio-eof-race.c program because the
-> > > filesystem ran out of space.  There are no speculative posteof
-> > > preallocations on a zoned filesystem, so let's skip this test on those
-> > > setups.
+On Tue, Aug 12, 2025 at 10:18:55AM -0700, Darrick J. Wong wrote:
+> On Sun, Aug 10, 2025 at 07:11:58PM +0530, Ojaswin Mujoo wrote:
+> > Stress file with atomic writes to ensure we excercise codepaths
+> > where we are mixing different FS operations with atomic writes
 > > 
-> > Did it run out of space because it is overwriting and we need a new
-> > allocation (I've not actually seen this fail in my zoned testing,
-> > that's why I'm asking)?  If so it really should be using the new
-> > _require_inplace_writes Filipe just sent to the list.
+> > Suggested-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 > 
-> I took a deeper look into what's going on here, and I think the
-> intermittent ENOSPC failures are caused by:
-> 
-> 1. First we write to every byte in the 256M zoned rt device so that
->    0x55 gets written to the disk.
-> 2. Then we delete the huge file we created.
-> 3. The zoned garbage collector doesn't run.
-> 4. aio-dio-eof-race starts up and initiates an aiodio at pos 0.
-> 5. xfs_file_dio_write_zoned calls xfs_zoned_write_space_reserve
-> 6. xfs_zoned_space_reserve tries to decrement 64k from XC_FREE_RTEXTENTS
->    but gets ENOSPC.
-> 7. We didn't pass XFS_ZR_GREEDY, so we error out.
-> 
-> If I make the test sleep until I see zonegc do some work before starting
-> aio-dio-eof-race, the problem goes away.  I'm not sure what the proper
-> solution is, but maybe it's adding a wake_up to the gc process and
-> waiting for it?
+> Didn't I already tag this
+> Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
-Isn't the problem here that zonegc only even sees the freed block
-after inodegc did run?  i.e. after 2 the inode hasn't been truncated
-yet, and thus the blocks haven't been marked as free.
+Yes you did but since I moved the fsx avoid logic from common/rc to here
+I just thought it'd be better to remove old reviews.
 
+(also fyi, i also removed the reviews from g/1227 for the same reason)
+
+Thanks for the review again! 
+
+Regards,
+ojaswin
+> 
+> --D
+> 
+> > ---
+> >  tests/generic/1229     | 68 ++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/1229.out |  2 ++
+> >  2 files changed, 70 insertions(+)
+> >  create mode 100755 tests/generic/1229
+> >  create mode 100644 tests/generic/1229.out
+> > 
+> > diff --git a/tests/generic/1229 b/tests/generic/1229
+> > new file mode 100755
+> > index 00000000..7fa57105
+> > --- /dev/null
+> > +++ b/tests/generic/1229
+> > @@ -0,0 +1,68 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2025 IBM Corporation. All Rights Reserved.
+> > +#
+> > +# FS QA Test 1229
+> > +#
+> > +# fuzz fsx with atomic writes
+> > +#
+> > +. ./common/preamble
+> > +. ./common/atomicwrites
+> > +_begin_fstest rw auto quick atomicwrites
+> > +
+> > +_require_odirect
+> > +_require_scratch_write_atomic
+> > +
+> > +_scratch_mkfs >> $seqres.full 2>&1
+> > +_scratch_mount  >> $seqres.full 2>&1
+> > +
+> > +testfile=$SCRATCH_MNT/testfile
+> > +touch $testfile
+> > +
+> > +awu_max=$(_get_atomic_write_unit_max $testfile)
+> > +blksz=$(_get_block_size $SCRATCH_MNT)
+> > +bsize=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
+> > +
+> > +set_fsx_avoid() {
+> > +	local file=$1
+> > +
+> > +	case "$FSTYP" in
+> > +	"ext4")
+> > +		local dev=$(findmnt -n -o SOURCE --target $testfile)
+> > +
+> > +		# fsx insert/collpase range support for ext4+bigalloc is
+> > +		# currently broken, so disable it. Also disable incase we can't
+> > +		# detect bigalloc to be on safer side.
+> > +		if [ -z "$DUMPE2FS_PROG" ]; then
+> > +			echo "dumpe2fs not found, disabling insert/collapse range" >> $seqres.full
+> > +			FSX_AVOID+=" -I -C"
+> > +			return
+> > +		fi
+> > +
+> > +		$DUMPE2FS_PROG -h $dev 2>&1 | grep -q bigalloc && {
+> > +			echo "fsx insert/collapse range not supported with bigalloc. Disabling.." >> $seqres.full
+> > +			FSX_AVOID+=" -I -C"
+> > +		}
+> > +		;;
+> > +	*)
+> > +		;;
+> > +	esac
+> > +}
+> > +
+> > +# fsx usage:
+> > +#
+> > +# -N numops: total # operations to do
+> > +# -l flen: the upper bound on file size
+> > +# -o oplen: the upper bound on operation size (64k default)
+> > +# -Z: O_DIRECT ()
+> > +
+> > +set_fsx_avoid
+> > +_run_fsx_on_file $testfile -N 10000 -o $awu_max -A -l 500000 -r $bsize -w $bsize -Z $FSX_AVOID  >> $seqres.full
+> > +if [[ "$?" != "0" ]]
+> > +then
+> > +	_fail "fsx returned error: $?"
+> > +fi
+> > +
+> > +echo "Silence is golden"
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/1229.out b/tests/generic/1229.out
+> > new file mode 100644
+> > index 00000000..737d61c6
+> > --- /dev/null
+> > +++ b/tests/generic/1229.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 1229
+> > +Silence is golden
+> > -- 
+> > 2.49.0
+> > 
+> > 
