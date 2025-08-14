@@ -1,78 +1,80 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C917B272E42
-	for <fstests@vger.kernel.org>; Thu, 14 Aug 2025 20:53:43 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D07ED247287
+	for <fstests@vger.kernel.org>; Thu, 14 Aug 2025 21:10:43 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755204825; cv=none; b=p5Ib+xohkOg/OEiFO9nKRPSr6A/ljF0W+Z7m0wW9kEfd15R9NdHjr2xPqe8uSQCbbjgXSCE5ooAc90zIFWO8E099KAAJxhnYNv0tYzo8cfi7NQevp6+9ulTEjtBnpaZZZLHJS+sXlhR/w+xmj21nNl3mcOzoeRGMEReQ460ikk0=
+	t=1755205845; cv=none; b=b1WtoiCQxPIChjYC2EcQYNchHBGuP54EtTKoLFMECgQHELAN6VHw4ioShGsp6KGdnxr3UE6H+O/0Xndub7f/OJABWHfhrbF5FdFKFgNddAnpmUTowDSPx0WSFJ4AkE4nun+hoqsXr8fxpiq4UDPRBTLb8c2GlH8bKCwG+/gBK+s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755204825; c=relaxed/simple;
-	bh=LR2TiTRaDYkSKgdFxDplh+goz5oHCRNzHWqZFA1KPf8=;
+	s=arc-20240116; t=1755205845; c=relaxed/simple;
+	bh=XvVTx7FRz653OdphJRP8atbym25j9taCyVTePrT+fdo=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=YSSLT3RrNmwGY8jo2P38uV3xZZQ6fe0lI9/Ca8JslDFG6aROH81MIsKishbgs/l3Q60wzk4p3J16ah35BfaxwxhXBJXDh3U0pKdOeb2qwER7A2TGsJudamaL64XssFBZCXPpyYflSj90IXFCimPWvFELVzEMnlyYxP5/y0AeuuA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Ey/+cv3c; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=R3W6WtfvB2UoEjMbJpeIBHc/erwnEf6bFK760IsWEEby1n3vL8X81ZGTAa4uy1g5c3tU7rYs56ujKG5VPVALd/rAdz4DxcUctDGrj6C8JQ2E/oIZAHBHBm933NbUEojv74w07+aG9dzaoPsD/SgGiMFQSijsCIHtdMnasvFY1mA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=BUBksLVw; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ey/+cv3c"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BUBksLVw"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1755204822;
+	s=mimecast20190719; t=1755205842;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=SVBmjRRbsDiYgdks9UuUao/r/n534PcdVoBrMDuOOFM=;
-	b=Ey/+cv3cpSA5MWezTHkdRj52QboiFSarUfYbwwK4IQjqWJ/Ty9FfLzJM9PDIWZW86v+utk
-	uKZZeqCR2OiCw0iDYp1Ds1T5s9k+omqQkr1ZimXP8I5sN4wSRrBvl/t0f+EPSZhF0oBJp5
-	TxXpFjPy6PDBCcOcaCw5cemXDANL1Ys=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=M1p6iASRLcGUGil+NJHdLdUeyP1HO0f2x6yFT+1wUto=;
+	b=BUBksLVwy1amjWu2WHzKQGqfh23aC/LnwnY1S7HXb1bk8eb/zQpcQY+qy4WXgfwl+hrudt
+	TOt10KsjHbPF1ne7oHCIXIqkAaoTcTDuvQ0wFwm7oifFjlPDLUijcAGou9a/1KO0+3HtHj
+	Fkwlz07KdZcjXFWuj4Dt8x46yq3xhHQ=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-605-hb3GIhsFNWeH4HcMis21jg-1; Thu, 14 Aug 2025 16:53:41 -0400
-X-MC-Unique: hb3GIhsFNWeH4HcMis21jg-1
-X-Mimecast-MFC-AGG-ID: hb3GIhsFNWeH4HcMis21jg_1755204820
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-76e2ebafe0aso1187808b3a.3
-        for <fstests@vger.kernel.org>; Thu, 14 Aug 2025 13:53:41 -0700 (PDT)
+ us-mta-437-HWsYuJZVP-myHGcuyUmn8w-1; Thu, 14 Aug 2025 17:10:41 -0400
+X-MC-Unique: HWsYuJZVP-myHGcuyUmn8w-1
+X-Mimecast-MFC-AGG-ID: HWsYuJZVP-myHGcuyUmn8w_1755205840
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-323267bf596so1326070a91.1
+        for <fstests@vger.kernel.org>; Thu, 14 Aug 2025 14:10:41 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755204820; x=1755809620;
+        d=1e100.net; s=20230601; t=1755205840; x=1755810640;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=SVBmjRRbsDiYgdks9UuUao/r/n534PcdVoBrMDuOOFM=;
-        b=IrHOzTA32+7modABPbW+G6+EDdjSksn3NW4lDYyh6uGN+MGrDamAAsGWZSgiZMBwTD
-         3N7T/9I+kwqaL+fYuYXYCSxC0/R6nJqTQnzU3C+8oVcFPE5CIKiBiSDXD1hURJOC99Dk
-         wNzRVkuDKr1iTfQcSDreSPIiToyxYCpfokE29qtC7jV7g1UMpJK5mXDK0XL+hhth/JSN
-         0BeAolt8kFYVvmSSD2bcRHHz/i4eq8ejEGYOZkxDeZ2c38Rh6x1ZNh9S8LmAZaNpA/c3
-         qpHIMQAyAFpzSEffIUexZeMKJFwZrp3aqPKhiStcAbzQ3Q+w1rDgMto7IE09ATx5VdZy
-         pAFg==
-X-Forwarded-Encrypted: i=1; AJvYcCU+PRXqSEHUbSdAiouVBSuPHYczVC79uCyYJQxAiWMHPeTMoapcNhTvRoK1TqPphxCUur/ngEzk@vger.kernel.org
-X-Gm-Message-State: AOJu0YzQE7z72ce5ihEAEy/ckYncAa8tmQbEs20PwfMbCpb7GH0sJFeU
-	vl4N74dcnPYZBc/5TYn2iiikNMETp39Hh28xbdp+BPiTIiIO8pP/ORirv1MIhXJAnbFHcG/bqdd
-	6L1F9A9NoSWdfeigNJq7fBT7iTOF6a/mToDDb0KOHNkgZA/PtKAcbDcWhAqb8wSSt/IM=
-X-Gm-Gg: ASbGncvKbMiX7GXLiyDeRRJ/twVyc0vPQ8ltnvjw6ZmBB241nUPJpAtu/2edl4YGz3o
-	VggAHU6ZrlTfbiftOiGkYfRRGbcTe620ujWx7O0nMyi2vjZAG2W3g1VrKJjdFQWVz9MAFkZQnMG
-	tjynQPL7KGr6T28SQTt1LLaFHjUO5bRee0mw77b5EYu4IM5AtXBUW7vnWSfPXki1UjVKJ8DKsJ2
-	oQSK2A7/LXVngq0yedBA/O9mYZczf8mpLQ/5Y4+R00SEFJ8fx83e/lYuYLW5A24kPY67hCHLPJb
-	SjYumduQckO5APq9Ptn9BQJ+rylflSlrs9INEoIHgBpdRSuOFI516gCfLcJ6A6/eAHUoD+oBpGC
-	RVwhC
-X-Received: by 2002:a05:6a20:3c8f:b0:240:252a:158e with SMTP id adf61e73a8af0-240bcf5e721mr6902330637.3.1755204819979;
-        Thu, 14 Aug 2025 13:53:39 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEoGvypaL9JtBGvDGIWVjrTXCp8kSwohwcmyEzcdb8xXtBTwhMvoKZoi9NOdVkw7TC+xRs8Pg==
-X-Received: by 2002:a05:6a20:3c8f:b0:240:252a:158e with SMTP id adf61e73a8af0-240bcf5e721mr6902297637.3.1755204819502;
-        Thu, 14 Aug 2025 13:53:39 -0700 (PDT)
+        bh=M1p6iASRLcGUGil+NJHdLdUeyP1HO0f2x6yFT+1wUto=;
+        b=ul9grYbYnu2gTW6eDKvPp+7bcaCaa4CPxaORMwPKxyhUj2oUKmj638V/Zyc7lII4BU
+         oQIcW9lPW7aYFiKuteFh/OZ9NWVPJ7sUJ2ussr4DDknqcfdaMxu/b0vttjpOxaEd7ubL
+         XHLi1FpyJCzkJvCZ8XUz663u7Io6y71A3kDOV0e1HSh3ma/Zk1oI8MLOvXd+AOcV/qhN
+         +D03QC5lQa9ZVXSW1Fl401MurMTmCV2aPE8fddNslQzmeXVDoS82B3nap6+TUKmSaZTb
+         itSzDRm53RGVaTZ8QUvcrjAjLlwpCl20ATJGwUEemVASDeg46u4mmIl5jqcPKwM4dV8f
+         uSeQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWiQdxyp/8Z99hnlXafKWPj9FXjJZayYC5lZxOmWsINc+6CPXGCUs8Inqr5HQUuqkXMsRazCQWg@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw//UfxsAdFqpCkE63iiRPT+jfgHrpAeHrVKa+P+pYsA38e3+Ko
+	CR6fZLIvg6FBVFBaRzNzCfcfpUVXuZuwxVkqopB7natNTtlxeYSfFPCQRhwJJEuYgJyUt5h6UvL
+	EeEjOzQpu9CFzncnr4RgmKPCdy96rjeE+ITbz/HRieZHu3Qdupxjo4RD4Ua8=
+X-Gm-Gg: ASbGncvknzi6lV/Hymr5yRLVfUIfCxhuu5TpWb4Rdb+AJCLD8cvYO5w1NK5iXMU7KZP
+	EH0ozlDCr9ZYEZzUJsdXTws6uuMTIuo1MKrL8ZggsbTsI7spQIBYWgPABc8am6XeRU7zQXo4IDa
+	eyzSYGpCkVKIlxRF+acY+evHS5AUeKuvtmQmlPRhl4ETyCmm54pd4WDmnCQw/+uXcBGr7kh7A+Y
+	pHb0VpwlWfWYCpuZ/EFdNMJhs7OtM65ZVeig3M3weS/4Hd+l7GTDCurTrlJVCM2IIi1T/V7cAFK
+	BRCQ3q0wa7MLOqmI1vLDsAeHb1XjBU+S3fc4qsmDgKoLg9uDQdfxEluilR4McngrsD+4+OEndue
+	jfxNl
+X-Received: by 2002:a17:90b:4cc3:b0:313:f9fc:7213 with SMTP id 98e67ed59e1d1-32327a52000mr6942050a91.21.1755205840187;
+        Thu, 14 Aug 2025 14:10:40 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGsCbXWyKdDjP0tP1qpujrL82MSjEjK5m9kMdVMb8Cjh6VfAngt41evmn0Tc9j5eHhMZeB0SA==
+X-Received: by 2002:a17:90b:4cc3:b0:313:f9fc:7213 with SMTP id 98e67ed59e1d1-32327a52000mr6942023a91.21.1755205839765;
+        Thu, 14 Aug 2025 14:10:39 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-76e13eb0db0sm7485776b3a.3.2025.08.14.13.53.37
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-32330f8329asm2838253a91.3.2025.08.14.14.10.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 14 Aug 2025 13:53:39 -0700 (PDT)
-Date: Fri, 15 Aug 2025 04:53:34 +0800
+        Thu, 14 Aug 2025 14:10:39 -0700 (PDT)
+Date: Fri, 15 Aug 2025 05:10:35 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Chao Yu <chao@kernel.org>
 Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
 	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v2 1/3] f2fs/018: check data eof after partial truncation
- on compressed cluster
-Message-ID: <20250814205334.obe6tmyhphngntdv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250814090712.2119455-1-chao@kernel.org>
+Subject: Re: [PATCH 3/3] f2fs/020: do sanity check on i_xattr_nid
+Message-ID: <20250814211035.3eqltmi4wkuxuhq7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250811094415.1053545-1-chao@kernel.org>
+ <20250811094415.1053545-3-chao@kernel.org>
+ <20250813153407.b2ldb3u3zuw4ckbs@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <580b6314-4c79-404c-b8cc-c3d416bc09e8@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -81,180 +83,127 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250814090712.2119455-1-chao@kernel.org>
+In-Reply-To: <580b6314-4c79-404c-b8cc-c3d416bc09e8@kernel.org>
 
-On Thu, Aug 14, 2025 at 05:07:10PM +0800, Chao Yu wrote:
-> This is a regression testcase, it is added to check below case
-> and its variants:
-> - write 16k data into compressed file (data will be compressed)
-> - truncate file to 12k (truncate partial data in compressed cluster)
-> - truncate file to 20k
-> - verify data in range of [12k, 16k] to see whether data is all zero
-> or not
+On Thu, Aug 14, 2025 at 03:54:59PM +0800, Chao Yu wrote:
+> On 8/13/25 23:34, Zorro Lang wrote:
+> > On Mon, Aug 11, 2025 at 05:44:15PM +0800, Chao Yu wrote:
+> >> This is a regression test:
+> >> 1. create directory
+> >> 2. add a new xattr entry to create xattr node
+> >> 3. use inject.f2fs to inject nid of xattr node w/ ino in a file
+> >> 4. check whether f2fs kernel module will detect and report such
+> >>    corruption in the file
+> >>
+> >> Signed-off-by: Chao Yu <chao@kernel.org>
+> >> ---
+> >>  tests/f2fs/020     | 50 ++++++++++++++++++++++++++++++++++++++++++++++
+> >>  tests/f2fs/020.out |  2 ++
+> >>  2 files changed, 52 insertions(+)
+> >>  create mode 100755 tests/f2fs/020
+> >>  create mode 100644 tests/f2fs/020.out
+> >>
+> >> diff --git a/tests/f2fs/020 b/tests/f2fs/020
+> >> new file mode 100755
+> >> index 00000000..a6a08c8f
+> >> --- /dev/null
+> >> +++ b/tests/f2fs/020
+> >> @@ -0,0 +1,50 @@
+> >> +#! /bin/bash
+> >> +# SPDX-License-Identifier: GPL-2.0
+> >> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
+> >> +#
+> >> +# FS QA Test No. f2fs/020
+> >> +#
+> >> +# This is a regression test:
+> >> +# 1. create directory
+> >> +# 2. add a new xattr entry to create xattr node
+> >> +# 3. use inject.f2fs to inject nid of xattr node w/ ino in a file
+> >> +# 4. check whether f2fs kernel module will detect and report such
+> >> +#    corruption in the file
+> >> +#
+> >> +. ./common/preamble
+> >> +_begin_fstest auto quick rw
+> >> +
+> >> +_cleanup()
+> >> +{
+> >> +	_scratch_mkfs >> $seqres.full
+> >> +}
+> >> +
+> >> +_fixed_by_kernel_commit 061cf3a84bde \
+> >> +	"f2fs: fix to do sanity check on ino and xnid"
+> >> +
+> >> +export MKFS_OPTIONS=""
+> >> +_require_scratch
+> > 
+> > Same review points with patch 2/3, 
+> > 
+> >> +_require_command "$F2FS_INJECT_PROG" inject.f2fs
+> >> +
+> >> +testdir=$SCRATCH_MNT/testdir
+> >> +
+> >> +_scratch_mkfs >> $seqres.full
+> >> +_scratch_mount "-o user_xattr,noinline_xattr"
+> >> +
+> >> +mkdir $testdir
+> >> +# add a new xattr entry to create xattr node
+> >> +setfattr -n user.abc -v 123 $testdir
+> > 
+> > You can call `_require_attrs user` at first, then use "$SETFATTR_PROG"
 > 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Signed-off-by: Chao Yu <chao@kernel.org>
-> ---
-> v2:
-> - add missing _require_xfs_io_command "truncate"
-> - add missing _require_fio $fio_config
-> - use $XFS_IO_PROG instead of xfs_io
-> - avoid mkfs&mount .. umount for each round test
->  tests/f2fs/018     | 77 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/f2fs/018.out |  2 ++
->  2 files changed, 79 insertions(+)
->  create mode 100755 tests/f2fs/018
->  create mode 100644 tests/f2fs/018.out
+> Okay, will update them in v2.
 > 
-> diff --git a/tests/f2fs/018 b/tests/f2fs/018
-> new file mode 100755
-> index 00000000..e1047f78
-> --- /dev/null
-> +++ b/tests/f2fs/018
-> @@ -0,0 +1,77 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
-> +#
-> +# FS QA Test No. f2fs/018
-> +#
-> +# This is a regression test to check whether page eof will be
-> +# zero or not after we truncate partial data in compressed
-> +# cluster.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick rw compress
-> +
-> +_fixed_by_kernel_commit ba8dac350faf \
-> +	"f2fs: fix to zero post-eof page"
-> +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"f2fs: fix to zero data after EOF for compressed file correctly"
-> +
-> +_require_xfs_io_command "truncate"
-> +_require_scratch
-> +
-> +testfile=$SCRATCH_MNT/testfile
-> +fio_config=$tmp.fio
-> +
-> +cat >$fio_config <<EOF
-> +[global]
-> +filename=$testfile
-> +rw=read
-> +verify=pattern
-> +verify_pattern=0x00
-> +do_verify=1
-> +verify_only
-> +offset=0
-> +size=4k
-> +numjobs=1
-> +EOF
-> +_require_fio $fio_config
+> > 
+> >> +
+> >> +_scratch_unmount
+> >> +
+> >> +# inject i_xattr_nid w/ nid of inode node
+> >> +$F2FS_INJECT_PROG --node --mb i_xattr_nid --nid 4 --val 4 $SCRATCH_DEV >> $seqres.full
+> >> +
+> >> +_scratch_mount
+> >> +mkdir $testdir/dir >> $seqres.full 2>&1
+> > 
+> > May I ask what kind of failure will this case hit, if there's the bug?
+> 
+> Bug like syzbot reported, you can check the details in below commit:
+> 
+> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=061cf3a84bde
 
-Hmm... that looks strange if you create fio config file but don't use it later :-D
+So you hope to trigger a test failure by something likes:
 
-How about:
+"generic/361       _check_dmesg: something found in dmesg"
 
-build_fio_config()
-{
-	local offset=$1
-	local size=$2
+?
 
-	cat >$fio_config <<EOF
-[global]
-filename=$testfile
-rw=read
-verify=pattern
-verify_pattern=0x00
-do_verify=1
-verify_only
-offset=$offset
-size=$size
-numjobs=1
-EOF
-}
-
-build_fio_config 0 4k
-_require_fio $fio_config
-
-> +
-> +_scratch_mkfs "-O extra_attr,compression" >> $seqres.full || _fail "mkfs failed"
-> +_scratch_mount "-o compress_extension=*" >> $seqres.full
-> +
-> +check_data_eof()
-> +{
-> +	local eof_start=$1
-> +	local eof_size=$2
-> +	local filesize=$3
-> +	local offset1=$4
-> +	local offset2=$5
-> +	local offset3=$6
-> +
-> +
-
-rm -f $testfile
-
-> +	$XFS_IO_PROG -f -c "pwrite 0 $filesize" -c "fsync" $testfile >> $seqres.full
-> +	$XFS_IO_PROG -c "truncate $offset1" $testfile
-> +	$XFS_IO_PROG -c "truncate $offset2" $testfile
-> +
-> +	if [ "$offset3" ]; then
-> +		xfs_io -c "truncate $offset3" $testfile
-                ^^^^^^
-       $XFS_IO_PROG
-
-> +	fi
-> +
-> +	$FIO_PROG --name=verify-data --filename=$testfile --rw=read --verify=pattern \
-> +		--verify_pattern=0x00 --do_verify=1 --verify_only --offset=$eof_start \
-> +		--size=$eof_size >> $seqres.full 2>&1 || _fail "eof data is not zero"
-
-build_fio_config $eof_start $eof_size
-$FIO_PROG $fio_config >> $seqres.full 2>&1
-
-> +
-> +	rm -f $testfile
-
-Move this line to above, then
-
-return $?
-
-> +}
-> +
-> +check_data_eof 12k 4k 16k 12k 20k
-> +check_data_eof 10k 6k 16k 10k 20k
-> +check_data_eof 12k 4k 16k 8k 12k 20k
-> +check_data_eof 10k 6k 16k 8k 10k 20k
-
-run_check check_data_eof 12k 4k 16k 12k 20k
-run_check check_data_eof 10k 6k 16k 10k 20k
-run_check check_data_eof 12k 4k 16k 8k 12k 20k
-run_check check_data_eof 10k 6k 16k 8k 10k 20k
-
-This can help you to know which line fails if one of them is failed. Or you
-always get "eof data is not zero", no matter which line fails :)
-
-> +
-> +_scratch_unmount
-
-This unmount looks useless, due to SCRATCH_DEV is always unmounted after a test done.
+Did you try that, if it can fail this test on general kernel?
 
 Thanks,
 Zorro
 
-> +
-> +echo "Silence is golden"
-> +
-> +status=0
-> +exit
-> diff --git a/tests/f2fs/018.out b/tests/f2fs/018.out
-> new file mode 100644
-> index 00000000..8849e303
-> --- /dev/null
-> +++ b/tests/f2fs/018.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 018
-> +Silence is golden
-> -- 
-> 2.49.0
+> 
+> Thanks,
+> 
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> >> +_scratch_unmount
+> >> +
+> >> +echo "Silence is golden"
+> >> +
+> >> +status=0
+> >> +exit
+> >> diff --git a/tests/f2fs/020.out b/tests/f2fs/020.out
+> >> new file mode 100644
+> >> index 00000000..20d7944e
+> >> --- /dev/null
+> >> +++ b/tests/f2fs/020.out
+> >> @@ -0,0 +1,2 @@
+> >> +QA output created by 020
+> >> +Silence is golden
+> >> -- 
+> >> 2.49.0
+> >>
+> > 
 > 
 
