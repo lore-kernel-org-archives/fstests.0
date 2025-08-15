@@ -1,78 +1,77 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9DE92FD7AB
-	for <fstests@vger.kernel.org>; Fri, 15 Aug 2025 15:54:16 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8CB01E7C34
+	for <fstests@vger.kernel.org>; Fri, 15 Aug 2025 16:00:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755273258; cv=none; b=KfPhkrbUUSCTyeOpuHn/2834wZaffUGOibahHqT8omgqcAOr6m5gG8RyZyCqwmd6v+ZMyD4RsY3RCDF0eQwttJU5wNdXVrQhvR/VtI8Az/tjP2OHxys8nWMlXSQkFNcHdg81ygYVl28i3MiuS19zRbKH83s+R4f62QzgD1a5cxE=
+	t=1755273655; cv=none; b=OoREfhq9t/3Utueo3rZAI9KgROP7JhReVm4xICCHaPfejjXTdLGZjcu5zjc2kSgUVEF6WUqhFExw2X/ENYAzEirNvbNpeCrxiYlBMqTguja2idIwTlOCH526XieCjybAVwGRYIMtUi7TqXR+QpfeR1dDAKAhohOxSVKf/w/3p3I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755273258; c=relaxed/simple;
-	bh=NY8B1Z9FddZAzaCt8GE9tuaN9ny8asX0WuzemETSTRg=;
+	s=arc-20240116; t=1755273655; c=relaxed/simple;
+	bh=4fL6TF+OEpbSUcdc3EVCVkJGlrx5Rd+TY+MsUYASZcg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HyzGZ+pXSsfTYN5u9G08kfzSCih/HCymmf+5rJNlv9EEKvACNTr+Fg0PLGmg5LzQkOp32jWwLxOS97Fh1BvGeUM689XyJWUmBJZJ+JcLH1O2Q3aGXj6FAwn9CV+zoxXhlQyyLtjJDDzSG4wOSZtxFdinKARAfwQkEMbVkknGBlQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=LKuikM8C; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=CvYKAgZB1h46993Mz68z9Pc7gWafx2PJYEJ9SlOVTxSz/dQtJayKmCMmquxMPnftr/L3N3XXESN+Pv9xJF33UNAP+TJvHWliqYkRGDYADAeD/V1uFVvBRK7O3FmDbPSsrQ2gPpsZJSoB9LyEVTpc9l436Ee0WQHPhMfC3IqSO18=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=djbmKzFu; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LKuikM8C"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="djbmKzFu"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1755273255;
+	s=mimecast20190719; t=1755273652;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=NRaMgkMEgLgN4mQUMby7xLO7l22leF6759j8hvQ68v0=;
-	b=LKuikM8CH8dZ3g92fKiz9XFu73NHsLVGsg3RDiD8Yig5Q1L0NU72E9s3GNip2CDXQJc8dO
-	Sdpumf/OsJSoQ0ee6Sg0hLgbGxk1GOdjOteUa/pY9AgGs3QBE+vTJHwL+grQS06LLuG4a5
-	vfelkHaVmLZR4QbJ9jamwp4TN4dLlyE=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=Jp1PX+AOUQIhnbS4CXc7w8KsHa1VC6udXIXvYmjjWjc=;
+	b=djbmKzFuyyvZ6vNGV79oQ6ARuiDtxgHvcAJcGr8Uc5kSV7/+edivorSbWvBkoyHOLH1SOf
+	qiZtqdy+Crar49vFO4cLzwzzV+25PiZbkcl/7HmGA1DvHsQmvyQAiFCoPLIYbQfcQtVCzd
+	Z66hNgNIsOxXuP/mMdQ5ANiWZQOEfp4=
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
+ [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-45-LaW-xP-3ORSD-wOr8S5tCw-1; Fri, 15 Aug 2025 11:54:14 -0400
-X-MC-Unique: LaW-xP-3ORSD-wOr8S5tCw-1
-X-Mimecast-MFC-AGG-ID: LaW-xP-3ORSD-wOr8S5tCw_1755273253
-Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-76e1ff27cfaso2706603b3a.1
-        for <fstests@vger.kernel.org>; Fri, 15 Aug 2025 08:54:14 -0700 (PDT)
+ us-mta-473-xq4SAosjMZGNmMX1RnU1_Q-1; Fri, 15 Aug 2025 12:00:50 -0400
+X-MC-Unique: xq4SAosjMZGNmMX1RnU1_Q-1
+X-Mimecast-MFC-AGG-ID: xq4SAosjMZGNmMX1RnU1_Q_1755273650
+Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-76e2ead3b51so3438842b3a.2
+        for <fstests@vger.kernel.org>; Fri, 15 Aug 2025 09:00:50 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755273253; x=1755878053;
+        d=1e100.net; s=20230601; t=1755273649; x=1755878449;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=NRaMgkMEgLgN4mQUMby7xLO7l22leF6759j8hvQ68v0=;
-        b=JaZl0sXUnUFeE8aEoSqXyYOh7bysfu5n8d/Ypaz0CB8oKNefeZZbL3aY2hBVSyhfli
-         wQaxLG1fGehCFwdpRagxAdEKNXY6kKUJRgLJKSUS2WOPP016mGlXgY4pfocJLlUrV07r
-         Q31z48eKYM55n9bJA8yxCYNZfU+Y3m00LNM923fWEdNRJ6PJuGQdaadqyWC3W6OO6yPF
-         yO+m5OkCq9SgkDjgHOuH9qZvPIvtMDkd32OHkPT/ltYC1AS9LkZhbd9d05DcsEXTwm9F
-         dq0mjTSTBMRsm3PAKqpnYGfzXJZw4XRqPHN1FIOljP5rJY+DXYcqq/hMlrwN+rkepFFm
-         VDBw==
-X-Forwarded-Encrypted: i=1; AJvYcCUQdM1XirI2SMU8IJ/gdPZK/jT+u9ovKnncKO67kzdDoW05kplzyZoEF2ei5q1wgS6PDtxeinI3@vger.kernel.org
-X-Gm-Message-State: AOJu0YybDdG1EXYG/SE4vw1/2QE9vMwQO6UActcwPW9OsSCt0pdh6Pmy
-	fw89TL781fTx8qWH52TJ2+n+lDEOKyX0UZz4/9GfFVYh2m2F8EX7b5VwxNL1HKL5V/NjsLFLmLS
-	P2meh2B7vm7j9gn4wLLc+B8RBnAoGK/sBLrJ2noOEngCNPkC82tTevFGXWrI=
-X-Gm-Gg: ASbGncsZ7+hfZqNIRW97ys3wPfscXmOtSu2h8qfaVwgqFmKydVuYEDEN12KqjCZW9o6
-	yUAicEwHsssaZhYaYFAzg4+4fQpVOuqBHWYdOeugaZ3NjLsoDrH+Noi9Bxx3gtRbOZyy/b9ONSG
-	nmDxo+aHlI8+rGs9HNPDYR9F8BmpI9demNq5zKufGeujK26VSJPTukblAOTKO9Wd7HLbwh9iBEb
-	IM5nlNT5k0TYeZYXVGGvkfq8YCvWHcipJCGwKqvJ/CcqPbzMp8BOT3K8HdD8e4glDQyoLh1DC9l
-	l7J3nN+EdJ27GpQOuBSYppiTw0ketlTQPqAjCXo5FCnWEtXX+avgpVK9g8wYT8tZLARQvKEeCFb
-	yLvid
-X-Received: by 2002:a05:6a00:2344:b0:76b:cc37:d4c5 with SMTP id d2e1a72fcca58-76e43830aebmr4116954b3a.5.1755273253373;
-        Fri, 15 Aug 2025 08:54:13 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHVyz6fnoqKB51muPU4YuSBCAeUdAuoOcJyxwicsXPL6yhVmU/S9648a/DV3cU8AIDA8Bd9Uw==
-X-Received: by 2002:a05:6a00:2344:b0:76b:cc37:d4c5 with SMTP id d2e1a72fcca58-76e43830aebmr4116930b3a.5.1755273252964;
-        Fri, 15 Aug 2025 08:54:12 -0700 (PDT)
+        bh=Jp1PX+AOUQIhnbS4CXc7w8KsHa1VC6udXIXvYmjjWjc=;
+        b=qeLG6piWje1L5striPf4LzAVlABbH9aunr+N6zY2YiRsTf+KZxLlRQWeXYPylNXp99
+         QA87eh6cxF9Vkcy7qHGVMOyEkqnfOQvGXiCW4B1BXEq+lcSMGNksCffwvsSX5hnyHd/Y
+         iO8l9Y1qOZiMt89WJokWkWCzQFEAnGUwy5bdxTNBSfTRoaZcKV+917s+X6nKhVi5vetp
+         WVOLEbz147xLuFw521lfQ+UURTXhWoNMxyQsEAHSnFzuZwk9L6a7mrftYL/0MkYapJ5i
+         tYQH3P2TK8ooESZrDybZOwlCDkrqBhEB+0QXdZpi8B0+UhNWjBWgOcxd2eh2U70KF+gZ
+         tgEg==
+X-Forwarded-Encrypted: i=1; AJvYcCWidODj3JeI65M0oEbkpZE9ZNT970hcSK1Jl2fIfuAHHeJCSqZh6HQ9Zx/djC7kg7yhZ6zJvHXb@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx3QCHzMxUcAIgHIHH/f1iOvaLmAwumsswwvKhgCyafSJyAg9Lv
+	EDOJYk/FsYTkCDHi08k420iDdlGv7RR68cQoTPoNQUtFciKvVIX02pFPqlg3a3Qi/kGEJoUKp5W
+	eI4boLQBFhGBq3W4giqK1WmCRkz4oK06kykh6zwUVFWIix2Eb8y1OKlng0ftabKPNJqg=
+X-Gm-Gg: ASbGncuDYpzQvfOcR7aWd8wdtQT3vfebvgkrd1aaYCK8B+NAQc4s9ZAWPiQHbBf8xf0
+	luryQ/sdDTe/xn/PQfvECmxRJyGbXiLElob22kSJthgGvozdCWJlmnQbpBWF+fbHr+EgMtvc9aS
+	6oNrnOLL/YbJQ4mcOcRITLEHcbUdUMxeVfgCAzidtPqOvTCHCaPq/UOkU5+qTEjnsSKka+8DLx5
+	4eUKGUwvqaA/iwReEUW0z6YvuyY7oVQ5Db2pgD6aDOpNcOMIOUqQcB4CJA/VBUNiQYALS6EskhS
+	xZ+jhzxFtuuIskbEvlc3ZPNnXWbFC6+pSt8XjmhUqxD93VeSx+BQrsFhrW5LNS4XUsafS8WrlOt
+	QfZ6+
+X-Received: by 2002:a05:6a20:734f:b0:240:1de:8bdb with SMTP id adf61e73a8af0-240d2fed245mr4293924637.30.1755273649174;
+        Fri, 15 Aug 2025 09:00:49 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHHjcIiOd/VMu8eOTrV6+IjbR0JkdHjIT+JVLUji8iUqnv4iWhGh9afTHWDhQfU7AFS71FEQQ==
+X-Received: by 2002:a05:6a20:734f:b0:240:1de:8bdb with SMTP id adf61e73a8af0-240d2fed245mr4293686637.30.1755273647200;
+        Fri, 15 Aug 2025 09:00:47 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-76e45292dc1sm1394626b3a.50.2025.08.15.08.54.10
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-76e45593da9sm1399452b3a.105.2025.08.15.09.00.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 Aug 2025 08:54:12 -0700 (PDT)
-Date: Fri, 15 Aug 2025 23:54:08 +0800
+        Fri, 15 Aug 2025 09:00:46 -0700 (PDT)
+Date: Sat, 16 Aug 2025 00:00:42 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Chao Yu <chao@kernel.org>
 Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-	Daniel Lee <chullee@google.com>
-Subject: Re: [PATCH] f2fs/012: adapt lookup_mode=x mount option
-Message-ID: <20250815155408.ja527chpfrjtcuau@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250808065803.17298-1-chao@kernel.org>
+	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH v3 1/3] f2fs/015: test common mount options
+Message-ID: <20250815160042.pavsszqk5n3izmdm@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250804114016.2734919-1-chao@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -81,89 +80,350 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250808065803.17298-1-chao@kernel.org>
+In-Reply-To: <20250804114016.2734919-1-chao@kernel.org>
 
-On Fri, Aug 08, 2025 at 02:58:03PM +0800, Chao Yu wrote:
-> w/ below change [1], f2fs will enable lookup_mode=perf by default, it
-> will change f2fs dirent lookup method from linear based lookup to hash
-> based lookup.
+On Mon, Aug 04, 2025 at 07:40:14PM +0800, Chao Yu wrote:
+> As f2fs changes to use new mount APIs, let's add a new testcase
+> to check mount result for all f2fs supported common mount options
+> and their combinations, in order to detect any inconsistency during
+> mount.
 > 
-> So that, f2fs will ignore sb.s_encoding_flags by default, which is not
-> compatible w/ f2fs/012 testcase, in where it will control lookup method
-> by configuring this flag w/ fsck.f2fs.
-> 
-> To avoid failure of f2fs/012, let's check whether f2fs has supported
-> "lookup_mode=auto" mount option, mount w/ the option if it can,
-> otherwise, don't.
-> 
-> [1] https://lore.kernel.org/linux-f2fs-devel/20250805065228.1473089-1-chullee@google.com
-> 
-> Cc: Daniel Lee <chullee@google.com>
+> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
 > Signed-off-by: Chao Yu <chao@kernel.org>
 > ---
 
-With this patch, I always get below error:
+I forgot this patchset. This version is good to me,
 
-f2fs/012 2s ... - output mismatch (see /root/git/xfstests/results//f2fs/012.out.bad)
-    --- tests/f2fs/012.out      2025-07-21 13:33:12.379585206 +0800
-    +++ /root/git/xfstests/results//f2fs/012.out.bad    2025-08-15 23:51:54.156835560 +0800
-    @@ -1,2 +1,4 @@
-     QA output created by 012
-    +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/sda6, missing codepage or helper program, or other error.
-    +       dmesg(1) may have more information after failed mount system call.
-     Silence is golden
-    ...
-    (Run 'diff -u /root/git/xfstests/tests/f2fs/012.out /root/git/xfstests/results//f2fs/012.out.bad'  to see the entire diff)
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Then test passed without this patch:
-
-f2fs/012 2s ...  3s
-Ran: f2fs/012
-Passed all 1 tests
-
-
->  tests/f2fs/012 | 13 +++++++++++--
->  1 file changed, 11 insertions(+), 2 deletions(-)
+>  common/rc          |   3 +
+>  tests/f2fs/015     | 121 +++++++++++++++++++++++++++++++
+>  tests/f2fs/015.out | 173 +++++++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 297 insertions(+)
+>  create mode 100755 tests/f2fs/015
+>  create mode 100644 tests/f2fs/015.out
 > 
-> diff --git a/tests/f2fs/012 b/tests/f2fs/012
-> index b3df9a8f..15fc8f0c 100755
-> --- a/tests/f2fs/012
-> +++ b/tests/f2fs/012
-> @@ -22,6 +22,15 @@ _require_scratch_nocheck
->  _require_command "$F2FS_IO_PROG" f2fs_io
->  _require_command "$F2FS_INJECT_PROG" inject.f2fs
->  
-> +#check whether f2fs supports "lookup_mode=x" mount option
-> +mntopt=""
-> +_scratch_mkfs -O casefold -C utf8 >> $seqres.full
-> +_try_scratch_mount "-o lookup_mode=auto"
-> +if [ $? == 0 ]; then
-> +	mntopt="-o lookup_mode=auto"
-> +	_scratch_unmount
-> +fi
+> diff --git a/common/rc b/common/rc
+> index ff5df203..81587dad 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -876,6 +876,9 @@ _test_mkfs()
+>      ext2|ext3|ext4)
+>  	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
+>  	;;
+> +    f2fs)
+> +	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $* $TEST_DEV
+> +	;;
+>      xfs)
+>  	_test_options mkfs
+>  	$MKFS_PROG -t $FSTYP -- -f $TEST_OPTIONS $MKFS_OPTIONS $* $TEST_DEV
+> diff --git a/tests/f2fs/015 b/tests/f2fs/015
+> new file mode 100755
+> index 00000000..73ac3d82
+> --- /dev/null
+> +++ b/tests/f2fs/015
+> @@ -0,0 +1,121 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
+> +#
+> +# FS QA Test No. f2fs/015
+> +#
+> +# This testcase tries to check stability of mount result
+> +# w/ common mount option and their combination.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick mount
+> +_require_kernel_config CONFIG_F2FS_FS_XATTR
+> +_require_kernel_config CONFIG_F2FS_FS_POSIX_ACL
+> +_require_kernel_config CONFIG_F2FS_FAULT_INJECTION
 > +
->  check_lookup()
->  {
->  	local nolinear_lookup=$1
-> @@ -30,7 +39,7 @@ check_lookup()
->  	local redheart=$dir/$'\u2764\ufe0f'
->  
->  	_scratch_mkfs -O casefold -C utf8 >> $seqres.full
-> -	_scratch_mount
-> +	_scratch_mount $mntopt
->  
->  	mkdir $dir
->  	$F2FS_IO_PROG setflags casefold $dir >> $seqres.full
-> @@ -52,7 +61,7 @@ check_lookup()
->  
->  	$F2FS_INJECT_PROG --dent --mb d_hash --nid $ino --val 0x9a2ea068 $SCRATCH_DEV >> $seqres.full
->  
-> -	_scratch_mount
-> +	_scratch_mount $mntopt
->  	if [ $nolinear_lookup == "1" ]; then
->  		[ -f $redheart ] && _fail "red heart file should not exist"
->  	else
+> +options=(
+> +#	mount_option			mkfs_option
+> +	"background_gc=on"		""			\
+> +	"background_gc=off"		""			\
+> +	"background_gc=sync"		""			\
+> +	"disable_roll_forward"		""			\
+> +	"norecovery"			""			\
+> +	"discard"			""			\
+> +	"nodiscard"			""			\
+> +	"no_heap"			""			\
+> +	"heap"				""			\
+> +	"user_xattr"			""			\
+> +	"nouser_xattr"			""			\
+> +	"acl"				""			\
+> +	"noacl"				""			\
+> +	"active_logs=2"			""			\
+> +	"active_logs=4"			""			\
+> +	"active_logs=6"			""			\
+> +	"disable_ext_identify"		""			\
+> +	"inline_xattr"			""			\
+> +	"noinline_xattr"		""			\
+> +	"inline_xattr_size=400"		""			\
+> +	"inline_data"			""			\
+> +	"noinline_dentry"		""			\
+> +	"inline_dentry"			""			\
+> +	"noinline_dentry"		""			\
+> +	"flush_merge"			""			\
+> +	"noflush_merge"			""			\
+> +	"barrier"			""			\
+> +	"nobarrier"			""			\
+> +	"fastboot"			""			\
+> +	"extent_cache"			""			\
+> +	"noextent_cache"		""			\
+> +	"data_flush"			""			\
+> +	"reserve_root=32768"		""			\
+> +	"resuid=1000"			""			\
+> +	"resgid=1000"			""			\
+> +	"fault_injection=100"		""			\
+> +	"fault_type=4095"		""			\
+> +	"mode=adaptive"			""			\
+> +	"mode=lfs"			""			\
+> +	"mode=fragment:segment"		""			\
+> +	"mode=fragment:block"		""			\
+> +	"usrquota"			""			\
+> +	"grpquota"			""			\
+> +	"prjquota"			""			\
+> +	"usrjquota=ausrquota"		""			\
+> +	"grpjquota=agrpquota"		""			\
+> +	"prjjquota=aprjquota"		""			\
+> +	"jqfmt=vfsold"			""			\
+> +	"jqfmt=vfsv0"			""			\
+> +	"jqfmt=vfsv1"			""			\
+> +	"usrjquota="			""			\
+> +	"grpjquota="			""			\
+> +	"prjjquota="			""			\
+> +	"quota"				""			\
+> +	"noquota"			""			\
+> +	"alloc_mode=reuse"		""			\
+> +	"alloc_mode=default"		""			\
+> +	"fsync_mode=posix"		""			\
+> +	"fsync_mode=strict"		""			\
+> +	"fsync_mode=nobarrier"		""			\
+> +	"test_dummy_encryption"		""			\
+> +	"test_dummy_encryption=v1"	""			\
+> +	"test_dummy_encryption=v2"	""			\
+> +	"checkpoint=enable"		""			\
+> +	"checkpoint=disable"		""			\
+> +	"checkpoint=disable:32768"	""			\
+> +	"checkpoint=disable:50%"	""			\
+> +	"checkpoint_merge"		""			\
+> +	"nocheckpoint_merge"		""			\
+> +	"compress_algorithm=lzo"	""			\
+> +	"inlinecrypt"			""			\
+> +	"atgc"				""			\
+> +	"discard_unit=block"		""			\
+> +	"discard_unit=segment"		""			\
+> +	"discard_unit=section"		""			\
+> +	"memory=normal"			""			\
+> +	"memory=low"			""			\
+> +	"age_extent_cache"		""			\
+> +	"errors=panic"			""			\
+> +	"errors=continue"		""			\
+> +	"errors=remount-ro"		""			\
+> +	"nat_bits"			""			\
+> +	"atgc,mode=lfs"			""			\
+> +	"ro,flush_merge"		""			\
+> +	"rw"				"ro"			\
+> +	"norecovery,ro"			""			\
+> +)
+> +
+> +for ((i=0;i<${#options[@]};i=i+2))
+> +do
+> +	echo "Option#$i: ${options[$i]} : ${options[$((i+1))]}"
+> +
+> +	if [ "${options[$((i+1))]}" ]; then
+> +		_scratch_mkfs "-O ${options[$((i+1))]}" >> $seqres.full || _fail "mkfs failed"
+> +	else
+> +		_scratch_mkfs >> $seqres.full || _fail "mkfs failed"
+> +	fi
+> +	_try_scratch_mount "-o ${options[$i]}" >> $seqres.full 2>&1
+> +	echo $?
+> +	_scratch_unmount >> $seqres.full 2>&1
+> +done
+> +
+> +status=0
+> +exit
+> diff --git a/tests/f2fs/015.out b/tests/f2fs/015.out
+> new file mode 100644
+> index 00000000..8d6712f0
+> --- /dev/null
+> +++ b/tests/f2fs/015.out
+> @@ -0,0 +1,173 @@
+> +QA output created by 015
+> +Option#0: background_gc=on : 
+> +0
+> +Option#2: background_gc=off : 
+> +0
+> +Option#4: background_gc=sync : 
+> +0
+> +Option#6: disable_roll_forward : 
+> +0
+> +Option#8: norecovery : 
+> +32
+> +Option#10: discard : 
+> +0
+> +Option#12: nodiscard : 
+> +0
+> +Option#14: no_heap : 
+> +0
+> +Option#16: heap : 
+> +0
+> +Option#18: user_xattr : 
+> +0
+> +Option#20: nouser_xattr : 
+> +0
+> +Option#22: acl : 
+> +0
+> +Option#24: noacl : 
+> +0
+> +Option#26: active_logs=2 : 
+> +0
+> +Option#28: active_logs=4 : 
+> +0
+> +Option#30: active_logs=6 : 
+> +0
+> +Option#32: disable_ext_identify : 
+> +0
+> +Option#34: inline_xattr : 
+> +0
+> +Option#36: noinline_xattr : 
+> +0
+> +Option#38: inline_xattr_size=400 : 
+> +0
+> +Option#40: inline_data : 
+> +0
+> +Option#42: noinline_dentry : 
+> +0
+> +Option#44: inline_dentry : 
+> +0
+> +Option#46: noinline_dentry : 
+> +0
+> +Option#48: flush_merge : 
+> +0
+> +Option#50: noflush_merge : 
+> +0
+> +Option#52: barrier : 
+> +0
+> +Option#54: nobarrier : 
+> +0
+> +Option#56: fastboot : 
+> +0
+> +Option#58: extent_cache : 
+> +0
+> +Option#60: noextent_cache : 
+> +0
+> +Option#62: data_flush : 
+> +0
+> +Option#64: reserve_root=32768 : 
+> +0
+> +Option#66: resuid=1000 : 
+> +0
+> +Option#68: resgid=1000 : 
+> +0
+> +Option#70: fault_injection=100 : 
+> +0
+> +Option#72: fault_type=4095 : 
+> +0
+> +Option#74: mode=adaptive : 
+> +0
+> +Option#76: mode=lfs : 
+> +0
+> +Option#78: mode=fragment:segment : 
+> +0
+> +Option#80: mode=fragment:block : 
+> +0
+> +Option#82: usrquota : 
+> +0
+> +Option#84: grpquota : 
+> +0
+> +Option#86: prjquota : 
+> +32
+> +Option#88: usrjquota=ausrquota : 
+> +32
+> +Option#90: grpjquota=agrpquota : 
+> +32
+> +Option#92: prjjquota=aprjquota : 
+> +32
+> +Option#94: jqfmt=vfsold : 
+> +0
+> +Option#96: jqfmt=vfsv0 : 
+> +0
+> +Option#98: jqfmt=vfsv1 : 
+> +0
+> +Option#100: usrjquota= : 
+> +0
+> +Option#102: grpjquota= : 
+> +0
+> +Option#104: prjjquota= : 
+> +0
+> +Option#106: quota : 
+> +0
+> +Option#108: noquota : 
+> +0
+> +Option#110: alloc_mode=reuse : 
+> +0
+> +Option#112: alloc_mode=default : 
+> +0
+> +Option#114: fsync_mode=posix : 
+> +0
+> +Option#116: fsync_mode=strict : 
+> +0
+> +Option#118: fsync_mode=nobarrier : 
+> +0
+> +Option#120: test_dummy_encryption : 
+> +0
+> +Option#122: test_dummy_encryption=v1 : 
+> +0
+> +Option#124: test_dummy_encryption=v2 : 
+> +0
+> +Option#126: checkpoint=enable : 
+> +0
+> +Option#128: checkpoint=disable : 
+> +0
+> +Option#130: checkpoint=disable:32768 : 
+> +0
+> +Option#132: checkpoint=disable:50% : 
+> +0
+> +Option#134: checkpoint_merge : 
+> +0
+> +Option#136: nocheckpoint_merge : 
+> +0
+> +Option#138: compress_algorithm=lzo : 
+> +0
+> +Option#140: inlinecrypt : 
+> +0
+> +Option#142: atgc : 
+> +0
+> +Option#144: discard_unit=block : 
+> +0
+> +Option#146: discard_unit=segment : 
+> +0
+> +Option#148: discard_unit=section : 
+> +0
+> +Option#150: memory=normal : 
+> +0
+> +Option#152: memory=low : 
+> +0
+> +Option#154: age_extent_cache : 
+> +0
+> +Option#156: errors=panic : 
+> +0
+> +Option#158: errors=continue : 
+> +0
+> +Option#160: errors=remount-ro : 
+> +0
+> +Option#162: nat_bits : 
+> +0
+> +Option#164: atgc,mode=lfs : 
+> +32
+> +Option#166: ro,flush_merge : 
+> +32
+> +Option#168: rw : ro
+> +0
+> +Option#170: norecovery,ro : 
+> +0
 > -- 
-> 2.40.1
+> 2.49.0
 > 
 
