@@ -1,78 +1,78 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 491221607A4
-	for <fstests@vger.kernel.org>; Fri, 15 Aug 2025 16:01:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D66A1607A4
+	for <fstests@vger.kernel.org>; Fri, 15 Aug 2025 16:02:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755273689; cv=none; b=Y8DUB6qodUta0gxLgIF47HW8N91l+RJVIrPy5d8VWB+fE8ZZJlvUg+H40d527IUfi6LU2AK2taExkHu1Xk9yr3U4ra/AtIqHM0tzNm/2HZQXNyfoPZQI1yGH4ksQ3/Bh+4nGhQz4FIR6V+JCnKPOitqZijJFAskY1rqlkQAY4WE=
+	t=1755273737; cv=none; b=Bj4ycQJ06abd3noQyO/cc4epg/JGm6XPDaBL9BMbVQvOvanRL0uMOCa4zrq0PQlv/eLkjfJrEeed4soHRjExeWKpcqIGPO4n/Xd4HFdWwsEgbQ7RcMZ6mlfKsWu2sipwK5sQwZ8WXTzc/xxfe+wvnAl5cE4ov44fG+JyZWMpZ3k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755273689; c=relaxed/simple;
-	bh=ZagnOXtK2bAzCs9Bm5KQsE2Pl2BITR81ub0bZ1OdyJU=;
+	s=arc-20240116; t=1755273737; c=relaxed/simple;
+	bh=W8aIaegSld6dNbmNXHaXEH81veDHh/LPcjov5CMqUgk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=G5od3Z9ghPobEmulm9OmXg0inbF65q+FOcpB1ZMDgCS23OCaXVLMZnDpLPNTuNPwy08UwRiO0plrhAky05W39LTzGwFcJSsOKnQoKYjnwNYHKPba3c2wNIqxmd7Ql9m+JiEvdVaW+hOemNPgQ+IvI4PrctSFc4IdyDKvPKHd0eg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=S8S8g5Ju; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=C+rEwx0P13Dfa6bdZLDiRzKMAo+IRwFj8WEWfpYrng1hf4dT2nfHikStM94kWejwrFTI+Dl5YhRg6v/KaO/gCcgIy60J6fGuSSGhHn1wSrHX7qU8Roz/rxhRZCV/hCAA43Yyf68V1IFz+rhv/hiIa1eY+2KNWiG7zz647mlAJcM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=GUTcIeXk; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="S8S8g5Ju"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GUTcIeXk"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1755273687;
+	s=mimecast20190719; t=1755273734;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=t7zIJViFMTGRPSXqeocdaNgcPuKIfHn7AqwZgs3KNqw=;
-	b=S8S8g5Juzlf8uYkjh1BS+VH4L5ZMyM/8FDWqD6fJefI/5rxjhI41I1MlG5MB8kKjsespZm
-	Sal1feRN4j30D5IMJGXjEPNacGqXG8EIcpYJ+bbweqRhsBnhdsVGoUX/Mx6jDVhm5ti3Og
-	sjafnaN7eMNUtyEYYDrpklZv2gd+KO4=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=x7trs0stmb5KqYgODGI7WyrTJCu0r4CTNIU7M/XCXio=;
+	b=GUTcIeXkA0YmRLkzMwl8QqmL3fvpV5QNGR+z4IhSDHD/081LCxNvrAsp9YP8F9q2bD+iAn
+	xO2PHeNxPuzNrUaj65YYTpySbT4gHjo5sgOIm+TJZn5TPASxdvzEw9vKYcbdgUc1QvWdc+
+	rlB4UchC3aXmQJnQ822CNE7+L8+LpVM=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-325-M8ij5BevMceV2hqylEMoRw-1; Fri, 15 Aug 2025 12:01:25 -0400
-X-MC-Unique: M8ij5BevMceV2hqylEMoRw-1
-X-Mimecast-MFC-AGG-ID: M8ij5BevMceV2hqylEMoRw_1755273684
-Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-76e2e890901so3591242b3a.1
-        for <fstests@vger.kernel.org>; Fri, 15 Aug 2025 09:01:25 -0700 (PDT)
+ us-mta-670-_ggglUyoPXOZn3rB9Fftyw-1; Fri, 15 Aug 2025 12:02:13 -0400
+X-MC-Unique: _ggglUyoPXOZn3rB9Fftyw-1
+X-Mimecast-MFC-AGG-ID: _ggglUyoPXOZn3rB9Fftyw_1755273732
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-24458297be0so43763595ad.3
+        for <fstests@vger.kernel.org>; Fri, 15 Aug 2025 09:02:13 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755273684; x=1755878484;
+        d=1e100.net; s=20230601; t=1755273732; x=1755878532;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=t7zIJViFMTGRPSXqeocdaNgcPuKIfHn7AqwZgs3KNqw=;
-        b=vbMOm0lUQwRkweHC3yhSVQwQ1xnlQEbsJcEKrFhjLaQ3X1echH8QgXCpC3cTapxr+s
-         nbURpanicRu7l+JkGl3BvWL+AcjEExAxgfNGCzT0AG2aypk3XC22G9RLqDcoAhpNuwBX
-         RwXQFvhdwJ9x4bGFeOFsDCObOVjDSTL3xXzIE7wWYdEbGZbXv5rFs0OVaxCS3cMjAXIh
-         yrT7N+my4o7xG7WXnAREd+4bsW7GbcqGhiTaAeZKlyj2OWF5vb8UxxQvsTO9+7cFYNLr
-         49owxCdlJbGKz0EHJHaim8w3WubB6IhhaN6qUglbgjQw5mJa6BoUVh7Ah24Eg1sSMqCk
-         qYYQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVaYiHHUKeIYNPAphUVDPUaX2HYWuqNM/pccIT7OxYfA3Jku9fKPjUaLjuL84oj42uZ+OilYr3z@vger.kernel.org
-X-Gm-Message-State: AOJu0YzZ22zRhIeAecTJC9ASWKhTc3s8vUrPl4/7KxQmpclL611YBKDQ
-	+QzmDaN9V5lFU+Usp2VOsFeqRhlryHOZr4B4tuaZDveQGrBs/vW23rk21mt4N5GLBvmDggOLKAR
-	Jvn+4TzPHzfWt/3MSXxNBigtP+z4XcQAEDHxlmrHWlSYCd/lWZqkgTkksnis=
-X-Gm-Gg: ASbGncsbK3lcgx6FW/ucJUMSE3zRO8VyOM5B/G/qJiZxho49YRHJyVynFCftKDFn62k
-	jFtrVMlWlASloW1pO6WxE57UqO+nufTsXEC4C6whCmU0tReB/DoRVum0Nf1DX+4AkbxCvClE1ub
-	uxHjkAi5PYIpZtn4hBxue972olJt9fY5M/Xef2KSkYXlJhQojIRyMpmhBrADiDiUX20Ok3H4x/E
-	08tTuLqhwnRGy/A0KYuY0KnUGfUX/D9bv2hL4FD/++lzXYKqA5APQz9X18Dz9PPsWEZ3gupvN1k
-	K/k7kLD6FBKKtuCIc3BR/OCcfHpxTASNngZ1JEi4fLfNOKbwsTRnUBaCYBPOlf2D7voBLACNnjx
-	4JgQI
-X-Received: by 2002:a05:6a20:258d:b0:1f5:9024:3254 with SMTP id adf61e73a8af0-240d2d7d6f3mr4811307637.6.1755273684077;
-        Fri, 15 Aug 2025 09:01:24 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEgMp3e1XTigPaS6kNWf5YAQFA3G8AVx4PdH4JCXzN4E1mdijRlost0gaz+hwyPzL6CfnTXaw==
-X-Received: by 2002:a05:6a20:258d:b0:1f5:9024:3254 with SMTP id adf61e73a8af0-240d2d7d6f3mr4811223637.6.1755273683475;
-        Fri, 15 Aug 2025 09:01:23 -0700 (PDT)
+        bh=x7trs0stmb5KqYgODGI7WyrTJCu0r4CTNIU7M/XCXio=;
+        b=J1I4ZhtTfhEUwnGCh1RSicpF6+0JNYrTxvtAKdTkI3NJqFQ0s5BAGpRfAyc5RWzxEj
+         3ZzaOAKADJmlNUOAxet1VSSQJrS6XmR7eCfq+tzOf2ZO6ZoxPoVhcYnQU63a4ypnYh+n
+         IDMYhoyt5H1DHRbKZMRSr7SGo4HWPXCKwkDqlaHm4Th7VXB9IoAfNz9xX6gsNzeWakRz
+         4TjPeku8rOcMN8pSJmVmyjX9MDELKNPjm5LLQyDa14T5YIoQMEKJIpIjeRaBef0QZhPV
+         hT/TCmzw5eFRTLhgCjG/+jAFk4RzRuyNSvqEc3WqX47jKnh8gbEYhODvfcDRO401UWMH
+         F9xw==
+X-Forwarded-Encrypted: i=1; AJvYcCVMYUepnjT6KP53UZqvjrsuAwhSJxp5XelasRmHu7baIJcNQhblz01zeCMH20J2B5ViD7uTin6C@vger.kernel.org
+X-Gm-Message-State: AOJu0YyySpDQF6U28n7LrZug+SwCAseVid22/A3ByYqrUieCsTaeoLpY
+	Lp9lRIHi2jeMaKv7li3ezz+aQl6Tizq7ZIe7u6R1cZYUW8uk+mkHTJHeKMeUoAyb8FvdUW9KXaK
+	077UneUtemRCin+cTcpdc/4169begkNXTpB3CSqeiEWPERns6FKxjqc+7VpF6dEPvV+A=
+X-Gm-Gg: ASbGncs7DWd/wOpC1KXEksXxQd9nukGs0io9N+pQ/JZCkZemOkDUPJ7ZNNreOe45h5L
+	qBKniDXWcOhAQaP9rCIcEL1Jq7U0bmIZyb63qB3nFW5lHYj02xm4kwZ6+DyQHtB4AVpmjTEPwBp
+	VpqIZmSbjV/L6TiTzfXODERcbpFTubEg7zwl79dwUdv5tDG7bJQ3WAi/m008lyyQkIBPMB1vsER
+	uIfwMeg0A+5jCg5jxnxb3LnP1tRKBzmTJae6M8OpwmfXpmURaBo/U7331cOK87zxOir8Vl4tX/P
+	sTpPj9LVnrvD8173ZlIRxoWdvFicYx8Jhm8ALHndVJdDaBdRTFslnXjrq4vcciIg6DQH6hXOfi+
+	L6dGA
+X-Received: by 2002:a17:903:3546:b0:244:6b46:287b with SMTP id d9443c01a7336-2446d7a5b6fmr33199415ad.20.1755273731484;
+        Fri, 15 Aug 2025 09:02:11 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGWeB8r38bxKL+3gG+wc/E7BAZULHmVH4TEvNnC6Tj8Mxi0vNbgzc0GGqMf6qiNZnTgEnLfDQ==
+X-Received: by 2002:a17:903:3546:b0:244:6b46:287b with SMTP id d9443c01a7336-2446d7a5b6fmr33198945ad.20.1755273730935;
+        Fri, 15 Aug 2025 09:02:10 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-76e4556670csm1404704b3a.79.2025.08.15.09.01.21
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2446cae02e7sm17248085ad.39.2025.08.15.09.02.08
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 Aug 2025 09:01:23 -0700 (PDT)
-Date: Sat, 16 Aug 2025 00:01:18 +0800
+        Fri, 15 Aug 2025 09:02:10 -0700 (PDT)
+Date: Sat, 16 Aug 2025 00:02:06 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Chao Yu <chao@kernel.org>
 Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
 	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v3 2/3] f2fs/016: test special mount options
-Message-ID: <20250815160118.ht3ymxihqqr2rhk2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH v3 3/3] f2fs/017: test mount options for zoned device
+Message-ID: <20250815160206.ncfua6yvrwopk4hg@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20250804114016.2734919-1-chao@kernel.org>
- <20250804114016.2734919-2-chao@kernel.org>
+ <20250804114016.2734919-3-chao@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -81,11 +81,11 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250804114016.2734919-2-chao@kernel.org>
+In-Reply-To: <20250804114016.2734919-3-chao@kernel.org>
 
-On Mon, Aug 04, 2025 at 07:40:15PM +0800, Chao Yu wrote:
+On Mon, Aug 04, 2025 at 07:40:16PM +0800, Chao Yu wrote:
 > As f2fs changes to use new mount APIs, let's add a new testcase
-> to check mount result for all f2fs supported special mount options
+> to check mount result for special mount options for zoned device
 > and their combinations, in order to detect any inconsistency during
 > mount.
 > 
@@ -97,106 +97,84 @@ This version is good to me,
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  tests/f2fs/016     | 50 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/f2fs/016.out | 33 ++++++++++++++++++++++++++++++
->  2 files changed, 83 insertions(+)
->  create mode 100755 tests/f2fs/016
->  create mode 100644 tests/f2fs/016.out
+>  tests/f2fs/017     | 40 ++++++++++++++++++++++++++++++++++++++++
+>  tests/f2fs/017.out | 21 +++++++++++++++++++++
+>  2 files changed, 61 insertions(+)
+>  create mode 100755 tests/f2fs/017
+>  create mode 100644 tests/f2fs/017.out
 > 
-> diff --git a/tests/f2fs/016 b/tests/f2fs/016
+> diff --git a/tests/f2fs/017 b/tests/f2fs/017
 > new file mode 100755
-> index 00000000..800f75fc
+> index 00000000..cdf42fc8
 > --- /dev/null
-> +++ b/tests/f2fs/016
-> @@ -0,0 +1,50 @@
+> +++ b/tests/f2fs/017
+> @@ -0,0 +1,40 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
 > +#
-> +# FS QA Test No. f2fs/016
+> +# FS QA Test No. f2fs/017
 > +#
 > +# This testcase tries to check stability of mount result
-> +# w/ f2fs special mount options and their combination.
+> +# w/ mount options for zoned device and their combination.
 > +#
 > +. ./common/preamble
 > +_begin_fstest auto quick mount
-> +_require_kernel_config CONFIG_F2FS_FS_COMPRESSION
-> +_require_kernel_config CONFIG_F2FS_FS_LZO
-> +_require_kernel_config CONFIG_F2FS_FS_LZORLE
-> +_require_kernel_config CONFIG_F2FS_FS_LZ4
-> +_require_kernel_config CONFIG_F2FS_FS_LZ4HC
-> +_require_kernel_config CONFIG_F2FS_FS_ZSTD
+> +
+> +_require_zoned_device "$TEST_DEV"
+> +_test_unmount >> $seqres.full 2>&1
 > +
 > +options=(
 > +#	mount_option			mkfs_option
-> +	"inline_xattr_size=400"		"extra_attr,flexible_inline_xattr"\
-> +	"compress_algorithm=lzo"	"extra_attr,compression"	\
-> +	"compress_algorithm=lz4"	"extra_attr,compression"	\
-> +	"compress_algorithm=zstd"	"extra_attr,compression"	\
-> +	"compress_algorithm=lzo-rle"	"extra_attr,compression"	\
-> +	"compress_algorithm=lz4:3"	"extra_attr,compression"	\
-> +	"compress_algorithm=zstd:1"	"extra_attr,compression"	\
-> +	"compress_log_size=8"		"extra_attr,compression"	\
-> +	"compress_extension=so"		"extra_attr,compression"	\
-> +	"nocompress_extension=so"	"extra_attr,compression"	\
-> +	"nocompress_extension=*"	"extra_attr,compression"	\
-> +	"compress_extension=so,nocompress_extension=so"			\
-> +					"extra_attr,compression"	\
-> +	"compress_chksum"		"extra_attr,compression"	\
-> +	"compress_mode=fs"		"extra_attr,compression"	\
-> +	"compress_mode=user"		"extra_attr,compression"	\
-> +	"compress_cache"		"extra_attr,compression"	\
+> +	"background_gc=on"		"blkzone"		\
+> +	"background_gc=off"		"blkzone"		\
+> +	"background_gc=sync"		"blkzone"		\
+> +	"mode=adaptive"			"blkzone"		\
+> +	"mode=lfs"			"blkzone"		\
+> +	"mode=fragment:segment"		"blkzone"		\
+> +	"mode=fragment:block"		"blkzone"		\
+> +	"discard_unit=block"		"blkzone"		\
+> +	"discard_unit=segment"		"blkzone"		\
+> +	"discard_unit=section"		"blkzone"		\
 > +)
 > +
 > +for ((i=0;i<${#options[@]};i=i+2))
 > +do
 > +	echo "Option#$i: ${options[$i]} : ${options[$((i+1))]}"
-> +	_scratch_mkfs "-O ${options[$((i+1))]}" >> $seqres.full || _fail "mkfs failed"
-> +	_try_scratch_mount "-o ${options[$i]}" >> $seqres.full 2>&1
+> +	_test_mkfs "-m" >> $seqres.full || _fail "mkfs failed"
+> +	_test_mount "-o ${options[$i]}" >> $seqres.full 2>&1
 > +	echo $?
-> +	_scratch_unmount >> $seqres.full 2>&1
+> +	_test_unmount >> $seqres.full 2>&1
 > +done
 > +
 > +status=0
 > +exit
-> diff --git a/tests/f2fs/016.out b/tests/f2fs/016.out
+> diff --git a/tests/f2fs/017.out b/tests/f2fs/017.out
 > new file mode 100644
-> index 00000000..a8c96972
+> index 00000000..c260e0b1
 > --- /dev/null
-> +++ b/tests/f2fs/016.out
-> @@ -0,0 +1,33 @@
-> +QA output created by 016
-> +Option#0: inline_xattr_size=400 : extra_attr,flexible_inline_xattr
+> +++ b/tests/f2fs/017.out
+> @@ -0,0 +1,21 @@
+> +QA output created by 017
+> +Option#0: background_gc=on : blkzone
 > +0
-> +Option#2: compress_algorithm=lzo : extra_attr,compression
-> +0
-> +Option#4: compress_algorithm=lz4 : extra_attr,compression
-> +0
-> +Option#6: compress_algorithm=zstd : extra_attr,compression
-> +0
-> +Option#8: compress_algorithm=lzo-rle : extra_attr,compression
-> +0
-> +Option#10: compress_algorithm=lz4:3 : extra_attr,compression
-> +0
-> +Option#12: compress_algorithm=zstd:1 : extra_attr,compression
-> +0
-> +Option#14: compress_log_size=8 : extra_attr,compression
-> +0
-> +Option#16: compress_extension=so : extra_attr,compression
-> +0
-> +Option#18: nocompress_extension=so : extra_attr,compression
-> +0
-> +Option#20: nocompress_extension=* : extra_attr,compression
+> +Option#2: background_gc=off : blkzone
 > +32
-> +Option#22: compress_extension=so,nocompress_extension=so : extra_attr,compression
+> +Option#4: background_gc=sync : blkzone
+> +0
+> +Option#6: mode=adaptive : blkzone
 > +32
-> +Option#24: compress_chksum : extra_attr,compression
+> +Option#8: mode=lfs : blkzone
 > +0
-> +Option#26: compress_mode=fs : extra_attr,compression
+> +Option#10: mode=fragment:segment : blkzone
+> +32
+> +Option#12: mode=fragment:block : blkzone
+> +32
+> +Option#14: discard_unit=block : blkzone
 > +0
-> +Option#28: compress_mode=user : extra_attr,compression
+> +Option#16: discard_unit=segment : blkzone
 > +0
-> +Option#30: compress_cache : extra_attr,compression
+> +Option#18: discard_unit=section : blkzone
 > +0
 > -- 
 > 2.49.0
