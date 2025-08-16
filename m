@@ -1,130 +1,197 @@
-Received: from mail-ed1-f47.google.com (mail-ed1-f47.google.com [209.85.208.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 563172C21C8;
-	Fri, 15 Aug 2025 16:09:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 118EA27453
+	for <fstests@vger.kernel.org>; Sat, 16 Aug 2025 07:08:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755274172; cv=none; b=TI5FqFIKeZwd5oDce6/0PGoE+jVnUOnH31bUuVyR7ohRF5U21lIsNGvWk3XrL/ujMCfb8qls8zFgYQrcRd6vo3jQc9aa6k35pZoJFnsSb5Hx1ugd/V4LTBQhoy67LnipQ31swSFysaHpfqWjGXqE7CyhjYcdZ0+CM96POHdrqqs=
+	t=1755328089; cv=none; b=eiR4t5PI5RDdi2AQ7i0mYQ4xv//deO6WDcCX3bO77sH8rROP6dwlMA83chTzUbTqx/ivHXuVfHxdJuRsigwXPWS/7NVLsqKxgi4I9RD7wxsBKu6vDFLdv49+jLhjOKKjPEyo1jF7yp26ZYU2zMzzyPvPeMywLdvBON43MmtE2JQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755274172; c=relaxed/simple;
-	bh=P73dwaUBDaWkgGolkWG/hwKrYZgILKIIkbZZErL7kdU=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=lEdvoeWMSm2ngM+2q2QvpXE8jC4xnMUMRnWuuuVaH0r3JkfUmo+TMKTRVQqHnaMt4u1UBNiiHIrMRpPVn/LG5wklaGWozMSNQZ0eJtjyjbv1Cl2yPNerwqEqbw3vJvnH98caeigY8uQ2gPdqopldWNNxAo8roO5RWSZ8MYitR80=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PrC+Lcm1; arc=none smtp.client-ip=209.85.208.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1755328089; c=relaxed/simple;
+	bh=oB/06TCALlLhR3Djel57KDCw7IXYRM/va8rb6sfQzRY=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=aCK2RcrrFQXWwDWJj7JKsQrwdfFlOyO+8QJ5vYKOVibrmPdU2K15NOUhxNm8yWfWI8WTkGsx21pJZHGyhnCc6WVvcrBr83n+7UbtwENFDIckFselC+hpEIKc5sbpdStYu1u8l0eMAECTU2V1lEGmXVUpcQ+22MEwj5BPfYZ2VIA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=oxRZOmCC; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PrC+Lcm1"
-Received: by mail-ed1-f47.google.com with SMTP id 4fb4d7f45d1cf-6188b690517so3204171a12.1;
-        Fri, 15 Aug 2025 09:09:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1755274169; x=1755878969; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/zoMc0hor3cZgN8KXVf3DVLG/Aog0YVhAQ8E/o1jap8=;
-        b=PrC+Lcm1Nhz0IYe3XrGLPeulzc97Fa1GhXDteTEOgYB+w9VER+a8znHgsuH7x17c3/
-         jAr3oQmIZHkMnxTGCTDow2s7l91HPhKuo2frXLmzVrD30/nJ2/g/+Hw9oN6p1fXzsUE7
-         fF7dPtsvaOgxutFciCDKXS7GH5Kk1MWRgJfiw6QO/XuQa+FJLvc53kxFkIYRG5S16Cci
-         eZV6vikFJ+1UY1y6+Sa0GyzmyLYp2Jj1pMpsetqgupAcIWzCQV4IaT/EDQuxROdtEE8S
-         jcWxQlPNw30/r5hLeXOqvvj6SX0iPvMSU4ZTn2B/5n6X834x5k7/ggLJQ0ND0Dz0Wfmf
-         u6eA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755274169; x=1755878969;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=/zoMc0hor3cZgN8KXVf3DVLG/Aog0YVhAQ8E/o1jap8=;
-        b=M1lkk91u7FCCyphooiCL9793hl+lbNR6ha4diBFkxW3zQ54fM9jxw+Cz6J72wkfI59
-         K7BiShOfcmkgvESIrespgxTA8P+H4E2ksCpEKgw24YhwHvo7bxTycRnV4BV3BGs+Um6k
-         m2q56quF7ES2z+fxvnyKg5yD2f40hUWD/24GadVhnot9jwr4rY1No4NG2UHYneLjCkaQ
-         BUgbosiA15NGZzjUra53Twiq0GhlmcIPrVI40PZQGBH2T29EHIMYgG1rGovIc445xcZA
-         PrjectiuRj6VoAOaD00O/KDdy9V4XEWZQt8JcB0brhp14+QYkQyiu5Fzh82pUidUFJLO
-         Jypw==
-X-Forwarded-Encrypted: i=1; AJvYcCVsOqQ7Q/hpQ+sRhQ5QKHB0S7oQm2D8BvewV17+dw7u62Up2Lh0MnCMENm425MVZNWYOUxmDdr6@vger.kernel.org, AJvYcCXSX3CRrNNzjB9kHgIw8m/U5xey4tG34GPWFAa9PZUuAl+a6BKwCJCpBY385DhjYwjGF+Jt+11fq/OwdjWnhQ==@vger.kernel.org
-X-Gm-Message-State: AOJu0YxOrNhXm+exvU9s/XcxFjuU0tZAcTFsvo3MQY8d5n8rQOqC3WIN
-	O0+H0MeHg9WzBCauATiqN/jYzarzR+HWPSx89xcXRBJpX11tgoTEfsnYA4VYYJg59byPmI9MVKx
-	JjBp/MWS69dV7W+VEHLJXiGOGisgrS5k=
-X-Gm-Gg: ASbGncvKSthj7lqMVBRqDMDHepQqnwl0E5Jf2K+mz4n9qF0/HROdw4d47i2GAiFGG3b
-	dLwVhVpEtGvJ1+h29M6O8GFbVxvQKPhmrbG0v5g+fZKZx04O5AfOQ5RjV7DL47+eO1hF1obkZtz
-	ipighGGLu9PubhyAoCMuRkzxZzUqUYYVo3MCKlULdlToZVrKcGrI1apxIxy3vmhvlxk9hY5dXbE
-	jL83zDmssaRQ8WYLQ==
-X-Google-Smtp-Source: AGHT+IE48M8qHHLJroetAhwyyyMpPeL6uZvH0guSmXJh1D5JLxUelPf8jAVr8FieuSq5De7OHdL6wQMJ/BqmD+sNrS4=
-X-Received: by 2002:a05:6402:909:b0:618:273b:4f51 with SMTP id
- 4fb4d7f45d1cf-618b0559c09mr1728527a12.23.1755274168168; Fri, 15 Aug 2025
- 09:09:28 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="oxRZOmCC"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9A2CFC4CEEF;
+	Sat, 16 Aug 2025 07:08:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1755328088;
+	bh=oB/06TCALlLhR3Djel57KDCw7IXYRM/va8rb6sfQzRY=;
+	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
+	b=oxRZOmCCrhap1jYYMcHfYCsI9Ff01JWqD+cRI4JfHQOcFHvKBh2OcjP3WnmzNIorl
+	 BjP7IOgBr0BdXjUIQaoVyCl5QewUgNaMIIa4B0FNx4pm/jAYdWxkrIojaEilyUsNf9
+	 ULQtB839OfXNurmNlWf1j6m3Th1ip+UCOBfef2NDIwJumzIj4ALachwD51hkt593ay
+	 lyOlWOHLLEzSgUe2rgVV/8rXNzowixtOxipMVJ6Ez3TGpVabEzJi7ui5H0/rdOX/ZX
+	 lGw/fNJU7b2vQbCzMgPfRmQ6t3OfSlfMjlhEljcAZhCWp5itfkZMTuQ0J9rkx6LH1+
+	 rQVq/0dPTtyKg==
+Message-ID: <89f49625-467b-4871-b8db-cceeeba9bf76@kernel.org>
+Date: Sat, 16 Aug 2025 15:08:03 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250815144555.110780-1-zlang@kernel.org> <CAOQ4uxjVpVPVfiJPokpmu6pLDmjtYbeDr+j5jNHi8k9bK_2feg@mail.gmail.com>
- <20250815153520.xzgxwuwc7slt34li@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To: <20250815153520.xzgxwuwc7slt34li@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 15 Aug 2025 18:09:15 +0200
-X-Gm-Features: Ac12FXx_niVPpeJuLtzoahLGTpk0AkQvUHw1Zz9TQn_HoFt43eHGCG9XL0EBtXw
-Message-ID: <CAOQ4uxhNhs4MPC1ZOTC5_Kzxe9DeFxD75XK6wkSFPjNducVBWg@mail.gmail.com>
-Subject: Re: [PATCH] overlay/005: only run for xfs underlying fs
+User-Agent: Mozilla Thunderbird
+Cc: chao@kernel.org, Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+ jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH v2 3/3] f2fs/020: do sanity check on i_xattr_nid
 To: Zorro Lang <zlang@redhat.com>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org, 
-	linux-unionfs@vger.kernel.org, pdaly@redhat.com, 
-	Xiong Zhou <xzhou@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+References: <20250814090712.2119455-1-chao@kernel.org>
+ <20250814090712.2119455-3-chao@kernel.org>
+ <20250814211838.64o3q3jurbxvwp3a@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <40587d4a-44a2-4d82-9f9f-2934c52aba87@kernel.org>
+ <20250815151240.aie4fcudoglxvlh5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <20250815151240.aie4fcudoglxvlh5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Fri, Aug 15, 2025 at 5:35=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote=
-:
->
-> On Fri, Aug 15, 2025 at 05:16:51PM +0200, Amir Goldstein wrote:
-> > On Fri, Aug 15, 2025 at 4:47=E2=80=AFPM Zorro Lang <zlang@kernel.org> w=
-rote:
-> > >
-> > > When we runs overlay/005 on a system without xfs module, it always
-> > > fails as "unknown filesystem type xfs", due to this case require xfs
-> > > to be the underlying fs explicitly:
-> > >
-> > >   $MKFS_XFS_PROG -f -n ftype=3D1 $upper_loop_dev >>$seqres.full 2>&1
-> > >
-> > > So notrun this case if the underlying fs isn't 'xfs'.
-> >
-> > It would have been better if instead of mkfs.xfs, we would have
-> > used a helper to format $upper_loop_dev as $OVL_BASE_FSTYP
-> >
-> > But this is easier, so unless anybody wants to take on the better fix
-> >
-> > Acked-by: Amir Goldstein <amir73il@gmail.com>
->
-> Thanks Amir, No matter what kinds of underlying fs are all good?
->
+On 2025/8/15 23:12, Zorro Lang wrote:
+> On Fri, Aug 15, 2025 at 04:02:12PM +0800, Chao Yu wrote:
+>> On 8/15/25 05:18, Zorro Lang wrote:
+>>> On Thu, Aug 14, 2025 at 05:07:12PM +0800, Chao Yu wrote:
+>>>> This is a regression test:
+>>>> 1. create directory
+>>>> 2. add a new xattr entry to create xattr node
+>>>> 3. use inject.f2fs to inject nid of xattr node w/ ino in a file
+>>>> 4. check whether f2fs kernel module will detect and report such
+>>>>     corruption in the file
+>>>>
+>>>> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+>>>> Signed-off-by: Chao Yu <chao@kernel.org>
+>>>> ---
+>>>> v3:
+>>>> - use _require_scratch_nocheck instead of _require_scratch
+>>>> - add missing _require_attrs user
+>>>> - add comments for why exporting MKFS_OPTIONS=""
+>>>>   tests/f2fs/020     | 51 ++++++++++++++++++++++++++++++++++++++++++++++
+>>>>   tests/f2fs/020.out |  2 ++
+>>>>   2 files changed, 53 insertions(+)
+>>>>   create mode 100755 tests/f2fs/020
+>>>>   create mode 100644 tests/f2fs/020.out
+>>>>
+>>>> diff --git a/tests/f2fs/020 b/tests/f2fs/020
+>>>> new file mode 100755
+>>>> index 00000000..7ce1f92f
+>>>> --- /dev/null
+>>>> +++ b/tests/f2fs/020
+>>>> @@ -0,0 +1,51 @@
+>>>> +#! /bin/bash
+>>>> +# SPDX-License-Identifier: GPL-2.0
+>>>> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
+>>>> +#
+>>>> +# FS QA Test No. f2fs/020
+>>>> +#
+>>>> +# This is a regression test:
+>>>> +# 1. create directory
+>>>> +# 2. add a new xattr entry to create xattr node
+>>>> +# 3. use inject.f2fs to inject nid of xattr node w/ ino in a file
+>>>> +# 4. check whether f2fs kernel module will detect and report such
+>>>> +#    corruption in the file
+>>>> +#
+>>>> +. ./common/preamble
+>>>> +_begin_fstest auto quick rw
+>>>> +
+>>>> +. ./common/attr
+>>>> +
+>>>> +_fixed_by_kernel_commit 061cf3a84bde \
+>>>> +	"f2fs: fix to do sanity check on ino and xnid"
+>>>> +
+>>>> +_require_scratch_nocheck
+>>>> +_require_command "$F2FS_INJECT_PROG" inject.f2fs
+>>>> +_require_attrs user
+>>>> +
+>>>> +# remove all mkfs options to avoid layout change of on-disk inode
+>>>> +export MKFS_OPTIONS=""
+>>>> +
+>>>> +testdir=$SCRATCH_MNT/testdir
+>>>> +
+>>>> +_scratch_mkfs >> $seqres.full
+>>>> +_scratch_mount "-o user_xattr,noinline_xattr"
+>>>> +
+>>>> +mkdir $testdir
+>>>> +# add a new xattr entry to create xattr node
+>>>> +$SETFATTR_PROG -n user.abc -v 123 $testdir
+>>>> +
+>>>> +_scratch_unmount
+>>>> +
+>>>> +# inject i_xattr_nid w/ nid of inode node
+>>>> +$F2FS_INJECT_PROG --node --mb i_xattr_nid --nid 4 --val 4 $SCRATCH_DEV >> $seqres.full
+>>
+>> Zorro, I missed one thing, this testcase relies on a f2fs-tools patch, please apply
+>> this before running the testcase.
+>>
+>> https://git.kernel.org/pub/scm/linux/kernel/git/jaegeuk/f2fs-tools.git/commit/?h=dev-test&id=2174461cdd0a22edc5e7d172605bff4740582438
+>>
+>> Do I need to create a _require_* function for f2fs to verify whether f2fs-tools
+>> support the required feature or not?
+> 
+> Actually for further f2fs testing (depends on injection), we'd better to have related
+> functions, you can refer to:
+> 
+> _require_xfs_db_command
+> 
+> Or more xfs_db related functions in common/xfs if you need.
 
-All I know is what I read in the comments and git history.
-The documented kernel commit has nothing to do with xfs.
+Thanks for the information.
 
-> I saw this case use:
->
->   $MKFS_XFS_PROG -f -n ftype=3D1 $upper_loop_dev
->
-> So I thought it need the xfs ftype feature :-D
->
+> 
+> If you don't want to add this _require_ function in this patch (this's not the only
+> one f2fs case uses inject.f2fs), I think you can send another patchset to do that
+> later (just let this case fails on old f2fs temporarily :).
 
-Ha no. Overlayfs needs underlying support for readdir d_type
-but ftype is the default for xfs for a long long time.
-
-I think that when Xiong Zhou wrote tests 003,004,0005:
-
-https://lore.kernel.org/fstests/1461241438-24238-1-git-send-email-xzhou@red=
-hat.com/
-
-One of the tests was supposed to test the non-default ftype=3D0
-config and then 005 used explicit ftype=3D1, but I am pretty sure
-that ftype=3D1 was the default long before those tests were written.
-
-IOW, any the loop devices could be formatted with any base fs.
-The only thing that matters for the test is the small size of the
-formatted loop devices.
+Okay, will introduce _require_ function in separated patch. :)
 
 Thanks,
-Amir.
+
+> 
+> Thanks,
+> Zorro
+> 
+>>
+>>>> +
+>>>> +_scratch_mount
+>>
+>> Oh, I may missed to add "-o acl,user_xattr" here.
+>>
+>>>> +# may potentially trigger a deadlock w/ double inode_lock on parent's inode
+>>>> +mkdir $testdir/dir >> $seqres.full 2>&1
+>>>> +_scratch_unmount
+>>>
+>>> Can you provide a test result to prove this test case trigger a failure
+>>> on general kernel (not debug kernel). If it can, then this version is good
+>>> to me :)
+>>
+>> Well, expectation is it will hang kernel, so that the f2fs/020 will stop here
+>> once we encounter the issue.
+>>
+>> Thanks,
+>>
+>>>
+>>> Thanks,
+>>> Zorro
+>>>
+>>>> +
+>>>> +echo "Silence is golden"
+>>>> +
+>>>> +status=0
+>>>> +exit
+>>>> diff --git a/tests/f2fs/020.out b/tests/f2fs/020.out
+>>>> new file mode 100644
+>>>> index 00000000..20d7944e
+>>>> --- /dev/null
+>>>> +++ b/tests/f2fs/020.out
+>>>> @@ -0,0 +1,2 @@
+>>>> +QA output created by 020
+>>>> +Silence is golden
+>>>> -- 
+>>>> 2.49.0
+>>>>
+>>>
+>>
+> 
+
