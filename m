@@ -1,145 +1,156 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04CF5291C1C
-	for <fstests@vger.kernel.org>; Sat, 16 Aug 2025 12:14:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 298B522068B
+	for <fstests@vger.kernel.org>; Sun, 17 Aug 2025 08:43:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755346453; cv=none; b=o6sthjA/j4DNXItzVNjWubOd07y8nX7fYniWZN4Q0Qfg0+APE9w2zw6zgr6ztw/DRBNPzan2+17fUJ6uro/MqRbFZ5/rP30tbuB1t5NCiN4DfNwO53305WzBtNQIuQsDWmgRmhEQbTuUt9YFXDsCluM+MxMgFLe+E/aNsFRiP+4=
+	t=1755420202; cv=none; b=DKssmWxBdmaScAuWXHfn1GMQhhw4Em8oPf0v/cFt7S1Y1/DVE92kYluRYxCgxXeJd0K+0NCTPd6c05nGkKqSoX0d88nleT66OR8fD3Ay+9xYCgmpgQmbc7T/gA1OHE/ExNYVX3GKAqbIEnW5Wjmm8nTSEJfeEztm6WklodGdi0k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755346453; c=relaxed/simple;
-	bh=BD10JVkC3R7DkPjy0YQFa8uERMYfZwc8NczxD31yOCk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=C9vRQbozI36tC4y0bZOYdi+mjx0xkO10PTy415N1NLCWXHvLZlUxnHQtKCho4a/CDP9/VFAB1uc3PWAvIy/8Ua67Y+AlZHk/1b35+TSv2E57VSrxG2UeK3d9AZn099jquNn5sUKWdNpUjfAv64QbjlrO4gm3zqwRWyB5KSZjkrE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=I+VjRDHZ; arc=none smtp.client-ip=170.10.129.124
+	s=arc-20240116; t=1755420202; c=relaxed/simple;
+	bh=DqZWB0lltSj1U2F7ndykkiIRB65hhUDWTC9fkGUmwGM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ObD4iCWDdWWpk9WbrJV3ok//a2i5BTIKfgyMxJABUZFcpdRGeNvpLm2ieA/8jIPJaQ/yY+HiyhzoIBMOpwsPzFiUgW5HWA9EBov6gGDVzFwnKnXAX2/ylCiENN/xM/L6mwvhqqyqjp/LTKqCGfNw8HDLy9Hj3mZ+G10fO7LpwpE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=glD3vMf9; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="I+VjRDHZ"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="glD3vMf9"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1755346450;
+	s=mimecast20190719; t=1755420200;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=qLWcRDhFZNlURBXrvT9Nk3wXpWaxYOYQFIQkZVfgJPw=;
-	b=I+VjRDHZB6HXoNVMOAPK0B5r1UIqk00qiBwattew+ZXHfr936kMBqIBxmyW8l0Ff/wMEri
-	cuWLH4JbQVoCAEdv4tmwEUDwjTwBuJ5O6zIOrTY0ObquG06Ca9HwKU2TIsULaGrwDoKrfH
-	1Lw2tMPzg17S7pjR3mWaknrI48wfPQc=
-Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
- [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=Rq4YXS+xac1WFQmsLw/7/5+gnl0xUJ4PHyPQ6ACSu3g=;
+	b=glD3vMf9fyrnhqh584Maso2fooBdvSvFWVICygP7os6SpxGF6eftP7iIdNCUa+R5W4X1Mj
+	0ZjSDLBOfkON3pDv1AqtuSJtJgK3wWXu9wO2qNqvtBsxfXK68CqeON2ejLJP/hf5uTxmoF
+	N8nUq/HlwyZEAK1iFHXCJpi88vJwrVs=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-569-cRrlDpLfNZuvUfqt8FdIAA-1; Sat, 16 Aug 2025 08:14:09 -0400
-X-MC-Unique: cRrlDpLfNZuvUfqt8FdIAA-1
-X-Mimecast-MFC-AGG-ID: cRrlDpLfNZuvUfqt8FdIAA_1755346448
-Received: by mail-ej1-f71.google.com with SMTP id a640c23a62f3a-afcb733834bso293371266b.0
-        for <fstests@vger.kernel.org>; Sat, 16 Aug 2025 05:14:09 -0700 (PDT)
+ us-mta-50-ALOGQlGCN5Wa_b9fSTPTCw-1; Sun, 17 Aug 2025 04:43:18 -0400
+X-MC-Unique: ALOGQlGCN5Wa_b9fSTPTCw-1
+X-Mimecast-MFC-AGG-ID: ALOGQlGCN5Wa_b9fSTPTCw_1755420197
+Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-b4738634fc6so1136548a12.1
+        for <fstests@vger.kernel.org>; Sun, 17 Aug 2025 01:43:17 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755346447; x=1755951247;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=qLWcRDhFZNlURBXrvT9Nk3wXpWaxYOYQFIQkZVfgJPw=;
-        b=p/RmX9ayha6P7s+kAmqf7/gFjQ717/naqOjW+5yDBqFextPgv09ZwPBuh7UE2w3r2E
-         im0ZPmenxcN+UZKMB6wmZu13Ie/2ueSln9tbMMFiggSCwbMffiuvh2t0RHabHGIZ15V1
-         x1w9vl/o8RU4QjUDnJjsKzdmYF5rlP6EIezDsL6kOhVswQhzMsrrvq2T0tc8Of2ylxp7
-         H8P1cqPiELthCgdkig1y8xcgvU5+d7nnvZJP4BHuhvBTQwoI5c3AFiHyshHPmq1z9Idg
-         d5gf3i24RvejoW9EpZadWEdx/gOzRU6kA5e2VKQsQOoFruDPNjTx8qigj5Nrno3BZKCV
-         cb4Q==
-X-Gm-Message-State: AOJu0YxWwaT/0BQGDjFU22mTbKaA3fHs3V52Im2/JS1C2Hp1mmkjJ3e1
-	PEwFE88rU9RIbFqW495y2ajRH/O4m/8UBBDNEJbvXtcVwoy5j/BTgYqSIVe7WvKemxLm3BgwxmX
-	nySTwBJA9drwn7rQYxav/I6EPSLciFuludcg8W+ZQoB5sOqXvMprhcXCdF5SI2chD6hYUe7ZXUF
-	HDf7IfXuvT/V+QrkJGQk7Gd6+bsBApJGKHppQ00Ea0sg==
-X-Gm-Gg: ASbGnctmO7rYOArURZZGx4Dh90uod0I4tUQuvW8U8iP4Q8KvHJYcfdSHSOvxfkiddv5
-	PoMJ49/3+R6eqB6NyjBUQ0D+NlodSzPpbn0qsJ/E4Q8HlSHIQ5ByWCKTJxdpO3sz07kLtwXEQPF
-	BLoGl80cp0r9PB1pe+wn6Hqw==
-X-Received: by 2002:a17:907:c10:b0:af9:e1f0:cd15 with SMTP id a640c23a62f3a-afcdc248af0mr532387666b.18.1755346447025;
-        Sat, 16 Aug 2025 05:14:07 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEQjCPkWO4xFP0qiVY7R9QAi0veIzidLpinD+pqaN5Uyb1WZU9VKvwtELaQDT2JopefoCUyt5sDBU30jM+wlgg=
-X-Received: by 2002:a17:907:c10:b0:af9:e1f0:cd15 with SMTP id
- a640c23a62f3a-afcdc248af0mr532385966b.18.1755346446516; Sat, 16 Aug 2025
- 05:14:06 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1755420197; x=1756024997;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Rq4YXS+xac1WFQmsLw/7/5+gnl0xUJ4PHyPQ6ACSu3g=;
+        b=mjwIkV9aNHuYnHkbqvnHvYv+AmQNW6hz9BBFe/IM71NULrOseu0KeAq0Ovl8C3+Ibp
+         WkLZT87wGRhlxZo6SrWA3oPAkjUXFb/+TvCYrSGmfDVQG75ZgF+dcZxdLvTNhp/gUX9I
+         inX/P5SjM7VZ+vMCh85PhMfFe++KiilKtPKG4HWKbd9EFRcsmqjO1/4wM1z/OLGHYPN+
+         3SOIWOt0cBzZ7l3Y/bkZcLx9brKSijYEWtWPKmAQ/45FfCFGc8vCe8Di3kDLW7Aw/vXe
+         raz5bMNgGOm0F9sRdACQWoGEN6T2IUaS5BHW+w8GTZOCX7+vQJuzJTCePnASdzClJevg
+         WepQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXEKtIaMbYeeum6PnFJZgYAZm2uAwOKgMXoLAQgywS4km+bdBpfpvEP9Y7HkikrIA31d46sqqhS@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw3A1XdlbBgIIONsFaWm4QGa9Z7suYaWimzzn+2lgz2GLKBNESo
+	ZDzGAmfxm00K+rXdPN7luOLpMV3YKw0hYZys7jhDFcdzUVfqAWFQFbGtaM/s4HH0p/4qGXeu+ze
+	gwDigifBM2Zgjf46NMCQe9ZCznHXNIcLHHbQ/wVBQd6MomkP7M/Cq26SvP8w=
+X-Gm-Gg: ASbGncvQDUr+K2tjVYEpA9wHTkPSSWxtLTs/ePO7pMmOUzn1yjjcpzcXw2H4Wdl3nuw
+	kf/MnH3ZWH7HOhMJBKE52B32mugPxEdYxWxfCF3svh+cIzxCeu+7OCLf8d/5K6OpvRoKYzkJatx
+	q745lV9v3HjHY5W4BELBnGkYypibGuuL7GlGq8g3L1MwZnRPQdSfTM+qgmBcLprP0u2xBBRWweV
+	dXyzNc+yJaU3aO8JWfpqsy8bzXyasa0tl+zzxxZ6racrDZLHsmMJbBDp4576Enj2X67JMPZEmaM
+	j6f9OgdT1bs0R07T4dhmdFIR75KhM9eUvUTQs5QCKovEz6lg1u43Ejcmk+1isVp/mCj58RTk6Ix
+	qyYxC
+X-Received: by 2002:a17:902:d2ce:b0:235:eb8d:7fff with SMTP id d9443c01a7336-2446d8b1f83mr105604755ad.28.1755420196958;
+        Sun, 17 Aug 2025 01:43:16 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFeaLv3g8gcs36btGxPw09l7seNqjMeEa5e2kr7eFsSqwAraKtWBfVi3Ptpl9SpasTZy3uA9Q==
+X-Received: by 2002:a17:902:d2ce:b0:235:eb8d:7fff with SMTP id d9443c01a7336-2446d8b1f83mr105604595ad.28.1755420196618;
+        Sun, 17 Aug 2025 01:43:16 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2446d54fb54sm50570015ad.134.2025.08.17.01.43.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 17 Aug 2025 01:43:16 -0700 (PDT)
+Date: Sun, 17 Aug 2025 16:43:11 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Chao Yu <chao@kernel.org>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+	Daniel Lee <chullee@google.com>
+Subject: Re: [PATCH v2] f2fs/012: adapt lookup_mode=x mount option
+Message-ID: <20250817084311.txrzrcgqnm7g7spj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250816072909.2844349-1-chao@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250815144555.110780-1-zlang@kernel.org> <CAOQ4uxjVpVPVfiJPokpmu6pLDmjtYbeDr+j5jNHi8k9bK_2feg@mail.gmail.com>
- <20250815153520.xzgxwuwc7slt34li@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAOQ4uxhNhs4MPC1ZOTC5_Kzxe9DeFxD75XK6wkSFPjNducVBWg@mail.gmail.com>
-In-Reply-To: <CAOQ4uxhNhs4MPC1ZOTC5_Kzxe9DeFxD75XK6wkSFPjNducVBWg@mail.gmail.com>
-From: Murphy Zhou <xzhou@redhat.com>
-Date: Sat, 16 Aug 2025 20:13:49 +0800
-X-Gm-Features: Ac12FXxOHZLATSVAHEA8quqmmu4KM6Oo8-ubvsyEeiu5_M_cGb5HNoU5IYLkzHY
-Message-ID: <CALWRkkjd6jY6iqy=iOcFB1ABZGEhx+E26=ioVfsW0Ax9ySR6xw@mail.gmail.com>
-Subject: Re: [PATCH] overlay/005: only run for xfs underlying fs
-To: fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250816072909.2844349-1-chao@kernel.org>
 
-On Sat, Aug 16, 2025 at 12:09=E2=80=AFAM Amir Goldstein <amir73il@gmail.com=
-> wrote:
->
-> On Fri, Aug 15, 2025 at 5:35=E2=80=AFPM Zorro Lang <zlang@redhat.com> wro=
-te:
-> >
-> > On Fri, Aug 15, 2025 at 05:16:51PM +0200, Amir Goldstein wrote:
-> > > On Fri, Aug 15, 2025 at 4:47=E2=80=AFPM Zorro Lang <zlang@kernel.org>=
- wrote:
-> > > >
-> > > > When we runs overlay/005 on a system without xfs module, it always
-> > > > fails as "unknown filesystem type xfs", due to this case require xf=
-s
-> > > > to be the underlying fs explicitly:
-> > > >
-> > > >   $MKFS_XFS_PROG -f -n ftype=3D1 $upper_loop_dev >>$seqres.full 2>&=
-1
-> > > >
-> > > > So notrun this case if the underlying fs isn't 'xfs'.
-> > >
-> > > It would have been better if instead of mkfs.xfs, we would have
-> > > used a helper to format $upper_loop_dev as $OVL_BASE_FSTYP
-> > >
-> > > But this is easier, so unless anybody wants to take on the better fix
-> > >
-> > > Acked-by: Amir Goldstein <amir73il@gmail.com>
-> >
-> > Thanks Amir, No matter what kinds of underlying fs are all good?
-> >
->
-> All I know is what I read in the comments and git history.
-> The documented kernel commit has nothing to do with xfs.
->
-> > I saw this case use:
-> >
-> >   $MKFS_XFS_PROG -f -n ftype=3D1 $upper_loop_dev
-> >
-> > So I thought it need the xfs ftype feature :-D
-> >
->
-> Ha no. Overlayfs needs underlying support for readdir d_type
-> but ftype is the default for xfs for a long long time.
->
-> I think that when Xiong Zhou wrote tests 003,004,0005:
->
-> https://lore.kernel.org/fstests/1461241438-24238-1-git-send-email-xzhou@r=
-edhat.com/
->
-> One of the tests was supposed to test the non-default ftype=3D0
-> config and then 005 used explicit ftype=3D1, but I am pretty sure
-> that ftype=3D1 was the default long before those tests were written.
->
-> IOW, any the loop devices could be formatted with any base fs.
-> The only thing that matters for the test is the small size of the
-> formatted loop devices.
+On Sat, Aug 16, 2025 at 03:29:09PM +0800, Chao Yu wrote:
+> w/ below change [1], f2fs will enable lookup_mode=perf by default, it
+> will change f2fs dirent lookup method from linear based lookup to hash
+> based lookup.
+> 
+> So that, f2fs will ignore sb.s_encoding_flags by default, which is not
+> compatible w/ f2fs/012 testcase, in where it will control lookup method
+> by configuring this flag w/ fsck.f2fs.
+> 
+> To avoid failure of f2fs/012, let's check whether f2fs has supported
+> "lookup_mode=auto" mount option, mount w/ the option if it can,
+> otherwise, don't.
+> 
+> [1] https://lore.kernel.org/linux-f2fs-devel/20250805065228.1473089-1-chullee@google.com
+> 
+> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+> Cc: Daniel Lee <chullee@google.com>
+> Signed-off-by: Chao Yu <chao@kernel.org>
+> ---
+> v2:
+> - ignore error from _try_scratch_mount "-o lookup_mode=auto"
 
-Agree to remove the restrictions.
+This version looks good to me, thanks for fixing it.
 
->
->
-> Thanks,
-> Amir.
->
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  tests/f2fs/012 | 13 +++++++++++--
+>  1 file changed, 11 insertions(+), 2 deletions(-)
+> 
+> diff --git a/tests/f2fs/012 b/tests/f2fs/012
+> index b3df9a8f..7438d9ce 100755
+> --- a/tests/f2fs/012
+> +++ b/tests/f2fs/012
+> @@ -22,6 +22,15 @@ _require_scratch_nocheck
+>  _require_command "$F2FS_IO_PROG" f2fs_io
+>  _require_command "$F2FS_INJECT_PROG" inject.f2fs
+>  
+> +#check whether f2fs supports "lookup_mode=x" mount option
+> +mntopt=""
+> +_scratch_mkfs -O casefold -C utf8 >> $seqres.full
+> +_try_scratch_mount "-o lookup_mode=auto" >> $seqres.full 2>&1
+> +if [ $? == 0 ]; then
+> +	mntopt="-o lookup_mode=auto"
+> +	_scratch_unmount
+> +fi
+> +
+>  check_lookup()
+>  {
+>  	local nolinear_lookup=$1
+> @@ -30,7 +39,7 @@ check_lookup()
+>  	local redheart=$dir/$'\u2764\ufe0f'
+>  
+>  	_scratch_mkfs -O casefold -C utf8 >> $seqres.full
+> -	_scratch_mount
+> +	_scratch_mount $mntopt
+>  
+>  	mkdir $dir
+>  	$F2FS_IO_PROG setflags casefold $dir >> $seqres.full
+> @@ -52,7 +61,7 @@ check_lookup()
+>  
+>  	$F2FS_INJECT_PROG --dent --mb d_hash --nid $ino --val 0x9a2ea068 $SCRATCH_DEV >> $seqres.full
+>  
+> -	_scratch_mount
+> +	_scratch_mount $mntopt
+>  	if [ $nolinear_lookup == "1" ]; then
+>  		[ -f $redheart ] && _fail "red heart file should not exist"
+>  	else
+> -- 
+> 2.49.0
+> 
 
