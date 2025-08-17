@@ -1,156 +1,134 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 298B522068B
-	for <fstests@vger.kernel.org>; Sun, 17 Aug 2025 08:43:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8363B290F
+	for <fstests@vger.kernel.org>; Sun, 17 Aug 2025 14:57:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755420202; cv=none; b=DKssmWxBdmaScAuWXHfn1GMQhhw4Em8oPf0v/cFt7S1Y1/DVE92kYluRYxCgxXeJd0K+0NCTPd6c05nGkKqSoX0d88nleT66OR8fD3Ay+9xYCgmpgQmbc7T/gA1OHE/ExNYVX3GKAqbIEnW5Wjmm8nTSEJfeEztm6WklodGdi0k=
+	t=1755442675; cv=none; b=HXCeK2U4zLNJ2wk913Izy2S84BffB+FlvNDQ9Ej2/bp7eTaRtm0g62NHIk5NnAXPGsfLCmvDllyfK+HPX6sdYnnFmPXdomcVYHnrDO2350cXdBPUTjQr8JoMwQ7+i3WpAbFCtwYDwd6lslOlpIg3yDgcTrQ6xJu/JubF+94kxKE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755420202; c=relaxed/simple;
-	bh=DqZWB0lltSj1U2F7ndykkiIRB65hhUDWTC9fkGUmwGM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ObD4iCWDdWWpk9WbrJV3ok//a2i5BTIKfgyMxJABUZFcpdRGeNvpLm2ieA/8jIPJaQ/yY+HiyhzoIBMOpwsPzFiUgW5HWA9EBov6gGDVzFwnKnXAX2/ylCiENN/xM/L6mwvhqqyqjp/LTKqCGfNw8HDLy9Hj3mZ+G10fO7LpwpE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=glD3vMf9; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1755442675; c=relaxed/simple;
+	bh=WYmtNLM0emUtzxPPrInSj4lhGhxECA03hlEyCCb1B5g=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=NMX8qcMqNFe89LoFaYTqP6GOU6EHpnn9x84l5J62VEHLgu4b8Vt/aLdEhyJMHHCs0xdjtFmcaBTKnAv8uQcRSEl9wWGZKjrVVnjHXxFzqRvjJ25HoGEX9lZ+L8K2sFesJyKTygjVUfZQE4x54P+hVQdkhiEf41hhJ4n/M6LepIE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=V01+Yv0s; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="glD3vMf9"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1755420200;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Rq4YXS+xac1WFQmsLw/7/5+gnl0xUJ4PHyPQ6ACSu3g=;
-	b=glD3vMf9fyrnhqh584Maso2fooBdvSvFWVICygP7os6SpxGF6eftP7iIdNCUa+R5W4X1Mj
-	0ZjSDLBOfkON3pDv1AqtuSJtJgK3wWXu9wO2qNqvtBsxfXK68CqeON2ejLJP/hf5uTxmoF
-	N8nUq/HlwyZEAK1iFHXCJpi88vJwrVs=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-50-ALOGQlGCN5Wa_b9fSTPTCw-1; Sun, 17 Aug 2025 04:43:18 -0400
-X-MC-Unique: ALOGQlGCN5Wa_b9fSTPTCw-1
-X-Mimecast-MFC-AGG-ID: ALOGQlGCN5Wa_b9fSTPTCw_1755420197
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-b4738634fc6so1136548a12.1
-        for <fstests@vger.kernel.org>; Sun, 17 Aug 2025 01:43:17 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755420197; x=1756024997;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Rq4YXS+xac1WFQmsLw/7/5+gnl0xUJ4PHyPQ6ACSu3g=;
-        b=mjwIkV9aNHuYnHkbqvnHvYv+AmQNW6hz9BBFe/IM71NULrOseu0KeAq0Ovl8C3+Ibp
-         WkLZT87wGRhlxZo6SrWA3oPAkjUXFb/+TvCYrSGmfDVQG75ZgF+dcZxdLvTNhp/gUX9I
-         inX/P5SjM7VZ+vMCh85PhMfFe++KiilKtPKG4HWKbd9EFRcsmqjO1/4wM1z/OLGHYPN+
-         3SOIWOt0cBzZ7l3Y/bkZcLx9brKSijYEWtWPKmAQ/45FfCFGc8vCe8Di3kDLW7Aw/vXe
-         raz5bMNgGOm0F9sRdACQWoGEN6T2IUaS5BHW+w8GTZOCX7+vQJuzJTCePnASdzClJevg
-         WepQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXEKtIaMbYeeum6PnFJZgYAZm2uAwOKgMXoLAQgywS4km+bdBpfpvEP9Y7HkikrIA31d46sqqhS@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw3A1XdlbBgIIONsFaWm4QGa9Z7suYaWimzzn+2lgz2GLKBNESo
-	ZDzGAmfxm00K+rXdPN7luOLpMV3YKw0hYZys7jhDFcdzUVfqAWFQFbGtaM/s4HH0p/4qGXeu+ze
-	gwDigifBM2Zgjf46NMCQe9ZCznHXNIcLHHbQ/wVBQd6MomkP7M/Cq26SvP8w=
-X-Gm-Gg: ASbGncvQDUr+K2tjVYEpA9wHTkPSSWxtLTs/ePO7pMmOUzn1yjjcpzcXw2H4Wdl3nuw
-	kf/MnH3ZWH7HOhMJBKE52B32mugPxEdYxWxfCF3svh+cIzxCeu+7OCLf8d/5K6OpvRoKYzkJatx
-	q745lV9v3HjHY5W4BELBnGkYypibGuuL7GlGq8g3L1MwZnRPQdSfTM+qgmBcLprP0u2xBBRWweV
-	dXyzNc+yJaU3aO8JWfpqsy8bzXyasa0tl+zzxxZ6racrDZLHsmMJbBDp4576Enj2X67JMPZEmaM
-	j6f9OgdT1bs0R07T4dhmdFIR75KhM9eUvUTQs5QCKovEz6lg1u43Ejcmk+1isVp/mCj58RTk6Ix
-	qyYxC
-X-Received: by 2002:a17:902:d2ce:b0:235:eb8d:7fff with SMTP id d9443c01a7336-2446d8b1f83mr105604755ad.28.1755420196958;
-        Sun, 17 Aug 2025 01:43:16 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFeaLv3g8gcs36btGxPw09l7seNqjMeEa5e2kr7eFsSqwAraKtWBfVi3Ptpl9SpasTZy3uA9Q==
-X-Received: by 2002:a17:902:d2ce:b0:235:eb8d:7fff with SMTP id d9443c01a7336-2446d8b1f83mr105604595ad.28.1755420196618;
-        Sun, 17 Aug 2025 01:43:16 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2446d54fb54sm50570015ad.134.2025.08.17.01.43.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 17 Aug 2025 01:43:16 -0700 (PDT)
-Date: Sun, 17 Aug 2025 16:43:11 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Chao Yu <chao@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-	Daniel Lee <chullee@google.com>
-Subject: Re: [PATCH v2] f2fs/012: adapt lookup_mode=x mount option
-Message-ID: <20250817084311.txrzrcgqnm7g7spj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250816072909.2844349-1-chao@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="V01+Yv0s"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 806FBC4CEEB;
+	Sun, 17 Aug 2025 14:57:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1755442675;
+	bh=WYmtNLM0emUtzxPPrInSj4lhGhxECA03hlEyCCb1B5g=;
+	h=Date:From:To:Subject:From;
+	b=V01+Yv0spblO6HwqKD94flAu7BO6GFH5MQH5i9yuR+oz+2YdJf9o0ib+wt/6SKtpt
+	 Iyz/THI7S+ruNEelcmYs0MEX8ciV+0wytdvwVB1Z0EGCMuNclv0U6+SJYQNl7Xvex+
+	 NURmoFtPpusIIJ/xbThy3mVmqHdYn1WHjHxT9Ao0+ev4rEzAMCRNA746jip2ZqCeBM
+	 8LIx3cLKCNtuokf8xbv0Xqo8YW5drofEKml+fncGDlTZ5sTViIgg1ko+UmDYTNsdV9
+	 RO+86x87wYH7R5POKHY2+TBMkDs+8o83i5TVrzF6KHub0IIzmAPSs0+hqaSZvmHL1q
+	 bsJCyBAFDJDng==
+Date: Sun, 17 Aug 2025 22:57:49 +0800
+Message-ID: <30a3730afc7a68f705e755eb81688550@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2025.08.04 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="iZFF5tYcHvgp"
+Content-Disposition: inline
+
+
+--iZFF5tYcHvgp
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250816072909.2844349-1-chao@kernel.org>
 
-On Sat, Aug 16, 2025 at 03:29:09PM +0800, Chao Yu wrote:
-> w/ below change [1], f2fs will enable lookup_mode=perf by default, it
-> will change f2fs dirent lookup method from linear based lookup to hash
-> based lookup.
-> 
-> So that, f2fs will ignore sb.s_encoding_flags by default, which is not
-> compatible w/ f2fs/012 testcase, in where it will control lookup method
-> by configuring this flag w/ fsck.f2fs.
-> 
-> To avoid failure of f2fs/012, let's check whether f2fs has supported
-> "lookup_mode=auto" mount option, mount w/ the option if it can,
-> otherwise, don't.
-> 
-> [1] https://lore.kernel.org/linux-f2fs-devel/20250805065228.1473089-1-chullee@google.com
-> 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Cc: Daniel Lee <chullee@google.com>
-> Signed-off-by: Chao Yu <chao@kernel.org>
-> ---
-> v2:
-> - ignore error from _try_scratch_mount "-o lookup_mode=auto"
+Hi all,
 
-This version looks good to me, thanks for fixing it.
+The master branch of the xfstests repository at:
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
->  tests/f2fs/012 | 13 +++++++++++--
->  1 file changed, 11 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/f2fs/012 b/tests/f2fs/012
-> index b3df9a8f..7438d9ce 100755
-> --- a/tests/f2fs/012
-> +++ b/tests/f2fs/012
-> @@ -22,6 +22,15 @@ _require_scratch_nocheck
->  _require_command "$F2FS_IO_PROG" f2fs_io
->  _require_command "$F2FS_INJECT_PROG" inject.f2fs
->  
-> +#check whether f2fs supports "lookup_mode=x" mount option
-> +mntopt=""
-> +_scratch_mkfs -O casefold -C utf8 >> $seqres.full
-> +_try_scratch_mount "-o lookup_mode=auto" >> $seqres.full 2>&1
-> +if [ $? == 0 ]; then
-> +	mntopt="-o lookup_mode=auto"
-> +	_scratch_unmount
-> +fi
-> +
->  check_lookup()
->  {
->  	local nolinear_lookup=$1
-> @@ -30,7 +39,7 @@ check_lookup()
->  	local redheart=$dir/$'\u2764\ufe0f'
->  
->  	_scratch_mkfs -O casefold -C utf8 >> $seqres.full
-> -	_scratch_mount
-> +	_scratch_mount $mntopt
->  
->  	mkdir $dir
->  	$F2FS_IO_PROG setflags casefold $dir >> $seqres.full
-> @@ -52,7 +61,7 @@ check_lookup()
->  
->  	$F2FS_INJECT_PROG --dent --mb d_hash --nid $ino --val 0x9a2ea068 $SCRATCH_DEV >> $seqres.full
->  
-> -	_scratch_mount
-> +	_scratch_mount $mntopt
->  	if [ $nolinear_lookup == "1" ]; then
->  		[ -f $redheart ] && _fail "red heart file should not exist"
->  	else
-> -- 
-> 2.49.0
-> 
+has just been updated to v2025.08.04 version.
 
+Thanks,
+Zorro
+
+The new head of the master branch is commit:
+
+3d57f543ae0c xfs/838: actually force usage of the realtime device
+
+New commits:
+
+Anthony Iliopoulos (1):
+      [9f6c59e0d485] xfs/189: fix remount barrier test failure
+
+Boris Burkov (1):
+      [5dae2b3ca547] btrfs/301: enhance nested simple quotas test
+
+Darrick J. Wong (6):
+      [aa14b84a8d1a] xfs/259: try to force loop device block size
+      [dca21d3724df] xfs/432: fix metadump loop device blocksize problems
+      [86950a4e23c1] generic/767: require fallocate support
+      [ca57558daefe] generic/767: only test the hardware atomic write unit
+      [8b81cf5ce725] generic/767: allow on any atomic writes filesystem
+      [3d57f543ae0c] xfs/838: actually force usage of the realtime device
+
+Filipe Manana (2):
+      [57e68bd5c6bb] generic/211: verify if the filesystem being tested supports in place writes
+      [d8b702f89e01] generic: test fsync of file with 0 links and extents
+
+Theodore Ts'o (1):
+      [c8434d36096d] ext4/028: require that the scratch file system has the extent feature enabled
+
+
+Code Diffstat:
+
+ .gitignore            |   1 +
+ common/atomicwrites   |   6 +++
+ common/ext4           |  23 ++++++++---
+ common/metadump       |  12 ++++--
+ common/rc             | 108 ++++++++++++++++++++++++++++++++++++++++++++++++--
+ src/Makefile          |   2 +-
+ src/unlink-fsync.c    |  45 +++++++++++++++++++++
+ tests/btrfs/301       |  10 ++++-
+ tests/ext4/028        |   1 +
+ tests/generic/211     |   9 +----
+ tests/generic/563     |   2 +-
+ tests/generic/767     |  19 +++++++--
+ tests/generic/771     |  60 ++++++++++++++++++++++++++++
+ tests/generic/771.out |   4 ++
+ tests/xfs/078         |   4 +-
+ tests/xfs/189         |   2 +-
+ tests/xfs/259         |   2 +-
+ tests/xfs/613         |   3 +-
+ tests/xfs/838         |   1 +
+ 19 files changed, 282 insertions(+), 32 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--iZFF5tYcHvgp
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmih7dAACgkQlNbPkfr2
+tMwEoBAAvyzRxxZIJsMNp0an3IHRJ59JMt4HASN8qiCO81trqvAA1bbquEy6ATC4
+Ck1N70TxQnKoybHnut3zD0xbfNvmyHgNT34o2I+rqTRsV6vvQw8NN5Z69rTCSjb3
+zQqPhSxiqOOrOTaM4NnEbDXbpPG0/z3H213u05ND1BeNxJcKCyKssfxP/JZQ+iyK
+QoQfgu80D1kLnXoAQXGb4U+o2xA0ETTGwrTQnWupGLiPeKmgT88hpcXic6zGuAnR
+OCvEB+ac87K0TGpT9Edi1Ci5/YmxW4ptGoc+MkUtGtqwj0A9ASjc29/2xUk3/MNp
++WdvsRaJkfOQ9XFkzVspZ0t0DyR6YUmbb0FP67SZVNul6hm7B+0RVyfjXUd1wfNn
+laeR00CZRHAsQCEn0hOasMCWLoBtozb4MbvYsunl19nB5nniZnFKHKM39am4hh1A
+kqbKLSE0wyR0DMv0qp0/eGWue3CP3Vqo2E4GS7C6yfBUmQiXyxczf9Sbfb/qpBZP
+PXkBaMuGOPD0IwFlqF5iKUFXi9V+MvhMNpf92kB9HKfe5FPa86y46FZfRIrz7Vqa
+hwc07ZNVE6WzfyPVg0mujwGM+a4Z3o94zjaynaE+J9Pk5Q0j3X8XCMzOYVSBz4C8
+ZKv58vEGMYFcABfEcJs1l4PMlN6SjgRE+800KJeTjhUol6CAuaE=
+=h4mJ
+-----END PGP SIGNATURE-----
+
+--iZFF5tYcHvgp--
