@@ -1,41 +1,41 @@
 Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13A89279912
-	for <fstests@vger.kernel.org>; Mon, 18 Aug 2025 07:27:33 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 92F4D2571BD
+	for <fstests@vger.kernel.org>; Mon, 18 Aug 2025 07:27:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755502055; cv=none; b=AcBEWvZaffKuoihOgRaO0JwcPwHwWQKbyNnLIZx0l4bD+5ST+DO1HhD33Wo3tNKoHaz8awF1OXitvcfWBcOZmkdBmXqSKAvHSCv2OHJbgSFSWEUJk1b5gUV9VZGLBZTOJ1rD3hH63WhcRYyaUz3jaNvM92I8A4TwC0kaOJPTpEM=
+	t=1755502059; cv=none; b=uvuo6Li93yoCKbPIUT1mH6dK1iEJ/E5FwzFcD0EWAgVw7jqDDRYshLYAFj2X5Vqhnzkgvh0qJEE9O/0l6raZy5iKE1GxYkYNZE/hfNHQB2yCXIB7ULIxbRqooju2/R3hywxiGCZjHmHOhb81xsMHkQ13fEAYRzDPxJtollj83C4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755502055; c=relaxed/simple;
-	bh=WkS6COpZ3FbswIiYVtoT0nmqIJ6MqqPPIfRNGjjjXIk=;
+	s=arc-20240116; t=1755502059; c=relaxed/simple;
+	bh=mRzv0ENwxbauzLTsFs6nVPxVF50usN3p/7w8kpsnQoc=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=bubwd+koyObH/XN5pkBnS4XuNv99PpC49N8uQej9EJ7kRWW0KyqGD70cD6N68GBvPVixeuD9JhIB9k277MS7/gt6mdDZyXYD1wlq1yWy5HP3oJwWOiFijbwfxp3F9UJITHXTdP2zG1Qs+oU0Ljw3k1DgfNA1li+8SjnaZ3XvXbQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=BReirCvy; arc=none smtp.client-ip=198.137.202.133
+	 MIME-Version; b=bh2ea6M6fP1PanLU+7wl5SD/PZVBkF3o8qUtPvRzQPz8+1L7UckdRbMMmb7aDwRZmuC/X50qBWt1hEF+8+x0PM9lAodG9RFtpqfvogT3Yq0uSZjqH++vdbpF7kzuSsk7jXThP+iWjh56uBfjdvq+H206tXET4QwVuJ/YmN91obY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=qLoyFBLW; arc=none smtp.client-ip=198.137.202.133
 Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="BReirCvy"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="qLoyFBLW"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender
 	:Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=me00rVAv9P/xAncVaoack4S6NsGJSMaaV35AHZqdhYA=; b=BReirCvyAoZiLWR+T6C7wYgSeD
-	GJi3FHOWDKUaQQrf+wrqY0O7HY35Wc2uan0r0b8YbhG8TCI9YsMsGo2mxXOYOcab6OljH3TZ23uYd
-	J8k7YSuaUh3V8ErUX6LmAgpXT1J+pFTVX+RKNjJXu//ybQv8zFgt6g/PojakMdCeQ1GFzvtDeuxlE
-	RUyrL0wgmGvjYGRoFlAPP8jXRFmsETOLUlD/OEPJ4/vthDVs1v717iYamNezKs6TT8Nf4jXHatfzL
-	NtXvJh5uJrpCwnc+QD/I/E6Y1d8z05o7DMW9vl9kKDC6cUGwbh73cRNY4WJIh7lxTLgEB63YRrW6D
-	ReuAAZwA==;
+	bh=L0JnGL5fz3KwV9NdIgvXoQKuqCsx52yn96HAgfVaveI=; b=qLoyFBLWbZslfPJHLjgaDfu/UH
+	6e+AzByKAh0Hhv2pa7jgiANvo5h7kYbZ/y7FHnnlR+/wChFoE1LkLCQzeZkrkCf1yhnLIuDT8VXZB
+	jHx/5hV6ivjgrFz8swgy/ojFlxLAPcz0YyETIQENtcmo+revoTsLvtaaRtpuCEdaFlbYDh5G3hMia
+	vTouRL35XtO6E884IGCDaKDd620fqVGsiRC970QhYKsX8dKZIy360uhKjBT2Y8sXG2y10+E3vhHwx
+	kbqy9xDa3noGWbkRU4eaI12rNcvGpCI9qUHe+VdFGIOL7mcIjsFR10sFEMdU3jZmZfGQW/Fvk/zsr
+	sRXNw/RA==;
 Received: from 85-127-105-248.dsl.dynamic.surfer.at ([85.127.105.248] helo=localhost)
 	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1unuHE-00000006mkK-0Mnj;
-	Mon, 18 Aug 2025 07:27:32 +0000
+	id 1unuHH-00000006mkV-2DK9;
+	Mon, 18 Aug 2025 07:27:35 +0000
 From: Christoph Hellwig <hch@lst.de>
 To: Zorro Lang <zlang@kernel.org>
 Cc: fstests@vger.kernel.org
-Subject: [PATCH 1/3] dmthin: _notrun when dm-thin setup fails
-Date: Mon, 18 Aug 2025 09:27:16 +0200
-Message-ID: <20250818072724.1559133-2-hch@lst.de>
+Subject: [PATCH 2/3] generic/081: don't hang when running on devices with protection information
+Date: Mon, 18 Aug 2025 09:27:17 +0200
+Message-ID: <20250818072724.1559133-3-hch@lst.de>
 X-Mailer: git-send-email 2.47.2
 In-Reply-To: <20250818072724.1559133-1-hch@lst.de>
 References: <20250818072724.1559133-1-hch@lst.de>
@@ -48,53 +48,29 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-dm-think does not work on device with protection information.  Instead
-of failing the tests using it in obscure ways, _norun them.
+The dm snapshot target does not work on devices with protection
+information, and the udevadm settle command simply hangs when lvcreate
+failed because of that.  Avoid that by doing a strategic _notrun when
+lvcreate fails.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- common/dmthin | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ tests/generic/081 | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/common/dmthin b/common/dmthin
-index 453e43a0499e..a1e1fb8763c0 100644
---- a/common/dmthin
-+++ b/common/dmthin
-@@ -105,13 +105,13 @@ _dmthin_init()
- 	# Metadata device
- 	DMTHIN_META_TABLE="0 $meta_dev_size linear $dm_backing_dev $meta_dev_offset"
- 	_dmsetup_create $DMTHIN_META_NAME --table "$DMTHIN_META_TABLE" || \
--		_fatal "failed to create dm thin meta device"
-+		_notrun "failed to create dm thin meta device"
+diff --git a/tests/generic/081 b/tests/generic/081
+index 97928bf4a435..00280e9cff3b 100755
+--- a/tests/generic/081
++++ b/tests/generic/081
+@@ -73,7 +73,8 @@ $LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1 || \
+ 	_notrun "LVM is too stupid for this device"
+ # We use yes pipe instead of 'lvcreate --yes' because old version of lvm
+ # (like 2.02.95 in RHEL6) don't support --yes option
+-yes | $LVM_PROG lvcreate -L ${lvsize}M -n $lvname $vgname >>$seqres.full 2>&1
++yes | $LVM_PROG lvcreate -L ${lvsize}M -n $lvname $vgname >>$seqres.full 2>&1 \
++	|| _notrun "Can't set up LVM"
+ _udev_wait /dev/mapper/$vgname-$lvname
  
- 	# Data device
- 	local data_dev_offset=$((meta_dev_offset + $meta_dev_size))
- 	DMTHIN_DATA_TABLE="0 $data_dev_size linear $dm_backing_dev $data_dev_offset"
- 	_dmsetup_create $DMTHIN_DATA_NAME --table "$DMTHIN_DATA_TABLE" || \
--		_fatal "failed to create dm thin data device"
-+		_notrun "failed to create dm thin data device"
- 
- 	# Zap the pool metadata dev.  Explicitly fsync the zeroes to disk
- 	# because a slow-running udev running concurrently with dd can maintain
-@@ -124,16 +124,16 @@ _dmthin_init()
- 	# "start length thin-pool metadata_dev data_dev data_block_size low_water_mark"
- 	DMTHIN_POOL_TABLE="0 $data_dev_size thin-pool $DMTHIN_META_DEV $DMTHIN_DATA_DEV $cluster_size $low_water"
- 	_dmsetup_create $DMTHIN_POOL_NAME --table "$DMTHIN_POOL_TABLE" || \
--		_fatal "failed to create dm thin pool device"
-+		_notun "failed to create dm thin pool device"
- 
- 	# Thin volume
- 	$DMSETUP_PROG message $DMTHIN_POOL_DEV 0 "create_thin $pool_id" || \
--		_fatal "failed to message pool device"
-+		_notrun "failed to message pool device"
- 
- 	# start length thin pool_dev dev_id [external_origin_dev]
- 	DMTHIN_VOL_TABLE="0 $virtual_size thin $DMTHIN_POOL_DEV $pool_id"
- 	_dmsetup_create $DMTHIN_VOL_NAME --table "$DMTHIN_VOL_TABLE" || \
--		_fatal "failed to create dm thin volume device"
-+		_notrun "failed to create dm thin volume device"
- 
- }
  
 -- 
 2.47.2
