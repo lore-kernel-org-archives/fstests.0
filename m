@@ -1,138 +1,73 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4208E1D514B
-	for <fstests@vger.kernel.org>; Sun, 17 Aug 2025 15:06:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45D9A263F52;
+	Mon, 18 Aug 2025 04:37:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755443171; cv=none; b=fcT1XuJtpaAeTKs35eG2AY91F1WEvZw6XDkUZKsNhMqFFpwmSC4ugugYQtn8P5BaamZTMc6Gr8MOhfwntj3pR8EjJJzgwetc4UwTCQ+WbaGBqd4W2AfoOClK4ITvnUN61l+9rwNra5cLZUGczdwscfD9ViF7Bk1zd1p1EnUtGh4=
+	t=1755491856; cv=none; b=DqxzdMMAacRIotHqY8rwGEggjPP++hG021BHCcQ3sXD0yEpqTINjZ+gt0EOksRjmnqS0UxTZQpbsa72xtZ6r5nxtBcbsvymu7ITW24Eaak8ef8OXHawxU4blFsG+6mHEfhqQlctAcwAHvumR+Nmb5ijj9SMZOCxzS9gHWrEckXY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755443171; c=relaxed/simple;
-	bh=VtOAcb2X8jxo9938CXMY3n1CgI7ylAkYI1bdQE0nGrI=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=QzEIcx/caMXf+16jcaQzCXZahtzR5ME9X3rCQZV0aMD2bKrEhjgeMEpokIKvbaw1h8kmuzw4pq0nzxj4BKsyqdu28ysulm3Ltej5BHKD+LJS0FuZesnhJ9qyAPU+Wc8zZKlVYzJn+Z6b4UfOSIkTSXihHLNZOKX/LMZjca98xp4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FZzyVf3r; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1755491856; c=relaxed/simple;
+	bh=OzKhllUJgxE8f5DRItzMWTr/zxmwFP09zIVFJRCdTcw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=jdzii0JvG/MCNgVKVzObAHAoqUdO/omEKqPUPamDWaARy73ZiQmzFWhR85CeuznxwmDTS/VP+koHpDfbvek/l8vc4/97e0sikQcLl90eEwHw1UchMst+aZpOXMFEgjb8zPfcizZPC2wGY5qXHTWL3iR4jY7ylWJTj0SMZAfDub8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=vUZItgjx; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FZzyVf3r"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1E7B4C4CEEB;
-	Sun, 17 Aug 2025 15:06:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755443170;
-	bh=VtOAcb2X8jxo9938CXMY3n1CgI7ylAkYI1bdQE0nGrI=;
-	h=Date:From:To:Subject:From;
-	b=FZzyVf3rXzVBEihEjQAvR7y79LQJr8WbsRKEpgYmltWxAM6INuCyn38ccju0xyKuU
-	 Z0u37NfPBH19MmYdKMzsD1fFXsTyg4SnAj99RSUiC3EUaK2JD3bHzzo3jl/Hy3WJR5
-	 cMiJEsIrCgg0Jb6MHUM6eSJJJFhQrXBWpAnJKG7cw86+QeH0cStkl6DxnxkHpuRvE4
-	 GT32cp1jM2qsNUfsnurhY8jeinKcRaGNXsGpFIVUhAt5ZFgWJP+FbEGJsnK3Mz+RUS
-	 mg1iy9JxfBphLnLMX6LNnGQxkMMM5bKOIg1GD+VeXz5V3d2SHxSzoiddhjcYQfwae0
-	 XL0RyZPFj7GOA==
-Date: Sun, 17 Aug 2025 23:06:06 +0800
-Message-ID: <4eaf5933d0ba456957e3d69ea43668e9@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2025.08.17
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="vUZItgjx"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=maYmslETCWG8Wv0ihlJT3aab029z77BNwcKFXO/89co=; b=vUZItgjxxZas5wL13tDBNXNK7t
+	PX6Q4zBDQnENVNwDdJKtZXjVbF7D+JflkRgwsADb6sNjvhslRZ0TUhS2vdSY1mPxyJu1M+uAiELMR
+	5mQOZVja3o1W8nJN4hQMEtuVcnavMc+Lmnx27XyfAoVvDojMItVpQCZEiuQSbpuOxtFkGIqTlU6cl
+	fIR6sYH+p6Pzh0Xs/SY2t03+h+EfDWaEVX8DLv3dhm59/WuwR4rL+bmSxVjSHgjXljQZPdGQE6ZCA
+	jGVjzxae3YSAUPNDVqS/+9c/9Ohghzf7bz3fmiiquBOSmPBU79C8qsTz+vqvPsW7TI1LL29GUBo0I
+	K7R6ZLHg==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1unrci-00000006Taw-4Bg1;
+	Mon, 18 Aug 2025 04:37:32 +0000
+Date: Sun, 17 Aug 2025 21:37:32 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@infradead.org>, zlang@redhat.com,
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 2/7] generic/427: try to ensure there's some free space
+ before we do the aio test
+Message-ID: <aKKuDLPgJqlCKXYz@infradead.org>
+References: <175381957865.3020742.6707679007956321815.stgit@frogsfrogsfrogs>
+ <175381957936.3020742.7058031120679185727.stgit@frogsfrogsfrogs>
+ <aIopyOh1TDosDK1m@infradead.org>
+ <20250812185459.GB7952@frogsfrogsfrogs>
+ <aJwfiw9radbDZq-p@infradead.org>
+ <20250813061452.GC7981@frogsfrogsfrogs>
+ <aJwvi03EX0LWzXfI@infradead.org>
+ <20250814221623.GT7965@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="PDBYp6yhesud"
-Content-Disposition: inline
-
-
---PDBYp6yhesud
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20250814221623.GT7965@frogsfrogsfrogs>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-Hi all,
+On Thu, Aug 14, 2025 at 03:16:23PM -0700, Darrick J. Wong wrote:
+> On Tue, Aug 12, 2025 at 11:24:11PM -0700, Christoph Hellwig wrote:
+> > On Tue, Aug 12, 2025 at 11:14:52PM -0700, Darrick J. Wong wrote:
+> > > Yeah... for the other ENOSPC-on-write paths, we kick inodegc, so maybe
+> > > xfs_zoned_space_reserve (or its caller, more likely) ought to do that
+> > > too?
+> > 
+> > Can you give this a spin?  Still running testing here, but so far
+> > nothing blew up.
+> 
+> Running inodegc_flush() once doesn't fix it, but doesn't hurt either.
 
-The for-next branch of the xfstests repository at:
+Weird.  I can't think of anything else that would hide the available
+space in this case.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2025.08.17 release.
-
-Release Notes:
-1) There're 7 new test cases in this release, include xfs/131, and f2fs/015,
-   f2fs/016, f2fs/017, f2fs/018, f2fs/019 and f2fs/020.
-2) This release is for f2fs testing updates mainly, f2fs has more and more
-   test cases now.
-
-More updates and fixes refer to below, thanks for all these contributions.
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-5a9cd3ef1b33 f2fs/012: adapt lookup_mode=x mount option
-
-New commits ([N]ew, [U]pdate):
-
-Brian Foster (1):
-[N]      [3e802fc7c387] xfs: test iomap zero range via fsx and error tag
-
-Chao Yu (7):
-[N]      [88aa818b3325] f2fs: test common mount options
-[N]      [f1cb492c2b65] f2fs: test special mount options
-[N]      [785d75ac4918] f2fs: test mount options for zoned device
-[N]      [3c4fce2127c9] f2fs: check data eof after partial truncation on compressed cluster
-[N]      [7d38f690bf85] f2fs: do sanity check on mapping table
-[N]      [97faf40fc28d] f2fs: do sanity check on i_xattr_nid
-[U]      [5a9cd3ef1b33] f2fs/012: adapt lookup_mode=x mount option
-
-John Garry (1):
-[U]      [00dced3f6730] generic/765: modify some steps to fix test
-
-Zorro Lang (1):
-[U]      [b076a3a72941] overlay/005: only run for xfs underlying fs
-
-
-Code Diffstat:
-
- common/rc          |   3 +
- tests/f2fs/012     |  13 +++-
- tests/f2fs/015     | 121 +++++++++++++++++++++++++++++++++++++
- tests/f2fs/015.out | 173 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/f2fs/016     |  50 ++++++++++++++++
- tests/f2fs/016.out |  33 ++++++++++
- tests/f2fs/017     |  40 +++++++++++++
- tests/f2fs/017.out |  21 +++++++
- tests/f2fs/018     |  84 ++++++++++++++++++++++++++
- tests/f2fs/018.out |   2 +
- tests/f2fs/019     |  42 +++++++++++++
- tests/f2fs/019.out |   2 +
- tests/f2fs/020     |  51 ++++++++++++++++
- tests/f2fs/020.out |   2 +
- tests/generic/765  |  40 +------------
- tests/overlay/005  |   1 +
- tests/xfs/131      |  26 ++++++++
- tests/xfs/131.out  |   2 +
- 18 files changed, 666 insertions(+), 40 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---PDBYp6yhesud
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmih78UACgkQlNbPkfr2
-tMxaIhAAl2vsnsy+Heo2Iza9Pj8KgQugE+PhSEVPn558RFky1jNthxHfkIiQCIda
-DB+MTat6RQjVHo283EtkJKqmva0zhZ2ZZ3oSeeTK36OyJELcA9zoPqdxhjompS40
-EYQS7m+X+ijmV19R+tv7Ie6qFtZ45ikwMhe64ePT0MnBgaXK+GWXqt70t5nk+A0p
-gkLjJ7Q5Gc/GmR+m8PZZyuiFCfUwaslbfmrf3cEf7sI+WiPSOyHVGQqeilxdNY4g
-Sn5rlvneLU/xSNcXNCqr7kYCqo7yY3akmS/x7ypliBZ1TMM1w7mdu5c5LZUEwdAj
-4sO0VPVl3660n+Itd3+dvlMCHzKOz0TL+LeHnwnBZIsBS0ED7fjxYfUWteWKfyoZ
-Yg9usBS438Onf813rlrYHv5HloK2Uz1ibmv6nn2G1TiXtitLHSsFcgU2JbgG27zp
-nKH3/VfuN84PYavd7vmbXG+bV/+ooqln4xrTD72tdj8mwnS23fCOSSCqR2nvtbcG
-H+p+W3yQuVAXMz4RIMCPp03j2CXKQr5sjvMcuN2U/RzAaU9ADaSp0gwDCdSwPvFm
-GZg8fXiiBO2cwDn3KiU4yQaoT15eV+FRafsBIHVLbA8xJqY8fdrTEOnwCCP2x22d
-gWO2swwk67ZjYRBkmCunswiM4zjHkMRocJqlX4nkBzp3NoUIOYA=
-=Goig
------END PGP SIGNATURE-----
-
---PDBYp6yhesud--
