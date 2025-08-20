@@ -1,66 +1,65 @@
-Received: from mail-wr1-f53.google.com (mail-wr1-f53.google.com [209.85.221.53])
+Received: from mail-pf1-f176.google.com (mail-pf1-f176.google.com [209.85.210.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ADDCD3054CC
-	for <fstests@vger.kernel.org>; Tue, 19 Aug 2025 22:30:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E5AE78F34;
+	Wed, 20 Aug 2025 04:36:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755642602; cv=none; b=U6cJ3TqO9kC8smrfPlCixyNvvtPf5hsbfdFh6EhnOU43ooCB/aDT12U47AklccUp2jIj+KpNxUkQ8IMDTsQCUNrpgMdX7OLBNImTBDef554PaxbTZrCtUuwtoSzkzg/9aVAbagux7eF+Z/4cCSqewTupufvzbsvbRfHiwa9edkk=
+	t=1755664617; cv=none; b=gCic286Z2iO4WI+BaAFBDiv9F91xHg2cFR9QarSdart+Ope4STBw4O/ByfnbF6Ux3gwdccY56y9kgsBAAoILQxG7jqGyk8m45jW9HoRewuSxZkJ27ztRWoCbq8ZkZtHrYlJk9sIkuJehl2JIUxHm4wqJbsU0h4Soy/bQe8/BWno=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755642602; c=relaxed/simple;
-	bh=HZksAYQ4kHU1lDM12o32HhtqzCvx7LHxTmMQn52UwxY=;
+	s=arc-20240116; t=1755664617; c=relaxed/simple;
+	bh=oGSgSWRQbWUrK6PrC6AlfJTk+airiWaSw7qpja9+mck=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=LvFb8R7PXtORSolAmxcLetcY4S5XXRszgA80IvVDW+uo7o4X4k0qMyEXdhnfn51OZynJsN65t9NpOXk5MTvbONHaJMWWN87Mfq2/xKNJ3e9PIZR1Ezk9Dv5eNU8xv4uZXxewdnrfZg3Q0bl4VZxV1y6en8IG3SbUpwpnRnlSawM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=LZZKFwqh; arc=none smtp.client-ip=209.85.221.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	 In-Reply-To:Content-Type; b=DIZJRpdrWwSUFRy19kDhSiMtaa7M7zuaF5AFe9BueFTxxnOwuIUg+X/nHyLeqh7BK5F290PoHKz4htKA8zuDsVWwkzmPyifOza8HjCoVDSLAeAPjFrrV0AWPZ1X6nTrutL2PpHutwvmqQjWhTVXCU8WxpkdMYjorrflpvT/DKIQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=DAnsRe46; arc=none smtp.client-ip=209.85.210.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="LZZKFwqh"
-Received: by mail-wr1-f53.google.com with SMTP id ffacd0b85a97d-3bea24519c0so154177f8f.1
-        for <fstests@vger.kernel.org>; Tue, 19 Aug 2025 15:30:00 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DAnsRe46"
+Received: by mail-pf1-f176.google.com with SMTP id d2e1a72fcca58-76e563b25c4so2331212b3a.0;
+        Tue, 19 Aug 2025 21:36:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1755642599; x=1756247399; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=L3LyUExt2tysrsAgQ6Hn1/JoNy0ONRwUrROZs392ODI=;
-        b=LZZKFwqhglp/2SPkGKIiJKLsn4zyUa3KEqDY2S5gQoW+LrGavp/FAcXq5E9HyW8Tgg
-         SO3ig/DvekoVRryiyNKNdTU27y8lcRCWqcPTzUg9gtkxzwPGfRrWhyPLsarLXEwvIAMF
-         AnR7uUF8H+lXKV5TLYjgF+H/ADe9E7bgk3ZhrLi6DcI33vclHX4TF7eKLjnJNKnSWf4S
-         7BhjZVx91r0fDQa+h826bxVL5Lb7ZZggUxbDqmavUME2S8otkMyi9ADmHsvmUk93rVJK
-         iJtLTG2vMaV+QBNCyTd9DPxYLgTB49BlAmgZiLHQXuSShAaajuzN3VMhOCAo3zsAGUar
-         WAqA==
+        d=gmail.com; s=20230601; t=1755664616; x=1756269416; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=yHPk0r8vmS5OhHJBMFssV9sLlQqdeHDtah2tqZC8Brw=;
+        b=DAnsRe46tQt6eIV9peMY/sw/gvy5tVCXlR/c44Sc6lOym6RdBwBAbZkO/5+lV/zlDX
+         9JqW4bcxcr57Rv520EzvKf1/jDxrcLq6thJc1kw+TKH9CeU2ywwgDIGYLLaK9VWJ8IQy
+         A0sUnXFBCgtFK5XOdI7vzdbcYggwf9x0r/+TXfnDQakcYug0Gjwk2ZiIR+lHCmGYfY8T
+         ITB7fXZp+qJOlxDnCfmQCBlbnBeX3yUhymPZqr2xhxWoe2elLVO6jZzCftfJVmbzl7Cq
+         7asgqnsTLgQVpDpsjF00xhza3NAn3vZ5AhNkscCltKrDYRnHmbyRehWLe3G39ARen1bX
+         q68A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755642599; x=1756247399;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=L3LyUExt2tysrsAgQ6Hn1/JoNy0ONRwUrROZs392ODI=;
-        b=msjpbBq/E7WFZ5oUNh7igYkpgOOn69TJaKsKK0WViNvKovrJtToVc+hUzIax6fcWKH
-         lHR3AKFb1ocfgCT/lbeDojYVqYS21rkPvpmINmK0mzz83gjRdi9WFlHM6/dRuIjGjASW
-         v/c2Ql34nm/eNNUNvuP1XTGhCOGnFXjniue5LQcobwjHlY3SscRvy5PY5w/rHKgaK3ys
-         tTopJlMHV9mR8oZLgE9aAtEuV7hUQEOUhXBfLSzSLmJPagoToHCGBb7ge/9NLU4xuz2H
-         NUQi+MwzpfmSwxoocYSm8C4SnPSZPbxJ0l0RsU7OXx2Qg4Pz+OGRuyRTV7YNOzxTTNY/
-         Phcw==
-X-Forwarded-Encrypted: i=1; AJvYcCWatMPtD5WIpDN6N7qVr6EjnI7612mxUPkFOCTrs9fuXz79kt2K5bBCOkUboj+hsJ1Pgu8scGGE@vger.kernel.org
-X-Gm-Message-State: AOJu0YyvT34TA3EEDvLL7ypKOryaur9DRtnWxiQQuOZ5YoKnu6TONlMO
-	59Bb5Xsgezh4pzGIfnfcPOfJ3qMOu3zLJBzVmfKGCBUa5y5LlfVsL0BFFqZ5TGnW4qo=
-X-Gm-Gg: ASbGncsgkIgZv8mP7/TdQT3kQFvIiZjb5FByFTc8wMrNj8BrJ3vXy2CDtL4/+xqPEH4
-	moo9K0GFVg6wxUsVEhnRR3QnsUI+KtZIm7xDc+53HqCDYBraV/B0bI3AuZZ35pHQMO/F31OLP97
-	LSuss5J09R1C8de73/tQvs+DGRfnSgbbDfKfTNbevUmgcGq7Ys6cwhMFYW4VFgj5UrV2lguGQdK
-	KlFXOx9fO4l97o6xYXo86ppWPkFIWhRorgIULgQkuTQUhpR6kDcP5cG9vXn48FbEGu4vrcNvY8r
-	XgZILqrcXxM68soLCUPXC3YAd/JCjyNKWUVM0ECoJ+Fds/1R1IXXe1nWa9UgZjBG7VUT66rzmCE
-	NTcsJCespL80Ie3hmDMUCd5gR3EQ7io4Pdu6ui7bvxpGQHNOV49A=
-X-Google-Smtp-Source: AGHT+IFU6nVs7UDjGjLCtY7cw2ELDqChPOw8cByYfJ8OpXaugzrRfYvBRlHz+wNCv4KEP0WqxF0OtA==
-X-Received: by 2002:a05:6000:2508:b0:3b7:9d87:9808 with SMTP id ffacd0b85a97d-3c1333b5f1dmr3206192f8f.15.1755642598887;
-        Tue, 19 Aug 2025 15:29:58 -0700 (PDT)
-Received: from ?IPV6:2403:580d:fda1::299? (2403-580d-fda1--299.ip6.aussiebb.net. [2403:580d:fda1::299])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3242433f986sm1703572a91.0.2025.08.19.15.29.54
+        d=1e100.net; s=20230601; t=1755664616; x=1756269416;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=yHPk0r8vmS5OhHJBMFssV9sLlQqdeHDtah2tqZC8Brw=;
+        b=VmHtE8qYqdmCmswvHE7qD3Q6tP5X4aXn0iK/Xv2+LVcTkRGJPGrrfDD8dkNM/rxy/E
+         Zpq/mT0TEANjPWRg6t6OCNCZnWEEzVh7KlLxL3AMyZxWcbI7B53OzyYeYJr8/x9qW5Q6
+         1zYlzBYA06+sjDEC/7HkeHlFgc/prVsP+lXQUcMxVKH99MeBVvNVkFzDZvY+IFw7PoeJ
+         7wTNMIxfO4atiAHiK8BX034e7lOaYCryXCTS/XO3hs72X23siJBbikqNq3Wd82VXncDw
+         wOa82QzcGTewk9u+VZ3hKfm/lhWzGhwKWzoIRzb/z0cxvOSSYUcrSbDyd4BJ34+Q9Xgc
+         YlqQ==
+X-Forwarded-Encrypted: i=1; AJvYcCV5J6Q5qQVqAl+yhWpAY2o956OZ9sS0Vaeed8mW2WtsXgaKMfXhTrFmQqhBaFbbXoiNi3LgQdyU@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywvqg7asKVMXHZh5Zfh+b9hVjHU7x/zmkWn9ZD43PjuzJC6t0z7
+	thF6kBnMJi0osg+t40XFLyfFCpMWeYq4RDIiCfkGff2refLTTT+lGwvS
+X-Gm-Gg: ASbGncszNOL/IboP69VnwsVuPvdcN7+AwtH6e/j7SZSP2vC0vmQ06WqvSmaszHWKjhW
+	YXj/8k9WeuyCL7X3hvyYp6AnYkeriw5mxkiEvmOtTGMGr+JUojqW70gMbsle+tFd3Qd8ykFoA8u
+	i8CuRgefPp/obvpRJ6nlOKrfVX1D1QXuckgj5zguyUCZwTjVym7WLOgnokvYXGCRBMuTe1Yu0h1
+	emNUPWRf3qOd9Gj6EMV8BQVAyaOoQCN1CCDUSgml6KzadZwfRc9aHQOKk5hgOcWYHqKl4cxodj7
+	2oRfEzYyUMnUR8oKTQfRMIgicBvA3eIPcNCY1N4sH3StVCMIbPiRuB5Vox8ugiYB1myN9/yH+Pv
+	/aaN8aeKgCnn3yhkk7h7b+WErtpEkUj8j
+X-Google-Smtp-Source: AGHT+IEggaNNUK1nSkAbAtXcWKm7coB8byWT5rD+e9r9d3FjZjMGs5RurS8NHd7s/3WXnAWBngUd6g==
+X-Received: by 2002:a05:6a21:328e:b0:240:17d2:c004 with SMTP id adf61e73a8af0-2431b9e997fmr2633071637.43.1755664615642;
+        Tue, 19 Aug 2025 21:36:55 -0700 (PDT)
+Received: from [192.168.0.120] ([49.207.219.20])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b4763fea78dsm1131648a12.13.2025.08.19.21.36.52
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 19 Aug 2025 15:29:57 -0700 (PDT)
-Message-ID: <26059372-f900-4348-997e-d6c379c685f8@suse.com>
-Date: Wed, 20 Aug 2025 07:59:51 +0930
+        Tue, 19 Aug 2025 21:36:55 -0700 (PDT)
+Message-ID: <38b18de1-dcbe-4084-ac60-1b8dfd74d4b9@gmail.com>
+Date: Wed, 20 Aug 2025 10:06:50 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -68,116 +67,120 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 4/4] generic/563: Increase the iosize to to cover for
- btrfs
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>, fstests@vger.kernel.org
+Subject: Re: [PATCH v2 2/4] generic/274: Make the pwrite block sizes and
+ offsets to 64k
+Content-Language: en-US
+To: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, ritesh.list@gmail.com,
  ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org,
  fdmanana@kernel.org, quwenruo.btrfs@gmx.com
 References: <cover.1755604735.git.nirjhar.roy.lists@gmail.com>
- <ecdd04bce98bb0d1393289e84cf8913ae10cb222.1755604735.git.nirjhar.roy.lists@gmail.com>
-Content-Language: en-US
-From: Qu Wenruo <wqu@suse.com>
-Autocrypt: addr=wqu@suse.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
- FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXVgBQkQ/lqxAAoJEMI9kfOh
- Jf6o+jIH/2KhFmyOw4XWAYbnnijuYqb/obGae8HhcJO2KIGcxbsinK+KQFTSZnkFxnbsQ+VY
- fvtWBHGt8WfHcNmfjdejmy9si2jyy8smQV2jiB60a8iqQXGmsrkuR+AM2V360oEbMF3gVvim
- 2VSX2IiW9KERuhifjseNV1HLk0SHw5NnXiWh1THTqtvFFY+CwnLN2GqiMaSLF6gATW05/sEd
- V17MdI1z4+WSk7D57FlLjp50F3ow2WJtXwG8yG8d6S40dytZpH9iFuk12Sbg7lrtQxPPOIEU
- rpmZLfCNJJoZj603613w/M8EiZw6MohzikTWcFc55RLYJPBWQ+9puZtx1DopW2jOwE0EWdWB
- rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
- Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
- E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
- vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
- g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
- AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
- cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
- qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
- /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
- o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
- JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
-In-Reply-To: <ecdd04bce98bb0d1393289e84cf8913ae10cb222.1755604735.git.nirjhar.roy.lists@gmail.com>
+ <49bd135f95d50fd4b8db41593551b1958ed380a7.1755604735.git.nirjhar.roy.lists@gmail.com>
+ <0a10a9b0-a55c-4607-be0b-7f7f01c2d729@suse.com>
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+In-Reply-To: <0a10a9b0-a55c-4607-be0b-7f7f01c2d729@suse.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 
 
+On 8/20/25 03:39, Qu Wenruo wrote:
+>
+>
+> 在 2025/8/19 21:30, Nirjhar Roy (IBM) 写道:
+>> This test was written with 4k block size in mind and it fails with
+>> 64k block size when tested with btrfs.
+>> The test first does pre-allocation, then fills up the
+>> filesystem. After that it tries to fragment and fill holes at offsets
+>> of 4k(i.e, 1 fsblock) - which works fine with 4k block size, but with
+>> 64k block size, the test tries to fragment and fill holes within
+>> 1 fsblock(of size 64k). This results in overwrite of 64k fsblocks
+>> and the write fails. The reason for this failure is that during
+>> overwrite, there is no more space available for COW.
+>> Fix this by changing the pwrite block size and offsets to 64k
+>> so that the test never tries to punch holes or overwrite within 1 
+>> fsblock
+>> and the test becomes compatible with all block sizes.
+>>
+>> For non-COW filesystems/files, this test should work even if the
+>> underlying filesytem block size > 64k.
+>>
+>> Reported-by: Disha Goel <disgoel@linux.ibm.com>
+>> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+>
+> Overall looks good to me.
+>
+> Although still a minor concern inlined below.
+>
+> [...]>
+>>   # Fill the rest of the fs completely
+>>   # Note, this will show ENOSPC errors in $seqres.full, that's ok.
+>>   echo "Fill fs with 1M IOs; ENOSPC expected" >> $seqres.full
+>>   dd if=/dev/zero of=$SCRATCH_MNT/tmp1 bs=1M >>$seqres.full 2>&1
+>> -echo "Fill fs with 4K IOs; ENOSPC expected" >> $seqres.full
+>> -dd if=/dev/zero of=$SCRATCH_MNT/tmp2 bs=4K >>$seqres.full 2>&1
+>> +echo "Fill fs with 64K IOs; ENOSPC expected" >> $seqres.full
+>> +dd if=/dev/zero of=$SCRATCH_MNT/tmp2 bs=64K >>$seqres.full 2>&1
+>
+> Not sure if using 64K block size to fill the fs is the correct way.
+>
+> For example on a fs with 4K block size, but at end of filling there 
+> are only 60K left.
+>
+> This will fail the filling as we can not reserve 64K data space anymore.
+> But it's not 100% filling the data space either.
+> This may not matter that much as in the preallocated filling stage, 
+> every operation is still in 64K block size though.
+>
+> I'd prefer to keep the old 4K as block size (as it's the minimal 
+> support one), or use the fs block size for filling.
+> This will ensure we really use up all the data space.
+>
+> Thanks,
+> Qu
 
-在 2025/8/19 21:30, Nirjhar Roy (IBM) 写道:
-> When tested with block size/node size 64K on btrfs, then the test fails
-> with the folllowing error:
->       QA output created by 563
->       read/write
->       read is in range
->      -write is in range
->      +write has value of 8855552
->      +write is NOT in range 7969177.6 .. 8808038.4
->       write -> read/write
->      ...
-> The slight increase in the amount of bytes that are written is because
-> of the increase in the the nodesize(metadata) and hence it exceeds
-> the tolerance limit slightly. Fix this by increasing the iosize.
-> Increasing the iosize increases the tolerance range and covers the
-> tolerance for btrfs higher node sizes.
-> 
-> Reported-by: Disha Goel <disgoel@linux.ibm.com>
-> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+Okay, makes sense. I will revert it to the older 4k size and send an 
+updated version.
 
-Looks good to me.
+--NR
 
-Just want to add some more analyze for the failure case.
-
-For the test it writes 8M data with 5% tolerance (around 408K) with the 
-total writes.
-
-With 64K block size (and it implies 64K metadata size) for btrfs, it 
-mean we can have at most 7 tree blocks of writes plus two super blocks 
-updated.
-
-Considering the default metadata profile is DUP, doubling the metadata 
-writes, the real limit is only 3 tree blocks.
-
-And when doing fsync, btrfs will create at least 2 new tree blocks, one 
-for the log tree root, and one for the log tree of the subvolume.
-
-This is still inside the tolerance, thus the test case can still pass 
-for a lot of cases.
-
-But if a full transaction commit is triggered, btrfs will need to create 
-at least 3 new tree blocks for root, extent and subvolume tree.
-Depending on the mkfs config, it will increase to 7 tree blocks (free 
-space tree, block group tree, csum tree and uuid tree created at mount).
-
-All are exceeding the tolerance limit.
-
-Doubling the io size will make the tolerance to be 8 tree blocks, 
-covering the worst case of 64K metadata sized btrfs, at least for now.
-
-Reviewed-by: Qu Wenruo <wqu@suse.com>
-
-Thanks,
-Qu
-
-> ---
->   tests/generic/563 | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/563 b/tests/generic/563
-> index 89a71aa4..6cb9ddb0 100755
-> --- a/tests/generic/563
-> +++ b/tests/generic/563
-> @@ -43,7 +43,7 @@ _require_block_device $SCRATCH_DEV
->   _require_non_zoned_device ${SCRATCH_DEV}
->   
->   cgdir=$CGROUP2_PATH
-> -iosize=$((1024 * 1024 * 8))
-> +iosize=$((1024 * 1024 * 16))
->   
->   # Check cgroup read/write charges against expected values. Allow for some
->   # tolerance as different filesystems seem to account slightly differently.
+>
+>>   _scratch_sync
+>>   # Last effort, use O_SYNC
+>> -echo "Fill fs with 4K DIOs; ENOSPC expected" >> $seqres.full
+>> -dd if=/dev/zero of=$SCRATCH_MNT/tmp3 bs=4K oflag=sync >>$seqres.full 
+>> 2>&1
+>> +echo "Fill fs with 64K DIOs; ENOSPC expected" >> $seqres.full
+>> +dd if=/dev/zero of=$SCRATCH_MNT/tmp3 bs=64K oflag=sync 
+>> >>$seqres.full 2>&1
+>>   # Save space usage info
+>>   echo "Post-fill space:" >> $seqres.full
+>>   df $SCRATCH_MNT >>$seqres.full 2>&1
+>> @@ -63,7 +63,7 @@ df $SCRATCH_MNT >>$seqres.full 2>&1
+>>   echo "Fill in prealloc space; fragment at offsets:" >> $seqres.full
+>>   for i in `seq 1 2 1023`; do
+>>       echo -n "$i " >> $seqres.full
+>> -    dd if=/dev/zero of=$SCRATCH_MNT/test seek=$i bs=4K count=1 
+>> conv=notrunc \
+>> +    dd if=/dev/zero of=$SCRATCH_MNT/test seek=$i bs=64K count=1 
+>> conv=notrunc \
+>>           >>$seqres.full 2>/dev/null || _fail "failed to write to 
+>> test file"
+>>   done
+>>   _scratch_sync
+>> @@ -71,7 +71,7 @@ echo >> $seqres.full
+>>   echo "Fill in prealloc space; fill holes at offsets:" >> $seqres.full
+>>   for i in `seq 2 2 1023`; do
+>>       echo -n "$i " >> $seqres.full
+>> -    dd if=/dev/zero of=$SCRATCH_MNT/test seek=$i bs=4K count=1 
+>> conv=notrunc \
+>> +    dd if=/dev/zero of=$SCRATCH_MNT/test seek=$i bs=64K count=1 
+>> conv=notrunc \
+>>           >>$seqres.full 2>/dev/null || _fail "failed to fill test file"
+>>   done
+>>   _scratch_sync
+>
+-- 
+Nirjhar Roy
+Linux Kernel Developer
+IBM, Bangalore
 
