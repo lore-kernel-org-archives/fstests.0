@@ -1,126 +1,117 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+Received: from fhigh-b8-smtp.messagingengine.com (fhigh-b8-smtp.messagingengine.com [202.12.124.159])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13265275B05;
-	Thu, 21 Aug 2025 12:19:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96DF0393DDD;
+	Thu, 21 Aug 2025 21:58:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.159
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755778787; cv=none; b=o+67mkouvoTHA6Ru+gVVcO0oLveu92Zzpz98vYgSiJNZyBHpJovYW6r/l5Jwl8PrZ1k1+v6hgtqf+RO9Uo92CtnckD4SFHDMVpHspg27HzNJ+gS3WnRcZIISSpon9ez38tVI9wS3/v4qKsBeosNfYLf7CQVdVl5wXfpugfvMc2M=
+	t=1755813523; cv=none; b=fm47XFzInXd1l6Yc1zVtdvZRf0BoGypBMHZkMhWC4k3pYYrrV+0kBJBzp1/GthHKBbmzLfMd1n9Lmz1nJWKHF8Xnf1ztmh1op0uPDltQBSESo0O9GnMG8y/eQgVqEHnyo11gtj2l7cYJylZsfr1ar2zUwBz+unreP/JOdbi2EDU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755778787; c=relaxed/simple;
-	bh=9nrwNazOC064iJN5DaK4WKws0OYdf/Neuy1zVI88R2k=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=WLkY113MFGen/PjWJ9H4MrS1T6w+/Czk6DpInNkYUShMzFDLbFdrh1eyEB6OYflOwMgBkcA8r2op7y0vmpoIhQ7BgxBs83l3mgAmOJDdB+Z0ixhdLpAFZ5k40rIFtdNww2uxPD8sZ95gYqen0rSPFEXQa4gHWKv12ySg1eMuUTY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=fEm2R/rs; arc=none smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	s=arc-20240116; t=1755813523; c=relaxed/simple;
+	bh=AHzvwdH4OlsrC3WecwQaH5iFvjwL2CErVH3aT5EESn4=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=UC61iwQ4tZ+4ajwcnm2ijXSd/GGSwCqk1Zk3bQ0iibfCzSqs1Ouhnd3GrRezKWAluHK01QW3YcjmMo6xcYuxk+IXCQN6ZTLlfFRD/FvJT+xrlnkCZzY+fmWeYj1enqRo6e6Nj7TOH7YXo9tcBNE2999Awl1fjG2S0DrvBIsWEoQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io; spf=pass smtp.mailfrom=bur.io; dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b=qtjvS0ew; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=mM6mjmEo; arc=none smtp.client-ip=202.12.124.159
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bur.io
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="fEm2R/rs"
-Received: from pps.filterd (m0360072.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 57L0SOVG014376;
-	Thu, 21 Aug 2025 12:19:40 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=pp1; bh=jabod7imMIYKgTg5L+VE3q6C2cbhQL
-	J3Zp4FnaW2Ujw=; b=fEm2R/rs7fC1k1UeOaQJNYy4J1+LGLELXKz7ofcGqBuPRB
-	BV0wn+T9cQE7PTOE3BJJXSdCAxKNx4EYCujlFDSoPvckaap1f3mGBKSAbMt1Rk3A
-	2Yr25yX3xI3gXJVM9A3cEU+prefBRKKc2C4DABmAb7+x8NpJxvycnV4B5O57J2z8
-	yzAyv08Ydro0dZDviUVRd2rDYzolEXyDyAbJOHpxaGs0y6XPxuKBu4ul50TQJH1U
-	6SK/zFqxrV6IKtPN0R0DnUJINgHkeRiwMhtLC7wxg6vW15yiIKrZUKs6kBnzznt1
-	T6LdgA+oDIu6/3bVR0YalzV2If7evaAHlSwK77jg==
-Received: from pps.reinject (localhost [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48n38w0dfd-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 21 Aug 2025 12:19:39 +0000 (GMT)
-Received: from m0360072.ppops.net (m0360072.ppops.net [127.0.0.1])
-	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 57LCIwgv021533;
-	Thu, 21 Aug 2025 12:19:39 GMT
-Received: from ppma23.wdc07v.mail.ibm.com (5d.69.3da9.ip4.static.sl-reverse.com [169.61.105.93])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48n38w0df4-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 21 Aug 2025 12:19:39 +0000 (GMT)
-Received: from pps.filterd (ppma23.wdc07v.mail.ibm.com [127.0.0.1])
-	by ppma23.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 57LAnwNN026916;
-	Thu, 21 Aug 2025 12:19:38 GMT
-Received: from smtprelay04.fra02v.mail.ibm.com ([9.218.2.228])
-	by ppma23.wdc07v.mail.ibm.com (PPS) with ESMTPS id 48my4w87jw-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 21 Aug 2025 12:19:38 +0000
-Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
-	by smtprelay04.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 57LCJa1x34013696
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 21 Aug 2025 12:19:36 GMT
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 71E222004B;
-	Thu, 21 Aug 2025 12:19:36 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 4CE2F20043;
-	Thu, 21 Aug 2025 12:19:34 +0000 (GMT)
-Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.109.219.158])
-	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
-	Thu, 21 Aug 2025 12:19:34 +0000 (GMT)
-Date: Thu, 21 Aug 2025 17:49:23 +0530
-From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To: John Garry <john.g.garry@oracle.com>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-        Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
-        tytso@mit.edu, linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-ext4@vger.kernel.org
-Subject: Re: [PATCH v4 10/11] ext4: Atomic writes test for bigalloc using fio
- crc verifier on multiple files
-Message-ID: <aKcOy9xCfdC_skbZ@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
-References: <cover.1754833177.git.ojaswin@linux.ibm.com>
- <48873bdce79f491b8b8948680afe041831af08cd.1754833177.git.ojaswin@linux.ibm.com>
- <7c4824a6-8922-470d-915c-e783a4e0e9cc@oracle.com>
- <aKbYvubsS8xUG88d@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
- <8b39d392-0a10-47fd-ac3c-b73a1e341e86@oracle.com>
+	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="qtjvS0ew";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="mM6mjmEo"
+Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
+	by mailfhigh.stl.internal (Postfix) with ESMTP id 995FF7A0148;
+	Thu, 21 Aug 2025 17:58:40 -0400 (EDT)
+Received: from phl-mailfrontend-02 ([10.202.2.163])
+  by phl-compute-01.internal (MEProxy); Thu, 21 Aug 2025 17:58:40 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
+	:content-transfer-encoding:content-type:date:date:from:from
+	:in-reply-to:message-id:mime-version:reply-to:subject:subject:to
+	:to; s=fm1; t=1755813520; x=1755899920; bh=q+Vz1QIp1l6NM+QVhGD2d
+	RBWcax9kULVm8LiU3xcl8s=; b=qtjvS0ewTLk6bOFFiLgOXLiMl3PLGOhNC7JPg
+	b1JWR/2CrlFzaRdNfEo8wVyn7HivlHk30tvNb0b+t2FfIhAYKGaMkK8DU1HGHG5w
+	sAsIBs1TbJPwSP2mbXrlPcaqG2ECxqB+UZeaj2it/9CUKrv6UbJlhNi7pX2zpghh
+	UJcRBxW9INB8XaRvDcT8Oy4Lk/QFABvH+AJQAbOSBgB8ux/yWwqanI9MOPRPAHE/
+	cY9/pHsoGa093ranbfO34dhpMhzbyU/YPrEnGhL5Dzdukd1HASZAPVQ88Ygkpgwm
+	gdHs1Yy20sl27/b7e1yv9PecT8xWGwqtLx+9ZWTLixBX/rLlQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:content-transfer-encoding:content-type
+	:date:date:feedback-id:feedback-id:from:from:in-reply-to
+	:message-id:mime-version:reply-to:subject:subject:to:to
+	:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=
+	1755813520; x=1755899920; bh=q+Vz1QIp1l6NM+QVhGD2dRBWcax9kULVm8L
+	iU3xcl8s=; b=mM6mjmEo6Q761A0602JzVn3cImXxPYBaB6/GKgeP2zCLjTwc0ru
+	6Vgdj3jlo5KU3HcFRCzSGZ3oBN8mvoKAoeg9SfkyGE0DaQNgVc24AVdg99lqpXaF
+	zRvI+pEtc08fALQ3YECoxq8HKWp4/9JXOEeu10ZLaNvz548LZQM4ti0SIBMvw0AS
+	FHI1SVlBQExZMH65Uf6UZemHMmfGt8jdp0OliJrGRgx1VwjnT3dcioDlA+UJsZNZ
+	1t1+IC6sCjH62l648wi18O51GoGGFk+ElZkH8bw1KLqVXMKgEq2As1Mlo28bA0S5
+	MCa/OO/eIqSrKNn1kjzCHE2iXxcfDHerh+A==
+X-ME-Sender: <xms:kJanaAyVcgra0NKXVOgGJovrkXUv0XK3gcR5dCVVx-fhuqwaAxMkSw>
+    <xme:kJanaLK5I54yTOY5-zkhkeK07R2oExrUgyWBqzLlkgmfEll9zKkdWKiLwmojDYQgO
+    qkxemAhYl1_v6W0IN4>
+X-ME-Received: <xmr:kJanaPR9tQR3A-6XtWRfSyFojZLELIxhoEdwYf7ZgzPInbvwoFLPOZOvHC0RsPsyfWgrMni97tHENaK-OQzNEnT1N1k>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgdduiedvvdekucetufdoteggodetrf
+    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
+    rghilhhouhhtmecufedttdenucenucfjughrpefhvffufffkofgggfestdekredtredttd
+    enucfhrhhomhepuehorhhishcuuehurhhkohhvuceosghorhhishessghurhdrihhoqeen
+    ucggtffrrghtthgvrhhnpeduiedtleeuieejfeelffevleeifefgjeejieegkeduudetfe
+    ekffeftefhvdejveenucevlhhushhtvghrufhiiigvpedunecurfgrrhgrmhepmhgrihhl
+    fhhrohhmpegsohhrihhssegsuhhrrdhiohdpnhgspghrtghpthhtohepfedpmhhouggvpe
+    hsmhhtphhouhhtpdhrtghpthhtoheplhhinhhugidqsghtrhhfshesvhhgvghrrdhkvghr
+    nhgvlhdrohhrghdprhgtphhtthhopehfshhtvghsthhssehvghgvrhdrkhgvrhhnvghlrd
+    horhhgpdhrtghpthhtohepkhgvrhhnvghlqdhtvggrmhesfhgsrdgtohhm
+X-ME-Proxy: <xmx:kJanaLriMjMQRLGZAPJoiK3KZ-d65BeTMak-aKyRWyweYDGdDsFI4A>
+    <xmx:kJanaMplBDczhP3vcaGzErYP6usEpsrP4bHAzNAQv_6SMBagXb8OqA>
+    <xmx:kJanaNPgdNAI1giCEOsa-sBAhGyckcfkHsE3paEBuv-zEN24z59wwA>
+    <xmx:kJanaNxZZdmlqT0JLlB7ixT8WLOiV25cbYSYonOAzNQZUf2xqdCiUw>
+    <xmx:kJanaL06qmsfHjdawJ2JPj5-lDUR0fWRamYcKSFzFJEb3bZ18Dvb3QQQ>
+Feedback-ID: i083147f8:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
+ 21 Aug 2025 17:58:39 -0400 (EDT)
+From: Boris Burkov <boris@bur.io>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org,
+	kernel-team@fb.com
+Subject: [PATCH] btrfs/301: test nested squota teardown
+Date: Thu, 21 Aug 2025 14:59:10 -0700
+Message-ID: <4095ca2ed24f4159650d282ef1aeefa46c028215.1755813480.git.boris@bur.io>
+X-Mailer: git-send-email 2.50.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <8b39d392-0a10-47fd-ac3c-b73a1e341e86@oracle.com>
-X-TM-AS-GCONF: 00
-X-Proofpoint-ORIG-GUID: dyZJ_10eRNb3lcZEqCzJXfu4Awl0VyMi
-X-Proofpoint-GUID: bDxMBs5j8jVRMbRC-yHjsSbFMMcf2KGS
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODE5MDIyMiBTYWx0ZWRfX7oE01YfJtAi2
- BK0BlrEHM4S0h7WvRrMykrZW34ljFdFsBiadvTNEEN+55qkNg6RIYR9vrA6LpYFQWK4fPofZl53
- vt+8/bFhvEzlmHQeeLOBA4fdh5rjB2IuE3DZ+8JygOYpY02IS3VZSuk+IU1aUiYnLo3k29d6qF2
- 8z3fhJ0SBvcq05vn1VM98UBjDdIcHNtVoJolYLXRhrElo47nh5G+G8flVstrsa5uSMM5o4wRgbt
- XieN1l322X3mUEfwGQvrUg3mkUvx4vGEoLHtfzkhY30bMl/WvRzQvgsJ2WTekKAtLY3PGbwvPTD
- ZWCd7TDJazFLQ0ibUimqPn03jm2Ymjjpy7cNKRSurXOoGWhAveWYp5qUsgRb+9sgvJ0dKRPMfGw
- eRkeg4X+0KlVx0XqD7mgrn56DPGYcw==
-X-Authority-Analysis: v=2.4 cv=a9dpNUSF c=1 sm=1 tr=0 ts=68a70edb cx=c_pps
- a=3Bg1Hr4SwmMryq2xdFQyZA==:117 a=3Bg1Hr4SwmMryq2xdFQyZA==:17
- a=kj9zAlcOel0A:10 a=2OwXVqhp2XgA:10 a=tBZCFxjrRziQfJ6o_zoA:9
- a=CjuIK1q_8ugA:10 a=cPQSjfK2_nFv0Q5t_7PE:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-08-21_03,2025-08-20_03,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- lowpriorityscore=0 spamscore=0 suspectscore=0 adultscore=0 impostorscore=0
- malwarescore=0 bulkscore=0 priorityscore=1501 clxscore=1015 phishscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.19.0-2508110000 definitions=main-2508190222
+Content-Transfer-Encoding: 8bit
 
-On Thu, Aug 21, 2025 at 10:28:56AM +0100, John Garry wrote:
-> On 21/08/2025 09:28, Ojaswin Mujoo wrote:
-> > Yes these 2 tests are similar however 061 uses fallocate=native +
-> > _scratch_mkfs_ext4 to test whether atomic writes on preallocated file
-> > via multiple threads works correctly.
-> > 
-> > The 062 uses fallocate=truncate + _scratch_mkfs_sized 360MB +
-> > 'multiple jobs each writing to a different file' to ensure we are
-> > extensively stressing the allocation logic in low space scenarios.
-> 
-> I see, please at least fully document this in the commit messages.
-> 
-> Thanks
+---
+ tests/btrfs/301 | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-Will do.
+diff --git a/tests/btrfs/301 b/tests/btrfs/301
+index 7f676001..4c0ba119 100755
+--- a/tests/btrfs/301
++++ b/tests/btrfs/301
+@@ -21,6 +21,8 @@ _require_no_compress
+ 
+ _fixed_by_kernel_commit XXXXXXXXXXXX \
+ 	"btrfs: fix iteration bug in __qgroup_excl_accounting()"
++_fixed_by_kernel_commit XXXXXXXXXXXX \
++	"btrfs: fix squota _cmpr stats leak"
+ 
+ subv=$SCRATCH_MNT/subv
+ nested=$SCRATCH_MNT/subv/nested
+@@ -393,6 +395,13 @@ nested_accounting()
+ 	check_qgroup_usage 2/100 $(($subv_usage + $nested_usage))
+ 	do_enospc_falloc $nested/large_falloc 2G
+ 	do_enospc_write $nested/large 2G
++	# ensure we can tear everything down in the nested scenario
++	$BTRFS_UTIL_PROG qgroup limit none 1/100 $SCRATCH_MNT
++	$BTRFS_UTIL_PROG subvolume delete $nested >> $seqres.full
++	$BTRFS_UTIL_PROG subvolume delete $subv >> $seqres.full
++	trigger_cleaner
++	$BTRFS_UTIL_PROG qgroup destroy 1/100 $SCRATCH_MNT
++	$BTRFS_UTIL_PROG qgroup destroy 2/100 $SCRATCH_MNT
+ 	_scratch_unmount
+ }
+ 
+-- 
+2.49.0
 
-Regards,
-ojaswin
