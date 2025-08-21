@@ -1,181 +1,156 @@
 Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A2FC20D4E9;
-	Thu, 21 Aug 2025 10:36:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A9462F0C46;
+	Thu, 21 Aug 2025 11:05:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755772564; cv=none; b=VaQpUXJvVQO012vrdrKV4+c1aJyX3E9PKb7iHxgHfQBg/ei8z1Si9DZ1Zh28c/s6zkfVpfEIiZnQdHNSLP3iIo4kk8G1KzGGnJpFzbHTQ4b5TY2z3wbY3NmfXJW5XafmQP+iBcCnRihHCvNFfXKM+yQAQYTyGkwvVjLXEE2pHMk=
+	t=1755774341; cv=none; b=Pnfh9gik1OyS2DHWsp84iOBjsULFuNxWGNHPeqKo4DMc2dhM6SdpKowT/6zsJTaPho062w+07yRiNHd4zc3TklKgR8RY2D17cNATHZQ0XWCgiiq9rZtOGCCormy6dEDZKZxjjL5QI66dfQu1By5x6NT7duNkdL8qBcd7cUZKgA8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755772564; c=relaxed/simple;
-	bh=3eiXtDFL+TiNhIYNwcA17FNhl8ql+o1EmOT6uDEdQhs=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=JkNPXJihFMDa/RRts+XRDP9EHhkoLOpdhJ9YiGvZyAJZnxrOuQyjBG6nZpIRL6+n0dvX57uc+7P8yz6q+hp7qNBSUI5zFK5TWV30iRK2fhO6uAUInZftojYYVcp3+R6viiBaoLZEXSk3snsICSB5sDzZEUkA4aeXS0bhtwSyobU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=Zzu56/8X; arc=none smtp.client-ip=148.163.158.5
+	s=arc-20240116; t=1755774341; c=relaxed/simple;
+	bh=H5PAtIsi+ZryOcW08UFiqAu8tRNSAroiUJuaTRQbX8o=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=hyEFjft0lTgzLCLRuvLRcaXOd+Jk1oyYM2iRYGSR/VWb16JrnDazX83f9oIQWZq92OGzZke8j805RxT2jR4T9DXKfFMeRQnYPYA5KNZqlg30iOi3tLqu8x4nUNNTq4jPMm9sHGPbNc7QqKxfTK5Bept3bHJ7X+dSAjoO6NkjrOk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=l6Y4Y3ZE; arc=none smtp.client-ip=148.163.158.5
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="Zzu56/8X"
-Received: from pps.filterd (m0360072.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 57L6WhGX007291;
-	Thu, 21 Aug 2025 10:35:52 GMT
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="l6Y4Y3ZE"
+Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 57L6GFXk011680;
+	Thu, 21 Aug 2025 11:05:34 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=pp1; bh=p/B2y/2toKUTDV+0i8ur2afBFLuK9+
-	7m6jozN7zkskE=; b=Zzu56/8Xd7rWEycqLXBrmMmsiSvR1Z9OP1rlzvoX1r39ou
-	P7XS2SMvf6bjXL5odogK/6+hhBVL/M9sThHYV6TAhAFHvde9AaxeY/TZH6ofEmwO
-	jAMi9Sb847mjGpaMo3vBNsOcaaQvybBumZ4plNRQdNN92tEmjSuDQ83Mw0T15BZ5
-	O17KesFhcz+jYQSTk4tAfBpaO4VLLyj/zzr8XtckXr8dtCszqmKmVNtZDcDB2CAf
-	A6n24rSF7NajU73bHz28rHBDCXIFTGWSFAIbNX/TDaa/mvHQ84HGCT9v1N2beJvp
-	rzQlO+eNk5btLgXWDLT1CjK5yz1s/CKAghhy4xsQ==
+	:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=pp1; bh=9KOjod
+	VKSG86MJB+wuj94P7nwqDNdceJnIe5s7cEhyU=; b=l6Y4Y3ZEmt7VtZ6e84XAKH
+	iNy9KE/wT2RTTO+m1/c+hX85wPJg6MjwYtjjVrZI7MN0pKbrYkbBYONHHZE0YXtj
+	d/pDfUQeMmSB0mEtSMaXQuYA3eYgXDQXNeVMuC09swZOmCYB2UC9inxKCiZksEH0
+	s/t/86bYr9xK2nueLp0/uxPGO8Yp+oYlmteG6FLWc5c1L23BiAh72mLg1CWaiMqw
+	V3mCYyEd91AkHxUgFVzKpkgex1QYLmodE0DXjGeEgmCCGOsQBnf+zlWjHT9VK2k6
+	e6m9As9kqMW/VM80Tk5Y7vuB8HpLxjT4BsHIRfVltb5Cz2Gp+h+ZNoLTm3zl88nw
+	==
 Received: from pps.reinject (localhost [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48n38w0092-1
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48n38vr4hy-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 21 Aug 2025 10:35:52 +0000 (GMT)
-Received: from m0360072.ppops.net (m0360072.ppops.net [127.0.0.1])
-	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 57LAJHK4006441;
-	Thu, 21 Aug 2025 10:35:51 GMT
-Received: from ppma22.wdc07v.mail.ibm.com (5c.69.3da9.ip4.static.sl-reverse.com [169.61.105.92])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48n38w008y-1
+	Thu, 21 Aug 2025 11:05:33 +0000 (GMT)
+Received: from m0353725.ppops.net (m0353725.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 57LB18J1001225;
+	Thu, 21 Aug 2025 11:05:33 GMT
+Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48n38vr4hw-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 21 Aug 2025 10:35:51 +0000 (GMT)
-Received: from pps.filterd (ppma22.wdc07v.mail.ibm.com [127.0.0.1])
-	by ppma22.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 57L6pSOj024786;
-	Thu, 21 Aug 2025 10:35:50 GMT
+	Thu, 21 Aug 2025 11:05:33 +0000 (GMT)
+Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma11.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 57LAndiC031845;
+	Thu, 21 Aug 2025 11:05:32 GMT
 Received: from smtprelay07.fra02v.mail.ibm.com ([9.218.2.229])
-	by ppma22.wdc07v.mail.ibm.com (PPS) with ESMTPS id 48my5vyupd-1
+	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 48my5y8048-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 21 Aug 2025 10:35:50 +0000
-Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
-	by smtprelay07.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 57LAZmAN41812236
+	Thu, 21 Aug 2025 11:05:32 +0000
+Received: from smtpav04.fra02v.mail.ibm.com (smtpav04.fra02v.mail.ibm.com [10.20.54.103])
+	by smtprelay07.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 57LB5Uht48955696
 	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 21 Aug 2025 10:35:48 GMT
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id A66C220043;
-	Thu, 21 Aug 2025 10:35:48 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 8D16D20040;
-	Thu, 21 Aug 2025 10:35:46 +0000 (GMT)
-Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.109.219.158])
-	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
-	Thu, 21 Aug 2025 10:35:46 +0000 (GMT)
-Date: Thu, 21 Aug 2025 16:05:44 +0530
-From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To: David Laight <david.laight.linux@gmail.com>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-        Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
-        john.g.garry@oracle.com, tytso@mit.edu, linux-xfs@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH v4 01/11] common/rc: Add _min() and _max() helpers
-Message-ID: <aKb2gB9WC8mdez6e@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
-References: <cover.1754833177.git.ojaswin@linux.ibm.com>
- <43f45a0885f28fd1d1a88122a42830dd9eeb7e2c.1754833177.git.ojaswin@linux.ibm.com>
- <20250813132034.6d0771de@pumpkin>
+	Thu, 21 Aug 2025 11:05:30 GMT
+Received: from smtpav04.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id B1ADB20040;
+	Thu, 21 Aug 2025 11:05:30 +0000 (GMT)
+Received: from smtpav04.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 914DB20043;
+	Thu, 21 Aug 2025 11:05:29 +0000 (GMT)
+Received: from [9.109.217.148] (unknown [9.109.217.148])
+	by smtpav04.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Thu, 21 Aug 2025 11:05:29 +0000 (GMT)
+Message-ID: <7f52f3ad-ad01-4337-be3a-eb281e319b24@linux.ibm.com>
+Date: Thu, 21 Aug 2025 16:35:28 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250813132034.6d0771de@pumpkin>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] generic/365: Fix false failure when mapping ends with
+ free space
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>, Zorro Lang <zlang@redhat.com>,
+        fstests@vger.kernel.org
+Cc: Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
+        linux-kernel@vger.kernel.org
+References: <cc80fdb62151d677809f2eb36eadebd3720c8701.1754385487.git.ojaswin@linux.ibm.com>
+Content-Language: en-GB
+From: Disha Goel <disgoel@linux.ibm.com>
+In-Reply-To: <cc80fdb62151d677809f2eb36eadebd3720c8701.1754385487.git.ojaswin@linux.ibm.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 X-TM-AS-GCONF: 00
-X-Proofpoint-ORIG-GUID: vECXwCi-SPoW-pZk6aQNMll0Be370F7r
-X-Proofpoint-GUID: bkkIkRjOvtNhHZyKpktEU6OsgE2YOM6v
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODE5MDIyMiBTYWx0ZWRfX2NJ2ouscLGit
- 16q1JnD8uHPR7fKGC/tGNCONy/Ca8vCC32v28rvm3UvtGat3A74clzQupwwRybm0WSJf4Q8Q2vu
- QQySN1r0HyL136jGlE/j1WAmX31bC5NEJnicaIFYhaXUxqObyGEPrbs9BtwkB9Ui5TUW0VqzNAd
- 1MXTwXzVj+N1MGK7A5aeQa0r7u/spcqekda1y4VCyE0d4Mczm+HVwIxyHNsgYZSBsJ3XDc/yyVu
- NgP0J4jPQX1TCZbN+LlgmrwpDyJ0PkpvRzFPix8DVwE5+xLhBMublFZFZcqPbw2+eIMWYL+Jtsn
- DIkxCpXydy4Vyi1RKvggazetOyw906Lc/H1AXCoNFh51qjBhO9h6zMX5y34iw7EuEZKMSz6CnFU
- ttSp3cQzw9edJQoWDu5TdCIpAyjUFw==
-X-Authority-Analysis: v=2.4 cv=a9dpNUSF c=1 sm=1 tr=0 ts=68a6f688 cx=c_pps
- a=5BHTudwdYE3Te8bg5FgnPg==:117 a=5BHTudwdYE3Te8bg5FgnPg==:17
- a=kj9zAlcOel0A:10 a=2OwXVqhp2XgA:10 a=VnNF1IyMAAAA:8 a=VwQbUJbxAAAA:8
- a=TSqor-If1qTvfEId-wcA:9 a=CjuIK1q_8ugA:10 a=cPQSjfK2_nFv0Q5t_7PE:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODE5MDIyMiBTYWx0ZWRfX5YHaHWjf7ttj
+ KCWZMD1oucTornXtyEezwStLQc5VjvLvW4baDFPipINWP6Q67tM+MrI553DoI8M20Lcfe/b+y8t
+ MqVl5qQq5FgNArzWtPzcc0JNPUxi3p7TPOQPCLtrmx6dON8ONmS0VhySpBgZ5i1wTITqtcL62zv
+ ZGPLHperLlH+LkNYzpxRYTNtJlR78ClYDSipzdP5P9TWYbuKfsnwFBtJlp/rNVdgoAXEPRohsGM
+ NyRF+8g0hD13XeReaHFPYxIzA8abMWWdr45kIw/S4SwzJngr518H2OPN3rhU/QYr5hotU9hVzEU
+ xLjnwJhYqsay53z/oOGHI619UBDRLSkF1Oe6oH05YG850t/R83mgi07NJY7da4JTJwKRqtn/0wy
+ qfqWY25I7g4nN/Bsmey5c329FMqJhQ==
+X-Proofpoint-ORIG-GUID: UvwHFhqaKqyWf84aqA3YFo-PuMomyVmf
+X-Authority-Analysis: v=2.4 cv=T9nVj/KQ c=1 sm=1 tr=0 ts=68a6fd7d cx=c_pps
+ a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17
+ a=IkcTkHD0fZMA:10 a=2OwXVqhp2XgA:10 a=VnNF1IyMAAAA:8 a=KIs-IOsx-tpsIMvQhSAA:9
+ a=QEXdDO2ut3YA:10
+X-Proofpoint-GUID: LLkuNLn4ZpBLpG79TeDgHsdLiQbsBOkq
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-08-21_02,2025-08-20_03,2025-03-28_01
+ definitions=2025-08-21_03,2025-08-20_03,2025-03-28_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- lowpriorityscore=0 spamscore=0 suspectscore=0 adultscore=0 impostorscore=0
- malwarescore=0 bulkscore=0 priorityscore=1501 clxscore=1015 phishscore=0
+ impostorscore=0 malwarescore=0 phishscore=0 spamscore=0 clxscore=1011
+ bulkscore=0 suspectscore=0 lowpriorityscore=0 priorityscore=1501 adultscore=0
  classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
  reason=mlx scancount=1 engine=8.19.0-2508110000 definitions=main-2508190222
 
-On Wed, Aug 13, 2025 at 01:20:34PM +0100, David Laight wrote:
-> On Sun, 10 Aug 2025 19:11:52 +0530
-> Ojaswin Mujoo <ojaswin@linux.ibm.com> wrote:
+On 05/08/25 2:55 pm, Ojaswin Mujoo wrote:
+> If we have a small FS where the first free space mapping is also the
+> last mapping of the FS, then the following sub-test fails:
 > 
-> > Many programs open code these functionalities so add it as a generic helper
-> > in common/rc
-> > 
-> > Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> > ---
-> >  common/rc | 22 ++++++++++++++++++++++
-> >  1 file changed, 22 insertions(+)
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index 96578d15..3858ddce 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -5873,6 +5873,28 @@ _require_program() {
-> >  	_have_program "$1" || _notrun "$tag required"
-> >  }
-> >  
-> > +_min() {
-> > +	local ret
-> > +
-> > +	for arg in "$@"; do
-> > +		if [ -z "$ret" ] || (( $arg < $ret )); then
-> > +			ret="$arg"
-> > +		fi
-> > +	done
-> > +	echo $ret
-> > +}
+>    echo "test whatever came after freesp"
+>    $XFS_IO_PROG -c "fsmap -d $((freesp_end + 2)) $((freesp_end + 3))" $SCRATCH_MNT
 > 
-> Perhaps:
-> 	local ret="$1"
-> 	shift
-> 	for arg in "$@"; do
-> 		ret=$(((arg) < (ret) ? (arg) : (ret)))
-> 	done;
-> 	echo "$ret"
-> that should work for 'min 10 "2 + 3"' (with bash, but not dash).
+> since there is nothing after the freespace. Fix this by punching a 1M
+> hole in a 3M file to ensure that the first free space is always
+> surrounded by allocated blocks.
 > 
-> 	David
+> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 
-Hi David,
+I tested the patch on Power, and it resolves the test failures with a 
+64k block size.
 
-Thanks for the feedback. I agree that your way is slightly better but i
-would like to keep the current patch as is since we already have some
-reviews on it and I would prefer to keep the code as is (especially
-since both ways are close enough). Hope this is okay.
+Tested-by: Disha Goel <disgoel@linux.ibm.com>
 
-Also, we can always do 
+SECTION       -- ext4_64k
+RECREATING    -- ext4 on /dev/loop0
+FSTYP         -- ext4
+PLATFORM      -- Linux/ppc64le localhost 6.17.0-rc2-00060-g068a56e56fa8 
+#2 SMP Thu Aug 21 16:28:18 IST 2025
+MKFS_OPTIONS  -- -F -b 65536 /dev/loop1
+MOUNT_OPTIONS -- -o block_validity /dev/loop1 /mnt/scratch
 
-_min 10 $((2 + 3)) 
+generic/365 1s ...  1s
+Ran: generic/365
+Passed all 1 tests
 
-which is a bit more intuitive imo
-
-Regards,
-ojaswin
-
+> ---
+>   tests/generic/365 | 4 ++++
+>   1 file changed, 4 insertions(+)
 > 
-> > +
-> > +_max() {
-> > +	local ret
-> > +
-> > +	for arg in "$@"; do
-> > +		if [ -z "$ret" ] || (( $arg > $ret )); then
-> > +			ret="$arg"
-> > +		fi
-> > +	done
-> > +	echo $ret
-> > +}
-> > +
-> >  ################################################################################
-> >  # make sure this script returns success
-> >  /bin/true
-> 
+> diff --git a/tests/generic/365 b/tests/generic/365
+> index 36cb2530..bbadae71 100755
+> --- a/tests/generic/365
+> +++ b/tests/generic/365
+> @@ -32,6 +32,10 @@ if ((blksz < 2048)); then
+>   	_notrun "test requires at least 4 bblocks per fsblock"
+>   fi
+>   
+> +# This makes sure there is free space surrounded by allocated blocks, which
+> +# is needed for some sub tests.
+> +$XFS_IO_PROG -fc 'falloc 0 3M' -c 'fpunch 1M 1M' -c 'fsync' $SCRATCH_MNT/f
+> +
+>   $XFS_IO_PROG -c 'fsmap' $SCRATCH_MNT >> $seqres.full
+>   
+>   find_freesp() {
+
