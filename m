@@ -1,67 +1,67 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 790E92561AB;
-	Fri, 22 Aug 2025 14:28:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 126B9301476;
+	Fri, 22 Aug 2025 14:38:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755872885; cv=none; b=j20WYht63X1QyG6YCynFf7vsZfMU6ryJ6DFB5bI9Vpi1VM8jk3nKM4Di6NsaqBjbrE+AKD5H8r4jr1oPQWSagycw6hrQryZot4B4H46RXA17yg4PjImlXTY15Sne1sxZedk8S6HoyyWutWKIPLF53czzD2IoPwMADAsghkFbGBA=
+	t=1755873482; cv=none; b=MyY4809ScY7g7fSX88238izXhEE7yrcf7a2l5CcMUcyxLib8H5iM5Or4vNmqH3YaD0Ij1ZHqnhvpgGWkLmhdWsIFcrSBW/aI2ugva4vYX46XOjVMgTUOuSlgyRbuGIWOXPd4JOsRgBE+IL4bX9wr6TNt3THbsysYZ3eeMXB9h3w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755872885; c=relaxed/simple;
-	bh=Uc/2YNo1B6sY+gGqwyjgH3Mq9wt6Mdw6eKN9/X03YiA=;
+	s=arc-20240116; t=1755873482; c=relaxed/simple;
+	bh=0aQ87Z9YPm7YRzXx/jqudE3hhFx9OOJZrExPAgcEGQE=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=kAJ5h4ru0zRfXAP4jmkvnTadLb1hkdWds7uhQ1hTH+pUgLZrnBQ7u98dwQMRkwUi+hjpqY827jBR5L0QGCluHUdh6ma3kcrffrCcYUfZgyt4owEdJJeGddqJi3xGQVzZYvsOhKpvfTT4FgjRRwIR/03InfOWMxkxIgpZS3Qe7RY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=kumni1r7; arc=none smtp.client-ip=148.163.158.5
+	 In-Reply-To:Content-Type; b=qU4pVsIzigeno0R28Icac6xoTFw9q9oUAINKzhTQMwk6DB9UfypBkDZ10ti2iaHNrWNvjWlWgy4PyD5pD21Vglxwo7+sxr+yPlOjQTUWebClhJJkeL7CQ9tpLNH5XLlNaD0AgJzbHbe9YzClEs2tPuTMvY9lPh0rYqn0JJAKh98=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=GxgHjcQd; arc=none smtp.client-ip=148.163.156.1
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="kumni1r7"
-Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 57M7JX8T012800;
-	Fri, 22 Aug 2025 14:28:00 GMT
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="GxgHjcQd"
+Received: from pps.filterd (m0356517.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 57M7rdj8026178;
+	Fri, 22 Aug 2025 14:37:58 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
 	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pp1; bh=f3kfrr
-	rY090nJ2lNiKPwnUTtCSLsRyWTuX3dPdeT3IU=; b=kumni1r7B6B3m1/q16GZ0W
-	TfdcRU7BKvi4+UZnr/Ca5fCCxcyYDypXaWFMhjMFWgMC8ZHHoluoaeF4qJ5b2uoq
-	ANsw5N5O4tg38Fj9O7a3suPR3Q1E3n5ZhS2A3fTVsTkVH3XZfdmhRg4VLAABNCMb
-	tWHiC1w6bOaAiONhSShdzzqyJlwLs7a9qhvL0CV2t5hLiZ1Jfz48YNrn4KG2l0L6
-	3vSrcmp46cGpcYabOgGCkn2wBea3xoqB2qk5z3gzGMO16CwruOF89pMmob/P6lvS
-	24LSHKkW883jEJmDE8sNDpOuctMN877m6u3H8x/20tU0z1T4nTZi8JQY+6I9hqUQ
+	:message-id:mime-version:references:subject:to; s=pp1; bh=5DZl15
+	J8sjFwFeMO7jk4e5fCN/jkYuYnllKgv6wKg3s=; b=GxgHjcQdqIX/V5v1JxJPz/
+	Vp2vOeqmoJJn3QEbzprrb3RoNsKOlgWt7NIThAxf36sMAaxPQNF+ey1CTMDCAiLp
+	heQ/Xs3tyZipeRht/Q/3UauF3w1+PWVvlV1I71Cw4HIAff2R1QF4rN7A51jedUzN
+	kSDKt4hbqg0NvihgMg9yXL+AjN4k0fO1kAVUxH8vdLfRYWpJM6ZP48rogiedP0Em
+	IK4DtqNs5evPjm3subqzQyIAncBL1Y4dIpuOcSrKO5xzThw+MU6mPRsN4RjyQ9Oy
+	BzJ33iBMO8Gqxjeyag8GL3f24lmIj0llbFSmEHfy8Hwd2a0S3VDakfjOijGVlb8w
 	==
 Received: from pps.reinject (localhost [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48n38vxu1h-1
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48n38vq37k-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 22 Aug 2025 14:27:59 +0000 (GMT)
-Received: from m0353725.ppops.net (m0353725.ppops.net [127.0.0.1])
-	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 57MEPNDN008702;
-	Fri, 22 Aug 2025 14:27:59 GMT
-Received: from ppma22.wdc07v.mail.ibm.com (5c.69.3da9.ip4.static.sl-reverse.com [169.61.105.92])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48n38vxu1c-1
+	Fri, 22 Aug 2025 14:37:58 +0000 (GMT)
+Received: from m0356517.ppops.net (m0356517.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 57MEY0T0028125;
+	Fri, 22 Aug 2025 14:37:58 GMT
+Received: from ppma12.dal12v.mail.ibm.com (dc.9e.1632.ip4.static.sl-reverse.com [50.22.158.220])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48n38vq37g-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 22 Aug 2025 14:27:59 +0000 (GMT)
-Received: from pps.filterd (ppma22.wdc07v.mail.ibm.com [127.0.0.1])
-	by ppma22.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 57MCeB0T024778;
-	Fri, 22 Aug 2025 14:27:58 GMT
-Received: from smtprelay05.fra02v.mail.ibm.com ([9.218.2.225])
-	by ppma22.wdc07v.mail.ibm.com (PPS) with ESMTPS id 48my5w5mxw-1
+	Fri, 22 Aug 2025 14:37:57 +0000 (GMT)
+Received: from pps.filterd (ppma12.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma12.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 57MC0DTV016013;
+	Fri, 22 Aug 2025 14:37:57 GMT
+Received: from smtprelay04.fra02v.mail.ibm.com ([9.218.2.228])
+	by ppma12.dal12v.mail.ibm.com (PPS) with ESMTPS id 48my42dpxu-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 22 Aug 2025 14:27:58 +0000
+	Fri, 22 Aug 2025 14:37:56 +0000
 Received: from smtpav05.fra02v.mail.ibm.com (smtpav05.fra02v.mail.ibm.com [10.20.54.104])
-	by smtprelay05.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 57MERuwt41288098
+	by smtprelay04.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 57MEbtb032571930
 	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 22 Aug 2025 14:27:56 GMT
+	Fri, 22 Aug 2025 14:37:55 GMT
 Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 8E3CE20040;
-	Fri, 22 Aug 2025 14:27:56 +0000 (GMT)
+	by IMSVA (Postfix) with ESMTP id 48A6820043;
+	Fri, 22 Aug 2025 14:37:55 +0000 (GMT)
 Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id A854820043;
-	Fri, 22 Aug 2025 14:27:54 +0000 (GMT)
+	by IMSVA (Postfix) with ESMTP id 5329920040;
+	Fri, 22 Aug 2025 14:37:53 +0000 (GMT)
 Received: from [9.124.211.112] (unknown [9.124.211.112])
 	by smtpav05.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Fri, 22 Aug 2025 14:27:54 +0000 (GMT)
-Message-ID: <845a62e3-2c10-4fd8-9a62-ff01e5f921db@linux.ibm.com>
-Date: Fri, 22 Aug 2025 19:57:53 +0530
+	Fri, 22 Aug 2025 14:37:53 +0000 (GMT)
+Message-ID: <501cb5ba-4890-4f1c-815a-4b15cf7942e8@linux.ibm.com>
+Date: Fri, 22 Aug 2025 20:07:52 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -69,226 +69,92 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 3/4] btrfs/137: Make this test compatible with all
- supported block sizes
+Subject: Re: [PATCH v3 4/4] generic/563: Increase the iosize to to cover for
+ btrfs
 Content-Language: en-GB
 To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>, fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
         djwong@kernel.org, zlang@kernel.org, fdmanana@kernel.org,
         quwenruo.btrfs@gmx.com
 References: <cover.1755677274.git.nirjhar.roy.lists@gmail.com>
- <88dcfb6cea422cebc5bbdcd4a0ba912f9c8666fa.1755677274.git.nirjhar.roy.lists@gmail.com>
+ <7e337d30307b293b30c6ad00c1fc222bbeed640c.1755677274.git.nirjhar.roy.lists@gmail.com>
 From: Disha Goel <disgoel@linux.ibm.com>
-In-Reply-To: <88dcfb6cea422cebc5bbdcd4a0ba912f9c8666fa.1755677274.git.nirjhar.roy.lists@gmail.com>
+In-Reply-To: <7e337d30307b293b30c6ad00c1fc222bbeed640c.1755677274.git.nirjhar.roy.lists@gmail.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 X-TM-AS-GCONF: 00
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODE5MDIyMiBTYWx0ZWRfX7fwC2BfiqyyE
- IGYyRegB3ykQ1I/BPkfzwxoTl7vKzz2HG7yBK8UlGJl0kf4JcVM4cHfWBxjf/qCIUgSjk/a0ig+
- 39TkHMEbub3Y2qL13b+PrCffKCMNihOIIE0R8kn/dyYcrEnhrAoyiMEuUNVR0UUxf3Hz2XUd6Ni
- iqyKzw06TfTBBRlZJyD+CNMgovP+/92bq4nuTgDjlGTpBNGWgCm4+KITE8gE7bMT4YL5bpuQry3
- RXZ7mTFVrT9BIdkfGCPV5pL191STfkPI+X1+osjT0scov31o/X++4l6NTAlDcCuOW34KifbBpxI
- QvSzl2dFXABgp7o8sWGqg1SsmQ2qqQg/Nph4cGNEA5320T6buaihGRLkwXvD5/Mtupwx57GcVwl
- ZIU15My3VGX1ReZDrLMndwtD8SC/vA==
-X-Proofpoint-ORIG-GUID: MZlHaesuUGPUzSeV28DAKD6sHtG8PTg6
-X-Authority-Analysis: v=2.4 cv=T9nVj/KQ c=1 sm=1 tr=0 ts=68a87e6f cx=c_pps
- a=5BHTudwdYE3Te8bg5FgnPg==:117 a=5BHTudwdYE3Te8bg5FgnPg==:17
- a=IkcTkHD0fZMA:10 a=2OwXVqhp2XgA:10 a=iox4zFpeAAAA:8 a=VnNF1IyMAAAA:8
- a=pGLkceISAAAA:8 a=M7u16W5OUpISNRXCUzAA:9 a=QEXdDO2ut3YA:10
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODE5MDIyMiBTYWx0ZWRfX6B2gZNbafu2e
+ GAjM90lZA6fruu2RUq/jpkyR1ir4PgN5FYQtC+Xa3R8gzQTDCY26jJVc8cxYY+SwA9wsz4D3+yT
+ Kx6dSBNRmqWo7Vl92S8/ZulEDIFnkaZqlMRKWl0x6iS9gGHhb5JTIWKyUvSS2bp/aBWL0oPESGb
+ lIVOtEUj1RBlOui5C6aRmXJWd0wWGnY3XSu5DBpLUKvlviDk2x9CdF74gB7jolJ1k6MYC3T8W36
+ fE4JQNSkWdYGY7ZBNzwIPdLR8ArUzkWV7RDK1nBmT4z10cNcBnYQ47LkzlJhiu5vON79G1L/Zod
+ ZjvX0iI+wgDSYapKmvwsL1FphhmWSPAB7zVkHOgts44twm8jW0bct02fCIb/whzl0cGTPf2g8vO
+ EePZC3DeLwpfNltpv+sZTQ9ozt93NA==
+X-Authority-Analysis: v=2.4 cv=PMlWOfqC c=1 sm=1 tr=0 ts=68a880c6 cx=c_pps
+ a=bLidbwmWQ0KltjZqbj+ezA==:117 a=bLidbwmWQ0KltjZqbj+ezA==:17
+ a=dg36b7u27vu_zB18:21 a=IkcTkHD0fZMA:10 a=2OwXVqhp2XgA:10 a=VwQbUJbxAAAA:8
+ a=7YfXLusrAAAA:8 a=iox4zFpeAAAA:8 a=VnNF1IyMAAAA:8 a=pGLkceISAAAA:8
+ a=eZ7gknJ-1AbwHKOAYn4A:9 a=QEXdDO2ut3YA:10 a=SLz71HocmBbuEhFRYD3r:22
  a=WzC6qhA0u3u7Ye7llzcV:22 a=cPQSjfK2_nFv0Q5t_7PE:22
-X-Proofpoint-GUID: RiBba16E8eWgoh2SpN56vSWzxDyevgOj
+X-Proofpoint-GUID: i7Srgv9yG9Rcgno0M7kbq1kM_E9hTI7T
+X-Proofpoint-ORIG-GUID: uYZZ3Y9Jk21r-J07SJZE_luhWBHM1Lww
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
  definitions=2025-08-22_04,2025-08-20_03,2025-03-28_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- impostorscore=0 malwarescore=0 phishscore=0 spamscore=0 clxscore=1015
- bulkscore=0 suspectscore=0 lowpriorityscore=0 priorityscore=1501 adultscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.19.0-2508110000 definitions=main-2508190222
+ impostorscore=0 bulkscore=0 adultscore=0 priorityscore=1501
+ lowpriorityscore=0 malwarescore=0 spamscore=0 phishscore=0 suspectscore=0
+ clxscore=1015 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2508110000
+ definitions=main-2508190222
 
 On 20/08/25 1:45 pm, Nirjhar Roy (IBM) wrote:
-> For large block sizes like 64k it failed simply because this
-> test was written with 4k block size in mind.
-> The first few lines of the error logs are as follows:
-> 
->       d3dc847171f9081bd75d7a2d3b53d322  SCRATCH_MNT/snap2/bar
-> 
->       File snap1/foo fiemap results in the original filesystem:
->      -0: [0..7]: data
->      +0: [0..127]: data
-> 
->       File snap1/bar fiemap results in the original filesystem:
+> When tested with block size/node size 64K on btrfs, then the test fails
+> with the folllowing error:
+>       QA output created by 563
+>       read/write
+>       read is in range
+>      -write is in range
+>      +write has value of 8855552
+>      +write is NOT in range 7969177.6 .. 8808038.4
+>       write -> read/write
 >      ...
+> The slight increase in the amount of bytes that are written is because
+> of the increase in the the nodesize(metadata) and hence it exceeds
+> the tolerance limit slightly. Fix this by increasing the iosize.
+> Increasing the iosize increases the tolerance range and covers the
+> tolerance for btrfs higher node sizes.
+> A very detailed explanation is given by Qu Wenruo in [1]
 > 
-> Fix this by making the test choose offsets and block size as 64k
-> which is aligned with all the underlying supported fs block sizes.
+> [1] https://lore.kernel.org/all/fa0dc9e3-2025-49f2-9f20-71190382fce5@gmx.com/
 > 
 > Reviewed-by: Qu Wenruo <wqu@suse.com>
 > Reported-by: Disha Goel <disgoel@linux.ibm.com>
 > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
 
-I tested it on Power, and the btrfs/137 test passes with both 4k & 64k 
+The patch looks good. However, the subject line seems incorrect, could 
+you please fix it.
+
+I tested it on Power, and the generic/563 test passes with both 4k & 64k 
 block sizes.
-
-SECTION       -- btrfs_64k
-RECREATING    -- btrfs on /dev/loop0
-FSTYP         -- btrfs
-PLATFORM      -- Linux/ppc64le localhost 6.17.0-rc2-00060-g068a56e56fa8 
-#3 SMP Thu Aug 21 17:54:04 IST 2025
-MKFS_OPTIONS  -- -f -s 65536 -n 65536 /dev/loop1
-MOUNT_OPTIONS -- /dev/loop1 /mnt/scratch
-
-btrfs/137 2s ...  1s
-Ran: btrfs/137
-Passed all 1 tests
 
 Tested-by: Disha Goel <disgoel@linux.ibm.com>
 
 > ---
->   tests/btrfs/137     | 11 ++++----
->   tests/btrfs/137.out | 66 ++++++++++++++++++++++-----------------------
->   2 files changed, 39 insertions(+), 38 deletions(-)
+>   tests/generic/563 | 2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/tests/btrfs/137 b/tests/btrfs/137
-> index 7710dc18..c1d498bd 100755
-> --- a/tests/btrfs/137
-> +++ b/tests/btrfs/137
-> @@ -23,6 +23,7 @@ _cleanup()
->   _require_test
->   _require_scratch
->   _require_xfs_io_command "fiemap"
-> +_require_btrfs_no_compress
+> diff --git a/tests/generic/563 b/tests/generic/563
+> index 89a71aa4..6cb9ddb0 100755
+> --- a/tests/generic/563
+> +++ b/tests/generic/563
+> @@ -43,7 +43,7 @@ _require_block_device $SCRATCH_DEV
+>   _require_non_zoned_device ${SCRATCH_DEV}
 >   
->   send_files_dir=$TEST_DIR/btrfs-test-$seq
+>   cgdir=$CGROUP2_PATH
+> -iosize=$((1024 * 1024 * 8))
+> +iosize=$((1024 * 1024 * 16))
 >   
-> @@ -33,12 +34,12 @@ _scratch_mkfs >>$seqres.full 2>&1
->   _scratch_mount
->   
->   # Create the first test file.
-> -$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 4K" $SCRATCH_MNT/foo | _filter_xfs_io
-> +$XFS_IO_PROG -f -c "pwrite -S 0xaa -b 64k 0 64K" $SCRATCH_MNT/foo | _filter_xfs_io
->   
->   # Create a second test file with a 1Mb hole.
->   $XFS_IO_PROG -f \
-> -     -c "pwrite -S 0xaa 0 4K" \
-> -     -c "pwrite -S 0xbb 1028K 4K" \
-> +     -c "pwrite -S 0xaa -b 64k 0 64K" \
-> +     -c "pwrite -S 0xbb -b 64k 1088K 64K" \
->        $SCRATCH_MNT/bar | _filter_xfs_io
->   
->   $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-> @@ -46,10 +47,10 @@ $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
->   
->   # Now add one new extent to our first test file, increasing its size and leaving
->   # a 1Mb hole between the first extent and this new extent.
-> -$XFS_IO_PROG -c "pwrite -S 0xbb 1028K 4K" $SCRATCH_MNT/foo | _filter_xfs_io
-> +$XFS_IO_PROG -c "pwrite -S 0xbb -b 64k 1088K 64K" $SCRATCH_MNT/foo | _filter_xfs_io
->   
->   # Now overwrite the last extent of our second test file.
-> -$XFS_IO_PROG -c "pwrite -S 0xcc 1028K 4K" $SCRATCH_MNT/bar | _filter_xfs_io
-> +$XFS_IO_PROG -c "pwrite -S 0xcc -b 64k 1088K 64K" $SCRATCH_MNT/bar | _filter_xfs_io
->   
->   $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
->   		 $SCRATCH_MNT/snap2 >/dev/null
-> diff --git a/tests/btrfs/137.out b/tests/btrfs/137.out
-> index 8554399f..e863dd51 100644
-> --- a/tests/btrfs/137.out
-> +++ b/tests/btrfs/137.out
-> @@ -1,63 +1,63 @@
->   QA output created by 137
-> -wrote 4096/4096 bytes at offset 0
-> +wrote 65536/65536 bytes at offset 0
->   XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -wrote 4096/4096 bytes at offset 0
-> +wrote 65536/65536 bytes at offset 0
->   XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -wrote 4096/4096 bytes at offset 1052672
-> +wrote 65536/65536 bytes at offset 1114112
->   XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -wrote 4096/4096 bytes at offset 1052672
-> +wrote 65536/65536 bytes at offset 1114112
->   XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -wrote 4096/4096 bytes at offset 1052672
-> +wrote 65536/65536 bytes at offset 1114112
->   XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->   
->   File digests in the original filesystem:
-> -3e4309c7cc81f23d45e260a8f13ca860  SCRATCH_MNT/snap1/foo
-> -f3934f0cf164e2efa1bab71f2f164990  SCRATCH_MNT/snap1/bar
-> -f3934f0cf164e2efa1bab71f2f164990  SCRATCH_MNT/snap2/foo
-> -d3dc847171f9081bd75d7a2d3b53d322  SCRATCH_MNT/snap2/bar
-> +9802287a6faa01a1fd0e01732b732fca  SCRATCH_MNT/snap1/foo
-> +fe93f68ad1d8d5e47feba666ee6d3c47  SCRATCH_MNT/snap1/bar
-> +fe93f68ad1d8d5e47feba666ee6d3c47  SCRATCH_MNT/snap2/foo
-> +8d06f9b5841190b586a7526d0dd356f3  SCRATCH_MNT/snap2/bar
->   
->   File snap1/foo fiemap results in the original filesystem:
-> -0: [0..7]: data
-> +0: [0..127]: data
->   
->   File snap1/bar fiemap results in the original filesystem:
-> -0: [0..7]: data
-> -1: [8..2055]: hole
-> -2: [2056..2063]: data
-> +0: [0..127]: data
-> +1: [128..2175]: hole
-> +2: [2176..2303]: data
->   
->   File snap2/foo fiemap results in the original filesystem:
-> -0: [0..7]: data
-> -1: [8..2055]: hole
-> -2: [2056..2063]: data
-> +0: [0..127]: data
-> +1: [128..2175]: hole
-> +2: [2176..2303]: data
->   
->   File snap2/bar fiemap results in the original filesystem:
-> -0: [0..7]: data
-> -1: [8..2055]: hole
-> -2: [2056..2063]: data
-> +0: [0..127]: data
-> +1: [128..2175]: hole
-> +2: [2176..2303]: data
->   
->   At subvol SCRATCH_MNT/snap1
->   At subvol SCRATCH_MNT/snap2
->   At subvol snap1
->   
->   File digests in the new filesystem:
-> -3e4309c7cc81f23d45e260a8f13ca860  SCRATCH_MNT/snap1/foo
-> -f3934f0cf164e2efa1bab71f2f164990  SCRATCH_MNT/snap1/bar
-> -f3934f0cf164e2efa1bab71f2f164990  SCRATCH_MNT/snap2/foo
-> -d3dc847171f9081bd75d7a2d3b53d322  SCRATCH_MNT/snap2/bar
-> +9802287a6faa01a1fd0e01732b732fca  SCRATCH_MNT/snap1/foo
-> +fe93f68ad1d8d5e47feba666ee6d3c47  SCRATCH_MNT/snap1/bar
-> +fe93f68ad1d8d5e47feba666ee6d3c47  SCRATCH_MNT/snap2/foo
-> +8d06f9b5841190b586a7526d0dd356f3  SCRATCH_MNT/snap2/bar
->   
->   File snap1/foo fiemap results in the new filesystem:
-> -0: [0..7]: data
-> +0: [0..127]: data
->   
->   File snap1/bar fiemap results in the new filesystem:
-> -0: [0..7]: data
-> -1: [8..2055]: hole
-> -2: [2056..2063]: data
-> +0: [0..127]: data
-> +1: [128..2175]: hole
-> +2: [2176..2303]: data
->   
->   File snap2/foo fiemap results in the new filesystem:
-> -0: [0..7]: data
-> -1: [8..2055]: hole
-> -2: [2056..2063]: data
-> +0: [0..127]: data
-> +1: [128..2175]: hole
-> +2: [2176..2303]: data
->   
->   File snap2/bar fiemap results in the new filesystem:
-> -0: [0..7]: data
-> -1: [8..2055]: hole
-> -2: [2056..2063]: data
-> +0: [0..127]: data
-> +1: [128..2175]: hole
-> +2: [2176..2303]: data
+>   # Check cgroup read/write charges against expected values. Allow for some
+>   # tolerance as different filesystems seem to account slightly differently.
 
