@@ -1,198 +1,222 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19CA028F4;
-	Fri, 22 Aug 2025 00:32:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9970A2D2493;
+	Fri, 22 Aug 2025 08:02:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755822775; cv=none; b=NL1XI3OvnBANCNM6sYbQdZcZuSuVpQ3GpPQG27Ct4esS0lX6mFVqIKHNM6Zez+ybvM+LrTWZemElh4jQ5qXI8vqDtB0TrOEHfSWqrrqKIm+Blx9udS+gXdm34/M27avkjeTbUEz6CTAw5STc+TFIB4P9LVaWvXSKbtaZl21O/LE=
+	t=1755849749; cv=none; b=kyBNIh8E2ctDaajtleGchuw1gsRqOlR6Z/EGcoix4OalM/1uRdoHwMy8WOWerRHOPsLrCdJY4xEFofSXBeUJaw/hSQ6iTK5J/pjVvYxGPE3oXXQliBY/fL/VZDuE9a1PFsSzMsciOKYAG3IgyIBXcplzC9IlK/hpICdolDNLUwk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755822775; c=relaxed/simple;
-	bh=sFiM0SbUSCE/c0BYix2JiUJiEVX8mAMWD3rDjPvxvJ0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=lSeUJKqqgjuRNLsTj8KWO5XPoKCVJr21wNIGapeks/Q2+rn05k5mK9krmJOFH1z12XupHdHLrEmJ/tAJvAR5E+G9h0wvIhZQfSkcWJMSRwsTxIdOkXrCZFjnSK4copsCMGYLXxagU70x2k6Lxo/5Mye7SZJ5WUtre4xvnxtEQhE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=GdyI0fnd; arc=none smtp.client-ip=212.227.17.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1755849749; c=relaxed/simple;
+	bh=cO/3U/eefNmuV0fkpHHB06UIQw41o5saDF/+2uVAL3A=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=UjHVw31EWLwhGlOivAHsWFgYMqnQ8qKF3iF2DL5fdVp7EDT8wTZPC7v0t/9t9HdhXafC6+GzdF3wAxCcLeTkDuRpe7Jls5mgrkxX4/89qqkdMfK6XVfxsaOzt3uiifRXX/cANPj6zrr26plmm9t8a+dbure1tMUdiqq0/k1RL2Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=ixiS5U08; arc=none smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="GdyI0fnd"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1755822766; x=1756427566; i=quwenruo.btrfs@gmx.com;
-	bh=3lpoY4fou6E9O6ga0GKO6kv0rhaYDEQMkzQq9GSIMz0=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=GdyI0fndRjXs0E46MXbr8D9DOt0Zso31dOE9o/wy9hfexXxMGLbQXIEKkeYS8qRK
-	 BjBII3p+ksSXKeSe/0YBjcSAaiO9JdAB5Q5SxF9SokbnsD2ufDbMsA/iqJbBHPFvW
-	 HYKxjvOFUDszgAt9y7D7/7ukmzqhg74pqSj8VxTzt+B64TbucsjZuQU5rlrLYLBdT
-	 si+gC4B/F63foJ8icJQ+xHiAuRwffJ+/xFZd+GyHlUiP2c1A5C2LT0+5ievSxpIlF
-	 LbSaJknVpRfZenwZkdUc0vTYFrohSCqE61ItUrFLlZ22no9zb6zdUlWJwB3KVUPXT
-	 Hkv8+HKU390JYM9yQQ==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.229] ([159.196.52.54]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MKKUp-1v7Bpa2YJz-00XOdW; Fri, 22
- Aug 2025 02:32:46 +0200
-Message-ID: <dd02704d-61d2-4ffa-8785-7c8d4fc6457a@gmx.com>
-Date: Fri, 22 Aug 2025 10:02:42 +0930
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="ixiS5U08"
+Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 57M2nYfD011680;
+	Fri, 22 Aug 2025 08:02:18 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=pp1; bh=i1FlfvV7amyG5SGfRy/i7C5UBw2YHvXvVtCx8KKM3
+	Qw=; b=ixiS5U080SAz54ra5hDt0urv2ZaUYRnUltmpgGGevPqLFKRfdnjHFxXPL
+	6YV7EhuOB1wTnsEcYLPchLoyY3AsIxRVwoeVEdUBID014XgHvzA9eFTotwr7VIXZ
+	X0FFT7gRivrD6DTkshKRMHN9u+aFF+0uGWf2f3VQESQXZnDk3vfeSkWZbT3F5p06
+	sHGON4FKbp3/RxNLby+y45tRBKvrY0G20zBhEFgQ1GxeaYtT6NW+U6plsPZPxbtY
+	n7D7/LuHjVQC7XPTi5jkiqJsqYxr/Kqo5xqDYK85q5TLQYn5Zpt4Y8YzjoHEx2G3
+	H1VPMJG44qENQL+lMo6GQNo/gMxJA==
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48n38vw4ce-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 22 Aug 2025 08:02:18 +0000 (GMT)
+Received: from m0353725.ppops.net (m0353725.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 57M7aPRB029953;
+	Fri, 22 Aug 2025 08:02:17 GMT
+Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48n38vw4ca-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 22 Aug 2025 08:02:17 +0000 (GMT)
+Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma11.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 57M3ZA3F031905;
+	Fri, 22 Aug 2025 08:02:16 GMT
+Received: from smtprelay04.fra02v.mail.ibm.com ([9.218.2.228])
+	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 48my5ycaff-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 22 Aug 2025 08:02:16 +0000
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay04.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 57M82EJ134013750
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Fri, 22 Aug 2025 08:02:14 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id C71472005A;
+	Fri, 22 Aug 2025 08:02:14 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 6F5B820040;
+	Fri, 22 Aug 2025 08:02:12 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.124.210.10])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Fri, 22 Aug 2025 08:02:12 +0000 (GMT)
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+Cc: Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
+        john.g.garry@oracle.com, tytso@mit.edu, linux-xfs@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: [PATCH v5 00/11] Add more tests for multi fs block atomic writes
+Date: Fri, 22 Aug 2025 13:31:59 +0530
+Message-ID: <cover.1755849134.git.ojaswin@linux.ibm.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] btrfs/301: test nested squota teardown
-To: Boris Burkov <boris@bur.io>, linux-btrfs@vger.kernel.org,
- fstests@vger.kernel.org, kernel-team@fb.com
-References: <af8736b1-e85a-4867-a884-194fe8f9abb5@gmx.com>
- <49ed1733eaa2fcc3a9ec3f6cd8544016253d6914.1755819214.git.boris@bur.io>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
- sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
- xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
- naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
- tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
- 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
- VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
- CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
- B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
- Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
- +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
- HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
-In-Reply-To: <49ed1733eaa2fcc3a9ec3f6cd8544016253d6914.1755819214.git.boris@bur.io>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:LqwHZQeAmTSH5qxmFt0tu8YaCJT0yrmUrE6aDl1QXWZz+WF2kle
- fc9XFQrO8B8ReiOAHQBVHvmFeWX8rFIJVncj2P/v2w5PhuBhjSRp3GbQJdH2NnYjm7A7Ikp
- OHHmZf4nNT+WTyT3CHvC/mS8w78qmlJ3vUH23Yr7URMmERDgUqeXGxIVWoZmY/4W/4sPSo0
- wxWtWyoxpi7CArUWvgjmw==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:zIdsfufYINM=;Pyqp2RVxU6Kj0EVCP/s0nI9Q365
- 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
- yym/JjNclkhwfor6KNF9jz7zswyD
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODE5MDIyMiBTYWx0ZWRfX7YbSbCZpSyS+
+ zBQEQyB6vKs7rkNp6bHlrt6c1Og+wg2CEqzeDfVVgcSHRwKOTzDw+peDuB0eychi4vkf8puJQuP
+ IPzg3bjgWVtybOiOWYcgUqyphlGywqysdMqBTIKDXMgczbCuczhK4fh57vF0LxoBiEVfCHTZr2w
+ zVqNLE+AsDl7UtGPPsL2nNGlG5ThBKPPFZUUIVJs5eCpMmxWQjPrJoMZjEcAukpY1lSNESj8a8R
+ 1HWEMgVIscS9LeBYUy43EcJycy+u60KGR+wokdWts698aB/AXsKRNtnbULDO1ktkAgZqyUE9EH6
+ ev53OWayUHP1BiVQ9bc9RHyn7PoedEQay8nd5f+k6HMkCHUlevbNQjlH9FXUavhVNh+ogk+Pk1P
+ jvVE/JPd6AzPW3U0awvZ1bFf0jjWfA==
+X-Proofpoint-ORIG-GUID: XmTOaExi3ApobZ8XMQTKLeIqiEP4PKqs
+X-Authority-Analysis: v=2.4 cv=T9nVj/KQ c=1 sm=1 tr=0 ts=68a8240a cx=c_pps
+ a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17
+ a=2OwXVqhp2XgA:10 a=VwQbUJbxAAAA:8 a=yPCof4ZbAAAA:8 a=VnNF1IyMAAAA:8
+ a=otfDAVWHr6qse-eGaWMA:9 a=cPQSjfK2_nFv0Q5t_7PE:22
+X-Proofpoint-GUID: tTXTE9KQuxt13TkyuQq2xW-6S0HdQceP
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-08-22_02,2025-08-20_03,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ impostorscore=0 malwarescore=0 phishscore=0 spamscore=0 clxscore=1015
+ bulkscore=0 suspectscore=0 lowpriorityscore=0 priorityscore=1501 adultscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2508110000 definitions=main-2508190222
+
+Changes in v5: (Thanks to John & Darrick for reviews)
+- commor/rc: Add a _require_fio_version helper
+- fsx: Switch atomic writes off if direct IO (-Z) not passed
+- fio tests: better commit messages to explain what we are testing
+- ext4/06{1..2}: Refactor code, also test only a few combinations of bs
+  clustersize rather than every single
+
+Changes in v4: (Thanks to Darrick, John and Zorro for the reviews) [4]
+
+- g/1226,1227: Modify fio threads to not issue overlapping atomic writes
+- g/1228: Use xfs_io -c "shutdown" instead of _scratch_shutdown to avoid
+          bash overhead
+- g/1229: Remove FSX_AVOID handling for bigalloc from common/rc. It is
+          part of the specific test now
+- ext4/063: add more clearer extent diagram
+- ext4/064: Drop the test for now as im taking sometime to understand
+            the behavior better.
+- Removed test numbers from commit message
+- For tests with significant changes I've removed the RVBs
+
+[4] https://lore.kernel.org/fstests/0eb2703b-a862-4a40-b271-6b8bb27b4ad4@oracle.com/T/#mef34a8c13cbee466bfc162db637d6e1cf0a8b06d
+
+Changes in v3 [3]:
+
+- (2/13) use dumpe2fs to figure out if FS is bigalloc
+- (9/13) generic/1230: Detect device speeds for more accurate testing. ALso
+  speeds up the test
+- fio tests - switch to write followed by verify approach to avoid false
+  failures due to fio verify reads splitting and racing with atomic
+  writes. Discussion thread:
+
+  https://lore.kernel.org/fstests/0430bd73-e6c2-4ce9-af24-67b1e1fa9b5b@oracle.com/
+
+  [3] https://lore.kernel.org/fstests/cover.1752329098.git.ojaswin@linux.ibm.com/
+
+Changes in v2 [1]:
+
+- (1/13) new patch with _min and _max helpers
+- (2/13) remove setup_fs_options and add fsx specifc helper
+- (4/13) skip atomic write instead of falling back to normal write (fsx)
+- (4/13) make atomic write default on instead of default off (fsx)
+- (5,6/13) refactor and cleanup fio tests
+- (7/13) refactored common code
+- (8/13) dont ignore mmap writes for fsx with atomic writes
+- (9/13) use od instead of xxd. handle cleanup of bg threads in _cleanup()
+- (10-13/13) minor refactors
+- change all tests use _fail for better consistency
+- use higher tests numbers for easier merging
+
+ [1] https://lore.kernel.org/fstests/cover.1750924903.git.ojaswin@linux.ibm.com/
+
+* Original cover [2] *
+
+These are the tests we were using to verify that filesystems are not
+tearing multi fs block atomic writes. Infact some of the tests like
+generic/772 (now: g/1230) actually helped us catch and fix issues in
+ext4's early implementations of multi fs block atomic writes and hence
+we feel these tests are useful to have in xfstests.
+
+We have tested these with scsi debug as well as a real nvme device
+supporting multi fs block atomic writes.
+
+Thoughts and suggestions are welcome!
+
+[2] rfc: https://lore.kernel.org/fstests/cover.1749629233.git.ojaswin@linux.ibm.com/
 
 
 
-=E5=9C=A8 2025/8/22 09:05, Boris Burkov =E5=86=99=E9=81=93:
-> Nested squotas with snapshots is the most complicated case, so add some
-> extra checks to it. Specifically, ensure that full tear down of the
-> subvols and parent qgroups works properly.
->=20
-> Signed-off-by: Boris Burkov <boris@bur.io>
+Ojaswin Mujoo (10):
+  common/rc: Add _min() and _max() helpers
+  common/rc: Add _require_fio_version helper
+  common/rc: Add a helper to run fsx on a given file
+  ltp/fsx.c: Add atomic writes support to fsx
+  generic: Add atomic write test using fio crc check verifier
+  generic: Add atomic write test using fio verify on file mixed mappings
+  generic: Add atomic write multi-fsblock O_[D]SYNC tests
+  generic: Stress fsx with atomic writes enabled
+  generic: Add sudden shutdown tests for multi block atomic writes
+  ext4: Atomic write test for extent split across leaf nodes
 
-Reviewed-by: Qu Wenruo <wqu@suse.com>
+Ritesh Harjani (IBM) (2):
+  ext4: test atomic write and ioend codepaths with bigalloc
+  ext4: Test atomic writes allocation and write codepaths with bigalloc
 
-Thanks,
-Qu
+ common/rc              |  77 +++++++-
+ ltp/fsx.c              | 115 +++++++++++-
+ tests/ext4/061         | 155 ++++++++++++++++
+ tests/ext4/061.out     |   2 +
+ tests/ext4/062         | 203 +++++++++++++++++++++
+ tests/ext4/062.out     |   2 +
+ tests/ext4/063         | 129 +++++++++++++
+ tests/ext4/063.out     |   2 +
+ tests/generic/1226     | 108 +++++++++++
+ tests/generic/1226.out |   2 +
+ tests/generic/1227     | 132 ++++++++++++++
+ tests/generic/1227.out |   2 +
+ tests/generic/1228     | 137 ++++++++++++++
+ tests/generic/1228.out |   2 +
+ tests/generic/1229     |  68 +++++++
+ tests/generic/1229.out |   2 +
+ tests/generic/1230     | 397 +++++++++++++++++++++++++++++++++++++++++
+ tests/generic/1230.out |   2 +
+ 18 files changed, 1529 insertions(+), 8 deletions(-)
+ create mode 100755 tests/ext4/061
+ create mode 100644 tests/ext4/061.out
+ create mode 100755 tests/ext4/062
+ create mode 100644 tests/ext4/062.out
+ create mode 100755 tests/ext4/063
+ create mode 100644 tests/ext4/063.out
+ create mode 100755 tests/generic/1226
+ create mode 100644 tests/generic/1226.out
+ create mode 100755 tests/generic/1227
+ create mode 100644 tests/generic/1227.out
+ create mode 100755 tests/generic/1228
+ create mode 100644 tests/generic/1228.out
+ create mode 100755 tests/generic/1229
+ create mode 100644 tests/generic/1229.out
+ create mode 100755 tests/generic/1230
+ create mode 100644 tests/generic/1230.out
 
-> ---
->   tests/btrfs/301 | 9 +++++++++
->   1 file changed, 9 insertions(+)
->=20
-> diff --git a/tests/btrfs/301 b/tests/btrfs/301
-> index 7f676001..4c0ba119 100755
-> --- a/tests/btrfs/301
-> +++ b/tests/btrfs/301
-> @@ -21,6 +21,8 @@ _require_no_compress
->  =20
->   _fixed_by_kernel_commit XXXXXXXXXXXX \
->   	"btrfs: fix iteration bug in __qgroup_excl_accounting()"
-> +_fixed_by_kernel_commit XXXXXXXXXXXX \
-> +	"btrfs: fix squota _cmpr stats leak"
->  =20
->   subv=3D$SCRATCH_MNT/subv
->   nested=3D$SCRATCH_MNT/subv/nested
-> @@ -393,6 +395,13 @@ nested_accounting()
->   	check_qgroup_usage 2/100 $(($subv_usage + $nested_usage))
->   	do_enospc_falloc $nested/large_falloc 2G
->   	do_enospc_write $nested/large 2G
-> +	# ensure we can tear everything down in the nested scenario
-> +	$BTRFS_UTIL_PROG qgroup limit none 1/100 $SCRATCH_MNT
-> +	$BTRFS_UTIL_PROG subvolume delete $nested >> $seqres.full
-> +	$BTRFS_UTIL_PROG subvolume delete $subv >> $seqres.full
-> +	trigger_cleaner
-> +	$BTRFS_UTIL_PROG qgroup destroy 1/100 $SCRATCH_MNT
-> +	$BTRFS_UTIL_PROG qgroup destroy 2/100 $SCRATCH_MNT
->   	_scratch_unmount
->   }
->  =20
+-- 
+2.49.0
 
