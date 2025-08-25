@@ -1,151 +1,136 @@
-Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0EBDD18DF62;
-	Mon, 25 Aug 2025 06:08:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 139C02FB60D
+	for <fstests@vger.kernel.org>; Mon, 25 Aug 2025 15:29:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756102140; cv=none; b=JsMg+H1SlDJ1IL9iE4IMfVk121eEF8Ism0rtPKOYZXw7gRXGq019HZSm4Lgf9i5FlfkvTht5+eW0lLSlj5bDxLDFjACD6wVGEWEWUUSuj8HeBPgAbzzf9i8HIJKxbyOG7mnnzdC65cOMLGOzGhZ8m/q9d4wdTzUKujbj/sDaaXM=
+	t=1756135777; cv=none; b=qeTzb74ayhGe5pyGRytS55bdT1W1tML6duFcK3Ch4CXtfq6OyuasS3cFbkULGykE8y5LOaM/+Mwd+eTTqe2lZBuGo5m9ciD13/PmxTA4LNhcsqnswPA0qQKE6cw1iPFBP4OCMMewRihxNHwq8bEcy5pmBwURA0Yitpzp6H0qypI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756102140; c=relaxed/simple;
-	bh=fOg2rikJSBXbdvaWm7pWnLtoNbBye1QoCZaFW8KYW44=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=kkdcHKhQJMONVI2j1QxqsgbMdkpnD7S0ECDg2oHqnL+IAAiZqel7yFpzygRjcELyqw0CSld5YbMUYUx84Y++Jh2HnBkMMLgA+47HzkEVCoSWGO2/zDNpcCxKKSmOW36Fur5XPLfg6vV/thb1UYdaJ2D0jPzvUdCu6E+pT1lLkL4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PAh2VNib; arc=none smtp.client-ip=209.85.214.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1756135777; c=relaxed/simple;
+	bh=J3OexhTznRccGZs6rVKORbGFuV/gnAKP1RScDPG8lrY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=TOTg28xaiA7weWZ46AB7tsZ3ydbEtJMQbehg4kwBKCBUNeoOJqlpPy3NeV4bNXWNC5BYOKSCyFSxcpS+fQOgopHmvG1UjC8RfX0wNGKYl7GPKx42w94oz5XXbBM0zQS1qH/MBE6YdzQLvLLB+ffEc47iZQx9G9EZW+gBeek440M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ehts61jh; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PAh2VNib"
-Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-24687a76debso10081935ad.0;
-        Sun, 24 Aug 2025 23:08:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1756102138; x=1756706938; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=QWo0HvnFKQO2x4FLpne5+21ofwRrF2q/uH1iwkAkYZM=;
-        b=PAh2VNibaiP90f96Yno1XTkiwh1ayXbqFj940h5+bxsvUzfckBwAV1wxN95zwXE0qQ
-         IVlxDv/9xzyT9M9C9xTVZNNCheUlxugwl2dXe06LkmluocGcc7K/pwkT5peyQeT88gkr
-         SDXGcKnNsYZ50i4w0iRrRGWQS85iF8/i1WnC0tjjAFFi4bYEsolD8muDm58QPU1ogvFq
-         6NQ+WJFRynZBR6M6WlDtUKeYuSAJ73uK3e6TMDtfSqoEITvJAoEFpadqqQ4ddBDA/gda
-         JnAXh72sPd9X9goKbj12aM6GqZXTaeLbPoxYo2foPfuvqJA03s0Yl8gB3GthkShhpdXc
-         Z0hw==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ehts61jh"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1756135774;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=1i2+2A3UxG6szUKYKSkulwqqvxOOp1ZI6uI4Bar8uaU=;
+	b=ehts61jhmzr6ZNeap394AF7LuHKL98Fc6+BL4YzkDqr0NKO+O5tm/MvFesC6C5dmZ/7WYs
+	YlOEPp4tPxlI0TsGY+gnPd7bBcgv2M9ksQAC+XZ+dj3ABFUGPFvPVJcQ06dHJdcy5Wo7FF
+	MbpyxIbWoIf9hlKefuAg4NZahXkybbQ=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-121-cfhdfZq6Nv6jqCbEE2E0MA-1; Mon, 25 Aug 2025 11:29:31 -0400
+X-MC-Unique: cfhdfZq6Nv6jqCbEE2E0MA-1
+X-Mimecast-MFC-AGG-ID: cfhdfZq6Nv6jqCbEE2E0MA_1756135770
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-2465bc6da05so35051115ad.0
+        for <fstests@vger.kernel.org>; Mon, 25 Aug 2025 08:29:31 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1756102138; x=1756706938;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=QWo0HvnFKQO2x4FLpne5+21ofwRrF2q/uH1iwkAkYZM=;
-        b=ns0ZmfESUiRJrocvmxv3HQ7pkGZnLKaJVNUXmMXarNjQiBvBe0o6j2JCQkVgrg+sYR
-         dqoQdp+4+XcMzR9PNIrTFoZYDhv4LvM/kPBzEs3ae30mLdBCtC2rkKHvczn8z3T2cwg9
-         yHY+YUu9ep9LxjicZuaRkynFAxucps8WQgsADtI6GoPzcvlllnJ9evzmkXmga+g3l6Vg
-         h8Gxc9+sH1dXwYk/fvUzPJsjM3+kcLF/cjvF3yUi505xV3SoXGpgPlISDz5zwM9no47v
-         N1PdyyJ+OvHi+lIrcm6LOrl+jJBEqpVAKTL076pizbI1G5SedMGOD3EauY+6qQTC0Jpt
-         +mMQ==
-X-Forwarded-Encrypted: i=1; AJvYcCV6/5Xx4AzO6KowI43s6UuTIZjz7MIv8LsK8zWJDbs6lzKUG1X7yDUi4UaGN7o9d+h+9GaRMq5i@vger.kernel.org
-X-Gm-Message-State: AOJu0YxPFBEnhEJU9lnv49OG/CbI2VnFNTINmr158CuuUctO6DfvULm8
-	e/oA2NBtI1d7LQf6YZZonYFjBO6Ov8/TRY87S8BbmwghJBVH6EmCbUIL
-X-Gm-Gg: ASbGncvp95/6OBQtzXvmb0k4YJ8rT/vj/DR+N89Si/sqVejWOirfd9UPBcjf5nNjOjL
-	5joOXtVcfq5oFbMJawwR2hZXP3wlDxsPGGFYb3/YwdHxUGdbhFvZteZldn/YoeM+j16kbm1hL9d
-	BidqsrupM7yZebH1/tTeoeiTCYip2+dJuUDKzPoBrkSicPIWP7QGJXOsCczEbX6OEDQxdgyPNrv
-	lovxVdCka1bzmyfKcuLbNQSx9AcE2NvMKDJLGgL/uakkh42K3cuSwk4mSodxe0bq4Vk2DVGab4n
-	oxLxy/ZfeYwQEJ5AfFrRSykSFNyGp1rJOQf1tv5nCZwUB7l7L5h1LrnZ0Omg5VS+l+YCIuM4Adb
-	BACg1ZKimsya0zRyVEh0xHmBbROMKjinv
-X-Google-Smtp-Source: AGHT+IGqLbbCRlDHxwlxlar/vEQzKA8yrc23ORBwx0Iq8p5h+4QqUtl2WnnLOxBCfgCn0OXRH71I9w==
-X-Received: by 2002:a17:902:d542:b0:246:c428:ca4 with SMTP id d9443c01a7336-246c4281372mr35791575ad.25.1756102138303;
-        Sun, 24 Aug 2025 23:08:58 -0700 (PDT)
-Received: from [192.168.0.120] ([49.207.214.73])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-246688801bdsm57973175ad.123.2025.08.24.23.08.55
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 24 Aug 2025 23:08:57 -0700 (PDT)
-Message-ID: <30a36652-2476-4244-bcdf-c576e12565bf@gmail.com>
-Date: Mon, 25 Aug 2025 11:38:53 +0530
+        d=1e100.net; s=20230601; t=1756135770; x=1756740570;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=1i2+2A3UxG6szUKYKSkulwqqvxOOp1ZI6uI4Bar8uaU=;
+        b=t3mP5y+XHGdT+CfVioUb8iZwdnYVW1nbmCG8FNVZCNgWjzYZZ0BmH4vh5ae0GB6e+6
+         3FebMPfZ/xJkLeYp+ZSV2fGsvUnFG/48XrkVlcDIfhomsxXXAt/xXID11sZvAPp4hIf0
+         LCtKCAF5xzFiPpOCFphQDhkdYk1dA0yRsvwEvfrnyXV55R4W8E1mONDtZjhCQGIErioi
+         OTpN/R5hqu+dbqGEXdc4lXacKw99zRR5aAk+qFlKDsxJZMmO5CP26S6uOhrMLR1X/P/+
+         7Ddb5rWPIshUEMAi4cmVaILuVJBsjXQjHwUuhtGGqMygacI68lz3V3haNviId5JXKm/m
+         EU3w==
+X-Gm-Message-State: AOJu0Yxvt9bE0NnuK4rMRJLPDrwBhZmHk7Mie4DZk2SgVy9R+D94iGio
+	rWJi7AAjgs8xge2a8Is4Kf0NTKAa3+Kzjyd2ox40l4OLfYN2af/8lfZgukVCcj3d/EtA95p4Y1V
+	11YxpiRK0FBfl1Qt/mataTPlVTIiXdUyAZ/c0+hPFBJirTqx+JVwqTD72CgU=
+X-Gm-Gg: ASbGnctoXkd/7ODT9rN/q5Q4eFEXqNNM8ifEfHMbkqPE94v2D9poff5ffZ359cwTrTe
+	fJUJQVsXqZ42QQNBEQXnRdlIicfVRGsO9BX6RnDa9fogif3R1BzmxOz/Wcoj/XGupcPneI6SGNH
+	FJbU2ErNrfY0kEpG/NU9BAENc4IZIoL9s4KGUo4a/WspxtXozLmIqX6lYO6mccEj5mtGVHcxaI/
+	K2deV6mKkpKs/7eDvayG/GlkBBpsyikCBXYfXZKbZvPbbbxgzT3khE+8FNmb/7gnvMeSmbvWrB1
+	ItJC2dPAT3FSAMuR5As5u8iQiaL9xkbrZT3a0xtNq5hv5n9NWN5aqZF0zc8aqKUS1G3v/AiNh3s
+	B5Zth
+X-Received: by 2002:a17:902:ec89:b0:246:6fb:5016 with SMTP id d9443c01a7336-2462ee8df3bmr168166815ad.20.1756135770227;
+        Mon, 25 Aug 2025 08:29:30 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEkjrdn8sUCl9oN5WP7fv8c57Lb6oiCyKRUuIJz4eEVVQ+NkS3wVSOVsUIBXnoXNW1yzDXQtw==
+X-Received: by 2002:a17:902:ec89:b0:246:6fb:5016 with SMTP id d9443c01a7336-2462ee8df3bmr168166495ad.20.1756135769854;
+        Mon, 25 Aug 2025 08:29:29 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3254c47f2dcsm7174352a91.31.2025.08.25.08.29.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 25 Aug 2025 08:29:29 -0700 (PDT)
+Date: Mon, 25 Aug 2025 23:29:25 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
+	djwong@kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] generic/365: Fix false failure when mapping ends with
+ free space
+Message-ID: <20250825152925.tcbbn5rxbjpk4ts7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cc80fdb62151d677809f2eb36eadebd3720c8701.1754385487.git.ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 4/4] generic/563: Increase the iosize to to cover for
- btrfs
-Content-Language: en-US
-To: Disha Goel <disgoel@linux.ibm.com>, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, ritesh.list@gmail.com,
- ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org,
- fdmanana@kernel.org, quwenruo.btrfs@gmx.com
-References: <cover.1755677274.git.nirjhar.roy.lists@gmail.com>
- <7e337d30307b293b30c6ad00c1fc222bbeed640c.1755677274.git.nirjhar.roy.lists@gmail.com>
- <501cb5ba-4890-4f1c-815a-4b15cf7942e8@linux.ibm.com>
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <501cb5ba-4890-4f1c-815a-4b15cf7942e8@linux.ibm.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <cc80fdb62151d677809f2eb36eadebd3720c8701.1754385487.git.ojaswin@linux.ibm.com>
 
+On Tue, Aug 05, 2025 at 02:55:56PM +0530, Ojaswin Mujoo wrote:
+> If we have a small FS where the first free space mapping is also the
+> last mapping of the FS, then the following sub-test fails:
+> 
+>   echo "test whatever came after freesp"
+>   $XFS_IO_PROG -c "fsmap -d $((freesp_end + 2)) $((freesp_end + 3))" $SCRATCH_MNT
+> 
+> since there is nothing after the freespace. Fix this by punching a 1M
+> hole in a 3M file to ensure that the first free space is always
+> surrounded by allocated blocks.
+> 
+> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> ---
+>  tests/generic/365 | 4 ++++
+>  1 file changed, 4 insertions(+)
+> 
+> diff --git a/tests/generic/365 b/tests/generic/365
+> index 36cb2530..bbadae71 100755
+> --- a/tests/generic/365
+> +++ b/tests/generic/365
+> @@ -32,6 +32,10 @@ if ((blksz < 2048)); then
+>  	_notrun "test requires at least 4 bblocks per fsblock"
+>  fi
+>  
+> +# This makes sure there is free space surrounded by allocated blocks, which
+> +# is needed for some sub tests.
+> +$XFS_IO_PROG -fc 'falloc 0 3M' -c 'fpunch 1M 1M' -c 'fsync' $SCRATCH_MNT/f
 
-On 8/22/25 20:07, Disha Goel wrote:
-> On 20/08/25 1:45 pm, Nirjhar Roy (IBM) wrote:
->> When tested with block size/node size 64K on btrfs, then the test fails
->> with the folllowing error:
->>       QA output created by 563
->>       read/write
->>       read is in range
->>      -write is in range
->>      +write has value of 8855552
->>      +write is NOT in range 7969177.6 .. 8808038.4
->>       write -> read/write
->>      ...
->> The slight increase in the amount of bytes that are written is because
->> of the increase in the the nodesize(metadata) and hence it exceeds
->> the tolerance limit slightly. Fix this by increasing the iosize.
->> Increasing the iosize increases the tolerance range and covers the
->> tolerance for btrfs higher node sizes.
->> A very detailed explanation is given by Qu Wenruo in [1]
->>
->> [1] 
->> https://lore.kernel.org/all/fa0dc9e3-2025-49f2-9f20-71190382fce5@gmx.com/
->>
->> Reviewed-by: Qu Wenruo <wqu@suse.com>
->> Reported-by: Disha Goel <disgoel@linux.ibm.com>
->> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
->
-> The patch looks good. However, the subject line seems incorrect, could 
-> you please fix it.
+If you add "falloc" and "fpunch" operations, you need to:
 
-Thanks. Added the RBs, fixed some typos and sent the final [v4].
+_require_xfs_io_command "falloc"
+_require_xfs_io_command "fpunch"
 
+Due to not all fileystems support these two fs operations.
 
-[v4] 
-https://lore.kernel.org/all/cover.1756101620.git.nirjhar.roy.lists@gmail.com/
+BTW, I'm wondering how small (and what kind of) the fs you use, cause there's only
+one unused region, even this's a clean fs, there're some still many different
+metadatas. I even tried a 100M ext2 fs (which doesn't has log space), there're
+many free space regions. So I'm curious, how can you hit this issue? And if the
+SCRATCH_DEV is too small (e.g. 10M), do we really need to test with that fs size:)
 
---NR
+Thanks,
+Zorro
 
->
-> I tested it on Power, and the generic/563 test passes with both 4k & 
-> 64k block sizes.
->
-> Tested-by: Disha Goel <disgoel@linux.ibm.com>
->
->> ---
->>   tests/generic/563 | 2 +-
->>   1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/tests/generic/563 b/tests/generic/563
->> index 89a71aa4..6cb9ddb0 100755
->> --- a/tests/generic/563
->> +++ b/tests/generic/563
->> @@ -43,7 +43,7 @@ _require_block_device $SCRATCH_DEV
->>   _require_non_zoned_device ${SCRATCH_DEV}
->>     cgdir=$CGROUP2_PATH
->> -iosize=$((1024 * 1024 * 8))
->> +iosize=$((1024 * 1024 * 16))
->>     # Check cgroup read/write charges against expected values. Allow 
->> for some
->>   # tolerance as different filesystems seem to account slightly 
->> differently.
->
--- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+> +
+>  $XFS_IO_PROG -c 'fsmap' $SCRATCH_MNT >> $seqres.full
+>  
+>  find_freesp() {
+> -- 
+> 2.49.0
+> 
 
