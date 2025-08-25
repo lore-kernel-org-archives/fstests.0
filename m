@@ -1,77 +1,40 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 139C02FB60D
-	for <fstests@vger.kernel.org>; Mon, 25 Aug 2025 15:29:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32FAD2FD1D4
+	for <fstests@vger.kernel.org>; Mon, 25 Aug 2025 15:44:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756135777; cv=none; b=qeTzb74ayhGe5pyGRytS55bdT1W1tML6duFcK3Ch4CXtfq6OyuasS3cFbkULGykE8y5LOaM/+Mwd+eTTqe2lZBuGo5m9ciD13/PmxTA4LNhcsqnswPA0qQKE6cw1iPFBP4OCMMewRihxNHwq8bEcy5pmBwURA0Yitpzp6H0qypI=
+	t=1756136656; cv=none; b=FmhhHag/fgQ7nCGLWnh0MgSfUuiYx9czcWYvebLMQs4aQNH343TuEvyTQt9gIn8CgDboq9to+AduEZA7GouTW4DiFRe9aPHEE+GriFaWYkrS1E/Husjrtfk13lcNVLNT8PtgLczsTTzH9JxbWMApPHLipGxMcjjXoE1oEPSyNzU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756135777; c=relaxed/simple;
-	bh=J3OexhTznRccGZs6rVKORbGFuV/gnAKP1RScDPG8lrY=;
+	s=arc-20240116; t=1756136656; c=relaxed/simple;
+	bh=f6UTTV3HQ3d6jbPvPhW3byClTFkJH7JWH0y1fcalmfg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TOTg28xaiA7weWZ46AB7tsZ3ydbEtJMQbehg4kwBKCBUNeoOJqlpPy3NeV4bNXWNC5BYOKSCyFSxcpS+fQOgopHmvG1UjC8RfX0wNGKYl7GPKx42w94oz5XXbBM0zQS1qH/MBE6YdzQLvLLB+ffEc47iZQx9G9EZW+gBeek440M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ehts61jh; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=kYHmzJgRiDRa+3iiuLVEHyw8CJzhkfjCkuQbd6+qrOlzWMFPhPPc2J0D8SDZ54rINZxoprM613lgKazvOdmQIAO1ERXvdc5aiTVkc3IJqqzom4y913zlz6kZBntT5yLq9EwlTF7l/ZJDAjuv3Ev9f9fI7uUSKZDxqipFzwfO7zE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=a9vnquFK; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ehts61jh"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1756135774;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=1i2+2A3UxG6szUKYKSkulwqqvxOOp1ZI6uI4Bar8uaU=;
-	b=ehts61jhmzr6ZNeap394AF7LuHKL98Fc6+BL4YzkDqr0NKO+O5tm/MvFesC6C5dmZ/7WYs
-	YlOEPp4tPxlI0TsGY+gnPd7bBcgv2M9ksQAC+XZ+dj3ABFUGPFvPVJcQ06dHJdcy5Wo7FF
-	MbpyxIbWoIf9hlKefuAg4NZahXkybbQ=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-121-cfhdfZq6Nv6jqCbEE2E0MA-1; Mon, 25 Aug 2025 11:29:31 -0400
-X-MC-Unique: cfhdfZq6Nv6jqCbEE2E0MA-1
-X-Mimecast-MFC-AGG-ID: cfhdfZq6Nv6jqCbEE2E0MA_1756135770
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-2465bc6da05so35051115ad.0
-        for <fstests@vger.kernel.org>; Mon, 25 Aug 2025 08:29:31 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1756135770; x=1756740570;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=1i2+2A3UxG6szUKYKSkulwqqvxOOp1ZI6uI4Bar8uaU=;
-        b=t3mP5y+XHGdT+CfVioUb8iZwdnYVW1nbmCG8FNVZCNgWjzYZZ0BmH4vh5ae0GB6e+6
-         3FebMPfZ/xJkLeYp+ZSV2fGsvUnFG/48XrkVlcDIfhomsxXXAt/xXID11sZvAPp4hIf0
-         LCtKCAF5xzFiPpOCFphQDhkdYk1dA0yRsvwEvfrnyXV55R4W8E1mONDtZjhCQGIErioi
-         OTpN/R5hqu+dbqGEXdc4lXacKw99zRR5aAk+qFlKDsxJZMmO5CP26S6uOhrMLR1X/P/+
-         7Ddb5rWPIshUEMAi4cmVaILuVJBsjXQjHwUuhtGGqMygacI68lz3V3haNviId5JXKm/m
-         EU3w==
-X-Gm-Message-State: AOJu0Yxvt9bE0NnuK4rMRJLPDrwBhZmHk7Mie4DZk2SgVy9R+D94iGio
-	rWJi7AAjgs8xge2a8Is4Kf0NTKAa3+Kzjyd2ox40l4OLfYN2af/8lfZgukVCcj3d/EtA95p4Y1V
-	11YxpiRK0FBfl1Qt/mataTPlVTIiXdUyAZ/c0+hPFBJirTqx+JVwqTD72CgU=
-X-Gm-Gg: ASbGnctoXkd/7ODT9rN/q5Q4eFEXqNNM8ifEfHMbkqPE94v2D9poff5ffZ359cwTrTe
-	fJUJQVsXqZ42QQNBEQXnRdlIicfVRGsO9BX6RnDa9fogif3R1BzmxOz/Wcoj/XGupcPneI6SGNH
-	FJbU2ErNrfY0kEpG/NU9BAENc4IZIoL9s4KGUo4a/WspxtXozLmIqX6lYO6mccEj5mtGVHcxaI/
-	K2deV6mKkpKs/7eDvayG/GlkBBpsyikCBXYfXZKbZvPbbbxgzT3khE+8FNmb/7gnvMeSmbvWrB1
-	ItJC2dPAT3FSAMuR5As5u8iQiaL9xkbrZT3a0xtNq5hv5n9NWN5aqZF0zc8aqKUS1G3v/AiNh3s
-	B5Zth
-X-Received: by 2002:a17:902:ec89:b0:246:6fb:5016 with SMTP id d9443c01a7336-2462ee8df3bmr168166815ad.20.1756135770227;
-        Mon, 25 Aug 2025 08:29:30 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEkjrdn8sUCl9oN5WP7fv8c57Lb6oiCyKRUuIJz4eEVVQ+NkS3wVSOVsUIBXnoXNW1yzDXQtw==
-X-Received: by 2002:a17:902:ec89:b0:246:6fb:5016 with SMTP id d9443c01a7336-2462ee8df3bmr168166495ad.20.1756135769854;
-        Mon, 25 Aug 2025 08:29:29 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3254c47f2dcsm7174352a91.31.2025.08.25.08.29.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 25 Aug 2025 08:29:29 -0700 (PDT)
-Date: Mon, 25 Aug 2025 23:29:25 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
-	djwong@kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] generic/365: Fix false failure when mapping ends with
- free space
-Message-ID: <20250825152925.tcbbn5rxbjpk4ts7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cc80fdb62151d677809f2eb36eadebd3720c8701.1754385487.git.ojaswin@linux.ibm.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="a9vnquFK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7641DC4CEED;
+	Mon, 25 Aug 2025 15:44:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1756136654;
+	bh=f6UTTV3HQ3d6jbPvPhW3byClTFkJH7JWH0y1fcalmfg=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=a9vnquFK/xuSr2qwYNljAaSPxqgAY4XUYxTGsbBnl8BntUJ39701ZnGT+kxwdBpkv
+	 OXDCr9/V/aFmHEuxI7bwzJQk1XH5tVI1aREbMadf4O7YjBIFZ/bITfXJO5Tsh+nb8o
+	 oOYoYzGMF8wKGhvGACfHmD1ynXXOigu+Ur2PuwKk3KyZW7eTLP9Tjp+ZulQppesPW1
+	 ov5ueALxmEBryzGtWAvB50EsZwgHsrvf6U9b57amF3kVfnUJpIeaCx2hvY1oGyR1X0
+	 IndqVrE7PVVybWUCUWku/d46P0H60AzBmzAmzgmUmHKVAIyXSaS4BG/sEWlXyssALe
+	 1koTFL3/imwxA==
+Date: Mon, 25 Aug 2025 23:44:10 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/3] dmthin: _notrun when dm-thin setup fails
+Message-ID: <20250825154410.dt5avycrauhtd2te@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250818072724.1559133-1-hch@lst.de>
+ <20250818072724.1559133-2-hch@lst.de>
+ <20250818205131.GD7952@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -80,57 +43,85 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <cc80fdb62151d677809f2eb36eadebd3720c8701.1754385487.git.ojaswin@linux.ibm.com>
+In-Reply-To: <20250818205131.GD7952@frogsfrogsfrogs>
 
-On Tue, Aug 05, 2025 at 02:55:56PM +0530, Ojaswin Mujoo wrote:
-> If we have a small FS where the first free space mapping is also the
-> last mapping of the FS, then the following sub-test fails:
+On Mon, Aug 18, 2025 at 01:51:31PM -0700, Darrick J. Wong wrote:
+> On Mon, Aug 18, 2025 at 09:27:16AM +0200, Christoph Hellwig wrote:
+> > dm-think does not work on device with protection information.  Instead
+> > of failing the tests using it in obscure ways, _norun them.
 > 
->   echo "test whatever came after freesp"
->   $XFS_IO_PROG -c "fsmap -d $((freesp_end + 2)) $((freesp_end + 3))" $SCRATCH_MNT
+> Heh, I wish we had a thinking device mapper target. :)
+
+Me too :) anyway I'll help to change this typo.
+
 > 
-> since there is nothing after the freespace. Fix this by punching a 1M
-> hole in a 3M file to ensure that the first free space is always
-> surrounded by allocated blocks.
+> > Signed-off-by: Christoph Hellwig <hch@lst.de>
 > 
-> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> ---
->  tests/generic/365 | 4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/tests/generic/365 b/tests/generic/365
-> index 36cb2530..bbadae71 100755
-> --- a/tests/generic/365
-> +++ b/tests/generic/365
-> @@ -32,6 +32,10 @@ if ((blksz < 2048)); then
->  	_notrun "test requires at least 4 bblocks per fsblock"
->  fi
->  
-> +# This makes sure there is free space surrounded by allocated blocks, which
-> +# is needed for some sub tests.
-> +$XFS_IO_PROG -fc 'falloc 0 3M' -c 'fpunch 1M 1M' -c 'fsync' $SCRATCH_MNT/f
+> Anyhow, failure to set up a dm-thinp volume sounds like failing to meet
+> a test precondition, sooo
 
-If you add "falloc" and "fpunch" operations, you need to:
-
-_require_xfs_io_command "falloc"
-_require_xfs_io_command "fpunch"
-
-Due to not all fileystems support these two fs operations.
-
-BTW, I'm wondering how small (and what kind of) the fs you use, cause there's only
-one unused region, even this's a clean fs, there're some still many different
-metadatas. I even tried a 100M ext2 fs (which doesn't has log space), there're
-many free space regions. So I'm curious, how can you hit this issue? And if the
-SCRATCH_DEV is too small (e.g. 10M), do we really need to test with that fs size:)
+I'm wondering, if we choose _notrun when _dmthin_init/dmsetup_create fails,
+but others _dmxxxx_init/dmsetup_create [1]  fails, we still call _fatal. Isn't
+that an inconsistent behavior :)
 
 Thanks,
 Zorro
 
-> +
->  $XFS_IO_PROG -c 'fsmap' $SCRATCH_MNT >> $seqres.full
->  
->  find_freesp() {
-> -- 
-> 2.49.0
-> 
+[1]
+zorro@zlang-laptop:~/git/upstream/xfs/xfstests-dev$ ls common/dm*
+common/dmdelay  common/dmdust  common/dmerror  common/dmflakey  common/dmhugedisk  common/dmlogwrites  common/dmthin
 
+> 
+> Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+> 
+> --D
+> 
+> > ---
+> >  common/dmthin | 10 +++++-----
+> >  1 file changed, 5 insertions(+), 5 deletions(-)
+> > 
+> > diff --git a/common/dmthin b/common/dmthin
+> > index 453e43a0499e..a1e1fb8763c0 100644
+> > --- a/common/dmthin
+> > +++ b/common/dmthin
+> > @@ -105,13 +105,13 @@ _dmthin_init()
+> >  	# Metadata device
+> >  	DMTHIN_META_TABLE="0 $meta_dev_size linear $dm_backing_dev $meta_dev_offset"
+> >  	_dmsetup_create $DMTHIN_META_NAME --table "$DMTHIN_META_TABLE" || \
+> > -		_fatal "failed to create dm thin meta device"
+> > +		_notrun "failed to create dm thin meta device"
+> >  
+> >  	# Data device
+> >  	local data_dev_offset=$((meta_dev_offset + $meta_dev_size))
+> >  	DMTHIN_DATA_TABLE="0 $data_dev_size linear $dm_backing_dev $data_dev_offset"
+> >  	_dmsetup_create $DMTHIN_DATA_NAME --table "$DMTHIN_DATA_TABLE" || \
+> > -		_fatal "failed to create dm thin data device"
+> > +		_notrun "failed to create dm thin data device"
+> >  
+> >  	# Zap the pool metadata dev.  Explicitly fsync the zeroes to disk
+> >  	# because a slow-running udev running concurrently with dd can maintain
+> > @@ -124,16 +124,16 @@ _dmthin_init()
+> >  	# "start length thin-pool metadata_dev data_dev data_block_size low_water_mark"
+> >  	DMTHIN_POOL_TABLE="0 $data_dev_size thin-pool $DMTHIN_META_DEV $DMTHIN_DATA_DEV $cluster_size $low_water"
+> >  	_dmsetup_create $DMTHIN_POOL_NAME --table "$DMTHIN_POOL_TABLE" || \
+> > -		_fatal "failed to create dm thin pool device"
+> > +		_notun "failed to create dm thin pool device"
+> >  
+> >  	# Thin volume
+> >  	$DMSETUP_PROG message $DMTHIN_POOL_DEV 0 "create_thin $pool_id" || \
+> > -		_fatal "failed to message pool device"
+> > +		_notrun "failed to message pool device"
+> >  
+> >  	# start length thin pool_dev dev_id [external_origin_dev]
+> >  	DMTHIN_VOL_TABLE="0 $virtual_size thin $DMTHIN_POOL_DEV $pool_id"
+> >  	_dmsetup_create $DMTHIN_VOL_NAME --table "$DMTHIN_VOL_TABLE" || \
+> > -		_fatal "failed to create dm thin volume device"
+> > +		_notrun "failed to create dm thin volume device"
+> >  
+> >  }
+> >  
+> > -- 
+> > 2.47.2
+> > 
+> > 
+> 
