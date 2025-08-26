@@ -1,160 +1,227 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A1782FF64F
-	for <fstests@vger.kernel.org>; Mon, 25 Aug 2025 16:08:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1E8229D27E
+	for <fstests@vger.kernel.org>; Tue, 26 Aug 2025 10:40:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756138095; cv=none; b=GpkFFaIRoyJjabE3CnjH2HCSW8yUBom16ci6mTl2eWKl+dawqMjiWR/UOs0j/53BJcVFDTmKgaqyDFs3XUSXmGiWya8/P2mkD2F6My9/eJZm2Aq0UiNBRry498AHZcNeflBZxaDwklxdSIUSQ5576LXV81eJprz8mSeFdqQwioU=
+	t=1756204816; cv=none; b=YNqayNFzLkIb9jnxWfIntzdhVPDDXHKHVQsZFTvj2kNA1MRLm0T1x7nGwrB47JBGUxzHEQ39KXit7oOyNTdKKV2Qdv/VXPqe5n40Zw88S4oQPSz1PxhgDnfTd5DCEzBGlzE2VMZxQEGYSg1O7nmlJgNrj2iksiR0PTPEVnQuQiE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756138095; c=relaxed/simple;
-	bh=lx8unmZZotH1lOPOwGBWaz+oEXYueOAZnio+N2QuHm4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=RiQhHaXdjTUHSCnx9HlOFGY4dD7Ji/VE4keRdIpac38VZYpVwr3WpbusblBBQ6kKLpcRWOnJo8jDtCdmnKb78IbeIz+bqo6QzQu7z9yppqQH4o8Dp1JJyb8sAcUMKv4Yqvp8ozh/jdIkpp+fs/E2V7lfh+A4a/DfaRVY0Z6iNWM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=aAPKs58T; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1756204816; c=relaxed/simple;
+	bh=hs9eBPDABg4SIlafemijA244+wXru9HWJCNTORtQxmc=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=u1msaBaohxDtcIKyvD3OkM5uTjmTdgkcRTauu6eyyA92tPBc1ATarHgtBP7d6misx7Ww6A83EvygJ1pCFrJLdsLXBUfsTTlnuSjOXJWRyRBgYjvouvvoLXLl5vHOKdltSp/QGV1CTplo/D2btvMHqBbsddyqe8soZMrvoAgsCRs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=W1uj/1E1; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=W1uj/1E1; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aAPKs58T"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1756138092;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=S26mrjD5N2pdJld3xZ+GOHAoTX+ohujbOU33KruSQAI=;
-	b=aAPKs58TzQhtc0je8KghmU6FG7wRafWB4AGY8weOP8zAbxYb0TF3sExski+kWOl8W+xlov
-	fUvXQGTV7ozNqmD5bIYi8UsUNUmxDIa9WuMeZGp2N40+vIHlGywFpRPDgHxta1y0RitEX6
-	q1CeGy98OEfonk5mMOO+QjlAprNL8ZU=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-484-P3-RVSbvN0SBH9F3HZhZvA-1; Mon, 25 Aug 2025 12:08:10 -0400
-X-MC-Unique: P3-RVSbvN0SBH9F3HZhZvA-1
-X-Mimecast-MFC-AGG-ID: P3-RVSbvN0SBH9F3HZhZvA_1756138087
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-b47253319b8so3444721a12.3
-        for <fstests@vger.kernel.org>; Mon, 25 Aug 2025 09:08:08 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1756138087; x=1756742887;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=S26mrjD5N2pdJld3xZ+GOHAoTX+ohujbOU33KruSQAI=;
-        b=u/264Op7ac3lnh4JsaWziN7npUxodGTrOZElpRIBI+k6DhLEWB0PbtS5olaLI9eApO
-         DWoHWshuZqK+aMvzgJBKXBZBCXt/H66OV7Cxk5eeoOGxJMu9Mj7SMrRDk/W0ADgE9NRw
-         gU+7/g78PSA8mjuaj+U66D9/IeNcBNlz6aXVYSrwoM/WGI0Mop8G7EqpFKocP8QMYqMh
-         E5JwSGMgkFkEIbNxZfPlsGNZBCkuoNFgmiLcuipADBPyvVIzjn9KnbUR8fP0w+V4cUbn
-         McDsse8VrpTxgGc2CMjwicp2/gmA2LBFqLjhay4v4is5Frs0fyX2MiA/mvJ/Yc4o24So
-         WSUg==
-X-Gm-Message-State: AOJu0YxB2JD9T98M3VXkTQCczDzIwTPsCW0ogry2J+OAxvWRUWTgyWSa
-	DV5ISThyEouJBXh5IXBX7dkaT9c+4t9iFa/pa77gl2qsKJHE3AzbOToSDwv64x/WGfW9GkshvHi
-	ge2DMeMdLfs8bn+H6SuIYAEDlsLUJSG4BHPinaw2rSSeSFX1hv26U7xTEm5g=
-X-Gm-Gg: ASbGncvc+GB9JLkzH1TaEMc4sNaERTfmMYNlAhpns4UguBYmG2quhJVf6r+NukyhmJs
-	rBzZy3alyvv4AcXLGEBBQh/TGromMHZx60lt0l2FFzLf+iirRbfG5bPSymFfRpCK/gt8sKxgmPe
-	gdqth1+qMWY/XLfTimu1i3LzOnKHJ1Zfv21TG2Y7Mdm8WwY9KusbxQ/vE8RDNdzVg1NSbMo2zTg
-	Q5ozwI4pkP/AlOoaUwYqZ91arY2PH9uRGsdtYw1jcYnnsmXMyoWpj8QFcihGYHh66inpZ8aLFuQ
-	war1tb39UzLS8L4w0woK9z6Lh03s8A9M7Thfc1PzKvQU9wkMr5fduNuM7+7456UyjEyT9FtIRgH
-	yrei9
-X-Received: by 2002:a05:6a20:7fa7:b0:220:631c:e090 with SMTP id adf61e73a8af0-24340884ecfmr17792506637.0.1756138087332;
-        Mon, 25 Aug 2025 09:08:07 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFuGQjcHakFAYSJasLNIwmwH5AbB+ig9C8K1dte2zhi+ECS9Vuy2ZlNckCYG18AokysGYZ0Zw==
-X-Received: by 2002:a05:6a20:7fa7:b0:220:631c:e090 with SMTP id adf61e73a8af0-24340884ecfmr17792475637.0.1756138086873;
-        Mon, 25 Aug 2025 09:08:06 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b49cbb7c09fsm6956388a12.26.2025.08.25.09.08.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 25 Aug 2025 09:08:06 -0700 (PDT)
-Date: Tue, 26 Aug 2025 00:08:01 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
-	djwong@kernel.org, john.g.garry@oracle.com, tytso@mit.edu,
-	linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-ext4@vger.kernel.org
-Subject: Re: [PATCH v5 02/12] common/rc: Add _require_fio_version helper
-Message-ID: <20250825160801.ffktqauw2o6l5ql3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cover.1755849134.git.ojaswin@linux.ibm.com>
- <955d47b2534d9236adbd2bbd13598bbd1da8fc04.1755849134.git.ojaswin@linux.ibm.com>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="W1uj/1E1";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="W1uj/1E1"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id DD15A21262;
+	Tue, 26 Aug 2025 10:40:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1756204812; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=odwKUP99tCqLykUJEuVpKu9HxEdPL9jnr4wHrWNezxw=;
+	b=W1uj/1E1Fb23u7GYTd4D8N5HvNJK3xtniOeOdmEinqdlKX0SvJ1JrCcknOGPvTn3TI21+4
+	DevDfwjnDYSFNC5FyOdDCx2I/FKGzqyns1g8S0Rp5paWEASeJSpkWIK01K/u+2hHjxTE47
+	aE0KUy43Ru5Bg9t7MmBJFmis34B70k0=
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1756204812; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=odwKUP99tCqLykUJEuVpKu9HxEdPL9jnr4wHrWNezxw=;
+	b=W1uj/1E1Fb23u7GYTd4D8N5HvNJK3xtniOeOdmEinqdlKX0SvJ1JrCcknOGPvTn3TI21+4
+	DevDfwjnDYSFNC5FyOdDCx2I/FKGzqyns1g8S0Rp5paWEASeJSpkWIK01K/u+2hHjxTE47
+	aE0KUy43Ru5Bg9t7MmBJFmis34B70k0=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id D408913A31;
+	Tue, 26 Aug 2025 10:40:11 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id bRIlJAuPrWimeAAAD6G6ig
+	(envelope-from <wqu@suse.com>); Tue, 26 Aug 2025 10:40:11 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] fstests: btrfs: add a new test case to verify compressed read
+Date: Tue, 26 Aug 2025 20:09:54 +0930
+Message-ID: <20250826103954.26168-1-wqu@suse.com>
+X-Mailer: git-send-email 2.50.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <955d47b2534d9236adbd2bbd13598bbd1da8fc04.1755849134.git.ojaswin@linux.ibm.com>
+Content-Transfer-Encoding: 8bit
+X-Spamd-Result: default: False [-2.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_CONTAINS_FROM(1.00)[];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-0.999];
+	MIME_GOOD(-0.10)[text/plain];
+	RCPT_COUNT_TWO(0.00)[2];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_TLS_ALL(0.00)[]
+X-Spam-Flag: NO
+X-Spam-Level: 
+X-Spam-Score: -2.80
 
-On Fri, Aug 22, 2025 at 01:32:01PM +0530, Ojaswin Mujoo wrote:
-> The main motivation of adding this function on top of _require_fio is
-> that there has been a case in fio where atomic= option was added but
-> later it was changed to noop since kernel didn't yet have support for
-> atomic writes. It was then again utilized to do atomic writes in a later
-> version, once kernel got the support. Due to this there is a point in
-> fio where _require_fio w/ atomic=1 will succeed even though it would
-> not be doing atomic writes.
-> 
-> Hence, add an explicit helper to ensure tests to require specific
-> versions of fio to work past such issues.
+The new test case is a regression test related to the block size < page
+size handling of compressed read.
 
-Actually I'm wondering if fstests really needs to care about this. This's
-just a temporary issue of fio, not kernel or any fs usespace program. Do
-we need to add a seperated helper only for a temporary fio issue? If fio
-doesn't break fstests running, let it run. Just the testers install proper
-fio (maybe latest) they need. What do you and others think?
+The test case will only be triggered with 64K page size and 4K btrfs
+block size.
+I'm using aarch64 with 64K page size to trigger the regression.
 
-Thanks,
-Zorro
+The test case will create the following file layout:
 
-> 
-> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> ---
->  common/rc | 32 ++++++++++++++++++++++++++++++++
->  1 file changed, 32 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index 35a1c835..f45b9a38 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -5997,6 +5997,38 @@ _max() {
->  	echo $ret
->  }
->  
-> +# Check the required fio version. Examples:
-> +#   _require_fio_version 3.38 (matches 3.38 only)
-> +#   _require_fio_version 3.38+ (matches 3.38 and above)
-> +#   _require_fio_version 3.38- (matches 3.38 and below)
-> +_require_fio_version() {
-> +	local req_ver="$1"
-> +	local fio_ver
-> +
-> +	_require_fio
-> +	_require_math
-> +
-> +	fio_ver=$(fio -v | cut -d"-" -f2)
-> +
-> +	case "$req_ver" in
-> +	*+)
-> +		req_ver=${req_ver%+}
-> +		test $(_math "$fio_ver >= $req_ver") -eq 1 || \
-> +			_notrun "need fio >= $req_ver (found $fio_ver)"
-> +		;;
-> +	*-)
-> +		req_ver=${req_ver%-}
-> +		test $(_math "$fio_ver <= $req_ver") -eq 1 || \
-> +			_notrun "need fio <= $req_ver (found $fio_ver)"
-> +		;;
-> +	*)
-> +		req_ver=${req_ver%-}
-> +		test $(_math "$fio_ver == $req_ver") -eq 1 || \
-> +			_notrun "need fio = $req_ver (found $fio_ver)"
-> +		;;
-> +	esac
-> +}
-> +
->  ################################################################################
->  # make sure this script returns success
->  /bin/true
-> -- 
-> 2.49.0
-> 
+  base:
+  [0, 64K): Single compressed data extent at bytenr X.
+
+  new:
+  [0, 32K): Reflinked from base [32K, 64K)
+  [32K, 60K): Reflinked from base [0, 28K)
+  [60K, 64K): New 4K write
+
+  The range [0, 32K) and [32K, 64K) are pointing to the same compressed
+  data.
+
+  The last 4K write is a special workaround. It is a block aligned
+  write, thus it will create the folio but without reading out the
+  remaing part.
+
+  This is to avoid readahead path, which has the proper fix.
+  We want single folio read without readahead.
+
+Then output the file "new" just after the last 4K write, then cycle
+mount and output the content again.
+
+For patched kernel, or with 4K page sized system, the test will pass,
+the resulted content will not change during mount cycles.
+
+For unpatched kernel and with 64K page size, the test will fail, the
+content after the write will be incorrect (the range [32K, 60K) will be
+zero), but after a mount cycle the content is correct again.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/337     | 56 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/337.out | 23 +++++++++++++++++++
+ 2 files changed, 79 insertions(+)
+ create mode 100755 tests/btrfs/337
+ create mode 100644 tests/btrfs/337.out
+
+diff --git a/tests/btrfs/337 b/tests/btrfs/337
+new file mode 100755
+index 00000000..9cd2ea42
+--- /dev/null
++++ b/tests/btrfs/337
+@@ -0,0 +1,56 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 SUSE Linux Products GmbH.  All Rights Reserved.
++#
++# FS QA Test 337
++#
++# Test compressed read with shared extents, especially for bs < ps cases.
++#
++. ./common/preamble
++_begin_fstest auto quick compress reflink
++
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: do more strict compressed read merge check"
++
++. ./common/filter
++. ./common/reflink
++
++_require_btrfs_support_sectorsize 4096
++_require_scratch_reflink
++
++# The layout used in the test case is all 4K based, and can only be reproduced
++# with page size larger than 4K.
++_scratch_mkfs -s 4k >> $seqres.full
++_scratch_mount "-o compress"
++
++# Create the reflink source, which must be a compressed extent.
++$XFS_IO_PROG -f -c "pwrite -S 0x0f 0 32K" \
++		-c "pwrite -S 0xf0 32K 32K" \
++		-c sync $SCRATCH_MNT/base >> $seqres.full
++echo "Reflink source:"
++echo "Reflink source:" >> $seqres.full
++od -t x1 $SCRATCH_MNT/base | _filter_od
++
++# Create the reflink dest, which reverse the order of the two 32K range.
++#
++# And do a further aligned write into the last block.
++# This write is to make sure the folio exists in filemap, so that we won't go
++# through the readahead path (which has the proper handling) for the folio.
++$XFS_IO_PROG -f -c "reflink $SCRATCH_MNT/base 32K 0 32K" \
++		-c "reflink $SCRATCH_MNT/base 0 32K 32K" \
++		-c "pwrite 60K 4K" $SCRATCH_MNT/new >> $seqres.full
++
++# This will result an incorrect output for unpatched kernel.
++# The range [32K, 60K) will be zero due to incorrectly merged compressed read.
++echo "Before mount cycle:"
++od -t x1 $SCRATCH_MNT/new | _filter_od
++
++_scratch_cycle_mount
++
++# This will go through readahead path, which has the proper handling, thus give
++# the correct content.
++echo "After mount cycle:"
++od -t x1 $SCRATCH_MNT/new | _filter_od
++
++status=0
++_exit 0
+diff --git a/tests/btrfs/337.out b/tests/btrfs/337.out
+new file mode 100644
+index 00000000..d3e35863
+--- /dev/null
++++ b/tests/btrfs/337.out
+@@ -0,0 +1,23 @@
++QA output created by 337
++Reflink source:
++0 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f
++*
++10 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0
++*
++20
++Before mount cycle:
++0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0
++*
++10 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f
++*
++17 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd
++*
++20
++After mount cycle:
++0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0
++*
++10 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f
++*
++17 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd
++*
++20
+-- 
+2.49.0
 
