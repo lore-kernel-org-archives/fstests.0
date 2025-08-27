@@ -1,211 +1,190 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B982828312E
-	for <fstests@vger.kernel.org>; Wed, 27 Aug 2025 15:16:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4BD8427FD5D;
+	Wed, 27 Aug 2025 15:16:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756307789; cv=none; b=LPQBoiVBv8YugCWZI+a33gWegNYNnJamwGG8MiQhT9wmA24qA8qLHEYbd4jl/cwFB3jKLBN5tEdqEqpSOGb0j7GIMkVE2oHBF9WChlULOoLnuZOJFnFcB8u3fc7N7FVdXbRwVYKzOloI5ij2fJoIWgv2546odvxGkcCvyzoY+ZQ=
+	t=1756307812; cv=none; b=EmNdd/xyGVhV+YZV7WBocUJRO5SDSX1NPvYA0ngBgEXJawRFcp+5JbdLl+VfDofG8EYf7P53azZg2n+LvGxVPeBtV2oJ+FtLUSKQXXI+/rtyPOYtMJAvFCz3jRMVP5535mbpQWBnSpWIQ0EgcKtiXY2ZCfqOtpY1kg2pVQCXKIM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756307789; c=relaxed/simple;
-	bh=kYbsGAy8GMeUA6lqVnw4fhaUnEOWu7NsbJ/bKKr/7v8=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=FGNPJJcf4DiDuqBZar7mxaKsjYWJyAJexOdMjRaxjs/qH1p5Ym5HMmzxXWU+w0N46X7z0B1TMan5nBdexkSdRdx2TpcVdP3PzDZYuXf5dsjdpidDj9ntbq67bCwKul4xPOEarvs7LzpiFVvLxjL1InzYfVs5Xwg36ODKYrMJuow=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZcdaDaim; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1756307812; c=relaxed/simple;
+	bh=mOV+nWXhghC+6OaXr13EUm4ZGN4mHYeKxrBdFRkt1RM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=sFkHQBoeT9SUJ9yVHDsx32ym9hd3CFvg+g3dgONiwWQcGveEcQ4bsGeFYaBWN1DqUiTrmbQXuUuz4h5VwoP05KVoV2e5qNv51N/4UwM9GjCHy6CZwwRnwa7kLVYTNI92Ce6XQVPvZV90bUYzBIdlYoYF3yoPrKftVswAm3ifOQA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=tQrILEOn; arc=none smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZcdaDaim"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1756307786;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=XTUCl5n/kCYAs38Bk2khoNLAR3VoHOaPiVzysLhfkqM=;
-	b=ZcdaDaimabL0GEPcmmi0aMcwj/KgpqbAI9j85SB8QgRGe4QnPxtA4DGaSfK+ErOj7OkxJS
-	6suGnKx4/dVAoStRl06vNp+pot9dZ2YK5WIHM+ildAszxch1EtkR8zMZGoMySE4NsbVEE/
-	aAH2BqWVhf4reIRkqiBHcF/OL2UL/d0=
-Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com
- [209.85.128.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-361-WYihbJHUNV2iNcol9OaX2g-1; Wed, 27 Aug 2025 11:16:23 -0400
-X-MC-Unique: WYihbJHUNV2iNcol9OaX2g-1
-X-Mimecast-MFC-AGG-ID: WYihbJHUNV2iNcol9OaX2g_1756307783
-Received: by mail-wm1-f72.google.com with SMTP id 5b1f17b1804b1-45a1ad21752so5434075e9.1
-        for <fstests@vger.kernel.org>; Wed, 27 Aug 2025 08:16:23 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1756307782; x=1756912582;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=XTUCl5n/kCYAs38Bk2khoNLAR3VoHOaPiVzysLhfkqM=;
-        b=BCJ1mGBYP7gDG0LGSUxYSo5+t4njMSSRpmEh5cy6t6xphljSoNbiX9f2jsIMjK36ba
-         OJjjvq7RKY+evUMo9AYHyBS6nfBJZzSbu4pWGMPZGTz4x+U3ItODx/MvKn/zJh0EmNRd
-         /gEmvsDPEdtPveqcDvd9gM0yUhC0mGqaMW4DtFZotiOO00QrERC9OivpN5/dWjqX31/5
-         3rgTpT1J2vU5xfBBQjLhD1X89UHnq6KqLpNZGpzQD3TXDPoGZH5pfN3nsCm5ZMLoAJ0J
-         NhkXRD8abQMQUEYzmGmmQQrvaMrqXEEhMHVQG7crapJqsbpqkRsvv+8MLWyqbGfsDpqs
-         oJCw==
-X-Gm-Message-State: AOJu0YyJMAxmkiY3R/+91rl758A8IEYjn8xShEOBE51MQIZTvnYlfIkj
-	TEswytT6gL0mZ4YOm3lcjm+qkSfVIgTHdHLCts6zrFG7FRQnFC+xMJvci6bK8a7X9Dtpzk690vW
-	R4E8JC5toNcs9QVcsPlRwEn/6baGlcRfBs+7BHVNMuoZEamq3Cu41qMFhrQ==
-X-Gm-Gg: ASbGnct8LJWULnfGfunw21UHNiHCgPdCeBzYmidjbLFwPOVHCB1hVDGME9mLG7u5gzr
-	b1V2916ERFKyp1K9RYqnxZN9bsWpC0skgGSBvZWeiWs5KSMpDqZ5d/zPK5cF1lvU1B1imktS0XR
-	zWR2LG1PX5xbQR2SRqnmGhnR0sU7LU7rZM6ukjBH+/S7oJxH8+2HIBarUbv7bm8DjvDhDmDmqeo
-	3qrR1BzgSirRIzfJAC1E2Fkj5ZIN/BZOwk6DDyRYK1Q4jEId8myCpn+MvP4PIsPIdGk9dPr8uHr
-	Gc5LCo8GP8Ezdv9huw==
-X-Received: by 2002:a05:600c:c0d9:b0:459:dbc2:201e with SMTP id 5b1f17b1804b1-45b6870dda4mr26737685e9.9.1756307782494;
-        Wed, 27 Aug 2025 08:16:22 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEPJoIJySLeawXgr/PUlSZfR/ZHT6IBnT2EEtKiU7dNbcjnC1lc9hzdIQdOtJCf9k0+zYGgNA==
-X-Received: by 2002:a05:600c:c0d9:b0:459:dbc2:201e with SMTP id 5b1f17b1804b1-45b6870dda4mr26737515e9.9.1756307782002;
-        Wed, 27 Aug 2025 08:16:22 -0700 (PDT)
-Received: from [127.0.0.2] ([91.245.205.131])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-45b6f0c6dc1sm35019145e9.1.2025.08.27.08.16.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 27 Aug 2025 08:16:21 -0700 (PDT)
-From: Andrey Albershteyn <aalbersh@redhat.com>
-X-Google-Original-From: Andrey Albershteyn <aalbersh@kernel.org>
-Date: Wed, 27 Aug 2025 17:16:17 +0200
-Subject: [PATCH v2 3/3] xfs: test quota's project ID on special files
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="tQrILEOn"
+Received: from pps.filterd (m0360083.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 57R7wpnL011849;
+	Wed, 27 Aug 2025 15:16:43 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=pp1; bh=SPyx11geBrvCeW8/DE+b27cLGdioY2
+	twq7XbikpR9hU=; b=tQrILEOnkv2ygrRG3IyrCMGcoKLVm+C7kU+2PbwLRdD9xc
+	k+zwwxhG3qr4s/HFsObRELXYawLhEKRj3ltaBYe1cHFLEoud0wzvNM+r0Wzk5hMk
+	e3NPwuIZ+E/lA3yqqvf2hJ8jc9KW05gfWA4++ZKt3CvGFrrxQ2iF7Kjvck70i+sY
+	zyoS6OJZ3FGu20LMFB3teNdc3yHh7kYS6KsjCdOurGRGRu46e9ixLnd/QAsDsVWT
+	KnMmdrU37hV8/uSUj5Qx3tKQ5Uej02bM7nO1/VznvitGD+95vCDkFsBbFBWpNe7A
+	+ximIn47kMLCHslR5Wa1+gjIKGf2YVxilLBZZRrg==
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48q5584tyh-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 27 Aug 2025 15:16:42 +0000 (GMT)
+Received: from m0360083.ppops.net (m0360083.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 57RFGgVX001288;
+	Wed, 27 Aug 2025 15:16:42 GMT
+Received: from ppma13.dal12v.mail.ibm.com (dd.9e.1632.ip4.static.sl-reverse.com [50.22.158.221])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 48q5584tyc-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 27 Aug 2025 15:16:42 +0000 (GMT)
+Received: from pps.filterd (ppma13.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma13.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 57RCPxFe002473;
+	Wed, 27 Aug 2025 15:16:41 GMT
+Received: from smtprelay02.fra02v.mail.ibm.com ([9.218.2.226])
+	by ppma13.dal12v.mail.ibm.com (PPS) with ESMTPS id 48qt6mgahc-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 27 Aug 2025 15:16:41 +0000
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay02.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 57RFGdWA38666592
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Wed, 27 Aug 2025 15:16:39 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 2463D2004E;
+	Wed, 27 Aug 2025 15:16:39 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id DD3D120040;
+	Wed, 27 Aug 2025 15:16:36 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.39.23.211])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Wed, 27 Aug 2025 15:16:36 +0000 (GMT)
+Date: Wed, 27 Aug 2025 20:46:34 +0530
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
+        djwong@kernel.org, john.g.garry@oracle.com, tytso@mit.edu,
+        linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v5 02/12] common/rc: Add _require_fio_version helper
+Message-ID: <aK8hUqdee-JFcFHn@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+References: <cover.1755849134.git.ojaswin@linux.ibm.com>
+ <955d47b2534d9236adbd2bbd13598bbd1da8fc04.1755849134.git.ojaswin@linux.ibm.com>
+ <20250825160801.ffktqauw2o6l5ql3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20250827-xattrat-syscall-v2-3-ba489b5bc17a@kernel.org>
-References: <20250827-xattrat-syscall-v2-0-ba489b5bc17a@kernel.org>
-In-Reply-To: <20250827-xattrat-syscall-v2-0-ba489b5bc17a@kernel.org>
-To: fstests@vger.kernel.org
-Cc: zlang@redhat.com, linux-fsdevel@vger.kernel.org, 
- linux-xfs@vger.kernel.org, Andrey Albershteyn <aalbersh@kernel.org>, 
- Andrey Albershteyn <aalbersh@redhat.com>
-X-Mailer: b4 0.15-dev
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3958; i=aalbersh@kernel.org;
- h=from:subject:message-id; bh=WxjcIOGrMxQ8fi2CDevfH6n7oBhoM80FQoibXLNSdqo=;
- b=owJ4nJvAy8zAJea2/JXEGuOHHIyn1ZIYMtYrOq17uqvDwDGr7//vyMqzHbX11ob6lxITJ92bc
- W4X88fpbqs6SlkYxLgYZMUUWdZJa01NKpLKP2JQIw8zh5UJZAgDF6cATIT3BSPD6b6Onr03OWbW
- m77ZM4GrO+xi/GoHbQPrWx6u4U/Yl88/x/Df8UamnvP22w4cQTcj9+d489uYuGx47SudfIb9/Ht
- b+d+MANODR5E=
-X-Developer-Key: i=aalbersh@kernel.org; a=openpgp;
- fpr=AE1B2A9562721A6FC4307C1F46A7EA18AC33E108
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250825160801.ffktqauw2o6l5ql3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: d02U5Q3hom6xqs3PZk50E5KMp5ujhhzo
+X-Proofpoint-ORIG-GUID: 00srl8NFDJ-SUUPFIpEZKfq2C8CLAwNd
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODIzMDAyMSBTYWx0ZWRfXzU/FxPxWV0P6
+ 2hwQiSOLB/vjx4nk+bTJyGT8MGii3+ZjEOZnyJb01w/UJ1S/AKOgcG67CH1ulmF67o9kQK4K1Xc
+ Lol2JdhQEvv7wSeJHOUVsBdNRPJ0MGixviP01yc5FUUzdXdP0YIiOFTwl5L1MOovEg3UjwMHpRz
+ 5yDgylgLQ4BDRud4OhT9wDKC+YY954F6+8k1zrxZFSX9vcP7kRh4VGEFrCEYuYhBoqU0GlcqWH1
+ DpspFAEpy4fhrvOhc+C3lzISvQDwmlHTIIg3NyaDlzPJzuyhHtYUjhtsa0noqsbrjA0EhTHrw/K
+ ijcGDxOHO6oHVEShn9YXo++MlbfHZs5GvbSoufzQ0uBkuNyjoV2gA2g3pMAEjdUvyvbhEfariqm
+ QMsf9fYf
+X-Authority-Analysis: v=2.4 cv=A8ZsP7WG c=1 sm=1 tr=0 ts=68af215a cx=c_pps
+ a=AfN7/Ok6k8XGzOShvHwTGQ==:117 a=AfN7/Ok6k8XGzOShvHwTGQ==:17
+ a=kj9zAlcOel0A:10 a=2OwXVqhp2XgA:10 a=VnNF1IyMAAAA:8 a=eC5F5FB79jDbC9rVOvkA:9
+ a=CjuIK1q_8ugA:10
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-08-27_03,2025-08-26_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ phishscore=0 adultscore=0 priorityscore=1501 suspectscore=0 clxscore=1015
+ spamscore=0 impostorscore=0 malwarescore=0 bulkscore=0 classifier=typeunknown
+ authscore=0 authtc= authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2507300000 definitions=main-2508230021
 
-From: Andrey Albershteyn <aalbersh@redhat.com>
+On Tue, Aug 26, 2025 at 12:08:01AM +0800, Zorro Lang wrote:
+> On Fri, Aug 22, 2025 at 01:32:01PM +0530, Ojaswin Mujoo wrote:
+> > The main motivation of adding this function on top of _require_fio is
+> > that there has been a case in fio where atomic= option was added but
+> > later it was changed to noop since kernel didn't yet have support for
+> > atomic writes. It was then again utilized to do atomic writes in a later
+> > version, once kernel got the support. Due to this there is a point in
+> > fio where _require_fio w/ atomic=1 will succeed even though it would
+> > not be doing atomic writes.
+> > 
+> > Hence, add an explicit helper to ensure tests to require specific
+> > versions of fio to work past such issues.
+> 
+> Actually I'm wondering if fstests really needs to care about this. This's
+> just a temporary issue of fio, not kernel or any fs usespace program. Do
+> we need to add a seperated helper only for a temporary fio issue? If fio
+> doesn't break fstests running, let it run. Just the testers install proper
+> fio (maybe latest) they need. What do you and others think?
+> 
+> Thanks,
+> Zorro
 
-With addition of file_getattr() and file_setattr(), xfs_quota now can
-set project ID on filesystem inodes behind special files. Previously,
-quota reporting didn't count inodes of special files created before
-project initialization. Only new inodes had project ID set.
+Hey Zorro,
 
-Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
----
- tests/xfs/2000     | 73 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/2000.out | 15 +++++++++++
- 2 files changed, 88 insertions(+)
+Sure I'm okay with not keeping the helper and letting the user make sure
+the fio version is correct.
 
-diff --git a/tests/xfs/2000 b/tests/xfs/2000
-new file mode 100755
-index 000000000000..7d45732bdbb7
---- /dev/null
-+++ b/tests/xfs/2000
-@@ -0,0 +1,73 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2024 Red Hat.  All Rights Reserved.
-+#
-+# FS QA Test No. 2000
-+#
-+# Test that XFS can set quota project ID on special files
-+#
-+. ./common/preamble
-+_begin_fstest auto quota
-+
-+# Import common functions.
-+. ./common/quota
-+. ./common/filter
-+
-+# Modify as appropriate.
-+_require_scratch
-+_require_xfs_quota
-+_require_test_program "af_unix"
-+_require_test_program "file_attr"
-+_require_symlinks
-+_require_mknod
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_qmount_option "pquota"
-+_scratch_mount
-+
-+create_af_unix () {
-+	$here/src/af_unix $* || echo af_unix failed
-+}
-+
-+filter_quota() {
-+	_filter_quota | sed "s~$tmp.projects~PROJECTS_FILE~"
-+}
-+
-+projectdir=$SCRATCH_MNT/prj
-+id=42
-+
-+mkdir $projectdir
-+mkfifo $projectdir/fifo
-+mknod $projectdir/chardev c 1 1
-+mknod $projectdir/blockdev b 1 1
-+create_af_unix $projectdir/socket
-+touch $projectdir/foo
-+ln -s $projectdir/foo $projectdir/symlink
-+touch $projectdir/bar
-+ln -s $projectdir/bar $projectdir/broken-symlink
-+rm -f $projectdir/bar
-+
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -sp $projectdir $id" $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "limit -p isoft=20 ihard=20 $id " $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -cp $projectdir $id" $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "report -inN -p" $SCRATCH_DEV | _filter_project_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -Cp $projectdir $id" $SCRATCH_DEV | filter_quota
-+
-+# Let's check that we can recreate the project (flags were cleared out)
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -sp $projectdir $id" $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "limit -p isoft=20 ihard=20 $id " $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "report -inN -p" $SCRATCH_DEV | _filter_project_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -Cp $projectdir $id" $SCRATCH_DEV | filter_quota
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/2000.out b/tests/xfs/2000.out
-new file mode 100644
-index 000000000000..e53ceb959775
---- /dev/null
-+++ b/tests/xfs/2000.out
-@@ -0,0 +1,15 @@
-+QA output created by 2000
-+Setting up project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-+Checking project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-+#42 8 20 20 00 [--------]
-+
-+Clearing project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-+Setting up project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-+#42 8 20 20 00 [--------]
-+
-+Clearing project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
+@John, does that sound okay?
 
--- 
-2.49.0
-
+Regards,
+ojaswin
+> 
+> > 
+> > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> > ---
+> >  common/rc | 32 ++++++++++++++++++++++++++++++++
+> >  1 file changed, 32 insertions(+)
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index 35a1c835..f45b9a38 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -5997,6 +5997,38 @@ _max() {
+> >  	echo $ret
+> >  }
+> >  
+> > +# Check the required fio version. Examples:
+> > +#   _require_fio_version 3.38 (matches 3.38 only)
+> > +#   _require_fio_version 3.38+ (matches 3.38 and above)
+> > +#   _require_fio_version 3.38- (matches 3.38 and below)
+> > +_require_fio_version() {
+> > +	local req_ver="$1"
+> > +	local fio_ver
+> > +
+> > +	_require_fio
+> > +	_require_math
+> > +
+> > +	fio_ver=$(fio -v | cut -d"-" -f2)
+> > +
+> > +	case "$req_ver" in
+> > +	*+)
+> > +		req_ver=${req_ver%+}
+> > +		test $(_math "$fio_ver >= $req_ver") -eq 1 || \
+> > +			_notrun "need fio >= $req_ver (found $fio_ver)"
+> > +		;;
+> > +	*-)
+> > +		req_ver=${req_ver%-}
+> > +		test $(_math "$fio_ver <= $req_ver") -eq 1 || \
+> > +			_notrun "need fio <= $req_ver (found $fio_ver)"
+> > +		;;
+> > +	*)
+> > +		req_ver=${req_ver%-}
+> > +		test $(_math "$fio_ver == $req_ver") -eq 1 || \
+> > +			_notrun "need fio = $req_ver (found $fio_ver)"
+> > +		;;
+> > +	esac
+> > +}
+> > +
+> >  ################################################################################
+> >  # make sure this script returns success
+> >  /bin/true
+> > -- 
+> > 2.49.0
+> > 
+> 
