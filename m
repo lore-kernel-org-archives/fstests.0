@@ -1,231 +1,54 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD40421C9F4;
-	Wed, 27 Aug 2025 08:49:17 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9EE19275B1B;
+	Wed, 27 Aug 2025 15:14:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756284557; cv=none; b=oLaon+u45eKX90/t175Ba5ZuIyaHHWtfe1HpQlz5p6XvQkLk2ESgQ4pr9m/XdH+ZkYkkq1amXiH3vGpVKsKLcV4eKpUgYHQin2a2/28C+ejI1VBaSYgQ/P6nu2b3+e73mCjrzv0YHbU1WawrVVebh90NhkJI3FqV3ij0HkZzvpw=
+	t=1756307679; cv=none; b=s0YzLr/HVyrJ2oYdcst7QGsUkWk2nQEPjOCuN+V9szO9y1j7EV1MqDUfL8j9JB96AxygtWvzhcirBs9SA8PquRsHU0tl9UN1pIhAEK7mYXQUZWG1+qxRVSBNuqxpofmrhQeRQhpTBRB56SDMhHUTo5rR1vtoq6bgLNdhSU50bpo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756284557; c=relaxed/simple;
-	bh=JJPzO76SBMlE/609qI+KDyccjKYXuZdSquwj4U7KGUU=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=jzwhvO3sARQlDSKqzDdkBSDvP/GTkWs+9mpndWgVMdKW7sC9g6dYMejhvTUIOE4+3fgQJUV4bqrwazmF/qUCBJZY3ISukK/zNyZfJYJe7DCfVo29wQBFHSKkZ8OiWlD4gQfvv9W4M0a1R0W0doMmYDDR64pz24ciqw5j0saCaBc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kDRALR6D; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1756307679; c=relaxed/simple;
+	bh=QEXhxovWYUHVgBkEl/gTdcNOIaqUcKQWivj1PPJZ8ak=;
+	h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=Kj5h731xrtRMlsud5Fi2zcvo9ovuqHUvgLsWbU0mfwJjn0uGCKknN2W15QH0Ynx2fQj8t0Yc/zRIC9klZRUIFP56mmSGzqxoclCiBX7/FMiMgBPtgXO2K/Drv9X0asRA7cBeKT/XcDYV8iZv+Po9bbhfsamWDf0hNRPe7c8joA8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=sEWOPwlc; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kDRALR6D"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5ACFAC113D0;
-	Wed, 27 Aug 2025 08:49:17 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sEWOPwlc"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 33E17C4CEEB;
+	Wed, 27 Aug 2025 15:14:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1756284557;
-	bh=JJPzO76SBMlE/609qI+KDyccjKYXuZdSquwj4U7KGUU=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=kDRALR6DRnLUl4E4tEOYW6KX42G/lz5i8E9ZGyo3IN8K4S3DykokfUTNky5P0IISh
-	 QjFukHH5eF7Og3qeHkyxWFpudapGut4BoFQN57klfJmSO0XHhRKwrW5j0/hEkedV3l
-	 gZv+9yYpRZ/HTYgU7QFAxZuVgrftAAXYrHFWVNfOTPqPfeTLuhKyV26VDfBtr63YCZ
-	 AGcABqzTmXCZ+iZuRH1JpME1SE6v33XFg+kZH5wsbvrCQHjVaKzrGevFNEgr3+wek0
-	 8YVwItr88BdZ6CqI3bqe7cdIpT92lC7L5io2eez9os+U5KvHzaXVSwTFQSouAYNZ11
-	 aNZ8tQnuAWRVA==
-Received: by mail-ej1-f49.google.com with SMTP id a640c23a62f3a-afe9f6caf9eso309457266b.3;
-        Wed, 27 Aug 2025 01:49:17 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCWURUND4/Fo5na1trmhINXEWzcdV/HawMP5b8kBlg9D+cbw6HahQrhB/6ZyB6pZ4XI4yt4bUu8a@vger.kernel.org
-X-Gm-Message-State: AOJu0YxSOzIgB6jXM1hSTeiAo2t+MQzwAbZyfiHsbc7IQdR3jhpUziE+
-	AjMOtV52yW3RfkM3AzB5lx6dAHvGUGnU3pXAlJNpTSwnCiUo7u+tpbXUTQL85OOhJ5MxbFHCHnA
-	XBTiqW8IgJxxqvhGfnctv+LdEdqepQ74=
-X-Google-Smtp-Source: AGHT+IFh6Zu1CiJ+R3Bxpb7DrqO7Rep2Ov0iIZkwUNTG0nGYqvKPDMOfYFkQO4NQH6vOOTT+w1NrKefUAHiwaAdzZ98=
-X-Received: by 2002:a17:906:fe05:b0:ad5:777d:83d8 with SMTP id
- a640c23a62f3a-afe29447253mr1614838866b.29.1756284555851; Wed, 27 Aug 2025
- 01:49:15 -0700 (PDT)
+	s=k20201202; t=1756307679;
+	bh=QEXhxovWYUHVgBkEl/gTdcNOIaqUcKQWivj1PPJZ8ak=;
+	h=Date:From:To:Subject:From;
+	b=sEWOPwlc5DcbkrzZsmuHKldDt3UJ3b5kzMqaCJH54R/JAgt6PKT+d3cIy9+n5HXOl
+	 sd8nKssxoWawsydvr/q12+rIZjQUWAR/O04Ah7W0Nn14jGr/6lrt27ZdXEPLZtUNEG
+	 N9u9zlQR5O0fOj5LjrlB8PpLE1M1QF2HlDFUb7L2I01sJxQDPsxpbrV36AEv/VrrAi
+	 YoDcUISMUVxYkOZbn0QqiN58yH4HiN/3K6qkOaIfboApMQA71dWUsVLgEILXNDETX7
+	 jC3NgGuiaF5jF4praeEiyqacWdNqNSXKvt7anzhGEfGjEMskyGaRogWYkaZV8Kxfpq
+	 21/HIz6dxHsTw==
+Date: Wed, 27 Aug 2025 17:14:36 +0200
+From: Andrey Albershteyn <aalbersh@kernel.org>
+To: linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+	fstests@vger.kernel.org
+Subject: Tests for file_getattr()/file_setattr() and xfsprogs update
+Message-ID: <dvht4j3ipg74c2inz33n6azo65sebhhag5odh7535hfssamxfa@6wr2m4niilye>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250827014250.170552-1-wqu@suse.com>
-In-Reply-To: <20250827014250.170552-1-wqu@suse.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Wed, 27 Aug 2025 09:48:39 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H42rX5AxNXZF-t8Qs-=PiRhU818_iYxj8iaTq=egWAWyg@mail.gmail.com>
-X-Gm-Features: Ac12FXyBiBcp4kEaIrZa3Q5VgQTYw40mw0Wq_mKsd150tzlNxWdoSPRMI6v84G0
-Message-ID: <CAL3q7H42rX5AxNXZF-t8Qs-=PiRhU818_iYxj8iaTq=egWAWyg@mail.gmail.com>
-Subject: Re: [PATCH v3] fstests: btrfs: add a new test case to verify
- compressed read
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-On Wed, Aug 27, 2025 at 2:44=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
->
-> The new test case is a regression test related to the block size < page
-> size handling of compressed read.
->
-> The test case will only be triggered with 64K page size and 4K btrfs
-> block size.
-> I'm using aarch64 with 64K page size to trigger the regression.
->
-> The test case will create the following file layout:
->
->   base:
->   [0, 64K): Single compressed data extent at bytenr X.
->
->   new:
->   [0, 32K): Reflinked from base [32K, 64K)
->   [32K, 60K): Reflinked from base [0, 28K)
->   [60K, 64K): New 4K write
->
->   The range [0, 32K) and [32K, 64K) are pointing to the same compressed
->   data.
->
->   The last 4K write is a special workaround. It is a block aligned
->   write, thus it will create the folio but without reading out the
->   remaing part.
->
->   This is to avoid readahead path, which has the proper fix.
->   We want single folio read without readahead.
->
-> Then output the file "new" just after the last 4K write, then cycle
-> mount and output the content again.
->
-> For patched kernel, or with 4K page sized system, the test will pass,
-> the resulted content will not change during mount cycles.
->
-> For unpatched kernel and with 64K page size, the test will fail, the
-> content after the write will be incorrect (the range [32K, 60K) will be
-> zero), but after a mount cycle the content is correct again.
->
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
+Hi all,
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+This two patchsets are update to xfsprogs to utilize recently added
+file_getattr() and file_setattr() syscalls.
 
-Looks good, thanks.
+The second patchset adds two tests to fstests, one generic one on
+these syscals and second one is for XFS's original usecase for these
+syscalls (projects quotas).
 
-> ---
-> Changelog:
-> v3:
-> - Fix the golden output which is generated by an unpatched kernel
->
-> v2:
-> - Remove the unnecessary sync inherited from the kernel fix
-> - Use _hexdump instead of open-coded od dumps
-> - Use the correct 'clone' group instead of 'reflink'
-> - Minor grammar fixes
->   All thanks to Filipe.
-> ---
->  tests/btrfs/337     | 55 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/337.out | 23 +++++++++++++++++++
->  2 files changed, 78 insertions(+)
->  create mode 100755 tests/btrfs/337
->  create mode 100644 tests/btrfs/337.out
->
-> diff --git a/tests/btrfs/337 b/tests/btrfs/337
-> new file mode 100755
-> index 00000000..9c409e4d
-> --- /dev/null
-> +++ b/tests/btrfs/337
-> @@ -0,0 +1,55 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 SUSE Linux Products GmbH.  All Rights Reserved.
-> +#
-> +# FS QA Test 337
-> +#
-> +# Test compressed read with shared extents, especially for bs < ps cases=
-.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick compress clone
-> +
-> +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +       "btrfs: fix corruption reading compressed range when block size i=
-s smaller than page size"
-> +
-> +. ./common/filter
-> +. ./common/reflink
-> +
-> +_require_btrfs_support_sectorsize 4096
-> +_require_scratch_reflink
-> +
-> +# The layout used in the test case is all 4K based, and can only be repr=
-oduced
-> +# with page size larger than 4K.
-> +_scratch_mkfs -s 4k >> $seqres.full
-> +_scratch_mount "-o compress"
-> +
-> +# Create the reflink source, which must be a compressed extent.
-> +$XFS_IO_PROG -f -c "pwrite -S 0x0f 0 32K" \
-> +               -c "pwrite -S 0xf0 32K 32K" \
-> +               $SCRATCH_MNT/base >> $seqres.full
-> +echo "Reflink source:"
-> +_hexdump $SCRATCH_MNT/base
-> +
-> +# Create the reflink dest, which reverses the order of the two 32K range=
-s.
-> +#
-> +# And do a further aligned write into the last block.
-> +# This write is to make sure the folio exists in filemap, so that we won=
-'t go
-> +# through the readahead path (which has the proper handling) for the fol=
-io.
-> +$XFS_IO_PROG -f -c "reflink $SCRATCH_MNT/base 32K 0 32K" \
-> +               -c "reflink $SCRATCH_MNT/base 0 32K 32K" \
-> +               -c "pwrite 60K 4K" $SCRATCH_MNT/new >> $seqres.full
-> +
-> +# This will result an incorrect output for unpatched kernel.
-> +# The range [32K, 60K) will be zero due to incorrectly merged compressed=
- read.
-> +echo "Before mount cycle:"
-> +_hexdump $SCRATCH_MNT/new
-> +
-> +_scratch_cycle_mount
-> +
-> +# This will go through readahead path, which has the proper handling, th=
-us give
-> +# the correct content.
-> +echo "After mount cycle:"
-> +_hexdump $SCRATCH_MNT/new
-> +
-> +status=3D0
-> +_exit 0
-> diff --git a/tests/btrfs/337.out b/tests/btrfs/337.out
-> new file mode 100644
-> index 00000000..cecbbbcf
-> --- /dev/null
-> +++ b/tests/btrfs/337.out
-> @@ -0,0 +1,23 @@
-> +QA output created by 337
-> +Reflink source:
-> +000000 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f  >...............=
-.<
-> +*
-> +008000 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0  >...............=
-.<
-> +*
-> +010000
-> +Before mount cycle:
-> +000000 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0  >...............=
-.<
-> +*
-> +008000 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f  >...............=
-.<
-> +*
-> +00f000 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  >...............=
-.<
-> +*
-> +010000
-> +After mount cycle:
-> +000000 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0 f0  >...............=
-.<
-> +*
-> +008000 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f 0f  >...............=
-.<
-> +*
-> +00f000 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  >...............=
-.<
-> +*
-> +010000
-> --
-> 2.49.0
->
->
+-- 
+- Andrey
