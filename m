@@ -1,80 +1,84 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 200D12566
-	for <fstests@vger.kernel.org>; Fri, 29 Aug 2025 19:49:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 57DE61DBB13
+	for <fstests@vger.kernel.org>; Sat, 30 Aug 2025 17:09:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756496995; cv=none; b=NYUptxS/iF0b4MobESWJTe7RxofSl1dBo+POnGHc2GX2tFc10TJvaU71fUh5XN/VhoIwJ/7Q4uq7xCgQ6keTtEerxffklydnJrUCBqJ9NjZjZV8j+O4hmcK3dKqmGXs98aCdmZQStYZx6QxIF/kxDrQvEpGS/c0KX/yoM/rKPUE=
+	t=1756573759; cv=none; b=KoEoXdz2O9ci5eqc+KiShNxP4kcXLWLxB4WgRqCApUbxVT/d5+TOqss9itdFRYOa8uxc77R7wsq223dHhSMp/N5wocUfwP/4uHah0WfHnl3vSajbap0OA4ingPI+vcp4xZCZUw7gmlUrLPEtajy4X4PVMXlYLWO0eWuwsyU/2ys=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756496995; c=relaxed/simple;
-	bh=a5eFrNkIcDrXe+Puhx3mGU4LOKgNBCBNHfW+ZFDpoWA=;
+	s=arc-20240116; t=1756573759; c=relaxed/simple;
+	bh=JcLfCr1fNOZJnTTEBFUzA+5oLmKS60tKVwGIhQXW+GI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cx5VTCLP9t4DUmwQganFaezOwsZhjmoKYNunw57oK3N+KT98tKPSiLcxD859L+KsHPSUXIOx4Eq6BbgJ1xMUmuWAEWlsCM/qi/JncTxKb8cW+dJMnlsr13Z0YFjDZWAIcsoafCrY6xyogm3hzy05dUSkgbbvrlvm63QEBhmfZCs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=gE9bUV6D; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=HO2x/TUeybXhQeWMX1AxC9yVLZA5hwIXPwAO4HNW+COYJG/szVjOco+lnkmmdPsqRfWfa68oCGBfCRvkCE+NGmQamBPmiucHUv0auH8WhQQjggE/eW9Ezj4bWPUCCvqWnci2gAtOKi0yCTd4qkyMWVn9KNgj3zYEqQ3r9gKgkBM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=I6oOpXxv; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gE9bUV6D"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="I6oOpXxv"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1756496991;
+	s=mimecast20190719; t=1756573756;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=RMdIQN66cD/YcQY6Z/a5UCF1NEW1DiO9Izgj9G8g51E=;
-	b=gE9bUV6D4t0ZwjE8wkawKXxZOpLQJ71R7IhEwz9URFp3Q2/FlDmRI7KNKRHg8suEeN/a4u
-	jHP5klEPMwkqqwGX2WInZ13IGakSb9KPzoiACkgG+bB1+UnwbZTMNgER5QI4nUq676Sbnj
-	3PkhkLqaHTsJMVjNbhY5HALKof58gHM=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=+sQOUl1w6wrKYsvuJH5QyydsTUnK4b9iWYOLl0ehlfc=;
+	b=I6oOpXxv6bWbFKf5QtBf96xPNY97p3Ncd6xqrlUW4nk15T/wZh90ansDonpOovTcqb46t/
+	q+EwYUekiGYMwBcx+x7hqfC+v6zLEv7hCWvMaXViJFO2x3Qpc3s+2UiV49ILlRyeEHYUwn
+	Gla/N1B9bkEHgsJETBepASDU8enzlIM=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-281-vI3VRBUFOICehb31cTZUPQ-1; Fri, 29 Aug 2025 15:49:50 -0400
-X-MC-Unique: vI3VRBUFOICehb31cTZUPQ-1
-X-Mimecast-MFC-AGG-ID: vI3VRBUFOICehb31cTZUPQ_1756496989
-Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-b4dfb96c99dso230705a12.0
-        for <fstests@vger.kernel.org>; Fri, 29 Aug 2025 12:49:50 -0700 (PDT)
+ us-mta-116-H_jPaXZ2O0WIF30qraHFsw-1; Sat, 30 Aug 2025 13:09:14 -0400
+X-MC-Unique: H_jPaXZ2O0WIF30qraHFsw-1
+X-Mimecast-MFC-AGG-ID: H_jPaXZ2O0WIF30qraHFsw_1756573753
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-244582bc5e4so36425155ad.2
+        for <fstests@vger.kernel.org>; Sat, 30 Aug 2025 10:09:14 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1756496989; x=1757101789;
+        d=1e100.net; s=20230601; t=1756573753; x=1757178553;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=RMdIQN66cD/YcQY6Z/a5UCF1NEW1DiO9Izgj9G8g51E=;
-        b=iYswOr25hGAPoPd0jo58PnOKPgulMtRQfC+7XTklQbyXroiCeb6tCVJlMsVrh2x/QF
-         O27zSGWsifhLJb4LeBRyNlpcXq8XUqIv6y0hG2xXn/w13pD45MQwxqBd7yaXlxyKR4zU
-         fQV8RMOFIlpdPYx7v9VVAKZkJSXA3ftmj7UqXyi04xyW4sbllUYfj/hTKk8QnOhNr7QF
-         /BOcXJHYKLe/OFV/OI64k1iHw7rEGucmP161tUd4hJn3bzD8kgaWYUtn6wFqpmyPqFbU
-         /Zya5KzaM5TayjGKOk3M319cxIfqFag1j+5HDsAOAOrl5Mvbif6kKrVCjqUnhXziKvlU
-         2ACw==
-X-Forwarded-Encrypted: i=1; AJvYcCXHORimPXR8c1vZRjONakQ8eDfIg594hUjKowAF0PfIrcwYyoDiZK7XmOVP95EmWCPAnOK/R+Ho@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyb1CubpiQmlqKk+rGOBqyqJftt0FTyd2/+T5wN/SFsS7U9JXlg
-	NPyNE7L4p1rXzvx70/qsjV9awUNbHynEQ3CT4YbcOhbnDQw39DtVWQd13LnRX3XrFm/NOYk+MAk
-	MfSLhkmWnVbpIl8H9HHVac8bmKHItanRNt378EiftQBSq6FnRhw0alTZiH24=
-X-Gm-Gg: ASbGncszHJTsnYbRnos0VrMDDDeJszc/NFDdC8dwcIV74iZO579t6/yKTNLthK8/Yhp
-	1vVMeptvcIZLJFVyZgqyWVpMsqa4nGjZqIHWPLWNWowQ8uLi68kxk2Bzu9S81WZw+i9gWq2gNoa
-	9/sNyePayO8ChlYXdM79u7SEbTaDHG1Ke6XdY26vBEPNxozu3kYt0drUzbc26CXN2P/3shBDyyJ
-	uLfUbTbPc2ngO7OukyN48mYyN4jABH8MSrXJpFNM4dxqSjRcgIMvqtbS+MoGSDZi2slHr93XqPf
-	gEA6O4MgvtdfSNy7+73n44RMpwZplyaOG4NmgBYS1wCAV5yJmDSOpHPQUI21T+4rE6yEkduZFT+
-	FfUO/
-X-Received: by 2002:a05:6a20:9144:b0:243:d1bd:fbb8 with SMTP id adf61e73a8af0-243d1be0540mr2137560637.45.1756496989207;
-        Fri, 29 Aug 2025 12:49:49 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEJFXWKvEUk8NkIVE1vKO1pzKN6LKOy8f1M6xCrqPnVaW/CcwDFrYxjVr/EGngHYNjG/wTXEw==
-X-Received: by 2002:a05:6a20:9144:b0:243:d1bd:fbb8 with SMTP id adf61e73a8af0-243d1be0540mr2137527637.45.1756496988673;
-        Fri, 29 Aug 2025 12:49:48 -0700 (PDT)
+        bh=+sQOUl1w6wrKYsvuJH5QyydsTUnK4b9iWYOLl0ehlfc=;
+        b=dPF1pJAI9rB6zWSLq9WkA/mYR1E0gI5jfTPGDtDUm8FfMaD67ZLKF5o79XvDJwDo2J
+         atSTBP4p0MzyHh4J72x4Adf4dqFTwc9NKmRhnJZ4s2zNz6zfM0MUNSKYPJVvPFEqcph6
+         R6pvihRkVYGZAB58h03Ctw6dhRLcyt0G05Icr2fXQy1b7Gf2Fmdj1KVDHY/f8ZRVsMEw
+         K5fO2/s1OfFDu7q6i+QFPUPpn+aH/x8xnYKztCvvbDJpsFeX6XuAS/4HrQlvEU7DAD+O
+         /S0sWxQGVbXRTGMRoBthXBp9YhvzJXFIxRi7C8zBjGUh0fA4ff4WtqpF1RDte+w7ceMD
+         +x2Q==
+X-Forwarded-Encrypted: i=1; AJvYcCW/lrVN54IWtteFTG7o7xCo3212TQ5U2CS4xUDpRHwmT9/KRmXkqA/UTHp/OfFJmWQ9pZLkdC2Q@vger.kernel.org
+X-Gm-Message-State: AOJu0YwYvU/llpYaBjwIT1UO7bcjl8RFiXn89rcLuVq+dtYpGT7wuMoG
+	PtWI9vfXPKzxp8T4f64J9k3et9Blo+qyn6mQYB71QWxFCpRl/8U2sDKbXQn2G3HAh2HeKweDUDg
+	m+U9VvZOY9/9z2ZTXuONUnZF/C+abqxTDD4aSz22J6CBUeAnAIqudAF0EH8o=
+X-Gm-Gg: ASbGncvOhAwI4hu5V3BOZcI+pj/cPF8eP6CPejasgCDk6pXvEvoEDkzFXA1LUZ/FrRH
+	4xfoTjzvrz6013XbEqcH9ofGtXJ+EvSdjlhuG+3W1Ln3ITyRsLSyQz6OqAC+ta+f4aQCanII4bZ
+	KyRc8soKgQ3TtQtM5uE+8qecja44KJLMHQDX0j4nFyhm2rl53hOlOwn1lIsA5buXxrGXqkpO5nq
+	bjbBt7ZNROjyv7N35fCxprXc4oWwtL+CjP2Ev+J92jujtl4jjcAcIU7DLc905Lep2zY7TyK91he
+	jWmDp9NbJ35TrLxIY2skPr1vKo/t8K7ssNGQk91FUbjp/aZFtLF+b/iHteXM9oVvbJe2WJrBZlG
+	2/0tq
+X-Received: by 2002:a17:903:190:b0:246:e8cc:8cef with SMTP id d9443c01a7336-24944870a4emr42656285ad.3.1756573753174;
+        Sat, 30 Aug 2025 10:09:13 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFufkm14+kWgLeyAtnWDENYX2tBc3g+OtzDJJ2/KfgKYaBdKqAHSLkaQW2S2IFh13FYgWrI7Q==
+X-Received: by 2002:a17:903:190:b0:246:e8cc:8cef with SMTP id d9443c01a7336-24944870a4emr42656025ad.3.1756573752783;
+        Sat, 30 Aug 2025 10:09:12 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b4cd073be18sm2875752a12.14.2025.08.29.12.49.46
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-24a92f89763sm16457905ad.48.2025.08.30.10.09.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 29 Aug 2025 12:49:48 -0700 (PDT)
-Date: Sat, 30 Aug 2025 03:49:43 +0800
+        Sat, 30 Aug 2025 10:09:12 -0700 (PDT)
+Date: Sun, 31 Aug 2025 01:09:07 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Donald Douwsma <ddouwsma@redhat.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-	Eric Sandeen <sandeen@sandeen.net>,
-	"Darrick J . Wong" <djwong@kernel.org>,
-	Carlos Maiolino <cem@kernel.org>
-Subject: Re: [PATCH v2] xfs: test case for handling io errors when reading
- extended attributes
-Message-ID: <20250829194943.bqzecrnelwze6svp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250829042419.1084367-1-ddouwsma@redhat.com>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
+	Ritesh Harjani <ritesh.list@gmail.com>, john.g.garry@oracle.com,
+	tytso@mit.edu, linux-xfs@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v5 02/12] common/rc: Add _require_fio_version helper
+Message-ID: <20250830170907.htlqcmafntjwkjf4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1755849134.git.ojaswin@linux.ibm.com>
+ <955d47b2534d9236adbd2bbd13598bbd1da8fc04.1755849134.git.ojaswin@linux.ibm.com>
+ <20250825160801.ffktqauw2o6l5ql3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <aK8hUqdee-JFcFHn@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <20250828150905.GB8092@frogsfrogsfrogs>
+ <aLHcgyWtwqMTX-Mz@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -83,338 +87,127 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250829042419.1084367-1-ddouwsma@redhat.com>
+In-Reply-To: <aLHcgyWtwqMTX-Mz@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 
-On Fri, Aug 29, 2025 at 02:24:19PM +1000, Donald Douwsma wrote:
-> We've seen reports from the field panicing in xfs_trans_brelse after
-> an io error for an attribute block.
+On Fri, Aug 29, 2025 at 10:29:47PM +0530, Ojaswin Mujoo wrote:
+> On Thu, Aug 28, 2025 at 08:09:05AM -0700, Darrick J. Wong wrote:
+> > On Wed, Aug 27, 2025 at 08:46:34PM +0530, Ojaswin Mujoo wrote:
+> > > On Tue, Aug 26, 2025 at 12:08:01AM +0800, Zorro Lang wrote:
+> > > > On Fri, Aug 22, 2025 at 01:32:01PM +0530, Ojaswin Mujoo wrote:
+> > > > > The main motivation of adding this function on top of _require_fio is
+> > > > > that there has been a case in fio where atomic= option was added but
+> > > > > later it was changed to noop since kernel didn't yet have support for
+> > > > > atomic writes. It was then again utilized to do atomic writes in a later
+> > > > > version, once kernel got the support. Due to this there is a point in
+> > > > > fio where _require_fio w/ atomic=1 will succeed even though it would
+> > > > > not be doing atomic writes.
+> > > > > 
+> > > > > Hence, add an explicit helper to ensure tests to require specific
+> > > > > versions of fio to work past such issues.
+> > > > 
+> > > > Actually I'm wondering if fstests really needs to care about this. This's
+> > > > just a temporary issue of fio, not kernel or any fs usespace program. Do
+> > > > we need to add a seperated helper only for a temporary fio issue? If fio
+> > > > doesn't break fstests running, let it run. Just the testers install proper
+> > > > fio (maybe latest) they need. What do you and others think?
+> > 
+> > Are there obvious failures if you try to run these new atomic write
+> > tests on a system with the weird versions of fio that have the no-op
+> > atomic= functionality?  I'm concerned that some QA person is going to do
+> > that unwittingly and report that everything is ok when in reality they
+> > didn't actually test anything.
 > 
-> sd 0:0:23:0: [sdx] tag#271 CDB: Read(16) 88 00 00 00 00 00 9b df 5e 78 00 00 00 08 00 00
-> critical medium error, dev sdx, sector 2615107192 op 0x0:(READ) flags 0x1000 phys_seg 1 prio class 2
-> XFS (sdx1): metadata I/O error in "xfs_da_read_buf+0xe1/0x140 [xfs]" at daddr 0x9bdf5678 len 8 error 61
-> BUG: kernel NULL pointer dereference, address: 00000000000000e0
-> ...
-> RIP: 0010:xfs_trans_brelse+0xb/0xe0 [xfs]
-> ...
-> Call Trace:
->  <TASK>
->  ...
->  ? xfs_trans_brelse+0xb/0xe0 [xfs]
->  xfs_attr_leaf_get+0xb6/0xc0 [xfs]
->  xfs_attr_get+0xa0/0xd0 [xfs]
->  xfs_xattr_get+0x75/0xb0 [xfs]
->  __vfs_getxattr+0x53/0x70
->  inode_doinit_use_xattr+0x63/0x180
->  inode_doinit_with_dentry+0x196/0x510
->  security_d_instantiate+0x2f/0x50
->  d_splice_alias+0x46/0x2b0
->  xfs_vn_lookup+0x8b/0xb0 [xfs]
->  __lookup_slow+0x84/0x130
->  walk_component+0x158/0x1d0
->  path_lookupat+0x6e/0x1c0
->  filename_lookup+0xcf/0x1d0
->  vfs_statx+0x8d/0x170
->  vfs_fstatat+0x54/0x70
->  __do_sys_newfstatat+0x26/0x60
+> I think John has a bit more background but afaict, RWF_ATOMIC support
+> was added (fio commit: d01612f3ae25) but then removed (commit:
+> a25ba6c64fe1) since the feature didn't make it to kernel in time.
+> However the option seemed to be kept in place. Later, commit 40f1fc11d
+> added the support back in a later version of fio. 
 > 
-> As this is specific to ENODATA test using scsi_debug instead of dmerror
-> which returns EIO.
+> So yes, I think there are some version where fio will accept atomic=1
+> but not act upon it and the tests may start failing with no apparent
+> reason.
+
+The concern from Darrick might be a problem. May I ask which fio commit
+brought in this issue, and which fio commit fixed it? If this issue be
+brought in and fixed within a fio release, it might be better. But if it
+crosses fio release, that might be bad, then we might be better to have
+this helper.
+
+Thanks,
+Zorro
+
 > 
-> Signed-off-by: Donald Douwsma <ddouwsma@redhat.com>
-> ---
->  tests/xfs/999     | 193 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/999.out |   2 +
->  2 files changed, 195 insertions(+)
->  create mode 100755 tests/xfs/999
->  create mode 100644 tests/xfs/999.out
-> 
-> diff --git a/tests/xfs/999 b/tests/xfs/999
-> new file mode 100755
-> index 00000000..2a45eb7c
-> --- /dev/null
-> +++ b/tests/xfs/999
-> @@ -0,0 +1,193 @@
-> +#!/bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 999
-> +#
-> +# Regression test for panic following IO error when reading extended attribute blocks
-> +#
-> +#   XFS (sda): metadata I/O error in "xfs_da_read_buf+0xe1/0x140 [xfs]" at daddr 0x78 len 8 error 61
-> +#   BUG: kernel NULL pointer dereference, address: 00000000000000e0
-> +#   ...
-> +#   RIP: 0010:xfs_trans_brelse+0xb/0xe0 [xfs]
-> +#
-> +#   [53887.310123] Call Trace:
-> +#    <TASK>
-> +#    ? show_trace_log_lvl+0x1c4/0x2df
-> +#    ? show_trace_log_lvl+0x1c4/0x2df
-> +#    ? xfs_attr_leaf_get+0xb6/0xc0 [xfs]
-> +#    ? __die_body.cold+0x8/0xd
-> +#    ? page_fault_oops+0x134/0x170
-> +#    ? xfs_trans_read_buf_map+0x133/0x300 [xfs]
-> +#    ? exc_page_fault+0x62/0x150
-> +#    ? asm_exc_page_fault+0x22/0x30
-> +#    ? xfs_trans_brelse+0xb/0xe0 [xfs]
-> +#    xfs_attr_leaf_get+0xb6/0xc0 [xfs]
-> +#    xfs_attr_get+0xa0/0xd0 [xfs]
-> +#    xfs_xattr_get+0x88/0xd0 [xfs]
-> +#    __vfs_getxattr+0x7b/0xb0
-> +#    inode_doinit_use_xattr+0x63/0x180
-> +#    inode_doinit_with_dentry+0x196/0x510
-> +#    security_d_instantiate+0x3a/0xb0
-> +#    d_splice_alias+0x46/0x2b0
-> +#    xfs_vn_lookup+0x8b/0xb0 [xfs]
-> +#    __lookup_slow+0x81/0x130
-> +#    walk_component+0x158/0x1d0
-> +#    ? path_init+0x2c5/0x3f0
-> +#    path_lookupat+0x6e/0x1c0
-> +#    filename_lookup+0xcf/0x1d0
-> +#    ? tlb_finish_mmu+0x65/0x150
-> +#    vfs_statx+0x82/0x160
-> +#    vfs_fstatat+0x54/0x70
-> +#    __do_sys_newfstatat+0x26/0x60
-> +#    do_syscall_64+0x5c/0xe0
-> +#
-> +# For SELinux enabled filesystems the attribute security.selinux will be
-> +# created before any additional attributes are added. Any attempt to open the
-> +# file will read this entry, leading to the panic being triggered as above, via
-> +# security_d_instantiate, rather than fgetxattr(2), to test via fgetxattr mount
-> +# with a fixed context=
-> +#
-> +# Kernels prior to v4.16 don't have medium_error_start, and only return errors
-> +# for a specific location, making scsi_debug unsuitable for checking old kernels.
-> +# See d9da891a892a scsi: scsi_debug: Add two new parameters to scsi_debug driver
-
-Haha, I think we don't need to write such long comment, how about shorten it a bit,
-for example remove the call trace details :)
-
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest auto
-                      ^^^^
-                      attr
-
-> +
-> +_fixed_by_kernel_commit ae668cd567a6 "xfs: do not propagate ENODATA disk errors into xattr code"
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	_unmount $SCRATCH_MNT
-> +	_put_scsi_debug_dev
-> +}
-> +
-> +# Import common functions.
-> +. ./common/scsi_debug
-> +
-> +_require_scsi_debug
-> +modinfo scsi_debug | grep -wq medium_error_start || _notrun "test requires scsi_debug medium_error_start"
-
-Oh, maybe we can improve _require_scsi_debug, help it to accept arguments, likes:
-
-  _require_scsi_debug medium_error_start
-
-> +scsi_debug_dev=$(_get_scsi_debug_dev)
-> +test -b $scsi_debug_dev || _notrun "Failed to initialize scsi debug device"
-> +echo "SCSI debug device $scsi_debug_dev" >>$seqres.full
-> +
-> +_mkfs_dev $scsi_debug_dev  >> $seqres.full
-> +_mount $scsi_debug_dev $SCRATCH_MNT  >> $seqres.full
-
-Hmm... if you use $SCRATCH_MNT, you might need _require_scratch. You can set
-SCRATCH_DEV=$scsi_debug_dev, then use _scratch_mkfs and _scratch_mount and
-other _scratch_* functions in this case.
-
-> +
-> +blocksize=$(_get_block_size $SCRATCH_MNT) >> $seqres.full
-                                             ^^^^^^^^^^^^^^^
-                                             what's this for?
-
-Better to use _get_file_block_size.
-
-> +echo Blocksize $blocksize >> $seqres.full
-> +
-> +# Use dry_run=1 when verifying the test to avoid panicking.
-> +enable_error=1
-> +[ ${dry_run:-0} -eq 1 ] && enable_error=0
-
-I think the dry_run is useless for this case in xfstests, except you
-hope to create a new global parameter named "dry_run" for xfstests.
-I think we don't need that. Please use other method to decide enable_error.
-Or always "enable error" if that's a necessary condition to reproduce the
-bug.
-
-> +
-> +test_attr()
-> +{
-> +	test=$1
-> +	testfile=$SCRATCH_MNT/$test
-> +	attr_size=$2 # bytes
-> +	error_at_block=${3:-0}
-
-Better to use "local" for variables in a function.
-
-> +	shift 3
-
-But there might be not the 3rd argument, as you set it to 0 by default.
-
-I didn't see you use any $4, $* or $@ below, so maybe we don't need this
-line ?
-
-> +
-> +	value_size=$attr_size
-
-Looks like the attr_size and value_size are duplicated, due to I didn't
-see you change any of them below.
-
-> +
-> +	echo 0 > /sys/module/scsi_debug/parameters/opts
-> +
-> +	echo -e "\nTesting : $test" >> $seqres.full
-> +	echo -e "attr size: $attr_size" >> $seqres.full
-> +	echo -e "error at block: $error_at_block\n" >> $seqres.full
-> +
-> +	touch $testfile
-> +
-> +	inode=$(ls -i $testfile|awk '{print $1}')
-
-inode=$(stat -c '%i' $testfile)
-
-> +	printf "inode: %d Testfile: %s\n" $inode $testfile >> $seqres.full
-> +	setfattr -n user.test_attr -v $(printf "%0*d" $value_size $value_size) $testfile
-
-As this case is "attr" related, so you need these:
-
-. common/attr
-
-_require_attrs user
-
-$SETFATTR_PROG ....
-
-> +
-> +	$XFS_IO_PROG -c "bmap -al" $testfile >> $seqres.full
-> +	start_blocks=($($XFS_IO_PROG -c "bmap -al" $testfile | awk 'match($3, /[0-9]+/, a) {print a[0]}'))
-> +	echo "Attribute fork extent(s) start at ${attrblocks[*]}" >> $seqres.full
-> +
-> +	_unmount $SCRATCH_MNT >>$seqres.full 2>&1
-> +
-> +	echo "Dump inode $inode details with xfs_db" >> $seqres.full
-> +	$XFS_DB_PROG -c "inode $inode" -c "print core.aformat core.naextents a" $scsi_debug_dev >> $seqres.full
-> +	inode_daddr=$($XFS_DB_PROG -c "inode $inode" -c "daddr" $scsi_debug_dev | awk '{print $4}')
-
-_scratch_xfs_get_metadata_field ...
-
-> +	echo inode daddr $inode_daddr >> $seqres.full
-> +
-> +
-> +	_mount $scsi_debug_dev $SCRATCH_MNT  >> $seqres.full
-> +
-> +        if [[ start_blocks[0] -ne 0 ]]; then
-        ^^^
-
-> +                # Choose the block to error, currently only works with a single extent.
-> +                error_daddr=$((start_blocks[0] + error_at_block*blocksize/512))
-> +        else
-> +                # Default to the inode daddr when no extents were found.
-> +                # Fails reading the inode during stat, so arguably useless
-> +                # even for testing the upper layers of getfattr.
-> +                error_daddr=$inode_daddr
-
-I'm curious, won't this affect the inode core ? If inode core can't be read, won't
-this cause other problem which isn't as you expect?
-
-> +        fi
-        ^^^
-
-Bad indentation ...
-
-> +
-> +	echo "Setup scsi_debug to error when reading attributes from block" \
-> +	     "$error_at_block at daddr $error_daddr" >> $seqres.full
-> +	echo $error_daddr > /sys/module/scsi_debug/parameters/medium_error_start
-> +	echo $(($blocksize/512)) > /sys/module/scsi_debug/parameters/medium_error_count
-> +
-> +	if [ $enable_error -eq 1 ]; then
-> +		echo Enabling error >> $seqres.full
-> +        	echo 2 > /sys/module/scsi_debug/parameters/opts
-> +	fi
-> +
-> +	grep ^ /sys/module/scsi_debug/parameters/{medium_error_start,medium_error_count,opts} >> $seqres.full
-> +
-> +	echo "Re-read the extended attribute on $testfile, panics on IO errors" >> $seqres.full
-> +	sync # Let folk see where we failed in the results.
-> +	getfattr -d -m - $testfile >> $seqres.full 2>&1 # Panic here on failure
-
-If you don't care about the getfattr output, you don't need to call _getfattr, but
-please use $GETFATTR_PROG at least.
-
-
-
-> +}
-> +
-> +
-> +# TODO: Avoid assumptions about inode size using _xfs_get_inode_size and
-> +#       _xfs_get_inode_core_bytes, currently assuming 512 byte inodes.
-> +
-> +# aformat shortform
-> +# Include shortform for completeness, we can only inject errors for attributes
-> +# stored outside of the inode.
-> +test_attr "attr_local" 1 0
-> +
-> +# aformat extents
-> +# Single leaf block, known to panic
-> +test_attr "attr_extent_one_block" 512 0
-> +
-> +# Other tests to exercise multi block extents and multi extent attribute forks.
-> +# Before the panic was understood it seemed possible that failing on the second
-> +# block of a multi block attribute fork was involved. Seems like it may be
-> +# worth testing in the future.
-> +
-> +test_attr "attr_extent_two_blocks_1" 5000 0
-> +test_attr "attr_extent_two_blocks_2" 5000 1
-> +# test_attr "attr_extent_many_blocks" 16000 4
-> +#
-> +# When using a single name=value pair to fill the space these tend to push out
-> +# to multiple extents, rather than a single long extent, so don't yet test
-> +# failing subsequent blocks within the first extent.
-> +#
-> +# i.e.
-> +# xfs_bmap -va $testfile
-> +# /mnt/test/testfile:
-> +# EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL
-> +#   0: [0..7]:          96..103           0 (96..103)            8
-> +#   1: [8..23]:         80..95            0 (80..95)            16
-> +
-> +# aformat btree
-> +# test_attr "attr_extents" 50000 0
-> +# test_attr "attr_extents" 50000 $blocksize
-> +# test_attr "attr_extents" 50000 $((blocksize+1))
-
-Can you really get a btree aformat through this ? I doubt that. You
-might need lots of attribute entries, not only one attribute with huge
-data.
-
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-> new file mode 100644
-> index 00000000..3b276ca8
-> --- /dev/null
-> +++ b/tests/xfs/999.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 999
-> +Silence is golden
-> -- 
-> 2.47.3
-> 
+> Regards,
+> ojaswin
+> > 
+> > --D
+> > 
+> > > > Thanks,
+> > > > Zorro
+> > > 
+> > > Hey Zorro,
+> > > 
+> > > Sure I'm okay with not keeping the helper and letting the user make sure
+> > > the fio version is correct.
+> > > 
+> > > @John, does that sound okay?
+> > > 
+> > > Regards,
+> > > ojaswin
+> > > > 
+> > > > > 
+> > > > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> > > > > ---
+> > > > >  common/rc | 32 ++++++++++++++++++++++++++++++++
+> > > > >  1 file changed, 32 insertions(+)
+> > > > > 
+> > > > > diff --git a/common/rc b/common/rc
+> > > > > index 35a1c835..f45b9a38 100644
+> > > > > --- a/common/rc
+> > > > > +++ b/common/rc
+> > > > > @@ -5997,6 +5997,38 @@ _max() {
+> > > > >  	echo $ret
+> > > > >  }
+> > > > >  
+> > > > > +# Check the required fio version. Examples:
+> > > > > +#   _require_fio_version 3.38 (matches 3.38 only)
+> > > > > +#   _require_fio_version 3.38+ (matches 3.38 and above)
+> > > > > +#   _require_fio_version 3.38- (matches 3.38 and below)
+> > > > > +_require_fio_version() {
+> > > > > +	local req_ver="$1"
+> > > > > +	local fio_ver
+> > > > > +
+> > > > > +	_require_fio
+> > > > > +	_require_math
+> > > > > +
+> > > > > +	fio_ver=$(fio -v | cut -d"-" -f2)
+> > > > > +
+> > > > > +	case "$req_ver" in
+> > > > > +	*+)
+> > > > > +		req_ver=${req_ver%+}
+> > > > > +		test $(_math "$fio_ver >= $req_ver") -eq 1 || \
+> > > > > +			_notrun "need fio >= $req_ver (found $fio_ver)"
+> > > > > +		;;
+> > > > > +	*-)
+> > > > > +		req_ver=${req_ver%-}
+> > > > > +		test $(_math "$fio_ver <= $req_ver") -eq 1 || \
+> > > > > +			_notrun "need fio <= $req_ver (found $fio_ver)"
+> > > > > +		;;
+> > > > > +	*)
+> > > > > +		req_ver=${req_ver%-}
+> > > > > +		test $(_math "$fio_ver == $req_ver") -eq 1 || \
+> > > > > +			_notrun "need fio = $req_ver (found $fio_ver)"
+> > > > > +		;;
+> > > > > +	esac
+> > > > > +}
+> > > > > +
+> > > > >  ################################################################################
+> > > > >  # make sure this script returns success
+> > > > >  /bin/true
+> > > > > -- 
+> > > > > 2.49.0
+> > > > > 
+> > > > 
+> > > 
 > 
 
