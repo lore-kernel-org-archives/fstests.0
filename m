@@ -1,46 +1,39 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FD272FF64F
-	for <fstests@vger.kernel.org>; Thu,  4 Sep 2025 13:00:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB154304BCE;
+	Thu,  4 Sep 2025 15:00:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756990856; cv=none; b=B09rwJvZpZ+p3+gbrJttQPgiFwxiTIqs4pPBkl8QeJ7qpC0LugbHYJvT5/By1GIr2Uy50PlUgGGeYxB72hcTAjImtx910r+5TQxsosF073yopI8HpvgHKLuH9Vr5qj7VwoAvmd/f41PZDv7kwExVUX6mDjv78dGTdSbJ9mHTiQE=
+	t=1756998024; cv=none; b=ueZheqT74n8EosGUR31HSsAl5bjKQW2F9UaZfDNAewDN5q/ZOi5ECGvcCb3ITm6Cd0cn0KYprvZUDRGQRjjiKAiccuV4ulMPrJZGhSD+1u1jvtDiUUjK8+QrkgRz0C/3WU0XT/rSFqobAJoiceZo/Xr+YTi5Byc7cRY+6Pg9EP8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756990856; c=relaxed/simple;
-	bh=Tmgaw4i0Yd4nWUFJu9joP03HPkAuLpfqflf1bi5GjyA=;
+	s=arc-20240116; t=1756998024; c=relaxed/simple;
+	bh=6haEVOJoZ/15vSBMmKp/Kvv3+tPPbDgux+p0zG6seos=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Htkb2OAmQtfREtwvog4eLg6Riqao/YhQEwrx3SpXxBe+ebIHAXq09F/oJlgXBnPty9qjfV95ymbkAP0kIu2/AG3XKHttJQW9tQ8YlZj3j3J9i2xrnKmRheJv/PmL2WJ6rFT5pO0UD1oof30pvWAxZ4LYerEi6rOicv5q6j6Qp/I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=pavqM5uI; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	 Content-Type:Content-Disposition:In-Reply-To; b=knryIRvZiCYShnNG1F5ISUHeLmHp6lW9mDgL14Xm1YMsQxeN2mI8ZEI7BfUrZqDaG4CwYtdCRoMBeW0YJpeQyytYNFerFiXfIN/Pv4pG2aJC2DVd8dQbGVLXsIahilAIlHhOwUj8rR7DJsOjcEm44aRTboDoTbmqJsiyE6m698E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QLwrk2j3; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="pavqM5uI"
-Received: from trampoline.thunk.org (pool-173-48-82-200.bstnma.fios.verizon.net [173.48.82.200])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 584D0lug019785
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 4 Sep 2025 09:00:48 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1756990849; bh=uR/MGN8yFgfE1t/K21wdgS0m0nWB6QMulCRtGqp8wMw=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=pavqM5uIeO+Kd24WXUyCs0emWw1bn9YJsGsq8iO22XNEjfWaQwvJOAJORbDCYqX/P
-	 qssZWjlZ1TrNGBT8l8K/ay0758IfcvsNaiQGyKvJwIfLczRaEueeCSZibnCdbO3Jbh
-	 UQW+C8KDe6TlZTtorZH3NWC+0GB26zR1xYjycWEp9ESGO3E2ltL1qaAN1d4R11esGE
-	 JIi/NMK5Wrf2R1Y1Frl3v1pIT+cERL+03xEpFi1KP9o4ohNIM9JoxK85Tk7VpHIF8A
-	 u5DjvaZ0GHTDnTxESXyj6A5nSMVN8gzN4kWF+JdXRYDZoC+sJ1NvVm4Z7SoFS7K98f
-	 izlp6PnetPRww==
-Received: by trampoline.thunk.org (Postfix, from userid 15806)
-	id 88C5E2E00D6; Thu, 04 Sep 2025 09:00:47 -0400 (EDT)
-Date: Thu, 4 Sep 2025 09:00:47 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QLwrk2j3"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8C96EC4CEF0;
+	Thu,  4 Sep 2025 15:00:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1756998023;
+	bh=6haEVOJoZ/15vSBMmKp/Kvv3+tPPbDgux+p0zG6seos=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=QLwrk2j3q2eyyDEQI9SThKZ7BfYgf+GZ2UY5Xeh9K4ueUMEKmicFQrHiGWNtTGHao
+	 pE1kTCnjzHAvk70gmrSzsOgnyjSNjKueBnNqD0QuqYEqhh3Lvy0r18NNIRw7BOU8Zp
+	 OFhjQHv3ctIoZaoUstBezjTYhlgMOvksISsHnio1Mh/7VC06RhE6Df0hsgwR3Nsb2a
+	 mmF3zrRmTxAAXD0iyNPAPdDZYrnWXrh/oVzZ8Tjy2QomZpVzYXmgCOSoQlu0CgMGHY
+	 0djsMsjSIGS8SNszC+Mx797nUQWdBunj5YnNwFawmt8DC8HneWVqGBKZeADuv4Xfkc
+	 l4fbbVrzJjXKA==
+Date: Thu, 4 Sep 2025 08:00:22 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
 To: Qu Wenruo <wqu@suse.com>
 Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v2] fstests: generic/228: do not rely on the bash core
- dump output
-Message-ID: <20250904130047.GB3267668@mit.edu>
-References: <20250904061944.105518-1-wqu@suse.com>
+Subject: Re: [PATCH] fstests: generic/733: avoid output difference due to
+ bash's version
+Message-ID: <20250904150022.GE8092@frogsfrogsfrogs>
+References: <20250904081429.114716-1-wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -49,53 +42,107 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250904061944.105518-1-wqu@suse.com>
+In-Reply-To: <20250904081429.114716-1-wqu@suse.com>
 
-On Thu, Sep 04, 2025 at 03:49:44PM +0930, Qu Wenruo wrote:
-> [BUG]
-> With bash 5.3.x, the test case generic/228 will always fail with the
-> following golden output mismatch:
+On Thu, Sep 04, 2025 at 05:44:29PM +0930, Qu Wenruo wrote:
+> [FALSE ALERT]
+> When running generic/733 with bash 5.3.3 (any thing newer than 5.3.0
+> will reproduce the bug), the test case will fail like the following:
 > 
-> FSTYP         -- btrfs
-> PLATFORM      -- Linux/x86_64 btrfs-vm 6.17.0-rc3-custom+ #281 SMP PREEMPT_DYNAMIC Thu Aug 28 11:15:21 ACST 2025
-> MKFS_OPTIONS  -- /dev/mapper/test-scratch1
-> MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
-> 
-> generic/228 1s ... - output mismatch (see /home/adam/xfstests/results//generic/228.out.bad)
->     --- tests/generic/228.out	2025-09-04 15:15:08.965000000 +0930
->     +++ /home/adam/xfstests/results//generic/228.out.bad	2025-09-04 15:16:05.627457599 +0930
->     @@ -1,6 +1,6 @@
->      QA output created by 228
->      File size limit is now set to 100 MB.
->      Let us try to preallocate 101 MB. This should fail.
->     -File size limit exceeded
->     +File size limit exceeded   $XFS_IO_PROG -f -c 'falloc 0 101m' $TEST_DIR/ouch
->      Let us now try to preallocate 50 MB. This should succeed.
->      Test over.
+> generic/733 19s ... - output mismatch (see /home/adam/xfstests/results//generic/733.out.bad)
+>     --- tests/generic/733.out	2025-09-04 17:30:08.568000000 +0930
+>     +++ /home/adam/xfstests/results//generic/733.out.bad	2025-09-04 17:30:32.898475103 +0930
+>     @@ -2,5 +2,5 @@
+>      Format and mount
+>      Create a many-block file
+>      Reflink the big file
+>     -Terminated
+>     +Terminated                 $here/src/t_reflink_read_race "$testdir/file1" "$testdir/file2" "$testdir/outcome" &>> $seqres.full
+>      test completed successfully
 >     ...
->     (Run 'diff -u /home/adam/xfstests/tests/generic/228.out /home/adam/xfstests/results//generic/228.out.bad'  to see the entire diff)
-> Ran: generic/228
-> Failures: generic/228
-> Failed 1 of 1 tests
+>     (Run 'diff -u /home/adam/xfstests/tests/generic/733.out /home/adam/xfstests/results//generic/733.out.bad'  to see the entire diff)
 > 
 > [CAUSE]
-> The "File size limit exceeded" line is never from xfs_io, but the
-> coredump from bash itself.
+> The failure is fs independent, but bash version dependent.
 > 
-> And with latest 5.3.x bash, it added extra dump during such core dump
-> handling (even if we have explicitly skipped the coredump).
+> In bash v5.3.x, the job control will output the command which triggered
+> the job control (from termination to core dump etc).
+> 
+> The "Terminated" message is not from the program, but from bash's job
+> control, thus redirection won't hide that message.
 > 
 > [FIX]
-> Instead of relying on bash to do the coredump, which is unreliable
-> between different bash versions as I have shown above, ignore the
-> SIGXFSZ signal so that xfs_io will do the error output, which is more
-> reliable than bash.
+> Instead of relying on the job control behavior from bash, run the
+> t_reflink_read_race tool in background, and wait for it to finish.
 > 
-> And since we do not need to bother the coredump behavior, remove all the
-> cleanup and preparation for coredump.
+> Background bash will be non-interactive, thus no job control and no
+> "Terminated" message.
+> 
+> Thankfully this particular test case does extra checks on the outcome
+> file to determine if the program is properly terminated, thus we are
+> safe to delete the "Terminated" line from the golden output.
 > 
 > Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>  tests/generic/733     | 15 ++++++++++++++-
+>  tests/generic/733.out |  1 -
+>  2 files changed, 14 insertions(+), 2 deletions(-)
+> 
+> diff --git a/tests/generic/733 b/tests/generic/733
+> index aa7ad994..b8321abc 100755
+> --- a/tests/generic/733
+> +++ b/tests/generic/733
+> @@ -70,8 +70,21 @@ done
+>  echo "fnr=$fnr" >> $seqres.full
+>  
+>  echo "Reflink the big file"
+> +# Workaround the default job control by running it at background.
+> +#
+> +# Job control of bash v5.3.x will output the command which triggered the job
+> +# control (terminated, core dump etc).
+> +# And since it's handled by bash itself, redirection won't work for the job
+> +# control message.
+> +#
+> +# Running the command in background will disable the job control thus
+> +# there will be no extra message like "Terminated".
+> +#
+> +# We will check the outcome file to determine if the program is properly
+> +# terminated, thus no need to bother the job control message.
+>  $here/src/t_reflink_read_race "$testdir/file1" "$testdir/file2" \
+> -	"$testdir/outcome" &>> $seqres.full
+> +	"$testdir/outcome" &>> $seqres.full &
+> +wait
 
-Makes sense, thanks for testing against the latest bash!
+Hrmm, the only problem I can see is what happens if someone hits ^C to
+terminate fstests while t_reflink_read_race is running?  Will anything
+wait for it to terminate, or will the user be stuck with it running in
+the background, pinning the mount, etc. ?
 
-Reviewed-by: Theodore Ts'o <tytso@mit.edu>
+Or can we use shell command groups here:
+
+{ $here/src/t_reflink_read_race <params> ; } 2>/dev/null
+
+(the semicolon is significant)
+
+to run t_reflink_read_race as a foreground job but redirect the
+shell's helpful termination messages to /dev/null?
+
+--D
+
+>  
+>  if [ ! -e "$testdir/outcome" ]; then
+>  	echo "Could not set up program"
+> diff --git a/tests/generic/733.out b/tests/generic/733.out
+> index d4f5a7c7..2383cc8d 100644
+> --- a/tests/generic/733.out
+> +++ b/tests/generic/733.out
+> @@ -2,5 +2,4 @@ QA output created by 733
+>  Format and mount
+>  Create a many-block file
+>  Reflink the big file
+> -Terminated
+>  test completed successfully
+> -- 
+> 2.51.0
+> 
+> 
