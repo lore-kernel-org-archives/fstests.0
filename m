@@ -1,39 +1,41 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB154304BCE;
-	Thu,  4 Sep 2025 15:00:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3BE23126B5
+	for <fstests@vger.kernel.org>; Thu,  4 Sep 2025 17:39:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756998024; cv=none; b=ueZheqT74n8EosGUR31HSsAl5bjKQW2F9UaZfDNAewDN5q/ZOi5ECGvcCb3ITm6Cd0cn0KYprvZUDRGQRjjiKAiccuV4ulMPrJZGhSD+1u1jvtDiUUjK8+QrkgRz0C/3WU0XT/rSFqobAJoiceZo/Xr+YTi5Byc7cRY+6Pg9EP8=
+	t=1757007559; cv=none; b=kW5LcU6kJoffTCBdc4wTx0A3TgDb2ng9SOgo6t02BgKK/Li7RRMnuCn3k/mCdI/obPtywvp+/BpVBjBXUGyi1u72MzS2l+Why/rSlhaM6xI+F4WLgUO5Ac3y3qQomvytiZWPg3PR1S3T9y5JTYC2oGgO2U52anXPbHq7kGpN9G0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756998024; c=relaxed/simple;
-	bh=6haEVOJoZ/15vSBMmKp/Kvv3+tPPbDgux+p0zG6seos=;
+	s=arc-20240116; t=1757007559; c=relaxed/simple;
+	bh=0TFVItmf9nXUHxwT077yaL+fpDSVSKq3dUyp0d4NDEk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=knryIRvZiCYShnNG1F5ISUHeLmHp6lW9mDgL14Xm1YMsQxeN2mI8ZEI7BfUrZqDaG4CwYtdCRoMBeW0YJpeQyytYNFerFiXfIN/Pv4pG2aJC2DVd8dQbGVLXsIahilAIlHhOwUj8rR7DJsOjcEm44aRTboDoTbmqJsiyE6m698E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QLwrk2j3; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=bzwYDg8HfVXiYvdw/OAOzQh8PAe+sfebqzb4GQy/5Id632wgY9TdC4oK7Ebb9BfEi9jlWVQM3JTh9mrzYMuhzOpZaVvJpW1U/0Hyc6+WiHSzjf9/H+9BClm2GUpCESmpJFtV8H+nV2s49lAflOiS7hZ8dAXrnf2SnE85oysWdY0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=J83wFC/T; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QLwrk2j3"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8C96EC4CEF0;
-	Thu,  4 Sep 2025 15:00:23 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="J83wFC/T"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EA160C4CEF0;
+	Thu,  4 Sep 2025 17:39:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1756998023;
-	bh=6haEVOJoZ/15vSBMmKp/Kvv3+tPPbDgux+p0zG6seos=;
+	s=k20201202; t=1757007559;
+	bh=0TFVItmf9nXUHxwT077yaL+fpDSVSKq3dUyp0d4NDEk=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=QLwrk2j3q2eyyDEQI9SThKZ7BfYgf+GZ2UY5Xeh9K4ueUMEKmicFQrHiGWNtTGHao
-	 pE1kTCnjzHAvk70gmrSzsOgnyjSNjKueBnNqD0QuqYEqhh3Lvy0r18NNIRw7BOU8Zp
-	 OFhjQHv3ctIoZaoUstBezjTYhlgMOvksISsHnio1Mh/7VC06RhE6Df0hsgwR3Nsb2a
-	 mmF3zrRmTxAAXD0iyNPAPdDZYrnWXrh/oVzZ8Tjy2QomZpVzYXmgCOSoQlu0CgMGHY
-	 0djsMsjSIGS8SNszC+Mx797nUQWdBunj5YnNwFawmt8DC8HneWVqGBKZeADuv4Xfkc
-	 l4fbbVrzJjXKA==
-Date: Thu, 4 Sep 2025 08:00:22 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: generic/733: avoid output difference due to
- bash's version
-Message-ID: <20250904150022.GE8092@frogsfrogsfrogs>
-References: <20250904081429.114716-1-wqu@suse.com>
+	b=J83wFC/TCNlaLnUUOjMjVjrGL0c+vX3rbfHdQIxMpQ30ar9MaHUgG9JXETzwc07GF
+	 Gtfdjs1f5xJHVKdDz3nr3/SU7eNsqppEEDM7e845VK8E/yeQhLuJI4I/SQa+Pjpzei
+	 vEKqE7UdaZVN4l+9JJD4hbSJYftwEkjyIh6VR7GjBFQmB+1RmWpxbTlkkoSNixI2Pn
+	 qXRuPlboqpK0v839jhpubw6c7WhDmfErLOhJ2CSmJKMb51W/EE4YFhsNLL+AGi45WS
+	 2Ga99FLHB72JueCRjmTnkgj0l6xjtywX4Wwr0kdzhYJ2PSFnjloGDXRh22rrIZs6tO
+	 mxoQXeyX17N9Q==
+Date: Thu, 4 Sep 2025 17:39:17 +0000
+From: Eric Biggers <ebiggers@kernel.org>
+To: Jan Prusakowski <jprusakowski@google.com>
+Cc: Zorro Lang <zlang@kernel.org>, Chao Yu <chao@kernel.org>,
+	fstests@vger.kernel.org, jaegeuk@kernel.org,
+	linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH v1] common/encrypt: Do not run
+ _verify_ciphertext_for_encryption_policy on compressed FS
+Message-ID: <20250904173917.GB854551@google.com>
+References: <20250904085449.290354-1-jprusakowski@google.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,107 +44,44 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250904081429.114716-1-wqu@suse.com>
+In-Reply-To: <20250904085449.290354-1-jprusakowski@google.com>
 
-On Thu, Sep 04, 2025 at 05:44:29PM +0930, Qu Wenruo wrote:
-> [FALSE ALERT]
-> When running generic/733 with bash 5.3.3 (any thing newer than 5.3.0
-> will reproduce the bug), the test case will fail like the following:
+On Thu, Sep 04, 2025 at 10:54:49AM +0200, Jan Prusakowski wrote:
+> _verify_ciphertext_for_encryption_policy() checks if encryption works
+> correctly by reading encrypted file's contents directly from a block device and
+> comparing it to a known good ciphertext.
 > 
-> generic/733 19s ... - output mismatch (see /home/adam/xfstests/results//generic/733.out.bad)
->     --- tests/generic/733.out	2025-09-04 17:30:08.568000000 +0930
->     +++ /home/adam/xfstests/results//generic/733.out.bad	2025-09-04 17:30:32.898475103 +0930
->     @@ -2,5 +2,5 @@
->      Format and mount
->      Create a many-block file
->      Reflink the big file
->     -Terminated
->     +Terminated                 $here/src/t_reflink_read_race "$testdir/file1" "$testdir/file2" "$testdir/outcome" &>> $seqres.full
->      test completed successfully
->     ...
->     (Run 'diff -u /home/adam/xfstests/tests/generic/733.out /home/adam/xfstests/results//generic/733.out.bad'  to see the entire diff)
-> 
-> [CAUSE]
-> The failure is fs independent, but bash version dependent.
-> 
-> In bash v5.3.x, the job control will output the command which triggered
-> the job control (from termination to core dump etc).
-> 
-> The "Terminated" message is not from the program, but from bash's job
-> control, thus redirection won't hide that message.
-> 
-> [FIX]
-> Instead of relying on the job control behavior from bash, run the
-> t_reflink_read_race tool in background, and wait for it to finish.
-> 
-> Background bash will be non-interactive, thus no job control and no
-> "Terminated" message.
-> 
-> Thankfully this particular test case does extra checks on the outcome
-> file to determine if the program is properly terminated, thus we are
-> safe to delete the "Terminated" line from the golden output.
-> 
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->  tests/generic/733     | 15 ++++++++++++++-
->  tests/generic/733.out |  1 -
->  2 files changed, 14 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/generic/733 b/tests/generic/733
-> index aa7ad994..b8321abc 100755
-> --- a/tests/generic/733
-> +++ b/tests/generic/733
-> @@ -70,8 +70,21 @@ done
->  echo "fnr=$fnr" >> $seqres.full
->  
->  echo "Reflink the big file"
-> +# Workaround the default job control by running it at background.
-> +#
-> +# Job control of bash v5.3.x will output the command which triggered the job
-> +# control (terminated, core dump etc).
-> +# And since it's handled by bash itself, redirection won't work for the job
-> +# control message.
-> +#
-> +# Running the command in background will disable the job control thus
-> +# there will be no extra message like "Terminated".
-> +#
-> +# We will check the outcome file to determine if the program is properly
-> +# terminated, thus no need to bother the job control message.
->  $here/src/t_reflink_read_race "$testdir/file1" "$testdir/file2" \
-> -	"$testdir/outcome" &>> $seqres.full
-> +	"$testdir/outcome" &>> $seqres.full &
-> +wait
+> This, however, won't work if the file systems is also compressed. So this patch
+> disables tests using this function when a compressed FS is used.
 
-Hrmm, the only problem I can see is what happens if someone hits ^C to
-terminate fstests while t_reflink_read_race is running?  Will anything
-wait for it to terminate, or will the user be stuck with it running in
-the background, pinning the mount, etc. ?
+Apparently this is for f2fs.  There isn't really any such thing as a
+"compressed filesystem" for f2fs.  Rather, f2fs supports compression on
+a per-file basis: the filesystem can contain a mix of compressed and
+uncompressed files.  Probably you used 'compression_extension=*', which
+caused f2fs to automatically enable compression on the files that
+xfstests created, which caused the test failure.  But that behavior is
+specific to 'compress_extension=*', not to compression support per se.
 
-Or can we use shell command groups here:
+> diff --git a/common/f2fs b/common/f2fs
+> index 1b39d8ce..c46e2aa2 100644
+> --- a/common/f2fs
+> +++ b/common/f2fs
+> @@ -25,3 +25,10 @@ _require_scratch_f2fs_compression()
+>  		_scratch_unmount
+>  	fi
+>  }
+> +
+> +_require_f2fs_no_compress()
+> +{
+> +	if _normalize_mount_options "$MOUNT_OPTIONS" | grep -q "compress"; then
+> +		_notrun "This test requires no compression enabled"
+> +	fi
+> +}
 
-{ $here/src/t_reflink_read_race <params> ; } 2>/dev/null
+That just checks for compression support, not whether the test file is
+actually compressed.
 
-(the semicolon is significant)
+But also, we don't really need to skip these tests.  Instead, how about
+using 'chattr +m' to explicitly set the test file to uncompressed?
 
-to run t_reflink_read_race as a foreground job but redirect the
-shell's helpful termination messages to /dev/null?
-
---D
-
->  
->  if [ ! -e "$testdir/outcome" ]; then
->  	echo "Could not set up program"
-> diff --git a/tests/generic/733.out b/tests/generic/733.out
-> index d4f5a7c7..2383cc8d 100644
-> --- a/tests/generic/733.out
-> +++ b/tests/generic/733.out
-> @@ -2,5 +2,4 @@ QA output created by 733
->  Format and mount
->  Create a many-block file
->  Reflink the big file
-> -Terminated
->  test completed successfully
-> -- 
-> 2.51.0
-> 
-> 
+- Eric
