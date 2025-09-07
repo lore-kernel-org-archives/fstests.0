@@ -1,144 +1,130 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 025991DC075
-	for <fstests@vger.kernel.org>; Sun,  7 Sep 2025 05:29:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D8C4126C02
+	for <fstests@vger.kernel.org>; Sun,  7 Sep 2025 14:02:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757222995; cv=none; b=a9vO184Uzw5OJV2yldKf/SxGWJTooEm1WCQeUE1LWtNAWsZ3h9ityI5/y29QwXn9/9M0zTwxHJK1+MG0UKmlXDvqHBlBmwfXnyBJDaaYbspn75xAJk+M3YQBkUE6+5LjTLF/AA3DpAJnhwJXh60Tn/aQlwBBlCh8SwEkDutP3io=
+	t=1757253734; cv=none; b=NBUsKxw7u6TCQBDxavxYSyot7B1EMZRIVQ+WKXUTMQJM1Jwm6lzfRKmz34c4uQE2rzlcu1gjRHuOqrBM8yLhvmQjvt5tm26r0RnCrxYsWQN1Q88o8KSOmcUhAFa80Z4Iln3gYo+4xQxdYKCRbsZjZytop32vTmQzeDPLWmd4U+M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757222995; c=relaxed/simple;
-	bh=caTPKCkAvkuQGw3fUn3P6ZaPL/8hegzI2j/493ESBVk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=tQ4F8bHfylgsOWbdi8rpg38WCXbxkyIT4m0u85wwtf/rrjNRSNrLkzVkpA0wHWyiHgZNCNJ+6PVeSfWKxUxlZtakR6CopAogkMEpp1JXKVRPrIW+TueBFQDDhJTj9VdSPu48/n8yxip4zISg7ENHCytvcdHYHDq9e0aCoPX7lP8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=RrOPIF9F; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1757253734; c=relaxed/simple;
+	bh=pJI3SPni4wEaTlj9eUR7Ei9RGK2ncOjdhWx1WZuhATw=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=BB1pKXSyVZDmWGeae+sR/63NyN4yiomBVRR//mw3jWvAGI1yeTSEcLK41IdMQ3PvCNBr3XVRfDHQG4n8n28tMnft9AV/ZgJe5Ou7AtTS9ERGNYqlbVoWE5Y2+NAcYFfriahddm4lLacOoEEfqZIiR43p6LJpWfl7uYpOb/+txf8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OeFl+MZQ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RrOPIF9F"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1757222992;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=NDSHjXOUY0OzHHbNYkSfv2EmWxAIktBkwdxNx3m1wgU=;
-	b=RrOPIF9FT8TKjNfjnICyF9vVIE1d5J0AkYImR56vZtcrq8enmGkZv62gy3PpG92q/SJ8vU
-	FA7i8vnHE1DTSCGebcYNK49/I5KW5YvXX49W7h2ESnF5OO94e4fnIHQPlEjbT9nD4wfLPy
-	909haERKoVb832+pCTow8CUcJadBGFw=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-618-ZXfZaC_ENW-IbKzpLbeasg-1; Sun, 07 Sep 2025 01:29:50 -0400
-X-MC-Unique: ZXfZaC_ENW-IbKzpLbeasg-1
-X-Mimecast-MFC-AGG-ID: ZXfZaC_ENW-IbKzpLbeasg_1757222989
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-772642f9fa3so4281537b3a.1
-        for <fstests@vger.kernel.org>; Sat, 06 Sep 2025 22:29:50 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757222989; x=1757827789;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=NDSHjXOUY0OzHHbNYkSfv2EmWxAIktBkwdxNx3m1wgU=;
-        b=Z1FfjTrndHniEiMjGLPNO/2HJkZxjCHocDQfFmN/hbSFJAB8I6DODBzWWlRzmdo0k/
-         S2MSCiZ2pXrnflmHWRBiURr7qubxIT6dWyGCtRtmL5oL5ABVAlZMrLx3I+cjx1t9Z1K5
-         TvhMgoSVIz1V9H2PHa41MMIiAgy4iTYY2frbwJIz5/U5zEfZEdDumgxrgJgjV9r1AIXr
-         fgg+uRd1m1hNWyalshPMTHOYKzgVZZO2D1IOcrkrQx2C9B2rS3mnZxikRhNZYGXGLbrX
-         ynxFDE/fwzIKKMyHCIRGUW8KDd0VR14ywU0xMYXRcKFRVtXXB0lZ4lCGanUAnQzywlf9
-         4PdQ==
-X-Forwarded-Encrypted: i=1; AJvYcCW7cpwQUBGuaCZs3j2WfJKMgxkoCrn7yTDyJvUzgoy2dtwHKbItg+kf47rOwT8rph+qVvexdz3L@vger.kernel.org
-X-Gm-Message-State: AOJu0YyLzbx1wGQBdGgTtq8E0hUrSmLhnAIg41lRaCgn5Qn20mCrYOk+
-	GsZJIxtKcbBO5xarkK6FGauSG6xeJbOjWtDW6O5rYDee+umdJ8SCzfL2YnA2SycfTnHlp9Rd07I
-	NimtNDchhDJTXPHAW8MfPVF5pLIIyAurT5wVX5K+ATqLW7VtvHy8H2s9nXkg=
-X-Gm-Gg: ASbGncsVSx8se1x+cg+NnKT/RIyQ2EIHJf0+I1PsfrNvzocjyq6+nKm20fsbOy1LeUI
-	GxJr4bOtTjoWpKUl4/Moz1cgvJcI0G5S9KZQ11GzeAC4O4COD0ze5Ib1SkCfWPY/eU9GbAaEvx8
-	APXDRLzhHJ4VO2JNh0McuezenhOH+3JRfvByTpJl0D72gL5lQZimCpSNkomCkRVd2qHZxdjs+/G
-	nmlJ7c3BTVeyPahMQshfbomll4kpqzGkHF10WgPTqglh7MLefg8qrZMsYyOv7LOIq1+B2M8j2jJ
-	LLufTlxkG6TVe2S8VQKrhYSu6BxyEGbT7a0eMO9TITc4Nn6pocZzbpstCo5L/3HLEkQUc6bYW/P
-	gyLGO
-X-Received: by 2002:a05:6a20:4303:b0:245:fc8e:ef5b with SMTP id adf61e73a8af0-24e7cc230b9mr12289014637.5.1757222989279;
-        Sat, 06 Sep 2025 22:29:49 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHvhkV+C/ngmYr5b9L+PxjVes3H9Tvgst7PxAuC8Mh5uWsBWo7Hp8B67gRI5Mjyth4C7Hk8+Q==
-X-Received: by 2002:a05:6a20:4303:b0:245:fc8e:ef5b with SMTP id adf61e73a8af0-24e7cc230b9mr12288987637.5.1757222988895;
-        Sat, 06 Sep 2025 22:29:48 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b520eaf013esm5307355a12.52.2025.09.06.22.29.45
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 06 Sep 2025 22:29:48 -0700 (PDT)
-Date: Sun, 7 Sep 2025 13:29:43 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: John Garry <john.g.garry@oracle.com>
-Cc: Ojaswin Mujoo <ojaswin@linux.ibm.com>, fstests@vger.kernel.org,
-	Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
-	tytso@mit.edu, linux-xfs@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH v5 02/12] common/rc: Add _require_fio_version helper
-Message-ID: <20250907052943.4r3eod6bdb2up63p@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cover.1755849134.git.ojaswin@linux.ibm.com>
- <955d47b2534d9236adbd2bbd13598bbd1da8fc04.1755849134.git.ojaswin@linux.ibm.com>
- <1b12c0d9-b564-4e57-b1a5-359e2e538e9c@oracle.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OeFl+MZQ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 91D28C4CEF0;
+	Sun,  7 Sep 2025 14:02:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1757253732;
+	bh=pJI3SPni4wEaTlj9eUR7Ei9RGK2ncOjdhWx1WZuhATw=;
+	h=Date:From:To:Subject:From;
+	b=OeFl+MZQQPnWh0LDbOMad6BF0/BJ5IuOml4pjNps8E64nH6L+OnvOQlzNOQ2V/UQT
+	 ASM3tUZ1yzpBzDGdSCn+Cr6BvIP5FfZnd/z6l4ibiKtHwz0E3izmKBQtZ4yIz1XA2s
+	 3ePyHQkXMTT5SqFJ62gfO5SrWJilpC6jDGHmAuqZgXPeay8Qn/9oZYF5v++oNt4Xz8
+	 ZSxzVDDG9aLhFxt2al6YaYnTzb41AVW7HdMhTT7/+gpvOyEGtKGEpK7ykig7gLkyNI
+	 VjXV+4YnsyJ5Tz5nTSjhptfLG+I2gRZZAzKjkZwQflPML1HXeirWApUoNVx4/+BHGO
+	 zveKy3Bsd2E2Q==
+Date: Sun, 07 Sep 2025 22:02:08 +0800
+Message-ID: <dc12aabf7d5a337098d1b52f19dd728c@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2025.08.17 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="pNNYPsVtqQFj"
+Content-Disposition: inline
+
+
+--pNNYPsVtqQFj
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1b12c0d9-b564-4e57-b1a5-359e2e538e9c@oracle.com>
 
-On Tue, Sep 02, 2025 at 03:50:10PM +0100, John Garry wrote:
-> On 22/08/2025 09:02, Ojaswin Mujoo wrote:
-> > The main motivation of adding this function on top of _require_fio is
-> > that there has been a case in fio where atomic= option was added but
-> > later it was changed to noop since kernel didn't yet have support for
-> > atomic writes. It was then again utilized to do atomic writes in a later
-> > version, once kernel got the support. Due to this there is a point in
-> > fio where _require_fio w/ atomic=1 will succeed even though it would
-> > not be doing atomic writes.
-> > 
-> > Hence, add an explicit helper to ensure tests to require specific
-> > versions of fio to work past such issues.
-> > 
-> > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> > ---
-> >   common/rc | 32 ++++++++++++++++++++++++++++++++
-> >   1 file changed, 32 insertions(+)
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index 35a1c835..f45b9a38 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -5997,6 +5997,38 @@ _max() {
-> >   	echo $ret
-> >   }
-> > +# Check the required fio version. Examples:
-> > +#   _require_fio_version 3.38 (matches 3.38 only)
-> > +#   _require_fio_version 3.38+ (matches 3.38 and above)
-> > +#   _require_fio_version 3.38- (matches 3.38 and below)
-> 
-> This requires the user to know the version which corresponds to the feature.
-> Is that how things are done for other such utilities and their versions vs
-> features?
-> 
-> I was going to suggest exporting something like
-> _require_fio_atomic_writes(), and _require_fio_atomic_writes() calls
-> _require_fio_version() to check the version.
+Hi all,
 
-(Sorry, I made a half reply in my last email)
+The master branch of the xfstests repository at:
 
-This looks better than only using _require_fio_version. But the nature is still
-checking fio version. If we don't have a better idea to check if fio really
-support atomic writes, the _require_fio_version is still needed.
-Or we rename it to "__require_fio_version" (one more "_"), to mark it's
-not recommended using directly. But that looks a bit like a trick :-D
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated to v2025.08.17 version.
 
 Thanks,
 Zorro
 
+The new head of the master branch is commit:
 
-> 
-> Thanks,
-> John
-> 
-> 
+5a9cd3ef1b33 f2fs/012: adapt lookup_mode=x mount option
 
+New commits:
+
+Brian Foster (1):
+      [3e802fc7c387] xfs: test iomap zero range via fsx and error tag
+
+Chao Yu (7):
+      [88aa818b3325] f2fs: test common mount options
+      [f1cb492c2b65] f2fs: test special mount options
+      [785d75ac4918] f2fs: test mount options for zoned device
+      [3c4fce2127c9] f2fs: check data eof after partial truncation on compressed cluster
+      [7d38f690bf85] f2fs: do sanity check on mapping table
+      [97faf40fc28d] f2fs: do sanity check on i_xattr_nid
+      [5a9cd3ef1b33] f2fs/012: adapt lookup_mode=x mount option
+
+John Garry (1):
+      [00dced3f6730] generic/765: modify some steps to fix test
+
+Zorro Lang (1):
+      [b076a3a72941] overlay/005: only run for xfs underlying fs
+
+
+Code Diffstat:
+
+ common/rc          |   3 +
+ tests/f2fs/012     |  13 +++-
+ tests/f2fs/015     | 121 +++++++++++++++++++++++++++++++++++++
+ tests/f2fs/015.out | 173 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/f2fs/016     |  50 ++++++++++++++++
+ tests/f2fs/016.out |  33 ++++++++++
+ tests/f2fs/017     |  40 +++++++++++++
+ tests/f2fs/017.out |  21 +++++++
+ tests/f2fs/018     |  84 ++++++++++++++++++++++++++
+ tests/f2fs/018.out |   2 +
+ tests/f2fs/019     |  42 +++++++++++++
+ tests/f2fs/019.out |   2 +
+ tests/f2fs/020     |  51 ++++++++++++++++
+ tests/f2fs/020.out |   2 +
+ tests/generic/765  |  40 +------------
+ tests/overlay/005  |   1 +
+ tests/xfs/131      |  26 ++++++++
+ tests/xfs/131.out  |   2 +
+ 18 files changed, 666 insertions(+), 40 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--pNNYPsVtqQFj
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmi9kAQACgkQlNbPkfr2
+tMyJaxAAkQ9B5JLBfhd6d529AWQwT+ERu07cl1IFA9b8kjHu9eVZIH7Mrv0E+VkE
+1zSRYQ8zDm23WOih0fsRy1GbzJI3ETW2oT4yqZHBU2HRS1P7xOmraNsBtTkZx557
+vFLIn5bjLlG7NOYTVNrmzuJ/A7xLaymCAuAtyXjgH5GWIxY4aQp4C64PrHXlSrGA
+mb7Japft8Htf56PFbenaJSmaOjNSvtsHmWEF1SFnhTHRq0yma37LCJTdfZe3LImo
+S9/+Sxazg0ONKvBOQIWFOxayZfdHuYsoTz6zA4jE2SjptfVRz/pQ8YSs/5yuQQRU
+VK/h9c7UMBZ28Oe/oxR5wmEUepFv0w+iaRHz5iCpeT7ZhnkT6e20zRT0voI+gX1Z
+6+hmGdPuA8Ribk96zowdH9vya296BVLX6Pf1fUEkG3aND3xOofyktmyTX7S2zp4t
+xXvyBA2lma19nWiWg1zNqwAnibOU9mNn7fH3pnZelYBZ5DP/J4a+saQwY8ACYu6g
+FDlV4xXAF8r0Q//UyfhEbpc9k5O6TPGqveuPnE7RFAsc4nkYlNs11x7AyON7brts
+B+cDGAqxVyDFEUzLEA0q2QY3577diWAnAe2j9j57QIsIzk1h0Dki9eQHiu8DFSh6
+BTy2utC2LzNhQvxn1HPopziINoc9W+OvkDYjQZ37cUU7cnDlh2I=
+=ube5
+-----END PGP SIGNATURE-----
+
+--pNNYPsVtqQFj--
