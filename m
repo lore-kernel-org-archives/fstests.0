@@ -1,96 +1,140 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 010722EFDAD
-	for <fstests@vger.kernel.org>; Sat,  6 Sep 2025 13:17:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A05E22629D
+	for <fstests@vger.kernel.org>; Sun,  7 Sep 2025 05:18:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757164647; cv=none; b=Dk41vF4Q0wxr3xieCTHGyJdaSX7zQUbdP9PsZHwBZ8ZIY4RTdKaweqbVCrHNFwjIWwVqyISB8Y3Zn0QBPE7JXm3aSgoKUcxHqaG2FvZDT+SwGrYt2LBk/bC4X0oDC8Gwlhy+994VSDRZy6FqnUWE3pP9vPxJ4oP2ieYCKyFlAvA=
+	t=1757222295; cv=none; b=OJGBoYctzmWiWe5HxvRWtjpxaIoT7fTrOl7mVXD9MNBTo9qlTrERbLGoDohKiwSe1fDJ07Si759m1vA9raXFWDiZt+YzRG5O506u9ZXb4kJv+TSWwbvp88WQEDUSxvRMxZsAZ0FM74xw2vE6TZIcnsFuqFkQhsVG2jw6VkQu6CE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757164647; c=relaxed/simple;
-	bh=lcY6kfXsOFKUROZwNB0gn3jPYPWwbN+4G2hgbZaucfA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=BJ7E4NnRtUviYd4nfowJbF2biW0OQSJATC9HsDMeI64U31bcmjqcN3WO/Yfv7J6nbRx364AXcOYj1WjVpd2QyBw26izd05DbeYvgRC2UjKh3/noLS9auTwUsxQLHL4ElMPqLCbXghdNJlqFmvO77H4bhouYZkYMUqS567mGmHjc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rWnys/ym; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1757222295; c=relaxed/simple;
+	bh=qwccVuzbUesgD3QoZMWodzkcU8xN7J0ykW7Ze0ZXgK4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=WWhtUMGHXZn7TfARG4g5TyTm29aL9Di8DJ76+VLxrfT0ZQPcVEqsRLLr6xT9EkPXOTVHvz33MEUnf5tWxev/8iPa061p96fOgonVKizFo3Ngp7ppkkyIl1xDF5B4lfCNr2+tPCYHaiXmK8DfO6sPNzQerbqgCgxWUU3EbEPAys0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=T+ak4fXz; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rWnys/ym"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC754C4CEF4;
-	Sat,  6 Sep 2025 13:17:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1757164646;
-	bh=lcY6kfXsOFKUROZwNB0gn3jPYPWwbN+4G2hgbZaucfA=;
-	h=From:To:Cc:Subject:Date:From;
-	b=rWnys/ymTF+2vRc8NcaB9XH6ou7bWXo+NINCqmtRNdmGmN8YpjpTARtP2gR5EuN8r
-	 FM3KyirpMlsFDyTFm+RSt73HzVoTDyPfbJv2x88RQ9xp83pvx/sBQWdCbVKMbV4Tgu
-	 2rYvXsLOVXdlUkbLZkhACu3CS/ODXnYMj/wDiwcHsdqItLS8U1/k45xPkMZ+wjatjW
-	 JSS12yGYhA/Qn2luY+mU2HCay5MbLuB2vn+8X7RdZwI8OCaqNSBCPn5GaZ/eUEj3OY
-	 r8ui88JNQsb4vZBQADXKntRAcS5cySCTRQNIsf9wj4PvdkIsbvQ6S+l/Ypl1bYK0ty
-	 1fx2+kHnnLIKQ==
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Cc: djwong@kernel.org
-Subject: [PATCH] common/atomicwrites: fix _require_scratch_write_atomic when awu_max_fs is empty
-Date: Sat,  6 Sep 2025 21:17:22 +0800
-Message-ID: <20250906131722.1333025-1-zlang@kernel.org>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="T+ak4fXz"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1757222291;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=OblASZcrr7kB2yJKEylAwifpAWWyy4KUP/8RCxYnVGo=;
+	b=T+ak4fXzwMnGbGfZcOyCWWH17x8dfYw0u+JTbZ/rWvlD6k51mAQ24i8pivRZzQ88uJKFz+
+	brJuaziumt3PeH9HqShuw1HV1nB5zUxFXhhHZXODf2ykmvE5cFn9X51HY9FOgiEMGdKKRd
+	qd3HXgDVMfUzh9IzZXa3wh9yJb6TlJw=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-106-fRNgTIndPwCbyCIYApT-CA-1; Sun, 07 Sep 2025 01:18:10 -0400
+X-MC-Unique: fRNgTIndPwCbyCIYApT-CA-1
+X-Mimecast-MFC-AGG-ID: fRNgTIndPwCbyCIYApT-CA_1757222289
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-24b2336e513so52181195ad.0
+        for <fstests@vger.kernel.org>; Sat, 06 Sep 2025 22:18:09 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1757222289; x=1757827089;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=OblASZcrr7kB2yJKEylAwifpAWWyy4KUP/8RCxYnVGo=;
+        b=cAzhwOChsMbMizFFkwsRqznVm3i+zbMkbs5z1U6zXL3v1s38oWcv1yWQ3V7w1q3V8N
+         byewZXzX+k6TXHVYSk1b7dw25ihOFWMHO37wyKHf68F0PfE5m4AZM4X1PKBQqLCPJZx4
+         le7NGZvTPULmsNbj95k6Xat0jCB9cx+ELakzmy1iLTXrurJteAyxTv7z0XrkHHzq8uS+
+         pEfeZX35RQCKNVsyhSTq2ybptUGaoynXp4aWh4uRXu8HmqnBcQeeFMcsYOEUUusevxvW
+         L46uFyojxCvWZBKRP+cqFaGWpHaZ5KcaS+W0eE6A7Xwd48PzCQDUjejoj/dm40qwd/Hm
+         1Hhw==
+X-Forwarded-Encrypted: i=1; AJvYcCXu1IoupQwlXD2HdB3PsOfa5FEXUu/sjdQdcoZmDFNtKfRacimmylFK1pBevb5R4VqAMc8W41qh@vger.kernel.org
+X-Gm-Message-State: AOJu0YyGfg24fW+uax78+jKDG9koZBOlExa1aRvfaNp0X3DXQvGgJvrQ
+	Claw4/R+B3FALNoaHblky2lXQm5+QY53W6kbvnsRZc63CLbMwR87CooGZy/1v8wEwE74cpWEehE
+	n0ZkzztRxdGIZc78W0T0vZshBD/8h0/XguCZ4MbzcwAKDUEhpU/JzbknMio4=
+X-Gm-Gg: ASbGncupPfRevOD3eR1BeIoQDheAerAO1zkw969aVJQY1jrIyEfrG4BFW2Wcbze+3vY
+	3Ch3m2D0GL2wXMdfrfNVYKqHtkuALLjx1GJDxlf8ErJDG8QQreRZsMyhtPiHKKKUvzUEhWySlcz
+	AC8Ic8JS6esPqr0OXcrsQ6QYc1ejGnV0tQRTGk69e7+Jh8x9uZ5xrGRAEFtYMtRNn6sOwQxagnO
+	RPeJqO9WDuHKzUBT7jE6xvve8vbwffqLYSBPEjoPIaC9KnTwOgFWOtgbf4Ojw1P5V+3zGHfK42J
+	2qc57nltvUGC5SiUcV0/iJYs9Jqq+p2wKGtbwBHbN31rAsKsZy+LwNb/8WESWcuk18i6q5QCVoM
+	RLtZG
+X-Received: by 2002:a17:902:7c98:b0:249:33db:34b with SMTP id d9443c01a7336-25174374976mr39073035ad.42.1757222288995;
+        Sat, 06 Sep 2025 22:18:08 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IErgKrN3nawKeRdKJYtoByqaDG+aENeILCXOZaM7UN1gFx5Yj70HtS39XlJA3mnEHXugO/6/A==
+X-Received: by 2002:a17:902:7c98:b0:249:33db:34b with SMTP id d9443c01a7336-25174374976mr39072895ad.42.1757222288607;
+        Sat, 06 Sep 2025 22:18:08 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-24b020a7cb5sm146860015ad.115.2025.09.06.22.18.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 06 Sep 2025 22:18:08 -0700 (PDT)
+Date: Sun, 7 Sep 2025 13:18:03 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: John Garry <john.g.garry@oracle.com>
+Cc: Ojaswin Mujoo <ojaswin@linux.ibm.com>, fstests@vger.kernel.org,
+	Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
+	tytso@mit.edu, linux-xfs@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v5 02/12] common/rc: Add _require_fio_version helper
+Message-ID: <20250907051803.t4av26vmf7zodzjl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1755849134.git.ojaswin@linux.ibm.com>
+ <955d47b2534d9236adbd2bbd13598bbd1da8fc04.1755849134.git.ojaswin@linux.ibm.com>
+ <1b12c0d9-b564-4e57-b1a5-359e2e538e9c@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1b12c0d9-b564-4e57-b1a5-359e2e538e9c@oracle.com>
 
-If a kernel doesn't support atomic write, _get_atomic_write_unit_min
-and _get_atomic_write_unit_max will get nothing.
+On Tue, Sep 02, 2025 at 03:50:10PM +0100, John Garry wrote:
+> On 22/08/2025 09:02, Ojaswin Mujoo wrote:
+> > The main motivation of adding this function on top of _require_fio is
+> > that there has been a case in fio where atomic= option was added but
+> > later it was changed to noop since kernel didn't yet have support for
+> > atomic writes. It was then again utilized to do atomic writes in a later
+> > version, once kernel got the support. Due to this there is a point in
+> > fio where _require_fio w/ atomic=1 will succeed even though it would
+> > not be doing atomic writes.
+> > 
+> > Hence, add an explicit helper to ensure tests to require specific
+> > versions of fio to work past such issues.
+> > 
+> > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> > ---
+> >   common/rc | 32 ++++++++++++++++++++++++++++++++
+> >   1 file changed, 32 insertions(+)
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index 35a1c835..f45b9a38 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -5997,6 +5997,38 @@ _max() {
+> >   	echo $ret
+> >   }
+> > +# Check the required fio version. Examples:
+> > +#   _require_fio_version 3.38 (matches 3.38 only)
+> > +#   _require_fio_version 3.38+ (matches 3.38 and above)
+> > +#   _require_fio_version 3.38- (matches 3.38 and below)
+> 
+> This requires the user to know the version which corresponds to the feature.
+> Is that how things are done for other such utilities and their versions vs
+> features?
 
-  local awu_min_bdev=$(_get_atomic_write_unit_min $SCRATCH_DEV)
-  local awu_max_bdev=$(_get_atomic_write_unit_max $SCRATCH_DEV)
+I don't like to use "version" to be the _require_ condition either. fstests always
+recommend "checking if the feature/behavior is really supported" at first, not a
+hard version limitation. Some old downstream software might backport new upstream
+commits, the version is useless for them.
 
-If $awu_min_bdev and $awu_max_bdev are empty, then the logic likes
-"[ $awu_min_bdev -eq 0 ] && [ $awu_max_bdev -eq 0 ]" is meaningless,
-and it causes g/767 hang on system which doesn't support atomic
-write.
+Thanks,
+Zorro
 
-Signed-off-by: Zorro Lang <zlang@kernel.org>
----
- common/atomicwrites | 9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
-
-diff --git a/common/atomicwrites b/common/atomicwrites
-index 33526399d..bbcc4e7c5 100644
---- a/common/atomicwrites
-+++ b/common/atomicwrites
-@@ -47,8 +47,9 @@ _require_scratch_write_atomic_multi_fsblock()
- 
- 	_scratch_unmount
- 
--	test $awu_max_fs -ge $((bsize * 2)) || \
-+	if [ -z "$awu_max_fs" -o $awu_max_fs -lt $((bsize * 2)) ];then
- 		_notrun "multi-block atomic writes not supported by this filesystem"
-+	fi
- }
- 
- _require_scratch_write_atomic()
-@@ -58,7 +59,8 @@ _require_scratch_write_atomic()
- 	local awu_min_bdev=$(_get_atomic_write_unit_min $SCRATCH_DEV)
- 	local awu_max_bdev=$(_get_atomic_write_unit_max $SCRATCH_DEV)
- 
--	if [ $awu_min_bdev -eq 0 ] && [ $awu_max_bdev -eq 0 ]; then
-+	if [ -z "$awu_min_bdev" -o -z "$awu_max_bdev" ] || \
-+		[ $awu_min_bdev -eq 0 -a $awu_max_bdev -eq 0 ];then
- 		_notrun "write atomic not supported by this block device"
- 	fi
- 
-@@ -75,7 +77,8 @@ _require_scratch_write_atomic()
- 
- 	_scratch_unmount
- 
--	if [ $awu_min_fs -eq 0 ] && [ $awu_max_fs -eq 0 ]; then
-+	if [ -z "$awu_min_fs" -o -z "$awu_max_fs" ] || \
-+		[ $awu_min_fs -eq 0 -a $awu_max_fs -eq 0 ];then
- 		_notrun "write atomic not supported by this filesystem"
- 	fi
- }
--- 
-2.49.0
+> 
+> I was going to suggest exporting something like
+> _require_fio_atomic_writes(), and _require_fio_atomic_writes() calls
+> _require_fio_version() to check the version.
+> 
+> Thanks,
+> John
+> 
+> 
 
