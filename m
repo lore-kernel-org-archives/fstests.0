@@ -1,70 +1,70 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A05E22629D
-	for <fstests@vger.kernel.org>; Sun,  7 Sep 2025 05:18:12 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 025991DC075
+	for <fstests@vger.kernel.org>; Sun,  7 Sep 2025 05:29:52 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757222295; cv=none; b=OJGBoYctzmWiWe5HxvRWtjpxaIoT7fTrOl7mVXD9MNBTo9qlTrERbLGoDohKiwSe1fDJ07Si759m1vA9raXFWDiZt+YzRG5O506u9ZXb4kJv+TSWwbvp88WQEDUSxvRMxZsAZ0FM74xw2vE6TZIcnsFuqFkQhsVG2jw6VkQu6CE=
+	t=1757222995; cv=none; b=a9vO184Uzw5OJV2yldKf/SxGWJTooEm1WCQeUE1LWtNAWsZ3h9ityI5/y29QwXn9/9M0zTwxHJK1+MG0UKmlXDvqHBlBmwfXnyBJDaaYbspn75xAJk+M3YQBkUE6+5LjTLF/AA3DpAJnhwJXh60Tn/aQlwBBlCh8SwEkDutP3io=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757222295; c=relaxed/simple;
-	bh=qwccVuzbUesgD3QoZMWodzkcU8xN7J0ykW7Ze0ZXgK4=;
+	s=arc-20240116; t=1757222995; c=relaxed/simple;
+	bh=caTPKCkAvkuQGw3fUn3P6ZaPL/8hegzI2j/493ESBVk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=WWhtUMGHXZn7TfARG4g5TyTm29aL9Di8DJ76+VLxrfT0ZQPcVEqsRLLr6xT9EkPXOTVHvz33MEUnf5tWxev/8iPa061p96fOgonVKizFo3Ngp7ppkkyIl1xDF5B4lfCNr2+tPCYHaiXmK8DfO6sPNzQerbqgCgxWUU3EbEPAys0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=T+ak4fXz; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=tQ4F8bHfylgsOWbdi8rpg38WCXbxkyIT4m0u85wwtf/rrjNRSNrLkzVkpA0wHWyiHgZNCNJ+6PVeSfWKxUxlZtakR6CopAogkMEpp1JXKVRPrIW+TueBFQDDhJTj9VdSPu48/n8yxip4zISg7ENHCytvcdHYHDq9e0aCoPX7lP8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=RrOPIF9F; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="T+ak4fXz"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RrOPIF9F"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1757222291;
+	s=mimecast20190719; t=1757222992;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=OblASZcrr7kB2yJKEylAwifpAWWyy4KUP/8RCxYnVGo=;
-	b=T+ak4fXzwMnGbGfZcOyCWWH17x8dfYw0u+JTbZ/rWvlD6k51mAQ24i8pivRZzQ88uJKFz+
-	brJuaziumt3PeH9HqShuw1HV1nB5zUxFXhhHZXODf2ykmvE5cFn9X51HY9FOgiEMGdKKRd
-	qd3HXgDVMfUzh9IzZXa3wh9yJb6TlJw=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=NDSHjXOUY0OzHHbNYkSfv2EmWxAIktBkwdxNx3m1wgU=;
+	b=RrOPIF9FT8TKjNfjnICyF9vVIE1d5J0AkYImR56vZtcrq8enmGkZv62gy3PpG92q/SJ8vU
+	FA7i8vnHE1DTSCGebcYNK49/I5KW5YvXX49W7h2ESnF5OO94e4fnIHQPlEjbT9nD4wfLPy
+	909haERKoVb832+pCTow8CUcJadBGFw=
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
+ [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-106-fRNgTIndPwCbyCIYApT-CA-1; Sun, 07 Sep 2025 01:18:10 -0400
-X-MC-Unique: fRNgTIndPwCbyCIYApT-CA-1
-X-Mimecast-MFC-AGG-ID: fRNgTIndPwCbyCIYApT-CA_1757222289
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-24b2336e513so52181195ad.0
-        for <fstests@vger.kernel.org>; Sat, 06 Sep 2025 22:18:09 -0700 (PDT)
+ us-mta-618-ZXfZaC_ENW-IbKzpLbeasg-1; Sun, 07 Sep 2025 01:29:50 -0400
+X-MC-Unique: ZXfZaC_ENW-IbKzpLbeasg-1
+X-Mimecast-MFC-AGG-ID: ZXfZaC_ENW-IbKzpLbeasg_1757222989
+Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-772642f9fa3so4281537b3a.1
+        for <fstests@vger.kernel.org>; Sat, 06 Sep 2025 22:29:50 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757222289; x=1757827089;
+        d=1e100.net; s=20230601; t=1757222989; x=1757827789;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=OblASZcrr7kB2yJKEylAwifpAWWyy4KUP/8RCxYnVGo=;
-        b=cAzhwOChsMbMizFFkwsRqznVm3i+zbMkbs5z1U6zXL3v1s38oWcv1yWQ3V7w1q3V8N
-         byewZXzX+k6TXHVYSk1b7dw25ihOFWMHO37wyKHf68F0PfE5m4AZM4X1PKBQqLCPJZx4
-         le7NGZvTPULmsNbj95k6Xat0jCB9cx+ELakzmy1iLTXrurJteAyxTv7z0XrkHHzq8uS+
-         pEfeZX35RQCKNVsyhSTq2ybptUGaoynXp4aWh4uRXu8HmqnBcQeeFMcsYOEUUusevxvW
-         L46uFyojxCvWZBKRP+cqFaGWpHaZ5KcaS+W0eE6A7Xwd48PzCQDUjejoj/dm40qwd/Hm
-         1Hhw==
-X-Forwarded-Encrypted: i=1; AJvYcCXu1IoupQwlXD2HdB3PsOfa5FEXUu/sjdQdcoZmDFNtKfRacimmylFK1pBevb5R4VqAMc8W41qh@vger.kernel.org
-X-Gm-Message-State: AOJu0YyGfg24fW+uax78+jKDG9koZBOlExa1aRvfaNp0X3DXQvGgJvrQ
-	Claw4/R+B3FALNoaHblky2lXQm5+QY53W6kbvnsRZc63CLbMwR87CooGZy/1v8wEwE74cpWEehE
-	n0ZkzztRxdGIZc78W0T0vZshBD/8h0/XguCZ4MbzcwAKDUEhpU/JzbknMio4=
-X-Gm-Gg: ASbGncupPfRevOD3eR1BeIoQDheAerAO1zkw969aVJQY1jrIyEfrG4BFW2Wcbze+3vY
-	3Ch3m2D0GL2wXMdfrfNVYKqHtkuALLjx1GJDxlf8ErJDG8QQreRZsMyhtPiHKKKUvzUEhWySlcz
-	AC8Ic8JS6esPqr0OXcrsQ6QYc1ejGnV0tQRTGk69e7+Jh8x9uZ5xrGRAEFtYMtRNn6sOwQxagnO
-	RPeJqO9WDuHKzUBT7jE6xvve8vbwffqLYSBPEjoPIaC9KnTwOgFWOtgbf4Ojw1P5V+3zGHfK42J
-	2qc57nltvUGC5SiUcV0/iJYs9Jqq+p2wKGtbwBHbN31rAsKsZy+LwNb/8WESWcuk18i6q5QCVoM
-	RLtZG
-X-Received: by 2002:a17:902:7c98:b0:249:33db:34b with SMTP id d9443c01a7336-25174374976mr39073035ad.42.1757222288995;
-        Sat, 06 Sep 2025 22:18:08 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IErgKrN3nawKeRdKJYtoByqaDG+aENeILCXOZaM7UN1gFx5Yj70HtS39XlJA3mnEHXugO/6/A==
-X-Received: by 2002:a17:902:7c98:b0:249:33db:34b with SMTP id d9443c01a7336-25174374976mr39072895ad.42.1757222288607;
-        Sat, 06 Sep 2025 22:18:08 -0700 (PDT)
+        bh=NDSHjXOUY0OzHHbNYkSfv2EmWxAIktBkwdxNx3m1wgU=;
+        b=Z1FfjTrndHniEiMjGLPNO/2HJkZxjCHocDQfFmN/hbSFJAB8I6DODBzWWlRzmdo0k/
+         S2MSCiZ2pXrnflmHWRBiURr7qubxIT6dWyGCtRtmL5oL5ABVAlZMrLx3I+cjx1t9Z1K5
+         TvhMgoSVIz1V9H2PHa41MMIiAgy4iTYY2frbwJIz5/U5zEfZEdDumgxrgJgjV9r1AIXr
+         fgg+uRd1m1hNWyalshPMTHOYKzgVZZO2D1IOcrkrQx2C9B2rS3mnZxikRhNZYGXGLbrX
+         ynxFDE/fwzIKKMyHCIRGUW8KDd0VR14ywU0xMYXRcKFRVtXXB0lZ4lCGanUAnQzywlf9
+         4PdQ==
+X-Forwarded-Encrypted: i=1; AJvYcCW7cpwQUBGuaCZs3j2WfJKMgxkoCrn7yTDyJvUzgoy2dtwHKbItg+kf47rOwT8rph+qVvexdz3L@vger.kernel.org
+X-Gm-Message-State: AOJu0YyLzbx1wGQBdGgTtq8E0hUrSmLhnAIg41lRaCgn5Qn20mCrYOk+
+	GsZJIxtKcbBO5xarkK6FGauSG6xeJbOjWtDW6O5rYDee+umdJ8SCzfL2YnA2SycfTnHlp9Rd07I
+	NimtNDchhDJTXPHAW8MfPVF5pLIIyAurT5wVX5K+ATqLW7VtvHy8H2s9nXkg=
+X-Gm-Gg: ASbGncsVSx8se1x+cg+NnKT/RIyQ2EIHJf0+I1PsfrNvzocjyq6+nKm20fsbOy1LeUI
+	GxJr4bOtTjoWpKUl4/Moz1cgvJcI0G5S9KZQ11GzeAC4O4COD0ze5Ib1SkCfWPY/eU9GbAaEvx8
+	APXDRLzhHJ4VO2JNh0McuezenhOH+3JRfvByTpJl0D72gL5lQZimCpSNkomCkRVd2qHZxdjs+/G
+	nmlJ7c3BTVeyPahMQshfbomll4kpqzGkHF10WgPTqglh7MLefg8qrZMsYyOv7LOIq1+B2M8j2jJ
+	LLufTlxkG6TVe2S8VQKrhYSu6BxyEGbT7a0eMO9TITc4Nn6pocZzbpstCo5L/3HLEkQUc6bYW/P
+	gyLGO
+X-Received: by 2002:a05:6a20:4303:b0:245:fc8e:ef5b with SMTP id adf61e73a8af0-24e7cc230b9mr12289014637.5.1757222989279;
+        Sat, 06 Sep 2025 22:29:49 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHvhkV+C/ngmYr5b9L+PxjVes3H9Tvgst7PxAuC8Mh5uWsBWo7Hp8B67gRI5Mjyth4C7Hk8+Q==
+X-Received: by 2002:a05:6a20:4303:b0:245:fc8e:ef5b with SMTP id adf61e73a8af0-24e7cc230b9mr12288987637.5.1757222988895;
+        Sat, 06 Sep 2025 22:29:48 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-24b020a7cb5sm146860015ad.115.2025.09.06.22.18.05
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b520eaf013esm5307355a12.52.2025.09.06.22.29.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 06 Sep 2025 22:18:08 -0700 (PDT)
-Date: Sun, 7 Sep 2025 13:18:03 +0800
+        Sat, 06 Sep 2025 22:29:48 -0700 (PDT)
+Date: Sun, 7 Sep 2025 13:29:43 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: John Garry <john.g.garry@oracle.com>
 Cc: Ojaswin Mujoo <ojaswin@linux.ibm.com>, fstests@vger.kernel.org,
@@ -72,7 +72,7 @@ Cc: Ojaswin Mujoo <ojaswin@linux.ibm.com>, fstests@vger.kernel.org,
 	tytso@mit.edu, linux-xfs@vger.kernel.org,
 	linux-kernel@vger.kernel.org, linux-ext4@vger.kernel.org
 Subject: Re: [PATCH v5 02/12] common/rc: Add _require_fio_version helper
-Message-ID: <20250907051803.t4av26vmf7zodzjl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Message-ID: <20250907052943.4r3eod6bdb2up63p@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <cover.1755849134.git.ojaswin@linux.ibm.com>
  <955d47b2534d9236adbd2bbd13598bbd1da8fc04.1755849134.git.ojaswin@linux.ibm.com>
  <1b12c0d9-b564-4e57-b1a5-359e2e538e9c@oracle.com>
@@ -119,19 +119,23 @@ On Tue, Sep 02, 2025 at 03:50:10PM +0100, John Garry wrote:
 > This requires the user to know the version which corresponds to the feature.
 > Is that how things are done for other such utilities and their versions vs
 > features?
-
-I don't like to use "version" to be the _require_ condition either. fstests always
-recommend "checking if the feature/behavior is really supported" at first, not a
-hard version limitation. Some old downstream software might backport new upstream
-commits, the version is useless for them.
-
-Thanks,
-Zorro
-
 > 
 > I was going to suggest exporting something like
 > _require_fio_atomic_writes(), and _require_fio_atomic_writes() calls
 > _require_fio_version() to check the version.
+
+(Sorry, I made a half reply in my last email)
+
+This looks better than only using _require_fio_version. But the nature is still
+checking fio version. If we don't have a better idea to check if fio really
+support atomic writes, the _require_fio_version is still needed.
+Or we rename it to "__require_fio_version" (one more "_"), to mark it's
+not recommended using directly. But that looks a bit like a trick :-D
+
+Thanks,
+Zorro
+
+
 > 
 > Thanks,
 > John
