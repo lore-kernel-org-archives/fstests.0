@@ -1,91 +1,92 @@
 Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B569221FD4;
-	Mon,  8 Sep 2025 07:54:15 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9BC23043A4;
+	Mon,  8 Sep 2025 14:28:40 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757318058; cv=fail; b=HGI0PrWn4yJOQR/g09aEhdMVxNwxn46OAjI85PYFEU+/j0VN1LFARXrCJXtCchcQ/rC2VI0PFVqFB+2TPHUjQHej/KEv+KFmFuIC6mqXp2GF1qH8oHD1AnlASPrgUHgxnkl6HNdrXnlSvm7SjJhfqD4qV5ixc8sSbW6nOxWCU6Y=
+	t=1757341722; cv=fail; b=KY44guYoTVCVHl3K4NlfpPdtpul1Chv7PKb8nS8035Wk8+vXo9L3y5RjhJuu/pp2ZsbN8KdWOo8B90KHLcrk4gtHimMr2NIys9dJJKTajMZEfLq3pN6sdb+SoGEt5sL9yhYTCV2ctWAQp3ejQ2G4I6bo/Hb6H+yuJ7Vn3f1gWLw=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757318058; c=relaxed/simple;
-	bh=oq1NqTCRBU4NFEpU234ziIi6D2yv5Fiu/vVz4StV4S8=;
+	s=arc-20240116; t=1757341722; c=relaxed/simple;
+	bh=HON0Bcc/SPt+cekfu1An9yskMMfqhgwfQA+JSqc/PEw=;
 	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=nDeuwpV0WABAvFeO4xJaZjmWqPlzj1VYeUGJREWf9T9eFLOfKez4k0cPUjiugOwv6Xj4U2Zpz6O3wQpBNJU7x710GS5hTMb/zVnVZ2JIzGnQB9QO6JVtxF9/Jb/ZIun+lBNp0gygfcm6w0D9lEuy6UC4HSyYa5AKfayAd/8K5r8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=aD8jEp6W; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=pb2urpGZ; arc=fail smtp.client-ip=205.220.165.32
+	 Content-Type:MIME-Version; b=ZAS5TREtetpiXhsIYDX71iRc/k0EcvsA8OX6CDrlF/04Zy314ADGRlxqJVoBHthU/rH9dwxEA/e6haaQo4l6WpVQ9xG2ICnhMnsgtexkTO9PPvwCJbbd0KmbsrF6Z6vXFXnPmEzrJQgKa9Eg/s5lmRpFOyt5FsH4b92Ic0NBDjc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=mwbz8J0H; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=gfC8tHmd; arc=fail smtp.client-ip=205.220.165.32
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="aD8jEp6W";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="pb2urpGZ"
-Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5887cPJW005848;
-	Mon, 8 Sep 2025 07:54:09 GMT
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="mwbz8J0H";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="gfC8tHmd"
+Received: from pps.filterd (m0246627.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 588E1r7q017683;
+	Mon, 8 Sep 2025 14:28:31 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
 	:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=
-	corp-2025-04-25; bh=oY/bzDth1OqvPiqbKNualandQwL/fG1eBsCh9VbILxg=; b=
-	aD8jEp6WWWh70LMsn6SH0iBqJxtOT2NIqGhjbeiQw32OKZJ6BgFO5yCAoGW81G00
-	MbKfPWkFhv+OyHq4GqnHRi21/B3LVxqn3Vn/gZ0SRwMxNmGJ2vgBt6FGqpLPHtvc
-	V4Js7GMWREj6br6Y7uyfRW05tJ1UxWoyBdOujLjIri/zYqXMp7Fo6tqbrg02S790
-	goSRE5zY69EcyJWZ2uNwShiHD1HHBNEK4MB7O88xVwnv2drj/ee3ep0Fu8I7RZkx
-	BJXagE4ABfQX1U/tQYpsDzLGYP0XwOzdXLhoGpL/4XUbagdK+r9j105MXs3OdATY
-	Z4rUXrTMz7iqsjulvbRs0w==
-Received: from iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta02.appoci.oracle.com [147.154.18.20])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 491txb8118-1
+	corp-2025-04-25; bh=MjSXGFiEZxJMVhIGppxLHN4hn86AZ2jjZVTBkeTvFn0=; b=
+	mwbz8J0HzNPtddCttp1BeA+V3DO5qZ2Q1gjuGIa7XIsSf6rtu663BA7ylyaAZ9E7
+	SOXoaFt3zRyjaulTcN40Ss/IPMCBAk5u4O0XVOrbhDKr7stv4AFHhTX5w5ygg+x5
+	wBICXQrHo+W8AcLTpyLZJLPX869kXvFDkfqz26maEMlNRmQLhkhoiqauoi7uGcAw
+	DNR7hD9LzekRO4WqRC5PKmIgqbxv/TPjbxBDfujkcWsbthi91VO08IYGUwTbC6VB
+	aTj24znydiPDrtAI3pyqtFrUseFqasJVzf6HdkQeoo1cDqOIfG+MP4Ut3MgLYrlS
+	aH3GL4GPt31r2BvUIwqANQ==
+Received: from phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta01.appoci.oracle.com [138.1.114.2])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 491yx6r4tk-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 08 Sep 2025 07:54:08 +0000 (GMT)
-Received: from pps.filterd (iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 58877FPv025959;
-	Mon, 8 Sep 2025 07:54:04 GMT
-Received: from nam02-sn1-obe.outbound.protection.outlook.com (mail-sn1nam02on2046.outbound.protection.outlook.com [40.107.96.46])
-	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 490bd7udnt-1
+	Mon, 08 Sep 2025 14:28:31 +0000 (GMT)
+Received: from pps.filterd (phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 588DuClK030242;
+	Mon, 8 Sep 2025 14:28:30 GMT
+Received: from nam02-sn1-obe.outbound.protection.outlook.com (mail-sn1nam02on2071.outbound.protection.outlook.com [40.107.96.71])
+	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 490bd9926d-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 08 Sep 2025 07:54:04 +0000
+	Mon, 08 Sep 2025 14:28:30 +0000
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=HE+kxqUC7F0zCNOxqGFy5ZRvH6LtOwiaD/JDu5pal6f4lHyiXwzTpPJ59zh1FlJvVUOuaC16/0apoW8ntI/+HRIM51k7Mk4KGPMc+9pmr7AO/LeoWQbqX1hUjnj+iO5xa76rc0GyXyY6STMmPhelIbmcmfr2Z7RA8uygJs8Purp68xYkGwj4b7SXk/GzR7zLwgrNa9mLoIk4/D3PaJfDmoQWgqqdNIJ1MTpC3QwbYM3Kxddke3M0B8XL15mRpGzRthn28/F5uYoSgzpzKspv01ByVGz8UlORfCBZtnR6QvsGH37HFVU84rDBG7GQuYPncT+xVDINsnQP1FKmOUfNfw==
+ b=i3rmO7Y7jYGTFvPcGBfFJaIaUIH5cOyGI3oVUhH8ymZFpSutPvxJna+8wHXYxkL+Mmh/244fZPwRzMpnXSsarFHfo2N4cs/xaueGrj8Dce9AzWFmxnDv0CnDAkWaRNXBWj215qAyeYEqRZbirFdJ3Bpq+d3YJOBhB1sE1CCqEQ1VQDTRoiWn88jCGFndYDEDfUHY8XSqJP+okDkyJ3lR7jM6FaOXlYHjuxZmiFxqnASbhLDlMotukiYAohLbpymQ9n6D04wHtOT+add5EQDggEXY5A2dmT6Ceh5xXU6Li2/Fndtfv0wn9mtbAxlV2bn9jyI4DyHP0XHO6FE0Tdn8gg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=oY/bzDth1OqvPiqbKNualandQwL/fG1eBsCh9VbILxg=;
- b=AkpbDHw9dFdJdrShcu1Lii3rY8YufSJnCRsS76s6QqKrFtr8Fg5LLR1/30k4658UY8Grn4ND8QR5Wc5kqdcXQLSXgvQo1WgO9HB4rCzh3/2F2BQZ3b702vF1lZ/D314FBde1TluBNexz9PgcoMeroLvURhQg2uMaIe+o0UadE6mLTD5DNvKXdQkvU7W8POWEsqdCL2zH34T88IK0jP9Rj7aIzqs/T1mr+qIBB7gMckKdKJ2P6dcMYt5Aggomi+b410Qetn4ln3Qk6pIc4BMZ6Es9uX3VJ8q1WEqbWGkECIwOEXIJl6xl4aHVtBl6RsLO1wFIytlS1jL/p3I9QEl/zg==
+ bh=MjSXGFiEZxJMVhIGppxLHN4hn86AZ2jjZVTBkeTvFn0=;
+ b=vyh3BIOd/RzKsPDfqLjP6UjmtuMEx3Z44p5H1u9nqnBRVXigbrDEd/rvGHbXY7M+pvIraSlGGQMpHKkqkx4nCjlmxW1n420vrbEzF5g5waEQcX0Wq2wUYDZwVKZk6ZI2nRZhoN/enUlH5T3BxaeBqV2L/qs/4uJPeEHmSztU7fIJeVqD/zrfM4lVsK0i8Bb45btgMaw/66KNvtVwSW0H21+D/RwjpVbp+5Hkrpnd5bBFSva1XO5sw5sVwQ926Uplx4sVE7b4smUPzO+xF9kqucIHLCQ9P/c7b6FI3mfZniy3sxc4S+l21rWTIKreQPkCMzq0JWTWp2HDPc4uy2TAhA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
  dkim=pass header.d=oracle.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=oY/bzDth1OqvPiqbKNualandQwL/fG1eBsCh9VbILxg=;
- b=pb2urpGZiNsnVVbmZAwZ+Wpq1Jc8II8d8hFda1j8t1aEaCwwhP4oVsadOgMi65/M0n8beeb/8KnL3HQHLzCsf/FTUgL5xkLHpkHfblpwyaA+asAsmSBEvIlZ8092afc8xUAXNLipnTme5PY5JQxO8u3CHFP4C9jR39EoQ+dCC7M=
+ bh=MjSXGFiEZxJMVhIGppxLHN4hn86AZ2jjZVTBkeTvFn0=;
+ b=gfC8tHmdg1xZk8J0YoqXHYpfkfZfNKqoLXgaAqcPFU9hW2QUlkH4qYYNDgf9w3PzH0HTHnNEaMo78KFz445Bti3jfVK1QKkQ1cvFHC14tt3YlaEOSFb7FKV3Qkh1GnYXMmd2DlNinI5N2zRvoO5LLVzSZ3ENddAcgXHqxGO+cFc=
 Received: from MN2PR10MB4320.namprd10.prod.outlook.com (2603:10b6:208:1d5::16)
- by DS7PR10MB5119.namprd10.prod.outlook.com (2603:10b6:5:297::7) with
+ by BY5PR10MB4307.namprd10.prod.outlook.com (2603:10b6:a03:212::18) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9094.19; Mon, 8 Sep
- 2025 07:54:02 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9094.22; Mon, 8 Sep
+ 2025 14:28:00 +0000
 Received: from MN2PR10MB4320.namprd10.prod.outlook.com
  ([fe80::42ec:1d58:8ba8:800c]) by MN2PR10MB4320.namprd10.prod.outlook.com
- ([fe80::42ec:1d58:8ba8:800c%7]) with mapi id 15.20.9094.018; Mon, 8 Sep 2025
- 07:54:02 +0000
-Message-ID: <448079fd-ac31-4a6e-99f8-9021c0a92476@oracle.com>
-Date: Mon, 8 Sep 2025 08:53:59 +0100
+ ([fe80::42ec:1d58:8ba8:800c%7]) with mapi id 15.20.9094.021; Mon, 8 Sep 2025
+ 14:28:00 +0000
+Message-ID: <674aa21b-4c47-4586-abdc-5198840fcea5@oracle.com>
+Date: Mon, 8 Sep 2025 15:27:57 +0100
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 04/12] ltp/fsx.c: Add atomic writes support to fsx
+Subject: Re: [PATCH v5 09/12] generic: Add sudden shutdown tests for multi
+ block atomic writes
 To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
         Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
         tytso@mit.edu, linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-ext4@vger.kernel.org
 References: <cover.1755849134.git.ojaswin@linux.ibm.com>
- <8b7e007fd87918a0c3976ca7d06c089ed9b0070c.1755849134.git.ojaswin@linux.ibm.com>
- <e2892851-5426-43d3-a25e-be9d9c7f860a@oracle.com>
- <aLsP6ROqLqhdbLZz@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <2b523de842ada3ac7759cedae80485ae201d7e5d.1755849134.git.ojaswin@linux.ibm.com>
+ <12281f45-c42f-4d1e-bcff-f14be46483a8@oracle.com>
+ <aLsYj1tqEbH5RpAu@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 Content-Language: en-US
 From: John Garry <john.g.garry@oracle.com>
 Organization: Oracle Corporation
-In-Reply-To: <aLsP6ROqLqhdbLZz@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+In-Reply-To: <aLsYj1tqEbH5RpAu@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: LO4P302CA0032.GBRP302.PROD.OUTLOOK.COM
- (2603:10a6:600:317::13) To MN2PR10MB4320.namprd10.prod.outlook.com
+X-ClientProxiedBy: FR3P281CA0062.DEUP281.PROD.OUTLOOK.COM
+ (2603:10a6:d10:4b::11) To MN2PR10MB4320.namprd10.prod.outlook.com
  (2603:10b6:208:1d5::16)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -94,142 +95,666 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: MN2PR10MB4320:EE_|DS7PR10MB5119:EE_
-X-MS-Office365-Filtering-Correlation-Id: aec5f6be-5306-4c2d-a476-08ddeeace022
+X-MS-TrafficTypeDiagnostic: MN2PR10MB4320:EE_|BY5PR10MB4307:EE_
+X-MS-Office365-Filtering-Correlation-Id: b78c4f2c-54ab-49c8-9a4a-08ddeee3e97c
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|376014|366016;
+X-Microsoft-Antispam: BCL:0;ARA:13230040|376014|1800799024|366016|7053199007;
 X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?Zis1TXJ2THFNb2QydndiRS9xdHhLaHovdWVhSGIzRW1INC9yNnV5cUo1b2R0?=
- =?utf-8?B?RWpwdmtmaGtqdXMvcER5dTNyVXFGL2xIa1V0RCtZQmdWdU9qUXpMVFJiNUNo?=
- =?utf-8?B?emhPeEhCcHpUZkNlOEdKMk52WjU0dTlXWTVONitJNm15NHNqR0Fuc0I0THk1?=
- =?utf-8?B?VFk0OWd2Sy9jTFRKSkMvK3hNbCtwTU55c3U1YzhGSHVkMU5EbmJ6NUxldlQx?=
- =?utf-8?B?RXQ0L2FzcER0cW1RUU1tQ1d4TURpUjMxM01UMmE1YXF3cU8ybTM5WVkrZ09U?=
- =?utf-8?B?Tyt5VUV4ODdFQXRIN0h1b0g2ZkQ5enZyTURlT0FOSUp5MTFzc0xoZTlDdVEw?=
- =?utf-8?B?VytLSXBjWERCSjkvZ2dLcS9RQ0R1SjNiYkdDUlFDa25td2FldnUwZWgzMG9r?=
- =?utf-8?B?a1ZJU2ZYcTQ4VFRCVWVwdnN4Z1kyK2JhQlF3NWk2QldPb2JvQXIyK3VkWEwv?=
- =?utf-8?B?andHNDhZL0ZiT2hjS25QKzVCTlJiOHAvQVhBSjE1bjhSa2tzV1BpeC9NeGVC?=
- =?utf-8?B?M0RHNENKeDZ4ekpDVUNud3YxODJFVm51KzJiYWFXVWh0NGVqMk5DSjZJRkZX?=
- =?utf-8?B?eTZSSzJSZ1YxZXBoUURodVkzZk9kTDFna2hsNkVwK3FFelRHVGR4WldKejlN?=
- =?utf-8?B?SXA4T1JFbTJaTDJvckY1K3Z3TDh3TFpjKzIrenIxank5b0lydEsvcmVCeUVn?=
- =?utf-8?B?c0lTTHE1ZlZpeWhQQnBnZzZrM3hrTGJiejYyTUExNVZWUjB2Nmt5TitLL0ZX?=
- =?utf-8?B?WURsdldNRUU0VHVMOGJYdHJVY251NHFNK1h0ODhzdHhHd2FsSWJQeU5oMTZu?=
- =?utf-8?B?cEkvbWEvdUxwUlFKZ3hvSzllc0x5MlJ3dllhMmhkNGdTa29DMmxMTGEyRXY1?=
- =?utf-8?B?VCs5dHVmWDh1VGRSOTFiZWdHWElsUzBiZXFzVVlweUdxdXdkNFBxZFJVWlY5?=
- =?utf-8?B?QVNUbnBVK3N0QjJ4UU9ybzk5NEJMQXJhWUgwZkRlZkIxQWNLSHZ3bm92eVBB?=
- =?utf-8?B?SFNVOFowVks1YS9nTTdHUzNsWFVyNUloTWVtNzliczZXWm5DdTJsOTNKT3FZ?=
- =?utf-8?B?WXRPSk9RaUExZlZEamF1Y0FKOFIzakYwNUNNNU81alI0bitGNDZtOEZ2RmZR?=
- =?utf-8?B?bEhKZk90YnVRZmpvRFlmYldrTHNaS2FSSUJzUWovMm91VlpoS1BqTmFGY1Z5?=
- =?utf-8?B?K3F3NmNvY2lSSk8wSWhJNkN6Nkx1SWV2UnorL3BaOEdLK2tuZHJnbzR6V1lP?=
- =?utf-8?B?KzVXOUtLcGxOdi8wM0VhblBHSzJpMDBYMGc3S0FnRnM2RTRDejVWcldoRjAw?=
- =?utf-8?B?N2RkNC9RSU5nRk1SamFvNzROR3NHeVNidnVYZ3FYMmdqaGUwcWZXMmhFNkp2?=
- =?utf-8?B?WTFjNHhLWGUya3R4NjBpU2Rvc2k5VlpSa0pvNnl0elZGZGdvUWlvMUtyRkI4?=
- =?utf-8?B?VCtSUHdLak9LU0tpUEs1ZGNpT0VxQ0hLU012VEZ4T0FzVWlDb0ttVDliWlZn?=
- =?utf-8?B?aTh0TnZOWVc1aDV4d0tSa0U3V08xSWFJNkI1eFJUb2xRLzZhZzJrN2I3MGJp?=
- =?utf-8?B?c2JFNVJWbGJkOC9EUUhlK3RCVWE2SXdPQ3hFdFJZdkhaeUJ6SDVJYms1b1JI?=
- =?utf-8?B?SWUzT0d1UE4xamhyTFRZWGgzVnFxQlo5enI2cEticktKSUNhTFh1dlBmaDA5?=
- =?utf-8?B?Smd2SFJmWlNzcktMNEp4eDduR212VDB1c29za2V6STFYREN0RTNrOWo1UFZ2?=
- =?utf-8?B?VTNoa3dGT3Q0WHpPbkVRWm1lREVRTzF4TDdhWHZvQ1NJT1hpMmV0NS9LdDIx?=
- =?utf-8?B?bFgySjBqazlWUm5ZNDVSL21rUHpIS0dZeUp0RFZHSkhyQW5aN0pkTjR6aEk4?=
- =?utf-8?B?SW5qejRCTEtFRTRRUSsveG9HOU83RzVFMlZySk5pZXRSdU5zOGJCTzlmN0Ni?=
- =?utf-8?Q?rxwPgfmdNrw=3D?=
+	=?utf-8?B?T3d6RjJpcjZmWThxdlFObVM5MFg3aFhmRHNsdmFGeElpZDJXaUlVeWhEaUdo?=
+ =?utf-8?B?MGxkODVoYjBwMldoeUt0U29Na1hmMDlMeXJYNlBxVE1LMmZWZ0IwRVRmbHhU?=
+ =?utf-8?B?ZElQcXdkcnF3Wkp2QytLZ1hybHFpQis4VkdWSG1XUWxXTnFZREdWN2NtSFhl?=
+ =?utf-8?B?VGtTM0cveEZwZXdPRzJQc1d1aEJhRG9HSGFnamFGWnhDNVJ6dU1kTllBNnk3?=
+ =?utf-8?B?YmlRVk1pVFVPYkZQbDFiRzRDUy9GaStNelRYQVJVS2s2RjlQOTlqSzhOTDBs?=
+ =?utf-8?B?VXJjZDlqcVVlYnI1Vk1haU9hYlBRdmZDSG9SUVRKdWt5UjhjNW9sKzBjdVgz?=
+ =?utf-8?B?NUVEeG4wZmxKNEhSb1V3aXNnS25ZS2p0YjZBSVA4cUJ4T1NJYlVHTG1xRjlu?=
+ =?utf-8?B?SWhzK1VKaVRQdzlWNDRrWDZOSlZxZ1RzREtseUtZS3hUMnF3Vk9KOUVKWEhY?=
+ =?utf-8?B?c3JjYnYrMmxWZnZyenB3UitWUjR0NjRWd2dobE9Kem1xWGl1Q1l3NXNETE9Y?=
+ =?utf-8?B?Q1pUekx0dytUTGpUTE52NDhDZ2syRlBxbnJIa2tqNStLZzBkWkhTQ0luTVdp?=
+ =?utf-8?B?bG9FV3lzcmRsRXV0YjFZT290QUYxSEsyeHRPUjZUeGdPQS9rdUJzY2FxK3Jz?=
+ =?utf-8?B?ZkliSGhEbjdMNVhkRVBzbnRUSnRxamU0UUNYZ0Nvcks3dnFYYTBQQWtVNEVP?=
+ =?utf-8?B?UElxRE1kUmJJK0FzNWFsWTlyQ3MxQThwaFFndkpLQWNveUVSaXphc0xGbUZz?=
+ =?utf-8?B?RkdLZnVXTUkzTXFaQWQrdUVQUmlleERPa3FtRU0wWGpRQVZmQnZIRGFhQTV0?=
+ =?utf-8?B?K2gzdER1V00xNGlWSGJkbFNXTEs2NlhiZ1puYk5xd0VBVHZmTmZlUXdNU1Nh?=
+ =?utf-8?B?aW5JcnkwcTVJM3ArQm9CWVE0UlJNWlphdk1Wenp6THFubTEvYmdhNzU1T0h1?=
+ =?utf-8?B?ZUt0MTNPbHZUODVMRURqOUZmMzFoc3d3dWJTVmRoRmF1c3JmVFU0d1JaMHAy?=
+ =?utf-8?B?Y1EzMUp3b2ZGdWowd2dvWVNRTkhyd1VQS2lqTTlscFpTNmZtU3dOKzhDa3o5?=
+ =?utf-8?B?b2VkMm04elFyK2ZPZkQyb0NGUjRBc3RLL1B3N21zUGFJWHBVTDBoZEpTTmVJ?=
+ =?utf-8?B?QXdKV3J4cEpDWENmNG5BYTJMK0JHbkc2K0ZLS3pMQks3NDNyWWhDUVdsejdx?=
+ =?utf-8?B?Y3Mxc0FUTm1RYVZ2VHI2MFhaQUZFSEZnZzZuWmxSQVBrRlI4c1hQdjBsTzJX?=
+ =?utf-8?B?VnRqNHRIQmFLMFlzbVZCMjhCaEtaeDRBQW9oOFBLRXZ3SHBid3cxbWlodkRB?=
+ =?utf-8?B?M1RxWjR5RnBsOG4yVmdjRXhscDdVcEtKWkc2Z2FFS09YajNyN2VwNE9BaGZq?=
+ =?utf-8?B?UE5xYitxcVczUGdOZkFPSERoeUpGNDNpZTJuQVBEbjdkWlk0dG8zcTVNaDdY?=
+ =?utf-8?B?SDBXblhKYjBZckNMSXJ4YjFUUS90ejdJVWs2aVJ1aENkVHNOL1Rnb2d0cHRH?=
+ =?utf-8?B?ek90bnhSbGVJSmpWUkJVR1BSdTlkRjdsNER6dmh5Q3gzMDJqM1ZLSFdDcFli?=
+ =?utf-8?B?cXZ6TE1WRGs4ZGRqSFJHSG40SXNFMGxtVnhVR3R3T2ZFaDc5eEpWUjVGSnNq?=
+ =?utf-8?B?Z09aZjdrcTNZVWVMdEpDZStGN2x1K1Flbmp2WkxlVm1JMFhiNnVkaUtYZGZS?=
+ =?utf-8?B?NXZGaG9GQmFrdTNtTnZvNmM3c201c0h4dFl6OWJoVmtoL0s3ZVpXNkpPc3Rv?=
+ =?utf-8?B?UURGbFlHUUhYcHhwR0FzYm5QL2E0d3lyT2VsckFrdmdQSXUyVi9EQU40VkZZ?=
+ =?utf-8?B?R255aDJ0MnBFZnpXVUdhVFUxU2U0QWp0bjZWUUtWdzN2Mmp2WXpSVERKTjRU?=
+ =?utf-8?B?Y2JRUEFTUjM5cm5zQWtweEdsU0JIV2VxOVNpYmptZEdCczFGYU1GMDJRTEtz?=
+ =?utf-8?Q?+SM24j6VRkY=3D?=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MN2PR10MB4320.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(366016);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MN2PR10MB4320.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(366016)(7053199007);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?VUdRVHpLaU93S1pmdDc3NVJuVEhhMS9RQU9KYnJOUlNNckcwdldPMEVmV2J5?=
- =?utf-8?B?WjV3bXY5b0ZIS21GcWZDVjNoOWZtNk9FSFNTbFpZZ2JUWXdZMGRkRzZHMGlt?=
- =?utf-8?B?amFjQWNBMmsvWlkreWhXZ2tlK2JiaWE2M1RFME5ucG4yaExmSXlwR3UvWDgw?=
- =?utf-8?B?ZWswUnl4LzQrekZRYm1UQzE1RVNwbWNFUG8wWGdtL2k2RVNob3ViMnAxTUNm?=
- =?utf-8?B?VHNzWmpTNlFtdnk0SlBtSnFuTjM0NTRUcno3aTl6eU1WQ1ozTjNDb1lTMHZy?=
- =?utf-8?B?NURHY0hmZUZiUEpjZW0vaUQ0dkdubGxMZjNCUXNsSlFJVXE5WjJEbDhFSXdT?=
- =?utf-8?B?RkNEeUI3M2Vic25sdksveTA3Y0lmSFdYbjM2T0lQSU1aYlJtbmx3dndkZkx0?=
- =?utf-8?B?citnT0FXRUxYMWh6NlZpTjJoWkd4QUd6RHo2cDZwWndhQ2t6MGdEeUdZL1Q4?=
- =?utf-8?B?SGtNNjdBYWJFSWVsZWsxN2hTM1ZwL3Y3eThIWkJLUmRGTlJ3c1BncGJ6eFBL?=
- =?utf-8?B?S05TRHR6am9JMFJtWnI1WWhROU1ybjFSckNKMG9SdGpCWVY0akRSMDN2OTgr?=
- =?utf-8?B?TWxDTUw3c25NeDJhTTNkaHc4VW5TNkU2TitRcHpJT3RFRGVOWGUyMFk2MU1B?=
- =?utf-8?B?S0hlNks1cHRpd2diSCtDRUg5MEVFVDErZ2ZLNjVMczRSUkU1SG12OTJIV2JX?=
- =?utf-8?B?VDB5MkFMb0dLOFFxZlN3aExCYlVMbEQ0dVpGeCthVFhUVUJrTjNPMzBPbGVr?=
- =?utf-8?B?WWEwTWV0QjhidisrMVFKK2g5T05tSTdIRjVQb2hRYURSbHJzdWNjRktJOXps?=
- =?utf-8?B?dnlQSnk3dm9PSktwczFYOHpkS1dmY05lK1dPSWN1NmNKOEJuZmdicEg1djNE?=
- =?utf-8?B?d0xEd2g3Mms3aDZpRTJDY3ZJSGEzSXJCdlQrTE9nMW8vdXJzVlE5MCtzLzNI?=
- =?utf-8?B?S1lNc29LblFnSS9RbFlOcVJVVGpmZ3VHVHgwc3lvYzJocDRPQVpWcmd0b0lv?=
- =?utf-8?B?cFFmNVJXRFJkVlJSdjdjREFzMUIwTUJwaDJSTDcxRkczakRDMFZJRzVmS0Y4?=
- =?utf-8?B?b1RKWnFqaFJmODV5cHZkL1JTK05saEh2MVVrYTBDaTdYd3lJZEZ6YVBNdGdG?=
- =?utf-8?B?TCtuOEVzeGgrTHhOREVVbmpEWStPa2JXeXkwdVFwTlZXbTZZWnYzS0FBK2tL?=
- =?utf-8?B?d2k5QVpUdTk4bHp2aVdSU0VieHNValBTR0loMHpwbDJpd3NBdGZDQ2ZhUjRF?=
- =?utf-8?B?V0ZubXF6M0dTN3FIY3ZOcklvZFZJNHpDRzh1N3JsRGNQUDBOZFgwSU9WTFJ6?=
- =?utf-8?B?THBpS3p1YUlZeHduODV0SGxwWVNpZGRrSFJKSnhPRlU2dFRZTGV0eS9RRlRw?=
- =?utf-8?B?LzZNMzV3b0lGQjVTeUt1eWtON2dQNmlIZmZ2NjZGRDlMWFJnbUJtWnl5NU84?=
- =?utf-8?B?ZHo2clFuL3M0MGRNUHFOWnFIL3hJYnQ3UlhkZkQ0UDM3STRnYVJ5Sjc0V2t6?=
- =?utf-8?B?cmIxcU9WM0pRWXFMS1o3WjZlS1RuTkE1NGh1WDRnOVBTTjdUcUFUSHRJdWlV?=
- =?utf-8?B?T0Q2cHpIUWJSZHdNRkU4Y2xHeGlHZmJOakZJei9PWnlQVHU4czBLQmlGRXRQ?=
- =?utf-8?B?azNGeWxEZUw5SnhDaXNjdTJBTWlKanlVZ3pSOGx3YkRvc1FOU1lrL0xoWmNq?=
- =?utf-8?B?NjNWTlphTGJiZk5hWFk3dWZRNWtIT2dEVUhVaVdqdVEvWmdJT1BMUkphT2hp?=
- =?utf-8?B?eFIxV01nT0cxbTF0RlhCUDhQZ1NGR29XemI2c2w1Qm1ZaTNqUXg0N293YUZm?=
- =?utf-8?B?bjJBb0V6a1M0YVBZdVRVdWViMko2S3BIempLVmwyU3crMHpZaCtaaWNmOWVG?=
- =?utf-8?B?RllDNUwrZkMxSTZBd3RxWE1jbmhBTlI3S2JRUUVDREV2Q21yUVoxRzFLaitr?=
- =?utf-8?B?dmRobzV4QTFVajd0eHBLVE9hbmZGdkVnWmtJbGhBdUdvR1Z2bEhWdU9adCtB?=
- =?utf-8?B?QkFCUVBlU052MDQxZXQ0emp4Y0U4RnQ0MjRyRG01d2RmUEN2SEdjMmUwM0dN?=
- =?utf-8?B?anVzSERMb0o4OUJPbEVhdG9sQ284cWtVTmxmbnF4NTZxUHVyU1ZjazVOV1pv?=
- =?utf-8?Q?WbQ8CZNWx7iD32EGsbEW4F+Nb?=
+	=?utf-8?B?Wmw4MFd5MmFyL0F1UlVIK3hHYnlsTU9QV1FGNm93cEpyZ3JCQmFPMmJkbU93?=
+ =?utf-8?B?OVB5RmNaYnZYMTVBZUpKbFNERkYycStwWnU0eWNmOFptOFFDYTdxWVdWK1FZ?=
+ =?utf-8?B?NEVrcGtGZ0tUSzRFbTJiRDFwam9HQk1ldWlUaTFLTUFmMzRrMUc3UkVmVVFr?=
+ =?utf-8?B?OTE5V1ZoMUpvdlhNcW5nYUpmQ3JTMUdmazcxa2o4YURScDlEWjdncEVQanZW?=
+ =?utf-8?B?L3BkWnd1V1JhTUNmK3NrNWpQU1ZpN2QxY1FsUGRXd2V3R1laMnVjbUJuRU1R?=
+ =?utf-8?B?TnNqZmhaMlMzRjVBWlFQWVRYTzZkWi9oWjlLb29lRTlHYlV0endKb3I4Nzdw?=
+ =?utf-8?B?WEhqTkI4RllEM0t2N1ZWV0o5S2FTSytiVlNFQk1IK3orM2tkZDhpMnhWeFk4?=
+ =?utf-8?B?ZGM3ZE1mZmJMTGVENWRZdzJUNmpHMWZGeVBiZURxYVZhWG1FNmJJUExaR0NO?=
+ =?utf-8?B?Zjh5RWtqQmxiYm5EQnh2bS92Y0h5Z3hPTDlEVFhVa3dIZHhOOCszdXdQUWw0?=
+ =?utf-8?B?eWtwWnZjZVZQUU9VenBVK2xEWHJuQzRmc1JBelhCamtSVy9rUEltSHdSdHRw?=
+ =?utf-8?B?dTVhNzFCOEx0amQ4dVU4aURJY3RGb3QwOWRNVnlqeGVtZmprNlYvcStvcVNH?=
+ =?utf-8?B?cGxqUytUc3RhNTVZWW1YSzlIUi8zbjVnMk53RThaa0xEZlNEREdIcXYxWnJE?=
+ =?utf-8?B?byt0YnJtNmpGTEp5OVMvSENNOFQ5MUJWYnp2bHp3SDNONjB1cFlweU1nWS9n?=
+ =?utf-8?B?dXEyZDJCQTI4WEp2OHdEYU40KzlKUjFRc092cWI1bnVhZGhHQkx5RDNvWHB4?=
+ =?utf-8?B?eTVYdklCWDhMRUN1ZU83d2tkOGtXWFA0QVROQVkvL0QyQUpIdWV2a2pVZDRS?=
+ =?utf-8?B?TzcvZExWRWNnTnRhN3phZmR6Vjc5ckFtWUxyNmRPNzUvRFlpZ0RlUkMzZzZr?=
+ =?utf-8?B?dkc3enY1Ym5oM21xSGVtMTJGcVJyUHA4SW5RYjZDa096ME9weFJCS0grZlhR?=
+ =?utf-8?B?ZlhiSGQvcGhHZlZMY3FNR0pMd0JWd01RTHFFK2pXZW4xRW11R3BiV0pmRk9Z?=
+ =?utf-8?B?UzROWTAvcTRrUUd1cnN5Q1JGZFM2UUozOGVNdzdVRnVRTGhtVkVtSG1sR2Fl?=
+ =?utf-8?B?RDJrVi95dGhXRkl1ZVdkVE1kTy9GNjYybUdiYUNVbGRnOEZYZEFVR3BnalVS?=
+ =?utf-8?B?bDk3d3ZJZ2Z2bFA1MlR5aGhIaFhoOUhOY2tWQVVyWnA2YkNvRFpPUkV0b1cx?=
+ =?utf-8?B?Z2poUE14Y2laT2puWUJ5VkFxY1JWNG5XT2YwNkJFWEluNkJ4MUJmMnA4N3I5?=
+ =?utf-8?B?T2UyUlRaYkZyUW5wdDJwZUZsY1dib2tHNC92NlpidUtOSlhhUmxrdFVSYmhW?=
+ =?utf-8?B?UDlzYWoyYmk4cVBOaE11VHdaVUFheTBmUFZybHRZRUR2T3JDUStMRHk3Y1Zz?=
+ =?utf-8?B?YWp2cjI4WHBhM0RFK29TdDV2TWQyaWQ3VGhCRjhQWllueHA3ell0bitKbFk0?=
+ =?utf-8?B?eUk4cXFFNVByaUhBbVE5dGp2Q0RNWE9BNzZmSGVjSFBEcXZTU2M5Ui9TS2Zo?=
+ =?utf-8?B?M3I5SWUrUUxxNW44eGpzM2dRdURONFFtTmlSRG5QN29HTGNEdldJMlQwZ3Rv?=
+ =?utf-8?B?UzJ3aW5JZU5ERzh6c3ZxS2lOcExKNGpuazByVlM5QUlmQ0RoSHEvd2F1bTZL?=
+ =?utf-8?B?MW5zM2x2amh4RXRSYWZteWtCZnJGVnVvckFhSjRCa3lwcTZuTWRrbUxqbkNR?=
+ =?utf-8?B?QWtYYUVaNXRjQ1BWNTVNeUtwaGVNblU1eWl6cENnZUhwNCtyS0dnN3ZRYjM1?=
+ =?utf-8?B?V2ZSVkc1SkRQYXpVSGxoQk5WMmN0dFc2ZVQvN1plMG5HZHBwV3hKYlRjNzh4?=
+ =?utf-8?B?Q2tOeSs0SFVSZDNjcXFDVitibzNtMFE1NHdGNmNkWFdaWGkrSExpekVVMVVS?=
+ =?utf-8?B?Mjc1ODlYamtwOVRIRXp2eGN0Z0pNc3lybmJvNUJPTmlnOFhlcUhMeVo0bENq?=
+ =?utf-8?B?YkhZOHBwV3A4V0VUMzV0Wnl5TlNZem1KclFLK21Walk1ajFWYWUxWk1JZ25Y?=
+ =?utf-8?B?RFFrb3BDTTdYTDRNTGNoSDRIcmZna2lMMjNBSkhNNVFuZWtRZFVINlc0anF3?=
+ =?utf-8?Q?ZhhguhNyr99V6ZG0PX/3tEtQu?=
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	9/agFJcig0OhgJTx6/wxOitFTPwZZPll9vw0A6yMKk/FDr98qxX6F2t9YVhSUc9JWBi1i2fSRFe0bFet4QfOkL8q90X0gD9bIfckhRtRvauDrC4ur0YOtz3DvSiYnUskdNqArZkvxt7Ah7/cWSEcYZ/FUcAEbxERBZ4Rab/9X/uEf5LckrxQS7C32MB/qwcYT7qclNmcfjE5Eb2DcetpnPAEpKvQpTMLPKrsT2dfhTOVbSAcrZoBR5fHyKhFNuTxRKcsaID8uig2LlSzkBHa2QBKNWxb/5VJ3h0qGWFOsc1O/wxLkrZcbN4XqwCdgrEPw05Spiv1eS1gqrLr73DbYnLLfV24ZWLXbs01mTfX91+QNRFE6NkktG9ldNme07OxWsYbgcUkT4EPBk/3K7UOeznQBPlpcRN37mEspmo8L6SdrWtqeY1j6/GCO2dkqmJ+pyYWfqYLG/LqrvvT853rTPhDXzTZ/C0Pp4UxZyQ6lIxTUYzwQw8wKTTNSbl54eu0W9isqPVhQB7+3hjAW41ut3bsjvKahhfP/rZ4x+8yqhpOmtsKwweuTZXk1p8qEG1JeWHU27RlG2xbaj+KRt2p4jCIpGQAvm7c0Tsh5dLTq54=
+	EFkNJHYdovzEDLehsPYUTOEpLGpr3bESYwpb+UJgCuDXo6FSlBnlgxBHWpdJwsgLmkmY0S9uX15wsgfb+A+93oIelm/MXIYo3tgkkTL1iBEtNkhTkC6eGkxSjVqME3Kp3r4JSKHqs+ydsER+7lLzvAO3m1TF8jFkEN6u3NF0IPi+QIkbrFdnsga0N1NJ3fKZ7NwbKEJ5ygRs5loIjbX6w+E8UxiStdHt2qT2J4kt20ty+2Ef5Jf+jvoxeMEITcEPYx1nTfOKdruyoQk/AcT29nSaxpeFv1x9xklU9jghuxBPuTStiGLbvqT5w437jXa7fv+eNv1x1ZwyF/WCpT5hro75EVlr6CtUTnwg9pL10KQOnF4js4x9Nw2V7m/IYPgEOwT71sA2QDCSGjfrmj6QTHHK4Y7P1xyeV7NgI9mK6E5A44KjBRsCNd7OGGmJERw2myxT/NwJgaaA7+XOiOOOg/xOJAmVaznSqhpPB5DJnBnAsxnlerjrlWELHAc1kvWZk9gxVKdV2XscFoVCemI3Wf93ph68yc8fGag9VHGCAi3/DZGeMn0R256gyMjLEBME5PT3jAY9CetdQ67iSPKGTmQDA8WzKkU7An2fEYu7f4k=
 X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: aec5f6be-5306-4c2d-a476-08ddeeace022
+X-MS-Exchange-CrossTenant-Network-Message-Id: b78c4f2c-54ab-49c8-9a4a-08ddeee3e97c
 X-MS-Exchange-CrossTenant-AuthSource: MN2PR10MB4320.namprd10.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Sep 2025 07:54:02.0562
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Sep 2025 14:28:00.0588
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: USJfp6JOLU6TQ5Wj/aSyYqasbIJHSOkWyKhDqTXrVKSz0s6PpAXfBT2CMWGYJ+5q6U1tDX4uwqYfoBNTFvHJfQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS7PR10MB5119
+X-MS-Exchange-CrossTenant-UserPrincipalName: +6DpD+dm9a8j1GSSc1pvL3EFy1pUEKcDzZHkXQWy3EFjfE4KR2qMuGUiygtcGAFyzg/nYcD+T9GqwoWT8hSTwQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR10MB4307
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-09-08_02,2025-09-08_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 phishscore=0 suspectscore=0
- mlxscore=0 adultscore=0 bulkscore=0 malwarescore=0 mlxlogscore=937
+ definitions=2025-09-08_05,2025-09-08_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 mlxscore=0 phishscore=0
+ bulkscore=0 mlxlogscore=999 malwarescore=0 adultscore=0 suspectscore=0
  classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2508110000
- definitions=main-2509080079
-X-Proofpoint-GUID: 1PGLlXJGRTiZrAjPLvgQQ299t35P7BuN
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwOTA4MDA3NCBTYWx0ZWRfXw2bcr1v5fP0n
- kmRJgHJCpipeK+iH4rPMN7mNXKVShri4GZx8ZKGbzjEiDG/juWVcBDvfw6lI4GRV/uRXRSN7+42
- 7GATQyHaF/lK4arc9gdSoL8RECg50AvxskLDwXW4+cnnxE50esjxHQ4qmeCZmr/0NRGN644CmUx
- 53OBY6cK8OV070SrIcIvS6a2mbjc2MnF6ClVc/j5nOnMzURtc9GxpzzS6cC9EXd9HI+iCu7DW1f
- 2RZUpmX5vlOrBpWxNzKRb3P7jdj2VEu1cUq9dAbnjsGfF4IMZc+xZGwHM2+M5r1IoLlPRQRYNLw
- 9/N3CSRbrLxoVpnbN5qnf8Jxv2RRm4cdFQmXZsDlOmXD5xVXIIwbzf6jHl2Wobuk0nEWJS6AnVd
- iWQQviNilan+h/MfP+R5vB1q5M4Dsw==
-X-Authority-Analysis: v=2.4 cv=Z8HsHGRA c=1 sm=1 tr=0 ts=68be8ba0 b=1 cx=c_pps
- a=e1sVV491RgrpLwSTMOnk8w==:117 a=e1sVV491RgrpLwSTMOnk8w==:17
+ definitions=main-2509080145
+X-Authority-Analysis: v=2.4 cv=SaP3duRu c=1 sm=1 tr=0 ts=68bee80f cx=c_pps
+ a=XiAAW1AwiKB2Y8Wsi+sD2Q==:117 a=XiAAW1AwiKB2Y8Wsi+sD2Q==:17
  a=6eWqkTHjU83fiwn7nKZWdM+Sl24=:19 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
  a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=wKuvFiaSGQ0qltdbU6+NXLB8nM8=:19
  a=Ol13hO9ccFRV9qXi2t6ftBPywas=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=yJojWOMRYYMA:10 a=GoEa3M9JfhUA:10 a=wS-98QlKGl-D8LSDywEA:9
- a=QEXdDO2ut3YA:10 cc=ntf awl=host:13602
-X-Proofpoint-ORIG-GUID: 1PGLlXJGRTiZrAjPLvgQQ299t35P7BuN
+ a=yJojWOMRYYMA:10 a=GoEa3M9JfhUA:10 a=pGLkceISAAAA:8 a=VwQbUJbxAAAA:8
+ a=VnNF1IyMAAAA:8 a=L6dLE3yhhPwVN8ulp-sA:9 a=QEXdDO2ut3YA:10
+X-Proofpoint-ORIG-GUID: LLbjTPaQoysPdqs0_r6-H5rXhXgHSnt8
+X-Proofpoint-GUID: LLbjTPaQoysPdqs0_r6-H5rXhXgHSnt8
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwOTA4MDEzMyBTYWx0ZWRfX5YfqzGlUWU17
+ j90ccMj0otLOf6A8JKHd2O9YNOCjd1myAKMGv3HwNzY0Qkc6gIhRebN0JLA2azf7CbRNrXygUBM
+ Ony3ij+HCRIj7gYx7lIqwa+egbmcsvwVknOibXiS3QysVWQBgqGrrqvJaZoCAOYogN1rLdPlWVz
+ GQ0AzUBIO65vVBxEK7dB3mTWGebo6iXYvB2W187A3GrUyKIzel3GnmCull8MzU92OGKjou7CRRE
+ IUBR+lFvRklD2s+gfjxh8X2YysilrsyaaXgZm1u1BG1RiEIXPy561FvvVNTNmlDAHHCj3gynMcz
+ jfM45YxbrrOzEURPTuhx2tAq74+eC0gSjI1JbXFWfY9Jaz8EAkFTmbf8iyF/JRJg94q8zf3fiP7
+ 0uTUx1Di
 
-On 05/09/2025 17:29, Ojaswin Mujoo wrote:
+On 05/09/2025 18:06, Ojaswin Mujoo wrote:
+> On Tue, Sep 02, 2025 at 04:49:26PM +0100, John Garry wrote:
+>> On 22/08/2025 09:02, Ojaswin Mujoo wrote:
+>>> This test is intended to ensure that multi blocks atomic writes
+>>> maintain atomic guarantees across sudden FS shutdowns.
+>>>
+>>> The way we work is that we lay out a file with random mix of written,
+>>> unwritten and hole extents. Then we start performing atomic writes
+>>> sequentially on the file while we parallely shutdown the FS. Then we
+>>> note the last offset where the atomic write happened just before shut
+>>> down and then make sure blocks around it either have completely old
+>>> data or completely new data, ie the write was not torn during shutdown.
+>>>
+>>> We repeat the same with completely written, completely unwritten and completely
+>>> empty file to ensure these cases are not torn either.  Finally, we have a
+>>> similar test for append atomic writes
+>>>
+>>> Suggested-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+>>> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+>>> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+>>
+>> Please check comments, below, thanks!
+>>
+>>> ---
+>>>    tests/generic/1230     | 397 +++++++++++++++++++++++++++++++++++++++++
+>>>    tests/generic/1230.out |   2 +
+>>>    2 files changed, 399 insertions(+)
+>>>    create mode 100755 tests/generic/1230
+>>>    create mode 100644 tests/generic/1230.out
+>>>
+>>> diff --git a/tests/generic/1230 b/tests/generic/1230
+>>> new file mode 100755
+>>> index 00000000..cff5adc0
+>>> --- /dev/null
+>>> +++ b/tests/generic/1230
+>>> @@ -0,0 +1,397 @@
+>>> +#! /bin/bash
+>>> +# SPDX-License-Identifier: GPL-2.0
+>>> +# Copyright (c) 2025 IBM Corporation. All Rights Reserved.
+>>> +#
+>>> +# FS QA Test No. 1230
+>>> +#
+>>> +# Test multi block atomic writes with sudden FS shutdowns to ensure
+>>> +# the FS is not tearing the write operation
+>>> +. ./common/preamble
+>>> +. ./common/atomicwrites
+>>> +_begin_fstest auto atomicwrites
 >>> +
->>> +/*
->>> + * Round down n to nearest power of 2.
->>> + * If n is already a power of 2, return n;
->>> + */
->>> +static int rounddown_pow_of_2(int n) {
->>> +	int i = 0;
->>> +
->>> +	if (is_power_of_2(n))
->>> +		return n;
->>> +
->>> +	for (; (1 << i) < n; i++);
->>> +
->>> +	return 1 << (i - 1);
->> Is this the neatest way to do this?
-> Well it is a straigforward o(logn) way. Do you have something else in
-> mind?
+>>> +_require_scratch_write_atomic_multi_fsblock
+>>> +_require_atomic_write_test_commands
+>>> +_require_scratch_shutdown
+>>> +_require_xfs_io_command "truncate"
+>>
+>> is a similar fallocate test needed?
+> 
+> Hey John, we run the test for the following cases:
+> 
+> - file has mixed mapping
+> - file has only hole (trucate case)
+> - file has only unwritten blocks (falloc case)
+> - file has only written blocks
+> 
+> So we already do that. It's just that we don't need the
+> _require_xfs_io_command "falloc" since it is already included in
+> _require_atomic_write_test_commnads.
 
-check what the kernel does is always a good place to start...
+ok
 
-Thanks
+> 
+>>
+>>> +
+>>> +_scratch_mkfs >> $seqres.full 2>&1
+>>> +_scratch_mount >> $seqres.full
+>>> +
+>>> +testfile=$SCRATCH_MNT/testfile
+>>> +touch $testfile
+>>> +
+>>> +awu_max=$(_get_atomic_write_unit_max $testfile)
+>>> +blksz=$(_get_block_size $SCRATCH_MNT)
+>>> +echo "Awu max: $awu_max" >> $seqres.full
+>>> +
+>>> +num_blocks=$((awu_max / blksz))
+>>> +# keep initial value high for dry run. This will be
+>>> +# tweaked in dry_run() based on device write speed.
+>>> +filesize=$(( 10 * 1024 * 1024 * 1024 ))
+>>
+>> could this cause some out-of-space issue? That's 10GB, right?
+> 
+> Hey John, yes this is just a dummy value. We tune the filesize later
+> based on how fast the device is. That will usually be around 3 * (bytes
+> written in 0.2s) (check dry_run function).
+> 
+> Generally this will be a smaller size. ( 3GB on a 5GB/s SSD.) But yes
+> I should probably add a _notrun if our ssd fast enough to fill up the
+> full FS in 0.2s.
+
+ok, good
+
+> 
+>>
+>>> +
+>>> +_cleanup() {
+>>> +	[ -n "$awloop_pid" ] && kill $awloop_pid &> /dev/null
+>>> +	wait
+>>> +}
+>>> +
+>>> +atomic_write_loop() {
+>>> +	local off=0
+>>> +	local size=$awu_max
+>>> +	for ((i=0; i<$((filesize / $size )); i++)); do
+>>> +		# Due to sudden shutdown this can produce errors so just
+>>> +		# redirect them to seqres.full
+>>> +		$XFS_IO_PROG -c "open -fsd $testfile" -c "pwrite -S 0x61 -DA -V1 -b $size $off $size" >> /dev/null 2>>$seqres.full
+>>> +		echo "Written to offset: $off" >> $tmp.aw
+>>> +		off=$((off + $size))
+>>> +	done
+>>> +}
+>>> +
+>>> +# This test has the following flow:
+>>> +# 1. Start doing sequential atomic writes in bg, upto $filesize
+>>
+>> bg?
+> 
+> background*. I'll change it.
+>>
+>>> +# 2. Sleep for 0.2s and shutdown the FS
+>>> +# 3. kill the atomic write process
+>>> +# 4. verify the writes were not torn
+>>> +#
+>>> +# We ideally want the shutdown to happen while an atomic write is ongoing
+>>> +# but this gets tricky since faster devices can actually finish the whole
+>>> +# atomic write loop before sleep 0.2s completes, resulting in the shutdown
+>>> +# happening after the write loop which is not what we want. A simple solution
+>>> +# to this is to increase $filesize so step 1 takes long enough but a big
+>>> +# $filesize leads to create_mixed_mappings() taking very long, which is not
+>>> +# ideal.
+>>> +#
+>>> +# Hence, use the dry_run function to figure out the rough device speed and set
+>>> +# $filesize accordingly.
+>>> +dry_run() {
+>>> +	echo >> $seqres.full
+>>> +	echo "# Estimating ideal filesize..." >> $seqres.full
+>>> +	atomic_write_loop &
+>>> +	awloop_pid=$!
+>>> +
+>>> +	local i=0
+>>> +	# Wait for atleast first write to be recorded or 10s
+>>> +	while [ ! -f "$tmp.aw" -a $i -le 50 ]; do i=$((i + 1)); sleep 0.2; done
+>>> +
+>>> +	if [[ $i -gt 50 ]]
+>>> +	then
+>>> +		_fail "atomic write process took too long to start"
+>>> +	fi
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Shutting down filesystem while write is running" >> $seqres.full
+>>> +	_scratch_shutdown
+>>> +
+>>> +	kill $awloop_pid 2>/dev/null  # the process might have finished already
+>>> +	wait $awloop_pid
+>>> +	unset $awloop_pid
+>>> +
+>>> +	bytes_written=$(tail -n 1 $tmp.aw | cut -d" " -f4)
+>>> +	echo "# Bytes written in 0.2s: $bytes_written" >> $seqres.full
+>>> +
+>>> +	filesize=$((bytes_written * 3))
+>>> +	echo "# Setting \$filesize=$filesize" >> $seqres.full
+>>> +
+>>> +	rm $tmp.aw
+>>> +	sleep 0.5
+>>> +
+>>> +	_scratch_cycle_mount
+>>> +
+>>> +}
+>>> +
+>>> +create_mixed_mappings() {
+>>
+>> Is this same as patch 08/12?
+> 
+> I believe you mean the [D]SYNC tests, yes it is the same.
+
+then maybe factor out the test, if possible. I assume that this sort of 
+approach is taken for xfstests.
+
+> 
+>>
+>>> +	local file=$1
+>>> +	local size_bytes=$2
+>>> +
+>>> +	echo "# Filling file $file with alternate mappings till size $size_bytes" >> $seqres.full
+>>> +	#Fill the file with alternate written and unwritten blocks
+>>> +	local off=0
+>>> +	local operations=("W" "U")
+>>> +
+>>> +	for ((i=0; i<$((size_bytes / blksz )); i++)); do
+>>> +		index=$(($i % ${#operations[@]}))
+>>> +		map="${operations[$index]}"
+>>> +
+>>> +		case "$map" in
+>>> +		    "W")
+>>> +			$XFS_IO_PROG -fc "pwrite -b $blksz $off $blksz" $file  >> /dev/null
+>>
+>> does this just write random data? I don't see any pattern being set.
+> 
+> By default pwrite writes 0xcd if no patterns is specified. This helps us
+> reliably check the data back.
+
+ok, understood
+
+> 
+>>
+>>> +			;;
+>>> +		    "U")
+>>> +			$XFS_IO_PROG -fc "falloc $off $blksz" $file >> /dev/null
+>>> +			;;
+>>> +		esac
+>>> +		off=$((off + blksz))
+>>> +	done
+>>> +
+>>> +	sync $file
+>>> +}
+>>> +
+>>> +populate_expected_data() {
+>>> +	# create a dummy file with expected old data for different cases
+>>> +	create_mixed_mappings $testfile.exp_old_mixed $awu_max
+>>> +	expected_data_old_mixed=$(od -An -t x1 -j 0 -N $awu_max $testfile.exp_old_mixed)
+>>> +
+>>> +	$XFS_IO_PROG -fc "falloc 0 $awu_max" $testfile.exp_old_zeroes >> $seqres.full
+>>> +	expected_data_old_zeroes=$(od -An -t x1 -j 0 -N $awu_max $testfile.exp_old_zeroes)
+>>> +
+>>> +	$XFS_IO_PROG -fc "pwrite -b $awu_max 0 $awu_max" $testfile.exp_old_mapped >> $seqres.full
+>>> +	expected_data_old_mapped=$(od -An -t x1 -j 0 -N $awu_max $testfile.exp_old_mapped)
+>>> +
+>>> +	# create a dummy file with expected new data
+>>> +	$XFS_IO_PROG -fc "pwrite -S 0x61 -b $awu_max 0 $awu_max" $testfile.exp_new >> $seqres.full
+>>> +	expected_data_new=$(od -An -t x1 -j 0 -N $awu_max $testfile.exp_new)
+>>> +}
+>>> +
+>>> +verify_data_blocks() {
+>>> +	local verify_start=$1
+>>> +	local verify_end=$2
+>>> +	local expected_data_old="$3"
+>>> +	local expected_data_new="$4"
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Checking data integrity from $verify_start to $verify_end" >> $seqres.full
+>>> +
+>>> +	# After an atomic write, for every chunk we ensure that the underlying
+>>> +	# data is either the old data or new data as writes shouldn't get torn.
+>>> +	local off=$verify_start
+>>> +	while [[ "$off" -lt "$verify_end" ]]
+>>> +	do
+>>> +		#actual_data=$(xxd -s $off -l $awu_max -p $testfile)
+>>> +		actual_data=$(od -An -t x1 -j $off -N $awu_max $testfile)
+>>> +		if [[ "$actual_data" != "$expected_data_new" ]] && [[ "$actual_data" != "$expected_data_old" ]]
+>>> +		then
+>>> +			echo "Checksum match failed at off: $off size: $awu_max"
+>>> +			echo "Expected contents: (Either of the 2 below):"
+>>> +			echo
+>>> +			echo "Expected old: "
+>>> +			echo "$expected_data_old"
+>>
+>>
+>> it would be nice if this was deterministic - see comment in
+>> create_mixed_mappings
+> 
+> Yes, it is. It will be 0xcdcdcdcd
+>>
+>>> +			echo
+>>> +			echo "Expected new: "
+>>> +			echo "$expected_data_new"
+>>
+>> nit: I am not sure what is meant by "expected". I would just have "new
+>> data". We don't know what to expect, as it could be old or new, right?
+> 
+> Yes, so the I was thinking of it this way:
+> 
+> We either expect the data to be the full new (named expected_new) or
+> fully old (named expected_old). Else renaming it to new vs old vs actual
+> makese it a bit more confusing imo
+
+ok, good
+
+> 
+>>
+>>> +			echo
+>>> +			echo "Actual contents: "
+>>> +			echo "$actual_data"
+>>> +
+>>> +			_fail
+>>> +		fi
+>>> +		echo -n "Check at offset $off suceeded! " >> $seqres.full
+>>> +		if [[ "$actual_data" == "$expected_data_new" ]]
+>>> +		then
+>>> +			echo "matched new" >> $seqres.full
+>>> +		elif [[ "$actual_data" == "$expected_data_old" ]]
+>>> +		then
+>>> +			echo "matched old" >> $seqres.full
+>>> +		fi
+>>> +		off=$(( off + awu_max ))
+>>> +	done
+>>> +}
+>>> +
+>>> +# test data integrity for file by shutting down in between atomic writes
+>>> +test_data_integrity() {
+>>> +	echo >> $seqres.full
+>>> +	echo "# Writing atomically to file in background" >> $seqres.full
+>>> +	atomic_write_loop &
+>>> +	awloop_pid=$!
+>>> +
+>>
+>> from here ...
+>>
+>>> +	local i=0
+>>> +	# Wait for atleast first write to be recorded or 10s
+>>> +	while [ ! -f "$tmp.aw" -a $i -le 50 ]; do i=$((i + 1)); sleep 0.2; done
+>>> +
+>>> +	if [[ $i -gt 50 ]]
+>>> +	then
+>>> +		_fail "atomic write process took too long to start"
+>>> +	fi
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Shutting down filesystem while write is running" >> $seqres.full
+>>> +	_scratch_shutdown
+>>> +
+>>> +	kill $awloop_pid 2>/dev/null  # the process might have finished already
+>>> +	wait $awloop_pid
+>>> +	unset $awloop_pid
+>>
+>> ... to here looks similar in many functions. Can we factor it out?
+> 
+> Right thats true, I'll factor this out. Thanks for pointing it out.
+
+ok
+
+>>
+>>> +
+>>> +	last_offset=$(tail -n 1 $tmp.aw | cut -d" " -f4)
+>>> +	if [[ -z $last_offset ]]
+>>> +	then
+>>> +		last_offset=0
+>>> +	fi
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Last offset of atomic write: $last_offset" >> $seqres.full
+>>> +
+>>> +	rm $tmp.aw
+>>> +	sleep 0.5
+>>> +
+>>> +	_scratch_cycle_mount
+>>> +
+>>> +	# we want to verify all blocks around which the shutdown happended
+>>> +	verify_start=$(( last_offset - (awu_max * 5)))
+>>> +	if [[ $verify_start < 0 ]]
+>>> +	then
+>>> +		verify_start=0
+>>> +	fi
+>>> +
+>>> +	verify_end=$(( last_offset + (awu_max * 5)))
+>>> +	if [[ "$verify_end" -gt "$filesize" ]]
+>>> +	then
+>>> +		verify_end=$filesize
+>>> +	fi
+>>> +}
+>>> +
+>>> +# test data integrity for file wiht written and unwritten mappings
+>>
+>> with
+>>
+>>> +test_data_integrity_mixed() {
+>>> +	$XFS_IO_PROG -fc "truncate 0" $testfile >> $seqres.full
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Creating testfile with mixed mappings" >> $seqres.full
+>>> +	create_mixed_mappings $testfile $filesize
+>>> +
+>>> +	test_data_integrity
+>>> +
+>>> +	verify_data_blocks $verify_start $verify_end "$expected_data_old_mixed" "$expected_data_new"
+>>> +}
+>>> +
+>>> +# test data integrity for file with completely written mappings
+>>> +test_data_integrity_writ() {
+>>
+>> please spell "writ" out fully, which I think should be "written"
+> 
+> Yes, will do.
+> 
+>>
+>>> +	$XFS_IO_PROG -fc "truncate 0" $testfile >> $seqres.full
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Creating testfile with fully written mapping" >> $seqres.full
+>>> +	$XFS_IO_PROG -c "pwrite -b $filesize 0 $filesize" $testfile >> $seqres.full
+>>> +	sync $testfile
+>>> +
+>>> +	test_data_integrity
+>>> +
+>>> +	verify_data_blocks $verify_start $verify_end "$expected_data_old_mapped" "$expected_data_new"
+>>> +}
+>>> +
+>>> +# test data integrity for file with completely unwritten mappings
+>>> +test_data_integrity_unwrit() {
+>>
+>> same as above
+>>
+>>> +	$XFS_IO_PROG -fc "truncate 0" $testfile >> $seqres.full
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Creating testfile with fully unwritten mappings" >> $seqres.full
+>>> +	$XFS_IO_PROG -c "falloc 0 $filesize" $testfile >> $seqres.full
+>>> +	sync $testfile
+>>> +
+>>> +	test_data_integrity
+>>> +
+>>> +	verify_data_blocks $verify_start $verify_end "$expected_data_old_zeroes" "$expected_data_new"
+>>> +}
+>>> +
+>>> +# test data integrity for file with no mappings
+>>> +test_data_integrity_hole() {
+>>> +	$XFS_IO_PROG -fc "truncate 0" $testfile >> $seqres.full
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Creating testfile with no mappings" >> $seqres.full
+>>> +	$XFS_IO_PROG -c "truncate $filesize" $testfile >> $seqres.full
+>>> +	sync $testfile
+>>> +
+>>> +	test_data_integrity
+>>> +
+>>> +	verify_data_blocks $verify_start $verify_end "$expected_data_old_zeroes" "$expected_data_new"
+>>> +}
+>>> +
+>>> +test_filesize_integrity() {
+>>> +	$XFS_IO_PROG -c "truncate 0" $testfile >> $seqres.full
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Performing extending atomic writes over file in background" >> $seqres.full
+>>> +	atomic_write_loop &
+>>> +	awloop_pid=$!
+>>> +
+>>> +	local i=0
+>>> +	# Wait for atleast first write to be recorded or 10s
+>>> +	while [ ! -f "$tmp.aw" -a $i -le 50 ]; do i=$((i + 1)); sleep 0.2; done
+>>> +
+>>> +	if [[ $i -gt 50 ]]
+>>> +	then
+>>> +		_fail "atomic write process took too long to start"
+>>> +	fi
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Shutting down filesystem while write is running" >> $seqres.full
+>>> +	_scratch_shutdown
+>>> +
+>>> +	kill $awloop_pid 2>/dev/null  # the process might have finished already
+>>> +	wait $awloop_pid
+>>> +	unset $awloop_pid
+>>> +
+>>> +	local last_offset=$(tail -n 1 $tmp.aw | cut -d" " -f4)
+>>> +	if [[ -z $last_offset ]]
+>>> +	then
+>>> +		last_offset=0
+>>> +	fi
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Last offset of atomic write: $last_offset" >> $seqres.full
+>>> +	rm $tmp.aw
+>>> +	sleep 0.5
+>>> +
+>>> +	_scratch_cycle_mount
+>>> +	local filesize=$(_get_filesize $testfile)
+>>> +	echo >> $seqres.full
+>>> +	echo "# Filesize after shutdown: $filesize" >> $seqres.full
+>>> +
+>>> +	# To confirm that the write went atomically, we check:
+>>> +	# 1. The last block should be a multiple of awu_max
+>>> +	# 2. The last block should be the completely new data
+>>> +
+>>> +	if (( $filesize % $awu_max ))
+>>> +	then
+>>> +		echo "Filesize after shutdown ($filesize) not a multiple of atomic write unit ($awu_max)"
+>>> +	fi
+>>> +
+>>> +	verify_start=$(( filesize - (awu_max * 5)))
+>>> +	if [[ $verify_start < 0 ]]
+>>> +	then
+>>> +		verify_start=0
+>>> +	fi
+>>> +
+>>> +	local verify_end=$filesize
+>>> +
+>>> +	# Here the blocks should always match new data hence, for simplicity of
+>>> +	# code, just corrupt the $expected_data_old buffer so it never matches
+>>> +	local expected_data_old="POISON"
+>>> +	verify_data_blocks $verify_start $verify_end "$expected_data_old" "$expected_data_new"
+>>> +}
+>>> +
+>>> +$XFS_IO_PROG -fc "truncate 0" $testfile >> $seqres.full
+>>> +
+>>> +dry_run
+>>> +
+>>> +echo >> $seqres.full
+>>> +echo "# Populating expected data buffers" >> $seqres.full
+>>> +populate_expected_data
+>>> +
+>>> +# Loop 20 times to shake out any races due to shutdown
+>>> +for ((iter=0; iter<20; iter++))
+>>> +do
+>>> +	echo >> $seqres.full
+>>> +	echo "------ Iteration $iter ------" >> $seqres.full
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Starting data integrity test for atomic writes over mixed mapping" >> $seqres.full
+>>> +	test_data_integrity_mixed
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Starting data integrity test for atomic writes over fully written mapping" >> $seqres.full
+>>> +	test_data_integrity_writ
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Starting data integrity test for atomic writes over fully unwritten mapping" >> $seqres.full
+>>> +	test_data_integrity_unwrit
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Starting data integrity test for atomic writes over holes" >> $seqres.full
+>>> +	test_data_integrity_hole
+>>> +
+>>> +	echo >> $seqres.full
+>>> +	echo "# Starting filesize integrity test for atomic writes" >> $seqres.full
+>>
+>> what does "Starting filesize integrity test" mean?
+> 
+> Basically other tests already truncate the file to a higher value and
+> then perform the shut down test. Here we actually do append atomic
+> writes since we want to also stress the i_size update paths during
+> shutdown to ensure that doesn't cause any tearing with atomic writes.
+> 
+> I can maybe rename it to:
+> 
+> 
+> echo "# Starting data integrity test for atomic append writes" >> $seqres.full
+> 
+> Thanks for the review!
+> 
+
+It's just the name "integrity" that throws me a bit..
