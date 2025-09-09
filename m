@@ -1,72 +1,73 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4025134F497
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BD1E350D52
 	for <fstests@vger.kernel.org>; Tue,  9 Sep 2025 15:26:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757431567; cv=none; b=R7UmNG2BvjAs4CnP80XtVHruvbsjzJjVzFDP0l5ff5iuE3ejsLT2UXR7Lk1mwz392V++PUSWHOkQodD33lkR/5TftbWCnH+YOf0LKsZZ7tBGFzCbxXjfy3/eQ7eqXdblLyRs3ksH/9yADjnsun9/r6sZd+Y457MNu+Vw3dQx8S8=
+	t=1757431567; cv=none; b=jWriHpxNa+xz92IljvaMStvNLa9npQsmecJp1xzGARZVy/qR2lSYFaqaJ52fLBLBBmR0tBypodUCUcqeIa2yDUCR1ZSGC3oEjqJedjzMGq5h38XhrMWQTb9Wc1XFnoSaG9ghcTe+Tsr4UnbE7vwPCzro0YUjXvsb0Lrtvtb21LU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1757431567; c=relaxed/simple;
-	bh=1g0F8G0ZJ3aQR1QOcer4WbbNZ4zedOeqU7qRg83YmYs=;
+	bh=FK9ckZlUIT5NP6l4ajjq7S2PGhEFaswizWRppgSgHXo=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=rAK3Y0CEz6bGFhTpRoakDkYAuD970FvOohMo5B9JF5kx/rXwmYyssB6exWK8pnga4bZRRZXmM04hWIDGk7+x36MEG6neZ2NwbOlFmzPGyThEHgoDlVpXj/cVSAu8IgBXi/Q6dz93B4BJHaNrmAIypOMO1NXS6qRx6xUR2mDNU+w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VWbv1iv9; arc=none smtp.client-ip=170.10.129.124
+	 In-Reply-To:To:Cc; b=aucdNw/OgJO12KusjgCc8a7xzeCdJUUoV3VcDYUJbQfVcwnNkLmyGDdCgzCz1eph/ceNoo1B4CjYQdiVX7Q/m5NcrkhBURRg1UCtjW2PoU5elRBao+LkQpMRf0ZqEgGER0EZQ/TCEJigp/XJ4v8b1no4KAz3XDsWMXGiPjjoMPQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WNplObjz; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VWbv1iv9"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WNplObjz"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1757431564;
+	s=mimecast20190719; t=1757431565;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=TOc2kyXwkfyHFjkUB0VqkLUggJ+gZJQWX3oPeW8H3Q4=;
-	b=VWbv1iv9xt8YDfjFbw/L/3U6Zk6fcPHdewZZ6/augI4nA8I6bYOkPY/HFkF17PZn1Rbxu1
-	EghGq++tm8o7GiitID0SJZj2vqHOC7y65C7kCkzmKhEo7F18NvrvE97lVdamSsqmmqAum0
-	TtwNEF/Vew9QWZCZjg5b6W7HOIhUVmw=
-Received: from mail-wm1-f69.google.com (mail-wm1-f69.google.com
- [209.85.128.69]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=MR82k89loQqbpWRhbWbGHqwEmrwV8ovuS9azBDHWF0g=;
+	b=WNplObjzZslbj+hEDhAa1MfxQc6ShawRRKBvIcPXALW9kx8X9wNuKdcexQxKbBIhcDJd7j
+	1eavz7jlogNlGsGCGOX/+zIBC77gu+RgvW5j2PeXcNFucxibZgo9iul6jhcqgmsUeb3IRi
+	S4E+oyX4/67UQcB85sX+AymlFZWkklU=
+Received: from mail-wm1-f70.google.com (mail-wm1-f70.google.com
+ [209.85.128.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-121-vOU1Xh9tPeWRfx1ZxJVH0g-1; Tue, 09 Sep 2025 11:26:03 -0400
-X-MC-Unique: vOU1Xh9tPeWRfx1ZxJVH0g-1
-X-Mimecast-MFC-AGG-ID: vOU1Xh9tPeWRfx1ZxJVH0g_1757431562
-Received: by mail-wm1-f69.google.com with SMTP id 5b1f17b1804b1-45b990eb77cso40608965e9.0
-        for <fstests@vger.kernel.org>; Tue, 09 Sep 2025 08:26:02 -0700 (PDT)
+ us-mta-175-nw5wDaztMXeszE0Wm5J8_g-1; Tue, 09 Sep 2025 11:26:03 -0400
+X-MC-Unique: nw5wDaztMXeszE0Wm5J8_g-1
+X-Mimecast-MFC-AGG-ID: nw5wDaztMXeszE0Wm5J8_g_1757431562
+Received: by mail-wm1-f70.google.com with SMTP id 5b1f17b1804b1-45de27bf706so13487335e9.0
+        for <fstests@vger.kernel.org>; Tue, 09 Sep 2025 08:26:03 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20230601; t=1757431562; x=1758036362;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=TOc2kyXwkfyHFjkUB0VqkLUggJ+gZJQWX3oPeW8H3Q4=;
-        b=YkJ9P81K/aUcsosogHp/hfAKpIU4k2ZniZ+sbKxFIjUTmoZxCeHl6haR9UtODi7bHb
-         ib1a+KS1RZnen+gQWqiO6QKwh/Ui8CkesvriV1f9FpvBaHgweC97Sb7d5I3kHpK/yEKw
-         /gNRPctrFp55Cr5kV8kaEqkz953WZaKM+Il5DQ5/ZoGP79OR1XKHshx4XW+wLpLF9S18
-         roYphABxAYR02NDjltep8+fLS684vlwTCFNbNk35qYLv1yzYV9vW7UtGCu81rZsFa9oQ
-         LtXfRnr5YyXA9JMAqTFRrX67WUBqG5SYL//JO86cvkePybKtURABJYiDUYWR8VBrC/dy
-         V4zQ==
-X-Gm-Message-State: AOJu0YyIlxruHgUs69Cbz98isIRP7+egWZ3zjvvHdNlbMeWQXRDblsgo
-	LzRp0lPxovZNgU0MLtySXTCxUpfpqjl1kolirJAWf9QEXR+SZvKzzSwO7Ep42dyu2iXdAV+rLOV
-	E/zz6guISx0wENyHmumPIO+bqT4MePhg1I7iVh72ifV9FCXkZiRLGrxtlAA==
-X-Gm-Gg: ASbGnctGO28xaAaFLHMqdA7kbQCDoAICfPaRPFZnEb1cm4OopEJ/K5uDiAUNrpXmll8
-	nzDe0eW9n+yEIC5tb6hQIMC8LzWNONTFZcLTwChcvuX1xnICwdvVKDeoDwxtAfboOH0LzO8GerX
-	AoKEHp1RVjkAJtrol7c/zc7XkLT0bc7UF4QI7dBxE0Y2Pam4XXdLIlUbbsq0Jpq1v6GxKzDUFhm
-	Lf37HL0Obi95Bhh3cho6m9ODAiPv3MdAcIapJK2F0DGwJ46nxvHq9Mlx1xJiev1SYcHEm8a1Fam
-	IbqUUrwh5h8/2GnJg05pAIF863+AeiqwFybfPHw=
-X-Received: by 2002:a05:600c:4ed2:b0:45d:d99a:e5fc with SMTP id 5b1f17b1804b1-45dde1b2fe6mr111120025e9.7.1757431561749;
-        Tue, 09 Sep 2025 08:26:01 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGj1ljVV/zfvg7Dx18dXXX43FnrgvpyvSumiZaHW/FxS6lgCA0DQqjIk+b8to4SDBl9QpZsPw==
-X-Received: by 2002:a05:600c:4ed2:b0:45d:d99a:e5fc with SMTP id 5b1f17b1804b1-45dde1b2fe6mr111119735e9.7.1757431561279;
-        Tue, 09 Sep 2025 08:26:01 -0700 (PDT)
+        bh=MR82k89loQqbpWRhbWbGHqwEmrwV8ovuS9azBDHWF0g=;
+        b=ATF3Mb2/XePfblhWwv/6l6AYrvziF5prx/+MAx90lgBZ/NcfBjZ/J5Or+5UCoSdFX7
+         v2T6Pc8H4ih5uXuaFOcS7lkrW9kNtYy48u15uIpD4Mph+urrgytS5opR6dRSXgYfWiWR
+         4y+xX1J3of1WK1gZguEVNLEGR0CtLGSs1UQOU4bXEgKvrMsxOmi2MUCCKXFpIJdEtCWd
+         SjpL0Dc5Ny7TeWlfepyegIi3WlsunNS/MzPYB0YVl02WucK81VqIKEaOBZuayhp8duGy
+         hrfLRVlZw4qq1aW8nr/Q29XDOCUyXTjkUJPVoawOU/yh+IC4j/uPRLZZcHjeHo0sHIYc
+         is9A==
+X-Gm-Message-State: AOJu0YwX1g0uV2Im/w12mf8ssZFdBh09EW6Ui5OJF5WXXM0Sjy/uIFlv
+	1F9zHPA1MwiLMyFAz1zF+X9N/lHg6HiXZUUpKkkYgyKM4zJ/HGXhTVjOz0LdnMlwNF/ykUQantM
+	iL85XjfaSMtyOltTwL86st9tGeRsBMt99MkicRDVg+oj2QFSrSj+fV7uQpg==
+X-Gm-Gg: ASbGnctE9w3GgQiHqgEuX4qvnLQYcFn+7XRNEOHVRu2OgoJtKZrjng4Hpsqk/yfu99e
+	mi8UQS41juNnS+p+b0wBINZpJ23MaBLbk7izSSA83uHtBmww9so3QJZm7T0pdGH4KL7CaqTNGRL
+	BdNHoYNuIz7OhoPvGD1ciiAe1M37xwx+0NcNOO04th4Uvs1qIMMk0oRITyxR/eG4ehjPlusfFXA
+	9sxgETnVkuLtOi0uCnfbyW1OMbLU3KgcttHIwIyaSNNEQ1vQCFowA1yDjdk3cU02JsNpzjqSQZ4
+	oWzOkIqohqKiSR6zV26GZTFIyY3j5QG9FrMFpLc=
+X-Received: by 2002:a05:600c:630e:b0:458:bd31:2c27 with SMTP id 5b1f17b1804b1-45dddee9c7fmr100645805e9.23.1757431562412;
+        Tue, 09 Sep 2025 08:26:02 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFCnPMWACOsDM1uMYMYJeKmOJ1pT+RNybfKT+ByO64ivr4ZEE5yLV7x2NlpjEG+APPAEop5iQ==
+X-Received: by 2002:a05:600c:630e:b0:458:bd31:2c27 with SMTP id 5b1f17b1804b1-45dddee9c7fmr100645575e9.23.1757431562023;
+        Tue, 09 Sep 2025 08:26:02 -0700 (PDT)
 Received: from [127.0.0.2] ([91.245.205.131])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-45b9a6ecfafsm348550005e9.21.2025.09.09.08.26.00
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-45b9a6ecfafsm348550005e9.21.2025.09.09.08.26.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 09 Sep 2025 08:26:00 -0700 (PDT)
+        Tue, 09 Sep 2025 08:26:01 -0700 (PDT)
 From: Andrey Albershteyn <aalbersh@redhat.com>
 X-Google-Original-From: Andrey Albershteyn <aalbersh@kernel.org>
-Date: Tue, 09 Sep 2025 17:25:56 +0200
-Subject: [PATCH v3 1/3] file_attr: introduce program to set/get fsxattr
+Date: Tue, 09 Sep 2025 17:25:57 +0200
+Subject: [PATCH v3 2/3] generic: introduce test to test
+ file_getattr/file_setattr syscalls
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -75,392 +76,192 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20250909-xattrat-syscall-v3-1-9ba483144789@kernel.org>
+Message-Id: <20250909-xattrat-syscall-v3-2-9ba483144789@kernel.org>
 References: <20250909-xattrat-syscall-v3-0-9ba483144789@kernel.org>
 In-Reply-To: <20250909-xattrat-syscall-v3-0-9ba483144789@kernel.org>
 To: fstests@vger.kernel.org
 Cc: zlang@redhat.com, linux-fsdevel@vger.kernel.org, 
- linux-xfs@vger.kernel.org, Andrey Albershteyn <aalbersh@kernel.org>
+ linux-xfs@vger.kernel.org, Andrey Albershteyn <aalbersh@kernel.org>, 
+ "Darrick J. Wong" <djwong@kernel.org>
 X-Mailer: b4 0.15-dev
-X-Developer-Signature: v=1; a=openpgp-sha256; l=9766; i=aalbersh@kernel.org;
- h=from:subject:message-id; bh=1g0F8G0ZJ3aQR1QOcer4WbbNZ4zedOeqU7qRg83YmYs=;
- b=owJ4nJvAy8zAJea2/JXEGuOHHIyn1ZIYMg64s/sEpB+1i95vyjZZ+rG7AQv/1PwTqbNvOoefZ
- Hku9sTonE9HKQuDGBeDrJgiyzppralJRVL5Rwxq5GHmsDKBDGHg4hSAidj1MvwzPtc44f6lv0n9
- LJKiwmkbiuNLNoTIKW7NeV9qveLw/01KDL9ZdBYfnCA5fYFP7JnJc9cycfzXXhyd/V90K6OVTpp
- ZpiE7AMeKQxM=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=5333; i=aalbersh@kernel.org;
+ h=from:subject:message-id; bh=FK9ckZlUIT5NP6l4ajjq7S2PGhEFaswizWRppgSgHXo=;
+ b=owJ4nJvAy8zAJea2/JXEGuOHHIyn1ZIYMg64s+9IPbX0rIfrtMWar+IkOpa9yFDpb9/ssdN1o
+ uHXlnP91Wc6SlkYxLgYZMUUWdZJa01NKpLKP2JQIw8zh5UJZAgDF6cATGSXDCPD1gkztpjVJnhc
+ WOvGJJ1TarZHP2q++Pv3iy9s43l9c+Z7VkaG0x8+PMxK7HN6fLzwk6zixD0b0+Ya9cxOjZjDadG
+ auec9IwC51UmP
 X-Developer-Key: i=aalbersh@kernel.org; a=openpgp;
  fpr=AE1B2A9562721A6FC4307C1F46A7EA18AC33E108
 
-This programs uses newly introduced file_getattr and file_setattr
-syscalls. This program is partially a test of invalid options. This will
-be used further in the test.
+Add a test to test basic functionality of file_getattr() and
+file_setattr() syscalls. Most of the work is done in file_attr
+utility.
 
 Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 ---
- .gitignore            |   1 +
- configure.ac          |   1 +
- include/builddefs.in  |   1 +
- m4/package_libcdev.m4 |  16 +++
- src/Makefile          |   5 +
- src/file_attr.c       | 274 ++++++++++++++++++++++++++++++++++++++++++++++++++
- 6 files changed, 298 insertions(+)
+ tests/generic/2000     | 109 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/2000.out |  37 +++++++++++++++++
+ 2 files changed, 146 insertions(+)
 
-diff --git a/.gitignore b/.gitignore
-index 6948fd602f95..82c57f415301 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -211,6 +211,7 @@ tags
- /src/min_dio_alignment
- /src/dio-writeback-race
- /src/unlink-fsync
-+/src/file_attr
- 
- # Symlinked files
- /tests/generic/035.out
-diff --git a/configure.ac b/configure.ac
-index f3c8c643f0eb..f7519fa97654 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -73,6 +73,7 @@ AC_HAVE_RLIMIT_NOFILE
- AC_NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE
- AC_HAVE_FICLONE
- AC_HAVE_TRIVIAL_AUTO_VAR_INIT
-+AC_HAVE_FILE_GETATTR
- 
- AC_CHECK_FUNCS([renameat2])
- AC_CHECK_FUNCS([reallocarray])
-diff --git a/include/builddefs.in b/include/builddefs.in
-index 96d5ed25b3e2..708d75b24d76 100644
---- a/include/builddefs.in
-+++ b/include/builddefs.in
-@@ -74,6 +74,7 @@ HAVE_BMV_OF_SHARED = @have_bmv_of_shared@
- HAVE_RLIMIT_NOFILE = @have_rlimit_nofile@
- NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE = @need_internal_xfs_ioc_exchange_range@
- HAVE_FICLONE = @have_ficlone@
-+HAVE_FILE_GETATTR = @have_file_getattr@
- 
- GCCFLAGS = -std=gnu11 -funsigned-char -fno-strict-aliasing -Wall
- SANITIZER_CFLAGS += @autovar_init_cflags@
-diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
-index ed8fe6e32ae0..17f57f427410 100644
---- a/m4/package_libcdev.m4
-+++ b/m4/package_libcdev.m4
-@@ -86,3 +86,19 @@ AC_DEFUN([AC_HAVE_TRIVIAL_AUTO_VAR_INIT],
-     CFLAGS="${OLD_CFLAGS}"
-     AC_SUBST(autovar_init_cflags)
-   ])
-+
-+#
-+# Check if we have a file_getattr system call (Linux)
-+#
-+AC_DEFUN([AC_HAVE_FILE_GETATTR],
-+  [ AC_MSG_CHECKING([for file_getattr syscall])
-+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-+#define _GNU_SOURCE
-+#include <sys/syscall.h>
-+#include <unistd.h>
-+    ]], [[
-+         syscall(__NR_file_getattr, 0, 0, 0, 0, 0, 0);
-+    ]])],[have_file_getattr=yes
-+       AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
-+    AC_SUBST(have_file_getattr)
-+  ])
-diff --git a/src/Makefile b/src/Makefile
-index 7080e34896c3..711dbb917b3a 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -62,6 +62,11 @@ ifeq ($(HAVE_FALLOCATE), true)
- LCFLAGS += -DHAVE_FALLOCATE
- endif
- 
-+ifeq ($(HAVE_FILE_GETATTR), yes)
-+LINUX_TARGETS += file_attr
-+LCFLAGS += -DHAVE_FILE_GETATTR
-+endif
-+
- ifeq ($(PKG_PLATFORM),linux)
- TARGETS += $(LINUX_TARGETS)
- endif
-diff --git a/src/file_attr.c b/src/file_attr.c
-new file mode 100644
-index 000000000000..29bb6c903403
+diff --git a/tests/generic/2000 b/tests/generic/2000
+new file mode 100755
+index 000000000000..b03e9697bb14
 --- /dev/null
-+++ b/src/file_attr.c
-@@ -0,0 +1,274 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Copyright (c) 2025 Red Hat, Inc.  All Rights Reserved.
-+ */
++++ b/tests/generic/2000
+@@ -0,0 +1,109 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 Red Hat Inc.  All Rights Reserved.
++#
++# FS QA Test No. 2000
++#
++# Test file_getattr/file_setattr syscalls
++#
++. ./common/preamble
++_begin_fstest auto
 +
-+#include "global.h"
-+#include <sys/syscall.h>
-+#include <getopt.h>
-+#include <errno.h>
-+#include <linux/fs.h>
-+#include <sys/stat.h>
-+#include <string.h>
-+#include <getopt.h>
-+#include <stdlib.h>
-+#include <unistd.h>
++. ./common/filter
 +
-+#ifndef HAVE_FILE_GETATTR
-+#define __NR_file_getattr 468
-+#define __NR_file_setattr 469
++# Modify as appropriate.
++_require_scratch
++_require_test_program "af_unix"
++_require_test_program "file_attr"
++_require_symlinks
++_require_mknod
 +
-+struct file_attr {
-+	__u32	fa_xflags;	/* xflags field value (get/set) */
-+	__u32	fa_extsize;	/* extsize field value (get/set)*/
-+	__u32	fa_nextents;	/* nextents field value (get)   */
-+	__u32	fa_projid;	/* project identifier (get/set) */
-+	__u32	fa_cowextsize;	/* CoW extsize field value (get/set) */
-+};
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
 +
-+#endif
-+
-+#define SPECIAL_FILE(x) \
-+	   (S_ISCHR((x)) \
-+	|| S_ISBLK((x)) \
-+	|| S_ISFIFO((x)) \
-+	|| S_ISLNK((x)) \
-+	|| S_ISSOCK((x)))
-+
-+static struct option long_options[] = {
-+	{"set",			no_argument,	0,	's' },
-+	{"get",			no_argument,	0,	'g' },
-+	{"no-follow",		no_argument,	0,	'n' },
-+	{"at-cwd",		no_argument,	0,	'a' },
-+	{"set-nodump",		no_argument,	0,	'd' },
-+	{"invalid-at",		no_argument,	0,	'i' },
-+	{"too-big-arg",		no_argument,	0,	'b' },
-+	{"too-small-arg",	no_argument,	0,	'm' },
-+	{"new-fsx-flag",	no_argument,	0,	'x' },
-+	{0,			0,		0,	0 }
-+};
-+
-+static struct xflags {
-+	uint	flag;
-+	char	*shortname;
-+	char	*longname;
-+} xflags[] = {
-+	{ FS_XFLAG_REALTIME,		"r", "realtime"		},
-+	{ FS_XFLAG_PREALLOC,		"p", "prealloc"		},
-+	{ FS_XFLAG_IMMUTABLE,		"i", "immutable"	},
-+	{ FS_XFLAG_APPEND,		"a", "append-only"	},
-+	{ FS_XFLAG_SYNC,		"s", "sync"		},
-+	{ FS_XFLAG_NOATIME,		"A", "no-atime"		},
-+	{ FS_XFLAG_NODUMP,		"d", "no-dump"		},
-+	{ FS_XFLAG_RTINHERIT,		"t", "rt-inherit"	},
-+	{ FS_XFLAG_PROJINHERIT,		"P", "proj-inherit"	},
-+	{ FS_XFLAG_NOSYMLINKS,		"n", "nosymlinks"	},
-+	{ FS_XFLAG_EXTSIZE,		"e", "extsize"		},
-+	{ FS_XFLAG_EXTSZINHERIT,	"E", "extsz-inherit"	},
-+	{ FS_XFLAG_NODEFRAG,		"f", "no-defrag"	},
-+	{ FS_XFLAG_FILESTREAM,		"S", "filestream"	},
-+	{ FS_XFLAG_DAX,			"x", "dax"		},
-+	{ FS_XFLAG_COWEXTSIZE,		"C", "cowextsize"	},
-+	{ FS_XFLAG_HASATTR,		"X", "has-xattr"	},
-+	{ 0, NULL, NULL }
-+};
-+
-+static int
-+file_getattr(
-+		int			dfd,
-+		const char		*filename,
-+		struct file_attr	*fsx,
-+		size_t			usize,
-+		unsigned int		at_flags)
-+{
-+	return syscall(__NR_file_getattr, dfd, filename, fsx, usize, at_flags);
++file_attr () {
++	$here/src/file_attr $*
 +}
 +
-+static int
-+file_setattr(
-+		int			dfd,
-+		const char		*filename,
-+		struct file_attr	*fsx,
-+		size_t			usize,
-+		unsigned int		at_flags)
-+{
-+	return syscall(__NR_file_setattr, dfd, filename, fsx, usize, at_flags);
++create_af_unix () {
++	$here/src/af_unix $* || echo af_unix failed
 +}
 +
-+static void
-+print_xflags(
-+	uint		flags,
-+	int		verbose,
-+	int		dofname,
-+	const char	*fname,
-+	int		dobraces,
-+	int		doeol)
-+{
-+	struct xflags	*p;
-+	int		first = 1;
++projectdir=$SCRATCH_MNT/prj
 +
-+	if (dobraces)
-+		fputs("[", stdout);
-+	for (p = xflags; p->flag; p++) {
-+		if (flags & p->flag) {
-+			if (verbose) {
-+				if (first)
-+					first = 0;
-+				else
-+					fputs(", ", stdout);
-+				fputs(p->longname, stdout);
-+			} else {
-+				fputs(p->shortname, stdout);
-+			}
-+		} else if (!verbose) {
-+			fputs("-", stdout);
-+		}
-+	}
-+	if (dobraces)
-+		fputs("]", stdout);
-+	if (dofname)
-+		printf(" %s ", fname);
-+	if (doeol)
-+		fputs("\n", stdout);
-+}
++# Create normal files and special files
++mkdir $projectdir
++mkfifo $projectdir/fifo
++mknod $projectdir/chardev c 1 1
++mknod $projectdir/blockdev b 1 1
++create_af_unix $projectdir/socket
++touch $projectdir/foo
++ln -s $projectdir/foo $projectdir/symlink
++touch $projectdir/bar
++ln -s $projectdir/bar $projectdir/broken-symlink
++rm -f $projectdir/bar
 +
-+int main(int argc, char *argv[])
-+{
-+	int error;
-+	int c;
-+	const char *path = NULL;
-+	const char *path1 = NULL;
-+	const char *path2 = NULL;
-+	unsigned int at_flags = 0;
-+	unsigned int fa_xflags = 0;
-+	int action = 0; /* 0 get; 1 set */
-+	struct file_attr fsx = { };
-+	int fa_size = sizeof(struct file_attr);
-+	struct stat status;
-+	int fd;
-+	int at_fdcwd = 0;
-+	int unknwon_fa_flag = 0;
++echo "Error codes"
++# wrong AT_ flags
++file_attr --get --invalid-at $projectdir ./foo
++file_attr --set --invalid-at $projectdir ./foo
++# wrong fsxattr size (too big, too small)
++file_attr --get --too-big-arg $projectdir ./foo
++file_attr --get --too-small-arg $projectdir ./foo
++file_attr --set --too-big-arg $projectdir ./foo
++file_attr --set --too-small-arg $projectdir ./foo
++# out of fsx_xflags mask
++file_attr --set --new-fsx-flag $projectdir ./foo
 +
-+	while (1) {
-+		int option_index = 0;
++echo "Initial attributes state"
++file_attr --get $projectdir | _filter_scratch
++file_attr --get $projectdir ./fifo
++file_attr --get $projectdir ./chardev
++file_attr --get $projectdir ./blockdev
++file_attr --get $projectdir ./socket
++file_attr --get $projectdir ./foo
++file_attr --get $projectdir ./symlink
 +
-+		c = getopt_long_only(argc, argv, "", long_options,
-+				&option_index);
-+		if (c == -1)
-+			break;
++echo "Set FS_XFLAG_NODUMP (d)"
++file_attr --set --set-nodump $projectdir
++file_attr --set --set-nodump $projectdir ./fifo
++file_attr --set --set-nodump $projectdir ./chardev
++file_attr --set --set-nodump $projectdir ./blockdev
++file_attr --set --set-nodump $projectdir ./socket
++file_attr --set --set-nodump $projectdir ./foo
++file_attr --set --set-nodump $projectdir ./symlink
 +
-+		switch (c) {
-+		case 's':
-+			action = 1;
-+			break;
-+		case 'g':
-+			action = 0;
-+			break;
-+		case 'n':
-+			at_flags |= AT_SYMLINK_NOFOLLOW;
-+			break;
-+		case 'a':
-+			at_fdcwd = 1;
-+			break;
-+		case 'd':
-+			fa_xflags |= FS_XFLAG_NODUMP;
-+			break;
-+		case 'i':
-+			at_flags |= (1 << 25);
-+			break;
-+		case 'b':
-+			fa_size = getpagesize() + 1; /* max size if page size */
-+			break;
-+		case 'm':
-+			fa_size = 19; /* VER0 size of fsxattr is 20 */
-+			break;
-+		case 'x':
-+			unknwon_fa_flag = (1 << 27);
-+			break;
-+		default:
-+			goto usage;
-+		}
-+	}
++echo "Read attributes"
++file_attr --get $projectdir | _filter_scratch
++file_attr --get $projectdir ./fifo
++file_attr --get $projectdir ./chardev
++file_attr --get $projectdir ./blockdev
++file_attr --get $projectdir ./socket
++file_attr --get $projectdir ./foo
++file_attr --get $projectdir ./symlink
 +
-+	if (!path1 && optind < argc)
-+		path1 = argv[optind++];
-+	if (!path2 && optind < argc)
-+		path2 = argv[optind++];
++echo "Set attribute on broken link with AT_SYMLINK_NOFOLLOW"
++file_attr --set --set-nodump $projectdir ./broken-symlink
++file_attr --get $projectdir ./broken-symlink
 +
-+	if (at_fdcwd) {
-+		fd = AT_FDCWD;
-+		path = path1;
-+	} else if (!path2) {
-+		error = stat(path1, &status);
-+		if (error) {
-+			fprintf(stderr,
-+"Can not get file status of %s: %s\n", path1, strerror(errno));
-+			return error;
-+		}
++file_attr --set --no-follow --set-nodump $projectdir ./broken-symlink
++file_attr --get --no-follow $projectdir ./broken-symlink
 +
-+		if (SPECIAL_FILE(status.st_mode)) {
-+			fprintf(stderr,
-+"Can not open special file %s without parent dir: %s\n", path1, strerror(errno));
-+			return errno;
-+		}
++cd $SCRATCH_MNT
++touch ./foo2
++echo "Initial state of foo2"
++file_attr --get --at-cwd ./foo2
++echo "Set attribute relative to AT_FDCWD"
++file_attr --set --at-cwd --set-nodump ./foo2
++file_attr --get --at-cwd ./foo2
 +
-+		fd = open(path1, O_RDONLY);
-+		if (fd == -1) {
-+			fprintf(stderr, "Can not open %s: %s\n", path1,
-+					strerror(errno));
-+			return errno;
-+		}
-+	} else {
-+		fd = open(path1, O_RDONLY);
-+		if (fd == -1) {
-+			fprintf(stderr, "Can not open %s: %s\n", path1,
-+					strerror(errno));
-+			return errno;
-+		}
-+		path = path2;
-+	}
++echo "Set attribute on AT_FDCWD"
++mkdir ./bar
++file_attr --get --at-cwd ./bar
++cd ./bar
++file_attr --set --at-cwd --set-nodump ""
++file_attr --get --at-cwd .
 +
-+	if (!path)
-+		at_flags |= AT_EMPTY_PATH;
-+
-+	error = file_getattr(fd, path, &fsx, fa_size,
-+			at_flags);
-+	if (error) {
-+		fprintf(stderr, "Can not get fsxattr on %s: %s\n", path,
-+				strerror(errno));
-+		return error;
-+	}
-+	if (action) {
-+		fsx.fa_xflags |= (fa_xflags | unknwon_fa_flag);
-+
-+		error = file_setattr(fd, path, &fsx, fa_size,
-+				at_flags);
-+		if (error) {
-+			fprintf(stderr, "Can not set fsxattr on %s: %s\n", path,
-+					strerror(errno));
-+			return error;
-+		}
-+	} else {
-+		if (path2)
-+			print_xflags(fsx.fa_xflags, 0, 1, path, 0, 1);
-+		else
-+			print_xflags(fsx.fa_xflags, 0, 1, path1, 0, 1);
-+	}
-+
-+	return error;
-+
-+usage:
-+	printf("Usage: %s [options]\n", argv[0]);
-+	printf("Options:\n");
-+	printf("\t--get, -g\t\tget filesystem inode attributes\n");
-+	printf("\t--set, -s\t\tset filesystem inode attributes\n");
-+	printf("\t--at-cwd, -a\t\topen file at current working directory\n");
-+	printf("\t--no-follow, -n\t\tdon't follow symlinks\n");
-+	printf("\t--set-nodump, -d\t\tset FS_XFLAG_NODUMP on an inode\n");
-+	printf("\t--invalid-at, -i\t\tUse invalid AT_* flag\n");
-+	printf("\t--too-big-arg, -b\t\tSet fsxattr size bigger than PAGE_SIZE\n");
-+	printf("\t--too-small-arg, -m\t\tSet fsxattr size to 19 bytes\n");
-+	printf("\t--new-fsx-flag, -x\t\tUse unknown fa_flags flag\n");
-+
-+	return 1;
-+}
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/2000.out b/tests/generic/2000.out
+new file mode 100644
+index 000000000000..11b1fcbb630b
+--- /dev/null
++++ b/tests/generic/2000.out
+@@ -0,0 +1,37 @@
++QA output created by 2000
++Error codes
++Can not get fsxattr on ./foo: Invalid argument
++Can not get fsxattr on ./foo: Invalid argument
++Can not get fsxattr on ./foo: Argument list too long
++Can not get fsxattr on ./foo: Invalid argument
++Can not get fsxattr on ./foo: Argument list too long
++Can not get fsxattr on ./foo: Invalid argument
++Can not set fsxattr on ./foo: Invalid argument
++Initial attributes state
++----------------- SCRATCH_MNT/prj 
++----------------- ./fifo 
++----------------- ./chardev 
++----------------- ./blockdev 
++----------------- ./socket 
++----------------- ./foo 
++----------------- ./symlink 
++Set FS_XFLAG_NODUMP (d)
++Read attributes
++------d---------- SCRATCH_MNT/prj 
++------d---------- ./fifo 
++------d---------- ./chardev 
++------d---------- ./blockdev 
++------d---------- ./socket 
++------d---------- ./foo 
++------d---------- ./symlink 
++Set attribute on broken link with AT_SYMLINK_NOFOLLOW
++Can not get fsxattr on ./broken-symlink: No such file or directory
++Can not get fsxattr on ./broken-symlink: No such file or directory
++------d---------- ./broken-symlink 
++Initial state of foo2
++----------------- ./foo2 
++Set attribute relative to AT_FDCWD
++------d---------- ./foo2 
++Set attribute on AT_FDCWD
++----------------- ./bar 
++------d---------- . 
 
 -- 
 2.50.1
