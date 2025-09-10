@@ -1,213 +1,152 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D026235207F
-	for <fstests@vger.kernel.org>; Tue,  9 Sep 2025 15:26:06 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA58C304BC6
+	for <fstests@vger.kernel.org>; Wed, 10 Sep 2025 06:07:25 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757431568; cv=none; b=aIvAO648EeSbFjxybQSjuCKH+Z40/izUf7QrehbdE3lbf0nw4V5fCWsY7kyRC2L/HCwFTFvgih+kpl6ceYJVqAKP3mOo16l2xd6TtwqbTNSGSrr6HXraxRX6w9i98ZUFePxtGnag2opnnqPswyf7W0eHVRV7Uy26hjx+ccKmVWY=
+	t=1757484447; cv=none; b=Ly/3TEL5ZHA26dbwsmfxxAzl9iGOGDeC06iMHYqUh9PMB+vRtm96sQ+xiVB4ix1KstDEdON6nb0EkMtQx6Ek/nPxUlKD/CmQ5I43Z3P7H+0WDYTMEWGyffFK/IzfTSRXDTMx1PBjwlQCKzbg2Qi1WpCADj6gN1JEbh8zcTwiG7Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757431568; c=relaxed/simple;
-	bh=4dypLPu6DNf9DAMNJyF5UXwIvayiqJK8XG4EG3pgjZo=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=sSGJZpEYUADzVTmqV4lXZeWhy/Gm+ceEM5rem/QKiOVcgJ+yNTiUgb12iOvzzvlccwbp4wB964H56nikhfUdINfIb/xSdnq2869vkV7sDsgMSmlhi7j4RSFgfTswVMC4WytXPK/KxpmawVAayVA7PgIY5VZLnOVv2OhwK4anGV4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=HoBs7HYE; arc=none smtp.client-ip=170.10.133.124
+	s=arc-20240116; t=1757484447; c=relaxed/simple;
+	bh=gbYCNoVCr2sz/dvmF3FJfLnJEFurD2LkE3QO/MJ+M9Q=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=YgyYwD4rSIHXbzYf9Z0zyX9f5umFng+9XbAUaFMzPht9it+NV6C2djM5b8BXjRLUChMyOifwQt7dkP7L5JeNIhpDS5IKL1vsqehNkFSohSYJl+D2q2AE+tXq//rbvup6C6dZkjdlZMkkw7RR5SDA/XI+O+8MX1H+pg5MCexag6w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=OjHxuDyr; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="HoBs7HYE"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OjHxuDyr"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1757431565;
+	s=mimecast20190719; t=1757484444;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=GpNh9Npv8ACuKwnSClKnKFFRR5xgF6p+DJW3Gcbr8Pk=;
-	b=HoBs7HYE2BFBkiomau+ClO2ea8ap8WZAa1O88EkRpcpl2HVXrLPNYwyTUgXMFWLn5gs5Ae
-	efMeBJiw0WsuptB0orLOWl6gOWI1XNoGdvUgYtbvMOf8FV468QxbX6mzOyrbHbmB6vBOfn
-	pdsOikOdz/ZjBkAmhxxAwFoKO+7ZXvs=
-Received: from mail-wr1-f70.google.com (mail-wr1-f70.google.com
- [209.85.221.70]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=+mWiGzTdHTTRflbkk77kHOQXZWch1zMY1MtxXB+Kyuw=;
+	b=OjHxuDyrG5eZrTFYx+Cpk2FXyK7s2kn8rXF/uS+X6EHhgNzGQCS79kpFZRKZEtmLufXQYK
+	UyvSSLNK4doYs9L0+8M8M2Ndd2EARNKZrlUCvOaAJzEXCYj0Og4q8TvcfhZP67kZ9V0KCs
+	/CMemZ/6KhIiT7Ih/AU0daagSMikyD4=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-404-2K6083gcMf-QrVLof6xZfQ-1; Tue, 09 Sep 2025 11:26:04 -0400
-X-MC-Unique: 2K6083gcMf-QrVLof6xZfQ-1
-X-Mimecast-MFC-AGG-ID: 2K6083gcMf-QrVLof6xZfQ_1757431563
-Received: by mail-wr1-f70.google.com with SMTP id ffacd0b85a97d-3e50783dda8so1971805f8f.2
-        for <fstests@vger.kernel.org>; Tue, 09 Sep 2025 08:26:04 -0700 (PDT)
+ us-mta-564-bPcQyBGHNDidYk28qeroCQ-1; Wed, 10 Sep 2025 02:07:22 -0400
+X-MC-Unique: bPcQyBGHNDidYk28qeroCQ-1
+X-Mimecast-MFC-AGG-ID: bPcQyBGHNDidYk28qeroCQ_1757484442
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-24b0e137484so54457585ad.0
+        for <fstests@vger.kernel.org>; Tue, 09 Sep 2025 23:07:22 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757431563; x=1758036363;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=GpNh9Npv8ACuKwnSClKnKFFRR5xgF6p+DJW3Gcbr8Pk=;
-        b=suBVUfXL5mxHidJrsDxb5/EIbpLEYm1XH3DqjSWPuPuTD8gnSHRA13O9P8qDgpoNfx
-         4Iq4opjtUy1EoVoLV9e8SQd/uuQpxBkf0DNVXz3i6J7s8/FQw76r/UpRMClxyeF0FOEG
-         YgeOHCgwg03H2/pTkvlST6Dn/05hS8B9wHsdsKV+8RpTILbxELIG4XUcDY4ZRKNuQG0K
-         MAwTFPwJxGfH3JF7DgSFVURLzinXuyxub1YhloEt4nebUsuAlFDgqHAOpOOgH3v42nAi
-         QoEUI8jdIcd0DxSM3whbU4RN65FV1VJnC1xf8OBHfnbsqFA/CCBlGdxccpJrejGP3mz2
-         J1ag==
-X-Gm-Message-State: AOJu0Yz1Jfvzst64GAkEXyvNzDjH5Q8ezrCU2RDfA6dmnDCqzsmy078T
-	Ub5tz99WFltWtaOHUR7VV6hPMv0nnlUDQ7g/krAugM2OykCYvOuLuL/Z4aYDHj8tjtMyP1lqnWn
-	rW4u5XPwZ8fU/6owae07LUIoy33gitDYB4rVJXwYUcDZmbvF6whqq4X+8ng==
-X-Gm-Gg: ASbGncuDwHT5p7ejQZwcF52h/xFB0EePTatRnwMzxmqW96kK7c/JguinuIDA7SIz7zf
-	n08XgyQE9Af2swZxVAtlVzY6h8rt4s0H5DJL2pnVJMSHVVPATcdMt1rT49fzMNBP0nCVtTcFaHj
-	IZQ4mwkiPvzYU1zx/c8UA3hlvEVyYB/VeyhkbQQxXbgX879rSAKmCEr45imwPzEmckQ5mwCH3hw
-	ajvaRnod13cvM0YJCuPFEQNlikZwTKEcshmkeBd3mhFrSjchB8uMff/i+wPlEEb7Ir7S4CoSwGG
-	GL6RgmPmv3rl4qcFZe6XiC2eVySw/wdNJygx6VQ=
-X-Received: by 2002:a05:6000:26c6:b0:3e7:4701:d1a3 with SMTP id ffacd0b85a97d-3e74701d5bamr8119819f8f.38.1757431563395;
-        Tue, 09 Sep 2025 08:26:03 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IE+0/mzhErgMtuLp43Q9Ly+zDslZ5No/VC0mdy3h84qXsoOBvnDTW5JxZPf6YxuKLf2h/pD1Q==
-X-Received: by 2002:a05:6000:26c6:b0:3e7:4701:d1a3 with SMTP id ffacd0b85a97d-3e74701d5bamr8119795f8f.38.1757431562945;
-        Tue, 09 Sep 2025 08:26:02 -0700 (PDT)
-Received: from [127.0.0.2] ([91.245.205.131])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-45b9a6ecfafsm348550005e9.21.2025.09.09.08.26.02
+        d=1e100.net; s=20230601; t=1757484441; x=1758089241;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=+mWiGzTdHTTRflbkk77kHOQXZWch1zMY1MtxXB+Kyuw=;
+        b=pEJZJ59s8lT1wJjWLNDl5hApkQkWmtQZWfjk1ftAMDrNLel/IsotIJgH5ZiAk8cvyT
+         C8LeGMIlERiKG98MfRdyFZPbpyydunVi4HuSrDtH3KJQaExSy7/hBQwUlrltH8LIDrFH
+         BAW144ujUeikIJolsRieUbk9k3NhsWJYTMy3kfda/q/d0nlBjqKJ362WdXvNjXp8od8T
+         bwo4TGK74RGNW6YuKOaJ7iThJyfdL34aM4leFB25e1m5P3Wyti/GE47DCE4munDj8bAT
+         8bcHV9Uv3SRid5c7U/AE4ygQwMFx1h0mQMk7DzVrQzLmsXo3hI9QONbjKY0p0suHBqIh
+         sV9A==
+X-Forwarded-Encrypted: i=1; AJvYcCUnjR8GtcgI6E4+M4NIO3uLqG9yEOLS6uKjBETJKVMmeDodQ4EewKtHSN+0yNs2suMyGjxsp9le@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw0poBleWFAiFjd4qKQUGT/eFL4Jp75t7T+zkgPU2BMKHjNDMdU
+	MoiADvZNZyRzk+pEs1vUMGRWLR1vXF1589bI/QYZuYC0uWCNfGw+syZeE7AdGKaZUmWpjijm2qF
+	k82cigC7Vz/0CTRUpiRkEZhRNcabMi5T8lWdOc1GM/VtHw5qSC/R70XdzpV8=
+X-Gm-Gg: ASbGncvM0Z2Dr2HVCK2ps83SYCwn9SUqoHOu6y7HKNKoFoJ7dHMIB6rPjj1npPHtZ0L
+	IQq3UHKh5AhvrEYj7BcFgT2GqXOQwTeJdk7AKIb4DPl2LbcfqWG3mKQVsNPC8hEYMTw4XCYzvod
+	jwoHnyV3Ycxal4W9OipvOdSyuJlw8CY03r/LTNGy7fd7bCY3KQ24+BI7tpsjhVnJNbw5+V9+hNT
+	p/CSrov3tVZjznXGrKnwGr0HqJ1WTHZvkZBQG5CxS2GmhK5CjLW7JUgHTYqGUtGRIABlAVFnSfK
+	hfXmQFC2w0RarZVboMfVtdIalwF0USCjM3d+CDq7CQZltuYWHYlqA2rmdO7HcLuTEBIFVgwO6G7
+	6lps3
+X-Received: by 2002:a17:902:d4cc:b0:24e:af92:70c2 with SMTP id d9443c01a7336-2516f240f23mr198910955ad.24.1757484441651;
+        Tue, 09 Sep 2025 23:07:21 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IG1bGkKYcod7Z34ZVF7GZWSfh7v+1OYk2L6fq8uiER3IOseuf+HFEJpoxMGlGVvkQFgYlzxIA==
+X-Received: by 2002:a17:902:d4cc:b0:24e:af92:70c2 with SMTP id d9443c01a7336-2516f240f23mr198910585ad.24.1757484441124;
+        Tue, 09 Sep 2025 23:07:21 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-25a2742590csm16198215ad.8.2025.09.09.23.07.18
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 09 Sep 2025 08:26:02 -0700 (PDT)
-From: Andrey Albershteyn <aalbersh@redhat.com>
-X-Google-Original-From: Andrey Albershteyn <aalbersh@kernel.org>
-Date: Tue, 09 Sep 2025 17:25:58 +0200
-Subject: [PATCH v3 3/3] xfs: test quota's project ID on special files
+        Tue, 09 Sep 2025 23:07:20 -0700 (PDT)
+Date: Wed, 10 Sep 2025 14:07:15 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: John Garry <john.g.garry@oracle.com>, fstests@vger.kernel.org,
+	Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
+	tytso@mit.edu, linux-xfs@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v5 02/12] common/rc: Add _require_fio_version helper
+Message-ID: <20250910060715.gc2thcbklvhzaxz2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1755849134.git.ojaswin@linux.ibm.com>
+ <955d47b2534d9236adbd2bbd13598bbd1da8fc04.1755849134.git.ojaswin@linux.ibm.com>
+ <1b12c0d9-b564-4e57-b1a5-359e2e538e9c@oracle.com>
+ <20250907052943.4r3eod6bdb2up63p@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <aL_US3g7BFpRccQE@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <08438a13-6be7-4be3-a102-35a1f6fec9a5@oracle.com>
+ <aL_tLHcWyFPShrUc@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20250909-xattrat-syscall-v3-3-9ba483144789@kernel.org>
-References: <20250909-xattrat-syscall-v3-0-9ba483144789@kernel.org>
-In-Reply-To: <20250909-xattrat-syscall-v3-0-9ba483144789@kernel.org>
-To: fstests@vger.kernel.org
-Cc: zlang@redhat.com, linux-fsdevel@vger.kernel.org, 
- linux-xfs@vger.kernel.org, Andrey Albershteyn <aalbersh@kernel.org>, 
- Andrey Albershteyn <aalbersh@redhat.com>, 
- "Darrick J. Wong" <djwong@kernel.org>
-X-Mailer: b4 0.15-dev
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4010; i=aalbersh@kernel.org;
- h=from:subject:message-id; bh=NFXZJCDM6gddTTqUPtjzyqiRjXXUpTibfg7JUhy4vGI=;
- b=owJ4nJvAy8zAJea2/JXEGuOHHIyn1ZIYMg64swfpLLyvd6I3zdRwn2GD1S7PJbOmrdx6ILud5
- +ra3A6h+aUdpSwMYlwMsmKKLOuktaYmFUnlHzGokYeZw8oEMoSBi1MAJhK0gOEP961fy42mbrda
- ob87ee28AtVu9vPll16dz2v+aBEcuoNLmJHhW0/xh+lz3fI2HDz59rvTYf8pry1eZxqVf7P9rja
- vlukoOwA7WEnr
-X-Developer-Key: i=aalbersh@kernel.org; a=openpgp;
- fpr=AE1B2A9562721A6FC4307C1F46A7EA18AC33E108
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <aL_tLHcWyFPShrUc@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 
-From: Andrey Albershteyn <aalbersh@redhat.com>
+On Tue, Sep 09, 2025 at 02:32:36PM +0530, Ojaswin Mujoo wrote:
+> On Tue, Sep 09, 2025 at 08:26:52AM +0100, John Garry wrote:
+> > On 09/09/2025 08:16, Ojaswin Mujoo wrote:
+> > > > > This requires the user to know the version which corresponds to the feature.
+> > > > > Is that how things are done for other such utilities and their versions vs
+> > > > > features?
+> > > > > 
+> > > > > I was going to suggest exporting something like
+> > > > > _require_fio_atomic_writes(), and _require_fio_atomic_writes() calls
+> > > > > _require_fio_version() to check the version.
+> > > > (Sorry, I made a half reply in my last email)
+> > > > 
+> > > > This looks better than only using _require_fio_version. But the nature is still
+> > > > checking fio version. If we don't have a better idea to check if fio really
+> > > > support atomic writes, the _require_fio_version is still needed.
+> > > > Or we rename it to "__require_fio_version" (one more "_"), to mark it's
+> > > > not recommended using directly. But that looks a bit like a trick 😂
+> > > > 
+> > > > Thanks,
+> > > > Zorro
+> > > Hey Zorro, I agree with your points that version might not be the best
+> > > indicator esp for downstream software, but at this point I'm unsure
+> > > what's the workaround.
 
-With addition of file_getattr() and file_setattr(), xfs_quota now can
-set project ID on filesystem inodes behind special files. Previously,
-quota reporting didn't count inodes of special files created before
-project initialization. Only new inodes had project ID set.
+Hi Ojaswin, I don't have better workaround than require_fio_version for now. I mean:
+1) name _require_fio_version as __require_fio_version, to mark it's an internal function
+   of another common function.
+2) only call __require_fio_version in _require_fio_atomic_writes for now, don't use it
+   in any test cases directly.
 
-Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
----
- tests/xfs/2000     | 73 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/2000.out | 15 +++++++++++
- 2 files changed, 88 insertions(+)
+> > > 
+> > > One thing that comes to mind is to let fio do the atomic write and use
+> > > the tracepoints to confirm if RWF_ATOMIC was passed, but that adds a lot
+> > > of dependency on tracing framework being present (im unsure if something
+> > > like this is used somewhere in xfstests before). Further it's messy to
+> > > figure out that out of all the IO fio command will do, which one to
+> > > check for RWF_ATOMIC.
+> > > 
+> > > It can be done I suppose but is this sort of complexity something we
+> > > want to add is the question. Or do we just go ahead with the version
+> > > check.
+> > 
+> > I think that just checking the version is fine for this specific feature.
+> > But I still also think that versioning should be hidden from the end user,
+> > i.e. we should provide a helper like _require_fio_atomic_writes
+> 
+> Sure, I'm okay. @Zorro, does that sound okay to you?
 
-diff --git a/tests/xfs/2000 b/tests/xfs/2000
-new file mode 100755
-index 000000000000..413022dd5d8a
---- /dev/null
-+++ b/tests/xfs/2000
-@@ -0,0 +1,73 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 Red Hat.  All Rights Reserved.
-+#
-+# FS QA Test No. 2000
-+#
-+# Test that XFS can set quota project ID on special files
-+#
-+. ./common/preamble
-+_begin_fstest auto quota
-+
-+# Import common functions.
-+. ./common/quota
-+. ./common/filter
-+
-+# Modify as appropriate.
-+_require_scratch
-+_require_xfs_quota
-+_require_test_program "af_unix"
-+_require_test_program "file_attr"
-+_require_symlinks
-+_require_mknod
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_qmount_option "pquota"
-+_scratch_mount
-+
-+create_af_unix () {
-+	$here/src/af_unix $* || echo af_unix failed
-+}
-+
-+filter_quota() {
-+	_filter_quota | sed "s~$tmp.projects~PROJECTS_FILE~"
-+}
-+
-+projectdir=$SCRATCH_MNT/prj
-+id=42
-+
-+mkdir $projectdir
-+mkfifo $projectdir/fifo
-+mknod $projectdir/chardev c 1 1
-+mknod $projectdir/blockdev b 1 1
-+create_af_unix $projectdir/socket
-+touch $projectdir/foo
-+ln -s $projectdir/foo $projectdir/symlink
-+touch $projectdir/bar
-+ln -s $projectdir/bar $projectdir/broken-symlink
-+rm -f $projectdir/bar
-+
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -sp $projectdir $id" $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "limit -p isoft=20 ihard=20 $id " $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -cp $projectdir $id" $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "report -inN -p" $SCRATCH_DEV | _filter_project_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -Cp $projectdir $id" $SCRATCH_DEV | filter_quota
-+
-+# Let's check that we can recreate the project (flags were cleared out)
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -sp $projectdir $id" $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "limit -p isoft=20 ihard=20 $id " $SCRATCH_DEV | filter_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "report -inN -p" $SCRATCH_DEV | _filter_project_quota
-+$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-+	-c "project -Cp $projectdir $id" $SCRATCH_DEV | filter_quota
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/2000.out b/tests/xfs/2000.out
-new file mode 100644
-index 000000000000..e53ceb959775
---- /dev/null
-+++ b/tests/xfs/2000.out
-@@ -0,0 +1,15 @@
-+QA output created by 2000
-+Setting up project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-+Checking project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-+#42 8 20 20 00 [--------]
-+
-+Clearing project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-+Setting up project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-+#42 8 20 20 00 [--------]
-+
-+Clearing project 42 (path SCRATCH_MNT/prj)...
-+Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
+Sure, that's what I tried to say as above, sorry if I made you misunderstand :)
 
--- 
-2.50.1
+Thanks,
+Zorro
+
+> > 
+> > thanks,
+> > John
+> 
 
