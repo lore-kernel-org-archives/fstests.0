@@ -1,103 +1,126 @@
-Received: from mail-ej1-f73.google.com (mail-ej1-f73.google.com [209.85.218.73])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D31D327280E
-	for <fstests@vger.kernel.org>; Mon, 15 Sep 2025 10:05:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4F8BB2309B2;
+	Mon, 15 Sep 2025 11:19:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757930705; cv=none; b=u6i3L5W25xgaAKvg44ANyr0s09Ud0yc2rlrpypemiFaEjgmSCmXcizRDgCCq6JUN3t3nqfsQbebMdCNxzdxVQpCBA9rE7qYUwaN6BKaIqowppUjImzEl83FdOe8o2XPRqhj1Byi38+erDpJdYI4dVjZfFqvoyaCpKhYork9v9hQ=
+	t=1757935196; cv=none; b=pIba6taMNIRS3MbqlqAabLwVOEkj6lLvaluQcVs1Qcihq05Fn/u+jjKWyHQrxxVdGLiQly81aL/jEWYqkn43jQKKdX6PhkiVvGlz7QB7Ynjoj7cBw7+68HXmlecVJL8VxA8kxCMDKrBjjX2OXHU+x66QT206+TR0aWgq04DaBWI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757930705; c=relaxed/simple;
-	bh=s2ziUCNYAIGDdrADmPQM2T1urNUgcF1abd7E79Xd9Is=;
-	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=su2gIhpz+NZ/XnyiGvAnfXPzaTzI7d2oH2Ac6TDt7qok5eLcIH0SDukvYAmOS9H8zM0Dc+ltlnpiatz9bSmbpj8DTyoyBc/5X/EaSujOOAqNeXLWvY1p/BnPCOXhqSSI0E/U6hy/gJs9goGqqN1STurWf8/gx5poQz1zFNV4TIg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=tjFx2URX; arc=none smtp.client-ip=209.85.218.73
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com
+	s=arc-20240116; t=1757935196; c=relaxed/simple;
+	bh=uYTGOhsbXa0ucAORTyXGNU1yOdgccqwDw4jKSydkw4s=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=uW8GIgjwAeYXh/9pYGI1ilT2k5QiQOEDxzabPMaqR9sJIU7c6nfv2fUGZ6tqy99Q4/MXKRAKUxBLeNPnLgFbyVWMvTDVdwUxx2TkSiQS2EHENNPfKyd7e79lykjgySk1YSK6OmiVxprbIx2ft53UXvIgH7wxOr7rsed5igyPvTA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=d48efdLi; arc=none smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="tjFx2URX"
-Received: by mail-ej1-f73.google.com with SMTP id a640c23a62f3a-b0c1a67399aso130613666b.2
-        for <fstests@vger.kernel.org>; Mon, 15 Sep 2025 03:05:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1757930701; x=1758535501; darn=vger.kernel.org;
-        h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
-         :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=RhOb+fXoz/JynstoF4uW9k/iZuOaeZSzWY+DYBWeboA=;
-        b=tjFx2URXMc3T6Og8jXaEA4UfNEQIf+OLwp9L3CGCvgrqujBNRu+fJoT4533djiJGLj
-         wFqz49dmXgq2wzV87Tp9MEf504LGD8dlaU4w+j/4fQz0GWthbkfgIaWm7rb+yoXdxfYq
-         nQ1PF9xjLE4EqCVIjyiaDVvcOMLzSG8DSROk/1pgJGTqTCfhuSoMyfiy8+Ou3s8eBm7o
-         IQGMCFmA48cgP3Mly2eUKxd3VPfn+DmkDxlspGDtkR8GUTpjyhd54tZ2VsNfrbsHh4rn
-         SyqsRP6w58+laKcTYM6bWIoeWdldv1k9BsdAdzV4xdrZQ5rmuPBpcjvOE2ym91pqLXHJ
-         5kSQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757930701; x=1758535501;
-        h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
-         :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=RhOb+fXoz/JynstoF4uW9k/iZuOaeZSzWY+DYBWeboA=;
-        b=nql5/kjHqKOkGFJ8dVHppodpiTN5mZElUDapa696bh5fngdPvLOB0bbk3CefusIov+
-         9OP/QTu0aNPoDLT07Wsl9L6KNjjdKNIFOG0xAru2Q5Cqyi4vXMSubkYPbX6MYk4GIwbe
-         tQ0Auq5lLq7iljl43FrUGbKlXPcstHWpFyGUqqdRER8g2tZIkuGMf8/5n+mj69jmoLO5
-         v90ikeQ5fbit55B7/kPztxjQCxJHsLcWq1l8PflycLlF1MGXGe0wYoVxgbiDgGEWO5rT
-         bnIheJ/3efnD9Z6MRtFTi2rzdW0FR+p+rPwSi39cO8bH4xR9UIZ0H2pmhLzz9AX5+WHV
-         rCfA==
-X-Forwarded-Encrypted: i=1; AJvYcCWQj6bS7eqO225WEt5tsSPf2bLW3OvmjGW5P7nzun7P6i26fhCaSO+3N6CIVGm4ppGo9P0DgWAs@vger.kernel.org
-X-Gm-Message-State: AOJu0YxnLvsXfO9hyc1Js147Pg+l10fwdTLj+hvyIxMR1cR4f3O4GnSd
-	ZKDWSBpKlxMO9lhLrKt+lYQ70XpN5cVYqzd5irbWCKCLJ3Qg8FW7RSIqS9GyEnEQwV1bCkdfQXu
-	MBRNkLU5X1SbZbXq56+Mf9IrdGKkwig==
-X-Google-Smtp-Source: AGHT+IEJoLywW7u172IwfK9/WZbn/vWDjB5heLqpeIZl1R5HWLwd/Sp6g2o2dBQVVVgodrM3OmdmACuDrPXNTYNgOsU=
-X-Received: from ejdcw6.prod.google.com ([2002:a17:907:1606:b0:b07:e174:152a])
- (user=jprusakowski job=prod-delivery.src-stubby-dispatcher) by
- 2002:a17:907:7b8d:b0:b04:aadd:b8d7 with SMTP id a640c23a62f3a-b07c3540759mr1152316466b.13.1757930701187;
- Mon, 15 Sep 2025 03:05:01 -0700 (PDT)
-Date: Mon, 15 Sep 2025 12:04:51 +0200
-In-Reply-To: <20250915100451.810719-1-jprusakowski@google.com>
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="d48efdLi"
+Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 58F0aHfK021403;
+	Mon, 15 Sep 2025 11:19:46 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=pp1; bh=RzaO4b3jqUKV+R1jZy05KPKafZ2dFe
+	rEnB2JNj90Jws=; b=d48efdLivBSU1F1HWhPeikxxDsHywuTXUJsDSfi3FoLKl3
+	s09S3Mwxlo4kCAYwJi8Zq+bIJOOZiIYd9EUM8AIrHSe9A61aWRqMXBC+yIIhUWtO
+	bTpWPE9U/od52slWEH2Mju7zh1OIyNljzQJFAm1dY02R464SORTo8hKD2EmQXvW0
+	5afF81w7y2GPOQkRP7Z84yNI2EBR1O69CMDNJzYa4mLHJMbTJuYdz4OVwraEPqy9
+	9Y5HQC3h4R5/iB17uf/oeFc0T83LDPAh7NC7xUUG3X0OtjX33rNbSosb9oPMCSjs
+	s57FUZSSVHRbxlyUD2FCwWEmrNJGGpMjLimmH3iA==
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 494y1x1pas-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 15 Sep 2025 11:19:46 +0000 (GMT)
+Received: from m0353725.ppops.net (m0353725.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 58FBJjYr000418;
+	Mon, 15 Sep 2025 11:19:45 GMT
+Received: from ppma21.wdc07v.mail.ibm.com (5b.69.3da9.ip4.static.sl-reverse.com [169.61.105.91])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 494y1x1paq-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 15 Sep 2025 11:19:45 +0000 (GMT)
+Received: from pps.filterd (ppma21.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma21.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 58FBFTXY022384;
+	Mon, 15 Sep 2025 11:19:45 GMT
+Received: from smtprelay03.fra02v.mail.ibm.com ([9.218.2.224])
+	by ppma21.wdc07v.mail.ibm.com (PPS) with ESMTPS id 495kxpe3v0-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 15 Sep 2025 11:19:45 +0000
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay03.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 58FBJh8O55837166
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Mon, 15 Sep 2025 11:19:43 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 33EAB20040;
+	Mon, 15 Sep 2025 11:19:43 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 7EB382004B;
+	Mon, 15 Sep 2025 11:19:40 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.109.219.158])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Mon, 15 Sep 2025 11:19:40 +0000 (GMT)
+Date: Mon, 15 Sep 2025 16:49:37 +0530
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: John Garry <john.g.garry@oracle.com>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+        Ritesh Harjani <ritesh.list@gmail.com>, djwong@kernel.org,
+        tytso@mit.edu, linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v6 01/12] common/rc: Add _min() and _max() helpers
+Message-ID: <aMf2SUh0gLeQO7rw@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+References: <cover.1757610403.git.ojaswin@linux.ibm.com>
+ <9475f8da726b894dd152b54b1416823181052c2a.1757610403.git.ojaswin@linux.ibm.com>
+ <5a22a799-a6b9-43d3-9226-d1d554d170e4@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-References: <20250915100451.810719-1-jprusakowski@google.com>
-X-Mailer: git-send-email 2.51.0.384.g4c02a37b29-goog
-Message-ID: <20250915100451.810719-2-jprusakowski@google.com>
-Subject: [PATCH v2 1/1] common/encrypt: Do not run _verify_ciphertext_for_encryption_policy
- on compressed FS
-From: Jan Prusakowski <jprusakowski@google.com>
-To: Zorro Lang <zlang@kernel.org>, Chao Yu <chao@kernel.org>, fstests@vger.kernel.org
-Cc: jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net, 
-	Eric Biggers <ebiggers@google.com>, Jan Prusakowski <jprusakowski@google.com>
-Content-Type: text/plain; charset="UTF-8"
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <5a22a799-a6b9-43d3-9226-d1d554d170e4@oracle.com>
+X-TM-AS-GCONF: 00
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwOTEzMDAxMCBTYWx0ZWRfX4PEjCcHcDazi
+ ChJnYqEgF0f7QzeDdSRFGeGGKahaA1HZZmyIglhD0XOKju3ma5fiI9fiGJXwiEIH9NSIAwXMjMx
+ 5z+5NzBv7xoCRdewcAOmyI4J9K+k2TDYcM7wGWnkVj9MucYc2w6qOS7q6r6b0buy6DQoFFlnUGO
+ NyqVKcN4j2TKGue06hlMsorE+qRmqUMZI1IVZABVomqE4I83stG9UnHM2S2mKuOFNxGOq3tJDFV
+ dU1VM1yhtk5X5XC8BnM54JMGSG/sRyO6AgzmWyrfFX28EeCrdgYcK7xHFafp4EAMjFF2UDX2TpB
+ Rs41/s2S2sa2E2NW4/q2cTWLRnKlivdUQWbIl/8Suw7ETUqFMv2d64Eqrl4HofRr0JD7apsb/5y
+ Wpv1NrpG
+X-Proofpoint-ORIG-GUID: _ARQOro69MyPk80WuckITckUz4zPTBcj
+X-Authority-Analysis: v=2.4 cv=euPfzppX c=1 sm=1 tr=0 ts=68c7f652 cx=c_pps
+ a=GFwsV6G8L6GxiO2Y/PsHdQ==:117 a=GFwsV6G8L6GxiO2Y/PsHdQ==:17
+ a=kj9zAlcOel0A:10 a=yJojWOMRYYMA:10 a=VwQbUJbxAAAA:8 a=VnNF1IyMAAAA:8
+ a=yPCof4ZbAAAA:8 a=8tsh_XVOevaKpRn8MqUA:9 a=CjuIK1q_8ugA:10 a=zgiPjhLxNE0A:10
+X-Proofpoint-GUID: A2FXZeoIDjSsugnX2y3qRDJhBVmKB57_
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-09-15_04,2025-09-12_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ clxscore=1015 malwarescore=0 phishscore=0 suspectscore=0 spamscore=0
+ bulkscore=0 impostorscore=0 priorityscore=1501 adultscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2507300000 definitions=main-2509130010
 
-verify_ciphertext_for_encryption_policy() checks if encryption works
-correctly by reading encrypted file's contents directly from a block device and
-comparing it to a known good ciphertext.
+On Fri, Sep 12, 2025 at 05:53:47PM +0100, John Garry wrote:
+> On 11/09/2025 18:13, Ojaswin Mujoo wrote:
+> > Many programs open code these functionalities so add it as a generic helper
+> > in common/rc
+> > 
+> > Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> 
+> Reviewed-by: John Garry <john.g.gary@oracle.com>
+> 
+> I just sent a patch for something similar for blktests to linux-block. I
+> wonder how much commonality there is for such helpers...
+> 
+> BTW, let me know if I should attribute some credit there. cheers
 
-This, however, won't work if the test file is also compressed. So this patch
-adds a check if a test file is compressed and disables compression in this case.
+Thanks for the review John!
 
-Signed-off-by: Jan Prusakowski <jprusakowski@google.com>
----
- common/encrypt | 7 +++++++
- 1 file changed, 7 insertions(+)
+I think the helpers are simple enough so credit is not needed :) 
 
-diff --git a/common/encrypt b/common/encrypt
-index d4f6e3dc..c25ff5a4 100644
---- a/common/encrypt
-+++ b/common/encrypt
-@@ -790,6 +790,13 @@ _do_verify_ciphertext_for_encryption_policy()
- 	_set_encpolicy $dir $keyspec $set_encpolicy_args -f $policy_flags
- 	for src in $tmp.testfile_*; do
- 		dst=$dir/${src##*.}
-+		# To make sure the test file is not compressed we create an empty one
-+		# and disable compression first (F2FS won't allow resetting the
-+		# compression flag if the file has data already in it).
-+		touch $dst
-+		if lsattr $dst | grep -qE ".+c.+ $dst" ; then
-+			chattr -c $dst
-+		fi
- 		cp $src $dst
- 		inode=$(stat -c %i $dst)
- 		blocklist=$(_get_ciphertext_block_list $dst)
--- 
-2.51.0.384.g4c02a37b29-goog
-
+Thanks,
+Ojaswin
