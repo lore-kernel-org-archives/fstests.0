@@ -1,78 +1,73 @@
-Received: from mail-pl1-f180.google.com (mail-pl1-f180.google.com [209.85.214.180])
+Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com [209.85.210.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9825E313267
-	for <fstests@vger.kernel.org>; Tue, 16 Sep 2025 15:12:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 84469148FE6
+	for <fstests@vger.kernel.org>; Tue, 16 Sep 2025 15:30:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758035555; cv=none; b=Q0epuvtb+1Cufi+saggKwNVYDNNbXsl6fug3PV0YANBIHP9WqZ3SrHBujxJ9rJ7iyohvmHtBXKViHMF+1oUxyhMKl3K9xGm0KjOZ/2mqcr7iijKGwD0ESy7QiPWtHUqKua2GUcC3V6UZ4TCbgobsYof/L3H2oiy742wN8VM6zLQ=
+	t=1758036638; cv=none; b=e6mPcUgIvUqOdHvA2A8bws1dg4exBE2pOzub+TO02QWP3Gz3TibQZstIkScbJLtTQjYDyAR7VkvWlQk0jbbubHUisrtLywvDRS+TX7q+XU5HsK4HGhMv8l5i0LF4BE0kYrz0m0XYzOLEwbyo+/LeWZjyQMAdRqmJsWLPQwEB44o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758035555; c=relaxed/simple;
-	bh=52dm8vE0b9XMEcBizu6dX6hNzmMPv+yJ/9yp89AZYXI=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=WCWO2z/JIamKP/UpyW3/eApnuqR9VGjALgrObKz6v8OKZiM5/bgDlj5CkM7miBXte+c5aKGan+GUKWNhg3r2sauG9SQ8KiKmr67kBsZBpo45ajMs8lekt6AemIZkABEaccoZ8cYkzb3rId3x71li3i9UQSs1hmcygsJ6sSdFqM4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=mbFXa+Jz; arc=none smtp.client-ip=209.85.214.180
+	s=arc-20240116; t=1758036638; c=relaxed/simple;
+	bh=VFjjGQQjJy1mpPkSqfxHEfuW8YkJqNNBDPC3Nl+LO4M=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=m2ac91HuIZPBXeHLLd7Oq/fHg0Uyhk2t5fNj9PXYuy8q5AyS8fQTDF85RbXkImiajilgMJlxCOwSdkgdzKcJrHCqev2gEq/4hjJKvlkRizWpZ4r7VXRWy5IlkMX9bp7aSL8+dseqJjrIvcvLsdvtinQZmCIxRogAE2QUNBPQXz8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=nP8wow8O; arc=none smtp.client-ip=209.85.210.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mbFXa+Jz"
-Received: by mail-pl1-f180.google.com with SMTP id d9443c01a7336-26060bcc5c8so34596365ad.1
-        for <fstests@vger.kernel.org>; Tue, 16 Sep 2025 08:12:33 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nP8wow8O"
+Received: by mail-pf1-f172.google.com with SMTP id d2e1a72fcca58-77251d7cca6so5334272b3a.3
+        for <fstests@vger.kernel.org>; Tue, 16 Sep 2025 08:30:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1758035552; x=1758640352; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=2lia7qHS7vatNKnZWg3upjBy1l3FQ5GxPeDvnNhzXYE=;
-        b=mbFXa+JzUfKjFDsdpwwycE3BXR9zGYLmQ/GH8831HrrySczMLHogO63UEp/lGHyyS0
-         8dPkF88BHHU4Wv2x/JwCnx04vT9HaAxJNd+FN/84g5zNAPp5cOiqErRWj27E9RdX5xxI
-         SBtiMCU5MFLgtbUYv3OwX32eSiFI5OB4O1zK5clXmS1y+qbkXiRMedqzlEpEQvA4xrki
-         dvsNYNuGsMhMnzg/9SgAoi55C3+6yk/UxoNzGPPnSgfgknNlG/k9CiKVqLhgM4MK3uc5
-         HxC2XoX/pCOHxscS+UcKy6eKD39qMH8l8CrhNQDl5BQ4cqvFCIvhSSGxzdx6awYomHDq
-         MIkQ==
+        d=gmail.com; s=20230601; t=1758036636; x=1758641436; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=tM22SWsty6XqN+ZQ6rRBUiY5czii7jKoPery64Dg66Q=;
+        b=nP8wow8OLA60RJit+wHDfegduQfzXywuIfJLwWf9HkyYrcLC8gXX/chzVZTfTKVul2
+         +0Qba0T6eh7m2yvibn1SsagcXrRsnGr6woSmbCokCSBcdJzdXTCzyEiggegcB3X75eEY
+         Y+Imtx66OD45hWaPiSoh08vpABa0sB7MvwuCqnQJN5Dm66XQVI6BK3mYz9l/paBq3f4r
+         6dHDkg/ih8zoTHOwja4KqtgeJ+1RySQws/m0fc2OWN3/el4I6AMsgAf1GmlS5tuROhQx
+         /s6dfoAWpQgdgT/P++q2/M6Dmfywoai4sO2LIt+4+IC6N+mRO4AfqKM0OsJkd5cl9dDy
+         fYRw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1758035552; x=1758640352;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=2lia7qHS7vatNKnZWg3upjBy1l3FQ5GxPeDvnNhzXYE=;
-        b=aGtVZXrZZmQ9J7CGQ8buO0HPfwqfnVlWlirJ04kZRM5X/YU8umWBTKwKxleSiHXUhZ
-         7oOBFHLn/OdIAyuD3OVozP/U17LjMuV4Z69CY7unG4W+sbEw1mqFji10/u5yClUDjza4
-         1catSjwLvGonVIV5FdysTKAWYbkbWWhX9+wa+byzQYja5uj05LuRaGLk7lFS4q9v8XRW
-         RhiVH/3Mp+vxAXSvwTUCqhV9LaTagF76nNr9sNyk7qMc5Gt49wyk4+gra/ohESpjov5v
-         5W9QcDPf89nja0VG4G8VtJEgFayFMtBkqksOxs7Ez+6GWjNjHQunF5uCyAb99DP1vUE7
-         03Dw==
-X-Gm-Message-State: AOJu0YwNavjDkF3kmSGXiHr5jvNwT5DuQJMkBDiZ5NolhesjotxjKoU3
-	ADPm02CVad83p30RbypWiA5jw0XY2BhlRn4MnBV9AOqkjgzxhlEx7nitBvCPIw==
-X-Gm-Gg: ASbGncsa18U3Dl2oUgcvxRSJmOnr4t6oeWptNMLgdi8elaRifFHY1hGpwEJ8vU/O0ub
-	l7EYVjj0SSK5sviV5X+NM7EfijkxrMmRlzXS7RA34rDUF5bA21WOnghpPuUoeFyHm0jKZpOQasA
-	eI337pvDVMSMyVe5FUdcFWzQKdmnv0ALn7T2FSEVYmMv1WZbc/tMKrkukHQSFswW1nukmdRv+ID
-	NKNLLGfVG3RFr3ZId1XgPSBOuiathIfAtdmVLw6nppD1G7DTqWBjDavlGmc5ULWrukd/GUZsNPL
-	gAxwVLQX20Qrvo/2TDF7xlif19ZhDUPgeVZeH5rFqXWChh4Hhehg3p9X3rTY2gKrJYqG39wYC2b
-	V+jM0w1QgBL55NH7F34gXwlevk3s=
-X-Google-Smtp-Source: AGHT+IFVZZm4lA2BHgbhsVi5jux7fAcpZpcBPgjjtlRMCHESlgJEbEs25GPx7+NtYuLPG5IoXq7pFw==
-X-Received: by 2002:a17:903:b0e:b0:24c:e6fa:2a38 with SMTP id d9443c01a7336-25d2547e40fmr198717555ad.25.1758035552108;
-        Tue, 16 Sep 2025 08:12:32 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1758036636; x=1758641436;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=tM22SWsty6XqN+ZQ6rRBUiY5czii7jKoPery64Dg66Q=;
+        b=KuY+4n46WLxzK0zpxPX0xKEXQ/r4outsH8LGvtOntmx6fbS6XJhrECzo+lVjkHdwT9
+         q6edbd1dekr9uRTYkkk7AmTPNTgn+3Qz7gpEPl4e3T84Qo57hQcxv1wgfNe6mLDKiinv
+         +zEZxALnx28Xc/YOiItvy47yw8S7tu+DrNg6eUzwGDuhEYxbmaf4yL4OSXufxeyPvL9o
+         3Gft6+CCKYl6IvrmHegO1vzyq3RWhjPMWRMsGDtQVYL+FeHiZUVXduNFH/LtsnMlFo+I
+         X0BtW9mgBzM5bySVM9N8Dx486n9myVq/C6gIpg6H2k84CBGjNYfkWK0XCpXbIRVnzo8i
+         USGQ==
+X-Gm-Message-State: AOJu0YzxT/NFYmgGOQH9IFyCto7oL4OT7VR47yvVb62JYvJpgCkicpW+
+	dQE66wMWIG13V8fXuKjUFYp0oJXfDCBjbgnE9Yp0N20xCOWOYlAxH75L9fHC3g==
+X-Gm-Gg: ASbGncvZDltp3J8qPfkLvQzboCG4J2Df5+aZaxO1XupCDY6lxfWlNBDfooBNgg5XGLe
+	MAcQWlSXwkdnns6o/OScgxOeCTytFszlZVk8l4LITXhj8EciC67VPb2CiWHAofbcZbDvbUfYobv
+	pCjTaHJF+H/O6CNgZ+JbHUUWHlG0Lk/RMNU7tyehOBJa+uR9fTdrYMg7UY2A18yF8QL5cwExuH0
+	uxwEUcwKwTdeq9n356lStJsOa8OiXQVxIQFhjlKi5MuTkLoSuA9Y9hWvIIp9HdTux/AiCYUJ2eU
+	8N3iZO5lqa544WgXr2MmpW+6InT7orrfZAY8d2RMFt5M9oc21Ku+YO47zEf9Mh8Cv+yQ3FgiL4s
+	nOGWdk4quQf4iVQxz0CzAG770zDjas5ReEB88gg==
+X-Google-Smtp-Source: AGHT+IFA76YP4R1LOrU+/DxrqWh+sHq7cKhUXntKO92SGebh/pBMUS+EkNMSwr+27eniGxIeAOIzXg==
+X-Received: by 2002:a17:902:e547:b0:264:b836:f192 with SMTP id d9443c01a7336-264b836f845mr112740015ad.35.1758036635820;
+        Tue, 16 Sep 2025 08:30:35 -0700 (PDT)
 Received: from citest-1.. ([49.207.211.178])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-25c3a84a750sm164780175ad.83.2025.09.16.08.12.29
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-262df893ec5sm92596345ad.46.2025.09.16.08.30.33
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 16 Sep 2025 08:12:31 -0700 (PDT)
+        Tue, 16 Sep 2025 08:30:35 -0700 (PDT)
 From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
 To: fstests@vger.kernel.org
 Cc: nirjhar.roy.lists@gmail.com,
 	ritesh.list@gmail.com,
 	ojaswin@linux.ibm.com,
 	djwong@kernel.org,
-	bfoster@redhat.com,
-	david@fromorbit.com,
-	hsiangkao@linux.alibaba.com,
+	fdmanana@kernel.org,
+	quwenruo.btrfs@gmx.com,
 	zlang@kernel.org
-Subject: [RFC 3/3] xfs: Add multi AG shrink + shutdown + recovery tests
-Date: Tue, 16 Sep 2025 15:11:32 +0000
-Message-Id: <f3ac18465aa2d7d3eb382dca7c76fc893bd9aadd.1758035262.git.nirjhar.roy.lists@gmail.com>
+Subject: [PATCH 0/4] btrfs: More test fixes for large block/node sizes
+Date: Tue, 16 Sep 2025 15:30:08 +0000
+Message-Id: <cover.1758036285.git.nirjhar.roy.lists@gmail.com>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <cover.1758035262.git.nirjhar.roy.lists@gmail.com>
-References: <cover.1758035262.git.nirjhar.roy.lists@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -81,121 +76,25 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This test repeatedly shrinks, then shuts down
-the filesystem and checks that recovery works
-fine - this is similar to what is already being done
-in xfs/609 but this tests with filesystem shrink and in
-xfs/609 it is tested with filesystem growth.
+More btrfs test fixes. These tests were ran with 64k block size and they failed.
+Individual patches have the details. A previous patch series with some other
+test fixes was posted[1].
 
-Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
----
- tests/xfs/333     | 87 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/333.out |  2 ++
- 2 files changed, 89 insertions(+)
- create mode 100755 tests/xfs/333
- create mode 100644 tests/xfs/333.out
+[1] https://lore.kernel.org/all/cover.1756101620.git.nirjhar.roy.lists@gmail.com/
 
-diff --git a/tests/xfs/333 b/tests/xfs/333
-new file mode 100755
-index 00000000..1c319329
---- /dev/null
-+++ b/tests/xfs/333
-@@ -0,0 +1,87 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>.  All Rights Reserved.
-+#
-+# FS QA Test 333
-+#
-+# Test XFS online growfs log recover with shrinking the filesystem
-+#
-+. ./common/preamble
-+_begin_fstest auto growfs stress shutdown log recoveryloop shrinkfs
-+
-+# Import common functions.
-+. ./common/filter
-+
-+_stress_scratch()
-+{
-+	procs=4
-+	nops=999
-+	# -w ensures that the only ops are ones which cause write I/O
-+	FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w -p $procs \
-+	    -n $nops`
-+	_run_fsstress_bg $FSSTRESS_ARGS >> $seqres.full 2>&1
-+}
-+FSSIZE=$(( 1024 * 1024 * 1024 )) # 1G
-+_require_scratch
-+_require_scratch_size $((FSSIZE / 1024)) #KB
-+_require_command "$XFS_GROWFS_PROG" xfs_growfs
-+
-+_scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-+. $tmp.mkfs	# extract blocksize and data size for scratch device
-+
-+endsize=`expr 128 \* 1048576`	# stop after shrinking to this size
-+[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
-+
-+nags=16
-+# We want to test with and without stress. The reason is that, if stress
-+# fills up the filesystem such that all the AGs are non-empty, then all
-+# the shrink commands will fail and we won't be able to test recovery
-+# during shrink. So to cover all the types of scenarios, we are testing
-+#  with and without stress.
-+for stress in 0 1
-+do
-+	size=`expr 512 \* 1048576`	# 512 megabytes initially
-+	sizeb=`expr $size / $dbsize`	# in data blocks
-+	logblks=$(_scratch_find_xfs_min_logblocks -dsize=${size} -dagcount=${nags})
-+	_scratch_mkfs_xfs -lsize=${logblks}b -dsize=${size} -dagcount=${nags} \
-+		>> $seqres.full 2>&1 || _fail "mkfs failed"
-+	_scratch_mount
-+
-+	$XFS_INFO_PROG $SCRATCH_MNT 2>&1 | _filter_mkfs 2>$tmp.xfsinfo >/dev/null
-+	. $tmp.xfsinfo
-+
-+	if [[ "$stress" -eq 1 ]]; then
-+		echo "Testing with Stress" >> $seqres.full 2>&1
-+	else
-+		echo "Testing without Stress" >> $seqres.full 2>&1
-+	fi
-+	# Shrink the filesystem in random sized chunks while performing shutdown and
-+	# recovery. The randomization is intended to create a mix of sub-ag and
-+	# multi-ag shrinks.
-+	while [ $size -ge $endsize ]; do
-+		echo "*** shrinking a ${sizeb} block filesystem (shrink)" >> \
-+			$seqres.full
-+		if [[ "$stress" -eq 1 ]]; then
-+			_stress_scratch
-+		fi
-+
-+		decsize=$((RANDOM % 40 * 1048576))
-+		size=`expr $size - $decsize`
-+		sizeb=`expr $size / $dbsize`	# in data blocks
-+		$XFS_GROWFS_PROG -D ${sizeb} $SCRATCH_MNT >> $seqres.full 2>&1
-+
-+		sleep $((RANDOM % 3))
-+		_scratch_shutdown
-+		if [[ "$stress" -eq 1 ]]; then
-+			_kill_fsstress
-+		fi
-+		_scratch_cycle_mount
-+	done > /dev/null 2>&1
-+	wait
-+	_scratch_unmount
-+done
-+
-+echo "Silence is golden"
-+
-+_exit 0
-+
-diff --git a/tests/xfs/333.out b/tests/xfs/333.out
-new file mode 100644
-index 00000000..60a15898
---- /dev/null
-+++ b/tests/xfs/333.out
-@@ -0,0 +1,2 @@
-+QA output created by 333
-+Silence is golden
--- 
+Nirjhar Roy (IBM) (4):
+  generic/371: Fix the test to be compatible block sizes upto 64k
+  generic/562: Make test compatible with block sizes till 64k
+  btrfs/200: Make the test compatible with all supported block sizes
+  btrfs/290: Make the test compatible with all supported block sizes
+
+ tests/btrfs/200     |  8 ++++----
+ tests/btrfs/200.out |  8 ++++----
+ tests/btrfs/290     | 16 ++++++++--------
+ tests/generic/371   |  2 +-
+ tests/generic/562   |  2 +-
+ 5 files changed, 18 insertions(+), 18 deletions(-)
+
+--
 2.34.1
 
