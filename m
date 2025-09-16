@@ -1,62 +1,62 @@
-Received: from mail-pg1-f173.google.com (mail-pg1-f173.google.com [209.85.215.173])
+Received: from mail-pl1-f178.google.com (mail-pl1-f178.google.com [209.85.214.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD54830C624
-	for <fstests@vger.kernel.org>; Tue, 16 Sep 2025 15:12:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1737823D7C7
+	for <fstests@vger.kernel.org>; Tue, 16 Sep 2025 15:12:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758035534; cv=none; b=mdSDYP4Q6nojl1KAOwmU3ZHKQlcgRxQg+nv234MQovaqTj+fuREJ+DVbPt5Zvm8sgK2TdI5v+xoV6pZx16SflgZ8wqsKQyBo6LOsdhNeAyhj23QS4bM8iFEVcZX+lP/r1u0bKFiJERMHtFgb2xJUCsyXaSx/IkpFA0rBhTfSwyA=
+	t=1758035543; cv=none; b=PaK+twAbCkp/jW1nIf44Do+65dqvdAWllCyTNcYD8Rh6hi1IH/xLGSidW6teH4cBnOicwKfwJfHjvX02ht+qpYCI0aqblhuGZ4JzFhnlx4bQWmQsEwsw7sfmn+TCAEFz6dUuktodhhIPkpJySpVLdbP4gnVjvH8KgeMgcvvXWCk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758035534; c=relaxed/simple;
-	bh=QNOQY/QoUruGKT7ypIZYtMMPfGgcJ069JOiRiMkdHR0=;
+	s=arc-20240116; t=1758035543; c=relaxed/simple;
+	bh=shJnxipfBLTZUEsYxtt5nBOTVhzHJUyJI9KpFQ+oIDU=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=r3X4w2rugjeboQsuF8JwsRDhAo9gOFAWTCuYYj10X8LQQcX83SwV3S3sjeMXFCQ6qdE/Pm9cIZZCX01Sazf2qgLdHKKUd2J59p89a3cKIUNdY6jTR/AhKjVEMqnG8Ru68DW8M85a06TL7x0KW+y5qZt1WUhq2jdPVpNXjxCuc1Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=X2Gf1qyD; arc=none smtp.client-ip=209.85.215.173
+	 MIME-Version; b=qAoMxRFfVeWL6EuGzEG2MMusT+NGFwl5HWU2vjw9Sxssca3N/y1TQdAFTDKMnXiUrUtlrm7Wis/+weQNHfVKxYGL080i+WkTEupjnXpet3xJDXp4jyzKGJDOnh0j1D44ChullczeNh/QvPDk1AznVbLAVoeMPvovjX9msnVMhZQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Sfwr9ItQ; arc=none smtp.client-ip=209.85.214.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="X2Gf1qyD"
-Received: by mail-pg1-f173.google.com with SMTP id 41be03b00d2f7-b4c1fc383eeso3755316a12.1
-        for <fstests@vger.kernel.org>; Tue, 16 Sep 2025 08:12:12 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Sfwr9ItQ"
+Received: by mail-pl1-f178.google.com with SMTP id d9443c01a7336-266fa7a0552so21026565ad.3
+        for <fstests@vger.kernel.org>; Tue, 16 Sep 2025 08:12:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1758035531; x=1758640331; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1758035541; x=1758640341; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=lHEXmWQs67WVJBtVdflBLkGM9FSswp6rWc/lP2Txhn4=;
-        b=X2Gf1qyDsRYz7EWQXZFEb7zstWlP8NuvF1/lc/r6GIGpmGmlIENdfEnJRgq08DeHCu
-         RTleEIBoCMgb7McrsKlnrzcmoqIk+JgYLHMJyii3dQ3eJwwqs1HIQi23AMKkXTkxJ3wk
-         OlJ+RO4gBBkq/WzifGB04EcpH8swCjKfwndJZu+mB25Tny5ZA5ApRnW9wXTbCUE6zIcf
-         FfGZQXDMceD+s3pmZEtTH85svbCNpGKgGY/4nzNfpqTPpRTmsS2KeoeH2hh+NUEdjR1i
-         DohrEAuDgVzzEnUp08Gjogb4ucz4F45NNTY6TLIBvxYJyTOPU2wwLDedKGaxRJR6yBK5
-         /FNA==
+        bh=Qb2mdwudAX666QSHLbQ+Cm03d1XmYp7BsMy78ix8Ooc=;
+        b=Sfwr9ItQWJsgTPLKT8Ejvv5HFPnaCP9N8R1DIRIY8caX6zMtckmp9q65AT45PDwajB
+         Yv6xljPX5d68DkRw3q04ht9rU1IOilmIFCZeNjQtz+4NlR30LZySzrwpRGVJl7IhK3Nn
+         5YkLcUPOVvEe/wFHcclYMEdnEauZqvHa5JjWXJjMvGmwpXE6yNHp6bRH4WOZLnhUAu+8
+         vejtjEe+krLUT9JveP1e5gBb0u5OkIWSMjaYivAzkr6hJN4deNZ2gCwf4s0KzmaecF9d
+         aIM7rPi69Om4pZfBB/NN+maanNV67oGk74blvNswmOPKdgbojqCdA1WiUprPJ4rKwCLk
+         symg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1758035531; x=1758640331;
+        d=1e100.net; s=20230601; t=1758035541; x=1758640341;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=lHEXmWQs67WVJBtVdflBLkGM9FSswp6rWc/lP2Txhn4=;
-        b=liBUTpfHU2smxuOpntb5lVtzYQ24MZGrOpgWvD59iHF6fOrT8sIHWV7339kFwDyD+G
-         udnNrycGeI5LwEczUrnjiRpVepCA11RB9d8FyAwVC73g9hQQAkPUylXLtO+kgRExykeZ
-         RQlws3Vsr3bcdpY4gvJpFZkYRYYA+PwdWn+ihMV7UlZUTvNTHoRuITuWrnPNoAh7uW+t
-         JB0DGKrCBCQltcjHf+RTo1cvWwOapXxN3zqpcycO297ePbxUSmwC3ww1os8PxtfuEj5p
-         0P9lwhxqbBi/fAtNgfaJRwH9kSSbK3Fw2YZ5l+y3FzemfjvnKr+m2QBXnpecUvz2CZ1S
-         nhIA==
-X-Gm-Message-State: AOJu0Yxp2RkUr7DsgCQgUD74K7fXBkaDAW1O9yvxhmWmlKZediQPvUMt
-	SY1uL3nN8I93ilZZh3AmE8ShHqSw6Jef43OF4eELykvAPTsJcGVyFMNAUd26og==
-X-Gm-Gg: ASbGncsf9GkQiDNSs2Y9fz3ciadMNGzPBX5g1pZMhJuWHgYix86Zwsh2jGOoWqAJsyi
-	SfqzQSLxLwOhRZPdVn9aHhfFIkK04fhweOzOqQ+2eVQnP/xRhVm+Uwjmi9upGN/fmv44QFWdMj8
-	chmt7/zhOvnV2MZ05CboC66Uf/1+g445EHVkCklIIgf4TfwFZ62d3Y7wtyxDmNCILi2K7ueB0Qv
-	86iwyOvmXKi+iXULlvy51IhkRVfx9cTrmN9Cy3u6+q9SkHSNTLWmxlJCpvDff2QpHLsi+L0t6Tz
-	u73+2tVUqd50lO1F4exktGNa1UxgwUetLIZzWy0TYhRK8nQJRyFoys4Qb1ANObCw/rRHB15nxUY
-	8Qjsm2cTaxHkFsshLPv9KSZanQBE=
-X-Google-Smtp-Source: AGHT+IE0aHLCIwFCjOzWYGSgOK3fd38DAW5ihNU5dtmAFUrfboWX1M4vhhNg0S+ZPX8LznZoU0h2Ww==
-X-Received: by 2002:a17:903:2410:b0:24c:9a51:9a33 with SMTP id d9443c01a7336-25d24e9df3dmr189019435ad.22.1758035531500;
-        Tue, 16 Sep 2025 08:12:11 -0700 (PDT)
+        bh=Qb2mdwudAX666QSHLbQ+Cm03d1XmYp7BsMy78ix8Ooc=;
+        b=pDIhG3ZLGphex4Z09DVym1hHDFh3+EJtDlSmjmNOUjYXAp2IkndZbRvTzD8YS9Y8Tr
+         QxNx2hGHHNCpxWkJXLJ2KGQ4iutN8ILcR8QBqLv1M4fRZTvDHb2ozUjfr75saa2qgOXA
+         mGFYYTJ1dDDa8jFIKisDtKHQv4mfN4h/bRTbAmQhJY5BzBlDK19x0/gq2p/PFq44NE7N
+         AF8wKd5Ajxc+fl5A84R7bEyYsanBjNhm6yuuAQiJWnlOZ8gbCNtJO+YeOKDXvwtAvMe1
+         jVTeXjwWU45hLvuS3AHFE1ban0kfDxeGIdZ+3ljYm65ogRGVyS75tF7kO57yc4qIlBur
+         u4Jw==
+X-Gm-Message-State: AOJu0YwwF6MM8CatmHLKFaxIE2RIb6B2aPrCIIyPjYQ6N6h60PwAJi7c
+	i/lJGpavRqGc8xVEGliLnLKaLuqCBUm1mvX5jcyGA4mIPQZrfOuD5Qah8yUWCg==
+X-Gm-Gg: ASbGnctrKaUZVRvd3U5/UIzTW9Ncols64i9ZS2HM8uIjnBtqOll0J6law1LaBgP7Hw8
+	k0xu471MDFvLaCX6yrt2QZrHxpeTE4w5lOAUzY42U8IqS/sSLuVtoffcDSXK2zSP9Ny74qQ1ngh
+	OwSqo9QloPervnQH2v6wyivgUC9UjSO89wkAdpZCFlM3aZDBEtzb0g3VX2Exl9Vllvm/CvwQQYz
+	hKJnT8up+20ZU0Za4gqcVUnTjkI2cpkB8IwPEY1VwNJ4/rFHpJoL4ITLpbli2+NPoWOWG+6wXe8
+	ESAN6jGMGjIWov+dPc8sjWkjN+789Cs+TB3FD31+GKG50ubAhaEwovylaUE21ykgcRh+ANFzsrT
+	DB4IUDl+SD2ZWtGWzchYG/fNDX9o=
+X-Google-Smtp-Source: AGHT+IGnIGP44hd1Wh+KQ3hKMW3Fmgu6OuRiBWGWTz0WX2g+qxNS7d0Ut1BcXvt0QxLWSpFYm0Lkzw==
+X-Received: by 2002:a17:903:384b:b0:24e:95bb:88b1 with SMTP id d9443c01a7336-25d267641f0mr180595395ad.34.1758035540895;
+        Tue, 16 Sep 2025 08:12:20 -0700 (PDT)
 Received: from citest-1.. ([49.207.211.178])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-25c3a84a750sm164780175ad.83.2025.09.16.08.12.08
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-25c3a84a750sm164780175ad.83.2025.09.16.08.12.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 16 Sep 2025 08:12:11 -0700 (PDT)
+        Tue, 16 Sep 2025 08:12:20 -0700 (PDT)
 From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
 To: fstests@vger.kernel.org
 Cc: nirjhar.roy.lists@gmail.com,
@@ -67,9 +67,9 @@ Cc: nirjhar.roy.lists@gmail.com,
 	david@fromorbit.com,
 	hsiangkao@linux.alibaba.com,
 	zlang@kernel.org
-Subject: [RFC 1/3] xfs/163: Update this test with multi AG shrink sub-tests
-Date: Tue, 16 Sep 2025 15:11:30 +0000
-Message-Id: <e924537069e2b8ec4744a2bdb05125a63f778ceb.1758035262.git.nirjhar.roy.lists@gmail.com>
+Subject: [RFC 2/3] xfs: Add parallel back to back grow/shrink tests
+Date: Tue, 16 Sep 2025 15:11:31 +0000
+Message-Id: <9d54a448d58666196ae5c665b0cfddd5ca0bf3b8.1758035262.git.nirjhar.roy.lists@gmail.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <cover.1758035262.git.nirjhar.roy.lists@gmail.com>
 References: <cover.1758035262.git.nirjhar.roy.lists@gmail.com>
@@ -81,242 +81,122 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Now, that the support for removal of entire empty
-AG has been added, add more sub-tests to validate
-shrink sizes worth equal to or more than 1 AG along with
-some out of bounds/invalid shrink sub-test cases.
+This test makes several parallel back to back
+shrink/grow requests and makes sure that at
+the end of all operations, the filesystem is in
+a consistent state with no corruptions and crashes.
 
 Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
 ---
- tests/xfs/163     | 162 ++++++++++++++++++++++++++++++++++++----------
- tests/xfs/163.out |  23 +++++--
- 2 files changed, 147 insertions(+), 38 deletions(-)
+ tests/xfs/611     | 89 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/611.out |  2 ++
+ 2 files changed, 91 insertions(+)
+ create mode 100755 tests/xfs/611
+ create mode 100644 tests/xfs/611.out
 
-diff --git a/tests/xfs/163 b/tests/xfs/163
-index 015a82cd..fb80065f 100755
---- a/tests/xfs/163
-+++ b/tests/xfs/163
-@@ -6,14 +6,46 @@
- #
- # XFS shrinkfs basic functionality test
- #
--# This test attempts to shrink with a small size (512K), half AG size and
--# an out-of-bound size (agsize + 1) to observe if it works as expected.
-+# This test attempts to shrink the filesystem by various sizes and verifies
-+# if it works as expected.
- #
- . ./common/preamble
- _begin_fstest auto quick growfs shrinkfs
- 
- # Import common functions.
- . ./common/filter
+diff --git a/tests/xfs/611 b/tests/xfs/611
+new file mode 100755
+index 00000000..605beddb
+--- /dev/null
++++ b/tests/xfs/611
+@@ -0,0 +1,89 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>.  All Rights Reserved.
++#
++# FS QA Test 611
++#
++# This test is similar to xfs/163. It creates NUM_PROCS number of processes.
++# Some will  pass, some will fail with
++#    a) operation in progress
++#    b) no space available
++#    c) size unchanged.
++# The primary difference of this test with xfs/163 is that all the back to back
++# xfs_growfs requests are made without recreating the filesystem in between 2
++# requests. This test ensures that even after several grow/shrink requests, the
++# filesystem is in a consistent state and there are no crashes or metadata
++# corruptions.
++
++. ./common/preamble
++_begin_fstest auto quick growfs shrinkfs
++
++. ./common/filter
 +_require_scratch_xfs_shrink
 +
 +AGCOUNT=16
 +FSSIZE=$((2 * 1024 * 1024 * 1024)) # 2G
-+_require_scratch_size $((FSSIZE / 1024))
++NUM_LOOP=500
++NUM_PROCS=$((4 * LOAD_FACTOR))
++_require_scratch_size $((FSSIZE / 1024)) #KB
 +
-+reset()
++_stress_scratch()
++{
++	procs=4
++	nops=9999
++	# -w ensures that the only ops are ones which cause write I/O
++	FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w -p $procs \
++	    -n $nops`
++	_run_fsstress_bg $FSSTRESS_ARGS >> $seqres.full 2>&1
++}
++
++setup()
 +{
 +	_scratch_unmount >> $seqres.full 2>&1
 +	# agcount in an xfs filesystem >= 2
 +	_scratch_mkfs -dsize="$FSSIZE" -dagcount="$AGCOUNT" 2>&1 | \
 +		tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs >/dev/null
 +	. $tmp.mkfs
-+	tot_dblocks=$dblocks
-+	oagcount=$agcount
 +	_scratch_mount >> $seqres.full
 +}
 +
-+# This functions converts a given number of fsblocks to AG count.
-+_dblocks_to_ag()
-+{
-+	local blocks="$1"
-+	local agdiv=$((blocks/agsize))
-+	local agmod=$((blocks%agsize))
-+	local agc
-+	if [[ "$agmod" == 0 ]]; then
-+		agc="$agdiv"
-+	else
-+		agc=$(( agdiv + 1 ))
-+	fi
-+	echo "$agc"
-+}
- 
- test_shrink()
- {
-@@ -24,47 +56,111 @@ test_shrink()
- 	_check_scratch_fs
- 	_scratch_mount
- 
--	# If we couldn't shrink the filesystem due to lack of space, we're
--	# done with this test.
--	[ $1 -ne $dblocks ] && \
--		grep -q 'No space left on device' $tmp.growfs && \
--		_notrun "Could not shrink due to lack of space"
- 	cat $tmp.growfs >> $seqres.full
-+	$XFS_INFO_PROG $SCRATCH_MNT 2>&1 | \
-+		_filter_mkfs 2>$tmp.xfsinfo >/dev/null
-+	. $tmp.xfsinfo
-+	[ $ret -eq 0 ]
++run_loop() {
++	for ((i=0; i<"$NUM_LOOP"; i++)); do
++		numag=$(( RANDOM % 17 ))
++		nblocksag=$(( numag * agsize ))
++		numblksoff=$(( RANDOM % agsize ))
++		nblkstot=$(( nblocksag + numblksoff ))
++		xfs_growfs -D "$nblkstot" $SCRATCH_MNT >> $seqres.full 2>&1
++	done
 +}
 +
-+# run_test <number of blocks to remove> <test name> <optional: error message>
-+# If the test is expected to succeed, then there is no need to provide an error
-+# message.
-+run_test_shrink()
++start_test()
 +{
-+	local delta_blocks="$1"
-+	local test_name="$2"
-+	local error_message="$3"
- 
--	$XFS_INFO_PROG $SCRATCH_MNT 2>&1 | _filter_mkfs 2>$tmp.growfs >/dev/null
--	. $tmp.growfs
--	[ $ret -eq 0 -a $1 -eq $dblocks ]
-+	echo "$test_name"
-+	reset
-+	local tsize=$((tot_dblocks-delta_blocks))
-+	local nagcount=`_dblocks_to_ag "$tsize"`
-+	echo "delta = $delta_blocks newblocks = $tsize nagcount = $nagcount" \
-+		>> $seqres.full
-+	if [[ "$error_message" == "" ]]; then
-+		# no error message means the test is expected to succeed
-+		test_shrink "$tsize" || \
-+			echo "Shrink $test_name failure"
-+		# Verify the parameters
-+		[[ "$dblocks" -ne "$tsize" ]] && \
-+			echo "dblocks not changed properly after shrinking \"$test_name\"" \
-+			&& 	echo "expected $tsize got $dblocks"
-+		[[ "$agcount" -ne "$nagcount" ]] && \
-+			echo "agcount not changed properly after shrinking \"$test_name\"" \
-+			&& 	echo "expected $nagcount got $agcount"
-+	else
-+		test_shrink "$tsize" && \
-+			echo "Shrink \"$test_name\" succeeded unexpectedly"
-+		grep -q "$error_message" $tmp.growfs || \
-+			echo "Error message missing - shrinking \"$test_name\" (expected: $error_message)"
-+		# Verify the parameters
-+		[[ "$dblocks" -ne "$tot_dblocks" ]] && \
-+			echo "dblocks changed after shrink failure \"$test_name\"" && \
-+			echo "expected $tot_dblocks got $dblocks"
-+		[[ "$agcount" -ne "$oagcount" ]] && \
-+			echo "agcount changed after shrink failure \"$test_name\"" && \
-+			echo "expected $oagcount got $agcount"
++	for ((j=0; j<"$NUM_PROCS"; j++)); do
++		run_loop "$j" &
++	done
++	if [[ "$1" -eq 1 ]]; then
++		_stress_scratch
 +	fi
- }
- 
--_require_scratch_xfs_shrink
-+# This function, first shrinks the fs, then grows it. This is to make sure that
-+# the fs is able to grow properly after a shrink has taken place.
-+# Usage: run_test_shrink_grow <number of blocks to remove> <test name>
-+run_test_shrink_grow()
-+{
-+	local delta_blocks="$1"
-+	local test_name="$2"
-+
-+	echo "$test_name"
-+	reset
-+	local tsize=$((tot_dblocks-delta_blocks))
-+	test_shrink "$tsize" || \
-+		echo "$test_name failure"
-+	# Now grow the fs
-+	test_shrink "$tot_dblocks" || \
-+		echo "$test_name failure"
-+	# Verify the parameters
-+	[[ "$dblocks" -ne "$tot_dblocks" ]] && \
-+		echo "dblocks not changed properly after \"$test_name\"" \
-+		&& 	echo "expected $tot_dblocks got $dblocks"
-+	[[ "$agcount" -ne "$oagcount" ]] && \
-+		echo "agcount not changed properly after \"$test_name\"" \
-+		&& 	echo "expected $oagcount got $agcount"
 +}
- 
--echo "Format and mount"
-+reset
- 
--# agcount = 1 is forbidden on purpose, and need to ensure shrinking to
--# 2 AGs isn't feasible yet. So agcount = 3 is the minimum number now.
--_scratch_mkfs -dsize="$((900 * 1024 * 1024))" -dagcount=3 2>&1 | \
--	tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs >/dev/null
--. $tmp.mkfs
--t_dblocks=$dblocks
--_scratch_mount >> $seqres.full
-+# Tests expected to pass
-+# run_test_shrink <number of blocks to remove> <test name>
-+echo "#Tests partial and multi-ag shrinking"
-+run_test_shrink 1 "shrink by 1 block"
-+run_test_shrink $((agsize/2)) "shrink by 0.5 AG"
-+run_test_shrink $((agsize)) "shrink by 1 AG"
-+run_test_shrink $((agsize*6)) "shrink by 6 AG"
-+run_test_shrink $((agsize*3+agsize/2)) "shrink by 3.5 AG"
-+echo
- 
--echo "Shrink fs (small size)"
--test_shrink $((t_dblocks-512*1024/dbsize)) || \
--	echo "Shrink fs (small size) failure"
-+# run_test_shrink_grow <number of blocks to remove> <test name>
-+echo "#Tests partial and multi-ag shink followed by growfs"
-+run_test_shrink_grow $((agsize/2)) "shrink by 0.5 AG -> grow by 0.5 AG"
-+run_test_shrink_grow $((agsize*6)) "shrink by 6 AG -> grow by 6 AG"
-+run_test_shrink_grow $((agsize*3+agsize/2)) "shrink by 3.5 AG -> grow by 3.5 AG"
-+echo
- 
--echo "Shrink fs (half AG)"
--test_shrink $((t_dblocks-agsize/2)) || \
--	echo "Shrink fs (half AG) failure"
-+echo "#Test out of bounds ag shrink: Below tests are expected to fail"
-+# Tests expected to fail
-+# run_test_shrink_grow <number of blocks to remove> <test name> <error message>
-+run_test_shrink "$(( (AGCOUNT - 1) * agsize ))" "shrink to 1 AG" "Invalid argument"
-+run_test_shrink "$(( tot_dblocks - 1 ))" "shrink to 1 block" "Invalid argument"
- 
--echo "Shrink fs (out-of-bound)"
--test_shrink $((t_dblocks-agsize-1)) && \
--	echo "Shrink fs (out-of-bound) failure"
--[ $dblocks -ne $((t_dblocks-agsize/2)) ] && \
--	echo "dblocks changed after shrinking failure"
-+# XFS expects a minimum of XFS_MIN_AG_BLOCKS (64) per AG. If we are shrinking
-+# the (new) tail AG below this threshold value, then the shrink op should fail.
-+run_test_shrink "$(( agsize - 1 ))" "shrink tail AG to 1 block" "Invalid argument"
-+run_test_shrink "$(( agsize * 2 - 1 ))" "shrink new tail AG to 1 block" "Invalid argument"
-+echo
- 
- $XFS_INFO_PROG $SCRATCH_MNT >> $seqres.full
--echo "*** done"
- 
- # success, all done
--status=0
--exit
++
++# We want to test with and without stress. The reason is that, if stress
++# fills up the filesystem such that all the AGs are non-empty, then all
++# the shrink commands will fail and we won't be able to test. So to cover all
++# the types of scenarios, we are testing with and without stress.
++for stress in 0 1
++do
++	setup
++	if [[ "$stress" -eq 1 ]]; then
++		echo "Testing with stress" >> $seqres.full 2>&1
++	else
++		echo "Testing without stress" >> $seqres.full 2>&1
++	fi
++	start_test "$stress"
++	wait
++	sleep 2
++	_check_scratch_fs
++done
++echo "Silence is golden"
++# success, all done
 +_exit 0
-diff --git a/tests/xfs/163.out b/tests/xfs/163.out
-index bd66d4a9..4f15dc94 100644
---- a/tests/xfs/163.out
-+++ b/tests/xfs/163.out
-@@ -1,6 +1,19 @@
- QA output created by 163
--Format and mount
--Shrink fs (small size)
--Shrink fs (half AG)
--Shrink fs (out-of-bound)
--*** done
-+#Tests partial and multi-ag shrinking
-+shrink by 1 block
-+shrink by 0.5 AG
-+shrink by 1 AG
-+shrink by 6 AG
-+shrink by 3.5 AG
-+
-+#Tests partial and multi-ag shink followed by growfs
-+shrink by 0.5 AG -> grow by 0.5 AG
-+shrink by 6 AG -> grow by 6 AG
-+shrink by 3.5 AG -> grow by 3.5 AG
-+
-+#Test out of bounds ag shrink: Below tests are expected to fail
-+shrink to 1 AG
-+shrink to 1 block
-+shrink tail AG to 1 block
-+shrink new tail AG to 1 block
-+
+diff --git a/tests/xfs/611.out b/tests/xfs/611.out
+new file mode 100644
+index 00000000..b8a44164
+--- /dev/null
++++ b/tests/xfs/611.out
+@@ -0,0 +1,2 @@
++QA output created by 611
++Silence is golden
 -- 
 2.34.1
 
