@@ -1,216 +1,184 @@
-Received: from mail-wm1-f46.google.com (mail-wm1-f46.google.com [209.85.128.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 245B113C8FF
-	for <fstests@vger.kernel.org>; Thu, 18 Sep 2025 11:20:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA58721B905
+	for <fstests@vger.kernel.org>; Thu, 18 Sep 2025 16:15:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758194415; cv=none; b=gAPu5elw4JQcTnK64K5UQCBzr/XKdhVuUHOaroQQdgeLpbHv0zVRA8YB+XrANbl19/6qlHIGck1leDGD1IGjO/6vva0NrkZCVHxBY96L1C9UG7z3DqywabfHkiRATvg4/mNsHG398g2GNFvLi95xjBq1lSbBsnzKw5+NW7qoVpg=
+	t=1758212152; cv=none; b=ZvEtRW8qFf91xpERucUASX6KI7235PD/k1cuVtXmfz+6o+xhoH7iOgX0ai0Jl7i1b8WBRU0JfrXD2g0PTPjDYw5ak68tz2x0Bp/CdZeK/MMSd/AGDn4v1TNYsUi3ZItwqc0XPhhOlmagqQdU/3J0OmicuIkRoDq+lu1aAAwbmKs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758194415; c=relaxed/simple;
-	bh=DvNk/6Tfbe234u7pJoBYWvNrwsGekYd5PhezW27Jq/I=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=lIAo2YHg12ULTa4QYUBtP5Y2qL8VDdu8VjtHo0OEa30y3dndwqCfiIbFcxviZX3RAs0k/fhs2xEDDM2gWrk4O/H+2RQOqj4yannD9puI1I+XQa4WehJb8AVOXwj20Ac3EZARsylTbewBTnv2wSgdBjEzC0kvxg7scaEfiqm0oeo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=XtH9Fu1l; arc=none smtp.client-ip=209.85.128.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1758212152; c=relaxed/simple;
+	bh=BBcXkF218h/n+sjdRsmTt/qgF2tdpx7WgyO2AZNvKaM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=PWmj+vxHBOcN8Fu8JpNqUAdDLx8I4J7AQ+gSyt6L0Eot8juHB6i1FhLF4SJQucCHsxFQO6ZRfYkfFS/2LXk7dAjYxajc5gPGDsIUtWRaScyX01ypMl/SqAAn8IdEarcD3c4RELMbc7IuBgAtp2IbmaGJHrRY/mJ8GJCGzG2M0Ng=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NCb5V1Xq; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="XtH9Fu1l"
-Received: by mail-wm1-f46.google.com with SMTP id 5b1f17b1804b1-45f2f7ae386so6042365e9.3
-        for <fstests@vger.kernel.org>; Thu, 18 Sep 2025 04:20:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1758194411; x=1758799211; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=sENNlj28H6WAqlpeJFaW44U/oykFV61OE6bayPFhytY=;
-        b=XtH9Fu1luq9LfDS53d2+8yRquM59sLMNx6C3uHWCJ2vLZnbNcEtqV+ASEXK2/zenZt
-         M30esao+HgrIlZAvVSkMngB4b131JlTR1DVI3agP/GzD2zKVF8NwwtLfF9rHGI6A1grn
-         xwnkWzhwbCKcI7H0Kv8alEsdvbVHUleim4JbG/CmqHgG+liYNpPtxVMRu2PZhUpHiahR
-         PV9lxDSLZM3dbT05fLBplV8QFOff+6ygNj5jKtIzrVE2ftuuWmLyf47Lmwb+UAm0/HHk
-         eZfDPUY4JRAdMpz3mbIbfZQaTe0xXYGJxqRaf1c+rz7CSAilWAnSeCA0eZxsR1uuE13Q
-         dKuQ==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NCb5V1Xq"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1758212149;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=iHi0Djn9pjoeuw2kAszNHnpCYY5ix2jYe9lxD0wWsrY=;
+	b=NCb5V1XqRNLJHbm9lpAU+wjkRQkFY6Fx67uXe09ZQW350nnBjG48G5C/Wh6ZJV1+GfulVn
+	HxnBi9BwNe6i85rqNUQ2hCFuSPUYniYryl7cDSq8aZWQ8BjG7n8QcS4Lsm0TdZbx4BRnuT
+	GN8xQA19o/rH4u/m2WJ3J1Pgednivw0=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-441-hOvvFo9VOFiWdMKtws4u0w-1; Thu, 18 Sep 2025 12:15:48 -0400
+X-MC-Unique: hOvvFo9VOFiWdMKtws4u0w-1
+X-Mimecast-MFC-AGG-ID: hOvvFo9VOFiWdMKtws4u0w_1758212147
+Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-b55118e2d01so291021a12.1
+        for <fstests@vger.kernel.org>; Thu, 18 Sep 2025 09:15:48 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1758194411; x=1758799211;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-message-state:from:to:cc:subject:date
+        d=1e100.net; s=20230601; t=1758212147; x=1758816947;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=sENNlj28H6WAqlpeJFaW44U/oykFV61OE6bayPFhytY=;
-        b=bcm0Rsi9NQg+ud45jWW6fCLH5F8x0rDAx0W9QfqKNnFXMfqBwusInmgh5tRoXacsUt
-         3s/kfb0ZEmS3GR74D7eIRdyGzcaQhlGLC/yh0DfnvoEZ+xa7uwo3CrrsuMNKE3CuNTZW
-         1R6zsDN+4Xi+Vd9eSe6pvidIEtVQxZyJzlDLK8+2V1hGrJk6riXB6V9a93xwMohlKdYu
-         ugexHWghc4T8D9GDS704tkbrL2q41JJGGEKKrmSqggzNVhI4XU+sO8/aLrMYTFqfeDc0
-         kxDhB14KHTfevGVxtQhwfpGxitDbnxAEyz9djP6mQnmb8TPY5p1/mxdpFdNqO6GZGNP/
-         WXFw==
-X-Forwarded-Encrypted: i=1; AJvYcCVq6N4k9tJwUY/D4c3qSOg+zlyqrpHgniCjtO7veuQJ9d0tSp992Y7pTBGqQbXXtOpH/y2+FIB+@vger.kernel.org
-X-Gm-Message-State: AOJu0YwtWts6bYZDRL4dtV22RHFyq2ySpA+ksBe8zMP9R0wyaGbqfdSX
-	UvAP2DqNr02ic9vbPW0H5kNJ4t2HjG0KRgZMDR9PzxNEPy79W53CiNRnApiBN0gpOUU=
-X-Gm-Gg: ASbGncu1dVoE8Q5jVb4o8/h2St1ye8mANha6SPP9a6yJn2WlNFyzAwpHhjnHX2+DmhB
-	QSPC2hKWcps5EyHZQ9rj4ylHg6sPVObUUftqbaiYK+Ff0pZG9EFYNGNdhSE1RXw2l1Qq+afriwu
-	2slBXeUqY4L9xkLVoUY1KFl2QwxTH4/IlA+iM6Etx5IEmmkH6moiFGdosyCgOGTpuJVizhR8/iJ
-	C6MCR2YX4cckSD+jUUlm3aoIoaLspEkcHNOF3dpCEcVdQYhP7IYWtkcq9gCWF6New2Z7qvmmmRd
-	lsO0AIMi2sNX3GyZt7pOG5FpY1IeTu3M+BXjoeWkbvHmHcvYBe130Qcj08dQ9N/Z6St70FulrhE
-	KRPugPxLVpU84NqaOnb378TEcCHpWTTv4+DWHBgv9Vbwhi62rp0jrp9TgDNXUCZHX6TOTpQ==
-X-Google-Smtp-Source: AGHT+IESPWrlsLTpLEpusTWXutsxWfyDhohP0Vqvoj+NuDj6V3wKtIqPYIGHATlcP5nDl8MIUxAn3A==
-X-Received: by 2002:adf:faca:0:b0:3ee:1118:df7d with SMTP id ffacd0b85a97d-3ee1118e2a5mr1381400f8f.47.1758194411232;
-        Thu, 18 Sep 2025 04:20:11 -0700 (PDT)
-Received: from ?IPV6:2403:580d:fda1::299? (2403-580d-fda1--299.ip6.aussiebb.net. [2403:580d:fda1::299])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-33060803335sm2298051a91.24.2025.09.18.04.20.08
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 18 Sep 2025 04:20:10 -0700 (PDT)
-Message-ID: <64692751-9073-4554-96ac-7cad3db48e88@suse.com>
-Date: Thu, 18 Sep 2025 20:50:05 +0930
+        bh=iHi0Djn9pjoeuw2kAszNHnpCYY5ix2jYe9lxD0wWsrY=;
+        b=CTYAzU7A3Bn4NxK2M1zN/wu3riKcR2Tr3ovmV49AsOl/Ef8Qgdbqn52KeZiQ3G874p
+         PgfBlUm6zKh4NTIOlxbWzd0GrnwrJHM5MklbXAkM56Gd15+UV9w6O/Q/qj9QgHbWeWwD
+         vGDaUJXTsZEPMfqJ2/0a6d3iQZKLWF4RMfmkB4remk8wIMp2boZ1WWut9p+iN8+/HKrs
+         Ozd7YzKIHydWbWMIo45HiQSVCwH7wBcGV6x3ejtN08WqqjhbtcHos5k0z00+gHsyc3OT
+         b2xIA8YQ2RUQiLcYFAbtxk+ArccLziHm6gmF43wwA5aQkhTFbRMJiM9xblbAnHBmDLW6
+         jSUQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWZ+zKD0xkYTzQqzH0aC1nirP7y0lNL6JR+mhAST9Z+YQeS+NXTelrXDySJ6UyyXE0Ye2Huy2nz@vger.kernel.org
+X-Gm-Message-State: AOJu0YyPXLthlOUdUPEIolO2lI45L/1eor9PZRKvomFebPME3BbmZFM/
+	W27D8a0tjtx3zMW20Yo02pgUf9F912N0uUO+SPb4VqjeIfDExZrGQLxw+hxg0/R5HD3kNAv5fAd
+	GOc3lb2UVM4my0cPrRLQPSgNVgpOOuPBc42EeAOzroGTl8Wqck17nO8FKtS8=
+X-Gm-Gg: ASbGnct5P9gbJRaR1+w2+RhArk4gvI2IdOB8j7udpUS2I680muP+qUvWzSKi65HNMxo
+	4CSFFuGnfJb3MJoU3F7bE1j1gK9NS0KAaqzEBzh8YLLw4Z5LabP3RpfklaAqdE0W/fyCtjR6ccc
+	11dNQpXWo24jN6iWkiPYCIBBJUEUhVRRcPmak026ZZn2ghX6Gi08hDG904b8tfXItZySX5+GYun
+	4BfMfEs8gxuIhyQkM1n40OrPpesgwF80CTplnMW1G5AAwYGq9xkWXakmsOJCqBYvCSAQNGH2Mpx
+	/E2e4NJkRs6Xshv1KqOne9nUJFT9etr+mvsumJ2b/AeS4TBa72VmsSjIooStJkS1zv54acwL03D
+	Zbna9
+X-Received: by 2002:a17:902:ef48:b0:248:6d1a:4304 with SMTP id d9443c01a7336-269ba50119amr1725405ad.38.1758212147232;
+        Thu, 18 Sep 2025 09:15:47 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGLU7pgjoAnL3Ri3kP/kIOmI3SEhjxxYClOXShBU7Aiqq9kw1kyHDtTZrQxJqAji3pow1cQGQ==
+X-Received: by 2002:a17:902:ef48:b0:248:6d1a:4304 with SMTP id d9443c01a7336-269ba50119amr1724915ad.38.1758212146704;
+        Thu, 18 Sep 2025 09:15:46 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-26980331eccsm29776065ad.123.2025.09.18.09.15.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 18 Sep 2025 09:15:46 -0700 (PDT)
+Date: Fri, 19 Sep 2025 00:15:42 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v2] btrfs: reject fs block size larger than 4K
+Message-ID: <20250918161542.a432gwgfzzbxz4rc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250918103226.99091-1-wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] btrfs/305: skip the run if block size is not 4K
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-References: <20250918105909.102551-1-wqu@suse.com>
- <CAL3q7H6E=pcY12JGvz2Cx=vuDRMprLwptvWtsQ5FevtHpC37xA@mail.gmail.com>
-Content-Language: en-US
-From: Qu Wenruo <wqu@suse.com>
-Autocrypt: addr=wqu@suse.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
- FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXVgBQkQ/lqxAAoJEMI9kfOh
- Jf6o+jIH/2KhFmyOw4XWAYbnnijuYqb/obGae8HhcJO2KIGcxbsinK+KQFTSZnkFxnbsQ+VY
- fvtWBHGt8WfHcNmfjdejmy9si2jyy8smQV2jiB60a8iqQXGmsrkuR+AM2V360oEbMF3gVvim
- 2VSX2IiW9KERuhifjseNV1HLk0SHw5NnXiWh1THTqtvFFY+CwnLN2GqiMaSLF6gATW05/sEd
- V17MdI1z4+WSk7D57FlLjp50F3ow2WJtXwG8yG8d6S40dytZpH9iFuk12Sbg7lrtQxPPOIEU
- rpmZLfCNJJoZj603613w/M8EiZw6MohzikTWcFc55RLYJPBWQ+9puZtx1DopW2jOwE0EWdWB
- rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
- Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
- E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
- vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
- g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
- AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
- cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
- qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
- /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
- o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
- JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
-In-Reply-To: <CAL3q7H6E=pcY12JGvz2Cx=vuDRMprLwptvWtsQ5FevtHpC37xA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250918103226.99091-1-wqu@suse.com>
 
+On Thu, Sep 18, 2025 at 08:02:26PM +0930, Qu Wenruo wrote:
+> [BUG]
+> When running the experimental block size > page support, the test case
+> btrfs/192 fails with the following error:
+> 
+> FSTYP         -- btrfs
+> PLATFORM      -- Linux/x86_64 btrfs-vm 6.17.0-rc4-custom+ #287 SMP PREEMPT_DYNAMIC Thu Sep 18 16:42:54 ACST 2025
+> MKFS_OPTIONS  -- -s 8k /dev/mapper/test-scratch1
+> MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
+> 
+> btrfs/192 436s ... [failed, exit status 1]- output mismatch (see /home/adam/xfstests/results//btrfs/192.out.bad)
+>     --- tests/btrfs/192.out	2022-05-11 11:25:30.746666664 +0930
+>     +++ /home/adam/xfstests/results//btrfs/192.out.bad	2025-09-18 18:34:10.511152624 +0930
+>     @@ -1,2 +1,2 @@
+>      QA output created by 192
+>     -Silence is golden
+>     +ERROR: illegal nodesize 4096 (smaller than 8192)
+>     ...
+>     (Run 'diff -u /home/adam/xfstests/tests/btrfs/192.out /home/adam/xfstests/results//btrfs/192.out.bad'  to see the entire diff)
+> 
+> Please note that, btrfs bs > ps is still under development.
+> This is only an early run to expose false alerts.
+> 
+> [CAUSE]
+> The test case explicitly requires 4K nodesize to bump up tree size.
+> 
+> However if we use fs block size larger than 4K, the node size 4K will be
+> smaller than a block, causing mkfs failure, as block size is the minimal
+> unit for both data and metadata, thus node size smaller than block size
+> is illege.
+> 
+> [FIX]
+> Before calling mkfs on the log-writes dm device, do a simple mkfs and
+> mount of the scratch device, to verify the block size.
+> 
+> If the block size is larger than 4k, skip the test case.
+> 
+> And since we're here, remove the out-of-date page size check, as btrfs
+> has subpage block size support for a while.
+> Instead use a more accurate supported sector size check.
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+> Changelog:
+> v2:
+> - Add the commit message on why we can remove the page size check
+> 
+> - Use _scratch_btrfs_sectorsize() so we do not need to mount/unmount
+>   scratch device
+> 
+> - Add the missing _require_btrfs_support_sectorsize call
+> ---
 
+Hi Qu,
 
-在 2025/9/18 20:47, Filipe Manana 写道:
-> On Thu, Sep 18, 2025 at 11:59 AM Qu Wenruo <wqu@suse.com> wrote:
->>
->> [FALSE ALERT]
->> When running btrfs with block size larger than 4K (e.g. 8K in this
->> case), the test case will fail like this:
->>
->> FSTYP         -- btrfs
->> PLATFORM      -- Linux/x86_64 btrfs-vm 6.17.0-rc4-custom+ #287 SMP PREEMPT_DYNAMIC Thu Sep 18 16:42:54 ACST 2025
->> MKFS_OPTIONS  -- -s 8k /dev/mapper/test-scratch1
->> MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
->>
->> btrfs/305 1s ... - output mismatch (see /home/adam/xfstests/results//btrfs/305.out.bad)
->>      --- tests/btrfs/305.out     2024-07-15 16:17:42.639999997 +0930
->>      +++ /home/adam/xfstests/results//btrfs/305.out.bad  2025-09-18 18:44:14.914196231 +0930
->>      @@ -12,11 +12,9 @@
->>       leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
->>       fs uuid <UUID>
->>       chunk uuid <UUID>
->>      -   item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 16
->>      +   item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 16
->>                          stripe 0 devid 1 physical XXXXXXXXX
->>      -   item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 16
->>      ...
->>      (Run 'diff -u /home/adam/xfstests/tests/btrfs/305.out /home/adam/xfstests/results//btrfs/305.out.bad'  to see the entire diff)
->>
->> In the above case it's the experimental support of block size larger
->> than page size.
->> The feature is still under development.
->>
->> [CAUSE]
->> That test case requires 4K block size, but it has no way to control
->> that, as QA runners can specify MKFS_OPTIONS="-s 8k", to override the
->> default block size.
->>
->> Normally this is impossible as on x86_64 the only supported block size is
->> 4K, already the minimal block size of btrfs. So there is no way to use
->> other block size in that test case.
->>
->> However with the experiemental bs > ps support, even on x86_64 it's
-> 
-> typo in experimental
-> 
->> possible to use 8K block size, and that breaks the 4K block size
->> assumption of the test case.
->>
->> [FIX]
->> Add a quick scratch mkfs, and grab the block size of the resulted fs.
-> 
-> resulted -> resulting
-> 
->> If the block size is not 4K, skip the run.
->>
->> Since we're here, also remove the page size check, since we have subpage
->> block size support for a while, and replace it with a more accurate
->> supported sectorsize check.
->>
->> This more accurate sectorsize support now allows aarch64 (64K page size)
->> to run btrfs/305 successfully, improving the subpage bs support coverage.
->>
->> Signed-off-by: Qu Wenruo <wqu@suse.com>
->> ---
->> Changelog:
->> v2:
->> - Fix the _notrun message to use $blksz instead of the wrong $blocksize
->> ---
->>   tests/btrfs/305 | 8 +++++++-
->>   1 file changed, 7 insertions(+), 1 deletion(-)
->>
->> diff --git a/tests/btrfs/305 b/tests/btrfs/305
->> index ad060853..bd484bbe 100755
->> --- a/tests/btrfs/305
->> +++ b/tests/btrfs/305
->> @@ -22,7 +22,13 @@ _require_btrfs_fs_feature "free_space_tree"
->>   _require_btrfs_free_space_tree
->>   _require_btrfs_no_compress
->>
->> -test $(_get_page_size) -eq 4096 || _notrun "this tests requires 4k pagesize"
->> +_require_btrfs_support_sectorsize 4096
->> +
->> +_scratch_mkfs >> /dev/null
->> +blksz=$(_scratch_btrfs_sectorsize)
->> +if [ $blksz -ne 4096 ]; then
->> +       _notrun "this tests require blocksize 4096, has $blksz"
->> +fi
-> 
-> should be "this test requires a block size of 4096 bytes, have $blocksize"
-> 
-> So at least 3 of the raid stripe tree tests, from btrfs/304,305,306
-> require the same exact fix, why not combine all the fixes in a single
-> patch?
-> I've sent patches for the other two that do exactly the same.
+As this patch only changes btrfs/192, so the subject is better to be
+"btrfs/192: ....", due to "btrfs: ..." makes me think it changes lots
+of btrfs cases, or it's a new btrfs case :)
 
-Right, I'll combine them into one, so we don't need to duplicate the 
-same grammar errors into 3...
+Thanks for you fix many issues about "btrfs 4k sector and block size",
+I saw you keep sending more patches about that, I think you're working
+on this thing recently. Could you please put this patch and others
+"btrfs/304~306" patches or more if you have in one patcheset. Then I'll
+know you've done all you want, and I can merge them together :)
 
 Thanks,
-Qu
+Zorro
+
+
+
+>  tests/btrfs/192 | 11 ++++++++---
+>  1 file changed, 8 insertions(+), 3 deletions(-)
 > 
-> Thanks.
+> diff --git a/tests/btrfs/192 b/tests/btrfs/192
+> index 0a8ab2c1..a9a43cfe 100755
+> --- a/tests/btrfs/192
+> +++ b/tests/btrfs/192
+> @@ -33,10 +33,15 @@ _require_btrfs_mkfs_feature "no-holes"
+>  _require_log_writes
+>  _require_scratch
+>  _require_attrs
+> +_require_btrfs_support_sectorsize 4096
+>  
+> -# We require a 4K nodesize to ensure the test isn't too slow
+> -if [ $(_get_page_size) -ne 4096 ]; then
+> -	_notrun "This test doesn't support non-4K page size yet"
+> +_scratch_mkfs > /dev/null
+> +blksz=$(_scratch_btrfs_sectorsize $SCRATCH_MNT)
+> +
+> +# We need 4K nodesize, and if block size is larger than that mkfs will
+> +# fail. So reject any block size larger than 4K.
+> +if [ $blksz -gt 4096 ]; then
+> +	_notrun "This test requires block size 4096, has $blksz"
+>  fi
+>  
+>  runtime=30
+> -- 
+> 2.51.0
 > 
->>
->>   test_8k_new_stripe()
->>   {
->> --
->> 2.51.0
->>
->>
+> 
 
