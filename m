@@ -1,59 +1,59 @@
 Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6270A27B4E4
-	for <fstests@vger.kernel.org>; Thu, 18 Sep 2025 10:56:55 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 272A32FFF9F
+	for <fstests@vger.kernel.org>; Thu, 18 Sep 2025 10:59:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758193018; cv=none; b=Mr2MR2GPqgskL9MRgQcJyPEyFAhQYrp0sHNZLvFiCxkJX7Nwvcnz5vBrIuux+LvrcRX4adJNbjdee0zzHttHtWBIeeD9r5poRscJ8G/0WXEHYQOcFBktdwFR0nhaA4uaGiP6exheTtiuS+SSAN7tQotiMMIOkJ8UvjoLI+geOjc=
+	t=1758193172; cv=none; b=A97CFMQSeHxr/jcheM4FDrf9dt9OPKUNWok+hGGKG7DyywX28fIjddbJndTPj4iVB2UqoL8zT2au7ulUdYUuhxvh/zwOzLB6N1fG3b3t3cTh4nq9/TaMLHHR0pCZF9XUJB0BBnkkbwzXlYJi5+sgPGVyUhbaIb4ZOB2Qw0Nzi4s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758193018; c=relaxed/simple;
-	bh=w8M56Io3DtV6sb+npIj45xBAetkluyQK9WIS89UQxN4=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=B3J5up05oc7UxlxxxQHZHaZDHp5GbQXnW9FBkcleuHYjp7FqSn/zPSaGQOIpGmCHCKJduoKWGslkm+CpPim4bm5gOaUHHCmugfx0sX5JHEAPrCXYzUdEbR0hkR+eQLcrU3Q9O5IenfQvDdrqakqqAQd7ri4dt0wDfKaHRwhBNhY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=s50DbiBY; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=s50DbiBY; arc=none smtp.client-ip=195.135.223.131
+	s=arc-20240116; t=1758193172; c=relaxed/simple;
+	bh=fwe44n39iiOFOcBiJiyBldHSbp1YT+UHKY4nYWteqHk=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=jmBdTZeGbV3ynVjZ5IWFgT4Q46sCR2yxq+HKx3nbI9974ebZH5vK5EAvVbXUppBHUTIxjSNZUjqQzzkQtZopW0xLsA4vo+cgf53UQ4OXdZ/VD8GD+3oUJUDd+uPEsTSK5KI6NBXUxQIdUduMNUfTWL0JmUf+E4865TfkvlJrilE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=s7cUfCtQ; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=s7cUfCtQ; arc=none smtp.client-ip=195.135.223.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="s50DbiBY";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="s50DbiBY"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="s7cUfCtQ";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="s7cUfCtQ"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 870501F393;
-	Thu, 18 Sep 2025 10:56:53 +0000 (UTC)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 5148A1F393;
+	Thu, 18 Sep 2025 10:59:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1758193013; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	t=1758193168; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
 	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=wUII1B0WaExmnpsPRYlwIRQ6G7d25VaNt2nTWYOjAUg=;
-	b=s50DbiBYX5fcbT8cByNDeyLsOP6JPwNBynA6rwmMQ120r/uEyOy2FatP1+0pJXwWOpoqwa
-	dvMM21kLDLLfefOVb5gB/v0GpZwLT3MdnqziIEF1FVo4jXAGLrwTP2pF0cK11so8yNRj1K
-	U5uLlpyZ42MpMfVnjCOi/XtdjPrhvoU=
+	bh=0gb+TnnIlAOj/mR564zg4oUEOiB5UMGi3/MwcOyAghs=;
+	b=s7cUfCtQw9ufB0MK4M3D2ut/k3hTn9gAUAP9zAgftETp92LD0DhjbJzJIvUKEFpCl0FGta
+	wBdSiQISzkGzx8w3PMKEPU6+HnLn97aW/77D3aP/FHRFqksS5zz9JaqKLp06WWVwHVO+F6
+	ZcCgGj6oDecv3YSV4+ISjeJgz8BrX8s=
 Authentication-Results: smtp-out2.suse.de;
-	none
+	dkim=pass header.d=suse.com header.s=susede1 header.b=s7cUfCtQ
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1758193013; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	t=1758193168; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
 	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=wUII1B0WaExmnpsPRYlwIRQ6G7d25VaNt2nTWYOjAUg=;
-	b=s50DbiBYX5fcbT8cByNDeyLsOP6JPwNBynA6rwmMQ120r/uEyOy2FatP1+0pJXwWOpoqwa
-	dvMM21kLDLLfefOVb5gB/v0GpZwLT3MdnqziIEF1FVo4jXAGLrwTP2pF0cK11so8yNRj1K
-	U5uLlpyZ42MpMfVnjCOi/XtdjPrhvoU=
+	bh=0gb+TnnIlAOj/mR564zg4oUEOiB5UMGi3/MwcOyAghs=;
+	b=s7cUfCtQw9ufB0MK4M3D2ut/k3hTn9gAUAP9zAgftETp92LD0DhjbJzJIvUKEFpCl0FGta
+	wBdSiQISzkGzx8w3PMKEPU6+HnLn97aW/77D3aP/FHRFqksS5zz9JaqKLp06WWVwHVO+F6
+	ZcCgGj6oDecv3YSV4+ISjeJgz8BrX8s=
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 752C913A39;
-	Thu, 18 Sep 2025 10:56:52 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 5290D13A39;
+	Thu, 18 Sep 2025 10:59:27 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id BNaQDXTly2iPdwAAD6G6ig
-	(envelope-from <wqu@suse.com>); Thu, 18 Sep 2025 10:56:52 +0000
+	id ILiYBQ/my2hTeAAAD6G6ig
+	(envelope-from <wqu@suse.com>); Thu, 18 Sep 2025 10:59:27 +0000
 From: Qu Wenruo <wqu@suse.com>
 To: linux-btrfs@vger.kernel.org,
 	fstests@vger.kernel.org
-Subject: [PATCH] btrfs/305: skip the run if block size is not 4K
-Date: Thu, 18 Sep 2025 20:26:26 +0930
-Message-ID: <20250918105626.102204-1-wqu@suse.com>
+Subject: [PATCH v2] btrfs/305: skip the run if block size is not 4K
+Date: Thu, 18 Sep 2025 20:29:09 +0930
+Message-ID: <20250918105909.102551-1-wqu@suse.com>
 X-Mailer: git-send-email 2.50.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -63,28 +63,37 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Spam-Level: 
-X-Spamd-Result: default: False [-2.80 / 50.00];
+X-Spam-Flag: NO
+X-Rspamd-Queue-Id: 5148A1F393
+X-Rspamd-Action: no action
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Spamd-Result: default: False [-3.01 / 50.00];
 	BAYES_HAM(-3.00)[100.00%];
 	NEURAL_HAM_LONG(-1.00)[-1.000];
 	MID_CONTAINS_FROM(1.00)[];
 	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-0.999];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
 	MIME_GOOD(-0.10)[text/plain];
-	RCPT_COUNT_TWO(0.00)[2];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	MX_GOOD(-0.01)[];
 	ARC_NA(0.00)[];
 	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:mid];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	MIME_TRACE(0.00)[0:+];
 	RCVD_COUNT_TWO(0.00)[2];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	MIME_TRACE(0.00)[0:+];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	FROM_HAS_DN(0.00)[];
+	DNSWL_BLOCKED(0.00)[2a07:de40:b281:106:10:150:64:167:received,2a07:de40:b281:104:10:150:64:97:from];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:dkim,suse.com:mid,suse.com:email];
 	TO_MATCH_ENVRCPT_ALL(0.00)[];
 	TO_DN_NONE(0.00)[];
-	RCVD_TLS_ALL(0.00)[]
-X-Spam-Flag: NO
-X-Spam-Score: -2.80
+	RCVD_TLS_ALL(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	RCPT_COUNT_TWO(0.00)[2];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	DKIM_TRACE(0.00)[suse.com:+]
+X-Spam-Score: -3.01
 
 [FALSE ALERT]
 When running btrfs with block size larger than 4K (e.g. 8K in this
@@ -139,11 +148,15 @@ to run btrfs/305 successfully, improving the subpage bs support coverage.
 
 Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
+Changelog:
+v2:
+- Fix the _notrun message to use $blksz instead of the wrong $blocksize
+---
  tests/btrfs/305 | 8 +++++++-
  1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/tests/btrfs/305 b/tests/btrfs/305
-index ad060853..e6e39e84 100755
+index ad060853..bd484bbe 100755
 --- a/tests/btrfs/305
 +++ b/tests/btrfs/305
 @@ -22,7 +22,13 @@ _require_btrfs_fs_feature "free_space_tree"
@@ -156,7 +169,7 @@ index ad060853..e6e39e84 100755
 +_scratch_mkfs >> /dev/null
 +blksz=$(_scratch_btrfs_sectorsize)
 +if [ $blksz -ne 4096 ]; then
-+	_notrun "this tests require blocksize 4096, has $blocksize"
++	_notrun "this tests require blocksize 4096, has $blksz"
 +fi
  
  test_8k_new_stripe()
