@@ -1,152 +1,132 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD07B2E8E08;
-	Thu, 25 Sep 2025 09:30:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C23329B777
+	for <fstests@vger.kernel.org>; Thu, 25 Sep 2025 16:50:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758792634; cv=none; b=U/d+GcolUXqTVv72ekbcCUfCTK96yBzmLfPFJAN+A0w7F/QBoyy/BLcSTJBojhR2OGZSbzmThsW/ME+Hpn/05GymmMUn8fp7N5p48Ohb4Pe59GX2Uwum5nEVDgGq49AHIpacZoqUIPEgH0Vi57COeuu4aUQLfotF8qDvZpSRM5s=
+	t=1758819049; cv=none; b=uxpVvMxKYyDOJc4p0Gi5Oh70VlBBgIUy300Ab8vtCfAw5C9VdCoYzP1elnZ5a4zY9cfxAgzQtLPtRWuqei+EP9EGKUUBojwN+wRN5sd2IBaPo3SvaOOsEM/LkB4olJsd2ImLfl/Mzz9b6K4dBCKM4qf6HF6BxqJrLiWKK1Ge8hE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758792634; c=relaxed/simple;
-	bh=8EdRATLQJC+x0x6sRG682jNp1lICRAVFLuBuRe4iR50=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=qq+KIEGZo2bjYexPo03eq6ZFm42pdo+dNAJtEH5k9/A4Xv/IcJu3MAflgb3tPTwV5/T936fiK8zLA63IW7tFoipsvkQetScz0MVO/lGbvdIiyafnQFXHXhzQyrQSUqS0KkrvMywthL+otaaBBA7QtuByAcKUd0gXnXwDEJ5tySE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WT5Uy8ee; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1758819049; c=relaxed/simple;
+	bh=VKwsXaIBCX9vrwHP5cv/Z/sFqNIDQ0ImhER6MIkNAGY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=RPJgXW1sD7bTJQG35cunwOPPP5rrkFkEB1Tk6dAj0yTkoDmXbO8k579l0/ItrUNWDcz+yoQWm6Y5q86KHoZ+5tOmF/3QtPxESxtSs9j1oZ7Si6/kEFIMtxsPVZ5HUDSEZjUKHVQGGPV6jQPjCBDMBz1248yU185yqPgMNSFNhRg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=o4r/Mcb1; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WT5Uy8ee"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 67843C4CEF7;
-	Thu, 25 Sep 2025 09:30:33 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="o4r/Mcb1"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BD71CC4CEF0;
+	Thu, 25 Sep 2025 16:50:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1758792634;
-	bh=8EdRATLQJC+x0x6sRG682jNp1lICRAVFLuBuRe4iR50=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=WT5Uy8eeAePazQXKu67wHqdQ/WdiAiNMc7+B+kvMkzQjKFzcOXIYJSU6nPxzT/zMx
-	 FxC2qeKa4cwAP9sSUIh1eRZedsmDtHJM5zF4VxUuJ7PPoUY7Vg7V09L0dVlhgQsSYf
-	 hle5GS5IvTf3yo/tX1vZG3s5y5ZMnCq50bdDK+OZUmJrG0EAAlGgjvRNhb9JmYyv/U
-	 RaxMvst519VETElcfB45a+ipMghloUrQcAW/yc7rglCiCMGj3iAvY0fEkaxoy2rKOK
-	 CaTfVYAPH+xgu/2xQ0DJdmHqM93swbsrZQh4c+YY46RwZj7SHp20RU4Xpa8Ry0RRBN
-	 E9QIraur+3lyw==
-From: cem@kernel.org
-To: zlang@redhat.com
-Cc: djwong@kernel.org,
-	linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH 3/3] xfs/539: Remove test for good
-Date: Thu, 25 Sep 2025 11:29:26 +0200
-Message-ID: <20250925093005.198090-4-cem@kernel.org>
-X-Mailer: git-send-email 2.51.0
-In-Reply-To: <20250925093005.198090-1-cem@kernel.org>
-References: <20250925093005.198090-1-cem@kernel.org>
+	s=k20201202; t=1758819046;
+	bh=VKwsXaIBCX9vrwHP5cv/Z/sFqNIDQ0ImhER6MIkNAGY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=o4r/Mcb1m7KNx62fXBCb0RDArDs+K598eTYLJW82cu6wwbuF+1N0bKM7oP6T09o4A
+	 zcFxfV7PDbR1L6JoZ9Uf32ndcSduHQ7WJcoBBaclVwnQDFeb3xAG7ETc1SnxU1h4Y5
+	 /oEh9FeXo9G+YHAGL9LaOInhW8oJ3kucYwhDY5ewfJD1/dvXp5eDzvBRrXMFtPOp+i
+	 3lnNUunCvqDYzrVNen/wiG3ikvD2nLad4MMAElECV/HcxAawfEz/TfHBZS1WQleHhh
+	 2jbz19UGR++iFb8PLsEBXfzceDt8p5Iou170Xc5Dfm8Rd6Rqcfu36mYOEl4ytPSRJ1
+	 4hK1fhR9DcH8g==
+Date: Thu, 25 Sep 2025 09:50:46 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] common/rc: destroy loop dev before fallback recreation
+Message-ID: <20250925165046.GG8092@frogsfrogsfrogs>
+References: <20250924181235.152502-1-bfoster@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250924181235.152502-1-bfoster@redhat.com>
 
-From: Carlos Maiolino <cem@kernel.org>
+On Wed, Sep 24, 2025 at 02:12:35PM -0400, Brian Foster wrote:
+> When running fstests on an s390x box I observed failure to unmount
+> filesystem errors due to stale loop devices being left around. This
+> root caused down to generic/361 leaving around an attached loop0
+> device. On further inspection, the test actually created two loop
+> devices (loop0 and loop1), and executed on and cleaned up the
+> latter.
+> 
+> The origin of the former appears to be that the initial losetup
+> command in _create_loop_device() fails due to $dio_args in this
+> environment, but still creates the loop device. For example:
+> 
+>  # losetup --direct-io=on -f --show /mnt/scratch/fs.img
+>  /dev/loop0
+>  losetup: /dev/loop0: set direct io failed: Invalid argument
 
-This check deprecation warnings are not being printed during remount for
-both attr2 and ikeep mount options.
+Egad following the argument parsing in losetup is awful.  I had thought
+that the -f would set act == ACT_FIND_FREE which would then set up the
+loop device with one configure call, but the error message clearly
+indicates that we're failing here:
 
-Both options are now gone in 6.17, so this test not only is pointless
-from 6.17 and above, but will always fail due the lack of these options.
+	case A_SET_DIRECT_IO:
+		res = loopcxt_ioctl_dio(&lc, use_dio);
+		if (res)
+			warn(_("%s: set direct io failed"),
+			        loopcxt_get_device(&lc));
+		break;
 
-Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
----
- tests/xfs/539     | 72 -----------------------------------------------
- tests/xfs/539.out |  2 --
- 2 files changed, 74 deletions(-)
- delete mode 100755 tests/xfs/539
- delete mode 100644 tests/xfs/539.out
+In this case, we clearly don't tear down the loop device after this
+failure, so yes, you've found a bug.  losetup can totally create a loop
+device, fail to configure it, and return EXIT_FAILURE without tearing
+down that loop device.
 
-diff --git a/tests/xfs/539 b/tests/xfs/539
-deleted file mode 100755
-index 5098be4a9351..000000000000
---- a/tests/xfs/539
-+++ /dev/null
-@@ -1,72 +0,0 @@
--#! /bin/bash
--# SPDX-License-Identifier: GPL-2.0
--# Copyright (c) 2020 Red Hat, Inc.. All Rights Reserved.
--#
--# FS QA Test 539
--#
--# https://bugzilla.kernel.org/show_bug.cgi?id=211605
--# Verify that the warnings are not printed on remount if the mount option has
--# the same value as during the mount
--#
--# Regression test for commit:
--# 92cf7d36384b xfs: Skip repetitive warnings about mount options
--
--. ./common/preamble
--_begin_fstest auto quick mount
--
--# Import common functions.
--
--_fixed_by_kernel_commit 92cf7d36384b \
--	"xfs: Skip repetitive warnings about mount options"
--
--_require_check_dmesg
--_require_scratch
--
--log_tag()
--{
--	echo "fstests $seqnum [tag]" > /dev/kmsg
--}
--
--dmesg_since_test_tag()
--{
--	dmesg | tac | sed -ne "0,\#fstests $seqnum \[tag\]#p" | \
--		tac
--}
--
--check_dmesg_for_since_tag()
--{
--	dmesg_since_test_tag | grep -E -q "$1"
--}
--
--echo "Silence is golden."
--
--# Skip old kernels that did not print the warning yet
--log_tag
--_scratch_mkfs > $seqres.full 2>&1
--_scratch_mount -o attr2
--_scratch_unmount
--check_dmesg_for_since_tag "XFS: attr2 mount option is deprecated" || \
--	_notrun "Deprecation warning are not printed at all."
--
--# Test mount with default options (attr2 and noikeep) and remount with
--# 2 groups of options
--# 1) the defaults (attr2, noikeep)
--# 2) non defaults (noattr2, ikeep)
--_scratch_mount
--for VAR in {attr2,noikeep}; do
--	log_tag
--	_scratch_remount $VAR
--	check_dmesg_for_since_tag "XFS: $VAR mount option is deprecated." && \
--		echo "Should not be able to find deprecation warning for $VAR"
--done
--for VAR in {noattr2,ikeep}; do
--	log_tag
--	_scratch_remount $VAR >> $seqres.full 2>&1
--	check_dmesg_for_since_tag "XFS: $VAR mount option is deprecated" || \
--		echo "Could not find deprecation warning for $VAR"
--done
--_scratch_unmount
--
--# success, all done
--status=0
--exit
-diff --git a/tests/xfs/539.out b/tests/xfs/539.out
-deleted file mode 100644
-index 038993426333..000000000000
---- a/tests/xfs/539.out
-+++ /dev/null
-@@ -1,2 +0,0 @@
--QA output created by 539
--Silence is golden.
--- 
-2.51.0
+>  # losetup -a
+>  /dev/loop0: [64771]:131 (/mnt/scratch/fs.img)
+> 
+> The helper then goes on to create loop1, but it or the test never
+> deals with loop0. To avoid this problem, detach any old loop device
+> if one was set up before the fallback losetup command.
+> 
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> ---
+> 
+> This appears to be fallout from recent commit aa14b84a8d1a2 ("xfs/259:
+> try to force loop device block size"). I'm not really sure why losetup
+> creates the device with bad dio settings but not with block size. Maybe
+> it's more of a dynamic setting or whatever and that's why this was
+> previously a separate losetup command..? Anyways, this seems to work for
+> me..
 
+It probably has to do with the underlying fs not supporting directio or
+something.  What fstype is /mnt/scratch, and which kernel version?
+
+> Brian
+> 
+>  common/rc | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index 81587dad..891f6b7e 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4596,6 +4596,7 @@ _create_loop_device()
+>  	# size to the directio alignment of the underlying fs, so if we want to
+>  	# use our own sector size, we need to specify that at creation time.
+>  	if ! dev="$(losetup $dio_args $args -f --show $file 2>/dev/null)"; then
+> +		test -n "$dev" && losetup -d "$dev" > /dev/null 2>&1
+
+The logic looks sound, but I think there ought to be a comment
+explicitly documenting this behavior of losetup:
+
+		# losetup can create a loop device, fail to configure
+		# it, and return EXIT_FAILURE without tearing down that
+		# loop device.
+		test -n "$dev" && losetup -d "$dev" &>/dev/null
+
+Because I won't remember this subtlety 3 months from now. :(
+
+--D
+
+>  		dev="$(losetup $args -f --show $file)" || \
+>  			_fail "Cannot assign $file to a loop device ($args)"
+>  	fi
+> -- 
+> 2.51.0
+> 
+> 
