@@ -1,106 +1,141 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C99E86353
-	for <fstests@vger.kernel.org>; Fri, 26 Sep 2025 12:08:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 199B41EBA1E
+	for <fstests@vger.kernel.org>; Fri, 26 Sep 2025 15:08:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758888523; cv=none; b=qeIoV4pScAi+lc1YLVGkRjf88HvSLt8/0vXA9unqSa//pknPNObHsMDA/DhZCd9fLk5i37/LWyGtq27oX8UtSFcT0+dOn29mjBQDr2u/4M7oq1CoEshdZOaTOFFfT8vCn8CHhvx3zYHuZTk3CBpE7yhARVO4rHi8w+b+1gzP6Ng=
+	t=1758899334; cv=none; b=RehXv72nkZQYU/kafVS/Cs1ORUZhld5M6I9q3XV5OI4+uh0eamlTcErRre1N/v8FFK2jfhlU7FftYttmX7SqE+Uf3AbO5uNWaUf8unxWc9iqov29w7h+KJY5emOk2afs7GUHm1LtysSqhoxHuXywhqr3U/T/cs0ZDJOoPNjVsJY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758888523; c=relaxed/simple;
-	bh=oxS5Z8DxejhVRs8AjfZlZYBGpgk5MOQQEVBuVOPm/h8=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=HFJd28ZGIaTzeeFsZEUFllb8Cq7N6udifrV5/5ILJLcMg0/P4pSmgSMXZuXcNORfZoI5H13hn2Pj7xX/qg34U5mardx6mGo/hxwuPYjr2qUGeApXU2a0QcGkG1tgjmfYWzbmztAkaV0ESr1wvFmR0QvcZttIr7AhO1N8iZOIJ3c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=iTf4vnJ7; arc=none smtp.client-ip=170.10.133.124
+	s=arc-20240116; t=1758899334; c=relaxed/simple;
+	bh=Nzwdg6o8Epi7xB41PjiO/aHDCrUJscT3sEFMw4jKdcQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Gz/szJtOSnBeP8Z8NsfcPwoWPPYAe+hflB1DI6Mad+A2WSIgArV+6t1hW/fI8A5ezx/lLTqaFEJ6q3z47+y1eHiCfdflTAXXEgKDDcNC3aVRnNlWZG9SkSR5FtVXGQ1BY2ioADHXH9aahx0Pm7vuxJalDhXvjTwZdP2wP/dBj+I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=PVegEexz; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="iTf4vnJ7"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PVegEexz"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1758888521;
+	s=mimecast20190719; t=1758899332;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=xA3ZAYYPUthY3FOGQdCaRdV4bXoymfBfBOZrbI6WPM4=;
-	b=iTf4vnJ7Rt5yAny3KPxZPwcUqMeo3gsJY7YJx6EtzSyFUTgIRgx9jZmpd3V6StM5d5Dcw8
-	PjN52NZFP4Pb9Eu3Dxohwc+Z3aGtxYxMduZ0klAfJ57Q8Sks5xENwBtqhgxvA4LV5EgzWB
-	1t1yzB8EaAb8bwscCFqiwsOZ5EKk9Lw=
-Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-374-7FcSK703N1yKBVXJkU2T0w-1; Fri,
- 26 Sep 2025 08:08:39 -0400
-X-MC-Unique: 7FcSK703N1yKBVXJkU2T0w-1
-X-Mimecast-MFC-AGG-ID: 7FcSK703N1yKBVXJkU2T0w_1758888518
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 8C3B8195605B;
-	Fri, 26 Sep 2025 12:08:38 +0000 (UTC)
-Received: from bfoster.redhat.com (unknown [10.22.64.134])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id E38951956095;
-	Fri, 26 Sep 2025 12:08:37 +0000 (UTC)
-From: Brian Foster <bfoster@redhat.com>
-To: fstests@vger.kernel.org
-Cc: djwong@kernel.org
-Subject: [PATCH v2] common/rc: destroy loop dev before fallback recreation
-Date: Fri, 26 Sep 2025 08:12:49 -0400
-Message-ID: <20250926121249.214798-1-bfoster@redhat.com>
+	 in-reply-to:in-reply-to:references:references;
+	bh=E+UA9/4sihT6+ga8fp0raxdh1Y6GmJgTf+A2TwhFLjc=;
+	b=PVegEexz2om0RTVpCX6RCc9HUhR1IJ7Ua9YJIeMIaMJJcuM+WPscKthJl+/kYrTBfeM/2+
+	OYoz/UP+KJN9XPbSJ1ZgwsRvK4e0OloDdwtfaMZF3tiRJw0hpBjunu9mm2LuantzQ/jL0E
+	LxOlCSt+Gmbpa3ctY4/AVyljfxrlMqI=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-153-PxqxwhaGPxeXtb0E91Q0pQ-1; Fri, 26 Sep 2025 11:08:50 -0400
+X-MC-Unique: PxqxwhaGPxeXtb0E91Q0pQ-1
+X-Mimecast-MFC-AGG-ID: PxqxwhaGPxeXtb0E91Q0pQ_1758899329
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2699ed6d43dso24726555ad.1
+        for <fstests@vger.kernel.org>; Fri, 26 Sep 2025 08:08:50 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1758899329; x=1759504129;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=E+UA9/4sihT6+ga8fp0raxdh1Y6GmJgTf+A2TwhFLjc=;
+        b=aPO56lHSvsHE2BtSnEKH/lfF6S4EAhzxKdnkTFnD/kMjXetvW3MNZSURMbZYtF3fUH
+         8BCxnXgSTZ5KStb8tJQp+xgMOiVdjO0kNwHbDAcOpvDFTyDN8fQn2s85h9DghgkrNKPN
+         sKHwoxYv2Dpve+NahxmJgiIHNDHUhrZtYUK05Idk4wHLpkBMRmgfB/qmh8LaCwr6+PHL
+         ZZylBnvQninvTlS9qdbkKODIgQzJYDbC34yXY2Hwil2Nuo3zSxZv3wjXqP8dVnUEiWHK
+         N9P99im5UdKksWB+9MvbgWoi7JHtpDrpVQ5AtstW3p5l/Lb3OoCVgLAm0mllgKG2gVcx
+         F9ug==
+X-Gm-Message-State: AOJu0YzGqiRxITZFJffRgkrSSEHnTiUVrfuzSzyIgIw1gM16OK04w4pu
+	D9EJMBmkTDyO4+NXfmUSTT8w57Xp0cAMIjZkySm3o7ZqmjnpAl9hJPWHlvBwqD5iyIfsxH74BSi
+	qnxkx+FRjLM50e62MjdvcHJjXffkO3yLnusf1aT2hA1OdWVQIRruT9PHcdBE=
+X-Gm-Gg: ASbGncuTBCZ+poyVG7t8JHckwzGzZxlvm2SaSU5qrhvfhUojxYCureo6iKrALULlGif
+	hp/WB6Msl+cIzNSAqKn5WRyFV/QjMu56auoVcGXU7s3yssPn5STkUkz2APV5u4awPWL1bel6agm
+	ogHJ+17XBUzmIX4zxjifEeXHAmIIwuU8QKOeUfjci1Dw1IAMdk27KBbkLlHQR0F0e+1ZNp7z7ZH
+	zP6KxZ9JBP6eswLnQwqdd9NIHtYbZTR3e/boYJXme2zWvpeqzpSe7+4ShA3zSCkO3NeRn6R1oal
+	OnByudSMr8kPJFfPsjNZ+V4/Yq9B8GSmY/h0ENJTQKs8UBgjXOMVAM9qjmQuTWDLNIok4YbZOal
+	uEeMg
+X-Received: by 2002:a17:902:c409:b0:275:f156:965c with SMTP id d9443c01a7336-27ed4ade26bmr90389345ad.52.1758899329505;
+        Fri, 26 Sep 2025 08:08:49 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IF5/jyd+KDYBoNbXQ/Ez1q83B/qAFalkBiRoSO5hRTJUWk1YcB/L/dWS00/3xCyBJekn8aabA==
+X-Received: by 2002:a17:902:c409:b0:275:f156:965c with SMTP id d9443c01a7336-27ed4ade26bmr90388985ad.52.1758899329020;
+        Fri, 26 Sep 2025 08:08:49 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-27ed69952a7sm57373875ad.101.2025.09.26.08.08.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 26 Sep 2025 08:08:48 -0700 (PDT)
+Date: Fri, 26 Sep 2025 23:08:44 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org, djwong@kernel.org
+Subject: Re: [PATCH v2] common/rc: destroy loop dev before fallback recreation
+Message-ID: <20250926150844.7mp2soi2koanxyxe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250926121249.214798-1-bfoster@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250926121249.214798-1-bfoster@redhat.com>
 
-When running fstests on an s390x box I observed failure to unmount
-filesystem errors due to stale loop devices being left around. This
-root caused down to generic/361 leaving around an attached loop0
-device. On further inspection, the test actually created two loop
-devices (loop0 and loop1), and executed on and cleaned up the
-latter.
+On Fri, Sep 26, 2025 at 08:12:49AM -0400, Brian Foster wrote:
+> When running fstests on an s390x box I observed failure to unmount
+> filesystem errors due to stale loop devices being left around. This
+> root caused down to generic/361 leaving around an attached loop0
+> device. On further inspection, the test actually created two loop
+> devices (loop0 and loop1), and executed on and cleaned up the
+> latter.
+> 
+> The origin of the former appears to be that the initial losetup
+> command in _create_loop_device() fails due to $dio_args in this
+> environment, but still creates the loop device. For example:
+> 
+>  # losetup --direct-io=on -f --show /mnt/scratch/fs.img
+>  /dev/loop0
+>  losetup: /dev/loop0: set direct io failed: Invalid argument
+>  # losetup -a
+>  /dev/loop0: [64771]:131 (/mnt/scratch/fs.img)
+> 
+> The helper then goes on to create loop1, but it or the test never
+> deals with loop0. To avoid this problem, detach any old loop device
+> if one was set up before the fallback losetup command.
+> 
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> ---
 
-The origin of the former appears to be that the initial losetup
-command in _create_loop_device() fails due to $dio_args in this
-environment, but still creates the loop device. For example:
 
- # losetup --direct-io=on -f --show /mnt/scratch/fs.img
- /dev/loop0
- losetup: /dev/loop0: set direct io failed: Invalid argument
- # losetup -a
- /dev/loop0: [64771]:131 (/mnt/scratch/fs.img)
 
-The helper then goes on to create loop1, but it or the test never
-deals with loop0. To avoid this problem, detach any old loop device
-if one was set up before the fallback losetup command.
+> 
+> v2:
+> - Add comment to document wonky losetup behavior.
+> v1: https://lore.kernel.org/fstests/20250924181235.152502-1-bfoster@redhat.com/
+> 
+>  common/rc | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index 81587dad..1ec84263 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4596,6 +4596,9 @@ _create_loop_device()
+>  	# size to the directio alignment of the underlying fs, so if we want to
+>  	# use our own sector size, we need to specify that at creation time.
+>  	if ! dev="$(losetup $dio_args $args -f --show $file 2>/dev/null)"; then
+> +		# losetup can return error for certain configuration settings
+> +		# but still create a loop device.
+> +		test -n "$dev" && losetup -d "$dev" > /dev/null 2>&1
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
----
+I'm not sure if "-b" is better than "-n", anyway "-n" makes sense too.
 
-v2:
-- Add comment to document wonky losetup behavior.
-v1: https://lore.kernel.org/fstests/20250924181235.152502-1-bfoster@redhat.com/
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
- common/rc | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/common/rc b/common/rc
-index 81587dad..1ec84263 100644
---- a/common/rc
-+++ b/common/rc
-@@ -4596,6 +4596,9 @@ _create_loop_device()
- 	# size to the directio alignment of the underlying fs, so if we want to
- 	# use our own sector size, we need to specify that at creation time.
- 	if ! dev="$(losetup $dio_args $args -f --show $file 2>/dev/null)"; then
-+		# losetup can return error for certain configuration settings
-+		# but still create a loop device.
-+		test -n "$dev" && losetup -d "$dev" > /dev/null 2>&1
- 		dev="$(losetup $args -f --show $file)" || \
- 			_fail "Cannot assign $file to a loop device ($args)"
- 	fi
--- 
-2.51.0
+>  		dev="$(losetup $args -f --show $file)" || \
+>  			_fail "Cannot assign $file to a loop device ($args)"
+>  	fi
+> -- 
+> 2.51.0
+> 
+> 
 
