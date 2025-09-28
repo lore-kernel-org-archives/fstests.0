@@ -1,69 +1,69 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC62A2BF3CC
-	for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 08:55:24 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97650235BEE
+	for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 13:19:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759049726; cv=none; b=gEjg3dTrdVJoxxHC5ryOf2gnGuMh3/FVPjqGN4GreJTvAKM/mUyckehvEAGRNvijkTxOmS7RX4OsvG572/SRZRL6Q0tAMdaBDV9kf7hTuIohDDxiWtmIxC78hEE3PYooW2h8/SLDNVxbJlGjAymaSkVRwXrjYMllGbfiIDs1Yqk=
+	t=1759065576; cv=none; b=DRaL5LJ1O90qxgQsxBqj5iJomtf6OWVivg6F2zkOtOuGwTo9X51HPjwEBVdbgyKg5wTiuytplgYzJl0bgXEkSv+nwoqR5ENN1Rs5RnX7w46IcSH0KIMXpXs12xzqGyxfI/TbYOkiYNVpSh1AAbNo/o2iCTrxTU/fvbyVzPz+TJw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759049726; c=relaxed/simple;
-	bh=47L4z2ZubzufgHKx7Sf83hXtAFm/muAd2nyS7yOjgY4=;
+	s=arc-20240116; t=1759065576; c=relaxed/simple;
+	bh=KczxhiO3rq4LfuMibjOQzQvDn+yuz+agq6FXGFipxHM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IFFnLjLvH6pIsXCb76OZ0lqnbec/DihAMqU1vJ+iMxJpkLOTSpfvY9KxKqG1Z5mE+IOkDWCw1qw5AtruMnBYFGgxls9Nz6sPVfBZU6XqMUFrzTZ3KbtK2RRWagfShToUKdD5iwp0E41lqZTddJMAcCblt+zpJUjlGUcOu1zdAkg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=dYAMo1eJ; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=lQyfXb0fJUeh1+hutiMso4kC2XqHAsrfRn1nyQsoJczUZgtkNSOqwkbB901IKmu+2+5f7OhL8shUy7l4ND6AdPcAb7i/5avL+iGHvrv/af8+tCm8zEJO0Dtd1V1MYV5WjDCrIxOtHtbjm1agUaJY1IuUKCRSUUD2IzpDWOCp2C4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=FT4GYT/2; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dYAMo1eJ"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FT4GYT/2"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1759049723;
+	s=mimecast20190719; t=1759065573;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=d1S5xY96n9JukFLzowEfCehiE9MIZUz+dxfbandNPMg=;
-	b=dYAMo1eJ8P1eEfn1Lx1M/mf6NkVYpR3S81b/wFw0nlHPkeaUS6S2IQpACRD4jkvX1o7W+3
-	u+H88yJDE59Ayr7BHKlGtoPS+W0LiACv4YgOGxCkZl48DjVc9twHlB7kag44cqrJwjAu/q
-	IFhVJ7a/mJ0pY7Xbkfja81+ltKl84yA=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=snNrG5EeW/S+hcRKJgw63KoPcdk3l0w22xmJa+ekRf8=;
+	b=FT4GYT/2++6njNY53SO4lAdnJ03aiJai0sDAVcmd3rnbBGoLcfkJhTTjDthSJr3zCN7akJ
+	cuJ6GiCDFkCKJ3sTabyUpbFoLOme55yAWRyKyGj/HwMRGzjGI8uMg6yqcsKiYazbUrHJgg
+	AnjjmCM5fVEkduWtzP17IJm5Ni2waWU=
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
+ [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-558-hclLX0c5NyG7tzdhNxIwXg-1; Sun, 28 Sep 2025 04:55:22 -0400
-X-MC-Unique: hclLX0c5NyG7tzdhNxIwXg-1
-X-Mimecast-MFC-AGG-ID: hclLX0c5NyG7tzdhNxIwXg_1759049721
-Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-b57cf8dba28so2556272a12.1
-        for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 01:55:22 -0700 (PDT)
+ us-mta-528-xIqHjOinOnSE_E7nuA19Jg-1; Sun, 28 Sep 2025 09:19:32 -0400
+X-MC-Unique: xIqHjOinOnSE_E7nuA19Jg-1
+X-Mimecast-MFC-AGG-ID: xIqHjOinOnSE_E7nuA19Jg_1759065571
+Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-781269a9049so2268674b3a.2
+        for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 06:19:31 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759049721; x=1759654521;
+        d=1e100.net; s=20230601; t=1759065571; x=1759670371;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=d1S5xY96n9JukFLzowEfCehiE9MIZUz+dxfbandNPMg=;
-        b=hHsmIMKigA5OjjDImJ1+UeV8PGwiBJdhvsOTjuCkI67M1QFUQc/lHeGqHcWzXWcs3B
-         lIJ2Mk4S7Q5sNTGzT/3K9dVAWI3T3tGQKPd9V2SXAkMm/5rClX+SCYWRwrFq9WzYMFeD
-         OUwW38n/9EBAnn+bs/Hj5EdUr26TuH8IbWP0foKcb2L/MbtcNF8mGIrhSXxrwvjr1HpS
-         FmnbP4muQOMKn0M12G49FxiYjR1NtTh7sRQZxNVpnLt5Xsym7/vkW63q6Tq6xYH/qPUz
-         6vhQndCTKhqh2aM28bmayUGkAzF5Tt4q3+wtjdly7TwJu3/XsLyIgetpD994ai3s5hPs
-         pWKQ==
-X-Gm-Message-State: AOJu0Yz96DOPkgq877+oTQGMGYWlqB87WOJK2VoeiPec5mSN+uFAuSGe
-	31tr4VR0uHn//CxYRuQ2f3Pf5LZPDn2o4x0pbG/Qc1i8We2HbBoU64xM8LKFo7t+Pm1OEu8V5YT
-	NHM6HJG4jxlN/uh/ae3m0JHr5tHflqHahdd0/v50guUIHC95IB6um2DUJ1Qg=
-X-Gm-Gg: ASbGncuyL7qybdxNFYxxWpvk4L77B/OJtdveYlhsaLJ4HJpX/hztiudBr8HZR1qDhtv
-	MhtlxdmTFF2jkJcMg2e879US6DaKB0Bv8nqQe/BbKeHnCdn5JqUC+KUCW2kRSPFAQQa/oWSNVdH
-	NpRA28A3X56QwOXfE0VvNgNLyGZJVXN726M7PkeKlKzoQXWuqlNqdwEq41f2N5zfm8bVXV2W+Qo
-	h3kcjrU5LBRAu3Ib1Hf2BrBEHB6LJB2ytlSpNf7bldVBAKOVenJh5lL+TLEJll6J+dXVikNJxbM
-	dTEi5V8FcR95IvI+KZXM0hWvwzgXiSqT7jTZHYTfd2TJqPO7XS24nsqJtObPu9jW8nNuPBfRYDk
-	A5CmZ
-X-Received: by 2002:a17:902:ec89:b0:27e:f06b:ae31 with SMTP id d9443c01a7336-27ef06bb0b8mr88880065ad.61.1759049721227;
-        Sun, 28 Sep 2025 01:55:21 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHDc1Umotj4jXQHlcyKodu4MkpzRnRU3+gH6QjdJJVK9GnYoAoP2k6fHZFQhnUMYVj73kDMjw==
-X-Received: by 2002:a17:902:ec89:b0:27e:f06b:ae31 with SMTP id d9443c01a7336-27ef06bb0b8mr88879845ad.61.1759049720665;
-        Sun, 28 Sep 2025 01:55:20 -0700 (PDT)
+        bh=snNrG5EeW/S+hcRKJgw63KoPcdk3l0w22xmJa+ekRf8=;
+        b=IAn8GKDzJi8IZHZkX4LQVujOmaejlm16ScNT5A339O0+impcvDiax7G0rnFLsJre9/
+         FIsr+SAP434i9py7uxXCzF4wwvhvSduOysN5WMGKJOW+qxnleid6GLhv7/XPCnZF8rPq
+         D9XDsOxNvnCn944qzE3wgz4WNx6wcP3PTRQ25RPN+2O650nHLbZO7oZ6S53EFGW8GfSv
+         DzQDBqLWrI9q7NgH3t+04r5WGy+/nwqoTLtg3CKH6lnoXYP0oA0Xi+uH+iSbeW2LQBlN
+         XkbYLgHl1zvPBWcLsn2/FVNzFYaqRnJJIrQKN+ZE3jupJhZO8EXSChDx8g5OeWMqMEyq
+         b0mg==
+X-Gm-Message-State: AOJu0YwHSC41xToLCCoBKNhvkn2PEne3y77YK+A+QuysbN7AzMODbtEa
+	yI2GvV5iuCEchoPBp6yHxCEEpOF/A2pdhTGolRtH9F5Plh50MLtd19nRoOEvKWEYdiPOPHebuKW
+	RL06PXYspZuio0fKo8etXylKYLU4B5fkzU8+Q5fPrD3TeWwI5HQHZVtMAFDo=
+X-Gm-Gg: ASbGncstHJVEL6vJ3C2AQInq4wXsq97esjiwIucbmJc1Hm8emqz+koVyQlw/ssMjLE0
+	KjekE5QxJaMTFYoe4tgSEw/gtsSL01OQl4zoWB0W4UOXG0VXrPSmyotGvRybA6N7G/TiNWlYYzT
+	s9rVtlkuvDbj4EPg1LSnA5RLOyzRaTmjE5y690P5JNi6aOSSeEGNFORr2uQvwLxd5woHDXxrNFo
+	UaNLCn/rfy6I0IlmU/DBIlYbzZk9tJL4c2eLS0/lJBGuLooiEYgZJNIADxcTJU4DV7cpvRiUERW
+	J/sQLftGL+hyvlW8vYPjAn/eZG5JW4ZwbmgyZjZU3PT6us/FvYGE9o4vRfpIGo73zImcW0t3BvA
+	iWT3Z
+X-Received: by 2002:a05:6a00:3e27:b0:781:2538:bf95 with SMTP id d2e1a72fcca58-7812538c1afmr5753911b3a.10.1759065571014;
+        Sun, 28 Sep 2025 06:19:31 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGoygR7HngElZikzt76IKHuWl2MqmxpbWRCgwmp2pHOfMa3v0CliuV3U0gtlzeqwn7G94AEeQ==
+X-Received: by 2002:a05:6a00:3e27:b0:781:2538:bf95 with SMTP id d2e1a72fcca58-7812538c1afmr5753895b3a.10.1759065570588;
+        Sun, 28 Sep 2025 06:19:30 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-27ed65e8e89sm101399075ad.0.2025.09.28.01.55.17
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-782e36c803fsm2078160b3a.38.2025.09.28.06.19.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 28 Sep 2025 01:55:20 -0700 (PDT)
-Date: Sun, 28 Sep 2025 16:55:14 +0800
+        Sun, 28 Sep 2025 06:19:30 -0700 (PDT)
+Date: Sun, 28 Sep 2025 21:19:24 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
@@ -71,7 +71,7 @@ Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
 	linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
 	linux-ext4@vger.kernel.org
 Subject: Re: [PATCH v7 04/12] ltp/fsx.c: Add atomic writes support to fsx
-Message-ID: <20250928085514.6cosenx2n2kipu2w@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Message-ID: <20250928131924.b472fjxwir7vphsr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <cover.1758264169.git.ojaswin@linux.ibm.com>
  <c3a040b249485b02b569b9269b649d02d721d995.1758264169.git.ojaswin@linux.ibm.com>
 Precedence: bulk
@@ -93,6 +93,15 @@ On Fri, Sep 19, 2025 at 12:17:57PM +0530, Ojaswin Mujoo wrote:
 > Reviewed-by: John Garry <john.g.garry@oracle.com>
 > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 > ---
+
+Hmm... this patch causes more regular fsx test cases fail on old kernel,
+(e.g. g/760, g/617, g/263 ...) except set "FSX_AVOID=-a". Is there a way
+to disable "atomic write" automatically if it's not supported by current
+system?
+
+Thanks,
+Zorro
+
 >  ltp/fsx.c | 115 +++++++++++++++++++++++++++++++++++++++++++++++++++---
 >  1 file changed, 110 insertions(+), 5 deletions(-)
 > 
@@ -244,33 +253,6 @@ On Fri, Sep 19, 2025 at 12:17:57PM +0530, Ojaswin Mujoo wrote:
 > +	if (o_direct != O_DIRECT) {
 > +		fprintf(stderr, "main: atomic writes need O_DIRECT (-Z), "
 > +				"disabling!\n");
-
-This patch causes some fsx test cases fail (e.g. g/127, g/231) as:
-
---- /dev/fd/63	2025-09-26 17:25:48.413212392 -0400
-+++ generic/127.out.bad	2025-09-26 17:25:48.177803644 -0400
-@@ -1,7 +1,13 @@
- QA output created by 127
-+main: atomic writes need O_DIRECT (-Z), disabling!
- All 100000 operations completed A-OK!
-+main: atomic writes need O_DIRECT (-Z), disabling!
- All 100000 operations completed A-OK!
-+main: atomic writes need O_DIRECT (-Z), disabling!
- All 100000 operations completed A-OK!
-+main: atomic writes need O_DIRECT (-Z), disabling!
- All 100000 operations completed A-OK!
-+main: atomic writes need O_DIRECT (-Z), disabling!
- All 100000 operations completed A-OK!
-+main: atomic writes need O_DIRECT (-Z), disabling!
- All 100000 operations completed A-OK!
-
-Due to you didn't deal with the "-q" (quiet) option at here. If you don't have
-objection, I'll change this part as:
-
-  if (o_direct != O_DIRECT && !quiet)
-
-And ...
-
 > +		return 0;
 > +	}
 > +
@@ -291,18 +273,6 @@ And ...
 > +
 > +	fprintf(stderr, "main: IO Stack does not support "
 > +			"atomic writes, disabling!\n");
-
-... change this line as:
-
-if (!quiet)
-	fprintf(stderr, "main: IO Stack does not support "
-			"atomic writes, disabling!\n");
-
-When I merge it.
-
-Thanks,
-Zorro
-
 > +	return 0;
 > +}
 > +
