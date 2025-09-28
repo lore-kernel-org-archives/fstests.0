@@ -1,141 +1,380 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9BCD2BEC42
-	for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 08:53:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC62A2BF3CC
+	for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 08:55:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759049582; cv=none; b=LHOX0vlz9f9xQCs0+H0RV5+i8wv7bIQpD/tM6jPKrgpDW69CuHF2Ipu15k0FlRKUY2cvfwNeFESVmg+MRfkwL0BjCyyHGJBUpbHUzSxdnA68etqdGzNoObLooAuBN+3m60Y89OxWMNpxxZgNZExabuo8BwkE3AXIiyUY+ETdpWc=
+	t=1759049726; cv=none; b=gEjg3dTrdVJoxxHC5ryOf2gnGuMh3/FVPjqGN4GreJTvAKM/mUyckehvEAGRNvijkTxOmS7RX4OsvG572/SRZRL6Q0tAMdaBDV9kf7hTuIohDDxiWtmIxC78hEE3PYooW2h8/SLDNVxbJlGjAymaSkVRwXrjYMllGbfiIDs1Yqk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759049582; c=relaxed/simple;
-	bh=Ba3s8CZ9Sh7orNoDoBFCVy6+HFnC2PXzqvsdQw7kHSE=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=khIDN5cMViAX84Lr2UT5MMyXtZnGuKjHxcfAXkBJTojA21rwfkz2D2k+SSS+MzFKyPAnfEjelzTukzj+/QMQrqIy4qz3uX+Y7PL4tPpNhtzoSKZBNsL4xo+ZiC5pC2CBtiRCAGBoNPdiU1KbVMl8q3UO9IPqjBLGVNydxUp3pWM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jc/aRr25; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1759049726; c=relaxed/simple;
+	bh=47L4z2ZubzufgHKx7Sf83hXtAFm/muAd2nyS7yOjgY4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=IFFnLjLvH6pIsXCb76OZ0lqnbec/DihAMqU1vJ+iMxJpkLOTSpfvY9KxKqG1Z5mE+IOkDWCw1qw5AtruMnBYFGgxls9Nz6sPVfBZU6XqMUFrzTZ3KbtK2RRWagfShToUKdD5iwp0E41lqZTddJMAcCblt+zpJUjlGUcOu1zdAkg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=dYAMo1eJ; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jc/aRr25"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 433CDC116B1;
-	Sun, 28 Sep 2025 08:53:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1759049582;
-	bh=Ba3s8CZ9Sh7orNoDoBFCVy6+HFnC2PXzqvsdQw7kHSE=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=jc/aRr25flDU00t8YIcZZnzKyeXVnl1knO3csJW9eXK3KO7SaDYzaJbsLDi3Rhvmq
-	 QCLBeVIPvrlrJ2HmG/ZwtBlyV5HDmVI7ygLdgjbzyXDsyoUdSMVqZDPSFpUQObAAzB
-	 I5zL7YawFv9YsPadNPpJZqr5lrOD/951X4W4jAPNzErLoG6hSixnTWjZ1TFKmdzmOo
-	 aNXxuq5qYoKZRlHezBCk2sYiIwvhRWsnAmSNe2hAho81mc4CoNBGgaB6wHBV7CtyLz
-	 42t8O3Qq6Km2TXiYUddDYwjZPKrpFWB6U4O9UQWddKSxy3wym+R0wZCF6QrsC+LFI3
-	 EkwfewwKF0AOw==
-From: Chao Yu <chao@kernel.org>
-To: Zorro Lang <zlang@kernel.org>,
-	fstests@vger.kernel.org
-Cc: jaegeuk@kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net,
-	Chao Yu <chao@kernel.org>
-Subject: [PATCH v2 2/2] f2fs/022: do sanity check on footer of non inode dnode
-Date: Sun, 28 Sep 2025 16:34:42 +0800
-Message-Id: <20250928083442.7955-2-chao@kernel.org>
-X-Mailer: git-send-email 2.40.1
-In-Reply-To: <20250928083442.7955-1-chao@kernel.org>
-References: <20250928083442.7955-1-chao@kernel.org>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dYAMo1eJ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1759049723;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=d1S5xY96n9JukFLzowEfCehiE9MIZUz+dxfbandNPMg=;
+	b=dYAMo1eJ8P1eEfn1Lx1M/mf6NkVYpR3S81b/wFw0nlHPkeaUS6S2IQpACRD4jkvX1o7W+3
+	u+H88yJDE59Ayr7BHKlGtoPS+W0LiACv4YgOGxCkZl48DjVc9twHlB7kag44cqrJwjAu/q
+	IFhVJ7a/mJ0pY7Xbkfja81+ltKl84yA=
+Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
+ [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-558-hclLX0c5NyG7tzdhNxIwXg-1; Sun, 28 Sep 2025 04:55:22 -0400
+X-MC-Unique: hclLX0c5NyG7tzdhNxIwXg-1
+X-Mimecast-MFC-AGG-ID: hclLX0c5NyG7tzdhNxIwXg_1759049721
+Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-b57cf8dba28so2556272a12.1
+        for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 01:55:22 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1759049721; x=1759654521;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=d1S5xY96n9JukFLzowEfCehiE9MIZUz+dxfbandNPMg=;
+        b=hHsmIMKigA5OjjDImJ1+UeV8PGwiBJdhvsOTjuCkI67M1QFUQc/lHeGqHcWzXWcs3B
+         lIJ2Mk4S7Q5sNTGzT/3K9dVAWI3T3tGQKPd9V2SXAkMm/5rClX+SCYWRwrFq9WzYMFeD
+         OUwW38n/9EBAnn+bs/Hj5EdUr26TuH8IbWP0foKcb2L/MbtcNF8mGIrhSXxrwvjr1HpS
+         FmnbP4muQOMKn0M12G49FxiYjR1NtTh7sRQZxNVpnLt5Xsym7/vkW63q6Tq6xYH/qPUz
+         6vhQndCTKhqh2aM28bmayUGkAzF5Tt4q3+wtjdly7TwJu3/XsLyIgetpD994ai3s5hPs
+         pWKQ==
+X-Gm-Message-State: AOJu0Yz96DOPkgq877+oTQGMGYWlqB87WOJK2VoeiPec5mSN+uFAuSGe
+	31tr4VR0uHn//CxYRuQ2f3Pf5LZPDn2o4x0pbG/Qc1i8We2HbBoU64xM8LKFo7t+Pm1OEu8V5YT
+	NHM6HJG4jxlN/uh/ae3m0JHr5tHflqHahdd0/v50guUIHC95IB6um2DUJ1Qg=
+X-Gm-Gg: ASbGncuyL7qybdxNFYxxWpvk4L77B/OJtdveYlhsaLJ4HJpX/hztiudBr8HZR1qDhtv
+	MhtlxdmTFF2jkJcMg2e879US6DaKB0Bv8nqQe/BbKeHnCdn5JqUC+KUCW2kRSPFAQQa/oWSNVdH
+	NpRA28A3X56QwOXfE0VvNgNLyGZJVXN726M7PkeKlKzoQXWuqlNqdwEq41f2N5zfm8bVXV2W+Qo
+	h3kcjrU5LBRAu3Ib1Hf2BrBEHB6LJB2ytlSpNf7bldVBAKOVenJh5lL+TLEJll6J+dXVikNJxbM
+	dTEi5V8FcR95IvI+KZXM0hWvwzgXiSqT7jTZHYTfd2TJqPO7XS24nsqJtObPu9jW8nNuPBfRYDk
+	A5CmZ
+X-Received: by 2002:a17:902:ec89:b0:27e:f06b:ae31 with SMTP id d9443c01a7336-27ef06bb0b8mr88880065ad.61.1759049721227;
+        Sun, 28 Sep 2025 01:55:21 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHDc1Umotj4jXQHlcyKodu4MkpzRnRU3+gH6QjdJJVK9GnYoAoP2k6fHZFQhnUMYVj73kDMjw==
+X-Received: by 2002:a17:902:ec89:b0:27e:f06b:ae31 with SMTP id d9443c01a7336-27ef06bb0b8mr88879845ad.61.1759049720665;
+        Sun, 28 Sep 2025 01:55:20 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-27ed65e8e89sm101399075ad.0.2025.09.28.01.55.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 28 Sep 2025 01:55:20 -0700 (PDT)
+Date: Sun, 28 Sep 2025 16:55:14 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
+	djwong@kernel.org, john.g.garry@oracle.com, tytso@mit.edu,
+	linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v7 04/12] ltp/fsx.c: Add atomic writes support to fsx
+Message-ID: <20250928085514.6cosenx2n2kipu2w@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1758264169.git.ojaswin@linux.ibm.com>
+ <c3a040b249485b02b569b9269b649d02d721d995.1758264169.git.ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <c3a040b249485b02b569b9269b649d02d721d995.1758264169.git.ojaswin@linux.ibm.com>
 
-This is a regression test:
-1. create foo & bar
-2. write 8M data to foo
-3. use inject.f2fs to inject i_nid[0] of foo w/ ino of bar
-4. fpunch in foo w/ specified range
+On Fri, Sep 19, 2025 at 12:17:57PM +0530, Ojaswin Mujoo wrote:
+> Implement atomic write support to help fuzz atomic writes
+> with fsx.
+> 
+> Suggested-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> Reviewed-by: John Garry <john.g.garry@oracle.com>
+> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> ---
+>  ltp/fsx.c | 115 +++++++++++++++++++++++++++++++++++++++++++++++++++---
+>  1 file changed, 110 insertions(+), 5 deletions(-)
+> 
+> diff --git a/ltp/fsx.c b/ltp/fsx.c
+> index 163b9453..bdb87ca9 100644
+> --- a/ltp/fsx.c
+> +++ b/ltp/fsx.c
+> @@ -40,6 +40,7 @@
+>  #include <liburing.h>
+>  #endif
+>  #include <sys/syscall.h>
+> +#include "statx.h"
+>  
+>  #ifndef MAP_FILE
+>  # define MAP_FILE 0
+> @@ -49,6 +50,10 @@
+>  #define RWF_DONTCACHE	0x80
+>  #endif
+>  
+> +#ifndef RWF_ATOMIC
+> +#define RWF_ATOMIC	0x40
+> +#endif
+> +
+>  #define NUMPRINTCOLUMNS 32	/* # columns of data to print on each line */
+>  
+>  /* Operation flags (bitmask) */
+> @@ -110,6 +115,7 @@ enum {
+>  	OP_READ_DONTCACHE,
+>  	OP_WRITE,
+>  	OP_WRITE_DONTCACHE,
+> +	OP_WRITE_ATOMIC,
+>  	OP_MAPREAD,
+>  	OP_MAPWRITE,
+>  	OP_MAX_LITE,
+> @@ -200,6 +206,11 @@ int	uring = 0;
+>  int	mark_nr = 0;
+>  int	dontcache_io = 1;
+>  int	hugepages = 0;                  /* -h flag */
+> +int	do_atomic_writes = 1;		/* -a flag disables */
+> +
+> +/* User for atomic writes */
+> +int awu_min = 0;
+> +int awu_max = 0;
+>  
+>  /* Stores info needed to periodically collapse hugepages */
+>  struct hugepages_collapse_info {
+> @@ -288,6 +299,7 @@ static const char *op_names[] = {
+>  	[OP_READ_DONTCACHE] = "read_dontcache",
+>  	[OP_WRITE] = "write",
+>  	[OP_WRITE_DONTCACHE] = "write_dontcache",
+> +	[OP_WRITE_ATOMIC] = "write_atomic",
+>  	[OP_MAPREAD] = "mapread",
+>  	[OP_MAPWRITE] = "mapwrite",
+>  	[OP_TRUNCATE] = "truncate",
+> @@ -422,6 +434,7 @@ logdump(void)
+>  				prt("\t***RRRR***");
+>  			break;
+>  		case OP_WRITE_DONTCACHE:
+> +		case OP_WRITE_ATOMIC:
+>  		case OP_WRITE:
+>  			prt("WRITE    0x%x thru 0x%x\t(0x%x bytes)",
+>  			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+> @@ -1073,6 +1086,25 @@ update_file_size(unsigned offset, unsigned size)
+>  	file_size = offset + size;
+>  }
+>  
+> +static int is_power_of_2(unsigned n) {
+> +	return ((n & (n - 1)) == 0);
+> +}
+> +
+> +/*
+> + * Round down n to nearest power of 2.
+> + * If n is already a power of 2, return n;
+> + */
+> +static int rounddown_pow_of_2(int n) {
+> +	int i = 0;
+> +
+> +	if (is_power_of_2(n))
+> +		return n;
+> +
+> +	for (; (1 << i) < n; i++);
+> +
+> +	return 1 << (i - 1);
+> +}
+> +
+>  void
+>  dowrite(unsigned offset, unsigned size, int flags)
+>  {
+> @@ -1081,6 +1113,27 @@ dowrite(unsigned offset, unsigned size, int flags)
+>  	offset -= offset % writebdy;
+>  	if (o_direct)
+>  		size -= size % writebdy;
+> +	if (flags & RWF_ATOMIC) {
+> +		/* atomic write len must be between awu_min and awu_max */
+> +		if (size < awu_min)
+> +			size = awu_min;
+> +		if (size > awu_max)
+> +			size = awu_max;
+> +
+> +		/* atomic writes need power-of-2 sizes */
+> +		size = rounddown_pow_of_2(size);
+> +
+> +		/* atomic writes need naturally aligned offsets */
+> +		offset -= offset % size;
+> +
+> +		/* Skip the write if we are crossing max filesize */
+> +		if ((offset + size) > maxfilelen) {
+> +			if (!quiet && testcalls > simulatedopcount)
+> +				prt("skipping atomic write past maxfilelen\n");
+> +			log4(OP_WRITE_ATOMIC, offset, size, FL_SKIPPED);
+> +			return;
+> +		}
+> +	}
+>  	if (size == 0) {
+>  		if (!quiet && testcalls > simulatedopcount && !o_direct)
+>  			prt("skipping zero size write\n");
+> @@ -1088,7 +1141,10 @@ dowrite(unsigned offset, unsigned size, int flags)
+>  		return;
+>  	}
+>  
+> -	log4(OP_WRITE, offset, size, FL_NONE);
+> +	if (flags & RWF_ATOMIC)
+> +		log4(OP_WRITE_ATOMIC, offset, size, FL_NONE);
+> +	else
+> +		log4(OP_WRITE, offset, size, FL_NONE);
+>  
+>  	gendata(original_buf, good_buf, offset, size);
+>  	if (offset + size > file_size) {
+> @@ -1108,8 +1164,9 @@ dowrite(unsigned offset, unsigned size, int flags)
+>  		       (monitorstart == -1 ||
+>  			(offset + size > monitorstart &&
+>  			(monitorend == -1 || offset <= monitorend))))))
+> -		prt("%lld write\t0x%x thru\t0x%x\t(0x%x bytes)\tdontcache=%d\n", testcalls,
+> -		    offset, offset + size - 1, size, (flags & RWF_DONTCACHE) != 0);
+> +		prt("%lld write\t0x%x thru\t0x%x\t(0x%x bytes)\tdontcache=%d atomic_wr=%d\n", testcalls,
+> +		    offset, offset + size - 1, size, (flags & RWF_DONTCACHE) != 0,
+> +		    (flags & RWF_ATOMIC) != 0);
+>  	iret = fsxwrite(fd, good_buf + offset, size, offset, flags);
+>  	if (iret != size) {
+>  		if (iret == -1)
+> @@ -1785,6 +1842,36 @@ do_dedupe_range(unsigned offset, unsigned length, unsigned dest)
+>  }
+>  #endif
+>  
+> +int test_atomic_writes(void) {
+> +	int ret;
+> +	struct statx stx;
+> +
+> +	if (o_direct != O_DIRECT) {
+> +		fprintf(stderr, "main: atomic writes need O_DIRECT (-Z), "
+> +				"disabling!\n");
 
-If we haven't applied kernel patch ("f2fs: fix to do sanity check on
-node footer for non inode dnode"), f2fs may missed to do sanity check
-on corrupted dnode, result in panic or deadloop in step 4).
+This patch causes some fsx test cases fail (e.g. g/127, g/231) as:
 
-Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-Signed-off-by: Chao Yu <chao@kernel.org>
----
-v2:
-- remove "_require_kernel_config CONFIG_F2FS_CHECK_FS"
-- update comments a bit
- tests/f2fs/022     | 54 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/f2fs/022.out |  2 ++
- 2 files changed, 56 insertions(+)
- create mode 100755 tests/f2fs/022
- create mode 100644 tests/f2fs/022.out
+--- /dev/fd/63	2025-09-26 17:25:48.413212392 -0400
++++ generic/127.out.bad	2025-09-26 17:25:48.177803644 -0400
+@@ -1,7 +1,13 @@
+ QA output created by 127
++main: atomic writes need O_DIRECT (-Z), disabling!
+ All 100000 operations completed A-OK!
++main: atomic writes need O_DIRECT (-Z), disabling!
+ All 100000 operations completed A-OK!
++main: atomic writes need O_DIRECT (-Z), disabling!
+ All 100000 operations completed A-OK!
++main: atomic writes need O_DIRECT (-Z), disabling!
+ All 100000 operations completed A-OK!
++main: atomic writes need O_DIRECT (-Z), disabling!
+ All 100000 operations completed A-OK!
++main: atomic writes need O_DIRECT (-Z), disabling!
+ All 100000 operations completed A-OK!
 
-diff --git a/tests/f2fs/022 b/tests/f2fs/022
-new file mode 100755
-index 00000000..ed3b4f2b
---- /dev/null
-+++ b/tests/f2fs/022
-@@ -0,0 +1,54 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
-+#
-+# FS QA Test No. f2fs/022
-+#
-+# This is a regression test:
-+# 1. create foo & bar
-+# 2. write 8M data to foo
-+# 3. use inject.f2fs to inject i_nid[0] of foo w/ ino of bar
-+# 4. fpunch in foo w/ specified range
-+#
-+. ./common/preamble
-+_begin_fstest auto quick rw
-+
-+. ./common/attr
-+
-+_fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"f2fs: fix to do sanity check on node footer for non inode dnode"
-+
-+_require_scratch_nocheck
-+_require_command "$F2FS_INJECT_PROG" inject.f2fs
-+
-+# remove all mkfs options to avoid layout change of on-disk inode
-+export MKFS_OPTIONS=""
-+
-+foo_path=$SCARTCH_MNT/foo
-+bar_path=$SCARTCH_MNT/bar
-+
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount
-+
-+touch $foo_path
-+touch $bar_path
-+$XFS_IO_PROG $foo_path -c "pwrite 0 8M"
-+sync
-+foo_ino=`stat -c '%i' $foo_path`
-+bar_ino=`stat -c '%i' $bar_path`
-+_scratch_unmount
-+
-+# inject foo inode to replace i_nid[0] w/ to bar ino
-+$F2FS_INJECT_PROG --node --mb i_nid --nid $foo_ino --idx 0 --val $bar_ino $SCRATCH_DEV >> $seqres.full || _fail "failed to inject"
-+
-+_scratch_mount
-+
-+# if CONFIG_F2FS_CHECK_FS is enabled, it will trigger a kernel panic,
-+# otherwise, it will enter a deadloop.
-+$XFS_IO_PROG $foo_path -c "fpunch 6984k 4k"
-+_scratch_unmount
-+
-+echo "Silence is golden"
-+
-+status=0
-+exit
-diff --git a/tests/f2fs/022.out b/tests/f2fs/022.out
-new file mode 100644
-index 00000000..394c6a7c
---- /dev/null
-+++ b/tests/f2fs/022.out
-@@ -0,0 +1,2 @@
-+QA output created by 022
-+Silence is golden
--- 
-2.40.1
+Due to you didn't deal with the "-q" (quiet) option at here. If you don't have
+objection, I'll change this part as:
+
+  if (o_direct != O_DIRECT && !quiet)
+
+And ...
+
+> +		return 0;
+> +	}
+> +
+> +	ret = xfstests_statx(AT_FDCWD, fname, 0, STATX_WRITE_ATOMIC, &stx);
+> +	if (ret < 0) {
+> +		fprintf(stderr, "main: Statx failed with %d."
+> +			" Failed to determine atomic write limits, "
+> +			" disabling!\n", ret);
+> +		return 0;
+> +	}
+> +
+> +	if (stx.stx_attributes & STATX_ATTR_WRITE_ATOMIC &&
+> +	    stx.stx_atomic_write_unit_min > 0) {
+> +		awu_min = stx.stx_atomic_write_unit_min;
+> +		awu_max = stx.stx_atomic_write_unit_max;
+> +		return 1;
+> +	}
+> +
+> +	fprintf(stderr, "main: IO Stack does not support "
+> +			"atomic writes, disabling!\n");
+
+... change this line as:
+
+if (!quiet)
+	fprintf(stderr, "main: IO Stack does not support "
+			"atomic writes, disabling!\n");
+
+When I merge it.
+
+Thanks,
+Zorro
+
+> +	return 0;
+> +}
+> +
+>  #ifdef HAVE_COPY_FILE_RANGE
+>  int
+>  test_copy_range(void)
+> @@ -2356,6 +2443,12 @@ have_op:
+>  			goto out;
+>  		}
+>  		break;
+> +	case OP_WRITE_ATOMIC:
+> +		if (!do_atomic_writes) {
+> +			log4(OP_WRITE_ATOMIC, offset, size, FL_SKIPPED);
+> +			goto out;
+> +		}
+> +		break;
+>  	}
+>  
+>  	switch (op) {
+> @@ -2385,6 +2478,11 @@ have_op:
+>  			dowrite(offset, size, 0);
+>  		break;
+>  
+> +	case OP_WRITE_ATOMIC:
+> +		TRIM_OFF_LEN(offset, size, maxfilelen);
+> +		dowrite(offset, size, RWF_ATOMIC);
+> +		break;
+> +
+>  	case OP_MAPREAD:
+>  		TRIM_OFF_LEN(offset, size, file_size);
+>  		domapread(offset, size);
+> @@ -2511,13 +2609,14 @@ void
+>  usage(void)
+>  {
+>  	fprintf(stdout, "usage: %s",
+> -		"fsx [-dfhknqxyzBEFHIJKLORWXZ0]\n\
+> +		"fsx [-adfhknqxyzBEFHIJKLORWXZ0]\n\
+>  	   [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid]\n\
+>  	   [-l flen] [-m start:end] [-o oplen] [-p progressinterval]\n\
+>  	   [-r readbdy] [-s style] [-t truncbdy] [-w writebdy]\n\
+>  	   [-A|-U] [-D startingop] [-N numops] [-P dirpath] [-S seed]\n\
+>  	   [--replay-ops=opsfile] [--record-ops[=opsfile]] [--duration=seconds]\n\
+>  	   ... fname\n\
+> +	-a: disable atomic writes\n\
+>  	-b opnum: beginning operation number (default 1)\n\
+>  	-c P: 1 in P chance of file close+open at each op (default infinity)\n\
+>  	-d: debug output for all operations\n\
+> @@ -3059,9 +3158,13 @@ main(int argc, char **argv)
+>  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
+>  
+>  	while ((ch = getopt_long(argc, argv,
+> -				 "0b:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+> +				 "0ab:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+>  				 longopts, NULL)) != EOF)
+>  		switch (ch) {
+> +		case 'a':
+> +			prt("main(): Atomic writes disabled\n");
+> +			do_atomic_writes = 0;
+> +			break;
+>  		case 'b':
+>  			simulatedopcount = getnum(optarg, &endp);
+>  			if (!quiet)
+> @@ -3475,6 +3578,8 @@ main(int argc, char **argv)
+>  		exchange_range_calls = test_exchange_range();
+>  	if (dontcache_io)
+>  		dontcache_io = test_dontcache_io();
+> +	if (do_atomic_writes)
+> +		do_atomic_writes = test_atomic_writes();
+>  
+>  	while (keep_running())
+>  		if (!test())
+> -- 
+> 2.49.0
+> 
 
