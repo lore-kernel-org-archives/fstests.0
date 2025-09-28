@@ -1,79 +1,77 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15769A927
-	for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 13:51:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B46D20C461
+	for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 14:09:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759067501; cv=none; b=Hx74JWN6ZMRM5yBS9UM7Pl0sxDZwMl+1pM50a6bZrTGDJMCW8i1oYUTSZQPR+QGmo1L++MEixnlUbqqVTpSMeJjVqQJ1vLtwUVu7llUnPE/5YcXuuTF2mss3GJH70QaGkjB5kXwgl+qCXEWhdtJCthU/iEKHBkJrieMmGsJYl7Y=
+	t=1759068565; cv=none; b=JqLVEe5HieGGa8Ne4B2tyGQvCIW2GGwQQjg3fQMMDzMa30i5/YzdUYU+fGPNRUw6+Vm5hqXatI0kser9nwf/lR0RaYYSSMIS/DrqkOkgykzDoB6mGUq/96JGbNirZmgQXuoh+iFhQZCTsuoasY5JRShY/No+qGL/vbID7r8AV+U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759067501; c=relaxed/simple;
-	bh=aK1FwrYLvI8mi0RMOERTwz1F7uoDNcYfzu2w5OfZkJg=;
+	s=arc-20240116; t=1759068565; c=relaxed/simple;
+	bh=HIv9fxeKoLpkODQ6gx+4GUvWUiSEZp3tB2+TUXxAHmg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cGuY2FJlDlNWMMoHiVBRt5n9+ywopsAAPqIw3VNYU/F1M66kQPVTle9Vnx/PmbKmWYJ5aaNw1p6Wqs6yDsF71qBWClB0fsG9h0KxfrwQomipZBzK3BdTTtbjgBdwGztUWZyu9yzK4AcUlhvU+RTkcMigLXhdGCWTfNYnVfjsEFI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=bNj5g5iF; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=mKBkIYR5k6+KsQqhZpwMeP7aNO961lWwIPxUEMaiU1zhmWar5TqTR8qfLg8Y85coQuHOl1C5rzh3PNYj1wFi3+5piAE7B4NQ7EmKHzxUaVjwG6l+/x2UJbqqnT7TIokqaHANia80PKUCgfpZuIeu781tPEw8Xr4lfRyJbBI6gw8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=DbEmMImg; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bNj5g5iF"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="DbEmMImg"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1759067498;
+	s=mimecast20190719; t=1759068562;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=j9JpqdLLT9z1M051j1qXRqMQ5SMaqtTYMmpk/UjNV5Q=;
-	b=bNj5g5iFgwHHcYKZLQI7xjBzWlgjy5He2yFKaKTinmPWchGSN0Qj/QIXWbETsIKDNmt7kA
-	KUCaMKvjZPLtLKL3DCJ8O6QE+YbNq/+dZo7tPiTzlKU5vep+Vqjj/IXGEdk61hp6oyy66R
-	/+/hsrNJed3KX2s28Z/q4H5e6xrPSqQ=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=F7phqQjkQjET3LfaZXC37tPIuWA1DfFBJL3a2NYjcDU=;
+	b=DbEmMImgXwZDzSiItq1TMeBH2hiI4mDw0ZKIg0oamBkw1kEVbojX8RURKYEKoGmKYxjb6Y
+	mCPJQK0xxbwrlEzeoNVoZ82N1uWcvUX4aR8RMPTGyOeJFC2HyzYDlMoWRloWCfL0QxMvFP
+	1eVX/+PORs+gH0jodK/GM9tHFCuc//I=
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
+ [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-675-CdkhVhqpN4yfsOWqD5FF3w-1; Sun, 28 Sep 2025 09:51:35 -0400
-X-MC-Unique: CdkhVhqpN4yfsOWqD5FF3w-1
-X-Mimecast-MFC-AGG-ID: CdkhVhqpN4yfsOWqD5FF3w_1759067494
-Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-b5529da7771so2789238a12.0
-        for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 06:51:34 -0700 (PDT)
+ us-mta-558-Fs0LLzLVNNOu3_JivgSzRg-1; Sun, 28 Sep 2025 10:09:20 -0400
+X-MC-Unique: Fs0LLzLVNNOu3_JivgSzRg-1
+X-Mimecast-MFC-AGG-ID: Fs0LLzLVNNOu3_JivgSzRg_1759068559
+Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-7821487d16bso1702389b3a.1
+        for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 07:09:20 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759067494; x=1759672294;
+        d=1e100.net; s=20230601; t=1759068559; x=1759673359;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=j9JpqdLLT9z1M051j1qXRqMQ5SMaqtTYMmpk/UjNV5Q=;
-        b=bF2HvPyq25cPIEKAXMAcbVHhm/D+JgirRdwXraTBXbAicFOPNXeNosh1pFJfUPj82p
-         8BSHbXYQRAzw3fXhuYAnBoF26hWrEykYk1KsWBs+Hb0AodjlB+rWXcqojEUYGyIpVRYT
-         7yISZiEyy8vGkYUkbPMXeo4ZIvrb6AnJCPFRQxBU2bcb0YifEWQ+Mg1aNHkyaiOFLyl7
-         nJSvFktX6PqV51l7Cj/HAD5BpS3l908t28i7IN9SRpQSCGqyURKvq5F3Y9RZFoaun2Ne
-         Hy2MH53AKOgIoLArh2f7FJPkM4a05JsHV9uSTqUw1t49xgnMFuQrbvShApL6j+EN7Rze
-         +T7Q==
-X-Forwarded-Encrypted: i=1; AJvYcCUPm2TNLV5avAz/ECGPZZQqRKTzNltQNmKOVjwGQi181e+T6ysAJyHSHRKuquHpSTA78bJykKXt@vger.kernel.org
-X-Gm-Message-State: AOJu0YwEpqEA80tC5Z95+AQO8n0pFy4cXc9tbI/8+YxoJ2PsGgEvl+Nm
-	1VvRQpN39L9K3EZF0FhIcDiqMols14guYQVl/+lwRtGP1E4xoSFQPQwWbSOpfQULoQdF6KS6YX0
-	Mk0tzCn6lxOm7L3JlYnGX50tY204TgJoBksyqZhk+lErV5VCQ4aExvtO/79s=
-X-Gm-Gg: ASbGnct8PXnWZnH6kHn6llAfOnoYSyn/Il0np097MC3zkSgtdkP5dMbRY7dgu+cceFk
-	YOMnq2taaWIl/LLKGpIj2DgEKowciNoMmiMTxwYLBvCE5RNlhVu8yH0ug6SDoF10zPWPtbp68OI
-	iS05z9lNzDtBuWJy3PZCi7HIjYNoYsHcszGe+UvlAKN5OuTeOs6ZTVoOUx/pZl1ZFqDWbW7s6IG
-	YaIFXy0jguIwPTDDQkj7EpQM4wEiCVCs70MeGYq3G4zVJ74l9PIXBzDAlhKUrrj+f1mBPQE6A8I
-	76ByxxwCrHXSszSpqelTmbcPqVUcUv8Uqy8NzgztXvRkZut0pL5o1IiXwzpb5Yw2hHYUDdUNyoy
-	nCvUp
-X-Received: by 2002:a05:6a21:e098:b0:24d:38c:26bd with SMTP id adf61e73a8af0-2e7d1ff0a57mr18099761637.43.1759067493896;
-        Sun, 28 Sep 2025 06:51:33 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGg04/G4NfqhTpCpCPdtRAQV4uvWVXc/77oQZV+4Ld5cvDuBuQgZe2sLsXaxO5UGEano05WVA==
-X-Received: by 2002:a05:6a21:e098:b0:24d:38c:26bd with SMTP id adf61e73a8af0-2e7d1ff0a57mr18099734637.43.1759067493381;
-        Sun, 28 Sep 2025 06:51:33 -0700 (PDT)
+        bh=F7phqQjkQjET3LfaZXC37tPIuWA1DfFBJL3a2NYjcDU=;
+        b=sEOWtHnMUhuUPvsKjXwNklwGPQrg5yvshxqGmZUL4Zvo7qcOzeUHA/DDKMC4TTOUB7
+         lRPXtmOIRqFoxHoblv9ngSEdE3hJ3p1t8sap0TTnD5Ya4a5rMlc3U0a7dwcvmnfBN9gW
+         5COBnCIEfzrbeyqMQumrQvd4V/MK+XdjnZ/kVSkpBYocO3kXoZx8wKIU7dqmhgl3X+Md
+         X9F8th1J6FzduGf+e2MTemS2HqFO21I907p4SO0x95UGhVRfg101iDlEy37r9N+qPtX6
+         MLb2p1HiOZgChDyNA9Vwcf0AtFIvQIReAevEtc1nDkPGjYGsRt6Hzd5zUD/umqRmiPQj
+         ziNg==
+X-Forwarded-Encrypted: i=1; AJvYcCX3VG2SKrXFXF2nNsmV+k5yTSbFKV6TqhWA0ZRT0ewJTrjEUp6GDUONN9TGxSTLyNAUbhJToNYf@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz8xj37WfwIoeIOpKNQAEMxSaMB1Rfi6jBqJl3C/g/Xic3gEeST
+	lO0bXIhtUAI7KE3jT/MEsF+hsC20VWgCQDC+OohUXGaNx9YpdytgZcGKYSKgCQSXuS2isnNSNNc
+	FjMgIacI7+hzG3o7H4VG/3EnovjmIMJtFhXtw+v7cZ3Sv3XVjVknLymRbSOk=
+X-Gm-Gg: ASbGnct1NPlTIoOvvLTy0nIRzMqErQshB09JQRILirJx8QxWVKjCxMu+4XjEcjXivGY
+	0PmI/pFxWgIZOmvl7TFq1/hLtnotJGGJMK1ft5RrZa0AMjX4q2UoWgOYOqyXKRI1FQoc63NpmAU
+	2/kyrluJIDPSauvrkenY6qnyadCwabKzvf5BvecRxydFbWFNKOYU/OyejhjNI/Jx/oOnYeQ5s/+
+	sPJ+afly0LK4xO3LzMMP4cv4uQrrr3tdSZN55w7vQa+XN1R0o9kz8p3hIEkWoJCEQF0k9Ozhxhw
+	8Aso7Jwa+OW2mjC9C3j8vdsdVjLHdf5PC4ydLaK9sJO+YldvfIi6RMESvjaqNpzHlYRuQH7HptR
+	wlPv9
+X-Received: by 2002:a05:6a00:3e27:b0:781:2538:bf95 with SMTP id d2e1a72fcca58-7812538c1afmr5863338b3a.10.1759068559233;
+        Sun, 28 Sep 2025 07:09:19 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IE9KwuyyUxEYxrcXGvbZ56lhVKm2MUGHT1tYoWpwyucJ5NEUp+nTy3kb4K12c/ZZMKGd/lvTg==
+X-Received: by 2002:a05:6a00:3e27:b0:781:2538:bf95 with SMTP id d2e1a72fcca58-7812538c1afmr5863322b3a.10.1759068558888;
+        Sun, 28 Sep 2025 07:09:18 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-78102c279f8sm8916171b3a.98.2025.09.28.06.51.31
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-783ad5e99acsm1496423b3a.22.2025.09.28.07.09.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 28 Sep 2025 06:51:33 -0700 (PDT)
-Date: Sun, 28 Sep 2025 21:51:28 +0800
+        Sun, 28 Sep 2025 07:09:18 -0700 (PDT)
+Date: Sun, 28 Sep 2025 22:09:14 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Chao Yu <chao@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v2 2/2] f2fs/022: do sanity check on footer of non inode
- dnode
-Message-ID: <20250928135128.s57p4hj6y223gvf7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250928083442.7955-1-chao@kernel.org>
- <20250928083442.7955-2-chao@kernel.org>
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 3/3] btrfs/26[67]: update the stale comments
+Message-ID: <20250928140914.xufifxpgz6dpnqmd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250918224327.12979-1-wqu@suse.com>
+ <20250918224327.12979-4-wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -82,105 +80,59 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250928083442.7955-2-chao@kernel.org>
+In-Reply-To: <20250918224327.12979-4-wqu@suse.com>
 
-On Sun, Sep 28, 2025 at 04:34:42PM +0800, Chao Yu wrote:
-> This is a regression test:
-> 1. create foo & bar
-> 2. write 8M data to foo
-> 3. use inject.f2fs to inject i_nid[0] of foo w/ ino of bar
-> 4. fpunch in foo w/ specified range
+On Fri, Sep 19, 2025 at 08:13:27AM +0930, Qu Wenruo wrote:
+> Test case btrfs/266 is verifying the buffered read repair on RAID1C3,
+> and btrfs/267 is verifying the direct IO read repair on RAID1C3.
 > 
-> If we haven't applied kernel patch ("f2fs: fix to do sanity check on
-> node footer for non inode dnode"), f2fs may missed to do sanity check
-> on corrupted dnode, result in panic or deadloop in step 4).
+> However btrfs/267 is using incorrect comments, it says the test case is
+> verify buffered read repair, but it's not the case.
 > 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Signed-off-by: Chao Yu <chao@kernel.org>
+> Fix those stale comments by explicitly mention buffered/direct IO for
+> each test case. (btrfs/266 for buffered, btrfs/267 for direct)
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 > ---
-> v2:
-> - remove "_require_kernel_config CONFIG_F2FS_CHECK_FS"
-> - update comments a bit
 
-This version looks good to me,
+Makes sense to me,
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  tests/f2fs/022     | 54 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/f2fs/022.out |  2 ++
->  2 files changed, 56 insertions(+)
->  create mode 100755 tests/f2fs/022
->  create mode 100644 tests/f2fs/022.out
+>  tests/btrfs/266 | 4 ++--
+>  tests/btrfs/267 | 2 +-
+>  2 files changed, 3 insertions(+), 3 deletions(-)
 > 
-> diff --git a/tests/f2fs/022 b/tests/f2fs/022
-> new file mode 100755
-> index 00000000..ed3b4f2b
-> --- /dev/null
-> +++ b/tests/f2fs/022
-> @@ -0,0 +1,54 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
-> +#
-> +# FS QA Test No. f2fs/022
-> +#
-> +# This is a regression test:
-> +# 1. create foo & bar
-> +# 2. write 8M data to foo
-> +# 3. use inject.f2fs to inject i_nid[0] of foo w/ ino of bar
-> +# 4. fpunch in foo w/ specified range
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick rw
-> +
-> +. ./common/attr
-> +
-> +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"f2fs: fix to do sanity check on node footer for non inode dnode"
-> +
-> +_require_scratch_nocheck
-> +_require_command "$F2FS_INJECT_PROG" inject.f2fs
-> +
-> +# remove all mkfs options to avoid layout change of on-disk inode
-> +export MKFS_OPTIONS=""
-> +
-> +foo_path=$SCARTCH_MNT/foo
-> +bar_path=$SCARTCH_MNT/bar
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount
-> +
-> +touch $foo_path
-> +touch $bar_path
-> +$XFS_IO_PROG $foo_path -c "pwrite 0 8M"
-> +sync
-> +foo_ino=`stat -c '%i' $foo_path`
-> +bar_ino=`stat -c '%i' $bar_path`
-> +_scratch_unmount
-> +
-> +# inject foo inode to replace i_nid[0] w/ to bar ino
-> +$F2FS_INJECT_PROG --node --mb i_nid --nid $foo_ino --idx 0 --val $bar_ino $SCRATCH_DEV >> $seqres.full || _fail "failed to inject"
-> +
-> +_scratch_mount
-> +
-> +# if CONFIG_F2FS_CHECK_FS is enabled, it will trigger a kernel panic,
-> +# otherwise, it will enter a deadloop.
-> +$XFS_IO_PROG $foo_path -c "fpunch 6984k 4k"
-> +_scratch_unmount
-> +
-> +echo "Silence is golden"
-> +
-> +status=0
-> +exit
-> diff --git a/tests/f2fs/022.out b/tests/f2fs/022.out
-> new file mode 100644
-> index 00000000..394c6a7c
-> --- /dev/null
-> +++ b/tests/f2fs/022.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 022
-> +Silence is golden
+> diff --git a/tests/btrfs/266 b/tests/btrfs/266
+> index 3490ecce..f8407c98 100755
+> --- a/tests/btrfs/266
+> +++ b/tests/btrfs/266
+> @@ -5,8 +5,8 @@
+>  #
+>  # FS QA Test 266
+>  #
+> -# Test that btrfs raid repair on a raid1c3 profile can repair interleaving
+> -# errors on all mirrors.
+> +# Test that btrfs buffered read repair on a raid1c3 profile can repair
+> +# interleaving errors on all mirrors.
+>  #
+>  
+>  . ./common/preamble
+> diff --git a/tests/btrfs/267 b/tests/btrfs/267
+> index 66e08d18..22c4aeaa 100755
+> --- a/tests/btrfs/267
+> +++ b/tests/btrfs/267
+> @@ -5,7 +5,7 @@
+>  #
+>  # FS QA Test 267
+>  #
+> -# Test that btrfs buffered read repair on a raid1c3 profile can repair
+> +# Test that btrfs direct IO read repair on a raid1c3 profile can repair
+>  # interleaving errors on all mirrors.
+>  #
+>  
 > -- 
-> 2.40.1
+> 2.51.0
+> 
 > 
 
