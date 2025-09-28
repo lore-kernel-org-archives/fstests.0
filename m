@@ -1,78 +1,78 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05407211499
-	for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 14:12:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B4272F2E
+	for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 14:55:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759068779; cv=none; b=orLNUMIvYueVw0FZcF4mnYxg2JcHKWKyZymsTvRDrptOD4pPOtgwCe54i51lQJMpyECYqLAfvNTdVQn814UPOgf16jWCS6l6Kfy89ruU8CCGCEsWLQaGYWnWO3joFnOJDSzcwPonxhxLXEdoj3IVnyLBa9cgkHUhONZs07Oz2JY=
+	t=1759071309; cv=none; b=FAQKeeNiY3FNDQD/dfRQN4ayaOvcN/9ioUYSTUKkl76C+YitrZa1xPTohB3fwhpCKOpkDrVKtZ+FHSG8OkEMHFyEDKAYTxvT5Aj+UAOAnxaQ7TD7+TRDDur86qB/jEqLrjR+8Qddslf7nIc9J6aLAeJVfht0iOvnO4oNxP6LjO4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759068779; c=relaxed/simple;
-	bh=kr0eoCud+NiggYCoVN6Gw1CXhAmpepeAhR6lFqY5rHg=;
+	s=arc-20240116; t=1759071309; c=relaxed/simple;
+	bh=faXbKWkSCqgyuZE7zHv7M+wyMfCgrrphjB4x+XER4bg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=sjqKqWJZCUvGJ3HWFksOB2SbyjytD8ejru3O5z8IIcMiSMf7cjTsQyS36HRTiU5NnF2MQ/5CJhlupwf96oFnrTV58V/jOjYgg/HtoWHkJw59sDxs9QcQPoYbfVtVWUJuzMs1EcysjaYs9GcC/OVITtgIf04TPsm4dRQkkNGkGhg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ejJLuh7o; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=Ykz+F1RGnUNJ8XYi0IgvH8OuoIX30dOQ9zsXwXYNVe6GnWck6n2GdeU6VrMdlghleueP/Tls3SckqqfWn2dBkA4Vh0t3QqHl4iBtOS8hr+H1Bh9R2Pj5Ld5xCbJ6T36pFQ9NkjxJ1plOJLeTcSeM/kkQDNn+jE9qA9GQeaCBySo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=iDztpd44; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ejJLuh7o"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="iDztpd44"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1759068776;
+	s=mimecast20190719; t=1759071305;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=Qi/rjaEucLtimn1dq1VxAoX3G7f9Ufds5B/N6AXO5hE=;
-	b=ejJLuh7oMn9je/0j9XvTI8sUqGuYM+VY/1kueUfywY6RT5bmGgpZlJQgIvDHZ5EqcLMJ2a
-	IuRva3JdUD6l+uNvx1oSl3CrzDAtEp4NfSsJSTbPuhUOOq/HWAvH1woJyoX4SHljdiA1yN
-	wOhR3NNmE4k7CeCuGbokqd8DufDTqgA=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=VCbcP4jnuJD0yk6auspq17+0DRODrBb74tm3+Qhevr0=;
+	b=iDztpd445NAlnSnTq2PqW3HGIM0RFS5NpsKYe/Gjjxdxi+OJON99RPm+tcImmdoHQqpAOf
+	e5AIAIeePJsdAq9sDEHWaGe7ZFPiDpX1njQgNw1zqo4A0UFe9UZ3r7H40VU/0HQ+hkdA2S
+	zZgumRmYEVRwu6WzTOlctp2xNG9vSlc=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-646-iOD6Kv4hPCqZkwQapJLDGw-1; Sun, 28 Sep 2025 10:12:54 -0400
-X-MC-Unique: iOD6Kv4hPCqZkwQapJLDGw-1
-X-Mimecast-MFC-AGG-ID: iOD6Kv4hPCqZkwQapJLDGw_1759068773
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-32ec2211659so3657923a91.0
-        for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 07:12:54 -0700 (PDT)
+ us-mta-663-E0y0TZlUN_mZzUyTtuo8VQ-1; Sun, 28 Sep 2025 10:55:04 -0400
+X-MC-Unique: E0y0TZlUN_mZzUyTtuo8VQ-1
+X-Mimecast-MFC-AGG-ID: E0y0TZlUN_mZzUyTtuo8VQ_1759071303
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-269939bfccbso46377665ad.1
+        for <fstests@vger.kernel.org>; Sun, 28 Sep 2025 07:55:03 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759068773; x=1759673573;
+        d=1e100.net; s=20230601; t=1759071303; x=1759676103;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Qi/rjaEucLtimn1dq1VxAoX3G7f9Ufds5B/N6AXO5hE=;
-        b=ZXNvNEugCP1uY/V0oZH+7rWuDZwJce9hYu41I25ACg+IJ2FI5Z5wT8U8ZtxiXJJ+Sg
-         2ZRknUS75qoq2DGH7KL4MwgUNjT7VoXAS4NLK7rhi2qLbx6OGED2LOdbz7J+1defqHve
-         N/C1XkGdQLMrIxDMEPl84d2XaqgppU2u10i3rGyRF5r+a/o/M5PTauWRfZQi4lmOFndu
-         wD6N4GJNwOVI7YQdqfoM64JFCAETg2R9yAjqFKgfCo5FVTCCC5TOQeJq5aretl9uaRnH
-         F++zqaX2cj34CjViVtO0f1MlecKaUHe0XwGhyKClKJbLndiXo1hqWU91sOgVJ5SDQ0fb
-         4OcQ==
-X-Forwarded-Encrypted: i=1; AJvYcCW/isHvEsyGrl5buLpCf75T2AOgqJqBgrfV7VL/uvO4W2u3TxYsitZFapcUO+DLh1jcJQNzNIDm@vger.kernel.org
-X-Gm-Message-State: AOJu0YyewWaEynTahrnlxNCRXXDhOQavMYjgzeTn4nWJp0XMzXq1edwi
-	ZoUqYKLsjHW2/xOjb+Q6K/oB+j7lzrlUfbmhyCvIbEDwxWd63f7MP0OjzIv2lyaKGNWt63muXxI
-	CGT8Himz1grqpsRdLOnPEMnsCc82A8dQRaaYZ7lU0XwOW5YXqJ+Kt9zaPpih0lGCucC4=
-X-Gm-Gg: ASbGnctXKV0Te/n7PAzWAT5+19V1hWXqXulZAhgGCzIQF+DcM7JWSM+2aLvWnslMDXg
-	YytIXw1J+IWQ1MNpZlwtc/fs7VHDanMZGyRqnJlTAx3zYHg9Pk4RQatqB59eSUVziAOzNUeEOU2
-	w8xJbohwA7ibBR4DM+OmJerWykifAmpWsZ3VlDGZVnhEdEX1iOqIsyiT0J4U6r7kz67Xp49RHUk
-	pudanFkwedRtkXVSlIK/qk19/BRIlwcvBQI5YUPqr4YUg/e6bzb5rc0Azna2bbQzTxWeez+6Rvx
-	gpIRW3kaXoTQjmvONCnD9djymManKO+S7TdIzW7IykV7Dfbj76gkmUfSWvc38rb+cD2V9h6VtDT
-	X0zvP
-X-Received: by 2002:a17:90b:3148:b0:31e:c95a:cef8 with SMTP id 98e67ed59e1d1-3342a2e148cmr12089927a91.32.1759068772846;
-        Sun, 28 Sep 2025 07:12:52 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IG/WrWJV5vC9UeUCgllL425TonGJAqVaawtt08txpJk2KKejUpzKnRPhw6pKZ3xCcrz+jj7UQ==
-X-Received: by 2002:a17:90b:3148:b0:31e:c95a:cef8 with SMTP id 98e67ed59e1d1-3342a2e148cmr12089905a91.32.1759068772282;
-        Sun, 28 Sep 2025 07:12:52 -0700 (PDT)
+        bh=VCbcP4jnuJD0yk6auspq17+0DRODrBb74tm3+Qhevr0=;
+        b=AkrUsVE9537x9Fr0u34bBMF90bA6JmeZz+Mkw0hD/PFi05pQI73hOT9PSlF/G9YwA/
+         ORGId0IFSeg7Gtq+Qe5G9RXbsFqbIRWI0/EaHrE1fSOo+i7GUEFumQeHOHmWzAG1o7rT
+         jAPJKChidlZWR3yZ44y2o0WeD32WPSz31BqWqe6vFa6SJifpZmeFz9AFPxdZhC0XDa2A
+         UD/FyB9v0roSvhqn34CVYqXxlFsg4HfwKYfv/z2pNrUNNmbq8G/+Afr4bvXg+69NfGMO
+         Kbs0ggWbYQdKuV7IZqYGRgE5sh97a/4YIgIxMM88rOPhqpv3RTHLvzLX4SyMD+VkvZrA
+         /51A==
+X-Forwarded-Encrypted: i=1; AJvYcCWYLhN/rif6rD20KZmNpNl0X4X+EeUdomdwD6gzRV7hC/iwtyJGL8wzD7L2S8wUbiWgh76AhSfM@vger.kernel.org
+X-Gm-Message-State: AOJu0YwghA2Az1xJsKTyaMC/8dntpzTB7YBvGCyNOEw2BXFU7gKxz93d
+	CgergDqxxwTQoNKDWhd0JOVsejo+G2TipJ+HnfDsD3LshyP5dkHl1CxzHLCp4H+F1pcDE/Y7WgA
+	ceOyC1xryE4grkE1BgKC+z6qfcnxc812bt0S+P/6YGkohugrNHEaEHjyY4R4=
+X-Gm-Gg: ASbGncuhL/qWh35xvyiCg/DPSDs13hKRJbKXQhfObsLOiEhtXhyCpeTUShsOmew1oFm
+	8cnDa250M0wJ5P9jtLpcWtxOWgXZIqOF9BNthophiCPIwYJFOu1/qM4a+dQr1REgN32tdvrmV7M
+	fT124hYYEiOB7JI4GHZmvPozzMH2cBnZ16tVJDlekjIAl/rkEhmKFPRnNAgXJSwtSbCTMFL9+Rd
+	nNFZxEHXmttKIsA1+ZfPwuCQvyoWkyHvS+v70KhoOSytsN9IwycSWKheh2DO8pPhJ5aLKu2OCXy
+	gNg20HB/fLmqaH7LhAylsVqpGM3WrSr/Nxswy8HBd4Ced5YU6WOkuMrhd32amSxpm5VenZRfkkI
+	nZGbZ
+X-Received: by 2002:a17:902:e54d:b0:266:2e6b:f5a7 with SMTP id d9443c01a7336-27ed4a89b48mr157882725ad.58.1759071302574;
+        Sun, 28 Sep 2025 07:55:02 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEnZJHixwIXPjcp9HWUyz95ng9jKF9JaA/afuk6s64CuGQ4XCLUMKYvsb5zwyBW8bI1FO/YTg==
+X-Received: by 2002:a17:902:e54d:b0:266:2e6b:f5a7 with SMTP id d9443c01a7336-27ed4a89b48mr157882555ad.58.1759071302079;
+        Sun, 28 Sep 2025 07:55:02 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3352c6e11d8sm7585193a91.17.2025.09.28.07.12.50
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b57c5575350sm9022500a12.26.2025.09.28.07.54.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 28 Sep 2025 07:12:51 -0700 (PDT)
-Date: Sun, 28 Sep 2025 22:12:48 +0800
+        Sun, 28 Sep 2025 07:55:01 -0700 (PDT)
+Date: Sun, 28 Sep 2025 22:54:53 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Qu Wenruo <wqu@suse.com>
 Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/3] btrfs/192 btrfs/30[456]: explicitly specify block
- size to avoid false alerts
-Message-ID: <20250928141248.jo6tklfl6riomfgu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH 1/3] btrfs/012 btrfs/136: skip the test if ext* doesn't
+ support the block size
+Message-ID: <20250928145453.wyztv2kvfpgmlw3k@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20250918224327.12979-1-wqu@suse.com>
- <20250918224327.12979-3-wqu@suse.com>
+ <20250918224327.12979-2-wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -81,199 +81,104 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250918224327.12979-3-wqu@suse.com>
+In-Reply-To: <20250918224327.12979-2-wqu@suse.com>
 
-On Fri, Sep 19, 2025 at 08:13:26AM +0930, Qu Wenruo wrote:
-> [BUG]
-> When running the experimental block size > page support, the test cases
-> btrfs/192 and btrfs/30[456] fail with the following error:
+On Fri, Sep 19, 2025 at 08:13:25AM +0930, Qu Wenruo wrote:
+> [FALSE ALERT]
+> When testing btrfs bs > ps support, the test cases btrfs/012 and
+> btrfs/136 fail like the following:
 > 
-> FSTYP         -- btrfs
-> PLATFORM      -- Linux/x86_64 btrfs-vm 6.17.0-rc4-custom+ #287 SMP PREEMPT_DYNAMIC Thu Sep 18 16:42:54 ACST 2025
-> MKFS_OPTIONS  -- -s 8k /dev/mapper/test-scratch1
-> MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
+>  FSTYP         -- btrfs
+>  PLATFORM      -- Linux/x86_64 btrfs-vm 6.17.0-rc4-custom+ #285 SMP PREEMPT_DYNAMIC Mon Sep 15 14:40:01 ACST 2025
+>  MKFS_OPTIONS  -- -s 8k /dev/mapper/test-scratch1
+>  MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
 > 
-> btrfs/192 436s ... [failed, exit status 1]- output mismatch (see /home/adam/xfstests/results//btrfs/192.out.bad)
->     --- tests/btrfs/192.out	2022-05-11 11:25:30.746666664 +0930
->     +++ /home/adam/xfstests/results//btrfs/192.out.bad	2025-09-18 18:34:10.511152624 +0930
->     @@ -1,2 +1,2 @@
->      QA output created by 192
->     -Silence is golden
->     +ERROR: illegal nodesize 4096 (smaller than 8192)
->     ...
->     (Run 'diff -u /home/adam/xfstests/tests/btrfs/192.out /home/adam/xfstests/results//btrfs/192.out.bad'  to see the entire diff)
+>  btrfs/012       [failed, exit status 1]- output mismatch (see /home/adam/xfstests/results//btrfs/012.out.bad)
+>      --- tests/btrfs/012.out	2024-07-17 16:27:18.790000343 +0930
+>      +++ /home/adam/xfstests/results//btrfs/012.out.bad	2025-09-15 16:32:55.185922173 +0930
+>      @@ -1,7 +1,11 @@
+>       QA output created by 012
+>      +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/test-scratch1, missing codepage or helper program, or other error.
+>      +       dmesg(1) may have more information after failed mount system call.
+>      +mkdir: cannot create directory '/mnt/scratch/stressdir': File exists
+>      +umount: /mnt/scratch: not mounted.
+>       Checking converted btrfs against the original one:
+>      -OK
+>      ...
+>      (Run 'diff -u /home/adam/xfstests/tests/btrfs/012.out /home/adam/xfstests/results//btrfs/012.out.bad'  to see the entire diff)
 > 
-> btrfs/304 1s ... - output mismatch (see /home/adam/xfstests/results//btrfs/304.out.bad)
->     --- tests/btrfs/304.out	2024-07-15 16:17:42.639999997 +0930
->     +++ /home/adam/xfstests/results//btrfs/304.out.bad	2025-09-18 18:44:13.761000000 +0930
->     @@ -10,7 +10,7 @@
->      leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
->      fs uuid <UUID>
->      chunk uuid <UUID>
->     -	item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 16
->     +	item 0 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 16
->      			stripe 0 devid 1 physical XXXXXXXXX
->      total bytes XXXXXXXX
->     ...
->     (Run 'diff -u /home/adam/xfstests/tests/btrfs/304.out /home/adam/xfstests/results//btrfs/304.out.bad'  to see the entire diff)
-> 
-> btrfs/305 1s ... - output mismatch (see /home/adam/xfstests/results//btrfs/305.out.bad)
->     --- tests/btrfs/305.out	2024-07-15 16:17:42.639999997 +0930
->     +++ /home/adam/xfstests/results//btrfs/305.out.bad	2025-09-18 18:44:14.914196231 +0930
->     @@ -12,11 +12,9 @@
->      leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
->      fs uuid <UUID>
->      chunk uuid <UUID>
->     -	item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 16
->     +	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 16
->      			stripe 0 devid 1 physical XXXXXXXXX
->     -	item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 16
->     ...
->     (Run 'diff -u /home/adam/xfstests/tests/btrfs/305.out /home/adam/xfstests/results//btrfs/305.out.bad'  to see the entire diff)
-> 
-> btrfs/306 1s ... - output mismatch (see /home/adam/xfstests/results//btrfs/306.out.bad)
->     --- tests/btrfs/306.out	2024-07-15 16:17:42.639999997 +0930
->     +++ /home/adam/xfstests/results//btrfs/306.out.bad	2025-09-18 18:44:16.075000000 +0930
->     @@ -14,7 +14,7 @@
->      chunk uuid <UUID>
->      	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 16
->      			stripe 0 devid 1 physical XXXXXXXXX
->     -	item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 16
->     +	item 1 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 16
->      			stripe 0 devid 2 physical XXXXXXXXX
->      total bytes XXXXXXXX
->     ...
->     (Run 'diff -u /home/adam/xfstests/tests/btrfs/306.out /home/adam/xfstests/results//btrfs/306.out.bad'  to see the entire diff)
-> 
-> Please note that, btrfs bs > ps is still under development.
-> This is only an early run to expose false alerts.
+>  btrfs/136 3s ... - output mismatch (see /home/adam/xfstests/results//btrfs/136.out.bad)
+>      --- tests/btrfs/136.out	2022-05-11 11:25:30.743333331 +0930
+>      +++ /home/adam/xfstests/results//btrfs/136.out.bad	2025-09-19 07:00:00.395280850 +0930
+>      @@ -1,2 +1,10 @@
+>       QA output created by 136
+>      +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/test-scratch1, missing codepage or helper program, or other error.
+>      +       dmesg(1) may have more information after failed mount system call.
+>      +umount: /mnt/scratch: not mounted.
+>      +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/test-scratch1, missing codepage or helper program, or other error.
+>      +       dmesg(1) may have more information after failed mount system call.
+>      +umount: /mnt/scratch: not mounted.
+>      ...
+>      (Run 'diff -u /home/adam/xfstests/tests/btrfs/136.out /home/adam/xfstests/results//btrfs/136.out.bad'  to see the entire diff)
 > 
 > [CAUSE]
-> The test case btrfs/192 requires 4K nodesize to bump up tree size, and
-> btrfs/30[456] all requires 4K block size as the workload is designed
-> with that.
+> Currently ext* doesn't support block size larger than page size, thus
+> at mkfs time it will output the following warning:
 > 
-> However if the QA runner is specify other block size (8K in this case),
-> it will break the 4K block size assumption of those tests, either
-> results mkfs failure in btrfs/192, or output difference for
-> btrfs/30[456].
+>  Warning: blocksize 8192 not usable on most systems.
+>  mke2fs 1.47.3 (8-Jul-2025)
+>  Warning: 8192-byte blocks too big for system (max 4096), forced to continue
+> 
+> Furthermore at ext* mount time it will fail with the following dmesg:
+> 
+>  EXT4-fs (loop0): bad block size 8192
 > 
 > [FIX]
-> Just explicitly specify the 4K block size during mkfs.
+> Check if the mount of the newly created ext* succeeded.
 > 
-> And since we're here, remove the out-of-date page size check, as btrfs
-> has subpage block size support for a while.
-> Instead use a more accurate supported sector size check, this allows the
-> test to be run on aarch64 with 64K page size.
+> If not, since the only extra parameter for mkfs is the block size, we
+> know it's some block size ext* not yet supported, and skip the test
+> case.
 > 
 > Signed-off-by: Qu Wenruo <wqu@suse.com>
 > ---
-
-Makes sense to me, welcome more review points from btrfs list.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
->  tests/btrfs/192 | 8 ++------
->  tests/btrfs/304 | 5 ++---
->  tests/btrfs/305 | 5 ++---
->  tests/btrfs/306 | 5 ++---
->  4 files changed, 8 insertions(+), 15 deletions(-)
+>  tests/btrfs/012 | 3 +++
+>  tests/btrfs/136 | 3 +++
+>  2 files changed, 6 insertions(+)
 > 
-> diff --git a/tests/btrfs/192 b/tests/btrfs/192
-> index 0a8ab2c1..56ec2b28 100755
-> --- a/tests/btrfs/192
-> +++ b/tests/btrfs/192
-> @@ -33,11 +33,7 @@ _require_btrfs_mkfs_feature "no-holes"
->  _require_log_writes
->  _require_scratch
->  _require_attrs
-> -
-> -# We require a 4K nodesize to ensure the test isn't too slow
-> -if [ $(_get_page_size) -ne 4096 ]; then
-> -	_notrun "This test doesn't support non-4K page size yet"
-> -fi
-> +_require_btrfs_support_sectorsize 4096
+> diff --git a/tests/btrfs/012 b/tests/btrfs/012
+> index f41d7e4e..665831b9 100755
+> --- a/tests/btrfs/012
+> +++ b/tests/btrfs/012
+> @@ -42,6 +42,9 @@ $MKFS_EXT4_PROG -F -b $BLOCK_SIZE $SCRATCH_DEV > $seqres.full 2>&1 || \
+>  	_notrun "Could not create ext4 filesystem"
+>  # Manual mount so we don't use -t btrfs or selinux context
+>  mount -t ext4 $SCRATCH_DEV $SCRATCH_MNT
+> +if [ $? -ne 0 ]; then
+> +	_notrun "block size $BLOCK_SIZE is not supported by ext4"
+> +fi
+
+Hmm... the mount failure maybe not caused by the "$BLOCK_SIZE is not supported",
+I'm wondering if this _notrun might ignore real bug. How about check the
+"blocksize < pagesize" at least?
+
 >  
->  runtime=30
->  nr_cpus=$("$here/src/feature" -o)
-> @@ -55,7 +51,7 @@ $BLKDISCARD_PROG $LOGWRITES_DMDEV > /dev/null 2>&1
->  # Use no-holes to avoid warnings of missing file extent items (expected
->  # for holes due to mix of buffered and direct IO writes).
->  # And use 4K nodesize to bump tree height.
-> -_log_writes_mkfs -O no-holes -n 4k >> $seqres.full
-> +_log_writes_mkfs -O no-holes -n 4k -s 4k >> $seqres.full
->  _log_writes_mount
+>  echo "populating the initial ext fs:" >> $seqres.full
+>  mkdir "$SCRATCH_MNT/$BASENAME"
+> diff --git a/tests/btrfs/136 b/tests/btrfs/136
+> index 65bbcf51..6b4b52e4 100755
+> --- a/tests/btrfs/136
+> +++ b/tests/btrfs/136
+> @@ -45,6 +45,9 @@ $MKFS_EXT4_PROG -F -t ext3 -b $BLOCK_SIZE $SCRATCH_DEV > $seqres.full 2>&1 || \
 >  
->  $BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/src > /dev/null
-> diff --git a/tests/btrfs/304 b/tests/btrfs/304
-> index b7ed66af..18f73590 100755
-> --- a/tests/btrfs/304
-> +++ b/tests/btrfs/304
-> @@ -20,8 +20,7 @@ _require_btrfs_fs_feature "raid_stripe_tree"
->  _require_btrfs_fs_feature "free_space_tree"
->  _require_btrfs_free_space_tree
->  _require_btrfs_no_compress
-> -
-> -test $(_get_page_size) -eq 4096 || _notrun "this tests requires 4k pagesize"
-> +_require_btrfs_support_sectorsize 4096
+>  # mount and populate non-extent file
+>  mount -t ext3 $SCRATCH_DEV $SCRATCH_MNT
+> +if [ $? -ne 0 ]; then
+> +	_notrun "block size $BLOCK_SIZE is not supported by ext3"
+> +fi
+>  populate_data "$SCRATCH_MNT/ext3_ext4_data/ext3"
+>  _scratch_unmount
 >  
->  test_4k_write()
->  {
-> @@ -31,7 +30,7 @@ test_4k_write()
->  	_scratch_dev_pool_get $ndevs
->  
->  	echo "==== Testing $profile ===="
-> -	_scratch_pool_mkfs -d $profile -m $profile -O raid-stripe-tree
-> +	_scratch_pool_mkfs -s 4k -d $profile -m $profile -O raid-stripe-tree
->  	_scratch_mount
->  
->  	$XFS_IO_PROG -fc "pwrite 0 4k" "$SCRATCH_MNT/foo" | _filter_xfs_io
-> diff --git a/tests/btrfs/305 b/tests/btrfs/305
-> index ad060853..45747627 100755
-> --- a/tests/btrfs/305
-> +++ b/tests/btrfs/305
-> @@ -21,8 +21,7 @@ _require_btrfs_fs_feature "raid_stripe_tree"
->  _require_btrfs_fs_feature "free_space_tree"
->  _require_btrfs_free_space_tree
->  _require_btrfs_no_compress
-> -
-> -test $(_get_page_size) -eq 4096 || _notrun "this tests requires 4k pagesize"
-> +_require_btrfs_support_sectorsize 4096
->  
->  test_8k_new_stripe()
->  {
-> @@ -32,7 +31,7 @@ test_8k_new_stripe()
->  	_scratch_dev_pool_get $ndevs
->  
->  	echo "==== Testing $profile ===="
-> -	_scratch_pool_mkfs -d $profile -m $profile -O raid-stripe-tree
-> +	_scratch_pool_mkfs -s 4k -d $profile -m $profile -O raid-stripe-tree
->  	_scratch_mount
->  
->  	# Fill the first stripe up to 64k - 4k
-> diff --git a/tests/btrfs/306 b/tests/btrfs/306
-> index b47c446b..db3defc8 100755
-> --- a/tests/btrfs/306
-> +++ b/tests/btrfs/306
-> @@ -21,8 +21,7 @@ _require_btrfs_fs_feature "raid_stripe_tree"
->  _require_btrfs_fs_feature "free_space_tree"
->  _require_btrfs_free_space_tree
->  _require_btrfs_no_compress
-> -
-> -test $(_get_page_size) -eq 4096 || _notrun "this tests requires 4k pagesize"
-> +_require_btrfs_support_sectorsize 4096
->  
->  test_4k_write_64koff()
->  {
-> @@ -32,7 +31,7 @@ test_4k_write_64koff()
->  	_scratch_dev_pool_get $ndevs
->  
->  	echo "==== Testing $profile ===="
-> -	_scratch_pool_mkfs -d $profile -m $profile -O raid-stripe-tree
-> +	_scratch_pool_mkfs -s 4k -d $profile -m $profile -O raid-stripe-tree
->  	_scratch_mount
->  
->  	# precondition one stripe
 > -- 
 > 2.51.0
 > 
