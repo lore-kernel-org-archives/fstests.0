@@ -1,189 +1,135 @@
-Received: from mail-qt1-f181.google.com (mail-qt1-f181.google.com [209.85.160.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.synology.com (mail.synology.com [211.23.38.101])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04A6B2AE97
-	for <fstests@vger.kernel.org>; Tue, 30 Sep 2025 03:47:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E9C22D2390;
+	Tue, 30 Sep 2025 07:58:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.23.38.101
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759204072; cv=none; b=toViLPBpGXzTFA6mPan5dRL5DS3DoWpbG4XDMapvSfdTcAlS18OTx5t+hLg0C2OYmaYWh0yjgz2Hi1FqIOWevCyh8AJmYCivt0GCWkDziFCixtiXlc9SzZL5gOkELU8lsvwS3ES7H9M0YIiLpkpcvqGtMf4PQ8QoHD6ahKVT94c=
+	t=1759219091; cv=none; b=XgQ/tMuqRrfbrWpXsSrdiDoBnw8D25eeKlHHYvi+WJi4S8E/R05f8kc2cQ3le/NiyZCEzYD1gxkTswYJae3LNJbaHJQv12l1qJZVP/SQa9/RHYhqDLZRqX+xfpq5ebVZuAD8xineOoUL2Qzfd64UXdnLXnWF80745pvMyfTWotk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759204072; c=relaxed/simple;
-	bh=zsDi7uslgFZ3sSKUmMd091B+OdYeBJygmTOMeEND5oA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=fB11H5DAwiTLMtPepjRa8PZzT0fD25WgJC1wox8FWLFaa5+MIAqisDOJyUj6emEoZEXJu6v/Cj0bqkqQhwOjWyzO+g9y/sDRQ7P/XFKZTVB8CVUbtyOL2nuswz/NhegDwFRl6lDQA+b0Bv7KoCZvLOUCAR/W9X4+9SxWklK5yvw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=MJ7w9lds; arc=none smtp.client-ip=209.85.160.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1759219091; c=relaxed/simple;
+	bh=OHZNGg7WopG9zm0fu26hShbHYBIBKKUMRHxA+AiPzJY=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=J/zlZ71lxvzEv+HE0PhUe8jkHAvgKm6a7uWR7wQaNlMaSdhRDNQ30yhX0i0fU/OG5FRxZ5dQ+9ndtH0xQ/LNYgcExhMZDxtRvOAYGOyLgdcgsfLNvITnDKMUS4wERl2uNRX+XsAInCIzA68GF/KCIk23K/RzCHXsmoG1mSJrDGY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=synology.com; spf=pass smtp.mailfrom=synology.com; dkim=pass (1024-bit key) header.d=synology.com header.i=@synology.com header.b=rNBfSMGI; arc=none smtp.client-ip=211.23.38.101
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=synology.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=synology.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MJ7w9lds"
-Received: by mail-qt1-f181.google.com with SMTP id d75a77b69052e-4dfbab4fb0dso11313321cf.3
-        for <fstests@vger.kernel.org>; Mon, 29 Sep 2025 20:47:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1759204070; x=1759808870; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=le1M6VkoM8maBhpGpaBfI2kaslb6T3gdHrKqeP+njDI=;
-        b=MJ7w9ldsgY9itc817U9s0ggvgc2HrTlrq8GTF+/Jzx4ljTTpIaBAPlFAM61nPVhnya
-         58UtEA5CewRtVuv40sAl0i0mM10UPJetVlZMHipX3+k2RFDmtbyfT3E2IFJvT/TNXS+O
-         RaqKCR/1qha9UmiaNgbWE8A2p3RwN8Gimk9x97Y53219SvCOma5JMbIb2hUlqzYH+3Ep
-         WXYkbeCrJtS/69mdne7LwiPwS9ALBJ19SIdZ0g6BdD4t3rieOSA6A5JsZCh5/H5UhKU3
-         /I8IixrvZd3C0+q+IljmlrvR+V49u+LDFl/AtQdq6NDdDHg2y0CAGlc/m0zxwjC/aWQF
-         +7aQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759204070; x=1759808870;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=le1M6VkoM8maBhpGpaBfI2kaslb6T3gdHrKqeP+njDI=;
-        b=RcySLewlF7Kn5a3xDRgE4qQvDsb+zxho83iO060FQ5PyPzztS2gWellyIJtmS4RUhB
-         T+xlYhqj+G8U8YQSlhm9YbA67QGNdPru4BjrCLNfqReVpnFGN2mR7dcuvGpjrwkrtlK7
-         njqkYeUnSYon9AWWVxF8BxfbGBGjwX8EbDwT5iPoI+a8MZifOzrfWmLB6wxDvAZpKX4B
-         45GLMUHcFMHpiKtwHK9zhGTno82OBMQbj0azf3YSifwUD9CBANNcWJnlJ0Lcw3QYvHkM
-         ZmCagMmxOQ3YDcwbP3YGYmXfmAMg20g+L56wkPbUdFtF3DKFi6UfbIKaHo8FTj/T3lFJ
-         fVbQ==
-X-Gm-Message-State: AOJu0YyDNQfEMlij8PJGtJ806yBywJfe5LwWv33gMYBVf4wG4HCB+ikT
-	i8Lykhu+BbM61/HJiu5xh/dcoZXroR8DN/AdD6n3BqXf9MmEUTvzEX0EZpldKIUq07mTxd+9tyW
-	wqr2mK7t0NbOrBRERxYN92+TqCfwnqBI=
-X-Gm-Gg: ASbGncthyhqocwRdQfZzDp0VxxheWVAUZfkcenrzxDh4JJJ00MAs8MW/vPENEIZ/5nQ
-	q8nb0+/I4phR+pJIb+TglQK4SAGKSWqg+IzFsZR6b07vcKX0iQgsP5AB5hRQyu5KWQ1a9ZjZTu8
-	Vfv/vnFCRvEBavLOY8Wnw49hMrzNnU+dthhCqGnXhu9bdyTAk+UAhDeKAglzJdomoYnPtY8g5wb
-	mDqOCmbvHbDgJknkpYu8sqqvLsH9Q9aULWFE8CYU1XF0yJ1SQ8MlHbEbvi72A==
-X-Google-Smtp-Source: AGHT+IHRn7wwofmckgetIFv7NrcubZxn6rGcrfJ0dYm+EeA9hAKHUc/yMdNYvRtWsOi0Pb8wklD9ICZ4GeMk/aZyVl8=
-X-Received: by 2002:a05:622a:5144:b0:4df:fb58:b253 with SMTP id
- d75a77b69052e-4dffb58b653mr90163061cf.48.1759204069824; Mon, 29 Sep 2025
- 20:47:49 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=synology.com header.i=@synology.com header.b="rNBfSMGI"
+From: ethanwu <ethanwu@synology.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=synology.com; s=123;
+	t=1759219086; bh=OHZNGg7WopG9zm0fu26hShbHYBIBKKUMRHxA+AiPzJY=;
+	h=From:To:Cc:Subject:Date;
+	b=rNBfSMGIXqbMhPYtVMgHRdbVog/OrPwpkwOTVQiaZDJvXyF3iiWOEwAuB28qmGTMZ
+	 9sh8Zfj4i7dl8gkAPSpwQqBnekSlh9GX099IDX+gRFD2bJe88jkRFwQ5BohbO5by11
+	 MiPZXy/T8Z10Govpb0RiMZVuIe24PdIpnR+uF9OU=
+To: fstests@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org,
+	Slava.Dubeyko@ibm.com,
+	ethan198912@gmail.com,
+	ethanwu <ethanwu@synology.com>
+Subject: [PATCH] ceph/006: test snapshot data integrity after punch hole operations
+Date: Tue, 30 Sep 2025 15:57:42 +0800
+Message-ID: <20250930075743.2404523-1-ethanwu@synology.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1758148804.git.anand.jain@oracle.com> <512a6148be0d8da51278f94a29b959f3950bcc0b.1758148804.git.anand.jain@oracle.com>
- <20250926155753.yhhrbfnilvmk2t47@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To: <20250926155753.yhhrbfnilvmk2t47@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From: Anand Jain <anajain.sg@gmail.com>
-Date: Tue, 30 Sep 2025 11:47:38 +0800
-X-Gm-Features: AS18NWCZGtNkWjyUPnubP-JR7Jk5LnsHQ5z55GYM6FNGTIys3gcBfYurna24xq8
-Message-ID: <CANZP331iHxPpL0kQfwhzQrSkevs9KS8NF9cvcc-KNDUexM7wbQ@mail.gmail.com>
-Subject: Re: [PATCH 1/2] common/rc: helper functions to handle block devices
- via sysfs
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-Synology-Spam-Flag: no
+X-Synology-Virus-Status: no
+X-Synology-MCP-Status: no
+X-Synology-Spam-Status: score=0, required 6, WHITELIST_FROM_ADDRESS 0
+Content-Type: text/plain
 
-On 26/9/25 23:57, Zorro Lang wrote:
-> On Thu, Sep 18, 2025 at 08:32:46AM +0800, Anand Jain wrote:
->> From: Anand Jain <anand.jain@oracle.com>
->>
->> _bdev_handle(dev)
->>      get sysfs handle for a given block device.
->>
->> _has_bdev_sysfs_delete(dev_path)
->>      Checks if the block device supports sysfs-based delete.
->>
->> _require_scratch_bdev_delete()
->>      Test if the scratch device does not support sysfs delete.
->>
->> Signed-off-by: Anand Jain <anand.jain@oracle.com>
->> ---
->>   common/rc | 26 ++++++++++++++++++++++++++
->>   1 file changed, 26 insertions(+)
->>
->> diff --git a/common/rc b/common/rc
->> index 81587dad500c..627ddcc02fb8 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -4388,6 +4388,32 @@ _get_file_extent_sector()
->>      echo "$result"
->>   }
->>
->> +_bdev_handle()
->> +{
->> +    local device=3D$(echo $1 | rev | cut -d"/" -f1 | rev)
->                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
->
-> basename $1 ?
->
-> if you hope to make sure it's not link, you can
->
+Add test to verify that Ceph snapshots preserve original file data
+when the live file is modified with punch hole operations. The test
+creates a file, takes a snapshot, punches multiple holes in the
+original file, then verifies the snapshot data remains unchanged.
 
-> basename $(_real_dev $1)
+Signed-off-by: ethanwu <ethanwu@synology.com>
+---
+ tests/ceph/006     | 58 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ceph/006.out |  2 ++
+ 2 files changed, 60 insertions(+)
+ create mode 100755 tests/ceph/006
+ create mode 100644 tests/ceph/006.out
 
-Whoops, not sure what I was thinking. There's actually a helper for
-this, _short_dev().
-The changes below will fix it. I can send v2 if needed, unless it can
-be fixed at merge
-time. Let me know what works best.
------------------------------------
-$ git diff
-diff --git a/common/rc b/common/rc
-index 627ddcc02fb8..085fab6e34f0 100644
---- a/common/rc
-+++ b/common/rc
-@@ -4390,7 +4390,7 @@ _get_file_extent_sector()
+diff --git a/tests/ceph/006 b/tests/ceph/006
+new file mode 100755
+index 00000000..3f4b4547
+--- /dev/null
++++ b/tests/ceph/006
+@@ -0,0 +1,58 @@
++#!/bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2025 Synology All Rights Reserved.
++#
++# FS QA Test No. ceph/006
++#
++# Test that snapshot data remains intact after punch hole operations
++# on the original file.
++#
++. ./common/preamble
++_begin_fstest auto quick snapshot
++
++. common/filter
++
++_require_test
++_require_xfs_io_command "pwrite"
++_require_xfs_io_command "fpunch"
++_exclude_test_mount_option "test_dummy_encryption"
++
++# TODO: Update with final commit SHA when merged
++_fixed_by_kernel_commit 1b7b474b3a78 \
++	"ceph: fix snapshot context missing in ceph_zero_partial_object"
++
++workdir=$TEST_DIR/test-$seq
++snapdir=$workdir/.snap/snap1
++rmdir $snapdir 2>/dev/null
++rm -rf $workdir
++mkdir $workdir
++
++$XFS_IO_PROG -f -c "pwrite -S 0xab 0 1048576" $workdir/foo > /dev/null
++
++mkdir $snapdir
++
++original_md5=$(md5sum $snapdir/foo | cut -d' ' -f1)
++
++# Punch several holes of various sizes at different offsets
++$XFS_IO_PROG -c "fpunch 0 4096" $workdir/foo
++$XFS_IO_PROG -c "fpunch 16384 8192" $workdir/foo
++$XFS_IO_PROG -c "fpunch 65536 16384" $workdir/foo
++$XFS_IO_PROG -c "fpunch 262144 32768" $workdir/foo
++$XFS_IO_PROG -c "fpunch 1024000 4096" $workdir/foo
++
++# Make sure we don't read from cache
++echo 3 > /proc/sys/vm/drop_caches
++
++snapshot_md5=$(md5sum $snapdir/foo | cut -d' ' -f1)
++
++if [ "$original_md5" != "$snapshot_md5" ]; then
++    echo "FAIL: Snapshot data changed after punch hole operations"
++    echo "Original md5sum: $original_md5"
++    echo "Snapshot md5sum: $snapshot_md5"
++fi
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ceph/006.out b/tests/ceph/006.out
+new file mode 100644
+index 00000000..675c1b7c
+--- /dev/null
++++ b/tests/ceph/006.out
+@@ -0,0 +1,2 @@
++QA output created by 006
++Silence is golden
+-- 
+2.43.0
 
- _bdev_handle()
- {
--       local device=3D$(echo $1 | rev | cut -d"/" -f1 | rev)
-+       local device=3D$(_short_dev $1)
 
-        test -e /sys/class/block/${device}/device/scsi_disk/ || \
-                        _notrun "Failed to obtain sys block handle"
-@@ -4401,7 +4401,7 @@ _bdev_handle()
- _has_bdev_sysfs_delete()
- {
-        local dev_path=3D$1
--       local device=3D$(echo $dev_path | rev | cut -d"/" -f1 | rev)
-+       local device=3D$(_short_dev $1)
-        local delete_path=3D/sys/class/block/${device}/device/delete
-
-        test -e $delete_path
----------------------------------------------
-
-
->> +
->> +    test -e /sys/class/block/${device}/device/scsi_disk/ || \
->> +                    _notrun "Failed to obtain sys block handle"
->> +
->> +    ls /sys/class/block/${device}/device/scsi_disk/
->> +}
->> +
->> +_has_bdev_sysfs_delete()
->> +{
->> +    local dev_path=3D$1
->> +    local device=3D$(echo $dev_path | rev | cut -d"/" -f1 | rev)
->> +    local delete_path=3D/sys/class/block/${device}/device/delete
->> +
->> +    test -e $delete_path
->> +}
->> +
->> +_require_scratch_bdev_delete()
->> +{
->
-> I'm wondering if it's better to call "_require_block_device" at first, be=
-fore
-> checking the /sys ?
-
-There=E2=80=99s no harm in using _require_block_device() here, but I don=E2=
-=80=99t
-think it will help,
-a non block device won't reach this place anyway.
-config: _check_device() will fail for non-block devices.
-
-Thanks, Anand
-
->> +    if ! _has_bdev_sysfs_delete $SCRATCH_DEV; then
->> +            _notrun "require scratch device sys delete support"
->> +    fi
->> +}
->> +
->>   # arg 1 is dev to remove and is output of the below eg.
->>   # ls -l /sys/class/block/sdd | rev | cut -d "/" -f 3 | rev
->>   _devmgt_remove()
->> --
->> 2.51.0
->>
->>
->
+Disclaimer: The contents of this e-mail message and any attachments are confidential and are intended solely for addressee. The information may also be legally privileged. This transmission is sent in trust, for the sole purpose of delivery to the intended recipient. If you have received this transmission in error, any use, reproduction or dissemination of this transmission is strictly prohibited. If you are not the intended recipient, please immediately notify the sender by reply e-mail or phone and delete this message and its attachments, if any.
