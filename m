@@ -1,186 +1,231 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F95B2BDC2F
-	for <fstests@vger.kernel.org>; Thu,  2 Oct 2025 06:58:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58BCC239E81
+	for <fstests@vger.kernel.org>; Thu,  2 Oct 2025 07:13:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759388299; cv=none; b=jqTu/mpf9NJqmiHvhyV8teelSJFgt9CiRDZppZ9obxZpG1scVH0+HpVTiDHjQ9KhgZiAF85W7+BP3aMHAUY6jFSTOl15QhNKd6/q8Wwag3Du1661zp+9Yj04gPQKoXIkmLzQPmby9Xd7STgsnAjDgPiVCP1YB1MuB7xBHOJZBA4=
+	t=1759389243; cv=none; b=OVWJxpfZKGPj6Ck3Nq8a9g8LE+0cRKzvpYzsJovGXY8yjXyQeYTnwDl38pzTPQWk8UvWwOcA9SLtPYe7oF9pZYEPSUQifXNA4t0ZJ/j0aelascishkqlDh5ZYMGLlmS/PZgpuxapsxD9bETHQxoXLUOhQ3HWEuKagzg+8FosMr4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759388299; c=relaxed/simple;
-	bh=Mbay8p6OAxhIy4VBUB0Llxal02RTAw3uLQbas9/xcbE=;
+	s=arc-20240116; t=1759389243; c=relaxed/simple;
+	bh=FBscNO4Osp8fJCrRhXQDU2USDsG0KLIXJoOhhs49+Ew=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=to7dcCX7w9Q0qnvHxdvnt4fpKdCvBQpcYjHT/EyPN9GP/0oXfFQ8XUaVGtYXLEzLSHG75k505cBCw0y6SIOIish9xqu/tpF7vM3KAtKt+GIUHuuKZ2mx0bjXiqkabxmUd3cRw1ffQKEZEmyrFydvK1MGAOcBl80NtEAA1pv5i7c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=USlOnJl1; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=GiT3VC4YtMpY58lkkqpHMv6wbRrw7kEZeOeVyuRIVdPlM3sLLb3uAkoANvcwQB+tifRzm0fQBcEIBreU8Vp+TXtmHMh8bp82lX3veP+a+dWZxkcefOsj9S29cQCW7LgchcwFayExlBAoKnlH7jxYRNND9Bcl6xNNVFfc9e210VY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=SXt9ytX4; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="USlOnJl1"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SXt9ytX4"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1759388296;
+	s=mimecast20190719; t=1759389237;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=Zp3VaLXBhBf7B6czUgI06vrP6mixrXVc+Bnb0mXPHoo=;
-	b=USlOnJl1GZYZvQV23pqVSVI3h7UCsRn/rVpNgyYMVJTcpMU/gq5GSFfu1xlJxN/NGrN/uB
-	nB6h/3b2Tljlc0zIl5LhaJTECU09SoVxmqclTgKeV/GholvCusCUMUrxa2B/G+Z1x+LTNG
-	bzGW2UREAekq+t/W4EiWESbT+Kppiew=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=fnZ27ieYTOSFRfY/wHn6jiluEoUMobm+VDg/9WPXtb0=;
+	b=SXt9ytX4+QPlNebkOb5lWN3TfwTCIeD5gnmHi3tm/rKHnFyh6L9KlaBbLqOoDepysaDo+6
+	ur8oPh/T2UohoboBDDf4me5qfGxQi8SNbwz9E6Rn0NZuVEDExiF3H0nDIcaKlZR8FkNKug
+	XU3HruAFmfd5boGKFA/ljjOzb+Oy5Iw=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-623-76p-q1eXOd2fIrfB9UVO3Q-1; Thu, 02 Oct 2025 02:58:14 -0400
-X-MC-Unique: 76p-q1eXOd2fIrfB9UVO3Q-1
-X-Mimecast-MFC-AGG-ID: 76p-q1eXOd2fIrfB9UVO3Q_1759388294
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-7821487d16bso1418372b3a.1
-        for <fstests@vger.kernel.org>; Wed, 01 Oct 2025 23:58:14 -0700 (PDT)
+ us-mta-668-QYrsnL42ObKfORd-XhVQRA-1; Thu, 02 Oct 2025 03:13:55 -0400
+X-MC-Unique: QYrsnL42ObKfORd-XhVQRA-1
+X-Mimecast-MFC-AGG-ID: QYrsnL42ObKfORd-XhVQRA_1759389234
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-268149e1c28so7156115ad.1
+        for <fstests@vger.kernel.org>; Thu, 02 Oct 2025 00:13:55 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759388294; x=1759993094;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Zp3VaLXBhBf7B6czUgI06vrP6mixrXVc+Bnb0mXPHoo=;
-        b=WrYWC7ryasxu5ECNgX4s3i6c1HxeiZLKEGzDcMC+FNjU1ljKOehFel87GFtK6USB/X
-         6FC4wU+YcvOXT90cCuw5s4Tba3FxYj0ayNSK482K3BxcedBzuBmw0duTsA3JojPEpkfY
-         OwHqfG+DnPcaEVo3YOgx9ceyqcdXJ4sUK2Obagz0pynRjExkQDLxxhyqs5nDjTr4OTHd
-         GQaaZWtxNqS2ZywtAg2XH+1rRK1Hsft4JIq2A3b+tP+tsFKu9NWzRabUb5VF3QccLrMa
-         ENi0Ik2JKhtvXlxZ7xYFGV9vJxYevKDDNeOEuRoYPdGpG8Ry/kX5IcYsc7he4+1MlJtx
-         d86g==
-X-Forwarded-Encrypted: i=1; AJvYcCW99dTFZ7RFD+lQuJr8kfs8yzMuIanxHrRvT0fXTn8eZpIjsZQOIyME2SLqSxup1T62hj2//tKp@vger.kernel.org
-X-Gm-Message-State: AOJu0YxJrOZBU29Eq84UorVdugvbBTAU9S6ihxyiPs4dZUEcB51PGUOF
-	MJMKuew3lUJ9Po1eqOMAeJC+F4BENYDgkoEwPLdQfIiUE6y9Bz25GXWilGoGuzNMkgUnRk7FhZ7
-	w1+N90IhMprTSU+vC7ZecqBg61nTBKmU8t0h9wXgZRvkoIAw4HE3hi2HYMOQ=
-X-Gm-Gg: ASbGnctVXhAJInqy3WbuNwXf4E7Q+vsAUWxVZsPi/xgjRI4OEaQRt8UPyCTEdR1IAW3
-	HQg+naiXft8mz5s0xLOwosniySxh0oYlybcErk+DsPk2Fpl/bLRXn6mwj9KiLQHNyZIzv6iYdSB
-	vOhZG9QhJi2zZ9/bL0eOlSpd+uFJGfLfQmSlZmXsiet9yIN+o7ll4ate+dTXE2/THXH7lLYlV7a
-	Q+/YC5zamIQD9nxCXGQgSRwoQ/z7AEOsKrlWnp9x5N5GH7gtxbVh3kaoJDXhs6ePkEx4XOwsfG7
-	wNlxJWsbSd5ciQi1w41Ev408lEeqPdKqdJBggf0QGXVJVnM4rXAQawweZKF8q3I38FS7XMZ0GXP
-	KfOVtiwckCQ==
-X-Received: by 2002:a05:6a00:1893:b0:781:2624:ed5c with SMTP id d2e1a72fcca58-78af417f373mr7372643b3a.26.1759388293702;
-        Wed, 01 Oct 2025 23:58:13 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IH5ImDArdMdVNl0+p2Gw3C2BINhKXT4NpiUZL2yMf2CS0xOzCL2dhRE5V9Gej+wlYNZO+yWNQ==
-X-Received: by 2002:a05:6a00:1893:b0:781:2624:ed5c with SMTP id d2e1a72fcca58-78af417f373mr7372616b3a.26.1759388293122;
-        Wed, 01 Oct 2025 23:58:13 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1759389234; x=1759994034;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=fnZ27ieYTOSFRfY/wHn6jiluEoUMobm+VDg/9WPXtb0=;
+        b=KfV6oDdawkA71NknwVTqTfEr5VhEC5IoLQ4u7OSaqm8UrY7VY9Ls7d3D94vzU/tcb+
+         WbjvmAYWq1WvrLQr9z4QHg5Vqjd8iMdMq56dgcsebnhQBeQWv4KVSe9ANGjMQWHL+MFS
+         O/Jb9GjJcJwVD96u1kF5ySGtOL3c7s8yuQjCWwsnKGNIGgBAnP3sRQkkzCi75WTJ2vCY
+         V6tMigxYwBpr7deII0qOZAdYbAiIwRtwViBo24C6BPmSspNC0ax+VSPnApMPxV9KfpRI
+         3+xVIP0corGO6WTSuPmhV8wAs1TOvZO8ywmijTLr+uN9r3B8y1pgWVLaYi+DhrnkxSAQ
+         yOSA==
+X-Gm-Message-State: AOJu0YzRCYKGg3iLo8ftqN8jQETgl+m6fpa+6T+DjRVpKAtR2y8OfTIg
+	obHiUmq0Fq9ZCv9i+cNMYhwOi5bvuSXs32AS63VgM7T05fyy32feQcDcfpJesNSWoObDGGL5DbC
+	X2eaj8g47TpVSlhSeHYceRgPmBKBKZjWj/lk4ZKUB2Lr6Z36F6d4felVrjIk=
+X-Gm-Gg: ASbGncvRQ/ZrswGJAcC0LAWfn6VSFSzxgJbJhdmgSGMs36Zlzkmpeglfrae+yMdSQPf
+	z9TFJm8p+qge2k5yT9IrbCPcocBzHf2DX0EvwpRcx5H6KiXizb3Lx7+MpkC13FaepUOJbTer1bs
+	NbOlh7gWi9ItBrDl7QR9woNUOAG/MI0fTgNsEPoDANzRNGe1c2ZvoQqqHWz3+kDN5erkNny2yUL
+	JUic+UPX15RyLznK3vQ8DzCWovo8J9fe5Aw1w4oNmxj2xwxi+MqFSRCnfh/14uzGIZkDGmS8dDo
+	Iddio2oVCoF3XizFeonah44Ez0PyPhKLWdDqV0SCNfpkd5jIQUMHZWtcYLlfMHePRSa/1ji7750
+	NhcEOdgbO2g==
+X-Received: by 2002:a17:902:ebc8:b0:261:cb35:5a0e with SMTP id d9443c01a7336-28e7f4dafbemr67568525ad.57.1759389234273;
+        Thu, 02 Oct 2025 00:13:54 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGQB3n307tLwZdG10MItso7oQUjbG7xbdVGGydSZYosB0LXus2LOnyLPLkmvn7ogR4JYi6y4Q==
+X-Received: by 2002:a17:902:ebc8:b0:261:cb35:5a0e with SMTP id d9443c01a7336-28e7f4dafbemr67568235ad.57.1759389233648;
+        Thu, 02 Oct 2025 00:13:53 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-78b01fb1902sm1527258b3a.31.2025.10.01.23.58.11
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3399bc196c3sm3310645a91.0.2025.10.02.00.13.51
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 01 Oct 2025 23:58:12 -0700 (PDT)
-Date: Thu, 2 Oct 2025 14:58:08 +0800
+        Thu, 02 Oct 2025 00:13:53 -0700 (PDT)
+Date: Thu, 2 Oct 2025 15:13:48 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v2 1/3] btrfs/012 btrfs/136: skip the test if ext*
- doesn't support the block size
-Message-ID: <20251002065808.6cxusfy72larui34@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20251002005648.47021-1-wqu@suse.com>
- <20251002005648.47021-2-wqu@suse.com>
+To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
+	"ethanwu@synology.com" <ethanwu@synology.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	"ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>,
+	"ethan198912@gmail.com" <ethan198912@gmail.com>
+Subject: Re: [PATCH] ceph/006: test snapshot data integrity after punch hole
+ operations
+Message-ID: <20251002071348.57mqzt6iqvlnf7hf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250930075743.2404523-1-ethanwu@synology.com>
+ <7d9866d591e7fe4e5f3336aaa13107db402a608d.camel@ibm.com>
+ <d6b17cbb-3504-4c3c-9f31-35c538248503@Mail>
+ <cc9d84c5a3b683ccd7c86fcede503e07b048e94c.camel@ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20251002005648.47021-2-wqu@suse.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <cc9d84c5a3b683ccd7c86fcede503e07b048e94c.camel@ibm.com>
 
-On Thu, Oct 02, 2025 at 10:26:46AM +0930, Qu Wenruo wrote:
-> [FALSE ALERT]
-> When testing btrfs bs > ps support, the test cases btrfs/012 and
-> btrfs/136 fail like the following:
-> 
->  FSTYP         -- btrfs
->  PLATFORM      -- Linux/x86_64 btrfs-vm 6.17.0-rc4-custom+ #285 SMP PREEMPT_DYNAMIC Mon Sep 15 14:40:01 ACST 2025
->  MKFS_OPTIONS  -- -s 8k /dev/mapper/test-scratch1
->  MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
-> 
->  btrfs/012       [failed, exit status 1]- output mismatch (see /home/adam/xfstests/results//btrfs/012.out.bad)
->      --- tests/btrfs/012.out	2024-07-17 16:27:18.790000343 +0930
->      +++ /home/adam/xfstests/results//btrfs/012.out.bad	2025-09-15 16:32:55.185922173 +0930
->      @@ -1,7 +1,11 @@
->       QA output created by 012
->      +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/test-scratch1, missing codepage or helper program, or other error.
->      +       dmesg(1) may have more information after failed mount system call.
->      +mkdir: cannot create directory '/mnt/scratch/stressdir': File exists
->      +umount: /mnt/scratch: not mounted.
->       Checking converted btrfs against the original one:
->      -OK
->      ...
->      (Run 'diff -u /home/adam/xfstests/tests/btrfs/012.out /home/adam/xfstests/results//btrfs/012.out.bad'  to see the entire diff)
-> 
->  btrfs/136 3s ... - output mismatch (see /home/adam/xfstests/results//btrfs/136.out.bad)
->      --- tests/btrfs/136.out	2022-05-11 11:25:30.743333331 +0930
->      +++ /home/adam/xfstests/results//btrfs/136.out.bad	2025-09-19 07:00:00.395280850 +0930
->      @@ -1,2 +1,10 @@
->       QA output created by 136
->      +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/test-scratch1, missing codepage or helper program, or other error.
->      +       dmesg(1) may have more information after failed mount system call.
->      +umount: /mnt/scratch: not mounted.
->      +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/test-scratch1, missing codepage or helper program, or other error.
->      +       dmesg(1) may have more information after failed mount system call.
->      +umount: /mnt/scratch: not mounted.
->      ...
->      (Run 'diff -u /home/adam/xfstests/tests/btrfs/136.out /home/adam/xfstests/results//btrfs/136.out.bad'  to see the entire diff)
-> 
-> [CAUSE]
-> Currently ext* doesn't support block size larger than page size, thus
-> at mkfs time it will output the following warning:
-> 
->  Warning: blocksize 8192 not usable on most systems.
->  mke2fs 1.47.3 (8-Jul-2025)
->  Warning: 8192-byte blocks too big for system (max 4096), forced to continue
-> 
-> Furthermore at ext* mount time it will fail with the following dmesg:
-> 
->  EXT4-fs (loop0): bad block size 8192
-> 
-> [FIX]
-> Check if the mount of the newly created ext* succeeded.
-> 
-> If not and the block size is larger than page size, we know it's some
-> block size ext* not yet supported, and skip the test case.
-> 
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
+On Wed, Oct 01, 2025 at 06:09:34PM +0000, Viacheslav Dubeyko wrote:
+> On Wed, 2025-10-01 at 11:11 +0800, ethanwu wrote:
+> > Viacheslav Dubeyko <Slava. Dubeyko@ ibm. com> 於 2025-10-01 02: 24 寫道： On Tue, 2025-09-30 at 15: 57 +0800, ethanwu wrote: > Add test to verify that Ceph snapshots preserve original file data > when the live file is modified with punch
+> >  
+> > Viacheslav Dubeyko <Slava.Dubeyko@ibm.com> 於 2025-10-01 02:24 寫道：
+> > 
+> > 
+> > > On Tue, 2025-09-30 at 15:57 +0800, ethanwu wrote:
+> > > > Add test to verify that Ceph snapshots preserve original file data
+> > > > when the live file is modified with punch hole operations. The test
+> > > > creates a file, takes a snapshot, punches multiple holes in the
+> > > > original file, then verifies the snapshot data remains unchanged.
+> > > > 
+> > > > Signed-off-by: ethanwu <ethanwu@synology.com>
+> > > > ---
+> > > >  tests/ceph/006     | 58 ++++++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/ceph/006.out |  2 ++
+> > > >  2 files changed, 60 insertions(+)
+> > > >  create mode 100755 tests/ceph/006
+> > > >  create mode 100644 tests/ceph/006.out
+> > > > 
+> > > > diff --git a/tests/ceph/006 b/tests/ceph/006
+> > > > new file mode 100755
+> > > > index 00000000..3f4b4547
+> > > > --- /dev/null
+> > > > +++ b/tests/ceph/006
+> > > > @@ -0,0 +1,58 @@
+> > > > +#!/bin/bash
+> > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > +# Copyright (C) 2025 Synology All Rights Reserved.
+> > > > +#
+> > > > +# FS QA Test No. ceph/006
+> > > > +#
+> > > > +# Test that snapshot data remains intact after punch hole operations
+> > > > +# on the original file.
+> > > > +#
+> > > > +. ./common/preamble
+> > > > +_begin_fstest auto quick snapshot
+> > > > +
+> > > > +. common/filter
+> > > > +
+> > > > +_require_test
+> > > > +_require_xfs_io_command "pwrite"
+> > > > +_require_xfs_io_command "fpunch"
+> > > > +_exclude_test_mount_option "test_dummy_encryption"
+> > > > +
+> > > > +# TODO: Update with final commit SHA when merged
+> > > > +_fixed_by_kernel_commit 1b7b474b3a78 \
+> > > > + "ceph: fix snapshot context missing in ceph_zero_partial_object"
+> > > > +
+> > > > +workdir=$TEST_DIR/test-$seq
+> > > > +snapdir=$workdir/.snap/snap1
+> > > > +rmdir $snapdir 2>/dev/null
+> > > > +rm -rf $workdir
+> > > > +mkdir $workdir
+> > > > +
+> > > > +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 1048576" $workdir/foo > /dev/null
+> > > > +
+> > > > +mkdir $snapdir
+> > > > +
+> > > > +original_md5=$(md5sum $snapdir/foo | cut -d' ' -f1)
+> > > > +
+> > > > +# Punch several holes of various sizes at different offsets
+> > > > +$XFS_IO_PROG -c "fpunch 0 4096" $workdir/foo
+> > > > +$XFS_IO_PROG -c "fpunch 16384 8192" $workdir/foo
+> > > > +$XFS_IO_PROG -c "fpunch 65536 16384" $workdir/foo
+> > > > +$XFS_IO_PROG -c "fpunch 262144 32768" $workdir/foo
+> > > > +$XFS_IO_PROG -c "fpunch 1024000 4096" $workdir/foo
+> > > > +
+> > > > +# Make sure we don't read from cache
+> > > > +echo 3 > /proc/sys/vm/drop_caches
+> > > > +
+> > > > +snapshot_md5=$(md5sum $snapdir/foo | cut -d' ' -f1)
+> > > > +
+> > > > +if [ "$original_md5" != "$snapshot_md5" ]; then
+> > > > +    echo "FAIL: Snapshot data changed after punch hole operations"
+> > > > +    echo "Original md5sum: $original_md5"
+> > > > +    echo "Snapshot md5sum: $snapshot_md5"
+> > > > +fi
+> > > > +
+> > > > +echo "Silence is golden"
+> > > > +
+> > > > +# success, all done
+> > > > +status=0
+> > > > +exit
+> > > > diff --git a/tests/ceph/006.out b/tests/ceph/006.out
+> > > > new file mode 100644
+> > > > index 00000000..675c1b7c
+> > > > --- /dev/null
+> > > > +++ b/tests/ceph/006.out
+> > > > @@ -0,0 +1,2 @@
+> > > > +QA output created by 006
+> > > > +Silence is golden
+> > > 
+> > > One idea has crossed my mind. I think we need to check somehow that snapshots
+> > > support has been enabled. Otherwise, I believe that test will fail. But it will
+> > > be better to inform about necessity to enable the snapshots support.
 
-This version is good to me, if there're not more review points btrfs list,
-I'll merge this patchset in next release. Thanks!
+Weird, not sure why I didn't get this email ...
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+> > > 
+> > > Thanks,
+> > > Slava.
+> > 
+> > OK, I'll add the following into common/ceph
+> >  
+> > +# this test requires ceph snapshot support
+> > +_require_ceph_snapshot()
+> > +{
+> > + local test_snapdir="$TEST_DIR/.snap/test_snap_$$"
+> > + mkdir "$test_snapdir" 2>/dev/null || _notrun "Ceph snapshots not supported (requires fs flag 'allow_snaps' and client auth capability 'snap')"
+> > + rmdir "$test_snapdir"
 
->  tests/btrfs/012 | 3 +++
->  tests/btrfs/136 | 3 +++
->  2 files changed, 6 insertions(+)
+So ".snap" directory is a ceph specific directory for snapshot. Sorry, I never used
+ceph, I'm wondering, if ceph snapshot feature isn't supported, users can't create any
+directory with "." prefix, or only can't create ".snap" in ceph? Due to ".snap" directory
+can be created in general filesystems (no special meaning):
+
+  $ mkdir .snap
+  $ ls -ld .snap
+  drwxr-xr-x. 2 zorro zorro 6 Oct  2 15:09 .snap
+  $ rm -rf .snap
+
+Thanks,
+Zorro
+
+> > +}
+> >  
+> > and add 
+> > +_require_ceph_snapshot
+> > in ceph/006
+> >  
+> > is this check and error message clear enough?
+> > 
 > 
-> diff --git a/tests/btrfs/012 b/tests/btrfs/012
-> index f41d7e4e..6914fba6 100755
-> --- a/tests/btrfs/012
-> +++ b/tests/btrfs/012
-> @@ -42,6 +42,9 @@ $MKFS_EXT4_PROG -F -b $BLOCK_SIZE $SCRATCH_DEV > $seqres.full 2>&1 || \
->  	_notrun "Could not create ext4 filesystem"
->  # Manual mount so we don't use -t btrfs or selinux context
->  mount -t ext4 $SCRATCH_DEV $SCRATCH_MNT
-> +if [ $? -ne 0 -a $BLOCK_SIZE -gt $(_get_page_size) ]; then
-> +	_notrun "block size $BLOCK_SIZE is not supported by ext4"
-> +fi
->  
->  echo "populating the initial ext fs:" >> $seqres.full
->  mkdir "$SCRATCH_MNT/$BASENAME"
-> diff --git a/tests/btrfs/136 b/tests/btrfs/136
-> index 65bbcf51..fd24d3f8 100755
-> --- a/tests/btrfs/136
-> +++ b/tests/btrfs/136
-> @@ -45,6 +45,9 @@ $MKFS_EXT4_PROG -F -t ext3 -b $BLOCK_SIZE $SCRATCH_DEV > $seqres.full 2>&1 || \
->  
->  # mount and populate non-extent file
->  mount -t ext3 $SCRATCH_DEV $SCRATCH_MNT
-> +if [ $? -ne 0 -a $BLOCK_SIZE -gt $(_get_page_size) ]; then
-> +	_notrun "block size $BLOCK_SIZE is not supported by ext3"
-> +fi
->  populate_data "$SCRATCH_MNT/ext3_ext4_data/ext3"
->  _scratch_unmount
->  
-> -- 
-> 2.51.0
+> Looks good. I believe it looks reasonably enough. :)
 > 
-> 
+> Thanks,
+> Slava.
 
