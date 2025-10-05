@@ -1,250 +1,142 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8BE921E7660
-	for <fstests@vger.kernel.org>; Sun,  5 Oct 2025 15:40:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC1F934BA39
+	for <fstests@vger.kernel.org>; Sun,  5 Oct 2025 15:56:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759678813; cv=none; b=tvLcPhOny/rpwTpu2zR+1ZBWjCFBdLnctd9nIKNpolYB/IslxZnXKCvyT4NSc1LhGIeCNCbutJDJmMOpnEaEhGs/LkebH19d4OZ6ITzBv79xnpdCsnZK7e1Vr7YkeDCvpNkFVW4rbaQvcjBOvXBzvea49X5V15NM2mM+D9Pg+5U=
+	t=1759679814; cv=none; b=MSiqmyKEOar3pQWj+XyQtrPqEqm3Fm86tnzB40w6UHVm/Jff01mLm7obQiuqBJJF8IxjgPQopNGMnwx8fWsFFcGZoHPgXHavBmdxmHyf4sFXb/5E7UDdAnn3RRfumBBKqaPQp7U1cRFRKTrTloUX+JT8gzgOay85xVv8BuVQ/Vk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759678813; c=relaxed/simple;
-	bh=R1K2JFKJydcEZh45xXiV8Sc9Vqu8beUFlAY3k7qUxFg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=DwCVR0lf6SQ/vl8PBD+0oiFpDU1QGatu8Bh4spNEgjFFn0JJ7biHP3E/k6TZgvjy4mxfUQ/h2HSOixhNzAMn3rw8E3pMbYrix/7p7gH0H3WxOWqvFWAOrqJFiwHaC8pS8CmvhCDRpyK02vC8urxMXZg9rsRDM8PZ0/CeHO/1hS8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Hg6Xjwq8; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1759679814; c=relaxed/simple;
+	bh=/JvR7wr5v5qo1U7AqOMlFERINhTIJPgHTA+QVv5FNb4=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=AZkDwl0nJeNBKjlCIkaeB0VSrIoihz4v3N5EbH4qN1x5/1zLqVGwBUrU0KyOLWQwLeUfjCVB3TR4bJ6bdoMce8E00ufCehVKJjTJ/6Y4pUek1FSijeyB8BEDP/xxc0mL+Ld0nUOCh3nbvjYQsVKIhq5AESJllADhwLFKs03E+RI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kZpn+kRe; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Hg6Xjwq8"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1759678806;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=ug83nJMIxm1+l9zlfeCnO8Pp3qwC8RmBILGiMr6FtEA=;
-	b=Hg6Xjwq8xq4oFxGoyQ7Cp/Oi1mp56b9jxfaTm9ZdONYlN9IP8Z7tct232kNpDHAAp391hM
-	1RlGvEY43EvhY6N/woZ6JWyJAb6loFwqzLtu7hB5pbBC2DhWvDniAVOL8R/BHJV3FLxNK9
-	KYttvsBlM7pOByAMnDgcSskZwNH8td4=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-326-E6EzqZ9aOBmQDO-kfsxxUg-1; Sun, 05 Oct 2025 11:40:04 -0400
-X-MC-Unique: E6EzqZ9aOBmQDO-kfsxxUg-1
-X-Mimecast-MFC-AGG-ID: E6EzqZ9aOBmQDO-kfsxxUg_1759678804
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-32eaa47c7c8so3574091a91.3
-        for <fstests@vger.kernel.org>; Sun, 05 Oct 2025 08:40:04 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759678804; x=1760283604;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ug83nJMIxm1+l9zlfeCnO8Pp3qwC8RmBILGiMr6FtEA=;
-        b=cyIHzqRBqp6w+7pcNjJHo6TgB8ni5Fz9UBJxLp9mye4tN1k319XW81NhSP05pSJNm7
-         hydiBXC+hkv9xCT7yEmio6JgVaPaWK3OFX/83QWBee3sjUYaf3AA2ESmcBlyY5tolx9U
-         LxLE4ke0o3vRB6A59LEJIZQVwkgFs+fJWmlKTPpNu794/Ci90aBJRnSrr7DxMX2HAIdK
-         RdPXsak5yvtDEwqtVhNOzntt/5HpgYsvri/KxVcFk0/dEg4cgzlpXHu0xKF89Bv7x3np
-         GHYRQFcwd8INcpnjWk7TcL0C/kXrEHyAA5L1+LzA/EK+RM+LJzC3oR0hmdMnSmZNzunI
-         xVcQ==
-X-Gm-Message-State: AOJu0YzFoKDLnVbPPcDlEPxwD9ty+4923365WghWNPPYcEBK8tYeesj3
-	XIQPK//TeB39ioSNoQrhqDALuOxRx1dZYMnWhG4b6ka5d2a639jnb68o9kaHrp/o0XFaaUcoOJt
-	ziULHY8p/WBwLvPcZW4SPPR3VZnMazOLT1Qf4qF7mBA7Ziflwvm7jsfyG7bc=
-X-Gm-Gg: ASbGnctEURU6V1DTUnhDVKmFjXRZMStWr4h+Gw4NupXyeLeDEmSUdpXhjJW+My/kpRV
-	x0xBj+15hnKNrzk6GFoXrNs2zxv9vXlRulqTBo9VDoxoccO3soQgh3vnLV7dyPA4AtwNv4WCP/6
-	VGHDSUJlryBK0i6Mkh9ryP3QYWCk9G+v1k57x2T6PHq3r0LAGDl43q5xLmcWZ6h4K9LAu5/HSFL
-	8/Nk6cRCJMVGZ9FRCD2mwEwRBBJ3F8TO8IUDprJrH5L2+7C/53Yk2UlxDGHr4MyynyL01GOlGpb
-	RSLtF4BuDv/w7w3NWOfBonGFTueNuYrKTksovLjAePT/MpNmfsU1C4RebreSaphW0mHsYQH0bUp
-	LfIdI0I6zcw==
-X-Received: by 2002:a17:90b:1c8f:b0:334:cb89:bde6 with SMTP id 98e67ed59e1d1-339c2708152mr11655668a91.4.1759678803391;
-        Sun, 05 Oct 2025 08:40:03 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IF+5A5ndgSqmcSPje32KNyrlaoqKKZEgvjbPFV9uoEl3fimy9YeWgI871mlSOzBWHxJetpfFQ==
-X-Received: by 2002:a17:90b:1c8f:b0:334:cb89:bde6 with SMTP id 98e67ed59e1d1-339c2708152mr11655642a91.4.1759678802881;
-        Sun, 05 Oct 2025 08:40:02 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-339a6ff27fbsm13374036a91.14.2025.10.05.08.39.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 05 Oct 2025 08:40:02 -0700 (PDT)
-Date: Sun, 5 Oct 2025 23:39:56 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc: fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
-	djwong@kernel.org, john.g.garry@oracle.com, tytso@mit.edu,
-	linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-ext4@vger.kernel.org
-Subject: Re: [PATCH v7 04/12] ltp/fsx.c: Add atomic writes support to fsx
-Message-ID: <20251005153956.zofernclbbva3xt6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cover.1758264169.git.ojaswin@linux.ibm.com>
- <c3a040b249485b02b569b9269b649d02d721d995.1758264169.git.ojaswin@linux.ibm.com>
- <20250928131924.b472fjxwir7vphsr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <aN683ZHUzA5qPVaJ@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
- <20251003171932.pxzaotlafhwqsg5v@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <aOJrNHcQPD7bgnfB@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kZpn+kRe"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5B29FC4CEF4;
+	Sun,  5 Oct 2025 15:56:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1759679813;
+	bh=/JvR7wr5v5qo1U7AqOMlFERINhTIJPgHTA+QVv5FNb4=;
+	h=Date:From:To:Subject:From;
+	b=kZpn+kReF7Z9dCYn/I8fLdhHeNNs5U/0lmX5Vp/n003Fu2YUqt4XLQgjuaP9EZsg/
+	 KGSNHi5+PFK1P+tC0z42BPjVuGXCLblqNLL1OXwWBdm1Fl28NrIgsqwxKaSejt4Tcq
+	 LeLOfLoW/jpXg8fsOjCCXtnFIeoTbIwAkYq3pevmPIW2tXhzRk9jBNj1+/hS7kGWxJ
+	 XYI+Pd4m+iWtKDgKB9Pa/RqwjpUbhLIpv8Z9w+0/8BAdY+TJZRWBQobeXCHU2y7J5w
+	 NnmwfkX0Hb2IRN52ETPdxzrFR5+FxyYLOzCqgVmlYug3VK7Exlxmh6SNmbRr8TKS7s
+	 6nwZ6RGkNlSvw==
+Date: Sun, 05 Oct 2025 23:56:48 +0800
+Message-ID: <0d2ac875ecb5396e52f1c180d48122f8@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to v2025.09.07
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="cXOLt00uk8fU"
+Content-Disposition: inline
+
+
+--cXOLt00uk8fU
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aOJrNHcQPD7bgnfB@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 
-On Sun, Oct 05, 2025 at 06:27:24PM +0530, Ojaswin Mujoo wrote:
-> On Sat, Oct 04, 2025 at 01:19:32AM +0800, Zorro Lang wrote:
-> > On Thu, Oct 02, 2025 at 11:26:45PM +0530, Ojaswin Mujoo wrote:
-> > > On Sun, Sep 28, 2025 at 09:19:24PM +0800, Zorro Lang wrote:
-> > > > On Fri, Sep 19, 2025 at 12:17:57PM +0530, Ojaswin Mujoo wrote:
-> > > > > Implement atomic write support to help fuzz atomic writes
-> > > > > with fsx.
-> > > > > 
-> > > > > Suggested-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-> > > > > Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> > > > > Reviewed-by: John Garry <john.g.garry@oracle.com>
-> > > > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> > > > > ---
-> > > > 
-> > > > Hmm... this patch causes more regular fsx test cases fail on old kernel,
-> > > > (e.g. g/760, g/617, g/263 ...) except set "FSX_AVOID=-a". Is there a way
-> > > > to disable "atomic write" automatically if it's not supported by current
-> > > > system?
-> > > 
-> > > Hi Zorro, 
-> > > Sorry for being late, I've been on vacation this week.
-> > > 
-> > > Yes so by design we should be automatically disabling atomic writes when
-> > > they are not supported by the stack but seems like the issue is that
-> > > when we do disable it we print some extra messages to stdout/err which
-> > > show up in the xfstests output causing failure.
-> > > 
-> > > I can think of 2 ways around this:
-> > > 
-> > > 1. Don't print anything and just silently drop atomic writes if stack
-> > > doesn't support them.
-> > > 
-> > > 2. Make atomic writes as a default off instead of default on feature but
-> > > his loses a bit of coverage as existing tests wont get atomic write
-> > > testing free of cost any more.
-> > 
-> > Hi Ojaswin,
-> > 
-> > Please have a nice vacation :)
-> > 
-> > It's not the "extra messages" cause failure, those "quiet" failures can be fixed
-> > by:
-> 
-> Oh okay got it.
-> 
-> > 
-> > diff --git a/ltp/fsx.c b/ltp/fsx.c
-> > index bdb87ca90..0a035b37b 100644
-> > --- a/ltp/fsx.c
-> > +++ b/ltp/fsx.c
-> > @@ -1847,8 +1847,9 @@ int test_atomic_writes(void) {
-> >         struct statx stx;
-> >  
-> >         if (o_direct != O_DIRECT) {
-> > -               fprintf(stderr, "main: atomic writes need O_DIRECT (-Z), "
-> > -                               "disabling!\n");
-> > +               if (!quiet)
-> > +                       fprintf(stderr, "main: atomic writes need O_DIRECT (-Z), "
-> > +                                       "disabling!\n");
-> >                 return 0;
-> >         }
-> >  
-> > @@ -1867,8 +1868,9 @@ int test_atomic_writes(void) {
-> >                 return 1;
-> >         }
-> >  
-> > -       fprintf(stderr, "main: IO Stack does not support "
-> > -                       "atomic writes, disabling!\n");
-> > +       if (!quiet)
-> > +               fprintf(stderr, "main: IO Stack does not support "
-> > +                               "atomic writes, disabling!\n");
-> >         return 0;
-> >  }
-> 
-> > 
-> > But I hit more read or write failures e.g. [1], this failure can't be
-> > reproduced with FSX_AVOID=-a. Is it a atomic write bug or an unexpected
-> > test failure?
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> 
-> <...>
-> 
-> > +244(244 mod 256): SKIPPED (no operation)
-> > +245(245 mod 256): FALLOC   0x695c5 thru 0x6a2e6	(0xd21 bytes) INTERIOR
-> > +246(246 mod 256): MAPWRITE 0x5ac00 thru 0x5b185	(0x586 bytes)
-> > +247(247 mod 256): WRITE    0x31200 thru 0x313ff	(0x200 bytes)
-> > +248(248 mod 256): SKIPPED (no operation)
-> > +249(249 mod 256): TRUNCATE DOWN	from 0x78242 to 0xf200	******WWWW
-> > +250(250 mod 256): FALLOC   0x65000 thru 0x66f26	(0x1f26 bytes) PAST_EOF
-> > +251(251 mod 256): WRITE    0x45400 thru 0x467ff	(0x1400 bytes) HOLE	***WWWW
-> > +252(252 mod 256): SKIPPED (no operation)
-> > +253(253 mod 256): SKIPPED (no operation)
-> > +254(254 mod 256): MAPWRITE 0x4be00 thru 0x4daee	(0x1cef bytes)
-> > +255(255 mod 256): MAPREAD  0xc000 thru 0xcae9	(0xaea bytes)
-> > +256(  0 mod 256): READ     0x3e000 thru 0x3efff	(0x1000 bytes)
-> > +257(  1 mod 256): SKIPPED (no operation)
-> > +258(  2 mod 256): INSERT 0x45000 thru 0x45fff	(0x1000 bytes)
-> > +259(  3 mod 256): ZERO     0x1d7d5 thru 0x1f399	(0x1bc5 bytes)	******ZZZZ
-> > +260(  4 mod 256): TRUNCATE DOWN	from 0x4eaef to 0x11200	******WWWW
-> > +261(  5 mod 256): WRITE    0x43000 thru 0x43fff	(0x1000 bytes) HOLE	***WWWW
-> > +262(  6 mod 256): WRITE    0x2200 thru 0x31ff	(0x1000 bytes)
-> > +263(  7 mod 256): WRITE    0x15000 thru 0x15fff	(0x1000 bytes)
-> > +264(  8 mod 256): WRITE    0x2e400 thru 0x2e7ff	(0x400 bytes)
-> > +265(  9 mod 256): COPY 0xd000 thru 0xdfff	(0x1000 bytes) to 0x1d800 thru 0x1e7ff	******EEEE
-> > +266( 10 mod 256): CLONE 0x2a000 thru 0x2afff	(0x1000 bytes) to 0x21000 thru 0x21fff
-> > +267( 11 mod 256): MAPREAD  0x31000 thru 0x31d0a	(0xd0b bytes)
-> > +268( 12 mod 256): SKIPPED (no operation)
-> > +269( 13 mod 256): WRITE    0x25000 thru 0x25fff	(0x1000 bytes)
-> > +270( 14 mod 256): SKIPPED (no operation)
-> > +271( 15 mod 256): MAPREAD  0x30000 thru 0x30577	(0x578 bytes)
-> > +272( 16 mod 256): PUNCH    0x1a267 thru 0x1c093	(0x1e2d bytes)
-> > +273( 17 mod 256): MAPREAD  0x1f000 thru 0x1f9c9	(0x9ca bytes)
-> > +274( 18 mod 256): WRITE    0x40800 thru 0x40dff	(0x600 bytes)
-> > +275( 19 mod 256): SKIPPED (no operation)
-> > +276( 20 mod 256): MAPWRITE 0x20600 thru 0x22115	(0x1b16 bytes)
-> > +277( 21 mod 256): MAPWRITE 0x3d000 thru 0x3ee5a	(0x1e5b bytes)
-> > +278( 22 mod 256): WRITE    0x2ee00 thru 0x2efff	(0x200 bytes)
-> > +279( 23 mod 256): WRITE    0x76200 thru 0x769ff	(0x800 bytes) HOLE
-> > +280( 24 mod 256): SKIPPED (no operation)
-> > +281( 25 mod 256): SKIPPED (no operation)
-> > +282( 26 mod 256): MAPREAD  0xa000 thru 0xa5e7	(0x5e8 bytes)
-> > +283( 27 mod 256): SKIPPED (no operation)
-> > +284( 28 mod 256): SKIPPED (no operation)
-> > +285( 29 mod 256): SKIPPED (no operation)
-> > +286( 30 mod 256): SKIPPED (no operation)
-> > +287( 31 mod 256): COLLAPSE 0x11000 thru 0x11fff	(0x1000 bytes)
-> > +288( 32 mod 256): COPY 0x5d000 thru 0x5dfff	(0x1000 bytes) to 0x4ca00 thru 0x4d9ff
-> > +289( 33 mod 256): TRUNCATE DOWN	from 0x75a00 to 0x1e400
-> > +290( 34 mod 256): MAPREAD  0x1c000 thru 0x1d802	(0x1803 bytes)	***RRRR***
-> > +Log of operations saved to "/mnt/xfstests/test/junk.fsxops"; replay with --replay-ops
-> > +Correct content saved for comparison
-> > +(maybe hexdump "/mnt/xfstests/test/junk" vs "/mnt/xfstests/test/junk.fsxgood")
-> > 
-> > Thanks,
-> > Zorro
-> 
-> Hi Zorro, just to confirm is this on an older kernel that doesnt support
-> RWF_ATOMIC or on a kernle that does support it.
+Hi all,
 
-I tested on linux 6.16 and current latest linux v6.17+ (will be 6.18-rc1 later).
-About the RWF_ATOMIC flag in my system:
+The master branch of the xfstests repository at:
 
-# grep -rsn RWF_ATOMIC /usr/include/
-/usr/include/bits/uio-ext.h:51:#define RWF_ATOMIC       0x00000040 /* Write is to be issued with torn-write
-/usr/include/linux/fs.h:424:#define RWF_ATOMIC  ((__kernel_rwf_t)0x00000040)
-/usr/include/linux/fs.h:431:                     RWF_APPEND | RWF_NOAPPEND | RWF_ATOMIC |\
-/usr/include/xfs/linux.h:236:#ifndef RWF_ATOMIC
-/usr/include/xfs/linux.h:237:#define RWF_ATOMIC ((__kernel_rwf_t)0x00000040)
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated to v2025.09.07 version.
 
 Thanks,
 Zorro
 
-> 
-> Regards,
-> ojaswin
-> 
+The new head of the master branch is commit:
 
+911e9f168004 fstests: generic/733: avoid output difference due to bash's version
+
+New commits:
+
+Boris Burkov (1):
+      [cf73c0adc635] btrfs/301: test nested squota teardown
+
+Christoph Hellwig (3):
+      [86a1a51cf62e] dmthin: _notrun when dm-thin setup fails
+      [aff1e92c3f47] generic/081: don't hang when running on devices with protection information
+      [fa19801cda23] generic/450: don't hang when running on devices with protection information
+
+Filipe Manana (2):
+      [6dca84887d87] generic/363: mention btrfs kernel fix for block size < page size scenario
+      [bfa369f55a2b] fstests: add commit IDs for kernel fixes already merged upstream
+
+Johannes Thumshirn (1):
+      [9d618786c0d1] btrfs/237: skip test on devices with conventional zones
+
+Nirjhar Roy (IBM) (4):
+      [579a65fc0de0] btrfs/301: Make the test compatible with all the supported block sizes
+      [d6506d38a3ee] generic/274: Make the pwrite block sizes and offsets to 64k
+      [6ec632659993] btrfs/137: Make this test compatible with all supported block sizes
+      [f5822b2bced6] generic/563: Increase the iosize to cover for btrfs higher node sizes
+
+Ojaswin Mujoo (1):
+      [8735e3e15fc7] generic/365: Fix false failure when mapping ends with free space
+
+Qu Wenruo (3):
+      [6ca32795a99e] fstests: btrfs: add a new test case to verify compressed read
+      [8dd133d0763b] fstests: generic/228: do not rely on the bash core dump output
+      [911e9f168004] fstests: generic/733: avoid output difference due to bash's version
+
+
+Code Diffstat:
+
+ common/dmthin         | 10 ++++----
+ tests/btrfs/137       | 11 +++++----
+ tests/btrfs/137.out   | 66 +++++++++++++++++++++++++--------------------------
+ tests/btrfs/237       |  9 +++++--
+ tests/btrfs/301       | 13 ++++++++--
+ tests/btrfs/337       | 53 +++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/337.out   | 23 ++++++++++++++++++
+ tests/generic/081     |  3 ++-
+ tests/generic/211     |  2 +-
+ tests/generic/228     | 28 ++++++----------------
+ tests/generic/228.out |  2 +-
+ tests/generic/274     |  8 +++----
+ tests/generic/363     |  8 +++++--
+ tests/generic/365     |  6 +++++
+ tests/generic/459     |  6 +++--
+ tests/generic/563     |  2 +-
+ tests/generic/733     | 17 +++++++++++--
+ tests/generic/733.out |  1 -
+ tests/generic/771     |  2 +-
+ 19 files changed, 186 insertions(+), 84 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--cXOLt00uk8fU
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmjilSQACgkQlNbPkfr2
+tMwdAQ//clzZrVr2M8tAiAdl1aamQrHnntB1Y8QEPkraT6uxytBgnyXgxfXIv1DP
+zFSxVi7bAwiVtZNn3onIkR/6qsGA6WhINKkuSyFU53w4QoCcu1SnjJV9DsWAcCJw
+shcyw4Ojr9vLUPYxPL//mcOr7C5n4bynTXrS1/83gMaeqV/TIU2yoYAQK94Tx3Iy
+Dbbs8nNw1DMgYi9tQgxr+i75eaxka04+Q/eEBdy/MFagWYmi6QefB3KlmCPwlznl
+gKSVF1QMREQl4COjkNs4PKd7NnEYBPyIu6PQ37IAxspEiPXes1ComzqRnxsBUW7I
+KFzSxcOAo462Ac87xkYc+ZC/KFPQ3VWUHJEKS0/niD4ly6rKmVteis61EE44rgeU
+aVSXkex1wQ1pdqG9PBT5rdqVC2B7ymNOsGgQrz6tlKJ+1PVx1qtURz5VVBDsoF4x
+nlNV4zwLGlpLsDB7OsgWMoGb2WBNLfSFtbNdzcuLhvpcQjfPp3E98ZHqJ38P/KNW
+Z3HBKhOVYOguQru+YQsw50auDlAr+/hkIB1p8QfXP7DQQPvsV/NKDs6o6e6elQMe
+LchCNQmNDVN5KRm+joAmN9ysnHhGrmc83pYVQLizcR1QebY5CeGYrwYiTKzutJBE
+2nvZ29TPrUWwX9fo5XVSmROJ7a0VYR7UCW9bioBMmbguQyq3UFE=
+=7xFJ
+-----END PGP SIGNATURE-----
+
+--cXOLt00uk8fU--
