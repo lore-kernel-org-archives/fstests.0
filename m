@@ -1,240 +1,194 @@
-Received: from mail-wr1-f47.google.com (mail-wr1-f47.google.com [209.85.221.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 881E72045AD
-	for <fstests@vger.kernel.org>; Sat,  4 Oct 2025 01:54:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 594C234BA22
+	for <fstests@vger.kernel.org>; Sun,  5 Oct 2025 10:37:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759542876; cv=none; b=RY865reOzvza6diL1YmqQew0Is0NAl3Jky2mVUBIctr6jRHJswFtPqPLO0ovKugnc8fJOw1onjSPawDGhnC8FGap+u209UOaQNrlBIcCzAyQ/IMkd8AwdJyateHSzLxVDpP1AOQDh/SVY2rEGDOl++cTsW7/myRP7ZhJlb2uaUk=
+	t=1759660627; cv=none; b=NOiO3mniNtvY9pmkkx4Tqmygpr3p0W+f1txOMpU/ZO52mf8dSTpcrlcrp9SHUnkNT/T7Fc9S9Jg7rM2NfK4K9ZWZypgJfRmrpY2nilQruodcqF+zN4NFNuvjwEXeSwKN80WP/Q0aoTxr8xJRhEz7JbTacvwIQAn+CWiX1sf8nUU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759542876; c=relaxed/simple;
-	bh=mwqdtz22zLDM1ib3mMryJkShOjPddoXYLXVe2JaHsUc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=X42PAaaWQW33EDXBBlMr/TAQ3d2BRy4++szWljYy5Y1DeSUh3Ub/2jMdielLqzYF9QzZ0bYWxxIOTT8Dne2M03d3o0+fYL31eAL+7QpPVz1sQyJ1Ur9SCeAwUZhQEZX8Jjcm3YzTaaa83Jm9I4ujHDdEAg5H3G0BkMIoyxTnDjc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=WlcBobbb; arc=none smtp.client-ip=209.85.221.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1759660627; c=relaxed/simple;
+	bh=6LIHPOQPLDWrr6EbSN7wwdKPe2nDjZ08h3rW+KOWZrw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=RgOC05PVvbX1kjccRwV96tAL9/ICCnXpit56KEpZlge5/DnfVmscu8iN5kZO7zoO8IMjc3SgMGKcwVBmM/xpCnwKMenTxUt4yIH/QF+xyUvS8NvCrGoJLrGKFsADEA3pS7fD1XbCRTS8oLqRoyrisMqNRNZYswmiO33B7hffWpk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=gUN9Anrr; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="WlcBobbb"
-Received: by mail-wr1-f47.google.com with SMTP id ffacd0b85a97d-42557c5cedcso1574748f8f.0
-        for <fstests@vger.kernel.org>; Fri, 03 Oct 2025 18:54:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1759542872; x=1760147672; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:to:subject:user-agent:mime-version:date
-         :message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=BvzRkfxWzemjOrfpQpDfYeKA9Ef/jrIiRI53PNmmGi8=;
-        b=WlcBobbbWNtSeTkQyfF2ApPcJOwGxZZNbwrEig7lKGGRBq4FYn9R124BWoqcY/IK6l
-         UNTnrUb0reVyPakECsGIAqaciLDgUeIbSnerKfPv6XT62PxBoeq3Cl5Q4wcn/4Z88O3t
-         sy1i2VK0tnLGhI8Kw+L7FsO9MpHIx7CQJLurngAjpQgIsVt5j24y3RVBIIvblO/LwXfX
-         VtZSBrgCHjVNch4NEhrdCkiqLTydJFbu40GlgSyJAxPNdiMKwcSPDbdwVicIyuv8H1ii
-         wROFa7I4MrKx2aFOX84UMGWa2lxRMKXC/oUBDsMQWxF6RpLPxcjh25WZ/fLUqBoHHXCm
-         YRJw==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gUN9Anrr"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1759660624;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=cXE+Do4eiYEQpRMZRWtP81SSjx9Cj+R+tBIOazUtRqs=;
+	b=gUN9Anrr0iQVvomA4xAn4cpGcv3Kh/0Y/0KXb5L2D47t9JroSbVzWxpC6u+gxd1rOdJaUQ
+	0UH7c50Paxe9zSmPYyv3vxX6lQFGeXS8si1wI8uUtaE+z0mu4dB60EafILqPLtptc07goc
+	wWfT60ILpIXaTiokwSL3p4PYC/hjV90=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-33-Eepdmp3yO6S5nhCiO9Dt3g-1; Sun, 05 Oct 2025 06:37:03 -0400
+X-MC-Unique: Eepdmp3yO6S5nhCiO9Dt3g-1
+X-Mimecast-MFC-AGG-ID: Eepdmp3yO6S5nhCiO9Dt3g_1759660622
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-33428befc5bso3865820a91.0
+        for <fstests@vger.kernel.org>; Sun, 05 Oct 2025 03:37:02 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759542872; x=1760147672;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:to:subject:user-agent:mime-version:date
-         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=BvzRkfxWzemjOrfpQpDfYeKA9Ef/jrIiRI53PNmmGi8=;
-        b=Me/XSpxJV9V64aqRiFobHm9rm07HGU31SFS5UMiV8mUA2QNcp/mVtiIiJTLqKsG2AU
-         4qsVgF17eAHT22yeVMzbSLqQd2QKUYFVPdUGhSOQ4WQ1eskW3tjXv7gji8JQuaYmH6sk
-         HB9lDlBJZDq9EgNaswXG8MCZaw0u5os2l9Ip4hGPb+bd60ccr4IraQr7RfsymVfo95r5
-         m79UPD9INcf26xACrJl9W0a9NmU5xLSJj/LvVDLfdqC4MaeXc7TpOqG7qEGr11mBEXwk
-         MYFpVB9EYElax9UAiN3CwcRNUDWJZ/tr9mXfpq8pPYOPnxIJixAoqaUpdkeTZA3RRIAJ
-         UFBg==
-X-Forwarded-Encrypted: i=1; AJvYcCUI4pM2QRTFzLqNwSiinUgd6uJA2dcvgpx9Q3JI1XxNUG0rVeRZRabTihML/b9orm41tiqNrjnG@vger.kernel.org
-X-Gm-Message-State: AOJu0YxQ2LR6mrGIeLFnFAziCc0DGzzK3aSJ9mgY8iUvwA+Mz2N8saP6
-	67NYAkn+vuBmseQeXEQCL39WJkwFewkLXnTI87WTf2ay499vZ5tu8ZEIgW9iLjUZZno=
-X-Gm-Gg: ASbGncvjmDZg2HzUYOuFqNYvfecIbtRGGm/qmVeNI9+VIhV4QGe20K7S6eOVw5lv9Fg
-	0zJznszx5Ha9uV1x6KBva1V1xq8xJyixpkEmOInnW+d55f7zVss4XkvPFImbGF+CgjVzj/0+ZWM
-	/EYjydYzSVv5Z4uJyaAZSu3OytFXDfYyaXEhTkFsicqtPQIrKaPZWKgN47OF+rU+trd6G/JPCCn
-	4VDH/7GFvrxbd1IbBpdpApv8C66vxbnjjI/vtw8vrJQ4/8FNEMwgAzjlc0m3eTKfWgBf1Qyj+dF
-	aTJasmt9aya190081hASMxzSIJsy6CB/TJyAflX8p1Z8WlfhbB6gzlKJcd3TkJQgIyvAjTVg4mP
-	AkJyJ5VwH5WA0OzDmfA0QwLjdlwUStCu7Ui+PiAZhx7HPzIBvqjZVj2rufSGKShielM9AZxD2zg
-	E=
-X-Google-Smtp-Source: AGHT+IGBu8tWFBHrh838n1k/I0brZKqRDXKtMk4SNLa7wJ8u4Gb52nNwUcLvEK00EYQp38T6fgMRng==
-X-Received: by 2002:a05:6000:186f:b0:405:3028:1be4 with SMTP id ffacd0b85a97d-42567137c45mr2708568f8f.8.1759542871672;
-        Fri, 03 Oct 2025 18:54:31 -0700 (PDT)
-Received: from ?IPV6:2403:580d:fda1::299? (2403-580d-fda1--299.ip6.aussiebb.net. [2403:580d:fda1::299])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-28e8d1d584esm62727975ad.107.2025.10.03.18.54.29
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 03 Oct 2025 18:54:31 -0700 (PDT)
-Message-ID: <55d549d2-fec1-442f-ad9f-875d2ec6c864@suse.com>
-Date: Sat, 4 Oct 2025 11:24:27 +0930
+        d=1e100.net; s=20230601; t=1759660622; x=1760265422;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=cXE+Do4eiYEQpRMZRWtP81SSjx9Cj+R+tBIOazUtRqs=;
+        b=cFLO7mlNHyG0Qd2hN1ZVFmlcDofZf6rhq8KH7jUQnVEL1aZb24y8l4vBVt117zn70I
+         7N9IRICDQO8KgF2iP1oI9dBsZydtWWUo+aQMkFnT7VuCxnKKRe4gxbqrw5TfflSAWBXD
+         BY/8IFLl7WU6IZ8Dv0Vl9YUCdHOAzcitaOgrs9j9x4IxJsSGKWFcd827lQmfJAuATEc1
+         jnsuw508Y4gsn4ivSqCSgpncy4V5GpDm67N/W7irNHNoBWOhExlePadZy0Rq8hF/GXkv
+         lHdW9KFwzg5NKWNdElHakYnEBgYmch8aBMx3LsPD8YzUrEFh03kmS7qe1juAMsyl2x+K
+         AfdQ==
+X-Gm-Message-State: AOJu0Yy/gn/Lb5o4oJ/DWlgEdCxSJTFCiK9YLC5B9lkhbW6jZwa3onEK
+	0ETYBuG0PpGZqHyvEDoPrJgdMRFUl3f3fEGxS8NauAYaqa1vAWH64dXKit2xxH3UYYX6mHK9IZI
+	tHGGWXyCgLVV4l88DJJ9s57nkzKhLuVjtfMq1WaaL9ZMb/MbSQz0TWkcqzVU=
+X-Gm-Gg: ASbGnct4DwnGXL/B4j8LOuxpp4o0Crg1D90sqKmdLySQzzG3ulmtUiZYIWa0H/f08MH
+	YTb074ffZmCWnRwfYHk5o6qQNCL+gk+3ZY5fSvZ9VnGaYWyhBkU5QZR0ZJPC0360dZdzsHXRN3E
+	hATk97PA+xqqfiHBLCz90oueSygft4XaLBQ1WkbOGTN4f20xRAV9OhxnUTcNNqD9Ve1QdlrxZeS
+	Z4tFPb2zBp9Hqlx0w+LAHq2TDUde0Od5vPQ74ZsdbzoX3kiGj0yZOoX3E1EjgWiS+JBp8xiNKE7
+	1MwGh2g+bK3wMgFNLs/xjhXyoQkaqPxZbM+2mVyXwucvBVPoYlKnE1Wqs9DbPAL7zy7aNERGbaz
+	X1MW0/930Jg==
+X-Received: by 2002:a17:90b:1b48:b0:327:ba77:a47 with SMTP id 98e67ed59e1d1-339c2782afbmr12219254a91.15.1759660621778;
+        Sun, 05 Oct 2025 03:37:01 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFm83AyjS7X4hJtAl1cFaaDJwlNM/NB1MMUPpV8cEk9b8Sb3eLjy4T+3C65MTyp4EHmOdh1hA==
+X-Received: by 2002:a17:90b:1b48:b0:327:ba77:a47 with SMTP id 98e67ed59e1d1-339c2782afbmr12219225a91.15.1759660621290;
+        Sun, 05 Oct 2025 03:37:01 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b6099d4d324sm9665636a12.27.2025.10.05.03.36.58
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 05 Oct 2025 03:37:00 -0700 (PDT)
+Date: Sun, 5 Oct 2025 18:36:56 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Andrey Albershteyn <aalbersh@redhat.com>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+	linux-xfs@vger.kernel.org, Andrey Albershteyn <aalbersh@kernel.org>
+Subject: Re: [PATCH v4 1/3] file_attr: introduce program to set/get fsxattr
+Message-ID: <20251005103656.5qu3lmjvlcjkwjx4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20251003-xattrat-syscall-v4-0-1cfe6411c05f@kernel.org>
+ <20251003-xattrat-syscall-v4-1-1cfe6411c05f@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 3/3] fstests: btrfs: test RAID conversions under stress
-To: Leo Martins <loemra.dev@gmail.com>, linux-btrfs@vger.kernel.org,
- kernel-team@fb.com, fstests@vger.kernel.org
-References: <cover.1759532729.git.loemra.dev@gmail.com>
- <455b9a2b102631febc1b05802006d3d304d4baeb.1759534540.git.loemra.dev@gmail.com>
-Content-Language: en-US
-From: Qu Wenruo <wqu@suse.com>
-Autocrypt: addr=wqu@suse.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
- FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXVgBQkQ/lqxAAoJEMI9kfOh
- Jf6o+jIH/2KhFmyOw4XWAYbnnijuYqb/obGae8HhcJO2KIGcxbsinK+KQFTSZnkFxnbsQ+VY
- fvtWBHGt8WfHcNmfjdejmy9si2jyy8smQV2jiB60a8iqQXGmsrkuR+AM2V360oEbMF3gVvim
- 2VSX2IiW9KERuhifjseNV1HLk0SHw5NnXiWh1THTqtvFFY+CwnLN2GqiMaSLF6gATW05/sEd
- V17MdI1z4+WSk7D57FlLjp50F3ow2WJtXwG8yG8d6S40dytZpH9iFuk12Sbg7lrtQxPPOIEU
- rpmZLfCNJJoZj603613w/M8EiZw6MohzikTWcFc55RLYJPBWQ+9puZtx1DopW2jOwE0EWdWB
- rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
- Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
- E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
- vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
- g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
- AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
- cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
- qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
- /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
- o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
- JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
-In-Reply-To: <455b9a2b102631febc1b05802006d3d304d4baeb.1759534540.git.loemra.dev@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20251003-xattrat-syscall-v4-1-1cfe6411c05f@kernel.org>
 
-
-
-在 2025/10/4 09:11, Leo Martins 写道:
-> Add test to test btrfs conversion while being stressed. This is
-> important since btrfs no longer allows allocating from different RAID
-> block_groups during conversions meaning there may be added enospc
-> pressure.
+On Fri, Oct 03, 2025 at 11:32:44AM +0200, Andrey Albershteyn wrote:
+> This programs uses newly introduced file_getattr and file_setattr
+> syscalls. This program is partially a test of invalid options. This will
+> be used further in the test.
 > 
-> Signed-off-by: Leo Martins <loemra.dev@gmail.com>
+> Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
+> ---
 
-Please do not mix patches for different projects into the same patchset.
+[snap]
 
-A lot of us are using b4 to merge (kernel/progs) patches, which will 
-merge the whole series, including the one intended to fstests.
+> +	if (!path1 && optind < argc)
+> +		path1 = argv[optind++];
+> +	if (!path2 && optind < argc)
+> +		path2 = argv[optind++];
+> +
+> +	if (at_fdcwd) {
+> +		fd = AT_FDCWD;
+> +		path = path1;
+> +	} else if (!path2) {
+> +		error = stat(path1, &status);
+> +		if (error) {
+> +			fprintf(stderr,
+> +"Can not get file status of %s: %s\n", path1, strerror(errno));
+> +			return error;
+> +		}
+> +
+> +		if (SPECIAL_FILE(status.st_mode)) {
+> +			fprintf(stderr,
+> +"Can not open special file %s without parent dir: %s\n", path1, strerror(errno));
+> +			return errno;
+> +		}
+> +
+> +		fd = open(path1, O_RDONLY);
+> +		if (fd == -1) {
+> +			fprintf(stderr, "Can not open %s: %s\n", path1,
+> +					strerror(errno));
+> +			return errno;
+> +		}
+> +	} else {
+> +		fd = open(path1, O_RDONLY);
+> +		if (fd == -1) {
+> +			fprintf(stderr, "Can not open %s: %s\n", path1,
+> +					strerror(errno));
+> +			return errno;
+> +		}
+> +		path = path2;
+> +	}
+> +
+> +	if (!path)
+> +		at_flags |= AT_EMPTY_PATH;
+> +
+> +	error = file_getattr(fd, path, &fsx, fa_size,
+> +			at_flags);
+> +	if (error) {
+> +		fprintf(stderr, "Can not get fsxattr on %s: %s\n", path,
+> +				strerror(errno));
+> +		return error;
+> +	}
+
+We should have a _require_* helper to _notrun your generic and xfs test cases,
+when system doesn't support the file_getattr/setattr feature. Or we always hit
+something test errors like below on old system:
+
+  +Can not get fsxattr on ./fifo: Operation not supported
+
+Maybe check if the errno is "Operation not supported", or any better idea?
+
 
 Thanks,
-Qu
-> ---
->   tests/btrfs/337     | 95 +++++++++++++++++++++++++++++++++++++++++++++
->   tests/btrfs/337.out |  2 +
->   2 files changed, 97 insertions(+)
->   create mode 100755 tests/btrfs/337
->   create mode 100644 tests/btrfs/337.out
+Zorro
+
+> +	if (action) {
+> +		fsx.fa_xflags |= (fa_xflags | unknwon_fa_flag);
+> +
+> +		error = file_setattr(fd, path, &fsx, fa_size,
+> +				at_flags);
+> +		if (error) {
+> +			fprintf(stderr, "Can not set fsxattr on %s: %s\n", path,
+> +					strerror(errno));
+> +			return error;
+> +		}
+> +	} else {
+> +		if (path2)
+> +			print_xflags(fsx.fa_xflags, 0, 1, path, 0, 1);
+> +		else
+> +			print_xflags(fsx.fa_xflags, 0, 1, path1, 0, 1);
+> +	}
+> +
+> +	return error;
+> +
+> +usage:
+> +	printf("Usage: %s [options]\n", argv[0]);
+> +	printf("Options:\n");
+> +	printf("\t--get, -g\t\tget filesystem inode attributes\n");
+> +	printf("\t--set, -s\t\tset filesystem inode attributes\n");
+> +	printf("\t--at-cwd, -a\t\topen file at current working directory\n");
+> +	printf("\t--no-follow, -n\t\tdon't follow symlinks\n");
+> +	printf("\t--set-nodump, -d\t\tset FS_XFLAG_NODUMP on an inode\n");
+> +	printf("\t--invalid-at, -i\t\tUse invalid AT_* flag\n");
+> +	printf("\t--too-big-arg, -b\t\tSet fsxattr size bigger than PAGE_SIZE\n");
+> +	printf("\t--too-small-arg, -m\t\tSet fsxattr size to 19 bytes\n");
+> +	printf("\t--new-fsx-flag, -x\t\tUse unknown fa_flags flag\n");
+> +
+> +	return 1;
+> +}
 > 
-> diff --git a/tests/btrfs/337 b/tests/btrfs/337
-> new file mode 100755
-> index 00000000..fa335ed7
-> --- /dev/null
-> +++ b/tests/btrfs/337
-> @@ -0,0 +1,95 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Meta Platforms, Inc. All Rights Reserved.
-> +#
-> +# FS QA Test btrfs/337
-> +#
-> +# Test RAID profile conversion with concurrent allocations.
-> +# This combines profile conversion (like btrfs/195) with concurrent
-> +# fsstress allocations (like btrfs/060-064).
-> +
-> +. ./common/preamble
-> +_begin_fstest auto volume balance scrub raid
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	_kill_fsstress
-> +}
-> +
-> +. ./common/filter
-> +# we check scratch dev after each loop
-> +_require_scratch_nocheck
-> +_require_scratch_dev_pool 4
-> +# Zoned btrfs only supports SINGLE profile
-> +_require_non_zoned_device "${SCRATCH_DEV}"
-> +
-> +# Load up the available configs
-> +_btrfs_get_profile_configs
-> +declare -a TEST_VECTORS=(
-> +# $nr_dev_min:$data:$metadata:$data_convert:$metadata_convert
-> +"4:single:raid1"
-> +"4:single:raid0"
-> +"4:single:raid10"
-> +"4:single:dup"
-> +"4:single:raid5"
-> +"4:single:raid6"
-> +"2:raid1:single"
-> +)
-> +
-> +run_testcase() {
-> +	IFS=':' read -ra args <<< $1
-> +	num_disks=${args[0]}
-> +	src_type=${args[1]}
-> +	dst_type=${args[2]}
-> +
-> +	if [[ ! "${_btrfs_profile_configs[@]}" =~ "$dst_type" ]]; then
-> +		echo "=== Skipping test: $1 ===" >> $seqres.full
-> +		return
-> +	fi
-> +
-> +	_scratch_dev_pool_get $num_disks
-> +
-> +	echo "=== Running test: $1 (converting $src_type -> $dst_type) ===" >> $seqres.full
-> +
-> +	_scratch_pool_mkfs -d$src_type -m$src_type >> $seqres.full 2>&1
-> +	_scratch_mount
-> +
-> +	echo "Creating initial data..." >> $seqres.full
-> +	_run_fsstress -d $SCRATCH_MNT -w -n 10000 >> $seqres.full 2>&1
-> +
-> +	args=`_scale_fsstress_args -p 20 -n 1000 -d $SCRATCH_MNT/stressdir`
-> +	echo "Starting fsstress: $args" >> $seqres.full
-> +	_run_fsstress_bg $args
-> +
-> +	echo "Starting conversion: $src_type -> $dst_type" >> $seqres.full
-> +	_run_btrfs_balance_start -f -dconvert=$dst_type $SCRATCH_MNT >> $seqres.full
-> +	[ $? -eq 0 ] || echo "$1: Failed convert"
-> +
-> +	echo "Waiting for fsstress to complete..." >> $seqres.full
-> +	_wait_for_fsstress
-> +
-> +	# Verify the conversion was successful
-> +	echo "Checking filesystem profile after conversion..." >> $seqres.full
-> +	$BTRFS_UTIL_PROG filesystem df $SCRATCH_MNT >> $seqres.full
-> +
-> +	# Scrub to verify data integrity
-> +	echo "Scrubbing filesystem..." >> $seqres.full
-> +	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >> $seqres.full 2>&1
-> +	if [ $? -ne 0 ]; then
-> +		echo "$1: Scrub found errors"
-> +	fi
-> +
-> +	_scratch_unmount
-> +	_check_scratch_fs
-> +	_scratch_dev_pool_put
-> +}
-> +
-> +echo "Silence is golden"
-> +for i in "${TEST_VECTORS[@]}"; do
-> +	run_testcase $i
-> +done
-> +
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/337.out b/tests/btrfs/337.out
-> new file mode 100644
-> index 00000000..d80a9830
-> --- /dev/null
-> +++ b/tests/btrfs/337.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 337
-> +Silence is golden
+> -- 
+> 2.50.1
+> 
 
