@@ -1,166 +1,226 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7ECB34BA4B
-	for <fstests@vger.kernel.org>; Sun,  5 Oct 2025 16:13:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F2F91F5825
+	for <fstests@vger.kernel.org>; Mon,  6 Oct 2025 09:38:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759680815; cv=none; b=kZJTgNBEZLxTKTLFpGpCf/BVluBiwVlJHyMBqDbRJ2ejALnA67w9oOA3yYJ1PAooTt7i5Da+E90KmV5DOrhhkOy84VOpO+7vMBvAjsflwUwgc1QbUrOgjd14xVI7U2nwKVkFxqIPJEMXfLLBUWtEtJxiByF8M8KXzXQRiPH1qjg=
+	t=1759743511; cv=none; b=nFNZhn50RvNZhzZqW8pJO0GyqVN4O78YT1HBuGUsY7hX2fgXACmlgx5d2hEVZXT/5zLSqmU+Qx9KPEzF2Hk4ZCSsVA4D8wfE9aDLX296TR4euOf1hqKgFWl/PYIABzGaFxtabBvpGxr+ePwyKAXgi5AcldnHqy29cyCyeCJZx6s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759680815; c=relaxed/simple;
-	bh=LPG5ZlgUGol6gLVE3SlAi8PR78lUdIH8rlfKRJafzFg=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=T1EqgO7omURtKEBjekcH/ISa3KTQEJ1pM2p3n5FbKpbT/0uFdC6Grh4hDrSv0j0eUhToWg+PBMAjL/C2IGURCs7aMgaM8U0ZzjyZee7TD7UEePe8eJ/18A0RR+EbDwbmFyMrOFPVZSmfGl9g8qOQ1jkLK0oPZlfRyEytYsBTfc8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hjp1FDBw; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1759743511; c=relaxed/simple;
+	bh=xz/hZvzoakCriGkhB/bKuYdZ7YxI5bb7fHg5f/gAr14=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=cx0kLRR2sgSg42Y1CyCseklqQuJMUJNedognN0QCHI6PMgWOxgxo2yWWt4bXeYOUHpU7OVPMPxpbGENm/teNppRtO1vHJHP8QUZ8WTObPbHy5az+jfXGP9O8OjKhanriBb6BCxeG9RiECE8dIWAwNEXwJaynNkuxWCP5yFRU0bw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=RvkIYx+O; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hjp1FDBw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CF3FFC4CEF4;
-	Sun,  5 Oct 2025 16:13:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1759680815;
-	bh=LPG5ZlgUGol6gLVE3SlAi8PR78lUdIH8rlfKRJafzFg=;
-	h=Date:From:To:Subject:From;
-	b=hjp1FDBwzFLTkPFo4PX/f/R4aG7Cnoz87nUeRdDOuDJcM5lwstHkc+fXjlREj8IhE
-	 ELyNWTf27aYfA+LNAOxlolgkBwYvJI91DZfBPOddr0Y7ksKUBjmMIOaA9/+X5Xjdon
-	 bRTvKBacIQTPkqSbxAp2wZrArqywKaiTMpeDcG8y/DXLzTuFt5fILQtq+7qqFRba3F
-	 3lXVvfDk2HMCQS+HJffsEC5NXvguFjTDRLPMdrgZGQSgrY5wom1AOhhppJqpjmPcUm
-	 fnZH7dljCBXS3AT1VT9RmbQQqUxUN5ziRXgkl693MdGm6d3VTDYiEsU7i1hz1lHJKD
-	 gSPURfhZYDoEw==
-Date: Mon, 06 Oct 2025 00:13:30 +0800
-Message-ID: <834a6e1ed1f377c9a014a55093a102e5@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2025.10.05
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RvkIYx+O"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1759743508;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=wsVDhkH03OWQAuqDWfBRNCEFQGrTGPu8ofI2SiM2cKk=;
+	b=RvkIYx+OGsz9McK+uIgc+q7D25+m0RBeNisOKf2fAzSZWCZpZBLkDTrFD07Ffcr5R9cw2A
+	FB0SA9xLKFuX2CiZGOJliJrsVjjOpR5U7IPZ76yf3J9Imss3AE3fXoeT9q2T0Q4W9gR87R
+	kFTy/Riz6yswcl7nr2tCPqpJ2u4/zsg=
+Received: from mail-wm1-f70.google.com (mail-wm1-f70.google.com
+ [209.85.128.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-691-oIF8sKpYMr2npepbJpekmg-1; Mon, 06 Oct 2025 05:38:26 -0400
+X-MC-Unique: oIF8sKpYMr2npepbJpekmg-1
+X-Mimecast-MFC-AGG-ID: oIF8sKpYMr2npepbJpekmg_1759743506
+Received: by mail-wm1-f70.google.com with SMTP id 5b1f17b1804b1-46e4cb3e4deso14454525e9.1
+        for <fstests@vger.kernel.org>; Mon, 06 Oct 2025 02:38:26 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1759743506; x=1760348306;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=wsVDhkH03OWQAuqDWfBRNCEFQGrTGPu8ofI2SiM2cKk=;
+        b=dMZmt7Oqos+bKlauXnh3CU1BrYH9J8pBWKzl59yfnOj8WDTSi3zuul8ImCnCmHgCXW
+         9COQk4ZfF+wbWcsXThiZCxZ0zC7UpfDmPa/JJfdwZBJCHTbfBun8WMBzNU/ocrnkrKVT
+         iRlnxkpnkwEp/zdWwCP0Gih4adSlccDGJQC4bbRO52QNc9jjuRcsD6HmcZ1lOJLaTjNn
+         Q1HcondSksL7QAkuGW1tEuiecmSDCMVXSRrUjzPe06JrEsvtH/bp4apu8bPTnXRnA+kk
+         QKXEjx2v8LxyIAv5tmxJ+vcEhEyc592bYNqvkjt0/AL+Upjn7VLYDM7VYDxekcrlnXwL
+         M69A==
+X-Gm-Message-State: AOJu0YwTSjV09ErR3ubJEVzWa25b5B/8RjuQQy91CVThVMh6Ju8R2IHw
+	tj5N8slz9ZXxIiivyiea7hW/TE1mqNXWb4XBtDPIRyPTR68XoAphjcIY6ZKRs5Ykwmw8DVpWkIZ
+	IcoVY2TvCqU6W28CWizil9EbpF8dgj9rB4kV9VQuIgT36caVP1gJ+LdcONA==
+X-Gm-Gg: ASbGncvKIm9VWO7pY3R50wNOghdow5HyYDeIaS6aLP5SE/xDITLSrvj/K5oFOWpSyjx
+	7I1IPDZWzA061EGOISg1NWzFRnSokJMj7+fCEh/R+ZeGucGwqjCxMP5qz3IMwEmMG/CG6MHxZEE
+	gMawe9HKuTKz/T9Lr+9Gm6n5nrs3Ae50/0LXHypHc9TgpgGMKH5t8rjEPFhfl5hUpqVrNMPZpZw
+	SO8WxwU37qQSRRKj9A9xGGc+Kazsa+Pqn9kJOQsXUpg3TfAAbC3NaXkpnd0Ls75Rpi9FhUQwFAb
+	rl5Q8se9gZHxNr1GUZWUGU/XQgUf2EZCx8Qh093O7gA5tukI71CdWS9qY2Ui3ipWlg==
+X-Received: by 2002:a05:600c:1f90:b0:45d:dc10:a5ee with SMTP id 5b1f17b1804b1-46e70cab483mr81343185e9.15.1759743505609;
+        Mon, 06 Oct 2025 02:38:25 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHlCYUUFPB4ex5CVbIn5iY3pHvG7kFW2Jjm67YSJUH6t7qfO2Y4261WpJcAoaKplrHvSbogkQ==
+X-Received: by 2002:a05:600c:1f90:b0:45d:dc10:a5ee with SMTP id 5b1f17b1804b1-46e70cab483mr81342845e9.15.1759743504850;
+        Mon, 06 Oct 2025 02:38:24 -0700 (PDT)
+Received: from thinky (ip-217-030-074-039.aim-net.cz. [217.30.74.39])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4255d8a6bb2sm19624486f8f.10.2025.10.06.02.38.24
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 06 Oct 2025 02:38:24 -0700 (PDT)
+Date: Mon, 6 Oct 2025 11:37:53 +0200
+From: Andrey Albershteyn <aalbersh@redhat.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+	linux-xfs@vger.kernel.org, Andrey Albershteyn <aalbersh@kernel.org>
+Subject: Re: [PATCH v4 1/3] file_attr: introduce program to set/get fsxattr
+Message-ID: <7mytyiatnhgwplgda3cmiqq3hb7z6ulwgvwbkueb5dm2sdxwlg@ijti4d7vgrck>
+References: <20251003-xattrat-syscall-v4-0-1cfe6411c05f@kernel.org>
+ <20251003-xattrat-syscall-v4-1-1cfe6411c05f@kernel.org>
+ <20251005103656.5qu3lmjvlcjkwjx4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="BLpH6EhyaZjp"
-Content-Disposition: inline
-
-
---BLpH6EhyaZjp
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20251005103656.5qu3lmjvlcjkwjx4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-Hi all,
+On 2025-10-05 18:36:56, Zorro Lang wrote:
+> On Fri, Oct 03, 2025 at 11:32:44AM +0200, Andrey Albershteyn wrote:
+> > This programs uses newly introduced file_getattr and file_setattr
+> > syscalls. This program is partially a test of invalid options. This will
+> > be used further in the test.
+> > 
+> > Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
+> > ---
+> 
+> [snap]
+> 
+> > +	if (!path1 && optind < argc)
+> > +		path1 = argv[optind++];
+> > +	if (!path2 && optind < argc)
+> > +		path2 = argv[optind++];
+> > +
+> > +	if (at_fdcwd) {
+> > +		fd = AT_FDCWD;
+> > +		path = path1;
+> > +	} else if (!path2) {
+> > +		error = stat(path1, &status);
+> > +		if (error) {
+> > +			fprintf(stderr,
+> > +"Can not get file status of %s: %s\n", path1, strerror(errno));
+> > +			return error;
+> > +		}
+> > +
+> > +		if (SPECIAL_FILE(status.st_mode)) {
+> > +			fprintf(stderr,
+> > +"Can not open special file %s without parent dir: %s\n", path1, strerror(errno));
+> > +			return errno;
+> > +		}
+> > +
+> > +		fd = open(path1, O_RDONLY);
+> > +		if (fd == -1) {
+> > +			fprintf(stderr, "Can not open %s: %s\n", path1,
+> > +					strerror(errno));
+> > +			return errno;
+> > +		}
+> > +	} else {
+> > +		fd = open(path1, O_RDONLY);
+> > +		if (fd == -1) {
+> > +			fprintf(stderr, "Can not open %s: %s\n", path1,
+> > +					strerror(errno));
+> > +			return errno;
+> > +		}
+> > +		path = path2;
+> > +	}
+> > +
+> > +	if (!path)
+> > +		at_flags |= AT_EMPTY_PATH;
+> > +
+> > +	error = file_getattr(fd, path, &fsx, fa_size,
+> > +			at_flags);
+> > +	if (error) {
+> > +		fprintf(stderr, "Can not get fsxattr on %s: %s\n", path,
+> > +				strerror(errno));
+> > +		return error;
+> > +	}
+> 
+> We should have a _require_* helper to _notrun your generic and xfs test cases,
+> when system doesn't support the file_getattr/setattr feature. Or we always hit
+> something test errors like below on old system:
+> 
+>   +Can not get fsxattr on ./fifo: Operation not supported
+> 
+> Maybe check if the errno is "Operation not supported", or any better idea?
 
-The for-next branch of the xfstests repository at:
+There's build system check for file_getattr/setattr syscalls, so if
+they aren't in the kernel file_attr will not compile.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Then there's _require_test_program "file_attr" in the tests, so
+these will not run if kernel doesn't have these syscalls.
 
-has just been updated and tagged as v2025.10.05 release.
+However, for XFS for example, there's [1] and [2] which are
+necessary for these tests to pass. 
 
-Sorry for this late release, we have many patches are still under reviewing
-and updating, I'll try to merge them in time when they're ready.
+So, there a few v6.17 kernels which would still run these tests but
+fail for XFS (and still fails as these commits are in for-next now).
 
-Release Notes:
-1) There're 4 new test cases in this release, include generic/772,
-   xfs/648, f2fs/021 and f2fs/022.
-2) The g/772 and x/648 are new feature test cases, to cover new
-   file_getattr/file_setattr syscalls. They might fail on on old
-   kernel which doesn't support this feature, we'll add a proper
-   _require_ helper to _notrun on old kernel later.
-3) The f/021 and f/022 are f2fs regression tests, they might cause
-   panic/hang on old kernel, so downstream testing please use them
-   carefully.
-4) XFS attr2 and ikeep related tests are totally removed, due to
-   xfs has removed these two options totally.
-5) Some btrfs test cases are fixed/updated to be better to run on large
-   block size btrfs 
+For other filesystems generic/ will also fail on newer kernels as it
+requires similar modifications as in XFS to support changing file
+attributes on special files.
 
-More updates or fixes refer to below, thanks for all these contributions.
+I suppose it make sense for this test to fail for other fs which
+don't implement changing file attributes on special files.
+Otherwise, this test could be split into generic/ (file_get/setattr
+on regular files) and xfs/ (file_get/setattr on special files).
 
-Thanks,
-Zorro
+What do you think?
 
-The new head of the for-next branch is commit:
+[1]: https://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git/commit/?h=for-next&id=8a221004fe5288b66503699a329a6b623be13f91
+[2]: https://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git/commit/?h=for-next&id=0239bd9fa445a21def88f7e76fe6e0414b2a4da0
 
-2cba4b54e6ab xfs: test quota's project ID on special files
+> 
+> 
+> Thanks,
+> Zorro
+> 
+> > +	if (action) {
+> > +		fsx.fa_xflags |= (fa_xflags | unknwon_fa_flag);
+> > +
+> > +		error = file_setattr(fd, path, &fsx, fa_size,
+> > +				at_flags);
+> > +		if (error) {
+> > +			fprintf(stderr, "Can not set fsxattr on %s: %s\n", path,
+> > +					strerror(errno));
+> > +			return error;
+> > +		}
+> > +	} else {
+> > +		if (path2)
+> > +			print_xflags(fsx.fa_xflags, 0, 1, path, 0, 1);
+> > +		else
+> > +			print_xflags(fsx.fa_xflags, 0, 1, path1, 0, 1);
+> > +	}
+> > +
+> > +	return error;
+> > +
+> > +usage:
+> > +	printf("Usage: %s [options]\n", argv[0]);
+> > +	printf("Options:\n");
+> > +	printf("\t--get, -g\t\tget filesystem inode attributes\n");
+> > +	printf("\t--set, -s\t\tset filesystem inode attributes\n");
+> > +	printf("\t--at-cwd, -a\t\topen file at current working directory\n");
+> > +	printf("\t--no-follow, -n\t\tdon't follow symlinks\n");
+> > +	printf("\t--set-nodump, -d\t\tset FS_XFLAG_NODUMP on an inode\n");
+> > +	printf("\t--invalid-at, -i\t\tUse invalid AT_* flag\n");
+> > +	printf("\t--too-big-arg, -b\t\tSet fsxattr size bigger than PAGE_SIZE\n");
+> > +	printf("\t--too-small-arg, -m\t\tSet fsxattr size to 19 bytes\n");
+> > +	printf("\t--new-fsx-flag, -x\t\tUse unknown fa_flags flag\n");
+> > +
+> > +	return 1;
+> > +}
+> > 
+> > -- 
+> > 2.50.1
+> > 
+> 
 
-New commits:
+-- 
+- Andrey
 
-Andrey Albershteyn (3):
-      [ef1028cf0379] file_attr: introduce program to set/get fsxattr
-      [4eb40174d77c] generic: introduce test to test file_getattr/file_setattr syscalls
-      [2cba4b54e6ab] xfs: test quota's project ID on special files
-
-Brian Foster (1):
-      [986a4cc1f5a7] common/rc: destroy loop dev before fallback recreation
-
-Carlos Maiolino (3):
-      [e2932df1b5d0] xfs/513: remove attr2 and ikeep tests
-      [21d6c88606ce] xfs/613: remove attr2 tests
-      [c3b7b05756d6] xfs/539: Remove test for good
-
-Chao Yu (2):
-      [38ae4c5048a0] f2fs/021: test quota mount option
-      [9460a05243ac] f2fs/022: do sanity check on footer of non inode dnode
-
-Qu Wenruo (3):
-      [ebfd9f1ea7c6] btrfs/012 btrfs/136: skip the test if ext* doesn't support the block size
-      [f8d78645f2ab] btrfs/192 btrfs/30[456]: explicitly specify block size to avoid false alerts
-      [57589265bf74] btrfs/26[67]: update the stale comments
-
-
-Code Diffstat:
-
- .gitignore            |   1 +
- common/filter         |  15 +++
- common/rc             |   3 +
- configure.ac          |   1 +
- include/builddefs.in  |   1 +
- m4/package_libcdev.m4 |  16 +++
- src/Makefile          |   5 +
- src/file_attr.c       | 274 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/012       |   3 +
- tests/btrfs/136       |   3 +
- tests/btrfs/192       |   8 +-
- tests/btrfs/266       |   4 +-
- tests/btrfs/267       |   2 +-
- tests/btrfs/304       |   5 +-
- tests/btrfs/305       |   5 +-
- tests/btrfs/306       |   5 +-
- tests/f2fs/021        |  30 ++++++
- tests/f2fs/021.out    |   2 +
- tests/f2fs/022        |  54 ++++++++++
- tests/f2fs/022.out    |   2 +
- tests/generic/772     | 109 ++++++++++++++++++++
- tests/generic/772.out |  37 +++++++
- tests/xfs/513         |  11 --
- tests/xfs/513.out     |   7 --
- tests/xfs/539         |  72 -------------
- tests/xfs/539.out     |   2 -
- tests/xfs/613         |   6 --
- tests/xfs/613.out     |   4 -
- tests/xfs/648         |  73 ++++++++++++++
- tests/xfs/648.out     |  15 +++
- 30 files changed, 655 insertions(+), 120 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---BLpH6EhyaZjp
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmjimMgACgkQlNbPkfr2
-tMzYWxAAg7nvQJM0R28WBE6kyH04hjg6AnJukVSS3Q7+Y6GTS9HnFU3adXSrlTtF
-zfLhV2sKcmfsK6m+ONs3+g0XXYuJWhYxofO12aY27pIpbDGWtCXf45iEjTlJnjyr
-2qV57dzfPOumu+48Y90Lg1mVA+A8Sf8b69QxWif32Vi6oIIH6iAoN0QauG/mx76S
-elEy0bHCxnEv7SCBpaejezVsm12jgkl6WxeAeMWj/DMF8V9Rz03Sodlh+ChsNK2P
-vRYtfmDe2udRvqWEmv65tVF7EVneSOYo2/Mz4MQbjP1/dOfRZzAnoMkRf15/7ssd
-1ReBzTsAVAPlC7zNwR7ffEgC7XK40XlmDD0OHy4ahlRqLVaI/AQ3vqzfqDhoCII2
-2GDbgCjxTzFG6YfZu08UTK7pRMcyNmQ/f3+Ttq7eWhjJxMbXhOR3DukEM5hgls09
-Hh3m7R/WLq3Qfd7UaOaxm93cffOJlXWifjxmT+erNdl5ygNLhvzNuIJwbj4vMIWw
-CYtQpL3eE9sJypLhrA65OltqLNrsXwyxtllhRh7DqSK/4u93K8vjxazyg3bpXsZ7
-o6pwni71PZKG2vbmlC0wMCJ+Hq3m+C/bHsv0s97t/DLDOUQbi8VrEnxI9Yp8JllL
-EwIeIRMTk3H784zo7ZV+nhTqkZUsEYT3bD8QfHa4xie+jKnsJXc=
-=LVlR
------END PGP SIGNATURE-----
-
---BLpH6EhyaZjp--
