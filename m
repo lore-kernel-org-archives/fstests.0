@@ -1,54 +1,54 @@
-Received: from mail-ej1-f73.google.com (mail-ej1-f73.google.com [209.85.218.73])
+Received: from mail-ed1-f74.google.com (mail-ed1-f74.google.com [209.85.208.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2BEEA2F2D
-	for <fstests@vger.kernel.org>; Mon,  6 Oct 2025 09:58:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF83019067C
+	for <fstests@vger.kernel.org>; Mon,  6 Oct 2025 10:07:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759744717; cv=none; b=NRBSAdcb+n524Y4AFJH3XnDMOsZaXs/dZoaGqY5+UR3u1OUJULQ84K7z15Ui5Qb80Pf0w6YA6etHjMG6HQekTCfsvDgJf0QAI3/FRnQOc6mH0UXZP/9le7MTcS1ZpVft46vNIA7CW4C+mt2JSNNZtTNKt9p0ODR1xWn6WJdspes=
+	t=1759745251; cv=none; b=FuZsupBy9NZvZqGWmXI23STr0+GEOQb5AtcxluJ0Ch8NugR4PEuW1GqG+pT4aN+hHgBzECdpfwvbUmGbAjd41J7si49zKjTgLprfG82QuLjNgF57fFRbSca7/4s9B/ZHWfwZdQ2FVGew4gO12ha2tZLdMXpOXl0CQVvsDufv7xM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759744717; c=relaxed/simple;
-	bh=tuyw+rQN52fKBBrA28TI7nHi+GHMhzTaISK7mFLQqEc=;
-	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=ToINsBXk0enMTEmNYBtdEKOSU3uyoVJCJL54SCHQaXZvvbILGfDmHvwqRy5gaIdluO/U/4lZWAk5LaQipgmQNe3CiYlEGzYqAtmRItVsEy/6ePkEvNObK8Ki2PgHlymJGV/7CC7+MdBihVOybhpFcZo7lw91e4PVGdcXARnNrIA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=4YdyUPFO; arc=none smtp.client-ip=209.85.218.73
+	s=arc-20240116; t=1759745251; c=relaxed/simple;
+	bh=ssP+Pu8EHHnANvsOdBkNO78FOPl/IHrcayjUL4L7LMI=;
+	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=esXtGxZ65zfqDKa6jA1Zi2NB6jD13ajSOzVV+xLWdGoy3k7i8b1Rpq7ZAYR4JrKBlECkII5eaKaae4Vt6sPrZDQbWYluf5N47aVqUBko2/reUCfKx0O5xd3oDzXY7DWc6hr44axhSF2YzSX83jQZF3x1UVPHvnP5RQiEIjKzBRA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=g0ytWamP; arc=none smtp.client-ip=209.85.208.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="4YdyUPFO"
-Received: by mail-ej1-f73.google.com with SMTP id a640c23a62f3a-b41c67edce5so482701766b.3
-        for <fstests@vger.kernel.org>; Mon, 06 Oct 2025 02:58:35 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="g0ytWamP"
+Received: by mail-ed1-f74.google.com with SMTP id 4fb4d7f45d1cf-62fd1b03d74so5152503a12.0
+        for <fstests@vger.kernel.org>; Mon, 06 Oct 2025 03:07:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1759744714; x=1760349514; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1759745248; x=1760350048; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=Sc4vGQFYPIBaWztyvb1x80Wmo5m+eEeS575TWEadZus=;
-        b=4YdyUPFOSYUn8DIcW061N+685gpR0WybxQ+7HhgRwbuoBrrDg8TmiYdyibvfXEdA7h
-         97RcoArL576CE5ZyoB3P9yFxFciA1GRG7SKMVtA9Uw9ANEAic8P+jEK8BcQzpE1KJZ/0
-         +nu6tj+KJNueG4eKyJqYZSpIrFTWX1EpueWRTj4KwJ+rCKNkV9jhTU0fv5m3QEeIMUki
-         ShhcDaY1aTe9KGdR1VY0N0s9BSF67LeQZnyuX2/RU77SMApbElD+Qg3WHnDN30ih82gY
-         ZziSZnhh4dpxrPZ+9S1+G9p+umenoK9AV4dCoIFsPKvdTyU6r+ZBVTWfHCX9+vI26fuU
-         ZIEA==
+        bh=y8AjHP2BMxxekAp+wHrrG6IAM0ijg+DCDAJtMGZzegA=;
+        b=g0ytWamPAerSkPXiEPb2n2+TftxwgX31gHZnGf2pczb0DW12TZw9KEbS1xRNXdbd4o
+         XSJ5UA7d5F462STeZHMJZuYZ84+uXAEd3vuuxEEAN/KP8JIQYNcyp/WvLeEgmH9snRL0
+         svO5zfkTdXDJPZt1iDYI1UilOCvddw8SNgzf/kaUv5X1ht1fauVLW+xpms39zbow8Nn/
+         AShX1VLphGXqQNQXW+fjXpFU7YBlVBHnOwikcQ8AphiDUd/pjMY8eauLSGoK/JagDfoF
+         NWkQ2yOPGYdUQFI4V9rx4Zs3w83E9LGYvLq6yR1my6hdBcinc5TOBGvCUGtoXRN7FN+4
+         CGnA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759744714; x=1760349514;
+        d=1e100.net; s=20230601; t=1759745248; x=1760350048;
         h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=Sc4vGQFYPIBaWztyvb1x80Wmo5m+eEeS575TWEadZus=;
-        b=BAEvXOFk++dVEBjjEwIL9SfxOown1INHPsDC4axy0pgXCBkX/9p3pqp6vxjlwrSVr/
-         wqXShj1IoCfoUdfT9HT7QBrPG4FAXBwzP+D3ILWkHxFoZBmmu8aZ2G1UFYFAJjSDOCOQ
-         mpL1DsFRudP2SSnxI4EzU5LwM8QfWW4OujKncac3bMVorIf5S58PzcRieUzXCegzCQEQ
-         g3sUuNjyj8bLupUrDCMzystGm/3Il2+9Z1GLAR/2Nr6tdF2CxUc0tEj2S0YjYQmUlSO8
-         GFYJxdhTserHp+fs++aFR4r6Pl/5zwm54c9i2we+COvrBqSqfcIbPuvdlO4l4p61Uazl
-         MINA==
-X-Forwarded-Encrypted: i=1; AJvYcCXmjqo9HiRZP6nbkIxxC8j0wiISsuRH79YV4ugmeuciHo4RGwfNEWg2qZomsG/kB8WXUHnK2H/0@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy/YYXMUgiywQ1S2PT7aJZLGbTP8Yerx8cYc04SRLma+kqZxAbs
-	xn7U1WxBuP7cxqqazQdRQm9mlA3rPYWusHRogs3DtGLcm8f8GPFmowrnYhpG5GxhixKVoaUklB4
-	qtYdJNPY5Xl5UaOVTAKBpGyGu6UxflA==
-X-Google-Smtp-Source: AGHT+IH38hWGPvZTjm7gSlYootDowCEylUmuxNHmWeR8Ovsb7/fEr161qyR4TF7YXSyDwiHegDbvcDrCXNF/znzR6Eo=
-X-Received: from ejbci9.prod.google.com ([2002:a17:906:c349:b0:b3d:d79a:5f98])
+        bh=y8AjHP2BMxxekAp+wHrrG6IAM0ijg+DCDAJtMGZzegA=;
+        b=jyW5Zsg2FeXvmhCw71iOrVCk8QDQZxKSZrhc/XngrSj//trCcqbWmyvKnQFdNhX0SX
+         g+c8XL3Wfk/BUKu2Lzg1VqBB1BbAjzA//lF/Ud7u3fXUEy/ohHZCJck3ArFqYwTIsJ3p
+         rcetUByKw51OxUr3LFE5/GGotaWwcRMVyxEJ6ued4q0bBBFx9z6fwXXj2Jx9EtaHL2td
+         otkf/2T0rG7GfjkoCC6ThheqpCEj2yY/+sxtd5bV+/glUN5i8ufepCDqb1OrY4kOr1vh
+         4LuYgbbBSPexfuaz3nWvSKKy+MYk/y8AhdUcBcH3FFXW8LF23BcbI/JR7scAeV6IetN4
+         fuNQ==
+X-Forwarded-Encrypted: i=1; AJvYcCV43Mk1eDnOZuc90neP9Tk1U3GjA8IEvuCLH0VWpaafnWw50tZ8TCfzcgvdo3c3yoDt09f3z7rc@vger.kernel.org
+X-Gm-Message-State: AOJu0YyFre3eAg8ab4MpLEFO+TkBWzOoW0nAo1GuWoFBqKANdyWCLun+
+	IBbsCHftSPlS9tO7FZHHwduSKHpD4OdLHrV5Ycg/Mdor0VuJmhQgu66+L82sIlVFxjsYIb3WN4a
+	t0RJ5l3DWPA4Gvw+gDGHdPwqg4Qxelw==
+X-Google-Smtp-Source: AGHT+IGaOvMuxw+j8+jAjq57qg7DRkWnQZOVLbHJzaCCRqJzVwyoWB4RMYvEZDlpZvF3gdBG8DuwX+0lyPnJryMyeuQ=
+X-Received: from edbbm11.prod.google.com ([2002:a05:6402:b0b:b0:636:7b56:c4f5])
  (user=jprusakowski job=prod-delivery.src-stubby-dispatcher) by
- 2002:a17:907:3f21:b0:b38:6689:b9fe with SMTP id a640c23a62f3a-b49c2a576ebmr1293699966b.7.1759744714330;
- Mon, 06 Oct 2025 02:58:34 -0700 (PDT)
-Date: Mon,  6 Oct 2025 11:58:13 +0200
+ 2002:a05:6402:34cd:b0:62f:337b:beed with SMTP id 4fb4d7f45d1cf-63939c28153mr12378079a12.30.1759745248294;
+ Mon, 06 Oct 2025 03:07:28 -0700 (PDT)
+Date: Mon,  6 Oct 2025 12:07:13 +0200
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -56,55 +56,45 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 X-Mailer: git-send-email 2.51.0.618.g983fd99d29-goog
-Message-ID: <20251006095813.3497619-1-jprusakowski@google.com>
-Subject: [PATCH v3] common/encrypt: Explicitly set the test file to uncompressed
+Message-ID: <20251006100713.3501501-1-jprusakowski@google.com>
+Subject: [PATCH] f2fs/009: Add delay after killing socket tool
 From: Jan Prusakowski <jprusakowski@google.com>
-To: Zorro Lang <zlang@kernel.org>, Eric Biggers <ebiggers@google.com>, fstests@vger.kernel.org
-Cc: Chao Yu <chao@kernel.org>, jaegeuk@kernel.org, 
-	linux-f2fs-devel@lists.sourceforge.net, 
+To: Zorro Lang <zlang@kernel.org>, Chao Yu <chao@kernel.org>, fstests@vger.kernel.org
+Cc: jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net, 
 	Jan Prusakowski <jprusakowski@google.com>
 Content-Type: text/plain; charset="UTF-8"
 
-verify_ciphertext_for_encryption_policy() checks if encryption works
-correctly by reading encrypted file's contents directly from a block device and
-comparing it to a known good ciphertext.
+When running the test in a VM on a host with all CPUs busy, the kill command
+returns before socket tool shuts down. This prevents unmounting the
+scratch, causing the test to fail.
 
-This, however, won't work if the test file is also compressed. So this patch
-adds a check if a test file is compressed and disables its compression in this
-case.
+The added sleep ensures that the socket tool closes before the next test steps.
 
 Signed-off-by: Jan Prusakowski <jprusakowski@google.com>
-
 ---
-Changes in v2:
-The test file is now created empty first, followed by resetting the
-FS_COMP_FL attribute, and then copying the test data.
+ tests/f2fs/009 | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Changes in v3:
-Added explicit FS_NOCOMP_FL attribute to the test file.
-
----
- common/encrypt | 7 +++++++
- 1 file changed, 7 insertions(+)
-
-diff --git a/common/encrypt b/common/encrypt
-index d4f6e3dc..f2687631 100644
---- a/common/encrypt
-+++ b/common/encrypt
-@@ -790,6 +790,13 @@ _do_verify_ciphertext_for_encryption_policy()
- 	_set_encpolicy $dir $keyspec $set_encpolicy_args -f $policy_flags
- 	for src in $tmp.testfile_*; do
- 		dst=$dir/${src##*.}
-+		# To make sure the test file is not compressed we create an empty one
-+		# and disable compression first (F2FS won't allow resetting the
-+		# compression flag if the file has data already in it).
-+		touch $dst
-+		if lsattr $dst | grep -qE ".+c.+ $dst" ; then
-+			chattr -c +m $dst
-+		fi
- 		cp $src $dst
- 		inode=$(stat -c %i $dst)
- 		blocklist=$(_get_ciphertext_block_list $dst)
+diff --git a/tests/f2fs/009 b/tests/f2fs/009
+index 7333d484..d4893139 100755
+--- a/tests/f2fs/009
++++ b/tests/f2fs/009
+@@ -95,6 +95,7 @@ pid=$!
+ sleep 2
+ ino=`stat -c '%i' $filename`
+ kill $pid >> $seqres.full 2>&1
++sleep 2
+ check_links 0 0 $ino
+ 
+ ln -s $SCRATCH_MNT/empty $filename
+@@ -127,6 +128,7 @@ pid=$!
+ sleep 2
+ ino=`stat -c '%i' $filename`
+ kill $pid >> $seqres.full 2>&1
++sleep 2
+ check_links 0 1 $ino
+ 
+ ln -s $SCRATCH_MNT/empty $filename
 -- 
 2.51.0.618.g983fd99d29-goog
 
