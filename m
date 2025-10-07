@@ -1,197 +1,162 @@
-Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com [209.85.210.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF98A2D97A0
-	for <fstests@vger.kernel.org>; Tue,  7 Oct 2025 11:22:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 98A402D97BF
+	for <fstests@vger.kernel.org>; Tue,  7 Oct 2025 11:22:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759836154; cv=none; b=BEmSIl+tvgewqlhA3v5J7Nuv8yGwW9g5kdo2u9OZ54aQiQQfDT4qG3A6ZdEx2wu7NW58H906332SAmGV8XRMGlBUJMyQWSOwJmCXMPfVbn3zWNB9N4wA+NfI/ujRHXCKn4c2ccEy877H9o4BNb4dyJFuzNz35ssOBT3nPnVzywI=
+	t=1759836173; cv=none; b=fXs8JeENXgTTSrlpVsmSNfz65OTT73ZfmUdVEzJI8hy29EZCAM3o4eCK8/2Ey0ZWWXJ/HrrZ72ho5hgLLJv/j3yW1N/6cft1QuqSyxvU6DASDCOCkX9fXUjYxfaaIJfv5JdEMJB01oXl1MV7gd6C73bhFt0Rr5Du7+1UReHftgA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759836154; c=relaxed/simple;
-	bh=AAg2VE8iB7bPuEfQ9ClmPTedk3fq8VIVUeYtzbjamMA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=GiGJ1l52Q8ud079cFpoOVMIx9PlolGJRi3a8pYxPaada+Lck954OmfoRPbopleEpX69Uz2sgz1uuoFGALg9Vl4JduK6l+MI/3dVFX4yA4disRI6MbNl4I9D13Glnd102rYUx9jE1pYq35fqubtuA0dCDiInpWjlq5v+JI91vaBQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=LBiEx0np; arc=none smtp.client-ip=209.85.210.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1759836173; c=relaxed/simple;
+	bh=eP8q0v1FvPcq0wHEKOWS6F3vyzy+zXD11XS41M4kF7E=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=NY5fXkyc6JDmHeK1FKyKvtcf+VLNi70VPRFVotVEz48Wfuw2w8lezqilMgb3KqplIeUU+V0P+T/lCvUieppQFsRl3GAvEkyKqPZRU7DT22tvBpuu4itmItb2HVXG0rGnd+elo5E/F72PPfClju1rkk6kXsDhHWmYdR4y9Cfe54Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WCbxLW6h; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LBiEx0np"
-Received: by mail-pf1-f172.google.com with SMTP id d2e1a72fcca58-77e6495c999so6142872b3a.3
-        for <fstests@vger.kernel.org>; Tue, 07 Oct 2025 04:22:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1759836152; x=1760440952; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=VYl+85PcERWz3SWqGL0mL4/Mx4Yt41r+iR2lKSkEuok=;
-        b=LBiEx0np4XFjJ48ikBjaiVyGIY9HiTA9KoeuoteAnhMB3LrVrtsvhGktiieDq01URI
-         jQY8fCFLXFL/LTBWRhunjiamUEfj4MRS8MoJ5FlQruXxmp3Nh74hRa+wTdnwKUz/vpey
-         /9X/rQGLjN4M+xd8nrxClqQXE/VcFhXoS/3QSGurmzPCrtmPUDT1eV+BY2gs7EtbOhw8
-         NVN/hoTAD89B9wV8xQh1CNv4kDVriMIpez3Ek6K0QEG58+vXUd98tpnKQGqkWrqI+zyC
-         iVTqQR2gchJNQk73F+BzUGZmcvyILw1fLpLvOrvPpQAFGGV+X/FKH5TilWowOu4/h7wN
-         Ec/A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759836152; x=1760440952;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=VYl+85PcERWz3SWqGL0mL4/Mx4Yt41r+iR2lKSkEuok=;
-        b=NMe3ZcV8zBQ5HtjGs5rwEPLzXYdlufbY/hhz/6EYGiorWD4ZWqnxx0SJTL0yBFE+FR
-         r+4HDnGZZhXbj6r134gSateheC4jfq6Ii4STJ0WmdW9EnZDiGx6cewjbl+DLAkLRcdKR
-         QZ/tdYIgWJ3nDhz0cuTTFUQrr4aLw+pNIhuPclwLtN4sdmirsrEgveuVNj6f8SAqzph3
-         ARBGVmVZU/CcA1Hc46QKigpipPFqcsoqI4M/3VHwG0VKmp+jUSfg5o2+uVXld57yJ2fk
-         cS3jYGn/reEQxmLkp7z0bTWJmvuUqNk/suPYvR6rltixhGmbps54Kc0pyTLtzH0Fmqbd
-         IkAw==
-X-Forwarded-Encrypted: i=1; AJvYcCWuxd9j3gvvc+yU6LKUOtr14WZP+WGNxAD2zZJ4HYkMv4YYQjsZNDIlpGAsBlYbA9l4VYFAL3Ld@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxj6dYiLoD/j0Zg6jkHJmvlAYuKCXG6k2D9JN4GoFHf14Yr9O8k
-	Umtd19kjswb20muIzAi4Z6faL/rIW8+C3Fowxq1cqKrCTeBVicVnMre+
-X-Gm-Gg: ASbGncuv8wShdCjyOX40MrfFV0IL/poHbzA0rE6vjVuYFA1TZih/BS/LTJywoTpxXdn
-	7ORjzQqBtLpiW+kI63LWpsTpIfJyfi/6a+OeGS0gzZKg/IsL1TX/FUmaKAY5+PAA8N08OkrrT91
-	uR3uiXRg84Y6MhtwlbAWIZE/h/7M8IWapYd9ioOv+xstGxMMBkoakvE6b/tmMhDLoFXKowZ+xfh
-	uLh3TQJ7Jqt/3ScDzLVz4gvFV6YK+lbboiG6rhCo1vvj1Kh1uXQyhmUN8KHQ6Tvl83zMiU10SBQ
-	reNm1G1qiOEgqMewaUSQAqM27+TAwUXJzJmYedrs8zv0CPvVFEz3rH/Q1k+8toK6f9lNtpytLnW
-	8/EbsFyjITxtleehEPpzGkHIAVRxT7F0UL7ysS+fO6O9oUk4GZupNv8B8+UP0c8P4gVpxDqQR+y
-	wStTYKmIjiWzrjIcjloQT+8Hbg9qo9JpsF8ZOWnAQ=
-X-Google-Smtp-Source: AGHT+IEOfO+shJRk8mlgNI63ly0IkYAurYlBMqG+ND6IXzSd6ad3wvsaCb+uJ8CbXU90YUZuCYHQqg==
-X-Received: by 2002:a05:6a00:238d:b0:781:1771:c12c with SMTP id d2e1a72fcca58-78c984c060cmr20253531b3a.0.1759836151961;
-        Tue, 07 Oct 2025 04:22:31 -0700 (PDT)
-Received: from ?IPV6:2405:201:d006:804f:3dc3:e5b1:3dc8:9cf5? ([2405:201:d006:804f:3dc3:e5b1:3dc8:9cf5])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-78b0206e6ccsm15393234b3a.63.2025.10.07.04.22.29
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 07 Oct 2025 04:22:31 -0700 (PDT)
-Message-ID: <9d9fd202-2f54-4aff-9cf0-a0ef0d0b609b@gmail.com>
-Date: Tue, 7 Oct 2025 16:52:27 +0530
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WCbxLW6h"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3D00DC4CEFE
+	for <fstests@vger.kernel.org>; Tue,  7 Oct 2025 11:22:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1759836173;
+	bh=eP8q0v1FvPcq0wHEKOWS6F3vyzy+zXD11XS41M4kF7E=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=WCbxLW6hGb+nrAllURetzUA6uYCA0KhyC5xze5Kn3iLV+DmPiPOtQngC9QHHKeSGS
+	 S05Rjrh49nGlt1vmtm25O1Tg+Xi0S1YwswNy5kWXYulaM9eo+T2EyzCSZe1Nx4ozZJ
+	 lYDpna4FxbAIW4GEPIetAqXXBj5rQ+VnxX24B8feQDVaCyo6SArYoi8CXUIiBOZkgu
+	 /sXwF9KPF+vVEN1mXrUP/khzeatSmQua9Nvxs1a65dRBF4nge99DVnhzuvCxXqbtP7
+	 SHk4htzvHqGBcQnsns/U2sm9KYR70yXF99ZbHb5FCiszt9g6s0iVSQzLEZk3E7WKxE
+	 4PjVe1oSqPglQ==
+Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-b463f986f80so936807066b.2
+        for <fstests@vger.kernel.org>; Tue, 07 Oct 2025 04:22:53 -0700 (PDT)
+X-Gm-Message-State: AOJu0Yx6jAllwXkDOHakHW8c7MuX+nVL9AWiayPOZk4TQT5mJDGisKbw
+	/g61pAIu7AWNEeRDsomYerCzLays8m4xSBuSZgmvdnlsgKVjDteIuzxWvXWu9K9X6TwBfGvnRcS
+	zNu5b0AQ8l7t72TEOR2J7rSrsEGJclN4=
+X-Google-Smtp-Source: AGHT+IEAyBmWKBCZymSXYUH6FfCCi22wmuxobBDl4XLJitmC8DBKyQh/pBKpqr6PDSwasy3NIWWFtPpBs/y97t4rndw=
+X-Received: by 2002:a17:906:f581:b0:b3c:896:abf5 with SMTP id
+ a640c23a62f3a-b49c098e2c7mr2025674166b.25.1759836171800; Tue, 07 Oct 2025
+ 04:22:51 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/4] generic/562: Make test compatible with block sizes
- till 64k
-Content-Language: en-US
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
- ritesh.list@gmail.com, ojaswin@linux.ibm.com, djwong@kernel.org,
- quwenruo.btrfs@gmx.com, zlang@kernel.org,
- linux-btrfs <linux-btrfs@vger.kernel.org>
-References: <cover.1758036285.git.nirjhar.roy.lists@gmail.com>
- <b3ce6c555b0a04f6c8cca08ab36e3b0068abbbb2.1758036285.git.nirjhar.roy.lists@gmail.com>
- <20250926165421.k7n3m6o2nuscarkq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <86b3c5c5-82ec-4083-9f1c-ac3fc11b0d57@gmail.com>
- <CAL3q7H5keL6SJt0PpsV7wtDrf8sg0xgVy5piOv5WycCynbmrgg@mail.gmail.com>
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <CAL3q7H5keL6SJt0PpsV7wtDrf8sg0xgVy5piOv5WycCynbmrgg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+References: <cover.1758036285.git.nirjhar.roy.lists@gmail.com> <8081c6bcdc56ca2018e51e98e7d3086068f026b9.1758036285.git.nirjhar.roy.lists@gmail.com>
+In-Reply-To: <8081c6bcdc56ca2018e51e98e7d3086068f026b9.1758036285.git.nirjhar.roy.lists@gmail.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Tue, 7 Oct 2025 12:22:13 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H58hDCrYMqDwdO_Lf7B2J+Wdv5FpAw6u5NkDK0ExZ8K0A@mail.gmail.com>
+X-Gm-Features: AS18NWCFVAbvGKfcSze4ubI6ubYZXEspTtvwwJcrbX7X7ER7fk4RBnKMvNI1XvM
+Message-ID: <CAL3q7H58hDCrYMqDwdO_Lf7B2J+Wdv5FpAw6u5NkDK0ExZ8K0A@mail.gmail.com>
+Subject: Re: [PATCH 4/4] btrfs/290: Make the test compatible with all
+ supported block sizes
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: fstests@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com, 
+	djwong@kernel.org, quwenruo.btrfs@gmx.com, zlang@kernel.org, 
+	linux-btrfs <linux-btrfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-
-On 10/7/25 16:48, Filipe Manana wrote:
-> On Tue, Oct 7, 2025 at 9:29 AM Nirjhar Roy (IBM)
-> <nirjhar.roy.lists@gmail.com> wrote:
->>
->> On 9/26/25 22:24, Zorro Lang wrote:
->>> On Tue, Sep 16, 2025 at 03:30:10PM +0000, Nirjhar Roy (IBM) wrote:
->>>> This test fails with 64k sector size in btrfs. The reason for
->>>> this is the need for additional space because of COW. When
->>>> the reflink/clone of file bar into file foo is done, there
->>>> is no additional space left for COW - the reason is that the
->>>> metadata space usage is much higher with 64k node size.
->>>> In order to verify this, I instrumented the test script and
->>>> disabled COW for file foo and bar and the test passes in 64k
->>>> (and runs faster too).
->>>>
->>>> With 64k sector and node size (COW enabled)
->>>> After pwriting foo and bar and before filling up the fs
->>>> Filesystem      Size  Used Avail Use% Mounted on
->>>> /dev/loop1      512M  324M  3.0M 100% /mnt1/scratch
->>>> After filling up the fs
->>>> Filesystem      Size  Used Avail Use% Mounted on
->>>> /dev/loop1      512M  441M  3.0M 100% /mnt1/scratch
->>>>
->>>> With 64k sector and node size (COW disabled)
->>>> After pwriting foo and bar and before filling up the fs
->>>> Filesystem      Size  Used Avail Use% Mounted on
->>>> /dev/loop1      512M  224M  231M  50% /mnt1/scratch
->>>> After filling up the fs
->>>> Filesystem      Size  Used Avail Use% Mounted on
->>>> /dev/loop1      512M  424M   31M  94% /mnt1/scratch
->>>>
->>>> As we can see, with COW, the fs is completely full after
->>>> filling up the fs but with COW disabled, we have some
->>>> space left.
->>>>
->>>> Fix this by increasing the fs size to 590M so that even with
->>>> 64k node size and COW enabled, reflink has enough space to
->>>> continue.
->>>>
->>>> Reported-by: Disha Goel <disgoel@linux.ibm.com>
->>>> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
->>>> ---
->>>>    tests/generic/562 | 2 +-
->>>>    1 file changed, 1 insertion(+), 1 deletion(-)
->>>>
->>>> diff --git a/tests/generic/562 b/tests/generic/562
->>>> index 03a66ff2..b9562730 100755
->>>> --- a/tests/generic/562
->>>> +++ b/tests/generic/562
->>>> @@ -22,7 +22,7 @@ _require_scratch_reflink
->>>>    _require_test_program "punch-alternating"
->>>>    _require_xfs_io_command "fpunch"
->>>>
->>>> -_scratch_mkfs_sized $((512 * 1024 * 1024)) >>$seqres.full 2>&1
->>>> +_scratch_mkfs_sized $((590 * 1024 * 1024)) >>$seqres.full 2>&1
->>> Filipe is the author of this test case, if he can help to make sure
->>> the 512MiB fs size isn't the necessary condition to reproduce the
->>> original bug he tried to uncover, I'm good to have this change, even
->>> change to bigger size :)
->> Okay, I will wait for Filipe's comment on this change. Thank you.
-> This is probably ok.
-> This test was to exercise a bug fixed in 2019, commit 690a5dbfc513
-> ("Btrfs: fix ENOSPC errors, leading to transaction aborts, when
-> cloning extents").
-> It's hard to confirm nowadays since the fix landed in kernel 5.4,
-> trying a revert of that commit is not practical since there are tons
-> of changes done on top of it, the alternative would be to test a 5.3
-> kernel or older.
+On Tue, Sep 16, 2025 at 4:31=E2=80=AFPM Nirjhar Roy (IBM)
+<nirjhar.roy.lists@gmail.com> wrote:
 >
-> The while loop below should ensure we try to fill all metadata space
-> with files that have only inline extents, so in theory it should be ok
-> for any fs size.
+> This test fails with 64k block size with the following error:
 >
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+>      punch
+>      pread: Input/output error
+>      pread: Input/output error
+>     +ERROR: couldn't find extent 4096 for inode 261
+>      plug
+>     -pread: Input/output error
+>     -pread: Input/output error
+>     ...
 >
-> Btw, when you do a patchset that modifies btrfs tests, or even generic
-> tests that were motivated by btrfs bugs, please cc the btrfs mailing
-> list... I haven't noticed this before because the list was not cc'ed.
+> The reason is that, some of the subtests are written with 4k blocksize
+> in mind. Fix the test by making the offsets and sizes to 64k so
 
-Yes, I usually cc the btrfs mailing list but I missed it this time, 
-sorry about that.
+"... offsets and sizes to 64k..." -> "... offsets and sizes multiples of 64=
+K..."
 
---NR
-
+> that it becomes compatible/aligned with all supported block sizes.
 >
+> Reported-by: Disha Goel <disgoel@linux.ibm.com>
+> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> ---
+>  tests/btrfs/290 | 16 ++++++++--------
+>  1 file changed, 8 insertions(+), 8 deletions(-)
 >
->> --NR
->>
->>> Thanks,
->>> Zorro
->>>
->>>>    _scratch_mount
->>>>
->>>>    file_size=$(( 200 * 1024 * 1024 )) # 200Mb
->>>> --
->>>> 2.34.1
->>>>
->>>>
->> --
->> Nirjhar Roy
->> Linux Kernel Developer
->> IBM, Bangalore
->>
--- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+> diff --git a/tests/btrfs/290 b/tests/btrfs/290
+> index 04563dfe..fecec473 100755
+> --- a/tests/btrfs/290
+> +++ b/tests/btrfs/290
+> @@ -106,15 +106,15 @@ corrupt_reg_to_prealloc() {
+>  # corrupt a file by punching a hole
+>  corrupt_punch_hole() {
+>         local f=3D$SCRATCH_MNT/punch
+> -       $XFS_IO_PROG -fc "pwrite -q -S 0x58 0 12288" $f
+> +       $XFS_IO_PROG -fc "pwrite -q -S 0x58 0 196608" $f
 
+Can you please make this more readable and type 192K instead of 196608?
+
+>         local ino=3D$(get_ino $f)
+>         # make a new extent in the middle, sync so the writes don't coale=
+sce
+>         $XFS_IO_PROG -c sync $SCRATCH_MNT
+> -       $XFS_IO_PROG -fc "pwrite -q -S 0x59 4096 4096" $f
+> +       $XFS_IO_PROG -fc "pwrite -q -S 0x59 64k 64k" $f
+
+Here you use 64k instead of 65536, which is more readable.
+
+>         _fsv_enable $f
+>         _scratch_unmount
+>         # change disk_bytenr to 0, representing a hole
+> -       $BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 4096 -f disk_bytenr --value =
+0 \
+> +       $BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 65536 -f disk_bytenr --value=
+ 0 \
+>                                                                     $SCRA=
+TCH_DEV
+>         _scratch_mount
+>         validate $f
+> @@ -123,14 +123,14 @@ corrupt_punch_hole() {
+>  # plug hole
+>  corrupt_plug_hole() {
+>         local f=3D$SCRATCH_MNT/plug
+> -       $XFS_IO_PROG -fc "pwrite -q -S 0x58 0 12288" $f
+> +       $XFS_IO_PROG -fc "pwrite -q -S 0x58 0 196608" $f
+
+Same here, 192K.
+
+>         local ino=3D$(get_ino $f)
+> -       $XFS_IO_PROG -fc "falloc 4k 4k" $f
+> +       $XFS_IO_PROG -fc "falloc 64k 64k" $f
+>         _fsv_enable $f
+>         _scratch_unmount
+>         # change disk_bytenr to some value, plugging the hole
+> -       $BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 4096 -f disk_bytenr \
+> -                                                  --value 13639680 $SCRA=
+TCH_DEV
+> +       $BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 65536 -f disk_bytenr \
+> +                                                  --value 218234880 $SCR=
+ATCH_DEV
+>         _scratch_mount
+>         validate $f
+>  }
+> @@ -166,7 +166,7 @@ corrupt_root_hash() {
+>  # corrupt the Merkle tree data itself
+>  corrupt_merkle_tree() {
+>         local f=3D$SCRATCH_MNT/merkle
+> -       $XFS_IO_PROG -fc "pwrite -q -S 0x58 0 12288" $f
+> +       $XFS_IO_PROG -fc "pwrite -q -S 0x58 0 196608" $f
+
+Same here, 192K.
+
+Also please always cc the btrfs mailing list for changes to btrfs tests.
+
+
+>         local ino=3D$(get_ino $f)
+>         _fsv_enable $f
+>         _scratch_unmount
+> --
+> 2.34.1
+>
