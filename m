@@ -1,43 +1,36 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail.synology.com (mail.synology.com [211.23.38.101])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8ECDF2D7DDF
-	for <fstests@vger.kernel.org>; Thu,  9 Oct 2025 09:08:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25AF42D6E7F;
+	Thu,  9 Oct 2025 09:41:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.23.38.101
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760000935; cv=none; b=tw2Q+JyTvSSA0I9YLZDv/0SBgKRsO5LsFTViMQ5h+914cyGwMI1gOl8sd05VRA9Me2WIKndoEi+Y6Rowl5RwY6M+1zJnAmyJvyRIe82XXKEg4Y5LHnuYkBGKmNUgBgW8nk2LdGLUPYu2decPbOmoBtJ51/GjoJj1Cm3BoPJbSUs=
+	t=1760002872; cv=none; b=u4M5f/N7wsFWezxJAtOfIHa67WAzeaqgZnRezvrv/V8bOsqBnQ++9/CKmiWSpwgIZppXQm3pAwsCepCxsr1BwaXbB5sBfl02HCRwAnA8NaPvHNzSsJFH27RVgT1plLm0ZxuAySnPJwkJn8s1NA3mtET30IiSW9775OYSQP/0Fu8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760000935; c=relaxed/simple;
-	bh=rafZBb+BEGY7+V0BVWM7lcH+DPHEnQbVHTH/W0YjSso=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=DrDRjSNgYIZ3xiE/8c+Jux/6SnI31M84pB+n5S2wkqSY7SkFc6TA/ote3y1xS2PxCrp7OMZH+jSYp2Vq3HYRgN3XanWywOLXssEZj1rxhO1Ihc2q5viZL8h0NGdXquqqVjUaWDPLxF6wsBCtHs0aCi+kqX0d1hB/gPAG+q4UZQY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iDTogICe; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1760002872; c=relaxed/simple;
+	bh=JioEsW4Ahw1bsNv4Qggu+h+dmUhXBrPXrXh9I+wL6Kc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=VUtve7pZ5co5zOOMtkZ2nqZOMHPdPLe4jW8CjQOus+sfxCkx5Rnnj3UK5mXwyEum7gwpJPw/rEZHzD8CWAP/M1kNRalHJbl1xMqIiTOLFbeNFc3IfLWju4pYsV6uxTnvhlx8BT71fBc4HYG6dlAXRTuOPRRydfabent4H56ZXkA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=synology.com; spf=pass smtp.mailfrom=synology.com; dkim=pass (1024-bit key) header.d=synology.com header.i=@synology.com header.b=NtaBS8Bp; arc=none smtp.client-ip=211.23.38.101
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=synology.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=synology.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iDTogICe"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 098EEC4CEE7;
-	Thu,  9 Oct 2025 09:08:53 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1760000935;
-	bh=rafZBb+BEGY7+V0BVWM7lcH+DPHEnQbVHTH/W0YjSso=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=iDTogICeHrWrW6XWrY/ZcJyC39NGqE8RfRAnZzTN3aOg0jpDnmCdH/rSHPxKS+y5L
-	 /N+F3OjHSEFeHyfiF+exNeHHILbLKNcdmZV/KwBg0OadLKNcxfeybTJXUaKG9ggPSU
-	 TA00VzmGvOcE1Bt2nijfuqVhkuSoNwEcbGIWLN35S/Z1O1FE2VwxMsR1fyBiVeHLk5
-	 JDgBNneGscFKu2MO2Q2kGK/Cyb3gtD5MAHBsLBWrftTeFuhZIVV+JHDnJ4QpOcVKRz
-	 1HsFQ9Rh0E0xNlr/q/CZ4tOFwe08AGSC+KV+VIOCxBPzvt9vkG4PoAH6Xoh3xdAEX7
-	 YKGTy4GOiP2iw==
-From: Chao Yu <chao@kernel.org>
-To: Zorro Lang <zlang@kernel.org>,
-	fstests@vger.kernel.org
-Cc: jaegeuk@kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net,
-	Chao Yu <chao@kernel.org>
-Subject: [PATCH 3/3] common/f2fs: introduce _require_inject_f2fs_command()
-Date: Thu,  9 Oct 2025 16:50:43 +0800
-Message-Id: <20251009085043.16910-3-chao@kernel.org>
-X-Mailer: git-send-email 2.40.1
-In-Reply-To: <20251009085043.16910-1-chao@kernel.org>
-References: <20251009085043.16910-1-chao@kernel.org>
+	dkim=pass (1024-bit key) header.d=synology.com header.i=@synology.com header.b="NtaBS8Bp"
+From: ethanwu <ethanwu@synology.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=synology.com; s=123;
+	t=1760002299; bh=JioEsW4Ahw1bsNv4Qggu+h+dmUhXBrPXrXh9I+wL6Kc=;
+	h=From:To:Cc:Subject:Date;
+	b=NtaBS8Bpy4XRPKapQMP3HBYDwhZ2JrEgG1peYvOjmcNOOgEhbwiYv4mAYH2ajE0mO
+	 0hGvlvFubYjq+2HePrG4I8ttwILud4k3qxm4p6a+fekV1f4EXiaSLZlRJDUvWMmpr+
+	 0olE+fdyWV/FRYjVembj6tuVFCAMWcHhu6iiK+GU=
+To: fstests@vger.kernel.org
+Cc: zlang@redhat.com,
+	ceph-devel@vger.kernel.org,
+	Slava.Dubeyko@ibm.com,
+	ethan198912@gmail.com,
+	ethanwu <ethanwu@synology.com>
+Subject: [PATCH v3] ceph/006: test snapshot data integrity after punch hole operations
+Date: Thu,  9 Oct 2025 17:31:29 +0800
+Message-ID: <20251009093129.2437815-1-ethanwu@synology.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,124 +38,194 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Synology-MCP-Status: no
+X-Synology-Spam-Status: score=0, required 6, WHITELIST_FROM_ADDRESS 0
+X-Synology-Spam-Flag: no
+X-Synology-Virus-Status: no
+Content-Type: text/plain
 
-Introduce _require_inject_f2fs_command() to check whether inject.f2fs
-supports specific metaarea and member parameters.
+Add test to verify that Ceph snapshots preserve original file data
+when the live file is modified with punch hole operations. The test
+creates a file, takes a snapshot, punches multiple holes in the
+original file, then verifies the snapshot data remains unchanged.
 
-Meanwhile, let's check inject.f2fs requirement inside
-_require_inject_f2fs_command() for cleanup.
-
-Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-Signed-off-by: Chao Yu <chao@kernel.org>
+Signed-off-by: ethanwu <ethanwu@synology.com>
 ---
- common/f2fs    | 27 +++++++++++++++++++++++++++
- tests/f2fs/009 |  2 +-
- tests/f2fs/012 |  2 +-
- tests/f2fs/019 |  2 +-
- tests/f2fs/020 |  2 +-
- tests/f2fs/022 |  2 +-
- 6 files changed, 32 insertions(+), 5 deletions(-)
+ v1->v2: previous version is 'ceph/006: test snapshot data integrity
+ after punch hole'.
+    1. move it to generic and add _require_snapshot check.
+    2. modify punch hole offset/len to be 64K aligned
+ v2->v3:
+    1. move test back to ceph specific since it uses ceph snapshot API.
+    2. support custom snapdirname mount option.
+    3. add _ceph_remove_snapshot and _ceph_create_snapshot functions.
 
-diff --git a/common/f2fs b/common/f2fs
-index 4d0d688b..82d3102e 100644
---- a/common/f2fs
-+++ b/common/f2fs
-@@ -69,3 +69,30 @@ _check_f2fs_filesystem()
- 
-     return 0
+---
+ common/ceph        | 76 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ceph/006     | 58 +++++++++++++++++++++++++++++++++++
+ tests/ceph/006.out |  2 ++
+ 3 files changed, 136 insertions(+)
+ create mode 100755 tests/ceph/006
+ create mode 100644 tests/ceph/006.out
+
+diff --git a/common/ceph b/common/ceph
+index df7a6814..6a19527e 100644
+--- a/common/ceph
++++ b/common/ceph
+@@ -38,3 +38,79 @@ _ceph_get_client_id()
+ {
+ 	$GETFATTR_PROG --only-values -n "ceph.client_id" $TEST_DIR 2>/dev/null
  }
 +
-+# check that inject.f2fs supports to inject specific field in specific meta area
-+_require_inject_f2fs_command()
++# Get the snapshot directory name from mount options
++# Defaults to ".snap" if snapdirname option is not set
++_ceph_get_snapdirname()
 +{
-+	_require_command "$F2FS_INJECT_PROG" inject.f2fs
++	local mnt_point=$1
++	local snapdirname
 +
-+	if [ $# -ne 2 ]; then
-+		echo "Usage: _require_inject_f2fs_command metaarea member" 1>&2
-+		_exit 1
++	# Extract snapdirname from mount options
++	snapdirname=$(findmnt -n -o OPTIONS "$mnt_point" | grep -o 'snapdirname=[^,]*' | cut -d'=' -f2)
++
++	# Default to .snap if not set
++	if [ -z "$snapdirname" ]; then
++		echo ".snap"
++	else
++		echo "$snapdirname"
 +	fi
-+	metaarea=$1
-+	member=$2
-+
-+	case $metaarea in
-+	sb|cp|nat|sit)
-+		val=0
-+		;;
-+	ssa|node|dent)
-+		;;
-+	*)
-+		_notrun "unsupport metaarea: $metaarea"
-+		;;
-+	esac
-+
-+	$F2FS_INJECT_PROG "--$metaarea" "$val" "-h" | grep "$member:" > /dev/null || \
-+		_notrun "--$metaarea --mb $member support is missing"
 +}
-diff --git a/tests/f2fs/009 b/tests/f2fs/009
-index 7333d484..4c179f2d 100755
---- a/tests/f2fs/009
-+++ b/tests/f2fs/009
-@@ -12,7 +12,7 @@
- _begin_fstest auto quick
- 
- _require_scratch
--_require_command "$F2FS_INJECT_PROG" inject.f2fs
-+_require_inject_f2fs_command node i_links
- _require_command "$(type -P socket)" socket
- 
- _fixed_by_git_commit f2fs-tools 958cd6e \
-diff --git a/tests/f2fs/012 b/tests/f2fs/012
-index 7438d9ce..53d54bf6 100755
---- a/tests/f2fs/012
-+++ b/tests/f2fs/012
-@@ -20,7 +20,7 @@ _fixed_by_kernel_commit 91b587ba79e1 \
- export LC_ALL=C.UTF-8
- _require_scratch_nocheck
- _require_command "$F2FS_IO_PROG" f2fs_io
--_require_command "$F2FS_INJECT_PROG" inject.f2fs
-+_require_inject_f2fs_command dent d_hash
- 
- #check whether f2fs supports "lookup_mode=x" mount option
- mntopt=""
-diff --git a/tests/f2fs/019 b/tests/f2fs/019
-index 2307bd96..a6e6e38c 100755
---- a/tests/f2fs/019
-+++ b/tests/f2fs/019
-@@ -18,7 +18,7 @@ _fixed_by_kernel_commit 77de19b6867f \
- 	"f2fs: fix to avoid out-of-boundary access in dnode page"
- 
- _require_scratch_nocheck
--_require_command "$F2FS_INJECT_PROG" inject.f2fs
-+_require_inject_f2fs_command node addr
- 
- # remove all mkfs options to avoid layout change of on-disk inode
- export MKFS_OPTIONS=""
-diff --git a/tests/f2fs/020 b/tests/f2fs/020
-index 38bc6582..a6933134 100755
---- a/tests/f2fs/020
-+++ b/tests/f2fs/020
-@@ -20,7 +20,7 @@ _fixed_by_kernel_commit 061cf3a84bde \
- 	"f2fs: fix to do sanity check on ino and xnid"
- 
- _require_scratch_nocheck
--_require_command "$F2FS_INJECT_PROG" inject.f2fs
-+_require_inject_f2fs_command node i_xattr_nid
- _require_attrs user
- 
- # remove all mkfs options to avoid layout change of on-disk inode
-diff --git a/tests/f2fs/022 b/tests/f2fs/022
-index ed3b4f2b..48a8386b 100755
---- a/tests/f2fs/022
-+++ b/tests/f2fs/022
-@@ -19,7 +19,7 @@ _fixed_by_kernel_commit xxxxxxxxxxxx \
- 	"f2fs: fix to do sanity check on node footer for non inode dnode"
- 
- _require_scratch_nocheck
--_require_command "$F2FS_INJECT_PROG" inject.f2fs
-+_require_inject_f2fs_command node i_nid
- 
- # remove all mkfs options to avoid layout change of on-disk inode
- export MKFS_OPTIONS=""
++
++# Create a CephFS snapshot
++# _ceph_create_snapshot <directory_path> <snapshot_name>
++# Creates a snapshot under <directory_path>/.snap/<snapshot_name>
++# or <directory_path>/<custom_snapdir>/<snapshot_name> if snapdirname is set
++_ceph_create_snapshot()
++{
++	local dir_path=$1
++	local snap_name=$2
++	local snapdirname
++	local snapdir
++	local mnt_point
++
++	if [ -z "$dir_path" ] || [ -z "$snap_name" ]; then
++		echo "Usage: _ceph_create_snapshot <directory_path> <snapshot_name>"
++		return 1
++	fi
++
++	# Find the mount point for this directory
++	mnt_point=$(df -P "$dir_path" | tail -1 | awk '{print $NF}')
++	snapdirname=$(_ceph_get_snapdirname "$mnt_point")
++	snapdir="$dir_path/$snapdirname/$snap_name"
++
++	mkdir "$snapdir" || return 1
++	echo "$snapdir"
++}
++
++# Remove a CephFS snapshot
++# _ceph_remove_snapshot <directory_path> <snapshot_name>
++_ceph_remove_snapshot()
++{
++	local dir_path=$1
++	local snap_name=$2
++	local snapdirname
++	local snapdir
++	local mnt_point
++
++	if [ -z "$dir_path" ] || [ -z "$snap_name" ]; then
++		echo "Usage: _ceph_remove_snapshot <directory_path> <snapshot_name>"
++		return 1
++	fi
++
++	# Find the mount point for this directory
++	mnt_point=$(df -P "$dir_path" | tail -1 | awk '{print $NF}')
++	snapdirname=$(_ceph_get_snapdirname "$mnt_point")
++	snapdir="$dir_path/$snapdirname/$snap_name"
++
++	rmdir "$snapdir" 2>/dev/null
++}
++
++# this test requires ceph snapshot support
++_require_ceph_snapshot()
++{
++	local snapdirname=$(_ceph_get_snapdirname "$TEST_DIR")
++	local test_snapdir="$TEST_DIR/$snapdirname/test_snap_$$"
++	mkdir "$test_snapdir" 2>/dev/null || _notrun "Ceph snapshots not supported (requires fs flag 'allow_snaps' and client auth capability 'snap')"
++	rmdir "$test_snapdir"
++}
+diff --git a/tests/ceph/006 b/tests/ceph/006
+new file mode 100755
+index 00000000..a5af6ca3
+--- /dev/null
++++ b/tests/ceph/006
+@@ -0,0 +1,58 @@
++#!/bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2025 Synology All Rights Reserved.
++#
++# FS QA Test No. ceph/006
++#
++# Test that snapshot data remains intact after punch hole operations
++# on the original file.
++#
++. ./common/preamble
++_begin_fstest auto quick snapshot
++
++. common/ceph
++
++_require_test
++_require_xfs_io_command "pwrite"
++_require_xfs_io_command "fpunch"
++_require_ceph_snapshot
++_exclude_test_mount_option "test_dummy_encryption"
++
++# TODO: commit is not merged yet. Update with final commit SHA once merged.
++_fixed_by_kernel_commit 1b7b474b3a78 \
++	"ceph: fix snapshot context missing in ceph_zero_partial_object"
++
++workdir=$TEST_DIR/test-$seq
++_ceph_remove_snapshot $workdir snap1
++rm -rf $workdir
++mkdir $workdir
++
++$XFS_IO_PROG -f -c "pwrite -S 0xab 0 1048576" $workdir/foo > /dev/null
++
++snapdir=$(_ceph_create_snapshot $workdir snap1)
++
++original_md5=$(md5sum $snapdir/foo | cut -d' ' -f1)
++
++$XFS_IO_PROG -c "fpunch 0 65536" $workdir/foo
++$XFS_IO_PROG -c "fpunch 131072 65536" $workdir/foo
++$XFS_IO_PROG -c "fpunch 262144 65536" $workdir/foo
++$XFS_IO_PROG -c "fpunch 393216 65536" $workdir/foo
++
++# Make sure we don't read from cache
++echo 3 > /proc/sys/vm/drop_caches
++
++snapshot_md5=$(md5sum $snapdir/foo | cut -d' ' -f1)
++
++if [ "$original_md5" != "$snapshot_md5" ]; then
++    echo "FAIL: Snapshot data changed after punch hole operations"
++    echo "Original md5sum: $original_md5"
++    echo "Snapshot md5sum: $snapshot_md5"
++fi
++
++_ceph_remove_snapshot $workdir snap1
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ceph/006.out b/tests/ceph/006.out
+new file mode 100644
+index 00000000..675c1b7c
+--- /dev/null
++++ b/tests/ceph/006.out
+@@ -0,0 +1,2 @@
++QA output created by 006
++Silence is golden
 -- 
-2.40.1
+2.43.0
 
+
+Disclaimer: The contents of this e-mail message and any attachments are confidential and are intended solely for addressee. The information may also be legally privileged. This transmission is sent in trust, for the sole purpose of delivery to the intended recipient. If you have received this transmission in error, any use, reproduction or dissemination of this transmission is strictly prohibited. If you are not the intended recipient, please immediately notify the sender by reply e-mail or phone and delete this message and its attachments, if any.
