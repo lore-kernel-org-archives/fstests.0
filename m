@@ -1,43 +1,81 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 860D435957;
-	Fri, 10 Oct 2025 05:17:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 543F31E1A17
+	for <fstests@vger.kernel.org>; Fri, 10 Oct 2025 09:30:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760073446; cv=none; b=H6T9YLL8czCBXcC4Af2M1vIV1yKtObxufDdxFI5+IjZqBr3U0aChHgigH8hpO0/NLzrI+fEzGar0xhwNf0wDG6/zTgLhW1gJHS8SH2cFFnfq9AwdQtWjB/9bh1zjiiJq+C6NKeUOHzdEXTPJS9pfGkT5eRn9mhjpggwRbEBP1ME=
+	t=1760088639; cv=none; b=G4YEIgycFcvXwnP8HO5fviBRUKEnfcfcL0ytOVz/aPvWIFfkHym4AorLICXgp9BYeZlE6xjc+aR2+uEFL0vTJCBPSJY10qTOkZV70TeolEpNO+NaJ/vKDh4ffcVL108zmolCI1ZGJq2qOcL1F2SWwROw/JcMK4x/jYOijimARtA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760073446; c=relaxed/simple;
-	bh=9Vh8lk+lR1y93KfcHP+uWP8NRG89UN/phcU1DDGze7E=;
+	s=arc-20240116; t=1760088639; c=relaxed/simple;
+	bh=Mj1VFJrp5c9ZO6C9l+r3P2v9gziELaHnsFG5WfCZSmg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Td9ZdVT7Jz24zmK/OfxlNN1rs2AG+owEP7Gj6vBl474r2z/IMxPaX92HMnd1R/RdXPkZuDusQFo4gew/vc55NyMmPksDLZ5et9/+0OPPMzM0DKXMohAosFvRYaEANq5/B7Rf4pEQwyetxBD1zY+WjUJuNQNf4uiSjovY/bdLiqQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=MP7wBmKH; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=sEToEg4uM2kqB6vBDd4kvo8dMs22XUGuKEIJ69VLtyN4Sfbhhepmd+3WmbrsCgJJXB3dtBNVXeBV8idd/ZvBg1crjhyTk1iGk4nxIRfap/qc/B4bcAkufkbR/aHWXboAVexqDPPFb4cqJN6N/Gc6cWnldOFjSVm5LfCXQbGaa6M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=eHkhATlP; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="MP7wBmKH"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=abbETGVm6GnVYpDK0/3pKaYOuRq5SCQFS58nsHOJFNs=; b=MP7wBmKHs5T/KEUepU65w9V1yu
-	z1rnXSDjgCVeQ0R1Dn4K5ybGyGKIrQL/RaUCy9U3N0sImIv3F32qaqrQ6rhSMN/Q4oHonr9I6es37
-	Z06i7EUG03ABQfISSWZfG1/9i1VH7lUzGFfYbkdB1fpnxc5c2cYYuaaiGr/noz9mSQl7Qo8im0aEG
-	37F8XKwQeTbiCIgcN0teS19u5O1+8ORAeafD5DOaafXnfhzymd5vRfD5Bx4U2VM/NJszByuHBo1Pw
-	66pA7O7iRow9eeHubMchcGjwfnJfK2V8zwyMtU71mtcnnLRH+RyoIimNHLwXKfOijd+7s63Texc/m
-	7Xr8vI9Q==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1v75VH-00000007hTE-1OBD;
-	Fri, 10 Oct 2025 05:17:19 +0000
-Date: Thu, 9 Oct 2025 22:17:19 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	"Darrick J. Wong" <djwong@kernel.org>
-Subject: Re: mkfs.xfs "concurrency" change concerns
-Message-ID: <aOiW3_Z7e3vtJ2oe@infradead.org>
-References: <84c8a5e5-938d-4745-996d-4237009c9cc5@sandeen.net>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="eHkhATlP"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1760088635;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=m19Suyk+a/n7mC2eYJunRdPA51fybU8+8EZ/+1nO9VI=;
+	b=eHkhATlPwYPcw6efcNA4DM/a3kid8xBATl7Yvjvk14DEbcZU+JHJujXLTyLtWHhlVulS6g
+	lkHS+Ck3Hrz+6HAHpc5BxSihh147RZuQB4b+yKDZNz6B8OZkPynmIu+6ndBQwOOoFreykt
+	E7nI61ahO9jcd2KkdFO8+2yXZh/xF+k=
+Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com
+ [209.85.128.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-194--mY_nnyZN2ys5FXTwGBetA-1; Fri, 10 Oct 2025 05:30:33 -0400
+X-MC-Unique: -mY_nnyZN2ys5FXTwGBetA-1
+X-Mimecast-MFC-AGG-ID: -mY_nnyZN2ys5FXTwGBetA_1760088632
+Received: by mail-wm1-f72.google.com with SMTP id 5b1f17b1804b1-46e3e177893so11477045e9.2
+        for <fstests@vger.kernel.org>; Fri, 10 Oct 2025 02:30:33 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1760088632; x=1760693432;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=m19Suyk+a/n7mC2eYJunRdPA51fybU8+8EZ/+1nO9VI=;
+        b=a6X8Q565J46vEFFms5eSlbGosQPXBu7gAUvH4m6TURkxEWBnImkyyHWGtsmJg1Eczi
+         FAwib3CPnTbKoSphvDb+ef/ukP9Sw8W8Ro90AtSf7v5fdGAXcZ4QFJTfZ7RTu4BV/ZvB
+         TU68axqmGs6EDRRSbGexsIR8Vr2E0AgiYJzKkl6GhKu0NtrFhRm+kR/Ji/MTFaYUnVW4
+         ekxbenZ8kbjUyV6DXgFSoT00uCTV8XARscVyEzJLoc6mYWdUs41yQLm+NjPXRMt/oyzR
+         D4X3CLryJEQLtYLAambeObjCCcl58ZtLJO8O+zj5EgzJYDucwbFEhK6PojsHGpKiNu1L
+         d/DQ==
+X-Forwarded-Encrypted: i=1; AJvYcCW8vO6E7Hxlfe9MECMn3JEuCePqCHQZrGKva61Via06IMWC1BRwv6nM9caW8bVHyjGsjftt4ZCX@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyl9ddBtPTLxkPHZN9sT7y1T00zoBfy6QwxeoogYg8qD5j2fLRl
+	UWSvNijiVaujjxkwtaSRzJvTN7uE71TGtGN2EiOlp8Pwr5bZjuTHwV8H1VrBpQA5F2CEw2rYkXo
+	6+SG68ekIT/fv4r0bXBQvbqmC0LE/SsBZdljvPo1HRPc3aUWTc4OrdYXX/Q==
+X-Gm-Gg: ASbGncuoFO/92bISZ2qea2boUlqrP0ek1xb6PWdG3G3crISYZPDNo1ojMpfUtXHCPYh
+	vq9z1MKcSEbJ6Nh5ROfMUsqqMi/G0nZhxD7EXHkiF19/rYNERaAcMtfJPQREmRMDA0KJn5mu9rt
+	XuugWjQuUu+4tJocKd7YcVj2BMYOn8pysZqLyphGMn2P06enSg43EMAsx0m+W4axx3+NzpZVXGy
+	BnP8A0qImGr6goIMMvI9XMasoQGZg+tagIV9DsYlS2dX7pc+mcZ/hG9lXvCVJ86d+7JRggNOn35
+	GoyNvFFkjRELBL9tGBWJ8LJAXL9Q+ulycxMHAy8hbCX0lNEAVEPy4QoXa32s
+X-Received: by 2002:a05:600c:8b22:b0:46e:4882:94c7 with SMTP id 5b1f17b1804b1-46fa9b02c6amr75031605e9.28.1760088632090;
+        Fri, 10 Oct 2025 02:30:32 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEValMKthgp8I9VN0cd5Fx0yrOVtvxfOWumQ9lQuIn4WkPIIugbGuRT1eABE90tSGUAw2wzQw==
+X-Received: by 2002:a05:600c:8b22:b0:46e:4882:94c7 with SMTP id 5b1f17b1804b1-46fa9b02c6amr75031225e9.28.1760088631453;
+        Fri, 10 Oct 2025 02:30:31 -0700 (PDT)
+Received: from thinky (ip-217-030-074-039.aim-net.cz. [217.30.74.39])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-46fb482ba41sm39161405e9.4.2025.10.10.02.30.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 10 Oct 2025 02:30:31 -0700 (PDT)
+Date: Fri, 10 Oct 2025 11:30:30 +0200
+From: Andrey Albershteyn <aalbersh@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, 
+	linux-fsdevel@vger.kernel.org, linux-xfs@vger.kernel.org, 
+	Andrey Albershteyn <aalbersh@kernel.org>
+Subject: Re: [PATCH v4 1/3] file_attr: introduce program to set/get fsxattr
+Message-ID: <g25qhhy73arfepcubtsvrhfc3e3e2dktoludzpfwqxvkcphkxf@4n5s4jpvxmpr>
+References: <20251003-xattrat-syscall-v4-0-1cfe6411c05f@kernel.org>
+ <20251003-xattrat-syscall-v4-1-1cfe6411c05f@kernel.org>
+ <20251005103656.5qu3lmjvlcjkwjx4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <7mytyiatnhgwplgda3cmiqq3hb7z6ulwgvwbkueb5dm2sdxwlg@ijti4d7vgrck>
+ <20251009185630.GA6178@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -46,17 +84,178 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <84c8a5e5-938d-4745-996d-4237009c9cc5@sandeen.net>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <20251009185630.GA6178@frogsfrogsfrogs>
 
-On Thu, Oct 09, 2025 at 03:13:47PM -0500, Eric Sandeen wrote:
-> Specifically, xfs/078, xfs/216, and xfs/217 are failing for us
-> on various machines with between 8 and 128 CPUS, due to the
-> fundamental change in geometry that results from the new
-> concurrency behavior, which makes any consistent golden
-> output that involves geometry details quite difficult.
+On 2025-10-09 11:56:30, Darrick J. Wong wrote:
+> On Mon, Oct 06, 2025 at 11:37:53AM +0200, Andrey Albershteyn wrote:
+> > On 2025-10-05 18:36:56, Zorro Lang wrote:
+> > > On Fri, Oct 03, 2025 at 11:32:44AM +0200, Andrey Albershteyn wrote:
+> > > > This programs uses newly introduced file_getattr and file_setattr
+> > > > syscalls. This program is partially a test of invalid options. This will
+> > > > be used further in the test.
+> > > > 
+> > > > Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
+> > > > ---
+> > > 
+> > > [snap]
+> > > 
+> > > > +	if (!path1 && optind < argc)
+> > > > +		path1 = argv[optind++];
+> > > > +	if (!path2 && optind < argc)
+> > > > +		path2 = argv[optind++];
+> > > > +
+> > > > +	if (at_fdcwd) {
+> > > > +		fd = AT_FDCWD;
+> > > > +		path = path1;
+> > > > +	} else if (!path2) {
+> > > > +		error = stat(path1, &status);
+> > > > +		if (error) {
+> > > > +			fprintf(stderr,
+> > > > +"Can not get file status of %s: %s\n", path1, strerror(errno));
+> > > > +			return error;
+> > > > +		}
+> > > > +
+> > > > +		if (SPECIAL_FILE(status.st_mode)) {
+> > > > +			fprintf(stderr,
+> > > > +"Can not open special file %s without parent dir: %s\n", path1, strerror(errno));
+> > > > +			return errno;
+> > > > +		}
+> > > > +
+> > > > +		fd = open(path1, O_RDONLY);
+> > > > +		if (fd == -1) {
+> > > > +			fprintf(stderr, "Can not open %s: %s\n", path1,
+> > > > +					strerror(errno));
+> > > > +			return errno;
+> > > > +		}
+> > > > +	} else {
+> > > > +		fd = open(path1, O_RDONLY);
+> > > > +		if (fd == -1) {
+> > > > +			fprintf(stderr, "Can not open %s: %s\n", path1,
+> > > > +					strerror(errno));
+> > > > +			return errno;
+> > > > +		}
+> > > > +		path = path2;
+> > > > +	}
+> > > > +
+> > > > +	if (!path)
+> > > > +		at_flags |= AT_EMPTY_PATH;
+> > > > +
+> > > > +	error = file_getattr(fd, path, &fsx, fa_size,
+> > > > +			at_flags);
+> > > > +	if (error) {
+> > > > +		fprintf(stderr, "Can not get fsxattr on %s: %s\n", path,
+> > > > +				strerror(errno));
+> > > > +		return error;
+> > > > +	}
+> > > 
+> > > We should have a _require_* helper to _notrun your generic and xfs test cases,
+> > > when system doesn't support the file_getattr/setattr feature. Or we always hit
+> > > something test errors like below on old system:
+> > > 
+> > >   +Can not get fsxattr on ./fifo: Operation not supported
+> > > 
+> > > Maybe check if the errno is "Operation not supported", or any better idea?
+> > 
+> > There's build system check for file_getattr/setattr syscalls, so if
+> > they aren't in the kernel file_attr will not compile.
+> > 
+> > Then there's _require_test_program "file_attr" in the tests, so
+> > these will not run if kernel doesn't have these syscalls.
+> > 
+> > However, for XFS for example, there's [1] and [2] which are
+> > necessary for these tests to pass. 
+> > 
+> > So, there a few v6.17 kernels which would still run these tests but
+> > fail for XFS (and still fails as these commits are in for-next now).
+> > 
+> > For other filesystems generic/ will also fail on newer kernels as it
+> > requires similar modifications as in XFS to support changing file
+> > attributes on special files.
+> > 
+> > I suppose it make sense for this test to fail for other fs which
+> > don't implement changing file attributes on special files.
+> > Otherwise, this test could be split into generic/ (file_get/setattr
+> > on regular files) and xfs/ (file_get/setattr on special files).
+> > 
+> > What do you think?
+> 
+> generic/772 (and xfs/648) probably each ought to be split into two
+> pieces -- one for testing file_[gs]etattr on regular/directory files;
+> and a second one for the special files.  All four of them ought to
+> _notrun if the kernel doesn't support the intended target.
 
-FYI, the zoned XFS CI has seen these fail as well, and I've never
-been able to reproduce it locally.  The CI runs on a fairly beefy
-box so I suspect it could be correlated.
+I see, yeah that's what I thought of, I will split them and send new
+patchset soon
+
+> 
+> Right now I have injected into both:
+> 
+> mkfifo $projectdir/fifo
+> 
+> $here/src/file_attr --get $projectdir ./fifo &>/dev/null || \
+> 	_notrun "file_getattr not supported on $FSTYP"
+
+Thanks! Looks like a good check to use
+
+> 
+> to make the failures go away on 6.17.
+> 
+> --D
+> 
+> > [1]: https://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git/commit/?h=for-next&id=8a221004fe5288b66503699a329a6b623be13f91
+> > [2]: https://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git/commit/?h=for-next&id=0239bd9fa445a21def88f7e76fe6e0414b2a4da0
+> > 
+> > > 
+> > > 
+> > > Thanks,
+> > > Zorro
+> > > 
+> > > > +	if (action) {
+> > > > +		fsx.fa_xflags |= (fa_xflags | unknwon_fa_flag);
+> > > > +
+> > > > +		error = file_setattr(fd, path, &fsx, fa_size,
+> > > > +				at_flags);
+> > > > +		if (error) {
+> > > > +			fprintf(stderr, "Can not set fsxattr on %s: %s\n", path,
+> > > > +					strerror(errno));
+> > > > +			return error;
+> > > > +		}
+> > > > +	} else {
+> > > > +		if (path2)
+> > > > +			print_xflags(fsx.fa_xflags, 0, 1, path, 0, 1);
+> > > > +		else
+> > > > +			print_xflags(fsx.fa_xflags, 0, 1, path1, 0, 1);
+> > > > +	}
+> > > > +
+> > > > +	return error;
+> > > > +
+> > > > +usage:
+> > > > +	printf("Usage: %s [options]\n", argv[0]);
+> > > > +	printf("Options:\n");
+> > > > +	printf("\t--get, -g\t\tget filesystem inode attributes\n");
+> > > > +	printf("\t--set, -s\t\tset filesystem inode attributes\n");
+> > > > +	printf("\t--at-cwd, -a\t\topen file at current working directory\n");
+> > > > +	printf("\t--no-follow, -n\t\tdon't follow symlinks\n");
+> > > > +	printf("\t--set-nodump, -d\t\tset FS_XFLAG_NODUMP on an inode\n");
+> > > > +	printf("\t--invalid-at, -i\t\tUse invalid AT_* flag\n");
+> > > > +	printf("\t--too-big-arg, -b\t\tSet fsxattr size bigger than PAGE_SIZE\n");
+> > > > +	printf("\t--too-small-arg, -m\t\tSet fsxattr size to 19 bytes\n");
+> > > > +	printf("\t--new-fsx-flag, -x\t\tUse unknown fa_flags flag\n");
+> > > > +
+> > > > +	return 1;
+> > > > +}
+> > > > 
+> > > > -- 
+> > > > 2.50.1
+> > > > 
+> > > 
+> > 
+> > -- 
+> > - Andrey
+> > 
+> > 
+> 
+
+-- 
+- Andrey
 
