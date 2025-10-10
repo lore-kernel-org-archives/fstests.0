@@ -1,83 +1,39 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C6F22F9D9E
-	for <fstests@vger.kernel.org>; Fri, 10 Oct 2025 15:30:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA20B1C695;
+	Fri, 10 Oct 2025 19:17:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760110260; cv=none; b=WogXuffVmllvkjGz2SzowLBuruFc5bSzwbirQLrHm4JERcZ+waJUSglacl9zTJQznr9mofcWwUWUNfGjC9cYNNTHPsBjGzN7Y5wy7Lf8l99H5Fk6wHiDTBu12Xks+eSNXO1HZRCjZygzCkQyAcXyW7OoET6ysrrGxYpq7HXKt7g=
+	t=1760123834; cv=none; b=HwE9Wq3D9lPbiAYc8gL7PtZZTzg2oQxXn/jfjieUIft3bUL3bytDOF+/47Yb+4dpkSY/3GjmryUCtdH0Pa8meVfDg9QbpdjJHl6IpQoZsBsTfDYEeZJQccHCNFyJfWSDCZhzyWKDv+mtC+080dS3O1m21xIcymv1rHjQhSWoYfE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760110260; c=relaxed/simple;
-	bh=/03Pw5upvDM5utHp0VziZGnocQcEhzmDgUxgcESsugw=;
+	s=arc-20240116; t=1760123834; c=relaxed/simple;
+	bh=PzknFBQw3perTgK6dg6uLwLby5KLLkm09XKTdUT4Yjw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gyP+vZqIG4rUqXXYL7JSK6txxz3FGoT3CaCnb5sfQeg5PeNxSpdXrrBILsJ+n8e1ieJgax+LPOhCLZo8a6hXpJjA6r7vOaDwbSu5PZbxGnm9dBJAp8RbwsnGcW43DAwle8UUDW+IztHpmI5Nb3z7UiGkjLXvxje5zT+DkN/3b5I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Za+WjAO5; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=CKFKWt+PQ3CnaXXU6oDstZR8DvLxampABTv5m748KyAtfIdSxexO3YPp35OGiLBOaaRRl1yI44pHWTl4xetBb8UlE3n/epNE4mcFMcMqPcABwJQnBIBC0KCUZBfdGlPZMMqqGIBa5t38/EC/nJidMgUePH2kcjQSVyAoWeu51OM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OGRoH7Xm; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Za+WjAO5"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1760110257;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=toyaPl0BwPmMTea5F2bVNCmB2GMR7wLyTYNGYyEE7m0=;
-	b=Za+WjAO5/3I1jFKVzDGaYr0rAhrhsArTGse2ZH0CUT1LCdXQ5/dRUklpcG9WyTsC2FMO0B
-	P9mI4Lge075/+3MnJVxryzolYuVzqW/35kzs0St0FQor4UJvWUnXWeDSlktrn8OXox7SKW
-	GIAclg90Gi4728MdeE+1hqS789Ja8ZU=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-407-lofwsYICMIaOYfqns2zyUQ-1; Fri, 10 Oct 2025 11:30:56 -0400
-X-MC-Unique: lofwsYICMIaOYfqns2zyUQ-1
-X-Mimecast-MFC-AGG-ID: lofwsYICMIaOYfqns2zyUQ_1760110254
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-33826e101ecso8230956a91.1
-        for <fstests@vger.kernel.org>; Fri, 10 Oct 2025 08:30:55 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1760110254; x=1760715054;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=toyaPl0BwPmMTea5F2bVNCmB2GMR7wLyTYNGYyEE7m0=;
-        b=Nc9D/C9HPbsy97uKZa2M8e+wgmT8heSCN/YlNv+zWwKAc9Z4N5+BIPjRuvpTaADw93
-         tZjxNHI/fEZke9RaSIuPtg3Ks30+wF+OqPivEVvg5HiBw6tk1QwjotJAb3XZVXROK+PD
-         MrCrdXLDHGnIE24BqLqKosDlSMpm/5UVtrlz+aDg8xPr+dJkNRpNI5iD1WvoKn2VNG/O
-         VHYsRe8ONEXVRZKFQOZCfW9EUf7VF75VNwQPwyBYvl3d5Fk3EH42hBpgMso+gfTznWxe
-         +BAii+FLFYaK7ajjFkHgPOS5mVazr5N/z4BXIBk70HbZapFEzVW2JIkNPqTHLdBMnT9/
-         TvGA==
-X-Forwarded-Encrypted: i=1; AJvYcCVFJ6RnCEnV/t+WUh0pZ98mY20Gy/F6ipCx/OzXIh60+NBwxn0hvEQ5CdCER9NWh9xxz9LtN+bp@vger.kernel.org
-X-Gm-Message-State: AOJu0YxjsQRX1UK9p7cisz0tDc0796/k0iI+B1GS1GNBNbjwNOeJ7qhT
-	YrDaJ2/+rk6yy9bRDj+Z66MrGihrte8KhQJIo5ZCb3Esq1Xpm7CNFz7rgdzOxH6Va2R4C0dFF0M
-	Xx3NmcE6p5+Jj3a1B4rfbdDK44nVYX8HPlPrK/bwUFrYP4RndX2jC6LhDX6E=
-X-Gm-Gg: ASbGnctOKeWzyAkgkkIXljS7EynUqUjCYJwXRRh9gus3j0Z1BHnYW0JA8LJHCJTu/Iq
-	ecAhZ5/2M0WdPHn+HXDv+sSGAt8Pczv1UiqxUWVy7PK+CjNpoW+BbePCJ3nxPMnrOszC4MoWv/c
-	YiDb6ICMIXd4hr5Xt54w961EYUdkTXS1QHYGoIlSLsQ9XXvBNX095WU7VMz4awqnQXGit3ra6ss
-	SZMK2Z6l9bVNwsSExXr09Twyq+HsS0tXnpfoLbASC39xEcEmM5DzU0UFLhpD1GyJAFPfvjjv48v
-	w1bVbSQtZpfDeWMmc9Ulhz7z3rivOIKQmkXfoxzjvt7NV6N0OFiWtEHA4mK7sRBBSJlQWNo7SRz
-	rVsdc
-X-Received: by 2002:a17:90b:1a8b:b0:32e:2fa7:fe6b with SMTP id 98e67ed59e1d1-33b5171dc4bmr17090588a91.14.1760110253885;
-        Fri, 10 Oct 2025 08:30:53 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IE1f0AGOsJEpmCcJ38D9CxFjhHy8Xot8TOmTMK+pphk9BVjIZONuSrczqBgiHp9KjaWoWWqJg==
-X-Received: by 2002:a17:90b:1a8b:b0:32e:2fa7:fe6b with SMTP id 98e67ed59e1d1-33b5171dc4bmr17090474a91.14.1760110253113;
-        Fri, 10 Oct 2025 08:30:53 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-33b52a5656dsm4025456a91.11.2025.10.10.08.30.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 10 Oct 2025 08:30:52 -0700 (PDT)
-Date: Fri, 10 Oct 2025 23:30:47 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Andrey Albershteyn <aalbersh@redhat.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org, linux-xfs@vger.kernel.org,
-	Andrey Albershteyn <aalbersh@kernel.org>
-Subject: Re: [PATCH v4 1/3] file_attr: introduce program to set/get fsxattr
-Message-ID: <20251010153047.2abso45wwnkfeykz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20251003-xattrat-syscall-v4-0-1cfe6411c05f@kernel.org>
- <20251003-xattrat-syscall-v4-1-1cfe6411c05f@kernel.org>
- <20251005103656.5qu3lmjvlcjkwjx4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <7mytyiatnhgwplgda3cmiqq3hb7z6ulwgvwbkueb5dm2sdxwlg@ijti4d7vgrck>
- <20251009185630.GA6178@frogsfrogsfrogs>
- <g25qhhy73arfepcubtsvrhfc3e3e2dktoludzpfwqxvkcphkxf@4n5s4jpvxmpr>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OGRoH7Xm"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 54894C4CEF1;
+	Fri, 10 Oct 2025 19:17:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1760123834;
+	bh=PzknFBQw3perTgK6dg6uLwLby5KLLkm09XKTdUT4Yjw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=OGRoH7XmNqahA2QTYXuASvBVgAJDwshyqDJHHQortVTjZ1pz1NLw8+wgYqB5atpg9
+	 wOQkVXO8qzkqVn7xRGKX758Z5whVMpmojSFMyknmLstQ451mYCQLCc/R+1cF5X9bPp
+	 5xqtdFsbKGfFVz0qKu0ZwUykf/vL5HpU4XgVDVvqX7gjCgks2J57546k1lhRhGinyV
+	 pvx1xcTLydKjrqISGjMyL7T0q39xMeZ4XXhQOEb4zGzOw5opwJGV6bXywVTj0tiIwh
+	 6qom2HlXdRowVcLuQjUO0YU5th1KChOMsriVxFUC60/URWCAKRzVw/j1VcFTxKzdWY
+	 fkBX1VzV8g5Rw==
+Date: Fri, 10 Oct 2025 12:17:13 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: Re: mkfs.xfs "concurrency" change concerns
+Message-ID: <20251010191713.GE6188@frogsfrogsfrogs>
+References: <84c8a5e5-938d-4745-996d-4237009c9cc5@sandeen.net>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -86,192 +42,148 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <g25qhhy73arfepcubtsvrhfc3e3e2dktoludzpfwqxvkcphkxf@4n5s4jpvxmpr>
+In-Reply-To: <84c8a5e5-938d-4745-996d-4237009c9cc5@sandeen.net>
 
-On Fri, Oct 10, 2025 at 11:30:30AM +0200, Andrey Albershteyn wrote:
-> On 2025-10-09 11:56:30, Darrick J. Wong wrote:
-> > On Mon, Oct 06, 2025 at 11:37:53AM +0200, Andrey Albershteyn wrote:
-> > > On 2025-10-05 18:36:56, Zorro Lang wrote:
-> > > > On Fri, Oct 03, 2025 at 11:32:44AM +0200, Andrey Albershteyn wrote:
-> > > > > This programs uses newly introduced file_getattr and file_setattr
-> > > > > syscalls. This program is partially a test of invalid options. This will
-> > > > > be used further in the test.
-> > > > > 
-> > > > > Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
-> > > > > ---
-> > > > 
-> > > > [snap]
-> > > > 
-> > > > > +	if (!path1 && optind < argc)
-> > > > > +		path1 = argv[optind++];
-> > > > > +	if (!path2 && optind < argc)
-> > > > > +		path2 = argv[optind++];
-> > > > > +
-> > > > > +	if (at_fdcwd) {
-> > > > > +		fd = AT_FDCWD;
-> > > > > +		path = path1;
-> > > > > +	} else if (!path2) {
-> > > > > +		error = stat(path1, &status);
-> > > > > +		if (error) {
-> > > > > +			fprintf(stderr,
-> > > > > +"Can not get file status of %s: %s\n", path1, strerror(errno));
-> > > > > +			return error;
-> > > > > +		}
-> > > > > +
-> > > > > +		if (SPECIAL_FILE(status.st_mode)) {
-> > > > > +			fprintf(stderr,
-> > > > > +"Can not open special file %s without parent dir: %s\n", path1, strerror(errno));
-> > > > > +			return errno;
-> > > > > +		}
-> > > > > +
-> > > > > +		fd = open(path1, O_RDONLY);
-> > > > > +		if (fd == -1) {
-> > > > > +			fprintf(stderr, "Can not open %s: %s\n", path1,
-> > > > > +					strerror(errno));
-> > > > > +			return errno;
-> > > > > +		}
-> > > > > +	} else {
-> > > > > +		fd = open(path1, O_RDONLY);
-> > > > > +		if (fd == -1) {
-> > > > > +			fprintf(stderr, "Can not open %s: %s\n", path1,
-> > > > > +					strerror(errno));
-> > > > > +			return errno;
-> > > > > +		}
-> > > > > +		path = path2;
-> > > > > +	}
-> > > > > +
-> > > > > +	if (!path)
-> > > > > +		at_flags |= AT_EMPTY_PATH;
-> > > > > +
-> > > > > +	error = file_getattr(fd, path, &fsx, fa_size,
-> > > > > +			at_flags);
-> > > > > +	if (error) {
-> > > > > +		fprintf(stderr, "Can not get fsxattr on %s: %s\n", path,
-> > > > > +				strerror(errno));
-> > > > > +		return error;
-> > > > > +	}
-> > > > 
-> > > > We should have a _require_* helper to _notrun your generic and xfs test cases,
-> > > > when system doesn't support the file_getattr/setattr feature. Or we always hit
-> > > > something test errors like below on old system:
-> > > > 
-> > > >   +Can not get fsxattr on ./fifo: Operation not supported
-> > > > 
-> > > > Maybe check if the errno is "Operation not supported", or any better idea?
-> > > 
-> > > There's build system check for file_getattr/setattr syscalls, so if
-> > > they aren't in the kernel file_attr will not compile.
-> > > 
-> > > Then there's _require_test_program "file_attr" in the tests, so
-> > > these will not run if kernel doesn't have these syscalls.
-> > > 
-> > > However, for XFS for example, there's [1] and [2] which are
-> > > necessary for these tests to pass. 
-> > > 
-> > > So, there a few v6.17 kernels which would still run these tests but
-> > > fail for XFS (and still fails as these commits are in for-next now).
-> > > 
-> > > For other filesystems generic/ will also fail on newer kernels as it
-> > > requires similar modifications as in XFS to support changing file
-> > > attributes on special files.
-> > > 
-> > > I suppose it make sense for this test to fail for other fs which
-> > > don't implement changing file attributes on special files.
-> > > Otherwise, this test could be split into generic/ (file_get/setattr
-> > > on regular files) and xfs/ (file_get/setattr on special files).
-> > > 
-> > > What do you think?
-> > 
-> > generic/772 (and xfs/648) probably each ought to be split into two
-> > pieces -- one for testing file_[gs]etattr on regular/directory files;
-> > and a second one for the special files.  All four of them ought to
-> > _notrun if the kernel doesn't support the intended target.
+On Thu, Oct 09, 2025 at 03:13:47PM -0500, Eric Sandeen wrote:
+> Hey all -
 > 
-> I see, yeah that's what I thought of, I will split them and send new
-> patchset soon
-
-This patchset has been merged, as the feature has been merged, so let's
-have the coverage at first. Please feel free to change the cases base on
-the newest for-next branch.
-
+> this got long, so tl;dr:
 > 
-> > 
-> > Right now I have injected into both:
-> > 
-> > mkfifo $projectdir/fifo
-> > 
-> > $here/src/file_attr --get $projectdir ./fifo &>/dev/null || \
-> > 	_notrun "file_getattr not supported on $FSTYP"
+> 1) concurrency geometry breaks some xfstests for me
+> 2) concurrency behavior is not consistent w/ loopback vs. imagefile
+> 3) concurrency defaults to the mkfs machine not the mount machine
 > 
-> Thanks! Looks like a good check to use
-
-Yes, use you src/file_attr program in the _require_ helper, refer to
-_require_idmapped_mounts or _require_seek_data_hole or others.
-
-Thanks,
-Zorro
-
+> In detail:
 > 
-> > 
-> > to make the failures go away on 6.17.
-> > 
-> > --D
-> > 
-> > > [1]: https://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git/commit/?h=for-next&id=8a221004fe5288b66503699a329a6b623be13f91
-> > > [2]: https://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git/commit/?h=for-next&id=0239bd9fa445a21def88f7e76fe6e0414b2a4da0
-> > > 
-> > > > 
-> > > > 
-> > > > Thanks,
-> > > > Zorro
-> > > > 
-> > > > > +	if (action) {
-> > > > > +		fsx.fa_xflags |= (fa_xflags | unknwon_fa_flag);
-> > > > > +
-> > > > > +		error = file_setattr(fd, path, &fsx, fa_size,
-> > > > > +				at_flags);
-> > > > > +		if (error) {
-> > > > > +			fprintf(stderr, "Can not set fsxattr on %s: %s\n", path,
-> > > > > +					strerror(errno));
-> > > > > +			return error;
-> > > > > +		}
-> > > > > +	} else {
-> > > > > +		if (path2)
-> > > > > +			print_xflags(fsx.fa_xflags, 0, 1, path, 0, 1);
-> > > > > +		else
-> > > > > +			print_xflags(fsx.fa_xflags, 0, 1, path1, 0, 1);
-> > > > > +	}
-> > > > > +
-> > > > > +	return error;
-> > > > > +
-> > > > > +usage:
-> > > > > +	printf("Usage: %s [options]\n", argv[0]);
-> > > > > +	printf("Options:\n");
-> > > > > +	printf("\t--get, -g\t\tget filesystem inode attributes\n");
-> > > > > +	printf("\t--set, -s\t\tset filesystem inode attributes\n");
-> > > > > +	printf("\t--at-cwd, -a\t\topen file at current working directory\n");
-> > > > > +	printf("\t--no-follow, -n\t\tdon't follow symlinks\n");
-> > > > > +	printf("\t--set-nodump, -d\t\tset FS_XFLAG_NODUMP on an inode\n");
-> > > > > +	printf("\t--invalid-at, -i\t\tUse invalid AT_* flag\n");
-> > > > > +	printf("\t--too-big-arg, -b\t\tSet fsxattr size bigger than PAGE_SIZE\n");
-> > > > > +	printf("\t--too-small-arg, -m\t\tSet fsxattr size to 19 bytes\n");
-> > > > > +	printf("\t--new-fsx-flag, -x\t\tUse unknown fa_flags flag\n");
-> > > > > +
-> > > > > +	return 1;
-> > > > > +}
-> > > > > 
-> > > > > -- 
-> > > > > 2.50.1
-> > > > > 
-> > > > 
-> > > 
-> > > -- 
-> > > - Andrey
-> > > 
-> > > 
-> > 
+> So, I realize I'm late to the game here and didn't review the patches
+> before they went in, but it looks like the "concurrency" mkfs.xfs
+> arguments and defaults are breaking several xfstests.
 > 
-> -- 
-> - Andrey
+> 4738ff0 mkfs: allow sizing realtime allocation groups for concurrency
+> c02a1873 mkfs: allow sizing internal logs for concurrency
+> 9338bc8b mkfs: allow sizing allocation groups for concurrency
 > 
+> Specifically, xfs/078, xfs/216, and xfs/217 are failing for us
+> on various machines with between 8 and 128 CPUS, due to the
+> fundamental change in geometry that results from the new
+> concurrency behavior, which makes any consistent golden
+> output that involves geometry details quite difficult.
 
+Uggggh.  You're right, I see golden output changes in xfs/078 if I boost
+the number of VM CPUs past four:
+
+--- /run/fstests/bin/tests/xfs/078.out  2025-07-15 14:41:40.195202883 -0700
++++ /var/tmp/fstests/xfs/078.out.bad    2025-10-10 11:56:14.040263143 -0700
+@@ -188,6 +188,6 @@
+ *** mount loop filesystem
+ *** grow loop filesystem
+ xfs_growfs --BlockSize=4096 --Blocks=268435456
+-data blocks changed from 268435456 to 4194304001
++data blocks changed from 268435456 to 4194304000
+ *** unmount
+ *** all done
+
+Can this happen if RAID stripe parameters also get involved and change
+the AG count?  This test could be improved by parsing the block counts
+and using _within to get past those kinds of problems, if there's more
+than one way to make the golden output wrong despite correct operation.
+
+What do your xfs/21[67] failures look like?
+
+> One option might be to detect whether the "concurrency" args
+> exist in mkfs.xfs, and set that back to 4, which is probably likely
+> to more or less behave the old way, and match the current golden
+> output which was (usually) based on 4 AGs. But that might break
+> the purpose of some of the tests, if we're only validating behavior
+> when a specific set of arguments is applied.
+
+I think you're really asking to force the old behavior from before the
+concurrency options existed, but only if fstests is running.  Or maybe
+a little more than that; I'll get to that at the end.
+
+> (for 078, adding -d concurrency=4 seems to fix it. For  216 and 217
+> I think I needed -l concurrency=4, but this might depend on nr cpus.)
+> 
+> So, we could probably fix xfstests to make mkfs.xfs behave the old way,
+> with loss of coverage of behavior with current code defaults.
+
+Well yes, you'd be losing test coverage either for configurations that
+set concurrency options explicitly, or when the storage are
+nonrotational.
+
+> Other concerns, though - I see that we only do this if the storage
+> is nonrotational. But in testing, if you set up a loop device, the
+> loop dev is nonrotational, and gets the new concurrency behavior,
+> while doing a mkfs.xfs directly on the backing file doesn't:
+> 
+> # losetup /dev/loop4 testfile.img
+> 
+> # mkfs.xfs -f /dev/loop4 2>&1 | grep agcount
+> meta-data=/dev/loop4             isize=512    agcount=6, agsize=11184810 blks
+> 
+> # mkfs.xfs -f testfile.img 2>&1 | grep agcount
+> meta-data=testfile.img           isize=512    agcount=4, agsize=16777216 blks
+> 
+> so we get different behavior depending on how you access the image file.
+
+What kernel is this?  6.17 sets ROTATIONAL by default and clears it if
+the backing bdev (or the bdev backing the file) has ROTATIONAL set.
+That might be why you see the discrepancy.  I think that behavior has
+been in the kernel since ~6.11 or so.
+
+[Aside: Obviously, checking inode->i_sb->sb_bdev isn't sufficient for
+files on a multi-disk filesystem, but it's probably close enough here.]
+
+(But see below)
+
+> And speaking of image files, it's a pretty common use case to use mkfs.xfs
+> on image files for deployment elsewhere.  Maybe the good news, even if
+
+Yes, mkfs defaults to assuming rotational (and hence not computing a
+concurrency factor) if the BLKROTATIONAL query fails.  So that might
+be why you get 4 AGs on a regular file but 6 on a loop device pointing
+to the same file.
+
+> accidental, is that if you mkfs the file directly, you don't get system-
+> specific "concurrence" geometry. But I am concerned that there is no
+> guarantee that the machine performing mkfs is the machine that will mount
+> the filesystem, so this seems like a slightly dangerous assumption for 
+> default behavior.
+
+What I tell our internal customers is:
+
+1. Defer formatting until deployment whenever possible so that mkfs can
+optimize the filesystem for the storage and machine it actually gets.
+
+2. If you can't do that, then try to make the image creator machine
+match the deployment hardware as much as possible in terms of
+rotationality and CPU count.
+
+3. We shouldn't have a #3 because that's leaving performance on the
+table.
+
+They were very happy to see performance gains after adjusting their
+WOS generation scripts towards #1.
+
+But I think it's this #3 here that's causing the most concern for you?
+I suppose if you really don't know what the deployment hardware is going
+to look like then ... falling back to the default calculations (which
+are mostly for spinning-rust) at least is familiar.
+
+Would the creation of -[dlr] concurrency=never options to mkfs.xfs
+address all of your concerns?
+
+> I understand the desire to DTRT by default, but I am concerned about
+> test breakage, loopdev inconsistencies, and too-broad assumptions about
+> where the resulting filesystem will actually be used.
+
+That itself is a ... very broad statement considering that this code
+landed in 6.8 and this is the first I've heard of complaints. ;)
+
+--D
+
+> Thoughts?
+> Thanks,
+> -Eric
+> 
+> 
