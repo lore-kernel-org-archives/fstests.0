@@ -1,155 +1,62 @@
-Received: from fhigh-a5-smtp.messagingengine.com (fhigh-a5-smtp.messagingengine.com [103.168.172.156])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E7177264FB5;
-	Thu,  9 Oct 2025 20:13:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.156
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 860D435957;
+	Fri, 10 Oct 2025 05:17:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760040832; cv=none; b=WyWGUcln/0iTa6Nyo/+DkVU6Q75UK0W0tgmPSbbZbeDuRXiO40KEezGo/a558Hg1Apa+sbj3rctn6ixLpp68/CVgwQsw9Aws92A7QbXoeo2TabU1LXM50kL97V3mMinIFMyLU2tmbZk4WEHj7P02kaaiECJwRU8Pxk6ds9P5cTc=
+	t=1760073446; cv=none; b=H6T9YLL8czCBXcC4Af2M1vIV1yKtObxufDdxFI5+IjZqBr3U0aChHgigH8hpO0/NLzrI+fEzGar0xhwNf0wDG6/zTgLhW1gJHS8SH2cFFnfq9AwdQtWjB/9bh1zjiiJq+C6NKeUOHzdEXTPJS9pfGkT5eRn9mhjpggwRbEBP1ME=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760040832; c=relaxed/simple;
-	bh=9AjLQYvVBXlOqXoly79mNevUBYd8UiKGNvv/z+j3Ws0=;
-	h=Message-ID:Date:MIME-Version:To:Cc:From:Subject:Content-Type; b=ScUmtQ5JmNCsXgdwUTwd+LhLnMr5Vem6DDPTjRXndSgDjXznLLNVPLc9RWJVuDXWsoi1qAb8SGgCBQYjMbrqwZy3lNXD4xorTsoDGWhyi4YP654P4UtEpw9lcZUOb/rgxjBQVRJzc1WhwoI65pjwpDpCMTpGCwZk1TPzmpGy6SU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net; spf=pass smtp.mailfrom=sandeen.net; dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b=eeJB2GD+; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=C1K1oOfF; arc=none smtp.client-ip=103.168.172.156
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandeen.net
+	s=arc-20240116; t=1760073446; c=relaxed/simple;
+	bh=9Vh8lk+lR1y93KfcHP+uWP8NRG89UN/phcU1DDGze7E=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Td9ZdVT7Jz24zmK/OfxlNN1rs2AG+owEP7Gj6vBl474r2z/IMxPaX92HMnd1R/RdXPkZuDusQFo4gew/vc55NyMmPksDLZ5et9/+0OPPMzM0DKXMohAosFvRYaEANq5/B7Rf4pEQwyetxBD1zY+WjUJuNQNf4uiSjovY/bdLiqQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=MP7wBmKH; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b="eeJB2GD+";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="C1K1oOfF"
-Received: from phl-compute-07.internal (phl-compute-07.internal [10.202.2.47])
-	by mailfhigh.phl.internal (Postfix) with ESMTP id 115FD14000D5;
-	Thu,  9 Oct 2025 16:13:49 -0400 (EDT)
-Received: from phl-mailfrontend-01 ([10.202.2.162])
-  by phl-compute-07.internal (MEProxy); Thu, 09 Oct 2025 16:13:49 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net; h=
-	cc:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:message-id:mime-version:reply-to
-	:subject:subject:to:to; s=fm2; t=1760040829; x=1760127229; bh=by
-	aPV/hzxTRnPB07BSzudbh23pV+4nv/vKtJRwrJKtg=; b=eeJB2GD+eUrnpU4WLx
-	fh4dHf+BZa16qw4Zaszp3/Sdug0859cl2TO9dP7tFe128JNiUoM/aXB2xPuDbgEv
-	GTr6PUi1RE+3bxvQ7aDErpR12yMtjKGye/OgnBJ87WkYRDEgUuBrpKBmT/toYGdd
-	nVyfOHfB2MCN3CaMnd/et8U+WM/3Liiw2B92i5sfk9TEiYlhbbxwo5UJOcId4fA7
-	RSg59rPyuaAT260S31X/STRoWZLF3wLp0ziSWggj0Ru+DyoccUJehPLC473dTXXx
-	Rkn04vT25B+o7RFwqWcOVnFwmgu41Lk5ju7d8XtqtiAGqEuM0kYCzJBtzm95z1Tf
-	xbIQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:message-id:mime-version:reply-to:subject
-	:subject:to:to:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-	fm2; t=1760040829; x=1760127229; bh=byaPV/hzxTRnPB07BSzudbh23pV+
-	4nv/vKtJRwrJKtg=; b=C1K1oOfFsDh2PbwC2LdYDHrqzs5MXDCFvSpzVCau8S8Z
-	xkk+dppej8JTE46up83uJqbtfnwrok09znAbrnhUT5AEu+Ade/868h2gX7pIx0j0
-	z2j28+kMpZiJGfGC2a6Kd9BtTLNE1U4NxIxZQPijEoB65pGVaF9z2jLVlS7Oi5cQ
-	t3Dx/LZ31bfd5mHhb82LXOq3vABHqcV6HM0jaW7edyYLLXY9fNKSIxCoAvBeTbDW
-	m+ngYRg+jJxYYJ0m6J0gp89Y7BZrwWE/nGIX0Bc5oRYWSpxdsKtaBTfM6AIIF3yA
-	KjI4FBBpo6mj0Tp15XFnk3m9UjZXVjfM1p7KpFWV/g==
-X-ME-Sender: <xms:fBfoaLqiMAe3NCB6izGKpcDFWafPxzG0JLOGDG2wIcxgW-4h49tvOQ>
-    <xme:fBfoaNboKvrLTu5jJDz_nvu_apLvfYW926QTPzqnwasVR4_Lb16MbH07N6woGt-UL
-    f5uGMA9YY6o02Xc5O4bOfYQq9UiJdPSS-7gnz_kcbtDXCd-dnX2LUA>
-X-ME-Received: <xmr:fBfoaLTiHrX4568IqLbJytshBBqJYv0PfU4CWplb5LZJF_bKdSxQnbgfHLa_DczPRou3WHC6rgMKSERaAGkCaI4>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdeggddutdejudduucetufdoteggodetrf
-    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
-    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
-    gurhepkfffgggfvfevhffutgfgsehtjeertddtvdejnecuhfhrohhmpefgrhhitgcuufgr
-    nhguvggvnhcuoehsrghnuggvvghnsehsrghnuggvvghnrdhnvghtqeenucggtffrrghtth
-    gvrhhnpeeiueejjedtgeeuhefggfejleekffduledugfekgedutefgvdegtefhteetfeet
-    heenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpehsrg
-    hnuggvvghnsehsrghnuggvvghnrdhnvghtpdhnsggprhgtphhtthhopeefpdhmohguvgep
-    shhmthhpohhuthdprhgtphhtthhopehlihhnuhigqdigfhhssehvghgvrhdrkhgvrhhnvg
-    hlrdhorhhgpdhrtghpthhtohepfhhsthgvshhtshesvhhgvghrrdhkvghrnhgvlhdrohhr
-    ghdprhgtphhtthhopegujhifohhngheskhgvrhhnvghlrdhorhhg
-X-ME-Proxy: <xmx:fBfoaM6_Vf5xH9dS4GkVROEn_ofho2Lc4axlB0IbhohPzcZmwureBw>
-    <xmx:fBfoaIzIkDi_KoUihiTzmCae1JNSqvf5p9brIdDNerX6Ok0OJIZi1g>
-    <xmx:fBfoaDTsEdbFGd2D5xZbN94TaR_X7iA1YqS4Mqm4IS_L7yLg13fIuw>
-    <xmx:fBfoaPVXsoWbhQ0DShHyteLz4B0gS3hCcOCxACRsaEG7izsysQ7mkg>
-    <xmx:fRfoaCIRLesa1hnkC_e8mK2PkD07AnMuaG4_yu64uXpaVx7ACmx2dplI>
-Feedback-ID: i2b59495a:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
- 9 Oct 2025 16:13:48 -0400 (EDT)
-Message-ID: <84c8a5e5-938d-4745-996d-4237009c9cc5@sandeen.net>
-Date: Thu, 9 Oct 2025 15:13:47 -0500
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="MP7wBmKH"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=abbETGVm6GnVYpDK0/3pKaYOuRq5SCQFS58nsHOJFNs=; b=MP7wBmKHs5T/KEUepU65w9V1yu
+	z1rnXSDjgCVeQ0R1Dn4K5ybGyGKIrQL/RaUCy9U3N0sImIv3F32qaqrQ6rhSMN/Q4oHonr9I6es37
+	Z06i7EUG03ABQfISSWZfG1/9i1VH7lUzGFfYbkdB1fpnxc5c2cYYuaaiGr/noz9mSQl7Qo8im0aEG
+	37F8XKwQeTbiCIgcN0teS19u5O1+8ORAeafD5DOaafXnfhzymd5vRfD5Bx4U2VM/NJszByuHBo1Pw
+	66pA7O7iRow9eeHubMchcGjwfnJfK2V8zwyMtU71mtcnnLRH+RyoIimNHLwXKfOijd+7s63Texc/m
+	7Xr8vI9Q==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1v75VH-00000007hTE-1OBD;
+	Fri, 10 Oct 2025 05:17:19 +0000
+Date: Thu, 9 Oct 2025 22:17:19 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	"Darrick J. Wong" <djwong@kernel.org>
+Subject: Re: mkfs.xfs "concurrency" change concerns
+Message-ID: <aOiW3_Z7e3vtJ2oe@infradead.org>
+References: <84c8a5e5-938d-4745-996d-4237009c9cc5@sandeen.net>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Content-Language: en-US
-To: "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
- "Darrick J. Wong" <djwong@kernel.org>
-From: Eric Sandeen <sandeen@sandeen.net>
-Subject: mkfs.xfs "concurrency" change concerns
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <84c8a5e5-938d-4745-996d-4237009c9cc5@sandeen.net>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-Hey all -
+On Thu, Oct 09, 2025 at 03:13:47PM -0500, Eric Sandeen wrote:
+> Specifically, xfs/078, xfs/216, and xfs/217 are failing for us
+> on various machines with between 8 and 128 CPUS, due to the
+> fundamental change in geometry that results from the new
+> concurrency behavior, which makes any consistent golden
+> output that involves geometry details quite difficult.
 
-this got long, so tl;dr:
-
-1) concurrency geometry breaks some xfstests for me
-2) concurrency behavior is not consistent w/ loopback vs. imagefile
-3) concurrency defaults to the mkfs machine not the mount machine
-
-In detail:
-
-So, I realize I'm late to the game here and didn't review the patches
-before they went in, but it looks like the "concurrency" mkfs.xfs
-arguments and defaults are breaking several xfstests.
-
-4738ff0 mkfs: allow sizing realtime allocation groups for concurrency
-c02a1873 mkfs: allow sizing internal logs for concurrency
-9338bc8b mkfs: allow sizing allocation groups for concurrency
-
-Specifically, xfs/078, xfs/216, and xfs/217 are failing for us
-on various machines with between 8 and 128 CPUS, due to the
-fundamental change in geometry that results from the new
-concurrency behavior, which makes any consistent golden
-output that involves geometry details quite difficult.
-
-One option might be to detect whether the "concurrency" args
-exist in mkfs.xfs, and set that back to 4, which is probably likely
-to more or less behave the old way, and match the current golden
-output which was (usually) based on 4 AGs. But that might break
-the purpose of some of the tests, if we're only validating behavior
-when a specific set of arguments is applied.
-
-(for 078, adding -d concurrency=4 seems to fix it. For  216 and 217
-I think I needed -l concurrency=4, but this might depend on nr cpus.)
-
-So, we could probably fix xfstests to make mkfs.xfs behave the old way,
-with loss of coverage of behavior with current code defaults.
-
-Other concerns, though - I see that we only do this if the storage
-is nonrotational. But in testing, if you set up a loop device, the
-loop dev is nonrotational, and gets the new concurrency behavior,
-while doing a mkfs.xfs directly on the backing file doesn't:
-
-# losetup /dev/loop4 testfile.img
-
-# mkfs.xfs -f /dev/loop4 2>&1 | grep agcount
-meta-data=/dev/loop4             isize=512    agcount=6, agsize=11184810 blks
-
-# mkfs.xfs -f testfile.img 2>&1 | grep agcount
-meta-data=testfile.img           isize=512    agcount=4, agsize=16777216 blks
-
-so we get different behavior depending on how you access the image file.
-
-And speaking of image files, it's a pretty common use case to use mkfs.xfs
-on image files for deployment elsewhere.  Maybe the good news, even if
-accidental, is that if you mkfs the file directly, you don't get system-
-specific "concurrence" geometry. But I am concerned that there is no
-guarantee that the machine performing mkfs is the machine that will mount
-the filesystem, so this seems like a slightly dangerous assumption for 
-default behavior.
-
-I understand the desire to DTRT by default, but I am concerned about
-test breakage, loopdev inconsistencies, and too-broad assumptions about
-where the resulting filesystem will actually be used.
-
-Thoughts?
-Thanks,
--Eric
+FYI, the zoned XFS CI has seen these fail as well, and I've never
+been able to reproduce it locally.  The CI runs on a fairly beefy
+box so I suspect it could be correlated.
 
