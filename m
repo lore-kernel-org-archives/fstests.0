@@ -1,127 +1,149 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C966238159;
-	Sat, 11 Oct 2025 13:47:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8952118C31;
+	Sun, 12 Oct 2025 00:36:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760190448; cv=none; b=pvFSRYILSRCa+CVd/6rprnk2LNtDRMfhe0UC32R1CZa8sxjg/efDNNs5IYwSSsVB9HM/5/lZozwKgFd1eS3Dcl+XLLjunyMyXkOZ8+ACFB8RX+MUso2LorJklQVmLduYMoBKIskfgraV34OiUkIPf3ka6kcCbW3/u+LHtHcQz5k=
+	t=1760229382; cv=none; b=ikO5TYz2vllDSxUovtWd6z+9BYMU/JsjqzAXic11wWBqH23twsWl2QtoZA6jz6B6uvdxyg/ZtCv0EdzRPb1m2DYR1blqJd5E6E0cF7hjXqf2YsCRI4PKSiTxfSVVjcqeXpHkY3axwfWCrsQgjk9P0vsNADRGKNun+71j2XxO/GU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760190448; c=relaxed/simple;
-	bh=670+SLhGJSa0RHHnsaPGdt71nMJ5tF9DQXOGLrslfKQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=PFgPtbo6dcGsNwEwHFgUMl7C52f5v6VKHhlGCI8c4sr1QOblSWKw1AEzKxOoA556ck2HkTf0xp0JTpHhVDX1hyMkR+0VVvZWAOm7anM6w9M2JY18ta2PpbBvYStTFGJXb4OJ49mGW18w4EMobx84z5BE2lkPFBxU7uWPR9HEEZM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=GGH4s4vS; arc=none smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	s=arc-20240116; t=1760229382; c=relaxed/simple;
+	bh=d5IeSn7VzI5lxZXVELh6tC/WwuTU9ey1cyw4wcNRIWA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=QKF3UprUH8VH12Gl3Bs1vvjW3u/J+P9C9oVKdgOwzSBJV8CRFPjK0Xfonw/BprOSGLbmIYXRw4FNBOM5ER7upMJVxyGL4UAW729FzI03Dd7fIgr7nEq3toXC5axqPibf0X5t929anPnnFSMH3AjsnKI1PCnRX93f0zpLCkRoiNI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SIbr3+TR; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="GGH4s4vS"
-Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59BAT3GB026248;
-	Sat, 11 Oct 2025 13:47:23 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=pp1; bh=sh3QqBiUmrHdaX7NpL0vaWXjTrLKYoraAAmGhb4iP
-	Uo=; b=GGH4s4vSvSDDlqOuyAnkCB5NtDlNgO2aRxepBYtJ4ZdIO1OZIMZzoFvXJ
-	1doGqo9FWXW7DJgZLSAaOdY/rVs8Jp2PPb1N6sqv6Xu5JlIffvaPJkDTa+lhrT09
-	NRbUdyIYS0BaNSmQBiMJ04tUz16juXfNsdqo8Vm3Zpvlfhbg30kTfZfx8B8a46f7
-	lDvmbNyE3PqrMoEvrRu0Hwl9ZLGYenU//8TE3y1N2QZEXX0l6nHFQ/K+XEr+x3T2
-	JD0+aQ9nCtlIbaexTHoYEUOTS9ow8bOnLQbmFGmpIJwiI9XW2XNMwTeY96x5t+Gz
-	h1Uisicpmg3Btdd4zs//YGjPY3pTg==
-Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 49qdnp1q3x-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Sat, 11 Oct 2025 13:47:23 +0000 (GMT)
-Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
-	by ppma11.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 59BCFB2P026038;
-	Sat, 11 Oct 2025 13:47:14 GMT
-Received: from smtprelay01.fra02v.mail.ibm.com ([9.218.2.227])
-	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 49nvamxdqc-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Sat, 11 Oct 2025 13:47:14 +0000
-Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
-	by smtprelay01.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 59BDlCVL52953492
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Sat, 11 Oct 2025 13:47:12 GMT
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 9FAD3200D0;
-	Sat, 11 Oct 2025 13:47:12 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id A0F5F200CF;
-	Sat, 11 Oct 2025 13:47:10 +0000 (GMT)
-Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.124.218.19])
-	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Sat, 11 Oct 2025 13:47:09 +0000 (GMT)
-From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
-Cc: srivathsa.d.dara@oracle.com, linux-kernel@vger.kernel.org,
-        Disha Goel <disgoel@linux.ibm.com>
-Subject: [PATCH] ext4/060: Skip for dax devices on non-4k page sizes
-Date: Sat, 11 Oct 2025 19:17:08 +0530
-Message-ID: <20251011134708.2426769-1-ojaswin@linux.ibm.com>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SIbr3+TR"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5EC98C4CEF4;
+	Sun, 12 Oct 2025 00:36:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1760229381;
+	bh=d5IeSn7VzI5lxZXVELh6tC/WwuTU9ey1cyw4wcNRIWA=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=SIbr3+TRALoto027wUlzOJ+P9ouNtZPiyRxqzXcNOYx5zire+7xIOv3dehZKxPjYb
+	 lIfclvc6Umx9C/8v/X/rvCVytoc/pBkr4kO6+NBhSiFTE6mAPb+Vtv2yAmnVLyD/gn
+	 iCHzpeoLO8LaAPoLVzKQaLdvcsweFhweuA9WlW/NKOtD8IyedxSuSU2TMfjgv4ASGk
+	 nWxs/kHXEn99u47XVqUyiViub5FAk4+IekyI7imJBZhbbp4pGlW1lByP2G3iSjG6pb
+	 Vj0krbNe3/VRgIABNrAjJ7QBsV6ysCGiNNnAnG56DW+qhWMZ9fr/iy0L+9BMvV5eHS
+	 w8wFuRHddzgMQ==
+Message-ID: <14046f78-e1e9-4188-8405-16055520513f@kernel.org>
+Date: Sun, 12 Oct 2025 09:36:18 +0900
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 2/3] common/zoned: add _create_zloop
+To: Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
+ "Darrick J. Wong" <djwong@kernel.org>, Carlos Maiolino <cem@kernel.org>
+Cc: Zorro Lang <zlang@redhat.com>, hch <hch@lst.de>,
+ Naohiro Aota <Naohiro.Aota@wdc.com>,
+ "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
+ Hans Holmberg <Hans.Holmberg@wdc.com>,
+ "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+ "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>
+References: <20251007125803.55797-1-johannes.thumshirn@wdc.com>
+ <VGGoqK-5ZWJTAAy5zOK2QgRfnghNzWtGFoBwL6Sw9bqE7moL7lyTr43XUUgtMM54gKwCKIpC1Jz9u5ZcnpNATg==@protonmail.internalid>
+ <20251007125803.55797-3-johannes.thumshirn@wdc.com>
+ <hrht5llavtcgd5bb6sgsluy3vs2m6ddzzshkhwqb4fjgujgrli@6px7vpsk7ek3>
+ <20251008150806.GA6188@frogsfrogsfrogs>
+ <f0713993-cebf-4e42-9c1a-26706a52be4d@wdc.com>
+From: Damien Le Moal <dlemoal@kernel.org>
+Content-Language: en-US
+Organization: Western Digital Research
+In-Reply-To: <f0713993-cebf-4e42-9c1a-26706a52be4d@wdc.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDExMDAwNSBTYWx0ZWRfX5cCO3cla4EWp
- VKnZpxvV2iWKTq0CClppl0aBdjrqF7w5P5bVmKI8hBM/c0bVO4v2YWVu1YhO1+tElElus7WosGu
- CKCQ1tN9c301N2G2FBq7byUigs+xc6h0L2KZmKfvQflMagQzj40pjHcD3hcmPGcP+Zo/P/zsHLS
- 1pizjzvSCtysK9JrmPndUKrG1zSoKzIVN1Xt6/kZqqoKRvrlSI/j1oqjye7t2DagD3vPNtnaGWA
- WISpwZWwY466mfsDlLr0BQR1zfSGC4KS3jm01sMYFnmyg4HnpndqD1RM3A/SV7Xk1YD/2jGa4jW
- 89YRxXhMcMy1M/OY4mClXW8G4hn3m4kMVKu3IfOYk1Jb+CfP40VrypWTh5lKhHa+usHWzNLoE9h
- 0oey3X3kI1IfMv+3YjWpvyP978pbvg==
-X-Proofpoint-ORIG-GUID: v__kscBe4EpHszsgWnkpb-er6mb-V7RE
-X-Proofpoint-GUID: v__kscBe4EpHszsgWnkpb-er6mb-V7RE
-X-Authority-Analysis: v=2.4 cv=MoxfKmae c=1 sm=1 tr=0 ts=68ea5feb cx=c_pps
- a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17
- a=x6icFKpwvdMA:10 a=VnNF1IyMAAAA:8 a=r4p1LJxbrcFJ-OCt0_UA:9
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-10-11_03,2025-10-06_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- impostorscore=0 spamscore=0 lowpriorityscore=0 suspectscore=0 phishscore=0
- bulkscore=0 priorityscore=1501 malwarescore=0 clxscore=1011 adultscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.19.0-2510020000 definitions=main-2510110005
 
-This test tries to trigger an ext4 corruption by resizing past the
-meta_bg size (8GB on 4k blocksize) in ext4. Since the test is sensistive
-to the size and FS layout it hardcodes the 4kb blocksize ignoring user's
-$MKFS_OPTIONS. While this is okay for most cases it fails for dax based
-filesystems where system pagesize is non-4k.
+On 2025/10/11 18:34, Johannes Thumshirn wrote:
+> On 10/8/25 5:08 PM, Darrick J. Wong wrote:
+>> On Wed, Oct 08, 2025 at 04:38:16PM +0200, Carlos Maiolino wrote:
+>>> On Tue, Oct 07, 2025 at 02:58:02PM +0200, Johannes Thumshirn wrote:
+>>>> Add _create_zloop a helper function for creating a zloop device.
+>>>>
+>>>> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+>>>> ---
+>>>>   common/zoned | 23 +++++++++++++++++++++++
+>>>>   1 file changed, 23 insertions(+)
+>>>>
+>>>> diff --git a/common/zoned b/common/zoned
+>>>> index 41697b08..33d3543b 100644
+>>>> --- a/common/zoned
+>>>> +++ b/common/zoned
+>>>> @@ -45,3 +45,26 @@ _require_zloop()
+>>>>   	    _notrun "This test requires zoned loopback device support"
+>>>>       fi
+>>>>   }
+>>>> +
+>>>> +# Create a zloop device
+>>>> +# useage: _create_zloop [id] <base_dir> <zone_size> <nr_conv_zones>
+>>>> +_create_zloop()
+>>>> +{
+>>>> +    local id=$1
+>>>> +
+>>>> +    if [ -n "$2" ]; then
+>>>> +        local base_dir=",base_dir=$2"
+>>>> +    fi
+>>>> +
+>>>> +    if [ -n "$3" ]; then
+>>>> +        local zone_size=",zone_size_mb=$3"
+>>>> +    fi
+>>>> +
+>>>> +    if [ -n "$4" ]; then
+>>>> +        local conv_zones=",conv_zones=$4"
+>>>> +    fi
+>>>> +
+>>>> +    local zloop_args="add id=$id$base_dir$zone_size$conv_zones"
+>>>> +
+>>>> +    echo "$zloop_args" > /dev/zloop-control
+>> Hmm, so the caller figures out its own /dev/zloopNNN number, passes NNN
+>> into the zloop-control devices, and then maybe a new bdev is created?
+>> Does NNN have to be one more than the current highest zloop device, or
+>> can it be any number?
+>>
+>> Source code says that if NNN >= 0 then it tries to create a new
+>> zloopNNN or fails with EEXIST; otherwise it gives you the lowest unused
+>> id.  It'd be nice in the second case if there were a way for the driver
+>> to tell you what the NNN is.
+>>
+>> The _create_zloop users seem to do an ls to select an NNN.  At a minimum
+>> that code probably ought to get hoisted to here as a common function (or
+>> maybe just put in _create_zloop itself).
+>>
+>> Or maybe turned into a loop like:
+>>
+>> 	while true; do
+>> 		local id=$(_next_zloop_id)
+>> 		err="$(echo "add id=$id$base_dir..." 2>&1 > /dev/zloop-control)"
+>> 		if [ -z "$err" ]; then
+>> 			echo "/dev/zloop$id"
+>> 			return 0
+>> 		fi
+>> 		if echo "$err" | ! grep -q "File exists"; then
+>> 			echo "$err" 1>&2
+>> 			return 1;
+>> 		fi
+>> 	done
+>>
+>> That way test cases don't have to do all that setup themselves?
+>>
+> Unfortunately the user has to create the zloop directory (e.g. 
+> BASE_DIR/0 for zloop0) beforehand (might be a bug though).
 
-One way to work past this is to make the test blocksize agnostic, but
-since we still need the disk to be as big as the meta_bg size, this
-means for blocksize=64kb filesystems we need a scratch disk of ~4TB
-which is not feasible.
+Not a bug. It is by design since the user can specify the ID of the zloop drive
+to create. And there is no fixed association between device ID and directory
+path to keep things flexible for the user/distro.
 
-Hence, just skip the test if fsdax is used in a non-4k page size system.
+> What I could do is  encapsulate the find the next zloop and mkdir -p for 
+> the user (and call in _create_zloop if no id is supplied?)
 
-Reported-by: Disha Goel <disgoel@linux.ibm.com>
-Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
----
- tests/ext4/060 | 4 ++++
- 1 file changed, 4 insertions(+)
+Yes. Do that. The zloop directory si not something that the tests should touch
+anyway, so you should just define your own id <-> dir path mapping in the helpers.
 
-diff --git a/tests/ext4/060 b/tests/ext4/060
-index b8cc542f..565f8601 100755
---- a/tests/ext4/060
-+++ b/tests/ext4/060
-@@ -17,6 +17,10 @@ _begin_fstest auto resize quick
- _exclude_fs ext2
- _exclude_fs ext3
- 
-+if __scratch_uses_fsdax && [[ $(_get_page_size) -ne 4096 ]]; then
-+    _notrun "Test does not support dax on non-4k pagesize systems"
-+fi
-+
- _fixed_by_kernel_commit a6b3bfe176e8 \
- 	"ext4: fix corruption during on-line resize"
- 
+
+
 -- 
-2.49.0
-
+Damien Le Moal
+Western Digital Research
