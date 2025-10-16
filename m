@@ -1,95 +1,101 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 077532EBBA4;
-	Wed, 15 Oct 2025 16:38:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4F5D32DF6E6;
+	Thu, 16 Oct 2025 15:20:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.143.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760546330; cv=none; b=k1jzr8IQko8bOssAH+GA8yQPXGqikTn9tJ/sGdL+J0IXcREHER2YXkI+ZeU0DL15U188xugk2oL44dUiOf/wuACEsFSbCTLTFKK+jn3KnV69dcBqhOXustIZcwGGIo6uvpDD9pbm+vLu/F9pWSV4yfI3r4n5oP1b3BMKceSmaRE=
+	t=1760628042; cv=none; b=WROk3+iowaBlfSX8ZscFMis7jpsPv/B/Ba3GSDxvJQ9c+Z7s5WCB5RmnRTtm+pOR7sEQZL1285KcvXo5JdvigezdgrsIgR2j8DQjx1lST4GBl2VFrVqbzzRKIrGyIrdXz+QqecXdAE5e4ZWco8Ms1c23s/M6qcZI76ZllpUjTnw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760546330; c=relaxed/simple;
-	bh=TBtB9SZHlCb6aUdkP28L/XORjmB1SmT8maHpSFesCaY=;
-	h=Date:Subject:From:To:Cc:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=XQPoBXthogmlUuenCC7fbwcXFzvNpkE6b3SOzFP6OvG4yCmASdx/5FzNJu0VHIhzSmcaFOPxSythMoahURWlkuhkUl9iYG1UDvQAdL+m1F1K+HI76/hAEg9tIOaupEra/DAF9w9slvWVnYoRo01cSHWUUVzNkoE9vU8AWI3Q5p0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=asSosk4u; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1760628042; c=relaxed/simple;
+	bh=XLQDR+sCfZaZG59gmf6RoAAM8IPdatxdmZLU82p7m2A=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=WYZyI//6bAX9teVbrNibgxfb8O7S+tsgayr3kHIcb/jn5oSG42/AXXPrt44NWglK9IOtYiwC0kdut3Uk/cR15a+KX8ICdHELp7dDJOlIXi9vntcQ1SE+afhmzq9P9WiroY/SxR/nx3LoEyrBWLbVBl1bzO2ODpjywpQw1ZK8esc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=mk6qCHg+; arc=none smtp.client-ip=68.232.143.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="asSosk4u"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 86B53C4CEF8;
-	Wed, 15 Oct 2025 16:38:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1760546328;
-	bh=TBtB9SZHlCb6aUdkP28L/XORjmB1SmT8maHpSFesCaY=;
-	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
-	b=asSosk4u9tZ+NJBKR2AqAX9ayKLf69SVzV7vzwI9SCrP5zyRbzlBe7Q9i6Vuf75Kd
-	 ueqvNtt538KUzVzynfYKdx6QVBw7aEn35wPz8mpsynSXMdBS70LrOBgIMS41nQeOTR
-	 XgDgSLZwMMpxozM0N7lgl5Zu8q0Sv+cDFI22P/hZMzBPudR9E/K4PQxcEUW6X4cR+w
-	 5SeZNP3jaYejsUSggFM5sboxob4PdvJKH2ZppcPt4SqN55jvEn1YPdJ0T8R9Qw/LAe
-	 1NtmTeMWfHZJYgBv+YmgtU1n1cB8GUBRUNCYIzif4hor229iRzeTqQ5BKs4FhucJi5
-	 PGMT3hi7Jmr1A==
-Date: Wed, 15 Oct 2025 09:38:48 -0700
-Subject: [PATCH 8/8] common: fix _require_xfs_io_command pwrite -A for various
- blocksizes
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: djwong@kernel.org, zlang@redhat.com
-Cc: fstests@vger.kernel.org, fstests@vger.kernel.org,
- linux-xfs@vger.kernel.org
-Message-ID: <176054618045.2391029.13403718073912452422.stgit@frogsfrogsfrogs>
-In-Reply-To: <176054617853.2391029.10911105763476647916.stgit@frogsfrogsfrogs>
-References: <176054617853.2391029.10911105763476647916.stgit@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="mk6qCHg+"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1760628040; x=1792164040;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=XLQDR+sCfZaZG59gmf6RoAAM8IPdatxdmZLU82p7m2A=;
+  b=mk6qCHg+CbRpFiH/5pAztfXRbff9VdSTIgRPHvItBhLcHixP8ECIqjyS
+   D877OjzYYHEnIyN1pceDoOFyaOtp3ovGqw1QgQMcxpIuKh/eqMU+PuYZI
+   AWB0qed+9eUfhT1YLoOh1i2OA2H1yWrBRa72wgF2tvjhv/mqN/41Msz0k
+   PUGfH5tG6WiaYSbOju7FmoM89k/vzM3TO8uc52tGih34rnw4sM0PMWQoZ
+   i9VtXeNYOdflufTALNlvNktMloPIlfT04EVmOyToFAVwpWfzXqocVjWrj
+   j4vuqPeJsVLJDDsMfEKZP6+IF2Tq63FdWu5pC+kjl7kybrDch8yZqhi1u
+   w==;
+X-CSE-ConnectionGUID: F1WG1Bh6QLu/2rg8k8H1vg==
+X-CSE-MsgGUID: s4XIg347TQifstIQtDFQAw==
+X-IronPort-AV: E=Sophos;i="6.19,234,1754928000"; 
+   d="scan'208";a="134589295"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 16 Oct 2025 23:20:39 +0800
+IronPort-SDR: 68f10d47_0c5eFRCxi8DGV+rNwXaI4ftU+2jw0VubaRAgfQnUwuTMg3l
+ EYpzLQz27sZx2Bjx8id3Tehv1tNi/m2wps6S7+w==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 16 Oct 2025 08:20:39 -0700
+WDCIronportException: Internal
+Received: from unknown (HELO neo.wdc.com) ([10.224.28.40])
+  by uls-op-cesaip02.wdc.com with ESMTP; 16 Oct 2025 08:20:35 -0700
+From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Christoph Hellwig <hch@lst.de>,
+	Naohiro Aota <naohiro.aota@wdc.com>,
+	linux-btrfs@vger.kernel.org,
+	Hans Holmberg <hans.holmberg@wdc.com>,
+	fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org,
+	Carlos Maiolino <cem@kernel.org>,
+	"Darrick J . Wong" <djwong@kernel.org>,
+	Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH v5 0/3] fstests: basic smoke test on zoned loop device
+Date: Thu, 16 Oct 2025 17:20:29 +0200
+Message-ID: <20251016152032.654284-1-johannes.thumshirn@wdc.com>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-From: Darrick J. Wong <djwong@kernel.org>
+Add a very basic smoke test on a zoned loopback device to check that noone is
+accidentially breaking support for zoned block devices in filesystems that
+support these.
 
-In this predicate, we should test an atomic write of the minimum
-supported size, not just 4k.  This fixes a problem where none of the
-atomic write tests actually run on a 32k-fsblock xfs because you can't
-do a sub-fsblock atomic write.
+Currently this includes btrfs, f2fs and xfs.
 
-Cc: <fstests@vger.kernel.org> # v2025.04.13
-Fixes: d90ee3b6496346 ("generic: add a test for atomic writes")
-Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
----
- common/rc |   14 +++++++++++---
- 1 file changed, 11 insertions(+), 3 deletions(-)
+Changes to v4:
+- Find next free id in _create_zloop
+- Add _destroy_zloop
+- Fix typo in _create_zloop documentation
+- Redirect mkfs error to seqres.full
 
+Changes to v3:
+- Don't mkdir zloop_base in test but in _create_zloop
+- Add Christoph's Reviewed-by in 1/3
 
-diff --git a/common/rc b/common/rc
-index 1b78cd0c358bb9..dcae5bc33b19ce 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3030,16 +3030,24 @@ _require_xfs_io_command()
- 	"pwrite")
- 		# -N (RWF_NOWAIT) only works with direct vectored I/O writes
- 		local pwrite_opts=" "
-+		local write_size="4k"
- 		if [ "$param" == "-N" ]; then
- 			opts+=" -d"
--			pwrite_opts+="-V 1 -b 4k"
-+			pwrite_opts+="-V 1 -b $write_size"
- 		fi
- 		if [ "$param" == "-A" ]; then
- 			opts+=" -d"
--			pwrite_opts+="-V 1 -b 4k"
-+			# try to write the minimum supported atomic write size
-+			write_size="$($XFS_IO_PROG -f -c "statx -r -m $STATX_WRITE_ATOMIC" $testfile 2>/dev/null | \
-+				grep atomic_write_unit_min | \
-+				grep -o '[0-9]\+')"
-+			if [ -z "$write_size" ] || [ "$write_size" = "0" ]; then
-+				write_size="0 --not-supported"
-+			fi
-+			pwrite_opts+="-V 1 -b $write_size"
- 		fi
- 		testio=`$XFS_IO_PROG -f $opts -c \
--		        "pwrite $pwrite_opts $param 0 4k" $testfile 2>&1`
-+		        "pwrite $pwrite_opts $param 0 $write_size" $testfile 2>&1`
- 		param_checked="$pwrite_opts $param"
- 		;;
- 	"scrub"|"repair")
+Changes to v2:
+- Add Carlos' Reviewed-bys
+- Add a _find_last_zloop() helper
+
+Johannes Thumshirn (3):
+  common/zoned: add _require_zloop
+  common/zoned: add helpers for creation and teardown of zloop devices
+  generic: basic smoke for filesystems on zoned block devices
+
+ common/zoned          | 60 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/772     | 43 +++++++++++++++++++++++++++++++
+ tests/generic/772.out |  2 ++
+ 3 files changed, 105 insertions(+)
+ create mode 100755 tests/generic/772
+ create mode 100644 tests/generic/772.out
+
+-- 
+2.51.0
 
