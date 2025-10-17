@@ -1,77 +1,77 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E38A42050
-	for <fstests@vger.kernel.org>; Fri, 17 Oct 2025 19:30:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAA8F333452
+	for <fstests@vger.kernel.org>; Fri, 17 Oct 2025 20:25:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760729426; cv=none; b=rHh788IyrplXbf5xlanbJpcakXh7dwqOH3K0vUEib2/DxxqTqIbtt0/g/iD1ugGrUxzTtalAfPey8eji8A9fuOdfSN8HxCVl4nsNCUHvgGMZmEP6AxuywN47hlm3OrF9j62PKWwzatFJWpL+l0fnDVEN3eIkq88uyf7B1tH8Uh0=
+	t=1760732757; cv=none; b=gSesXu3++2if+iYfufof+tLIW/iEFWge4pQMde7K/HNv/mjn/TIoFnAV6V7YKx7uLKKshYnNFHUN0JhV3V2HJ6h2ggeqX7+MDy4guuSe+BE4MKheW2uAGkpLNPIshLYf1gHSZDiub1dKQAch2J3AC4B2UjZFTQHGZjKJuk5/spo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760729426; c=relaxed/simple;
-	bh=ac30U7GQQORXzpcrqqMcSfoRuu1DKEHwjaDFpbJKsQk=;
+	s=arc-20240116; t=1760732757; c=relaxed/simple;
+	bh=jM5A3TelHkeicjfx+wxJIKYR3jCvvcb2IvEl8LyEalw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IEpUag2ELWKVg6rCU0UcmTKph1b1yVO8l/OntFORz1W8+iG3vdl4iPws0cso65gsgyendk+RXU1JSHvO8Kuunp9tGZbB5AWDMQc/wGav7GDZEm5lAp6VGvvqh1NN2H1/cUicGXzwL6mavehrWRquyDLfPZPsYwIC9al+J7O+L7Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VO+ANYsN; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=gMwgzy+JIr1wISYxJMCCV0DeoCGXVT4WfbSQxIxzRDvuJRR3qcptbwUmBoalm0D65+kn+gVccDerzgcW2UpJD9r4eL7C/zsxTcIvz0d7TtGBIrBkdyY7lhIfDYJum/OL6xsSGMk6dj8xOYfJwp4cabTXd7gI/vuvb7KH90LYtUY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=DbIRHnbV; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VO+ANYsN"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="DbIRHnbV"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1760729423;
+	s=mimecast20190719; t=1760732754;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=7VL9F1Q6eRmzq2H+mSS9Xs3FgFDlVtC38/QZmDEt33w=;
-	b=VO+ANYsNjJQ7le3A2KRlNBCeb4KTg2z/2/cOaCANq0d1ofvRq+YDfapta1qmgMvlZs1eIt
-	mxNWFXQUdCZ1kfHEkVPtDJv1sQ1+m6GTZFFzZeWonWE3yJb4TviiXFkpsreVQHsqXfpbIe
-	86/467VV0bqOn+PTpfP8shVkSYKIo8I=
+	bh=SC+5NC1S5pdFEKz3wHqgv0vTb+teR0zOymxzWocp7FQ=;
+	b=DbIRHnbVX/Z08LtPqG/OECf7DBYLjPihzxx3ATNYHIdt35OlKIED8hQhXOydCWkyKRWcGx
+	IfrhWMU9Jsp8xTNme/GEBNJISKiKaHn7r1hJzzobaztlucTNbidoredwUY7TSEr0qtrC1L
+	VsWy1zU4HsLA01TVdanLxRH0Gd99sKc=
 Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
  [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-685-5IoIgDSeM7SgEGWcSkb9YQ-1; Fri, 17 Oct 2025 15:30:21 -0400
-X-MC-Unique: 5IoIgDSeM7SgEGWcSkb9YQ-1
-X-Mimecast-MFC-AGG-ID: 5IoIgDSeM7SgEGWcSkb9YQ_1760729420
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-27356178876so16688265ad.1
-        for <fstests@vger.kernel.org>; Fri, 17 Oct 2025 12:30:21 -0700 (PDT)
+ us-mta-593-9WsrYgvHOdaC7lV8DtSxRQ-1; Fri, 17 Oct 2025 16:25:51 -0400
+X-MC-Unique: 9WsrYgvHOdaC7lV8DtSxRQ-1
+X-Mimecast-MFC-AGG-ID: 9WsrYgvHOdaC7lV8DtSxRQ_1760732750
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2909e6471a9so18054605ad.0
+        for <fstests@vger.kernel.org>; Fri, 17 Oct 2025 13:25:51 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1760729420; x=1761334220;
+        d=1e100.net; s=20230601; t=1760732750; x=1761337550;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=7VL9F1Q6eRmzq2H+mSS9Xs3FgFDlVtC38/QZmDEt33w=;
-        b=KVrIjGZZn2yVO8DKU5bviX2aKvA/4WJ0G/Sb9g/sq3zAf15TspGhw+qaEVDqUYe+1F
-         zaGGbvyqDfofQr6RxQLP9Jd3OpkKRf4WZonpnh/8/mMFu/0WrYOoSBpu9SdnYiF/dza1
-         oj9aLmn2bwauFdIvq5CanY6tY+GkZ1LHBrDVaJArosisz46BAWixzIoHs1N3JihfHGzA
-         sWiCgrt7MXslurCjDp9SxlIC0BcBRtyLw2Q7rc7xZnTYjq7/nMUBIVwkRdThQZewOKZw
-         7HvJu7vZHSUFA3drebvsPAUU4zxVX7x3lqQLdR9XFU+RsgBxDMDXq1mXR5YOxyS+rNro
-         pMkg==
-X-Forwarded-Encrypted: i=1; AJvYcCXaylpaRhR01rgp593mj1rYfGTnRs6WuFuRcr3AAGsGW1bjQBNsHNwfMKXuoBSA6tJRnqaKmw7t@vger.kernel.org
-X-Gm-Message-State: AOJu0YwDxm9YQZq8goinS0BNRdCzxLtXPHTNj5QfSddpe2S7VaIa8u9K
-	w018lC9uvpwG4frHZGk9Oauh2Y4jhNcPFTF9LE03DxwXtFbCRTaK7NIxGupp5P9r7FyJ/BNV0X5
-	SnEPN8/0RIBjHUDEiM4T0Nq8KtPXgWpW8yrhmHdvbskRVOqSfvzqxA3jm3OH2/QipiRg=
-X-Gm-Gg: ASbGncuKEXRfyutKcPItsZQoP7vIIb0FbgDD1J7alFimGsf+/H3FmLgq4ibq5DWjUt7
-	25mNiE9vl0J8o/LIRmVdWW+57QB6yctGudxGvNAmVZerTBt4uVQ3fzPmqP/YTKUzvects+5NNPL
-	K6XIhXdTV/ewaIJWVLKL1R8ECtFgwz2JwZ7XAymTvAJ4Gi/i2TH2TePpO5aDh9aQE3KorjcugGM
-	1vZUn2MqGg107TjDh35Yx+5iaLeG56J6HFTsCGrtdx32rjMrb/SB8L6Y/bC4EvZ6I4OhMdKZ3yw
-	B9xg9xGArekMq6q35UVd0WVOc2D817uocREM0Kri87iImHm62lYNfjb1x6AAfU9k4xHO+7tyPM/
-	qLpShjo1EXuBlAaIWC5CMzpgeYh1xHEPOCg+90Tg=
-X-Received: by 2002:a17:902:e80c:b0:265:57dc:977b with SMTP id d9443c01a7336-290cccc781amr59659345ad.61.1760729419839;
-        Fri, 17 Oct 2025 12:30:19 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IG86OYrKZBz0jqOvlvMY1DrD8J9pWCiiZpCc3+lBMHwZDjWzThPUv6LILa7L0/tIPfw/2/thw==
-X-Received: by 2002:a17:902:e80c:b0:265:57dc:977b with SMTP id d9443c01a7336-290cccc781amr59659045ad.61.1760729419400;
-        Fri, 17 Oct 2025 12:30:19 -0700 (PDT)
+        bh=SC+5NC1S5pdFEKz3wHqgv0vTb+teR0zOymxzWocp7FQ=;
+        b=rUa6MhjD6pWU+AschoKMGFARBqevGaaUisck6JokFSbZtas6/L9OlltoB+KHFqxpbO
+         XkvS30OEC8iAtwOxS+zQM1s/byO/6rM7srAnscgOqumT1n8tYtkGBZjw2gUTcfG+WsgF
+         GGnC6hzQTUjq+ER0E0agKG7mSggZiVG6Qw4c4eupRINBryQ49uBX98NGrDOyh+jhdc9H
+         KDtZkOQy6It9JaVqotcKeGZtMTydXYjesWCcHF0eQIsPAPEEN4F7TW8fY0gOm+J1ieR+
+         Cu8QMmreUK0OSohqe2pyrDvOYZoo7ctPB7K1x9cZB4oYG2qUn/gdywuNxQisLG2ayiq6
+         s/vA==
+X-Gm-Message-State: AOJu0YwCBY+Us9QL7VMRXnHOlj/lYcqzrlPokY3alG9TxWEg8CbQJTvC
+	lOwFDEgtWaa2YwGiWJbo4LCAAMLoO3oZewSmQ2uCreFzq5XMee7BJPjaFMj40fbmUxxKJO9RZu/
+	KZFnhSW/+Ufct6ebjJ9PUUtj8cp/9LC3NDN47Vwfvw+VWlYos11BaFQ2EVs0=
+X-Gm-Gg: ASbGncv8AjYbWVPmkl6ujinEtxmmAZeq/MHHg8IXBFMEur3k6rTMHbRgEFmZgM2rhtp
+	6OHflgXt2f5fh0r3YCmfb4/9yho72dyBh2VzR7PHALN02wb/+ES2CGzH9z2Pmhl0M6wuUUEmmiC
+	gJ8X6vPvWJwCwwjHaJ3JhdwKyf/eMkpG3LV1f+gIh2DuzMdWuxYRXkNmRBDGpec37h7IX9dO/R+
+	jH3qMvwVuG3470mQr7QMllTY8/131EPI8ZBPV7AoNV9CvzHdrSR0XGPyPc3bQt8wGQc/JRFVeNm
+	cu/1P8uA0zriTJI1t5RMpWQ4cCKACzFQL7cCku46AYrfXgzqt1xmIyccDH2InN8M1PU+F7R9ZV1
+	r87/vuS+HAztep7IdQkovV20Z84+6T4hMlzJrzXM=
+X-Received: by 2002:a17:903:1a4c:b0:267:ba92:4d19 with SMTP id d9443c01a7336-290c99a8ed3mr63606635ad.0.1760732749972;
+        Fri, 17 Oct 2025 13:25:49 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFxfxr0prdBShKiiD3OH0xFK8B3tzOOnqVQzoTfYO6FzFCXRk2P6WQVkDGH421mM7plLtUZuA==
+X-Received: by 2002:a17:903:1a4c:b0:267:ba92:4d19 with SMTP id d9443c01a7336-290c99a8ed3mr63606425ad.0.1760732749517;
+        Fri, 17 Oct 2025 13:25:49 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-292471d5959sm2910105ad.68.2025.10.17.12.30.15
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-292472197e9sm3835075ad.116.2025.10.17.13.25.46
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Oct 2025 12:30:18 -0700 (PDT)
-Date: Sat, 18 Oct 2025 03:30:13 +0800
+        Fri, 17 Oct 2025 13:25:48 -0700 (PDT)
+Date: Sat, 18 Oct 2025 04:25:44 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Chao Yu <chao@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v3 1/2] f2fs/021: test quota mount option
-Message-ID: <20251017193013.ykrwjftkvhaug76z@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20251011084715.608562-1-chao@kernel.org>
+To: ethanwu <ethanwu@synology.com>
+Cc: fstests@vger.kernel.org, ceph-devel@vger.kernel.org,
+	Slava.Dubeyko@ibm.com, ethan198912@gmail.com
+Subject: Re: [PATCH v3] ceph/006: test snapshot data integrity after punch
+ hole operations
+Message-ID: <20251017202544.3a5es5j57r6ifkwd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20251009093129.2437815-1-ethanwu@synology.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -80,80 +80,216 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251011084715.608562-1-chao@kernel.org>
+In-Reply-To: <20251009093129.2437815-1-ethanwu@synology.com>
 
-On Sat, Oct 11, 2025 at 04:47:14PM +0800, Chao Yu wrote:
-> This testcase tries to check whether f2fs can handle "usrjquota="
-> during remount correctly, it expects kernel will encounter NULL
-> pointer dereference bug w/o the fix ("f2fs: fix to avoid NULL pointer
-> dereference in f2fs_check_quota_consistency()").
+On Thu, Oct 09, 2025 at 05:31:29PM +0800, ethanwu wrote:
+> Add test to verify that Ceph snapshots preserve original file data
+> when the live file is modified with punch hole operations. The test
+> creates a file, takes a snapshot, punches multiple holes in the
+> original file, then verifies the snapshot data remains unchanged.
 > 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
-> Signed-off-by: Chao Yu <chao@kernel.org>
+> Signed-off-by: ethanwu <ethanwu@synology.com>
+> ---
+>  v1->v2: previous version is 'ceph/006: test snapshot data integrity
+>  after punch hole'.
+>     1. move it to generic and add _require_snapshot check.
+>     2. modify punch hole offset/len to be 64K aligned
+>  v2->v3:
+>     1. move test back to ceph specific since it uses ceph snapshot API.
+>     2. support custom snapdirname mount option.
+>     3. add _ceph_remove_snapshot and _ceph_create_snapshot functions.
+> 
 > ---
 
-Hi Chao,
+Thanks for your update :) I'm not familiar with ceph, so I'll try to review
+this patch from fstests side. Welcome ceph list provide more review points :)
 
-This patchset has been merged, you can send a seperated patch to update the
-commit id of _fixed_by_kernel_commit :)
+>  common/ceph        | 76 ++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ceph/006     | 58 +++++++++++++++++++++++++++++++++++
+>  tests/ceph/006.out |  2 ++
+>  3 files changed, 136 insertions(+)
+>  create mode 100755 tests/ceph/006
+>  create mode 100644 tests/ceph/006.out
+> 
+> diff --git a/common/ceph b/common/ceph
+> index df7a6814..6a19527e 100644
+> --- a/common/ceph
+> +++ b/common/ceph
+> @@ -38,3 +38,79 @@ _ceph_get_client_id()
+>  {
+>  	$GETFATTR_PROG --only-values -n "ceph.client_id" $TEST_DIR 2>/dev/null
+>  }
+> +
+> +# Get the snapshot directory name from mount options
+> +# Defaults to ".snap" if snapdirname option is not set
+> +_ceph_get_snapdirname()
+> +{
+> +	local mnt_point=$1
+> +	local snapdirname
+> +
+> +	# Extract snapdirname from mount options
+> +	snapdirname=$(findmnt -n -o OPTIONS "$mnt_point" | grep -o 'snapdirname=[^,]*' | cut -d'=' -f2)
+> +
+> +	# Default to .snap if not set
+> +	if [ -z "$snapdirname" ]; then
+> +		echo ".snap"
+> +	else
+> +		echo "$snapdirname"
+> +	fi
+> +}
+> +
+> +# Create a CephFS snapshot
+> +# _ceph_create_snapshot <directory_path> <snapshot_name>
+> +# Creates a snapshot under <directory_path>/.snap/<snapshot_name>
+> +# or <directory_path>/<custom_snapdir>/<snapshot_name> if snapdirname is set
+> +_ceph_create_snapshot()
+> +{
+> +	local dir_path=$1
+> +	local snap_name=$2
+> +	local snapdirname
+> +	local snapdir
+> +	local mnt_point
+> +
+> +	if [ -z "$dir_path" ] || [ -z "$snap_name" ]; then
+> +		echo "Usage: _ceph_create_snapshot <directory_path> <snapshot_name>"
+> +		return 1
+> +	fi
+> +
+> +	# Find the mount point for this directory
+> +	mnt_point=$(df -P "$dir_path" | tail -1 | awk '{print $NF}')
+> +	snapdirname=$(_ceph_get_snapdirname "$mnt_point")
+> +	snapdir="$dir_path/$snapdirname/$snap_name"
+> +
+> +	mkdir "$snapdir" || return 1
+> +	echo "$snapdir"
+> +}
+> +
+> +# Remove a CephFS snapshot
+> +# _ceph_remove_snapshot <directory_path> <snapshot_name>
+> +_ceph_remove_snapshot()
+> +{
+> +	local dir_path=$1
+> +	local snap_name=$2
+> +	local snapdirname
+> +	local snapdir
+> +	local mnt_point
+> +
+> +	if [ -z "$dir_path" ] || [ -z "$snap_name" ]; then
+> +		echo "Usage: _ceph_remove_snapshot <directory_path> <snapshot_name>"
+> +		return 1
+> +	fi
+> +
+> +	# Find the mount point for this directory
+> +	mnt_point=$(df -P "$dir_path" | tail -1 | awk '{print $NF}')
+> +	snapdirname=$(_ceph_get_snapdirname "$mnt_point")
+> +	snapdir="$dir_path/$snapdirname/$snap_name"
+> +
+> +	rmdir "$snapdir" 2>/dev/null
+
+What if the snapdir can't be removed? Is that possible?
+
+> +}
+> +
+> +# this test requires ceph snapshot support
+> +_require_ceph_snapshot()
+> +{
+> +	local snapdirname=$(_ceph_get_snapdirname "$TEST_DIR")
+> +	local test_snapdir="$TEST_DIR/$snapdirname/test_snap_$$"
+> +	mkdir "$test_snapdir" 2>/dev/null || _notrun "Ceph snapshots not supported (requires fs flag 'allow_snaps' and client auth capability 'snap')"
+
+Is "$snapdirname" created before calling this function? Do we need "-p" option?
+
+> +	rmdir "$test_snapdir"
+> +}
+> diff --git a/tests/ceph/006 b/tests/ceph/006
+> new file mode 100755
+> index 00000000..a5af6ca3
+> --- /dev/null
+> +++ b/tests/ceph/006
+> @@ -0,0 +1,58 @@
+> +#!/bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2025 Synology All Rights Reserved.
+> +#
+> +# FS QA Test No. ceph/006
+> +#
+> +# Test that snapshot data remains intact after punch hole operations
+> +# on the original file.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick snapshot
+> +
+> +. common/ceph
+> +
+> +_require_test
+> +_require_xfs_io_command "pwrite"
+
+I think "pwrite" is nearly always supported, don't need to check it :)
+
+> +_require_xfs_io_command "fpunch"
+> +_require_ceph_snapshot
+> +_exclude_test_mount_option "test_dummy_encryption"
+> +
+> +# TODO: commit is not merged yet. Update with final commit SHA once merged.
+> +_fixed_by_kernel_commit 1b7b474b3a78 \
+> +	"ceph: fix snapshot context missing in ceph_zero_partial_object"
+> +
+> +workdir=$TEST_DIR/test-$seq
+> +_ceph_remove_snapshot $workdir snap1
+> +rm -rf $workdir
+> +mkdir $workdir
+> +
+> +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 1048576" $workdir/foo > /dev/null
+> +
+> +snapdir=$(_ceph_create_snapshot $workdir snap1)
+
+As you just "return 1" if the _ceph_create_snapshot fails, what if the
+snapshot isn't created? So how about calling "_fail" if it fails.
+
+> +
+> +original_md5=$(md5sum $snapdir/foo | cut -d' ' -f1)
+> +
+> +$XFS_IO_PROG -c "fpunch 0 65536" $workdir/foo
+> +$XFS_IO_PROG -c "fpunch 131072 65536" $workdir/foo
+> +$XFS_IO_PROG -c "fpunch 262144 65536" $workdir/foo
+> +$XFS_IO_PROG -c "fpunch 393216 65536" $workdir/foo
+> +
+> +# Make sure we don't read from cache
+> +echo 3 > /proc/sys/vm/drop_caches
+> +
+> +snapshot_md5=$(md5sum $snapdir/foo | cut -d' ' -f1)
+> +
+> +if [ "$original_md5" != "$snapshot_md5" ]; then
+> +    echo "FAIL: Snapshot data changed after punch hole operations"
+> +    echo "Original md5sum: $original_md5"
+> +    echo "Snapshot md5sum: $snapshot_md5"
+> +fi
+> +
+> +_ceph_remove_snapshot $workdir snap1
+
+Better to make sure the snapshot is removed in _cleanup.
 
 Thanks,
 Zorro
 
-> v3:
-> - update commit id in _fixed_by_kernel_commit line
->  tests/f2fs/021     | 30 ++++++++++++++++++++++++++++++
->  tests/f2fs/021.out |  2 ++
->  2 files changed, 32 insertions(+)
->  create mode 100755 tests/f2fs/021
->  create mode 100644 tests/f2fs/021.out
-> 
-> diff --git a/tests/f2fs/021 b/tests/f2fs/021
-> new file mode 100755
-> index 00000000..0cacb138
-> --- /dev/null
-> +++ b/tests/f2fs/021
-> @@ -0,0 +1,30 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Chao Yu.  All Rights Reserved.
-> +#
-> +# FS QA Test No. f2fs/021
-> +#
-> +# This testcase tries to check whether f2fs can handle "usrjquota="
-> +# during remount correctly
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick mount quota remount
-> +
-> +_fixed_by_kernel_commit 930a9a6ee8e7 \
-> +	"f2fs: fix to avoid NULL pointer dereference in f2fs_check_quota_consistency()"
-> +
-> +_require_scratch
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount "-o usrquota"
-> +quotacheck -uc $SCRATCH_MNT
-> +_scratch_unmount
-> +
-> +_scratch_mount "-o usrjquota=aquota.user,jqfmt=vfsold"
-> +_scratch_mount "-o remount,usrjquota=,jqfmt=vfsold"
-> +_scratch_unmount
 > +
 > +echo "Silence is golden"
 > +
+> +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/f2fs/021.out b/tests/f2fs/021.out
+> diff --git a/tests/ceph/006.out b/tests/ceph/006.out
 > new file mode 100644
-> index 00000000..09f4062d
+> index 00000000..675c1b7c
 > --- /dev/null
-> +++ b/tests/f2fs/021.out
+> +++ b/tests/ceph/006.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 021
+> +QA output created by 006
 > +Silence is golden
 > -- 
-> 2.49.0
+> 2.43.0
+> 
+> 
+> Disclaimer: The contents of this e-mail message and any attachments are confidential and are intended solely for addressee. The information may also be legally privileged. This transmission is sent in trust, for the sole purpose of delivery to the intended recipient. If you have received this transmission in error, any use, reproduction or dissemination of this transmission is strictly prohibited. If you are not the intended recipient, please immediately notify the sender by reply e-mail or phone and delete this message and its attachments, if any.
 > 
 
