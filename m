@@ -1,45 +1,43 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 994A82749D2;
-	Mon, 20 Oct 2025 15:46:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E59E6284883;
+	Mon, 20 Oct 2025 16:26:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760975165; cv=none; b=qH/+6tG2xS3cJhia0qncScRqvLylYDoh6nWjYbgOYmtSrovJkLW3wDpmmOHh+Bgpb8N6hBmvD88EkKyLV8mYL58wJoOIVNRRp90TuRDWrY76ivro/XrFCPkgLv+1h6XuZlxbSZVW+IqBu8nAuFlxge4rkxswswQKoNaFlHcj99U=
+	t=1760977575; cv=none; b=EoHpVWCtpUoLabXKY6mxhvQNeAy9Dbg5EsopHaOdCtIW9rm9vq0x1jyQ8ds3y7DcjVEoIWymiVB5bbfYExonTT4w4mkkM3RtkKEc9N+A+EYlsqiYAfieGRjaBLYPbYMClD0CtXJrqwVwNqKjeUAs/blN0ljbOA0dobG0b0yn5zE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760975165; c=relaxed/simple;
-	bh=9PHbj/50TJlL2mJs5KAkblwr3rqPCXHavZ+odHpxDqA=;
+	s=arc-20240116; t=1760977575; c=relaxed/simple;
+	bh=zsZoMD4MPLGVHY2Ca63iS4NhlAloiOvul2Ex28jGRew=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=e7lLde5mM2NSx6bkWp19X1eX1R7srU9yo9F65OiA+eUhQhWe4TV2aIYHrhXvBqF0LF35eR1pn6exWWjIn00j1wagRGcND8POEy6Tr3dDhXYaY8KofI1XBAfL4zgWLEhPo0wzl4LX2SOFjg5FDyqHTHiiBVbd3e0DYuO8kTWDpNw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lC16KZfl; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=APACgXLT+ligJLGfj/ErkagTYdxL2a+26G5CVpUCX+2HLJ6+a6pvWVPxmv8Rw0sPHPrmYAnzOW/+4py7e52Fvo26bGJ9X6lqbxMkMbfZalb18xgQESap9fzPHlehX2Gd5xgjd3ury3PKe0WTk4HEPON5bldUy0nMaU/Sg92R+sE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lvNn7awj; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lC16KZfl"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 68951C4CEF9;
-	Mon, 20 Oct 2025 15:46:05 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lvNn7awj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BE84DC113D0;
+	Mon, 20 Oct 2025 16:26:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1760975165;
-	bh=9PHbj/50TJlL2mJs5KAkblwr3rqPCXHavZ+odHpxDqA=;
+	s=k20201202; t=1760977574;
+	bh=zsZoMD4MPLGVHY2Ca63iS4NhlAloiOvul2Ex28jGRew=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=lC16KZfliaWyzcZ0gI9+JKtjt/tn0hy7hdoQ/kQvODKYWaGEahgsfZNRar5khjYc3
-	 xRWIDP5XHJ9R4T5L4Nu6KgbehOWDD5cTRBmB5vWwQxSUfLgIV6ChVSx/QSXEhe8tDX
-	 dys7h8h+1VtCWmQpuJYLqLC7s3kW8SFhtYy83ksmDCUNhIGn0mYzbhoxihHrtMbqVx
-	 I/YmfIejuSzM0Tsz34pw2JRa5+ju4dtuxuWQXIEwl5J/k0lTozcmFNAkrLo0da7Ywp
-	 1lyRTzYTxOiemUjp9DMaT4jxz2JIlWX78Hpc1wBe+CpetBsqwMCvFRkhsji8TrHeTh
-	 5RvxXligNsSEg==
-Date: Mon, 20 Oct 2025 08:46:04 -0700
+	b=lvNn7awj0/QOcEugbSpjqnBvLsCZfKUcFRY3fZ1L0dTy1xXxBtXE+YPP5OazARHp4
+	 awI/MiCWfmF8nq7+GZ/Zsz5l+8MB/WR7azAnOvtFYXANSV09zc1RccFCZJjUcQuLzk
+	 Ke6t+lgBHnnk1DPfESmWH6qs5yF+6ouMxsDKfswW4ZOhPuJa/bXhCEeHRflGRIDmW9
+	 HFLOpc8jlXn9Tbr5txSuphxbK50TRZRvJeMMaA93PxBpcsi907ETcRbBX/eqaPUVCZ
+	 PIgi6efoon5MkQXnfXO1RO88M1jqHMWdkRjVvYRXerLwK7L9u4ZNodlrKTm2OScH6E
+	 9BTPWcsuGMIIA==
+Date: Mon, 20 Oct 2025 09:26:14 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Cc: Zorro Lang <zlang@redhat.com>, Christoph Hellwig <hch@lst.de>,
-	fstests@vger.kernel.org, Damien Le Moal <dlemoal@kernel.org>,
-	Naohiro Aota <naohiro.aota@wdc.com>,
-	Anand Jain <anand.jain@oracle.com>, linux-btrfs@vger.kernel.org,
-	Hans Holmberg <Hans.Holmberg@wdc.com>, linux-xfs@vger.kernel.org,
-	Carlos Maiolino <cem@kernel.org>
-Subject: Re: [PATCH v6 2/3] common/zoned: add helpers for creation and
- teardown of zloop devices
-Message-ID: <20251020154604.GJ6178@frogsfrogsfrogs>
-References: <20251017055008.672621-1-johannes.thumshirn@wdc.com>
- <20251017055008.672621-3-johannes.thumshirn@wdc.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 5/8] generic/772: actually check for file_getattr special
+ file support
+Message-ID: <20251020162614.GK6178@frogsfrogsfrogs>
+References: <176054617853.2391029.10911105763476647916.stgit@frogsfrogsfrogs>
+ <176054617988.2391029.18130416327249525205.stgit@frogsfrogsfrogs>
+ <20251017174633.lvfvpv2zoauwo7s7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20251017225448.GH6178@frogsfrogsfrogs>
+ <20251018075708.t7agddy5ceisek2e@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -48,89 +46,115 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251017055008.672621-3-johannes.thumshirn@wdc.com>
+In-Reply-To: <20251018075708.t7agddy5ceisek2e@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Fri, Oct 17, 2025 at 07:50:07AM +0200, Johannes Thumshirn wrote:
-> Add _create_zloop, _destroy_zloop and _find_next_zloop helper functions
-> for creating destroying and finding the next free zloop device.
+On Sat, Oct 18, 2025 at 03:57:08PM +0800, Zorro Lang wrote:
+> On Fri, Oct 17, 2025 at 03:54:48PM -0700, Darrick J. Wong wrote:
+> > On Sat, Oct 18, 2025 at 01:46:33AM +0800, Zorro Lang wrote:
+> > > On Wed, Oct 15, 2025 at 09:38:01AM -0700, Darrick J. Wong wrote:
+> > > > From: Darrick J. Wong <djwong@kernel.org>
+> > > > 
+> > > > On XFS in 6.17, this test fails with:
+> > > > 
+> > > >  --- /run/fstests/bin/tests/generic/772.out	2025-10-06 08:27:10.834318149 -0700
+> > > >  +++ /var/tmp/fstests/generic/772.out.bad	2025-10-08 18:00:34.713388178 -0700
+> > > >  @@ -9,29 +9,34 @@ Can not get fsxattr on ./foo: Invalid ar
+> > > >   Can not set fsxattr on ./foo: Invalid argument
+> > > >   Initial attributes state
+> > > >   ----------------- SCRATCH_MNT/prj
+> > > >  ------------------ ./fifo
+> > > >  ------------------ ./chardev
+> > > >  ------------------ ./blockdev
+> > > >  ------------------ ./socket
+> > > >  ------------------ ./foo
+> > > >  ------------------ ./symlink
+> > > >  +Can not get fsxattr on ./fifo: Inappropriate ioctl for device
+> > > >  +Can not get fsxattr on ./chardev: Inappropriate ioctl for device
+> > > >  +Can not get fsxattr on ./blockdev: Inappropriate ioctl for device
+> > > >  +Can not get fsxattr on ./socket: Inappropriate ioctl for device
+> > > > 
+> > > > This is a result of XFS' file_getattr implementation rejecting special
+> > > > files prior to 6.18.  Therefore, skip this new test on old kernels.
+> > > > 
+> > > > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> > > > ---
+> > > >  tests/generic/772 |    3 +++
+> > > >  tests/xfs/648     |    3 +++
+> > > >  2 files changed, 6 insertions(+)
+> > > > 
+> > > > 
+> > > > diff --git a/tests/generic/772 b/tests/generic/772
+> > > > index cc1a1bb5bf655c..e68a6724654450 100755
+> > > > --- a/tests/generic/772
+> > > > +++ b/tests/generic/772
+> > > > @@ -43,6 +43,9 @@ touch $projectdir/bar
+> > > >  ln -s $projectdir/bar $projectdir/broken-symlink
+> > > >  rm -f $projectdir/bar
+> > > >  
+> > > > +file_attr --get $projectdir ./fifo &>/dev/null || \
+> > > > +	_notrun "file_getattr not supported on $FSTYP"
+> > > 
+> > > I'm wondering if a _require_file_attr() is better?
+> > 
+> > It's checking specifically that the new getattr syscall works on special
+> > files.  I suppose you could wrap that in a helper, but I think this is a
+> > lot more direct about what it's looking for.
 > 
-> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-> ---
->  common/zoned | 53 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 53 insertions(+)
-> 
-> diff --git a/common/zoned b/common/zoned
-> index 41697b08..e2f5969c 100644
-> --- a/common/zoned
-> +++ b/common/zoned
-> @@ -45,3 +45,56 @@ _require_zloop()
->  	    _notrun "This test requires zoned loopback device support"
->      fi
->  }
-> +
-> +_find_next_zloop()
-> +{
-> +    id=0
+> Please correct me if I'm wrong. The new syscall is created for setting extended
+> attributes on special files, therefore I suppose if there's file_setattr syscall
+> and it can work on regular file, then it can work on any other files the fs supports.
+> If this's correct, _require_file_attr can use file_attr to try to set and get
+> attr on a regular file in $TEST_DIR, to make sure the whole file_set/getattr
+> feature is supported. Is that right?
 
-local id=0
+No.  The new new syscall allows programs to specify a {dir fd, path}
+input that points to a special file, but it uses the existing per-fs
+get/setattr implementations.  All of those implementations have to
+remove their copy-pasta'd code:
 
-(so the helper won't reassign a variable in the caller's scope)
+	if (d_is_special(dentry))
+		return -ENOTTY;
 
-With that fixed,
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+before the new syscall will return non-error for special files.  This
+wasn't done for all of the filesystems before 6.18, which means that
+6.17 has the syscall but none of the filesystems support accessing
+special files.  As of 6.18-rc2, gfs, jfs, and ubifs still have that
+code.
+
+TLDR: You can't assume that the new syscall works with special files.
 
 --D
 
-> +
-> +    while true; do
-> +        if [[ ! -b "/dev/zloop$id" ]]; then
-> +            break
-> +        fi
-> +        id=$((id + 1))
-> +    done
-> +
-> +    echo "$id"
-> +}
-> +
-> +# Create a zloop device
-> +# usage: _create_zloop <base_dir> <zone_size> <nr_conv_zones>
-> +_create_zloop()
-> +{
-> +    local id="$(_find_next_zloop)"
-> +
-> +    if [ -n "$1" ]; then
-> +        local zloop_base="$1"
-> +    else
-> +        local zloop_base="/var/local/zloop"
-> +    fi
-> +
-> +    if [ -n "$2" ]; then
-> +        local zone_size=",zone_size_mb=$2"
-> +    fi
-> +
-> +    if [ -n "$3" ]; then
-> +        local conv_zones=",conv_zones=$3"
-> +    fi
-> +
-> +    mkdir -p "$zloop_base/$id"
-> +
-> +    local zloop_args="add id=$id,base_dir=$zloop_base$zone_size$conv_zones"
-> +
-> +    echo "$zloop_args" > /dev/zloop-control || \
-> +        _fail "cannot create zloop device"
-> +
-> +    echo "/dev/zloop$id"
-> +}
-> +
-> +_destroy_zloop() {
-> +    local zloop="$1"
-> +
-> +    test -b "$zloop" || return
-> +    local id=$(echo $zloop | grep -oE '[0-9]+$')
-> +
-> +    echo "remove id=$id" > /dev/zloop-control
-> +}
-> -- 
-> 2.51.0
+> Thanks,
+> Zorro
+> 
+> > 
+> > --D
+> > 
+> > > Thanks,
+> > > Zorro
+> > > 
+> > > > +
+> > > >  echo "Error codes"
+> > > >  # wrong AT_ flags
+> > > >  file_attr --get --invalid-at $projectdir ./foo
+> > > > diff --git a/tests/xfs/648 b/tests/xfs/648
+> > > > index 215c809887b609..e3c2fbe00b666a 100755
+> > > > --- a/tests/xfs/648
+> > > > +++ b/tests/xfs/648
+> > > > @@ -47,6 +47,9 @@ touch $projectdir/bar
+> > > >  ln -s $projectdir/bar $projectdir/broken-symlink
+> > > >  rm -f $projectdir/bar
+> > > >  
+> > > > +$here/src/file_attr --get $projectdir ./fifo &>/dev/null || \
+> > > > +	_notrun "file_getattr not supported on $FSTYP"
+> > > > +
+> > > >  $XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+> > > >  	-c "project -sp $projectdir $id" $SCRATCH_DEV | filter_quota
+> > > >  $XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+> > > > 
+> > > 
+> > > 
+> > 
 > 
 > 
