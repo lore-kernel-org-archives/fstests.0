@@ -1,145 +1,120 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A48724DCEB
-	for <fstests@vger.kernel.org>; Mon, 20 Oct 2025 11:33:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 689F419C553
+	for <fstests@vger.kernel.org>; Mon, 20 Oct 2025 13:55:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760960020; cv=none; b=U4lU7W1jN+xndbkDdbAnLhQgsEm0HWHMTO1d855VxRVQWpsg/p7DtEESlVnEjQFN3Rv/PyPvwQ8MfrY/85HeDGy4zeOd5bOPQwvAjD9iuiqIoxVDOBNDiALiNjygnTWVVzDnU6lDQK424H/pmgzIDCSs8+I6SE2Q9isnC2/bBpQ=
+	t=1760968557; cv=none; b=dOLNyxD8axexEG4UhDSXQf52RvrrvuUge1mst7VBSKCMT+gatnVmeDqp2P/JYZ322gVAhhmWLlM6xhpfHh0y+pum1TDM4fYkWXfEr+u6MlH8w3EO1q2mtfWiRu9VXT/NAEkPGMXOFFxwibJ7lBt3FTUVA8JrZ7ciWSIcCBcknoU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760960020; c=relaxed/simple;
-	bh=6EiGStiBznav1eSgay7iCK/qy5mr0rH2mzyH9UWsfy8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=UcVWdYihYjJeylAIClPvuYDU0X90NjpgY6cKWuJt1Qb74IdUVXQfCFTlUcGLhMqKl9mo05qqpTza2wSyOBt8kCzkj6oNhT7thV19KGEFKg8vuDzNdhD4IG2iACNR/KOeL6L43UC6cklPpTy9kAZhSqgo6fnuS4H07VlyksXJtbw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZadAJu84; arc=none smtp.client-ip=170.10.129.124
+	s=arc-20240116; t=1760968557; c=relaxed/simple;
+	bh=GmbQ2jXhDm7vy2iDgaO/7OoZbduITFdgv011FhLwyA4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=DFNkE3FJ5Nvv0mCg+uRHARgLaoF3fdHgxLe2QBSChRt5xR7Grm64OTtaBjWkx81ErS8drDP0ob+Y4kSNp/f+FGX+YwnV/eQJKhfQ6tT2WqotHM6YxHGxQZ+pTMO575ka/ftOgldG8OvthlL0hNNQfCc14dwWppTy75u6BqwpXAU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YcjF8J/f; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZadAJu84"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YcjF8J/f"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1760960018;
+	s=mimecast20190719; t=1760968554;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=5P+mZVBt10RC7+9Dyixo8N3Ti/idpjm/0QEnemownhg=;
-	b=ZadAJu84RwdHjN80WyZIqZ0xlyuXZBqaPnotqKR3NpFyB0OcOXNUns/gLd7EhA/f/qQ2VR
-	E6p1GcCZxj+vC5uz0syFpXa+G6P3Cjo81pxO9HKgZdqi2MGU9UPemQl5/bX/jtowWmmYBh
-	pLxKYJnkifWi3n/Owfn3hguYSFrdHZ8=
-Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
- [209.85.208.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=6J67v77z2C8c8cpDHO3kHr83huPFvvnav5l9yd83eE4=;
+	b=YcjF8J/fJ2H+BeTUgSmHHypjqFusSPUA5VECLYgaAhTis2g39/2jAhW24rAqyedNQ4NR3n
+	CHx3qcN+jqPAf/Ov8W9yOtPVp++LOQEg21KCZHFZuucpbjgjF/OAskZM3s5QCDjv0U+t3K
+	UMfwq5VnhEm42WKoCreZP26T1aVH3kc=
+Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com
+ [209.85.128.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-185-QooFe7kbOzCD3maVX-QUvQ-1; Mon, 20 Oct 2025 07:33:36 -0400
-X-MC-Unique: QooFe7kbOzCD3maVX-QUvQ-1
-X-Mimecast-MFC-AGG-ID: QooFe7kbOzCD3maVX-QUvQ_1760960016
-Received: by mail-ed1-f72.google.com with SMTP id 4fb4d7f45d1cf-63c0d3d7178so5233788a12.3
-        for <fstests@vger.kernel.org>; Mon, 20 Oct 2025 04:33:36 -0700 (PDT)
+ us-mta-462-QOJ0ntXPOaitaTgYiAyYZg-1; Mon, 20 Oct 2025 09:55:52 -0400
+X-MC-Unique: QOJ0ntXPOaitaTgYiAyYZg-1
+X-Mimecast-MFC-AGG-ID: QOJ0ntXPOaitaTgYiAyYZg_1760968552
+Received: by mail-wm1-f72.google.com with SMTP id 5b1f17b1804b1-46e4cb3e4deso16010415e9.1
+        for <fstests@vger.kernel.org>; Mon, 20 Oct 2025 06:55:52 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1760960015; x=1761564815;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=5P+mZVBt10RC7+9Dyixo8N3Ti/idpjm/0QEnemownhg=;
-        b=OfbZ+Muf8wpDdL/IbRwVsGGWNtGNNC/HuLilNYZBlv7V/2ayWilFs93oQowbOSnlLH
-         qDba+akue2w7E0q4lT4McP+IdnOI3WlAeCIeccHc986rUBhQWQZ/BTOX3wI/XkcSqt+8
-         4bINnBPkCLLBk4d1dIwjAoTLGgBa1hL2YvV8U+uggwoEHn67R3pf7WmZ7CIDXLhjy1Vz
-         zyDfq6BkXDfy6BQYL+jrQqR4qzyc/Uqwx1vprbb+YUPt6YZGDROQMx+yavl8CQZeds5P
-         U0ZnqfgP4r9JUXnkDJN4nxiSOSruxE876lBLJaNm7b00PjIbmZZpLQgi4st+F8cIGkXC
-         tdug==
-X-Forwarded-Encrypted: i=1; AJvYcCV/g9M4gin+Nc9uowGqBvJcq7ozkgcjBCG/LgyPxMCvSe/81VwQ5+pbZut/r21OFjxvaIrqt1JG@vger.kernel.org
-X-Gm-Message-State: AOJu0YwF9r9AErJxCBu3/ZeTMGWsvF26PHk2S832zpKTRWyFOAtvcsVS
-	TeNezfltXFEou5bCuqVovNM7RouWbHb+yXYSnA690Sz9TKtHjuE2PpCJvOfA/hCpYXQVEGo58b2
-	trqX0dsgnmkExeUU9k3fqpEatfFLLIjRnY8Cw6lB5Q5yj/qEwcDv+jW9fSYXpZpqls1Y=
-X-Gm-Gg: ASbGnctYraYfM4iDi8hB1v0hhmE1Vi0hG5EYt8Db2YBRf2g2lgtOTd0p7Lhd9Rzz/Vf
-	07Psky4YBJy2ElN5n2AF9Q9MOffZeC8o1z+JFbw59NuPh6c48jksv2NgD0mv09TBQh8YTvvXyA+
-	tDB5rj86c55i/bppDHOg2baCEFc4F/9tTwfvfxpgFEFCkjFJRBSh15rTcd7oFdzt4wgy0qB+RfS
-	mm1m4Kt8KO/5QfN1An3cXrmoymGySEeG9qhVPVvAoyQOqsPAM6pnDs1BG91fa2uKaPfbf7BEqgP
-	GhAYodSsro53pRyHASaTewP6EgmJpdndT3DDT05A4TzehauntBbOIjckFSKwWFCHBdldkgB448l
-	71/CZ5Om63VjB0xfPOufsrUMOaOmO2hfVodhq
-X-Received: by 2002:a05:6402:1443:b0:61c:35c0:87c6 with SMTP id 4fb4d7f45d1cf-63c1f647f4emr12287023a12.12.1760960014998;
-        Mon, 20 Oct 2025 04:33:34 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHfpMYghkzzs/Ww2s0+gFlJskIrmobsHH+lSHmxFfy4Z1IyJwk98fukBGwGrnhsp3o9CDhWpQ==
-X-Received: by 2002:a05:6402:1443:b0:61c:35c0:87c6 with SMTP id 4fb4d7f45d1cf-63c1f647f4emr12287002a12.12.1760960014517;
-        Mon, 20 Oct 2025 04:33:34 -0700 (PDT)
-Received: from [192.168.100.149] (gw20-pha-stl-mmo-2.avonet.cz. [131.117.213.219])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-63c4945ef49sm6389403a12.29.2025.10.20.04.33.33
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 20 Oct 2025 04:33:34 -0700 (PDT)
-Message-ID: <426917c5-baf7-4a0c-a62c-f674d6ace20b@redhat.com>
-Date: Mon, 20 Oct 2025 13:33:33 +0200
+        d=1e100.net; s=20230601; t=1760968551; x=1761573351;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=6J67v77z2C8c8cpDHO3kHr83huPFvvnav5l9yd83eE4=;
+        b=GWq7VNX+UcWRHRgmcGHOH9rdy0QtGoEU0S8EFCUeRy1ogyIBmHEOfEZlOy76Dxvmcc
+         5fwovJTqEtJ5sh5IVfw8UUhy30AKlLA83KxjT3RZnI+JAOS496vyu8LEq50uJwaB44q0
+         PE688Oi5ff1h+Zna5JlOEfN63krJoC6Is8L6iROo8Us7QE7BiUt0VEZvpQR8T/WfHfio
+         +RzeihMM5oQlFLs7JHRVlt+YflPDYO5OOneJkVIC54AzCv/5TzlRRCJK2wXNUSvl74jB
+         yaAwO7Mf+s+JPOspC4cEixK5XXRzmlM8SwKZI5v4a0Y9e4nlzGOPlHeF427iWvnN85XU
+         1pkw==
+X-Forwarded-Encrypted: i=1; AJvYcCWFaBu2IHer46jmWjAZK3eZDkBih6+q+I9uxelxg+21/MM2niBuCPWRw4C3w57XdyZoptdYNVjp@vger.kernel.org
+X-Gm-Message-State: AOJu0YzlMpLHSfjDFK5B0MeCJC+jEIcqIGnXX3U+Tgie54Dfz5+3p9Gu
+	ZQbBsD2sd6nVwas6RHERbZPkEmnPWs/HqPd9li7idXtyKrnAss4whLrFj0SjHeUlZKxgRFe4w/F
+	2tA2OuTbecwaq0j54aowY2ZHpxF+AsREIUjXn2ad7hH18a/Q5EWlaQtYH9QVszMY1ug==
+X-Gm-Gg: ASbGncvl2+ipWjHVmcYLMJxLPOKUlEA8vJ3cy+xQ0nNwL5C+jpElVppunE9wd1JsFN8
+	PDuO8xxWlm0ymZJpvntgebwZ3/Qg0gXNFbNhSH6ndefRSrR2/IstOIRgcbNsiJi681e/vWtRU9g
+	K072wEiJnGfBrKX88hEwIZ2BGiW1qttO7InefwcE7/TK6dMaE0EDWOoH3rAJ5C0OvSG/eZW1+ja
+	9TsiLBYvZdOTUUll+BhGRJxHfIirUT+9dfNWvUcWKRYirrWlsG3aJi40kgMV3URTX5LlpCvILdI
+	ubQm0joDnQZrcvw/seyA0UGHTxmU11XLsQX4HUpn4N15zeoipi8Waloiwt5KSsoZysjF7IZxwBz
+	54hp4pORES1M333wfzXh8YkN4UxXuoVllHg==
+X-Received: by 2002:a05:600c:8183:b0:45f:29eb:2148 with SMTP id 5b1f17b1804b1-4711724e5bcmr97818375e9.7.1760968551385;
+        Mon, 20 Oct 2025 06:55:51 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEoNeNjAOEFjzezPaRjRgxNsc3TH8pxblhe4oKdUeogy3uxUDDRaVGenIo3sbIkIFY6QuXKhQ==
+X-Received: by 2002:a05:600c:8183:b0:45f:29eb:2148 with SMTP id 5b1f17b1804b1-4711724e5bcmr97818105e9.7.1760968550781;
+        Mon, 20 Oct 2025 06:55:50 -0700 (PDT)
+Received: from thinky.redhat.com (ip-217-030-074-039.aim-net.cz. [217.30.74.39])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-47152959b55sm151404645e9.6.2025.10.20.06.55.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 20 Oct 2025 06:55:50 -0700 (PDT)
+From: Andrey Albershteyn <aalbersh@redhat.com>
+X-Google-Original-From: Andrey Albershteyn <aalbersh@kernel.org>
+To: linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Cc: djwong@kernel.org,
+	zlang@redhat.com,
+	Andrey Albershteyn <aalbersh@kernel.org>
+Subject: [PATCH 0/3] generic/772: split and fix
+Date: Mon, 20 Oct 2025 15:55:27 +0200
+Message-ID: <20251020135530.1391193-1-aalbersh@kernel.org>
+X-Mailer: git-send-email 2.50.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] common/atomicwrites: fix _require_scratch_write_atomic
- when awu_max_fs is empty
-To: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Content-Transfer-Encoding: 8bit
+
+Hi all,
+
+This one add one missed file attribute flag (n). Then, the check for
+file_getattr/file_setattr on regular and special files is lifted to the
+common/ for futher test splitting. The generic/772 is split into two
+tests one for regular files and one for special files.
+
+This one based on top of Darrick's "random fixes" patchset [1]
+
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
+Cc: zlang@redhat.com
 Cc: djwong@kernel.org
-References: <20250906131722.1333025-1-zlang@kernel.org>
-Content-Language: en-US
-From: Pavel Reichl <preichl@redhat.com>
-In-Reply-To: <20250906131722.1333025-1-zlang@kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
 
-On 06/09/2025 15:17, Zorro Lang wrote:
-> If a kernel doesn't support atomic write, _get_atomic_write_unit_min
-> and _get_atomic_write_unit_max will get nothing.
->
->    local awu_min_bdev=$(_get_atomic_write_unit_min $SCRATCH_DEV)
->    local awu_max_bdev=$(_get_atomic_write_unit_max $SCRATCH_DEV)
->
-> If $awu_min_bdev and $awu_max_bdev are empty, then the logic likes
-> "[ $awu_min_bdev -eq 0 ] && [ $awu_max_bdev -eq 0 ]" is meaningless,
-> and it causes g/767 hang on system which doesn't support atomic
-> write.
->
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
-> ---
->   common/atomicwrites | 9 ++++++---
->   1 file changed, 6 insertions(+), 3 deletions(-)
->
-> diff --git a/common/atomicwrites b/common/atomicwrites
-> index 33526399d..bbcc4e7c5 100644
-> --- a/common/atomicwrites
-> +++ b/common/atomicwrites
-> @@ -47,8 +47,9 @@ _require_scratch_write_atomic_multi_fsblock()
->   
->   	_scratch_unmount
->   
-> -	test $awu_max_fs -ge $((bsize * 2)) || \
-> +	if [ -z "$awu_max_fs" -o $awu_max_fs -lt $((bsize * 2)) ];then
->   		_notrun "multi-block atomic writes not supported by this filesystem"
-> +	fi
->   }
->   
->   _require_scratch_write_atomic()
-> @@ -58,7 +59,8 @@ _require_scratch_write_atomic()
->   	local awu_min_bdev=$(_get_atomic_write_unit_min $SCRATCH_DEV)
->   	local awu_max_bdev=$(_get_atomic_write_unit_max $SCRATCH_DEV)
->   
-> -	if [ $awu_min_bdev -eq 0 ] && [ $awu_max_bdev -eq 0 ]; then
-> +	if [ -z "$awu_min_bdev" -o -z "$awu_max_bdev" ] || \
-> +		[ $awu_min_bdev -eq 0 -a $awu_max_bdev -eq 0 ];then
->   		_notrun "write atomic not supported by this block device"
->   	fi
->   
-> @@ -75,7 +77,8 @@ _require_scratch_write_atomic()
->   
->   	_scratch_unmount
->   
-> -	if [ $awu_min_fs -eq 0 ] && [ $awu_max_fs -eq 0 ]; then
-> +	if [ -z "$awu_min_fs" -o -z "$awu_max_fs" ] || \
-> +		[ $awu_min_fs -eq 0 -a $awu_max_fs -eq 0 ];then
->   		_notrun "write atomic not supported by this filesystem"
->   	fi
->   }
+[1]: https://lore.kernel.org/fstests/176054617853.2391029.10911105763476647916.stgit@frogsfrogsfrogs/T/#t
 
-LGTM
+Andrey Albershteyn (3):
+  common/filter: add missing file attribute
+  generic/772: require filesystem to support file_[g|s]etattr
+  generic/772: split this test into 772 and 773 for regular and special
+    files
 
-Reviewed-by: Pavel Reichl <preichl@redhat.com>
+ common/filter         |  2 +-
+ common/rc             | 32 +++++++++++++++++
+ tests/generic/772     | 41 ++-------------------
+ tests/generic/772.out | 14 --------
+ tests/generic/773     | 84 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/773.out | 20 +++++++++++
+ tests/xfs/648         |  7 ++--
+ 7 files changed, 142 insertions(+), 58 deletions(-)
+ create mode 100755 tests/generic/773
+ create mode 100644 tests/generic/773.out
 
+-- 
+2.50.1
 
