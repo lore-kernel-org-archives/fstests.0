@@ -1,105 +1,146 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03BA32F6197;
-	Mon, 20 Oct 2025 14:16:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 18A4628371
+	for <fstests@vger.kernel.org>; Mon, 20 Oct 2025 14:30:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760969805; cv=none; b=ZUYggj+Uv4FTDlkmMGgUpwUkGc5VbeQmzOM7JYRhWvh3vr5HuBn6HfYGY4ojFBx72YSDPmnlTmrXgwyteYk2S9BpPcDIWnmeleOq2XDlrqr8R2+Y+Gtn1ftlUH6IVkMVSfPRfqgavC8iyE+/oZywYkOkSNN8pEpaL5CQRrIqAw4=
+	t=1760970654; cv=none; b=QHtPVeg6GajI1NIGzYV3ip4zKGGlcVjz3SFvse9i0x4tozBol+1t/zOyKtf1T1JpsQtW52JxqRxWQ6i9eSR8wQC7Q4CRetBH1z3bknuUYEpMJ43frbtIkwcXiKJVbbQXTNxF4jXUHlPK1Nk0Dg5HNnt7CJfyCmuNQAYHxMVaIm0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760969805; c=relaxed/simple;
-	bh=EE/mDIV+O28xCCxx8aUI6Upyyg2gFcq8QAj8aKxRYVw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=kV/Gr0xsWLo/2oXlPqpTDqYbEarB2KXgG3jn6U9S9aWlXwdPqnRSzkRRdKn3mnj4WKUNLwefEZisq2kLJkk8xjLifWuwOvTJxpT3t9ekAKeUI3QMkEDORDQikEOi4xCt6u8yVQGpDpH5PNh+9vIMYXyf+VQch8IybEY5mI9XWuQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RzfZ4+ZB; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1760970654; c=relaxed/simple;
+	bh=f66oFHxPsfgrk595tE2oPmOfe/pNPiqlt5+BFWFbyA4=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=nxCp3KSQwlRkcffWCki+VssW/zmmqJh6qMp9tQZ/w7EyG0hVIE/QAOCOs0PvyWCnS+g4ZYpWfeZjuWx4myOoZlzmO14D+XXSjZzVIvGrLhH8d7Xv8dO1IPRsrbLmCSxYi/O+CJ2yEUv2A9sdnBnzZZAxFByliRbmoNibmRAsP1Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bIbJFTy5; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RzfZ4+ZB"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 32652C4CEFB;
-	Mon, 20 Oct 2025 14:16:42 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bIbJFTy5"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 34B8AC4CEF9;
+	Mon, 20 Oct 2025 14:30:53 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1760969804;
-	bh=EE/mDIV+O28xCCxx8aUI6Upyyg2gFcq8QAj8aKxRYVw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=RzfZ4+ZBKqJI7is0dGJvy5qmv2hdavusjRlJP60hNiVfn45sfkI9yR0S67L9U8tYT
-	 +4xuA/RSWyh37GGb+OYwBdgHV64Okk4k1eeSbRjoi4b5xmp1WQcJOJBetJO17WKfgx
-	 hDBF3AG3N90Ulf5foztqg6M7oTs0QHciLcGHibS07SEHriKL1e23up5jgCQLAawxUu
-	 L3eMRlD7pR3ZU90yVJZ2UOGEJrDcK3GskAFDOt3Fk8bPDeK6iR5gh8FiErGjddkl1k
-	 8SWyk2syOWo05bLGDprBr/3PoJcfvAXWBiHNPtmjszeT4qP8Tq6RcrciTX51fCRS7X
-	 PvEdat8BqHeMQ==
-Date: Mon, 20 Oct 2025 22:16:39 +0800
+	s=k20201202; t=1760970653;
+	bh=f66oFHxPsfgrk595tE2oPmOfe/pNPiqlt5+BFWFbyA4=;
+	h=Date:From:To:Subject:From;
+	b=bIbJFTy5p1E8ZrwzhQFNRuDyjkWXda/rmMFwmli43LNPY9lx3F7YRTcHW6x/NeuJz
+	 10h/Q2AhZW9iFXj9zhVhsmQrsvDr5Ylfz1IqgAajI5Q1bEC5pI7/rqMe1KkwNVnw2D
+	 LO8taiDL6bUqrGeVjeOZ8CGXp0DCipUPVr716jYJ+I3UjV+BSNRC/F6Y8L8OY83qbX
+	 tGf4E2O53y8M1dSjQ9Io0x9e8YKFmC8fW9kMgS/lI0OMl4FIHZbqVveld8Ta2zjHfP
+	 U4R+bqj4515sWyLgHJZzm1ZHmRv2ztrSTyG1Q3eLMwzscX2G82x/xiEbi85SkEnMXU
+	 UCKyz3GpOFepw==
+Date: Mon, 20 Oct 2025 22:30:50 +0800
+Message-ID: <c7014cf20a69300494388a6826d2bb92@kernel.org>>
 From: Zorro Lang <zlang@kernel.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 1/8] generic/427: try to ensure there's some free space
- before we do the aio test
-Message-ID: <20251020141639.ekbpgtfjdyybd3wz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <176054617853.2391029.10911105763476647916.stgit@frogsfrogsfrogs>
- <176054617913.2391029.5774423816009069866.stgit@frogsfrogsfrogs>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2025.10.05 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="CQ3k44AKZI5P"
+Content-Disposition: inline
+
+
+--CQ3k44AKZI5P
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <176054617913.2391029.5774423816009069866.stgit@frogsfrogsfrogs>
 
-On Wed, Oct 15, 2025 at 09:36:58AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> On a filesystem configured like this:
-> MKFS_OPTIONS="-m metadir=1,autofsck=1,uquota,gquota,pquota -d rtinherit=1 -r zoned=1"
-> 
-> This test fails like this:
-> 
-> --- a/tests/generic/427.out      2025-04-30 16:20:44.584246582 -0700
-> +++ b/tests/generic/427.out.bad        2025-07-14 10:47:07.605377287 -0700
-> @@ -1,2 +1,2 @@
->  QA output created by 427
-> -Success, all done.
-> +pwrite: No space left on device
+Hi all,
 
-Hahah, I just felt weird, why g/427 failed as:
+The master branch of the xfstests repository at:
 
-   QA output created by 427
-  -pwrite: No space left on device
-  +Success, all done.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-then I found `git am` treats above commit log as part of the patch :-D Please add
-some blanks to above fail messages.
-
-BTW, I decided not to merge this patchset in today's release, due to I haven't gotten
-time to give it enough test. I'll try to merge it (or part of it) in next release .
-Sorry for the late.
+has just been updated to v2025.10.05 version.
 
 Thanks,
 Zorro
 
-> 
-> The pwrite failure comes from the aio-dio-eof-race.c program because the
-> filesystem ran out of space.  There are no speculative posteof
-> preallocations on a zoned filesystem, so let's skip this test on those
-> setups.
-> 
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
->  tests/generic/427 |    3 +++
->  1 file changed, 3 insertions(+)
-> 
-> 
-> diff --git a/tests/generic/427 b/tests/generic/427
-> index bddfdb8714e9a7..bb20d9f44a2b5a 100755
-> --- a/tests/generic/427
-> +++ b/tests/generic/427
-> @@ -28,6 +28,9 @@ _require_no_compress
->  _scratch_mkfs_sized $((256 * 1024 * 1024)) >>$seqres.full 2>&1
->  _scratch_mount
->  
-> +# Zoned filesystems don't support speculative preallocations
-> +_require_inplace_writes $SCRATCH_MNT
-> +
->  # try to write more bytes than filesystem size to fill the filesystem,
->  # then remove all these data. If we still can find these stale data in
->  # a file' eofblock, then it's a bug
-> 
+The new head of the master branch is commit:
+
+2cba4b54e6ab xfs: test quota's project ID on special files
+
+New commits:
+
+Andrey Albershteyn (3):
+      [ef1028cf0379] file_attr: introduce program to set/get fsxattr
+      [4eb40174d77c] generic: introduce test to test file_getattr/file_setattr syscalls
+      [2cba4b54e6ab] xfs: test quota's project ID on special files
+
+Brian Foster (1):
+      [986a4cc1f5a7] common/rc: destroy loop dev before fallback recreation
+
+Carlos Maiolino (3):
+      [e2932df1b5d0] xfs/513: remove attr2 and ikeep tests
+      [21d6c88606ce] xfs/613: remove attr2 tests
+      [c3b7b05756d6] xfs/539: Remove test for good
+
+Chao Yu (2):
+      [38ae4c5048a0] f2fs/021: test quota mount option
+      [9460a05243ac] f2fs/022: do sanity check on footer of non inode dnode
+
+Qu Wenruo (3):
+      [ebfd9f1ea7c6] btrfs/012 btrfs/136: skip the test if ext* doesn't support the block size
+      [f8d78645f2ab] btrfs/192 btrfs/30[456]: explicitly specify block size to avoid false alerts
+      [57589265bf74] btrfs/26[67]: update the stale comments
+
+
+Code Diffstat:
+
+ .gitignore            |   1 +
+ common/filter         |  15 +++
+ common/rc             |   3 +
+ configure.ac          |   1 +
+ include/builddefs.in  |   1 +
+ m4/package_libcdev.m4 |  16 +++
+ src/Makefile          |   5 +
+ src/file_attr.c       | 274 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/012       |   3 +
+ tests/btrfs/136       |   3 +
+ tests/btrfs/192       |   8 +-
+ tests/btrfs/266       |   4 +-
+ tests/btrfs/267       |   2 +-
+ tests/btrfs/304       |   5 +-
+ tests/btrfs/305       |   5 +-
+ tests/btrfs/306       |   5 +-
+ tests/f2fs/021        |  30 ++++++
+ tests/f2fs/021.out    |   2 +
+ tests/f2fs/022        |  54 ++++++++++
+ tests/f2fs/022.out    |   2 +
+ tests/generic/772     | 109 ++++++++++++++++++++
+ tests/generic/772.out |  37 +++++++
+ tests/xfs/513         |  11 --
+ tests/xfs/513.out     |   7 --
+ tests/xfs/539         |  72 -------------
+ tests/xfs/539.out     |   2 -
+ tests/xfs/613         |   6 --
+ tests/xfs/613.out     |   4 -
+ tests/xfs/648         |  73 ++++++++++++++
+ tests/xfs/648.out     |  15 +++
+ 30 files changed, 655 insertions(+), 120 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--CQ3k44AKZI5P
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmj2Rx4ACgkQlNbPkfr2
+tMz8JA/+MXK5K4a3HQ17BPZZIgYFrEk3QRj8sKygUEc9Y9J6QeJzluHyXhIQe/U1
+Olo79iCiOkYLAdGrEEzP/eD2/5sadQphl9FHEEUCEMJweLzVC63nF7yBzteV8OvF
+JICqDvyM8S5U/5FsbjYI2GP1zn9V8WBWII+vGHpdBJnRFGwkayr2y1Ems6LsBEjk
+Y8GtU2/BQUvUZUAUk78QceNQryN0jKm86nTOM3xi4qbOhvNfG0C2YZM1+K0d19Vr
+UqMTjX7D9UEEDLjolDqifKQiYS+fQSX3Kk9X2AoO9TFprfshNFqXnmguys61FVww
+YrJPrJa55Tu7ZaxAEBAOK96vZKgm/Tml1lkZhXUCk0rIth3XkT5F54gCNnefu3Cd
+9teXx1ugnzLukGv75Ie3g5I6jNIA5FDo0n99kaxuesR6xCWWkWik9zU/pth8kWMV
+nUVR7XTa1My+SX73uYd22Z0R8ijAdyjqoJ3hkZ1CTFtCcdb5KpxgbXb2tSOqmxQM
+Uq/yqp70UZmpFc7Hm13JAR1rg82cYxeERTgzHyG5ku/xBzOdcZZr0JSohTfyDtRb
+VsbfoJNurdrLD0x8359ML6ozEDWcFZeDSMO9uBa9i8z5pAIuQX9iu9YLptKRTDkS
+LsF4WZ/dFT8tZ670+wwfD67nh6qo1ewDnhq8+B4JtQzdYcrRJL8=
+=ks1W
+-----END PGP SIGNATURE-----
+
+--CQ3k44AKZI5P--
