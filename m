@@ -1,73 +1,74 @@
-Received: from mail-pf1-f179.google.com (mail-pf1-f179.google.com [209.85.210.179])
+Received: from mail-pj1-f41.google.com (mail-pj1-f41.google.com [209.85.216.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 094772C027B
-	for <fstests@vger.kernel.org>; Fri, 24 Oct 2025 09:01:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53D0835B144
+	for <fstests@vger.kernel.org>; Fri, 24 Oct 2025 09:18:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761296483; cv=none; b=G9EJ3fp+E1jwZFgWR8PYWd6JHIwvTkZpvoxQFcOIeKLgC0z6kYJKje076gOjHpMX/DNpmsF8V6Skc+yIpueS/QfGlC8SQ6E+a19l0aIHoK7rXtiBhBkphRRzAQGXZaVP4Gx/MhLkajMDdMtdKwsVad9GukUiWzAINJGoVXPZ2Ys=
+	t=1761297487; cv=none; b=kSu1rvMNAOlkc8RYZjIj4erBgG1DL86qK1D+tzOyiX3BG7OoSru8X5/ArCRsRwSgt77vZsMMQHFBOCYegNUuErlR2WZHLUAZQInYIKckY+F+bc3AWSr6QOCKaw6Fz2r5q7qnvd82EEyBmTHu7+u8NjiNjwDKB/rbwT7fxy5Mc3k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761296483; c=relaxed/simple;
-	bh=kzd8hR8ZB48TRf1FBLYy52ZbdXMgU2pQUI3oHfpkBtE=;
+	s=arc-20240116; t=1761297487; c=relaxed/simple;
+	bh=MkHSCjiuGbedRTO0h6kA5KeA8QWtdD4n/Bl601uZN10=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:Mime-Version; b=Nm7QJZ/XLYhX/JAY6jtqSAJwofGkv7NccuISEAqKF1dPwQfCaDxAjBZNebsvwGwtbVCgY+N8lSRi1I+z2iPbBzE8/xJafFLzv1gzCstnyQG8DuN8GP+B6jtzakiqp3tL5HOhHaKtc0gK4XxkWnSr7lSINt2RVsNKDLQX3cnOIaA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FmmN4878; arc=none smtp.client-ip=209.85.210.179
+	 Content-Type:Mime-Version; b=A3wpKebHs2d5wu7u34s8xZvMib0DA1iXxH4bxwEgouH7wcq2IPmcErRNSe1CZrNaLVoqfbX9GjFS3CWzTcWnCzM5COD/0PLHHprv2nv7QshCmK2Oee2a1lMWxYhxSdS6wE9ONqtxas+gKts6T5qyTVJRHyRoyumIf7crWOcKB2c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RpX+1xOz; arc=none smtp.client-ip=209.85.216.41
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FmmN4878"
-Received: by mail-pf1-f179.google.com with SMTP id d2e1a72fcca58-7a27053843bso2587616b3a.1
-        for <fstests@vger.kernel.org>; Fri, 24 Oct 2025 02:01:21 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RpX+1xOz"
+Received: by mail-pj1-f41.google.com with SMTP id 98e67ed59e1d1-33c4252c3c5so1809396a91.0
+        for <fstests@vger.kernel.org>; Fri, 24 Oct 2025 02:18:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1761296481; x=1761901281; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1761297486; x=1761902286; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to:date
          :cc:to:from:subject:message-id:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=JzOfaQD9roYcEhX3qr2200GMaOEmWqdNntaV+C+xDvo=;
-        b=FmmN48785e4CoOH3n5OKyz1wzyowcEBIxngIdu6viSgpOh6bZqog7kKSWaVMX8wFOs
-         AwQKnR51WVp0KQQ2Rkv+EZ7+Vk0fiOZT8uvXDIeSqZYzP1DZ8Wo04ndBJ3hn3lH+bpwm
-         THir5zWbRxLgqy4AG8dcyYGlhxbEbE69kuX+YbFY892vpRqIoFtbaJ9B7tcXzvto3+Ta
-         mfq2kNCfX51IR/bswYaPXPeCpmdenqIGdYJrzpcnWALJPGQDuTj/XvUaTTQOYR8zs18T
-         1z4WHtf7RtwbHqWo7WvLYxxnZHNCkYhdCES622mEgaDIEmgnQXKyWlO76hVeTVCdbw4f
-         TRiQ==
+        bh=VTneT4Vk3qDp9GQmX9ch/ZDi0+H9sikLlw+PPuUwI9Y=;
+        b=RpX+1xOz0niX0y/9HZZ9qInEjuu1efGesWqva+aXrqsXE0Kfwdjon/xs2ik7yoE2sR
+         PiEqs4p/iiyQo4ofe6/YW+W5/HHTkmAC6pgaQ7oGPGgmCck53Q7Hn6vY1/9ZDv86jGIm
+         XNhmSTkPoPjAEjWyfgswIKZK5FRT76aR9kt48lg4fLdpyYxEl2E3672yIHFstKjLW7vb
+         v0p5KWQ9INgq21NoJ10az/HYRMibotQTYndF1+yVM3hMtptN4numo+n+9diSwC6ofzZz
+         b5lA+YL/bwQTUIQeYsTWSZfAh2dhd2ByMKKw/FIuTfJjR238A9ojPBFWLmieQEvataoQ
+         bayA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761296481; x=1761901281;
+        d=1e100.net; s=20230601; t=1761297486; x=1761902286;
         h=content-transfer-encoding:mime-version:references:in-reply-to:date
          :cc:to:from:subject:message-id:x-gm-message-state:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=JzOfaQD9roYcEhX3qr2200GMaOEmWqdNntaV+C+xDvo=;
-        b=VENjw6uyFuz5ajrArOGU/+bBOt2GYql8VQLldaXWybDnTWzDd7AaoOCTN8yHoszDoL
-         dCQnKXZpnh0Y7RZPl0MwfwEq2QW5sGQB12FsefMiyHO396yEhr/6brRJCd42GWbIBXe/
-         kjh/qebJ+aj0/TND/68X8PVbkFsEIwYd8qxCnoa8AlvPkcm6qazNjj8285ul8ejeLAfM
-         9os66Jjf1wzy1LRloVHMyHAEQFL3o4K5eSYr7WQISuFXlXZji1GcrPcwIBAc6s6fM78P
-         liNAJfyMEVAEA8vg2rKN1FT2VezGJK5dAxyc4UzSQRTh70lSNWVe1XLKybBeVfVuPvUz
-         J1Zg==
-X-Gm-Message-State: AOJu0Yyppv3GQfqatwuIZNYQt/XiOLsD48hiyCgaFpSR7Nri4S/Sz0XW
-	L50vIil+dotC5Xsq/71dgne5mgbAc8CUgAU5/TKX9ZcaT14dDrMb39TZD/g+bQ==
-X-Gm-Gg: ASbGncvBHVOU6noqHLWciSbfUhyU94ZSCX88O1KJnkimmhMe7H1vBT8ruwdCl3XHu7T
-	gNGCjiXL/1669dNmmeZZ1b+RDtskFCeAYH0RxIiH5ija8cW+7UDM7hdoUQSpqlwBEgfxcVcaW22
-	CLg4rUHWA3mN+dUQJRcjrRqjhKoFdUDnNOzDH++RbUIhKj+GwCyrIxNpd763Be8KAekTqAI/SQO
-	eWvTX/Ps1yIU20W+THXyqQRDtLd8dfacYQZ9bWnRVkZEzL2b2GTTs90eeQIIoc6HPlLfKfCIzju
-	WTKlgosyexGWKGsRf17TCrjzSGcdr8uKO48Hw3iZtpTvO4VFJI+ZMUMdcqeszv2NY/YBdyeJKIc
-	zkUdSJzNUQ5d/UJXlTWtf8ovopJgmJoPuYS6ShHDy2nQGDREr9bHZzXXaytEZOjaLMygRCPOsEF
-	JKfXGMqnsGxt5sNChrx+bZr6gPKzOYnB3CPMLHcXWDI55iSLACMInF
-X-Google-Smtp-Source: AGHT+IEWrEXZsXwa1nm/Ns8JJ7ZzpHbBOT23EPNhXFS4lCF44h+6JLL3rQbtrCdZsowGvK3GciFshw==
-X-Received: by 2002:a05:6a00:4652:b0:79a:f5eb:3dce with SMTP id d2e1a72fcca58-7a28686017dmr1852730b3a.31.1761296481235;
-        Fri, 24 Oct 2025 02:01:21 -0700 (PDT)
+        bh=VTneT4Vk3qDp9GQmX9ch/ZDi0+H9sikLlw+PPuUwI9Y=;
+        b=Ox6LpXimCLtxUhAYhgKz9QPcfIdSX7hR+G/ejOgURb99h/0Ga+iab4d7x65yJuyChc
+         lSq8CJ7tuq7LwM7sy4cb0ELSgXRBe6odLAINpu+1DwA1kTZ8YBQ0MQjjp+4QdFmxxwXF
+         CN/17BIPA66MBijoqpFwU2H8iXVqgerieqlTIjN5umsB4XkBx0Nzic9uC0mWaYb+0z34
+         6517vSA9MYhKaHMpmuFI/Beqwdy871XdvOk+Dy/tsRqxkpNhCryAKWFeeYBZN69Z6Bvs
+         cbuPpIHnF58aOvG24e8u2glgcuGh5d0we+ck/wCgfvEvCF15LylKFQH8kJKzn0snPMTI
+         kmLQ==
+X-Gm-Message-State: AOJu0YxSbNwVVmQjZiats2huRRX4PNYiPnot4g2cpSWwoOiFdqIStCsR
+	1WOuBVI0BpxcYJO9nnUoraCx0m/HSXIjT3nl6oz4EWQFF8lwmYCyTXGw
+X-Gm-Gg: ASbGnctX+SUldZi36OWxu1LVRRjUKcxNopAfuO5uOWVnOXs0hvqCFoS2cR9bAJUDdQd
+	EKZXhhHtAHJHeTWSZimU6IOGghUHohn68veDNAIvIz0LJ6yXz3yxXO/V1gW+RlZjXWynQlTm7as
+	a4TIGZ2FKwjd3YNwZqRjGAvh7lHecHoGmD0ax6OwWw+SuiMzxKvyQMCoeU+0WLiUDRZmrRjW3/o
+	W1Mue2WDAiyl5cZaOnzy0O7I/3wk1/XzauswPpQnHt5Ml++eL2lAiiB58p/npuKrp+nsOl92T2W
+	YkAu6+JXKusHHs3Ue/ou/FOuAYggFY3tjyA6Dr6x0Lg3Po2U5X3XOoeV30tqOp1GjgRtTHbUuYy
+	o76pBewLBCzpwAcYVHsa4YcHR5aSqy7L6qPWO2C2RjS1Ar5a4YRSr3iFobpoPq07uUw7sZZJ6/A
+	B/AP9KwhdvrtLdzQWq4oDZCtq62d0w38aCR7XQydLaWR8AxjWuzi42
+X-Google-Smtp-Source: AGHT+IHtqGH6GpsWMe5DfeL4ZG5hW8+CzCw1Icbbe6oa59Qq4QMqv2SGK239tZT1wwgZrx9aw6abfg==
+X-Received: by 2002:a17:90b:3907:b0:32c:2cd:4d67 with SMTP id 98e67ed59e1d1-33fafbac1d9mr7627042a91.13.1761297485604;
+        Fri, 24 Oct 2025 02:18:05 -0700 (PDT)
 Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com ([49.207.202.82])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7a274b8b343sm5215739b3a.45.2025.10.24.02.01.19
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-33e223cb0a5sm8399329a91.1.2025.10.24.02.18.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 Oct 2025 02:01:20 -0700 (PDT)
-Message-ID: <95366976c8fee19ab2901c4b11fe5925042fdc95.camel@gmail.com>
-Subject: Re: [PATCH 7/8] common/attr: fix _require_noattr2
+        Fri, 24 Oct 2025 02:18:05 -0700 (PDT)
+Message-ID: <4e8a9b373fdfeecd3e0de2a91ecdd75fbb94e18e.camel@gmail.com>
+Subject: Re: [PATCH 8/8] common: fix _require_xfs_io_command pwrite -A for
+ various blocksizes
 From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
 To: "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com
 Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Date: Fri, 24 Oct 2025 14:31:16 +0530
-In-Reply-To: <176054618026.2391029.1336336050566653412.stgit@frogsfrogsfrogs>
+Date: Fri, 24 Oct 2025 14:48:00 +0530
+In-Reply-To: <176054618045.2391029.13403718073912452422.stgit@frogsfrogsfrogs>
 References: 
 	<176054617853.2391029.10911105763476647916.stgit@frogsfrogsfrogs>
-	 <176054618026.2391029.1336336050566653412.stgit@frogsfrogsfrogs>
+	 <176054618045.2391029.13403718073912452422.stgit@frogsfrogsfrogs>
 Content-Type: text/plain; charset="UTF-8"
 X-Mailer: Evolution 3.28.5 (3.28.5-27.el8_10) 
 Precedence: bulk
@@ -81,39 +82,55 @@ Content-Transfer-Encoding: 7bit
 On Wed, 2025-10-15 at 09:38 -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> attr2/noattr2 doesn't do anything anymore and aren't reported in
-> /proc/mounts, so we need to check /proc/mounts and _notrun as a result.
+> In this predicate, we should test an atomic write of the minimum
+> supported size, not just 4k.  This fixes a problem where none of the
+> atomic write tests actually run on a 32k-fsblock xfs because you can't
+> do a sub-fsblock atomic write.
 > 
+> Cc: <fstests@vger.kernel.org> # v2025.04.13
+> Fixes: d90ee3b6496346 ("generic: add a test for atomic writes")
 > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
 > ---
->  common/attr |    4 ++++
->  1 file changed, 4 insertions(+)
+>  common/rc |   14 +++++++++++---
+>  1 file changed, 11 insertions(+), 3 deletions(-)
 > 
 > 
-> diff --git a/common/attr b/common/attr
-> index 1c1de63e9d5465..35e0bee4e3aa53 100644
-> --- a/common/attr
-> +++ b/common/attr
-> @@ -241,7 +241,11 @@ _require_noattr2()
->  		|| _fail "_try_scratch_mkfs_xfs failed on $SCRATCH_DEV"
->  	_try_scratch_mount -o noattr2 > /dev/null 2>&1 \
->  		|| _notrun "noattr2 mount option not supported on $SCRATCH_DEV"
-> +	grep -w "$SCRATCH_MNT" /proc/mounts | awk '{print $4}' | grep -q -w noattr2
-If noatrr2 doesn't do anything, then in that case _try_scratch_mount will ignore noattr2 and mount
-will succeed. With the above change, we are just checking if noattr2 appears in /proc/mounts(after
-the mount), if yes then the preconditions returns true, else the test using this precondition is
-notrun. Right?
+> diff --git a/common/rc b/common/rc
+> index 1b78cd0c358bb9..dcae5bc33b19ce 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3030,16 +3030,24 @@ _require_xfs_io_command()
+>  	"pwrite")
+>  		# -N (RWF_NOWAIT) only works with direct vectored I/O writes
+>  		local pwrite_opts=" "
+> +		local write_size="4k"
+>  		if [ "$param" == "-N" ]; then
+>  			opts+=" -d"
+> -			pwrite_opts+="-V 1 -b 4k"
+> +			pwrite_opts+="-V 1 -b $write_size"
+Nit: We can still keep this to 4k (or any random size and not necessarily a size = fsblocksize),
+right?
+>  		fi
+>  		if [ "$param" == "-A" ]; then
+>  			opts+=" -d"
+> -			pwrite_opts+="-V 1 -b 4k"
+> +			# try to write the minimum supported atomic write size
+> +			write_size="$($XFS_IO_PROG -f -c "statx -r -m $STATX_WRITE_ATOMIC" $testfile 2>/dev/null | \
+> +				grep atomic_write_unit_min | \
+> +				grep -o '[0-9]\+')"
+> +			if [ -z "$write_size" ] || [ "$write_size" = "0" ]; then
+> +				write_size="0 --not-supported"
+> +			fi
+> +			pwrite_opts+="-V 1 -b $write_size"
+>  		fi
+>  		testio=`$XFS_IO_PROG -f $opts -c \
+> -		        "pwrite $pwrite_opts $param 0 4k" $testfile 2>&1`
+> +		        "pwrite $pwrite_opts $param 0 $write_size" $testfile 2>&1`
+This looks good to me:
 
-This looks okay to me.
 Reviewed-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-
---NR
-> +	local res=${PIPESTATUS[2]}
->  	_scratch_unmount
-> +	test $res -eq 0 \
-> +		|| _notrun "noattr2 mount option no longer functional"
->  }
->  
->  # getfattr -R returns info in readdir order which varies from fs to fs.
+>  		param_checked="$pwrite_opts $param"
+>  		;;
+>  	"scrub"|"repair")
 > 
 
