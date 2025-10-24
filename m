@@ -1,136 +1,140 @@
-Received: from mail-pj1-f41.google.com (mail-pj1-f41.google.com [209.85.216.41])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53D0835B144
-	for <fstests@vger.kernel.org>; Fri, 24 Oct 2025 09:18:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77A4530B512;
+	Fri, 24 Oct 2025 11:53:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761297487; cv=none; b=kSu1rvMNAOlkc8RYZjIj4erBgG1DL86qK1D+tzOyiX3BG7OoSru8X5/ArCRsRwSgt77vZsMMQHFBOCYegNUuErlR2WZHLUAZQInYIKckY+F+bc3AWSr6QOCKaw6Fz2r5q7qnvd82EEyBmTHu7+u8NjiNjwDKB/rbwT7fxy5Mc3k=
+	t=1761306798; cv=none; b=anGgQFvGcCmxyxadPPhWmnxB7U8v+KNW1Z4V5hHXDRFUB6y+giDycf0FRcv8Z+Ve3X2GCa/0sR3Z9es5HwRgp4y9+MGVOoy3dKLQ6RrxFvvz6XFRb/BJ6YZIpD1JEZHGGCMctrPw87PS6pjo/i1djX1s4Ip7Va1+CkWlT8R4hU8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761297487; c=relaxed/simple;
-	bh=MkHSCjiuGbedRTO0h6kA5KeA8QWtdD4n/Bl601uZN10=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:Mime-Version; b=A3wpKebHs2d5wu7u34s8xZvMib0DA1iXxH4bxwEgouH7wcq2IPmcErRNSe1CZrNaLVoqfbX9GjFS3CWzTcWnCzM5COD/0PLHHprv2nv7QshCmK2Oee2a1lMWxYhxSdS6wE9ONqtxas+gKts6T5qyTVJRHyRoyumIf7crWOcKB2c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RpX+1xOz; arc=none smtp.client-ip=209.85.216.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1761306798; c=relaxed/simple;
+	bh=sxwfvU/Ry46nRT9HyyzOGsIz+BtjWU/lpLrAM2ZeT2A=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=tu5MOcZyVC6yBFtk5uqAjKVcjz/F9cRjXADQj4l3NzZ9NiGQ23Bt0MH6IiyFyGISzaEQ1Yg0145lR+5svHFPd2c72xtMPE5dCz0zjn51dTfumYI0DOVAW8A6Rspj3mE4Zid5trXKT6L0X/pmb+tSXpYOGW57ep3JXW45L9QI2xk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Zwc08M8m; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RpX+1xOz"
-Received: by mail-pj1-f41.google.com with SMTP id 98e67ed59e1d1-33c4252c3c5so1809396a91.0
-        for <fstests@vger.kernel.org>; Fri, 24 Oct 2025 02:18:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1761297486; x=1761902286; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to:date
-         :cc:to:from:subject:message-id:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=VTneT4Vk3qDp9GQmX9ch/ZDi0+H9sikLlw+PPuUwI9Y=;
-        b=RpX+1xOz0niX0y/9HZZ9qInEjuu1efGesWqva+aXrqsXE0Kfwdjon/xs2ik7yoE2sR
-         PiEqs4p/iiyQo4ofe6/YW+W5/HHTkmAC6pgaQ7oGPGgmCck53Q7Hn6vY1/9ZDv86jGIm
-         XNhmSTkPoPjAEjWyfgswIKZK5FRT76aR9kt48lg4fLdpyYxEl2E3672yIHFstKjLW7vb
-         v0p5KWQ9INgq21NoJ10az/HYRMibotQTYndF1+yVM3hMtptN4numo+n+9diSwC6ofzZz
-         b5lA+YL/bwQTUIQeYsTWSZfAh2dhd2ByMKKw/FIuTfJjR238A9ojPBFWLmieQEvataoQ
-         bayA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761297486; x=1761902286;
-        h=content-transfer-encoding:mime-version:references:in-reply-to:date
-         :cc:to:from:subject:message-id:x-gm-message-state:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=VTneT4Vk3qDp9GQmX9ch/ZDi0+H9sikLlw+PPuUwI9Y=;
-        b=Ox6LpXimCLtxUhAYhgKz9QPcfIdSX7hR+G/ejOgURb99h/0Ga+iab4d7x65yJuyChc
-         lSq8CJ7tuq7LwM7sy4cb0ELSgXRBe6odLAINpu+1DwA1kTZ8YBQ0MQjjp+4QdFmxxwXF
-         CN/17BIPA66MBijoqpFwU2H8iXVqgerieqlTIjN5umsB4XkBx0Nzic9uC0mWaYb+0z34
-         6517vSA9MYhKaHMpmuFI/Beqwdy871XdvOk+Dy/tsRqxkpNhCryAKWFeeYBZN69Z6Bvs
-         cbuPpIHnF58aOvG24e8u2glgcuGh5d0we+ck/wCgfvEvCF15LylKFQH8kJKzn0snPMTI
-         kmLQ==
-X-Gm-Message-State: AOJu0YxSbNwVVmQjZiats2huRRX4PNYiPnot4g2cpSWwoOiFdqIStCsR
-	1WOuBVI0BpxcYJO9nnUoraCx0m/HSXIjT3nl6oz4EWQFF8lwmYCyTXGw
-X-Gm-Gg: ASbGnctX+SUldZi36OWxu1LVRRjUKcxNopAfuO5uOWVnOXs0hvqCFoS2cR9bAJUDdQd
-	EKZXhhHtAHJHeTWSZimU6IOGghUHohn68veDNAIvIz0LJ6yXz3yxXO/V1gW+RlZjXWynQlTm7as
-	a4TIGZ2FKwjd3YNwZqRjGAvh7lHecHoGmD0ax6OwWw+SuiMzxKvyQMCoeU+0WLiUDRZmrRjW3/o
-	W1Mue2WDAiyl5cZaOnzy0O7I/3wk1/XzauswPpQnHt5Ml++eL2lAiiB58p/npuKrp+nsOl92T2W
-	YkAu6+JXKusHHs3Ue/ou/FOuAYggFY3tjyA6Dr6x0Lg3Po2U5X3XOoeV30tqOp1GjgRtTHbUuYy
-	o76pBewLBCzpwAcYVHsa4YcHR5aSqy7L6qPWO2C2RjS1Ar5a4YRSr3iFobpoPq07uUw7sZZJ6/A
-	B/AP9KwhdvrtLdzQWq4oDZCtq62d0w38aCR7XQydLaWR8AxjWuzi42
-X-Google-Smtp-Source: AGHT+IHtqGH6GpsWMe5DfeL4ZG5hW8+CzCw1Icbbe6oa59Qq4QMqv2SGK239tZT1wwgZrx9aw6abfg==
-X-Received: by 2002:a17:90b:3907:b0:32c:2cd:4d67 with SMTP id 98e67ed59e1d1-33fafbac1d9mr7627042a91.13.1761297485604;
-        Fri, 24 Oct 2025 02:18:05 -0700 (PDT)
-Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com ([49.207.202.82])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-33e223cb0a5sm8399329a91.1.2025.10.24.02.18.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 Oct 2025 02:18:05 -0700 (PDT)
-Message-ID: <4e8a9b373fdfeecd3e0de2a91ecdd75fbb94e18e.camel@gmail.com>
-Subject: Re: [PATCH 8/8] common: fix _require_xfs_io_command pwrite -A for
- various blocksizes
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-To: "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Date: Fri, 24 Oct 2025 14:48:00 +0530
-In-Reply-To: <176054618045.2391029.13403718073912452422.stgit@frogsfrogsfrogs>
-References: 
-	<176054617853.2391029.10911105763476647916.stgit@frogsfrogsfrogs>
-	 <176054618045.2391029.13403718073912452422.stgit@frogsfrogsfrogs>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5 (3.28.5-27.el8_10) 
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Zwc08M8m"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 11C38C4CEF1;
+	Fri, 24 Oct 2025 11:53:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1761306797;
+	bh=sxwfvU/Ry46nRT9HyyzOGsIz+BtjWU/lpLrAM2ZeT2A=;
+	h=From:To:Cc:Subject:Date:From;
+	b=Zwc08M8mjRGK6sbSkOCSvivmcKjElCIfS7tHDhd8qDKMxIe82ydXMuR5dcEl/FgDa
+	 MObZu9d7Ch4tE95YVrQTPOR0Pp1t41SmzLq4NE24Bu3AkOrESn90M7v45EoQcXuzGl
+	 oVxYDpXFbbmA6Nw90efYxPqwn//82hxgptJIx+xl9DnakUVDHl4n3OZbuqW++hh7wp
+	 4VPuQD5+IzqHyergFrjpgxhcJ6f8qnS2+cvtw/uc95bM0RLSyxc+DrFkyKvZCNLT0R
+	 5FeyNjckLmk8kFvkk/vXHxx/IH55MRwHw/cxt1+ngz5a6QqBw2d0vW7vk3UmYA8G3d
+	 tOU7oY/892KgA==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic: test fsync of directory after renaming new symlink
+Date: Fri, 24 Oct 2025 12:53:12 +0100
+Message-ID: <54585ed26988fb88be1eab8211aa383a5e7cbd19.1761306683.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-On Wed, 2025-10-15 at 09:38 -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> In this predicate, we should test an atomic write of the minimum
-> supported size, not just 4k.  This fixes a problem where none of the
-> atomic write tests actually run on a 32k-fsblock xfs because you can't
-> do a sub-fsblock atomic write.
-> 
-> Cc: <fstests@vger.kernel.org> # v2025.04.13
-> Fixes: d90ee3b6496346 ("generic: add a test for atomic writes")
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
->  common/rc |   14 +++++++++++---
->  1 file changed, 11 insertions(+), 3 deletions(-)
-> 
-> 
-> diff --git a/common/rc b/common/rc
-> index 1b78cd0c358bb9..dcae5bc33b19ce 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3030,16 +3030,24 @@ _require_xfs_io_command()
->  	"pwrite")
->  		# -N (RWF_NOWAIT) only works with direct vectored I/O writes
->  		local pwrite_opts=" "
-> +		local write_size="4k"
->  		if [ "$param" == "-N" ]; then
->  			opts+=" -d"
-> -			pwrite_opts+="-V 1 -b 4k"
-> +			pwrite_opts+="-V 1 -b $write_size"
-Nit: We can still keep this to 4k (or any random size and not necessarily a size = fsblocksize),
-right?
->  		fi
->  		if [ "$param" == "-A" ]; then
->  			opts+=" -d"
-> -			pwrite_opts+="-V 1 -b 4k"
-> +			# try to write the minimum supported atomic write size
-> +			write_size="$($XFS_IO_PROG -f -c "statx -r -m $STATX_WRITE_ATOMIC" $testfile 2>/dev/null | \
-> +				grep atomic_write_unit_min | \
-> +				grep -o '[0-9]\+')"
-> +			if [ -z "$write_size" ] || [ "$write_size" = "0" ]; then
-> +				write_size="0 --not-supported"
-> +			fi
-> +			pwrite_opts+="-V 1 -b $write_size"
->  		fi
->  		testio=`$XFS_IO_PROG -f $opts -c \
-> -		        "pwrite $pwrite_opts $param 0 4k" $testfile 2>&1`
-> +		        "pwrite $pwrite_opts $param 0 $write_size" $testfile 2>&1`
-This looks good to me:
+From: Filipe Manana <fdmanana@suse.com>
 
-Reviewed-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
->  		param_checked="$pwrite_opts $param"
->  		;;
->  	"scrub"|"repair")
-> 
+Test that if we fsync a directory that has a new symlink, then rename the
+symlink and fsync again the directory, after a power failure the symlink
+exists with the new name and not the old one.
+
+This is to exercise a bug in btrfs where we ended up not persisting the
+new name of the symlink. That is fixed by a kernel patch that has the
+following subject:
+
+ "btrfs: set inode flag BTRFS_INODE_COPY_EVERYTHING when logging new name"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/779     | 60 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/779.out |  2 ++
+ 2 files changed, 62 insertions(+)
+ create mode 100755 tests/generic/779
+ create mode 100644 tests/generic/779.out
+
+diff --git a/tests/generic/779 b/tests/generic/779
+new file mode 100755
+index 00000000..40d1a86c
+--- /dev/null
++++ b/tests/generic/779
+@@ -0,0 +1,60 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 SUSE S.A.  All Rights Reserved.
++#
++# FS QA Test 779
++#
++# Test that if we fsync a directory that has a new symlink, then rename the
++# symlink and fsync again the directory, after a power failure the symlink
++# exists with the new name and not the old one.
++#
++. ./common/preamble
++_begin_fstest auto quick log
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -r -f $tmp.*
++}
++
++. ./common/dmflakey
++
++_require_scratch
++_require_symlinks
++_require_dm_target flakey
++
++[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: set inode flag BTRFS_INODE_COPY_EVERYTHING when logging new name"
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# Create our test dir and add a symlink inside it.
++mkdir $SCRATCH_MNT/dir
++ln -s foobar $SCRATCH_MNT/dir/old-slink
++
++# Fsync the test dir, should persist the symlink.
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir
++
++# Rename the symlink and fsync the directory. It should persist the new symlink
++# name.
++mv $SCRATCH_MNT/dir/old-slink $SCRATCH_MNT/dir/new-slink
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir
++
++# Simulate a power failure and then mount again the filesystem to replay the
++# journal/log.
++_flakey_drop_and_remount
++
++# Check that the symlink exists with the new name and has the correct content.
++[ -L $SCRATCH_MNT/dir/new-slink ] || echo "symlink dir/new-slink not found"
++echo "symlink content: $(readlink $SCRATCH_MNT/dir/new-slink)"
++
++_unmount_flakey
++
++# success, all done
++_exit 0
+diff --git a/tests/generic/779.out b/tests/generic/779.out
+new file mode 100644
+index 00000000..c595cd01
+--- /dev/null
++++ b/tests/generic/779.out
+@@ -0,0 +1,2 @@
++QA output created by 779
++symlink content: foobar
+-- 
+2.47.2
 
