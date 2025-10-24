@@ -1,82 +1,40 @@
-Received: from fhigh-a5-smtp.messagingengine.com (fhigh-a5-smtp.messagingengine.com [103.168.172.156])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E60E315D4E;
-	Fri, 24 Oct 2025 13:41:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.156
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 271F41C7009;
+	Fri, 24 Oct 2025 22:08:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761313307; cv=none; b=Wr9C4hetD2Py0RUsbht9TVEGcd06MEmIZYqGcKLnenGmvz5drjCagj7p/DYLZqhzXwCgt7jkGnlJ60C7eXj+zTR9Wnq86bIRqXWq6Fbzf+cGrhvuFt4adW5Pm6xX9jsBJ9SVyOQev7wjRfxYuK9WOU2jwW7d/8xY9LnrQQLPPtc=
+	t=1761343732; cv=none; b=FJsouNuACHLK0H4Dh/zv3mnvgTmir2kXOWvJMXPeywNqssqPaETaeRh2hU+CMVwzlYCoymgJ7VGXWuMwMmE1YrF0ma3s2nr8u5e9fGyegClvrmtFkB50DEKE9ZmswGNq5Le7ftngzQyAQYj8TKF85Lds+kMN8v8qbzZj4Nf5IkM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761313307; c=relaxed/simple;
-	bh=GjvlTSV4sSVedh4E/AqW1SJeZi+7VaSvsp24sZ49AeU=;
+	s=arc-20240116; t=1761343732; c=relaxed/simple;
+	bh=Picls1+Xijq5huTjGeJpVt5CxysQFo0zKMNGi41xCLY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OBI91tQgLVuhg2me8UeA8OvCURyuzur4ynETddMYYxKcfWuT2nR7Sh1sdSs3UaORKEE8TZbETPWpp7qM7TK8Ewt+rhMwnZOxxv5GBvcpdGv9gNq6z4UY8Az528yUk5+PYuq/ZUJrZmrFobmU+iytPH6feFKLIgHWCWwV1sFD1r4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io; spf=pass smtp.mailfrom=bur.io; dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b=h3gDAJCg; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=DQWc6uZn; arc=none smtp.client-ip=103.168.172.156
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bur.io
+	 Content-Type:Content-Disposition:In-Reply-To; b=lD8Cxq2A58YPBTzFwKEpESOSCMA/mwc+g1cp/+OIU3k6v2+CqzrOM/jCQ0dEQub26xJ1jNTmFn09Gaj9eSeR5kz/mbRGl4GYAcItxoEpioSTFVDoZB6X6Wfs2QpRtCpjL9UMjKDswPB9dE28EjHXzhoW2q3wICm+8dKCipKNeGk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=L0T9FRni; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="h3gDAJCg";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="DQWc6uZn"
-Received: from phl-compute-06.internal (phl-compute-06.internal [10.202.2.46])
-	by mailfhigh.phl.internal (Postfix) with ESMTP id 4E7FF14001D0;
-	Fri, 24 Oct 2025 09:41:44 -0400 (EDT)
-Received: from phl-mailfrontend-02 ([10.202.2.163])
-  by phl-compute-06.internal (MEProxy); Fri, 24 Oct 2025 09:41:44 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc:cc
-	:content-type:content-type:date:date:from:from:in-reply-to
-	:in-reply-to:message-id:mime-version:references:reply-to:subject
-	:subject:to:to; s=fm3; t=1761313304; x=1761399704; bh=GOBrcL9T6R
-	g6ZlGsRLtG8PddbfaOKTeucMsDnUDVF1A=; b=h3gDAJCgj9MRaRPw1XrBbBZFc3
-	Fz4agsP89TI5MA71c/QOxRAvBzZmpjFx5UXbRSluBUuhX4J1mdzVEQ3f5Qko9mEc
-	gZDZXdCjufOOGLgFB61Zt3qg3leHjCdX7PE78liY56EOvw1LbPC3zq3SuAzcyWYs
-	JYvqyAoy9QZdyKVAynFXYoAOeOQOKK9kDQMTIYfP0XroJW4R5ShSVbyjJvbPUtKm
-	VMRLoNex2VXYBsD1134P5rw5CSSFawjamyI787QJEDGwPa+JyumrOnKYCE+Z62Tj
-	bekdzygZHDcYyXFQ4N6qS5zgbMgrxLRo2fN24a09EoR28mg1IuIFiCqwO/fg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-type:content-type:date:date
-	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
-	:message-id:mime-version:references:reply-to:subject:subject:to
-	:to:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=
-	1761313304; x=1761399704; bh=GOBrcL9T6Rg6ZlGsRLtG8PddbfaOKTeucMs
-	DnUDVF1A=; b=DQWc6uZn1Im0K1jltHJ/4SAH+ODV9nctOyoRhLf70Vgdo59ckKu
-	SqTW2fGPkHmfnNySx8yGd+POBBocaEnmZG3qTKZnF0wyaWFjTpeuoC5kr0NjDF3V
-	A7Ok0YaOmdZ0dXJmsfVJ9gZ9DuZ7wbmAeFx+qWqlxsm37XUxIx1EpL9hkleBfhrX
-	CPiUhbLqvzbuP6XsHYac6DpsIBTXZAO3aq6/Odx7aZnZ8CxWkfwxv10bgswSXj1P
-	/Zw7sKgtAzuxGw7oZBgCXJaPQ2rwEcVJ2bZbsn6qxJv23cfkKdBXSCtcovy5I+3F
-	5V5wX5+0kn8lsVYuvM6sl5zgYRBNU52ZH8g==
-X-ME-Sender: <xms:GIL7aICTpBTpNcHPHeBWMqp_uFe0KJ64spAwt_TOfmCMrBg7Za9hEg>
-    <xme:GIL7aIXbt3mnHEk_XqxzgcP1Gq82xAePIBJTgyyH_7AKRHIkZvT-3YbCYSl2EoBqh
-    5Z8JMic5qiDKzZ8X-lI-QsZTbgzLBCeumT4CE3oOh_fAaM7RbCF2CE>
-X-ME-Received: <xmr:GIL7aGArX2T_bWfk5WqiTpQw261FEPPhBHShUCj_EiTRrdWCGkqiXmXY-g>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdeggddugeelgeekucetufdoteggodetrf
-    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
-    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
-    gurhepfffhvfevuffkfhggtggujgesthdtredttddtvdenucfhrhhomhepuehorhhishcu
-    uehurhhkohhvuceosghorhhishessghurhdrihhoqeenucggtffrrghtthgvrhhnpeekvd
-    ekffejleelhfevhedvjeduhfejtdfhvdevieeiiedugfeugfdtjefgfeeljeenucevlhhu
-    shhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegsohhrihhssegsuh
-    hrrdhiohdpnhgspghrtghpthhtohepgedpmhhouggvpehsmhhtphhouhhtpdhrtghpthht
-    ohepfhgumhgrnhgrnhgrsehkvghrnhgvlhdrohhrghdprhgtphhtthhopehfshhtvghsth
-    hssehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinhhugidqsghtrhhf
-    shesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehfughmrghnrghnrgessh
-    hushgvrdgtohhm
-X-ME-Proxy: <xmx:GIL7aL8FlMhoYuKQjFZ7KJIkkXasxCMXNc5DNBNvzKCsnYu24yBU8A>
-    <xmx:GIL7aNEfL9oZNwIgCS1SVaU5HG6qu-2JbissKuzhToNtexAsAv8J6Q>
-    <xmx:GIL7aJM4f-rm8btJVYBt7xCaHU93Gfb1BZBh9vk_e_j9AOR_RkV7jg>
-    <xmx:GIL7aHe7lWnu-KDfgfB7dObA1TdQIPxHVppgvA4jw3Hh9fxhPSbVHw>
-    <xmx:GIL7aPAinb7vy7XAMsgh8ph-yZlrkKXwygwHLZ199-QI9Cd3w-R3FPp0>
-Feedback-ID: i083147f8:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Fri,
- 24 Oct 2025 09:41:43 -0400 (EDT)
-Date: Fri, 24 Oct 2025 06:41:41 -0700
-From: Boris Burkov <boris@bur.io>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] generic: test fsync of directory after renaming new
- symlink
-Message-ID: <aPuCFeWGuxG4am51@devvm12410.ftw0.facebook.com>
-References: <54585ed26988fb88be1eab8211aa383a5e7cbd19.1761306683.git.fdmanana@suse.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="L0T9FRni"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9AC26C4CEF1;
+	Fri, 24 Oct 2025 22:08:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1761343729;
+	bh=Picls1+Xijq5huTjGeJpVt5CxysQFo0zKMNGi41xCLY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=L0T9FRni+T2LZwvK1N6E+5H40oWfXVsobxlFgroj1piKI4soS5WAmSJF+9v5f24bX
+	 iben5RaY8FgB/7ds/vp1h6XYR3UmgypT37DGiQrfm2dRr65M9rfJ3yaJ/C7Z9hmUKC
+	 uBlSPVgimH1KhgcY7AO/tI/C2a+fDGIQh91V4qbKzSq7G4gj8Pgo8KnXH+YKB71ktA
+	 T6haLOrOH54mNoHIeN+dov0szFmHKH9Ig1IopdltHhS/nb7HfiU0QwYyBwiRI3azR7
+	 pXjTgm5tbXEWkQK+a6sXPYd8ntfJJ3JOx/6IAwK46ZZMLPWcmpPguu7V57wU3FbNAd
+	 0aCrWvmVtOPvA==
+Date: Fri, 24 Oct 2025 15:08:49 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 2/8] common/rc: fix _require_xfs_io_shutdown
+Message-ID: <20251024220849.GM4015566@frogsfrogsfrogs>
+References: <176054617853.2391029.10911105763476647916.stgit@frogsfrogsfrogs>
+ <176054617932.2391029.3304833304093152893.stgit@frogsfrogsfrogs>
+ <ee99fc234ccfc433662975d45f24c8900428e2ea.camel@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -85,106 +43,64 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <54585ed26988fb88be1eab8211aa383a5e7cbd19.1761306683.git.fdmanana@suse.com>
+In-Reply-To: <ee99fc234ccfc433662975d45f24c8900428e2ea.camel@gmail.com>
 
-On Fri, Oct 24, 2025 at 12:53:12PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> Test that if we fsync a directory that has a new symlink, then rename the
-> symlink and fsync again the directory, after a power failure the symlink
-> exists with the new name and not the old one.
-> 
-> This is to exercise a bug in btrfs where we ended up not persisting the
-> new name of the symlink. That is fixed by a kernel patch that has the
-> following subject:
-> 
->  "btrfs: set inode flag BTRFS_INODE_COPY_EVERYTHING when logging new name"
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+On Fri, Oct 24, 2025 at 01:01:50PM +0530, Nirjhar Roy (IBM) wrote:
+> On Wed, 2025-10-15 at 09:37 -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Capturing the output of _scratch_shutdown_handle requires one to enclose
+> > the callsite with $(), otherwise you're comparing the literal string
+> > "_scratch_shutdown_handle" to $SCRATCH_MNT, which always fails.
+> > 
+> > Also fix _require_xfs_io_command to handle testing the shutdown command
+> > correctly.
+> > 
+> > Cc: <fstests@vger.kernel.org> # v2025.06.22
+> > Fixes: 4b1cf3df009b22 ("fstests: add helper _require_xfs_io_shutdown")
+> > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> > ---
+> >  common/rc |    7 ++++++-
+> >  1 file changed, 6 insertions(+), 1 deletion(-)
+> > 
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index 1ec84263c917c0..1b78cd0c358bb9 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -619,7 +619,7 @@ _scratch_shutdown_and_syncfs()
+> >  # requirement down to _require_scratch_shutdown.
+> >  _require_xfs_io_shutdown()
+> >  {
+> > -	if [ _scratch_shutdown_handle != $SCRATCH_MNT ]; then
+> > +	if [ $(_scratch_shutdown_handle) != $SCRATCH_MNT ]; then
+> Yeah, right. _scratch_shutdown_handle is a function call and should be placed in a $() or ``. 
+> >  		# Most likely overlayfs
+> >  		_notrun "xfs_io -c shutdown not supported on $FSTYP"
+> >  	fi
+> > @@ -3073,6 +3073,11 @@ _require_xfs_io_command()
+> >  		rm -f $testfile.1
+> >  		param_checked="$param"
+> >  		;;
+> > +	"shutdown")
+> > +		testio=$($XFS_IO_PROG -f -x -c "$command $param" $testfile 2>&1)
+> > +		param_checked="$param"
+> > +		_test_cycle_mount
+> > +		;;
+> Looks good to me. Just curious, any reason why we are testing with TEST_DIR and not with
+> SCRATCH_MNT? 
 
-Reviewed-by: Boris Burkov <boris@bur.io>
+$TEST_DIR is always available and mounted, whereas SCRATCH_* are
+optional.
 
-> ---
->  tests/generic/779     | 60 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/779.out |  2 ++
->  2 files changed, 62 insertions(+)
->  create mode 100755 tests/generic/779
->  create mode 100644 tests/generic/779.out
-> 
-> diff --git a/tests/generic/779 b/tests/generic/779
-> new file mode 100755
-> index 00000000..40d1a86c
-> --- /dev/null
-> +++ b/tests/generic/779
-> @@ -0,0 +1,60 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 SUSE S.A.  All Rights Reserved.
-> +#
-> +# FS QA Test 779
-> +#
-> +# Test that if we fsync a directory that has a new symlink, then rename the
-> +# symlink and fsync again the directory, after a power failure the symlink
-> +# exists with the new name and not the old one.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick log
-> +
-> +_cleanup()
-> +{
-> +	_cleanup_flakey
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +
-> +. ./common/dmflakey
-> +
-> +_require_scratch
-> +_require_symlinks
-> +_require_dm_target flakey
-> +
-> +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"btrfs: set inode flag BTRFS_INODE_COPY_EVERYTHING when logging new name"
-> +
-> +rm -f $seqres.full
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-> +_require_metadata_journaling $SCRATCH_DEV
-> +_init_flakey
-> +_mount_flakey
-> +
-> +# Create our test dir and add a symlink inside it.
-> +mkdir $SCRATCH_MNT/dir
-> +ln -s foobar $SCRATCH_MNT/dir/old-slink
-> +
-> +# Fsync the test dir, should persist the symlink.
-> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir
-> +
-> +# Rename the symlink and fsync the directory. It should persist the new symlink
-> +# name.
-> +mv $SCRATCH_MNT/dir/old-slink $SCRATCH_MNT/dir/new-slink
-> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir
-> +
-> +# Simulate a power failure and then mount again the filesystem to replay the
-> +# journal/log.
-> +_flakey_drop_and_remount
-> +
-> +# Check that the symlink exists with the new name and has the correct content.
-> +[ -L $SCRATCH_MNT/dir/new-slink ] || echo "symlink dir/new-slink not found"
-> +echo "symlink content: $(readlink $SCRATCH_MNT/dir/new-slink)"
-> +
-> +_unmount_flakey
-> +
-> +# success, all done
-> +_exit 0
-> diff --git a/tests/generic/779.out b/tests/generic/779.out
-> new file mode 100644
-> index 00000000..c595cd01
-> --- /dev/null
-> +++ b/tests/generic/779.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 779
-> +symlink content: foobar
-> -- 
-> 2.47.2
+> Reviewed-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+
+Thanks!
+
+--D
+
+> >  	"utimes" )
+> >  		testio=`$XFS_IO_PROG -f -c "utimes 0 0 0 0" $testfile 2>&1`
+> >  		;;
+> > 
 > 
