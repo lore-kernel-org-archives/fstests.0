@@ -1,74 +1,73 @@
-Received: from mail-pf1-f180.google.com (mail-pf1-f180.google.com [209.85.210.180])
+Received: from mail-pf1-f179.google.com (mail-pf1-f179.google.com [209.85.210.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E11C2FE053
-	for <fstests@vger.kernel.org>; Fri, 24 Oct 2025 07:44:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 094772C027B
+	for <fstests@vger.kernel.org>; Fri, 24 Oct 2025 09:01:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761291875; cv=none; b=OgdiVo5OagCPVR84v72bNPpFVUf3sUKDO8hL3axUWQ4NwLuvMTdJz3l9SXUhiW6QBWLoHEJt3r4k8DMCMRyn32LmhQYrVfeVZORGPxnHDkf0327taocfm6ZWf3l/J1bmaAaIGA8Dw4P7aWvuzqL02q6mmQkQ8vmJA1+vSedYok8=
+	t=1761296483; cv=none; b=G9EJ3fp+E1jwZFgWR8PYWd6JHIwvTkZpvoxQFcOIeKLgC0z6kYJKje076gOjHpMX/DNpmsF8V6Skc+yIpueS/QfGlC8SQ6E+a19l0aIHoK7rXtiBhBkphRRzAQGXZaVP4Gx/MhLkajMDdMtdKwsVad9GukUiWzAINJGoVXPZ2Ys=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761291875; c=relaxed/simple;
-	bh=ArZYbRNMdA6N4gxDdcBF9wkRYxv5mM3zDGm0GProB9Y=;
+	s=arc-20240116; t=1761296483; c=relaxed/simple;
+	bh=kzd8hR8ZB48TRf1FBLYy52ZbdXMgU2pQUI3oHfpkBtE=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:Mime-Version; b=IRGd2Ff/naUoCQ6QE/SToFI2qaFqgZ8K91l3So2FxCf9LhxWuaUHZhDjNQhxFeuSAz+58e/LeKaeZtKUa2YRmXJnxNeq65WCR2S/j3AKQQnGUY6p4/IUHUvv6iKYCuiwb5BauvX7JevYvg6SBRPFs+vsac8T4bXFd4OoRy0cs3E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JMXWtk8X; arc=none smtp.client-ip=209.85.210.180
+	 Content-Type:Mime-Version; b=Nm7QJZ/XLYhX/JAY6jtqSAJwofGkv7NccuISEAqKF1dPwQfCaDxAjBZNebsvwGwtbVCgY+N8lSRi1I+z2iPbBzE8/xJafFLzv1gzCstnyQG8DuN8GP+B6jtzakiqp3tL5HOhHaKtc0gK4XxkWnSr7lSINt2RVsNKDLQX3cnOIaA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FmmN4878; arc=none smtp.client-ip=209.85.210.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JMXWtk8X"
-Received: by mail-pf1-f180.google.com with SMTP id d2e1a72fcca58-781997d195aso1278644b3a.3
-        for <fstests@vger.kernel.org>; Fri, 24 Oct 2025 00:44:33 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FmmN4878"
+Received: by mail-pf1-f179.google.com with SMTP id d2e1a72fcca58-7a27053843bso2587616b3a.1
+        for <fstests@vger.kernel.org>; Fri, 24 Oct 2025 02:01:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1761291873; x=1761896673; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1761296481; x=1761901281; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to:date
          :cc:to:from:subject:message-id:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=5YK5Cv2mHUZf0+sS6ZBkjl83GDLbEDehObxxO+NhiJw=;
-        b=JMXWtk8X5j6syd33yn+4vwYWYkH98W5IdJme7pzVgtElqhKon+8qobp9XJ8dLk88NE
-         KbPyoqJyv6SWjQeNl3vw0i1g6wkJJer2ysjOi9i9B9FdIgSKJ0nL7NRwM79Y+RS7DCRd
-         Etf4EDO7s3rm4m6pu+JbFb1sVhb7PqcV3Q+jlUIfveYobr08oHDfC7fbJ75covf8RQnW
-         TlkWzBwSpb3305XEiFUKqcAwkAoq3jogWqbYJT2TdicfSGTdMmIGIcDJPnk4PjP7ixo8
-         XLSdYIm4+SnGC2dOKaOubYTtHqohuiI6JAc3//bevdZYcjJbWuY8FI5QcYnd1Ct9u5em
-         ngbw==
+        bh=JzOfaQD9roYcEhX3qr2200GMaOEmWqdNntaV+C+xDvo=;
+        b=FmmN48785e4CoOH3n5OKyz1wzyowcEBIxngIdu6viSgpOh6bZqog7kKSWaVMX8wFOs
+         AwQKnR51WVp0KQQ2Rkv+EZ7+Vk0fiOZT8uvXDIeSqZYzP1DZ8Wo04ndBJ3hn3lH+bpwm
+         THir5zWbRxLgqy4AG8dcyYGlhxbEbE69kuX+YbFY892vpRqIoFtbaJ9B7tcXzvto3+Ta
+         mfq2kNCfX51IR/bswYaPXPeCpmdenqIGdYJrzpcnWALJPGQDuTj/XvUaTTQOYR8zs18T
+         1z4WHtf7RtwbHqWo7WvLYxxnZHNCkYhdCES622mEgaDIEmgnQXKyWlO76hVeTVCdbw4f
+         TRiQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761291873; x=1761896673;
+        d=1e100.net; s=20230601; t=1761296481; x=1761901281;
         h=content-transfer-encoding:mime-version:references:in-reply-to:date
          :cc:to:from:subject:message-id:x-gm-message-state:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=5YK5Cv2mHUZf0+sS6ZBkjl83GDLbEDehObxxO+NhiJw=;
-        b=RRK7ERs+XglccPkDlKv7268NC3jlKhaOE+/5v+fKzlGm7ylHHM2iaUyVBZv0n985vd
-         Ql95Tlzc1WDAAVhKWqifsh4FeF8bwi6cldBecbBA5V8AesZiRD9tGOBlbViYrQwebtBp
-         Xbj4qRmmn4CGRU36uwWltXUL4Q0TDcl2HxxB7UCLsmMRBhllXLCvUJFLMhAmr+aGKlR3
-         Ybzy12SEOj+QjJi4wkEslU+s/YN9k3ruXsXoriKLKH8f777PmaW+5f+ieITV/e+kYQEG
-         ieqUanxjsmR8SrJf41bel/q9H1dWG1xkhQxpcA88vZ3rnmeYI2nCLLvyeZaJkezrjqHM
-         C9Bw==
-X-Gm-Message-State: AOJu0YyWtR60a3klt6X9LIrennTpvD9CJzXWZnhz4o5lgpYQgVf/y8k1
-	ZWoA8K0TiRULLHVGj4tLWyPGAqCwQuJHXyhZegh36/eJBYfeUW2QxY1V
-X-Gm-Gg: ASbGncsQuEkcc3NaGrP+Fmvh1SBTdzEb+VX5I3TlJDbVbQ6agug3aClJqT7XHPv2nEA
-	+mRYomqGeEvLspjjnNaHJAnmGQcZm5tPAuzhLijGEw4j5u6UEBHvcKMK+x9cA83TXWEWvlCP1Vq
-	iAHixwz25snntBktvtNm5W28FUbTSETMYDH9W/OGKwBdr9PHtk/6vyl+fEHZPO7kJ0Hf4wttvMT
-	eJ2juJz5/l0VRl3kY0nuCfaL1z4qxzRcwQM74OFsCR/EHj/krCRAHYOoimC5/iKJ4hnlU+nNnqV
-	loUrkWM/lTUld8WTgqk8SZowvI2tpA4dEf79us4/QNNiM3Ugi2FJAYP8uAG4CgsTzjYTIsUThlB
-	bvsuZpJoa5NU4npYzU6DxvalsuptECykLXOHVSRNjdCPhHWjmedEl/SAp97yDKmMVUhf97AoQdV
-	dXIB1dVGXi8MG77PvXd05D/Ra6oJ6QfS3VeutKqFmttkPsXrmTuKQn
-X-Google-Smtp-Source: AGHT+IFjb5mZJgyR6bGIzS0AMBegu+BQn8DvDFMRLJFSSMUddJwgyi8DVtG32VC9u1C+4NcA8h2O6g==
-X-Received: by 2002:a05:6a20:3d20:b0:2fb:62bb:dec with SMTP id adf61e73a8af0-33dead55a43mr1920840637.39.1761291872700;
-        Fri, 24 Oct 2025 00:44:32 -0700 (PDT)
+        bh=JzOfaQD9roYcEhX3qr2200GMaOEmWqdNntaV+C+xDvo=;
+        b=VENjw6uyFuz5ajrArOGU/+bBOt2GYql8VQLldaXWybDnTWzDd7AaoOCTN8yHoszDoL
+         dCQnKXZpnh0Y7RZPl0MwfwEq2QW5sGQB12FsefMiyHO396yEhr/6brRJCd42GWbIBXe/
+         kjh/qebJ+aj0/TND/68X8PVbkFsEIwYd8qxCnoa8AlvPkcm6qazNjj8285ul8ejeLAfM
+         9os66Jjf1wzy1LRloVHMyHAEQFL3o4K5eSYr7WQISuFXlXZji1GcrPcwIBAc6s6fM78P
+         liNAJfyMEVAEA8vg2rKN1FT2VezGJK5dAxyc4UzSQRTh70lSNWVe1XLKybBeVfVuPvUz
+         J1Zg==
+X-Gm-Message-State: AOJu0Yyppv3GQfqatwuIZNYQt/XiOLsD48hiyCgaFpSR7Nri4S/Sz0XW
+	L50vIil+dotC5Xsq/71dgne5mgbAc8CUgAU5/TKX9ZcaT14dDrMb39TZD/g+bQ==
+X-Gm-Gg: ASbGncvBHVOU6noqHLWciSbfUhyU94ZSCX88O1KJnkimmhMe7H1vBT8ruwdCl3XHu7T
+	gNGCjiXL/1669dNmmeZZ1b+RDtskFCeAYH0RxIiH5ija8cW+7UDM7hdoUQSpqlwBEgfxcVcaW22
+	CLg4rUHWA3mN+dUQJRcjrRqjhKoFdUDnNOzDH++RbUIhKj+GwCyrIxNpd763Be8KAekTqAI/SQO
+	eWvTX/Ps1yIU20W+THXyqQRDtLd8dfacYQZ9bWnRVkZEzL2b2GTTs90eeQIIoc6HPlLfKfCIzju
+	WTKlgosyexGWKGsRf17TCrjzSGcdr8uKO48Hw3iZtpTvO4VFJI+ZMUMdcqeszv2NY/YBdyeJKIc
+	zkUdSJzNUQ5d/UJXlTWtf8ovopJgmJoPuYS6ShHDy2nQGDREr9bHZzXXaytEZOjaLMygRCPOsEF
+	JKfXGMqnsGxt5sNChrx+bZr6gPKzOYnB3CPMLHcXWDI55iSLACMInF
+X-Google-Smtp-Source: AGHT+IEWrEXZsXwa1nm/Ns8JJ7ZzpHbBOT23EPNhXFS4lCF44h+6JLL3rQbtrCdZsowGvK3GciFshw==
+X-Received: by 2002:a05:6a00:4652:b0:79a:f5eb:3dce with SMTP id d2e1a72fcca58-7a28686017dmr1852730b3a.31.1761296481235;
+        Fri, 24 Oct 2025 02:01:21 -0700 (PDT)
 Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com ([49.207.202.82])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7a274aaec46sm4906323b3a.31.2025.10.24.00.44.30
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7a274b8b343sm5215739b3a.45.2025.10.24.02.01.19
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 Oct 2025 00:44:32 -0700 (PDT)
-Message-ID: <68e2839c0a7848a95fa5b2b8f6107b1e941636a4.camel@gmail.com>
-Subject: Re: [PATCH 5/8] generic/772: actually check for file_getattr
- special file support
+        Fri, 24 Oct 2025 02:01:20 -0700 (PDT)
+Message-ID: <95366976c8fee19ab2901c4b11fe5925042fdc95.camel@gmail.com>
+Subject: Re: [PATCH 7/8] common/attr: fix _require_noattr2
 From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
 To: "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com
 Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Date: Fri, 24 Oct 2025 13:14:29 +0530
-In-Reply-To: <176054617988.2391029.18130416327249525205.stgit@frogsfrogsfrogs>
+Date: Fri, 24 Oct 2025 14:31:16 +0530
+In-Reply-To: <176054618026.2391029.1336336050566653412.stgit@frogsfrogsfrogs>
 References: 
 	<176054617853.2391029.10911105763476647916.stgit@frogsfrogsfrogs>
-	 <176054617988.2391029.18130416327249525205.stgit@frogsfrogsfrogs>
+	 <176054618026.2391029.1336336050566653412.stgit@frogsfrogsfrogs>
 Content-Type: text/plain; charset="UTF-8"
 X-Mailer: Evolution 3.28.5 (3.28.5-27.el8_10) 
 Precedence: bulk
@@ -82,66 +81,39 @@ Content-Transfer-Encoding: 7bit
 On Wed, 2025-10-15 at 09:38 -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> On XFS in 6.17, this test fails with:
-> 
->  --- /run/fstests/bin/tests/generic/772.out	2025-10-06 08:27:10.834318149 -0700
->  +++ /var/tmp/fstests/generic/772.out.bad	2025-10-08 18:00:34.713388178 -0700
->  @@ -9,29 +9,34 @@ Can not get fsxattr on ./foo: Invalid ar
->   Can not set fsxattr on ./foo: Invalid argument
->   Initial attributes state
->   ----------------- SCRATCH_MNT/prj
->  ------------------ ./fifo
->  ------------------ ./chardev
->  ------------------ ./blockdev
->  ------------------ ./socket
->  ------------------ ./foo
->  ------------------ ./symlink
->  +Can not get fsxattr on ./fifo: Inappropriate ioctl for device
->  +Can not get fsxattr on ./chardev: Inappropriate ioctl for device
->  +Can not get fsxattr on ./blockdev: Inappropriate ioctl for device
->  +Can not get fsxattr on ./socket: Inappropriate ioctl for device
-> 
-> This is a result of XFS' file_getattr implementation rejecting special
-> files prior to 6.18.  Therefore, skip this new test on old kernels.
+> attr2/noattr2 doesn't do anything anymore and aren't reported in
+> /proc/mounts, so we need to check /proc/mounts and _notrun as a result.
 > 
 > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
 > ---
->  tests/generic/772 |    3 +++
->  tests/xfs/648     |    3 +++
->  2 files changed, 6 insertions(+)
+>  common/attr |    4 ++++
+>  1 file changed, 4 insertions(+)
 > 
 > 
-> diff --git a/tests/generic/772 b/tests/generic/772
-> index cc1a1bb5bf655c..e68a6724654450 100755
-> --- a/tests/generic/772
-> +++ b/tests/generic/772
-> @@ -43,6 +43,9 @@ touch $projectdir/bar
->  ln -s $projectdir/bar $projectdir/broken-symlink
->  rm -f $projectdir/bar
->  
-> +file_attr --get $projectdir ./fifo &>/dev/null || \
-> +	_notrun "file_getattr not supported on $FSTYP"
-> +
-Shouldn't we use $here/src/file_attr like we have done later (maybe just for consistency)?
-Also, I am wondering if we can have something like
-_require_get_attr_for_special_files() helper kind of a thing?
+> diff --git a/common/attr b/common/attr
+> index 1c1de63e9d5465..35e0bee4e3aa53 100644
+> --- a/common/attr
+> +++ b/common/attr
+> @@ -241,7 +241,11 @@ _require_noattr2()
+>  		|| _fail "_try_scratch_mkfs_xfs failed on $SCRATCH_DEV"
+>  	_try_scratch_mount -o noattr2 > /dev/null 2>&1 \
+>  		|| _notrun "noattr2 mount option not supported on $SCRATCH_DEV"
+> +	grep -w "$SCRATCH_MNT" /proc/mounts | awk '{print $4}' | grep -q -w noattr2
+If noatrr2 doesn't do anything, then in that case _try_scratch_mount will ignore noattr2 and mount
+will succeed. With the above change, we are just checking if noattr2 appears in /proc/mounts(after
+the mount), if yes then the preconditions returns true, else the test using this precondition is
+notrun. Right?
+
+This looks okay to me.
+Reviewed-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+
 --NR
->  echo "Error codes"
->  # wrong AT_ flags
->  file_attr --get --invalid-at $projectdir ./foo
-> diff --git a/tests/xfs/648 b/tests/xfs/648
-> index 215c809887b609..e3c2fbe00b666a 100755
-> --- a/tests/xfs/648
-> +++ b/tests/xfs/648
-> @@ -47,6 +47,9 @@ touch $projectdir/bar
->  ln -s $projectdir/bar $projectdir/broken-symlink
->  rm -f $projectdir/bar
+> +	local res=${PIPESTATUS[2]}
+>  	_scratch_unmount
+> +	test $res -eq 0 \
+> +		|| _notrun "noattr2 mount option no longer functional"
+>  }
 >  
-> +$here/src/file_attr --get $projectdir ./fifo &>/dev/null || \
-> +	_notrun "file_getattr not supported on $FSTYP"
-> +
->  $XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
->  	-c "project -sp $projectdir $id" $SCRATCH_DEV | filter_quota
->  $XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+>  # getfattr -R returns info in readdir order which varies from fs to fs.
 > 
 
