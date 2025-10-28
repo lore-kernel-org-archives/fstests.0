@@ -1,186 +1,142 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 085FE2FE078
-	for <fstests@vger.kernel.org>; Sat, 25 Oct 2025 19:40:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7DA1A19F48D;
+	Tue, 28 Oct 2025 07:18:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761421235; cv=none; b=hYGZoMjj5yGNIITIJUzpFaGSjFk7jB5RpymPdfUmsjg87K1LBjXdUmhEZyNeMI5KOFHtEwvxJpxIDv40n9HZO7oXqix3MUKcWuPsKqkG3SBl4k/q8dx7juK94yLVAmzhr64pFdSnL3MloUX9thJO9vHqHB8ssh5gkPsneBrFKQE=
+	t=1761635935; cv=none; b=aY+jp98++9pIqO9v1YfrvpaIf6YiFSMMYvt2I6NsvX4d70+FoJhXN12Ia/HPq6bQg2X3o134m0iVGlA5GSFoPYy8lqTCJer+cKrRXv4TuR8mQZMd+LWGsn9QftLMkYSQxILWyPyEj3IhgirTNWWeOhafCwNjlZGsK2IF1ua68DY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761421235; c=relaxed/simple;
-	bh=d21JXLFTr0JMClT3cTO06af1EoTHek0okUpiXPBhI+0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DPuq1+AWNWIVpOa4vnnteyDHHrLDbz1ZOU6rb4wLSxiRdo4Wz0bj2ua0YCS76dKEwd7DwI1le4BB8qMveJb0P9JjZCkUR9P2EPvPGixlfQIer2HUnlVAmdLLl2YCGUWJXnPta5mEQVVy161dwU+6z2Ey9W1DAmG2XxDfoa0i57E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GrWHVxEi; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1761635935; c=relaxed/simple;
+	bh=BXFBq7Er5A9bRGBHiLTG5uqk2zxYrix6RZxVlQfuScg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=jnXKAYjndynWpSUL9bx5JPjJ7MP6ocu8DFH3vQwqv7EG9mntLuoMp8sUALo3JYqmpQs965F+dwueKpOuOJdfK58wHjTTC2Z591SgVEs7y3wDWq/USKAUwjI+ZT3Rw6eJ2VckCNCoN83G+/3vL9dVCEur17eR/4Y/eC7Ucw1kilA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=AgxpBU2Q; arc=none smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GrWHVxEi"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B2C40C4AF09
-	for <fstests@vger.kernel.org>; Sat, 25 Oct 2025 19:40:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1761421234;
-	bh=d21JXLFTr0JMClT3cTO06af1EoTHek0okUpiXPBhI+0=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=GrWHVxEiHXyGgbi2Ioc06Q999Xb7gyIQmluceu609tq8x/NmLKwSpCloqu1QuiFAE
-	 17IPoNxOHkMrfqV+tmikyfEKj9/1vkxI5jc0yHi/394IndMXRZwKLWBfz53eKEVlmU
-	 QLoEpgoAN+kLtdBRbJMgGqsXY+iLh94FzI5XsvOoFUUsmmHdYSGJSgjgdVvWWmDNI3
-	 mTaafvl5PsapBta1c3AghPzW+CYRQlpsl0LbDxrq/gYllAw6Ed60BfnsxZTGg9MKQU
-	 GtYnhWyeR6dp4Q6/cyrsAzG0NunVbA4uphUNADFHlzCtYIhHi91/uJG/Td+njTpBDW
-	 rRAblp5ShjrvQ==
-Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-b5e19810703so508793466b.2
-        for <fstests@vger.kernel.org>; Sat, 25 Oct 2025 12:40:34 -0700 (PDT)
-X-Gm-Message-State: AOJu0Yy/ah18rneUGiqdCiJ5JxCSzwZI7NiYvnHZHe/Ey3z7mTtR7T1r
-	boM1GEKo5ykqk/tAT7Ot7H5WvnQ5qvzglZkWi62Xv1AgpCelBhZRdrTCbC29Eg6GaEQf0smH4zM
-	w1AXjCNtcsUgHNTBONpfYP/1bcDpdzrI=
-X-Google-Smtp-Source: AGHT+IHtN9EXE7QCzMp3RjoeIKxVjTGT5O86kAcBXbxKA5O3NiAEOx35I5hWMrgScmfXIW67vuo1BCSr8GXUAv5Ll+M=
-X-Received: by 2002:a17:907:1b11:b0:b5c:66ce:bfe6 with SMTP id
- a640c23a62f3a-b6474b348bemr4201967866b.55.1761421233277; Sat, 25 Oct 2025
- 12:40:33 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="AgxpBU2Q"
+Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59RN7OCx031798;
+	Tue, 28 Oct 2025 07:18:49 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=pp1; bh=P7Py8NhbCX0BEipZgHSAOlAVJoSfFXFjwG/L7gFbT
+	3g=; b=AgxpBU2QHGTCkQzDPVzKH5M3XNS44ox35npgDzoFNScVYpHFNfgwEODk4
+	B7hDdy1NRY9cBHO0GGytqPoxIVWz/UAhqTffpnEy/5n7ZPD02TYyg2Wcx0NdWrt8
+	hSMWD2Al0DRMGjZIjID3ZZnsrC6fKh74FDWfMIUXk6aYzw/N2XZ88YgjAGndG8sQ
+	XkFHv5+rxoW7SnCrPliU2CXk7PJKEFmiuIq9ubNz3mBILis1ZKbpHbd403aDxfw3
+	l0IqB2qtoa1gRLPPU6TIXpPaG0lBjI8Nlc6cc0qQvaWHLFrvjQ/RTgKwtcLU7n81
+	mMlQ1unuK8nsMuYW435RaBzVxS+4Q==
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4a0mys2g0w-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 28 Oct 2025 07:18:49 +0000 (GMT)
+Received: from m0353725.ppops.net (m0353725.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.0.8) with ESMTP id 59S7C4bT024613;
+	Tue, 28 Oct 2025 07:18:48 GMT
+Received: from ppma12.dal12v.mail.ibm.com (dc.9e.1632.ip4.static.sl-reverse.com [50.22.158.220])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4a0mys2g0u-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 28 Oct 2025 07:18:48 +0000 (GMT)
+Received: from pps.filterd (ppma12.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma12.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 59S6qehT021584;
+	Tue, 28 Oct 2025 07:18:48 GMT
+Received: from smtprelay05.fra02v.mail.ibm.com ([9.218.2.225])
+	by ppma12.dal12v.mail.ibm.com (PPS) with ESMTPS id 4a18vs1nsk-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 28 Oct 2025 07:18:47 +0000
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay05.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 59S7IkJ833620334
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 28 Oct 2025 07:18:46 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 4909920067;
+	Tue, 28 Oct 2025 07:18:46 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id A2E3F20063;
+	Tue, 28 Oct 2025 07:17:44 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.in.ibm.com (unknown [9.109.219.158])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Tue, 28 Oct 2025 07:17:44 +0000 (GMT)
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+Cc: Leah Rumancik <lrumancik@google.com>, linux-ext4@vger.kernel.org
+Subject: [PATCH] ext4/048: Fix hangup due to no free inodes
+Date: Tue, 28 Oct 2025 12:47:43 +0530
+Message-ID: <20251028071743.1507168-1-ojaswin@linux.ibm.com>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <54585ed26988fb88be1eab8211aa383a5e7cbd19.1761306683.git.fdmanana@suse.com>
- <bb46518c-9836-4bd2-8142-fbb8c859fd3f@suse.com>
-In-Reply-To: <bb46518c-9836-4bd2-8142-fbb8c859fd3f@suse.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Sat, 25 Oct 2025 20:39:56 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H4bcqMZEu_QSQVETQWPzkBCSpi2cKEAbfcpHPcPG=Wc0A@mail.gmail.com>
-X-Gm-Features: AWmQ_blbiKtZ0-YE6_W4fktYFfOqH-5U11f_yEyY-skoMLrNmCv53w8nSJ2niFI
-Message-ID: <CAL3q7H4bcqMZEu_QSQVETQWPzkBCSpi2cKEAbfcpHPcPG=Wc0A@mail.gmail.com>
-Subject: Re: [PATCH] generic: test fsync of directory after renaming new symlink
-To: Qu Wenruo <wqu@suse.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
-	Filipe Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: QWRnHhBYZLjB1cG1dE65taQswsqjdDpK
+X-Authority-Analysis: v=2.4 cv=ct2WUl4i c=1 sm=1 tr=0 ts=69006e59 cx=c_pps
+ a=bLidbwmWQ0KltjZqbj+ezA==:117 a=bLidbwmWQ0KltjZqbj+ezA==:17
+ a=x6icFKpwvdMA:10 a=VkNPw1HP01LnGYTKEx00:22 a=VnNF1IyMAAAA:8
+ a=MHt_SkkdIr3fsFmjLxcA:9
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDI1MDAxMCBTYWx0ZWRfXwBjKxXaNfITq
+ /zSlAd2CkApjLQooNersleCu89gkhAwwb/TEbBfSQJ1P00S/MMzMYTYBGXCPy2NOJvS+EmyNtEk
+ WziVZdWuOjKLQXYA30nxjSAmIhCm4VccAV4cDnIWSAPwfVqpCzaXKmrhXfpmlINjMUOAJvNk5dq
+ imSsfXyqCcY7gw0ec0djCXjs03dpkZvAiRmK0YViIGpyOIn38a0TRuuyw7fTEA9sGtNCt7TAWhT
+ A4oTF1DryDXhaIO3Bj/2uUlCtMshoafUiCfAC0B8px10ZfS7SUJ8F7Cp3qKmwmmUfKm336HqHET
+ iZ7i5DaNZ+01jPeKH3/yDV2nRyPhvH3GmfQbd1F9Ye90JHHix3/8n6OixnECvo3kRtYu4i1pQu5
+ pTYtbD1SuEDL0EjHylIyw1Zenk8EHQ==
+X-Proofpoint-GUID: vkAL9tWgAf1lrlGm97IBpGeC70tWCRV7
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-10-28_03,2025-10-22_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ bulkscore=0 phishscore=0 lowpriorityscore=0 impostorscore=0 malwarescore=0
+ spamscore=0 adultscore=0 priorityscore=1501 clxscore=1015 suspectscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2510020000 definitions=main-2510250010
 
-On Sat, Oct 25, 2025 at 11:13=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
->
->
->
-> =E5=9C=A8 2025/10/24 22:23, fdmanana@kernel.org =E5=86=99=E9=81=93:
-> > From: Filipe Manana <fdmanana@suse.com>
-> >
-> > Test that if we fsync a directory that has a new symlink, then rename t=
-he
-> > symlink and fsync again the directory, after a power failure the symlin=
-k
-> > exists with the new name and not the old one.
-> >
-> > This is to exercise a bug in btrfs where we ended up not persisting the
-> > new name of the symlink. That is fixed by a kernel patch that has the
-> > following subject:
-> >
-> >   "btrfs: set inode flag BTRFS_INODE_COPY_EVERYTHING when logging new n=
-ame"
-> >
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > ---
-> >   tests/generic/779     | 60 ++++++++++++++++++++++++++++++++++++++++++=
-+
-> >   tests/generic/779.out |  2 ++
-> >   2 files changed, 62 insertions(+)
-> >   create mode 100755 tests/generic/779
-> >   create mode 100644 tests/generic/779.out
-> >
-> > diff --git a/tests/generic/779 b/tests/generic/779
-> > new file mode 100755
-> > index 00000000..40d1a86c
-> > --- /dev/null
-> > +++ b/tests/generic/779
-> > @@ -0,0 +1,60 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2025 SUSE S.A.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 779
-> > +#
-> > +# Test that if we fsync a directory that has a new symlink, then renam=
-e the
-> > +# symlink and fsync again the directory, after a power failure the sym=
-link
-> > +# exists with the new name and not the old one.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick log
-> > +
-> > +_cleanup()
-> > +{
-> > +     _cleanup_flakey
-> > +     cd /
-> > +     rm -r -f $tmp.*
-> > +}
-> > +
-> > +. ./common/dmflakey
-> > +
-> > +_require_scratch
-> > +_require_symlinks
-> > +_require_dm_target flakey
-> > +
-> > +[ "$FSTYP" =3D "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-> > +     "btrfs: set inode flag BTRFS_INODE_COPY_EVERYTHING when logging n=
-ew name"
-> > +
-> > +rm -f $seqres.full
->
-> Looks like a rouge command?
+We currently mkfs a 128MB filesystem, which gives use ~2048 free inodes
+on 64k blocksize. The test then keeps adding new files to a directory to
+trigger an htree split. For 64k this takes more than the total free
+inodes, which causes touch to return -ENOSPC. This leads to the while
+loop in induce_node_split() to never finish.
 
-It was copied from some other test.
-A few tests have this, but it doesn't seem to be needed (anymore at least).
+To fix this:
+1. Format a 1G FS which gives us atleast 16K inodes to work with.
+2. _fail if there's any error while trying to induce node split, so we
+   dont get stuck in loop
 
-I'll let Zerro remove the line when he picks this.
+Fixes: 466ddbfd1151 ("ext4: add test for ext4_dir_entry2 wipe")
+Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+---
+ tests/ext4/048 | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
->
->
-> Otherwise looks good to me.
->
-> Reviewed-by: Qu Wenruo <wqu@suse.com>
->
-> Thanks,
-> Qu
->
-> > +
-> > +_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-> > +_require_metadata_journaling $SCRATCH_DEV
-> > +_init_flakey
-> > +_mount_flakey
-> > +
-> > +# Create our test dir and add a symlink inside it.
-> > +mkdir $SCRATCH_MNT/dir
-> > +ln -s foobar $SCRATCH_MNT/dir/old-slink
-> > +
-> > +# Fsync the test dir, should persist the symlink.
-> > +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir
-> > +
-> > +# Rename the symlink and fsync the directory. It should persist the ne=
-w symlink
-> > +# name.
-> > +mv $SCRATCH_MNT/dir/old-slink $SCRATCH_MNT/dir/new-slink
-> > +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir
-> > +
-> > +# Simulate a power failure and then mount again the filesystem to repl=
-ay the
-> > +# journal/log.
-> > +_flakey_drop_and_remount
-> > +
-> > +# Check that the symlink exists with the new name and has the correct =
-content.
-> > +[ -L $SCRATCH_MNT/dir/new-slink ] || echo "symlink dir/new-slink not f=
-ound"
-> > +echo "symlink content: $(readlink $SCRATCH_MNT/dir/new-slink)"
-> > +
-> > +_unmount_flakey
-> > +
-> > +# success, all done
-> > +_exit 0
-> > diff --git a/tests/generic/779.out b/tests/generic/779.out
-> > new file mode 100644
-> > index 00000000..c595cd01
-> > --- /dev/null
-> > +++ b/tests/generic/779.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 779
-> > +symlink content: foobar
->
+diff --git a/tests/ext4/048 b/tests/ext4/048
+index 2031c8c8..6343ff3a 100755
+--- a/tests/ext4/048
++++ b/tests/ext4/048
+@@ -69,6 +69,11 @@ induce_node_split() {
+ 	while [[ "$(stat --printf="%s" $testdir)" == "$dir_size" ]]; do
+ 		file_num=$(($file_num + 1))
+ 		touch $testdir/test"$(printf "%04d" $file_num)"
++		local ret=$?
++		if [[ $ret -ne 0 ]]
++		then
++			_fail "ERROR induce_node_split(): $ret"
++		fi
+ 	done
+ 	_scratch_unmount >> $seqres.full 2>&1
+ }
+@@ -81,7 +86,7 @@ test_file1="test0001"
+ test_file2="test0002"
+ test_file3="test0003"
+ 
+-_scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full 2>&1
++_scratch_mkfs_sized $((1 * 1024 * 1024 * 1024)) >> $seqres.full 2>&1
+ 
+ # create scratch dir for testing
+ # create some files with no name a substr of another name so we can grep later
+-- 
+2.51.0
+
