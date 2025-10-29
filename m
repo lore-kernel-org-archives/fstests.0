@@ -1,93 +1,160 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 453E329A9F9
-	for <fstests@vger.kernel.org>; Wed, 29 Oct 2025 12:02:37 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6460D325737;
+	Wed, 29 Oct 2025 15:46:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761739357; cv=none; b=azp1AXnEE+WKf2oAjMxrVZfDUKFcb29f1M5vYMKFw2z8TmNZN4rlZ0tItza+UIQzj/f7BIyyILj2jMfhHQpS7g195nelZNAi9FcDzg+6XVq5ZbmaAkjdXcakcWs6E7VzePReG7tCun1Yy1ap6Aro8UqxyRt5b+7LaU5+r8tdk5Y=
+	t=1761752796; cv=none; b=L5t4n5kJibCMRJo4kf8FVK9BqSXA0P0Uj8CgIcvk8lzWz5DOajiXdQBS0gxT8xJeaVxA+AgLX5IwcTuUPlwW44VdlY2pULfeBV0bFbEbwH25ycBRjpRvhxep0n2VP4eEy3FcmgM8kwvUTQkbduMTFaSXOzUNfDoSqOqIFjna2Gc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761739357; c=relaxed/simple;
-	bh=FnowuDxDevMD9mwxtf2kNZdUxIQHi9dzh6ou8P39uIk=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=lZteFCox8CjUDmYowBL8sCibwVuFOBxOR0dj9SFVkoQjwodU3zvpupjhFDXPNHmGg3c2/2CzevgG8DBXdteD2I8Q2owkS8p850sSooJwCL7IlnV9MjOkluO313NI1czda0pM60iAZc/3X0Q2+QS3q3069PdKYt8rbx/0dpwgsh8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ctQ82c1p; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1761752796; c=relaxed/simple;
+	bh=lOG3BhluQpo+8ApurJHcCLu9b4sc0GZYjvlpQXGrcAI=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=SJQKTjdyqb8WrNuHubzmcmkAXNeUjgq0poemb8GYAQS0KhJ1J2P5gAyhPt+yJTF8emt/Ydv1t6Dgoo3tdBucolOhbF4SgY4HRfsiWBOUgf1xFnfAH8Xi2infGP5X1yLoH1QVprVtWFEOJQuGLPUyinmjAuVQIOp/06d0dVZa3WE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=A6RjVtLt; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ctQ82c1p"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6B1E8C4CEF7;
-	Wed, 29 Oct 2025 12:02:35 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="A6RjVtLt"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1F8F9C4CEF7;
+	Wed, 29 Oct 2025 15:46:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1761739356;
-	bh=FnowuDxDevMD9mwxtf2kNZdUxIQHi9dzh6ou8P39uIk=;
-	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
-	b=ctQ82c1pR6v5IOaKMWnF5Zoi83j1Lq4iLMqUndjC8XcxGYLeVnA/ObbfJAMKMKb9z
-	 K3II5fnXvLGBeTI1sZ+x1qAWERTERwL/YZS6MYYZXHpxZ9pxdk2wOJiXJfQwjY+NQd
-	 OjxgtLMwbM2+M2J/tKhy+FdamHdHMiysbhmBofSQv5MBEqlas7497FYuQyrMAeppzi
-	 GnOrxUMBKBhR5udK6TGwzn3uMjpw4GSM+46Yaj6Ev/VZVT3jBJFJ5A98RQIZ7VfYct
-	 aPiIup7aCMUOXWXnksZMdB1pAJcrvCbOPQElMUFjR9caUl2tWJVKME4cfvxJBcjeWj
-	 b/+OwV1+7yUVg==
-Message-ID: <1a26766d-311c-460b-b5c3-309750b3f0a1@kernel.org>
-Date: Wed, 29 Oct 2025 20:02:33 +0800
+	s=k20201202; t=1761752796;
+	bh=lOG3BhluQpo+8ApurJHcCLu9b4sc0GZYjvlpQXGrcAI=;
+	h=From:To:Cc:Subject:Date:From;
+	b=A6RjVtLtluR8h8KTsJLOt73681zYnlZSSCHDcuUFd2Yt6MZMVZuk6dR9fCN0u4KA8
+	 5HR95mwLWllC4VUNzw5MukhiClPIu/dF2Rqd2iEPywp9gpSa4pOJr2N8D8BX1T3Iwm
+	 sT6ikTcHl+G9cPluf70a4JG3Q84G5K8ndy90pekgJu/6OdR1cEJCwq573KL0SO4mT2
+	 IR//pzA7FgVKFFqhhb6CI8UMUSPQPvaJL6fFb2YiTxzs7OyIMLZ0u0e9YSGcPMYUvj
+	 BDYCIolKS1H1xgdEb1wp6m2pFI2TXbISniOfC9+qUBxy+9HNUlUWDntwSKFSV5V7ju
+	 3iSIYLtnCPjDg==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic: test a scenario of dir fsync after adding a link to a subdir
+Date: Wed, 29 Oct 2025 15:46:30 +0000
+Message-ID: <92f178d04f74f9281b97d67bdf402e7a5e3baec9.1761752457.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: chao@kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>,
- linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v1] f2fs/011: use random data to avoid file compression
-To: Joanne Chang <joannechien@google.com>, Zorro Lang <zlang@kernel.org>,
- fstests@vger.kernel.org
-References: <20251029093457.183578-1-joannechien@google.com>
-Content-Language: en-US
-From: Chao Yu <chao@kernel.org>
-In-Reply-To: <20251029093457.183578-1-joannechien@google.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-Joanne,
+From: Filipe Manana <fdmanana@suse.com>
 
-On 10/29/25 17:34, Joanne Chang wrote:
-> Currently, the created files are filled with 0. When filesystem level
-> compression is used, they take up much less space than expected. So
-> the final fallocate does not show an error.
-> 
-> The created files are filled by /dev/urandom instead to ensure they
-> are not compressed. This way the files take up the same space whether
-> compression is used or not.
-> 
-> Signed-off-by: Joanne Chang <joannechien@google.com>
-> ---
->  tests/f2fs/011 | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/f2fs/011 b/tests/f2fs/011
-> index c21cb586..75679b36 100755
-> --- a/tests/f2fs/011
-> +++ b/tests/f2fs/011
-> @@ -35,8 +35,9 @@ _scratch_mount -o checkpoint=disable:10%
->  pinfile=$SCRATCH_MNT/file
->  
->  # simulate fragment status in f2fs
-> -for ((i=0;i<256;i++)) do
-> -	$XFS_IO_PROG -f -c "pwrite 0 1m" $SCRATCH_MNT/$i >>$seqres.full
-> +dd if=/dev/urandom of=$SCRATCH_MNT/0 bs=1M count=1 2> /dev/null
+Test that if we add a new directory to the root directory, change a file
+in the root directory, fsync the file, add a hard link for the file inside
+the new directory and then fsync the root directory, after a power failure
+the root directory has the entry for the new directory.
 
-IIRC, $XFS_IO_PROG is preferred in xfstests [1]
+This is a regression test for the following btrfs patch:
 
-[1] https://lore.kernel.org/fstests/20250326140938.6ll7yeez6iwabvgi@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com
+ "btrfs: do not update last_log_commit when logging inode due to a new name"
 
-So, what do you think of this?
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/780     | 73 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/780.out | 10 ++++++
+ 2 files changed, 83 insertions(+)
+ create mode 100755 tests/generic/780
+ create mode 100644 tests/generic/780.out
 
-for ((i=0;i<256;i++)) do
-	$XFS_IO_PROG -f -c "pwrite -i /dev/urandom 0 1m" $SCRATCH_MNT/$i >>$seqres.full
-done
-
-> +for ((i=1;i<256;i++)) do
-> +	cp $SCRATCH_MNT/0 $SCRATCH_MNT/$i
->  done
->  sync
->  
+diff --git a/tests/generic/780 b/tests/generic/780
+new file mode 100755
+index 00000000..d4977b06
+--- /dev/null
++++ b/tests/generic/780
+@@ -0,0 +1,73 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 SUSE S.A.  All Rights Reserved.
++#
++# FS QA Test 780
++#
++# Test that if we add a new directory to the root directory, change a file in
++# the root directory, fsync the file, add a hard link for the file inside the
++# new directory and then fsync the root directory, after a power failure the
++# root directory has the entry for the new directory.
++#
++. ./common/preamble
++_begin_fstest auto quick log
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -r -f $tmp.*
++}
++
++. ./common/filter
++. ./common/dmflakey
++
++_require_scratch
++_require_dm_target flakey
++
++[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: do not update last_log_commit when logging inode due to a new name"
++
++_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# Create our test file.
++touch $SCRATCH_MNT/foo
++
++# Make sure it's durably persisted.
++_scratch_sync
++
++# Create a test directory in the root dir.
++mkdir $SCRATCH_MNT/dir
++
++# Write some data to the file and fsync it.
++$XFS_IO_PROG -c "pwrite -S 0xab 0 64K" \
++	     -c "fsync" $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Add a hard link for our file inside the test directory.
++# On btrfs this causes updating the file's inode and both parent
++# directories in the log tree (in memory only).
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/dir/bar
++
++# Fsync the root directory.
++# We expect it to persist the entry for directory "dir".
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/
++
++# Simulate a power failure and then mount again the filesystem to replay the
++# journal/log.
++_flakey_drop_and_remount
++
++# The directory "dir" should be present as well as file "foo".
++# Filter the 'lost+found' that only exists in some filesystems like ext4.
++echo "Root content:"
++ls -1 $SCRATCH_MNT | grep -v 'lost+found'
++
++# Also check file "foo" has the expected data.
++echo "File data:"
++_hexdump $SCRATCH_MNT/foo
++
++_unmount_flakey
++
++_exit 0
+diff --git a/tests/generic/780.out b/tests/generic/780.out
+new file mode 100644
+index 00000000..3be43734
+--- /dev/null
++++ b/tests/generic/780.out
+@@ -0,0 +1,10 @@
++QA output created by 780
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Root content:
++dir
++foo
++File data:
++000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab  >................<
++*
++010000
+-- 
+2.47.2
 
