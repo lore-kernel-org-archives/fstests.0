@@ -1,43 +1,42 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB46F2E8B85;
-	Wed, 29 Oct 2025 18:13:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DD1E1C2BD;
+	Wed, 29 Oct 2025 23:52:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761761616; cv=none; b=D2Isi/719GFQSHoWLD4d+l80LNkraJ4oT23/wSlUSmODYts+lEVkqQEvW+c3TzmL8lMtc4+ymhFS4HAKlOxqnQDOJ/IvtznhOl4Zw4vy1WkrNEAhIlMAUhcWvlGJvt6iS3RbWd0TK7rT1D7tY+rutulYgg/Z8SMIrFtKZBar/94=
+	t=1761781955; cv=none; b=JJ7JNozjP/PD1QIsmAF+uvacyPxu7aClPY/ahM7w5YjPh0ps9k34SdvI6SjZU3xik+0wVgOB8Xk8jnKaEWTV6XXMSPmHoldJRXyZ19+b7z9OqO2I8EPZzpju4un3sS7giowzvGc7a3XhKSTOTXRA+oKvdIh7ssoajdyDQh4W80Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761761616; c=relaxed/simple;
-	bh=O4pe0KaVYZJ0MRJ62aWnJfMj3faZYC7std7ttBoAfbk=;
+	s=arc-20240116; t=1761781955; c=relaxed/simple;
+	bh=V2XrcyvN6/8XRYF1YiXjH0P5KLrXEXLSKJ61uFr7rIY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=DF8Mc+JZBa9iG9G24yLddGQP5GwDD1gzH6XE1qKBpX7y/T4N8aaeewQYyEAwaqQOG7r46UhBbqSPNei5EYm/FnLjwRmgBia3eRkIlR7+wxsKNFmVQsme7T11jXvLeUs8WSgBGY47aAHQoEFNZWjzxPaoMD4Z+uHKW/ULlBI9gwY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Qz88XQJ9; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=BwDvlUvU3hG16DpRp5xd6446WvQYMv7MpWGJ56+zIvEZ5wWoW5pikTX78plnk/zsN0yNJ6bFjW3Nr21NgaY/q7qtMhoPXzZEo6CimOqSyJ3t3hiKkQy3m74VKw9q/tLBeg6ImVhRhvUVIsXYvaFbDYzsP3V+oGYyImoSLuCZfRg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VLQMaBua; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Qz88XQJ9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7C516C4CEF7;
-	Wed, 29 Oct 2025 18:13:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VLQMaBua"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E794BC4CEF7;
+	Wed, 29 Oct 2025 23:52:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1761761616;
-	bh=O4pe0KaVYZJ0MRJ62aWnJfMj3faZYC7std7ttBoAfbk=;
+	s=k20201202; t=1761781955;
+	bh=V2XrcyvN6/8XRYF1YiXjH0P5KLrXEXLSKJ61uFr7rIY=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Qz88XQJ9zKHAbGZg5PxJkjG0or11MnFuSlnvz/8tjBZ9pyG5eU721l0WAvtmHwlFm
-	 mqKyrkYqEl2KNEfM5O/lA1Q1T2ajYV0qLIBSPEfzZSP+h5OtlCh4wAnnTbFOVzJp3E
-	 RbKCTtYOXzhCc56qg0vc/x3xTHLizK+EN4bEv9utTA7i4ZttuBGI/1uEHrbp1Um+ml
-	 wQ+Rva7RVEnZWpAsWDTqLdA1HwS3KkqqLBZbeX4/tOlUCboUUad9yXnBR0s2kOzg9s
-	 erbQ1dMayhPRFdqg74N3UVOkWqIxgPLXbXFPNq6H4qHuIGPBNICQd4jw4iC5TVe9f8
-	 gfjBKkO2AwjEw==
-Date: Wed, 29 Oct 2025 11:13:36 -0700
+	b=VLQMaBuaQA/xHXPdgS+DZGAbO/jlykqLUBRrChTKyTGsqH6u5CuHJTRU5qMGa6YsU
+	 bD9WqfAibi9RyDLNS0QLJ7NGM5cnFyc1JqDXHElxw7hvkkwDGaz2vDtoZM2aAjfY/C
+	 cxTGrx8Xc36Ry5F7mwBkSQRvt22TVAaFZgQR1XReB9G6x5Usl6FFTXoomqWw3MGcPt
+	 604pIrsJ9DX8X+YF6rEuo65PnuWeLB3vic1pOc7tddh580o00dmned4ygudj0KlxwG
+	 r0DsSvrBmn+C3j0Q/RiYz6hNZk7F5WtvRSqdg6xa9EUzf+sKf0PozBCAV7fUQ+PQPf
+	 3moo1ELrl18FQ==
+Date: Wed, 29 Oct 2025 16:52:34 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Carlos Maiolino <cem@kernel.org>
-Cc: Ojaswin Mujoo <ojaswin@linux.ibm.com>, Zorro Lang <zlang@redhat.com>,
-	fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
-	john.g.garry@oracle.com, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs: fix write failures in software-provided atomic
- writes
-Message-ID: <20251029181336.GJ3356773@frogsfrogsfrogs>
-References: <cover.1758264169.git.ojaswin@linux.ibm.com>
- <c3a040b249485b02b569b9269b649d02d721d995.1758264169.git.ojaswin@linux.ibm.com>
- <20251029181132.GH3356773@frogsfrogsfrogs>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, neal@gompa.dev,
+	linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+	joannelkoong@gmail.com, bernd@bsbernd.com
+Subject: Re: [PATCHSET v6] fstests: support ext4 fuse testing
+Message-ID: <20251029235234.GZ6178@frogsfrogsfrogs>
+References: <20251029002755.GK6174@frogsfrogsfrogs>
+ <176169819804.1433624.11241650941850700038.stgit@frogsfrogsfrogs>
+ <aQHf3UGaURFzC17U@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -46,97 +45,31 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251029181132.GH3356773@frogsfrogsfrogs>
+In-Reply-To: <aQHf3UGaURFzC17U@infradead.org>
 
-On Wed, Oct 29, 2025 at 11:11:32AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> With the 5 Oct 2025 release of fstests, generic/521 fails for me on
-> regular (aka non-block-atomic-writes) storage:
-> 
-> QA output created by 521
-> dowrite: write: Input/output error
-> LOG DUMP (8553 total operations):
-> 1(  1 mod 256): SKIPPED (no operation)
-> 2(  2 mod 256): WRITE    0x7e000 thru 0x8dfff	(0x10000 bytes) HOLE
-> 3(  3 mod 256): READ     0x69000 thru 0x79fff	(0x11000 bytes)
-> 4(  4 mod 256): FALLOC   0x53c38 thru 0x5e853	(0xac1b bytes) INTERIOR
-> 5(  5 mod 256): COPY 0x55000 thru 0x59fff	(0x5000 bytes) to 0x25000 thru 0x29fff
-> 6(  6 mod 256): WRITE    0x74000 thru 0x88fff	(0x15000 bytes)
-> 7(  7 mod 256): ZERO     0xedb1 thru 0x11693	(0x28e3 bytes)
-> <snip>
-> 
-> with a warning in dmesg from iomap about XFS trying to give it a
-> delalloc mapping for a directio write.  Fix the software atomic write
-> iomap_begin code to convert the reservation into a written mapping.
-> This doesn't fix the data corruption problems reported by generic/760,
-> but it's a start.
+On Wed, Oct 29, 2025 at 02:35:25AM -0700, Christoph Hellwig wrote:
+> I find the series a bit hard to follow, because it mixes generic
+> with fs specific with test specific patches totally randomly.  Can
+> you get a bit of an order into it?  And maybe just send a series
+> with the conceptual core changes first outside the giant patch bombs?
+> Or if parts are useful outside the fuse ext4 context just send them
+> out in a self-contained series?  Bonus points for a bit of a highlevel
+> summary why these changes are needed in the cover letter.
 
-Grrrr I forgot to remove the reply-to tag when I harvested the cc list
-from this old thread for a bug fix.  Sorry about that.
+Well TBH there's a lot of accumulated stuff including some treewide
+cleanups in my fstests branch that needs to go upstream before the
+fuse2fs changes.  I've been waiting the entire year to see if
+check-parallel will get finished... and I'm not going to wait anymore.
+That's why I haven't tidied up this patchset at all.
+
+The TLDR version is that FSTYP=fuse.ext4 is how you select the fuse
+server, and you ought to have mkfs.fuse.ext4/fsck.fuse.ext4 point to the
+appropriate e2fsprogs programs; a [fuse.ext4] section in mke2fs.conf;
+and fuse4fs installed as /sbin/mount.fuse.ext4 or /sbin/ext4 depending
+on how your libfuse is configured.
+
+Then this series is basically making sure that FSTYP=fuse.ext* works,
+and turning off feature tests for things that aren't supported by
+fuse2fs.
 
 --D
-
-> 
-> Cc: <stable@vger.kernel.org> # v6.16
-> Fixes: bd1d2c21d5d249 ("xfs: add xfs_atomic_write_cow_iomap_begin()")
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
->  fs/xfs/xfs_iomap.c |   21 +++++++++++++++++++--
->  1 file changed, 19 insertions(+), 2 deletions(-)
-> 
-> diff --git a/fs/xfs/xfs_iomap.c b/fs/xfs/xfs_iomap.c
-> index d3f6e3e42a1191..e1da06b157cf94 100644
-> --- a/fs/xfs/xfs_iomap.c
-> +++ b/fs/xfs/xfs_iomap.c
-> @@ -1130,7 +1130,7 @@ xfs_atomic_write_cow_iomap_begin(
->  		return -EAGAIN;
->  
->  	trace_xfs_iomap_atomic_write_cow(ip, offset, length);
-> -
-> +retry:
->  	xfs_ilock(ip, XFS_ILOCK_EXCL);
->  
->  	if (!ip->i_cowfp) {
-> @@ -1141,6 +1141,8 @@ xfs_atomic_write_cow_iomap_begin(
->  	if (!xfs_iext_lookup_extent(ip, ip->i_cowfp, offset_fsb, &icur, &cmap))
->  		cmap.br_startoff = end_fsb;
->  	if (cmap.br_startoff <= offset_fsb) {
-> +		if (isnullstartblock(cmap.br_startblock))
-> +			goto convert;
->  		xfs_trim_extent(&cmap, offset_fsb, count_fsb);
->  		goto found;
->  	}
-> @@ -1169,8 +1171,10 @@ xfs_atomic_write_cow_iomap_begin(
->  	if (!xfs_iext_lookup_extent(ip, ip->i_cowfp, offset_fsb, &icur, &cmap))
->  		cmap.br_startoff = end_fsb;
->  	if (cmap.br_startoff <= offset_fsb) {
-> -		xfs_trim_extent(&cmap, offset_fsb, count_fsb);
->  		xfs_trans_cancel(tp);
-> +		if (isnullstartblock(cmap.br_startblock))
-> +			goto convert;
-> +		xfs_trim_extent(&cmap, offset_fsb, count_fsb);
->  		goto found;
->  	}
->  
-> @@ -1210,6 +1214,19 @@ xfs_atomic_write_cow_iomap_begin(
->  	xfs_iunlock(ip, XFS_ILOCK_EXCL);
->  	return xfs_bmbt_to_iomap(ip, iomap, &cmap, flags, IOMAP_F_SHARED, seq);
->  
-> +convert:
-> +	xfs_iunlock(ip, XFS_ILOCK_EXCL);
-> +	error = xfs_bmapi_convert_delalloc(ip, XFS_COW_FORK, offset, iomap,
-> +			NULL);
-> +	if (error)
-> +		return error;
-> +
-> +	/*
-> +	 * Try the lookup again, because the delalloc conversion might have
-> +	 * turned the COW mapping into unwritten, but we need it to be in
-> +	 * written state.
-> +	 */
-> +	goto retry;
->  out_unlock:
->  	xfs_iunlock(ip, XFS_ILOCK_EXCL);
->  	return error;
-> 
