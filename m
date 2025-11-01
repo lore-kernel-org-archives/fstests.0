@@ -1,230 +1,165 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D2B22BEC52
-	for <fstests@vger.kernel.org>; Sat,  1 Nov 2025 09:27:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F24864086A
+	for <fstests@vger.kernel.org>; Sat,  1 Nov 2025 09:34:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761989264; cv=none; b=BGVn1Uwrr5vV80Rt4J4pL1kuRNvLWWBIIotqs8qNkOHlPtq0Vxvb/yvcV3/ltbk0p/qib8hae9GzGzvMUYSuUqBYpLTw3gBGtRso/7/T5tcZ9kwH9VGewfI1Y4vgY9LRDZhHzGMM+VgiJtRjXyBcmU+FriiChVB7KtcSTnZg1YU=
+	t=1761989669; cv=none; b=YKIT8VnbuOdnSNuMSgWAlIr1KVXLW4tHcLJ8Kfzuylw6rE7YZdAZzVSuv10ZTsTCks0r2jTdOkfU8gU/Hlaf2R2/fnHyDwiS/IPb0eGRWuX3RxoGFG/7/IulZKL0SkEwpvu53NiFQXzbBb0EXhB2P3bexY9fHl8PK6k5QdrccHM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761989264; c=relaxed/simple;
-	bh=5UGM2acK4U+UYS//dJ4YbqwnQW/uNu85pIF1mdy4LM4=;
+	s=arc-20240116; t=1761989669; c=relaxed/simple;
+	bh=OvSXWv59YMDB5w77LCXU4APAUw6OWmhMXtgLwNAuw/U=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=FdBzhqhjJu8tD/HgZgbeyjimSlbub+HVrsCLC5bEBegmglYmnG/rtuIdqJevawgVcHbZLVWRDFUGsc/9CF5q1j2p/yZxJlSIP9wpELYQhJp4BpaMhkZVowmkJnkeH6ZxYXt//aXMGOaeQNJKI+uF6qXgtMAOPr4bVfl04Irst2o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=U+ulZNDf; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=hLTzj8ZU; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=VOsGq7mM4/LVixLxbqnYIZ+mWIVwAnaUDtbj9ODiT4l7pdl9uuus2qVZAJGmUMXmAcffhX8jAHpKT3hhn8MpWp9ucKw3WoTsink35DPExbO7BqlQkADBxMmVviIQeeQi8vDuY3ItnMGmH+X3HPzFj6ITYYRupYMJRo7Tb7rx3+E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JHWGNTa7; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=GLPObivd; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="U+ulZNDf";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="hLTzj8ZU"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JHWGNTa7";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="GLPObivd"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1761989261;
+	s=mimecast20190719; t=1761989666;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=RbQmNSy9P0NTgIS1jo9Ela3U7G3myp7cj0Hkt1v3so8=;
-	b=U+ulZNDfAFMHv6az43c08lFuCBFhsuVtDQOoDAR+QYwEPPO0EtHNzfscnyiOj7z5n1v4Tw
-	gj/a55/bOYsgY3pLBWCdYEw4H1Md5XBPWwQ1MLjHL3RVw98523bv1StlMj2rsSFcTLY0Pw
-	gpFlsaFMFIfCyU3W1y00laOcWHJJSlU=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=6I8+PYpj4VSzvWtRvWrniQOXdcXFUBE7kuDCLe/jFhU=;
+	b=JHWGNTa7R7l34+AS/ZQ4D/4/nnw0oEnRztcBrTNNu8L53o6/gP4aP0iwCZnWFh/ycrRjwm
+	RE+L3pzgRtAVYRee3ieS0zS10m7Jx8zj9obnNTxkonKWYlTf3XJEc//hPdfalWdBas9FzL
+	frdOTVQTiIWewPg7mjGBMb7XuinrNd0=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-125-L2bmSz7sN3KA1h-QxF6Bpg-1; Sat, 01 Nov 2025 05:27:40 -0400
-X-MC-Unique: L2bmSz7sN3KA1h-QxF6Bpg-1
-X-Mimecast-MFC-AGG-ID: L2bmSz7sN3KA1h-QxF6Bpg_1761989259
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-33da1f30fdfso7063594a91.3
-        for <fstests@vger.kernel.org>; Sat, 01 Nov 2025 02:27:39 -0700 (PDT)
+ us-mta-518-U5LIoBcEN9uXL8J53WOqPg-1; Sat, 01 Nov 2025 05:34:25 -0400
+X-MC-Unique: U5LIoBcEN9uXL8J53WOqPg-1
+X-Mimecast-MFC-AGG-ID: U5LIoBcEN9uXL8J53WOqPg_1761989664
+Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-b471737e673so4808722a12.1
+        for <fstests@vger.kernel.org>; Sat, 01 Nov 2025 02:34:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1761989259; x=1762594059; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=RbQmNSy9P0NTgIS1jo9Ela3U7G3myp7cj0Hkt1v3so8=;
-        b=hLTzj8ZULgq/Dueu7xz5/djcS5AiAXOTKmikBouLZumhDO2TQ23rgq82YwYHGaHSMt
-         X5MlRsk84xAZ8MGrDzFLY9PPstMm/Ips4FDq5Owrk2VZbR5laKFJmI9iVagamW42B4ma
-         Jdw94uhlFbzqAsSjJ0DBSt4SqeLTifgeSS3CQi/nhjbCOqqsP446QFA+w3C3aVf1prhN
-         JlD3I9pu7mqVjhhU1bFCeqDppmCrhfOag/fDyYmdk1ws0Gq3awZBGWDzbciRnoemQ28p
-         PMmHOiUTduX2R2CSgLhd8ezzYIwamziJyERXtb3x/i9N5rnt6w6olrZxJ9TD/99+B7gJ
-         JC9Q==
+        d=redhat.com; s=google; t=1761989664; x=1762594464; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=6I8+PYpj4VSzvWtRvWrniQOXdcXFUBE7kuDCLe/jFhU=;
+        b=GLPObivd6JkbEBhc44QbfhzSRwXlASx6BHP4y843KLtFISh5zoDSah4MO0/pCMl/Lp
+         CjzvTR8kK/6rrbMLZ8LfBWRJxq2tAdm7V2hpCuU0woDotykGoYb0r63T811EUxWDcTCg
+         Vghs10utuEYwRLYRh4RcOCojoC6lZGzPv6Z1AmKITX1Wl+OBZEoy/joQFWuc/a2N3P6/
+         I0LlOMdWOqBMVmZS1Bh7zsas6KzdaGHTgEN9XF1Si6F/mncapbnNvYvL/vfyltXLKghp
+         C+/v2Qqf5BzpbaaOKWTQcCEpCqqI/Zf0G8m7DLM13sKHH+oFgnL2jDEg3ZnM3Ol+vVlt
+         cAhQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761989259; x=1762594059;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=RbQmNSy9P0NTgIS1jo9Ela3U7G3myp7cj0Hkt1v3so8=;
-        b=KfCF3+rmN9k7e702b/Bq8uRRTtmda8G7H2AxWS/IlbZmkP0rPtTLaItunyplx9y4qC
-         6W5A/fBHvRIX3GXxT1L2XMvH1EV375lS9rOv8oqjvMbfJJZ2+J7UrD9+dVe52hWD2Qf9
-         QZOR1ljS4e8wByKBn+ayCGrjKLrCvdtTTOeXZkTP/mkBfUIjpYEORBXxlPjMhXqUuOng
-         8kxuv21vYTyMcQQb2qLp2JApZ8w9EiLQwWi3jsDlWCpqn982/md9lvcGImXrywKUN15E
-         zd7s73DaONdgeZAXGwTx/BedhRfyczceTMNk4CHjr4Zz6Zg9cBGjkbw7OX430rxRMCy/
-         Xrsg==
-X-Forwarded-Encrypted: i=1; AJvYcCWWLdKEfEQ6+R8vom6UQAR+FwrVJb38i+EJzjJGsYJ5ozULS8PpmEKlJiuCHZL/GIEUpklzhQTi@vger.kernel.org
-X-Gm-Message-State: AOJu0YxqJBbZm1gDazEvjXldek6bWfrZ1oIYK07rAvUFjVx1tlN2gTfe
-	oBzl6tjZTNrELiD7nAzQz13ZMO2b8Kj/d9FmV3uBc7zwPUmE0j7Jc3KBPjBvK91i9aFGOzjk6rV
-	Wh0A04RVKMbOdPDYvVi+CnwCdTihAq7DxiT29Frgnm4Jjg4wsqqy2EvsGloA=
-X-Gm-Gg: ASbGnctsTVxevd8VSf24fepeVhT08AAYW/C7S53HEpP9K74fEJ8Q2c17IX2D1i5oYXC
-	K0CiknDcqgVYmwtG/fS9x6v0IGzbciEJ3D9YmXAfckoBHqZyDLWIFkoWpXSLnYpqJNWeA6YxM0X
-	WjYlHLTzAPVCcWy6KgHUDacJLb2kRx1k8WUFsl3WHyXS1x+e5dP1RijY9w7+L4lRHsqDZVVeVNP
-	SlNrWIR9Pfbc8hS5rxK5erFMUy1fLCWBRFm7eDqXLIFrRVb4GpKB8YWWHheldOQVuV+elTaOG5t
-	pC4vrigoZcXX/zeMmnv547QZeaKWyJJGFPSBHJIHvk5X0jIe2pAXGLQ9ZCd/kvdo9jRQyK1J1u7
-	JralH3Ecgx7FHCslZqBWywPwi2+FfLMo6pVsEvNA=
-X-Received: by 2002:a17:903:2f8c:b0:295:5b68:996a with SMTP id d9443c01a7336-2955b6899d8mr9378965ad.12.1761989258717;
-        Sat, 01 Nov 2025 02:27:38 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHNQ7oH/ftv3ZeKsXzq6fngr+BkDkGPtK3d2e7A3QVpLpTaT3o3n0L0swl5GRcNH+f3VgG1dw==
-X-Received: by 2002:a17:903:2f8c:b0:295:5b68:996a with SMTP id d9443c01a7336-2955b6899d8mr9378705ad.12.1761989258084;
-        Sat, 01 Nov 2025 02:27:38 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1761989664; x=1762594464;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=6I8+PYpj4VSzvWtRvWrniQOXdcXFUBE7kuDCLe/jFhU=;
+        b=jSC+mxTbMckVv50shcuUHBohd0YFIq/47ahupk6mUSv4BImP6rI1gYkQK/pJFG+7v4
+         qzQMjyn/b/+SCkFq75LSdVbVd6/DXuhZymWPpwR7FHcOdYazzvizdLBWWvQCTdadElQl
+         BSRpZBLZQygIXra40OFbZN1dAp1G/rZqvPslwPMN3lbzn9e0X6r08IiERSHqcBMx57Sj
+         hn47MZRCZTRxPL81DMTNM2NOA7qjYUMWIOpxUgHBtyTkVI80BKRqNNDQaYSv9Xugx4fS
+         DAuIO627d6SmILApgG8RtOBHWK7UzMfRcnShfCootUB7kwcwveGBQUp//i35U/1uGzuP
+         zlng==
+X-Forwarded-Encrypted: i=1; AJvYcCX4OBNZvTDJDnlbXFpeeF7RNlBo4fnBVQRJGS7T18ug/JvhLPNjk5obPWBNsKmfnEJcG0F/3cNA@vger.kernel.org
+X-Gm-Message-State: AOJu0YyqgxhZDvG+QSMPFFs7xFroHEbrzmWo4DQFanCzDdH6rkKmkF4R
+	8PwcS/1/qJ7wyHB1ockZXsapYNn5LZy0ccNVV3SqJYqUv2p1UaMfl5ktqKJG49SfF0nPItwKvmC
+	3oLCfPwRhzY84U8Z12p6gtVLkTuhyGd3PLCsynDUPdOkc00FpPBSS8qZ/Wp8=
+X-Gm-Gg: ASbGncuShmePmFlBmVS6gnqMiG/uoHhoexrcGNcb7GpTow7/R6Spg1iMvUtRYeOAPOs
+	k7epn8dCa+U+icNqxWB/M3ynsM0SiLmmxTIQqV0f9JqztHIg5hrJewkyUfXs5L5/5XxOLrH0voB
+	vE3bc+lyc1kcy3iN+6tUZF4TDN1G3WhpGuotBW1XWvEmGMdrohH/fPiMcWKwsgfidf0xdDmoNZq
+	vCFTJl+993/hxPztLrwIuVS2ZjP+sBdI80tKUqpdbm5CP2Fwy/gdXWVLAbqXZli/iQ9gkYdtzS+
+	8Xv7QFtmzEg7rKOXwfWDq/HqVDocJRTz0lZ0o7qpp5Ja7OgZnGp+tSZFQdhdKoL/+TY6m460lOf
+	3US77cBUV6rVwAg5VIX7w8bgOV2G/58zLyKl8yyA=
+X-Received: by 2002:a05:6a20:5483:b0:320:3da8:34d7 with SMTP id adf61e73a8af0-348ca75c030mr8773926637.22.1761989664192;
+        Sat, 01 Nov 2025 02:34:24 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEf4BPTw+ye+CnUs6ChgmaJyZ3i45UwrxJYl8zw36ypBb5uUyo/awyluzaX+K9gQv6v6V3nUw==
+X-Received: by 2002:a05:6a20:5483:b0:320:3da8:34d7 with SMTP id adf61e73a8af0-348ca75c030mr8773902637.22.1761989663594;
+        Sat, 01 Nov 2025 02:34:23 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-295688c68f0sm6092415ad.41.2025.11.01.02.27.35
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7a7d8d72733sm4765002b3a.21.2025.11.01.02.34.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 01 Nov 2025 02:27:37 -0700 (PDT)
-Date: Sat, 1 Nov 2025 17:27:32 +0800
+        Sat, 01 Nov 2025 02:34:22 -0700 (PDT)
+Date: Sat, 1 Nov 2025 17:34:18 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] generic: test fsync of directory after renaming new
- symlink
-Message-ID: <20251101092732.56fb7d3gzarabudd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <54585ed26988fb88be1eab8211aa383a5e7cbd19.1761306683.git.fdmanana@suse.com>
- <bb46518c-9836-4bd2-8142-fbb8c859fd3f@suse.com>
- <CAL3q7H4bcqMZEu_QSQVETQWPzkBCSpi2cKEAbfcpHPcPG=Wc0A@mail.gmail.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 09/11] generic/778: fix severe performance problems
+Message-ID: <20251101093418.wxv6w6diisvflrrp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <176107188615.4163693.708102333699699249.stgit@frogsfrogsfrogs>
+ <176107188833.4163693.9661686434641271120.stgit@frogsfrogsfrogs>
+ <aPhbp5xf9DgX0If7@infradead.org>
+ <20251022042731.GK3356773@frogsfrogsfrogs>
+ <20251031174734.GD6178@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAL3q7H4bcqMZEu_QSQVETQWPzkBCSpi2cKEAbfcpHPcPG=Wc0A@mail.gmail.com>
+In-Reply-To: <20251031174734.GD6178@frogsfrogsfrogs>
 
-On Sat, Oct 25, 2025 at 08:39:56PM +0100, Filipe Manana wrote:
-> On Sat, Oct 25, 2025 at 11:13 AM Qu Wenruo <wqu@suse.com> wrote:
-> >
-> >
-> >
-> > 在 2025/10/24 22:23, fdmanana@kernel.org 写道:
-> > > From: Filipe Manana <fdmanana@suse.com>
-> > >
-> > > Test that if we fsync a directory that has a new symlink, then rename the
-> > > symlink and fsync again the directory, after a power failure the symlink
-> > > exists with the new name and not the old one.
-> > >
-> > > This is to exercise a bug in btrfs where we ended up not persisting the
-> > > new name of the symlink. That is fixed by a kernel patch that has the
-> > > following subject:
-> > >
-> > >   "btrfs: set inode flag BTRFS_INODE_COPY_EVERYTHING when logging new name"
-> > >
-> > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > > ---
-> > >   tests/generic/779     | 60 +++++++++++++++++++++++++++++++++++++++++++
-> > >   tests/generic/779.out |  2 ++
-> > >   2 files changed, 62 insertions(+)
-> > >   create mode 100755 tests/generic/779
-> > >   create mode 100644 tests/generic/779.out
-> > >
-> > > diff --git a/tests/generic/779 b/tests/generic/779
-> > > new file mode 100755
-> > > index 00000000..40d1a86c
-> > > --- /dev/null
-> > > +++ b/tests/generic/779
-> > > @@ -0,0 +1,60 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2025 SUSE S.A.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test 779
-> > > +#
-> > > +# Test that if we fsync a directory that has a new symlink, then rename the
-> > > +# symlink and fsync again the directory, after a power failure the symlink
-> > > +# exists with the new name and not the old one.
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick log
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +     _cleanup_flakey
-> > > +     cd /
-> > > +     rm -r -f $tmp.*
-> > > +}
-> > > +
-> > > +. ./common/dmflakey
-> > > +
-> > > +_require_scratch
-> > > +_require_symlinks
-> > > +_require_dm_target flakey
-> > > +
-> > > +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-> > > +     "btrfs: set inode flag BTRFS_INODE_COPY_EVERYTHING when logging new name"
-> > > +
-> > > +rm -f $seqres.full
-> >
-> > Looks like a rouge command?
+On Fri, Oct 31, 2025 at 10:47:34AM -0700, Darrick J. Wong wrote:
+> On Tue, Oct 21, 2025 at 09:27:31PM -0700, Darrick J. Wong wrote:
+> > On Tue, Oct 21, 2025 at 09:20:55PM -0700, Christoph Hellwig wrote:
+> > > On Tue, Oct 21, 2025 at 11:41:33AM -0700, Darrick J. Wong wrote:
+> > > > As a result, one loop through the test takes almost 4 minutes.  The test
+> > > > loops 20 times, so it runs for 80 minutes(!!) which is a really long
+> > > > time.
+> > > 
+> > > Heh.  I'm glade none of my usual test setups even supports atomics I
+> > > guess :)
+> > 
+> > FWIW the failure was on a regular xfs, no hw atomics.  So in theory
+> > you're affected, but only if you pulled the 20 Oct next branch.
+> > 
+> > > > So the first thing we do is observe that the giant slow loop is being
+> > > > run as a single thread on an empty filesystem.  Most of the time the
+> > > > allocator generates a mostly physically contiguous file.  We could
+> > > > fallocate the whole file instead of fallocating one block every other
+> > > > time through the loop.  This halves the setup time.
+> > > > 
+> > > > Next, we can also stuff the remaining pwrite commands into a bash array
+> > > > and only invoke xfs_io once every 128x through the loop.  This amortizes
+> > > > the xfs_io startup time, which reduces the test loop runtime to about 20
+> > > > seconds.
+> > > 
+> > > Wouldn't it make sense to adopt src/punch-alternating.c to also be
+> > > able to create unwritten extents instead of holes for the punched
+> > > range and run all of this from a C program?
+> > 
+> > For the write sizes it comes up with I'm guessing that this test will
+> > almost always be poking the software fallbacks so it probably doesn't
+> > matter if the file is full of holes.
 > 
-> It was copied from some other test.
-> A few tests have this, but it doesn't seem to be needed (anymore at least).
+> ...and now running this with 32k-fsblocks reveals that the
+> atomic_write_loop code actually writes the wrong value into $tmp.aw and
+> only runs the loop once, so the test fails because dry_run thinks the
+> file size should be 0.
 > 
-> I'll let Zerro remove the line when he picks this.
+> Also the cmds+=() line needs to insert its own -c or else you end up
+> writing huge files to $here.  Ooops.
+> 
+> Will send a v2 once the brownpaperbag testing finishes.
 
-Sure, just removed and merged, this patch is good to me.
+Hi Darrick,
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+JFYI:) If you don't mind, as I haven't seen your v2, I'll try to merge this patchset
+without this [09/11] at first. Then I can merge another patchset "[PATCH 0/3] generic/772:
+split and fix" which bases on this patchset, and give them a test.
 
 Thanks,
 Zorro
 
 > 
-> >
-> >
-> > Otherwise looks good to me.
-> >
-> > Reviewed-by: Qu Wenruo <wqu@suse.com>
-> >
-> > Thanks,
-> > Qu
-> >
-> > > +
-> > > +_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-> > > +_require_metadata_journaling $SCRATCH_DEV
-> > > +_init_flakey
-> > > +_mount_flakey
-> > > +
-> > > +# Create our test dir and add a symlink inside it.
-> > > +mkdir $SCRATCH_MNT/dir
-> > > +ln -s foobar $SCRATCH_MNT/dir/old-slink
-> > > +
-> > > +# Fsync the test dir, should persist the symlink.
-> > > +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir
-> > > +
-> > > +# Rename the symlink and fsync the directory. It should persist the new symlink
-> > > +# name.
-> > > +mv $SCRATCH_MNT/dir/old-slink $SCRATCH_MNT/dir/new-slink
-> > > +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir
-> > > +
-> > > +# Simulate a power failure and then mount again the filesystem to replay the
-> > > +# journal/log.
-> > > +_flakey_drop_and_remount
-> > > +
-> > > +# Check that the symlink exists with the new name and has the correct content.
-> > > +[ -L $SCRATCH_MNT/dir/new-slink ] || echo "symlink dir/new-slink not found"
-> > > +echo "symlink content: $(readlink $SCRATCH_MNT/dir/new-slink)"
-> > > +
-> > > +_unmount_flakey
-> > > +
-> > > +# success, all done
-> > > +_exit 0
-> > > diff --git a/tests/generic/779.out b/tests/generic/779.out
-> > > new file mode 100644
-> > > index 00000000..c595cd01
-> > > --- /dev/null
-> > > +++ b/tests/generic/779.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 779
-> > > +symlink content: foobar
-> >
+> --D
+> 
+> > > Otherwise this looks good:
+> > > 
+> > > Reviewed-by: Christoph Hellwig <hch@lst.de>
+> > 
+> > Thanks!
+> > 
+> > --D
+> > 
 > 
 
