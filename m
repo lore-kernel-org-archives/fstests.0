@@ -1,420 +1,315 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4ABB4C8F0
-	for <fstests@vger.kernel.org>; Tue,  4 Nov 2025 06:30:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762237828; cv=none; b=RftVi+LkWHSqiAig6HIbNK5rCho2q0O4e/kJ8gVjYte+8ktuap0y8bFO1LHJ4UscBBRk9cwfC8N7uPkgLgqzV3JquzXwXI/u0p1fGtmUhsETRBQq6JAhm5sXKCqWQsm+UKtnaBi2tBzRuhPV2iRgndfxNxs0vDhYF9ndYWn5wIw=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762237828; c=relaxed/simple;
-	bh=TyXIPVR2yWGQbWzB55tMi+H9xRlJWsHh2Q5Bw5DuYqM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=k6KzyFIlA83ZKE5HwPgQXw036twXbDzh/cMvvedQ7/6gARpm7E4UGN4C6/s+qR2+N5I86HdLmnCPMQy+AhbWuEKqwfFZGLhsZefFoASaa2f7On2KwZ4UhUmWwI0o0Bb/vwp/c+xxSRT5CiSDce1XJ3Xp6HkyfhM2Z3bfJRZ7BcQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XhUE+t5+; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=twpjx7Ws; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CCC728BAAC;
+	Tue,  4 Nov 2025 10:08:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.177.32
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1762250931; cv=fail; b=i6UiS74eAaDJrc70TciamHoucbmTexMCK2DTV3LomK+ljjg3EOW0rLefuqe4I9np9Zqm47iatTV0aaLKr9nsWCZd0T+VXUwYJiLI3Je9j/8JSwmgn/GPpIxl0TLbvO8t7lkCYjhBs1t9lWWLtPS90IbCxSA3wJVx5oDgOH0vCnM=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1762250931; c=relaxed/simple;
+	bh=0jzpCv9HU/GVEFjinntRQV91YMu33yvwXjZMFW5MO80=;
+	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=sKzPfmOvTwGrXxWQDnuGs/+9YxeYWBp4MAnMO/gK9mYO770sMU/HdfEFmDbPLV6z5SUPF6iIeoSXtuEloiev6J4f4IooN+bZXLJ3c8Lw74hcCxsSSxsSnjER5ubp9uXznFc1doU9u63HonKSD/omXGqqVUbnQzCdRU3IzuaBZKw=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=CFn0aKgP; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=HWvOltJA; arc=fail smtp.client-ip=205.220.177.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XhUE+t5+";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="twpjx7Ws"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1762237825;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=3jFJMkSf6diY9FldhqoYNQMdhp//5+GG9tdctJ1noww=;
-	b=XhUE+t5+UWCglEYpRol2UilMnFhXhW8B/nCQcoxPIeWFiIbkBvcxKEUlcCBRWBVfK0lhO8
-	N9hF2OtxTQK8PKScL1W9TqAJDGm+767olgXnIPkovRSvpCuWMD+toKahbVVseVInXj63Ex
-	MX+BWlO97vKFPD7OtcaYwqYBwyPDpGA=
-Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
- [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-35-SvXSS7YLPBi0gwIryn-GTg-1; Tue, 04 Nov 2025 01:30:24 -0500
-X-MC-Unique: SvXSS7YLPBi0gwIryn-GTg-1
-X-Mimecast-MFC-AGG-ID: SvXSS7YLPBi0gwIryn-GTg_1762237823
-Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-b9b9e8b0812so4048116a12.0
-        for <fstests@vger.kernel.org>; Mon, 03 Nov 2025 22:30:23 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="CFn0aKgP";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="HWvOltJA"
+Received: from pps.filterd (m0333520.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5A49tEwT010132;
+	Tue, 4 Nov 2025 10:08:42 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
+	:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=
+	corp-2025-04-25; bh=kKkJgM6m4lUx4Uxg6KQ+axZqc2TgTQnK5N3Nm+ejFEc=; b=
+	CFn0aKgPkEmW9TR6X5QbdsMVCSyNj8H2s+2G0DJ/+0bgn+oLha0MMP8PVMJ+2DXn
+	ydfUS/X9RMU70rXrZjuQzh38nVI09k0FVcIj+BrXqshCxP42/JQFbabuHg575Xv6
+	WRMv+qItx5tQIJ3aHSxvcJSiaD1upp3VBh5djmnZ1UO4yxgP2Gd/RRCWBIPXCI9A
+	kdRAwxJiqkanEViGN3Q3ZSNk6Ki7pBrt3ISMYUNKaYSt/63aOQgXfEmWd4rWpFMX
+	/6pvNlHNPGZJztRsiuSThJVl5hTjpN4eIy98gSrBcpNpg64MIORCAynJXAB1juTP
+	xQFoESBf2Hpz+j5+WSQfHA==
+Received: from phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta03.appoci.oracle.com [138.1.37.129])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 4a7f9er1pv-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 04 Nov 2025 10:08:41 +0000 (GMT)
+Received: from pps.filterd (phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+	by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 5A483MpT015032;
+	Tue, 4 Nov 2025 10:08:40 GMT
+Received: from ph7pr06cu001.outbound.protection.outlook.com (mail-westus3azon11010066.outbound.protection.outlook.com [52.101.201.66])
+	by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 4a58n94vb2-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 04 Nov 2025 10:08:40 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=aC+COSqd9H3pNDrC3hI6i0QVy1gswENr2tOFztTL+aoqH6khSgLMZfZl0Srls4qJmmuojRP1PVgytGDR4T4/RsL5kFI2uKRHKEvNxSAdCvASuz0ob71VBHq4hQFh+A4UqVkhW+MgYcj5ZPC6d9uy9sMQ5Yrnwv2Voljy2OrDlcEYjgOEzsKFx4neF8OhTuEv/Y3JzjwkzLl9MB9PhSyOv1AI8aHD94ozOsUXeVxBP6ABmoZx0blHkyy2siwhK5FCe2LEkQZ+QUxhayoNnksTOKKTKEySgGHeUvHdT+5bl8JmGmnv4u+c7JA7z51DLjs+sCJFuGurAUDX0bXWnaTNLg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=kKkJgM6m4lUx4Uxg6KQ+axZqc2TgTQnK5N3Nm+ejFEc=;
+ b=dTJMnVsFL1NlM+hU/tFXo0loocy8iA4YjS2d48ZP7qcKtiOkN3rMH2/iR13l8B6Zu6J3f9NpbAbLljVv1/C4l6hmqODMnvK3jqixHTItXfyd0xG79SML/Xg2UrL6elRMShUChytVj1Zzis4F1Ma/qQHdmZQC0pnKJ/3W29LXJVWA05hFmzKF88t2lG37OfelyqUpgFnRAupvzyxkT0EuatwbaVirzG4APHxyVEN1eyG6EOvvN52d/at6kr9osa/aKaX/jHiPSk0cA1zvH1WBA50LxkMvATtFlHqZD52a8F+fknrcMg+JWInuvor3x4ADytwpdOnJGYy3zw/2MAQJIg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1762237822; x=1762842622; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=3jFJMkSf6diY9FldhqoYNQMdhp//5+GG9tdctJ1noww=;
-        b=twpjx7WstZvfWxJw35QclP5XEQrhkp/ILvxWGQS9P6vD+Z6CvSCBJnk+29guP/ctMt
-         HYqaeBdhcdacaDuA4G98mvhaMRlxjzHeTKS75BPn5VTV7p06dgVnO5y4i3zE4Bzq9UEf
-         ZKzOY/VoJI71hlAcvBJjLgTyhjlPZlou6RpsLXfxt9nklAPt0C21WbYyAgOgtVgyDdkl
-         zZf52mTwGn4vZh9M8za9gCJeZbNaFHgVmaGAii9o1zcMb0zN/bP+8EdCMVQgpUlIaTJC
-         dJHQboFjz4d7ZN8Zrjpw0dfQdGRjnnMcPmERTTJbySzqT2RZHdWi74mvNt/Zx/QwcKXK
-         UgZw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1762237822; x=1762842622;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=3jFJMkSf6diY9FldhqoYNQMdhp//5+GG9tdctJ1noww=;
-        b=gqb38XqlAG8Lt6xvKNxtDLLMgUT9Hqh6y0uge/ebl4C/CIL8gDLHZ5BXYU9EJVZNrf
-         pJqJid1e4l4I0hZPcg6hsfRc4LqaidAhyH0aeTko9ATmX4QET6o6F+G03i9qL7sZbq9u
-         KYCpFOpsuIG3kdlfNpD6sXqxZGEXhF2/EsNEdy+6t6+RRin8FqGg3x0Vx9GfPjeXRaKU
-         6xqewjjXMncDLCPwEg4aUXvabDS460YPF0HU1u1uPN6Zun2QIkenkTjmHEdhrHTiU3kh
-         7WwrOkAuJbDwGM3837zaKCKDwIm2Wz50Gj3lQzyv/9E3FYkURy/MTY1f1bqDkT0Vpajc
-         duFg==
-X-Forwarded-Encrypted: i=1; AJvYcCUPr3JOCmjP59XuJ4knYXLKAJ56ovkcX174aVHYZEsOrwlqw0wphnJ3NsairjuHkQJb0lWDSF5N@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyvq7iYyNkjXYeoxw6inLl7l6RaA2fVfD5lN2C0voKAgVJq1gHC
-	nEvzYFaGz6wgI+M9U9RxqFPnwvy37iiFAecmtAdnkYkHj1JzjnLEq1Xyis37hYnKdxyDH6Hbi5e
-	3n9x8FTRnd1vkm3YH7c023Z5Dr+8ppwOrOStha3mzG/YX/YY+mvp5vKnP1/rMWrHROtd0SQ==
-X-Gm-Gg: ASbGncvb3vo6uDNc5KE/uMAkIuhIzhi0E5SG1wdR5GQRwtG0pm5m7eilLwxYM/RL+Fo
-	h97e8TR0Pq8Lh0xlu3QjQ1C/FGqCqcOGkVO/K6OxWm/eKhASKuLczG6r5cjw3rna5mcOJfKcHXd
-	ji+XIrui8TNKgPNwkeXQdrufD259iKI5PnzZKU1uhjK4qMH7OMcOZK8Pl6abnTKhvLcRAUkuaPo
-	VQJVA+b9FutlWA8EsgRSG2Iy6NJZ29thSKmZmAjmvk8LWjJyVMBOvGTn9JMFeIWdIqmtPV2hstd
-	UuidbzLNEkgtRz35eMDK9V2JeqhcODlU0jexKK5gRbjVe4+uY75oUkPnEV948uG4Gi4bZR/D7Vz
-	jOdupHua5IQJ2k5QUTINWAR+X81mBJzvPBUAmF7g=
-X-Received: by 2002:a17:903:2302:b0:295:557e:746f with SMTP id d9443c01a7336-295557e7a25mr148300595ad.32.1762237822232;
-        Mon, 03 Nov 2025 22:30:22 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGFSxY5Iu9lfIb9OeQ/xMFfYmczKuwF1H2zizizPeSbsXG/KkRw1X+Nh6etskaEWhL4x79SUw==
-X-Received: by 2002:a17:903:2302:b0:295:557e:746f with SMTP id d9443c01a7336-295557e7a25mr148300255ad.32.1762237821647;
-        Mon, 03 Nov 2025 22:30:21 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-29601a7476bsm13107635ad.103.2025.11.03.22.30.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 03 Nov 2025 22:30:20 -0800 (PST)
-Date: Tue, 4 Nov 2025 14:30:16 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: add a new generic test case to verify direct io
- read
-Message-ID: <20251104063016.b3w2zwuz7mx5st5t@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250926095013.136988-1-wqu@suse.com>
- <20251101155702.5e2g42ixg3qvh5b5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <9acb730d-6174-4ae6-a5d8-d1bca947462b@suse.com>
- <20251102100805.qfxyd6zuyobjy6j6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <8068a2bf-293a-4821-8748-6eefac702935@gmx.com>
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=kKkJgM6m4lUx4Uxg6KQ+axZqc2TgTQnK5N3Nm+ejFEc=;
+ b=HWvOltJAd8hBRwxhbfuJYMiNzF+EED9AubtYF6wuGNTh4HGEGBa8GHlg0N2TiCJAJMLv7a8AkfUy4Zl/V6PtnwOP/Oc2xx0jd69hpt1eXQFOLOZOTe7siJhmws0M0cESx9/pC/v3SRsHug2E6a6TJNhTavwbd7/T2xTS86RHYNM=
+Received: from MN2PR10MB4320.namprd10.prod.outlook.com (2603:10b6:208:1d5::16)
+ by DS7PR10MB5104.namprd10.prod.outlook.com (2603:10b6:5:3a1::6) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9253.18; Tue, 4 Nov
+ 2025 10:08:12 +0000
+Received: from MN2PR10MB4320.namprd10.prod.outlook.com
+ ([fe80::42ec:1d58:8ba8:800c]) by MN2PR10MB4320.namprd10.prod.outlook.com
+ ([fe80::42ec:1d58:8ba8:800c%5]) with mapi id 15.20.9275.015; Tue, 4 Nov 2025
+ 10:08:12 +0000
+Message-ID: <cb1f1963-8ca4-460f-b620-6026a26ce9eb@oracle.com>
+Date: Tue, 4 Nov 2025 10:08:10 +0000
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/2] xfs: fix delalloc write failures in software-provided
+ atomic writes
+To: "Darrick J. Wong" <djwong@kernel.org>, Carlos Maiolino <cem@kernel.org>
+Cc: Ojaswin Mujoo <ojaswin@linux.ibm.com>, Zorro Lang <zlang@redhat.com>,
+        fstests@vger.kernel.org, Ritesh Harjani <ritesh.list@gmail.com>,
+        linux-xfs@vger.kernel.org
+References: <20251103174024.GB196370@frogsfrogsfrogs>
+Content-Language: en-US
+From: John Garry <john.g.garry@oracle.com>
+Organization: Oracle Corporation
+In-Reply-To: <20251103174024.GB196370@frogsfrogsfrogs>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: LO2P123CA0051.GBRP123.PROD.OUTLOOK.COM
+ (2603:10a6:600:1::15) To MN2PR10MB4320.namprd10.prod.outlook.com
+ (2603:10b6:208:1d5::16)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <8068a2bf-293a-4821-8748-6eefac702935@gmx.com>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: MN2PR10MB4320:EE_|DS7PR10MB5104:EE_
+X-MS-Office365-Filtering-Correlation-Id: 71630038-b6b5-48dc-7a23-08de1b8a101b
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|376014|1800799024|366016|7053199007;
+X-Microsoft-Antispam-Message-Info:
+	=?utf-8?B?M3BMakllVmRVc1l1b0hyM1JlMlFBSm9SVVV6QXBUOWgzQTV0cUkrNzBHbitj?=
+ =?utf-8?B?Mkp2M0NYRmtJTFlycmxnMy82RWN6dWxLeXhka09GeWF5a1BDZGYvRmxjTTZu?=
+ =?utf-8?B?cnovS1V4M2MrQjZMNGFJdmtINmtoM1ZuRHB5a0QrQUcyMjlyOWtHUGNSQ1dG?=
+ =?utf-8?B?MUJUWUo0bDRXNnY0WFZmNGFyUVN2a1RpeVoreitrSGl2K1NIZUFBSjh3MGU1?=
+ =?utf-8?B?Y3p1cVc1L3hGZ012UHNneW9hTjh2MXA1UFR4STluMmRTS0VXSU1vZXRnUUpt?=
+ =?utf-8?B?RWVMQWREMURvdC9QL3ArTll5cWZybk9pWXlHVUg2bW1CUm1ORjM4alkyUDEx?=
+ =?utf-8?B?V2ZjWFQ5eWpoOGh3c3lmS09tTHFJMUFLT2p0bDNhSTFmZUVWYW01MFhQbnJZ?=
+ =?utf-8?B?R1YzTERQTGJDUjdqZWxtY1BMNFM4NlRXWXlGYWNXYU12OXlHUXFZL29peFVF?=
+ =?utf-8?B?NDlZWjJZdlBKaWJtdU5CWGUrbjZac1BzTXJ4MG4ySHR6K0R2RytLZkxuNzFB?=
+ =?utf-8?B?UXlwZlZSNExwYlZwRTZCek80N2ZFQUNibWg5ZVJObHR4SXErc1RacGhUMjZ6?=
+ =?utf-8?B?YS9hS0NwZ1NyVzhQbjZrTlhJcDE3NmN2WGR5b2dKdW5pcnlCMXVhektzU3Zt?=
+ =?utf-8?B?S0cvREdwSmFRVndEbHJJV203VTNIQ29PV1AwWlRjTFhsOFNvVEJnTCtrbFY2?=
+ =?utf-8?B?QStDL1VHeXUyTXVhVmROdkp5ejU0RUJPTWFyMXZMMFJCTk1SU0FFcnNEM2Va?=
+ =?utf-8?B?QzlFWVA2YmpKNlJhYkNLeEFJRExodHJJWm9hUFM2V3ExbGF6alR3dmRJRkxX?=
+ =?utf-8?B?aFhURVQyTVRHNmZQNTl5ZEVBcjJrRW1ONjJZR2N3ZXMxYnlJb0JRbmRzLzNy?=
+ =?utf-8?B?R0ZYSWYrWUhoS3M2VHhLd2x5ejhxcy9SMFlVakUxNXJxVjAyZTFBU28wL2xj?=
+ =?utf-8?B?dTROVHptSmdJcHdGV3B1cnllZzNVZEl0R0kyZGtIUzdNNHM3bDlJOXl5OGFn?=
+ =?utf-8?B?aTVMTmJYckJvWGZQQnlSZlVjTlZ4OHhTTngxTHVCMmRHWEtyYVYvenlGNzdy?=
+ =?utf-8?B?TGh5NEdmcEJoeTdxWUJBUW1lRmNiYVVOVjhCdjIzZlFwVEtpeml6ZUk4bG1l?=
+ =?utf-8?B?VWdOQ0VNOHp4eXNtOFBQazNXbmdVLzFveXJ1bGVIT1I4QjNoekV2UFZuZHZR?=
+ =?utf-8?B?cVhzMDdraG1LQVdTeVdEUS9ObGlBYmJsUDFvWHJ5NkRyUDdoVUpFcGZoc1Nx?=
+ =?utf-8?B?TXMwbENXUmp4VHBRK1hWdzFWdHZLN1NGSG5hWnBFd0s2VUw0aEpEdzM4TW94?=
+ =?utf-8?B?QXp6YUZSWW5sSVFqNWNhU255cUlqZFJqMU1ReG5lQVI4SnBlNFZhQ0ZwQ0Fy?=
+ =?utf-8?B?Sk05bWhOM3NsNjZ3WFgvNmpnZzVOT20yMEl3emdoamJTMDBRN1YzSUxYdkZR?=
+ =?utf-8?B?UkJBTTVWWVYxOEFxREt5aVRiaUcrOFltMDM2UmNsbVMxZWZWcTVab01Iay80?=
+ =?utf-8?B?VWZ5LzUzYmhxY015ZDU2YWxIQ0kyQlpzbnB4UHc3eDRhNlNuMWZGMlVNVjZj?=
+ =?utf-8?B?ZGtQM3Q0YlZPRngrUUtmNDVETkJxZkxRNVd0NHI0MEkrMzBaeVJnRVp1bTJN?=
+ =?utf-8?B?S3Nzb0hIWDRyTmVZR3VMU3VKU3dRLzFCeTltUE5zaCtLenI2cGdRSXZzS2Z5?=
+ =?utf-8?B?VUk2ZVdkaURyM0NaL3hWemNGWGx0VEhSeW5tYXRGQ1p4blFmMzV2SUMreXd2?=
+ =?utf-8?B?U3htbFBMTjF6ajRFWVNIMTVqRVh3TDlCeXdmQnFVcVErNCtEZDVzRFZwb2I4?=
+ =?utf-8?B?akRXaWcxUi83WjJVbml4V1h6bjZyclNzYndwUjlibUhFSlJSZUdQMDhRK1A3?=
+ =?utf-8?B?NFVjM3NxZDY1Skt0V2NQelBvRUdNQm1xUzJPRlI1bjlFNVBqcVkreUJzM0N3?=
+ =?utf-8?Q?xmPu0QSk1mL1TxrfgNrftDPylnKdi4y0?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MN2PR10MB4320.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(366016)(7053199007);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?b09KVXl0Q3ppUkpZdW0rNkxpRC9abEs2VDBnbG8wTHRQSnVhSnJURkhoZTNo?=
+ =?utf-8?B?VENvK0FtVGZQQjRhTTFZR1R2MVhQTkczQndHa2RNUE9pTGU0K1h4eWtKM1NQ?=
+ =?utf-8?B?ZTlPR0RhYnV1Q2UrNExuME96MGJlVzRmRWcxbklFSjB5clFSV25OQmdxUEFH?=
+ =?utf-8?B?ZlFUSDZ5NE1PZCtiU3RRQnZhTFVwZDdUU2FIYkJRVWtDYm9ZRnNqbEFhb3ZM?=
+ =?utf-8?B?RFNoeEtMcThuRHk3L1NlbWN0c29WTW04OHFLamduWkY5R2hNcTFUVWd1azBV?=
+ =?utf-8?B?djFwNUNJbEU2eFpjbndMV1RGejBNNzY2NTE0WkMrWmtSYVUzVTR2aVpvSjN6?=
+ =?utf-8?B?OS8yeFRJSTZWV1AyS2VhVU9DNG80Ylh1OHY4MG1HeUVBZWxkdStXMGhJZGpH?=
+ =?utf-8?B?TkYydGRtUUEwSEtyMHFiVU16QllTRmtuUUF5cklZM2Izdk9pY3FmdksvMjl1?=
+ =?utf-8?B?RThOdlhPT2Fxb25SMGtCSnZmVzQxR2U0SHdzZVhNczhRMUNXRFdKRndlWCt5?=
+ =?utf-8?B?dGZLYmVUNjVMS1g2bnpWWEt0c1hXTHVxdWg1dDlXYVNteFFocS9JZnFiSnhB?=
+ =?utf-8?B?VUNYTkY0NHBrdWx6UGJzRHpGS0V0TnkydHlEWFRXQURRZXZsQzdsSXN3TnB0?=
+ =?utf-8?B?M3FOMHhrTkN5MVdZc2VKMGp2TlQ3WklFRFJETk9oTUtOVWExUTVsblNmME16?=
+ =?utf-8?B?cUl0SGZDcVh1eTAzQ0VFR0p6SHZpZ1Erc01ZU2xqUm92VmpFM1llUytmcG93?=
+ =?utf-8?B?UmVLYnlQTXhxa3hWRnRzYWwxVnUyNUw0NnZtSUFGZ3p0dVJNT3NOaUxZdDJj?=
+ =?utf-8?B?ZGRINWxZUU9UdTNPRHVwQXEwck96S25ZTXZpSDdkdVVZUlJiZWJlcXVoMkJ6?=
+ =?utf-8?B?OVdHaExUSWxMV1lKU090Wk1EaUNON3BmUE1sekd2aWFMNHlvZk5yQnJqOHRj?=
+ =?utf-8?B?YkRxK3FlNzJkS3dUbUZmazVWeS9xcXQ5SzZCZmZPSXZOcExGSzJ5bGlXejl0?=
+ =?utf-8?B?cUk3UUIydlRBUmtNVDJab1ErOFpyU2pzL1Y1dGFadkp6bTVEVitVQTVVcjla?=
+ =?utf-8?B?THdoT2szbHNCUnY0ZEVlZWdrbFlzV25SVDJ3K3lmbS9NMGtpTkdCL2dFbHZW?=
+ =?utf-8?B?RGhNSkpyczF6U2VpRmljVkZQSmllYjM4ZHQrWGhucHBlYnJhWDFvWkV2SjBD?=
+ =?utf-8?B?U21HWFNDaG5USmJQOUM4elNoN0NUQ2gwR1FPL0J2aTFBMVFzTkJTdlU1UXNM?=
+ =?utf-8?B?b2xQUzQzcHA3VGt0QTlIRUx2YVd0Y25jbEk1NkQxUkg4Q2k0eis0MUk2YndL?=
+ =?utf-8?B?Y21BMzZNQlJ1OGpxY2c1WFNEQWVtL2ZsQi9tbnFTSXpFSGJyUW1kSE1EMy9l?=
+ =?utf-8?B?TThFbE9KM3hBM0Y5blc3d1RJMGVySFZ5WG4zanhzdVI1WUlyTkIzdkZaam14?=
+ =?utf-8?B?dzdqaWdhWGdiQkVUeDVUbThLalhBSkQydjk2TFVCWWdPTnpOREhKR3RONkVy?=
+ =?utf-8?B?dUh0UUxwYlVOVmVUcVRKT2lVcGhqWHgwRlhPakxOdjVySzFwYnJ1d1VFSGRW?=
+ =?utf-8?B?aWl2cDEwR1F3Qk8xU1lIdUJIUlJacXJzYTlJQmhkV0ZGditsNE9IOEFmUUlN?=
+ =?utf-8?B?MGZjdlQ5dXc2bTI2WXhhcjVtTXN1cXNNSE5KcDJ2MElnNnV5ZXhQc0xNeENx?=
+ =?utf-8?B?NGtpZzFYalZJdUZBVUhaZnFUSk5kOEVibHU3TW9KanNlWmF2cldjLytCTHVh?=
+ =?utf-8?B?cGxPSEFITlk4ekJRaEoyd013d2laWkJsbHFZa0pkdytVOUVoWU1ucm5zODFR?=
+ =?utf-8?B?TlBIWVlyYzlkVTZaZ2ZYR2xPOUw1bmROZ1g4WGhzeEIxdHpwTFd3R1RabFFu?=
+ =?utf-8?B?aWVOeUROYVJBMlZzS21sNXpJS3lWZmdraVJQSWpjVzBXOE5UV1BBdm1kT01P?=
+ =?utf-8?B?bVdIcVlNRFlzZHFnV0dqancwSGFXOWw4VEJzeXJrMk9DWUQ3bEFjTlBmei94?=
+ =?utf-8?B?Y2h2V1lWbGQ0Z1Q5S1k4N3RUblVVMmpaYlg0N3ZKQkcyYUI0bnRoVDcreG91?=
+ =?utf-8?B?eTRiQmd2b2pnZThKYVRKc2Q5NkJKaExpMUdLTnZUc1VpOE02RHF0bmpvV0Rs?=
+ =?utf-8?Q?F/9sWcr2DZgqNgmAxIxbmocKm?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	7XoNuMCE8/AekST4uN7eg1J+m3MplBFjVaiG97uy2aq5hjs92ys4O9QmZE1reqfWoqnfuBuPaibwgzSUfl3rZt0Sigsc371kxTuca9Pvbb5/WygDCW4R7uZ245CfqStFJucngD6Es9dl3FUORICFuAQe9H/YGSGroETzd7GhUemt2zgYwOXdQEHAs79tCry6thvnfK461u7Vajk3rr9eN2ps0IicATnF3SMwqrafZ0paB98OydA3nTfpBec38sVBCBbaMrVnJqZdj5aXgpqkV5iAM/D8gsd7Uc6kYpHiKuPwAHFTt93xaC7QOYC2GrLeVW0Tfwa2H6yIUIwwjDu2uKtrS7JWxaYgwqSoecJRS3OOvwxNj189GJ30uU+syf+XPrDB5s3JMYUxPVrM+PXyt1OYF3xVXetNbZcKKsziHh5jEfa4YDGG4NJhfJtlfSV/wVYbZfZbQtwPDF/18y2WK0CzbVpslrpvXnDsXBeauJdzyW6X4+csBGMm/wuP+ruWRffMFGPFvaVLIFPw7tGBciIjjvME0UEkuQqv0MPufsYRAwvKs8v1XbnvzxGX7payiKVuoz82GL2fpkfBItYtWS8wHE9Uixf5VqEgXtz1KRg=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 71630038-b6b5-48dc-7a23-08de1b8a101b
+X-MS-Exchange-CrossTenant-AuthSource: MN2PR10MB4320.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Nov 2025 10:08:12.3892
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: qQc7Oys/a/CY2oIO4ViCpRUVG8UsCuGIGtDx2IFQ/QK8c0GTR5bqhUtuwSjY6PRXRG4ORM5rBWe77CFIq4b7eQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS7PR10MB5104
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
+ definitions=2025-11-03_06,2025-11-03_03,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 mlxlogscore=999 spamscore=0
+ adultscore=0 phishscore=0 malwarescore=0 bulkscore=0 suspectscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2510240000
+ definitions=main-2511040083
+X-Proofpoint-GUID: 9CGXBmiNUBDYUxJZXylUsqktCGBL8k5c
+X-Proofpoint-ORIG-GUID: 9CGXBmiNUBDYUxJZXylUsqktCGBL8k5c
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTA0MDA3OSBTYWx0ZWRfX00w5JwwGguSM
+ UbRLaNm9Zp2MTBlYO3xDEr5oN3VZ1+3fwppDMMjr+0i+u0xg0MbFTplycNgF/kAHIUxV5b86TXo
+ WxLJGbSoMvb5HagLMEKyBFt1ucDlERWYL8p9zp2IXr5uuiBJqpj2hg2PNbifk6KEfc3QWFGl7MS
+ Z3H54+RfyZbHnd7OyiafzuqjtAvbLPVE2HQIbRHo6/X7XHSmoOJnfHcwdYL64MqKZnmXvqCPLJD
+ hJ9XVgTkYeoZ3gZWndterv2vntAyCuqPld1sh7lV6ImSFS08YXJ7vitBM+3gdntOeifHo6Rme3D
+ oa+HEL/BqwXFud4tNFYrcSZUc58dRnDmgHEj7uZnPOsb1kA1Xhq+AAlr/gaDEDvS8znwMvC7Z9y
+ qbLJmTNroDO38LogN1Bo99Egdsbuzw==
+X-Authority-Analysis: v=2.4 cv=Os5CCi/t c=1 sm=1 tr=0 ts=6909d0a9 b=1 cx=c_pps
+ a=WeWmnZmh0fydH62SvGsd2A==:117 a=WeWmnZmh0fydH62SvGsd2A==:17
+ a=6eWqkTHjU83fiwn7nKZWdM+Sl24=:19 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
+ a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
+ a=6UeiqGixMTsA:10 a=GoEa3M9JfhUA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=VwQbUJbxAAAA:8 a=yPCof4ZbAAAA:8 a=I_7oYbkV-FiYGLY8p5cA:9 a=QEXdDO2ut3YA:10
 
-On Mon, Nov 03, 2025 at 07:30:48AM +1030, Qu Wenruo wrote:
+On 03/11/2025 17:40, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
+> With the 20 Oct 2025 release of fstests, generic/521 fails for me on
+> regular (aka non-block-atomic-writes) storage:
 > 
-> 在 2025/11/2 20:38, Zorro Lang 写道:
-> > On Sun, Nov 02, 2025 at 07:42:45AM +1030, Qu Wenruo wrote:
-> [...]
-> > > I'll keep pushing the fix so that the test case can be merged with an
-> > > upstream fix.
-> > 
-> > Oh, thanks for this information! I didn't get any response from btrfs list, I
-> > thought we've missed this one :) I haven't pushed this test case offically.
-> > If the kernel fix is awaiting approval, I don't mind delaying this patch
-> > merge. Anyway, it's good to be merged into fstests side, if only btrfs side
-> > would like to treat this test failure as a bug. If they don't, this case is
-> > meaningless.
-> > 
-> > What do you think?
-> > 
-> > 1) You can send this patch with my RVB later, after your kernel patch be acked.
+> QA output created by 521
+> dowrite: write: Input/output error
+> LOG DUMP (8553 total operations):
+> 1(  1 mod 256): SKIPPED (no operation)
+> 2(  2 mod 256): WRITE    0x7e000 thru 0x8dfff	(0x10000 bytes) HOLE
+> 3(  3 mod 256): READ     0x69000 thru 0x79fff	(0x11000 bytes)
+> 4(  4 mod 256): FALLOC   0x53c38 thru 0x5e853	(0xac1b bytes) INTERIOR
+> 5(  5 mod 256): COPY 0x55000 thru 0x59fff	(0x5000 bytes) to 0x25000 thru 0x29fff
+> 6(  6 mod 256): WRITE    0x74000 thru 0x88fff	(0x15000 bytes)
+> 7(  7 mod 256): ZERO     0xedb1 thru 0x11693	(0x28e3 bytes)
 > 
-> I'd prefer this path. It's not a good experience if we merge some test case
-> that we don't have fix, and have to revert the test case later.
+> with a warning in dmesg from iomap about XFS trying to give it a
+> delalloc mapping for a directio write.  Fix the software atomic write
+> iomap_begin code to convert the reservation into a written mapping.
+> This doesn't fix the data corruption problems reported by generic/760,
+> but it's a start.
+> 
+> Cc: <stable@vger.kernel.org> # v6.16
+> Fixes: bd1d2c21d5d249 ("xfs: add xfs_atomic_write_cow_iomap_begin()")
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
 
-Sure, that makes sense to me too. Please feel free to re-send this patch later :)
+FWIW:
 
-Thanks,
-Zorro
+Reviewed-by: John Garry <john.g.garry@oracle.com>
 
+> ---
+>   fs/xfs/xfs_iomap.c |   21 +++++++++++++++++++--
+>   1 file changed, 19 insertions(+), 2 deletions(-)
 > 
-> Thanks,
-> Qu
-> 
-> > 2) Or if the btrfs list has treated this as a bug, just need to talk more about
-> >     how to fix it, then fstests can merge it to uncover the bug at first.
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > 
-> > > 
-> > > Thanks,
-> > > Qu
-> > > 
-> > > > 
-> > > > >    .gitignore            |   1 +
-> > > > >    src/Makefile          |   2 +-
-> > > > >    src/dio-read-race.c   | 167 ++++++++++++++++++++++++++++++++++++++++++
-> > > > >    tests/generic/772     |  41 +++++++++++
-> > > > >    tests/generic/772.out |   2 +
-> > > > >    5 files changed, 212 insertions(+), 1 deletion(-)
-> > > > >    create mode 100644 src/dio-read-race.c
-> > > > >    create mode 100755 tests/generic/772
-> > > > >    create mode 100644 tests/generic/772.out
-> > > > > 
-> > > > > diff --git a/.gitignore b/.gitignore
-> > > > > index 82c57f41..3e950079 100644
-> > > > > --- a/.gitignore
-> > > > > +++ b/.gitignore
-> > > > > @@ -210,6 +210,7 @@ tags
-> > > > >    /src/fiemap-fault
-> > > > >    /src/min_dio_alignment
-> > > > >    /src/dio-writeback-race
-> > > > > +/src/dio-read-race
-> > > > >    /src/unlink-fsync
-> > > > >    /src/file_attr
-> > > > > diff --git a/src/Makefile b/src/Makefile
-> > > > > index 711dbb91..e7dd4db5 100644
-> > > > > --- a/src/Makefile
-> > > > > +++ b/src/Makefile
-> > > > > @@ -21,7 +21,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
-> > > > >    	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
-> > > > >    	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test \
-> > > > >    	readdir-while-renames dio-append-buf-fault dio-write-fsync-same-fd \
-> > > > > -	dio-writeback-race unlink-fsync
-> > > > > +	dio-writeback-race dio-read-race unlink-fsync
-> > > > >    LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
-> > > > >    	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> > > > > diff --git a/src/dio-read-race.c b/src/dio-read-race.c
-> > > > > new file mode 100644
-> > > > > index 00000000..7c6389e0
-> > > > > --- /dev/null
-> > > > > +++ b/src/dio-read-race.c
-> > > > > @@ -0,0 +1,167 @@
-> > > > > +// SPDX-License-Identifier: GPL-2.0+
-> > > > > +/*
-> > > > > + * dio-read-race -- test direct IO read with the contents of
-> > > > > + * the buffer changed during the read, which should not cause any read error.
-> > > > > + *
-> > > > > + * Copyright (C) 2025 SUSE Linux Products GmbH.
-> > > > > + */
-> > > > > +
-> > > > > +/*
-> > > > > + * dio-read-race
-> > > > > + *
-> > > > > + * Compile:
-> > > > > + *
-> > > > > + *   gcc -Wall -pthread -o dio-read-race dio-read-race.c
-> > > > > + *
-> > > > > + * Make sure filesystems with explicit data checksum can handle direct IO
-> > > > > + * reads correctly, so that even the contents of the direct IO buffer changes
-> > > > > + * during read, the fs should still work fine without data checksum mismatch.
-> > > > > + * (Normally by falling back to buffer IO to keep the checksum and contents
-> > > > > + *  consistent)
-> > > > > + *
-> > > > > + * Usage:
-> > > > > + *
-> > > > > + *   dio-read-race [-b <buffersize>] [-s <filesize>] <filename>
-> > > > > + *
-> > > > > + * Where:
-> > > > > + *
-> > > > > + *   <filename> is the name of the test file to create, if the file exists
-> > > > > + *   it will be overwritten.
-> > > > > + *
-> > > > > + *   <buffersize> is the buffer size for direct IO. Users are responsible to
-> > > > > + *   probe the correct direct IO size and alignment requirement.
-> > > > > + *   If not specified, the default value will be 4096.
-> > > > > + *
-> > > > > + *   <filesize> is the total size of the test file. If not aligned to <blocksize>
-> > > > > + *   the result file size will be rounded up to <blocksize>.
-> > > > > + *   If not specified, the default value will be 64MiB.
-> > > > > + */
-> > > > > +
-> > > > > +#include <fcntl.h>
-> > > > > +#include <stdlib.h>
-> > > > > +#include <stdio.h>
-> > > > > +#include <pthread.h>
-> > > > > +#include <unistd.h>
-> > > > > +#include <getopt.h>
-> > > > > +#include <string.h>
-> > > > > +#include <errno.h>
-> > > > > +#include <sys/stat.h>
-> > > > > +
-> > > > > +static int fd = -1;
-> > > > > +static void *buf = NULL;
-> > > > > +static unsigned long long filesize = 64 * 1024 * 1024;
-> > > > > +static int blocksize = 4096;
-> > > > > +
-> > > > > +const int orig_pattern = 0x00;
-> > > > > +const int modify_pattern = 0xff;
-> > > > > +
-> > > > > +static void *do_io(void *arg)
-> > > > > +{
-> > > > > +	ssize_t ret;
-> > > > > +
-> > > > > +	ret = read(fd, buf, blocksize);
-> > > > > +	pthread_exit((void *)ret);
-> > > > > +}
-> > > > > +
-> > > > > +static void *do_modify(void *arg)
-> > > > > +{
-> > > > > +	memset(buf, modify_pattern, blocksize);
-> > > > > +	pthread_exit(NULL);
-> > > > > +}
-> > > > > +
-> > > > > +int main (int argc, char *argv[])
-> > > > > +{
-> > > > > +	pthread_t io_thread;
-> > > > > +	pthread_t modify_thread;
-> > > > > +	unsigned long long filepos;
-> > > > > +	int opt;
-> > > > > +	int ret = -EINVAL;
-> > > > > +
-> > > > > +	while ((opt = getopt(argc, argv, "b:s:")) > 0) {
-> > > > > +		switch (opt) {
-> > > > > +		case 'b':
-> > > > > +			blocksize = atoi(optarg);
-> > > > > +			if (blocksize == 0) {
-> > > > > +				fprintf(stderr, "invalid blocksize '%s'\n", optarg);
-> > > > > +				goto error;
-> > > > > +			}
-> > > > > +			break;
-> > > > > +		case 's':
-> > > > > +			filesize = atoll(optarg);
-> > > > > +			if (filesize == 0) {
-> > > > > +				fprintf(stderr, "invalid filesize '%s'\n", optarg);
-> > > > > +				goto error;
-> > > > > +			}
-> > > > > +			break;
-> > > > > +		default:
-> > > > > +			fprintf(stderr, "unknown option '%c'\n", opt);
-> > > > > +			goto error;
-> > > > > +		}
-> > > > > +	}
-> > > > > +	if (optind >= argc) {
-> > > > > +		fprintf(stderr, "missing argument\n");
-> > > > > +		goto error;
-> > > > > +	}
-> > > > > +	ret = posix_memalign(&buf, sysconf(_SC_PAGESIZE), blocksize);
-> > > > > +	if (!buf) {
-> > > > > +		fprintf(stderr, "failed to allocate aligned memory\n");
-> > > > > +		exit(EXIT_FAILURE);
-> > > > > +	}
-> > > > > +	fd = open(argv[optind], O_DIRECT | O_RDWR | O_CREAT, 0600);
-> > > > > +	if (fd < 0) {
-> > > > > +		fprintf(stderr, "failed to open file '%s': %m\n", argv[optind]);
-> > > > > +		goto error;
-> > > > > +	}
-> > > > > +
-> > > > > +	memset(buf, orig_pattern, blocksize);
-> > > > > +	/* Create the original file. */
-> > > > > +	for (filepos = 0; filepos < filesize; filepos += blocksize) {
-> > > > > +
-> > > > > +		ret = write(fd, buf, blocksize);
-> > > > > +		if (ret < 0) {
-> > > > > +			ret = -errno;
-> > > > > +			fprintf(stderr, "failed to write the initial content: %m");
-> > > > > +			goto error;
-> > > > > +		}
-> > > > > +	}
-> > > > > +	ret = lseek(fd, 0, SEEK_SET);
-> > > > > +	if (ret < 0) {
-> > > > > +		ret = -errno;
-> > > > > +		fprintf(stderr, "failed to set file offset to 0: %m");
-> > > > > +		goto error;
-> > > > > +	}
-> > > > > +
-> > > > > +	/* Do the read race. */
-> > > > > +	for (filepos = 0; filepos < filesize; filepos += blocksize) {
-> > > > > +		void *retval = NULL;
-> > > > > +
-> > > > > +		memset(buf, orig_pattern, blocksize);
-> > > > > +		pthread_create(&io_thread, NULL, do_io, NULL);
-> > > > > +		pthread_create(&modify_thread, NULL, do_modify, NULL);
-> > > > > +		ret = pthread_join(io_thread, &retval);
-> > > > > +		if (ret) {
-> > > > > +			errno = ret;
-> > > > > +			ret = -ret;
-> > > > > +			fprintf(stderr, "failed to join io thread: %m\n");
-> > > > > +			goto error;
-> > > > > +		}
-> > > > > +		if ((ssize_t )retval < blocksize) {
-> > > > > +			ret = -EIO;
-> > > > > +			fprintf(stderr, "io thread failed\n");
-> > > > > +			goto error;
-> > > > > +		}
-> > > > > +		ret = pthread_join(modify_thread, NULL);
-> > > > > +		if (ret) {
-> > > > > +			errno = ret;
-> > > > > +			ret = -ret;
-> > > > > +			fprintf(stderr, "failed to join modify thread: %m\n");
-> > > > > +			goto error;
-> > > > > +		}
-> > > > > +	}
-> > > > > +error:
-> > > > > +	close(fd);
-> > > > > +	free(buf);
-> > > > > +	if (ret < 0)
-> > > > > +		return EXIT_FAILURE;
-> > > > > +	return EXIT_SUCCESS;
-> > > > > +}
-> > > > > diff --git a/tests/generic/772 b/tests/generic/772
-> > > > > new file mode 100755
-> > > > > index 00000000..46593536
-> > > > > --- /dev/null
-> > > > > +++ b/tests/generic/772
-> > > > > @@ -0,0 +1,41 @@
-> > > > > +#! /bin/bash
-> > > > > +# SPDX-License-Identifier: GPL-2.0
-> > > > > +# Copyright (c) 2025 2025 SUSE Linux Products GmbH.  All Rights Reserved.
-> > > > > +#
-> > > > > +# FS QA Test 772
-> > > > > +#
-> > > > > +# Making sure direct IO (O_DIRECT) reads won't cause any data checksum mismatch,
-> > > > > +# even if the contents of the buffer changes during read.
-> > > > > +#
-> > > > > +# This is mostly for filesystems with data checksum support, as the content can
-> > > > > +# be modified by user space during checksum verification.
-> > > > > +#
-> > > > > +# To avoid such false alerts, such filesystems should fallback to buffer IO to
-> > > > > +# avoid inconsistency, and never trust user space memory when checksum is involved.
-> > > > > +# For filesystems without data checksum support, nothing needs to be bothered.
-> > > > > +#
-> > > > > +. ./common/preamble
-> > > > > +_begin_fstest auto quick
-> > > > > +
-> > > > > +_require_scratch
-> > > > > +_require_odirect
-> > > > > +_require_test_program dio-read-race
-> > > > > +
-> > > > > +
-> > > > > +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-> > > > > +	"btrfs: fallback to buffered read if the inode has data checksum"
-> > > > > +
-> > > > > +_scratch_mkfs > $seqres.full 2>&1
-> > > > > +_scratch_mount
-> > > > > +
-> > > > > +blocksize=$(_get_file_block_size $SCRATCH_MNT)
-> > > > > +filesize=$(( 64 * 1024 * 1024))
-> > > > > +
-> > > > > +echo "blocksize=$blocksize filesize=$filesize" >> $seqres.full
-> > > > > +
-> > > > > +$here/src/dio-read-race -b $blocksize -s $filesize $SCRATCH_MNT/foobar
-> > > > > +
-> > > > > +echo "Silence is golden"
-> > > > > +
-> > > > > +# success, all done
-> > > > > +_exit 0
-> > > > > diff --git a/tests/generic/772.out b/tests/generic/772.out
-> > > > > new file mode 100644
-> > > > > index 00000000..98c13968
-> > > > > --- /dev/null
-> > > > > +++ b/tests/generic/772.out
-> > > > > @@ -0,0 +1,2 @@
-> > > > > +QA output created by 772
-> > > > > +Silence is golden
-> > > > > -- 
-> > > > > 2.51.0
-> > > > > 
-> > > > > 
-> > > > 
-> > > 
-> > 
-> > 
-> 
-> 
+> diff --git a/fs/xfs/xfs_iomap.c b/fs/xfs/xfs_iomap.c
+> index d3f6e3e42a1191..e1da06b157cf94 100644
+> --- a/fs/xfs/xfs_iomap.c
+> +++ b/fs/xfs/xfs_iomap.c
+> @@ -1130,7 +1130,7 @@ xfs_atomic_write_cow_iomap_begin(
+>   		return -EAGAIN;
+>   
+>   	trace_xfs_iomap_atomic_write_cow(ip, offset, length);
+> -
+> +retry:
+>   	xfs_ilock(ip, XFS_ILOCK_EXCL);
+>   
+>   	if (!ip->i_cowfp) {
+> @@ -1141,6 +1141,8 @@ xfs_atomic_write_cow_iomap_begin(
+>   	if (!xfs_iext_lookup_extent(ip, ip->i_cowfp, offset_fsb, &icur, &cmap))
+>   		cmap.br_startoff = end_fsb;
+>   	if (cmap.br_startoff <= offset_fsb) {
+> +		if (isnullstartblock(cmap.br_startblock))
+
+This following comment is unrelated to this patch and is only relevant 
+to pre-existing code:
+
+isnullstartblock() seems to be a check specific to delayed allocation, 
+so I don't why "null" is used in the name, and not "delalloc" or 
+something else more specific.
+
+I guess that there is some history here (behind the naming).
+
+> +			goto convert;
+>   		xfs_trim_extent(&cmap, offset_fsb, count_fsb);
+>   		goto found;
+>   	}
+> @@ -1169,8 +1171,10 @@ xfs_atomic_write_cow_iomap_begin(
+>   	if (!xfs_iext_lookup_extent(ip, ip->i_cowfp, offset_fsb, &icur, &cmap))
+>   		cmap.br_startoff = end_fsb;
+>   	if (cmap.br_startoff <= offset_fsb) {
+> -		xfs_trim_extent(&cmap, offset_fsb, count_fsb);
+>   		xfs_trans_cancel(tp);
+> +		if (isnullstartblock(cmap.br_startblock))
+> +			goto convert;
+> +		xfs_trim_extent(&cmap, offset_fsb, count_fsb);
+>   		goto found;
+>   	}
+>   
+> @@ -1210,6 +1214,19 @@ xfs_atomic_write_cow_iomap_begin(
+>   	xfs_iunlock(ip, XFS_ILOCK_EXCL);
+>   	return xfs_bmbt_to_iomap(ip, iomap, &cmap, flags, IOMAP_F_SHARED, seq);
+>   
+> +convert:
+
+minor comment:
+
+could convert_delay be a better name, like used in 
+xfs_buffered_write_iomap_begin()?
+
+> +	xfs_iunlock(ip, XFS_ILOCK_EXCL);
+> +	error = xfs_bmapi_convert_delalloc(ip, XFS_COW_FORK, offset, iomap,
+> +			NULL);
+> +	if (error)
+> +		return error;
+> +
+> +	/*
+> +	 * Try the lookup again, because the delalloc conversion might have
+> +	 * turned the COW mapping into unwritten, but we need it to be in
+> +	 * written state.
+> +	 */
+> +	goto retry;
+>   out_unlock:
+>   	xfs_iunlock(ip, XFS_ILOCK_EXCL);
+>   	return error;
 
