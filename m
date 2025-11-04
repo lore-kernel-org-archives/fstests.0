@@ -1,183 +1,232 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41AB61E9B37
-	for <fstests@vger.kernel.org>; Tue,  4 Nov 2025 15:55:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E74FF334396;
+	Tue,  4 Nov 2025 17:18:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762271754; cv=none; b=B/rE8JhrkEAM00FiFmNx/mPXMMiesaXEMHjNFVmedJfVc3s9cIEpOygZ24o2L4AG8+Gan7m2Mm1t8LhIKMQ+yvEt6yJuub5KPbrUm2j5wPtFz0CixtGeZJMgdfCKjq/HLQhBuDT0Qhpo9jdGBTC/QFyQApCPYU/MQh8FsAZIDWE=
+	t=1762276683; cv=none; b=LaRjP+ZhvlHep/Ko5z8Gw0l6M6l/FPjcsTHQ+G0Uevu6gjpyfDw4ed8L43afNxBJ8vsJ+0UrZZvS2hbplXSL/uHLk7bhAPjGEDYBzy2Z6wmqNGSjEu7lFr7zFgPihd1IuFz3Dc+nV85kpLURTwQPeGUXsooLWqo+6r8I4TTLXOM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762271754; c=relaxed/simple;
-	bh=NhKtTy/wvD0ZIn6jJEB6Koyx8uTO8f4JV/069n74H+M=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=dCVc3jmes8CV7tQF4/JEUiq0p8xQ515t/IiB9vFQuV0MdWSyAunPwqqYdeiOzYQ2wcB89e2NYPpEY8e8c1t3+/ghDCr6YoXewqvA2VAxCQqiv7738JZDC7Ukvnb1u46VBI6JXP4OtBcg+WBPuzLQ8hmW/diFQho7aJRW3QPYFzw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IJzZhetp; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1762276683; c=relaxed/simple;
+	bh=OehEy2RqSln3rqPcjFDM6qg/2qUKWCks8ZYNM0/zQxc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=p8fFKMyXSGj6PLjRrDjLVdfvSFNq5ut4ZRlEwNY8pGObfPJ+y2GgfP9n9RbG5FJejb5CbubXmVMvfteemUJe5lRvC6S7XYlp+So3P4huEnm65qosFBNiHe3HPETAM+3RHDLPfVJGaGK9tBovYKz9t8GVxbwNiIcaTz8BoR3QE64=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MxeklXDA; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IJzZhetp"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9587AC4CEF7;
-	Tue,  4 Nov 2025 15:55:53 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MxeklXDA"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6F8D1C4CEF7;
+	Tue,  4 Nov 2025 17:18:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1762271754;
-	bh=NhKtTy/wvD0ZIn6jJEB6Koyx8uTO8f4JV/069n74H+M=;
-	h=Date:From:To:Subject:From;
-	b=IJzZhetpQdt63zRmD+UjRKs278/T8Dd2aKo7Mrh1b3Ni/qkQqIM3rQeCTaiFYKtoQ
-	 HNT42KfDbP9uyQmN9SbgrIcVWhOH471Bi+mmJV/elaiPDI+in/RWwP2jcJ8QKJ0pWW
-	 PsR5RxwktYZnKxi+gu/fpSURLeTmXvxDrw/zKn/33h0BOmRbmV74qCIJzkK+kDhgax
-	 XsA6JfEdsxS4Kvkk7YqlpFzhYSv6pVjkCnGwcD6RLUIHY7OHVkCZb+cu2xU51zjcce
-	 F4RqO+3Z6UH3KkW5YXh2xavk03mSu4xkpnPG4XWNFCFv4TF+6R1vX7oUuqufcFC4i5
-	 zu9O5V+12j2HQ==
-Date: Tue, 04 Nov 2025 23:55:51 +0800
-Message-ID: <838a10f1370d0468e11ea1f290c85e61@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2025.11.04
+	s=k20201202; t=1762276682;
+	bh=OehEy2RqSln3rqPcjFDM6qg/2qUKWCks8ZYNM0/zQxc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=MxeklXDAmjSFb5HKr1Ndl7A0GR8+3KftXmVTflK9VCzO8vPIvZWbgSBT5B7aUwTl7
+	 ufC0fcGA4+zPFDwtOdyFmd4TJZIa53qpdIIlNsCrwXssCC9C7sjhtNPO5UXVE/FDPw
+	 s5/m13DinKrwc3UcDR5/San2BdtxlDJpd35r6aEtl0Qt0aMzx1g76ZR3FNHMz06ABa
+	 vOQmnM8Cu5GA+XJWVyY89VU5Nhgdie/7H3VGWQP1tSknL6dTnJUw3YUO3J4DS6uiJx
+	 epouSljy63uF1fBqOVCLOFXDP9CLxRQLXrh+ptMvTnDeTBU5/x+z7ntx6eO+DJbqqB
+	 vwcYGHYalq3RA==
+Date: Tue, 4 Nov 2025 09:18:01 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: John Garry <john.g.garry@oracle.com>
+Cc: Carlos Maiolino <cem@kernel.org>, Ojaswin Mujoo <ojaswin@linux.ibm.com>,
+	Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+	Ritesh Harjani <ritesh.list@gmail.com>, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 2/2] xfs: fix various problems in
+ xfs_atomic_write_cow_iomap_begin
+Message-ID: <20251104171801.GL196370@frogsfrogsfrogs>
+References: <20251103174024.GB196370@frogsfrogsfrogs>
+ <20251103174400.GC196370@frogsfrogsfrogs>
+ <02174386-c930-419e-9ad2-2ae265235d6d@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="BvlXMWQffmvU"
-Content-Disposition: inline
-
-
---BvlXMWQffmvU
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <02174386-c930-419e-9ad2-2ae265235d6d@oracle.com>
 
-Hi all,
+On Tue, Nov 04, 2025 at 12:07:53PM +0000, John Garry wrote:
+> On 03/11/2025 17:44, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > I think there are several things wrong with this function:
+> > 
+> > A) xfs_bmapi_write can return a much larger unwritten mapping than what
+> >     the caller asked for.  We convert part of that range to written, but
+> >     return the entire written mapping to iomap even though that's
+> >     inaccurate.
+> > 
+> > B) The arguments to xfs_reflink_convert_cow_locked are wrong -- an
+> >     unwritten mapping could be *smaller* than the write range (or even
+> >     the hole range).  In this case, we convert too much file range to
+> >     written state because we then return a smaller mapping to iomap.
+> > 
+> > C) It doesn't handle delalloc mappings.  This I covered in the patch
+> >     that I already sent to the list.
+> > 
+> > D) Reassigning count_fsb to handle the hole means that if the second
+> >     cmap lookup attempt succeeds (due to racing with someone else) we
+> >     trim the mapping more than is strictly necessary.  The changing
+> >     meaning of count_fsb makes this harder to notice.
+> > 
+> > E) The tracepoint is kinda wrong because @length is mutated.  That makes
+> >     it harder to chase the data flows through this function because you
+> >     can't just grep on the pos/bytecount strings.
+> > 
+> > F) We don't actually check that the br_state = XFS_EXT_NORM assignment
+> >     is accurate, i.e that the cow fork actually contains a written
+> >     mapping for the range we're interested in
+> > 
+> > G) Somewhat inadequate documentation of why we need to xfs_trim_extent
+> >     so aggressively in this function.
+> > 
+> > H) Not sure why xfs_iomap_end_fsb is used here, the vfs already clamped
+> >     the write range to s_maxbytes.
+> 
+> Can you point out that code? I wonder if we should be rejecting anything
+> which goes over s_maxbytes for RWF_ATOMIC.
 
-The for-next branch of the xfstests repository at:
+generic_write_check_limits:
+https://elixir.bootlin.com/linux/v6.17.7/source/fs/read_write.c#L1709
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+xfs_file_dio_write_atomic -> xfs_file_write_checks ->
+generic_write_checks -> generic_write_checks_count ->
+generic_write_check_limits
 
-has just been updated and tagged as v2025.11.04 release.
+> > 
+> > Fix these issues, and then the atomic writes regressions in generic/760,
+> > generic/617, generic/091, generic/263, and generic/521 all go away for
+> > me.
+> > 
+> > Cc: <stable@vger.kernel.org> # v6.16
+> > Fixes: bd1d2c21d5d249 ("xfs: add xfs_atomic_write_cow_iomap_begin()")
+> > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> 
+> this looks ok, thanks
+> 
+> Reviewed-by: John Garry <john.g.garry@oracle.com>
+> 
+> I'm just doing powerfail testing - I'll let you know if any issues found
+> 
+> > ---
+> >   fs/xfs/xfs_iomap.c |   60 ++++++++++++++++++++++++++++++++++++++++++----------
+> >   1 file changed, 49 insertions(+), 11 deletions(-)
+> > 
+> > diff --git a/fs/xfs/xfs_iomap.c b/fs/xfs/xfs_iomap.c
+> > index e1da06b157cf94..469f34034daddd 100644
+> > --- a/fs/xfs/xfs_iomap.c
+> > +++ b/fs/xfs/xfs_iomap.c
+> > @@ -1091,6 +1091,29 @@ const struct iomap_ops xfs_zoned_direct_write_iomap_ops = {
+> >   };
+> >   #endif /* CONFIG_XFS_RT */
+> > +#ifdef DEBUG
+> > +static void
+> > +xfs_check_atomic_conversion(
+> 
+> xfs_check_atomic_cow_conversion() might be better, I don't think that it is
+> so important
 
-Release Notes:
-1) There're 4 new test cases in this release, include ceph/006, g/779, g/781
-   and g/782.
-2) New helpers to create and destroy zoned loop device, g/781 is the first
-   test case to use these helpers.
-3) Support core dumps from crashed programs by systemd-coredump.
+Ok.
 
-There're many fixes for ext4, xfs, btrfs, f2fs testing and so on. More details
-please refer to below. Thanks for all these contributions!
+--D
 
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-5b75444bc912 ceph: test snapshot data integrity after punch hole operations
-
-New commits:
-
-Andrey Albershteyn (2):
-      [43761bafd7b5] generic/772: require filesystem to support file_[g|s]etattr
-      [e4bcfeb065b0] generic/772: split this test into two tests for regular and special files
-
-Chao Yu (2):
-      [930ef1140392] f2fs: add commit id to _fixed_by_kernel_commit for f2fs/02[1-2]
-      [fea0ae7e9d7a] f2fs/022: fix to run testcase correctly
-
-Darrick J. Wong (12):
-      [462c5419fcdd] generic/427: try to ensure there's some free space before we do the aio test
-      [39809c7a56b2] common/rc: fix _require_xfs_io_shutdown
-      [e9f38cc0a97a] generic/742: avoid infinite loop if no fiemap results
-      [ae421bd93cf4] generic/{482,757}: skip test if there are no FUA writes
-      [706b5f0f78a4] generic/772: actually check for file_getattr special file support
-      [10b3cbd86d0d] common/filter: fix _filter_file_attributes to handle src/file_attr.c file flags
-      [9cff03b40a9f] common/attr: fix _require_noattr2
-      [ae2728de5cb9] common: fix _require_xfs_io_command pwrite -A for various blocksizes
-      [be294eb15eee] check: line up stdout columns
-      [4d5b1462c0d4] fsx: don't print messages when atomic writes are explicitly disabled
-      [6e853e735338] fsstress: don't abort when stat(".") returns EIO
-      [9886baabdec3] check: collect core dumps from systemd-coredump
-
-Filipe Manana (2):
-      [6930df3fd6e8] generic: test fsync of directory after renaming new symlink
-      [3db9a5c44737] generic: test a scenario of dir fsync after adding a link to a subdir
-
-Joanne Chang (1):
-      [8d3cb85a8b9d] f2fs/011: use random data to avoid file compression
-
-Johannes Thumshirn (3):
-      [41f4ef18a442] common/zoned: add _require_zloop
-      [e7d008d1fed2] common/zoned: add helpers for creation and teardown of zloop devices
-      [c055aae8d958] generic: basic smoke for filesystems on zoned block devices
-
-Ojaswin Mujoo (1):
-      [1035b332a57f] ext4/048: Fix hangup due to no free inodes
-
-Yong Sun (1):
-      [55cf5e5ba4f6] generic/270: replace pidwait to wait
-
-Zorro Lang (1):
-      [606ec307b361] common/atomicwrites: fix _require_scratch_write_atomic when awu_max_fs is empty
-
-ethanwu (1):
-      [5b75444bc912] ceph: test snapshot data integrity after punch hole operations
-
-
-Code Diffstat:
-
- README                | 20 +++++++++++
- check                 | 10 +++++-
- common/atomicwrites   |  9 +++--
- common/attr           |  4 +++
- common/ceph           | 77 ++++++++++++++++++++++++++++++++++++++++
- common/filter         | 33 +++++++++++++-----
- common/rc             | 97 ++++++++++++++++++++++++++++++++++++++++++++++++---
- common/zoned          | 61 ++++++++++++++++++++++++++++++++
- ltp/fsstress.c        | 29 +++++++++++++--
- ltp/fsx.c             |  1 -
- src/fiemap-fault.c    | 14 +++++++-
- tests/ceph/006        | 63 +++++++++++++++++++++++++++++++++
- tests/ceph/006.out    |  2 ++
- tests/ext4/048        |  7 +++-
- tests/f2fs/011        |  2 +-
- tests/f2fs/021        |  2 +-
- tests/f2fs/022        | 10 +++---
- tests/f2fs/022.out    |  2 +-
- tests/generic/270     |  2 +-
- tests/generic/427     |  3 ++
- tests/generic/482     |  2 +-
- tests/generic/757     |  2 +-
- tests/generic/772     | 54 ++++++----------------------
- tests/generic/772.out | 14 --------
- tests/generic/779     | 60 +++++++++++++++++++++++++++++++
- tests/generic/779.out |  2 ++
- tests/generic/780     | 86 +++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/780.out | 20 +++++++++++
- tests/generic/781     | 44 +++++++++++++++++++++++
- tests/generic/781.out |  2 ++
- tests/generic/782     | 73 ++++++++++++++++++++++++++++++++++++++
- tests/generic/782.out | 10 ++++++
- tests/xfs/648         |  3 +-
- 33 files changed, 727 insertions(+), 93 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---BvlXMWQffmvU
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmkKIeQACgkQlNbPkfr2
-tMyGDA/+I1nchNA6d6Tfvyi4IRp/w3vpokfuMBlrkOee6fhxh0fpl2PTtzen2eY6
-/CXXWvwvV+hda19EqnwiSiQ9uFXIoyqUK9QSJwFLKJe7FZdIhjxwJ8Gp7nI1+iWw
-EFhSTvqqYwowkBEyHLQfSzcI8gqw/tIj0ww9cJo3LQwoIx5gwNJzTg4rKv7+OLDU
-cIVx/iBgCZbMYxT+hhTdwYRKyXTRZQiAxiQ0t4DgfjViwrcDIOiGRwQfGsTK2/ZU
-8DcgMU/x+vtkRatV8kjqdR0VPafjVr37WgSvGLB/I8HOm9BFfLa2EKTcdBz3pX/N
-A1FShnPkEdPwxfH++bh/lQ9X6HCCBDZm0BI4uX1+ZQQdK1MlQ/tMAdGq7jG46xfS
-wws50/tC3AkVz5DSU0I7uZfCbsy4D8Mm0dHsvDWO6MbrB88m1OAcp/pvsbbLgfim
-zEm3ltQ3LZJTD/FlKJH8Z42G/u8ocn6bnIRwKkux5WKmkZ3JFn2+vkO0YMOyjvyW
-or7nVxw8UqadJRKoXrDffiTSKR2a4QX5aV7bhb6M+ptj6rQgBp/lWQQWXYlNp7/b
-+cqAMqnvLRXM+pLMRPilWhSMJfB7LVkl4yGmHcKxo7E/Ggs9KaZ+Chhx0/ddrpYQ
-WSI2Wx9djxSLRmjdbAo04FMJWaoe+r3ilNloPIEjUNVTA9fAO2g=
-=odn6
------END PGP SIGNATURE-----
-
---BvlXMWQffmvU--
+> > +	struct xfs_inode		*ip,
+> > +	xfs_fileoff_t			offset_fsb,
+> > +	xfs_filblks_t			count_fsb,
+> > +	const struct xfs_bmbt_irec	*cmap)
+> > +{
+> > +	struct xfs_iext_cursor		icur;
+> > +	struct xfs_bmbt_irec		cmap2 = { };
+> > +
+> > +	if (xfs_iext_lookup_extent(ip, ip->i_cowfp, offset_fsb, &icur, &cmap2))
+> > +		xfs_trim_extent(&cmap2, offset_fsb, count_fsb);
+> > +
+> > +	ASSERT(cmap2.br_startoff == cmap->br_startoff);
+> > +	ASSERT(cmap2.br_blockcount == cmap->br_blockcount);
+> > +	ASSERT(cmap2.br_startblock == cmap->br_startblock);
+> > +	ASSERT(cmap2.br_state == cmap->br_state);
+> > +}
+> > +#else
+> > +# define xfs_check_atomic_conversion(...)	((void)0)
+> > +#endif
+> > +
+> >   static int
+> >   xfs_atomic_write_cow_iomap_begin(
+> >   	struct inode		*inode,
+> > @@ -1102,9 +1125,10 @@ xfs_atomic_write_cow_iomap_begin(
+> >   {
+> >   	struct xfs_inode	*ip = XFS_I(inode);
+> >   	struct xfs_mount	*mp = ip->i_mount;
+> > -	const xfs_fileoff_t		offset_fsb = XFS_B_TO_FSBT(mp, offset);
+> > -	xfs_fileoff_t		end_fsb = xfs_iomap_end_fsb(mp, offset, length);
+> > -	xfs_filblks_t		count_fsb = end_fsb - offset_fsb;
+> > +	const xfs_fileoff_t	offset_fsb = XFS_B_TO_FSBT(mp, offset);
+> > +	const xfs_fileoff_t	end_fsb = XFS_B_TO_FSB(mp, offset + length);
+> > +	const xfs_filblks_t	count_fsb = end_fsb - offset_fsb;
+> > +	xfs_filblks_t		hole_count_fsb;
+> >   	int			nmaps = 1;
+> >   	xfs_filblks_t		resaligned;
+> >   	struct xfs_bmbt_irec	cmap;
+> > @@ -1143,14 +1167,20 @@ xfs_atomic_write_cow_iomap_begin(
+> >   	if (cmap.br_startoff <= offset_fsb) {
+> >   		if (isnullstartblock(cmap.br_startblock))
+> >   			goto convert;
+> > +
+> > +		/*
+> > +		 * cmap could extend outside the write range due to previous
+> > +		 * speculative preallocations.  We must trim cmap to the write
+> > +		 * range because the cow fork treats written mappings to mean
+> > +		 * "write in progress".
+> > +		 */
+> >   		xfs_trim_extent(&cmap, offset_fsb, count_fsb);
+> >   		goto found;
+> >   	}
+> > -	end_fsb = cmap.br_startoff;
+> > -	count_fsb = end_fsb - offset_fsb;
+> > +	hole_count_fsb = cmap.br_startoff - offset_fsb;
+> > -	resaligned = xfs_aligned_fsb_count(offset_fsb, count_fsb,
+> > +	resaligned = xfs_aligned_fsb_count(offset_fsb, hole_count_fsb,
+> >   			xfs_get_cowextsz_hint(ip));
+> >   	xfs_iunlock(ip, XFS_ILOCK_EXCL);
+> > @@ -1186,7 +1216,7 @@ xfs_atomic_write_cow_iomap_begin(
+> >   	 * atomic writes to that same range will be aligned (and don't require
+> >   	 * this COW-based method).
+> >   	 */
+> > -	error = xfs_bmapi_write(tp, ip, offset_fsb, count_fsb,
+> > +	error = xfs_bmapi_write(tp, ip, offset_fsb, hole_count_fsb,
+> >   			XFS_BMAPI_COWFORK | XFS_BMAPI_PREALLOC |
+> >   			XFS_BMAPI_EXTSZALIGN, 0, &cmap, &nmaps);
+> >   	if (error) {
+> > @@ -1199,17 +1229,25 @@ xfs_atomic_write_cow_iomap_begin(
+> >   	if (error)
+> >   		goto out_unlock;
+> > +	/*
+> > +	 * cmap could map more blocks than the range we passed into bmapi_write
+> > +	 * because of EXTSZALIGN or adjacent pre-existing unwritten mappings
+> > +	 * that were merged.  Trim cmap to the original write range so that we
+> > +	 * don't convert more than we were asked to do for this write.
+> > +	 */
+> > +	xfs_trim_extent(&cmap, offset_fsb, count_fsb);
+> > +
+> >   found:
+> >   	if (cmap.br_state != XFS_EXT_NORM) {
+> > -		error = xfs_reflink_convert_cow_locked(ip, offset_fsb,
+> > -				count_fsb);
+> > +		error = xfs_reflink_convert_cow_locked(ip, cmap.br_startoff,
+> > +				cmap.br_blockcount);
+> >   		if (error)
+> >   			goto out_unlock;
+> >   		cmap.br_state = XFS_EXT_NORM;
+> > +		xfs_check_atomic_conversion(ip, offset_fsb, count_fsb, &cmap);
+> >   	}
+> > -	length = XFS_FSB_TO_B(mp, cmap.br_startoff + cmap.br_blockcount);
+> > -	trace_xfs_iomap_found(ip, offset, length - offset, XFS_COW_FORK, &cmap);
+> > +	trace_xfs_iomap_found(ip, offset, length, XFS_COW_FORK, &cmap);
+> >   	seq = xfs_iomap_inode_sequence(ip, IOMAP_F_SHARED);
+> >   	xfs_iunlock(ip, XFS_ILOCK_EXCL);
+> >   	return xfs_bmbt_to_iomap(ip, iomap, &cmap, flags, IOMAP_F_SHARED, seq);
+> 
+> 
