@@ -1,60 +1,59 @@
-Received: from mail-ed1-f54.google.com (mail-ed1-f54.google.com [209.85.208.54])
+Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41D12309EED
-	for <fstests@vger.kernel.org>; Thu,  6 Nov 2025 09:03:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35362747F
+	for <fstests@vger.kernel.org>; Thu,  6 Nov 2025 09:23:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762419792; cv=none; b=rLJED1JBMABliX1K1LLQEKS5iUEpTessZuI10JNsIM6chlaezwLIDq+rbx/8l+1PipL6bN7PvHsFamO0TxmClPWmlwi3NxC7DWlhqyhGfaFcq9OG5OASkMeSz74UKymvueay5/wH+uQQUc87p1PUvpvq7pC0Gmb/RSSjLLRPQOQ=
+	t=1762421001; cv=none; b=sljFi9dUFIazk3QW7ibaRnTZDzR8ij12R1lwiLHQcXsubdzQm0SsSMh3D1jDYnw09jxlpbB2xrQjEBdG8OM01P5SarAPe2BU1VRW7WT6mRpVaxkb5PKiLYKn0M5rd1hEZyM5u1pS61+OFzwBTm13fRS360+blvtRA7UP+CvxsGw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762419792; c=relaxed/simple;
-	bh=0EKAehxKkI/bTw9WUORbVkGz8/nS+B2Kso4BX+bmOcU=;
+	s=arc-20240116; t=1762421001; c=relaxed/simple;
+	bh=Xx2goxP07Ev6XJrC+lInY39ZwnU/1SAfj6bly3//d04=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=mXjcVDWebTFlaj6PXGv+gykzWNGw2PDDwxbtRnJt1ANAdf+YnfHUhGeuKDHJkBc/bhGZru+8U4H6cnC4cwqonhXjtdL3wnI683nEjB1ZkDH+a+BB06ajm6eKP87qyPGJ4CfgJiO1zZFS/cMGu15Y/yGAYmlwuuj8XjlJqXC9yxE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WYTuwoHs; arc=none smtp.client-ip=209.85.208.54
+	 To:Cc:Content-Type; b=j/tzsE4y/kQRm4uPPer7vyrBBE9E+/RQn0s8xiumgADRDAUpIWFe+X9uOhrt32ZR2uMsqu51/df+Uby6VxSpdYQoQT506snM0UlblLOzAOXi1OcmBFtYxCRkjd3dbCDWJlBPIZRcAs5mTMW9KTOysGFgetbjIG3jqaNeSoYpQBc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=NHCf6eJc; arc=none smtp.client-ip=209.85.208.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WYTuwoHs"
-Received: by mail-ed1-f54.google.com with SMTP id 4fb4d7f45d1cf-64034284521so1067582a12.1
-        for <fstests@vger.kernel.org>; Thu, 06 Nov 2025 01:03:10 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="NHCf6eJc"
+Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-640bd9039fbso1216546a12.2
+        for <fstests@vger.kernel.org>; Thu, 06 Nov 2025 01:23:19 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1762419789; x=1763024589; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=veIj9WdBpJJNLGbbTumRAOZ1DVwrSRtT1QGKYvneLtE=;
-        b=WYTuwoHswTDQdrk2J9Byqj7f/Husd4nnYTfT5hDwYM9qbNvMrqzk3jWBqpFf5pF9IZ
-         xzOtmQrbMenNPXGpT4RowxdsBgEo6JvsQhAR1wbpO//4K7gzZeCyE75Wpf/NeEP4k/iT
-         VbQO44VulP2dMtkPiivIc/uRMrYO5qbcx3rNe471ERaRKb1SVvMz61pm5UKvSAA8D7nb
-         AR9GSbYzwdw5ZQYPqfoAuRZLbkUTooohJKnjOjfmLeJ8srPqEDgBSge2sJx/uMciNPgf
-         d+gF5HL/2mL8yg1lylzuq1scROxUHlX2IhXfKjGIl0dm+8hGFrkqvkcp1z69l1Jgf0Y2
-         5KMA==
+        d=gmail.com; s=20230601; t=1762420998; x=1763025798; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=gyHf382iB6Vu/4cvvmbK0M9rXdxTzal+EE70kvjPdpA=;
+        b=NHCf6eJcr0L/UzpieW7xrbvDzfc2WifzM7CZe02EX1vG83rlmZx7AixNUdlZjEnYha
+         /DbMSjXDKY+BwN3/MHuDAmV5y/mNqb//dlBYJZN2/HJjaoefP9+9uCxKqe7vvvWGHOTJ
+         zQs5saX1KqbYXDIFi+Q6J6cG8SWV4ta1lv/A8OHZ8L9DKr9qTKz+4V6tRNJ4BHzEJSM0
+         DB98/Fr4E0lFDKsPdJrYPsjyzXCqU+l7QDYEPK6ofdNUEuBA4H58CkbB81ZvZoraaU7z
+         3XTdyvfPaQGg3A1IfEOLYq5aOg4kqjOE5qBuG2oHZ1BthcE9vzm+OXK3gbEGRPn8uqQw
+         Z3XQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1762419789; x=1763024589;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=veIj9WdBpJJNLGbbTumRAOZ1DVwrSRtT1QGKYvneLtE=;
-        b=CVZV/Kzj9TPl3zRwSa8v+4/zP8CU2VZpiGdIVIdb0ydgX6uLhPcXXTI2/TFvV4DN+b
-         5azwcARgmuWu4gBcFz75iXE0KuLXcyH9ZmU4M859lrNH9yiyPzKeRVTZRNu17Seek2Iy
-         YDyRMmqR/ISU6QvMcKX3ppS4hQIK8Y5LaLBFs+d3m6/jvdBw5PjXi2qpKAM2hcCV4ZQN
-         Sa6dnmi5T91IdPLA4X0Oifzoq4faDSlVZ0SqF4u/tLVlubpgr5HiTSSePwAymOCAKWA/
-         ruLTvyFsbAEn72wtJF3PXM/HLMy5dSOGwkQZV+B5bKIX+txV82Jhhm5gVL9JWNnRZPQ9
-         ayNw==
-X-Forwarded-Encrypted: i=1; AJvYcCW118cN0HFrGIzuYa8lJ124iKvX5ShM43tOQun4AKJ5rCYQr0gjL2kP3bSbg9o3tv0MTXzIbpaw@vger.kernel.org
-X-Gm-Message-State: AOJu0YxBmk5dIThIrH4uyQY2cfSZyQ7C0RZeoWJCSqcdv0EqoR8kmRuQ
-	YMDnG85aEuLKhIP+Dqr86pzKZp/XnUohqirjQbN1nBAOFcFJG6TeM5PfPuXSLjfxq+xv/FkZCj1
-	4kQFRUvySZdeZ/Gu/DFk+zRP3MLDH6JY=
-X-Gm-Gg: ASbGncst/qYqWFD/VJeojb4aWlUImoR4H8d7QFlZHoJcrBi7LllBbtM2J2dbhh2lgGt
-	dk98ONNPXM1plIEMRo4i9RuaioDcq3lYkNxcXpwV/GVQGZ0dj4AOBY4cYPY8MJ/SiJZ/NPPR2b9
-	voGpElq9iE3zzkm+UzZUW7KEs7J5MROs16BIkIDVKp4yaSs3VNP5PQ6OZAXmOZdiPn4PDjOycyh
-	attlvqGdQcMzbXML4CcQOpssUjtrifpU2onZPz4xlvLPK+cqtXNuq2S/6aQIvsF7/JeHLP2cKG4
-	2FXeShAeVwftOXn9NifBCxI0L3FWJw==
-X-Google-Smtp-Source: AGHT+IGzG4L1zsLSrPolVgz53k8qLjyW8wdBsccQu20dip4z2Ulliwm8dDW4Lw75AwMHZ0hiIPIToqA/2u2N+i4Tu34=
-X-Received: by 2002:a05:6402:34c6:b0:640:abd5:8642 with SMTP id
- 4fb4d7f45d1cf-64105a477d4mr5755119a12.21.1762419788438; Thu, 06 Nov 2025
- 01:03:08 -0800 (PST)
+        d=1e100.net; s=20230601; t=1762420998; x=1763025798;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=gyHf382iB6Vu/4cvvmbK0M9rXdxTzal+EE70kvjPdpA=;
+        b=ksu6ljre1LEZ+KHAYWP68ophJUUDXp0r5CTRmXWF2Bm4QiPgx1zzqFVJQqzOX3YVW4
+         kfJR5Utobo92jOyZdic3VfFCW6Imb2ATxho1XmUVM4+h0eaSTb9UOzh0p7kPcM55gzSY
+         m8pYu/dvxCVCkr3PIyKaLIkVTi68IxNhnrYxKJGYugiQVN6SXuU+RmsA/7GawLopkPCz
+         1h8l/lwKGsQe4rFFWxki7qAqaZqCwyQ1vnkvEnNzpgE/dcRWfYhfu4wSOE2yy5O6rPjA
+         mepDsFExr4yWVBqlS6f9+QaYDHOwNOIuivR8NlsOnBM56TEl3O6G94PwY43EoYcbAXFy
+         hz1w==
+X-Forwarded-Encrypted: i=1; AJvYcCW3KOREVDbrYsw18EKeVuCY8KdyWCGvAUOps5/buxS1epKHa3+luEBn+hiTdNTFOyzjPF5rXIe5@vger.kernel.org
+X-Gm-Message-State: AOJu0YxG4i8tb15EkRwqvb8ey4khtfRbNc2Mm492SDn8nWxew1ND2yua
+	wWK2s10ZfQ8EsAGtok5jWTN3wH0ji8wlaHW6JJHvQjeCxjJYCDOiDNJYAowLmEqycMVn7SYVnEB
+	vRTv9XO/iPI6hnsSjwLFy9TWHvE2Pl2U=
+X-Gm-Gg: ASbGncv6BfHzQGvxMtt4Ft2o58pFdK32DDQzBVbX61Or/4+hxQUAyvsRY4zNOoBjYFE
+	ptixDGrqrmirQ09vzOZUnkYEZTW73XmMGpeJBPRv5rb57b28ptBgwcP//IuJUEQJlOyn+SXLK/T
+	nqvR11xP9lQ3y16usVBcn0Tzgu1ouPSFVBZsVVCRcTy3MmkXVQvLajGySbfl0GUrRczF1T5Muy6
+	3NchrsCA9fszcg5dYRRcHOkf5WpixAZ0YpfJpVKq1ekjCRDMtRPfKB4Zg1K98ztpZbw5NM+Af2L
+	oJir/hPtLeaVAFMsb8o=
+X-Google-Smtp-Source: AGHT+IGoqlY0H9bN6kflnCnpfZ1SeA3J+m46Gr7/ZpMgeH+MMnt78aDZtzIjWuufnNUX4YlGm/ee2052ryyV7rBBdgY=
+X-Received: by 2002:a05:6402:5107:b0:640:a7bc:30d3 with SMTP id
+ 4fb4d7f45d1cf-64105a579fbmr5534462a12.27.1762420997390; Thu, 06 Nov 2025
+ 01:23:17 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -62,87 +61,187 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <176169819804.1433624.11241650941850700038.stgit@frogsfrogsfrogs>
- <176169820014.1433624.17059077666167415725.stgit@frogsfrogsfrogs>
- <CAOQ4uxhgCqf8pj-ebUiC_HNG4VLyv7UEOausCt5Cs831_AnGUg@mail.gmail.com> <20251105225609.GD196358@frogsfrogsfrogs>
-In-Reply-To: <20251105225609.GD196358@frogsfrogsfrogs>
+ <176169820388.1433624.12333256574549591904.stgit@frogsfrogsfrogs>
+ <aQNNZ6lxeMntTifa@amir-ThinkPad-T480> <20251105231228.GG196358@frogsfrogsfrogs>
+In-Reply-To: <20251105231228.GG196358@frogsfrogsfrogs>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 6 Nov 2025 10:02:57 +0100
-X-Gm-Features: AWmQ_bn2fAKjP1LvxTPOzsC5eSdfONWi8mVFNaKjNuG1RFoEXsyn3eS71zosukU
-Message-ID: <CAOQ4uxhqVQYZvgNp=yN_u9rqoEw4wZ_YuAfwnpgrnduBruNMbg@mail.gmail.com>
-Subject: Re: [PATCH 02/33] generic/740: don't run this test for fuse ext* implementations
+Date: Thu, 6 Nov 2025 10:23:04 +0100
+X-Gm-Features: AWmQ_bkFfr2QWpjytnKZXPYVdXPuOOKUsZ7eWSiLQV4mMAXXwLamXIlq03E7Svw
+Message-ID: <CAOQ4uxhQt6LNo7QaN3rWy3eCeAS9r0xNcMW4ZvdrY5YgMbq66g@mail.gmail.com>
+Subject: Re: [PATCH 22/33] generic/631: don't run test if we can't mount overlayfs
 To: "Darrick J. Wong" <djwong@kernel.org>
 Cc: zlang@redhat.com, neal@gompa.dev, fstests@vger.kernel.org, 
 	linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
 	joannelkoong@gmail.com, bernd@bsbernd.com
+Content-Type: multipart/mixed; boundary="0000000000007ebfec0642e99dee"
+
+--0000000000007ebfec0642e99dee
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Nov 5, 2025 at 11:56=E2=80=AFPM Darrick J. Wong <djwong@kernel.org>=
+On Thu, Nov 6, 2025 at 12:12=E2=80=AFAM Darrick J. Wong <djwong@kernel.org>=
  wrote:
 >
-> On Thu, Oct 30, 2025 at 10:59:00AM +0100, Amir Goldstein wrote:
-> > On Wed, Oct 29, 2025 at 2:30=E2=80=AFAM Darrick J. Wong <djwong@kernel.=
-org> wrote:
-> > >
+> On Thu, Oct 30, 2025 at 12:35:03PM +0100, Amir Goldstein wrote:
+> > On Tue, Oct 28, 2025 at 06:26:09PM -0700, Darrick J. Wong wrote:
 > > > From: Darrick J. Wong <djwong@kernel.org>
 > > >
-> > > mke2fs disables foreign filesystem detection no matter what type you
-> > > pass in, so we need to block this for both fuse server variants.
+> > > This test fails on fuse2fs with the following:
 > > >
+> > > +mount: /opt/merged0: wrong fs type, bad option, bad superblock on ov=
+erlay, missing codepage or helper program, or other error.
+> > > +       dmesg(1) may have more information after failed mount system =
+call.
+> > >
+> > > dmesg logs the following:
+> > >
+> > > [  764.775172] overlayfs: upper fs does not support tmpfile.
+> > > [  764.777707] overlayfs: upper fs does not support RENAME_WHITEOUT.
+> > >
+> > > From this, it's pretty clear why the test fails -- overlayfs checks t=
+hat
+> > > the upper filesystem (fuse2fs) supports RENAME_WHITEOUT and O_TMPFILE=
+.
+> > > fuse2fs doesn't support either of these, so the mount fails and then =
+the
+> > > test goes wild.
+> > >
+> > > Instead of doing that, let's do an initial test mount with the same
+> > > options as the workers, and _notrun if that first mount doesn't succe=
+ed.
+> > >
+> > > Fixes: 210089cfa00315 ("generic: test a deadlock in xfs_rename when w=
+hiteing out files")
 > > > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
 > > > ---
-> > >  common/rc         |    2 +-
-> > >  tests/generic/740 |    1 +
-> > >  2 files changed, 2 insertions(+), 1 deletion(-)
+> > >  tests/generic/631 |   22 ++++++++++++++++++++++
+> > >  1 file changed, 22 insertions(+)
 > > >
 > > >
-> > > diff --git a/common/rc b/common/rc
-> > > index 3fe6f53758c05b..18d11e2c5cad3a 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -1889,7 +1889,7 @@ _do()
-> > >  #
-> > >  _exclude_fs()
-> > >  {
-> > > -       [ "$1" =3D "$FSTYP" ] && \
-> > > +       [[ $FSTYP =3D~ $1 ]] && \
-> > >                 _notrun "not suitable for this filesystem type: $FSTY=
-P"
-> >
-> > If you accept my previous suggestion of MKFSTYP, then could add:
-> >
-> >        [[ $MKFSTYP =3D~ $1 ]] && \
-> >                _notrun "not suitable for this filesystem on-disk
-> > format: $MKFSTYP"
-> >
-> >
+> > > diff --git a/tests/generic/631 b/tests/generic/631
+> > > index 72bf85e30bdd4b..64e2f911fdd10e 100755
+> > > --- a/tests/generic/631
+> > > +++ b/tests/generic/631
+> > > @@ -64,6 +64,26 @@ stop_workers() {
+> > >     done
 > > >  }
 > > >
-> > > diff --git a/tests/generic/740 b/tests/generic/740
-> > > index 83a16052a8a252..e26ae047127985 100755
-> > > --- a/tests/generic/740
-> > > +++ b/tests/generic/740
-> > > @@ -17,6 +17,7 @@ _begin_fstest mkfs auto quick
-> > >  _exclude_fs ext2
-> > >  _exclude_fs ext3
-> > >  _exclude_fs ext4
-> > > +_exclude_fs fuse.ext[234]
-> > >  _exclude_fs jfs
-> > >  _exclude_fs ocfs2
-> > >  _exclude_fs udf
+> > > +require_overlayfs() {
+> > > +   local tag=3D"check"
+> > > +   local mergedir=3D"$SCRATCH_MNT/merged$tag"
+> > > +   local l=3D"lowerdir=3D$SCRATCH_MNT/lowerdir:$SCRATCH_MNT/lowerdir=
+1"
+> > > +   local u=3D"upperdir=3D$SCRATCH_MNT/upperdir$tag"
+> > > +   local w=3D"workdir=3D$SCRATCH_MNT/workdir$tag"
+> > > +   local i=3D"index=3Doff"
+> > > +
+> > > +   rm -rf $SCRATCH_MNT/merged$tag
+> > > +   rm -rf $SCRATCH_MNT/upperdir$tag
+> > > +   rm -rf $SCRATCH_MNT/workdir$tag
+> > > +   mkdir $SCRATCH_MNT/merged$tag
+> > > +   mkdir $SCRATCH_MNT/workdir$tag
+> > > +   mkdir $SCRATCH_MNT/upperdir$tag
+> > > +
+> > > +   _mount -t overlay overlay -o "$l,$u,$w,$i" $mergedir || \
+> > > +           _notrun "cannot mount overlayfs"
+> > > +   umount $mergedir
+> > > +}
+> > > +
+> > >  worker() {
+> > >     local tag=3D"$1"
+> > >     local mergedir=3D"$SCRATCH_MNT/merged$tag"
+> > > @@ -91,6 +111,8 @@ worker() {
+> > >     rm -f $SCRATCH_MNT/workers/$tag
+> > >  }
 > > >
+> > > +require_overlayfs
+> > > +
+> > >  for i in $(seq 0 $((4 + LOAD_FACTOR)) ); do
+> > >     worker $i &
+> > >  done
 > > >
 > >
-> > And then you wont need to add fuse.ext[234] to exclude list
-> >
-> > At the (very faint) risk of having a test that only wants to exclude ex=
-t4 and
-> > does not want to exclude fuse.ext4, I think this is worth it.
+> > I agree in general, but please consider this (untested) cleaner patch
 >
-> I guess we could try to do [[ $MKFSTYP =3D~ ^$1 ]]; ?
+> Yes, this works too.  Since this is your code, could you send it to the
+> list with a proper commit message (or even just copy mine) and then I
+> can ack it?
+>
 
-Yeh of course, either that or [ $MKFSTYP =3D $1 ]
-if we do not care to add pattern matching.
+Attached.
+Now it's even tested.
+
+I put you down as Suggested-by.
+Feel free to choose your own roles...
 
 Thanks,
 Amir.
+
+--0000000000007ebfec0642e99dee
+Content-Type: text/x-patch; charset="US-ASCII"; 
+	name="0001-generic-631-don-t-run-test-if-we-can-t-mount-overlay.patch"
+Content-Disposition: attachment; 
+	filename="0001-generic-631-don-t-run-test-if-we-can-t-mount-overlay.patch"
+Content-Transfer-Encoding: base64
+Content-ID: <f_mhn7wkkk0>
+X-Attachment-Id: f_mhn7wkkk0
+
+RnJvbSBkYzMxMzUyZDZjOTI2ZTBmNmRhNjIzOGVjY2JjYWE5NmIxZmI4OWMyIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBBbWlyIEdvbGRzdGVpbiA8YW1pcjczaWxAZ21haWwuY29tPgpE
+YXRlOiBUaHUsIDMwIE9jdCAyMDI1IDEyOjI0OjIxICswMTAwClN1YmplY3Q6IFtQQVRDSF0gZ2Vu
+ZXJpYy82MzE6IGRvbid0IHJ1biB0ZXN0IGlmIHdlIGNhbid0IG1vdW50IG92ZXJsYXlmcwoKVGhp
+cyB0ZXN0IGZhaWxzIG9uIGZ1c2UyZnMgd2l0aCB0aGUgZm9sbG93aW5nOgoKbW91bnQ6IC9vcHQv
+bWVyZ2VkMDogd3JvbmcgZnMgdHlwZSwgYmFkIG9wdGlvbiwgYmFkIHN1cGVyYmxvY2sgb24gb3Zl
+cmxheSwKICAgICAgIG1pc3NpbmcgY29kZXBhZ2Ugb3IgaGVscGVyIHByb2dyYW0sIG9yIG90aGVy
+IGVycm9yLgogICAgICAgZG1lc2coMSkgbWF5IGhhdmUgbW9yZSBpbmZvcm1hdGlvbiBhZnRlciBm
+YWlsZWQgbW91bnQgc3lzdGVtIGNhbGwuCgpkbWVzZyBsb2dzIHRoZSBmb2xsb3dpbmc6CgpbICA3
+NjQuNzc1MTcyXSBvdmVybGF5ZnM6IHVwcGVyIGZzIGRvZXMgbm90IHN1cHBvcnQgdG1wZmlsZS4K
+WyAgNzY0Ljc3NzcwN10gb3ZlcmxheWZzOiB1cHBlciBmcyBkb2VzIG5vdCBzdXBwb3J0IFJFTkFN
+RV9XSElURU9VVC4KCkZyb20gdGhpcywgaXQncyBwcmV0dHkgY2xlYXIgd2h5IHRoZSB0ZXN0IGZh
+aWxzIC0tIG92ZXJsYXlmcyBjaGVja3MgdGhhdAp0aGUgdXBwZXIgZmlsZXN5c3RlbSAoZnVzZTJm
+cykgc3VwcG9ydHMgUkVOQU1FX1dISVRFT1VUIGFuZCBPX1RNUEZJTEUuCmZ1c2UyZnMgZG9lc24n
+dCBzdXBwb3J0IGVpdGhlciBvZiB0aGVzZSwgc28gdGhlIG1vdW50IGZhaWxzIGFuZCB0aGVuIHRo
+ZQp0ZXN0IGdvZXMgd2lsZC4KCkluc3RlYWQgb2YgZG9pbmcgdGhhdCwgbGV0J3MgZG8gYW4gaW5p
+dGlhbCB0ZXN0IG1vdW50IHdpdGggdGhlIHNhbWUKb3B0aW9ucyBhcyB0aGUgd29ya2VycywgYW5k
+IF9ub3RydW4gaWYgdGhhdCBmaXJzdCBtb3VudCBkb2Vzbid0IHN1Y2NlZWQuCgpGaXhlczogMjEw
+MDg5Y2ZhMDAzMTUgKCJnZW5lcmljOiB0ZXN0IGEgZGVhZGxvY2sgaW4geGZzX3JlbmFtZSB3aGVu
+IHdoaXRlaW5nIG91dCBmaWxlcyIpClN1Z2dlc3RlZC1ieTogIkRhcnJpY2sgSi4gV29uZyIgPGRq
+d29uZ0BrZXJuZWwub3JnPgpTaWduZWQtb2ZmLWJ5OiBBbWlyIEdvbGRzdGVpbiA8YW1pcjczaWxA
+Z21haWwuY29tPgotLS0KIHRlc3RzL2dlbmVyaWMvNjMxIHwgMzkgKysrKysrKysrKysrKysrKysr
+KysrKysrKysrKy0tLS0tLS0tLS0tCiAxIGZpbGUgY2hhbmdlZCwgMjggaW5zZXJ0aW9ucygrKSwg
+MTEgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvdGVzdHMvZ2VuZXJpYy82MzEgYi90ZXN0cy9n
+ZW5lcmljLzYzMQppbmRleCBjMzhhYjc3MS4uN2RjMzM1YWEgMTAwNzU1Ci0tLSBhL3Rlc3RzL2dl
+bmVyaWMvNjMxCisrKyBiL3Rlc3RzL2dlbmVyaWMvNjMxCkBAIC00Niw3ICs0Niw2IEBAIF9yZXF1
+aXJlX2V4dHJhX2ZzIG92ZXJsYXkKIAogX3NjcmF0Y2hfbWtmcyA+PiAkc2VxcmVzLmZ1bGwKIF9z
+Y3JhdGNoX21vdW50Ci1fc3VwcG9ydHNfZmlsZXR5cGUgJFNDUkFUQ0hfTU5UIHx8IF9ub3RydW4g
+Im92ZXJsYXlmcyB0ZXN0IHJlcXVpcmVzIGRfdHlwZSIKIAogbWtkaXIgJFNDUkFUQ0hfTU5UL2xv
+d2VyZGlyCiBta2RpciAkU0NSQVRDSF9NTlQvbG93ZXJkaXIxCkBAIC02NCw3ICs2Myw3IEBAIHN0
+b3Bfd29ya2VycygpIHsKIAlkb25lCiB9CiAKLXdvcmtlcigpIHsKK21vdW50X292ZXJsYXkoKSB7
+CiAJbG9jYWwgdGFnPSIkMSIKIAlsb2NhbCBtZXJnZWRpcj0iJFNDUkFUQ0hfTU5UL21lcmdlZCR0
+YWciCiAJbG9jYWwgbD0ibG93ZXJkaXI9JFNDUkFUQ0hfTU5UL2xvd2VyZGlyOiRTQ1JBVENIX01O
+VC9sb3dlcmRpcjEiCkBAIC03MiwyNSArNzEsNDMgQEAgd29ya2VyKCkgewogCWxvY2FsIHc9Indv
+cmtkaXI9JFNDUkFUQ0hfTU5UL3dvcmtkaXIkdGFnIgogCWxvY2FsIGk9ImluZGV4PW9mZiIKIAor
+CXJtIC1yZiAkU0NSQVRDSF9NTlQvbWVyZ2VkJHRhZworCXJtIC1yZiAkU0NSQVRDSF9NTlQvdXBw
+ZXJkaXIkdGFnCisJcm0gLXJmICRTQ1JBVENIX01OVC93b3JrZGlyJHRhZworCW1rZGlyICRTQ1JB
+VENIX01OVC9tZXJnZWQkdGFnCisJbWtkaXIgJFNDUkFUQ0hfTU5UL3dvcmtkaXIkdGFnCisJbWtk
+aXIgJFNDUkFUQ0hfTU5UL3VwcGVyZGlyJHRhZworCisJbW91bnQgLXQgb3ZlcmxheSBvdmVybGF5
+IC1vICIkbCwkdSwkdywkaSIgIiRtZXJnZWRpciIKK30KKwordW5tb3VudF9vdmVybGF5KCkgewor
+CWxvY2FsIHRhZz0iJDEiCisJbG9jYWwgbWVyZ2VkaXI9IiRTQ1JBVENIX01OVC9tZXJnZWQkdGFn
+IgorCisJX3VubW91bnQgJG1lcmdlZGlyCit9CisKK3dvcmtlcigpIHsKKwlsb2NhbCB0YWc9IiQx
+IgorCWxvY2FsIG1lcmdlZGlyPSIkU0NSQVRDSF9NTlQvbWVyZ2VkJHRhZyIKKwogCXRvdWNoICRT
+Q1JBVENIX01OVC93b3JrZXJzLyR0YWcKIAl3aGlsZSB0ZXN0IC1lICRTQ1JBVENIX01OVC9ydW5u
+aW5nOyBkbwotCQlybSAtcmYgJFNDUkFUQ0hfTU5UL21lcmdlZCR0YWcKLQkJcm0gLXJmICRTQ1JB
+VENIX01OVC91cHBlcmRpciR0YWcKLQkJcm0gLXJmICRTQ1JBVENIX01OVC93b3JrZGlyJHRhZwot
+CQlta2RpciAkU0NSQVRDSF9NTlQvbWVyZ2VkJHRhZwotCQlta2RpciAkU0NSQVRDSF9NTlQvd29y
+a2RpciR0YWcKLQkJbWtkaXIgJFNDUkFUQ0hfTU5UL3VwcGVyZGlyJHRhZwotCi0JCW1vdW50IC10
+IG92ZXJsYXkgb3ZlcmxheSAtbyAiJGwsJHUsJHcsJGkiICRtZXJnZWRpcgorCQltb3VudF9vdmVy
+bGF5ICR0YWcKIAkJbXYgJG1lcmdlZGlyL2V0Yy9hY2Nlc3MuY29uZiAkbWVyZ2VkaXIvZXRjL2Fj
+Y2Vzcy5jb25mLmJhawogCQl0b3VjaCAkbWVyZ2VkaXIvZXRjL2FjY2Vzcy5jb25mCiAJCW12ICRt
+ZXJnZWRpci9ldGMvYWNjZXNzLmNvbmYgJG1lcmdlZGlyL2V0Yy9hY2Nlc3MuY29uZi5iYWsKIAkJ
+dG91Y2ggJG1lcmdlZGlyL2V0Yy9hY2Nlc3MuY29uZgotCQlfdW5tb3VudCAkbWVyZ2VkaXIKKwkJ
+dW5tb3VudF9vdmVybGF5ICR0YWcKIAlkb25lCiAJcm0gLWYgJFNDUkFUQ0hfTU5UL3dvcmtlcnMv
+JHRhZwogfQogCittb3VudF9vdmVybGF5IGNoZWNrIHx8IFwKKwlfbm90cnVuICJjYW5ub3QgbW91
+bnQgb3ZlcmxheWZzIHdpdGggdW5kZXJseWluZyBmaWxlc3lzdGVtICRGU1RZUCIKK3VubW91bnRf
+b3ZlcmxheSBjaGVjaworCiBmb3IgaSBpbiAkKHNlcSAwICQoKDQgKyBMT0FEX0ZBQ1RPUikpICk7
+IGRvCiAJd29ya2VyICRpICYKIGRvbmUKLS0gCjIuNTEuMQoK
+--0000000000007ebfec0642e99dee--
