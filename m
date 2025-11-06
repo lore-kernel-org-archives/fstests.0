@@ -1,220 +1,170 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f45.google.com (mail-ed1-f45.google.com [209.85.208.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B83F9256C8B;
-	Wed,  5 Nov 2025 23:12:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1C433093CD
+	for <fstests@vger.kernel.org>; Thu,  6 Nov 2025 08:58:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762384349; cv=none; b=VtjRx2Mc7qvchBt2jemWxLf/Om2r+4otWIYmBi5/rWv0p6A95mmlE7LgVdz6x82ckdlxb4lSelv1rQ58hIO5A1B6p1cJMDQaMIAu8DFi0PIMglx5iZYIITyaELMX4Ncfwh64slwSCt5ud/sflCpZYubVK1b0xh3ltkcRC/QH54s=
+	t=1762419523; cv=none; b=JbuUfUWy2zGLoD2E22es7VFqME/T690tnZ/FcyOpUE331PDIITR8gsXtLVW02+kpXqq4P6wbW9c73jVJ5kv0Vvl1MnmoYlNC5Xo5kJdFJS/ud3+4aKNyNS3xMThSyfJyJ7S4GWbm9X8Hcu49tkwXV/JqVxdspTF0Gdajk9ysEJ4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762384349; c=relaxed/simple;
-	bh=1cjuJE9QmMmaUHWGKukSnkn4TGToV+0ncbBRmyJldH8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KsUc4m9zkc0t1nhVQ8TZ06p6mkHH+89MySEFC7/9EZe83Ohkc6niSImX9ct1RJIuJT/Dx87k1QQYgLo/WY9qymV4baD/aVjrDYTpZzWTETmmoORbY7ChgOo/QRxH7R6Mzwvy9o4qiMD3YLBrWocNLoPEC9I5HD8yeI1JGhB8n9g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OUuaD9v7; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1762419523; c=relaxed/simple;
+	bh=jZcI5+1Ss6TPvgkAAV76GUd62OE9+TiURdgHBGyzwoU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=srXERISAJE7ZvFTFWCqI+9V+4QCr/vzCKdWK+dCt2oh9v7+oCi1Rv+4SZYQJqwv8r4bkbNwsgMvTsGXWqhQDxpXqXbUtiLsVfcid3efVLd8qjadkYbIxP1Dk3npae+/tAkK+j+qmZSAAdic2G5YwJcNC4bjtdDd7JxNczpHDFKg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Sz6Qetui; arc=none smtp.client-ip=209.85.208.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OUuaD9v7"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3D89EC4CEF5;
-	Wed,  5 Nov 2025 23:12:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1762384349;
-	bh=1cjuJE9QmMmaUHWGKukSnkn4TGToV+0ncbBRmyJldH8=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=OUuaD9v72qus6Rt6N/co6eumb9jhkPNj0A1EfMDj3cuyzlrOqpk5HSqE4ymU421o/
-	 ZfEwxlTlgDPXaSohLBCV0LRJ7n/87SN7u8cLVGIKFtlYGbvWCVTYLoAzqm2Js41Kzu
-	 WSMo8CgoexQmW13tSdXcnwQsD8Js3st6R96Q9dskXK28DChJl/N3+Hi/YiYR3ch+65
-	 y86sJPK5mdk2g6Jx1J0zxe25ERKa48lFQ/7GqPfFN8tUYhdGOX0uHmeVhZOh8nqQR+
-	 fkWKYz3Afo/vsc0avO79qZyYYd5m0scyJJ6wy9d4fPRGzVNV4PtS03cD+h0lshexKw
-	 D6XVVT4JPpiAg==
-Date: Wed, 5 Nov 2025 15:12:28 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: zlang@redhat.com, neal@gompa.dev, fstests@vger.kernel.org,
-	linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-	joannelkoong@gmail.com, bernd@bsbernd.com
-Subject: Re: [PATCH 22/33] generic/631: don't run test if we can't mount
- overlayfs
-Message-ID: <20251105231228.GG196358@frogsfrogsfrogs>
-References: <176169819804.1433624.11241650941850700038.stgit@frogsfrogsfrogs>
- <176169820388.1433624.12333256574549591904.stgit@frogsfrogsfrogs>
- <aQNNZ6lxeMntTifa@amir-ThinkPad-T480>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Sz6Qetui"
+Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-640aaa89697so988252a12.3
+        for <fstests@vger.kernel.org>; Thu, 06 Nov 2025 00:58:41 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1762419520; x=1763024320; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ck0m8wFZB9XcmaKq8dytQ0ONqq6wW9ZN3Xn7nrKuDWc=;
+        b=Sz6QetuiUOHkA3tM+NddvSdrLzzIvP6a/nXsDbGgIdL56l1FE2G16HlcbU8kQ7PFLA
+         HfMSQVIEcrsCnz/+YSltV/EHvolDeDWRC10b/XRskjSzE61iY6qDxDSSaBFc2IM4HCyq
+         YnmVFnSY+7gslOmfhj7DAIydVezdn+1/AqgPUDUrjqDyHJqOuB4Zc/vhXcCO9pUcayiQ
+         Xx+/j33PiEOVlTNfTjhn+ocM5j9Z8HXjN5Pv6J2Ow4N3FaBHZdPesil5a2LODYrj6hhj
+         +pCMCg6QEm58dQEGpBnmYanvL3/HQeywq8Fgjy8nkYZpUSkFNWb1eXTH7xcj12VU1Cbm
+         iY7A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1762419520; x=1763024320;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=ck0m8wFZB9XcmaKq8dytQ0ONqq6wW9ZN3Xn7nrKuDWc=;
+        b=SNIlCNBy0dFxKcqMngBS1EldrBICL+0utbxEGpdabwSBdrB1G+1TWNJx3DJpMSCXWC
+         O3+4oy1vBcWOwrnObIDyD4QcpMazyL5NcPcOqQtLXPvm0S/u7fLKS6bubDWLEiWjsN6j
+         hmJf0dHdKJskundlpsSw6E+Zuybmuq1dW+M/VMajfauOfm7erkqradxVecooi0TpxXy5
+         iDj6MdwEEb9tIK/vlGX4lALBIEy5E9Axy+KoLccTuV6n99DhyqNISdB+/0RyXCGsdP30
+         OcWB0bCgVSqPEGjvww63Xa8gDxgNmvScsJfSfcOZo/KQIIKl/Vt5XGZc+werk+BngDTT
+         7HgA==
+X-Forwarded-Encrypted: i=1; AJvYcCVh0xpg9WpxKc29/q8m6VAwjm7FDC093B883KCrMa2An/VNTOfPnxb57GreaZD9k412w1NIjjx5@vger.kernel.org
+X-Gm-Message-State: AOJu0YyDW4y3Fi4szV7olkRsUYevEaAnp5ruq+IL3UWpcMJkw1z5kuP4
+	jYLvZkZTqR9CircbR40CsRhDrNF1gKR2hO/qJa41QLq7p9DjqzcZYVLDp1m9P40HFUEETeJLkVC
+	WmePI9Q7iAgo2y50u1Dedj9IE2l1FIv3kmt6B4d9B9Q==
+X-Gm-Gg: ASbGncvJSZ/Z/Ypt+Jl1zXavTs0nUAkyTmmxr3yBfjlOKNKC8bqLqbUhKDldDLmsW4U
+	o1h7kBdX+vCg0ltPNsiQ4dmX6Foq0XOpHrqca1Hz4Qno3ATQ0R58Wt+FJwww0jprbi2kqXTBDuQ
+	pil2sPyorUGfNlCqGueeS0GX435qVv3ErZqBa7lCPp7A0RSEGt94h/zAUxZngCSIEye7aDrTvW6
+	da5az8WG4iUqMuMfFMjquRc5DoW2sqYjhEA+FjGEtS6XLT1PD8X/zVPU//X/vfnJD7xMqJN2C7a
+	sd0DpPcMtqeIE5do3KI=
+X-Google-Smtp-Source: AGHT+IEHawD1xB6GQmLFykw+yW+B52duLhBw9u10AbP5tS5Ky2pbjNedqdkSkvdgV804kceaE8LvNF0HWEEdMMxXtws=
+X-Received: by 2002:a05:6402:4301:b0:634:ab36:3c74 with SMTP id
+ 4fb4d7f45d1cf-641058bbcafmr5577723a12.9.1762419519709; Thu, 06 Nov 2025
+ 00:58:39 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aQNNZ6lxeMntTifa@amir-ThinkPad-T480>
+References: <176169819804.1433624.11241650941850700038.stgit@frogsfrogsfrogs>
+ <176169819994.1433624.4365613323075287467.stgit@frogsfrogsfrogs>
+ <CAOQ4uxj7yaX5qLEs4BOJBJwybkHzv8WmNsUt0w_zehueOLLP9A@mail.gmail.com> <20251105225355.GC196358@frogsfrogsfrogs>
+In-Reply-To: <20251105225355.GC196358@frogsfrogsfrogs>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 6 Nov 2025 09:58:28 +0100
+X-Gm-Features: AWmQ_bl5E-AoHE-1AuDyZsQmdfkMyiI2gUbeKfvAWpOXmZ3IVywzlGkMPg_nxeA
+Message-ID: <CAOQ4uxjC+rFKrp3SMMabyBwSKOWDGGpVR7-5gyodGbH80ucnkA@mail.gmail.com>
+Subject: Re: [PATCH 01/33] misc: adapt tests to handle the fuse ext[234] drivers
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: zlang@redhat.com, neal@gompa.dev, fstests@vger.kernel.org, 
+	linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+	joannelkoong@gmail.com, bernd@bsbernd.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Oct 30, 2025 at 12:35:03PM +0100, Amir Goldstein wrote:
-> On Tue, Oct 28, 2025 at 06:26:09PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > This test fails on fuse2fs with the following:
-> > 
-> > +mount: /opt/merged0: wrong fs type, bad option, bad superblock on overlay, missing codepage or helper program, or other error.
-> > +       dmesg(1) may have more information after failed mount system call.
-> > 
-> > dmesg logs the following:
-> > 
-> > [  764.775172] overlayfs: upper fs does not support tmpfile.
-> > [  764.777707] overlayfs: upper fs does not support RENAME_WHITEOUT.
-> > 
-> > From this, it's pretty clear why the test fails -- overlayfs checks that
-> > the upper filesystem (fuse2fs) supports RENAME_WHITEOUT and O_TMPFILE.
-> > fuse2fs doesn't support either of these, so the mount fails and then the
-> > test goes wild.
-> > 
-> > Instead of doing that, let's do an initial test mount with the same
-> > options as the workers, and _notrun if that first mount doesn't succeed.
-> > 
-> > Fixes: 210089cfa00315 ("generic: test a deadlock in xfs_rename when whiteing out files")
-> > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> > ---
-> >  tests/generic/631 |   22 ++++++++++++++++++++++
-> >  1 file changed, 22 insertions(+)
-> > 
-> > 
-> > diff --git a/tests/generic/631 b/tests/generic/631
-> > index 72bf85e30bdd4b..64e2f911fdd10e 100755
-> > --- a/tests/generic/631
-> > +++ b/tests/generic/631
-> > @@ -64,6 +64,26 @@ stop_workers() {
-> >  	done
-> >  }
-> >  
-> > +require_overlayfs() {
-> > +	local tag="check"
-> > +	local mergedir="$SCRATCH_MNT/merged$tag"
-> > +	local l="lowerdir=$SCRATCH_MNT/lowerdir:$SCRATCH_MNT/lowerdir1"
-> > +	local u="upperdir=$SCRATCH_MNT/upperdir$tag"
-> > +	local w="workdir=$SCRATCH_MNT/workdir$tag"
-> > +	local i="index=off"
-> > +
-> > +	rm -rf $SCRATCH_MNT/merged$tag
-> > +	rm -rf $SCRATCH_MNT/upperdir$tag
-> > +	rm -rf $SCRATCH_MNT/workdir$tag
-> > +	mkdir $SCRATCH_MNT/merged$tag
-> > +	mkdir $SCRATCH_MNT/workdir$tag
-> > +	mkdir $SCRATCH_MNT/upperdir$tag
-> > +
-> > +	_mount -t overlay overlay -o "$l,$u,$w,$i" $mergedir || \
-> > +		_notrun "cannot mount overlayfs"
-> > +	umount $mergedir
-> > +}
-> > +
-> >  worker() {
-> >  	local tag="$1"
-> >  	local mergedir="$SCRATCH_MNT/merged$tag"
-> > @@ -91,6 +111,8 @@ worker() {
-> >  	rm -f $SCRATCH_MNT/workers/$tag
-> >  }
-> >  
-> > +require_overlayfs
-> > +
-> >  for i in $(seq 0 $((4 + LOAD_FACTOR)) ); do
-> >  	worker $i &
-> >  done
-> > 
-> 
-> I agree in general, but please consider this (untested) cleaner patch
+On Wed, Nov 5, 2025 at 11:53=E2=80=AFPM Darrick J. Wong <djwong@kernel.org>=
+ wrote:
+>
+> On Thu, Oct 30, 2025 at 10:51:06AM +0100, Amir Goldstein wrote:
+> > On Wed, Oct 29, 2025 at 2:22=E2=80=AFAM Darrick J. Wong <djwong@kernel.=
+org> wrote:
+> > >
+> > > From: Darrick J. Wong <djwong@kernel.org>
+> > >
+> > > It would be useful to be able to run fstests against the userspace
+> > > ext[234] driver program fuse2fs.  A convention (at least on Debian)
+> > > seems to be to install fuse drivers as /sbin/mount.fuse.XXX so that
+> > > users can run "mount -t fuse.XXX" to start a fuse driver for a
+> > > disk-based filesystem type XXX.
+> > >
+> > > Therefore, we'll adopt the practice of setting FSTYP=3Dfuse.ext4 to
+> > > test ext4 with fuse2fs.  Change all the library code as needed to han=
+dle
+> > > this new type alongside all the existing ext[234] checks, which seems=
+ a
+> > > little cleaner than FSTYP=3Dfuse FUSE_SUBTYPE=3Dext4, which also woul=
+d
+> > > require even more treewide cleanups to work properly because most
+> > > fstests code switches on $FSTYP alone.
+> > >
+> >
+> > I agree that FSTYP=3Dfuse.ext4 is cleaner than
+> > FSTYP=3Dfuse FUSE_SUBTYPE=3Dext4
+> > but it is not extendable to future (e.g. fuse.xfs)
+> > and it is still a bit ugly.
+> >
+> > Consider:
+> > FSTYP=3Dfuse.ext4
+> > MKFSTYP=3Dext4
+> >
+> > I think this is the correct abstraction -
+> > fuse2fs/ext4 are formatted that same and mounted differently
+> >
+> > See how some of your patch looks nicer and naturally extends to
+> > the imaginary fuse.xfs...
+>
+> Maybe I'd rather do it the other way around for fuse4fs:
+>
+> FSTYP=3Dext4
+> MOUNT_FSTYP=3Dfuse.ext4
+>
 
-Yes, this works too.  Since this is your code, could you send it to the
-list with a proper commit message (or even just copy mine) and then I
-can ack it?
+Sounds good. Will need to see the final patch.
 
---D
+> (obviously, MOUNT_FSTYP=3D$FSTYP if the test runner hasn't overridden it)
+>
+> Where $MOUNT_FSTYP is what you pass to mount -t and what you'd see in
+> /proc/mounts.  The only weirdness with that is that some of the helpers
+> will end up with code like:
+>
+>         case $FSTYP in
+>         ext4)
+>                 # do ext4 stuff
+>                 ;;
+>         esac
+>
+>         case $MOUNT_FSTYP in
+>         fuse.ext4)
+>                 # do fuse4fs stuff that overrides ext4
+>                 ;;
+>         esac
+>
+> which would be a little weird.
+>
 
-> Thanks,
-> Amir.
-> 
+Sounds weird, but there is always going to be weirdness
+somewhere - need to pick the least weird result or most
+easy to understand code IMO.
 
-> From 470e7e26dc962b58ee1aabd578e63fe7a0df8cdd Mon Sep 17 00:00:00 2001
-> From: Amir Goldstein <amir73il@gmail.com>
-> Date: Thu, 30 Oct 2025 12:24:21 +0100
-> Subject: [PATCH] generic/631: don't run test if we can't mount overlayfs
-> 
-> ---
->  tests/generic/631 | 39 ++++++++++++++++++++++++++++-----------
->  1 file changed, 28 insertions(+), 11 deletions(-)
-> 
-> diff --git a/tests/generic/631 b/tests/generic/631
-> index c38ab771..7dc335aa 100755
-> --- a/tests/generic/631
-> +++ b/tests/generic/631
-> @@ -46,7 +46,6 @@ _require_extra_fs overlay
->  
->  _scratch_mkfs >> $seqres.full
->  _scratch_mount
-> -_supports_filetype $SCRATCH_MNT || _notrun "overlayfs test requires d_type"
->  
->  mkdir $SCRATCH_MNT/lowerdir
->  mkdir $SCRATCH_MNT/lowerdir1
-> @@ -64,7 +63,7 @@ stop_workers() {
->  	done
->  }
->  
-> -worker() {
-> +mount_overlay() {
->  	local tag="$1"
->  	local mergedir="$SCRATCH_MNT/merged$tag"
->  	local l="lowerdir=$SCRATCH_MNT/lowerdir:$SCRATCH_MNT/lowerdir1"
-> @@ -72,25 +71,43 @@ worker() {
->  	local w="workdir=$SCRATCH_MNT/workdir$tag"
->  	local i="index=off"
->  
-> +	rm -rf $SCRATCH_MNT/merged$tag
-> +	rm -rf $SCRATCH_MNT/upperdir$tag
-> +	rm -rf $SCRATCH_MNT/workdir$tag
-> +	mkdir $SCRATCH_MNT/merged$tag
-> +	mkdir $SCRATCH_MNT/workdir$tag
-> +	mkdir $SCRATCH_MNT/upperdir$tag
-> +
-> +	mount -t overlay overlay -o "$l,$u,$w,$i" "$mergedir"
-> +}
-> +
-> +unmount_overlay() {
-> +	local tag="$1"
-> +	local mergedir="$SCRATCH_MNT/merged$tag"
-> +
-> +	_unmount $mergedir
-> +}
-> +
-> +worker() {
-> +	local tag="$1"
-> +	local mergedir="$SCRATCH_MNT/merged$tag"
-> +
->  	touch $SCRATCH_MNT/workers/$tag
->  	while test -e $SCRATCH_MNT/running; do
-> -		rm -rf $SCRATCH_MNT/merged$tag
-> -		rm -rf $SCRATCH_MNT/upperdir$tag
-> -		rm -rf $SCRATCH_MNT/workdir$tag
-> -		mkdir $SCRATCH_MNT/merged$tag
-> -		mkdir $SCRATCH_MNT/workdir$tag
-> -		mkdir $SCRATCH_MNT/upperdir$tag
-> -
-> -		mount -t overlay overlay -o "$l,$u,$w,$i" $mergedir
-> +		mount_overlay $tag
->  		mv $mergedir/etc/access.conf $mergedir/etc/access.conf.bak
->  		touch $mergedir/etc/access.conf
->  		mv $mergedir/etc/access.conf $mergedir/etc/access.conf.bak
->  		touch $mergedir/etc/access.conf
-> -		_unmount $mergedir
-> +		unmount_overlay $tag
->  	done
->  	rm -f $SCRATCH_MNT/workers/$tag
->  }
->  
-> +mount_overlay check || \
-> +	_notrun "cannot mount overlayfs with underlying filesystem $FSTYP"
-> +unmount_overlay check
-> +
->  for i in $(seq 0 $((4 + LOAD_FACTOR)) ); do
->  	worker $i &
->  done
-> -- 
-> 2.51.1
-> 
+> _scratch_mount would end up with:
+>
+>         $MOUNT_PROG -t $MOUNT_FSTYP ...
+>
+> and detecting it would be
+>
+>         grep -q -w $MOUNT_FSTYP /proc/mounts || _fail "booooo"
+>
+> Hrm?
 
+Those look obviously nice.
+
+Maybe the answer is to have all MOUNT_FSTYP, MKFS_FSTYP
+and FSTYP and use whichever best fits in the context.
+
+Thanks,
+Amir.
