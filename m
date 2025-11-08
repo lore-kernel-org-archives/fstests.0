@@ -1,212 +1,78 @@
-Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E26A171C9
-	for <fstests@vger.kernel.org>; Fri,  7 Nov 2025 07:51:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 46AF01A3BD7
+	for <fstests@vger.kernel.org>; Sat,  8 Nov 2025 14:01:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762501875; cv=none; b=Uu7WZ9rc/imZY9aGDHKrvxD0qBPb6M81U3CchC+SEC4CfDTfw9nrcM3Wduh2KrqbfxOOdkQZnrRj2CkVtixerC35iflIZO2GH7FF/ptzdJoW3qUfoCngqEQigGKS1ywD3ZyHlVhxZyW1s/ZdK5TLoUMvUwGRdMIp38cQ5+I20yU=
+	t=1762610492; cv=none; b=QTJjD+DVzwdzbC2jWsCYL7R1158jt7rWg3f2jkr0fh1I1eimjKM9TXMa2xqLVOgaehX+y4ijtITwXrIIZCXr2pL1ovYu1JzUwn/ZSnlUzXJMVH2VuJIo5vY1UXaFUQls2dVMmrQ/r/ypM2KU6qk7WbYzA4thAWSM26ECWBE7hsw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762501875; c=relaxed/simple;
-	bh=DBkxoSNlKaSPUMK4zellr7NQI5sAgx6z9H/pZ4MGVqI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ZNpbK1mhTGlpVj1AYloiBZIbGgr57vJcsHeJS0PYTuDIRFvfqi5Zoy2oyjmSr34lt9c2HMMCrmzDdD2WGMpeg9ssuE1yqcKj3w8Q7g+a6R66JEH1Bh1zOQuVFXwxd2gn/+gnEh7n6+OzlUIrlKwjaOxU5IA1Z8drtKtDOZV1foI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=HsK+QnaS; arc=none smtp.client-ip=209.85.208.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1762610492; c=relaxed/simple;
+	bh=CNJoTmBYU76d3qdtzuMHrbQpge/KdZ6/OsOyxVTEXWE=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Weoh6pJqeyr4u3P3yhIrBTseGLGde9QFnkvI2ihVDQF00kG2b37NS/xA3UUaQOqmId893yvhbCjTC4J0Y+/48ItXTz+etOvPyUWvfPVuhud8ogj+5NXiTUOgP1/oEab5TBgsXzwYKXdbQoE84v7pCyqqNTQcjmmYt7RhjD7Pwsg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=IKPY4bm9; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HsK+QnaS"
-Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-640c48b3b90so811994a12.0
-        for <fstests@vger.kernel.org>; Thu, 06 Nov 2025 23:51:12 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1762501871; x=1763106671; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=gypdu32AjBdl8JRh/paj6OCLfQy8ztkLDfHJejFEMqc=;
-        b=HsK+QnaS3sPxVxk2m3RzVCU2iYIyNIc5wvyVaCv24AUeONkHsTfrSk8lNa4Jb4QQFL
-         5dR+H8N2sTQ3cf1WWLirpqmLue1oB3LfW4aRXBKDU0iBKiPPBYHMEhkVwdGYjDOKNxTd
-         TrOSZAA4k9wUBFklMWGF45+1uQObdRWWMIec4W4HcxcKsvJJQYrue2iAzlYshrj1YsLL
-         q9p68hUnqC5ArqOUb9bsCKL0f97NwUNIbMhhU8l3EduOpqtzjVoGVBS7dkOsvK7B5tCU
-         P9f8bIq1ZAnk2t/t+h8jR4nOVRVJSuw4jOxou26H3NPehG0Cwbp60DT1hYQwK31A1fZi
-         unBw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1762501871; x=1763106671;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=gypdu32AjBdl8JRh/paj6OCLfQy8ztkLDfHJejFEMqc=;
-        b=BcBX+ut4PPj7HcyNrP8Bhakgn7T1Kc2VoKBsuXUpoyRsTLik9LINBA9aL86FHLjp1S
-         mB2p+c5fP4VxFvnekzjL37yK1ivAjyjvnHDbcAPt+sgGPdmZHrAeIfJDVnrGmPEY8dT9
-         IFtkDwWdmP4U3HdlqQzsI3vkKyIb1/zRTurw+tAk2/9AHCBRtnnCObSKA3z9KnQ69V91
-         tBuFinaKjQAKPhT3X3hXLxdA3lNmZB9wHCmTrqbmXqwhXN8yDVJEjkgJi8vaXO/eIVTB
-         wvzKsvEiQd3WFR+usyq3e8cFmDeU2eoU6PUT9Fd40SNlZPOWS16a4+QLmLbnhVsKS45U
-         CUsg==
-X-Forwarded-Encrypted: i=1; AJvYcCUVvfrNib5LbQ3R5H0lKKDikXLhDcloe4VUznrEP5xCSdz7HiWui4pb6wj+V6xeR+7NzP/2+JBG@vger.kernel.org
-X-Gm-Message-State: AOJu0YwFa1ykLTm34kFqq218zZjrFOGKXIpouyXk0x5bVkOuJlpHmqTn
-	BhSu49XUGXa0RdWaTv1TBT2sZtO8GjnpEHf3ABdf7Ik/m7dJGOnc3nl5IBtT+9RGhoLPNQNnEEx
-	lCbgmx4Jm6SgAu/x77L8bWDdkVjefadE=
-X-Gm-Gg: ASbGnculmh7dMQp23fe7jD9YNosOW7clQWOA2PnIQ145Cyq22obGHoKa4cHLxuMdeQO
-	pTKdBjWKpWBs9ov8l30oTRsb7Xlf7az6odTOGl4st43Y9wqt2tjXjt6ME8HYw0b9vcJnd9enWSu
-	FuoG82Wp8EtKI2o41NDzA39xipouZEd88WRrAXSGJtkb51+TuWbHoWyOVqTlWnvGTnR7AedcsZs
-	v7856bN01zcy0LLnQw57dPdudkEJMl3m9PWeSsiKfxA9/1KHPPHP5h5DoTNdIfoIkdV7TEcAa4N
-	Y51iYP258n9ujaLubJY=
-X-Google-Smtp-Source: AGHT+IE0wn+JgXGDP+/X23JJiJR87uZ3bU9Eku9RD/Xf6SIQu9XEELdfWfIJb6UWtw6QwSr76TEb6t86wyo+1imQhyo=
-X-Received: by 2002:a05:6402:51c6:b0:640:ca67:848d with SMTP id
- 4fb4d7f45d1cf-6413eeb9fb6mr2107882a12.8.1762501870320; Thu, 06 Nov 2025
- 23:51:10 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="IKPY4bm9"
+Received: from trampoline.thunk.org (pool-173-48-122-154.bstnma.fios.verizon.net [173.48.122.154])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 5A8E1HK1015238
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sat, 8 Nov 2025 09:01:18 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1762610479; bh=BNBVr38ff5e6t5oymiiuzp16Ba/4xNCIhgf/dMIqUZ4=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=IKPY4bm92ZJKv/V3v2BmYZzKzTXUZ7vZZLP0SAA6GazsILZzfi+mbLLGTDs88J0Oi
+	 x9B5Wj4gFcnqH1jHKJOhNJ9wCAdAGAPthaqHFM7476pxK96d/e87sGgOvV49nMqqyh
+	 PGAeISm0VeUEmgvEn2FUC1PCQAeSyXgK/a308VGvlDB5/wxfMwP30s/KKg77lRTbTj
+	 ufC8lUQypDGKLyF243O/wDwlmDmyHkx3Is1jLQDUzuulbBhVSouSCbKLAJ7psslQt3
+	 YK3ShcGolTHgasAUltXSkfyh2nOk165ofkKsmlVUsr1mxltQFGjfemUeJX16Vlq+xA
+	 Fv3q/TJU9xpHw==
+Received: by trampoline.thunk.org (Postfix, from userid 15806)
+	id C5DCE2E00D9; Sat, 08 Nov 2025 09:01:16 -0500 (EST)
+Date: Sat, 8 Nov 2025 09:01:16 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "wqu@suse.com" <wqu@suse.com>,
+        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
+        "glaubitz@physik.fu-berlin.de" <glaubitz@physik.fu-berlin.de>,
+        "frank.li@vivo.com" <frank.li@vivo.com>,
+        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>
+Subject: Re: [RFC] Why generic/073 is generic but not btrfs specific?
+Message-ID: <20251108140116.GB2988753@mit.edu>
+References: <92ac4eb8cdc47ddc99edeb145e67882259d3aa0e.camel@ibm.com>
+ <fb616f30-5a56-4436-8dc7-0d8fe2b4d772@suse.com>
+ <06b369cd4fdf2dfb1cfe0b43640dbe6b05be368a.camel@ibm.com>
+ <a43fd07d-88e6-473d-a0be-3ba3203785e6@suse.com>
+ <ee43d81115d91ceb359f697162f21ce50cee29ff.camel@ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <176169819804.1433624.11241650941850700038.stgit@frogsfrogsfrogs>
- <176169819994.1433624.4365613323075287467.stgit@frogsfrogsfrogs>
- <CAOQ4uxj7yaX5qLEs4BOJBJwybkHzv8WmNsUt0w_zehueOLLP9A@mail.gmail.com>
- <20251105225355.GC196358@frogsfrogsfrogs> <CAOQ4uxjC+rFKrp3SMMabyBwSKOWDGGpVR7-5gyodGbH80ucnkA@mail.gmail.com>
- <20251106231215.GC196366@frogsfrogsfrogs>
-In-Reply-To: <20251106231215.GC196366@frogsfrogsfrogs>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 7 Nov 2025 08:50:58 +0100
-X-Gm-Features: AWmQ_bka4NhoB4_0GzsMDp2JL8GmrqvBcI2VdjLITQEvTx--8zNv2vTizrwbetI
-Message-ID: <CAOQ4uxjBpm_2cUDHyU72pSRc5KLDNm9tRgGYsoaAtp6tM6yFwg@mail.gmail.com>
-Subject: Re: [PATCH 01/33] misc: adapt tests to handle the fuse ext[234] drivers
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, neal@gompa.dev, fstests@vger.kernel.org, 
-	linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
-	joannelkoong@gmail.com, bernd@bsbernd.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ee43d81115d91ceb359f697162f21ce50cee29ff.camel@ibm.com>
 
-On Fri, Nov 7, 2025 at 12:12=E2=80=AFAM Darrick J. Wong <djwong@kernel.org>=
- wrote:
->
-> On Thu, Nov 06, 2025 at 09:58:28AM +0100, Amir Goldstein wrote:
-> > On Wed, Nov 5, 2025 at 11:53=E2=80=AFPM Darrick J. Wong <djwong@kernel.=
-org> wrote:
-> > >
-> > > On Thu, Oct 30, 2025 at 10:51:06AM +0100, Amir Goldstein wrote:
-> > > > On Wed, Oct 29, 2025 at 2:22=E2=80=AFAM Darrick J. Wong <djwong@ker=
-nel.org> wrote:
-> > > > >
-> > > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > >
-> > > > > It would be useful to be able to run fstests against the userspac=
-e
-> > > > > ext[234] driver program fuse2fs.  A convention (at least on Debia=
-n)
-> > > > > seems to be to install fuse drivers as /sbin/mount.fuse.XXX so th=
-at
-> > > > > users can run "mount -t fuse.XXX" to start a fuse driver for a
-> > > > > disk-based filesystem type XXX.
-> > > > >
-> > > > > Therefore, we'll adopt the practice of setting FSTYP=3Dfuse.ext4 =
-to
-> > > > > test ext4 with fuse2fs.  Change all the library code as needed to=
- handle
-> > > > > this new type alongside all the existing ext[234] checks, which s=
-eems a
-> > > > > little cleaner than FSTYP=3Dfuse FUSE_SUBTYPE=3Dext4, which also =
-would
-> > > > > require even more treewide cleanups to work properly because most
-> > > > > fstests code switches on $FSTYP alone.
-> > > > >
-> > > >
-> > > > I agree that FSTYP=3Dfuse.ext4 is cleaner than
-> > > > FSTYP=3Dfuse FUSE_SUBTYPE=3Dext4
-> > > > but it is not extendable to future (e.g. fuse.xfs)
-> > > > and it is still a bit ugly.
-> > > >
-> > > > Consider:
-> > > > FSTYP=3Dfuse.ext4
-> > > > MKFSTYP=3Dext4
-> > > >
-> > > > I think this is the correct abstraction -
-> > > > fuse2fs/ext4 are formatted that same and mounted differently
-> > > >
-> > > > See how some of your patch looks nicer and naturally extends to
-> > > > the imaginary fuse.xfs...
-> > >
-> > > Maybe I'd rather do it the other way around for fuse4fs:
-> > >
-> > > FSTYP=3Dext4
-> > > MOUNT_FSTYP=3Dfuse.ext4
-> > >
-> >
-> > Sounds good. Will need to see the final patch.
-> >
-> > > (obviously, MOUNT_FSTYP=3D$FSTYP if the test runner hasn't overridden=
- it)
-> > >
-> > > Where $MOUNT_FSTYP is what you pass to mount -t and what you'd see in
-> > > /proc/mounts.  The only weirdness with that is that some of the helpe=
-rs
-> > > will end up with code like:
-> > >
-> > >         case $FSTYP in
-> > >         ext4)
-> > >                 # do ext4 stuff
-> > >                 ;;
-> > >         esac
-> > >
-> > >         case $MOUNT_FSTYP in
-> > >         fuse.ext4)
-> > >                 # do fuse4fs stuff that overrides ext4
-> > >                 ;;
-> > >         esac
-> > >
-> > > which would be a little weird.
-> > >
-> >
-> > Sounds weird, but there is always going to be weirdness
-> > somewhere - need to pick the least weird result or most
-> > easy to understand code IMO.
-> >
-> > > _scratch_mount would end up with:
-> > >
-> > >         $MOUNT_PROG -t $MOUNT_FSTYP ...
-> > >
-> > > and detecting it would be
-> > >
-> > >         grep -q -w $MOUNT_FSTYP /proc/mounts || _fail "booooo"
-> > >
-> > > Hrm?
-> >
-> > Those look obviously nice.
-> >
-> > Maybe the answer is to have all MOUNT_FSTYP, MKFS_FSTYP
-> > and FSTYP and use whichever best fits in the context.
->
-> Hrmm well I would /like/ avoid adding MKFS_FSTYP since ext4 is ext4, no
-> matter whether we're using the kernel or fuse42fs.  Do you have a use
-> case for adding such a thing?
->
+On Thu, Nov 06, 2025 at 10:29:46PM +0000, Viacheslav Dubeyko wrote:
+> > > Technically speaking, HFS+ is journaling file system in Apple implementation.
+> > > But we don't have this functionality implemented and fully supported on Linux
+> > > kernel side. Potentially, it can be done but currently we haven't such
+> > > functionality yet. So, HFS/HFS+ doesn't use journaling on Linux kernel side  and
+> > > no journal replay could happen. :)
 
-No use case, beyond more flexibility in writing clear code.
-I agree with Zorro that ext4 is not only ext4.
-ext4 is ext4 on-disk format and it is ext4 driver and this ambiguity
-can be a source of confusion sometimes.
+If the implementation of HJFJS+ in Linux doesn't support metadata
+consistency after a crash, I'd suggest adding HFS+ to
+_has_metadat_journalling().  This will suppress a number of test
+failures so you can focus on other issues which arguably is probably
+higher priority for you to fix.
 
-I don't see the problem with defining MKFS_FSTYP
-the controversial part IMO is what FSTYP should be
-referring to, the flesh or the spirit...
+After you get HFS+ to run clean with the journalling tesets skipped,
+then you can focus on adding that guarantee at that point, perhaps?
 
-Trying to think up a use case, ntfs has at least 3 Linux drivers
-that I know of (ntfs,ntfs3 and fuse.ntfs-3g) and another one that was recen=
-tly
-proposed (ntfsplus). At least some have also their matching mkfs
-and should be able to cross mount an ntfs formatted by other mkfs.
-
-So testing any variation of MKFS_FSTYP and MOUNT_FSTYP
-makes sense.
-
-Using MKFS_FSTYP in mkfs and fsck helpers and using MOUNT_FSTYP
-in mount helpers is always good practice IMO.
-
-My intuition is that FSTYP should be defined to whichever
-results in less churn and less weird looking code, but I don't know
-which one that would be.
-
-Thanks,
-Amir.
+     	     	      	     	  - Ted
