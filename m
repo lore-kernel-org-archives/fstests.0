@@ -1,78 +1,437 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 46AF01A3BD7
-	for <fstests@vger.kernel.org>; Sat,  8 Nov 2025 14:01:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C54C931328A
+	for <fstests@vger.kernel.org>; Mon, 10 Nov 2025 18:10:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762610492; cv=none; b=QTJjD+DVzwdzbC2jWsCYL7R1158jt7rWg3f2jkr0fh1I1eimjKM9TXMa2xqLVOgaehX+y4ijtITwXrIIZCXr2pL1ovYu1JzUwn/ZSnlUzXJMVH2VuJIo5vY1UXaFUQls2dVMmrQ/r/ypM2KU6qk7WbYzA4thAWSM26ECWBE7hsw=
+	t=1762798220; cv=none; b=g0oaMu3jYpmPepOeLHzfwJGb9Kt4upGebP22C/z8DZf5J00HVSroKN3ZnA/TVNJj+6lTLvdsFwF3HfjyZTlUNjTeJvGfLHSyQEc06V2cRVT7g7XHVWQ5ODqqbHq9lJxdUJHIEm682d7CUBS2Pnw64537rQ4nkfnxKBvSm0qPvQo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762610492; c=relaxed/simple;
-	bh=CNJoTmBYU76d3qdtzuMHrbQpge/KdZ6/OsOyxVTEXWE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Weoh6pJqeyr4u3P3yhIrBTseGLGde9QFnkvI2ihVDQF00kG2b37NS/xA3UUaQOqmId893yvhbCjTC4J0Y+/48ItXTz+etOvPyUWvfPVuhud8ogj+5NXiTUOgP1/oEab5TBgsXzwYKXdbQoE84v7pCyqqNTQcjmmYt7RhjD7Pwsg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=IKPY4bm9; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1762798220; c=relaxed/simple;
+	bh=7A/klNTfb+YT/8QV/hZyS+urovDgy5B3ogLjInLQ19o=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=YcE0pon78+Bh8gaXCm7N9fcRO/g/+dQQ8DcW5O6EUrkeKJ3rUL44dOw2RQ+7tbkIZDniq5PY8ino2oxiRL/PuvqqBMZiGf0FYVjxPRi2ye3+/mh4fj3iD5jEULKh52yZ2Wp0EtgUzb6knNMjQN21sYyzsHUBS0l/9sZjlh2HUOs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=bjeFNZDD; arc=none smtp.client-ip=209.85.218.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="IKPY4bm9"
-Received: from trampoline.thunk.org (pool-173-48-122-154.bstnma.fios.verizon.net [173.48.122.154])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 5A8E1HK1015238
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Sat, 8 Nov 2025 09:01:18 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1762610479; bh=BNBVr38ff5e6t5oymiiuzp16Ba/4xNCIhgf/dMIqUZ4=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=IKPY4bm92ZJKv/V3v2BmYZzKzTXUZ7vZZLP0SAA6GazsILZzfi+mbLLGTDs88J0Oi
-	 x9B5Wj4gFcnqH1jHKJOhNJ9wCAdAGAPthaqHFM7476pxK96d/e87sGgOvV49nMqqyh
-	 PGAeISm0VeUEmgvEn2FUC1PCQAeSyXgK/a308VGvlDB5/wxfMwP30s/KKg77lRTbTj
-	 ufC8lUQypDGKLyF243O/wDwlmDmyHkx3Is1jLQDUzuulbBhVSouSCbKLAJ7psslQt3
-	 YK3ShcGolTHgasAUltXSkfyh2nOk165ofkKsmlVUsr1mxltQFGjfemUeJX16Vlq+xA
-	 Fv3q/TJU9xpHw==
-Received: by trampoline.thunk.org (Postfix, from userid 15806)
-	id C5DCE2E00D9; Sat, 08 Nov 2025 09:01:16 -0500 (EST)
-Date: Sat, 8 Nov 2025 09:01:16 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "wqu@suse.com" <wqu@suse.com>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-        "glaubitz@physik.fu-berlin.de" <glaubitz@physik.fu-berlin.de>,
-        "frank.li@vivo.com" <frank.li@vivo.com>,
-        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>
-Subject: Re: [RFC] Why generic/073 is generic but not btrfs specific?
-Message-ID: <20251108140116.GB2988753@mit.edu>
-References: <92ac4eb8cdc47ddc99edeb145e67882259d3aa0e.camel@ibm.com>
- <fb616f30-5a56-4436-8dc7-0d8fe2b4d772@suse.com>
- <06b369cd4fdf2dfb1cfe0b43640dbe6b05be368a.camel@ibm.com>
- <a43fd07d-88e6-473d-a0be-3ba3203785e6@suse.com>
- <ee43d81115d91ceb359f697162f21ce50cee29ff.camel@ibm.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bjeFNZDD"
+Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-b727f452fffso2061266b.1
+        for <fstests@vger.kernel.org>; Mon, 10 Nov 2025 10:10:12 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1762798209; x=1763403009; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=qm1ipUFEbh/EJjaySV8xjvMxbZYgzFThW1ifj+hci64=;
+        b=bjeFNZDDxAWFD2vij8VdLsrKbI/eo9lC7mbnK8+6iNbwfa3f9tutw22ZV+NS1imrX4
+         DMOrEcs9cXeQJois7/jRJL4OwCXYAKDAYhO0+q1jNWLXjk0R7f4YutYWdeJT0tD0Vi62
+         AK7O7lBbhAWImROW7YozkP4P/OxLzZBucyGmlUDB8AcIGXMB56KqEXTCaoyJUvXk9eq9
+         tvlwSMkQA64oIYMtm8hnF0CdDUrfsPoyUw4Nvf+TtWUGX9x1J7DMYKLf6cbADXVYdxrd
+         qToWt9D9r1elHzvdLs/ExWd17M5M2xByb4hq9nYNifYPAnbm7DlW7rQyVYH8VTk/HLYR
+         +Rbg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1762798209; x=1763403009;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=qm1ipUFEbh/EJjaySV8xjvMxbZYgzFThW1ifj+hci64=;
+        b=JkHNrgEPK4wYfD3Ftk6LrYBae9e2/sDmqK0dYvI2MCHzpr5tivZWg17Z0N8orbokhn
+         GlINHOkZspHfLHaKhMv0DJ/y2wQUazcKdvbJSs1ZPP79AyIycWFaHA47M13PN9R0sg8Y
+         cvqaWmQxJsFftpJ4Fu6RSStLrQSTJZQw+Tkkuedgy13rP4yKzhu31nIoaSEC/dn4X6pS
+         ebvuh8bK86nQZPRpsZ6OKOU22PjHpclAlNB10rnOcQX5mFH8sXO9xCkaZgb3Iv5PAuSn
+         dlh8qDs3aqr5OYmRT7Pyzmqy70+d33UoMPIhVkqKJzyhpjwUZPAvmw8wQNIMm5riB2w6
+         uVVA==
+X-Forwarded-Encrypted: i=1; AJvYcCWxMObK/z2CjU+yHtIeYC8BtQdlaRyy7dR3wX6XZ4US3B4MoWEtHYhSmAQchcgHQHBot+0KzP+u@vger.kernel.org
+X-Gm-Message-State: AOJu0YzJOOzYnCBLo2ddE2BNF7oj3wGwuiW7+5y6M6MLiWbSicaaDzZZ
+	gnbUzKv2//JCYXgc7oZbwbg5mh6tPu20o7CLKkTlX84hlIEheMSDS91uk8455a2hEAqan8eUgq8
+	JgOzKc++He4bwtneI78vYx6L/4lM4y/s=
+X-Gm-Gg: ASbGncsVJEZsUw+rZHDCGqO3NNs0ftoIlO8eYyjH5hcMlXrt2OjZ34xuz/2nVmXd2Hn
+	lVadWWeociybXYnAJts+2xztXHh20+SKBkgy3SW8C4maXQhPNx4FBmXd3CBqTGdH6wIWQAJOn1q
+	KkFJ54MV6WeefYkGrRkB+GTEVUxiQr4obZn4R7gFef7daDKBWpPp18IuW03bYVrXPaZyBGzseLl
+	nk2+0k9ydPVjNu+OcVda3N7JBVdSBuAl4oRmNMuTQJOXbKaeSE8MJ36PSyJx8mYfJhqVsjiv+86
+	o09mSrYXjt6SVEbsoqU=
+X-Google-Smtp-Source: AGHT+IE9RQ43bxTeJulVyOuNdqaDcNxUbFWXXka/BBJZ48N/in36UvSy9kHZh0gvmBt8RT82ewTHZRiGgWl0tNf1oCk=
+X-Received: by 2002:a17:907:7e88:b0:b72:6d68:6663 with SMTP id
+ a640c23a62f3a-b731da47f5dmr30594566b.31.1762798209172; Mon, 10 Nov 2025
+ 10:10:09 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ee43d81115d91ceb359f697162f21ce50cee29ff.camel@ibm.com>
+References: <20251017170649.2092386-1-amir73il@gmail.com>
+In-Reply-To: <20251017170649.2092386-1-amir73il@gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Mon, 10 Nov 2025 19:09:57 +0100
+X-Gm-Features: AWmQ_bmJvBv64mZ2hcxf8Ude9CefbMAaAwDMgeRenHoZ2qoqHTt4RKvwPpXm_68
+Message-ID: <CAOQ4uxjj3J0exNb4ik0h4Q2P_J+pRm8qVw2jmoGmzopc+1zaiw@mail.gmail.com>
+Subject: Re: [PATCH] overlay: add tests for casefolded layers
+To: Zorro Lang <zlang@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Christian Brauner <brauner@kernel.org>, 
+	=?UTF-8?Q?Andr=C3=A9_Almeida?= <andrealmeid@igalia.com>, 
+	linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Nov 06, 2025 at 10:29:46PM +0000, Viacheslav Dubeyko wrote:
-> > > Technically speaking, HFS+ is journaling file system in Apple implementation.
-> > > But we don't have this functionality implemented and fully supported on Linux
-> > > kernel side. Potentially, it can be done but currently we haven't such
-> > > functionality yet. So, HFS/HFS+ doesn't use journaling on Linux kernel side  and
-> > > no journal replay could happen. :)
+On Fri, Oct 17, 2025 at 7:06=E2=80=AFPM Amir Goldstein <amir73il@gmail.com>=
+ wrote:
+>
+> Overalyfs did not allow mounting layers with casefold capable fs
+> until kernel v6.17-rc1 and did not allow casefold enabled layers
+> until kernel v6.18-rc1.
+>
+> Since kernel v6.18-rc1, overalyfs allows this kind of setups,
+> as long as the layers have consistent encoding and all the directories
+> in the subtree have consistent casefolding.
+>
+> Create test cases for the following scenarios:
+> - Mounting overlayfs with casefold disabled
+> - Mounting overlayfs with casefold enabled
+> - Lookup subdir in overlayfs with mismatch casefold to parent dir
+> - Change casefold of underlying subdir while overalyfs is mounted
+> - Mounting overlayfs with strict enconding, but casefold disabled
+> - Mounting overlayfs with strict enconding casefold enabled
+> - Mounting overlayfs with layers with inconsistent UTF8 version
+>
+> Co-developed-by: Andr=C3=A9 Almeida <andrealmeid@igalia.com>
+> Signed-off-by: Andr=C3=A9 Almeida <andrealmeid@igalia.com>
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>
+> Zorro,
 
-If the implementation of HJFJS+ in Linux doesn't support metadata
-consistency after a crash, I'd suggest adding HFS+ to
-_has_metadat_journalling().  This will suppress a number of test
-failures so you can focus on other issues which arguably is probably
-higher priority for you to fix.
+Ping?
 
-After you get HFS+ to run clean with the journalling tesets skipped,
-then you can focus on adding that guarantee at that point, perhaps?
+Thanks,
+Amir.
 
-     	     	      	     	  - Ted
+>
+> This test covers the overlayfs casefold feature that was introduced in
+> two steps - casefold disabled layers in 6.17-rc1 and casefold enabled
+> layers in 6.18-rc1.
+>
+> I think there is less interest in testing the v6.17 changes on their own
+> so this test requires support for casefold enabled layers from 6.18-rc1
+> and will notrun on kernel < 6.18-rc1:
+>
+> generic/999 5s ...  [12:43:16] [12:43:18] [not run]
+>         generic/999 -- overlayfs does not support casefold enabled layers
+>
+> If there is a demand, we could split a test for the v6.17 support.
+>
+> Note that this test is written as a generic and not an overlay test,
+> because we do not have the infrastructure to format and mount a base fs
+> with casefold support, so this test can run with e.g. ext4 FSTYP, but it
+> will notrun with e.g. xfs FSTYPE:
+>
+> generic/999 6s ...  [12:30:03] [12:30:05] [not run]
+>         generic/999 -- xfs does not support casefold feature
+>
+> I left the test number 999 for you to re-number.
+> If you prefer that I post with another test number assignment in the
+> future please let me know.
+>
+> Thanks,
+> Amir.
+>
+>
+>  tests/generic/999     | 243 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/999.out |  13 +++
+>  2 files changed, 256 insertions(+)
+>  create mode 100755 tests/generic/999
+>  create mode 100644 tests/generic/999.out
+>
+> diff --git a/tests/generic/999 b/tests/generic/999
+> new file mode 100755
+> index 00000000..e81ea036
+> --- /dev/null
+> +++ b/tests/generic/999
+> @@ -0,0 +1,243 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2025 CTERA Networks. All Rights Reserved.
+> +#
+> +# FS QA Test 999
+> +#
+> +# Test overlayfs error cases with casefold enabled layers
+> +#
+> +# Overalyfs did not allow mounting layers with casefold capable fs
+> +# until kernel v6.17 and with casefold enabled until kernel v6.18.
+> +# Since kernel v6.17, overalyfs allows the mount, as long as casefolding
+> +# is disabled on all directories.
+> +# Since kernel v6.18, overalyfs allows the mount, as long as casefolding
+> +# is consistent on all directories and encoding is consistent on all lay=
+ers.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick mount casefold
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +       cd /
+> +       _unmount $merge 2>/dev/null
+> +       rm -r -f $tmp.*
+> +}
+> +
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/casefold
+> +
+> +_exclude_fs overlay
+> +_require_extra_fs overlay
+> +
+> +_require_scratch_casefold
+> +
+> +# Create casefold capable base fs
+> +_scratch_mkfs_casefold >>$seqres.full 2>&1
+> +_scratch_mount_casefold
+> +
+> +# Create lowerdir, upperdir and workdir without casefold enabled
+> +lowerdir=3D"$SCRATCH_MNT/ovl-lower"
+> +upperdir=3D"$SCRATCH_MNT/ovl-upper"
+> +workdir=3D"$SCRATCH_MNT/ovl-work"
+> +merge=3D"$SCRATCH_MNT/ovl-merge"
+> +
+> +mount_casefold_version()
+> +{
+> +       option=3D"casefold=3D$1"
+> +       mount -t tmpfs -o $option tmpfs $2
+> +}
+> +
+> +mount_overlay()
+> +{
+> +       local lowerdirs=3D$1
+> +
+> +       _mount -t overlay overlay $merge \
+> +               -o lowerdir=3D$lowerdirs,upperdir=3D$upperdir,workdir=3D$=
+workdir
+> +}
+> +
+> +unmount_overlay()
+> +{
+> +       _unmount $SCRATCH_MNT/ovl-merge 2>/dev/null
+> +}
+> +
+> +# Try to mount an overlay with casefold enabled layers.
+> +# On kernels older than v6.18 expect failure and skip the test
+> +mkdir -p $merge $upperdir $workdir $lowerdir
+> +_casefold_set_attr $upperdir >>$seqres.full
+> +_casefold_set_attr $workdir >>$seqres.full
+> +_casefold_set_attr $lowerdir >>$seqres.full
+> +mount_overlay $lowerdir >>$seqres.full 2>&1 || \
+> +       _notrun "overlayfs does not support casefold enabled layers"
+> +unmount_overlay
+> +
+> +# Re-create casefold disabled layers with lower subdir
+> +casefolddir=3D$lowerdir/casefold
+> +rm -rf $upperdir $workdir $lowerdir
+> +mkdir -p $upperdir $workdir $lowerdir $casefolddir
+> +
+> +# Try to mount an overlay with casefold capable but disabled layers.
+> +# Since we already verified that overalyfs supports casefold enabled lay=
+ers
+> +# this is expected to succeed.
+> +echo Casefold disabled
+> +mount_overlay $lowerdir >>$seqres.full 2>&1 || \
+> +       echo "Overlayfs mount with casefold disabled layers failed (1)"
+> +ls $merge/casefold/ >>$seqres.full
+> +unmount_overlay
+> +
+> +# Use new upper/work dirs for each test to avoid ESTALE errors
+> +# on mismatch lowerdir/upperdir (see test overlay/037)
+> +rm -rf $upperdir $workdir
+> +mkdir $upperdir $workdir
+> +
+> +# Try to mount an overlay with casefold disabled layers and
+> +# enable casefold on lowerdir root after mount - expect ESTALE error on =
+lookup.
+> +echo Casefold enabled after mount
+> +mount_overlay $casefolddir >>$seqres.full || \
+> +       echo "Overlayfs mount with casefold disabled layers failed (2)"
+> +_casefold_set_attr $casefolddir >>$seqres.full
+> +mkdir $casefolddir/subdir
+> +ls $merge/subdir |& _filter_scratch
+> +unmount_overlay
+> +
+> +# Try to mount an overlay with casefold enabled lowerdir root - expect E=
+INVAL.
+> +# With libmount version >=3D v1.39, we expect the following descriptive =
+error:
+> +# mount: overlay: case-insensitive directory on .../ovl-lower/casefold n=
+ot supported
+> +# but we want the test to run with older libmount, so we so not expect t=
+his output
+> +# we just expect a mount failure.
+> +echo Casefold enabled lower dir
+> +mount_overlay $casefolddir >>$seqres.full 2>&1 && \
+> +       echo "Overlayfs mount with casefold enabled lowerdir should have =
+failed" && \
+> +       unmount_overlay
+> +
+> +# Changing lower layer root again
+> +rm -rf $upperdir $workdir
+> +mkdir $upperdir $workdir
+> +
+> +# Try to mount an overlay with casefold disabled layers, but with
+> +# casefold enabled subdir in lowerdir - expect EREMOTE error on lookup.
+> +echo Casefold enabled lower subdir
+> +mount_overlay $lowerdir >>$seqres.full
+> +ls $merge/casefold/subdir |& _filter_scratch
+> +unmount_overlay
+> +
+> +# workdir needs to be empty to set casefold attribute
+> +rm -rf $workdir/*
+> +
+> +_casefold_set_attr $upperdir >>$seqres.full
+> +_casefold_set_attr $workdir >>$seqres.full
+> +
+> +echo Casefold enabled upper dir
+> +mount_overlay $lowerdir >>$seqres.full 2>&1 && \
+> +       echo "Overlayfs mount with casefold enabled upperdir should have =
+failed" && \
+> +       unmount_overlay
+> +
+> +# lowerdir needs to be empty to set casefold attribute
+> +rm -rf $lowerdir/*
+> +_casefold_set_attr $lowerdir >>$seqres.full
+> +mkdir $casefolddir
+> +
+> +# Try to mount an overlay with casefold enabled layers.
+> +# On kernels older than v6.18 expect failure and skip the rest of the te=
+st
+> +# On kernels v6.18 and newer, expect success and run the rest of the tes=
+t cases.
+> +echo Casefold enabled
+> +mount_overlay $lowerdir >>$seqres.full 2>&1 || \
+> +       echo "Overlayfs mount with casefold enabled layers failed (1)"
+> +ls $merge/casefold/ >>$seqres.full
+> +unmount_overlay
+> +
+> +# Try to mount an overlayfs with casefold enabled layers. After the moun=
+t,
+> +# disable casefold on the lower layer and try to lookup a file. Should r=
+eturn
+> +# -ESTALE
+> +echo Casefold disabled on lower after mount
+> +mount_overlay $lowerdir >>$seqres.full 2>&1 || \
+> +       echo "Overlayfs mount with casefold enabled layers failed (2)"
+> +rm -rf $lowerdir/*
+> +_casefold_unset_attr $lowerdir >>$seqres.full
+> +mkdir $lowerdir/dir
+> +ls $merge/dir/ |& _filter_scratch
+> +unmount_overlay
+> +
+> +# cleanup
+> +rm -rf $lowerdir/*
+> +_casefold_set_attr $lowerdir >>$seqres.full
+> +
+> +# Try to mount an overlayfs with casefold enabled layers. After the moun=
+t,
+> +# disable casefold on a subdir in  the lower layer and try to lookup it.
+> +# Should return -EREMOTE
+> +echo Casefold disabled on subdir after mount
+> +mkdir $lowerdir/casefold/
+> +mount_overlay $lowerdir >>$seqres.full 2>&1 || \
+> +       echo "Overlayfs mount with casefold enabled layers failed (3)"
+> +_casefold_unset_attr $lowerdir/casefold/
+> +mkdir $lowerdir/casefold/subdir
+> +ls $merge/casefold/subdir |& _filter_scratch
+> +unmount_overlay
+> +
+> +# cleanup
+> +rm -rf $lowerdir/*
+> +
+> +# Test strict enconding, but casefold not enabled. Should work
+> +_scratch_umount_idmapped
+> +
+> +_scratch_mkfs_casefold_strict >>$seqres.full 2>&1
+> +_scratch_mount_casefold
+> +
+> +mkdir -p $merge $upperdir $workdir $lowerdir
+> +
+> +mount_overlay $lowerdir >>$seqres.full 2>&1 || \
+> +       echo "Overlayfs mount with strict casefold disabled layers failed=
+"
+> +unmount_overlay
+> +
+> +# Test strict enconding, with casefold enabled. Should fail
+> +# dmesg: overlayfs: strict encoding not supported
+> +rm -rf $upperdir $workdir
+> +mkdir $upperdir $workdir
+> +
+> +_casefold_set_attr $upperdir >>$seqres.full
+> +_casefold_set_attr $workdir >>$seqres.full
+> +_casefold_set_attr $lowerdir >>$seqres.full
+> +
+> +mount_overlay $lowerdir >>$seqres.full 2>&1 && \
+> +       echo "Overlayfs mount with strict casefold enabled should have fa=
+iled" && \
+> +       unmount_overlay
+> +
+> +# Test inconsistent casefold version. Should fail
+> +# dmesg: overlayfs: all layers must have the same encoding
+> +
+> +# use tmpfs to make easier to create two different mount points with dif=
+ferent
+> +# utf8 versions
+> +testdir=3D"$SCRATCH_MNT/newdir/"
+> +mkdir $testdir
+> +
+> +MNT1=3D"$testdir/mnt1"
+> +MNT2=3D"$testdir/mnt2"
+> +
+> +mkdir $MNT1 $MNT2 "$testdir/merge"
+> +
+> +mount_casefold_version "utf8-12.1.0" $MNT1
+> +mount_casefold_version "utf8-11.0.0" $MNT2
+> +
+> +mkdir "$MNT1/dir" "$MNT2/dir"
+> +
+> +_casefold_set_attr "$MNT1/dir"
+> +_casefold_set_attr "$MNT2/dir"
+> +
+> +mkdir "$MNT1/dir/lower" "$MNT2/dir/upper" "$MNT2/dir/work"
+> +
+> +upperdir=3D"$MNT2/dir/upper"
+> +workdir=3D"$MNT2/dir/work"
+> +lowerdir=3D"$MNT1/dir/lower"
+> +
+> +mount_overlay $lowerdir >>$seqres.full 2>&1  && \
+> +       echo "Overlayfs mount different unicode versions should have fail=
+ed" && \
+> +       unmount_overlay
+> +
+> +umount $MNT1
+> +umount $MNT2
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/generic/999.out b/tests/generic/999.out
+> new file mode 100644
+> index 00000000..ce383d94
+> --- /dev/null
+> +++ b/tests/generic/999.out
+> @@ -0,0 +1,13 @@
+> +QA output created by 999
+> +Casefold disabled
+> +Casefold enabled after mount
+> +ls: cannot access 'SCRATCH_MNT/ovl-merge/subdir': Stale file handle
+> +Casefold enabled lower dir
+> +Casefold enabled lower subdir
+> +ls: cannot access 'SCRATCH_MNT/ovl-merge/casefold/subdir': Object is rem=
+ote
+> +Casefold enabled upper dir
+> +Casefold enabled
+> +Casefold disabled on lower after mount
+> +ls: cannot access 'SCRATCH_MNT/ovl-merge/dir/': Stale file handle
+> +Casefold disabled on subdir after mount
+> +ls: cannot access 'SCRATCH_MNT/ovl-merge/casefold/subdir': Object is rem=
+ote
+> --
+> 2.50.1
+>
