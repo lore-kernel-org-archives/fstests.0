@@ -1,128 +1,130 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f201.google.com (mail-pl1-f201.google.com [209.85.214.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 91F7C33557B;
-	Wed, 12 Nov 2025 13:02:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D58802236E8
+	for <fstests@vger.kernel.org>; Wed, 12 Nov 2025 13:52:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762952520; cv=none; b=OOqhTRZKKuPF/kMjprs4w2Fx3+Stw27eAP/PQ9TjVOiaJe3TEtnVG7PF7Qi/DzjtXUhp7zoTcZgNvSF6P4ZcpDaRUJ2Aou0oBy+F23Y3j8T3N7gen2xiyWS8xg6RN5xvtFRFTCDuQASyghptq4tmD5ju3RpGIyFlxbkUrITcrIA=
+	t=1762955552; cv=none; b=HiUPhA6RXebEa7J4pLC3+9FkTvBQx6ydben5heQKBBFD9XyVW5JYUFjKUZnm3yZpMupuqJKwA5W2PJGlKp1CjwlnYEmIYmqk8zXkNRIdkt2Qo5rK5or0aiPvuMLuQUoheo7lXP0NsLV6PtWXEVcWAUzm8uGVdngMXNCzPXd4xOY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762952520; c=relaxed/simple;
-	bh=tmpmS4hYp0yttGcr5QrOJmbu3JaaJWOIiD9pK9G+jKM=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=tksd0JakSYNT2n8Uq1uag2ttKe0ZQBEwGUrC+I9OJPBPwa78Z+NSd3+YDxMZqvk/XTkR6ipUNCCLs4jTZcIH0UME+JernBYboUeBKmud9Txrb6BQklWJI4RcHgSutrnNK29SjIqFAQr0Ii2ty8AyH6MBGPLBcAfNZJieFnj9j2k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=O+7E6nmI; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1762955552; c=relaxed/simple;
+	bh=jhPPAEuaECdlGx/Ur9iCh3Bo0V5ddtzcufUO/fSbPyE=;
+	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=DGp71O+I3HHPumAanHH0baz3K9CkY/FcmuV40XhSDNImx2+2Z7Sl7a92KoaCJskEbntkp0khJFJWuqYrwoCFjmRKfU0wf5Zs3ijFqfBgSOSJUXJih7UB6jNTpwGUN86TvQS0l5uN6Y+9IjpsscSDG2Qn0LURWGpVNL5rgd6q0/8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--joannechien.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=EOT2V2ZC; arc=none smtp.client-ip=209.85.214.201
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--joannechien.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="O+7E6nmI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5F349C16AAE;
-	Wed, 12 Nov 2025 13:01:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1762952520;
-	bh=tmpmS4hYp0yttGcr5QrOJmbu3JaaJWOIiD9pK9G+jKM=;
-	h=From:To:Cc:Subject:Date:From;
-	b=O+7E6nmIH5oMy9NPYEANboPoYP8XTh5pmCef3FCUsmGj1M+HbH51RKbopethYKF7z
-	 mpdB4gANdv7MhQcB40H/k0QouOkKpw5CtdeJeXTJgWDHt6kCkuLmpBh89G5+1xGlVj
-	 H3xCH+SH9IBm+r9VLlP1WCvNxHe1Rnf8aS1ZBVb8dHAyN+D5TQYbHaH6s0MEZ6HJJq
-	 kUkmJLCd6qaSbYKUvtCDmibT0Wku9YgG35RDT5n4ThZ7LDqiZrvm/ureu62fJ6zHrV
-	 x5cWOGjh4j67AuDA4hnKcErij7T9+ZUMMlc+SU0Do3BtRPEmHo0MvQw2d8U2Ck7/rg
-	 QOyXOihxY01RQ==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] fstests: add kernel commit IDs to some tests that miss it
-Date: Wed, 12 Nov 2025 13:01:51 +0000
-Message-ID: <e167d491435cbb02c671c974d7a2f80613f1c487.1762952458.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.47.2
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="EOT2V2ZC"
+Received: by mail-pl1-f201.google.com with SMTP id d9443c01a7336-295592eb5dbso9505495ad.0
+        for <fstests@vger.kernel.org>; Wed, 12 Nov 2025 05:52:30 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20230601; t=1762955550; x=1763560350; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:from:subject:message-id
+         :mime-version:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=cAqmjbnFTx0PD1U3KZiXQZaIp+Ci7CPGA/Vlub4qq/c=;
+        b=EOT2V2ZCnbokJL0HCsSl/ncDyb2MxoOQLbEKeCpAfLMss6zNfdTKTIiOU6bqD7RXmk
+         bsbixQ5VhSMYQufhTELReGwdB+qWHeD0wG1EUGyGSJ3BAtD/Zb2nO1TyY+EWo/uA/jg2
+         UoFWLBVlPpRc7jtmjisuFVVOiGLjBYtSHdcA27HLChk2lXlTvEBMDIcJhBSUucLv1xky
+         eS+UVjXQjsF+sSqRCIgkvw7707TEEOuJnUhzoSYtwdP4Lxx548v7vi19wsCtWHfyF8y/
+         +/ZFrudFjmaLFE8230wZfrykGTkBqFANqre/P/hj6nlikl6PzEPVcUoEXmAlkOYmEMI3
+         UMwQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1762955550; x=1763560350;
+        h=content-transfer-encoding:cc:to:from:subject:message-id
+         :mime-version:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=cAqmjbnFTx0PD1U3KZiXQZaIp+Ci7CPGA/Vlub4qq/c=;
+        b=olIgoNxubQpXti1d/W7LpI6ekXobf4NMD9SqFVzIAoTkaR76TIbjI6WFUlAz2HuQfB
+         uz10FXFWErRDjmkm5INtCYFw98VoKhDbplLvE3ma4yevjEgJxmVJPD38hEGx8J6b0g5d
+         XaBuvSitIgv7SnzjwdYJgrb/xLNR2xYekNpI0AuMMaWdjwe1GySUR2klE8AMapCgILRy
+         MEZpyXieFdTLlGsNOCSI2yNcbciI0HE0wEjTQV0239r1XRJVXOro/XvKFZSthZbd2loC
+         QyNeW7rAGV2bMBIr2hfx01hpyjse8Z0AQ8z/pVrgieMGDQnThE+xf0YDOQTJDdutAiYO
+         HyLw==
+X-Forwarded-Encrypted: i=1; AJvYcCVJOml42zAAOZRKmY8KScegh3Qm0/X6DdtU/+it18i4eKUe2riMWAkaaZTiy/1X3merUO1uXokm@vger.kernel.org
+X-Gm-Message-State: AOJu0YzwS0Xpdq0rKz4Juggz8kcSEZdDpkt5/n8Ygoz6I+/avZqbXpYy
+	veS/0CMRMqJpt0OvdAMDLsZFnU1TU1h45nRKbeJ/Pmx+kTC0T7AL128TD9P2j9iSABJ7YWrOG5G
+	uXdmbALABdJ6I+PQ3Odrw0X7qXA==
+X-Google-Smtp-Source: AGHT+IFa1/z3OmNWJRFn7pOmrLwDKdq+UncKUvLXHcY+9584LDffNgyGIdkpaXYCSTZqvtr6F2u6H1JyPVJ9JsxmCw==
+X-Received: from plxe3.prod.google.com ([2002:a17:902:ef43:b0:298:33c9:abd5])
+ (user=joannechien job=prod-delivery.src-stubby-dispatcher) by
+ 2002:a17:903:38cd:b0:295:fac:7b72 with SMTP id d9443c01a7336-2984ede39d5mr36881895ad.52.1762955550222;
+ Wed, 12 Nov 2025 05:52:30 -0800 (PST)
+Date: Wed, 12 Nov 2025 13:52:21 +0000
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.51.2.1041.gc1ab5b90ca-goog
+Message-ID: <20251112135223.3467852-1-joannechien@google.com>
+Subject: [PATCH v1 1/3] f2fs/015: clear MKFS_OPTIONS and MOUNT_OPTIONS
+From: Joanne Chang <joannechien@google.com>
+To: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Cc: Jaegeuk Kim <jaegeuk@kernel.org>, linux-f2fs-devel@lists.sourceforge.net, 
+	Chao Yu <chao@kernel.org>, Joanne Chang <joannechien@google.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: Filipe Manana <fdmanana@suse.com>
+Currently, residual options can interfere with checking the mount
+behavior of the listed MKFS_OPTIONS and MOUNT_OPTIONS. For example,
+"Option#120: test_dummy_encryption" should fail with the listed
+options but succeeds if =E2=80=9CMKFS_OPTIONS=3Dencrypt=E2=80=9D is preset.=
+ By
+explicitly clearing MKFS_OPTIONS and MOUNT_OPTIONS, the test=E2=80=99s
+reliability can be improved.
 
-Kernel patches for some tests are now in Linus' tree, so update their
-commit IDs and for btrfs/301 fix the commit subject since it was changed
-before being sent to Linus.
+f2fs/015.out is also updated to expect failure for cases that require
+additional mkfs attributes to mount.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Joanne Chang <joannechien@google.com>
 ---
- tests/btrfs/301   | 4 ++--
- tests/btrfs/337   | 2 +-
- tests/f2fs/018    | 2 +-
- tests/generic/779 | 2 +-
- tests/generic/782 | 2 +-
- 5 files changed, 6 insertions(+), 6 deletions(-)
+ tests/f2fs/015     | 3 +++
+ tests/f2fs/015.out | 8 ++++----
+ 2 files changed, 7 insertions(+), 4 deletions(-)
 
-diff --git a/tests/btrfs/301 b/tests/btrfs/301
-index 4b51a273..f1f33cd9 100755
---- a/tests/btrfs/301
-+++ b/tests/btrfs/301
-@@ -21,8 +21,8 @@ _require_no_compress
- 
- _fixed_by_kernel_commit 7b632596188e \
- 	"btrfs: fix iteration bug in __qgroup_excl_accounting()"
--_fixed_by_kernel_commit XXXXXXXXXXXX \
--	"btrfs: fix squota _cmpr stats leak"
-+_fixed_by_kernel_commit de134cb54c3a \
-+	"btrfs: fix squota compressed stats leak"
- 
- subv=$SCRATCH_MNT/subv
- nested=$SCRATCH_MNT/subv/nested
-diff --git a/tests/btrfs/337 b/tests/btrfs/337
-index a57df1de..e6db3cd6 100755
---- a/tests/btrfs/337
-+++ b/tests/btrfs/337
-@@ -9,7 +9,7 @@
- . ./common/preamble
- _begin_fstest auto quick compress clone
- 
--_fixed_by_kernel_commit xxxxxxxxxxxx \
-+_fixed_by_kernel_commit 9786531399a6 \
- 	"btrfs: fix corruption reading compressed range when block size is smaller than page size"
- 
- . ./common/reflink
-diff --git a/tests/f2fs/018 b/tests/f2fs/018
-index 2373129b..f0cbed2d 100755
---- a/tests/f2fs/018
-+++ b/tests/f2fs/018
-@@ -13,7 +13,7 @@ _begin_fstest auto quick rw compress
- 
- _fixed_by_kernel_commit ba8dac350faf \
- 	"f2fs: fix to zero post-eof page"
--_fixed_by_kernel_commit xxxxxxxxxxxx \
-+_fixed_by_kernel_commit 0b2cd5092139 \
- 	"f2fs: fix to zero data after EOF for compressed file correctly"
- 
- _require_xfs_io_command "truncate"
-diff --git a/tests/generic/779 b/tests/generic/779
-index 40d1a86c..842472ae 100755
---- a/tests/generic/779
-+++ b/tests/generic/779
-@@ -24,7 +24,7 @@ _require_scratch
- _require_symlinks
- _require_dm_target flakey
- 
--[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-+[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit 953902e4fb4c \
- 	"btrfs: set inode flag BTRFS_INODE_COPY_EVERYTHING when logging new name"
- 
- rm -f $seqres.full
-diff --git a/tests/generic/782 b/tests/generic/782
-index a85959a4..13c729d2 100755
---- a/tests/generic/782
-+++ b/tests/generic/782
-@@ -25,7 +25,7 @@ _cleanup()
- _require_scratch
- _require_dm_target flakey
- 
--[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-+[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit bfe3d755ef7c \
- 	"btrfs: do not update last_log_commit when logging inode due to a new name"
- 
- _scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
--- 
-2.47.2
+diff --git a/tests/f2fs/015 b/tests/f2fs/015
+index 73ac3d82..6a7a582c 100755
+--- a/tests/f2fs/015
++++ b/tests/f2fs/015
+@@ -103,6 +103,9 @@ options=3D(
+ 	"norecovery,ro"			""			\
+ )
+=20
++# remove all mkfs/mount options to avoid affecting results
++export MKFS_OPTIONS=3D""
++export MOUNT_OPTIONS=3D""
+ for ((i=3D0;i<${#options[@]};i=3Di+2))
+ do
+ 	echo "Option#$i: ${options[$i]} : ${options[$((i+1))]}"
+diff --git a/tests/f2fs/015.out b/tests/f2fs/015.out
+index 8d6712f0..3df29436 100644
+--- a/tests/f2fs/015.out
++++ b/tests/f2fs/015.out
+@@ -38,7 +38,7 @@ Option#34: inline_xattr :
+ Option#36: noinline_xattr :=20
+ 0
+ Option#38: inline_xattr_size=3D400 :=20
+-0
++32
+ Option#40: inline_data :=20
+ 0
+ Option#42: noinline_dentry :=20
+@@ -120,11 +120,11 @@ Option#116: fsync_mode=3Dstrict :
+ Option#118: fsync_mode=3Dnobarrier :=20
+ 0
+ Option#120: test_dummy_encryption :=20
+-0
++32
+ Option#122: test_dummy_encryption=3Dv1 :=20
+-0
++32
+ Option#124: test_dummy_encryption=3Dv2 :=20
+-0
++32
+ Option#126: checkpoint=3Denable :=20
+ 0
+ Option#128: checkpoint=3Ddisable :=20
+--=20
+2.51.2.1041.gc1ab5b90ca-goog
 
