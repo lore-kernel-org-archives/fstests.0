@@ -1,51 +1,45 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1FB381397
-	for <fstests@vger.kernel.org>; Wed, 12 Nov 2025 20:06:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A88B935CBB2;
+	Wed, 12 Nov 2025 22:29:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762977971; cv=none; b=rBHhEVND3wUDKCmqbkOc3WF4t6DU7IFd7sRlgUF/01B5Qvs9jzuQL4o+uFTEcdpKfXeN7m6Uw/nngejHVlVbujS+pXT2Z9b7gysmBi/SAwlSl611qsCehsEvQCdnV+0XHYSDbZaiqO36uTxAVhSev1ZbYBLun0LDVsnDm+yLp8w=
+	t=1762986561; cv=none; b=jlmFDex4OiV7Mw5VefhytGWcCt3UrBIg5jegQ97De7t93gHEQrxkpvt7VfDZ+O3E31QM/kbsXnYy9OVimbva6W9BtriexI5aCif4ZESALCoPGIhWpn8e0mJ2Eipk41muNaWdoylSptk7gEzQGhqoohzVpVQCGj8ODB2PokYMC/k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762977971; c=relaxed/simple;
-	bh=YidZ2iaBMgBfIyOZoPUl0ZumXjccVvctwYCN9vaa7S4=;
+	s=arc-20240116; t=1762986561; c=relaxed/simple;
+	bh=usrjYj7mtzjrvGjswJhH+ucxIQYkVTxMWhNDGaxXMA0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gvqQkbnqoAMZrz9fTBf+6N1mALugRPtd33cqoxgR2HEFWyXW6wsOboKKWE+v5tlxpS+3L0EYNgewF4M0SoJZ/YjdpZe/F19Edzh4m+P9t9vz/1L1Rwy+tuWhITf96HaeBmT+8+QkAT9w1s8Au0xiv+BfUHv9WXBtVbZ4/RUbN4k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=ggZzRfk1; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	 Content-Type:Content-Disposition:In-Reply-To; b=omQTOak6/i0v9vJEmr51Qptkvf1TjiZ/Jyhd+GGUxar+79ipA4spXlcXgrgpJiJ06W9LnrKMrI2mPykB2s6sEIHXTVuhBWPeJNQJH+bEL7A9AC925bgruq/k7MG6/B2eY2hYV/EoOmY2dFm/0g0vspceiX7ALHt9ybVwxfRBQmE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hUp2mjpK; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="ggZzRfk1"
-Received: from trampoline.thunk.org (pool-173-48-82-200.bstnma.fios.verizon.net [173.48.82.200])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 5ACK5eQT024470
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 12 Nov 2025 15:05:42 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1762977943; bh=C28Oa7WcfAdQg4Gfs4Lt81ztqf7ENvQBvIcZtxopAbw=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=ggZzRfk1rAV++4yYImW8ycBzitiVkxYScyVjgkr5RbWEXzVVwiy5jI/JeBrpq5v7s
-	 ijf3n5lf5KpnNkFU2GfUEqnfeS8vgux1MRK2RSsroEHb4oCQdM7709GwqdfOD4z/1+
-	 vIwuW+gC4ATR1ql9BIh6/m2hW15LjRYLdBwWGb3L/kr7JFqFBrhtoCZtVm2uguPY/N
-	 ztQ4C1PRDixs3VXH11iQVp801Ah8njnleXs8NpxlAiD9INrj4N3InXtyoIc6kDPCk1
-	 v6xwbVYETd4LGvGx8Sym/eLk4JQtPis0oja7pf+Y6gwh/zDe8lBCgOVjDy60AU/RSK
-	 hN9XGsQzoZ46A==
-Received: by trampoline.thunk.org (Postfix, from userid 15806)
-	id D487D2E00D9; Wed, 12 Nov 2025 15:05:40 -0500 (EST)
-Date: Wed, 12 Nov 2025 15:05:40 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: "Darrick J. Wong" <djwong@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hUp2mjpK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 20AF9C4CEF8;
+	Wed, 12 Nov 2025 22:29:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1762986561;
+	bh=usrjYj7mtzjrvGjswJhH+ucxIQYkVTxMWhNDGaxXMA0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=hUp2mjpKWxoyAZHiw+zsJgD/h+UEqB1gKmb3KFfipwna09NsMucDzYXdj5l231066
+	 96njTmZ5UQXmTksTTj+lJj9rP+C8W6xTvSbRXCSlSJwqd0llcIGxCzNarfuD8BGGqn
+	 eCIBzXw8Su9XMQ4iMZc10QIIo+9ZpKHeTlx1iJZCRcGhWGBFM7IRPles9eqbKIpv6r
+	 y6m28NqBEFU5mu9UOMnWwghEjmTQoeW8d+HYA3PFewhQmH5OggIVqrEhfmEHboQ3t/
+	 +2qIThBSkBMz0qRqbBYOcPCdz1TUB1zgurAut74wg0jDRl0Im3E808IHwxHE2EIedU
+	 WfU3sfSaHTu+Q==
+Date: Wed, 12 Nov 2025 14:29:20 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Theodore Ts'o <tytso@mit.edu>
 Cc: Baokun Li <libaokun1@huawei.com>, zlang@redhat.com, neal@gompa.dev,
-        fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, joannelkoong@gmail.com,
-        bernd@bsbernd.com
-Subject: Re: [PATCH 04/33] common/rc: skip test if swapon doesn't work
-Message-ID: <20251112200540.GD3131573@mit.edu>
+	fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org, joannelkoong@gmail.com,
+	bernd@bsbernd.com
+Subject: [PATCH v6.1 04/33] common/rc: skip test if swapon doesn't work
+Message-ID: <20251112222920.GO196358@frogsfrogsfrogs>
 References: <176169819804.1433624.11241650941850700038.stgit@frogsfrogsfrogs>
  <176169820051.1433624.4158113392739761085.stgit@frogsfrogsfrogs>
  <016f51ff-6129-4265-827e-3c2ae8314fe1@huawei.com>
  <20251112182617.GH196366@frogsfrogsfrogs>
+ <20251112200540.GD3131573@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -54,20 +48,55 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251112182617.GH196366@frogsfrogsfrogs>
+In-Reply-To: <20251112200540.GD3131573@mit.edu>
 
-On Wed, Nov 12, 2025 at 10:26:17AM -0800, Darrick J. Wong wrote:
-> 
-> Well at that point we might as well collapse everything into:
-> 
-> 	if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
-> 		_scratch_unmount
-> 		_notrun "swapfiles are not supported for $FSTYP"
-> 	fi
+From: Darrick J. Wong <djwong@kernel.org>
 
-Agreed.  I don't think the ext4 special case makes sense here.  If we
-want to have a specific "swapfiles are working when we expect them
-to", let's do that as a single file system specific test.  Let's keep
-_require_scratch_swapfile simple.
+In _require_scratch_swapfile, skip the test if swapon fails for whatever
+reason, just like all the other filesystems.  There are certain ext4
+configurations where swapon isn't supported, such as S_DAX files on
+pmem, and (for now) blocksize > pagesize filesystems.
 
-						- Ted
+Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+---
+v6.1: clobber all the ext-specific stuff
+---
+ common/rc |   25 ++++---------------------
+ 1 file changed, 4 insertions(+), 21 deletions(-)
+
+diff --git a/common/rc b/common/rc
+index b62e21f778d938..564235ea2e995c 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3268,27 +3268,10 @@ _require_scratch_swapfile()
+ 	# Minimum size for mkswap is 10 pages
+ 	_format_swapfile "$SCRATCH_MNT/swap" $(($(_get_page_size) * 10)) > /dev/null
+ 
+-	# ext* has supported all variants of swap files since their
+-	# introduction, so swapon should not fail.
+-	case "$FSTYP" in
+-	ext2|ext3|ext4)
+-		if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
+-			if _check_s_dax "$SCRATCH_MNT/swap" 1 >/dev/null; then
+-				_scratch_unmount
+-				_notrun "swapfiles are not supported"
+-			else
+-				_scratch_unmount
+-				_fail "swapon failed for $FSTYP"
+-			fi
+-		fi
+-		;;
+-	*)
+-		if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
+-			_scratch_unmount
+-			_notrun "swapfiles are not supported"
+-		fi
+-		;;
+-	esac
++	if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
++		_scratch_unmount
++		_notrun "swapon failed for $FSTYP"
++	fi
+ 
+ 	swapoff "$SCRATCH_MNT/swap" >/dev/null 2>&1
+ 	_scratch_unmount
