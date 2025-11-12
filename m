@@ -1,55 +1,55 @@
-Received: from mail-pl1-f201.google.com (mail-pl1-f201.google.com [209.85.214.201])
+Received: from mail-pl1-f202.google.com (mail-pl1-f202.google.com [209.85.214.202])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96E8B2264A3
-	for <fstests@vger.kernel.org>; Wed, 12 Nov 2025 13:52:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2C851229B12
+	for <fstests@vger.kernel.org>; Wed, 12 Nov 2025 13:52:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.202
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762955556; cv=none; b=kJosUR/DpdAsVVoO5PRJrscjVhJ65Z5xferC/nAxYC/haO1OTDxz11hy79326sRtTyl34uy09j3p6T1156Ir9xyxvnZWmyNEF5en459u9Onwp7SXdJWNiiMqVC3yzZVab1WP5fDB6o85Osn2wOeJf13LeiQw7P3PWbEGqWeEFOU=
+	t=1762955561; cv=none; b=soOZED8zMM0g4+6MTPhtguuBpjjfJjXkfdMpYfTXVwZ51UGmd+qtwLw5671tRIwi+mtycccCm2nSRSr+S2nrlKgoIjkzm2c76FAZ/TUWujNZ3pw/ntXGIBCGKzNNE8Up8tGqlaGdDhGQqYk7Jg64jtIM4Cibqrs2ySLAfbBxI9k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762955556; c=relaxed/simple;
-	bh=XacK+f/z/ZowWVgMhgDp0o4XT7Xyy1ABCWIHqpGAB1c=;
+	s=arc-20240116; t=1762955561; c=relaxed/simple;
+	bh=UWb08bRPfXPtPWx+aZWuY8TV33Rt0cUOHM2jOayqbQU=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=j3hS+LYz92Mei9UfsY/L4K94mi8MTUbeO9FL2Tw6zVTLyOO8vkHnKf7yERb45HFmxXGGqEw6TmYj7pgPIeQxcW98jIy+ccOOEM8zURE6daxIlZCVeHIubo6w05S59fp3+CcdSYCf7MPHBiXb7qt7MIT2KisZxaEq4G/DC4XsNME=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--joannechien.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=l58DMMgs; arc=none smtp.client-ip=209.85.214.201
+	 To:Cc:Content-Type; b=m7/6L074t45DTAzGk0B2bVBN9ISj9r6QuJ1LHX77Ky+otqQIiS8M0tTofqjb+AKBqjfOvwiliTGtiqqzDHFkKFHYg4hppVXPuvPXUj2NYyyXcLSQCNl8DTJSZtIcbUYYmkCQ5gL0Gs8gNMALhpffGfdMtNXFo42S9DnnrxJuPJU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--joannechien.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=iHctceBa; arc=none smtp.client-ip=209.85.214.202
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--joannechien.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="l58DMMgs"
-Received: by mail-pl1-f201.google.com with SMTP id d9443c01a7336-297f8a2ba9eso23559505ad.3
-        for <fstests@vger.kernel.org>; Wed, 12 Nov 2025 05:52:35 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="iHctceBa"
+Received: by mail-pl1-f202.google.com with SMTP id d9443c01a7336-297d50cd8c4so22876665ad.0
+        for <fstests@vger.kernel.org>; Wed, 12 Nov 2025 05:52:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1762955555; x=1763560355; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1762955559; x=1763560359; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=OENtFm3i817Weeec6gfeOIxaItbxpGoqMQTgjpOdTX8=;
-        b=l58DMMgsjvnCWznAOMWw6k4fwgdjFQO79tAG/j9XBbcHyjDmqOu2merZlp1mxTttEl
-         rUbw5238ss9sLJ9zSIcwJJMOG81udIxu1U/Gs13FD1wMuqFD4/YD3vQDd58hnSc6SBAr
-         cMCBBK/tvzQ1ndrPu1t+SUsufnYyJXK8WS1l754PQ4s6EkyATi27ZqMH4ZPdBExgEgvL
-         DeEdYFOYqUCeEAzPKL/f8759iIsC4GOZhNopU7dAQ/toKHthh9Akqv4thbMsf1i2hOlf
-         jF3+f4kLwOVAQI9viilfa+0p/69feyJSgRbpL28bM6XZXbNa81kH6+OpkmPMrCYmK9FX
-         Bk5A==
+        bh=CQ6Qy7ndj39B6pMalkS3qilQZ+lIftQt3Cy+FN17e5g=;
+        b=iHctceBaup9pKFU1xwwafW49343pbbf7ibPCSzoQUC+QqoOC4JsZVXGk1Ur0ch5IsS
+         i5gkePs8dbjwl7snzgXtPakV6b4bCr026zy6RGeHjfUdugL4s50kqYAoNw7wBbtcIBWt
+         iWwHgA3WSMvfN8eQyM8MOACf7r94Jzq4HvIE3q3W6vLL0t+OPdDhkDLAO8dvBNi+5W7t
+         fkzoU3k2tz85x4U+lyhQAeCFkgjO3r7zuiB+FgRmd6KGHxivyuhh3pzc54qNGtq/+ePj
+         PCAzq8XIMJfNUkhy/JfNE9pfYietxt3n1pPiJ1lhDlyW4uumULJiXpOf89sSV/wbOJ+B
+         4KIg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1762955555; x=1763560355;
+        d=1e100.net; s=20230601; t=1762955559; x=1763560359;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=OENtFm3i817Weeec6gfeOIxaItbxpGoqMQTgjpOdTX8=;
-        b=RTEkZkMLYX1Z77H6SvPhRIYn+q0O2PIzT5LZS5L/4bbLxXgY0jU4htLr2A5gk+NlST
-         CqqDiLjwuWzoOSLiiRRwAZY2jAyZrKmTaIrBr4ewhHeu42qYv5e+hIIs7pzmLEkULkVO
-         WS7sAmVkIitNwyFQN0b28I6M6DlEv81XCOfjgBlHfuEdrZgQAEJOZiRrNG54v7v0NrDA
-         rK6U7Rg0bAoXKAjt/SGQYTCrJnC6U1zTbfJxKlk9yT3uPRGLooE1PQ7CXoPAkj7SDfAi
-         bkytSQV4RTQndjuF9htTc6cx6NUZKL0Qvx0ytrxMrVqa42lQTqWvrkHlhORlvNIEYMgq
-         oyGg==
-X-Forwarded-Encrypted: i=1; AJvYcCWS/eoWakwDChl+wcSDByqYNqYUh/p0lkifj/8KZ/ZuzsRxAqPG4uHdPDgBlS6uvxgyM/tD4wPC@vger.kernel.org
-X-Gm-Message-State: AOJu0YyIg9TtyjTmzyrJv+DKiaTGqwKBECikHOT3ndkYpaaEYFCtxlIw
-	V+PCuRersrvC2HaJxf+99XoE9+SXhjRh60FMZHU41ZMJw1XwcK5kFPqiBttFkaO46KbhvFQWzBJ
-	VDCM1SmkYeYPIUISS1QNjNtRJrQ==
-X-Google-Smtp-Source: AGHT+IGYly76A9Dd808N0QerjHX/E1vUnUBAoo2QELTCdqvZDNN1bXjuebt9+R3/MPxan6OXBu1W5VVnu9LUrxpnQw==
-X-Received: from plby21.prod.google.com ([2002:a17:902:ed55:b0:295:304d:8359])
+        bh=CQ6Qy7ndj39B6pMalkS3qilQZ+lIftQt3Cy+FN17e5g=;
+        b=YnrgU4Jc9j28Bey9F+CiNj0VeTLwjQapmvgRYiaMr5M38k+YbFPZCdPdhcAVBDhIgu
+         tzLXxe16YowB7gUrTnlDv5ayxR919RO9PI8ouaMBoymYXhBCFBN5iVhR8FZqLhR7RL2m
+         yiOVIK2VTRIrnqleN9QGvOxuYvKFUSqVHVdbxqSgB9IVHU4pMBtFmZ/1KMv3JWizvlK6
+         LtxP2mfvYo9tCEI+zsA5yOHB8imiUbI1D2w5ww13kaCGfCnd0CITeUHxN/PA5HRe5x3U
+         pi9KLYZtyxCyV8jIa3Qg93PNRZTHM7VGpfP9WlRrCzay4VXgUvogz03/N+BYpdV9slKB
+         Gkuw==
+X-Forwarded-Encrypted: i=1; AJvYcCUMvSWE2kCrCk1sh3giS8iBjTqiiCw3YlhC8Ux8NA8q0BakePNuXAIHJ9kmk6+sN02H0I43dwsO@vger.kernel.org
+X-Gm-Message-State: AOJu0YyittK8TUs6Q+gmxg0/idBTckl3cFpmonHwooImimMkoOfoOdh2
+	yq4tWAl0tThR7dbD/4wsEjkvxwQXxB0yoR4+U+bgJ5lZrLbPNuhGLs2nXJFnMXd8Xp8jFcWlWot
+	JA1Z8QmJKgoAONgYr///mdonGSg==
+X-Google-Smtp-Source: AGHT+IEvwPE8wXHAoTH4+kRCz/nwKtlAXCsMVOxHQHz6fO63yQ7yVeRoMRbdXyB0GF6cp2lHZ9lVEAu4F9AjgFQhJg==
+X-Received: from plhn15.prod.google.com ([2002:a17:903:110f:b0:297:d52d:2b6c])
  (user=joannechien job=prod-delivery.src-stubby-dispatcher) by
- 2002:a17:903:1904:b0:297:c638:d7ca with SMTP id d9443c01a7336-2984ed356e1mr34439665ad.14.1762955554887;
- Wed, 12 Nov 2025 05:52:34 -0800 (PST)
-Date: Wed, 12 Nov 2025 13:52:22 +0000
+ 2002:a17:902:dace:b0:293:33b:a9b0 with SMTP id d9443c01a7336-2984edcada9mr39893955ad.32.1762955559492;
+ Wed, 12 Nov 2025 05:52:39 -0800 (PST)
+Date: Wed, 12 Nov 2025 13:52:23 +0000
 In-Reply-To: <20251112135223.3467852-1-joannechien@google.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -59,61 +59,49 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20251112135223.3467852-1-joannechien@google.com>
 X-Mailer: git-send-email 2.51.2.1041.gc1ab5b90ca-goog
-Message-ID: <20251112135223.3467852-2-joannechien@google.com>
-Subject: [PATCH v1 2/3] f2fs/016: add test cases for test_dummy_encryption
- mount option
+Message-ID: <20251112135223.3467852-3-joannechien@google.com>
+Subject: [PATCH v1 3/3] f2fs/{019,020}: clear MOUNT_OPTIONS alongside MKFS_OPTIONS
 From: Joanne Chang <joannechien@google.com>
 To: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
 Cc: Jaegeuk Kim <jaegeuk@kernel.org>, linux-f2fs-devel@lists.sourceforge.net, 
 	Chao Yu <chao@kernel.org>, Joanne Chang <joannechien@google.com>
 Content-Type: text/plain; charset="UTF-8"
 
-Add test cases to verify f2fs's support for different versions of the
-"test_dummy_encryption" mount option.
-
-To ensure test robustness, the MKFS_OPTIONS and MOUNT_OPTIONS are
-cleared. This prevents additional options from interfereing with the
-test results.
+Currently, f2fs/019 and f2fs/020 only clears MKFS_OPTIONS. This causes
+the tests to fail when leftover MOUNT_OPTIONS depend on unapplied
+MKFS_OPTIONS. So MOUNT_OPTIONS should also be cleared to ensure reliable
+mounting.
 
 Signed-off-by: Joanne Chang <joannechien@google.com>
 ---
- tests/f2fs/016     | 6 ++++++
- tests/f2fs/016.out | 6 ++++++
- 2 files changed, 12 insertions(+)
+ tests/f2fs/019 | 1 +
+ tests/f2fs/020 | 1 +
+ 2 files changed, 2 insertions(+)
 
-diff --git a/tests/f2fs/016 b/tests/f2fs/016
-index 800f75fc..a6df827d 100755
---- a/tests/f2fs/016
-+++ b/tests/f2fs/016
-@@ -35,8 +35,14 @@ options=(
- 	"compress_mode=fs"		"extra_attr,compression"	\
- 	"compress_mode=user"		"extra_attr,compression"	\
- 	"compress_cache"		"extra_attr,compression"	\
-+	"test_dummy_encryption"		"encrypt"					\
-+	"test_dummy_encryption=v1"	"encrypt"					\
-+	"test_dummy_encryption=v2"	"encrypt"					\
- )
+diff --git a/tests/f2fs/019 b/tests/f2fs/019
+index a6e6e38c..721f2180 100755
+--- a/tests/f2fs/019
++++ b/tests/f2fs/019
+@@ -22,6 +22,7 @@ _require_inject_f2fs_command node addr
  
-+# remove all mkfs/mount options to avoid affecting results
-+export MKFS_OPTIONS=""
+ # remove all mkfs options to avoid layout change of on-disk inode
+ export MKFS_OPTIONS=""
 +export MOUNT_OPTIONS=""
- for ((i=0;i<${#options[@]};i=i+2))
- do
- 	echo "Option#$i: ${options[$i]} : ${options[$((i+1))]}"
-diff --git a/tests/f2fs/016.out b/tests/f2fs/016.out
-index a8c96972..5ff116a7 100644
---- a/tests/f2fs/016.out
-+++ b/tests/f2fs/016.out
-@@ -31,3 +31,9 @@ Option#28: compress_mode=user : extra_attr,compression
- 0
- Option#30: compress_cache : extra_attr,compression
- 0
-+Option#32: test_dummy_encryption : encrypt
-+0
-+Option#34: test_dummy_encryption=v1 : encrypt
-+0
-+Option#36: test_dummy_encryption=v2 : encrypt
-+0
+ 
+ testfile=$SCRATCH_MNT/testfile
+ 
+diff --git a/tests/f2fs/020 b/tests/f2fs/020
+index a6933134..eecd312d 100755
+--- a/tests/f2fs/020
++++ b/tests/f2fs/020
+@@ -25,6 +25,7 @@ _require_attrs user
+ 
+ # remove all mkfs options to avoid layout change of on-disk inode
+ export MKFS_OPTIONS=""
++export MOUNT_OPTIONS=""
+ 
+ testdir=$SCRATCH_MNT/testdir
+ 
 -- 
 2.51.2.1041.gc1ab5b90ca-goog
 
