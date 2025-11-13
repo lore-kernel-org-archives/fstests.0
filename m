@@ -1,297 +1,268 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7D5322157B
-	for <fstests@vger.kernel.org>; Thu, 13 Nov 2025 11:52:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 62C0026299;
+	Thu, 13 Nov 2025 11:53:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763034722; cv=none; b=VjMtoNoUdJp2r3mhlM6MEbb9UDMyuYqfA1tYcvQ/Vg7qABfidW0bspfLW+Sk8cjeaCz1BK1acdqsxQuEEF/UUiqWbrEq9NkBjNygh5z499Fn3Qeq/Kup/UCqbr4LtSZilAxBR7ht1N4MrFMiYQZc6P3HzCXRF/oTWxeMnv/q2us=
+	t=1763034839; cv=none; b=SgPSQ/IOjZZoIVEzqaA6jd9U+BioHCweaZcp7AjqczBmpR6NL4qcG8mwfSY5mbaXKFzu3MGvND7RQYpPk8f1Gj5UR9xxQh6SVr6SrihAbCanwQAoyG3kzVy0RrEXHACiS6JUiWb4dPMZYv3WZ30NgtbdkZ/nTZ5EXrOrQb79V8o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763034722; c=relaxed/simple;
-	bh=YXJvfN1jxopK0p/AQ6GZzWk5pbDMiRMhHcy0zDwNn1Y=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=bOdKlwRrFF+e7lJEVkQK+TtADFMo/EwmGEdNckntWki6O2M8yg0yGPkdzjpqkn5hjQO1oH5sNvMr9mNDMFYoBBi8gcLR0qCRYnRACUYtMWRduD7/8fpkrgImcD7Of63sq9wrY+59d3qtwJzcCG4CdmDYPHYLCc3dBxeVZSyRCZk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MCM8KV+/; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=lEiMLoxk; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1763034839; c=relaxed/simple;
+	bh=64WDtD7uXeYzCDfjeZNPSZiHZwvWHYaGDQd5jdLa70w=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Aqt4n0d79ZO3Ok8m0Ab4cDfgtpbE9Gp9pLdiVwKw45AH7uesSAoiBznPFy3+tobzygpFHeye6fjwh5hRQP/DLaZHErDGxZKXibp6l0rSAB/QudI6phIUSoFP/mdFH9ey3kNGMCpFmkduEBTcHoVNnmqssDzWD53UB4upwBZ4gBU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=TP9cLZdT; arc=none smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MCM8KV+/";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="lEiMLoxk"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1763034719;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=RBqzIIFLzKA6ktqbJ0neX3QGtNEe7qUDgzPZycedjg0=;
-	b=MCM8KV+/CjdvIbNkVXLcCFPfM9XZLSvIO+cBfJ5MpsJ4c2u1PkDC1zTok1kxqT5f67ZXdf
-	Q4Vpx73GI7albqWMwGX9r8DaNA9nZbe/+0oFkPcpjoVFgBRzXi+tcOAsIfVgSGJ+sWKdQg
-	16LWC91X5jhxzpYfQbf66GGHlSFcGP0=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-537-8GFt08eBM82led9g_x2LVg-1; Thu, 13 Nov 2025 06:51:58 -0500
-X-MC-Unique: 8GFt08eBM82led9g_x2LVg-1
-X-Mimecast-MFC-AGG-ID: 8GFt08eBM82led9g_x2LVg_1763034718
-Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-4ed6ff3de05so21748891cf.3
-        for <fstests@vger.kernel.org>; Thu, 13 Nov 2025 03:51:58 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1763034717; x=1763639517; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=RBqzIIFLzKA6ktqbJ0neX3QGtNEe7qUDgzPZycedjg0=;
-        b=lEiMLoxkgnGG0ZtGIFAdtflsV7KufT18g9fHQc2yy2azQRuRC73UXw4MvmqqMCcWE7
-         JQwTwcTeqSEOo0KoUFJ7V36Nnco3OytpPiESMUZm3CiqGpRxkDh70eSFo8vjnLU1wWh9
-         J1LX83D3rSBV+dVEgANhtN2+Z/F56Whmjo03zV5jufvCLQGz2JOlIB5lNi61Ee9PfKqX
-         mX6jV68sOCUyB3diZ65LRPzOeAL0isTnuWmpVB2TgwYleprtPf3U4F0hT+3Lab61DhKk
-         95hMxjf8ZzPnpeXGxlFrgzIuwS2nyDwW0rue0OIfvh3r8HKBPxJ0x3L9sYpUIkvflNK3
-         b1yA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763034717; x=1763639517;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=RBqzIIFLzKA6ktqbJ0neX3QGtNEe7qUDgzPZycedjg0=;
-        b=U/v9L8Ow6I+fucWubdGvXFeUBXKKB3LBjgU3BkKkgmAc3wV4vnYmMm5CRUGDiK4LIr
-         q2ErIRYlZDM0BeFkaqvZadkV82qYJoEgc2fBqpKm/FVZbECQfGZaUVhHI6Lz5AAyFJ+s
-         w+9azQyoDRGkA7CwKFgYYJTn4zDQhESdfQXDVZna3OPZjmkLSldZScQ1+asZp5Rycg1o
-         B8C4OK8+1gg5fhZjSSgqqZ8DiNYoh/vQ0Y/oKbLkfZIDT7OIxsZM8BcIyLyX8Y/buLan
-         VlstCUJXw3zPrtD6c0fgqQyy5DFQykRfXI/k6vyiS1jN4/AsJor0Cqjjy37KBSl3Z+0B
-         kXvQ==
-X-Gm-Message-State: AOJu0YzM5Xqv01iENqhMENyQMJ8/cRrXQvTS3hl9hcbMWRKHLLZ3n2Yf
-	Hd4iPnNJyxJ/AvfMeeLIw3eVgqVp5GqCtWBIT/d2VxpkHqVBBoU2oHIf/WxHoNkEes27jFSjeFC
-	Kn3wiP+CNKloipDGh2B8pD1twaJ83TFRBYhF58JkE6Ms+qbIQWOLMQKv3jTrCLXBrerbs9ftQmK
-	R5SX0pZz1XxpB6b85R8JRwXVMA7VEx3OZ7z1+SOajU4jvqzg==
-X-Gm-Gg: ASbGncvgx/aqxHzJe4as/xZzTGT17jnru1TI+C8zJYw56pvoaDk2Adi2kHs0qN2Hu/P
-	bnL64slGsjY/wBeipf7XRhuVx91Eg/W7a8+gFQOFBeNdyxyN7Gn09bpCPaztLMbtSK5pZ9zEYs2
-	aty9Q7GC6Do0zI1xuG9Ju6ye6sc4J1jgJb4Up4PLVMvzZbVlslFZ7bCXyGbQ/d/XH03xf4iWQEd
-	JUxlf911mnh+USi5Fcn7bfhB9GIvxiwE8JWN4S9g4qRwFgf0NO0mhU9CQcIoIqzdxKS6jLd+E2A
-	6xaplFOHocGDO5gYHjjjI72eWDHyBCWfeaLPedNRQEKUBF+exgWHO7Jx84wShCL+HJKp54g=
-X-Received: by 2002:a05:622a:1190:b0:4ed:ae38:6592 with SMTP id d75a77b69052e-4eddbe21298mr83740361cf.79.1763034716836;
-        Thu, 13 Nov 2025 03:51:56 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEZy3xtVVyojrWDpqj3k+OhLQrefqFLzZf3+c4yBDmyZf3Pg8m3FuqHWnk0GPaz+z1bPNxHhQ==
-X-Received: by 2002:a05:622a:1190:b0:4ed:ae38:6592 with SMTP id d75a77b69052e-4eddbe21298mr83740141cf.79.1763034716272;
-        Thu, 13 Nov 2025 03:51:56 -0800 (PST)
-Received: from fedorakvm ([66.187.232.140])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8828652d941sm10112246d6.30.2025.11.13.03.51.55
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 13 Nov 2025 03:51:55 -0800 (PST)
-From: Ravi Singh <ravising@redhat.com>
-To: fstests@vger.kernel.org
-Cc: djwong@kernel.org
-Subject: [PATCH v2 1/1] README: improve README formatting and clarity
-Date: Thu, 13 Nov 2025 06:51:35 -0500
-Message-ID: <20251113115135.609307-2-ravising@redhat.com>
-X-Mailer: git-send-email 2.51.1
-In-Reply-To: <20251113115135.609307-1-ravising@redhat.com>
-References: <20251113115135.609307-1-ravising@redhat.com>
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="TP9cLZdT"
+Received: from pps.filterd (m0353729.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5AD2rq9F028450;
+	Thu, 13 Nov 2025 11:53:53 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=pp1; bh=GKI/8jI/p2dAN7lUnIbnNie9FLKP+K
+	RiZr/olLktSbA=; b=TP9cLZdTplkS0vkmg2yqQIpT7hBAlFRMMKrqnB4+1NTzz+
+	TqSUyUHT3rFt08o5BcrbuNK1iwn3YmtH0RfprXS2s3yX4SB3SleqNG5yCzZC7hrc
+	O2Ke9HoeGsyTgeIgVMlKO/GbtAYml2g1RK14piKe2nk/lGKPX/YLgdhqkKHRpoLN
+	u9onWWZq+gMDpxl/rv0q4IFXxRrt79EIj8h7C1aPqiJdjggRkm2G1ORWVo7hu+uJ
+	lR9f6OBO5G8m6PbgkWLMnvc1S4bdfTrIgk7IT3ZFLIiizgfTE4J1DGq2klrzUxG7
+	ZZFs8BkNA2ezbuF9r46hVp3lwlVR0NUv1VqhJMLw==
+Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4aa5cjej6m-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 13 Nov 2025 11:53:52 +0000 (GMT)
+Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma11.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 5AD90tOo011428;
+	Thu, 13 Nov 2025 11:53:52 GMT
+Received: from smtprelay05.fra02v.mail.ibm.com ([9.218.2.225])
+	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 4aajw1n98v-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 13 Nov 2025 11:53:52 +0000
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay05.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 5ADBroXe40108428
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Thu, 13 Nov 2025 11:53:50 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 4CCEE20043;
+	Thu, 13 Nov 2025 11:53:50 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id A459620040;
+	Thu, 13 Nov 2025 11:53:48 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.124.211.50])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Thu, 13 Nov 2025 11:53:48 +0000 (GMT)
+Date: Thu, 13 Nov 2025 17:23:45 +0530
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH 2/7] generic/778: fix severe performance problems
+Message-ID: <aRXGyR9kj0kPirIE@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+References: <176279908967.605950.2192923313361120314.stgit@frogsfrogsfrogs>
+ <176279909041.605950.16815410156483574567.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <176279909041.605950.16815410156483574567.stgit@frogsfrogsfrogs>
+X-TM-AS-GCONF: 00
+X-Authority-Analysis: v=2.4 cv=Ss+dKfO0 c=1 sm=1 tr=0 ts=6915c6d1 cx=c_pps
+ a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17
+ a=kj9zAlcOel0A:10 a=6UeiqGixMTsA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=VwQbUJbxAAAA:8 a=fKXWO0R7MBri_iPdQioA:9 a=CjuIK1q_8ugA:10
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTA4MDA5NSBTYWx0ZWRfX9f37TQIX4u8A
+ TYb1UhvH77jSBske1HzVQtuaIaJjlsdvEwmYHHcULxKtogWix9yhGfrfsw/7H6mWEQKx8iaTLZ0
+ GXi4yB9dvBMCLt3XfXJ0uyNykWifvVHT7Klm6I0Y7CzHkWisKMvHBK+KrokpgV+5vYs4SVgPJ+e
+ 2hON+eW60CDkVK1Z7qGc6D4Qa4Z8VTxl4wPh1QcUEzo0uDtHNhQ7PfN2qlxExjreq5hSTLypt+R
+ LwWhJfPGMVr52taid3UDB4bogQ/UqLRLguHA9BJw00mNp55C6dbOb9BycHGOLfoo0vY0YXWneNF
+ PmB/16QGEHMmJ5CyiP23z3aB7N8Y3/11AqdK6yM1/3h2O2/dXrvzYYLsydX7Vs9/MZ7nQjeQezC
+ 0eTp4vOmrtv9ENN73660PC04odYIFw==
+X-Proofpoint-GUID: Syuo0ufitwU2CH6vDYWXyeddI1BABOmG
+X-Proofpoint-ORIG-GUID: Syuo0ufitwU2CH6vDYWXyeddI1BABOmG
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
+ definitions=2025-11-13_02,2025-11-12_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ clxscore=1015 suspectscore=0 impostorscore=0 bulkscore=0 phishscore=0
+ lowpriorityscore=0 adultscore=0 priorityscore=1501 spamscore=0 malwarescore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2510240000 definitions=main-2511080095
 
-- Standardize shell command prompts with '#' for readability
-- Correct minor typos
-- Clarify instructions for running tests.
+On Mon, Nov 10, 2025 at 10:26:32AM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> This test takes 4800s to run, which is horrible.  AFAICT it starts out
+> by timing how much can be written atomically to a new file in 0.2
+> seconds, then scales up the file size by 3x.  On not very fast storage,
 
-Signed-off-by: Ravi Singh <ravising@redhat.com>
----
- README | 70 +++++++++++++++++++++++++++++++---------------------------
- 1 file changed, 37 insertions(+), 33 deletions(-)
+Hi Darrick,
 
-diff --git a/README b/README
-index 9e9afe3c..fd27812e 100644
---- a/README
-+++ b/README
-@@ -97,8 +97,8 @@ Ubuntu or Debian
- 
- 1. Make sure that package list is up-to-date and install all necessary packages:
- 
--   $ sudo apt-get update
--   $ sudo apt-get install acl attr automake bc dbench dump e2fsprogs fio gawk \
-+   # sudo apt-get update
-+   # sudo apt-get install acl attr automake bc dbench dump e2fsprogs fio gawk \
-         gcc git indent libacl1-dev libaio-dev libcap-dev libgdbm-dev libtool \
-         libtool-bin liburing-dev libuuid1 lvm2 make psmisc python3 quota sed \
-         uuid-dev uuid-runtime xfsprogs linux-headers-$(uname -r) sqlite3 \
-@@ -106,7 +106,7 @@ Ubuntu or Debian
- 
- 2. Install packages for the filesystem(s) being tested:
- 
--   $ sudo apt-get install exfatprogs f2fs-tools ocfs2-tools udftools xfsdump \
-+   # sudo apt-get install exfatprogs f2fs-tools ocfs2-tools udftools xfsdump \
-         xfslibs-dev
- 
- Fedora
-@@ -114,14 +114,14 @@ Fedora
- 
- 1. Install all necessary packages from standard repository:
- 
--   $ sudo yum install acl attr automake bc dbench dump e2fsprogs fio gawk gcc \
-+   # sudo yum install acl attr automake bc dbench dump e2fsprogs fio gawk gcc \
-         gdbm-devel git indent kernel-devel libacl-devel libaio-devel \
-         libcap-devel libtool liburing-devel libuuid-devel lvm2 make psmisc \
-         python3 quota sed sqlite udftools  xfsprogs
- 
- 2. Install packages for the filesystem(s) being tested:
- 
--    $ sudo yum install btrfs-progs exfatprogs f2fs-tools ocfs2-tools xfsdump \
-+    # sudo yum install btrfs-progs exfatprogs f2fs-tools ocfs2-tools xfsdump \
-         xfsprogs-devel
- 
- RHEL or CentOS
-@@ -133,7 +133,7 @@ RHEL or CentOS
- 2. Install all necessary packages which are available from standard repository
-    and EPEL:
- 
--   $ sudo yum install acl attr automake bc dbench dump e2fsprogs fio gawk gcc \
-+   # sudo yum install acl attr automake bc dbench dump e2fsprogs fio gawk gcc \
-         gdbm-devel git indent kernel-devel libacl-devel libaio-devel \
-         libcap-devel libtool libuuid-devel lvm2 make psmisc python3 quota sed \
-         sqlite udftools xfsprogs
-@@ -148,10 +148,10 @@ RHEL or CentOS
- 4. Install packages for the filesystem(s) being tested:
- 
-     For XFS install:
--     $ sudo yum install xfsdump xfsprogs-devel
-+     # sudo yum install xfsdump xfsprogs-devel
- 
-     For exfat install:
--     $ sudo yum install exfatprogs
-+     # sudo yum install exfatprogs
- 
-     For f2fs build and install:
-      - see https://git.kernel.org/pub/scm/linux/kernel/git/jaegeuk/f2fs-tools.git/about/
-@@ -164,25 +164,25 @@ SUSE Linux Enterprise or openSUSE
- 
- 1. Install all necessary packages from standard repositories:
- 
--   $ sudo zypper install acct automake bc dbench duperemove dump fio gcc git \
-+   # sudo zypper install acct automake bc dbench duperemove dump fio gcc git \
-         indent libacl-devel libaio-devel libattr-devel libcap libcap-devel \
-         libtool liburing-devel libuuid-devel lvm2 make quota sqlite3 xfsprogs
- 
- 2. Install packages for the filesystem(s) being tested:
- 
-     For btrfs install:
--     $ sudo zypper install btrfsprogs libbtrfs-devel
-+     # sudo zypper install btrfsprogs libbtrfs-devel
- 
-     For XFS install:
--     $ sudo zypper install xfsdump xfsprogs-devel
-+     # sudo zypper install xfsdump xfsprogs-devel
- 
- Build and install test, libs and utils
- --------------------------------------
- 
--$ git clone git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
--$ cd xfstests-dev
--$ make
--$ sudo make install
-+# git clone git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-+# cd xfstests-dev
-+# make
-+# sudo make install
- 
- Setup Environment
- -----------------
-@@ -216,12 +216,14 @@ Setup Environment
- 5. Copy local.config.example to local.config and edit as needed. The TEST_DEV
-    and TEST_DIR are required.
- 
-+   # cp local.config.example local.config
-+
- 6. (optional) Create fsgqa test users and groups:
- 
--   $ sudo useradd -m fsgqa
--   $ sudo useradd 123456-fsgqa
--   $ sudo useradd fsgqa2
--   $ sudo groupadd fsgqa
-+   # sudo useradd -m fsgqa
-+   # sudo useradd 123456-fsgqa
-+   # sudo useradd fsgqa2
-+   # sudo groupadd fsgqa
- 
-    The "123456-fsgqa" user creation step can be safely skipped if your system
-    doesn't support names starting with digits, only a handful of tests require
-@@ -251,7 +253,7 @@ For example, to run the tests with loopback partitions:
- 
- The config for the setup above is:
- 
--    $ cat local.config
-+    # cat local.config
-     export TEST_DEV=/dev/loop0
-     export TEST_DIR=/mnt/test
-     export SCRATCH_DEV=/dev/loop1
-@@ -316,7 +318,7 @@ Tools specification:
-       test, if the kernel supports kmemleak.
-  - fsstress:
-     - Set FSSTRESS_AVOID and/or FSX_AVOID, which contain options added to
--      the end of fsstresss and fsx invocations, respectively, in case you wish
-+      the end of fsstress and fsx invocations, respectively, in case you wish
-       to exclude certain operational modes from these tests.
-  - core dumps:
-     - Set COREDUMP_COMPRESSOR to a compression program to compress crash dumps.
-@@ -378,25 +380,27 @@ ______________________
- 
- Running tests:
- 
--    - cd xfstests
-+    - # cd xfstests-dev
-     - By default the tests suite will run all the tests in the auto group. These
-       are the tests that are expected to function correctly as regression tests,
-       and it excludes tests that exercise conditions known to cause machine
-       failures (i.e. the "dangerous" tests).
--    - ./check '*/001' '*/002' '*/003'
--    - ./check '*/06?'
--    - Groups of tests maybe ran by: ./check -g [group(s)]
-+          # ./check
-+    - Running specific tests:
-+          # ./check '*/001' '*/002' '*/003'
-+          # ./check '*/06?'
-+    - Groups of tests maybe ran by: # ./check -g [group(s)]
-       See the tests/*/group.list files after building xfstests to learn about
-       each test's group memberships.
-     - If you want to run all tests regardless of what group they are in
--      (including dangerous tests), use the "all" group: ./check -g all
--    - To randomize test order: ./check -r [test(s)]
-+      (including dangerous tests), use the "all" group: # ./check -g all
-+    - To randomize test order: # ./check -r [test(s)]
-     - You can explicitly specify NFS/AFS/CIFS/OVERLAY, otherwise
-       the filesystem type will be autodetected from $TEST_DEV:
--        - for running nfs tests: ./check -nfs [test(s)]
--        - for running afs tests: ./check -afs [test(s)]
--        - for running cifs/smb3 tests: ./check -cifs [test(s)]
--        - for overlay tests: ./check -overlay [test(s)]
-+        - for running nfs tests: # ./check -nfs [test(s)]
-+        - for running afs tests: # ./check -afs [test(s)]
-+        - for running cifs/smb3 tests: # ./check -cifs [test(s)]
-+        - for overlay tests: # ./check -overlay [test(s)]
-           The TEST and SCRATCH partitions should be pre-formatted
-           with another base fs, where the overlay dirs will be created
- 
-@@ -438,7 +442,7 @@ Test script environment:
- 	    $TEST_DEV.
- 
- 	(b) mkfs a new XFS filesystem on $SCRATCH_DEV, and mount this
--	    on $SCRATCH_MNT. Call the the _require_scratch function
-+	    on $SCRATCH_MNT. Call the _require_scratch function
-             on startup if you require use of the scratch partition.
-             _require_scratch does some checks on $SCRATCH_DEV &
-             $SCRATCH_MNT and makes sure they're unmounted. You should
-@@ -507,7 +511,7 @@ Test script environment:
- 	initialise the test environment correctly, the the build infrastructure
- 	also scans the test files for _begin_fstests invocations. It does this
- 	to compile the group lists that are used to determine which tests to run
--	when `check` is executed. In other words, test files files must call
-+	when `check` is executed. In other words, test files must call
- 	_begin_fstest with their intended groups or they will not be run.
- 
- 	However, because the build infrastructure also uses _begin_fstests as
--- 
-2.51.1
+So 250MB in 0.2s is like 1.2GBps which seems pretty fast. Did you mean
+"On fast storage ..." ?
 
+> this can result in file_size being set to ~250MB on a 4k fsblock
+> filesystem.  That's about 64,000 blocks.
+> 
+> The next thing this test does is try to create a file of that size
+> (250MB) of alternating written and unwritten blocks.  For some reason,
+> it sets up this file by invoking xfs_io 64,000 times to write small
+> amounts of data, which takes 3+ minutes on the author's system because
+> exec overhead is pretty high when you do that.
+
+> 
+> As a result, one loop through the test takes almost 4 minutes.  The test
+> loops 20 times, so it runs for 80 minutes(!!) which is a really long
+> time.
+> 
+> So the first thing we do is observe that the giant slow loop is being
+> run as a single thread on an empty filesystem.  Most of the time the
+> allocator generates a mostly physically contiguous file.  We could
+> fallocate the whole file instead of fallocating one block every other
+> time through the loop.  This halves the setup time.
+> 
+> Next, we can also stuff the remaining pwrite commands into a bash array
+> and only invoke xfs_io once every 128x through the loop.  This amortizes
+> the xfs_io startup time, which reduces the test loop runtime to about 20
+> seconds.
+
+Oh right, this is very bad. Weirdly I never noticed the test taking such
+a huge time while testing on scsi_debug and also on an enterprise SSD.
+
+Thanks for fixing this up though, I will start using maybe dm-delay
+while stressing the tests in the future to avoid such issues.
+
+> 
+> Finally, replace the 20x loop with a _soak_loop_running 5x loop because
+> 5 seems like enough.  Anyone who wants more can set TIME_FACTOR or
+> SOAK_DURATION to get more intensive testing.  On my system this cuts the
+> runtime to 75 seconds.
+
+So about the loops, we were running a modified version of this test,
+which used non atomic writes, to confirm if we are able to catch torn
+writes this way. We noticed that it sometimes took 10+ loops to observe
+the torn write. Hence we kept iters=20. Since catching a torn write is
+critical for working of atomic writes, I think it might make sense to
+leave it at 20. If we feel this is a very high value, we can perhaps
+remove -g auto and keep -g stress -g atomicwrites so only people who
+explicitly want to stress atomic writes will run it.
+
+> 
+> Cc: <fstests@vger.kernel.org> # v2025.10.20
+> Fixes: ca954527ff9d97 ("generic: Add sudden shutdown tests for multi block atomic writes")
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> ---
+>  tests/generic/778 |   59 ++++++++++++++++++++++++++++++++++++-----------------
+>  1 file changed, 40 insertions(+), 19 deletions(-)
+> 
+> 
+> diff --git a/tests/generic/778 b/tests/generic/778
+> index 8cb1d8d4cad45d..7cfabc3a47a521 100755
+> --- a/tests/generic/778
+> +++ b/tests/generic/778
+> @@ -42,22 +42,28 @@ atomic_write_loop() {
+>  		# Due to sudden shutdown this can produce errors so just
+>  		# redirect them to seqres.full
+>  		$XFS_IO_PROG -c "open -fsd $testfile" -c "pwrite -S 0x61 -DA -V1 -b $size $off $size" >> /dev/null 2>>$seqres.full
+> -		echo "Written to offset: $off" >> $tmp.aw
+> -		off=$((off + $size))
+> +		echo "Written to offset: $((off + size))" >> $tmp.aw
+> +		off=$((off + size))
+>  	done
+>  }
+>  
+>  start_atomic_write_and_shutdown() {
+>  	atomic_write_loop &
+>  	awloop_pid=$!
+> +	local max_loops=100
+>  
+>  	local i=0
+> -	# Wait for at least first write to be recorded or 10s
+> -	while [ ! -f "$tmp.aw" -a $i -le 50 ]; do i=$((i + 1)); sleep 0.2; done
+> +	# Wait for at least first write to be recorded or too much time passes
+> +	while [ ! -f "$tmp.aw" -a $i -le $max_loops ]; do
+> +		i=$((i + 1))
+> +		sleep 0.2
+> +	done
+>  
+> -	if [[ $i -gt 50 ]]
+> +	cat $tmp.aw >> $seqres.full
+> +
+> +	if [[ $i -gt $max_loops ]]
+>  	then
+> -		_fail "atomic write process took too long to start"
+> +		_notrun "atomic write process took too long to start"
+>  	fi
+>  
+>  	echo >> $seqres.full
+> @@ -113,21 +119,34 @@ create_mixed_mappings() {
+>  	local off=0
+>  	local operations=("W" "U")
+>  
+> +	test $size_bytes -eq 0 && return
+> +
+> +	# fallocate the whole file once because preallocating single blocks
+> +	# with individual xfs_io invocations is really slow and the allocator
+> +	# usually gives out consecutive blocks anyway
+> +	$XFS_IO_PROG -f -c "falloc 0 $size_bytes" $file
+> +
+> +	local cmds=()
+>  	for ((i=0; i<$((size_bytes / blksz )); i++)); do
+> -		index=$(($i % ${#operations[@]}))
+> -		map="${operations[$index]}"
+> +		if (( i % 2 == 0 )); then
+> +			cmds+=(-c "pwrite -b $blksz $off $blksz")
+> +		fi
+> +
+> +		# batch the write commands into larger xfs_io invocations to
+> +		# amortize the fork overhead
+> +		if [ "${#cmds[@]}" -ge 128 ]; then
+> +			$XFS_IO_PROG "${cmds[@]}" "$file" >> /dev/null
+> +			cmds=()
+> +		fi
+>  
+> -		case "$map" in
+> -		    "W")
+> -			$XFS_IO_PROG -fc "pwrite -b $blksz $off $blksz" $file  >> /dev/null
+> -			;;
+> -		    "U")
+> -			$XFS_IO_PROG -fc "falloc $off $blksz" $file >> /dev/null
+> -			;;
+> -		esac
+>  		off=$((off + blksz))
+>  	done
+>  
+> +	if [ "${#cmds[@]}" -gt 0 ]; then
+> +		$XFS_IO_PROG "${cmds[@]}" "$file" >> /dev/null
+> +		cmds=()
+> +	fi
+> +
+>  	sync $file
+>  }
+>  
+> @@ -336,9 +355,9 @@ echo >> $seqres.full
+>  echo "# Populating expected data buffers" >> $seqres.full
+>  populate_expected_data
+>  
+> -# Loop 20 times to shake out any races due to shutdown
+> -for ((iter=0; iter<20; iter++))
+> -do
+> +# Loop to shake out any races due to shutdown
+> +iter=0
+> +while _soak_loop_running $TIME_FACTOR; do
+>  	echo >> $seqres.full
+>  	echo "------ Iteration $iter ------" >> $seqres.full
+>  
+> @@ -361,6 +380,8 @@ do
+>  	echo >> $seqres.full
+>  	echo "# Starting shutdown torn write test for append atomic writes" >> $seqres.full
+>  	test_append_torn_write
+> +
+> +	iter=$((iter + 1))
+>  done
+>  
+>  echo "Silence is golden"
+> 
