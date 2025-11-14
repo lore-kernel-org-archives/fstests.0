@@ -1,88 +1,65 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F35D835957
-	for <fstests@vger.kernel.org>; Fri, 14 Nov 2025 01:02:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A84426C39E
+	for <fstests@vger.kernel.org>; Fri, 14 Nov 2025 01:30:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763082175; cv=none; b=nLTBECiAArVak1dQPIcO3tMFBvcuhZqboaDmis8+ilM71uYMcci2gl6Pip4XMZme5E19ckXlBSpGzSSlQYn5WGPIyp9naYanUO+PkGP00SZkYc2zzbFj6D9u/ENhnDiPqbVf/cAA7U0XNuyHBiu/ndsDSNXa6KYXSrZK4OvZF9s=
+	t=1763083844; cv=none; b=ukZEr9KGpBiuid+KgCqdjWLrdRDQyG1KunSGwn+eoLuZ3psQOAdAv/I85RKxSHb9s6AeXW/47dOjZN/9QkoAn15tOLVKDw+LhEKcysz/qhQZu6+axwTKsCh8D9KLxnTjb3hACyLIgkRfjORC0D637mHQvypnyRNsW94mCsLqKi4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763082175; c=relaxed/simple;
-	bh=3xe85HA/1czSxmL7nCgRY6ULTgCxgCzYhRT130ACms0=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=NafkYqxFP6JYte5Uw8o75TtQZrEHj/GPagWFCrLr0/4Vw5JZzITOSVHFkqw+91ZXo50HkUfqngkD/CioySN54K++pGG9ZPPX//MUJuML0ZJrzBMDcsAe31jxeHEqW5JSdmB59Hs/5HvXUFzVOMkhHds/ulCieHhW/mt+K7NU9P8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=cvucctQr; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1763083844; c=relaxed/simple;
+	bh=a1cdXiNw2H1JE/HA6Rad4k0t2mwYcH0+AZQJU2v9Q+4=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=FEQNyBsjda1Em7iBDyoajOV5tlOZlzxUgraMwCTBDzfrozfwcfi+StluOZRFoxtyOFG3jb6JoTtqRCdd5Ec2SOa0kXc8LDLY9UdRnP+snSeZwBxjJAQL+l0By9gWznKIaIuPIx5aEbydA3QGqXAGrXt8FWY/z4gCA5GIWqWRd1w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=a6FdrW0O; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="cvucctQr"
-Received: from trampoline.thunk.org (pool-173-48-82-200.bstnma.fios.verizon.net [173.48.82.200])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 5AE12io6013898
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 13 Nov 2025 20:02:45 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1763082166; bh=mPon4wbQ6WvSI1i08sBcmuTwM2MyzZxPZubwjqdLtHs=;
-	h=From:Subject:Date:Message-ID:MIME-Version;
-	b=cvucctQrSIZzsmBZyN+LglFT+Ebi6c2tXe31TML5bB5LMlP1OvEGYq+OTxmELwjrV
-	 49PbePYgVq2RpORA3+prbxeMObE8/m1YLaD/tOrU9RxHGnAdc+VN3pNgHbXOhNTooP
-	 93gVmSinuNyPEbkXhmLPuxc/g9PFrZ4k6n7IcjUFuOFfkN4AlPz7w9RW7JCYPiWF+z
-	 ztcU+VUOSAT9AGF5QvvbDChsqjnzKr9Ys0IywGEhVDf1pgHT9/h2zLn+8G76Sod6nz
-	 K3JKZJK/KWmrQi+ETwsr+GRtDwIa6FCMqbWvMtcuVRgcXeSwSUT/lkqPtizOPYBEHA
-	 Aeu4rmu/bz3og==
-Received: by trampoline.thunk.org (Postfix, from userid 15806)
-	id 869752E00D9; Thu, 13 Nov 2025 20:02:44 -0500 (EST)
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: fstests@vger.kernel.org
-Cc: "Theodore Ts'o" <tytso@mit.edu>, Ojaswin Mujoo <ojaswin@linux.ibm.com>,
-        Zorro Lang <zlang@kernel.org>
-Subject: [PATCH] generic/773: fix expected output "QA output created by 1226"
-Date: Thu, 13 Nov 2025 20:02:38 -0500
-Message-ID: <20251114010238.2173413-1-tytso@mit.edu>
-X-Mailer: git-send-email 2.51.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="a6FdrW0O"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9004AC4CEF5;
+	Fri, 14 Nov 2025 01:30:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1763083843;
+	bh=a1cdXiNw2H1JE/HA6Rad4k0t2mwYcH0+AZQJU2v9Q+4=;
+	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
+	b=a6FdrW0O3G2gTk2LmZmezLEusB3LRDO9X6ERx4+XQxYwruG/1CJ+Ghszf8FZdNAcG
+	 WenInxKs7Mtfd+G7e1fFLFNV3GksMlZ7j0uU6RCd3oNMmvc5NmMZvTzTQJYGNTgvzS
+	 8zMHYkq8tWw+gWZ25FMVE4/gqV2DYBdaagdoqRUJ5cvVzui23vlp6EQuPDr8EnCyvY
+	 0lLWyRbb6OFDMMx1iK7QuLQq6B/Ra+ViZhegTw9a5pepT//JcNv2B1+XGe2wuuTV0D
+	 LkSJ4smZqbE+REoQOhB+d5/ka5f92zu25pjh2hhbiX7EGwETxo6m4u6yyPgOfFkVIy
+	 MBJ7O5Glyx1qg==
+Message-ID: <41d4bf9e-708f-4a24-b9cc-f0adf30140c8@kernel.org>
+Date: Fri, 14 Nov 2025 09:30:43 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Cc: chao@kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>,
+ linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH v1 1/3] f2fs/015: clear MKFS_OPTIONS and MOUNT_OPTIONS
+To: Joanne Chang <joannechien@google.com>, Zorro Lang <zlang@kernel.org>,
+ fstests@vger.kernel.org
+References: <20251112135223.3467852-1-joannechien@google.com>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <20251112135223.3467852-1-joannechien@google.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 
-The test generic/773 was apparently submitted as generic/1226, but
-when it was renamed to pack the test namespace, apparently the test
-output wasn't adjusted to reflect the new test name, leading to the
-test failing on sytems that have devices that support atomic writes.
+On 11/12/2025 9:52 PM, Joanne Chang wrote:
+> Currently, residual options can interfere with checking the mount
+> behavior of the listed MKFS_OPTIONS and MOUNT_OPTIONS. For example,
+> "Option#120: test_dummy_encryption" should fail with the listed
+> options but succeeds if “MKFS_OPTIONS=encrypt” is preset. By
+> explicitly clearing MKFS_OPTIONS and MOUNT_OPTIONS, the test’s
+> reliability can be improved.
+> 
+> f2fs/015.out is also updated to expect failure for cases that require
+> additional mkfs attributes to mount.
+> 
+> Signed-off-by: Joanne Chang <joannechien@google.com>
 
-Fixes: 1499d4ff2365 ("generic: Add atomic write test using fio crc ...")
-Cc: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc: Zorro Lang <zlang@kernel.org>
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- tests/generic/773     | 2 +-
- tests/generic/773.out | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+Reviewed-by: Chao Yu <chao@kernel.org>
 
-diff --git a/tests/generic/773 b/tests/generic/773
-index 7ad745546..0a30ac7f4 100755
---- a/tests/generic/773
-+++ b/tests/generic/773
-@@ -2,7 +2,7 @@
- # SPDX-License-Identifier: GPL-2.0
- # Copyright (c) 2025 IBM Corporation. All Rights Reserved.
- #
--# FS QA Test 1226
-+# FS QA Test 773
- #
- # Validate FS atomic write using fio crc check verifier.
- #
-diff --git a/tests/generic/773.out b/tests/generic/773.out
-index 6dce0ea52..8626114df 100644
---- a/tests/generic/773.out
-+++ b/tests/generic/773.out
-@@ -1,2 +1,2 @@
--QA output created by 1226
-+QA output created by 773
- Silence is golden
--- 
-2.51.0
-
+Thanks,
