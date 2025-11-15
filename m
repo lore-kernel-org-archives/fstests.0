@@ -1,393 +1,234 @@
-Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com [209.85.208.44])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC4BF2DC78E
-	for <fstests@vger.kernel.org>; Fri, 14 Nov 2025 19:48:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3CEE2A1C7;
+	Sat, 15 Nov 2025 02:32:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763149737; cv=none; b=cfDRhGxR+rCNEZ/T5N/bOrS2AiDQF0gTGz5Q2fDhPPjfAn/45AbHa4WFlwSQ8ycoyc5LCR5Y/VElfRy02O63Un5j0f1vilhgmDkj+FiD43eyKXdA1f5mL0SXR+YGwY/j4nuVFBGNlImosqv5HvK9Gr8oOmi5XBMisSmeKe3I2Ww=
+	t=1763173971; cv=none; b=tOIZlMJPpxjsfziLqBvV1WO3SszYbavpTK6ubQjS1RxvxXECKKSfFouWkUgo7SCAaPpwRHTCiKQenm8VgWtq43ETBSGm5LjmYWFZXsh10T2toM0sCXtLeC/deNTm4tgpzvV52lok+mUE7DvelerxaNJJaBfPcULaackSwg/XXvM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763149737; c=relaxed/simple;
-	bh=j6twI5SqQGvOPFdhGNQNuBtlelBO6pkQcYFTuqJo4NE=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=BMpglcz3LUD6n7g9xxng2tzGTkujz/YT5U0wjbwx0IHnnEyaHNowQY9rmtPkiadQbwfKF9T/F4hpwsidVMWMCPAn51JKOPtHwh5OF3O8vAYPqA39I1ShyQEQgRhr7Vqw9cWCl1j5oxXjUc0KV9bR6ZW6QJZkTTQ4PWbe5HSKpXg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=QeuOC15F; arc=none smtp.client-ip=209.85.208.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1763173971; c=relaxed/simple;
+	bh=otAQ7a26ss8k30fOohTALHF2V8L26CcuE722HUM3was=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=f+Ziv0e8FSRxvcObRjnWrjc26nRyahAZ7Pp63IlGJcmGy0pJkAU6odsMSxmPNW1/qCI2Jcvfx2tDn6MLWd0tetJtlYALzHgtQw82eLpy81v3xZGIc0MyRugVsmW4Se+gJiNq4BGMcK2g5bHOrc7LHJ0hwNLv376Ev9gyRPN6kcM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PmEGMy/s; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QeuOC15F"
-Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-6408f9cb1dcso3554710a12.3
-        for <fstests@vger.kernel.org>; Fri, 14 Nov 2025 11:48:55 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1763149734; x=1763754534; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=tv0IKvKJcdm09lOdehlfWwQJkkukI0ZDKzc1jq3HU1E=;
-        b=QeuOC15FC1dM+LjGtYm2+HJJi+ZcdX+7R4qy5YOj6SHK4K4BXQsSUK4+gZ76QGDxG+
-         6IZDXnVMDR6uhv62oj3gMvVrcsdDI/a7yT5CLTTrMKcIY+sHM+EFJy341C5GX7N3mBUX
-         S+Q6waWwjTLRT+fsfSQs9yirxmKEJxLCDHUwedUX+n3Urxnasu3+M0eGSslkaAQI9DWe
-         zi5ebipEpC0SXK8yz+Do/DtG+B+QjwvXDsldufLAITQrl9v86nA3JtGldl2GprtA/E1B
-         Az3GQ8/7ZOF4Vt2e4P/hE9mB7wMRFEUPYefm7D3BSgNS9/Hz1PM95oqgb+x7I9ZfexUM
-         nkXQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763149734; x=1763754534;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=tv0IKvKJcdm09lOdehlfWwQJkkukI0ZDKzc1jq3HU1E=;
-        b=KSmnI2Obm6ansVdRMCT4Cwv/j70czZ1MI9ejsWpHSHCaXCJ39tEvnSx5QF4nXmlY8E
-         wgRpkli2aAJLCpFutlsSdqYjOQX/tAe1UPZB0u2kWhe9YX8WWDGqulGwf5OAMt118pSs
-         96lI6j3EXQ86cwPoPFaVqp2KbU2rGJ+gf1mdbxuTE7I5LbfVvmNeqwrwPirwNcOBgycv
-         g/M9OPSWrCscyF4C5pef6qBVbTR6Y4ITpPJ16V1EzASS8WhR6yUlfB+yVUwM4vBD9Aeu
-         2ziG3uooeUTsqZ7Euy3yqTQKwkhab/m7kMnKsjkBjjfnQImK/Yr73PoMsdxgGg7dWtGB
-         aOTw==
-X-Forwarded-Encrypted: i=1; AJvYcCWxLjSLRdhqgWYWJe84WQdnDbmepgO7yUlRK7W1bW3ktuAzNqTt/wrQBQlOar++wfX7BJUe9V1B@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxmzw6yq557Rw+dN3TX5IJYMU49Tcw5ybbHOmpbHT7bwNkYT6uj
-	6xe8PJnP2MsOl5g4P4WUUDUkcdOK284/cf4ao/D+yapJ97nat0a6R26D
-X-Gm-Gg: ASbGncv5gyK06+1cLEv5jhK2nOLQLqsWedZKct4WUcollBCACBRJeoET2TT/R9s2EnU
-	9ns17aRo1MPpike3YOW2aJVv3UoIOi5KKganx6sj/Qy8ntoAK31tNO30aHOnAXWDOB5jQfPWokb
-	n75WPXPjlfb9K76gbkcd4rgN7wolpByNMYyLPJs0+FIdMRB+IekuyUMXeLb+F3k3SfmGbjVVmDA
-	DXOuEHQQ4JzVPpIgFRCYB6jVd4XdWt4HIeZoXOJrppqBr3lAjCAM4B4SqjGkCXgJPSe2eIylYfX
-	cZHAIwqmDjnoWq+InU0hsZgqY0SC4DQktmdIyN1O5Tjqhanfc5Ohu8QMSfC87U1zEmveyUdodhK
-	3G0IOTI1yS895o50xpz5zFPtZrYxQgABSh8AUFgYAO7ngZnHv1ue6hRg3Cdg9QWs6ICTfy3o4p9
-	3DoSARE1p8UA1/IsGx9CRL9hwAc0mP7rQVo9GTY07m+zQdJKnnzDIPyw+vZIhqNfs+QCb5Nb49h
-	yFziw==
-X-Google-Smtp-Source: AGHT+IH9/VmrpBDdC3X+Pu/jasW2eLDwTI8VLT3G+6FDxr+TM96Do/OesjkQl9u7f62ZGK9sRCOZvQ==
-X-Received: by 2002:a17:907:1b20:b0:b6d:3fc9:e60c with SMTP id a640c23a62f3a-b736780c131mr435172766b.20.1763149733822;
-        Fri, 14 Nov 2025 11:48:53 -0800 (PST)
-Received: from localhost (2001-1c00-570d-ee00-9bc7-e3f9-3583-f90e.cable.dynamic.v6.ziggo.nl. [2001:1c00:570d:ee00:9bc7:e3f9:3583:f90e])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b734fad41cesm443604066b.16.2025.11.14.11.48.52
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Nov 2025 11:48:53 -0800 (PST)
-From: Amir Goldstein <amir73il@gmail.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>,
-	Christian Brauner <brauner@kernel.org>,
-	=?UTF-8?q?Andr=C3=A9=20Almeida?= <andrealmeid@igalia.com>,
-	linux-unionfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH v2] overlay: add tests for casefolded layers
-Date: Fri, 14 Nov 2025 20:48:52 +0100
-Message-ID: <20251114194852.1344740-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.51.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PmEGMy/s"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9D99FC19425;
+	Sat, 15 Nov 2025 02:32:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1763173971;
+	bh=otAQ7a26ss8k30fOohTALHF2V8L26CcuE722HUM3was=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=PmEGMy/sxVncRM8QqEX+igsmaAuU2T9zFlUybAXHkolC1xVpLbpzAfJunQMyUgoGw
+	 yusIrLyeSSRgmCXKqgEd9Ubydp6Rn9xX1GkM/hGswXXoHwH70FWsDaFhURca4XdQi9
+	 LtuH1YrQ3cI0eKDTQbVQcLaZZ435xHAJcA9fAQMLAUSBK450TbIGEwTiJu44Ob0rAY
+	 CQBEkQpJTBCzrugncmChMBi6I6PMzyU3FBR6OYS1Rm7igSRcE4pBmVcGXEwGCGUTti
+	 roaKKibvbkFEFVgr0gNAcNt3HYv5C8EDlD/ZCkh5NRC/xTw8BcQ5IgHpV5cs8lLV+Y
+	 1FTRVqoxqrZuw==
+Date: Fri, 14 Nov 2025 18:32:51 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH 2/7] generic/778: fix severe performance problems
+Message-ID: <20251115023251.GI196366@frogsfrogsfrogs>
+References: <176279908967.605950.2192923313361120314.stgit@frogsfrogsfrogs>
+ <176279909041.605950.16815410156483574567.stgit@frogsfrogsfrogs>
+ <aRXGyR9kj0kPirIE@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <aRXGyR9kj0kPirIE@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 
-Overalyfs did not allow mounting layers with casefold capable fs
-until kernel v6.17 and did not allow casefold enabled layers
-until kernel v6.18.
+On Thu, Nov 13, 2025 at 05:23:45PM +0530, Ojaswin Mujoo wrote:
+> On Mon, Nov 10, 2025 at 10:26:32AM -0800, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > This test takes 4800s to run, which is horrible.  AFAICT it starts out
+> > by timing how much can be written atomically to a new file in 0.2
+> > seconds, then scales up the file size by 3x.  On not very fast storage,
+> 
+> Hi Darrick,
+> 
+> So 250MB in 0.2s is like 1.2GBps which seems pretty fast. Did you mean
+> "On fast storage ..." ?
 
-Since kernel v6.18, overalyfs allows this kind of setups,
-as long as the layers have consistent encoding and all the directories
-in the subtree have consistent casefolding.
+No, I have even faster storage. ;)
 
-Create test cases for the following scenarios:
-- Mounting overlayfs with casefold disabled
-- Mounting overlayfs with casefold enabled
-- Lookup subdir in overlayfs with mismatch casefold to parent dir
-- Change casefold of underlying subdir while overalyfs is mounted
-- Mounting overlayfs with strict enconding, but casefold disabled
-- Mounting overlayfs with strict enconding casefold enabled
-- Mounting overlayfs with layers with inconsistent UTF8 version
+> > this can result in file_size being set to ~250MB on a 4k fsblock
+> > filesystem.  That's about 64,000 blocks.
+> > 
+> > The next thing this test does is try to create a file of that size
+> > (250MB) of alternating written and unwritten blocks.  For some reason,
+> > it sets up this file by invoking xfs_io 64,000 times to write small
+> > amounts of data, which takes 3+ minutes on the author's system because
+> > exec overhead is pretty high when you do that.
+> 
+> > 
+> > As a result, one loop through the test takes almost 4 minutes.  The test
+> > loops 20 times, so it runs for 80 minutes(!!) which is a really long
+> > time.
+> > 
+> > So the first thing we do is observe that the giant slow loop is being
+> > run as a single thread on an empty filesystem.  Most of the time the
+> > allocator generates a mostly physically contiguous file.  We could
+> > fallocate the whole file instead of fallocating one block every other
+> > time through the loop.  This halves the setup time.
+> > 
+> > Next, we can also stuff the remaining pwrite commands into a bash array
+> > and only invoke xfs_io once every 128x through the loop.  This amortizes
+> > the xfs_io startup time, which reduces the test loop runtime to about 20
+> > seconds.
+> 
+> Oh right, this is very bad. Weirdly I never noticed the test taking such
+> a huge time while testing on scsi_debug and also on an enterprise SSD.
 
-Co-developed-by: André Almeida <andrealmeid@igalia.com>
-Signed-off-by: André Almeida <andrealmeid@igalia.com>
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+It doesn't help that xfs supports much larger awu_max than (say) ext4.
 
-Hi Zorro,
+> Thanks for fixing this up though, I will start using maybe dm-delay
+> while stressing the tests in the future to avoid such issues.
 
-I fixed the bug you found with tmpfs.
+fork() is a bit expensive.
 
-Please note that I did not assign a sequential test number because
-I wanted to let you assign a non conflicting number when you merge it.
+> > 
+> > Finally, replace the 20x loop with a _soak_loop_running 5x loop because
+> > 5 seems like enough.  Anyone who wants more can set TIME_FACTOR or
+> > SOAK_DURATION to get more intensive testing.  On my system this cuts the
+> > runtime to 75 seconds.
+> 
+> So about the loops, we were running a modified version of this test,
+> which used non atomic writes, to confirm if we are able to catch torn
+> writes this way. We noticed that it sometimes took 10+ loops to observe
+> the torn write. Hence we kept iters=20. Since catching a torn write is
+> critical for working of atomic writes, I think it might make sense to
+> leave it at 20. If we feel this is a very high value, we can perhaps
+> remove -g auto and keep -g stress -g atomicwrites so only people who
+> explicitly want to stress atomic writes will run it.
 
-Thanks,
-Amir.
+In that case we ought to limit the awu_max that we feed to the test
+because otherwise it starts running a lot of IO.
 
-Chages since v1:
-- Fix test run with tmpfs (needed _scratch_mount_casefold_strict)
-- unmount MNT1/MNT2 in cleanup
-- Use _mount _unmount helpers
+--D
 
- tests/generic/999     | 242 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/999.out |  13 +++
- 2 files changed, 255 insertions(+)
- create mode 100755 tests/generic/999
- create mode 100644 tests/generic/999.out
-
-diff --git a/tests/generic/999 b/tests/generic/999
-new file mode 100755
-index 00000000..c315b8ba
---- /dev/null
-+++ b/tests/generic/999
-@@ -0,0 +1,242 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2025 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test 999
-+#
-+# Test overlayfs error cases with casefold enabled layers
-+#
-+# Overalyfs did not allow mounting layers with casefold capable fs
-+# until kernel v6.17 and with casefold enabled until kernel v6.18.
-+# Since kernel v6.17, overalyfs allows the mount, as long as casefolding
-+# is disabled on all directories.
-+# Since kernel v6.18, overalyfs allows the mount, as long as casefolding
-+# is consistent on all directories and encoding is consistent on all layers.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick mount casefold
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	_unmount $merge 2>/dev/null
-+	_unmount $MNT1 2>/dev/null
-+	_unmount $MNT2 2>/dev/null
-+	rm -r -f $tmp.*
-+}
-+
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/casefold
-+
-+_exclude_fs overlay
-+_require_extra_fs overlay
-+
-+_require_scratch_casefold
-+
-+# Create casefold capable base fs
-+_scratch_mkfs_casefold >>$seqres.full 2>&1
-+_scratch_mount_casefold
-+
-+# Create lowerdir, upperdir and workdir without casefold enabled
-+lowerdir="$SCRATCH_MNT/ovl-lower"
-+upperdir="$SCRATCH_MNT/ovl-upper"
-+workdir="$SCRATCH_MNT/ovl-work"
-+merge="$SCRATCH_MNT/ovl-merge"
-+
-+mount_casefold_version()
-+{
-+	option="casefold=$1"
-+	_mount -t tmpfs -o $option tmpfs $2
-+}
-+
-+mount_overlay()
-+{
-+	local lowerdirs=$1
-+
-+	_mount -t overlay overlay $merge \
-+		-o lowerdir=$lowerdirs,upperdir=$upperdir,workdir=$workdir
-+}
-+
-+unmount_overlay()
-+{
-+	_unmount $merge 2>/dev/null
-+}
-+
-+# Try to mount an overlay with casefold enabled layers.
-+# On kernels older than v6.18 expect failure and skip the test
-+mkdir -p $merge $upperdir $workdir $lowerdir
-+_casefold_set_attr $upperdir >>$seqres.full
-+_casefold_set_attr $workdir >>$seqres.full
-+_casefold_set_attr $lowerdir >>$seqres.full
-+mount_overlay $lowerdir >>$seqres.full 2>&1 || \
-+	_notrun "overlayfs does not support casefold enabled layers"
-+unmount_overlay
-+
-+# Re-create casefold disabled layers with lower subdir
-+casefolddir=$lowerdir/casefold
-+rm -rf $upperdir $workdir $lowerdir
-+mkdir -p $upperdir $workdir $lowerdir $casefolddir
-+
-+# Try to mount an overlay with casefold capable but disabled layers.
-+# Since we already verified that overalyfs supports casefold enabled layers
-+# this is expected to succeed.
-+echo Casefold disabled
-+mount_overlay $lowerdir >>$seqres.full 2>&1 || \
-+	echo "Overlayfs mount with casefold disabled layers failed (1)"
-+ls $merge/casefold/ >>$seqres.full
-+unmount_overlay
-+
-+# Use new upper/work dirs for each test to avoid ESTALE errors
-+# on mismatch lowerdir/upperdir (see test overlay/037)
-+rm -rf $upperdir $workdir
-+mkdir $upperdir $workdir
-+
-+# Try to mount an overlay with casefold disabled layers and
-+# enable casefold on lowerdir root after mount - expect ESTALE error on lookup.
-+echo Casefold enabled after mount
-+mount_overlay $casefolddir >>$seqres.full || \
-+	echo "Overlayfs mount with casefold disabled layers failed (2)"
-+_casefold_set_attr $casefolddir >>$seqres.full
-+mkdir $casefolddir/subdir
-+ls $merge/subdir |& _filter_scratch
-+unmount_overlay
-+
-+# Try to mount an overlay with casefold enabled lowerdir root - expect EINVAL.
-+# With libmount version >= v1.39, we expect the following descriptive error:
-+# mount: overlay: case-insensitive directory on .../ovl-lower/casefold not supported
-+# but we want the test to run with older libmount, so we so not expect this output
-+# we just expect a mount failure.
-+echo Casefold enabled lower dir
-+mount_overlay $casefolddir >>$seqres.full 2>&1 && \
-+	echo "Overlayfs mount with casefold enabled lowerdir should have failed" && \
-+	unmount_overlay
-+
-+# Changing lower layer root again
-+rm -rf $upperdir $workdir
-+mkdir $upperdir $workdir
-+
-+# Try to mount an overlay with casefold disabled layers, but with
-+# casefold enabled subdir in lowerdir - expect EREMOTE error on lookup.
-+echo Casefold enabled lower subdir
-+mount_overlay $lowerdir >>$seqres.full
-+ls $merge/casefold/subdir |& _filter_scratch
-+unmount_overlay
-+
-+# workdir needs to be empty to set casefold attribute
-+rm -rf $workdir/*
-+
-+_casefold_set_attr $upperdir >>$seqres.full
-+_casefold_set_attr $workdir >>$seqres.full
-+
-+echo Casefold enabled upper dir
-+mount_overlay $lowerdir >>$seqres.full 2>&1 && \
-+	echo "Overlayfs mount with casefold enabled upperdir should have failed" && \
-+	unmount_overlay
-+
-+# lowerdir needs to be empty to set casefold attribute
-+rm -rf $lowerdir/*
-+_casefold_set_attr $lowerdir >>$seqres.full
-+mkdir $casefolddir
-+
-+# Try to mount an overlay with casefold enabled layers.
-+# On kernels older than v6.18 expect failure and skip the rest of the test
-+# On kernels v6.18 and newer, expect success and run the rest of the test cases.
-+echo Casefold enabled
-+mount_overlay $lowerdir >>$seqres.full 2>&1 || \
-+	echo "Overlayfs mount with casefold enabled layers failed (1)"
-+ls $merge/casefold/ >>$seqres.full
-+unmount_overlay
-+
-+# Try to mount an overlayfs with casefold enabled layers. After the mount,
-+# disable casefold on the lower layer and try to lookup a file. Should return
-+# -ESTALE
-+echo Casefold disabled on lower after mount
-+mount_overlay $lowerdir >>$seqres.full 2>&1 || \
-+	echo "Overlayfs mount with casefold enabled layers failed (2)"
-+rm -rf $lowerdir/*
-+_casefold_unset_attr $lowerdir >>$seqres.full
-+mkdir $lowerdir/dir
-+ls $merge/dir/ |& _filter_scratch
-+unmount_overlay
-+
-+# cleanup
-+rm -rf $lowerdir/*
-+_casefold_set_attr $lowerdir >>$seqres.full
-+
-+# Try to mount an overlayfs with casefold enabled layers. After the mount,
-+# disable casefold on a subdir in  the lower layer and try to lookup it.
-+# Should return -EREMOTE
-+echo Casefold disabled on subdir after mount
-+mkdir $lowerdir/casefold/
-+mount_overlay $lowerdir >>$seqres.full 2>&1 || \
-+	echo "Overlayfs mount with casefold enabled layers failed (3)"
-+_casefold_unset_attr $lowerdir/casefold/
-+mkdir $lowerdir/casefold/subdir
-+ls $merge/casefold/subdir |& _filter_scratch
-+unmount_overlay
-+
-+# cleanup
-+rm -rf $lowerdir/*
-+
-+# Test strict enconding, but casefold not enabled. Should work
-+_scratch_umount_idmapped
-+
-+_scratch_mkfs_casefold_strict >>$seqres.full 2>&1
-+_scratch_mount_casefold_strict
-+
-+mkdir -p $merge $upperdir $workdir $lowerdir
-+
-+mount_overlay $lowerdir >>$seqres.full 2>&1 || \
-+	echo "Overlayfs mount with strict casefold disabled layers failed"
-+unmount_overlay
-+
-+# Test strict enconding, with casefold enabled. Should fail
-+# dmesg: overlayfs: strict encoding not supported
-+rm -rf $upperdir $workdir
-+mkdir $upperdir $workdir
-+
-+_casefold_set_attr $upperdir >>$seqres.full
-+_casefold_set_attr $workdir >>$seqres.full
-+_casefold_set_attr $lowerdir >>$seqres.full
-+
-+mount_overlay $lowerdir >>$seqres.full 2>&1 && \
-+	echo "Overlayfs mount with strict casefold enabled should have failed" && \
-+	unmount_overlay
-+
-+# Test inconsistent casefold version. Should fail
-+# dmesg: overlayfs: all layers must have the same encoding
-+
-+# use tmpfs to make easier to create two different mount points with different
-+# utf8 versions
-+testdir="$SCRATCH_MNT/newdir/"
-+mkdir $testdir
-+
-+MNT1="$testdir/mnt1"
-+MNT2="$testdir/mnt2"
-+
-+mkdir $MNT1 $MNT2 "$testdir/merge"
-+
-+mount_casefold_version "utf8-12.1.0" $MNT1
-+mount_casefold_version "utf8-11.0.0" $MNT2
-+
-+mkdir "$MNT1/dir" "$MNT2/dir"
-+
-+_casefold_set_attr "$MNT1/dir"
-+_casefold_set_attr "$MNT2/dir"
-+
-+mkdir "$MNT1/dir/lower" "$MNT2/dir/upper" "$MNT2/dir/work"
-+
-+upperdir="$MNT2/dir/upper"
-+workdir="$MNT2/dir/work"
-+lowerdir="$MNT1/dir/lower"
-+
-+mount_overlay $lowerdir >>$seqres.full 2>&1  && \
-+	echo "Overlayfs mount different unicode versions should have failed" && \
-+	unmount_overlay
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/999.out b/tests/generic/999.out
-new file mode 100644
-index 00000000..ce383d94
---- /dev/null
-+++ b/tests/generic/999.out
-@@ -0,0 +1,13 @@
-+QA output created by 999
-+Casefold disabled
-+Casefold enabled after mount
-+ls: cannot access 'SCRATCH_MNT/ovl-merge/subdir': Stale file handle
-+Casefold enabled lower dir
-+Casefold enabled lower subdir
-+ls: cannot access 'SCRATCH_MNT/ovl-merge/casefold/subdir': Object is remote
-+Casefold enabled upper dir
-+Casefold enabled
-+Casefold disabled on lower after mount
-+ls: cannot access 'SCRATCH_MNT/ovl-merge/dir/': Stale file handle
-+Casefold disabled on subdir after mount
-+ls: cannot access 'SCRATCH_MNT/ovl-merge/casefold/subdir': Object is remote
--- 
-2.51.1
-
+> > 
+> > Cc: <fstests@vger.kernel.org> # v2025.10.20
+> > Fixes: ca954527ff9d97 ("generic: Add sudden shutdown tests for multi block atomic writes")
+> > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> > ---
+> >  tests/generic/778 |   59 ++++++++++++++++++++++++++++++++++++-----------------
+> >  1 file changed, 40 insertions(+), 19 deletions(-)
+> > 
+> > 
+> > diff --git a/tests/generic/778 b/tests/generic/778
+> > index 8cb1d8d4cad45d..7cfabc3a47a521 100755
+> > --- a/tests/generic/778
+> > +++ b/tests/generic/778
+> > @@ -42,22 +42,28 @@ atomic_write_loop() {
+> >  		# Due to sudden shutdown this can produce errors so just
+> >  		# redirect them to seqres.full
+> >  		$XFS_IO_PROG -c "open -fsd $testfile" -c "pwrite -S 0x61 -DA -V1 -b $size $off $size" >> /dev/null 2>>$seqres.full
+> > -		echo "Written to offset: $off" >> $tmp.aw
+> > -		off=$((off + $size))
+> > +		echo "Written to offset: $((off + size))" >> $tmp.aw
+> > +		off=$((off + size))
+> >  	done
+> >  }
+> >  
+> >  start_atomic_write_and_shutdown() {
+> >  	atomic_write_loop &
+> >  	awloop_pid=$!
+> > +	local max_loops=100
+> >  
+> >  	local i=0
+> > -	# Wait for at least first write to be recorded or 10s
+> > -	while [ ! -f "$tmp.aw" -a $i -le 50 ]; do i=$((i + 1)); sleep 0.2; done
+> > +	# Wait for at least first write to be recorded or too much time passes
+> > +	while [ ! -f "$tmp.aw" -a $i -le $max_loops ]; do
+> > +		i=$((i + 1))
+> > +		sleep 0.2
+> > +	done
+> >  
+> > -	if [[ $i -gt 50 ]]
+> > +	cat $tmp.aw >> $seqres.full
+> > +
+> > +	if [[ $i -gt $max_loops ]]
+> >  	then
+> > -		_fail "atomic write process took too long to start"
+> > +		_notrun "atomic write process took too long to start"
+> >  	fi
+> >  
+> >  	echo >> $seqres.full
+> > @@ -113,21 +119,34 @@ create_mixed_mappings() {
+> >  	local off=0
+> >  	local operations=("W" "U")
+> >  
+> > +	test $size_bytes -eq 0 && return
+> > +
+> > +	# fallocate the whole file once because preallocating single blocks
+> > +	# with individual xfs_io invocations is really slow and the allocator
+> > +	# usually gives out consecutive blocks anyway
+> > +	$XFS_IO_PROG -f -c "falloc 0 $size_bytes" $file
+> > +
+> > +	local cmds=()
+> >  	for ((i=0; i<$((size_bytes / blksz )); i++)); do
+> > -		index=$(($i % ${#operations[@]}))
+> > -		map="${operations[$index]}"
+> > +		if (( i % 2 == 0 )); then
+> > +			cmds+=(-c "pwrite -b $blksz $off $blksz")
+> > +		fi
+> > +
+> > +		# batch the write commands into larger xfs_io invocations to
+> > +		# amortize the fork overhead
+> > +		if [ "${#cmds[@]}" -ge 128 ]; then
+> > +			$XFS_IO_PROG "${cmds[@]}" "$file" >> /dev/null
+> > +			cmds=()
+> > +		fi
+> >  
+> > -		case "$map" in
+> > -		    "W")
+> > -			$XFS_IO_PROG -fc "pwrite -b $blksz $off $blksz" $file  >> /dev/null
+> > -			;;
+> > -		    "U")
+> > -			$XFS_IO_PROG -fc "falloc $off $blksz" $file >> /dev/null
+> > -			;;
+> > -		esac
+> >  		off=$((off + blksz))
+> >  	done
+> >  
+> > +	if [ "${#cmds[@]}" -gt 0 ]; then
+> > +		$XFS_IO_PROG "${cmds[@]}" "$file" >> /dev/null
+> > +		cmds=()
+> > +	fi
+> > +
+> >  	sync $file
+> >  }
+> >  
+> > @@ -336,9 +355,9 @@ echo >> $seqres.full
+> >  echo "# Populating expected data buffers" >> $seqres.full
+> >  populate_expected_data
+> >  
+> > -# Loop 20 times to shake out any races due to shutdown
+> > -for ((iter=0; iter<20; iter++))
+> > -do
+> > +# Loop to shake out any races due to shutdown
+> > +iter=0
+> > +while _soak_loop_running $TIME_FACTOR; do
+> >  	echo >> $seqres.full
+> >  	echo "------ Iteration $iter ------" >> $seqres.full
+> >  
+> > @@ -361,6 +380,8 @@ do
+> >  	echo >> $seqres.full
+> >  	echo "# Starting shutdown torn write test for append atomic writes" >> $seqres.full
+> >  	test_append_torn_write
+> > +
+> > +	iter=$((iter + 1))
+> >  done
+> >  
+> >  echo "Silence is golden"
+> > 
+> 
