@@ -1,234 +1,184 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 535077E792
-	for <fstests@vger.kernel.org>; Sat, 15 Nov 2025 07:37:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7EC3F1F4613
+	for <fstests@vger.kernel.org>; Sat, 15 Nov 2025 08:11:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763192257; cv=none; b=X0PKG9fK2n2Nq4zt7sfwDvCPBVay7+xU+s5FPObcwtuRzMRgM8zveqvnTlAwpRT6o4FIqwoRrmP8jYHHkAfCcegzDLkSA+xghoHIR1aNx2uluYPPbX+qUTNt9FFPd3/PPhtdtkLeDffnvxwT6yqU0vPZSViA4mPCcFTiIDfXS/A=
+	t=1763194308; cv=none; b=nm1qgCdL9xuJrn4iI4STTSQPGFZaXLLkTSUot0PNzlDrfT0/uHJ+gv2ApJSKzQ+KH925HRTHdsfVmlMae3MXkxUW9Kp1bMtZL+pWDTo/2eMRDc6STfDyiS/faRGvUwLmW0HjXqcfYOI69Uqw7IBklnNVYsiwnpXrzGqwwSUSJts=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763192257; c=relaxed/simple;
-	bh=Q+EJgoV9OGNkgW6m/Rt5higpv0j5DfYxCG92xNr5Ngc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=FnQPayJE6uyIJjTKrNqsurJfGMm8uItrg6hbBS8X5BvEN79zn5jkjbTdDDeROGXCXKQ+3zt5O2U4fe7e1qK+1iavagqZiGVy3soI9J8ncCLuSGqbqAsaVYKIaPLByF+sz9a/zSgkYD0chU5rAmUMmpv2iF9JyLMRDA7J9NZSiIk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=W17uF3zb; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=cE3O9eZS; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1763194308; c=relaxed/simple;
+	bh=QIBFpHynOInHiAJlxbAK/wTVou/4Ob0QHGDLNQ4jfRk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=MDpFYhx7OjB3w/Vc3f5Njh20HMrYYPRcuAbri9xtWO461W3xXldRZm1shV4RMC6vp4lWU05yNt2lBeNKtSBa/1cUdFVJc8XW6wbtbS8yWe+Gu4/W0rkaZ8i9uDH/rBBM21KbaDgLxlojECUKEahsL7XqeytpnbYWsr64tBE87E8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=m6SygEBe; arc=none smtp.client-ip=209.85.218.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="W17uF3zb";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="cE3O9eZS"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1763192254;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=bpt7AJNJ29x1IN4z7g8Oew2mK6ZG5cMHvoRNgZWqvX4=;
-	b=W17uF3zbve3FJU+iRwnEGks6Ytg4P7F5O4sHFIiyzRtE9/yXpL5hewY/Aa6Yi+Mbu8AwhD
-	sNS3fX0xneTr3Y2NhoOAj1UdmB7DIlYczVuw69hX1p9hO3lyObHn4om/vWzKCDUnCAoh5l
-	l6PvDiE6ilVXYVDG8Nl9b0cOWvi3Scs=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-204-PuBejNybOSeDR1KyQmj_Eg-1; Sat, 15 Nov 2025 02:37:31 -0500
-X-MC-Unique: PuBejNybOSeDR1KyQmj_Eg-1
-X-Mimecast-MFC-AGG-ID: PuBejNybOSeDR1KyQmj_Eg_1763192251
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2956cdcdc17so30821765ad.3
-        for <fstests@vger.kernel.org>; Fri, 14 Nov 2025 23:37:31 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="m6SygEBe"
+Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-b70bee93dc4so386719666b.3
+        for <fstests@vger.kernel.org>; Sat, 15 Nov 2025 00:11:46 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1763192250; x=1763797050; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=bpt7AJNJ29x1IN4z7g8Oew2mK6ZG5cMHvoRNgZWqvX4=;
-        b=cE3O9eZSoESYpfpAgTww4doDkO6jwirzPfzN7KUwETsBjJfui1eK8miB59ZN02HQ/4
-         3T0l1AYGJDBCkD6Ro2LWvB2NAXxwBIGzcfEXfKn8IEzorAquMtDie5Vc1LsYcavllhUv
-         +9AyEOi5Ya0pCduTB3vbbyseMW4DdpxmAnuq1/NVLEiBDBouBeHKwHg4S1/rxPwHO1/p
-         QiJymjI3KxWwAucDS9Rk1Vf9omBJ80UXk4JRExcdrA+HODeZvtOSHGImIhE0949kBdwk
-         VoVmzKjXZqimDoqiO80yJ3juIdKZGg0N+5dVyAT6zMcUtRRz1lh4HQAAkCSfgwuqQF/0
-         jt4w==
+        d=gmail.com; s=20230601; t=1763194305; x=1763799105; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=nTgJvucTK4WSvLw37JpaJABlSGehYqmIEwQ+BAHe7h4=;
+        b=m6SygEBeyQZzYJKIOX5kXQv4NCse1a+jw8P0/3ktPt1FGAETPbaTaDKFRmfhzp5cFX
+         KLC4iqZGJ2tXSZ47ULHOyJbtvs7HHbU6GqD1Aji1dxako6wKZ83SOPIL8s0Tzg9L0x88
+         hxho3cmihust1s7JOmHvWBwn8j9IoSIO8lAA7kKHkSrMEEPkwVh9//DgWiN+OEqBio5V
+         HP4zw5JnAohGdJ8jnZugYGZeiuiocqFuUbTI3P5ZGgT96xbCiSMWgh19r9Iij3XNdehr
+         7aXDUDaXzfKv90RewQxK7b1wEg7lvD65tyPqIgpM7zDS4ruQ0lBFGcVQdZUnR98jhhk5
+         PcYg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763192250; x=1763797050;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=bpt7AJNJ29x1IN4z7g8Oew2mK6ZG5cMHvoRNgZWqvX4=;
-        b=umhtLrPT+Tz3eWQyC9eQKruBOpcbSAOTJ9j9PM9agdU3q9PhSd+BHFCQyzlH/4s4B4
-         zImjLQ+Z3TR6RzaBxmWRsUbHkEvWvLRDa/b/S/Hoj3+0BZKd9uW9/JI+AnQxIegMIENS
-         DyPSTdLRlOMft8H/NOTzonIif5PNlLxutY3RXMoKkJwkt+QkvFro+VKiL+DPDSrm3n69
-         lSVK/ICR8bS5cbBnfi3pdOZEMmhJw7LUfGyA7b1z6nk9uwWLVhbsiRcfAIs1XjUol92m
-         nq+8QucDZeN/xHAQIz6G/UdLRBtW65c+XT5TjzgyFUEMyieK7T3dEfN1Sc8f6McwS7mB
-         CiWA==
-X-Gm-Message-State: AOJu0Yx6TdUAmu21Ui+YzQ/Z3zCU60FeBTnat33TUS+4FeQnaR3YgjN/
-	7U7tha/Ld+6fh3jtJGe0ZbAtd51uIjgDQs8bSpUu3CSE3qmT5FbKHPyE8osJMUcH9+6ur5DHQQX
-	EfduwTpeeh57sfY7CiEW5jCa+PGQP86hVHviSxSgdCP9H8Bx/kPONdTQK/aqei4X6Gh8=
-X-Gm-Gg: ASbGnctrN36/7pOmEK5XG6gy1as/yva1LHNisofvhSxJzOF1tHuKCj0DLM2i/7VzNP1
-	e7QClqizUvWYvmkuxVR7qNGCetpZ2rRvzHH1iNSQhsnGPp5oaf6FUdzDbL6TbXb2OEq7e/mjD1R
-	vo2cQEE9a2+WA2WkjouxjS5ZVEsFG1d2fT6gURMOGO5CXbjnMgBFH0r5McNizXSL4rEGjY863j7
-	kKc+vBWcZAaHtcQ/5mLIS29Gcak9VPD7VEz57/Drtq+2ehx3LR1U/RsMRH3AD15DNeo/PjDgHpe
-	Nul/XpDbC/WZ/XYLlmUo+7ghtxui/e59gOL7MeQ0bAH9c4dOZVFV1LA2VWN8oyQ2+ZUFRDyWz1q
-	HrLyJfUAMZPfLaO/kTdf0OzqieIbGqIH6mJb02beURz5lGQM/Sw==
-X-Received: by 2002:a17:902:ef51:b0:267:a1f1:9b23 with SMTP id d9443c01a7336-2986a6d0e8fmr72746215ad.18.1763192249880;
-        Fri, 14 Nov 2025 23:37:29 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IF6hQKUeF6Jq+BIeWcwDmoIem2yUQBwotEdn/Us91MrAC17FzqEJUBOiCoK8CdxwDvRH6Wubg==
-X-Received: by 2002:a17:902:ef51:b0:267:a1f1:9b23 with SMTP id d9443c01a7336-2986a6d0e8fmr72746025ad.18.1763192249369;
-        Fri, 14 Nov 2025 23:37:29 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2985c23849esm77120015ad.5.2025.11.14.23.37.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Nov 2025 23:37:28 -0800 (PST)
-Date: Sat, 15 Nov 2025 15:37:24 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: test incremental send after deleting directories
- with many hardlinks
-Message-ID: <20251115073724.6qgcuijwutisrtu4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <8d1b819511b4c93b5ba0b3137090f5c28a952364.1761844883.git.fdmanana@suse.com>
+        d=1e100.net; s=20230601; t=1763194305; x=1763799105;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=nTgJvucTK4WSvLw37JpaJABlSGehYqmIEwQ+BAHe7h4=;
+        b=cjjncythTO0TK1vCpi3XEjYMVIuqofH4UY/9E2oFaQiIyhl7xp5qLZK8qXfYipNkbs
+         Dk59v0Efi31EzVsz0PLvDA1F1U/AapD4/a+MSje5qvMyu9EadT9fO/A/xfVNQf9wbXs8
+         8F7aEi2PFcrSQFSbzLPhi5z4arbMAp4PPFe+vs1dshsCoseWFUmzdSUnF5VLM7RBwBIy
+         M2DdHMJVAUp7cLKlBjVs3Ad24k4gZXLo80BK4GpPI4WPrHOXAJpQvx5ABv2Q5ronHM2v
+         30vkwSU2ihT84zWrmR+HNwutMKtOVPD7Mfgy33rcuhj+Q0Ux/YIMGkkxlqYD0Kzr5wBF
+         EE6g==
+X-Forwarded-Encrypted: i=1; AJvYcCVTO9BmfS5kD5KyIRJ0cvFMJUt/RRVnzg/Hr7fh+t1TZ2SjmOxGks7JKiJbmKX+llog277UO2m6@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx0kFvRZ6nwuDENpkKSVCwA/rT8UOEGGgURMSUBXU4xG4xa0sW7
+	wTnne9C8Zmdh/6qfeugPKezj8jD7Yzf8hfsD8eW/YTXrq+wH6S0sIfxPxpCg8sdq3iNdlZUrXEF
+	3A1tDWf+Jxt2vp4C8sCcPmjzwarbwGtA=
+X-Gm-Gg: ASbGncsLhm0oHEreX0aE/Nukahf2iiquvbO5pvMAF5pDcOCuokoNFFharhvjPruNUDS
+	lJxf3QT92zuSRSrETE2fgpHOEeHw6t5JnZa0Q+9oRrYFbF2X0+dASGbfQ7zU2+NPKsBS/wK8Rbd
+	29EPgYCb4L68iN4L+sE6HAVPfVqUebCufQK/fN00VQH7Bry+zQKGsWiVp3IjK45fwH5+3Z37CH/
+	8h84/PE7Q8p/xrr112E9dw3YqShimnvoKalOw3kJmnUJxtOWtkxjTo22kTs3I9E8IsXZ6HAEB2M
+	dz0boYCg6njzSbS/iGPsHq1RgAJpRg==
+X-Google-Smtp-Source: AGHT+IH1xDPFtHhZ9mUxe/8mNbdWMETlMxaoF1sBpFr568z4QBWRznGo2vR0HbO6CO3Ap7/fxj6AW13RGYp/iskf7MY=
+X-Received: by 2002:a17:907:7f18:b0:b4e:a47f:715d with SMTP id
+ a640c23a62f3a-b736780c24bmr577407766b.17.1763194304569; Sat, 15 Nov 2025
+ 00:11:44 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <8d1b819511b4c93b5ba0b3137090f5c28a952364.1761844883.git.fdmanana@suse.com>
+References: <20251114194852.1344740-1-amir73il@gmail.com> <20251115071102.pelohvzihg4aafse@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20251115071102.pelohvzihg4aafse@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Sat, 15 Nov 2025 09:11:33 +0100
+X-Gm-Features: AWmQ_bmBKpgg4Fmq2iK_15HmvUz2CjgPkQ8V2O5kx6bJTm16kqG_bYVBuI7i-dM
+Message-ID: <CAOQ4uxjWWTm7wYK9737V89ToYgF6gSZ4TD1=tr58nNehk5rcoA@mail.gmail.com>
+Subject: Re: [PATCH v2] overlay: add tests for casefolded layers
+To: Zorro Lang <zlang@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Christian Brauner <brauner@kernel.org>, 
+	=?UTF-8?Q?Andr=C3=A9_Almeida?= <andrealmeid@igalia.com>, 
+	linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Oct 30, 2025 at 05:22:44PM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> Test that an incremental send works after we removed directories that have
-> large number of hardlinks for the same file (so that we have extrefs).
-> 
-> This is a regression test for the kernel commit 1fabe43b4e1a ("btrfs:
-> send: fix duplicated rmdir operations when using extrefs").
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
+On Sat, Nov 15, 2025 at 8:11=E2=80=AFAM Zorro Lang <zlang@redhat.com> wrote=
+:
+>
+> On Fri, Nov 14, 2025 at 08:48:52PM +0100, Amir Goldstein wrote:
+> > Overalyfs did not allow mounting layers with casefold capable fs
+> > until kernel v6.17 and did not allow casefold enabled layers
+> > until kernel v6.18.
+> >
+> > Since kernel v6.18, overalyfs allows this kind of setups,
+> > as long as the layers have consistent encoding and all the directories
+> > in the subtree have consistent casefolding.
+> >
+> > Create test cases for the following scenarios:
+> > - Mounting overlayfs with casefold disabled
+> > - Mounting overlayfs with casefold enabled
+> > - Lookup subdir in overlayfs with mismatch casefold to parent dir
+> > - Change casefold of underlying subdir while overalyfs is mounted
+> > - Mounting overlayfs with strict enconding, but casefold disabled
+> > - Mounting overlayfs with strict enconding casefold enabled
+> > - Mounting overlayfs with layers with inconsistent UTF8 version
+> >
+> > Co-developed-by: Andr=C3=A9 Almeida <andrealmeid@igalia.com>
+> > Signed-off-by: Andr=C3=A9 Almeida <andrealmeid@igalia.com>
+> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > ---
+> >
+> > Hi Zorro,
+> >
+> > I fixed the bug you found with tmpfs.
+> >
+> > Please note that I did not assign a sequential test number because
+> > I wanted to let you assign a non conflicting number when you merge it.
+>
+> Thanks Amir :) This version looks good to me, just one question below...
+>
+> >
+> > Thanks,
+> > Amir.
+> >
+> > Chages since v1:
+> > - Fix test run with tmpfs (needed _scratch_mount_casefold_strict)
+> > - unmount MNT1/MNT2 in cleanup
+> > - Use _mount _unmount helpers
+> >
+> >  tests/generic/999     | 242 ++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/999.out |  13 +++
+> >  2 files changed, 255 insertions(+)
+> >  create mode 100755 tests/generic/999
+> >  create mode 100644 tests/generic/999.out
+> >
+> > diff --git a/tests/generic/999 b/tests/generic/999
+> > new file mode 100755
+> > index 00000000..c315b8ba
+> > --- /dev/null
+> > +++ b/tests/generic/999
+> > @@ -0,0 +1,242 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (C) 2025 CTERA Networks. All Rights Reserved.
+> > +#
+> > +# FS QA Test 999
+> > +#
+> > +# Test overlayfs error cases with casefold enabled layers
+> > +#
+> > +# Overalyfs did not allow mounting layers with casefold capable fs
+> > +# until kernel v6.17 and with casefold enabled until kernel v6.18.
+> > +# Since kernel v6.17, overalyfs allows the mount, as long as casefoldi=
+ng
+> > +# is disabled on all directories.
+> > +# Since kernel v6.18, overalyfs allows the mount, as long as casefoldi=
+ng
+> > +# is consistent on all directories and encoding is consistent on all l=
+ayers.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick mount casefold
+> > +
+> > +# Override the default cleanup function.
+> > +_cleanup()
+> > +{
+> > +     cd /
+> > +     _unmount $merge 2>/dev/null
+> > +     _unmount $MNT1 2>/dev/null
+> > +     _unmount $MNT2 2>/dev/null
+>
+> ... I saw you mount $MNT1 and $MNT2 at first, then mount $merge:
+>
+>   mount_casefold_version "utf8-12.1.0" $MNT1
+>   mount_casefold_version "utf8-11.0.0" $MNT2
+>   ...
+>   mount_overlay $lowerdir (which mount on $merge)
+>
+> So I think unmount $merge after umount $MNT1 and $MNT2 might (looks)
+> make more sense, although I saw you've tried to do unmount_overlay
+> before _cleanup :)
+>
 
-This patch is good to me, it can reproduce the bug on v6.18-rc1, then test
-passed on v6.18-rc4 (which contains the bug fix). As there's not any review
-point/objection from btrfs list after 2 weeks, I'd like to merge this patch
-in next fstests release.
+Conceptually, overlayfs mount is a stack, so the correct order is
+to unmount the top of the stack ($merge) first and then to unmounted
+the base fs of the stack ($MNT1,$MNT2).
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+In practice, the order does not matter because overlayfs mount does
+not prevent unmount of the mounts that were used as upper/lower,
+but there is certainly no reason to require unmounting them first.
 
->  tests/btrfs/338     | 93 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/338.out |  3 ++
->  2 files changed, 96 insertions(+)
->  create mode 100755 tests/btrfs/338
->  create mode 100644 tests/btrfs/338.out
-> 
-> diff --git a/tests/btrfs/338 b/tests/btrfs/338
-> new file mode 100755
-> index 00000000..0cc29c7c
-> --- /dev/null
-> +++ b/tests/btrfs/338
-> @@ -0,0 +1,93 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 SUSE S.A.  All Rights Reserved.
-> +#
-> +# FS QA Test 338
-> +#
-> +# Test that an incremental send works after we removed directories that have
-> +# large number of hardlinks for the same file (so that we have extrefs).
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick send
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -fr $tmp.*
-> +	rm -fr $send_files_dir
-> +}
-> +
-> +_require_test
-> +_require_scratch
-> +_require_fssum
-> +
-> +_fixed_by_kernel_commit 1fabe43b4e1a \
-> +	"btrfs: send: fix duplicated rmdir operations when using extrefs"
-> +
-> +send_files_dir=$TEST_DIR/btrfs-test-$seq
-> +
-> +rm -fr $send_files_dir
-> +mkdir $send_files_dir
-> +
-> +first_stream="$send_files_dir/1.send"
-> +second_stream="$send_files_dir/2.send"
-> +first_fssum="$send_files_dir/snap1.fssum"
-> +second_fssum="$send_files_dir/snap2.fssum"
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "first mkfs failed"
-> +_scratch_mount
-> +
-> +# Create two directories which will have many hardlinks for the same file, a
-> +# large number that triggers the use of extrefs. This way we will get many
-> +# extref items in the subvolume tree, with a very high likelyhood that not
-> +# all hardlinks for directory "a" are consecutive in the tree, that they are
-> +# interspersed with extref items for hardlinks to directory "b".
-> +#
-> +# Example:
-> +#
-> +#        item 0 key (259 INODE_EXTREF 2309449) itemoff 16257 itemsize 26
-> +#                index 6925 parent 257 namelen 8 name: foo.6923
-> +#        item 1 key (259 INODE_EXTREF 2311350) itemoff 16231 itemsize 26
-> +#                index 6588 parent 258 namelen 8 name: foo.6587
-> +#        item 2 key (259 INODE_EXTREF 2457395) itemoff 16205 itemsize 26
-> +#                index 6611 parent 257 namelen 8 name: foo.6609
-> +#        (...)
-> +#
-> +# Refer to the kernel commit's changelog for more details.
-> +mkdir $SCRATCH_MNT/a
-> +mkdir $SCRATCH_MNT/b
-> +
-> +touch $SCRATCH_MNT/a/foo
-> +for ((i = 1; i <= 1000; i++)); do
-> +	ln $SCRATCH_MNT/a/foo $SCRATCH_MNT/a/foo.$i
-> +	ln $SCRATCH_MNT/a/foo $SCRATCH_MNT/b/foo.$i
-> +done
-> +
-> +_btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap1
-> +
-> +# Now delete the directories and all the links inside them.
-> +rm -fr $SCRATCH_MNT/a
-> +rm -fr $SCRATCH_MNT/b
-> +
-> +_btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2
-> +
-> +_btrfs send -f $first_stream $SCRATCH_MNT/snap1
-> +_btrfs send -f $second_stream -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2
-> +
-> +$FSSUM_PROG -A -f -w $first_fssum $SCRATCH_MNT/snap1
-> +$FSSUM_PROG -A -f -w $second_fssum -x $SCRATCH_MNT/snap2/snap1 \
-> +	$SCRATCH_MNT/snap2
-> +
-> +# Create a new fs and apply both send streams.
-> +_scratch_unmount
-> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "second mkfs failed"
-> +_scratch_mount
-> +
-> +_btrfs receive -f $first_stream $SCRATCH_MNT
-> +_btrfs receive -f $second_stream $SCRATCH_MNT
-> +
-> +$FSSUM_PROG -r $first_fssum $SCRATCH_MNT/snap1
-> +$FSSUM_PROG -r $second_fssum $SCRATCH_MNT/snap2
-> +
-> +# success, all done
-> +_exit 0
-> diff --git a/tests/btrfs/338.out b/tests/btrfs/338.out
-> new file mode 100644
-> index 00000000..7ea61817
-> --- /dev/null
-> +++ b/tests/btrfs/338.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 338
-> +OK
-> +OK
-> -- 
-> 2.47.2
-> 
-> 
-
+Thanks,
+Amir.
