@@ -1,156 +1,240 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f45.google.com (mail-pj1-f45.google.com [209.85.216.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 46125309DD2
-	for <fstests@vger.kernel.org>; Mon, 17 Nov 2025 17:41:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2045A285041
+	for <fstests@vger.kernel.org>; Tue, 18 Nov 2025 07:35:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763401278; cv=none; b=u8El9814EYwsvEkggXy4q1ERhStg5CYZQYAsoCnlTX/A936CYebWkLQ7y81VtLqrs1afw8I7SMhye7VnDvQcBWIxDi3l10Qu97m3Ymg6pQMLf0raUr5sQjKqzBEfDuCYYHlqwOVcjMRUjEhFpcFZKoag0sBtkoVuJpkQdj/zKrI=
+	t=1763451331; cv=none; b=DF/TZrTr3ldo1oaec/dj8GqT3IH+Cy56i+XjNatlT46LBImmxQydpVnI97HXervKQAQiL8pkeBWJlLBb5GAINxHn/46PWSaSn5Ueb7C9inqeUOgGsLZlV2NGMCX3DKZQ2BiH0u8DrTu4pF01LwyEXpq9DI0BQDRuJV92+984PmI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763401278; c=relaxed/simple;
-	bh=La/DAYtGpO56fwvMoExwRrHYklrmFbVeEgSa4VCfuzI=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=ZMWdKsBZ4/DHaNtnimhCuKhxvq1/fxyA3I4nYjnFKZ0tZZb+dxTIYmsoCDEtRHt1T8dW8ntt4GmdMGgKPFOQ9yrSE0tySGqgjOKllQhuXhJKpGNfYvWJl1b0p/OpMhsfTsDoMkWNXSdFTc27RK9tklIP58yTTFDV9f9wF1lQn9k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=B2imF2sr; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1763451331; c=relaxed/simple;
+	bh=XVAWyKzt1bYt9jpYTmjEVmTIDb6x305gdOQ85BCuj4E=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Q6UtYzCvQAIAid77ndG7D9gJ62REy2jKh4HNetnFBko4eoLrvnhfxuPclLdd+4ofqC+7owtZ3ItUSUU47ZR/opGJwlgpR0QpFgAhRolpyub7YD42NbNhkR3YnFuOyEhVnzvzaI+zzoXW6UPP/lnRC+XyUtBrKs+MouNVjl3PyfM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=OdIv4/c2; arc=none smtp.client-ip=209.85.216.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="B2imF2sr"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3085EC2BC9E;
-	Mon, 17 Nov 2025 17:41:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1763401277;
-	bh=La/DAYtGpO56fwvMoExwRrHYklrmFbVeEgSa4VCfuzI=;
-	h=Date:From:To:Subject:From;
-	b=B2imF2srG5sZaRVcmbQcdn8TRXKDliT8BRAdwke9YZUPBv7yjuUhvmF+nybQ2rLEo
-	 UQf3SVJJjT2lNx/hzm8hDyyyemzp5dV0kJPwi8iX6gmqcScHFkxG5TdxlgRl0V68jh
-	 9ohjyYA+5+kjUCM2rJ4drAxg7F+Plj2PdLjRHmOSk1G/4SXE2Jh6Ltd3xYpAk36O8N
-	 R1YDXl1toMu7b+SD611lnuNHosym0tULUSgHI4+sYoo4qvWlKH8IT3Z+tNXIHSIpYZ
-	 3LkHUI/b2Y1+cI7n1gTpD1SnDmQGEiSLKwEi9sO0kDk+CW7nfacNMXjWOiN0QoClzp
-	 C7fOx9IR/71FQ==
-Date: Tue, 18 Nov 2025 01:41:11 +0800
-Message-ID: <4e2d8c3d65126e53660492f39b8024c7@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2025.11.18
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OdIv4/c2"
+Received: by mail-pj1-f45.google.com with SMTP id 98e67ed59e1d1-343d73d08faso4672820a91.0
+        for <fstests@vger.kernel.org>; Mon, 17 Nov 2025 23:35:30 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1763451329; x=1764056129; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=uTRo4S4W+AYlowFpVgzM04+bbe83GqG0z8F03lkjbS0=;
+        b=OdIv4/c2Ol5vOJUb/nckt7xv0nFjOft51w74JlX7Zyr2w/HVc6r3WRqlNoHQ20ddm4
+         iky/XPX9bfO2vN4tVFCVH10YNFfvn474hmLTCvuk5ibO8L132m9sG9CNlSTVoCXRNOGt
+         zMucKoiXRXB8JVk2ol8hc69AyQeKqiEObqkgmVAu8KVyc0ifhTRwJZjjIFNiM1vQYVv4
+         xuIYRB5H8HWlZjYO3mW9usaQx7G+1XgJ2sr2tsmTWxkf1uyxgwrop4JgCZxjApWSTayp
+         kC2ru/SMvaEbA1Mv1RYOqUG9LwTAfkGCOX1Ul43mTZIEaWn160gIhMXa3YahrBEBQcFc
+         1xNQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1763451329; x=1764056129;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=uTRo4S4W+AYlowFpVgzM04+bbe83GqG0z8F03lkjbS0=;
+        b=Ikz0jy/WktbwpWW/eKIMY+NXpFufzrUSSitWIab4imjM3912vNSSa9bkOjCS7dyfCy
+         JcWWSK3bN28e3XyM71C4se0zq+zwcClpOenm5/bpc59FTIRTwXvdfN9EStN37MKQOO+j
+         IQBFSaq8V0hBG97AtUPQMe6dDv+yV+O3ftIzwna479TqAVhcYv9iFx0Z9LsNzLYwQ/Kk
+         nZHts8Dq7HHfKMA+69UoMno9qjFlG+4UEF5rCn8tnWuRvc2Fmxl8aYMTJQwJfgGW7Ww6
+         /htMhKDJHMwP6YlgXHOmmgi98HqLAU+cIlHgmcb+JMOZiSSDprUAN7WaCp4sXJ9n7Tvf
+         dZ8A==
+X-Forwarded-Encrypted: i=1; AJvYcCXUbHmdrCz4ITDeHdcUcGMqX/p+kwRVHcmwADTi8R7O4q4AZwwTtHwOK8HfL3M4oI7bLjwIAU1U@vger.kernel.org
+X-Gm-Message-State: AOJu0YzZ6dAU509xTR1apn9idN8BMsKEMWv7uNFtp10DOZxyDilwrqyx
+	NYmgkaagjiof0J0osTba0zUxwOjJbeKqzCZfkJK4vUN9pw/bQ2hwo/j3
+X-Gm-Gg: ASbGnctSuVCMDp/jnA7ubWruxXAShc4w4jRy6yypsJbs4nbSSyMGQXKj44rPE7qMVXI
+	FDh9cFhFm23CGCUrpOGFNvIOzYCc5HsyfRYlBO4kQuLydwLlmnq3y44cmfafXEyhiNEWsZgZi5l
+	5IfxZvnMEcT7YCbGmKpTGGqhkXeM3GO9AGp3XlxFGx8eRoS7FZ/ikXkw5mGop2TZduWwSEBK2a+
+	QQOkmenugcZtwxSHjNuDspFIOjXgtuKnmU0NPFfJyoPUcBCA4w2vAVdJfPfdJySwfo1YI8+MSG1
+	hPrOAf0z1c3CZvu2ZilqHCav0Ou41HVzHRnquVOltJP6iTgYNlPpsUGc99JKgO+OWFbCxSJOD2p
+	3U2W1tXsuJSL5xMHGYaNsMOylNKSt4kz5phACRyXlUxji2DYGne5vj8utLzQEM6sBlcEvKM7jm+
+	TC2uJR38jkruzLt5JWQ/2Wr9eUZARTdDcO/p1zbnurOPwL2DlLbzDMqz+FRe0r
+X-Google-Smtp-Source: AGHT+IEHKKz0Cjj3Zv8b67ra4djfJLHStYKLQWPLvtMHZlwVL86SzQ0ZTx4GFMwFHpYtN+UrhI4NLQ==
+X-Received: by 2002:a17:90b:3c86:b0:340:f009:ca99 with SMTP id 98e67ed59e1d1-345aea63bf9mr2830554a91.0.1763451329377;
+        Mon, 17 Nov 2025 23:35:29 -0800 (PST)
+Received: from ddn232-monserver.lab.ddn.com (fs276ec80e.tkyc203.ap.nuro.jp. [39.110.200.14])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-343e06fe521sm21060184a91.1.2025.11.17.23.35.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 17 Nov 2025 23:35:29 -0800 (PST)
+From: Xiao Yang <iceyangxiao@gmail.com>
+To: zlang@kernel.org,
+	zlang@redhat.com
+Cc: timday@amazon.com,
+	fstests@vger.kernel.org,
+	sihara@ddn.com,
+	Xiao Yang <iceyangxiao@gmail.com>
+Subject: [PATCH] fstests: Add lustre support
+Date: Tue, 18 Nov 2025 07:30:11 +0000
+Message-ID: <20251118073011.362595-1-iceyangxiao@gmail.com>
+X-Mailer: git-send-email 2.43.7
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="QUNuElGde2V0"
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 
+Add basic lustre support so that we can continuously
+improve lustre by fstests.
 
---QUNuElGde2V0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Xiao Yang <iceyangxiao@gmail.com>
+---
+ README                 |  2 ++
+ README.config-sections |  7 +++++++
+ check                  |  3 ++-
+ common/config          |  5 +++++
+ common/rc              | 29 ++++++++++++++++++++++++++++-
+ 5 files changed, 44 insertions(+), 2 deletions(-)
 
-Hi all,
+diff --git a/README b/README
+index 9e9afe3c..9e3ff13f 100644
+--- a/README
++++ b/README
+@@ -87,6 +87,8 @@ L4: Active support from the fs list, has lots of own cases.
+ +------------+-------+---------------------------------------------------------+
+ | 9p         |  L1   | N/A                                                     |
+ +------------+-------+---------------------------------------------------------+
++| lustre     |  L1   | N/A                                                     |
+++------------+-------+---------------------------------------------------------+
+ 
+ _______________________
+ BUILDING THE FSQA SUITE
+diff --git a/README.config-sections b/README.config-sections
+index a42d9d7b..18af445f 100644
+--- a/README.config-sections
++++ b/README.config-sections
+@@ -135,3 +135,10 @@ TEST_DEV=%example.com:xfstest.test
+ TEST_DIR=/mnt/xfstest.test
+ SCRATCH_DEV=%example.com:xfstest.scratch
+ SCRATCH_MNT=/mnt/xfstest.scratch
++
++[lustre]
++FSTYP=lustre
++TEST_DIR=/mnt/test
++TEST_DEV=192.168.1.1@tcp:/test
++SCRATCH_MNT=/mnt/scratch
++SCRATCH_DEV=192.168.1.1@tcp:/scratch
+diff --git a/check b/check
+index ce7eacb7..a5d43d98 100755
+--- a/check
++++ b/check
+@@ -70,6 +70,7 @@ check options
+     -pvfs2		test PVFS2
+     -tmpfs		test TMPFS
+     -ubifs		test ubifs
++    -lustre             test lustre
+     -l			line mode diff
+     -udiff		show unified diff (default)
+     -n			show me, do not run tests
+@@ -277,7 +278,7 @@ while [ $# -gt 0 ]; do
+ 	case "$1" in
+ 	-\? | -h | --help) usage ;;
+ 
+-	-nfs|-afs|-glusterfs|-cifs|-9p|-fuse|-virtiofs|-pvfs2|-tmpfs|-ubifs)
++	-nfs|-afs|-glusterfs|-cifs|-9p|-fuse|-virtiofs|-pvfs2|-tmpfs|-ubifs|-lustre)
+ 		FSTYP="${1:1}"
+ 		;;
+ 	-overlay)
+diff --git a/common/config b/common/config
+index 1420e35d..9d3c36e8 100644
+--- a/common/config
++++ b/common/config
+@@ -394,6 +394,9 @@ _common_mount_opts()
+ 	ubifs)
+ 		echo $UBIFS_MOUNT_OPTIONS
+ 		;;
++	lustre)
++		echo $LUSTRE_MOUNT_OPTIONS
++		;;
+ 	*)
+ 		;;
+ 	esac
+@@ -539,6 +542,8 @@ _source_specific_fs()
+ 		[ "$UBIUPDATEVOL_PROG" = "" ] && _fatal "ubiupdatevol not found"
+ 		. ./common/ubifs
+ 		;;
++	lustre)
++		;;
+ 	esac
+ }
+ 
+diff --git a/common/rc b/common/rc
+index 8fd7876a..7f75963b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -867,6 +867,9 @@ _test_mkfs()
+     pvfs2)
+ 	# do nothing for pvfs2
+ 	;;
++    lustre)
++	# do nothing for lustre
++	;;
+     udf)
+         $MKFS_UDF_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
+ 	;;
+@@ -981,7 +984,7 @@ _scratch_mkfs()
+ 	local mkfs_status
+ 
+ 	case $FSTYP in
+-	nfs*|afs|cifs|ceph|overlay|glusterfs|pvfs2|9p|fuse|virtiofs)
++	nfs*|afs|cifs|ceph|overlay|glusterfs|pvfs2|9p|fuse|virtiofs|lustre)
+ 		# unable to re-create this fstyp, just remove all files in
+ 		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+ 		# created in previous runs
+@@ -2064,6 +2067,15 @@ _require_scratch_nocheck()
+ 			_notrun "this test requires a valid \$SCRATCH_MNT"
+ 		fi
+ 		;;
++	lustre)
++		echo $SCRATCH_DEV | grep -q "@.*:/" > /dev/null 2>&1
++		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
++			_notrun "this test requires a valid \$SCRATCH_DEV"
++		fi
++		if [ ! -d "$SCRATCH_MNT" ]; then
++			_notrun "this test requires a valid \$SCRATCH_MNT"
++		fi
++		;;
+ 	*)
+ 		 if [ -z "$SCRATCH_DEV" -o "`_is_block_dev "$SCRATCH_DEV"`" = "" ]
+ 		 then
+@@ -2288,6 +2300,15 @@ _require_test()
+ 			_notrun "this test requires a valid \$TEST_DIR"
+ 		fi
+ 		;;
++	lustre)
++		echo $TEST_DEV | grep -q "@.*:/" > /dev/null 2>&1
++		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
++			_notrun "this test requires a valid \$TEST_DEV"
++		fi
++		if [ ! -d "$TEST_DIR" ]; then
++			_notrun "this test requires a valid \$TEST_DIR"
++		fi
++		;;
+ 	*)
+ 		 if [ -z "$TEST_DEV" ] || [ "`_is_block_dev "$TEST_DEV"`" = "" ]
+ 		 then
+@@ -3658,6 +3679,9 @@ _check_test_fs()
+ 	;;
+     pvfs2)
+ 	;;
++    lustre)
++	# no way to check consistency for lustre
++	;;
+     udf)
+ 	# do nothing for now
+ 	;;
+@@ -3720,6 +3744,9 @@ _check_scratch_fs()
+ 	;;
+     pvfs2)
+ 	;;
++    lustre)
++	# no way to check consistency for lustre
++	;;
+     btrfs)
+ 	_check_btrfs_filesystem $device
+ 	;;
+-- 
+2.43.7
 
-The for-next branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2025.11.18 release.
-
-Release Notes:
-1) There're 3 new test cases in this release, include btrfs/338, f2fs/023
-   and generic/783. b/338 and f/023 are regression tests to uncover known
-   btrfs and f2fs issues, g/783 tests overlay casefold feature.
-2) Fix some test issues on xfs, f2fs, btrfs and so on.
-
-More details refer to below, thanks for all these contributions.
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-a668057f00dd overlay: add tests for casefolded layers
-
-New commits:
-
-Amir Goldstein (1):
-      [a668057f00dd] overlay: add tests for casefolded layers
-
-Chao Yu (1):
-      [c34a6b562840] f2fs: test sanity check condition w/ error injection
-
-Darrick J. Wong (7):
-      [927e55a2ae5d] common: leave any breadcrumbs when _link_out_file_named can't find the output file
-      [252d25fb9efd] generic/778: fix severe performance problems
-      [09728c352684] generic/778: fix background loop control with sentinel files
-      [545c94d8c386] generic/019: skip test when there is no journal
-      [99f79500aa9e] xfs/837: fix test to work with pre-metadir quota mount options
-      [c5e62a6b8503] generic/774: reduce file size
-      [a11b37ec4265] generic/774: turn off lfsr
-
-Filipe Manana (2):
-      [7b709ce99762] fstests: add kernel commit IDs to some tests that miss it
-      [faf816b98513] btrfs: test incremental send after deleting directories with many hardlinks
-
-Joanne Chang (3):
-      [288a86433f0a] f2fs/015: clear MKFS_OPTIONS and MOUNT_OPTIONS
-      [21be8aa17349] f2fs/016: add test cases for test_dummy_encryption mount option
-      [1ffbdcaae45a] f2fs/{019,020}: clear MOUNT_OPTIONS alongside MKFS_OPTIONS
-
-Theodore Ts'o (1):
-      [28e2a205c8d1] generic/773: fix expected output "QA output created by 1226"
-
-
-Code Diffstat:
-
- common/rc                              |   1 +
- tests/btrfs/301                        |   4 +-
- tests/btrfs/337                        |   2 +-
- tests/btrfs/338                        |  93 +++++++++++++
- tests/btrfs/338.out                    |   3 +
- tests/f2fs/015                         |   3 +
- tests/f2fs/015.out                     |   8 +-
- tests/f2fs/016                         |   6 +
- tests/f2fs/016.out                     |   6 +
- tests/f2fs/018                         |   2 +-
- tests/f2fs/019                         |   1 +
- tests/f2fs/020                         |   1 +
- tests/f2fs/023                         |  49 +++++++
- tests/f2fs/023.out                     |   2 +
- tests/generic/019                      |   1 +
- tests/generic/773                      |   2 +-
- tests/generic/773.out                  |   2 +-
- tests/generic/774                      |   6 +-
- tests/generic/778                      |  97 +++++++++----
- tests/generic/779                      |   2 +-
- tests/generic/782                      |   2 +-
- tests/generic/783                      | 242 +++++++++++++++++++++++++++++++++
- tests/generic/783.out                  |  13 ++
- tests/xfs/837                          |  28 ++--
- tests/xfs/837.cfg                      |   1 +
- tests/xfs/{837.out => 837.out.default} |   0
- tests/xfs/837.out.oldquota             |   6 +
- 27 files changed, 532 insertions(+), 51 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---QUNuElGde2V0
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmkbXf8ACgkQlNbPkfr2
-tMyxuQ/9FvYk4djeXbZ4YEHM5pgME5EZmBi8vVzZLgn/ICfnWZQEj3N1Sl9141XE
-UvBwsuHJOxR0TpzrSf+ylU2vuuedCE2HmF5Tn3V3L8OVYqAz9iD/G6wB7iVLlXPa
-G5xbH4+K+GjyxvC+AaIrGxOydeMfo5m+bMUqvg+slK1o9L0AADPnp0//x/UtynnP
-z9hJuTYzAOQgtmjStVBNivE0vlugg6U73aOdRn1aNAfyHepJgDdZrNEXcUn5EExO
-FtQOfNgJ5Bp2rxrkbWVhqQCK8Z3DDd+y3cb96A7pcIbzHX6pJh3apRtqmtglhjXt
-8k8V0iNkQK0wbljY3a56wfz0wpZi24RRBLaRIJEjwKgm8GM2zwitOPxo/ZPZo851
-W1lWELRjWQdulvdKpLjBzLStIl3Nj4r1gfCkvFoG0uaqmUN8s0happIgxHJ5bxRx
-GIXWJjUK6Zj1RSXEy2CbvVnfs6qvr8oSKIVl8p3MJYzgXFdFE22DZ96XtR2JAb2n
-nHRBqr3fs+Zb9lXKakr5nDlm6rgo+O3VrOGOmnC/0MfHHkPU2My+ZFtkr00tKqo2
-GTtsoflCIKJdALcoeuZQOnWBadQThLG0duala35eH18BhRitA0Jh07gq8eFyEt8+
-HIz7t5xQsaayj705KiX9j6ZkMajVmB2VCzyDWDbolXTduoUs764=
-=XHi6
------END PGP SIGNATURE-----
-
---QUNuElGde2V0--
