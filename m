@@ -1,103 +1,310 @@
-Received: from mail-pf1-f169.google.com (mail-pf1-f169.google.com [209.85.210.169])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 875B8286400
-	for <fstests@vger.kernel.org>; Wed, 19 Nov 2025 04:10:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B1BDA1DDC28
+	for <fstests@vger.kernel.org>; Wed, 19 Nov 2025 04:12:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763525408; cv=none; b=KWYrt5fUiUcIgKZ+0FSo514LTdXZlSvJncD0wshtAZPVhZqjsFh+YqId3xNQW/PdWNTNmof1yHvZIN0hfIX7uDs5a87xMql9dVhNYri+WVYx74yefbjs1YHyX/hDW+aLzfKU6Lx/wzUJzYLgpOqg8HMvPkjVW0kb8EclgNFP27c=
+	t=1763525543; cv=none; b=F4T9FkpGRrIj1yyRdkVdrFYUpPN6elAcvI8xaKIRtoVn9ymQIJQ6EUCUyNgIUUkHiCe6tGFs8vfF8xrWDwS6nYGOFs+E7qQIYJMbEtk/Y152sBaOkE3voUzwtarZjezPWQUiADHdph356PiLJrr01qy5D13HusD4LoKdZB5qb7M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763525408; c=relaxed/simple;
-	bh=fF53GfDbUj9vcv3GJGIpMmCIeFJl/zpxm8QsU3nBw94=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=lJdOPQHfVImGKpSykWnuiEYpFRYxYUClyR5e3L7QFgKqQTxYRqxSIrPH9GfSKPMGHmpicBFixSzQQvyc2pX3HvzqfBZeI5Q+W1RIraZ5NqfUHzbGdUNp28s7aoYjlTK2Q3s0Pb6CnC+XQUOfRNQZAkmBX1DqB/7/nVeSfK0QRTo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WmE6xzat; arc=none smtp.client-ip=209.85.210.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1763525543; c=relaxed/simple;
+	bh=BUTyI0YPsaO+aXhSxO1xSyOP/Ol27XvhOLjG/wVVvjM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=lUfv/c6ka+jZeuxJVhhhAF7VAeUWygfmgryc2FqDON2CdW498IyEmAOWDD/NIGmTHl574cACd+gwohO8n6HK+z3JdPLYEe1vXP5QtN2I4VH5lYCAuXkAg80KstuzLvU2oBWiFr3SvSDEUSrsZovokIM06E+Aw3n8AF8zDRrX8gY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NQ1EOvzQ; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=sgQBFY1L; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WmE6xzat"
-Received: by mail-pf1-f169.google.com with SMTP id d2e1a72fcca58-7ba92341f83so2641677b3a.0
-        for <fstests@vger.kernel.org>; Tue, 18 Nov 2025 20:10:05 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NQ1EOvzQ";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="sgQBFY1L"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1763525540;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=3LBhqn2Z71rFoZH4yBQdRf1abhnkDpos2VEDXLQ5yGo=;
+	b=NQ1EOvzQcVgmWiX4T1iRG9pfu7mhp8d5rAfhMc00ZzC1iMCXXK6gMLI8kNLIgi+Ir3HKfk
+	t/Pu4plSzf0oQSSZoMJw+1RG3QVQZ+6XyL0bRVBgbsQXEMJX9fga9KlZB2PQaoOgndPqT5
+	ji9TFK34Mze6SzNPpvY7INZHyZlp6Ek=
+Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com
+ [209.85.219.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-36-9xr91BVBMTOFXR-c0ZknDQ-1; Tue, 18 Nov 2025 23:12:18 -0500
+X-MC-Unique: 9xr91BVBMTOFXR-c0ZknDQ-1
+X-Mimecast-MFC-AGG-ID: 9xr91BVBMTOFXR-c0ZknDQ_1763525538
+Received: by mail-qv1-f69.google.com with SMTP id 6a1803df08f44-880444afa2cso76366876d6.1
+        for <fstests@vger.kernel.org>; Tue, 18 Nov 2025 20:12:18 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1763525405; x=1764130205; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=8UCZhwwf9t3MtvkWfQO0Q94wHMfsVWFQb5oYTizu+bE=;
-        b=WmE6xzatBsyuY3cJ4g2CPWgnUB1K3CmacrkcXWbXLYG+tUwzXLBoUbb5TU0+ZYhKNq
-         4MWKK4xeBinCx0Hsl8xMbe6MGny/qFoYLt8JxW4/tq4sJSKb5CEK0J5NoFCZdapA8NU2
-         kzmZe950+QoGTM1rjOveSmtPV37ASU9SS4yWpMe+4vvX29tucw5mvup6a8BfFxpWl4WH
-         58qooKqDzWi00uaq4S2+uS5aMJSuU9tKWLOZ528HyFzEWe/XpSjxMVwt4Iq327P+K42u
-         ZKjUGUFrz8STBCVloD1Pk4MOQW6Ms2JMAkDBhg6ALxPrklY/g9+1WqIgFnvzWyEN+hvO
-         4Yyw==
+        d=redhat.com; s=google; t=1763525538; x=1764130338; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=3LBhqn2Z71rFoZH4yBQdRf1abhnkDpos2VEDXLQ5yGo=;
+        b=sgQBFY1LyEDFGTJttHHeCpOkhhi2C3eh/XJAm2m2cU1pK15OSRG1t8NBjnyTls5mib
+         e2uK9uveX63AK26kbygI0sxXoYk4Fudda3xqHPjRCnEXzyIbYOTXBtAgUo2Ec7GmLgSB
+         S6kCGi2K18myIQk0CrNeVns3NZF9aF1jdAmObUqgVzQMTX/DNZ+X76Xg6AdMcRNctJ/M
+         qY05Sqcj8NdOOb1i6m+nULg6JcD9mE4vza06EwueJLaGpBGWWZXpA7trbd5VUj3mMgf+
+         ofo/M4ib388ydkpir8UrZLjF9x4KrsHD4jL2ji7re4FcBSBgqkcSr5PEK4fMfXZUVBYH
+         SXxQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763525405; x=1764130205;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=8UCZhwwf9t3MtvkWfQO0Q94wHMfsVWFQb5oYTizu+bE=;
-        b=BEvQj2ADDD9a2IWjfpmkcioJgW4URxbAyOmAkMwSRo59QMpt4ejuolX4pMKEGtUHP8
-         eqrQ/BbFpeb6EnkUiCaSxPXNZVPseKphXYnXZCI4vBVmrGU5/F6jArcyVnBL03w79Kbr
-         M3/bR5NjoulR6xYhWq/7TRwk2UCXqhItQ7Mcv7cIfIqsgfMKv3clUYWn+IeNL6erMi6D
-         kw+Yh8sNihLtKL9tHOfSJO4TIzfVqQCJ62oUZD1u6o3Xv7kMFCirJIFtEc/Ul1x+zWQU
-         x0u7CvIby+ex1V5J+vHeVTeMoIsY2UNtUZREJKFlif63SKFAve2f47a1/zUkZMTRhlPX
-         +oyg==
-X-Forwarded-Encrypted: i=1; AJvYcCXiB+hIWZwvqWb39avpsz1Q25CZ5SPIvE7122pVN74blwK8HjOjqxKxaxzBg4JCVHPEaRN0lghG@vger.kernel.org
-X-Gm-Message-State: AOJu0YyUywoa5NMdUqgEKcMjxlD27C3BJaAu0yc/vMiR6OVH/9RTgsyF
-	zVQmBJBeh/IbBtURawCqvqeQxqJtkGVsk0JKwm5xZ/w6n1n/e8P4GBMh
-X-Gm-Gg: ASbGncueIXYZDc7MSOwYG+/yVX0SHs3BzrUq49rK2u/GsSX+iy5x45aNLQeJWlT6Txz
-	YYuXVayP4CLFppZ6KzltgVNOmn0zxsInnDi4l1TPtlSjiDEALonR1WiWk7bAmbKWKzd2VNUS6bA
-	FXurBXoFOGQuG0qnMXd0BPcNFo7qmYDQ7tinGisFw6fzsSgDI9QX90kmVmmX8tKzVN0FFR/jO5w
-	KYOpVQDdkV6KK0ZxTTvXaup6p6Ej83/9AeRnNlgB3a//pca8h85KclDOtVoCk+LbOwMWaTuvzTY
-	ipzK0yypTdZhl0/as4+DTtffQAgh3mydDAAjMi+HNtEm24/bfV32SR7A0upoHrbxfH+GBBVBTIX
-	y2554QAySJfUdZcuNbsrqw5U8UteqfMBt+Xu/Gs/Dfx2iHng2PDXHdzBVAZ09xXpWMJeBz/oE+e
-	a2j38g+NU/+Cl4G8bd3N809x3QG0Ocacuow1Go6VTF3IK/jc6HipdEyZV4l8nl8c4ceOrhD99C0
-	Qo=
-X-Google-Smtp-Source: AGHT+IGrKtdbjhH8spRFYFh41PWSFa1moAkQ39DvDP0LAr5d2ystUs246cMJKdvAqgR+t+Qk0PBdKw==
-X-Received: by 2002:a05:6a21:6d96:b0:34e:7bef:e820 with SMTP id adf61e73a8af0-35ba229d434mr22889590637.41.1763525404682;
-        Tue, 18 Nov 2025 20:10:04 -0800 (PST)
-Received: from [192.168.1.184] (softbank126125156093.bbtec.net. [126.125.156.93])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-bc36db21e76sm16871112a12.7.2025.11.18.20.10.03
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 18 Nov 2025 20:10:04 -0800 (PST)
-Message-ID: <15aa65ce-2d29-44d7-8316-7e90535b738d@gmail.com>
-Date: Wed, 19 Nov 2025 13:10:02 +0900
+        d=1e100.net; s=20230601; t=1763525538; x=1764130338;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=3LBhqn2Z71rFoZH4yBQdRf1abhnkDpos2VEDXLQ5yGo=;
+        b=Gj77cCQ74YesgZocAoqTIba+//X+JtICntjiwlmlf8qaDFq6KUzuWBZs+/DEgkzDaK
+         SC8l4h7NCwGSeYIuimbUpXxiUmYeuc/fabyxrr5UEiISYj8ixFvO51jHK+g8V1j3UlLd
+         Bx0ayQShnv+SERqT0eDvABVA8Yux2TbbVKR8X12AHrJX0wKTcjfkm2BgsjgYxAmQJ5Ty
+         ET8HoATn0M95JSFdQRS09gAW77BRzR4Ag/cJQdg39pgQ7ViePIgDGEMqCOgDTdOnQCtN
+         OPFrQ6bR1RVPTYZ4TcHuchKKYKeFA5LTJyiQTDnpcMojBjcXfQL0NhDv4RWOj3AGC1xt
+         Y7jA==
+X-Forwarded-Encrypted: i=1; AJvYcCUrh+XTKA6BI8l9ks5McEwiaw79glZ4LhMS1XmTH2q6IRp+X6ge/G43SrI0/J4LKGLouWvGkovc@vger.kernel.org
+X-Gm-Message-State: AOJu0YxbCh9zTnRkoC4r5EnT83kRXjU9kNUX5J9kdxWiPMQJqMrdR1uu
+	aCsVrotXzNpWUKkHNoHPnztExiRDOjcgPuwMNIk4HnVKdFcMxOJDreKUeRCO+ivdY4BqF6yW7kx
+	NjClkbjZKk8yIddE/8nRHiWGyXwW0L3sps/CvQVt3ISbqUz21AxOI57jM5LE=
+X-Gm-Gg: ASbGnctjbdefCxEki9s6azP0YenbKUJklddIDTPPJyrqu8h7E0gTy5qVmIRiaWDXGXJ
+	A0TwdoQSBLegmk1l2dDMyCm7mJg6EHtniQIQDmgM2XL/VevKWOAKaYbUn8bZ/XgdjUHad3a4yGY
+	WEVCfhxKXrNi2ioLqHmzt4Og4CotlTTrE8UpjMsbr/10m+HSSZ9gnK7M4h45Zc9E3xmOySrdvN9
+	GP/4OCKEJUn58g62SgMAxnb4mwxPEE65IaW74XumIV7Dxyy+LPxKR9kYGdR9u4H43cPBpHlAk9f
+	KQlY+o1H7mlS8sBoTkCZ2V114x1vKVoHOfTiNGsty3tplOEoMajYZP6SYWpzVUiCdtFOfMB2z+C
+	rL8v/c0Q8wqPd8pI4l1h6
+X-Received: by 2002:a05:6214:2421:b0:87c:2919:7db0 with SMTP id 6a1803df08f44-88292686a87mr332784406d6.33.1763525538222;
+        Tue, 18 Nov 2025 20:12:18 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IH3EXYPJlsYA9s/LP2uNVl48TWIUJ3H0sEJGPKGg5UmQPMj6+XX4L5WGAhNK2KxbJqYZ7Otvg==
+X-Received: by 2002:a05:6214:2421:b0:87c:2919:7db0 with SMTP id 6a1803df08f44-88292686a87mr332784166d6.33.1763525537706;
+        Tue, 18 Nov 2025 20:12:17 -0800 (PST)
+Received: from anathem.redhat.com ([2001:8003:4a36:e700:8cd:5151:364a:2095])
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-88286318333sm127943706d6.24.2025.11.18.20.12.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 18 Nov 2025 20:12:17 -0800 (PST)
+From: Donald Douwsma <ddouwsma@redhat.com>
+To: linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Cc: Zorro Lang <zlang@kernel.org>,
+	Donald Douwsma <ddouwsma@redhat.com>
+Subject: [PATCH v3] xfs: test case for handling io errors when reading extended attributes
+Date: Wed, 19 Nov 2025 15:12:10 +1100
+Message-ID: <20251119041210.2385106-1-ddouwsma@redhat.com>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: Add lustre support
-To: "Day, Timothy" <timday@amazon.com>, Christoph Hellwig <hch@infradead.org>
-Cc: "zlang@kernel.org" <zlang@kernel.org>, "zlang@redhat.com"
- <zlang@redhat.com>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
- "sihara@ddn.com" <sihara@ddn.com>
-References: <20251118073011.362595-1-iceyangxiao@gmail.com>
- <aRxrgesZ948FOWTt@infradead.org>
- <E35FD5CE-23C0-4A3D-B563-93E19F929291@amazon.com>
-Content-Language: en-US
-From: Xiao Yang <iceyangxiao@gmail.com>
-In-Reply-To: <E35FD5CE-23C0-4A3D-B563-93E19F929291@amazon.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
+We've seen reports from the field panicking in xfs_trans_brelse after an
+IO error when reading an attribute block.
 
-On 11/19/2025 12:23 AM, Day, Timothy wrote:
-> For better or worse, xfstests does support some out-of-tree
-> filesystems like gluster and bcachefs (both listed in the support
-> matrix in the README, which also suggests that " Firstly,
-> there's not hard restriction about which filesystem can use fstests.
-> Any filesystem can give fstests a try"). Lustre support wouldn't
-> seem that out of place, even if it takes a while for Lustre to
-> make its way in-tree.
-> 
-> Tim Day
+sd 0:0:23:0: [sdx] tag#271 CDB: Read(16) 88 00 00 00 00 00 9b df 5e 78 00 00 00 08 00 00
+critical medium error, dev sdx, sector 2615107192 op 0x0:(READ) flags 0x1000 phys_seg 1 prio class 2
+XFS (sdx1): metadata I/O error in "xfs_da_read_buf+0xe1/0x140 [xfs]" at daddr 0x9bdf5678 len 8 error 61
+BUG: kernel NULL pointer dereference, address: 00000000000000e0
+...
+RIP: 0010:xfs_trans_brelse+0xb/0xe0 [xfs]
 
-Agreed. According to the README, I think xfstests can also support lustre.
-We can improve lustre through xfstests and give various feedback to xfstests.
+Signed-off-by: Donald Douwsma <ddouwsma@redhat.com>
 
-Best Regards,
-Xiao Yang
+---
+V3
+- Zorro's suggestions (_require_scsi_debug, _require_scratch, ..., use _get_file_block_size
+  drop dry_run, fix local variables and parameters, common/attr, ...)
+- Override SELINUX_MOUNT_OPTIONS to avoid _scratch_mount breaking the test
+- Add test to quick attr
+- Change test_attr() to work with blocks instead of bytes
+- Name the scsi_debug options to make it clearer where the error is active
+- Determine size of the attr value required based on filesystem block size
+V2
+- As this is specific to ENODATA test using scsi_debug instead of dmerror
+which returns EIO.
+---
+ common/scsi_debug |   8 ++-
+ tests/xfs/999     | 139 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/999.out |   2 +
+ 3 files changed, 148 insertions(+), 1 deletion(-)
+ create mode 100755 tests/xfs/999
+ create mode 100644 tests/xfs/999.out
+
+diff --git a/common/scsi_debug b/common/scsi_debug
+index 1e0ca255..c3fe7be6 100644
+--- a/common/scsi_debug
++++ b/common/scsi_debug
+@@ -6,6 +6,7 @@
+ 
+ . common/module
+ 
++# _require_scsi_debug [mod_param]
+ _require_scsi_debug()
+ {
+ 	local mod_present=0
+@@ -30,9 +31,14 @@ _require_scsi_debug()
+ 			_patient_rmmod scsi_debug || _notrun "scsi_debug module in use"
+ 		fi
+ 	fi
++
+ 	# make sure it has the features we need
+ 	# logical/physical sectors plus unmap support all went in together
+-	modinfo scsi_debug | grep -wq sector_size || _notrun "scsi_debug too old"
++	grep -wq sector_size <(modinfo scsi_debug) || _notrun "scsi_debug too old"
++	# make sure it supports this module parameter
++	if [ -n "$1" ];then
++		grep -Ewq "$1" <(modinfo scsi_debug) || _notrun "scsi_debug not support $1"
++	fi
+ }
+ 
+ # Args: [physical sector size, [logical sector size, [unaligned(0|1), [size in megs]]]]
+diff --git a/tests/xfs/999 b/tests/xfs/999
+new file mode 100755
+index 00000000..2a571195
+--- /dev/null
++++ b/tests/xfs/999
+@@ -0,0 +1,139 @@
++#!/bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 Red Hat Inc.  All Rights Reserved.
++#
++# FS QA Test 999
++#
++# Regression test for panic following IO error when reading extended attribute blocks
++#
++#   XFS (sda): metadata I/O error in "xfs_da_read_buf+0xe1/0x140 [xfs]" at daddr 0x78 len 8 error 61
++#   BUG: kernel NULL pointer dereference, address: 00000000000000e0
++#   ...
++#   RIP: 0010:xfs_trans_brelse+0xb/0xe0 [xfs]
++#
++# For SELinux enabled filesystems the attribute security.selinux will be
++# created before any additional attributes are added. In this case the
++# regression will trigger via security_d_instantiate() during a stat(2),
++# without SELinux this should trigger from fgetxattr(2).
++#
++# Kernels prior to v4.16 don't have medium_error_start, and only return errors
++# for a specific location, making scsi_debug unsuitable for checking old
++# kernels. See d9da891a892a scsi: scsi_debug: Add two new parameters to
++# scsi_debug driver
++#
++
++. ./common/preamble
++_begin_fstest auto quick attr
++
++_fixed_by_kernel_commit ae668cd567a6 \
++	"xfs: do not propagate ENODATA disk errors into xattr code"
++
++# Override the default cleanup function.
++_cleanup()
++{
++	_unmount $SCRATCH_MNT 2>/dev/null
++	_put_scsi_debug_dev
++	cd /
++	rm -f $tmp.*
++}
++
++# Import common functions.
++. ./common/attr
++. ./common/scsi_debug
++
++_require_scratch_nocheck
++_require_scsi_debug "medium_error_start"
++_require_attrs user
++
++# If SELinux is enabled common/config sets a default context, which which breaks this test.
++export SELINUX_MOUNT_OPTIONS=""
++
++scsi_debug_dev=$(_get_scsi_debug_dev)
++scsi_debug_opt_noerror=0
++scsi_debug_opt_error=${scsi_debug_opt_error:=2}
++test -b $scsi_debug_dev || _notrun "Failed to initialize scsi debug device"
++echo "SCSI debug device $scsi_debug_dev" >>$seqres.full
++
++SCRATCH_DEV=$scsi_debug_dev
++_scratch_mkfs >> $seqres.full
++_scratch_mount
++
++block_size=$(_get_file_block_size $SCRATCH_MNT)
++inode_size=$(_xfs_get_inode_size $SCRATCH_MNT)
++error_length=$((block_size/512)) # Error all sectors in the block
++
++echo Block size $block_size >> $seqres.full
++echo Inode size $inode_size >> $seqres.full
++
++test_attr()
++{
++	local test=$1
++	local testfile=$SCRATCH_MNT/$test
++	local attr_blocks=$2
++	local error_at_block=${3:-0}
++
++	local attr_size_bytes=$((block_size/2*attr_blocks))
++
++	# The maximum size for a single value is ATTR_MAX_VALUELEN (64*1024)
++	# If we wanted to test a larger range of extent combinations the test
++	# would need to use multiple values.
++	[[ $attr_size_bytes -ge 65536 ]] && echo "Test would need to be modified to support > 64k values for $attr_blocks blocks".
++
++	echo $scsi_debug_opt_noerror > /sys/module/scsi_debug/parameters/opts
++
++	echo -e "\nTesting : $test" >> $seqres.full
++	echo -e "attr size: $attr_blocks" >> $seqres.full
++	echo -e "error at block: $error_at_block\n" >> $seqres.full
++
++	touch $testfile
++	local inode=$(stat -c '%i' $testfile)
++	$SETFATTR_PROG -n user.test_attr -v $(printf "%0*d" $attr_size_bytes $attr_size_bytes) $testfile
++
++	$XFS_IO_PROG -c "bmap -al" $testfile >> $seqres.full
++	start_blocks=($($XFS_IO_PROG -c "bmap -al" $testfile | awk 'match($3, /[0-9]+/, a) {print a[0]}'))
++	echo "Attribute fork extent(s) start at ${start_blocks[*]}" >> $seqres.full
++
++	_scratch_unmount
++
++	echo "Dump inode $inode details with xfs_db" >> $seqres.full
++	_scratch_xfs_db -c "inode $inode" -c "print core.aformat core.naextents a" >> $seqres.full
++
++	if [[ start_blocks[0] -ne 0 ]]; then
++		# Choose the block to error, currently only works with a single extent.
++		error_daddr=$((start_blocks[0] + error_at_block*block_size/512))
++	else
++		# Default to the inode daddr when no extents were found.
++		# Errors when getfattr(1) stats the inode and doesnt get to getfattr(2)
++		error_daddr=$(_scratch_xfs_db -c "inode $inode" -c "daddr" | awk '{print $4}')
++	fi
++
++	_scratch_mount
++
++	echo "Setup scsi_debug to error when reading attributes from block" \
++	     "$error_at_block at daddr $error_daddr" >> $seqres.full
++	echo $error_daddr > /sys/module/scsi_debug/parameters/medium_error_start
++	echo $error_length > /sys/module/scsi_debug/parameters/medium_error_count
++	echo $scsi_debug_opt_error > /sys/module/scsi_debug/parameters/opts
++	grep ^ /sys/module/scsi_debug/parameters/{medium_error_start,medium_error_count,opts} >> $seqres.full
++
++	echo "Read the extended attribute on $testfile" >> $seqres.full
++	sync # the fstests logs to disk.
++
++	_getfattr -d -m - $testfile >> $seqres.full 2>&1 # Panic here on failure
++}
++
++# aformat shortform
++test_attr "attr_local" 0 0
++
++# aformat extents
++# Single leaf block, known to panic
++test_attr "attr_extent_one_block" 1 0
++
++# Other tests to exercise multi block extents
++test_attr "attr_extent_two_blocks_1" 2 1
++test_attr "attr_extent_two_blocks_2" 2 2
++
++# success, all done
++echo Silence is golden
++status=0
++exit
+diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+new file mode 100644
+index 00000000..3b276ca8
+--- /dev/null
++++ b/tests/xfs/999.out
+@@ -0,0 +1,2 @@
++QA output created by 999
++Silence is golden
+-- 
+2.47.3
+
