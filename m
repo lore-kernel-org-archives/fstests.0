@@ -1,90 +1,88 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69ECB2DE70A
-	for <fstests@vger.kernel.org>; Wed, 19 Nov 2025 10:07:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F75D35B156
+	for <fstests@vger.kernel.org>; Wed, 19 Nov 2025 12:49:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763546840; cv=none; b=r7/niYJXrTqfLWKiXCEEeSs072XgVVLleaIw8JFtEhy+CyNDvTcdjyHDJf9G2rUDW3lY7RTpcoJzQqyprGXlA59apX17DhApDR9EiBpL5Khvlf95aVhpdJCdirGCnSCbkwFskISkX7253NiWlOi69I+2ZupqMekA4dnWuDpP8c4=
+	t=1763556581; cv=none; b=Krw+tpUwQv67ALHomKBQ612PWR8+vcIH/2kzDveg3Tw5yvGBDZqkjEjzQhdHI2mVU3FZGyRgLCJqynICFLiI7Y/aOvvvRyQbbWGtcl/nao0FNlQLtNsMuEbOWUrvTEMa3JeGkDFYEXKp6JLhMnIG/3xwvmTfmq03qCcB6X7KP5w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763546840; c=relaxed/simple;
-	bh=a0fZsPHfFz6EIOKiJRlhIKx4YZ9/MoQhh76o2pEkfS8=;
+	s=arc-20240116; t=1763556581; c=relaxed/simple;
+	bh=Aml9mhbo5ieOTq8KwkIuEkeGr1B1i0U6iqTTRe5f7Zo=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=fAjVeODP7jSfWavRQUV+f+4H72iWFReEhAVdB5gNBGz0+v+4oAL5VXHyYFlfGYxIpvPGB3XF4cvRhh7n/A09f7aiU4fTMgZ4Gvrz4WJbKVey5KECitA/4s2dhigjvjbQCTmHXFj0hevptv7D/ZZx4GHhOsU6CrWgTDSl4KlFUDU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Pm2U7PjV; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=OJd9crNx; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=H3j0pgD78sK2OxNin+hfQ3Wx8u1juh2w76DrFRNt2BjbhFiSvBW6fwJDTSzOMNzrUziprHqnWzVTTqNQHgOkZoBXGBGFWkDx6m6Z91OikuaZln2vtArpVHmrQQ1EJiM3g7IjQlr01X1E5lIWZpwSlbWG6NzdhT7QDS2xNG1AR1M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=CE7bkVhz; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=ia0W/+1C; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Pm2U7PjV";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="OJd9crNx"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CE7bkVhz";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="ia0W/+1C"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1763546837;
+	s=mimecast20190719; t=1763556578;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=WszxwMa10KM0DX9YUmjHkdh+SdZBhe4zpc44s1sPiFE=;
-	b=Pm2U7PjVxHan5QrdbHiAjHkpJxXW7S7fpdVBXE1lXBmgeVpT1jYhJDn7gaKRrA4lpTaqIh
-	plJI4DSowJKVfe/9EvsJJPQW7N53YLr34FPIV8dH7XDKxiWsJME3meOj/WQtNC9cxzXkL1
-	4WqKlVV6NLVh3LMUx13Zc4wGfDSdd1M=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=flkABsEx2eMbyuz8BLkDw0Qlh05ntEkhFH7p7w45OwQ=;
+	b=CE7bkVhz8ZSuAcMOHIxVomuNxPAWII/gAJbs1AiYeyltnMT+sRDcEe1C7it9OBQAVSD44k
+	uTh7BOBDThuT896czIS8/ChOw1ohnDTdQpcpCJQXGdhcUKcd8xVOP0yF1l3fSgrYnm3n/l
+	HJDwnY2NQkrY6nBNLG4HdAG9Haxwres=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-413-LZ2dqMLFOFa4nG9R-0LIxA-1; Wed, 19 Nov 2025 05:07:15 -0500
-X-MC-Unique: LZ2dqMLFOFa4nG9R-0LIxA-1
-X-Mimecast-MFC-AGG-ID: LZ2dqMLFOFa4nG9R-0LIxA_1763546835
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-297dde580c8so216681955ad.1
-        for <fstests@vger.kernel.org>; Wed, 19 Nov 2025 02:07:15 -0800 (PST)
+ us-mta-146-iNEQQ0LINsS2Bl4KFU2pKg-1; Wed, 19 Nov 2025 07:49:37 -0500
+X-MC-Unique: iNEQQ0LINsS2Bl4KFU2pKg-1
+X-Mimecast-MFC-AGG-ID: iNEQQ0LINsS2Bl4KFU2pKg_1763556576
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-295592eb5dbso58681175ad.0
+        for <fstests@vger.kernel.org>; Wed, 19 Nov 2025 04:49:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1763546835; x=1764151635; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1763556575; x=1764161375; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=WszxwMa10KM0DX9YUmjHkdh+SdZBhe4zpc44s1sPiFE=;
-        b=OJd9crNxBWT2DbEI+Wbh771CJhSSuVPjpHAudc8jSwg0oJTkz5XGbFi7ckp+6l2l+g
-         5NGmmyvJIkjTO+gzgxLX4YlF4MCO14+CumxcxV8Ez53fPrmuhb1IfdX/dAGzgApqpZbx
-         4yqHh20QaGjtpa/WcBKCL70IGAuLabG2sMljDjWKJDsmCtXCHmNcyYQq5M5EyFNyzyrr
-         gkVoXtDdTRSHDyyaaOjC5qcRtvILoI0NaxjpZUzdw/QkBRNChP2CIwkrdX6ZeBcqCoDT
-         YRlw5/vh6aI7PLMbizatn2+cBkFL4J2ARPKH4V7SkmbRpextdmHrLvOifY9JSFO1/1E5
-         h6nQ==
+        bh=flkABsEx2eMbyuz8BLkDw0Qlh05ntEkhFH7p7w45OwQ=;
+        b=ia0W/+1CXj//F4QwCbEfblaDrxfK5qzB6pLz1YTm2o1ebEnHDyjdCuqiRKY6vGfGV8
+         UIn8uJuVMp0W93MKqflQzuM7GA6uJ9jgxuGObEjinFGWvfY/cQzon6w5FWvgWaAjC5El
+         traZkpN3kubUAv6rn1ykkP4yy+5LIAg2PAbg1jSLP6SD8BGknjrJTkFTLbyyaxGhakgY
+         t0EeZ3AgMyVV6YUeM4fUJ7EESPIXdoySI3P4Vd04xn9tiMKUsy2Xn6F+tIAG6S6E0rdC
+         sPoT7vS1fSTT3qvIWHd4yaoz8AOe3TEXbOgkQUusowzdSM8lqTHN9YC7CfoPeUP2ZMYw
+         /tKQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763546835; x=1764151635;
+        d=1e100.net; s=20230601; t=1763556575; x=1764161375;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=WszxwMa10KM0DX9YUmjHkdh+SdZBhe4zpc44s1sPiFE=;
-        b=uM1D64jMMWORbDQA08guljf4dE0Oi0lmBY8wgRQ6odlqhirJGaKJ+E8Zc27f0+oj68
-         S4SEQh08A/njYbmqgPwpYs5UvMenBdnzeRYYEMDAqlgJLnjJgeLrLaxJi7fFVekmkO43
-         jmPotzSegwmd9KtgsG5Q/eUHpIFnI+r2+Fkw3jWUpZ7idqknnjMjK2r1MeplYVj4gVHw
-         NoQrzYY3gqNBbk7A0tGiueCVBRl/0U6N9k1bon3mWFP4qfHrHS8LUmG3vuESD7r4qm88
-         wbzvv/S8NUPVZ3hdbC/LaEV2OzHNp6RgkVlGe/GlIA7jQkPMfDQ85PfoitY2wUErQBF1
-         Ju7g==
-X-Forwarded-Encrypted: i=1; AJvYcCVNi/6TVZQbqskJ1CJpan+3hJy/0U7b9iSv2R0PplBXE2pxENXAdMESlnPA3TQZDHeE5Ek4Bsux@vger.kernel.org
-X-Gm-Message-State: AOJu0YyNjp2XW9TCtDJc0g0KgBzu0j0N3lY200G0JYd0RHaOL5MQw6fZ
-	Q0rnZJol6THxve5+AFU0x87igzIOTE9ZPXALcMVTLTF/tgjjFIkXepBG1bh5qpQNWpZIRWK0oxt
-	MjoT0pfCB+BJ97qbjLwafN8bWiMDhvD8lpoVeQcx094k9lkHW7QwfdYeD0d8=
-X-Gm-Gg: ASbGncs06BZV1xZXq1jabfPfkFac1qrhaITCdxUq208shgB0tUp8khogZrblU8LFLu3
-	BoWhMYHEeAmOsd0hT89k/uDYuVFvmBoDAkQXiR4+/+rBRYfFMV79KtD1m+EUMx983Cax04clo2i
-	vlpqz5QWy+zsO4erZk8/ZF3Jv4WnX0t7kLpAnQlC1QBgPew6OVfHpqMoRL7QC4/8+LcEQRfxNgC
-	Y1l/37jEoDiugQTL8K0FxjhqFLmxjPiOX2jBQgOZfkcrchtWE9WB2I10DuZ7Jsia9jkzDoxmBtv
-	Zq45qh7bNkOo2LVO0j0tMv3mYospE03flkjLt36qg7f/DmMTwZkIuAUjBk/bkn8CsOFtD2MSWdy
-	z5DSCXLOQTbu14V0N9iEUiPYV3PPbbgs6X+do0QykoF6FLPUebQ==
-X-Received: by 2002:a17:903:1b04:b0:269:b6c8:4a4b with SMTP id d9443c01a7336-2986a6b89ebmr223119735ad.6.1763546834479;
-        Wed, 19 Nov 2025 02:07:14 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGFnRlAWY0+IJsNWg8uhnENCS8pxXs/DxCJDD7YFCP4cmcvQBqp8i4OVfIF68+04tjbQvVoqQ==
-X-Received: by 2002:a17:903:1b04:b0:269:b6c8:4a4b with SMTP id d9443c01a7336-2986a6b89ebmr223119345ad.6.1763546833902;
-        Wed, 19 Nov 2025 02:07:13 -0800 (PST)
+        bh=flkABsEx2eMbyuz8BLkDw0Qlh05ntEkhFH7p7w45OwQ=;
+        b=vp+VyYKCWQr2AMUId5ZnChua5ao8yZ5+HswjVxNp/AUDTjI6S5IlQ2NlCIMGL8AM0B
+         L/pD5wKv9NpMB1GHgJ97tRNRD3UPSZ9mTSn1LBxjCEPHiknuNWUQ6zyr7cGk+QmLfqpF
+         A0JlnXctFR/GzteNeAq3gZ+Lh+N6qnQDEAqBWBcyqL+Ca4seWSQsfZhr3WVZDo5xR4To
+         UA0w/IoP/lYSQSnifqJ5RBQAGl18xvIU7FWm9RuuGrnlSkC4N7ExEy1wULZAdHxwhdmT
+         y+bSMia2+Cf2XGwoQwv8vRRdX/dXYXHS0JFfJL3xVv/F8ic5c7OAAhniPhEHwUmp21L8
+         XJMw==
+X-Gm-Message-State: AOJu0YzQUKYUUrl45fcqmKng2R7zN5edTECreH8se3BGdBUomyUTBstZ
+	nfk0N8kPOwFB4BLJcbUUQJdLXjs6ejolLLRhuQGxfVABiAqG9N4P2A6BgtEFZZDGGracYWR7DAd
+	ezBiULPENl65z0bNwjsmFmGEDwX5oNhZIyXg/XNDNsuq9txyN3ob+UV8Yk2wXlN7GOy8=
+X-Gm-Gg: ASbGncvEIb+wnFmAdNDsh5UMGMqFQ80xOcL2Jf2S/oUoM9jqy5V1c4AQPpXUew0xn05
+	DAbct4KI9o13syaShqwQnNadf8Y5S7njxa/mv25UJwRBkU5v7L01GKUUwup8tBlZok2DP3sUOBs
+	aDZeqZLzFOOiMxD/QrvLKzKkDUdNNyRqjkdC2Q+/gJwQ7rQXRIUQAMgYZT/KOwcPV8GM8hFqBVk
+	bTsxZvRmHdx20zxNQNPpyd/2oefohs/DI1At0Ned40uJfIGvXJMNIspjAamD3P0RR/zi3iG13Ye
+	H9bmTPyHalLiQoAjUSnpH938iJvLF22FhDynFLLQqmDFYKCA2FKtmpZvHT4VDF/kFuUJrRmIddZ
+	hga+l73Ky7ZUWAjgccRlY6x9Ej1Ch/Jgdwx6C4pj4ZsXBF0AJ5g==
+X-Received: by 2002:a17:902:e788:b0:295:9cb5:ae07 with SMTP id d9443c01a7336-2986a72bfa8mr210273895ad.38.1763556575372;
+        Wed, 19 Nov 2025 04:49:35 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHbH9UiL2wp1w2nlF+UYaofJ7mKdhhfcN9stx+h2/YWunOFbKhq9ZMAdbKY9c4oxzla47t0Ag==
+X-Received: by 2002:a17:902:e788:b0:295:9cb5:ae07 with SMTP id d9443c01a7336-2986a72bfa8mr210273645ad.38.1763556574905;
+        Wed, 19 Nov 2025 04:49:34 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2985c2b0c92sm202872115ad.69.2025.11.19.02.07.11
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2985c2b0d68sm208240305ad.61.2025.11.19.04.49.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 19 Nov 2025 02:07:13 -0800 (PST)
-Date: Wed, 19 Nov 2025 18:07:09 +0800
+        Wed, 19 Nov 2025 04:49:34 -0800 (PST)
+Date: Wed, 19 Nov 2025 20:49:30 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Donald Douwsma <ddouwsma@redhat.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-	Zorro Lang <zlang@kernel.org>
-Subject: Re: [PATCH v3] xfs: test case for handling io errors when reading
- extended attributes
-Message-ID: <20251119100709.zbkenjwztblkjobd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20251119041210.2385106-1-ddouwsma@redhat.com>
+To: Jakob Unterwurzacher <jakobunt@gmail.com>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+	Miklos Szeredi <mszeredi@redhat.com>
+Subject: Re: [PATCH] fstests: add fuse.gocryptfs support
+Message-ID: <20251119124930.mefocqn25p3j2fbm@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20251116184545.3450048-1-jakobunt@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -93,238 +91,142 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251119041210.2385106-1-ddouwsma@redhat.com>
+In-Reply-To: <20251116184545.3450048-1-jakobunt@gmail.com>
 
-On Wed, Nov 19, 2025 at 03:12:10PM +1100, Donald Douwsma wrote:
-> We've seen reports from the field panicking in xfs_trans_brelse after an
-> IO error when reading an attribute block.
+On Sun, Nov 16, 2025 at 07:45:38PM +0100, Jakob Unterwurzacher wrote:
+> Add instructions for testing gocryptfs, an encrypted overlay filesystem,
+> and a few small changes that were needed for gocryptfs compatibility:
 > 
-> sd 0:0:23:0: [sdx] tag#271 CDB: Read(16) 88 00 00 00 00 00 9b df 5e 78 00 00 00 08 00 00
-> critical medium error, dev sdx, sector 2615107192 op 0x0:(READ) flags 0x1000 phys_seg 1 prio class 2
-> XFS (sdx1): metadata I/O error in "xfs_da_read_buf+0xe1/0x140 [xfs]" at daddr 0x9bdf5678 len 8 error 61
-> BUG: kernel NULL pointer dereference, address: 00000000000000e0
-> ...
-> RIP: 0010:xfs_trans_brelse+0xb/0xe0 [xfs]
+> 1) _scratch_unmount and _test_unmount now unmount fuse filesystems
+> via mountpoint instead of via device. Unmounting via device fails when
+> the "device" is actually a directory on a different filesystem.
+> Unmounting via mountpoint always works.
 > 
-> Signed-off-by: Donald Douwsma <ddouwsma@redhat.com>
+> 2) Add subtype=passthrough_ll to the passthrough_ll mount options.
+> This makes passthrough_ll behave more like most other fuse filesystems
+> which do set a subtype. Example from my Fedora box:
 > 
+> 	$ mount | grep -o "type fuse\\..* "
+> 	type fuse.gvfsd-fuse
+> 	type fuse.portal
+> 	type fuse.gocryptfs
+> 	type fuse.encfs
+> 	type fuse.passthrough_ll
+> 
+> With this change, _check_mounted_on can match on $FSTYP$FUSE_SUBTYP
+> for passthrough_ll, which also works for gocryptfs and likely most
+> other fuse filesystems.
+> 
+> Results for passthrough_ll on top of tmpfs:
+> 
+> 	Failures: generic/120 generic/125 generic/184 generic/294 generic/306 generic/317 generic/355
+> 	generic/363 generic/426 generic/434 generic/452 generic/467 generic/477 generic/633 generic/647
+> 	generic/653 generic/675 generic/683 generic/684 generic/729 generic/745 generic/751 generic/756
+> 	generic/777
+> 	Failed 24 of 769 tests
+> 
+> Results for gocryptfs on top of tmpfs:
+> 
+> 	Failures: generic/020 generic/062 generic/093 generic/099 generic/103 generic/120 generic/125
+> 	generic/184 generic/285 generic/294 generic/306 generic/317 generic/319 generic/426 generic/434
+> 	generic/444 generic/452 generic/467 generic/471 generic/477 generic/633 generic/676 generic/683
+> 	generic/688 generic/696 generic/697 generic/707 generic/756 generic/777
+> 	Failed 29 of 769 tests
+> 
+> Signed-off-by: Jakob Unterwurzacher <jakobunt@gmail.com>
 > ---
-> V3
-> - Zorro's suggestions (_require_scsi_debug, _require_scratch, ..., use _get_file_block_size
->   drop dry_run, fix local variables and parameters, common/attr, ...)
-> - Override SELINUX_MOUNT_OPTIONS to avoid _scratch_mount breaking the test
-> - Add test to quick attr
-> - Change test_attr() to work with blocks instead of bytes
-> - Name the scsi_debug options to make it clearer where the error is active
-> - Determine size of the attr value required based on filesystem block size
-> V2
-> - As this is specific to ENODATA test using scsi_debug instead of dmerror
-> which returns EIO.
-> ---
->  common/scsi_debug |   8 ++-
->  tests/xfs/999     | 139 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/999.out |   2 +
->  3 files changed, 148 insertions(+), 1 deletion(-)
->  create mode 100755 tests/xfs/999
->  create mode 100644 tests/xfs/999.out
+>  README.fuse | 34 ++++++++++++++++++++++++++++++++--
+>  common/rc   | 11 ++++++++++-
+>  2 files changed, 42 insertions(+), 3 deletions(-)
 > 
-> diff --git a/common/scsi_debug b/common/scsi_debug
-> index 1e0ca255..c3fe7be6 100644
-> --- a/common/scsi_debug
-> +++ b/common/scsi_debug
-> @@ -6,6 +6,7 @@
->  
->  . common/module
->  
-> +# _require_scsi_debug [mod_param]
->  _require_scsi_debug()
->  {
->  	local mod_present=0
-> @@ -30,9 +31,14 @@ _require_scsi_debug()
->  			_patient_rmmod scsi_debug || _notrun "scsi_debug module in use"
->  		fi
->  	fi
+> diff --git a/README.fuse b/README.fuse
+> index 969dbd5d..df248681 100644
+> --- a/README.fuse
+> +++ b/README.fuse
+> @@ -1,3 +1,6 @@
+> +passthrough_ll
+> +==============
 > +
->  	# make sure it has the features we need
->  	# logical/physical sectors plus unmap support all went in together
-> -	modinfo scsi_debug | grep -wq sector_size || _notrun "scsi_debug too old"
-> +	grep -wq sector_size <(modinfo scsi_debug) || _notrun "scsi_debug too old"
-> +	# make sure it supports this module parameter
-> +	if [ -n "$1" ];then
-> +		grep -Ewq "$1" <(modinfo scsi_debug) || _notrun "scsi_debug not support $1"
-> +	fi
->  }
+>  Here are instructions for testing fuse using the passthrough_ll example
+>  filesystem provided in the libfuse source tree:
 >  
->  # Args: [physical sector size, [logical sector size, [unaligned(0|1), [size in megs]]]]
-> diff --git a/tests/xfs/999 b/tests/xfs/999
-> new file mode 100755
-> index 00000000..2a571195
-> --- /dev/null
-> +++ b/tests/xfs/999
-> @@ -0,0 +1,139 @@
+> @@ -22,5 +25,32 @@ export SCRATCH_DEV=non2
+>  export SCRATCH_MNT=/mnt/scratch
+>  export FSTYP=fuse
+>  export FUSE_SUBTYP=.passthrough_ll
+> -export MOUNT_OPTIONS="-osource=/home/test/scratch,allow_other,default_permissions"
+> -export TEST_FS_MOUNT_OPTS="-osource=/home/test/test,allow_other,default_permissions"
+> +export MOUNT_OPTIONS="-osource=/home/test/scratch,subtype=passthrough_ll,allow_other,default_permissions"
+> +export TEST_FS_MOUNT_OPTS="-osource=/home/test/test,subtype=passthrough_ll,allow_other,default_permissions"
+
+This patch changes the required parameter to test FUSE, cc fuse list to get
+more review.
+
+> +
+> +
+> +gocryptfs
+> +=========
+> +
+> +Here are the instructions for gocryptfs:
+> +
+> +git clone https://github.com/rfjakob/gocryptfs.git
+> +cd gocryptfs
+> +./build.bash
+> +cat << EOF | sudo tee /sbin/mount.fuse.gocryptfs
 > +#!/bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 999
-> +#
-> +# Regression test for panic following IO error when reading extended attribute blocks
-> +#
-> +#   XFS (sda): metadata I/O error in "xfs_da_read_buf+0xe1/0x140 [xfs]" at daddr 0x78 len 8 error 61
-> +#   BUG: kernel NULL pointer dereference, address: 00000000000000e0
-> +#   ...
-> +#   RIP: 0010:xfs_trans_brelse+0xb/0xe0 [xfs]
-> +#
-> +# For SELinux enabled filesystems the attribute security.selinux will be
-> +# created before any additional attributes are added. In this case the
-> +# regression will trigger via security_d_instantiate() during a stat(2),
-> +# without SELinux this should trigger from fgetxattr(2).
-> +#
-> +# Kernels prior to v4.16 don't have medium_error_start, and only return errors
-> +# for a specific location, making scsi_debug unsuitable for checking old
-> +# kernels. See d9da891a892a scsi: scsi_debug: Add two new parameters to
-> +# scsi_debug driver
-> +#
+> +exec $(pwd)/gocryptfs -q -allow_other -acl -extpass "echo test" "\$@"
+> +EOF
+> +sudo chmod +x /sbin/mount.fuse.gocryptfs
+> +mkdir -p /mnt/gocryptfs.test /mnt/gocryptfs.scratch /home/test/gocryptfs.test /home/test/gocryptfs.scratch
+> +gocryptfs -init -q -scryptn=10 -extpass "echo test" /home/test/gocryptfs.test
+> +gocryptfs -init -q -scryptn=10 -extpass "echo test" /home/test/gocryptfs.scratch
 > +
-> +. ./common/preamble
-> +_begin_fstest auto quick attr
+> +Use the following local.config file:
 > +
-> +_fixed_by_kernel_commit ae668cd567a6 \
-> +	"xfs: do not propagate ENODATA disk errors into xattr code"
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	_unmount $SCRATCH_MNT 2>/dev/null
-> +	_put_scsi_debug_dev
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# Import common functions.
-> +. ./common/attr
-> +. ./common/scsi_debug
-> +
-> +_require_scratch_nocheck
-> +_require_scsi_debug "medium_error_start"
-> +_require_attrs user
-> +
-> +# If SELinux is enabled common/config sets a default context, which which breaks this test.
-                                                                       ^^^^^
-
-> +export SELINUX_MOUNT_OPTIONS=""
-> +
-> +scsi_debug_dev=$(_get_scsi_debug_dev)
-> +scsi_debug_opt_noerror=0
-> +scsi_debug_opt_error=${scsi_debug_opt_error:=2}
-> +test -b $scsi_debug_dev || _notrun "Failed to initialize scsi debug device"
-> +echo "SCSI debug device $scsi_debug_dev" >>$seqres.full
-> +
-> +SCRATCH_DEV=$scsi_debug_dev
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount
-> +
-> +block_size=$(_get_file_block_size $SCRATCH_MNT)
-> +inode_size=$(_xfs_get_inode_size $SCRATCH_MNT)
-> +error_length=$((block_size/512)) # Error all sectors in the block
-> +
-> +echo Block size $block_size >> $seqres.full
-> +echo Inode size $inode_size >> $seqres.full
-> +
-> +test_attr()
-> +{
-> +	local test=$1
-> +	local testfile=$SCRATCH_MNT/$test
-> +	local attr_blocks=$2
-> +	local error_at_block=${3:-0}
-> +
-> +	local attr_size_bytes=$((block_size/2*attr_blocks))
-> +
-> +	# The maximum size for a single value is ATTR_MAX_VALUELEN (64*1024)
-> +	# If we wanted to test a larger range of extent combinations the test
-> +	# would need to use multiple values.
-> +	[[ $attr_size_bytes -ge 65536 ]] && echo "Test would need to be modified to support > 64k values for $attr_blocks blocks".
-> +
-> +	echo $scsi_debug_opt_noerror > /sys/module/scsi_debug/parameters/opts
-> +
-> +	echo -e "\nTesting : $test" >> $seqres.full
-> +	echo -e "attr size: $attr_blocks" >> $seqres.full
-> +	echo -e "error at block: $error_at_block\n" >> $seqres.full
-> +
-> +	touch $testfile
-> +	local inode=$(stat -c '%i' $testfile)
-> +	$SETFATTR_PROG -n user.test_attr -v $(printf "%0*d" $attr_size_bytes $attr_size_bytes) $testfile
-> +
-> +	$XFS_IO_PROG -c "bmap -al" $testfile >> $seqres.full
-> +	start_blocks=($($XFS_IO_PROG -c "bmap -al" $testfile | awk 'match($3, /[0-9]+/, a) {print a[0]}'))
-        ^^^^^^^^^^^^
-        local start_blocks
-
-
-OK, so you still don't want to use:
-
-  local start_blocks=$(_scratch_xfs_get_metadata_field "a.bmx[0].startblock" "inode $inode")
-
-Anyway, both ways are good to get the start_blocks for this case. So ... (don't need to send v4)
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-> +	echo "Attribute fork extent(s) start at ${start_blocks[*]}" >> $seqres.full
-> +
-> +	_scratch_unmount
-> +
-> +	echo "Dump inode $inode details with xfs_db" >> $seqres.full
-> +	_scratch_xfs_db -c "inode $inode" -c "print core.aformat core.naextents a" >> $seqres.full
-> +
-> +	if [[ start_blocks[0] -ne 0 ]]; then
-> +		# Choose the block to error, currently only works with a single extent.
-> +		error_daddr=$((start_blocks[0] + error_at_block*block_size/512))
-> +	else
-> +		# Default to the inode daddr when no extents were found.
-> +		# Errors when getfattr(1) stats the inode and doesnt get to getfattr(2)
-> +		error_daddr=$(_scratch_xfs_db -c "inode $inode" -c "daddr" | awk '{print $4}')
-> +	fi
-> +
-> +	_scratch_mount
-> +
-> +	echo "Setup scsi_debug to error when reading attributes from block" \
-> +	     "$error_at_block at daddr $error_daddr" >> $seqres.full
-> +	echo $error_daddr > /sys/module/scsi_debug/parameters/medium_error_start
-> +	echo $error_length > /sys/module/scsi_debug/parameters/medium_error_count
-> +	echo $scsi_debug_opt_error > /sys/module/scsi_debug/parameters/opts
-> +	grep ^ /sys/module/scsi_debug/parameters/{medium_error_start,medium_error_count,opts} >> $seqres.full
-> +
-> +	echo "Read the extended attribute on $testfile" >> $seqres.full
-> +	sync # the fstests logs to disk.
-> +
-> +	_getfattr -d -m - $testfile >> $seqres.full 2>&1 # Panic here on failure
-> +}
-> +
-> +# aformat shortform
-> +test_attr "attr_local" 0 0
-> +
-> +# aformat extents
-> +# Single leaf block, known to panic
-> +test_attr "attr_extent_one_block" 1 0
-> +
-> +# Other tests to exercise multi block extents
-> +test_attr "attr_extent_two_blocks_1" 2 1
-> +test_attr "attr_extent_two_blocks_2" 2 2
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-> new file mode 100644
-> index 00000000..3b276ca8
-> --- /dev/null
-> +++ b/tests/xfs/999.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 999
-> +Silence is golden
+> +export TEST_DEV=/home/test/gocryptfs.test
+> +export TEST_DIR=/mnt/gocryptfs.test
+> +export SCRATCH_DEV=/home/test/gocryptfs.scratch
+> +export SCRATCH_MNT=/mnt/gocryptfs.scratch
+> +export FSTYP=fuse
+> +export FUSE_SUBTYP=.gocryptfs
+> diff --git a/common/rc b/common/rc
+> index 8fd7876a..da8be16e 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -512,6 +512,11 @@ _scratch_unmount()
+>  	tmpfs)
+>  		_unmount $SCRATCH_MNT
+>  		;;
+> +	fuse)
+> +		# The "source device" can be an arbitrary string for fuse filesystems
+> +		# and may not be unique. Unmount by mountpoint instead.
+> +		_unmount $SCRATCH_MNT
+> +		;;
+>  	*)
+>  		_unmount $SCRATCH_DEV
+>  		;;
+> @@ -703,6 +708,10 @@ _test_unmount()
+>  {
+>  	if [ "$FSTYP" == "overlay" ]; then
+>  		_overlay_test_unmount
+> +	elif [ "$FSTYP" == "fuse" ]; then
+> +		# The "source device" can be an arbitrary string for fuse filesystems
+> +		# and may not be unique. Unmount by mountpoint instead.
+> +		_unmount $TEST_DIR
+>  	else
+>  		_unmount $TEST_DEV
+>  	fi
+> @@ -5021,7 +5030,7 @@ init_rc()
+>  
+>  	# Sanity check that TEST partition is not mounted at another mount point
+>  	# or as another fs type
+> -	_check_mounted_on TEST_DEV $TEST_DEV TEST_DIR $TEST_DIR $FSTYP || _exit 1
+> +	_check_mounted_on TEST_DEV $TEST_DEV TEST_DIR $TEST_DIR $FSTYP$FUSE_SUBTYP || exit 1
+>  	if [ -n "$SCRATCH_DEV" ]; then
+>  		# Sanity check that SCRATCH partition is not mounted at another
+>  		# mount point, because it is about to be unmounted and formatted.
 > -- 
-> 2.47.3
+> 2.51.0
 > 
 > 
 
