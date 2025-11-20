@@ -1,43 +1,37 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 17FE3376BF8;
-	Thu, 20 Nov 2025 16:09:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24F2D22257E
+	for <fstests@vger.kernel.org>; Thu, 20 Nov 2025 23:15:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763654964; cv=none; b=Tn6hZKuZNoNhhFWCCHBBk5uXb/bIsorbGH89+e3jUA60AIqrCR7nWsW34VS+9hn4ZPlYxqBhyAzGNJmenRDh1i1K2YGnJoN02LYmDJotbRwPVJ/sSYvnysREI4HglES4veuAc1vQ94sHAGDM0gz2D/U5hxJFOS9wGrZTVrfHnZM=
+	t=1763680537; cv=none; b=Us0Hmg74XE9vclFXEd1cPrts3qBO0KvxI2tP4szE2Up3S+/esPpbuVMEVNPEsw1bl0/oy2aUSlRRd1OSAdUl4xw1RVLx3FI7iUxuGBzA9ujkU4YWGfe4UV4PwgwI4kcngasKw2QRU8KdMMM1RDiZzs/JEYMd0Om4eESvEQQ0dQk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763654964; c=relaxed/simple;
-	bh=AwxgNqL6CsHoxDlLGVJBSknEoVNH25fGO0VDogj0xfk=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Fy9t+rNcz7mwhhlej6UtbNRDv2dfUtlZvJ2BnSzGSslHPx/stNwFvzfNKn19JWKjy9MKZM3awCvfBzoMh1QJrL2CPioARBQidl5bmAYa4oIY69Bcmp3QxW205hWMu6ejxWhHtrl3JmNnRCN6rP098hkQmqjtk5sY78X+pbAECt0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kXaqFP2N; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1763680537; c=relaxed/simple;
+	bh=lc7M/JeNaHxtkGdbFvzPrKB17fborAkUNGKx8myI8M0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Me6E5Rtt/27u8WE7xW3Uml2VH4+HdgHC+WnY/gR1813NSq9OZgBrQ5v/CIX/EAHJ+RTBY0u1+ojtJp+Ymq8aEL9iXl7LIPYFr7sYX1mLnSulw3lf8dOFmJP1Ei9okaSdWh8DgmZfYJC5DtEzdbz9CeK5zUH/BPUz/9d0DMenI/w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lUXaBaOr; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kXaqFP2N"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 07B40C4CEF1;
-	Thu, 20 Nov 2025 16:09:21 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lUXaBaOr"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D1B83C4CEF1;
+	Thu, 20 Nov 2025 23:15:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1763654963;
-	bh=AwxgNqL6CsHoxDlLGVJBSknEoVNH25fGO0VDogj0xfk=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=kXaqFP2NvNAkCMigDaOdEh/7Y8Izhsar67ZwWo2vlWxk1Lp5igTM7PoVW6f7bu9sB
-	 L4nJqFB4DshPVPRa3PP6HQ7R2S9RirYaUZg+4AZz9/Tr4NtwPiZbUgF3bswfSdk/OJ
-	 Jy+Nhh6G8PqLqOQttEkPZvNqhPoU+jdR/3vFy1UPBfTu+lC7RSNTML5GNcm1sugCbX
-	 S/NsG18Z9tKCZNv4lGFnKziqjR3LF+RyhKlXGihmHoIWP3/vGVpb7qTl3Aoyai+yLz
-	 c9TBhmhL4QMyKRZvqMHJOwKh+UKA4is70OLTmbRj28QuMzOaUcICdQTCHNAUsHYaAc
-	 GT4yV2DNQvvPg==
-From: cem@kernel.org
+	s=k20201202; t=1763680536;
+	bh=lc7M/JeNaHxtkGdbFvzPrKB17fborAkUNGKx8myI8M0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=lUXaBaOrICxY17+Uz/YJPnuvoL7EZnwZid15KSoiSTNva9nZXf65K1wgoZUbDxFDb
+	 DKbFuFWIfyaPhu/DVqfxh7jrUM+MTXdrnlLQkMqgxWezwvQT4HoAyaMsGi1eVJiUVM
+	 rr/Na/W28pENtjukJAcLBtlysShIpsaUF88TOmSRIjKdmGy1uN0a4zNNbpyFJiB3kZ
+	 /BggerJy1kS+uJ9RKPvAgPTQTrHQ/AqRa0CFdJeJ0uBgbWMh+DbORYHUhFDlzVKu0f
+	 yoCMHegTaQAqLUdKzulTZF2ywB2qcjfO+6Pp8cW3L8zX/prvd4x/dOzCwUasSUAzZ0
+	 z2b+NcRh6f+FQ==
+Date: Thu, 20 Nov 2025 15:15:36 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
 To: zlang@kernel.org
-Cc: hch@lst.de,
-	hans.holmberg@wdc.com,
-	johannes.thumshirn@wdc.com,
-	fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: [PATCH 2/2] xfs: Add test for mkfs with smaller zone capacity
-Date: Thu, 20 Nov 2025 17:08:30 +0100
-Message-ID: <20251120160901.63810-3-cem@kernel.org>
-X-Mailer: git-send-email 2.51.1
-In-Reply-To: <20251120160901.63810-1-cem@kernel.org>
+Cc: fstests@vger.kernel.org, Christoph Hellwig <hch@infradead.org>
+Subject: [PATCH] common/rc: fix _xfs_is_realtime_file for internal rt devices
+Message-ID: <20251120231536.GK196366@frogsfrogsfrogs>
 References: <20251120160901.63810-1-cem@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -45,73 +39,36 @@ List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20251120160901.63810-1-cem@kernel.org>
 
-From: Carlos Maiolino <cem@kernel.org>
+From: Darrick J. Wong <djwong@kernel.org>
 
-Add a regression test for initializing zoned block devices with
-sequential zones with a capacity smaller than the conventional
-zones capacity.
+Now that we can have internal realtime devices, it's possible to have a
+realtime filesystem without setting USE_EXTERNAL=yes or SCRATCH_RTDEV.
+Use the existing _xfs_has_feature helper to figure out if the given path
+points to a filesystem with an online realtime volume.
 
-Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
 ---
- tests/xfs/333     | 37 +++++++++++++++++++++++++++++++++++++
- tests/xfs/333.out |  2 ++
- 2 files changed, 39 insertions(+)
- create mode 100755 tests/xfs/333
- create mode 100644 tests/xfs/333.out
+ common/xfs |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/tests/xfs/333 b/tests/xfs/333
-new file mode 100755
-index 000000000000..f045b13c73ee
---- /dev/null
-+++ b/tests/xfs/333
-@@ -0,0 +1,37 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 333
-+#
-+# Test that mkfs can properly initialize zoned devices
-+# with a sequential zone capacity smaller than the conventional zone.
-+#
-+. ./common/preamble
-+. ./common/zoned
+diff --git a/common/xfs b/common/xfs
+index ffdb82e6c970ba..8b1b87413659ad 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -253,9 +253,9 @@ _xfs_get_dir_blocksize()
+ # Decide if this path is a file on the realtime device
+ _xfs_is_realtime_file()
+ {
+-	if [ "$USE_EXTERNAL" != "yes" ] || [ -z "$SCRATCH_RTDEV" ]; then
+-		return 1
+-	fi
++	local mntpt="$(findmnt --target "$1" --noheadings --output TARGET)"
 +
-+_begin_fstest auto zone mkfs quick
-+_cleanup()
-+{
-+	_destroy_zloop $zloop
-+}
-+
-+_require_scratch
-+_require_zloop
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount >> $seqres.full
-+
-+zloopdir="$SCRATCH_MNT/zloop"
-+zone_size=64
-+conv_zones=2
-+zone_capacity=63
-+
-+zloop=$(_create_zloop $zloopdir $zone_size $conv_zones $zone_capacity)
-+
-+_try_mkfs_dev $zloop >> $seqres.full 2>&1 || \
-+	_fail "Cannot mkfs zoned filesystem"
-+
-+echo Silence is golden
-+# success, all done
-+_exit 0
-diff --git a/tests/xfs/333.out b/tests/xfs/333.out
-new file mode 100644
-index 000000000000..60a158987a22
---- /dev/null
-+++ b/tests/xfs/333.out
-@@ -0,0 +1,2 @@
-+QA output created by 333
-+Silence is golden
--- 
-2.51.1
-
++	_xfs_has_feature $mntpt realtime || return 1
+ 	$XFS_IO_PROG -c 'stat -v' "$1" | grep -q -w realtime
+ }
+ 
