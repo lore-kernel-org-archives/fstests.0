@@ -1,41 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F03FE27703E
-	for <fstests@vger.kernel.org>; Fri, 21 Nov 2025 16:20:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D60F72135CE;
+	Fri, 21 Nov 2025 16:35:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763742039; cv=none; b=TedOgzy7g1j8URXNoQREd/2OLSaVs1v+Y9gnUFRY49o9TyrR+VoC+sUUlly3VrCLw8D28MpzIdpw6QweMtyV8l99NcvYDAIGikgkKAqudPrhxbVtf95cs50vLmx+14x0n2WfZmc9gD53u85cK2OjRneryevoXw2LchGSgD+EUPU=
+	t=1763742954; cv=none; b=frumITHpIaE5cwf12xqbwz4yY+B36Ra+usXDlAqENpYMveFNx788kp4CNe1VoN2Huy8qyE6gmKlNKIcVWdm4Dccma5GADVPTiruZm+u/Gy1fq6rgN1xkFJLqDyONN3kOJL66T4rbCc0QzsNoL3DSPOp2oMNcJJLXGs+vt1wlWG8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763742039; c=relaxed/simple;
-	bh=cpz9t1UGGZr/PXb6IC3wehJha9F0RaSXPQCecKsza24=;
+	s=arc-20240116; t=1763742954; c=relaxed/simple;
+	bh=2UiKS+dmV086WopYnefuZPkUM31z9bm/uw2Iwxsyv+A=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=fyMRjIkWfQmVE2fcl8yMyZeedP06SFHmK73P2l25v+rAX7dXd5pgys6JJp88d77fkmpj1U0aJzgtdMQ6OebHW/L/G3HSzkswnUx3N/Jdb0dQ/caoSsYy+2Ta90D4scDlrIe4aGUmkXSgmtQ5Vj3asZcusmuKUohx83Iz5zuCnNU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=p5CdFI6e; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=a+Z2z7DoA9mZxwN/nD9a9p9yeZLzjdRCnVXV5Ixp4/7MINBdd361cBgQr3htwXP7SaLjkG+wdp/jgjOGCErvs/7qZupn69EzzMRlwcjlN1u43/kc21v488UXNewVYGVcv0hdgIGW66VPGFVJeLsFAAucjDdDA72qf0GuwW0ROT0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HvUHI8YB; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="p5CdFI6e"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 71C77C4CEF1;
-	Fri, 21 Nov 2025 16:20:38 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HvUHI8YB"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6AEEAC4CEF1;
+	Fri, 21 Nov 2025 16:35:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1763742038;
-	bh=cpz9t1UGGZr/PXb6IC3wehJha9F0RaSXPQCecKsza24=;
+	s=k20201202; t=1763742954;
+	bh=2UiKS+dmV086WopYnefuZPkUM31z9bm/uw2Iwxsyv+A=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=p5CdFI6eNNFpa41cbseip7S8bxPLOWp2Hdiosg7bhwqbuR/cjvcoXXx476pmfFj7f
-	 FRPjJ0AA7ZvyTiGkKuxyFjBj/vnAK2FRjHkGGSEI8jAvmb6yim5P1mM0DlVD/Obdf1
-	 5FIid7G4uIzjTHejP6YAUYOLmYgVoH/gVDqWVAC5w7vCj8ltfduHbIOwELTXfCQDrW
-	 WgE27UGAaH9UlD+RuZEb9etOVbsZrCrN0o5QnwzTSPrt2Is4SsoTwX27I1KaM7Ib8d
-	 KdgrD1vquPUzsAwK34M8Ftlw6kyCzrTOnNMye7KE1Uw1tOVA0jbU3OO3RRS32Kv17Q
-	 d+lL1Y0Piec8g==
-Date: Fri, 21 Nov 2025 08:20:37 -0800
+	b=HvUHI8YBaEL6d0ut+891OJtN8cAhdKtQOvSm/QSLvPjHZQl7ClluPtmXRqNq5b/NJ
+	 W3MCoKEy9RoKl8hb/DlxShpHEA1QELD7FN7qnY3bO2s4wvlMxvOe3Jf9Nc8Cj/plRu
+	 16bHgXVjEwk7dnPnYlkKXz8CZRjHbKDCbGrhoN/oC7DFUQs185MmUewyCgIDGJiTPk
+	 hWSlJm1wmMHKs/qOCfBhdqwfStZFrstMmHlOSAjheLZbn0IwCaAdeOzuFcT1fepT1Q
+	 ExZ8MbqZxYPIZf7c/pXuDYy99dChhqstyzprjOg1vkFahATxjPFqClKgU1O+uKOtbL
+	 U7hw/gR+mWw2A==
+Date: Fri, 21 Nov 2025 08:35:53 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: zlang@kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] common/rc: fix _xfs_is_realtime_file for internal rt
- devices
-Message-ID: <20251121162037.GG196391@frogsfrogsfrogs>
-References: <20251120160901.63810-1-cem@kernel.org>
- <20251120231536.GK196366@frogsfrogsfrogs>
- <aSAK8qG0vFjK79z4@infradead.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/3] generic/484: force I/O to the data device for XFS
+Message-ID: <20251121163553.GM196366@frogsfrogsfrogs>
+References: <20251121071013.93927-1-hch@lst.de>
+ <20251121071013.93927-2-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,27 +43,45 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aSAK8qG0vFjK79z4@infradead.org>
+In-Reply-To: <20251121071013.93927-2-hch@lst.de>
 
-On Thu, Nov 20, 2025 at 10:47:14PM -0800, Christoph Hellwig wrote:
-> On Thu, Nov 20, 2025 at 03:15:36PM -0800, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > Now that we can have internal realtime devices, it's possible to have a
-> > realtime filesystem without setting USE_EXTERNAL=yes or SCRATCH_RTDEV.
-> > Use the existing _xfs_has_feature helper to figure out if the given path
-> > points to a filesystem with an online realtime volume.
+On Fri, Nov 21, 2025 at 08:10:05AM +0100, Christoph Hellwig wrote:
+> Otherwise the error injection to the data device might not work as
+> expected.  For example in some zoned setups I see the failures in
+> a slightly different spot than expected without this.
 > 
-> Looks good:
-> 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> 
-> although right now it should not matter - one user of
-> _xfs_is_realtime_file requires reflinks and the other explicitly
-> excludes zoned file systems.
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-I know; I found this by observing that one of the new xfs_healer tests
-wasn't working quite right on internal-zoned xfs.  There wouldn't be
-much point in citing xfs/1899 as the discovery point. :(
+Wow, how did I miss this all these years?
+
+Ohhh, because this is an internal-rtdev failure isn't it?
+
+How about removing the "unset SCRATCH_RTDEV" a few lines up too?
+
+With that,
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
 --D
+
+> ---
+>  tests/generic/484 | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/tests/generic/484 b/tests/generic/484
+> index ec50735a5b58..0455efcb6000 100755
+> --- a/tests/generic/484
+> +++ b/tests/generic/484
+> @@ -42,6 +42,9 @@ _scratch_mkfs > $seqres.full 2>&1
+>  _dmerror_init
+>  _dmerror_mount
+>  
+> +# ensure we are on the data device, as dm error inject the error there
+> +[ "$FSTYP" == "xfs" ] && _xfs_force_bdev data $SCRATCH_MNT
+> +
+>  # create file
+>  testfile=$SCRATCH_MNT/syncfs-reports-errors
+>  touch $testfile
+> -- 
+> 2.47.3
+> 
+> 
