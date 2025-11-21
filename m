@@ -1,92 +1,121 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0EEBC2D9EC7;
-	Fri, 21 Nov 2025 17:04:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 201A42E7BA3
+	for <fstests@vger.kernel.org>; Fri, 21 Nov 2025 17:55:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763744683; cv=none; b=staBtEiMDYYPAIZYdCbbs+PPrDuFFsNFEAdfGKSDYUJ/LGwf005DzY5RyI7vNgtTK/tIMeF2yjaGyt1f+UHd0eGs+fLSetCI/gpZ5Pv87U3ptOSQFn5k7Olu5tjWof84U0jDYMFloslfT3hw6yw1oVshDMoCS0r7qRnZRT3InRQ=
+	t=1763747743; cv=none; b=E/Dhq3B3wJxZYQVuMPoRtL1Z9xjAqpCbkYnmibd7F9sk0ZOpsyxmHniJLsDAtI3Q/oLEmdc4Lbvpis7sQyZkTyNGIwWNiu1eia2t0wNYyjCuUcDHrgaicCvwBDUgrWYr7sQH/n9foldxjmhLSzhRi1p084tlI0EZd7pOLdOPNoU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763744683; c=relaxed/simple;
-	bh=E7gGSRlT3EEnVwdxumPZ0J2/0FVLsiRXO4ZosciiKVw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Dz8/ghtHo/Y8I0+5/ucyH0epNwPvAKQy5hb0GI5IafuwOQ65q2a8+iFzH7QYjD14oYjGDZOLVoSsJM3fQeNbi0yDtzzH6S8AfPSa5B7NV/KS/YaDZcsbe/QKAZMVazQFOgfVu7X6f43eoaZmrXXsGhbdCPdfpKt1Oa80NkUm5Rs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eovfbcZC; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1763747743; c=relaxed/simple;
+	bh=4GkAj7pF2EIR9GTFdVHGYJtWl+diz32yreWlqEaOtPU=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=BVl5faj80VkGoxc+F0sTGf/RjF74sMnriYsbl1TZ2oKcQbvX/eqDuo3/BuL76RqVSBsnFwKORy6S7yY5yF5cIfh+jLm5cP2qMfW7ur3V7ye+JP3MnQdAe6jxkA3JXq1e4hU1NzadzIg4KtT72cfTDn5Cc9Cx7RfOShb1jNZNcNY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=pass smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda.com header.i=@toxicpanda.com header.b=CuWfpyN+; arc=none smtp.client-ip=209.85.128.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=toxicpanda.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eovfbcZC"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7EF40C4CEF1;
-	Fri, 21 Nov 2025 17:04:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1763744682;
-	bh=E7gGSRlT3EEnVwdxumPZ0J2/0FVLsiRXO4ZosciiKVw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=eovfbcZCz8kDRz7CbkesD2a+p/jBS/9nKer3WLvSyR1rTtfJvkP4e4hV/nbGLkigz
-	 oT/t8EOIAVKcwFqgs1Ewmc1aXUzzIwqjk/VedWkIZUYvYPWsjE1BU3P+pnfkozHGdq
-	 8OJV4JmfW5kHgMDeJ339FvVN0jU5ARuZj49C4yGRZoZauQt0NvzxdZfRnzWyJgsdLM
-	 nlwD//wlsH6CDSMqNFQoCb5IEWyh62o5mWK42affjN6Nuug90U7ZblMEXlG1nzB1Pp
-	 yIfDmS1XpFIuEUbUoqxkQzEJxAY/P8/KwV8SNejnhEUowAJ2q0Sr7sbxR6oeIXkCwL
-	 0tQKZqbx5g8/w==
-Date: Fri, 21 Nov 2025 09:04:41 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 3/3] xfs/158: _notrun when the file system can't be
- created
-Message-ID: <20251121170441.GO196366@frogsfrogsfrogs>
-References: <20251121071013.93927-1-hch@lst.de>
- <20251121071013.93927-4-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=toxicpanda.com header.i=@toxicpanda.com header.b="CuWfpyN+"
+Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-7895017c722so22727387b3.2
+        for <fstests@vger.kernel.org>; Fri, 21 Nov 2025 09:55:40 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda.com; s=google; t=1763747739; x=1764352539; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=xHh7NAxLq+wyjDH19eKilpc7ukFZkWjRBiy614h4rD8=;
+        b=CuWfpyN+k8zjfk9K4KE8uGhvnORmdizUY4LJJn2DxxZEf4BMtdHNPxyAVdRAsxMOe0
+         AQNTM73zDUFciCPvJ16UR7Cu0tprPCwu9C2MnDOHLVd/oUjlMpqrjMmiiDStOzc7oO+b
+         DssDyTyy1o5G08D30rbm4yyZi3/VjyZ66GnoBXX/NDN8vUqYYUexaxfVWyE0nH+eVxa+
+         IIHIFF2Rco9hTlIiNTiXLtSCCGztCejv8kG4bGuXc60WqwgO55mXv2yEI7KoEDSEElK5
+         VS8+I8WYedgz2edC1R75qVQ5aoRwL9yKw4N1BQAx7ltTR/3c08pONG5sfvlXwjUDU/AA
+         RwFg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1763747739; x=1764352539;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=xHh7NAxLq+wyjDH19eKilpc7ukFZkWjRBiy614h4rD8=;
+        b=jWj5+ou5pnPg3rg52Hglaf8kf7PviFe0shtPCaTVK6U3GpQSA5duQYNx6HUEAApUp8
+         mv4ejktEs5MZYvcdUlyFGXdilgTkoW22PuAy+bmMIkEXRSv/LF8HuGbXOvzAw1Cm2/6+
+         QZVk3EqnX/sHyqfD/TFD2QhCbALgaft9heMfKgjsUmB9mPySCCwbde13yqKll2tJe/3u
+         l3/vs9AbqeUYek43siyVv6R7yBKgYwn8OkHkc82KBT+In2q+cyTlFcrRHAoBadOvEdoK
+         tytpYUW0wd5Hc9mNuVuDTGIMVSwumJId122rX89ZVnQlvULaOQbQQy+ZOUAhVFzPkIZy
+         iLdg==
+X-Gm-Message-State: AOJu0Yzl9ZrbFCJwY4tCCPHZ0FueVo0XdZhJgTpBbNlJAuF9XpyPOGnK
+	uPjccRNdjV+eHR/KUbbFZ3+E2EuVpQqZNGC08y9TvJnPCUX7idtvkmdAAMxLvKUR5DBF40KVK6m
+	umDcRaKl8Kw==
+X-Gm-Gg: ASbGncuFKGoYrb2ORIBNNwt74rCOgKBnNpAquHT8lr5+dJtPU35F+TVBODfj9eInv/q
+	wYcrM8p6l8FLAddzpwNjx8GiItU7l6sFol3Ok2pvgPeQh5u+l5SFORNpFSMc/S4soi6WudPF6vX
+	Z5U/K3YNpDgL/FJHvKYIHHtb4PYiPnvZxktuvpk6ZcKiz/ZZHAjB2xaXhSumK2aFAjhXg+rQG1c
+	ba09/aELiiiZOGfvjVIpEAdtQBJs/1soXKLnC/YilI2fFoO7jqAvIJVnbxcqJs0AciDiGz3Uo/Q
+	ftejRmj1I5BY/fVGEQS4VP+pRrqrWUQwCVGPkWGB+HH2q7jY5q5jcJooxmgvE6A9EepheCZCEOC
+	Z+Mnd/zbwUMaO9zE+3SDxooLFWess5DbtHpNC2Wof6sypZj9UZU4wpGXmQkXdtnRVPddHi0jbmc
+	kX+p4HLjGuEGTL
+X-Google-Smtp-Source: AGHT+IF7CrjaJfBfeShvlylP9IT2+CGfxtZYt+FhuAACkB2AmYUmdrylfzosaWjlWLKo5XX/H3FmQg==
+X-Received: by 2002:a05:690c:3612:b0:784:a232:b3d9 with SMTP id 00721157ae682-78a8b4adf05mr21852877b3.18.1763747739535;
+        Fri, 21 Nov 2025 09:55:39 -0800 (PST)
+Received: from localhost ([2603:6080:7702:ce00:f528:9f2f:44c:2c84])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-78a7987f5e4sm17629327b3.8.2025.11.21.09.55.38
+        for <fstests@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 21 Nov 2025 09:55:38 -0800 (PST)
+From: Josef Bacik <josef@toxicpanda.com>
+To: fstests@vger.kernel.org
+Subject: [PATCH] fstests: fix bug with _check_dmesg "some pattern"
+Date: Fri, 21 Nov 2025 12:55:34 -0500
+Message-ID: <16110e3dac5c7476dd5c74bfb50efb4dc1aac5f0.1763747729.git.josef@toxicpanda.com>
+X-Mailer: git-send-email 2.51.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20251121071013.93927-4-hch@lst.de>
+Content-Transfer-Encoding: 8bit
 
-On Fri, Nov 21, 2025 at 08:10:07AM +0100, Christoph Hellwig wrote:
-> I get an "inode btree counters not supported without finobt support"
-> with some zoned setups with the latests xfsprogs.  Just _notrun the
-> test if we can't create the original file system feature combination
-> that we're trying to upgrade from.
+I've been rigging up Claude to run fstests via an MCP, and part of this
+means it mounts a 9p file system to save the fstests results. This was
+giving me occasional ENODATA errors, which I dug into. Turns out it's a
+race between truncate and read on 9p which is completely normal for 9p,
+but it's uncovering an actual bug in _check_dmesg. The way bash works is
+when you do
 
-What configuration, specifically?  I haven't noticed any problems with
-xfs/158 and:
+cat foo | whatever > foo
 
-MKFS_OPTIONS  -- -f -m metadir=1 -r zoned=1 /dev/sdf
-MKFS_OPTIONS  -- -f -rrtdev=/dev/sdd -m metadir=1 -d rtinherit=1 -r zoned=1 /dev/sdf
+bash will setup the various communication channels first, which is the |
+and >, and then it will execute the commands. This means that it
+truncates foo FIRST, and then it launches cat. Which means we'd race
+with truncate and sometimes get data, sometimes get nothing. And even
+worse on 9p we'd get ENODATA because we get a 0 read back when we
+thought the isize was reasonable.
 
---D
+Fix this by changing this case in _check_dmesg to redirect to another
+file, and move that file over $seqres.dmesg to be checked later.
 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/xfs/158 | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/xfs/158 b/tests/xfs/158
-> index 89bf8c851659..02ab39ffda0b 100755
-> --- a/tests/xfs/158
-> +++ b/tests/xfs/158
-> @@ -22,12 +22,14 @@ _scratch_mkfs -m crc=1,inobtcount=1,finobt=0 &> $seqres.full && \
->  	echo "Should not be able to format with inobtcount but not finobt."
->  
->  # Make sure we can't upgrade a filesystem to inobtcount without finobt.
-> -_scratch_mkfs -m crc=1,inobtcount=0,finobt=0 >> $seqres.full
-> +try_scratch_mkfs -m crc=1,inobtcount=0,finobt=0 || \
-> +	_notrun "invalid feature combination" >> $seqres.full
->  _scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
->  _check_scratch_xfs_features INOBTCNT
->  
->  # Format V5 filesystem without inode btree counter support and populate it.
-> -_scratch_mkfs -m crc=1,inobtcount=0 >> $seqres.full
-> +_scratch_mkfs -m crc=1,inobtcount=0 || \
-> +	_notrun "invalid feature combination" >> $seqres.full
->  _scratch_mount
->  
->  mkdir $SCRATCH_MNT/stress
-> -- 
-> 2.47.3
-> 
-> 
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ common/rc | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/common/rc b/common/rc
+index a10ac177..947685df 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4844,7 +4844,14 @@ _check_dmesg()
+ 	# test failures. Custom filters are then applied afterwards.
+ 	_dmesg_since_test_start | _check_dmesg_filter > $seqres.dmesg
+ 	if [ -n "$1" ]; then
+-		cat $seqres.dmesg | $1 > $seqres.dmesg
++		# We use $seqres.dmesg.tmp because shell will setup the
++		# redirections first, which means we would truncate
++		# $seqres.dmesg before cat'ing it. This is racy so sometimes it
++		# would work, but othertimes it would silently fail, or in the
++		# case of 9p you'd get ENODATA. We must redirect into a
++		# temporary file and then move it.
++		cat $seqres.dmesg | $1 > $seqres.dmesg.tmp && \
++			mv $seqres.dmesg.tmp $seqres.dmesg
+ 	fi
+ 
+ 	grep -E -q -e "kernel BUG at" \
+-- 
+2.51.1
+
