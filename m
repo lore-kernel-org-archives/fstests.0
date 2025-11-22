@@ -1,91 +1,91 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4AA02296BAA
-	for <fstests@vger.kernel.org>; Sat, 22 Nov 2025 07:41:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1AF6436D50C
+	for <fstests@vger.kernel.org>; Sat, 22 Nov 2025 08:36:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763797280; cv=none; b=IspLFRHOCypSJBExTUGxzQGNSeNvJvm8pcPzcr3sU8jSWG7sqC6ta9AcPD4tpZAE1nyTE6/woeW0dpIwqIEXpRyAP7NtaryJ1YFbpHYtCwqjmvMG6SvjUd1Pb/bhd/Zsu2F3MJoKW8t5PqQCzfvEu3pP+YzDw3y+yMgNewD3Hmk=
+	t=1763800620; cv=none; b=W0pUjdPXsMzFIkpcBnpHbhw6CvYu1pB3QxbQfDAFw0vuQov7QxDOi/N4wiWS+/R9aSJ43Hdn0s3lb0dcyi7BGIre1l39DXywZiM6iVyGDBSTulilj8iLEt70fB2yykNHKdNV1GbfFNUvbNqmcfVSOOo/gRe0a/IUzmJhw5Ifcdg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763797280; c=relaxed/simple;
-	bh=i5ISNR6vMM/F/kla/kmJr+XHj4sLn6qvyzzfnXmHaXg=;
+	s=arc-20240116; t=1763800620; c=relaxed/simple;
+	bh=ztgXdhjxtjkovT48jBmQmJ1bQCaLWwKJ31UmH8BuFs4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=MEkgmWyaYN78WbbxGpAMHzlk+rlqnukYcjU8fR11HzMKnU8gE3tGykiQzehBLUYZ6Gp1l7EO1AOJ9PGEaKr4zaGG9szB9eqmU/+4zHvPdyF6016IcgRtY4j0ukbZfJGZ5qbb6zZuWzt5QXmyzPBDYvZDW5rtQmXqDMRlsOrZELA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=cHQbuKlV; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=PdkHG4U8; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=tNkm+EhkmjcSU6jl8RsOocB6ymNr/055U/LhJ+1GvzjYIhqrODri2BuPnE/dN8pnK9T3txFYJHLJtjgOGVnb7oUZPtYfgEdzsSme/PrqjcsaK/+joXAeezKQjpjynXTtjTbXIAzQ4elt7Nk8YOzJF1jp4DMcOqCmZzMPIWmWEHE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=g2mG70mm; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=WdQD7aD8; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cHQbuKlV";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="PdkHG4U8"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="g2mG70mm";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="WdQD7aD8"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1763797278;
+	s=mimecast20190719; t=1763800617;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=2lzzkrYSefFSUe5bJI0RBijIkjMIBc7EYqbMfwC7QqQ=;
-	b=cHQbuKlVaF8mbdP9MS8soAC0IW+oaUgLXunT2rbI5548qxNjVxmV/76iD1lNw0YRjKxTgL
-	PBybbXLx21iBWuBjCKEPYblht61rTQl8chd7veQkJcOgnR3JEcsI3eWbR1uYsWR+ofhulv
-	KgBnNvXWTuoTea4hfpjojK+zH4Nqwto=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=N2zqQPxfD8wBoqVPNB/Ddc7v1WO9JhWHYtXYtFICkgs=;
+	b=g2mG70mmV3YjK+3BqtgI7CFJlABvKvTerGbGTSUyczbZM5OIFO/A6jvj92rRnc+q59Wfo/
+	BRBod+fGiaH5h6BYBUvfPItKOD/dhq4zCWMBuJr8Htiw4MvxlfOUE+qtSJsYsupsWdHN1q
+	l4+Zwshc622J8d5p9fBIGOsTZ8rLTy4=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-609-otjT3DNVPsC4-OWTXm10lw-1; Sat, 22 Nov 2025 02:41:16 -0500
-X-MC-Unique: otjT3DNVPsC4-OWTXm10lw-1
-X-Mimecast-MFC-AGG-ID: otjT3DNVPsC4-OWTXm10lw_1763797275
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-29557f43d56so37193925ad.3
-        for <fstests@vger.kernel.org>; Fri, 21 Nov 2025 23:41:15 -0800 (PST)
+ us-mta-330-qroQawqLM4-vTaiAuwnJTw-1; Sat, 22 Nov 2025 03:36:53 -0500
+X-MC-Unique: qroQawqLM4-vTaiAuwnJTw-1
+X-Mimecast-MFC-AGG-ID: qroQawqLM4-vTaiAuwnJTw_1763800612
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-297df52c960so77846755ad.1
+        for <fstests@vger.kernel.org>; Sat, 22 Nov 2025 00:36:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1763797275; x=1764402075; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1763800612; x=1764405412; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=2lzzkrYSefFSUe5bJI0RBijIkjMIBc7EYqbMfwC7QqQ=;
-        b=PdkHG4U8/PwaUULJIvS/p23vFfVrP32BYhbMH3//oNcD1IaFFs7NvAyoKYLH175RN8
-         Z9ftzrrice2dUMArj5KbzPo0Z5cP4wh/UpppRN8GyhHL/CUDOuvOSvLCuqcheFOxmmjj
-         jVTO2vQI1hbVslG+y7ewmn+DV+++UYBS5w6afZHaLI4bRWCqzA3Ng5cCvPaFUyK/t0xc
-         2Wwf73b8DC1JLu4WZ9WVEkDPpQ1vVkhdmpJEWCMvil3xvF4HD2/BMFFN7wakmpwHZAKo
-         AEDSdHLa4lXXlyarohvpY2UGz78hItXXzzm33KYgMeHCKg5GG9sDa4wDRI87MFrhBpfs
-         rmbw==
+        bh=N2zqQPxfD8wBoqVPNB/Ddc7v1WO9JhWHYtXYtFICkgs=;
+        b=WdQD7aD8W++Pu6sTimx8FKNR78HkD4FB/HqeksLAeuv4LN10VR+MQYxy/1bO3CFkaB
+         v2Z1jge4jQ44cZDS0EF/YZH0RrJeAA9jbGNruk7qCBhxziE3LteRJCTVmQrOoDRS/xWs
+         xdsuIALmxxrxj8pjAsNKV6m+qteh+U2wn4l1YR3/6rTTrh1PAbGDmp5pgCm37QvTB5MB
+         obd0nAGtnY2LAqhLxVWgz/PrWIsPbXdCy3A70Fdlt4kz8EJmyafcXXdq4moMcjKWHTpZ
+         p6jb6n95nyPbAbqiwSmyOzYN23xY2TCmuMfLYqXb9X1v03GLw9GvGTDVFFaLy8B6EXF/
+         vbjQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763797275; x=1764402075;
+        d=1e100.net; s=20230601; t=1763800612; x=1764405412;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=2lzzkrYSefFSUe5bJI0RBijIkjMIBc7EYqbMfwC7QqQ=;
-        b=Pi9RDowENj1hK+K9DsZ+WilnWyIDke/fKI2HH4JqfPlClEK5KehimZe5eBx9Vj2Ahg
-         iCtZ83LL8XVjiunZp4Bx3JKR8bYkcwozOF6te3nqMYGr7iz4mzZ/EO8xAgWuq0q7B0s3
-         kYT6jLLbqrBoOVNtvbHKEijrXpzvKUWCn/F7b2fAzOduXOgvEkkMS3n5TIlEJZgxqI7n
-         EsnVDy/oRpsz9T66ZkZj9Qzdqfb2lf8X14VJccuLh87s183v92YXqQQIezy0LrGZZUND
-         At6qI14QbRHjZUh4QEXVq8ZHM1MOEnoF8aMBNXqNTDqp5+kdFu9Mhx2zYMTBhlcRpYKK
-         A3Eg==
-X-Forwarded-Encrypted: i=1; AJvYcCVCHuwhMnMf3j09/XGhdhIOanry2+RA2ifGRLakM9GP7xcS9IdyPmYWOlwSlbEbYEU7bJ3p6W1d@vger.kernel.org
-X-Gm-Message-State: AOJu0YyS4TZVILWBCdkeUzF15eAhw+qpIOnRcPfUF9JozesIQRTPcRfH
-	rHzLK09X2V5iLNKPlsEaQUhSBRmsyQdi0uChNgLGUybB+xLV0wy2eaX10Ub450/lSVMu9jWZnKr
-	c2ILrp4Rh330UZeh+LVsj/I+3qmBzpRTR+vB3c3tpQKnXURLGqBpqakEh7vE=
-X-Gm-Gg: ASbGncu6YrhO9ZIEPbp2MfNVBBQNhlMN1dAsDvMFvqwCR2V6MNDl+UD6+8gm6JtGooR
-	Y3wwFWauvasPzIUyu5XKKvCDDGcTOeKS8yrGDlflbsh73q2VDXUObBrS7eEoM4ihQ2u5voK1Lbk
-	vGutgPb3b9foczfqWWbkY9n6hwcQ58Fw3JZmutt9Z9W49mn+tVW0oY7xYC110ElPAOtk67y42GF
-	+Xtzj52wROj3x/exM4xfZgbekzhmczzR/zHsPJJcvQEXnHu83I2BlEnVVBbYZvzP1JY6bMta2Uz
-	ZfM1dH9iTer19O7ptf1s/hW/iuy/6Tym3+fS+mnsQc9U3TNsgKRM+Esoz45cUCysCdZfBikXyGo
-	WfNmVRt2oAkKvAEn1uNq84ZUPxz4XrNFDFeczBI52I0W9B1HUpw==
-X-Received: by 2002:a17:903:3c46:b0:269:82a5:f9e9 with SMTP id d9443c01a7336-29b6bf3bdc4mr61786055ad.29.1763797274884;
-        Fri, 21 Nov 2025 23:41:14 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGeQbPuHNYN4oOKN5LWmPMEd3/TkK5RwO8DF2irVXxmUm2vCXD3Fwsq79Vn2QYwDeataKTxwQ==
-X-Received: by 2002:a17:903:3c46:b0:269:82a5:f9e9 with SMTP id d9443c01a7336-29b6bf3bdc4mr61785875ad.29.1763797274388;
-        Fri, 21 Nov 2025 23:41:14 -0800 (PST)
+        bh=N2zqQPxfD8wBoqVPNB/Ddc7v1WO9JhWHYtXYtFICkgs=;
+        b=tvsneXJm3uKGrqBQGzfJRTaFHr/FKJAUPh40JY4UBfWxm3dFIpKnWn/O9A1XgXsjnb
+         GvbBgzb004Bcmm0r5SqgXci4wjoSwfXNwmxYWaUqN/a3+7LmgH1EqYGqajL6i40s/UjS
+         ix5FwaiWwtInCNIDj8SOJpCQmcul+w+ORqc9JWa9YPNntQ31fV8ZycSq5TZRFeH4rixz
+         d+TaK+ciBCMbhskTac7BCnz6AtsM06VWS31Spi0e0HFw1LMt6CAmlzbQQ2XDBtFoPj4w
+         hD2dLnCy4hSBZIIFeluBzJmUquQGdyUFMh7YzqfPO32e7cR74kBbuMrcn5msR9r2muOD
+         iyNw==
+X-Forwarded-Encrypted: i=1; AJvYcCU8q2yNgVBzuhpRlRCTVqn62lXnahFG269Ha/gr8mKamzgJ8dF2tQMRswKMZuJODKGCybhefqip@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw0oNO6Fix2o9k+KwKm2ri/RMzdZaPhlvRF+qFYK5vKiG4kPv4q
+	UuaAbKHueRbiDw2qqxKnGNb8eCYQC3f3YFcUDTPdttZJ+liBD4EcGoQlzyzM/o5MBhuLBTGmXI+
+	/VISqvU2Eaj9v5v4DWkL2nRbWsGdX3LKTlgQiUCibFOFqFIewgRKSxrJUGYQ=
+X-Gm-Gg: ASbGncvhcxv/AVaNdA54UUm3fLjDdLoDa3kkFRcgUR66+QcuzQo/vym6Gzm8uhf3Xgl
+	F0uOK/lt3bZoCxpmEpQT9gq8v6apLpOYyu1IOIdlZ9z1O4txGa6EzkdSbEzgn7e52A4zXk4FnNM
+	XS4VrMXf2DPVazztj6R4dkkIENr6EvVhVhzIUJTrpuQWH4vyzJGXlFCc91C67613Hp7wqRN7mOL
+	8b6Z6uUJm3IuBiCOH9D/KwkIruEKLIIdNDmsKBYvGKoK3rQJcV4hVvCuXA4/qo2MXyk3R5awJaB
+	Z01stgNjssEMqHDvhJO55H7eFwsE2t4dLo4OTyxNZchpS2AVeCewnxPkQ3tuXBLZMieYqakaGUo
+	iq4OjT0CcvhqxmoaC5g1C7yyWEIpHdxzLvz/OLNQfVFdHiZCBRw==
+X-Received: by 2002:a17:902:cf10:b0:295:4d50:aab6 with SMTP id d9443c01a7336-29b6bec46afmr71868935ad.18.1763800612475;
+        Sat, 22 Nov 2025 00:36:52 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHZKVywsAu0qzobqnzraeicR/A1ubiNv8l1v7u8EFYDdKAkfyP7Xd1nvEfkitfjqRENmetaDg==
+X-Received: by 2002:a17:902:cf10:b0:295:4d50:aab6 with SMTP id d9443c01a7336-29b6bec46afmr71868815ad.18.1763800612057;
+        Sat, 22 Nov 2025 00:36:52 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-29b5b2a6b22sm76166955ad.86.2025.11.21.23.41.11
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-29b5b13e279sm77727945ad.41.2025.11.22.00.36.48
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 21 Nov 2025 23:41:13 -0800 (PST)
-Date: Sat, 22 Nov 2025 15:41:08 +0800
+        Sat, 22 Nov 2025 00:36:51 -0800 (PST)
+Date: Sat, 22 Nov 2025 16:36:46 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: cem@kernel.org
 Cc: zlang@kernel.org, hch@lst.de, hans.holmberg@wdc.com,
 	johannes.thumshirn@wdc.com, fstests@vger.kernel.org,
 	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 1/2] common/zoned: enable passing a custom capacity
-Message-ID: <20251122074108.x4zenebioteynejq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH 2/2] xfs: Add test for mkfs with smaller zone capacity
+Message-ID: <20251122083646.ihtwb3k4eocnb7fe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20251120160901.63810-1-cem@kernel.org>
- <20251120160901.63810-2-cem@kernel.org>
+ <20251120160901.63810-3-cem@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -94,56 +94,118 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251120160901.63810-2-cem@kernel.org>
+In-Reply-To: <20251120160901.63810-3-cem@kernel.org>
 
-On Thu, Nov 20, 2025 at 05:08:29PM +0100, cem@kernel.org wrote:
+On Thu, Nov 20, 2025 at 05:08:30PM +0100, cem@kernel.org wrote:
 > From: Carlos Maiolino <cem@kernel.org>
 > 
-> Extend _create_zloop() to accept a custom zone capacity.
+> Add a regression test for initializing zoned block devices with
+> sequential zones with a capacity smaller than the conventional
+> zones capacity.
 > 
 > Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
 > ---
->  common/zoned | 8 ++++++--
->  1 file changed, 6 insertions(+), 2 deletions(-)
+>  tests/xfs/333     | 37 +++++++++++++++++++++++++++++++++++++
+>  tests/xfs/333.out |  2 ++
+>  2 files changed, 39 insertions(+)
+>  create mode 100755 tests/xfs/333
+>  create mode 100644 tests/xfs/333.out
 > 
-> diff --git a/common/zoned b/common/zoned
-> index 88b81de5db4d..51c011b247d2 100644
-> --- a/common/zoned
-> +++ b/common/zoned
-> @@ -61,7 +61,7 @@ _find_next_zloop()
->  }
->  
->  # Create a zloop device
-> -# usage: _create_zloop <base_dir> <zone_size> <nr_conv_zones>
-> +# usage: _create_zloop <base_dir> <zone_size> <nr_conv_zones> <zone_capacity>
-
-Actually from the logic of _create_zloop, these 4 arguments are optional, not
-necessary, so the "<...>" should be "[...]"
-
->  _create_zloop()
->  {
->      local id="$(_find_next_zloop)"
-> @@ -80,9 +80,13 @@ _create_zloop()
->          local conv_zones=",conv_zones=$3"
->      fi
->  
-> +    if [ -n "$4" ]; then
-> +	local zone_capacity=",zone_capacity_mb=$4"
-> +    fi
+> diff --git a/tests/xfs/333 b/tests/xfs/333
+> new file mode 100755
+> index 000000000000..f045b13c73ee
+> --- /dev/null
+> +++ b/tests/xfs/333
+> @@ -0,0 +1,37 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 333
+> +#
+> +# Test that mkfs can properly initialize zoned devices
+> +# with a sequential zone capacity smaller than the conventional zone.
+> +#
+> +. ./common/preamble
+> +. ./common/zoned
 > +
->      mkdir -p "$zloop_base/$id"
->  
-> -    local zloop_args="add id=$id,base_dir=$zloop_base$zone_size$conv_zones"
-> +    local zloop_args="add id=$id,base_dir=$zloop_base$zone_size$conv_zones$zone_capacity"
+> +_begin_fstest auto zone mkfs quick
+> +_cleanup()
+> +{
+> +	_destroy_zloop $zloop
 
-If the "zone_capacity" isn't a new feature which need a _require_ helper to check
-it's supported, then this patch looks good to me.
+        cd /
+        rm -r -f $tmp.*
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+> +}
+> +
+> +_require_scratch
 
->  
->      echo "$zloop_args" > /dev/zloop-control || \
->          _fail "cannot create zloop device"
+_require_block_device $SCRATCH_DEV
+
+> +_require_zloop
+
+g/781 checks if current $FSTYP supports zoned filesystem, and _notrun if it's
+not supported:
+
+        _try_mkfs_dev $zloop >> $seqres.full 2>&1 ||\
+                _notrun "cannot mkfs zoned filesystem"
+
+I'm wondering if we could have a common helper for that, then this case can be
+a generic test case too.
+
+For example:
+
+_require_zloop_filesystem()
+{
+        _require_zloop
+
+        local zloopdir="$TEST_DIR/zloop_test"
+        local zloop=$(_create_zloop $zloopdir 64 2)
+
+	_try_mkfs_dev $zloop >/dev/null 2>&1 || \
+		_notrun "cannot make $FSTYP on zloop"
+	_destroy_zloop $zloop
+}
+
+But this method takes too much time to run, does anyone have a better idea to help it
+to be finished in several seconds?
+
+
+> +
+> +_scratch_mkfs > /dev/null 2>&1
+> +_scratch_mount >> $seqres.full
+> +
+> +zloopdir="$SCRATCH_MNT/zloop"
+> +zone_size=64
+> +conv_zones=2
+> +zone_capacity=63
+
+Better to add a comment to explain what are these numbers for.
+
+> +
+> +zloop=$(_create_zloop $zloopdir $zone_size $conv_zones $zone_capacity)
+> +
+> +_try_mkfs_dev $zloop >> $seqres.full 2>&1 || \
+> +	_fail "Cannot mkfs zoned filesystem"
+> +
+> +echo Silence is golden
+
+Is this done? If such zloop device can be created, should we expect it works as usual?
+
+Thanks,
+Zorro
+
+> +# success, all done
+> +_exit 0
+> diff --git a/tests/xfs/333.out b/tests/xfs/333.out
+> new file mode 100644
+> index 000000000000..60a158987a22
+> --- /dev/null
+> +++ b/tests/xfs/333.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 333
+> +Silence is golden
 > -- 
 > 2.51.1
 > 
