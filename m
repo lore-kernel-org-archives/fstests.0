@@ -1,212 +1,335 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1AF6436D50C
-	for <fstests@vger.kernel.org>; Sat, 22 Nov 2025 08:36:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 236D235962
+	for <fstests@vger.kernel.org>; Mon, 24 Nov 2025 13:20:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763800620; cv=none; b=W0pUjdPXsMzFIkpcBnpHbhw6CvYu1pB3QxbQfDAFw0vuQov7QxDOi/N4wiWS+/R9aSJ43Hdn0s3lb0dcyi7BGIre1l39DXywZiM6iVyGDBSTulilj8iLEt70fB2yykNHKdNV1GbfFNUvbNqmcfVSOOo/gRe0a/IUzmJhw5Ifcdg=
+	t=1763990424; cv=none; b=jesVk7s/SjGrnaotTB3opugUz0zC5rd3ArNTb6rXYDWWHXr6v2Pjny2DFu9mH9CsOnnfeccewpHJBfEhR9mHd6j9ySRUvCjxOKKEAYKo7x12uwA7z0qlqvzF40VkfWtj+GNpaMJvZXjb07FUZst5WaS+S1Zq96AmwhFyxmXpR5Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763800620; c=relaxed/simple;
-	bh=ztgXdhjxtjkovT48jBmQmJ1bQCaLWwKJ31UmH8BuFs4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=tNkm+EhkmjcSU6jl8RsOocB6ymNr/055U/LhJ+1GvzjYIhqrODri2BuPnE/dN8pnK9T3txFYJHLJtjgOGVnb7oUZPtYfgEdzsSme/PrqjcsaK/+joXAeezKQjpjynXTtjTbXIAzQ4elt7Nk8YOzJF1jp4DMcOqCmZzMPIWmWEHE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=g2mG70mm; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=WdQD7aD8; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1763990424; c=relaxed/simple;
+	bh=8cEVA4q5ZHQ+hr5gifg8ACuEi5xp9kCN/TI1goGswI8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ghp1fQPEt5wC3Oi42K67/eIj8CPc6bC0wQgiN8iuZDgilDsToWqupkpc/Mo/qdRDxdQu8tHb011pI80w5s+lTbCIZG3vaW027MXeMtA7Xlhkqq1gc/fUyFZcLhKx4E621a3ciVpJZnroHgRrhcsw495GVdO5DWffRtzMTI3Yx7E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=LMmj0gVa; arc=none smtp.client-ip=209.85.128.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="g2mG70mm";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="WdQD7aD8"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1763800617;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=N2zqQPxfD8wBoqVPNB/Ddc7v1WO9JhWHYtXYtFICkgs=;
-	b=g2mG70mmV3YjK+3BqtgI7CFJlABvKvTerGbGTSUyczbZM5OIFO/A6jvj92rRnc+q59Wfo/
-	BRBod+fGiaH5h6BYBUvfPItKOD/dhq4zCWMBuJr8Htiw4MvxlfOUE+qtSJsYsupsWdHN1q
-	l4+Zwshc622J8d5p9fBIGOsTZ8rLTy4=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-330-qroQawqLM4-vTaiAuwnJTw-1; Sat, 22 Nov 2025 03:36:53 -0500
-X-MC-Unique: qroQawqLM4-vTaiAuwnJTw-1
-X-Mimecast-MFC-AGG-ID: qroQawqLM4-vTaiAuwnJTw_1763800612
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-297df52c960so77846755ad.1
-        for <fstests@vger.kernel.org>; Sat, 22 Nov 2025 00:36:53 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="LMmj0gVa"
+Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-477a2ab455fso46505455e9.3
+        for <fstests@vger.kernel.org>; Mon, 24 Nov 2025 05:20:21 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1763800612; x=1764405412; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=N2zqQPxfD8wBoqVPNB/Ddc7v1WO9JhWHYtXYtFICkgs=;
-        b=WdQD7aD8W++Pu6sTimx8FKNR78HkD4FB/HqeksLAeuv4LN10VR+MQYxy/1bO3CFkaB
-         v2Z1jge4jQ44cZDS0EF/YZH0RrJeAA9jbGNruk7qCBhxziE3LteRJCTVmQrOoDRS/xWs
-         xdsuIALmxxrxj8pjAsNKV6m+qteh+U2wn4l1YR3/6rTTrh1PAbGDmp5pgCm37QvTB5MB
-         obd0nAGtnY2LAqhLxVWgz/PrWIsPbXdCy3A70Fdlt4kz8EJmyafcXXdq4moMcjKWHTpZ
-         p6jb6n95nyPbAbqiwSmyOzYN23xY2TCmuMfLYqXb9X1v03GLw9GvGTDVFFaLy8B6EXF/
-         vbjQ==
+        d=suse.com; s=google; t=1763990420; x=1764595220; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=q/isk8s+NNhtumspmAWAcqJr8SZvKeuAWhZEZe4B8kU=;
+        b=LMmj0gVaFyb8jCBj4iCcLhXhZtePBtnUTRctUpLHYEhLs5AWOM4eHrUUeBcHa6ft8K
+         3IuQDfYNWwG1Qai4OG3D8cLy3oGa87JVvq3oSnPy6TEUTpQxWgTGBq1JG2YJJ8ZWe4UP
+         4hEoyizJ8euFQ2Umh7LvzZKa7Ao9WkWAW+68vu7Y/onwEgXPolKvd/tFtfbjQJak7qfe
+         G/82Cl8WI3375138LFyFf5Nx5NbefMPGY5IlSUVvS477AZfuZlAma5KgXaslOGDGTmnK
+         sdyTpdT1bMF6Xq1LxaXKJnnW7r5Ocv+lfn75DT5VK+MpmpbTRDpJQ3jE8FLcMqoL2NZj
+         95gA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763800612; x=1764405412;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=N2zqQPxfD8wBoqVPNB/Ddc7v1WO9JhWHYtXYtFICkgs=;
-        b=tvsneXJm3uKGrqBQGzfJRTaFHr/FKJAUPh40JY4UBfWxm3dFIpKnWn/O9A1XgXsjnb
-         GvbBgzb004Bcmm0r5SqgXci4wjoSwfXNwmxYWaUqN/a3+7LmgH1EqYGqajL6i40s/UjS
-         ix5FwaiWwtInCNIDj8SOJpCQmcul+w+ORqc9JWa9YPNntQ31fV8ZycSq5TZRFeH4rixz
-         d+TaK+ciBCMbhskTac7BCnz6AtsM06VWS31Spi0e0HFw1LMt6CAmlzbQQ2XDBtFoPj4w
-         hD2dLnCy4hSBZIIFeluBzJmUquQGdyUFMh7YzqfPO32e7cR74kBbuMrcn5msR9r2muOD
-         iyNw==
-X-Forwarded-Encrypted: i=1; AJvYcCU8q2yNgVBzuhpRlRCTVqn62lXnahFG269Ha/gr8mKamzgJ8dF2tQMRswKMZuJODKGCybhefqip@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw0oNO6Fix2o9k+KwKm2ri/RMzdZaPhlvRF+qFYK5vKiG4kPv4q
-	UuaAbKHueRbiDw2qqxKnGNb8eCYQC3f3YFcUDTPdttZJ+liBD4EcGoQlzyzM/o5MBhuLBTGmXI+
-	/VISqvU2Eaj9v5v4DWkL2nRbWsGdX3LKTlgQiUCibFOFqFIewgRKSxrJUGYQ=
-X-Gm-Gg: ASbGncvhcxv/AVaNdA54UUm3fLjDdLoDa3kkFRcgUR66+QcuzQo/vym6Gzm8uhf3Xgl
-	F0uOK/lt3bZoCxpmEpQT9gq8v6apLpOYyu1IOIdlZ9z1O4txGa6EzkdSbEzgn7e52A4zXk4FnNM
-	XS4VrMXf2DPVazztj6R4dkkIENr6EvVhVhzIUJTrpuQWH4vyzJGXlFCc91C67613Hp7wqRN7mOL
-	8b6Z6uUJm3IuBiCOH9D/KwkIruEKLIIdNDmsKBYvGKoK3rQJcV4hVvCuXA4/qo2MXyk3R5awJaB
-	Z01stgNjssEMqHDvhJO55H7eFwsE2t4dLo4OTyxNZchpS2AVeCewnxPkQ3tuXBLZMieYqakaGUo
-	iq4OjT0CcvhqxmoaC5g1C7yyWEIpHdxzLvz/OLNQfVFdHiZCBRw==
-X-Received: by 2002:a17:902:cf10:b0:295:4d50:aab6 with SMTP id d9443c01a7336-29b6bec46afmr71868935ad.18.1763800612475;
-        Sat, 22 Nov 2025 00:36:52 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHZKVywsAu0qzobqnzraeicR/A1ubiNv8l1v7u8EFYDdKAkfyP7Xd1nvEfkitfjqRENmetaDg==
-X-Received: by 2002:a17:902:cf10:b0:295:4d50:aab6 with SMTP id d9443c01a7336-29b6bec46afmr71868815ad.18.1763800612057;
-        Sat, 22 Nov 2025 00:36:52 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-29b5b13e279sm77727945ad.41.2025.11.22.00.36.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 22 Nov 2025 00:36:51 -0800 (PST)
-Date: Sat, 22 Nov 2025 16:36:46 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: cem@kernel.org
-Cc: zlang@kernel.org, hch@lst.de, hans.holmberg@wdc.com,
-	johannes.thumshirn@wdc.com, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 2/2] xfs: Add test for mkfs with smaller zone capacity
-Message-ID: <20251122083646.ihtwb3k4eocnb7fe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20251120160901.63810-1-cem@kernel.org>
- <20251120160901.63810-3-cem@kernel.org>
+        d=1e100.net; s=20230601; t=1763990420; x=1764595220;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=q/isk8s+NNhtumspmAWAcqJr8SZvKeuAWhZEZe4B8kU=;
+        b=IPi8XdMyGkhF+FFQ0Yom1hBCgsnxHYP/e2WKdP6f/zdxblOZ1lBKZq/wnhNE0VqhSe
+         PC4wKuU1iCnbFEnrEFc8U8NZPdzf3ewDyfYAFTacuuWRhXHJSBSLs75duitxA+Tr9XIs
+         OK6y7WAkKc99ZMkxswfF5LA3RItTBFPRf6IzigZlkoMJT9frPmVRmtaKAtONJrXRQ1fD
+         x8CwOt14T7B2LKEfNtsHCdcIJLqiq6GI3guLT0Aj2Q3e+2+t1zMVz6Uv5QoQtZtnLK3K
+         8HSNE02bY/xeS+Ri3GBBPaDWQ4ja+m6HE5GRXkfmIyx3plgb86XnbVTVEhQvVMtcGu9s
+         3ZIA==
+X-Gm-Message-State: AOJu0YwQlC9/mxYoyRT9Qyni4cBpGQqM5ZrpgkC5WRnFDX8TZoF4lc4K
+	xEmVCpn4t37Al4A6EzjleYPMmx4foRnUtDK79+d7ulawsDJSFigAkJKOIGGelVOPn8pCWcPfzFA
+	vPL+8au6ggcG8
+X-Gm-Gg: ASbGncte+D+648ffmEKxuJuTN6lRJkUDFJru5LMHnATSIWswq581wFFI7nw7lG+aVgt
+	0SFxFHEwHFD+LIySe61hAR0ZevN4Zw7LKt5A6NHM0JQjq9UbMUKVVwcMug3vz30bOm3WeAWR1zl
+	FiyPVW6bxdc9Q/c7+FrAfAzzN/TDxrpOy8eQ236OVEefKqHA7qAupU4K6H33blhcednfR5S+0W2
+	Dl8sLtTTZK1T7m5IaqBuG3aswTHaiDL6RrxBAHi1LBBqGGAWswxm8i/M0N1NEGvsnM2yRIWR6Gc
+	lWzviR2q/oDg9jbB/g+DuxBRo3yX8xYDlVJVxxalzVK5YsQXXG57+fWjnPdkTYilJULS5YR2pYa
+	0L3iP4efirkoRiUnN2psnuBWo55cDGl87prghtsXv9WiLhHOPrcdHnBXntS8bsfApdhGhXdvtgi
+	urDwDZ6TiZryZ9WiCGFuJUeR1coAUCMmHdDPLevw==
+X-Google-Smtp-Source: AGHT+IHgUGp4XaDDyqrMS/EIn2pms/acven8AxxWB4zO6hMRWGBdsiNeKGsTxhL2WUvooMOUZamzJg==
+X-Received: by 2002:a05:600c:1f94:b0:477:af07:dd21 with SMTP id 5b1f17b1804b1-477c1123edfmr96289885e9.25.1763990420240;
+        Mon, 24 Nov 2025 05:20:20 -0800 (PST)
+Received: from MacBookPro.lan ([202.127.77.110])
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-2a6fc3d0bb6sm73035838eec.2.2025.11.24.05.20.17
+        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
+        Mon, 24 Nov 2025 05:20:19 -0800 (PST)
+From: Su Yue <glass.su@suse.com>
+To: fstests@vger.kernel.org
+Cc: l@damenly.org,
+	linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org,
+	Su Yue <glass.su@suse.com>
+Subject: [PATCH] generic: use _qmount_option and _qmount
+Date: Mon, 24 Nov 2025 21:20:04 +0800
+Message-ID: <20251124132004.23965-1-glass.su@suse.com>
+X-Mailer: git-send-email 2.50.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20251120160901.63810-3-cem@kernel.org>
+Content-Transfer-Encoding: 8bit
 
-On Thu, Nov 20, 2025 at 05:08:30PM +0100, cem@kernel.org wrote:
-> From: Carlos Maiolino <cem@kernel.org>
-> 
-> Add a regression test for initializing zoned block devices with
-> sequential zones with a capacity smaller than the conventional
-> zones capacity.
-> 
-> Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
-> ---
->  tests/xfs/333     | 37 +++++++++++++++++++++++++++++++++++++
->  tests/xfs/333.out |  2 ++
->  2 files changed, 39 insertions(+)
->  create mode 100755 tests/xfs/333
->  create mode 100644 tests/xfs/333.out
-> 
-> diff --git a/tests/xfs/333 b/tests/xfs/333
-> new file mode 100755
-> index 000000000000..f045b13c73ee
-> --- /dev/null
-> +++ b/tests/xfs/333
-> @@ -0,0 +1,37 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 333
-> +#
-> +# Test that mkfs can properly initialize zoned devices
-> +# with a sequential zone capacity smaller than the conventional zone.
-> +#
-> +. ./common/preamble
-> +. ./common/zoned
-> +
-> +_begin_fstest auto zone mkfs quick
-> +_cleanup()
-> +{
-> +	_destroy_zloop $zloop
+Many generic tests call `_scratch_mount -o usrquota` then
+chmod 777, quotacheck and quotaon.
+It can be simpilfied to _qmount_option and _qmount. The later
+function already calls quotacheck, quota and chmod.
 
-        cd /
-        rm -r -f $tmp.*
+Convertaions can save a few lines. tests/generic/380 is an exception
+because it tests chown.
 
-> +}
-> +
-> +_require_scratch
+Signed-off-by: Su Yue <glass.su@suse.com>
+---
+ tests/generic/082 |  9 ++-------
+ tests/generic/219 | 11 ++++-------
+ tests/generic/230 | 11 ++++++-----
+ tests/generic/231 |  6 ++----
+ tests/generic/232 |  6 ++----
+ tests/generic/233 |  6 ++----
+ tests/generic/234 |  5 ++---
+ tests/generic/235 |  5 ++---
+ tests/generic/244 |  1 -
+ tests/generic/270 |  6 ++----
+ tests/generic/280 |  5 ++---
+ tests/generic/400 |  2 +-
+ 12 files changed, 27 insertions(+), 46 deletions(-)
 
-_require_block_device $SCRATCH_DEV
-
-> +_require_zloop
-
-g/781 checks if current $FSTYP supports zoned filesystem, and _notrun if it's
-not supported:
-
-        _try_mkfs_dev $zloop >> $seqres.full 2>&1 ||\
-                _notrun "cannot mkfs zoned filesystem"
-
-I'm wondering if we could have a common helper for that, then this case can be
-a generic test case too.
-
-For example:
-
-_require_zloop_filesystem()
-{
-        _require_zloop
-
-        local zloopdir="$TEST_DIR/zloop_test"
-        local zloop=$(_create_zloop $zloopdir 64 2)
-
-	_try_mkfs_dev $zloop >/dev/null 2>&1 || \
-		_notrun "cannot make $FSTYP on zloop"
-	_destroy_zloop $zloop
-}
-
-But this method takes too much time to run, does anyone have a better idea to help it
-to be finished in several seconds?
-
-
-> +
-> +_scratch_mkfs > /dev/null 2>&1
-> +_scratch_mount >> $seqres.full
-> +
-> +zloopdir="$SCRATCH_MNT/zloop"
-> +zone_size=64
-> +conv_zones=2
-> +zone_capacity=63
-
-Better to add a comment to explain what are these numbers for.
-
-> +
-> +zloop=$(_create_zloop $zloopdir $zone_size $conv_zones $zone_capacity)
-> +
-> +_try_mkfs_dev $zloop >> $seqres.full 2>&1 || \
-> +	_fail "Cannot mkfs zoned filesystem"
-> +
-> +echo Silence is golden
-
-Is this done? If such zloop device can be created, should we expect it works as usual?
-
-Thanks,
-Zorro
-
-> +# success, all done
-> +_exit 0
-> diff --git a/tests/xfs/333.out b/tests/xfs/333.out
-> new file mode 100644
-> index 000000000000..60a158987a22
-> --- /dev/null
-> +++ b/tests/xfs/333.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 333
-> +Silence is golden
-> -- 
-> 2.51.1
-> 
+diff --git a/tests/generic/082 b/tests/generic/082
+index f078ef2ffff9..6bb9cf2a22ae 100755
+--- a/tests/generic/082
++++ b/tests/generic/082
+@@ -23,13 +23,8 @@ _require_scratch
+ _require_quota
+ 
+ _scratch_mkfs >>$seqres.full 2>&1
+-_scratch_mount "-o usrquota,grpquota"
+-
+-# xfs doesn't need these setups and quotacheck even fails on xfs, so just
+-# redirect the output to $seqres.full for debug purpose and ignore the results,
+-# as we check the quota status later anyway.
+-quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
+-quotaon $SCRATCH_MNT >>$seqres.full 2>&1
++_qmount_option 'usrquota,grpquota'
++_qmount "usrquota,grpquota"
+ 
+ # first remount ro with a bad option, a failed remount ro should not disable
+ # quota, but currently xfs doesn't fail in this case, the unknown option is
+diff --git a/tests/generic/219 b/tests/generic/219
+index 642823859886..a2eb0b20f408 100755
+--- a/tests/generic/219
++++ b/tests/generic/219
+@@ -91,25 +91,22 @@ test_accounting()
+ 
+ _scratch_unmount 2>/dev/null
+ _scratch_mkfs >> $seqres.full 2>&1
+-_scratch_mount "-o usrquota,grpquota"
++_qmount_option "usrquota,grpquota"
++_qmount
+ _force_vfs_quota_testing $SCRATCH_MNT
+-quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+-quotaon $SCRATCH_MNT 2>/dev/null
+ _scratch_unmount
+ 
+ echo; echo "### test user accounting"
+-export MOUNT_OPTIONS="-o usrquota"
++_qmount_option "usrquota"
+ _qmount
+-quotaon $SCRATCH_MNT 2>/dev/null
+ type=u
+ test_files
+ test_accounting
+ _scratch_unmount 2>/dev/null
+ 
+ echo; echo "### test group accounting"
+-export MOUNT_OPTIONS="-o grpquota"
++_qmount_option "grpquota"
+ _qmount
+-quotaon $SCRATCH_MNT 2>/dev/null
+ type=g
+ test_files
+ test_accounting
+diff --git a/tests/generic/230 b/tests/generic/230
+index a8caf5a808c3..0a680dbc874b 100755
+--- a/tests/generic/230
++++ b/tests/generic/230
+@@ -99,7 +99,8 @@ grace=2
+ _qmount_option 'defaults'
+ 
+ _scratch_mkfs >> $seqres.full 2>&1
+-_scratch_mount "-o usrquota,grpquota"
++_qmount_option "usrquota,grpquota"
++_qmount
+ _force_vfs_quota_testing $SCRATCH_MNT
+ BLOCK_SIZE=$(_get_file_block_size $SCRATCH_MNT)
+ quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+@@ -113,8 +114,8 @@ setquota -g -t $grace $grace $SCRATCH_MNT
+ _scratch_unmount
+ 
+ echo; echo "### test user limit enforcement"
+-_scratch_mount "-o usrquota"
+-quotaon $SCRATCH_MNT 2>/dev/null
++_qmount_option "usrquota"
++_qmount
+ type=u
+ test_files
+ test_enforcement
+@@ -122,8 +123,8 @@ cleanup_files
+ _scratch_unmount 2>/dev/null
+ 
+ echo; echo "### test group limit enforcement"
+-_scratch_mount "-o grpquota"
+-quotaon $SCRATCH_MNT 2>/dev/null
++_qmount_option "grpquota"
++_qmount
+ type=g
+ test_files
+ test_enforcement
+diff --git a/tests/generic/231 b/tests/generic/231
+index ce7e62ea1886..02910523d0b5 100755
+--- a/tests/generic/231
++++ b/tests/generic/231
+@@ -47,10 +47,8 @@ _require_quota
+ _require_user
+ 
+ _scratch_mkfs >> $seqres.full 2>&1
+-_scratch_mount "-o usrquota,grpquota"
+-chmod 777 $SCRATCH_MNT
+-quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+-quotaon -u -g $SCRATCH_MNT 2>/dev/null
++_qmount_option "usrquota,grpquota"
++_qmount
+ 
+ if ! _fsx 1; then
+ 	_scratch_unmount 2>/dev/null
+diff --git a/tests/generic/232 b/tests/generic/232
+index c903a5619045..21375809d299 100755
+--- a/tests/generic/232
++++ b/tests/generic/232
+@@ -44,10 +44,8 @@ _require_scratch
+ _require_quota
+ 
+ _scratch_mkfs > $seqres.full 2>&1
+-_scratch_mount "-o usrquota,grpquota"
+-chmod 777 $SCRATCH_MNT
+-quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+-quotaon -u -g $SCRATCH_MNT 2>/dev/null
++_qmount_option "usrquota,grpquota"
++_qmount
+ 
+ _fsstress
+ _check_quota_usage
+diff --git a/tests/generic/233 b/tests/generic/233
+index 3fc1b63abb24..4606f3bde2ab 100755
+--- a/tests/generic/233
++++ b/tests/generic/233
+@@ -59,10 +59,8 @@ _require_quota
+ _require_user
+ 
+ _scratch_mkfs > $seqres.full 2>&1
+-_scratch_mount "-o usrquota,grpquota"
+-chmod 777 $SCRATCH_MNT
+-quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+-quotaon -u -g $SCRATCH_MNT 2>/dev/null
++_qmount_option "usrquota,grpquota"
++_qmount
+ setquota -u $qa_user 32000 32000 1000 1000 $SCRATCH_MNT 2>/dev/null
+ 
+ _fsstress
+diff --git a/tests/generic/234 b/tests/generic/234
+index 4b25fc6507cc..2c596492a3e0 100755
+--- a/tests/generic/234
++++ b/tests/generic/234
+@@ -66,9 +66,8 @@ _require_quota
+ 
+ 
+ _scratch_mkfs >> $seqres.full 2>&1
+-_scratch_mount "-o usrquota,grpquota"
+-quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+-quotaon -u -g $SCRATCH_MNT 2>/dev/null
++_qmount_option "usrquota,grpquota"
++_qmount
+ test_setting
+ _scratch_unmount
+ 
+diff --git a/tests/generic/235 b/tests/generic/235
+index 037c29e806db..7a616650fc8f 100755
+--- a/tests/generic/235
++++ b/tests/generic/235
+@@ -25,9 +25,8 @@ do_repquota()
+ 
+ 
+ _scratch_mkfs >> $seqres.full 2>&1
+-_scratch_mount "-o usrquota,grpquota"
+-quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+-quotaon $SCRATCH_MNT 2>/dev/null
++_qmount_option "usrquota,grpquota"
++_qmount
+ 
+ touch $SCRATCH_MNT/testfile
+ chown $qa_user:$qa_user $SCRATCH_MNT/testfile
+diff --git a/tests/generic/244 b/tests/generic/244
+index b68035129c82..989bb4f5385e 100755
+--- a/tests/generic/244
++++ b/tests/generic/244
+@@ -66,7 +66,6 @@ done
+ # remount just for kicks, make sure we get it off disk
+ _scratch_unmount
+ _qmount
+-quotaon $SCRATCH_MNT 2>/dev/null
+ 
+ # Read them back by iterating based on quotas returned.
+ # This should match what we set, even if we don't directly
+diff --git a/tests/generic/270 b/tests/generic/270
+index c3d5127a0b51..9ac829a7379f 100755
+--- a/tests/generic/270
++++ b/tests/generic/270
+@@ -62,10 +62,8 @@ _require_command "$SETCAP_PROG" setcap
+ _require_attrs security
+ 
+ _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
+-_scratch_mount "-o usrquota,grpquota"
+-chmod 777 $SCRATCH_MNT
+-quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+-quotaon -u -g $SCRATCH_MNT 2>/dev/null
++_qmount_option "usrquota,grpquota"
++_qmount
+ 
+ if ! _workout; then
+ 	_scratch_unmount 2>/dev/null
+diff --git a/tests/generic/280 b/tests/generic/280
+index 3108fd23fb70..fae0a02145cf 100755
+--- a/tests/generic/280
++++ b/tests/generic/280
+@@ -34,9 +34,8 @@ _require_freeze
+ 
+ _scratch_unmount 2>/dev/null
+ _scratch_mkfs >> $seqres.full 2>&1
+-_scratch_mount "-o usrquota,grpquota"
+-quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+-quotaon $SCRATCH_MNT 2>/dev/null
++_qmount_option "usrquota,grpquota"
++_qmount
+ xfs_freeze -f $SCRATCH_MNT
+ setquota -u root 1 2 3 4 $SCRATCH_MNT &
+ pid=$!
+diff --git a/tests/generic/400 b/tests/generic/400
+index 77970da69a41..ef27c254167c 100755
+--- a/tests/generic/400
++++ b/tests/generic/400
+@@ -22,7 +22,7 @@ _require_scratch
+ 
+ _scratch_mkfs >> $seqres.full 2>&1
+ 
+-MOUNT_OPTIONS="-o usrquota,grpquota"
++_qmount_option "usrquota,grpquota"
+ _qmount
+ _require_getnextquota
+ 
+-- 
+2.48.1
 
