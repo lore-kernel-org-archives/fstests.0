@@ -1,335 +1,151 @@
-Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 236D235962
-	for <fstests@vger.kernel.org>; Mon, 24 Nov 2025 13:20:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2537127990A;
+	Mon, 24 Nov 2025 15:27:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763990424; cv=none; b=jesVk7s/SjGrnaotTB3opugUz0zC5rd3ArNTb6rXYDWWHXr6v2Pjny2DFu9mH9CsOnnfeccewpHJBfEhR9mHd6j9ySRUvCjxOKKEAYKo7x12uwA7z0qlqvzF40VkfWtj+GNpaMJvZXjb07FUZst5WaS+S1Zq96AmwhFyxmXpR5Q=
+	t=1763998044; cv=none; b=KADqpUu6mVvWi7W6nRZ64hhizijMl4ztakVD//mfEwjNisJgG+kHExSxyFTAUxJFEREadiiMkp1ovN+XiC+pTdAWcotXj0hgtooTlEoVd2Nh7UzOPIE3rQu+RrhFqFH3m53LXxN2bWDzlgOkcZ0bSbyxrYXHnF0ebxnM+8dIVFk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763990424; c=relaxed/simple;
-	bh=8cEVA4q5ZHQ+hr5gifg8ACuEi5xp9kCN/TI1goGswI8=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ghp1fQPEt5wC3Oi42K67/eIj8CPc6bC0wQgiN8iuZDgilDsToWqupkpc/Mo/qdRDxdQu8tHb011pI80w5s+lTbCIZG3vaW027MXeMtA7Xlhkqq1gc/fUyFZcLhKx4E621a3ciVpJZnroHgRrhcsw495GVdO5DWffRtzMTI3Yx7E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=LMmj0gVa; arc=none smtp.client-ip=209.85.128.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1763998044; c=relaxed/simple;
+	bh=KBZLCgDQczk1qNfXgYUwHRe9gqN214in7GQPzckM670=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ed9YoXQVg2Oe3WTlrtfM9m2OVRcfLUh/dg5C7ElE1bYoeMuQ/q2YjyqO2E5M6vCMIKgVn6Qu+fK9sUUI3Ax7v0bpv3PjLlymtA3YqErgMeKSg6XmyZMNCnun7+omElUldYOgJw3fHCtxkRv+gNIAqy6rXWXbbBwt+0KZRh7caNw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fvnjU6Ed; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="LMmj0gVa"
-Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-477a2ab455fso46505455e9.3
-        for <fstests@vger.kernel.org>; Mon, 24 Nov 2025 05:20:21 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1763990420; x=1764595220; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=q/isk8s+NNhtumspmAWAcqJr8SZvKeuAWhZEZe4B8kU=;
-        b=LMmj0gVaFyb8jCBj4iCcLhXhZtePBtnUTRctUpLHYEhLs5AWOM4eHrUUeBcHa6ft8K
-         3IuQDfYNWwG1Qai4OG3D8cLy3oGa87JVvq3oSnPy6TEUTpQxWgTGBq1JG2YJJ8ZWe4UP
-         4hEoyizJ8euFQ2Umh7LvzZKa7Ao9WkWAW+68vu7Y/onwEgXPolKvd/tFtfbjQJak7qfe
-         G/82Cl8WI3375138LFyFf5Nx5NbefMPGY5IlSUVvS477AZfuZlAma5KgXaslOGDGTmnK
-         sdyTpdT1bMF6Xq1LxaXKJnnW7r5Ocv+lfn75DT5VK+MpmpbTRDpJQ3jE8FLcMqoL2NZj
-         95gA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763990420; x=1764595220;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=q/isk8s+NNhtumspmAWAcqJr8SZvKeuAWhZEZe4B8kU=;
-        b=IPi8XdMyGkhF+FFQ0Yom1hBCgsnxHYP/e2WKdP6f/zdxblOZ1lBKZq/wnhNE0VqhSe
-         PC4wKuU1iCnbFEnrEFc8U8NZPdzf3ewDyfYAFTacuuWRhXHJSBSLs75duitxA+Tr9XIs
-         OK6y7WAkKc99ZMkxswfF5LA3RItTBFPRf6IzigZlkoMJT9frPmVRmtaKAtONJrXRQ1fD
-         x8CwOt14T7B2LKEfNtsHCdcIJLqiq6GI3guLT0Aj2Q3e+2+t1zMVz6Uv5QoQtZtnLK3K
-         8HSNE02bY/xeS+Ri3GBBPaDWQ4ja+m6HE5GRXkfmIyx3plgb86XnbVTVEhQvVMtcGu9s
-         3ZIA==
-X-Gm-Message-State: AOJu0YwQlC9/mxYoyRT9Qyni4cBpGQqM5ZrpgkC5WRnFDX8TZoF4lc4K
-	xEmVCpn4t37Al4A6EzjleYPMmx4foRnUtDK79+d7ulawsDJSFigAkJKOIGGelVOPn8pCWcPfzFA
-	vPL+8au6ggcG8
-X-Gm-Gg: ASbGncte+D+648ffmEKxuJuTN6lRJkUDFJru5LMHnATSIWswq581wFFI7nw7lG+aVgt
-	0SFxFHEwHFD+LIySe61hAR0ZevN4Zw7LKt5A6NHM0JQjq9UbMUKVVwcMug3vz30bOm3WeAWR1zl
-	FiyPVW6bxdc9Q/c7+FrAfAzzN/TDxrpOy8eQ236OVEefKqHA7qAupU4K6H33blhcednfR5S+0W2
-	Dl8sLtTTZK1T7m5IaqBuG3aswTHaiDL6RrxBAHi1LBBqGGAWswxm8i/M0N1NEGvsnM2yRIWR6Gc
-	lWzviR2q/oDg9jbB/g+DuxBRo3yX8xYDlVJVxxalzVK5YsQXXG57+fWjnPdkTYilJULS5YR2pYa
-	0L3iP4efirkoRiUnN2psnuBWo55cDGl87prghtsXv9WiLhHOPrcdHnBXntS8bsfApdhGhXdvtgi
-	urDwDZ6TiZryZ9WiCGFuJUeR1coAUCMmHdDPLevw==
-X-Google-Smtp-Source: AGHT+IHgUGp4XaDDyqrMS/EIn2pms/acven8AxxWB4zO6hMRWGBdsiNeKGsTxhL2WUvooMOUZamzJg==
-X-Received: by 2002:a05:600c:1f94:b0:477:af07:dd21 with SMTP id 5b1f17b1804b1-477c1123edfmr96289885e9.25.1763990420240;
-        Mon, 24 Nov 2025 05:20:20 -0800 (PST)
-Received: from MacBookPro.lan ([202.127.77.110])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-2a6fc3d0bb6sm73035838eec.2.2025.11.24.05.20.17
-        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Mon, 24 Nov 2025 05:20:19 -0800 (PST)
-From: Su Yue <glass.su@suse.com>
-To: fstests@vger.kernel.org
-Cc: l@damenly.org,
-	linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org,
-	Su Yue <glass.su@suse.com>
-Subject: [PATCH] generic: use _qmount_option and _qmount
-Date: Mon, 24 Nov 2025 21:20:04 +0800
-Message-ID: <20251124132004.23965-1-glass.su@suse.com>
-X-Mailer: git-send-email 2.50.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fvnjU6Ed"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3C111C4CEF1;
+	Mon, 24 Nov 2025 15:27:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1763998043;
+	bh=KBZLCgDQczk1qNfXgYUwHRe9gqN214in7GQPzckM670=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=fvnjU6EdLVX81N6UnSyZbNSaS4GDe2hs5MIkvFxl5JoNAmbpA6VrOo7j8yPqG4H1I
+	 Q/yNke1cyTuh3z3QHCdtpttTw54EkgWB/zjevYCBj+Z97zdBm+c/jWdA02NoW4qqPa
+	 LmB8ani4P1IYqAeWRSN5AReEtIw29MVzr3hdGHlKSFZWdjRzsyupPMGChpoKp7Tls/
+	 lKgrhd08sEMiCB6WjtOdZ4JBCkCEN+uGhaQLYDCI0V1u+fFjZfCIJ1GU7MJcDyxMV8
+	 eW55flIQho1ogzPX06MDKuyIIda23w57BrfokdTtVFlg2fN0T8v9GBEkfDOygXoxrT
+	 Ofw9eAhSlrIlQ==
+Date: Mon, 24 Nov 2025 16:27:19 +0100
+From: Carlos Maiolino <cem@kernel.org>
+To: Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
+Cc: "zlang@kernel.org" <zlang@kernel.org>, hch <hch@lst.de>, 
+	Hans Holmberg <Hans.Holmberg@wdc.com>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>, 
+	"linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH 2/2] xfs: Add test for mkfs with smaller zone capacity
+Message-ID: <ba3tbnjq2dernii2n6leyc6z76lcezsjemomtm54mrbm2xcnz5@kx3qp3qgrtqe>
+References: <20251120160901.63810-1-cem@kernel.org>
+ <20251120160901.63810-3-cem@kernel.org>
+ <EffPQB_WQabsgl7V1GQULuAp9QQGB7KoH0wN5tHOvQUWRriHZorc1NPnsGnKEV1obcisN1kjuXM0KzubUhxk5Q==@protonmail.internalid>
+ <9f6b4f20-9d71-49a5-a313-f860b3e8a4e3@wdc.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <9f6b4f20-9d71-49a5-a313-f860b3e8a4e3@wdc.com>
 
-Many generic tests call `_scratch_mount -o usrquota` then
-chmod 777, quotacheck and quotaon.
-It can be simpilfied to _qmount_option and _qmount. The later
-function already calls quotacheck, quota and chmod.
+On Fri, Nov 21, 2025 at 06:51:31AM +0000, Johannes Thumshirn wrote:
+> On 11/20/25 5:09 PM, cem@kernel.org wrote:
+> > From: Carlos Maiolino <cem@kernel.org>
+> >
+> > Add a regression test for initializing zoned block devices with
+> > sequential zones with a capacity smaller than the conventional
+> > zones capacity.
+> 
+> 
+> Hi Carlos,
+> 
+> Two quick questions:
+> 
+> 1) Is there a specific reason this is a xfs only test? I think checking
+> this on btrfs and f2fs would make sense as well, like with generic/781.
 
-Convertaions can save a few lines. tests/generic/380 is an exception
-because it tests chown.
+I wrote this mostly as a regression test for xfs's mkfs, but yeah, I don't
+think there is any reason for this to be xfs-specific.
 
-Signed-off-by: Su Yue <glass.su@suse.com>
----
- tests/generic/082 |  9 ++-------
- tests/generic/219 | 11 ++++-------
- tests/generic/230 | 11 ++++++-----
- tests/generic/231 |  6 ++----
- tests/generic/232 |  6 ++----
- tests/generic/233 |  6 ++----
- tests/generic/234 |  5 ++---
- tests/generic/235 |  5 ++---
- tests/generic/244 |  1 -
- tests/generic/270 |  6 ++----
- tests/generic/280 |  5 ++---
- tests/generic/400 |  2 +-
- 12 files changed, 27 insertions(+), 46 deletions(-)
+> 
+> 2)  I would also mount the FS and perform some IO on it.
 
-diff --git a/tests/generic/082 b/tests/generic/082
-index f078ef2ffff9..6bb9cf2a22ae 100755
---- a/tests/generic/082
-+++ b/tests/generic/082
-@@ -23,13 +23,8 @@ _require_scratch
- _require_quota
- 
- _scratch_mkfs >>$seqres.full 2>&1
--_scratch_mount "-o usrquota,grpquota"
--
--# xfs doesn't need these setups and quotacheck even fails on xfs, so just
--# redirect the output to $seqres.full for debug purpose and ignore the results,
--# as we check the quota status later anyway.
--quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
--quotaon $SCRATCH_MNT >>$seqres.full 2>&1
-+_qmount_option 'usrquota,grpquota'
-+_qmount "usrquota,grpquota"
- 
- # first remount ro with a bad option, a failed remount ro should not disable
- # quota, but currently xfs doesn't fail in this case, the unknown option is
-diff --git a/tests/generic/219 b/tests/generic/219
-index 642823859886..a2eb0b20f408 100755
---- a/tests/generic/219
-+++ b/tests/generic/219
-@@ -91,25 +91,22 @@ test_accounting()
- 
- _scratch_unmount 2>/dev/null
- _scratch_mkfs >> $seqres.full 2>&1
--_scratch_mount "-o usrquota,grpquota"
-+_qmount_option "usrquota,grpquota"
-+_qmount
- _force_vfs_quota_testing $SCRATCH_MNT
--quotacheck -u -g $SCRATCH_MNT 2>/dev/null
--quotaon $SCRATCH_MNT 2>/dev/null
- _scratch_unmount
- 
- echo; echo "### test user accounting"
--export MOUNT_OPTIONS="-o usrquota"
-+_qmount_option "usrquota"
- _qmount
--quotaon $SCRATCH_MNT 2>/dev/null
- type=u
- test_files
- test_accounting
- _scratch_unmount 2>/dev/null
- 
- echo; echo "### test group accounting"
--export MOUNT_OPTIONS="-o grpquota"
-+_qmount_option "grpquota"
- _qmount
--quotaon $SCRATCH_MNT 2>/dev/null
- type=g
- test_files
- test_accounting
-diff --git a/tests/generic/230 b/tests/generic/230
-index a8caf5a808c3..0a680dbc874b 100755
---- a/tests/generic/230
-+++ b/tests/generic/230
-@@ -99,7 +99,8 @@ grace=2
- _qmount_option 'defaults'
- 
- _scratch_mkfs >> $seqres.full 2>&1
--_scratch_mount "-o usrquota,grpquota"
-+_qmount_option "usrquota,grpquota"
-+_qmount
- _force_vfs_quota_testing $SCRATCH_MNT
- BLOCK_SIZE=$(_get_file_block_size $SCRATCH_MNT)
- quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-@@ -113,8 +114,8 @@ setquota -g -t $grace $grace $SCRATCH_MNT
- _scratch_unmount
- 
- echo; echo "### test user limit enforcement"
--_scratch_mount "-o usrquota"
--quotaon $SCRATCH_MNT 2>/dev/null
-+_qmount_option "usrquota"
-+_qmount
- type=u
- test_files
- test_enforcement
-@@ -122,8 +123,8 @@ cleanup_files
- _scratch_unmount 2>/dev/null
- 
- echo; echo "### test group limit enforcement"
--_scratch_mount "-o grpquota"
--quotaon $SCRATCH_MNT 2>/dev/null
-+_qmount_option "grpquota"
-+_qmount
- type=g
- test_files
- test_enforcement
-diff --git a/tests/generic/231 b/tests/generic/231
-index ce7e62ea1886..02910523d0b5 100755
---- a/tests/generic/231
-+++ b/tests/generic/231
-@@ -47,10 +47,8 @@ _require_quota
- _require_user
- 
- _scratch_mkfs >> $seqres.full 2>&1
--_scratch_mount "-o usrquota,grpquota"
--chmod 777 $SCRATCH_MNT
--quotacheck -u -g $SCRATCH_MNT 2>/dev/null
--quotaon -u -g $SCRATCH_MNT 2>/dev/null
-+_qmount_option "usrquota,grpquota"
-+_qmount
- 
- if ! _fsx 1; then
- 	_scratch_unmount 2>/dev/null
-diff --git a/tests/generic/232 b/tests/generic/232
-index c903a5619045..21375809d299 100755
---- a/tests/generic/232
-+++ b/tests/generic/232
-@@ -44,10 +44,8 @@ _require_scratch
- _require_quota
- 
- _scratch_mkfs > $seqres.full 2>&1
--_scratch_mount "-o usrquota,grpquota"
--chmod 777 $SCRATCH_MNT
--quotacheck -u -g $SCRATCH_MNT 2>/dev/null
--quotaon -u -g $SCRATCH_MNT 2>/dev/null
-+_qmount_option "usrquota,grpquota"
-+_qmount
- 
- _fsstress
- _check_quota_usage
-diff --git a/tests/generic/233 b/tests/generic/233
-index 3fc1b63abb24..4606f3bde2ab 100755
---- a/tests/generic/233
-+++ b/tests/generic/233
-@@ -59,10 +59,8 @@ _require_quota
- _require_user
- 
- _scratch_mkfs > $seqres.full 2>&1
--_scratch_mount "-o usrquota,grpquota"
--chmod 777 $SCRATCH_MNT
--quotacheck -u -g $SCRATCH_MNT 2>/dev/null
--quotaon -u -g $SCRATCH_MNT 2>/dev/null
-+_qmount_option "usrquota,grpquota"
-+_qmount
- setquota -u $qa_user 32000 32000 1000 1000 $SCRATCH_MNT 2>/dev/null
- 
- _fsstress
-diff --git a/tests/generic/234 b/tests/generic/234
-index 4b25fc6507cc..2c596492a3e0 100755
---- a/tests/generic/234
-+++ b/tests/generic/234
-@@ -66,9 +66,8 @@ _require_quota
- 
- 
- _scratch_mkfs >> $seqres.full 2>&1
--_scratch_mount "-o usrquota,grpquota"
--quotacheck -u -g $SCRATCH_MNT 2>/dev/null
--quotaon -u -g $SCRATCH_MNT 2>/dev/null
-+_qmount_option "usrquota,grpquota"
-+_qmount
- test_setting
- _scratch_unmount
- 
-diff --git a/tests/generic/235 b/tests/generic/235
-index 037c29e806db..7a616650fc8f 100755
---- a/tests/generic/235
-+++ b/tests/generic/235
-@@ -25,9 +25,8 @@ do_repquota()
- 
- 
- _scratch_mkfs >> $seqres.full 2>&1
--_scratch_mount "-o usrquota,grpquota"
--quotacheck -u -g $SCRATCH_MNT 2>/dev/null
--quotaon $SCRATCH_MNT 2>/dev/null
-+_qmount_option "usrquota,grpquota"
-+_qmount
- 
- touch $SCRATCH_MNT/testfile
- chown $qa_user:$qa_user $SCRATCH_MNT/testfile
-diff --git a/tests/generic/244 b/tests/generic/244
-index b68035129c82..989bb4f5385e 100755
---- a/tests/generic/244
-+++ b/tests/generic/244
-@@ -66,7 +66,6 @@ done
- # remount just for kicks, make sure we get it off disk
- _scratch_unmount
- _qmount
--quotaon $SCRATCH_MNT 2>/dev/null
- 
- # Read them back by iterating based on quotas returned.
- # This should match what we set, even if we don't directly
-diff --git a/tests/generic/270 b/tests/generic/270
-index c3d5127a0b51..9ac829a7379f 100755
---- a/tests/generic/270
-+++ b/tests/generic/270
-@@ -62,10 +62,8 @@ _require_command "$SETCAP_PROG" setcap
- _require_attrs security
- 
- _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
--_scratch_mount "-o usrquota,grpquota"
--chmod 777 $SCRATCH_MNT
--quotacheck -u -g $SCRATCH_MNT 2>/dev/null
--quotaon -u -g $SCRATCH_MNT 2>/dev/null
-+_qmount_option "usrquota,grpquota"
-+_qmount
- 
- if ! _workout; then
- 	_scratch_unmount 2>/dev/null
-diff --git a/tests/generic/280 b/tests/generic/280
-index 3108fd23fb70..fae0a02145cf 100755
---- a/tests/generic/280
-+++ b/tests/generic/280
-@@ -34,9 +34,8 @@ _require_freeze
- 
- _scratch_unmount 2>/dev/null
- _scratch_mkfs >> $seqres.full 2>&1
--_scratch_mount "-o usrquota,grpquota"
--quotacheck -u -g $SCRATCH_MNT 2>/dev/null
--quotaon $SCRATCH_MNT 2>/dev/null
-+_qmount_option "usrquota,grpquota"
-+_qmount
- xfs_freeze -f $SCRATCH_MNT
- setquota -u root 1 2 3 4 $SCRATCH_MNT &
- pid=$!
-diff --git a/tests/generic/400 b/tests/generic/400
-index 77970da69a41..ef27c254167c 100755
---- a/tests/generic/400
-+++ b/tests/generic/400
-@@ -22,7 +22,7 @@ _require_scratch
- 
- _scratch_mkfs >> $seqres.full 2>&1
- 
--MOUNT_OPTIONS="-o usrquota,grpquota"
-+_qmount_option "usrquota,grpquota"
- _qmount
- _require_getnextquota
- 
--- 
-2.48.1
+I'm not sure about this. Do you have any purpose in mind? This is
+specifically to test mkfs is able to properly format the filesystem, not
+to try the kernel module per-se.
+One could argue that something 'could' go wrong in the mkfs that might
+be found out only via some IO, but that would require much more than
+just 'some IO'.
 
+I do think a mount/unmount might add some value to the test, but I fail
+to see why issuing a random amount of I/O would prove the correctness of
+mkfs properly dealing with small capacities.
+
+Cheers.
+Carlos
+
+> 
+> 
+> 
+> > Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+> > ---
+> >   tests/xfs/333     | 37 +++++++++++++++++++++++++++++++++++++
+> >   tests/xfs/333.out |  2 ++
+> >   2 files changed, 39 insertions(+)
+> >   create mode 100755 tests/xfs/333
+> >   create mode 100644 tests/xfs/333.out
+> >
+> > diff --git a/tests/xfs/333 b/tests/xfs/333
+> > new file mode 100755
+> > index 000000000000..f045b13c73ee
+> > --- /dev/null
+> > +++ b/tests/xfs/333
+> > @@ -0,0 +1,37 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2025 Red Hat, Inc.  All Rights Reserved.
+> > +#
+> > +# FS QA Test 333
+> > +#
+> > +# Test that mkfs can properly initialize zoned devices
+> > +# with a sequential zone capacity smaller than the conventional zone.
+> > +#
+> > +. ./common/preamble
+> > +. ./common/zoned
+> > +
+> > +_begin_fstest auto zone mkfs quick
+> > +_cleanup()
+> > +{
+> > +	_destroy_zloop $zloop
+> > +}
+> > +
+> > +_require_scratch
+> > +_require_zloop
+> > +
+> > +_scratch_mkfs > /dev/null 2>&1
+> > +_scratch_mount >> $seqres.full
+> > +
+> > +zloopdir="$SCRATCH_MNT/zloop"
+> > +zone_size=64
+> > +conv_zones=2
+> > +zone_capacity=63
+> > +
+> > +zloop=$(_create_zloop $zloopdir $zone_size $conv_zones $zone_capacity)
+> > +
+> > +_try_mkfs_dev $zloop >> $seqres.full 2>&1 || \
+> > +	_fail "Cannot mkfs zoned filesystem"
+> > +
+> > +echo Silence is golden
+> > +# success, all done
+> > +_exit 0
+> > diff --git a/tests/xfs/333.out b/tests/xfs/333.out
+> > new file mode 100644
+> > index 000000000000..60a158987a22
+> > --- /dev/null
+> > +++ b/tests/xfs/333.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 333
+> > +Silence is golden
+> 
+> 
