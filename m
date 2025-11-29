@@ -1,205 +1,307 @@
-Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DA712D0635
-	for <fstests@vger.kernel.org>; Fri, 28 Nov 2025 06:33:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ADD9D182B7;
+	Sat, 29 Nov 2025 08:52:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764311618; cv=none; b=XKgw/rH5639GcZEdYeYBkKxzLlxgyJRL4WB/V11OtzMoTzr08jwPgEBD8XvqTEFqWdarLvFMNWjKNPv0XvRaSw8jewmo7Hh/dgmf4sLuiIfw0f91UfpNZeev1z6dCmoB02HZ7ZetaXt8wLbNijsUbegm+O+oGJ3lty1gztvdGBQ=
+	t=1764406367; cv=none; b=LF5zc9D0IZrlQoa+vDNLd16FBkSTyHku3bHVJwW4nP3a5m2BKz6spf0okZwNO2mZsW3Hbat7yYWGBqT0xO4NxKh0X1RQDRT5dyDVidbTIHzLoKmdn3TnGo94hVqsm7yuQHypqn8rC+/56uzUBGP3Gq83iQBA48lWv7ZhpeQ78gU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764311618; c=relaxed/simple;
-	bh=Lc3gfdT9Lu3f9QngPtKzGJJW/U9dAokhGDGyNQ4lk7c=;
-	h=Message-ID:Date:MIME-Version:Subject:From:To:References:
-	 In-Reply-To:Content-Type; b=MsKutMPp6iDI9v0udH4TAnawZJnsNaxho3XbcA3Gr8mgaDAZalxj+UG8mOrZgFEgJ3IQrZP7SxBY6EVDbW0Mh8/PyqBBB4RXQtpG7nQG2eyRVGG8kqol/4O8tduSHZx3+FD9sT6Dcu4pSTNi/qaNb/4w8bDGN4FUIfYrfk5Dubw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=T5hhBrCQ; arc=none smtp.client-ip=209.85.128.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1764406367; c=relaxed/simple;
+	bh=nClj+COov/1I3RkkROa9pm1axrzdz/bY6YWa+/IukA8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=rvSn4XPyKKs3/VMJt0cHvJoD9g1QV4v0M9Wjbcwsv+O97KAn4Zu9hLsz+vwNYF7S36xxTm8iWllTNECT+brIsE1T68eHAHmyzu3bk2vSQ1xM3O5BGBRaEFieQnfsw4uTJ8B4fEqb2XYjWWbFi4K5Hy1iZWggtGDGkpm948kbmJA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=JLuVt6iO; arc=none smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="T5hhBrCQ"
-Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-4779aa4f928so11421075e9.1
-        for <fstests@vger.kernel.org>; Thu, 27 Nov 2025 22:33:35 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1764311613; x=1764916413; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:content-language
-         :references:to:from:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=qsrT5ubHZ3F8UgMeNxac4MyuI9ebaQK0E+RbSUM7t6Q=;
-        b=T5hhBrCQN99nquOCX3p9vYIEnOo1S+9gBxo+VeOoM1CRGOkgMn2Qif8AqvKFRJ/YWv
-         f5yF5XDyAnn9x6REEwgFu0EXfqXhNG4WSnY3BR6D16oJNvZ57bKzjwOP3HCiM/WCJPBh
-         E9SvCq6KafYvs3MG+CctKztRMuZf11n+QCXncnsfPCuaNcTiBl3ysJsUP4Nx+tZn/oou
-         3WcGsWb18LfDXdrrPctCpjyLE/S+Xv+EgYyO8bL6MLq2D95V7+HnYeRZclZbXn9im0cH
-         s3hd8nbn6szpQlhMn9XtGsrjoSL+x+WF3aVty8YFLANVxYr2KJZGWY2oOViuiaw0WIv2
-         vflg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1764311613; x=1764916413;
-        h=content-transfer-encoding:in-reply-to:autocrypt:content-language
-         :references:to:from:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=qsrT5ubHZ3F8UgMeNxac4MyuI9ebaQK0E+RbSUM7t6Q=;
-        b=wcnOGJ1qMm97V/s9257PEbratNRHXz958p2poF+b1n5R6uFq1q1zSdIbuERzUC/Pz3
-         E/kUM3cv3aYJGIeDEgWsQlDZ79DVoN+Iao/8zFwkzwIqdB8YefRf1lZb0GqGw7Qs6hhc
-         i77CNZ03aI171uEqA5lXlvrBD3U7P5rcL4aZxsQzacFg4Cp8nNT7tHnp2wAahw1cVi19
-         LQV9J5nw//vYJ+LLwVIUXEF2JKOb5dCwWKvL406EvH/uJUH3PV6C8ID/weR3u4D9Masc
-         yzWWKqpgPd36u959qJYWduGhavI0Hs/txD4xGrQ19nz35t/dS/dwJ7kXfRfQY8uxBaOA
-         RrOg==
-X-Forwarded-Encrypted: i=1; AJvYcCV7YCGkpfmarUGOcpprIcjn1sPNyzzswtcZclljRizj0n2luISjLFHdjeKyY7phLn4gZZT6YZyO@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw7PRYQ8+Hd+aXBa3npivhfD+FKQsLd8orxGXONldOWoUlFXbXy
-	NchwbtboYfjL+14WGzzVlgWQG5AoFQr0OVzm+tn3FXySIYADFmJ959Q3Q0Z4N0WrxXiQmf8u+7X
-	1L7BE
-X-Gm-Gg: ASbGnct7ogcL45yERFnxLdCTy9K5bkfq6qjLxL1sfCKp031TfP2+vLY0lWNb+d6JLks
-	ikBo27A3SM3bdOW+wWexp23B0HZYf1NnD9ybs2uHhgv3lsP4ZeY+jzfybK8iLHqlqFDRMc02a4+
-	za44Iw5tK3raoKWsRSzMUlkkCnvjTAoF9+yLnbT9b/IYP5hNrdx2ztdEtbJ4A1Pq7ifPw2GMzJt
-	//T+PDVP50uPgEI7dN6XQZUEeB9WpCGom1oHRxEeGGh04t7IThB19aupIaBYIZ83HTobFipyYvu
-	ihwgYuVEQnvLEOMrXIMqTPmTltmW7Jm8sW2dktu3dQPiElmdGFBA46gTXGR39xp1qbMQ363Nnzh
-	+IJmTqinKvdgm4hQOYJUA2sIKRL5DXE9LrLv9Mj0nm2obZbHSLS/fgeSlYrWCVIwXp2OFaoovpA
-	kwr4pC/OtjW1IcapNAUMTd5wB/Gs2H/gzqil2nwHg=
-X-Google-Smtp-Source: AGHT+IHrH03q69tJ1aiiqC/INhAGdxhwl1iNrSCnQ+5tzWd4jNxsY72apgKPvuGNtPa57mLRntcWEg==
-X-Received: by 2002:a05:600c:4f49:b0:46e:761b:e7ff with SMTP id 5b1f17b1804b1-47904b24957mr128951965e9.28.1764311613430;
-        Thu, 27 Nov 2025 22:33:33 -0800 (PST)
-Received: from ?IPV6:2403:580d:fda1::299? (2403-580d-fda1--299.ip6.aussiebb.net. [2403:580d:fda1::299])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-78ad102dd77sm12508247b3.47.2025.11.27.22.33.31
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 27 Nov 2025 22:33:32 -0800 (PST)
-Message-ID: <cc1b5cda-2ef5-4c8d-9591-5723185666a9@suse.com>
-Date: Fri, 28 Nov 2025 17:03:29 +1030
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="JLuVt6iO"
+Received: from pps.filterd (m0356517.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5AT30wYi025909;
+	Sat, 29 Nov 2025 08:52:41 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=pp1; bh=bnlU2AcrMXhNFa2XzEjbaRwqVOpAW1
+	F/0H3rZhlC3so=; b=JLuVt6iOaFwzhArYl6OCU3fWPHcYDqwyeWDD3HHQHgepLq
+	WQf7dgHFjxed1VIvCjIZXst8vAd3HXVkVw8CneH0xj1HJy0U/hl+Qm/1CecB+F3r
+	EyvRiplNbZvhoGXH6McaWXnWjqKJkQLvfEDOuOkEyimA5nDpYV1UPLzht51euu5u
+	BPfDfzR7+Y1YYes56Y71CeyCIkpUYo2BAW6gDUpx/EtpsJpsL4M7qIs+rk1YUlA+
+	KBmVCO9q+87U1/i8g3nCW/XWkRJvixLbcvwNgmYP9vI7cfhgVJC3g616jjM5Es/6
+	gymk/CEUddcEgFdOlpUvQjaqvbSRVqDI59zwZ3dw==
+Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4aqrj98h25-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sat, 29 Nov 2025 08:52:41 +0000 (GMT)
+Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma11.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 5AT4A38g025075;
+	Sat, 29 Nov 2025 08:52:40 GMT
+Received: from smtprelay06.fra02v.mail.ibm.com ([9.218.2.230])
+	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 4akt720am5-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sat, 29 Nov 2025 08:52:40 +0000
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay06.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 5AT8qcgC29491662
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Sat, 29 Nov 2025 08:52:38 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 63CB620043;
+	Sat, 29 Nov 2025 08:52:38 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 0AC4120040;
+	Sat, 29 Nov 2025 08:52:37 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.39.27.95])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Sat, 29 Nov 2025 08:52:36 +0000 (GMT)
+Date: Sat, 29 Nov 2025 14:22:11 +0530
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH 2/7] generic/778: fix severe performance problems
+Message-ID: <aSq0OzvJHT1yOdvF@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+References: <176279908967.605950.2192923313361120314.stgit@frogsfrogsfrogs>
+ <176279909041.605950.16815410156483574567.stgit@frogsfrogsfrogs>
+ <aRXGyR9kj0kPirIE@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <20251115023251.GI196366@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] fstests: generic/746: skip if btrfs' new
- block-group-tree is involved
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-References: <f89dd72abd7040e4373d2655a7f2625f7c96c3b7.1764280576.git.wqu@suse.com>
-Content-Language: en-US
-Autocrypt: addr=wqu@suse.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
- FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXVgBQkQ/lqxAAoJEMI9kfOh
- Jf6o+jIH/2KhFmyOw4XWAYbnnijuYqb/obGae8HhcJO2KIGcxbsinK+KQFTSZnkFxnbsQ+VY
- fvtWBHGt8WfHcNmfjdejmy9si2jyy8smQV2jiB60a8iqQXGmsrkuR+AM2V360oEbMF3gVvim
- 2VSX2IiW9KERuhifjseNV1HLk0SHw5NnXiWh1THTqtvFFY+CwnLN2GqiMaSLF6gATW05/sEd
- V17MdI1z4+WSk7D57FlLjp50F3ow2WJtXwG8yG8d6S40dytZpH9iFuk12Sbg7lrtQxPPOIEU
- rpmZLfCNJJoZj603613w/M8EiZw6MohzikTWcFc55RLYJPBWQ+9puZtx1DopW2jOwE0EWdWB
- rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
- Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
- E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
- vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
- g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
- AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
- cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
- qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
- /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
- o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
- JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
-In-Reply-To: <f89dd72abd7040e4373d2655a7f2625f7c96c3b7.1764280576.git.wqu@suse.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20251115023251.GI196366@frogsfrogsfrogs>
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: qvdmZ9j3zLAReX0Hoq45uP7kJLEtnqlE
+X-Proofpoint-ORIG-GUID: qvdmZ9j3zLAReX0Hoq45uP7kJLEtnqlE
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTI5MDAyMCBTYWx0ZWRfX9l64Fy6fCbeV
+ gynz0Gv0nr8s80Win6Ni34P5R5E+kj+5z3QVKu+tQoof2/a/02I+NrOQqToCCZowrIDCG1bbfpa
+ tvrsS7VIIlcEZYsmLqhCIKmsSZFg9BgT9CnRxD3n97r901E2aq4exY/46QjdXKI+IYkfzliha4r
+ cmgAjUNOpp9MNJb7618HQ01iaImHpV0JEzi9KweJweqjpeW8hfoGP+Tm9+fMnsJloQPO+TuLn3K
+ Mxa3/DhN7iLy+Y2/39BMWBGvE3YTMfaLOXrTug9vWAhgkeWHTrUTJOGKD0qIQGIfFBzr6w5z7HD
+ GuqJEO0lwnHyL5goe6xc5VYUrbKjLQKOkmuPLcBR2GYgIFJM72Wji1i1RVEVv+be1DoqQlVabXK
+ Kzuf5EMC72JdpbEehAEcwDFfEKalaw==
+X-Authority-Analysis: v=2.4 cv=dYGNHHXe c=1 sm=1 tr=0 ts=692ab459 cx=c_pps
+ a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17
+ a=kj9zAlcOel0A:10 a=6UeiqGixMTsA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=VwQbUJbxAAAA:8 a=fXYFMPuYrlktsdxoAhkA:9 a=CjuIK1q_8ugA:10
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
+ definitions=2025-11-28_08,2025-11-27_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ malwarescore=0 spamscore=0 suspectscore=0 clxscore=1015 adultscore=0
+ lowpriorityscore=0 bulkscore=0 phishscore=0 priorityscore=1501
+ impostorscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2510240000
+ definitions=main-2511290020
 
-This is replaced by this newer patch:
+On Fri, Nov 14, 2025 at 06:32:51PM -0800, Darrick J. Wong wrote:
+> On Thu, Nov 13, 2025 at 05:23:45PM +0530, Ojaswin Mujoo wrote:
+> > On Mon, Nov 10, 2025 at 10:26:32AM -0800, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <djwong@kernel.org>
+> > > 
+> > > This test takes 4800s to run, which is horrible.  AFAICT it starts out
+> > > by timing how much can be written atomically to a new file in 0.2
+> > > seconds, then scales up the file size by 3x.  On not very fast storage,
+> > 
+> > Hi Darrick,
 
-  https://lore.kernel.org/linux-btrfs/20251128063137.67274-1-wqu@suse.com/
+(Sorry I missed this email somehow)
 
-The newer patch adds proper block-group-tree support by a new python 
-based script, that accepts an extra block group tree dump to properly 
-handle the block group boundary case.
+> > 
+> > So 250MB in 0.2s is like 1.2GBps which seems pretty fast. Did you mean
+> > "On fast storage ..." ?
+> 
+> No, I have even faster storage. ;)
 
-Thanks,
-Qu
+:O
 
-在 2025/11/28 08:26, Qu Wenruo 写道:
-> [FALSE ALERT]
-> The test case will fail on btrfs if the new block-group-tree feature is
-> enabled:
-> 
-> FSTYP         -- btrfs
-> PLATFORM      -- Linux/x86_64 btrfs-vm 6.18.0-rc6-custom+ #321 SMP PREEMPT_DYNAMIC Sun Nov 23 16:34:33 ACDT 2025
-> MKFS_OPTIONS  -- -O block-group-tree /dev/mapper/test-scratch1
-> MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
-> 
-> generic/746 44s ... [failed, exit status 1]- output mismatch (see xfstests-dev/results//generic/746.out.bad)
->      --- tests/generic/746.out	2024-06-27 13:55:51.286338519 +0930
->      +++ xfstests-dev/results//generic/746.out.bad	2025-11-28 07:47:17.039827837 +1030
->      @@ -2,4 +2,4 @@
->       Generating garbage on loop...done.
->       Running fstrim...done.
->       Detecting interesting holes in image...done.
->      -Comparing holes to the reported space from FS...done.
->      +Comparing holes to the reported space from FS...Sectors 256-2111 are not marked as free!
->      ...
->      (Run 'diff -u xfstests-dev/tests/generic/746.out xfstests-dev/results//generic/746.out.bad'  to see the entire diff)
-> 
-> [CAUSE]
-> Sectors [256, 2048) are the reserved 1M free space.
-> Sectors [2048, 2112) are the leading free space in the chunk tree.
-> Sectors [2112, 2144) is the first tree block in the chunk tree.
-> 
-> However the reported free sectors from get_free_sectors() looks like this:
-> 
->    2144 10566
->    10688 11711
->    ...
-> 
-> Note that there should be a free sector range in [2048, 2112) but it's
-> not reported in get_free_sectors().
-> 
-> The get_free_sectors() call is fs dependent, and for btrfs it's using
-> parse-extent-tree.awk script to handle the extent tree dump.
-> 
-> The script uses BLOCK_GROUP_ITEM items to detect the beginning of a
-> block group so that it can calculate the hole between the bginning of a
-> block group and the first data/metadata item.
-> 
-> However block-group-tree feature moves BLOCK_GROUP_ITEM items to a
-> dedicated tree, making the existing script unable to parse the free
-> space at the beginning of a block group.
-> 
-> [FIX]
-> For block-group-tree feature, we need to parse both block group tree and
-> extent tree and do cross-reference.
-> It is not that simple to do in a single awk script, so unfortunately
-> skip the test if the btrfs has block-group-tree feature enabled.
-> 
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
-> Changelog
-> v2:
-> - Fix several typos in the commit message
->    Mostly related to the sequence between 1 and 2, have all kinds of typos
->    like: 2122 (should be 2112) 1244 (should be 2144)
-> ---
->   tests/generic/746 | 12 ++++++++++++
->   1 file changed, 12 insertions(+)
-> 
-> diff --git a/tests/generic/746 b/tests/generic/746
-> index 6f02b1cc3547..c62fdbc9de20 100755
-> --- a/tests/generic/746
-> +++ b/tests/generic/746
-> @@ -162,6 +162,18 @@ mkdir $loop_mnt
->   _mkfs_dev $loop_dev
->   _mount $loop_dev $loop_mnt
->   
-> +# The new block-group-tree will feature screw up the extent tree parsing, as
-> +# there is no more block group item in that tree to mark the start
-> +# of a block group, causing the free space between the beginning of bg
-> +# and the first data/metadata block not counted as free space.
-> +# So reject fs with block-group-tree feature for now.
-> +if [ $FSTYP = "btrfs" ]; then
-> +	if $BTRFS_UTIL_PROG inspect-internal dump-super $loop_dev |\
-> +		grep -q BLOCK_GROUP_TREE; then
-> +		_notrun "No support for block-group-tree extent tree parsing yet"
-> +	fi
-> +fi
-> +
->   echo -n "Generating garbage on loop..."
->   # Goal is to fill it up, ignore any errors.
->   for i in `seq 1 10`; do
+So that means on an even faster storage this problem would be even more
+visible because our file size would be >250MB
 
+> 
+> > > this can result in file_size being set to ~250MB on a 4k fsblock
+> > > filesystem.  That's about 64,000 blocks.
+> > > 
+> > > The next thing this test does is try to create a file of that size
+> > > (250MB) of alternating written and unwritten blocks.  For some reason,
+> > > it sets up this file by invoking xfs_io 64,000 times to write small
+> > > amounts of data, which takes 3+ minutes on the author's system because
+> > > exec overhead is pretty high when you do that.
+> > 
+> > > 
+> > > As a result, one loop through the test takes almost 4 minutes.  The test
+> > > loops 20 times, so it runs for 80 minutes(!!) which is a really long
+> > > time.
+> > > 
+> > > So the first thing we do is observe that the giant slow loop is being
+> > > run as a single thread on an empty filesystem.  Most of the time the
+> > > allocator generates a mostly physically contiguous file.  We could
+> > > fallocate the whole file instead of fallocating one block every other
+> > > time through the loop.  This halves the setup time.
+> > > 
+> > > Next, we can also stuff the remaining pwrite commands into a bash array
+> > > and only invoke xfs_io once every 128x through the loop.  This amortizes
+> > > the xfs_io startup time, which reduces the test loop runtime to about 20
+> > > seconds.
+> > 
+> > Oh right, this is very bad. Weirdly I never noticed the test taking such
+> > a huge time while testing on scsi_debug and also on an enterprise SSD.
+> 
+> It doesn't help that xfs supports much larger awu_max than (say) ext4.
+
+I did test on xfs as well. But yea maybe my SSD is just not fast enough.
+
+> 
+> > Thanks for fixing this up though, I will start using maybe dm-delay
+> > while stressing the tests in the future to avoid such issues.
+> 
+> fork() is a bit expensive.
+> 
+> > > 
+> > > Finally, replace the 20x loop with a _soak_loop_running 5x loop because
+> > > 5 seems like enough.  Anyone who wants more can set TIME_FACTOR or
+> > > SOAK_DURATION to get more intensive testing.  On my system this cuts the
+> > > runtime to 75 seconds.
+> > 
+> > So about the loops, we were running a modified version of this test,
+> > which used non atomic writes, to confirm if we are able to catch torn
+> > writes this way. We noticed that it sometimes took 10+ loops to observe
+> > the torn write. Hence we kept iters=20. Since catching a torn write is
+> > critical for working of atomic writes, I think it might make sense to
+> > leave it at 20. If we feel this is a very high value, we can perhaps
+> > remove -g auto and keep -g stress -g atomicwrites so only people who
+> > explicitly want to stress atomic writes will run it.
+> 
+> In that case we ought to limit the awu_max that we feed to the test
+> because otherwise it starts running a lot of IO.
+
+Yes I think that makes sense. Right now we get awu_max of 4M on xfs that
+means we always end up only testing software atomic writes.  Maybe we
+can instead cap awu_max at 64K or something. This way, we can test both
+hw atomic writes (when device supports it) and sw atomic writes (when it
+doesn't)
+
+Regards,
+ojaswin
+
+> 
+> --D
+> 
+> > > 
+> > > Cc: <fstests@vger.kernel.org> # v2025.10.20
+> > > Fixes: ca954527ff9d97 ("generic: Add sudden shutdown tests for multi block atomic writes")
+> > > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> > > ---
+> > >  tests/generic/778 |   59 ++++++++++++++++++++++++++++++++++++-----------------
+> > >  1 file changed, 40 insertions(+), 19 deletions(-)
+> > > 
+> > > 
+> > > diff --git a/tests/generic/778 b/tests/generic/778
+> > > index 8cb1d8d4cad45d..7cfabc3a47a521 100755
+> > > --- a/tests/generic/778
+> > > +++ b/tests/generic/778
+> > > @@ -42,22 +42,28 @@ atomic_write_loop() {
+> > >  		# Due to sudden shutdown this can produce errors so just
+> > >  		# redirect them to seqres.full
+> > >  		$XFS_IO_PROG -c "open -fsd $testfile" -c "pwrite -S 0x61 -DA -V1 -b $size $off $size" >> /dev/null 2>>$seqres.full
+> > > -		echo "Written to offset: $off" >> $tmp.aw
+> > > -		off=$((off + $size))
+> > > +		echo "Written to offset: $((off + size))" >> $tmp.aw
+> > > +		off=$((off + size))
+> > >  	done
+> > >  }
+> > >  
+> > >  start_atomic_write_and_shutdown() {
+> > >  	atomic_write_loop &
+> > >  	awloop_pid=$!
+> > > +	local max_loops=100
+> > >  
+> > >  	local i=0
+> > > -	# Wait for at least first write to be recorded or 10s
+> > > -	while [ ! -f "$tmp.aw" -a $i -le 50 ]; do i=$((i + 1)); sleep 0.2; done
+> > > +	# Wait for at least first write to be recorded or too much time passes
+> > > +	while [ ! -f "$tmp.aw" -a $i -le $max_loops ]; do
+> > > +		i=$((i + 1))
+> > > +		sleep 0.2
+> > > +	done
+> > >  
+> > > -	if [[ $i -gt 50 ]]
+> > > +	cat $tmp.aw >> $seqres.full
+> > > +
+> > > +	if [[ $i -gt $max_loops ]]
+> > >  	then
+> > > -		_fail "atomic write process took too long to start"
+> > > +		_notrun "atomic write process took too long to start"
+> > >  	fi
+> > >  
+> > >  	echo >> $seqres.full
+> > > @@ -113,21 +119,34 @@ create_mixed_mappings() {
+> > >  	local off=0
+> > >  	local operations=("W" "U")
+> > >  
+> > > +	test $size_bytes -eq 0 && return
+> > > +
+> > > +	# fallocate the whole file once because preallocating single blocks
+> > > +	# with individual xfs_io invocations is really slow and the allocator
+> > > +	# usually gives out consecutive blocks anyway
+> > > +	$XFS_IO_PROG -f -c "falloc 0 $size_bytes" $file
+> > > +
+> > > +	local cmds=()
+> > >  	for ((i=0; i<$((size_bytes / blksz )); i++)); do
+> > > -		index=$(($i % ${#operations[@]}))
+> > > -		map="${operations[$index]}"
+> > > +		if (( i % 2 == 0 )); then
+> > > +			cmds+=(-c "pwrite -b $blksz $off $blksz")
+> > > +		fi
+> > > +
+> > > +		# batch the write commands into larger xfs_io invocations to
+> > > +		# amortize the fork overhead
+> > > +		if [ "${#cmds[@]}" -ge 128 ]; then
+> > > +			$XFS_IO_PROG "${cmds[@]}" "$file" >> /dev/null
+> > > +			cmds=()
+> > > +		fi
+> > >  
+> > > -		case "$map" in
+> > > -		    "W")
+> > > -			$XFS_IO_PROG -fc "pwrite -b $blksz $off $blksz" $file  >> /dev/null
+> > > -			;;
+> > > -		    "U")
+> > > -			$XFS_IO_PROG -fc "falloc $off $blksz" $file >> /dev/null
+> > > -			;;
+> > > -		esac
+> > >  		off=$((off + blksz))
+> > >  	done
+> > >  
+> > > +	if [ "${#cmds[@]}" -gt 0 ]; then
+> > > +		$XFS_IO_PROG "${cmds[@]}" "$file" >> /dev/null
+> > > +		cmds=()
+> > > +	fi
+> > > +
+> > >  	sync $file
+> > >  }
+> > >  
+> > > @@ -336,9 +355,9 @@ echo >> $seqres.full
+> > >  echo "# Populating expected data buffers" >> $seqres.full
+> > >  populate_expected_data
+> > >  
+> > > -# Loop 20 times to shake out any races due to shutdown
+> > > -for ((iter=0; iter<20; iter++))
+> > > -do
+> > > +# Loop to shake out any races due to shutdown
+> > > +iter=0
+> > > +while _soak_loop_running $TIME_FACTOR; do
+> > >  	echo >> $seqres.full
+> > >  	echo "------ Iteration $iter ------" >> $seqres.full
+> > >  
+> > > @@ -361,6 +380,8 @@ do
+> > >  	echo >> $seqres.full
+> > >  	echo "# Starting shutdown torn write test for append atomic writes" >> $seqres.full
+> > >  	test_append_torn_write
+> > > +
+> > > +	iter=$((iter + 1))
+> > >  done
+> > >  
+> > >  echo "Silence is golden"
+> > > 
+> > 
