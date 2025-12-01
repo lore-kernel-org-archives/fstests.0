@@ -1,67 +1,39 @@
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ADD9D182B7;
-	Sat, 29 Nov 2025 08:52:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4D86292B4B;
+	Mon,  1 Dec 2025 22:59:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764406367; cv=none; b=LF5zc9D0IZrlQoa+vDNLd16FBkSTyHku3bHVJwW4nP3a5m2BKz6spf0okZwNO2mZsW3Hbat7yYWGBqT0xO4NxKh0X1RQDRT5dyDVidbTIHzLoKmdn3TnGo94hVqsm7yuQHypqn8rC+/56uzUBGP3Gq83iQBA48lWv7ZhpeQ78gU=
+	t=1764629965; cv=none; b=eGLpHj0DDZSzjrnbDHiPJDcJ8ZF372ABBgbaBO4HdG+rMqLQxOxjxxb0d4g08lgMBntKaniDUfZvNQCdB5wMfgSotLmaYQPSOuPvB/lqzPA0M2yHK0IFU9BvcGh5LNdH+Hn5WHkmNBeMXmXz6XZ1OWeiE0QfaFFLZCXhyX66mvc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764406367; c=relaxed/simple;
-	bh=nClj+COov/1I3RkkROa9pm1axrzdz/bY6YWa+/IukA8=;
+	s=arc-20240116; t=1764629965; c=relaxed/simple;
+	bh=kuXP4O/MyRwYbglg8oo+/Dmlqqm22FmToSbOO1/POMI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rvSn4XPyKKs3/VMJt0cHvJoD9g1QV4v0M9Wjbcwsv+O97KAn4Zu9hLsz+vwNYF7S36xxTm8iWllTNECT+brIsE1T68eHAHmyzu3bk2vSQ1xM3O5BGBRaEFieQnfsw4uTJ8B4fEqb2XYjWWbFi4K5Hy1iZWggtGDGkpm948kbmJA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=JLuVt6iO; arc=none smtp.client-ip=148.163.156.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=fEBJeF/1HJfrH4EEVpQvhEQH2twqGuRr7EASkv3s0/yC0V2t9mfX6mYfZ1bfF7JXH7tUMtmoxj/rE9YAav4G/EGnYy4boDqcg6AZQtcY1NkbjdvLEBa4Ii53UE+ZhsrckInG+Z5lg/mdgaNC478qLbOwk3Hv1KGO9z4p2n/QEVY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=e4W7FtYK; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="JLuVt6iO"
-Received: from pps.filterd (m0356517.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5AT30wYi025909;
-	Sat, 29 Nov 2025 08:52:41 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=pp1; bh=bnlU2AcrMXhNFa2XzEjbaRwqVOpAW1
-	F/0H3rZhlC3so=; b=JLuVt6iOaFwzhArYl6OCU3fWPHcYDqwyeWDD3HHQHgepLq
-	WQf7dgHFjxed1VIvCjIZXst8vAd3HXVkVw8CneH0xj1HJy0U/hl+Qm/1CecB+F3r
-	EyvRiplNbZvhoGXH6McaWXnWjqKJkQLvfEDOuOkEyimA5nDpYV1UPLzht51euu5u
-	BPfDfzR7+Y1YYes56Y71CeyCIkpUYo2BAW6gDUpx/EtpsJpsL4M7qIs+rk1YUlA+
-	KBmVCO9q+87U1/i8g3nCW/XWkRJvixLbcvwNgmYP9vI7cfhgVJC3g616jjM5Es/6
-	gymk/CEUddcEgFdOlpUvQjaqvbSRVqDI59zwZ3dw==
-Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4aqrj98h25-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Sat, 29 Nov 2025 08:52:41 +0000 (GMT)
-Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
-	by ppma11.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 5AT4A38g025075;
-	Sat, 29 Nov 2025 08:52:40 GMT
-Received: from smtprelay06.fra02v.mail.ibm.com ([9.218.2.230])
-	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 4akt720am5-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Sat, 29 Nov 2025 08:52:40 +0000
-Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
-	by smtprelay06.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 5AT8qcgC29491662
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Sat, 29 Nov 2025 08:52:38 GMT
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 63CB620043;
-	Sat, 29 Nov 2025 08:52:38 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 0AC4120040;
-	Sat, 29 Nov 2025 08:52:37 +0000 (GMT)
-Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.39.27.95])
-	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
-	Sat, 29 Nov 2025 08:52:36 +0000 (GMT)
-Date: Sat, 29 Nov 2025 14:22:11 +0530
-From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH 2/7] generic/778: fix severe performance problems
-Message-ID: <aSq0OzvJHT1yOdvF@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
-References: <176279908967.605950.2192923313361120314.stgit@frogsfrogsfrogs>
- <176279909041.605950.16815410156483574567.stgit@frogsfrogsfrogs>
- <aRXGyR9kj0kPirIE@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
- <20251115023251.GI196366@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="e4W7FtYK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 56370C4CEF1;
+	Mon,  1 Dec 2025 22:59:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1764629965;
+	bh=kuXP4O/MyRwYbglg8oo+/Dmlqqm22FmToSbOO1/POMI=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=e4W7FtYKYSbM7oAVBIgHtRfIJaGzVwtN94Lzps9MPw9QduxFjMFXtpcLcvS8EfzOA
+	 UQBH2TRaAxRfrXMoRE7/XOhwlgf9Ie27Q7HZbGMIlEorCEiCdSnbefvMToKfPa+Sxs
+	 FRF5dJ1hEez3jDahaBtiYY3lmbh2Cu4JrklN8YCD5tKEOkqeL2BLOQ8MupC3EL3tFt
+	 S/zqLiF6Oy24498hogBSsOaaIo6Qop4g6ra25hgxqKcD+6aSsa8PctMY5Xn6LbTOKB
+	 ltKn8Ql/ARQfO73RPjqwN36Jx/bK0H9N5HvhtGXMZ1Fma565fciIXj14Xaw+FRrXl+
+	 vhfy+ChsrYjkg==
+Date: Mon, 1 Dec 2025 14:59:24 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Su Yue <glass.su@suse.com>
+Cc: fstests@vger.kernel.org, l@damenly.org, linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] generic: use _qmount_option and _qmount
+Message-ID: <20251201225924.GA89454@frogsfrogsfrogs>
+References: <20251124132004.23965-1-glass.su@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -70,238 +42,275 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251115023251.GI196366@frogsfrogsfrogs>
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: qvdmZ9j3zLAReX0Hoq45uP7kJLEtnqlE
-X-Proofpoint-ORIG-GUID: qvdmZ9j3zLAReX0Hoq45uP7kJLEtnqlE
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTI5MDAyMCBTYWx0ZWRfX9l64Fy6fCbeV
- gynz0Gv0nr8s80Win6Ni34P5R5E+kj+5z3QVKu+tQoof2/a/02I+NrOQqToCCZowrIDCG1bbfpa
- tvrsS7VIIlcEZYsmLqhCIKmsSZFg9BgT9CnRxD3n97r901E2aq4exY/46QjdXKI+IYkfzliha4r
- cmgAjUNOpp9MNJb7618HQ01iaImHpV0JEzi9KweJweqjpeW8hfoGP+Tm9+fMnsJloQPO+TuLn3K
- Mxa3/DhN7iLy+Y2/39BMWBGvE3YTMfaLOXrTug9vWAhgkeWHTrUTJOGKD0qIQGIfFBzr6w5z7HD
- GuqJEO0lwnHyL5goe6xc5VYUrbKjLQKOkmuPLcBR2GYgIFJM72Wji1i1RVEVv+be1DoqQlVabXK
- Kzuf5EMC72JdpbEehAEcwDFfEKalaw==
-X-Authority-Analysis: v=2.4 cv=dYGNHHXe c=1 sm=1 tr=0 ts=692ab459 cx=c_pps
- a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17
- a=kj9zAlcOel0A:10 a=6UeiqGixMTsA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=VwQbUJbxAAAA:8 a=fXYFMPuYrlktsdxoAhkA:9 a=CjuIK1q_8ugA:10
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
- definitions=2025-11-28_08,2025-11-27_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 spamscore=0 suspectscore=0 clxscore=1015 adultscore=0
- lowpriorityscore=0 bulkscore=0 phishscore=0 priorityscore=1501
- impostorscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2510240000
- definitions=main-2511290020
+In-Reply-To: <20251124132004.23965-1-glass.su@suse.com>
 
-On Fri, Nov 14, 2025 at 06:32:51PM -0800, Darrick J. Wong wrote:
-> On Thu, Nov 13, 2025 at 05:23:45PM +0530, Ojaswin Mujoo wrote:
-> > On Mon, Nov 10, 2025 at 10:26:32AM -0800, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > This test takes 4800s to run, which is horrible.  AFAICT it starts out
-> > > by timing how much can be written atomically to a new file in 0.2
-> > > seconds, then scales up the file size by 3x.  On not very fast storage,
-> > 
-> > Hi Darrick,
+On Mon, Nov 24, 2025 at 09:20:04PM +0800, Su Yue wrote:
+> Many generic tests call `_scratch_mount -o usrquota` then
+> chmod 777, quotacheck and quotaon.
 
-(Sorry I missed this email somehow)
+What does the chmod 777 do, in relation to the quota{check,on} programs?
+Is it necessary for the root dir to be world writable (and executable!)
+for quota tools to work?
 
-> > 
-> > So 250MB in 0.2s is like 1.2GBps which seems pretty fast. Did you mean
-> > "On fast storage ..." ?
+> It can be simpilfied to _qmount_option and _qmount. The later
+> function already calls quotacheck, quota and chmod.
 > 
-> No, I have even faster storage. ;)
+> Convertaions can save a few lines. tests/generic/380 is an exception
 
-:O
+"Conversions" ?
 
-So that means on an even faster storage this problem would be even more
-visible because our file size would be >250MB
+--D
 
+> because it tests chown.
 > 
-> > > this can result in file_size being set to ~250MB on a 4k fsblock
-> > > filesystem.  That's about 64,000 blocks.
-> > > 
-> > > The next thing this test does is try to create a file of that size
-> > > (250MB) of alternating written and unwritten blocks.  For some reason,
-> > > it sets up this file by invoking xfs_io 64,000 times to write small
-> > > amounts of data, which takes 3+ minutes on the author's system because
-> > > exec overhead is pretty high when you do that.
-> > 
-> > > 
-> > > As a result, one loop through the test takes almost 4 minutes.  The test
-> > > loops 20 times, so it runs for 80 minutes(!!) which is a really long
-> > > time.
-> > > 
-> > > So the first thing we do is observe that the giant slow loop is being
-> > > run as a single thread on an empty filesystem.  Most of the time the
-> > > allocator generates a mostly physically contiguous file.  We could
-> > > fallocate the whole file instead of fallocating one block every other
-> > > time through the loop.  This halves the setup time.
-> > > 
-> > > Next, we can also stuff the remaining pwrite commands into a bash array
-> > > and only invoke xfs_io once every 128x through the loop.  This amortizes
-> > > the xfs_io startup time, which reduces the test loop runtime to about 20
-> > > seconds.
-> > 
-> > Oh right, this is very bad. Weirdly I never noticed the test taking such
-> > a huge time while testing on scsi_debug and also on an enterprise SSD.
+> Signed-off-by: Su Yue <glass.su@suse.com>
+> ---
+>  tests/generic/082 |  9 ++-------
+>  tests/generic/219 | 11 ++++-------
+>  tests/generic/230 | 11 ++++++-----
+>  tests/generic/231 |  6 ++----
+>  tests/generic/232 |  6 ++----
+>  tests/generic/233 |  6 ++----
+>  tests/generic/234 |  5 ++---
+>  tests/generic/235 |  5 ++---
+>  tests/generic/244 |  1 -
+>  tests/generic/270 |  6 ++----
+>  tests/generic/280 |  5 ++---
+>  tests/generic/400 |  2 +-
+>  12 files changed, 27 insertions(+), 46 deletions(-)
 > 
-> It doesn't help that xfs supports much larger awu_max than (say) ext4.
-
-I did test on xfs as well. But yea maybe my SSD is just not fast enough.
-
+> diff --git a/tests/generic/082 b/tests/generic/082
+> index f078ef2ffff9..6bb9cf2a22ae 100755
+> --- a/tests/generic/082
+> +++ b/tests/generic/082
+> @@ -23,13 +23,8 @@ _require_scratch
+>  _require_quota
+>  
+>  _scratch_mkfs >>$seqres.full 2>&1
+> -_scratch_mount "-o usrquota,grpquota"
+> -
+> -# xfs doesn't need these setups and quotacheck even fails on xfs, so just
+> -# redirect the output to $seqres.full for debug purpose and ignore the results,
+> -# as we check the quota status later anyway.
+> -quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
+> -quotaon $SCRATCH_MNT >>$seqres.full 2>&1
+> +_qmount_option 'usrquota,grpquota'
+> +_qmount "usrquota,grpquota"
+>  
+>  # first remount ro with a bad option, a failed remount ro should not disable
+>  # quota, but currently xfs doesn't fail in this case, the unknown option is
+> diff --git a/tests/generic/219 b/tests/generic/219
+> index 642823859886..a2eb0b20f408 100755
+> --- a/tests/generic/219
+> +++ b/tests/generic/219
+> @@ -91,25 +91,22 @@ test_accounting()
+>  
+>  _scratch_unmount 2>/dev/null
+>  _scratch_mkfs >> $seqres.full 2>&1
+> -_scratch_mount "-o usrquota,grpquota"
+> +_qmount_option "usrquota,grpquota"
+> +_qmount
+>  _force_vfs_quota_testing $SCRATCH_MNT
+> -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+> -quotaon $SCRATCH_MNT 2>/dev/null
+>  _scratch_unmount
+>  
+>  echo; echo "### test user accounting"
+> -export MOUNT_OPTIONS="-o usrquota"
+> +_qmount_option "usrquota"
+>  _qmount
+> -quotaon $SCRATCH_MNT 2>/dev/null
+>  type=u
+>  test_files
+>  test_accounting
+>  _scratch_unmount 2>/dev/null
+>  
+>  echo; echo "### test group accounting"
+> -export MOUNT_OPTIONS="-o grpquota"
+> +_qmount_option "grpquota"
+>  _qmount
+> -quotaon $SCRATCH_MNT 2>/dev/null
+>  type=g
+>  test_files
+>  test_accounting
+> diff --git a/tests/generic/230 b/tests/generic/230
+> index a8caf5a808c3..0a680dbc874b 100755
+> --- a/tests/generic/230
+> +++ b/tests/generic/230
+> @@ -99,7 +99,8 @@ grace=2
+>  _qmount_option 'defaults'
+>  
+>  _scratch_mkfs >> $seqres.full 2>&1
+> -_scratch_mount "-o usrquota,grpquota"
+> +_qmount_option "usrquota,grpquota"
+> +_qmount
+>  _force_vfs_quota_testing $SCRATCH_MNT
+>  BLOCK_SIZE=$(_get_file_block_size $SCRATCH_MNT)
+>  quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+> @@ -113,8 +114,8 @@ setquota -g -t $grace $grace $SCRATCH_MNT
+>  _scratch_unmount
+>  
+>  echo; echo "### test user limit enforcement"
+> -_scratch_mount "-o usrquota"
+> -quotaon $SCRATCH_MNT 2>/dev/null
+> +_qmount_option "usrquota"
+> +_qmount
+>  type=u
+>  test_files
+>  test_enforcement
+> @@ -122,8 +123,8 @@ cleanup_files
+>  _scratch_unmount 2>/dev/null
+>  
+>  echo; echo "### test group limit enforcement"
+> -_scratch_mount "-o grpquota"
+> -quotaon $SCRATCH_MNT 2>/dev/null
+> +_qmount_option "grpquota"
+> +_qmount
+>  type=g
+>  test_files
+>  test_enforcement
+> diff --git a/tests/generic/231 b/tests/generic/231
+> index ce7e62ea1886..02910523d0b5 100755
+> --- a/tests/generic/231
+> +++ b/tests/generic/231
+> @@ -47,10 +47,8 @@ _require_quota
+>  _require_user
+>  
+>  _scratch_mkfs >> $seqres.full 2>&1
+> -_scratch_mount "-o usrquota,grpquota"
+> -chmod 777 $SCRATCH_MNT
+> -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+> -quotaon -u -g $SCRATCH_MNT 2>/dev/null
+> +_qmount_option "usrquota,grpquota"
+> +_qmount
+>  
+>  if ! _fsx 1; then
+>  	_scratch_unmount 2>/dev/null
+> diff --git a/tests/generic/232 b/tests/generic/232
+> index c903a5619045..21375809d299 100755
+> --- a/tests/generic/232
+> +++ b/tests/generic/232
+> @@ -44,10 +44,8 @@ _require_scratch
+>  _require_quota
+>  
+>  _scratch_mkfs > $seqres.full 2>&1
+> -_scratch_mount "-o usrquota,grpquota"
+> -chmod 777 $SCRATCH_MNT
+> -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+> -quotaon -u -g $SCRATCH_MNT 2>/dev/null
+> +_qmount_option "usrquota,grpquota"
+> +_qmount
+>  
+>  _fsstress
+>  _check_quota_usage
+> diff --git a/tests/generic/233 b/tests/generic/233
+> index 3fc1b63abb24..4606f3bde2ab 100755
+> --- a/tests/generic/233
+> +++ b/tests/generic/233
+> @@ -59,10 +59,8 @@ _require_quota
+>  _require_user
+>  
+>  _scratch_mkfs > $seqres.full 2>&1
+> -_scratch_mount "-o usrquota,grpquota"
+> -chmod 777 $SCRATCH_MNT
+> -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+> -quotaon -u -g $SCRATCH_MNT 2>/dev/null
+> +_qmount_option "usrquota,grpquota"
+> +_qmount
+>  setquota -u $qa_user 32000 32000 1000 1000 $SCRATCH_MNT 2>/dev/null
+>  
+>  _fsstress
+> diff --git a/tests/generic/234 b/tests/generic/234
+> index 4b25fc6507cc..2c596492a3e0 100755
+> --- a/tests/generic/234
+> +++ b/tests/generic/234
+> @@ -66,9 +66,8 @@ _require_quota
+>  
+>  
+>  _scratch_mkfs >> $seqres.full 2>&1
+> -_scratch_mount "-o usrquota,grpquota"
+> -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+> -quotaon -u -g $SCRATCH_MNT 2>/dev/null
+> +_qmount_option "usrquota,grpquota"
+> +_qmount
+>  test_setting
+>  _scratch_unmount
+>  
+> diff --git a/tests/generic/235 b/tests/generic/235
+> index 037c29e806db..7a616650fc8f 100755
+> --- a/tests/generic/235
+> +++ b/tests/generic/235
+> @@ -25,9 +25,8 @@ do_repquota()
+>  
+>  
+>  _scratch_mkfs >> $seqres.full 2>&1
+> -_scratch_mount "-o usrquota,grpquota"
+> -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+> -quotaon $SCRATCH_MNT 2>/dev/null
+> +_qmount_option "usrquota,grpquota"
+> +_qmount
+>  
+>  touch $SCRATCH_MNT/testfile
+>  chown $qa_user:$qa_user $SCRATCH_MNT/testfile
+> diff --git a/tests/generic/244 b/tests/generic/244
+> index b68035129c82..989bb4f5385e 100755
+> --- a/tests/generic/244
+> +++ b/tests/generic/244
+> @@ -66,7 +66,6 @@ done
+>  # remount just for kicks, make sure we get it off disk
+>  _scratch_unmount
+>  _qmount
+> -quotaon $SCRATCH_MNT 2>/dev/null
+>  
+>  # Read them back by iterating based on quotas returned.
+>  # This should match what we set, even if we don't directly
+> diff --git a/tests/generic/270 b/tests/generic/270
+> index c3d5127a0b51..9ac829a7379f 100755
+> --- a/tests/generic/270
+> +++ b/tests/generic/270
+> @@ -62,10 +62,8 @@ _require_command "$SETCAP_PROG" setcap
+>  _require_attrs security
+>  
+>  _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
+> -_scratch_mount "-o usrquota,grpquota"
+> -chmod 777 $SCRATCH_MNT
+> -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+> -quotaon -u -g $SCRATCH_MNT 2>/dev/null
+> +_qmount_option "usrquota,grpquota"
+> +_qmount
+>  
+>  if ! _workout; then
+>  	_scratch_unmount 2>/dev/null
+> diff --git a/tests/generic/280 b/tests/generic/280
+> index 3108fd23fb70..fae0a02145cf 100755
+> --- a/tests/generic/280
+> +++ b/tests/generic/280
+> @@ -34,9 +34,8 @@ _require_freeze
+>  
+>  _scratch_unmount 2>/dev/null
+>  _scratch_mkfs >> $seqres.full 2>&1
+> -_scratch_mount "-o usrquota,grpquota"
+> -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+> -quotaon $SCRATCH_MNT 2>/dev/null
+> +_qmount_option "usrquota,grpquota"
+> +_qmount
+>  xfs_freeze -f $SCRATCH_MNT
+>  setquota -u root 1 2 3 4 $SCRATCH_MNT &
+>  pid=$!
+> diff --git a/tests/generic/400 b/tests/generic/400
+> index 77970da69a41..ef27c254167c 100755
+> --- a/tests/generic/400
+> +++ b/tests/generic/400
+> @@ -22,7 +22,7 @@ _require_scratch
+>  
+>  _scratch_mkfs >> $seqres.full 2>&1
+>  
+> -MOUNT_OPTIONS="-o usrquota,grpquota"
+> +_qmount_option "usrquota,grpquota"
+>  _qmount
+>  _require_getnextquota
+>  
+> -- 
+> 2.48.1
 > 
-> > Thanks for fixing this up though, I will start using maybe dm-delay
-> > while stressing the tests in the future to avoid such issues.
 > 
-> fork() is a bit expensive.
-> 
-> > > 
-> > > Finally, replace the 20x loop with a _soak_loop_running 5x loop because
-> > > 5 seems like enough.  Anyone who wants more can set TIME_FACTOR or
-> > > SOAK_DURATION to get more intensive testing.  On my system this cuts the
-> > > runtime to 75 seconds.
-> > 
-> > So about the loops, we were running a modified version of this test,
-> > which used non atomic writes, to confirm if we are able to catch torn
-> > writes this way. We noticed that it sometimes took 10+ loops to observe
-> > the torn write. Hence we kept iters=20. Since catching a torn write is
-> > critical for working of atomic writes, I think it might make sense to
-> > leave it at 20. If we feel this is a very high value, we can perhaps
-> > remove -g auto and keep -g stress -g atomicwrites so only people who
-> > explicitly want to stress atomic writes will run it.
-> 
-> In that case we ought to limit the awu_max that we feed to the test
-> because otherwise it starts running a lot of IO.
-
-Yes I think that makes sense. Right now we get awu_max of 4M on xfs that
-means we always end up only testing software atomic writes.  Maybe we
-can instead cap awu_max at 64K or something. This way, we can test both
-hw atomic writes (when device supports it) and sw atomic writes (when it
-doesn't)
-
-Regards,
-ojaswin
-
-> 
-> --D
-> 
-> > > 
-> > > Cc: <fstests@vger.kernel.org> # v2025.10.20
-> > > Fixes: ca954527ff9d97 ("generic: Add sudden shutdown tests for multi block atomic writes")
-> > > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> > > ---
-> > >  tests/generic/778 |   59 ++++++++++++++++++++++++++++++++++++-----------------
-> > >  1 file changed, 40 insertions(+), 19 deletions(-)
-> > > 
-> > > 
-> > > diff --git a/tests/generic/778 b/tests/generic/778
-> > > index 8cb1d8d4cad45d..7cfabc3a47a521 100755
-> > > --- a/tests/generic/778
-> > > +++ b/tests/generic/778
-> > > @@ -42,22 +42,28 @@ atomic_write_loop() {
-> > >  		# Due to sudden shutdown this can produce errors so just
-> > >  		# redirect them to seqres.full
-> > >  		$XFS_IO_PROG -c "open -fsd $testfile" -c "pwrite -S 0x61 -DA -V1 -b $size $off $size" >> /dev/null 2>>$seqres.full
-> > > -		echo "Written to offset: $off" >> $tmp.aw
-> > > -		off=$((off + $size))
-> > > +		echo "Written to offset: $((off + size))" >> $tmp.aw
-> > > +		off=$((off + size))
-> > >  	done
-> > >  }
-> > >  
-> > >  start_atomic_write_and_shutdown() {
-> > >  	atomic_write_loop &
-> > >  	awloop_pid=$!
-> > > +	local max_loops=100
-> > >  
-> > >  	local i=0
-> > > -	# Wait for at least first write to be recorded or 10s
-> > > -	while [ ! -f "$tmp.aw" -a $i -le 50 ]; do i=$((i + 1)); sleep 0.2; done
-> > > +	# Wait for at least first write to be recorded or too much time passes
-> > > +	while [ ! -f "$tmp.aw" -a $i -le $max_loops ]; do
-> > > +		i=$((i + 1))
-> > > +		sleep 0.2
-> > > +	done
-> > >  
-> > > -	if [[ $i -gt 50 ]]
-> > > +	cat $tmp.aw >> $seqres.full
-> > > +
-> > > +	if [[ $i -gt $max_loops ]]
-> > >  	then
-> > > -		_fail "atomic write process took too long to start"
-> > > +		_notrun "atomic write process took too long to start"
-> > >  	fi
-> > >  
-> > >  	echo >> $seqres.full
-> > > @@ -113,21 +119,34 @@ create_mixed_mappings() {
-> > >  	local off=0
-> > >  	local operations=("W" "U")
-> > >  
-> > > +	test $size_bytes -eq 0 && return
-> > > +
-> > > +	# fallocate the whole file once because preallocating single blocks
-> > > +	# with individual xfs_io invocations is really slow and the allocator
-> > > +	# usually gives out consecutive blocks anyway
-> > > +	$XFS_IO_PROG -f -c "falloc 0 $size_bytes" $file
-> > > +
-> > > +	local cmds=()
-> > >  	for ((i=0; i<$((size_bytes / blksz )); i++)); do
-> > > -		index=$(($i % ${#operations[@]}))
-> > > -		map="${operations[$index]}"
-> > > +		if (( i % 2 == 0 )); then
-> > > +			cmds+=(-c "pwrite -b $blksz $off $blksz")
-> > > +		fi
-> > > +
-> > > +		# batch the write commands into larger xfs_io invocations to
-> > > +		# amortize the fork overhead
-> > > +		if [ "${#cmds[@]}" -ge 128 ]; then
-> > > +			$XFS_IO_PROG "${cmds[@]}" "$file" >> /dev/null
-> > > +			cmds=()
-> > > +		fi
-> > >  
-> > > -		case "$map" in
-> > > -		    "W")
-> > > -			$XFS_IO_PROG -fc "pwrite -b $blksz $off $blksz" $file  >> /dev/null
-> > > -			;;
-> > > -		    "U")
-> > > -			$XFS_IO_PROG -fc "falloc $off $blksz" $file >> /dev/null
-> > > -			;;
-> > > -		esac
-> > >  		off=$((off + blksz))
-> > >  	done
-> > >  
-> > > +	if [ "${#cmds[@]}" -gt 0 ]; then
-> > > +		$XFS_IO_PROG "${cmds[@]}" "$file" >> /dev/null
-> > > +		cmds=()
-> > > +	fi
-> > > +
-> > >  	sync $file
-> > >  }
-> > >  
-> > > @@ -336,9 +355,9 @@ echo >> $seqres.full
-> > >  echo "# Populating expected data buffers" >> $seqres.full
-> > >  populate_expected_data
-> > >  
-> > > -# Loop 20 times to shake out any races due to shutdown
-> > > -for ((iter=0; iter<20; iter++))
-> > > -do
-> > > +# Loop to shake out any races due to shutdown
-> > > +iter=0
-> > > +while _soak_loop_running $TIME_FACTOR; do
-> > >  	echo >> $seqres.full
-> > >  	echo "------ Iteration $iter ------" >> $seqres.full
-> > >  
-> > > @@ -361,6 +380,8 @@ do
-> > >  	echo >> $seqres.full
-> > >  	echo "# Starting shutdown torn write test for append atomic writes" >> $seqres.full
-> > >  	test_append_torn_write
-> > > +
-> > > +	iter=$((iter + 1))
-> > >  done
-> > >  
-> > >  echo "Silence is golden"
-> > > 
-> > 
