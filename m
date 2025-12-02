@@ -1,90 +1,44 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 27714176ADE
-	for <fstests@vger.kernel.org>; Tue,  2 Dec 2025 04:17:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA1D819C546
+	for <fstests@vger.kernel.org>; Tue,  2 Dec 2025 04:41:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764649033; cv=none; b=D/kpOFqLeVm5+G42kx+q8q2op8nJ/RK+iogt2S+gIIhqeKD3kw6P3jjTt6UIlIw11KBmf/rzhGhe9r6JU9zjqAQST2wI4TsTtAQoFalzf/ZeAQLHCDfvqW0Mwcg+sQxIvbuqFJMWfZyKea4d9tonKTx0Mt8PBM+PIZUfw5VoxoU=
+	t=1764650477; cv=none; b=ONZmh6O58LfuCdAYvolFBLHNiArfGxDFf1SoM9KY1OTUqWOK5EnRDzJCwwGubT4XbPYZxhcirT8oXsNSnEbBx1gg0jTOdFXeZp66BckT1EkyVmjEFgDPrfDsPbthJdwZKRFyFnaFIczBqogVb0mR5AQtd2KnYp9RaHWnOGl3baA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764649033; c=relaxed/simple;
-	bh=ah5nYOP6c9lSuKDe49RQ5yuYYM+3psF1VX0FA8BUvSA=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gc3qgzwpxt/LKnbAp7O1CXIg8EApZhF42x6BwtX8LVkOxhrSXDLoVgABr0HhTEtFy7SYw/kBYwixIhF2eoRQm3Dy2X4lty48306TsTn+vDjbuIgJLoEXtjuX6XYptO+1PzriBS390UGnGWDoUz1mRIYeOAUifLodkIB7wty4DXU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=AyOZel7Y; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=qV2aJjWt; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1764650477; c=relaxed/simple;
+	bh=vcB1NI6pKxlriW2ns8mUSEBDyix80vD7DwQHBxyWi4U=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=Qv3vk4004Da6oHKEeBOIk7A7RqK6tbkk0RBfX2A+OlQzfXbNS8AnyMRXLNU5zRR/ODLGhcXpYBLuppknjbsGvmW00bgdgW63y3Uo9FxMGiGfrBrDFxxpPePRjQWcSSEdSWVyvn87gtIToHrHL7cDzsA2/0kw7Vlk/ORhiXotH64=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=N8BqqJyz; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AyOZel7Y";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="qV2aJjWt"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1764649030;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=FOVhVPby26S7Sm2GODw1N28S+VVsoHvVcOsIsxdA41Q=;
-	b=AyOZel7YFTie4yKCTtv4fc/qjoeR3gCiNI4YpLg6jdP7izcq52RoBwJ49V7VCYB826m5ph
-	aM84ZtVM9gr0I56Yul7pjInsD6Liw2bOJiJfrl8KE6cuYms8ZaEHck0WibG3068A2Yubge
-	s97R/GPP9ZpOfU/dOaVSYrOcXMD5KN4=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-691-Lh-NT9yqN3uE4yacMo1fQg-1; Mon, 01 Dec 2025 23:17:08 -0500
-X-MC-Unique: Lh-NT9yqN3uE4yacMo1fQg-1
-X-Mimecast-MFC-AGG-ID: Lh-NT9yqN3uE4yacMo1fQg_1764649028
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-3438744f11bso8413727a91.2
-        for <fstests@vger.kernel.org>; Mon, 01 Dec 2025 20:17:08 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1764649028; x=1765253828; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=FOVhVPby26S7Sm2GODw1N28S+VVsoHvVcOsIsxdA41Q=;
-        b=qV2aJjWtikSKBZypQzcb74LxQjr6QE62pM+8xNFUEMYdMBQzHJuqLhnDRRB9QbQhxS
-         VpudV2JQogUOCSvbVAg1vFOy8imSOLQfA56V/u9a5a5EhhnBzbO7RBIPmkHg/FzwG9wT
-         dCZ/MXZzQpbwqUC5EKqrziG5ZSupj4trdf+4xrzEzdbjh0runA0Xlo7hz+gdWBDmPK+D
-         S7PE7jjPnA19/wu4uOROaadDS7+pJEUEuSLTT3D6ZfVL+2+27fVUF2q3DulOPbmrg4Xn
-         ilNWijINb3wh174Ie3F69w4Fgd65bPQ7M+B9LxuS/dfD0i9WMK8PN/ImgjWsOh+NH5cM
-         LRVw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1764649028; x=1765253828;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=FOVhVPby26S7Sm2GODw1N28S+VVsoHvVcOsIsxdA41Q=;
-        b=v8yKexPkxYpS55alONC5h4FJSx78EZs10jeMfoj7TIrUillLDmS1CD0dOq+w+7ak1i
-         GMZQjC7a301nQ3MpbBF3R89erfOnHg3TySy/nR9RjRHuB6w48SDi4ojzwvsiUsUPu4iB
-         jJQltvJT2mta00Gb38cVUqMpvd0rc5n94SbqZTNv8gl5Z4tbQK/F38NCKyoNNpAvLjsX
-         5eLQnUjMARey0a2w8+6CQrgZq6diKl5VGjVu+sJo+rzCz1VLWDcRJYTt4w41tDLwlLZy
-         OW3sc2y/vmveo1s+u6TdowzZdyivWr25QY3XkEjiz/YwM1CJwE1bQhmP1wC34MEBEm7y
-         HYaQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVK2fNBzwH0OpgbCAmj3oFbQglgsy/RkY36OHhRGEhU7FGuLzikhj1s+xqMB6aLbHHTXY4ry8jY@vger.kernel.org
-X-Gm-Message-State: AOJu0YxeOv/+LM71/4+O6KCaPNNyOu2fUCRnhSaPmoXZ8OBakxAz4SBn
-	Eul7mvZhbD8jitIWy7Py7tF0KIZ8Ceh6+mIghh21fyZNZ/4uhvQajtFaFcuUs3m266CidYW1Blv
-	29jqpA8CO/86H6V2E4OQ5fMy/DFX2YtNAvX4dA8ZaWc/0IAynMsW8zPaCWJA=
-X-Gm-Gg: ASbGnctp9wXWcfnu8m2su4TOaWSv1czeggeCZkj6uJ17RnvSO9dMBcat2Rj6w0LBMxf
-	1wnJkXjyD/vVHu8tDsUz3MIy1draba1u27+1B6kRZr8zUb0t2s+sNmykbXmYguLnUt45yqqXpIw
-	SavTkJ5yDnlAUMg7sb0jcxr/BGUgJTH8rlvVRtx7LyAIORsKaYSscUF0Gp04V+HPx+3r2KZ9rL2
-	D7wK+u1Wdku8kyep3Ehkz0Vf0obFqZYDvaGFEzXXXL8JrAc8Iu8ncVLpm/qex5oLmwxjcQ2aYfq
-	VLFZLG/vZz9xeiMZHAT+USao16BQM0OelPEBl8jdtv8R7X39u4PgQr992sqcmp5NipCuzX9pQTv
-	w0nI2u23HraycMonBrYAptsQ0gC6PoM4ME3H2ejqfBcSm341j2A==
-X-Received: by 2002:a17:90b:1c91:b0:32b:df0e:9283 with SMTP id 98e67ed59e1d1-34733f3e84fmr36685144a91.34.1764649027557;
-        Mon, 01 Dec 2025 20:17:07 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEar7S2w5DviYqZgaxduHjgAYE/sRtZ6cpfS/3FDaT23TH2FRg4PWLmyOMfqyTzuB9g1zt2ZQ==
-X-Received: by 2002:a17:90b:1c91:b0:32b:df0e:9283 with SMTP id 98e67ed59e1d1-34733f3e84fmr36685112a91.34.1764649026925;
-        Mon, 01 Dec 2025 20:17:06 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3477b1cbdc0sm14643857a91.2.2025.12.01.20.17.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 01 Dec 2025 20:17:06 -0800 (PST)
-Date: Tue, 2 Dec 2025 12:17:01 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Su Yue <glass.su@suse.com>, fstests@vger.kernel.org, l@damenly.org,
-	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] generic: use _qmount_option and _qmount
-Message-ID: <20251202041701.cb2yzns2ytddt7dh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20251124132004.23965-1-glass.su@suse.com>
- <20251201225924.GA89454@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="N8BqqJyz"
+Received: from macsyma.thunk.org (pool-173-48-121-67.bstnma.fios.verizon.net [173.48.121.67])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 5B24eqk6003070
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 1 Dec 2025 23:40:53 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1764650454; bh=hlNAOT1sbtQ7BjQ4GHShq/oTk+cnA1iwgTWmvBQZSkA=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=N8BqqJyzEMncuuvG01kGsVpJ5SmcZTX8IkpRnPMww4acEB2zlrS9P8kbwFYQM3pm0
+	 CH7aywDq/nQoJLmwDEDVGJeoX36zA5Vkk28DeJdHmrjn4gWHmt7qoBT3RJev/oUtz2
+	 t9Mw8FsFmveQDC24m/w9lj6IuUGnm+jn4A9Z9QTwpHMAclm5y4wpT+WRY8F4T0tP4V
+	 fDTYgKESnLiMj/iuE9cjk018dC07hmGwsA9yhcbtBS7J1sDZ4BQC7UirDvDTCeTuHG
+	 ZA7oEkSvyM0TfQVj/pqUBKlSbEOPHXR4mryEgkV9B+3dJrTGUzq0wRi08eQzfXEDPv
+	 vzdSoYca9vJRA==
+Received: by macsyma.thunk.org (Postfix, from userid 15806)
+	id 4E2AA4DC648E; Mon,  1 Dec 2025 23:39:52 -0500 (EST)
+Date: Mon, 1 Dec 2025 23:39:52 -0500
+From: "Theodore Tso" <tytso@mit.edu>
+To: Jaegeuk Kim <jaegeuk@kernel.org>, Chao Yu <chao@kernel.org>
+Cc: linux-f2fs-devel@lists.sourceforge.net, fstests@vger.kernel.org
+Subject: generic/204 is crashing on linux-next when testing f2fs
+Message-ID: <20251202043952.GA70808@macsyma.lan>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -93,294 +47,95 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251201225924.GA89454@frogsfrogsfrogs>
 
-On Mon, Dec 01, 2025 at 02:59:24PM -0800, Darrick J. Wong wrote:
-> On Mon, Nov 24, 2025 at 09:20:04PM +0800, Su Yue wrote:
-> > Many generic tests call `_scratch_mount -o usrquota` then
-> > chmod 777, quotacheck and quotaon.
-> 
-> What does the chmod 777 do, in relation to the quota{check,on} programs?
-> Is it necessary for the root dir to be world writable (and executable!)
-> for quota tools to work?
+(fstests cc'ed so I can a get handy-dandy lore.kernel.org URL for the
+ exclude file with the background for the test exclusion.)
 
-Hi Darrick,
+Hi, I've been running xfstests on ext4, xfs, btrfs, and f2fs on
+linux-next[1], and for the past week or two, the tests have been
+hanging due to a BUG getting triggered on either f2fs/encrypt[2] or
+f2fs/compress[3] test configrations.
 
-The _qmount always does "chmod ugo+rwx $SCRATCH_MNT", I think it's for regular
-users (e.g. fsgqa) can write into $SCRATCH_MNT. If a test case doesn't use
-regular user, the "chmod 777" isn't necessary. The author of _qmount might
-think "chmod 777 $SCRATCH_MN" doesn't hurt anything quota test, so always
-does that no matter if it's needed. If you think it hurts something, we can
-only do that for the cases who really need that :)
+[1] Using the command: "gce-xfstests ltm -c ext4/all,xfs/all,btrfs/all,f2fs/all -g auto --repo https://kernel.googlesource.com/pub/scm/linux/kernel/git/next/linux-next --watch fs-next"
+[2] https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/root/fs/f2fs/cfg/encrypt
+[3] https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/root/fs/f2fs/cfg/compress
 
-I think this patch trys to help quota test cases to use unified common helpers,
-most of them don't need the "chmod 777" actually, right Su?
+Interestingly, after the BUG_ON things get wedged so badly that
+"systemctl" hangs forever.  So apparently whatever is going wrong, it
+causes the systemd to malfunction in a profound way.  As a result, the
+test VM hangs for days until I get around to aborting the VM.
 
-Thanks,
-Zorro
+For now, I'll exclude generic/204 from the f2fs configs in my test
+appliance; if you have a chance to take a look at this and let me know
+when it might be safe to re-neable generic/204 for f2fs, that would be
+great.  Thanks!
 
-> 
-> > It can be simpilfied to _qmount_option and _qmount. The later
-> > function already calls quotacheck, quota and chmod.
-> > 
-> > Convertaions can save a few lines. tests/generic/380 is an exception
-> 
-> "Conversions" ?
-> 
-> --D
-> 
-> > because it tests chown.
-> > 
-> > Signed-off-by: Su Yue <glass.su@suse.com>
-> > ---
-> >  tests/generic/082 |  9 ++-------
-> >  tests/generic/219 | 11 ++++-------
-> >  tests/generic/230 | 11 ++++++-----
-> >  tests/generic/231 |  6 ++----
-> >  tests/generic/232 |  6 ++----
-> >  tests/generic/233 |  6 ++----
-> >  tests/generic/234 |  5 ++---
-> >  tests/generic/235 |  5 ++---
-> >  tests/generic/244 |  1 -
-> >  tests/generic/270 |  6 ++----
-> >  tests/generic/280 |  5 ++---
-> >  tests/generic/400 |  2 +-
-> >  12 files changed, 27 insertions(+), 46 deletions(-)
-> > 
-> > diff --git a/tests/generic/082 b/tests/generic/082
-> > index f078ef2ffff9..6bb9cf2a22ae 100755
-> > --- a/tests/generic/082
-> > +++ b/tests/generic/082
-> > @@ -23,13 +23,8 @@ _require_scratch
-> >  _require_quota
-> >  
-> >  _scratch_mkfs >>$seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > -
-> > -# xfs doesn't need these setups and quotacheck even fails on xfs, so just
-> > -# redirect the output to $seqres.full for debug purpose and ignore the results,
-> > -# as we check the quota status later anyway.
-> > -quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
-> > -quotaon $SCRATCH_MNT >>$seqres.full 2>&1
-> > +_qmount_option 'usrquota,grpquota'
-> > +_qmount "usrquota,grpquota"
-> >  
-> >  # first remount ro with a bad option, a failed remount ro should not disable
-> >  # quota, but currently xfs doesn't fail in this case, the unknown option is
-> > diff --git a/tests/generic/219 b/tests/generic/219
-> > index 642823859886..a2eb0b20f408 100755
-> > --- a/tests/generic/219
-> > +++ b/tests/generic/219
-> > @@ -91,25 +91,22 @@ test_accounting()
-> >  
-> >  _scratch_unmount 2>/dev/null
-> >  _scratch_mkfs >> $seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > +_qmount_option "usrquota,grpquota"
-> > +_qmount
-> >  _force_vfs_quota_testing $SCRATCH_MNT
-> > -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-> > -quotaon $SCRATCH_MNT 2>/dev/null
-> >  _scratch_unmount
-> >  
-> >  echo; echo "### test user accounting"
-> > -export MOUNT_OPTIONS="-o usrquota"
-> > +_qmount_option "usrquota"
-> >  _qmount
-> > -quotaon $SCRATCH_MNT 2>/dev/null
-> >  type=u
-> >  test_files
-> >  test_accounting
-> >  _scratch_unmount 2>/dev/null
-> >  
-> >  echo; echo "### test group accounting"
-> > -export MOUNT_OPTIONS="-o grpquota"
-> > +_qmount_option "grpquota"
-> >  _qmount
-> > -quotaon $SCRATCH_MNT 2>/dev/null
-> >  type=g
-> >  test_files
-> >  test_accounting
-> > diff --git a/tests/generic/230 b/tests/generic/230
-> > index a8caf5a808c3..0a680dbc874b 100755
-> > --- a/tests/generic/230
-> > +++ b/tests/generic/230
-> > @@ -99,7 +99,8 @@ grace=2
-> >  _qmount_option 'defaults'
-> >  
-> >  _scratch_mkfs >> $seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > +_qmount_option "usrquota,grpquota"
-> > +_qmount
-> >  _force_vfs_quota_testing $SCRATCH_MNT
-> >  BLOCK_SIZE=$(_get_file_block_size $SCRATCH_MNT)
-> >  quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-> > @@ -113,8 +114,8 @@ setquota -g -t $grace $grace $SCRATCH_MNT
-> >  _scratch_unmount
-> >  
-> >  echo; echo "### test user limit enforcement"
-> > -_scratch_mount "-o usrquota"
-> > -quotaon $SCRATCH_MNT 2>/dev/null
-> > +_qmount_option "usrquota"
-> > +_qmount
-> >  type=u
-> >  test_files
-> >  test_enforcement
-> > @@ -122,8 +123,8 @@ cleanup_files
-> >  _scratch_unmount 2>/dev/null
-> >  
-> >  echo; echo "### test group limit enforcement"
-> > -_scratch_mount "-o grpquota"
-> > -quotaon $SCRATCH_MNT 2>/dev/null
-> > +_qmount_option "grpquota"
-> > +_qmount
-> >  type=g
-> >  test_files
-> >  test_enforcement
-> > diff --git a/tests/generic/231 b/tests/generic/231
-> > index ce7e62ea1886..02910523d0b5 100755
-> > --- a/tests/generic/231
-> > +++ b/tests/generic/231
-> > @@ -47,10 +47,8 @@ _require_quota
-> >  _require_user
-> >  
-> >  _scratch_mkfs >> $seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > -chmod 777 $SCRATCH_MNT
-> > -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-> > -quotaon -u -g $SCRATCH_MNT 2>/dev/null
-> > +_qmount_option "usrquota,grpquota"
-> > +_qmount
-> >  
-> >  if ! _fsx 1; then
-> >  	_scratch_unmount 2>/dev/null
-> > diff --git a/tests/generic/232 b/tests/generic/232
-> > index c903a5619045..21375809d299 100755
-> > --- a/tests/generic/232
-> > +++ b/tests/generic/232
-> > @@ -44,10 +44,8 @@ _require_scratch
-> >  _require_quota
-> >  
-> >  _scratch_mkfs > $seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > -chmod 777 $SCRATCH_MNT
-> > -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-> > -quotaon -u -g $SCRATCH_MNT 2>/dev/null
-> > +_qmount_option "usrquota,grpquota"
-> > +_qmount
-> >  
-> >  _fsstress
-> >  _check_quota_usage
-> > diff --git a/tests/generic/233 b/tests/generic/233
-> > index 3fc1b63abb24..4606f3bde2ab 100755
-> > --- a/tests/generic/233
-> > +++ b/tests/generic/233
-> > @@ -59,10 +59,8 @@ _require_quota
-> >  _require_user
-> >  
-> >  _scratch_mkfs > $seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > -chmod 777 $SCRATCH_MNT
-> > -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-> > -quotaon -u -g $SCRATCH_MNT 2>/dev/null
-> > +_qmount_option "usrquota,grpquota"
-> > +_qmount
-> >  setquota -u $qa_user 32000 32000 1000 1000 $SCRATCH_MNT 2>/dev/null
-> >  
-> >  _fsstress
-> > diff --git a/tests/generic/234 b/tests/generic/234
-> > index 4b25fc6507cc..2c596492a3e0 100755
-> > --- a/tests/generic/234
-> > +++ b/tests/generic/234
-> > @@ -66,9 +66,8 @@ _require_quota
-> >  
-> >  
-> >  _scratch_mkfs >> $seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-> > -quotaon -u -g $SCRATCH_MNT 2>/dev/null
-> > +_qmount_option "usrquota,grpquota"
-> > +_qmount
-> >  test_setting
-> >  _scratch_unmount
-> >  
-> > diff --git a/tests/generic/235 b/tests/generic/235
-> > index 037c29e806db..7a616650fc8f 100755
-> > --- a/tests/generic/235
-> > +++ b/tests/generic/235
-> > @@ -25,9 +25,8 @@ do_repquota()
-> >  
-> >  
-> >  _scratch_mkfs >> $seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-> > -quotaon $SCRATCH_MNT 2>/dev/null
-> > +_qmount_option "usrquota,grpquota"
-> > +_qmount
-> >  
-> >  touch $SCRATCH_MNT/testfile
-> >  chown $qa_user:$qa_user $SCRATCH_MNT/testfile
-> > diff --git a/tests/generic/244 b/tests/generic/244
-> > index b68035129c82..989bb4f5385e 100755
-> > --- a/tests/generic/244
-> > +++ b/tests/generic/244
-> > @@ -66,7 +66,6 @@ done
-> >  # remount just for kicks, make sure we get it off disk
-> >  _scratch_unmount
-> >  _qmount
-> > -quotaon $SCRATCH_MNT 2>/dev/null
-> >  
-> >  # Read them back by iterating based on quotas returned.
-> >  # This should match what we set, even if we don't directly
-> > diff --git a/tests/generic/270 b/tests/generic/270
-> > index c3d5127a0b51..9ac829a7379f 100755
-> > --- a/tests/generic/270
-> > +++ b/tests/generic/270
-> > @@ -62,10 +62,8 @@ _require_command "$SETCAP_PROG" setcap
-> >  _require_attrs security
-> >  
-> >  _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > -chmod 777 $SCRATCH_MNT
-> > -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-> > -quotaon -u -g $SCRATCH_MNT 2>/dev/null
-> > +_qmount_option "usrquota,grpquota"
-> > +_qmount
-> >  
-> >  if ! _workout; then
-> >  	_scratch_unmount 2>/dev/null
-> > diff --git a/tests/generic/280 b/tests/generic/280
-> > index 3108fd23fb70..fae0a02145cf 100755
-> > --- a/tests/generic/280
-> > +++ b/tests/generic/280
-> > @@ -34,9 +34,8 @@ _require_freeze
-> >  
-> >  _scratch_unmount 2>/dev/null
-> >  _scratch_mkfs >> $seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-> > -quotaon $SCRATCH_MNT 2>/dev/null
-> > +_qmount_option "usrquota,grpquota"
-> > +_qmount
-> >  xfs_freeze -f $SCRATCH_MNT
-> >  setquota -u root 1 2 3 4 $SCRATCH_MNT &
-> >  pid=$!
-> > diff --git a/tests/generic/400 b/tests/generic/400
-> > index 77970da69a41..ef27c254167c 100755
-> > --- a/tests/generic/400
-> > +++ b/tests/generic/400
-> > @@ -22,7 +22,7 @@ _require_scratch
-> >  
-> >  _scratch_mkfs >> $seqres.full 2>&1
-> >  
-> > -MOUNT_OPTIONS="-o usrquota,grpquota"
-> > +_qmount_option "usrquota,grpquota"
-> >  _qmount
-> >  _require_getnextquota
-> >  
-> > -- 
-> > 2.48.1
-> > 
-> > 
-> 
+BTW, if you'd be interestedr receiving the daily ouptut of the
+gce-xfstests run for f2fs, let me know.  That can be arranged...
+
+	     	     	       	  - Ted
+
+P.S.  Here's the dmesg output from a run this morning using the
+linux-next kernel 6.18.0-xfstests-g781b8d22e5d5:
+
+[ 1011.282502] run fstests generic/204 at 2025-12-01 22:27:28
+[ 1011.604590] F2FS-fs (dm-1): f2fs_recover_fsync_data: recovery fsync data, check_only: 0
+[ 1011.605016] F2FS-fs (dm-1): Mounted with checkpoint version = 55cbed75
+[ 1065.186351] ------------[ cut here ]------------
+[ 1065.191112] kernel BUG at fs/f2fs/segment.c:2872!
+[ 1065.195977] Oops: invalid opcode: 0000 [#1] SMP PTI
+[ 1065.201170] CPU: 0 UID: 0 PID: 390275 Comm: umount Tainted: G        W           6.18.0-xfstests-g781b8d22e5d5 #1 PREEMPT(none) 
+[ 1065.212886] Tainted: [W]=WARN
+[ 1065.216868] Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 10/02/2025
+[ 1065.226646] RIP: 0010:get_new_segment+0x28d/0x2b0
+[ 1065.231684] Code: e4 ff ff ff e9 5f ff ff ff ba 08 00 00 00 31 f6 4c 89 e7 e8 25 14 fe ff 4c 89 ef e8 6d ea 6c 00 b8 8b ff ff ff e9 3e ff ff ff <0f> 0b 83 7c 24 04 01 0f 85 4e fe ff ff 41 39 ee 0f 82 45 fe ff ff
+[ 1065.250635] RSP: 0018:ffffb3d684a2b860 EFLAGS: 00010246
+[ 1065.255988] RAX: 0000000000000031 RBX: ffffb3d684a2b8b4 RCX: 0000000000000031
+[ 1065.263230] RDX: 0000000000000000 RSI: 0000000000000031 RDI: ffff8e76c1d3e290
+[ 1065.270556] RBP: 0000000000000001 R08: ffff8e76c1d3e288 R09: 0000000000000000
+[ 1065.277801] R10: 0000000000000001 R11: 0000000000000000 R12: ffff8e76c6b1f000
+[ 1065.285090] R13: ffff8e7729c2308c R14: 0000000000000000 R15: ffff8e7729c23080
+[ 1065.292362] FS:  00007fb977a5f840(0000) GS:ffff8e78090e8000(0000) knlGS:0000000000000000
+[ 1065.301096] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[ 1065.307080] CR2: 00007fef85ee165c CR3: 000000015b64e006 CR4: 00000000003706f0
+[ 1065.314528] Call Trace:
+[ 1065.317324]  <TASK>
+[ 1065.319547]  new_curseg+0xb5/0x220
+[ 1065.323166]  f2fs_allocate_data_block+0x51e/0x750
+[ 1065.328026]  do_write_page+0x57/0x280
+[ 1065.331823]  f2fs_do_write_node_page+0x38/0x70
+[ 1065.336395]  __write_node_folio+0x2d1/0x4e0
+[ 1065.340723]  f2fs_sync_node_pages+0x428/0x550
+[ 1065.345209]  block_operations+0x33e/0x450
+[ 1065.349518]  f2fs_write_checkpoint+0x103/0x5e0
+[ 1065.354119]  kill_f2fs_super+0x14b/0x190
+[ 1065.358297]  deactivate_locked_super+0x33/0xb0
+[ 1065.362918]  cleanup_mnt+0xea/0x180
+[ 1065.366582]  task_work_run+0x5c/0xa0
+[ 1065.370323]  exit_to_user_mode_loop+0xb1/0xd0
+[ 1065.374850]  do_syscall_64+0x155/0x160
+[ 1065.378830]  entry_SYSCALL_64_after_hwframe+0x76/0x7e
+[ 1065.384054] RIP: 0033:0x7fb977cb8217
+[ 1065.387743] Code: 0d 00 f7 d8 64 89 02 b8 ff ff ff ff c3 66 0f 1f 44 00 00 31 f6 e9 09 00 00 00 66 0f 1f 84 00 00 00 00 00 b8 a6 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 01 c3 48 8b 15 b1 5b 0d 00 f7 d8 64 89 02 b8
+[ 1065.406622] RSP: 002b:00007ffc531c8d48 EFLAGS: 00000246 ORIG_RAX: 00000000000000a6
+[ 1065.414317] RAX: 0000000000000000 RBX: 0000564b0abc7af8 RCX: 00007fb977cb8217
+[ 1065.421570] RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000564b0abce710
+[ 1065.428834] RBP: 0000000000000000 R08: 0000000000000000 R09: 0000000000000000
+[ 1065.436085] R10: 0000000000000008 R11: 0000000000000246 R12: 00007fb977e1826c
+[ 1065.443415] R13: 0000564b0abce710 R14: 0000564b0abc7e30 R15: 0000564b0abc79f0
+[ 1065.450667]  </TASK>
+[ 1065.453067] ---[ end trace 0000000000000000 ]---
+[ 1065.457915] RIP: 0010:get_new_segment+0x28d/0x2b0
+[ 1065.462751] Code: e4 ff ff ff e9 5f ff ff ff ba 08 00 00 00 31 f6 4c 89 e7 e8 25 14 fe ff 4c 89 ef e8 6d ea 6c 00 b8 8b ff ff ff e9 3e ff ff ff <0f> 0b 83 7c 24 04 01 0f 85 4e fe ff ff 41 39 ee 0f 82 45 fe ff ff
+[ 1065.481788] RSP: 0018:ffffb3d684a2b860 EFLAGS: 00010246
+[ 1065.487199] RAX: 0000000000000031 RBX: ffffb3d684a2b8b4 RCX: 0000000000000031
+[ 1065.494559] RDX: 0000000000000000 RSI: 0000000000000031 RDI: ffff8e76c1d3e290
+[ 1065.501898] RBP: 0000000000000001 R08: ffff8e76c1d3e288 R09: 0000000000000000
+[ 1065.509183] R10: 0000000000000001 R11: 0000000000000000 R12: ffff8e76c6b1f000
+[ 1065.516459] R13: ffff8e7729c2308c R14: 0000000000000000 R15: ffff8e7729c23080
+[ 1065.523744] FS:  00007fb977a5f840(0000) GS:ffff8e78090e8000(0000) knlGS:0000000000000000
+[ 1065.532160] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[ 1065.538091] CR2: 00007fef85ee165c CR3: 000000015b64e006 CR4: 00000000003706f0
+[ 1065.545412] note: umount[390275] exited with preempt_count 1
+
 
