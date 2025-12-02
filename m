@@ -1,141 +1,508 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA1D819C546
-	for <fstests@vger.kernel.org>; Tue,  2 Dec 2025 04:41:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2BEDC2DE70B
+	for <fstests@vger.kernel.org>; Tue,  2 Dec 2025 04:41:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764650477; cv=none; b=ONZmh6O58LfuCdAYvolFBLHNiArfGxDFf1SoM9KY1OTUqWOK5EnRDzJCwwGubT4XbPYZxhcirT8oXsNSnEbBx1gg0jTOdFXeZp66BckT1EkyVmjEFgDPrfDsPbthJdwZKRFyFnaFIczBqogVb0mR5AQtd2KnYp9RaHWnOGl3baA=
+	t=1764650479; cv=none; b=OgjFY8HHwAZ3dc6UcwRx0BP7/ltQPsDRd6Kv1VwCaYNIeC+ChMNXX+QgBTxvK/STSQ3UrElPXpVSDaBCSKWpBp/WOpRRbZK8cfBfgadsZNSlWn9BT/e5ePZzluG1epR25T042SoBWwLOCM48Cio97r81Kx9YW38XU4YEv37ptY4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764650477; c=relaxed/simple;
-	bh=vcB1NI6pKxlriW2ns8mUSEBDyix80vD7DwQHBxyWi4U=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=Qv3vk4004Da6oHKEeBOIk7A7RqK6tbkk0RBfX2A+OlQzfXbNS8AnyMRXLNU5zRR/ODLGhcXpYBLuppknjbsGvmW00bgdgW63y3Uo9FxMGiGfrBrDFxxpPePRjQWcSSEdSWVyvn87gtIToHrHL7cDzsA2/0kw7Vlk/ORhiXotH64=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=N8BqqJyz; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1764650479; c=relaxed/simple;
+	bh=sgSUooADDJYcrJZ0x6JMLL9dkPYVtlR+OJNo37ynnGI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=IeXQ7/5BobL9SBVwk88Re1xYkdGmqIB6W1/j7PrMAoS4dYropYSefSK0XcgVm99yn1fjGPYjP/rxJizCrQvySOhHq4gNyExpEIA3rm9G3glkW5AA4LogXr18vhoqeQx6/Po0MDlTWLoyFZuZ1B3b60ot7+S0kCFWtReeCB4Ci5I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=h2Rag++b; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=thP+Syug; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="N8BqqJyz"
-Received: from macsyma.thunk.org (pool-173-48-121-67.bstnma.fios.verizon.net [173.48.121.67])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 5B24eqk6003070
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 1 Dec 2025 23:40:53 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1764650454; bh=hlNAOT1sbtQ7BjQ4GHShq/oTk+cnA1iwgTWmvBQZSkA=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=N8BqqJyzEMncuuvG01kGsVpJ5SmcZTX8IkpRnPMww4acEB2zlrS9P8kbwFYQM3pm0
-	 CH7aywDq/nQoJLmwDEDVGJeoX36zA5Vkk28DeJdHmrjn4gWHmt7qoBT3RJev/oUtz2
-	 t9Mw8FsFmveQDC24m/w9lj6IuUGnm+jn4A9Z9QTwpHMAclm5y4wpT+WRY8F4T0tP4V
-	 fDTYgKESnLiMj/iuE9cjk018dC07hmGwsA9yhcbtBS7J1sDZ4BQC7UirDvDTCeTuHG
-	 ZA7oEkSvyM0TfQVj/pqUBKlSbEOPHXR4mryEgkV9B+3dJrTGUzq0wRi08eQzfXEDPv
-	 vzdSoYca9vJRA==
-Received: by macsyma.thunk.org (Postfix, from userid 15806)
-	id 4E2AA4DC648E; Mon,  1 Dec 2025 23:39:52 -0500 (EST)
-Date: Mon, 1 Dec 2025 23:39:52 -0500
-From: "Theodore Tso" <tytso@mit.edu>
-To: Jaegeuk Kim <jaegeuk@kernel.org>, Chao Yu <chao@kernel.org>
-Cc: linux-f2fs-devel@lists.sourceforge.net, fstests@vger.kernel.org
-Subject: generic/204 is crashing on linux-next when testing f2fs
-Message-ID: <20251202043952.GA70808@macsyma.lan>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="h2Rag++b";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="thP+Syug"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1764650475;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Ku3XKEaQduG3st4GPpClvS3CMN7tknRNm7Q27p+t5Yg=;
+	b=h2Rag++b2+IPy1Gt1wM7sa+RmuTTFYh29Y1MXyq2GLRqpW4/MwlKrhjnAtKsw/jzm2dgOV
+	5rDb4QWs+ezqdsKUhGJMz6e34fDQdiKdvTWFzZ05InJn28NRfVj01hJ+8Xs7R+LqiFICHn
+	VA0s3vy5ZESjPJYFi2H0Af/bg6L1Oy8=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-312-kVYyZ0gNPCa3BVjnzPj9vQ-1; Mon, 01 Dec 2025 23:41:14 -0500
+X-MC-Unique: kVYyZ0gNPCa3BVjnzPj9vQ-1
+X-Mimecast-MFC-AGG-ID: kVYyZ0gNPCa3BVjnzPj9vQ_1764650473
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-7b873532cc8so3902448b3a.1
+        for <fstests@vger.kernel.org>; Mon, 01 Dec 2025 20:41:14 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1764650473; x=1765255273; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=Ku3XKEaQduG3st4GPpClvS3CMN7tknRNm7Q27p+t5Yg=;
+        b=thP+Syugvc0REHv6LT3y/br12QXm7exzrHrxqeWqGCXNRioeujCSt1OJmktcjCoTOM
+         CEHo7X4pPcOalrbchiNrcf7qUzwAR0cLs7N99DAt6+euQY4wnThQgV+4YkJ3n0GWzxfL
+         oBuEwCs72tRX/z5vdLP9p0rLZIT2qSp5muehLJ/goj3lW8MLUf1Xm7sJBBevJPku4cnX
+         81opPeRNSaTobh1Psiicae3Zlf5l1pcp+prgbxKrbINhSRhu9FAe4I23qLtLHjGMyFR/
+         VvN8bjRG4YTXSyUlcl433QudwWB/u82K2VisO7+upYeTtN3dLLgE+UcsMV/Ke61OmMSS
+         dqfQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1764650473; x=1765255273;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=Ku3XKEaQduG3st4GPpClvS3CMN7tknRNm7Q27p+t5Yg=;
+        b=s/+AzQ67EyuXUuP6j5O1yB8IteuM5gwSw4ZSy02+QOm7kUh8NpyiVFK+rSi0HvBSSI
+         VDLjnb5jtM48kBg2LuhvC7c5GtrCFUAyKmm6SVCgaW2GB9Yv/nAIuo6IYPBEIiBlQVV9
+         PdGbhfkXbkl08/bekXR1WpEGV3TTCzJBTLXB/BjRAkR/qPU6ThMqkfMpdLUgqpwl3YHZ
+         GNKX/fZrcqQH3SJ8ZAL2gHsKUkA5Z16GAcBCev6x7Ye+5TwxhyWcgTEwMFtJmTsBwL/N
+         xRRXWE93AnUh9qH893ZVeh52zqnGPiZ3jiUduH9LXVjlX8XiVLhZI0nLJSpedO/ADplc
+         nxrg==
+X-Forwarded-Encrypted: i=1; AJvYcCWlfAnpRuqFiYdbEb3cSAilMAMkdfHtApVoY7ysDveRrQEubDuTsHI4dmxiWaq1j+2bejo+PRRE@vger.kernel.org
+X-Gm-Message-State: AOJu0YzsPcH+rir6IY1Us18a1pnJ4/LzvzqfqIGwawy9HOVXwWRwmyPT
+	dqygOWxsj+pljHSeJCgO5IbvAv4X2wYrzszKI/i4nHpLhdSyXZffKwJqRUFqcjbNwQ0NMYFLwM7
+	Xt6UOmxiqinFo4Pm4lyDn4nosYOb/BennQ+uUsS6sVJXDFz0Ps3kPY/agMB8=
+X-Gm-Gg: ASbGncshhNRQdDSI0iXpji9MDrNf6U8a5+WlBQSvM/EUBa97dRIsz5/0mSNuNVgY++2
+	Gf90g7c3z7he+S2g6pK+kQR3gI9IP0E2sRKkhlm3E7R6mi2+9sAu4xQGFn8dtdPJF6sSGCAy4PJ
+	ZXFkBAhy1XPC40ReeMEY7BYBWt2peUb0+ohaeWk23QGCOiTgfgF4k0f8uxaoytFE8CaRWPTmCMB
+	k2UoDCGlK2NEeM3NrJijMLWbY98hnrv+nMJ31dR2UAy2kmS26Fds+qQy4BfynUuu2TMKkmNlF/i
+	SU26SQVvokVS77Ne+uD3wO4EN5z0IsPMjEaGi4M6r5gfC2fouIjx/yF8w35hWhIcAhtx31SoZV1
+	xErLFNlfQrjzb8L69guFwED+QJ4Bju3O5HqjiGVwDFgzL3KeRTg==
+X-Received: by 2002:a05:6a00:1381:b0:7ad:1907:5756 with SMTP id d2e1a72fcca58-7dd77f1906dmr1326136b3a.12.1764650473235;
+        Mon, 01 Dec 2025 20:41:13 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFU+CBHEijrf7uQ+MM56C1bSg8wT2lr0k6YebQRG2iWtfMLiBRSpLkkwj4u5nOg8JyCyPAwAw==
+X-Received: by 2002:a05:6a00:1381:b0:7ad:1907:5756 with SMTP id d2e1a72fcca58-7dd77f1906dmr1326107b3a.12.1764650472574;
+        Mon, 01 Dec 2025 20:41:12 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7d15f080beasm15270368b3a.47.2025.12.01.20.41.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 01 Dec 2025 20:41:11 -0800 (PST)
+Date: Tue, 2 Dec 2025 12:41:07 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] fstests: generic/746: update the parser to handle block
+ group tree
+Message-ID: <20251202044107.rbwdpljddv7yscag@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20251128063137.67274-1-wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20251128063137.67274-1-wqu@suse.com>
 
-(fstests cc'ed so I can a get handy-dandy lore.kernel.org URL for the
- exclude file with the background for the test exclusion.)
+On Fri, Nov 28, 2025 at 05:01:33PM +1030, Qu Wenruo wrote:
+> [FALSE ALERT]
+> The test case will fail on btrfs if the new block-group-tree feature is
+> enabled:
+> 
+> FSTYP         -- btrfs
+> PLATFORM      -- Linux/x86_64 btrfs-vm 6.18.0-rc6-custom+ #321 SMP PREEMPT_DYNAMIC Sun Nov 23 16:34:33 ACDT 2025
+> MKFS_OPTIONS  -- -O block-group-tree /dev/mapper/test-scratch1
+> MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
+> 
+> generic/746 44s ... [failed, exit status 1]- output mismatch (see xfstests-dev/results//generic/746.out.bad)
+>     --- tests/generic/746.out	2024-06-27 13:55:51.286338519 +0930
+>     +++ xfstests-dev/results//generic/746.out.bad	2025-11-28 07:47:17.039827837 +1030
+>     @@ -2,4 +2,4 @@
+>      Generating garbage on loop...done.
+>      Running fstrim...done.
+>      Detecting interesting holes in image...done.
+>     -Comparing holes to the reported space from FS...done.
+>     +Comparing holes to the reported space from FS...Sectors 256-2111 are not marked as free!
+>     ...
+>     (Run 'diff -u xfstests-dev/tests/generic/746.out xfstests-dev/results//generic/746.out.bad'  to see the entire diff)
+> 
+> [CAUSE]
+> Sectors [256, 2048) are the from the reserved first 1M free space.
+> Sectors [2048, 2112) are the leading free space in the chunk tree.
+> Sectors [2112, 2144) is the first tree block in the chunk tree.
+> 
+> However the reported free sectors from get_free_sectors() looks like this:
+> 
+>   2144 10566
+>   10688 11711
+>   ...
+> 
+> Note that there should be a free sector range in [2048, 2112) but it's
+> not reported in get_free_sectors().
+> 
+> The get_free_sectors() call is fs dependent, and for btrfs it's using
+> parse-extent-tree.awk script to handle the extent tree dump.
+> 
+> The script uses BLOCK_GROUP_ITEM items to detect the beginning of a
+> block group so that it can calculate the hole between the beginning of a
+> block group and the first data/metadata item.
+> 
+> However block-group-tree feature moves BLOCK_GROUP_ITEM items to a
+> dedicated tree, making the existing script unable to parse the free
+> space at the beginning of a block group.
+> 
+> [FIX]
+> Introduce a new script, parse-free-space.py, that accepts two tree
+> dumps:
+> 
+> - block group tree dump
+>   If the fs has block-group-tree feature, it's the block group tree
+>   dump.
+>   Otherwise the regular extent tree dump is enough.
+> 
+> - extent tree dump
+>   The usual extent tree dump.
+> 
+> With a dedicated block group tree dump, the script can correctly handle
+> the beginning part of free space, no matter if block-group-tree feature
+> is enabled or not.
+> 
+> And with this parser, the old parse-extent-tree.awk can be retired.
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>  src/parse-extent-tree.awk | 144 --------------------------------------
+>  src/parse-free-space.py   | 122 ++++++++++++++++++++++++++++++++
+>  tests/generic/746         |  16 ++++-
+>  3 files changed, 135 insertions(+), 147 deletions(-)
+>  delete mode 100755 src/parse-extent-tree.awk
+>  create mode 100755 src/parse-free-space.py
+> 
+> diff --git a/src/parse-extent-tree.awk b/src/parse-extent-tree.awk
+> deleted file mode 100755
+> index 1e69693c..00000000
+> --- a/src/parse-extent-tree.awk
+> +++ /dev/null
+> @@ -1,144 +0,0 @@
+> -# SPDX-License-Identifier: GPL-2.0
+> -# Copyright (c) 2019 Nikolay Borisov, SUSE LLC.  All Rights Reserved.
+> -#
+> -# Parses btrfs' extent tree for holes. Holes are the ranges between 2 adjacent
+> -# extent blocks. For example if we have the following 2 metadata items in the
+> -# extent tree:
+> -#	item 6 key (30425088 METADATA_ITEM 0) itemoff 16019 itemsize 33
+> -#	item 7 key (30490624 METADATA_ITEM 0) itemoff 15986 itemsize 33
+> -#
+> -# There is a whole of 64k between then - 30490624−30425088 = 65536
+> -# Same logic applies for adjacent EXTENT_ITEMS.
+> -#
+> -# The script requires the following parameters passed on command line:
+> -#     * sectorsize - how many bytes per sector, used to convert the output of
+> -#     the script to sectors.
+> -#     * nodesize - size of metadata extents, used for internal calculations
+> -
+> -# Given an extent line "item 2 key (13672448 EXTENT_ITEM 65536) itemoff 16153 itemsize 53"
+> -# or "item 6 key (30425088 METADATA_ITEM 0) itemoff 16019 itemsize 33" returns
+> -# either 65536 (for data extents) or the fixes nodesize value for metadata
+> -# extents.
+> -function get_extent_size(line, tmp) {
+> -	if (line ~ data_match || line ~ bg_match) {
+> -		split(line, tmp)
+> -		gsub(/\)/,"", tmp[6])
+> -		return tmp[6]
+> -	} else if (line ~ metadata_match) {
+> -		return nodesize
+> -	}
+> -}
+> -
+> -# given a 'item 2 key (13672448 EXTENT_ITEM 65536) itemoff 16153 itemsize 53'
+> -# and returns 13672448.
+> -function get_extent_offset(line, tmp) {
+> -	split(line, tmp)
+> -	gsub(/\(/,"",tmp[4])
+> -	return tmp[4]
+> -}
+> -
+> -# This function parses all the extents belonging to a particular block group
+> -# which are accumulated in lines[] and calculates the offsets of the holes
+> -# part of this block group.
+> -#
+> -# base_offset and bg_line are local variables
+> -function print_array(base_offset, bg_line)
+> -{
+> -	if (match(lines[0], bg_match)) {
+> -		# we don't have an extent at the beginning of of blockgroup, so we
+> -		# have a hole between blockgroup offset and first extent offset
+> -		bg_line = lines[0]
+> -		prev_size=0
+> -		prev_offset=get_extent_offset(bg_line)
+> -		delete lines[0]
+> -	} else {
+> -		# we have an extent at the beginning of block group, so initialize
+> -		# the prev_* vars correctly
+> -		bg_line = lines[1]
+> -		prev_size = get_extent_size(lines[0])
+> -		prev_offset = get_extent_offset(lines[0])
+> -		delete lines[1]
+> -		delete lines[0]
+> -	}
+> -
+> -	bg_offset=get_extent_offset(bg_line)
+> -	bgend=bg_offset + get_extent_size(bg_line)
+> -
+> -	for (i in lines) {
+> -			cur_size = get_extent_size(lines[i])
+> -			cur_offset = get_extent_offset(lines[i])
+> -			if (cur_offset  != prev_offset + prev_size)
+> -				print int((prev_size + prev_offset) / sectorsize), int((cur_offset-1) / sectorsize)
+> -			prev_size = cur_size
+> -			prev_offset = cur_offset
+> -	}
+> -
+> -	print int((prev_size + prev_offset) / sectorsize), int((bgend-1) / sectorsize)
+> -	total_printed++
+> -	delete lines
+> -}
+> -
+> -BEGIN {
+> -	loi_match="^.item [0-9]* key \\([0-9]* (BLOCK_GROUP_ITEM|METADATA_ITEM|EXTENT_ITEM) [0-9]*\\).*"
+> -	metadata_match="^.item [0-9]* key \\([0-9]* METADATA_ITEM [0-9]*\\).*"
+> -	data_match="^.item [0-9]* key \\([0-9]* EXTENT_ITEM [0-9]*\\).*"
+> -	bg_match="^.item [0-9]* key \\([0-9]* BLOCK_GROUP_ITEM [0-9]*\\).*"
+> -	node_match="^node.*$"
+> -	leaf_match="^leaf [0-9]* flags"
+> -	line_count=0
+> -	total_printed=0
+> -	skip_lines=0
+> -}
+> -
+> -{
+> -	# skip lines not belonging to a leaf
+> -	if (match($0, node_match)) {
+> -		skip_lines=1
+> -	} else if (match($0, leaf_match)) {
+> -		skip_lines=0
+> -	}
+> -
+> -	if (!match($0, loi_match) || skip_lines == 1) next;
+> -
+> -	# we have a line of interest, we need to parse it. First check if there is
+> -	# anything in the array
+> -	if (line_count==0) {
+> -		lines[line_count++]=$0;
+> -	} else {
+> -		prev_line=lines[line_count-1]
+> -		split(prev_line, prev_line_fields)
+> -		prev_objectid=prev_line_fields[4]
+> -		objectid=$4
+> -
+> -		if (objectid == prev_objectid && match($0, bg_match)) {
+> -			if (total_printed>0) {
+> -				# We are adding a BG after we have added its first extent
+> -				# previously, consider this a record ending event and just print
+> -				# the array
+> -
+> -				delete lines[line_count-1]
+> -				print_array()
+> -				# we now start a new array with current and previous lines
+> -				line_count=0
+> -				lines[line_count++]=prev_line
+> -				lines[line_count++]=$0
+> -			} else {
+> -				# first 2 added lines are EXTENT and BG that match, in this case
+> -				# just add them
+> -				lines[line_count++]=$0
+> -
+> -			}
+> -		} else if (match($0, bg_match)) {
+> -			# ordinary end of record
+> -			print_array()
+> -			line_count=0
+> -			lines[line_count++]=$0
+> -		} else {
+> -			lines[line_count++]=$0
+> -		}
+> -	}
+> -}
+> -
+> -END {
+> -	print_array()
+> -}
+> diff --git a/src/parse-free-space.py b/src/parse-free-space.py
+> new file mode 100755
+> index 00000000..3c761715
+> --- /dev/null
+> +++ b/src/parse-free-space.py
+> @@ -0,0 +1,122 @@
+> +#!/usr/bin/python3
+> +# SPDX-License-Identifier: GPL-2.0
+> +#
+> +# Parse block group and extent tree output to create a free sector list.
+> +#
+> +# Usage:
+> +#  ./parse-free-space -n <nodesize> -b <bg_dump> -e <extent_dump>
+> +#
+> +# nodesize:     The nodesize of the btrfs
+> +# bg_dump:      The tree dump file that contains block group items
+> +#               If block-group-tree feature is enabled, it's block group tree dump.
+> +#               Otherwise it's extent tree dump
+> +# extent_dump:  The tree dump file that contains extent items
+> +#               Just the extent tree dump, requires all tree block and data have
+> +#               corresponding extent/metadata item.
+> +#
+> +# The output is "%d %d", the first one is the sector number (in 512 byte) of the
+> +# free space, the second one is the last sector number of the free range.
+> +
+> +import getopt
+> +import sys
+> +import re
+> +
+> +bg_match = "^.item [0-9]* key \\([0-9]* BLOCK_GROUP_ITEM [0-9]*\\).*"
+> +metadata_match="^.item [0-9]* key \\([0-9]* METADATA_ITEM [0-9]*\\).*"
+> +data_match="^.item [0-9]* key \\([0-9]* EXTENT_ITEM [0-9]*\\).*"
+> +
+> +def parse_block_groups(file_path):
+> +    bg_list = []
+> +    with open(file_path, 'r') as bg_file:
+> +        for line in bg_file:
+> +            match = re.search(bg_match, line)
+> +            if match == None:
+> +                continue
+> +            start = match.group(0).split()[3][1:]
+> +            length = match.group(0).split()[5][:-1]
+> +            bg_list.append({'start': int(start), 'length': int(length)})
+> +    return sorted(bg_list, key=lambda d: d['start'])
+> +
+> +def parse_extents(file_path):
+> +    extent_list = []
+> +    with open(file_path, 'r') as bg_file:
+> +        for line in bg_file:
+> +            match = re.search(data_match, line)
+> +            if match:
+> +                start = match.group(0).split()[3][1:]
+> +                length = match.group(0).split()[5][:-1]
+> +                extent_list.append({'start': int(start), 'length': int(length)})
+> +                continue
+> +            match = re.search(metadata_match, line)
+> +            if match:
+> +                start = match.group(0).split()[3][1:]
+> +                length = nodesize
+> +                extent_list.append({'start': int(start), 'length': int(length)})
+> +                continue
+> +    return sorted(extent_list, key=lambda d: d['start'])
+> +
+> +def range_end(range):
+> +    return range['start'] + range['length']
+> +
+> +def calc_free_spaces(bg_list, extent_list):
+> +    free_list = []
+> +    bg_iter = iter(bg_list)
+> +    cur_bg = next(bg_iter)
+> +    prev_end = cur_bg['start']
+> +
+> +    for cur_extent in extent_list:
+> +        # Finished one bg, add the remaining free space.
+> +        while range_end(cur_bg) <= cur_extent['start']:
+> +            if range_end(cur_bg) > prev_end:
+> +                free_list.append({'start': prev_end,
+> +                                  'length': range_end(cur_bg) - prev_end})
+> +            cur_bg = next(bg_iter)
+> +            prev_end = cur_bg['start']
+> +
+> +        if prev_end < cur_extent['start']:
+> +            free_list.append({'start': prev_end,
+> +                              'length': cur_extent['start'] - prev_end})
+> +        prev_end = range_end(cur_extent)
+> +
+> +    # Handle the remaining part in the bg
+> +    if range_end(cur_bg) > prev_end:
+> +        free_list.append({'start': prev_end,
+> +                          'length': range_end(cur_bg) - prev_end})
+> +
+> +    # Handle the remaining empty bgs (if any)
+> +    for cur_bg in bg_iter:
+> +        free_list.append({'start': cur_bg['start'],
+> +                          'length': cur_bg['length']})
+> +
+> +
+> +    return free_list
+> +
+> +nodesize = 0
+> +sectorsize = 512
+> +bg_file_path = ''
+> +extent_file_path = ''
+> +
+> +opts, args = getopt.getopt(sys.argv[1:], 's:n:b:e:')
+> +for o, a in opts:
+> +    if o == '-n':
+> +        nodesize = int(a)
+> +    elif o == '-b':
+> +        bg_file_path = a
+> +    elif o == '-e':
+> +        extent_file_path = a
+> +    elif o == '-s':
+> +        sectorsize = int(a)
+> +
+> +if nodesize == 0 or sectorsize == 0:
+> +    print("require -n <nodesize> and -s <sectorsize>")
+> +    sys.exit(1)
+> +if not bg_file_path or not extent_file_path:
+> +    print("require -b <bg_file> and -e <extent_file>")
+> +    sys.exit(1)
+> +
+> +bg_list = parse_block_groups(bg_file_path)
+> +extent_list = parse_extents(extent_file_path)
+> +free_space_list = calc_free_spaces(bg_list, extent_list)
+> +for free_space in free_space_list:
+> +    print(free_space['start'] >> 9,
+> +          (range_end(free_space) >> 9) - 1)
+> diff --git a/tests/generic/746 b/tests/generic/746
+> index 6f02b1cc..0d53546e 100755
+> --- a/tests/generic/746
+> +++ b/tests/generic/746
+> @@ -93,13 +93,23 @@ get_free_sectors()
+>  			| sed -n 's/nodesize\s*\(.*\)/\1/p')
+>  
+>  		# Get holes within block groups
+> -		$BTRFS_UTIL_PROG inspect-internal dump-tree -t extent $loop_dev \
+> -			| $AWK_PROG -v sectorsize=512 -v nodesize=$nodesize -f $here/src/parse-extent-tree.awk
+> +		$BTRFS_UTIL_PROG inspect-internal dump-tree -t extent $loop_dev >> $tmp/extent_dump
+> +		if $BTRFS_UTIL_PROG inspect-internal dump-super $loop_dev |\
+> +				grep -q "BLOCK_GROUP_TREE"; then
+> +			$BTRFS_UTIL_PROG inspect-internal dump-tree -t block-group $loop_dev \
+> +				>> $tmp/bg_dump
+> +		else
+> +			cp $tmp/extent_dump $tmp/bg_dump
+> +		fi
+> +		$here/src/parse-free-space.py -n $nodesize -b $tmp/bg_dump -e $tmp/extent_dump \
 
-Hi, I've been running xfstests on ext4, xfs, btrfs, and f2fs on
-linux-next[1], and for the past week or two, the tests have been
-hanging due to a BUG getting triggered on either f2fs/encrypt[2] or
-f2fs/compress[3] test configrations.
+OK, one more python script :) That needs the testing system must have
+python interpreter. So:
 
-[1] Using the command: "gce-xfstests ltm -c ext4/all,xfs/all,btrfs/all,f2fs/all -g auto --repo https://kernel.googlesource.com/pub/scm/linux/kernel/git/next/linux-next --watch fs-next"
-[2] https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/root/fs/f2fs/cfg/encrypt
-[3] https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/root/fs/f2fs/cfg/compress
+  _require_command $PYTHON3_PROG python3
 
-Interestingly, after the BUG_ON things get wedged so badly that
-"systemctl" hangs forever.  So apparently whatever is going wrong, it
-causes the systemd to malfunction in a profound way.  As a result, the
-test VM hangs for days until I get around to aborting the VM.
+or
 
-For now, I'll exclude generic/204 from the f2fs configs in my test
-appliance; if you have a chance to take a look at this and let me know
-when it might be safe to re-neable generic/204 for f2fs, that would be
-great.  Thanks!
+  [ "$FSTYP" = "btrfs" ] && _require_command $PYTHON3_PROG python3
 
-BTW, if you'd be interestedr receiving the daily ouptut of the
-gce-xfstests run for f2fs, let me know.  That can be arranged...
+then
 
-	     	     	       	  - Ted
+  $PYTHON3_PROG $here/src/parse-free-space.py ...
 
-P.S.  Here's the dmesg output from a run this morning using the
-linux-next kernel 6.18.0-xfstests-g781b8d22e5d5:
+So this test will be skipped if someone doesn't have python3 in his testing system.
+As this's a btrfs related change, if there's not objection from btrfs list, I'm
+good with this change (from awk script to python script).
 
-[ 1011.282502] run fstests generic/204 at 2025-12-01 22:27:28
-[ 1011.604590] F2FS-fs (dm-1): f2fs_recover_fsync_data: recovery fsync data, check_only: 0
-[ 1011.605016] F2FS-fs (dm-1): Mounted with checkpoint version = 55cbed75
-[ 1065.186351] ------------[ cut here ]------------
-[ 1065.191112] kernel BUG at fs/f2fs/segment.c:2872!
-[ 1065.195977] Oops: invalid opcode: 0000 [#1] SMP PTI
-[ 1065.201170] CPU: 0 UID: 0 PID: 390275 Comm: umount Tainted: G        W           6.18.0-xfstests-g781b8d22e5d5 #1 PREEMPT(none) 
-[ 1065.212886] Tainted: [W]=WARN
-[ 1065.216868] Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 10/02/2025
-[ 1065.226646] RIP: 0010:get_new_segment+0x28d/0x2b0
-[ 1065.231684] Code: e4 ff ff ff e9 5f ff ff ff ba 08 00 00 00 31 f6 4c 89 e7 e8 25 14 fe ff 4c 89 ef e8 6d ea 6c 00 b8 8b ff ff ff e9 3e ff ff ff <0f> 0b 83 7c 24 04 01 0f 85 4e fe ff ff 41 39 ee 0f 82 45 fe ff ff
-[ 1065.250635] RSP: 0018:ffffb3d684a2b860 EFLAGS: 00010246
-[ 1065.255988] RAX: 0000000000000031 RBX: ffffb3d684a2b8b4 RCX: 0000000000000031
-[ 1065.263230] RDX: 0000000000000000 RSI: 0000000000000031 RDI: ffff8e76c1d3e290
-[ 1065.270556] RBP: 0000000000000001 R08: ffff8e76c1d3e288 R09: 0000000000000000
-[ 1065.277801] R10: 0000000000000001 R11: 0000000000000000 R12: ffff8e76c6b1f000
-[ 1065.285090] R13: ffff8e7729c2308c R14: 0000000000000000 R15: ffff8e7729c23080
-[ 1065.292362] FS:  00007fb977a5f840(0000) GS:ffff8e78090e8000(0000) knlGS:0000000000000000
-[ 1065.301096] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[ 1065.307080] CR2: 00007fef85ee165c CR3: 000000015b64e006 CR4: 00000000003706f0
-[ 1065.314528] Call Trace:
-[ 1065.317324]  <TASK>
-[ 1065.319547]  new_curseg+0xb5/0x220
-[ 1065.323166]  f2fs_allocate_data_block+0x51e/0x750
-[ 1065.328026]  do_write_page+0x57/0x280
-[ 1065.331823]  f2fs_do_write_node_page+0x38/0x70
-[ 1065.336395]  __write_node_folio+0x2d1/0x4e0
-[ 1065.340723]  f2fs_sync_node_pages+0x428/0x550
-[ 1065.345209]  block_operations+0x33e/0x450
-[ 1065.349518]  f2fs_write_checkpoint+0x103/0x5e0
-[ 1065.354119]  kill_f2fs_super+0x14b/0x190
-[ 1065.358297]  deactivate_locked_super+0x33/0xb0
-[ 1065.362918]  cleanup_mnt+0xea/0x180
-[ 1065.366582]  task_work_run+0x5c/0xa0
-[ 1065.370323]  exit_to_user_mode_loop+0xb1/0xd0
-[ 1065.374850]  do_syscall_64+0x155/0x160
-[ 1065.378830]  entry_SYSCALL_64_after_hwframe+0x76/0x7e
-[ 1065.384054] RIP: 0033:0x7fb977cb8217
-[ 1065.387743] Code: 0d 00 f7 d8 64 89 02 b8 ff ff ff ff c3 66 0f 1f 44 00 00 31 f6 e9 09 00 00 00 66 0f 1f 84 00 00 00 00 00 b8 a6 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 01 c3 48 8b 15 b1 5b 0d 00 f7 d8 64 89 02 b8
-[ 1065.406622] RSP: 002b:00007ffc531c8d48 EFLAGS: 00000246 ORIG_RAX: 00000000000000a6
-[ 1065.414317] RAX: 0000000000000000 RBX: 0000564b0abc7af8 RCX: 00007fb977cb8217
-[ 1065.421570] RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000564b0abce710
-[ 1065.428834] RBP: 0000000000000000 R08: 0000000000000000 R09: 0000000000000000
-[ 1065.436085] R10: 0000000000000008 R11: 0000000000000246 R12: 00007fb977e1826c
-[ 1065.443415] R13: 0000564b0abce710 R14: 0000564b0abc7e30 R15: 0000564b0abc79f0
-[ 1065.450667]  </TASK>
-[ 1065.453067] ---[ end trace 0000000000000000 ]---
-[ 1065.457915] RIP: 0010:get_new_segment+0x28d/0x2b0
-[ 1065.462751] Code: e4 ff ff ff e9 5f ff ff ff ba 08 00 00 00 31 f6 4c 89 e7 e8 25 14 fe ff 4c 89 ef e8 6d ea 6c 00 b8 8b ff ff ff e9 3e ff ff ff <0f> 0b 83 7c 24 04 01 0f 85 4e fe ff ff 41 39 ee 0f 82 45 fe ff ff
-[ 1065.481788] RSP: 0018:ffffb3d684a2b860 EFLAGS: 00010246
-[ 1065.487199] RAX: 0000000000000031 RBX: ffffb3d684a2b8b4 RCX: 0000000000000031
-[ 1065.494559] RDX: 0000000000000000 RSI: 0000000000000031 RDI: ffff8e76c1d3e290
-[ 1065.501898] RBP: 0000000000000001 R08: ffff8e76c1d3e288 R09: 0000000000000000
-[ 1065.509183] R10: 0000000000000001 R11: 0000000000000000 R12: ffff8e76c6b1f000
-[ 1065.516459] R13: ffff8e7729c2308c R14: 0000000000000000 R15: ffff8e7729c23080
-[ 1065.523744] FS:  00007fb977a5f840(0000) GS:ffff8e78090e8000(0000) knlGS:0000000000000000
-[ 1065.532160] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[ 1065.538091] CR2: 00007fef85ee165c CR3: 000000015b64e006 CR4: 00000000003706f0
-[ 1065.545412] note: umount[390275] exited with preempt_count 1
+Thanks,
+Zorro
 
+> +			>> $tmp/bg_free_space
+>  
+>  		# Get holes within unallocated space on disk
+>  		$BTRFS_UTIL_PROG inspect-internal dump-tree -t dev $loop_dev \
+> -			| $AWK_PROG -v sectorsize=512 -v devsize=$device_size -f $here/src/parse-dev-tree.awk
+> +			| $AWK_PROG -v sectorsize=512 -v devsize=$device_size \
+> +			  -f $here/src/parse-dev-tree.awk >> $tmp/unallocated
+>  
+> +		cat $tmp/bg_free_space $tmp/unallocated | sort
+>  	;;
+>  	esac
+>  }
+> -- 
+> 2.51.2
+> 
+> 
 
