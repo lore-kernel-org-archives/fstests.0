@@ -1,136 +1,115 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19848304989
-	for <fstests@vger.kernel.org>; Wed,  3 Dec 2025 14:50:10 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 804DA3168E8;
+	Wed,  3 Dec 2025 15:43:25 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764773411; cv=none; b=EUp/PJOgKdMpEvCZaZXhJ3fymh1v/BR0KN++UnSsTzBa32qZ+tN6W2QN+EWpt1OUfzWiTyawEJ6TvBQIzdow6o5JMe5SD9H7AtJB7DIbAoMl0+1EJVsEZhhgDCShv7FnJf2JIt2EuZqUNcdS3pzkPTmMBWZybd2mIzhK44UskBw=
+	t=1764776605; cv=none; b=sMfvt2JZzwym43sykVg2HL/dcSTUEMima/5Ut1bYzWOkofa9o8B7NAf90KUbYkPnh2UJiFpsJRUOUlkP6CkLyIlu9PD4uZ6T/CSsoyIA6am4xvQy8YV4i2ApomQAXfIt+69c/4hFJkt+eQwFWjqC9LUvUR+gU+l9yp7Mw2qANzo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764773411; c=relaxed/simple;
-	bh=oLrDHvoObHuGVFCnx9d5iq+V0OJdGrYmDmNE6P88dSk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=GIX7rg6V/E7GQkJeVwewQfyf+I+5ctgFupCgQhZrZLpmq826IbXCx6TDmm2IMzfQFhZDhSMX7Yrz1r9WdA9KOkfAYHmqKLX0qk19p+P0Hk9ZyBQe09+Q4BAjS5OuGTNxcHP4mFlj5/Fuf3THcYSuBZTFky9LmiTsJ6FepREb1/Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PaWhvKFD; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1764776605; c=relaxed/simple;
+	bh=xUUFN25vdNbdu2trCW7X7Rfr5nSpd90Zw9B852J2q60=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=YmPJUYhIIu6U2r3Sye02Bu/2AyvFgBMQRBd3RzyhdZT7LBaRPN0JZwvMKAaBVfXmV9E26bm5et1r7X7FliPbncHCLQu39N9IkYnwVImcws4D8tvuLEl3js9Jg1t59aURaT1INj445KFm7m/tktvl5vNcpjvxejzUn0g3fzZJq08=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SvxJvT/E; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PaWhvKFD"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 62D8EC116B1
-	for <fstests@vger.kernel.org>; Wed,  3 Dec 2025 14:50:10 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SvxJvT/E"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9DDC7C16AAE;
+	Wed,  3 Dec 2025 15:43:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1764773410;
-	bh=oLrDHvoObHuGVFCnx9d5iq+V0OJdGrYmDmNE6P88dSk=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=PaWhvKFDeLgXl9B/oUy2ds8QjUd+01FlstPxN88+JNs/X2wCXhMzoI7iVGc1IpTd6
-	 3B/zalYjKobDhf7DNC19cCxCP9njz7c/KBejuoeEfrmhyCa3jqpa18QFBAQ6e+EQg0
-	 0qAWk79skz0gtuzgq9W7F2m+GsOQiCw93+BFMuDsSAAvkrWlgtI6Of6kFgcFby6jNU
-	 2XHeWr0/y6Hn3HuOu1ecKT0Xm3rRmxwmTlyYHrOVGxG3jfZ9qUQaSIwkU9jNvKsaLn
-	 PBEZ96NuZj3CXMRm5XgLYdZZqZt93MIwOWMbowXVCriGM1t+ex+0MelUrijW3pwOO5
-	 EFpVfSnFkMhgA==
-Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-b713c7096f9so1108144166b.3
-        for <fstests@vger.kernel.org>; Wed, 03 Dec 2025 06:50:10 -0800 (PST)
-X-Gm-Message-State: AOJu0Yy8Er3AMqgze8VqCyh9Xymxx6AnfD/Zjnf4XM0RekM3SyVQJe/h
-	MM9AKVpClzxGd/juYpdVUJlBVQjX3qew6+3lyA6uaG81yr//N0+6gHOHOy/40k15oln7UBOYYbu
-	Td/myQx+buiIN6FFfCKdb5sG/8g+xMMw=
-X-Google-Smtp-Source: AGHT+IGTFMTsB8asxhVz5VyMiXJsY+jI1MHwOI7PlM1iei9uoj9bvoeupHmpoB6HeN6fSNKnIg8mctTL8VWFRFCnnX8=
-X-Received: by 2002:a17:907:c10:b0:b72:7cd3:d55b with SMTP id
- a640c23a62f3a-b79dbe71a4amr271601966b.12.1764773408913; Wed, 03 Dec 2025
- 06:50:08 -0800 (PST)
+	s=k20201202; t=1764776605;
+	bh=xUUFN25vdNbdu2trCW7X7Rfr5nSpd90Zw9B852J2q60=;
+	h=From:Subject:Date:To:Cc:From;
+	b=SvxJvT/EE4avVzD15h0OlYeuPUqlW5afvHlGejR14vthQPNshFBGEWqYY6BSIE1i2
+	 RQ5jRGCEzTwFYlZ631UqszozWHoFpt3v2lUbGEnR9Usy5ZDmakxUejm7lf75cZ+aoF
+	 u+/m31JvDMpqfY58iEx7aTdoSFafg3ROEodwtrPUxcia6tCxUZF+njtd+hKK52XdJF
+	 3oIxGImHwbLP/wj256MKz7lJusJ3I/gl0ZVog64DamydJBdF8AYz5mC6kqbQGjFnU3
+	 qNTTrRNVt6Pwf31MYVQmPaXQ3TZfByNDCHnnYFTPrvV/haE/RGouZgJjw9trfyKt5+
+	 S/Rsb1flMEKmA==
+From: Jeff Layton <jlayton@kernel.org>
+Subject: [PATCH fstests v3 0/3] generic: new testcases for delegation
+ support
+Date: Wed, 03 Dec 2025 10:43:06 -0500
+Message-Id: <20251203-dir-deleg-v3-0-be55fbf2ad53@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251203114328.10386-1-realwakka@gmail.com>
-In-Reply-To: <20251203114328.10386-1-realwakka@gmail.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Wed, 3 Dec 2025 14:49:31 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H678q0xFPZN2LqA6PD-akb0Zs_OeQSPdm_p+JS-9Bc96g@mail.gmail.com>
-X-Gm-Features: AWmQ_bk9CMyqAPCPwtrlBx8x0--L9yU4NMTOygMecdYh9sa-oQSGcc0JeRfdZtY
-Message-ID: <CAL3q7H678q0xFPZN2LqA6PD-akb0Zs_OeQSPdm_p+JS-9Bc96g@mail.gmail.com>
-Subject: Re: [PATCH v3 1/1] btrfs/339: test receive dump stream for different user
-To: Sidong Yang <realwakka@gmail.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/22NywqDMBBFf0Vm3SnJaGrtqv9RuvAx0aGikkhoE
+ f+9ISsLnd3h3nNnA89O2MMt28BxEC/zFCE/ZdAO9dQzShcZSJHR8bAThx2P3KO1yiidt7UpFMT
+ +4tjKO209wPqV/erhGYNB/Dq7T/oRdIr/zAWNEYvywqppNbO5v9hNPJ5n16eZQEe1OqqECm1lq
+ KmppPxa/Kj7vn8Br3JMKOcAAAA=
+X-Change-ID: 20251111-dir-deleg-ff05013ca540
+To: fstests@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org, Zorro Lang <zlang@redhat.com>, 
+ Christian Brauner <brauner@kernel.org>, Jeff Layton <jlayton@kernel.org>
+X-Mailer: b4 0.14.2
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1695; i=jlayton@kernel.org;
+ h=from:subject:message-id; bh=xUUFN25vdNbdu2trCW7X7Rfr5nSpd90Zw9B852J2q60=;
+ b=owEBbQKS/ZANAwAKAQAOaEEZVoIVAcsmYgBpMFqbeQd572/vq7b4VdMUKbu1BgiGs3ENZBN7U
+ Xqnw2NoMeeJAjMEAAEKAB0WIQRLwNeyRHGyoYTq9dMADmhBGVaCFQUCaTBamwAKCRAADmhBGVaC
+ Fa/9EADEsXLioJmyUudk0dvmzBZwFcMmMljkQTdMEi5KxnmMK2/V0Wc6DjnDyEL5pIQQl7HSlP2
+ qLpdP/6Qn2iKyVpO0cVMTEPqNvndtKkWr9hgNROKGkiNzM6+mW5S7JCBvpRVGpB+iyvE8U/pmoa
+ C2CvMzlzMjYO2a/XT3Hhhgl7+0X9fbbxtiFtMfasYrONUw8T+RRPWhP5ZE3oAwuv16RJlmOb8Dd
+ aXbHRGnHsniSThE+C0tDYf2UvWqB/MrrxjC2HKm2ha8iw4M0RFeVyLuL7DfgNGalZtJb3aQcqDH
+ gxWy5KMt9C3VnWtR+MUPcGLnwEy0H2bo7kJIV5ZOZoOhUHaYJCasOyXLcBGqt2Sf+EpbNvpmWYY
+ 8CXOwWFEPTe1bTQ9lEcce4jOEBOa7A8HU481/XDE/8WQutOJAQxC40zmpkaNjH5BcAHHqy7AoMN
+ eTUFQ5EQcdR493HEunp4JcMMsPcDg6/+vzhXGVRdARpwgQqxfMErWrcX6XrWTHW7nALKpzVVGlH
+ 5oX0LzwvdPhhOFgu2KW5H4CY9J9CrWNxdMccf9vDQ/QT0pqzjjm4iFUME4j2pDtBRjX54qct+Fp
+ LglySbhfijnuJuvA/YeBIk8+z/3/k/xUEmjWQ67Q3iMivmjp43Pjdb6aOicAPGkxJW+1mV0Ahom
+ G2zMSZ2A+w7aOCQ==
+X-Developer-Key: i=jlayton@kernel.org; a=openpgp;
+ fpr=4BC0D7B24471B2A184EAF5D3000E684119568215
 
-On Wed, Dec 3, 2025 at 11:43=E2=80=AFAM Sidong Yang <realwakka@gmail.com> w=
-rote:
->
-> Test receive to dump stream file from different user.
->
-> This is a regression test for the btrfs-progs commit cd933616d485
-> ("btrfs-progs: receive: don't use O_NOATIME to open stream for
-> dumping").
->
-> Signed-off-by: Sidong Yang <realwakka@gmail.com>
+The main difference from the last set are just changes to address
+Zorro's review comments.
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Support for delegations has been merged into mainline, but there is
+still an outstanding bugfix [1] that will need to be merged before the
+file delegation test passes properly.
 
-Looks good now, thanks.
+To: fstests@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org
+Cc: Zorro Lang <zlang@redhat.com>
+Cc: Christian Brauner <brauner@kernel.org>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
 
-> ---
-> v2:
-> - forward to $seqres.full rather than -q
-> - use $tmp for stream file
-> v3:
-> - use _btrfs than $BTRFS_UTIL_PROG
-> - remove unnecessary cleanup, requirement
-> ---
->  tests/btrfs/339     | 32 ++++++++++++++++++++++++++++++++
->  tests/btrfs/339.out |  2 ++
->  2 files changed, 34 insertions(+)
->  create mode 100755 tests/btrfs/339
->  create mode 100644 tests/btrfs/339.out
->
-> diff --git a/tests/btrfs/339 b/tests/btrfs/339
-> new file mode 100755
-> index 00000000..234a9ea0
-> --- /dev/null
-> +++ b/tests/btrfs/339
-> @@ -0,0 +1,32 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Sidong Yang.  All Rights Reserved.
-> +#
-> +# FS QA Test 339
-> +#
-> +# Test btrfs receive dump stream from different user
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick send snapshot
-> +
-> +. ./common/filter
-> +
-> +_require_scratch
-> +_require_user
-> +
-> +_fixed_by_git_commit btrfs-progs cd933616d485 \
-> +       "btrfs-progs: receive: don't use O_NOATIME to open stream for dum=
-ping"
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-> +_scratch_mount
-> +
-> +stream=3D$tmp.fsv.ss
-> +
-> +_btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap
-> +_btrfs send -f $stream $SCRATCH_MNT/snap
-> +chmod a+r $stream
-> +_su $qa_user -c "$BTRFS_UTIL_PROG receive --dump -f $stream" >> $seqres.=
-full
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +_exit 0
-> diff --git a/tests/btrfs/339.out b/tests/btrfs/339.out
-> new file mode 100644
-> index 00000000..293ea808
-> --- /dev/null
-> +++ b/tests/btrfs/339.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 339
-> +Silence is golden
-> --
-> 2.43.0
->
+[1]: https://lore.kernel.org/linux-fsdevel/20251201-dir-deleg-ro-v1-0-2e32cf2df9b7@kernel.org/
+
+---
+Changes in v3:
+- Clean up per Zorro's comments
+- Use ./new to generate boilerplate test scripts
+- Add both tests to "locks" and "quick" groups
+- Link to v2: https://lore.kernel.org/r/20251119-dir-deleg-v2-0-f952ba272384@kernel.org
+
+Changes in v2:
+- Add tests for file delegations
+- Clean up after testing whether leases are supported
+- Link to v1: https://lore.kernel.org/r/20251111-dir-deleg-v1-1-d476e0bc1ee5@kernel.org
+
+---
+Jeff Layton (3):
+      common/rc: clean up after the _require_test_fcntl_setlease() test
+      generic: add tests for directory delegations
+      generic: add tests for file delegations
+
+ common/locktest       |  19 +-
+ common/rc             |  11 +
+ src/locktest.c        | 621 +++++++++++++++++++++++++++++++++++++++++++++++++-
+ tests/generic/783     |  19 ++
+ tests/generic/783.out |   2 +
+ tests/generic/784     |  20 ++
+ tests/generic/784.out |   2 +
+ 7 files changed, 679 insertions(+), 15 deletions(-)
+---
+base-commit: 5b75444bc9123f261e0aa95f72328af4c827786a
+change-id: 20251111-dir-deleg-ff05013ca540
+
+Best regards,
+-- 
+Jeff Layton <jlayton@kernel.org>
+
