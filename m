@@ -1,38 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D767E346FA9;
-	Wed,  3 Dec 2025 17:38:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7897D2FDC4F
+	for <fstests@vger.kernel.org>; Wed,  3 Dec 2025 19:32:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764783500; cv=none; b=h3/peLUgFOfkgMkKllAQ3OkimW7Gejv53EpUlinjcJLFDNyGkfIXpWRzffEBb1JpOBQGRePwsWJx/6C3+68f1eoT9Qm4SQzVxxYr5AG1QaFiHDlojJ+c8MFTKuQgFZ1mg2TZrKFb0eJ8bs1gAVXfmXWUcTUuGHSwARvkpEOMoqo=
+	t=1764790320; cv=none; b=HyoYMQDFl6i9kOrkYc8vuBU/WOaOyR7nWDymM8jQrVagk9iYJ5o13U2fsD13qZFyu1N9+asH6n1Sc1iT3xXqNO+JkUCMwq6YnIXkZ5G6bU2QpuamWo3CNmr/MpeXYgrzItZ2gUuqwj3Xc0oTje3kSWxUixzGC6SQ57/wJq0KLq0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764783500; c=relaxed/simple;
-	bh=tmfRmA28K+PaL9EZVq8H10oTJ8A5bJG2yVQavw67f9s=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Ui6o7XGRjE0T37NxlVt/nG+lCnHBrfgu6Do97r8054vs1cduFuqGY+AI6Shq3QzUHvnGMjIVOfbWTkz35jhLmUVtews3Rsr9qYa+h72+sgNhFb4Kx+lUvD9ktEVEdKHhJ5rvUZWfSRC2AzH98t0oU1xy3Txbu6v9UI3x2k8LP8k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nlPQHlKN; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1764790320; c=relaxed/simple;
+	bh=JQ73DsR3vSrwlgoERKzmcSkW9Qw/PCxxhEFOlNAOaEM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Dygoraa+1JV7XXW/0cqM7b/PYJTbfKBA2mvyR11PayJmDPPMKR2cfihT6snW5PkI8CwwzwmrMxMivM2wdk18iRJNUnhfH7zWnSU6OWqeNaGOjGFTTxIPr1iRSETS0QleYkyBMyqv+jDYMTRD8VGrJ1/8Z/gvVdWRHKpQnIJKTPQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mZySEC99; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nlPQHlKN"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 90E4AC4CEF5;
-	Wed,  3 Dec 2025 17:38:19 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mZySEC99"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9B29AC4CEF5;
+	Wed,  3 Dec 2025 19:31:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1764783500;
-	bh=tmfRmA28K+PaL9EZVq8H10oTJ8A5bJG2yVQavw67f9s=;
+	s=k20201202; t=1764790319;
+	bh=JQ73DsR3vSrwlgoERKzmcSkW9Qw/PCxxhEFOlNAOaEM=;
 	h=From:To:Cc:Subject:Date:From;
-	b=nlPQHlKNlcSNFOK+lXjEdcQyj6QKTioNbHPRdrX/6nGGJ8NafufaPibWbTaGCOe3L
-	 mK0cE3vJwFN8WhZDFAeixqr/GVWukOhRA18GR3TftKqtt3ZWQZ7gfN6DxvelRjGw4N
-	 RgrCfKWjQLSlj376fNk9r0BDl7iGjilXjh5ewh0tTQ9MUCg+tH+88MRveBBMVFEp4o
-	 h9yqTiDZ2x9io9+pFSLzX/e/jgv4Jfx6JjO7O/sY4bQgx6jMqWH6kE+hYh1yiCLT3E
-	 ZKZCOmuBdc0NGuVK3hT9hBFJiz9dGsivT7RqOXBOPEBUcGfPSwS32vhHnZHEIyNtVS
-	 6lGSwcm7gznYg==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] generic: test journaling after renaming fsynced file and fsync parent dir
-Date: Wed,  3 Dec 2025 17:38:14 +0000
-Message-ID: <a883e236548bec41bb0b043fe0105b4da4fd0749.1764783252.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.47.2
+	b=mZySEC99H7CU+jjMAeqEnydP7UxQHV96VkVIt8mur31YCqfGemquRT76yDTGmdJim
+	 n0WEDSQAzy9n1QpHLEgb26MUWcoorPi+vFDAoeXh2LURtMrGMykHmFuwBSCMG8CXwG
+	 5itnzPoPQow6dfw+qHsRzsIEE36UsNkt9I7xfuLORvzUZYdA0LjVc2bqp63jr4fH5l
+	 JtTPGH+dC0IQ+x3eoeQewOiae+nDmdNNDv7ZGZ4rq17BA8h5gH55XKvbuuvxjDH7YB
+	 rE6Sn1p4ORI8mvvVMHLrETatp427Mzmh2TVEvS4MbhcwMSLOFRMxglGyTYaotVm6cU
+	 vyEdJ2iRR3zvQ==
+From: Chao Yu <chao@kernel.org>
+To: Zorro Lang <zlang@kernel.org>,
+	fstests@vger.kernel.org
+Cc: jaegeuk@kernel.org,
+	linux-f2fs-devel@lists.sourceforge.net,
+	Chao Yu <chao@kernel.org>
+Subject: [PATCH] common/quota: fix to wait for all inodes been evicted in _check_quota_usage()
+Date: Thu,  4 Dec 2025 03:31:47 +0800
+Message-ID: <20251203193147.3320893-1-chao@kernel.org>
+X-Mailer: git-send-email 2.52.0.223.gf5cc29aaa4-goog
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -41,116 +43,59 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: Filipe Manana <fdmanana@suse.com>
+generic/233  3s ... - output mismatch (see /share/git/fstests/results//generic/233.out.bad)
+    --- tests/generic/233.out   2025-01-12 21:57:40.259440359 +0800
+    +++ /share/git/fstests/results//generic/233.out.bad 2025-12-04 03:02:26.000000000 +0800
+    @@ -4,4 +4,12 @@
 
-Test that if we fsync a file, create a directory in the same parent
-directory of the file, add a file to the new directory, rename the
-initial file and then fsync the parent directory of the first file, after
-a power failure the new directory exists, with its new entry and the first
-file has the new name and any data we wrote to it before its fsync.
+     seed = S
+     Comparing user usage
+    +4c4
+    +< #1000     --   31476   32000   32000            994  1000  1000
+    +---
+    +> #1000     --   31476   32000   32000            944  1000  1000
+    ...
+    (Run 'diff -u /share/git/fstests/tests/generic/233.out /share/git/fstests/results//generic/233.out.bad'  to see the entire diff)
+Ran: generic/233
+Failures: generic/233
+Failed 1 of 1 tests
 
-This exercises a reported btrfs bug which is fixed by a patch with the
-following subject:
+Sometimes, generic/233 will fail due to it founds inode count is mismatched
+in between in-memory one and on-disk one.
 
-  "btrfs: do not skip logging new dentries when logging a new name"
+The reason is cgroup v2 implementation requires to increase inode reference,
+and then attach it to thread related cgroup writeback structure, once it
+needs to switch once write owner changes of target inode, a kernel thread
+will process it and then release inode reference via evict_inode().
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+So, sync & drop_cache may not guarantee all inodes being evicted, as cgroup
+has one more refernece on inodes during the time.
+
+If inode has not been evicted, dquot inode reference will not be release, it
+will lead to inode quota mismatch.
+
+Let's add a delay to wait for cgroup switching completion before quota check.
+
+Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+Signed-off-by: Chao Yu <chao@kernel.org>
 ---
- tests/generic/785     | 73 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/785.out |  4 +++
- 2 files changed, 77 insertions(+)
- create mode 100755 tests/generic/785
- create mode 100644 tests/generic/785.out
+ common/quota | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/tests/generic/785 b/tests/generic/785
-new file mode 100755
-index 00000000..a6cfdd87
---- /dev/null
-+++ b/tests/generic/785
-@@ -0,0 +1,73 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 SUSE S.A.  All Rights Reserved.
-+#
-+# FS QA Test 785
-+#
-+# Test that if we fsync a file, create a directory in the same parent directory
-+# of the file, add a file to the new directory, rename the initial file and then
-+# fsync the parent directory of the first file, after a power failure the new
-+# directory exists, with its new entry and the first file has the new name and
-+# any data we wrote to it before its fsync.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick log
+diff --git a/common/quota b/common/quota
+index a51386b1..de7e84e8 100644
+--- a/common/quota
++++ b/common/quota
+@@ -333,6 +333,9 @@ _check_quota_usage()
+ 	# XXX: really need an ioctl instead of this big hammer
+ 	echo 3 > /proc/sys/vm/drop_caches
+ 
++	# wait for inode_switch_wbs_wor_fn() to release inodes
++	sleep 3
 +
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -r -f $tmp.*
-+}
-+
-+. ./common/filter
-+. ./common/dmflakey
-+
-+_require_scratch
-+_require_dm_target flakey
-+_require_fssum
-+
-+[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: do not skip logging new dentries when logging a new name"
-+
-+_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+_mount_flakey
-+
-+# Create our first test file.
-+echo -n > $SCRATCH_MNT/file1
-+
-+# Persist the file and commit the current transaction.
-+_scratch_sync
-+
-+# Change the file (by writing some data to it for example) and fsync it.
-+$XFS_IO_PROG -c "pwrite -S 0xab 0 1000" \
-+	     -c "fsync" $SCRATCH_MNT/file1 | _filter_xfs_io
-+
-+# Create a new directory in the same parent directory as the previous file.
-+mkdir $SCRATCH_MNT/dir
-+# Add a new file to this new directory.
-+echo -n > $SCRATCH_MNT/dir/foo
-+
-+# Rename the first file, but keeping it in the same parent directory.
-+mv $SCRATCH_MNT/file1 $SCRATCH_MNT/file2
-+
-+# Fsync the parent directory of the first file.
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/
-+
-+# Create a digest of the filesystem's content.
-+$FSSUM_PROG -A -f -w $tmp.fssum $SCRATCH_MNT/
-+
-+# Simulate a power failure and then mount again the filesystem to replay the
-+# journal/log.
-+_flakey_drop_and_remount
-+
-+# Verify the filesystem has the same content that it had right before the power
-+# failure and after the last fsync.
-+$FSSUM_PROG -r $tmp.fssum $SCRATCH_MNT/
-+
-+_unmount_flakey
-+
-+# success, all done
-+_exit 0
-diff --git a/tests/generic/785.out b/tests/generic/785.out
-new file mode 100644
-index 00000000..b509508b
---- /dev/null
-+++ b/tests/generic/785.out
-@@ -0,0 +1,4 @@
-+QA output created by 785
-+wrote 1000/1000 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+OK
+ 	VFS_QUOTA=0
+ 	case $FSTYP in
+ 	ext2|ext3|ext4|f2fs|gfs2|bcachefs)
 -- 
-2.47.2
+2.49.0
 
