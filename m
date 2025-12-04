@@ -1,40 +1,60 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7897D2FDC4F
-	for <fstests@vger.kernel.org>; Wed,  3 Dec 2025 19:32:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 959A019AD5C
+	for <fstests@vger.kernel.org>; Thu,  4 Dec 2025 04:41:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764790320; cv=none; b=HyoYMQDFl6i9kOrkYc8vuBU/WOaOyR7nWDymM8jQrVagk9iYJ5o13U2fsD13qZFyu1N9+asH6n1Sc1iT3xXqNO+JkUCMwq6YnIXkZ5G6bU2QpuamWo3CNmr/MpeXYgrzItZ2gUuqwj3Xc0oTje3kSWxUixzGC6SQ57/wJq0KLq0=
+	t=1764823292; cv=none; b=JezpeEQTmmutVQcYk80xVQEzaymwAldf191fS640TQ1pa9k9mwQ6XomYEv4hwvEnFeBMFJg1pOlHmAYY7WxtI9MgfyRkkbAzUMXruHdKbpMmi8/nnJYQet9fACOBDKEh0SEe1ORXQl51JFPlI8v7oYiOk2zgZscG1YtgaRFm3DM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764790320; c=relaxed/simple;
-	bh=JQ73DsR3vSrwlgoERKzmcSkW9Qw/PCxxhEFOlNAOaEM=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Dygoraa+1JV7XXW/0cqM7b/PYJTbfKBA2mvyR11PayJmDPPMKR2cfihT6snW5PkI8CwwzwmrMxMivM2wdk18iRJNUnhfH7zWnSU6OWqeNaGOjGFTTxIPr1iRSETS0QleYkyBMyqv+jDYMTRD8VGrJ1/8Z/gvVdWRHKpQnIJKTPQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mZySEC99; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1764823292; c=relaxed/simple;
+	bh=zXXRsUaEREtCr5L2kro3mVXjnsf3ePNpQCi7wrf1CaM=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=ikbYwlvL3RzOTJIQ/5JzHtznaozZ/1NeLcnTXk3cQ3g0sTzw1GZCBxUv+f/ZPfTEf4n9P55+qR3KXBK26yxgOo/6MwDfRTazaatEO4EjgYRnMSspnSPbrt5fu5JnK/ldb0MGJhNPXNBMdtLouclffwtnrxEQLg5VO0BmIDpzIk4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=XmRFUzvl; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=XmRFUzvl; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mZySEC99"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9B29AC4CEF5;
-	Wed,  3 Dec 2025 19:31:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1764790319;
-	bh=JQ73DsR3vSrwlgoERKzmcSkW9Qw/PCxxhEFOlNAOaEM=;
-	h=From:To:Cc:Subject:Date:From;
-	b=mZySEC99H7CU+jjMAeqEnydP7UxQHV96VkVIt8mur31YCqfGemquRT76yDTGmdJim
-	 n0WEDSQAzy9n1QpHLEgb26MUWcoorPi+vFDAoeXh2LURtMrGMykHmFuwBSCMG8CXwG
-	 5itnzPoPQow6dfw+qHsRzsIEE36UsNkt9I7xfuLORvzUZYdA0LjVc2bqp63jr4fH5l
-	 JtTPGH+dC0IQ+x3eoeQewOiae+nDmdNNDv7ZGZ4rq17BA8h5gH55XKvbuuvxjDH7YB
-	 rE6Sn1p4ORI8mvvVMHLrETatp427Mzmh2TVEvS4MbhcwMSLOFRMxglGyTYaotVm6cU
-	 vyEdJ2iRR3zvQ==
-From: Chao Yu <chao@kernel.org>
-To: Zorro Lang <zlang@kernel.org>,
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="XmRFUzvl";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="XmRFUzvl"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 81ED93388F;
+	Thu,  4 Dec 2025 04:41:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1764823287; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=gfCg3g9XyaCfW39BvXJ8opKW+E8jYL+WpWJXknQ5k2E=;
+	b=XmRFUzvl16lUDEg5o65YwXTshIlQw6xDdottzBkoB0S/xjhp3F+WzEescXItlmchc27kW2
+	jjxle27OMOZlVn0gcae0U4TLCjypTlgN/j5scxiCoyjI78aEWERDQIhPngmPVI9d8Jzuwc
+	3Vd+PTXp7wMX8vbj2VydociX0xXGhHc=
+Authentication-Results: smtp-out1.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=XmRFUzvl
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1764823287; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=gfCg3g9XyaCfW39BvXJ8opKW+E8jYL+WpWJXknQ5k2E=;
+	b=XmRFUzvl16lUDEg5o65YwXTshIlQw6xDdottzBkoB0S/xjhp3F+WzEescXItlmchc27kW2
+	jjxle27OMOZlVn0gcae0U4TLCjypTlgN/j5scxiCoyjI78aEWERDQIhPngmPVI9d8Jzuwc
+	3Vd+PTXp7wMX8vbj2VydociX0xXGhHc=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 82EA73EA63;
+	Thu,  4 Dec 2025 04:41:26 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id JVqDEfYQMWncIQAAD6G6ig
+	(envelope-from <wqu@suse.com>); Thu, 04 Dec 2025 04:41:26 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
 	fstests@vger.kernel.org
-Cc: jaegeuk@kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net,
-	Chao Yu <chao@kernel.org>
-Subject: [PATCH] common/quota: fix to wait for all inodes been evicted in _check_quota_usage()
-Date: Thu,  4 Dec 2025 03:31:47 +0800
-Message-ID: <20251203193147.3320893-1-chao@kernel.org>
-X-Mailer: git-send-email 2.52.0.223.gf5cc29aaa4-goog
+Subject: [PATCH] fstests: btrfs: add a new test case to verify quick qgroup inherit
+Date: Thu,  4 Dec 2025 15:11:08 +1030
+Message-ID: <20251204044108.181671-1-wqu@suse.com>
+X-Mailer: git-send-email 2.52.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,60 +62,131 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	MIME_TRACE(0.00)[0:+];
+	ARC_NA(0.00)[];
+	RCPT_COUNT_TWO(0.00)[2];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	RCVD_TLS_ALL(0.00)[];
+	DKIM_TRACE(0.00)[suse.com:+];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	RCVD_COUNT_TWO(0.00)[2];
+	DNSWL_BLOCKED(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	TO_DN_NONE(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:dkim,suse.com:mid,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns]
+X-Rspamd-Action: no action
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Spam-Level: 
+X-Rspamd-Queue-Id: 81ED93388F
+X-Spam-Flag: NO
+X-Spam-Score: -3.01
 
-generic/233  3s ... - output mismatch (see /share/git/fstests/results//generic/233.out.bad)
-    --- tests/generic/233.out   2025-01-12 21:57:40.259440359 +0800
-    +++ /share/git/fstests/results//generic/233.out.bad 2025-12-04 03:02:26.000000000 +0800
-    @@ -4,4 +4,12 @@
+[BUG]
+There is a bug report that simple quota exposed a bug in the quick
+qgroup inherit, that if there is a multi-level qgroup parent
+relationship, only the direct parent got updated.
 
-     seed = S
-     Comparing user usage
-    +4c4
-    +< #1000     --   31476   32000   32000            994  1000  1000
-    +---
-    +> #1000     --   31476   32000   32000            944  1000  1000
-    ...
-    (Run 'diff -u /share/git/fstests/tests/generic/233.out /share/git/fstests/results//generic/233.out.bad'  to see the entire diff)
-Ran: generic/233
-Failures: generic/233
-Failed 1 of 1 tests
+[TEST CASE]
+The test case will create the following subvolume and qgroups first:
 
-Sometimes, generic/233 will fail due to it founds inode count is mismatched
-in between in-memory one and on-disk one.
+- A new subvolume at '/subv1'
+- Qgroup 1/1
+- Qgroup 2/1
 
-The reason is cgroup v2 implementation requires to increase inode reference,
-and then attach it to thread related cgroup writeback structure, once it
-needs to switch once write owner changes of target inode, a kernel thread
-will process it and then release inode reference via evict_inode().
+And subvolume '/subv1' is assgiend to qgroup 1/1, so 1/1 is the direct
+parent.
+Then qgroup 1/1 is also assigned to 2/1, so 2/1 is an indirect parent of
+subvolume '/subv1'.
 
-So, sync & drop_cache may not guarantee all inodes being evicted, as cgroup
-has one more refernece on inodes during the time.
+Then the trigger part is to creating a snapshot of '/subv1' and also
+assigned the new snapshot into qgroup 1/1 during the snapshot creation.
 
-If inode has not been evicted, dquot inode reference will not be release, it
-will lead to inode quota mismatch.
+Since 1/1 is the parent of '/subv1' and the new snapshot, and qgroup 1/1
+fully owns '/subv1', we can do a quick inherit.
 
-Let's add a delay to wait for cgroup switching completion before quota check.
+After the triggering part, just finish the test case and the fsck after
+the test case should detect any qgroup inconsistency.
 
-Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-Signed-off-by: Chao Yu <chao@kernel.org>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- common/quota | 3 +++
- 1 file changed, 3 insertions(+)
+ tests/btrfs/339     | 45 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/339.out |  2 ++
+ 2 files changed, 47 insertions(+)
+ create mode 100755 tests/btrfs/339
+ create mode 100644 tests/btrfs/339.out
 
-diff --git a/common/quota b/common/quota
-index a51386b1..de7e84e8 100644
---- a/common/quota
-+++ b/common/quota
-@@ -333,6 +333,9 @@ _check_quota_usage()
- 	# XXX: really need an ioctl instead of this big hammer
- 	echo 3 > /proc/sys/vm/drop_caches
- 
-+	# wait for inode_switch_wbs_wor_fn() to release inodes
-+	sleep 3
+diff --git a/tests/btrfs/339 b/tests/btrfs/339
+new file mode 100755
+index 00000000..6581b61b
+--- /dev/null
++++ b/tests/btrfs/339
+@@ -0,0 +1,45 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 SUSE S.A.  All Rights Reserved.
++#
++# FS QA Test 339
++#
++# Make sure when doing a quick inherit for snapshot, all parent qgroups
++# including direct and indirect parents are properly updated.
++#
++. ./common/preamble
++_begin_fstest auto quick qgroup
 +
- 	VFS_QUOTA=0
- 	case $FSTYP in
- 	ext2|ext3|ext4|f2fs|gfs2|bcachefs)
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: qgroup: update all parent qgroups when doing quick inherit"
++
++# For the automatic fsck at unmount.
++_require_scratch
++_require_btrfs_qgroup_report
++
++# This will imply mkfs and enable regular qgroup.
++_require_scratch_qgroup
++_scratch_mount
++
++# Create a subvolume along with qgroups 1/1 and 2/1.
++# The subvolume qgroup is assgiend to 1/1, and 1/1 is assigned to 2/1.
++_btrfs subvolume create $SCRATCH_MNT/subv1
++subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT subv1)
++_btrfs qgroup create 1/1 $SCRATCH_MNT
++_btrfs qgroup create 2/1 $SCRATCH_MNT
++_btrfs qgroup assign 1/1 2/1 $SCRATCH_MNT
++_btrfs qgroup assign 0/$subvolid 1/1 $SCRATCH_MNT
++
++# All above assign should result quick update, no need for a full rescan
++echo "Before quick inherit:" >> $seqres.full
++_btrfs qgroup show -p --sync $SCRATCH_MNT >> $seqres.full
++
++# The next snapshot creation will create a snapshot and assign it to 1/1,
++# which is the same parent of the source subvolume, and we can do a quick inherit
++# without marking qgroup inconsistent.
++_btrfs subv snap -i 1/1 $SCRATCH_MNT/subv1 $SCRATCH_MNT/snap1
++echo "After quick inherit:" >> $seqres.full
++_btrfs qgroup show -p --sync $SCRATCH_MNT >> $seqres.full
++
++echo "Silence is golden"
++_exit 0
+diff --git a/tests/btrfs/339.out b/tests/btrfs/339.out
+new file mode 100644
+index 00000000..293ea808
+--- /dev/null
++++ b/tests/btrfs/339.out
+@@ -0,0 +1,2 @@
++QA output created by 339
++Silence is golden
 -- 
-2.49.0
+2.51.2
 
