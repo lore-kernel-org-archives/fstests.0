@@ -1,44 +1,41 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35625261B9D;
-	Thu,  4 Dec 2025 17:18:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D20062DC328
+	for <fstests@vger.kernel.org>; Thu,  4 Dec 2025 17:20:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764868735; cv=none; b=S0qvMzMCwPLIzPP9yuiBTz+Wb9DipsdRId9yyUqBsN5NRy0tYEh2uW3S5QD3am55JRsTWXoGIRoiwvFpZCbWMtu7AHly0NQYWtS9P8QcEd6GDOy7OczacAGobgZHrSX7zS7IdwHLlWaMKQn/9Jm8PbA2XUS3pZGi5ZBizd6VyEQ=
+	t=1764868829; cv=none; b=gHD7PyEE5Fp1ZQ69cYZbKd6iKP7Wsi+YkOaJ+fbgrlzjpWjHnD8caZRGy6yYaiKsPgMly5rCpPeTBnmrI0BtqHswwtBiiBb3a+q5j7JLA32+GpDTS3wJV6j1p9QnhUGeCHV23glpPUekvdMS59p7Dp70vrCAdZ34dGj6oY24Ftw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764868735; c=relaxed/simple;
-	bh=+s7C0ErrNbC+GByRFJIB9Zms5pwT6EhHNRa+xY/X8+M=;
+	s=arc-20240116; t=1764868829; c=relaxed/simple;
+	bh=tK+eY6Vb4Ife1n+uhuaMnmqsWLcoPqv6F/KpnpZ34cY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=kRQgBZ/u6qwXFd0jbfWQhUqUPmabgQlzh5apxi3akuih9fkxy5zht8jBe2koWohJRa6R8K2gyZ9JLADCqzb1T2IuO33Bz533OReyYz+4ZsEoq4zXE7b8L7rQFQC33vLuqj33o7ZwAgxO6Khigr4kOh3xmAYS8y55S/Asl/6MlQQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=uTarys6P; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=Xo4yWNv//WqB1d75hz/aUMfHCiJhTCllHynDbe11+P+vKSq4lASWuW5GIv03o1qaohPeNZBJdHdPMaUCxWUKvLnpEhx7tUejrKwsCbLEVQZr0Sh3bp9eY6i1gN81kV4wligWKtBNPfZhiCZc84e8Of2p/UzuU7kHibEt+mippAE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Tlva8Roe; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="uTarys6P"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B623AC4CEFB;
-	Thu,  4 Dec 2025 17:18:54 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Tlva8Roe"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E7D75C4CEFB;
+	Thu,  4 Dec 2025 17:20:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1764868734;
-	bh=+s7C0ErrNbC+GByRFJIB9Zms5pwT6EhHNRa+xY/X8+M=;
+	s=k20201202; t=1764868829;
+	bh=tK+eY6Vb4Ife1n+uhuaMnmqsWLcoPqv6F/KpnpZ34cY=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=uTarys6PVXXw7IHWf/u6Vm5kiLQrzBaIzZ9MHDAZKDA8Or5f24GgBvggfGIFbNZ7s
-	 DFqYWaSNpx6xKRUb6sWaeqlTUqlhFgQUHrGgyXJtuuWTGSCdTruR+1+pMGydoBtIoH
-	 pgagO79aYwePAZnAb9J1ogLHbr+Kp6sEAQThb3JSDiO/RVq6oRVweSjRE0uRo6zqZ7
-	 q7q+BpKwQqX1nwJrORVw5vly2fx7PCpcS7dlWKx2lbudsKgQwGsvniJniKEoW1RYG5
-	 yqs0ELlmgraOWJ82uF6folFscIQrtmo7Pk+Yxv+HtvFDCMyWP9JNM3i9PzM60UV9Eu
-	 kl3t0uoqhwTDQ==
-Date: Thu, 4 Dec 2025 09:18:54 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH 2/7] generic/778: fix severe performance problems
-Message-ID: <20251204171854.GF89492@frogsfrogsfrogs>
-References: <176279908967.605950.2192923313361120314.stgit@frogsfrogsfrogs>
- <176279909041.605950.16815410156483574567.stgit@frogsfrogsfrogs>
- <aRXGyR9kj0kPirIE@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
- <20251115023251.GI196366@frogsfrogsfrogs>
- <aSq0OzvJHT1yOdvF@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
- <20251201231908.GB89492@frogsfrogsfrogs>
- <aS_WhMSGtfeYN5Tu@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+	b=Tlva8RoewqIBhqyRHgIqO1o8YoXo24jG0VpiNy3ittTIuxLVuZhWPj9bKrLrueSef
+	 xPUdBfMNu6ynsBbxfr9nSEecOvp6gUT06b5MfLx13dF0L6/KzwbewTKra5Gv4gTzVw
+	 0WY8KMpTHvO4it5MsAiG2GavflG6j/mDCeAKvBcDIkCkVvPqynV2j1/NC22YpVbdDM
+	 CqPN5OeQeVRCGkwQtM+f9aykZAjvn6kMMRieN/aVTLRMbF4rXN/zpJnejTBGtqoWLb
+	 yGrnswSMi+yBwJbVfXxtOlyneSUSWI3BNLlisLpL2K7vgOiUdusLeeGlSZNC2vTZjB
+	 gv35q14cwfUjQ==
+Date: Thu, 4 Dec 2025 17:20:27 +0000
+From: Jaegeuk Kim <jaegeuk@kernel.org>
+To: Theodore Tso <tytso@mit.edu>
+Cc: Jaegeuk Kim <jaegeuk.kim@gmail.com>, Chao Yu <chao@kernel.org>,
+	linux-f2fs-devel@lists.sourceforge.net, fstests@vger.kernel.org
+Subject: Re: generic/204 is crashing on linux-next when testing f2fs
+Message-ID: <aTHC2wtlC5d00xYL@google.com>
+References: <20251202043952.GA70808@macsyma.lan>
+ <CAOtxgyeik6kgF6SktvFj=anntmJZ_aWneqq1XzLpqpHK1XMb+Q@mail.gmail.com>
+ <20251203021709.GA71988@macsyma.lan>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -47,252 +44,61 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aS_WhMSGtfeYN5Tu@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+In-Reply-To: <20251203021709.GA71988@macsyma.lan>
 
-On Wed, Dec 03, 2025 at 11:49:48AM +0530, Ojaswin Mujoo wrote:
-> On Mon, Dec 01, 2025 at 03:19:08PM -0800, Darrick J. Wong wrote:
-> > On Sat, Nov 29, 2025 at 02:22:11PM +0530, Ojaswin Mujoo wrote:
-> > > On Fri, Nov 14, 2025 at 06:32:51PM -0800, Darrick J. Wong wrote:
-> > > > On Thu, Nov 13, 2025 at 05:23:45PM +0530, Ojaswin Mujoo wrote:
-> > > > > On Mon, Nov 10, 2025 at 10:26:32AM -0800, Darrick J. Wong wrote:
-> > > > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > > > 
-> > > > > > This test takes 4800s to run, which is horrible.  AFAICT it starts out
-> > > > > > by timing how much can be written atomically to a new file in 0.2
-> > > > > > seconds, then scales up the file size by 3x.  On not very fast storage,
-> > > > > 
-> > > > > Hi Darrick,
-> > > 
-> > > (Sorry I missed this email somehow)
-> > > 
-> > > > > 
-> > > > > So 250MB in 0.2s is like 1.2GBps which seems pretty fast. Did you mean
-> > > > > "On fast storage ..." ?
-> > > > 
-> > > > No, I have even faster storage. ;)
-> > > 
-> > > :O
-> > > 
-> > > So that means on an even faster storage this problem would be even more
-> > > visible because our file size would be >250MB
-> > > 
-> > > > 
-> > > > > > this can result in file_size being set to ~250MB on a 4k fsblock
-> > > > > > filesystem.  That's about 64,000 blocks.
-> > > > > > 
-> > > > > > The next thing this test does is try to create a file of that size
-> > > > > > (250MB) of alternating written and unwritten blocks.  For some reason,
-> > > > > > it sets up this file by invoking xfs_io 64,000 times to write small
-> > > > > > amounts of data, which takes 3+ minutes on the author's system because
-> > > > > > exec overhead is pretty high when you do that.
-> > > > > 
-> > > > > > 
-> > > > > > As a result, one loop through the test takes almost 4 minutes.  The test
-> > > > > > loops 20 times, so it runs for 80 minutes(!!) which is a really long
-> > > > > > time.
-> > > > > > 
-> > > > > > So the first thing we do is observe that the giant slow loop is being
-> > > > > > run as a single thread on an empty filesystem.  Most of the time the
-> > > > > > allocator generates a mostly physically contiguous file.  We could
-> > > > > > fallocate the whole file instead of fallocating one block every other
-> > > > > > time through the loop.  This halves the setup time.
-> > > > > > 
-> > > > > > Next, we can also stuff the remaining pwrite commands into a bash array
-> > > > > > and only invoke xfs_io once every 128x through the loop.  This amortizes
-> > > > > > the xfs_io startup time, which reduces the test loop runtime to about 20
-> > > > > > seconds.
-> > > > > 
-> > > > > Oh right, this is very bad. Weirdly I never noticed the test taking such
-> > > > > a huge time while testing on scsi_debug and also on an enterprise SSD.
-> > > > 
-> > > > It doesn't help that xfs supports much larger awu_max than (say) ext4.
-> > > 
-> > > I did test on xfs as well. But yea maybe my SSD is just not fast enough.
-> > > 
-> > > > 
-> > > > > Thanks for fixing this up though, I will start using maybe dm-delay
-> > > > > while stressing the tests in the future to avoid such issues.
-> > > > 
-> > > > fork() is a bit expensive.
-> > > > 
-> > > > > > 
-> > > > > > Finally, replace the 20x loop with a _soak_loop_running 5x loop because
-> > > > > > 5 seems like enough.  Anyone who wants more can set TIME_FACTOR or
-> > > > > > SOAK_DURATION to get more intensive testing.  On my system this cuts the
-> > > > > > runtime to 75 seconds.
-> > > > > 
-> > > > > So about the loops, we were running a modified version of this test,
-> > > > > which used non atomic writes, to confirm if we are able to catch torn
-> > > > > writes this way. We noticed that it sometimes took 10+ loops to observe
-> > > > > the torn write. Hence we kept iters=20. Since catching a torn write is
-> > > > > critical for working of atomic writes, I think it might make sense to
-> > > > > leave it at 20. If we feel this is a very high value, we can perhaps
-> > > > > remove -g auto and keep -g stress -g atomicwrites so only people who
-> > > > > explicitly want to stress atomic writes will run it.
-> > > > 
-> > > > In that case we ought to limit the awu_max that we feed to the test
-> > > > because otherwise it starts running a lot of IO.
-> > > 
-> > > Yes I think that makes sense. Right now we get awu_max of 4M on xfs that
-> > > means we always end up only testing software atomic writes.  Maybe we
-> > > can instead cap awu_max at 64K or something. This way, we can test both
-> > > hw atomic writes (when device supports it) and sw atomic writes (when it
-> > > doesn't)
+On 12/02, Theodore Tso wrote:
+> On Tue, Dec 02, 2025 at 09:30:44AM -0800, Jaegeuk Kim wrote:
+> > > For now, I'll exclude generic/204 from the f2fs configs in my test
+> > > appliance; if you have a chance to take a look at this and let me know
+> > > when it might be safe to re-neable generic/204 for f2fs, that would be
+> > > great.  Thanks!
 > > 
-> > Yeah, capping the testing block size sounds like a good idea.  What do
-> > you think about using min(awu_max_opt * 2, awu_max) ?
+> > Thank you for sharing the report. I didn't hit this in my setup tho, let
+> > us try to reproduce it first.
 > 
-> Im thinking that now that we are modifying this, maybe we can improve
-> coverage by also testing hardware atomic write paths. Right now the
-> test will mostly be testing SW fallback on XFS because we use awu_max
-> (usually 4M).
+> I'm not able to reproduce it by running generic/204 by itself; only
+> when running the full auto group.  (See below).  The generic/204 test
+> reformats the scratch partition at the beginning of the test, and
+> doesn't depend on the test partition.  Presumably, a previous test
+> when running the auto group is somehow setting up generic/204 to fail.
 > 
-> Maybe something like min(awu_max_opt, awu_max) gets us coverage of both
-> paths?
-> 
-> Also looking at xfs_get_atomic_write_max_opt() there is the caveat that 
-> awu_max_opt is returned as 0 if awu_max <= blocksize (should be rare
-> with software atomic writes but yeah) and ext4 always returns it as 0 so
-> we will need to handle that.
-> 
-> How about (psuedocode):
-> 
-> if (awu_max_opt == 0)
-> 		/* software only, limit to 128k */
->     awu_max = min(statx->awu_max, 128K)
-> else
->     awu_max = min(statx->awu_max_opt, statx->awu_max)
+> I'll try doing a run with KASAN enabled, in case that gives us some
+> insight.
 
-I think that's worth trying!
+Thank you. fyi; I found some other xfstests failures, hence dropped some
+suspicious patches and pushed today. Currently, my setup passed all the
+test-cases with it, so if possible, could you please check probably tomorrow
+linux-next?
 
---D
+Thanks,
 
 > 
-> Regards,
-> ojaswin
-> > 
-> > --D
-> > 
-> > > Regards,
-> > > ojaswin
-> > > 
-> > > > 
-> > > > --D
-> > > > 
-> > > > > > 
-> > > > > > Cc: <fstests@vger.kernel.org> # v2025.10.20
-> > > > > > Fixes: ca954527ff9d97 ("generic: Add sudden shutdown tests for multi block atomic writes")
-> > > > > > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> > > > > > ---
-> > > > > >  tests/generic/778 |   59 ++++++++++++++++++++++++++++++++++++-----------------
-> > > > > >  1 file changed, 40 insertions(+), 19 deletions(-)
-> > > > > > 
-> > > > > > 
-> > > > > > diff --git a/tests/generic/778 b/tests/generic/778
-> > > > > > index 8cb1d8d4cad45d..7cfabc3a47a521 100755
-> > > > > > --- a/tests/generic/778
-> > > > > > +++ b/tests/generic/778
-> > > > > > @@ -42,22 +42,28 @@ atomic_write_loop() {
-> > > > > >  		# Due to sudden shutdown this can produce errors so just
-> > > > > >  		# redirect them to seqres.full
-> > > > > >  		$XFS_IO_PROG -c "open -fsd $testfile" -c "pwrite -S 0x61 -DA -V1 -b $size $off $size" >> /dev/null 2>>$seqres.full
-> > > > > > -		echo "Written to offset: $off" >> $tmp.aw
-> > > > > > -		off=$((off + $size))
-> > > > > > +		echo "Written to offset: $((off + size))" >> $tmp.aw
-> > > > > > +		off=$((off + size))
-> > > > > >  	done
-> > > > > >  }
-> > > > > >  
-> > > > > >  start_atomic_write_and_shutdown() {
-> > > > > >  	atomic_write_loop &
-> > > > > >  	awloop_pid=$!
-> > > > > > +	local max_loops=100
-> > > > > >  
-> > > > > >  	local i=0
-> > > > > > -	# Wait for at least first write to be recorded or 10s
-> > > > > > -	while [ ! -f "$tmp.aw" -a $i -le 50 ]; do i=$((i + 1)); sleep 0.2; done
-> > > > > > +	# Wait for at least first write to be recorded or too much time passes
-> > > > > > +	while [ ! -f "$tmp.aw" -a $i -le $max_loops ]; do
-> > > > > > +		i=$((i + 1))
-> > > > > > +		sleep 0.2
-> > > > > > +	done
-> > > > > >  
-> > > > > > -	if [[ $i -gt 50 ]]
-> > > > > > +	cat $tmp.aw >> $seqres.full
-> > > > > > +
-> > > > > > +	if [[ $i -gt $max_loops ]]
-> > > > > >  	then
-> > > > > > -		_fail "atomic write process took too long to start"
-> > > > > > +		_notrun "atomic write process took too long to start"
-> > > > > >  	fi
-> > > > > >  
-> > > > > >  	echo >> $seqres.full
-> > > > > > @@ -113,21 +119,34 @@ create_mixed_mappings() {
-> > > > > >  	local off=0
-> > > > > >  	local operations=("W" "U")
-> > > > > >  
-> > > > > > +	test $size_bytes -eq 0 && return
-> > > > > > +
-> > > > > > +	# fallocate the whole file once because preallocating single blocks
-> > > > > > +	# with individual xfs_io invocations is really slow and the allocator
-> > > > > > +	# usually gives out consecutive blocks anyway
-> > > > > > +	$XFS_IO_PROG -f -c "falloc 0 $size_bytes" $file
-> > > > > > +
-> > > > > > +	local cmds=()
-> > > > > >  	for ((i=0; i<$((size_bytes / blksz )); i++)); do
-> > > > > > -		index=$(($i % ${#operations[@]}))
-> > > > > > -		map="${operations[$index]}"
-> > > > > > +		if (( i % 2 == 0 )); then
-> > > > > > +			cmds+=(-c "pwrite -b $blksz $off $blksz")
-> > > > > > +		fi
-> > > > > > +
-> > > > > > +		# batch the write commands into larger xfs_io invocations to
-> > > > > > +		# amortize the fork overhead
-> > > > > > +		if [ "${#cmds[@]}" -ge 128 ]; then
-> > > > > > +			$XFS_IO_PROG "${cmds[@]}" "$file" >> /dev/null
-> > > > > > +			cmds=()
-> > > > > > +		fi
-> > > > > >  
-> > > > > > -		case "$map" in
-> > > > > > -		    "W")
-> > > > > > -			$XFS_IO_PROG -fc "pwrite -b $blksz $off $blksz" $file  >> /dev/null
-> > > > > > -			;;
-> > > > > > -		    "U")
-> > > > > > -			$XFS_IO_PROG -fc "falloc $off $blksz" $file >> /dev/null
-> > > > > > -			;;
-> > > > > > -		esac
-> > > > > >  		off=$((off + blksz))
-> > > > > >  	done
-> > > > > >  
-> > > > > > +	if [ "${#cmds[@]}" -gt 0 ]; then
-> > > > > > +		$XFS_IO_PROG "${cmds[@]}" "$file" >> /dev/null
-> > > > > > +		cmds=()
-> > > > > > +	fi
-> > > > > > +
-> > > > > >  	sync $file
-> > > > > >  }
-> > > > > >  
-> > > > > > @@ -336,9 +355,9 @@ echo >> $seqres.full
-> > > > > >  echo "# Populating expected data buffers" >> $seqres.full
-> > > > > >  populate_expected_data
-> > > > > >  
-> > > > > > -# Loop 20 times to shake out any races due to shutdown
-> > > > > > -for ((iter=0; iter<20; iter++))
-> > > > > > -do
-> > > > > > +# Loop to shake out any races due to shutdown
-> > > > > > +iter=0
-> > > > > > +while _soak_loop_running $TIME_FACTOR; do
-> > > > > >  	echo >> $seqres.full
-> > > > > >  	echo "------ Iteration $iter ------" >> $seqres.full
-> > > > > >  
-> > > > > > @@ -361,6 +380,8 @@ do
-> > > > > >  	echo >> $seqres.full
-> > > > > >  	echo "# Starting shutdown torn write test for append atomic writes" >> $seqres.full
-> > > > > >  	test_append_torn_write
-> > > > > > +
-> > > > > > +	iter=$((iter + 1))
-> > > > > >  done
-> > > > > >  
-> > > > > >  echo "Silence is golden"
-> > > > > > 
-> > > > > 
+> 						- Ted
+> 							
+> TESTRUNID: ltm-20251202161646
+> KERNEL:    kernel	6.18.0-rc4-xfstests-kasan-00072-g6fb67ac89690 #314 SMP PREEMPT_DYNAMIC Tue Dec  2 16:05:26 EST 2025 x86_64
+> CMDLINE:   --kernel gs://gce-xfstests/kernel.deb -c f2fs/all -a -C 30 generic/204
+> CPUS:      2
+> MEM:       7680
+> 
+> f2fs/default: 30 tests, 6043 seconds
+> f2fs/encrypt: 30 tests, 6209 seconds
+> f2fs/compress: 30 tests, 6140 seconds
+> Totals: 90 tests, 0 skipped, 0 failures, 0 errors, 18392s
+> 
+> FSTESTIMG: gce-xfstests/xfstests-amd64-202512020012
+> FSTESTPRJ: gce-xfstests
+> FSTESTVER: blktests	4badb27 (Fri, 31 Oct 2025 19:53:27 +0900)
+> FSTESTVER: fio		fio-3.41 (Fri, 5 Sep 2025 14:21:17 -0600)
+> FSTESTVER: fsverity	v1.7 (Tue, 4 Nov 2025 17:28:17 -0800)
+> FSTESTVER: ima-evm-utils	v1.5 (Mon, 6 Mar 2023 07:40:07 -0500)
+> FSTESTVER: libaio  	libaio-0.3.108-82-gb8eadc9 (Thu, 2 Jun 2022 13:33:11 +0200)
+> FSTESTVER: ltp		20250930 (Tue, 30 Sep 2025 13:53:45 +0200)
+> FSTESTVER: quota		v4.05-77-g22ff3d9 (Tue, 2 Sep 2025 08:12:02 -0400)
+> FSTESTVER: util-linux	v2.41.2 (Mon, 22 Sep 2025 12:56:34 +0200)
+> FSTESTVER: xfsprogs	v6.17.0 (Mon, 20 Oct 2025 16:49:00 +0200)
+> FSTESTVER: xfstests-bld	gce-xfstests-202504292206-34-g84a091b7 (Tue, 2 Dec 2025 00:09:25 -0500)
+> FSTESTVER: xfstests	v2025.11.04-12-g64e3dbda7 (Thu, 13 Nov 2025 19:58:03 -0500)
+> FSTESTVER: zz_build-distro	trixie
+> FSTESTSET: generic/204
+> FSTESTOPT: count 30 fail_loop_count 0
