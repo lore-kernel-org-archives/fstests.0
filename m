@@ -1,40 +1,87 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1280A2E6CA8
-	for <fstests@vger.kernel.org>; Thu,  4 Dec 2025 21:59:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ED29E2571A5
+	for <fstests@vger.kernel.org>; Fri,  5 Dec 2025 06:17:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764885582; cv=none; b=KkyAcH0tqI3Yui3IwxeQ5XZGEQTlX3Wr3pBF0lrVmmdvgmNuCraxgMVGPUKP2vloa76pIc55tv72NcL8y9kF0/VtIKabCqv302mjKtHt+1ZvCQXUlHNGN/ODAToIOqi6UHm+j+JTE8Le2tXOFkaEoYLj8sn8oxj62ACRDmmbPHE=
+	t=1764915426; cv=none; b=HqcOzkCiiIpfD0Vh8hjZ9IeT3R/Bi1QtwuZweO2nJb0aSzMId0v2OG5lrq4CLcSGSah7s98eXBjyNZOYtw93JTxOjD6k8zyH4gAW1atSa1hdyYWEKLZepys4aRLz2XppNAPk2Rqap5TOjqSvKGXCemIPBowCPTUgXezB+Zat2r0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764885582; c=relaxed/simple;
-	bh=BUcQWs/vguk/FMfGF4LR6FgNh7gOnALaP4H43tcWHiE=;
+	s=arc-20240116; t=1764915426; c=relaxed/simple;
+	bh=lRvMy3Nsa4018CCXzjE5gndFWfgaLWm51xN0ZdAb1DY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=AtaJp8hRXejZxIgFWpf0wy/9SLoX33i5dw5sZ665K3Gj08l5z/DEpFtSqRuBA6rkEydz851Eum4r1/6uVok+Tp2kTba+mRCwHs+h5e83vgOnSZPAOgcodgguxHE//2Ia1bqXFXT2tc82gzL0i2jV5c+KHS6UD4MGqqoF19xS7Po=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=B9qNF8JW; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=Hps7iBeXjpjPcxn4p1/5zlFiThatDRjjoI9bbAuJ9Qobv305GUv5kxKILd57KstKfzaZvp26Ocpky1ekDhSZNwG9wRYU1Sw85IyeRu/aaRUzSkHnjG35wvXZLPBCM9uUZqdTkLbCarvn4RTxeJOsWM9gxr3hfbu5vnsWRba3lkU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=J1jRvutT; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=gGhAPJYn; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="B9qNF8JW"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8F997C4CEFB;
-	Thu,  4 Dec 2025 21:59:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1764885581;
-	bh=BUcQWs/vguk/FMfGF4LR6FgNh7gOnALaP4H43tcWHiE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=B9qNF8JWq7GPOc1KdDKsljVo2f+4Fv1ZaR347BDYJzVbTD9vzOt1PakXyezZkWlY5
-	 2MBfTviQQrco2t57MKKWYrTKwHFJFLYRLmsWmiF1le9K1+skMzc/SdDMRdYzDowECY
-	 W5IbN/HXb/EshSjJY+uUUJ8zc5uPsdU+mfXIGGJd8gTWFhFHEsTYbMFEjOXsIzvJK3
-	 bfRQdzanIeh0DUqpvDwer9wXVTI9pTHtzRvAsqRPz98X7rYBL2gq/OBgTrBb83k509
-	 7QU1Bsqgawy3CZrJReJ8UPRPq3mZHUH3gkVD3QXJoUmY7hSNKq1ZGYgu+yOKn3DJmM
-	 a777KwSTEs8cw==
-Date: Thu, 4 Dec 2025 13:59:41 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Chao Yu <chao@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH] common/quota: fix to wait for all inodes been evicted in
- _check_quota_usage()
-Message-ID: <20251204215941.GF89454@frogsfrogsfrogs>
-References: <20251203193147.3320893-1-chao@kernel.org>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="J1jRvutT";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="gGhAPJYn"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1764915422;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=xXzRynHVZD35dsZOQSAxDidWH5UYp+SP25S9dmTtEho=;
+	b=J1jRvutTYDs+fDLX9nyy59li/lzxHy87XAwVbg+mYQssPH9etvlU3hNSljf0AzVoFAvrNr
+	wB7hr5WtLcgp+HzkpdO5fXF1S9Meir4oGwiGiVVodBb/G8PrOdoda4dtkIacWj1s5JZ8tt
+	BtIAWR7Liad8K5n/2cLBx3hDwANtwhI=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-208-BoRCI9PBN5So0ZdUF6MtzA-1; Fri, 05 Dec 2025 01:17:01 -0500
+X-MC-Unique: BoRCI9PBN5So0ZdUF6MtzA-1
+X-Mimecast-MFC-AGG-ID: BoRCI9PBN5So0ZdUF6MtzA_1764915420
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-29848363458so34365515ad.2
+        for <fstests@vger.kernel.org>; Thu, 04 Dec 2025 22:17:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1764915420; x=1765520220; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=xXzRynHVZD35dsZOQSAxDidWH5UYp+SP25S9dmTtEho=;
+        b=gGhAPJYn7RnryCgYJqApSohtCI2gYZjkA2DdsKVDs3KvozYUFtE8+GWZTxEj2J4hai
+         8NJPrDajFz6wMUzzyKaVxTZmNtJQjx6tPxMunoO4jTT5gXpdyP02ZW7juxzPZp+m4tQv
+         e0GplKahWdf/pcXWFeMHrie6dAOVm8xYyijyBK1GlaGnHXlxWd/ICX22RdCHwu7LvzEA
+         u5PDInUuQDF+JqgRkZbe2VceNnXhHma37LuzN/9iI2MOhzIndmofqK9uSUzPPUxvNUnS
+         pm/VOjpasp7wJLn+nV8FHCdeyEl0Jx7OFDTP8WTBltqcVEepQpfCXlkmU9PLPCbAXhXa
+         DruQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1764915420; x=1765520220;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=xXzRynHVZD35dsZOQSAxDidWH5UYp+SP25S9dmTtEho=;
+        b=TOz4YDCyoDlQGlceyk8s3Cdegne6IIFaPJmwSEuYx6Hr//31q/dcDfeL5tCZehhlkW
+         BdBtHh9iUIbqoZp+szaiZdICD3hU5rTSHCmWmK+FT4tnhgrZZvEV04argriP1qRE/vps
+         +6dEPCWLXQpajKZVgoIG69HxcPtmFCTd2L8eEbLJ9+kadkBcsljypoEKjy4IksOemtYm
+         R/nMme4LfsImdflxnMDLHYB8rNhXiKnSLLFjS+lfXiVw4lsAigxclKl1hzuieBrFV9u8
+         ZsoqImw4nqLoGIa1C2D8jQCEqeSuatoiCZAFH2nJ+kS0x7Y9qePevJm3Xz4ULTvlgDSp
+         GSTg==
+X-Gm-Message-State: AOJu0YyVnT6nsymdeZEJQF//lOViQIvFX2dn1FUcSGHTlt52x1lDcUwV
+	GhvSkSKK5SU7ud+9XAAnrtkTA/IEC1PfRQFiMFghppTEyTC1f+M+LGiUD5Sp3CmGJ/w6fKGxNf3
+	7K5lNRvFZwO6RDyEHEjuU4HPQG9AXPnE2VopDCtbSeYBr6c+aW8sMRfgkDJk=
+X-Gm-Gg: ASbGncujedgo4IbJhseMsk7vGsh3UCG8Co+p3u0arTzlhrWk/H+1JCnWSba2Jy+5xGe
+	ij7CliVh/S0LdZe29X7cDF/YL9oKYQik25IfNxUkzTKECVOA7oxB6s2nU6J9lxQs54pTdNKUErL
+	vxXnCLzL48BkEERTUx/TmIFLN0wy+pG+k/j2JrXjPEgcUDBNyvK5Di5oovLpdHqi8h7Eg4aNbY2
+	a9lzYDBOa+T/5egIrS01No4RmHIkETKkWqFJu+Vo1DNvkZWayoocKz93bg11Wt90mftPxBYyy7g
+	a/3RClyjAwcgTo6J15as/pr1rF6RW2dh0y3kIkvOdmR6MAdfQmYCaUtjQcDZFpVGhGZ/C3cdPbM
+	DoTLP9nG9WrnKyy0AoLzNxb1Mm6/Srb56SSudYJJ8iSFPKqQgXA==
+X-Received: by 2002:a17:903:38cf:b0:298:42ba:c437 with SMTP id d9443c01a7336-29d6848f252mr104944825ad.50.1764915420225;
+        Thu, 04 Dec 2025 22:17:00 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IF1PWOM7eO8T0mI71RM9pRlNw2s5iGdFGEO38X35ZYLBc56M0oZfbuHAFiUklmP4+mopL57Tw==
+X-Received: by 2002:a17:903:38cf:b0:298:42ba:c437 with SMTP id d9443c01a7336-29d6848f252mr104944545ad.50.1764915419610;
+        Thu, 04 Dec 2025 22:16:59 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-29dae99eab5sm37735695ad.51.2025.12.04.22.16.57
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 04 Dec 2025 22:16:58 -0800 (PST)
+Date: Fri, 5 Dec 2025 14:16:54 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH] fsstress: allow multiple suboptions to -f
+Message-ID: <20251205061654.gyoz2nvtokzgux5p@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20251204215317.GE89454@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,74 +90,90 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251203193147.3320893-1-chao@kernel.org>
+In-Reply-To: <20251204215317.GE89454@frogsfrogsfrogs>
 
-On Thu, Dec 04, 2025 at 03:31:47AM +0800, Chao Yu wrote:
-> generic/233  3s ... - output mismatch (see /share/git/fstests/results//generic/233.out.bad)
->     --- tests/generic/233.out   2025-01-12 21:57:40.259440359 +0800
->     +++ /share/git/fstests/results//generic/233.out.bad 2025-12-04 03:02:26.000000000 +0800
->     @@ -4,4 +4,12 @@
+On Thu, Dec 04, 2025 at 01:53:17PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
->      seed = S
->      Comparing user usage
->     +4c4
->     +< #1000     --   31476   32000   32000            994  1000  1000
->     +---
->     +> #1000     --   31476   32000   32000            944  1000  1000
->     ...
->     (Run 'diff -u /share/git/fstests/tests/generic/233.out /share/git/fstests/results//generic/233.out.bad'  to see the entire diff)
-> Ran: generic/233
-> Failures: generic/233
-> Failed 1 of 1 tests
+> I got bitten by fsstress's argument parsing recently because it turns
+> out that if you do:
 > 
-> Sometimes, generic/233 will fail due to it founds inode count is mismatched
-> in between in-memory one and on-disk one.
+> # fsstress -z -f creat=2,unlink=1
 > 
-> The reason is cgroup v2 implementation requires to increase inode reference,
-> and then attach it to thread related cgroup writeback structure, once it
-> needs to switch once write owner changes of target inode, a kernel thread
-> will process it and then release inode reference via evict_inode().
+> It will ignore everything after the '2' and worse yet it won't tell you
+> that it's done so unless you happen to pass -S to make it spit out the
+> frequency table.
 > 
-> So, sync & drop_cache may not guarantee all inodes being evicted, as cgroup
-> has one more refernece on inodes during the time.
+> Adapt process_freq to tokenize the argument string so that it can handle
+> a comma-separated list of key-value arguments.
 > 
-> If inode has not been evicted, dquot inode reference will not be release, it
-> will lead to inode quota mismatch.
-> 
-> Let's add a delay to wait for cgroup switching completion before quota check.
-> 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Signed-off-by: Chao Yu <chao@kernel.org>
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
 > ---
->  common/quota | 3 +++
->  1 file changed, 3 insertions(+)
+
+Looks and tests good to me, it even works with:
+  "-f rmdir=10,link=10,creat=10,mkdir=10,rename=30 -f stat=30 -f unlink=30 -f truncate=20"
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  ltp/fsstress.c |   43 +++++++++++++++++++++++++++++--------------
+>  1 file changed, 29 insertions(+), 14 deletions(-)
 > 
-> diff --git a/common/quota b/common/quota
-> index a51386b1..de7e84e8 100644
-> --- a/common/quota
-> +++ b/common/quota
-> @@ -333,6 +333,9 @@ _check_quota_usage()
->  	# XXX: really need an ioctl instead of this big hammer
->  	echo 3 > /proc/sys/vm/drop_caches
+> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> index 00773cc004bfac..c17ac440414325 100644
+> --- a/ltp/fsstress.c
+> +++ b/ltp/fsstress.c
+> @@ -1792,23 +1792,38 @@ opendir_path(pathname_t *name)
+>  void
+>  process_freq(char *arg)
+>  {
+> -	opdesc_t	*p;
+> -	char		*s;
+> +	char		*token;
+> +	char		*argstr = strdup(arg);
+> +	char		*tokstr = argstr ? argstr : arg;
 >  
-> +	# wait for inode_switch_wbs_wor_fn() to release inodes
-> +	sleep 3
-
-Odd -- I've never seen this problem crop up on ext4 or XFS.  What's
-different about f2fs such that writeback is still in progress?
-
-Oh, XFS cycles the mount and ext4 does ... quotaoff???
-
-Perhaps the sleep 3 thing should only be done for f2fs?  Or do you see
-it on other filesystems as well?
-
---D
-
+> -	s = strchr(arg, '=');
+> -	if (s == NULL) {
+> -		fprintf(stderr, "bad argument '%s'\n", arg);
+> -		exit(1);
+> -	}
+> -	*s++ = '\0';
+> -	for (p = ops; p < ops_end; p++) {
+> -		if (strcmp(arg, p->name) == 0) {
+> -			p->freq = atoi(s);
+> -			return;
+> +	while ((token = strtok(tokstr, ",")) != NULL) {
+> +		opdesc_t	*p = ops;
+> +		char		*s = strchr(token, '=');
+> +		int		found = 0;
 > +
->  	VFS_QUOTA=0
->  	case $FSTYP in
->  	ext2|ext3|ext4|f2fs|gfs2|bcachefs)
-> -- 
-> 2.49.0
+> +		if (!s) {
+> +			fprintf(stderr, "bad argument '%s'\n", token);
+> +			exit(1);
+> +		}
+> +
+> +		*s = '\0';
+> +		for (; p < ops_end; p++) {
+> +			if (strcmp(token, p->name) == 0) {
+> +				p->freq = atoi(s + 1);
+> +				found = 1;
+> +				break;
+> +			}
+>  		}
+> +
+> +		if (!found) {
+> +			fprintf(stderr, "can't find op type %s for -f\n", token);
+> +			exit(1);
+> +		}
+> +
+> +		tokstr = NULL;
+>  	}
+> -	fprintf(stderr, "can't find op type %s for -f\n", arg);
+> -	exit(1);
+> +
+> +	free(argstr);
+>  }
+>  
+>  int
 > 
-> 
+
