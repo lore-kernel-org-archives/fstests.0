@@ -1,87 +1,89 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ED29E2571A5
-	for <fstests@vger.kernel.org>; Fri,  5 Dec 2025 06:17:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 634212F39B0
+	for <fstests@vger.kernel.org>; Fri,  5 Dec 2025 06:33:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764915426; cv=none; b=HqcOzkCiiIpfD0Vh8hjZ9IeT3R/Bi1QtwuZweO2nJb0aSzMId0v2OG5lrq4CLcSGSah7s98eXBjyNZOYtw93JTxOjD6k8zyH4gAW1atSa1hdyYWEKLZepys4aRLz2XppNAPk2Rqap5TOjqSvKGXCemIPBowCPTUgXezB+Zat2r0=
+	t=1764916384; cv=none; b=bug5zDn783lgBcQYtkMcOz1cQWIxUXu6jQ1x1eJu9zNBPFhndHM0kytdkPcPpe/xvN1kSXs89gqso0dPCjMkZh2WgJTbtzvTw9nNUrjxSGKkmD+AquVDKAJ7Fywu3eiW6sWEU6rqgYEMbwLmqJU+/Cx/kkt77c+GEzCTyuuC97c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764915426; c=relaxed/simple;
-	bh=lRvMy3Nsa4018CCXzjE5gndFWfgaLWm51xN0ZdAb1DY=;
+	s=arc-20240116; t=1764916384; c=relaxed/simple;
+	bh=mQF+UH7XKhH3onXdlZmd8nHr/dAP/g4rycaSgnwq9EM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Hps7iBeXjpjPcxn4p1/5zlFiThatDRjjoI9bbAuJ9Qobv305GUv5kxKILd57KstKfzaZvp26Ocpky1ekDhSZNwG9wRYU1Sw85IyeRu/aaRUzSkHnjG35wvXZLPBCM9uUZqdTkLbCarvn4RTxeJOsWM9gxr3hfbu5vnsWRba3lkU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=J1jRvutT; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=gGhAPJYn; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=h28B3gdLgI16PfqEDdnFIzvh8T7ni0H331p2xx3SXjEaTwAU6yKBMiQpA1GivTUxbU1XEDtPVsz1tK+fWSBg94t2+ugFqExR2weQ6HkKm3otR0iihNvud8ASR8ceV6DncRMvniAQI9ZHpwXnHpive3/fB0r//zt+qJ8rdd74NMI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fb+UvakS; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=AnmLySqs; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="J1jRvutT";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="gGhAPJYn"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fb+UvakS";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="AnmLySqs"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1764915422;
+	s=mimecast20190719; t=1764916378;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=xXzRynHVZD35dsZOQSAxDidWH5UYp+SP25S9dmTtEho=;
-	b=J1jRvutTYDs+fDLX9nyy59li/lzxHy87XAwVbg+mYQssPH9etvlU3hNSljf0AzVoFAvrNr
-	wB7hr5WtLcgp+HzkpdO5fXF1S9Meir4oGwiGiVVodBb/G8PrOdoda4dtkIacWj1s5JZ8tt
-	BtIAWR7Liad8K5n/2cLBx3hDwANtwhI=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=MxQYGdl9daQmzLJX+aD+FW2UyY+NMB7PfubW+CqxcGA=;
+	b=fb+UvakSh400pL/uxLoVq/GZU+ddyr7QnzO20bbrlV6XgHZEor7IInlGVWGfiHalbVtO5G
+	y7ZmVYJPNWZwQt7Op1X9ykn3WgVCs27vL9vqc/B+qxW+Qj/QeljSBxVHjYCA4ttKdCaG+F
+	q0IYeZYyYCpIH81CF5qw1WFB9Va+BIo=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-208-BoRCI9PBN5So0ZdUF6MtzA-1; Fri, 05 Dec 2025 01:17:01 -0500
-X-MC-Unique: BoRCI9PBN5So0ZdUF6MtzA-1
-X-Mimecast-MFC-AGG-ID: BoRCI9PBN5So0ZdUF6MtzA_1764915420
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-29848363458so34365515ad.2
-        for <fstests@vger.kernel.org>; Thu, 04 Dec 2025 22:17:01 -0800 (PST)
+ us-mta-2--Fs23h5TO1qlCuUqvnsQHQ-1; Fri, 05 Dec 2025 01:32:56 -0500
+X-MC-Unique: -Fs23h5TO1qlCuUqvnsQHQ-1
+X-Mimecast-MFC-AGG-ID: -Fs23h5TO1qlCuUqvnsQHQ_1764916376
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-297e66542afso44547925ad.3
+        for <fstests@vger.kernel.org>; Thu, 04 Dec 2025 22:32:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1764915420; x=1765520220; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1764916376; x=1765521176; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=xXzRynHVZD35dsZOQSAxDidWH5UYp+SP25S9dmTtEho=;
-        b=gGhAPJYn7RnryCgYJqApSohtCI2gYZjkA2DdsKVDs3KvozYUFtE8+GWZTxEj2J4hai
-         8NJPrDajFz6wMUzzyKaVxTZmNtJQjx6tPxMunoO4jTT5gXpdyP02ZW7juxzPZp+m4tQv
-         e0GplKahWdf/pcXWFeMHrie6dAOVm8xYyijyBK1GlaGnHXlxWd/ICX22RdCHwu7LvzEA
-         u5PDInUuQDF+JqgRkZbe2VceNnXhHma37LuzN/9iI2MOhzIndmofqK9uSUzPPUxvNUnS
-         pm/VOjpasp7wJLn+nV8FHCdeyEl0Jx7OFDTP8WTBltqcVEepQpfCXlkmU9PLPCbAXhXa
-         DruQ==
+        bh=MxQYGdl9daQmzLJX+aD+FW2UyY+NMB7PfubW+CqxcGA=;
+        b=AnmLySqsvk2361Bhd21CcI1C8jy8+qQnvP2LJ7Qo/5i1MKJDOPY7RjDAwGEt7nx8Fc
+         5aAn25MgwXR2JCp6/wJg4RthfzO4KUgaFUINDsSD+EllTcUNUcs4Q3K9uaYThvigb96b
+         ub6yOWNJsQDtG5DHrJ3njmURBmDaKV2Q0zAJEwiiHQmDrCfyDmAJEwa5/Tt8TYqLMuBU
+         46BBtAeiGvto0O2ELlEGJ5EqQQELTPBf1cWQ/gEgKlPWO+2ruaSpSndwyzrvCGF3cNmz
+         LoE/rJavS2qZfCkvLQrPU/k8Zl5WhlEYN5/GW+YuJwYjfdUE4H1Qoq5nvpGRGmn10Yn1
+         aEBA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1764915420; x=1765520220;
+        d=1e100.net; s=20230601; t=1764916376; x=1765521176;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=xXzRynHVZD35dsZOQSAxDidWH5UYp+SP25S9dmTtEho=;
-        b=TOz4YDCyoDlQGlceyk8s3Cdegne6IIFaPJmwSEuYx6Hr//31q/dcDfeL5tCZehhlkW
-         BdBtHh9iUIbqoZp+szaiZdICD3hU5rTSHCmWmK+FT4tnhgrZZvEV04argriP1qRE/vps
-         +6dEPCWLXQpajKZVgoIG69HxcPtmFCTd2L8eEbLJ9+kadkBcsljypoEKjy4IksOemtYm
-         R/nMme4LfsImdflxnMDLHYB8rNhXiKnSLLFjS+lfXiVw4lsAigxclKl1hzuieBrFV9u8
-         ZsoqImw4nqLoGIa1C2D8jQCEqeSuatoiCZAFH2nJ+kS0x7Y9qePevJm3Xz4ULTvlgDSp
-         GSTg==
-X-Gm-Message-State: AOJu0YyVnT6nsymdeZEJQF//lOViQIvFX2dn1FUcSGHTlt52x1lDcUwV
-	GhvSkSKK5SU7ud+9XAAnrtkTA/IEC1PfRQFiMFghppTEyTC1f+M+LGiUD5Sp3CmGJ/w6fKGxNf3
-	7K5lNRvFZwO6RDyEHEjuU4HPQG9AXPnE2VopDCtbSeYBr6c+aW8sMRfgkDJk=
-X-Gm-Gg: ASbGncujedgo4IbJhseMsk7vGsh3UCG8Co+p3u0arTzlhrWk/H+1JCnWSba2Jy+5xGe
-	ij7CliVh/S0LdZe29X7cDF/YL9oKYQik25IfNxUkzTKECVOA7oxB6s2nU6J9lxQs54pTdNKUErL
-	vxXnCLzL48BkEERTUx/TmIFLN0wy+pG+k/j2JrXjPEgcUDBNyvK5Di5oovLpdHqi8h7Eg4aNbY2
-	a9lzYDBOa+T/5egIrS01No4RmHIkETKkWqFJu+Vo1DNvkZWayoocKz93bg11Wt90mftPxBYyy7g
-	a/3RClyjAwcgTo6J15as/pr1rF6RW2dh0y3kIkvOdmR6MAdfQmYCaUtjQcDZFpVGhGZ/C3cdPbM
-	DoTLP9nG9WrnKyy0AoLzNxb1Mm6/Srb56SSudYJJ8iSFPKqQgXA==
-X-Received: by 2002:a17:903:38cf:b0:298:42ba:c437 with SMTP id d9443c01a7336-29d6848f252mr104944825ad.50.1764915420225;
-        Thu, 04 Dec 2025 22:17:00 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IF1PWOM7eO8T0mI71RM9pRlNw2s5iGdFGEO38X35ZYLBc56M0oZfbuHAFiUklmP4+mopL57Tw==
-X-Received: by 2002:a17:903:38cf:b0:298:42ba:c437 with SMTP id d9443c01a7336-29d6848f252mr104944545ad.50.1764915419610;
-        Thu, 04 Dec 2025 22:16:59 -0800 (PST)
+        bh=MxQYGdl9daQmzLJX+aD+FW2UyY+NMB7PfubW+CqxcGA=;
+        b=rrjYpl6Fnwjf2/pC83ac1Pb5wqFsv1YZ0MTRPx2J9IoSJcNrwLzldsVUoylkznWqJK
+         GA2UPEL34aCwNjmfw+DREqqgEYDxlpeYkPPgzdokCoCahPpoD5kXQ1c7OBo/Mbyr22Q1
+         +jVoWIs11i2ktzTqgpF6orEoNXz2O3xYNsfK43qnCVV2uzcrvQmDcyOgtkxb9CoYLqEU
+         WM9tCZ0kbPgJITqCiRB0hx2MpNudgzmaQRhFoxgYGePBtRzNzIdLFxJ+or9pZ/yBCK9+
+         pgnOxf8+z/f1E+h3hUYczLy4Xe/OXBP0bNDXoMCDeaOm9dVqIioJbkxQo5kyq1ELTnN3
+         0cMg==
+X-Gm-Message-State: AOJu0YzFH1mrtQ+e6qM77VQXHwNY1LUKVuGh/DaNdItSy4YP+nsvhAqm
+	8NGKJiJvTomVR0rO1/CF5uGoE8+Eh1eLp2E6Uz6mJ7AtiwXkpyWT3AuU2M/dzCIDRG+DVTequ/D
+	ke8iKRkgBPV+EheUftK43RxT2xkxh3ojE6Gn4/BjEsVkxG1kUH3/NtvKkMkM=
+X-Gm-Gg: ASbGncsCXn8FBEeJxTnu7ruvGR7Iu/fTXNk2vA2TBIZu1t2bxUBFHAoDX+ljG9kB6aY
+	mYZc3Pf4ikEok0cTqBFoarI4GGQ++GNqmhJTZxTXroLphDxQB9BNV0xaOets1CB+QBUu2XHnjBd
+	2opyOPmHVH1sKgvJ6Yac8EAkp2sfjpgMjWIGrqGkG4uQARvwhzj1dM/cxJyAYkVcIXuKGARrlfC
+	/piOM0u6DU/emrUmfiGV48ulAfhUA3TBusqNjXdh2olwh0LJVL+UM9f3Qw04UKgMGqN0YU9t/rn
+	GKV+zGoiNgjmXrpEqB9B9NJWm5qyWiDVW3nu/Y2qJkVo7S8MQjxI2tPWrbj16lBJnmmIaLtPkiq
+	6e3lD6Cb2RcOpLu/9PpO+T7pWZBzVYdlDw8hGaD6d8QgBtUP6Mg==
+X-Received: by 2002:a17:903:2303:b0:24b:270e:56c7 with SMTP id d9443c01a7336-29d9f67d57dmr65051195ad.7.1764916375593;
+        Thu, 04 Dec 2025 22:32:55 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IExcEHN+AWAV9cWkGJZYiC3/x7+IcD7DjmA1NemvRy6mH6eHM3wG0CuOMqu80wQf9iNTmcdRA==
+X-Received: by 2002:a17:903:2303:b0:24b:270e:56c7 with SMTP id d9443c01a7336-29d9f67d57dmr65050825ad.7.1764916375078;
+        Thu, 04 Dec 2025 22:32:55 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-29dae99eab5sm37735695ad.51.2025.12.04.22.16.57
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-29daeae6ea0sm37752035ad.99.2025.12.04.22.32.52
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Dec 2025 22:16:58 -0800 (PST)
-Date: Fri, 5 Dec 2025 14:16:54 +0800
+        Thu, 04 Dec 2025 22:32:54 -0800 (PST)
+Date: Fri, 5 Dec 2025 14:32:50 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] fsstress: allow multiple suboptions to -f
-Message-ID: <20251205061654.gyoz2nvtokzgux5p@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20251204215317.GE89454@frogsfrogsfrogs>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] generic: test journaling after renaming fsynced file and
+ fsync parent dir
+Message-ID: <20251205063250.zj746ryaullmkc4a@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <a883e236548bec41bb0b043fe0105b4da4fd0749.1764783252.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -90,90 +92,126 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251204215317.GE89454@frogsfrogsfrogs>
+In-Reply-To: <a883e236548bec41bb0b043fe0105b4da4fd0749.1764783252.git.fdmanana@suse.com>
 
-On Thu, Dec 04, 2025 at 01:53:17PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Wed, Dec 03, 2025 at 05:38:14PM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> I got bitten by fsstress's argument parsing recently because it turns
-> out that if you do:
+> Test that if we fsync a file, create a directory in the same parent
+> directory of the file, add a file to the new directory, rename the
+> initial file and then fsync the parent directory of the first file, after
+> a power failure the new directory exists, with its new entry and the first
+> file has the new name and any data we wrote to it before its fsync.
 > 
-> # fsstress -z -f creat=2,unlink=1
+> This exercises a reported btrfs bug which is fixed by a patch with the
+> following subject:
 > 
-> It will ignore everything after the '2' and worse yet it won't tell you
-> that it's done so unless you happen to pass -S to make it spit out the
-> frequency table.
+>   "btrfs: do not skip logging new dentries when logging a new name"
 > 
-> Adapt process_freq to tokenize the argument string so that it can handle
-> a comma-separated list of key-value arguments.
-> 
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > ---
 
-Looks and tests good to me, it even works with:
-  "-f rmdir=10,link=10,creat=10,mkdir=10,rename=30 -f stat=30 -f unlink=30 -f truncate=20"
+Looks good to me,
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  ltp/fsstress.c |   43 +++++++++++++++++++++++++++++--------------
->  1 file changed, 29 insertions(+), 14 deletions(-)
+>  tests/generic/785     | 73 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/785.out |  4 +++
+>  2 files changed, 77 insertions(+)
+>  create mode 100755 tests/generic/785
+>  create mode 100644 tests/generic/785.out
 > 
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index 00773cc004bfac..c17ac440414325 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -1792,23 +1792,38 @@ opendir_path(pathname_t *name)
->  void
->  process_freq(char *arg)
->  {
-> -	opdesc_t	*p;
-> -	char		*s;
-> +	char		*token;
-> +	char		*argstr = strdup(arg);
-> +	char		*tokstr = argstr ? argstr : arg;
->  
-> -	s = strchr(arg, '=');
-> -	if (s == NULL) {
-> -		fprintf(stderr, "bad argument '%s'\n", arg);
-> -		exit(1);
-> -	}
-> -	*s++ = '\0';
-> -	for (p = ops; p < ops_end; p++) {
-> -		if (strcmp(arg, p->name) == 0) {
-> -			p->freq = atoi(s);
-> -			return;
-> +	while ((token = strtok(tokstr, ",")) != NULL) {
-> +		opdesc_t	*p = ops;
-> +		char		*s = strchr(token, '=');
-> +		int		found = 0;
+> diff --git a/tests/generic/785 b/tests/generic/785
+> new file mode 100755
+> index 00000000..a6cfdd87
+> --- /dev/null
+> +++ b/tests/generic/785
+> @@ -0,0 +1,73 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 SUSE S.A.  All Rights Reserved.
+> +#
+> +# FS QA Test 785
+> +#
+> +# Test that if we fsync a file, create a directory in the same parent directory
+> +# of the file, add a file to the new directory, rename the initial file and then
+> +# fsync the parent directory of the first file, after a power failure the new
+> +# directory exists, with its new entry and the first file has the new name and
+> +# any data we wrote to it before its fsync.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick log
 > +
-> +		if (!s) {
-> +			fprintf(stderr, "bad argument '%s'\n", token);
-> +			exit(1);
-> +		}
+> +_cleanup()
+> +{
+> +	_cleanup_flakey
+> +	cd /
+> +	rm -r -f $tmp.*
+> +}
 > +
-> +		*s = '\0';
-> +		for (; p < ops_end; p++) {
-> +			if (strcmp(token, p->name) == 0) {
-> +				p->freq = atoi(s + 1);
-> +				found = 1;
-> +				break;
-> +			}
->  		}
+> +. ./common/filter
+> +. ./common/dmflakey
 > +
-> +		if (!found) {
-> +			fprintf(stderr, "can't find op type %s for -f\n", token);
-> +			exit(1);
-> +		}
+> +_require_scratch
+> +_require_dm_target flakey
+> +_require_fssum
 > +
-> +		tokstr = NULL;
->  	}
-> -	fprintf(stderr, "can't find op type %s for -f\n", arg);
-> -	exit(1);
+> +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
+> +	"btrfs: do not skip logging new dentries when logging a new name"
 > +
-> +	free(argstr);
->  }
->  
->  int
+> +_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
+> +_require_metadata_journaling $SCRATCH_DEV
+> +_init_flakey
+> +_mount_flakey
+> +
+> +# Create our first test file.
+> +echo -n > $SCRATCH_MNT/file1
+> +
+> +# Persist the file and commit the current transaction.
+> +_scratch_sync
+> +
+> +# Change the file (by writing some data to it for example) and fsync it.
+> +$XFS_IO_PROG -c "pwrite -S 0xab 0 1000" \
+> +	     -c "fsync" $SCRATCH_MNT/file1 | _filter_xfs_io
+> +
+> +# Create a new directory in the same parent directory as the previous file.
+> +mkdir $SCRATCH_MNT/dir
+> +# Add a new file to this new directory.
+> +echo -n > $SCRATCH_MNT/dir/foo
+> +
+> +# Rename the first file, but keeping it in the same parent directory.
+> +mv $SCRATCH_MNT/file1 $SCRATCH_MNT/file2
+> +
+> +# Fsync the parent directory of the first file.
+> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/
+> +
+> +# Create a digest of the filesystem's content.
+> +$FSSUM_PROG -A -f -w $tmp.fssum $SCRATCH_MNT/
+> +
+> +# Simulate a power failure and then mount again the filesystem to replay the
+> +# journal/log.
+> +_flakey_drop_and_remount
+> +
+> +# Verify the filesystem has the same content that it had right before the power
+> +# failure and after the last fsync.
+> +$FSSUM_PROG -r $tmp.fssum $SCRATCH_MNT/
+> +
+> +_unmount_flakey
+> +
+> +# success, all done
+> +_exit 0
+> diff --git a/tests/generic/785.out b/tests/generic/785.out
+> new file mode 100644
+> index 00000000..b509508b
+> --- /dev/null
+> +++ b/tests/generic/785.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 785
+> +wrote 1000/1000 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +OK
+> -- 
+> 2.47.2
+> 
 > 
 
