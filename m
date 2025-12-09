@@ -1,41 +1,60 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4ADA119644B
-	for <fstests@vger.kernel.org>; Tue,  9 Dec 2025 07:50:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C4FB241663
+	for <fstests@vger.kernel.org>; Tue,  9 Dec 2025 08:25:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765266639; cv=none; b=OjNMcYCD2Y7m2ScoulsPyLGrX9sgFQLC/Z5OTrRrujjVC/swNdZZqL+Wsikq8S5fy7whwvbcbY8y28rmGXaTP4fca6tvd4fMaPRPxI5eK6NvXkafQkIv0uA8gU/RAGFFQLqGSsCMYK22aOEIZno+p7q8wEpQ1BN4bb4zZeduEAw=
+	t=1765268733; cv=none; b=BxOVYa4zauSGCYU4SiJibl4VonXaanGcCkMubDxCWpC/uKKli8FJ91UiP7lQCsl1e3kUVO1/qgtoV/vwZoT0dwIb7zvgiQyN60PK6jbBct7UssPUiroTsD1VoWR9v8eggzR3xel67Bb8lbBUKj1I+KESbdPmAdPYeBB82drOCu4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765266639; c=relaxed/simple;
-	bh=LrBjfGwuZDchK7/MYTK0mv5CH8g5/vx8/nh/5oP7Blo=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=pJjT5XrsKVMN3um7uWbEAjdyr9vFh/03DkRhY0EL8iMaqASTPIYN51uPhcdUJuTIUEpMRUmBIoFoLAVU1WcUPMgefWcAfFnXy/covgIIS0tQUkMUSjz+gmaQPpYGbwbiZMN0Z9DUnYLtJz4nleztplIqvoemXotXfurSQXyoS+g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EyYbXyEW; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1765268733; c=relaxed/simple;
+	bh=IzvJq8cmdvwB7cTsmrElnfFMLx+ueU7IxybQCkC6t64=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=kAtNfvXSSBMtwAjrlkD/L6GQzIPPkHduuUGKYHiC5ViC4kVIClQ3Wi1ohPPijZWAtwEk9gAJM8c8v/w4Mvrm55+N8+QwuIT/Zivx9J5Ck9t+FIxgOqxznVu4qQjRcsUaMKdSxvvn/PQgB/MubfQ0Nk5J1JAeqN8cFRo4poN2aHE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=c2+X7ff2; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=Kqpm/dEe; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EyYbXyEW"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 76C29C4CEF5;
-	Tue,  9 Dec 2025 07:50:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1765266639;
-	bh=LrBjfGwuZDchK7/MYTK0mv5CH8g5/vx8/nh/5oP7Blo=;
-	h=From:To:Cc:Subject:Date:From;
-	b=EyYbXyEWaCWOOHyFrriTBGGgI6PVr25QSO/Hk+7O2zibNBSExcMxU6VmqPmjp37GX
-	 ejxzakJ9Q9a8ZaYaUaQYIhF2GR+/c5hB9S1T0RFicv4swE/4gz4hT1dJ9dfBo5HMF4
-	 /Cg4MysWb0q9FCjxF7GZe7shs3YJ222ZYrinQDm+f0wSSE5iWS+9FOo2t6fo37PRUC
-	 zgspCKt95EbsYf9v1DP4Huj8Gcc+Hv4ohepKW1ZDLtRGFCfC1/AjBfb7PzYJaQRbPn
-	 Y6/RWMMU+URC1Gm459jw47TSjZZpj00ozKW+PxscIui2StW2aCzb+LaP89PQ6EjRal
-	 PmUZevDRLKlgw==
-From: Chao Yu <chao@kernel.org>
-To: Zorro Lang <zlang@kernel.org>,
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="c2+X7ff2";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Kqpm/dEe"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id D71575BD97;
+	Tue,  9 Dec 2025 08:25:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1765268728; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=wkFisWNnn2Tm2Uc6X5IF7i9sXkQuYZ2tOJzehW3/9zI=;
+	b=c2+X7ff2XdlbU6FWA+RSFi/nlAhjJqdpynhm6rjsKLy+jV2BRtCOpqSxbMcSwHL0v9VrkX
+	lBvhPPDS8cAXl3hNyoE7BLrZxgYILsSGXYgyltKqWAxOwLPX4ZfIiA9CAQ3L64kMizlRCf
+	4kJCGHRVBvaotsEAPCfTdWH9AMmVJXA=
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b="Kqpm/dEe"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1765268726; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=wkFisWNnn2Tm2Uc6X5IF7i9sXkQuYZ2tOJzehW3/9zI=;
+	b=Kqpm/dEe2YwT9GPLcFob6OFjXZM35iUZiFt2c4e1OZAQLBjTs/inrClzn3SvP9Eno3dyHx
+	CnHBUrni+A3SV2YIY0SCPCYLRRIfSTsEkfnwj0UYK8xmnTrCSFsV2B4M8mdzw4AVp6vlyX
+	BrF0vF3pL2KdFTfI3QeCQQIFo6qwK+g=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id D89AE3EA63;
+	Tue,  9 Dec 2025 08:25:25 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id MYFjJvXcN2n/fAAAD6G6ig
+	(envelope-from <wqu@suse.com>); Tue, 09 Dec 2025 08:25:25 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
 	fstests@vger.kernel.org
-Cc: jaegeuk@kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net,
-	Chao Yu <chao@kernel.org>,
-	"Darrick J. Wong" <djwong@kernel.org>
-Subject: [PATCH v3] common/quota: fix to wait for all inodes been evicted in _check_quota_usage()
-Date: Tue,  9 Dec 2025 15:50:28 +0800
-Message-ID: <20251209075028.909869-1-chao@kernel.org>
-X-Mailer: git-send-email 2.52.0.223.gf5cc29aaa4-goog
+Subject: [PATCH] fstests: btrfs/226: skip the test for bs > ps cases
+Date: Tue,  9 Dec 2025 18:55:04 +1030
+Message-ID: <20251209082504.107995-1-wqu@suse.com>
+X-Mailer: git-send-email 2.52.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,69 +62,114 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Spam-Flag: NO
+X-Spam-Score: -3.01
+X-Rspamd-Queue-Id: D71575BD97
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	MIME_TRACE(0.00)[0:+];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:dkim,suse.com:email,btrfs-vm:email,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo];
+	RCPT_COUNT_TWO(0.00)[2];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	DNSWL_BLOCKED(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	RCVD_TLS_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DKIM_TRACE(0.00)[suse.com:+]
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Rspamd-Action: no action
+X-Spam-Level: 
 
-generic/233  3s ... - output mismatch (see /share/git/fstests/results//generic/233.out.bad)
-    --- tests/generic/233.out   2025-01-12 21:57:40.259440359 +0800
-    +++ /share/git/fstests/results//generic/233.out.bad 2025-12-04 03:02:26.000000000 +0800
-    @@ -4,4 +4,12 @@
+[RANDOM FAILURE]
+Sometimes btrfs/226 can fail but sometimes it can also pass with 8K
+fs block size and 4K page size:
 
-     seed = S
-     Comparing user usage
-    +4c4
-    +< #1000     --   31476   32000   32000            994  1000  1000
-    +---
-    +> #1000     --   31476   32000   32000            944  1000  1000
+[adam@btrfs-vm xfstests]$ sudo ./check btrfs/226
+FSTYP         -- btrfs
+PLATFORM      -- Linux/x86_64 btrfs-vm 6.18.0-custom+ #323 SMP PREEMPT_DYNAMIC Mon Dec  8 07:38:30 ACDT 2025
+MKFS_OPTIONS  -- -s 8k /dev/mapper/test-scratch1
+MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
+
+btrfs/226    2s ...  3s
+Ran: btrfs/226
+Passed all 1 tests
+
+[adam@btrfs-vm xfstests]$ sudo ./check btrfs/226
+FSTYP         -- btrfs
+PLATFORM      -- Linux/x86_64 btrfs-vm 6.18.0-custom+ #323 SMP PREEMPT_DYNAMIC Mon Dec  8 07:38:30 ACDT 2025
+MKFS_OPTIONS  -- -s 8k /dev/mapper/test-scratch1
+MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
+
+btrfs/226    3s ... - output mismatch (see /home/adam/xfstests/results//btrfs/226.out.bad)
+    --- tests/btrfs/226.out	2024-04-12 14:04:03.080000035 +0930
+    +++ /home/adam/xfstests/results//btrfs/226.out.bad	2025-12-09 18:46:44.416878799 +1030
+    @@ -39,14 +39,11 @@
+     Testing write against prealloc extent at eof
+     wrote 65536/65536 bytes at offset 0
+     XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+    -wrote 65536/65536 bytes at offset 65536
+    -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+    +pwrite: Resource temporarily unavailable
+     File after write:
     ...
-    (Run 'diff -u /share/git/fstests/tests/generic/233.out /share/git/fstests/results//generic/233.out.bad'  to see the entire diff)
-Ran: generic/233
-Failures: generic/233
+    (Run 'diff -u /home/adam/xfstests/tests/btrfs/226.out /home/adam/xfstests/results//btrfs/226.out.bad'  to see the entire diff)
+Ran: btrfs/226
+Failures: btrfs/226
 Failed 1 of 1 tests
 
-Sometimes, generic/233 will fail due to it founds inode count is mismatched
-in between quota system and filesystem.
+[CAUSE]
+For the failure case, the failure is from check_direct_IO(), which find
+out that the buffer provided is only aligned to PAGE_SIZE (4K), not to the
+fs block size (8K).
 
-The reason is cgroup v2 implementation will increase inode reference first,
-and then, attach it to thread related cgroup writeback structure, once it
-needs to switch write owner of target inode, a kernel thread will process
-it, and finally release inode reference via evict_inode().
+The user space can only ensure the allocated memory is contiguous in the
+user space, but the user space can not ensure the underlying physical
+memory layout, thus depending on the memory allocation situation, the
+user space can not always get physically contiguous memory, and fail the
+check_direct_IO() call.
 
-So, sync & drop_cache may not guarantee all inodes being evicted, as cgroup
-has one more referenece on inodes during the time.
+After failed check_direct_IO(), we fall back to buffered IO, but since
+this particular test case is using RWF_NOWAIT, rejecting buffered IO
+fallback, the direct IO failed with -EAGAIN.
 
-If inode has not been evicted, dquot inode reference will not be release, it
-will lead to inode count mismatch.
+[FIX]
+Since we can not ensure the physical memory layout for direct IO, just
+skip this test case if the fs block size is larger than page size.
 
-Let's add a delay to wait for cgroup switching completion before quota check.
-
-Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-Cc: Darrick J. Wong <djwong@kernel.org>
-Signed-off-by: Chao Yu <chao@kernel.org>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
-v3:
-- sleep in existed case statement rather than in newly added check condition
- common/quota | 9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
+ tests/btrfs/226 | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/common/quota b/common/quota
-index a51386b1..5d351fdf 100644
---- a/common/quota
-+++ b/common/quota
-@@ -335,7 +335,14 @@ _check_quota_usage()
+diff --git a/tests/btrfs/226 b/tests/btrfs/226
+index afab5868..110a1239 100755
+--- a/tests/btrfs/226
++++ b/tests/btrfs/226
+@@ -26,6 +26,10 @@ _scratch_mkfs >>$seqres.full 2>&1
+ # nodatasum (otherwise it falls back to buffered IO).
+ _scratch_mount -o nodatasum
  
- 	VFS_QUOTA=0
- 	case $FSTYP in
--	ext2|ext3|ext4|f2fs|gfs2|bcachefs)
-+	ext2|ext3|ext4|gfs2|bcachefs)
-+		VFS_QUOTA=1
-+		quotaon -f -u -g $SCRATCH_MNT 2>/dev/null
-+		;;
-+	f2fs)
-+		# wait for inode_switch_wbs_wor_fn() to release inodes
-+		sleep 3
++if [ "$(_get_block_size $SCRATCH_MNT)" -gt "$(_get_page_size)" ]; then
++	_notrun "fs block size larger than page size, unreliable direct IO buffer alignment"
++fi
 +
- 		VFS_QUOTA=1
- 		quotaon -f -u -g $SCRATCH_MNT 2>/dev/null
- 		;;
+ # Test a write against COW file/extent - should fail with -EAGAIN. Disable the
+ # NOCOW attribute of the file just in case MOUNT_OPTIONS has "-o nodatacow".
+ echo "Testing write against COW file"
 -- 
-2.49.0
+2.51.2
 
