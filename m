@@ -1,36 +1,36 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF58922D7B9
-	for <fstests@vger.kernel.org>; Tue,  9 Dec 2025 14:00:28 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6058D2EB868
+	for <fstests@vger.kernel.org>; Tue,  9 Dec 2025 14:31:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765288828; cv=none; b=aEdTvz/vGfMG+D+8DAF9+0WDT2jcxGov2jzDcXOle/p0Sumsn/zOgYrU3PqmW2CnnOHWagzwVaaXSa1LzPbzoXAhiu0aluKwnw61MV6Mcx2GFlKSnr203dTbgLc2VHQ55dnx3c/jZYNo4IAmoIl/6wWX+94rv9v1SVBcrLH92pY=
+	t=1765290680; cv=none; b=Fos9eJtufk8iyPLAIice1a+nV9qveXq5n0UNrTRM5XuMsiGMx61YLU22nxNDyMPXFbHbvneQVuwmyKux/9IwiDrS2xEVYnBydW/ulveHtvpqshIXezrwL9tOD8YZT+J2BuiKKC7teoPpmItEKDvZIczWGQ31ob9r/YbT+/dgLOs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765288828; c=relaxed/simple;
-	bh=anhV63hUCW/PGAFj9bhpk838fkSeoloA65DzqfCw7vc=;
+	s=arc-20240116; t=1765290680; c=relaxed/simple;
+	bh=exjVE+sHo+W6H2JbMdzVNKsuJT0/TjPr9SK+tWCGYkE=;
 	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=cVAnqO9W4RCpj8FP9DRN0moojyT25NpqScG7JlBabi0GZ6M8uwC0GahM1hB6czPpB4Domz2t1rasplUiKO5TgXnAhTHPziO1U7sD0q5ujEKPixJpfGrJpNMuARNe31d6V1iih7O4GqM7MRwUb0kTbxoYAIy0NldSyIA96LBU7RY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FoZjH70q; arc=none smtp.client-ip=10.30.226.201
+	 Content-Disposition; b=XUoroKQ+0N3qRksj6XW/7TGtwg7RfFvDaYayTMnwPrHf024l3kMILu10zGeausdnneg4fEnHGcbiXW/26L/ECjqHkbFZXKyjDwRp8v7g4SwRAjdTEklUFLtbCQuAvQqC5r8n0RVew3ZzC6dIfeIdiV5PNCtAvB0Hv2F1P9pfkHM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZsNyY6Sm; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FoZjH70q"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E9DF0C4CEF5;
-	Tue,  9 Dec 2025 14:00:27 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZsNyY6Sm"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 741B3C4CEF5;
+	Tue,  9 Dec 2025 14:31:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1765288828;
-	bh=anhV63hUCW/PGAFj9bhpk838fkSeoloA65DzqfCw7vc=;
+	s=k20201202; t=1765290679;
+	bh=exjVE+sHo+W6H2JbMdzVNKsuJT0/TjPr9SK+tWCGYkE=;
 	h=Date:From:To:Subject:From;
-	b=FoZjH70quYXJLCBGWRoSP8j+lrE3Nl07ermNhxdJGl1hr80BC5QoHXCDFNWzKS83s
-	 dFS9JkIz2AeZof5vTzsuGeWL5mluDGMlB99iSDLgU19VgdR6PyG0/UHuMXfTKyJpnG
-	 DLf6njWmkUx10U4RlJwhKVGx+9yqEtcrR1OhiKUM2z9NhQuUjw2ZRhDXR1GjjYQozp
-	 MzV8qRskvCpGBXWjqcwEBA3N3LYOk17pnBmAkW02krFZWvZhWq68d6mJonGy41IH8U
-	 0QvnwplXoNAlODuMkOb34BcW3EH79Z1UWbz9nooBlzPqnYocP68QvfzERLuPrgrlP4
-	 /vIy7ufn/x5vA==
-Date: Tue, 09 Dec 2025 22:00:19 +0800
-Message-ID: <71512d4fb3dd3edc682839aaf83a1a66@kernel.org>>
+	b=ZsNyY6SmUBRGPJAtSmo1d4PIDSq6RfC7eF/exQfIa3clSQOdq/zw3kaTqRXEtRCav
+	 ermBK3kNnL8b70FStiqZ0llMiUOT03ZR9c005PcixAwosb8FizjINKoRubtbLHklj4
+	 QoMWqhNsrFlNLa0vrS5tEoM/PpkUkLdMLTlxrzyPwnsYMAw/ToAX7Xlfk/IB7DotEQ
+	 PqjqBak4oKY3Fly6S8mCz2UGOSKzfbbukkMMYt1+mQu0rzZ3V0spFKXL7SShdwuy5/
+	 wQiBJKtQ+qi650ZTHnrfjs4rdM9XvrjbJC98MUvlVvFv2yujIZe6JhlHohtbb3ncoG
+	 sXx2cp9trlOHQ==
+Date: Tue, 09 Dec 2025 22:31:16 +0800
+Message-ID: <c0629a4e66a1d5d80de5ff7c4739cec9@kernel.org>>
 From: Zorro Lang <zlang@kernel.org>
 To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2025.11.18 onto master branch
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2025.12.09
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -38,111 +38,108 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="7UJHo6Y5X5Iq"
+	protocol="application/pgp-signature"; boundary="a69pAnKkNx2b"
 Content-Disposition: inline
 
 
---7UJHo6Y5X5Iq
+--a69pAnKkNx2b
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2025.11.18 version.
+has just been updated and tagged as v2025.12.09 release.
+
+Release Notes:
+1) There're 5 new test cases in this release, include generic/784, generic/785,
+   generic/786, generic/787 and xfs/649.
+2) The g/784, g/785 and x/649 are regression test cases to uncover known btrfs
+   or xfs bugs.
+3) New "delegation" feature test coverage -- generic/786, generic/787.
+4) New fsstress.c usage about option -f.
+
+More updates and details refer to below, thanks for all these contributions.
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-a668057f00dd overlay: add tests for casefolded layers
+df16c93a89d3 generic: add tests for file delegations
 
 New commits:
 
-Amir Goldstein (1):
-      [a668057f00dd] overlay: add tests for casefolded layers
+Christoph Hellwig (2):
+      [37a5ef84413e] generic/484: force I/O to the data device for XFS
+      [74c8afa4f132] xfs/049: create the nested XFS file systems on the loop device
 
-Chao Yu (1):
-      [c34a6b562840] f2fs: test sanity check condition w/ error injection
+Darrick J. Wong (1):
+      [1b37d45c4373] fsstress: allow multiple suboptions to -f
 
-Darrick J. Wong (7):
-      [927e55a2ae5d] common: leave any breadcrumbs when _link_out_file_named can't find the output file
-      [252d25fb9efd] generic/778: fix severe performance problems
-      [09728c352684] generic/778: fix background loop control with sentinel files
-      [545c94d8c386] generic/019: skip test when there is no journal
-      [99f79500aa9e] xfs/837: fix test to work with pre-metadir quota mount options
-      [c5e62a6b8503] generic/774: reduce file size
-      [a11b37ec4265] generic/774: turn off lfsr
+Donald Douwsma (1):
+      [5760b2105985] xfs: test case for handling io errors when reading extended attributes
 
 Filipe Manana (2):
-      [7b709ce99762] fstests: add kernel commit IDs to some tests that miss it
-      [faf816b98513] btrfs: test incremental send after deleting directories with many hardlinks
+      [7e5537c5ec3f] generic: test a scenario of power failure after renames and fsyncs
+      [3970e305333e] generic: test journaling after renaming fsynced file and fsync parent dir
 
-Joanne Chang (3):
-      [288a86433f0a] f2fs/015: clear MKFS_OPTIONS and MOUNT_OPTIONS
-      [21be8aa17349] f2fs/016: add test cases for test_dummy_encryption mount option
-      [1ffbdcaae45a] f2fs/{019,020}: clear MOUNT_OPTIONS alongside MKFS_OPTIONS
+Jeff Layton (3):
+      [bf6ed3418e0f] common/rc: clean up after the _require_test_fcntl_setlease() test
+      [4e77fcc28c03] generic: add tests for directory delegations
+      [df16c93a89d3] generic: add tests for file delegations
 
-Theodore Ts'o (1):
-      [28e2a205c8d1] generic/773: fix expected output "QA output created by 1226"
+Sidong Yang (1):
+      [d569940311fd] btrfs/339: test receive dump stream for different user
 
 
 Code Diffstat:
 
- common/rc                              |   1 +
- tests/btrfs/301                        |   4 +-
- tests/btrfs/337                        |   2 +-
- tests/btrfs/338                        |  93 +++++++++++++
- tests/btrfs/338.out                    |   3 +
- tests/f2fs/015                         |   3 +
- tests/f2fs/015.out                     |   8 +-
- tests/f2fs/016                         |   6 +
- tests/f2fs/016.out                     |   6 +
- tests/f2fs/018                         |   2 +-
- tests/f2fs/019                         |   1 +
- tests/f2fs/020                         |   1 +
- tests/f2fs/023                         |  49 +++++++
- tests/f2fs/023.out                     |   2 +
- tests/generic/019                      |   1 +
- tests/generic/773                      |   2 +-
- tests/generic/773.out                  |   2 +-
- tests/generic/774                      |   6 +-
- tests/generic/778                      |  97 +++++++++----
- tests/generic/779                      |   2 +-
- tests/generic/782                      |   2 +-
- tests/generic/783                      | 242 +++++++++++++++++++++++++++++++++
- tests/generic/783.out                  |  13 ++
- tests/xfs/837                          |  28 ++--
- tests/xfs/837.cfg                      |   1 +
- tests/xfs/{837.out => 837.out.default} |   0
- tests/xfs/837.out.oldquota             |   6 +
- 27 files changed, 532 insertions(+), 51 deletions(-)
+ common/locktest       |  19 +-
+ common/rc             |  11 +
+ common/scsi_debug     |   8 +-
+ ltp/fsstress.c        |  43 ++--
+ src/locktest.c        | 621 +++++++++++++++++++++++++++++++++++++++++++++++++-
+ tests/btrfs/339       |  32 +++
+ tests/btrfs/339.out   |   2 +
+ tests/generic/484     |   3 +
+ tests/generic/784     |  76 ++++++
+ tests/generic/784.out |  19 ++
+ tests/generic/785     |  73 ++++++
+ tests/generic/785.out |   4 +
+ tests/generic/786     |  19 ++
+ tests/generic/786.out |   2 +
+ tests/generic/787     |  20 ++
+ tests/generic/787.out |   2 +
+ tests/xfs/049         |   5 +-
+ tests/xfs/649         | 139 +++++++++++
+ tests/xfs/649.out     |   2 +
+ 19 files changed, 1068 insertions(+), 32 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
 
---7UJHo6Y5X5Iq
+--a69pAnKkNx2b
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmk4KwEACgkQlNbPkfr2
-tMwgQw//RQiBVxIb/LYww/XfbsiVJUR+HP4eJs5TWZNHIQt1+Hir+zi8UbDsWr0L
-tFYBSuWsWiZDN7gWVm46CiYsztCY862BG3NLTVYWTxHjbGiT+gtIOGPBoonT3Yh6
-5GTqckXdRpddhVq2RaHQBI65hyVe9XbUYaE/r0W1+cgV5opqdvgmt52HjG7fpGi5
-uIp+KkbPg4UvQjAMkLcsm2CgFW68VaAg2CKvzXhVxi4ClvQSU/t5/hsoGZ2Kk0u6
-oV48OewPpMo35galQh5hgeDXGYIxRefFhYD+Yw7sK1mEPwbp6FC9GQtFq0szJ6ja
-nyscNEmR8ezxAB3Jhgm5jX17EPin7agf8JNTcFbsbEYhnblH6AQ0IG9DG7WxLscT
-rF8rNzY7ntgYaBh11twbmqfJoClqwr+0Zvyf4yCgKiZLv3RPiLFGm+Xv76QStvqg
-IyN0+2URc/agwwlZ9929GpfiAIvePwONDOGV9tV1lP8a/+6ys9+2P59dOpMRm1gV
-WlygznrzheIugkBCua5OL58vOcPV3E7YDa41mUWj+fKEgl6RSfaJnCOA/Wu/oMRD
-F3pqh26xOhtF+0V+Np7XnZDhr8MvjiE+Gevn2vbHc7JiW5pWFYxMhuTx/icRQPgd
-zfF9C0+WI/6O/acc6Fa2uPpldQ6chmAV09cMGfVV3V7RgnGVJzA=
-=ZpR5
+iQIzBAABCgAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmk4Mo4ACgkQlNbPkfr2
+tMy1xg//YAMOGLBbJ28bOHjIAErs4HL3UThoK9rUvVY4sT+L2adaFFMdWASsNc1P
+hrC5SRi+TWTAtNPb/3uLt68E6Bnt1B8PN8odf22lc6KoZuygKfCZXX/vb7/vPUA2
+TQsW6mKQS7eqb5HSkqMxzczNb70totnU6fOB/zXwXK1XDYQpV0E8sS1xEasUzKXo
+SjAhj5anyx0TEwSj0+m5HVGdrYQwQVMsPiGmzxMsQnSlk7DNJihDq3cOximtODQj
+DE3c2401apQfs3Gtyc23cglldcRFO8lH6/1sqSiQjyqEEcLeGttEJ3R7+pj/v4U5
+9v6SWejSf07Rx8vaAaTykt2ejMj306unnp7DudVKRwZICmrbwHXtoYHaKOxk3cy3
+0PYUtSQx8pCr964hoSU5rsso9JxQnAnrGjzHtv3Ocl/D1fZIDGmHtLluJwlF49lu
+4wGouN7xI+ZuVC8ueU65j2JRYr3qw6N4+GwBs7NgBxBm0zMIdkD521Y7jZXRhBLR
+Ko9kY0ApOFrfvFP4uBEPFAA9OugLdy7aTg76rBrz/DwgsuOt6riP9GsS++b9UWdM
+FnBNlGAzXFfyLmQ49Mow03BSf6l0EpYL3ArOiQ3oaV5rqWKirkS4TnglRUERFSYs
+mYdRP6K3BQkC5/ULJQE/5BCzL7osMuAV6xXjdRz0EzpN78gnQWY=
+=7Dar
 -----END PGP SIGNATURE-----
 
---7UJHo6Y5X5Iq--
+--a69pAnKkNx2b--
