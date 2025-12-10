@@ -1,30 +1,41 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 733691C3F36;
-	Wed, 10 Dec 2025 16:57:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45A44329E77;
+	Wed, 10 Dec 2025 19:32:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765385834; cv=none; b=WJWKUd8ROf76NVYCDcOgTtuZq6XqBHzVDa/8QyRIB0HyE8shHjvg1vVDLVIta3LRarOr8pIdVt6oclkQnPgAhiu8W0iMHQdLkwE/tCKWxW4DXpU4nSKh0/ityBC4sdsRKYKpuC5btnw2hDve4wwxyi9H2uVnM3k+Foo9zOEE5Dg=
+	t=1765395147; cv=none; b=ARIzuMWo3diwlQYnZKYzwFU1U1HVuPCn0N9Ke18Hpo/IIFaaRA/WkA8k4CBAtx8e7IXn84nvcF7obKx6+7f4GgnNrFVmGNAf+YJicDOBSFIYwBv5yignwfQimoDjIpI2FSZCSVh9ENoCPJM+/UlQB08TbEdQnEcT9G8lbN7mjec=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765385834; c=relaxed/simple;
-	bh=z3lhCxdOR1PjvSfGDeco2TSonEBoyc0XHSq1oY2970E=;
+	s=arc-20240116; t=1765395147; c=relaxed/simple;
+	bh=WQMXNj24kGlHy1vHQK1q8lQWUdVKt86XUBICJh2ZTWQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=bt94GMxTXAR6szoZldN4Uhi/52ivtcvyX83iOy9sVFN+WgjI7/URJHfR0YGY4e8Fm25Pf7h72+ZUvYkoO7Y3+ojJKduotZHoLEz3VZm6DCgWPumd9lB/mxP1+bEs+rlcvecTDrjxNp7Wsc1oSJLAVwbRbSqDQ8+TQZoNpRJlHxw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id D127768AA6; Wed, 10 Dec 2025 17:57:06 +0100 (CET)
-Date: Wed, 10 Dec 2025 17:57:06 +0100
-From: Christoph Hellwig <hch@lst.de>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, zlang@kernel.org,
-	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs: add a test that zoned file systems with rump RTG
- can't be mounted
-Message-ID: <20251210165706.GB9489@lst.de>
-References: <20251210142330.3660787-1-hch@lst.de> <20251210165028.GC7725@frogsfrogsfrogs>
+	 Content-Type:Content-Disposition:In-Reply-To; b=i/ptsfWPLQpQpJjaC4T+vSQyAWg5UMSedaJCcg7WYJ2bgaC4BId3GrdLCOCjoYStqVvA0GPlCZilhXN/UzWBpYAcHS/qAg75UhyoguiEkzAw5zyCMf9p/jCuMsT4vL0mCfUc5rR40oFCg3RqIi3I9SBdpqrEWPUongz8auZGHXI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IGgWQrSe; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IGgWQrSe"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B851DC4CEF1;
+	Wed, 10 Dec 2025 19:32:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1765395146;
+	bh=WQMXNj24kGlHy1vHQK1q8lQWUdVKt86XUBICJh2ZTWQ=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=IGgWQrSeDbT6BgYt/O5SJuqgXekLhjbsMhoBoRTt3wewfRUDU1H7hIqGf0fghsIxO
+	 egC4QRypLjlpEvpUA7B+aZfK8Nf5QcAM5PJT06D/nxhQjF/6Eq+kHLtpJh2Tmu10ZU
+	 CrCe5lnioztPyNJpaZufJf+Upj3S4uyOXfAXD7tdn8lJzi3eyKe7r5JEt83HG/w3BD
+	 /R06ZlHydiih6KAmmyQTuyOFvmYDLzEqWSqbjglbvMPnvxwKEI0YarIxqNT3H9g2ep
+	 gLo9BxmCdd+MwHngYV0W0q1DufHSrIrtcDRpPL6a9y+u2ViITbSjb2Kp4ES5wlPrrW
+	 Nl9ySG83LsdWA==
+Date: Wed, 10 Dec 2025 11:32:26 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, Anand Jain <anand.jain@oracle.com>,
+	Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org,
+	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 02/12] ext4/006: call e2fsck directly
+Message-ID: <20251210193226.GA94594@frogsfrogsfrogs>
+References: <20251210054831.3469261-1-hch@lst.de>
+ <20251210054831.3469261-3-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -33,26 +44,36 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251210165028.GC7725@frogsfrogsfrogs>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <20251210054831.3469261-3-hch@lst.de>
 
-On Wed, Dec 10, 2025 at 08:50:28AM -0800, Darrick J. Wong wrote:
-> > +_scratch_mkfs > /dev/null 2>&1
-> > +blocks=$(_scratch_xfs_db -c 'sb 0' -c 'print rblocks' | awk '{print $3}')
+On Wed, Dec 10, 2025 at 06:46:48AM +0100, Christoph Hellwig wrote:
+> _check_scratch_fs takes an optional device name, but no optional
+> arguments.  Call e2fsck directly for this extN-specific test instead.
 > 
-> blocks="$(_scratch_xfs_get_metadata_field rblocks 'sb 0')"
-
-Ah, I had a vague memory something like this existed but could not
-find it.
-
-> > +blocks=$((blocks - 4096))
-> > +_scratch_xfs_db -x -c 'sb 0' -c "write -d rblocks $blocks" > /dev/null 2>&1
-> > +_scratch_xfs_db -x -c 'sb 0' -c "write -d rextents $blocks" > /dev/null 2>&1
-> > +_try_scratch_mount || _notrun "Can't mount rump RTG file system"
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/ext4/006 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> Doesn't the _notrun here cause the test to be "skipped" when in fact it
-> actually exhibits the behavior that you want (i.e. it passes)?
+> diff --git a/tests/ext4/006 b/tests/ext4/006
+> index 2ece22a4bd1e..07dcf356b0bc 100755
+> --- a/tests/ext4/006
+> +++ b/tests/ext4/006
+> @@ -44,7 +44,7 @@ repair_scratch() {
+>  	res=$?
+>  	if [ "${res}" -eq 0 ]; then
+>  		echo "++ allegedly fixed, reverify" >> "${FSCK_LOG}"
+> -		_check_scratch_fs -n >> "${FSCK_LOG}" 2>&1
+> +		e2fsck -n >> "${FSCK_LOG}" 2>&1
 
-Yes.  Which sort of does what's intended (fail on broken behavior) but
-in a very odd way.  I'll do this in a nicer way.
+Doesn't this need a device name?  e.g. e2fsck -n $SCRATCH_DEV ?
 
+--D
+
+>  		res=$?
+>  	fi
+>  	echo "++ fsck returns ${res}" >> "${FSCK_LOG}"
+> -- 
+> 2.47.3
+> 
+> 
