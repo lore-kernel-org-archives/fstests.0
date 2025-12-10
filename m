@@ -1,86 +1,67 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 327F41A38F9;
-	Tue,  9 Dec 2025 21:41:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BDA29277C8D;
+	Wed, 10 Dec 2025 05:48:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765316470; cv=none; b=dDup49rN1otk6r5LBJjxjXI+dvp24jlR4QPAfcritXQQyr/EAaQ6tSXohgt0YhCtb3yNeOMfC8fUOX4EmzjIu7lebdFBl7QWiEt0tup7TcuMdKVB8ro3XYZNeWRJvGjptzWX68XP0oBCvhEGj5u3FvtnNo+MS4hO1zlGvb0EC7k=
+	t=1765345722; cv=none; b=t1jf/fL1qFIjDyAmA/q7HVjPOT4WzmRJK50nLeot0ynq++hkYwfzr8DcfIar0tVrlkNXlUIimq377uVGWNO4IP0eZRoicWi1Q5mD9kWr03HHDEQUD0Av//U7B70n9a2I9PxxjoOUKi00DZDErGWm+6O7E467SqmAPW7Ighh9ZEE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765316470; c=relaxed/simple;
-	bh=fdZLlRAP+Nvg9Zxz3D4x5l6oGEdPV4r9TIWov40uXWw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=S2yaMKDBmHhDy8kIt5ePHaSiUATWscZ9Wnrw+6B2bRLl36rX7pzMQVb9I1t7K7MYvlxF8M/GLxVkBvtR5DI6Znrubz1gleoyfE16sKDjakDYSVroxXTnFQ89cpujfXeUTwzHOaKVmw+T17NHO+5ZC0VY5x77Eah8WgIPm2TMyJA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=V8JlOGxh; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1765345722; c=relaxed/simple;
+	bh=ScU+knU2DYhxcrArQpVSGQWCnc+9iHCa9eBJKtgt1fg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=JYhRH0bXNezUZOnaWUYts00VSnS3ckNOFHRV0cRJxrr3F6BQVxiralT8f3Tvw9bQ4j9/XBjrm51axyvLDzhbYwagfYzG58ySIDSSBYZcKWtCxP4+LONFGX/4qAVUjeez32oOyHF0PGlr8Pz3iiBU3+shcZL4wO9uNx32AVIqIEA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=i6bOYIxm; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="V8JlOGxh"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 69C6AC4CEF5;
-	Tue,  9 Dec 2025 21:41:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1765316469;
-	bh=fdZLlRAP+Nvg9Zxz3D4x5l6oGEdPV4r9TIWov40uXWw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=V8JlOGxhBggS7QSTRYBn5ZoPzUKR2lVWErQBUCQvdUNUb3TPcJ3QgpMwB+gRFj0Cy
-	 wx/RT1aFPLPMHivjSxHtg4mXV0NhjJy7jfPrAzWNBExnIQpPOTjmHIsxjwqCHvKRMG
-	 gzFGAXWT1WwCoPnbxPd+TC0/VApWbVq74NMx9yqDcHcEJ2uS+obLpJ0QixAoXWzAHV
-	 dpW0Xbu0gPgUF/xCU5bAVjoAtRpQfntT2BBtf0/Lvrv4/zKhEklScjiY82e8ka05HT
-	 oWzQ0n1SDjofp17TYiwLil62iJa8GR2p5zo9O5DP6cAa3X1iOdAJqAlvHj+XMy9T0v
-	 53uDfuqLVZAnA==
-Date: Tue, 9 Dec 2025 13:40:50 -0800
-From: Eric Biggers <ebiggers@kernel.org>
-To: Julian Sun <sunjunchao@bytedance.com>
-Cc: Christoph Hellwig <hch@infradead.org>, linux-ext4@vger.kernel.org,
-	linux-fscrypt@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: ext4/004 hangs with -o inlinecrypt,test_dummy_encryption
-Message-ID: <20251209214050.GA7867@quark>
-References: <aTZ3ahPop7q8O5cE@infradead.org>
- <80f77860-2d5d-4ff9-9bb8-1e5bc46a4692@bytedance.com>
- <dfb1479b-8aef-4f55-ba5b-4ae0595c4f99@bytedance.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="i6bOYIxm"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=nKoFYaTth9To4A98PNzbKA2Q2w8kacJxcP4sUx2dxOA=; b=i6bOYIxmORIMrMJF6Do0SrNE9f
+	9EXm3rIaxfR4Fk1H7hIYA6TGftA7yXxzqycjqJSO2gZjcKBsktkMEQsPeqo1NE8swZ7d9PByoTbzC
+	oKEYJBTnlvaRqvawDB/FpqiOp8jRz6RitOopMLet4TmVKi0iffaNpBrU4M2JSv3iIFwS+XL/P78/+
+	MieFLghT0M/5C6VIo5+EM5sJ1Y2GTQ1mwKON7Lge5ke9R+GFhfVjM+65l/C/bbj0eYQTzecOe5K9/
+	MJ0ji4gb5/MijX6dH4Gy2BnLIkpXo9XV5/Wo20S1elp8iuX7g5U5sHEizv4g4VYGpzXyTtq2ORWH/
+	M3fhemJg==;
+Received: from 2a02-8389-2341-5b80-d601-7564-c2e0-491c.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:d601:7564:c2e0:491c] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1vTD40-0000000F93N-24Ub;
+	Wed, 10 Dec 2025 05:48:39 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: Zorro Lang <zlang@kernel.org>
+Cc: Anand Jain <anand.jain@oracle.com>,
+	Filipe Manana <fdmanana@suse.com>,
+	"Darrick J. Wong" <djwong@kernel.org>,
+	fstests@vger.kernel.org,
+	linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: stop overriding SCRATCH_{,LOG,RT}DEV
+Date: Wed, 10 Dec 2025 06:46:46 +0100
+Message-ID: <20251210054831.3469261-1-hch@lst.de>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <dfb1479b-8aef-4f55-ba5b-4ae0595c4f99@bytedance.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Tue, Dec 09, 2025 at 05:46:22PM +0800, Julian Sun wrote:
-> On 12/9/25 4:40 PM, Julian Sun wrote:
-> > 
-> > I can reproduce this issue locally with both v6.18 and v6.0. The problem
-> > disappears after removing test_dummy_encryption, and it still reproduces
-> > when test_dummy_encryption is set alone in MOUNT_OPTIONS. Therefore, I
-> > believe the issue lies in test_dummy_encryption — it is an
-> > implementation of fscrypt.
-> > 
-> > CC: linux-fscrypt
-> > 
-> > Thanks,
-> 
-> cc linux-fscrypt
-> 
-> -- 
-> Julian Sun <sunjunchao@bytedance.com>
-> 
+Hi all,
 
-It seems to be a known failure.  ext4/004, along with various other
-tests, is excluded by
-https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/root/fs/ext4/cfg/encrypt.exclude
-as follows:
+this series cleans up various tests to get out of the business of
+overriding the scratch devices setup.  This is not only generally a
+little ugly, but breaks when mkfs options are incompatible with the
+synthesized setups.
 
-    ext4/004	// dump/restore doesn't handle quotas
-
-I'm not sure why the comment mentions quotas.  It probably should say
-"encryption", not "quotas".
-
-Either way, the exclusion logic in xfstests-bld really should be
-incorporated directly into xfstests, e.g. by using
-_exclude_test_mount_option "test_dummy_encryption".
-
-This seems to be a wider issue.  Effectively, ext4's exclusion lists for
-xfstests are being maintained outside of xfstests itself.
-
-- Eric
+My prime example right now are two zoned XFS options:  -r rtreserved,
+which only works for zoned RT devices, and breaks as soon as we're
+running on non-RT or non-Zoned setups, and -r rtstart which only works
+for internal RT zoned RT devices, and breaks as soon as an actual
+SCRATCH_RTDEV was used.  There's probably more that we've been
+papering over with the try_ options and by scratch_mkfs dropping
+options when they conflict.  I plan to remove the need for the latter
+in a follow-on series as it leads to hard to debug bugs.
