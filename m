@@ -1,41 +1,31 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C61D28B4FE;
-	Wed, 10 Dec 2025 23:24:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31D2B12DDA1;
+	Thu, 11 Dec 2025 04:52:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765409085; cv=none; b=ttWZdiOwadGUnlhryF/x/0ULL5w11yK4qHrcdq8oaaThNwop4ZsMk52OoMxEt2RFeZgZFWtB+1WMfkatWa8Tafxn203Omn/DwryPpei408XdKSJ2HPxBUUwtED3rrHW0Hhq0CgoAO/bXJRf3kBF1PanVKjjaYAdBxn96fp73yHw=
+	t=1765428750; cv=none; b=Pg8RSudYuzVC12aYYbwNqVpi/dJMfqkJwLsIOIAibCBZuOX2vmabZ9T6XZg35q21heQGH3EjYl6HgOWAOVrlJuEcRr2jLGp3l1h40+InkUwR5lMfjHkaQlri5Tpqm9uVTX62YwLoGe/Pnf4a6TCyhpwLU2zlQxWvaRR7eMvQOMc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765409085; c=relaxed/simple;
-	bh=QHFYGkjS7t/tV5LAsSqLpR1Ex3WMImzlq9muG/JD+p4=;
+	s=arc-20240116; t=1765428750; c=relaxed/simple;
+	bh=uO2uelI0XoKDKZJTOl4WxWaNTOhsgykPN2bxICYnNS0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=bGN3azoo5SicUg7STinSkN0FmH78I+B7WjvXjZtYmLlj/b0CZH1wy/9LPSTTYOGFxGRQ7sAX3+d6sOdmrb5tAFKqPbWuxu0igrWjApf63uTeKuhusodM0ff7kMirNd96Jpj+faOcJ34LAfwbDref0rfXA+PEwTXjIRPLK0OT2U0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HHa8rSJV; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HHa8rSJV"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 015F8C4CEF1;
-	Wed, 10 Dec 2025 23:24:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1765409085;
-	bh=QHFYGkjS7t/tV5LAsSqLpR1Ex3WMImzlq9muG/JD+p4=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=HHa8rSJVWfy4aLXb3iqsSdNm2v0QL6r3Oy7xza97MQ3IqUTQm76ip/MIGWm1TrGYp
-	 x03SbNyLltjDkrkGqABVIguTGvpbJaRDdLEFx7FjgOyCq3NXvyJ8nvcW2YL89bh/QP
-	 RaZoxlZbomiouPaKcdGTXD+ODE0GNotmlas0pdgjk4wSfBQIHtet5i3o5qxEkQ6ZrR
-	 FqBsOOdceTiR+HRTzv5T1VDqRyXYhMGR3DWNTv7l0QrivhNZMCvHmQqRdLJYXEZjd7
-	 xJZdedH2uEtv0Jq32qBAHDL2OL8ErFS8qy+h0Ycjm0Zyl59RhJslJr0In8gmCzSP4t
-	 oRRT51Z9AKj2A==
-Date: Wed, 10 Dec 2025 15:24:44 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Zorro Lang <zlang@kernel.org>, Anand Jain <anand.jain@oracle.com>,
+	 Content-Type:Content-Disposition:In-Reply-To; b=dka1tLorA8ERXKGSuIlqrw3VoGY0iRD4UhMhVnr8JWOLdwkUsW+H1SdP+JfBnjILGAncFC8jjDL+CoMH/kR8UqxVfVgEnwG0KuGGTCso4JJtLN8cceuqoP1S2soUrwdRHWt/7GTAalfeXMiOco/B2aL3QltdtiLhfPgdPqa3vmg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 32E9F68AA6; Thu, 11 Dec 2025 05:52:24 +0100 (CET)
+Date: Thu, 11 Dec 2025 05:52:24 +0100
+From: Christoph Hellwig <hch@lst.de>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>,
+	Anand Jain <anand.jain@oracle.com>,
 	Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org,
 	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 04/12] ext4/032: use _check_dev_fs
-Message-ID: <20251210232444.GL94594@frogsfrogsfrogs>
-References: <20251210054831.3469261-1-hch@lst.de>
- <20251210054831.3469261-5-hch@lst.de>
+Subject: Re: [PATCH 02/12] ext4/006: call e2fsck directly
+Message-ID: <20251211045223.GA26257@lst.de>
+References: <20251210054831.3469261-1-hch@lst.de> <20251210054831.3469261-3-hch@lst.de> <20251210193226.GA94594@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,38 +34,30 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251210054831.3469261-5-hch@lst.de>
+In-Reply-To: <20251210193226.GA94594@frogsfrogsfrogs>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-On Wed, Dec 10, 2025 at 06:46:50AM +0100, Christoph Hellwig wrote:
-> _check_dev_fs is the new designated helper to check file systems on
-> arbitrary devices, use that instead of _check_generic_filesystem, which
-> is just an implementation detail.
+On Wed, Dec 10, 2025 at 11:32:26AM -0800, Darrick J. Wong wrote:
+> On Wed, Dec 10, 2025 at 06:46:48AM +0100, Christoph Hellwig wrote:
+> > _check_scratch_fs takes an optional device name, but no optional
+> > arguments.  Call e2fsck directly for this extN-specific test instead.
+> > 
+> > Signed-off-by: Christoph Hellwig <hch@lst.de>
+> > ---
+> >  tests/ext4/006 | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/tests/ext4/006 b/tests/ext4/006
+> > index 2ece22a4bd1e..07dcf356b0bc 100755
+> > --- a/tests/ext4/006
+> > +++ b/tests/ext4/006
+> > @@ -44,7 +44,7 @@ repair_scratch() {
+> >  	res=$?
+> >  	if [ "${res}" -eq 0 ]; then
+> >  		echo "++ allegedly fixed, reverify" >> "${FSCK_LOG}"
+> > -		_check_scratch_fs -n >> "${FSCK_LOG}" 2>&1
+> > +		e2fsck -n >> "${FSCK_LOG}" 2>&1
 > 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> Doesn't this need a device name?  e.g. e2fsck -n $SCRATCH_DEV ?
 
-Looks reasonable to me,
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
-
---D
-
-> ---
->  tests/ext4/032 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/ext4/032 b/tests/ext4/032
-> index 690fcf066c11..043ae4f53505 100755
-> --- a/tests/ext4/032
-> +++ b/tests/ext4/032
-> @@ -66,7 +66,7 @@ ext4_online_resize()
->  	$UMOUNT_PROG ${IMG_MNT}
->  
->  	echo "+++ check fs" | tee -a $seqres.full
-> -	_check_generic_filesystem $LOOP_DEVICE >> $seqres.full 2>&1 || \
-> +	_check_dev_fs $LOOP_DEVICE >> $seqres.full 2>&1 || \
->  		_fail "fsck should not fail"
->  	_destroy_loop_device $LOOP_DEVICE && LOOP_DEVICE=
->  }
-> -- 
-> 2.47.3
-> 
-> 
+Yes.
