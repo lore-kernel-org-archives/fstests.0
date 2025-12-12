@@ -1,160 +1,172 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 057DD30F7E3;
-	Fri, 12 Dec 2025 08:23:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A6096293C4E;
+	Fri, 12 Dec 2025 20:00:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765527805; cv=none; b=oOVHPv8UkS4kK03xMO5t8I5LoQY7Ay7AsLcX0Rs6pyU4oz8X6IpKb/iMCQkl9MEjErCU7JauC+oTNv2DVEC87unVTQ/4IAeYYU6iOQOrLk9u8833Wg9h/R1OEW0SZ3UcBi6unL37a718fsRCLEZMZflXJHXl2ZWsvkSOuvuy8aY=
+	t=1765569610; cv=none; b=fmhhWzJZTTJYglq84onKmwpfZZ3aYL3ik8oNtBs7ZBhjkG/gCjCx1X9WqmOff2My+DiUiBEFbbFWVU3KK+LvjCM2SpUXwbJ5qdCQ1HUHuheOynrBhTbvbrwXT4SQm5c5jfqyQgDRm0y50GWDzvM4zTEWFH/7wT/WkSAVxXd488M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765527805; c=relaxed/simple;
-	bh=aGiamXkn1VF0z2lGTZ3ubs0hl83g4dJpt6xBwhMGWW4=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Rt8t4YVH0TzcySKhy5gy5v6ao7Kqr2YOrqxiWOeav4jKNZow6Q+Nsu5FtdDTG3tcFzxwW7kCukV4bDwYZurkYnZ01PDGtlkWMny+mANn0R9PbpmY/liY8IMKFP12lVUTzFplY+Rblt9KXeP+btLmAu9PNb+33V441SX4DC6gzJU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=VFdkGOqW; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1765569610; c=relaxed/simple;
+	bh=vpnA1gSsoj+G4KLc7+57NwAKvZHybgpXipbyBmf0ItE=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=kxQuv8b6eff6jn5s0VtEHivaNjpw7f7cyfGIf1u15vEc72PB/gBax7ButfPo0DypjH//fg09QlS67Pvlsi6qxNlbH41THj3+AI/zE8I7C+oAMzoYj2Mt1c1iEB4bhgL/dx9r81CMMJ/+3Ee8s1VsLiLbLsFVi1pEo3OEh9wULK0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=raeKppk0; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="VFdkGOqW"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender
-	:Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=elD0+ujFEGaCtAGB28tzo6uCe9uXllSkts/kMeVnkX0=; b=VFdkGOqWCQZ2itXGtmhsgJaQrg
-	GUBahu7wmxG/XrAyRkhRoB/Gkim1WsWPsxOSmwPWEa7EOe8+RfNhKkFk69wi+SHrcA+0uyza1HYUN
-	1ob0sfjsxaTVcwqfxBTf58y7fEFsHzT3o+2AFhXGAC3DXBO3jYFoNxgcd9DYKh8mB0ohrZWsFM2sw
-	hoYCyXxqX1KYDC337YO7y73bM7IQb/jpAuI1By/FOhdl9hEEDwambwOWXWcUw9wDIVmEh5+pCDgWj
-	zf7Q6XN/8FTHonW2w8SNDGJnn5neQQKiR4vo/CYDydJ5Y8X+/kpJdRJT94N2jHgQm9pCoEPA0FPdb
-	49a4MD2w==;
-Received: from 2a02-8389-2341-5b80-d601-7564-c2e0-491c.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:d601:7564:c2e0:491c] helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vTyQs-00000000GGL-46NW;
-	Fri, 12 Dec 2025 08:23:23 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: Zorro Lang <zlang@kernel.org>
-Cc: Anand Jain <asj@kernel.org>,
-	Filipe Manana <fdmanana@suse.com>,
-	"Darrick J. Wong" <djwong@kernel.org>,
-	fstests@vger.kernel.org,
-	linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: [PATCH 13/13] xfs/650: require a real SCRATCH_RTDEV
-Date: Fri, 12 Dec 2025 09:22:01 +0100
-Message-ID: <20251212082210.23401-14-hch@lst.de>
-X-Mailer: git-send-email 2.47.3
-In-Reply-To: <20251212082210.23401-1-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="raeKppk0"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0E2CFC16AAE;
+	Fri, 12 Dec 2025 20:00:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1765569610;
+	bh=vpnA1gSsoj+G4KLc7+57NwAKvZHybgpXipbyBmf0ItE=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=raeKppk06bGapbg/REAo1hWv43PCh7R955FhQYybwGrP2e2nMox/XhVFo6E4MSAV0
+	 1RNzc/2PL3cNX0p87sdOuzLqyjPYlpDUDSL9dwc4vYvWg0E450RXTI6fszjc3aFx6R
+	 0TvRfeZSk27ZFnZ2wjluG4YjcQTP/Ef45Tol6QbZ66EMhdq2eOPS62JQN/dSfSj4As
+	 FtKlb/Cx9PhBYyvL7p4GQUMVhW/hlMp4O+4Kencfxwqx+DZRxvYYjPd0A44ffnEoYl
+	 mWyXHACz2Ky0q31BoX7dXOfcBp/x3Q2k9B3/iNTbAYO4b2sxFuhzFiO0bXcvcxJRDw
+	 5AbJWvPSttf6A==
+Date: Fri, 12 Dec 2025 12:00:09 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, Anand Jain <asj@kernel.org>,
+	Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org,
+	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 12/13] xfs/530: require a real SCRATCH_RTDEV
+Message-ID: <20251212200009.GB7716@frogsfrogsfrogs>
 References: <20251212082210.23401-1-hch@lst.de>
+ <20251212082210.23401-13-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20251212082210.23401-13-hch@lst.de>
 
-Require a real SCRATCH_RTDEV instead of faking one up using a loop
-device, as otherwise the options specified in MKFS_OPTIONS might
-not actually work the configuration.
+On Fri, Dec 12, 2025 at 09:22:00AM +0100, Christoph Hellwig wrote:
+> Require a real SCRATCH_RTDEV instead of faking one up using a loop
+> device, as otherwise the options specified in MKFS_OPTIONS might
+> not actually work the configuration.
+> 
+> Note that specifying a rtextsize doesn't work for zoned file systems,
+> so _notrun when mkfs fails.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+Looks fine to me, thanks for answering questions
 Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
----
- tests/xfs/650 | 63 +++++----------------------------------------------
- 1 file changed, 6 insertions(+), 57 deletions(-)
 
-diff --git a/tests/xfs/650 b/tests/xfs/650
-index d8f70539665f..418a1e7aae7c 100755
---- a/tests/xfs/650
-+++ b/tests/xfs/650
-@@ -9,21 +9,11 @@
- # bunmapi"). On XFS without the fixes, truncate will hang forever.
- #
- . ./common/preamble
--_begin_fstest auto prealloc preallocrw
--
--# Override the default cleanup function.
--_cleanup()
--{
--	_scratch_unmount &>/dev/null
--	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
--	cd /
--	rm -f $tmp.*
--	rm -f "$TEST_DIR/$seq"
--}
-+_begin_fstest auto prealloc preallocrw realtime
- 
- . ./common/filter
- 
--_require_scratch_nocheck
-+_require_realtime
- _require_xfs_io_command "falloc"
- 
- maxextlen=$((0x1fffff))
-@@ -31,51 +21,11 @@ bs=4096
- rextsize=4
- filesz=$(((maxextlen + 1) * bs))
- 
--must_disable_feature() {
--	local feat="$1"
--
--	# If mkfs doesn't know about the feature, we don't need to disable it
--	$MKFS_XFS_PROG --help 2>&1 | grep -q "${feat}=0" || return 1
--
--	# If turning the feature on works, we don't need to disable it
--	_scratch_mkfs_xfs_supported -m "${feat}=1" "${disabled_features[@]}" \
--		> /dev/null 2>&1 && return 1
--
--	# Otherwise mkfs knows of the feature and formatting with it failed,
--	# so we do need to mask it.
--	return 0
--}
--
--extra_options=""
--# Set up the realtime device to reproduce the bug.
-+_scratch_mkfs \
-+	-d agsize=$(((maxextlen + 1) * bs / 2)),rtinherit=1 \
-+	-r extsize=$((bs * rextsize)) \
-+	>>$seqres.full 2>&1
- 
--# If we don't have a realtime device, set up a loop device on the test
--# filesystem.
--if [[ $USE_EXTERNAL != yes || -z $SCRATCH_RTDEV ]]; then
--	_require_test
--	loopsz="$((filesz + (1 << 26)))"
--	_require_fs_space "$TEST_DIR" $((loopsz / 1024))
--	$XFS_IO_PROG -c "truncate $loopsz" -f "$TEST_DIR/$seq"
--	loop_dev="$(_create_loop_device "$TEST_DIR/$seq")"
--	USE_EXTERNAL=yes
--	SCRATCH_RTDEV="$loop_dev"
--	disabled_features=()
--
--	# disable reflink if not supported by realtime devices
--	must_disable_feature reflink &&
--		disabled_features=(-m reflink=0)
--
--	# disable rmap if not supported by realtime devices
--	must_disable_feature rmapbt &&
--		disabled_features+=(-m rmapbt=0)
--fi
--extra_options="$extra_options -r extsize=$((bs * rextsize))"
--extra_options="$extra_options -d agsize=$(((maxextlen + 1) * bs / 2)),rtinherit=1"
--
--_scratch_mkfs $extra_options "${disabled_features[@]}" >>$seqres.full 2>&1
--_try_scratch_mount >>$seqres.full 2>&1 || \
--	_notrun "mount failed, kernel doesn't support realtime?"
--_scratch_unmount
- _scratch_mount
- _require_fs_space "$SCRATCH_MNT" $((filesz / 1024))
- 
-@@ -108,7 +58,6 @@ $XFS_IO_PROG -c "pwrite -b 1M -W 0 $(((maxextlen + 2 - rextsize) * bs))" \
- # Truncate the extents.
- $XFS_IO_PROG -c "truncate 0" -c fsync "$SCRATCH_MNT/file"
- 
--# We need to do this before the loop device gets torn down.
- _scratch_unmount
- _check_scratch_fs
- 
--- 
-2.47.3
+--D
 
+> ---
+>  tests/xfs/530     | 42 +++++++++++++-----------------------------
+>  tests/xfs/530.out |  1 -
+>  2 files changed, 13 insertions(+), 30 deletions(-)
+> 
+> diff --git a/tests/xfs/530 b/tests/xfs/530
+> index 4a41127e3b82..ffc9e902e1b7 100755
+> --- a/tests/xfs/530
+> +++ b/tests/xfs/530
+> @@ -10,36 +10,22 @@
+>  . ./common/preamble
+>  _begin_fstest auto quick realtime growfs
+>  
+> -# Override the default cleanup function.
+> -_cleanup()
+> -{
+> -	cd /
+> -	_scratch_unmount >> $seqres.full 2>&1
+> -	[ -n "$rt_loop_dev" ] && _destroy_loop_device $rt_loop_dev
+> -	rm -f $tmp.* $TEST_DIR/$seq.rtvol
+> -}
+> -
+> -# Import common functions.
+>  . ./common/filter
+>  . ./common/inject
+>  . ./common/populate
+>  
+> -
+> -# Note that we don't _require_realtime because we synthesize a rt volume
+> -# below.
+> -_require_test
+> +_require_scratch
+> +_require_realtime
+>  _require_xfs_debug
+>  _require_test_program "punch-alternating"
+>  _require_xfs_io_error_injection "reduce_max_iextents"
+>  _require_xfs_io_error_injection "bmap_alloc_minlen_extent"
+> -_require_scratch_nocheck
+>  
+>  echo "* Test extending rt inodes"
+>  
+>  _scratch_mkfs | _filter_mkfs >> $seqres.full 2> $tmp.mkfs
+>  . $tmp.mkfs
+>  
+> -echo "Create fake rt volume"
+>  nr_bitmap_blks=25
+>  nr_bits=$((nr_bitmap_blks * dbsize * 8))
+>  
+> @@ -50,17 +36,12 @@ else
+>  	rtextsz=$dbsize
+>  fi
+>  
+> -rtdevsz=$((nr_bits * rtextsz))
+> -truncate -s $rtdevsz $TEST_DIR/$seq.rtvol
+> -rt_loop_dev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
+> -
+>  echo "Format and mount rt volume"
+> -
+> -export USE_EXTERNAL=yes
+> -export SCRATCH_RTDEV=$rt_loop_dev
+> -_scratch_mkfs -d size=$((1024 * 1024 * 1024)) \
+> -	      -r size=${rtextsz},extsize=${rtextsz} >> $seqres.full
+> -_try_scratch_mount || _notrun "Couldn't mount fs with synthetic rt volume"
+> +_try_scratch_mkfs_xfs \
+> +	-d size=$((1024 * 1024 * 1024)) \
+> +	-r size=${rtextsz},extsize=${rtextsz} >> $seqres.full 2>&1 || \
+> +	_notrun "Couldn't created crafted fs (zoned?)"
+> +_try_scratch_mount || _notrun "Couldn't mount crafted fs"
+>  
+>  # If we didn't get the desired realtime volume and the same blocksize as the
+>  # first format (which we used to compute a specific rt geometry), skip the
+> @@ -92,7 +73,12 @@ echo "Inject bmap_alloc_minlen_extent error tag"
+>  _scratch_inject_error bmap_alloc_minlen_extent 1
+>  
+>  echo "Grow realtime volume"
+> -$XFS_GROWFS_PROG -r $SCRATCH_MNT >> $seqres.full 2>&1
+> +# growfs expects sizes in FSB units
+> +fsbsize=$(_get_block_size $SCRATCH_MNT)
+> +rtdevsz=$((nr_bits * rtextsz))
+> +
+> +$XFS_GROWFS_PROG -R $((rtdevsize / fsbsize)) $SCRATCH_MNT \
+> +	>> $seqres.full 2>&1
+>  if [[ $? == 0 ]]; then
+>  	echo "Growfs succeeded; should have failed."
+>  	exit 1
+> @@ -115,8 +101,6 @@ echo "Check filesystem"
+>  _check_scratch_fs
+>  
+>  _scratch_unmount &> /dev/null
+> -_destroy_loop_device $rt_loop_dev
+> -unset rt_loop_dev
+>  
+>  # success, all done
+>  status=0
+> diff --git a/tests/xfs/530.out b/tests/xfs/530.out
+> index 6ddb572f9435..3c508b4564f7 100644
+> --- a/tests/xfs/530.out
+> +++ b/tests/xfs/530.out
+> @@ -1,6 +1,5 @@
+>  QA output created by 530
+>  * Test extending rt inodes
+> -Create fake rt volume
+>  Format and mount rt volume
+>  Consume free space
+>  Create fragmented filesystem
+> -- 
+> 2.47.3
+> 
+> 
