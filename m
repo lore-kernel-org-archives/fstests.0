@@ -1,112 +1,191 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2BB4E28CF6F;
-	Mon, 15 Dec 2025 09:50:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0C5423184F
+	for <fstests@vger.kernel.org>; Mon, 15 Dec 2025 18:27:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765792256; cv=none; b=LAP63jfWc3eoEPxwZfP9JPpPebHOx9hHGcFx60dj7iY2AhHlVcgyGogfHyYED+oX9deWwYJkgYHY0c9HNzvJx3BmlOx0UDt4YahuWBwLM6R3q/Dj2l7dk+k87QoR2Uv5b99KmVEgkv86oV4+cC+5TqshBxiYDnjhgVU21zaee5U=
+	t=1765823265; cv=none; b=WFbp+1br0Oqua/XXyCaMVtyP23qKv5xZQXYMxeDPFecULOWz1hrWpcTDcm+aRXkt50l91UEG/RA+AzUgYHtEbXamqyUernGzo4MGMYsenwEePxKY4hEmPsTwR33NWgOzDOGPJB1DAsvYKgQpJ6MSjyD2AukXKZPKKZyfOLRtIa0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765792256; c=relaxed/simple;
-	bh=knyQ+OBaeqWnb90rRIj6w+TJnFo7QcMZsOcfn1qqINg=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=M2ftdI9TLu3buy9iSU9gd2VDtRbwJW44Nwkhyr04Iw1T20QeKvZwEqe/wnphwhHSnvRgg7qB/9TOqHgONfsMEC+PpgmAz1OKGmN4N+vuZJfTW7lPFgWTHHanqRrbiwLHwBEcPqp/rgy3dKvpr7DQfGqSpPPExqSdIByveZhua3c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=gdIhNGIN; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1765823265; c=relaxed/simple;
+	bh=ZpEEWd3W7s/OPB4IoO4OTEjwEFrvzXP5ZvwDzoV2ID0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=T3M1XO5vgw3ypEoSUOAAL4CfSiy4OntguPInf7q1Jz41z8Ww1va9rTClulmtF5dGq7LxLu6sBaGiYV8vsbR5GEm5HE2hMeSgNJ6j1IpKtOO3FFhZpIveAQq0i/T0MIWTrFXNpDX9wqMCuFSfFDF78z+xbkB9DrjRuSvhCY+cvsA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=eatnPw43; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=QS7UkUGn; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=UJ+9s2Kf; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=a0+126/G; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="gdIhNGIN"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender
-	:Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=zLzvjx5K8C4z7XBJkkL8ekvlYlxqw9abxGNoDncelWk=; b=gdIhNGIN6LRgPXlXPctDIIPvoJ
-	YGgKM6tA45TgWV3P8IRwNpUFMZ4UBD9x5/T9jKGr7D1UUVixKvT/Havm8KWLiI3T+2R0PmKK7h8dY
-	ZJ1v+3HupHWpd+jDH8gbdy6b72X0FSTR79lY/GFcaOT5QpmZap8FEfxx8DhE2881T0HlpiqRYqQQK
-	5bj02SnbSNfZda4XVf89DwiUj7WmKyFa60zr/okj5hKPrV0aPCbH6D3KlV83ohUf4CfKaSjROOkYj
-	bdrLAC/FAsfD1NwERIcrfQLY6apW0OVA4JADRUAFA5A/yEzBtB+5qQ8TkBt34qfMImhaW5croB1FI
-	U6oU0+Ww==;
-Received: from [2001:4bb8:2d3:f4f4:dcee:db:50a:ae71] (helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vV5EE-00000003OqE-19zj;
-	Mon, 15 Dec 2025 09:50:54 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: Zorro Lang <zlang@kernel.org>
-Cc: "Darrick J. Wong" <djwong@kernel.org>,
-	fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: [PATCH 3/3] xfs: add a test that mkfs round up realtime subvolume sizes to the zone size
-Date: Mon, 15 Dec 2025 10:50:29 +0100
-Message-ID: <20251215095036.537938-4-hch@lst.de>
-X-Mailer: git-send-email 2.47.3
-In-Reply-To: <20251215095036.537938-1-hch@lst.de>
-References: <20251215095036.537938-1-hch@lst.de>
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="eatnPw43";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="QS7UkUGn";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="UJ+9s2Kf";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="a0+126/G"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 16B4A336F9;
+	Mon, 15 Dec 2025 18:27:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1765823262;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=kVfEEMvG0YXZ1ksN0MHBFHziQtswAIIOuNianF7RZpo=;
+	b=eatnPw43Zt+uJ6z5BqMeVPfNNYVHWqcO7MUfuFNPg5N57i4LoqLxPFYhqR7j8WR+kvb6G0
+	USYpWAFXWBY0OuQ7LlXkVgstY2ZFdRQsl09uEjJUpP8lSbKPBkTCZ3CnqGIQ0fQx6o6ogT
+	mS4ofxvZ71pneL/6qg4LZysoIKNrv84=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1765823262;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=kVfEEMvG0YXZ1ksN0MHBFHziQtswAIIOuNianF7RZpo=;
+	b=QS7UkUGnFVsaTHV+834Eri4JJNCXCEsrmyUEJGJ3Jdzee27O3R/nxQxp6ZSuudOUJIHX4h
+	gTg6/iVe+frssJBg==
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1765823261;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=kVfEEMvG0YXZ1ksN0MHBFHziQtswAIIOuNianF7RZpo=;
+	b=UJ+9s2KfZe1aJmqMgvA1T2jNfvfKhe7oax9E4UDOHbY8v3x/xBJduTP7KLFug5PAXhhjs/
+	gJeHwI9EB3/rkH9JD6BP34tZL7B66i4nNoSG5UdVpoZMzzqTMLC4oFC67Pq+arSWA8/O9B
+	uMl7LT5XQdoOo53BFJJknyoOSq/OnD0=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1765823261;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=kVfEEMvG0YXZ1ksN0MHBFHziQtswAIIOuNianF7RZpo=;
+	b=a0+126/Gwzhv5UTYMztnajp5nT+0XWJ2gUKDn5oQJF07b8NE8KiqPYlwFs9d2bAYUUj8dG
+	0KBOC+wHM6A9HCDQ==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id F3A023EA63;
+	Mon, 15 Dec 2025 18:27:40 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id m5JNOxxTQGm7dgAAD6G6ig
+	(envelope-from <dsterba@suse.cz>); Mon, 15 Dec 2025 18:27:40 +0000
+Date: Mon, 15 Dec 2025 19:27:35 +0100
+From: David Sterba <dsterba@suse.cz>
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v2] fstests: generic/746: update the parser to handle
+ block group tree
+Message-ID: <20251215182735.GB3195@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+References: <20251205071726.159577-1-wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20251205071726.159577-1-wqu@suse.com>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+X-Spamd-Result: default: False [-3.95 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	HAS_REPLYTO(0.30)[dsterba@suse.cz];
+	NEURAL_HAM_SHORT(-0.15)[-0.730];
+	MIME_GOOD(-0.10)[text/plain];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	TO_DN_SOME(0.00)[];
+	ARC_NA(0.00)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	MIME_TRACE(0.00)[0:+];
+	FROM_HAS_DN(0.00)[];
+	REPLYTO_DOM_NEQ_TO_DOM(0.00)[];
+	RCPT_COUNT_THREE(0.00)[3];
+	FROM_EQ_ENVFROM(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	REPLYTO_ADDR_EQ_FROM(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,imap1.dmz-prg2.suse.org:helo,suse.cz:replyto]
+X-Spam-Level: 
+X-Spam-Flag: NO
+X-Spam-Score: -3.95
 
-Make sure mkfs doesn't create unmountable file systems.
+On Fri, Dec 05, 2025 at 05:47:26PM +1030, Qu Wenruo wrote:
+> [FALSE ALERT]
+> The test case will fail on btrfs if the new block-group-tree feature is
+> enabled:
+> 
+> FSTYP         -- btrfs
+> PLATFORM      -- Linux/x86_64 btrfs-vm 6.18.0-rc6-custom+ #321 SMP PREEMPT_DYNAMIC Sun Nov 23 16:34:33 ACDT 2025
+> MKFS_OPTIONS  -- -O block-group-tree /dev/mapper/test-scratch1
+> MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
+> 
+> generic/746 44s ... [failed, exit status 1]- output mismatch (see xfstests-dev/results//generic/746.out.bad)
+>     --- tests/generic/746.out	2024-06-27 13:55:51.286338519 +0930
+>     +++ xfstests-dev/results//generic/746.out.bad	2025-11-28 07:47:17.039827837 +1030
+>     @@ -2,4 +2,4 @@
+>      Generating garbage on loop...done.
+>      Running fstrim...done.
+>      Detecting interesting holes in image...done.
+>     -Comparing holes to the reported space from FS...done.
+>     +Comparing holes to the reported space from FS...Sectors 256-2111 are not marked as free!
+>     ...
+>     (Run 'diff -u xfstests-dev/tests/generic/746.out xfstests-dev/results//generic/746.out.bad'  to see the entire diff)
+> 
+> [CAUSE]
+> Sectors [256, 2048) are the from the reserved first 1M free space.
+> Sectors [2048, 2112) are the leading free space in the chunk tree.
+> Sectors [2112, 2144) is the first tree block in the chunk tree.
+> 
+> However the reported free sectors from get_free_sectors() looks like this:
+> 
+>   2144 10566
+>   10688 11711
+>   ...
+> 
+> Note that there should be a free sector range in [2048, 2112) but it's
+> not reported in get_free_sectors().
+> 
+> The get_free_sectors() call is fs dependent, and for btrfs it's using
+> parse-extent-tree.awk script to handle the extent tree dump.
+> 
+> The script uses BLOCK_GROUP_ITEM items to detect the beginning of a
+> block group so that it can calculate the hole between the beginning of a
+> block group and the first data/metadata item.
+> 
+> However block-group-tree feature moves BLOCK_GROUP_ITEM items to a
+> dedicated tree, making the existing script unable to parse the free
+> space at the beginning of a block group.
+> 
+> [FIX]
+> Introduce a new script, parse-free-space.py, that accepts two tree
+> dumps:
+> 
+> - block group tree dump
+>   If the fs has block-group-tree feature, it's the block group tree
+>   dump.
+>   Otherwise the regular extent tree dump is enough.
+> 
+> - extent tree dump
+>   The usual extent tree dump.
+> 
+> With a dedicated block group tree dump, the script can correctly handle
+> the beginning part of free space, no matter if block-group-tree feature
+> is enabled or not.
+> 
+> And with this parser, the old parse-extent-tree.awk can be retired.
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+> Changelog:
+> v2:
+> - Add extra requirement for python3 if the fs is btrfs
+> - Utilize $PYTHON3_PROG other than calling the script directly
+> - Add the comment on we need single DATA/METADATA profiles
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- tests/xfs/653     | 33 +++++++++++++++++++++++++++++++++
- tests/xfs/653.out |  2 ++
- 2 files changed, 35 insertions(+)
- create mode 100755 tests/xfs/653
- create mode 100644 tests/xfs/653.out
-
-diff --git a/tests/xfs/653 b/tests/xfs/653
-new file mode 100755
-index 000000000000..07d9125c2ff0
---- /dev/null
-+++ b/tests/xfs/653
-@@ -0,0 +1,33 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+# Copyright (c) 2025 Christoph Hellwig.
-+#
-+# FS QA Test No. 653
-+#
-+# Tests that mkfs for a zoned file system rounds realtime subvolume sizes up to
-+# the zone size to create mountable file systems.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick realtime growfs zone
-+
-+. ./common/filter
-+. ./common/zoned
-+
-+_require_realtime
-+_require_scratch
-+_require_scratch_size $((2 * 1024 * 1024)) # 1GiB in kiB units
-+
-+fsbsize=4096
-+unaligned_size=$((((1 * 1024 * 1024 * 1024) + (fsbsize * 13)) / fsbsize))
-+
-+# Manual mkfs and mount to not inject an existing RT device
-+echo "Try to format file system"
-+_try_mkfs_dev -b size=4k -r zoned=1,size=${unaligned_size}b $SCRATCH_DEV \
-+		>> $seqres.full 2>&1 ||\
-+	_notrun "cannot mkfs zoned filesystem"
-+_mount $SCRATCH_DEV $SCRATCH_MNT
-+umount $SCRATCH_MNT
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/653.out b/tests/xfs/653.out
-new file mode 100644
-index 000000000000..2cba5cdf1171
---- /dev/null
-+++ b/tests/xfs/653.out
-@@ -0,0 +1,2 @@
-+QA output created by 653
-+Try to format file system
--- 
-2.47.3
-
+Reviewed-by: David Sterba <dsterba@suse.com>
