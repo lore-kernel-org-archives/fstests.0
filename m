@@ -1,151 +1,250 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f171.google.com (mail-pf1-f171.google.com [209.85.210.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC074265CA6;
-	Fri, 12 Dec 2025 20:11:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6ED8024A076
+	for <fstests@vger.kernel.org>; Mon, 15 Dec 2025 05:04:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765570303; cv=none; b=k4R+wlqbOHlgSWP2L8lgMZU/rhutzKcj+Ebtq4AGkRtU3gbWWXtJKx1NlWNBMe2Yvv0FQXmIiwHcsuHIb0IvD8/r7QS6QNHQZOHJ8wfaQn4PVUK40o3oFTQ/Zbvl5JAC3EibLKbbYYVyrU0AXDz5LMk7il9ohBsKYD2fG3ZWUoE=
+	t=1765775062; cv=none; b=rO3v0I6qbavb1owJy5da076s1gJ9ddZPd1EGOgfHiZizr3at9/l5oRnEwro8Y8gfp+G/3JMavxYTZgG2/gl7MJ6p7TkkrErpZ9YoWQhz9R4F2SkVlZg2n3XPD8Dq5GRzKGN8R7i1YAU9EGw9XWYs7rhzt6DaPV1FMPIMvkDcysY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765570303; c=relaxed/simple;
-	bh=+JT48ozqF9ScLI1VbymQxnIPRD2JGzx1/CpA8qAJI0A=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=g1tQgWNKWOYE85OuKlKbUnCvimKxgBVACBgBFqJXMxEw33gxkjla/oaxwHtoDCU5aGPBwu0+gbYiiZAd419DFH5xYCnFmr5T9QWJX4E8Svba4BQ0OsObOJlIk13EdVX5eXjAP9G/me0ht/rtvMF85+Hk3NAj2eAJTcmawyEi1/8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mwVIIMy8; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1765775062; c=relaxed/simple;
+	bh=6QmFm5BOXTEHjRAylnBJN5wt96Vr9CRtAMegcywyyJc=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=BvG2MLq7kZ+SV3kXmWLIEEs4V8lVamUdqMwLT08zOWYnz5GKERLBRj2XD9MRwB6gbxTfxsXtfuGmhr6LCDYahw99VoCtk2tWxMBgXKEljjV/gXOBHLQjh6q8Y1hp049URxrDjJO2CMVUGF+yzMdDAqrgW9UGLjKtdeya4n7nlYU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=KsXDAcJa; arc=none smtp.client-ip=209.85.210.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mwVIIMy8"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51136C4CEF1;
-	Fri, 12 Dec 2025 20:11:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1765570303;
-	bh=+JT48ozqF9ScLI1VbymQxnIPRD2JGzx1/CpA8qAJI0A=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=mwVIIMy87PsdU5v3I0uztKEU5kuPf/b56TJoH5yDQevpPHzi7qbWet4SwIZXzg6Xz
-	 FxH0bg2XQ7bwhaxosevHVri0iCQNAchdgf8ZGgEHhLHiibUXlQUvSHnGiwWgOjor7R
-	 dN/AEARpzZIhLr95A/i0hm8Y8WD23G5VVfdMFHA28n3yRbZFkELmWX6m3YSgnjU2HY
-	 PC8swRNN5OJQbbMlmoCjqTBRAlWPXK76rnlIiUqDyC0dqZ078I+u9ujI7XZZb28Qmc
-	 13puJVL6yfifSwdx9oqGR638YxuUGJ3GHS17Poi3C+wfLXrCmCE/p7ZcLH5zY9ZE/9
-	 iceiwbBdCWU4w==
-Date: Fri, 12 Dec 2025 12:11:42 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Zorro Lang <zlang@kernel.org>, Anand Jain <asj@kernel.org>,
-	Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org,
-	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 01/13] dmflakey: override SCRATCH_DEV in _init_flakey
-Message-ID: <20251212201142.GF7716@frogsfrogsfrogs>
-References: <20251212082210.23401-1-hch@lst.de>
- <20251212082210.23401-2-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KsXDAcJa"
+Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-7aa9be9f03aso2367490b3a.2
+        for <fstests@vger.kernel.org>; Sun, 14 Dec 2025 21:04:20 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1765775060; x=1766379860; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=tZGyA7pBdSvrHmzYabMFoB6rBogwUp86ekQykEwOfOE=;
+        b=KsXDAcJal21zACibSvKYUqkap8c/wpfX8xAp8Css6X5b3LTtF/payNlYVNmRB2z5a/
+         cTALxa8zxjsi69Wqsnn9c7jR+d5WOG8PRoFaCuBTh9peCaW82OyKZATemy8rTzY0FxhC
+         aBQwXm/83zjfMHKgDW6q2V0GjFx3F8bMBLxJ5WMwlhMHZv0Vmygm4oABNrCco14P2OKw
+         LsrC/xWjF67qnWMiz3RP6XMwAsXRfOIOccJhkJo7JSNhvgkJN248ijMvcmSUccRyx5b5
+         sHzNEzjBd/NqTI+BtOUpE7TxVgJH7j0iPOP86WMRHo5QB27f5pE70pfKf1jNpMQrdxUt
+         9R/w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1765775060; x=1766379860;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=tZGyA7pBdSvrHmzYabMFoB6rBogwUp86ekQykEwOfOE=;
+        b=Xj0buyrvV/A7Zvt60n4+Pw3wErIK/EaCqVrWUcb6n14xM9+PylEibFOBtWOeHXhjLV
+         MFhJkWl8JvtcemZLueTrhpFT5g/HilOFsU+gEY4Q9lQCs+w5Bhn4l2qNFXPWsHoIC3Q5
+         jAitQphpQdWL2RUSSmO1MMAb9xLPu449jzMFhqmHeCgFlr2UMcQSffo396ppZPcVuabV
+         8UIzel6T9bQDJhuB37ZG9FWGYqeXe9bcJ0CBc+yrkpGMY29QpDrE6oJi28gUwwLd/22P
+         i7rjDtMrn773ucYhVbXxJMRUs5vwOtOGeXzFqVfPWVm8CYZ0ni0HkjzDDfUwJf10Wo6E
+         Z3NA==
+X-Gm-Message-State: AOJu0YyaYmr6iWRFG3buKu5C0k0WoqJinF8j9/A2xFzOhSBUdO8Z310T
+	m0quaFeEZzGXAD1gvVr48ZCASvviAfz5k826dZxb/uBz/TuqKlJqn7WZ
+X-Gm-Gg: AY/fxX5p/y7QPXpKiTEg5bD1afUbKn3eb79eOO//QIYb8QZR49+sJrqzkblw9C/jAHM
+	0BpURV+7/jYiUh51mPUDnSQ4Uxs2dHnPN9ZS3E6YiLdG4OoaXWhwTf37S202CxlAf2GvwMWe3bD
+	7rdnZ2UmuA0KVWuNlkZsHvipiV2tOBwGYDoCQvOWATciQ8w+aYPlBGqScarKBXglpn40K8GkSVQ
+	pMtXPtxn3oZKo5L4dBfDj74+3YObifN7eqrxr5fJDafQsUNzMYIuAAPLi9ULZHWAKKdYnL8hnoh
+	W/gAr0524+61mNTZVDkeDBs1PhiMaw4cm6ynXlN7r/djIuUUYtnceqaw+SYr8lE+aIQDISjq+3N
+	0FvIzP+DWPlg+oa7bLZHAX1KCu7Q9Itseb50KviiXWhnCLQSU9OWDzf3NMB827TBL27Ssj40cvS
+	4389afpy0+0sq1eLW12mo9cw==
+X-Google-Smtp-Source: AGHT+IGCxPpj/+ZlGgaLnL92SemtmZ9bg1o7bpPUXZQfeNn1WhaCHlhp0a8dZrp8y+9ZzViCc97Fvw==
+X-Received: by 2002:a05:6a00:4c97:b0:7e8:4471:8dd with SMTP id d2e1a72fcca58-7f66a07d110mr10010040b3a.62.1765775059493;
+        Sun, 14 Dec 2025 21:04:19 -0800 (PST)
+Received: from [192.168.0.120] ([49.207.205.246])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7f4c547e720sm11312785b3a.57.2025.12.14.21.04.16
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 14 Dec 2025 21:04:18 -0800 (PST)
+Message-ID: <b3d93d75-9c39-44ac-9c7e-0346b3a970cf@gmail.com>
+Date: Mon, 15 Dec 2025 10:34:14 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20251212082210.23401-2-hch@lst.de>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/4] generic/371: Fix the test to be compatible block
+ sizes upto 64k
+To: Zorro Lang <zlang@redhat.com>, linux-btrfs <linux-btrfs@vger.kernel.org>
+Cc: fstests@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
+ djwong@kernel.org, fdmanana@kernel.org, quwenruo.btrfs@gmx.com,
+ zlang@kernel.org
+References: <cover.1758036285.git.nirjhar.roy.lists@gmail.com>
+ <a44d80e30dca7e71e701ec90d75717a0581def4d.1758036285.git.nirjhar.roy.lists@gmail.com>
+ <20250926163758.hrg4bbyvk3xipcqo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <ef8b27aa-9ae9-4f5c-9798-38197c327df9@gmail.com>
+ <20251101113625.zyq4gsf6d63q6dti@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Language: en-US
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+In-Reply-To: <20251101113625.zyq4gsf6d63q6dti@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Fri, Dec 12, 2025 at 09:21:49AM +0100, Christoph Hellwig wrote:
-> _init_flakey already overrides SCRATCH_LOGDEV and SCRATCH_RTDEV so that
-> the XFS-specific helpers work fine with external devices.  Do the same
-> for SCRATCH_DEV itself, so that _scratch_mount and _scratch_unmount just
-> work, and so that _check_scratch_fs does not need to override the main
-> device.
-> 
-> This requires some small adjustments in how generic/741 checks that
-> mounting the underlying device fails, but the new version actually is
-> simpler than the old one, and in xfs/438 where we need to be careful
-> where to create the custome dm table.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
-<snip>
-> diff --git a/common/dmflakey b/common/dmflakey
-> index 7368a3e5b324..cb0359901c16 100644
-> --- a/common/dmflakey
-> +++ b/common/dmflakey
-> @@ -15,11 +15,19 @@ export FLAKEY_LOGNAME="flakey-logtest.$seq"
->  _init_flakey()
->  {
->  	# Scratch device
-> -	local BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
-> -	export FLAKEY_DEV="/dev/mapper/$FLAKEY_NAME"
-> -	FLAKEY_TABLE="0 $BLK_DEV_SIZE flakey $SCRATCH_DEV 0 180 0"
-> -	FLAKEY_TABLE_DROP="0 $BLK_DEV_SIZE flakey $SCRATCH_DEV 0 0 180 1 drop_writes"
-> -	FLAKEY_TABLE_ERROR="0 $BLK_DEV_SIZE flakey $SCRATCH_DEV 0 0 180 1 error_writes"
-> +	if [ -z "$NON_FLAKEY_DEV" ]; then
-> +		# Set up the device switch
-> +		local backing_dev="$SCRATCH_DEV"
-> +		export NON_FLAKEY_DEV="$SCRATCH_DEV"
-> +		SCRATCH_DEV=/dev/mapper/$FLAKEY_NAME
-> +	else
-> +		# Already set up; recreate tables
-> +		local backing_dev="$NON_FLAKEY_DEV"
-> +	fi
-> +	local BLK_DEV_SIZE=`blockdev --getsz $backing_dev`
-> +	FLAKEY_TABLE="0 $BLK_DEV_SIZE flakey $backing_dev 0 180 0"
-> +	FLAKEY_TABLE_DROP="0 $BLK_DEV_SIZE flakey $backing_dev 0 0 180 1 drop_writes"
-> +	FLAKEY_TABLE_ERROR="0 $BLK_DEV_SIZE flakey $backing_dev 0 0 180 1 error_writes"
 
-Ok, so _init_flakey still sets FLAKEY_TABLE_ERROR...
+On 11/1/25 17:06, Zorro Lang wrote:
+> On Tue, Oct 21, 2025 at 02:27:46PM +0530, Nirjhar Roy (IBM) wrote:
+>> On 9/26/25 22:07, Zorro Lang wrote:
+>>> On Tue, Sep 16, 2025 at 03:30:09PM +0000, Nirjhar Roy (IBM) wrote:
+>>>> When this test was ran with btrfs with 64k sector/block size, it
+>>>> failed with
+>>>>
+>>>>        QA output created by 371
+>>>>        Silence is golden
+>>>>       +fallocate: No space left on device
+>>>>       +pwrite: No space left on device
+>>>>       +fallocate: No space left on device
+>>>>       +pwrite: No space left on device
+>>>>       +pwrite: No space left on device
+>>>>       ...
+>>>>
+>>>> This is what is going on:
+>>>>
+>>>> Let us see the following set of operations:
+>>>>
+>>>> --- With 4k sector size ---
+>>>> $ mkfs.btrfs -f -b 256m -s 4k -n 4k /dev/loop0
+>>>> $ mount /dev/loop0 /mnt1/scratch/
+>>>> $ df -h /dev/loop0
+>>>> Filesystem      Size  Used Avail Use% Mounted on
+>>>> /dev/loop0      256M  1.5M  175M   1% /mnt1/scratch
+>>>>
+>>>> $ xfs_io -f -c "pwrite 0 80M" /mnt1/scratch/t1
+>>>> wrote 83886080/83886080 bytes at offset 0
+>>>> 80 MiB, 20480 ops; 0.4378 sec (182.693 MiB/sec and 46769.3095 ops/sec)
+>>>>
+>>>> $ df -h /dev/loop0
+>>>> Filesystem      Size  Used Avail Use% Mounted on
+>>>> /dev/loop0      256M  1.5M  175M   1% /mnt1/scratch
+>>>>
+>>>> $ sync
+>>>> $ df -h /dev/loop0
+>>>> Filesystem      Size  Used Avail Use% Mounted on
+>>>> /dev/loop0      256M   82M   95M  47% /mnt1/scratch
+>>>>
+>>>> $ xfs_io -f -c "pwrite 0 80M" /mnt1/scratch/t2
+>>>> wrote 83886080/83886080 bytes at offset 0
+>>>> 80 MiB, 20480 ops; 0:00:01.25 (63.881 MiB/sec and 16353.4648 ops/sec)
+>>>>
+>>>> $ df -h /dev/loop0
+>>>> Filesystem      Size  Used Avail Use% Mounted on
+>>>> /dev/loop0      256M  137M   40M  78% /mnt1/scratch
+>>>>
+>>>> $ sync
+>>>> $ df -h /dev/loop0
+>>>> Filesystem      Size  Used Avail Use% Mounted on
+>>>> /dev/loop0      256M  162M   15M  92% /mnt1/scratch
+>>>>
+>>>> Now let us repeat with 64k sector size
+>>>> --- With 64k sector size ---
+>>>> $ mkfs.btrfs -f -b 256m -s 64k -n 64k /dev/loop0
+>>>> $ mount /dev/loop0 /mnt1/scratch/
+>>>> $ df -h /dev/loop0
+>>>> Filesystem      Size  Used Avail Use% Mounted on
+>>>> /dev/loop0      256M   24M  175M  12% /mnt1/scratch
+>>>>
+>>>> $ xfs_io -f -c "pwrite 0 80M" /mnt1/scratch/t1
+>>>> wrote 83886080/83886080 bytes at offset 0
+>>>> 80 MiB, 20480 ops; 0.8460 sec (94.553 MiB/sec and 24205.4914 ops/sec)
+>>>> $
+>>>> $ df -h /dev/loop0
+>>>> Filesystem      Size  Used Avail Use% Mounted on
+>>>> /dev/loop0      256M   24M  175M  12% /mnt1/scratch
+>>>>
+>>>> $ sync
+>>>> $ df -h /dev/loop0
+>>>> Filesystem      Size  Used Avail Use% Mounted on
+>>>> /dev/loop0      256M  104M   95M  53% /mnt1/scratch
+>>>>
+>>>> $ xfs_io -f -c "pwrite 0 80M" /mnt1/scratch/t2
+>>>> pwrite: No space left on device
+>>>>
+>>>> Now, we can see that with 64k node size, 256M is not sufficient
+>>>> to hold 2 files worth 80M. For 64k, we can also see that the initial
+>>>> space usage on a fresh filesystem is 24M and for 4k its 1.5M. So
+>>>> because of higher node size, more metadata space is getting used.
+>>>> This test requires the size of the filesystem to be at least capable
+>>>> to hold 2 80M files.
+>>>> Fix this by increasing the fs size from 256M to 330M.
+>>> Thanks for this detailed explanation. As this's a ENOSPC test, so we
+>>> must make sure this case still can uncover the original bug, before
+>>> increasing the fs size. Can you make sure that? Or maybe we can replace
+>>> that "80M" with a variable (according to "Avail" size).
+>> Hi Filipe, Zorro, Wang,
+>>
+>> The original commit message of generic/371 says that this test catches some
+>> excess space usage issues. Is(Are) there any patch(es) that fix this issue -
+>> so that I can remove the commits and check if the test expectedly fails with
+>> slightly large fssize i.e, 330M?
+>>
+>> I did find some related commits [1] and I ran the test with 330M and
+>> 256M(the default size) after removing the commits[1] but the test passes
+>> with both the filesystem sizes. So I am guessing, this is not the patch that
+>> can test generic/371.
+>>
+>> [1] https://lore.kernel.org/linux-btrfs/cover.1610747242.git.josef@toxicpanda.com/
+> Hi,
+>
+> I'm not familiar with btrfs patches, but from the commit history, I suspect
+> it *might* be related with below commit:
+>
+> commit 18513091af9483ba84328d42092bd4d42a3c958f
+> Author: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
+> Date:   Mon Jul 25 15:51:40 2016 +0800
+>
+>      btrfs: update btrfs_space_info's bytes_may_use timely
+>
+> Or "c0d2f6104e8ab2eb75e58e72494ad4b69c5227f8" :)
+>
+> Thanks,
+> Zorro
 
->  	_dmsetup_create $FLAKEY_NAME --table "$FLAKEY_TABLE" || \
->  		_fatal "failed to create flakey device"
->  
-<snip>
-> diff --git a/tests/xfs/438 b/tests/xfs/438
-> index 6d1988c8b9b8..4ff249df6967 100755
-> --- a/tests/xfs/438
-> +++ b/tests/xfs/438
-> @@ -32,7 +32,7 @@ _cleanup()
->  		sysctl -w fs.xfs.xfssyncd_centisecs=${interval} >/dev/null 2>&1
->  	cd /
->  	rm -f $tmp.*
-> -	_unmount_flakey >/dev/null 2>&1
-> +	_scratch_unmount >/dev/null 2>&1
->  	_cleanup_flakey > /dev/null 2>&1
->  }
->  
-> @@ -100,6 +100,9 @@ echo "Silence is golden"
->  
->  _scratch_mkfs > $seqres.full 2>&1
->  
-> +# this needs to happen after mkfs, but before _init_flakey overrides SCRATCH_DEV
-> +FLAKEY_TABLE_ERROR=$(make_xfs_scratch_flakey_table)
-> +
->  # no error will be injected
->  _init_flakey
+Hi Zorro, Filipe and Qu
 
-...but won't _init_flakey clobber the value of FLAKEY_TABLE_ERROR set
-by make_xfs_scratch_flakey_table?
+Thank you for the pointers. I tried running the test reverting the above 
+2 mentioned commits, but the test seems to pass without these commits, 
+so probably these are not the ones. I am not able to find any other 
+relevant commits and the test case is also very old. Any further ideas?
 
---D
+--NR
 
->  $DMSETUP_PROG info >> $seqres.full
-> @@ -111,7 +114,7 @@ interval=$(sysctl -n fs.xfs.xfssyncd_centisecs 2>/dev/null)
->  sysctl -w fs.xfs.xfssyncd_centisecs=100 >> $seqres.full 2>&1
->  
->  _qmount_option "usrquota"
-> -_mount_flakey
-> +_scratch_mount
->  
->  # We need to set the quota limitation twice, and inject the write error
->  # after the second setting. If we try to inject the write error after
-> @@ -127,7 +130,6 @@ xfs_freeze -f $SCRATCH_MNT
->  xfs_freeze -u $SCRATCH_MNT
->  
->  # inject write IO error
-> -FLAKEY_TABLE_ERROR=$(make_xfs_scratch_flakey_table)
->  _load_flakey_table ${FLAKEY_ERROR_WRITES}
->  $DMSETUP_PROG info >> $seqres.full
->  $DMSETUP_PROG table >> $seqres.full
-> @@ -142,7 +144,7 @@ _scratch_sync
->  # the completion of the retried write of dquota buffer
->  sleep 2
->  
-> -_unmount_flakey
-> +_scratch_unmount
->  
->  _cleanup_flakey
->  
+>
+>> --NR
+>>
+>>> Thanks,
+>>> Zorro
+>>>
+>>>> Reported-by: Disha Goel <disgoel@linux.ibm.com>
+>>>> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+>>>> ---
+>>>>    tests/generic/371 | 2 +-
+>>>>    1 file changed, 1 insertion(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/tests/generic/371 b/tests/generic/371
+>>>> index b312c450..95af308e 100755
+>>>> --- a/tests/generic/371
+>>>> +++ b/tests/generic/371
+>>>> @@ -19,7 +19,7 @@ _require_scratch
+>>>>    _require_xfs_io_command "falloc"
+>>>>    test "$FSTYP" = "xfs" && _require_xfs_io_command "extsize"
+>>>> -_scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
+>>>> +_scratch_mkfs_sized $((330 * 1024 * 1024)) >> $seqres.full 2>&1
+>>>>    _scratch_mount
+>>>>    # Disable speculative post-EOF preallocation on XFS, which can grow fast enough
+>>>> -- 
+>>>> 2.34.1
+>>>>
+>> -- 
+>> Nirjhar Roy
+>> Linux Kernel Developer
+>> IBM, Bangalore
+>>
+-- 
+Nirjhar Roy
+Linux Kernel Developer
+IBM, Bangalore
+
