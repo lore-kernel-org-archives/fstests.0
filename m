@@ -1,86 +1,41 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D4A7271A6D
-	for <fstests@vger.kernel.org>; Mon, 15 Dec 2025 18:28:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 959A83254AC;
+	Mon, 15 Dec 2025 19:25:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765823327; cv=none; b=JEvdIKNjIVEBP08bJMIu6EncDQvJicD4yF02iLVWuBZb1qBDFhJvoJ2io8F37xf8X/jmb3BTp81KoN6kbzaLtEjpcoon+J5iroTDM4hLubP479a4tK6GzmIPI+l86d0M4btC7O2zEm/dfQLQ3ptH/vEqW9vyCFB7hRc38lPNgek=
+	t=1765826753; cv=none; b=LLWrIQYpt42+iB5fXA9NUcXqcMn19Yzef2sFiUlkZ+LSa4+RWo2YFJn43ExqgOj1AB79Ad2RyoFPiYEtzjZb7JGWK8B4SOf6YKRbEKoZs1c6DqqJJ9GmPMByhGVe9q/QnXv/Xo17acwKZePLPICiJ5lRXCCqWbGQBCy1GKyJs4s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765823327; c=relaxed/simple;
-	bh=cHkClbS6w2WTvCYEqEdmD61brGsBOK7+EPfhJkbCUM0=;
+	s=arc-20240116; t=1765826753; c=relaxed/simple;
+	bh=PGYnLgduNN5eGHwe4uE1s/WwyAcmoq1oR0d3qfSDNCc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=lqH6/k9gnx10dyQjLDCwZQ3TZz6oij22Sa5G+thHnTXyoAEa2MFnFauD9hI1zcByYAFXHqBnuQjSNmll+ZckAuKy/TSgy4hSI09P9nJJMdJFuSjuxO1UVxXCE2NfISQSVa8Au3q0wI4hucpbKvArR/aMG6iuiYt+CMheCfuCN0Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=URhxnMWG; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=lTp8gveL; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=KCwxaF0d; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=926Kk8VD; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	 Content-Type:Content-Disposition:In-Reply-To; b=jTh4jFQRpduPgvL/SFKk5tsgjyu+VnULYNXtYMiiGK2JA3uZGLkt72WJGoCiUyygSPdBIDGsoAoOChiD0+niRXHls6sk+Hp32xSJEgadpNSomad7hYccAPNEDthLM+1Ga4kkKl4Jvip+leFYw8voKHWEjgpz83zsTB/WfoG69sA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WTCVibvL; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="URhxnMWG";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="lTp8gveL";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="KCwxaF0d";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="926Kk8VD"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 981B65BCC2;
-	Mon, 15 Dec 2025 18:28:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1765823323;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=CwMR7GcZwjMUt7ny2lTk6nrVG5eRDhzrc8rjkYW3NAY=;
-	b=URhxnMWG7h4e6HtZShjVphmnLtnp+vaCTCxHh3fU1ZzdtYWhE7O0Zv8TjdB2qgCO5VAn4z
-	hkB8FDQDS7BfNP2il3oXIRQH24E0Tl+5SE9JL8on84odgIluYg/HRkmGM6OSveXfofD7wo
-	mZzmfMa9qliHrF+dFBSzK3+avsLfAkw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1765823323;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=CwMR7GcZwjMUt7ny2lTk6nrVG5eRDhzrc8rjkYW3NAY=;
-	b=lTp8gveLaAaa5yoXoM8ncnGIHETBNtXtrJKfUr00Fo8pgVVQNYF3pShekQE768YfWPk398
-	iQq1GuQdHPAdDRDw==
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=KCwxaF0d;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=926Kk8VD
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1765823322;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=CwMR7GcZwjMUt7ny2lTk6nrVG5eRDhzrc8rjkYW3NAY=;
-	b=KCwxaF0db0fD3VqXvou2skachfCgy634vMbVcFALrvwNcYtmmLuVck3L42eX+VuRp9Y5eo
-	mQCSu10nNmDp4u6sHPOEHDyRDQEVIId4yMh2cJlqPgQAoBYn2WMFb+Lo7q94WFG3uwJJrT
-	XBAcVxdhwh99L+PZzLRIlE3QcbgRqtw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1765823322;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=CwMR7GcZwjMUt7ny2lTk6nrVG5eRDhzrc8rjkYW3NAY=;
-	b=926Kk8VDKn569HJiBw5+3uNObzVbHrWDngwZfYlo8b8BiT9EXtkohKLfXG3qRAAKq1somL
-	3kae0ja/iFV8XODg==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 80F713EA63;
-	Mon, 15 Dec 2025 18:28:42 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id TH5JH1pTQGntdwAAD6G6ig
-	(envelope-from <dsterba@suse.cz>); Mon, 15 Dec 2025 18:28:42 +0000
-Date: Mon, 15 Dec 2025 19:28:41 +0100
-From: David Sterba <dsterba@suse.cz>
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: btrfs: add a new test case to verify quick
- qgroup inherit
-Message-ID: <20251215182841.GC3195@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <20251204044108.181671-1-wqu@suse.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WTCVibvL"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1D31EC4CEF5;
+	Mon, 15 Dec 2025 19:25:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1765826753;
+	bh=PGYnLgduNN5eGHwe4uE1s/WwyAcmoq1oR0d3qfSDNCc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=WTCVibvLmrJedQ5bcCXN25xTjBLyMIjFOkBIcUJ5LvmX2SCQa+OcXeTnnqb4WATkU
+	 trGQvVXTXkbUFFAdMTsf/RGwyLqIaPZ7HU2fuf+lkFUYGYUo9ZPEFga35yCdxI+P04
+	 Pb2kgb2EChCs0TMwDXJ71eZeBXAl6MPL8Rpai2RAqw/NvDDWmYcE8VwGOpw8QFQ9aZ
+	 pfGVB0bL3KJWWzxVD/VcaQskwAal/yIwePDHDdr2NndH+G3WbrS5dssO+cASmR4Wht
+	 nm1ZhDBe4NPowjCx1Ba5I9iAWpCBQdc5CdiE0KcAs+fZU45GosPPhc5gEMSAjG0UrE
+	 VUX9oRrL+74EA==
+Date: Mon, 15 Dec 2025 11:25:52 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 3/3] xfs: add a test that mkfs round up realtime
+ subvolume sizes to the zone size
+Message-ID: <20251215192552.GK7725@frogsfrogsfrogs>
+References: <20251215095036.537938-1-hch@lst.de>
+ <20251215095036.537938-4-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -89,69 +44,76 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251204044108.181671-1-wqu@suse.com>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
-X-Spamd-Result: default: False [-4.21 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	HAS_REPLYTO(0.30)[dsterba@suse.cz];
-	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-0.998];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	ARC_NA(0.00)[];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	TO_DN_SOME(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	FROM_HAS_DN(0.00)[];
-	DKIM_TRACE(0.00)[suse.cz:+];
-	REPLYTO_DOM_NEQ_TO_DOM(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	REPLYTO_ADDR_EQ_FROM(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	DNSWL_BLOCKED(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DWL_DNSWL_BLOCKED(0.00)[suse.cz:dkim];
-	RCPT_COUNT_THREE(0.00)[3];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns,suse.com:email,twin.jikos.cz:mid,suse.cz:dkim,suse.cz:replyto]
-X-Rspamd-Action: no action
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Spam-Level: 
-X-Rspamd-Queue-Id: 981B65BCC2
-X-Spam-Flag: NO
-X-Spam-Score: -4.21
+In-Reply-To: <20251215095036.537938-4-hch@lst.de>
 
-On Thu, Dec 04, 2025 at 03:11:08PM +1030, Qu Wenruo wrote:
-> [BUG]
-> There is a bug report that simple quota exposed a bug in the quick
-> qgroup inherit, that if there is a multi-level qgroup parent
-> relationship, only the direct parent got updated.
+On Mon, Dec 15, 2025 at 10:50:29AM +0100, Christoph Hellwig wrote:
+> Make sure mkfs doesn't create unmountable file systems.
 > 
-> [TEST CASE]
-> The test case will create the following subvolume and qgroups first:
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/xfs/653     | 33 +++++++++++++++++++++++++++++++++
+>  tests/xfs/653.out |  2 ++
+>  2 files changed, 35 insertions(+)
+>  create mode 100755 tests/xfs/653
+>  create mode 100644 tests/xfs/653.out
 > 
-> - A new subvolume at '/subv1'
-> - Qgroup 1/1
-> - Qgroup 2/1
-> 
-> And subvolume '/subv1' is assgiend to qgroup 1/1, so 1/1 is the direct
-> parent.
-> Then qgroup 1/1 is also assigned to 2/1, so 2/1 is an indirect parent of
-> subvolume '/subv1'.
-> 
-> Then the trigger part is to creating a snapshot of '/subv1' and also
-> assigned the new snapshot into qgroup 1/1 during the snapshot creation.
-> 
-> Since 1/1 is the parent of '/subv1' and the new snapshot, and qgroup 1/1
-> fully owns '/subv1', we can do a quick inherit.
-> 
-> After the triggering part, just finish the test case and the fsck after
-> the test case should detect any qgroup inconsistency.
-> 
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> diff --git a/tests/xfs/653 b/tests/xfs/653
+> new file mode 100755
+> index 000000000000..07d9125c2ff0
+> --- /dev/null
+> +++ b/tests/xfs/653
+> @@ -0,0 +1,33 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2025 Christoph Hellwig.
+> +#
+> +# FS QA Test No. 653
+> +#
+> +# Tests that mkfs for a zoned file system rounds realtime subvolume sizes up to
+> +# the zone size to create mountable file systems.
 
-Reviewed-by: David Sterba <dsterba@suse.com>
+What size rt volume does this create?  It looks like you're specifying
+an rt zone size of ... (1GB + 52K)?  And testing that mkfs rounds the
+rt volume size down to some multiple of that?  Or is it rounding the
+*zone* size down to 1G?
+
+<confused>
+
+--D
+
+> +. ./common/preamble
+> +_begin_fstest auto quick realtime growfs zone
+> +
+> +. ./common/filter
+> +. ./common/zoned
+> +
+> +_require_realtime
+> +_require_scratch
+> +_require_scratch_size $((2 * 1024 * 1024)) # 1GiB in kiB units
+> +
+> +fsbsize=4096
+> +unaligned_size=$((((1 * 1024 * 1024 * 1024) + (fsbsize * 13)) / fsbsize))
+> +
+> +# Manual mkfs and mount to not inject an existing RT device
+> +echo "Try to format file system"
+> +_try_mkfs_dev -b size=4k -r zoned=1,size=${unaligned_size}b $SCRATCH_DEV \
+> +		>> $seqres.full 2>&1 ||\
+> +	_notrun "cannot mkfs zoned filesystem"
+> +_mount $SCRATCH_DEV $SCRATCH_MNT
+> +umount $SCRATCH_MNT
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/653.out b/tests/xfs/653.out
+> new file mode 100644
+> index 000000000000..2cba5cdf1171
+> --- /dev/null
+> +++ b/tests/xfs/653.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 653
+> +Try to format file system
+> -- 
+> 2.47.3
+> 
+> 
