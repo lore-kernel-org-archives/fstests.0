@@ -1,98 +1,101 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 54A6F334692;
-	Tue, 16 Dec 2025 18:29:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55F66247DE1;
+	Tue, 16 Dec 2025 19:05:16 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765909797; cv=none; b=EdFCt6SJc3FffZrUHGVPiGjWIvXknQ0Ky9OmVZx9n3ZNUtaGQVxtndrjvSIa+1wMCQ7NLq0yqbjrcACnWxE9JzcuADCsFIY7pFWlCaJIUDSk2QhWfbjLGylq809dzb2Bl5MDjW7Q0xdpEGqEjQyKlQaYgEdIgXfNl4wlKFKz2/E=
+	t=1765911917; cv=none; b=WpftM8iAGDg65FJigcXyM7q97o9JiDR8oIAy4yPO08VPFUxw2lXTvgLaBtTjDTeb+eoxgMvXyo41YbtrnntTBoI55pFPxScuTCn3viV432NYJxTSN8hqjMd2La9LxZPGaX4ycuu8a96HSlXi+WEHlNxYiYK8X0f0Nb+rHc6VtYU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765909797; c=relaxed/simple;
-	bh=C2kpIORsZRV6tdd2EnJC8r441dzUXpzD3XkFlV7Xpd4=;
-	h=Date:Subject:From:To:Cc:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=TC6gxWnRnmbX6gzUmRplb0Yx0V4yujk78DBXtm28T+CL/cv7r2bPnj+unh1Oik5IGsOFy/9ukF+h/CH6Pr5zN/vqpJSuzZqwRQapVx8DowzvQJFnpKBfgW0gRjQsFKEpod+eudeG7AZCA7Ll5IJvA5+cYpaSiDFf8NnQyPyNwvE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=m1BeKq7s; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1765911917; c=relaxed/simple;
+	bh=tszyIee8QQiwVf3eWQq0zgt+oOG6xxOhTFlv1uH82Vg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=MeNsy3vfwcQ/Aysyi6dtOw4j5ZS1N/gmYvWuTX8pkRELTkcKlxeyLRCaFqHtKaJdX1PbiKPCeAOcojogqL+E6Kq0lmZFWUcvt0J19zif9FcT4I2k3IfY7JH9s6oZdNWFP0053C/nby9OqagTlJSzzs8l7ZeaM58fhbMhfRrLVPQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Y+sH6mjI; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="m1BeKq7s"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 213A8C4CEF1;
-	Tue, 16 Dec 2025 18:29:57 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Y+sH6mjI"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C4DC4C4CEF1;
+	Tue, 16 Dec 2025 19:05:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1765909797;
-	bh=C2kpIORsZRV6tdd2EnJC8r441dzUXpzD3XkFlV7Xpd4=;
-	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
-	b=m1BeKq7srCgLh8oDBWqwGGL0M74D5oAkG3tvakeTvzyN7R9sC9570Pa9sImm+36lm
-	 NSSFLhWl3qaisNsg39gOvTX8oGWaG7o+sJ7IOq9BwwtuuVX+1V/n7hb69rJXLNnZ2Q
-	 ekiHnCfpXx8gJkL4L31/1HaTbA3A5eq0zMN1bFfstkB1bMuOlC3NL8Ot/ua0t6SQpq
-	 g/PPXycQRlObEaQO2f0LiQeROIh9GFpOexY18OUPROIGnrv2KHbpOJHwWDr2MGC8pu
-	 XLxZKmLDNrQLWcYC7fHR+8IVnqEYJfRRzMtSK5BR1zjtGCj1JoyiHXG8lwnkfCgitP
-	 7nSeDknf/vq8w==
-Date: Tue, 16 Dec 2025 10:29:56 -0800
-Subject: [PATCH 3/3] xfs/649: fix various problems
+	s=k20201202; t=1765911916;
+	bh=tszyIee8QQiwVf3eWQq0zgt+oOG6xxOhTFlv1uH82Vg=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Y+sH6mjIl3yEWwOkWa+rnICi0elhaUiFHcpI5hMV4VFl2Dm5s/MZf/4PjOvW6/Z6U
+	 lp61ebRj+FyS3yWLCnebkVD6/2C9V4n+AkLD5M51qzbNrahZDnaCoaDafZHn6ug/zL
+	 YOkqzQqVKU6CvAIx0FLfubM9Oy9xLVf0qMXadEV7mVvV0laL06nvekwe3x57x3p19G
+	 WAJlRMLCFl/gZ9crBuwbMNTvH2RzwCop2w/Qo1RyeMASOfv38RWjBVQ3htBtrEx3O9
+	 EnVNargKDEZWryoILs2ugLj7G8t4RmtwBBjLANVwdka2ieZoMXxmBKTFSJaA/TZIjU
+	 GYq5bIq6B+CMQ==
+Date: Tue, 16 Dec 2025 11:05:16 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: zlang@redhat.com, djwong@kernel.org
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
- fstests@vger.kernel.org
-Message-ID: <176590971773.3745129.6098946861687047333.stgit@frogsfrogsfrogs>
-In-Reply-To: <176590971706.3745129.3551344923809888340.stgit@frogsfrogsfrogs>
-References: <176590971706.3745129.3551344923809888340.stgit@frogsfrogsfrogs>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/3] xfs: add a test that zoned file systems with rump
+ RTG can't be mounted
+Message-ID: <20251216190516.GH7716@frogsfrogsfrogs>
+References: <20251215095036.537938-1-hch@lst.de>
+ <20251215095036.537938-2-hch@lst.de>
+ <20251215193345.GM7725@frogsfrogsfrogs>
+ <20251216051205.GB26237@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20251216051205.GB26237@lst.de>
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Tue, Dec 16, 2025 at 06:12:05AM +0100, Christoph Hellwig wrote:
+> On Mon, Dec 15, 2025 at 11:33:45AM -0800, Darrick J. Wong wrote:
+> > > +_scratch_mkfs > /dev/null 2>&1
+> > > +blocks=$(_scratch_xfs_db -c 'sb 0' -c 'print rblocks' | awk '{print $3}')
+> > > +blocks=$((blocks - 4096))
+> > > +_scratch_xfs_db -x -c 'sb 0' -c "write -d rblocks $blocks" > /dev/null 2>&1
+> > > +_scratch_xfs_db -x -c 'sb 0' -c "write -d rextents $blocks" > /dev/null 2>&1
+> > 
+> > You could put both of the write commands in the same invocation, e.g.
+> > 
+> > _scratch_xfs_db -x \
+> > 	-c 'sb 0' \
+> > 	-c "write -d rblocks $blocks" \
+> > 	-c "write -d rextents $blocks" > /dev/null 2>&1
+> > 
+> > For a little bit lower runtime.
+> 
+> I can do that, but I doubt it really matters..
+> 
+> > > +if _try_scratch_mount >/dev/null 2>&1; then
+> > > +	# for non-zoned file systems this can succeed just fine
+> > > +	_require_xfs_scratch_non_zoned
+> > 
+> > The logic in this test looks fine to me, but I wonder: have you (or
+> > anyone else) gone to Debian 13 and noticed this:
+> > 
+> > # mount /dev/sda /mnt
+> > # mount /dev/sda /mnt
+> > # grep /mnt /proc/mounts
+> > /dev/sda /mnt xfs rw,relatime,inode64,logbufs=8,logbsize=32k,noquota 0 0
+> > /dev/sda /mnt xfs rw,relatime,inode64,logbufs=8,logbsize=32k,noquota 0 0
+> > 
+> > It looks like util-linux switched to the new fsopen mount API between
+> > Debian 12 and 13, and whereas the old mount(8) would fail if the fs was
+> > already mounted, the new one just creates two mounts, which both then
+> > must be unmounted.  So now I'm hunting around for unbalanced
+> > mount/unmount pairs in fstests. :(
+> 
+> The old mount API also supported that at the syscall level, but it got
+> disable in mount(8), so if mount now does this and previously didn't it
+> seems like an unintended change.
 
-Fix a couple of problems with this new test:
+Oh, it's very much an intentional change.  Someone complained and the
+maintainer declined to revert:
+https://github.com/util-linux/util-linux/issues/3800
 
-First, the comment for the $attr_size_bytes check says that the maximum
-size of a single xattr value is 64k.  This is true, but the check
-triggers the warning even when the size is exactly 64k.
+because we can all just add --onlyonce to our scripts if we want the old
+behavior.  Or set LIBMOUNT_FORCE_MOUNT2=always and hope that doesn't go
+away.
 
-Second, the test fails to format with 32k and 64k fsblock size
-filesystems because the scsi_debug device size is 128M, and that's not
-large enough for the minimum log size.  Raise that to 320M.
-
-Cc: <fstests@vger.kernel.org> # v2025.12.09
-Fixes: 5760b2105985bf ("xfs: test case for handling io errors when reading extended attributes")
-Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
----
- tests/xfs/649 |    7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
-
-
-diff --git a/tests/xfs/649 b/tests/xfs/649
-index f7b559f72fe913..56277c62932e16 100755
---- a/tests/xfs/649
-+++ b/tests/xfs/649
-@@ -48,14 +48,15 @@ _require_attrs user
- # If SELinux is enabled common/config sets a default context, which breaks this test.
- export SELINUX_MOUNT_OPTIONS=""
- 
--scsi_debug_dev=$(_get_scsi_debug_dev)
-+# need at least 320m to format with 32/64k fsblock size
-+scsi_debug_dev=$(_get_scsi_debug_dev 512 512 0 321)
- scsi_debug_opt_noerror=0
- scsi_debug_opt_error=${scsi_debug_opt_error:=2}
- test -b $scsi_debug_dev || _notrun "Failed to initialize scsi debug device"
- echo "SCSI debug device $scsi_debug_dev" >>$seqres.full
- 
- SCRATCH_DEV=$scsi_debug_dev
--_scratch_mkfs >> $seqres.full
-+_scratch_mkfs >> $seqres.full || _notrun "could not format filesystem"
- _scratch_mount
- 
- block_size=$(_get_file_block_size $SCRATCH_MNT)
-@@ -77,7 +78,7 @@ test_attr()
- 	# The maximum size for a single value is ATTR_MAX_VALUELEN (64*1024)
- 	# If we wanted to test a larger range of extent combinations the test
- 	# would need to use multiple values.
--	[[ $attr_size_bytes -ge 65536 ]] && echo "Test would need to be modified to support > 64k values for $attr_blocks blocks".
-+	[[ $attr_size_bytes -gt 65536 ]] && echo "Test would need to be modified to support > 64k values for $attr_blocks blocks".
- 
- 	echo $scsi_debug_opt_noerror > /sys/module/scsi_debug/parameters/opts
- 
-
+--D
