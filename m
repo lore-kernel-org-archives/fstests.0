@@ -1,38 +1,42 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D9781BC41
-	for <fstests@vger.kernel.org>; Wed, 17 Dec 2025 00:15:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0EE3C184;
+	Wed, 17 Dec 2025 10:21:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765930551; cv=none; b=HxMJxH+hu3ii6YNY+xA6xUA3SLvjLBZklXIHXkpg6yUDjG6zImG7siexJ5o0mrK1tnhwCn7sxWKK2x7ObCwhwkGwSg8Pi1kmYnF5ZGNBuiAyRyUkAIxiun0Ut+B4kFt/hTriIq6C7wHDjCaVhvbpVw2eUDrFyNzeye5zY8Wdf8w=
+	t=1765966898; cv=none; b=SMFAiQ0Ua1i9ZhycFl0iE0KCNnpq1JGKMvZcYO32cmy08Z1aZIHOrfGmaRduNK1g0dyiIq03I5Iq8tgsXDMcyvv0gg41zd4EsC9Exa5QjKQVgIfPbr5wSnnRfLigadBlusdeVHNYGKgnOH9skzVldqw28iGqfTuCsaSDr4TkH4s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765930551; c=relaxed/simple;
-	bh=V7N+cHSmzX+IBcFdOnXxIlZbAFcQrimFbfbrpPXdMs8=;
+	s=arc-20240116; t=1765966898; c=relaxed/simple;
+	bh=ANOvcozK8eWFLwOeyvSQ9Fshz9Dg84EcB19LObAbmfs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=BTJ/wK0ORl0MTx/+pH87Zg9cIc8Y2i2kYyWWfk/a5IKtQOJA2e0T2DZMRVX1TdR+B49vwCAIK8pUm60ykszwu5/vhyF9O8zQRQoq6K1pAfR35AKyVr9EktWYpy1tyciGK3wSgnxx2GDPzUHfVf111nV+pgQkwsCQQ6CSbmbN5eU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ISt0OzRO; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=PomB5P+T+9YtinHKG7Mi/ZlKrSkAtmLcWDc5F7cpVfOIiyHaWCw3wYEs4m0wa8UvRunbGm+7YR3ZlOqVWArVOWVFUCKv+Hq9PA7LMRmulhPU0HYrP4pHUL8y3bj+lAPKJXziBML0Y4FUIThCvHoJsQtdhqRBkPMogkN9HaCWm6g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=brC0Oepy; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ISt0OzRO"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F01E6C113D0;
-	Wed, 17 Dec 2025 00:15:50 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1765930551;
-	bh=V7N+cHSmzX+IBcFdOnXxIlZbAFcQrimFbfbrpPXdMs8=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=ISt0OzROTaJLBPQLmsRyLxXrRug5sj5R4YHPtzqTcOpXgz0GMvDDL0345blpXLzkr
-	 uRVnfSXw/gEwS2mmWughDvBAhKNf/CRk7hl0IWjvNSEi32xztmekAMcvOLO5yyXYmP
-	 JkqLw5zpYuPEA6E/0JQpkiH2HSYldrNw9HjoDEGTkdhJcFTnTc0is0ITzqNg1DIBuz
-	 mi7eeYPAleImYGtuPr3kNR+7lg2NWz0GFOIpSvXPhbXemnCBiOvMZ3sQbRq5IimCjK
-	 UdcDt1xYoc1A4k9qN/IRBO+OsCXadI48/zJrhnEzJ7EpVxc+j8Xmq7u3i6D5yN7Zkm
-	 k50z74McqsLcw==
-Date: Tue, 16 Dec 2025 16:15:50 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Luca Di Maio <luca.dimaio1@gmail.com>
-Cc: fstests@vger.kernel.org, hch@infradead.org
-Subject: Re: [PATCH v4] xfs: test reproducible builds
-Message-ID: <20251217001550.GI7716@frogsfrogsfrogs>
-References: <20251216080233.2324849-1-luca.dimaio1@gmail.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="brC0Oepy"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=fpkm6EceW2lwEfW+KYaLXqwTZ2Rbo+YFDFZ8IaZPUQ4=; b=brC0Oepy95i++1L8OFRk9OkCIB
+	W8MhMK/rHJYupP0vWuNpItVDKom1L+n3vjiWCT5XW5ncGtMSRX+MrSkJXiNGuFq7AJHPXuU4zvk2X
+	4u/5nk1H+ouK6PocSwQcsKuKUwaLSSqebJijLofCJixZV900Ye6b9xcMJfJOSmpxnhT+g5RlDidaE
+	B3bQ5Qhe0s+fLbbvMSntyYe3xSakDczx+yxEcedeoQORsUVuMqVLZAdSX6Ljrx4C3Wr6A5u1DsnY+
+	wKfs8+9u5uUxmxV69vonDVpFFdTxfYF7DkpDTgH2vsovbkQwplhctNy4BD876fBfa9oAC91j38Y8f
+	BFEVALRw==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1vVof2-00000006d9g-1ohV;
+	Wed, 17 Dec 2025 10:21:36 +0000
+Date: Wed, 17 Dec 2025 02:21:36 -0800
+From: Christoph Hellwig <hch@infradead.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: zlang@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/3] check: put temporary files in TMPDIR, not /tmp
+Message-ID: <aUKEMFM_a8yU4CJb@infradead.org>
+References: <176590971706.3745129.3551344923809888340.stgit@frogsfrogsfrogs>
+ <176590971736.3745129.17863225958624907500.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -41,69 +45,17 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251216080233.2324849-1-luca.dimaio1@gmail.com>
+In-Reply-To: <176590971736.3745129.17863225958624907500.stgit@frogsfrogsfrogs>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Tue, Dec 16, 2025 at 09:02:33AM +0100, Luca Di Maio wrote:
-> With the addition of the `-p` populate option, SOURCE_DATE_EPOCH and
-> DETERMINISTIC_SEED support, it is possible to create fully reproducible
-> pre-populated filesystems. We should test them here.
-> 
-> v1 -> v2:
-> - Changed test group from parent to mkfs
-> - Fixed PROTO_DIR to point to a new dir
-> - Populate PROTO_DIR with relevant file types
-> - Move from md5sum to sha256sum
-> v2 -> v3
-> - Properly check if mkfs.xfs supports SOURCE_DATE_EPOCH and
->   DETERMINISTIC_SEED
-> - use fsstress program to generate the PROTO_DIR content
-> - simplify test output
-> v3 -> v4
-> - Add _cleanup function
-> 
-> Signed-off-by: Luca Di Maio <luca.dimaio1@gmail.com>
-> ---
->  tests/xfs/841     | 171 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/841.out |   3 +
->  2 files changed, 174 insertions(+)
->  create mode 100755 tests/xfs/841
->  create mode 100644 tests/xfs/841.out
-> 
-> diff --git a/tests/xfs/841 b/tests/xfs/841
-> new file mode 100755
-> index 00000000..a75f5879
-> --- /dev/null
-> +++ b/tests/xfs/841
-> @@ -0,0 +1,171 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Chainguard, Inc. All Rights Reserved.
-> +#
-> +# FS QA Test No. 841
-> +#
-> +# Test that XFS filesystems created with reproducibility options produce
-> +# identical images across multiple runs. This verifies that the combination
-> +# of SOURCE_DATE_EPOCH, DETERMINISTIC_SEED, and -m uuid= options result in
-> +# bit-for-bit reproducible filesystem images.
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick mkfs
-> +
-> +# Image file settings
-> +IMG_SIZE="512M"
-> +IMG_FILE="$TEST_DIR/xfs_reproducible_test.img"
-> +PROTO_DIR="$TEST_DIR/proto"
-> +
-> +# Fixed values for reproducibility
-> +FIXED_UUID="12345678-1234-1234-1234-123456789abc"
-> +FIXED_EPOCH="1234567890"
-> +
-> +_cleanup() {
-> +	rm -r -f "$PROTO_DIR" "$IMG_FILE"
-> +}
+On Tue, Dec 16, 2025 at 10:29:25AM -0800, Darrick J. Wong wrote:
+> Allow system administrators or fstests runners to set TMPDIR to a
+> directory that won't get purged, and make fstests follow that.  Fix up
+> generic/002 so that it doesn't use $tmp for paths on the test
+> filesystem.
 
-The start of this function needs to copy the code from the _cleanup
-function in common/preable, as Dave said elsewhere.  Otherwise this
-looks ok to me.
+The second part feels like it's worth a separate patch to make it more
+clearly stand out.  Either way all the changes looks good:
 
---D
+Reviewed-by: Christoph Hellwig <hch@lst.de>
+
