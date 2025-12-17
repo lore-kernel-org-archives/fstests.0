@@ -1,99 +1,110 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f171.google.com (mail-pl1-f171.google.com [209.85.214.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DE55D33CE85
-	for <fstests@vger.kernel.org>; Wed, 17 Dec 2025 16:36:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 396AF217736
+	for <fstests@vger.kernel.org>; Wed, 17 Dec 2025 16:59:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765989409; cv=none; b=Pw5nju2tLER/bTs9WwSPIljLW1cVCKrw/h6U98VDecx0J+UKRN0DKdMfFOllALQpuJBw0PveevJEZVyGk9zNxFu0R7yIbb5orPkpg+twRc5Y+ysApSLc7sDn4i6m14JVfVP/4Q88YKPqh1qloUrcYy/ieyDyZ/GdKjt5gVuoKSk=
+	t=1765990795; cv=none; b=tyNfy7pPqTZdeoJBaq6Ss58Ec1Zn9ncRBvDw2l+Ttaj1f47EPXMwFzSJzZ7784Y/uZaiP39DlxrfmFCoxHtN2TVcrODV5jMOhR3LGo+R7sbear0yyF6o3kGgG82zumjwAvQUlawmo+jHRXItwGn+HT4tZi7Me/ENJyc70KzfldM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765989409; c=relaxed/simple;
-	bh=5+5GvQsF5aSghxZBfkZSeckEzlVRkv5HVlXbXvKtFDI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Z75gwROhAo4yidEKH0Fzj8RT1MEa1l5dIuzlZqKjwAjN3CIqPcrKU1rNI2xxgmr0qqWLdMXwEvbe8RAfzI0IZgQmNBl1NAB3StK6TDBtml2yB8lTCjX6ZH4PlpphmCyMUYzRkxO+RGHuBp4Qa5XysBzxW2jfBc9z6+r8Tr3vcKI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kTahcYfW; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1765990795; c=relaxed/simple;
+	bh=4nT3eL+nqqlKXmzFJdFVnTOdEBe7d+tIOLCTKsUwt94=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=npF6bpHapjhDmwq5EJTJpbqvWqxDvqBvBxOSMzC6fa0kZsXoUHjTACgxt9H9vaXBJ5JwMNVtsxUjKV/JW63fkP5R4sC6B6Y5Y9whIAMFwBJO2V4Ia8canSr+0a8UhOBuQ3iykAMHzr4p21ebngjwSmiBJI+SG7GvjRGyJpPILK4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FQ91WYlr; arc=none smtp.client-ip=209.85.214.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kTahcYfW"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5E808C4CEF5;
-	Wed, 17 Dec 2025 16:36:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1765989407;
-	bh=5+5GvQsF5aSghxZBfkZSeckEzlVRkv5HVlXbXvKtFDI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=kTahcYfWkY3DnSAP9KKRQF47L3s8HWmag2Wx3lRNj+U9VhpzVjBZ8Te+5ymMYkhnX
-	 fk5ufrhTISV5h8BzVu9faAFRlvyLpCCDpijFpVIF+63OKynNZhPn3zA7le7FV66YOn
-	 9wYWjcTMIoi3N8fUpqlO3d0bADmwK0WVeAUV7ZX6wfttduclbXX4XSYJ71BdRlQACz
-	 9bwpFdvcuRondGyioGMdKxdpMl+DfoZ5J//y3j8Umj5AkKb1Xq73XmCZWwyLMPjdFE
-	 YyjZGsTeUBVpqEDAszX0YQhmt9PVjU7MEjXQz6+bFr7ipjd0ACua8mIUXRX9zaj2DK
-	 ZWBBKslyl6p5Q==
-Date: Wed, 17 Dec 2025 08:36:46 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Anthony Iliopoulos <ailiop@suse.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/490: fix failure due to deprecated ikeep mount option
-Message-ID: <20251217163646.GJ7716@frogsfrogsfrogs>
-References: <20251217110819.150741-1-ailiop@suse.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FQ91WYlr"
+Received: by mail-pl1-f171.google.com with SMTP id d9443c01a7336-29f2676bb21so67712485ad.0
+        for <fstests@vger.kernel.org>; Wed, 17 Dec 2025 08:59:54 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1765990793; x=1766595593; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=0JZV4ZTKPnvVOohyqVtnOMKthFN4WCJ75pI/pYQsXF0=;
+        b=FQ91WYlrlb3ZNT2Y346nixu0QlqkDboGLvyhaNMUZ8dYVjcO+eA9CSsnPouB3awBFI
+         ih/Emu3ORhfKb4Cz9185hKIKT37ySgTcqzLRxCZae46WcNukaR3PiuBY1mBY7HUSTMpz
+         wJ669cQUKh5aNIyMPniNwaGCfGkX0hrb2tfRbAlP6w/YlfzWSX0vJtkxntBSTQq2btbL
+         XNcLtBIvRujfs81wv2VRkZAIlaNHy5rV6yO5Kw/057FRH1rojLIoVgHNYvnmn1V7gRxh
+         fZQppAAVFmtHGmhm563AhC7Wuj/cgutgNiYvdSg3B4T6j4o2pH8rJ3jSs0RJszSjcb45
+         DryQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1765990793; x=1766595593;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=0JZV4ZTKPnvVOohyqVtnOMKthFN4WCJ75pI/pYQsXF0=;
+        b=O96TO9H/W4Uj3G9WYpdk6gK7faoyeKwt+7j7dc8+Wve3lDj8VZUtaYwv3fzR9uzYzS
+         wh8uZNz56VIy4jAGJNzkBr0e4pymKdX2b3A+10EBcSN02XlOGWeTZkHew+fuwSFr6toP
+         ktyT1Vahqip9uu2Cw/05bn4qYbHKonlde8ahPQOGKbtwjBGMgoHnU85/ZGzi6pJpLxyj
+         KmSC8V3VRNdmKau1H6dZEEhjUP9GejgZf0GWxiYrs9DxNIkR7ZC0bDXdlhIrTyHqEDqi
+         wxDCmqUZYLR1vS9pTdmvG4GydvS7i2ms/MCV8ynlzLKPnNv4dDtbgbb8gzGjAPj9my0O
+         HDgw==
+X-Forwarded-Encrypted: i=1; AJvYcCWz5OKzPEMdFS/rBNy4aiiOI5hiqofnQUz+Sxzot8LODDOIodZc5YxIejH8badXLAl1S/Ls5ZFF@vger.kernel.org
+X-Gm-Message-State: AOJu0YwiG5642M6LXVwUEJ16zZMRG/3SK1zFwtdOD1mNKme2hwv7+mW6
+	lAT3b/b8Xt6dve+cUzWPNdPPw7fGNorz1OklkuNUFXI6vSEjepuCknZ+FyRGnqgZ
+X-Gm-Gg: AY/fxX7tn828iq7Eu+P3HnGjPDUpavogRzy59QmA3WTrrLeh407Eguin46XxY6EfrUX
+	dEEn7LP128FcQzpcRd6hZtb1yBxYEsvCMkH5RZz1xz9WJHKF+VYe4YjPC+cbL/7El0iDb7eGMm5
+	J7IKHZDxjevka6CHjsPxStCAVXQ2ocf7jMk8XYqEXUYtbcZVk/EDOD8bPLgLeYYmbOLI/zTQ9aM
+	rTYagxDVM3u632ICszo1aRmTHh+DdYKNqu3H+odBCnEdgA+tLzVlblDQODSTEzAsFOEvF+7c6Q5
+	UERscGGfXVQoQ51Woo1psqFBRFzk+O4GFYGnccF6bqpmd7QY4jMNNgMvYEYWN/mXh9Wk8L3GSx4
+	kKzMnoJVrpPu+QOPQEf0xZG7Zicf1rYoEO9NksTT8p9aM4nsDJfF0p89LBc81iGpLXB50m7886f
+	BiKLn3G8N+cwRryYg=
+X-Google-Smtp-Source: AGHT+IFoKMbJ9xsJocF+/SOztzH9OTtMgNQkpOw51+pBJHLXYHTp4rBAb77rmGPybXMBIEZgWFijkA==
+X-Received: by 2002:a17:903:458d:b0:29f:135c:5f25 with SMTP id d9443c01a7336-29f23de670cmr175716925ad.4.1765990793498;
+        Wed, 17 Dec 2025 08:59:53 -0800 (PST)
+Received: from [192.168.50.70] ([49.245.38.171])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2a2ccdc62f6sm107615ad.29.2025.12.17.08.59.51
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 17 Dec 2025 08:59:53 -0800 (PST)
+Message-ID: <62945fac-eab8-4e42-8f3b-dfdee66a1b15@gmail.com>
+Date: Thu, 18 Dec 2025 00:59:50 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20251217110819.150741-1-ailiop@suse.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 01/13] dmflakey: override SCRATCH_DEV in _init_flakey
+To: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>
+Cc: Anand Jain <asj@kernel.org>, Filipe Manana <fdmanana@suse.com>,
+ "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
+ linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
+References: <20251212082210.23401-1-hch@lst.de>
+ <20251212082210.23401-2-hch@lst.de>
+Content-Language: en-US
+From: Anand Jain <anajain.sg@gmail.com>
+In-Reply-To: <20251212082210.23401-2-hch@lst.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Wed, Dec 17, 2025 at 12:08:19PM +0100, Anthony Iliopoulos wrote:
-> The ikeep mount option has been deprecated as of kernel commit
-> b9a176e54162 ("xfs: remove deprecated mount options"), and after commit
-> 3e7ec343f066 ("xfs: loudly complain about defunct mount options") there
-> is a warning emitted when testing v5 filesystems.
-> 
-> Fix it by explicitly requiring and formatting scratch to nocrc/v4, as
-> the test cannot otherwise be triggered on v5 without the ikeep option.
-> 
-> Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
 
-<nod> sorry I missed this one, I only test with XFS_DEBUG=y
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+ > where to create the custome dm table.
 
---D
+typo
+s/custome/custom/
 
-> ---
->  tests/xfs/490 | 12 ++----------
->  1 file changed, 2 insertions(+), 10 deletions(-)
-> 
-> diff --git a/tests/xfs/490 b/tests/xfs/490
-> index a3b0747580ea..366acbfa3ef9 100755
-> --- a/tests/xfs/490
-> +++ b/tests/xfs/490
-> @@ -20,6 +20,7 @@ _begin_fstest auto quick
->  # Modify as appropriate.
->  _require_scratch_nocheck
->  _require_xfs_mkfs_finobt
-> +_require_xfs_nocrc
->  
->  # Skip the verifier "xfs_check_agi_freecount()" which verify the number of free
->  # inodes in the AGI is correct, when XFS_DEBUG is enabled
-> @@ -35,16 +36,7 @@ filter_dmesg()
->  # If enable free inode B+tree, this case will fail on xfs_dialloc_ag_update_inobt,
->  # that's not what we want to test. Due to finobt feature is not necessary for this
->  # test, so disable it directly.
-> -_scratch_mkfs_xfs -m finobt=0 | _filter_mkfs 2>$tmp.mkfs >> $seqres.full
-> -
-> -# On V5 filesystem, this case can't trigger bug because it doesn't read inodes
-> -# we are allocating from disk - it simply overwrites them with new inode
-> -# information. So use ikeep mount option to stop that.
-> -source $tmp.mkfs
-> -mount_opt=""
-> -if [ $_fs_has_crcs -eq 1 ]; then
-> -	mount_opt="-o ikeep"
-> -fi
-> +_scratch_mkfs_xfs -m crc=0,finobt=0 | _filter_mkfs 2>$tmp.mkfs >> $seqres.full
->  
->  blksz=$(_scratch_xfs_get_sb_field blocksize)
->  agcount=$(_scratch_xfs_get_sb_field agcount)
-> -- 
-> 2.52.0
-> 
-> 
+
+>   _cleanup_flakey()
+>   {
+>   	# If dmsetup load fails then we need to make sure to do resume here
+>   	# otherwise the umount will hang
+>   	test -n "$NON_FLAKEY_LOGDEV" && $DMSETUP_PROG resume $FLAKEY_LOGNAME &> /dev/null
+>   	test -n "$NON_FLAKEY_RTDEV" && $DMSETUP_PROG resume $FLAKEY_RTNAME &> /dev/null
+
+
+> -	$DMSETUP_PROG resume flakey-test > /dev/null 2>&1
+> +	test -n "$NON_FLAKEY_DEV" && $DMSETUP_PROG resume flakey-test > /dev/null 2>&1
+
+flakey-test target? Appears to be a typo for $FLAKEY_NAME;
+I'll send a separate patch fixing the existing bug.
+
+The rest looks good.
+
+Reviewed-by: Anand Jain <asj@kernel.org>
+
+Thanks.
