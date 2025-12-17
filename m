@@ -1,67 +1,66 @@
-Received: from mail-pf1-f181.google.com (mail-pf1-f181.google.com [209.85.210.181])
+Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6410325BF13
-	for <fstests@vger.kernel.org>; Wed, 17 Dec 2025 17:02:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D2343469ED
+	for <fstests@vger.kernel.org>; Wed, 17 Dec 2025 17:04:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765990977; cv=none; b=MLIm0E1l1zNxYHUdqBTkmqbbwSrD3fPlherKxCV+g6Lt5JnA/Sx/2uVC/8SelicnCnfFnM6LQTqT7dFBXJWyF05MrbXH7OoI3rSnnRKUp5VsqNhT5kh8jDudqyZqiZYiziVZBe8SB8/huKmEvPDVYxfU6vaZq9M73MI4nmdRUZc=
+	t=1765991081; cv=none; b=KYuApCy5I0No81l61F//kyzbCPX6P69IuMvTXJu97RCMs4b81b7he5ti3k7OiYxeUP1HNoOpDmc9U1QMBL76AG83m3ybz5rwIwv9oD3LHFlswsBEpVz0tAVsPq7Sj2eTFB40bavJcQwWCteWgFIH/9mrQoAZY5H/Wkni4I9zHCI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765990977; c=relaxed/simple;
-	bh=uHy78ltZLfP3vZAy+9dakrgZD+WHxMypGgmYocIc10A=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=QpHHKuxRUirYFMcEaEub93Aaa9oO9c9unmSz+9L7SYuH5Lz26lqnqKGLJbmY5NBCbKQ3H+HpILuq7BNUbp3iOmeXLzMLjLlf0mUH+rtxulDqudgxOVjLOWKUAvDZusXKq90wCnaZBGOq8TwqvFbSkXArz8JmzE2oDI1aG4a3grg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GoqR9O3w; arc=none smtp.client-ip=209.85.210.181
+	s=arc-20240116; t=1765991081; c=relaxed/simple;
+	bh=hlf2F0WFEMV77iV9h71UB6Sx4lGPX/1ax28MtW+95x8=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=G+E2PEf+SUgROo21sXxBqdJgXUlzbUBkwLAc0AlCD0G7vSBer/NEyoyiyBBq86GxCGkAnGPXhwnm7ug4c/GcDmYsivFQ5FeJXZq5K5QN1szLVyIdwB2gA7kTTmrDPZudYWuZ9yP07qbS8sXBmYRMHnFdwldXyCnrbQ1B/f5IGsI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fyMoRHnO; arc=none smtp.client-ip=209.85.214.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GoqR9O3w"
-Received: by mail-pf1-f181.google.com with SMTP id d2e1a72fcca58-7b6dd81e2d4so6068379b3a.0
-        for <fstests@vger.kernel.org>; Wed, 17 Dec 2025 09:02:55 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fyMoRHnO"
+Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-29f102b013fso73674275ad.2
+        for <fstests@vger.kernel.org>; Wed, 17 Dec 2025 09:04:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1765990974; x=1766595774; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=zmZkpXUu+2c71qcVZUC1Y31FhXycQNoQwCBPVwFSGN8=;
-        b=GoqR9O3wWXj5Dz3yzzuMMNkSKjdlbLUOWdO+SWix0RqYTmr2XFoiPNG2JAnZINwIyz
-         2qe0w8Wipk9kdF6LIqEVv7wyvLPRA/mYVtY3WEd/N/1QEVlmROKaNGh8QFJt2LHfxbVH
-         AI5BCFeBRVNWV9dkEqDyxkGkG4S14zKvgYhW+Dvc7MoAn13IgaIRUX2fkg53aRuxSvJD
-         kvzcsTERDenan7/GI8TbV12oDj/PYJKwBNO5TukNZKs6x2Os8rdT2oDziL7X33RLM67t
-         697EEkTswuF//TTJi6lvXFur0YIyU1fl5GaHTlX0NJ86MtMt74/orp3CSoZmKv3H7gWW
-         Vjxw==
+        d=gmail.com; s=20230601; t=1765991079; x=1766595879; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:content-language:references
+         :cc:to:subject:from:user-agent:mime-version:date:message-id:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=ho94FLLOSJHFFY5GW+ImodCHqbIMG5RYp+UDa9CSbnA=;
+        b=fyMoRHnOy/EvoJtz2HWbJkdEQ/CAjSpUZPG/Pe5AsvwBMGRraMD1CvdqoCWJ1Wh1Vr
+         jqsqjM1BwSz2l6IPRUUEcjoJcgbvQHYi5R+deAX3cly3TIJqgBGlBvrFJIK6VDgO5tTw
+         8qBI/wdbJtOik1ce5iM/uQEanl/r0izwsvgqWAOo7mhQGm+tmFlu+zZMRAKGc2u47fG+
+         V1ekrPpIGgmE4LqcGOBPgDaV+P+ZCDfJte4+hebZ3xhhwdzdQkmr6hZ9iBwqnutUpaxm
+         0SOvu1oOmGhTVnwh24z2mp3wOL5npQ0TQJaU+tpV7dPnURmm0PhPS8WpK/8B6r/4EKtG
+         kVog==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765990974; x=1766595774;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=zmZkpXUu+2c71qcVZUC1Y31FhXycQNoQwCBPVwFSGN8=;
-        b=DgjF6rU5McLruS4rMx/CLGXEiY3O9HbxhriaWU6rlYxYfkjigmgx5M2g3ToEtKa8vG
-         oPfhNVHVNLIdqBpoxYN3rcjGyLfeAj0NnFON6kFV/a4MQwqUGm1xzrVUJrciV4sC3MK/
-         DCoKdHuwADVYJBUa5iBnOYjg8Bu2aX5hl4QgSqaiwopyvyTT65EK3PrWpobUIwbpIJ82
-         2w24hAf8SVzmB4uqil5H9cjGPVCl5NDnKQxVOoc/LvpbKSu5V80WIN3mQ2d/uogUh5Yx
-         EbEYMEDs+OajLUMgOcaMr+n2xCibOcrBwhEqwfVDtwJXelzdGU8QGhmeU7dQGVBiZAUW
-         XJsQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVO5+rhWxMLMG8RODEkXw6QXheSdGB/6M+xwKPXqGBhgRKcJTcGnfLCyxUlGd4Mo4p7wq77VWy7@vger.kernel.org
-X-Gm-Message-State: AOJu0YxvTQl5KLnlvlpRvi/1KIvGjDnnjoRgvnxM680SkaJwR1YX7JWt
-	YERoCRUPxTKo4fD0mkVp6SUojkaAFWY3o8uN0Bl90K5XmNhGeS96DWR3
-X-Gm-Gg: AY/fxX4CNI8frP3+BwH8Vs78xxL15dlRgFS0MRJtgHNxnzmoy+djigLI3uAa7n8uGDS
-	Tw4FgxCgsDqCQwpPa4NoI2olpIYlgIiEvPQtYdbPCj67OfZ0oxAZZBrh+Za3nXZe5f8glg+tIHW
-	GMMJU9yqaJMCEpQDHtPA/XL8CkC1+/CTfRXuwmgY8zZoyzNx7/JHTdURPw5EZAy7IGLpKQhYqfc
-	nOcVPebj8lmGewEEm36bOB4xSL8DaLwCTDZ4a3hz+RRoI8T8lfdrAAuqiS/6rpAXtTp5erP9gtc
-	P1wwvIQNVzYuWKIFq4yIDOjlB2VYYAKqEwH6+8rSDQ5TfjtXPYBwDEP0Y2hBX/kNghsBGC0wdsk
-	enW0iO7lJhV1but+zWsaPqKjSjTh17owxgsxxuGKHAwKTtzyLud3xi9W1PsGMRNei4eVnbd7M+P
-	U6DUZzz3NfJcQ8ymw=
-X-Google-Smtp-Source: AGHT+IES/QvdT35sIutV+Y6xroJ/V0XHB5MqKJMJkgKmO10jTRb2RdKRWgYqZwpFGOURoKjxaE9EUA==
-X-Received: by 2002:a05:6a21:3383:b0:341:d537:f8bf with SMTP id adf61e73a8af0-369afc0038amr16517748637.38.1765990974164;
-        Wed, 17 Dec 2025 09:02:54 -0800 (PST)
+        d=1e100.net; s=20230601; t=1765991079; x=1766595879;
+        h=content-transfer-encoding:in-reply-to:content-language:references
+         :cc:to:subject:from:user-agent:mime-version:date:message-id:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=ho94FLLOSJHFFY5GW+ImodCHqbIMG5RYp+UDa9CSbnA=;
+        b=FCp+WCGe3V3t/bh6o8SNFDwIQuAFPLAwJpd+5OnWAGFcGfcGTxrvaNhxbpXNHACGVq
+         QTIu4VzyX+58VaouNkVI7m20W33VLZEenXiCJKindEcKdthkMgrv3Id0AOCgZADpa7/9
+         DguShptzU/lejARVUMarTaLLt4cpL54efxpxjWocam5RUjNiKy55NVtIextlgJUTn40b
+         +Iyo7ehP3FeFj2++HHNkrBrblu6IBCBKizM3To/33zrHgR8s0JLvWfrUTdWSS2pYG4cd
+         hnhBN4tdhO6Cjz/MuXGiIhuGWfBACC5LA40dn29JRv2od/61D7nPDJ6lNQxkMdiidILj
+         Ulhw==
+X-Forwarded-Encrypted: i=1; AJvYcCX/vguVW7Bm7zx4NThIEJF0Te3FlIqQs6Z2otAHF6qTKuECV8v8YVL6is13YsHXsYOaU+6OvHhE@vger.kernel.org
+X-Gm-Message-State: AOJu0YwtqGm7Eu/OnxE0D3r1IOBcU8XyiZ3P1uuDTZe5H7zAgYc9NKTR
+	P8klt9SQA7cIocuqnq9MgFq9848L5uceLKB5qYxIp/fwFCjU8VGVEMY0MclcWI8j
+X-Gm-Gg: AY/fxX4u9Dkkil1S+j48LcaM1XvK4UbXzWOuIdl0+DKF2fzRIg0mCW+CD3VdXgMfc1Z
+	It7RoY8bLizYdK9CNiAkfmHBIegS1QV4IAvaJ+cEw1rR+A8M90vibt7Bgt07uln0EBA57NX4H8/
+	MVOxf5eeX9c/M2ojM4uYlRJGfT2jPUMXaD5kJi6WXm1b8kWPBgWZ7RujaT7JAO0xGApEkYMrMsQ
+	4O9ZvJAZc3rbAUFvUAjo6JphNw7xjs5ViS5YbC3uKfKPjvJD0jyjh5udTpvbsOHdJjB6Xl69JIG
+	SRDqdvKE7pcdG4t9y1V6N4gk29okvXlntc6p+p3euPDV5jNsITsq9kc/oo1smNhrI2E9YQoH7wV
+	48XFZChcmyFz2vMT/Di++9Qg3t4SnuVfhz+sPaJ6j7gZKvaP3VHHTSzOfJoFgX/kVbHh8SS0dc9
+	SNtXP+P9FiGHigJLc=
+X-Google-Smtp-Source: AGHT+IGglLUxbz7F1zaaKXL4o3u9tQkXv1b3wt/mp7TFc59oza6w2APwy5n2p12gp0/ZwJGMsEmEkQ==
+X-Received: by 2002:a17:903:458d:b0:29f:135c:5f25 with SMTP id d9443c01a7336-29f23de670cmr175908485ad.4.1765991079047;
+        Wed, 17 Dec 2025 09:04:39 -0800 (PST)
 Received: from [192.168.50.70] ([49.245.38.171])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-34cd9aaaf2csm1933817a91.5.2025.12.17.09.02.52
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2a2ce09c616sm10475ad.88.2025.12.17.09.04.37
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 17 Dec 2025 09:02:53 -0800 (PST)
-Message-ID: <0556e82c-600d-4324-8cf0-6d11613d57cc@gmail.com>
-Date: Thu, 18 Dec 2025 01:02:51 +0800
+        Wed, 17 Dec 2025 09:04:38 -0800 (PST)
+Message-ID: <161818cf-2052-46fe-ac50-f68d4d62141c@gmail.com>
+Date: Thu, 18 Dec 2025 01:04:36 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -69,270 +68,62 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 05/13] generic/590: split XFS RT specific bits out
-To: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>
-Cc: Anand Jain <asj@kernel.org>, Filipe Manana <fdmanana@suse.com>,
- "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
- linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
-References: <20251212082210.23401-1-hch@lst.de>
- <20251212082210.23401-6-hch@lst.de>
-Content-Language: en-US
 From: Anand Jain <anajain.sg@gmail.com>
-In-Reply-To: <20251212082210.23401-6-hch@lst.de>
+Subject: Re: [PATCH] MAINTAINERS: update entry for Anand Jain
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, asj@kernel.org, fstests@vger.kernel.org
+References: <20251210055134.3470190-1-hch@lst.de>
+ <CANZP331-x5hPUUAZW+W3cHGm3b_P4hUW1gYmVGKZB8fn53g87w@mail.gmail.com>
+Content-Language: en-US
+In-Reply-To: <CANZP331-x5hPUUAZW+W3cHGm3b_P4hUW1gYmVGKZB8fn53g87w@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+
+This email didn't go through due to the HTML format, so I'm resending it 
+now in plain text.
 
 
-Looks good
 Reviewed-by: Anand Jain <asj@kernel.org>
 
-Thanks
+Best.
 
 
-On 12/12/25 16:21, Christoph Hellwig wrote:
-> Currently generic/590 runs a very different test on XFS that creates
-> a lot device and so on.  Split that out into a new XFS-specific test,
-> and let generic/590 always run using the file system parameter specified
-> in the config even for XFS.
+On 10/12/25 16:52, Anand Jain wrote:
+> Christoph, thanks. This looks good. ( I’m viewing it on my mobile, while 
+> traveling .)
 > 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
->   tests/generic/590 |  68 ++-------------------------
->   tests/xfs/650     | 117 ++++++++++++++++++++++++++++++++++++++++++++++
->   tests/xfs/650.out |   2 +
->   3 files changed, 123 insertions(+), 64 deletions(-)
->   create mode 100755 tests/xfs/650
->   create mode 100644 tests/xfs/650.out
+> Reviewed-by: Anand Jain <asj@kernel.org <mailto:asj@kernel.org>>
 > 
-> diff --git a/tests/generic/590 b/tests/generic/590
-> index ba1337a856f1..54c26f2ae5ed 100755
-> --- a/tests/generic/590
-> +++ b/tests/generic/590
-> @@ -4,27 +4,15 @@
->   #
->   # FS QA Test 590
->   #
-> -# Test commit 0c4da70c83d4 ("xfs: fix realtime file data space leak") and
-> -# 69ffe5960df1 ("xfs: don't check for AG deadlock for realtime files in
-> -# bunmapi"). On XFS without the fixes, truncate will hang forever. On other
-> -# filesystems, this just tests writing into big fallocates.
-> +# Tests writing into big fallocates.
-> +#
-> +# Based on an XFS RT subvolume specific test now split into xfs/650.
->   #
->   . ./common/preamble
->   _begin_fstest auto prealloc preallocrw
->   
-> -# Override the default cleanup function.
-> -_cleanup()
-> -{
-> -	_scratch_unmount &>/dev/null
-> -	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> -	cd /
-> -	rm -f $tmp.*
-> -	rm -f "$TEST_DIR/$seq"
-> -}
-> -
->   . ./common/filter
->   
-> -_require_scratch_nocheck
->   _require_xfs_io_command "falloc"
->   
->   maxextlen=$((0x1fffff))
-> @@ -32,54 +20,7 @@ bs=4096
->   rextsize=4
->   filesz=$(((maxextlen + 1) * bs))
->   
-> -must_disable_feature() {
-> -	local feat="$1"
-> -
-> -	# If mkfs doesn't know about the feature, we don't need to disable it
-> -	$MKFS_XFS_PROG --help 2>&1 | grep -q "${feat}=0" || return 1
-> -
-> -	# If turning the feature on works, we don't need to disable it
-> -	_scratch_mkfs_xfs_supported -m "${feat}=1" "${disabled_features[@]}" \
-> -		> /dev/null 2>&1 && return 1
-> -
-> -	# Otherwise mkfs knows of the feature and formatting with it failed,
-> -	# so we do need to mask it.
-> -	return 0
-> -}
-> -
-> -extra_options=""
-> -# If we're testing XFS, set up the realtime device to reproduce the bug.
-> -if [[ $FSTYP = xfs ]]; then
-> -	# If we don't have a realtime device, set up a loop device on the test
-> -	# filesystem.
-> -	if [[ $USE_EXTERNAL != yes || -z $SCRATCH_RTDEV ]]; then
-> -		_require_test
-> -		loopsz="$((filesz + (1 << 26)))"
-> -		_require_fs_space "$TEST_DIR" $((loopsz / 1024))
-> -		$XFS_IO_PROG -c "truncate $loopsz" -f "$TEST_DIR/$seq"
-> -		loop_dev="$(_create_loop_device "$TEST_DIR/$seq")"
-> -		USE_EXTERNAL=yes
-> -		SCRATCH_RTDEV="$loop_dev"
-> -		disabled_features=()
-> -
-> -		# disable reflink if not supported by realtime devices
-> -		must_disable_feature reflink &&
-> -			disabled_features=(-m reflink=0)
-> -
-> -		# disable rmap if not supported by realtime devices
-> -		must_disable_feature rmapbt &&
-> -			disabled_features+=(-m rmapbt=0)
-> -	fi
-> -	extra_options="$extra_options -r extsize=$((bs * rextsize))"
-> -	extra_options="$extra_options -d agsize=$(((maxextlen + 1) * bs / 2)),rtinherit=1"
-> -
-> -	_scratch_mkfs $extra_options "${disabled_features[@]}" >>$seqres.full 2>&1
-> -	_try_scratch_mount >>$seqres.full 2>&1 || \
-> -		_notrun "mount failed, kernel doesn't support realtime?"
-> -	_scratch_unmount
-> -else
-> -	_scratch_mkfs $extra_options >>$seqres.full 2>&1
-> -fi
-> +_scratch_mkfs >>$seqres.full 2>&1
->   _scratch_mount
->   _require_fs_space "$SCRATCH_MNT" $((filesz / 1024))
->   
-> @@ -112,7 +53,6 @@ $XFS_IO_PROG -c "pwrite -b 1M -W 0 $(((maxextlen + 2 - rextsize) * bs))" \
->   # Truncate the extents.
->   $XFS_IO_PROG -c "truncate 0" -c fsync "$SCRATCH_MNT/file"
->   
-> -# We need to do this before the loop device gets torn down.
->   _scratch_unmount
->   _check_scratch_fs
->   
-> diff --git a/tests/xfs/650 b/tests/xfs/650
-> new file mode 100755
-> index 000000000000..d8f70539665f
-> --- /dev/null
-> +++ b/tests/xfs/650
-> @@ -0,0 +1,117 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Facebook.  All Rights Reserved.
-> +#
-> +# FS QA Test 650
-> +#
-> +# Test commit 0c4da70c83d4 ("xfs: fix realtime file data space leak") and
-> +# 69ffe5960df1 ("xfs: don't check for AG deadlock for realtime files in
-> +# bunmapi"). On XFS without the fixes, truncate will hang forever.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto prealloc preallocrw
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	_scratch_unmount &>/dev/null
-> +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> +	cd /
-> +	rm -f $tmp.*
-> +	rm -f "$TEST_DIR/$seq"
-> +}
-> +
-> +. ./common/filter
-> +
-> +_require_scratch_nocheck
-> +_require_xfs_io_command "falloc"
-> +
-> +maxextlen=$((0x1fffff))
-> +bs=4096
-> +rextsize=4
-> +filesz=$(((maxextlen + 1) * bs))
-> +
-> +must_disable_feature() {
-> +	local feat="$1"
-> +
-> +	# If mkfs doesn't know about the feature, we don't need to disable it
-> +	$MKFS_XFS_PROG --help 2>&1 | grep -q "${feat}=0" || return 1
-> +
-> +	# If turning the feature on works, we don't need to disable it
-> +	_scratch_mkfs_xfs_supported -m "${feat}=1" "${disabled_features[@]}" \
-> +		> /dev/null 2>&1 && return 1
-> +
-> +	# Otherwise mkfs knows of the feature and formatting with it failed,
-> +	# so we do need to mask it.
-> +	return 0
-> +}
-> +
-> +extra_options=""
-> +# Set up the realtime device to reproduce the bug.
-> +
-> +# If we don't have a realtime device, set up a loop device on the test
-> +# filesystem.
-> +if [[ $USE_EXTERNAL != yes || -z $SCRATCH_RTDEV ]]; then
-> +	_require_test
-> +	loopsz="$((filesz + (1 << 26)))"
-> +	_require_fs_space "$TEST_DIR" $((loopsz / 1024))
-> +	$XFS_IO_PROG -c "truncate $loopsz" -f "$TEST_DIR/$seq"
-> +	loop_dev="$(_create_loop_device "$TEST_DIR/$seq")"
-> +	USE_EXTERNAL=yes
-> +	SCRATCH_RTDEV="$loop_dev"
-> +	disabled_features=()
-> +
-> +	# disable reflink if not supported by realtime devices
-> +	must_disable_feature reflink &&
-> +		disabled_features=(-m reflink=0)
-> +
-> +	# disable rmap if not supported by realtime devices
-> +	must_disable_feature rmapbt &&
-> +		disabled_features+=(-m rmapbt=0)
-> +fi
-> +extra_options="$extra_options -r extsize=$((bs * rextsize))"
-> +extra_options="$extra_options -d agsize=$(((maxextlen + 1) * bs / 2)),rtinherit=1"
-> +
-> +_scratch_mkfs $extra_options "${disabled_features[@]}" >>$seqres.full 2>&1
-> +_try_scratch_mount >>$seqres.full 2>&1 || \
-> +	_notrun "mount failed, kernel doesn't support realtime?"
-> +_scratch_unmount
-> +_scratch_mount
-> +_require_fs_space "$SCRATCH_MNT" $((filesz / 1024))
-> +
-> +# Allocate maxextlen + 1 blocks. As long as the allocator does something sane,
-> +# we should end up with two extents that look something like:
-> +#
-> +# u3.bmx[0-1] = [startoff,startblock,blockcount,extentflag]
-> +# 0:[0,0,2097148,1]
-> +# 1:[2097148,2097148,4,1]
-> +#
-> +# Extent 0 has blockcount = ALIGN_DOWN(maxextlen, rextsize). Extent 1 is
-> +# adjacent and has blockcount = rextsize. Both are unwritten.
-> +$XFS_IO_PROG -c "falloc 0 $filesz" -c fsync -f "$SCRATCH_MNT/file"
-> +
-> +# Write extent 0 + one block of extent 1. Our extents should end up like so:
-> +#
-> +# u3.bmx[0-1] = [startoff,startblock,blockcount,extentflag]
-> +# 0:[0,0,2097149,0]
-> +# 1:[2097149,2097149,3,1]
-> +#
-> +# Extent 0 is written and has blockcount = ALIGN_DOWN(maxextlen, rextsize) + 1,
-> +# Extent 1 is adjacent, unwritten, and has blockcount = rextsize - 1 and
-> +# startblock % rextsize = 1.
-> +#
-> +# The -b is just to speed things up (doing GBs of I/O in 4k chunks kind of
-> +# sucks).
-> +$XFS_IO_PROG -c "pwrite -b 1M -W 0 $(((maxextlen + 2 - rextsize) * bs))" \
-> +	"$SCRATCH_MNT/file" >> "$seqres.full"
-> +
-> +# Truncate the extents.
-> +$XFS_IO_PROG -c "truncate 0" -c fsync "$SCRATCH_MNT/file"
-> +
-> +# We need to do this before the loop device gets torn down.
-> +_scratch_unmount
-> +_check_scratch_fs
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/xfs/650.out b/tests/xfs/650.out
-> new file mode 100644
-> index 000000000000..d7a3e4b63483
-> --- /dev/null
-> +++ b/tests/xfs/650.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 650
-> +Silence is golden
+
+
+
+> On Wed, 10 Dec 2025 at 12:51 PM, Christoph Hellwig <hch@lst.de 
+> <mailto:hch@lst.de>> wrote:
+> 
+>     The oracle address bounces.  Replaced it with the kernel.org
+>     <http://kernel.org> address
+>     found in recent commit logs.
+> 
+>     Signed-off-by: Christoph Hellwig <hch@lst.de <mailto:hch@lst.de>>
+>     ---
+>       MAINTAINERS | 2 +-
+>       1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+>     diff --git a/MAINTAINERS b/MAINTAINERS
+>     index a0f50f3d98b4..19e558296809 100644
+>     --- a/MAINTAINERS
+>     +++ b/MAINTAINERS
+>     @@ -108,7 +108,7 @@ Maintainers List
+>                or reviewer or co-maintainer can be in cc list.
+> 
+>       BTRFS
+>     -M:     Anand Jain <anand.jain@oracle.com
+>     <mailto:anand.jain@oracle.com>>
+>     +M:     Anand Jain <asj@kernel.org <mailto:asj@kernel.org>>
+>       R:     Filipe Manana <fdmanana@suse.com <mailto:fdmanana@suse.com>>
+>       L: linux-btrfs@vger.kernel.org <mailto:linux-btrfs@vger.kernel.org>
+>       S:     Supported
+>     -- 
+>     2.47.3
+> 
 
