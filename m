@@ -1,38 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5379A3451DA
-	for <fstests@vger.kernel.org>; Wed, 17 Dec 2025 17:45:32 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A90B71624C5;
+	Thu, 18 Dec 2025 04:12:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765993534; cv=none; b=egRm9bP9c3o30CUsXk7UzH+iDtJOjLfd/v1NRCic+QBFSkQrOwMJ/ZIix8wWZQOYncclngXpb9UG2qU550ww0AAePAX59SYLhxN1NEO4WIEZjd6H6W/r7EJ5TK2qvTEdvekBhVdByLH4smXtmDqO8DYmOrxD0izbTSpCH18rReY=
+	t=1766031154; cv=none; b=ACqqTWm530LSDMSb4+VZ7wShkE/NlTW0Hq6NHSHkcuPqM1/sI8nUcCXqmCRDe/VCYXR0v+uq8F8ghlxihuKwz1yK6bRg+WncI2Eypp646odlJZXj6LgljMZ0U6LM16NKZoMo3jifN2pGsrHLn902kWf6UsyiqopTtRe9GbzKYmM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765993534; c=relaxed/simple;
-	bh=dwA0O1SqYfsgiOIIr1xH4M+72XH8ZIUVtP/XzSonX3I=;
+	s=arc-20240116; t=1766031154; c=relaxed/simple;
+	bh=X9aZiq5TPCCR3pfb5ByiaDaiFXS82MJv8O4ohs17Lyw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=UTZ0OfvBkQZxEYb7/4MWP0H4rItdxTY77kERtSIbxSQylI1ZN8UCukCjRCRzX7/4J+bGeqOFskLuay2uz8QJDUVkePQ+Uk4OstQATNN3QEdmxj5zB+/OAUYtwG6FO3EP9K3VQRzPR71NUJd1oMA6ly8+s6xSWOsra6bdf0TzQZU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Jd5D3DdQ; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=ez/qczoVujsRigy1axiLa6lvOcX4mWtH75zgFW5ZMDcKRpHscq84z4EDqp1F6vVPsltLVr0jLFOXyh6AqikkPDYTqfOYeRCKkp9giL//4IWFsgAVIj6bxj0tYfM8n97HF2XzUbsNBZQpzBJDLJ+YfXktH+KfaOvnfdEUR3Dq7ws=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NRLcKrYF; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Jd5D3DdQ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 04F2DC4CEF5;
-	Wed, 17 Dec 2025 17:45:31 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NRLcKrYF"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 30774C4CEFB;
+	Thu, 18 Dec 2025 04:12:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1765993532;
-	bh=dwA0O1SqYfsgiOIIr1xH4M+72XH8ZIUVtP/XzSonX3I=;
+	s=k20201202; t=1766031153;
+	bh=X9aZiq5TPCCR3pfb5ByiaDaiFXS82MJv8O4ohs17Lyw=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Jd5D3DdQuOF1CsFEYtFJpxJSzTtr8YR9GoeJ7Qo3OJax8ulS9EHzwtPAZkxjfDYMJ
-	 MzXlFwEd5gJxWo900w91eixb/0SLAIbbnV/0DrA/6c8cgnL9o6BYXuGIoZBMxZE4fB
-	 A190/uvNCO8TS0AyYZix4UO75iziFIinQz0BMQi6mkZ2Tx6GVlzaUf2ZqTQRAwTj0K
-	 W2UAvIhNMl0uxJqgw7r2hpREug+Dr4rhSuGZi1AOxi2vXEm1clxXwF7R4UUbPeh+PP
-	 s6/Sj/JEAND26OqHJb/7VXaZT5fVCSme3SHuc785V5yjIeUSaLCn2OWpji+r5qI5gt
-	 2Ff27IC7vn0zA==
-Date: Wed, 17 Dec 2025 09:45:31 -0800
+	b=NRLcKrYFwhSGiu5Q5+cUjPvVa8rivq1A1st0nIKxkgxFc6DOp/0kNdE7v9uK912lZ
+	 LF3SCmSyk5PWsK+fs6u5yrSPH3F5MuK0O43ZtNYcqeETE6qV4j/Oq8u279FPnLrQJm
+	 UUPNfRFDMYTFtKx8hIownXUsGxIAWP/tG/l8glE9cdc9ZGKHMwi6sL81UR+JtKGq7q
+	 ggi9OGJ91wlh0cQ8xlgGduFr/iZnBfNHK++V371bZtP5emlMMjupaBrudw78LJI+ad
+	 D+Vytnq0KCqfBwWVQtOMl630Nd3H65PiLXBbWaX6ObnXtKr0Z7Xp9oBJyvDeFrTDyQ
+	 TmwWEiwNjGlaw==
+Date: Wed, 17 Dec 2025 20:12:32 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Anand Jain <asj@kernel.org>
-Cc: zlang@kernel.org, hch@lst.de, fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: fix flaky device name in _cleanup_flakey
-Message-ID: <20251217174531.GK7716@frogsfrogsfrogs>
-References: <6025643af0c6a7d7d377aef22a53f23f24f06db6.1765988375.git.asj@kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 3/3] xfs/649: fix various problems
+Message-ID: <20251218041232.GW7725@frogsfrogsfrogs>
+References: <176590971706.3745129.3551344923809888340.stgit@frogsfrogsfrogs>
+ <176590971773.3745129.6098946861687047333.stgit@frogsfrogsfrogs>
+ <aUKFBx09MGp4Z2bu@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -41,46 +43,21 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <6025643af0c6a7d7d377aef22a53f23f24f06db6.1765988375.git.asj@kernel.org>
+In-Reply-To: <aUKFBx09MGp4Z2bu@infradead.org>
 
-On Thu, Dec 18, 2025 at 01:00:22AM +0800, Anand Jain wrote:
-> There is no device named flakey-test, which _cleanup_flakey() currently
-> uses. The actual device name is stored in $FLAKEY_NAME and is set to
-> flakey-test.$seq. Use $FLAKEY_NAME instead.
+On Wed, Dec 17, 2025 at 02:25:11AM -0800, Christoph Hellwig wrote:
+> On Tue, Dec 16, 2025 at 10:29:56AM -0800, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Fix a couple of problems with this new test:
 > 
-> Signed-off-by: Anand Jain <asj@kernel.org>
+> It looks like this patch got dropped again?  While my git repository
+> has the commit ID, I can't find the test in the patches-in-queue or
+> for-next branches.
+> 
+> The changes themselves look sane to me.
 
-Ugh, still finding obvious bugs a year later <grumble>
-
-Cc: <fstests@vger.kernel.org> # v2024.12.08
-Fixes: 603030dee015ba ("fstests: per-test dmflakey instances")
-
-Thanks for spotting this, Anand.
-
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+You might've pulled my for-next branch.  IIRC I've never sent this one
+to the list, so Zorro has never seen it.
 
 --D
-
-> ---
->  (apply this on top of the patchset
-> 	'stop overriding SCRATCH_{,LOG,RT}DEV v2')
->  common/dmflakey | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/common/dmflakey b/common/dmflakey
-> index cb0359901c16..6ac666f5b61e 100644
-> --- a/common/dmflakey
-> +++ b/common/dmflakey
-> @@ -76,7 +76,7 @@ _cleanup_flakey()
->  	# otherwise the umount will hang
->  	test -n "$NON_FLAKEY_LOGDEV" && $DMSETUP_PROG resume $FLAKEY_LOGNAME &> /dev/null
->  	test -n "$NON_FLAKEY_RTDEV" && $DMSETUP_PROG resume $FLAKEY_RTNAME &> /dev/null
-> -	test -n "$NON_FLAKEY_DEV" && $DMSETUP_PROG resume flakey-test > /dev/null 2>&1
-> +	test -n "$NON_FLAKEY_DEV" && $DMSETUP_PROG resume $FLAKEY_NAME &> /dev/null
->  
->  	_unmount $SCRATCH_MNT > /dev/null 2>&1
->  
-> -- 
-> 2.43.0
-> 
-> 
