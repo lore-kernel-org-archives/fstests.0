@@ -1,235 +1,152 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E33BF2EFD8C
-	for <fstests@vger.kernel.org>; Tue, 23 Dec 2025 07:40:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 490392E8B74
+	for <fstests@vger.kernel.org>; Tue, 23 Dec 2025 08:49:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766475617; cv=none; b=YkB8LIfhd/kvSjqPpNkoB7psj7K/KlJcpu/mMQKuEtZZvkbE/jHi7VhcfCCsUIZhFRaGO/2a/Uek5vRMpG3KbP858PomruFOSLI5J27cxA8mnwerVC1ugSi2aM9mocz7mhb9NLuj3G2o2fR4ia5BNU5Pqnl8LG3qydnkxnrkezg=
+	t=1766479786; cv=none; b=ODU6ehvqSlrbN1mMNAN8fN4WXflUBbHKebeqXdb7EWrPQXp1Dm6Dnxo2n7bCV+Inf4wghzIfxwwL78b7dp2p1OT6MAIM9uUWXx4kKG2MqjR4WTWA5sytQaFECmFeX6Jinq0jtBMavR4j754h41HzEo6a9rYlL90Cn25bedIbG5s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766475617; c=relaxed/simple;
-	bh=L5CByaYXJWONGE9+sxwtNikIVQtw/OGu1T5LuXrHYIk=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=Wii+mrwbNvr3EzKoa7uy+gSM7QWqtV1Oex4oSWfNGLk/swqHG59gtkf1FdgqVMP2AeA6bHaQl47Y0U3flSYXwVAkqMWjJSWFS1UU3d272sAM2qossFVr4owj3PJVT4L02her74wGCcJ8g4rOCm2CWpJZQuhoEZHtMEIQfh4eK3M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=q8gJIS0L; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=K4o7tNBB; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1766479786; c=relaxed/simple;
+	bh=bw63hmm4WBfVd813kPWKauftYM2k1+OdQg3giWMQ05Q=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=DhaTLqQRyQOZedL9pViOJZ/VGfVtxlDzUdKnrXqxZwOlk+97OQsVIKrVuCVTrtfhH/bMH7Vz8Tqbi6ulHWxo9SI5YOyXyF6e7MuweNSF85jiy4WgKzwBgSM80j6C87SNaFDpl5amkyjI4w4fE/hZRbclpn8yfvNzSfwP5Y5dYTA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=Uvx9Zwab; arc=none smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="q8gJIS0L";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="K4o7tNBB"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id C9B2F33684;
-	Tue, 23 Dec 2025 07:40:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1766475614; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=q9iYhaWiB2zQF0AW7VsiZ5vDEdP8y+1uhNi6vq9cEnc=;
-	b=q8gJIS0LQJmwUKQXJzJjhxizHkSzvkdX3eZukNdyjOrZZoKBeHhOtGD5u+CRsPLGGoOVjp
-	nFzsYhDGFxFiHGJ7jHAXzmT5IXNOntuiP7SOsNgK09WkwiNjztq4A4EAF1MwAUQ0WoGduO
-	vi4wrVrUqTMnXfoIcrBegWM74p3sWqs=
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=K4o7tNBB
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1766475613; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=q9iYhaWiB2zQF0AW7VsiZ5vDEdP8y+1uhNi6vq9cEnc=;
-	b=K4o7tNBB3JcWKNVtOWdlYeKfCR2UZ7m4glG/dxYbTpSuOCbvK6OqAkzUjdMXg89QGzoOPm
-	1nbtzsgMPazN2ZBuHocNsiDVrQH/Exo8s8NMCHDwa0NSStH+qxBoJ70KuOb+V0vJmZXtNi
-	NnzoP9Ip2IThb9PDSCP9dsEsmTj7hCQ=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id C34843EA63;
-	Tue, 23 Dec 2025 07:40:12 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id uC4yH1xHSmmDJgAAD6G6ig
-	(envelope-from <wqu@suse.com>); Tue, 23 Dec 2025 07:40:12 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH] fstests: btrfs/131: remove deprecated v1 space cache tests
-Date: Tue, 23 Dec 2025 18:09:39 +1030
-Message-ID: <20251223073939.128157-1-wqu@suse.com>
-X-Mailer: git-send-email 2.52.0
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="Uvx9Zwab"
+Received: from pps.filterd (m0360072.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5BN8EAjj016646;
+	Tue, 23 Dec 2025 08:49:36 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=
+	content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=pp1; bh=HLSm1D
+	6v1MQHc9hlREZh1AwUoTbW1xcpBdU2ZsGtbzU=; b=Uvx9ZwabCjWnKRtiEDMEmo
+	eU6OfpLWcKvDmcjpbpQFRCkJUnGNqOY46WMGez4x3ISR1PyZNCUevo/NWgz80nKf
+	DUs5yOFWuleRNCSYeaGpdydJv6jQRlntAL7PXGnYbmsOXwLAXbuoqUCPMcSOFpz8
+	9Pe6aoJNARCX82XYq7e6f565at8ToMjBdGrHsxDIWAKld/yOnzU8Acgn91Wh/DJL
+	QCIFXnTdLp6m9Z7FM9Fkvk5IqEpId1zXn5jmXoomxYrTNk/RGZtt29misFVwhu8E
+	2Y7Dqm6hra1anEfsayMjEa6DmeHFB+hher0EVI1sbpjqBwLvWea9biQXXpQ8dlqw
+	==
+Received: from ppma21.wdc07v.mail.ibm.com (5b.69.3da9.ip4.static.sl-reverse.com [169.61.105.91])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4b5ketufv7-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 23 Dec 2025 08:49:36 +0000 (GMT)
+Received: from pps.filterd (ppma21.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma21.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 5BN5RUYJ004192;
+	Tue, 23 Dec 2025 08:49:35 GMT
+Received: from smtprelay01.fra02v.mail.ibm.com ([9.218.2.227])
+	by ppma21.wdc07v.mail.ibm.com (PPS) with ESMTPS id 4b674mtbqw-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 23 Dec 2025 08:49:35 +0000
+Received: from smtpav07.fra02v.mail.ibm.com (smtpav07.fra02v.mail.ibm.com [10.20.54.106])
+	by smtprelay01.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 5BN8nV4a58917250
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 23 Dec 2025 08:49:31 GMT
+Received: from smtpav07.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 54A6320043;
+	Tue, 23 Dec 2025 08:49:31 +0000 (GMT)
+Received: from smtpav07.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id AF0DB20040;
+	Tue, 23 Dec 2025 08:49:30 +0000 (GMT)
+Received: from [9.39.24.113] (unknown [9.39.24.113])
+	by smtpav07.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Tue, 23 Dec 2025 08:49:30 +0000 (GMT)
+Message-ID: <1d4c911a-fce6-4b84-a2d4-0729a038393b@linux.ibm.com>
+Date: Tue, 23 Dec 2025 14:19:29 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Spam-Flag: NO
-X-Spam-Score: -3.01
-X-Rspamd-Queue-Id: C9B2F33684
-X-Spamd-Result: default: False [-3.01 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	ARC_NA(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	MIME_TRACE(0.00)[0:+];
-	DNSWL_BLOCKED(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	RCPT_COUNT_TWO(0.00)[2];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:dkim,suse.com:email,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo];
-	RCVD_TLS_ALL(0.00)[];
-	TO_DN_NONE(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DKIM_TRACE(0.00)[suse.com:+]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Rspamd-Action: no action
-X-Spam-Level: 
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] generic/108: fix test hand upon failure to create LV
+Content-Language: en-GB
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>, Zorro Lang <zlang@redhat.com>,
+        fstests@vger.kernel.org
+References: <79202ac8855a232c678bb9bddabda8c1866bc400.1766387606.git.ojaswin@linux.ibm.com>
+ <aUl43EdYJK-Tb2Y0@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+From: Disha Goel <disgoel@linux.ibm.com>
+In-Reply-To: <aUl43EdYJK-Tb2Y0@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: XxSAuwxMLIxEmzgcVUYl9lI21PsdNORH
+X-Authority-Analysis: v=2.4 cv=Qdxrf8bv c=1 sm=1 tr=0 ts=694a57a0 cx=c_pps
+ a=GFwsV6G8L6GxiO2Y/PsHdQ==:117 a=GFwsV6G8L6GxiO2Y/PsHdQ==:17
+ a=IkcTkHD0fZMA:10 a=wP3pNCr1ah4A:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=VnNF1IyMAAAA:8 a=YfDc65UHFS09e2AHyuYA:9 a=QEXdDO2ut3YA:10
+X-Proofpoint-ORIG-GUID: XxSAuwxMLIxEmzgcVUYl9lI21PsdNORH
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMjIzMDA3MiBTYWx0ZWRfX9y4htJDnub+j
+ fCTYGS5kobseJuuSGcoKVgxC6/4c1hIMflr03+gz80s8Ol6ZcKlORs8o2U4FzMXJq1VhOXFcFEP
+ 1RHu57UT7RmYT86adDdrQjR88eNnKyNUNBgLs1RlFACUdtw1fxzGbR8FHt28U28lsfI/bJSDfwJ
+ DJE+zpZktHmUVgN/1WN+AAr7GCmf0EAjT55+nUIJfw6xQh7zpHr5wOZxL5YX1x2oBfL1I/yPWHj
+ rNSWYyY3AZe4PzqoTQ3SJEfhT53Th57ZLF5GezuX/5C9oMtJvbn/KAlHIxT2YEXCmhoiWAafxS+
+ LapevW5pJNtqDeow039JAevxbPtQomUoPxmWkij+Qk5sCVrbU6T5ucocXEyabNg3UnFZyCF4h1/
+ n07xfLZiH/mtR0APy1fS6Bs1fVG4VjeN9wLL0IRAC0m7MoTPyt+3A8WGar/O3RU9+1vgjflYkH4
+ 2pI/deLZ275Qhih2Xtw==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
+ definitions=2025-12-23_02,2025-12-22_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ suspectscore=0 bulkscore=0 lowpriorityscore=0 malwarescore=0 clxscore=1011
+ priorityscore=1501 phishscore=0 impostorscore=0 adultscore=0 spamscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2512120000 definitions=main-2512230072
 
-Since upstream kernel commit 1e7bec1f7d65 ("btrfs: emit a warning about
-space cache v1 being deprecated"), v1 space cache is deprecated and
-we're considering to remove the support soon.
+On 22/12/25 10:29 pm, Ojaswin Mujoo wrote:
+> On Mon, Dec 22, 2025 at 12:44:09PM +0530, Ojaswin Mujoo wrote:
+>> In case the lvcreate operation fails, we don't catch the error and
+>> proceed as usual. The test then tries to wait for the LV to come up
+>> but it never does, causing a hang.
+>>
+>> Fix this by catching any errors while creating the LV.
+>>
+>> Context for completeness:
+>>
+>> This was noticed when we accidentally used CONFIG_SCSI_DEBUG=y instead
+>> of =m, causing it to create an 8MB SCSI debug device. This led to the
+>> lvcreate operation to fail with:
+>>
+>>    Insufficient suitable allocatable extents for logical volume lv_108: 68 more required
+>>
+>> However the test never caught this resulting in a hang.
+>>
+>> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 
-This means soon v1 space cache mount option will no longer be accepted,
-and the test case will fail due to such change.
+Patch looks good to me.
 
-Update the test case to remove all v1 cache usage, so we only support
-two cache modes, either nospace_cache or space_cache=v2.
+Tested-by & Reviewed-by: Disha Goel <disgoel@linux.ibm.com>
 
-This also allows bs < ps btrfs to be tested for this test case which has
-no v1 space cache from day 1.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- tests/btrfs/131     | 34 ++++++++++------------------------
- tests/btrfs/131.out |  7 ++-----
- 2 files changed, 12 insertions(+), 29 deletions(-)
-
-diff --git a/tests/btrfs/131 b/tests/btrfs/131
-index b4756a5f..d2b4b91d 100755
---- a/tests/btrfs/131
-+++ b/tests/btrfs/131
-@@ -14,21 +14,15 @@ _begin_fstest auto quick
- _require_scratch
- _require_btrfs_command inspect-internal dump-super
- _require_btrfs_fs_feature free_space_tree
--# Zoned btrfs does not support space_cache(v1)
--_require_non_zoned_device "${SCRATCH_DEV}"
- # Block group tree does not support space_cache(v1)
- _require_btrfs_no_block_group_tree
- 
--_scratch_mkfs >/dev/null 2>&1
--[ "$(_get_page_size)" -gt "$(_scratch_btrfs_sectorsize)" ] && \
--	_notrun "cannot run with subpage sectorsize"
--
--mkfs_v1()
-+mkfs_nocache()
- {
- 	_scratch_mkfs >/dev/null 2>&1
- 	# Future proof against btrfs-progs making space_cache=v2 filesystems by
- 	# default.
--	_scratch_mount -o clear_cache,space_cache=v1
-+	_scratch_mount -o clear_cache,nospace_cache
- 	_scratch_unmount
- }
- 
-@@ -54,41 +48,39 @@ check_fst_compat()
- export MOUNT_OPTIONS=""
- 
- # When the free space tree is not enabled:
--# -o space_cache=v1: keep using the old free space cache
-+# -o nospace_cache: keep no space cache
- # -o space_cache=v2: enable the free space tree
- # -o clear_cache,space_cache=v2: clear the free space cache and enable the free space tree
- # We don't check the no options case or plain space_cache as that will change
- # in the future to turn on space_cache=v2.
- 
--mkfs_v1
--echo "Using free space cache"
--_scratch_mount -o space_cache=v1
-+mkfs_nocache
-+echo "Using no space cache"
-+_scratch_mount -o nospace_cache
- check_fst_compat
- _scratch_unmount
- 
--mkfs_v1
-+mkfs_nocache
- echo "Enabling free space tree"
- _scratch_mount -o space_cache=v2
- check_fst_compat
- _scratch_unmount
- 
--mkfs_v1
--echo "Disabling free space cache and enabling free space tree"
-+mkfs_nocache
-+echo "Clearing free space cache and enabling free space tree"
- _scratch_mount -o clear_cache,space_cache=v2
- check_fst_compat
- _scratch_unmount
- 
- # When the free space tree is enabled:
--# -o nospace_cache, -o space_cache=v1: error
-+# -o nospace_cache: error
- # no options, -o space_cache=v2: keep using the free space tree
- # -o clear_cache, -o clear_cache,space_cache=v2: clear and recreate the free space tree
- # -o clear_cache,nospace_cache: clear the free space tree
--# -o clear_cache,space_cache=v1: clear the free space tree, enable the free space cache
- 
- mkfs_v2
- echo "Trying to mount without free space tree"
- _try_scratch_mount -o nospace_cache >/dev/null 2>&1 || echo "mount failed"
--_try_scratch_mount -o space_cache=v1 >/dev/null 2>&1 || echo "mount failed"
- 
- mkfs_v2
- echo "Mounting existing free space tree"
-@@ -115,12 +107,6 @@ _scratch_mount -o clear_cache,nospace_cache
- check_fst_compat
- _scratch_unmount
- 
--mkfs_v2
--echo "Reverting to free space cache"
--_scratch_mount -o clear_cache,space_cache=v1
--check_fst_compat
--_scratch_unmount
--
- # success, all done
- status=0
- exit
-diff --git a/tests/btrfs/131.out b/tests/btrfs/131.out
-index aaa4a70a..97769dc7 100644
---- a/tests/btrfs/131.out
-+++ b/tests/btrfs/131.out
-@@ -1,13 +1,12 @@
- QA output created by 131
--Using free space cache
-+Using no space cache
- free space tree is disabled
- Enabling free space tree
- free space tree is enabled
--Disabling free space cache and enabling free space tree
-+Clearing free space cache and enabling free space tree
- free space tree is enabled
- Trying to mount without free space tree
- mount failed
--mount failed
- Mounting existing free space tree
- free space tree is enabled
- free space tree is enabled
-@@ -16,5 +15,3 @@ free space tree is enabled
- free space tree is enabled
- Disabling free space tree
- free space tree is disabled
--Reverting to free space cache
--free space tree is disabled
--- 
-2.51.2
+> 
+> Missed to add (hope this gets auto picked up during merge :) ):
+> 
+> Reported-by: Disha Goel <disgoel@linux.ibm.com>
+> 
+> Regards,
+> ojaswin
+> 
+>> ---
+>>   tests/generic/108 | 2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/tests/generic/108 b/tests/generic/108
+>> index 4f86ec94..308afe20 100755
+>> --- a/tests/generic/108
+>> +++ b/tests/generic/108
+>> @@ -60,7 +60,7 @@ $LVM_PROG vgcreate -f $vgname $SCSI_DEBUG_DEV $SCRATCH_DEV >>$seqres.full 2>&1
+>>   # We use yes pipe instead of 'lvcreate --yes' because old version of lvm
+>>   # (like 2.02.95 in RHEL6) don't support --yes option
+>>   yes | $LVM_PROG lvcreate -i 2 -I 4m -L ${lvsize}m -n $lvname $vgname \
+>> -	>>$seqres.full 2>&1
+>> +	>>$seqres.full 2>&1 || _notrun "Failed to create LVM lv"
+>>   _udev_wait /dev/mapper/$vgname-$lvname
+>>   
+>>   # _mkfs_dev exits the test on failure, this makes sure test lv is created by
+>> -- 
+>> 2.51.0
+>>
+> 
 
