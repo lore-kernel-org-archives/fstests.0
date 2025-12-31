@@ -1,88 +1,90 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39CC430F532
-	for <fstests@vger.kernel.org>; Wed, 31 Dec 2025 22:26:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC3863115B5
+	for <fstests@vger.kernel.org>; Wed, 31 Dec 2025 22:49:48 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767219981; cv=none; b=AJ3BmtJOmckWR/AQTigbqegGNal3eO8Pd3qsUSV3zS0f75CuogQfWgHhHqD5mHRRyvF/cwAddEaD9G0C6vWUIu8uz3A/q9UL4A8MSlD3Vj+2Ksgh2HzYx5EPiiAH8/zJGSm3YTjNqgZ5q4NAp3XKUCBBfdMSYn/XgBYgG33dsig=
+	t=1767221391; cv=none; b=C+G8lE0WbMJRGicQl/FyHYOFPj4SOHLGLjie+/OoVJNNaR7v3jDTYtf2NjOwri4gfpF/EiILfQPAYclAgyrzlWBD/6dZbJqpqO7de+YpXKqzLlTbA6qopCoMIjhADiDR2A35LLHp9CdU40+lxUEoZyc9O4Mg16v2YM1JoXPk4TU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767219981; c=relaxed/simple;
-	bh=4pqBk5aAIRoNhif2HO1/nsph/bdQj38c2Yo89j0sytM=;
+	s=arc-20240116; t=1767221391; c=relaxed/simple;
+	bh=TPaLaE/VATs7DF+xFjPkCAcNnt/jKPcnLWXvoxdeEoM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IlxTn3NGsc+3atEC9oPYyfT6nxPohOVYIdtUlaE8WlSGI7hHWnIaLo7xAkKL3V1fFYS92ZvaMGtPu0zbjU1awC9XamsnpyuDljgPeL+IL42169m3bWwuB3ld798V8K6AR3YpbHwFj/WpaaD7LP5xTGKeQreHeYSrMM+6pPvu7Sk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=aMAwpvxz; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=Y+2fVcWd; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=BuT96cxXXnmCisD0ArBwA75yGnoDslJdre3ZCEjldJ+ifuYgiHDwvjl7Jcgv0UU2cZC0+NCQymYsjrE6ACt6KTLsDnU50X131kaM3uNImneCwtC786P2hQXL1vS/qBwVSTpNc/KZqw3Ohav9f/xHzYsDPFdmfZt31IhME3oBJGA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Y+M/CYp5; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=mwPmqrcQ; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aMAwpvxz";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="Y+2fVcWd"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Y+M/CYp5";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="mwPmqrcQ"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1767219979;
+	s=mimecast20190719; t=1767221387;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=QiVsfjKNJCcO38sVQpJEBYAeq0gcXWkKlGmVCeZEjpI=;
-	b=aMAwpvxz9X6b4RWLRODZOuvVomhqGdXzdMoxUBX8qC3qXAZ1PDWiGUhx7lKw15M8RBsR3E
-	YIVZhu8k9pcKXIhrFY6pUW2t73gocY1XGx/y0ea1FlZCIcP9diBD1ATPUZO2aMxYbJnvqK
-	zngWyjpjkXr2AhZrs1lLN+ONblWcHx4=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=x6GKpgzl+uEYOc1cCsJPOvSPKEZjCVA9sg/IZVkE1Hw=;
+	b=Y+M/CYp5KmEFsnz0ZGZlW9QIKdEHFlDOA0K4u9Mdw8UvlNl2YQlLhvUAcroD8zCZyyy88t
+	K8kEMjVmM0RA0ixXosu3RGmb6I1jszmFHvFrh+VOMmNUnpGglN+F/mUiqjWtkQ5CvZMNGK
+	yawbS/RUzAyfUXKpAraOdgdA0C/sTvI=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-160-_qpa5JyHPSaXEmqRa9uqpQ-1; Wed, 31 Dec 2025 17:26:17 -0500
-X-MC-Unique: _qpa5JyHPSaXEmqRa9uqpQ-1
-X-Mimecast-MFC-AGG-ID: _qpa5JyHPSaXEmqRa9uqpQ_1767219976
-Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-34eb6589ed2so9893142a91.2
-        for <fstests@vger.kernel.org>; Wed, 31 Dec 2025 14:26:17 -0800 (PST)
+ us-mta-508-RemJaHaBM0SgBbdQffyXXw-1; Wed, 31 Dec 2025 17:49:45 -0500
+X-MC-Unique: RemJaHaBM0SgBbdQffyXXw-1
+X-Mimecast-MFC-AGG-ID: RemJaHaBM0SgBbdQffyXXw_1767221385
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-34c904a1168so24305155a91.1
+        for <fstests@vger.kernel.org>; Wed, 31 Dec 2025 14:49:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1767219976; x=1767824776; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1767221385; x=1767826185; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=QiVsfjKNJCcO38sVQpJEBYAeq0gcXWkKlGmVCeZEjpI=;
-        b=Y+2fVcWdXTvQdwcVgk2KKQXcE336pam9wBr8DYkzkySrmmMEdpQWERx+VtnsxA+SKS
-         3r4UW22yCc+KZ0l5wqeH04A04TQSLEb2AKbJGjkRwebAZXoKxcacvodaR928FDAMiozE
-         M4C+Bjqr08el1gIiltB/6Cmn76dPXOshtrwh8gzwaKruRwShIbeqEkBO9SqeYYtQR6/1
-         nyjBEZ/8fhIj1tUtJemdRE35OvconpCDYW/d+1OPcx5qIWuR3foDcHKPRFGk78stU3EH
-         ns3BwZxfShdB87pZSkg5qM1NbmnB5FGjDJJ2YWM+lwBvID1g811eRWOndGLSPLiF2/xD
-         UsMw==
+        bh=x6GKpgzl+uEYOc1cCsJPOvSPKEZjCVA9sg/IZVkE1Hw=;
+        b=mwPmqrcQGj5CSCXlOm6y9pqr5qMTAdYedpI5F+A3IMDwSBlARHRXFZXwHWduzWODHJ
+         71Hau0kt24bJmDllYk7+p9UzgVU4QoEIoGjYHOaofW4SrLhgyZAkhsYtbLF3jobk5+IE
+         k8z2toqEBSFW8DS81JQz1GK1DGEKd94QLZB4XGPTLmbJpIphJkO/BBuBWfMAvm8fY0TL
+         zK1ex/9QVz523yHLhHOTcMi3voLtEvWd+AphTfQyqfBhE3MU9Dip+Xapb7V4wruGGhhJ
+         7e0EXHXWRBNwII+Z5noNdN5SOAS1XYiFcZZui8mTJJyImfgiZNDjm1R8bRNw8gQ9yOar
+         OABA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767219976; x=1767824776;
+        d=1e100.net; s=20230601; t=1767221385; x=1767826185;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=QiVsfjKNJCcO38sVQpJEBYAeq0gcXWkKlGmVCeZEjpI=;
-        b=PXBRQ5RIG2/gniXBownHh9GtZHLLh16toVKRpNBuZKHpZzK/bod5zQU0UkfsDR6yr3
-         qxTvPaIw0UFtUQOBlOvFKfnYt+vnm7qkcBsg6LLVX/dtJuuCRvXp3N6psmye9AAAIjpc
-         tH1kKADd8+GLG8SdTlRGhUr9ACVjDVa1ctku/2XOWA8mF6xj4hKix1hiIpkqvbsd3S3N
-         beoCFPU4CxtR8Kfy52g4NO/n38KpqaHfeWpiWimjlDAYD1nGBhXMKzcjFbgEuLY96Ugr
-         kRhh5PlBbTXiSvu9kZ66dZ8qoP+OpQDYfrRJKomJvaeksx4eJ1W215We6H0SFKPju5Jq
-         id+A==
-X-Forwarded-Encrypted: i=1; AJvYcCVE/wTtAwRjDqykVqa5bdhyek7MldxbcSx68uh19nxMEuHgJ5xC8aknIqYgUPRUneuPl4wj8V8U@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx7YpYjdlfGQtfnVzHGPSLC+p66emW/Gr5Cx3zQSTVj0OnhHHhp
-	yUbqNGOz5/3Q8kQjBrQXz2y5Qe0sF4y4brbkLY6Q3v0R311mhS3y/ChpMjN2Pw5L+T4xoTv5Yb4
-	8IwlqoWhhYUejzgd2F+FtdVgRzsSkl3qcP6nh3UWkEHdFJ9gO4WrZaOK9Xs8=
-X-Gm-Gg: AY/fxX6iqttnZVdw4k1SBP3AMnVWDaRtxJ+zvwgQNZ519Y+QyUvyLeVWj6RvsCyPYX1
-	7OZgafYW6DVY3ThRImYy6tr27K4Wn+Pqe+xg/WeKVv7zGyUynm5/e2/Ji/ySAoFxQNbq19obUaq
-	leP0ItcJSZansBeCBtD6YGDc1oKX0gDfYx9v3y6sO7FOPTNWfhAbP3mVbnFVFMTkC7ym8GlqafA
-	qm8yCT2/aKvYI9F2h0kdrF4hYq4MXBtXV3HJaGOuhdmLaKNtdKbC/D6GB9PSEfbItMsd4VDugMK
-	zWA5uHGuA1XCvsuKkIJkdiwVCa1mybJpMzdj/c1knKvx5YDCxYH8qd7PCts1VBs6Fti9J0n/tK0
-	X/Jv1lm9Aad+F2sZ8lqPFx2T4EVP+VuFNsvdeJwgg5gGM/SJKog==
-X-Received: by 2002:a05:6a20:7351:b0:35e:bfe5:ee82 with SMTP id adf61e73a8af0-376a9acecfdmr32432611637.48.1767219976454;
-        Wed, 31 Dec 2025 14:26:16 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEjYfsqsv8gURLxbYnZxhql3EeCqYIHHexZIlKyir+i/AvJL4ZcQc1S2ibH7e3Yub6CVT1ryw==
-X-Received: by 2002:a05:6a20:7351:b0:35e:bfe5:ee82 with SMTP id adf61e73a8af0-376a9acecfdmr32432603637.48.1767219976023;
-        Wed, 31 Dec 2025 14:26:16 -0800 (PST)
+        bh=x6GKpgzl+uEYOc1cCsJPOvSPKEZjCVA9sg/IZVkE1Hw=;
+        b=YQHPXa35XzUpuqXW8Q7tQhi4AsikB5dxVOWroI7aq0SiwkkaVLAOELtqEjxyUA1N9P
+         Z2uriANbo4K6BEoiXkPj6wwOBoXCIWJyUv2NMSQ/9BB4xTqBYurJxKJEmDGsjaeItlk+
+         3ce+yeXabKPxlgOQ7S96yilgja1D7yhmtFq/anqZdZSFZZqRz3GByYrn4RUTIXFHiDD0
+         GH4d7Vukav46C++5jIOVs97GT2GsCdSFiY6yF0i/QhO1EU4HIPWIzt+1V4du72DsZ3Xv
+         mRIO+MKY7TbLl+VXLW3Jfaqw6C5ecMYw2c5Gis9m7FkpKzPo9AqquoWooxMaxoPg2RUN
+         +h0g==
+X-Forwarded-Encrypted: i=1; AJvYcCVcJ18+VtDDI17p57HYAk0BKZvWhKYlNEQSP7VgvWzaUiqZDe10GY3YgYwm7EVSmAH/FiNbppaW@vger.kernel.org
+X-Gm-Message-State: AOJu0YwaxZTMkaeWWp0nWjh8IlNrOjQccbwOrEFU7V+a/bXVthnC2Gsm
+	pLeftb7Vc5etlgpXJnheMzBpdj6fxqA7PMxPaolkVII04sE6/UZQ2mAzFeBoJvKbzkbCjL3hOOo
+	8abZA4so1TJZWxjw6NVGiq7tpYw8OChXGgsTFFS3g7NvJids8hJJqdcO09fE=
+X-Gm-Gg: AY/fxX550s/yZABb2OPt6AYR2/HSJxKlTGHX9Qjh3U3HEdcmxCdxyMe37Rxkk3Kw9Km
+	3wpl42v069xF0Ht3/Ap+4u59PAsMf/SjVvCoY2vt2Pv1UAxSzF6T32NPUKl5i1BCfBkieqfnPyC
+	tfENTILdl85sawITaLQrqbce6eZatTSklW9SBt7lcr9/Q3vp1mKHWSfILO23Mv59X4+4XcLgA3k
+	+NpiUztlFZ5wSKkjyIVY3Xcj3Y1FjO1jUIyokj6eKOG1wzbv9FoxjwtC83vEprJPXO1xS6V5e4v
+	IByK0W+SApK8A8GafBjkN4qJzMDQKZEmpS0SycIdiDua2qC8I4MIirY1PJZTDLD3Mps5PcsP7e4
+	05AHq9n5nQR8a/pXyLNJuuBJ4bck8dI9wONZmygyKA1gGKFJR7Q==
+X-Received: by 2002:a17:90b:56cb:b0:341:abdc:8ea2 with SMTP id 98e67ed59e1d1-34e9220008fmr34597031a91.37.1767221384750;
+        Wed, 31 Dec 2025 14:49:44 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEIYaURwXAcaI0COgfWMrpbKyUkKD+aSVskVgccKJOH+tWiGzepanBLjAa7XKP4FJlWWfuZwg==
+X-Received: by 2002:a17:90b:56cb:b0:341:abdc:8ea2 with SMTP id 98e67ed59e1d1-34e9220008fmr34597021a91.37.1767221384284;
+        Wed, 31 Dec 2025 14:49:44 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c3a4deb6f17sm5875894a12.22.2025.12.31.14.26.12
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-34e9219f165sm33493132a91.3.2025.12.31.14.49.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 31 Dec 2025 14:26:14 -0800 (PST)
-Date: Thu, 1 Jan 2026 06:26:10 +0800
+        Wed, 31 Dec 2025 14:49:42 -0800 (PST)
+Date: Thu, 1 Jan 2026 06:49:37 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Christoph Hellwig <hch@lst.de>
-Cc: zlang@kernel.org, asj@kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] MAINTAINERS: update entry for Anand Jain
-Message-ID: <20251231222610.vsjbsjudb7khte76@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20251210055134.3470190-1-hch@lst.de>
+To: Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: glaubitz@physik.fu-berlin.de, linux-fsdevel@vger.kernel.org,
+	frank.li@vivo.com, fstests@vger.kernel.org, zlang@kernel.org,
+	Slava.Dubeyko@ibm.com
+Subject: Re: [PATCH] generic/020: limit xattr value by 3802 bytes
+Message-ID: <20251231224937.uu67l76cytcd36ns@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20251224002957.1137211-1-slava@dubeyko.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -91,36 +93,41 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251210055134.3470190-1-hch@lst.de>
+In-Reply-To: <20251224002957.1137211-1-slava@dubeyko.com>
 
-On Wed, Dec 10, 2025 at 06:51:34AM +0100, Christoph Hellwig wrote:
-> The oracle address bounces.  Replaced it with the kernel.org address
-> found in recent commit logs.
+On Tue, Dec 23, 2025 at 04:29:58PM -0800, Viacheslav Dubeyko wrote:
+> HFS+ implementation supports only inline extended attributes.
+> The size of value for inline xattr is limited by 3802 bytes [1].
 > 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> [1] https://elixir.bootlin.com/linux/v6.19-rc2/source/include/linux/hfs_common.h#L626
+> 
+> Signed-off-by: Viacheslav Dubeyko <slava@dubeyko.com>
 > ---
+>  tests/generic/020 | 5 +++++
+>  1 file changed, 5 insertions(+)
+> 
+> diff --git a/tests/generic/020 b/tests/generic/020
+> index 8b77d5ca..540f539b 100755
+> --- a/tests/generic/020
+> +++ b/tests/generic/020
+> @@ -168,6 +168,11 @@ _attr_get_maxval_size()
+>  		fi
+>  		max_attrval_size=$((65536 - $size - $selinux_size - $max_attrval_namelen))
+>  		;;
+> +	hfsplus)
+> +		# HFS+ implementation supports only inline extended attributes.
+> +		# The size of value for inline xattr is limited by 3802 bytes.
+> +		max_attrval_size=3802
+> +		;;
 
-Thanks for this update,
+Glad to get supportes from HFS list, this patch looks good to me.
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  MAINTAINERS | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index a0f50f3d98b4..19e558296809 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -108,7 +108,7 @@ Maintainers List
->  	  or reviewer or co-maintainer can be in cc list.
->  
->  BTRFS
-> -M:	Anand Jain <anand.jain@oracle.com>
-> +M:	Anand Jain <asj@kernel.org>
->  R:	Filipe Manana <fdmanana@suse.com>
->  L:	linux-btrfs@vger.kernel.org
->  S:	Supported
+>  	*)
+>  		# Assume max ~1 block of attrs
+>  		BLOCK_SIZE=`_get_block_size $TEST_DIR`
 > -- 
-> 2.47.3
+> 2.43.0
 > 
 
