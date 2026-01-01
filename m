@@ -1,133 +1,534 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC3863115B5
-	for <fstests@vger.kernel.org>; Wed, 31 Dec 2025 22:49:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9B341F4611
+	for <fstests@vger.kernel.org>; Thu,  1 Jan 2026 08:42:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767221391; cv=none; b=C+G8lE0WbMJRGicQl/FyHYOFPj4SOHLGLjie+/OoVJNNaR7v3jDTYtf2NjOwri4gfpF/EiILfQPAYclAgyrzlWBD/6dZbJqpqO7de+YpXKqzLlTbA6qopCoMIjhADiDR2A35LLHp9CdU40+lxUEoZyc9O4Mg16v2YM1JoXPk4TU=
+	t=1767256963; cv=none; b=BO+CNaJSUi8xXTmUhQ4Gq4kxNETWR4AgFDOJoSAozVaoxCN576Y2zOZpCpOkij3bODLuj8nKxASXDLAfbL3MfrLZZu1rEs2whQC5ChJwgBNU3If5g61lx9gKxwYp0gn/JonykDphlqrYW7KGevGaRpIlzXl7YUlSfDB6spNOXds=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767221391; c=relaxed/simple;
-	bh=TPaLaE/VATs7DF+xFjPkCAcNnt/jKPcnLWXvoxdeEoM=;
+	s=arc-20240116; t=1767256963; c=relaxed/simple;
+	bh=a+FFONRBEpB+OqSr2QaoDw1SqU6I8+ARXvupLSVJzCc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=BuT96cxXXnmCisD0ArBwA75yGnoDslJdre3ZCEjldJ+ifuYgiHDwvjl7Jcgv0UU2cZC0+NCQymYsjrE6ACt6KTLsDnU50X131kaM3uNImneCwtC786P2hQXL1vS/qBwVSTpNc/KZqw3Ohav9f/xHzYsDPFdmfZt31IhME3oBJGA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Y+M/CYp5; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=mwPmqrcQ; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=lEBcWAgBZp4FssYKpB4yWwgEzgogkeebvMQN09+9GgrSm6oaOadnFpWIwMDX6jc9if7e2VCPHwXjckGrxbq0EW5yCFr6Zzf3tGaizDI8gCSgiDmWYhX/NclKi1ovceUPDJGulxl/YC6N16Eo4lTf6bJDdYugRdV6Aalf5Ktw+kc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Peqm9fXH; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=B6LPi4uM; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Y+M/CYp5";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="mwPmqrcQ"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Peqm9fXH";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="B6LPi4uM"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1767221387;
+	s=mimecast20190719; t=1767256959;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=x6GKpgzl+uEYOc1cCsJPOvSPKEZjCVA9sg/IZVkE1Hw=;
-	b=Y+M/CYp5KmEFsnz0ZGZlW9QIKdEHFlDOA0K4u9Mdw8UvlNl2YQlLhvUAcroD8zCZyyy88t
-	K8kEMjVmM0RA0ixXosu3RGmb6I1jszmFHvFrh+VOMmNUnpGglN+F/mUiqjWtkQ5CvZMNGK
-	yawbS/RUzAyfUXKpAraOdgdA0C/sTvI=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=uynV/TGnMJE2w/2wWJyQ3tWEooZCQjZwZ/DoujUYQqA=;
+	b=Peqm9fXH1bAa4/uOoydd6wZSF6Dwo8rctgoQecH0NsUG8VZycX41NEnB8PZX+j+bw7+nyV
+	SwBiWF4UHZFuHYMjuAEaqQR46DHrHz6N3F+/Ml1b4AhzujpFEGiQYR2+UYePCiGRTxypvA
+	KqeHGyL2nI5d4kPaqqraoFtPeu9/gUI=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-508-RemJaHaBM0SgBbdQffyXXw-1; Wed, 31 Dec 2025 17:49:45 -0500
-X-MC-Unique: RemJaHaBM0SgBbdQffyXXw-1
-X-Mimecast-MFC-AGG-ID: RemJaHaBM0SgBbdQffyXXw_1767221385
-Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-34c904a1168so24305155a91.1
-        for <fstests@vger.kernel.org>; Wed, 31 Dec 2025 14:49:45 -0800 (PST)
+ us-mta-653-sBAgjMQrMIGwsKHB5HrbSw-1; Thu, 01 Jan 2026 03:42:36 -0500
+X-MC-Unique: sBAgjMQrMIGwsKHB5HrbSw-1
+X-Mimecast-MFC-AGG-ID: sBAgjMQrMIGwsKHB5HrbSw_1767256956
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2a0a8c465c1so75375755ad.1
+        for <fstests@vger.kernel.org>; Thu, 01 Jan 2026 00:42:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1767221385; x=1767826185; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=x6GKpgzl+uEYOc1cCsJPOvSPKEZjCVA9sg/IZVkE1Hw=;
-        b=mwPmqrcQGj5CSCXlOm6y9pqr5qMTAdYedpI5F+A3IMDwSBlARHRXFZXwHWduzWODHJ
-         71Hau0kt24bJmDllYk7+p9UzgVU4QoEIoGjYHOaofW4SrLhgyZAkhsYtbLF3jobk5+IE
-         k8z2toqEBSFW8DS81JQz1GK1DGEKd94QLZB4XGPTLmbJpIphJkO/BBuBWfMAvm8fY0TL
-         zK1ex/9QVz523yHLhHOTcMi3voLtEvWd+AphTfQyqfBhE3MU9Dip+Xapb7V4wruGGhhJ
-         7e0EXHXWRBNwII+Z5noNdN5SOAS1XYiFcZZui8mTJJyImfgiZNDjm1R8bRNw8gQ9yOar
-         OABA==
+        d=redhat.com; s=google; t=1767256956; x=1767861756; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=uynV/TGnMJE2w/2wWJyQ3tWEooZCQjZwZ/DoujUYQqA=;
+        b=B6LPi4uMEVP7SZPm7Ag6GPxl+nslbKVJ72eLqLZTepdWUBntkzRdUqf2T2PBir8Ahk
+         fonZFLpAfM7hjFbgTEO9ft7apqpbbXOldmJ5SV6jZWJBVcRxI2DqFhmXeYJaxMdaSSU8
+         WVSZ1nrMoCvU/SmZI/C2lBmw9vpo994b8qZix3Ui5d2j0oTQfkSQWv6JL8Dgnxaf5peX
+         78DBdGq39JqoVHewTPjPJVpUFocMIbudRlGydGjSfpnwSjphyHDRrHZYPkVURu5NIZi1
+         wu1JxLU/Ak53ExmFKbTqcqThp/r51gQ2DPSF00+T4Xqm5FuIJljrMYjFuCMP2uBqH+1D
+         +mRQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767221385; x=1767826185;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=x6GKpgzl+uEYOc1cCsJPOvSPKEZjCVA9sg/IZVkE1Hw=;
-        b=YQHPXa35XzUpuqXW8Q7tQhi4AsikB5dxVOWroI7aq0SiwkkaVLAOELtqEjxyUA1N9P
-         Z2uriANbo4K6BEoiXkPj6wwOBoXCIWJyUv2NMSQ/9BB4xTqBYurJxKJEmDGsjaeItlk+
-         3ce+yeXabKPxlgOQ7S96yilgja1D7yhmtFq/anqZdZSFZZqRz3GByYrn4RUTIXFHiDD0
-         GH4d7Vukav46C++5jIOVs97GT2GsCdSFiY6yF0i/QhO1EU4HIPWIzt+1V4du72DsZ3Xv
-         mRIO+MKY7TbLl+VXLW3Jfaqw6C5ecMYw2c5Gis9m7FkpKzPo9AqquoWooxMaxoPg2RUN
-         +h0g==
-X-Forwarded-Encrypted: i=1; AJvYcCVcJ18+VtDDI17p57HYAk0BKZvWhKYlNEQSP7VgvWzaUiqZDe10GY3YgYwm7EVSmAH/FiNbppaW@vger.kernel.org
-X-Gm-Message-State: AOJu0YwaxZTMkaeWWp0nWjh8IlNrOjQccbwOrEFU7V+a/bXVthnC2Gsm
-	pLeftb7Vc5etlgpXJnheMzBpdj6fxqA7PMxPaolkVII04sE6/UZQ2mAzFeBoJvKbzkbCjL3hOOo
-	8abZA4so1TJZWxjw6NVGiq7tpYw8OChXGgsTFFS3g7NvJids8hJJqdcO09fE=
-X-Gm-Gg: AY/fxX550s/yZABb2OPt6AYR2/HSJxKlTGHX9Qjh3U3HEdcmxCdxyMe37Rxkk3Kw9Km
-	3wpl42v069xF0Ht3/Ap+4u59PAsMf/SjVvCoY2vt2Pv1UAxSzF6T32NPUKl5i1BCfBkieqfnPyC
-	tfENTILdl85sawITaLQrqbce6eZatTSklW9SBt7lcr9/Q3vp1mKHWSfILO23Mv59X4+4XcLgA3k
-	+NpiUztlFZ5wSKkjyIVY3Xcj3Y1FjO1jUIyokj6eKOG1wzbv9FoxjwtC83vEprJPXO1xS6V5e4v
-	IByK0W+SApK8A8GafBjkN4qJzMDQKZEmpS0SycIdiDua2qC8I4MIirY1PJZTDLD3Mps5PcsP7e4
-	05AHq9n5nQR8a/pXyLNJuuBJ4bck8dI9wONZmygyKA1gGKFJR7Q==
-X-Received: by 2002:a17:90b:56cb:b0:341:abdc:8ea2 with SMTP id 98e67ed59e1d1-34e9220008fmr34597031a91.37.1767221384750;
-        Wed, 31 Dec 2025 14:49:44 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEIYaURwXAcaI0COgfWMrpbKyUkKD+aSVskVgccKJOH+tWiGzepanBLjAa7XKP4FJlWWfuZwg==
-X-Received: by 2002:a17:90b:56cb:b0:341:abdc:8ea2 with SMTP id 98e67ed59e1d1-34e9220008fmr34597021a91.37.1767221384284;
-        Wed, 31 Dec 2025 14:49:44 -0800 (PST)
+        d=1e100.net; s=20230601; t=1767256956; x=1767861756;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=uynV/TGnMJE2w/2wWJyQ3tWEooZCQjZwZ/DoujUYQqA=;
+        b=wyOmyFNY03yJFxBeo6QgnoWUY0f4Bt8MzUM93aCabi2pSmQGuO141joZp+iVKwk+8I
+         bUE/suq6uTxXdu/uL0brEyqVKGckzJDi8CiClqwGjEXU9K3S9KudxkcuOFEchPMW9cOP
+         j1pw0g4ZZwTeCsNqCNNqXb3naR8kA8Lef4tGyeFbR4O9soG5NvckFCNI5Opht5PAvpyI
+         K/hgbiqyHJIa76f5NLiJG83D42F4GTVGbBpzlUj61h5ewGMFa/SeWqQEpmpJPSKEreeL
+         iy9CXd2a+oEQ376hVs36VWlfcBO4hpmUSpkXQ5jnkf9g6qmoNs53fGayS+SbJXGIUlxC
+         95BQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXlpOGu6nDFFzsjPsanxsplFvMHYVlYAQ/ySVIhh/Ziggus2KXeKEq1i1OgLieIqPhgk0Z3cLNh@vger.kernel.org
+X-Gm-Message-State: AOJu0YzDREgNDiW2SKn3WVKXmhnBL8985h6rirBlmNsrNo3/BxwvJU/w
+	HZioRIdKgg+XWEGmvMAGT18ntHDJ3WPJ8wOGCnwBZie+6ogEOWZulh9UEzA5Zhc90Avnbr5H8oe
+	wYrjvMCM2ODoxDsuh3DUPlAMA0dd2Nr9yJib8qyqlOQ8O61WZfcwBqXPpvF8=
+X-Gm-Gg: AY/fxX4vzFBjzoo8pmqYq62i2iIxxO/NfXvcHBxXrET94qAUQZgGMBmmb0vr1/JW+qO
+	xl22Cdu0KFjCOCP05G/4LdJaP0dOIk8U0FLFSI4SzzDeWYHKoETfmGeWuNcEpz5m4lXTl+jxpPk
+	1CJ3QAq6kS4YO2bW2kHv2WAPi2Osr1iOl8YQ+zFRLGoRJGV+yWttXPFfmWbrRxm77A4rJ2YpKTC
+	BldsApDTcvI2pHmRYEu8f++v+KNuVPWF5MfwFRAInzTmPReaI9Db7pFhXIldTQQqXvVxTnrV88u
+	uJa1y/J4hR3mCJzF3ypNG9Pl4+uv5IlO1x/ZvgJGVbbtdZLQwTwNPBxZftBEY+XSdPJSMU7lKW5
+	fM8zlGkEpYMzCLrmPWVfI0MbY4U2BL4ndpz2dgTgpWrWC4shylQ==
+X-Received: by 2002:a17:902:dace:b0:2a0:eaf5:5cd8 with SMTP id d9443c01a7336-2a2caab6e40mr385049355ad.9.1767256955664;
+        Thu, 01 Jan 2026 00:42:35 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IE68JJNBRDY4BiYJPa4gV0aKhuCUQOx8XO+Hz93m7mlY4+7+i5CSB0Xzo1RwtSmwmoq6RBagg==
+X-Received: by 2002:a17:902:dace:b0:2a0:eaf5:5cd8 with SMTP id d9443c01a7336-2a2caab6e40mr385049265ad.9.1767256955075;
+        Thu, 01 Jan 2026 00:42:35 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-34e9219f165sm33493132a91.3.2025.12.31.14.49.40
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2a2f3d4cb90sm350758525ad.51.2026.01.01.00.42.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 31 Dec 2025 14:49:42 -0800 (PST)
-Date: Thu, 1 Jan 2026 06:49:37 +0800
+        Thu, 01 Jan 2026 00:42:34 -0800 (PST)
+Date: Thu, 1 Jan 2026 16:42:30 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Viacheslav Dubeyko <slava@dubeyko.com>
-Cc: glaubitz@physik.fu-berlin.de, linux-fsdevel@vger.kernel.org,
-	frank.li@vivo.com, fstests@vger.kernel.org, zlang@kernel.org,
-	Slava.Dubeyko@ibm.com
-Subject: Re: [PATCH] generic/020: limit xattr value by 3802 bytes
-Message-ID: <20251231224937.uu67l76cytcd36ns@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20251224002957.1137211-1-slava@dubeyko.com>
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v2] fstests: generic/746: update the parser to handle
+ block group tree
+Message-ID: <20260101084230.tciqvaxa5pxhi3xq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20251205071726.159577-1-wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20251224002957.1137211-1-slava@dubeyko.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20251205071726.159577-1-wqu@suse.com>
 
-On Tue, Dec 23, 2025 at 04:29:58PM -0800, Viacheslav Dubeyko wrote:
-> HFS+ implementation supports only inline extended attributes.
-> The size of value for inline xattr is limited by 3802 bytes [1].
+On Fri, Dec 05, 2025 at 05:47:26PM +1030, Qu Wenruo wrote:
+> [FALSE ALERT]
+> The test case will fail on btrfs if the new block-group-tree feature is
+> enabled:
 > 
-> [1] https://elixir.bootlin.com/linux/v6.19-rc2/source/include/linux/hfs_common.h#L626
+> FSTYP         -- btrfs
+> PLATFORM      -- Linux/x86_64 btrfs-vm 6.18.0-rc6-custom+ #321 SMP PREEMPT_DYNAMIC Sun Nov 23 16:34:33 ACDT 2025
+> MKFS_OPTIONS  -- -O block-group-tree /dev/mapper/test-scratch1
+> MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
 > 
-> Signed-off-by: Viacheslav Dubeyko <slava@dubeyko.com>
+> generic/746 44s ... [failed, exit status 1]- output mismatch (see xfstests-dev/results//generic/746.out.bad)
+>     --- tests/generic/746.out	2024-06-27 13:55:51.286338519 +0930
+>     +++ xfstests-dev/results//generic/746.out.bad	2025-11-28 07:47:17.039827837 +1030
+>     @@ -2,4 +2,4 @@
+>      Generating garbage on loop...done.
+>      Running fstrim...done.
+>      Detecting interesting holes in image...done.
+>     -Comparing holes to the reported space from FS...done.
+>     +Comparing holes to the reported space from FS...Sectors 256-2111 are not marked as free!
+>     ...
+>     (Run 'diff -u xfstests-dev/tests/generic/746.out xfstests-dev/results//generic/746.out.bad'  to see the entire diff)
+> 
+> [CAUSE]
+> Sectors [256, 2048) are the from the reserved first 1M free space.
+> Sectors [2048, 2112) are the leading free space in the chunk tree.
+> Sectors [2112, 2144) is the first tree block in the chunk tree.
+> 
+> However the reported free sectors from get_free_sectors() looks like this:
+> 
+>   2144 10566
+>   10688 11711
+>   ...
+> 
+> Note that there should be a free sector range in [2048, 2112) but it's
+> not reported in get_free_sectors().
+> 
+> The get_free_sectors() call is fs dependent, and for btrfs it's using
+> parse-extent-tree.awk script to handle the extent tree dump.
+> 
+> The script uses BLOCK_GROUP_ITEM items to detect the beginning of a
+> block group so that it can calculate the hole between the beginning of a
+> block group and the first data/metadata item.
+> 
+> However block-group-tree feature moves BLOCK_GROUP_ITEM items to a
+> dedicated tree, making the existing script unable to parse the free
+> space at the beginning of a block group.
+> 
+> [FIX]
+> Introduce a new script, parse-free-space.py, that accepts two tree
+> dumps:
+> 
+> - block group tree dump
+>   If the fs has block-group-tree feature, it's the block group tree
+>   dump.
+>   Otherwise the regular extent tree dump is enough.
+> 
+> - extent tree dump
+>   The usual extent tree dump.
+> 
+> With a dedicated block group tree dump, the script can correctly handle
+> the beginning part of free space, no matter if block-group-tree feature
+> is enabled or not.
+> 
+> And with this parser, the old parse-extent-tree.awk can be retired.
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 > ---
->  tests/generic/020 | 5 +++++
->  1 file changed, 5 insertions(+)
+> Changelog:
+> v2:
+> - Add extra requirement for python3 if the fs is btrfs
+> - Utilize $PYTHON3_PROG other than calling the script directly
+> - Add the comment on we need single DATA/METADATA profiles
+> ---
+>  src/parse-extent-tree.awk | 144 --------------------------------------
+
+As you've removed the parse-extent-tree.awk, it should be removed from
+src/Makefile too, or `make install` always fails as
+
+  /bin/sh ../libtool --quiet --mode=install ../install-sh -o root -g root -m 755 dmerror fill2attr fill2fs fill2fs_check scaleread.sh btrfs_crc32c_forged_name.py popdir.pl popattr.py soak_duration.awk parse-dev-tree.awk parse-extent-tree.awk /var/lib/xfstests/src
+  cp: cannot stat 'parse-extent-tree.awk': No such file or directory
+  gmake[1]: *** [Makefile:137: install] Error 1
+  make: *** [Makefile:103: src-install] Error 2
+
+So I'll do below change when I merge this patch, to avoid this installation
+regressoin:
+
+  diff --git a/src/Makefile b/src/Makefile
+  index 711dbb91..ad2ffd85 100644
+  --- a/src/Makefile
+  +++ b/src/Makefile
+  @@ -40,7 +40,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 
+   EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+                btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+  -             soak_duration.awk parse-dev-tree.awk parse-extent-tree.awk
+  +             soak_duration.awk parse-dev-tree.awk
+
+Thanks,
+Zorro
+
+>  src/parse-free-space.py   | 122 ++++++++++++++++++++++++++++++++
+>  tests/generic/746         |  24 +++++--
+>  3 files changed, 142 insertions(+), 148 deletions(-)
+>  delete mode 100755 src/parse-extent-tree.awk
+>  create mode 100755 src/parse-free-space.py
 > 
-> diff --git a/tests/generic/020 b/tests/generic/020
-> index 8b77d5ca..540f539b 100755
-> --- a/tests/generic/020
-> +++ b/tests/generic/020
-> @@ -168,6 +168,11 @@ _attr_get_maxval_size()
->  		fi
->  		max_attrval_size=$((65536 - $size - $selinux_size - $max_attrval_namelen))
->  		;;
-> +	hfsplus)
-> +		# HFS+ implementation supports only inline extended attributes.
-> +		# The size of value for inline xattr is limited by 3802 bytes.
-> +		max_attrval_size=3802
-> +		;;
-
-Glad to get supportes from HFS list, this patch looks good to me.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
->  	*)
->  		# Assume max ~1 block of attrs
->  		BLOCK_SIZE=`_get_block_size $TEST_DIR`
+> diff --git a/src/parse-extent-tree.awk b/src/parse-extent-tree.awk
+> deleted file mode 100755
+> index 1e69693c..00000000
+> --- a/src/parse-extent-tree.awk
+> +++ /dev/null
+> @@ -1,144 +0,0 @@
+> -# SPDX-License-Identifier: GPL-2.0
+> -# Copyright (c) 2019 Nikolay Borisov, SUSE LLC.  All Rights Reserved.
+> -#
+> -# Parses btrfs' extent tree for holes. Holes are the ranges between 2 adjacent
+> -# extent blocks. For example if we have the following 2 metadata items in the
+> -# extent tree:
+> -#	item 6 key (30425088 METADATA_ITEM 0) itemoff 16019 itemsize 33
+> -#	item 7 key (30490624 METADATA_ITEM 0) itemoff 15986 itemsize 33
+> -#
+> -# There is a whole of 64k between then - 30490624−30425088 = 65536
+> -# Same logic applies for adjacent EXTENT_ITEMS.
+> -#
+> -# The script requires the following parameters passed on command line:
+> -#     * sectorsize - how many bytes per sector, used to convert the output of
+> -#     the script to sectors.
+> -#     * nodesize - size of metadata extents, used for internal calculations
+> -
+> -# Given an extent line "item 2 key (13672448 EXTENT_ITEM 65536) itemoff 16153 itemsize 53"
+> -# or "item 6 key (30425088 METADATA_ITEM 0) itemoff 16019 itemsize 33" returns
+> -# either 65536 (for data extents) or the fixes nodesize value for metadata
+> -# extents.
+> -function get_extent_size(line, tmp) {
+> -	if (line ~ data_match || line ~ bg_match) {
+> -		split(line, tmp)
+> -		gsub(/\)/,"", tmp[6])
+> -		return tmp[6]
+> -	} else if (line ~ metadata_match) {
+> -		return nodesize
+> -	}
+> -}
+> -
+> -# given a 'item 2 key (13672448 EXTENT_ITEM 65536) itemoff 16153 itemsize 53'
+> -# and returns 13672448.
+> -function get_extent_offset(line, tmp) {
+> -	split(line, tmp)
+> -	gsub(/\(/,"",tmp[4])
+> -	return tmp[4]
+> -}
+> -
+> -# This function parses all the extents belonging to a particular block group
+> -# which are accumulated in lines[] and calculates the offsets of the holes
+> -# part of this block group.
+> -#
+> -# base_offset and bg_line are local variables
+> -function print_array(base_offset, bg_line)
+> -{
+> -	if (match(lines[0], bg_match)) {
+> -		# we don't have an extent at the beginning of of blockgroup, so we
+> -		# have a hole between blockgroup offset and first extent offset
+> -		bg_line = lines[0]
+> -		prev_size=0
+> -		prev_offset=get_extent_offset(bg_line)
+> -		delete lines[0]
+> -	} else {
+> -		# we have an extent at the beginning of block group, so initialize
+> -		# the prev_* vars correctly
+> -		bg_line = lines[1]
+> -		prev_size = get_extent_size(lines[0])
+> -		prev_offset = get_extent_offset(lines[0])
+> -		delete lines[1]
+> -		delete lines[0]
+> -	}
+> -
+> -	bg_offset=get_extent_offset(bg_line)
+> -	bgend=bg_offset + get_extent_size(bg_line)
+> -
+> -	for (i in lines) {
+> -			cur_size = get_extent_size(lines[i])
+> -			cur_offset = get_extent_offset(lines[i])
+> -			if (cur_offset  != prev_offset + prev_size)
+> -				print int((prev_size + prev_offset) / sectorsize), int((cur_offset-1) / sectorsize)
+> -			prev_size = cur_size
+> -			prev_offset = cur_offset
+> -	}
+> -
+> -	print int((prev_size + prev_offset) / sectorsize), int((bgend-1) / sectorsize)
+> -	total_printed++
+> -	delete lines
+> -}
+> -
+> -BEGIN {
+> -	loi_match="^.item [0-9]* key \\([0-9]* (BLOCK_GROUP_ITEM|METADATA_ITEM|EXTENT_ITEM) [0-9]*\\).*"
+> -	metadata_match="^.item [0-9]* key \\([0-9]* METADATA_ITEM [0-9]*\\).*"
+> -	data_match="^.item [0-9]* key \\([0-9]* EXTENT_ITEM [0-9]*\\).*"
+> -	bg_match="^.item [0-9]* key \\([0-9]* BLOCK_GROUP_ITEM [0-9]*\\).*"
+> -	node_match="^node.*$"
+> -	leaf_match="^leaf [0-9]* flags"
+> -	line_count=0
+> -	total_printed=0
+> -	skip_lines=0
+> -}
+> -
+> -{
+> -	# skip lines not belonging to a leaf
+> -	if (match($0, node_match)) {
+> -		skip_lines=1
+> -	} else if (match($0, leaf_match)) {
+> -		skip_lines=0
+> -	}
+> -
+> -	if (!match($0, loi_match) || skip_lines == 1) next;
+> -
+> -	# we have a line of interest, we need to parse it. First check if there is
+> -	# anything in the array
+> -	if (line_count==0) {
+> -		lines[line_count++]=$0;
+> -	} else {
+> -		prev_line=lines[line_count-1]
+> -		split(prev_line, prev_line_fields)
+> -		prev_objectid=prev_line_fields[4]
+> -		objectid=$4
+> -
+> -		if (objectid == prev_objectid && match($0, bg_match)) {
+> -			if (total_printed>0) {
+> -				# We are adding a BG after we have added its first extent
+> -				# previously, consider this a record ending event and just print
+> -				# the array
+> -
+> -				delete lines[line_count-1]
+> -				print_array()
+> -				# we now start a new array with current and previous lines
+> -				line_count=0
+> -				lines[line_count++]=prev_line
+> -				lines[line_count++]=$0
+> -			} else {
+> -				# first 2 added lines are EXTENT and BG that match, in this case
+> -				# just add them
+> -				lines[line_count++]=$0
+> -
+> -			}
+> -		} else if (match($0, bg_match)) {
+> -			# ordinary end of record
+> -			print_array()
+> -			line_count=0
+> -			lines[line_count++]=$0
+> -		} else {
+> -			lines[line_count++]=$0
+> -		}
+> -	}
+> -}
+> -
+> -END {
+> -	print_array()
+> -}
+> diff --git a/src/parse-free-space.py b/src/parse-free-space.py
+> new file mode 100755
+> index 00000000..3c761715
+> --- /dev/null
+> +++ b/src/parse-free-space.py
+> @@ -0,0 +1,122 @@
+> +#!/usr/bin/python3
+> +# SPDX-License-Identifier: GPL-2.0
+> +#
+> +# Parse block group and extent tree output to create a free sector list.
+> +#
+> +# Usage:
+> +#  ./parse-free-space -n <nodesize> -b <bg_dump> -e <extent_dump>
+> +#
+> +# nodesize:     The nodesize of the btrfs
+> +# bg_dump:      The tree dump file that contains block group items
+> +#               If block-group-tree feature is enabled, it's block group tree dump.
+> +#               Otherwise it's extent tree dump
+> +# extent_dump:  The tree dump file that contains extent items
+> +#               Just the extent tree dump, requires all tree block and data have
+> +#               corresponding extent/metadata item.
+> +#
+> +# The output is "%d %d", the first one is the sector number (in 512 byte) of the
+> +# free space, the second one is the last sector number of the free range.
+> +
+> +import getopt
+> +import sys
+> +import re
+> +
+> +bg_match = "^.item [0-9]* key \\([0-9]* BLOCK_GROUP_ITEM [0-9]*\\).*"
+> +metadata_match="^.item [0-9]* key \\([0-9]* METADATA_ITEM [0-9]*\\).*"
+> +data_match="^.item [0-9]* key \\([0-9]* EXTENT_ITEM [0-9]*\\).*"
+> +
+> +def parse_block_groups(file_path):
+> +    bg_list = []
+> +    with open(file_path, 'r') as bg_file:
+> +        for line in bg_file:
+> +            match = re.search(bg_match, line)
+> +            if match == None:
+> +                continue
+> +            start = match.group(0).split()[3][1:]
+> +            length = match.group(0).split()[5][:-1]
+> +            bg_list.append({'start': int(start), 'length': int(length)})
+> +    return sorted(bg_list, key=lambda d: d['start'])
+> +
+> +def parse_extents(file_path):
+> +    extent_list = []
+> +    with open(file_path, 'r') as bg_file:
+> +        for line in bg_file:
+> +            match = re.search(data_match, line)
+> +            if match:
+> +                start = match.group(0).split()[3][1:]
+> +                length = match.group(0).split()[5][:-1]
+> +                extent_list.append({'start': int(start), 'length': int(length)})
+> +                continue
+> +            match = re.search(metadata_match, line)
+> +            if match:
+> +                start = match.group(0).split()[3][1:]
+> +                length = nodesize
+> +                extent_list.append({'start': int(start), 'length': int(length)})
+> +                continue
+> +    return sorted(extent_list, key=lambda d: d['start'])
+> +
+> +def range_end(range):
+> +    return range['start'] + range['length']
+> +
+> +def calc_free_spaces(bg_list, extent_list):
+> +    free_list = []
+> +    bg_iter = iter(bg_list)
+> +    cur_bg = next(bg_iter)
+> +    prev_end = cur_bg['start']
+> +
+> +    for cur_extent in extent_list:
+> +        # Finished one bg, add the remaining free space.
+> +        while range_end(cur_bg) <= cur_extent['start']:
+> +            if range_end(cur_bg) > prev_end:
+> +                free_list.append({'start': prev_end,
+> +                                  'length': range_end(cur_bg) - prev_end})
+> +            cur_bg = next(bg_iter)
+> +            prev_end = cur_bg['start']
+> +
+> +        if prev_end < cur_extent['start']:
+> +            free_list.append({'start': prev_end,
+> +                              'length': cur_extent['start'] - prev_end})
+> +        prev_end = range_end(cur_extent)
+> +
+> +    # Handle the remaining part in the bg
+> +    if range_end(cur_bg) > prev_end:
+> +        free_list.append({'start': prev_end,
+> +                          'length': range_end(cur_bg) - prev_end})
+> +
+> +    # Handle the remaining empty bgs (if any)
+> +    for cur_bg in bg_iter:
+> +        free_list.append({'start': cur_bg['start'],
+> +                          'length': cur_bg['length']})
+> +
+> +
+> +    return free_list
+> +
+> +nodesize = 0
+> +sectorsize = 512
+> +bg_file_path = ''
+> +extent_file_path = ''
+> +
+> +opts, args = getopt.getopt(sys.argv[1:], 's:n:b:e:')
+> +for o, a in opts:
+> +    if o == '-n':
+> +        nodesize = int(a)
+> +    elif o == '-b':
+> +        bg_file_path = a
+> +    elif o == '-e':
+> +        extent_file_path = a
+> +    elif o == '-s':
+> +        sectorsize = int(a)
+> +
+> +if nodesize == 0 or sectorsize == 0:
+> +    print("require -n <nodesize> and -s <sectorsize>")
+> +    sys.exit(1)
+> +if not bg_file_path or not extent_file_path:
+> +    print("require -b <bg_file> and -e <extent_file>")
+> +    sys.exit(1)
+> +
+> +bg_list = parse_block_groups(bg_file_path)
+> +extent_list = parse_extents(extent_file_path)
+> +free_space_list = calc_free_spaces(bg_list, extent_list)
+> +for free_space in free_space_list:
+> +    print(free_space['start'] >> 9,
+> +          (range_end(free_space) >> 9) - 1)
+> diff --git a/tests/generic/746 b/tests/generic/746
+> index 6f02b1cc..4eb4252b 100755
+> --- a/tests/generic/746
+> +++ b/tests/generic/746
+> @@ -93,13 +93,23 @@ get_free_sectors()
+>  			| sed -n 's/nodesize\s*\(.*\)/\1/p')
+>  
+>  		# Get holes within block groups
+> -		$BTRFS_UTIL_PROG inspect-internal dump-tree -t extent $loop_dev \
+> -			| $AWK_PROG -v sectorsize=512 -v nodesize=$nodesize -f $here/src/parse-extent-tree.awk
+> +		$BTRFS_UTIL_PROG inspect-internal dump-tree -t extent $loop_dev >> $tmp/extent_dump
+> +		if $BTRFS_UTIL_PROG inspect-internal dump-super $loop_dev |\
+> +				grep -q "BLOCK_GROUP_TREE"; then
+> +			$BTRFS_UTIL_PROG inspect-internal dump-tree -t block-group $loop_dev \
+> +				>> $tmp/bg_dump
+> +		else
+> +			cp $tmp/extent_dump $tmp/bg_dump
+> +		fi
+> +		$PYTHON3_PROG $here/src/parse-free-space.py -n $nodesize -b $tmp/bg_dump \
+> +			-e $tmp/extent_dump >> $tmp/bg_free_space
+>  
+>  		# Get holes within unallocated space on disk
+>  		$BTRFS_UTIL_PROG inspect-internal dump-tree -t dev $loop_dev \
+> -			| $AWK_PROG -v sectorsize=512 -v devsize=$device_size -f $here/src/parse-dev-tree.awk
+> +			| $AWK_PROG -v sectorsize=512 -v devsize=$device_size \
+> +			  -f $here/src/parse-dev-tree.awk >> $tmp/unallocated
+>  
+> +		cat $tmp/bg_free_space $tmp/unallocated | sort
+>  	;;
+>  	esac
+>  }
+> @@ -157,7 +167,13 @@ merged_sectors="$tmp/merged_free_sectors"
+>  mkdir $loop_mnt
+>  
+>  [ "$FSTYP" = "xfs" ] && MKFS_OPTIONS="-f $MKFS_OPTIONS"
+> -[ "$FSTYP" = "btrfs" ] && MKFS_OPTIONS="$MKFS_OPTIONS -f -dsingle -msingle"
+> +if [ "$FSTYP" = "btrfs" ]; then
+> +	# Only SINGLE chunks have their logical address 1:1 mapped
+> +	# to physical addresses.
+> +	MKFS_OPTIONS="$MKFS_OPTIONS -f -dsingle -msingle"
+> +	_require_command $PYTHON3_PROG python3
+> +fi
+> +
+>  
+>  _mkfs_dev $loop_dev
+>  _mount $loop_dev $loop_mnt
 > -- 
-> 2.43.0
+> 2.51.2
+> 
 > 
 
