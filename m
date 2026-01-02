@@ -1,156 +1,287 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qv1-f53.google.com (mail-qv1-f53.google.com [209.85.219.53])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E51C727E054
-	for <fstests@vger.kernel.org>; Fri,  2 Jan 2026 15:43:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1FA6923B63C
+	for <fstests@vger.kernel.org>; Fri,  2 Jan 2026 20:44:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767368608; cv=none; b=pGLoEkrrYT+DqzV6R1bloPEAGFknQu4y/SEZclw2H7UpmEBI5LQA5CDKSpfktX1pdtw2wkeIhIi0Q0DNFa5ovloETOnjqLWIlBHXDS0Agu1pUoZdVwxstKaam5mcFabLO8jKPCOdCmC1tqf4KBdb1OplW5F2mGFvr1wDEtckiW8=
+	t=1767386656; cv=none; b=brYu+7H4WtMBQNhxa4XnsdkLAmVcpeS9cWmXxvmla1sLGHVRbJTnbsejW6PBivP2ET36MOw6L9a+cx1QIYWvOqu8xOW7ZwOibBAtulwaAvLbA34oWDXEoZtkKuif/QMqFLo8vsjiHYWSkfvQv0nqzNBmAr8q04ZktoAs0mgkn+c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767368608; c=relaxed/simple;
-	bh=2dwqUFew7od2MeYUd4pMaUJl/7Uypsvp58tk38X2xak=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KOWRZi/LLo6fcEk8w7lPz41ElKshDlmX+lHvmmmDtJGeOeEYivmkJ503LhW8garTNrmpm2rmnYw3Cp4ZR+4ocvwYrL7mddlLMxEEcTfw+NK7bc9ql6Xc9tRa5SgZ9cpEBz87AQpQ0dYhOdRGAkE72cB4hMNN7FCITH6e+27sj0s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=G4q6iuCR; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=tsfuS1bo; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1767386656; c=relaxed/simple;
+	bh=DN8IjB586EVNXNlTGeznxFJKVLvMAjfgJru+Q/lYq58=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=erkTiFqY/px5eBbzj5wZOxjT3JnpIs3tXsSPkzhkUw4wyG4AcHPuOhpgNWG8RNkaRpTZAhaSTK2cyVYeqdqDzebtdO+PJzNoQkC8k8cP7475/ABZhNIeZhOGvpqveVyCgEyUvWZ+1LNUsTCoK+m5cR2AhDWrN2XGSNo5a4R5v3E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=a8zzPz6M; arc=none smtp.client-ip=209.85.219.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="G4q6iuCR";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="tsfuS1bo"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1767368603;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=ubwpuamFY2AQrzeCL3bViI7nLkU6HgXAqKdT43+8US8=;
-	b=G4q6iuCRtXskn6TXV0cmShZXU9VsMq3ynG0F3DcyjoWdSALBUREbLC5IXYJtmKpoJthH4U
-	N0L88wb5xFJjbdsT7PYjTgqc4vMraBSGcNZTrytMg2Fn6KZJsJXFpkMQD7ETKVQUeMdrHA
-	XGQxUaYGVmaVMV7ksCgHi4C+3WYelRo=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-159-Xr_T6wrEMSG1s80T_t3WEg-1; Fri, 02 Jan 2026 10:43:22 -0500
-X-MC-Unique: Xr_T6wrEMSG1s80T_t3WEg-1
-X-Mimecast-MFC-AGG-ID: Xr_T6wrEMSG1s80T_t3WEg_1767368602
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-2a0dabc192eso280233995ad.0
-        for <fstests@vger.kernel.org>; Fri, 02 Jan 2026 07:43:22 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="a8zzPz6M"
+Received: by mail-qv1-f53.google.com with SMTP id 6a1803df08f44-890228ed342so50860086d6.2
+        for <fstests@vger.kernel.org>; Fri, 02 Jan 2026 12:44:14 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1767368602; x=1767973402; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=ubwpuamFY2AQrzeCL3bViI7nLkU6HgXAqKdT43+8US8=;
-        b=tsfuS1bonYV+ulYxe4cFsuH9z1b85Kkb0Ro6vqGfLUkFWfBZwQq6c7z8ZBGah951Qp
-         5wjm5xelXbow58BfiomC42jDoXJ+Lp69BY8Ipx4DZI2QAjboDK8TxuLbbPJzX0R0LLNW
-         bzpRZYLYpLpV21LbqV/m81Zl1fH7wG8ZoPvEeLrhGXqIf4O+SO7+xfa3O6q3D/MA9+HS
-         3uRZB5cWupTlVtcq6wX1ukqr00YIWjXT/ng3wkuslLRQ3/DbH1AQD9d+daVQ1lSmUD0I
-         nLvhn9Zn1N/UUZ41ayNShdepAf2RHwhglhCulJ+WZJVyGEuOO8SsGLlxv5f17GjGgtlZ
-         9QMA==
+        d=gmail.com; s=20230601; t=1767386654; x=1767991454; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=bqIcSVd+xoY8ASEy3GsyEpFUXlpbXJ2Up2WLEeLSjok=;
+        b=a8zzPz6MZ12FCIL7aj7UwPHRDy2nRUhdXIeIeegh/C4GQtbSny/YFd66rM+/kI/KNq
+         e9IbFkZNGll6Bbxy7F+SjmMLKuperWbkkb5FLiALQAAuQf+K7Kx/a7oMeCFtvxmhTxR3
+         Z8/HP3ldvXKiOGJkf0LvIIQiTH6VeyqDLsOlDap4KBxFZ2qmjqIIUV0Yu6aJjYupoFFj
+         n7+OnRcg6IHchN4WzIKcAYdoWk01g9kznEvGbc0iyXlpTq6oPe2/C9prO3fGmjtzFN9P
+         SiWFtHszdzoWc+6dZfft0X2iRHfgORtf4ByGskDYv6bJTHzj5Y/HcLmZT61w9Ndc8wU3
+         2G2A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767368602; x=1767973402;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ubwpuamFY2AQrzeCL3bViI7nLkU6HgXAqKdT43+8US8=;
-        b=JfIveRi4OiaMm24mK8yHw0+4FE/BrYjPG0RICCC/xKxI0hcSsMSGxR1cwKaa7nZK5F
-         LeatGJ2YYY3vRiEA3vL2FR5qQf+vWthPty8tTA8+3u/HIxLkG7lIAnZs/NboJSO40dWd
-         NIFT2u/0eaLebw7U4l0J3MsfB4Ofijn3IN7YNY52VkVUIUkjCCylUIP7JMCNMYsexu2G
-         TjA4sEF7s2gWAaf4KiUOFSubZ3xcN1OiA8KEkujDgDBWHrfX4og0mI5GetU8TOh9AcCC
-         GRvJqGA2h6LBd05mAFJDhfnQctvP/ZaJjDjwIlvOQuYwn4d2d0a3kjGdF1z7cASikQAn
-         x+cQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVvkP6+ZWc9lNixDG2uMqSZ2Ltpp8Q3/rWbjvP1a4m1Xo4n7JRwWFLnM4sWH3DtYxfyyBD66myd@vger.kernel.org
-X-Gm-Message-State: AOJu0YxBwsVwbIEqTsddcJz+G+plktoNWimqprXuFWW8/2WOG1ouQ+78
-	0oXsCjhkSVjU7A+P/roFWdzUK2wdfFq9TpHtCCTdJefOGgjFu5p42piRh2jQVe4+TdBbHAtxeQX
-	Z6ZIK+A0rDJaUKKu6nPM5A4UQPh+xeRxUIakuleY5AGDJHtmNWb3US71usqE=
-X-Gm-Gg: AY/fxX6q41aXQxQWhWC46yqtwVaIhG92EhwtYMO1K4OKjRdSD6adkaKWvxGLoAdnyFL
-	lYSNAbEJ04Z3YLYbwiZqUEdYHcuEEViP0wcDYYSi3sacEIwE5HYVjqIIwzpMcsOOdzeTNsjahQr
-	mKLHpOfJLSvFvYMQ7zIqpQYHUyOoh4GHPH+LvOUi1v9uBR0/8OXIVWmaZW7kgXN3LDdAV3OPTKt
-	MuikFbk4EGmzh3kRtIIRW9HnkmdK4F8e3AF77IKGNRVqFiJOkDta5DHCumForm6gX9cqxB5Hame
-	DXumKJTn80hq00apUGertKLPLZTO/8iXDxnYdaf2CJehRs+ltS4xivgE6HNJlzh3lbDsCuJHse1
-	LVr3WZ28D2LwX7PTZFRQlyDpn3ebEz+zMGjYF6jdNBmqDU85XDA==
-X-Received: by 2002:a17:902:ecc8:b0:2a0:f0db:690e with SMTP id d9443c01a7336-2a2f293b522mr444812225ad.52.1767368601628;
-        Fri, 02 Jan 2026 07:43:21 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IF0OCIb2Th3sRmo68pWOrOUpG3BBs23phZVPVnW42Vu89iwm2I8ZmIncZdMhhMDBnxhtTgAkA==
-X-Received: by 2002:a17:902:ecc8:b0:2a0:f0db:690e with SMTP id d9443c01a7336-2a2f293b522mr444812015ad.52.1767368601080;
-        Fri, 02 Jan 2026 07:43:21 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c1e79e05712sm35655650a12.14.2026.01.02.07.43.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 02 Jan 2026 07:43:20 -0800 (PST)
-Date: Fri, 2 Jan 2026 23:43:15 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Carlos Maiolino <cem@kernel.org>
-Cc: zlang@kernel.org, linux-xfs@vger.kernel.org, djwong@kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] punch-alternating: prevent punching all extents
-Message-ID: <20260102154315.nfh5kdiz7b5cuswq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20251221102500.37388-1-cem@kernel.org>
- <20251231184618.qpl2d32gth4ajcsp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <aVfHvxvMVbS7phq_@nidhogg.toxiclabs.cc>
+        d=1e100.net; s=20230601; t=1767386654; x=1767991454;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=bqIcSVd+xoY8ASEy3GsyEpFUXlpbXJ2Up2WLEeLSjok=;
+        b=mFi0pDINYM8S7o4I1X8SugdIpEdRwV+soCZNAa+Av6yGJnzKbxLo/u9r3eqLAGWcaA
+         5Rwldg83hulEGw5Lzom7DEAv2W8GGZiFqabXgTWm8y2s7Ka8Kqq0DBS8YSIFVdj/QNIa
+         hHHjOhrv7em+uRsehyLW17EtaK5DGXxD3pBpESrTbU5OviRwtoxmD1GqG3HEs6KdXqvb
+         iS0wLtGn9J3FJur4tUUC43PqfRne7J/hGWUo5BNmUAVscaZue9HiNwtWL85D0fs31nPR
+         hC3sLuLRM5M/7xVmzTZL95spAq551fV2Vi35kmXHYgruAi5NgcXdN2AqFqYWadP6NhMq
+         ST1g==
+X-Forwarded-Encrypted: i=1; AJvYcCVqqeAPEV0qBK8Qs+rGtIZz3wwZry/o2JNrjX7WyC3+Vhasj6cJP7h+5YI/LPpdnDm6xOObpIKD@vger.kernel.org
+X-Gm-Message-State: AOJu0YyCsr60uIjbcpsnsZFfkJIFKPBNaKBIXp2v4AMOx1/oIKsqfq4B
+	8Hlzvh9RrqHxxg23dvg6UYt5vEjkr8m/RNJ0FiG425kxauDU3j7AOI20Weaipysrj3Nx4uOKO8Q
+	0kLl4Vhib5eVSoPVihuprIpEpnQOP8ns=
+X-Gm-Gg: AY/fxX5AArzSvlaQxptU+SQP4tSSwE9Swh44PmW+aMeHzGLVngvxmzsoAvVTSAOW/C7
+	FpY8QgF58Jt5E918kPKgXXlJaoQLlAsCNnS4EobJ61Qdn8YG1lqSdQEX3gKNcB0+EWgGh28TQ4e
+	90dZWJKUjdWS8YAJLNeEUncw5mpjNK1a7FPZm8Qx7eBNmylJJ2IHZXUmRcWwvuWTaVY9edBv+k0
+	0XqtosTg/p+eVbXRRI9HzrAz6nUu3opZqadh28NkTq5HBiwu75uyP8uAxj7ZObwITF1TkVXOFok
+	XCNGrKo5WquyqG4U0mvZbO/pNcNtemNxaQZeduwNh5axgcxrFzejLAXPDE21JBzYiDe9Mdu5F4N
+	+MmS1uIdFZTKqhZay8ErAqbCkvi7A6psMfuE3/vqh9vcy8yCEHNw7l/LnTHonwS7RXTh/i4vGIG
+	n8xUdeuv4AeD0n2dVqL2dv
+X-Google-Smtp-Source: AGHT+IFcCyp7/KVwj6mTT5eQu26PGAZ4uUXIseM49f/qqY0nDily3Xo3tbaEku9n9QdLnQtc/h8QOlnvxzmWAM6GepM=
+X-Received: by 2002:ad4:530b:0:b0:882:4a63:63a7 with SMTP id
+ 6a1803df08f44-88d8442ff3bmr465632166d6.60.1767386653810; Fri, 02 Jan 2026
+ 12:44:13 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aVfHvxvMVbS7phq_@nidhogg.toxiclabs.cc>
+References: <CAH2r5muo2jWVkqAwnT-NNPpYeA9P6WHq6Jic-g6r3NM3-+eq2Q@mail.gmail.com>
+ <20251231184053.taidcweyhrwxleeu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAH2r5mvoeCj8h5nQQm82TSy9MA6yJ1UYVPCRPPFV+BJBYaY_oA@mail.gmail.com>
+ <CAH2r5mtr=q3H2hDj5mrOjM5jM5zvSHN0OEQ3MYEt5a3J8wkYHg@mail.gmail.com>
+ <CAH2r5mvq4hKkyRx37gb21QmHBuGjDB5YcUd=YW5jTkk6+X5YMA@mail.gmail.com> <20251231194112.aapst4mb6pwgsarz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20251231194112.aapst4mb6pwgsarz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Steve French <smfrench@gmail.com>
+Date: Fri, 2 Jan 2026 14:43:58 -0600
+X-Gm-Features: AQt7F2ofJLebUnhPiQhwucCKJxt6h-5ABI5lnHiaKEgQ8nWHlpgZdY7yXEzi_Fk
+Message-ID: <CAH2r5muXzz70Bq=20gby=U8w4+cX0n6O5TaBEina=wAbGWN3HA@mail.gmail.com>
+Subject: Re: upper vs. lower case hexdump vs od on current Ubuntu causes
+ generic/029, 030 and 031 to fail
+To: Zorro Lang <zlang@redhat.com>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org, 
+	Paulo Alcantara <pc@manguebit.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, Jan 02, 2026 at 02:36:01PM +0100, Carlos Maiolino wrote:
-> On Thu, Jan 01, 2026 at 02:46:18AM +0800, Zorro Lang wrote:
-> > On Sun, Dec 21, 2025 at 11:24:50AM +0100, cem@kernel.org wrote:
-> > > From: Carlos Maiolino <cem@kernel.org>
-> > > 
-> > > If by any chance the punch size is >= the interval, we end up punching
-> > > everything, zeroing out the file.
-> > > 
-> > > As this is not a tool to dealloc the whole file, so force the user to
-> > > pass a configuration that won't cause it to happen.
-> > > 
-> > > Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
-> > > Signed-off-by: Carlos Maiolino <cem@kernel.org>
-> > > ---
-> > >  src/punch-alternating.c | 5 +++++
-> > >  1 file changed, 5 insertions(+)
-> > > 
-> > > diff --git a/src/punch-alternating.c b/src/punch-alternating.c
-> > > index d2bb4b6a2276..c555b48d8591 100644
-> > > --- a/src/punch-alternating.c
-> > > +++ b/src/punch-alternating.c
-> > > @@ -88,6 +88,11 @@ int main(int argc, char *argv[])
-> > >  		usage(argv[0]);
-> > >  	}
-> > >  
-> > > +	if (size >= interval) {
-> > > +		printf("Interval must be > size\n");
-> > > +		usage(argv[0]);
-> > > +	}
-> > 
-> > OK, I don't mind adding this checking. May I ask which test case hit this
-> > "size >= interval" issue when you ran your test?
-> 
-> None. I was just using the program to test some other stuff without any
-> specific test.
+I could repro the problem by running od command the same way that
+_hexdump() in fstests calls, and I did confirm that on current Ubuntu
+you can workaround it by doing:
 
-Sure, good to know there's not other issues :) This program is a good tool to
-do some other tests, especially creates lots of data extents effectively :)
-I've pushed this patch to patches-in-queue branch, will merge it in next
-release after testing, feel free to check it.
+"sudo apt-get remove coreutils-from-uutils --allow-remove-essential"
+(which auto-installs gnu utils after uutils are deleted)
 
+On Wed, Dec 31, 2025 at 1:41=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote=
+:
+>
+> On Wed, Dec 31, 2025 at 01:10:15PM -0600, Steve French wrote:
+> > But it does show gnu coreutils installed ... "gnu-coreutils is already
+> > the newest version (9.5-1ubuntu4)."
+> >
+> > On Wed, Dec 31, 2025 at 1:09=E2=80=AFPM Steve French <smfrench@gmail.co=
+m> wrote:
+> > >
+> > > but I guess they are different packages that include 'od' now.   Was
+> > > "GNU coreutils" now is in 'uutils coreutils' package
+>
+> Anyway, I think you'd better to make sure if it's an expected behavior (o=
+utput
+> format) change of latest gnu od command at first. If it's, we need a filt=
+er.
+> If not, this might be a bug (default behavior change).
+>
+> Thanks,
+> Zorro
+>
+> > >
+> > > On Wed, Dec 31, 2025 at 1:05=E2=80=AFPM Steve French <smfrench@gmail.=
+com> wrote:
+> > > >
+> > > > Very strange - it shows version 0.2.2 (while the working one shows =
+version 9.4)
+> > > >
+> > > > smfrench@smfrench-ThinkPad-P16s-Gen-2:~$ od --version
+> > > > od (uutils coreutils) 0.2.2
+> > > > smfrench@smfrench-ThinkPad-P16s-Gen-2:~$ cat /etc/*release*
+> > > > DISTRIB_ID=3DUbuntu
+> > > > DISTRIB_RELEASE=3D25.10
+> > > > DISTRIB_CODENAME=3Dquesting
+> > > > DISTRIB_DESCRIPTION=3D"Ubuntu 25.10"
+> > > > PRETTY_NAME=3D"Ubuntu 25.10"
+> > > > NAME=3D"Ubuntu"
+> > > > VERSION_ID=3D"25.10"
+> > > > VERSION=3D"25.10 (Questing Quokka)"
+> > > >
+> > > > On Wed, Dec 31, 2025 at 12:41=E2=80=AFPM Zorro Lang <zlang@redhat.c=
+om> wrote:
+> > > > >
+> > > > > On Mon, Dec 22, 2025 at 06:33:41PM -0600, Steve French wrote:
+> > > > > > I noticed that tests generic/029 and generic/030 and generic/03=
+1 now
+> > > > > > fail on current Ubuntu (Ubuntu 25.10) due to a upper vs. lower =
+case
+> > > > > > issue in dumping test output (hexdump/od). This is testing with
+> > > > > > 6.19-rc2 but it looks like a change to hexdump or od that likel=
+y broke
+> > > > > > this.  Any ideas?
+> > > > > >
+> > > > > > See e.g.
+> > > > > >
+> > > > > > generic/029  0s ... - output mismatch (see
+> > > > > > /home/smfrench/xfstests-dev/results//samba/generic/029.out.bad)
+> > > > > >     --- tests/generic/029.out   2025-08-22 09:54:32.256748004 -=
+0500
+> > > > > >     +++ /home/smfrench/xfstests-dev/results//samba/generic/029.=
+out.bad
+> > > > > >  2025-12-19 18:25:13.562003626 -0600
+> > > > > >     @@ -42,10 +42,10 @@
+> > > > > >      000600 57 57 58 58 58 58 58 58 58 58 58 58 58 58 58 58  >W=
+WXXXXXXXXXXXXXX<
+> > > > > >      000610 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58  >X=
+XXXXXXXXXXXXXXX<
+> > > > > >      *
+> > > > > >     -0007f0 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58 59  >X=
+XXXXXXXXXXXXXXY<
+> > > > > >     +0007F0 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58 59  >X=
+XXXXXXXXXXXXXXY<
+> > > > >
+> > > > > Hi Steve,
+> > > > >
+> > > > > Sorry for this late reply, I just backed from holiday.
+> > > > >
+> > > > > What's the version of your "od" command in Ubuntu 25.10 ? e.g.
+> > > > >   # od --version
+> > > > >   od (GNU coreutils) 9.9
+> > > > >
+> > > > >
+> > > > > The hexdump output is from the common/rc:_hexdump() helper, it ac=
+tually runs
+> > > > > "od -Ax -t x1z ..." command. If the output format of latest "od" =
+command is
+> > > > > changed, we used to use a *filter* to help the output to be compa=
+tible.
+> > > > > For example:
+> > > > >
+> > > > >   _hexdump()
+> > > > >   {
+> > > > >         od -Ax -t x1z ... | awk '{$1=3Dtolower($1);print}'
+> > > > >   }
+> > > > >
+> > > > > If you have a better idea to do that with a simple 'sed' command =
+line, that
+> > > > > would be better.
+> > > > >
+> > > > > Thanks,
+> > > > > Zorro
+> > > > >
+> > > > >
+> > > > > >      000800 59 59 59 59 59 59 59 59 59 59 59 59 59 59 59 59  >Y=
+YYYYYYYYYYYYYYY<
+> > > > > >
+> > > > > > and
+> > > > > >
+> > > > > >      80 generic/030  0s ... - output mismatch (see
+> > > > > > /home/smfrench/xfstests-dev/results//samba/generic/030.out.bad)
+> > > > > >      81     --- tests/generic/030.out   2025-08-22 09:54:32.257=
+748640 -0500
+> > > > > >      82     +++
+> > > > > > /home/smfrench/xfstests-dev/results//samba/generic/030.out.bad
+> > > > > > 2025-12-19 18:25:14.073196575 -0600
+> > > > > >      83     @@ -4,50 +4,50 @@
+> > > > > >      84      =3D=3D=3D=3D Pre-Remount =3D=3D=3D
+> > > > > >      85      000000 58 58 58 58 58 58 58 58 58 58 58 58 58 58 5=
+8 58
+> > > > > > >XXXXXXXXXXXXXXXX<
+> > > > > >      86      *
+> > > > > >      87     -4e6400 59 59 59 59 59 59 59 59 59 59 59 59 59 59 5=
+9 59
+> > > > > > >YYYYYYYYYYYYYYYY<
+> > > > > >      88     +4E6400 59 59 59 59 59 59 59 59 59 59 59 59 59 59 5=
+9 59
+> > > > > > >YYYYYYYYYYYYYYYY<
+> > > > > >      89      *
+> > > > > >      90     -4e7000
+> > > > > >      91     ...
+> > > > > >      92     (Run 'diff -u
+> > > > > > /home/smfrench/xfstests-dev/tests/generic/030.out
+> > > > > > /home/smfrench/xfstests-dev/results//samba/generic/030.out.bad'=
+  to
+> > > > > > see the entire diff)
+> > > > > >      93 generic/031  1s ... - output mismatch (see
+> > > > > > /home/smfrench/xfstests-dev/results//samba/generic/031.out.bad)
+> > > > > >      94     --- tests/generic/031.out   2025-08-22 09:54:32.257=
+748640 -0500
+> > > > > >      95     +++
+> > > > > > /home/smfrench/xfstests-dev/results//samba/generic/031.out.bad
+> > > > > > 2025-12-19 18:25:14.411496471 -0600
+> > > > > >      96     @@ -6,14 +6,14 @@
+> > > > > >      97      =3D=3D=3D=3D Pre-Remount =3D=3D=3D
+> > > > > >      98      000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0=
+0 00
+> > > > > > >................<
+> > > > > >      99      *
+> > > > > >     100     -01f860 00 00 00 00 00 00 00 00 00 00 00 00 cd cd c=
+d cd
+> > > > > > >................<
+> > > > > >     101     -01f870 cd cd cd cd cd cd cd cd cd cd cd cd cd cd c=
+d cd
+> > > > > > >................<
+> > > > > >     102     +01F860 00 00 00 00 00 00 00 00 00 00 00 00 cd cd c=
+d cd
+> > > > > > >................<
+> > > > > >     103     +01F870 cd cd cd cd cd cd cd cd cd cd cd cd cd cd c=
+d cd
+> > > > > > >................<
+> > > > > >
+> > > > > >
+> > > > > > --
+> > > > > > Thanks,
+> > > > > >
+> > > > > > Steve
+> > > > > >
+> > > > >
+> > > >
+> > > >
+> > > > --
+> > > > Thanks,
+> > > >
+> > > > Steve
+> > >
+> > >
+> > >
+> > > --
+> > > Thanks,
+> > >
+> > > Steve
+> >
+> >
+> >
+> > --
+> > Thanks,
+> >
+> > Steve
+> >
+>
+
+
+--=20
 Thanks,
-Zorro
 
-> 
-> > 
-> > Reviewed-by: Zorro Lang <zlang@redhat.com>
-> > 
-> > > +
-> > >  	if (optind != argc - 1)
-> > >  		usage(argv[0]);
-> > >  
-> > > -- 
-> > > 2.52.0
-> > > 
-> > 
-> 
-
+Steve
