@@ -1,114 +1,61 @@
-Received: from mail-wr1-f47.google.com (mail-wr1-f47.google.com [209.85.221.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7735B2749DF
-	for <fstests@vger.kernel.org>; Sun,  4 Jan 2026 10:28:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26D2D219A8A
+	for <fstests@vger.kernel.org>; Sun,  4 Jan 2026 14:42:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767522510; cv=none; b=P9BThJTjnU+juV9peMHpIhuKaEGgsKI7Zy2f9rXAl6DpVkVvsWolTw5UCDiA65ro8CEMtAYyXTv146oIrO7n7QmbrQZoouvcuETamcwnnxeMRRCAKTcClde7+RflHLFBFvA6cY55x1dw/qwgf2XVLBH2ecMh8tX+oBK28D7neG0=
+	t=1767537771; cv=none; b=ogYbP5oauwt3plAakfdbec2bDjjyds2Wc1Ee7kiISiCZtewwluW3MG/XUHAaGOXMd15i9VsS6EYSNu2byjoUAzSy2hyrITytH2tsL32khT1SpJm6bSBnaoDQBIWMSdfSe7/OB7ewIE2HycBYk71h5Q/KaoBM6h3c/KIJyt3rNI0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767522510; c=relaxed/simple;
-	bh=mPf64OuzXEc3KkRuMa9elOZgsUxIXGY07NDrBM4XyIg=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=GHThO+p2vsgETlcZQU2dXupUTn9BbiQwy+RfsblUw+QM5zZ9rw5C0pYg42tjg9a8Zi1174ZDfCjZfvpVKBHLbTQc2BuzNoqNrr0XNYqWmLvWxApBmheH4yjypeBRFvAo5f0rVY4ZBfE+wIFBVy+xjEVxdAq9ViG2jEKMlCmzTKc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ncO3PWcn; arc=none smtp.client-ip=209.85.221.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1767537771; c=relaxed/simple;
+	bh=qLh7a2fNEbatp51SHeXp1DxBMO4onwIeinZHCMPacSY=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=L4wMSTaQghsRnM2kqab4qY2HIzmChe+XcrghAVyMsSvGgTgZzynTJHwpZ5D041xYV0SA9GakmcgOR7sgYQLo07z4zc6Nm7j8M1Aw2u2caFf4VCcbKzcEnwNenU2ubiQNxvcfxSH2QN9MCBwgmj8cBOcHOcUojx2feWQT6dULrqE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Kqzerijv; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ncO3PWcn"
-Received: by mail-wr1-f47.google.com with SMTP id ffacd0b85a97d-42fb5810d39so8626869f8f.2
-        for <fstests@vger.kernel.org>; Sun, 04 Jan 2026 02:28:28 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1767522506; x=1768127306; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=ioZCmMCvfxYbOEz6+YktSjMUFBQeEXYc6gF1BxofAfY=;
-        b=ncO3PWcnws30XZq4GPBHJA0Cyj1hH6kEjJ9QErmBhIjWOgyTOM9qcNdxHjjBNLh6hQ
-         sfpEdOYZSN9Ud5i/prdzIJFkH8H9gsmbcL8D7ndA053EydFOlkHFbiACbkqfsCXSAOJE
-         vMfV8OlaH6aZmBBaqwHTskhJkADoDbmg0LuHvyFEp9XnkDWCyLJBQlGnPvW7hIKAbEIS
-         SmRAK7nnsQID5xOs+G8msG+dp15RTQUEKLcKIx3WU3kEGAQOSd5V4vyzqEuDna4FFqTK
-         Hym5DbD1eZfPuIf5gogPp+UmyAXVdavcvozFbFpRHjtvY3LVkzfS8Utkx520pYKUDFQk
-         YX5A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767522506; x=1768127306;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ioZCmMCvfxYbOEz6+YktSjMUFBQeEXYc6gF1BxofAfY=;
-        b=M1gERmGeXxzWQYuzG6s965xqPte9WQKURlR5SRoE0xh3GgO864kovd0UpTK7D+QdlB
-         50VMJ9Q1Hfgotf6EIWecs2yGgPbYrnRbzt9yAJAv78yBiflUqhvcsPIUbew1fWGpFY+L
-         d0rp+hPBq54g4l58LHqp/dlCz2CxN2OdFRwyQeZBobhp2U3QtgedD1mazb9c3zNPXkDP
-         xkPcKQOK0cnmrJqMKiQsEUL/z6P+Ua1kBlvZhImTLs6w4zXV/k4EHVgDKXK6578TzLhJ
-         L/2Czv346ogmEovwJa+zYjZut3/c8Ck6E9uTqKtjizvfh5ZwDQKiMnEHx3NHF+aSYn7D
-         Qkdg==
-X-Gm-Message-State: AOJu0YyNTiTvIygPM9y/OMq4kvaosjpbzU3fyQbfR9OIJgGrm50/RxWd
-	bTimuwudKAJOMt4pFIUeLl2WLiz7gRte+Tp80lOAoOv67cpTEtndBC0dKWG3lQ==
-X-Gm-Gg: AY/fxX6nOwIRUXp24GE3o/17hfOeKL0+osP8GPuX9AssriGkdR0sTlptPY6+JSJf0M8
-	EpiXSNIH1qWVlh1DXy9CpSZUTX0KtlQmox+QyYPWl0y3kHUnyE9opqOo02k+muVZjQwZBqdHl2Q
-	rpg+VKQWoMeD5F6tPp9byFLqrKcL9Rakrp9u0jaoEjPLL2oiwG8zjmaJEI3Oe+610BjspbkW8vP
-	y3X1ZH5/508bqoOti1SufYp/bUz3fopV5A/IFtzjVr2+G9VAC0oZ5NzaUHGWfmWDtfcrSVfAQRa
-	1nKmTokv0eJpm1gW5KGTDCyuclELlCyUlk2jvUc7gBC/1vxZDCdFbY6MRr30Q43zfe0zxClB07K
-	/ia06MX1H0owg0XAldtJFTx9w0oCwky/t9llCfCNDCcUv2Whm67lobozHMJ3nhA+S5/0OD3yRcL
-	7gxldEGCgttPHM85fMnp3Gq6P2Wk3oVzLxe7+3XgGOW3+zTnuLlwXEb6unETjRk8kZzwXhNAw0C
-	WsI
-X-Google-Smtp-Source: AGHT+IEKlqqsGQn6+FD9RYm/T8f49WT3+xuMgJG+i3M5ZhjWM6jKbozobn2yNWI6pBx66irr3du+Rw==
-X-Received: by 2002:a05:6000:2285:b0:430:fafd:f1d2 with SMTP id ffacd0b85a97d-4324e4c6848mr65679831f8f.11.1767522506509;
-        Sun, 04 Jan 2026 02:28:26 -0800 (PST)
-Received: from shaharhoch-lin.roam.corp.google.com ([46.121.134.232])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4324eab2c4fsm94578203f8f.42.2026.01.04.02.28.25
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 04 Jan 2026 02:28:26 -0800 (PST)
-From: Shahar Hochma <shaharhoch@gmail.com>
-To: fstests@vger.kernel.org
-Cc: Shahar Hochma <shaharhoch@gmail.com>
-Subject: [PATCH] t_readdir_3: Allow EOF on ignore_error
-Date: Sun,  4 Jan 2026 12:28:16 +0200
-Message-ID: <20260104102816.1542861-1-shaharhoch@gmail.com>
-X-Mailer: git-send-email 2.52.0.351.gbe84eed79e-goog
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Kqzerijv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2F4BAC4CEF7;
+	Sun,  4 Jan 2026 14:42:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1767537770;
+	bh=qLh7a2fNEbatp51SHeXp1DxBMO4onwIeinZHCMPacSY=;
+	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
+	b=KqzerijvOqYgGRe9eC4ccQ/LSA5ayJm0QlP+gcpnScS0uf4rWnqsOcGbIzWVG65BM
+	 xIa59gy2aFExXvSwaOfVO1u5gaamgOgmym6qWn8pQM3HMVoIK6T86d8zAOHl2ro6YC
+	 7mW6WPxPKAQYVsdPd8u4RgCnWoFX6bE5OKsoQPYuZtw7cyz1ssfFxus5VLY0RfkUPi
+	 2Kc1XJyRchgnBuZPv/2n3J0uvaQOSIrZJR8FqXWIOTFxwtTNNl9gI3YU7BuxR67wGR
+	 CigyXPmH5U6jAzEupdvy/3vIvS8O5cMhGfTh7RzSe7uy/8BqcnNGFIBzgrD85/XlBw
+	 d1Y60CvpVlD/w==
+Message-ID: <5b348fba-6b32-420b-a0ff-65c5d368d1a1@kernel.org>
+Date: Sun, 4 Jan 2026 22:42:29 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Cc: chao@kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>,
+ linux-f2fs-devel@lists.sourceforge.net, Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH v2] common/rc: add _require_blocks_in_file helper
+To: Joanne Chang <joannechien@google.com>, Zorro Lang <zlang@kernel.org>,
+ fstests@vger.kernel.org
+References: <20251229023145.1806877-1-joannechien@google.com>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <20251229023145.1806877-1-joannechien@google.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-ignore_error is used when providing random input to setpos.
-This can, by chance, produce a valid response from readdir,
-but with EOF. In which case, we don't want the test to fail.
+On 12/29/2025 10:31 AM, Joanne Chang wrote:
+> generic/735 attempts to create a file with nearly 2^32 blocks. However,
+> some filesystems have a maximum file block limit below this threshold.
+> For instance, F2FS is limited to approximately 2^30 blocks due to the
+> capacity of the inode. So add _require_blocks_in_file helper to skip the
+> test in such cases.
+> 
+> Signed-off-by: Joanne Chang <joannechien@google.com>
 
-Signed-off-by: Shahar Hochma <shaharhoch@gmail.com>
----
- src/t_readdir_3.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+Reviewed-by: Chao Yu <chao@kernel.org>
 
-diff --git a/src/t_readdir_3.c b/src/t_readdir_3.c
-index 8f9bb326..5d7afddc 100644
---- a/src/t_readdir_3.c
-+++ b/src/t_readdir_3.c
-@@ -52,12 +52,12 @@ static void libc_getentry(struct dirent *entry)
- 	errno = 0;
- 	ret = readdir(dir);
- 	if (!ret) {
-+		if (ignore_error)
-+			return;
- 		if (errno == 0) {
- 			fprintf(stderr, "Unexpected EOF while reading dir.\n");
- 			exit(1);
- 		}
--		if (ignore_error)
--			return;
- 		perror("readdir");
- 		exit(1);
- 	}
-@@ -92,6 +92,8 @@ static void kernel_getentry(struct dirent *entry)
- 		exit(1);
- 	}
- 	if (ret == 0) {
-+		if (ignore_error)
-+			return;
- 		fprintf(stderr, "Unexpected EOF while reading dir.\n");
- 		exit(1);
- 	}
--- 
-2.52.0.351.gbe84eed79e-goog
-
+Thanks,
