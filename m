@@ -1,155 +1,115 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1235E254B18;
-	Tue,  6 Jan 2026 16:36:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB5EB19DF4D
+	for <fstests@vger.kernel.org>; Tue,  6 Jan 2026 23:36:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767717390; cv=none; b=aizXYf2kNFA8ARG2hC4avrxIJKUQDQfucfYGeLJHNQE8Je/UXbCKdWWCGEDVacg8fbOji1X4knbHaPJnHy81DZsqX+ivxjkO+USz84G8qfVHMBYsAHAIG0iQT2xFRD7bGbEthfg8r0YLEK3mTWNURFtM6amYfnxHAiImcR+irkQ=
+	t=1767742582; cv=none; b=FvdIaz6EeOJ0AZMvlTlPPxiSbWV9tEKcxI/FAXAARqqwqtvEd2sPwopxD3Rtg0emf0S4r7Bzfn1yVERhNT9Z6rDQnpKpHDGitt3R0Y2Emf6ClH/9d3Fp1KG67Nqcmuyf5JKDBhtEstbzGTohAVC+Gmga2EkbOr1jS86f3kX4Hd4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767717390; c=relaxed/simple;
-	bh=YDUnswj3zAgAUBPNvL5Nb8UuwiZt0aAYaBYhGEo5Wpo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Om4uNb4f1OQMmf0jZOaVKRJeEuNRjkXm1+eaSVHXdcvdREyCuASTWrDy6hLiKGK76QvCY16p8GOjYFeKUEb/dpQJUa/DKPQ/AMbrbZqxuhIDlLGBObVFomWH6nzEckQEnrCWdddAdDLQFCUfP0iPiVdMKnwzH1BpTnAkdnyYwK0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qjeJIvMN; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1767742582; c=relaxed/simple;
+	bh=IOGXyKfRAtQgkCQsFi6glUXjNoElbj9x16QGZvKR9ec=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=SXJIHJIpwZUwjZ49gsg9zldRMI7Im/SR+sz/VoUcx4l+KK2bYCKb5WSUa8ADnSvMBsCC+bJQVPgsuqBDAPH/to1EsRM4r1AnmRLLAbfeW6XNn0m7oy/V9yq4Y17/J7q4KTDoMuDv9vi91BH8J42oCv4yLZq9jf4EQl0qNq1kvYg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20230601.gappssmtp.com header.i=@dubeyko-com.20230601.gappssmtp.com header.b=Hhs6cudN; arc=none smtp.client-ip=209.85.128.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qjeJIvMN"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 992A3C116C6;
-	Tue,  6 Jan 2026 16:36:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1767717389;
-	bh=YDUnswj3zAgAUBPNvL5Nb8UuwiZt0aAYaBYhGEo5Wpo=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=qjeJIvMNg6jnKhydM4JuG9jsMqRnNoxCZore3iLgl3x8Y/u5DpZboEX9itnoF2a+R
-	 Ubd4o47RWoD59pucylomgfEV2oEFyaONZM6IwP6gxzKdN9QXoTjF3c3dsD83vUB+wc
-	 YPoes1suckunEtoINFoG0QL0VQiwara6qrg2tpKPQYALELodxqsX6HKWLGPxOu2szS
-	 VzfKKGk5L1QPn7sEXkFHU2RCuqX1mH3If1eSV2r0A990hZceo4kMZ99pe7/rdFzlhD
-	 0NuHHufj+vgDf2uro/qMYcDTskbInjrjT6Wc3fuQOmMptI7RIVZUMUqn5B4KDRr0fT
-	 H6UzN45FGp5ng==
-Date: Tue, 6 Jan 2026 08:36:29 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Glass Su <glass.su@suse.com>
-Cc: fstests@vger.kernel.org, Su Yue <l@damenly.org>,
-	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
-	zlang@redhat.com
-Subject: Re: [PATCH v2] generic: use _qmount_option and _qmount
-Message-ID: <20260106163629.GG191501@frogsfrogsfrogs>
-References: <20251208065829.35613-1-glass.su@suse.com>
- <F1D7CB58-C22E-436C-B8C9-26A3F83CA018@suse.com>
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20230601.gappssmtp.com header.i=@dubeyko-com.20230601.gappssmtp.com header.b="Hhs6cudN"
+Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-79018a412edso17109787b3.0
+        for <fstests@vger.kernel.org>; Tue, 06 Jan 2026 15:36:19 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=dubeyko-com.20230601.gappssmtp.com; s=20230601; t=1767742579; x=1768347379; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=P903sGCFXcIuyiG+MFuiGvGYJlxu7DOENj1XsX+4lW4=;
+        b=Hhs6cudNrVhmRvEXg6CAeebE0gmLs6qn4+Nj+c/eQkBWD7ANffZ1KpUmF8xdQXCJSn
+         qkmeiM3NC6hYxHJlQWNCtzuO1njzqWm5Wm1OT8z0h124Acd5C+A9n+Z/H23ii1LTh7kf
+         Z1Gi1QyDSLoC1OUKUZ683ALUqSNdmPBcAl0lyqBT0LlSUDcb0W/sRDrBvkdAaiZvgtn+
+         Fn3RwWcxR8bGO7tBZvjbYWMaF6w8HhGm4hmkKEqkoH5kGpe6WKn1PNTtH2jC9n5MlKnR
+         zNRiPWvFL3xb1xKZANsQe21tnyODPUhf4vxF+dBfPdcgJvzn2u4dPP93RMIDV/edZ5RU
+         67+A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1767742579; x=1768347379;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=P903sGCFXcIuyiG+MFuiGvGYJlxu7DOENj1XsX+4lW4=;
+        b=Dp8JT8IPj4lo3HsNxjcnPSaEQHCRs+szQMQGNMVKLlpSKEiqiIMHLMTlMme3m7FsD6
+         9Uz61CbcqH+mRl0vTOIsouA28yHhaD4tHzb4lcaevTTPR/OtdUKiTNKR7TwvH2wsXEay
+         80WBtW7xZC153ywBSOslLVKGSL4xmAVKcSMSI757qkjvwCoDBWx8TbvVjw4Cex0uwTzT
+         VkCjO+FC4ScTjA8MRP/gBoQ+nxBDKVInyOsu0f3wsh9WG++nj+dlTyJHOIwcUKU68M4q
+         FZMrUrr5h3Saxgygjc3HE6EwJhhhm3k22zEaOL1zUm1B0uAYsMMqJaC96xtG2+Ui9Tau
+         DCGQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWC9CRt4ylR2kMZfd55BRsUVBcwDUqh9C11PXNwv7dKQtOWAgLPigccGWEh7NI0It1LkoTxOKI/@vger.kernel.org
+X-Gm-Message-State: AOJu0YwWJB92w6gpwyuO6ahWu+IR9vqc2TfeQaaYKaXprUi+eL5ljXfz
+	OjaITanUzMmj4Ba75k7TpIehqjy3yhaBwXBbtHEICZ9xoRexmB1T8PUvzBmR1bA3VfM=
+X-Gm-Gg: AY/fxX4OeHh408Blaq/nIWb5G2dYo7g9ohdaoHtXIjB9aP74pmZpS6juZOKk4xtE/m8
+	UVxxUkgo/R4AMpqJJsiV88dajSfwAu+39kGO8geKaGAMY0IcKfxY/lPlMQNRSfYcHxV9wkilgHW
+	OMtnwCrEEH5KC79c4IPPix+kLRmQF9kMuAaqX/SMOEReRkibTSbUdqTEaHAPI8yBXtiQXD/sxtf
+	jzV4LEQiqhdxOGaJSLg29gkmJaVsNX4XlZv5gcS8U2tO18NE0BgoQxzPiGxUXF2wpMQe1wiKfGU
+	XIAjgaosow6IF0KELj2oEeDh3+6KHjrbhVahNLuP6yO85IGlJAcqgfCAiXVOG+z79I2JCiugqCb
+	+Nu3z4QlaSfq5BYla46qSmTq7GSGasy/J+3VqP7CIf063fYYL9qTbn6VKzQyCLpXOE9KffOLH+7
+	E0on4ZuuBnRU9RMAISxj6m4p10TyK+7T/Hz4pwOoUZ4oexBjxRUAGEOm6kCBYzB50v+Tdseg1d4
+	q6XHKV4UmPVPCZiNAUDX58=
+X-Google-Smtp-Source: AGHT+IGGrnRIngS8B91uiKhP8B+rtLRAgmEqeRLsRN/E00Rq6uOZNjkNxxJuDcm5aZr0O87LJ8pg/A==
+X-Received: by 2002:a05:690c:6104:b0:78f:8666:4bb8 with SMTP id 00721157ae682-790b56d503amr9297877b3.55.1767742578835;
+        Tue, 06 Jan 2026 15:36:18 -0800 (PST)
+Received: from pop-os.attlocal.net ([2600:1700:6476:1430:e046:4528:3155:2351])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-790aa42544csm12965327b3.0.2026.01.06.15.36.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 06 Jan 2026 15:36:18 -0800 (PST)
+From: Viacheslav Dubeyko <slava@dubeyko.com>
+To: glaubitz@physik.fu-berlin.de,
+	linux-fsdevel@vger.kernel.org,
+	frank.li@vivo.com,
+	fstests@vger.kernel.org,
+	zlang@kernel.org
+Cc: Slava.Dubeyko@ibm.com,
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Subject: [PATCH] xfstests: hfs/hfsplus don't support metadata journaling
+Date: Tue,  6 Jan 2026 15:35:56 -0800
+Message-Id: <20260106233555.2345163-1-slava@dubeyko.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <F1D7CB58-C22E-436C-B8C9-26A3F83CA018@suse.com>
 
-On Tue, Dec 23, 2025 at 02:41:50PM +0800, Glass Su wrote:
-> 
-> 
-> > On Dec 8, 2025, at 14:58, Su Yue <glass.su@suse.com> wrote:
-> > 
-> > This commit touches generic tests call `_scratch_mount -o usrquota`
-> > then chmod 777, quotacheck and quotaon. They can be simpilfied
-> > to _qmount_option and _qmount. _qmount already calls quotacheck,
-> > quota and chmod ugo+rwx. The conversions can save a few lines.
-> > 
-> > Signed-off-by: Su Yue <glass.su@suse.com>
-> 
-> Gentle ping.
+HFS file system doesn't support metadata journaling.
+This patch marks HFS file system as not supporting
+metadata journaling in _has_metadata_journaling()
+of common/rc.
 
-Sorry, I've been on vacation.
+Technically speaking, HFS+ is journaling file system.
+However, current Linux kernel implementation doesn't
+support even journal replay. This patch marks HFS+ file
+system as not supporting metadata journaling in
+_has_metadata_journaling() of common/rc. If journaling
+support functionality in HFS+ will be implemented,
+then HFS+ could be deleted from _has_metadata_journaling()
+in the future.
 
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+Signed-off-by: Viacheslav Dubeyko <slava@dubeyko.com>
+---
+ common/rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---D
+diff --git a/common/rc b/common/rc
+index c3cdc220..82491935 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4267,7 +4267,7 @@ _has_metadata_journaling()
+ 	fi
+ 
+ 	case "$FSTYP" in
+-	ext2|vfat|msdos|udf|exfat|tmpfs)
++	ext2|vfat|msdos|udf|exfat|tmpfs|hfs|hfsplus)
+ 		echo "$FSTYP does not support metadata journaling"
+ 		return 1
+ 		;;
+-- 
+2.43.0
 
-> — 
-> Su
-> > ---
-> > Changelog:
-> > v2:
-> >  Only convert the tests calling chmod 777.
-> > ---
-> > tests/generic/231 | 6 ++----
-> > tests/generic/232 | 6 ++----
-> > tests/generic/233 | 6 ++----
-> > tests/generic/270 | 6 ++----
-> > 4 files changed, 8 insertions(+), 16 deletions(-)
-> > 
-> > diff --git a/tests/generic/231 b/tests/generic/231
-> > index ce7e62ea1886..02910523d0b5 100755
-> > --- a/tests/generic/231
-> > +++ b/tests/generic/231
-> > @@ -47,10 +47,8 @@ _require_quota
-> > _require_user
-> > 
-> > _scratch_mkfs >> $seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > -chmod 777 $SCRATCH_MNT
-> > -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-> > -quotaon -u -g $SCRATCH_MNT 2>/dev/null
-> > +_qmount_option "usrquota,grpquota"
-> > +_qmount
-> > 
-> > if ! _fsx 1; then
-> > _scratch_unmount 2>/dev/null
-> > diff --git a/tests/generic/232 b/tests/generic/232
-> > index c903a5619045..21375809d299 100755
-> > --- a/tests/generic/232
-> > +++ b/tests/generic/232
-> > @@ -44,10 +44,8 @@ _require_scratch
-> > _require_quota
-> > 
-> > _scratch_mkfs > $seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > -chmod 777 $SCRATCH_MNT
-> > -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-> > -quotaon -u -g $SCRATCH_MNT 2>/dev/null
-> > +_qmount_option "usrquota,grpquota"
-> > +_qmount
-> > 
-> > _fsstress
-> > _check_quota_usage
-> > diff --git a/tests/generic/233 b/tests/generic/233
-> > index 3fc1b63abb24..4606f3bde2ab 100755
-> > --- a/tests/generic/233
-> > +++ b/tests/generic/233
-> > @@ -59,10 +59,8 @@ _require_quota
-> > _require_user
-> > 
-> > _scratch_mkfs > $seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > -chmod 777 $SCRATCH_MNT
-> > -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-> > -quotaon -u -g $SCRATCH_MNT 2>/dev/null
-> > +_qmount_option "usrquota,grpquota"
-> > +_qmount
-> > setquota -u $qa_user 32000 32000 1000 1000 $SCRATCH_MNT 2>/dev/null
-> > 
-> > _fsstress
-> > diff --git a/tests/generic/270 b/tests/generic/270
-> > index c3d5127a0b51..9ac829a7379f 100755
-> > --- a/tests/generic/270
-> > +++ b/tests/generic/270
-> > @@ -62,10 +62,8 @@ _require_command "$SETCAP_PROG" setcap
-> > _require_attrs security
-> > 
-> > _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
-> > -_scratch_mount "-o usrquota,grpquota"
-> > -chmod 777 $SCRATCH_MNT
-> > -quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-> > -quotaon -u -g $SCRATCH_MNT 2>/dev/null
-> > +_qmount_option "usrquota,grpquota"
-> > +_qmount
-> > 
-> > if ! _workout; then
-> > _scratch_unmount 2>/dev/null
-> > -- 
-> > 2.50.1 (Apple Git-155)
-> > 
-> 
-> 
