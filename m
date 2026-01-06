@@ -1,261 +1,250 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B11972F3601
-	for <fstests@vger.kernel.org>; Tue,  6 Jan 2026 11:53:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D1B627E05A
+	for <fstests@vger.kernel.org>; Tue,  6 Jan 2026 12:23:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767700409; cv=none; b=BjeQZ2ngkcPyMReHwQhPaKIXKlDjd0cfmPNty3TCenIh/90c8LeGxJQQp7o7Rsg3NR9L69tQtQU4gEHNEtjtlQ/eSYIjDEF41RY/eLUoclTe+M+BlrnqgEBDkJZNFje3Vpv9qlLDF942If8+poqvOBYks62MIQdM/AbCWUK8ejE=
+	t=1767702182; cv=none; b=J2JxBNlKKKgp5eNIjjSlDKGWTqtiP+6JMTjf1ekBJhJijEmKWg3DTgx3hRffzgJNaYCtU1Bqeia5puWKdMbK6/B1dHhFeYc4itSvXEldmPjwAwx8kMQ7KtdxRRrhwrvFUikEW9moq7sSSRBjETSt3j64xMSWvFYb5wSbl5LDpKs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767700409; c=relaxed/simple;
-	bh=MWG0Zglvd29bx6a4AZGV6SqQpZdhADDXtzQ0c4Ds978=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=FiGDHoNH8JXriHSfydFkN/D8+QTF8NZ9xSHLtHr+PNIBER609rbfLkifPx5ALp9u7LgvIMDxFGzbmL8GxmheoO/tgjp6yCN+IwJ03UDs+w5PWSAYtOCVpZZrAqkITGNRFrPqLUjBCYblG4wLmcStgSxSHPfNRCtOr2xzEC+TFVU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fW6vW/H9; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=V7DFt+dT; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1767702182; c=relaxed/simple;
+	bh=VXcLMidZ+5a2ktvnUyI1Ow5ey96YO0nR9cGfyTzbi6A=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=AIpD7ooWBU5UZkY8qHtkDU7sf6EAu9TVu9G3fN4/A0VF9pjEMH8mHxSMAbA35688HwsBqUadOALVWU/PqvKSMRgY03489W5kg84JxfOrIBMzx837Yu5w3nOTtcyA/9dy5lRWmdyEaNKDbqVqgPRw7l7F/oqetFeBu8EC7ZFef8I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SFxlXZnu; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fW6vW/H9";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="V7DFt+dT"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1767700406;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=aEgid8z1Mi7abwQ5T3UH1jzdW67mQ6CtP9yV7wpbSb0=;
-	b=fW6vW/H9QPF8jJeFucoP4Sj/9ZWLL36rTyEDDZxmNaOUmSNfx+ggofMFBlkYGyqlQTBA1j
-	QNMWgrJoJqb0HizHUopwZXP04gfDVOtfdRRWONQVipHqzaMGx55OvNPzd31EZZjKopoQrc
-	8e2jAdrgO6qtf7rxowRWWsvph0b8zL0=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-662-SDVPHRVJN2OXYi22iXhKdw-1; Tue, 06 Jan 2026 06:53:25 -0500
-X-MC-Unique: SDVPHRVJN2OXYi22iXhKdw-1
-X-Mimecast-MFC-AGG-ID: SDVPHRVJN2OXYi22iXhKdw_1767700405
-Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-c0c7e0a8ac1so1344025a12.0
-        for <fstests@vger.kernel.org>; Tue, 06 Jan 2026 03:53:25 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1767700403; x=1768305203; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=aEgid8z1Mi7abwQ5T3UH1jzdW67mQ6CtP9yV7wpbSb0=;
-        b=V7DFt+dTI5JvJyMjqoVFqIa7NeSp3dXiOpQdHeYBVpxJqodeZ5qkvNFb7HNxCxE8E2
-         ViojD/BalqashQTvteaBb1qWCIvFIQXp2Ja+8J4I2uDhSgBo6JsesGiM9zQZrPihFqq2
-         3UC2B7cOoN3yvHeQCmg7HLGVpYifrSR1L9VZkDJ4jbrHtbtzluVF+40/SqMpZNGtnSV8
-         H+WDqxu3BaA52EI8MUl9Gp4eCoD1S+0S+r0NOw0Yllad6MheVF7LHi8IwlqRACeEERG/
-         CThqEsgrUUuR0oh57/it9Fbnps+HxDvJw8HzjR5N+iafHevn53nMvSn/bcURPo6ybAvx
-         GGAw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767700403; x=1768305203;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=aEgid8z1Mi7abwQ5T3UH1jzdW67mQ6CtP9yV7wpbSb0=;
-        b=LLvqU9bBMMmc58v8aM+hDy/QEr1/b3wYvcXdINLMsCe41JUb+cMwOFFkStlEecgtJG
-         F8DARwY9GVoXMKmXwQULqyRP5jLkNFCRd/XmPntR5XdYM6yMlVcIKDSh9HUcaVH0GwIY
-         HXrWo3jcV/NViLgTYCqgr3ZBO/d8Z/oQnmRIFeymsmAr+ysutRshsvdDSlEyqSPnLFmS
-         FAI2l4CSDosXXpwuDOrFzKV9SUz47IPWLlcbQVXBTr5Sps8BOnQPGVdEBqY8pVftKTkx
-         Nz8JcWsUkU1enzt7Bn0BR1bUW+8UfgFG9SK485q7WK8fzeCB09Ue0rDMR2U77XjUp341
-         YaGg==
-X-Gm-Message-State: AOJu0YwmnxzT77+WONkwJ7CkFnPbJMdG1iOGABJ2WRim2EPZa2otipWd
-	ruWokJPA3CbBpHQ7EsLV6i6CZd4Sw1L94mipNKFaJClXR961sSF1SnLubH7qwyhfZYzlIFBpgnD
-	gRcMqJEQtlpYuRmIENJb7hbjmKWRMaJgyCKo4jKApJBaz62xyh9E9Uy0yg7EBrSoZXOU=
-X-Gm-Gg: AY/fxX6y5Yr7yY9Iks9fuUCQT4+e+V4aRpk4M1FdIxMuh2Y304dZ70Q6nultnmY4hdl
-	ujxnM/1DeG5+qprI312wyVvBtS1RTDFIQ+0GYHfsIjs1XUlhXJXuiBG8IjJ0rbA6uHSRwQ5VOE/
-	3HRPBhaH2wHu43J2os/XQT4DOtZDh7BgQa8k+9JwgJyKEx/OBqII69TG8guiOfgjs7zK8eSm4zW
-	TYDsg1v4DoXSXSnToeEZ+E+HotgDLoS/Sld5yKovwWM97Uq4gynRyREYLnc1zBIAoc3VnS9GVGz
-	Lq29HE4Gm2jMGep2jH/vppQOH29HE1Dde4yQvMwoJzdldD1yXRYQ7AvEoXgoKdZJFJ6gazIpfV/
-	lVqrB3yoFiSOnX9082vTts+LzRRE6HBzb3KlLtFWUS9x0el9oNA==
-X-Received: by 2002:a05:6a20:72a6:b0:366:19fd:dbe4 with SMTP id adf61e73a8af0-389822c1e44mr2526895637.4.1767700403243;
-        Tue, 06 Jan 2026 03:53:23 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGahWa5NKO+aagTbF1nIRt2Qo0M7Wk2kJAm/td/1+Dzw3K5r3/sDFz13B0KHyMpnopi/tM4VQ==
-X-Received: by 2002:a05:6a20:72a6:b0:366:19fd:dbe4 with SMTP id adf61e73a8af0-389822c1e44mr2526876637.4.1767700402691;
-        Tue, 06 Jan 2026 03:53:22 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c4cc8d2932bsm2324272a12.21.2026.01.06.03.53.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 06 Jan 2026 03:53:20 -0800 (PST)
-Date: Tue, 6 Jan 2026 19:53:16 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>, Zorro Lang <zlang@kernel.org>
-Subject: Re: [PATCH] btrfs: test power failure after fsync and rename
- exchanging directories
-Message-ID: <20260106115316.jzdtch6zmdo7w5hb@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <3cb8fdeec6e3bf977682d1074bf3e7ba1719b98c.1765466812.git.fdmanana@suse.com>
- <CAL3q7H7AY2iC+Z8LEv8+TawbuXJdwoXei_0d+NEccVYE5Wu3PA@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SFxlXZnu"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC533C116C6
+	for <fstests@vger.kernel.org>; Tue,  6 Jan 2026 12:23:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1767702181;
+	bh=VXcLMidZ+5a2ktvnUyI1Ow5ey96YO0nR9cGfyTzbi6A=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=SFxlXZnu2c4OmDdb0Z2kN1+6q5QtutTUES2MjFF61AKtlZcKF+naeZSSWIio7AIw2
+	 bW0PnR4QnzAZvUyY5ynNlc6uUPyhDNy63TKSGFS1T4t6fNhU/f2f66XB6K30YLYzDE
+	 MFQYlUj/IHjOSQldj+85rky2njoNQVzx/oozO/SAiabEe+aOx3JIQAzYuFeCZDC6Gg
+	 k/0g9K19n7+1F+cNVI1TyEzxZGEX22oB+XoMQKUryDgkk7rAYEaG4FJagVgUT2ZmcI
+	 k+VwJWsF5xh13VxV0Je4290E7PyNzVHGD5m1ZXNGlS/fVdCJrc8s5rEpJHjUkTBDjY
+	 AWx3qz3PRaFhQ==
+Received: by mail-ej1-f42.google.com with SMTP id a640c23a62f3a-b843d418e37so34487266b.0
+        for <fstests@vger.kernel.org>; Tue, 06 Jan 2026 04:23:01 -0800 (PST)
+X-Gm-Message-State: AOJu0YxDBKBj40+DVp/hYIzAMiw/fwhf/KiPx0eOyriqiX/gxqc8tkgw
+	5lgaZSwbXHS8ae/kRjCgzhOAj+sh/9dEQb2isSguDNkBmXdJsxubSbdyhUYH/yKBZd6UrSUwV0V
+	6iNe0EVcLRcXb9faj7Fme++1m+tKct8k=
+X-Google-Smtp-Source: AGHT+IHgxXbGF7KrOpAZiCtlo0UbQfnxpDuMV+dUsaXXxCvbHlNFhbxWk+N/v2sgO9wf5LMPodjuG4lrLIrYQNpuklU=
+X-Received: by 2002:a17:907:2da9:b0:b80:811d:20ba with SMTP id
+ a640c23a62f3a-b84298dbbbamr264931766b.14.1767702180316; Tue, 06 Jan 2026
+ 04:23:00 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAL3q7H7AY2iC+Z8LEv8+TawbuXJdwoXei_0d+NEccVYE5Wu3PA@mail.gmail.com>
+References: <3cb8fdeec6e3bf977682d1074bf3e7ba1719b98c.1765466812.git.fdmanana@suse.com>
+ <CAL3q7H7AY2iC+Z8LEv8+TawbuXJdwoXei_0d+NEccVYE5Wu3PA@mail.gmail.com> <20260106115316.jzdtch6zmdo7w5hb@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20260106115316.jzdtch6zmdo7w5hb@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Tue, 6 Jan 2026 12:22:23 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H4FBxrU6zHLgquFv2yhM-ArWONGdvq9sk8hNcKQNhr8fw@mail.gmail.com>
+X-Gm-Features: AQt7F2ooTBez4SOfb96qDrq5DdbbfXplcCNmkD8N5MA3ezwJgKrABqPlPcGW03c
+Message-ID: <CAL3q7H4FBxrU6zHLgquFv2yhM-ArWONGdvq9sk8hNcKQNhr8fw@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: test power failure after fsync and rename
+ exchanging directories
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	Filipe Manana <fdmanana@suse.com>, Zorro Lang <zlang@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, Jan 05, 2026 at 04:22:28PM +0000, Filipe Manana wrote:
-> On Thu, Dec 11, 2025 at 3:42 PM <fdmanana@kernel.org> wrote:
+On Tue, Jan 6, 2026 at 11:53=E2=80=AFAM Zorro Lang <zlang@redhat.com> wrote=
+:
+>
+> On Mon, Jan 05, 2026 at 04:22:28PM +0000, Filipe Manana wrote:
+> > On Thu, Dec 11, 2025 at 3:42=E2=80=AFPM <fdmanana@kernel.org> wrote:
+> > >
+> > > From: Filipe Manana <fdmanana@suse.com>
+> > >
+> > > Test renaming one directory over another one that has a subvolume ins=
+ide
+> > > it and fsync a file in the other directory that was previously rename=
+d.
+> > > We want to verify that after a power failure we are able to mount the
+> > > filesystem and it has the correct content (all renames visible).
+> > >
+> > > This exercises a bug fixed by the following kernel patch:
+> > >
+> > >   "btrfs: always detect conflicting inodes when logging inode refs"
+> > >
+> > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > >
-> > From: Filipe Manana <fdmanana@suse.com>
+> > Ping.
 > >
-> > Test renaming one directory over another one that has a subvolume inside
-> > it and fsync a file in the other directory that was previously renamed.
-> > We want to verify that after a power failure we are able to mount the
-> > filesystem and it has the correct content (all renames visible).
-> >
-> > This exercises a bug fixed by the following kernel patch:
-> >
-> >   "btrfs: always detect conflicting inodes when logging inode refs"
-> >
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> 
-> Ping.
-> 
-> Zorro, this missed the last update.
+> > Zorro, this missed the last update.
+>
+> Hi Filipe, Happey new year :) I just backed from holiday, so hurried to
 
-Hi Filipe, Happey new year :) I just backed from holiday, so hurried to
-merge some patches with enough RVB. This patch hasn't been reviewed,
-especially it conflicted with another patchset (refer to below review points),
-so I decided to deal with it in next release. Sorry for the delaying ...
+Happy new year! Thanks.
 
-> 
-> 
-> > ---
-> >  tests/btrfs/340     | 75 +++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/btrfs/340.out | 15 +++++++++
-> >  2 files changed, 90 insertions(+)
-> >  create mode 100755 tests/btrfs/340
-> >  create mode 100644 tests/btrfs/340.out
-> >
-> > diff --git a/tests/btrfs/340 b/tests/btrfs/340
-> > new file mode 100755
-> > index 00000000..d52893ae
-> > --- /dev/null
-> > +++ b/tests/btrfs/340
-> > @@ -0,0 +1,75 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2025 SUSE S.A.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 340
-> > +#
-> > +# Test renaming one directory over another one that has a subvolume inside it
-> > +# and fsync a file in the other directory that was previously renamed. We want
-> > +# to verify that after a power failure we are able to mount the filesystem and
-> > +# it has the correct content (all renames visible).
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick subvol rename log
-> > +
-> > +_cleanup()
-> > +{
-> > +       _cleanup_flakey
-> > +       cd /
-> > +       rm -r -f $tmp.*
-> > +}
-> > +
-> > +. ./common/filter
-> > +. ./common/dmflakey
-> > +. ./common/renameat2
-> > +
-> > +_require_scratch
-> > +_require_dm_target flakey
-> > +_require_renameat2 exchange
-> > +
-> > +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> > +       "btrfs: always detect conflicting inodes when logging inode refs"
-> > +
-> > +_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-> > +_require_metadata_journaling $SCRATCH_DEV
-> > +_init_flakey
-> > +_mount_flakey
+> merge some patches with enough RVB. This patch hasn't been reviewed,
+> especially it conflicted with another patchset (refer to below review poi=
+nts),
+> so I decided to deal with it in next release. Sorry for the delaying ...
 
-The _mount_flakey and _unmount_flakey have been removed by:
+Ok, so this patch was sent before that patchset was merged...
+I'll rebase and resend, thanks.
 
-  commit eb2ad950ea90d8d8d861f8beac138d6a19f0f819
-  Author: Christoph Hellwig <hch@lst.de>
-  Date:   Thu Dec 18 08:29:59 2025 +0100
-
-      dmflakey: override SCRATCH_DEV in _init_flakey
-
-> > +
-> > +# Create our test directories, one with a file inside, another with a subvolume
-> > +# that is not empty (has one file).
-> > +mkdir $SCRATCH_MNT/dir1
-> > +echo -n > $SCRATCH_MNT/dir1/foo
-> > +
-> > +mkdir $SCRATCH_MNT/dir2
-> > +_btrfs subvolume create $SCRATCH_MNT/dir2/subvol
-> > +echo -n > $SCRATCH_MNT/dir2/subvol/subvol_file
-> > +
-> > +_scratch_sync
-> > +
-> > +# Rename file foo so that its inode's last_unlink_trans is updated to the
-> > +# current transaction.
-> > +mv $SCRATCH_MNT/dir1/foo $SCRATCH_MNT/dir1/bar
-> > +
-> > +# Rename exchange dir1 with dir2.
-> > +$here/src/renameat2 -x $SCRATCH_MNT/dir1 $SCRATCH_MNT/dir2
-> > +
-> > +# Fsync file bar, we just renamed from foo.
-> > +# Until the kernel fix mentioned above, it would result in logging dir2 without
-> > +# logging dir1, causing log replay to attempt to remove the inode for dir1 since
-> > +# the inode for dir2 has the same name in the same parent directory. Not only
-> > +# this was not correct, since we did not delete the directory, but it would also
-> > +# result in a log replay failure (and therefore mount failure) because we would
-> > +# be attempting to delete a directory with a non-empty subvolume inside it.
-> > +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir2/bar
-> > +
-> > +# Simulate a power failure and then mount again the filesystem to replay the
-> > +# journal/log. We should be able to replay the log tree and mount successfully.
-> > +_flakey_drop_and_remount
-> > +
-> > +echo -e "Filesystem contents after power failure:\n"
-> > +ls -1R $SCRATCH_MNT | _filter_scratch
-> > +
-> > +_unmount_flakey
-
-The _cleanup_flakey in your _cleanup contains the _unmount $SCRATCH_MNT, so if
-you don't need "double umount", I think we can remove this line directly.
-
-Others looks good to me, please rebase to v2026.01.05 in v2, then I'll review
-and merge your v2 into patches-in-queue, then push it in next release :)
-
-Thanks,
-Zorro
-
-> > +
-> > +# success, all done
-> > +_exit 0
-> > diff --git a/tests/btrfs/340.out b/tests/btrfs/340.out
-> > new file mode 100644
-> > index 00000000..7745c639
-> > --- /dev/null
-> > +++ b/tests/btrfs/340.out
-> > @@ -0,0 +1,15 @@
-> > +QA output created by 340
-> > +Filesystem contents after power failure:
-> > +
-> > +SCRATCH_MNT:
-> > +dir1
-> > +dir2
-> > +
-> > +SCRATCH_MNT/dir1:
-> > +subvol
-> > +
-> > +SCRATCH_MNT/dir1/subvol:
-> > +subvol_file
-> > +
-> > +SCRATCH_MNT/dir2:
-> > +bar
-> > --
-> > 2.47.2
+>
 > >
 > >
-> 
-
+> > > ---
+> > >  tests/btrfs/340     | 75 +++++++++++++++++++++++++++++++++++++++++++=
+++
+> > >  tests/btrfs/340.out | 15 +++++++++
+> > >  2 files changed, 90 insertions(+)
+> > >  create mode 100755 tests/btrfs/340
+> > >  create mode 100644 tests/btrfs/340.out
+> > >
+> > > diff --git a/tests/btrfs/340 b/tests/btrfs/340
+> > > new file mode 100755
+> > > index 00000000..d52893ae
+> > > --- /dev/null
+> > > +++ b/tests/btrfs/340
+> > > @@ -0,0 +1,75 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2025 SUSE S.A.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test 340
+> > > +#
+> > > +# Test renaming one directory over another one that has a subvolume =
+inside it
+> > > +# and fsync a file in the other directory that was previously rename=
+d. We want
+> > > +# to verify that after a power failure we are able to mount the file=
+system and
+> > > +# it has the correct content (all renames visible).
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest auto quick subvol rename log
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +       _cleanup_flakey
+> > > +       cd /
+> > > +       rm -r -f $tmp.*
+> > > +}
+> > > +
+> > > +. ./common/filter
+> > > +. ./common/dmflakey
+> > > +. ./common/renameat2
+> > > +
+> > > +_require_scratch
+> > > +_require_dm_target flakey
+> > > +_require_renameat2 exchange
+> > > +
+> > > +_fixed_by_kernel_commit xxxxxxxxxxxx \
+> > > +       "btrfs: always detect conflicting inodes when logging inode r=
+efs"
+> > > +
+> > > +_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
+> > > +_require_metadata_journaling $SCRATCH_DEV
+> > > +_init_flakey
+> > > +_mount_flakey
+>
+> The _mount_flakey and _unmount_flakey have been removed by:
+>
+>   commit eb2ad950ea90d8d8d861f8beac138d6a19f0f819
+>   Author: Christoph Hellwig <hch@lst.de>
+>   Date:   Thu Dec 18 08:29:59 2025 +0100
+>
+>       dmflakey: override SCRATCH_DEV in _init_flakey
+>
+> > > +
+> > > +# Create our test directories, one with a file inside, another with =
+a subvolume
+> > > +# that is not empty (has one file).
+> > > +mkdir $SCRATCH_MNT/dir1
+> > > +echo -n > $SCRATCH_MNT/dir1/foo
+> > > +
+> > > +mkdir $SCRATCH_MNT/dir2
+> > > +_btrfs subvolume create $SCRATCH_MNT/dir2/subvol
+> > > +echo -n > $SCRATCH_MNT/dir2/subvol/subvol_file
+> > > +
+> > > +_scratch_sync
+> > > +
+> > > +# Rename file foo so that its inode's last_unlink_trans is updated t=
+o the
+> > > +# current transaction.
+> > > +mv $SCRATCH_MNT/dir1/foo $SCRATCH_MNT/dir1/bar
+> > > +
+> > > +# Rename exchange dir1 with dir2.
+> > > +$here/src/renameat2 -x $SCRATCH_MNT/dir1 $SCRATCH_MNT/dir2
+> > > +
+> > > +# Fsync file bar, we just renamed from foo.
+> > > +# Until the kernel fix mentioned above, it would result in logging d=
+ir2 without
+> > > +# logging dir1, causing log replay to attempt to remove the inode fo=
+r dir1 since
+> > > +# the inode for dir2 has the same name in the same parent directory.=
+ Not only
+> > > +# this was not correct, since we did not delete the directory, but i=
+t would also
+> > > +# result in a log replay failure (and therefore mount failure) becau=
+se we would
+> > > +# be attempting to delete a directory with a non-empty subvolume ins=
+ide it.
+> > > +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir2/bar
+> > > +
+> > > +# Simulate a power failure and then mount again the filesystem to re=
+play the
+> > > +# journal/log. We should be able to replay the log tree and mount su=
+ccessfully.
+> > > +_flakey_drop_and_remount
+> > > +
+> > > +echo -e "Filesystem contents after power failure:\n"
+> > > +ls -1R $SCRATCH_MNT | _filter_scratch
+> > > +
+> > > +_unmount_flakey
+>
+> The _cleanup_flakey in your _cleanup contains the _unmount $SCRATCH_MNT, =
+so if
+> you don't need "double umount", I think we can remove this line directly.
+>
+> Others looks good to me, please rebase to v2026.01.05 in v2, then I'll re=
+view
+> and merge your v2 into patches-in-queue, then push it in next release :)
+>
+> Thanks,
+> Zorro
+>
+> > > +
+> > > +# success, all done
+> > > +_exit 0
+> > > diff --git a/tests/btrfs/340.out b/tests/btrfs/340.out
+> > > new file mode 100644
+> > > index 00000000..7745c639
+> > > --- /dev/null
+> > > +++ b/tests/btrfs/340.out
+> > > @@ -0,0 +1,15 @@
+> > > +QA output created by 340
+> > > +Filesystem contents after power failure:
+> > > +
+> > > +SCRATCH_MNT:
+> > > +dir1
+> > > +dir2
+> > > +
+> > > +SCRATCH_MNT/dir1:
+> > > +subvol
+> > > +
+> > > +SCRATCH_MNT/dir1/subvol:
+> > > +subvol_file
+> > > +
+> > > +SCRATCH_MNT/dir2:
+> > > +bar
+> > > --
+> > > 2.47.2
+> > >
+> > >
+> >
+>
