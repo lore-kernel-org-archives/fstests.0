@@ -1,144 +1,170 @@
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75451328623
-	for <fstests@vger.kernel.org>; Wed,  7 Jan 2026 10:37:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 066C22EA169;
+	Wed,  7 Jan 2026 13:03:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767782276; cv=none; b=mpeuuM0xR5+2YQveJrCb+Mo1iZCXxbjIttgty2IaPci5KMs8LgpTHXy3dj4UHiJa7+mue5+zcRYrV2K/nld4cb6whtogfihZiIvaf/OCjYnrQsoanvszb3BvoOgL9dBCYlznpUVtYJFRFFk2tt5xtOMzqMIelgJsCRtC4ZOAvyA=
+	t=1767790998; cv=none; b=o6JGXyIe0vZEb0DY6p79XgwbnvIqZQgyHis8IeR0caIebveSicenzZ3+x5tfw4KMgSYxcoLVUS4lAEqVmOm/63PNsb0gLduobgZz0Yf6mnTwLZ2/Lr5p9amC1zmzLcDmP4qiGlUwgIQ73vbdAKEz6bezzvkoA/VzmT8qWgIZ5VY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767782276; c=relaxed/simple;
-	bh=Um25oj7nki0zFSgy1PTq+dKr8xv6jDz8qrGIRulaGmM=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=GJbm3BV3tvpYBHkbNQahc6wtQoNhUbQay+UnEkOtqc4pjHLYIwNh7JH/U87qb7eHZroStn8DRSnDhLIvv/xxmLzWOIEFubp3GeOvdOffCK0oVIVx2q13AOZdn7exu8stkl3pq78Qov1gGJ6TeUvX7iSeQt5FwAkJtPnmVHR6bTI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=Ls+Inz1Z; arc=none smtp.client-ip=148.163.156.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	s=arc-20240116; t=1767790998; c=relaxed/simple;
+	bh=vRLpx5vVdiPz7YURGJxoXQZNlqXXjnlqOCqTkFR1ME0=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=SVH4RO96dHSSEqDyxz979U/99V8e0VWS2H6Spa+KD+KDM5qlE+gcHwbGojaKu4KuFpGtET7i8zs6hj6EFJ3jYyX/i9+4lhtsAbSpUKmvnTaLCrsC6Ibn1Uxo6IkT3kU36vN8gyzHY/QLxfAW4OYiYyj7sj5u11XZMRf0dQqgHc0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JINiTXys; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="Ls+Inz1Z"
-Received: from pps.filterd (m0353729.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 607AX8xD009924;
-	Wed, 7 Jan 2026 10:37:51 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=pp1; bh=fa6VW2JSjZ6g9mioA+BrUQS/iWRKnsv+qhjUiaqia
-	xE=; b=Ls+Inz1ZXmmpCnsC06Muccsa8kKBo8s9uD+0fNyXR6JDJ+GyerMjDxBy2
-	7noj3LCEMV3/jfyvXxZ94ClBtPy6XwHYjesxS7JoYCrEovOBm8tx5F+8jwjlM0MK
-	+V/JNqH4BezU1zw4M5ki6izcWZEoshxCRmIcpG3jSG21ZvbgGvj8iabx/s4vH8ia
-	ZFrSidkWC3R860hpMOoGkAEys2Cl5pzB0EVhdwoBTjcWGI4PHn7/vGZSkCaU9uUv
-	0Yy+jtstmU5moIROfGEBss5NQY2+tHsxA43DkwpU31OJXZrg/M16YLzdCW7t/Rzc
-	oR12d+3rsF1juEDMe7zpvgOYxMSow==
-Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4betsq8bfn-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 07 Jan 2026 10:37:51 +0000 (GMT)
-Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
-	by ppma11.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 60797jvY019177;
-	Wed, 7 Jan 2026 10:37:50 GMT
-Received: from smtprelay02.fra02v.mail.ibm.com ([9.218.2.226])
-	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 4bfg51860g-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 07 Jan 2026 10:37:50 +0000
-Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
-	by smtprelay02.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 607AbkDQ44630498
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 7 Jan 2026 10:37:46 GMT
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id BCE0C20043;
-	Wed,  7 Jan 2026 10:37:46 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id B626120040;
-	Wed,  7 Jan 2026 10:37:45 +0000 (GMT)
-Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.39.31.215])
-	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Wed,  7 Jan 2026 10:37:45 +0000 (GMT)
-From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
-Cc: Disha Goel <disgoel@linux.ibm.com>
-Subject: [PATCH v2] generic/108: fix test hand upon failure to create LV
-Date: Wed,  7 Jan 2026 16:07:44 +0530
-Message-ID: <98f8ef5ff92632a0be336a563ebda36cfe898348.1767782181.git.ojaswin@linux.ibm.com>
-X-Mailer: git-send-email 2.51.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JINiTXys"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 01005C2BC87;
+	Wed,  7 Jan 2026 13:03:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1767790997;
+	bh=vRLpx5vVdiPz7YURGJxoXQZNlqXXjnlqOCqTkFR1ME0=;
+	h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+	b=JINiTXystfo9788xKdUCxKisXTCjsAbTHnci9TCtUaEkMrE7hrm59Dv4IJlsA2slb
+	 q76lRVZN/9M1xp8EK8qJAonukm6VSBlH5Qx1WZjDQNgqMctK/KNgNKjS+Tmep0IOxG
+	 Pd607nAz3ytkvRRhGeYVYuIhpdgz9pasByHCDFK5IxNzo4Vm07kGg4XJud2fFqZgX+
+	 OROtwJERAluip3+Dpvvx/tZEbbOrGHNHAdnDxWehDZ/qTDgYDYqffT5GWjbgfNWhb3
+	 WHVTYkCFGdnxp6c/z58oK5gab9YHO4c98ldypZkptZt4ip6kF96wkG6qSpbMbq/oCa
+	 pxRcbJ66Xlbag==
+Message-ID: <748ad0ea534ea14e4401a0a94d29e64f27629095.camel@kernel.org>
+Subject: Re: [PATCH fstests v3 3/3] generic: add tests for file delegations
+From: Jeff Layton <jlayton@kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, Zorro Lang
+	 <zlang@redhat.com>, Christian Brauner <brauner@kernel.org>
+Date: Wed, 07 Jan 2026 08:03:15 -0500
+In-Reply-To: <aV316LhsVSl0n9-E@infradead.org>
+References: <20251203-dir-deleg-v3-0-be55fbf2ad53@kernel.org>
+	 <20251203-dir-deleg-v3-3-be55fbf2ad53@kernel.org>
+	 <aVyriyPD8x8oJUo-@infradead.org>
+	 <696b5d94d413aa89b88c68138eabecca9ce9e873.camel@kernel.org>
+	 <aV316LhsVSl0n9-E@infradead.org>
+Autocrypt: addr=jlayton@kernel.org; prefer-encrypt=mutual;
+ keydata=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
+ QZIQXVeAA+smfTT0tDrisj1U5x6ZB9b3nBg65kc=
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.58.2 (3.58.2-1.fc43) 
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: HGIGH1NbBthG0r622ky8b0GChPiGIT2p
-X-Authority-Analysis: v=2.4 cv=Jvf8bc4C c=1 sm=1 tr=0 ts=695e377f cx=c_pps
- a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17
- a=vUbySO9Y5rIA:10 a=VkNPw1HP01LnGYTKEx00:22 a=VnNF1IyMAAAA:8
- a=0fFrJNyYT6Ehky_TIyQA:9
-X-Proofpoint-ORIG-GUID: HGIGH1NbBthG0r622ky8b0GChPiGIT2p
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMTA3MDA4MyBTYWx0ZWRfX7rI1J07mkpBX
- yIO6OagIiJhNL6OIcCq85p9eGS8SV9drdKL4PUhDsd5pOxeEM2DBlRAdt2I0S7mpRWvc71rayja
- x/eVh72gPCsucP+jtayQlV8J9LGryNr9wPxcGTcgpIYMh7IBzEk0qcy6jRxcUEEfAOOLaA+hflz
- jxou2cuk/QKNvQuv7YgCIuuR4USzV4hBdLWC/+BOOpXVZrY7zJjW7I+X/LpQ7ieykvpsMmfU+3V
- BatB27Jd1eBvbtYB2a1Y6lK+fc67equ+Pc2GlWOzcKMYfi3cHhlAL7jofE5+h7UsYqdPOt1H3d9
- GO/TDMA7+n9RDVNhDt5DwK5MeXkvwTpfIeyPyGJSu55JBa+lG8LTXs02usIrUlCSZL7CsgVuGKz
- yn7LovVmNAR6NkCQmayhbinfMbmbwdsCb3cUydwcuLs74YnwTzPE5ZZJS2PBhfJEaURRNxDbg01
- 3nmlcPAlnckoWIbkXOg==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
- definitions=2026-01-07_01,2026-01-06_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- clxscore=1015 suspectscore=0 impostorscore=0 lowpriorityscore=0
- priorityscore=1501 phishscore=0 adultscore=0 spamscore=0 bulkscore=0
- malwarescore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2512120000
- definitions=main-2601070083
 
-In case the lvcreate operation fails, we don't catch the error and
-proceed as usual. The test then tries to wait for the LV to come up
-but it never does, causing a hang.
+On Tue, 2026-01-06 at 21:58 -0800, Christoph Hellwig wrote:
+> On Tue, Jan 06, 2026 at 06:09:24AM -0500, Jeff Layton wrote:
+> > On Mon, 2026-01-05 at 22:28 -0800, Christoph Hellwig wrote:
+> > > On Wed, Dec 03, 2025 at 10:43:09AM -0500, Jeff Layton wrote:
+> > > > Mostly the same ones as leases, but some additional tests to valida=
+te
+> > > > that they are broken on metadata changes.
+> > >=20
+> > > Under what conditions is this test supposed to actually work?  It see=
+ms
+> > > to consistently fail for me even with latest mainline, which is a bit
+> > > annoying.
+> >=20
+> > There is a patch that is not yet merged:
+>=20
+> Thanks.  Also what is the story with generic/786 on NFS?
+>=20
+> It seems to constantly fail for me:
+>=20
+> generic/786  5s ... [   17.862569] run fstests generic/786 at 2026-01-07 =
+05:29:40
+> [failed, exit status 1]- output mismatch (see /root/xfstests-dev/results/=
+/generic/786.out.bad)
+>     --- tests/generic/786.out	2025-12-18 06:25:33.420000000 +0000
+>     +++ /root/xfstests-dev/results//generic/786.out.bad	2026-01-07 05:29:=
+47.576897353 +0000
+>     @@ -1,2 +1,3 @@
+>      QA output created by 786
+>     -success!
+>     +Server reported failure (1)
+>     +(see /root/xfstests-dev/results//generic/786.full for details)
+>     ...
+>     (Run 'diff -u /root/xfstests-dev/tests/generic/786.out /root/xfstests=
+-dev/results//generic/786.out.bad'  to see the entire diff)
 
-To fix this:
-1. Add a check to ensure SCSI_DEBUG dev is of required size
-2. Additionally, fail if there are errors while creating the LV.
+Mea culpa.
 
-Context for completeness:
+I missed the fact that directories have a different set of
+file_operations on NFS here, and those don't have the ->setlease method
+set. It's a simple fix, but it looks like I'll need to do this in some
+other filesystems too. I'll send a follow-on series soon.
 
-This was noticed when we accidentally used CONFIG_SCSI_DEBUG=y instead
-of =m, causing it to create an 8MB SCSI debug device. This led to the
-lvcreate operation to fail with:
-
-  Insufficient suitable allocatable extents for logical volume lv_108: 68 more required
-
-However the test never caught this resulting in a hang.
-
-Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Reported-by: Disha Goel <disgoel@linux.ibm.com>
----
- tests/generic/108 | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
-
-diff --git a/tests/generic/108 b/tests/generic/108
-index 4f86ec94..05d743a9 100755
---- a/tests/generic/108
-+++ b/tests/generic/108
-@@ -50,6 +50,11 @@ SCSI_DEBUG_DEV=`_get_scsi_debug_dev ${physical:-512} ${logical:-512} 0 $size`
- test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
- echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
- 
-+got_size_kb=$(_get_device_size $SCSI_DEBUG_DEV)
-+
-+[[ $got_size_kb -lt $((size * 1024)) ]] &&
-+	_notrun "Need SCSI debug device of size $(( size * 1024 )) KB. Got $got_size_kb KB"
-+
- # create striped volume with 4MB stripe size
- #
- # lvm has a hardcoded list of valid devices and fails with
-@@ -60,7 +65,7 @@ $LVM_PROG vgcreate -f $vgname $SCSI_DEBUG_DEV $SCRATCH_DEV >>$seqres.full 2>&1
- # We use yes pipe instead of 'lvcreate --yes' because old version of lvm
- # (like 2.02.95 in RHEL6) don't support --yes option
- yes | $LVM_PROG lvcreate -i 2 -I 4m -L ${lvsize}m -n $lvname $vgname \
--	>>$seqres.full 2>&1
-+	>>$seqres.full 2>&1 || _fail "Failed to create LVM lv"
- _udev_wait /dev/mapper/$vgname-$lvname
- 
- # _mkfs_dev exits the test on failure, this makes sure test lv is created by
--- 
-2.51.0
-
+Thanks,
+--=20
+Jeff Layton <jlayton@kernel.org>
