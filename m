@@ -1,39 +1,41 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31A7A22689C
-	for <fstests@vger.kernel.org>; Sat, 10 Jan 2026 01:34:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 177E621CC62
+	for <fstests@vger.kernel.org>; Sat, 10 Jan 2026 01:38:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768008893; cv=none; b=lK60ksNEYkBZO/WdH6hS1rZvp6g6TJCFsLvQReNUqmQU5aGJt/uw+LRQpfnZGjmTK7NYmhHDYY+K5mQB3ZTWVz707+o1KzX4ZgKHEEY1qHKThLqS2SE8YBWtaKSmqE7atqWez4Rdbnsw2fISq6mTgorqFK/FO9VyaAswWjErqfI=
+	t=1768009083; cv=none; b=DR6UNIdJv3uUQlCHbMeQiZEFfSmzE802sGlKcN2AXjDifqqOTi11nCLBkm+Q9NNx4gwJI2zwnQPpgM64TBECP5nHbKGoJX+7V2QKBXEljLB+ntsRxElzlAi2e6CBlApIDNs8M5kjrkuymDA95SUizqMBR0qSA6H/UyrNcFjMnKo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768008893; c=relaxed/simple;
-	bh=L3Bsg9YguiSw8jrViTqIRgr5edrfbTEKF7ddMrq9yfg=;
+	s=arc-20240116; t=1768009083; c=relaxed/simple;
+	bh=1SLFpiBB9qlYA2B0NL1BDi/rggkL1u617yITITr0y8U=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=sZm2V8PIaSSAtyPXfEpn2vqHD3TcqexAtCqMSpVZPeoDQHZGqKRMLgNV+eWa/rhcepprJgRpq77FAOef0wI30YUzGV4Mf1yMBt3Kk0U3JVypbRuVp3Ma0vtE7RNqwH+gL+S6KGR6L1VgAetIEe+Pg5gzL7e8M9geLDYevbg4zPg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RYxuqZp0; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=nZxeY/1TAtR6nvZ4/R4+6f49TgOEwZm46gj2isZD9M09ybaz3xLlOngtohtOZpvRjsW1Ha9vLgNuf+Y+dP2b+csgvKd9c+Kc4x3qy1rvg/CS0e6x2u9gShYITD2Mnm74jDK3O/fvH9JdgYldK4Q45wMw6DjAK1bzKoLPQt9RNY0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Oi1Verq7; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RYxuqZp0"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B6812C4CEF1;
-	Sat, 10 Jan 2026 01:34:52 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Oi1Verq7"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ACBECC4CEF1;
+	Sat, 10 Jan 2026 01:38:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768008892;
-	bh=L3Bsg9YguiSw8jrViTqIRgr5edrfbTEKF7ddMrq9yfg=;
+	s=k20201202; t=1768009082;
+	bh=1SLFpiBB9qlYA2B0NL1BDi/rggkL1u617yITITr0y8U=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=RYxuqZp0P0nVYRvveNZRe84osqJQfrpZvG0cxaCX5J89qYjmODLw8C6YVk97MU1++
-	 KgXoRGLCB8xcqjvs6C/vb7p7adtZhIsWZrhRAWDUV/rWK94KiQGatRYrU+a75UVNSN
-	 887gHGv5Gj8mGh7DuvzFU4PXAdi+Dc8maQsCyc0ydeK9wqf2XDv25gnYHx1BqUU6Xm
-	 +RnAax+2mCDIhCGNNlDoLJ6apmIBPDsfil4Rn6etFTP4DOpCORnLowgqkPI29gVmO+
-	 LBaWQAOg+Dlm2wGPNpIZ8oootcjGX2cTUuj1aGML4pdVojSXfhLvPIgGkuT/CFJR/k
-	 k8KAjYWs+22dg==
-Date: Fri, 9 Jan 2026 17:34:52 -0800
+	b=Oi1Verq7l28rgBZS0fdU8RQi8LroRuewJ7vxMwnvhk2UZTZIe+fjDgG4P030svuE1
+	 +ps94EWb+TaZadLPigaYcvWLoOwMmHWhUbaDIrF+TVp7mjhGGgRCl96CANiWe8J+pn
+	 V63rpkMTjPE8RFXGAEexcPft44JIWW0UEkoo8jG6QMXtJ9U4sxsHsQqZSY2mDlhM15
+	 CweqTULTjSOyIf++GSCM0JRQRcV1C1/LgmFa4soUSr1wWwyNeVX8mlq59YfcM9CcOF
+	 YroYxBdYyLJsnM3Feetuomr/L8+a2+qLvw8UqVKi2YscCm0gRxzECZnVUQAvz8RhRg
+	 GAbsR4KIlJU+g==
+Date: Fri, 9 Jan 2026 17:38:02 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-	Disha Goel <disgoel@linux.ibm.com>
-Subject: Re: [PATCH v2] generic/108: fix test hand upon failure to create LV
-Message-ID: <20260110013452.GA15541@frogsfrogsfrogs>
-References: <98f8ef5ff92632a0be336a563ebda36cfe898348.1767782181.git.ojaswin@linux.ibm.com>
+To: Joanne Chang <joannechien@google.com>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	Jaegeuk Kim <jaegeuk@kernel.org>,
+	linux-f2fs-devel@lists.sourceforge.net, Chao Yu <chao@kernel.org>,
+	Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH v3] common/rc: add _require_blocks_in_file helper
+Message-ID: <20260110013802.GB15541@frogsfrogsfrogs>
+References: <20260108022501.754320-1-joannechien@google.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,67 +44,83 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <98f8ef5ff92632a0be336a563ebda36cfe898348.1767782181.git.ojaswin@linux.ibm.com>
+In-Reply-To: <20260108022501.754320-1-joannechien@google.com>
 
-On Wed, Jan 07, 2026 at 04:07:44PM +0530, Ojaswin Mujoo wrote:
-> In case the lvcreate operation fails, we don't catch the error and
-> proceed as usual. The test then tries to wait for the LV to come up
-> but it never does, causing a hang.
+On Thu, Jan 08, 2026 at 02:25:01AM +0000, Joanne Chang wrote:
+> generic/735 attempts to create a file with nearly 2^32 blocks. However,
+> some filesystems have a maximum file block limit below this threshold.
+> For instance, F2FS is limited to approximately 2^30 blocks due to the
+> capacity of the inode. So add _require_blocks_in_file helper to skip the
+> test in such cases.
 > 
-> To fix this:
-> 1. Add a check to ensure SCSI_DEBUG dev is of required size
-> 2. Additionally, fail if there are errors while creating the LV.
-> 
-> Context for completeness:
-> 
-> This was noticed when we accidentally used CONFIG_SCSI_DEBUG=y instead
-> of =m, causing it to create an 8MB SCSI debug device. This led to the
-> lvcreate operation to fail with:
-> 
->   Insufficient suitable allocatable extents for logical volume lv_108: 68 more required
-> 
-> However the test never caught this resulting in a hang.
-> 
-> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> Reported-by: Disha Goel <disgoel@linux.ibm.com>
+> The helper uses a hardcoded constant instead of a programmatic method,
+> so that bugs which affect the maximum file size are not masked.
 
-Ooops.  Yeah, I think it's a good idea to check the scsi_debug size and
-to bail out if lvcreate fails.
+Not to mention trying to create a file with 1,057,053,439 blocks
+allocated to it would probably take forever.
 
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+Hang on, we're talking about iblocks (aka the number of blocks allocated
+to this inode), not the maximum file size in blocks, right?
+
+If so, then maybe this function and its comments should
+s/blocks/iblocks/?  Or am I confused? ;)
 
 --D
 
+> Signed-off-by: Joanne Chang <joannechien@google.com>
 > ---
->  tests/generic/108 | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
+> v2 -> v3: 
+> - added explanation for using constants to commit message
 > 
-> diff --git a/tests/generic/108 b/tests/generic/108
-> index 4f86ec94..05d743a9 100755
-> --- a/tests/generic/108
-> +++ b/tests/generic/108
-> @@ -50,6 +50,11 @@ SCSI_DEBUG_DEV=`_get_scsi_debug_dev ${physical:-512} ${logical:-512} 0 $size`
->  test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
->  echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
+> v1 -> v2:
+> - changed title from "generic/735: disable for f2fs"
+> - used a new helper function instead of _exclude_fs as Christoph Hellwig
+>   suggested
+> 
+>  common/rc         | 16 ++++++++++++++++
+>  tests/generic/735 |  1 +
+>  2 files changed, 17 insertions(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index c3cdc220..e92f4854 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -6120,6 +6120,22 @@ _require_file_attr_special()
+>  	fi
+>  }
 >  
-> +got_size_kb=$(_get_device_size $SCSI_DEBUG_DEV)
+> +# Require filesystem to accomodate enough blocks in a file
+> +_require_blocks_in_file()
+> +{
+> +	local blocks=$1
 > +
-> +[[ $got_size_kb -lt $((size * 1024)) ]] &&
-> +	_notrun "Need SCSI debug device of size $(( size * 1024 )) KB. Got $got_size_kb KB"
+> +	case $FSTYP in
+> +	f2fs)
+> +		if [ $blocks -gt 1057053439 ]; then
+> +			_notrun "$blocks blocks per file not supported on $FSTYP"
+> +		fi
+> +		;;
+> +	*)
+> +		;;
+> +	esac
+> +}
 > +
->  # create striped volume with 4MB stripe size
->  #
->  # lvm has a hardcoded list of valid devices and fails with
-> @@ -60,7 +65,7 @@ $LVM_PROG vgcreate -f $vgname $SCSI_DEBUG_DEV $SCRATCH_DEV >>$seqres.full 2>&1
->  # We use yes pipe instead of 'lvcreate --yes' because old version of lvm
->  # (like 2.02.95 in RHEL6) don't support --yes option
->  yes | $LVM_PROG lvcreate -i 2 -I 4m -L ${lvsize}m -n $lvname $vgname \
-> -	>>$seqres.full 2>&1
-> +	>>$seqres.full 2>&1 || _fail "Failed to create LVM lv"
->  _udev_wait /dev/mapper/$vgname-$lvname
+>  ################################################################################
+>  # make sure this script returns success
+>  /bin/true
+> diff --git a/tests/generic/735 b/tests/generic/735
+> index 9bbdf3a1..2fbf125c 100755
+> --- a/tests/generic/735
+> +++ b/tests/generic/735
+> @@ -22,6 +22,7 @@ fi
+>  _require_odirect
+>  _require_xfs_io_command "falloc"
+>  _require_xfs_io_command "finsert"
+> +_require_blocks_in_file $(( (1 << 32) - 1 ))
 >  
->  # _mkfs_dev exits the test on failure, this makes sure test lv is created by
+>  dev_size=$((80 * 1024 * 1024))
+>  _scratch_mkfs_sized $dev_size >>$seqres.full 2>&1
 > -- 
-> 2.51.0
+> 2.52.0.351.gbe84eed79e-goog
 > 
 > 
