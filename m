@@ -1,42 +1,42 @@
 Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 709EE221F0A;
-	Tue, 13 Jan 2026 16:02:12 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E22CD221F0A
+	for <fstests@vger.kernel.org>; Tue, 13 Jan 2026 16:02:41 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768320134; cv=none; b=g0rzT3WebOFeQZUhD45Ar3zdcr0Vqiapayg+/7s9HrxN42rbw5Qu71msOVj3gnkw7qBKVipAPH9Qo4/ipfInw58UMw5BfbEj4z7XfqzXxf2P9hC3vDdjkvtcEMYQdabOZlC7hcoYOnF3Bp2cXhWoMGPCa3JqK7ed+US1UUbceBI=
+	t=1768320163; cv=none; b=W9EAsMIVNKONnQnSHsu/bWufFJ0BjoFrnbicyoHmuTP+C4+OP99swOMVS4UmIQgk+ddDXe3BZw0CBiWmmWxi37PZOXWzbp4BEEPttur2vvnHeVs9E6rEl9RzGqSKbh40dbhvQys71gPO/Xc38vxScJFR041v7b8I390h+XPV7lg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768320134; c=relaxed/simple;
+	s=arc-20240116; t=1768320163; c=relaxed/simple;
 	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=D7GEr3vZDBLHpr1VCYlNsemVJ94StFj0LrIUbBaOubzCSxOOny8aEMHgQY+xFXSNW/VfSV+0f+3qPd/S6Oe3QM/F6Kyprc9mGxtlbMeuuU2y9vP5SaHYZm8KStdDQinSAymg/LzndfbnTf0cTexrucsU/ZgajzbVaVp0yyeXfzQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=djYwGuIG; arc=none smtp.client-ip=198.137.202.133
+	 Content-Type:Content-Disposition:In-Reply-To; b=jwQiIt0gTLgyJ3X2rGsDV/4+Os9wzaf3hzeF1q3mI3GT1uGAaLtdskxD2yqblQmSzL0+LX099vHfez1L4lHZDbEsWIvSFZP2f/Njb49qBbtF/roMrafn2uG7Bpu81C4X6rqsr1I4NOWPgwhfvOm1jcHJoloTQSxN7ea/KW6Me10=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=fGsUEXXj; arc=none smtp.client-ip=198.137.202.133
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="djYwGuIG"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="fGsUEXXj"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
 	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
 	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=djYwGuIGTafOzPYMOKUUbdIrLa
-	ILYy0/8tsChJZBBu1FerweqUvnWZ3JPq1voC+wbY7tsz4YFZwokf0N0NvkwtlNx3gViG6VmLBYGMJ
-	anviHlCDEMvleUK3Aj9kXyiQGQdujbZUdS438AGSjpAcPRpC1wYs2VyRa89z3fUsa/QFOHsdRD/lQ
-	nIJdvrlmY3hMaS06k3lhxmcpmm0KpvXvIlPaKMzdnyg+eL9i5u61azZRzT1isVyWI5AWkyyxfQDhQ
-	RAIb/hsXx08IEeeLg2Gzr5WeraArY+TYBIeNgJlQ06/h+azvJq20wqMSrgmCVrVW2wG3nRqM3z5OI
-	vAt+/Bdg==;
+	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=fGsUEXXjoAqpLlnxpQ2glMDoR9
+	eMe7Ca+b8iNGYvAjfV+N6w2ULEus0a1xneszG8jPQH/9Ku/BkYmnoqPtQoaDcFezjNH5YLfsgAubF
+	HJiPeZGt83TKaMEe5zi941stXiS6jyzk7zlwe8zn09zMZqf2aO7sleYugTZQG0yeLgy6vfL5Czx0U
+	ThNBESZjvQ0zTiO+tIfRN4ZtZU7hv9Ej1EztMzkN6re55thfQ2Q2Pq0VphvJ8rmEumT+ui9FbCXiG
+	icFD07gzTuWHqehpkDRbpBJ9Gq/7XmTPHR6WAfWttJ8kOh+fS0jX/CWOXZsJMXLZ6xLJrNtB4mUIk
+	RKXHb3Cw==;
 Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vfgqR-00000007R4x-3mcK;
-	Tue, 13 Jan 2026 16:02:11 +0000
-Date: Tue, 13 Jan 2026 08:02:11 -0800
+	id 1vfgqv-00000007R6B-1srq;
+	Tue, 13 Jan 2026 16:02:41 +0000
+Date: Tue, 13 Jan 2026 08:02:41 -0800
 From: Christoph Hellwig <hch@infradead.org>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] fsx: add missing -T option to getopt_long()
-Message-ID: <aWZsg2N06upcVfq9@infradead.org>
-References: <dcbecbe996375e0f04962aa2e1a97ade927ecf74.1768225429.git.fdmanana@suse.com>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+	Disha Goel <disgoel@linux.ibm.com>
+Subject: Re: [PATCH v2] generic/108: fix test hand upon failure to create LV
+Message-ID: <aWZsoW3eXseFFpWO@infradead.org>
+References: <98f8ef5ff92632a0be336a563ebda36cfe898348.1767782181.git.ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,7 +45,7 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <dcbecbe996375e0f04962aa2e1a97ade927ecf74.1768225429.git.fdmanana@suse.com>
+In-Reply-To: <98f8ef5ff92632a0be336a563ebda36cfe898348.1767782181.git.ojaswin@linux.ibm.com>
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
 Looks good:
