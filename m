@@ -1,88 +1,89 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C6602192F4
-	for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 17:53:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E79122C2368
+	for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 18:05:28 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768758818; cv=none; b=Huonl3zDvarVNWgBI7JvKR2XMlPAsq3f2/c6zTyn/MAgpZTW0m6lkfxUPxsheVjpkxR+Q0TskVO4bYDA6o1yW6+OvPCD+GtDaaAFQ2Do83DQjBcQfPadbo/V/SBQr+yWSno1mknGhBGF5tL43lwU05tbwnCL2dtwiDCeu96wCeI=
+	t=1768759530; cv=none; b=i1JahB0faiPZi4etafkY0Fh189506wBWdiOg810z7q2oAPOqsbSyD+C6cMKkKtCedBcTbyg+clT31KF8XHf2Wtg2Jj8wCoVPffcUHVPqxhUHp9gv885pISk1iDbTWXT/CMiPNGIHGAJoS/x2OD4DnURJqf/PPHBycWc1mU7DKBY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768758818; c=relaxed/simple;
-	bh=OBY1fwyKD+/rPwGzjvs0OjCfeLmAtP2pCzQUeiPLIQo=;
+	s=arc-20240116; t=1768759530; c=relaxed/simple;
+	bh=EBopMWp3Nu+B1DwCwjkUZBZPU5R58050Bh9WTkE2Jvc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EA4wdt2ZjVq69xDZLDdOrYPF5wBxo4HHMjbKXfoaHNTrXllpDla+KCN1LP4uewGLqk8NPluJeaUgkhZVFjffs2o3LZ9C5H3SVR0wxLMHAJTOHSv4HYn8XO+fi0VVwOJFXpYYwXN3ov+BFsiERY1J/MeOx3jCc17XeQ59CRuf4uo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=PS7ogtB8; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=HpqEbG+A; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=qN2/BxlhmEV+gHKbHEwxkHBc0W5bPiPWyFLILLgYO1p3Iw9ZCY0leyGkepX79Wliibk4ATw8rEOtGVEM+fOMGGXV8ahb5WBWZid/U0AfAYzbglvNxo+ZxWm3XeS2Ueo89hcqFSqUr51tMD7HiXGISEs/y3gjFSqWhRWtirQ9vHs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=EBsGZHWG; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=q1f6rTjs; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PS7ogtB8";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="HpqEbG+A"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="EBsGZHWG";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="q1f6rTjs"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1768758816;
+	s=mimecast20190719; t=1768759527;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=cCduauureZNvluvTgXiZCfmGyf5eIIhlYcj7VXYOhQ4=;
-	b=PS7ogtB8ks3TsR2GLeGsZT7S3Ko4LHnPuY3XeV8UTZgbkLecrmjQRPIeGgODpmdMJKMipf
-	PVs/WYDk7g/bsz6fOCuwzr+tMbaYuqiyA2m+wjc9N6EtTiH7rau4obrz2wZ9LYC/wpKX1P
-	rInyZgHtQzX/KVliQe4Nb7mav6W0Acw=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=7GTIcWu2ZHoot7uN0uZ+bnOWWdj0iWA6yylYTcRdXwU=;
+	b=EBsGZHWGKZ1LsTIJSwkZDIvChMAb4E+IfXi+PCdVtzZY8TSKqLk35Yw6HGa4YUW4Ragmmx
+	DwLmlaLBUqSweX/V7uevd5SdEox11sdD48ax3/okEc1oHjNN8ShKtk6trvXBqn3DkKt6Cv
+	6gfE7trBZaDGUpyjvN5G5TdyyNSAq4w=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-189-eaLVz0pFMGurtxhw6QLWkA-1; Sun, 18 Jan 2026 12:53:34 -0500
-X-MC-Unique: eaLVz0pFMGurtxhw6QLWkA-1
-X-Mimecast-MFC-AGG-ID: eaLVz0pFMGurtxhw6QLWkA_1768758814
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-2a089575ab3so30547235ad.0
-        for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 09:53:34 -0800 (PST)
+ us-mta-149-SJ-pPx4eNqivzoAAM6La0w-1; Sun, 18 Jan 2026 13:05:26 -0500
+X-MC-Unique: SJ-pPx4eNqivzoAAM6La0w-1
+X-Mimecast-MFC-AGG-ID: SJ-pPx4eNqivzoAAM6La0w_1768759526
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-34c37b8dc4fso6756805a91.2
+        for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 10:05:26 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1768758814; x=1769363614; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1768759525; x=1769364325; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=cCduauureZNvluvTgXiZCfmGyf5eIIhlYcj7VXYOhQ4=;
-        b=HpqEbG+AaNs6JZZd9OG/yUKtfDjNsqBeXvt+vtOO+UnZs8X7oKBwY+RcVfkGuB6KMP
-         bqlZ/9A7x2nMehX6zeviUfNMYxH78aFOqMXvkWZp9iVH583W1SKSVavrblXsXdIYW7XM
-         5/8YR/Ehy7bPap8o0npCM4csMaofdOnDqoKPdiNeK3fYJh/WQ2hl/lybGBvUEmAUfY3G
-         emlQXuiIdxF5BWfPzHaYfdJe1ZEhDF3+PBqwGJDDkklxUlJpUU4ALmTjc2jRYw74xSs8
-         U3pcOyQykCnjCZf8VK7ZjFrvPuUGmso9zpRnGM95XOqVYPd1A+c8ZR8gm8ufb8dQUnVy
-         7cLg==
+        bh=7GTIcWu2ZHoot7uN0uZ+bnOWWdj0iWA6yylYTcRdXwU=;
+        b=q1f6rTjsFDgqgifOi9+xYaacb6XBGgqXkQ3n55HgfyPKULlheeIsBrqYHZ2txHymvY
+         yvA/VPxqYt2aeqdFZjwdmAp58mAwwUNIANUyF4gCAVMSXvjLh9Tz1NdbS+5dHGPzexA5
+         bESxX4GxXoHbl5dazodi5H2IKnnTaHQFNR1PwA9biB3xSXGwhkWgNs06SwTKpvGVDZvQ
+         nWYXs35CmzVysvkV1XSdaZ/r3palFXQcXkhNovhhLjEUtefTxan0ADPPdmyrlizNGP83
+         5yvLr17+nif7wSg0baUp58eB0IJbLdqTV9nGoa8WzpDXYbzv5yxl+LTM3UhbD5hUknSm
+         8fbg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1768758814; x=1769363614;
+        d=1e100.net; s=20230601; t=1768759525; x=1769364325;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=cCduauureZNvluvTgXiZCfmGyf5eIIhlYcj7VXYOhQ4=;
-        b=DLMeKuDxrCRSYNs+IEoEGFzseaTUPmYa4OkBgHH95eq2U5QQVCddFKpbDwZed6nLxE
-         rWAt1TR55fs65BC4l35iBByaFFcwicOyaKTMgBBQlbY1RimmQpURmO+Mf5WWDmdUGtr7
-         eXwpiLxkP/oeLVUZcSFQncrqPvcojiE9MB9Edfny+OFZj6dBpFmGGYVsWPXy4SUsusG3
-         KqU7aG+dznwXxPqjCPvW4feYrH71FB1C3rbfuhApz+P0CmHNyP5qaKICPiEfzALjygsb
-         a3LE9cM07x/Z5w6I0Znciry/Id34sOixmbGJokSLlKoMRAlvTl1kqnN9VuPeoE423gtp
-         EF+A==
-X-Forwarded-Encrypted: i=1; AJvYcCWbfqYyOKAYLtX5VNrTHu0kgFBkUOrVdx1cEHWbwim5ZZCSEykeEEOGI1DQFn5nKgoewv/xNGrn@vger.kernel.org
-X-Gm-Message-State: AOJu0YyLcEGzQ5V8JhOgJZlntytuGoDU5NMqONlQpuCQqi259UWUJ8RB
-	VV/+JOts9Vtx0MNGXRF7xF4+L9em0W0WZi6U1wH2cHrTwwdfcgYhCyRfM1kTf+GQ4En7TLKbAr7
-	oFkIij8S3cC9BYQp1HUl2gg2jcHf74kaOR1blmwHxBSDyG7uHJr2RFaN/1FM=
-X-Gm-Gg: AY/fxX4tQU7dWrtxtqu1RDLOS39Tz9f+RO28aDxntC+Wtn2LxPvSgWwAHt6jSJ7gSrh
-	U8E9RHieLwmDCiwftWyMoPRDDFFcPMoKrluDX3+WLrWXqThujWuzrtMki2ruEc7Z8ars5/ujVFp
-	hDu08Vp1Ldas3obJ6HmRHIYnEfhA/f+veiUsaKN6o4mu5HpTvwEIRAoQ31xi6pliDuonPfy8KXS
-	+8mb9dJ5v/wi0RoST3fCtRRSBgxecH/kXZQ7GTk42HquDmiwLTJ4S29vq5F9d9Q/eoaSRj1OnSY
-	rG5HT84enobpNAPvWa8I53x8AECWcfi76elF2h0Fc9e+2NBDsO7P3QzEweQIIVhwBvhoA78y8lq
-	SqavLesfnRaK8myUfCux95P9Y6s459TbZlPSKftJhBobqBJ/eSw==
-X-Received: by 2002:a17:903:22c3:b0:2a3:bf5f:926b with SMTP id d9443c01a7336-2a7176c7cf7mr97097105ad.47.1768758813692;
-        Sun, 18 Jan 2026 09:53:33 -0800 (PST)
-X-Received: by 2002:a17:903:22c3:b0:2a3:bf5f:926b with SMTP id d9443c01a7336-2a7176c7cf7mr97096955ad.47.1768758813242;
-        Sun, 18 Jan 2026 09:53:33 -0800 (PST)
+        bh=7GTIcWu2ZHoot7uN0uZ+bnOWWdj0iWA6yylYTcRdXwU=;
+        b=bKAfmY/Bq+st2Wg3f0nU5pqyrNbULIg+1ot6no+SdzNHHF8amq6n6pf2fXXWeS+DoW
+         s9Glsko99JiXqmbnqgyk+3We9CYUI7yvYXGy1f/tbMmmq/L2FfHmruFNm8gqF4Ce3AON
+         ddtAFot0hALA7pSj56WAmgds16Nrh1s9Bd/+3CXutEzViCndiUYkqcaGWYiYGHtD9PuA
+         h+4YO6BjTFH0oYNTgkhDxalibw9qQicZE+OSK4zRHYY/hsEPROOHt/uGFMhC8NtJnpIe
+         7GRNqcuHDPfmo/vwdWg6SWhNmaSzbp7VjSOHGlYHcZQmrjIKFSal4eofwKNEH/PNivQY
+         0lQQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVYpxCQg+dxWYRnZ0kQCOLFjiMan4sMpEAUN+LvoEtooRxn/wQkN1aJCQiWRz0L7AKRJe7ivzY+@vger.kernel.org
+X-Gm-Message-State: AOJu0YzndJzsAW0MlqJaXqUG3X5THeAxOU9xFJ34zIo2/GNzUI9TKmeZ
+	Ku3JdLNKGA0dOeN+xQrqVnjr2vKyarNGNe6LPhbkmbUAFdFtrUJ9XugtPeBJ5mEZ4XX5zsjGMuZ
+	JW8lhNpEckDsKsPnWXseG6FPOLcww/bCqpA+MKQrt93blCWjUDTWNHuqFrN4=
+X-Gm-Gg: AY/fxX70UlEvpxdB+rCKrVO9qF+w/X+s7ATAzQ/vKvuIq4WAhXpmOWZcrpnWZDW8k4r
+	4SHl2oV8xzHMAOKnEkkHJacQWc4tIvyQdC+tlcXjYoza35gnpiPQNS9W5n3DiuAgJQotz9JeVtS
+	NyHyHfS0iXntnjxfDcVVYNBqbpwiw8/u/lRZFuAbSP1G5cg6Re/dmAfwv7elAAwJ1jdWFU+a6QT
+	fSAIpH7SiP6FIwaOeZtblEwXHxNBIUwKzSt3Q+Ev+IDrdrH//yl6FHGkY/a3XFBaVoR9wI6oHeg
+	j1JDqNTo8+Y7injkhydcBIKAOm5/rlOtNzEI0W5hZd46q9kYI3d2uPJ+urPBFx0H32Wlv+rJmtW
+	37m5A0GLzijY1/asCcdkG1EsqAvxiAFeNrUVje4udB3Bsjhg90w==
+X-Received: by 2002:a05:6a21:328c:b0:38b:e88e:ad1f with SMTP id adf61e73a8af0-38e00d5d087mr8300941637.47.1768759525532;
+        Sun, 18 Jan 2026 10:05:25 -0800 (PST)
+X-Received: by 2002:a05:6a21:328c:b0:38b:e88e:ad1f with SMTP id adf61e73a8af0-38e00d5d087mr8300922637.47.1768759525007;
+        Sun, 18 Jan 2026 10:05:25 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2a7194164dfsm70048055ad.88.2026.01.18.09.53.30
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c5edf354b16sm7027939a12.30.2026.01.18.10.05.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 18 Jan 2026 09:53:32 -0800 (PST)
-Date: Mon, 19 Jan 2026 01:53:27 +0800
+        Sun, 18 Jan 2026 10:05:24 -0800 (PST)
+Date: Mon, 19 Jan 2026 02:05:19 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Luca Di Maio <luca.dimaio1@gmail.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, djwong@kernel.org,
-	hch@infradead.org, david@fromorbit.com
-Subject: Re: [PATCH v6] xfs: test reproducible builds
-Message-ID: <20260118175327.hdevfpau7uifdsb7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20260108142222.37304-1-luca.dimaio1@gmail.com>
+To: Viacheslav Dubeyko <slava@dubeyko.com>
+Cc: glaubitz@physik.fu-berlin.de, linux-fsdevel@vger.kernel.org,
+	frank.li@vivo.com, fstests@vger.kernel.org, zlang@kernel.org,
+	Slava.Dubeyko@ibm.com
+Subject: Re: [PATCH] xfstests: hfs/hfsplus don't support metadata journaling
+Message-ID: <20260118180519.xdddwoke2tey6ogt@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20260106233555.2345163-1-slava@dubeyko.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -91,254 +92,48 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260108142222.37304-1-luca.dimaio1@gmail.com>
+In-Reply-To: <20260106233555.2345163-1-slava@dubeyko.com>
 
-On Thu, Jan 08, 2026 at 03:22:22PM +0100, Luca Di Maio wrote:
-> With the addition of the `-p` populate option, SOURCE_DATE_EPOCH and
-> DETERMINISTIC_SEED support, it is possible to create fully reproducible
-> pre-populated filesystems. We should test them here.
+On Tue, Jan 06, 2026 at 03:35:56PM -0800, Viacheslav Dubeyko wrote:
+> HFS file system doesn't support metadata journaling.
+> This patch marks HFS file system as not supporting
+> metadata journaling in _has_metadata_journaling()
+> of common/rc.
 > 
-
-> v1 -> v2:
-> - Changed test group from parent to mkfs
-> - Fixed PROTO_DIR to point to a new dir
-> - Populate PROTO_DIR with relevant file types
-> - Move from md5sum to sha256sum
-> v2 -> v3
-> - Properly check if mkfs.xfs supports SOURCE_DATE_EPOCH and
->   DETERMINISTIC_SEED
-> - use fsstress program to generate the PROTO_DIR content
-> - simplify test output
-> v3 -> v4
-> - Add _cleanup function
-> v4 -> v5
-> - copy _cleanup from common/preamble
-> v5 -> v6
-> - remove debug typo/leftover
-
-I think it's not good to be commit log, better to move this part ->
-
+> Technically speaking, HFS+ is journaling file system.
+> However, current Linux kernel implementation doesn't
+> support even journal replay. This patch marks HFS+ file
+> system as not supporting metadata journaling in
+> _has_metadata_journaling() of common/rc. If journaling
+> support functionality in HFS+ will be implemented,
+> then HFS+ could be deleted from _has_metadata_journaling()
+> in the future.
 > 
-> Signed-off-by: Luca Di Maio <luca.dimaio1@gmail.com>
+> Signed-off-by: Viacheslav Dubeyko <slava@dubeyko.com>
 > ---
 
-  -> here
+Good to me.
 
->  tests/xfs/841     | 173 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/841.out |   3 +
->  2 files changed, 176 insertions(+)
->  create mode 100755 tests/xfs/841
->  create mode 100644 tests/xfs/841.out
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  common/rc | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/tests/xfs/841 b/tests/xfs/841
-> new file mode 100755
-> index 00000000..5f981d0a
-> --- /dev/null
-> +++ b/tests/xfs/841
-> @@ -0,0 +1,173 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 Chainguard, Inc. All Rights Reserved.
-> +#
-> +# FS QA Test No. 841
-> +#
-> +# Test that XFS filesystems created with reproducibility options produce
-> +# identical images across multiple runs. This verifies that the combination
-> +# of SOURCE_DATE_EPOCH, DETERMINISTIC_SEED, and -m uuid= options result in
-> +# bit-for-bit reproducible filesystem images.
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick mkfs
-> +
-> +# Image file settings
-> +IMG_SIZE="512M"
-> +IMG_FILE="$TEST_DIR/xfs_reproducible_test.img"
-> +PROTO_DIR="$TEST_DIR/proto"
-> +
-> +# Fixed values for reproducibility
-> +FIXED_UUID="12345678-1234-1234-1234-123456789abc"
-> +FIXED_EPOCH="1234567890"
-> +
-> +_cleanup() {
-> +	cd /
-> +	command -v _kill_fsstress &>/dev/null && _kill_fsstress
-> +	rm -r -f $tmp.* "$PROTO_DIR" "$IMG_FILE"
-> +}
-> +
-> +# Check if mkfs.xfs supports required options
-> +_check_mkfs_xfs_options()
-> +{
-> +	local check_img="$TEST_DIR/mkfs_check.img"
-> +	truncate -s 64M "$check_img" || return 1
-> +
-> +	# Check -m uuid support
-> +	$MKFS_XFS_PROG -m uuid=00000000-0000-0000-0000-000000000000 \
-> +		-N "$check_img" &> /dev/null
-> +	local uuid_support=$?
-> +
-> +	# Check -p support (protofile/directory population)
-> +	$MKFS_XFS_PROG 2>&1 | grep populate &> /dev/null
-> +	local proto_support=$?
-> +
-> +	grep -q SOURCE_DATE_EPOCH "$MKFS_XFS_PROG"
-> +	local reproducible_support=$?
-> +
-> +	rm -f "$check_img"
-> +
-> +	if [ $uuid_support -ne 0 ]; then
-> +		_notrun "mkfs.xfs does not support -m uuid= option"
-> +	fi
-> +	if [ $proto_support -ne 0 ]; then
-> +		_notrun "mkfs.xfs does not support -p option for directory population"
-> +	fi
-> +	if [ $reproducible_support -ne 0 ]; then
-> +		_notrun "mkfs.xfs does not support env options for reproducibility"
-> +	fi
-> +}
-> +
-> +# Create a prototype directory with all file types supported by mkfs.xfs -p
-> +_create_proto_dir()
-> +{
-> +	rm -rf "$PROTO_DIR"
-> +	mkdir -p "$PROTO_DIR"
-> +
-> +	$FSSTRESS_PROG -d $PROTO_DIR -s 1 -n 2000 -p 2 -z \
-> +		-f creat=15 \
-> +		-f mkdir=8 \
-> +		-f write=15 \
-> +		-f truncate=5 \
-> +		-f symlink=8 \
-> +		-f link=8 \
-> +		-f setfattr=12 \
-> +		-f chown=3 \
-> +		-f rename=5 \
-> +		-f unlink=2 \
-> +		-f rmdir=1
-
-To match the _kill_fsstress, when I merge this patch I'll change this part to:
-
-        FSSTRESS_ARGS=`_scale_fsstress_args -d $PROTO_DIR -s 1 -n 2000 -p 2 -z
-                -f creat=15 \
-                -f mkdir=8 \
-                -f write=15 \
-                -f truncate=5 \
-                -f symlink=8 \
-                -f link=8 \
-                -f setfattr=12 \
-                -f chown=3 \
-                -f rename=5 \
-                -f unlink=2 \
-                -f rmdir=1`
-        _run_fsstress $FSSTRESS_ARGS
-
-Thanks,
-Zorro
-
-> +
-> +
-> +	# FIFO (named pipe)
-> +	mkfifo "$PROTO_DIR/fifo"
-> +
-> +	# Unix socket
-> +	$here/src/af_unix "$PROTO_DIR/socket" 2> /dev/null || true
-> +
-> +	# Block device (requires root)
-> +	mknod "$PROTO_DIR/blockdev" b 1 0 2> /dev/null || true
-> +
-> +	# Character device (requires root)
-> +	mknod "$PROTO_DIR/chardev" c 1 3 2> /dev/null || true
-> +}
-> +
-> +_require_test
-> +_check_mkfs_xfs_options
-> +
-> +# Create XFS filesystem with full reproducibility options
-> +# Uses -p to populate from directory during mkfs (no mount needed)
-> +_mkfs_xfs_reproducible()
-> +{
-> +	local img=$1
-> +
-> +	# Create fresh image file
-> +	rm -f "$img"
-> +	truncate -s $IMG_SIZE "$img" || return 1
-> +
-> +	# Set environment variables for reproducibility:
-> +	# - SOURCE_DATE_EPOCH: fixes all inode timestamps to this value
-> +	# - DETERMINISTIC_SEED: uses fixed seed (0x53454544) instead of
-> +	#   getrandom()
-> +	#
-> +	# mkfs.xfs options:
-> +	# - -m uuid=: fixed filesystem UUID
-> +	# - -p dir: populate filesystem from directory during creation
-> +	SOURCE_DATE_EPOCH=$FIXED_EPOCH \
-> +	DETERMINISTIC_SEED=1 \
-> +	$MKFS_XFS_PROG \
-> +		-f \
-> +		-m uuid=$FIXED_UUID \
-> +		-p "$PROTO_DIR" \
-> +		"$img" >> $seqres.full 2>&1
-> +
-> +	return $?
-> +}
-> +
-> +# Compute hash of the image file
-> +_hash_image()
-> +{
-> +	sha256sum "$1" | awk '{print $1}'
-> +}
-> +
-> +# Run a single reproducibility test iteration
-> +_run_iteration()
-> +{
-> +	local iteration=$1
-> +
-> +	echo "Iteration $iteration: Creating filesystem with -p $PROTO_DIR" >> $seqres.full
-> +	if ! _mkfs_xfs_reproducible "$IMG_FILE"; then
-> +		echo "mkfs.xfs failed" >> $seqres.full
-> +		return 1
-> +	fi
-> +
-> +	local hash=$(_hash_image "$IMG_FILE")
-> +	echo "Iteration $iteration: Hash = $hash" >> $seqres.full
-> +
-> +	echo $hash
-> +}
-> +
-> +# Create the prototype directory with various file types
-> +_create_proto_dir
-> +
-> +echo "Test: XFS reproducible filesystem image creation"
-> +
-> +# Run three iterations
-> +hash1=$(_run_iteration 1)
-> +[ -z "$hash1" ] && _fail "Iteration 1 failed"
-> +
-> +hash2=$(_run_iteration 2)
-> +[ -z "$hash2" ] && _fail "Iteration 2 failed"
-> +
-> +hash3=$(_run_iteration 3)
-> +[ -z "$hash3" ] && _fail "Iteration 3 failed"
-> +
-> +# Verify all hashes match
-> +if [ "$hash1" = "$hash2" ] && [ "$hash2" = "$hash3" ]; then
-> +	echo "All filesystem images are identical."
-> +else
-> +	echo "ERROR: Filesystem images differ!"
-> +fi
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/841.out b/tests/xfs/841.out
-> new file mode 100644
-> index 00000000..3bdfbfda
-> --- /dev/null
-> +++ b/tests/xfs/841.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 841
-> +Test: XFS reproducible filesystem image creation
-> +All filesystem images are identical.
+> diff --git a/common/rc b/common/rc
+> index c3cdc220..82491935 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4267,7 +4267,7 @@ _has_metadata_journaling()
+>  	fi
+>  
+>  	case "$FSTYP" in
+> -	ext2|vfat|msdos|udf|exfat|tmpfs)
+> +	ext2|vfat|msdos|udf|exfat|tmpfs|hfs|hfsplus)
+>  		echo "$FSTYP does not support metadata journaling"
+>  		return 1
+>  		;;
 > -- 
-> 2.51.0
+> 2.43.0
+> 
 > 
 
