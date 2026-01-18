@@ -1,89 +1,89 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2DFA3241C8C
-	for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 18:30:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BCBD257435
+	for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 18:31:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768761036; cv=none; b=KWedFQFG7qLyyaDqDCAhbO4EWBd5Pn4iQG3/3E33QgrMqxApYGEOdypd95Gev9PWQyLA41Sy0vJtQnie0n5YXrgFRmZPUjy7JuraYFyqqavWnIcOjFzgMfpPB0jTzNNB2JKTew5I7TKtB/YWHVXDAgCV8dSRNgKQGjfHw5vDJ48=
+	t=1768761079; cv=none; b=aVLNZiYue0XEQteDMTkZzhBoPL4gZditTJgZAMJnpzOKBzyELZ1fw5FCiZEOMfuH5VWFyvV7cIm4UfrWqdtcCPksX7F+hfdOUAPaWJriKSjOuCbNFXJWotDQBqDpkBHIXbIOIhwhxR3Lld+XfLSffvInD6uympN1/xDPZ+OcwH4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768761036; c=relaxed/simple;
-	bh=xctVzUnmDdU0FD4ZskHtiGG5Z8wXby3d7Iwq4zHMwcA=;
+	s=arc-20240116; t=1768761079; c=relaxed/simple;
+	bh=p4xbpahW23b6CuP5GAQIEKesjiAvJi4Rd420YvEfLM4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qKbJvdbds6uN+53I+ww7gXWKXguFbaOrSMdyRZpGWLDyvNGn14R/GImpyJEhlEtAL9kuhZAu58Anw4n2VUjclZZhg1FMqLvmlLfwCDvz3vJafUf/jTYnbNrXXIZCmKI35q2tCotDN0hs2cDrhtPuRMgFgU26aIyMuQBGuzLIOr8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=LerLIPeM; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=R+HutaW/; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=Zz1c5g/ZDGIwzugKz5avXVdDo3OcXOT9l+NM99FH0uNWpZ6rhqvAnj5S87Sp4V9u+jQNQ5XGcHUPaPV60s2sKVMUp9hse6ySxU0zy2Fmc2kil6z6PWlYOzXHP6vzfAbLjVAypagBJSBfGAjW1DR/x4QBtEb4yaOZfmrhlnZoYYA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=V7nK/1Du; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=UaE9Gpvm; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LerLIPeM";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="R+HutaW/"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="V7nK/1Du";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="UaE9Gpvm"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1768761034;
+	s=mimecast20190719; t=1768761077;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=3X1KMouVRDZ7Q+OcTSRArrG6BTYnErN1JRr7rEw9494=;
-	b=LerLIPeMK7hMc2uNfz1Mh9Fc2ECQYhwZZdTpN+5dcVOmW4JqiTD3XrP3HnssdtJPYDRKcS
-	fENdQjrF7d4C0vX2Hte+ao565LmiKwb6Ge2vtt4Nlowsg9RB3l0nrRv54iD2zGDArtQYY9
-	B0Rty4B96EWlc42995k1dTaxE3D2Qec=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=PG+WnZVURBwXNb9Mlsn+dS5PAcavg3GNKoQtMm8KL5I=;
+	b=V7nK/1DuVhiyphptTV05MTkNImHoez4FF8HyrGi6CZFE9FHWno7STUk+VkpEUsUQaXNPx1
+	vlUw3Wei42b+GjuU79koKJ+5ILUu3TiQAZwPvEifim2tuJkTvhJmzxkTcZ987rnujdJUEP
+	/25GrVcueJiJy+7ZB3hGXol9Ynfo6Uc=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-159-_imGWbkKPwSgjo72Jf1f6A-1; Sun, 18 Jan 2026 13:30:32 -0500
-X-MC-Unique: _imGWbkKPwSgjo72Jf1f6A-1
-X-Mimecast-MFC-AGG-ID: _imGWbkKPwSgjo72Jf1f6A_1768761031
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2a0c495fc7aso31354335ad.3
-        for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 10:30:32 -0800 (PST)
+ us-mta-621-3fuMxf3OM_64G2tlK3QsFw-1; Sun, 18 Jan 2026 13:31:16 -0500
+X-MC-Unique: 3fuMxf3OM_64G2tlK3QsFw-1
+X-Mimecast-MFC-AGG-ID: 3fuMxf3OM_64G2tlK3QsFw_1768761075
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-34ab8693a2cso6534412a91.0
+        for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 10:31:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1768761031; x=1769365831; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1768761075; x=1769365875; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=3X1KMouVRDZ7Q+OcTSRArrG6BTYnErN1JRr7rEw9494=;
-        b=R+HutaW/agAoRkyc+W8rPRG8qJXlnAy/ogdxYAFjX5DRybMTDQOrk+AXB8jdy3arDG
-         ZKWB6CnZE96GVySJiCxbIFJiIXqtWOZXbLZ5OeAlyBwMPkjAFDEgKxGipe7GFJF49RdA
-         qB5uRIL4EOUx/SPrx39OfY1jzaIAncDD8Mtg63dIQ/MNoP1HRZYmDtYCJMKRybK1XR3C
-         MCqzdVoZ7GlmFyHUcnT6pd9QUTdkUmRBipC4j5672zv2+4oPf9QDBMC/sznuKOAaCMlH
-         IjTs5c8gTgNfFNRrHV7Qot0NDNA0u4zWqlO5w0ujc46Vf576KZgZAeFW4AxOI3nMkOkQ
-         9hhg==
+        bh=PG+WnZVURBwXNb9Mlsn+dS5PAcavg3GNKoQtMm8KL5I=;
+        b=UaE9GpvmPuRdxl0OJDFiOl2bEMOE/xkiNRuKS9Kqb8LVM7FjorQI/ufvrH8as5k9Cf
+         u/22h2+UhosaPZWv4UGUYqpsOjlV6ZZ7S2xNuWhWMrx4KkJzOga6lGUyBpyCpxe0cQ/F
+         DEmXOXXtTeAdEkR3USr7+yflNSJaL0lf1pClBIZ+UwXrEllX4tVv2mGMnVDKDzVO/tNP
+         zWRH2Mc2X0df7bCQd6wfItfC2TdhcwlYs+2gEY0lEP7ADH5qwFrsgzOoomElq3rm4jQ5
+         IamS0/nK76CJC2d3665OG5mVcSEMEN8hUC59s82ap7yvioGujfXgqApTmFu+/UKgr8Y2
+         ocoQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1768761031; x=1769365831;
+        d=1e100.net; s=20230601; t=1768761075; x=1769365875;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=3X1KMouVRDZ7Q+OcTSRArrG6BTYnErN1JRr7rEw9494=;
-        b=GpEzlMMhmI5koKGNGyuU+Uy6KTl8EDBnCUosl6URMa2F4v4cOtf2p8p43UqlQ7FHGW
-         pmVDXgLeQlkT5t65qeyiKVpV/d6KurTFjSR/ivJRAXtHFOOOwkaa/1wXZxxoPp+HJYKh
-         gXWRNg9qiF/wGY0yj+bytxY/3ak3NSEAuGSo2mT6sFi3+PYrJnq4vGNKA4ou3gQlt/eX
-         NvNyu9u1PgIgxuhO4Xxq8AEaWpUs/mrA3qcjvB9/9Biav288nEv7jMbyhE/sNxy96fjv
-         Z01jeLh4b/fS0+u7rYXUoT+LFsHH1cIIEiF9avfInK50bPk84tF89WtGMe3qln4ahqNA
-         QtRA==
-X-Forwarded-Encrypted: i=1; AJvYcCVSRFwOC8FzmxQ5xSNMA40WWw1E4wwTkEssk1UxFDjK1hMrcSmgzkd2xllnrh8SQPr9+SIHs7Bw@vger.kernel.org
-X-Gm-Message-State: AOJu0YzwMIEkUJgSkerB7peWqOALOaToce/DhM88LZp4T8KthsL8mmH4
-	FaD1FvdhozLNOt14J/QL1eHjntRTN0YR4K1VwIZIJEgMHIuoZlfWCcv9KMzcMd20om/u18MOtBh
-	dOA4STIkcCIJeBB2qqxav+2uWcNv5ZZzqLvhoj30PAA9wybtUH3pjtkiPbRg=
-X-Gm-Gg: AY/fxX5hEWfl+nOnyFQbbS2beh3fzKUVQQ1pGO5EMdOz0YT3s7Nf3oYPLw7ydkvn15u
-	wfTu9N5LEEzgtoBvItD5ZI+/sYLjb4vKgrWYFMfnekN9gsqDuGkJljWDgStk/VN4agxJSIRcoTY
-	8UyA5v82BtxQ0hkkTk1nsafwNVtYtYN9qbo1df7qlGjA6eTqd5KbGXdkGKOmXK893fDqy5NMhSQ
-	u5lqX/Ix4hBRn/JH0YJwIyRURsHv6jbnok1mrjNYkfarmijfk6WG5/CtbDUfwW5tSEH3jFAHf8S
-	hp7s97W1/bZETBbBW7wHeTUY4eE7MiTkxXz8PFlNl3TT8V66Z3Z0YiS9/ekYTsdfdvZWswqrBKg
-	Ww0xp0s/RQ/3ebnm7KraOMacW+U/RpX1lmZOkU73SiNEJpzwQAA==
-X-Received: by 2002:a17:903:124f:b0:2a0:d5b0:dd80 with SMTP id d9443c01a7336-2a7177d3737mr85656515ad.54.1768761031316;
-        Sun, 18 Jan 2026 10:30:31 -0800 (PST)
-X-Received: by 2002:a17:903:124f:b0:2a0:d5b0:dd80 with SMTP id d9443c01a7336-2a7177d3737mr85656385ad.54.1768761030816;
-        Sun, 18 Jan 2026 10:30:30 -0800 (PST)
+        bh=PG+WnZVURBwXNb9Mlsn+dS5PAcavg3GNKoQtMm8KL5I=;
+        b=O6S/P2I4z7Tti8CsUT3DX1tA1kD5TacDVnWPyIsKSx2AndCEFuYCvmMa4Zdqofjgli
+         toMLDri9lCnnZr573n6AhkABkiKgxAXh/zonOaewHRRm83U8yjJ/7wMSpb6CLVM7FX9O
+         cfl/uL+7ZtYbXqYH/tlBJwr6B7JqVtmOntQBnjIwx/HF5h55EemIIH+QT0GDCcbXa8Nd
+         m4NUIb0bQCUm6PXfvPGJZBo3mWvs0yk0sSnhwTapOtqRUnH2qN/FdSERVG9C6XmkmEcY
+         606sS+4NQxhcd3omwVnl2M3OQwqWFc7cHvsJz5Keh46dzJeB8V4m2s3d5xZKiVjl3lFd
+         DISQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXueAQR7nPmgqB/bNMP/o0Bg592nOySLxN27O5lV3BW2jXsSzLpaZIJSNGP4yPMhI3qjt19o3HL@vger.kernel.org
+X-Gm-Message-State: AOJu0YxlrPPhQrR0xwSS/M2z8zRqhKhBUMnirZWgegR6UbhuCGL+5MWA
+	+dKny+zyUf0Cwzj/sWa4ukPJjARv8qRN7M1M/gaeVl/XfktgcFGmOCN5ZlhHSKnBF6I3n6y+QzJ
+	m95rSZ8998k6U74qZWfwHA4ByuQWiX6u7C61QGhDmI1U/9vvO7m4D3lwwp9mVqgHLsvA=
+X-Gm-Gg: AY/fxX6CdPVIk7MDtiW9klSBxLYzqBtyc3Lv9+tDW2EFwKR2YUqYNtgjMSRz3v48/Ft
+	LVdwjvXLoGjRamAiG7Ei0dsejTH0qn2c1KzNRxQXF9RepKd0NKjO5A8GGoxjfASaFrswoyF+jI9
+	E+LMh6DcUWHEAfHQ/tuDuYQn7CdekLeSj80PhjO3PZQ0v41aDM5UPP0s1HOMwx3R8k22oWjsPlV
+	6+tozPaEHZkdizzBiw/uQ/UDj+QSwYIkZ5hxJFbxMWgwA1PqOnxR62sjiFGyy+hyIm/MTNr4WxG
+	ILPwbVUNScMaj9pNuSszCfWxf6893VzwvXJdIUsQxDld9ofWOLO4/XwbGydCx2n4t/Th2KnBsEM
+	JjOYeglmqEsL9lVz6rMS0rVodt20kXqWq7AcsN3eAtTNejrBNig==
+X-Received: by 2002:a17:90b:180b:b0:34c:253d:581d with SMTP id 98e67ed59e1d1-35272ee18e5mr7721204a91.9.1768761074594;
+        Sun, 18 Jan 2026 10:31:14 -0800 (PST)
+X-Received: by 2002:a17:90b:180b:b0:34c:253d:581d with SMTP id 98e67ed59e1d1-35272ee18e5mr7721187a91.9.1768761074132;
+        Sun, 18 Jan 2026 10:31:14 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2a7190ab921sm71169075ad.8.2026.01.18.10.30.27
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3527313c2a9sm7049023a91.17.2026.01.18.10.31.11
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 18 Jan 2026 10:30:30 -0800 (PST)
-Date: Mon, 19 Jan 2026 02:30:25 +0800
+        Sun, 18 Jan 2026 10:31:12 -0800 (PST)
+Date: Mon, 19 Jan 2026 02:31:08 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Qu Wenruo <wqu@suse.com>
 Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] fstests: btrfs/131: add explicit v1 space cache
- requirement
-Message-ID: <20260118183025.og6jq4rczm5hndz4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH 2/2] fstests: btrfs: add a new test case that is
+ future-proof
+Message-ID: <20260118183108.uck7fqg3utjh7wuq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20251225221553.19254-1-wqu@suse.com>
- <20251225221553.19254-2-wqu@suse.com>
+ <20251225221553.19254-3-wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -92,111 +92,182 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251225221553.19254-2-wqu@suse.com>
+In-Reply-To: <20251225221553.19254-3-wqu@suse.com>
 
-On Fri, Dec 26, 2025 at 08:45:52AM +1030, Qu Wenruo wrote:
-> The test case is utilizing v1 space cache, meanwhile v1 space cache
-> is already marked deprecated for a while since kernel commit
-> 1e7bec1f7d65 ("btrfs: emit a warning about space cache v1 being
-> deprecated").
+On Fri, Dec 26, 2025 at 08:45:53AM +1030, Qu Wenruo wrote:
+> Btrfs' v1 space cache is marked deprecated since commit 1e7bec1f7d65
+> ("btrfs: emit a warning about space cache v1 being deprecated"), and
+> soon the v1 space cache mount option will be fully dropped.
 > 
-> Furthermore quite some features are not compatible with v1 cache,
-> including the soon-to-be-default block-group-tree, and hardware
-> dependent zoned features.
+> Furthermore existing features like block-group-tree, zoned, and bs != ps
+> support are all rejecting v1 space cache or forcing the switch to v2
+> space cache.
 > 
-> Currently we reject those features for btrfs/131, but what we really
-> want is to only run the test case for supported features/kernels.
-> The current way to reject will not handle future kernels that completely
-> rejects v1 space cache.
+> The existing btrfs/131 is not going to handle the future well, and that
+> test case is mostly for LTS kernel testing now.
 > 
-> Add a new helper, _require_btrfs_v1_cache() to do the check, which
-> checks the following criteria:
-> 
-> - "space_cache=v1" mount option is supported
->   And to handle default v2 cache behavior, also add "clear_cache".
->   If the kernel has completely dropped v1 cache support, such mount
->   should fail.
-> 
-> - Check if FREE_SPACE_TREE feature exists after above mount
->   For bs != ps cases, v2 cache is enforced to replace v1 cache, thus
->   we need to double check to make sure above mount didn't result v2
->   cache.
-> 
-> - Check if cache generation is correct
->   If v1 cache is working, the cache_generation should be some valid
->   value other than 0 nor (u64)-1.
-> 
-> And replace the existing checks on zoned and block-group-tree with the
-> new one.
+> Add a new test case that is completely v1 cache free, so that it will
+> support the future where v1 cache is completely dropped, meanwhile still
+> keep the coverage for v2 cache and nospace_cache mount options.
 > 
 > Signed-off-by: Qu Wenruo <wqu@suse.com>
 > ---
 
-This patchset is good to me, if there's not more review points from btrfs
-list, I'll merge it.
-
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  common/btrfs    | 25 +++++++++++++++++++++++++
->  tests/btrfs/131 |  7 +------
->  2 files changed, 26 insertions(+), 6 deletions(-)
+>  tests/btrfs/131     |   5 ++-
+>  tests/btrfs/340     | 103 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/340.out |  15 +++++++
+>  3 files changed, 122 insertions(+), 1 deletion(-)
+>  create mode 100755 tests/btrfs/340
+>  create mode 100644 tests/btrfs/340.out
 > 
-> diff --git a/common/btrfs b/common/btrfs
-> index 6a1095ff..c2d616aa 100644
-> --- a/common/btrfs
-> +++ b/common/btrfs
-> @@ -630,6 +630,31 @@ _btrfs_no_v1_cache_opt()
->  	echo -n "-onospace_cache"
->  }
->  
-> +# v1 space cache is already deprecated and will be removed soon. Furthermore
-> +# the soon-to-be-default block-group-tree has dependency on v2 space cache, and
-> +# will reject v1 cache mount option.
-> +# Make sure v1 space cache is still supported for test cases still utilizing
-> +# v1 space cache.
-> +_require_btrfs_v1_cache()
+> diff --git a/tests/btrfs/131 b/tests/btrfs/131
+> index 026d11e6..b54b8326 100755
+> --- a/tests/btrfs/131
+> +++ b/tests/btrfs/131
+> @@ -4,7 +4,10 @@
+>  #
+>  # FS QA Test 131
+>  #
+> -# Test free space tree mount options.
+> +# Test free space tree mount options, 3 options involved:
+> +# - No space cache
+> +# - Old (deprecated) v1 space cache
+> +# - New (default) v2 space cache
+>  #
+>  . ./common/preamble
+>  _begin_fstest auto quick
+> diff --git a/tests/btrfs/340 b/tests/btrfs/340
+> new file mode 100755
+> index 00000000..0d558422
+> --- /dev/null
+> +++ b/tests/btrfs/340
+> @@ -0,0 +1,103 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 SUSE S.A.  All Rights Reserved.
+> +#
+> +# FS QA Test 340
+> +#
+> +# Test free space tree mount options, for newer kernels with only 2 options involed:
+> +# - No space cache
+> +# - New (default) v2 space cache
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +_require_scratch
+> +_require_btrfs_command inspect-internal dump-super
+> +_require_btrfs_fs_feature free_space_tree
+> +
+> +# The block-group-tree feature relies on v2 cache, thus it doesn't support
+> +# "nospace_cache" mount option.
+> +_require_btrfs_no_block_group_tree
+> +
+> +mkfs_nocache()
 > +{
-> +	_scratch_mkfs &> /dev/null
-> +	_try_scratch_mount -o clear_cache,space_cache=v1 || _notrun "v1 space cache is not supported"
+> +	_scratch_mkfs >/dev/null 2>&1
+> +	_scratch_mount -o clear_cache,nospace_cache
 > +	_scratch_unmount
+> +}
 > +
-> +	# Make sure no FREE_SPACE_TREE enabled.
-> +	if $BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV |\
-> +	   grep -q "FREE_SPACE_TREE"; then
-> +		_notrun "v1 space cache is not supported"
-> +	fi
+> +mkfs_v2()
+> +{
+> +	_scratch_mkfs >/dev/null 2>&1
+> +	_scratch_mount -o space_cache=v2
+> +	_scratch_unmount
+> +}
 > +
-> +	# Make sure the cache generation is not 0 nor -1.
-> +	local cache_gen=$($BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV |\
-> +			  grep "cache_generation" | $AWK_PROG '{ print $2 }' )
-> +	if [ "$cache_gen" -eq 0 -o $(( $test_num + 1 )) -eq 0 ]; then
-> +		_notrun "v1 space cache is not supported"
+> +check_fst_compat()
+> +{
+> +	compat_ro="$($BTRFS_UTIL_PROG inspect-internal dump-super "$SCRATCH_DEV" | \
+> +		     sed -rn 's/^compat_ro_flags\s+(.*)$/\1/p')"
+> +	if ((compat_ro & 0x1)); then
+> +		echo "free space tree is enabled"
+> +	else
+> +		echo "free space tree is disabled"
 > +	fi
 > +}
 > +
->  # Require certain sectorsize support
->  _require_btrfs_support_sectorsize()
->  {
-> diff --git a/tests/btrfs/131 b/tests/btrfs/131
-> index b4756a5f..026d11e6 100755
-> --- a/tests/btrfs/131
-> +++ b/tests/btrfs/131
-> @@ -14,14 +14,9 @@ _begin_fstest auto quick
->  _require_scratch
->  _require_btrfs_command inspect-internal dump-super
->  _require_btrfs_fs_feature free_space_tree
-> -# Zoned btrfs does not support space_cache(v1)
-> -_require_non_zoned_device "${SCRATCH_DEV}"
-> -# Block group tree does not support space_cache(v1)
-> -_require_btrfs_no_block_group_tree
-> +_require_btrfs_v1_cache
->  
->  _scratch_mkfs >/dev/null 2>&1
-> -[ "$(_get_page_size)" -gt "$(_scratch_btrfs_sectorsize)" ] && \
-> -	_notrun "cannot run with subpage sectorsize"
->  
->  mkfs_v1()
->  {
+> +# Mount options might interfere.
+> +export MOUNT_OPTIONS=""
+> +
+> +# When the free space tree is not enabled:
+> +# -o space_cache=v2: enable the free space tree
+> +# -o clear_cache,space_cache=v2: clear the old space cache and enable the free space tree
+> +# We don't check the no options case or plain space_cache as that will change
+> +# in the future to turn on space_cache=v2.
+> +
+> +mkfs_nocache
+> +echo "Using no space cache"
+> +_scratch_mount -o nospace_cache
+> +check_fst_compat
+> +_scratch_unmount
+> +
+> +mkfs_nocache
+> +echo "Enabling free space tree"
+> +_scratch_mount -o space_cache=v2
+> +check_fst_compat
+> +_scratch_unmount
+> +
+> +# When the free space tree is enabled:
+> +# -o nospace_cache: error
+> +# no options, -o space_cache=v2: keep using the free space tree
+> +# -o clear_cache, -o clear_cache,space_cache=v2: clear and recreate the free space tree
+> +# -o clear_cache,nospace_cache: clear the free space tree
+> +
+> +mkfs_v2
+> +echo "Trying to mount without free space tree"
+> +_try_scratch_mount -o nospace_cache >/dev/null 2>&1 || echo "mount failed"
+> +
+> +mkfs_v2
+> +echo "Mounting existing free space tree"
+> +_scratch_mount
+> +check_fst_compat
+> +_scratch_unmount
+> +_scratch_mount -o space_cache=v2
+> +check_fst_compat
+> +_scratch_unmount
+> +
+> +mkfs_v2
+> +echo "Recreating free space tree"
+> +_scratch_mount -o clear_cache,space_cache=v2
+> +check_fst_compat
+> +_scratch_unmount
+> +mkfs_v2
+> +_scratch_mount -o clear_cache
+> +check_fst_compat
+> +_scratch_unmount
+> +
+> +mkfs_v2
+> +echo "Disabling free space tree"
+> +_scratch_mount -o clear_cache,nospace_cache
+> +check_fst_compat
+> +_scratch_unmount
+> +
+> +_exit 0
+> diff --git a/tests/btrfs/340.out b/tests/btrfs/340.out
+> new file mode 100644
+> index 00000000..d8b99b3b
+> --- /dev/null
+> +++ b/tests/btrfs/340.out
+> @@ -0,0 +1,15 @@
+> +QA output created by 340
+> +Using no space cache
+> +free space tree is disabled
+> +Enabling free space tree
+> +free space tree is enabled
+> +Trying to mount without free space tree
+> +mount failed
+> +Mounting existing free space tree
+> +free space tree is enabled
+> +free space tree is enabled
+> +Recreating free space tree
+> +free space tree is enabled
+> +free space tree is enabled
+> +Disabling free space tree
+> +free space tree is disabled
 > -- 
 > 2.51.2
 > 
