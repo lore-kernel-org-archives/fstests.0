@@ -1,275 +1,301 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f52.google.com (mail-wr1-f52.google.com [209.85.221.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BCBD257435
-	for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 18:31:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7408248F6F
+	for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 19:18:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768761079; cv=none; b=aVLNZiYue0XEQteDMTkZzhBoPL4gZditTJgZAMJnpzOKBzyELZ1fw5FCiZEOMfuH5VWFyvV7cIm4UfrWqdtcCPksX7F+hfdOUAPaWJriKSjOuCbNFXJWotDQBqDpkBHIXbIOIhwhxR3Lld+XfLSffvInD6uympN1/xDPZ+OcwH4=
+	t=1768763913; cv=none; b=EuTC5IY2iXNDsUZnW4xQmdhth/Xiil4Vhmk0J1KA9pKz+F7LQHdlvqhDMOX3zf5JNElpAofvVQrh+fx6Z4kiYgT+sgQ4pebUgP6tkRe7TB78gFEKR687WqCaA34Jn/1tSl9KR7kVuO0DbhHQB8/WWDPDg/lm5udKX6YcrPjfzAM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768761079; c=relaxed/simple;
-	bh=p4xbpahW23b6CuP5GAQIEKesjiAvJi4Rd420YvEfLM4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Zz1c5g/ZDGIwzugKz5avXVdDo3OcXOT9l+NM99FH0uNWpZ6rhqvAnj5S87Sp4V9u+jQNQ5XGcHUPaPV60s2sKVMUp9hse6ySxU0zy2Fmc2kil6z6PWlYOzXHP6vzfAbLjVAypagBJSBfGAjW1DR/x4QBtEb4yaOZfmrhlnZoYYA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=V7nK/1Du; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=UaE9Gpvm; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1768763913; c=relaxed/simple;
+	bh=HwAjIbwgoh7+sEP7Bh4D4N1zateilLLQ1qr4qfEyiMo=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=qweySAYvH59UjRScgQGttz4zM5eqjjMXd9DkFYtiEmdLsuSe6yckrlhjCi2Jnh9/L2mpl8mPO5T3UXB/1yQZGfI3aG8/7kvPauMUBtrrq9uObM0s1mpDb1BnzLMqbwX9z/eRfC4G5RLTNwfBzCjXvHRIbqhHTtaLWLj4QI4TU10=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=im9jkZr8; arc=none smtp.client-ip=209.85.221.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="V7nK/1Du";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="UaE9Gpvm"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1768761077;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=PG+WnZVURBwXNb9Mlsn+dS5PAcavg3GNKoQtMm8KL5I=;
-	b=V7nK/1DuVhiyphptTV05MTkNImHoez4FF8HyrGi6CZFE9FHWno7STUk+VkpEUsUQaXNPx1
-	vlUw3Wei42b+GjuU79koKJ+5ILUu3TiQAZwPvEifim2tuJkTvhJmzxkTcZ987rnujdJUEP
-	/25GrVcueJiJy+7ZB3hGXol9Ynfo6Uc=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-621-3fuMxf3OM_64G2tlK3QsFw-1; Sun, 18 Jan 2026 13:31:16 -0500
-X-MC-Unique: 3fuMxf3OM_64G2tlK3QsFw-1
-X-Mimecast-MFC-AGG-ID: 3fuMxf3OM_64G2tlK3QsFw_1768761075
-Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-34ab8693a2cso6534412a91.0
-        for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 10:31:16 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="im9jkZr8"
+Received: by mail-wr1-f52.google.com with SMTP id ffacd0b85a97d-42fbad1fa90so3261454f8f.0
+        for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 11:18:31 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1768761075; x=1769365875; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=PG+WnZVURBwXNb9Mlsn+dS5PAcavg3GNKoQtMm8KL5I=;
-        b=UaE9GpvmPuRdxl0OJDFiOl2bEMOE/xkiNRuKS9Kqb8LVM7FjorQI/ufvrH8as5k9Cf
-         u/22h2+UhosaPZWv4UGUYqpsOjlV6ZZ7S2xNuWhWMrx4KkJzOga6lGUyBpyCpxe0cQ/F
-         DEmXOXXtTeAdEkR3USr7+yflNSJaL0lf1pClBIZ+UwXrEllX4tVv2mGMnVDKDzVO/tNP
-         zWRH2Mc2X0df7bCQd6wfItfC2TdhcwlYs+2gEY0lEP7ADH5qwFrsgzOoomElq3rm4jQ5
-         IamS0/nK76CJC2d3665OG5mVcSEMEN8hUC59s82ap7yvioGujfXgqApTmFu+/UKgr8Y2
-         ocoQ==
+        d=gmail.com; s=20230601; t=1768763910; x=1769368710; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=CtmORjNTrE4g7l2ECOXWpp2iAzgvLNSGbf1oku8deUw=;
+        b=im9jkZr8EWspf56ObRiALL81EgJVp21x/tvWTT8+NHgJU0vQPGfurkVBb5eP1+5mrf
+         yhThy3kVt07Mxuwc9/7iB90jypFcsLzp3zzU8Nt9Tnj5vZaV4g+4LrkKu5HUY98x6+Op
+         NJlY+5RW6BSU5K+kbyLUepnBmxFQy5Rd6T4RfoG/aMPIut1tPOf5eMVyMwo79cIe6eRn
+         HMcN3BeMs9z9CjKxJ02i+L9vU7nu6EWzKm2AiLZLWRXkx7Zz7lN7TJC477Tmk7JcMPl5
+         r/o7UL2KAJeAdDX5l3WW1ycjvPGOW6ZqjgmceLlsndwK6G9TUjpe293LthflEZCdzeG4
+         ju3Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1768761075; x=1769365875;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=PG+WnZVURBwXNb9Mlsn+dS5PAcavg3GNKoQtMm8KL5I=;
-        b=O6S/P2I4z7Tti8CsUT3DX1tA1kD5TacDVnWPyIsKSx2AndCEFuYCvmMa4Zdqofjgli
-         toMLDri9lCnnZr573n6AhkABkiKgxAXh/zonOaewHRRm83U8yjJ/7wMSpb6CLVM7FX9O
-         cfl/uL+7ZtYbXqYH/tlBJwr6B7JqVtmOntQBnjIwx/HF5h55EemIIH+QT0GDCcbXa8Nd
-         m4NUIb0bQCUm6PXfvPGJZBo3mWvs0yk0sSnhwTapOtqRUnH2qN/FdSERVG9C6XmkmEcY
-         606sS+4NQxhcd3omwVnl2M3OQwqWFc7cHvsJz5Keh46dzJeB8V4m2s3d5xZKiVjl3lFd
-         DISQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXueAQR7nPmgqB/bNMP/o0Bg592nOySLxN27O5lV3BW2jXsSzLpaZIJSNGP4yPMhI3qjt19o3HL@vger.kernel.org
-X-Gm-Message-State: AOJu0YxlrPPhQrR0xwSS/M2z8zRqhKhBUMnirZWgegR6UbhuCGL+5MWA
-	+dKny+zyUf0Cwzj/sWa4ukPJjARv8qRN7M1M/gaeVl/XfktgcFGmOCN5ZlhHSKnBF6I3n6y+QzJ
-	m95rSZ8998k6U74qZWfwHA4ByuQWiX6u7C61QGhDmI1U/9vvO7m4D3lwwp9mVqgHLsvA=
-X-Gm-Gg: AY/fxX6CdPVIk7MDtiW9klSBxLYzqBtyc3Lv9+tDW2EFwKR2YUqYNtgjMSRz3v48/Ft
-	LVdwjvXLoGjRamAiG7Ei0dsejTH0qn2c1KzNRxQXF9RepKd0NKjO5A8GGoxjfASaFrswoyF+jI9
-	E+LMh6DcUWHEAfHQ/tuDuYQn7CdekLeSj80PhjO3PZQ0v41aDM5UPP0s1HOMwx3R8k22oWjsPlV
-	6+tozPaEHZkdizzBiw/uQ/UDj+QSwYIkZ5hxJFbxMWgwA1PqOnxR62sjiFGyy+hyIm/MTNr4WxG
-	ILPwbVUNScMaj9pNuSszCfWxf6893VzwvXJdIUsQxDld9ofWOLO4/XwbGydCx2n4t/Th2KnBsEM
-	JjOYeglmqEsL9lVz6rMS0rVodt20kXqWq7AcsN3eAtTNejrBNig==
-X-Received: by 2002:a17:90b:180b:b0:34c:253d:581d with SMTP id 98e67ed59e1d1-35272ee18e5mr7721204a91.9.1768761074594;
-        Sun, 18 Jan 2026 10:31:14 -0800 (PST)
-X-Received: by 2002:a17:90b:180b:b0:34c:253d:581d with SMTP id 98e67ed59e1d1-35272ee18e5mr7721187a91.9.1768761074132;
-        Sun, 18 Jan 2026 10:31:14 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3527313c2a9sm7049023a91.17.2026.01.18.10.31.11
+        d=1e100.net; s=20230601; t=1768763910; x=1769368710;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=CtmORjNTrE4g7l2ECOXWpp2iAzgvLNSGbf1oku8deUw=;
+        b=meKQVRa8hn92e3Kb0+G9hoetM/H4KwJumW3kvJggt/nE1f3vnCXvS3MbRb328fNSN3
+         Lj+xcj5p/aLAvfM76TgJkw8pzsbzfV1lKpG/lauugPr1s8GXn7ou7+kK3S/+vJUmV+Tu
+         HmJm0Coi0/PJrfaNitl+UWf+b8Zqvz5kfKqTWtNd2JCpmXpKuPe/3sWbZLaeUO8mbRFI
+         rqbxQ4/59Vtb/DrH3vKxdV7GzXMYf2kk5E4F+sX3Yn31akaHB4xLkCA7/4FQVHe/5VeV
+         VRQZNn65DyVbLH9QMQApHGJM6b+YEwsKpCKbAAuUra+hQawmqb7OR9KYiwjer1VRf583
+         gzYw==
+X-Forwarded-Encrypted: i=1; AJvYcCWU3Pqsn/2tO4IXWwo+xYYB1uqbC/AoDBWMmXpuQYgaLZako3kJ8ZJBMd650E8V0cpkDlYerKCr@vger.kernel.org
+X-Gm-Message-State: AOJu0YzSgjMI77yVMu0t3C+UCOEOr6H9yvDquzDZqQBLEa3yjxd4bUbY
+	0An+bqrFLlWvNbrLzKBJ4I0vRYp03+m/OgB0xULr8G7slw+s6y61fwZd
+X-Gm-Gg: AY/fxX6aPKlIh/Vqt71mOF11yhY+K2aJyMQ8safKhEZtfd/KnEXsBffTcfP/7w5V9BY
+	2XhvM08AICBLDSqPRSZx5TshJ5G9khSRcHDOmZ3785bfJB6UWXNTmUfd/6wR1ie2E7lN/Q7HVwB
+	QJvhJLgbMmIA94uctFaFNTXzDlrJ9vYW5EU8ymG7GY8bBECcaJ0PbRF7kPjDH1it/95aMI1kRK6
+	AT4P2L1BU4Zxjq2MpG2beZbtTGr4a3RrLmLwjqji/oWuhAQNyUNsnjMBe6MngZygz/ODiomkiUN
+	KNcdGxkCc8bxJqH8Pie3+rQzrWHnwdGkGXrPQxdMAV9DJIgGwUML9jNzUiRCMGzlFTmdg1S6tnM
+	w8iBtMhMYZa0fuHU+pu++WZhTpFFguIVAf/Nupd5hG8AmwDmf+zKcdK5i5cLmhArS8RODe3fNQe
+	iIRit8dvxsVWnvQnPlV6kpLnLuiQ==
+X-Received: by 2002:a05:6000:200b:b0:430:fbe1:382a with SMTP id ffacd0b85a97d-43569bd49e1mr12027072f8f.54.1768763909888;
+        Sun, 18 Jan 2026 11:18:29 -0800 (PST)
+Received: from f13.tail696c1.ts.net ([2a01:e11:3:1ff0:f108:9c47:a37e:e4a4])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4356996cf58sm18391193f8f.22.2026.01.18.11.18.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 18 Jan 2026 10:31:12 -0800 (PST)
-Date: Mon, 19 Jan 2026 02:31:08 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] fstests: btrfs: add a new test case that is
- future-proof
-Message-ID: <20260118183108.uck7fqg3utjh7wuq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20251225221553.19254-1-wqu@suse.com>
- <20251225221553.19254-3-wqu@suse.com>
+        Sun, 18 Jan 2026 11:18:29 -0800 (PST)
+From: Luca Di Maio <luca.dimaio1@gmail.com>
+To: linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Cc: Luca Di Maio <luca.dimaio1@gmail.com>,
+	djwong@kernel.org,
+	hch@infradead.org,
+	david@fromorbit.com,
+	zlang@redhat.com
+Subject: [PATCH v7] xfs: test reproducible builds
+Date: Sun, 18 Jan 2026 20:17:21 +0100
+Message-ID: <20260118191721.1354833-1-luca.dimaio1@gmail.com>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20251225221553.19254-3-wqu@suse.com>
+Content-Transfer-Encoding: 8bit
 
-On Fri, Dec 26, 2025 at 08:45:53AM +1030, Qu Wenruo wrote:
-> Btrfs' v1 space cache is marked deprecated since commit 1e7bec1f7d65
-> ("btrfs: emit a warning about space cache v1 being deprecated"), and
-> soon the v1 space cache mount option will be fully dropped.
-> 
-> Furthermore existing features like block-group-tree, zoned, and bs != ps
-> support are all rejecting v1 space cache or forcing the switch to v2
-> space cache.
-> 
-> The existing btrfs/131 is not going to handle the future well, and that
-> test case is mostly for LTS kernel testing now.
-> 
-> Add a new test case that is completely v1 cache free, so that it will
-> support the future where v1 cache is completely dropped, meanwhile still
-> keep the coverage for v2 cache and nospace_cache mount options.
-> 
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
+With the addition of the `-p` populate option, SOURCE_DATE_EPOCH and
+DETERMINISTIC_SEED support, it is possible to create fully reproducible
+pre-populated filesystems. We should test them here.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Luca Di Maio <luca.dimaio1@gmail.com>
+---
 
->  tests/btrfs/131     |   5 ++-
->  tests/btrfs/340     | 103 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/340.out |  15 +++++++
->  3 files changed, 122 insertions(+), 1 deletion(-)
->  create mode 100755 tests/btrfs/340
->  create mode 100644 tests/btrfs/340.out
-> 
-> diff --git a/tests/btrfs/131 b/tests/btrfs/131
-> index 026d11e6..b54b8326 100755
-> --- a/tests/btrfs/131
-> +++ b/tests/btrfs/131
-> @@ -4,7 +4,10 @@
->  #
->  # FS QA Test 131
->  #
-> -# Test free space tree mount options.
-> +# Test free space tree mount options, 3 options involved:
-> +# - No space cache
-> +# - Old (deprecated) v1 space cache
-> +# - New (default) v2 space cache
->  #
->  . ./common/preamble
->  _begin_fstest auto quick
-> diff --git a/tests/btrfs/340 b/tests/btrfs/340
-> new file mode 100755
-> index 00000000..0d558422
-> --- /dev/null
-> +++ b/tests/btrfs/340
-> @@ -0,0 +1,103 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 SUSE S.A.  All Rights Reserved.
-> +#
-> +# FS QA Test 340
-> +#
-> +# Test free space tree mount options, for newer kernels with only 2 options involed:
-> +# - No space cache
-> +# - New (default) v2 space cache
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +_require_scratch
-> +_require_btrfs_command inspect-internal dump-super
-> +_require_btrfs_fs_feature free_space_tree
-> +
-> +# The block-group-tree feature relies on v2 cache, thus it doesn't support
-> +# "nospace_cache" mount option.
-> +_require_btrfs_no_block_group_tree
-> +
-> +mkfs_nocache()
-> +{
-> +	_scratch_mkfs >/dev/null 2>&1
-> +	_scratch_mount -o clear_cache,nospace_cache
-> +	_scratch_unmount
-> +}
-> +
-> +mkfs_v2()
-> +{
-> +	_scratch_mkfs >/dev/null 2>&1
-> +	_scratch_mount -o space_cache=v2
-> +	_scratch_unmount
-> +}
-> +
-> +check_fst_compat()
-> +{
-> +	compat_ro="$($BTRFS_UTIL_PROG inspect-internal dump-super "$SCRATCH_DEV" | \
-> +		     sed -rn 's/^compat_ro_flags\s+(.*)$/\1/p')"
-> +	if ((compat_ro & 0x1)); then
-> +		echo "free space tree is enabled"
-> +	else
-> +		echo "free space tree is disabled"
-> +	fi
-> +}
-> +
-> +# Mount options might interfere.
-> +export MOUNT_OPTIONS=""
-> +
-> +# When the free space tree is not enabled:
-> +# -o space_cache=v2: enable the free space tree
-> +# -o clear_cache,space_cache=v2: clear the old space cache and enable the free space tree
-> +# We don't check the no options case or plain space_cache as that will change
-> +# in the future to turn on space_cache=v2.
-> +
-> +mkfs_nocache
-> +echo "Using no space cache"
-> +_scratch_mount -o nospace_cache
-> +check_fst_compat
-> +_scratch_unmount
-> +
-> +mkfs_nocache
-> +echo "Enabling free space tree"
-> +_scratch_mount -o space_cache=v2
-> +check_fst_compat
-> +_scratch_unmount
-> +
-> +# When the free space tree is enabled:
-> +# -o nospace_cache: error
-> +# no options, -o space_cache=v2: keep using the free space tree
-> +# -o clear_cache, -o clear_cache,space_cache=v2: clear and recreate the free space tree
-> +# -o clear_cache,nospace_cache: clear the free space tree
-> +
-> +mkfs_v2
-> +echo "Trying to mount without free space tree"
-> +_try_scratch_mount -o nospace_cache >/dev/null 2>&1 || echo "mount failed"
-> +
-> +mkfs_v2
-> +echo "Mounting existing free space tree"
-> +_scratch_mount
-> +check_fst_compat
-> +_scratch_unmount
-> +_scratch_mount -o space_cache=v2
-> +check_fst_compat
-> +_scratch_unmount
-> +
-> +mkfs_v2
-> +echo "Recreating free space tree"
-> +_scratch_mount -o clear_cache,space_cache=v2
-> +check_fst_compat
-> +_scratch_unmount
-> +mkfs_v2
-> +_scratch_mount -o clear_cache
-> +check_fst_compat
-> +_scratch_unmount
-> +
-> +mkfs_v2
-> +echo "Disabling free space tree"
-> +_scratch_mount -o clear_cache,nospace_cache
-> +check_fst_compat
-> +_scratch_unmount
-> +
-> +_exit 0
-> diff --git a/tests/btrfs/340.out b/tests/btrfs/340.out
-> new file mode 100644
-> index 00000000..d8b99b3b
-> --- /dev/null
-> +++ b/tests/btrfs/340.out
-> @@ -0,0 +1,15 @@
-> +QA output created by 340
-> +Using no space cache
-> +free space tree is disabled
-> +Enabling free space tree
-> +free space tree is enabled
-> +Trying to mount without free space tree
-> +mount failed
-> +Mounting existing free space tree
-> +free space tree is enabled
-> +free space tree is enabled
-> +Recreating free space tree
-> +free space tree is enabled
-> +free space tree is enabled
-> +Disabling free space tree
-> +free space tree is disabled
-> -- 
-> 2.51.2
-> 
-> 
+v1 -> v2:
+- Changed test group from parent to mkfs
+- Fixed PROTO_DIR to point to a new dir
+- Populate PROTO_DIR with relevant file types
+- Move from md5sum to sha256sum
+v2 -> v3
+- Properly check if mkfs.xfs supports SOURCE_DATE_EPOCH and
+  DETERMINISTIC_SEED
+- use fsstress program to generate the PROTO_DIR content
+- simplify test output
+v3 -> v4
+- Add _cleanup function
+v4 -> v5
+- copy _cleanup from common/preamble
+v5 -> v6
+- remove debug typo/leftover
+v6 -> v7
+- adjust commit message
+
+ tests/xfs/841     | 173 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/841.out |   3 +
+ 2 files changed, 176 insertions(+)
+ create mode 100755 tests/xfs/841
+ create mode 100644 tests/xfs/841.out
+
+diff --git a/tests/xfs/841 b/tests/xfs/841
+new file mode 100755
+index 00000000..5f981d0a
+--- /dev/null
++++ b/tests/xfs/841
+@@ -0,0 +1,173 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 Chainguard, Inc. All Rights Reserved.
++#
++# FS QA Test No. 841
++#
++# Test that XFS filesystems created with reproducibility options produce
++# identical images across multiple runs. This verifies that the combination
++# of SOURCE_DATE_EPOCH, DETERMINISTIC_SEED, and -m uuid= options result in
++# bit-for-bit reproducible filesystem images.
++
++. ./common/preamble
++_begin_fstest auto quick mkfs
++
++# Image file settings
++IMG_SIZE="512M"
++IMG_FILE="$TEST_DIR/xfs_reproducible_test.img"
++PROTO_DIR="$TEST_DIR/proto"
++
++# Fixed values for reproducibility
++FIXED_UUID="12345678-1234-1234-1234-123456789abc"
++FIXED_EPOCH="1234567890"
++
++_cleanup() {
++	cd /
++	command -v _kill_fsstress &>/dev/null && _kill_fsstress
++	rm -r -f $tmp.* "$PROTO_DIR" "$IMG_FILE"
++}
++
++# Check if mkfs.xfs supports required options
++_check_mkfs_xfs_options()
++{
++	local check_img="$TEST_DIR/mkfs_check.img"
++	truncate -s 64M "$check_img" || return 1
++
++	# Check -m uuid support
++	$MKFS_XFS_PROG -m uuid=00000000-0000-0000-0000-000000000000 \
++		-N "$check_img" &> /dev/null
++	local uuid_support=$?
++
++	# Check -p support (protofile/directory population)
++	$MKFS_XFS_PROG 2>&1 | grep populate &> /dev/null
++	local proto_support=$?
++
++	grep -q SOURCE_DATE_EPOCH "$MKFS_XFS_PROG"
++	local reproducible_support=$?
++
++	rm -f "$check_img"
++
++	if [ $uuid_support -ne 0 ]; then
++		_notrun "mkfs.xfs does not support -m uuid= option"
++	fi
++	if [ $proto_support -ne 0 ]; then
++		_notrun "mkfs.xfs does not support -p option for directory population"
++	fi
++	if [ $reproducible_support -ne 0 ]; then
++		_notrun "mkfs.xfs does not support env options for reproducibility"
++	fi
++}
++
++# Create a prototype directory with all file types supported by mkfs.xfs -p
++_create_proto_dir()
++{
++	rm -rf "$PROTO_DIR"
++	mkdir -p "$PROTO_DIR"
++
++	$FSSTRESS_PROG -d $PROTO_DIR -s 1 -n 2000 -p 2 -z \
++		-f creat=15 \
++		-f mkdir=8 \
++		-f write=15 \
++		-f truncate=5 \
++		-f symlink=8 \
++		-f link=8 \
++		-f setfattr=12 \
++		-f chown=3 \
++		-f rename=5 \
++		-f unlink=2 \
++		-f rmdir=1
++
++
++	# FIFO (named pipe)
++	mkfifo "$PROTO_DIR/fifo"
++
++	# Unix socket
++	$here/src/af_unix "$PROTO_DIR/socket" 2> /dev/null || true
++
++	# Block device (requires root)
++	mknod "$PROTO_DIR/blockdev" b 1 0 2> /dev/null || true
++
++	# Character device (requires root)
++	mknod "$PROTO_DIR/chardev" c 1 3 2> /dev/null || true
++}
++
++_require_test
++_check_mkfs_xfs_options
++
++# Create XFS filesystem with full reproducibility options
++# Uses -p to populate from directory during mkfs (no mount needed)
++_mkfs_xfs_reproducible()
++{
++	local img=$1
++
++	# Create fresh image file
++	rm -f "$img"
++	truncate -s $IMG_SIZE "$img" || return 1
++
++	# Set environment variables for reproducibility:
++	# - SOURCE_DATE_EPOCH: fixes all inode timestamps to this value
++	# - DETERMINISTIC_SEED: uses fixed seed (0x53454544) instead of
++	#   getrandom()
++	#
++	# mkfs.xfs options:
++	# - -m uuid=: fixed filesystem UUID
++	# - -p dir: populate filesystem from directory during creation
++	SOURCE_DATE_EPOCH=$FIXED_EPOCH \
++	DETERMINISTIC_SEED=1 \
++	$MKFS_XFS_PROG \
++		-f \
++		-m uuid=$FIXED_UUID \
++		-p "$PROTO_DIR" \
++		"$img" >> $seqres.full 2>&1
++
++	return $?
++}
++
++# Compute hash of the image file
++_hash_image()
++{
++	sha256sum "$1" | awk '{print $1}'
++}
++
++# Run a single reproducibility test iteration
++_run_iteration()
++{
++	local iteration=$1
++
++	echo "Iteration $iteration: Creating filesystem with -p $PROTO_DIR" >> $seqres.full
++	if ! _mkfs_xfs_reproducible "$IMG_FILE"; then
++		echo "mkfs.xfs failed" >> $seqres.full
++		return 1
++	fi
++
++	local hash=$(_hash_image "$IMG_FILE")
++	echo "Iteration $iteration: Hash = $hash" >> $seqres.full
++
++	echo $hash
++}
++
++# Create the prototype directory with various file types
++_create_proto_dir
++
++echo "Test: XFS reproducible filesystem image creation"
++
++# Run three iterations
++hash1=$(_run_iteration 1)
++[ -z "$hash1" ] && _fail "Iteration 1 failed"
++
++hash2=$(_run_iteration 2)
++[ -z "$hash2" ] && _fail "Iteration 2 failed"
++
++hash3=$(_run_iteration 3)
++[ -z "$hash3" ] && _fail "Iteration 3 failed"
++
++# Verify all hashes match
++if [ "$hash1" = "$hash2" ] && [ "$hash2" = "$hash3" ]; then
++	echo "All filesystem images are identical."
++else
++	echo "ERROR: Filesystem images differ!"
++fi
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/841.out b/tests/xfs/841.out
+new file mode 100644
+index 00000000..3bdfbfda
+--- /dev/null
++++ b/tests/xfs/841.out
+@@ -0,0 +1,3 @@
++QA output created by 841
++Test: XFS reproducible filesystem image creation
++All filesystem images are identical.
+-- 
+2.51.0
 
