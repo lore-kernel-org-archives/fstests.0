@@ -1,87 +1,86 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7875204C36
-	for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 17:18:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F61316A395
+	for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 17:22:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768756738; cv=none; b=okianwFG6XCzjopxRHbRfUsVESaodC4AeX69nYWpcDgDVzClVagheRtrUXsgu7Sfm/Ei9AHkjb8Y0U0CNdHunsazxLidIg2mzLv9JF8dXi+9WBEVT+fQiI0xHR2CtgHr86TXIdClybP+WWPxZ7Mz+pixXdKjf/jnSOCDWeV8P78=
+	t=1768756968; cv=none; b=RVsp9W2lVflVrVmdeSDjI0o8yEkc1PcGOpIOnH0WOdZ64Da+z5yvVTvyEzUax9E5DH7gVwzVH74rhyOTUtUUbuabiz8AZ83YSV/02KD4m2z4o4VW7YZxlbFHf2ISiLQRlDc5WU+OV0kkRRIW6QDchoLPwN6MDtVo6ggJ83pbt8U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768756738; c=relaxed/simple;
-	bh=79WwHjzXcHTApvbu86UG865ls2+qm8AFjVIGbrjMxfE=;
+	s=arc-20240116; t=1768756968; c=relaxed/simple;
+	bh=ySjC3Kacyyqqr2LjJ8mgi4dk6bil1EMNbIEvsbbxC7U=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HgyadpKAENUO37meHihVLI1trxpjdpb/XipyAbDhEw/x+52XJS4ZruHXup3XFz/HfeoQDlqT0+LWp/J7O+LZWDj6LnYFUZk7gmRzNKN7j0ESUSLJrLsPQzs4BidsD9v55Wnu12mlO8Xo1PEaHq+7+oKIGCtjzqpppjBd+jbi9YQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=IUXvxKq+; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=jXfjRUNs; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=JlrGRe8iFC1eQTKzkPBSnFCgaKpjjPK3bkL3EVmfL+i2avSspKWqukjwheEWMeA+QMl1tInICdHRLNKogrUekF353Zxn9N9n/umlz46tDK4il+5qzjKo6H7KA66yWe1IX5eqaR2TvOv3JzUxgBL4jmpRDQmhmcKakNHe2I0OOgY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MO0QPxrC; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=qhjhyrUU; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="IUXvxKq+";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="jXfjRUNs"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MO0QPxrC";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="qhjhyrUU"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1768756736;
+	s=mimecast20190719; t=1768756966;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=C9Sh3sO4hz7HhjVEAHMpRjjqKNJlWjD7ufyRMWnbcZs=;
-	b=IUXvxKq+VrjQhfsOMkxTEgzXOowk8Vsg3M1miILJjoNZ1p+VRS6k1r56Ltj9KOjxLX9AJX
-	byBdv33WPsgeIwCwYusp4ATOJEoOLYWtDAobzjIylrFpC3+hZsEok4WH1VoRgXnFSK79iu
-	xdRR8Quw2iIdcvPyh4FT9kaspukFwtg=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=EB+wqXLTENqzoyUnpDkg82jF7PKC0gnv1oGoBYtLAdo=;
+	b=MO0QPxrCSgs5Dut77MCtkGTVWtT28ubm26KqdpanoVbgspiu9chf5OE7GxzRrq+E860KNG
+	fJ6iDaPR6xLXMEGHsxitEoKvwUxeisjutACdnPzB4mipPNTnafYThcqkx1Duya0j42vx5i
+	dSue29q7a/tijvXU2NUsv5B1PVQO7LE=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-617-5XfnzdKxN96VxXOW3uja2w-1; Sun, 18 Jan 2026 12:18:52 -0500
-X-MC-Unique: 5XfnzdKxN96VxXOW3uja2w-1
-X-Mimecast-MFC-AGG-ID: 5XfnzdKxN96VxXOW3uja2w_1768756732
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2a0d43fcb2fso84036215ad.3
-        for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 09:18:52 -0800 (PST)
+ us-mta-25-U9Kpev69NW-oWeah2KxlfQ-1; Sun, 18 Jan 2026 12:22:44 -0500
+X-MC-Unique: U9Kpev69NW-oWeah2KxlfQ-1
+X-Mimecast-MFC-AGG-ID: U9Kpev69NW-oWeah2KxlfQ_1768756964
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-29f25a008dbso24284425ad.1
+        for <fstests@vger.kernel.org>; Sun, 18 Jan 2026 09:22:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1768756731; x=1769361531; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1768756963; x=1769361763; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=C9Sh3sO4hz7HhjVEAHMpRjjqKNJlWjD7ufyRMWnbcZs=;
-        b=jXfjRUNsjaj7jZ1A8i6OgeTiKswoYu0KQzJSis0ZzQ8sqBS7dEYorR5S6VctALikj9
-         0hTN4srkfI7VAg89SyPnoPaagNDG1hovmjLHSy6Zir5LDqRtC9967p8ETyiU/uWMUpYJ
-         XDFzsGxsr301tgkyywwlFlAHr+9YTUu8H/o3kEOSXDcUxO+SQGF0PmYyuIo/e5P2khk1
-         kIvIuUVb1to0u6nDzQjdLoXTDpBULehX8UJqF1x3sGW4Doa+P81kP53GKfld5n3xh6M7
-         IzrYf5Jspb5IJeYF6CcywCcxhZEtaXatO6JcP0U5ltrjxPvYAnxpk7ZiZtTCPMN5K0pz
-         0qKQ==
+        bh=EB+wqXLTENqzoyUnpDkg82jF7PKC0gnv1oGoBYtLAdo=;
+        b=qhjhyrUU/2Vk0iCPQyiWx3XBTcMcSyKH3vXo3Zx5jhpZNggk89dSngfB5B2pg3RK3y
+         9WzYUO1JZ+DCkJ4wPL0VRr19eYKhwg10v3qOiQvA5tfhoxdlfP1OYvWOWqCc6xdxPd+j
+         w9Zsi55zD1NO2NJb4gkp4yvVGHlXf2aCzVMEsg/CpauNbMY3hmMPUQt+VAAnPr+Vs9DQ
+         aXfxHgN6Vyi1gsV/mFKJ2+SQ/iusKOSXBBTNrVycWZb7N0wcOYorlzlfA4snVZvHGNqf
+         TkHpZEZqaVUu+Rrqe2isM/P0qrw/0myNCyhanfAl3BoySzrIKtZcAT2UPj74lvtzHUYm
+         lNlw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1768756731; x=1769361531;
+        d=1e100.net; s=20230601; t=1768756963; x=1769361763;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=C9Sh3sO4hz7HhjVEAHMpRjjqKNJlWjD7ufyRMWnbcZs=;
-        b=Ttdm3FA4f7Jy2RzPnc0k1l4YAcZ4IoAU4a5YmPhu9LhTjKC/rac+Z2mCgX4+LhlVwl
-         z3vB1Py7nXagy0feROrDcRzVaSfP1S4LG/woJI/SKHGraYdulcBwjJh6RvXXpPD2F1W+
-         jvjUJJdVBNJYhv2bfwBf5CFeIlN9m8K+NLs5QciUJazbo6ZMY1s/rrK0LW0mHcTUL3Xi
-         5/xwyKVwLSoyGVj1Wnbm68d/Xey4XZHISw11pPzIwbjdqFW7q1/3CLFGZIHzwlFnJU11
-         ETU3yxmYzJfBoBSCi2GV5ziSbzdG0PTu2BEbxkFbvu6mFRRH4Awye58mpYxmvx7p7L6g
-         TY2A==
-X-Gm-Message-State: AOJu0YxQ3oj+WFRNPNLEiok94zKEZM/m3MGDu+m6NR+jPo9WItrISG/e
-	FpACCfYwfQviuXyvu/JojpwZwdZGDmhykDxXb9Ak74tPV+ZBnoUFlj00+iY7TX7viQEB8O45hdu
-	Un+daBvM+taB1/ZbZN6jeIpFWbTiIlIw1D+zyJBq+S/PVT3hrWBa8So4AxPg=
-X-Gm-Gg: AY/fxX7Re6MNqlmMTU288aVe24qmlZkH6XHqThXlCGjxqtcuH7sKpglB6FStaNs31uT
-	mN43r6RO3WQeWS47CrpcMUvRlA0hnL6za5f3JJhIza3z0EwBlr8UWV4pO9iyBppFUkL7QUiqSCQ
-	k6EOqrNmfP9q5rLB3iUMoKn+1aZXRixOUBTECxz/fk04Q9JD50IB1EU1ZZiumu0ydsGJsYbSRUn
-	rpmbiu0RKKm/vHofSzpcAaxV9/TcrLnswtGlaoJYAo3K9RxiMYjcLvRBKDgfkDB2mtuYfBjuxJt
-	s0JXSNY7g2W9tf15aaQzaCfAwK4cFeG4ywW8gE1kfSf1Nr22V5q1PyhPogZsZ/esxyr2lJT/GoH
-	6VnqLrzSPg3/srHjcZo19X5OhbZcLIt7t7clUB7ZhYZgiB5Xq6A==
-X-Received: by 2002:a17:903:124f:b0:2a0:c84f:4124 with SMTP id d9443c01a7336-2a7177e2b6fmr79213455ad.52.1768756731584;
-        Sun, 18 Jan 2026 09:18:51 -0800 (PST)
-X-Received: by 2002:a17:903:124f:b0:2a0:c84f:4124 with SMTP id d9443c01a7336-2a7177e2b6fmr79213285ad.52.1768756731034;
-        Sun, 18 Jan 2026 09:18:51 -0800 (PST)
+        bh=EB+wqXLTENqzoyUnpDkg82jF7PKC0gnv1oGoBYtLAdo=;
+        b=nVCFxkZc2ryVE96vdKhmwaETVdaF2NwPLJ9XAA1SOgFTWPuYMkh3xzPF3qpvxbqZ1C
+         /WQBDFtSeVe1NADn2HMCiB3Fjh5ayZAbmQ5a0tfJKsCzBAexk2JGhqNaZ3NEPF8MUb5J
+         3uBAfTSL5Q+b//rjmDpKF0R3EV3jIPchMks+ZLmKE4x5SHlcutJyX5RqcRyts9wz/nIL
+         s3IXH0U4dabt7UB05oBNztivZ9JFJSWUIF/8oIOaE5MEMcsg+gaURRlsUrlGjCUkYgw3
+         lPNtK24MQFoqnGLaMOBPUIIpRpLC1umxdJcb6kQupPAkaO10rzh+ZyEMU3d0xPrEmHR9
+         XnCA==
+X-Gm-Message-State: AOJu0YxEEHDGjjC1VI7ybwUIt5GpZN0SKiDUf4x2wIdxw+O2hxOIapti
+	Asm0/As4oUoDWBP41goQSv5IR32Tx590W1aiEg8QcwgaqygnQbnHT0z3f6ENotsc8UPtHPbmVNU
+	giqcVu82znbCsqv3NcoDN775rPQwUw3J56u+89mZe3Stg+DzMEA2SwDnLeOU0XTKwxXY=
+X-Gm-Gg: AY/fxX5JT+Vm+/z3XgMk/5IVDY2cLCucD69ZSRkcTO1zfYe+qcYWpsd6zKN6PRs2ND9
+	kCJnx1g27IewRnu3KvJ+2l7AZCCcNbaPWEMiw3h6aStGU6prbCiQSy9qq9VC+ETo15z/SgKr55x
+	s2PSLUy6vZwA23nVgaNV6M3suxv3QeCqNNOZteWIDQBRicpv0P4Xhq3HzuUZdL4nywwcX+n/Euz
+	QgkYpOA6Rn0WAhAaqfETPGjXUzdI9yIKxNGnGjWTRDzuLGHTYuRoIVgtF6XMri5pxs9ht699zMK
+	eucP0wOl6JZjF3pvumHSdRrACLfFhIKrIs8ayVBJ1aRDsJG5GI91u7MmbVNjS+3Lrqm0XZj0vMn
+	ywia9PjpqsxMU5zl9AUV3Hm5UzsWlwznMKC0O6SAaR9MvS+QoAA==
+X-Received: by 2002:a17:903:2343:b0:2a0:f83d:c321 with SMTP id d9443c01a7336-2a718896b3fmr78264555ad.23.1768756963069;
+        Sun, 18 Jan 2026 09:22:43 -0800 (PST)
+X-Received: by 2002:a17:903:2343:b0:2a0:f83d:c321 with SMTP id d9443c01a7336-2a718896b3fmr78264325ad.23.1768756962170;
+        Sun, 18 Jan 2026 09:22:42 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2a7193decfcsm71452475ad.60.2026.01.18.09.18.48
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2a7193fab79sm72540215ad.67.2026.01.18.09.22.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 18 Jan 2026 09:18:50 -0800 (PST)
-Date: Mon, 19 Jan 2026 01:18:46 +0800
+        Sun, 18 Jan 2026 09:22:41 -0800 (PST)
+Date: Mon, 19 Jan 2026 01:22:37 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] fsx: add missing -T option to getopt_long()
-Message-ID: <20260118171846.n5nxfoofpyi2od7i@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <dcbecbe996375e0f04962aa2e1a97ade927ecf74.1768225429.git.fdmanana@suse.com>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: fstests@vger.kernel.org, Disha Goel <disgoel@linux.ibm.com>
+Subject: Re: [PATCH v2] generic/108: fix test hand upon failure to create LV
+Message-ID: <20260118172237.mezbn4rchgthtqdr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <98f8ef5ff92632a0be336a563ebda36cfe898348.1767782181.git.ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -90,48 +89,64 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <dcbecbe996375e0f04962aa2e1a97ade927ecf74.1768225429.git.fdmanana@suse.com>
+In-Reply-To: <98f8ef5ff92632a0be336a563ebda36cfe898348.1767782181.git.ojaswin@linux.ibm.com>
 
-On Mon, Jan 12, 2026 at 01:44:09PM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Wed, Jan 07, 2026 at 04:07:44PM +0530, Ojaswin Mujoo wrote:
+> In case the lvcreate operation fails, we don't catch the error and
+> proceed as usual. The test then tries to wait for the LV to come up
+> but it never does, causing a hang.
 > 
-> Currently fsx fails with an invalid argument error when we pass the -T
-> option (do not use dontcache IO) to it because it's not listed in the
-> gepopt_long() call.
+> To fix this:
+> 1. Add a check to ensure SCSI_DEBUG dev is of required size
+> 2. Additionally, fail if there are errors while creating the LV.
 > 
-> Fix this and add T to the getopt_long() call.
+> Context for completeness:
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> This was noticed when we accidentally used CONFIG_SCSI_DEBUG=y instead
+> of =m, causing it to create an 8MB SCSI debug device. This led to the
+> lvcreate operation to fail with:
+> 
+>   Insufficient suitable allocatable extents for logical volume lv_108: 68 more required
+> 
+> However the test never caught this resulting in a hang.
+> 
+> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> Reported-by: Disha Goel <disgoel@linux.ibm.com>
 > ---
 
-Wow, so no one used this option before :) I just tried to search in xfstests,
-I didn't find any test cases or common helpers use the -T option of fsx, that's
-why we didn't find this issue before. I think you might test with FSX_AVOID="-T"
-or run fsx with -T manually. Anyway, thanks for finding and fixing this issue!
+Thanks for re-sending this V2, this version looks good to me now.
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Thanks,
-Zorro
-
->  ltp/fsx.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  tests/generic/108 | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
 > 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 626976dd..8626662b 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -3160,7 +3160,7 @@ main(int argc, char **argv)
->  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
+> diff --git a/tests/generic/108 b/tests/generic/108
+> index 4f86ec94..05d743a9 100755
+> --- a/tests/generic/108
+> +++ b/tests/generic/108
+> @@ -50,6 +50,11 @@ SCSI_DEBUG_DEV=`_get_scsi_debug_dev ${physical:-512} ${logical:-512} 0 $size`
+>  test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
+>  echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
 >  
->  	while ((ch = getopt_long(argc, argv,
-> -				 "0ab:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
-> +				 "0ab:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:TOP:RS:UWXZ",
->  				 longopts, NULL)) != EOF)
->  		switch (ch) {
->  		case 'a':
+> +got_size_kb=$(_get_device_size $SCSI_DEBUG_DEV)
+> +
+> +[[ $got_size_kb -lt $((size * 1024)) ]] &&
+> +	_notrun "Need SCSI debug device of size $(( size * 1024 )) KB. Got $got_size_kb KB"
+> +
+>  # create striped volume with 4MB stripe size
+>  #
+>  # lvm has a hardcoded list of valid devices and fails with
+> @@ -60,7 +65,7 @@ $LVM_PROG vgcreate -f $vgname $SCSI_DEBUG_DEV $SCRATCH_DEV >>$seqres.full 2>&1
+>  # We use yes pipe instead of 'lvcreate --yes' because old version of lvm
+>  # (like 2.02.95 in RHEL6) don't support --yes option
+>  yes | $LVM_PROG lvcreate -i 2 -I 4m -L ${lvsize}m -n $lvname $vgname \
+> -	>>$seqres.full 2>&1
+> +	>>$seqres.full 2>&1 || _fail "Failed to create LVM lv"
+>  _udev_wait /dev/mapper/$vgname-$lvname
+>  
+>  # _mkfs_dev exits the test on failure, this makes sure test lv is created by
 > -- 
-> 2.47.2
-> 
+> 2.51.0
 > 
 
