@@ -1,43 +1,73 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yx1-f42.google.com (mail-yx1-f42.google.com [74.125.224.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21D69238C0A;
-	Mon, 19 Jan 2026 16:57:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7652033D6C2
+	for <fstests@vger.kernel.org>; Tue, 20 Jan 2026 04:20:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768841822; cv=none; b=LGZby2x+esbQ8yuvhqiaKuKsZekWdXO8QhtAJkUtCTxmG4UTH7PnghLMVUODLx9IdMdCh4Ekt6hqBiFcv/cHP/JTZEYrIeL5rHfUu2HPmW4E8NR4EU46sDoQ+cJi6H8yIkiNyAIwtFKIB8MhazPvWnzKEVHJnfcWIu8RQDZhCPM=
+	t=1768882810; cv=none; b=MVoPUz3T0fBadmvFKg2kWbkKxAL4RfO+F2JFstWo+buXXXP2twsIoDxux9fxXNAEMe5Rp8+28t4WuTkriFknzf72mN2rdr4UIVE79p1AJOxILSLitCVdzq5+dUz5xs3Yt+vv1VfCfdAOEnMaJ3hxp9GKlfewRZiXiCNAyCGyhs4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768841822; c=relaxed/simple;
-	bh=FI4NI8dl6jSoy/l8FdXI8/RsUN0G2gTdmtm2I6gBCHw=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=sW4N04Q/H+LAIrsjXUwgxXhh8DhTdYS7t00rR4knqP/aSOkEcpxbL1ZSKeS/I3Tj/JzmZtWaAxpGd/ZVqEd2tFJ+hJnhCfzuW1FJQVaOl48ZzW1d0VThAroJtzTUdJOqyAWkAYto6H9+nv/BVEeAsPAqR1BqliUeTDGFJTYX/3g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QGEMF9Js; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1768882810; c=relaxed/simple;
+	bh=DlXgw2xybDKncbIwL7HxVkjEVsLQnZIQdS531aY8JUo=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=AArykweHnhqn9Y+r8wbTg3HzXgfFI1Tzm8Hf3ds4XqrobB5VZVva9Xso08rKi2pmJJ9WQ8I5LFWv2Hebnazo3kGfM17lF32U74REZiyotKU8d3Ya74Rg4Vmla9c3AOnWrU3dZheD+fn9wO/U4Nu68tHibq1TxmwEJU/tT4r4zqg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20230601.gappssmtp.com header.i=@dubeyko-com.20230601.gappssmtp.com header.b=obEGGJ+l; arc=none smtp.client-ip=74.125.224.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QGEMF9Js"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ADA42C16AAE;
-	Mon, 19 Jan 2026 16:57:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768841822;
-	bh=FI4NI8dl6jSoy/l8FdXI8/RsUN0G2gTdmtm2I6gBCHw=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=QGEMF9JscDXIATIn7Uo6TC5oh5iykDA0iDWxITF0DroSiPrde11TSvhcH/LC5dp2L
-	 HoE9FMHMf/506VXUE/P2x3V1zbZ/Fi05WOgg7Kj/OBZb+2GBviKo4jCL0aPVAASXVk
-	 /ccEH4nD7UsMWpSFr269GC7KQhpQcSLQKU8q6h8OEWRElrvf8iiCimHcUsTUJfu9sF
-	 2+ZxZPZeLlvcvVzedUIeeJsunrlLISPLeApCQyDdSZEMq/dcTXM82GzIoeHn4TOEUv
-	 Z+24f5Fiahbf2nFd9uWtTly+r9rRoTzMjwXVO5Marg8h19PcmDEM++v+5ECd6/ArBL
-	 SCkycNukpzQoQ==
-From: Andrey Albershteyn <aalbersh@kernel.org>
-To: linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org,
-	ebiggers@kernel.org
-Cc: Andrey Albershteyn <aalbersh@kernel.org>,
-	djwong@kernel.org
-Subject: [PATCH v2 2/2] fsverity: add tracepoints
-Date: Mon, 19 Jan 2026 17:56:43 +0100
-Message-ID: <20260119165644.2945008-3-aalbersh@kernel.org>
-X-Mailer: git-send-email 2.52.0
-In-Reply-To: <20260119165644.2945008-1-aalbersh@kernel.org>
-References: <20260119165644.2945008-1-aalbersh@kernel.org>
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20230601.gappssmtp.com header.i=@dubeyko-com.20230601.gappssmtp.com header.b="obEGGJ+l"
+Received: by mail-yx1-f42.google.com with SMTP id 956f58d0204a3-64455a2a096so4023143d50.3
+        for <fstests@vger.kernel.org>; Mon, 19 Jan 2026 20:20:06 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=dubeyko-com.20230601.gappssmtp.com; s=20230601; t=1768882805; x=1769487605; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=9jRfA1Hde7rJpNzHrIbFX351VYVHvA+SREvN9uZgC2c=;
+        b=obEGGJ+lp16vG5AYD5reJEw2qWtuqkumV0grroFIedzfi61lu5bU5CWIZJJigJ4znB
+         OR3Ucxg1W5Bgn8qnCJaUeMZUk7a9PuFNLrzxDNKAz/L6OKW/cH5H22LupVg/6sZHAqXK
+         631baate2UfB6njT8hwPhLExhQgqrx1+JlhrgW+P2G6iKXbPuJWEpKOTuhmuQK4X9QFY
+         fFFRgdvfMTBAPCep1sHdLPrSs9ptEQv/s6+FGIfy6Pzv38pRh5YNAw/5EFDqEolU2CBl
+         FIYjaW4mf3+JXIlXL1rNMo4wSu6Cr3sX/F7oaLIPdZt6sBrx02s4oiVFSb5i+wVfax1M
+         RgEw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1768882805; x=1769487605;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=9jRfA1Hde7rJpNzHrIbFX351VYVHvA+SREvN9uZgC2c=;
+        b=YlwzvsmcPt3KFRuek8KC64ame0Zrwm9u7JY9th6Ap9mqQ8jug89sOyPgZ5t1OgFczz
+         ZSiNhnly8Bzd0Zpy/fyB1YmJs4wxlZKQepsOYunzSZf2DkOSdvUFtGYZijQUHJQkk/B3
+         bGVRz0RY8y9cOOLWMp2RF/3wRvP3v2zdEis8cHmRLI30avO+KiEwkrq5JysPqm6Kje4V
+         zy+XGA/o22SVdNyI88WyVG2YKB93edfnmdCr/AYCM9eNrky9qchoRkW3+xtVreSyITsH
+         bapYHq1vEWl4gaUJUvQkDHH7xT5Twkv5yhLI0qBlWLUbuhNLXXEaL0LuaQUanMa4PAg5
+         CQgA==
+X-Forwarded-Encrypted: i=1; AJvYcCX30TmV2gzfJRE6C65K8jLLygsPbw0eEwuoJdfSRgkkoovzcpZJaBXc5SI3aY8YOqpwBHvNyeBZ@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxjn7kwoNi7Qp429cDRj83UseLECRWmsCv2b0+gvKJtuKwsDdrX
+	5k0Zdsw9f8L0yzsz8cpgG4ipqJouTa9AdYttPVlDD2YDlfLUuyCzdsly53kJh1H+BEA=
+X-Gm-Gg: AZuq6aIx8WiEmk95MCDDZobhlFFpzvmjC8HMEP+ZQDPayLpFQ+RAtVdtCf5NiUAaYZ2
+	Kp6dA/EOKk1mu0ibEZD3pApIuxEO/3fxqaLm2FTFHOVYbs+rVoCRy8Ri7fQzHBtH2njfCW4e/iU
+	ZM7t3JpQKEkXYD97IoRKhE9++AvJzKVL4k16HogjjLPyd05soI5BvznGrH+n3i9V/dsJEkWDMjc
+	bL2KhqHiO0D5GeuWQJzmMKSBSWr1UunTdyd2J587LPgtfPrk/UCFIUdObeGvON7dLjVHQ46gFkY
+	34+wckFu0R2cIIRQozv1Hhfim8uqF1iAMrGm9QurBK6L9z9PNTzArh4NOV9keZmzU05yqY9hxuh
+	DX4gseVd2tXac0wYle5YjbZoDZk+VszbnPM0rXelCLAFUpmHm/dGUa9rrbLa33oXIORkI7lUQgc
+	1jqTCCNAxr7/paEGhPWlJRJNtksp6QdfQGcU0KepVjAr1TC8rOANVbUOwewHRWb+0KLVmfDsjCs
+	1dQasFS6Hf9ONFQdDxKywg=
+X-Received: by 2002:a05:690c:c50c:b0:78f:984b:4bef with SMTP id 00721157ae682-7940a470576mr11400417b3.68.1768882805114;
+        Mon, 19 Jan 2026 20:20:05 -0800 (PST)
+Received: from pop-os.attlocal.net ([2600:1700:6476:1430:ead3:ebfb:3b92:a0e5])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-793c686db17sm47946407b3.38.2026.01.19.20.20.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 19 Jan 2026 20:20:04 -0800 (PST)
+From: Viacheslav Dubeyko <slava@dubeyko.com>
+To: glaubitz@physik.fu-berlin.de,
+	linux-fsdevel@vger.kernel.org,
+	frank.li@vivo.com,
+	fstests@vger.kernel.org
+Cc: Slava.Dubeyko@ibm.com,
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Subject: [PATCH] hfsplus: fix generic/062 xfstests failure
+Date: Mon, 19 Jan 2026 20:19:38 -0800
+Message-Id: <20260120041937.3450928-1-slava@dubeyko.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -46,263 +76,182 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-fs-verity previously had debug printk but it was removed. This patch
-adds trace points to similar places, as a better alternative.
+The xfstests' test-case generic/062 fails to execute
+correctly:
 
-Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-[djwong: fix formatting]
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+FSTYP -- hfsplus
+PLATFORM -- Linux/x86_64 hfsplus-testing-0001 6.15.0-rc4+ #8 SMP PREEMPT_DYNAMIC Thu May 1 16:43:22 PDT 2025
+MKFS_OPTIONS -- /dev/loop51
+MOUNT_OPTIONS -- /dev/loop51 /mnt/scratch
+
+generic/062 - output mismatch (see xfstests-dev/results//generic/062.out.bad)
+
+The generic/062 test tries to set and get xattrs for various types
+of objects (regular file, folder, block device, character
+device, pipe, etc) with the goal to check that xattr operations
+works correctly for all possible types of file system objects.
+But current HFS+ implementation somehow hasn't support of
+xattr operatioons for the case of block device, character
+device, and pipe objects. Also, it has not completely correct
+set of operations for the case symlinks.
+
+This patch implements proper declaration of xattrs operations
+hfsplus_special_inode_operations and hfsplus_symlink_inode_operations.
+Also, it slightly corrects the logic of hfsplus_listxattr()
+method.
+
+sudo ./check generic/062
+FSTYP         -- hfsplus
+PLATFORM      -- Linux/x86_64 hfsplus-testing-0001 6.19.0-rc1+ #59 SMP PREEMPT_DYNAMIC Mon Jan 19 16:26:21 PST 2026
+MKFS_OPTIONS  -- /dev/loop51
+MOUNT_OPTIONS -- /dev/loop51 /mnt/scratch
+
+generic/062 20s ...  20s
+Ran: generic/062
+Passed all 1 tests
+
+[1] https://github.com/hfs-linux-kernel/hfs-linux-kernel/issues/93
+
+Signed-off-by: Viacheslav Dubeyko <slava@dubeyko.com>
+cc: John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
+cc: Yangtao Li <frank.li@vivo.com>
+cc: linux-fsdevel@vger.kernel.org
 ---
- MAINTAINERS                     |   1 +
- fs/verity/enable.c              |   4 +
- fs/verity/fsverity_private.h    |   2 +
- fs/verity/init.c                |   1 +
- fs/verity/verify.c              |   9 ++
- include/trace/events/fsverity.h | 143 ++++++++++++++++++++++++++++++++
- 6 files changed, 160 insertions(+)
- create mode 100644 include/trace/events/fsverity.h
+ fs/hfsplus/inode.c | 23 +++++++++++++++++++++--
+ fs/hfsplus/xattr.c | 29 ++++++++++++++++++-----------
+ 2 files changed, 39 insertions(+), 13 deletions(-)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 12f49de7fe03..17607340dfab 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -10311,6 +10311,7 @@ T:	git https://git.kernel.org/pub/scm/fs/fsverity/linux.git
- F:	Documentation/filesystems/fsverity.rst
- F:	fs/verity/
- F:	include/linux/fsverity.h
-+F:	include/trace/events/fsverity.h
- F:	include/uapi/linux/fsverity.h
+diff --git a/fs/hfsplus/inode.c b/fs/hfsplus/inode.c
+index 6153e5cc6eb6..533c43cc3768 100644
+--- a/fs/hfsplus/inode.c
++++ b/fs/hfsplus/inode.c
+@@ -396,6 +396,19 @@ static const struct inode_operations hfsplus_file_inode_operations = {
+ 	.fileattr_set	= hfsplus_fileattr_set,
+ };
  
- FT260 FTDI USB-HID TO I2C BRIDGE DRIVER
-diff --git a/fs/verity/enable.c b/fs/verity/enable.c
-index 95ec42b84797..8718d943b428 100644
---- a/fs/verity/enable.c
-+++ b/fs/verity/enable.c
-@@ -222,6 +222,8 @@ static int enable_verity(struct file *filp,
- 	if (err)
- 		goto out;
- 
-+	trace_fsverity_enable(inode, &params);
++const struct inode_operations hfsplus_symlink_inode_operations = {
++	.get_link	= page_get_link,
++	.setattr	= hfsplus_setattr,
++	.getattr	= hfsplus_getattr,
++	.listxattr	= hfsplus_listxattr,
++};
 +
- 	/*
- 	 * Start enabling verity on this file, serialized by the inode lock.
- 	 * Fail if verity is already enabled or is already being enabled.
-@@ -264,6 +266,8 @@ static int enable_verity(struct file *filp,
- 		goto rollback;
- 	}
- 
-+	trace_fsverity_tree_done(inode, vi, &params);
++const struct inode_operations hfsplus_special_inode_operations = {
++	.setattr	= hfsplus_setattr,
++	.getattr	= hfsplus_getattr,
++	.listxattr	= hfsplus_listxattr,
++};
 +
- 	/*
- 	 * Tell the filesystem to finish enabling verity on the file.
- 	 * Serialized with ->begin_enable_verity() by the inode lock.
-diff --git a/fs/verity/fsverity_private.h b/fs/verity/fsverity_private.h
-index dd20b138d452..4b7ae1748f4e 100644
---- a/fs/verity/fsverity_private.h
-+++ b/fs/verity/fsverity_private.h
-@@ -161,4 +161,6 @@ static inline void fsverity_init_signature(void)
- 
- void __init fsverity_init_workqueue(void);
- 
-+#include <trace/events/fsverity.h>
+ static const struct file_operations hfsplus_file_operations = {
+ 	.llseek		= generic_file_llseek,
+ 	.read_iter	= generic_file_read_iter,
+@@ -455,12 +468,17 @@ struct inode *hfsplus_new_inode(struct super_block *sb, struct inode *dir,
+ 		hip->clump_blocks = sbi->data_clump_blocks;
+ 	} else if (S_ISLNK(inode->i_mode)) {
+ 		sbi->file_count++;
+-		inode->i_op = &page_symlink_inode_operations;
++		inode->i_op = &hfsplus_symlink_inode_operations;
+ 		inode_nohighmem(inode);
+ 		inode->i_mapping->a_ops = &hfsplus_aops;
+ 		hip->clump_blocks = 1;
++	} else if (S_ISCHR(inode->i_mode) || S_ISBLK(inode->i_mode) ||
++		   S_ISFIFO(inode->i_mode) || S_ISSOCK(inode->i_mode)) {
++		sbi->file_count++;
++		inode->i_op = &hfsplus_special_inode_operations;
+ 	} else
+ 		sbi->file_count++;
 +
- #endif /* _FSVERITY_PRIVATE_H */
-diff --git a/fs/verity/init.c b/fs/verity/init.c
-index 6e8d33b50240..d65206608583 100644
---- a/fs/verity/init.c
-+++ b/fs/verity/init.c
-@@ -5,6 +5,7 @@
-  * Copyright 2019 Google LLC
-  */
- 
-+#define CREATE_TRACE_POINTS
- #include "fsverity_private.h"
- 
- #include <linux/ratelimit.h>
-diff --git a/fs/verity/verify.c b/fs/verity/verify.c
-index 86067c8b40cf..940b8b956d7e 100644
---- a/fs/verity/verify.c
-+++ b/fs/verity/verify.c
-@@ -135,6 +135,9 @@ static bool verify_data_block(struct inode *inode, struct fsverity_info *vi,
- 		/* Byte offset of the wanted hash relative to @addr */
- 		unsigned int hoffset;
- 	} hblocks[FS_VERITY_MAX_LEVELS];
-+
-+	trace_fsverity_verify_data_block(inode, params, data_pos);
-+
- 	/*
- 	 * The index of the previous level's block within that level; also the
- 	 * index of that block's hash within the current level.
-@@ -214,6 +217,9 @@ static bool verify_data_block(struct inode *inode, struct fsverity_info *vi,
- 			want_hash = _want_hash;
- 			kunmap_local(haddr);
- 			put_page(hpage);
-+			trace_fsverity_merkle_hit(inode, data_pos, hblock_idx,
-+					level,
-+					hoffset >> params->log_digestsize);
- 			goto descend;
+ 	insert_inode_hash(inode);
+ 	mark_inode_dirty(inode);
+ 	hfsplus_mark_mdb_dirty(sb);
+@@ -591,10 +609,11 @@ int hfsplus_cat_read_inode(struct inode *inode, struct hfs_find_data *fd)
+ 			inode->i_fop = &hfsplus_file_operations;
+ 			inode->i_mapping->a_ops = &hfsplus_aops;
+ 		} else if (S_ISLNK(inode->i_mode)) {
+-			inode->i_op = &page_symlink_inode_operations;
++			inode->i_op = &hfsplus_symlink_inode_operations;
+ 			inode_nohighmem(inode);
+ 			inode->i_mapping->a_ops = &hfsplus_aops;
+ 		} else {
++			inode->i_op = &hfsplus_special_inode_operations;
+ 			init_special_inode(inode, inode->i_mode,
+ 					   be32_to_cpu(file->permissions.dev));
  		}
- 		hblocks[level].page = hpage;
-@@ -232,6 +238,9 @@ static bool verify_data_block(struct inode *inode, struct fsverity_info *vi,
- 		unsigned long hblock_idx = hblocks[level - 1].index;
- 		unsigned int hoffset = hblocks[level - 1].hoffset;
+diff --git a/fs/hfsplus/xattr.c b/fs/hfsplus/xattr.c
+index c3dcbe30f16a..9904944cbd54 100644
+--- a/fs/hfsplus/xattr.c
++++ b/fs/hfsplus/xattr.c
+@@ -258,6 +258,15 @@ static int hfsplus_create_attributes_file(struct super_block *sb)
+ 	return err;
+ }
  
-+		trace_fsverity_verify_merkle_block(inode, hblock_idx,
-+				level, hoffset >> params->log_digestsize);
++static inline
++bool is_xattr_operation_supported(struct inode *inode)
++{
++	if (HFSPLUS_IS_RSRC(inode))
++		return false;
 +
- 		fsverity_hash_block(params, haddr, real_hash);
- 		if (memcmp(want_hash, real_hash, hsize) != 0)
- 			goto corrupted;
-diff --git a/include/trace/events/fsverity.h b/include/trace/events/fsverity.h
-new file mode 100644
-index 000000000000..1825f87a00d6
---- /dev/null
-+++ b/include/trace/events/fsverity.h
-@@ -0,0 +1,143 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+#undef TRACE_SYSTEM
-+#define TRACE_SYSTEM fsverity
++	return true;
++}
 +
-+#if !defined(_TRACE_FSVERITY_H) || defined(TRACE_HEADER_MULTI_READ)
-+#define _TRACE_FSVERITY_H
+ int __hfsplus_setxattr(struct inode *inode, const char *name,
+ 			const void *value, size_t size, int flags)
+ {
+@@ -268,9 +277,11 @@ int __hfsplus_setxattr(struct inode *inode, const char *name,
+ 	u16 folder_finderinfo_len = sizeof(DInfo) + sizeof(DXInfo);
+ 	u16 file_finderinfo_len = sizeof(FInfo) + sizeof(FXInfo);
+ 
+-	if ((!S_ISREG(inode->i_mode) &&
+-			!S_ISDIR(inode->i_mode)) ||
+-				HFSPLUS_IS_RSRC(inode))
++	hfs_dbg("ino %lu, name %s, value %p, size %zu\n",
++		inode->i_ino, name ? name : NULL,
++		value, size);
 +
-+#include <linux/tracepoint.h>
-+
-+struct fsverity_descriptor;
-+struct merkle_tree_params;
-+struct fsverity_info;
-+
-+TRACE_EVENT(fsverity_enable,
-+	TP_PROTO(const struct inode *inode,
-+		 const struct merkle_tree_params *params),
-+	TP_ARGS(inode, params),
-+	TP_STRUCT__entry(
-+		__field(ino_t, ino)
-+		__field(u64, data_size)
-+		__field(unsigned int, block_size)
-+		__field(unsigned int, num_levels)
-+		__field(u64, tree_size)
-+	),
-+	TP_fast_assign(
-+		__entry->ino = inode->i_ino;
-+		__entry->data_size = i_size_read(inode);
-+		__entry->block_size = params->block_size;
-+		__entry->num_levels = params->num_levels;
-+		__entry->tree_size = params->tree_size;
-+	),
-+	TP_printk("ino %lu data size %llu tree size %llu block size %u levels %u",
-+		(unsigned long) __entry->ino,
-+		__entry->data_size,
-+		__entry->tree_size,
-+		__entry->block_size,
-+		__entry->num_levels)
-+);
-+
-+TRACE_EVENT(fsverity_tree_done,
-+	TP_PROTO(const struct inode *inode, const struct fsverity_info *vi,
-+		 const struct merkle_tree_params *params),
-+	TP_ARGS(inode, vi, params),
-+	TP_STRUCT__entry(
-+		__field(ino_t, ino)
-+		__field(unsigned int, levels)
-+		__field(unsigned int, block_size)
-+		__field(u64, tree_size)
-+		__dynamic_array(u8, root_hash, params->digest_size)
-+		__dynamic_array(u8, file_digest, params->digest_size)
-+	),
-+	TP_fast_assign(
-+		__entry->ino = inode->i_ino;
-+		__entry->levels = params->num_levels;
-+		__entry->block_size = params->block_size;
-+		__entry->tree_size = params->tree_size;
-+		memcpy(__get_dynamic_array(root_hash), vi->root_hash, __get_dynamic_array_len(root_hash));
-+		memcpy(__get_dynamic_array(file_digest), vi->file_digest, __get_dynamic_array_len(file_digest));
-+	),
-+	TP_printk("ino %lu levels %d block_size %d tree_size %lld root_hash %s digest %s",
-+		(unsigned long) __entry->ino,
-+		__entry->levels,
-+		__entry->block_size,
-+		__entry->tree_size,
-+		__print_hex_str(__get_dynamic_array(root_hash), __get_dynamic_array_len(root_hash)),
-+		__print_hex_str(__get_dynamic_array(file_digest), __get_dynamic_array_len(file_digest)))
-+);
-+
-+TRACE_EVENT(fsverity_verify_data_block,
-+	TP_PROTO(const struct inode *inode,
-+		 const struct merkle_tree_params *params,
-+		 u64 data_pos),
-+	TP_ARGS(inode, params, data_pos),
-+	TP_STRUCT__entry(
-+		__field(ino_t, ino)
-+		__field(u64, data_pos)
-+		__field(unsigned int, block_size)
-+	),
-+	TP_fast_assign(
-+		__entry->ino = inode->i_ino;
-+		__entry->data_pos = data_pos;
-+		__entry->block_size = params->block_size;
-+	),
-+	TP_printk("ino %lu pos %lld merkle_blocksize %u",
-+		(unsigned long) __entry->ino,
-+		__entry->data_pos,
-+		__entry->block_size)
-+);
-+
-+TRACE_EVENT(fsverity_merkle_hit,
-+	TP_PROTO(const struct inode *inode, u64 data_pos,
-+		 unsigned long hblock_idx, unsigned int level,
-+		 unsigned int hidx),
-+	TP_ARGS(inode, data_pos, hblock_idx, level, hidx),
-+	TP_STRUCT__entry(
-+		__field(ino_t, ino)
-+		__field(u64, data_pos)
-+		__field(unsigned long, hblock_idx)
-+		__field(unsigned int, level)
-+		__field(unsigned int, hidx)
-+	),
-+	TP_fast_assign(
-+		__entry->ino = inode->i_ino;
-+		__entry->data_pos = data_pos;
-+		__entry->hblock_idx = hblock_idx;
-+		__entry->level = level;
-+		__entry->hidx = hidx;
-+	),
-+	TP_printk("ino %lu data_pos %llu hblock_idx %lu level %u hidx %u",
-+		(unsigned long) __entry->ino,
-+		__entry->data_pos,
-+		__entry->hblock_idx,
-+		__entry->level,
-+		__entry->hidx)
-+);
-+
-+TRACE_EVENT(fsverity_verify_merkle_block,
-+	TP_PROTO(const struct inode *inode, unsigned long index,
-+		 unsigned int level, unsigned int hidx),
-+	TP_ARGS(inode, index, level, hidx),
-+	TP_STRUCT__entry(
-+		__field(ino_t, ino)
-+		__field(unsigned long, index)
-+		__field(unsigned int, level)
-+		__field(unsigned int, hidx)
-+	),
-+	TP_fast_assign(
-+		__entry->ino = inode->i_ino;
-+		__entry->index = index;
-+		__entry->level = level;
-+		__entry->hidx = hidx;
-+	),
-+	TP_printk("ino %lu hblock_idx %lu level %u hidx %u",
-+		(unsigned long) __entry->ino,
-+		__entry->index,
-+		__entry->level,
-+		__entry->hidx)
-+);
-+
-+#endif /* _TRACE_FSVERITY_H */
-+
-+/* This part must be outside protection */
-+#include <trace/define_trace.h>
++	if (!is_xattr_operation_supported(inode))
+ 		return -EOPNOTSUPP;
+ 
+ 	if (value == NULL)
+@@ -390,6 +401,7 @@ int __hfsplus_setxattr(struct inode *inode, const char *name,
+ 
+ end_setxattr:
+ 	hfs_find_exit(&cat_fd);
++	hfs_dbg("finished: res %d\n", err);
+ 	return err;
+ }
+ 
+@@ -514,9 +526,7 @@ ssize_t __hfsplus_getxattr(struct inode *inode, const char *name,
+ 	u16 record_length = 0;
+ 	ssize_t res;
+ 
+-	if ((!S_ISREG(inode->i_mode) &&
+-			!S_ISDIR(inode->i_mode)) ||
+-				HFSPLUS_IS_RSRC(inode))
++	if (!is_xattr_operation_supported(inode))
+ 		return -EOPNOTSUPP;
+ 
+ 	if (!strcmp_xattr_finder_info(name))
+@@ -709,9 +719,7 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
+ 
+ 	hfs_dbg("ino %lu\n", inode->i_ino);
+ 
+-	if ((!S_ISREG(inode->i_mode) &&
+-			!S_ISDIR(inode->i_mode)) ||
+-				HFSPLUS_IS_RSRC(inode))
++	if (!is_xattr_operation_supported(inode))
+ 		return -EOPNOTSUPP;
+ 
+ 	res = hfsplus_listxattr_finder_info(dentry, buffer, size);
+@@ -737,8 +745,7 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
+ 	err = hfsplus_find_attr(inode->i_sb, inode->i_ino, NULL, &fd);
+ 	if (err) {
+ 		if (err == -ENOENT) {
+-			if (res == 0)
+-				res = -ENODATA;
++			res = 0;
+ 			goto end_listxattr;
+ 		} else {
+ 			res = err;
 -- 
-2.52.0
+2.43.0
 
