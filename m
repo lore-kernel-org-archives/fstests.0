@@ -1,90 +1,90 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C5E927A123
-	for <fstests@vger.kernel.org>; Wed, 21 Jan 2026 13:51:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A19372192F9
+	for <fstests@vger.kernel.org>; Wed, 21 Jan 2026 14:23:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769003485; cv=none; b=ZUV0bEkyoS4wDibDRpuMjgC+JYN0xYuXVuoKvW0XGQA2sbnHTkxSKY0JFREB8TpcgK6ureOVjsNP76Ui4syNsLV+xLAZoq5l3XjDMll3AvP5XTnB2qLT0uEI0BFk53tcVzQrWJwNNR4RyyD5Kq4roOUij3yn/YyTRJnYFz7Rzx8=
+	t=1769005424; cv=none; b=fKu33N2eXg6Y6wJ+tIK+2Znr3HX3nKNQIzDK83DKMf++RvWY6fx/ONVYjGhU3+GO79HCkyF2cSCai4alLodNF2MaRJqYS2hDNDTvLSxfCzpX1y+q9MxiRFSucTO+gCTgGqIDLReza0LS2Z4D+xeIzD4euwHUkJRCHKRL6ssX5Zw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769003485; c=relaxed/simple;
-	bh=iO7E8zWhjoHroNGr61CgaNdoxjgpnsVYjZroJea4PO8=;
+	s=arc-20240116; t=1769005424; c=relaxed/simple;
+	bh=nKUMXjOmLTnE+RfU3XyoOlaUilXKRnb6aV3RgZl3MWc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=nglh1fLqRq24bNXTMXTt/MbLxbymrgooA2uz45rx5Rz2QBdSqGxBeOgttiz4ZwCJGF1DbrpRwkuqzC8eazUphgq6AY3+R32ZSy6Q/AuTSHWfTTpazPQ5PVetsGqeqG6tbzjP5A3zi7tzkr2KY7dXIFYC0Hxt1Wvr/G5Op5RB46I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=I9QgYB2g; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=XJgsg1PZ; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=Cky6LqZGqUH+K2AZAAG/iL4mJsaqGft5Rkxb3g964c1CThs9g+9JpGsGaRuN14tAATOjQeXQ3gXMvWBjw5Mw8btHeoPpp5x5UxAPVPwBzoQkncWkIDLxCKco9YRpa4Bn/MxFwCO8eF2VeeiRrJM4xQf8LSrBDhtr6SZ9tcxyLwk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=FMEPhyYv; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=UoIFnnPH; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="I9QgYB2g";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="XJgsg1PZ"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FMEPhyYv";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="UoIFnnPH"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1769003481;
+	s=mimecast20190719; t=1769005421;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=4pyOAe8U3dwnToaq8Wod8FWTkEuAMiKN15hDqRNZsMo=;
-	b=I9QgYB2gIGGOtd5/VUX0jE9ykcq5eiNB5SfTlNf9lbCoB8P/X8cZi7UfZ34GrWFb/dkQVV
-	CyZ8PdtPqgdap2gFOCBHgF0ncZuPKKAREqepx+FY8+2gQ7O6mCAJFBfMEVDVpxskzlsCna
-	NIWYYAMenvD5iEXaybYWJOPvFk3x/oE=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=ffT6Evq9xkKRyRVBJ43QX5OBdbtSbykl1lCqzNla/MU=;
+	b=FMEPhyYv0FNAFGI1ILoOBJvRivpPJH7z659aaKagxyQ+6BRr5oY8dvPJ72uSB90VDLDv1J
+	hnBkogz1u92sPUOV08Cr0GHiSSThDxLkaTz/ghdRvGDDzD2L1jyuzMhajRlsX1d7eYccl7
+	9MYJymD9/XrQ3EyXXvPd4XFifWUAp/U=
+Received: from mail-wr1-f70.google.com (mail-wr1-f70.google.com
+ [209.85.221.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-433-2_c5oOJSOuWsrQdhzQZhdw-1; Wed, 21 Jan 2026 08:51:20 -0500
-X-MC-Unique: 2_c5oOJSOuWsrQdhzQZhdw-1
-X-Mimecast-MFC-AGG-ID: 2_c5oOJSOuWsrQdhzQZhdw_1769003479
-Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-34c6e05af6fso6335824a91.1
-        for <fstests@vger.kernel.org>; Wed, 21 Jan 2026 05:51:20 -0800 (PST)
+ us-mta-122-btwu0B60N1Op1p30fqRqBA-1; Wed, 21 Jan 2026 09:23:39 -0500
+X-MC-Unique: btwu0B60N1Op1p30fqRqBA-1
+X-Mimecast-MFC-AGG-ID: btwu0B60N1Op1p30fqRqBA_1769005419
+Received: by mail-wr1-f70.google.com with SMTP id ffacd0b85a97d-4325b182e3cso4211560f8f.2
+        for <fstests@vger.kernel.org>; Wed, 21 Jan 2026 06:23:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1769003478; x=1769608278; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1769005418; x=1769610218; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=4pyOAe8U3dwnToaq8Wod8FWTkEuAMiKN15hDqRNZsMo=;
-        b=XJgsg1PZpba5XUlQqFxWqLL4e9s41WMob9EHryYKJSEzMk7fEGEprPq1tRjwfIJx19
-         jyYDwqLCFW7X4UkjHfNQjrxEqPYqR8NXjEVjp+rRyBHRH0wI0196/sE4Ogu++UrHJV6w
-         z0WGXnYFPcvLyidAY9C9FARlDJoUdb+xvytehCEDSXPIz7up5Yx3dnnDtijVtk+uR699
-         gtjsY35xEdNLIGBW2EC1uXfPqtbPdn8WQ7lN5e+YeP8tjaH2dw2IBtGHxJ4JvvlWA4h0
-         fTTfsj+bobFfIc2j1YInkW9AmacJ9NV4w4e6b3t5cB7LW5w0rRriSRcKKWHYmW+lDhWr
-         gV9w==
+        bh=ffT6Evq9xkKRyRVBJ43QX5OBdbtSbykl1lCqzNla/MU=;
+        b=UoIFnnPH26a3qw83VrDvv8ZHi0/FuQCbKpJwqA7lfRAvvwI/yWB1s2e7E+L8jELUcq
+         UVteg7J9McT0oNPpZcuK9tGJN7hf6v/yLh9AudWeLRKQrJGvJaTYcZ/+wwSrUhWbsvL8
+         27BnXTXL7nGVWOMfwpe9KbOiRo1z/GfOlSm4Wcmp9kWTYYzsjZOn5B/UGdKsRGrGDFD/
+         4jS1q298nvcZEUgPXe6dCVTFF8vRGSpdUpGZCNN3g58wsGKCn++iZJef8870dlO5jrHL
+         farELbCe64Zt23icY2GFypueKmDJHmrUU/0uHdSbgmEKcaJAMJz/X0bIHPpLDQGprhzJ
+         AR/Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1769003478; x=1769608278;
+        d=1e100.net; s=20230601; t=1769005418; x=1769610218;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=4pyOAe8U3dwnToaq8Wod8FWTkEuAMiKN15hDqRNZsMo=;
-        b=SmPlQ9Xk85hOV6oN5eEAdcJnhiEj5T/7RmMAa7/PV7P81MiuuxKGJBSiI+jvAxalno
-         EnaRNXwH/Oq4aBoDm7YO8aqko5NiMRgaBUzf/8Cbmp5iqZZryInhfUqnagVOfj25MR+o
-         rAFBrH99cIlTpgI1K1lbX4HIFrSs8PCmxVq/eouw81tp1ZYLznkCToqjT3/PG5Fr5+2x
-         8vW8vZIvbiX8a5/m0hmzKiaBU2ufnfbyhBgvx3IbUUQagB+WRYKf/Ad2y3VQzvug41If
-         SMpGSx9vSmeSBEVV9+c/35IVyONoLoWlZ+zsLu2H+F6pr8vY6cv3BTuVWT10EJTZp7jW
-         Ic8A==
-X-Gm-Message-State: AOJu0YyA/OVaj5fKJcQnVdAiiPCN2n1wvEE1BGetVRcJtSIW9NM7Nd9E
-	rSaNxAvbGpJtpE/Nj+iPTLWgvR6gjC+XFbO9SO1YnZDHaZgEfAXuZauqitcHIKNZYoBjSLCLD0r
-	f/QCBrYoofgf1ghzUvKy4LOakGFzEikf6LEGJVqQb0v2Pvr3a/kKoU+RaNvbQIgRwQpY3JQ==
-X-Gm-Gg: AZuq6aL4vjhB8JkEypmaq+WCW5tffPYPH7trlEVgL10hwkceITKSiuHWj6Udc4CAeMR
-	e6YwBeSJsmXFczzTHPYd8aNSVN5j+WZJ0h8HAw54I7cDbyY7DkZq7KKhZVFrnFqb5RY1dwdk44L
-	o/p7xJ7AWdEC5xULfeoUDJdBeTb5kFUkHlB3ERHHOEBTX4yCaXgEmjlMCZrcD/2r1DPi4p7DM2T
-	nY8JauuIVIqpxGhrd4d78A7Ylmn34tKXPvyxuQxKo+uQq6vPcYBU1WLgR73qeECSv8uXwD7uueQ
-	MZENvcw4B2rLxn1xmabKuclX34M6Zk5GLYu35yP6MWwtA1xUOVLp/dxwt43kOO7dXiUhrjZrHcY
-	BpUyNtWRXRogA9Z7eOFHdtQyUQHXipvLhOLCD95PJjex29tJ9Lw==
-X-Received: by 2002:a17:90b:4f48:b0:336:b60f:3936 with SMTP id 98e67ed59e1d1-35273179667mr15795516a91.12.1769003478089;
-        Wed, 21 Jan 2026 05:51:18 -0800 (PST)
-X-Received: by 2002:a17:90b:4f48:b0:336:b60f:3936 with SMTP id 98e67ed59e1d1-35273179667mr15795472a91.12.1769003477558;
-        Wed, 21 Jan 2026 05:51:17 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2a7190ce415sm158900115ad.35.2026.01.21.05.51.14
+        bh=ffT6Evq9xkKRyRVBJ43QX5OBdbtSbykl1lCqzNla/MU=;
+        b=qOMljfyUuxlZB3GD0vzmX16mJXrokhyD6z/GiJ7Z1YHgwGdBDAjGGFho4NER5/G35M
+         /S/gWNBFs0Df0nBBs6LEgoM/A2vOlwiIg3DDGZvp7btNFu9z5PVPGnK5dZnQEeAfdmaJ
+         ZrQeRhxodgO23/byK50Pb1/b/YSy2tcx5FGJlP8VwtG+3FSSwhrgknr9l8O3k/vmkB1F
+         03G2NIAEiGmB1UwNRULIVICSskruiA3zhOcn80BLNQDB0cIKLwOISq9WI1SjKRAQCYB7
+         32X8srevfh8+nrzoDstYztGV0qf3oWO+vI5Q/EBzbBzT8PV6dqPUDOrJV7TKLCPO5OzI
+         hDtA==
+X-Forwarded-Encrypted: i=1; AJvYcCXb90kt55qn/3tqlJb4I4x0rxJpyq3iKvzNbH3asOCW5Ssw/8PAvjlT9xjb8a5F8DaeHDvS07S3@vger.kernel.org
+X-Gm-Message-State: AOJu0YwuznIAPWnIfITqiOb0XlwJy7oZmrbDBBiELArW/DQFUqac6JPe
+	07pequC25tD/9VK4TNv3TknpRCcHZuwt9sdgPXoqYyoT16PxDpZ1l38LvvxMNLpae6hQ/0biEa5
+	aWBP398xQjuC7H8+tLuofWFd/oFTW/TXQloz3oRpCj3RJ195vREUAmBTOXA==
+X-Gm-Gg: AZuq6aIp96mNh9Ahu3PD5H325iPWodnNk+fTUOzoFgdnl/oBEEAgQgyNLbAmcIrxWMy
+	0ZmSI/zYiJSDRcg3Fd3jGkK327JvkkE1xXoUUYKczpQ43XDocXNEDAiRGbDFMeQ+Jy0XjaBPVFk
+	A6L1zlFxKPR5bRUk95l3VZEOAixKiobiFloOP8LBjHwXfvTt4BP8jCFMfRCBGh4eH9QIRNfg8vV
+	VTL0mztjka0wYntITn0/yRwe1/nO03WVhzbM1qvLdV70QTGa+jXhGVWqDYaReSqB8pJ491kTCUI
+	R0q1QYjlkO+xjbTX0kI9u/2bYc0pW0MP9r7eaxs2tkcT1U3bEg7/C+TcnN9Ms2KrSIRKsSmGSXc
+	=
+X-Received: by 2002:a05:6000:178c:b0:431:7a0:dbc2 with SMTP id ffacd0b85a97d-4358ff7cec8mr8739454f8f.31.1769005418376;
+        Wed, 21 Jan 2026 06:23:38 -0800 (PST)
+X-Received: by 2002:a05:6000:178c:b0:431:7a0:dbc2 with SMTP id ffacd0b85a97d-4358ff7cec8mr8739394f8f.31.1769005417731;
+        Wed, 21 Jan 2026 06:23:37 -0800 (PST)
+Received: from thinky ([217.30.74.39])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-43569921f6esm36452697f8f.4.2026.01.21.06.23.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 21 Jan 2026 05:51:16 -0800 (PST)
-Date: Wed, 21 Jan 2026 21:51:11 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-Cc: fstests@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
-	djwong@kernel.org, fdmanana@kernel.org, quwenruo.btrfs@gmx.com,
-	zlang@kernel.org
-Subject: Re: [PATCH 1/4] generic/371: Fix the test to be compatible block
- sizes upto 64k
-Message-ID: <20260121135111.7owayhl5sdva4gqq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cover.1758036285.git.nirjhar.roy.lists@gmail.com>
- <a44d80e30dca7e71e701ec90d75717a0581def4d.1758036285.git.nirjhar.roy.lists@gmail.com>
+        Wed, 21 Jan 2026 06:23:37 -0800 (PST)
+Date: Wed, 21 Jan 2026 15:23:06 +0100
+From: Andrey Albershteyn <aalbersh@redhat.com>
+To: Eric Biggers <ebiggers@kernel.org>
+Cc: Andrey Albershteyn <aalbersh@kernel.org>, linux-xfs@vger.kernel.org, 
+	fstests@vger.kernel.org, djwong@kernel.org
+Subject: Re: [PATCH v2 1/2] fs: add FS_XFLAG_VERITY for fs-verity files
+Message-ID: <nz4xsllj46jv66y5ain5fu277umo4x44ijjjpiinel5jrkajsx@j2hr6kq65wcb>
+References: <20260119165644.2945008-1-aalbersh@kernel.org>
+ <20260119165644.2945008-2-aalbersh@kernel.org>
+ <20260121003321.GB12110@quark>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -93,113 +93,34 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <a44d80e30dca7e71e701ec90d75717a0581def4d.1758036285.git.nirjhar.roy.lists@gmail.com>
+In-Reply-To: <20260121003321.GB12110@quark>
 
-On Tue, Sep 16, 2025 at 03:30:09PM +0000, Nirjhar Roy (IBM) wrote:
-> When this test was ran with btrfs with 64k sector/block size, it
-> failed with
+On 2026-01-20 16:33:21, Eric Biggers wrote:
+> On Mon, Jan 19, 2026 at 05:56:42PM +0100, Andrey Albershteyn wrote:
+> >  /* Read-only inode flags */
+> >  #define FS_XFLAG_RDONLY_MASK \
+> > -	(FS_XFLAG_PREALLOC | FS_XFLAG_HASATTR)
+> > +	(FS_XFLAG_PREALLOC | FS_XFLAG_HASATTR | FS_XFLAG_VERITY)
 > 
->      QA output created by 371
->      Silence is golden
->     +fallocate: No space left on device
->     +pwrite: No space left on device
->     +fallocate: No space left on device
->     +pwrite: No space left on device
->     +pwrite: No space left on device
->     ...
+> This is the first flag that's both a common flag and a read-only flag.
 > 
-> This is what is going on:
+> Looking at how FS_XFLAG_RDONLY_MASK gets used in
+> copy_fsxattr_from_user():
 > 
-> Let us see the following set of operations:
+>     fileattr_fill_xflags(fa, xfa.fsx_xflags);
+>     fa->fsx_xflags &= ~FS_XFLAG_RDONLY_MASK;
 > 
-> --- With 4k sector size ---
-> $ mkfs.btrfs -f -b 256m -s 4k -n 4k /dev/loop0
-> $ mount /dev/loop0 /mnt1/scratch/
-> $ df -h /dev/loop0
-> Filesystem      Size  Used Avail Use% Mounted on
-> /dev/loop0      256M  1.5M  175M   1% /mnt1/scratch
+> So it translates the xflags into fsflags, then clears the read-only
+> xflags *but not the read-only fsflags*.
 > 
-> $ xfs_io -f -c "pwrite 0 80M" /mnt1/scratch/t1
-> wrote 83886080/83886080 bytes at offset 0
-> 80 MiB, 20480 ops; 0.4378 sec (182.693 MiB/sec and 46769.3095 ops/sec)
+> If the user passed FS_XFLAG_VERITY, the result will be that
+> FS_XFLAG_VERITY will *not* be set in xflags, but FS_VERITY_FL will be
+> set in fsflags.
 > 
-> $ df -h /dev/loop0
-> Filesystem      Size  Used Avail Use% Mounted on
-> /dev/loop0      256M  1.5M  175M   1% /mnt1/scratch
-> 
-> $ sync
-> $ df -h /dev/loop0
-> Filesystem      Size  Used Avail Use% Mounted on
-> /dev/loop0      256M   82M   95M  47% /mnt1/scratch
-> 
-> $ xfs_io -f -c "pwrite 0 80M" /mnt1/scratch/t2
-> wrote 83886080/83886080 bytes at offset 0
-> 80 MiB, 20480 ops; 0:00:01.25 (63.881 MiB/sec and 16353.4648 ops/sec)
-> 
-> $ df -h /dev/loop0
-> Filesystem      Size  Used Avail Use% Mounted on
-> /dev/loop0      256M  137M   40M  78% /mnt1/scratch
-> 
-> $ sync
-> $ df -h /dev/loop0
-> Filesystem      Size  Used Avail Use% Mounted on
-> /dev/loop0      256M  162M   15M  92% /mnt1/scratch
-> 
-> Now let us repeat with 64k sector size
-> --- With 64k sector size ---
-> $ mkfs.btrfs -f -b 256m -s 64k -n 64k /dev/loop0
-> $ mount /dev/loop0 /mnt1/scratch/
-> $ df -h /dev/loop0
-> Filesystem      Size  Used Avail Use% Mounted on
-> /dev/loop0      256M   24M  175M  12% /mnt1/scratch
-> 
-> $ xfs_io -f -c "pwrite 0 80M" /mnt1/scratch/t1
-> wrote 83886080/83886080 bytes at offset 0
-> 80 MiB, 20480 ops; 0.8460 sec (94.553 MiB/sec and 24205.4914 ops/sec)
-> $
-> $ df -h /dev/loop0
-> Filesystem      Size  Used Avail Use% Mounted on
-> /dev/loop0      256M   24M  175M  12% /mnt1/scratch
-> 
-> $ sync
-> $ df -h /dev/loop0
-> Filesystem      Size  Used Avail Use% Mounted on
-> /dev/loop0      256M  104M   95M  53% /mnt1/scratch
-> 
-> $ xfs_io -f -c "pwrite 0 80M" /mnt1/scratch/t2
-> pwrite: No space left on device
-> 
-> Now, we can see that with 64k node size, 256M is not sufficient
-> to hold 2 files worth 80M. For 64k, we can also see that the initial
-> space usage on a fresh filesystem is 24M and for 4k its 1.5M. So
-> because of higher node size, more metadata space is getting used.
-> This test requires the size of the filesystem to be at least capable
-> to hold 2 80M files.
-> Fix this by increasing the fs size from 256M to 330M.
-> 
-> Reported-by: Disha Goel <disgoel@linux.ibm.com>
-> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-> ---
+> Is that working as intended?  It seems inconsistent.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Yeah, this seems wrong, thanks! I will send a patch
 
->  tests/generic/371 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/371 b/tests/generic/371
-> index b312c450..95af308e 100755
-> --- a/tests/generic/371
-> +++ b/tests/generic/371
-> @@ -19,7 +19,7 @@ _require_scratch
->  _require_xfs_io_command "falloc"
->  test "$FSTYP" = "xfs" && _require_xfs_io_command "extsize"
->  
-> -_scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
-> +_scratch_mkfs_sized $((330 * 1024 * 1024)) >> $seqres.full 2>&1
->  _scratch_mount
->  
->  # Disable speculative post-EOF preallocation on XFS, which can grow fast enough
-> -- 
-> 2.34.1
-> 
+-- 
+- Andrey
 
