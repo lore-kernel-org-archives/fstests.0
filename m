@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 379773033E0
-	for <fstests@vger.kernel.org>; Fri, 23 Jan 2026 04:08:14 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05F4D2D372D
+	for <fstests@vger.kernel.org>; Fri, 23 Jan 2026 04:08:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769141294; cv=none; b=afK0LOc6vooi9bVCfR1j+82FiTzBE3jnmddd6RVDDMtai/P7XxP0j/rS0Rc9G3qFnIVvmNRMfmi9gwMRfXNFnhCKLFvgeKv2Z3g8qJDI6aSdqz1y+6K5XXK74HQ2AvsI/cBhPBeiLaYsr3sLbWeBxE7tZ3z25/3DQZtJpsoEebg=
+	t=1769141327; cv=none; b=Kt9vEp08fIExHvSSlrPq/bdn/iOJq88au6c1GRHs/SonhhsHjrL3EXStyQ+ju21vDe36t8yCnd712dR3+mWfNin94gVF0NAVuH/dq+BN3xdgwtklYtgwSXUS65u5XynTXwhWfMw8EyPOTq/IQeIjVlAz9tWeHBrxgUwDkaOXoTw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769141294; c=relaxed/simple;
-	bh=T/HYvcY7VYFetxiMmPBkWe1rxWLD89ZdhJPfSk242Ik=;
+	s=arc-20240116; t=1769141327; c=relaxed/simple;
+	bh=wlGCSZXy6T9m5mbui6m5dviyE7AZ/Vj5vC2XwFQTI2Y=;
 	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=GFFY37pmItbIgihAwlb5UZXdJhUJgtFcPg6B9ZN3Cz5g6Uz9quXQNQ/LdMuA0VXZA+3UmntpD9YKr7cmVu48OzI2Br8pyvx9yYfmmC3Ta00n5sL2mhb8Q6xL0d5KwbgZiqu0qSu2zMkTtFf8mcPHjxkUeqlnq1I6nPQVT7hNsaM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=c15z6Qdu; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=Hd/jIzLarP63/xsu+N7R2vybcaaLUMu9bH9/NcelTmgYz9aSnjxOG0PIZTJIMLd28n/XA4V4mRNZN1fmvG1wR/J5hdghGhij/itMDvW1nLF8eJYJlh5frQ45MnM1bel4TOhP+XlrmTNLimUXR4d5wA4/hnGSfrbcHqaUd/PGr/0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DETJvzmB; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="c15z6Qdu"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 525D7C4CEF1;
-	Fri, 23 Jan 2026 04:08:12 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DETJvzmB"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0BA73C4CEF1;
+	Fri, 23 Jan 2026 04:08:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1769141293;
-	bh=T/HYvcY7VYFetxiMmPBkWe1rxWLD89ZdhJPfSk242Ik=;
+	s=k20201202; t=1769141326;
+	bh=wlGCSZXy6T9m5mbui6m5dviyE7AZ/Vj5vC2XwFQTI2Y=;
 	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
-	b=c15z6QdumavZYAnmXinL3OE/e6AbtEKRUaSuxjNH9u1G3E3WiofXkTDs4z7js+ow1
-	 3DCiEE/zgh6lH4y9B84ZQ6d4GN551CdiIjzP45AUTpBaq6HK55RyTlm8FwisKGf6ZQ
-	 LOaRByZclSk6tcvZq8f/eMiLpA73nK720axo2BJF6ltBOEjwSk5dSjyd3X29KruIu8
-	 EGdCfFQDcEMTzTOXGV3mObH3csgkSwiTczrvKjXHKn6EeAY2pb4/U2L42YDTnqNNBp
-	 vtGszcKPBszVfxwCYL+HO3pTwSiEG2v2mlsGDUNjFKdC9OO1WKRbck3VLsvlaIgimh
-	 m8oRQ3aA4YDcQ==
-Message-ID: <88894e46-f2e9-4d14-90c9-d6cda51abfcb@kernel.org>
-Date: Fri, 23 Jan 2026 12:08:11 +0800
+	b=DETJvzmBRUeGOuScx3ZkzOt2aBqFDDWHrHU5MZpdrP3HqFXAlBT/O1SP9Z5Xmug+q
+	 oniJ+S3fFVn6o5nhSqKcUFaZf7MeTIqvwefIKEBTFPwg7fQE82tukmUQR++DSaxBga
+	 nGcUxn91+fas6Tog3dqt/g4wZaNmObsR44C6+weJ7RGUc+5Dmp23V7ukViI3sRmgPt
+	 WU5ovZrPJ+xEkskmIUCD6aR901iv57WIPP0kIJszBfdzRUs7FzDlJV+4tdvm0V2SDK
+	 N+IAKZGpBvQDSoudHn9jIShmg9Au1hhPIgkuCUQ6cbdrn4T0MIfYTNi5KpMK2OmXaH
+	 MqTY9n+F036BQ==
+Message-ID: <4964e3f1-019e-43d4-bbd9-a6ba3ba48cda@kernel.org>
+Date: Fri, 23 Jan 2026 12:08:45 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -36,27 +36,25 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 Cc: chao@kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>,
- linux-f2fs-devel@lists.sourceforge.net, Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH v3] common/rc: add _require_blocks_in_file helper
+ linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH v1] f2fs/015: Test correct mkfs options for error cases
 To: Joanne Chang <joannechien@google.com>, Zorro Lang <zlang@kernel.org>,
  fstests@vger.kernel.org
-References: <20260108022501.754320-1-joannechien@google.com>
+References: <20260123032744.1018230-1-joannechien@google.com>
 Content-Language: en-US
 From: Chao Yu <chao@kernel.org>
-In-Reply-To: <20260108022501.754320-1-joannechien@google.com>
+In-Reply-To: <20260123032744.1018230-1-joannechien@google.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
-On 1/8/2026 10:25 AM, Joanne Chang wrote:
-> generic/735 attempts to create a file with nearly 2^32 blocks. However,
-> some filesystems have a maximum file block limit below this threshold.
-> For instance, F2FS is limited to approximately 2^30 blocks due to the
-> capacity of the inode. So add _require_blocks_in_file helper to skip the
-> test in such cases.
+On 1/23/2026 11:27 AM, Joanne Chang wrote:
+> From: Jaegeuk Kim <jaegeuk@kernel.org>
 > 
-> The helper uses a hardcoded constant instead of a programmatic method,
-> so that bugs which affect the maximum file size are not masked.
+> Let's add the required mkfs options for quota mount option cases with
+> wrong results.
 > 
+> Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+> Co-developed-by: Joanne Chang <joannechien@google.com>
 > Signed-off-by: Joanne Chang <joannechien@google.com>
 
 Reviewed-by: Chao Yu <chao@kernel.org>
