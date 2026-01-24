@@ -1,62 +1,204 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05F4D2D372D
-	for <fstests@vger.kernel.org>; Fri, 23 Jan 2026 04:08:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 540ED286A9
+	for <fstests@vger.kernel.org>; Sat, 24 Jan 2026 05:47:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769141327; cv=none; b=Kt9vEp08fIExHvSSlrPq/bdn/iOJq88au6c1GRHs/SonhhsHjrL3EXStyQ+ju21vDe36t8yCnd712dR3+mWfNin94gVF0NAVuH/dq+BN3xdgwtklYtgwSXUS65u5XynTXwhWfMw8EyPOTq/IQeIjVlAz9tWeHBrxgUwDkaOXoTw=
+	t=1769233642; cv=none; b=Mhw0xbrjEMait/pT6fA28Z2H5LrAoui30Y0HvWM44FFDG/IAGr7lfo2nENiJhttzqn6fu315Sx7g4FyYgwQ8/B5MnQMO7aVBnS6/nAtj44XXKTWEeBwNnpRVHz1aZAOAh2h5mcXpNJtq/yKMrI02XU/nyop9LvQwqvk7KUzN4yY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769141327; c=relaxed/simple;
-	bh=wlGCSZXy6T9m5mbui6m5dviyE7AZ/Vj5vC2XwFQTI2Y=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=Hd/jIzLarP63/xsu+N7R2vybcaaLUMu9bH9/NcelTmgYz9aSnjxOG0PIZTJIMLd28n/XA4V4mRNZN1fmvG1wR/J5hdghGhij/itMDvW1nLF8eJYJlh5frQ45MnM1bel4TOhP+XlrmTNLimUXR4d5wA4/hnGSfrbcHqaUd/PGr/0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DETJvzmB; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1769233642; c=relaxed/simple;
+	bh=J85VsNgvoiH5DkDE7Ny5cHLFzXfBk4QwQhMWYnr6eeo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ACfQEDicENFNVnYEQxYMRQyUBOGuJ/75TOoqA1XYLtOg/WpsYvphO29d8UJaZBpqGRVJ6w+AubF3DdIj5LEhALXYi7uKpMDkLGygVCT00v6QI4qsRkMxofcQDrHkFF55MrW+OCNq3LVbmLd6+cJjlxSMn3yZcWMwkwpQxuuO7LM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZX2iiC7W; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=Rl+zBwJ9; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DETJvzmB"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0BA73C4CEF1;
-	Fri, 23 Jan 2026 04:08:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1769141326;
-	bh=wlGCSZXy6T9m5mbui6m5dviyE7AZ/Vj5vC2XwFQTI2Y=;
-	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
-	b=DETJvzmBRUeGOuScx3ZkzOt2aBqFDDWHrHU5MZpdrP3HqFXAlBT/O1SP9Z5Xmug+q
-	 oniJ+S3fFVn6o5nhSqKcUFaZf7MeTIqvwefIKEBTFPwg7fQE82tukmUQR++DSaxBga
-	 nGcUxn91+fas6Tog3dqt/g4wZaNmObsR44C6+weJ7RGUc+5Dmp23V7ukViI3sRmgPt
-	 WU5ovZrPJ+xEkskmIUCD6aR901iv57WIPP0kIJszBfdzRUs7FzDlJV+4tdvm0V2SDK
-	 N+IAKZGpBvQDSoudHn9jIShmg9Au1hhPIgkuCUQ6cbdrn4T0MIfYTNi5KpMK2OmXaH
-	 MqTY9n+F036BQ==
-Message-ID: <4964e3f1-019e-43d4-bbd9-a6ba3ba48cda@kernel.org>
-Date: Fri, 23 Jan 2026 12:08:45 +0800
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZX2iiC7W";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="Rl+zBwJ9"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1769233640;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=XigFiWB5XsbpjAsILWRqUR/lcAHzH2pfsn89FJ8Y6xA=;
+	b=ZX2iiC7W6P5SkXw12DYOGm5psukFO3pUrIpfjwrsZksozfnieBoo42aBwUzDqHEG0nMt5K
+	ojLzQWxQJKKXiG4bP8Y2fkB9Q9vPykqJB3b2kFXkv8cJUT0Vay8iH9jjHQM8/CK6p+YRbE
+	G/yjfU074QD0VUoGY6x076xukmW7BOM=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-221-3KiuxiLROqGAiPy65KBK8g-1; Sat, 24 Jan 2026 00:47:18 -0500
+X-MC-Unique: 3KiuxiLROqGAiPy65KBK8g-1
+X-Mimecast-MFC-AGG-ID: 3KiuxiLROqGAiPy65KBK8g_1769233638
+Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-c337375d953so1660972a12.3
+        for <fstests@vger.kernel.org>; Fri, 23 Jan 2026 21:47:18 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1769233637; x=1769838437; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=XigFiWB5XsbpjAsILWRqUR/lcAHzH2pfsn89FJ8Y6xA=;
+        b=Rl+zBwJ9JPy3X2brtvkd2hA5xCpqb2N2irl2p4lLtYOOHwH5EJeoruoDRc14yjsP8B
+         lceNubNKpA9qbr57S4bJO36YxHNihNLpJJ6d0eqlegTCQHmPLVxbLtEYX1IV2jBUSWI8
+         /LmInUktOxmzE6NveflcaZ2nwzxF8i3nAjLlg8IkPoiIvVD50mmr9SRNYIMLwDUM0RPv
+         +mtn5ty2EGP4Aea5W60+Pn8CgNM5AsqOk2BWOxHDBYhmNTF484CXJwF9xmK2tvQb08x5
+         t6DqK73sMeUAAftJPRNmdxnIamlLsMJdnYIG1P0jpcEJdHOfffD6Q2nQl/1wPu5cYu0E
+         JfiQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1769233637; x=1769838437;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=XigFiWB5XsbpjAsILWRqUR/lcAHzH2pfsn89FJ8Y6xA=;
+        b=hOcSGnck78lFu/MPlepjTx8M25y+ZADGCqQund9+JN9EStw3ReHNmeMOF14uFkhTgg
+         nPV6Oxv9RwdjVLS2yg2So7iX7l1WBC0Gon21Irk2jd7yQRmhULbkVPYV7YyUz/sRbr4e
+         8/1zrAqTbENd0sAjKcBI4VeVWJsjxuc4jXmSeD9mcOrv3w3EEKj7zkSLJHqiq6kXJM7F
+         1HWcdZAlh6nqj+OmIMJ6liAw+HgwdPPEZ86yaIEtkkRbKz57bnWEeG1xF86PHpbxBWxL
+         7vJvvZ2UAVSnteEYWi9BY4BHzGQ7do6qUYHcHJipgGnyLUpkprghnRWbxoIsy0OLW+Po
+         Lcfw==
+X-Gm-Message-State: AOJu0YyURfCZFKmnetKGaX33/o/wZaYGsrT4YOskrrTSsq3YWv8iDELo
+	/tLtjMdZBO4+TSKwbOWtsG2MBFB1Czf7s2hplmW8gadkVSreTW78LnLUHupazAym9rAiPzJAlcF
+	Te9T8OliE5osL/IjoUsbMJz7AHdeYJ3gLHoEH4cRFj3dKRO8HqMrzX++DSJ4pjxfbG6I=
+X-Gm-Gg: AZuq6aLCJ+xqaqw+g77Ghw9G8Rq9x9a8PCNgcyWAqq1fHQgtKYE+s2mLABT5bcJOKn8
+	+QTczzP1yFDjjV+KcHuMxVDRy402W2EMWD9jBWq8jX6J+8fcE3cJU23Tnop5zUPrRNN22cymbt0
+	vhcI0qrMesAYC0c2lSNsS7PBPCyAtPK5hNMYE36oVNGQuYAq1yFWY8vQGqPT9PjM+DJsJBZ8Ldm
+	P6lsv31hUBzhmQGX7/G6NsJsnWQn648M0YttdaJA3he7OmI/nQFGfS+8loaRjtyPqeINPDSSVJP
+	/4pGVtYM7Hr8swrkr0OqorF/TRC/M9HrGgai1rRC7EFNjl3uDcRW0SgnYFbPUl2Ve5T5G0/Grbg
+	wvyOrbN/GhLzG9AKqqKjAB6DIvIFxtk176fnUJPyFSUkB8JjeIQ==
+X-Received: by 2002:a05:6a21:618e:b0:35e:d74:e4b6 with SMTP id adf61e73a8af0-38e6f6c626amr5583899637.7.1769233637146;
+        Fri, 23 Jan 2026 21:47:17 -0800 (PST)
+X-Received: by 2002:a05:6a21:618e:b0:35e:d74:e4b6 with SMTP id adf61e73a8af0-38e6f6c626amr5583886637.7.1769233636721;
+        Fri, 23 Jan 2026 21:47:16 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c635a16a106sm3444458a12.15.2026.01.23.21.47.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 23 Jan 2026 21:47:15 -0800 (PST)
+Date: Sat, 24 Jan 2026 13:47:11 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH] misc: allow zero duration for fsstress and fsx
+Message-ID: <20260124054711.3psxdefyfx6z5ps5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20260121012621.GE15541@frogsfrogsfrogs>
+ <20260121155456.pf6jeprhzua3rdl3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20260121174601.GE5945@frogsfrogsfrogs>
+ <20260122072100.2aynewdegsdz7stz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20260122161351.GA5916@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: chao@kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>,
- linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v1] f2fs/015: Test correct mkfs options for error cases
-To: Joanne Chang <joannechien@google.com>, Zorro Lang <zlang@kernel.org>,
- fstests@vger.kernel.org
-References: <20260123032744.1018230-1-joannechien@google.com>
-Content-Language: en-US
-From: Chao Yu <chao@kernel.org>
-In-Reply-To: <20260123032744.1018230-1-joannechien@google.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260122161351.GA5916@frogsfrogsfrogs>
 
-On 1/23/2026 11:27 AM, Joanne Chang wrote:
-> From: Jaegeuk Kim <jaegeuk@kernel.org>
+On Thu, Jan 22, 2026 at 08:13:51AM -0800, Darrick J. Wong wrote:
+> On Thu, Jan 22, 2026 at 03:21:00PM +0800, Zorro Lang wrote:
+> > On Wed, Jan 21, 2026 at 09:46:01AM -0800, Darrick J. Wong wrote:
+> > > On Wed, Jan 21, 2026 at 11:54:56PM +0800, Zorro Lang wrote:
+> > > > On Tue, Jan 20, 2026 at 05:26:21PM -0800, Darrick J. Wong wrote:
+> > > > > From: Darrick J. Wong <djwong@kernel.org>
+> > > > > 
+> > > > > Occasionally the common/fuzzy fuzz test helpers manage to time
+> > > > > something just right such that fsx or fsstress get invoked with a zero
+> > > > > second duration.  It's harmless to exit immediately without doing
+> > > > > anything, so allow this corner case.
+> > > > 
+> > > > Sure, duration=0 is harmless, I'm good with this patch.
+> > > > 
+> > > > Reviewed-by: Zorro Lang <zlang@redhat.com>
+> > > > 
+> > > > Please excuse my nitpicking. I'm curious about the semantics of "--duration=0".
+> > > > Looking at the output of `fsstress -v --duration=0`, it doesn't actually
+> > > > 'do nothing.' Instead, it behaves similarly to duration=1, where fsstress
+> > > > attempts to execute operations before timing out and exiting :-D
+> > > 
+> > > Yeah, I suppose it's possible to do a very small amount of work.
+> > > 
+> > > Would you mind changing that last sentence to read "It's harmless to
+> > > exit almost immediately having done very little work, so allow this
+> > > corner case." prior to commit?
+> > 
+> > Sure Darick, I can make that change prior to commit :) But I was just
+> > curious to hear your thoughts on:
+> > 
+> >   if (duration == 0) {
+> >           /* No action is taken if duration is 0 */
+> >           exit(0);
+> >   } else if (duration < 0) {
+> >           fprintf(stderr, "%lld: invalid duration\n", duration);
+> > 	  exit(88);
+> >   }
+> > 
+> > do you feel that makes more sense semantically :)
 > 
-> Let's add the required mkfs options for quota mount option cases with
-> wrong results.
-> 
-> Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
-> Co-developed-by: Joanne Chang <joannechien@google.com>
-> Signed-off-by: Joanne Chang <joannechien@google.com>
+> That would also work. Would you rather have the exits-immediately
+> version?  
 
-Reviewed-by: Chao Yu <chao@kernel.org>
+If both versions are good to you, I perfer the "exits-immediately" one, at least
+it fits the semantics of 0 better :)
+
+To save your time I can make this change when I merge it if you agree with that
+too. Let me know if there's anything else you'd like to add.
 
 Thanks,
+Zorro
+
+> 
+> --D
+> 
+> > Thanks,
+> > Zorro
+> > 
+> > > 
+> > > --D
+> > > 
+> > > > Thanks,
+> > > > Zorro
+> > > > 
+> > > > > 
+> > > > > Cc: <fstests@vger.kernel.org> # v2023.05.01
+> > > > > Fixes: 3e85dd4fe4236d ("misc: add duration for long soak tests")
+> > > > > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> > > > > ---
+> > > > >  ltp/fsstress.c |    2 +-
+> > > > >  ltp/fsx.c      |    2 +-
+> > > > >  2 files changed, 2 insertions(+), 2 deletions(-)
+> > > > > 
+> > > > > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> > > > > index c17ac440414325..b51bd8ada2a3be 100644
+> > > > > --- a/ltp/fsstress.c
+> > > > > +++ b/ltp/fsstress.c
+> > > > > @@ -645,7 +645,7 @@ int main(int argc, char **argv)
+> > > > >  				exit(87);
+> > > > >  			}
+> > > > >  			duration = strtoll(optarg, NULL, 0);
+> > > > > -			if (duration < 1) {
+> > > > > +			if (duration < 0) {
+> > > > >  				fprintf(stderr, "%lld: invalid duration\n", duration);
+> > > > >  				exit(88);
+> > > > >  			}
+> > > > > diff --git a/ltp/fsx.c b/ltp/fsx.c
+> > > > > index 626976dd4f9f27..4f8a2d5ab1fc08 100644
+> > > > > --- a/ltp/fsx.c
+> > > > > +++ b/ltp/fsx.c
+> > > > > @@ -3375,7 +3375,7 @@ main(int argc, char **argv)
+> > > > >  				exit(87);
+> > > > >  			}
+> > > > >  			duration = strtoll(optarg, NULL, 0);
+> > > > > -			if (duration < 1) {
+> > > > > +			if (duration < 0) {
+> > > > >  				fprintf(stderr, "%lld: invalid duration\n", duration);
+> > > > >  				exit(88);
+> > > > >  			}
+> > > > > 
+> > > > 
+> > > > 
+> > > 
+> > 
+> > 
+> 
+
