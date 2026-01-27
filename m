@@ -1,138 +1,142 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41BCA3570B3
-	for <fstests@vger.kernel.org>; Tue, 27 Jan 2026 15:47:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDDB535F8AD;
+	Tue, 27 Jan 2026 16:09:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769528836; cv=none; b=FfmBGjAmTBOyJBl+MQhwPjivPJdPxaG8az82xyCPiJWMm7DG6IG9WO3B+GFYHY2ndScR7D5w09K/KiG5DdTBWtlQyfjmYUkvI8xieTo8QC0jkiq9+5LF86xIjzFYCcLi0mMARRFRaxdUZrHKPQuGoEp4erL1KIEKAsooNzFwMV8=
+	t=1769530153; cv=none; b=eq8mRF238DG0b8weBrL5KN0/QuyIZzg0FNUpQusOEjYuhyaJyVqVgxPcenVdMROUvlmxa2izhzy/1NuqjjqeBKLvXJdfW5RqJY48AzIFhcztgbCzKFlvpLM4HhB5neeV8wQFlCqeDY/fY46D12oz8QGiKzPf07Rwz9GZ/kUOFOM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769528836; c=relaxed/simple;
-	bh=5UBvtJjD/J6g2q2tUVJqjHdn1UZLMUDtZlQ2wQdcrUo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IjDus/D+VYujaGwAuhp4qpO5+Iq0azQr+wF7+x7DT7yuC0QU1UtMZYBSzc3lJ70CX3Zfa3OloQmsqJTe1UyMwXHpfBNhUHBwNg5aUs6ZZXl2pqm23dy7ewArUAUyy6ccTfb3EYHco4xBQIV6tY7l/TetlkoI4textUmOk9OjugE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tSwtL/7E; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1769530153; c=relaxed/simple;
+	bh=DGJm/DlAo8k6JBlDUDjJZkMRv/LMhtnCZFfrEn07dqA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=DeApMuzdLKY212RNdqfDrupZlT6ZQDuNEv4y/fBFHcd4/bxiz76Vq5TVxCoj8pHrl32+z0g3pVZ+PZF81MY34Vrx2IzbB2Doc+GGa+Oaddbp9PcxDvQVOhXcgJ3xaNAxiPCMjNNgBf2/H4/s46NiMzTMKIz++zy/YUiPINuZsQo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=sUx3lV6z; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tSwtL/7E"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DA3B2C116C6;
-	Tue, 27 Jan 2026 15:47:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1769528835;
-	bh=5UBvtJjD/J6g2q2tUVJqjHdn1UZLMUDtZlQ2wQdcrUo=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=tSwtL/7EsR/udbf09N/WHZHkJ0jIxiiT+yIg/DqGsNZx6DjDe1ME2O/mH31s4HxX1
-	 W1Lv1vsi0xTJCqxXeJdTWHQiqTl7VHWCnAiHe3gwrvLCJm1m9UvS2bRL+AkEn1L2PZ
-	 Zylt6erVxZr2Gll7EBcCM0Wrvq2MU8mSGTlEG2OL7ukDt7pop6rdrD1JEhSkXK5H2M
-	 SB+SJ0lgxC3T7SVAxosLDa9uK7jlQEab1Qe1EVaf55+rxO8DIsVB1c2q4mF8D7jCkK
-	 nLgEV9I0cwp3i1Qp+nBQe90CZ3vHjUFZE1+CPEgDGVmbkNR7RTaGfkALh8GNeznJ+2
-	 QLnEXLnOK+x5g==
-Date: Tue, 27 Jan 2026 07:47:15 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org
-Subject: Re: [ANNOUNCE] fstests: for-next branch updated to v2026.01.27
-Message-ID: <20260127154715.GC5916@frogsfrogsfrogs>
-References: <e722a754c0ae8ed500fcdc16736a9202@kernel.org>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="sUx3lV6z"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=ZoOQyjVw/MyWXIPvSx+mLcL6v70dPOkdij1IAxVRBfg=; b=sUx3lV6znam1k59LuUr69WjP3k
+	Rjc/easX2/zXHyJTrSHdnjF4c8d+G6T1njd6dG8zgA4GZjntFq1mM++lYeLWL4Ju3aR4Zc+E2MXqk
+	VgqaLetfOlgUQ792zcspYto26HwbVC9+tQMhb3RKO6r9p7nT81wnqq0M3yhWKobmZPUN6zxBXMohk
+	CmfeCtHsUFgW5ckZoK53SC3CVxf4X5KcIjNAe3HSkQ9KNlvNr5vlhDJdCcfMbGsPn+H8Nqlkb4gr2
+	oOajn+B9YEvChOI2slCpytwsG/9A4Ss9BVneA1MfXxrWmJhhi2vqz9ni18sihALqXqJYEgRpJ2Rnn
+	bnp4U/XA==;
+Received: from 2a02-8389-2341-5b80-d601-7564-c2e0-491c.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:d601:7564:c2e0:491c] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1vklcs-0000000Ec90-2wm2;
+	Tue, 27 Jan 2026 16:09:11 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: zlang@kernel.org
+Cc: djwong@kernel.org,
+	hans.holmberg@wdc.com,
+	linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] xfs: test zone reset error handling
+Date: Tue, 27 Jan 2026 17:09:06 +0100
+Message-ID: <20260127160906.330682-1-hch@lst.de>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <e722a754c0ae8ed500fcdc16736a9202@kernel.org>
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Tue, Jan 27, 2026 at 02:58:36PM +0800, Zorro Lang wrote:
-> Hi all,
-> 
-> The for-next branch of the xfstests repository at:
-> 
-> 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-> 
-> has just been updated and tagged as v2026.01.27 release.
+Add a test that exercises the zone gc error handling, aka shutting
+down the file system or not mounting it using the new error
+injection knob and stats.
 
-I see that master did indeed jump to the Jan 5 tag, but for-next still
-seems to be at v2026.01.05?
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ tests/xfs/842     | 63 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/842.out |  2 ++
+ 2 files changed, 65 insertions(+)
+ create mode 100755 tests/xfs/842
+ create mode 100644 tests/xfs/842.out
 
---D
-
-> Release Notes:
-> 1) There're 3 new test cases in this release, includes btrfs/341, btrfs/342 and
->    xfs/841.
-> 2) fsstress and fsx don't fail when --duration=0.
-> 
-> More fixes on btrfs, ext4, f2fs, hfs and xfs, please refer to the details below.
-> Thanks for all these contributions.
-> 
-> Thanks,
-> Zorro
-> 
-> The new head of the for-next branch is commit:
-> 
-> 69cd20bd0498 xfs: test reproducible builds
-> 
-> New commits ([N]ew, [U]pdate):
-> 
-> Darrick J. Wong (2):
-> [U]      [754368070ac5] xfs/614: fix test for parent pointers
-> [U]      [31f7192f90a8] misc: allow zero duration for fsstress and fsx
-> 
-> Filipe Manana (2):
-> [N]      [8dad086a4701] btrfs: test power failure after fsync and rename exchanging directories
-> [U]      [e0ded76267f9] fsx: add missing -T option to getopt_long()
-> 
-> Jaegeuk Kim (1):
-> [U]      [096adc20b3df] f2fs/015: Test correct mkfs options for error cases
-> 
-> Luca Di Maio (1):
-> [N]      [69cd20bd0498] xfs: test reproducible builds
-> 
-> Nirjhar Roy (IBM) (1):
-> [U]      [725b08a6d61a] generic/371: Fix the test to be compatible block sizes upto 64k
-> 
-> Ojaswin Mujoo (1):
-> [U]      [a4dbdc5486b4] generic/108: fix test hand upon failure to create LV
-> 
-> Qu Wenruo (2):
-> [U]      [8d2e1bd3d294] fstests: btrfs/131: add explicit v1 space cache requirement
-> [N]      [bc74aaf6859c] fstests: btrfs: add a new test case that is future-proof
-> 
-> Viacheslav Dubeyko (1):
-> [U]      [facf3325d90d] xfstests: hfs/hfsplus don't support metadata journaling
-> 
-> caokewu (1):
-> [U]      [42c2ccaf3700] ext4/307: allocate donor file size dynamically
-> 
-> 
-> Code Diffstat:
-> 
->  common/btrfs                     |  25 ++++++
->  common/rc                        |   2 +-
->  common/xfs                       |   3 +
->  ltp/fsstress.c                   |   5 +-
->  ltp/fsx.c                        |   7 +-
->  tests/btrfs/131                  |  12 ++-
->  tests/btrfs/341                  |  73 ++++++++++++++++
->  tests/btrfs/341.out              |  15 ++++
->  tests/btrfs/342                  | 103 +++++++++++++++++++++++
->  tests/btrfs/342.out              |  15 ++++
->  tests/ext4/307                   |   5 +-
->  tests/f2fs/015                   |  10 ++-
->  tests/f2fs/015.out               |  92 ++++++++++----------
->  tests/generic/108                |   7 +-
->  tests/generic/371                |   2 +-
->  tests/xfs/614                    |   1 +
->  tests/xfs/614.cfg                |   4 +
->  tests/xfs/614.out.lba1024_parent | 177 +++++++++++++++++++++++++++++++++++++++
->  tests/xfs/614.out.lba2048_parent | 177 +++++++++++++++++++++++++++++++++++++++
->  tests/xfs/614.out.lba4096_parent | 177 +++++++++++++++++++++++++++++++++++++++
->  tests/xfs/614.out.lba512_parent  | 177 +++++++++++++++++++++++++++++++++++++++
->  tests/xfs/841                    | 173 ++++++++++++++++++++++++++++++++++++++
->  tests/xfs/841.out                |   3 +
->  23 files changed, 1205 insertions(+), 60 deletions(-)
-> --
-> Zorro Lang
-> zlang@kernel.org
-
+diff --git a/tests/xfs/842 b/tests/xfs/842
+new file mode 100755
+index 000000000000..8f6c13f1b19c
+--- /dev/null
++++ b/tests/xfs/842
+@@ -0,0 +1,63 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 Christoph Hellwig.
++#
++# FS QA Test No. 842
++#
++# Test that GC defragments sequentially written files.
++#
++. ./common/preamble
++_begin_fstest auto quick mount zone
++
++. ./common/filter
++. ./common/zoned
++
++_require_scratch
++_require_fs_sysfs stats/stats
++
++count_zone_resets() {
++	_get_fs_sysfs_attr $SCRATCH_DEV stats/stats | awk '/zoned/ {print $4}'
++}
++
++_scratch_mkfs >>$seqres.full 2>&1
++
++# figure out how much space we need for 3 zones worth of user data...
++blocksize=`_scratch_xfs_get_sb_field blocksize`
++rgblocks=`_scratch_xfs_get_sb_field rgextents`
++rgsize=$((3 * rgblocks * blocksize))
++echo "blocksize=${blocksize}, rgblocks=${rgblocks}, rgsize=${rgsize}" >>$seqres.full 2>&1
++
++# .. and create a file system with that size
++_scratch_mkfs_sized $rgsize >>$seqres.full 2>&1
++
++SAVED_MOUNT_OPTIONS="$MOUNT_OPTIONS"
++export MOUNT_OPTIONS="$MOUNT_OPTIONS -o errortag=zone_reset"
++_try_scratch_mount || _notrun "mount option not supported"
++_require_xfs_scratch_zoned
++
++# fill the file system and remove the data again, this should trigger zone
++# resets that will fail due to the error detection
++dd if=/dev/zero of=$SCRATCH_MNT/foo bs=1M >/dev/null 2>&1
++sync $SCRATCH_MNT
++rm $SCRATCH_MNT/foo
++sync $SCRATCH_MNT
++sleep 1
++
++touch $SCRATCH_MNT/bar 2>/dev/null && _fail "file system not shutdown"
++
++# unmount the shutdown file system
++_scratch_unmount
++
++# try mounting with error injection still enabled.  This should fail.
++_try_scratch_mount && _fail "file system mounted despite zone reset errors"
++
++# now try without the error injection
++MOUNT_OPTIONS="$SAVED_MOUNT_OPTIONS"
++_scratch_mount
++
++# all three zones should be reset on mount
++nr_resets=$(count_zone_resets)
++echo "zone resets: $nr_resets"
++
++status=0
++exit
+diff --git a/tests/xfs/842.out b/tests/xfs/842.out
+new file mode 100644
+index 000000000000..718805b5766e
+--- /dev/null
++++ b/tests/xfs/842.out
+@@ -0,0 +1,2 @@
++QA output created by 842
++zone resets: 3
+-- 
+2.47.3
 
