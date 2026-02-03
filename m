@@ -1,205 +1,138 @@
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C26A21F3B87
-	for <fstests@vger.kernel.org>; Tue,  3 Feb 2026 07:47:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45F92395D8D
+	for <fstests@vger.kernel.org>; Tue,  3 Feb 2026 08:28:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770104831; cv=none; b=F0uww89DgJYGWW3uUJNffYLaJzjSHWZo1UrKO53yBqqvdthDnh+si3IVWagrP9txVOA0CBqsaX4A4z503lrJmVxDiPMzZDn4pgG63T0lIaWq+1ZSTejmOtxA9ud+D/wRGY0pzYQLGkedtnJWDHlshD4IKms3GtBDelr8qvc36dc=
+	t=1770107335; cv=none; b=j9Mb1W9hD98Kwb2vgq9or+5sg0JEQQc/0VlyHKCLZhxVBhtOOr3OrMhxd0fNuT80TJWXuEpT0O1bcvY4MUSOyhPmy/NLMQUN5hbdEgLUfGh/4fmCX6DRz/l/kCIWMDFz2XUajL1x/4fgoQghYPMlRnwKyjolUrZDK8o0ticDJ1o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770104831; c=relaxed/simple;
-	bh=N03NInlogGf3lhGiaw27Bs0wKYg6UZeTDgrAuXkKLh4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=t7OqeizR/e4zBB6RgRy7nXMLU6FSCBqhpVGgQ3Sde3D3qIjjMcJy3D7LB6vVOAQAmpf5mQ8XcC8EJ0MJhJPojwPsRe3OGwW0zZBqrsQvmUZFVsSBHPTXg2DzeO5cLElqlG6LZLTPQWmdU/K94L8ohyqGlhdgzp+B1O2+kFSDr5o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=l08ji3Ep; arc=none smtp.client-ip=148.163.156.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	s=arc-20240116; t=1770107335; c=relaxed/simple;
+	bh=G1a1r/3AnAo9noTgD6SIMFOaLlYMed6hFH477lU1mJY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=MEG6aLKXP8Vyx2+gHiUCRlF97ZtfDndpWOstWfaHEBqwhyn2kW9Ma3AJ/Nref1URhiIOXqnz3TDmuyWBJViQOMznWO4NnLoH0zRHkBSx2MjtOCAGhRKNaikQOPkLCVKXdAH9WlThYtkFR5q5uAjco0DXMiq25+DBIVGuzqCgwHM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=FHX6Bi0N; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=JNmdRjix; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="l08ji3Ep"
-Received: from pps.filterd (m0360083.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 6130Gc4d028582;
-	Tue, 3 Feb 2026 07:47:07 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=
-	content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pp1; bh=gwTy11
-	Mo9DlgriZL5dNuOqXIyQDqsCycQg066ph7IHo=; b=l08ji3Ep7X6hAkzE7hkbAe
-	9lko+eNkyBo4uA1OycndrRJimmZnMg7mIvuZ1dP8cfR3PI891pkEg9pPdIbIC8E6
-	rAYJ1Rt4sOMmb+aLsImX6TKVIafBAuvJjAbyrggD5GhUwERa51MGi0RjXFmGbkt5
-	LpsuVffwJuhG2yPw3E+xOP6qDlXQdmlhPtNAjsSx/HniOWbxHgr+YBRFwZmRgSbq
-	4Wfj4H44qN6YZRHEtqhY5+ic2K1sjT+uP3raZgjkFpPeJS784sgPXYxR3s927CMY
-	rClUGiugabfHz8/2HHhIbbHjOL1Kw+jljV8sk8IE4dPyndShBv5yAC0+LQGvuvwQ
-	==
-Received: from ppma22.wdc07v.mail.ibm.com (5c.69.3da9.ip4.static.sl-reverse.com [169.61.105.92])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4c1986c6t9-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 03 Feb 2026 07:47:06 +0000 (GMT)
-Received: from pps.filterd (ppma22.wdc07v.mail.ibm.com [127.0.0.1])
-	by ppma22.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 6135NWmt009600;
-	Tue, 3 Feb 2026 07:47:05 GMT
-Received: from smtprelay01.fra02v.mail.ibm.com ([9.218.2.227])
-	by ppma22.wdc07v.mail.ibm.com (PPS) with ESMTPS id 4c1vey0aeh-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 03 Feb 2026 07:47:05 +0000
-Received: from smtpav01.fra02v.mail.ibm.com (smtpav01.fra02v.mail.ibm.com [10.20.54.100])
-	by smtprelay01.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 6137l1vK60621192
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 3 Feb 2026 07:47:01 GMT
-Received: from smtpav01.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id F0C0F20043;
-	Tue,  3 Feb 2026 07:47:00 +0000 (GMT)
-Received: from smtpav01.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 5B06120040;
-	Tue,  3 Feb 2026 07:47:00 +0000 (GMT)
-Received: from [9.109.198.113] (unknown [9.109.198.113])
-	by smtpav01.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Tue,  3 Feb 2026 07:47:00 +0000 (GMT)
-Message-ID: <99f8ceb5-761e-47de-a7ee-f823fd18f935@linux.ibm.com>
-Date: Tue, 3 Feb 2026 13:16:59 +0530
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FHX6Bi0N";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="JNmdRjix"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1770107331;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=bnv/JghgVk4idQK/RXe2hT8ls2BeCm0hMOi3sy0UuOo=;
+	b=FHX6Bi0NFdH3GNAvr86FrNZBZYdSZniOMYm1OTznGL7TmRK4fa+ItF1Efm3unw1LLjx0cL
+	ft3Kvu5ivvREmq0F2kas9Cf+IhvRvmAK7IVv4Wa8FjzHgbK9m2qAydWQLiG/ig48DTyzXG
+	9ewYLHH55EwJ+GFe6IKNXT6GaQCE3RA=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-634-eWCQsrThOPW5R_y9I8Yong-1; Tue, 03 Feb 2026 03:28:50 -0500
+X-MC-Unique: eWCQsrThOPW5R_y9I8Yong-1
+X-Mimecast-MFC-AGG-ID: eWCQsrThOPW5R_y9I8Yong_1770107329
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-34c6e05af6fso4866501a91.1
+        for <fstests@vger.kernel.org>; Tue, 03 Feb 2026 00:28:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1770107329; x=1770712129; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=bnv/JghgVk4idQK/RXe2hT8ls2BeCm0hMOi3sy0UuOo=;
+        b=JNmdRjixHGI7MR11C8sKOCbLICP8yka5ebPA6fxCobGRTOT2+XKV9qtGH+N/P8/6NT
+         UuGN253HetkQNO0MRfx45/hoSHW6qkh4kIh5Hg+VSIjZ/quJEjxWlqnTWSBc5nCoEAww
+         KX7+CD5wBI7JD8F9gbiS2QAJsqWsSxExiriNR7mv3W3ZWRpVJ5QcqD1Y4V7d8kOQsulW
+         Mjnpq3C/v7u1iXvtrQj4joJtrNbacn+BW26VWp0Mj02cw+prJBHc3wtOkS739o4Hwj2O
+         G+h0JOTbnZpgdvW3dao2h+XE/IduelV5kGmkyBMgTIOaLqBoMVuMPQ0qlO8OB1cSa9kk
+         BULQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1770107329; x=1770712129;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=bnv/JghgVk4idQK/RXe2hT8ls2BeCm0hMOi3sy0UuOo=;
+        b=hfFxDkOgA3bVC5VjTWK5+JBJjZE5mdh0lFLmnHKmY/LLXAmAYRx0T9yNnIlTpCr36G
+         q8VLS/mRjHVw68OgAmIhg9FYXjGtg3HAD2lRVc/npWJn9KOUB3N6ugFRp6LDaPCSgaoI
+         xWjOd62JneKQn+uV1dwkSQV0HqB1K6c22X1uNzoTMpsWECnKefAo2ck2pwL4OCOj40Dx
+         osgjUlobiHbMqlPKBHoBu2gsgZCGQiBAIpb/j8ok3xMuXNk6F/Y9E1XbGMQZTcbwuIv4
+         3hXefQQzbcCo1uVcLEFUhhgaPAo6sWWrVqKEf67gZRhSwIFNO2brod8ceOwYDSdqCk/Y
+         6+Dg==
+X-Forwarded-Encrypted: i=1; AJvYcCUvGXqaKgmUyHsBse/rROZxhoVrKkvb/gX0dUuKRrNEuCStD0Kr02ifb8vt38HUzkXqBoelPOJf@vger.kernel.org
+X-Gm-Message-State: AOJu0YxxPT3a9Wtuern6qbbGHHovJhzwz50quV4+sNhLOTu6YC26KOvB
+	oLCWrtHyGmZCls0sHgbpCkhesG7rhVKFYVb64J3oZQsN3W8YOjwDoL7tajlBgPZV84oFi4k/pnx
+	sbWn9syd1nO+SA+tP0SWqr9Pty5m5+R7YNVZ9SPWx0J4FfWQaMnCV06vfd3k=
+X-Gm-Gg: AZuq6aKg4W+tR/YpxQDGLpPTY1pOD/IBVpVeolmoFF+JKxafJ9bkMWEfPRV9YwZ0ljG
+	99IPBaNwjd4Ptgyh61VgaK9RtelqStPjBlID1v7CZRPzhxQQXjbwqA4RsiJTZf+WvYrunZuakZf
+	u4K8AMzXtIp/FDUsS1nn6ekqa9YUMOhfQjoM6M7aLWYFL/7dO5AjYyWX4/eNBPTvf3GxkhXmkH0
+	sogPlC/QCocYkmesXh/MNxMOpgxpfa0UbtcHqHavxgDpsBDDYr3HWdFFC8bXP2B2qrvUlAzP4Ad
+	n+dsmW1w0kCtIun7IguzaepISVZuuIvvoFHaueQzwZnxgZxw1wBRxSH8BssECJPqWOhV/X2BUXI
+	wDckplRAjieZ6fK5J5oXXsJgg4RkwtTBUzM9RlK4uSF7NwDy9PQ==
+X-Received: by 2002:a17:90b:180f:b0:340:25f0:a9b with SMTP id 98e67ed59e1d1-3543b3d2607mr12497611a91.33.1770107329250;
+        Tue, 03 Feb 2026 00:28:49 -0800 (PST)
+X-Received: by 2002:a17:90b:180f:b0:340:25f0:a9b with SMTP id 98e67ed59e1d1-3543b3d2607mr12497602a91.33.1770107328829;
+        Tue, 03 Feb 2026 00:28:48 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3547afceeb1sm1290786a91.4.2026.02.03.00.28.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 03 Feb 2026 00:28:48 -0800 (PST)
+Date: Tue, 3 Feb 2026 16:28:43 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, djwong@kernel.org, luca.dimaio1@gmail.com,
+	linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs/841: create a block device that must exist
+Message-ID: <20260203082843.rljncqwo7z4q4zgb@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20260202085701.343099-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] ext4/307: Calculate donor size to avoid failures for 64k
- bs
-Content-Language: en-GB
-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>, Zorro Lang <zlang@redhat.com>,
-        fstests@vger.kernel.org
-References: <20260202132730.589621-1-ojaswin@linux.ibm.com>
-From: Disha Goel <disgoel@linux.ibm.com>
-In-Reply-To: <20260202132730.589621-1-ojaswin@linux.ibm.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMjAzMDA1NyBTYWx0ZWRfX9iHk3BLupC/s
- mHYcLNFj//Kji25BBo/wxwUwjHCcYvcJl/pjx9D7D9xZpFmk6au5iMhlZM/rst4LEUQuj39St7u
- T3FCW55lxMxQFGWGxkMB0KVEgxBO62al9KKqPjiX/me0jZ2jNpmhovt3Q89aIN7hLlBZDK6DHiF
- 6xnimkBAQVrp2mqvHL+N00Wekm+a7jRkvldVSDMftqAj+ke9/c09F8SocbX7j/J8d21oz/EoOEM
- +NrdEghsFM4GAE6+S3cDnMSwSqRsTVfKunRXP3T0gFIwv5SnBTlQGHweYCySZn1PWF+YzUF5AK1
- L32Iya7Sj+w73+LVjaGVzWXTydC3+Dd/87MiajEJB9fS6KwTJQxn9AI7qlGlEYzhEShy5Z3bn3d
- yLdp7ur+Fr648/eMA7mxFbd78APMJAVYf11gO++dY+Nu/Of83LD7pqiaitWxGBu51hZZPQ1QFQu
- d8OdHIUnED4BDp+Dk/g==
-X-Proofpoint-GUID: pMKc5E05V2cJgJqaXfYkMgFHOPYeLEzn
-X-Authority-Analysis: v=2.4 cv=DbAaa/tW c=1 sm=1 tr=0 ts=6981a7fa cx=c_pps
- a=5BHTudwdYE3Te8bg5FgnPg==:117 a=5BHTudwdYE3Te8bg5FgnPg==:17
- a=IkcTkHD0fZMA:10 a=HzLeVaNsDn8A:10 a=VkNPw1HP01LnGYTKEx00:22
- a=VnNF1IyMAAAA:8 a=k54H8d9qNlckLa8umXgA:9 a=QEXdDO2ut3YA:10
-X-Proofpoint-ORIG-GUID: pMKc5E05V2cJgJqaXfYkMgFHOPYeLEzn
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-02-03_02,2026-02-02_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- bulkscore=0 phishscore=0 adultscore=0 malwarescore=0 impostorscore=0
- priorityscore=1501 lowpriorityscore=0 clxscore=1015 suspectscore=0
- spamscore=0 classifier=typeunknown authscore=0 authtc= authcc= route=outbound
- adjust=0 reason=mlx scancount=1 engine=8.19.0-2601150000
- definitions=main-2602030057
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260202085701.343099-1-hch@lst.de>
 
-On 02/02/26 6:57 pm, Ojaswin Mujoo wrote:
-> Hard coding donor size to 250M causes the following failure in e4compat
+On Mon, Feb 02, 2026 at 09:57:01AM +0100, Christoph Hellwig wrote:
+> This test currently creates a block device node for /dev/ram0,
+> which isn't guaranteed to exist, and can thus cause the test to
+> fail with:
 > 
-> e4compact.c:68: do_defrag_range: Assertion `donor->length >= len' failed.
-> ./common/rc: line 4616: 1583182 Aborted                 (core dumped)
+> mkfs.xfs: cannot open $TEST_DIR/proto/blockdev: No such device or address
 > 
-> The issue is that e4compat asserts that the stat.st_size of all files
-> combined shouldn't be more than that of the donor file. In case of 64k
-> blocksize, fsstress often creates sparse files which have >3G size even
-> though their disk utilization is <100M. Since donor file is not big
-> enough, this trips e4compat causing the failure.
+> Instead, create a node for the backing device for $TEST_DIR, which must
+> exist.
 > 
-> Fix this by dynamically calculating the donor file size based on the
-> size of all files. Also, make some changes to avoid future ENOSPC like
-> reducing the -n passed to fsstress to keep the size around 2G and making
-> sure we use the whole SCRATCH disk instead of 500M.
-> 
-> While we are at it, add some new lines to make the code bit more
-> readable.
-> 
-> Reported-by: Disha Goel <disgoel@linux.ibm.com>
-> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-
-Thanks for the patch Ojaswin. Tested successfully on my setup.
-
-Tested-by: Disha Goel <disgoel@linux.ibm.com>
-
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 > ---
->   tests/ext4/307 | 41 +++++++++++++++++++++++++++++++++++++----
->   1 file changed, 37 insertions(+), 4 deletions(-)
+
+This patch makes sense to me, thanks.
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  tests/xfs/841 | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
 > 
-> diff --git a/tests/ext4/307 b/tests/ext4/307
-> index 1f0e42ca..7e7fb9c8 100755
-> --- a/tests/ext4/307
-> +++ b/tests/ext4/307
-> @@ -12,24 +12,57 @@ _begin_fstest auto ioctl rw defrag prealloc
->   # Import common functions.
->   . ./common/filter
->   . ./common/defrag
-> +
-> +# Get the total of stat.st_size of each file to determine the
-> +# size of donor file. We use st_size here instead of blocks used
-> +# because thats what e4compat.c checks against.
-> +get_bytes_used() {
-> +	local filelist="$1"
-> +	local total=0
-> +	local blksz=$(_get_block_size $SCRATCH_MNT)
-> +
-> +	while IFS= read -r f; do
-> +		echo -n "File: $f: " >> $seqres.full
-> +		[[ -z "$f" ]] && continue
-> +
-> +		if [[ -f "$f" ]]; then
-> +			local bytes
-> +			bytes=$(stat -c %s "$f")
-> +			total=$((total + bytes))
-> +			echo $bytes >> $seqres.full
-> +		fi
-> +	done < "$filelist"
-> +
-> +	echo "Total bytes: $total" >> $seqres.full
-> +	echo $total
-> +}
-> +
->   # Disable all sync operations to get higher load
->   FSSTRESS_AVOID="$FSSTRESS_AVOID -ffsync=0 -fsync=0 -ffdatasync=0"
->   _workout()
->   {
-> +	local blksz=$(_get_block_size $SCRATCH_MNT)
-> +
->   	echo ""
->   	echo "Run fsstress"
->   	out=$SCRATCH_MNT/fsstress.$$
-> -	args=`_scale_fsstress_args -p4 -n999 -f setattr=1 -d $out`
-> +	args=`_scale_fsstress_args -p4 -n500 -f setattr=1 -d $out`
->   	echo "fsstress $args" >> $seqres.full
->   	_run_fsstress $args
-> +
->   	find $out -type f > $out.list
->   	cat $out.list | xargs  md5sum > $out.md5sum
-> -	usage=`du -sch $out | tail -n1 | gawk '{ print $1 }'`
-> +
-> +	bytes=`get_bytes_used $out.list`
-> +	echo "Total bytes used: $bytes" >> $seqres.full
-> +
->   	echo "Allocate donor file"
-> -	$XFS_IO_PROG -c "falloc 0 250M" -f $SCRATCH_MNT/donor | _filter_xfs_io
-> +	$XFS_IO_PROG -c "falloc 0 $bytes" -f $SCRATCH_MNT/donor | _filter_xfs_io
-> +
->   	echo "Perform compacting"
->   	cat $out.list | run_check $here/src/e4compact \
->   		-i -v -f $SCRATCH_MNT/donor  >> $seqres.full 2>&1
-> +
->   	echo "Check data"
->   	run_check md5sum -c $out.md5sum
->   }
-> @@ -41,7 +74,7 @@ _require_scratch
->   _require_defrag
->   _require_xfs_io_command "falloc"
->   
-> -_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
-> +_scratch_mkfs >> $seqres.full 2>&1
->   _scratch_mount
->   
->   _workout
+> diff --git a/tests/xfs/841 b/tests/xfs/841
+> index ee2368d4a746..ddb1b3bea104 100755
+> --- a/tests/xfs/841
+> +++ b/tests/xfs/841
+> @@ -85,9 +85,12 @@ _create_proto_dir()
+>  	$here/src/af_unix "$PROTO_DIR/socket" 2> /dev/null || true
+>  
+>  	# Block device (requires root)
+> -	mknod "$PROTO_DIR/blockdev" b 1 0 2> /dev/null || true
+> +	# Uses the device for $TEST_DIR to ensure it always exists.
+> +	mknod "$PROTO_DIR/blockdev" b $(stat -c '%Hd %Ld' $TEST_DIR) \
+> +		2> /dev/null || true
+>  
+>  	# Character device (requires root)
+> +	# Uses /dev/null, which should always exist
+>  	mknod "$PROTO_DIR/chardev" c 1 3 2> /dev/null || true
+>  }
+>  
+> -- 
+> 2.47.3
+> 
+> 
 
