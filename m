@@ -1,89 +1,87 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FAD922B5AC
-	for <fstests@vger.kernel.org>; Sun,  8 Feb 2026 17:27:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C0CB23A9B3
+	for <fstests@vger.kernel.org>; Sun,  8 Feb 2026 17:54:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770571625; cv=none; b=Plz7syGw4cInaFjYo4HTW6f0B7ELncmU8owodF1mJYBJkbGdjqP3PO3UcDZse3Rh3alvs2Dr1K+9Z7k3bcTsZ8B6cBjv5owBtL4qiYwlXoiqZ0w8KMU7xwiQSUwZmoF5bzSIwZ/mmXijkqb8LDf5cZjQWZ3NbrTHdzgRtcjf2Js=
+	t=1770573292; cv=none; b=ISj4EV1ikppDd19E8Q1G52lVOsIzUcIR3LejLuF64kwo505i/t/yqlmxUvePCQ6Vm0K69t3mRHQaBACruorGn9QmxYgIt/atGuWRKYWy5lpLRnxT7W4ZbHqr2+/YMV+qMqGAFxJ9JeD11dSNBCkezi4tZ3mkvYbhhas1bB8WSO4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770571625; c=relaxed/simple;
-	bh=66MGyAhUlU9MPo46AY/B7WtZrx+zpp+4gQH46VmdMCM=;
+	s=arc-20240116; t=1770573292; c=relaxed/simple;
+	bh=kXZRlQ8KeH8CU4gaK6SQU5UHRqLeG5WC8cBf1nTaqOs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Cwrvr1tJFGLLeh4Z2b6hmwvMnsmLNdFCYxmMzAP8fVm+K+gY1uG5TJXaPmB0Yo74cwwbTYLvVmyzsyvL7s1FcRYawQmeXJDqQYoTvabBP9G3dmw6ix6t03Fm11LPUpMUqOGCqku1M/TueAOq25O2/ivCjGSB02gkQKU87PPBqj4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=TxZ86VjD; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=mE+dD9sY; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=e1uBtEcQpSiv8DiyGA7ZVT1LTeO1jZ7BJYUqucbcJKO/n+6+g99FaNJKYvo/j8RQ3b65Mcc2WCT3EoBMvOwdUGHal17g4l3Q98SzMOpsEWBlxMXehiEheNSndDfQb+xMiGePDbUSkWWpRT2HiiS13jQlRgOsCud6yUFcinAkOmc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VNNV7W4a; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=B2VMfHAt; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="TxZ86VjD";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="mE+dD9sY"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VNNV7W4a";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="B2VMfHAt"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1770571624;
+	s=mimecast20190719; t=1770573291;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=xfG69KkwbfNss4k8EFcF/QNdJFpkrTk7nknMwMnAeHw=;
-	b=TxZ86VjD2c2n1hKnaElDUBgIEhwkmjsWIDVGqpTeiihwh3AOlJWK5wAX6OY2GsV8vNn/DH
-	D97WCdZKPqrSYCJtwsr0fWZL+lX4nLclqnKD3o71JjXQoSRatl+YxKQQfxquAmbEHeE6nx
-	yyIKlmdMZ2m6J7QysGM25jGZ5BbQMS8=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=Cc4JahNdkOdItF/J1j4gKrcyg78llUsUJ7bbKDWY1aw=;
+	b=VNNV7W4avolEDS92zCqqmNkOaRlSKwqCB0nqi+8NydEN8IDf41/vuw+u+liwMdoGZWBze4
+	DjgNBd6cPcU7Eve53lGFHLmrgDTPdmEhcPPQuHI/a9ude5dAA65XWWU5izs2DEeY2plGPF
+	duq111siJAMrpnlnhRGIgW+55iOsfCw=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-451-pYMD_-iiMfuWP6B5MC8kRw-1; Sun, 08 Feb 2026 12:27:03 -0500
-X-MC-Unique: pYMD_-iiMfuWP6B5MC8kRw-1
-X-Mimecast-MFC-AGG-ID: pYMD_-iiMfuWP6B5MC8kRw_1770571622
-Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-c5269fcecdeso1270035a12.0
-        for <fstests@vger.kernel.org>; Sun, 08 Feb 2026 09:27:02 -0800 (PST)
+ us-mta-610-GQOLWK_8Ohant7H3-WpijA-1; Sun, 08 Feb 2026 12:54:50 -0500
+X-MC-Unique: GQOLWK_8Ohant7H3-WpijA-1
+X-Mimecast-MFC-AGG-ID: GQOLWK_8Ohant7H3-WpijA_1770573289
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-354c7a38429so966154a91.0
+        for <fstests@vger.kernel.org>; Sun, 08 Feb 2026 09:54:50 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1770571622; x=1771176422; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1770573288; x=1771178088; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=xfG69KkwbfNss4k8EFcF/QNdJFpkrTk7nknMwMnAeHw=;
-        b=mE+dD9sYDWvDvPsV8rJJ9bSszA0WB7dOwbwTytqZ1sVVlKCvEUybcFGXGV/g8esd+z
-         mm+S7wwiYrbW1jFFpChm/ldtFhwlltGXjvqeyOii2ebF39ZOj5z3Yg9UF2zvpK62TVHX
-         uA1DtyU95UcomFRhopYNjaLIC4oKRjV+3wA6Nc0JXy2HU1grA4S8deZqrWFrMbPiW10B
-         yS6ArXnMRJv5RwbZ6XvMQ9Vqw8HGqAJI6PSxi9nguys/ycXaZ+aFFlzCShSodogfXsO4
-         qeovqX347aG3VR2z/QR1xSH5V3jgdEORp/wZwRYZDJCz881bDy7n/owIW6d1SDEQ+HK5
-         JaUw==
+        bh=Cc4JahNdkOdItF/J1j4gKrcyg78llUsUJ7bbKDWY1aw=;
+        b=B2VMfHAtO+xqCkWqBDLYl5Xp5PpHWso2TPm0TAM1f4CbU9l/CR4EugzMLQ9hmijy6S
+         lZOabeenfczwQ9+uy6xcM+4kcYh4DzXIVxhnh7F19Lb1nJ2mi5lIAApVp23CEF3KIqPa
+         G2bOwdJAg6nR8h06cPJAFTFpyBAa7rHlQX/GKka/H5UAujrdTdXXYWy8bZ+ElnUaaI2A
+         3KQZo1THJEnqTskKt9DQR/PFR/S+cPjyKCUrTYEt4Ve66ShvGazlY2z/SXPyaGMarAtt
+         75Kk7znlM0dZrZRVuPluBoCxTDGOzZPP9spNny7xrM+Db1wARhUwA2tkbZvqqzDSvAjR
+         rjJg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770571622; x=1771176422;
+        d=1e100.net; s=20230601; t=1770573288; x=1771178088;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=xfG69KkwbfNss4k8EFcF/QNdJFpkrTk7nknMwMnAeHw=;
-        b=LBa4TH5FRQDHgwHCZjBz0kJcM4cN06vz3Mb815XM+R5EAeu8pzeGH6l1lsYfXvQyGG
-         wKjsmTJW9Ar3Ns/N4wsJRhhXyBUNPm6cgPwtpWZQY+0dcAl5AHpCFWOsDFh8cnr4iiba
-         eb6mf4bxRuFWQgIDP336lzjY0BH3GQOLyxMcOD17D5yWmQyWaRDZeokzqgscr9tacfRO
-         Ch7oJ/Hw93kSmoJmtc+QWdxDJRac5MbVAa+R9CEQW7iXDCbXeMfd7ejFVVerh3OIkkPf
-         tgF6DFqJBFaBedu2ShB6ThR+hdNVI/nO0I9earSqhm1uT67t30yFc9KZdNY7f5IzL9am
-         z6BQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVn4qfe8BXWKjth5JQMlF2+fdqCRwZU8lW8zmoCdt7vqxOC5p0NK0nuTJ6vIOujG7t8/7vk2b55@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxs2QK3Y9m/ygQPL9WpOGTAEXtigZbUeE3xRLHomknDPmKadIKS
-	qsjqK8IfazC1tzg3XMlXIBcm2g7XzkgrINh1AmBxiwQW2vOv6RblmxYv2e6epz/Ldxt1mmi2fh7
-	k2OvQPI+LftjCKbS22uL0zRarnM+xHHpA4i8NfTFYs5SqCCHIUU9MXwqo+6M=
-X-Gm-Gg: AZuq6aKJE/BBdOSPzzh6srI9UL6lMO0DiGiU7kt8pNTPcOjBkP+HrsXFk9La/eJ7uRU
-	GYuz4nfE1u9bgdaziIIJX5TB8YQtA1oNdHAFvswYfcgqb71ZhbuxTMiErVGhrgSDubuQE2ZOrMW
-	yuWKo12mX0qgFIs26mg6dDHf3cE3S6ssX4oLhiGHLs6A04Pf93pC2ehVlVJE8LR8kIQN1oo9zlU
-	nx4R3cINVJj3qVS7vjWtiB536rp9RMH+NXdNMhOvEf3V0stQ/GkuAfiniwQfqD8JU3BHHpsDxTs
-	L9TuYpIl+BBwrkXJSw93H90HNYKW77wdY0VqKZeSoxjf6GWa51mFrMJQat+0XRkGFgN+BhSZFJi
-	Pi74bD59GQYLb+XeU2OmljmnLYmXKe2SmAYyVbuOqr1U1Y5l2jw==
-X-Received: by 2002:a05:6a21:7a8b:b0:35d:1bcd:6882 with SMTP id adf61e73a8af0-393acfe82d8mr7048428637.23.1770571621999;
-        Sun, 08 Feb 2026 09:27:01 -0800 (PST)
-X-Received: by 2002:a05:6a21:7a8b:b0:35d:1bcd:6882 with SMTP id adf61e73a8af0-393acfe82d8mr7048422637.23.1770571621527;
-        Sun, 08 Feb 2026 09:27:01 -0800 (PST)
+        bh=Cc4JahNdkOdItF/J1j4gKrcyg78llUsUJ7bbKDWY1aw=;
+        b=fxO8uvjIRQhdirZ8INdZHzWxsmPLwigM80qAZGsIcrrVRXm3r9FA82mnbELNV6xVdq
+         vkU1z89E/Sway3rC4BTLgrwVX+PmhRTPFk1joOwqDFyW1HLT8SonredGcFwQbWPi1fVY
+         mqWI4UPiOOm7WcJDCCHcpLmwPgeHKWYxbsjcbjCFWWLIgsmy7KOycm6OiItKeT9XP8F0
+         G9JcY2FymVJgxbLJ4ZRkvb+zcuGphhBS8PBXKh6BcGEFudr0i1FWukU6TY1aSPULfO1d
+         +InPzuBzxOFtR1XXEcBV9C+fFsg/PZ5s47AyT/rqn8H+w4f12g5r/ImDtZd7JV+CW3I6
+         atGQ==
+X-Gm-Message-State: AOJu0YzEr2tz6c1VlCax1KjBcxpmdMdsjWQ6Aii6jUlkotAJe4HJPAka
+	RKSUqltUqnH2M+O5PVp/GMJ4LeZgBfBwLf03T5Me/QDC4GSPZ1sRKQbc9p4e5Flfa7alirw6rNg
+	i3uWAuq+suYnV4RzcZpAKpvQzH5hif/fxfDoXB8ZcfLLDlG07c++t/jPyyYZ4wINHCy4=
+X-Gm-Gg: AZuq6aKWsQ4ih6MdJ/yEh2BymZ8nsigmg8dciXTcpEVC0OgQKqngm1lWcOk9tuhilGe
+	YsgiUP8CvJXA8UPgCknGyvWrHH5dSPLv+6Z9Qnq2XGPSG3fMyRAdGEwnMNDXfMDcWwBP8WVzYce
+	357vlQy0KHWBWosCqnwC3QlU3AwKCKoF7G2iBdEbOkn6BYMHKkmObHMC4blti37Pmmdxjejczg2
+	Ra4jeF8fOQ8/EC6HusW1XpLLS0wBIjtQHdqW6hioVI+FCHXaHpEPb8UUcx1Ll/dy+dIR2sDfvYx
+	xvvTJ9CkTIxYHbBUricmOXqLETifcNZd+jIy32M576Y8hVvEro9GGl/BN5xAGfC0hZQAtVIsXYJ
+	7qaGVCgGp8UbrTe4w4zYPLuQrA9K/V3uMtrzPPwfXo2XTDbXTDA==
+X-Received: by 2002:a17:90b:510a:b0:34a:c671:50df with SMTP id 98e67ed59e1d1-3549bc3bcd2mr11389222a91.17.1770573288594;
+        Sun, 08 Feb 2026 09:54:48 -0800 (PST)
+X-Received: by 2002:a17:90b:510a:b0:34a:c671:50df with SMTP id 98e67ed59e1d1-3549bc3bcd2mr11389211a91.17.1770573288089;
+        Sun, 08 Feb 2026 09:54:48 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c6dcb4fb808sm7753079a12.6.2026.02.08.09.26.59
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-354b64a8a9esm5293567a91.1.2026.02.08.09.54.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 08 Feb 2026 09:27:01 -0800 (PST)
-Date: Mon, 9 Feb 2026 01:26:57 +0800
+        Sun, 08 Feb 2026 09:54:47 -0800 (PST)
+Date: Mon, 9 Feb 2026 01:54:43 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v1.1 1/3] xfs/018: remove inline xattr recovery tests
-Message-ID: <20260208172657.2dq3esy44c7p7vnb@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <177005945267.2432878.7105483366958924034.stgit@frogsfrogsfrogs>
- <177005945298.2432878.17951687824065765554.stgit@frogsfrogsfrogs>
- <20260206215400.GC7703@frogsfrogsfrogs>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: fstests@vger.kernel.org, Disha Goel <disgoel@linux.ibm.com>
+Subject: Re: [PATCH] ext4/307: Calculate donor size to avoid failures for 64k
+ bs
+Message-ID: <20260208175443.5h5uy65figlq2y6f@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20260202132730.589621-1-ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -92,162 +90,122 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260206215400.GC7703@frogsfrogsfrogs>
+In-Reply-To: <20260202132730.589621-1-ojaswin@linux.ibm.com>
 
-On Fri, Feb 06, 2026 at 01:54:00PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Mon, Feb 02, 2026 at 06:57:30PM +0530, Ojaswin Mujoo wrote:
+> Hard coding donor size to 250M causes the following failure in e4compat
 > 
-> In Linux 7.0 we've changed the extended attribute update code to try to
-> take a shortcut for performance reasons.  Before walking through the
-> attr intent state machine (slow), the update will check to see if the
-> attr structure is in short format and will stay in that format after the
-> change.  If so, then the incore inode can be updated and logged, and
-> the update is complete (fast) in a single transaction.
+> e4compact.c:68: do_defrag_range: Assertion `donor->length >= len' failed.
+> ./common/rc: line 4616: 1583182 Aborted                 (core dumped)
 > 
-> (Obviously, for complex attr structures or large changes we still walk
-> through the intent machinery.)
+> The issue is that e4compat asserts that the stat.st_size of all files
+> combined shouldn't be more than that of the donor file. In case of 64k
+> blocksize, fsstress often creates sparse files which have >3G size even
+> though their disk utilization is <100M. Since donor file is not big
+> enough, this trips e4compat causing the failure.
 > 
-> However, xfs/018 tests the behavior of the "larp" error injector, which
-> only triggers from inside the attr intent state machine.  Therefore, the
-> short format tests don't actually trip the injector.  It makes no sense
-> to add a new larp injection callsite for the shortcut because either the
-> single transaction gets written to disk or it doesn't.
+> Fix this by dynamically calculating the donor file size based on the
+> size of all files. Also, make some changes to avoid future ENOSPC like
+> reducing the -n passed to fsstress to keep the size around 2G and making
+> sure we use the whole SCRATCH disk instead of 500M.
 > 
-> The golden output no longer matches because the attr update doesn't
-> return EIO and shut down the filesystem due to the larp injection.
-
-Oh, that really makes sense to me now, thanks for this detailed explanation.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
+> While we are at it, add some new lines to make the code bit more
+> readable.
 > 
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
+> Reported-by: Disha Goel <disgoel@linux.ibm.com>
+> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 > ---
-> v1.1: improve commit message, add rvb
-> ---
->  tests/xfs/018     |   24 ------------------------
->  tests/xfs/018.out |   45 ---------------------------------------------
->  2 files changed, 69 deletions(-)
+
+Hi,
+
+Thanks for your patch, but this patch is conflict with v2026.01.27 :
+	42c2ccaf ("ext4/307: allocate donor file size dynamically")
+
+both of you were trying to fix the donor file size issue. Please confirm if
+that commit helps you. If you still need further change, please rebase your
+patch on v2026.01.27.
+
+Thanks,
+Zorro
+
+>  tests/ext4/307 | 41 +++++++++++++++++++++++++++++++++++++----
+>  1 file changed, 37 insertions(+), 4 deletions(-)
 > 
-> diff --git a/tests/xfs/018 b/tests/xfs/018
-> index 8b6a3e1c508045..9b69c9cb14b33d 100755
-> --- a/tests/xfs/018
-> +++ b/tests/xfs/018
-> @@ -127,16 +127,6 @@ mkdir $testdir
+> diff --git a/tests/ext4/307 b/tests/ext4/307
+> index 1f0e42ca..7e7fb9c8 100755
+> --- a/tests/ext4/307
+> +++ b/tests/ext4/307
+> @@ -12,24 +12,57 @@ _begin_fstest auto ioctl rw defrag prealloc
+>  # Import common functions.
+>  . ./common/filter
+>  . ./common/defrag
+> +
+> +# Get the total of stat.st_size of each file to determine the
+> +# size of donor file. We use st_size here instead of blocks used
+> +# because thats what e4compat.c checks against.
+> +get_bytes_used() {
+> +	local filelist="$1"
+> +	local total=0
+> +	local blksz=$(_get_block_size $SCRATCH_MNT)
+> +
+> +	while IFS= read -r f; do
+> +		echo -n "File: $f: " >> $seqres.full
+> +		[[ -z "$f" ]] && continue
+> +
+> +		if [[ -f "$f" ]]; then
+> +			local bytes
+> +			bytes=$(stat -c %s "$f")
+> +			total=$((total + bytes))
+> +			echo $bytes >> $seqres.full
+> +		fi
+> +	done < "$filelist"
+> +
+> +	echo "Total bytes: $total" >> $seqres.full
+> +	echo $total
+> +}
+> +
+>  # Disable all sync operations to get higher load
+>  FSSTRESS_AVOID="$FSSTRESS_AVOID -ffsync=0 -fsync=0 -ffdatasync=0"
+>  _workout()
+>  {
+> +	local blksz=$(_get_block_size $SCRATCH_MNT)
+> +
+>  	echo ""
+>  	echo "Run fsstress"
+>  	out=$SCRATCH_MNT/fsstress.$$
+> -	args=`_scale_fsstress_args -p4 -n999 -f setattr=1 -d $out`
+> +	args=`_scale_fsstress_args -p4 -n500 -f setattr=1 -d $out`
+>  	echo "fsstress $args" >> $seqres.full
+>  	_run_fsstress $args
+> +
+>  	find $out -type f > $out.list
+>  	cat $out.list | xargs  md5sum > $out.md5sum
+> -	usage=`du -sch $out | tail -n1 | gawk '{ print $1 }'`
+> +
+> +	bytes=`get_bytes_used $out.list`
+> +	echo "Total bytes used: $bytes" >> $seqres.full
+> +
+>  	echo "Allocate donor file"
+> -	$XFS_IO_PROG -c "falloc 0 250M" -f $SCRATCH_MNT/donor | _filter_xfs_io
+> +	$XFS_IO_PROG -c "falloc 0 $bytes" -f $SCRATCH_MNT/donor | _filter_xfs_io
+> +
+>  	echo "Perform compacting"
+>  	cat $out.list | run_check $here/src/e4compact \
+>  		-i -v -f $SCRATCH_MNT/donor  >> $seqres.full 2>&1
+> +
+>  	echo "Check data"
+>  	run_check md5sum -c $out.md5sum
+>  }
+> @@ -41,7 +74,7 @@ _require_scratch
+>  _require_defrag
+>  _require_xfs_io_command "falloc"
 >  
->  require_larp
+> -_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
+> +_scratch_mkfs >> $seqres.full 2>&1
+>  _scratch_mount
 >  
-> -# empty, inline
-> -create_test_file empty_file1 0
-> -test_attr_replay empty_file1 "attr_name" $attr64 "s" "larp"
-> -test_attr_replay empty_file1 "attr_name" $attr64 "r" "larp"
-> -
-> -# empty, inline with an unaligned value
-> -create_test_file empty_fileX 0
-> -test_attr_replay empty_fileX "attr_nameX" $attr17 "s" "larp"
-> -test_attr_replay empty_fileX "attr_nameX" $attr17 "r" "larp"
-> -
->  # empty, internal
->  create_test_file empty_file2 0
->  test_attr_replay empty_file2 "attr_name" $attr1k "s" "larp"
-> @@ -152,16 +142,6 @@ create_test_file empty_fileY 0
->  test_attr_replay empty_fileY "attr_name" $attr32l "s" "larp"
->  test_attr_replay empty_fileY "attr_name" $attr32l "r" "larp"
->  
-> -# inline, inline
-> -create_test_file inline_file1 1 $attr16
-> -test_attr_replay inline_file1 "attr_name2" $attr64 "s" "larp"
-> -test_attr_replay inline_file1 "attr_name2" $attr64 "r" "larp"
-> -
-> -# inline, internal
-> -create_test_file inline_file2 1 $attr16
-> -test_attr_replay inline_file2 "attr_name2" $attr1k "s" "larp"
-> -test_attr_replay inline_file2 "attr_name2" $attr1k "r" "larp"
-> -
->  # inline, remote
->  create_test_file inline_file3 1 $attr16
->  test_attr_replay inline_file3 "attr_name2" $attr64k "s" "larp"
-> @@ -195,10 +175,6 @@ create_test_file remote_file2 1 $attr64k
->  test_attr_replay remote_file2 "attr_name2" $attr64k "s" "larp"
->  test_attr_replay remote_file2 "attr_name2" $attr64k "r" "larp"
->  
-> -# replace shortform with different value
-> -create_test_file sf_file 2 $attr64
-> -test_attr_replay sf_file "attr_name2" $attr16 "s" "larp"
-> -
->  # replace leaf with different value
->  create_test_file leaf_file 3 $attr1k
->  test_attr_replay leaf_file "attr_name2" $attr256 "s" "larp"
-> diff --git a/tests/xfs/018.out b/tests/xfs/018.out
-> index ad8fd5266f06d0..be1d6422af65a5 100644
-> --- a/tests/xfs/018.out
-> +++ b/tests/xfs/018.out
-> @@ -1,26 +1,6 @@
->  QA output created by 018
->  *** mkfs
->  *** mount FS
-> -attr_set: Input/output error
-> -Could not set "attr_name" for SCRATCH_MNT/testdir/empty_file1
-> -touch: cannot touch 'SCRATCH_MNT/testdir/empty_file1': Input/output error
-> -attr_name: e889d82dd111d6315d7b1edce2b1b30f  -
-> -
-> -attr_remove: Input/output error
-> -Could not remove "attr_name" for SCRATCH_MNT/testdir/empty_file1
-> -touch: cannot touch 'SCRATCH_MNT/testdir/empty_file1': Input/output error
-> -attr_name: d41d8cd98f00b204e9800998ecf8427e  -
-> -
-> -attr_set: Input/output error
-> -Could not set "attr_nameX" for SCRATCH_MNT/testdir/empty_fileX
-> -touch: cannot touch 'SCRATCH_MNT/testdir/empty_fileX': Input/output error
-> -attr_nameX: cb72c43fb97dd3cb4ac6ad2d9bd365e1  -
-> -
-> -attr_remove: Input/output error
-> -Could not remove "attr_nameX" for SCRATCH_MNT/testdir/empty_fileX
-> -touch: cannot touch 'SCRATCH_MNT/testdir/empty_fileX': Input/output error
-> -attr_nameX: d41d8cd98f00b204e9800998ecf8427e  -
-> -
->  attr_set: Input/output error
->  Could not set "attr_name" for SCRATCH_MNT/testdir/empty_file2
->  touch: cannot touch 'SCRATCH_MNT/testdir/empty_file2': Input/output error
-> @@ -51,26 +31,6 @@ Could not remove "attr_name" for SCRATCH_MNT/testdir/empty_fileY
->  touch: cannot touch 'SCRATCH_MNT/testdir/empty_fileY': Input/output error
->  attr_name: d41d8cd98f00b204e9800998ecf8427e  -
->  
-> -attr_set: Input/output error
-> -Could not set "attr_name2" for SCRATCH_MNT/testdir/inline_file1
-> -touch: cannot touch 'SCRATCH_MNT/testdir/inline_file1': Input/output error
-> -attr_name2: e889d82dd111d6315d7b1edce2b1b30f  -
-> -
-> -attr_remove: Input/output error
-> -Could not remove "attr_name2" for SCRATCH_MNT/testdir/inline_file1
-> -touch: cannot touch 'SCRATCH_MNT/testdir/inline_file1': Input/output error
-> -attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
-> -
-> -attr_set: Input/output error
-> -Could not set "attr_name2" for SCRATCH_MNT/testdir/inline_file2
-> -touch: cannot touch 'SCRATCH_MNT/testdir/inline_file2': Input/output error
-> -attr_name2: 4198214ee02e6ad7ac39559cd3e70070  -
-> -
-> -attr_remove: Input/output error
-> -Could not remove "attr_name2" for SCRATCH_MNT/testdir/inline_file2
-> -touch: cannot touch 'SCRATCH_MNT/testdir/inline_file2': Input/output error
-> -attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
-> -
->  attr_set: Input/output error
->  Could not set "attr_name2" for SCRATCH_MNT/testdir/inline_file3
->  touch: cannot touch 'SCRATCH_MNT/testdir/inline_file3': Input/output error
-> @@ -131,11 +91,6 @@ Could not remove "attr_name2" for SCRATCH_MNT/testdir/remote_file2
->  touch: cannot touch 'SCRATCH_MNT/testdir/remote_file2': Input/output error
->  attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
->  
-> -attr_set: Input/output error
-> -Could not set "attr_name2" for SCRATCH_MNT/testdir/sf_file
-> -touch: cannot touch 'SCRATCH_MNT/testdir/sf_file': Input/output error
-> -attr_name2: e43df9b5a46b755ea8f1b4dd08265544  -
-> -
->  attr_set: Input/output error
->  Could not set "attr_name2" for SCRATCH_MNT/testdir/leaf_file
->  touch: cannot touch 'SCRATCH_MNT/testdir/leaf_file': Input/output error
+>  _workout
+> -- 
+> 2.52.0
 > 
 
