@@ -1,187 +1,191 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B52FE25A2DE
-	for <fstests@vger.kernel.org>; Mon,  9 Feb 2026 09:54:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9E7D365A17
+	for <fstests@vger.kernel.org>; Mon,  9 Feb 2026 09:56:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770630896; cv=none; b=lAy9dxtFLjUR3vCP48wAwpf3dSaidWHpySZFIVxd6qo8HAnQuTo9BboVJ/X6z0DiAHMM2mTvmHUsIU4s40iHA/Dn1K/BsxiSr/3muljVkPK2DE8vdL0d+Vtl2YxlxodG9JaTvzywa1FySaiITpE+5aGU83/IwRqNXA5j2J+Gq+U=
+	t=1770630974; cv=none; b=UUq3RFvXsipeHVh36HeNlKdOBUTSYlKLS4zzBmXRolkN2JMA3Ic+lXkQiWE578JUA2qCdH+InyNreOgbT42pVRFmS2jMO39EHjvhEYRPrtsikwLssin84f/Zxf/9trEEN2tKJUmV2GOfsoogXFMD/qcEGP/MMpAlcBlj0u0lsJg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770630896; c=relaxed/simple;
-	bh=hYODIDh8W+YitfT96sel4kiJsxob5ho0S42GjgaBDVg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=IOGu27TAtJLuUMYVzel0M8SVJPaEpMGf4VosSVzYoIU75Hxlq9tL1b0lkm+HT8We6dl57AG7FvgNfoSxDIp8iHXnrE6ZrX8Cr0oB82o7x2WDnO37JwNI3da/Esr8ZDmitiiHPcbza9cFtDQvRvoaJE2rloPKLhrllykzn5BA2Jw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ho8/cku6; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1770630974; c=relaxed/simple;
+	bh=wnjXUSotQzCam9p5WGykfw4nArhBVG675aWmynxI9RQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=OjKPJDxL4ff7YT7jK1aUFhsPjuZhT1xrzf0/GaTZpkMu2UKswyhV+NWElPgVGsVBwXg7bIkyqD3xP7hlkMcpYAKdXkABkRFd9M0+zdzSE+mHP1Eia+rVFWJjKZv4wyMueg5OOo4HKkaCaVXw8YWwpd1CPFFba95IEwYnWtOUT+0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=MMmkjs+0; arc=none smtp.client-ip=209.85.128.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ho8/cku6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 97FA5C116C6
-	for <fstests@vger.kernel.org>; Mon,  9 Feb 2026 09:54:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1770630896;
-	bh=hYODIDh8W+YitfT96sel4kiJsxob5ho0S42GjgaBDVg=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=ho8/cku6OwaRl/MpbvUAEQBmMyqMtp2VGqTARLVqTMSzMx7mP4OznzWOltb6upxm+
-	 YKDtJ3ZVUzClEpWdlozg59cybWw6f1z5c1rg6aZFbSLb3m+fMEY44Rd55k3Ki6z3uX
-	 y8w7etaqRdtxByNRG2iOBVhXgIdWYYPZUyKuXjh6Ovpx72p9eDeKoj+u1gROrCqEvZ
-	 pd7uRjod84Wd1nAaYx76l/vZe2swIjYQ0PLXSvBzOO1wNXCJcuufcENX/20iZbe5bQ
-	 g0+OURCxqShHrWXLRZO3jzrmTjKC3udpsw/JxDKZ/nYWCYh+CXwQohigq+2tNuDkdy
-	 rsmEahiEQS45g==
-Received: by mail-ed1-f54.google.com with SMTP id 4fb4d7f45d1cf-65941c07e8dso4150824a12.1
-        for <fstests@vger.kernel.org>; Mon, 09 Feb 2026 01:54:56 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCURBYHbedjQP2Juj34FXQD4bzTAwl9uOwXTOos9/v/ddlIdaQohlV6W8EJ7f62bGZ3/e2B7UDyQ@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz3isajs9dfpmBsYejCFLDkr6ROgI89cGYxuTTuhWYTqb297aiY
-	YLBtWuZSdcStm2FHmC7WqcftvLMBd3zur1i9ngmnsnul5BRl4cG+VrZEwc9cQ7hLygVKi3WimYc
-	RISI5ce8JKgXREZfj/k2oLcJYlTzzXUs=
-X-Received: by 2002:a17:907:3c93:b0:b8e:99f8:8c4d with SMTP id
- a640c23a62f3a-b8edf3497cemr625190366b.51.1770630895187; Mon, 09 Feb 2026
- 01:54:55 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="MMmkjs+0"
+Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-4805ef35864so35664295e9.0
+        for <fstests@vger.kernel.org>; Mon, 09 Feb 2026 01:56:13 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1770630972; x=1771235772; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=Wy0F50xaaJVJTrrGGznzGV1HVjFueaLtRMJGHXPsuJc=;
+        b=MMmkjs+0F92nb2xQHgjSFRpsP6+ngo3dmwtUwFkZwv9FcagRttPT0E9h7hevY9AbrT
+         oyDcDBycuohwkWTb/R55MbmrlflbdyOj4s7jAqRZ6BuLpBrjSS33QFCmbULDY2HqKu1s
+         jMJADpG2SGKyw7JnB96olesYhtjOth6TGlKWmfsEg6le6n9e9iAdsXBval9dw9oVjxr4
+         fhnXlSbZaQsaxGpXoyCLnzJzKvB3D1BWUnQ16k6/S7BmNuiDKbcVGQg6BUIvaOlcNdUK
+         6TEKf5/eJg34fHHK5k9teY4IJwZqnpej7qYoEf8F7O654WN+6jN2f+I3VhfbyrIQYZKZ
+         kAGQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1770630972; x=1771235772;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Wy0F50xaaJVJTrrGGznzGV1HVjFueaLtRMJGHXPsuJc=;
+        b=QZSgxNeQ2WnUgK1xXf//TMS1HVhLieNIbTKcSz6//c9OxfiFzC3b92JCzteDPpSrTw
+         i7yF44OxOSZJoQDHrPzMJFczw5hZsotM5cbmfsLXlNb6OtZPpumisDgXH2Nqd+NVRp23
+         iJHBA2VgaQ1GseToR5eohiimkTU6uR1qrLBiMhJkXJgQZ0SKpWMX+BF+sho+3tx3h4x9
+         gD4J6SIFoiCAcQN3ttWpeickfJvS28zNdl/qakdQP0Lo9qWcUdS5XrHyXubnis2ggImT
+         KvlCHCeIRPDMAnmZ9+VOUmenF47gq/bxidtH11IDOPlEITscFWN8+5F+AXewtlT6k3wZ
+         uBAg==
+X-Forwarded-Encrypted: i=1; AJvYcCVJJUFDvYH1n1U05gaX/uglL4N3+Ds7l4GDk/l0ua+jrS5CqRRkwJgLzjdM46esIbqc76/0wxM5@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywm2kBWJlGtI9/O47ESL7+GWX5SrKeCor/RlRGx3fkisij8V5O4
+	kqTfOGZNcnNCUfzEFvgV6XG69kmk3voCS+wEHrh6/FnDaCSpfrbarkGqW3pZjZE0BL/AeeVa0b7
+	4a4+RJOU=
+X-Gm-Gg: AZuq6aLWdkBhisOQTIqDUofuVcjy90EKWlAK85Qde8svNPvXQDw5AOm9b13ZNQxRvb/
+	2dZ/lVrUUW2u8wHD56dd6+A9QUismXkg26ccwogNC0J4dSiDMYNxle67y4YwPhqVuXbgPmpYact
+	N0nNfL2DmqQ4PmzFhUwgnb2JimKSNmwjlcfVmvZaY+LMCwt6q9T9C4kfjbyFXc2pDLdSiJus3SE
+	EQDPLRWkqaxWqT7rGKDwVme9d38G2W1MMwc2/5ZfAxbY/KPFLt4wcZtGPvn8IYUPX1ARrlkz1tA
+	qJOBcxOXemLMZbwzuNC8on9mibWDQWv31IGnd5lEE+TEMP7iyNWhoxP8yAO8iERVoOrOlDkyxlF
+	UUIS9AauLXr+aNGi2nVpdXpuWAarYbKYxgGDbAjUUFVZ0IVSS4N1SVW9XA6u666wQ+qChuQQE5z
+	HdNu3pb3vrAuzjqBiVa+g0V2RS7MonDDe7AODNr4I=
+X-Received: by 2002:a05:600c:8b22:b0:477:b642:9dc9 with SMTP id 5b1f17b1804b1-4832021d9ccmr142589095e9.28.1770630972075;
+        Mon, 09 Feb 2026 01:56:12 -0800 (PST)
+Received: from ?IPV6:2403:580d:fda1::299? (2403-580d-fda1--299.ip6.aussiebb.net. [2403:580d:fda1::299])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c6dcb5eccbdsm8659108a12.19.2026.02.09.01.56.09
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 09 Feb 2026 01:56:11 -0800 (PST)
+Message-ID: <22b559fc-b3ec-4584-b19c-9f892ba9a32e@suse.com>
+Date: Mon, 9 Feb 2026 20:26:07 +1030
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260209095020.128806-1-wqu@suse.com>
-In-Reply-To: <20260209095020.128806-1-wqu@suse.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Mon, 9 Feb 2026 09:54:18 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H4_pRExfW6U67YfMK7hXouXspAXXJHPWM2t3yGC3AY0CQ@mail.gmail.com>
-X-Gm-Features: AZwV_Qg9tSDQEvDvwRSzTaHl32fKL5yh49LkWTAzJUyxDzNjKitt0KKyAbZrrf4
-Message-ID: <CAL3q7H4_pRExfW6U67YfMK7hXouXspAXXJHPWM2t3yGC3AY0CQ@mail.gmail.com>
+User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH v2] fstests: btrfs: add a regression test for incorrect
  inode incompressible flag
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, 
-	Filipe Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+To: Filipe Manana <fdmanana@kernel.org>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+ Filipe Manana <fdmanana@suse.com>
+References: <20260209095020.128806-1-wqu@suse.com>
+ <CAL3q7H4_pRExfW6U67YfMK7hXouXspAXXJHPWM2t3yGC3AY0CQ@mail.gmail.com>
+Content-Language: en-US
+From: Qu Wenruo <wqu@suse.com>
+Autocrypt: addr=wqu@suse.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
+ FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXVgBQkQ/lqxAAoJEMI9kfOh
+ Jf6o+jIH/2KhFmyOw4XWAYbnnijuYqb/obGae8HhcJO2KIGcxbsinK+KQFTSZnkFxnbsQ+VY
+ fvtWBHGt8WfHcNmfjdejmy9si2jyy8smQV2jiB60a8iqQXGmsrkuR+AM2V360oEbMF3gVvim
+ 2VSX2IiW9KERuhifjseNV1HLk0SHw5NnXiWh1THTqtvFFY+CwnLN2GqiMaSLF6gATW05/sEd
+ V17MdI1z4+WSk7D57FlLjp50F3ow2WJtXwG8yG8d6S40dytZpH9iFuk12Sbg7lrtQxPPOIEU
+ rpmZLfCNJJoZj603613w/M8EiZw6MohzikTWcFc55RLYJPBWQ+9puZtx1DopW2jOwE0EWdWB
+ rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
+ Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
+ E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
+ vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
+ g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
+ AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
+ cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
+ qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
+ /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
+ o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
+ JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
+In-Reply-To: <CAL3q7H4_pRExfW6U67YfMK7hXouXspAXXJHPWM2t3yGC3AY0CQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On Mon, Feb 9, 2026 at 9:50=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
->
-> [BUG]
-> Since kernel commit 59615e2c1f63 ("btrfs: reject single block sized
-> compression early"), a single block write at file offset 0, which can
-> not be inlined due the inode size, will mark the inode incompressible.
->
-> [REGRESSION TEST]
-> The new regression test will do:
->
-> - Create and mount the fs with compression,max_inline=3D2k
->
-> - Do the following operations:
->   * Truncate the inode to 2 * blocksize
->     This will rule out any future inlined writes.
->
->   * Buffered write [0, 2K)
->     Which will not be inlined.
->
->   * Sync
->     For affected kernels, this will set the inode with NOCOMPRESS
->     and reject all future compression on that inode.
->
->   * Buffered write [1M, 2M)
->     For affected kernels, the range will not be compressed due
->     to the NOCOMPRESS inode flag.
->
-> - Unmount the fs
->
-> - Make sure that:
->   * The inode has no NOCOMPRESS flag
->   * File extent at file offset 1M is being compressed
->
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
-> Changelog:
-> v2:
-> - Remove an unnessary sentence
->   Which is confusing because I missed the "and" to connect the two
->   sentences, and it's not needed after the first paragraph anyway.
->
-> - Use full "btrfs inspect-internal" group name instead
->
-> - Add missing punctures
-> ---
->  tests/btrfs/343     | 47 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/343.out |  2 ++
->  2 files changed, 49 insertions(+)
->  create mode 100755 tests/btrfs/343
->  create mode 100644 tests/btrfs/343.out
->
-> diff --git a/tests/btrfs/343 b/tests/btrfs/343
-> new file mode 100755
-> index 00000000..78079eff
-> --- /dev/null
-> +++ b/tests/btrfs/343
-> @@ -0,0 +1,47 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-> +#
-> +# FS QA Test 343
-> +#
-> +# A regression test to make sure a single-block write at file offset 0 w=
-on't
-> +# incorrectly mark the inode incompressible.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick compress
-> +
-> +_require_scratch
 
-Still missing a:
 
-_require_btrfs_command inspect-internal dump-tree
+在 2026/2/9 20:24, Filipe Manana 写道:
+> On Mon, Feb 9, 2026 at 9:50 AM Qu Wenruo <wqu@suse.com> wrote:
+>>
+>> [BUG]
+>> Since kernel commit 59615e2c1f63 ("btrfs: reject single block sized
+>> compression early"), a single block write at file offset 0, which can
+>> not be inlined due the inode size, will mark the inode incompressible.
+>>
+>> [REGRESSION TEST]
+>> The new regression test will do:
+>>
+>> - Create and mount the fs with compression,max_inline=2k
+>>
+>> - Do the following operations:
+>>    * Truncate the inode to 2 * blocksize
+>>      This will rule out any future inlined writes.
+>>
+>>    * Buffered write [0, 2K)
+>>      Which will not be inlined.
+>>
+>>    * Sync
+>>      For affected kernels, this will set the inode with NOCOMPRESS
+>>      and reject all future compression on that inode.
+>>
+>>    * Buffered write [1M, 2M)
+>>      For affected kernels, the range will not be compressed due
+>>      to the NOCOMPRESS inode flag.
+>>
+>> - Unmount the fs
+>>
+>> - Make sure that:
+>>    * The inode has no NOCOMPRESS flag
+>>    * File extent at file offset 1M is being compressed
+>>
+>> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+>> Signed-off-by: Qu Wenruo <wqu@suse.com>
+>> ---
+>> Changelog:
+>> v2:
+>> - Remove an unnessary sentence
+>>    Which is confusing because I missed the "and" to connect the two
+>>    sentences, and it's not needed after the first paragraph anyway.
+>>
+>> - Use full "btrfs inspect-internal" group name instead
+>>
+>> - Add missing punctures
+>> ---
+>>   tests/btrfs/343     | 47 +++++++++++++++++++++++++++++++++++++++++++++
+>>   tests/btrfs/343.out |  2 ++
+>>   2 files changed, 49 insertions(+)
+>>   create mode 100755 tests/btrfs/343
+>>   create mode 100644 tests/btrfs/343.out
+>>
+>> diff --git a/tests/btrfs/343 b/tests/btrfs/343
+>> new file mode 100755
+>> index 00000000..78079eff
+>> --- /dev/null
+>> +++ b/tests/btrfs/343
+>> @@ -0,0 +1,47 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
+>> +#
+>> +# FS QA Test 343
+>> +#
+>> +# A regression test to make sure a single-block write at file offset 0 won't
+>> +# incorrectly mark the inode incompressible.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick compress
+>> +
+>> +_require_scratch
+> 
+> Still missing a:
+> 
+> _require_btrfs_command inspect-internal dump-tree
+> 
+> As noted in the review of the first version.
+> Otherwise it looks good, thanks.
 
-As noted in the review of the first version.
-Otherwise it looks good, thanks.
-
-> +
-> +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +       "btrfs: fix the inline compressed extent check in inode_need_comp=
-ress()"
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount "-o compress,max_inline=3D2048"
-> +
-> +blocksize=3D$(_get_block_size $SCRATCH_MNT)
-> +
-> +# Create a sparse file which is 2 * blocksize, then try a small write at
-> +# file offset 0 which should not be inlined.
-> +# Sync so that [0, 2K) range is written, then write a larger range which
-> +# should be able to be compressed.
-> +$XFS_IO_PROG -f -c "truncate $((2 * $blocksize))" -c "pwrite 0 2k" -c sy=
-nc \
-> +               -c "pwrite 1m 1m" $SCRATCH_MNT/foobar >> $seqres.full
-> +ino=3D$(stat -c "%i" $SCRATCH_MNT/foobar)
-> +_scratch_unmount
-> +
-> +# Dump the fstree into seqres.full for debug
-> +$BTRFS_UTIL_PROG inspect dump-tree -t 5 $SCRATCH_DEV >> $seqres.full
-> +
-> +# Check the NOCOMPRESS flag of the inode.
-> +$BTRFS_UTIL_PROG inspect dump-tree -t 5 $SCRATCH_DEV |\
-> +grep -A 4 -e "item .* key ($ino INODE_ITEM 0)" | grep -q NOCOMPRESS
-> +[ $? -eq 0 ] && echo "inode $ino has NOCOMPRESS flag"
-> +
-> +# Check the file extent at fileoffset 1m
-> +$BTRFS_UTIL_PROG inspect dump-tree -t 5 $SCRATCH_DEV |\
-> +grep -A 4 -e "item .* key ($ino EXTENT_DATA 1048576)" | grep -q "compres=
-sion 0"
-> +[ $? -eq 0 ] && echo "inode $ino file offset 1M is not compressed"
-> +
-> +echo "Silence is golden"
-> +# success, all done
-> +_exit 0
-> diff --git a/tests/btrfs/343.out b/tests/btrfs/343.out
-> new file mode 100644
-> index 00000000..2eb30e4f
-> --- /dev/null
-> +++ b/tests/btrfs/343.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 343
-> +Silence is golden
-> --
-> 2.51.2
->
->
+Facepalm, I forgot to commit...
