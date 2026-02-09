@@ -1,121 +1,202 @@
-Received: from mail-ed1-f48.google.com (mail-ed1-f48.google.com [209.85.208.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF3742222B2
-	for <fstests@vger.kernel.org>; Mon,  9 Feb 2026 05:55:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.48
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770616534; cv=pass; b=ZTUhfDbxo3QLjpv/MD3sXXhEU657VQsyc2huGpoT6QZfOlhDwxD07DtP+o9rDOdvXDNu6Put52geabVHBTWrW31KXbY8oKOE/HSO/uePeOnNZiXWNNG1igr8sfyCYyVBI8+MasM1/KGrepmerQxZT6RCJsCPsAK8knuQxYy1vDQ=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770616534; c=relaxed/simple;
-	bh=T+QOvhsB6nnh3rBb/EQNR/3iQSifJMKBxkesTJz9bMg=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9826B23BCEE
+	for <fstests@vger.kernel.org>; Mon,  9 Feb 2026 09:33:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1770629592; cv=none; b=fVH4+91p3YK2KPHYALTM3maumAugGNUls1N1C/UMHzAuuoMljv0vkVVAmuV74+r9YrLvJxt+iDepH+YYJlQbt+1K/O7eLRdA2qR9tlMCmzZ//6sr+snfNRy8zUuLUBIDFKutFfXHN3L3SX+XFT60X/uJyAv8aCoJJ3UBIsccDoc=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1770629592; c=relaxed/simple;
+	bh=Cwetngl46StkbjBucGkivRAJM+lpr+HcwYyuXW0diFU=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=NrJcuhBvfacC/wGziNI1UVqGSlQfK75uYmWcFiaFCtb27f4TXznDO0YO+zqYcpi0aWfxZCaYFr9dCUfK8l+V5sKzK3Ixu0iaHJWjz7VCjy8BNQ8jJp2Ii7bGzopnKa/OOy9ksSB84RIAlOxOyFWXKrwfQmYmbnV3m7jlqmysuTM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=JRBuA2O7; arc=pass smtp.client-ip=209.85.208.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
+	 To:Cc:Content-Type; b=HQi3aO5N1uEOG06cZGElhodyVfy8gQWN8uGmESZgwLR8fam2Etxocr1eQOs0KrnNl+TxpC9afK1KtCkS6xGRSh1CEfkjPoWxEvvNIqdYR9RYQmhVgyhm5cTB5r25En5jMzAJSZinWUZ/HSLGt6daoZy2JFZKrib5OX5u0CX0cRM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qfRlTAZU; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="JRBuA2O7"
-Received: by mail-ed1-f48.google.com with SMTP id 4fb4d7f45d1cf-6581551aa88so7804a12.0
-        for <fstests@vger.kernel.org>; Sun, 08 Feb 2026 21:55:33 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1770616532; cv=none;
-        d=google.com; s=arc-20240605;
-        b=IDWG9MvOM4kuqIKgPpgUauEk2sR0ycDt4Bv3sI/51VgRBOZqhEsHQnraAz14HLzonY
-         YjOdEnZ2T6inhoEU1qCsxOJx1kuxHmR2wy/krt0s/uMwgJS6sogaroZ8wvC8lPDX8cNI
-         vJQElbKoQK+OdyoSJy0pPIfTgOO3nLmg0jIVm2MGLQPYyaFpuGB9H+enKMF0WhxMyFUC
-         p/CRGcQNBvtMYicGocOq04+HOTfMIeAwecmusW2lIIpOudFWreiKpVBTOqxE/YjI1fb8
-         OooEqSfB80TK3q5WbGowZjDCTAX3QylaWYNOm+UyIojlK0r3tHu2LacLnURvXUo9IvGB
-         UWuQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=T+QOvhsB6nnh3rBb/EQNR/3iQSifJMKBxkesTJz9bMg=;
-        fh=X47rxHd8z2NJafsQNVL6ZXp41OpRVRlZwAR+B9xVqNI=;
-        b=F1Dzj8YkyO3ZmKtidv7J569iKiLOvDcubezQBR9K+3wC8m6tDFcpTBxtc9Hsdml1Ky
-         FP63WxYbpQOTJtgr4Hcp4JuDLdHdt8ZvidBuirQMR4SH0Jgl88Z7EcCmUF66/78hKP/D
-         QbZgjVpBbq2Rz5b9oDb3n0ZvYZy29TfZ7IWoe19mzz91WbPfqcMDLG8E7wmDTQGT2HxM
-         Iy2bGsB7ZVwEGV4ZtqStXFZpYd5zi3kWyijfqMQC4+lVRLyvE4oYhHEPATmAr4LGLAmv
-         AmcnY8SIHd1S9IqyHt874m4uhjnBgeg0T5Gb9OkwffPxN9Qyg/T/GDGhg0bqU0D6//49
-         J+Fg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1770616532; x=1771221332; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=T+QOvhsB6nnh3rBb/EQNR/3iQSifJMKBxkesTJz9bMg=;
-        b=JRBuA2O7eVEaWWVCtqloGVGieFSs1TvxFbHO8zB8N4HPxZ02pNEIQDR/p+KF2Z9EUw
-         VsJ2DXajZ5Ob3iKgdYzO/O+63ewI1ygpFn+kvkmOd3SAIP7mzk1Qfxx9xcC9R26cJoQh
-         z5fVYHQl7w4hJWMTNdRlxPGm2fPW3vxRI4I7dMKs0XkA8zArjGwLKotOr1BIn/o9pSMp
-         2HGeOmt3vJsV9UJccPImQ9brWRqrk7eGmY8f/cxktJhXW7DNMCYvEO3VcS7kQ3xpJ48l
-         xQXIicv8UZraflHSEcTzwCRU8dUYeB0ksHEVh107NlGjr4L25FAVQjr27JPhcoSqlpmX
-         qFwg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770616532; x=1771221332;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=T+QOvhsB6nnh3rBb/EQNR/3iQSifJMKBxkesTJz9bMg=;
-        b=LGQk4aN/066V087CTArZYQkIjRtKTcKx1VRi+uQ8ffpknDXXOu6dg/xBlZAVitZWSv
-         7HeQh3kPAfjWunAzDCd1/rIg+ESq7r6uoC7MuohU9eyFs1D3MwL9ldLbGZ0N/7z+t/J0
-         5RajlhyLngKsBLCdApu93xpLv9D4kypj/gFDpBgAbw8ghM88a9NruCcMywUKC9I16X4T
-         Lv5Jg3jo69hgjurttZw0WttIDKNcukAFpTUeWW+YwVtv5uya1RUjcTU+h3ykOncrRxV6
-         FYYB78r5wBZbOCg2MeeS5ied6KZENyHtomz3i/PD2WSTfz5+DVyrbnNtzeNP0/TsUCRR
-         t/1Q==
-X-Forwarded-Encrypted: i=1; AJvYcCUvw5snma4uLcpwVL2SeU/0p/Kyz/gwtDV7kjgLOiwGaI/rNFJ3RpbN8vTTrYJwts8hVzDI6RYl@vger.kernel.org
-X-Gm-Message-State: AOJu0YxmeGsXmaRyEIeFzKt9CQzVXyAWaveV+mPlmJ3bg82xv8Zj/5Ry
-	Q3Sf1e/VSESjqj3+Oq+lBpQooz0WwcpcVI2mJZFZGy1DnX5uZglq05Bf1OVX8hEwpvOZBygtW/D
-	XOJCZHP+96phohA30ezk8rbPdcVh0Dh7Fx2zmZjNp
-X-Gm-Gg: AZuq6aIUhFTEXADVYklfKwtWIPbR6lNev/OotPPIdwv3ln16Vp/Tiu2gih9cJPgYu7W
-	vsBE5+HFWVzWrnd6gmgjVorHVTPp/VmkvF+IUlJ0qqrJMWGf+DZ88EfKk4ywBrSmiNcN5vGCojy
-	tBTYR3dShw64n8yAJzvMBHsw7D7JB1X4rmy7KmgrfjAv3BaLFjx7OcJ8FJZ6pv7eGUOSQMJg++L
-	ZQOdW7mxWuiqjASIsNG0TPTPTBlGCS9Id/GvHXTz+Gi14TOGr1Ct6phEYS7yWu0xNWBvBoS7J9n
-	+xYiNF0nlVihdLdDz3traStZ
-X-Received: by 2002:aa7:cf19:0:b0:649:8aa1:e524 with SMTP id
- 4fb4d7f45d1cf-659a9d1828emr30239a12.11.1770616532212; Sun, 08 Feb 2026
- 21:55:32 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qfRlTAZU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 36E14C116C6
+	for <fstests@vger.kernel.org>; Mon,  9 Feb 2026 09:33:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1770629592;
+	bh=Cwetngl46StkbjBucGkivRAJM+lpr+HcwYyuXW0diFU=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=qfRlTAZUzxwkuR4U8AqdvImu2FN/xeacb+5i4jCXudmoAcxpmuVfyjrsscq1g0tE3
+	 QhC/RyhYTpybjrxzYaSbVSQHeie4byb2GlgxGBtVbud7HlRjlh/Qrp32AP4h7HTpvu
+	 gCeAONmQRLN3+qzuSan1RLfkkRqLQdTjlXyCCPfeBh63duYWTcgY0btoziNL+GNwxm
+	 NVEg9mM91Gy+lZ7hymLSktz7kQbiOH6Ev+2whOyLTSCkynbffMDh6+uhmCiorYPyk3
+	 mPuhSVEEIhwfSPmHKTP+z43DiFoHbSZfSgs/dYTVF69qHV047uzSos8QOCnK/EZFGQ
+	 wvJdvHfOsUG+Q==
+Received: by mail-ej1-f42.google.com with SMTP id a640c23a62f3a-b883c8dfb00so750505666b.1
+        for <fstests@vger.kernel.org>; Mon, 09 Feb 2026 01:33:12 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCWzLuLzXWRvwYht05whEExJNf/H/U4dM+2rBS5NWVClUWHSJMcGE327LVTa02czzzHRa083FloQ@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw9fMG02trnvkDQDliWzdpgvthY0avGHWBJUYahpmmZFkPN5iWD
+	qEXAUQHwBuO4zLN1iORfFuZeUoa3ORx7+kHHokb5Dwx1n+HUw8pRyPk9xl0ILQ7XUbS0mwqLJiA
+	LYUOTwYZtUMjnnld+ApVyiaAJKqJ17vQ=
+X-Received: by 2002:a17:906:f582:b0:b8a:f3c0:c09 with SMTP id
+ a640c23a62f3a-b8edf46b9e4mr636769966b.59.1770629590789; Mon, 09 Feb 2026
+ 01:33:10 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260108022501.754320-1-joannechien@google.com>
- <20260110013802.GB15541@frogsfrogsfrogs> <CACQK4XDtrE5P-PjwSqvGtmEmMvEQS4r2KZkDh55LXY2YAoH6vw@mail.gmail.com>
- <20260208195043.vhvkanq5pysbb74y@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20260209015326.GK1535390@frogsfrogsfrogs> <20260209035419.ivosuxils2gnn3lw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To: <20260209035419.ivosuxils2gnn3lw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From: Joanne Chang <joannechien@google.com>
-Date: Mon, 9 Feb 2026 13:55:15 +0800
-X-Gm-Features: AZwV_Qjt0fAkperlVyp0uk5iJGAtZNUJexdbTOuM0fhw25LV9L2JU0rcyHAtMX0
-Message-ID: <CACQK4XChXe7PoCdCbzSySpc4g_bKRXkyW6zoZtL8eYzV9NzmXg@mail.gmail.com>
-Subject: Re: [PATCH v3] common/rc: add _require_blocks_in_file helper
-To: Zorro Lang <zlang@redhat.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org, 
-	linux-f2fs-devel@lists.sourceforge.net
+References: <20260209031009.28070-1-wqu@suse.com>
+In-Reply-To: <20260209031009.28070-1-wqu@suse.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Mon, 9 Feb 2026 09:32:33 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H7m+RkPVdczv2WZAnimtgXiPAes8HWyeydkyKKNg8V-Xg@mail.gmail.com>
+X-Gm-Features: AZwV_QhByepmfAEG8MFqJOL4xtywbU6fKBoXygHolTMQ7ZBXP3Rgtgw1a9lJep4
+Message-ID: <CAL3q7H7m+RkPVdczv2WZAnimtgXiPAes8HWyeydkyKKNg8V-Xg@mail.gmail.com>
+Subject: Re: [PATCH] fstests: btrfs: add a regression test for incorrect inode
+ incompressible flag
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Feb 9, 2026 at 11:54=E2=80=AFAM Zorro Lang <zlang@redhat.com> wrote=
-:
-> On Sun, Feb 08, 2026 at 05:53:26PM -0800, Darrick J. Wong wrote:
-> > Ok, since this is a limit on the maximum logical file block number,
-> > _require_max_file_range_blocks, perhaps?
+On Mon, Feb 9, 2026 at 3:10=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
 >
-> Thanks Darrick! I'm good with this, if Joanne agrees with this too, I can=
- help to
-> make this change locally to avoid asking for a new patch.
+> [BUG]
+> Since kernel commit 59615e2c1f63 ("btrfs: reject single block sized
+> compression early"), a single block write at file offset 0, which can
+> not be inlined due the inode size, will mark the inode incompressible.
 >
+> This is not the expected behavior is caused by that commit.
 
-I agree too. Thanks Darrick for the suggestion, and thanks Zorro
-for your help.
+Something odd with this sentence.
+But given the previous paragraph, it's not needed.
 
-Best regards,
-Joanne
-
-> Thanks,
-> Zorro
 >
-> >
-> > --D
+> [REGRESSION TEST]
+> The new regression test will do:
+>
+> - Create and mount the fs with compression,max_inline=3D2k
+>
+> - Do the following operations:
+>   * Truncate the inode to 2 * blocksize
+>     This will rule out any future inlined writes.
+>
+>   * Buffered write [0, 2K)
+>     Which will not be inlined.
+>
+>   * Sync
+>     For affected kernels, this will set the inode with NOCOMPRESS
+>     and reject all future compression on that inode.
+>
+>   * Buffered write [1M, 2M)
+>     For affected kernels, the range will not be compressed due
+>     to the NOCOMPRESS flag.
+>
+> - Unmount the fs
+>
+> - Make sure that:
+>   * The inode has no NOCOMPRESS flag
+>   * File extent at file offset 1M is being compressed
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>  tests/btrfs/343     | 47 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/343.out |  2 ++
+>  2 files changed, 49 insertions(+)
+>  create mode 100755 tests/btrfs/343
+>  create mode 100644 tests/btrfs/343.out
+>
+> diff --git a/tests/btrfs/343 b/tests/btrfs/343
+> new file mode 100755
+> index 00000000..78079eff
+> --- /dev/null
+> +++ b/tests/btrfs/343
+> @@ -0,0 +1,47 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
+> +#
+> +# FS QA Test 343
+> +#
+> +# A regression test to make sure a single-block write at file offset 0 w=
+on't
+> +# incorrectly mark the inode incompressible.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick compress
+> +
+> +_require_scratch
+> +
+> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +       "btrfs: fix the inline compressed extent check in inode_need_comp=
+ress()"
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount "-o compress,max_inline=3D2048"
+> +
+> +blocksize=3D$(_get_block_size $SCRATCH_MNT)
+> +
+> +# Create a sparse file which is 2 * blocksize, then try a small write at
+> +# file offset 0 which should not be inlined.
+> +# Sync so that [0, 2K) range is written, then write a larger range which
+> +# should be able to be compressed.
+> +$XFS_IO_PROG -f -c "truncate $((2 * $blocksize))" -c "pwrite 0 2k" -c sy=
+nc \
+> +               -c "pwrite 1m 1m" $SCRATCH_MNT/foobar >> $seqres.full
+> +ino=3D$(stat -c "%i" $SCRATCH_MNT/foobar)
+> +_scratch_unmount
+> +
+> +# Dump the fstree into seqres.full for debug
+
+Please end the sentence with punctuation - some of the other comments
+end with punctuation, others don't.
+
+> +$BTRFS_UTIL_PROG inspect dump-tree -t 5 $SCRATCH_DEV >> $seqres.full
+
+Please use the full command name "inspect-internal".
+Also missing at the top:
+
+_require_btrfs_command inspect-internal dump-tree
+
+
+> +
+> +# Check the NOCOMPRESS flag of the inode.
+
+Here there is punctuation.
+
+> +$BTRFS_UTIL_PROG inspect dump-tree -t 5 $SCRATCH_DEV |\
+
+inspect-internal
+
+> +grep -A 4 -e "item .* key ($ino INODE_ITEM 0)" | grep -q NOCOMPRESS
+> +[ $? -eq 0 ] && echo "inode $ino has NOCOMPRESS flag"
+> +
+> +# Check the file extent at fileoffset 1m
+
+Here, punctuation is missing again.
+
+> +$BTRFS_UTIL_PROG inspect dump-tree -t 5 $SCRATCH_DEV |\
+
+inspect-internal
+
+With those minor fixes:
+
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+
+Thanks.
+
+> +grep -A 4 -e "item .* key ($ino EXTENT_DATA 1048576)" | grep -q "compres=
+sion 0"
+> +[ $? -eq 0 ] && echo "inode $ino file offset 1M is not compressed"
+> +
+> +echo "Silence is golden"
+> +# success, all done
+> +_exit 0
+> diff --git a/tests/btrfs/343.out b/tests/btrfs/343.out
+> new file mode 100644
+> index 00000000..2eb30e4f
+> --- /dev/null
+> +++ b/tests/btrfs/343.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 343
+> +Silence is golden
+> --
+> 2.51.2
+>
+>
