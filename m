@@ -1,203 +1,166 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 026E728980F
-	for <fstests@vger.kernel.org>; Mon,  9 Feb 2026 03:10:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ADEE022D7B5
+	for <fstests@vger.kernel.org>; Mon,  9 Feb 2026 03:54:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770606632; cv=none; b=TWPfC3MT2TDH6IOqp/rtcKzMB+Evnrsa2MeaL2oUecwqVC2md7oKv9k3+GjwXm5z1qI8ogYDFqjtq4eFAsoqCW7SyjzLozCDf1CTqOndSQZbcanlG56gbFG+pKTTQ4itZTMoW5ar1pGz/xMhAndQ6/pWhG2brZl1hLVPXlfR/5I=
+	t=1770609268; cv=none; b=PWs7roirJy4fpQ0HJHm5EgSoMagqDdljZQ/hrDSGDV19VNt9iKENcLKggYOW0Lf7UCQqbzmp6Kq+RViDRm6dccWQK0CUzAebpwW1lqznwpAySg5USOFC+Te7hfH0EQAvwCQQXyQ6TaVH8q7mB2VqkaW9dtmj+mJbFUtAiO89wlQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770606632; c=relaxed/simple;
-	bh=TT3ht/WlKF3/C2tTnxEH/Xx4c0ZOMAKre48pfyc7XKE=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=Nb5FxgoILhw/9oTGBMgL95Ymfr0alwW39QwLmcl0FSgQzynuJExiMCzy/dAwDR//4v3FHyGvXOlMlsyrO1Ppy2AjkPVBIUqeY5lXn6gnU51JwCb06LEJ5xGuIqYNwhkJoeB+HspPvfLmZor2JeY6yaavAH4Vg1dfcg4jN4ZF8Lk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=N4NH1Sje; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=cZrRTkuw; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1770609268; c=relaxed/simple;
+	bh=qkYoD1gtJ07+ToQxwvg6qV9/Og+TgK93WkdsNT2K3+o=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=FXcUzH29hFTWMy4cPxD8Xl5EcZfibkcDZMADobcFb1TAda6sd6QqROGqlGghZ3DWVD2RDbbA8QN1xZUl29iJBlTz++ngQ4ZWpssD4nrwdLGPpQJI2X3tcjfjlepuhpmGG/7GzWmwDzkh3UddO53UTG8+Fr0But9oPntRLBE+Dc8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Hf8BrvW+; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=ga42SZNq; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="N4NH1Sje";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="cZrRTkuw"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id F2B813E709;
-	Mon,  9 Feb 2026 03:10:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1770606630; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=d4exBQ2buxfC0z2xu7wQ/aKPihayKG0VEVA4QkoCtv4=;
-	b=N4NH1SjeuXdLPY89x4Djp/XcrBHwhBk15s0WA9msqeie1Dn2zUe8dURIct/nF898k/0EKX
-	SDZH8crM0SLvwZ3f8f6Nz8Q/juRmjMCsIcIfIJg43oT7RZNQ/XclhxF8bhhsscs/pmKnCu
-	nor2t4CGVd7jQoeMAee5JN+jQdYQtfk=
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=cZrRTkuw
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1770606629; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=d4exBQ2buxfC0z2xu7wQ/aKPihayKG0VEVA4QkoCtv4=;
-	b=cZrRTkuwxSFozmfimW7HqCiKJz65JkRg67RUt7qGe9PI/L/lHSsZINXye8EywXfanhYJVE
-	5vS/BDoNHZyRA7DX4Qz0jWQyhLTcbq/3B1hrNZ/pCZLgN2A3HjdZwruJfZ7hL+Gn5/4HKG
-	v4mwwgfum6XSof+Fw9W9xF2rBVUL9IY=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 94A563EA63;
-	Mon,  9 Feb 2026 03:10:28 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id vBOMECRQiWmOaAAAD6G6ig
-	(envelope-from <wqu@suse.com>); Mon, 09 Feb 2026 03:10:28 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH] fstests: btrfs: add a regression test for incorrect inode incompressible flag
-Date: Mon,  9 Feb 2026 13:40:09 +1030
-Message-ID: <20260209031009.28070-1-wqu@suse.com>
-X-Mailer: git-send-email 2.52.0
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Hf8BrvW+";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="ga42SZNq"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1770609266;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=wYc5v3O1OT3iCO7ati2HJEqpec3eejd6ReypbOFPUMQ=;
+	b=Hf8BrvW+OfNKq11gdncuoX/hVQbTPXukZQrah2tyrqpL3jrjQhqtXARDPvwGUF2dhCYEoy
+	8E9x5JtAVB6obYnOag3GQSgDcY5O7td0j9bRWYKisCKFRe2VOnAjQXLVHYzsVCUwGpIWGx
+	dNmacAbEgnKGex95rk7KXAA4+ov0Hvo=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-650-McHfL6JNNaGGOhoaeWPfXg-1; Sun, 08 Feb 2026 22:54:25 -0500
+X-MC-Unique: McHfL6JNNaGGOhoaeWPfXg-1
+X-Mimecast-MFC-AGG-ID: McHfL6JNNaGGOhoaeWPfXg_1770609265
+Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-c61dee98720so1581055a12.0
+        for <fstests@vger.kernel.org>; Sun, 08 Feb 2026 19:54:25 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1770609264; x=1771214064; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=wYc5v3O1OT3iCO7ati2HJEqpec3eejd6ReypbOFPUMQ=;
+        b=ga42SZNqwxkYiibM/UxZNH0/3L09EpIxKoVIUCOJF8nfofQ7HPCyEdMQgWp1WHluxG
+         n9K1yN+VtHmeAfo8AR7FbWC6mYVB1qcIK4h+cKzRecqGNtMoZVyxegybbPkhkD4WYVg3
+         tYtnQABImFcLwYs05DS5XG6OtXFuwxPYFEkThf5WBCBvZH9YyKdQ0O3h+i9iVI0gWvE4
+         EK88vAbQb0kWoxAJGaLkO2EolPtDM7BiGDnahfMogjwnEu2WAXNcR2oEeJsBakjbrEI9
+         SvhIz0ZYUzsSVtsQcrEIv56GQoyDPgf32+hZSafVvz9M6PSPyfQBkNtrVtj2VNiimUpT
+         DBjA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1770609264; x=1771214064;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=wYc5v3O1OT3iCO7ati2HJEqpec3eejd6ReypbOFPUMQ=;
+        b=vU/e++Vo+bVsDI6xbtanUTT+alEaFjDhRQeexQF2R6xRW57hpnwS5z5TtMtXPzosVw
+         EYDdqD1ZCYOhCOcg0JufWWYK8MeQnVKUrHpIH7DMvdRmaCKr/YCO8th7WaRBiPOrh+v0
+         1UadYiWYuU06NQIulZDuIdQjMbnw1OLQn5XJ4vuDxNkJuF3mOzrpzV/0ULQhcbjED7hO
+         RfcE8ItWMXfUigYp12jaj7++7dY8PMcxa05ZypEaifBmQkvciUBE+c+UiDxor11/iRnp
+         APJ0iuWgfrH/VXRx3N7gECTuhyqO9AW8Ob3HxrqPqlQaORgtPfevJeUa9uTQOt0DALuk
+         cA5Q==
+X-Gm-Message-State: AOJu0YylluwjG3AW5dawIQHnWYmC8vDToc1eFnbVnadOY2wO52cWASqi
+	aIgyp+4aAeZnU+bCo7+/1lY53N4L5wNg1mZo64dTcmgTpzVRMrdUroUe/4R8uaiwco9L4fMOiar
+	caWo+nKNEseBC+18ixw6erA55AJG2NRh5t+bdhu6BfEVU2nw2gs2/+XtFWj4=
+X-Gm-Gg: AZuq6aI2qfg2Uknetb8ZcAN0T3rpgxGtJL6UpkoJ9+cR4uob2h2qBsZg2/a5N5+8/Y6
+	lDFR9hkIoYfyiYaVPqvNPuNajzQP8TaomedhEFDImq1L3RP5UN93+7FH9275BenCKHu2X0Naa88
+	BzLhFRq1qS6q9MGFnrWQtSGjUc/JlRJdswRKkRpa3wJLFaqLlbnWLf++8ET/Kn22MSqu2o5Usfs
+	/3kWTSJ+dHDiY2zAFcDQ6GetrqqPyKaJctRsJJcXI4bGlSniwTUFMr9h96daTOKZ2PkbBdY3z/J
+	XfVGjL7ZKB94Fg09sRQ7JBl2IGXD58TE1waVS0X+QSmKLPUahZrC9JczHTmg2p9ZQLAJHE094r/
+	XdbBbYXW8Qvf1bivIAdbLHN5WpRan12ReqSoUSCeiUz1zGyg+xg==
+X-Received: by 2002:a05:6a21:a89:b0:392:e5eb:f0f with SMTP id adf61e73a8af0-393ad3b6c44mr8349850637.68.1770609264491;
+        Sun, 08 Feb 2026 19:54:24 -0800 (PST)
+X-Received: by 2002:a05:6a21:a89:b0:392:e5eb:f0f with SMTP id adf61e73a8af0-393ad3b6c44mr8349831637.68.1770609263897;
+        Sun, 08 Feb 2026 19:54:23 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c6dcb526676sm7675744a12.12.2026.02.08.19.54.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 08 Feb 2026 19:54:23 -0800 (PST)
+Date: Mon, 9 Feb 2026 11:54:19 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>,
+	Joanne Chang <joannechien@google.com>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Subject: Re: [PATCH v3] common/rc: add _require_blocks_in_file helper
+Message-ID: <20260209035419.ivosuxils2gnn3lw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20260108022501.754320-1-joannechien@google.com>
+ <20260110013802.GB15541@frogsfrogsfrogs>
+ <CACQK4XDtrE5P-PjwSqvGtmEmMvEQS4r2KZkDh55LXY2YAoH6vw@mail.gmail.com>
+ <20260208195043.vhvkanq5pysbb74y@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20260209015326.GK1535390@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-X-Spam-Score: -3.01
-X-Spamd-Result: default: False [-3.01 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	MIME_TRACE(0.00)[0:+];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RCPT_COUNT_TWO(0.00)[2];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	ARC_NA(0.00)[];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	RCVD_TLS_ALL(0.00)[];
-	DKIM_TRACE(0.00)[suse.com:+];
-	RCVD_COUNT_TWO(0.00)[2];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	TO_DN_NONE(0.00)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	DNSWL_BLOCKED(0.00)[2a07:de40:b281:106:10:150:64:167:received,2a07:de40:b281:104:10:150:64:97:from];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo]
-X-Spam-Level: 
-X-Rspamd-Action: no action
-X-Rspamd-Queue-Id: F2B813E709
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Spam-Flag: NO
+In-Reply-To: <20260209015326.GK1535390@frogsfrogsfrogs>
 
-[BUG]
-Since kernel commit 59615e2c1f63 ("btrfs: reject single block sized
-compression early"), a single block write at file offset 0, which can
-not be inlined due the inode size, will mark the inode incompressible.
+On Sun, Feb 08, 2026 at 05:53:26PM -0800, Darrick J. Wong wrote:
+> On Mon, Feb 09, 2026 at 03:50:43AM +0800, Zorro Lang wrote:
+> > On Mon, Jan 12, 2026 at 11:20:36AM +0800, Joanne Chang wrote:
+> > > On Sat, Jan 10, 2026 at 9:38 AM Darrick J. Wong <djwong@kernel.org> wrote:
+> > > > On Thu, Jan 08, 2026 at 02:25:01AM +0000, Joanne Chang wrote:
+> > > > > generic/735 attempts to create a file with nearly 2^32 blocks. However,
+> > > > > some filesystems have a maximum file block limit below this threshold.
+> > > > > For instance, F2FS is limited to approximately 2^30 blocks due to the
+> > > > > capacity of the inode. So add _require_blocks_in_file helper to skip the
+> > > > > test in such cases.
+> > > > >
+> > > > > The helper uses a hardcoded constant instead of a programmatic method,
+> > > > > so that bugs which affect the maximum file size are not masked.
+> > > >
+> > > > Not to mention trying to create a file with 1,057,053,439 blocks
+> > > > allocated to it would probably take forever.
+> > > >
+> > > > Hang on, we're talking about iblocks (aka the number of blocks allocated
+> > > > to this inode), not the maximum file size in blocks, right?
+> > > >
+> > > > If so, then maybe this function and its comments should
+> > > > s/blocks/iblocks/?  Or am I confused? ;)
+> > > >
+> > > > --D
+> > > 
+> > > If I understand correctly, generic/735 creates a large logical file, but
+> > > the actual physical block allocation is much smaller. Also, the F2FS
+> > > limitation is about how many blocks the inode can address, no matter if
+> > > the blocks are actually allocated.
+> > > 
+> > > So I believe the requirement is about the maximum file size in blocks,
+> > > not the number of blocks actually allocated. Does it make sense to keep
+> > > the name, or do you think another term would be clearer? I appreciate
+> > > your thoughts on this.
+> > 
+> > Hi Darrick,
+> > 
+> > I think Joanne's explanation makes sense, if you don't have more review points
+> > on it, I'll merge this patch.
+> 
+> Agpgth, I didn't notice this reply!  My apologies! :(
+> 
+> Ok, since this is a limit on the maximum logical file block number,
+> _require_max_file_range_blocks, perhaps?
 
-This is not the expected behavior is caused by that commit.
+Thanks Darrick! I'm good with this, if Joanne agrees with this too, I can help to
+make this change locally to avoid asking for a new patch.
 
-[REGRESSION TEST]
-The new regression test will do:
+Thanks,
+Zorro
 
-- Create and mount the fs with compression,max_inline=2k
-
-- Do the following operations:
-  * Truncate the inode to 2 * blocksize
-    This will rule out any future inlined writes.
-
-  * Buffered write [0, 2K)
-    Which will not be inlined.
-
-  * Sync
-    For affected kernels, this will set the inode with NOCOMPRESS
-    and reject all future compression on that inode.
-
-  * Buffered write [1M, 2M)
-    For affected kernels, the range will not be compressed due
-    to the NOCOMPRESS flag.
-
-- Unmount the fs
-
-- Make sure that:
-  * The inode has no NOCOMPRESS flag
-  * File extent at file offset 1M is being compressed
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- tests/btrfs/343     | 47 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/343.out |  2 ++
- 2 files changed, 49 insertions(+)
- create mode 100755 tests/btrfs/343
- create mode 100644 tests/btrfs/343.out
-
-diff --git a/tests/btrfs/343 b/tests/btrfs/343
-new file mode 100755
-index 00000000..78079eff
---- /dev/null
-+++ b/tests/btrfs/343
-@@ -0,0 +1,47 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-+#
-+# FS QA Test 343
-+#
-+# A regression test to make sure a single-block write at file offset 0 won't
-+# incorrectly mark the inode incompressible.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick compress
-+
-+_require_scratch
-+
-+_fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: fix the inline compressed extent check in inode_need_compress()"
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount "-o compress,max_inline=2048"
-+
-+blocksize=$(_get_block_size $SCRATCH_MNT)
-+
-+# Create a sparse file which is 2 * blocksize, then try a small write at
-+# file offset 0 which should not be inlined.
-+# Sync so that [0, 2K) range is written, then write a larger range which
-+# should be able to be compressed.
-+$XFS_IO_PROG -f -c "truncate $((2 * $blocksize))" -c "pwrite 0 2k" -c sync \
-+		-c "pwrite 1m 1m" $SCRATCH_MNT/foobar >> $seqres.full
-+ino=$(stat -c "%i" $SCRATCH_MNT/foobar)
-+_scratch_unmount
-+
-+# Dump the fstree into seqres.full for debug
-+$BTRFS_UTIL_PROG inspect dump-tree -t 5 $SCRATCH_DEV >> $seqres.full
-+
-+# Check the NOCOMPRESS flag of the inode.
-+$BTRFS_UTIL_PROG inspect dump-tree -t 5 $SCRATCH_DEV |\
-+grep -A 4 -e "item .* key ($ino INODE_ITEM 0)" | grep -q NOCOMPRESS
-+[ $? -eq 0 ] && echo "inode $ino has NOCOMPRESS flag"
-+
-+# Check the file extent at fileoffset 1m
-+$BTRFS_UTIL_PROG inspect dump-tree -t 5 $SCRATCH_DEV |\
-+grep -A 4 -e "item .* key ($ino EXTENT_DATA 1048576)" | grep -q "compression 0"
-+[ $? -eq 0 ] && echo "inode $ino file offset 1M is not compressed"
-+
-+echo "Silence is golden"
-+# success, all done
-+_exit 0
-diff --git a/tests/btrfs/343.out b/tests/btrfs/343.out
-new file mode 100644
-index 00000000..2eb30e4f
---- /dev/null
-+++ b/tests/btrfs/343.out
-@@ -0,0 +1,2 @@
-+QA output created by 343
-+Silence is golden
--- 
-2.51.2
+> 
+> --D
+> 
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > > 
+> > > Best regards,
+> > > Joanne
+> > > 
+> > 
+> 
 
