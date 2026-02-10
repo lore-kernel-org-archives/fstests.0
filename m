@@ -1,58 +1,79 @@
-Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8CF6A3164D7;
-	Tue, 10 Feb 2026 11:11:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.141.245
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3015F2E764D
+	for <fstests@vger.kernel.org>; Tue, 10 Feb 2026 11:20:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770721884; cv=none; b=tV1A/kl8OzapWTG2DWJ7IF+fegTAwykqRRQ+hitHSu5MggC/9z/P5BbIt9ilnBat3CWgrtKyf5kD3bz1lH8Ny1NcrmZeK4kTtjpqpZD1EpmgP/6BMi+7MKdiPzSbuq276y5T8WpPA2lG+lyMMGVnEyfCiikQgepXMoWm44LK7TI=
+	t=1770722429; cv=none; b=Be3qyGWKYYkOzxwYWRAS11YzuWLbijneiPDKu+wPehJsToRzoUbXQ3Je1gnIJFxf5OnMEzAoHy1zY8/Ve7XRKT4xR4QQnUCYhad+f9UEO1OxowmJnNNrrXvpRPEZPizF3lkRTVF2hbuSRCKe5Nhetlzcq7a7zFQN2hR5mrMtZho=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770721884; c=relaxed/simple;
-	bh=Oqk/dNM0gIHjCF+IO7D0gR4dl8qjOkNyhni+rAh9W+w=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=t53RgJxhpm3ap3X4s8JHOK6Kyjj/Xaw+CFIIvSYenceIDwvZ3JKgg6o9TRKvzkY+ph59/o8Sk1Leo7q2cKbG8UU4MY4qO4lzX+VCtCY1tcBARFwR2boCr4auELYerD2DKcdWdwwH7FzK81PDAM1FpZF5tHyC0jAmuMLAlC41ZF0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=MWNGdJ7m; arc=none smtp.client-ip=68.232.141.245
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	s=arc-20240116; t=1770722429; c=relaxed/simple;
+	bh=zG31+GLCuJUKSSWbirrQTVdF3CjX6nr967D5y0EGiVA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=S9QGHEurSN1Apl6NUItsZyoCNYGevmeCc1xCCGRNIUyNCy7blPsgihE8VailkXF1aFFOfeOEr2W+15XqQ+W125bVw0oZ6JTmolCKQMidcbuPFf8pMvNADfz2XPN1Yf95ohp6Mtfo5/cIQYUs5MhPUda0FQYqzHOKZrfKOA5+p5E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=RTy0srup; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=dS9wMZGd; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=RTy0srup; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=dS9wMZGd; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="MWNGdJ7m"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1770721883; x=1802257883;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=Oqk/dNM0gIHjCF+IO7D0gR4dl8qjOkNyhni+rAh9W+w=;
-  b=MWNGdJ7m+Ga6tWrdabVc23puuqs9uilQvp+gug4r+yR3FVoSK/VlAri3
-   r3kjr4RONPMAASvCGJCvuHH0bK0lK7viyQ2Z7HL9tzyi0CeYD9lMfp5kL
-   Cm14QjCB5mQci34s9IOyn/+KhaEDkNnX7kQSe8SKUQMj+/n8NltddaRlN
-   JS7u6ie3dS2eky2AOfeYyO0OralPJ1A9G6tBEdBenAHrB9qSQOEP0kj6q
-   CzmcpEcXm2jtbrWdNNKpPFsGriozzI01q6nkFX8430+xPJbEcwcvfKras
-   yzSliD58TaL2LtZnahvOTOjqYVWinmh+WJYJQs2MGIHUNQWCjq5J9yugW
-   w==;
-X-CSE-ConnectionGUID: TjUhorzOQje/XPHkkOFVpw==
-X-CSE-MsgGUID: xIrknjmzSuuKGDlT9U6L5w==
-X-IronPort-AV: E=Sophos;i="6.21,283,1763395200"; 
-   d="scan'208";a="140451175"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 10 Feb 2026 19:11:16 +0800
-IronPort-SDR: 698b1255_JtKQfmfHWGfvDURBzk9VpW5MDRr/RAnzzK8fkXdjmQ72DgF
- Zj3EWNPUGYuBDDOCTPflF/sEGv/iir24d3Dc4KQ==
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 10 Feb 2026 03:11:17 -0800
-WDCIronportException: Internal
-Received: from unknown (HELO neo.fritz.box) ([10.224.28.118])
-  by uls-op-cesaip01.wdc.com with ESMTP; 10 Feb 2026 03:11:14 -0800
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Christoph Hellwig <hch@lst.de>,
-	linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org,
-	Hans Holmberg <Hans.Holmberg@wdc.com>,
-	Naohiro Aota <naohiro.aota@wdc.com>,
-	Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Subject: [PATCH] fstests: test premature ENOSPC in zoned garbage collection
-Date: Tue, 10 Feb 2026 12:11:03 +0100
-Message-ID: <20260210111103.265664-1-johannes.thumshirn@wdc.com>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="RTy0srup";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="dS9wMZGd";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="RTy0srup";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="dS9wMZGd"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 670C95BD42;
+	Tue, 10 Feb 2026 11:20:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1770722426; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=Da7XXIYXHfG+QgXD+inIbI1Wk4GZnkh++DXrDctfaQ4=;
+	b=RTy0srup7z57WM8QkTIVRCsSiXHaiWTdSBuQSBGASE7Ztap9QHC6b1ur1lKyLCENuq4a6W
+	To6AUkRVo65L2lF02fESz9cdRIqCHU8PxrYDaDRi4/jU+N3k4z4F0l14lQyV6WZhcce7X2
+	GuBQBAQ/PhQ2p1KxTRWXDiVyXKCLGzg=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1770722426;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=Da7XXIYXHfG+QgXD+inIbI1Wk4GZnkh++DXrDctfaQ4=;
+	b=dS9wMZGdMIJTAVTvo9KzbwOXEylIQ+OnflWWOVDVR4MyGfcn5E0DsRPolQ+bY3IOHq64Ah
+	/BkQm8DeEsXFbsAw==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1770722426; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=Da7XXIYXHfG+QgXD+inIbI1Wk4GZnkh++DXrDctfaQ4=;
+	b=RTy0srup7z57WM8QkTIVRCsSiXHaiWTdSBuQSBGASE7Ztap9QHC6b1ur1lKyLCENuq4a6W
+	To6AUkRVo65L2lF02fESz9cdRIqCHU8PxrYDaDRi4/jU+N3k4z4F0l14lQyV6WZhcce7X2
+	GuBQBAQ/PhQ2p1KxTRWXDiVyXKCLGzg=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1770722426;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=Da7XXIYXHfG+QgXD+inIbI1Wk4GZnkh++DXrDctfaQ4=;
+	b=dS9wMZGdMIJTAVTvo9KzbwOXEylIQ+OnflWWOVDVR4MyGfcn5E0DsRPolQ+bY3IOHq64Ah
+	/BkQm8DeEsXFbsAw==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 4A8993EA62;
+	Tue, 10 Feb 2026 11:20:26 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id kw6xEXoUi2kqLwAAD6G6ig
+	(envelope-from <jack@suse.cz>); Tue, 10 Feb 2026 11:20:26 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+	id EB881A0A4E; Tue, 10 Feb 2026 12:20:25 +0100 (CET)
+From: Jan Kara <jack@suse.cz>
+To: fstests@vger.kernel.org
+Cc: <linux-ext4@vger.kernel.org>,
+	Jan Kara <jack@suse.cz>
+Subject: [PATCH 0/4] Avoid failing shutdown tests without a journal
+Date: Tue, 10 Feb 2026 12:20:17 +0100
+Message-ID: <20260210111707.17132-1-jack@suse.cz>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -60,81 +81,34 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Spamd-Result: default: False [-2.75 / 50.00];
+	BAYES_HAM(-2.95)[99.77%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	RCVD_COUNT_THREE(0.00)[3];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	FROM_EQ_ENVFROM(0.00)[];
+	RCVD_TLS_LAST(0.00)[];
+	TO_DN_SOME(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCPT_COUNT_THREE(0.00)[3];
+	FROM_HAS_DN(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.cz:mid]
+X-Spam-Flag: NO
+X-Spam-Score: -2.75
+X-Spam-Level: 
 
-This test stresses garbage collection in zoned file systems by
-constantly overwriting the same file. It is inspired by a reproducer for
-a btrfs bugifx.
+Hello,
 
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
----
- tests/generic/783     | 48 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/783.out |  2 ++
- 2 files changed, 50 insertions(+)
- create mode 100755 tests/generic/783
- create mode 100644 tests/generic/783.out
+this patch series adds requirement for metadata journalling to couple
+of tests using filesystem shutdown. After shutdown a filesystem without
+a journal is not guaranteed to be consistent and thus tests often fail.
 
-diff --git a/tests/generic/783 b/tests/generic/783
-new file mode 100755
-index 000000000000..f996d78803a1
---- /dev/null
-+++ b/tests/generic/783
-@@ -0,0 +1,48 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Western Digital Corporation.  All Rights Reserved.
-+#
-+# FS QA Test 783
-+#
-+# This test stresses garbage collection in zoned file systems by constantly
-+# overwriting the same file. It is inspired by a reproducer for a btrfs bugifx.
-+
-+. ./common/preamble
-+_begin_fstest auto quick zone
-+
-+. ./common/filter
-+
-+_require_scratch_size $((16 * 1024 * 1024))
-+_require_zoned_device "$SCRATCH_DEV"
-+
-+# This test requires specific data space usage, skip if we have compression
-+# enabled.
-+_require_no_compress
-+
-+if [ "$FSTYP" = btrfs ]; then
-+	_fixed_by_kernel_commit XXXXXXXXXXXX \
-+		"btrfs: zoned: cap delayed refs metadata reservation to avoid overcommit"
-+	_fixed_by_kernel_commit XXXXXXXXXXXX \
-+		"btrfs: zoned: move partially zone_unusable block groups to reclaim list"
-+	_fixed_by_kernel_commit XXXXXXXXXXXX \
-+		"btrfs: zoned: add zone reclaim flush state for DATA space_info"
-+fi
-+
-+_scratch_mkfs_sized $((16 * 1024 * 1024 * 1024)) &>>$seqres.full
-+_scratch_mount
-+
-+blocks="$(df -TB 1G $SCRATCH_DEV |\
-+	$AWK_PROG -v fstyp="$FSTYP" 'match($2, fstyp) {print $3}')"
-+
-+loops=$(echo "$blocks * 4 - 2" | bc)
-+
-+for (( i = 0; i < $loops; i++)); do
-+	dd if=/dev/zero of=$SCRATCH_MNT/test bs=1M count=1024 status=none 2>&1
-+	if [ $? -ne 0 ]; then
-+		_fail "Failed writing on iteration $i"
-+	fi
-+done
-+
-+echo "Silence is golden"
-+# success, all done
-+_exit 0
-diff --git a/tests/generic/783.out b/tests/generic/783.out
-new file mode 100644
-index 000000000000..2522395956d4
---- /dev/null
-+++ b/tests/generic/783.out
-@@ -0,0 +1,2 @@
-+QA output created by 783
-+Silence is golden
--- 
-2.53.0
-
+							Honza
