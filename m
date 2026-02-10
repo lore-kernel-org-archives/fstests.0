@@ -1,61 +1,58 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0DCBC3093CF
-	for <fstests@vger.kernel.org>; Mon,  9 Feb 2026 09:57:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8CF6A3164D7;
+	Tue, 10 Feb 2026 11:11:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.141.245
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770631079; cv=none; b=B1aLUV06ak18XU6gY+cproj4OKL2Zmr6RinvhFisPGzfMLrSvat7ETXGOnfnAs3zmksNr2i9oQForhyjUV13rZeXU4MIl5sk1xKz2Q0lC9Fx0X4HwXJnTuwkTsF+TwntNOc/fHj7Qv2ojtGBlMJnBjTk8dSke7dvHod9KTEK60w=
+	t=1770721884; cv=none; b=tV1A/kl8OzapWTG2DWJ7IF+fegTAwykqRRQ+hitHSu5MggC/9z/P5BbIt9ilnBat3CWgrtKyf5kD3bz1lH8Ny1NcrmZeK4kTtjpqpZD1EpmgP/6BMi+7MKdiPzSbuq276y5T8WpPA2lG+lyMMGVnEyfCiikQgepXMoWm44LK7TI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770631079; c=relaxed/simple;
-	bh=2Wxk8TLvcCoJfdKe9wcl+yXk73vVH4FpAgzBAG40VYY=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=soaPO4dwJzGn1QwuR10ruYtcCfHzynAMxevyj4t5gh+Qh5DADtRC30GniZHEqog11Ao/p+9Fu/FWT9evOP72SHnhuTrE+hXAUxOGWbYLVY0nruVfyLGMTnCIcoE8WWEKycrOt6ECNMPaVbRqoWg5joirFdVgBwXASjF7bh+fErc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=Bxi0Qqvm; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=Bxi0Qqvm; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1770721884; c=relaxed/simple;
+	bh=Oqk/dNM0gIHjCF+IO7D0gR4dl8qjOkNyhni+rAh9W+w=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=t53RgJxhpm3ap3X4s8JHOK6Kyjj/Xaw+CFIIvSYenceIDwvZ3JKgg6o9TRKvzkY+ph59/o8Sk1Leo7q2cKbG8UU4MY4qO4lzX+VCtCY1tcBARFwR2boCr4auELYerD2DKcdWdwwH7FzK81PDAM1FpZF5tHyC0jAmuMLAlC41ZF0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=MWNGdJ7m; arc=none smtp.client-ip=68.232.141.245
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Bxi0Qqvm";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Bxi0Qqvm"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 384B05BCD8;
-	Mon,  9 Feb 2026 09:57:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1770631076; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=J1IDmlevR41VHdB6pPTz6i5TIBT+lC/nybHeFIRODII=;
-	b=Bxi0QqvmV5v5dz9ZR5Vg9ZibxiNfCJlHBFZ1S30GMyfwiAPXICvFhtYr9pMLwiGF4GHOh3
-	9JQjezUCg7N4vguceMfLyRDveCa7DRddl4r6ZuXaonFG3q65l7wogbopxghmfGYNxRyuy8
-	L9EcQTTweVYTcismw9Rh5hifWOYA/fQ=
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=Bxi0Qqvm
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1770631076; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=J1IDmlevR41VHdB6pPTz6i5TIBT+lC/nybHeFIRODII=;
-	b=Bxi0QqvmV5v5dz9ZR5Vg9ZibxiNfCJlHBFZ1S30GMyfwiAPXICvFhtYr9pMLwiGF4GHOh3
-	9JQjezUCg7N4vguceMfLyRDveCa7DRddl4r6ZuXaonFG3q65l7wogbopxghmfGYNxRyuy8
-	L9EcQTTweVYTcismw9Rh5hifWOYA/fQ=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 76EA53EA64;
-	Mon,  9 Feb 2026 09:57:54 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id KtyfCKKviWn6OgAAD6G6ig
-	(envelope-from <wqu@suse.com>); Mon, 09 Feb 2026 09:57:54 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Cc: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v3] fstests: btrfs: add a regression test for incorrect inode incompressible flag
-Date: Mon,  9 Feb 2026 20:27:35 +1030
-Message-ID: <20260209095735.130049-1-wqu@suse.com>
-X-Mailer: git-send-email 2.52.0
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="MWNGdJ7m"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1770721883; x=1802257883;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=Oqk/dNM0gIHjCF+IO7D0gR4dl8qjOkNyhni+rAh9W+w=;
+  b=MWNGdJ7m+Ga6tWrdabVc23puuqs9uilQvp+gug4r+yR3FVoSK/VlAri3
+   r3kjr4RONPMAASvCGJCvuHH0bK0lK7viyQ2Z7HL9tzyi0CeYD9lMfp5kL
+   Cm14QjCB5mQci34s9IOyn/+KhaEDkNnX7kQSe8SKUQMj+/n8NltddaRlN
+   JS7u6ie3dS2eky2AOfeYyO0OralPJ1A9G6tBEdBenAHrB9qSQOEP0kj6q
+   CzmcpEcXm2jtbrWdNNKpPFsGriozzI01q6nkFX8430+xPJbEcwcvfKras
+   yzSliD58TaL2LtZnahvOTOjqYVWinmh+WJYJQs2MGIHUNQWCjq5J9yugW
+   w==;
+X-CSE-ConnectionGUID: TjUhorzOQje/XPHkkOFVpw==
+X-CSE-MsgGUID: xIrknjmzSuuKGDlT9U6L5w==
+X-IronPort-AV: E=Sophos;i="6.21,283,1763395200"; 
+   d="scan'208";a="140451175"
+Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 10 Feb 2026 19:11:16 +0800
+IronPort-SDR: 698b1255_JtKQfmfHWGfvDURBzk9VpW5MDRr/RAnzzK8fkXdjmQ72DgF
+ Zj3EWNPUGYuBDDOCTPflF/sEGv/iir24d3Dc4KQ==
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 10 Feb 2026 03:11:17 -0800
+WDCIronportException: Internal
+Received: from unknown (HELO neo.fritz.box) ([10.224.28.118])
+  by uls-op-cesaip01.wdc.com with ESMTP; 10 Feb 2026 03:11:14 -0800
+From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Christoph Hellwig <hch@lst.de>,
+	linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org,
+	Hans Holmberg <Hans.Holmberg@wdc.com>,
+	Naohiro Aota <naohiro.aota@wdc.com>,
+	Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH] fstests: test premature ENOSPC in zoned garbage collection
+Date: Tue, 10 Feb 2026 12:11:03 +0100
+Message-ID: <20260210111103.265664-1-johannes.thumshirn@wdc.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -63,153 +60,81 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spamd-Result: default: False [-3.01 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_CONTAINS_FROM(1.00)[];
-	R_MISSING_CHARSET(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	ARC_NA(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:dkim,suse.com:email,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	TO_DN_SOME(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	FROM_EQ_ENVFROM(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	URIBL_BLOCKED(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns,suse.com:mid,suse.com:dkim,suse.com:email];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	RCPT_COUNT_THREE(0.00)[3];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	DKIM_TRACE(0.00)[suse.com:+]
-X-Spam-Flag: NO
-X-Spam-Score: -3.01
-X-Rspamd-Queue-Id: 384B05BCD8
-X-Rspamd-Action: no action
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Spam-Level: 
 
-[BUG]
-Since kernel commit 59615e2c1f63 ("btrfs: reject single block sized
-compression early"), a single block write at file offset 0, which can
-not be inlined due the inode size, will mark the inode incompressible.
+This test stresses garbage collection in zoned file systems by
+constantly overwriting the same file. It is inspired by a reproducer for
+a btrfs bugifx.
 
-[REGRESSION TEST]
-The new regression test will do:
-
-- Create and mount the fs with compression,max_inline=2k
-
-- Do the following operations:
-  * Truncate the inode to 2 * blocksize
-    This will rule out any future inlined writes.
-
-  * Buffered write [0, 2K)
-    Which will not be inlined.
-
-  * Sync
-    For affected kernels, this will set the inode with NOCOMPRESS
-    and reject all future compression on that inode.
-
-  * Buffered write [1M, 2M)
-    For affected kernels, the range will not be compressed due
-    to the NOCOMPRESS flag.
-
-- Unmount the fs
-
-- Make sure that:
-  * The inode has no NOCOMPRESS flag
-  * File extent at file offset 1M is being compressed
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Signed-off-by: Qu Wenruo <wqu@suse.com>
+Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 ---
-Changelog:
-v2:
-- Remove an unnessary sentence
-  Which is confusing because I missed the "and" to connect the two
-  sentences, and it's not needed after the first paragraph anyway.
-
-- Use full "btrfs inspect-internal" group name instead
-
-- Add missing punctures
-
-v3:
-- Properly commit the modification
-  Facepalm
----
- tests/btrfs/343     | 48 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/343.out |  2 ++
+ tests/generic/783     | 48 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/783.out |  2 ++
  2 files changed, 50 insertions(+)
- create mode 100755 tests/btrfs/343
- create mode 100644 tests/btrfs/343.out
+ create mode 100755 tests/generic/783
+ create mode 100644 tests/generic/783.out
 
-diff --git a/tests/btrfs/343 b/tests/btrfs/343
+diff --git a/tests/generic/783 b/tests/generic/783
 new file mode 100755
-index 00000000..3781373c
+index 000000000000..f996d78803a1
 --- /dev/null
-+++ b/tests/btrfs/343
++++ b/tests/generic/783
 @@ -0,0 +1,48 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
++# Copyright (c) 2026 Western Digital Corporation.  All Rights Reserved.
 +#
-+# FS QA Test 343
++# FS QA Test 783
 +#
-+# A regression test to make sure a single-block write at file offset 0 won't
-+# incorrectly mark the inode incompressible.
-+#
++# This test stresses garbage collection in zoned file systems by constantly
++# overwriting the same file. It is inspired by a reproducer for a btrfs bugifx.
++
 +. ./common/preamble
-+_begin_fstest auto quick compress
++_begin_fstest auto quick zone
 +
-+_require_scratch
-+_require_btrfs_command inspect-internal dump-tree
++. ./common/filter
 +
-+_fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: fix the inline compressed extent check in inode_need_compress()"
++_require_scratch_size $((16 * 1024 * 1024))
++_require_zoned_device "$SCRATCH_DEV"
 +
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount "-o compress,max_inline=2048"
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_no_compress
 +
-+blocksize=$(_get_block_size $SCRATCH_MNT)
++if [ "$FSTYP" = btrfs ]; then
++	_fixed_by_kernel_commit XXXXXXXXXXXX \
++		"btrfs: zoned: cap delayed refs metadata reservation to avoid overcommit"
++	_fixed_by_kernel_commit XXXXXXXXXXXX \
++		"btrfs: zoned: move partially zone_unusable block groups to reclaim list"
++	_fixed_by_kernel_commit XXXXXXXXXXXX \
++		"btrfs: zoned: add zone reclaim flush state for DATA space_info"
++fi
 +
-+# Create a sparse file which is 2 * blocksize, then try a small write at
-+# file offset 0 which should not be inlined.
-+# Sync so that [0, 2K) range is written, then write a larger range which
-+# should be able to be compressed.
-+$XFS_IO_PROG -f -c "truncate $((2 * $blocksize))" -c "pwrite 0 2k" -c sync \
-+		-c "pwrite 1m 1m" $SCRATCH_MNT/foobar >> $seqres.full
-+ino=$(stat -c "%i" $SCRATCH_MNT/foobar)
-+_scratch_unmount
++_scratch_mkfs_sized $((16 * 1024 * 1024 * 1024)) &>>$seqres.full
++_scratch_mount
 +
-+# Dump the fstree into seqres.full for debug.
-+$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV >> $seqres.full
++blocks="$(df -TB 1G $SCRATCH_DEV |\
++	$AWK_PROG -v fstyp="$FSTYP" 'match($2, fstyp) {print $3}')"
 +
-+# Check the NOCOMPRESS flag of the inode.
-+$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV |\
-+grep -A 4 -e "item .* key ($ino INODE_ITEM 0)" | grep -q NOCOMPRESS
-+[ $? -eq 0 ] && echo "inode $ino has NOCOMPRESS flag"
++loops=$(echo "$blocks * 4 - 2" | bc)
 +
-+# Check the file extent at fileoffset 1m.
-+$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV |\
-+grep -A 4 -e "item .* key ($ino EXTENT_DATA 1048576)" | grep -q "compression 0"
-+[ $? -eq 0 ] && echo "inode $ino file offset 1M is not compressed"
++for (( i = 0; i < $loops; i++)); do
++	dd if=/dev/zero of=$SCRATCH_MNT/test bs=1M count=1024 status=none 2>&1
++	if [ $? -ne 0 ]; then
++		_fail "Failed writing on iteration $i"
++	fi
++done
 +
 +echo "Silence is golden"
 +# success, all done
 +_exit 0
-diff --git a/tests/btrfs/343.out b/tests/btrfs/343.out
+diff --git a/tests/generic/783.out b/tests/generic/783.out
 new file mode 100644
-index 00000000..2eb30e4f
+index 000000000000..2522395956d4
 --- /dev/null
-+++ b/tests/btrfs/343.out
++++ b/tests/generic/783.out
 @@ -0,0 +1,2 @@
-+QA output created by 343
++QA output created by 783
 +Silence is golden
 -- 
-2.51.2
+2.53.0
 
