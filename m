@@ -1,46 +1,87 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACD9D2E093A
-	for <fstests@vger.kernel.org>; Tue, 10 Feb 2026 11:20:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 027FB2E093A
+	for <fstests@vger.kernel.org>; Tue, 10 Feb 2026 11:20:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770722434; cv=none; b=Saux4WaerOTsK1UFmw0TYAxD+uv9y+JAnlS/t+TSzgI9K7W8Sz3zDaz7uLy/WaHy+fGzqNBUKmaj2qjTmB2cTCj3mPUxt2oTY0KRvYPNfgIgnrioYNYin4Blx8593uAmBQKcdgIvZTjB/2b7rl/aSpwIXrLiTdgh5CaD4a+ohaE=
+	t=1770722436; cv=none; b=OEnaexHhI6j2lRboA8BhK5fir9KTN2XGNPQIkbz2PnH6X7rgY+Br1jZv4rjIeDElpAsON1h/GkUCqFj+JSXULvaNBxwBfhXvHsilZDfO4GL/AbvC+rwrhhgJyvPo0S/APbGZNB9GQ9rZh287gZFnXqH33En/U40Zxf1BU6800/k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770722434; c=relaxed/simple;
-	bh=2xe2R5Ol+ucUj8qLTHtzQaWKWRvcM+zBx4mXVtaln2Q=;
+	s=arc-20240116; t=1770722436; c=relaxed/simple;
+	bh=Sl/4PxVJbNd91Ba66ukzYJu/o094UCC3oOLXeDShRxM=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=poIu5JJHlcdI1LDhO7t9XWvERTwCvyeR5LmDcqmIyW3Pmg+Bnsft3wbf51t6SOisvzWPijFHyiPopz34F8UWmZlH8awlOvv6kArFpknY0CeQXb5IJmyou2EqE28PJUI9y4M1sIdnTKm8exEclnaBMBBzD4NpBdu1WWWITx9848w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; arc=none smtp.client-ip=195.135.223.131
+	 MIME-Version; b=B1HHnMfBVSyMR7EltLuZzLSa4UGboHq5Eo+ubi+bmB2ob6QwIWZ0q0gKY8N5uj9ELQIYnemkH/lqTQbvDb+4GvlVzC9rvrHKXYVw4GJN4+YZ1pGu6+YG5RJnCuSdGmr9VPnG/T6CdMTbdhaMTX7j8C07HWW/Y0JLore0+mnwj5w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=rmPNWUCI; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=d3Mn5SHS; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=rmPNWUCI; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=d3Mn5SHS; arc=none smtp.client-ip=195.135.223.130
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="rmPNWUCI";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="d3Mn5SHS";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="rmPNWUCI";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="d3Mn5SHS"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 7B7A95BD43;
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 759A63E6F2;
 	Tue, 10 Feb 2026 11:20:26 +0000 (UTC)
-Authentication-Results: smtp-out2.suse.de;
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1770722426; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=SIYEpcf36Pz4ierj/RBCMML/o9AreFS4DBdgDtqn+Hc=;
+	b=rmPNWUCI7EoCEVQj7OdVb2tbL7i3M0nIkOOn+MGb8hC4WX76zGKKepd3GoeoWj284DPs2M
+	bt7UnfiMcXFnC+/uW49zze/xEkoRFBtHHVS4UJOHXJfbY+U78YQ/P7aULvoE8uYU/L8cvn
+	/VAW5dMlwXI7MF4SFTuudygxDS6yT1w=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1770722426;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=SIYEpcf36Pz4ierj/RBCMML/o9AreFS4DBdgDtqn+Hc=;
+	b=d3Mn5SHSdyNnDT6Mj/NhBFTilvaFUd9ok90yRx09kJc8VwIT8YbYQ2Z9aPBLbbIan2EVtW
+	7g7f8NdnKtLAjbAw==
+Authentication-Results: smtp-out1.suse.de;
 	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1770722426; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=SIYEpcf36Pz4ierj/RBCMML/o9AreFS4DBdgDtqn+Hc=;
+	b=rmPNWUCI7EoCEVQj7OdVb2tbL7i3M0nIkOOn+MGb8hC4WX76zGKKepd3GoeoWj284DPs2M
+	bt7UnfiMcXFnC+/uW49zze/xEkoRFBtHHVS4UJOHXJfbY+U78YQ/P7aULvoE8uYU/L8cvn
+	/VAW5dMlwXI7MF4SFTuudygxDS6yT1w=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1770722426;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=SIYEpcf36Pz4ierj/RBCMML/o9AreFS4DBdgDtqn+Hc=;
+	b=d3Mn5SHSdyNnDT6Mj/NhBFTilvaFUd9ok90yRx09kJc8VwIT8YbYQ2Z9aPBLbbIan2EVtW
+	7g7f8NdnKtLAjbAw==
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 5B6363EA66;
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 5C4AE3EA67;
 	Tue, 10 Feb 2026 11:20:26 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id 9IdNFnoUi2kyLwAAD6G6ig
+	id tJ2HFnoUi2k2LwAAD6G6ig
 	(envelope-from <jack@suse.cz>); Tue, 10 Feb 2026 11:20:26 +0000
 Received: by quack3.suse.cz (Postfix, from userid 1000)
-	id 112FFA0B56; Tue, 10 Feb 2026 12:20:26 +0100 (CET)
+	id 03225A0B3F; Tue, 10 Feb 2026 12:20:26 +0100 (CET)
 From: Jan Kara <jack@suse.cz>
 To: fstests@vger.kernel.org
 Cc: <linux-ext4@vger.kernel.org>,
 	Jan Kara <jack@suse.cz>
-Subject: [PATCH 4/4] generic/705: Fix failure without a journal
-Date: Tue, 10 Feb 2026 12:20:21 +0100
-Message-ID: <20260210112025.28444-4-jack@suse.cz>
+Subject: [PATCH 2/4] generic/635: Fix failure without a journal
+Date: Tue, 10 Feb 2026 12:20:19 +0100
+Message-ID: <20260210112025.28444-2-jack@suse.cz>
 X-Mailer: git-send-email 2.51.0
 In-Reply-To: <20260210111707.17132-1-jack@suse.cz>
 References: <20260210111707.17132-1-jack@suse.cz>
@@ -51,20 +92,30 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Rspamd-Pre-Result: action=no action;
-	module=replies;
-	Message is reply to one we originated
-X-Spam-Score: -4.00
-X-Rspamd-Pre-Result: action=no action;
-	module=replies;
-	Message is reply to one we originated
-X-Rspamd-Action: no action
-X-Rspamd-Queue-Id: 7B7A95BD43
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Spam-Level: 
-X-Spamd-Result: default: False [-4.00 / 50.00];
-	REPLY(-4.00)[]
+X-Spamd-Result: default: False [-6.80 / 50.00];
+	REPLY(-4.00)[];
+	BAYES_HAM(-3.00)[99.99%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_CONTAINS_FROM(1.00)[];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	RCVD_TLS_LAST(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	TO_DN_SOME(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	RCPT_COUNT_THREE(0.00)[3];
+	RCVD_COUNT_THREE(0.00)[3];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.cz:mid,suse.cz:email]
 X-Spam-Flag: NO
+X-Spam-Score: -6.80
+X-Spam-Level: 
 
 The test uses fs shutdown. Without journalling the filesystem isn't
 guaranteed to be consistent after shutdown so not much we can test
@@ -72,20 +123,20 @@ there.
 
 Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- tests/generic/705 | 1 +
+ tests/generic/635 | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/tests/generic/705 b/tests/generic/705
-index 9c27fbbc389b..23f06d699dfa 100755
---- a/tests/generic/705
-+++ b/tests/generic/705
-@@ -12,6 +12,7 @@ _begin_fstest auto shutdown
+diff --git a/tests/generic/635 b/tests/generic/635
+index 4a811630a621..018b868cb6ce 100755
+--- a/tests/generic/635
++++ b/tests/generic/635
+@@ -26,6 +26,7 @@ _begin_fstest auto quick atime bigtime shutdown
  
  _require_scratch
  _require_scratch_shutdown
 +_require_metadata_journaling
- _require_command "$FILEFRAG_PROG" filefrag
- _scratch_mkfs > $seqres.full 2>&1
+ 
+ _scratch_mkfs > $seqres.full
  _scratch_mount
 -- 
 2.51.0
