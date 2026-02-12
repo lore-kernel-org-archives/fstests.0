@@ -1,89 +1,89 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7349E2580D1
-	for <fstests@vger.kernel.org>; Thu, 12 Feb 2026 18:40:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F80BBA21
+	for <fstests@vger.kernel.org>; Thu, 12 Feb 2026 18:53:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770921616; cv=none; b=MKQ7elgmwzMgc0lhOHaLyM7rcz9Pp/OPIfmA4/DVM8uDanpc16Y6FkAQu4O8wPPpxGxsmqREzXf6IfhFS+hH8MOr9bq66WJJpJ3zU8vkj5eaKUgMXrdHqOcrvLyXdMA6kDtOsAIwKU9WVDv4QKq9yUJhjv7AyoV1Du0zm/5xywk=
+	t=1770922422; cv=none; b=IpNmDop9On4v9lkBoRnJWTWUveF68YnAmubN/GTzIkGOlMlpdHoqUmAOu5cMKuEw3Utdid2EMGTE4fXu0pYBPnx4GJSHFdqTbWNzqQNJwkkuZIX5hIQlA3SNfLXkf0L1R75KP2PsOGEGNMGACHa+atfXO8G1WwfobBEaB/7qaw0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770921616; c=relaxed/simple;
-	bh=g3KveXRy84ewrKb79rs3rt3LFpuRwuI+ZfACt5NfNUE=;
+	s=arc-20240116; t=1770922422; c=relaxed/simple;
+	bh=8Ldg5BtJnWKFIlq0ZJudFfIkGC7ZR6/KYQaK1K02KQI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TGcC25VFSgIXuUB6Nck6Zb9Ovv/WmtUJ3kgbtj0kuf4h6HS9RK49rCb+Xre5k3S1Th3GAK/wXKoSBSE2t3tp56kTd6j2Li1pxpQZXUEo3/WtZekk6NEfAA+aMTFlvNpVo/u9CgGS5+PnitGbw4kMdYZdmnYMitDfeJtLdJsAI+s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Kvikwpx7; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=XYxbiM72; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=nWdp/fcQJULM1gEErBoVOBMDdFs4l1TDOIdHI6uK+h5Q/jFx2gqsL8Yet4UcnsYVvE7VrNaIDhc9UwvyuhvRttnEf4JqlzR8OC5qIJtNTmogktstB1iOL2mhwNRgqSS3uW0vG5HhWSvYTl5gzf2eIxIHkiXx0f9x5o4XqT6GICI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=eFNoXGR4; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=eLf34nJc; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Kvikwpx7";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="XYxbiM72"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="eFNoXGR4";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="eLf34nJc"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1770921614;
+	s=mimecast20190719; t=1770922420;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=4rQ4D/44Wfm5LQQPoh3Nucbx0K4XT0hM6hTMK5vwuKg=;
-	b=Kvikwpx7sDZlqk5c0PpF0vuYd3SyKVyRI2CYQG6BQATdNrAG+9bh1iPo1ljuDqTXePRQIb
-	+Ovv4Q45TkBoX/V1OBM6HPHrqlKKprEPINrIJ19/2b6BkmrTBI7CQ/gOwul0p8GqBDPxVQ
-	N3G3+oL4oxGB/3qNXFaTopeIaJz2woA=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=TpdABHHXmluI87ESBOkKLzcM9NdFtCInznpNKecCj0g=;
+	b=eFNoXGR4CyGr+4a2X822l8gs2/HQul9oPfSkQGiZ7CIqqoR6C3ATSPZSvzUHLhg6nUgJhy
+	3aT0yndRvsoCtO0g2KKNGRl8y+17vBEUxKe6rr2LFU9pnLtyr41Vx+visOO9caWKd6T1EY
+	hwMva5nBABi3Len1NNH9MScWvE/IFl4=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-91-9Wj2zVWJOZS2cFD25aAS0g-1; Thu, 12 Feb 2026 13:40:13 -0500
-X-MC-Unique: 9Wj2zVWJOZS2cFD25aAS0g-1
-X-Mimecast-MFC-AGG-ID: 9Wj2zVWJOZS2cFD25aAS0g_1770921612
-Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-354be486779so484911a91.0
-        for <fstests@vger.kernel.org>; Thu, 12 Feb 2026 10:40:13 -0800 (PST)
+ us-mta-516-v8c0CEaMPzSNV2w3FuSYuQ-1; Thu, 12 Feb 2026 13:53:38 -0500
+X-MC-Unique: v8c0CEaMPzSNV2w3FuSYuQ-1
+X-Mimecast-MFC-AGG-ID: v8c0CEaMPzSNV2w3FuSYuQ_1770922418
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2aadeb3dee4so5095845ad.2
+        for <fstests@vger.kernel.org>; Thu, 12 Feb 2026 10:53:38 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1770921612; x=1771526412; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1770922418; x=1771527218; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=4rQ4D/44Wfm5LQQPoh3Nucbx0K4XT0hM6hTMK5vwuKg=;
-        b=XYxbiM72hzk0TYKw5sWQvXHxLeUKv6a+l0f9NW6ttUJbHeF1BXOz0XmC81rpzFut4h
-         3+Bgw5JKt89+rRruEBfUo2jZKzEJJ35WzqsW6498UmMQmOUdDojuNfWL4w5FRYXe2lUq
-         OQXehag3qi1wyYqIl3ias9hX0FJ2V5Hk/f+ulpfL85yVg0YpjmXTcRTt/VBk4UcNBs7y
-         V9aZumPQUa34aRDJ51pUUNJs05Rr1Dx91so+D7onRWad6fnGJAulRV3RMPJtE/nn6dun
-         TgnJAKPfa+nbyDAz+Mf5P/xT2we7rmJqz0bBAKzOMM1/vduNcfHYyQP5uCp6iQ4zFuFe
-         qsFA==
+        bh=TpdABHHXmluI87ESBOkKLzcM9NdFtCInznpNKecCj0g=;
+        b=eLf34nJcm6qjldj/75d1jH4GB0PyKxc9oyuGwKzRmqrC5zNYNro6MfVSj9cZiRoBED
+         UA5AsFulNdMwHh5W1qzQ9568HrSTfvkp6vVGy517mH5hlMUtGWlAFYkbsPBbbjE5Z+7/
+         vb8cVAgZZ4tiWlD2m2B6fUwms6Q5xz1znQH4NU4lqudCyqHmu7mRqhx68pBCx56CCSkQ
+         AhxiHuyNSSpJBi9qoKpxom+m9H6GUls58TA1LFP3CbL/DpTUEhnT8+I4SoUK8mftDCQ1
+         pce9NGwu7VHb9ct4qGKjgWabkuT59/1xMKuo0FXXIwz/iMsE+erLZULzdulf+VlTjF7h
+         U7hw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770921612; x=1771526412;
+        d=1e100.net; s=20230601; t=1770922418; x=1771527218;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=4rQ4D/44Wfm5LQQPoh3Nucbx0K4XT0hM6hTMK5vwuKg=;
-        b=TM2DS+tA8qemZi8eXyujeUGxf5wnh2+ioo+ZRa3PwaVd+tfvUFOMwBOQC2gopbZT27
-         3DGAymRNcTUkB8z6xNLy3Z4ocEcSKskcdQjQnKUZZEORlmPqw3bZrPMNzhPAZlqBQ4yv
-         weGvS5gfoSOv7rePQsawqF0hnWfuM0TpskIjNqs43Cxere+sGmo51jx6OUmWCyBWYog6
-         HYpQ69QScZQSY1BNj9O0WU/bNYZZNDkAFznWx8k9It5VbMWYfS7yi0lijl5h1GvrLvas
-         hb+uxMelfRMYvJtm8klpDw3R1qz7EfIzGSSxagI6xgU4bsrJIUC2Wt0g4wwsTLRRoz9F
-         hkWA==
-X-Forwarded-Encrypted: i=1; AJvYcCWicwV5FLD1G2D1k9+Qkg3OWMIY0S2lRJMO+Diet0r+jFBwRfShHwjpnzslMGtqwAvfWn2ApWQx@vger.kernel.org
-X-Gm-Message-State: AOJu0YzM17KKQVf5OsPg1e2+lRGkT+M9mpLmeCL4h4IZrL9lJTS71Xxf
-	lE58gL8jjzFL0yPGzvSfLPNe0aeDe5ch9qca9kT38ewLcgRaH7HFqCvGC7r4ECFMxWI4i8lYmxy
-	l0Z+1teWBsBGrelThNO1o6hd9pBLFdaDaarBQoB1Yxfv7OGbxkGjenjOkXxNOmtRNwPM=
-X-Gm-Gg: AZuq6aIvFLbCSDdeMacxCS17I2591jEkK+ZdGK0njovapvRZn787KBVwCp5O8DYqNgM
-	MmIP2y88fYJdZ+kav+hTNgZis35L6vj57ttMgJDf+UYxop0HHOSjSuGkv4Nucd+CBmcj+Ehmtjg
-	3c60ZuXJ0+6HES8JDOz9Fe1VY8uwqwDb6g4CkUPpcW5uIzl6pRdqkWDO4ViAUExC5k0sDr9WPci
-	iHyN0R8P15nTlHKE8VcXnWsJUIBQVHhIXo5iz9r3fTGVsLWlGbFzS7RCXTn08XhGl3L0MbZLU0X
-	uIxvHlPEo9jdmwu4TikcOmcA7WMZ5DSKrfmMZ+wUPhW4eaUIU+ERSAuJGYufqCqdwCAumLndUzb
-	0xOpbb3tY0JtusgLIUjpXTMFUCN4SlpgMC7BRTFHb671vlvodE+FjXMZMe+pIWw==
-X-Received: by 2002:a17:90b:5583:b0:354:a284:3ff9 with SMTP id 98e67ed59e1d1-356a7a70dfbmr57589a91.26.1770921611925;
-        Thu, 12 Feb 2026 10:40:11 -0800 (PST)
-X-Received: by 2002:a17:90b:5583:b0:354:a284:3ff9 with SMTP id 98e67ed59e1d1-356a7a70dfbmr57575a91.26.1770921611368;
-        Thu, 12 Feb 2026 10:40:11 -0800 (PST)
+        bh=TpdABHHXmluI87ESBOkKLzcM9NdFtCInznpNKecCj0g=;
+        b=MGqwYh4+4DAFjCzwOUbqM/Aq4OH0M8s8BvummS3ni4JfGVwqQzzOhSD/Lzgfb9XwXt
+         MtErL/u1vPY2ouo1clGMHVQBDhhzEPVH8i45/gszBAfiZrZG1jHFeT38UHhfoAccJbb5
+         +42Peo2N4dagzug3n7igL9triFBiqCSMX31E8SC4YFLrKeR39k6LaY0eSbrb7QXuWlmQ
+         3iwhhtEdSxem3xZ6DyYZmD3C9APv3iTy2CeD8f+cI5ksO++R+zOjrdj21pEHkwmbn3ey
+         P0WnTTLf/K87OUhNUq1Ba/E3jS70Pa/g6VPkEhySjU92sL2C8J+4lWxIOIEWcN9zGz4a
+         WJTQ==
+X-Gm-Message-State: AOJu0Yw3Xh1krbros4XZmLtFwP1ZD4TFwY6PpzN85+ltI8D8fd0mbuLD
+	UnsYqnooR/FnjaOI/JLBnXitJkJPpX60rpUSWgxzBOegji/eq7QJrQ5/U/tB3EMTOAj/Zwukr0k
+	F4+SCZBLcRe3KbSLffcB3cnnFcelYtqezlycYaTHx074GwJbVU/dNybGhPiU=
+X-Gm-Gg: AZuq6aJpYQkrwRgz0ZWr1XpPgjZElTun3rGVOJNj1yL0BQML0AwBlFHFbPepcXwuzeB
+	WHlmBGU6IZ7gXXwNPOedJy41dfz9q0YaUEZLN7lPBkmMsq//rOS3+svs5w75qjNmezltjWK8Jka
+	u9ZhTeou5Pf0UD/7RIheLWkDPG71SdPwf/r2uFYP7rlO9jUGaRKeDbrw9FNc4ayTpgJL03wbCYv
+	cmZVxeoqIfsrKuCnsL9077+EeZQbLSlgnwqZW+0Dr5y9N1ORgpMCyiOauHQGAZd+Ls0YT9B/WMh
+	ZuR+3e2qpNVte/ch+VeyYUKTkEj1AZe/M984F3T7qB72G6OIGYhMH2TlNco3a+zIqU0JR7Mh/IB
+	ay61VaPzIQGbi3UAqi9TIjeJ7icN12iySEpWAfaCKzSYwaPFOJhVyU4sqwHtefg==
+X-Received: by 2002:a17:902:f68d:b0:2aa:e0d3:cad7 with SMTP id d9443c01a7336-2ab4cfc784dmr93595ad.27.1770922417599;
+        Thu, 12 Feb 2026 10:53:37 -0800 (PST)
+X-Received: by 2002:a17:902:f68d:b0:2aa:e0d3:cad7 with SMTP id d9443c01a7336-2ab4cfc784dmr93395ad.27.1770922417056;
+        Thu, 12 Feb 2026 10:53:37 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3567eba96d0sm5758343a91.11.2026.02.12.10.40.09
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ab2996665bsm84263655ad.54.2026.02.12.10.53.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 12 Feb 2026 10:40:10 -0800 (PST)
-Date: Fri, 13 Feb 2026 02:40:06 +0800
+        Thu, 12 Feb 2026 10:53:36 -0800 (PST)
+Date: Fri, 13 Feb 2026 02:53:32 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH v3] fstests: btrfs: add a regression test for incorrect
- inode incompressible flag
-Message-ID: <20260212184006.5pyxjnwxd5n5uad2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20260209095735.130049-1-wqu@suse.com>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: fstests@vger.kernel.org, Disha Goel <disgoel@linux.ibm.com>
+Subject: Re: [PATCH] ext4/307: Calculate donor size to avoid failures for 64k
+ bs
+Message-ID: <20260212185332.y7ndgibqix7tmibs@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20260202132730.589621-1-ojaswin@linux.ibm.com>
+ <20260208175443.5h5uy65figlq2y6f@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <aY2U0YssqaFU_ns9@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -92,135 +92,138 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260209095735.130049-1-wqu@suse.com>
+In-Reply-To: <aY2U0YssqaFU_ns9@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 
-On Mon, Feb 09, 2026 at 08:27:35PM +1030, Qu Wenruo wrote:
-> [BUG]
-> Since kernel commit 59615e2c1f63 ("btrfs: reject single block sized
-> compression early"), a single block write at file offset 0, which can
-> not be inlined due the inode size, will mark the inode incompressible.
+On Thu, Feb 12, 2026 at 02:22:33PM +0530, Ojaswin Mujoo wrote:
+> On Mon, Feb 09, 2026 at 01:54:43AM +0800, Zorro Lang wrote:
+> > On Mon, Feb 02, 2026 at 06:57:30PM +0530, Ojaswin Mujoo wrote:
+> > > Hard coding donor size to 250M causes the following failure in e4compat
+> > > 
+> > > e4compact.c:68: do_defrag_range: Assertion `donor->length >= len' failed.
+> > > ./common/rc: line 4616: 1583182 Aborted                 (core dumped)
+> > > 
+> > > The issue is that e4compat asserts that the stat.st_size of all files
+> > > combined shouldn't be more than that of the donor file. In case of 64k
+> > > blocksize, fsstress often creates sparse files which have >3G size even
+> > > though their disk utilization is <100M. Since donor file is not big
+> > > enough, this trips e4compat causing the failure.
+> > > 
+> > > Fix this by dynamically calculating the donor file size based on the
+> > > size of all files. Also, make some changes to avoid future ENOSPC like
+> > > reducing the -n passed to fsstress to keep the size around 2G and making
+> > > sure we use the whole SCRATCH disk instead of 500M.
+> > > 
+> > > While we are at it, add some new lines to make the code bit more
+> > > readable.
+> > > 
+> > > Reported-by: Disha Goel <disgoel@linux.ibm.com>
+> > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> > > ---
+> > 
+> > Hi,
+> > 
+> > Thanks for your patch, but this patch is conflict with v2026.01.27 :
+> > 	42c2ccaf ("ext4/307: allocate donor file size dynamically")
+> > 
+> > both of you were trying to fix the donor file size issue. Please confirm if
+> > that commit helps you. If you still need further change, please rebase your
+> > patch on v2026.01.27.
 > 
-> [REGRESSION TEST]
-> The new regression test will do:
+> Hi Zorro, 
 > 
-> - Create and mount the fs with compression,max_inline=2k
-> 
-> - Do the following operations:
->   * Truncate the inode to 2 * blocksize
->     This will rule out any future inlined writes.
-> 
->   * Buffered write [0, 2K)
->     Which will not be inlined.
-> 
->   * Sync
->     For affected kernels, this will set the inode with NOCOMPRESS
->     and reject all future compression on that inode.
-> 
->   * Buffered write [1M, 2M)
->     For affected kernels, the range will not be compressed due
->     to the NOCOMPRESS flag.
-> 
-> - Unmount the fs
-> 
-> - Make sure that:
->   * The inode has no NOCOMPRESS flag
->   * File extent at file offset 1M is being compressed
-> 
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
-> Changelog:
-> v2:
-> - Remove an unnessary sentence
->   Which is confusing because I missed the "and" to connect the two
->   sentences, and it's not needed after the first paragraph anyway.
-> 
-> - Use full "btrfs inspect-internal" group name instead
-> 
-> - Add missing punctures
-> 
-> v3:
-> - Properly commit the modification
->   Facepalm
-> ---
->  tests/btrfs/343     | 48 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/343.out |  2 ++
->  2 files changed, 50 insertions(+)
->  create mode 100755 tests/btrfs/343
->  create mode 100644 tests/btrfs/343.out
-> 
-> diff --git a/tests/btrfs/343 b/tests/btrfs/343
-> new file mode 100755
-> index 00000000..3781373c
-> --- /dev/null
-> +++ b/tests/btrfs/343
-> @@ -0,0 +1,48 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-> +#
-> +# FS QA Test 343
-> +#
-> +# A regression test to make sure a single-block write at file offset 0 won't
-> +# incorrectly mark the inode incompressible.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick compress
-> +
-> +_require_scratch
-> +_require_btrfs_command inspect-internal dump-tree
-> +
-> +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"btrfs: fix the inline compressed extent check in inode_need_compress()"
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount "-o compress,max_inline=2048"
-> +
-> +blocksize=$(_get_block_size $SCRATCH_MNT)
+> thanks for pointing this out. Weird that I didn't see this when I
+> rbeased on master.  I'll test the patch and get back to you.
 
-Do you mind I replace _get_block_size with _get_file_block_size when I merge it?
-Even though btrfs currently doesn't require special handling to get the correct block
-size, using this interface is more future-proof. It will help us to easily add specific
-logic later if btrfs ever needs it. Others are good to me,
+You can always rebase to "for-next" branch to get latest version, or check
+"patches-in-queue" scratch branch. The master branch is lagging behind :)
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-> +
-> +# Create a sparse file which is 2 * blocksize, then try a small write at
-> +# file offset 0 which should not be inlined.
-> +# Sync so that [0, 2K) range is written, then write a larger range which
-> +# should be able to be compressed.
-> +$XFS_IO_PROG -f -c "truncate $((2 * $blocksize))" -c "pwrite 0 2k" -c sync \
-> +		-c "pwrite 1m 1m" $SCRATCH_MNT/foobar >> $seqres.full
-> +ino=$(stat -c "%i" $SCRATCH_MNT/foobar)
-> +_scratch_unmount
-> +
-> +# Dump the fstree into seqres.full for debug.
-> +$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV >> $seqres.full
-> +
-> +# Check the NOCOMPRESS flag of the inode.
-> +$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV |\
-> +grep -A 4 -e "item .* key ($ino INODE_ITEM 0)" | grep -q NOCOMPRESS
-> +[ $? -eq 0 ] && echo "inode $ino has NOCOMPRESS flag"
-> +
-> +# Check the file extent at fileoffset 1m.
-> +$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV |\
-> +grep -A 4 -e "item .* key ($ino EXTENT_DATA 1048576)" | grep -q "compression 0"
-> +[ $? -eq 0 ] && echo "inode $ino file offset 1M is not compressed"
-> +
-> +echo "Silence is golden"
-> +# success, all done
-> +_exit 0
-> diff --git a/tests/btrfs/343.out b/tests/btrfs/343.out
-> new file mode 100644
-> index 00000000..2eb30e4f
-> --- /dev/null
-> +++ b/tests/btrfs/343.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 343
-> +Silence is golden
-> -- 
-> 2.51.2
 > 
+> Regards,
+> ojaswin
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > >  tests/ext4/307 | 41 +++++++++++++++++++++++++++++++++++++----
+> > >  1 file changed, 37 insertions(+), 4 deletions(-)
+> > > 
+> > > diff --git a/tests/ext4/307 b/tests/ext4/307
+> > > index 1f0e42ca..7e7fb9c8 100755
+> > > --- a/tests/ext4/307
+> > > +++ b/tests/ext4/307
+> > > @@ -12,24 +12,57 @@ _begin_fstest auto ioctl rw defrag prealloc
+> > >  # Import common functions.
+> > >  . ./common/filter
+> > >  . ./common/defrag
+> > > +
+> > > +# Get the total of stat.st_size of each file to determine the
+> > > +# size of donor file. We use st_size here instead of blocks used
+> > > +# because thats what e4compat.c checks against.
+> > > +get_bytes_used() {
+> > > +	local filelist="$1"
+> > > +	local total=0
+> > > +	local blksz=$(_get_block_size $SCRATCH_MNT)
+> > > +
+> > > +	while IFS= read -r f; do
+> > > +		echo -n "File: $f: " >> $seqres.full
+> > > +		[[ -z "$f" ]] && continue
+> > > +
+> > > +		if [[ -f "$f" ]]; then
+> > > +			local bytes
+> > > +			bytes=$(stat -c %s "$f")
+> > > +			total=$((total + bytes))
+> > > +			echo $bytes >> $seqres.full
+> > > +		fi
+> > > +	done < "$filelist"
+> > > +
+> > > +	echo "Total bytes: $total" >> $seqres.full
+> > > +	echo $total
+> > > +}
+> > > +
+> > >  # Disable all sync operations to get higher load
+> > >  FSSTRESS_AVOID="$FSSTRESS_AVOID -ffsync=0 -fsync=0 -ffdatasync=0"
+> > >  _workout()
+> > >  {
+> > > +	local blksz=$(_get_block_size $SCRATCH_MNT)
+> > > +
+> > >  	echo ""
+> > >  	echo "Run fsstress"
+> > >  	out=$SCRATCH_MNT/fsstress.$$
+> > > -	args=`_scale_fsstress_args -p4 -n999 -f setattr=1 -d $out`
+> > > +	args=`_scale_fsstress_args -p4 -n500 -f setattr=1 -d $out`
+> > >  	echo "fsstress $args" >> $seqres.full
+> > >  	_run_fsstress $args
+> > > +
+> > >  	find $out -type f > $out.list
+> > >  	cat $out.list | xargs  md5sum > $out.md5sum
+> > > -	usage=`du -sch $out | tail -n1 | gawk '{ print $1 }'`
+> > > +
+> > > +	bytes=`get_bytes_used $out.list`
+> > > +	echo "Total bytes used: $bytes" >> $seqres.full
+> > > +
+> > >  	echo "Allocate donor file"
+> > > -	$XFS_IO_PROG -c "falloc 0 250M" -f $SCRATCH_MNT/donor | _filter_xfs_io
+> > > +	$XFS_IO_PROG -c "falloc 0 $bytes" -f $SCRATCH_MNT/donor | _filter_xfs_io
+> > > +
+> > >  	echo "Perform compacting"
+> > >  	cat $out.list | run_check $here/src/e4compact \
+> > >  		-i -v -f $SCRATCH_MNT/donor  >> $seqres.full 2>&1
+> > > +
+> > >  	echo "Check data"
+> > >  	run_check md5sum -c $out.md5sum
+> > >  }
+> > > @@ -41,7 +74,7 @@ _require_scratch
+> > >  _require_defrag
+> > >  _require_xfs_io_command "falloc"
+> > >  
+> > > -_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
+> > > +_scratch_mkfs >> $seqres.full 2>&1
+> > >  _scratch_mount
+> > >  
+> > >  _workout
+> > > -- 
+> > > 2.52.0
+> > > 
+> > 
 > 
 
