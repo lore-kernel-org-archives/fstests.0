@@ -1,232 +1,238 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31E282C326A;
-	Thu, 12 Feb 2026 20:54:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3E1E2D6E71
+	for <fstests@vger.kernel.org>; Fri, 13 Feb 2026 09:21:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770929666; cv=none; b=gKnafpZh/36ySm0aoLbwYA7nQJXwy/zjJIuUgf08uEaG6elCDMqm4zJaxlkDl66BjucVbind56E+S9MQxdksi8Tf/Sb1MGmstkdyGOvOM6pOu7XjcbsZLRPo2QCcc9IaKOH5U0ImWKLdf8uwGNlj/I+p6298+gBf4wewSs/Cg9E=
+	t=1770974515; cv=none; b=QgiYnY1OqhyvbOrgNzzMo4M72k4mE8u2KWGT8zqLaKY8Fw2qXbcN7gMCVX4rBjWv3hE2Kc2TxKre7GUza8RFFz52yU6hE8ObeJmt5b3pCBmZl9PLzNqeHyb/WtOa5oQPDwdjvtsuyqQFj+ZVksEKB3HkhmKNsPdvELe9pWwr0Bg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770929666; c=relaxed/simple;
-	bh=fNCrntDcX2q17a4JHP/QXYP/wXcVsecow/Q6zKREpDA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=a1ty5e03DCzk23tGc6LsWqRvOoHGFRCui2ri+PY8H+/dN3UYbienpQa/2wmjZ3t38Z5GWFOqRCUAhwxARKCSvSIBC514V9j98+87UIpo487ryYmK3jcGeq81INEy8H61W+78zenRiqnsGcaY7VrXzbpXP9xZAdoOd/usg6kHPwg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=JlDdeEvJ; arc=none smtp.client-ip=212.227.17.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1770974515; c=relaxed/simple;
+	bh=3uOeeq5PgaucRHhAKdR4DYEvUR1N3/LwZN3JYfz1WzA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=hlxP7Yug6RoYhyClEMAcr7no+eWEZzesu4GbEa3DnM8TQSowOmxCoQfoC8GQiiwVZMUpxUCmKiFdnY2LfK7PX3Hk+kd0qvFVSulPEM58WEtL/A3/7v3s+EZl18nT0PxAk67r2UK6dZfWJIF7+xmvG6M8e/ZeDblNDPBB01zjY+c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=s60PsvcE; arc=none smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="JlDdeEvJ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1770929662; x=1771534462; i=quwenruo.btrfs@gmx.com;
-	bh=YVHYgrD3YGEdLdcTSeKEIdvQ4sodIfuVHHqASZOraow=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=JlDdeEvJ2GmzVNkzlztZG01f5N1c6wdwCGXGz3PpdhMj0t9TujUNgeSwUusyrvXj
-	 Ho3ws0Iu4kEOvYYwsg0WhG4SQh56bEeGnC9mNULcbYXkCUVTDKcHrkMBjLAd8C3td
-	 kLzxUFRRZSnVZBAR6Ld/DwagXZS+vJ/qrRh37tH/TA9Wq8X+bHMwxcv9xg3GDw4Ef
-	 IXUNbYXpPSO1Q5yUcqhnfR7AW9/NDIJRwf1fa1lfONnYZs9CxHAkKZ4Ev27Wurljx
-	 ctKr+NqyR0YD2+leE5kVcDGTi6fLyvJbodO/7wrILTvCxuFru7F0cD3AQg1c/61Dy
-	 NbrT5odVdptgOp/5Ig==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.229] ([159.196.52.54]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1M5QFB-1vpoDo3F7l-00F9A0; Thu, 12
- Feb 2026 21:54:22 +0100
-Message-ID: <74b8dbc6-34cc-470b-9812-b595af95c5b6@gmx.com>
-Date: Fri, 13 Feb 2026 07:24:17 +1030
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="s60PsvcE"
+Received: from pps.filterd (m0356517.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 61CH3Wa1192099;
+	Fri, 13 Feb 2026 09:21:51 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=pp1; bh=DXuHXUz/+cRGclC9qCtmCRcH60RTtj
+	j0MTtK1etlHxo=; b=s60PsvcEmZz46KEiO1d/ONg0OBVEZmdxmnhZD742mqvWKc
+	u+rbr5/6Ej7g1iQjPs0UyXSvEPSx5oyg97N7guF8kFL/PwbkpDcEaEVQ/11QtVv0
+	CNqzCGudxeOTl935NhvzBpsK/8yjMzNf7ndQHFtdUXtd7y9PrWixe8YHx0Q0ZXfM
+	mr8S6i+cHDvVOquaoYNqtOxq/5Fq+dgYVcRnG2kFFvnezbxIYmaTJVBWWRGvLNnr
+	/8ruRRIMdpsLCr7rUw7VJPVxR4L33d1+Yphgl5DuzEmDgXxBSux2daxrDcgbqAxJ
+	U/DeCIKnhRko5GLRONmyOV9zmYXugJGA3LaIy3wA==
+Received: from ppma22.wdc07v.mail.ibm.com (5c.69.3da9.ip4.static.sl-reverse.com [169.61.105.92])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4c696ut85d-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 13 Feb 2026 09:21:51 +0000 (GMT)
+Received: from pps.filterd (ppma22.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma22.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 61D7EMu0008883;
+	Fri, 13 Feb 2026 09:21:50 GMT
+Received: from smtprelay03.fra02v.mail.ibm.com ([9.218.2.224])
+	by ppma22.wdc07v.mail.ibm.com (PPS) with ESMTPS id 4c6g3ypab8-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 13 Feb 2026 09:21:50 +0000
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay03.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 61D9Lkqx50856322
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Fri, 13 Feb 2026 09:21:46 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 0DC602004B;
+	Fri, 13 Feb 2026 09:21:46 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 118112005A;
+	Fri, 13 Feb 2026 09:21:45 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.39.23.148])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Fri, 13 Feb 2026 09:21:44 +0000 (GMT)
+Date: Fri, 13 Feb 2026 14:51:42 +0530
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, Disha Goel <disgoel@linux.ibm.com>
+Subject: Re: [PATCH] ext4/307: Calculate donor size to avoid failures for 64k
+ bs
+Message-ID: <aY7tBJN2IozL4lk4@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+References: <20260202132730.589621-1-ojaswin@linux.ibm.com>
+ <20260208175443.5h5uy65figlq2y6f@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <aY2U0YssqaFU_ns9@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+ <20260212185332.y7ndgibqix7tmibs@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3] fstests: btrfs: add a regression test for incorrect
- inode incompressible flag
-To: Zorro Lang <zlang@redhat.com>, Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
- Filipe Manana <fdmanana@suse.com>
-References: <20260209095735.130049-1-wqu@suse.com>
- <20260212184006.5pyxjnwxd5n5uad2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
- sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
- xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
- naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
- tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
- 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
- VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
- CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
- B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
- Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
- +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
- HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
-In-Reply-To: <20260212184006.5pyxjnwxd5n5uad2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:AVjSwLPKPrznFKaWFz3S0nnLhNzeXuWxh3mrpIgyfWuFEhROFN8
- fyF4clIh9r+O8Z/ADP2JVKZGqk5R4FOXiAgvdDPw3/VgZeDqGe1anafTObqZy6EIBMHbPz9
- gJyt8k0DwboTKIPpWTwCD0GJnlqhS2Fl0Zl8kqiJ1sDKTjQT7vuQhKm6Ov9lrSAXQWiYF7P
- T3aEP+85IqkEH5IhKvycg==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:FuWlMkpvCeA=;NxWEwgTdSuDudvYUsIxN7n1bBZV
- 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
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260212185332.y7ndgibqix7tmibs@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+X-TM-AS-GCONF: 00
+X-Authority-Analysis: v=2.4 cv=YZiwJgRf c=1 sm=1 tr=0 ts=698eed2f cx=c_pps
+ a=5BHTudwdYE3Te8bg5FgnPg==:117 a=5BHTudwdYE3Te8bg5FgnPg==:17
+ a=kj9zAlcOel0A:10 a=HzLeVaNsDn8A:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=Mpw57Om8IfrbqaoTuvik:22 a=GgsMoib0sEa3-_RKJdDe:22 a=VnNF1IyMAAAA:8
+ a=4jk_VT3jfnzo7w-rDOgA:9 a=CjuIK1q_8ugA:10
+X-Proofpoint-ORIG-GUID: EzI4U5Ujgh_HL6IQCv1nf06Sj5FA3-Fw
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMjEzMDA3MSBTYWx0ZWRfX0tIWS3cbcuuI
+ knPCICoGfkYMrC45okQFjkvWhTB1ofMvjiOWd+tlL5X+Bxv+u1kS7zljKAcyYlbV0ASqSqoBYUV
+ F02AFHBpSZPV6+K/PrKqDSjn6SNugF7GS0cc0eYLjoP7FUU/pBZfWb3sWI9ofjB/9rzs8bFULzH
+ gLO2wHwP4DNYklraBASf/FqfZoLoqKycTU2HZqRMSCkhiEwtwUvUdina/NsmnZrdEZEFt+jnODl
+ cXP29j1Q3l2ATNYDx/56AI8s6jtzkPNfMoC95e300010+K7qYFtKBBFZzUvktPuhok+Q9GNIo6G
+ aMnrEHenQjLCdUunFiJ1fMDZaKwOly+Z7OwNl0hUQzzGmGXSyXfi8phtBuh5aqXUMRiomQJS7MM
+ J5PQyMzzPnFWNYyTDD6RHZbHWek5yKBxTJs38qoEDJFxZ1S4ris7zZQRTqtWHEyYKZICKyMFO6s
+ jVIaTyB8zNB/d8xKMyA==
+X-Proofpoint-GUID: EzI4U5Ujgh_HL6IQCv1nf06Sj5FA3-Fw
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.51,FMLib:17.12.100.49
+ definitions=2026-02-13_01,2026-02-12_03,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 spamscore=0 impostorscore=0 suspectscore=0 malwarescore=0
+ phishscore=0 bulkscore=0 adultscore=0 clxscore=1015 lowpriorityscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2601150000 definitions=main-2602130071
 
+On Fri, Feb 13, 2026 at 02:53:32AM +0800, Zorro Lang wrote:
+> On Thu, Feb 12, 2026 at 02:22:33PM +0530, Ojaswin Mujoo wrote:
+> > On Mon, Feb 09, 2026 at 01:54:43AM +0800, Zorro Lang wrote:
+> > > On Mon, Feb 02, 2026 at 06:57:30PM +0530, Ojaswin Mujoo wrote:
+> > > > Hard coding donor size to 250M causes the following failure in e4compat
+> > > > 
+> > > > e4compact.c:68: do_defrag_range: Assertion `donor->length >= len' failed.
+> > > > ./common/rc: line 4616: 1583182 Aborted                 (core dumped)
+> > > > 
+> > > > The issue is that e4compat asserts that the stat.st_size of all files
+> > > > combined shouldn't be more than that of the donor file. In case of 64k
+> > > > blocksize, fsstress often creates sparse files which have >3G size even
+> > > > though their disk utilization is <100M. Since donor file is not big
+> > > > enough, this trips e4compat causing the failure.
+> > > > 
+> > > > Fix this by dynamically calculating the donor file size based on the
+> > > > size of all files. Also, make some changes to avoid future ENOSPC like
+> > > > reducing the -n passed to fsstress to keep the size around 2G and making
+> > > > sure we use the whole SCRATCH disk instead of 500M.
+> > > > 
+> > > > While we are at it, add some new lines to make the code bit more
+> > > > readable.
+> > > > 
+> > > > Reported-by: Disha Goel <disgoel@linux.ibm.com>
+> > > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> > > > ---
+> > > 
+> > > Hi,
+> > > 
+> > > Thanks for your patch, but this patch is conflict with v2026.01.27 :
+> > > 	42c2ccaf ("ext4/307: allocate donor file size dynamically")
+> > > 
+> > > both of you were trying to fix the donor file size issue. Please confirm if
+> > > that commit helps you. If you still need further change, please rebase your
+> > > patch on v2026.01.27.
+> > 
+> > Hi Zorro, 
+> > 
+> > thanks for pointing this out. Weird that I didn't see this when I
+> > rbeased on master.  I'll test the patch and get back to you.
+> 
+> You can always rebase to "for-next" branch to get latest version, or check
+> "patches-in-queue" scratch branch. The master branch is lagging behind :)
 
+Ahh got it, thanks :)
 
-=E5=9C=A8 2026/2/13 05:10, Zorro Lang =E5=86=99=E9=81=93:
-[...]
->> +
->> +blocksize=3D$(_get_block_size $SCRATCH_MNT)
->=20
-> Do you mind I replace _get_block_size with _get_file_block_size when I m=
-erge it?
-
-Sure, and I'll try to remember to use that newer helper in the future.
-
-And if needed, I can replace the existing callsites with the newer=20
-helper in a dedicated patch.
-
-Thanks,
-Qu
-
-> Even though btrfs currently doesn't require special handling to get the =
-correct block
-> size, using this interface is more future-proof. It will help us to easi=
-ly add specific
-> logic later if btrfs ever needs it. Others are good to me,
->=20
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
->=20
->> +
->> +# Create a sparse file which is 2 * blocksize, then try a small write =
-at
->> +# file offset 0 which should not be inlined.
->> +# Sync so that [0, 2K) range is written, then write a larger range whi=
-ch
->> +# should be able to be compressed.
->> +$XFS_IO_PROG -f -c "truncate $((2 * $blocksize))" -c "pwrite 0 2k" -c =
-sync \
->> +		-c "pwrite 1m 1m" $SCRATCH_MNT/foobar >> $seqres.full
->> +ino=3D$(stat -c "%i" $SCRATCH_MNT/foobar)
->> +_scratch_unmount
->> +
->> +# Dump the fstree into seqres.full for debug.
->> +$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV >> $seqr=
-es.full
->> +
->> +# Check the NOCOMPRESS flag of the inode.
->> +$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV |\
->> +grep -A 4 -e "item .* key ($ino INODE_ITEM 0)" | grep -q NOCOMPRESS
->> +[ $? -eq 0 ] && echo "inode $ino has NOCOMPRESS flag"
->> +
->> +# Check the file extent at fileoffset 1m.
->> +$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV |\
->> +grep -A 4 -e "item .* key ($ino EXTENT_DATA 1048576)" | grep -q "compr=
-ession 0"
->> +[ $? -eq 0 ] && echo "inode $ino file offset 1M is not compressed"
->> +
->> +echo "Silence is golden"
->> +# success, all done
->> +_exit 0
->> diff --git a/tests/btrfs/343.out b/tests/btrfs/343.out
->> new file mode 100644
->> index 00000000..2eb30e4f
->> --- /dev/null
->> +++ b/tests/btrfs/343.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 343
->> +Silence is golden
->> --=20
->> 2.51.2
->>
->>
->=20
->=20
-
+Regards,
+ojaswin
+> 
+> > 
+> > Regards,
+> > ojaswin
+> > > 
+> > > Thanks,
+> > > Zorro
+> > > 
+> > > >  tests/ext4/307 | 41 +++++++++++++++++++++++++++++++++++++----
+> > > >  1 file changed, 37 insertions(+), 4 deletions(-)
+> > > > 
+> > > > diff --git a/tests/ext4/307 b/tests/ext4/307
+> > > > index 1f0e42ca..7e7fb9c8 100755
+> > > > --- a/tests/ext4/307
+> > > > +++ b/tests/ext4/307
+> > > > @@ -12,24 +12,57 @@ _begin_fstest auto ioctl rw defrag prealloc
+> > > >  # Import common functions.
+> > > >  . ./common/filter
+> > > >  . ./common/defrag
+> > > > +
+> > > > +# Get the total of stat.st_size of each file to determine the
+> > > > +# size of donor file. We use st_size here instead of blocks used
+> > > > +# because thats what e4compat.c checks against.
+> > > > +get_bytes_used() {
+> > > > +	local filelist="$1"
+> > > > +	local total=0
+> > > > +	local blksz=$(_get_block_size $SCRATCH_MNT)
+> > > > +
+> > > > +	while IFS= read -r f; do
+> > > > +		echo -n "File: $f: " >> $seqres.full
+> > > > +		[[ -z "$f" ]] && continue
+> > > > +
+> > > > +		if [[ -f "$f" ]]; then
+> > > > +			local bytes
+> > > > +			bytes=$(stat -c %s "$f")
+> > > > +			total=$((total + bytes))
+> > > > +			echo $bytes >> $seqres.full
+> > > > +		fi
+> > > > +	done < "$filelist"
+> > > > +
+> > > > +	echo "Total bytes: $total" >> $seqres.full
+> > > > +	echo $total
+> > > > +}
+> > > > +
+> > > >  # Disable all sync operations to get higher load
+> > > >  FSSTRESS_AVOID="$FSSTRESS_AVOID -ffsync=0 -fsync=0 -ffdatasync=0"
+> > > >  _workout()
+> > > >  {
+> > > > +	local blksz=$(_get_block_size $SCRATCH_MNT)
+> > > > +
+> > > >  	echo ""
+> > > >  	echo "Run fsstress"
+> > > >  	out=$SCRATCH_MNT/fsstress.$$
+> > > > -	args=`_scale_fsstress_args -p4 -n999 -f setattr=1 -d $out`
+> > > > +	args=`_scale_fsstress_args -p4 -n500 -f setattr=1 -d $out`
+> > > >  	echo "fsstress $args" >> $seqres.full
+> > > >  	_run_fsstress $args
+> > > > +
+> > > >  	find $out -type f > $out.list
+> > > >  	cat $out.list | xargs  md5sum > $out.md5sum
+> > > > -	usage=`du -sch $out | tail -n1 | gawk '{ print $1 }'`
+> > > > +
+> > > > +	bytes=`get_bytes_used $out.list`
+> > > > +	echo "Total bytes used: $bytes" >> $seqres.full
+> > > > +
+> > > >  	echo "Allocate donor file"
+> > > > -	$XFS_IO_PROG -c "falloc 0 250M" -f $SCRATCH_MNT/donor | _filter_xfs_io
+> > > > +	$XFS_IO_PROG -c "falloc 0 $bytes" -f $SCRATCH_MNT/donor | _filter_xfs_io
+> > > > +
+> > > >  	echo "Perform compacting"
+> > > >  	cat $out.list | run_check $here/src/e4compact \
+> > > >  		-i -v -f $SCRATCH_MNT/donor  >> $seqres.full 2>&1
+> > > > +
+> > > >  	echo "Check data"
+> > > >  	run_check md5sum -c $out.md5sum
+> > > >  }
+> > > > @@ -41,7 +74,7 @@ _require_scratch
+> > > >  _require_defrag
+> > > >  _require_xfs_io_command "falloc"
+> > > >  
+> > > > -_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
+> > > > +_scratch_mkfs >> $seqres.full 2>&1
+> > > >  _scratch_mount
+> > > >  
+> > > >  _workout
+> > > > -- 
+> > > > 2.52.0
+> > > > 
+> > > 
+> > 
+> 
