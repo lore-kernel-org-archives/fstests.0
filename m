@@ -1,159 +1,193 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A4A42836B0
-	for <fstests@vger.kernel.org>; Mon, 16 Feb 2026 09:34:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B678A305E32
+	for <fstests@vger.kernel.org>; Mon, 16 Feb 2026 11:54:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771234472; cv=none; b=u75eS2mWUUHqEc9zSR/n8K6yDI9jcR9p6bXY1jwqSuSaiAPrjoH+1RtwlgSASbyZRQZGN4pu7MkA8YGuiPOwlJhxWhjv1AmVkYpIEQeP284iyySqLYd+Y79UPIgPeXyESbyBv8wpCkLY06qGXZvF8euegw6ej4mdWDlOCcQ4IDE=
+	t=1771242873; cv=none; b=dYNf65IsjtquvQotRdIK7L1YLMATnXgImiABcADXQO1H7yGXrSGvoQAw4145gYVEF18GF4knjjK7VyQFPib+KmdVewRPCp+h5g/CirvsYbnW8hHyqkXh3K2vohuNnPylieWKZONJexdTpDEpY9LGrzhCnOojWkOzMGxVU6S2eZ0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771234472; c=relaxed/simple;
-	bh=jhMntOyS8kfKSMCQX1szEC2w1VIVF0WqxofuxaLd/tg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZMubnR/TogzjAxjAQ7kEjwkhX96W2LdiNrHZl1zOhIH9YVox22m0R+cTdauCdWJDAGYEqPfWCYu8WKGOg92a+N2JMtRZTFyLHqjkHsagD22OxLJSMz77pob9U1H1PdjkDeGHjupOmlQk6zkm8KoWA+BQC47kyiuxoxQSjkpSyIg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=eOFVj+nH; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=0e9h6n7W; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=eOFVj+nH; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=0e9h6n7W; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	s=arc-20240116; t=1771242873; c=relaxed/simple;
+	bh=ypWu3wVdPWoc7+P5m/sWvgG9Gy2dfvQfVsgDhOYL5Zk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ketjtoNlavxoZUjo6PtnKu6vgSaocxS0yNGlqWH/sxPQnvTfxflLCFhO6c5GzJODVHoY4vFQXZdogCYfum8GAt/1gQqmCUMMQg9nM/bJKgaT1l1kzta/P4xniYRVOIFfcbjYF0V8/ceORCEOR/0NZDP1xImV3NEB17mem+b2SkU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nlqBxvl6; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="eOFVj+nH";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="0e9h6n7W";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="eOFVj+nH";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="0e9h6n7W"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id A81685CE53;
-	Mon, 16 Feb 2026 09:34:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1771234469; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=OCszzZsjqv86kyDYo8qvw9YJ7L3pIGbbLC2tAnq4Pik=;
-	b=eOFVj+nHMTli7bxHkOQDoz5KPXwPx6diiDMWUdiey/emVGuV9NGaHcKp0FkAG0sxLdb/7x
-	IPPv7p3288qFxdMaQDGfAntctiAcNANUC4S2Vlr9ldRl0MxOlgwzGx4E1bjD421YLXT0ZK
-	7WJI2vRPJQpytoP9jMp72vMXn0b8qYw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1771234469;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=OCszzZsjqv86kyDYo8qvw9YJ7L3pIGbbLC2tAnq4Pik=;
-	b=0e9h6n7Wkxi13NMHcyZbXPESR9pmHQn2j1iaue7dVcxM7jAgbW/UYKnO5qaR+9mqRIej9Y
-	Zbv/Aj3avysTEbCg==
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=eOFVj+nH;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=0e9h6n7W
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1771234469; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=OCszzZsjqv86kyDYo8qvw9YJ7L3pIGbbLC2tAnq4Pik=;
-	b=eOFVj+nHMTli7bxHkOQDoz5KPXwPx6diiDMWUdiey/emVGuV9NGaHcKp0FkAG0sxLdb/7x
-	IPPv7p3288qFxdMaQDGfAntctiAcNANUC4S2Vlr9ldRl0MxOlgwzGx4E1bjD421YLXT0ZK
-	7WJI2vRPJQpytoP9jMp72vMXn0b8qYw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1771234469;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=OCszzZsjqv86kyDYo8qvw9YJ7L3pIGbbLC2tAnq4Pik=;
-	b=0e9h6n7Wkxi13NMHcyZbXPESR9pmHQn2j1iaue7dVcxM7jAgbW/UYKnO5qaR+9mqRIej9Y
-	Zbv/Aj3avysTEbCg==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 924023EA62;
-	Mon, 16 Feb 2026 09:34:29 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id aM+vI6Xkkml+dwAAD6G6ig
-	(envelope-from <jack@suse.cz>); Mon, 16 Feb 2026 09:34:29 +0000
-Received: by quack3.suse.cz (Postfix, from userid 1000)
-	id 19E6CA0AA5; Mon, 16 Feb 2026 09:56:07 +0100 (CET)
-Date: Mon, 16 Feb 2026 09:56:07 +0100
-From: Jan Kara <jack@suse.cz>
-To: Zorro Lang <zlang@kernel.org>
-Cc: Jan Kara <jack@suse.cz>, Zorro Lang <zlang@redhat.com>, 
-	fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 0/4] Avoid failing shutdown tests without a journal
-Message-ID: <bgtrbxzrwih2j2bgoanwf5sgl4go5xy6fxnvknkgnugqtkl5pt@iy6bcuqrx5ku>
-References: <20260210111707.17132-1-jack@suse.cz>
- <20260212084050.uim52ck6zhffd5kl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <zh372qbq2tq722476eaqrirmi55hxwzfs6msmzxfj6zv3jws5y@rdip5a6twsf6>
- <20260212164402.tbjcalfmeq6jfwum@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nlqBxvl6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3BCD0C2BC86
+	for <fstests@vger.kernel.org>; Mon, 16 Feb 2026 11:54:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1771242873;
+	bh=ypWu3wVdPWoc7+P5m/sWvgG9Gy2dfvQfVsgDhOYL5Zk=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=nlqBxvl63hMOw3nHTnNsq7/4XSdGTtVWjFKuyc1RJvzLpNjosK+Cxuq/k1sOtmpLG
+	 IuT3633Q1xWJTKrWysEb2hf2rcS4t6jAhcE3Ow5hJyqqCYM4wy+K0KDQXIYwDQjtd8
+	 cYCrhGi8OcnHj+qLvqDX1hEuWl5DvqvNfyNAY7KiYdmV2NcNueaTEDfB7QvZ/Lq2xK
+	 PA0aePQBcO4JoUdGurwVAQz1JikZexxhyaFG12EbYEg0mV1xopm5+JNN304y5dfTBq
+	 d4IcAHuVhGanvbUZY+p1V2Tgrm3W82Tm32fU09vQns57EUic8LkUIAj4NzmkxMoyXI
+	 +wV2BepW+/Akg==
+Received: by mail-ej1-f51.google.com with SMTP id a640c23a62f3a-b8842e5a2a1so376851966b.2
+        for <fstests@vger.kernel.org>; Mon, 16 Feb 2026 03:54:33 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCXlOGNsOwnxHH5UOR0ojmJoKkAv9WMaPyR5QdBPVqnqdc0sM6tbwz0D0WY5nVd0scoGDpUJFHpM@vger.kernel.org
+X-Gm-Message-State: AOJu0YxSe56R6Lx9wxN/xs9rXH032tClXSFeCsGk6e6rTQhJtQ9OtfUP
+	qxtJQccE3ZRspNQ/Ss45sJJmBVfBDmnCi8uF4+vDQicVoGHT/LNxxs9spPx72j2uYlfuTp/lbbc
+	LnVdWyQLNe5eKWKr23hmQ0Po4b030Uag=
+X-Received: by 2002:a17:907:7254:b0:b8e:9d66:f5fb with SMTP id
+ a640c23a62f3a-b8fb3e0fa22mr500521566b.0.1771242871774; Mon, 16 Feb 2026
+ 03:54:31 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260212164402.tbjcalfmeq6jfwum@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-X-Spamd-Result: default: False [-4.01 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_RHS_NOT_FQDN(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	MIME_TRACE(0.00)[0:+];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	TO_DN_SOME(0.00)[];
-	ARC_NA(0.00)[];
-	MISSING_XM_UA(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.cz:dkim];
-	RCPT_COUNT_FIVE(0.00)[6];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DNSWL_BLOCKED(0.00)[2a07:de40:b281:104:10:150:64:97:from,2a07:de40:b281:106:10:150:64:167:received];
-	RCVD_TLS_LAST(0.00)[];
-	RCVD_COUNT_THREE(0.00)[3];
-	DKIM_TRACE(0.00)[suse.cz:+]
-X-Spam-Flag: NO
-X-Spam-Score: -4.01
-X-Rspamd-Queue-Id: A81685CE53
-X-Rspamd-Action: no action
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Spam-Level: 
+References: <20260216033958.83632-1-wqu@suse.com>
+In-Reply-To: <20260216033958.83632-1-wqu@suse.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Mon, 16 Feb 2026 11:53:55 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H4R86w1QF5tK-HXVwtCi5TreLdSt2nRBeGHWPJv1P6FcA@mail.gmail.com>
+X-Gm-Features: AaiRm52wGDjOZ9HHX0d8nvmvJ5XCVKYseQuUu9rAf2-GFDAn1mdcteoCJHIuJTc
+Message-ID: <CAL3q7H4R86w1QF5tK-HXVwtCi5TreLdSt2nRBeGHWPJv1P6FcA@mail.gmail.com>
+Subject: Re: [PATCH] fstests: btrfs: add a test case for failed compressed
+ inline attempt
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Fri 13-02-26 00:44:02, Zorro Lang wrote:
-> On Thu, Feb 12, 2026 at 11:41:59AM +0100, Jan Kara wrote:
-> > > I initially considered calling _require_metadata_journaling directly inside
-> > > _require_scratch_shutdown. However, I decided against it because some cases might
-> > > only need the shutdown ioctl and don't strictly require a journal.
-> > 
-> > Absolutely. I think they should stay separate.
-> > 
-> > So to summarize I think we should still add _require_metadata_journaling to:
-> > 
-> > overlay/087
-> > g/536
-> > g/622
-> > g/722
-> 
-> Agree :)
+On Mon, Feb 16, 2026 at 3:40=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
+>
+> [BUG]
+> There is a long existing behavior that if a compressed inline attempt
+> failed, the whole inode is marked incompressible.
+>
+> Furthermore, the default threshold for compressed inline implies a
+> pretty high compression ratio (2K max inline vs 4K block size, thus 50%
+> compression ratio).
+>
+> This makes btrfs to mark inodes incompressible prematurely.
+>
+> [TEST]
+> The new test case is based on the previous btrfs/343 one, which will do:
+>
+> - Create and mount the fs with compress,max_inline=3D4
+>   4 bytes will be too small for any header, thus all compressed inline
+>   writes should fail.
+>
+> - Do the following operations:
+>   * Buffered write [0, blocksize / 2)
+>     Which can be inlined if using the default max_inline mount option
+>     and 4K fs block.
+>     But the new max_inline=3D4 will reject such compressed inline attempt=
+.
+>
+>     And such one block write should not trigger compression thus no
+>     compression ratio based check.
+>
+>   * Sync
+>     For unpatched kernels, this will set the inode with NOCOMPRESS flag
+>     and reject all future compression on that inode.
+>
+>   * Buffered write [1M, 2M)
+>     For unpatched kernels, the range will not be compressed due to the
+>     NOCOMPRESS flag.
+>
+> - Unmount the fs
+>
+> - Maker sure that:
+>   * The inode has no NOCOMPRESS flag
+>   * File extent at file offset 1M is being compressed
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>  tests/btrfs/344     | 53 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/344.out |  2 ++
+>  2 files changed, 55 insertions(+)
+>  create mode 100755 tests/btrfs/344
+>  create mode 100644 tests/btrfs/344.out
+>
+> diff --git a/tests/btrfs/344 b/tests/btrfs/344
+> new file mode 100755
+> index 00000000..4695104f
+> --- /dev/null
+> +++ b/tests/btrfs/344
+> @@ -0,0 +1,53 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
+> +#
+> +# FS QA Test 344
+> +#
+> +# Check if a failed inline attempt for compression write will mark
+> +# the whole inode as incompressible
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick compress
+> +
+> +_require_scratch
+> +_require_btrfs_command inspect-internal dump-tree
+> +
+> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +       "btrfs: do not mark inode incompressible after inline attempt fai=
+led"
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +
+> +# This inline limit is too small for any header.
+> +# Thus all compressed inline attempt should fail.
 
-Should I send patches or will you do this modification?
+attempt -> attempts
 
-> > and we might add fsync of parent directory before shutdown to g/737 and
-> > overlay/078. Does this sound good?
-> 
-> I'm concerned that adding broader sync or fsync operations might interfere with the
-> test's original intent. We should probably evaluate the impact further. Alternatively,
-> we could simply use _require_metadata_journaling to ensure we at least keep the
-> coverage for the original bug :)
+> +_scratch_mount "-o compress,max_inline=3D4"
+> +
+> +blocksize=3D$(_get_file_block_size $SCRATCH_MNT)
+> +
+> +# The initial half block write can be compressed, but the compressed
+> +# size will not meet the 4 bytes limits, thus it will not be inlined.
 
-I agree with the approach to just leave the test as is for now and invest time
-into deciding what's the proper solution once someone complains :)
+limits -> limit
 
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+Otherwise, it looks good, thanks.
+
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+
+
+> +#
+> +# Normally such single block write itself should not mark the inode
+> +# incompressible, no matter if there is an inline attempt or not.
+> +#
+> +# The 1M write should be compressed.
+> +$XFS_IO_PROG -f -c "pwrite 0 $(( $blocksize / 2 ))" -c sync \
+> +               -c "pwrite 1m 1m" $SCRATCH_MNT/foobar >> $seqres.full
+> +ino=3D$(stat -c "%i" $SCRATCH_MNT/foobar)
+> +_scratch_unmount
+> +
+> +# Dump the fs tree into seqres.full for debug.
+> +$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV >> $seqres=
+.full
+> +
+> +# Check the NOCOMPRESS flag of the inode.
+> +$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV |\
+> +grep -A 4 -e "item .* key ($ino INODE_ITEM 0)" | grep -q NOCOMPRESS
+> +[ $? -eq 0 ] && echo "inode $ino has NOCOMPRESS flag"
+> +
+> +# Check the file extent at file offset 1m.
+> +$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV |\
+> +grep -A 4 -e "item .* key ($ino EXTENT_DATA 1048576)" | grep -q "compres=
+sion 0"
+> +[ $? -eq 0 ] && echo "inode $ino file offset 1M is not compressed"
+> +
+> +echo "Silence is golden"
+> +_exit 0
+> diff --git a/tests/btrfs/344.out b/tests/btrfs/344.out
+> new file mode 100644
+> index 00000000..b950d5ae
+> --- /dev/null
+> +++ b/tests/btrfs/344.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 344
+> +Silence is golden
+> --
+> 2.51.2
+>
+>
