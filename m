@@ -1,145 +1,212 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E1C8818C2C
-	for <fstests@vger.kernel.org>; Mon, 16 Feb 2026 13:13:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39EF85B21A
+	for <fstests@vger.kernel.org>; Mon, 16 Feb 2026 21:29:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771247598; cv=none; b=Y5MQGdessSVZSmRjPvLJjorptJXjKKm6L08IqltZBv31Dtk6BINxq35dUtyXSu+I7l8vA/DPdVW6JaQ6TkawTRQh5RF5egdWlk948jmIZs6F1hFwNiXVy3UIrAvD7EzB1EJN7V3gTvDOXFdub/24RFjfpyDKy0YhiV0uBMyI1lc=
+	t=1771277389; cv=none; b=Oaapsp9D5giAiKuSLNR6SmnfFjjTZDfjpJXDWGzgVvm4Ba5+R02r5Hvvz8E9R09McMSiy5jG1xhqEiW+XtdKojaJFIufXd8rkbFrc/a6aDUwFGXdTUHtpquhRoktgY3/YymN2zlhPw/Egj4mYd0KdWmIc7ZEOrSy3v/BBoKBtnM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771247598; c=relaxed/simple;
-	bh=aZkJ2LC+4l1Mgl8JJsgnBU2eDftSKQyjyB4W5fPxgj0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EeKCNtx0vabji9n/F7huLDEfEnlgZZVBnReMvAuIJMCeqUuiDS8DwgQqqRLnzbuAFdw6GaXrLYI2thURHXsfQcE9xNNEq/hWHSW4Gfw5bjRPQ8HVN2LxlBmeoH0t/zlbktkfJ1j/lLTkDu3+i0fJ/HBxsaGGY3j+S+iWy15mjT4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZKMgSUzH; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=BWf8iQ0A; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1771277389; c=relaxed/simple;
+	bh=DAhREdvn3RMnxGI94j+argQTGO2Q+pRHd2QtT6Y4SXE=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Ndy9iv6UwN8NH+Jy1pvMTj/bqqxIJ7ud2Ume4z3/V61cj6zZwAPsddLyv9t+J9i8aQCm5Vib872fuHbbtdM9Q3QN01uubwGJKTx08roKA7u+7YwVHlrJcoGaX5N11jt7vNA9wD2RUpIylEEWtwLFGzOcTZ9oXCx12WE0mRMo/+Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=R8A7MCAG; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=R8A7MCAG; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZKMgSUzH";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="BWf8iQ0A"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1771247595;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=eLHZr6BMZ2SnRfi1VuJNibTfFH2915IfXyQtxJbNFRI=;
-	b=ZKMgSUzH9V/0y5VPTBS7h9u/T2TR/tn2qE+VpxtZN+BufpgtrqghKlnPYMxqpq3w6QRb2Y
-	jPB6uoWhMNIxLuIpGXShugbwwB27lW/osIs3pzVzPypHQJ/5VEKLYBAZsdMPUuSJedBPF7
-	s2vlFQxm0rjS/w2dpFTZF7GsOhSoKWQ=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-103-8k7k94h5PwqNQurmFzPqxA-1; Mon, 16 Feb 2026 08:13:14 -0500
-X-MC-Unique: 8k7k94h5PwqNQurmFzPqxA-1
-X-Mimecast-MFC-AGG-ID: 8k7k94h5PwqNQurmFzPqxA_1771247593
-Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-356236ae3c1so2940283a91.1
-        for <fstests@vger.kernel.org>; Mon, 16 Feb 2026 05:13:14 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1771247593; x=1771852393; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=eLHZr6BMZ2SnRfi1VuJNibTfFH2915IfXyQtxJbNFRI=;
-        b=BWf8iQ0AUM/hISVUYYhq5MRqvtxkrijT9r9y8YrO9YzKrUatKNZZpYOeDi/h4lyXW4
-         zzdUCt3zBkk+dhMvlhZmgEhRPZoiztNAgYKEBB93e4csNgVtgJbA2I93Q23OfvLUwdh1
-         fImttlJTVJw9nhOrutMnRTJxdsm64ovuTn6XxWazNAol7JnQZuWC+HwzTiVY8uckPg+O
-         AWwlsykSXKpMPtKjCBRWZrexgUk1J7auVe934z3a80AFdf88vTEB3mel/Z+fo57uXsfl
-         4U6gaMJRG4AxMVJCwJs7v2qNP5Gbzoc0iKtJFitZE/1IyeFnb90nREEXaOlxrIsODyuz
-         NwAw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771247593; x=1771852393;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=eLHZr6BMZ2SnRfi1VuJNibTfFH2915IfXyQtxJbNFRI=;
-        b=w0VJoROydUqLuZkhHSzgBSQ4pTefJUw5f4nW3vmmOrA0F/btvgZvSEtZ8rIjIyko7o
-         ymD4hX4xYhCYINRiDbsOX2arTq2wpAWcENzWCnfrMI88fLMmVGSbhGJNC1Jr4eyNbFNH
-         gjeoOWd8c6xmicvOuRIWC4JDNYOgyIbwYLeFW0VhEvZvccbEH7x/BOORAI5s+K+UpOB2
-         GP5KX3967e/G09u6Q5ATJHOTUlYqIPMAWslDpjClp33uvgwowfh4RVi/Yi4QQsZyGsKm
-         eCXDIH/ST2sTvqxSHr2+2a1icBUwp4RPZnXahPAjvwPpGG0ikDwFjVT7MpCY8Kd406m5
-         0xVg==
-X-Forwarded-Encrypted: i=1; AJvYcCXqMDKjEIEoN3DSmljTtCNPx5BE73CIUE1LKMPyJDjxrRg/1p25lVdjSIltZ/pPBDqp6Ix25lI6@vger.kernel.org
-X-Gm-Message-State: AOJu0YwfE9fHdR25EZO/2ql6LMq8Qh45BlWxNu4KJRtL7Y9XRW2ZUB4n
-	RiP5nvuyPFiG6pNXh2Sx3mWZouWJVyjT2bX6Oog0dhu2WgXhkjLFYcTUNDCpmtzYrpSux+ChrbT
-	FAmfVSYryDPtwaX3//JREcpr7bJW3fFl74DLKCpjZQlvuVakuR3SzEE1G4Pw=
-X-Gm-Gg: AZuq6aIvTnOdDWd3zuI1EocV8o0SUPlhS5R58Rad7V3tcN4JWHbw1bMzuO5bP5Ghgtw
-	f/4w6dF6eOjJj4aZVX6dvDGaR2MhD0KzRE7orvZV7aQ54XZ18eXim6kqjYLmOUEGpEOshIxCQYz
-	DGXz4Qi3Q1w10jQvmCcKugCeWwqrjXQh5zJiSYgBzmgA9AYXcpG/rK5A8kv/Hku5xNP9O2fQols
-	of3QTRh8DBeS41Kqeu6fqfmtGnwCdyhQajR3an2g3Qi+ZWFSvpG9MjFRtkVp00f3oYUuwdaJDGH
-	lTeNQgbuTqHXT7mYeOM/gGW5Usn8BpT3AFKvyk6Bv+zLHaP1KDjlUWrYIIySlg99WztRXcG4PUR
-	B3XnvZDVVPdnxhH2XE/apM+zOpwrOIU7NyHzupf3hothhUaIy0IayZiuxEYQBAQ==
-X-Received: by 2002:a17:90a:dfc8:b0:352:d0cf:9d18 with SMTP id 98e67ed59e1d1-357b50c0548mr6718924a91.5.1771247593525;
-        Mon, 16 Feb 2026 05:13:13 -0800 (PST)
-X-Received: by 2002:a17:90a:dfc8:b0:352:d0cf:9d18 with SMTP id 98e67ed59e1d1-357b50c0548mr6718904a91.5.1771247593047;
-        Mon, 16 Feb 2026 05:13:13 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3567eba92e2sm16065290a91.12.2026.02.16.05.13.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Feb 2026 05:13:12 -0800 (PST)
-Date: Mon, 16 Feb 2026 21:13:08 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Jan Kara <jack@suse.cz>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 0/4] Avoid failing shutdown tests without a journal
-Message-ID: <20260216131308.atxnkqehyke4conu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20260210111707.17132-1-jack@suse.cz>
- <20260212084050.uim52ck6zhffd5kl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <zh372qbq2tq722476eaqrirmi55hxwzfs6msmzxfj6zv3jws5y@rdip5a6twsf6>
- <20260212164402.tbjcalfmeq6jfwum@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <bgtrbxzrwih2j2bgoanwf5sgl4go5xy6fxnvknkgnugqtkl5pt@iy6bcuqrx5ku>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="R8A7MCAG";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="R8A7MCAG"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 997CD5BF06;
+	Mon, 16 Feb 2026 21:29:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1771277385; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=e2w3L/U+ocul6V1pAaDdshnnM4Q2qUALMRONJ58xyzc=;
+	b=R8A7MCAGtZy9/wGwglG+blkhh/cDHOJAM5G75m78YDwwljrAps872zDvdfP3xb8/9y+l1F
+	xARYexxD4HXaz7G+r1IpLwduTTXKrqMgloYP6QoHPgLfbKn4alNWyArZ4rvSPq32yN9GXX
+	53kv1OzuP4sRhs/JPI6ghy9FOVJWuwQ=
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1771277385; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=e2w3L/U+ocul6V1pAaDdshnnM4Q2qUALMRONJ58xyzc=;
+	b=R8A7MCAGtZy9/wGwglG+blkhh/cDHOJAM5G75m78YDwwljrAps872zDvdfP3xb8/9y+l1F
+	xARYexxD4HXaz7G+r1IpLwduTTXKrqMgloYP6QoHPgLfbKn4alNWyArZ4rvSPq32yN9GXX
+	53kv1OzuP4sRhs/JPI6ghy9FOVJWuwQ=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 58D253EA62;
+	Mon, 16 Feb 2026 21:29:44 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id QjcvB0iMk2mtTwAAD6G6ig
+	(envelope-from <wqu@suse.com>); Mon, 16 Feb 2026 21:29:44 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Cc: Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH v2] fstests: btrfs: add a test case for failed compressed inline attempt
+Date: Tue, 17 Feb 2026 07:59:24 +1030
+Message-ID: <20260216212924.34590-1-wqu@suse.com>
+X-Mailer: git-send-email 2.52.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <bgtrbxzrwih2j2bgoanwf5sgl4go5xy6fxnvknkgnugqtkl5pt@iy6bcuqrx5ku>
+Content-Transfer-Encoding: 8bit
+X-Spam-Score: -2.80
+X-Spamd-Result: default: False [-2.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_CONTAINS_FROM(1.00)[];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	TO_DN_SOME(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:email];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	RCPT_COUNT_THREE(0.00)[3];
+	RCVD_TLS_ALL(0.00)[]
+X-Spam-Level: 
+X-Spam-Flag: NO
 
-On Mon, Feb 16, 2026 at 09:56:07AM +0100, Jan Kara wrote:
-> On Fri 13-02-26 00:44:02, Zorro Lang wrote:
-> > On Thu, Feb 12, 2026 at 11:41:59AM +0100, Jan Kara wrote:
-> > > > I initially considered calling _require_metadata_journaling directly inside
-> > > > _require_scratch_shutdown. However, I decided against it because some cases might
-> > > > only need the shutdown ioctl and don't strictly require a journal.
-> > > 
-> > > Absolutely. I think they should stay separate.
-> > > 
-> > > So to summarize I think we should still add _require_metadata_journaling to:
-> > > 
-> > > overlay/087
-> > > g/536
-> > > g/622
-> > > g/722
-> > 
-> > Agree :)
-> 
-> Should I send patches or will you do this modification?
+[BUG]
+There is a long existing behavior that if a compressed inline attempt
+failed, the whole inode is marked incompressible.
 
-As you brought this issue up, so I'd like to leave the finish line to you :)
-I saw your 4 patches nearly use same subject and commit log too. If you fix more 4 cases,
-we'll have 8 seperated patches :-D So how about squashing all changes into one single
-patch? Does that make sense to you?
+Furthermore, the default threshold for compressed inline implies a
+pretty high compression ratio (2K max inline vs 4K block size, thus 50%
+compression ratio).
 
-Thanks,
-Zorro
+This makes btrfs to mark inodes incompressible prematurely.
 
-> 
-> > > and we might add fsync of parent directory before shutdown to g/737 and
-> > > overlay/078. Does this sound good?
-> > 
-> > I'm concerned that adding broader sync or fsync operations might interfere with the
-> > test's original intent. We should probably evaluate the impact further. Alternatively,
-> > we could simply use _require_metadata_journaling to ensure we at least keep the
-> > coverage for the original bug :)
-> 
-> I agree with the approach to just leave the test as is for now and invest time
-> into deciding what's the proper solution once someone complains :)
-> 
-> 								Honza
-> -- 
-> Jan Kara <jack@suse.com>
-> SUSE Labs, CR
-> 
+[TEST]
+The new test case is based on the previous btrfs/343 one, which will do:
+
+- Create and mount the fs with compress,max_inline=4
+  4 bytes will be too small for any header, thus all compressed inline
+  writes should fail.
+
+- Do the following operations:
+  * Buffered write [0, blocksize / 2)
+    Which can be inlined if using the default max_inline mount option
+    and 4K fs block.
+    But the new max_inline=4 will reject such compressed inline attempt.
+
+    And such one block write should not trigger compression thus no
+    compression ratio based check.
+
+  * Sync
+    For unpatched kernels, this will set the inode with NOCOMPRESS flag
+    and reject all future compression on that inode.
+
+  * Buffered write [1M, 2M)
+    For unpatched kernels, the range will not be compressed due to the
+    NOCOMPRESS flag.
+
+- Unmount the fs
+
+- Maker sure that:
+  * The inode has no NOCOMPRESS flag
+  * File extent at file offset 1M is being compressed
+
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+Changelog:
+v2:
+- Minor grammar error fixes
+---
+ tests/btrfs/344     | 53 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/344.out |  2 ++
+ 2 files changed, 55 insertions(+)
+ create mode 100755 tests/btrfs/344
+ create mode 100644 tests/btrfs/344.out
+
+diff --git a/tests/btrfs/344 b/tests/btrfs/344
+new file mode 100755
+index 00000000..4695104f
+--- /dev/null
++++ b/tests/btrfs/344
+@@ -0,0 +1,53 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
++#
++# FS QA Test 344
++#
++# Check if a failed inline attempt for compression write will mark
++# the whole inode as incompressible
++#
++. ./common/preamble
++_begin_fstest auto quick compress
++
++_require_scratch
++_require_btrfs_command inspect-internal dump-tree
++
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: do not mark inode incompressible after inline attempt failed"
++
++_scratch_mkfs >>$seqres.full 2>&1
++
++# This inline limit is too small for any header.
++# Thus all compressed inline attempt should fail.
++_scratch_mount "-o compress,max_inline=4"
++
++blocksize=$(_get_file_block_size $SCRATCH_MNT)
++
++# The initial half block write can be compressed, but the compressed
++# size will not meet the 4 bytes limits, thus it will not be inlined.
++#
++# Normally such single block write itself should not mark the inode
++# incompressible, no matter if there is an inline attempt or not.
++#
++# The 1M write should be compressed.
++$XFS_IO_PROG -f -c "pwrite 0 $(( $blocksize / 2 ))" -c sync \
++		-c "pwrite 1m 1m" $SCRATCH_MNT/foobar >> $seqres.full
++ino=$(stat -c "%i" $SCRATCH_MNT/foobar)
++_scratch_unmount
++
++# Dump the fs tree into seqres.full for debug.
++$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV >> $seqres.full
++
++# Check the NOCOMPRESS flag of the inode.
++$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV |\
++grep -A 4 -e "item .* key ($ino INODE_ITEM 0)" | grep -q NOCOMPRESS
++[ $? -eq 0 ] && echo "inode $ino has NOCOMPRESS flag"
++
++# Check the file extent at file offset 1m.
++$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV |\
++grep -A 4 -e "item .* key ($ino EXTENT_DATA 1048576)" | grep -q "compression 0"
++[ $? -eq 0 ] && echo "inode $ino file offset 1M is not compressed"
++
++echo "Silence is golden"
++_exit 0
+diff --git a/tests/btrfs/344.out b/tests/btrfs/344.out
+new file mode 100644
+index 00000000..b950d5ae
+--- /dev/null
++++ b/tests/btrfs/344.out
+@@ -0,0 +1,2 @@
++QA output created by 344
++Silence is golden
+-- 
+2.51.2
 
