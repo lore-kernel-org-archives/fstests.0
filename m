@@ -1,61 +1,38 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39EF85B21A
-	for <fstests@vger.kernel.org>; Mon, 16 Feb 2026 21:29:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 824A9280A29;
+	Tue, 17 Feb 2026 18:33:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771277389; cv=none; b=Oaapsp9D5giAiKuSLNR6SmnfFjjTZDfjpJXDWGzgVvm4Ba5+R02r5Hvvz8E9R09McMSiy5jG1xhqEiW+XtdKojaJFIufXd8rkbFrc/a6aDUwFGXdTUHtpquhRoktgY3/YymN2zlhPw/Egj4mYd0KdWmIc7ZEOrSy3v/BBoKBtnM=
+	t=1771353215; cv=none; b=nLwpcTvxEsexHout8C6YWowM3WaDYtnxOheAoTkNwRa+WbsETpcdR6nDCZIVfwMnJ8MyZ2uFT5aAxpfYNE/WZ7U4NKtcxrSKrZPASp/6h7n4Tw6f5IcEKTI+bqhcTWyFGbj11NNdfO0GMR2Iqusi8eXCKtmLQdgYYjGUDeIW664=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771277389; c=relaxed/simple;
-	bh=DAhREdvn3RMnxGI94j+argQTGO2Q+pRHd2QtT6Y4SXE=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Ndy9iv6UwN8NH+Jy1pvMTj/bqqxIJ7ud2Ume4z3/V61cj6zZwAPsddLyv9t+J9i8aQCm5Vib872fuHbbtdM9Q3QN01uubwGJKTx08roKA7u+7YwVHlrJcoGaX5N11jt7vNA9wD2RUpIylEEWtwLFGzOcTZ9oXCx12WE0mRMo/+Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=R8A7MCAG; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=R8A7MCAG; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1771353215; c=relaxed/simple;
+	bh=gGEVfelMtEM7n53HUBkv3jEHr3mCc4AtxtINeXGWwcs=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Rh8QyYNWSHbpqvQuNIBkj6sFJ+bZOyeu4lFDlydkV7R0/0Da7XH0hH0lbag81NoQ7tfHo2gQIgxTu++bjygUYhWkxxnAWMmdh2/4+7hPM+nS0zetQn9lziSro7cRFT+9nhP0ghXaISxQVWmQLWjYipr27r36sAZDKvXEM0wKxN4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kqKOebpX; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="R8A7MCAG";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="R8A7MCAG"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 997CD5BF06;
-	Mon, 16 Feb 2026 21:29:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1771277385; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=e2w3L/U+ocul6V1pAaDdshnnM4Q2qUALMRONJ58xyzc=;
-	b=R8A7MCAGtZy9/wGwglG+blkhh/cDHOJAM5G75m78YDwwljrAps872zDvdfP3xb8/9y+l1F
-	xARYexxD4HXaz7G+r1IpLwduTTXKrqMgloYP6QoHPgLfbKn4alNWyArZ4rvSPq32yN9GXX
-	53kv1OzuP4sRhs/JPI6ghy9FOVJWuwQ=
-Authentication-Results: smtp-out2.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1771277385; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=e2w3L/U+ocul6V1pAaDdshnnM4Q2qUALMRONJ58xyzc=;
-	b=R8A7MCAGtZy9/wGwglG+blkhh/cDHOJAM5G75m78YDwwljrAps872zDvdfP3xb8/9y+l1F
-	xARYexxD4HXaz7G+r1IpLwduTTXKrqMgloYP6QoHPgLfbKn4alNWyArZ4rvSPq32yN9GXX
-	53kv1OzuP4sRhs/JPI6ghy9FOVJWuwQ=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 58D253EA62;
-	Mon, 16 Feb 2026 21:29:44 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id QjcvB0iMk2mtTwAAD6G6ig
-	(envelope-from <wqu@suse.com>); Mon, 16 Feb 2026 21:29:44 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Cc: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v2] fstests: btrfs: add a test case for failed compressed inline attempt
-Date: Tue, 17 Feb 2026 07:59:24 +1030
-Message-ID: <20260216212924.34590-1-wqu@suse.com>
-X-Mailer: git-send-email 2.52.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kqKOebpX"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 987E9C4CEF7;
+	Tue, 17 Feb 2026 18:33:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1771353215;
+	bh=gGEVfelMtEM7n53HUBkv3jEHr3mCc4AtxtINeXGWwcs=;
+	h=From:To:Cc:Subject:Date:From;
+	b=kqKOebpXBQ5XNYXPHIZZW8POiU2ENLd/fPqhoVWMLpt63Xsvt5hZPUC8l8e6uOUO5
+	 anY1Fi8u+B+CvbYTHTFuaIrR5F5lA06OQs8WhPq/h3tqZpQz5sE22m49sRWxc9VmCL
+	 usFnyEGThFWm/gzSNcrjYzZZlLs+oeDTe8HSlts3JWTaGAObL/ZeCKNqhfavNMh7UA
+	 FHd8LtUAJ3FF2TG6LXP9GNdLtAQ2gMmSZ4r0sjiWozYonnYV6kffu+BthfBGxR3Chm
+	 CWW04c+idF9JwSPaT5wKjbEhNK4BJaDkzP3SC26BrcMPmKtsz6oTyPokY3l7DbateC
+	 VUJjOqf2hUWRQ==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic: test fsync of a file truncated to a length of zero
+Date: Tue, 17 Feb 2026 18:33:30 +0000
+Message-ID: <f4a25aa2a17255493a9887e0ba6610a307a4961a.1771352543.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -63,150 +40,101 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spam-Score: -2.80
-X-Spamd-Result: default: False [-2.80 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_CONTAINS_FROM(1.00)[];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	ARC_NA(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	TO_DN_SOME(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:email];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	RCPT_COUNT_THREE(0.00)[3];
-	RCVD_TLS_ALL(0.00)[]
-X-Spam-Level: 
-X-Spam-Flag: NO
 
-[BUG]
-There is a long existing behavior that if a compressed inline attempt
-failed, the whole inode is marked incompressible.
+From: Filipe Manana <fdmanana@suse.com>
 
-Furthermore, the default threshold for compressed inline implies a
-pretty high compression ratio (2K max inline vs 4K block size, thus 50%
-compression ratio).
+Test that if we truncate a file to 0, fsync it, add a hard link to the
+file and then fsync the parent directory, after a power failure the file
+has a size of 0 (and the hardlink exists too).
 
-This makes btrfs to mark inodes incompressible prematurely.
+This exercises a bug fixed by the following kernel patch for btrfs:
 
-[TEST]
-The new test case is based on the previous btrfs/343 one, which will do:
+  "btrfs: fix zero size inode with non-zero size after log replay"
 
-- Create and mount the fs with compress,max_inline=4
-  4 bytes will be too small for any header, thus all compressed inline
-  writes should fail.
-
-- Do the following operations:
-  * Buffered write [0, blocksize / 2)
-    Which can be inlined if using the default max_inline mount option
-    and 4K fs block.
-    But the new max_inline=4 will reject such compressed inline attempt.
-
-    And such one block write should not trigger compression thus no
-    compression ratio based check.
-
-  * Sync
-    For unpatched kernels, this will set the inode with NOCOMPRESS flag
-    and reject all future compression on that inode.
-
-  * Buffered write [1M, 2M)
-    For unpatched kernels, the range will not be compressed due to the
-    NOCOMPRESS flag.
-
-- Unmount the fs
-
-- Maker sure that:
-  * The inode has no NOCOMPRESS flag
-  * File extent at file offset 1M is being compressed
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Signed-off-by: Qu Wenruo <wqu@suse.com>
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
-Changelog:
-v2:
-- Minor grammar error fixes
----
- tests/btrfs/344     | 53 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/344.out |  2 ++
- 2 files changed, 55 insertions(+)
- create mode 100755 tests/btrfs/344
- create mode 100644 tests/btrfs/344.out
+ tests/generic/788     | 59 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/788.out |  5 ++++
+ 2 files changed, 64 insertions(+)
+ create mode 100755 tests/generic/788
+ create mode 100644 tests/generic/788.out
 
-diff --git a/tests/btrfs/344 b/tests/btrfs/344
+diff --git a/tests/generic/788 b/tests/generic/788
 new file mode 100755
-index 00000000..4695104f
+index 00000000..0234cc7f
 --- /dev/null
-+++ b/tests/btrfs/344
-@@ -0,0 +1,53 @@
++++ b/tests/generic/788
+@@ -0,0 +1,59 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
 +#
-+# FS QA Test 344
++# FS QA Test 788
 +#
-+# Check if a failed inline attempt for compression write will mark
-+# the whole inode as incompressible
++# Test that if we truncate a file to 0, fsync it, add a hard link to the file
++# and then fsync the parent directory, after a power failure the file has a
++# size of 0 (and the hardlink exists too).
 +#
 +. ./common/preamble
-+_begin_fstest auto quick compress
++_begin_fstest auto quick log
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -r -f $tmp.*
++}
++
++. ./common/filter
++. ./common/dmflakey
 +
 +_require_scratch
-+_require_btrfs_command inspect-internal dump-tree
++_require_dm_target flakey
 +
-+_fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: do not mark inode incompressible after inline attempt failed"
++[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: fix zero size inode with non-zero size after log replay"
 +
-+_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_scratch_mount
 +
-+# This inline limit is too small for any header.
-+# Thus all compressed inline attempt should fail.
-+_scratch_mount "-o compress,max_inline=4"
++mkdir $SCRATCH_MNT/dir
++$XFS_IO_PROG -f -c "pwrite -S 0xab 0 64K" $SCRATCH_MNT/dir/foo | _filter_xfs_io
 +
-+blocksize=$(_get_file_block_size $SCRATCH_MNT)
++# Persist the file and directory.
++_scratch_sync
 +
-+# The initial half block write can be compressed, but the compressed
-+# size will not meet the 4 bytes limits, thus it will not be inlined.
-+#
-+# Normally such single block write itself should not mark the inode
-+# incompressible, no matter if there is an inline attempt or not.
-+#
-+# The 1M write should be compressed.
-+$XFS_IO_PROG -f -c "pwrite 0 $(( $blocksize / 2 ))" -c sync \
-+		-c "pwrite 1m 1m" $SCRATCH_MNT/foobar >> $seqres.full
-+ino=$(stat -c "%i" $SCRATCH_MNT/foobar)
-+_scratch_unmount
++# Truncate the file to 0 and fsync it.
++$XFS_IO_PROG -c "truncate 0" -c "fsync" $SCRATCH_MNT/dir/foo
 +
-+# Dump the fs tree into seqres.full for debug.
-+$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV >> $seqres.full
++# Create a link to foo in the same dir.
++ln $SCRATCH_MNT/dir/foo $SCRATCH_MNT/dir/bar
 +
-+# Check the NOCOMPRESS flag of the inode.
-+$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV |\
-+grep -A 4 -e "item .* key ($ino INODE_ITEM 0)" | grep -q NOCOMPRESS
-+[ $? -eq 0 ] && echo "inode $ino has NOCOMPRESS flag"
++# Fsync the directory.
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir
 +
-+# Check the file extent at file offset 1m.
-+$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV |\
-+grep -A 4 -e "item .* key ($ino EXTENT_DATA 1048576)" | grep -q "compression 0"
-+[ $? -eq 0 ] && echo "inode $ino file offset 1M is not compressed"
++# Simulate a power failure and then mount again the filesystem to replay the
++# journal/log.
++_flakey_drop_and_remount
 +
-+echo "Silence is golden"
++echo "file size after power failure: $(stat -c %s $SCRATCH_MNT/dir/foo)"
++echo "file link count after power failure: $(stat -c %h $SCRATCH_MNT/dir/foo)"
++[ -f $SCRATCH_MNT/dir/bar ] || echo "link dir/bar is missing"
++
++# success, all done
 +_exit 0
-diff --git a/tests/btrfs/344.out b/tests/btrfs/344.out
+diff --git a/tests/generic/788.out b/tests/generic/788.out
 new file mode 100644
-index 00000000..b950d5ae
+index 00000000..37f3f36a
 --- /dev/null
-+++ b/tests/btrfs/344.out
-@@ -0,0 +1,2 @@
-+QA output created by 344
-+Silence is golden
++++ b/tests/generic/788.out
+@@ -0,0 +1,5 @@
++QA output created by 788
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++file size after power failure: 0
++file link count after power failure: 2
 -- 
-2.51.2
+2.47.2
 
