@@ -1,150 +1,135 @@
-Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6CB5233F8C4
-	for <fstests@vger.kernel.org>; Thu, 19 Feb 2026 14:40:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8D56340A41;
+	Thu, 19 Feb 2026 14:55:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771512059; cv=none; b=t5dSe6UwpNpn388Y/cnLm13vkSoQ/pT/pR6p0dylatInkIYmrb2W6QZ+PXlNqj8+Cgm2aLarKC7VWMME+17jU4TWUtfDUBtTDTqnZpWj3BciKI+Z1Zy5efb7i7CJxUk+bgjMS4idFY+2dNmwqNlbUaAMMAGXxEioitJxFNnS8lM=
+	t=1771512907; cv=none; b=NNOw5PedzzQEG4jne777/sT6TLT6IlspnJApO+RnkhqvWrwAFj/zf4zqXx6JMeQSaN3x5E4Ig5uQBm1bRD1OHuxdBogZiEhfXPIRnL/yj74tXZBgBcP8YGVZ0lwEMzfO578ihL/NDH1ELIeXzEa+kcCUJVxW4WdTStLs7hFZOKU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771512059; c=relaxed/simple;
-	bh=PhoA057osy1i3S+HKrAbmX1QXkZS5ZyPJtJHB8Kf4rU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=nOU33yW6pp8BdVU1S0HKmYgqG/2hOAq93DuEOUfKFVyLkOhkqjPSyeU4VcLvEE5YzKiUsmXB2wXOuHr7QOHbBJT7CV0tHgipWgvzpS4dgqPX68C4BCxYClo8w4591L/0t+CnGEPTsiyvSz3LVMMCXcEQtRhUU7AMyoJugWBTM7g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=iUqlOiCM; arc=none smtp.client-ip=209.85.214.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1771512907; c=relaxed/simple;
+	bh=06mXK+IUiNxgJCIWsDvTsADe49n8+9BLC2r3oL7Rs+s=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=qpwjdt97r0nabdCGBLSPnvJ+upO58nivm0kMLUOtnjah3WztC4IMfA09gz+Kr4fm/GOjO7AP2i++Nc8wRSTOCXxQqJ6M5lVLEEzcmTyE/p5OXB93WpOmnLiQQxieJMex8Dffgd8AlPhqMeXxZvsBRzoE7E7fYbCVI5EjmAfS42o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=c33aXwNU; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="iUqlOiCM"
-Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-2aad1bb5058so10433265ad.0
-        for <fstests@vger.kernel.org>; Thu, 19 Feb 2026 06:40:58 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1771512058; x=1772116858; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=zbIFaxq5xcyvqtoFGbdoji7321OG3eY0gh9+VmeT0ck=;
-        b=iUqlOiCMA4hmpvVHgklk4iz/m3syJ5mQDPcvTF/lkhK1HxPwEorCSNVhTnLis383kj
-         h3oX4EyMKtDBJwc8oKut7gG4IHjl2qWMKVGAnxT9qI/9CG9e5QT/1wasjpKlIrYDcFns
-         flwycemf8sEBERDI3fheAUeUIDIfIiB7OypHCEN8P3Iv0+f3dEUv8z4o08zxXA79zxf5
-         Ysa5D0ZJxBPRftEtCVyw1jkKUfhdTVtoxs5rXaIjzMUPPr+mALoMDNq9kuKeD08q8L6r
-         wsqyvMmBRml/rPuhaJgVwELUQWZFXUeZyiJr0pOlBgn++pL56k6LpXyQMlQVA9Lo8TKg
-         BbjQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771512058; x=1772116858;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=zbIFaxq5xcyvqtoFGbdoji7321OG3eY0gh9+VmeT0ck=;
-        b=dupFjqcDV24bST0Hlu1Lmb/tDeQFvPEaRJI5EgQJziPhKznJ9TN1W/pgvJChgyRv+5
-         yUsnoM3fortQ2RB+pR9bwfcx4y8TNH8AsH5TpL6RaQfiPcoj9eiATawH3bfSjTmFdksj
-         AGyMp+OfTrc2RPxUl0fljT4cW+0F4wSMM2l+8qzPrJ/OrUXqvmBfz3YWFMNH6iLz/5m+
-         4sgRUr2FidfzRvspP2mk1gNNphorb/Xhy1ho3mPVdEb8LIJDaUX3iji4WhJLNwdDqlsF
-         AbYHM8lAbbBT/WSCE9RkWfq6NRxGk3uMwtOd26usqmREHkfDRdoM7G1UwCBpMCJgRlbe
-         4XHg==
-X-Forwarded-Encrypted: i=1; AJvYcCUgSnZu/4YFqt0K2OZzv4QRnvcxO93DOgAOlRgkEeLhsYNXWqB1LAAA15EtZ/XI2ulk6DXJfDmj@vger.kernel.org
-X-Gm-Message-State: AOJu0YxiYQkQjj/57D9vLA7+1ZNr0FTtJd/sABKMnxxFO5iaYnjgybBX
-	u5mKsegKLAY9zRHu4ZtBf9IJLvJX4i/HZuFwgf/TWftdbi8CMwJXhXvi
-X-Gm-Gg: AZuq6aLVSoO7MigTobW7DKqpvsadBz+4RbjVx4b6/SU2HF9rua5MwKqHL3Gs/TeQu4X
-	GFz8xkxX5aWR1+qMZKovR3IHNxKC64KoMdttT52pHAipUcIWrQ9sVtuVqz636UdgKnL+DgvosPq
-	dP5ea+gxjgnbcyzz57ZZUCNeFxGFf0e9bcCwuXbd8d+gtp7E9tPHfJc2OLE8VdLC0PvCptOCwGT
-	KoZNo5LK8npeICy00cQsXJMTIUvzp5XWn9JjFHIMVmYMDBurg3JLX7yQPt5kZraxfZ7H6yzmnnZ
-	dKS6AIcfr1l9T3QpHrLS9SozSeDw2ZGKS5ZkSfqk5LOW3YneRUGbJC2yGk8Q8OvgLDzSchrqwgb
-	wHNJBGqwvxjf0AKR5qxVMwzFlVQmXTJCsBEF8wSP56bR+tCZYrOYMlUg8Jx/+EnF+kBSeyunZJq
-	bTmuVGdZMMSky7gICfOkG+LRDQgNpRImuDsb2u7Q==
-X-Received: by 2002:a17:903:3c6f:b0:2aa:d320:e969 with SMTP id d9443c01a7336-2ad50e5a717mr48246455ad.8.1771512057695;
-        Thu, 19 Feb 2026 06:40:57 -0800 (PST)
-Received: from [192.168.0.120] ([49.207.232.214])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ad1a73053dsm172985165ad.35.2026.02.19.06.40.53
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 19 Feb 2026 06:40:57 -0800 (PST)
-Message-ID: <dd1b584b-987c-4dce-b84c-c9fe74687e95@gmail.com>
-Date: Thu, 19 Feb 2026 20:10:50 +0530
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="c33aXwNU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0EF83C116D0;
+	Thu, 19 Feb 2026 14:55:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1771512907;
+	bh=06mXK+IUiNxgJCIWsDvTsADe49n8+9BLC2r3oL7Rs+s=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=c33aXwNUEw3ujB1kAFI0BG+KfHUAynHPPvZYyZO1nShIoPvMpdxdSRedTzEkW5Bzz
+	 WKIClv0R6mbATpm2yJH4oMONAPlUZtSwJIzQ8fpKSP91ZShzs4+dpobSyZVweF4Z2W
+	 j01oKbE/5sJIry4DTtLjx5dGShJ7HN0JouBt61Ub8Qdqyi59g4k2ZDOZqzgQh3BAqu
+	 OmORoffmVLiYy0ZqAzxfBVx8FL1nKQLIaYPOBhMK0gEv1gbUkOgZQxkVPX/dh8CnZT
+	 MlvqkxtK22RvZKszVEH1pCWXMJAM1qax4MXJ2jGiMrnHxVOj3LpLBSAQybQ163TSXk
+	 3y6FNkZVbgemA==
+Date: Thu, 19 Feb 2026 15:55:02 +0100
+From: Carlos Maiolino <cem@kernel.org>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: "Nirjhar Roy (IBM)" <nirjhar@linux.ibm.com>, djwong@kernel.org, 
+	hch@infradead.org, david@fromorbit.com, zlang@kernel.org, linux-xfs@vger.kernel.org, 
+	fstests@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com, 
+	hsiangkao@linux.alibaba.com
+Subject: Re: [PATCH v1 0/7] Add multi rtgroup grow and shrink tests
+Message-ID: <aZci9Fz8NgXhrUSa@nidhogg.toxiclabs.cc>
+References: <20260219055737.769860-1-nirjhar@linux.ibm.com>
+ <cover.1771425357.git.nirjhar.roy.lists@gmail.com>
+ <aZcIEd9DY_bQGJ9L@nidhogg.toxiclabs.cc>
+ <dd1b584b-987c-4dce-b84c-c9fe74687e95@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1 0/7] Add multi rtgroup grow and shrink tests
-Content-Language: en-US
-To: Carlos Maiolino <cem@kernel.org>,
- "Nirjhar Roy (IBM)" <nirjhar@linux.ibm.com>
-Cc: djwong@kernel.org, hch@infradead.org, david@fromorbit.com,
- zlang@kernel.org, linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
- ritesh.list@gmail.com, ojaswin@linux.ibm.com, hsiangkao@linux.alibaba.com
-References: <20260219055737.769860-1-nirjhar@linux.ibm.com>
- <cover.1771425357.git.nirjhar.roy.lists@gmail.com>
- <aZcIEd9DY_bQGJ9L@nidhogg.toxiclabs.cc>
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <aZcIEd9DY_bQGJ9L@nidhogg.toxiclabs.cc>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <dd1b584b-987c-4dce-b84c-c9fe74687e95@gmail.com>
+
+On Thu, Feb 19, 2026 at 08:10:50PM +0530, Nirjhar Roy (IBM) wrote:
+> 
+> On 2/19/26 18:25, Carlos Maiolino wrote:
+> > On Thu, Feb 19, 2026 at 06:10:48AM +0000, Nirjhar Roy (IBM) wrote:
+> > > From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+> > > 
+> > > This series adds several tests to validate the XFS realtime fs growth and
+> > > shrink functionality.
+> > > It begins with the introduction of some preconditions and helper
+> > > functions, then some tests that validate realtime group growth, followed
+> > > by realtime group shrink/removal tests and ends with a test that
+> > > validates both growth and shrink functionality together.
+> > > Individual patches have the details.
+> > Please don't send new versions in reply to the old one, it just make
+> > hard to pull patches from the list. b4 usually doesn't handle it
+> > gracefully.
+> 
+> This entire series is new i.e, the kernel changes, fstests and the xfsprogs
+> changes. Can you please explain as to what do you mean by the old version?
+> Which old are version are you referring to?
+
+Sure, I said 'old version' but the same applies to sending them in reply
+to other series/patches.
+
+This series was sent:
+
+In-Reply-To: <20260219055737.769860-1-nirjhar@linux.ibm.com>
+
+which is:
+
+Subject: xfs: Add support for multi rtgroup shrink+removal
 
 
-On 2/19/26 18:25, Carlos Maiolino wrote:
-> On Thu, Feb 19, 2026 at 06:10:48AM +0000, Nirjhar Roy (IBM) wrote:
->> From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
->>
->> This series adds several tests to validate the XFS realtime fs growth and
->> shrink functionality.
->> It begins with the introduction of some preconditions and helper
->> functions, then some tests that validate realtime group growth, followed
->> by realtime group shrink/removal tests and ends with a test that
->> validates both growth and shrink functionality together.
->> Individual patches have the details.
-> Please don't send new versions in reply to the old one, it just make
-> hard to pull patches from the list. b4 usually doesn't handle it
-> gracefully.
+In better wording, please don't nest series under other series/patches,
+or things like that. It works in some point cases, but in general it
+just makes my life difficult to pull them from the list.
 
-This entire series is new i.e, the kernel changes, fstests and the 
-xfsprogs changes. Can you please explain as to what do you mean by the 
-old version? Which old are version are you referring to?
 
---NR
-
->
->> Nirjhar Roy (IBM) (7):
->>    xfs: Introduce _require_realtime_xfs_{shrink,grow} pre-condition
->>    xfs: Introduce helpers to count the number of bitmap and summary
->>      inodes
->>    xfs: Add realtime group grow tests
->>    xfs: Add multi rt group grow + shutdown + recovery tests
->>    xfs: Add realtime group shrink tests
->>    xfs: Add multi rt group shrink + shutdown + recovery tests
->>    xfs: Add parallel back to back grow/shrink tests
->>
->>   common/xfs        |  65 +++++++++++++++-
->>   tests/xfs/333     |  95 +++++++++++++++++++++++
->>   tests/xfs/333.out |   5 ++
->>   tests/xfs/539     | 190 ++++++++++++++++++++++++++++++++++++++++++++++
->>   tests/xfs/539.out |  19 +++++
->>   tests/xfs/611     |  97 +++++++++++++++++++++++
->>   tests/xfs/611.out |   5 ++
->>   tests/xfs/654     |  90 ++++++++++++++++++++++
->>   tests/xfs/654.out |   5 ++
->>   tests/xfs/655     | 151 ++++++++++++++++++++++++++++++++++++
->>   tests/xfs/655.out |  13 ++++
->>   11 files changed, 734 insertions(+), 1 deletion(-)
->>   create mode 100755 tests/xfs/333
->>   create mode 100644 tests/xfs/333.out
->>   create mode 100755 tests/xfs/539
->>   create mode 100644 tests/xfs/539.out
->>   create mode 100755 tests/xfs/611
->>   create mode 100644 tests/xfs/611.out
->>   create mode 100755 tests/xfs/654
->>   create mode 100644 tests/xfs/654.out
->>   create mode 100755 tests/xfs/655
->>   create mode 100644 tests/xfs/655.out
->>
->> -- 
->> 2.34.1
->>
->>
--- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
-
+> 
+> --NR
+> 
+> > 
+> > > Nirjhar Roy (IBM) (7):
+> > >    xfs: Introduce _require_realtime_xfs_{shrink,grow} pre-condition
+> > >    xfs: Introduce helpers to count the number of bitmap and summary
+> > >      inodes
+> > >    xfs: Add realtime group grow tests
+> > >    xfs: Add multi rt group grow + shutdown + recovery tests
+> > >    xfs: Add realtime group shrink tests
+> > >    xfs: Add multi rt group shrink + shutdown + recovery tests
+> > >    xfs: Add parallel back to back grow/shrink tests
+> > > 
+> > >   common/xfs        |  65 +++++++++++++++-
+> > >   tests/xfs/333     |  95 +++++++++++++++++++++++
+> > >   tests/xfs/333.out |   5 ++
+> > >   tests/xfs/539     | 190 ++++++++++++++++++++++++++++++++++++++++++++++
+> > >   tests/xfs/539.out |  19 +++++
+> > >   tests/xfs/611     |  97 +++++++++++++++++++++++
+> > >   tests/xfs/611.out |   5 ++
+> > >   tests/xfs/654     |  90 ++++++++++++++++++++++
+> > >   tests/xfs/654.out |   5 ++
+> > >   tests/xfs/655     | 151 ++++++++++++++++++++++++++++++++++++
+> > >   tests/xfs/655.out |  13 ++++
+> > >   11 files changed, 734 insertions(+), 1 deletion(-)
+> > >   create mode 100755 tests/xfs/333
+> > >   create mode 100644 tests/xfs/333.out
+> > >   create mode 100755 tests/xfs/539
+> > >   create mode 100644 tests/xfs/539.out
+> > >   create mode 100755 tests/xfs/611
+> > >   create mode 100644 tests/xfs/611.out
+> > >   create mode 100755 tests/xfs/654
+> > >   create mode 100644 tests/xfs/654.out
+> > >   create mode 100755 tests/xfs/655
+> > >   create mode 100644 tests/xfs/655.out
+> > > 
+> > > -- 
+> > > 2.34.1
+> > > 
+> > > 
+> -- 
+> Nirjhar Roy
+> Linux Kernel Developer
+> IBM, Bangalore
+> 
