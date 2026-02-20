@@ -1,157 +1,175 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f46.google.com (mail-pj1-f46.google.com [209.85.216.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7142C3EBF2E;
-	Thu, 19 Feb 2026 16:35:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4F32A32ED4E
+	for <fstests@vger.kernel.org>; Fri, 20 Feb 2026 11:20:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771518944; cv=none; b=JBzpLAFqjm9Wqiv7CxufEh1isuCqN3mdfgyz2hD7d7sEv1Uk3m3/hqg36AbQq1KTc4mluSvLw7DgE6bVh+ruUicxmZfECvXgQD+KNJFgDcLmIinjh9OHsqfG5mAnFd/2e49MlLvciIfIni5fJbIIcCaE4bKJVwwlkCyjkhwfPF0=
+	t=1771586424; cv=none; b=JbNVqPB2xAITAMxVtvtYMktth2QOoKBA6h//+RMwJAw9eVAESvPYsg3AXPYCVuw4yNVom/IakEa3mnI2fHnE2vuT3ba2s+P8RsLy4q+pcajrNcuTtA79Fv2nIemxR9Bz2DSDTCNdeYvQbmCWc3hO2quEuUGBNDcZ2g4RGk8CIVM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771518944; c=relaxed/simple;
-	bh=YPrvkVaJt23Q927cNV1urRTMpZUQ2dGUVLzgjku0Da4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Dd8UKmo7mYtDJEG/lpsO9mpsDga5i9KjofemkVOsRec4BplIgYDkqir59t4vmMvTbB9MssXHwaXYEZN8pgEj/8hrFCzuYyaHZ6WGPk2VVNNQ8hsK7GXeH2xPyln7EoyeA7zwOTOOUkD+L0JmRkHMlM7O5Fz+W5agmao5phbHT5k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gZd+YGby; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1771586424; c=relaxed/simple;
+	bh=nQi19hmtDEY0gk0iFNrx0LAsaeAcE277705HTdktzcw=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:Mime-Version; b=HXUCj4Ya16UM/r0tPzpyrsA2mEhxtgo9GGB8wMZrKYa/+7+ZxhuT9tAW/jd512UiEix7d5mX+sCMxr4L1UficnZTKFYFq6DT3VrQxNtRX4cbMjaj7wMQn4rmlDTGAJDa3wZqmqmsEGr/x8eDm+UMR5XGC52xfCCDEpOSJu+8X/k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=k/TykN5D; arc=none smtp.client-ip=209.85.216.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gZd+YGby"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7D51CC4CEF7;
-	Thu, 19 Feb 2026 16:35:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1771518944;
-	bh=YPrvkVaJt23Q927cNV1urRTMpZUQ2dGUVLzgjku0Da4=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=gZd+YGby7+Qt3UW+rFEIzdo29MnSvcfVn7EdaZvXGEhynrbyqQOmRyKjP6yaFcLL/
-	 2dcipxUivBPfzmYj6o/Y1lZg7ZzsTJO96SMZH64luYaYnSTZ01rF0SIaLQM0sfMaH0
-	 zng+DDGj24xXr/G8aHOLogJ+MNt0w6PeSfjfZbQtZk0G+alUbYDws9Q/KUl+FE2GAk
-	 1Z+GbE/OeU/WKZY2kGxfj/JRSdwHWFk5yXR5X4cAF+sKb3ElGgWlMsl2cMiYAnTW0J
-	 Vzg2g8avKVUYBjKfzPBRxVq90q2NKMwriAJ2ksosOg9cIVHtbLBo2X3KV6JhcBl6m+
-	 VqLSCVYlAfrrQ==
-Date: Thu, 19 Feb 2026 17:35:38 +0100
-From: Carlos Maiolino <cem@kernel.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>, 
-	"Nirjhar Roy (IBM)" <nirjhar@linux.ibm.com>, hch@infradead.org, david@fromorbit.com, zlang@kernel.org, 
-	linux-xfs@vger.kernel.org, fstests@vger.kernel.org, ritesh.list@gmail.com, 
-	ojaswin@linux.ibm.com, hsiangkao@linux.alibaba.com
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="k/TykN5D"
+Received: by mail-pj1-f46.google.com with SMTP id 98e67ed59e1d1-3549bba5302so1197345a91.1
+        for <fstests@vger.kernel.org>; Fri, 20 Feb 2026 03:20:23 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1771586422; x=1772191222; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to:date
+         :cc:to:from:subject:message-id:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=EY5+afHS80rYVstbD4jaOCXuT4DGtTHT0Dn+4Tzqf40=;
+        b=k/TykN5DazAHuE5l1Pr7te/bCIZp5rZsmgnMeP8SjfM4BBxdKY+wZqjYTHqeiRJ9Sp
+         uv5XyejWlTETkZNZ4oCrGwctxwajuuuKQX4HjbNuYSPqleYD9lNR/DUt38ojCIZktL+z
+         ERWudlBb0x035R/ossoiS0qUKAl/t02r2Ji0871hOdG4+5sCJ0s8PvmaLidHENm0KyDz
+         Ud8SP6GREtzhWB50dC31Ym+8OlKAZ2B2TP/T4ylzsu/H/jbYAlRfl+X5ebkoQ0tbZrdf
+         UH64jSkqb72BSHbxakObextwynfCjJoMishfGwkSdsl52q+kmq582+MSwh61uSoysWAj
+         efsQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1771586422; x=1772191222;
+        h=content-transfer-encoding:mime-version:references:in-reply-to:date
+         :cc:to:from:subject:message-id:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=EY5+afHS80rYVstbD4jaOCXuT4DGtTHT0Dn+4Tzqf40=;
+        b=TBZiqSfkza41TSI208ExU3Kl0h4hejspoj6Yr30VxzyOUHeG6kbEbF6rzaeaTlc16q
+         pGAGRhMoF4X6Hc28BJEYB4/KaKYv/U5xrF//9kOsIII3Id7owXnXGXdpstBYD3ytuu/Q
+         /Fpqs90rfN9Uoc5gf4WgkKG8/xM69Crc4f0p0AQ8DaJSTuFGZiGwi7YIY4XSOK7g76Wv
+         RjC4DigESfiFmII38NA4CQ1eLSHoFrFkCqMBD+eXM48WBODJeyPU0a4P6wDzKRlfKqNY
+         XXv+i+BYPdtNTqE9H8p7LRKgvDGLFK/AiKQjD8H/KZorPQWhjA5tF032esI/Dnkp82/N
+         fAZQ==
+X-Forwarded-Encrypted: i=1; AJvYcCV6S0BimFo1rVvGTtr1MC53SsAvMhRfF97y1hKTeJN57/dmH9arjgUhRg9EDlOlLjQicAPUwIvm@vger.kernel.org
+X-Gm-Message-State: AOJu0YzquhkpzylYxPWxPoUzhNHenVCRVVYRoVIGA2vWyx1sSSh5cGay
+	LWjVUH4FpWuHIFiHhxBfmdwXz9uLh0ykUuzGn75f1tuWtk7KV08PGX3UlSNZtJic
+X-Gm-Gg: AZuq6aJD2gdvXdtcMybBzvfjv8x211vEdMU4MK5KotrukAdpcZYOQs+DJ3FhpdmCrpN
+	fz3SDK0W5/c2cEGvinVdQaN+8Fan0gIxOgSbKfFnirWpGlRz7/dXGXTCnkKjKH4WCQpUZDswp/V
+	gGMCrXl+8p0PF2wbxhmpUP029cowmLDynjPwID6qE4XM4bj6MY9tjtgYglnVi7Ieb0VU6tGrW5M
+	j1Pg0Q/gsnzIoQzRq1O5IUFKQuz8T8cQLe1pZVnHetRDr2/PA4sR8CNTc7UdxQJ0lkGaDZboHtM
+	EVdYMXijkWlmtUs43jc7cRKbXaZyMGIWdD9QO6LhatOWQENieDWt2WPFEGci70Kilgdfh5sWmg1
+	M9SwfOqrBz5v0Mxoj8WvFjkHqJI9J5OqUneSXBpmNIOZdZk/0rvhy3Y3N4HLNkvwkqv+RK1PZPV
+	3oziEBJduaEHt2p2kOJM7uowZDMFcbWCrjG+1orJYrQH35l/tor6Ikv6csZg727ThJkwMsn2Mr3
+	fTk
+X-Received: by 2002:a17:90b:1d48:b0:353:38c8:b612 with SMTP id 98e67ed59e1d1-358a66cd3d6mr1152109a91.12.1771586422521;
+        Fri, 20 Feb 2026 03:20:22 -0800 (PST)
+Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com ([49.207.233.114])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3589d80d3adsm2823159a91.2.2026.02.20.03.20.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 20 Feb 2026 03:20:21 -0800 (PST)
+Message-ID: <caf4de45aecea6ce7dda89b06c752ebfbd7e971b.camel@gmail.com>
 Subject: Re: [PATCH v1 0/7] Add multi rtgroup grow and shrink tests
-Message-ID: <aZc7pCdmIH3num0Q@nidhogg.toxiclabs.cc>
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+To: Carlos Maiolino <cem@kernel.org>
+Cc: djwong@kernel.org, hch@infradead.org, david@fromorbit.com,
+ zlang@kernel.org,  linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+ ritesh.list@gmail.com,  ojaswin@linux.ibm.com, hsiangkao@linux.alibaba.com
+Date: Fri, 20 Feb 2026 16:50:15 +0530
+In-Reply-To: <aZci9Fz8NgXhrUSa@nidhogg.toxiclabs.cc>
 References: <20260219055737.769860-1-nirjhar@linux.ibm.com>
- <cover.1771425357.git.nirjhar.roy.lists@gmail.com>
- <aZcIEd9DY_bQGJ9L@nidhogg.toxiclabs.cc>
- <dd1b584b-987c-4dce-b84c-c9fe74687e95@gmail.com>
- <aZci9Fz8NgXhrUSa@nidhogg.toxiclabs.cc>
- <20260219154936.GF6490@frogsfrogsfrogs>
+	 <cover.1771425357.git.nirjhar.roy.lists@gmail.com>
+	 <aZcIEd9DY_bQGJ9L@nidhogg.toxiclabs.cc>
+	 <dd1b584b-987c-4dce-b84c-c9fe74687e95@gmail.com>
+	 <aZci9Fz8NgXhrUSa@nidhogg.toxiclabs.cc>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5 (3.28.5-27.el8_10) 
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260219154936.GF6490@frogsfrogsfrogs>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 
-On Thu, Feb 19, 2026 at 07:49:36AM -0800, Darrick J. Wong wrote:
-> On Thu, Feb 19, 2026 at 03:55:02PM +0100, Carlos Maiolino wrote:
-> > On Thu, Feb 19, 2026 at 08:10:50PM +0530, Nirjhar Roy (IBM) wrote:
-> > > 
-> > > On 2/19/26 18:25, Carlos Maiolino wrote:
-> > > > On Thu, Feb 19, 2026 at 06:10:48AM +0000, Nirjhar Roy (IBM) wrote:
-> > > > > From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-> > > > > 
-> > > > > This series adds several tests to validate the XFS realtime fs growth and
-> > > > > shrink functionality.
-> > > > > It begins with the introduction of some preconditions and helper
-> > > > > functions, then some tests that validate realtime group growth, followed
-> > > > > by realtime group shrink/removal tests and ends with a test that
-> > > > > validates both growth and shrink functionality together.
-> > > > > Individual patches have the details.
-> > > > Please don't send new versions in reply to the old one, it just make
-> > > > hard to pull patches from the list. b4 usually doesn't handle it
-> > > > gracefully.
-> > > 
-> > > This entire series is new i.e, the kernel changes, fstests and the xfsprogs
-> > > changes. Can you please explain as to what do you mean by the old version?
-> > > Which old are version are you referring to?
-> > 
-> > Sure, I said 'old version' but the same applies to sending them in reply
-> > to other series/patches.
-> > 
-> > This series was sent:
-> > 
-> > In-Reply-To: <20260219055737.769860-1-nirjhar@linux.ibm.com>
-> > 
-> > which is:
-> > 
-> > Subject: xfs: Add support for multi rtgroup shrink+removal
-> > 
-> > 
-> > In better wording, please don't nest series under other series/patches,
-> > or things like that. It works in some point cases, but in general it
-> > just makes my life difficult to pull them from the list.
-> 
-> Pull requests, perhaps?
-> 
-> Or is the problem here that you're using b4/korgalore/etc to download
-> patchmails so that you can read them outside of a MUA?
-
-Yup, b4. Andrey mentioned there is a way to break threads, but that bit
-me once pulling weird stuff.
-
-> 
-> ((Again, I'll express a wish that people push their branches to
-> git.kernel.org and send a link in the cover letter; that's much easier
-> for me to pull and examine than reading emails or prying individual
-> maybe-MTA-corrupted emails out of mutt into applyable form...))
-> 
-> --D
-> 
-> > 
-> > > 
-> > > --NR
-> > > 
+On Thu, 2026-02-19 at 15:55 +0100, Carlos Maiolino wrote:
+> On Thu, Feb 19, 2026 at 08:10:50PM +0530, Nirjhar Roy (IBM) wrote:
+> > On 2/19/26 18:25, Carlos Maiolino wrote:
+> > > On Thu, Feb 19, 2026 at 06:10:48AM +0000, Nirjhar Roy (IBM) wrote:
+> > > > From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
 > > > > 
-> > > > > Nirjhar Roy (IBM) (7):
-> > > > >    xfs: Introduce _require_realtime_xfs_{shrink,grow} pre-condition
-> > > > >    xfs: Introduce helpers to count the number of bitmap and summary
-> > > > >      inodes
-> > > > >    xfs: Add realtime group grow tests
-> > > > >    xfs: Add multi rt group grow + shutdown + recovery tests
-> > > > >    xfs: Add realtime group shrink tests
-> > > > >    xfs: Add multi rt group shrink + shutdown + recovery tests
-> > > > >    xfs: Add parallel back to back grow/shrink tests
-> > > > > 
-> > > > >   common/xfs        |  65 +++++++++++++++-
-> > > > >   tests/xfs/333     |  95 +++++++++++++++++++++++
-> > > > >   tests/xfs/333.out |   5 ++
-> > > > >   tests/xfs/539     | 190 ++++++++++++++++++++++++++++++++++++++++++++++
-> > > > >   tests/xfs/539.out |  19 +++++
-> > > > >   tests/xfs/611     |  97 +++++++++++++++++++++++
-> > > > >   tests/xfs/611.out |   5 ++
-> > > > >   tests/xfs/654     |  90 ++++++++++++++++++++++
-> > > > >   tests/xfs/654.out |   5 ++
-> > > > >   tests/xfs/655     | 151 ++++++++++++++++++++++++++++++++++++
-> > > > >   tests/xfs/655.out |  13 ++++
-> > > > >   11 files changed, 734 insertions(+), 1 deletion(-)
-> > > > >   create mode 100755 tests/xfs/333
-> > > > >   create mode 100644 tests/xfs/333.out
-> > > > >   create mode 100755 tests/xfs/539
-> > > > >   create mode 100644 tests/xfs/539.out
-> > > > >   create mode 100755 tests/xfs/611
-> > > > >   create mode 100644 tests/xfs/611.out
-> > > > >   create mode 100755 tests/xfs/654
-> > > > >   create mode 100644 tests/xfs/654.out
-> > > > >   create mode 100755 tests/xfs/655
-> > > > >   create mode 100644 tests/xfs/655.out
-> > > > > 
-> > > > > -- 
-> > > > > 2.34.1
-> > > > > 
-> > > > > 
-> > > -- 
-> > > Nirjhar Roy
-> > > Linux Kernel Developer
-> > > IBM, Bangalore
-> > > 
+> > > > This series adds several tests to validate the XFS realtime fs growth and
+> > > > shrink functionality.
+> > > > It begins with the introduction of some preconditions and helper
+> > > > functions, then some tests that validate realtime group growth, followed
+> > > > by realtime group shrink/removal tests and ends with a test that
+> > > > validates both growth and shrink functionality together.
+> > > > Individual patches have the details.
+> > > Please don't send new versions in reply to the old one, it just make
+> > > hard to pull patches from the list. b4 usually doesn't handle it
+> > > gracefully.
 > > 
+> > This entire series is new i.e, the kernel changes, fstests and the xfsprogs
+> > changes. Can you please explain as to what do you mean by the old version?
+> > Which old are version are you referring to?
 > 
+> Sure, I said 'old version' but the same applies to sending them in reply
+> to other series/patches.
+> 
+> This series was sent:
+> 
+> In-Reply-To: <20260219055737.769860-1-nirjhar@linux.ibm.com>
+> 
+> which is:
+> 
+> Subject: xfs: Add support for multi rtgroup shrink+removal
+> 
+> 
+> In better wording, please don't nest series under other series/patches,
+> or things like that. It works in some point cases, but in general it
+> just makes my life difficult to pull them from the list.
+
+Okay sure. Actually I have seen some patchbombs follow a similar style i.e, have a top level root
+email/cover, and under that have multiple patchsets with each patchset having multiple
+patches/commits - so overall a 3 level nesting. Since this work has patches in 3 different projects,
+I thought of having all of them under one roof. If that is inconvenient for you, I will send
+individual patchsets separately from the next revision.
+--NR
+> 
+> 
+> > --NR
+> > 
+> > > > Nirjhar Roy (IBM) (7):
+> > > >    xfs: Introduce _require_realtime_xfs_{shrink,grow} pre-condition
+> > > >    xfs: Introduce helpers to count the number of bitmap and summary
+> > > >      inodes
+> > > >    xfs: Add realtime group grow tests
+> > > >    xfs: Add multi rt group grow + shutdown + recovery tests
+> > > >    xfs: Add realtime group shrink tests
+> > > >    xfs: Add multi rt group shrink + shutdown + recovery tests
+> > > >    xfs: Add parallel back to back grow/shrink tests
+> > > > 
+> > > >   common/xfs        |  65 +++++++++++++++-
+> > > >   tests/xfs/333     |  95 +++++++++++++++++++++++
+> > > >   tests/xfs/333.out |   5 ++
+> > > >   tests/xfs/539     | 190 ++++++++++++++++++++++++++++++++++++++++++++++
+> > > >   tests/xfs/539.out |  19 +++++
+> > > >   tests/xfs/611     |  97 +++++++++++++++++++++++
+> > > >   tests/xfs/611.out |   5 ++
+> > > >   tests/xfs/654     |  90 ++++++++++++++++++++++
+> > > >   tests/xfs/654.out |   5 ++
+> > > >   tests/xfs/655     | 151 ++++++++++++++++++++++++++++++++++++
+> > > >   tests/xfs/655.out |  13 ++++
+> > > >   11 files changed, 734 insertions(+), 1 deletion(-)
+> > > >   create mode 100755 tests/xfs/333
+> > > >   create mode 100644 tests/xfs/333.out
+> > > >   create mode 100755 tests/xfs/539
+> > > >   create mode 100644 tests/xfs/539.out
+> > > >   create mode 100755 tests/xfs/611
+> > > >   create mode 100644 tests/xfs/611.out
+> > > >   create mode 100755 tests/xfs/654
+> > > >   create mode 100644 tests/xfs/654.out
+> > > >   create mode 100755 tests/xfs/655
+> > > >   create mode 100644 tests/xfs/655.out
+> > > > 
+> > > > -- 
+> > > > 2.34.1
+> > > > 
+> > > > 
+> > -- 
+> > Nirjhar Roy
+> > Linux Kernel Developer
+> > IBM, Bangalore
+> > 
+
