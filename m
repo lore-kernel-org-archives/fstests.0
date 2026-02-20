@@ -1,142 +1,225 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f171.google.com (mail-pf1-f171.google.com [209.85.210.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 483122EC09B
-	for <fstests@vger.kernel.org>; Fri, 20 Feb 2026 17:04:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A8D1322B8B
+	for <fstests@vger.kernel.org>; Fri, 20 Feb 2026 18:12:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771607068; cv=none; b=WYZbUacOrPz0bnsK3pow1dZK7rBzqbiOoSaJzJjuOHaOhZedeNU6INde2YV/ShaF10R9mB+cE0JmrtkwVhmyMxLyyI24zPo5m5o9BKZ8bNZ+sF+J3/KCZi6bsCBNyLiKO5lGiMkHhi6IvVglAPwk0UoyQTsAlrNA+FUrxLMPcDw=
+	t=1771611134; cv=none; b=fGpFV1vshIfgfEDtVQrKFsJEzUhnCTsBUUxalobqSSF8tVWSmLvllJwD9itbgz7TbYiPE9yJG3JiKq36NjxMAb0CvDOMuAMtOC+CFgXyeNu1krE7EWLe8xvwMOpxKoq4VCentjxvYmuA9YTR6gZWp5ppJ+06mZigygqJ/nfZ4jo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771607068; c=relaxed/simple;
-	bh=lWC7kIUn6Kd2qGxzhX0BjMlBKu/uQyUotx5PYF3zyLY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Cxa5QEV2pM+bxvXS3fc21rOgagxV/F1Ww/UWr2PPaBSZb7x9+VhSTbN3TyC3khkbegKl5vS62FCu8LGOdUNOat5+uebiLqNyr3DuwViVQGySJLTBKD+xnTjDCT4Brl4VaoDjluaqiCZieA++vTPmf9moQYMFJ8qmdKEGb/Rv/3M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Q5Wg7hrQ; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=Ukkg3w81; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1771611134; c=relaxed/simple;
+	bh=QXiBS2u3WNPthvMcu8RHcrGjQZdLwGXaQ61hy2ceOZc=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=r81i8uEJNlva6Ku1sBROFWGq5l3yjInWAiAGQ35X++UviyGuBCirP2x0j6nFaB3FREYtOwHj67AF+3vnJOsrxLyhmjrIsL8KrNKEONqagqMEqw5HML7J/cAbgPGNhvOoEImeChN94EjTKmyjZWnzBq/7bC2SycbGTspJ736OCQk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=cBlPMUKa; arc=none smtp.client-ip=209.85.210.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Q5Wg7hrQ";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ukkg3w81"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1771607066;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=rKfTudlhTYtyQKKmPYvZFA0VzYKo3BAqGcuaoLTxpEw=;
-	b=Q5Wg7hrQbPTJXt/3xd5j+zssTnmSzAQcQ+Qpxo14OZz6iRXjtUNOpVuF8AV68a+oFGlNDH
-	ZipXw5l6lrHy42RYy/EJUZ3PBlS+MaprD9nYnrNgrw0r+fAboNv2Kh/eB4rJ8MjdUojhBG
-	IFd9zfduwEhlIaUChhmrEWsMHIAuErI=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-591-TzL1E0w4O6eQkTt-WkMCJg-1; Fri, 20 Feb 2026 12:04:24 -0500
-X-MC-Unique: TzL1E0w4O6eQkTt-WkMCJg-1
-X-Mimecast-MFC-AGG-ID: TzL1E0w4O6eQkTt-WkMCJg_1771607063
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-2ab0b2e804cso27255525ad.3
-        for <fstests@vger.kernel.org>; Fri, 20 Feb 2026 09:04:24 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cBlPMUKa"
+Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-826c49b7628so1043976b3a.0
+        for <fstests@vger.kernel.org>; Fri, 20 Feb 2026 10:12:13 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1771607063; x=1772211863; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=rKfTudlhTYtyQKKmPYvZFA0VzYKo3BAqGcuaoLTxpEw=;
-        b=Ukkg3w81nZ7lKcvW/ps3K8xTLUqNMtAjCoGJBo80qF4cVtC/scUrrpVYAclKmw+MQS
-         YizCKyJ+KfX+o515V93wntzoQAnbvOm9sZIIbNNN2ATklBEZZSgV5h4uxixD4PnB0shk
-         Z6H9EREOSDfWj2ZYoLpz8Pbz+GXevGBiG2ItGhW2WmfmVFukqAcCAN2DDN2tk1c0MWFD
-         jRpKHRuRONhkPejsnilyBH0Zic0m9TGdT/qvv8BIw/IbDiA1m9eCCe/BRz3ZQd+5ZOcz
-         ih7+S3FEbqtCU9yXaKFOgAyh8FVcA1Np94Pq/dPNeWTwLCbCWDVmxrLuW4sX7ZvPm3kJ
-         Rsdg==
+        d=gmail.com; s=20230601; t=1771611133; x=1772215933; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=TqtVpJyXlOSony1ZgNHaOS1RyIHwaNyTbJaxrJhP7jI=;
+        b=cBlPMUKav7RpjFBvYH1HO5e884abdKIbQ4QJqS1YBmw5ozZdEZozrdvPyBPraReo9S
+         kWzlHz8/Na5MnBMH+cZuFHui2hJwH3THW4Sh5pBn2eCVQXHeyUWvkNRhUsSBYKVtBQEa
+         et0H8nDSdZA8NwW9biEXvF5gztD63NMrYp04zZrHIJ7dXRvYWIlJRPbLrf1AAxhsbOgQ
+         ndwO3lsK/EzH2cR2Fz2aSLQSk/AJtxHSSi1X5IT8KSqsR0vH1wi4shUATHrOtYifda1w
+         qmgcivaN9zVt2jGvvNd0sK0vy88a2KK5FgJ2n7jFm0nfcDpohVPKdwRoqRpq5GLphl0U
+         l4VQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771607063; x=1772211863;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=rKfTudlhTYtyQKKmPYvZFA0VzYKo3BAqGcuaoLTxpEw=;
-        b=OOCFvxVqNPImRUQ1gR5g6wTBu42djIF8s3YEc8Q+jGw+MbPmknJlVFigH9BsV+JCmt
-         cNos2Vr0er3RD+y+hCfFSYGGuvrosqh18gtW+En99DrBnI5TOCVSLEZR/eEyjPZ8PKTs
-         s9f80Bx1TraNqqC2qVy+iUBWfmBeHBc7rlFdtF9VxB0/kyb3owl519N/1d1Baly/Gsyj
-         Ygb5y//5JGPC34L02wqdOC6ftDWKZQ009TvdzGX30DjLilIJxldEcnoYtCmcvc5klCvx
-         Gu3jEHJEFGgTCT6FmB6Xa4AW+11OBR5YDKB/XGX2I4TYLFCAvwxFgHCVCY2pTDo9hKXq
-         sUfg==
-X-Gm-Message-State: AOJu0YyL1iQisFKChtVsAmKOta1PyH39Pm4TZPaiSWEnVT6Jb5RXHN/x
-	hU00NwZqu3WLGAZWFI+4S5GNErb36DYQGeOPJZcCZoYQHCMFNF318tYMvBIRzShhHLOT3pKuePv
-	TOKj94GDswE5YbCdTEd8yQmLPiLf0zG5MxvYScbxdg6Kiuq4HV+nhYa4OPuA=
-X-Gm-Gg: AZuq6aIguXdbCa8p1hhSShuwF7wldcXuI+EG39N88WxIaLLV1mg8v1RpGC1GEcYMWWH
-	owZIUqt2UeRpkLQCWExFlY5bCL7IOfjjA/PnA4K775+IW2nd4XegrXMoZApK4S3tavRmfddVdLM
-	UF30Dod7WyFz6v2lARgHyEECcsYzXz2mrVRb0vfuzdJhsbNFzksFPeexs6TQH3ttck3MGv4YKU0
-	aU55Q7+rr9YoDg+P+D5AXLjDeehnVkZHCDgvNQByxXxfMnK9yq1LWs2vlaBoPaitWq544/gH+cI
-	INSWFVH69UPyX+ztuiT8moxtIcXN4LLk9hlEp3gzZUCBOwuX3kkkFfYnzBZkyTSg0LWlGU0gBLK
-	bP587CUD4fvukGSXe1qADStS5c1w+Z25idf3Eb0OOvrLuJCopBuVW5koXvtCxBw==
-X-Received: by 2002:a17:902:ea07:b0:2a7:a5b3:bf51 with SMTP id d9443c01a7336-2ad74418aeamr2151445ad.5.1771607063278;
-        Fri, 20 Feb 2026 09:04:23 -0800 (PST)
-X-Received: by 2002:a17:902:ea07:b0:2a7:a5b3:bf51 with SMTP id d9443c01a7336-2ad74418aeamr2151075ad.5.1771607062680;
-        Fri, 20 Feb 2026 09:04:22 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ad1a9d5c20sm212537305ad.46.2026.02.20.09.04.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 20 Feb 2026 09:04:22 -0800 (PST)
-Date: Sat, 21 Feb 2026 01:04:17 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Andrey Albershteyn <aalbersh@kernel.org>
-Cc: fstests@vger.kernel.org, fsverity@lists.linux.dev, ebiggers@kernel.org
-Subject: Re: [PATCH] generi/579: handle quoted cmp output
-Message-ID: <20260220170417.sbykhwr53sah2s7g@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20260219152524.1770469-1-aalbersh@kernel.org>
+        d=1e100.net; s=20230601; t=1771611133; x=1772215933;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=TqtVpJyXlOSony1ZgNHaOS1RyIHwaNyTbJaxrJhP7jI=;
+        b=K0IV/8G7xR768JWysZP9S3mNwAHpD4pnrPlWM3th4AwYcvWrBCSnZX/5m3/QgrgQxJ
+         Nzs6PvkXIicMQ+oh0Pvk74emfSD1YHA3M6CNFC66xRneNEVq5hTWN3oo60FVG1zad2fD
+         7LLERktHSr/cv5WolXp1x5QYFUySL7m6gABfI8zRFCsA5z/iEkF7DOdQBYyMB+nmm/Z+
+         hOO3I3zsucRRyF5AP0M8+sm2Kqox/dkz4kFR4x4Zgj3ut7ZAz6+iEObK75j3xqbeMfhb
+         UZ5acQubioWO+ZUOTsCGUJ1SflK2Pr7QXlKC9R7lezByssHuh1PKahXyrskMQu1a/qFr
+         3MYg==
+X-Forwarded-Encrypted: i=1; AJvYcCWF4AeAxbvlTyPRa8sjJzm9gbdWs7lVMVheFlFDmv7G7os9dCFAUXzvQqai/9A7PJR6TmhxRVgc@vger.kernel.org
+X-Gm-Message-State: AOJu0YxjAPzVeNPkvyClrFLBKsfnR0CFbo7mf3/fCXkpXN9Hamz4o+I4
+	TlLg+uknqyWXwX/z5DkPsCQ8XPQCfAPqLSZwVtEwEgvjVnU7U0Q0Y1Or
+X-Gm-Gg: AZuq6aKQM35L2VWp49xjfIWEZFUalKV2RJmWpPr5URFYUOx6WzyKHN9nEwLQAnKezfB
+	6Ut1Z0n5pQKB+B2Van8iS83+1Ga76kj6YfnN4yweXULkvJI9IfsGv7Ry49nwRSNl55/yMr/DFPT
+	HFSTGSuqSENZ/hnGKnemrYj+kIQOuA2yWpOZR4oEJl+RFG1Sjb1tiz0vMYxWcqWBdx6EcVqnKA6
+	WDI9Fx8LABThfNAnoY+HVNytjmYg4CcsBWE70H88NxZWk8ThgocK/eGy+vKG18UiXdHC+x15+0R
+	Bn6mpnXIpV+Xx5C10QGzfGukosGfCru2evFW/rWJLc4pO0XC03k64tsCr3ZE5z2WLoMols4Bssk
+	IhCPWpFr0sUCdxyLMZoDeRN3niyzhqUGDZjFyJkFFkC8n+oE0DiI4x3ZMNqy20qadjAjqZe1SKZ
+	fgCqGY4JCrH8MK/CDjkyCkwc6yU56Euq8JeQ==
+X-Received: by 2002:a05:6a21:50e:b0:38b:e890:2f36 with SMTP id adf61e73a8af0-39545f7d1e7mr430868637.46.1771611132749;
+        Fri, 20 Feb 2026 10:12:12 -0800 (PST)
+Received: from [192.168.0.120] ([49.207.233.114])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c70b7253b43sm96706a12.25.2026.02.20.10.12.08
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 20 Feb 2026 10:12:12 -0800 (PST)
+Message-ID: <9f4acd07-b8dd-45ff-b40a-4d135be3155d@gmail.com>
+Date: Fri, 20 Feb 2026 23:42:06 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260219152524.1770469-1-aalbersh@kernel.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v1 0/7] Add multi rtgroup grow and shrink tests
+Content-Language: en-US
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Carlos Maiolino <cem@kernel.org>, hch@infradead.org, david@fromorbit.com,
+ zlang@kernel.org, linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+ ritesh.list@gmail.com, ojaswin@linux.ibm.com, hsiangkao@linux.alibaba.com
+References: <20260219055737.769860-1-nirjhar@linux.ibm.com>
+ <cover.1771425357.git.nirjhar.roy.lists@gmail.com>
+ <aZcIEd9DY_bQGJ9L@nidhogg.toxiclabs.cc>
+ <dd1b584b-987c-4dce-b84c-c9fe74687e95@gmail.com>
+ <aZci9Fz8NgXhrUSa@nidhogg.toxiclabs.cc>
+ <20260219154936.GF6490@frogsfrogsfrogs>
+ <a3c85a2e0dff0d43ec66621c6fa530c66ec1c88e.camel@gmail.com>
+ <20260220161015.GV6490@frogsfrogsfrogs>
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+In-Reply-To: <20260220161015.GV6490@frogsfrogsfrogs>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On Thu, Feb 19, 2026 at 04:25:22PM +0100, Andrey Albershteyn wrote:
-> diffutils updated cmp with more consistent quoting in commit:
-> 
-> 	69ae797392bd cmp,diff,diff3,sdiff: quote more consistently
 
-Sigh... changing the default output of core commands again.
+On 2/20/26 21:40, Darrick J. Wong wrote:
+> On Fri, Feb 20, 2026 at 04:54:57PM +0530, Nirjhar Roy (IBM) wrote:
+>> On Thu, 2026-02-19 at 07:49 -0800, Darrick J. Wong wrote:
+>>> On Thu, Feb 19, 2026 at 03:55:02PM +0100, Carlos Maiolino wrote:
+>>>> On Thu, Feb 19, 2026 at 08:10:50PM +0530, Nirjhar Roy (IBM) wrote:
+>>>>> On 2/19/26 18:25, Carlos Maiolino wrote:
+>>>>>> On Thu, Feb 19, 2026 at 06:10:48AM +0000, Nirjhar Roy (IBM) wrote:
+>>>>>>> From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+>>>>>>>
+>>>>>>> This series adds several tests to validate the XFS realtime fs growth and
+>>>>>>> shrink functionality.
+>>>>>>> It begins with the introduction of some preconditions and helper
+>>>>>>> functions, then some tests that validate realtime group growth, followed
+>>>>>>> by realtime group shrink/removal tests and ends with a test that
+>>>>>>> validates both growth and shrink functionality together.
+>>>>>>> Individual patches have the details.
+>>>>>> Please don't send new versions in reply to the old one, it just make
+>>>>>> hard to pull patches from the list. b4 usually doesn't handle it
+>>>>>> gracefully.
+>>>>> This entire series is new i.e, the kernel changes, fstests and the xfsprogs
+>>>>> changes. Can you please explain as to what do you mean by the old version?
+>>>>> Which old are version are you referring to?
+>>>> Sure, I said 'old version' but the same applies to sending them in reply
+>>>> to other series/patches.
+>>>>
+>>>> This series was sent:
+>>>>
+>>>> In-Reply-To: <20260219055737.769860-1-nirjhar@linux.ibm.com>
+>>>>
+>>>> which is:
+>>>>
+>>>> Subject: xfs: Add support for multi rtgroup shrink+removal
+>>>>
+>>>>
+>>>> In better wording, please don't nest series under other series/patches,
+>>>> or things like that. It works in some point cases, but in general it
+>>>> just makes my life difficult to pull them from the list.
+>>> Pull requests, perhaps?
+>>>
+>>> Or is the problem here that you're using b4/korgalore/etc to download
+>>> patchmails so that you can read them outside of a MUA?
+>>>
+>>> ((Again, I'll express a wish that people push their branches to
+>>> git.kernel.org and send a link in the cover letter; that's much easier
+>>> for me to pull and examine than reading emails or prying individual
+>>> maybe-MTA-corrupted emails out of mutt into applyable form...))
+>> Okay, I will keep this in mind. I was under the impression that only
+>> maintainers can have their private branches in git.kernel.org. I will
+> Anyone with a kernel.org account can push git repos.
 
-> 
-> This causes generic/579 to fail from time to time due to grep not
-> catching these errors. Remove quote to work with new and old version of
-> cmp.
-> 
-> Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
-> ---
->  tests/generic/579 | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/tests/generic/579 b/tests/generic/579
-> index d5fab4892e9a..19ffd4954db2 100755
-> --- a/tests/generic/579
-> +++ b/tests/generic/579
-> @@ -71,6 +71,7 @@ for ((proc = 0; proc < nproc_reader; proc++)); do
->  			# match, regardless of whether verity has been enabled
->  			# or not yet (or is currently being enabled).
->  			cmp $orig_file $fsv_file |& _filter_scratch | \
-> +				sed "s/'//g" | \
+https://korg.docs.kernel.org/accounts.html
 
-Thanks for finding this bug. So the output of cmp isn't consistent between the
-old and new versions, which is going to break later cases (base on cmp) on old
-or new diffutils version. We usually handle this by wrapping it in a _cmp function
-to keep the behavior consistent, refer to how we handled common/attr:_getfattr().
+It says the following:
 
-If no more review points, I can merge this patch to fix this issue at first.
+Getting a kernel.org account
+Kernel.org accounts are reserved for Linux kernel maintainers or 
+high-profile developers. If you do not fall under one of these two 
+categories, it’s unlikely that an account will be issued to you.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-I'm not sure if we need further updates on diff command, we can revisit this
-if any bugs are reported.
+In that case, should I use GitHub?
 
-Thanks,
-Zorro
+>
+> github kinda works too, though I am a Bad Microsoft Citizen(tm) so they
+> arbitrarily claim on first access that I'm over a rate limit that they
+> do not specify.  Granted that makes them a Bad Provider(tm) but I doubt
+> they hear me above all the AI noise.
+Okay.
+>
+>> check on how to create a branch in git.kernel.org. For now, is it okay
+>> to just send the branch link as a separate email reply and you can
+>> take a look - next revision onwards I will have the link in the cover
+>> letter itself?
+> Sounds fine to me.
 
->  				grep -v "SCRATCH_MNT/fsv$i: No such file or directory" | \
->  				grep -v "EOF on SCRATCH_MNT/fsv$i"
->  
-> -- 
-> 2.51.2
-> 
+Thank you.
+
+--NR
+
+>
+> --D
+>
+>> --NR
+>>> --D
+>>>
+>>>>> --NR
+>>>>>
+>>>>>>> Nirjhar Roy (IBM) (7):
+>>>>>>>     xfs: Introduce _require_realtime_xfs_{shrink,grow} pre-condition
+>>>>>>>     xfs: Introduce helpers to count the number of bitmap and summary
+>>>>>>>       inodes
+>>>>>>>     xfs: Add realtime group grow tests
+>>>>>>>     xfs: Add multi rt group grow + shutdown + recovery tests
+>>>>>>>     xfs: Add realtime group shrink tests
+>>>>>>>     xfs: Add multi rt group shrink + shutdown + recovery tests
+>>>>>>>     xfs: Add parallel back to back grow/shrink tests
+>>>>>>>
+>>>>>>>    common/xfs        |  65 +++++++++++++++-
+>>>>>>>    tests/xfs/333     |  95 +++++++++++++++++++++++
+>>>>>>>    tests/xfs/333.out |   5 ++
+>>>>>>>    tests/xfs/539     | 190 ++++++++++++++++++++++++++++++++++++++++++++++
+>>>>>>>    tests/xfs/539.out |  19 +++++
+>>>>>>>    tests/xfs/611     |  97 +++++++++++++++++++++++
+>>>>>>>    tests/xfs/611.out |   5 ++
+>>>>>>>    tests/xfs/654     |  90 ++++++++++++++++++++++
+>>>>>>>    tests/xfs/654.out |   5 ++
+>>>>>>>    tests/xfs/655     | 151 ++++++++++++++++++++++++++++++++++++
+>>>>>>>    tests/xfs/655.out |  13 ++++
+>>>>>>>    11 files changed, 734 insertions(+), 1 deletion(-)
+>>>>>>>    create mode 100755 tests/xfs/333
+>>>>>>>    create mode 100644 tests/xfs/333.out
+>>>>>>>    create mode 100755 tests/xfs/539
+>>>>>>>    create mode 100644 tests/xfs/539.out
+>>>>>>>    create mode 100755 tests/xfs/611
+>>>>>>>    create mode 100644 tests/xfs/611.out
+>>>>>>>    create mode 100755 tests/xfs/654
+>>>>>>>    create mode 100644 tests/xfs/654.out
+>>>>>>>    create mode 100755 tests/xfs/655
+>>>>>>>    create mode 100644 tests/xfs/655.out
+>>>>>>>
+>>>>>>> -- 
+>>>>>>> 2.34.1
+>>>>>>>
+>>>>>>>
+>>>>> -- 
+>>>>> Nirjhar Roy
+>>>>> Linux Kernel Developer
+>>>>> IBM, Bangalore
+>>>>>
+>>
+-- 
+Nirjhar Roy
+Linux Kernel Developer
+IBM, Bangalore
 
