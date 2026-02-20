@@ -1,225 +1,223 @@
-Received: from mail-pf1-f171.google.com (mail-pf1-f171.google.com [209.85.210.171])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A8D1322B8B
-	for <fstests@vger.kernel.org>; Fri, 20 Feb 2026 18:12:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6C95264617
+	for <fstests@vger.kernel.org>; Fri, 20 Feb 2026 20:33:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771611134; cv=none; b=fGpFV1vshIfgfEDtVQrKFsJEzUhnCTsBUUxalobqSSF8tVWSmLvllJwD9itbgz7TbYiPE9yJG3JiKq36NjxMAb0CvDOMuAMtOC+CFgXyeNu1krE7EWLe8xvwMOpxKoq4VCentjxvYmuA9YTR6gZWp5ppJ+06mZigygqJ/nfZ4jo=
+	t=1771619630; cv=none; b=Mp7D6Mwtu/z48HdtRlIzZIdLK29s2gOPBdrjI/pvelP1+l/YIPUe5JQmPyx6CtBUkVketMQKvvGtIgzkFgWVTmFZGTaBiap8nZVwvBjcxaMMlF4u4pcbrPdBiFwzFIf5LGbkXuFVauxqhvZ1r2UF7+zRnCflIWedaRnQ6shwFhM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771611134; c=relaxed/simple;
-	bh=QXiBS2u3WNPthvMcu8RHcrGjQZdLwGXaQ61hy2ceOZc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=r81i8uEJNlva6Ku1sBROFWGq5l3yjInWAiAGQ35X++UviyGuBCirP2x0j6nFaB3FREYtOwHj67AF+3vnJOsrxLyhmjrIsL8KrNKEONqagqMEqw5HML7J/cAbgPGNhvOoEImeChN94EjTKmyjZWnzBq/7bC2SycbGTspJ736OCQk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=cBlPMUKa; arc=none smtp.client-ip=209.85.210.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1771619630; c=relaxed/simple;
+	bh=ZN7hzIky3RsaGoODk3Ivv33ZmjEOb5DwDXXYJymgYSU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=l5n9ZW6Lq2yzNbC0W7VW/RTgOsoZUJvNMvgleron8EaeH08a+TI7SlzEmaQJKuo+7iQD1hmeX3bD5MketmTvwOkgd3hUGvyvZ9IA8HtmpSdmyhnDjfebAcW+E6yz+4zeqbXMqM68bLCnHjqmYCBz7mzk3B6TmEN3AT6RXZiWBms=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=IHXnQtT3; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=8rLW04dy; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=IHXnQtT3; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=8rLW04dy; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cBlPMUKa"
-Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-826c49b7628so1043976b3a.0
-        for <fstests@vger.kernel.org>; Fri, 20 Feb 2026 10:12:13 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1771611133; x=1772215933; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=TqtVpJyXlOSony1ZgNHaOS1RyIHwaNyTbJaxrJhP7jI=;
-        b=cBlPMUKav7RpjFBvYH1HO5e884abdKIbQ4QJqS1YBmw5ozZdEZozrdvPyBPraReo9S
-         kWzlHz8/Na5MnBMH+cZuFHui2hJwH3THW4Sh5pBn2eCVQXHeyUWvkNRhUsSBYKVtBQEa
-         et0H8nDSdZA8NwW9biEXvF5gztD63NMrYp04zZrHIJ7dXRvYWIlJRPbLrf1AAxhsbOgQ
-         ndwO3lsK/EzH2cR2Fz2aSLQSk/AJtxHSSi1X5IT8KSqsR0vH1wi4shUATHrOtYifda1w
-         qmgcivaN9zVt2jGvvNd0sK0vy88a2KK5FgJ2n7jFm0nfcDpohVPKdwRoqRpq5GLphl0U
-         l4VQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771611133; x=1772215933;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=TqtVpJyXlOSony1ZgNHaOS1RyIHwaNyTbJaxrJhP7jI=;
-        b=K0IV/8G7xR768JWysZP9S3mNwAHpD4pnrPlWM3th4AwYcvWrBCSnZX/5m3/QgrgQxJ
-         Nzs6PvkXIicMQ+oh0Pvk74emfSD1YHA3M6CNFC66xRneNEVq5hTWN3oo60FVG1zad2fD
-         7LLERktHSr/cv5WolXp1x5QYFUySL7m6gABfI8zRFCsA5z/iEkF7DOdQBYyMB+nmm/Z+
-         hOO3I3zsucRRyF5AP0M8+sm2Kqox/dkz4kFR4x4Zgj3ut7ZAz6+iEObK75j3xqbeMfhb
-         UZ5acQubioWO+ZUOTsCGUJ1SflK2Pr7QXlKC9R7lezByssHuh1PKahXyrskMQu1a/qFr
-         3MYg==
-X-Forwarded-Encrypted: i=1; AJvYcCWF4AeAxbvlTyPRa8sjJzm9gbdWs7lVMVheFlFDmv7G7os9dCFAUXzvQqai/9A7PJR6TmhxRVgc@vger.kernel.org
-X-Gm-Message-State: AOJu0YxjAPzVeNPkvyClrFLBKsfnR0CFbo7mf3/fCXkpXN9Hamz4o+I4
-	TlLg+uknqyWXwX/z5DkPsCQ8XPQCfAPqLSZwVtEwEgvjVnU7U0Q0Y1Or
-X-Gm-Gg: AZuq6aKQM35L2VWp49xjfIWEZFUalKV2RJmWpPr5URFYUOx6WzyKHN9nEwLQAnKezfB
-	6Ut1Z0n5pQKB+B2Van8iS83+1Ga76kj6YfnN4yweXULkvJI9IfsGv7Ry49nwRSNl55/yMr/DFPT
-	HFSTGSuqSENZ/hnGKnemrYj+kIQOuA2yWpOZR4oEJl+RFG1Sjb1tiz0vMYxWcqWBdx6EcVqnKA6
-	WDI9Fx8LABThfNAnoY+HVNytjmYg4CcsBWE70H88NxZWk8ThgocK/eGy+vKG18UiXdHC+x15+0R
-	Bn6mpnXIpV+Xx5C10QGzfGukosGfCru2evFW/rWJLc4pO0XC03k64tsCr3ZE5z2WLoMols4Bssk
-	IhCPWpFr0sUCdxyLMZoDeRN3niyzhqUGDZjFyJkFFkC8n+oE0DiI4x3ZMNqy20qadjAjqZe1SKZ
-	fgCqGY4JCrH8MK/CDjkyCkwc6yU56Euq8JeQ==
-X-Received: by 2002:a05:6a21:50e:b0:38b:e890:2f36 with SMTP id adf61e73a8af0-39545f7d1e7mr430868637.46.1771611132749;
-        Fri, 20 Feb 2026 10:12:12 -0800 (PST)
-Received: from [192.168.0.120] ([49.207.233.114])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c70b7253b43sm96706a12.25.2026.02.20.10.12.08
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 20 Feb 2026 10:12:12 -0800 (PST)
-Message-ID: <9f4acd07-b8dd-45ff-b40a-4d135be3155d@gmail.com>
-Date: Fri, 20 Feb 2026 23:42:06 +0530
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="IHXnQtT3";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="8rLW04dy";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="IHXnQtT3";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="8rLW04dy"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 013495BCDF;
+	Fri, 20 Feb 2026 20:33:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1771619627; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=j5sFPnFTEC0R+m1adqkH9ENpjvDiZjFPjzLlf/Aj2I4=;
+	b=IHXnQtT3RWnMGe59c8HiMqfGSli1qJhNfbzjO1EPH+WICeKTK6SYZiSrsNTKw7CYGUMSOQ
+	/E8szB2yU/VhquVV4zYGN8H22W73iiHEVh3U8RZOAxb7RLnyyVzZkguo1q34wqIJcc4WcB
+	YaP99CH2U0gBCUJLvACHGWNfb71Tz9c=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1771619627;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=j5sFPnFTEC0R+m1adqkH9ENpjvDiZjFPjzLlf/Aj2I4=;
+	b=8rLW04dyUPMwT4l2JRDdZwbHqKHQFETVRZekv6MHp3mVGHEraxxecQJ6PVfdSZjIfNbbHC
+	nsEh2cDJK/uWqiCQ==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1771619627; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=j5sFPnFTEC0R+m1adqkH9ENpjvDiZjFPjzLlf/Aj2I4=;
+	b=IHXnQtT3RWnMGe59c8HiMqfGSli1qJhNfbzjO1EPH+WICeKTK6SYZiSrsNTKw7CYGUMSOQ
+	/E8szB2yU/VhquVV4zYGN8H22W73iiHEVh3U8RZOAxb7RLnyyVzZkguo1q34wqIJcc4WcB
+	YaP99CH2U0gBCUJLvACHGWNfb71Tz9c=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1771619627;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=j5sFPnFTEC0R+m1adqkH9ENpjvDiZjFPjzLlf/Aj2I4=;
+	b=8rLW04dyUPMwT4l2JRDdZwbHqKHQFETVRZekv6MHp3mVGHEraxxecQJ6PVfdSZjIfNbbHC
+	nsEh2cDJK/uWqiCQ==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id E14E43EA65;
+	Fri, 20 Feb 2026 20:33:46 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id 1YL5NirFmGnpGwAAD6G6ig
+	(envelope-from <jack@suse.cz>); Fri, 20 Feb 2026 20:33:46 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+	id 9F313A0A4A; Fri, 20 Feb 2026 21:33:42 +0100 (CET)
+From: Jan Kara <jack@suse.cz>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org,
+	Jan Kara <jack@suse.cz>
+Subject: [PATCH] tests: Fix failure in nojournal mode
+Date: Fri, 20 Feb 2026 21:33:08 +0100
+Message-ID: <20260220203308.6256-1-jack@suse.cz>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1 0/7] Add multi rtgroup grow and shrink tests
-Content-Language: en-US
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Carlos Maiolino <cem@kernel.org>, hch@infradead.org, david@fromorbit.com,
- zlang@kernel.org, linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
- ritesh.list@gmail.com, ojaswin@linux.ibm.com, hsiangkao@linux.alibaba.com
-References: <20260219055737.769860-1-nirjhar@linux.ibm.com>
- <cover.1771425357.git.nirjhar.roy.lists@gmail.com>
- <aZcIEd9DY_bQGJ9L@nidhogg.toxiclabs.cc>
- <dd1b584b-987c-4dce-b84c-c9fe74687e95@gmail.com>
- <aZci9Fz8NgXhrUSa@nidhogg.toxiclabs.cc>
- <20260219154936.GF6490@frogsfrogsfrogs>
- <a3c85a2e0dff0d43ec66621c6fa530c66ec1c88e.camel@gmail.com>
- <20260220161015.GV6490@frogsfrogsfrogs>
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <20260220161015.GV6490@frogsfrogsfrogs>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
+X-Spamd-Result: default: False [-2.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	RCVD_COUNT_THREE(0.00)[3];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	FROM_EQ_ENVFROM(0.00)[];
+	RCVD_TLS_LAST(0.00)[];
+	TO_DN_SOME(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCPT_COUNT_THREE(0.00)[3];
+	FROM_HAS_DN(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo]
+X-Spam-Flag: NO
+X-Spam-Score: -2.80
+X-Spam-Level: 
 
+Several tests use fs shutdown. Without journalling the filesystem isn't
+guaranteed to be consistent after shutdown. So for tests that don't make
+sure data makes it to the disk using fsync/sync we cannot really test
+much. Skip such tests without journalling.
 
-On 2/20/26 21:40, Darrick J. Wong wrote:
-> On Fri, Feb 20, 2026 at 04:54:57PM +0530, Nirjhar Roy (IBM) wrote:
->> On Thu, 2026-02-19 at 07:49 -0800, Darrick J. Wong wrote:
->>> On Thu, Feb 19, 2026 at 03:55:02PM +0100, Carlos Maiolino wrote:
->>>> On Thu, Feb 19, 2026 at 08:10:50PM +0530, Nirjhar Roy (IBM) wrote:
->>>>> On 2/19/26 18:25, Carlos Maiolino wrote:
->>>>>> On Thu, Feb 19, 2026 at 06:10:48AM +0000, Nirjhar Roy (IBM) wrote:
->>>>>>> From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
->>>>>>>
->>>>>>> This series adds several tests to validate the XFS realtime fs growth and
->>>>>>> shrink functionality.
->>>>>>> It begins with the introduction of some preconditions and helper
->>>>>>> functions, then some tests that validate realtime group growth, followed
->>>>>>> by realtime group shrink/removal tests and ends with a test that
->>>>>>> validates both growth and shrink functionality together.
->>>>>>> Individual patches have the details.
->>>>>> Please don't send new versions in reply to the old one, it just make
->>>>>> hard to pull patches from the list. b4 usually doesn't handle it
->>>>>> gracefully.
->>>>> This entire series is new i.e, the kernel changes, fstests and the xfsprogs
->>>>> changes. Can you please explain as to what do you mean by the old version?
->>>>> Which old are version are you referring to?
->>>> Sure, I said 'old version' but the same applies to sending them in reply
->>>> to other series/patches.
->>>>
->>>> This series was sent:
->>>>
->>>> In-Reply-To: <20260219055737.769860-1-nirjhar@linux.ibm.com>
->>>>
->>>> which is:
->>>>
->>>> Subject: xfs: Add support for multi rtgroup shrink+removal
->>>>
->>>>
->>>> In better wording, please don't nest series under other series/patches,
->>>> or things like that. It works in some point cases, but in general it
->>>> just makes my life difficult to pull them from the list.
->>> Pull requests, perhaps?
->>>
->>> Or is the problem here that you're using b4/korgalore/etc to download
->>> patchmails so that you can read them outside of a MUA?
->>>
->>> ((Again, I'll express a wish that people push their branches to
->>> git.kernel.org and send a link in the cover letter; that's much easier
->>> for me to pull and examine than reading emails or prying individual
->>> maybe-MTA-corrupted emails out of mutt into applyable form...))
->> Okay, I will keep this in mind. I was under the impression that only
->> maintainers can have their private branches in git.kernel.org. I will
-> Anyone with a kernel.org account can push git repos.
+Signed-off-by: Jan Kara <jack@suse.cz>
+---
+ tests/ext4/051    | 1 +
+ tests/generic/536 | 1 +
+ tests/generic/622 | 1 +
+ tests/generic/635 | 1 +
+ tests/generic/646 | 1 +
+ tests/generic/705 | 1 +
+ tests/generic/722 | 1 +
+ tests/overlay/087 | 1 +
+ 8 files changed, 8 insertions(+)
 
-https://korg.docs.kernel.org/accounts.html
-
-It says the following:
-
-Getting a kernel.org account
-Kernel.org accounts are reserved for Linux kernel maintainers or 
-high-profile developers. If you do not fall under one of these two 
-categories, it’s unlikely that an account will be issued to you.
-
-
-In that case, should I use GitHub?
-
->
-> github kinda works too, though I am a Bad Microsoft Citizen(tm) so they
-> arbitrarily claim on first access that I'm over a rate limit that they
-> do not specify.  Granted that makes them a Bad Provider(tm) but I doubt
-> they hear me above all the AI noise.
-Okay.
->
->> check on how to create a branch in git.kernel.org. For now, is it okay
->> to just send the branch link as a separate email reply and you can
->> take a look - next revision onwards I will have the link in the cover
->> letter itself?
-> Sounds fine to me.
-
-Thank you.
-
---NR
-
->
-> --D
->
->> --NR
->>> --D
->>>
->>>>> --NR
->>>>>
->>>>>>> Nirjhar Roy (IBM) (7):
->>>>>>>     xfs: Introduce _require_realtime_xfs_{shrink,grow} pre-condition
->>>>>>>     xfs: Introduce helpers to count the number of bitmap and summary
->>>>>>>       inodes
->>>>>>>     xfs: Add realtime group grow tests
->>>>>>>     xfs: Add multi rt group grow + shutdown + recovery tests
->>>>>>>     xfs: Add realtime group shrink tests
->>>>>>>     xfs: Add multi rt group shrink + shutdown + recovery tests
->>>>>>>     xfs: Add parallel back to back grow/shrink tests
->>>>>>>
->>>>>>>    common/xfs        |  65 +++++++++++++++-
->>>>>>>    tests/xfs/333     |  95 +++++++++++++++++++++++
->>>>>>>    tests/xfs/333.out |   5 ++
->>>>>>>    tests/xfs/539     | 190 ++++++++++++++++++++++++++++++++++++++++++++++
->>>>>>>    tests/xfs/539.out |  19 +++++
->>>>>>>    tests/xfs/611     |  97 +++++++++++++++++++++++
->>>>>>>    tests/xfs/611.out |   5 ++
->>>>>>>    tests/xfs/654     |  90 ++++++++++++++++++++++
->>>>>>>    tests/xfs/654.out |   5 ++
->>>>>>>    tests/xfs/655     | 151 ++++++++++++++++++++++++++++++++++++
->>>>>>>    tests/xfs/655.out |  13 ++++
->>>>>>>    11 files changed, 734 insertions(+), 1 deletion(-)
->>>>>>>    create mode 100755 tests/xfs/333
->>>>>>>    create mode 100644 tests/xfs/333.out
->>>>>>>    create mode 100755 tests/xfs/539
->>>>>>>    create mode 100644 tests/xfs/539.out
->>>>>>>    create mode 100755 tests/xfs/611
->>>>>>>    create mode 100644 tests/xfs/611.out
->>>>>>>    create mode 100755 tests/xfs/654
->>>>>>>    create mode 100644 tests/xfs/654.out
->>>>>>>    create mode 100755 tests/xfs/655
->>>>>>>    create mode 100644 tests/xfs/655.out
->>>>>>>
->>>>>>> -- 
->>>>>>> 2.34.1
->>>>>>>
->>>>>>>
->>>>> -- 
->>>>> Nirjhar Roy
->>>>> Linux Kernel Developer
->>>>> IBM, Bangalore
->>>>>
->>
+diff --git a/tests/ext4/051 b/tests/ext4/051
+index 728ad19bfcec..9fbf0404fec9 100755
+--- a/tests/ext4/051
++++ b/tests/ext4/051
+@@ -16,6 +16,7 @@ _exclude_fs ext2
+ _exclude_fs ext3
+ _require_scratch
+ _require_scratch_shutdown
++_require_metadata_journaling
+ _require_command "$TUNE2FS_PROG" tune2fs
+ 
+ echo "Silence is golden"
+diff --git a/tests/generic/536 b/tests/generic/536
+index 726120e67c8e..56a8ced2f8da 100755
+--- a/tests/generic/536
++++ b/tests/generic/536
+@@ -17,6 +17,7 @@ _begin_fstest auto quick rw shutdown
+ # Modify as appropriate.
+ _require_scratch
+ _require_scratch_shutdown
++_require_metadata_journaling
+ 
+ # create a small fs and initialize free blocks with a unique pattern
+ _scratch_mkfs_sized $((1024 * 1024 * 100)) >> $seqres.full 2>&1
+diff --git a/tests/generic/622 b/tests/generic/622
+index a67931ad877f..e8ead300e362 100755
+--- a/tests/generic/622
++++ b/tests/generic/622
+@@ -78,6 +78,7 @@ _cleanup()
+ # rather than the test filesystem.
+ _require_scratch
+ _require_scratch_shutdown
++_require_metadata_journaling
+ _require_xfs_io_command "pwrite"
+ _require_xfs_io_command "fsync"
+ _require_xfs_io_command "syncfs"
+diff --git a/tests/generic/635 b/tests/generic/635
+index 4a811630a621..018b868cb6ce 100755
+--- a/tests/generic/635
++++ b/tests/generic/635
+@@ -26,6 +26,7 @@ _begin_fstest auto quick atime bigtime shutdown
+ 
+ _require_scratch
+ _require_scratch_shutdown
++_require_metadata_journaling
+ 
+ _scratch_mkfs > $seqres.full
+ _scratch_mount
+diff --git a/tests/generic/646 b/tests/generic/646
+index b3b0ab0ace56..1e3f0cd54087 100755
+--- a/tests/generic/646
++++ b/tests/generic/646
+@@ -19,6 +19,7 @@ _begin_fstest auto quick recoveryloop shutdown
+ 
+ _require_scratch
+ _require_scratch_shutdown
++_require_metadata_journaling
+ _scratch_mkfs > $seqres.full 2>&1
+ 
+ _scratch_mount
+diff --git a/tests/generic/705 b/tests/generic/705
+index 9c27fbbc389b..23f06d699dfa 100755
+--- a/tests/generic/705
++++ b/tests/generic/705
+@@ -12,6 +12,7 @@ _begin_fstest auto shutdown
+ 
+ _require_scratch
+ _require_scratch_shutdown
++_require_metadata_journaling
+ _require_command "$FILEFRAG_PROG" filefrag
+ _scratch_mkfs > $seqres.full 2>&1
+ _scratch_mount
+diff --git a/tests/generic/722 b/tests/generic/722
+index b9c608713c37..10869bc7aabf 100755
+--- a/tests/generic/722
++++ b/tests/generic/722
+@@ -18,6 +18,7 @@ _require_test_program "punch-alternating"
+ _require_xfs_io_command exchangerange
+ _require_scratch
+ _require_scratch_shutdown
++_require_metadata_journaling
+ 
+ _scratch_mkfs >> $seqres.full
+ _scratch_mount
+diff --git a/tests/overlay/087 b/tests/overlay/087
+index 2ad069dbf78f..25d021095b6f 100755
+--- a/tests/overlay/087
++++ b/tests/overlay/087
+@@ -34,6 +34,7 @@ _begin_fstest auto quick mount shutdown
+ # Modify as appropriate.
+ _require_scratch_nocheck
+ _require_scratch_shutdown_and_syncfs
++_require_metadata_journaling
+ 
+ [ "$OVL_BASE_FSTYP" == "xfs" ] || \
+ 	_notrun "base fs $OVL_BASE_FSTYP has unknown behavior with syncfs after shutdown"
 -- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+2.51.0
 
