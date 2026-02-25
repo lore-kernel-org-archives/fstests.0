@@ -1,101 +1,128 @@
-Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5753A2D63F6
-	for <fstests@vger.kernel.org>; Wed, 25 Feb 2026 05:24:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2314C392814
+	for <fstests@vger.kernel.org>; Wed, 25 Feb 2026 10:27:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.153.144
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771997072; cv=none; b=BS9Y3NoICNbPLzHIX9UE5FpGNUfb9kxlATNxeNfWruWDM+I4MyyRRDUncbUy2rqvOzz86xumH8zOrbCgQPEuVnjx4ozrEEVl0g5EDxmLW1xB9BANYg1u1Ed/SGe8Ie5yi8Sf/bf/FWopvxJoyHS0kbQ5QJ4nuTge977rKxWYb8Q=
+	t=1772015267; cv=none; b=PUvOaDL6rt0yeRCWfh1Ju+XtzEyapUpdSMe5W75DvALWY1PAbmNXa74YukVRP+iuBH7PLkBHnRYbJpK27p7AJt4sGjFyifa3eIXQCGbjZbbKmD+4qLvqfIXt4A0jZCCbFMWvtPmuA0e9dRcU2ZklSgiQvLXZbAhN/LQG5MSQOjk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771997072; c=relaxed/simple;
-	bh=l34tSCvGC42EyUSp8qcSQNBClPGGwkcKluKp4Zjzov4=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:Mime-Version; b=JHZKTo1MVOwK4S0sC/EJ1/PB0RU78Mxm2q0bwjMBokQcbQx3pwRlnVCU/3WE/U7PCiOSX29YvmVmqiDbTR8k9T5kXxuiOFJ8YaUmNckvDzuyc6wJCelXKDJB6iebGPmXkGCrKyr7XNaJt2fLUYIBLB9ozhYUw2/CfarAmT8WFQk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=lB5WZ8vt; arc=none smtp.client-ip=209.85.214.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1772015267; c=relaxed/simple;
+	bh=5GtqqvJlMs4Ad6K/m/iFbsXDskYbfmhS6K1Ce3INJHA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=SYkRf0l1E8A/UhBvEu+CfhW+PG/hrU5Be9jGhYd+Qkh2GrKJANyLw8JG8o6c/uFig0M98b1aFF96Smda08EgpNmeSrymhI7dMrDsKKNkjwlpce1IbjNcwUIejPDU8MCde6gISyM/a1uZe12Cd3Awk0/pGMe51dzS0+3sfORWHeE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=RKTgt0d9; arc=none smtp.client-ip=216.71.153.144
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lB5WZ8vt"
-Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-2ad9f316d68so7482835ad.2
-        for <fstests@vger.kernel.org>; Tue, 24 Feb 2026 21:24:31 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1771997071; x=1772601871; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to:date
-         :cc:to:from:subject:message-id:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=RP5pxbrjsJQ0eXWB7/Uudx6F0MefVV0OrNtMgZFRCjM=;
-        b=lB5WZ8vtgl/Oz7tBYN659+S7GaeD+TjYG6QTTg6W2s/Cra3p48l2na7eKm67Dppsf6
-         2B284vpumc4U7PgP8o8rFY3Xeg7bu0IY2Tkpxl46ck+a+6XJUNhcu3wsxurgd7ExZjs8
-         oJBZGf1SNWPrLK5Wm6j2/2ER4eFMyc5a5T4d2euhib1VpD6DcXMgvQCh9/493pwXXHb1
-         2hUtw8W8SMVoJRHS4r2u9YdgT75D/Kb2cN6WocYa4h+FCB0wH3MnuXREAzSeprM7lBXn
-         G5axBoIUwTl5myp0Chb8a3TbnWKhj32TC786sCZXg/b5K8KjNdi5vxjOgc69H6gNdE06
-         ZidQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771997071; x=1772601871;
-        h=content-transfer-encoding:mime-version:references:in-reply-to:date
-         :cc:to:from:subject:message-id:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=RP5pxbrjsJQ0eXWB7/Uudx6F0MefVV0OrNtMgZFRCjM=;
-        b=vL2zZDMP6Sd5KQxRR9nv2yhnK2mGP07ko08HpqIiOe750d9/Bg93Ef8cX3+H8GwJQ0
-         PeZtTqX7nxRBBkGBM6d9EJzm+0E9nDfqhWS2Kx91GuOtKROIALEIliZnJW40VjR2f3uM
-         V9vQXSEMrOv9d3ahak8jVQSfP4mJ07eSUm/KAvSy3xWjyGKlgEKtGPOhVhFRrOg/ti19
-         IFYYpQTmREtgVsn/D/qfYMjpk51TKsiXnyY+xLfrY3FnSKrhssNWxmx8ax9wWzAOYez4
-         vWtQlCHaWQfer0ehZyrR4zefP5Nsj3ZABAygVOZdGYcji7n8lvzkjSnqDUBgimP8E6w1
-         FJVA==
-X-Forwarded-Encrypted: i=1; AJvYcCVRtoAyjG+qh76pEoSv7w95d0vUD0hNFGMarkfKbDIEzI4Z1uU/7JnsxDDgsUGqXJxwUMkPRAcJ@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz7x0GIBonvkeRRezuGkoMbMj3Sr/nBgCFAV98pZzM0aRuvYDP0
-	4GG18rE4MkA/ratsLXCpItBLG6emkqOlDI6HwGawj2lnbgQhRfu63VdW
-X-Gm-Gg: ATEYQzwuxWnQHUZLMDyDgKdJ6JBiSP6+Dfj89pu32aVEnRIEUTGHcK1bFBZZSbPKy+f
-	5GowPNClkOoq4rJyX69T3dJRUJq62oqyB87WQyvEXMToSUeWOfOioeKg+8AWXnOE2QKBXC943t9
-	7JkaElVbif/yh+13xBsEROpSyWTy5SmPsSwKgi3heVc5jWCjjrx45j4q4lhpfDfUKc8AHkDZCBo
-	16tK+FPI8uEFVIY4QyCXieLxe0NqWUlRVSIWMAwxaw0rc5gnyZgMOVK3UhUO3xNC1YIpWeQzjnY
-	cAYLTFhUcCeKoLnz7JyK9CSWe6tjWhEhGGDoleWpWWF4YqKLKoQycrb2QXeSw33mvIs+KngnMqr
-	4xiwpn+B6B3QDMKnSEa5ok6uUQFBPXmzh/vTuCAtkNXqUD2ODEGSa2RlNox4EqIJtXdouDFIzkG
-	EYeXSOasD1MuqQpxrOOv/3mNZ0fjZ3kLQAvudDKk3jVwjsRkXpo22lmeEj3ZO2Y7B/ocl7zEQlN
-	BQ=
-X-Received: by 2002:a17:903:1105:b0:29e:bf76:2d91 with SMTP id d9443c01a7336-2ad74539cf8mr136106825ad.42.1771997070718;
-        Tue, 24 Feb 2026 21:24:30 -0800 (PST)
-Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com ([49.207.233.55])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ad74f5dae6sm130398475ad.21.2026.02.24.21.24.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 24 Feb 2026 21:24:30 -0800 (PST)
-Message-ID: <b424960f4f5c91e1a7d5aa7f3b89569789bfa7b4.camel@gmail.com>
-Subject: Re: [PATCH v1 3/7] xfs: Add realtime group grow tests
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: djwong@kernel.org, cem@kernel.org, david@fromorbit.com,
- zlang@kernel.org,  linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
- ritesh.list@gmail.com,  ojaswin@linux.ibm.com, hsiangkao@linux.alibaba.com
-Date: Wed, 25 Feb 2026 10:54:25 +0530
-In-Reply-To: <aZawVm-cjoyM7ErV@infradead.org>
-References: <cover.1771425357.git.nirjhar.roy.lists@gmail.com>
-	 <f1230eca56f32e26b954be6684d1582dacf2aef6.1771425357.git.nirjhar.roy.lists@gmail.com>
-	 <aZawVm-cjoyM7ErV@infradead.org>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5 (3.28.5-27.el8_10) 
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="RKTgt0d9"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1772015266; x=1803551266;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=5GtqqvJlMs4Ad6K/m/iFbsXDskYbfmhS6K1Ce3INJHA=;
+  b=RKTgt0d9As/0ZbMu63jrM11tBzc7zVLvkiA0p8DwMjN4BaBv8z6bJy17
+   nvSlkdc0/mj5QEEDv4gaWEyToQHC1kY3ekgCHQ1Pwxs1g4AgzwHHtW/Rl
+   HELBQcyfDFfE2I9iys5vzsnomjK2WsG1VrRiiD2UXEcunjV2OGa2x6DC7
+   N/cDJJwWsOlESIjmoww8bTO9tnvAyhF+UAm9B2TFU6yhRxI8SdOrv1gfb
+   lyLrF2o+AQJeIHwE62w3nXBL0aGZYd2rfuCjRQMB/ebWpxzZPWBlQHoDj
+   x3Mwe9mpZw7uV1FPhuCK4abk9f7EJXptIZRQgSX+e1/ViXp+jURGZH1OY
+   A==;
+X-CSE-ConnectionGUID: QNPgJ+CKT5aGDCcRhCc4iw==
+X-CSE-MsgGUID: vQrkXftfQpa9xDSkDNZDRg==
+X-IronPort-AV: E=Sophos;i="6.21,310,1763395200"; 
+   d="scan'208";a="141040117"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 25 Feb 2026 18:27:45 +0800
+IronPort-SDR: 699ecea1_7KwASu3sbmy0onnlqqbXf84pZHgyObxlComnmJd0a5TzAr9
+ ZQPGR3K3cYALhYkosX5RXnLHORvgs0ND6qnjaKA==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 25 Feb 2026 02:27:46 -0800
+WDCIronportException: Internal
+Received: from c02g55h7ml85.ad.shared (HELO neo.fritz.box) ([10.224.26.5])
+  by uls-op-cesaip02.wdc.com with ESMTP; 25 Feb 2026 02:27:43 -0800
+From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org,
+	Christoph Hellwig <hch@lst.de>,
+	Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH v2 0/2] fstests: simplify per-fs _fixed_by_kernel_commit
+Date: Wed, 25 Feb 2026 11:27:39 +0100
+Message-ID: <20260225102741.174955-1-johannes.thumshirn@wdc.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-On Wed, 2026-02-18 at 22:40 -0800, Christoph Hellwig wrote:
-> On Thu, Feb 19, 2026 at 06:10:51AM +0000, Nirjhar Roy (IBM) wrote:
-> > From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-> > 
-> > Add unit tests to validate growth of realtime groups. This includes
-> > last rtgroup's partial growth case as well complete rtgroup addition.
-> 
-> Please tests these also with zoned rt devices.  They are a bit special
-> in that you can only grow (and in the future shrink) entire RTGs, and
-> don't have the bitmap/summary.  For some cases that might mean just
-> not running them (if they grow inside a RTG), and for others they might
-> need very minor tweaks.
+Hi Zorro,
 
-Sure. I will update these tests once I am able to make the shrink work with the zoned devices. Thank
-you for pointing this out. 
---NR
-> 
+Christoph asked in https://lore.kernel.org/r/20260210155123.GA3552@lst.de
+to introduce a _fixed_by_fs_commit helper, that encapulates the
+ if [ $FSTYP" = fs ] && _fixed_by_kernel_commit XXXXXX "blah"
+pattern.
+
+Here's my take on it. I also thought about adding more helpers like:
+- _fixed_by_btrfs_commit
+- _fixed_by_xfs_commit
+- _fixed_by_ext4_commit
+but not sure if this is going too far.
+
+Changes to v1:
+- Change to full blown if then fi in _fixed_by_kernel_commit
+- Add Christoph's Reviewed-by
+
+Johannes Thumshirn (2):
+  fstests: add _fixed_by_fs_commit helper
+  fstests: use _fixed_by_fs_commit where appropriate
+
+ common/rc         | 10 ++++++++++
+ tests/generic/211 |  2 +-
+ tests/generic/362 |  3 +--
+ tests/generic/363 | 10 ++++------
+ tests/generic/364 |  3 +--
+ tests/generic/365 | 15 ++++++---------
+ tests/generic/366 |  2 +-
+ tests/generic/367 |  2 +-
+ tests/generic/370 |  5 ++---
+ tests/generic/471 |  2 +-
+ tests/generic/562 |  3 +--
+ tests/generic/623 |  2 +-
+ tests/generic/631 |  3 +--
+ tests/generic/646 |  2 +-
+ tests/generic/649 |  2 +-
+ tests/generic/650 |  2 +-
+ tests/generic/695 |  2 +-
+ tests/generic/700 |  2 +-
+ tests/generic/701 |  2 +-
+ tests/generic/702 |  2 +-
+ tests/generic/703 |  3 +--
+ tests/generic/704 |  2 +-
+ tests/generic/706 |  3 +--
+ tests/generic/707 |  2 +-
+ tests/generic/708 |  3 +--
+ tests/generic/733 | 10 ++--------
+ tests/generic/736 |  2 +-
+ tests/generic/738 |  2 +-
+ tests/generic/741 |  2 +-
+ tests/generic/742 |  3 +--
+ tests/generic/748 |  2 +-
+ tests/generic/755 |  2 +-
+ tests/generic/757 |  2 +-
+ tests/generic/761 |  2 +-
+ tests/generic/763 |  2 +-
+ tests/generic/764 |  2 +-
+ tests/generic/766 |  8 +++-----
+ tests/generic/771 |  2 +-
+ tests/generic/779 |  2 +-
+ tests/generic/782 |  2 +-
+ tests/generic/784 |  2 +-
+ tests/generic/785 |  2 +-
+ 42 files changed, 63 insertions(+), 75 deletions(-)
+
+-- 
+2.53.0
 
