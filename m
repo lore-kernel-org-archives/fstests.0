@@ -1,85 +1,147 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF3F93D3482;
-	Wed, 25 Feb 2026 14:24:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F0DA3D6491
+	for <fstests@vger.kernel.org>; Wed, 25 Feb 2026 16:25:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772029477; cv=none; b=DPzXhz48HI1XIxClSZQGF4BOB5MuZVHq/i3rCysaR+6iDxkDAL+0rKopxIuOPuQWyoCJVGYWWeJ446nZEdF31GAoy+diDf0OugyYpo9+bk3cOuWhNc1fJuvG6gorB4TsWWO5vO49CCgidGo/e+dhnYF8kI5I0KuqxTM+aurlUD4=
+	t=1772036747; cv=none; b=HNgcIwej0zwr+IQ4QgKyNC9v8Q8CZN6W1PyMipJWVXeEW0vjxuFWk1rCfn5m5Zl6IQvBL2jdZ3MW9wCdhitNHpMcHGDt+UaPrh4pRsepZ4KPoCWU8Ewx2Slwge+8rXiNgZpJ8SSdL1HQsBlFR5O7cIppD86QsZbVjAKrdYktvLg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772029477; c=relaxed/simple;
-	bh=qsZY4iro4DPK6is1C/op7lHvrZw4o2fFLRWzHj7oD/g=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uNfUJHlZtvwgqma2rpB4RqkK3Umdnl7VKPvqrbdNBuDmigmCQ0Et+1Vv2+Nm0OrBisjfnJYhgS56ClN/LRoVRjCXy8/qPU50sVnhgoQICx915vSDcF3Z/rb3YFnyyob/z6Fdz1j7lxgBOET+aPmPzACWLZSMorrvJTK9tG5rr+w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=XQ8pJ0ac; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1772036747; c=relaxed/simple;
+	bh=JYMKVQPJg1jH4KtaPw25n289PlOQOWDBSUtCharWy8I=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=aQabh7T+ACN9aDekTFZGugEClNKG7pO9eufBVCWkZGT91IJBmxfRlmaz/Lyws0Tun6iQU50Ys2kX9sWl08hpdRmTrkurGzztSfVMYRKZ/IYgv9sR67QW6voBkrXdPWrvTg+b9tHPQHw+ryv3LqVy1YJWVR7WQ1CauB3ZbHBlKqU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RVB7bl2q; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="XQ8pJ0ac"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=9Sx6U9jamIBNlMfB6t0LAl4D4ql9zLLDo3L42wIR0WA=; b=XQ8pJ0aczDrvcAuJY6UrRBlMYZ
-	t6hJLJ0PXx5FJohgDrNfxJAbIVA31DKrBhsoA1GJaIjqEsQlIP/IAdv9nB2L4IZvB4ijmTaYq5ZVA
-	l7PpHHOFpdAtn/RON6EQj/STO2rbaF5bLM40SGhza1SLEYoKCRA4rV9hyXcsfe8dfZQ/VkY+zv+Os
-	T15pBVH5Fx1t4x8NoXrulXsYZAYgEwcvFeCHUBu3IQaSoP4/YDnDfyy4an3AQicOkinbZSuL+jU0Y
-	BXIs2xJvjEGuYB+VKb35St1dzAs6DRgKnjaoXRjX2NlysUA3uUR1HXgIAekLo7XKDvYXKS1uwVXk0
-	fuk3OYDg==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vvFoa-00000004BxY-0MT0;
-	Wed, 25 Feb 2026 14:24:36 +0000
-Date: Wed, 25 Feb 2026 06:24:36 -0800
-From: Christoph Hellwig <hch@infradead.org>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-Cc: Christoph Hellwig <hch@infradead.org>, djwong@kernel.org,
-	cem@kernel.org, david@fromorbit.com, linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org, ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com, hsiangkao@linux.alibaba.com
-Subject: Re: [RFC v1 4/4] xfs: Add support to shrink multiple empty realtime
- groups
-Message-ID: <aZ8GJGpEwp3Ihclh@infradead.org>
-References: <cover.1771418537.git.nirjhar.roy.lists@gmail.com>
- <1a3d14a03083b031ec831a3e748d9002fab23504.1771418537.git.nirjhar.roy.lists@gmail.com>
- <aZasXfB-GUiGT4yc@infradead.org>
- <d7853e26511631b9ca9a28bb691bbe82765640c0.camel@gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RVB7bl2q"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 20133C116D0;
+	Wed, 25 Feb 2026 16:25:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1772036746;
+	bh=JYMKVQPJg1jH4KtaPw25n289PlOQOWDBSUtCharWy8I=;
+	h=Date:From:To:Subject:From;
+	b=RVB7bl2q7/QaFFKKquSGIC2LkeNl4Vvwe3OW1zf9AXvLjt95HjzpF6YVx31gwFHY1
+	 aNZjYGyEsq4Bg0gF/TTdwc+4MK2cjoLbbVKtLJ3iiFkxLvm0iCK8L4JKYsRwyVSBT+
+	 kjnwHN2tYxr2TwZGhaW97ctMhl8l3+CwjANVH3wT6nbq9iiW5/jaC2q22R0bv1euwV
+	 0vCE6uQYBTDVAst/Cg09qDKbXDXRHX8xifBkdeDtGelKCEPEXlN+5sAqUp+OigR+ZG
+	 SS1QLOPpBtxPSZ1ynfIK1LJNLDtW5sOnL1CC+00DMLrVthXlkRLD9+w7u/BRMosRyU
+	 a7r9Wt2k5bIgw==
+Date: Thu, 26 Feb 2026 00:25:42 +0800
+Message-ID: <680e30e02982bf96d6749d431609f1aa@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2026.01.27 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="A4AwWgV1joPD"
+Content-Disposition: inline
+
+
+--A4AwWgV1joPD
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <d7853e26511631b9ca9a28bb691bbe82765640c0.camel@gmail.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Wed, Feb 25, 2026 at 10:47:40AM +0530, Nirjhar Roy (IBM) wrote:
-> > Highlevel note:  this seems to only cover classic bitmap based RTGs,
-> > and not zoned ones.  You might want to look into the latter because
-> 
-> Okay. So are you suggesting to add the shrink support only for the
-> zoned devices or extend this patch set to cover shrink for the zoned
-> devices too?
+Hi all,
 
-We should support all devices.  But what I'm trying to say is the
-zoned version is both simpler, and will actually allow you to get
-to an actually useful fully feature shink much more easily.
+The master branch of the xfstests repository at:
 
-> > they're actually much simpler, and with the zoned GC code we actually
-> > have a super nice way to move data out of the RTG.  I'd be happy to
-> > supple you a code sniplet for the latter.
-> 
-> Sure, that would be super useful. Also, since I don't have much
-> experience in zoned devices, can you please point to some relevant
-> resources and recent zoned device related patchsets that can help me
-> get started with?
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-You don't actually need a zoned device, you can just mkfs with
-"-r zoned=1" and get a internal rtdevice configuration.  If you are
-interested in the actual hardware and ecosystem take a look at:
-https://zonedstorage.io/
+has just been updated to v2026.01.27 version.
 
-If at some point you're interested in hardware samples contact me
-offlist and I'll connect you to the right people.
+Thanks,
+Zorro
 
+The new head of the master branch is commit:
+
+69cd20bd0498 xfs: test reproducible builds
+
+New commits:
+
+Darrick J. Wong (2):
+      [754368070ac5] xfs/614: fix test for parent pointers
+      [31f7192f90a8] misc: allow zero duration for fsstress and fsx
+
+Filipe Manana (2):
+      [8dad086a4701] btrfs: test power failure after fsync and rename exchanging directories
+      [e0ded76267f9] fsx: add missing -T option to getopt_long()
+
+Jaegeuk Kim (1):
+      [096adc20b3df] f2fs/015: Test correct mkfs options for error cases
+
+Luca Di Maio (1):
+      [69cd20bd0498] xfs: test reproducible builds
+
+Nirjhar Roy (IBM) (1):
+      [725b08a6d61a] generic/371: Fix the test to be compatible block sizes upto 64k
+
+Ojaswin Mujoo (1):
+      [a4dbdc5486b4] generic/108: fix test hand upon failure to create LV
+
+Qu Wenruo (2):
+      [8d2e1bd3d294] fstests: btrfs/131: add explicit v1 space cache requirement
+      [bc74aaf6859c] fstests: btrfs: add a new test case that is future-proof
+
+Viacheslav Dubeyko (1):
+      [facf3325d90d] xfstests: hfs/hfsplus don't support metadata journaling
+
+caokewu (1):
+      [42c2ccaf3700] ext4/307: allocate donor file size dynamically
+
+
+Code Diffstat:
+
+ common/btrfs                     |  25 ++++++
+ common/rc                        |   2 +-
+ common/xfs                       |   3 +
+ ltp/fsstress.c                   |   5 +-
+ ltp/fsx.c                        |   7 +-
+ tests/btrfs/131                  |  12 ++-
+ tests/btrfs/341                  |  73 ++++++++++++++++
+ tests/btrfs/341.out              |  15 ++++
+ tests/btrfs/342                  | 103 +++++++++++++++++++++++
+ tests/btrfs/342.out              |  15 ++++
+ tests/ext4/307                   |   5 +-
+ tests/f2fs/015                   |  10 ++-
+ tests/f2fs/015.out               |  92 ++++++++++----------
+ tests/generic/108                |   7 +-
+ tests/generic/371                |   2 +-
+ tests/xfs/614                    |   1 +
+ tests/xfs/614.cfg                |   4 +
+ tests/xfs/614.out.lba1024_parent | 177 +++++++++++++++++++++++++++++++++++++++
+ tests/xfs/614.out.lba2048_parent | 177 +++++++++++++++++++++++++++++++++++++++
+ tests/xfs/614.out.lba4096_parent | 177 +++++++++++++++++++++++++++++++++++++++
+ tests/xfs/614.out.lba512_parent  | 177 +++++++++++++++++++++++++++++++++++++++
+ tests/xfs/841                    | 173 ++++++++++++++++++++++++++++++++++++++
+ tests/xfs/841.out                |   3 +
+ 23 files changed, 1205 insertions(+), 60 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--A4AwWgV1joPD
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmmfImAACgkQlNbPkfr2
+tMxcyQ/9EJlI6hHYaDdAop87EKF6sUJv2IL5CV0P6QdjtlVEzlKoqFFTeTnG5deo
+bJ1dhuFmWlu2qnnwPeEFianPXDAkG1aFiUHz2g5NwnJpGlqxWgkRNtNr5XM4bQ9m
+PwAaALtftyrbmnsaKj1tSNhflZM0s+PA+PDQ72SuFD3j7wYo/4xdxJgjHuzSM8Zo
+6twoEtYqXVUO60YL1VR2ToLcCBQscjegEeDORLU1mfWer9gzJS7aCw0OH8FvAy8E
+ND20vq2m7HTFFTdGuWgw4lvdWqJtZKk9xZwsA31SmqkTbT7LWcFjQtPYG6yabdtz
+NtdEFmq1G/vANcijYnzTHXA6qkMYVmBWBpG3sV+FLjFzoxCAjIMcSe+S8Ww1fgM3
+1OwhZ3DybzTWO63QjzM0kCsLRlwDVhhOYDb8McnnPVzR92KsEozDPlxs8uqdJ59a
+KIt6U/HA0XHEUZzFMdghLJjuKPTNAyXpkN4KlJlwsVz0oFi2sGvQKJ+wYpcKYk45
+mhS14BCIDV+x8Dy96IKbkq8UUvvOUEyUfA4/PlV11V0n/aqXLKC8otQLhZPz2jYO
+k5fma2u8SmT3Fm+dhVsgs4vaxKmEJgsk1i4SIHoGIP2rE4qXS4t5lEeiYfaz0q4I
+5CgotXy+chnFJh/qrlwrZntT2PSG5GDwkPJeRw990nu9Rx3qsXM=
+=dd0G
+-----END PGP SIGNATURE-----
+
+--A4AwWgV1joPD--
