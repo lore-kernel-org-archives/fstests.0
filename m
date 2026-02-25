@@ -1,76 +1,76 @@
-Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
+Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 326742D7D3A
-	for <fstests@vger.kernel.org>; Wed, 25 Feb 2026 05:18:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5753A2D63F6
+	for <fstests@vger.kernel.org>; Wed, 25 Feb 2026 05:24:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771996718; cv=none; b=buDsNFXMt8M/eOGYhM1YxAiu6cvUrl21mRMKbsnZiXcnRPpB2+66FiDoTMUeKCWh6UfZfQEeUnHqvmBNp0G+AxI4ycPuDHrz+N46mdOOYsJF2+OKlTmRF04yVjj1RU29kYykBdpAaacpXc2DVx7IKf6ndDgQBL07SrFI6+eEa6k=
+	t=1771997072; cv=none; b=BS9Y3NoICNbPLzHIX9UE5FpGNUfb9kxlATNxeNfWruWDM+I4MyyRRDUncbUy2rqvOzz86xumH8zOrbCgQPEuVnjx4ozrEEVl0g5EDxmLW1xB9BANYg1u1Ed/SGe8Ie5yi8Sf/bf/FWopvxJoyHS0kbQ5QJ4nuTge977rKxWYb8Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771996718; c=relaxed/simple;
-	bh=C/wN3yfQ9G9UkppJlbjel0p2ELNuDRdLtDCjB5j1cuU=;
+	s=arc-20240116; t=1771997072; c=relaxed/simple;
+	bh=l34tSCvGC42EyUSp8qcSQNBClPGGwkcKluKp4Zjzov4=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:Mime-Version; b=QbU5b73s4C7hcpE/fq1eaAAwH519bc5BXordbDRH7gxnbTwhUe0PAl1IuL0J41nEfuzOXDGhM7I9yA6jJRsbblOBVbWWnp4WXtmn7O8faHyz7UfBG6iiLLizAckFyJd9h7Wk8nM/q60FIH0z7UNiHU97rU4zJcZy+6NfPO7qaMY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=iMVzZP9/; arc=none smtp.client-ip=209.85.214.181
+	 Content-Type:Mime-Version; b=JHZKTo1MVOwK4S0sC/EJ1/PB0RU78Mxm2q0bwjMBokQcbQx3pwRlnVCU/3WE/U7PCiOSX29YvmVmqiDbTR8k9T5kXxuiOFJ8YaUmNckvDzuyc6wJCelXKDJB6iebGPmXkGCrKyr7XNaJt2fLUYIBLB9ozhYUw2/CfarAmT8WFQk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=lB5WZ8vt; arc=none smtp.client-ip=209.85.214.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="iMVzZP9/"
-Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-2adae92249eso11672375ad.0
-        for <fstests@vger.kernel.org>; Tue, 24 Feb 2026 21:18:37 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lB5WZ8vt"
+Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-2ad9f316d68so7482835ad.2
+        for <fstests@vger.kernel.org>; Tue, 24 Feb 2026 21:24:31 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1771996716; x=1772601516; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1771997071; x=1772601871; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to:date
          :cc:to:from:subject:message-id:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=AlEL/5agn86aOLJOKSSL+66MwmfqUNVuVfSZ6HRleS0=;
-        b=iMVzZP9/Qiquj6w3jfj+I3hplVbyExN0DRXR3+V4pfLV8OLdkxnIMPalPeHZdtg2GG
-         Wdy2oSU3yy2Lpp95iDm/61rFMY2X4z1d7LFBS2s5KHu+2KYzFPnvpALPZPsWwYu5ah5s
-         27F7HzckNJP+gjOTUc4hcL9KO88XpZCJWpDL9EGx0q/JR2Heo5RKWOr1ut4q1SAme459
-         BvlsyJHEHlXYioGiYgEq3XizqeZ9W81UXcENCYHDNvj5zX9ocXUnTHCEmlc4HQru4z5j
-         3//Hlo6/BIQxRfiSeYfRbamIxTRCOulPiFpUQUATRXYaDCFIICGGP18ggD8Kqo/hpxdQ
-         GzcA==
+        bh=RP5pxbrjsJQ0eXWB7/Uudx6F0MefVV0OrNtMgZFRCjM=;
+        b=lB5WZ8vtgl/Oz7tBYN659+S7GaeD+TjYG6QTTg6W2s/Cra3p48l2na7eKm67Dppsf6
+         2B284vpumc4U7PgP8o8rFY3Xeg7bu0IY2Tkpxl46ck+a+6XJUNhcu3wsxurgd7ExZjs8
+         oJBZGf1SNWPrLK5Wm6j2/2ER4eFMyc5a5T4d2euhib1VpD6DcXMgvQCh9/493pwXXHb1
+         2hUtw8W8SMVoJRHS4r2u9YdgT75D/Kb2cN6WocYa4h+FCB0wH3MnuXREAzSeprM7lBXn
+         G5axBoIUwTl5myp0Chb8a3TbnWKhj32TC786sCZXg/b5K8KjNdi5vxjOgc69H6gNdE06
+         ZidQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771996716; x=1772601516;
+        d=1e100.net; s=20230601; t=1771997071; x=1772601871;
         h=content-transfer-encoding:mime-version:references:in-reply-to:date
          :cc:to:from:subject:message-id:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=AlEL/5agn86aOLJOKSSL+66MwmfqUNVuVfSZ6HRleS0=;
-        b=s4dVbRCHmKX6jq97SCpdREW61SLUsE7w1QuCor/ufEBHmU1l7lzNIZXNb/IlStyR2z
-         xHerU6o9T3/F2UnUdjwp0GQer0eECYmBEWtuV2nm4CP5IVQVhM9051Q4W07Z6xZR33Ig
-         rvjAQc29BEonFXjojmMkcL3tECbuHoJgEu9JIQo4TomKhJY3tiWF6vP1A4ynuGG/qRC5
-         fy7k+IJCddW1yjCPgx0dYkXSz8li874G3GXfiLRKdWQcgpPhgwstGLSYPneqMA9Z0YZK
-         9xppmZk95HhfouhEJZluxIgAljBeuPSVmwd5vw4zwmdJevg2oNbquk61s/SWuDB3E+1S
-         tXXQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWPmVjjm82gkO2d9I0a8kixD0WUGw7dRlKiStMDOSAO/dfTqCaZUAkH/EJhxbmv3py1aZTgCmhI@vger.kernel.org
-X-Gm-Message-State: AOJu0YzUrdX+OIVe86QI+HiwEzzgZRuIr52BF/LAtFFT4saVxy1laAmQ
-	lKsAYvvxxFTdmu2e9KH8uD9gWu8aQUfap68x2bBC0x4Wm2L115Zhg19h
-X-Gm-Gg: ATEYQzzSsDO9P1PyFFi6z2IJmNDWJMZXbXfH3zuOLunS0C4ITkuVSmCbcuXi8T/y0dk
-	wPAna/AxeAEWXRw3J7MwQuwtFsUqvGdFz9SxtEZjo1434y7Oc1x0XmUgLQ7nCqsYuuk20+bvwsD
-	H++EgUPtB1twRpcDbarAZAr7mbVpOKIne98I3eBzp8QkFUEe6OuDUyRj1Mtt19SMF4KTrjH7mgq
-	Du+Npdo2QV8UADRdFERy6P+2QeZFz8yujc/R+Z4hH5alMzdmazFtg0aeZCHJVCTfcs0rdnLjswp
-	Mbku2UPfyRDLDVveWXxouYRet+7t3ZCGjOCSwmdJrL5BskoNGOJUaSXTZ2yIBsslQiGz6KqFO92
-	fOCu7pifDwpO3EAt0TL3B1W0xpMoGdFzckDyv8tKQOlubF/8FXvenQv7uPndPNm0bq19CAvZLyo
-	pZk0sTNyhQZs6JI5qirJ73SlQ8dxb9k8GxK1Zjat0H105u3OGodb8sdVJfdFCX66fB0KrjOZgGl
-	74=
-X-Received: by 2002:a17:902:f60f:b0:2ab:3cba:42fa with SMTP id d9443c01a7336-2ad7453257bmr148390895ad.46.1771996716506;
-        Tue, 24 Feb 2026 21:18:36 -0800 (PST)
+        bh=RP5pxbrjsJQ0eXWB7/Uudx6F0MefVV0OrNtMgZFRCjM=;
+        b=vL2zZDMP6Sd5KQxRR9nv2yhnK2mGP07ko08HpqIiOe750d9/Bg93Ef8cX3+H8GwJQ0
+         PeZtTqX7nxRBBkGBM6d9EJzm+0E9nDfqhWS2Kx91GuOtKROIALEIliZnJW40VjR2f3uM
+         V9vQXSEMrOv9d3ahak8jVQSfP4mJ07eSUm/KAvSy3xWjyGKlgEKtGPOhVhFRrOg/ti19
+         IFYYpQTmREtgVsn/D/qfYMjpk51TKsiXnyY+xLfrY3FnSKrhssNWxmx8ax9wWzAOYez4
+         vWtQlCHaWQfer0ehZyrR4zefP5Nsj3ZABAygVOZdGYcji7n8lvzkjSnqDUBgimP8E6w1
+         FJVA==
+X-Forwarded-Encrypted: i=1; AJvYcCVRtoAyjG+qh76pEoSv7w95d0vUD0hNFGMarkfKbDIEzI4Z1uU/7JnsxDDgsUGqXJxwUMkPRAcJ@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz7x0GIBonvkeRRezuGkoMbMj3Sr/nBgCFAV98pZzM0aRuvYDP0
+	4GG18rE4MkA/ratsLXCpItBLG6emkqOlDI6HwGawj2lnbgQhRfu63VdW
+X-Gm-Gg: ATEYQzwuxWnQHUZLMDyDgKdJ6JBiSP6+Dfj89pu32aVEnRIEUTGHcK1bFBZZSbPKy+f
+	5GowPNClkOoq4rJyX69T3dJRUJq62oqyB87WQyvEXMToSUeWOfOioeKg+8AWXnOE2QKBXC943t9
+	7JkaElVbif/yh+13xBsEROpSyWTy5SmPsSwKgi3heVc5jWCjjrx45j4q4lhpfDfUKc8AHkDZCBo
+	16tK+FPI8uEFVIY4QyCXieLxe0NqWUlRVSIWMAwxaw0rc5gnyZgMOVK3UhUO3xNC1YIpWeQzjnY
+	cAYLTFhUcCeKoLnz7JyK9CSWe6tjWhEhGGDoleWpWWF4YqKLKoQycrb2QXeSw33mvIs+KngnMqr
+	4xiwpn+B6B3QDMKnSEa5ok6uUQFBPXmzh/vTuCAtkNXqUD2ODEGSa2RlNox4EqIJtXdouDFIzkG
+	EYeXSOasD1MuqQpxrOOv/3mNZ0fjZ3kLQAvudDKk3jVwjsRkXpo22lmeEj3ZO2Y7B/ocl7zEQlN
+	BQ=
+X-Received: by 2002:a17:903:1105:b0:29e:bf76:2d91 with SMTP id d9443c01a7336-2ad74539cf8mr136106825ad.42.1771997070718;
+        Tue, 24 Feb 2026 21:24:30 -0800 (PST)
 Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com ([49.207.233.55])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ad7500e1c0sm130118045ad.45.2026.02.24.21.18.33
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ad74f5dae6sm130398475ad.21.2026.02.24.21.24.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 24 Feb 2026 21:18:36 -0800 (PST)
-Message-ID: <dba862052a60544058d6e7e9cadd52e6870eb11b.camel@gmail.com>
-Subject: Re: [RFC v1 2/4] xfs: Introduce xfs_rtginodes_ensure_all()
+        Tue, 24 Feb 2026 21:24:30 -0800 (PST)
+Message-ID: <b424960f4f5c91e1a7d5aa7f3b89569789bfa7b4.camel@gmail.com>
+Subject: Re: [PATCH v1 3/7] xfs: Add realtime group grow tests
 From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
 To: Christoph Hellwig <hch@infradead.org>
-Cc: djwong@kernel.org, cem@kernel.org, david@fromorbit.com, 
-	linux-xfs@vger.kernel.org, fstests@vger.kernel.org, ritesh.list@gmail.com, 
-	ojaswin@linux.ibm.com, hsiangkao@linux.alibaba.com
-Date: Wed, 25 Feb 2026 10:48:31 +0530
-In-Reply-To: <aZaqZSUKUJDpuVQK@infradead.org>
-References: <cover.1771418537.git.nirjhar.roy.lists@gmail.com>
-	 <38947e4ca2d01828e7e7033f115770efe6ac9651.1771418537.git.nirjhar.roy.lists@gmail.com>
-	 <aZaqZSUKUJDpuVQK@infradead.org>
+Cc: djwong@kernel.org, cem@kernel.org, david@fromorbit.com,
+ zlang@kernel.org,  linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+ ritesh.list@gmail.com,  ojaswin@linux.ibm.com, hsiangkao@linux.alibaba.com
+Date: Wed, 25 Feb 2026 10:54:25 +0530
+In-Reply-To: <aZawVm-cjoyM7ErV@infradead.org>
+References: <cover.1771425357.git.nirjhar.roy.lists@gmail.com>
+	 <f1230eca56f32e26b954be6684d1582dacf2aef6.1771425357.git.nirjhar.roy.lists@gmail.com>
+	 <aZawVm-cjoyM7ErV@infradead.org>
 Content-Type: text/plain; charset="UTF-8"
 X-Mailer: Evolution 3.28.5 (3.28.5-27.el8_10) 
 Precedence: bulk
@@ -81,36 +81,21 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 
-On Wed, 2026-02-18 at 22:15 -0800, Christoph Hellwig wrote:
-> > +int
-> > +xfs_rtginodes_ensure_all(struct xfs_rtgroup *rtg)
+On Wed, 2026-02-18 at 22:40 -0800, Christoph Hellwig wrote:
+> On Thu, Feb 19, 2026 at 06:10:51AM +0000, Nirjhar Roy (IBM) wrote:
+> > From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+> > 
+> > Add unit tests to validate growth of realtime groups. This includes
+> > last rtgroup's partial growth case as well complete rtgroup addition.
 > 
-> Please use the usual XFS function definition style.
+> Please tests these also with zoned rt devices.  They are a bit special
+> in that you can only grow (and in the future shrink) entire RTGs, and
+> don't have the bitmap/summary.  For some cases that might mean just
+> not running them (if they grow inside a RTG), and for others they might
+> need very minor tweaks.
 
-Will fix this.
-> 
-> > +{
-> > +	int	i = 0;
-> 
-> The for loop already does this.
-> 
-> > +	int	error = 0;
-> > +
-> > +	ASSERT(rtg);
-> 
-> The assert isn't needed.
-> 
-> > +
-> > +	for (i = 0; i < XFS_RTGI_MAX; i++) {
-> > +		error = xfs_rtginode_ensure(rtg, i);
-> > +		if (error)
-> > +			break;
-> > +	}
-> > +	return error;
-> 
-> Just return the error directly from the loop and 0 if you make it
-> through, then there is no need for the error initialization at the
-> top either.
-+1 for all of the above.
+Sure. I will update these tests once I am able to make the shrink work with the zoned devices. Thank
+you for pointing this out. 
 --NR
+> 
 
