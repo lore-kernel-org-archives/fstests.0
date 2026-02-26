@@ -1,160 +1,124 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f182.google.com (mail-pl1-f182.google.com [209.85.214.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 441942D2385
-	for <fstests@vger.kernel.org>; Wed, 25 Feb 2026 16:41:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4292E2DB7A1
+	for <fstests@vger.kernel.org>; Thu, 26 Feb 2026 12:59:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772037693; cv=none; b=HKpbK4UIG/6ekQVZtC2+MiLrcM7VSLqXjr342OwEQ4Jdcy2lcCjO11RRIWSW8HMhXHk97DMkxITKFLO5qKZ0p6aw5fMqew8LOOtzeuXWyhthkkOvAaoCovZS+ZFimORGmIQyDLiWH6UWY3CYuaRUrd+yg9T74lFLtlaEv3pbmIQ=
+	t=1772110783; cv=none; b=FV5HEpd2zOluRLS7CZBFuluV/oSLcwP3xjyyOruC1Y3QBy3TFRAl7/WXLeXhANlFNkMeivJMFGR5oNVAuPZ992vWu8gO1G62AjlosjPQvPcLurba1hpeWrnoCTG+5QqgXj7KzUqf9CV/BnQBmta5uYCv4fqs7RcfsPh875kTIQc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772037693; c=relaxed/simple;
-	bh=OudVOdvti/B5LjpiO7nGE8v7MNR0UIOxrjw9Gg9Nlls=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=Yxyx/OQk1OMGIU7ih6Bvz0KtXCH+Q+T/Yyv3cUSIDiA8aKmLjFYoJN0hmOS3BabNvSyB7UwEX5mA/Y3hpSL0/v+Ym+FNsA9kMgBqQdfiThjtK1jELkC62bGrwPUaVxSCunOtNfpkV212JAb9+6nzRDWOTNvwXeAlbV00Cj2jYaM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jVbVR5Fo; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1772110783; c=relaxed/simple;
+	bh=8ZNMtwqLNIT5UifIf2TLPsjrgzNV+w/idgbtt6gen4c=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:Mime-Version; b=IiPvvIFATHFvKwrZbR7Yp3rP2FfFbkSibQM5t2N7ODIenS8QzKtKY+yah3UzMtXzKeYSYOqXMTwmFw+NZXDy4+H5woN/UN/XsYFaFgVBcQp+KL6ATuoWHwl+R69FvVNuTrtYQiFt2pqhKUPnLEZ4+y3kl5CQuJw5I6rhMqYjKUI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=lDlvwXe+; arc=none smtp.client-ip=209.85.214.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jVbVR5Fo"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CC63EC116D0;
-	Wed, 25 Feb 2026 16:41:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772037692;
-	bh=OudVOdvti/B5LjpiO7nGE8v7MNR0UIOxrjw9Gg9Nlls=;
-	h=Date:From:To:Subject:From;
-	b=jVbVR5FoPHbAdsV/D3DqJ74BvcICtQO2EIejMR3VpmTfrxoVSljK84Wtruqo24OgF
-	 Rgpbv+QsBmZwDID+YZElAGUlSOKhGu5OR+8onsqSLPPhDVzY0JpCgbF9k0imtGspLe
-	 ac8FgSzbHB0s2MW0o1oDWhBpcBNiplT3ycSyw1cWLmzRCvdpKnCxfspE8lUCWEccwo
-	 S7LqpWDry5hnyapVnGuihIIDa6Gd57oxs8bawy7f7EVgsySyAJz13RgaE0MPOd99J8
-	 TFhoYGvxNGtM25rcIUXRwZy1EhLK5+SOsWF2dV5YMDB6ILINFizGxWdjEIJ/vZLCgi
-	 TUUOSgXJxvAFA==
-Date: Thu, 26 Feb 2026 00:41:27 +0800
-Message-ID: <06a8801c215faa2bb6e5ed812c881110@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2026.02.26
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lDlvwXe+"
+Received: by mail-pl1-f182.google.com with SMTP id d9443c01a7336-2ab077e3f32so3338045ad.3
+        for <fstests@vger.kernel.org>; Thu, 26 Feb 2026 04:59:42 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1772110781; x=1772715581; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to:date
+         :cc:to:from:subject:message-id:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=SkyxfBart7AjDYDw5c6XtRbP25hY/UHBSwJPC48FLp8=;
+        b=lDlvwXe+jUW9a5/5IENQ64OMnymxdYJGluhUhZejMMcxwbA3kJ2ezMzXDElGFDeyOL
+         oHez4PrwnqjZE3mbahd/GqeOlWO+CTGPj/pHrV2mM7it5WFwoeIVWJn/L+U+gSXz2e+5
+         Jf4E9xV7PbleE6x58QcVh5Rdlub/Xfyr1FcbhFgMeAM4DR7TqORCtYkHEGRkujuGZKZG
+         ORGTdr1atXcGwlOM/udO7hlDkcRe1lFOjtgVNxQcQ7LOwnz4fTbdR8OIpU1CDMQtAL8H
+         9cFkOH574dipkOzSZVPYof7ijnd+9z8qSS6CRDWRbJzoPniiIqk0n5SoIVIfboHk0WWl
+         23aw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1772110781; x=1772715581;
+        h=content-transfer-encoding:mime-version:references:in-reply-to:date
+         :cc:to:from:subject:message-id:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=SkyxfBart7AjDYDw5c6XtRbP25hY/UHBSwJPC48FLp8=;
+        b=MRoQfVE7mksKn+6eFhtDf0s/8E5ljC4f9dbGWqiAJKwGpRl2PppiaUTnflpROhEFeP
+         d0U7vFnLirhl4/n1IX0TCIJT6PjvJot7tDpDmgrQRmgEZ5EF2iy+BZxbhhw9wJXCjkYG
+         MdVPS/TI9AU8CnoK0FQqia3VHiCFzJ5MlZYuKcboKUrwW2Vd+dCJ6POgfniNysBhFRLh
+         OE0WU7hpTL+hQFC7BaWOJWC1bmvVBxdiN/XEC+ZRdi3Hy0DfyXDEdMk351ivtjZvGayb
+         V5P/x49dUTiI21kVHXC5vO/OX/fKLmhJ85ZbnG1sLYrmPpISx91Tcp2DMks+Y8NM9Rnl
+         j2aQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWPmSNWy53UH/IscPXMjZESSmMVpybG3/7tez+dipHdty4tw5aem55QU/nhOdxnjSn5vEN6WFuF@vger.kernel.org
+X-Gm-Message-State: AOJu0YyqOrZD/U3q45XOoY/0bGC91O3F9irZzR5KAFZgGGY/eeaO6Toc
+	We2J3W88xE93AUEYRYPgf0I8RtlU/HbRofCaoqVI2FY87JKSPDmTgYNq
+X-Gm-Gg: ATEYQzwf4WE58ndmStJKM3emEOXBGBCHemajQ87u4iwOF28YOYHzOh6CaqTdVXhQaFW
+	1x+c1C5HIEkKxt2QuuKAjrszabsQrxOwskbnx/l1Tg7RWOosbGLM9ijTut6PIC25w/hzm9oqI1y
+	ovBzXPQjWWRTVesT0LmS4in8Gev9e66LdOJLKw8bPG9yOuGRGuXEXmaMrafWgASp39YTEvxIs51
+	j5RqpfOlYpfBfMoy4yqzuCDl/Kr59GbvR/LfNFHdmySgge9qkUNz3PpygS/8IH65aIo1r8QZKZH
+	WcrDnWc8IPYl/2pkAJO7U2Rj0HWVutpnxfdzwKO5HBCYLfTGhiNnhu6MGxeSyF5M/L/t2WLjie/
+	6g1FteOPqVbpZjtoHUmmoGzo2BKzr880rJq+UeuTFfnL0CEFXbEKSlFfjrSsAveQA+9+cs1oCzG
+	M5impH28FtGE+nmbggFCDzjg2WwOkhl5OhT8LWThPcIk4AnwW5CgkSsb86PSPXp73pTwPU60GB7
+	Wo=
+X-Received: by 2002:a17:903:2f04:b0:2aa:e3c7:6048 with SMTP id d9443c01a7336-2ade99a6871mr34212375ad.23.1772110781482;
+        Thu, 26 Feb 2026 04:59:41 -0800 (PST)
+Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com ([49.207.233.55])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2adfb5c9f79sm24602525ad.33.2026.02.26.04.59.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 26 Feb 2026 04:59:40 -0800 (PST)
+Message-ID: <33666a698483b57349a10df3418cf750a06cd769.camel@gmail.com>
+Subject: Re: [RFC v1 4/4] xfs: Add support to shrink multiple empty realtime
+ groups
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: djwong@kernel.org, cem@kernel.org, david@fromorbit.com, 
+	linux-xfs@vger.kernel.org, fstests@vger.kernel.org, ritesh.list@gmail.com, 
+	ojaswin@linux.ibm.com, hsiangkao@linux.alibaba.com
+Date: Thu, 26 Feb 2026 18:29:35 +0530
+In-Reply-To: <aZ8GJGpEwp3Ihclh@infradead.org>
+References: <cover.1771418537.git.nirjhar.roy.lists@gmail.com>
+	 <1a3d14a03083b031ec831a3e748d9002fab23504.1771418537.git.nirjhar.roy.lists@gmail.com>
+	 <aZasXfB-GUiGT4yc@infradead.org>
+	 <d7853e26511631b9ca9a28bb691bbe82765640c0.camel@gmail.com>
+	 <aZ8GJGpEwp3Ihclh@infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5 (3.28.5-27.el8_10) 
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="CsLXRNsNEq1D"
-Content-Disposition: inline
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 
+On Wed, 2026-02-25 at 06:24 -0800, Christoph Hellwig wrote:
+> On Wed, Feb 25, 2026 at 10:47:40AM +0530, Nirjhar Roy (IBM) wrote:
+> > > Highlevel note:  this seems to only cover classic bitmap based RTGs,
+> > > and not zoned ones.  You might want to look into the latter because
+> > 
+> > Okay. So are you suggesting to add the shrink support only for the
+> > zoned devices or extend this patch set to cover shrink for the zoned
+> > devices too?
+> 
+> We should support all devices.  But what I'm trying to say is the
+> zoned version is both simpler, and will actually allow you to get
+> to an actually useful fully feature shink much more easily.
 
---CsLXRNsNEq1D
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Okay. I will start taking a look at it.
+> 
+> > > they're actually much simpler, and with the zoned GC code we actually
+> > > have a super nice way to move data out of the RTG.  I'd be happy to
+> > > supple you a code sniplet for the latter.
+> > 
+> > Sure, that would be super useful. Also, since I don't have much
+> > experience in zoned devices, can you please point to some relevant
+> > resources and recent zoned device related patchsets that can help me
+> > get started with?
+> 
+> You don't actually need a zoned device, you can just mkfs with
+> "-r zoned=1" and get a internal rtdevice configuration.  If you are
 
-Hi all,
+Oh nice!. 
+> interested in the actual hardware and ecosystem take a look at:
+> https://zonedstorage.io/
+> 
+> If at some point you're interested in hardware samples contact me
+> offlist and I'll connect you to the right people.
 
-The for-next branch of the xfstests repository at:
+Thank you for the pointers.
+--NR
+> 
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2026.02.26 release.
-
-Release Notes:
-1) There're 4 new cases in this release, include btrfs/343, btrfs/344,
-   generic/788 and generic/789.
-2) Fix an issue from new diffutils. We haven't gotten more bug reports about
-   xfstests running with new version diffutils, if anyone hit any issues,
-   feel free to tell us or send patch to fstests.
-3) Skip some shutdown related cases from fs without journalling (by calling
-   _require_metadata_journaling)
-
-More fixes and updates refer to below, thanks for all these contributions!
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-3ded3e13c008 tests: Fix failure in nojournal mode
-
-New commits:
-
-Andrey Albershteyn (1):
-      [6fe19be2ecc1] generic/579: handle quoted cmp output
-
-Christoph Hellwig (2):
-      [1ec21c2911f3] generic: test that truncate(2) on fsverity is blocked
-      [163dbbfaacf0] xfs/841: create a block device that must exist
-
-Darrick J. Wong (3):
-      [98dd6070d7eb] xfs/018: remove inline xattr recovery tests
-      [08989d57ae35] xfs/620: force xattr leaf format for this test
-      [d290a3c1b673] generic/749: don't write a ton of _mread output to seqres.full
-
-Filipe Manana (2):
-      [6cc08eb81328] generic: add missing kernel commit IDs to tests 784 and 785
-      [75bbf15c5629] generic: test fsync of a file truncated to a length of zero
-
-Jan Kara (1):
-      [3ded3e13c008] tests: Fix failure in nojournal mode
-
-Joanne Chang (1):
-      [66c8f2df3f3a] common/rc: add _require_max_file_range_blocks helper
-
-Qu Wenruo (2):
-      [eeb894a242c8] fstests: btrfs: add a regression test for incorrect inode incompressible flag
-      [c26276f53d58] fstests: btrfs: add a test case for failed compressed inline attempt
-
-
-Code Diffstat:
-
- .gitignore            |  1 +
- common/rc             | 16 ++++++++++++++
- src/Makefile          |  2 +-
- src/truncate.c        | 17 +++++++++++++++
- tests/btrfs/343       | 48 +++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/343.out   |  2 ++
- tests/btrfs/344       | 53 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/344.out   |  2 ++
- tests/ext4/051        |  1 +
- tests/generic/536     |  1 +
- tests/generic/579     |  1 +
- tests/generic/622     |  1 +
- tests/generic/635     |  1 +
- tests/generic/646     |  1 +
- tests/generic/705     |  1 +
- tests/generic/722     |  1 +
- tests/generic/735     |  1 +
- tests/generic/749     | 11 +++++++---
- tests/generic/784     |  2 +-
- tests/generic/785     |  2 +-
- tests/generic/788     | 38 +++++++++++++++++++++++++++++++++
- tests/generic/788.out |  4 ++++
- tests/generic/789     | 59 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/789.out |  5 +++++
- tests/overlay/087     |  1 +
- tests/xfs/018         | 24 ---------------------
- tests/xfs/018.out     | 45 ---------------------------------------
- tests/xfs/620         |  7 ++++--
- tests/xfs/841         |  5 ++++-
- 29 files changed, 275 insertions(+), 78 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---CsLXRNsNEq1D
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmmfJhMACgkQlNbPkfr2
-tMx4TQ//ZFE3PFsDMFfgFkpvfhbHmNRTkmtRXrSS+WkUMh7DfVug6imhJ1Xbfpb6
-LtwuCovJAyaND2zISs7OWQGNEEiRGBsPkdwl/gvENZGiuBRUqlFL0Gf6Z4S/h80g
-RA3mpxFiSSMlko3xrbeo1wBE6u4ehwDQFBiSM1B3EjiQYKpeBVkaWXXNKWKT8QB5
-0LkNis3+lnX4EZIDXBY3wp4tXj+AP0fUgXGXnxXoD4PhES5dswiHat8lHqG9vHoJ
-4+dwBePLi0QMfcJ/+/OOkSO5OboRDtvMh2GqMZbmtpfZJmdmEC5UjcnAr2WAUoua
-QdBa1UEQvp/RyqTjT9MXBMmAafHZ+JwPUfCynJ+TFv2Ymqj3zJR8hqZFN3PnTUBV
-SNn1OcUk/suGeDsUFl5V8vBTq5I4CHut317B3f6TXGwMvarenpUcjrS/9kTGcPa0
-90HKMl2v4ktTCfkhVmYXw07/W8Q60DT1xb9hYxnHhBUP5tGOI9eevXeb8DRTq/D+
-1Xxygx7qaUuZgzMT3G2DTFAv+fsA5yQPGNS04pOeS6yK/VPIujhFCLMu01y70qQt
-Q12Y/qw2vrJuu4BER0gH2Ydax1cTEIgwiyIeTMCF9GJ/MGrXY5XOkHBGr5oFIEyv
-dwXdOmZfyvowcRxdzm8wDefsnFwg5GvDIIuabkdYOq0GGxQWPwA=
-=zgHo
------END PGP SIGNATURE-----
-
---CsLXRNsNEq1D--
