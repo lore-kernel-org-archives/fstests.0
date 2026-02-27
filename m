@@ -1,249 +1,88 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f50.google.com (mail-pj1-f50.google.com [209.85.216.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A8801D5CDE;
-	Fri, 27 Feb 2026 00:12:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AAAB0374162
+	for <fstests@vger.kernel.org>; Fri, 27 Feb 2026 23:28:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772151130; cv=none; b=NmQQ3SNZdo8+VHkUGjciPJxcw515xGov1dJDOz48Z15y75DtMOsUJV1vuxoo+pjbSGVmQzh2nKxKt3svjhmI3hgncp+lIzB7lqo5OKUGGiiul3M7cfliSFpVxUWD+ax7bs3YMrvIK/ibcpkIvItdhmnHj6NRJcR9tXI+uKsMsMM=
+	t=1772234881; cv=none; b=nIW4PkOFGkmZ8axl1YIc2bCKDZCrtgEzJPPHotCjdtao+WM2NZKP/7c6P68dAH1ZQtmaZ7LuFRctUjKkCrlkyyzdzzD9rUtFsllUdM7DHjpp6C6nnlpZ139OVmqVJFX6Dfb1nB+JqtBsktMp9h6d7XiqLT03e0S580wAbcFqDMM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772151130; c=relaxed/simple;
-	bh=u2Xwmug/8GVB1Rpy+IUtv4Yfybb1jbyZ5A2I+YnE2fA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=TW6XkU76FxqD704cI0kHuK1/SQb/VUshlB1GnOY/FPpTCcbtBxI4IVdfDvqhf7pbganbbK8Fz6qRWaQP/9YyPMlRWzMq+OMGbwz93OOVXXpCqRE4wtfWNmJXdKQc1+UNM5J6cICVMrpSbKm5hCvgKbLr+36aJuB8thNXyj/+Yv0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VQzsGscg; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1772234881; c=relaxed/simple;
+	bh=x6a9/T/8KUsonOtUFp4gCTDN5STRZkJWj7O158p6guA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=nuO5HEBDKhLZh3bZXNGn5bp+VGonfCF2fR2+jKGzvQRumRC4Uaf5db59B0TlYa49GwrDYwj3s7YOuaqtRTjMCPgYXFBZNFtyiiHxS03hDAhoNopKF/cK1N9FjkLN6vL7/UWHxn5dM8ZNBj6qbbK0QZ1UkaoQ2S+nVW/fs+MSbw8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Cnn64kn8; arc=none smtp.client-ip=209.85.216.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VQzsGscg"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 19F24C116C6;
-	Fri, 27 Feb 2026 00:12:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772151129;
-	bh=u2Xwmug/8GVB1Rpy+IUtv4Yfybb1jbyZ5A2I+YnE2fA=;
-	h=From:To:Cc:Subject:Date:From;
-	b=VQzsGscgqPPB4q9YeETiN3kHDl3iSUrBngs60s4ye+4Bp0qGydz/myhG8cHiajm+W
-	 pwN0+n2XzmoylWElVC2OD6TtohGXuReNG/ka0rwn9AfIn1AWkJfUqtrDmwqALy5Z4v
-	 gmX/gHHveWWJxPfDIpRUPLTOlJcX43NswKAklzAmqLkdQeth27/1PUkUv3mSDXR4Fl
-	 eymIvWyGHvM9MkeBH9zEEo+Jo57o7Y5p2NpyN5xUSJ3BO1/HNxa9KP124JFpVuzoBY
-	 iyo5YRI3htTIVB5dDx5JyaxAlbKuVA5qM5jF8pAnCbpG8j/CT1kEiim6qySAOQrn4t
-	 xvO7WcUqxf3PA==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs: test setting the same received UUID to a lot of subvolumes
-Date: Fri, 27 Feb 2026 00:12:05 +0000
-Message-ID: <6f697483d00fc7a001f2ce752a545d525cf2929c.1772151075.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.47.2
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Cnn64kn8"
+Received: by mail-pj1-f50.google.com with SMTP id 98e67ed59e1d1-356337f058aso1372344a91.2
+        for <fstests@vger.kernel.org>; Fri, 27 Feb 2026 15:28:00 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1772234880; x=1772839680; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=x6a9/T/8KUsonOtUFp4gCTDN5STRZkJWj7O158p6guA=;
+        b=Cnn64kn8qtTxu+QLGBBBIJKEZljbDN39CK5X50p9+tsK3iYoEgMxQ+2kv79ZIQpJIT
+         cuvowZaxkOOKAPF7omfNqaIL78pCo9bcrZLNfat1x+rCl+2nCxKnQ9jUK93zPguxYJVc
+         FnqoXP6sRNsysdM1HNbIY9QMAF3eiXwB55xhCcowWvciBocrYhAL/EmsK31IvIayM9r2
+         NqhvDnYMzoJ0oMXersJNNd30jUqwp01VMOfhnggfY3jiyp32lbR5jk+ObF5S4dGdBRhD
+         G5RLEI4GGFVQBaiVVd4deHxQq4F25fAERbchG+DLghq78g02GWOpvSZoECsjebNQMO/J
+         3Q1w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1772234880; x=1772839680;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=x6a9/T/8KUsonOtUFp4gCTDN5STRZkJWj7O158p6guA=;
+        b=SUER8vtiXoZ/XusyLD5wmppJJTrlmD5SSfCNZ4fhMRJEL6F/NWVWh3EJQn+EVQG6HI
+         c0ZmCfBwEsbiIMa7tCDp9L3bXbIe8iVyCh8Q9s9sLaN/zXbi8rFVR+NIswoCPGU44sde
+         Z4IgRDVOe2ZqQvsJWvQscLFtvpNNg1KmjVZhIGL3H+KDkT0OjBTEsijpzM+CTIDZDLUY
+         hWSEpc5xpbwhJQBl7554WlYDGq+M04vpjQQP4E8t2a7tNi3lnxZGgvKpJgu04/FALipp
+         fpBpn5IfnAv5mt/lFL3sw3POfS8jxrsql2AZ5aCEVYM8NjmX7C52Cxv52b4AfbtbIV00
+         N2AQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXI5q0LUXMXIz9mm8JpqNLLzTSQxZ3HZi90YY++/Zef77oRpXggZk8cAPCwKJtGQphcJUf7bCI9@vger.kernel.org
+X-Gm-Message-State: AOJu0YwRofrE0sec86NwrddLVih/hluprqoh9x/VXiTSCzI6aWP1bi5D
+	+HYH0CEoemGqy57Hot3yphKCEpG//JCYagIdAKlzsNSQZi2/v8TvHGaxR4athA==
+X-Gm-Gg: ATEYQzw2Dosjx+U+AiBmsoIgLZWwKpksRWQkJn6TAFQf0soq7USxKkawdAXqiEEYLc7
+	UJs/65m/EWC0sH+hsbRw2FlNk0ht0DpsQXB6Wa6h7D9AOXFF0ZH/UUixY0RcGF3esBgxNOPQwwj
+	OU0kcJWYyT7mzwKqXiRsUCozXZUCIcqy09XX3p9oH4N5uCG/V9Xs5LCNJ0SUD3Jp7NRecS1N1EM
+	eOktxDMOx2Ic051dhVxoDfzpAYgFA6p8uPBuJfCPBQWQe10SyPnYDaccVBUsNTx8Ya1cXEseNJk
+	9DHxuoU27rTU3WRociEeZGZgTCZcWmSMAhK10LjnVnr7MUlWFhMobmwcZjy0WFevmfvQVD8Tx0j
+	dRzM/vR+2rI8M9A4H0orq47tgAh7NVBsN6wx/InZ8hOa4DMCkrstsvuYWyrp1d5rP6C+XIC08Kc
+	rjTjAh0RTPBVJxe5wxz/WtYJcGuWs=
+X-Received: by 2002:a17:90b:524b:b0:354:999f:1b22 with SMTP id 98e67ed59e1d1-35965cf519bmr3283898a91.32.1772234879963;
+        Fri, 27 Feb 2026 15:27:59 -0800 (PST)
+Received: from [192.168.50.89] ([116.87.14.48])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c70fa8016f9sm5453294a12.17.2026.02.27.15.27.58
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 27 Feb 2026 15:27:59 -0800 (PST)
+Message-ID: <1843362c-1b5c-4b65-a7b9-1f489e6844a2@gmail.com>
+Date: Sat, 28 Feb 2026 07:27:56 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] btrfs: test setting the same received UUID to a lot of
+ subvolumes
+To: fdmanana@kernel.org, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+References: <6f697483d00fc7a001f2ce752a545d525cf2929c.1772151075.git.fdmanana@suse.com>
+Content-Language: en-US
+From: Anand Jain <anajain.sg@gmail.com>
+In-Reply-To: <6f697483d00fc7a001f2ce752a545d525cf2929c.1772151075.git.fdmanana@suse.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-From: Filipe Manana <fdmanana@suse.com>
 
-Test that using the received subvol ioctl to set a received UUID on a root
-does not trigger a transaction abort (and turn the filesystem to RO mode)
-if a user abuses by assigning the same received UUID to a large number of
-subvolumes.
 
-This exercises a bug fixed by the following kernel patch:
+Looks good to me.
 
- "btrfs: fix transaction abort on set received ioctl due to item overflow"
+Reviewed-by: Anand Jain <asj@kernel.org>
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- .gitignore                        |  1 +
- configure.ac                      |  4 ++
- src/Makefile                      |  4 ++
- src/t_btrfs_received_uuid_ioctl.c | 50 +++++++++++++++++++++++
- tests/btrfs/347                   | 66 +++++++++++++++++++++++++++++++
- tests/btrfs/347.out               |  3 ++
- 6 files changed, 128 insertions(+)
- create mode 100644 src/t_btrfs_received_uuid_ioctl.c
- create mode 100755 tests/btrfs/347
- create mode 100644 tests/btrfs/347.out
-
-diff --git a/.gitignore b/.gitignore
-index 2b5bedd5..0819d3c5 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -213,6 +213,7 @@ tags
- /src/unlink-fsync
- /src/file_attr
- /src/truncate
-+/src/t_btrfs_received_uuid_ioctl
- 
- # Symlinked files
- /tests/generic/035.out
-diff --git a/configure.ac b/configure.ac
-index f7519fa9..441f543c 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -106,6 +106,10 @@ AC_CHECK_TYPES([struct btrfs_ioctl_get_subvol_rootref_args], [], [], [[
- #include <stddef.h>
- #include <linux/btrfs.h>
- ]])
-+AC_CHECK_TYPES([struct btrfs_ioctl_received_subvol_args], [], [], [[
-+#include <stddef.h>
-+#include <linux/btrfs.h>
-+]])
- AC_CHECK_HEADERS([linux/btrfs.h linux/btrfs_tree.h])
- AC_CHECK_MEMBERS([struct btrfs_ioctl_vol_args_v2.subvolid], [], [], [[
- #include <stddef.h>
-diff --git a/src/Makefile b/src/Makefile
-index 577d816a..cc4efad4 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -107,6 +107,10 @@ ifeq ($(HAVE_FICLONE),yes)
-      TARGETS += t_reflink_read_race
- endif
- 
-+ifeq ($(HAVE_LIBBTRFSUTIL), true)
-+     LINUX_TARGETS += t_btrfs_received_uuid_ioctl
-+endif
-+
- ifeq ($(NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE),yes)
- LCFLAGS += -DNEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE
- endif
-diff --git a/src/t_btrfs_received_uuid_ioctl.c b/src/t_btrfs_received_uuid_ioctl.c
-new file mode 100644
-index 00000000..bd058278
---- /dev/null
-+++ b/src/t_btrfs_received_uuid_ioctl.c
-@@ -0,0 +1,50 @@
-+// SPDX-License-Identifier: GPL-2.0+
-+/*
-+ * Program to set a received UUID on a btrfs subvolume.
-+ */
-+
-+#include <sys/ioctl.h>
-+#include <btrfs/ioctl.h>
-+#include <uuid/uuid.h>
-+#include <fcntl.h>
-+#include <unistd.h>
-+#include <stdio.h>
-+#include <string.h>
-+#include <errno.h>
-+
-+int main(int argc, char **argv)
-+{
-+	struct btrfs_ioctl_received_subvol_args args;
-+	uuid_t uuid;
-+	int ret;
-+	int fd;
-+
-+	if (argc != 3) {
-+		fprintf(stderr, "Use: %s <uuid> <subvolume path>\n", argv[0]);
-+		return 1;
-+	}
-+
-+	ret = uuid_parse(argv[1], uuid);
-+	if (ret == -1) {
-+		fprintf(stderr,
-+	"Invalid UUID. Example: 8c628557-6987-42b2-ba16-b7cc79ddfb43\n");
-+		return 2;
-+	}
-+
-+	fd = open(argv[2], O_RDONLY | O_DIRECTORY, 0666);
-+	if (fd == -1) {
-+		perror("Failed to open fd");
-+		return 3;
-+	}
-+
-+	memset(&args, 0, sizeof(args));
-+	memcpy(args.uuid, uuid, BTRFS_UUID_SIZE);
-+
-+	ret = ioctl(fd, BTRFS_IOC_SET_RECEIVED_SUBVOL, &args);
-+	if (ret == -1) {
-+		perror("Failed to set received subvol");
-+		return 4;
-+	}
-+
-+	return 0;
-+}
-diff --git a/tests/btrfs/347 b/tests/btrfs/347
-new file mode 100755
-index 00000000..ebd53d97
---- /dev/null
-+++ b/tests/btrfs/347
-@@ -0,0 +1,66 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-+#
-+# FS QA Test 347
-+#
-+# Test that using the received subvol ioctl to set a received UUID on a root
-+# does not trigger a transaction abort (and turn the filesystem to RO mode) if
-+# a user abuses by assigning the same received UUID to a large number of
-+# subvolumes.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick subvol
-+
-+_require_test_program t_btrfs_received_uuid_ioctl
-+_require_scratch
-+_require_btrfs_support_sectorsize 4096
-+
-+_fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: fix transaction abort on set received ioctl due to item overflow"
-+
-+# Use a 4K node/leaf size to make the test faster.
-+_scratch_mkfs -n 4K >> $seqres.full 2>&1 || _fail "mkfs failed"
-+_scratch_mount
-+
-+# With a leaf size of 4K, we can get a BTRFS_UUID_KEY_RECEIVED_SUBVOL key with
-+# maximum number of 496 root IDs (u64 values).
-+#
-+# We have:
-+#
-+#  total item size = sizeof(struct btrfs_item) + sizeof(u64) * 496
-+#                  = 25 + 8 * 496 = 3993
-+#
-+#  BTRFS_LEAF_DATA_SIZE = leafsize - sizeof(struct btrfs_header)
-+#                       = 4096 - 101 = 3995
-+#
-+# So 497 root IDs would be 3993 + 8 = 4001 which is > BTRFS_LEAF_DATA_SIZE.
-+num_subvols=496
-+
-+for ((i = 1; i <= $num_subvols; i++)); do
-+	_btrfs subvolume create $SCRATCH_MNT/sv_$i
-+done
-+
-+for ((i = 1; i <= $num_subvols; i++)); do
-+	$here/src/t_btrfs_received_uuid_ioctl \
-+		8c628557-6987-42b2-ba16-b7cc79ddfb43 $SCRATCH_MNT/sv_$i
-+done
-+
-+# Add one more subvolume and try to set its received UUID to the same UUID.
-+# This should fail due to item overflow.
-+_btrfs subvolume create $SCRATCH_MNT/sv_last
-+$here/src/t_btrfs_received_uuid_ioctl \
-+	8c628557-6987-42b2-ba16-b7cc79ddfb43 $SCRATCH_MNT/sv_last
-+
-+# The failure to set the received uuid on this last subvolume should not cause
-+# in a transaction abort and turn the filesystem to RO mode - otherwise a
-+# malicious user could disrupt a system. So check this by seeing if we can
-+# create a file.
-+echo -n "hello world" > $SCRATCH_MNT/foobar
-+
-+# Unmount and mount again, verify file foobar exists and with the right content.
-+_scratch_cycle_mount
-+echo "File foobar content: $(cat $SCRATCH_MNT/foobar)"
-+
-+# success, all done
-+_exit 0
-diff --git a/tests/btrfs/347.out b/tests/btrfs/347.out
-new file mode 100644
-index 00000000..b98b6cec
---- /dev/null
-+++ b/tests/btrfs/347.out
-@@ -0,0 +1,3 @@
-+QA output created by 347
-+Failed to set received subvol: Value too large for defined data type
-+File foobar content: hello world
--- 
-2.47.2
-
+Anand
