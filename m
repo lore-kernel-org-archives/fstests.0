@@ -1,42 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F2B4E377562;
-	Thu, 26 Feb 2026 14:42:14 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A8801D5CDE;
+	Fri, 27 Feb 2026 00:12:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772116935; cv=none; b=R1VcVq7ZFkAsBE4vXsBxZAeAErb6FLoju0qKl0sRnekwO2j3qpfwNl2YwWQkbhjUiM8i/PjzQaLuHvUeabrLCv2+Cfndh6rrTU/KL/9aNFJQPTiJxaHJXI+3aDeSuLH3YOU7luzVPv3oEsImNUMfpb0SBybnBu4BWtMGhS/TC7k=
+	t=1772151130; cv=none; b=NmQQ3SNZdo8+VHkUGjciPJxcw515xGov1dJDOz48Z15y75DtMOsUJV1vuxoo+pjbSGVmQzh2nKxKt3svjhmI3hgncp+lIzB7lqo5OKUGGiiul3M7cfliSFpVxUWD+ax7bs3YMrvIK/ibcpkIvItdhmnHj6NRJcR9tXI+uKsMsMM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772116935; c=relaxed/simple;
-	bh=spl/u6G3mh/AR56lY6Yc5TU+Cds3VIwdZjxaSh1KxBc=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=rZd9pmWY83AopMGgR8N0QhMFOfH99SlyJNo9cry/TKvX91J65hFx67r6PdMeS024/yijE9VIaLhe2O8z1cGK2eV+7jDOM8aaNjCrVBqKC09GhgZAAuPFLFDePOID8KzlmR2VhXIQ19Z52etiHfFnIELAKBZVWQSh6vdLiAwPOuo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=C30D8nyQ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1772151130; c=relaxed/simple;
+	bh=u2Xwmug/8GVB1Rpy+IUtv4Yfybb1jbyZ5A2I+YnE2fA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=TW6XkU76FxqD704cI0kHuK1/SQb/VUshlB1GnOY/FPpTCcbtBxI4IVdfDvqhf7pbganbbK8Fz6qRWaQP/9YyPMlRWzMq+OMGbwz93OOVXXpCqRE4wtfWNmJXdKQc1+UNM5J6cICVMrpSbKm5hCvgKbLr+36aJuB8thNXyj/+Yv0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VQzsGscg; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="C30D8nyQ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 608E2C116C6;
-	Thu, 26 Feb 2026 14:42:13 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VQzsGscg"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 19F24C116C6;
+	Fri, 27 Feb 2026 00:12:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772116934;
-	bh=spl/u6G3mh/AR56lY6Yc5TU+Cds3VIwdZjxaSh1KxBc=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=C30D8nyQFTzp/271Jgmodg/JFLYGthoyJMSz1cI+TcDk+lDt7z+JBGmMK7JPGf1LM
-	 hwLT9tinf9EIVb7pYeHGEnbfKcERSh4vPsMeWsgS2R6ay/K3oMEzx82akjduLl2CiM
-	 xlEVByzIJkY7FiIwe21ynGyYolYAXPgLIoCemTXVFl+///t/k9jWWskdErkiYXLvYs
-	 tLxggKu7nH0iPUqzJaMfIMurCBBYxuF5gQxVAEMABQ69UuzaKcYi63AVEeO6Sc8if6
-	 57fP7RJZo95eRMsWSNUD6nhdWG9RNvYHRyNsrNprnw/xOiyVe2q/lCitkrBayrgEY2
-	 WWQbGFJXdHiuQ==
-From: Anand Jain <asj@kernel.org>
+	s=k20201202; t=1772151129;
+	bh=u2Xwmug/8GVB1Rpy+IUtv4Yfybb1jbyZ5A2I+YnE2fA=;
+	h=From:To:Cc:Subject:Date:From;
+	b=VQzsGscgqPPB4q9YeETiN3kHDl3iSUrBngs60s4ye+4Bp0qGydz/myhG8cHiajm+W
+	 pwN0+n2XzmoylWElVC2OD6TtohGXuReNG/ka0rwn9AfIn1AWkJfUqtrDmwqALy5Z4v
+	 gmX/gHHveWWJxPfDIpRUPLTOlJcX43NswKAklzAmqLkdQeth27/1PUkUv3mSDXR4Fl
+	 eymIvWyGHvM9MkeBH9zEEo+Jo57o7Y5p2NpyN5xUSJ3BO1/HNxa9KP124JFpVuzoBY
+	 iyo5YRI3htTIVB5dDx5JyaxAlbKuVA5qM5jF8pAnCbpG8j/CT1kEiim6qySAOQrn4t
+	 xvO7WcUqxf3PA==
+From: fdmanana@kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org,
-	linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: [PATCH 9/9] fstests: verify exportfs file handles on cloned filesystems
-Date: Thu, 26 Feb 2026 22:41:50 +0800
-Message-ID: <7bca92ab726b6edc5d96abfe54ce28aeea13ac87.1772095513.git.asj@kernel.org>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <cover.1772095513.git.asj@kernel.org>
-References: <cover.1772095513.git.asj@kernel.org>
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: test setting the same received UUID to a lot of subvolumes
+Date: Fri, 27 Feb 2026 00:12:05 +0000
+Message-ID: <6f697483d00fc7a001f2ce752a545d525cf2929c.1772151075.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,99 +41,209 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Ensure that exportfs can correctly decode file handles on a cloned
-filesystem across a mount cycle, by file handles generated on a
-cloned device remain valid after mount cycle.
+From: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Anand Jain <asj@kernel.org>
+Test that using the received subvol ioctl to set a received UUID on a root
+does not trigger a transaction abort (and turn the filesystem to RO mode)
+if a user abuses by assigning the same received UUID to a large number of
+subvolumes.
+
+This exercises a bug fixed by the following kernel patch:
+
+ "btrfs: fix transaction abort on set received ioctl due to item overflow"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/generic/795     | 67 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/795.out |  2 ++
- 2 files changed, 69 insertions(+)
- create mode 100644 tests/generic/795
- create mode 100644 tests/generic/795.out
+ .gitignore                        |  1 +
+ configure.ac                      |  4 ++
+ src/Makefile                      |  4 ++
+ src/t_btrfs_received_uuid_ioctl.c | 50 +++++++++++++++++++++++
+ tests/btrfs/347                   | 66 +++++++++++++++++++++++++++++++
+ tests/btrfs/347.out               |  3 ++
+ 6 files changed, 128 insertions(+)
+ create mode 100644 src/t_btrfs_received_uuid_ioctl.c
+ create mode 100755 tests/btrfs/347
+ create mode 100644 tests/btrfs/347.out
 
-diff --git a/tests/generic/795 b/tests/generic/795
+diff --git a/.gitignore b/.gitignore
+index 2b5bedd5..0819d3c5 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -213,6 +213,7 @@ tags
+ /src/unlink-fsync
+ /src/file_attr
+ /src/truncate
++/src/t_btrfs_received_uuid_ioctl
+ 
+ # Symlinked files
+ /tests/generic/035.out
+diff --git a/configure.ac b/configure.ac
+index f7519fa9..441f543c 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -106,6 +106,10 @@ AC_CHECK_TYPES([struct btrfs_ioctl_get_subvol_rootref_args], [], [], [[
+ #include <stddef.h>
+ #include <linux/btrfs.h>
+ ]])
++AC_CHECK_TYPES([struct btrfs_ioctl_received_subvol_args], [], [], [[
++#include <stddef.h>
++#include <linux/btrfs.h>
++]])
+ AC_CHECK_HEADERS([linux/btrfs.h linux/btrfs_tree.h])
+ AC_CHECK_MEMBERS([struct btrfs_ioctl_vol_args_v2.subvolid], [], [], [[
+ #include <stddef.h>
+diff --git a/src/Makefile b/src/Makefile
+index 577d816a..cc4efad4 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -107,6 +107,10 @@ ifeq ($(HAVE_FICLONE),yes)
+      TARGETS += t_reflink_read_race
+ endif
+ 
++ifeq ($(HAVE_LIBBTRFSUTIL), true)
++     LINUX_TARGETS += t_btrfs_received_uuid_ioctl
++endif
++
+ ifeq ($(NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE),yes)
+ LCFLAGS += -DNEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE
+ endif
+diff --git a/src/t_btrfs_received_uuid_ioctl.c b/src/t_btrfs_received_uuid_ioctl.c
 new file mode 100644
-index 000000000000..b6a75e500949
+index 00000000..bd058278
 --- /dev/null
-+++ b/tests/generic/795
-@@ -0,0 +1,67 @@
++++ b/src/t_btrfs_received_uuid_ioctl.c
+@@ -0,0 +1,50 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Program to set a received UUID on a btrfs subvolume.
++ */
++
++#include <sys/ioctl.h>
++#include <btrfs/ioctl.h>
++#include <uuid/uuid.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <stdio.h>
++#include <string.h>
++#include <errno.h>
++
++int main(int argc, char **argv)
++{
++	struct btrfs_ioctl_received_subvol_args args;
++	uuid_t uuid;
++	int ret;
++	int fd;
++
++	if (argc != 3) {
++		fprintf(stderr, "Use: %s <uuid> <subvolume path>\n", argv[0]);
++		return 1;
++	}
++
++	ret = uuid_parse(argv[1], uuid);
++	if (ret == -1) {
++		fprintf(stderr,
++	"Invalid UUID. Example: 8c628557-6987-42b2-ba16-b7cc79ddfb43\n");
++		return 2;
++	}
++
++	fd = open(argv[2], O_RDONLY | O_DIRECTORY, 0666);
++	if (fd == -1) {
++		perror("Failed to open fd");
++		return 3;
++	}
++
++	memset(&args, 0, sizeof(args));
++	memcpy(args.uuid, uuid, BTRFS_UUID_SIZE);
++
++	ret = ioctl(fd, BTRFS_IOC_SET_RECEIVED_SUBVOL, &args);
++	if (ret == -1) {
++		perror("Failed to set received subvol");
++		return 4;
++	}
++
++	return 0;
++}
+diff --git a/tests/btrfs/347 b/tests/btrfs/347
+new file mode 100755
+index 00000000..ebd53d97
+--- /dev/null
++++ b/tests/btrfs/347
+@@ -0,0 +1,66 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Anand Jain <asj@kernel.org>.  All Rights Reserved.
++# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
 +#
-+# FS QA Test No. 795
-+
++# FS QA Test 347
++#
++# Test that using the received subvol ioctl to set a received UUID on a root
++# does not trigger a transaction abort (and turn the filesystem to RO mode) if
++# a user abuses by assigning the same received UUID to a large number of
++# subvolumes.
++#
 +. ./common/preamble
++_begin_fstest auto quick subvol
 +
-+_begin_fstest auto quick exportfs clone
++_require_test_program t_btrfs_received_uuid_ioctl
++_require_scratch
++_require_btrfs_support_sectorsize 4096
 +
-+_require_test
-+_require_exportfs
-+_require_scratch_dev_pool 2
-+_require_test_program "open_by_handle"
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: fix transaction abort on set received ioctl due to item overflow"
 +
-+_cleanup()
-+{
-+	cd /
-+	rm -r -f $tmp.*
-+	_unmount $mnt2 2>/dev/null
-+	_scratch_dev_pool_put
-+}
++# Use a 4K node/leaf size to make the test faster.
++_scratch_mkfs -n 4K >> $seqres.full 2>&1 || _fail "mkfs failed"
++_scratch_mount
 +
-+# Create test dir and test files, encode file handles and store to tmp file
-+create_test_files()
-+{
-+	rm -rf $testdir
-+	mkdir -p $testdir
-+	$here/src/open_by_handle -cwp -o $tmp.handles_file $testdir $NUMFILES
-+}
++# With a leaf size of 4K, we can get a BTRFS_UUID_KEY_RECEIVED_SUBVOL key with
++# maximum number of 496 root IDs (u64 values).
++#
++# We have:
++#
++#  total item size = sizeof(struct btrfs_item) + sizeof(u64) * 496
++#                  = 25 + 8 * 496 = 3993
++#
++#  BTRFS_LEAF_DATA_SIZE = leafsize - sizeof(struct btrfs_header)
++#                       = 4096 - 101 = 3995
++#
++# So 497 root IDs would be 3993 + 8 = 4001 which is > BTRFS_LEAF_DATA_SIZE.
++num_subvols=496
 +
-+# Decode file handles loaded from tmp file
-+test_file_handles()
-+{
-+	local opt=$1
-+	local when=$2
++for ((i = 1; i <= $num_subvols; i++)); do
++	_btrfs subvolume create $SCRATCH_MNT/sv_$i
++done
 +
-+	echo test_file_handles after $when
-+	$here/src/open_by_handle $opt -i $tmp.handles_file $mnt2 $NUMFILES
-+}
++for ((i = 1; i <= $num_subvols; i++)); do
++	$here/src/t_btrfs_received_uuid_ioctl \
++		8c628557-6987-42b2-ba16-b7cc79ddfb43 $SCRATCH_MNT/sv_$i
++done
 +
-+_scratch_dev_pool_get 2
-+_scratch_mkfs_sized_clone >$seqres.full 2>&1
-+devs=($SCRATCH_DEV_POOL)
-+mnt2=$TEST_DIR/mnt2
-+mkdir -p $mnt2
++# Add one more subvolume and try to set its received UUID to the same UUID.
++# This should fail due to item overflow.
++_btrfs subvolume create $SCRATCH_MNT/sv_last
++$here/src/t_btrfs_received_uuid_ioctl \
++	8c628557-6987-42b2-ba16-b7cc79ddfb43 $SCRATCH_MNT/sv_last
 +
-+_scratch_mount $(_clone_mount_option)
-+_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
-+						_fail "Failed to mount dev2"
++# The failure to set the received uuid on this last subvolume should not cause
++# in a transaction abort and turn the filesystem to RO mode - otherwise a
++# malicious user could disrupt a system. So check this by seeing if we can
++# create a file.
++echo -n "hello world" > $SCRATCH_MNT/foobar
 +
-+NUMFILES=1
-+testdir=$mnt2/testdir
++# Unmount and mount again, verify file foobar exists and with the right content.
++_scratch_cycle_mount
++echo "File foobar content: $(cat $SCRATCH_MNT/foobar)"
 +
-+# Decode file handles of files/dir after cycle mount
-+create_test_files
-+
-+_scratch_unmount
-+_unmount $mnt2
-+_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
-+						_fail "Failed to mount dev2"
-+_scratch_mount $(_clone_mount_option)
-+
-+test_file_handles -rp "cycle mount"
-+
-+status=0
-+exit
-diff --git a/tests/generic/795.out b/tests/generic/795.out
++# success, all done
++_exit 0
+diff --git a/tests/btrfs/347.out b/tests/btrfs/347.out
 new file mode 100644
-index 000000000000..774fe7487d65
+index 00000000..b98b6cec
 --- /dev/null
-+++ b/tests/generic/795.out
-@@ -0,0 +1,2 @@
-+QA output created by 795
-+test_file_handles after cycle mount
++++ b/tests/btrfs/347.out
+@@ -0,0 +1,3 @@
++QA output created by 347
++Failed to set received subvol: Value too large for defined data type
++File foobar content: hello world
 -- 
-2.43.0
+2.47.2
 
