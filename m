@@ -1,88 +1,212 @@
-Received: from mail-pj1-f50.google.com (mail-pj1-f50.google.com [209.85.216.50])
+Received: from mail-ej1-f44.google.com (mail-ej1-f44.google.com [209.85.218.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AAAB0374162
-	for <fstests@vger.kernel.org>; Fri, 27 Feb 2026 23:28:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4169F317171
+	for <fstests@vger.kernel.org>; Sun,  1 Mar 2026 13:07:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772234881; cv=none; b=nIW4PkOFGkmZ8axl1YIc2bCKDZCrtgEzJPPHotCjdtao+WM2NZKP/7c6P68dAH1ZQtmaZ7LuFRctUjKkCrlkyyzdzzD9rUtFsllUdM7DHjpp6C6nnlpZ139OVmqVJFX6Dfb1nB+JqtBsktMp9h6d7XiqLT03e0S580wAbcFqDMM=
+	t=1772370427; cv=none; b=E0+pJJBY0TffmtQF13vCNHe0OBy+1IjpfrjEoy7teOuvZOXzt/nu1mLqwMh25EjzLTMSYgV/seB1LwrNHET4H4Uo3CARZVFilKcIU+8SlDgWKAMGt1OmbsanOCeZcknsy4bVQ1HUdSRVwaoSaex4d1+Ls9QIBLcnMJDSp1ZA1/0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772234881; c=relaxed/simple;
-	bh=x6a9/T/8KUsonOtUFp4gCTDN5STRZkJWj7O158p6guA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=nuO5HEBDKhLZh3bZXNGn5bp+VGonfCF2fR2+jKGzvQRumRC4Uaf5db59B0TlYa49GwrDYwj3s7YOuaqtRTjMCPgYXFBZNFtyiiHxS03hDAhoNopKF/cK1N9FjkLN6vL7/UWHxn5dM8ZNBj6qbbK0QZ1UkaoQ2S+nVW/fs+MSbw8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Cnn64kn8; arc=none smtp.client-ip=209.85.216.50
+	s=arc-20240116; t=1772370427; c=relaxed/simple;
+	bh=+b7IJmYsdPsiaWkABEc9hXLF8ekSKnQ2J1W6I/m5X0g=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=VzZ5CR09ey/yiJxTaMT885mJP27d2XW6+htgklxk7xUQqCb3JBVIU0HCAVUWDxHGKPVm9EifNLErO/WJdAr72v4zPnAEBnbE+6c1YIIbT/M8DJb6tocPoXdGqzRBTraT1fvk5WqQisO1j16T+uCwn5FTGKPNF3ltHFsBgQGETeY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Xyb+YWJv; arc=none smtp.client-ip=209.85.218.44
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Cnn64kn8"
-Received: by mail-pj1-f50.google.com with SMTP id 98e67ed59e1d1-356337f058aso1372344a91.2
-        for <fstests@vger.kernel.org>; Fri, 27 Feb 2026 15:28:00 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Xyb+YWJv"
+Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-b939cfc1e83so83239666b.0
+        for <fstests@vger.kernel.org>; Sun, 01 Mar 2026 05:07:06 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1772234880; x=1772839680; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=x6a9/T/8KUsonOtUFp4gCTDN5STRZkJWj7O158p6guA=;
-        b=Cnn64kn8qtTxu+QLGBBBIJKEZljbDN39CK5X50p9+tsK3iYoEgMxQ+2kv79ZIQpJIT
-         cuvowZaxkOOKAPF7omfNqaIL78pCo9bcrZLNfat1x+rCl+2nCxKnQ9jUK93zPguxYJVc
-         FnqoXP6sRNsysdM1HNbIY9QMAF3eiXwB55xhCcowWvciBocrYhAL/EmsK31IvIayM9r2
-         NqhvDnYMzoJ0oMXersJNNd30jUqwp01VMOfhnggfY3jiyp32lbR5jk+ObF5S4dGdBRhD
-         G5RLEI4GGFVQBaiVVd4deHxQq4F25fAERbchG+DLghq78g02GWOpvSZoECsjebNQMO/J
-         3Q1w==
+        d=gmail.com; s=20230601; t=1772370424; x=1772975224; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=21RpwEPOwVSx/Gfqd4huN5SHo5O6W1YNzF0HAagBVOE=;
+        b=Xyb+YWJvPyIRXvmbSfYtg+omoN8nPN8x4A+5QXO2Vc8ofRNPt4N+wpQB8ZSgPPA0PZ
+         nHwaGB1ZYGiDsquXgV/h46XgCBL6c2dRiA4UZnseDfrZ6zpNJACACZ0yn3g/524OcUft
+         nfsaXpxhJ7RyllFTEK10S0yI//CIvg7rfzro7qCZB4bfPY2sJLBuwIwTNyFm1n/Xephe
+         eoAX1fP2CsPrb21nDNnr+SkGAD04e0aw0i1zqvoEUsrsas38kWAL32jiif7wlnumXCqZ
+         wxeTd0U7zz20WiF2gu00BzhJIsMDzSOMT5UdWNey/0DiYWpUhuP17NsFG81ofzeOpIsN
+         yiWQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772234880; x=1772839680;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=x6a9/T/8KUsonOtUFp4gCTDN5STRZkJWj7O158p6guA=;
-        b=SUER8vtiXoZ/XusyLD5wmppJJTrlmD5SSfCNZ4fhMRJEL6F/NWVWh3EJQn+EVQG6HI
-         c0ZmCfBwEsbiIMa7tCDp9L3bXbIe8iVyCh8Q9s9sLaN/zXbi8rFVR+NIswoCPGU44sde
-         Z4IgRDVOe2ZqQvsJWvQscLFtvpNNg1KmjVZhIGL3H+KDkT0OjBTEsijpzM+CTIDZDLUY
-         hWSEpc5xpbwhJQBl7554WlYDGq+M04vpjQQP4E8t2a7tNi3lnxZGgvKpJgu04/FALipp
-         fpBpn5IfnAv5mt/lFL3sw3POfS8jxrsql2AZ5aCEVYM8NjmX7C52Cxv52b4AfbtbIV00
-         N2AQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXI5q0LUXMXIz9mm8JpqNLLzTSQxZ3HZi90YY++/Zef77oRpXggZk8cAPCwKJtGQphcJUf7bCI9@vger.kernel.org
-X-Gm-Message-State: AOJu0YwRofrE0sec86NwrddLVih/hluprqoh9x/VXiTSCzI6aWP1bi5D
-	+HYH0CEoemGqy57Hot3yphKCEpG//JCYagIdAKlzsNSQZi2/v8TvHGaxR4athA==
-X-Gm-Gg: ATEYQzw2Dosjx+U+AiBmsoIgLZWwKpksRWQkJn6TAFQf0soq7USxKkawdAXqiEEYLc7
-	UJs/65m/EWC0sH+hsbRw2FlNk0ht0DpsQXB6Wa6h7D9AOXFF0ZH/UUixY0RcGF3esBgxNOPQwwj
-	OU0kcJWYyT7mzwKqXiRsUCozXZUCIcqy09XX3p9oH4N5uCG/V9Xs5LCNJ0SUD3Jp7NRecS1N1EM
-	eOktxDMOx2Ic051dhVxoDfzpAYgFA6p8uPBuJfCPBQWQe10SyPnYDaccVBUsNTx8Ya1cXEseNJk
-	9DHxuoU27rTU3WRociEeZGZgTCZcWmSMAhK10LjnVnr7MUlWFhMobmwcZjy0WFevmfvQVD8Tx0j
-	dRzM/vR+2rI8M9A4H0orq47tgAh7NVBsN6wx/InZ8hOa4DMCkrstsvuYWyrp1d5rP6C+XIC08Kc
-	rjTjAh0RTPBVJxe5wxz/WtYJcGuWs=
-X-Received: by 2002:a17:90b:524b:b0:354:999f:1b22 with SMTP id 98e67ed59e1d1-35965cf519bmr3283898a91.32.1772234879963;
-        Fri, 27 Feb 2026 15:27:59 -0800 (PST)
-Received: from [192.168.50.89] ([116.87.14.48])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c70fa8016f9sm5453294a12.17.2026.02.27.15.27.58
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 27 Feb 2026 15:27:59 -0800 (PST)
-Message-ID: <1843362c-1b5c-4b65-a7b9-1f489e6844a2@gmail.com>
-Date: Sat, 28 Feb 2026 07:27:56 +0800
+        d=1e100.net; s=20230601; t=1772370424; x=1772975224;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=21RpwEPOwVSx/Gfqd4huN5SHo5O6W1YNzF0HAagBVOE=;
+        b=vn4iQ76FRRCqOFsYOs0pqL5Dd00Esoy/WZrBUPeRjOsNIYlYFghltCWzhn+NuADxPW
+         UV3G9L7QtHE9YfunUJmVOKClB8ZMr1HDgBmdQyJb1ot9uDBTyGbnXB+cRtO8Q3zWSD+V
+         9s0Vwfgt0PpYT/d/i1UW2uS+GXnTD/D2NlViBBXF96uy+gHGcgbJKa6ZWTcz+PLQvOcG
+         VwRe3o9YzbNN21uBPgUESrMXlok8c/hFSm4bvWPL+RVDorCWvOn0qllAYeVYY80zU2BJ
+         PKbYeiYF6bbzOdN38PgKjOWaqvA9/eAF5/q7MdeVn86HS1fzAq3/722B+/pwtk0JdTPH
+         rw8Q==
+X-Gm-Message-State: AOJu0YzEHB9JrNoa/oxgwsxaPGhDmPC0ZVg7MWXoSKQ7d9u0a40zMpdN
+	jkKgzngRyUqnUl30sX7WYRmkxEreNNyciKNkj+NbcmKE8ehDKj3bAbpX
+X-Gm-Gg: ATEYQzzRJMGJeQH/cW/XLCCQJzbJBwfdF3/liWIgupogHIeG+vO+ctT+IoTAEsyHsq9
+	QNIRdF4mDZs8BfUIGdcww0++BeR9rOt8P2duvw9uS6ylpE1Mq1W/WAPHCwoQNakH4u0u6bd0pNA
+	7dii91SYzXjhpxbsnyYlJ2wroCANWDXALjzKQ1I212qivF4UW74EdArun0bst4y6HY5Ar1Gyv7l
+	WdqGNDpUFEO6D/DrjK/t9GIpl7aZ6HV/yKNe2Dvk//eTNYtFdKKmNbcZCO243dDVjGNjn5SWbZZ
+	MN5hFH+4xnlRDc3NzwhEg73M9vG9/hFugiyP+uTNWcnbaXEgSo42JMdEP1gTF9GuLEiwCxfEkU4
+	q8QRqOVW0BSuYOabXL+MEWELfquXX7DqWv9NFrp/wkg7d4FPsubutv2JUkFkzT+dftKJmmzU5io
+	Rfdws9EN3TrW9sv4KtrtIxxdnO0mo49IX/nWA89Gu2QN6kNph5x2vbOVZ1fQMWlhHXvLz4z5XYo
+	farjB2N/NUSQtMk8ANWjCF0M2vM
+X-Received: by 2002:a17:906:4fc6:b0:b8e:d04e:e4fc with SMTP id a640c23a62f3a-b93763b7090mr565823366b.22.1772370424268;
+        Sun, 01 Mar 2026 05:07:04 -0800 (PST)
+Received: from localhost (2001-1c00-570d-ee00-d118-5ff5-6236-8e43.cable.dynamic.v6.ziggo.nl. [2001:1c00:570d:ee00:d118:5ff5:6236:8e43])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b9399ec5460sm145609966b.15.2026.03.01.05.07.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 01 Mar 2026 05:07:03 -0800 (PST)
+Date: Sun, 1 Mar 2026 14:07:02 +0100
+From: Amir Goldstein <amir73il@gmail.com>
+To: Anand Jain <asj@kernel.org>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
+	Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH 4/9] fstests: add test for inotify isolation on cloned
+ devices
+Message-ID: <aaQ59uL3rG7_WYHJ@amir-ThinkPad-T480>
+References: <cover.1772095513.git.asj@kernel.org>
+ <78014ba3d564004081dca3c1d7e69cec8943f629.1772095513.git.asj@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] btrfs: test setting the same received UUID to a lot of
- subvolumes
-To: fdmanana@kernel.org, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <6f697483d00fc7a001f2ce752a545d525cf2929c.1772151075.git.fdmanana@suse.com>
-Content-Language: en-US
-From: Anand Jain <anajain.sg@gmail.com>
-In-Reply-To: <6f697483d00fc7a001f2ce752a545d525cf2929c.1772151075.git.fdmanana@suse.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <78014ba3d564004081dca3c1d7e69cec8943f629.1772095513.git.asj@kernel.org>
 
+On Thu, Feb 26, 2026 at 10:41:45PM +0800, Anand Jain wrote:
+> Add a new test, to verify that the kernel correctly differentiates between
+> two block devices sharing the same FSID/UUID.
+> 
+> Signed-off-by: Anand Jain <asj@kernel.org>
+> ---
+>  common/config         |  1 +
+>  tests/generic/790     | 78 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/790.out |  7 ++++
+>  3 files changed, 86 insertions(+)
+>  create mode 100644 tests/generic/790
+>  create mode 100644 tests/generic/790.out
+> 
+> diff --git a/common/config b/common/config
+> index 1420e35ddfee..c08f828575a2 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -228,6 +228,7 @@ export BTRFS_MAP_LOGICAL_PROG=$(type -P btrfs-map-logical)
+>  export PARTED_PROG="$(type -P parted)"
+>  export XFS_PROPERTY_PROG="$(type -P xfs_property)"
+>  export FSCRYPTCTL_PROG="$(type -P fscryptctl)"
+> +export INOTIFYWAIT_PROG="$(type -P inotifywait)"
+>  
+>  # udev wait functions.
+>  #
+> diff --git a/tests/generic/790 b/tests/generic/790
+> new file mode 100644
+> index 000000000000..3809fced622d
+> --- /dev/null
+> +++ b/tests/generic/790
+> @@ -0,0 +1,78 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 Anand Jain <asj@kernel.org>.  All Rights Reserved.
+> +#
+> +# FS QA Test 790
+> +#
+> +# Verify if the kernel or userspace becomes confused when two block devices
+> +# share the same fid/fsid/uuid. Create inotify on both original and cloned
+> +# filesystem. Monitor the notification in the respective logs.
+> +
+> +. ./common/preamble
+> +
+> +_begin_fstest auto quick mount clone
+> +
+> +_require_test
+> +_require_scratch_dev_pool 2
+> +_require_command "$INOTIFYWAIT_PROG" inotifywait
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.*
+> +	umount $mnt1 $mnt2 2>/dev/null
+> +	_scratch_dev_pool_put
+> +}
+> +
+> +_scratch_dev_pool_get 2
+> +_scratch_mkfs_sized_clone >$seqres.full 2>&1
+> +devs=($SCRATCH_DEV_POOL)
+> +mnt2=$TEST_DIR/mnt2
+> +mkdir -p $mnt2
+> +
+> +_scratch_mount $(_clone_mount_option)
+> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
+> +						_fail "Failed to mount dev2"
+> +
+> +log1=$tmp.inotify1
+> +log2=$tmp.inotify2
+> +
+> +echo "Setup inotify watchers on both SCRATCH_MNT and mnt2"
+> +$INOTIFYWAIT_PROG -m -e create --format '%f' $SCRATCH_MNT > $log1 2>&1 &
+> +pid1=$!
+> +$INOTIFYWAIT_PROG -m -e create --format '%f' $mnt2 > $log2 2>&1 &
+> +pid2=$!
+> +sleep 2
+> +
+> +echo "Trigger file creation on SCRATCH_MNT"
+> +touch $SCRATCH_MNT/file_on_scratch_mnt
+> +sync
+> +sleep 1
+> +
+> +echo "Trigger file creation on mnt2"
+> +touch $mnt2/file_on_mnt2
+> +sync
+> +sleep 1
+> +
+> +echo "Verify inotify isolation"
+> +kill $pid1 $pid2
+> +wait $pid1 $pid2 2>/dev/null
 
+I think you also need to take care of killing the bg process
+in _cleanup() so that the test could be cleanly aborted.
 
-Looks good to me.
+Thanks,
+Amir.
 
-Reviewed-by: Anand Jain <asj@kernel.org>
-
-Anand
+> +
+> +if grep -q "file_on_scratch_mnt" $log1 && ! grep -q "file_on_mnt2" $log1; then
+> +	echo "SUCCESS: SCRATCH_MNT events isolated."
+> +else
+> +	echo "FAIL: SCRATCH_MNT inotify confusion!"
+> +	[ ! -s $log1 ] && echo "  - SCRATCH_MNT received no events."
+> +	grep -q "file_on_mnt2" $log1 && echo "  - SCRATCH_MNT received event from mnt2."
+> +fi
+> +
+> +if grep -q "file_on_mnt2" $log2 && ! grep -q "file_on_scratch_mnt" $log2; then
+> +	echo "SUCCESS: mnt2 events isolated."
+> +else
+> +	echo "FAIL: mnt2 inotify confusion!"
+> +	[ ! -s $log2 ] && echo "  - mnt2 received no events."
+> +	grep -q "file_on_scratch_mnt" $log2 && echo "  - mnt2 received event from SCRATCH_MNT."
+> +fi
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/790.out b/tests/generic/790.out
+> new file mode 100644
+> index 000000000000..3c92c34ffbda
+> --- /dev/null
+> +++ b/tests/generic/790.out
+> @@ -0,0 +1,7 @@
+> +QA output created by 790
+> +Setup inotify watchers on both SCRATCH_MNT and mnt2
+> +Trigger file creation on SCRATCH_MNT
+> +Trigger file creation on mnt2
+> +Verify inotify isolation
+> +SUCCESS: SCRATCH_MNT events isolated.
+> +SUCCESS: mnt2 events isolated.
+> -- 
+> 2.43.0
+> 
