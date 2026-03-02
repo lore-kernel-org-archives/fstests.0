@@ -1,65 +1,65 @@
-Received: from mail-pf1-f171.google.com (mail-pf1-f171.google.com [209.85.210.171])
+Received: from mail-pl1-f171.google.com (mail-pl1-f171.google.com [209.85.214.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8051E3E9F87
-	for <fstests@vger.kernel.org>; Mon,  2 Mar 2026 13:24:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26E28430BB2
+	for <fstests@vger.kernel.org>; Mon,  2 Mar 2026 13:30:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772457855; cv=none; b=D3acMrO5b8ttwX3L77KIqKgjB+ej0yyN0mnUD1XPQ1KP68kClpU2n1uZGm6GhHmFHFuIxeTXFEvPcNAHtHS3t/Aaep760ucNp/F9JSTHGFMz4sv2NdShusHcjC0/nilG4n9MLCbJvOG4y6MbGEDj2Tb3w03RM58VyPnSTQhOEu0=
+	t=1772458225; cv=none; b=O6to/JjvP0gbZNlBx6SjgCYlBcUe5UVwatBSsMxJFFT3JLH+VJ8VNLxWi6qVX8iuZM4S8b6/+g0T+5KISVE29BQWBM446DNK8ZunHOoAbW7wpXrak+cpOsI/IO7UUgFVgEuxBeOslNNwpjZNvroqKqo/m1586lH/kql5lAUzOeI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772457855; c=relaxed/simple;
-	bh=ltfsj99I78ai3Uw4cmgHT0d1UXB8XXPY1S98SmQRKs0=;
+	s=arc-20240116; t=1772458225; c=relaxed/simple;
+	bh=Rq7RfAq1tZwnyavsjnkK9wmAf48OHY+TrmeBnY75gVU=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=gOhtdXm1NmcMicIuY1yex/MDLlI4JqzAeLPQODT6IulEspZ5fWsixFQDXAtm5tUsleDke1roaV0UdufrOQISlK71DQScy4lHLs5I+RKont1ZmuXdq/pTQEyv5hLMMaZ9zEKbIPQx6cQkYOKDEwihwiOWSwAxYwfVqorR45W35Qw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=LueOPztv; arc=none smtp.client-ip=209.85.210.171
+	 In-Reply-To:Content-Type; b=aNIxkMTDeuUy9Kardsf77zISKMHW+fBK3Ve0wuVmGLYAEGZ1ds0nr8mq3sXQVCaSXPNWAOEq3fEpANcawJpPJhZmnPoU0LNEYA0ZGTXLRYbL4TL9CGcqX0wP4eel9RRjhE42dU+nhLFtdDHxZyE/lYj5abLFuX5ghLbF6J9LYFE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=QliuqGlh; arc=none smtp.client-ip=209.85.214.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LueOPztv"
-Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-82746ed8cb1so2178806b3a.3
-        for <fstests@vger.kernel.org>; Mon, 02 Mar 2026 05:24:09 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QliuqGlh"
+Received: by mail-pl1-f171.google.com with SMTP id d9443c01a7336-2ae46b9c70dso5551645ad.1
+        for <fstests@vger.kernel.org>; Mon, 02 Mar 2026 05:30:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1772457849; x=1773062649; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1772458220; x=1773063020; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:from:content-language
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=v9ZnDEvgwTfM42XxCeWf1ZWhMQzzUDLYvt9awp7GUwc=;
-        b=LueOPztvjLS8TwLVZEA7S/Gqx4FUAvlFDty0m5Ywooe7fOv98qYJW5jZgNLf+dBVXL
-         LDHJBQaDuMOVCpSXyW1+Ifxtrxx1k5aBtNnH2bops36EEp5mcPiOPW1dijZj1Czhbdp/
-         pZsaRzkSCMd1BdzxeRCthPqHRcn1DA6jZyy40+TlkrDM7menZPM6nH5P6RmWYEn14G4q
-         mjcww6g4kmG1tdsC21C6nJlZYWHEXqKLEHd/cI70mBkKIt6yI8nFQYdhYyvAi4oj8qQH
-         SKzV6RYep9VvN8RxJ5zmEyG44P3uYDiHRi8gHza32G3OS+HmEVQiquxEOGUwSF3IT4nI
-         HL1Q==
+        bh=s24i19n8lKIqVIDIL0pIocUyXuHdTYTMYpJQeikEDx4=;
+        b=QliuqGlhM72zAOFK2QwkQ1LbtSPrJdHcPPOCXJYqpUcpGXOCZJcRCbvBWdT8BUuq3v
+         bUQx6IaUTLOfZeUkEgGSzREw56LuGVkdDUwOhkjPuEjO87GZNWEXTGzcm3FqJzUTSiEB
+         hSUzGmc+N18g9cpKr86DaCf6/gLVfR1syAwTeH7odxYnUIQD0w6zQk9zKAyqNX7VGnS1
+         6j+jhjCCLv7Z351U9BAWsWqYhNZoigqcOVIp0LO6probde+f95GaH8BF+NiVK06ulphS
+         C2A+A6+ix2/DRDb63ftTR1A7znyW5Dej6xPIVEmaTGIivy8k+zZOTtowp3XM6wYdW+4Q
+         kGUg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772457849; x=1773062649;
+        d=1e100.net; s=20230601; t=1772458220; x=1773063020;
         h=content-transfer-encoding:in-reply-to:from:content-language
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=v9ZnDEvgwTfM42XxCeWf1ZWhMQzzUDLYvt9awp7GUwc=;
-        b=d4tkvAFUHX4CrdFcfYNCzSmX9OhS1XvhE+EmcRbAS3kIX/rLeaBIMsEEsN0D2JVyJJ
-         5D6TXcYcyIl/J1RvZPvJnaciE63mSmodwSIS2sjy/l7uJKu/iXx1keKSOCwCQHa4NTjn
-         W+meQE3Xhud1mgqfcO/c0fpl5qYdgTU7imVtr32+Trg6MQ4+mcsSdusU1OmNMY4tsTdy
-         us8XTxD0ty2fWYyDhS3iighyA22S8JHmCbFJJOdgv2rDAJJRYDp3snICd45j7WjKnH9V
-         OwTJCIstl/QoDo162CuvbQT7efoFk3urXNhaM8hMuFWvOGiouLEouw+Ih+uuUkbgcpoa
-         PKSw==
-X-Gm-Message-State: AOJu0YyVFC+PKbd+k5nKXpQQhnYUDoinjqfMu3BoABGXdGuiyu3VrcLG
-	+V+jEglKDBC9iYTz4uVkOds/0C9afvc+/K8pfkHULoVdwj8NnlMEvqY2
-X-Gm-Gg: ATEYQzxvTfOOMcKX7hblDgqGt/SBj+KioplZlqhecEBGOSMEEZiQ9tCf7xJsJnsYPK2
-	P07zoKRfAc6qdvUJtoa68SswtNnby0CZvp4nRxxhXSw/UGd73yV/7EJ9M/Es+xApSGzvYBKDaK5
-	Jll+g3w2+nxFa357I+OcDImW+BLiw0ojBJpB0AJ6EuQykgvtam/QrRGdkdmFnL/9lqe1iE2w744
-	Cxpiv7i112dynnS15BiBnjDd+TVoc+GgoozHjVzFqCArUUmLTYbmUafxNotzjFIbfwGGbWuFphA
-	2f5vUPv8hqX6NL8vAiR7OStpnlN/yDzOLBvcURGXrGu5nykXEwQ1WIUsDs+szjp3gN3mB9RPQkW
-	TEsOPu2rUe8/2jql8PL/E7sGD9OLSWA6Md7KlwF6P+NmYW0rMtSBhUvdqF0MLmA7nqOf7bsLCO6
-	iidJF5v1RFY4MDFdF2hdkV7bqqxb8=
-X-Received: by 2002:a05:6a00:3a25:b0:827:2891:c177 with SMTP id d2e1a72fcca58-8274da2fee7mr8658465b3a.64.1772457848572;
-        Mon, 02 Mar 2026 05:24:08 -0800 (PST)
+        bh=s24i19n8lKIqVIDIL0pIocUyXuHdTYTMYpJQeikEDx4=;
+        b=vhaVrCyNVcc3SRCNrM/ZxTdUBeXivkHuPyGS43UtMCNdnyDMEGytfxbvOy28+Hr0pr
+         HLn8pDn7BiEDyRkZyuQQUdo4ZCl3sv1SNNZzKFHW2QGYxfSvtxiDb35i3NoQbImFwMus
+         az2a6fsk/d7dD4avAA5eSVrS7+7P57Kk9B7LHrEKblgoT0j/Xe5cLoqkqPbt3fMtLfWe
+         gWGQ6jhKHe+ap1v8assAbn1qtaVCdUuLXmO/VI2OmeAUFcA/FXjJ6Zmqn/BMGPzUvMGI
+         ofgjuI2JWT1wRXIU0+HOkWKQnZCYl31hDKF1tSCAvY+YUZgS3Jvpk2YedV4ecxcpY1uK
+         fDLg==
+X-Gm-Message-State: AOJu0YxUwEqEKsm2zvUzSuhVP+OUBQdIUFj6Y3HH3+ch2xRFujsPoa46
+	3ED9MuWOOZGZTgmSfJlo2GT2ZPklL42gBkIcFUkcQlUHAPK15PJNg+C0
+X-Gm-Gg: ATEYQzxoZTg/xXUirCXDGjyuO6oaxBDrnUyDfg4Ez9IAEp62bo0alPcHksCUE1C+ID2
+	OWyKPOhmVR7ZYyVfODbXfdEHxWYvX0nv27ypsNlHRgqm/2Y4KK3SdH5yLUQhgOZOvbAa4JiA09o
+	xHJnMfri7mXNWK9wwaPqjt7YL/KKlQtuIFNux846dEzd2dbwViexcqZlHwSX3Ch/7jrG4lv+ste
+	SHGjUE+GxEnkwHKN/uLKRPII4FQwMNSNNnrLPA32tu3ZIj3CyeN7xPuVW5W6rRKqyJE6XVbJMnT
+	yNR/ZSSzRnEGvL1EIrAjYxJcvKxOGzeo1oh+15dA0bLSkyJ35M0rjuATAcxdLGgAfg+1tgnAQlF
+	aGXWjSIQH5UZJ4bzRdtEFjuaNh46oWbznycrCGLNbxAlFrOU5jZs5xx3/a9K2OMwVF0+cSwZT+M
+	3GC9aPwat0f3Yq2BNt2Ns31V32oa4/fJswid8GJA==
+X-Received: by 2002:a17:903:19cf:b0:2ae:4ad5:b76c with SMTP id d9443c01a7336-2ae4ad5ba05mr48823935ad.10.1772458220205;
+        Mon, 02 Mar 2026 05:30:20 -0800 (PST)
 Received: from [192.168.50.90] ([116.87.14.48])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-8273a05e831sm13446967b3a.58.2026.03.02.05.24.06
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ae45b5201fsm55018345ad.87.2026.03.02.05.30.18
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 02 Mar 2026 05:24:08 -0800 (PST)
-Message-ID: <73e51635-e461-4292-a858-f73ea4d23545@gmail.com>
-Date: Mon, 2 Mar 2026 21:24:05 +0800
+        Mon, 02 Mar 2026 05:30:19 -0800 (PST)
+Message-ID: <cb136241-ca7f-4c64-a6b3-3f86688240f3@gmail.com>
+Date: Mon, 2 Mar 2026 21:30:17 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -67,72 +67,46 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 4/9] fstests: add test for inotify isolation on cloned
- devices
+Subject: Re: [PATCH 5/9] fstests: verify fanotify isolation on cloned
+ filesystems
 To: Amir Goldstein <amir73il@gmail.com>, Anand Jain <asj@kernel.org>
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
  linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
  Jan Kara <jack@suse.cz>
 References: <cover.1772095513.git.asj@kernel.org>
- <78014ba3d564004081dca3c1d7e69cec8943f629.1772095513.git.asj@kernel.org>
- <aaQ59uL3rG7_WYHJ@amir-ThinkPad-T480>
+ <b54dea5e72585db5f5c3d74ce399f9d839965821.1772095513.git.asj@kernel.org>
+ <aaQ8CB7C4FjDuedR@amir-ThinkPad-T480>
 Content-Language: en-US
 From: Anand Jain <anajain.sg@gmail.com>
-In-Reply-To: <aaQ59uL3rG7_WYHJ@amir-ThinkPad-T480>
+In-Reply-To: <aaQ8CB7C4FjDuedR@amir-ThinkPad-T480>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -r -f $tmp.*
->> +	umount $mnt1 $mnt2 2>/dev/null
->> +	_scratch_dev_pool_put
->> +}
->> +
->> +_scratch_dev_pool_get 2
->> +_scratch_mkfs_sized_clone >$seqres.full 2>&1
->> +devs=($SCRATCH_DEV_POOL)
->> +mnt2=$TEST_DIR/mnt2
->> +mkdir -p $mnt2
->> +
->> +_scratch_mount $(_clone_mount_option)
->> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
->> +						_fail "Failed to mount dev2"
->> +
->> +log1=$tmp.inotify1
->> +log2=$tmp.inotify2
->> +
->> +echo "Setup inotify watchers on both SCRATCH_MNT and mnt2"
->> +$INOTIFYWAIT_PROG -m -e create --format '%f' $SCRATCH_MNT > $log1 2>&1 &
->> +pid1=$!
->> +$INOTIFYWAIT_PROG -m -e create --format '%f' $mnt2 > $log2 2>&1 &
->> +pid2=$!
->> +sleep 2
->> +
->> +echo "Trigger file creation on SCRATCH_MNT"
->> +touch $SCRATCH_MNT/file_on_scratch_mnt
->> +sync
->> +sleep 1
->> +
->> +echo "Trigger file creation on mnt2"
->> +touch $mnt2/file_on_mnt2
->> +sync
->> +sleep 1
->> +
->> +echo "Verify inotify isolation"
->> +kill $pid1 $pid2
->> +wait $pid1 $pid2 2>/dev/null
+>> diff --git a/src/Makefile b/src/Makefile
+>> index d0a4106e6be8..ff71cde936a7 100644
+>> --- a/src/Makefile
+>> +++ b/src/Makefile
+>> @@ -36,7 +36,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>>  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+>>  	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
+>>  	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
+>> -	rw_hint
+>> +	rw_hint fanotify
 > 
-> I think you also need to take care of killing the bg process
-> in _cleanup() so that the test could be cleanly aborted.
+> Check if you already have fsnotifywait installed on your system
+> most likely you do. It was added to inotify-tools quite some time ago.
+> Could save you from adding a custom prog.
+> Not 100% sure about fsnotifywait, but quite sure that
+> fsnotifywatch --verbose prints the FSID of events.
+> 
 
-You are right, SIGINT can terminate the testcase at any point, we need
-kill(1) in _cleanup().
+I missed that command. V2 switched to using fsnotifywait.
+V2 is not sent yet, I'll wait for any further comments.
 
-I'll fix this in v2.
+Thanks for the review.
 
-Thanks, Anand
+Anand
 
-
+> Thanks,
+> Amir.
