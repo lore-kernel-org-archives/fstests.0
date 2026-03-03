@@ -1,160 +1,121 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C0713537CD;
-	Tue,  3 Mar 2026 17:20:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F7E32DF6F4;
+	Tue,  3 Mar 2026 17:53:01 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772558419; cv=none; b=d9DR2rUpJf82Y7rOWUZZwrI4McC6sr6ZMQIVKkTiTEXUFLYd6A73sSMqqFFFxa/BM7QsFHG69FJ7BT99A8blpET/6dSI1xq3hsiRlJrjJVOslXH8sA3e++ECoBEr5hNYhUT1aRb968vMxMXHjgyF40vexvg7WIj+YgfIHxPeYfM=
+	t=1772560381; cv=none; b=Nx5OSqSsxHgCUkiJD0GFoO73BxH0rdEx2nwh6GIPDGrfBhygBhLMJLp5clV7870VL0mfouS+aAubPQgisDJKnODZ5hvivdvR42cxMQKwL/UTjiSXUJ7/DH7csxmYhHWNdwhg/6lKIcHciZA7+OelLOX2XgazwOzzOsL+cwM41GA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772558419; c=relaxed/simple;
-	bh=TVH3/gfJTLCRKCKNDmtOWdhwgUO28COAH57ZVdOsufw=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=cxb1JNgtxEo2PP0I+dppYCNIyP1xkyqD4/oIipIMQhLX5ekSnfwv3qbNlC3JWMqOUNwdTFGd+Ui/7H79CZoTbAhWfUdl1M6S5qUOGp3uZ+YQxdaZhcgvRkEaB5C3nz6a4sM9gomZsytk26Hwof5HMbVvnQ1V5hdS+BGOngJ/spY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZKlRGR8T; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1772560381; c=relaxed/simple;
+	bh=7QD5MqjyE+Wjyl0MhxMq8Ns+opJ4HIXK6UR6t+WDVh4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=NAKIgv9zYXbS1P6p6NN2xviJwTNhM9xJ9H3hXWTH0GWlcS/hE2+Y5iD+xK+nNXp7NtacuRObDRrbPVzCVfGz+KnUHIHjraYZUBplQXG0qfKv9Gf2NmbbWEDzW96x7Cep8Qf+uy2QHC8eJ+s9oxVcE53mY2QOw6/c/plGUzo7hmU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=vFbYO+o8; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZKlRGR8T"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 407B0C19425;
-	Tue,  3 Mar 2026 17:20:18 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="vFbYO+o8"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E4B28C116C6;
+	Tue,  3 Mar 2026 17:53:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772558419;
-	bh=TVH3/gfJTLCRKCKNDmtOWdhwgUO28COAH57ZVdOsufw=;
-	h=From:To:Cc:Subject:Date:From;
-	b=ZKlRGR8T0WZ3icxzkTnAriVfJGfaBar5n51pD5UJjWWlIZazyJ55EMLbUHEM+Supq
-	 /EBG5ONnb2z5Uk3EMYCHCajARVtfoEhWJ/rxceJ8jABM9Q24Fj2tA9BKcib7AHRfP8
-	 XBCYGUAR/cz44aYFxKdR5t7UKAQASUtdY9SrSchh9ZUKdyBbe4Fpn1G73aM86XldM8
-	 JufPurxIs3lqVHq58/uqMw+oBapXNhnw9MTkTG/hCY+mJa0dXwbSGDojzjN3UnWBzB
-	 j4CxlUYW6K1i4BAaYY1xKqEbbG3XuOTSLmx+R2K7bM2FPOvVPfZllfZNbUEuftoUgf
-	 vakhLLAPalOww==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs: test a directory fsync scenaro after replacing a subdir with a file
-Date: Tue,  3 Mar 2026 17:20:10 +0000
-Message-ID: <8e3c1626b6e49678976db67a861cb5dcfdb532c0.1772558357.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.47.2
+	s=k20201202; t=1772560381;
+	bh=7QD5MqjyE+Wjyl0MhxMq8Ns+opJ4HIXK6UR6t+WDVh4=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=vFbYO+o8xLrOMsSHnERuLJK9EEosB54/L0L1Z04JJ/by/7P+ddIznLeUv1jMHVotr
+	 iMWbG0qvUXe3V1xDQdXAen+hV2AS1szC2CD3RhD/94xf5lVybOxEl8Dz9C3EiON7PR
+	 C7NNe33xDtgJVeh+Vjctd+VOuLqQi8cTAr+jj+GPttMmGuAq7pilQkhr+n3DadmFSw
+	 QESNBjTuzOc3j5fH1JPw2XKUGMbXJa9/Nb6fAVjQfoygguovlWfZ7fCq31xh5kFiKz
+	 a02dK3TdZZwrSmqIeLcyySzCo0UIue2DPfjV3O5YLaAwmHr0J5Z0Jerfi+AgFPULs3
+	 sTDqYucISnk8A==
+Date: Tue, 3 Mar 2026 09:53:00 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, luca.dimaio1@gmail.com, linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs/841: create a block device that must exist
+Message-ID: <20260303175300.GT57948@frogsfrogsfrogs>
+References: <20260202085701.343099-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260202085701.343099-1-hch@lst.de>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Mon, Feb 02, 2026 at 09:57:01AM +0100, Christoph Hellwig wrote:
+> This test currently creates a block device node for /dev/ram0,
+> which isn't guaranteed to exist, and can thus cause the test to
+> fail with:
+> 
+> mkfs.xfs: cannot open $TEST_DIR/proto/blockdev: No such device or address
+> 
+> Instead, create a node for the backing device for $TEST_DIR, which must
+> exist.
 
-Test a scenario where we remove a directory previously persisted, create
-a file with the same name and parent directory, create two directories in
-the same parent directory, create a hard link for the new file in one of
-the new directories, fsync the directory with the hard link and fsync the
-parent directory. After a power failure we expect both directories to be
-persisted as well as the new file and its hard link.
+Hrm.  I'm still noticing regressions with this test, particularly when
+the blocksize of the test filesystem is different from the block size
+of the $IMG_FILE filesystem.
 
-This exercises a bug on btrfs fixed by the following kernel patch:
+So I started looking for fsblock discrepancies between
+xfs_reproducible_test.img.[1-3] and noticed that EOF block contents are
+different if the file being copied in has sparse holes in it that are
+not aligned to the fsblock size of the new filesystem.
 
-  "btrfs: log new dentries when logging parent dir of a conflicting inode"
+IOWs, if $TEST_DIR is a 1k fsblock filesystem and the $IMG_FILE
+filesystems have 4k fsblocks, you can write 1k at odd offsets (e.g. 1k,
+3k, 5k, 7k, etc) and the created file does not match the file in the
+proto dir.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/generic/790     | 69 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/790.out | 12 ++++++++
- 2 files changed, 81 insertions(+)
- create mode 100755 tests/generic/790
- create mode 100644 tests/generic/790.out
+I traced this to design thinko in libxfs_file_write -- it assumes that
+the caller always wants to write the full block, even if the buffer
+passed in does not cover the entire range of the block.  Therefore it'll
+zero the head and the tail of the xfs_buf before writing it out.
 
-diff --git a/tests/generic/790 b/tests/generic/790
-new file mode 100755
-index 00000000..a25203a1
---- /dev/null
-+++ b/tests/generic/790
-@@ -0,0 +1,69 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-+#
-+# FS QA Test 790
-+#
-+# Test a scenario where we remove a directory previously persisted, create a
-+# file with the same name and parent directory, create two directories in the
-+# same parent directory, create a hard link for the new file in one of the
-+# new directories, fsync the directory with the hard link and fsync the parent
-+# directory. After a power failure we expect both directories to be persisted
-+# as well as the new file and its hard link.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick log
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -r -f $tmp.*
-+}
-+
-+. ./common/dmflakey
-+
-+_require_scratch
-+_require_dm_target flakey
-+
-+[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: log new dentries when logging parent dir of a conflicting inode"
-+
-+_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+_scratch_mount
-+
-+mkdir $SCRATCH_MNT/foo
-+
-+_scratch_sync
-+
-+rmdir $SCRATCH_MNT/foo
-+
-+# Create two new directories in the same parent directory as the new file.
-+mkdir $SCRATCH_MNT/dir1
-+mkdir $SCRATCH_MNT/dir2
-+
-+# Create a file with the name of the directly we deleted and was persisted
-+# before.
-+touch $SCRATCH_MNT/foo
-+
-+# Create a hard link for the new file inside one of the new directories.
-+ln $SCRATCH_MNT/foo $SCRATCH_MNT/dir2/link
-+
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir2
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/
-+
-+# Simulate a power failure and then mount again the filesystem to replay the
-+# journal/log.
-+_flakey_drop_and_remount
-+
-+# We expect to see dir1, dir2, file foo and its hard link, since dir2 was
-+# explicitly fsynced as well as the parent directory.
-+echo -e "Filesystem content after power failure:\n"
-+# Exclude 'lost+found' dir from ext4 and last line if it's blank (due to removal
-+# of 'lost+found').
-+ls -R $SCRATCH_MNT/ | grep -v 'lost+found' | sed -e '${/^$/d;}'
-+
-+# success, all done
-+_exit 0
-diff --git a/tests/generic/790.out b/tests/generic/790.out
-new file mode 100644
-index 00000000..d2232a19
---- /dev/null
-+++ b/tests/generic/790.out
-@@ -0,0 +1,12 @@
-+QA output created by 790
-+Filesystem content after power failure:
-+
-+/home/fdmanana/btrfs-tests/scratch_1/:
-+dir1
-+dir2
-+foo
-+
-+/home/fdmanana/btrfs-tests/scratch_1/dir1:
-+
-+/home/fdmanana/btrfs-tests/scratch_1/dir2:
-+link
--- 
-2.47.2
+Thus, the region at 1k causes mkfs to allocate fileoff 0 (which is a 4k
+block).  Then libxfs_file_write writes 1024 bytes of zeroes, 1024 bytes
+of copied-in data, and 2048 bytes of more zeroes.
 
+Next, the region at 3k causes mkfs to re-call libxfs_file_write, but
+this time it writes 3072 bytes of zeroes and 1024 bytes of copied-in
+data, thus obliterating the first write.
+
+That bug's on me, and I'll fix it in writefile by rounding data_pos and
+hole_pos outward as needed to be aligned to the block size of the copied
+in filesystem.  And I'll update xfs/841 to compare $PROTO_DIR against
+what's in the new filesystem.
+
+That fixes the data corruption problem, but then the test still fails
+because now the space map isn't the same between mkfs invocations.
+
+--D
+
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/xfs/841 | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/xfs/841 b/tests/xfs/841
+> index ee2368d4a746..ddb1b3bea104 100755
+> --- a/tests/xfs/841
+> +++ b/tests/xfs/841
+> @@ -85,9 +85,12 @@ _create_proto_dir()
+>  	$here/src/af_unix "$PROTO_DIR/socket" 2> /dev/null || true
+>  
+>  	# Block device (requires root)
+> -	mknod "$PROTO_DIR/blockdev" b 1 0 2> /dev/null || true
+> +	# Uses the device for $TEST_DIR to ensure it always exists.
+> +	mknod "$PROTO_DIR/blockdev" b $(stat -c '%Hd %Ld' $TEST_DIR) \
+> +		2> /dev/null || true
+>  
+>  	# Character device (requires root)
+> +	# Uses /dev/null, which should always exist
+>  	mknod "$PROTO_DIR/chardev" c 1 3 2> /dev/null || true
+>  }
+>  
+> -- 
+> 2.47.3
+> 
+> 
