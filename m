@@ -1,97 +1,160 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DCF3D3DBD66;
-	Tue,  3 Mar 2026 16:53:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C0713537CD;
+	Tue,  3 Mar 2026 17:20:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772556797; cv=none; b=blWisOkL/E7sN7lyz2hNyAYqwu6IS/zFh1zcna6Z+7kvz5Usy5rl8LcgjT/Eh9qxkyC85VYUBqr8L3FfFJd6nC/rw9HTE3j9Xlq9Q5QOSs5A4+B/F4VRks9cXZKKPgr55dB2RqB+csBo+j9kMIqwNGTdkffSxq15THtCZOLzuBo=
+	t=1772558419; cv=none; b=d9DR2rUpJf82Y7rOWUZZwrI4McC6sr6ZMQIVKkTiTEXUFLYd6A73sSMqqFFFxa/BM7QsFHG69FJ7BT99A8blpET/6dSI1xq3hsiRlJrjJVOslXH8sA3e++ECoBEr5hNYhUT1aRb968vMxMXHjgyF40vexvg7WIj+YgfIHxPeYfM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772556797; c=relaxed/simple;
-	bh=hM3JuSJObjPYSaMejdndGHeShGaty5RqSUN6GqELeZ0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pdvcXfDSl3o8mAdJOrhpUsyqIL/36oNzo3frRrWXNiWLDChmykcR2q56uI2MTjTI0tkvl43Ppqy68Pz4soslLPQX9KdpnMYgmJkEjVtkEkdMMBPps1rgDt94YewFPM37vMYKDhG17wfLGBHWKz0zlL6YaJUYXoPvHzMJW66gzCM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=lZUzoahV; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1772558419; c=relaxed/simple;
+	bh=TVH3/gfJTLCRKCKNDmtOWdhwgUO28COAH57ZVdOsufw=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=cxb1JNgtxEo2PP0I+dppYCNIyP1xkyqD4/oIipIMQhLX5ekSnfwv3qbNlC3JWMqOUNwdTFGd+Ui/7H79CZoTbAhWfUdl1M6S5qUOGp3uZ+YQxdaZhcgvRkEaB5C3nz6a4sM9gomZsytk26Hwof5HMbVvnQ1V5hdS+BGOngJ/spY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZKlRGR8T; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="lZUzoahV"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=LK5ovpByNqMJYEsOUFqrGM8WApOp3poHiGmOjO+XhlA=; b=lZUzoahVcm4BR6DSZEXlobv0kn
-	2M0ZYyZW3ViL5NF+WB88v0QV2eoS5wflLDsr3U5kTfkVag85Jfd00a65yz3jKtvdoIqbfFRMXdZQC
-	DwKfOKlpBaUXOPtGt3GtAfv911qQEM7zNt7Zq793idsBDI3DkgXfbGZir0yVa4EyoOsYX2iCNysNz
-	ZJyahRkTL6i/emRSuSRFW6HhEVY+m749s41o+eieuEazBXOuBXCT1WPqkajLgUbtKKMwwFiJFT59t
-	FTVh4WJdkNjvEOJrNij/FpCkYKHjsIXyui6D2p5RT2HGGX9stlb1kzhR0itWWbR3Y8kVavwyUqZ5f
-	0Nb8L5qw==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vxSzg-0000000FbtI-1hEH;
-	Tue, 03 Mar 2026 16:53:12 +0000
-Date: Tue, 3 Mar 2026 08:53:12 -0800
-From: Christoph Hellwig <hch@infradead.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@infradead.org>, zlang@redhat.com,
-	linux-fsdevel@vger.kernel.org, hch@lst.de, gabriel@krisman.be,
-	amir73il@gmail.com, jack@suse.cz, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 1/1] generic: test fsnotify filesystem error reporting
-Message-ID: <aacR-EYFd0x_nRz-@infradead.org>
-References: <177249785452.483405.17984642662799629787.stgit@frogsfrogsfrogs>
- <177249785472.483405.1160086113668716052.stgit@frogsfrogsfrogs>
- <aab2JbAZI8RFq_XE@infradead.org>
- <20260303164901.GJ57948@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZKlRGR8T"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 407B0C19425;
+	Tue,  3 Mar 2026 17:20:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1772558419;
+	bh=TVH3/gfJTLCRKCKNDmtOWdhwgUO28COAH57ZVdOsufw=;
+	h=From:To:Cc:Subject:Date:From;
+	b=ZKlRGR8T0WZ3icxzkTnAriVfJGfaBar5n51pD5UJjWWlIZazyJ55EMLbUHEM+Supq
+	 /EBG5ONnb2z5Uk3EMYCHCajARVtfoEhWJ/rxceJ8jABM9Q24Fj2tA9BKcib7AHRfP8
+	 XBCYGUAR/cz44aYFxKdR5t7UKAQASUtdY9SrSchh9ZUKdyBbe4Fpn1G73aM86XldM8
+	 JufPurxIs3lqVHq58/uqMw+oBapXNhnw9MTkTG/hCY+mJa0dXwbSGDojzjN3UnWBzB
+	 j4CxlUYW6K1i4BAaYY1xKqEbbG3XuOTSLmx+R2K7bM2FPOvVPfZllfZNbUEuftoUgf
+	 vakhLLAPalOww==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: test a directory fsync scenaro after replacing a subdir with a file
+Date: Tue,  3 Mar 2026 17:20:10 +0000
+Message-ID: <8e3c1626b6e49678976db67a861cb5dcfdb532c0.1772558357.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260303164901.GJ57948@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Transfer-Encoding: 8bit
 
-On Tue, Mar 03, 2026 at 08:49:01AM -0800, Darrick J. Wong wrote:
-> > > +ext4)
-> > > +	# added at the same time as uevents
-> > > +	modprobe fs-$FSTYP
-> > > +	test -e /sys/fs/ext4/features/uevents || \
-> > > +		_notrun "$FSTYP does not support fsnotify ioerrors"
-> > > +	;;
-> > > +*)
-> > > +	_notrun "$FSTYP does not support fsnotify ioerrors"
-> > > +	;;
-> > > +esac
-> > 
-> > Please abstract this out into a documented helper in common/
-> 
-> Ok.  I'm not sure how to check for feature support on ext4 anymore since
-> the uevents patch didn't get merged, and then I clearly forgot to rip
-> that out of this helper here.
+From: Filipe Manana <fdmanana@suse.com>
 
-Oh.  Well, drop that then and move the xfs side and the default n
-into a common helper instead of hardcoding it in the test.
+Test a scenario where we remove a directory previously persisted, create
+a file with the same name and parent directory, create two directories in
+the same parent directory, create a hard link for the new file in one of
+the new directories, fsync the directory with the hard link and fsync the
+parent directory. After a power failure we expect both directories to be
+persisted as well as the new file and its hard link.
 
-> > and add proper error injection to the block code, which has been
-> > somewhere on my todo list forever because dm-error and friends are
-> > so painful to setup.  Maybe I need to expedite that.
-> 
-> I think it's theoretically possible to figure out that there's a zone
-> size and then round outwards the error-target part of the dm table to
-> align with a zone.
+This exercises a bug on btrfs fixed by the following kernel patch:
 
-It's the sysfs chunk size.  btrfs/237 harcodes reading that out,
-which could be easily lifted into a helper.
+  "btrfs: log new dentries when logging parent dir of a conflicting inode"
 
-> I have a lot more doubts about whether or not doing
-> that in bash/awk is a good idea though.  It'd be a lot easier if either
-> the block layer did error injection or if someone just fixes those
-> limitations in dm itself.
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/790     | 69 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/790.out | 12 ++++++++
+ 2 files changed, 81 insertions(+)
+ create mode 100755 tests/generic/790
+ create mode 100644 tests/generic/790.out
 
-I'll sign up to do the block layer stuff.  Doing so should allow us
-to run a lot more of the error injetion tests on zoned xfs, which
-would be good.  So I guess you should keep it as-is for now,
-and I'll do a sweep later.
+diff --git a/tests/generic/790 b/tests/generic/790
+new file mode 100755
+index 00000000..a25203a1
+--- /dev/null
++++ b/tests/generic/790
+@@ -0,0 +1,69 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
++#
++# FS QA Test 790
++#
++# Test a scenario where we remove a directory previously persisted, create a
++# file with the same name and parent directory, create two directories in the
++# same parent directory, create a hard link for the new file in one of the
++# new directories, fsync the directory with the hard link and fsync the parent
++# directory. After a power failure we expect both directories to be persisted
++# as well as the new file and its hard link.
++#
++. ./common/preamble
++_begin_fstest auto quick log
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -r -f $tmp.*
++}
++
++. ./common/dmflakey
++
++_require_scratch
++_require_dm_target flakey
++
++[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: log new dentries when logging parent dir of a conflicting inode"
++
++_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_scratch_mount
++
++mkdir $SCRATCH_MNT/foo
++
++_scratch_sync
++
++rmdir $SCRATCH_MNT/foo
++
++# Create two new directories in the same parent directory as the new file.
++mkdir $SCRATCH_MNT/dir1
++mkdir $SCRATCH_MNT/dir2
++
++# Create a file with the name of the directly we deleted and was persisted
++# before.
++touch $SCRATCH_MNT/foo
++
++# Create a hard link for the new file inside one of the new directories.
++ln $SCRATCH_MNT/foo $SCRATCH_MNT/dir2/link
++
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir2
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/
++
++# Simulate a power failure and then mount again the filesystem to replay the
++# journal/log.
++_flakey_drop_and_remount
++
++# We expect to see dir1, dir2, file foo and its hard link, since dir2 was
++# explicitly fsynced as well as the parent directory.
++echo -e "Filesystem content after power failure:\n"
++# Exclude 'lost+found' dir from ext4 and last line if it's blank (due to removal
++# of 'lost+found').
++ls -R $SCRATCH_MNT/ | grep -v 'lost+found' | sed -e '${/^$/d;}'
++
++# success, all done
++_exit 0
+diff --git a/tests/generic/790.out b/tests/generic/790.out
+new file mode 100644
+index 00000000..d2232a19
+--- /dev/null
++++ b/tests/generic/790.out
+@@ -0,0 +1,12 @@
++QA output created by 790
++Filesystem content after power failure:
++
++/home/fdmanana/btrfs-tests/scratch_1/:
++dir1
++dir2
++foo
++
++/home/fdmanana/btrfs-tests/scratch_1/dir1:
++
++/home/fdmanana/btrfs-tests/scratch_1/dir2:
++link
+-- 
+2.47.2
 
