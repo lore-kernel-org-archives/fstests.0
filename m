@@ -1,201 +1,211 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f50.google.com (mail-ej1-f50.google.com [209.85.218.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E3B233909AE;
-	Tue,  3 Mar 2026 00:47:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772498861; cv=none; b=SXCDS/kmAaABb4bdFs1PGgTimxL+z2oAJqVq0FbQNA+MVuIM7x0AwuLbCDSFfLuyDCnS+nP+j7AXnsMLbQWaXe3pu9f8jgxyGTXQ29QgQYEFxpxHoWme6xIY8wzQZimMOGFf3JXt92PBwswgHbfbcwanOoVK3VvoiSh7ir5k49k=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772498861; c=relaxed/simple;
-	bh=YFqBgaJuK1OlwbhS42ODQa19TFnjE6y8hxDLopekmpU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=PYT3lYBai7Mo+i1hVCQihQwbSFgdfJXCrnqN4v/vucGBt6MNzqFU5+oaNC4dhpXh3kjOz9gC5ctzbT0fT4044G4zUpUq/r/v17JplFASKbAZX/RPyn5KGxHigSF+UiJ1B08znCymqvgaZNHdX26LRJ9jNM70Et70Z+MM1AOj3X0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=l2J3Dix7; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9395938A722
+	for <fstests@vger.kernel.org>; Tue,  3 Mar 2026 09:21:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.50
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1772529679; cv=pass; b=Ur8qkmqCdAtwmRXztPt0SVCAjYrs7IxLsh6TPCoOiz05VFPzL2H0sXZmMeaszSMmSJICuOyOOyXgCp/LTp92h7TnpFRY9bLaZJGGtFTDXCJd6dPvY8f+3qbb+uXAgQjWDNQalgrxlUKcR5SMfz1AkZEfVxKmU0ZY6gXlUspihYo=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1772529679; c=relaxed/simple;
+	bh=bb64YLXIy3oPeHwsvS7m0P33nEAT9WuWSYWp276y4dI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=rJ+ioZtb09dVmTp0hu5UpgZxf+Bc85puvc63JOnNRZKyhd/8vAEEOegI1v+FdSDVLUixnbK0KbGJrroznlYxmMBGbKlpOCbiZbl5TerCJ574+yjzYMbpxWEjWJkX5YvRz27ujFRXmn9X3Q7FR48oAubUGNAxtFYOuUG2zirb/J8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=nGuTpO3B; arc=pass smtp.client-ip=209.85.218.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="l2J3Dix7"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 80E4DC19423;
-	Tue,  3 Mar 2026 00:47:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772498860;
-	bh=YFqBgaJuK1OlwbhS42ODQa19TFnjE6y8hxDLopekmpU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=l2J3Dix7QstK58DvFUkWhcoUsl4p8fRt90muSvHdcBnOxdi0LvQFW9w8nUPHArtFu
-	 toDnHcnaavjVD8nxRXu1dCqM0uGeg7fl5dNaOhmS6oOVIDpsVzja2/K9Y1zFbTiW9L
-	 telAWSl1f1cJftH3sUQJQjiklYMP+sEyDk3zNK+ZEluN8DVRn65EXNmbJ8j6ZuYxCQ
-	 iThjueMryqiHwvyJSQjx12Xvwxp3Ky8TMjjGxMA7bbPBY1/O+cfnFbk7h4oPeENn2O
-	 EvSQsU9DIhurfUT2iv3oYr0VZVVB4FKDArQZKqES1uTyEO+rfbv/duh9jGL7iDdIpw
-	 50YNF2n/jhedg==
-Date: Mon, 2 Mar 2026 16:47:39 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: zlang@redhat.com
-Cc: hch@lst.de, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: [PATCH 14/13] xfs: test xfs_healer startup service
-Message-ID: <20260303004739.GD13843@frogsfrogsfrogs>
-References: <20260303002508.GB57948@frogsfrogsfrogs>
- <177249785709.483507.8373602184765043420.stgit@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nGuTpO3B"
+Received: by mail-ej1-f50.google.com with SMTP id a640c23a62f3a-b932fe2e1a7so746147766b.1
+        for <fstests@vger.kernel.org>; Tue, 03 Mar 2026 01:21:17 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1772529676; cv=none;
+        d=google.com; s=arc-20240605;
+        b=CHlGE5MY3/xqlRpfO0l8qWX9KxEN5qRfOyOMp5+lgnl411He8mP+BrP+bMI56KudBE
+         88ZZaUK9zixPJP/VQqsXNfbzDeuPly4jnYgdo76Aan/EPe068ooGqC/V7Utk4z25c0tS
+         1BRW3LLLkf8p6lV386Cw6HuWSqaDY2uoFJ6Wq1OsINn3Fx5ztEGt928amOU8mJijMcZs
+         XOlW/OOO3AkGlBA3R1Z5EU5p3TBBj6b38bYfUXL0nVr3bwqlDcFZ7RShaWijBZ6/gWhg
+         7N4biK2b3/0kTh8hhekxyRh5lcL7iU5uTqfjoDX4p3CryuZK5kBHmpYziX/nuPY3jyTc
+         DCWQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=pkig2duPJVssDkbWxtWOY0gHaOnkUNJGF+RUH4/MX7E=;
+        fh=i06gytkCiIVC2KLP6FQarEuUlYW/WZEz6O1Cx+n1o2A=;
+        b=OeNarFCW1N6sO/6AlPE39AyvLbeGAI27S80sD2IocgKnL4k7ESfKLjIdgykfIyka+9
+         HHLRcG7G9o/OIncLXdFxsqnj52M9BfV4Wia/cA7E47SG60icrgIWS9AmnLz7Tw+r5br6
+         ZMOEfk4jlE0Hip8aRV7X7BoeObIPJNrvTjw/L9tOVKaEL0bkFHJw0VaN3PDQj0lFsQ12
+         iHpxFWbOZoMG5RfQZ8w8jv5NpLYimoB4clEzruhTzR3cmfB0A5VxrAoDuuZW9AgxFMG2
+         7hhPVfSJPOBY1paB0mZB0DXXlkN5F6MgN1gVBYmAJIOS8tAyhZTn2SS8ArElZ9og9Trh
+         STjQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1772529676; x=1773134476; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=pkig2duPJVssDkbWxtWOY0gHaOnkUNJGF+RUH4/MX7E=;
+        b=nGuTpO3ByxyjjWH2tKgvQehhnLj3L1VHUegh6UFn9Z60eQlD1tg/xJBb10Kh4bUSEP
+         YTjjKDswEqoZwpFvPZ9wIEOzbSzGwROyp3rx9ovIDwepfY2GhImOgdmCxodjRVrXVz+p
+         Se/gSpfm7dx72pfJ62GfD7/Hnz3LVKnhKgoumXg5urpBgVDYH2wkfY+iybIvkkamghzJ
+         LJaIdWxjTKCfKDtR4uiswi+skWBpIYFkW0Xy9l63k9aQd5d460EZrTss88JRcasaZEtA
+         HPkRxCpIbSQjQoGYQa1mzndXxuD3h5wu6WZf/iSgaHQeg8pEaNzxZJhWI6Tciu6TqduC
+         Y1Rw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1772529676; x=1773134476;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=pkig2duPJVssDkbWxtWOY0gHaOnkUNJGF+RUH4/MX7E=;
+        b=ZAULDAViS8iewLCN2jZmeIUKXLvMXDdP6pZzXMGH434tXFqMseCt3/9vZ9ojmtS207
+         VdFob+6F3NDJIU+2gyyA9gkUEj3AI4S3Hhdll7KrucPwS1yDIi1NkCyuuXv1IDJNMRyT
+         XRh0hatH2bG+25UCji92O40aKM0KEG2iWFbRBxgCFRvKO7pZOdnZ8xd8MCEEUSeUAi1O
+         8IJcu1CrW+m/cewbSpbsE0JYJUIYBQMQKlFvA8TLvc/YAmfL0yzinsEXY7dTTMpqncWo
+         LHWf2xbMz4AOhL6X4ryjbIywgzk/DdzrQLSNRix5UslP3PsDDfJDGagOZeq0dPwVyztj
+         Hv3Q==
+X-Forwarded-Encrypted: i=1; AJvYcCVI9nJFRjEhe5mMfnFpXEeS02hDcQOJgnfI63ZYQOjDYd9oZpDRimSJ/US/jjbzsXrXYCoHLqMz@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy+SK8rq1zZL77gQXehwp+6xxun5//W+C7HH8OF8U/muNOjBnzz
+	2Lld467+qfoQE/JCIWogRTS0iN+K++TV8Z1twXwmhqT9pEstzxj/JMQyYtD1pwQhxOVhzp6h68p
+	NX06VwudoX5eoPbgb0HlQJvk11Z/fhE8=
+X-Gm-Gg: ATEYQzxgcEXHBqEKKmLBMe3RMNClnITvgc/IP0dMwnHuhCSooj5PCptsbVVjaNNpw+t
+	6IqnG4rtyGUFIjbbdeTW0l4n1XrP2UxVxuoffRfTd31YAEgSqHaihx7DeLaWdFrkbJe3U674W7w
+	VBmAXRGVIeE4kYD33j1nTNgk63FO3vpd3JeogKfZ23im5y2UXhU1YFXLLXXwLFxR9cnHdMNLnO0
+	ol0FH02R+jhyFLmti5QrSMvx7D/dh+ABW9mpDYpo5AWWoO/uIfZtGRePXeQfPGy3DfHasPp/QwS
+	9M0+c0q+uWoSrRqOMB60/grIpliD433PmXtZEmrrHBRTWLY+/BU=
+X-Received: by 2002:a17:907:3d51:b0:b87:10fd:b590 with SMTP id
+ a640c23a62f3a-b9376590b83mr865582266b.60.1772529675436; Tue, 03 Mar 2026
+ 01:21:15 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <177249785709.483507.8373602184765043420.stgit@frogsfrogsfrogs>
+References: <177249785452.483405.17984642662799629787.stgit@frogsfrogsfrogs> <177249785472.483405.1160086113668716052.stgit@frogsfrogsfrogs>
+In-Reply-To: <177249785472.483405.1160086113668716052.stgit@frogsfrogsfrogs>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 3 Mar 2026 10:21:04 +0100
+X-Gm-Features: AaiRm535KwsgAVHj6EheTjrAtrSsGztnAGaoLe1OJY2V4Cm-WW3-sgOnbmd3S6E
+Message-ID: <CAOQ4uxgmYNWCs18+WU9-7QDkhp0f_xX6nvKiyDhS8gZzfUXXXA@mail.gmail.com>
+Subject: Re: [PATCH 1/1] generic: test fsnotify filesystem error reporting
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: zlang@redhat.com, linux-fsdevel@vger.kernel.org, hch@lst.de, 
+	gabriel@krisman.be, jack@suse.cz, fstests@vger.kernel.org, 
+	linux-xfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Tue, Mar 3, 2026 at 1:40=E2=80=AFAM Darrick J. Wong <djwong@kernel.org> =
+wrote:
+>
+> From: Darrick J. Wong <djwong@kernel.org>
+>
+> Test the fsnotify filesystem error reporting.
 
-Make sure that xfs_healer_start can actually start up xfs_healer service
-instances when a filesystem is mounted.
+For the record, I feel that I need to say to all the people whom we pushed =
+back
+on fanotify tests in fstests until there was a good enough reason to do so,
+that this seems like a good reason to do so ;)
 
-Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
----
- tests/xfs/1903     |  124 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/1903.out |    6 +++
- 2 files changed, 130 insertions(+)
- create mode 100755 tests/xfs/1903
- create mode 100644 tests/xfs/1903.out
+But also for future test writers, please note that FAN_FS_ERROR is an
+exception to the rule and please keep writing new fanotify/inotify tests in=
+ LTP
+(until there is a good enough reason...)
 
-diff --git a/tests/xfs/1903 b/tests/xfs/1903
-new file mode 100755
-index 00000000000000..d71d75a6af3f9d
---- /dev/null
-+++ b/tests/xfs/1903
-@@ -0,0 +1,124 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test No. 1903
-+#
-+# Check that the xfs_healer startup service starts the per-mount xfs_healer
-+# service for the scratch filesystem.  IOWs, this is basic testing for the
-+# xfs_healer systemd background services.
-+#
-+
-+# unreliable_in_parallel: this appears to try to run healer services on all
-+# mounted filesystems - that's a problem when there are a hundred other test
-+# filesystems mounted running other tests...
-+
-+. ./common/preamble
-+_begin_fstest auto selfhealing unreliable_in_parallel
-+
-+_cleanup()
-+{
-+	cd /
-+	test -n "$new_healerstart_svc" &&
-+		_systemd_unit_stop "$new_healerstart_svc"
-+	test -n "$was_masked" && \
-+		_systemd_unit_mask "$healer_svc" &>> $seqres.full
-+	if [ -n "$new_svcfile" ]; then
-+		rm -f "$new_svcfile"
-+		systemctl daemon-reload
-+	fi
-+	rm -r -f $tmp.*
-+}
-+
-+. ./common/filter
-+. ./common/populate
-+. ./common/fuzzy
-+. ./common/systemd
-+
-+_require_systemd_is_running
-+_require_systemd_unit_defined xfs_healer@.service
-+_require_systemd_unit_defined xfs_healer_start.service
-+_require_scratch
-+_require_scrub
-+_require_xfs_io_command "scrub"
-+_require_xfs_spaceman_command "health"
-+_require_populate_commands
-+_require_command "$XFS_HEALER_PROG" "xfs_healer"
-+_require_command $ATTR_PROG "attr"
-+
-+_xfs_skip_online_rebuild
-+_xfs_skip_offline_rebuild
-+
-+orig_svcfile="$(_systemd_unit_path "xfs_healer_start.service")"
-+test -f "$orig_svcfile" || \
-+	_notrun "cannot find xfs_healer_start service file"
-+
-+new_svcdir="$(_systemd_runtime_dir)"
-+test -d "$new_svcdir" || \
-+	_notrun "cannot find runtime systemd service dir"
-+
-+# We need to make some local mods to the xfs_healer_start service definition
-+# so we fork it and create a new service just for this test.
-+new_healerstart_svc="xfs_healer_start_fstest.service"
-+_systemd_unit_status "$new_healerstart_svc" 2>&1 | \
-+	grep -E -q '(could not be found|Loaded: not-found)' || \
-+	_notrun "systemd service \"$new_healerstart_svc\" found, will not mess with this"
-+
-+find_healer_trace() {
-+	local path="$1"
-+
-+	sleep 2		# wait for delays in startup
-+	$XFS_HEALER_PROG --supported "$path" 2>&1 | grep -q 'already running' || \
-+		echo "cannot find evidence that xfs_healer is running for $path"
-+}
-+
-+echo "Format and populate"
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount
-+_require_xfs_healer $SCRATCH_MNT
-+
-+# Configure the filesystem for background checks of the filesystem.
-+$ATTR_PROG -R -s xfs:autofsck -V check $SCRATCH_MNT >> $seqres.full
-+
-+was_masked=
-+healer_svc="$(_xfs_healer_svcname "$SCRATCH_MNT")"
-+
-+# Preserve the xfs_healer@ mask state -- we don't want this permanently
-+# changing global state.
-+if _systemd_unit_masked "$healer_svc"; then
-+	_systemd_unit_unmask "$healer_svc" &>> $seqres.full
-+	was_masked=1
-+fi
-+
-+echo "Start healer on scratch FS"
-+_systemd_unit_start "$healer_svc"
-+find_healer_trace "$SCRATCH_MNT"
-+_systemd_unit_stop "$healer_svc"
-+
-+new_svcfile="$new_svcdir/$new_healerstart_svc"
-+cp "$orig_svcfile" "$new_svcfile"
-+
-+sed -e '/ExecStart=/d' -e '/BindPaths=/d' -e '/ExecCondition=/d' -i $new_svcfile
-+cat >> "$new_svcfile" << ENDL
-+[Service]
-+ExecCondition=$XFS_HEALER_START_PROG --supported
-+ExecStart=$XFS_HEALER_START_PROG
-+ENDL
-+_systemd_reload
-+
-+# Emit the results of our editing to the full log.
-+systemctl cat "$new_healerstart_svc" >> $seqres.full
-+
-+echo "Start healer for everything"
-+_systemd_unit_start "$new_healerstart_svc"
-+find_healer_trace "$SCRATCH_MNT"
-+
-+echo "Restart healer for scratch FS"
-+_scratch_cycle_mount
-+find_healer_trace "$SCRATCH_MNT"
-+
-+echo "Healer testing done" | tee -a $seqres.full
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/1903.out b/tests/xfs/1903.out
-new file mode 100644
-index 00000000000000..07810f60ca10c6
---- /dev/null
-+++ b/tests/xfs/1903.out
-@@ -0,0 +1,6 @@
-+QA output created by 1903
-+Format and populate
-+Start healer on scratch FS
-+Start healer for everything
-+Restart healer for scratch FS
-+Healer testing done
+>
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> ---
+>  src/Makefile           |    2
+>  src/fs-monitor.c       |  155 +++++++++++++++++++++++++++++++++
+>  tests/generic/1838     |  228 ++++++++++++++++++++++++++++++++++++++++++=
+++++++
+>  tests/generic/1838.out |   20 ++++
+>  4 files changed, 404 insertions(+), 1 deletion(-)
+>  create mode 100644 src/fs-monitor.c
+>  create mode 100755 tests/generic/1838
+>  create mode 100644 tests/generic/1838.out
+>
+>
+...
+
+> diff --git a/tests/generic/1838 b/tests/generic/1838
+> new file mode 100755
+> index 00000000000000..087851ddcbdb44
+> --- /dev/null
+> +++ b/tests/generic/1838
+> @@ -0,0 +1,228 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2024-2026 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 1838
+> +#
+> +# Check that fsnotify can report file IO errors.
+> +
+> +. ./common/preamble
+> +_begin_fstest auto quick eio selfhealing
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +       cd /
+> +       test -n "$fsmonitor_pid" && kill -TERM $fsmonitor_pid
+> +       rm -f $tmp.*
+> +       _dmerror_cleanup
+> +}
+> +
+> +# Import common functions.
+> +. ./common/fuzzy
+> +. ./common/filter
+> +. ./common/dmerror
+> +. ./common/systemd
+> +
+> +case "$FSTYP" in
+> +xfs)
+> +       # added as a part of xfs health monitoring
+> +       _require_xfs_io_command healthmon
+> +       # no out of place writes
+> +       _require_no_xfs_always_cow
+> +       ;;
+> +ext4)
+> +       # added at the same time as uevents
+> +       modprobe fs-$FSTYP
+> +       test -e /sys/fs/ext4/features/uevents || \
+> +               _notrun "$FSTYP does not support fsnotify ioerrors"
+> +       ;;
+> +*)
+> +       _notrun "$FSTYP does not support fsnotify ioerrors"
+> +       ;;
+> +esac
+> +
+
+_require_fsnotify_errors ?
+
+> +_require_scratch
+> +_require_dm_target error
+> +_require_test_program fs-monitor
+> +_require_xfs_io_command "fiemap"
+> +_require_odirect
+> +
+> +# fsnotify only gives us a file handle, the error number, and the number=
+ of
+> +# times it was seen in between event deliveries.   The handle is mostly =
+useless
+> +# since we have no generic way to map that to a file path.  Therefore we=
+ can
+> +# only coalesce all the I/O errors into one report.
+> +filter_fsnotify_errors() {
+> +       _filter_scratch | \
+> +               grep -E '(FAN_FS_ERROR|Generic Error Record|error: 5)' | =
+\
+> +               sed -e "s/len=3D[0-9]*/len=3DXXX/g" | \
+> +               sort | \
+> +               uniq
+> +}
+
+move to common/filter?
+
+Apart from those nits, no further comments.
+
+Thanks,
+Amir.
