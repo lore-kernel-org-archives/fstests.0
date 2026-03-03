@@ -1,47 +1,44 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A84763B5840;
-	Tue,  3 Mar 2026 16:12:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C7D5370D4A;
+	Tue,  3 Mar 2026 16:38:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772554378; cv=none; b=RnuzvSP7sAKDyBuHQGq9lklLwbv98CApg5XofgGv4Foasm71Ttsg4TCphQOO0+N21UFh/BtP2Jeuoq0psFMKn6gMBCHXTLJTZwDEHAicI/FhcU6VWbXX3q3P0fNOZL2DOGT+/BwYn0I5zMyKWtTXSPwrEGvA1MDekgk5yhMjdZA=
+	t=1772555909; cv=none; b=EixPcUouPsYJG0eUO/gWgkAjdEBSo0pwD4C4B10gPy6XZcvTtktgzFCfHnvxdQp35uqfJQS6hHaMS6oi96N08gUBW75RX7raRVv9Ksx2u9i/S3gbOCnq/YyL3ErWiwoYzoHfHKP4qJcY49nGfvsClZ+LuSm+BLPxbngelTYSiOg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772554378; c=relaxed/simple;
-	bh=KhB9ELTOeynhh//iB0PKyH93KHWnqbQMCKrNAaPcFFc=;
+	s=arc-20240116; t=1772555909; c=relaxed/simple;
+	bh=td5tzea6Xp4RN2nFykvpRDtfXDPa6TnzFtAZISE44Xc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=u/xDev0YGMN7ROMkCjrc8wnNCRIXH8feplmrSGWE8dCfoKf0MCfVwaEeYYuChPvphhdVefixZ9NhPPYtjx49TxwlbHiedbEYVCoWKwunEpwmooclkMFeBwtFwLm3+ruByJdNmDy3nB1dVmo2tgyJEnlUzoTqhz49UGAQ0YboKIg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=RY1qS2zt; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=U/T+dHZem1O1m0bEQtGUTEb2wNOvvFXO+nRixpVLjnOCi5oRwORAbsxSyp7x64DoRJ/ifJ/0EwFFr2tfa34KACy2tNCjlEe1gZWFLcTjYT54qp7pEMZcPiTyBn4lXhekmc/SMJkkq6nliYO3QAdZg40706vV3IK6TdB+c8U9xss=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LHmMXCv1; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="RY1qS2zt"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=xH67VzYcBp5utoAGI6Gx1l1REfSpyFZcE6w/U37h8TA=; b=RY1qS2zttGZw+//8ov57EuqF+F
-	/ZR3FeT9mJXVgtDLYqjCk006VEqjFDp6RBH0EEz5nlcHeaGNiW3gB24wYByij/kXmSaFDD2mPcuYU
-	OsJAH70WxlGSqxNc3tzNHv//4MoaVEQj3Ej4auWz3CK1LvDGoXdueNLbmBs7GdR4kzpwVkWS5GQbs
-	mRPuQU5MDJhp9bCPzFfCd8LVNm7HkwOKaxnyqLqT1yP/W4LpBm0n2RRwHwGKq9i6Prqd+F0+AFstu
-	k5tDoKTt9+0v38BDRjutOxAHEZ5LKgPJdVjOtY89iggdr70YN5zWs23/+7KWs9HLlY5jRnIoen20k
-	rutwgRuA==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vxSMh-0000000FXQG-3yLK;
-	Tue, 03 Mar 2026 16:12:55 +0000
-Date: Tue, 3 Mar 2026 08:12:55 -0800
-From: Christoph Hellwig <hch@infradead.org>
-To: Gabriel Krisman Bertazi <gabriel@krisman.be>
-Cc: Christoph Hellwig <hch@infradead.org>,
-	"Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com,
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LHmMXCv1"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DB212C116C6;
+	Tue,  3 Mar 2026 16:38:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1772555908;
+	bh=td5tzea6Xp4RN2nFykvpRDtfXDPa6TnzFtAZISE44Xc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=LHmMXCv1wGeCzc7f0UchMuQlBuLKqZxerFjlAu96qaEThJ+o569CKTpuSMSvPfX33
+	 6lGCYD/vOCUBoEUwcR3toUAPaj9qIkeJlBimDS7fwhqDb1MN7fXT0q6bttmoRxSjJJ
+	 y29uJ2syrFNP+iu7TvHxAlh/PBr2hi5L9LOgO1UGEGrOJIH8rW4J3hNaiSm6XzWCHh
+	 FApRSjH8POSE951IbtSPT55pk5Kj28ZLfzGe2Y2SfxupjJM+JD521NnnMyuYhSBYkc
+	 6B7f0QN9hu9BPOURnF2DD5onpj4lAAW3WNT7ODUl74hLMq/o2Q7dR6GhOUL2lTIcWs
+	 5iEdK2Ik1vkgQ==
+Date: Tue, 3 Mar 2026 08:38:28 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Gabriel Krisman Bertazi <gabriel@krisman.be>, zlang@redhat.com,
 	linux-fsdevel@vger.kernel.org, hch@lst.de, amir73il@gmail.com,
 	jack@suse.cz, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 Subject: Re: [PATCH 1/1] generic: test fsnotify filesystem error reporting
-Message-ID: <aacIh7YJps8rp7gi@infradead.org>
+Message-ID: <20260303163828.GI57948@frogsfrogsfrogs>
 References: <177249785452.483405.17984642662799629787.stgit@frogsfrogsfrogs>
  <177249785472.483405.1160086113668716052.stgit@frogsfrogsfrogs>
  <aab2JbAZI8RFq_XE@infradead.org>
  <87ldg83nj7.fsf@mailhost.krisman.be>
+ <aacIh7YJps8rp7gi@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -50,36 +47,47 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <87ldg83nj7.fsf@mailhost.krisman.be>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <aacIh7YJps8rp7gi@infradead.org>
 
-On Tue, Mar 03, 2026 at 11:06:52AM -0500, Gabriel Krisman Bertazi wrote:
-> Christoph Hellwig <hch@infradead.org> writes:
+On Tue, Mar 03, 2026 at 08:12:55AM -0800, Christoph Hellwig wrote:
+> On Tue, Mar 03, 2026 at 11:06:52AM -0500, Gabriel Krisman Bertazi wrote:
+> > Christoph Hellwig <hch@infradead.org> writes:
+> > 
+> > >> +// SPDX-License-Identifier: GPL-2.0
+> > >> +/*
+> > >> + * Copyright 2021, Collabora Ltd.
+> > >> + */
+> > >
+> > > Where is this coming from?
+> > 
+> > This code is heavily based, if not the same, to what I originally wrote
+> > as a kernel tree "samples/fs-monitor.c" when I was employed by
+> > Collabora.  I appreciate Darrick keeping the note actually.
 > 
-> >> +// SPDX-License-Identifier: GPL-2.0
-> >> +/*
-> >> + * Copyright 2021, Collabora Ltd.
-> >> + */
-> >
-> > Where is this coming from?
+> The note is good.  But if we import code from somewhere, we should
+> document where it is coming from, both for attribution and to ease
+> any future resyncs if needed.
+
+Yeah, I copied this straight from the kernel tree, which is why it
+contains this wart:
+
+> > >> +#ifndef __GLIBC__
+> > >> +#include <asm-generic/int-ll64.h>
+> > >> +#endif
+> > >
+> > > And what is this for?  Looks pretty whacky.
+> > 
+> > Comes from kernel commit 3193e8942fc7 ("samples: fix building fs-monitor
+> > on musl systems") to fix building with musl.  We don't need it here.
 > 
-> This code is heavily based, if not the same, to what I originally wrote
-> as a kernel tree "samples/fs-monitor.c" when I was employed by
-> Collabora.  I appreciate Darrick keeping the note actually.
+> In the place that needs it it really should have a comment explainig
+> the logic behind it.
 
-The note is good.  But if we import code from somewhere, we should
-document where it is coming from, both for attribution and to ease
-any future resyncs if needed.
+I don't know that people *don't* try to run fstests with musl.  But as
+they seem surprisingly patient with continuously fixing up xfsprogs,
+perhaps it's ok to clean this up on the way into fstests.
 
-> >> +#ifndef __GLIBC__
-> >> +#include <asm-generic/int-ll64.h>
-> >> +#endif
-> >
-> > And what is this for?  Looks pretty whacky.
-> 
-> Comes from kernel commit 3193e8942fc7 ("samples: fix building fs-monitor
-> on musl systems") to fix building with musl.  We don't need it here.
+I'll add more attribution for the c file pointing back to where it came
+from.
 
-In the place that needs it it really should have a comment explainig
-the logic behind it.
-
+--D
