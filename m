@@ -1,211 +1,68 @@
-Received: from mail-ej1-f50.google.com (mail-ej1-f50.google.com [209.85.218.50])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9395938A722
-	for <fstests@vger.kernel.org>; Tue,  3 Mar 2026 09:21:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.50
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772529679; cv=pass; b=Ur8qkmqCdAtwmRXztPt0SVCAjYrs7IxLsh6TPCoOiz05VFPzL2H0sXZmMeaszSMmSJICuOyOOyXgCp/LTp92h7TnpFRY9bLaZJGGtFTDXCJd6dPvY8f+3qbb+uXAgQjWDNQalgrxlUKcR5SMfz1AkZEfVxKmU0ZY6gXlUspihYo=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772529679; c=relaxed/simple;
-	bh=bb64YLXIy3oPeHwsvS7m0P33nEAT9WuWSYWp276y4dI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=rJ+ioZtb09dVmTp0hu5UpgZxf+Bc85puvc63JOnNRZKyhd/8vAEEOegI1v+FdSDVLUixnbK0KbGJrroznlYxmMBGbKlpOCbiZbl5TerCJ574+yjzYMbpxWEjWJkX5YvRz27ujFRXmn9X3Q7FR48oAubUGNAxtFYOuUG2zirb/J8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=nGuTpO3B; arc=pass smtp.client-ip=209.85.218.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 40C9E3502A7;
+	Tue,  3 Mar 2026 14:51:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1772549482; cv=none; b=lLBiRJiiOMjoObykRKfVA5nIaRmON6GUcKebS0tM0wqT2wmkKc3q9IVLinn3m0ljFz+TK4R+HYHDuglDhFaxDVT7AdNMvQUY/qkFV7OLmCVUXACBFvbZ5MX+B0BJntr5B5iRG/KWUwNB7jcvzaGgYtQNpvd10wq83NwUpmvR0Qs=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1772549482; c=relaxed/simple;
+	bh=rgNL1inaPJ7m8XSklo6WqH97eI0lqnqRQLRDL64gSJE=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=mabaHp4vhYrklL1RvJnw/zFrjECrKNYbsJ9zMTsPB599qwH54KAw93hGKkFX2sGQGpxCSNucPlXQgWU1zgCAGHeAQ7sx6jTDdm0xRKuCST1GXRELSsxw5UDz4ftB0ZDQjQOHbhek5MQtUza3MYVgo2j0HFTlDMzv2m2Y3Vy4WpI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=WKsHdlMn; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nGuTpO3B"
-Received: by mail-ej1-f50.google.com with SMTP id a640c23a62f3a-b932fe2e1a7so746147766b.1
-        for <fstests@vger.kernel.org>; Tue, 03 Mar 2026 01:21:17 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1772529676; cv=none;
-        d=google.com; s=arc-20240605;
-        b=CHlGE5MY3/xqlRpfO0l8qWX9KxEN5qRfOyOMp5+lgnl411He8mP+BrP+bMI56KudBE
-         88ZZaUK9zixPJP/VQqsXNfbzDeuPly4jnYgdo76Aan/EPe068ooGqC/V7Utk4z25c0tS
-         1BRW3LLLkf8p6lV386Cw6HuWSqaDY2uoFJ6Wq1OsINn3Fx5ztEGt928amOU8mJijMcZs
-         XOlW/OOO3AkGlBA3R1Z5EU5p3TBBj6b38bYfUXL0nVr3bwqlDcFZ7RShaWijBZ6/gWhg
-         7N4biK2b3/0kTh8hhekxyRh5lcL7iU5uTqfjoDX4p3CryuZK5kBHmpYziX/nuPY3jyTc
-         DCWQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=pkig2duPJVssDkbWxtWOY0gHaOnkUNJGF+RUH4/MX7E=;
-        fh=i06gytkCiIVC2KLP6FQarEuUlYW/WZEz6O1Cx+n1o2A=;
-        b=OeNarFCW1N6sO/6AlPE39AyvLbeGAI27S80sD2IocgKnL4k7ESfKLjIdgykfIyka+9
-         HHLRcG7G9o/OIncLXdFxsqnj52M9BfV4Wia/cA7E47SG60icrgIWS9AmnLz7Tw+r5br6
-         ZMOEfk4jlE0Hip8aRV7X7BoeObIPJNrvTjw/L9tOVKaEL0bkFHJw0VaN3PDQj0lFsQ12
-         iHpxFWbOZoMG5RfQZ8w8jv5NpLYimoB4clEzruhTzR3cmfB0A5VxrAoDuuZW9AgxFMG2
-         7hhPVfSJPOBY1paB0mZB0DXXlkN5F6MgN1gVBYmAJIOS8tAyhZTn2SS8ArElZ9og9Trh
-         STjQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1772529676; x=1773134476; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=pkig2duPJVssDkbWxtWOY0gHaOnkUNJGF+RUH4/MX7E=;
-        b=nGuTpO3ByxyjjWH2tKgvQehhnLj3L1VHUegh6UFn9Z60eQlD1tg/xJBb10Kh4bUSEP
-         YTjjKDswEqoZwpFvPZ9wIEOzbSzGwROyp3rx9ovIDwepfY2GhImOgdmCxodjRVrXVz+p
-         Se/gSpfm7dx72pfJ62GfD7/Hnz3LVKnhKgoumXg5urpBgVDYH2wkfY+iybIvkkamghzJ
-         LJaIdWxjTKCfKDtR4uiswi+skWBpIYFkW0Xy9l63k9aQd5d460EZrTss88JRcasaZEtA
-         HPkRxCpIbSQjQoGYQa1mzndXxuD3h5wu6WZf/iSgaHQeg8pEaNzxZJhWI6Tciu6TqduC
-         Y1Rw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772529676; x=1773134476;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=pkig2duPJVssDkbWxtWOY0gHaOnkUNJGF+RUH4/MX7E=;
-        b=ZAULDAViS8iewLCN2jZmeIUKXLvMXDdP6pZzXMGH434tXFqMseCt3/9vZ9ojmtS207
-         VdFob+6F3NDJIU+2gyyA9gkUEj3AI4S3Hhdll7KrucPwS1yDIi1NkCyuuXv1IDJNMRyT
-         XRh0hatH2bG+25UCji92O40aKM0KEG2iWFbRBxgCFRvKO7pZOdnZ8xd8MCEEUSeUAi1O
-         8IJcu1CrW+m/cewbSpbsE0JYJUIYBQMQKlFvA8TLvc/YAmfL0yzinsEXY7dTTMpqncWo
-         LHWf2xbMz4AOhL6X4ryjbIywgzk/DdzrQLSNRix5UslP3PsDDfJDGagOZeq0dPwVyztj
-         Hv3Q==
-X-Forwarded-Encrypted: i=1; AJvYcCVI9nJFRjEhe5mMfnFpXEeS02hDcQOJgnfI63ZYQOjDYd9oZpDRimSJ/US/jjbzsXrXYCoHLqMz@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy+SK8rq1zZL77gQXehwp+6xxun5//W+C7HH8OF8U/muNOjBnzz
-	2Lld467+qfoQE/JCIWogRTS0iN+K++TV8Z1twXwmhqT9pEstzxj/JMQyYtD1pwQhxOVhzp6h68p
-	NX06VwudoX5eoPbgb0HlQJvk11Z/fhE8=
-X-Gm-Gg: ATEYQzxgcEXHBqEKKmLBMe3RMNClnITvgc/IP0dMwnHuhCSooj5PCptsbVVjaNNpw+t
-	6IqnG4rtyGUFIjbbdeTW0l4n1XrP2UxVxuoffRfTd31YAEgSqHaihx7DeLaWdFrkbJe3U674W7w
-	VBmAXRGVIeE4kYD33j1nTNgk63FO3vpd3JeogKfZ23im5y2UXhU1YFXLLXXwLFxR9cnHdMNLnO0
-	ol0FH02R+jhyFLmti5QrSMvx7D/dh+ABW9mpDYpo5AWWoO/uIfZtGRePXeQfPGy3DfHasPp/QwS
-	9M0+c0q+uWoSrRqOMB60/grIpliD433PmXtZEmrrHBRTWLY+/BU=
-X-Received: by 2002:a17:907:3d51:b0:b87:10fd:b590 with SMTP id
- a640c23a62f3a-b9376590b83mr865582266b.60.1772529675436; Tue, 03 Mar 2026
- 01:21:15 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="WKsHdlMn"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Transfer-Encoding
+	:Content-Type:MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:
+	Sender:Reply-To:Content-ID:Content-Description;
+	bh=0azL9xrP6RjsDUWM8INKgKlOF2jsHNXZZ1YqkDP2LyI=; b=WKsHdlMnkEgxG2jMJsdzyNnAM1
+	gzZbuFiJ1/V8ZzmO1LPj9LSCIMe92E/4TSnW/2LEozoRgcNnS/Tmbzbr8VwBZDUFyk8lf0YdHHnyU
+	OGhRH3DqO6vlgf9RzInWHL+4//md+jo7+ligTbO8SkPQDtCnWo5/DUFJ4ZYs78L6/sU9nk4KUmiqx
+	lDtXODNXhuW0El8IYf93I7qB6NtkM1O8sU+jSizp4ICfE7FCNb7Sax8iLmqjCXOUJIUmoekLGbVye
+	Pk/yEElZPvkvgoAjmyAyyLAwpkPjueWPB8YvMszj2/ekXOBJvRcI4CtmoO6asn/FGfmM09IXAmY5L
+	bd+8O/kw==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1vxR5j-0000000FMKT-3PDm;
+	Tue, 03 Mar 2026 14:51:19 +0000
+Date: Tue, 3 Mar 2026 06:51:19 -0800
+From: Christoph Hellwig <hch@infradead.org>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com,
+	linux-fsdevel@vger.kernel.org, hch@lst.de, gabriel@krisman.be,
+	jack@suse.cz, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/1] generic: test fsnotify filesystem error reporting
+Message-ID: <aab1Z7J-m97VfFvS@infradead.org>
+References: <177249785452.483405.17984642662799629787.stgit@frogsfrogsfrogs>
+ <177249785472.483405.1160086113668716052.stgit@frogsfrogsfrogs>
+ <CAOQ4uxgmYNWCs18+WU9-7QDkhp0f_xX6nvKiyDhS8gZzfUXXXA@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <177249785452.483405.17984642662799629787.stgit@frogsfrogsfrogs> <177249785472.483405.1160086113668716052.stgit@frogsfrogsfrogs>
-In-Reply-To: <177249785472.483405.1160086113668716052.stgit@frogsfrogsfrogs>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 3 Mar 2026 10:21:04 +0100
-X-Gm-Features: AaiRm535KwsgAVHj6EheTjrAtrSsGztnAGaoLe1OJY2V4Cm-WW3-sgOnbmd3S6E
-Message-ID: <CAOQ4uxgmYNWCs18+WU9-7QDkhp0f_xX6nvKiyDhS8gZzfUXXXA@mail.gmail.com>
-Subject: Re: [PATCH 1/1] generic: test fsnotify filesystem error reporting
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, linux-fsdevel@vger.kernel.org, hch@lst.de, 
-	gabriel@krisman.be, jack@suse.cz, fstests@vger.kernel.org, 
-	linux-xfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAOQ4uxgmYNWCs18+WU9-7QDkhp0f_xX6nvKiyDhS8gZzfUXXXA@mail.gmail.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Tue, Mar 3, 2026 at 1:40=E2=80=AFAM Darrick J. Wong <djwong@kernel.org> =
-wrote:
->
-> From: Darrick J. Wong <djwong@kernel.org>
->
-> Test the fsnotify filesystem error reporting.
+On Tue, Mar 03, 2026 at 10:21:04AM +0100, Amir Goldstein wrote:
+> On Tue, Mar 3, 2026 at 1:40 AM Darrick J. Wong <djwong@kernel.org> wrote:
+> >
+> > From: Darrick J. Wong <djwong@kernel.org>
+> >
+> > Test the fsnotify filesystem error reporting.
+> 
+> For the record, I feel that I need to say to all the people whom we pushed back
+> on fanotify tests in fstests until there was a good enough reason to do so,
+> that this seems like a good reason to do so ;)
 
-For the record, I feel that I need to say to all the people whom we pushed =
-back
-on fanotify tests in fstests until there was a good enough reason to do so,
-that this seems like a good reason to do so ;)
+Who pushed backed on that?  Because IMHO hiding stuff in ltp is a sure
+way it doesn't get exercisesd regularly?
 
-But also for future test writers, please note that FAN_FS_ERROR is an
-exception to the rule and please keep writing new fanotify/inotify tests in=
- LTP
-(until there is a good enough reason...)
-
->
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
->  src/Makefile           |    2
->  src/fs-monitor.c       |  155 +++++++++++++++++++++++++++++++++
->  tests/generic/1838     |  228 ++++++++++++++++++++++++++++++++++++++++++=
-++++++
->  tests/generic/1838.out |   20 ++++
->  4 files changed, 404 insertions(+), 1 deletion(-)
->  create mode 100644 src/fs-monitor.c
->  create mode 100755 tests/generic/1838
->  create mode 100644 tests/generic/1838.out
->
->
-...
-
-> diff --git a/tests/generic/1838 b/tests/generic/1838
-> new file mode 100755
-> index 00000000000000..087851ddcbdb44
-> --- /dev/null
-> +++ b/tests/generic/1838
-> @@ -0,0 +1,228 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2024-2026 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 1838
-> +#
-> +# Check that fsnotify can report file IO errors.
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick eio selfhealing
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +       cd /
-> +       test -n "$fsmonitor_pid" && kill -TERM $fsmonitor_pid
-> +       rm -f $tmp.*
-> +       _dmerror_cleanup
-> +}
-> +
-> +# Import common functions.
-> +. ./common/fuzzy
-> +. ./common/filter
-> +. ./common/dmerror
-> +. ./common/systemd
-> +
-> +case "$FSTYP" in
-> +xfs)
-> +       # added as a part of xfs health monitoring
-> +       _require_xfs_io_command healthmon
-> +       # no out of place writes
-> +       _require_no_xfs_always_cow
-> +       ;;
-> +ext4)
-> +       # added at the same time as uevents
-> +       modprobe fs-$FSTYP
-> +       test -e /sys/fs/ext4/features/uevents || \
-> +               _notrun "$FSTYP does not support fsnotify ioerrors"
-> +       ;;
-> +*)
-> +       _notrun "$FSTYP does not support fsnotify ioerrors"
-> +       ;;
-> +esac
-> +
-
-_require_fsnotify_errors ?
-
-> +_require_scratch
-> +_require_dm_target error
-> +_require_test_program fs-monitor
-> +_require_xfs_io_command "fiemap"
-> +_require_odirect
-> +
-> +# fsnotify only gives us a file handle, the error number, and the number=
- of
-> +# times it was seen in between event deliveries.   The handle is mostly =
-useless
-> +# since we have no generic way to map that to a file path.  Therefore we=
- can
-> +# only coalesce all the I/O errors into one report.
-> +filter_fsnotify_errors() {
-> +       _filter_scratch | \
-> +               grep -E '(FAN_FS_ERROR|Generic Error Record|error: 5)' | =
-\
-> +               sed -e "s/len=3D[0-9]*/len=3DXXX/g" | \
-> +               sort | \
-> +               uniq
-> +}
-
-move to common/filter?
-
-Apart from those nits, no further comments.
-
-Thanks,
-Amir.
