@@ -1,177 +1,162 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB52728643C;
-	Tue,  3 Mar 2026 18:16:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC49237FF79
+	for <fstests@vger.kernel.org>; Wed,  4 Mar 2026 10:10:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772561805; cv=none; b=Zwcrs8UcILQbjb5+VGYWEx3paHrSR3gsHdipbtuW6MI91s5kpEKzG/knSE+aeGXfMoULKqSGNyZq8aWtV/AyTrUJSw6OjPY2P0NO5vCa8fb8u9ga38TNRyZwAm1zVimlIEyycJEHzMQacJCYTfuliNv/7fiCH3fBGjVL8bmAeM4=
+	t=1772619050; cv=none; b=HaoR7QEywuG7VClLj7GF23grUrYjwPqnF/giD8dDf+VSbEJAc5ilffYtoSiNf++M/2O/NUiRHWr3nd2LD59smoKtJtFMZuqG1k5ksZoEhdnHZp/3hG6saQkErF21/x1cmt2DUe1Y9BtLNLk/h5h4Tjv8Q0392ghwdytgFgkzDOU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772561805; c=relaxed/simple;
-	bh=15tuPrd20ioZRCD1LUykAzX53lk0CSkjcrNensN6mL0=;
+	s=arc-20240116; t=1772619050; c=relaxed/simple;
+	bh=nCj61CizqZiEg+f7MtQHHwlwPtcq/rqtYaq2qEOP5wY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=mIJPY1I/TGvhci4yoYAezYkrrQV+FadMUfg0NBKfYQgN8NxtO+uGdyAKpwoiDxfFuRyglbsgpMK6yBPbrzQ4i8j4JOXjI6oNoEexfk66l/SjdBKAcfQuHbe5zVPLhBKaCdQzef++9DpXdseLE2hDoecuDHZeWkFGSba622L4PPk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=s9C2gRyD; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=s1IkYM6aIg8DyDIf3IgpI+7EbmUWwlt/T3prucOyn/YczsQKz2gy6NieAIBEYXM68rpGJJB+p0c9USZLVbiZYhbXMyOvX9Z7CQjkw2nHxk+RMTcmHnW1MKKN6+e9iQYJfk31W3IolN3p6gyjsSQziwpT1UBRpLoZ0wYlKdbcX14=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=bQISO49u; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=Yz+9ve/n; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=bQISO49u; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=Yz+9ve/n; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="s9C2gRyD"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 63FF2C116C6;
-	Tue,  3 Mar 2026 18:16:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772561805;
-	bh=15tuPrd20ioZRCD1LUykAzX53lk0CSkjcrNensN6mL0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=s9C2gRyD4H+E8mBEwHtjAiBKViVtLqzl68gHNh+YWP1/T8Dastpb3TOnXrW5JwEGs
-	 zuragptZbeKp9V3d/R03LrZX3/NnSVeAhKRFQioqtUeykFVm4uTdTXvRXH+OIdqKGH
-	 fDJg9YVjv6Tla2HBKOoRUy2+cn0NTo1paZZVSoE4+GSsIQhfEU06YSuYzNC8OmRQXB
-	 AAKT+W6LvHwU2EDGvFeeWq3jsxJadUjQ0TpuEnxDPTOEWY4FhcUWT/O2M/pRxYDzhD
-	 pT7+ELvSa/6w0evwkGp3cdTWgsP3icUw08LK4fCTfsSQKJPDHCenV1qW/SJBRMQ1ni
-	 hd/fBt4NLY+mg==
-Date: Tue, 3 Mar 2026 10:16:44 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH v2] btrfs: test a directory fsync scenaro after replacing
- a subdir with a file
-Message-ID: <20260303181644.GG13843@frogsfrogsfrogs>
-References: <8e3c1626b6e49678976db67a861cb5dcfdb532c0.1772558357.git.fdmanana@suse.com>
- <7997e07a4f530bc52edd1b93e662907c4cd07377.1772561118.git.fdmanana@suse.com>
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="bQISO49u";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="Yz+9ve/n";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="bQISO49u";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="Yz+9ve/n"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 1A1E25BDA8;
+	Wed,  4 Mar 2026 10:10:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1772619047; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=t4MIYmwFApZcbH8XmHq5Ir9R9Xf87Q5jbCIodmxKoxw=;
+	b=bQISO49u9vYqTIRiQdLqG7+H7Zre2VhJ+OgifW4Oz3vUQWPhsxdF2T8eHOzJR+rlFlDHJg
+	RycCmJyY07HcpCBhVbRhXAp+EMJby5mYOEqxSs4i7M4Jcl7azvdL0E1AFOXgJxO/t5qxBl
+	wEZk6bgYkdO217Db6MbYMjwXLJ29Nyo=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1772619047;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=t4MIYmwFApZcbH8XmHq5Ir9R9Xf87Q5jbCIodmxKoxw=;
+	b=Yz+9ve/nZuhu3ySSWtz3Qjss8KAhWzAojUXoD9ScgfAIqTmW/+x4JzNimR5fzA/bP6mvo/
+	Q0oR+UI+Qbs51hCA==
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=bQISO49u;
+	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b="Yz+9ve/n"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1772619047; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=t4MIYmwFApZcbH8XmHq5Ir9R9Xf87Q5jbCIodmxKoxw=;
+	b=bQISO49u9vYqTIRiQdLqG7+H7Zre2VhJ+OgifW4Oz3vUQWPhsxdF2T8eHOzJR+rlFlDHJg
+	RycCmJyY07HcpCBhVbRhXAp+EMJby5mYOEqxSs4i7M4Jcl7azvdL0E1AFOXgJxO/t5qxBl
+	wEZk6bgYkdO217Db6MbYMjwXLJ29Nyo=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1772619047;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=t4MIYmwFApZcbH8XmHq5Ir9R9Xf87Q5jbCIodmxKoxw=;
+	b=Yz+9ve/nZuhu3ySSWtz3Qjss8KAhWzAojUXoD9ScgfAIqTmW/+x4JzNimR5fzA/bP6mvo/
+	Q0oR+UI+Qbs51hCA==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 0F5623EA69;
+	Wed,  4 Mar 2026 10:10:47 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id ZDK5AycFqGn+eAAAD6G6ig
+	(envelope-from <jack@suse.cz>); Wed, 04 Mar 2026 10:10:47 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+	id C7FC0A0A1B; Wed,  4 Mar 2026 11:10:46 +0100 (CET)
+Date: Wed, 4 Mar 2026 11:10:46 +0100
+From: Jan Kara <jack@suse.cz>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Amir Goldstein <amir73il@gmail.com>, 
+	"Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com, linux-fsdevel@vger.kernel.org, hch@lst.de, 
+	gabriel@krisman.be, jack@suse.cz, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/1] generic: test fsnotify filesystem error reporting
+Message-ID: <6igt75nncormn6homqfeu6qj23vmzfhhf3eoprfkuexldg6xa2@xexics5uz52p>
+References: <177249785452.483405.17984642662799629787.stgit@frogsfrogsfrogs>
+ <177249785472.483405.1160086113668716052.stgit@frogsfrogsfrogs>
+ <CAOQ4uxgmYNWCs18+WU9-7QDkhp0f_xX6nvKiyDhS8gZzfUXXXA@mail.gmail.com>
+ <aab1Z7J-m97VfFvS@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <7997e07a4f530bc52edd1b93e662907c4cd07377.1772561118.git.fdmanana@suse.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <aab1Z7J-m97VfFvS@infradead.org>
+X-Spamd-Result: default: False [-4.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_RHS_NOT_FQDN(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	RCVD_COUNT_THREE(0.00)[3];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	ARC_NA(0.00)[];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	TO_DN_SOME(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_TLS_LAST(0.00)[];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	DNSWL_BLOCKED(0.00)[2a07:de40:b281:106:10:150:64:167:received,2a07:de40:b281:104:10:150:64:97:from];
+	RCPT_COUNT_SEVEN(0.00)[10];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	MISSING_XM_UA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FREEMAIL_CC(0.00)[gmail.com,kernel.org,redhat.com,vger.kernel.org,lst.de,krisman.be,suse.cz];
+	DKIM_TRACE(0.00)[suse.cz:+];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.cz:dkim,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns]
+X-Rspamd-Action: no action
+X-Spam-Flag: NO
+X-Spam-Score: -4.01
+X-Spam-Level: 
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Rspamd-Queue-Id: 1A1E25BDA8
 
-On Tue, Mar 03, 2026 at 06:07:33PM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Tue 03-03-26 06:51:19, Christoph Hellwig wrote:
+> On Tue, Mar 03, 2026 at 10:21:04AM +0100, Amir Goldstein wrote:
+> > On Tue, Mar 3, 2026 at 1:40 AM Darrick J. Wong <djwong@kernel.org> wrote:
+> > >
+> > > From: Darrick J. Wong <djwong@kernel.org>
+> > >
+> > > Test the fsnotify filesystem error reporting.
+> > 
+> > For the record, I feel that I need to say to all the people whom we pushed back
+> > on fanotify tests in fstests until there was a good enough reason to do so,
+> > that this seems like a good reason to do so ;)
 > 
-> Test a scenario where we remove a directory previously persisted, create
-> a file with the same name and parent directory, create two directories in
-> the same parent directory, create a hard link for the new file in one of
-> the new directories, fsync the directory with the hard link and fsync the
-> parent directory. After a power failure we expect both directories to be
-> persisted as well as the new file and its hard link.
-> 
-> This exercises a bug on btrfs fixed by the following kernel patch:
-> 
->   "btrfs: log new dentries when logging parent dir of a conflicting inode"
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
-> 
-> V2: Add missing scratch filter for the ls output.
+> Who pushed backed on that?  Because IMHO hiding stuff in ltp is a sure
+> way it doesn't get exercisesd regularly?
 
-Looks good to me now,
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+Amir wrote it well, I'd just add the 0-day runs LTP, distro people run LTP
+and lot of other test bots also run LTP so I wouldn't say fsnotify tests
+are not exercised regularly. For record I don't expect regular filesystem
+developers to need to run fsnotify tests as the code is generally well
+separated from individual filesystems. Filesystem error reporting is kind
+of special in this regard so I agree having it in fstests makes sense.
 
---D
-
-> 
->  tests/generic/790     | 70 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/790.out | 12 ++++++++
->  2 files changed, 82 insertions(+)
->  create mode 100755 tests/generic/790
->  create mode 100644 tests/generic/790.out
-> 
-> diff --git a/tests/generic/790 b/tests/generic/790
-> new file mode 100755
-> index 00000000..c9bac6d0
-> --- /dev/null
-> +++ b/tests/generic/790
-> @@ -0,0 +1,70 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-> +#
-> +# FS QA Test 790
-> +#
-> +# Test a scenario where we remove a directory previously persisted, create a
-> +# file with the same name and parent directory, create two directories in the
-> +# same parent directory, create a hard link for the new file in one of the
-> +# new directories, fsync the directory with the hard link and fsync the parent
-> +# directory. After a power failure we expect both directories to be persisted
-> +# as well as the new file and its hard link.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick log
-> +
-> +_cleanup()
-> +{
-> +	_cleanup_flakey
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +
-> +. ./common/filter
-> +. ./common/dmflakey
-> +
-> +_require_scratch
-> +_require_dm_target flakey
-> +
-> +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"btrfs: log new dentries when logging parent dir of a conflicting inode"
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-> +_require_metadata_journaling $SCRATCH_DEV
-> +_init_flakey
-> +_scratch_mount
-> +
-> +mkdir $SCRATCH_MNT/foo
-> +
-> +_scratch_sync
-> +
-> +rmdir $SCRATCH_MNT/foo
-> +
-> +# Create two new directories in the same parent directory as the new file.
-> +mkdir $SCRATCH_MNT/dir1
-> +mkdir $SCRATCH_MNT/dir2
-> +
-> +# Create a file with the name of the directly we deleted and was persisted
-> +# before.
-> +touch $SCRATCH_MNT/foo
-> +
-> +# Create a hard link for the new file inside one of the new directories.
-> +ln $SCRATCH_MNT/foo $SCRATCH_MNT/dir2/link
-> +
-> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir2
-> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/
-> +
-> +# Simulate a power failure and then mount again the filesystem to replay the
-> +# journal/log.
-> +_flakey_drop_and_remount
-> +
-> +# We expect to see dir1, dir2, file foo and its hard link, since dir2 was
-> +# explicitly fsynced as well as the parent directory.
-> +echo -e "Filesystem content after power failure:\n"
-> +# Exclude 'lost+found' dir from ext4 and last line if it's blank (due to removal
-> +# of 'lost+found').
-> +ls -R $SCRATCH_MNT/ | grep -v 'lost+found' | sed -e '${/^$/d;}' | _filter_scratch
-> +
-> +# success, all done
-> +_exit 0
-> diff --git a/tests/generic/790.out b/tests/generic/790.out
-> new file mode 100644
-> index 00000000..d9c0592d
-> --- /dev/null
-> +++ b/tests/generic/790.out
-> @@ -0,0 +1,12 @@
-> +QA output created by 790
-> +Filesystem content after power failure:
-> +
-> +SCRATCH_MNT/:
-> +dir1
-> +dir2
-> +foo
-> +
-> +SCRATCH_MNT/dir1:
-> +
-> +SCRATCH_MNT/dir2:
-> +link
-> -- 
-> 2.47.2
-> 
-> 
+								Honza
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
