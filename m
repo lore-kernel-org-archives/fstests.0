@@ -1,30 +1,44 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77EE52459DC;
-	Wed,  4 Mar 2026 12:55:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BD8427B34D;
+	Wed,  4 Mar 2026 13:05:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772628910; cv=none; b=Nn1C0eBGIa1C9/QB+hsf0BHYIFbcBC6NxY/vTVKSryVmjeB23soVeTf/HXAUemfNlAfcahB2JhYfHDC3gm/N4n2GBUPzPdrozoWBN8CYbd0hewYNA0qNFU7L1+c8Ugg+qOsCLvjWLd8icyIUp71fFRvTEXb0ymy3xSXYBcPq4nI=
+	t=1772629555; cv=none; b=UEBNu5sgzyhzFqd4WyhbP8SbqpYVbTjzJsmOIk7AmWmwrDPsAk2E4Tpie7biFXYJv82cAUfW56HVI9j8uWsUyfhR1HusXAQ1sBb8iie6V8vX/JoN3+Y5MTYi2OcaBsGddmkgsMzKhOOXK4HTlLy+LdHUgNfOsgSPfLs604ZS7bU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772628910; c=relaxed/simple;
-	bh=vMKkhjKX2RQJaqdwNqubqtCr0F/Z2N5HjnOE9i1FWmw=;
+	s=arc-20240116; t=1772629555; c=relaxed/simple;
+	bh=qW2uZJF8G4cHoLk9Cs8Nm6DlzN/ieCEqoSLV4RcIMYs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=a/oHoCB3l3ZCgS9ylf475oN6nAFsvTQLG+e2mMzQxuIQ2PBmalz1eqvc1dzc7hjXu5lafh5rkmnmgJnfr6vSzMB5MqsMF/wLQy3fjY3Pihc51qhXy7hN39T1TQDxG0H+tJa0cnoJGgyI1w4X+2s8LrtgOoUxC3hzKlF9LBePB/w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id 5EDE468AFE; Wed,  4 Mar 2026 13:55:02 +0100 (CET)
-Date: Wed, 4 Mar 2026 13:55:02 +0100
-From: Christoph Hellwig <hch@lst.de>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, zlang@kernel.org,
-	luca.dimaio1@gmail.com, linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/841: create a block device that must exist
-Message-ID: <20260304125502.GA13048@lst.de>
-References: <20260202085701.343099-1-hch@lst.de> <20260303175300.GT57948@frogsfrogsfrogs>
+	 Content-Type:Content-Disposition:In-Reply-To; b=EUgAf0IPnsVSiXSoR1NTfp0RphUHgQx6BCyJVTJE0YzV0YmQvspzgjdRzZH34YoWF0st7zMmZpwzWki2SNG0t5KpsByClQCldK9eijh+4ZqtODfRh3BAkxlqbh/tyRahes0hdB3NzzZX/szni3g0DPZXjTWTT2CMKErX0gWmAlw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=plJ2JubC; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="plJ2JubC"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=qW2uZJF8G4cHoLk9Cs8Nm6DlzN/ieCEqoSLV4RcIMYs=; b=plJ2JubCqQsE10JJqIV6r6+s1l
+	H18neL3htFlBJZt+BoikcNlhFTNG8636WAfL3AuCltFCSR6bwwICOyqUswL3ZEth/zF7A/QS7tXjR
+	PZ9T9Q8e6515cwCZXOs7CEs7znDavLpcKivV2uKK6cjTyBeqwQD+TKvcJkp5eBwPt/LdQV7HHqViw
+	x2hueon8YnthsdvVWeToPVwptMXgAl4kf8DO2fsBE0q2e+4r0XGpq0h5zfLQisNjNnuEwoLPkcEKi
+	3kwilUjfQMwqS5L1JoayHDoM85ifpyQ3cAzU8/Ab4zBhOU26wxn1BOQWsyrkAeIaL5norYeqCz1GZ
+	DtM7dF8Q==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1vxlvF-0000000HDkR-2iUg;
+	Wed, 04 Mar 2026 13:05:53 +0000
+Date: Wed, 4 Mar 2026 05:05:53 -0800
+From: Christoph Hellwig <hch@infradead.org>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH v2] btrfs: test a directory fsync scenaro after replacing
+ a subdir with a file
+Message-ID: <aaguMUK6TgYfwtZk@infradead.org>
+References: <8e3c1626b6e49678976db67a861cb5dcfdb532c0.1772558357.git.fdmanana@suse.com>
+ <7997e07a4f530bc52edd1b93e662907c4cd07377.1772561118.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -33,52 +47,8 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260303175300.GT57948@frogsfrogsfrogs>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <7997e07a4f530bc52edd1b93e662907c4cd07377.1772561118.git.fdmanana@suse.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Tue, Mar 03, 2026 at 09:53:00AM -0800, Darrick J. Wong wrote:
-> On Mon, Feb 02, 2026 at 09:57:01AM +0100, Christoph Hellwig wrote:
-> > This test currently creates a block device node for /dev/ram0,
-> > which isn't guaranteed to exist, and can thus cause the test to
-> > fail with:
-> > 
-> > mkfs.xfs: cannot open $TEST_DIR/proto/blockdev: No such device or address
-> > 
-> > Instead, create a node for the backing device for $TEST_DIR, which must
-> > exist.
-> 
-> Hrm.  I'm still noticing regressions with this test, particularly when
-> the blocksize of the test filesystem is different from the block size
-> of the $IMG_FILE filesystem.
-
-That is with the test in general, and not because of the block device
-fix, right?  Your description seems to indicate that, I'm just a bit
-confused as it is replying to my incremental patch.
-
-> So I started looking for fsblock discrepancies between
-> xfs_reproducible_test.img.[1-3] and noticed that EOF block contents are
-> different if the file being copied in has sparse holes in it that are
-> not aligned to the fsblock size of the new filesystem.
-
-Oooh.
-
-> Next, the region at 3k causes mkfs to re-call libxfs_file_write, but
-> this time it writes 3072 bytes of zeroes and 1024 bytes of copied-in
-> data, thus obliterating the first write.
-> 
-> That bug's on me,
-
-Yeah.
-
-
-> and I'll fix it in writefile by rounding data_pos and
-> hole_pos outward as needed to be aligned to the block size of the copied
-> in filesystem.  And I'll update xfs/841 to compare $PROTO_DIR against
-> what's in the new filesystem.
-> 
-> That fixes the data corruption problem, but then the test still fails
-> because now the space map isn't the same between mkfs invocations.
-
-Aarg.  But I'm glad we got a test for this feature that's uncovering
-old buggy/sloppy libxfs code..
+The subject is wrong, this is actually a generic test.
 
