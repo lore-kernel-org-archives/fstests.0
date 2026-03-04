@@ -1,162 +1,84 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC49237FF79
-	for <fstests@vger.kernel.org>; Wed,  4 Mar 2026 10:10:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77EE52459DC;
+	Wed,  4 Mar 2026 12:55:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772619050; cv=none; b=HaoR7QEywuG7VClLj7GF23grUrYjwPqnF/giD8dDf+VSbEJAc5ilffYtoSiNf++M/2O/NUiRHWr3nd2LD59smoKtJtFMZuqG1k5ksZoEhdnHZp/3hG6saQkErF21/x1cmt2DUe1Y9BtLNLk/h5h4Tjv8Q0392ghwdytgFgkzDOU=
+	t=1772628910; cv=none; b=Nn1C0eBGIa1C9/QB+hsf0BHYIFbcBC6NxY/vTVKSryVmjeB23soVeTf/HXAUemfNlAfcahB2JhYfHDC3gm/N4n2GBUPzPdrozoWBN8CYbd0hewYNA0qNFU7L1+c8Ugg+qOsCLvjWLd8icyIUp71fFRvTEXb0ymy3xSXYBcPq4nI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772619050; c=relaxed/simple;
-	bh=nCj61CizqZiEg+f7MtQHHwlwPtcq/rqtYaq2qEOP5wY=;
+	s=arc-20240116; t=1772628910; c=relaxed/simple;
+	bh=vMKkhjKX2RQJaqdwNqubqtCr0F/Z2N5HjnOE9i1FWmw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=s1IkYM6aIg8DyDIf3IgpI+7EbmUWwlt/T3prucOyn/YczsQKz2gy6NieAIBEYXM68rpGJJB+p0c9USZLVbiZYhbXMyOvX9Z7CQjkw2nHxk+RMTcmHnW1MKKN6+e9iQYJfk31W3IolN3p6gyjsSQziwpT1UBRpLoZ0wYlKdbcX14=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=bQISO49u; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=Yz+9ve/n; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=bQISO49u; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=Yz+9ve/n; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="bQISO49u";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="Yz+9ve/n";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="bQISO49u";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="Yz+9ve/n"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 1A1E25BDA8;
-	Wed,  4 Mar 2026 10:10:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1772619047; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=t4MIYmwFApZcbH8XmHq5Ir9R9Xf87Q5jbCIodmxKoxw=;
-	b=bQISO49u9vYqTIRiQdLqG7+H7Zre2VhJ+OgifW4Oz3vUQWPhsxdF2T8eHOzJR+rlFlDHJg
-	RycCmJyY07HcpCBhVbRhXAp+EMJby5mYOEqxSs4i7M4Jcl7azvdL0E1AFOXgJxO/t5qxBl
-	wEZk6bgYkdO217Db6MbYMjwXLJ29Nyo=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1772619047;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=t4MIYmwFApZcbH8XmHq5Ir9R9Xf87Q5jbCIodmxKoxw=;
-	b=Yz+9ve/nZuhu3ySSWtz3Qjss8KAhWzAojUXoD9ScgfAIqTmW/+x4JzNimR5fzA/bP6mvo/
-	Q0oR+UI+Qbs51hCA==
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=bQISO49u;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b="Yz+9ve/n"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1772619047; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=t4MIYmwFApZcbH8XmHq5Ir9R9Xf87Q5jbCIodmxKoxw=;
-	b=bQISO49u9vYqTIRiQdLqG7+H7Zre2VhJ+OgifW4Oz3vUQWPhsxdF2T8eHOzJR+rlFlDHJg
-	RycCmJyY07HcpCBhVbRhXAp+EMJby5mYOEqxSs4i7M4Jcl7azvdL0E1AFOXgJxO/t5qxBl
-	wEZk6bgYkdO217Db6MbYMjwXLJ29Nyo=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1772619047;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=t4MIYmwFApZcbH8XmHq5Ir9R9Xf87Q5jbCIodmxKoxw=;
-	b=Yz+9ve/nZuhu3ySSWtz3Qjss8KAhWzAojUXoD9ScgfAIqTmW/+x4JzNimR5fzA/bP6mvo/
-	Q0oR+UI+Qbs51hCA==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 0F5623EA69;
-	Wed,  4 Mar 2026 10:10:47 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id ZDK5AycFqGn+eAAAD6G6ig
-	(envelope-from <jack@suse.cz>); Wed, 04 Mar 2026 10:10:47 +0000
-Received: by quack3.suse.cz (Postfix, from userid 1000)
-	id C7FC0A0A1B; Wed,  4 Mar 2026 11:10:46 +0100 (CET)
-Date: Wed, 4 Mar 2026 11:10:46 +0100
-From: Jan Kara <jack@suse.cz>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Amir Goldstein <amir73il@gmail.com>, 
-	"Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com, linux-fsdevel@vger.kernel.org, hch@lst.de, 
-	gabriel@krisman.be, jack@suse.cz, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 1/1] generic: test fsnotify filesystem error reporting
-Message-ID: <6igt75nncormn6homqfeu6qj23vmzfhhf3eoprfkuexldg6xa2@xexics5uz52p>
-References: <177249785452.483405.17984642662799629787.stgit@frogsfrogsfrogs>
- <177249785472.483405.1160086113668716052.stgit@frogsfrogsfrogs>
- <CAOQ4uxgmYNWCs18+WU9-7QDkhp0f_xX6nvKiyDhS8gZzfUXXXA@mail.gmail.com>
- <aab1Z7J-m97VfFvS@infradead.org>
+	 Content-Type:Content-Disposition:In-Reply-To; b=a/oHoCB3l3ZCgS9ylf475oN6nAFsvTQLG+e2mMzQxuIQ2PBmalz1eqvc1dzc7hjXu5lafh5rkmnmgJnfr6vSzMB5MqsMF/wLQy3fjY3Pihc51qhXy7hN39T1TQDxG0H+tJa0cnoJGgyI1w4X+2s8LrtgOoUxC3hzKlF9LBePB/w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 5EDE468AFE; Wed,  4 Mar 2026 13:55:02 +0100 (CET)
+Date: Wed, 4 Mar 2026 13:55:02 +0100
+From: Christoph Hellwig <hch@lst.de>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@lst.de>, zlang@kernel.org,
+	luca.dimaio1@gmail.com, linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs/841: create a block device that must exist
+Message-ID: <20260304125502.GA13048@lst.de>
+References: <20260202085701.343099-1-hch@lst.de> <20260303175300.GT57948@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <aab1Z7J-m97VfFvS@infradead.org>
-X-Spamd-Result: default: False [-4.01 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_RHS_NOT_FQDN(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	RCVD_COUNT_THREE(0.00)[3];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	ARC_NA(0.00)[];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	TO_DN_SOME(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	RCVD_TLS_LAST(0.00)[];
-	FREEMAIL_ENVRCPT(0.00)[gmail.com];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	DNSWL_BLOCKED(0.00)[2a07:de40:b281:106:10:150:64:167:received,2a07:de40:b281:104:10:150:64:97:from];
-	RCPT_COUNT_SEVEN(0.00)[10];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	MISSING_XM_UA(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	FREEMAIL_CC(0.00)[gmail.com,kernel.org,redhat.com,vger.kernel.org,lst.de,krisman.be,suse.cz];
-	DKIM_TRACE(0.00)[suse.cz:+];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.cz:dkim,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns]
-X-Rspamd-Action: no action
-X-Spam-Flag: NO
-X-Spam-Score: -4.01
-X-Spam-Level: 
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Rspamd-Queue-Id: 1A1E25BDA8
+In-Reply-To: <20260303175300.GT57948@frogsfrogsfrogs>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-On Tue 03-03-26 06:51:19, Christoph Hellwig wrote:
-> On Tue, Mar 03, 2026 at 10:21:04AM +0100, Amir Goldstein wrote:
-> > On Tue, Mar 3, 2026 at 1:40 AM Darrick J. Wong <djwong@kernel.org> wrote:
-> > >
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > >
-> > > Test the fsnotify filesystem error reporting.
+On Tue, Mar 03, 2026 at 09:53:00AM -0800, Darrick J. Wong wrote:
+> On Mon, Feb 02, 2026 at 09:57:01AM +0100, Christoph Hellwig wrote:
+> > This test currently creates a block device node for /dev/ram0,
+> > which isn't guaranteed to exist, and can thus cause the test to
+> > fail with:
 > > 
-> > For the record, I feel that I need to say to all the people whom we pushed back
-> > on fanotify tests in fstests until there was a good enough reason to do so,
-> > that this seems like a good reason to do so ;)
+> > mkfs.xfs: cannot open $TEST_DIR/proto/blockdev: No such device or address
+> > 
+> > Instead, create a node for the backing device for $TEST_DIR, which must
+> > exist.
 > 
-> Who pushed backed on that?  Because IMHO hiding stuff in ltp is a sure
-> way it doesn't get exercisesd regularly?
+> Hrm.  I'm still noticing regressions with this test, particularly when
+> the blocksize of the test filesystem is different from the block size
+> of the $IMG_FILE filesystem.
 
-Amir wrote it well, I'd just add the 0-day runs LTP, distro people run LTP
-and lot of other test bots also run LTP so I wouldn't say fsnotify tests
-are not exercised regularly. For record I don't expect regular filesystem
-developers to need to run fsnotify tests as the code is generally well
-separated from individual filesystems. Filesystem error reporting is kind
-of special in this regard so I agree having it in fstests makes sense.
+That is with the test in general, and not because of the block device
+fix, right?  Your description seems to indicate that, I'm just a bit
+confused as it is replying to my incremental patch.
 
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+> So I started looking for fsblock discrepancies between
+> xfs_reproducible_test.img.[1-3] and noticed that EOF block contents are
+> different if the file being copied in has sparse holes in it that are
+> not aligned to the fsblock size of the new filesystem.
+
+Oooh.
+
+> Next, the region at 3k causes mkfs to re-call libxfs_file_write, but
+> this time it writes 3072 bytes of zeroes and 1024 bytes of copied-in
+> data, thus obliterating the first write.
+> 
+> That bug's on me,
+
+Yeah.
+
+
+> and I'll fix it in writefile by rounding data_pos and
+> hole_pos outward as needed to be aligned to the block size of the copied
+> in filesystem.  And I'll update xfs/841 to compare $PROTO_DIR against
+> what's in the new filesystem.
+> 
+> That fixes the data corruption problem, but then the test still fails
+> because now the space map isn't the same between mkfs invocations.
+
+Aarg.  But I'm glad we got a test for this feature that's uncovering
+old buggy/sloppy libxfs code..
+
