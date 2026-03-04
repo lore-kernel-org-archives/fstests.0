@@ -1,93 +1,41 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 463123469E6
-	for <fstests@vger.kernel.org>; Wed,  4 Mar 2026 15:57:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A57E7361DB8;
+	Wed,  4 Mar 2026 16:49:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772639829; cv=none; b=ukhjz/BQZqONMqta8SJmUkAB1HfH2y+pp7rQbHD6MmWxodVJrvHPHow1RsBI63Scr4ocggCxKIFQPU/dYUxYpK2NTbHAp79yU67+aHjQLctjAynPxIjwVjTJwVzD7nV0F5uatfW0GwVPqPdChiJAUOiydr4i55X7/Epr9fJ8TDc=
+	t=1772642988; cv=none; b=c+K9XfuJkAlMEX5vSka1PESuaA5Ep3XBRCbuWbroYm7ftOm6JfOLk/Q0zSRxfwt6825rEtbOn+zem+eVemhVcDcK2r0Iyco/HWM1wtU0xTnCG45L+FlhkMGON0C6U1HnPtRWk703FY7HSRIurLDQ2jj8lz3BpJE7+l/RGm5CTUc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772639829; c=relaxed/simple;
-	bh=m345xO8A8G7qS6xVDPuUI+Kz5nc3PfV2aenh3nNEeEM=;
+	s=arc-20240116; t=1772642988; c=relaxed/simple;
+	bh=zqrzxr1MA8BzlrUKvBCJrNGlu7J1lpLLID3A02GKxfk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=VWohCFVZRkakFeFeIEq1ur32tI2C0IZ8DrujpuE4kuz5M+TZhP2h3PJPHyTxIKtg4whn1NTGGohrTTM9oHkeQX4B1rQnO+ykL6c/e1WPu/wUlufgRWezifG2NoJx4/gnqm/mzOGvtXrPNgIIy3n2bWsV52qzBkr1FgbB7/WxGmo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=C5iSljlp; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=VQ5wBBXx; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=j1uk4u0JeTk8KcU+kQLykJfM/FAYl/xCx3yXOc4+aouck7PCzF7aKYtSRmhn2nHvUTbJ1nYV4RhiJLv2aRCaVPE3AgOB5lTE1SDPjfob0uaiTLj+J6lBrFL2Kco2AAI09sTXChp5BEvqL7qrf8CfD2V63a+wduapKv1cm6p/os4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HBZ2uYlY; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="C5iSljlp";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="VQ5wBBXx"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1772639827;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=W+9Ho15xe4D+QBehYcRY7ffWTr98jf1EjFNPRH2Y0fc=;
-	b=C5iSljlpL1Mu6N3bSx3ba8qG1RM+8NvDKqB2+fzOiMU9tT5EuueOyqJY8t7XtqaF0YgoWT
-	qZTTbx/RO69X2gtjd0982KoZuT+ufeKSSljsWXyX8Ai6MnKsy0+Xh06BV+F8pHYGEr+o8Z
-	+4DhvyAmxnp/wBaqeKpzXuBUiROJo/g=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-323-sB37VLovORyOqDAgtNz5Pg-1; Wed, 04 Mar 2026 10:57:06 -0500
-X-MC-Unique: sB37VLovORyOqDAgtNz5Pg-1
-X-Mimecast-MFC-AGG-ID: sB37VLovORyOqDAgtNz5Pg_1772639825
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2ae42659a39so270073685ad.1
-        for <fstests@vger.kernel.org>; Wed, 04 Mar 2026 07:57:05 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1772639825; x=1773244625; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=W+9Ho15xe4D+QBehYcRY7ffWTr98jf1EjFNPRH2Y0fc=;
-        b=VQ5wBBXxS1GIXJvOQdD2GTJNrZXWHf+xxVFUUMIQNUfmPYKHHusI7Cjq4rIcA9GSOT
-         Erh6+GreW1fYUh06GmLAwy8DERd7rNOQSOP1LgO7OLEFbfm45rmUgNK6xBXPaJrRbZbx
-         K0sAaOHTKtTdFWXez0WlQzLHZk0cOh58gsoBdIdMvqSUghS7PL0Mb3rTepYfGFC6GQUt
-         tw/H7WLCYZ5sVd1Nj591Uayi588Tik+xeY+KI7T1ZXP5hXDTIeKduBjyss4NsHNTNjfw
-         5uLE9vBl4t1RngYb0pUy2le8u/d89hy6/23Mjj6bnyGKU98ppyFNOoLpSXrZP2m7hCHP
-         KBcQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772639825; x=1773244625;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=W+9Ho15xe4D+QBehYcRY7ffWTr98jf1EjFNPRH2Y0fc=;
-        b=dMYACXcpw8TDRqupEaOWjbNcXgWIYVq/W3NzyVXpU+Mj2eNqHMUw1Pgh+O+M2RkkAd
-         itYQ8FYI4Iso9gZf2pJ0o7pNDht8+RnNDXOKg/yi2Je52dVXeMgVQvC1Oo+9czG9Fr7G
-         1MJHzfijbhXPfzx8Vux+6tFxxVTE3S/cXDXe1V19lE+IYNQk42k03mOZlVZfMdkDyZWC
-         DpVYqE9CT9VB0oxVKzVXPIi1wdevX9sX2Y+HANU9iEDU8cKiFtC8KlNLoYPPu2YpKIjI
-         FL3qAUmkC682fEUXZRgf2V6rNaHCT1HZ6LY2pplRer8kivXIt+CFfFxpvxsMzO/iSUxX
-         dwoA==
-X-Forwarded-Encrypted: i=1; AJvYcCUmRBfv2Sig2/1S3kWq0ANcDQM47dkt0nuknjdJUfj5OIabA573Zw8Yrra1An5yJ7xlDmo25YN1@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx3aivJvDrNKO+G6iExFsuGHqmxcul1HKC/m8mDMoGhi8VjBog+
-	WfzFF+iG73QO92agos5eBAdFPtOEw2SM5LX7mKzipZVM+LofnL/KWUZ9o8lko8dV23VmVfS827p
-	bjVaoNmel+TjQCumZntpC467xA1l39B98a4cN4qhasFXnRgixzgGXlCbDaxo=
-X-Gm-Gg: ATEYQzwZrRoYvLdaFAevUsXIP6q3QlNWh+VYUOdemEEOh5pIfkXrDR7WPWGJtQawbBT
-	QaWnB3PXhqncCaMCP6od1YATFUA/Wk0z8MRAptoC+/PdPixEQpv8lM8d9Jr48FS0rFwRUSVG87a
-	DEUQZnqA3IjZ4Uxxhnu1rOent+DttpaTjQqBkSGFG+wkZISeaiNtUygtsyM3rv8aP077x1TIgIr
-	hG8QKSnRO7YQZm3LD0XAWmAYFrjT30HXzTYbItt5ke/UwXmSAEZB0mdVcAAU7/ChzybXjlDu5e9
-	21JngHcOvb72i3ueBs2KHjPwRPs9j8mzMuViHLgD6xqNrwDpIZ/RQlKVGTXs3VMC3qJCISP9Wgh
-	Y1m3XGdfE0Otcjvyk5sCRp15E+0qVqH4381EhbHqmo4Xdd3LNfIXaFL6sLqKTDQ==
-X-Received: by 2002:a17:903:15c3:b0:2ae:5a21:f7ee with SMTP id d9443c01a7336-2ae6a8bfe34mr26660865ad.0.1772639825018;
-        Wed, 04 Mar 2026 07:57:05 -0800 (PST)
-X-Received: by 2002:a17:903:15c3:b0:2ae:5a21:f7ee with SMTP id d9443c01a7336-2ae6a8bfe34mr26660755ad.0.1772639824597;
-        Wed, 04 Mar 2026 07:57:04 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ae5e169997sm55199505ad.11.2026.03.04.07.57.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Mar 2026 07:57:04 -0800 (PST)
-Date: Wed, 4 Mar 2026 23:56:59 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: fdmanana@kernel.org, fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH v2] btrfs: test a directory fsync scenaro after replacing
- a subdir with a file
-Message-ID: <20260304155659.cb373wswpogy4rsn@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <8e3c1626b6e49678976db67a861cb5dcfdb532c0.1772558357.git.fdmanana@suse.com>
- <7997e07a4f530bc52edd1b93e662907c4cd07377.1772561118.git.fdmanana@suse.com>
- <aaguMUK6TgYfwtZk@infradead.org>
- <20260304151800.6qkmxjsufen7sbq4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <aahO7rnnaYg2MQ1o@infradead.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HBZ2uYlY"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0E782C4CEF7;
+	Wed,  4 Mar 2026 16:49:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1772642988;
+	bh=zqrzxr1MA8BzlrUKvBCJrNGlu7J1lpLLID3A02GKxfk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=HBZ2uYlY/PN5t2rnhIqi0RZojzcYf+Vzvdqya9uYo1D0XnfIS7zt1liSpuX2V+yAF
+	 aTF7uvB7oIM5raF1t5tOyrYltww8jmbogf4A2+Jq4wnnCsezUOqaOEp7pEqwskc7IM
+	 gtPpVGMF5B0NrI34G6o4nHU2nrYwBHjDGcDVC1CEvtn72rS/9qKm6t7Wf+qb6p3ZzZ
+	 CjMutR84DfOqG1LS5eqSr+WI3VbXfvUOPOyw6VvMwQJdXMJ/PMb2WlsOGFlWFTtF4L
+	 6JyGrkU+fovY/91P2lOMVNoCwt7ybE8ztMzTliKakttHZRmaQ+TmFI0mq1mrSSDWxr
+	 +gKZzFc0S0F4Q==
+Date: Wed, 4 Mar 2026 08:49:47 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, luca.dimaio1@gmail.com, linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs/841: create a block device that must exist
+Message-ID: <20260304164947.GX57948@frogsfrogsfrogs>
+References: <20260202085701.343099-1-hch@lst.de>
+ <20260303175300.GT57948@frogsfrogsfrogs>
+ <20260304125502.GA13048@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -96,22 +44,63 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aahO7rnnaYg2MQ1o@infradead.org>
+In-Reply-To: <20260304125502.GA13048@lst.de>
 
-On Wed, Mar 04, 2026 at 07:25:34AM -0800, Christoph Hellwig wrote:
-> On Wed, Mar 04, 2026 at 11:18:00PM +0800, Zorro Lang wrote:
-> > On Wed, Mar 04, 2026 at 05:05:53AM -0800, Christoph Hellwig wrote:
-> > > The subject is wrong, this is actually a generic test.
+On Wed, Mar 04, 2026 at 01:55:02PM +0100, Christoph Hellwig wrote:
+> On Tue, Mar 03, 2026 at 09:53:00AM -0800, Darrick J. Wong wrote:
+> > On Mon, Feb 02, 2026 at 09:57:01AM +0100, Christoph Hellwig wrote:
+> > > This test currently creates a block device node for /dev/ram0,
+> > > which isn't guaranteed to exist, and can thus cause the test to
+> > > fail with:
+> > > 
+> > > mkfs.xfs: cannot open $TEST_DIR/proto/blockdev: No such device or address
+> > > 
+> > > Instead, create a node for the backing device for $TEST_DIR, which must
+> > > exist.
 > > 
-> > Yeah, thanks Christoph, I'll change it to "generic" when I merge it.
+> > Hrm.  I'm still noticing regressions with this test, particularly when
+> > the blocksize of the test filesystem is different from the block size
+> > of the $IMG_FILE filesystem.
 > 
-> Assuming you also pick up Johanne's per fs fixed by cleanups, it
-> would be good to switch the new test over to that scheme.
+> That is with the test in general, and not because of the block device
+> fix, right?  Your description seems to indicate that, I'm just a bit
+> confused as it is replying to my incremental patch.
 
-Sure, thanks for the reminder. I'm doing that. It has more conflicts with
-latest for-next branch, I'm resolving those as well, and will push to
-patches-in-queue branch shortly.
+Correct, I'm just complaining about x841 in general.  Your bdev fix
+eliminated one of the sources of test failures.
 
+> > So I started looking for fsblock discrepancies between
+> > xfs_reproducible_test.img.[1-3] and noticed that EOF block contents are
+> > different if the file being copied in has sparse holes in it that are
+> > not aligned to the fsblock size of the new filesystem.
+> 
+> Oooh.
+> 
+> > Next, the region at 3k causes mkfs to re-call libxfs_file_write, but
+> > this time it writes 3072 bytes of zeroes and 1024 bytes of copied-in
+> > data, thus obliterating the first write.
+> > 
+> > That bug's on me,
+> 
+> Yeah.
 > 
 > 
+> > and I'll fix it in writefile by rounding data_pos and
+> > hole_pos outward as needed to be aligned to the block size of the copied
+> > in filesystem.  And I'll update xfs/841 to compare $PROTO_DIR against
+> > what's in the new filesystem.
+> > 
+> > That fixes the data corruption problem, but then the test still fails
+> > because now the space map isn't the same between mkfs invocations.
+> 
+> Aarg.  But I'm glad we got a test for this feature that's uncovering
+> old buggy/sloppy libxfs code..
 
+Yeah.  I missed the detail that none of the existing protofile tests
+actually tried to import sparse files, let alone checked the results.
+
+I'll try to send the fix patches in a bit but QA blew up last night so I
+should probably go figure out why there's suddenly log corruption, or if
+some cloud thing got really FUBARd at 17:08 last night.
+
+--D
