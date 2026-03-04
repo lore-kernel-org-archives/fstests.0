@@ -1,54 +1,69 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BD8427B34D;
-	Wed,  4 Mar 2026 13:05:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A79934AB0D
+	for <fstests@vger.kernel.org>; Wed,  4 Mar 2026 15:04:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772629555; cv=none; b=UEBNu5sgzyhzFqd4WyhbP8SbqpYVbTjzJsmOIk7AmWmwrDPsAk2E4Tpie7biFXYJv82cAUfW56HVI9j8uWsUyfhR1HusXAQ1sBb8iie6V8vX/JoN3+Y5MTYi2OcaBsGddmkgsMzKhOOXK4HTlLy+LdHUgNfOsgSPfLs604ZS7bU=
+	t=1772636655; cv=none; b=OBehhp1MXoI9oHNw5jbPTOmVZo4ao/sF19gVBwbrI3Hvw++LLKpDO6kNqbQB0/XYAd1Oo9moyZApLuJ9zObuctf64bP7pJGE1EznjRBkqLX31cGUW+BgRf9CNCQDOqo76KiblI7om8ByHLjC2PV+XdGz7HmfjU9ZDXoChi9Tfps=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772629555; c=relaxed/simple;
-	bh=qW2uZJF8G4cHoLk9Cs8Nm6DlzN/ieCEqoSLV4RcIMYs=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EUgAf0IPnsVSiXSoR1NTfp0RphUHgQx6BCyJVTJE0YzV0YmQvspzgjdRzZH34YoWF0st7zMmZpwzWki2SNG0t5KpsByClQCldK9eijh+4ZqtODfRh3BAkxlqbh/tyRahes0hdB3NzzZX/szni3g0DPZXjTWTT2CMKErX0gWmAlw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=plJ2JubC; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1772636655; c=relaxed/simple;
+	bh=5Ye0REItnKBcxlfOVIDs+PLE4HBkZCQkGC/PocV9s5A=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ERWRpljHoIYSKa8wcV8U7FrSSt+ZwAPyXl/ZH/E6rGYtnSQB4cfsQJGiVNbxyNEut8YvbtHTREB5doBuAaRaaftx2+PuvhP+Nnfy5zQToFm9Wko7uL75QReZXk0hLAWWegtgwDtqZzmve/vRx39vqjaKQIwf0b59gdERkEHHbQ4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hTdgbq+h; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="plJ2JubC"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=qW2uZJF8G4cHoLk9Cs8Nm6DlzN/ieCEqoSLV4RcIMYs=; b=plJ2JubCqQsE10JJqIV6r6+s1l
-	H18neL3htFlBJZt+BoikcNlhFTNG8636WAfL3AuCltFCSR6bwwICOyqUswL3ZEth/zF7A/QS7tXjR
-	PZ9T9Q8e6515cwCZXOs7CEs7znDavLpcKivV2uKK6cjTyBeqwQD+TKvcJkp5eBwPt/LdQV7HHqViw
-	x2hueon8YnthsdvVWeToPVwptMXgAl4kf8DO2fsBE0q2e+4r0XGpq0h5zfLQisNjNnuEwoLPkcEKi
-	3kwilUjfQMwqS5L1JoayHDoM85ifpyQ3cAzU8/Ab4zBhOU26wxn1BOQWsyrkAeIaL5norYeqCz1GZ
-	DtM7dF8Q==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vxlvF-0000000HDkR-2iUg;
-	Wed, 04 Mar 2026 13:05:53 +0000
-Date: Wed, 4 Mar 2026 05:05:53 -0800
-From: Christoph Hellwig <hch@infradead.org>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH v2] btrfs: test a directory fsync scenaro after replacing
- a subdir with a file
-Message-ID: <aaguMUK6TgYfwtZk@infradead.org>
-References: <8e3c1626b6e49678976db67a861cb5dcfdb532c0.1772558357.git.fdmanana@suse.com>
- <7997e07a4f530bc52edd1b93e662907c4cd07377.1772561118.git.fdmanana@suse.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hTdgbq+h"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51053C19423
+	for <fstests@vger.kernel.org>; Wed,  4 Mar 2026 15:04:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1772636655;
+	bh=5Ye0REItnKBcxlfOVIDs+PLE4HBkZCQkGC/PocV9s5A=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=hTdgbq+hXzi5ueu4SsWtofpmaY9pLRU6em8FMtVwgzc57f/4Mzl4NiNegenRp+YcY
+	 SZCKRCD+hOVYnbixCzoiWDoMlCixy4H0CnqKUV9fo4kRKZLhiSNu9C1U5WLl2IaLaX
+	 8s6eOPTZUt61/i8gbNTZIFdxcKUx7AUM/BeqJqTRdFQL834j3xUIDr7FxueXvlD1bo
+	 ekrp2HLXc0j5V1vtsVZ8R5M17Ok19b0hKEQxmCQnI4zqg6VBQonrsgPmwCX8xA2Gco
+	 F0n2eRkrENjb9Irb0a66yOcroybmiIlodfy1OgqXnGbicSb9yE0jVSrIkJcSrA6TM2
+	 E2+GA6JNEzfCw==
+Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-660b497adaaso2595298a12.3
+        for <fstests@vger.kernel.org>; Wed, 04 Mar 2026 07:04:15 -0800 (PST)
+X-Gm-Message-State: AOJu0Yx57DtXw6zE8GbQNpyx6CSvv+wc7hTHGqT917W77gcwgVN5Gqgi
+	eXkXQWu14K9UWcsDV9G5ZHLAPDRW3aZfcYLONDZK/2dh3jBY9lUhz5opf14RD1exXd1SAZjbPgi
+	eryvh8oTyMFkZxtgxsMmRyckW6FmKnSo=
+X-Received: by 2002:a17:906:d555:b0:b86:edb9:c01b with SMTP id
+ a640c23a62f3a-b93f11eb22emr133964966b.8.1772636653834; Wed, 04 Mar 2026
+ 07:04:13 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <7997e07a4f530bc52edd1b93e662907c4cd07377.1772561118.git.fdmanana@suse.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+References: <8e3c1626b6e49678976db67a861cb5dcfdb532c0.1772558357.git.fdmanana@suse.com>
+ <7997e07a4f530bc52edd1b93e662907c4cd07377.1772561118.git.fdmanana@suse.com> <aaguMUK6TgYfwtZk@infradead.org>
+In-Reply-To: <aaguMUK6TgYfwtZk@infradead.org>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Wed, 4 Mar 2026 15:03:37 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H44GTr+S91rYVfHcasWh9=QBe3dU9wLTRL4LJcinRE=VA@mail.gmail.com>
+X-Gm-Features: AaiRm51pf_gXyYDLOI2VE-Og2RSp-fCBAuxc8B85haNQVkRPrBuMSlH-h84aFcM
+Message-ID: <CAL3q7H44GTr+S91rYVfHcasWh9=QBe3dU9wLTRL4LJcinRE=VA@mail.gmail.com>
+Subject: Re: [PATCH v2] btrfs: test a directory fsync scenaro after replacing
+ a subdir with a file
+To: Christoph Hellwig <hch@infradead.org>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	Filipe Manana <fdmanana@suse.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-The subject is wrong, this is actually a generic test.
+On Wed, Mar 4, 2026 at 1:05=E2=80=AFPM Christoph Hellwig <hch@infradead.org=
+> wrote:
+>
+> The subject is wrong, this is actually a generic test.
 
+Yes, I'm sure Zorro can replace "btrfs:" with "generic:" when he picks this=
+.
+
+Thanks.
+
+>
