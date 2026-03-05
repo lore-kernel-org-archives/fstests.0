@@ -1,170 +1,202 @@
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
+Received: from fhigh-a6-smtp.messagingengine.com (fhigh-a6-smtp.messagingengine.com [103.168.172.157])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 766DB2EB87E;
-	Thu,  5 Mar 2026 08:51:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=68.232.143.124
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772700671; cv=fail; b=CS1xhq2z/NcraQyh9ThR9oAq9PMP9NltoSSw0tf+D7n92DjRNSBksncwnVQs3kd60VYWj8JloTnN3nDX0/WGfC/zNDI7Rrib4TlVOaBkBJN6F3UcukXPfVbxC3S8sI8fR2iN/ej+4OL6HgpEVc8TgaAEoYE9vHTnVme5d44oZtc=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772700671; c=relaxed/simple;
-	bh=sC+nbDH48eNbQb76sNaiLogKPOItpfEYuny0ven0NW0=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=vAtNKkOifpERg63InpOsOkciAkwgG+CIlOzL8Y9/Lqwlb33Iv2h1fjG/bogwrxi0pyaaKXtJuCbNrLshbGPY2XiziBp4GrNjD/o5lj5C0ZBX6MTEvpxEeuA6wAz13vovpX/tjX1iCwZ+v+NQ3c22h4l2klkw9Tlgaixj1svQoF8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=QFC43qYn; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=SUcE16Wy; arc=fail smtp.client-ip=68.232.143.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 74984371054;
+	Thu,  5 Mar 2026 17:49:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.157
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1772732980; cv=none; b=OY7GaF/46k4JdeBNQ4TICV4RqnC0WsT3M9VCCCw2O8aE1PVTw9CLhvzmZwnhx4pHhxN/6YvRhkhOfe/MlMQ4xqbMpSRegft+mn1wJacHvsJMNo24tsWTX/+aVD8skz3bx9CHksMG8tGdGYF0UBlOfo56ozKqRs7jjnv0CY0dx5w=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1772732980; c=relaxed/simple;
+	bh=WOzkUkbOKwAX79T6Q92WLwijfURHljlVEEGNqhUkZIY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=fO+njH5TJdx01ndNj8rD7jADrafZdUBgrDDl2cVE8Eo50PPiPfvOF116V3ri0eBG93Z1Ijb12Al+m3eHFDISpBpTGMoXeuc7eLknZELBoxDw21Q6jBuA/GW657bG5OpHLTVaIsGav/hEmoKhxQhVmFh+1K0242TwboxX/BFG5uU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io; spf=pass smtp.mailfrom=bur.io; dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b=MIZ2NrM4; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=pF7yezXN; arc=none smtp.client-ip=103.168.172.157
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bur.io
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="QFC43qYn";
-	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="SUcE16Wy"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1772700669; x=1804236669;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-id:content-transfer-encoding:
-   mime-version;
-  bh=sC+nbDH48eNbQb76sNaiLogKPOItpfEYuny0ven0NW0=;
-  b=QFC43qYn0x4fALrGB+1SG230XQzMiahGAldXux7YuVOLd4aYZu84j3PW
-   qG03gwm+ubhP3Mn5D9B6xXtFif/mp0DslTfeg5vDSuZmAkha88yMCibJO
-   SQfj8wxnaHq2eV8eu59l6cF8iQjyPNgkZfFPfz4OyAYQxEeUnRGOQH7Kp
-   sY0rjUy4OnucZmfPxYv9+d/EPTxUYxFuEwpgg1D3VyfowGD5k/HHYjKnl
-   9U0AHW2muFX1ziUWNXPTWLyZU1Qp99UwcMp2GW1Cpb9aO6lKVHGWqTbPc
-   LGmUMYLDImyTJjdcSmfhJnrOeiuIJ8djcjOL3owNgigcLecEDXLvROsjv
-   w==;
-X-CSE-ConnectionGUID: DujCCRK5TkCuTodwKd3pUQ==
-X-CSE-MsgGUID: xiJmYPA6SQKEnE9SSx+atw==
-X-IronPort-AV: E=Sophos;i="6.21,325,1763395200"; 
-   d="scan'208";a="143081647"
-Received: from mail-southcentralusazon11011049.outbound.protection.outlook.com (HELO SN4PR0501CU005.outbound.protection.outlook.com) ([40.93.194.49])
-  by ob1.hgst.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 05 Mar 2026 16:51:03 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=OdNpQCtQpvPg2OHyqz1tEIvo7GInwJMZBbDjkTUqm15+VdpOV1+zme2c0X+hGbVNBio9fvBcY86T2vMVYf20y1oDlC/LZtoWme8UaL0zbdqRPjyffQTOLcf+nmpnd2uJlDxoyGT1TIDjOivg3/NCX0cPfJDb5+FaJ0ci+v0IvQTcIEQZ9RNvNKM08cZVlD6mqsN2eQG0gEjFRYIRqPT5VgI6eWXEVsUHi5v59mhWEi7VdPzrOsBEn6ilxSQ6fbUhxqS9E6Zmk9kYhKMONcwLN6CminsvcssvSRE4lB1yBw5nkZO9Fz9igAANM/1xiEFUipD2K3nfuRl/leqgN5voEQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=sC+nbDH48eNbQb76sNaiLogKPOItpfEYuny0ven0NW0=;
- b=FBJKu4jJkCiVtaXxcGiTGmdVI6Fm8yDCc0Hm9WCKOqF5wJ1037jnR3+OSQYWJJq7oN7H3DnrgpQFlpBRIcCkmWE9DzHx+DjuLv7aRA+UxydW6zxq3dQijjSUmKqusz3VU6Q4lv1DoHibyX4urrC4awtWrj78moXrYGbRXEqdw1Nc6DoU/d7m0ex2h4iYl8BGmo1WfHZsBkw/Q24WyFvIQscD7lMVL1K0VMXoqL8dHRE9zyECMT3sic1NzdIYptthk4srwo+z0onToiN8bJ6QUnmtxAVcl0WOoQwkoup906uzKJmuT+zhtsfZO5x0e+tukcign4OIBmF8PQ8zcBXuSQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=sC+nbDH48eNbQb76sNaiLogKPOItpfEYuny0ven0NW0=;
- b=SUcE16WyCzRaR5O49Dt/Xywghhw7PQiHH1zuxpOxxuK8PRS+N35Bdvi/XOEVKkEwcdpaguJrRFEaKz+RkdohrVrPeekQxsLJ/aqZNRmGHIX+hAXmZKugJg5VwkDI5mHozFG9Hqx2b0GXOgLzLSB/NfEl1ZcBUE1KFJdYtaIL8Mc=
-Received: from LV8PR04MB8984.namprd04.prod.outlook.com (2603:10b6:408:18b::13)
- by DS4PR04MB9721.namprd04.prod.outlook.com (2603:10b6:8:280::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9678.16; Thu, 5 Mar
- 2026 08:51:00 +0000
-Received: from LV8PR04MB8984.namprd04.prod.outlook.com
- ([fe80::14a1:5b7a:6cf4:31a3]) by LV8PR04MB8984.namprd04.prod.outlook.com
- ([fe80::14a1:5b7a:6cf4:31a3%3]) with mapi id 15.20.9678.016; Thu, 5 Mar 2026
- 08:51:00 +0000
-From: Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
-To: Zorro Lang <zlang@redhat.com>
-CC: hch <hch@lst.de>, "linux-btrfs@vger.kernel.org"
-	<linux-btrfs@vger.kernel.org>, "fstests@vger.kernel.org"
-	<fstests@vger.kernel.org>, Hans Holmberg <Hans.Holmberg@wdc.com>, Naohiro
- Aota <Naohiro.Aota@wdc.com>
-Subject: Re: [PATCH] fstests: test premature ENOSPC in zoned garbage
- collection
-Thread-Topic: [PATCH] fstests: test premature ENOSPC in zoned garbage
- collection
-Thread-Index: AQHcmn380SEWYFJwgEKjj1PHhcZCxbWfxWOA
-Date: Thu, 5 Mar 2026 08:50:59 +0000
-Message-ID: <f5b82b17-f11d-435b-9bc9-893f049900ed@wdc.com>
-References: <20260210111103.265664-1-johannes.thumshirn@wdc.com>
-In-Reply-To: <20260210111103.265664-1-johannes.thumshirn@wdc.com>
-Accept-Language: en-GB, en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-user-agent: Mozilla Thunderbird
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: LV8PR04MB8984:EE_|DS4PR04MB9721:EE_
-x-ms-office365-filtering-correlation-id: e401f9c0-0d92-4e77-704b-08de7a94532e
-x-ld-processed: b61c8803-16f3-4c35-9b17-6f65f441df86,ExtAddr
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|366016|376014|19092799006|1800799024|10070799003|38070700021;
-x-microsoft-antispam-message-info:
- HJ7KxDyJphJLG1wfv2/3f5bLgSduUQclD66f8dJKXYsWSh7mca++5pODX1inJ9xCB3CHZF3bNIr0g/WSb10ByJdxXrS2tcJnqJCDBHSvUpUIl7CP2jnexh3bB/fNaniRfQuSSW6SDUCRp7NmXasQyL61Z+CZ7pLpDrN2ntLOw+jq5qGl2BTiMH84pitBm0L7hEXa68uwbdieFskfxDy24iin2LxidUzPG/o61Ga/nJ8Pol9qTf60iA5Wdjf0yZXj7uCMbGnr2UdF7FOFltF45Zi2bo7+gjf8fiJLVGbLXm5ui6GLU8KqGcUFUtiLbbeFNxTQBaWOr4b8x3vj63e4npfiEF/jwkM9Vj00m9o7NyB1+C4eGQBqO6ZEpXjJothcNR7iroYZMyr1q4BFRzd8uE4lMreGaZo8e1kXHc3CoWeVTtsnX7IPcaYS2UrfryfjeTMtkvJxIXoq+mZbWZM++QRlzjswDt2kvYQPSuONDfxUQKXYe4yUmjHgUejQOAzdW3dEFW80qURvm8/XbSuzVJ3K0WMsH5UkkGp9lEheFZCEwJPz7on3SkImbDgXkDn+OifzRkjHNCuecTxY/r7IvW8K0mgt94B+fXQwtGiEKxeM3qZPoLTzBDXKsalXIfU4SEDfaqhh7SMcUWzTMbNv5RcqcgJ9yGg/pVW6h/i4GQjlLOGU7F/+gvGO7asLAD/kHBINGk6cSpLjeMFjiAb2nQ6UCoKl87JwmO7/Ai9v7H2cUdBA7t3qw7C0A9m9kQWygJ0iGI2XdQEUTzoqv9LjDmenhjQRDjeDBOTaGyTvmWU=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:LV8PR04MB8984.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(19092799006)(1800799024)(10070799003)(38070700021);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 2
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?TytSbkR3WWxMSmwvUW9LaHdKY2ZPeTgvS1ovelQwRVRSSjFXNGl4TmpMK3h2?=
- =?utf-8?B?S1l3K2hDNDE1QnI1RXRJOU9uaTJiRXBwSG1Ta21HZTJJN3IyZzMyT1JVNWww?=
- =?utf-8?B?VmlIdGxHVFlBTCt6Y1I1ZUFYT1p3aVRDTnpzdDJDbG5uMVBSc21jRTlWVWR0?=
- =?utf-8?B?d3FVdmxlQnNCSC91dkg5VStucy9UU2I4TEF6WjhuemJZYnA0MlRESFFpeW9T?=
- =?utf-8?B?ZUpESXJlUmZ5QWloWTRtSWtpb215NGNWTzg0TlYvTXI5ZmY2YjVUVjBERXR5?=
- =?utf-8?B?WGt5Rkoyd3BVVElHamMvUE4yRW5Ib095RVArVDl2bHR6YzFPUVhzQjRCTUVB?=
- =?utf-8?B?RGVPY2NIRjN4bkZwY0RIc012eDZlbTE2b2JEQndvajQ4ZUd2UGZuNDhQWStG?=
- =?utf-8?B?M2hmek04RUJEc29SSVhQbXBzcTRjTHBmRTQvTkVNdXJjOVIrOVdydzZCYWov?=
- =?utf-8?B?OU94THBvZytITnpjbjlsbFM5RDc2dzV2WDR6ZlZ6aCtkU0tmWTNWekwwVGp0?=
- =?utf-8?B?QlF5dkNxYW9hbUc0Q3JOUittd0xlOHRTaEM3aGkxYnBzdUxvNzg1TGlKNy9K?=
- =?utf-8?B?SitLMFBZUE4xNlRSVVptcWlQTEFYR3V3aXdEMjM3ZE5wQ3N3NTcveVRUaDlt?=
- =?utf-8?B?L0NybFBLLzNjK3dQUHUvSFRTN0hBZlo2N1lWaVZOTUk2UW4xMVlLbzFHbmRp?=
- =?utf-8?B?c2lpNTJ5Ym1kZDlFQXg4aHk4MDIwM092WS84SDA2NW5jNU1VUmNpZmY3US9N?=
- =?utf-8?B?VlZXYkJGSDI5NzBWcXJlenY5MGxhWklhTS92UWM4cXU2TXVaeW0vZGZPcUsw?=
- =?utf-8?B?SmtCb09ZNnZ1VmdQY1NpZFpLblJHeFpQYkpnM2ZNMUszOFRsNmxoa1NYWXNY?=
- =?utf-8?B?TFZMZjBGY2V2TzIwVHkrTU9kVGpuMmhhN0ZrbEd2YXpKci82SGM3S0hXRVlo?=
- =?utf-8?B?VGlxSk5OcUJuTXprTmJJVEQ4VWVwaER3aDl0aXNscUZrMWk4ZDBhalZ1aXY5?=
- =?utf-8?B?TDdiYjMvdjBkN2QxWW43QllmRUh5dE52VkF0QldYQklWK2VDY3R5Rm8xMlVL?=
- =?utf-8?B?UE42a0RBLzZsbTdiTWgyOFBPd1k2K3JjZ3BEY3ArT3grZ3RwKzVISTZEcElO?=
- =?utf-8?B?bkNBUHBUaFRTZHhiSEpoc28rWDVveTRmd2xoM0hpUWMvVHRmc0sydzVGWjlU?=
- =?utf-8?B?VU1zVVpESmR1R3VQdUV6NDdaNXZqbW16UVRlZ3diOE5Ec1Z1MFR4djI3K0xl?=
- =?utf-8?B?dkxkNEc3QjZNdWxmSStIUWY0K2Rxc1pyN2FhdEllZnduYlpiRW1iMk9JMWdt?=
- =?utf-8?B?U3N0UjV5YU0vSnZvc0I5anFkK281bmVCa2ZlNDMwc2Nja1VhRWl5RGVVQzl6?=
- =?utf-8?B?VEROem1rWDZrMnQ2M3BHMXQwSTRWK2o0NUN5dC9wMUtaWEYrTVBMNVg4Vk51?=
- =?utf-8?B?SEIvdjlzNmU1OTZKUDN5VG42V3lGRHNWelM5WWV6YzZORU96SDAxQXdSN3BH?=
- =?utf-8?B?dEs4SnFVQkc0VFBNMG55aENRLzd3Ly95MWRpWE8wdW5qUDlubHg0RmdSMUZR?=
- =?utf-8?B?ZlhpMlB4RVQ2YklxTTVwSVFyL3dhSE1GcWszcHFuMHBwZHlEUmtBdXF4d1M3?=
- =?utf-8?B?SXZlMVdMMm9rRUFHTGFTRkRMcE9Uclk1MTJhM0ZIenZJOUpmcmk1SngrZ1dw?=
- =?utf-8?B?cjZWa1g4K1BYd3dqSnBTRkw2alRBeWhxRFBHaHQvZDA5bm14WTlJcjc1OHhp?=
- =?utf-8?B?WUlTZnZmQkxmcm5qZTJaeStid0MzSnpMZ1VrclZMSEdpN3FITjNNWkNqbm9w?=
- =?utf-8?B?ajhHNWlYd0M1SEhBaVQ1MWZUS3UzMDdXenBCWVZScXkzRE5hVVBjTHMwQmt1?=
- =?utf-8?B?aDZLYXp3YzVpK0pzSFdPN05OZlpXTzluaWRqSHVJeFA1K2U0dzYwUnVzbTBt?=
- =?utf-8?B?TWVJbEcwNGxIcFQ1WW1NWUtkMkljZHkxV1FxelFGMStKaWlWQ01GKzRvWGVZ?=
- =?utf-8?B?WFZFRGlSQ3RNTlllanhUZndyaE1ESnhqOFp0bmNHcmlZS0NHVmhiYnZnSkk5?=
- =?utf-8?B?U1FHS1RWeXRTTVhFelduMnZFSUJQckhvY3BLbHZkbTkzcWpIeEU3SG9zdTFI?=
- =?utf-8?B?NXdrek4vQy9abnpOQWVDVk9mY29UN0JrVjlLZTVwQzBiYjJOcVMwNTdLS2Zx?=
- =?utf-8?B?ekJ6MVh4TmxUV2lqOHpFRXN4OXpiYWlpc3R4Qy9ZdTh5KzdLekJocEJjdFpH?=
- =?utf-8?B?amhhU0hIN3NQS1M2V1pVamo5a0tPMkpZREFwaHczUnAzUVpZczFxTjRzQWRz?=
- =?utf-8?B?d0lJNUN4dHNLUXF6aFBtMi9ETGd4OC9ENGdML3hxYUdQVCs0aGl6bFgxaFBC?=
- =?utf-8?Q?O1LgZf9vEHXG20bZkAn6CQFPk2QF3atSTPJF/qjIDI3RQ?=
-x-ms-exchange-antispam-messagedata-1: kRtUNdMyXlR3oVZQ0j1efXTXnhJ5XvwH+/Y=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <D4ACB8F2EAD6B647BBB869E1DAD75E8D@namprd04.prod.outlook.com>
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="MIZ2NrM4";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="pF7yezXN"
+Received: from phl-compute-02.internal (phl-compute-02.internal [10.202.2.42])
+	by mailfhigh.phl.internal (Postfix) with ESMTP id B2750140016A;
+	Thu,  5 Mar 2026 12:49:38 -0500 (EST)
+Received: from phl-frontend-03 ([10.202.2.162])
+  by phl-compute-02.internal (MEProxy); Thu, 05 Mar 2026 12:49:38 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc:cc
+	:content-type:content-type:date:date:from:from:in-reply-to
+	:in-reply-to:message-id:mime-version:references:reply-to:subject
+	:subject:to:to; s=fm2; t=1772732978; x=1772819378; bh=mMdvIs+tjC
+	HyDZQgH2hmQUxNB0P/3EQTnxluRsQHJg8=; b=MIZ2NrM4tzoJXyL0LGu/9RHhyK
+	BZSHUCgO6xAoeKrmE5lTNL5E7WqWYEJsTt7jv7nPjT2tGFizBADYvWqjZMbi4/Vb
+	qeOsgWjQ4xIu01m4TDZVfnKarUdagrP7vlpmTwkRWN0Sf4dD4NeFfZVfeW5nLRrA
+	msxD3T6TpHq6hRbrZ963OW6n6/kY8plZF+ZGs8vlu5YU7uXQn9aH23C7XZdQ4XTm
+	/peoZ/7+BTSIeFR8STLk7Gpt3KI1QVYzh/7mm1WqMHz2VcfwGLICPGqkcITajcMo
+	4KxnhY5sWC71bhLe+dWD6aZ8G5lPyfZUlU1AjcvUkE7lBbIsSblu59usH/bQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-type:content-type:date:date
+	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
+	:message-id:mime-version:references:reply-to:subject:subject:to
+	:to:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=
+	1772732978; x=1772819378; bh=mMdvIs+tjCHyDZQgH2hmQUxNB0P/3EQTnxl
+	uRsQHJg8=; b=pF7yezXN7G5D1pNYePJ/QTfOnS6o4cWQjp8RPKShThRV67Q0FHV
+	UYypAGf4fHHU++P0kvwxXv/01Cth5ltWcgE0rxpmws+NN/XpWrqQgaDHqvDppnEa
+	mVcXWILUA5jt26wh43uULvjwvIwVu3vbC8KxEHV3miNxecmRCNYQCCCuM6cGI4ua
+	ny0Ly3l8aeQuKAZUq94QlmJO+GWuhNM1gwnQC4xSrtmaAU5zPXz562qKqoSAC1lI
+	PMMsW4Gz7qCQO1JDYxxfpOqWjb6SDsmW66Qs3oElqmBXpLKgdUXv2SYbhGaUprFs
+	SuZMGPDgsENSxXN3jrTFvsOdpvqeIAi25kA==
+X-ME-Sender: <xms:MsKpaQdHvH10zQ4n5a7fFn-okR0kfWTgR9nWOFXLeVy2NfC0qf9w0A>
+    <xme:MsKpaQCWjhZrZ9xkaaH1ahkHABEBLhSCQjR6H8NmvJB4DylV-Qg2_a-7CVcSSbCuj
+    GYojWrAGCQ0_8uRQuCVvo1OTLOhcwWVIYb3qyCuwwQLqd2iZZPQMMY>
+X-ME-Received: <xmr:MsKpab8Tu6rXy04ekyVE1-oPTW9f300zRTaDG3FN27ZWH72C--5u7KRHReI7BRIhDUzLcwpDSt13RfTv92qpQb3HukI>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefgedrtddtgddvieejtddvucetufdoteggodetrf
+    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
+    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
+    gurhepfffhvfevuffkfhggtggujgesthdtredttddtvdenucfhrhhomhepuehorhhishcu
+    uehurhhkohhvuceosghorhhishessghurhdrihhoqeenucggtffrrghtthgvrhhnpeekvd
+    ekffejleelhfevhedvjeduhfejtdfhvdevieeiiedugfeugfdtjefgfeeljeenucevlhhu
+    shhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegsohhrihhssegsuh
+    hrrdhiohdpnhgspghrtghpthhtohepgedpmhhouggvpehsmhhtphhouhhtpdhrtghpthht
+    ohepfhgumhgrnhgrnhgrsehkvghrnhgvlhdrohhrghdprhgtphhtthhopehfshhtvghsth
+    hssehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinhhugidqsghtrhhf
+    shesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehfughmrghnrghnrgessh
+    hushgvrdgtohhm
+X-ME-Proxy: <xmx:MsKpaTJQD-qQJP4gW9mhHFaZqHxovSEGjqJ1JyLF1EnfqcxmsCBTDg>
+    <xmx:MsKpacgklTzqp_RnU8UbHIgW196W3o4yzyXa1pJhW64yx0IWay4-7A>
+    <xmx:MsKpab4_GT525pjJmuKAu-X7llmzIF00Q9xPljr0BDvaqaxV6V1dzg>
+    <xmx:MsKpacZqP0ojEkGm333an3Axph6DUhGD7dvk3V-ZPPd9VmGsjIfHJw>
+    <xmx:MsKpaZjY2sSoQ52ae3GX1UUgaXTHCPJ2ZwmrSYrJi5LSoZZV9AMN1AVC>
+Feedback-ID: i083147f8:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
+ 5 Mar 2026 12:49:38 -0500 (EST)
+Date: Thu, 5 Mar 2026 09:50:18 -0800
+From: Boris Burkov <boris@bur.io>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] btrfs: test creating a large number of snapshots of a
+ received subvolume
+Message-ID: <20260305175018.GA1172981@zen.localdomain>
+References: <18154871aaddf2f1887c14e63513955c79b2a712.1772106013.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	oBvLS6D5hs+jLg5hn/VbRdZrBOnBC6Us9n3nLr0cW0dduIHH8cXLzmHdW/s8yXxepn/90l265FtNyibLm0Jm0T78Zs61b08P/3hizLz0IrMQTc9aliSUl1RdvwWFbSliV3PlEATUWVKcEbmBe1J47l+iymZlOkCeCOi9n5vGCAvtAeZdLp6i97/Gs5UV7fm/REeVLd4LE7nmfAIwuy9adGzXBvzA3Mx5D2MfyzoMRx1p7STYdFFyz1k5omr9xiNDpPzB1EiSFfQgeJKCJPIOXaIMoH3ySKxSBdffDdTWfOXv/SYXdpiJgfIXH9CffyJ+0lnBywg/vVfZ73ZE+uS4Ub/b0tooPZ/Xc6V1zfueE2HgfTrXGeEiyxsrFH8QQL2izsO5oxmemDG1XUTE5YwhZQYW+I4NpnUoc/5v4W0R9WVQFFsl7Mrd1LQyN4AIIy3MZ9WytXM96bEjh2JMfGrgr6sao/ewQxZGncyFW/ZiSFU1iF1wW/KrCUmRSwDy+WhE09GhaVJ3nmrRv7OuPKjNjxlAsJNZIs94OsgoZwWj1aa9XBg1HHr/OPOQYBI2lOI5C2NeEUvX+MAWmYBiiUapGSba2haTtEkFOOatCas8ZT3wYD1NUD9AWYek5ujoQuv/
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: LV8PR04MB8984.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: e401f9c0-0d92-4e77-704b-08de7a94532e
-X-MS-Exchange-CrossTenant-originalarrivaltime: 05 Mar 2026 08:51:00.2227
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 2C6U7pGxH9b4XDDGIXNvAh3/nzLHqrUly1Ra1Q1BRtv2qSebRayHlO7u5AfjqQE4a+4GmunKdLPD/aRNteXter5+d1c/YuAIKXJ3DaKzTbc=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS4PR04MB9721
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <18154871aaddf2f1887c14e63513955c79b2a712.1772106013.git.fdmanana@suse.com>
 
-T24gMi8xMC8yNiAxMjoxMSBQTSwgSm9oYW5uZXMgVGh1bXNoaXJuIHdyb3RlOg0KPiBUaGlzIHRl
-c3Qgc3RyZXNzZXMgZ2FyYmFnZSBjb2xsZWN0aW9uIGluIHpvbmVkIGZpbGUgc3lzdGVtcyBieQ0K
-PiBjb25zdGFudGx5IG92ZXJ3cml0aW5nIHRoZSBzYW1lIGZpbGUuIEl0IGlzIGluc3BpcmVkIGJ5
-IGEgcmVwcm9kdWNlciBmb3INCj4gYSBidHJmcyBidWdpZnguDQpab3JybyBwaW5nPyBTaG91bGQg
-SSByZWJhc2UgdGhpcz8NCg==
+On Thu, Feb 26, 2026 at 02:34:24PM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Test that we can create a large number of snapshots of a received
+> subvolume without triggering a transaction abort due to leaf item
+> overflow. Also check that we are able to delete the snapshots and use
+> the last one for an incremental send/receive despite an item overflow
+> when updating the uuid tree to insert a BTRFS_UUID_KEY_RECEIVED_SUBVOL
+> item.
+> 
+> This exercises a bug fixed by the following kernel patch:
+> 
+>   "btrfs: fix transaction abort when snapshotting received subvolumes"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Reviewed-by: Boris Burkov <boris@bur.io>
+> ---
+>  tests/btrfs/345     | 73 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/345.out |  2 ++
+>  2 files changed, 75 insertions(+)
+>  create mode 100755 tests/btrfs/345
+>  create mode 100644 tests/btrfs/345.out
+> 
+> diff --git a/tests/btrfs/345 b/tests/btrfs/345
+> new file mode 100755
+> index 00000000..75cc3067
+> --- /dev/null
+> +++ b/tests/btrfs/345
+> @@ -0,0 +1,73 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
+> +#
+> +# FS QA Test 345
+> +#
+> +# Test that we can create a large number of snapshots of a received subvolume
+> +# without triggering a transaction abort due to leaf item overflow. Also check
+> +# that we are able to delete the snapshots and use the last one for an
+> +# incremental send/receive despite an item overflow when updating the uuid tree
+> +# to insert a BTRFS_UUID_KEY_RECEIVED_SUBVOL item.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick subvol send snapshot
+> +
+> +_require_scratch
+> +_require_btrfs_support_sectorsize 4096
+> +_require_btrfs_command "property"
+> +
+> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +	"btrfs: fix transaction abort when snapshotting received subvolumes"
+> +
+> +# Use a 4K node/leaf size to make the test faster.
+> +_scratch_mkfs -n 4K >> $seqres.full 2>&1 || _fail "mkfs failed"
+> +_scratch_mount
+> +
+> +# Create a subvolume.
+> +_btrfs subvolume create $SCRATCH_MNT/sv
+> +touch $SCRATCH_MNT/sv/foo
+> +
+> +# Turn the subvolume to RO mode so that we can send it.
+> +_btrfs property set $SCRATCH_MNT/sv ro true
+> +
+> +# Send the subvolume and receive it. Our received version of the subvolume
+> +# (in $SCRATCH_MNT/snaps/sv) will have a non-NULL received UUID field in its
+> +# root item.
+> +mkdir $SCRATCH_MNT/snaps
+> +_btrfs send -f $SCRATCH_MNT/send.stream $SCRATCH_MNT/sv
+> +_btrfs receive -f $SCRATCH_MNT/send.stream $SCRATCH_MNT/snaps
+> +
+> +# Now snapshot the received the subvolume a lot of times and check we are able
+> +# to snapshot and that we don't trigger a transaction abort (will trigger a
+> +# warning and dump a stack trace in dmesg/syslog).
+> +total=$(( 1000 * LOAD_FACTOR ))
+> +for ((i = 1; i <= $total; i++)); do
+> +    _btrfs subvolume snapshot -r $SCRATCH_MNT/snaps/sv $SCRATCH_MNT/snaps/sv_$i
+> +done
+> +
+> +# Create a snapshot based on the last snapshot, add a file to it, and turn it
+> +# to RO so that we can used it for a send operation.
+> +last_snap="${SCRATCH_MNT}/snaps/sv_${total}"
+> +_btrfs subvolume snapshot $last_snap $SCRATCH_MNT/snaps/sv_last_as_parent
+> +echo -n "hello world" > $SCRATCH_MNT/snaps/sv_last_as_parent/bar
+> +_btrfs property set $SCRATCH_MNT/snaps/sv_last_as_parent ro true
+> +
+> +# Now we attempt to send and receive that snapshot, verify that it works even
+> +# if the creation of the snapshot $last_snap was not able to add a
+> +# BTRFS_UUID_KEY_RECEIVED_SUBVOL item to the uuid tree due to leaf overflow.
+> +_btrfs send -f $SCRATCH_MNT/inc_send.stream -p $last_snap \
+> +       $SCRATCH_MNT/snaps/sv_last_as_parent
+> +_btrfs receive -f $SCRATCH_MNT/inc_send.stream $SCRATCH_MNT/
+> +
+> +# Verify the received snapshot has the new file with the right content.
+> +diff $SCRATCH_MNT/snaps/sv_last_as_parent/bar $SCRATCH_MNT/sv_last_as_parent/bar
+> +
+> +# Now check that we are able to delete all the snapshots too.
+> +for ((i = 1; i <= $total; i++)); do
+> +    _btrfs subvolume delete $SCRATCH_MNT/snaps/sv_$i
+> +done
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +_exit 0
+> diff --git a/tests/btrfs/345.out b/tests/btrfs/345.out
+> new file mode 100644
+> index 00000000..11ef4e7e
+> --- /dev/null
+> +++ b/tests/btrfs/345.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 345
+> +Silence is golden
+> -- 
+> 2.47.2
+> 
