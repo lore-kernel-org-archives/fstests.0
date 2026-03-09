@@ -1,195 +1,209 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C4CF43A7F4E
-	for <fstests@vger.kernel.org>; Mon,  9 Mar 2026 16:51:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E0DB63ECBD5
+	for <fstests@vger.kernel.org>; Mon,  9 Mar 2026 17:21:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773075119; cv=none; b=dAlNF4nlGtFecmtkwtaD3sGGMyncyFGxHHtZKdKLQdhRxELz2mA2VfNG7Ec257DbbyNF/mD2IlBeEpoq3kKl6SFjs9YzsSwhp7qw5B1qI6T5jas8Usvm9RDpMXwXNLngORcwjiMjPgLxJM+x1LsPVgz6GOHjDCxZM7kcNYJeuNI=
+	t=1773076884; cv=none; b=AXAM1q1xngM33L5+Q2no4NNwef0PwLqA21Yj8o8oRAZVrurCidbP5FrCkPR0mOC4oqfLwRn3sXBnzwAN7CYSecyViW2Aq3VYOtQ1ZuNev4gF8YcoW75DkeeA02trICW0nUKCdoiTN/CCyXmVFh2ekq1j8OsTXX0Tk7AnvGr/h8o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773075119; c=relaxed/simple;
-	bh=pfPJGSGwLJpw6e+UV3B4HrX5vEv6FV7uTd+GSbj1eds=;
+	s=arc-20240116; t=1773076884; c=relaxed/simple;
+	bh=gINU3ll/SVvBIUMOU2bnewKP+K+46wFgDLuQyc8zPpQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=iLqC+QJz8uvAUe9+v+PBul84h0jRdh7Ew38aIY3YdIoFmFfs9Ncfi9niVW5CC+jJg1l0uaA1shyBaRHvcfu6FAgiEqTGD0yKBX5de1wvB+Cp6OizNhxmpar8pezxowWWwDWbQhuSbREpcalm2NafC26eNw9Avc912/RW+x+6gWc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=R8goawHZ; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=pVw45+nY; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=WBvkewrW621GMob+KDaSv1kwQUHfr2xxNpySV81hHhRhsZy7IFD9Edi1lSSB8j4F5YTby+fbZ4EEojDcjV4NdLd6GV9L9OonC/k2CebEmn15OkeSa91pUbCJl9VOijb/ofql7jsg7bZUgBzHp4jTqUfqJzG5yVmF0xAJ+r4QesA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VnKfBCZ/; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=QUIFA9Bx; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="R8goawHZ";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="pVw45+nY"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VnKfBCZ/";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="QUIFA9Bx"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1773075116;
+	s=mimecast20190719; t=1773076881;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=25QIYSKQ8RVJbNVeADyj4xqplKGsCB0QVBu3zT5eoAo=;
-	b=R8goawHZcY10TxemRIM5Z11WGW/zDbDDZv7LbFby+Odi3N+hWx8M4KQl2vkfti6ABjAPyX
-	Y7QdnOD/bDZm6JTeu5lSxtkhEajW93FMKa3e135g0CktzoQpnqrQZgkN6Ggke8iYBeWvWn
-	n3UDJ6pMc2KxGq0C5szwjrWD5EjNvUI=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=jHOFx7v+1K59pH4DGgR8PGGUszHIyjfXE3Oibz4IWbI=;
+	b=VnKfBCZ/giqCXhzMyin81R+xmg5W+KuBQhLTsr5GL+Z7Y+TaU+DclDECcNpgK91AcwB/Ob
+	wVuY8QSQk9Lb/qL0oMeZpN1IF16cX6LhgeWxlZwpyt0JYu2Xn7KxKNidzpIvX59oU6QLbA
+	zpMgNc8CyCIHWJlqLA+s86C4VVxyXc8=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-245-vipszgb9N1-IqadNhF72EA-1; Mon, 09 Mar 2026 12:51:55 -0400
-X-MC-Unique: vipszgb9N1-IqadNhF72EA-1
-X-Mimecast-MFC-AGG-ID: vipszgb9N1-IqadNhF72EA_1773075114
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2ae47b3adacso79506745ad.3
-        for <fstests@vger.kernel.org>; Mon, 09 Mar 2026 09:51:55 -0700 (PDT)
+ us-mta-437-oX03H4WVPhyp0vDCCj-JcA-1; Mon, 09 Mar 2026 13:21:20 -0400
+X-MC-Unique: oX03H4WVPhyp0vDCCj-JcA-1
+X-Mimecast-MFC-AGG-ID: oX03H4WVPhyp0vDCCj-JcA_1773076880
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-3595485abbbso11015203a91.2
+        for <fstests@vger.kernel.org>; Mon, 09 Mar 2026 10:21:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1773075114; x=1773679914; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=25QIYSKQ8RVJbNVeADyj4xqplKGsCB0QVBu3zT5eoAo=;
-        b=pVw45+nYUYZIX2cRoIQs1dYngNBVwANh0g7rZE5mcqkLNiZM72ZNgJw9zS5gyG2A8Q
-         PIYo2CNZXp+dNRxq15KLjO8wcC/Vv2MADnYHHsIjRVB/JSWxn1l3OuJmgf6JnQCZ3teZ
-         b3cHn2iqkSDV3TuE4pbA/fBVxR7eSGxOkxh1IbkWUNXbQ9lUSpV+H5sb4juaTV9oG6RA
-         uBefMEb9Zt9wI86XUl4pHK5X2qPpapQnJ9n0oF0dPLuU+yENS52+M0vJem00IXZPQW2y
-         bokki4ESu915zMkFKu5TXVAts1Lu2csY2M+METaTcWNl0jWVaRKo91kStGP614ATSSh9
-         WsEQ==
+        d=redhat.com; s=google; t=1773076879; x=1773681679; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=jHOFx7v+1K59pH4DGgR8PGGUszHIyjfXE3Oibz4IWbI=;
+        b=QUIFA9Bx6iVjxZIw2tO8QWY77jKrpLkfK0SQUr3rMYMGCAxoDcqghCnz8ov/5uNhF+
+         LflEZ5Xv04AbZ2FrklE35MzGg/5x2lITyG6/KZFlcT+RCY+1XCbM9NtwOYsYmtqLUBrP
+         R1Q6QOAApfxiI3amBmGk8C3Ys+7yDhH6dlKgknu9XdX5/D1RCCsi39Aa5UJPyFe3MNLS
+         nD1qIqSAzVYG16kHIIP04Jk32ucihZwumfhVjDhDFm7rzux3Lv2RwqcFzi8RhyvD5O0x
+         PtO+B0NT1Gj1ViGaLoGSSEee1Qyd54IsKe/YJmbP1wm82ZkyAppFNRzTE9pzNmRraP6e
+         zACQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1773075114; x=1773679914;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=25QIYSKQ8RVJbNVeADyj4xqplKGsCB0QVBu3zT5eoAo=;
-        b=XMXCnll8yfA6nQ22UVwKKbcmLVy46/aa4ouunEQsmkbdfkW3B/ylRb7gIXO45+Uk2/
-         iOlpIGdVI8ocqYNZsnD+k2Ag11hBP1iJX4W9q1GtfNHm8OGqp5BwcPbjYPA6kAfhuxS9
-         VYTzWjeoHFgCw3L9pcFg4yVyRC/C96zph5jx2NKP82OLgI0el/Eeay4x2CMfi9FhZkok
-         5hlrb+9HJwCx1pChHBoRLqKx2b6FQ8Q+yB0ONymntE1zBKJ9ETXND3qeMgcL0FDQxKqs
-         n/PZX+A2GCsKcGvYt6U5PHJK7Zi7Lr9A/86cMd/RmdUfE4/dprzEt1PBvsjKoaXkh4Ka
-         6gig==
-X-Forwarded-Encrypted: i=1; AJvYcCXZdRtNrrZCHH4SJe3w4Wz7nI7KERV4/YvfVUZK9blEIDpnMytOe2nHNJkgLiQTVO2Fh4EjA+4y@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw2mYpNzIJsFlPo4ISPDtkw/GQhojCKWgzVs3tU9J8BFyg8WGvx
-	Q9uvxJrO6py58jPKLcf9ukiJjIM7z7+otlP3CyJuR3X2ydbTHC924Kmui3TeQAd4m9NpRdjF8sh
-	aR/JV3i9mfIXITCfTC6qZeW4ZSI+0pLuPXnuf9U4nIPWsB4MxIdjrwvuR1hk=
-X-Gm-Gg: ATEYQzx+mwC5U0WQcg6ddgn67DapIkJUq8zcazGUq1AosMCiFXCAi7qYXS5imE46Iiz
-	R9fLAciXU3RUtVQlADzxKhIetXUDIIepTyA4ygJlbb9NYcjER2NrRVO6NqLrYUV4N+uWerCJvCm
-	A/aIJr9zJHlWBx709LFkouMHwHx9DWkVxf++XbPa9RjJIP033VKhAFq18JoZUCOnrlDZnw0tI/U
-	pOuP3wasMeIWf6HOMdul2Ge0ldBKRceERRWNr+XiM6S86Gc54M0IlPCk+Z1SEaRvtz5/153YSX/
-	jkKgAMWZqXr6sJs8fkLWaxusdY3qHM0fFAcJYzdZAN1n8aYqSHpTI1q3kRTXs7kXyyrl4aDWGeH
-	HNGjSlKWLSb+WbsrUobf2Kp2muXrZEMQNLJEtni50/4Qcdg0Dud/XBAuoZ2UDHQ==
-X-Received: by 2002:a17:902:e745:b0:2aa:d60c:d48a with SMTP id d9443c01a7336-2ae8241815emr118925395ad.7.1773075114094;
-        Mon, 09 Mar 2026 09:51:54 -0700 (PDT)
-X-Received: by 2002:a17:902:e745:b0:2aa:d60c:d48a with SMTP id d9443c01a7336-2ae8241815emr118925235ad.7.1773075113658;
-        Mon, 09 Mar 2026 09:51:53 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1773076879; x=1773681679;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=jHOFx7v+1K59pH4DGgR8PGGUszHIyjfXE3Oibz4IWbI=;
+        b=EfKD/2Grm4DaVx0Gnvn9QDB72uOmbwnogmwv0TbR+1L7pwl1qe8/xflzQ2HEb/56Z+
+         Te0Of5wN62kCL0RmToFH5JqfobKPieHEhXzB3o8CBkj0QMBqZx+YGsp1XKVg3iZhWeno
+         N3ihXy/SX9gAy5yA1MQHu79vhLB8kcUKnvmJxnx+rmpSM2hlEhuhpE3ufIOKJhvIksmC
+         uR4s9meTy23o2hY4iYoI6QkYVzbx9qWbo4+wfADR9ryMoSYnY8ov/ikIBY9m3rN6cjL7
+         z+QzDxKeuPTtiGnrAqkBa3K7Bzqy+gC4aYafUoVai9LOMtLAghy7OicxcV4OjKNf89kB
+         iZgQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWZIMShSP95kNYU+uVc6g5i3bzfAyptg2LB8kUBF2WWKL+2nhmx5lPd5VHC1kFSpkTyjCgQ6arn@vger.kernel.org
+X-Gm-Message-State: AOJu0YywYGfOEVpyjcr69uAUfegH4DqKQq3FQjxAaklzycpqPWDCqeiN
+	yXM16uCSnRd/Jl/umHCjDkK384a6qhiEHWo5t9qGRo8ZBPDhv4qpNJSOOU93gnYsxhLHGq3dGHn
+	8vsu6lKWGu2GtNXVU0afUwBJfn5gHHtmBIuA8MF1GmkxhjnpO7r5q8ve16oY=
+X-Gm-Gg: ATEYQzyUNr3y4E4TeLSjI/D/P4SJxho8pdTkdwSVaZ/mXT0G1xVvLix6J9vB2iJtuPO
+	mYDuJrjTkXXeZ6Khn5anMKHOeQyuu5yZY4WkBh5VtIefrPy4KNgihrb8XcNpryPM3L83AODLnCV
+	dSNYPvmLVIP0IVI8bxbUyt/SNsQalGoHrrXzoZ4rRKigVKnBvdLBGQkVVv2Mwb1puWkis892K6M
+	MiVIkxle60EsXkUp1dcwtRvAOn3U5/oeNbHrIG/s0BIjXgf5UzvQ6z1/T6rcCRHKqoLhE5E1ypc
+	fqQM5nHBUvkiuYUvvtA1OAfGZAzkXcPUKZZ9xWTCMSHudyzp+1B4lVLTgfS0+ihuHVUaKTAVHnz
+	RrYjymVMEdkrdL5VKB5L9/KyH5vZjN8o+0HtZk65IW2lBffbKH/X9xpNQZdkFKA==
+X-Received: by 2002:a17:90b:4e83:b0:359:8d38:cdf5 with SMTP id 98e67ed59e1d1-359be21a6fbmr10381784a91.2.1773076879382;
+        Mon, 09 Mar 2026 10:21:19 -0700 (PDT)
+X-Received: by 2002:a17:90b:4e83:b0:359:8d38:cdf5 with SMTP id 98e67ed59e1d1-359be21a6fbmr10381761a91.2.1773076878819;
+        Mon, 09 Mar 2026 10:21:18 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ae83e9b9c6sm137627845ad.29.2026.03.09.09.51.51
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-359f05ebde1sm210850a91.4.2026.03.09.10.21.16
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 09 Mar 2026 09:51:53 -0700 (PDT)
-Date: Tue, 10 Mar 2026 00:51:48 +0800
+        Mon, 09 Mar 2026 10:21:18 -0700 (PDT)
+Date: Tue, 10 Mar 2026 01:21:14 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
-Cc: hch <hch@lst.de>,
-	"linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	Hans Holmberg <Hans.Holmberg@wdc.com>,
-	Naohiro Aota <Naohiro.Aota@wdc.com>
-Subject: Re: [PATCH] fstests: test premature ENOSPC in zoned garbage
- collection
-Message-ID: <20260309165148.nxuukjvpizrwawft@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20260210111103.265664-1-johannes.thumshirn@wdc.com>
- <20260309153136.taooohkzuc4ov56p@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <f39bb05c-f3ea-439e-8a78-71909ec3ef3e@wdc.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: hch@lst.de, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 01/13] xfs: test health monitoring code
+Message-ID: <20260309172114.4pi7d4y4n2pprfzm@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <177249785709.483507.8373602184765043420.stgit@frogsfrogsfrogs>
+ <177249785787.483507.3326797286262755687.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <f39bb05c-f3ea-439e-8a78-71909ec3ef3e@wdc.com>
+In-Reply-To: <177249785787.483507.3326797286262755687.stgit@frogsfrogsfrogs>
 
-On Mon, Mar 09, 2026 at 03:35:56PM +0000, Johannes Thumshirn wrote:
-> On 3/9/26 4:31 PM, Zorro Lang wrote:
-> > On Tue, Feb 10, 2026 at 12:11:03PM +0100, Johannes Thumshirn wrote:
-> >> This test stresses garbage collection in zoned file systems by
-> >> constantly overwriting the same file. It is inspired by a reproducer for
-> >> a btrfs bugifx.
-> >>
-> >> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-> >> ---
-> >>   tests/generic/783     | 48 +++++++++++++++++++++++++++++++++++++++++++
-> >>   tests/generic/783.out |  2 ++
-> >>   2 files changed, 50 insertions(+)
-> >>   create mode 100755 tests/generic/783
-> >>   create mode 100644 tests/generic/783.out
-> >>
-> >> diff --git a/tests/generic/783 b/tests/generic/783
-> >> new file mode 100755
-> >> index 000000000000..f996d78803a1
-> >> --- /dev/null
-> >> +++ b/tests/generic/783
-> >> @@ -0,0 +1,48 @@
-> >> +#! /bin/bash
-> >> +# SPDX-License-Identifier: GPL-2.0
-> >> +# Copyright (c) 2026 Western Digital Corporation.  All Rights Reserved.
-> >> +#
-> >> +# FS QA Test 783
-> >> +#
-> >> +# This test stresses garbage collection in zoned file systems by constantly
-> >> +# overwriting the same file. It is inspired by a reproducer for a btrfs bugifx.
-> >> +
-> >> +. ./common/preamble
-> >> +_begin_fstest auto quick zone
-> >> +
-> >> +. ./common/filter
-> >> +
-> >> +_require_scratch_size $((16 * 1024 * 1024))
-> >> +_require_zoned_device "$SCRATCH_DEV"
-> >> +
-> >> +# This test requires specific data space usage, skip if we have compression
-> >> +# enabled.
-> >> +_require_no_compress
-> >> +
-> >> +if [ "$FSTYP" = btrfs ]; then
-> >> +	_fixed_by_kernel_commit XXXXXXXXXXXX \
-> >> +		"btrfs: zoned: cap delayed refs metadata reservation to avoid overcommit"
-> >> +	_fixed_by_kernel_commit XXXXXXXXXXXX \
-> >> +		"btrfs: zoned: move partially zone_unusable block groups to reclaim list"
-> >> +	_fixed_by_kernel_commit XXXXXXXXXXXX \
-> >> +		"btrfs: zoned: add zone reclaim flush state for DATA space_info"
-> > Please rebase to latest for-next branch, then change above "_fixed_by_kernel_commit"
-> > to "_fixed_by_fs_commit btrfs ...."
+On Mon, Mar 02, 2026 at 04:41:07PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Sure.
+> Add some functionality tests for the new health monitoring code.
+> 
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> ---
+>  doc/group-names.txt |    1 +
+>  tests/xfs/1885      |   53 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/1885.out  |    5 +++++
+>  3 files changed, 59 insertions(+)
+>  create mode 100755 tests/xfs/1885
+>  create mode 100644 tests/xfs/1885.out
 > 
 > 
-> >> +fi
-> >> +
-> >> +_scratch_mkfs_sized $((16 * 1024 * 1024 * 1024)) &>>$seqres.full
-> >> +_scratch_mount
-> >> +
-> >> +blocks="$(df -TB 1G $SCRATCH_DEV |\
-> >> +	$AWK_PROG -v fstyp="$FSTYP" 'match($2, fstyp) {print $3}')"
-> > Wouldn’t it make more sense to get the available size here? And there's a helper
-> > _get_available_space in common/rc.
-> 
-> I'll have a look at it and see if it fits.
-> 
-> 
-> >> +
-> >> +loops=$(echo "$blocks * 4 - 2" | bc)
-> > Is $blocks a huge number? How about using $((blocks * 4 - 2)) simply?
-> >
-> > Can you add a comment to explain what's this "blocks * 4 - 2" for?
-> Will do.
-> >> +
-> >> +for (( i = 0; i < $loops; i++)); do
-> >> +	dd if=/dev/zero of=$SCRATCH_MNT/test bs=1M count=1024 status=none 2>&1
-> > Not sure what's the "2>&1" for.
-> It was there before I had status=none, I'll fix it in the next revision.
-> >
-> > This isn't an append write, right? So we keep writting from 0 to 1G? Can you use a
-> > comment to explain why we require 16G sized SCRATCH_DEV ?
-> Because of the zoned write constraints? We can't overwrite until the 
-> zone is reset.
+> diff --git a/doc/group-names.txt b/doc/group-names.txt
+> index 10b49e50517797..158f84d36d3154 100644
+> --- a/doc/group-names.txt
+> +++ b/doc/group-names.txt
+> @@ -117,6 +117,7 @@ samefs			overlayfs when all layers are on the same fs
+>  scrub			filesystem metadata scrubbers
+>  seed			btrfs seeded filesystems
+>  seek			llseek functionality
+> +selfhealing		self healing filesystem code
+>  selftest		tests with fixed results, used to validate testing setup
+>  send			btrfs send/receive
+>  shrinkfs		decreasing the size of a filesystem
+> diff --git a/tests/xfs/1885 b/tests/xfs/1885
+> new file mode 100755
+> index 00000000000000..1d75ef19c7c9d9
+> --- /dev/null
+> +++ b/tests/xfs/1885
+> @@ -0,0 +1,53 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024-2026 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 1885
+> +#
+> +# Make sure that healthmon handles module refcount correctly.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto selfhealing
 
-Oh, this's a zoned storage test, sure, thanks! I think we could add a comment here to
-remind readers that this is actually a sequential/append write :)
+I found this test is quick enough, how about add it into "quick" group.
 
-Thanks,
-Zorro
+> +
+> +. ./common/filter
+> +. ./common/module
+
+Which helper is this "module" file being included for?
+
+> +
+> +refcount_file="/sys/module/xfs/refcnt"
+> +test -e "$refcount_file" || _notrun "cannot find xfs module refcount"
+
+Or did you intend to add this part as a helper into common/module?
+
+> +
+> +_require_test
+> +_require_xfs_io_command healthmon
+> +
+> +# Capture mod refcount without the test fs mounted
+> +_test_unmount
+> +init_refcount="$(cat "$refcount_file")"
+> +
+> +# Capture mod refcount with the test fs mounted
+> +_test_mount
+> +nomon_mount_refcount="$(cat "$refcount_file")"
+> +
+> +# Capture mod refcount with test fs mounted and the healthmon fd open.
+> +# Pause the xfs_io process so that it doesn't actually respond to events.
+> +$XFS_IO_PROG -c 'healthmon -c -v' $TEST_DIR >> $seqres.full &
+> +sleep 0.5
+> +kill -STOP %1
+> +mon_mount_refcount="$(cat "$refcount_file")"
+> +
+> +# Capture mod refcount with only the healthmon fd open.
+> +_test_unmount
+> +mon_nomount_refcount="$(cat "$refcount_file")"
+> +
+> +# Capture mod refcount after continuing healthmon (which should exit due to the
+> +# unmount) and killing it.
+> +kill -CONT %1
+> +kill %1
+> +wait
+
+We typically ensure that background processes are handled within the _cleanup function.
+
+> +nomon_nomount_refcount="$(cat "$refcount_file")"
+> +
+> +_within_tolerance "mount refcount" "$nomon_mount_refcount" "$((init_refcount + 1))" 0 -v
+> +_within_tolerance "mount + healthmon refcount" "$mon_mount_refcount" "$((init_refcount + 2))" 0 -v
+> +_within_tolerance "healthmon refcount" "$mon_nomount_refcount" "$((init_refcount + 1))" 0 -v
+> +_within_tolerance "end refcount" "$nomon_nomount_refcount" "$init_refcount" 0 -v
+> +
+> +status=0
+> +exit
+
+_exit 0
+
+> diff --git a/tests/xfs/1885.out b/tests/xfs/1885.out
+> new file mode 100644
+> index 00000000000000..f152cef0525609
+> --- /dev/null
+> +++ b/tests/xfs/1885.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 1885
+> +mount refcount is in range
+> +mount + healthmon refcount is in range
+> +healthmon refcount is in range
+> +end refcount is in range
+> 
 
