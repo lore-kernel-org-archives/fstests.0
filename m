@@ -1,638 +1,230 @@
-Received: from mail-ej1-f52.google.com (mail-ej1-f52.google.com [209.85.218.52])
+Received: from mail-wr1-f53.google.com (mail-wr1-f53.google.com [209.85.221.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 063423D7D8F
-	for <fstests@vger.kernel.org>; Tue, 10 Mar 2026 07:07:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F4A243DA24
+	for <fstests@vger.kernel.org>; Tue, 10 Mar 2026 10:29:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.221.53
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773126463; cv=pass; b=RV1sePS/e5mODrv8JpJDVZpU1KoEU2vJ7L6KZkRG50Qjb1UisWaspoHT7YG1Ge5OFm6PqRAlNT7p+pyxlvL5dyhrxloQ/EKZH9qB4rWosAXa0rbBiRbcuo5PGsltx93hrODBoTzyKWvLpJazqj/eFGw6BEOVUH79jivltKIIzzI=
+	t=1773138561; cv=pass; b=R9pGW2oBpWrh02aTu9LPYwDrDiR1+KGvSxaBcf7Quw3gKrfFvVlvAf3mv6qA5Hw2r2Nra2lgJK+wlIIRIqyx8w7VhMmJyTeFvnqpYyhNsYPXuz2KD0fygLX8cvBtVjtBgc3EpQWOUjRnWdOOBd4zzztztyr3hzh+EgAcckUvz2c=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773126463; c=relaxed/simple;
-	bh=j43F2oN+8bKY9mZk2JpvRoT9Ca1qAg+AkSJkR/QFU3g=;
+	s=arc-20240116; t=1773138561; c=relaxed/simple;
+	bh=0THoj63G4X/OLZWMRzXnJ5AOY+xdFq93ZDdOjPEu2yY=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=EITkgctxmqZpfmKLWxPCRTVuoEJ2DiVCHzXKzdhh25IqT2+AHRz8KnbrEN5rc+OMkRQPCXY9m/rSa8HMcj45VL9JEIN80xzdVn6y7wkPldvQdiy8or48vXpwZ4D6gLfAZaRQT7N3Dp0SPuOIQVxlpSCBlxWkwMYmK6D5fb8rsT8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=bu3Np2yf; arc=pass smtp.client-ip=209.85.218.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 To:Cc:Content-Type; b=cXhUIAJYqv3fK4eSg1E3XwUvOg9sjNNcER2Ac+B94vquoz+I6u41kgrp2qld9xCkLt9Gi01d9W0l9AI0ghZr6aU8RUWmyAMRvzQTQ5VA4gCuUunRcLycc32ulk1oVaDwdatMvqqItsuy1OEVHYI1eePKWoB7CUpZmpOz+9N5Wgs=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=YNtPUgpS; arc=pass smtp.client-ip=209.85.221.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bu3Np2yf"
-Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-b941762394aso548105366b.1
-        for <fstests@vger.kernel.org>; Tue, 10 Mar 2026 00:07:38 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773126457; cv=none;
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="YNtPUgpS"
+Received: by mail-wr1-f53.google.com with SMTP id ffacd0b85a97d-439f5abc829so118844f8f.3
+        for <fstests@vger.kernel.org>; Tue, 10 Mar 2026 03:29:19 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1773138558; cv=none;
         d=google.com; s=arc-20240605;
-        b=Zx15WAGnh0mcnAYgTwihcybxALZzOYw1BjpTnN8UvhnV5E3YzE6FTOj/sJGHRxDsk9
-         V6L+5u840C6V46YJIUw2nMhCTzoYfUN+c3je4gfyEIy99EKTa7zzX/Vn8Q9Q19uQewDG
-         C+rmAS/lX3sNnLrV79fU7FFoO9BK+Fak9r/6Zi1I+5blk66HIKSWdOm4s7TfEBRZbDJU
-         mR0xSDdOERO1FFxEMrqRhGy/Q5A2vewSk4LcHEASQsX863nuZ4KwQMb+ngscDavhFAe8
-         7vxHokkIlxp8Na3dzlsATekt7Y+VcRLuNFTQfhqQVHiZ3ztOnSpr/eiUdNH1+zTrv0T8
-         42iA==
+        b=EMVGFVq+AINLs0lAlgHDMRRYXQFjWhE8z5SYsCqVGm8WxHqoaf7o6SbiQEcpxKMx4/
+         TEXLkhrmogA9Mq1+HQhxe3AzAg8jO8ft2Gn0hUGitSwl5sZy5bIblXhVGyrdCuqanhK0
+         HyKdab5kDyXKtGvrXL4pUrAhNW3fVaMA7W/5BepjI8jh//ppBfwMXpP4RWACfewHpVxW
+         jj+a+RBbHgQA/64H8Wa73+XnNV6SF2n/lo3YuIhk+T9XncV0BGnJKE1lEzayVL8lVZPA
+         lHh0wRs79CvD1fVk7JOySQlqlmxACK2RJ46rbZ0fKcpTyDa9f/7JO0surMWuqluHUhYd
+         Uueg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=gsz7YMjyQRLyKuCL16GqxHe/rHr875sqVI8xQ7Gfri4=;
-        fh=LqUeZN2eZmYZLFUfxlDK6HfTnGZ6Y1VNcWKHXLW4rJI=;
-        b=hyyzAfQGvEJfyY4R7tUTTuWMvMdRQj0ErPLVgOWPRptuBXACQJTaYMFTiUt6a/Bs6F
-         aYi8awRYe+e40fOZKC0vcWpmFPc44MB2pagt6AW/tsaBe2wG9jE6t+VwtnQwgrjqLfBN
-         4/yTPpJF/0qv9UHyo4XB0CPCRAFSvKjXsspWX2oVOapfloAyz12N5VIoASITbD4khqjj
-         q2FIqOvoBEj43uZ7+089dcCXQcOHsbRhBb/KKPoxUBiXz1Cu6lYlaiqD6t5Hf0IBessN
-         OByoUZzlSAysih8zQeQ1JejLWwE4ngLkNQVmGKrTKljJ53z645/mU1Ezpto0JbrOfeA8
-         egaA==;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=6jiRYwrSlheK33/3j3KcGTsXsYmQOfwg8Zg5a92qNT8=;
+        fh=Rz6PFmmwA4izTQvUNYvU4T26BhBrFBC1mOZvhCznImw=;
+        b=iaP0y2h43w+fR9ixxLYs1yuT416Ng+8rirIpX0hHgFZDaY4qo0FRJ6g+cgvzB4fY7r
+         xt+VCj9jx4CbE2iScqBAiyRyu96x6VZeo3uIFP8H+isRJzf9bXEIPTNsvasVPgp7m79Z
+         PI1HABbGsAfxzc2M/7GZQoRyZW6sogqCWcSeFBdBanRB0ZcF+JHCJbJhu+TjdGZjYodw
+         2z7PkerGv88shyFC6z+HLu7w5b+6U3hYmJqm9K95iC3ZjXx+YFUXkasfNzhOL5d6eYmk
+         OR7gzzSIZVh87j/kR7GS+0LSGHl0SWeCi94W2xF3zPCWvCGQEutQY+wRFgQop1et/3No
+         MFfQ==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1773126457; x=1773731257; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=gsz7YMjyQRLyKuCL16GqxHe/rHr875sqVI8xQ7Gfri4=;
-        b=bu3Np2yf789m1MVijbX4pnpH7duzmkgGqb7W57QAzcQ9CqKgekvZfbmxvGfFl301OP
-         PjHrRYYJQbwYEfBVwusjwjYMfHQ/jukt9WlVYEVxBAug23SdGGASjHgv5hZWEZ43ewPG
-         RBpNKzpwyYlRdJd06NwG5z8fJs2h4A498wTgHKxRs+doy/mJRihF+KaVApWom7BUlKiR
-         gKmzi/3sdBAzlVn4p3Lq6onI0Ksm6TOqJTnV5MDz38frconTxdBDoF9jJlJ+0jSI6ovF
-         FRzTjPEwAUHog8PyD1Z5gN8LDlXn1y64ULcp6C6UCgNioelGaYNuxBPqr6Fq1LOqvvsA
-         WJiA==
+        d=suse.com; s=google; t=1773138558; x=1773743358; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=6jiRYwrSlheK33/3j3KcGTsXsYmQOfwg8Zg5a92qNT8=;
+        b=YNtPUgpSDSAPvUq91GfN9Pp1GcpOOj3MAJdZLLt7ii8gOXnYowlW/nR868XrfQQNML
+         BUJACPaHQnpqWtQVITYhCePZx0I9/jQRvwJsQDc9mnPnZbAQyRL5r/oYaM/fx5gJa9+X
+         yRBu1ro7nU4HMA6TPcgam7hfkxNMd7MPM0gmPr3/uNVXQy+9PJ/Xi7YVTTntvAw1MUwM
+         yj5IhIV7BXBcQ+vrbdocN7Iad7bbpgB4FTQUKc+mqGApJyXbN8jUDevcFqEsQHVquTf7
+         yforgNMBNdnfbXJ08DU4OhaOoQOeW9WhXgANq5ymd5AU3jg68j51evUrTz3MlACTBJBe
+         Dqwg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1773126457; x=1773731257;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=gsz7YMjyQRLyKuCL16GqxHe/rHr875sqVI8xQ7Gfri4=;
-        b=iFr7ss+cYlctWZtgDWPJEq1OB/qHdY49TCEU4oNgXpBfvpCybnHKXihDJWLwRbcnHw
-         bMTaHAwe1VzbLwqiOqvtdUg/Ah7Fu+YwklZRtua5rGLzyiJx29EUiJdqeW+CYFJVgA6N
-         Cu/2EMr/9HCqEBan4JXtnvYNSzZSkTL9vLV/QGcsPATgcBeQUSqgjYmz/O5TYivvnI75
-         xwCYAHqiony8R9dJ/mfKDrkHqqnYlHkA4dtA6aY/f/o0fljUGu8kLu9nojmcHNMSHWCq
-         qTrfwF3c22y+s7RuvVJzt1Y6N66Up5gruv2QgTuBeWtf0wz4brhK99UhEcvAP/8MYHbT
-         bi/Q==
-X-Forwarded-Encrypted: i=1; AJvYcCVQJSiuhGIWANORl/G6lPPqcDRSyRskAKEMvu6HtAo7li3bQCS+GAxYKTnGq7SojWQstDR9fu/l@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywa15z8I81jcWnEyEBWL/xz+rwIOVDbFxwpiP9+1nwNSszygR+Y
-	q19R4Tj1h5JzNO4wtX5mfsMfTMS0Zbo0ZZaD7CQymcWlc/27rFrudbnG0Cn9rm/+J0qi0j1Yfpt
-	n+9pMtEs1bm4tsU836LJCOU2T4iw5R0Y=
-X-Gm-Gg: ATEYQzwdsMeb8DKWXJl9ymybPRMNAJFHKOLHFohGM7WhF7Zyv+m1fCtdVFwgZDt9Di7
-	oEYySkc9+uLrG2+fSqwZGsx/VNpYT+ZfLkzJ8gf+ysdIn9M3doqYjgnCBUzQfnKRD0elsmOYU+m
-	QbS9wx0WG9VVJAH7Bts0ZysYWUUh6Q883lD5FRgTGecPvQgb/DTEl4tJtmDuRUeV9eK3RzMDtMe
-	KeeV2SSVR6yeX30gYu7FH9mTeImGO5NWkztdVfFOXEzbaIyn5xtvD9RpPy7pJMqS33LoXcLUiZy
-	JROseZs2XpJgxdt+9f0LcnfD+jIEbNJa0ZAqpj4x
-X-Received: by 2002:a17:907:3d11:b0:b8d:ce06:8a25 with SMTP id
- a640c23a62f3a-b942dfb40dfmr754528566b.35.1773126456614; Tue, 10 Mar 2026
- 00:07:36 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1773138558; x=1773743358;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=6jiRYwrSlheK33/3j3KcGTsXsYmQOfwg8Zg5a92qNT8=;
+        b=kscsFzCR+923SZDMizje+30eFkl4MMk18ygNGtr9b9rJi5E0cSePFKDIbCMLjHxbyC
+         lz08pP6uPMVtzvKk6/W/T6+dGFjt46pNHVVgXPUwjzIZrVbSDydff+EKZNC8x1IIojv+
+         iKzg/ZBB5bSIsc1gBVoioG+n0rRUoXLWJzYeUxOQJCQ+7hkugZ4G5HeDvgyR0xG/KbQ9
+         lpr4ukv1+n1i7FjXcoeoO0LOxrBWYxFpc1gdCA7aj1p6A1UFJRjFe6lJg8XjM+cYMzqv
+         jBnGJ4BS4tv5LqS6Y7GRqyu6ENFs4n/KLJaRjZDwgO0xchwJUN4NSDnNNiXjRFfaQU61
+         5uCA==
+X-Gm-Message-State: AOJu0YzM/KggJZhioG0nDfv0pIGkAegIRDxMZelD1pn+cNeTUzpWFQFS
+	5/AywLVjNdf5kcDj1RJ5SyufdgZOjAz+jhtMB7AdSCS7BCTg38KQQ1BM5IQ37XGpldk8U/efQ3h
+	+Hy9w3QAtzK/1jurHZ8kGLhLGo70DZSUWFuJldXWdSnkk4qlv3WJb
+X-Gm-Gg: ATEYQzzF9bqkePWSVhJRsASre5u/sfNIMLG9/bXWlvba0aValx0wUkB9dZKnuNs/k0A
+	JnnzrG33ykMOqPk8ZbLRN9D8kHI8rff5omN6wmbavA8aJQmYQ9h/ZUCIg0Dq02S7mvHPPPJ6SHP
+	bmSDjYTZprpQHdIwuJGN4J5+KUlEZ8cyXKT/X9P7ufzEy8QJI5V3wSn3gsbJjDrcizdUcV8vZvV
+	LpwZr0c9zooPN3z/C5CnFjWGLKEgl9lNrlOKi5haCg3jyRgyLgWjbqmU0Sigo7RNjqikm2o+wff
+	RzppSHF8Jr7AxFwQLbkmbR4bbwe4q1NpFcIO2viCMatXSib/7EGfiGPzZlTSHsmy9T3zWC5OX+3
+	bQeOR
+X-Received: by 2002:a5d:5887:0:b0:439:b3f8:7757 with SMTP id
+ ffacd0b85a97d-439da8a729emr25742771f8f.55.1773138558404; Tue, 10 Mar 2026
+ 03:29:18 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <177311403420.1186306.10503664469609309721.stgit@frogsfrogsfrogs> <177311403440.1186306.11707487947646813883.stgit@frogsfrogsfrogs>
-In-Reply-To: <177311403440.1186306.11707487947646813883.stgit@frogsfrogsfrogs>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 10 Mar 2026 08:07:25 +0100
-X-Gm-Features: AaiRm505qD_kHuhRWRePi-1Ctcx8jpDVILLu1qezKyr9kG5luITmX2H8lsGgMy8
-Message-ID: <CAOQ4uxh8K1kSjbEuEp=h04cAUd7HpdijHsTETaey40Y+2kV0QQ@mail.gmail.com>
-Subject: Re: [PATCH 1/1] generic: test fsnotify filesystem error reporting
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, jack@suse.cz, fstests@vger.kernel.org, 
-	gabriel@krisman.be, linux-fsdevel@vger.kernel.org, linux-xfs@vger.kernel.org, 
-	hch@lst.de
+References: <a1e2690efeb8570651894567d80511144424fb5e.1772106022.git.fdmanana@suse.com>
+In-Reply-To: <a1e2690efeb8570651894567d80511144424fb5e.1772106022.git.fdmanana@suse.com>
+From: Daniel Vacek <neelx@suse.com>
+Date: Tue, 10 Mar 2026 11:29:07 +0100
+X-Gm-Features: AaiRm53zdbSu2cqkrGddMddUj7QuXOvlCrthC_JgcKlKC2t11dskmJhjsvDYt3s
+Message-ID: <CAPjX3FfPExsBfs+0QsehE9G-oHidDHod45pbnDJBJadXzRTusg@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: test create a bunch of files with name hash collision
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	Filipe Manana <fdmanana@suse.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, Mar 10, 2026 at 4:50=E2=80=AFAM Darrick J. Wong <djwong@kernel.org>=
- wrote:
+On Thu, 26 Feb 2026 at 15:40, <fdmanana@kernel.org> wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 >
-> From: Darrick J. Wong <djwong@kernel.org>
+> Test that if we create a high number of files with a name that results in
+> a hash collision, the filesystem is not turned to RO due to a transaction
+> abort. This could be exploited by malicious users to disrupt a system.
 >
-> Test the fsnotify filesystem error reporting.
+> This exercies a bug fixed by the following kernel patch:
 >
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-
-Feel free to add:
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
-
+>  "btrfs: fix transaction abort on file creation due to name hash collision"
+>
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > ---
->  common/rc              |   25 ++++++
->  doc/group-names.txt    |    1
->  src/Makefile           |    2
->  src/fs-monitor.c       |  153 ++++++++++++++++++++++++++++++++++
->  tests/generic/1838     |  214 ++++++++++++++++++++++++++++++++++++++++++=
-++++++
->  tests/generic/1838.out |   20 ++++
->  6 files changed, 414 insertions(+), 1 deletion(-)
->  create mode 100644 src/fs-monitor.c
->  create mode 100755 tests/generic/1838
->  create mode 100644 tests/generic/1838.out
+>  tests/btrfs/346     | 95 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/346.out |  3 ++
+>  2 files changed, 98 insertions(+)
+>  create mode 100755 tests/btrfs/346
+>  create mode 100644 tests/btrfs/346.out
 >
->
-> diff --git a/common/rc b/common/rc
-> index fd4ca9641822cf..ccb78baf5bd41a 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3013,6 +3013,11 @@ _require_xfs_io_command()
->                 echo $testio | grep -q "Inappropriate ioctl" && \
->                         _notrun "xfs_io $command support is missing"
->                 ;;
-> +       "healthmon")
-> +               test -z "$param" && param=3D"-p"
-> +               testio=3D`$XFS_IO_PROG -c "healthmon $param" $TEST_DIR 2>=
-&1`
-> +               param_checked=3D"$param"
-> +               ;;
->         "label")
->                 testio=3D`$XFS_IO_PROG -c "label" $TEST_DIR 2>&1`
->                 ;;
-> @@ -6149,6 +6154,26 @@ _require_max_file_range_blocks()
->         esac
->  }
->
-> +_require_fanotify_ioerrors()
-> +{
-> +       local x
-> +
-> +       case "$FSTYP" in
-> +       xfs)
-> +               # added as a part of xfs health monitoring
-> +               _require_xfs_io_command healthmon
-> +               return 0
-> +               ;;
-> +       ext4)
-> +               # added at the same time as err_report_sec
-> +               x=3D"$(_get_fs_sysfs_attr $TEST_DEV err_report_sec)"
-> +               test -n "$x" && return 0
-> +               ;;
-> +       esac
-> +
-> +       _notrun "$FSTYP does not support fanotify ioerrors"
-> +}
-> +
->  ########################################################################=
-########
->  # make sure this script returns success
->  /bin/true
-> diff --git a/doc/group-names.txt b/doc/group-names.txt
-> index 10b49e50517797..158f84d36d3154 100644
-> --- a/doc/group-names.txt
-> +++ b/doc/group-names.txt
-> @@ -117,6 +117,7 @@ samefs                      overlayfs when all layers=
- are on the same fs
->  scrub                  filesystem metadata scrubbers
->  seed                   btrfs seeded filesystems
->  seek                   llseek functionality
-> +selfhealing            self healing filesystem code
->  selftest               tests with fixed results, used to validate testin=
-g setup
->  send                   btrfs send/receive
->  shrinkfs               decreasing the size of a filesystem
-> diff --git a/src/Makefile b/src/Makefile
-> index 577d816ae859b6..1c761da0ccff20 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -36,7 +36,7 @@ LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesize pre=
-allo_rw_pattern_reader \
->         fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail=
- \
->         detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
->         uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alig=
-nment \
-> -       rw_hint
-> +       rw_hint fs-monitor
->
->  EXTRA_EXECS =3D dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
->               btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-> diff --git a/src/fs-monitor.c b/src/fs-monitor.c
-> new file mode 100644
-> index 00000000000000..0cf09677a3efda
-> --- /dev/null
-> +++ b/src/fs-monitor.c
-> @@ -0,0 +1,153 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Copyright 2021, Collabora Ltd.
-> + * Copied from https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/=
-linux.git/tree/samples/fanotify/fs-monitor.c
-> + */
-> +
-> +#include <errno.h>
-> +#include <err.h>
-> +#include <stdlib.h>
-> +#include <stdio.h>
-> +#include <fcntl.h>
-> +#include <sys/fanotify.h>
-> +#include <sys/types.h>
-> +#include <unistd.h>
-> +
-> +#ifndef FAN_FS_ERROR
-> +#define FAN_FS_ERROR           0x00008000
-> +#define FAN_EVENT_INFO_TYPE_ERROR      5
-> +
-> +struct fanotify_event_info_error {
-> +       struct fanotify_event_info_header hdr;
-> +       __s32 error;
-> +       __u32 error_count;
-> +};
-> +#endif
-> +
-> +#ifndef FILEID_INO32_GEN
-> +#define FILEID_INO32_GEN       1
-> +#endif
-> +
-> +#ifndef FILEID_INVALID
-> +#define        FILEID_INVALID          0xff
-> +#endif
-> +
-> +static void print_fh(struct file_handle *fh)
-> +{
-> +       int i;
-> +       uint32_t *h =3D (uint32_t *) fh->f_handle;
-> +
-> +       printf("\tfh: ");
-> +       for (i =3D 0; i < fh->handle_bytes; i++)
-> +               printf("%hhx", fh->f_handle[i]);
-> +       printf("\n");
-> +
-> +       printf("\tdecoded fh: ");
-> +       if (fh->handle_type =3D=3D FILEID_INO32_GEN)
-> +               printf("inode=3D%u gen=3D%u\n", h[0], h[1]);
-> +       else if (fh->handle_type =3D=3D FILEID_INVALID && !fh->handle_byt=
-es)
-> +               printf("Type %d (Superblock error)\n", fh->handle_type);
-> +       else
-> +               printf("Type %d (Unknown)\n", fh->handle_type);
-> +
-> +}
-> +
-> +static void handle_notifications(char *buffer, int len)
-> +{
-> +       struct fanotify_event_metadata *event =3D
-> +               (struct fanotify_event_metadata *) buffer;
-> +       struct fanotify_event_info_header *info;
-> +       struct fanotify_event_info_error *err;
-> +       struct fanotify_event_info_fid *fid;
-> +       int off;
-> +
-> +       for (; FAN_EVENT_OK(event, len); event =3D FAN_EVENT_NEXT(event, =
-len)) {
-> +
-> +               if (event->mask !=3D FAN_FS_ERROR) {
-> +                       printf("unexpected FAN MARK: %llx\n",
-> +                                                       (unsigned long lo=
-ng)event->mask);
-> +                       goto next_event;
-> +               }
-> +
-> +               if (event->fd !=3D FAN_NOFD) {
-> +                       printf("Unexpected fd (!=3D FAN_NOFD)\n");
-> +                       goto next_event;
-> +               }
-> +
-> +               printf("FAN_FS_ERROR (len=3D%d)\n", event->event_len);
-> +
-> +               for (off =3D sizeof(*event) ; off < event->event_len;
-> +                    off +=3D info->len) {
-> +                       info =3D (struct fanotify_event_info_header *)
-> +                               ((char *) event + off);
-> +
-> +                       switch (info->info_type) {
-> +                       case FAN_EVENT_INFO_TYPE_ERROR:
-> +                               err =3D (struct fanotify_event_info_error=
- *) info;
-> +
-> +                               printf("\tGeneric Error Record: len=3D%d\=
-n",
-> +                                      err->hdr.len);
-> +                               printf("\terror: %d\n", err->error);
-> +                               printf("\terror_count: %d\n", err->error_=
-count);
-> +                               break;
-> +
-> +                       case FAN_EVENT_INFO_TYPE_FID:
-> +                               fid =3D (struct fanotify_event_info_fid *=
-) info;
-> +
-> +                               printf("\tfsid: %x%x\n",
-> +#if defined(__GLIBC__)
-> +                                      fid->fsid.val[0], fid->fsid.val[1]=
-);
-> +#else
-> +                                      fid->fsid.__val[0], fid->fsid.__va=
-l[1]);
-> +#endif
-> +                               print_fh((struct file_handle *) &fid->han=
-dle);
-> +                               break;
-> +
-> +                       default:
-> +                               printf("\tUnknown info type=3D%d len=3D%d=
-:\n",
-> +                                      info->info_type, info->len);
-> +                       }
-> +               }
-> +next_event:
-> +               printf("---\n\n");
-> +               fflush(stdout);
-> +       }
-> +}
-> +
-> +int main(int argc, char **argv)
-> +{
-> +       int fd;
-> +
-> +       char buffer[BUFSIZ];
-> +
-> +       if (argc < 2) {
-> +               printf("Missing path argument\n");
-> +               return 1;
-> +       }
-> +
-> +       fd =3D fanotify_init(FAN_CLASS_NOTIF|FAN_REPORT_FID, O_RDONLY);
-> +       if (fd < 0) {
-> +               perror("fanotify_init");
-> +               errx(1, "fanotify_init");
-> +       }
-> +
-> +       if (fanotify_mark(fd, FAN_MARK_ADD|FAN_MARK_FILESYSTEM,
-> +                         FAN_FS_ERROR, AT_FDCWD, argv[1])) {
-> +               perror("fanotify_mark");
-> +               errx(1, "fanotify_mark");
-> +       }
-> +
-> +       printf("fanotify active\n");
-> +       fflush(stdout);
-> +
-> +       while (1) {
-> +               int n =3D read(fd, buffer, BUFSIZ);
-> +
-> +               if (n < 0)
-> +                       errx(1, "read");
-> +
-> +               handle_notifications(buffer, n);
-> +       }
-> +
-> +       return 0;
-> +}
-> diff --git a/tests/generic/1838 b/tests/generic/1838
+> diff --git a/tests/btrfs/346 b/tests/btrfs/346
 > new file mode 100755
-> index 00000000000000..940811baae3a6e
+> index 00000000..ef301ef7
 > --- /dev/null
-> +++ b/tests/generic/1838
-> @@ -0,0 +1,214 @@
+> +++ b/tests/btrfs/346
+> @@ -0,0 +1,95 @@
 > +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2024-2026 Oracle.  All Rights Reserved.
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
 > +#
-> +# FS QA Test No. 1838
+> +# FS QA Test 346
 > +#
-> +# Check that fsnotify can report file IO errors.
-> +
+> +# Test that if we create a high number of files with a name that results in a
+> +# hash collision, the filesystem is not turned to RO due to a transaction abort.
+> +# This could be exploited by malicious users to disrupt a system.
+> +#
 > +. ./common/preamble
-> +_begin_fstest auto quick eio selfhealing
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +       cd /
-> +       test -n "$fsmonitor_pid" && kill -TERM $fsmonitor_pid
-> +       rm -f $tmp.*
-> +       _dmerror_cleanup
-> +}
-> +
-> +# Import common functions.
-> +. ./common/fuzzy
-> +. ./common/filter
-> +. ./common/dmerror
-> +. ./common/systemd
+> +_begin_fstest auto quick subvol
 > +
 > +_require_scratch
-> +_require_dm_target error
-> +_require_test_program fs-monitor
-> +_require_xfs_io_command "fiemap"
-> +_require_odirect
-> +_require_fanotify_ioerrors
+> +_require_btrfs_support_sectorsize 4096
 > +
-> +# no out of place writes
-> +test "$FSTYP" =3D "xfs" && _require_no_xfs_always_cow
+> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +       "btrfs: fix transaction abort on file creation due to name hash collision"
 > +
-> +# fsnotify only gives us a file handle, the error number, and the number=
- of
-> +# times it was seen in between event deliveries.   The handle is mostly =
-useless
-> +# since we have no generic way to map that to a file path.  Therefore we=
- can
-> +# only coalesce all the I/O errors into one report.
-> +filter_fsnotify_errors() {
-> +       _filter_scratch | \
-> +               grep -E '(FAN_FS_ERROR|Generic Error Record|error: 5)' | =
-\
-> +               sed -e "s/len=3D[0-9]*/len=3DXXX/g" | \
-> +               sort | \
-> +               uniq
-> +}
-> +
-> +_scratch_mkfs >> $seqres.full
-> +
-> +#
-> +# The dm-error map added by this test doesn't work on zoned devices beca=
-use
-> +# table sizes need to be aligned to the zone size, and even for zoned on
-> +# conventional this test will get confused because of the internal RT de=
-vice.
-> +#
-> +# That check requires a mounted file system, so do a dummy mount before =
-setting
-> +# up DM.
-> +#
+> +# Use a 4K node/leaf size to make the test faster and require less file names
+> +# that trigger a crc32c hash collision.
+> +_scratch_mkfs -n 4K >> $seqres.full 2>&1 || _fail "mkfs failed"
 > +_scratch_mount
-> +test $FSTYP =3D xfs && _require_xfs_scratch_non_zoned
-> +_scratch_unmount
 > +
-> +_dmerror_init
-> +_dmerror_mount >> $seqres.full 2>&1
+> +# List of names that result in the same crc32c hash for btrfs.
+> +declare -a names=(
+> +       'foobar'
+> +       '%a8tYkxfGMLWRGr55QSeQc4PBNH9PCLIvR6jZnkDtUUru1t@RouaUe_L:@xGkbO3nCwvLNYeK9vhE628gss:T$yZjZ5l-Nbd6CbC$M=hqE-ujhJICXyIxBvYrIU9-TDC'
+> +       'AQci3EUB%shMsg-N%frgU:02ByLs=IPJU0OpgiWit5nexSyxZDncY6WB:=zKZuk5Zy0DD$Ua78%MelgBuMqaHGyKsJUFf9s=UW80PcJmKctb46KveLSiUtNmqrMiL9-Y0I_l5Fnam04CGIg=8@U:Z'
+> +       'CvVqJpJzueKcuA$wqwePfyu7VxuWNN3ho$p0zi2H8QFYK$7YlEqOhhb%:hHgjhIjW5vnqWHKNP4'
+> +       'ET:vk@rFU4tsvMB0$C_p=xQHaYZjvoF%-BTc%wkFW8yaDAPcCYoR%x$FH5O:'
+> +       'HwTon%v7SGSP4FE08jBwwiu5aot2CFKXHTeEAa@38fUcNGOWvE@Mz6WBeDH_VooaZ6AgsXPkVGwy9l@@ZbNXabUU9csiWrrOp0MWUdfi$EZ3w9GkIqtz7I_eOsByOkBOO'
+> +       'Ij%2VlFGXSuPvxJGf5UWy6O@1svxGha%b@=%wjkq:CIgE6u7eJOjmQY5qTtxE2Rjbis9@us'
+> +       'KBkjG5%9R8K9sOG8UTnAYjxLNAvBmvV5vz3IiZaPmKuLYO03-6asI9lJ_j4@6Xo$KZicaLWJ3Pv8XEwVeUPMwbHYWwbx0pYvNlGMO9F:ZhHAwyctnGy%_eujl%WPd4U2BI7qooOSr85J-C2V$LfY'
+> +       'NcRfDfuUQ2=zP8K3CCF5dFcpfiOm6mwenShsAb_F%n6GAGC7fT2JFFn:c35X-3aYwoq7jNX5$ZJ6hI3wnZs$7KgGi7wjulffhHNUxAT0fRRLF39vJ@NvaEMxsMO'
+> +       'Oj42AQAEzRoTxa5OuSKIr=A_lwGMy132v4g3Pdq1GvUG9874YseIFQ6QU'
+> +       'Ono7avN5GjC:_6dBJ_'
+> +       'WHmN2gnmaN-9dVDy4aWo:yNGFzz8qsJyJhWEWcud7$QzN2D9R0efIWWEdu5kwWr73NZm4=@CoCDxrrZnRITr-kGtU_cfW2:%2_am'
+> +       'WiFnuTEhAG9FEC6zopQmj-A-$LDQ0T3WULz%ox3UZAPybSV6v1Z$b4L_XBi4M4BMBtJZpz93r9xafpB77r:lbwvitWRyo$odnAUYlYMmU4RvgnNd--e=I5hiEjGLETTtaScWlQp8mYsBovZwM2k'
+> +       'XKyH=OsOAF3p%uziGF_ZVr$ivrvhVgD@1u%5RtrV-gl_vqAwHkK@x7YwlxX3qT6WKKQ%PR56NrUBU2dOAOAdzr2=5nJuKPM-T-$ZpQfCL7phxQbUcb:BZOTPaFExc-qK-gDRCDW2'
+> +       'd3uUR6OFEwZr%ns1XH_@tbxA@cCPmbBRLdyh7p6V45H$P2$F%w0RqrD3M0g8aGvWpoTFMiBdOTJXjD:JF7=h9a_43xBywYAP%r$SPZi%zDg%ql-KvkdUCtF9OLaQlxmd'
+> +       'ePTpbnit%hyNm@WELlpKzNZYOzOTf8EQ$sEfkMy1VOfIUu3coyvIr13-Y7Sv5v-Ivax2Go_GQRFMU1b3362nktT9WOJf3SpT%z8sZmM3gvYQBDgmKI%%RM-G7hyrhgYflOw%z::ZRcv5O:lDCFm'
+> +       'evqk743Y@dvZAiG5J05L_ROFV@$2%rVWJ2%3nxV72-W7$e$-SK3tuSHA2mBt$qloC5jwNx33GmQUjD%akhBPu=VJ5g$xhlZiaFtTrjeeM5x7dt4cHpX0cZkmfImndYzGmvwQG:$euFYmXn$_2rA9mKZ'
+> +       'gkgUtnihWXsZQTEkrMAWIxir09k3t7jk_IK25t1:cy1XWN0GGqC%FrySdcmU7M8MuPO_ppkLw3=Dfr0UuBAL4%GFk2$Ma10V1jDRGJje%Xx9EV2ERaWKtjpwiZwh0gCSJsj5UL7CR8RtW5opCVFKGGy8Cky'
+> +       'hNgsG_8lNRik3PvphqPm0yEH3P%%fYG:kQLY=6O-61Wa6nrV_WVGR6TLB09vHOv%g4VQRP8Gzx7VXUY1qvZyS'
+> +       'isA7JVzN12xCxVPJZ_qoLm-pTBuhjjHMvV7o=F:EaClfYNyFGlsfw-Kf%uxdqW-kwk1sPl2vhbjyHU1A6$hz'
+> +       'kiJ_fgcdZFDiOptjgH5PN9-PSyLO4fbk_:u5_2tz35lV_iXiJ6cx7pwjTtKy-XGaQ5IefmpJ4N_ZqGsqCsKuqOOBgf9LkUdffHet@Wu'
+> +       'lvwtxyhE9:%Q3UxeHiViUyNzJsy:fm38pg_b6s25JvdhOAT=1s0$pG25x=LZ2rlHTszj=gN6M4zHZYr_qrB49i=pA--@WqWLIuX7o1S_SfS@2FSiUZN'
+> +       'rC24cw3UBDZ=5qJBUMs9e$=S4Y94ni%Z8639vnrGp=0Hv4z3dNFL0fBLmQ40=EYIY:Z=SLc@QLMSt2zsss2ZXrP7j4='
+> +       'uwGl2s-fFrf@GqS=DQqq2I0LJSsOmM%xzTjS:lzXguE3wChdMoHYtLRKPvfaPOZF2fER@j53evbKa7R%A7r4%YEkD=kicJe@SFiGtXHbKe4gCgPAYbnVn'
+> +       'UG37U6KKua2bgc:IHzRs7BnB6FD:2Mt5Cc5NdlsW%$1tyvnfz7S27FvNkroXwAW:mBZLA1@qa9WnDbHCDmQmfPMC9z-Eq6QT0jhhPpqyymaD:R02ghwYo%yx7SAaaq-:x33LYpei$5g8DMl3C'
+> +       'y2vjek0FE1PDJC0qpfnN:x8k2wCFZ9xiUF2ege=JnP98R%wxjKkdfEiLWvQzmnW'
+> +       '8-HCSgH5B%K7P8_jaVtQhBXpBk:pE-$P7ts58U0J@iR9YZntMPl7j$s62yAJO@_9eanFPS54b=UTw$94C-t=HLxT8n6o9P=QnIxq-f1=Ne2dvhe6WbjEQtc'
+> +       'YPPh:IFt2mtR6XWSmjHptXL_hbSYu8bMw-JP8@PNyaFkdNFsk$M=xfL6LDKCDM-mSyGA_2MBwZ8Dr4=R1D%7-mCaaKGxb990jzaagRktDTyp'
+> +       '9hD2ApKa_t_7x-a@GCG28kY:7$M@5udI1myQ$x5udtggvagmCQcq9QXWRC5hoB0o-_zHQUqZI5rMcz_kbMgvN5jr63LeYA4Cj-c6F5Ugmx6DgVf@2Jqm%MafecpgooqreJ53P-QTS'
+> +)
 > +
-> +test $FSTYP =3D xfs && _xfs_force_bdev data $SCRATCH_MNT
+> +# Now create files with all those names in the same parent directory.
+> +# It should not fail since a 4K leaf has enough space for them.
+> +for name in "${names[@]}"; do
+> +       touch $SCRATCH_MNT/$name
+> +done
 > +
-> +# Write a file with 4 file blocks worth of data, figure out the LBA to t=
-arget
-> +victim=3D$SCRATCH_MNT/a
-> +file_blksz=3D$(_get_file_block_size $SCRATCH_MNT)
-> +$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c "fsync" $vi=
-ctim >> $seqres.full
+> +# Now add one more file name that causes a crc32c hash collision.
+> +# This should fail, but it should not cause a transaction abort and turn the
+> +# filesystem into RO mode (which could be exploited by malicious users).
+> +touch $SCRATCH_MNT/'W6tIm-VK2@BGC@IBfcgg6j_p:pxp_QUqtWpGD5Ok_GmijKOJJt' \
+> +      >> $seqres.full 2>&1
+> +[ $? -eq 0 ] && echo "should not have been able to create file"
 > +
-> +awk_len_prog=3D'{print $4}'
-> +bmap_str=3D"$($XFS_IO_PROG -c "fiemap -v" $victim | grep "^[[:space:]]*0=
-:")"
-> +echo "$bmap_str" >> $seqres.full
+> +# Check that we are able to create another file, with a name that does not cause
+> +# a crc32c hash collision.
+> +echo -n "hello world" > $SCRATCH_MNT/baz
 > +
-> +phys=3D"$(echo "$bmap_str" | $AWK_PROG '{print $3}')"
-> +len=3D"$(echo "$bmap_str" | $AWK_PROG "$awk_len_prog")"
+> +# Unmount and mount again, verify file baz exists and with the right content.
+> +_scratch_cycle_mount
+> +echo "File baz content: $(cat $SCRATCH_MNT/baz)"
 > +
-> +fs_blksz=3D$(_get_block_size $SCRATCH_MNT)
-> +echo "file_blksz:$file_blksz:fs_blksz:$fs_blksz" >> $seqres.full
-> +kernel_sectors_per_fs_block=3D$((fs_blksz / 512))
+> +# Now try to create a subvolume with the same name that causes a hash collision.
+> +# It should fail, but it shouldn't trigger a transaction abort and turns the
+> +# filesystem to RO mode. Subvolume creation takes a different code path.
+> +$BTRFS_UTIL_PROG subvolume create \
+> +       $SCRATCH_MNT/'W6tIm-VK2@BGC@IBfcgg6j_p:pxp_QUqtWpGD5Ok_GmijKOJJt' \
+> +               >> $seqres.full 2>&1
+> +[ $? -eq 0 ] && echo "should not have been able to subvolume"
+
+"... to create subvolume"
+
 > +
-> +# Did we get at least 4 fs blocks worth of extent?
-> +min_len_sectors=3D$(( 4 * kernel_sectors_per_fs_block ))
-> +test "$len" -lt $min_len_sectors && \
-> +       _fail "could not format a long enough extent on an empty fs??"
+> +# Check that we are able to create another file, with a name that does not cause
+> +# a crc32c hash collision.
+> +echo -n "yada yada" > $SCRATCH_MNT/xyz
 > +
-> +phys_start=3D$(echo "$phys" | sed -e 's/\.\..*//g')
+> +# Unmount and mount again, verify file xyz exists and with the right content.
+> +_scratch_cycle_mount
+> +echo "File xyz content: $(cat $SCRATCH_MNT/xyz)"
 > +
-> +echo "$phys:$len:$fs_blksz:$phys_start" >> $seqres.full
-> +echo "victim file:" >> $seqres.full
-> +od -tx1 -Ad -c $victim >> $seqres.full
-> +
-> +# Set the dmerror table so that all IO will pass through.
-> +_dmerror_reset_table
-> +
-> +cat >> $seqres.full << ENDL
-> +dmerror before:
-> +$DMERROR_TABLE
-> +$DMERROR_RTTABLE
-> +<end table>
-> +ENDL
-> +
-> +# All sector numbers that we feed to the kernel must be in units of 512b=
-, but
-> +# they also must be aligned to the device's logical block size.
-> +logical_block_size=3D`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_=
-DEV`
-> +kernel_sectors_per_device_lba=3D$((logical_block_size / 512))
-> +
-> +# Mark as bad one of the device LBAs in the middle of the extent.  Targe=
-t the
-> +# second LBA of the third block of the four-block file extent that we al=
-located
-> +# earlier, but without overflowing into the fourth file block.
-> +bad_sector=3D$(( phys_start + (2 * kernel_sectors_per_fs_block) ))
-> +bad_len=3D$kernel_sectors_per_device_lba
-> +if (( kernel_sectors_per_device_lba < kernel_sectors_per_fs_block )); th=
-en
-> +       bad_sector=3D$((bad_sector + kernel_sectors_per_device_lba))
-> +fi
-> +if (( (bad_sector % kernel_sectors_per_device_lba) !=3D 0)); then
-> +       echo "bad_sector $bad_sector not congruent with device logical bl=
-ock size $logical_block_size"
-> +fi
-> +
-> +# Remount to flush the page cache, start fsnotify, and make the LBA bad
-> +_dmerror_unmount
-> +_dmerror_mount
-> +
-> +$here/src/fs-monitor $SCRATCH_MNT > $tmp.fsmonitor &
-> +fsmonitor_pid=3D$!
-> +sleep 1
-> +
-> +_dmerror_mark_range_bad $bad_sector $bad_len
-> +
-> +cat >> $seqres.full << ENDL
-> +dmerror after marking bad:
-> +$DMERROR_TABLE
-> +$DMERROR_RTTABLE
-> +<end table>
-> +ENDL
-> +
-> +_dmerror_load_error_table
-> +
-> +# See if buffered reads pick it up
-> +echo "Try buffered read"
-> +$XFS_IO_PROG -c "pread 0 $((4 * file_blksz))" $victim >> $seqres.full
-> +
-> +# See if directio reads pick it up
-> +echo "Try directio read"
-> +$XFS_IO_PROG -d -c "pread 0 $((4 * file_blksz))" $victim >> $seqres.full
-> +
-> +# See if directio writes pick it up
-> +echo "Try directio write"
-> +$XFS_IO_PROG -d -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c fsync $vict=
-im >> $seqres.full
-> +
-> +# See if buffered writes pick it up
-> +echo "Try buffered write"
-> +$XFS_IO_PROG -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c fsync $victim =
->> $seqres.full
-> +
-> +# Now mark the bad range good so that unmount won't fail due to IO error=
-s.
-> +echo "Fix device"
-> +_dmerror_mark_range_good $bad_sector $bad_len
-> +_dmerror_load_error_table
-> +
-> +cat >> $seqres.full << ENDL
-> +dmerror after marking good:
-> +$DMERROR_TABLE
-> +$DMERROR_RTTABLE
-> +<end table>
-> +ENDL
-> +
-> +# Unmount filesystem to start fresh
-> +echo "Kill fsnotify"
-> +_dmerror_unmount
-> +sleep 1
-> +kill -TERM $fsmonitor_pid
-> +unset fsmonitor_pid
-> +echo fsnotify log >> $seqres.full
-> +cat $tmp.fsmonitor >> $seqres.full
-> +cat $tmp.fsmonitor | filter_fsnotify_errors
-> +
-> +# Start fsnotify again so that can verify that the errors don't persist =
-after
-> +# we flip back to the good dm table.
-> +echo "Remount and restart fsnotify"
-> +_dmerror_mount
-> +$here/src/fs-monitor $SCRATCH_MNT > $tmp.fsmonitor &
-> +fsmonitor_pid=3D$!
-> +sleep 1
-> +
-> +# See if buffered reads pick it up
-> +echo "Try buffered read again"
-> +$XFS_IO_PROG -c "pread 0 $((4 * file_blksz))" $victim >> $seqres.full
-> +
-> +# See if directio reads pick it up
-> +echo "Try directio read again"
-> +$XFS_IO_PROG -d -c "pread 0 $((4 * file_blksz))" $victim >> $seqres.full
-> +
-> +# See if directio writes pick it up
-> +echo "Try directio write again"
-> +$XFS_IO_PROG -d -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c fsync $vict=
-im >> $seqres.full
-> +
-> +# See if buffered writes pick it up
-> +echo "Try buffered write again"
-> +$XFS_IO_PROG -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c fsync $victim =
->> $seqres.full
-> +
-> +# Unmount fs and kill fsnotify, then wait for it to finish
-> +echo "Kill fsnotify again"
-> +_dmerror_unmount
-> +sleep 1
-> +kill -TERM $fsmonitor_pid
-> +unset fsmonitor_pid
-> +cat $tmp.fsmonitor >> $seqres.full
-> +cat $tmp.fsmonitor | filter_fsnotify_errors
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/generic/1838.out b/tests/generic/1838.out
+> +_exit 0
+> diff --git a/tests/btrfs/346.out b/tests/btrfs/346.out
 > new file mode 100644
-> index 00000000000000..adae590fe0b2ea
+> index 00000000..e1b82cbd
 > --- /dev/null
-> +++ b/tests/generic/1838.out
-> @@ -0,0 +1,20 @@
-> +QA output created by 1838
-> +Try buffered read
-> +pread: Input/output error
-> +Try directio read
-> +pread: Input/output error
-> +Try directio write
-> +pwrite: Input/output error
-> +Try buffered write
-> +fsync: Input/output error
-> +Fix device
-> +Kill fsnotify
-> +       Generic Error Record: len=3DXXX
-> +       error: 5
-> +FAN_FS_ERROR (len=3DXXX)
-> +Remount and restart fsnotify
-> +Try buffered read again
-> +Try directio read again
-> +Try directio write again
-> +Try buffered write again
-> +Kill fsnotify again
+> +++ b/tests/btrfs/346.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 346
+> +File baz content: hello world
+> +File xyz content: yada yada
+> --
+> 2.47.2
+>
 >
