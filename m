@@ -1,125 +1,159 @@
-Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56F5A33B6C4
-	for <fstests@vger.kernel.org>; Wed, 11 Mar 2026 02:32:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7412156F45;
+	Wed, 11 Mar 2026 04:14:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773196343; cv=none; b=h2YGBJiDh2w+LezDPdqcGQM0BdHpPQMaQ7UnkLhs5PmNOm12783Nn3TjlVGZ2mnKn7s27R6MyDwb3HEYro3CrTBPN7LVwK7fhK1wlmiIUqWOcREiWTgAXzpBKWS1yp2ufy2b3cMyUwJzWLUkXw8qp7WRDTpZSakQ2x8un7485Dw=
+	t=1773202484; cv=none; b=Br1s195nIMrU4eGYdtXKh7izOEsRRlZeCD7V6g/ELNBwrgEN1ta+OVUbPlsLJwEXt9OvIb+riptdYUiRpMvlDhIZQy5EzA7KGhlPtw/l4i5kW76d5UX3PWlHICgc0eJ5uKs1m1u935HvKgxCmzjF/UK+ldyUuT7nhg9YYvDzY5Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773196343; c=relaxed/simple;
-	bh=2Y2qzvuPFdU5DMP+6rADIQVlTkbnE6vQUfOagnM8Itk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=E0Sfr10CD5xFy3AcZto/N1VLtZc+GuhUVWsXxMU+p5PaxuOZQteP0M1Y/TMhU1TPG4YelMmNyq+56hPOElKp8OBviYzh3nMtq06ohRSVPg2ybjAhYPfvMm5yELm2ZI2C26t3QGHBMpwEDNjpqcdylwBq5GnTQCB5zOklSHxWOGw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=mZrB476i; arc=none smtp.client-ip=209.85.214.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1773202484; c=relaxed/simple;
+	bh=gZJ9X2rZoyhmnbisw+42D76dMGyPoX97Y/emI/OHzQE=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=Xwf2XtR3JgwRpLl1MaMs8vxw7GehHVskgqdE1nZcM9xAIrQORZhYx6aJ+HBLmQSQ/Gq/4pk1MEwkcpg/jFsmKaYLTJ7jOIEDei8VELMZuJL5CBbhVjoxgexQRCLvCscZH/gcQjcWGJef0O4YkvLYFCLrWL4HmWvxgbwuNbrANHo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=c7G8cnzC; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mZrB476i"
-Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-2ae5636ab04so102497515ad.3
-        for <fstests@vger.kernel.org>; Tue, 10 Mar 2026 19:32:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1773196342; x=1773801142; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=OBSynOvi3xpXr30q7Fy487t9vRr0oTbMzF3rt3i3WIY=;
-        b=mZrB476iV6v+UUhfHNu0Xc4xcpu23gRjWlMTM0YjNyXgIME00YM3SF3fD+obqq13Q+
-         /Yh23eitCx8vLGMvo4zyBALew0QazOz+GVOI/IF93I2zr28wzPrN8kzJS52SszbPEgm9
-         jMRQ2oUgmirvOR1kSPjYUGU7qozsAdOIHpBkS31uUEPtG7MxQ+3tUEkzYsJoWGwQo+rf
-         OS7kjW4iiWTL8xQElAeJZwslGE9Y5ePm9x3u39tlEH+6xYubtXbrivoWns+D/tQMPQHL
-         2VdK7xhGw7sjlC7wVt642PWMynXkfKpV10aMZtOVN9p3K1A3ssX3fqOPLFQF1ZU6Qagl
-         vrLw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1773196342; x=1773801142;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=OBSynOvi3xpXr30q7Fy487t9vRr0oTbMzF3rt3i3WIY=;
-        b=DJFEE3nWBc89xWRp1/NNXc66F5edNuaAByDvODQX+D3qGhtmrAlTLeaFnrrqaF0w+U
-         yKOBFItkdPcWrVRuA9fUvEhXfJa8u+2H8yyBLS1r1dvgX95bVOL/jxpc+nsu7kSGPk4v
-         nhE6GA0Cql7W7Ar4l3x/xHHU6jEoNIFvht4MsQgPi9UNYS5F/w66JgJfTgnSzW3LH3i+
-         PgVg0YX/JMNCwDPhOith8TuROsfnuvNa8jYypwOXv4bv/DyFdBQOtOWdeCwuM2Q/r0ym
-         ctIWSsjVI3Q5PzEbjQP7OEkCzNDoWcvMzVCKuEf6ZLFjgoDa8XU72QTke8OiszN/J5ZL
-         nXHw==
-X-Gm-Message-State: AOJu0YzEoxwmrLj+mCkvzIz62EirVhIqFcDwDeSEO8WY5ymDugLWdckc
-	QeI3lZYH8KWvHMlsVZGmSWVpVtp8ZC26PtByE9MKScWVnir4bDzqvqOn
-X-Gm-Gg: ATEYQzz+tnsgr9+wy65hQpuKnT68icC9/6W/4c/EP4N4prcBpqVw3h0JVOdbDf7xVum
-	v1Jbu/4MfJI9PDmPCQU/3xPAtoozUlqO2mRZkpqJB0QkuiaI1WXUN1un1JoKubQxVnE+W7zuWJ7
-	52S4OlhI9OwJkFcikAlGjn3c3//Oi+hgG+Pz/gbZ/2AdNSy7CCPXg459xwZPB+BfPA4NDZcXnBD
-	yq5Y5kJafChaeGfBb9Yqd/H6+QOXUFFZv3+1fZ08bMmLUUhjhlgeMmkcRf6xRUfSrkMIF5ZOxRl
-	Y+UaDOkVfSS81kR90vmgOY8t1F8Mp0YTkdGfjr3EgLXPAdRq77jySlklsXdViinQN1ii5KeSSVj
-	AFsxEfS+2IapcANmIq+x79Rl6M3boJ4cnhlgdx5yCjqsqeejTDed6SW590m+RDPn4p3e5rDvRX9
-	9XBHN7J6H1Bp4QC4RUVWhQ3Gr9DYE=
-X-Received: by 2002:a17:903:2b0c:b0:2ad:d5ea:4c89 with SMTP id d9443c01a7336-2aeae7c04bcmr8516825ad.22.1773196341648;
-        Tue, 10 Mar 2026 19:32:21 -0700 (PDT)
-Received: from [192.168.50.90] ([116.87.14.48])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2aeae0e61a9sm6442645ad.0.2026.03.10.19.32.19
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 10 Mar 2026 19:32:21 -0700 (PDT)
-Message-ID: <43710dd2-4282-4475-a29d-983295fab86f@gmail.com>
-Date: Wed, 11 Mar 2026 10:32:18 +0800
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="c7G8cnzC"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 529EAC4CEF7;
+	Wed, 11 Mar 2026 04:14:44 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1773202484;
+	bh=gZJ9X2rZoyhmnbisw+42D76dMGyPoX97Y/emI/OHzQE=;
+	h=Date:From:To:Cc:Subject:From;
+	b=c7G8cnzCvX1wEgDsMDId6p81yylL+zHz4YxzEnM3KA/FmtTw4NxJ4buk3HvzGrz9F
+	 L417ZB8AZZc/HCBuqK79bCUbdq6ozvB5v2Fy4LEIbjpYPeUiRbMYtQ5lVgYWHfRLWX
+	 cRzjNfls7p7e4MgJ0QvQCzNzAsLSwIbOpnFpB19LF1E+zGlsCNMRSA3fsJQ40Mopp7
+	 QDgYyuBkkskwDVO3gljrYUo/L6bmbXkxoEjwCYV0zyr7RFqnu8rWZqbkDECWMB+1h9
+	 KNZIR1XSNVpzKIuhwZsgqWOlxAZyutXYyu/EGAONrLZAgVMXd6iBcQ0hBPG3lq62Ez
+	 7lMa3xvRWp/eQ==
+Date: Tue, 10 Mar 2026 21:14:43 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: zlang@redhat.com
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: [PATCH] xfs/62[3-8]: require XFS_SCRUB_PROG
+Message-ID: <20260311041443.GC6023@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/9] fstests: add _mkfs_scratch_clone() helper
-To: Zorro Lang <zlang@redhat.com>, Anand Jain <asj@kernel.org>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
- linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
-References: <cover.1772095513.git.asj@kernel.org>
- <254fdd3e212f6618ea33207ef24db2b316d2d8fc.1772095513.git.asj@kernel.org>
- <20260309191317.vxcjvqfpoqdiycki@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Anand Jain <anajain.sg@gmail.com>
-In-Reply-To: <20260309191317.vxcjvqfpoqdiycki@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
+From: Darrick J. Wong <djwong@kernel.org>
 
-> What about if ${#devs[@]} > 2 ?
+QA reports that xfs/62[3-8] fail because they didn't install
+xfsprogs-xfs_scrub package and this test requires xfs_scrub(8).
+Add the missing _require call, and update the README so that anyone
+running fstests on RHEL/Fedora actually get all the necessary
+components to do a full test of XFS.
 
-On purpose- so tests using _scratch_mkfs_sized_clone() don't
-pick a random higher number. If a test needs more than two
-devices, opens an opportunity to critically review this function.
->> +	fi
->> +
->> +	case "$FSTYP" in
->> +	"btrfs")
->> +		_scratch_mkfs_sized $size
->> +		_scratch_mount
->> +		$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/sv1
->> +		_scratch_unmount
->> +		;;
->> +	"xfs"|"ext4")
->> +		_scratch_mkfs_sized $size
->> +		;;
->> +	*)
->> +		_notrun "fstests clone op unsupported for FS $FSTYP"
->> +		;;
->> +	esac
->> +
->> +	# clone SCRATCH_DEV devs[0] to devs[1].
->> +	dd if=$SCRATCH_DEV of=${devs[1]} bs=$size status=none count=1 || \
->> +							_fail "Clone failed"
-> 
-> I'm wondering if we absolutely need to use SCRATCH_DEV_POOL for this test. Could we clone SCRATCH_DEV
-> to an image file instead? Or would it be feasible to simply run the test using two image files?
+Cc: <fstests@vger.kernel.org> # v2024.06.27
+Fixes: 4de8fd7860a2bb ("scrub: test correction of directory tree corruptions")
+Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+---
+ README        |    2 +-
+ tests/xfs/623 |    3 +--
+ tests/xfs/624 |    3 +--
+ tests/xfs/625 |    3 +--
+ tests/xfs/626 |    3 +--
+ tests/xfs/627 |    3 +--
+ tests/xfs/628 |    1 +
+ 7 files changed, 7 insertions(+), 11 deletions(-)
 
-Using a config file and testing directly on block devices lets
-us cover a wider range of devices.
-
-When I wrote this test case, I was also considering whether a
-serial-number–based mount without extra mount option, would be
-better in the kernel.
-
-The downside is that xfs/ext4 testers now need to use
-SCRATCH_DEV_POOL. Let me know what you prefer.
-
-
-
-
+diff --git a/README b/README
+index 211e273115f08f..36684cc6572d4b 100644
+--- a/README
++++ b/README
+@@ -126,7 +126,7 @@ Fedora
+    $ sudo yum install acl attr automake bc dbench dump e2fsprogs fio gawk gcc \
+         gdbm-devel git indent kernel-devel libacl-devel libaio-devel \
+         libcap-devel libtool liburing-devel libuuid-devel lvm2 make psmisc \
+-        python3 quota sed sqlite udftools  xfsprogs
++        python3 quota sed sqlite udftools xfsprogs xfsprogs-xfs_scrub
+ 
+ 2. Install packages for the filesystem(s) being tested:
+ 
+diff --git a/tests/xfs/623 b/tests/xfs/623
+index aff3f903660fa7..7f79ccbcbf7f14 100755
+--- a/tests/xfs/623
++++ b/tests/xfs/623
+@@ -16,8 +16,7 @@ _begin_fstest auto online_repair
+ . ./common/fuzzy
+ . ./common/populate
+ 
+-
+-# Modify as appropriate.
++_require_scrub
+ _require_xfs_db_command "link"
+ _require_xfs_db_command "unlink"
+ _require_scratch
+diff --git a/tests/xfs/624 b/tests/xfs/624
+index e63cfcc6e7ba82..09a922c8d18c8a 100755
+--- a/tests/xfs/624
++++ b/tests/xfs/624
+@@ -16,8 +16,7 @@ _begin_fstest auto online_repair
+ . ./common/fuzzy
+ . ./common/populate
+ 
+-
+-# Modify as appropriate.
++_require_scrub
+ _require_xfs_db_command "link"
+ _require_xfs_db_command "unlink"
+ _require_scratch
+diff --git a/tests/xfs/625 b/tests/xfs/625
+index 23013f195c9e7f..2654216b67aa11 100755
+--- a/tests/xfs/625
++++ b/tests/xfs/625
+@@ -16,8 +16,7 @@ _begin_fstest auto online_repair
+ . ./common/fuzzy
+ . ./common/populate
+ 
+-
+-# Modify as appropriate.
++_require_scrub
+ _require_xfs_db_command "link"
+ _require_xfs_db_command "unlink"
+ _require_scratch
+diff --git a/tests/xfs/626 b/tests/xfs/626
+index c424819cede6e1..3b4cdca4fe4e24 100755
+--- a/tests/xfs/626
++++ b/tests/xfs/626
+@@ -16,8 +16,7 @@ _begin_fstest auto online_repair
+ . ./common/fuzzy
+ . ./common/populate
+ 
+-
+-# Modify as appropriate.
++_require_scrub
+ _require_xfs_db_command "link"
+ _require_xfs_db_command "unlink"
+ _require_scratch
+diff --git a/tests/xfs/627 b/tests/xfs/627
+index 411a7603317058..fc54199b4a95de 100755
+--- a/tests/xfs/627
++++ b/tests/xfs/627
+@@ -16,8 +16,7 @@ _begin_fstest auto online_repair
+ . ./common/fuzzy
+ . ./common/populate
+ 
+-
+-# Modify as appropriate.
++_require_scrub
+ _require_xfs_db_command "link"
+ _require_xfs_db_command "unlink"
+ _require_scratch
+diff --git a/tests/xfs/628 b/tests/xfs/628
+index c77d67db358983..e003f41999f401 100755
+--- a/tests/xfs/628
++++ b/tests/xfs/628
+@@ -17,6 +17,7 @@ _begin_fstest scrub fsstress_scrub
+ . ./common/inject
+ . ./common/xfs
+ 
++_require_scrub
+ _require_scratch
+ _require_xfs_stress_scrub
+ 
