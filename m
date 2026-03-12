@@ -1,205 +1,319 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mout-p-101.mailbox.org (mout-p-101.mailbox.org [80.241.56.151])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2AC22820C6;
-	Thu, 12 Mar 2026 14:21:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C67A936BCF2;
+	Thu, 12 Mar 2026 19:53:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.151
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773325291; cv=none; b=f9LP1jvuU+M+KeiMUJUXbSOVfWQrOrZfGwgWJTWMiHGWOsUMZsI+SDmRgHgu+/NpPi0N2VX9G/u+MgNhiOXxQRgC1vGpL2e/900ukZVIiC4OluoSavMIEmsn5uTw7Y1L6HkYErUO3IYknlAw0wuPD/VkOgThVz3fdJ0JfjCqDag=
+	t=1773345208; cv=none; b=ZRKxluQkS+Qzc1NTfopAsykiF45pS1aCEexMhv4vdKT8PQEIXVAse7uMLyn4o2B7acB74aunAsx+0B04PzmcOGWiu0CQCaJxqCbDgAxT0yB4u2Kpjum4woLBgycK/YjybuNZS26Sg26heJaK2hAXKPm5jv4orVg1Glu7Hlqg39M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773325291; c=relaxed/simple;
-	bh=tMccCel+Z5i138C1lPY8yH3cbuhu4niRgkjvCwVuQLI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=khulOCAeqcihPWZ+DcmgFSZhEr3x15hcXib+SH0Cp4w2d3x7BnMQhARoPfzDRThauemdwVhWouk9Au7LKD3miu+aWRbubZVZ0TwW1HlzwPt7yPc3GC2jsmRWUJwMS9f5d1t4DxwPxVshuSxe2S4pItJ0OTNaoIJ1uO+Rc9AntTA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=vOiKDNqn; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="vOiKDNqn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6BF31C4CEF7;
-	Thu, 12 Mar 2026 14:21:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1773325291;
-	bh=tMccCel+Z5i138C1lPY8yH3cbuhu4niRgkjvCwVuQLI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=vOiKDNqnKD7iNNTG2MFsx4SzYAkB8ETw/KopJM2wiBgQY3K4Twmtce6goeX4KF+z3
-	 JJg7Qp1pSPAvWWlY986yD9Oh6HI9kjnRIsJoIChVozH9LiXS7H/oqSCfwfOMU+A/LY
-	 hb6rZcVAJWS1xmsTrndV7hGoOqikttDsl+mNwq05NnGN58osQMqYfdYP1ZWg79AqGL
-	 fPQozWwBDuoaAJvf2T/ddZ7fz+PcTozsNlAvQkPm2Sztp67caqyXm2XiuWept5SOA2
-	 Dosl76FzvLhQwEQv0nueRHD+iZZEPsmy0SjKgeNX0gPLBmrvf2g0M2g5Ujp4lT08lL
-	 dHKoVb3U0PwbQ==
-Date: Thu, 12 Mar 2026 07:21:30 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: zlang@redhat.com, Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: [PATCH 15/14] xfs: test xfs_healer can follow private mntns mount
- moves
-Message-ID: <20260312142130.GG1770774@frogsfrogsfrogs>
-References: <20260310033846.GH1105363@frogsfrogsfrogs>
- <177311403712.1186408.7032564474004561606.stgit@frogsfrogsfrogs>
+	s=arc-20240116; t=1773345208; c=relaxed/simple;
+	bh=dZHq//ER03NwZ9aCXAGyibFLCocI8vaUEFWMk6WGjU8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=TLfwSIxkNoWToHOnawh5oN4vOVtRur/D4GrWZnspHQeQZ9MyyMVmjHV4F4q9sKREvG32bDWuZUe1GkLhhDs6gD6uoetXFz2kwK0GUpq2Pi8Fw1jZoYWrPkTfE6nmGcvzVNNgDMLukkmm2DxFeB5o371xqebUr3RBS5GgYTglh8M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=pankajraghav.com; arc=none smtp.client-ip=80.241.56.151
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pankajraghav.com
+Received: from smtp202.mailbox.org (smtp202.mailbox.org [IPv6:2001:67c:2050:b231:465::202])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mout-p-101.mailbox.org (Postfix) with ESMTPS id 4fWywC3n9Nz9t6h;
+	Thu, 12 Mar 2026 20:53:15 +0100 (CET)
+Authentication-Results: outgoing_mbo_mout;
+	dkim=none;
+	spf=pass (outgoing_mbo_mout: domain of kernel@pankajraghav.com designates 2001:67c:2050:b231:465::202 as permitted sender) smtp.mailfrom=kernel@pankajraghav.com
+From: Pankaj Raghav <p.raghav@samsung.com>
+To: zlang@redhat.com
+Cc: fstests@vger.kernel.org,
+	lukas@herbolt.com,
+	dgc@kernel.org,
+	pankaj.raghav@linux.dev,
+	linux-xfs@vger.kernel.org,
+	djwong@kernel.org,
+	Pankaj Raghav <p.raghav@samsung.com>
+Subject: [PATCH] ltp: add support for FALLOC_FL_WRITE_ZEROES to fsx and fsstress
+Date: Thu, 12 Mar 2026 20:53:08 +0100
+Message-ID: <20260312195308.738189-1-p.raghav@samsung.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <177311403712.1186408.7032564474004561606.stgit@frogsfrogsfrogs>
+Content-Transfer-Encoding: 8bit
+X-Rspamd-Queue-Id: 4fWywC3n9Nz9t6h
 
-From: Darrick J. Wong <djwong@kernel.org>
+Add FALLOC_FL_WRITE_ZEROES support to both fsx and fsstress.
+FALLOC_FL_WRITE_ZEROES flag was added in the kernel as a part of Zhang
+Yi's series [1].
 
-Make sure that when xfs_healer needs to reopen a filesystem to repair
-it, it can still find the filesystem even if it has been mount --move'd.
-This requires a bunch of private namespace magic.
+FALLOC_FL_KEEP_SIZE is not supported when FALLOC_FL_WRITE_ZEROES is
+used.
 
-Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+[1] https://lore.kernel.org/linux-fsdevel/20250619111806.3546162-1-yi.zhang@huaweicloud.com/
+
+Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
 ---
- tests/xfs/1904     |  129 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/1904.out |    3 +
- 2 files changed, 132 insertions(+)
- create mode 100755 tests/xfs/1904
- create mode 100755 tests/xfs/1904.out
+ ltp/fsstress.c | 15 ++++++++-
+ ltp/fsx.c      | 85 ++++++++++++++++++++++++++++++++++++++++++++++++--
+ src/global.h   |  8 +++++
+ 3 files changed, 105 insertions(+), 3 deletions(-)
 
-diff --git a/tests/xfs/1904 b/tests/xfs/1904
-new file mode 100755
-index 00000000000000..78e8f5dcb0e834
---- /dev/null
-+++ b/tests/xfs/1904
-@@ -0,0 +1,129 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test 1904
-+#
-+# Ensure that autonomous self healing fixes the filesystem correctly even if
-+# the original mount has moved somewhere else via --move.
-+#
-+. ./common/preamble
-+_begin_fstest auto selfhealing
-+
-+. ./common/filter
-+. ./common/fuzzy
-+. ./common/systemd
-+
-+if [ -n "$IN_MOUNTNS" ]; then
-+	_mount --make-rprivate /
-+	findmnt -o TARGET,PROPAGATION >> $seqres.full
-+
-+	_scratch_mount
-+	_scratch_invoke_xfs_healer "$tmp.healer" --repair
-+
-+	# Move the scratch filesystem to a completely different mountpoint so that
-+	# we can test if the healer can find it again.
-+	new_dir=$TEST_DIR/moocow
-+	mkdir -p $new_dir
-+	_mount --move $SCRATCH_MNT $new_dir
-+
-+	df -t xfs >> $seqres.full
-+
-+	# Access the broken directory to trigger a repair, then poll the directory
-+	# for 5 seconds to see if it gets fixed without us needing to intervene.
-+	ls $new_dir/some/victimdir > /dev/null 2> $tmp.err
-+	_filter_scratch < $tmp.err | _filter_test_dir
-+	try=0
-+	while [ $try -lt 50 ] && grep -q 'Structure needs cleaning' $tmp.err; do
-+		echo "try $try saw corruption" >> $seqres.full
-+		sleep 0.1
-+		ls $new_dir/some/victimdir > /dev/null 2> $tmp.err
-+		try=$((try + 1))
-+	done
-+	echo "try $try no longer saw corruption or gave up" >> $seqres.full
-+	_filter_scratch < $tmp.err | _filter_test_dir
-+
-+	# List the dirents of /victimdir to see if it stops reporting corruption
-+	ls $new_dir/some/victimdir > /dev/null 2> $tmp.err
-+	try=0
-+	while [ $try -lt 50 ] && grep -q 'Structure needs cleaning' $tmp.err; do
-+		echo "retry $try still saw corruption" >> $seqres.full
-+		sleep 0.1
-+		ls $SCRATCH_MNT/some/victimdir > /dev/null 2> $tmp.err
-+		try=$((try + 1))
-+	done
-+	echo "retry $try no longer saw corruption or gave up" >> $seqres.full
-+
-+	new_dir_unmount() {
-+		_unmount $new_dir
-+	}
-+
-+	# Unmount to kill the healer
-+	_scratch_kill_xfs_healer new_dir_unmount
-+	cat $tmp.healer >> $seqres.full
-+
-+	# No need to clean up, the mount ns destructor will detach the
-+	# filesystems for us.
-+	exit
-+fi
-+
-+_cleanup()
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index 9d0ed32f..fe340aea 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -124,6 +124,7 @@ typedef enum {
+ 	OP_MWRITE,
+ 	OP_PUNCH,
+ 	OP_ZERO,
++	OP_WRITE_ZEROES,
+ 	OP_COLLAPSE,
+ 	OP_INSERT,
+ 	OP_READ,
+@@ -257,6 +258,7 @@ void	mread_f(opnum_t, long);
+ void	mwrite_f(opnum_t, long);
+ void	punch_f(opnum_t, long);
+ void	zero_f(opnum_t, long);
++void	write_zeroes_f(opnum_t, long);
+ void	collapse_f(opnum_t, long);
+ void	insert_f(opnum_t, long);
+ void	unshare_f(opnum_t, long);
+@@ -326,6 +328,7 @@ struct opdesc	ops[OP_LAST]	= {
+ 	[OP_MWRITE]	   = {"mwrite",	       mwrite_f,	2, 1 },
+ 	[OP_PUNCH]	   = {"punch",	       punch_f,		1, 1 },
+ 	[OP_ZERO]	   = {"zero",	       zero_f,		1, 1 },
++	[OP_WRITE_ZEROES]  = {"write_zeroes",  write_zeroes_f,	1, 1 },
+ 	[OP_COLLAPSE]	   = {"collapse",      collapse_f,	1, 1 },
+ 	[OP_INSERT]	   = {"insert",	       insert_f,	1, 1 },
+ 	[OP_READ]	   = {"read",	       read_f,		1, 0 },
+@@ -3827,6 +3830,7 @@ struct print_flags falloc_flags [] = {
+ 	{ FALLOC_FL_ZERO_RANGE, "ZERO_RANGE"},
+ 	{ FALLOC_FL_INSERT_RANGE, "INSERT_RANGE"},
+ 	{ FALLOC_FL_UNSHARE_RANGE, "UNSHARE_RANGE"},
++	{ FALLOC_FL_WRITE_ZEROES, "WRITE_ZEROES"},
+ 	{ -1, NULL}
+ };
+ 
+@@ -3886,7 +3890,8 @@ do_fallocate(opnum_t opno, long r, int mode)
+ 		off = roundup_64(off, stb.st_blksize);
+ 		len = roundup_64(len, stb.st_blksize);
+ 	}
+-	mode |= FALLOC_FL_KEEP_SIZE & random();
++	if (!(mode & FALLOC_FL_WRITE_ZEROES))
++		mode |= FALLOC_FL_KEEP_SIZE & random();
+ 	e = fallocate(fd, mode, (loff_t)off, (loff_t)len) < 0 ? errno : 0;
+ 	if (v)
+ 		printf("%d/%lld: fallocate(%s) %s%s [%lld,%lld] %d\n",
+@@ -4513,6 +4518,14 @@ zero_f(opnum_t opno, long r)
+ #endif
+ }
+ 
++void
++write_zeroes_f(opnum_t opno, long r)
 +{
-+	command -v _kill_fsstress &>/dev/null && _kill_fsstress
-+	cd /
-+	rm -r -f $tmp.*
-+	if [ -n "$new_dir" ]; then
-+		_unmount "$new_dir" &>/dev/null
-+		rm -rf "$new_dir"
-+	fi
++#ifdef HAVE_LINUX_FALLOC_H
++	do_fallocate(opno, r, FALLOC_FL_WRITE_ZEROES);
++#endif
 +}
 +
-+_require_unshare
-+_require_test
-+_require_scrub
-+_require_xfs_io_command "repair"	# online repair support
-+_require_xfs_db_command "blocktrash"
-+_require_command "$XFS_HEALER_PROG" "xfs_healer"
-+_require_command "$XFS_PROPERTY_PROG" "xfs_property"
-+_require_scratch
+ void
+ collapse_f(opnum_t opno, long r)
+ {
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index 32b9d599..63cdd58e 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -125,6 +125,7 @@ enum {
+ 	OP_FALLOCATE,
+ 	OP_PUNCH_HOLE,
+ 	OP_ZERO_RANGE,
++	OP_WRITE_ZEROES,
+ 	OP_COLLAPSE_RANGE,
+ 	OP_INSERT_RANGE,
+ 	OP_CLONE_RANGE,
+@@ -189,6 +190,7 @@ int     keep_size_calls = 1;            /* -K flag disables */
+ int     unshare_range_calls = 1;        /* -u flag disables */
+ int     punch_hole_calls = 1;           /* -H flag disables */
+ int     zero_range_calls = 1;           /* -z flag disables */
++int     write_zeroes_calls = 1;         /* -Y flag disables */
+ int	collapse_range_calls = 1;	/* -C flag disables */
+ int	insert_range_calls = 1;		/* -I flag disables */
+ int	mapped_reads = 1;		/* -R flag disables it */
+@@ -306,6 +308,7 @@ static const char *op_names[] = {
+ 	[OP_FALLOCATE] = "fallocate",
+ 	[OP_PUNCH_HOLE] = "punch_hole",
+ 	[OP_ZERO_RANGE] = "zero_range",
++	[OP_WRITE_ZEROES] = "write_zeroes",
+ 	[OP_COLLAPSE_RANGE] = "collapse_range",
+ 	[OP_INSERT_RANGE] = "insert_range",
+ 	[OP_CLONE_RANGE] = "clone_range",
+@@ -486,6 +489,13 @@ logdump(void)
+ 			if (overlap)
+ 				prt("\t******ZZZZ");
+ 			break;
++		case OP_WRITE_ZEROES:
++			prt("WZERO    0x%x thru 0x%x\t(0x%x bytes)",
++			    lp->args[0], lp->args[0] + lp->args[1] - 1,
++			    lp->args[1]);
++			if (overlap)
++				prt("\t******ZZZZ");
++			break;
+ 		case OP_COLLAPSE_RANGE:
+ 			prt("COLLAPSE 0x%x thru 0x%x\t(0x%x bytes)",
+ 			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+@@ -1413,6 +1423,59 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
+ }
+ #endif
+ 
++#ifdef FALLOC_FL_WRITE_ZEROES
++void
++do_write_zeroes(unsigned offset, unsigned length)
++{
++	unsigned end_offset;
++	int mode = FALLOC_FL_WRITE_ZEROES;
 +
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount
++	if (length == 0) {
++		if (!quiet && testcalls > simulatedopcount)
++			prt("skipping zero length write zeroes\n");
++		log4(OP_WRITE_ZEROES, offset, length, FL_SKIPPED);
++		return;
++	}
 +
-+_xfs_has_feature $SCRATCH_MNT rmapbt || \
-+	_notrun "reverse mapping required to test directory auto-repair"
-+_xfs_has_feature $SCRATCH_MNT parent || \
-+	_notrun "parent pointers required to test directory auto-repair"
-+_require_xfs_healer $SCRATCH_MNT --repair
++	end_offset = offset + length;
 +
-+# Configure the filesystem for automatic repair of the filesystem.
-+$XFS_PROPERTY_PROG $SCRATCH_MNT set autofsck=repair >> $seqres.full
++	if (end_offset > biggest) {
++		biggest = end_offset;
++		if (!quiet && testcalls > simulatedopcount)
++			prt("write_zeroes to largest ever: 0x%x\n", end_offset);
++	}
 +
-+# Create a largeish directory
-+dblksz=$(_xfs_get_dir_blocksize "$SCRATCH_MNT")
-+echo testdata > $SCRATCH_MNT/a
-+mkdir -p "$SCRATCH_MNT/some/victimdir"
-+for ((i = 0; i < (dblksz / 255); i++)); do
-+	fname="$(printf "%0255d" "$i")"
-+	ln $SCRATCH_MNT/a $SCRATCH_MNT/some/victimdir/$fname
-+done
++	log4(OP_WRITE_ZEROES, offset, length, FL_NONE);
 +
-+# Did we get at least two dir blocks?
-+dirsize=$(stat -c '%s' $SCRATCH_MNT/some/victimdir)
-+test "$dirsize" -gt "$dblksz" || echo "failed to create two-block directory"
++	if (end_offset > file_size)
++		update_file_size(offset, length);
 +
-+# Break the directory, remount filesystem
-+_scratch_unmount
-+_scratch_xfs_db -x \
-+	-c 'path /some/victimdir' \
-+	-c 'bmap' \
-+	-c 'dblock 1' \
-+	-c 'blocktrash -z -0 -o 0 -x 2048 -y 2048 -n 2048' >> $seqres.full
++	if (testcalls <= simulatedopcount)
++		return;
 +
-+# mount --move only works if mount propagation is disabled, so we have to start
-+# a subshell with a separate mount namespace, disable propagation for the
-+# entire directory tree, and only then can we run our tests.
-+IN_MOUNTNS=1 unshare -m bash "$0"
++	if ((progressinterval && testcalls % progressinterval == 0) ||
++	    (debug && (monitorstart == -1 || monitorend == -1 ||
++		      end_offset <= monitorend))) {
++		prt("%lld wzero\tfrom 0x%x to 0x%x, (0x%x bytes)\n", testcalls,
++			offset, offset+length, length);
++	}
++	if (fallocate(fd, mode, (loff_t)offset, (loff_t)length) == -1) {
++		prt("write zeroes: 0x%x to 0x%x\n", offset, offset + length);
++		prterr("do_write_zeroes: fallocate");
++		report_failure(161);
++	}
 +
-+status=0
-+exit
-diff --git a/tests/xfs/1904.out b/tests/xfs/1904.out
-new file mode 100755
-index 00000000000000..34a46298dd439a
---- /dev/null
-+++ b/tests/xfs/1904.out
-@@ -0,0 +1,3 @@
-+QA output created by 1904
-+QA output created by 1904
-+ls: reading directory 'TEST_DIR/moocow/some/victimdir': Structure needs cleaning
++	memset(good_buf + offset, '\0', length);
++}
++
++#else
++void
++do_write_zeroes(unsigned offset, unsigned length)
++{
++	return;
++}
++#endif
++
+ #ifdef FALLOC_FL_COLLAPSE_RANGE
+ void
+ do_collapse_range(unsigned offset, unsigned length)
+@@ -2409,6 +2472,12 @@ have_op:
+ 			goto out;
+ 		}
+ 		break;
++	case OP_WRITE_ZEROES:
++		if (!write_zeroes_calls) {
++			log4(OP_WRITE_ZEROES, offset, size, FL_SKIPPED);
++			goto out;
++		}
++		break;
+ 	case OP_COLLAPSE_RANGE:
+ 		if (!collapse_range_calls) {
+ 			log4(OP_COLLAPSE_RANGE, offset, size, FL_SKIPPED);
+@@ -2512,6 +2581,10 @@ have_op:
+ 		TRIM_OFF_LEN(offset, size, maxfilelen);
+ 		do_zero_range(offset, size, keep_size);
+ 		break;
++	case OP_WRITE_ZEROES:
++		TRIM_OFF_LEN(offset, size, maxfilelen);
++		do_write_zeroes(offset, size);
++		break;
+ 	case OP_COLLAPSE_RANGE:
+ 		TRIM_OFF_LEN(offset, size, file_size - 1);
+ 		offset = rounddown_64(offset, block_size);
+@@ -2611,7 +2684,7 @@ void
+ usage(void)
+ {
+ 	fprintf(stdout, "usage: %s",
+-		"fsx [-adfhknqxyzBEFHIJKLORWXZ0]\n\
++		"fsx [-adfhknqxyzBEFHIJKLORWXZ0Y]\n\
+ 	   [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid]\n\
+ 	   [-l flen] [-m start:end] [-o oplen] [-p progressinterval]\n\
+ 	   [-r readbdy] [-s style] [-t truncbdy] [-w writebdy]\n\
+@@ -2663,6 +2736,9 @@ usage(void)
+ #ifdef FALLOC_FL_ZERO_RANGE
+ "	-z: Do not use zero range calls\n"
+ #endif
++#ifdef FALLOC_FL_WRITE_ZEROES
++"	-Y: Do not use write zeroes calls\n"
++#endif
+ #ifdef FALLOC_FL_COLLAPSE_RANGE
+ "	-C: Do not use collapse range calls\n"
+ #endif
+@@ -3160,7 +3236,7 @@ main(int argc, char **argv)
+ 	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
+ 
+ 	while ((ch = getopt_long(argc, argv,
+-				 "0ab:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:TOP:RS:UWXZ",
++				 "0ab:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:TOP:RS:UWXZY",
+ 				 longopts, NULL)) != EOF)
+ 		switch (ch) {
+ 		case 'a':
+@@ -3307,6 +3383,9 @@ main(int argc, char **argv)
+ 		case 'z':
+ 			zero_range_calls = 0;
+ 			break;
++		case 'Y':
++			write_zeroes_calls = 0;
++			break;
+ 		case 'C':
+ 			collapse_range_calls = 0;
+ 			break;
+@@ -3568,6 +3647,8 @@ main(int argc, char **argv)
+ 		punch_hole_calls = test_fallocate(FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE);
+ 	if (zero_range_calls)
+ 		zero_range_calls = test_fallocate(FALLOC_FL_ZERO_RANGE);
++	if (write_zeroes_calls)
++		write_zeroes_calls = test_fallocate(FALLOC_FL_WRITE_ZEROES);
+ 	if (collapse_range_calls)
+ 		collapse_range_calls = test_fallocate(FALLOC_FL_COLLAPSE_RANGE);
+ 	if (insert_range_calls)
+diff --git a/src/global.h b/src/global.h
+index fbc0a0b5..e07b3703 100644
+--- a/src/global.h
++++ b/src/global.h
+@@ -179,6 +179,14 @@
+ #define FALLOC_FL_INSERT_RANGE		0x20
+ #endif
+ 
++#ifndef FALLOC_FL_UNSHARE_RANGE
++#define FALLOC_FL_UNSHARE_RANGE		0x40
++#endif
++
++#ifndef FALLOC_FL_WRITE_ZEROES
++#define FALLOC_FL_WRITE_ZEROES		0x80
++#endif
++
+ #endif /* HAVE_LINUX_FALLOC_H */
+ 
+ #ifdef HAVE_SYS_MMAN_H
+
+base-commit: 3ded3e13c008326d197d11ac975049ed1f8ec922
+-- 
+2.51.2
+
