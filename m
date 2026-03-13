@@ -1,90 +1,87 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 454ED3D88F7
-	for <fstests@vger.kernel.org>; Fri, 13 Mar 2026 18:01:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9DA6A3DCDB7
+	for <fstests@vger.kernel.org>; Fri, 13 Mar 2026 18:19:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773424878; cv=none; b=jB7bn/RpJtqtPckA68bzGl1mbc8gjgLUdgLoucYT8zK3ecHuNLSxf1g1GNv26ZMhm4T9V84Bq3KBd4oMGB5tFlTRdfdFjxjfng913aaboRpC1Sw2uxU3rOoahg2Er2Owuuxf/Dbqi9Qar9VB2FXFLpkxnuPs3KsVH92QyixblBc=
+	t=1773425942; cv=none; b=bkjd/pcZo1sh41Al9KQ1ZT3xB6XlBPRR08OMaxSxVgiWcCV0levnLdgHrbOyRX5Od98VcmQ7VulDukAr+STWsrS0cP4vXbPGG/nJ07IZutgpoLpNc2M2f7iMU966MqwXvpUELCuynB1wPunL1kFWz0iOh5d5RTYB8uUwQiMIsCU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773424878; c=relaxed/simple;
-	bh=K3ueN2ynEMLdPkUUz/L1/1gws64MxJVYOgfOROK9bVM=;
+	s=arc-20240116; t=1773425942; c=relaxed/simple;
+	bh=SyWkhZl5QWjnl/ygrKTz/4AjrADUsIachLIVufoC67U=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Em4ZR3N2g+AO2xc6W7zguSBUsuit/EfPadtg9pDFnpZUpU4i25Ytk6Shl3gVYM2MrbhMMS1j2of+p1U4jR6hczGaMvsrRtW4HNCv2G1NB1/ntIHYvj+gdzXeJ71yNqIKUyqi9jJ8eqkHFVbT/xeVLMnBiPSQiv6lrnsMlPHTfrU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=X0ruHoZl; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=mP6jzkIh; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=nCaXQV9wIATQeAgBdZPicznHxpY0bRqME2spEAnfNZwIumMMAPy3Jpe3pkHhkWJYFOa8TXRZYJJvqfjZLXlsWNGze17C9BVjxCsAvlCNfVq3GREl7lPqaqhVjOsm45aT0QKYg50VFZenZoXwplOh+LqVnf2nE9tdg85QrVpGzbI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XhiMl3Zf; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=F7/6Bjd7; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="X0ruHoZl";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="mP6jzkIh"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XhiMl3Zf";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="F7/6Bjd7"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1773424873;
+	s=mimecast20190719; t=1773425939;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=kxlvtRu2GCyKP60R4M61GEbEmBeWLZKVhHwCuaFNTE8=;
-	b=X0ruHoZlY9slQ07eRSQbEZD6ckxir60JTLPDLLgJBC197+VK4l6/RdV+efYh1DDIh4Ew/1
-	9ny/WXma0MKDsTdEG9HhFLbvh2DHqvPKEwih+X8MQiVIaOFH3EQx8kF1KQex9COw8VdfvK
-	WBOnRDBHYUm+KgRC1kGfy/G2VhExR+g=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=CfHkBqrrPcwelnP7I3yoE0n27Ml9ocYK3ty32ugod7s=;
+	b=XhiMl3ZfhpfAbnz5nOGEZBwTU3CjclAweTY0kmPDAtWehE9uQet8MNVGwYa006KUbVJo5a
+	REeFdVWIGopPpoI1Im08qpy0Vs5g61Oc0S+U+pdhQK9pWCA3lBO/K50wu3Hmh8536Bke4R
+	WtcHoMr2Zbhk9s2/QNyuXZJBHTwZocY=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-696-LSzEBlOEPECR3GIqDWsO9Q-1; Fri, 13 Mar 2026 14:01:10 -0400
-X-MC-Unique: LSzEBlOEPECR3GIqDWsO9Q-1
-X-Mimecast-MFC-AGG-ID: LSzEBlOEPECR3GIqDWsO9Q_1773424869
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-2aec3f67844so22730925ad.3
-        for <fstests@vger.kernel.org>; Fri, 13 Mar 2026 11:01:10 -0700 (PDT)
+ us-mta-611-paHgntDePui6sAxvycq1Sg-1; Fri, 13 Mar 2026 14:18:57 -0400
+X-MC-Unique: paHgntDePui6sAxvycq1Sg-1
+X-Mimecast-MFC-AGG-ID: paHgntDePui6sAxvycq1Sg_1773425936
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2ae6961bff0so181408755ad.2
+        for <fstests@vger.kernel.org>; Fri, 13 Mar 2026 11:18:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1773424869; x=1774029669; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1773425935; x=1774030735; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=kxlvtRu2GCyKP60R4M61GEbEmBeWLZKVhHwCuaFNTE8=;
-        b=mP6jzkIhpCETGnIhtziN3yscxNBHpYeJ+b1Uigpd01zwPffLg+DmqOr3To1X8b3zJv
-         C66H7QzxU8jbK58c4ADSfd6MF/r2fYpsW/kk/tmVjIj9G++5Muj4BOj0smY7WsghhT8e
-         ELQahDzIhRdtsl0Q0vIsNiv46BeSX5wggV75PUkBfsv8H8uGFESRaM+5KihbnKCTm0KY
-         TwaudaYyLaK2A2xFHe2FB+2IDkKYpa4D67Pj7nMazU9mZNXhmAdnoDqSq3/5bgSQmb1i
-         iku138n/N6l2y4J632CZ7tZcRAb94a8I3zSTFqLwV8ArUwpW47PxG/wvDUZ6eT5237H2
-         ZEKQ==
+        bh=CfHkBqrrPcwelnP7I3yoE0n27Ml9ocYK3ty32ugod7s=;
+        b=F7/6Bjd7gnnkvQr30MW9vK22psZlvytUjgGuMWMz8lJd/RINQqBki7sEkmyTe9gp33
+         y6hlI5rGnxWqEXWh/8zfiDCbn+IjhNh3EMBEtdBGS1ENQb04RA8Rj1BE6JQLOsYMFueN
+         eujWRMfTY0OJ6XWyUoaBxtftDyi//zplnTHBAcY8j+NlGSSou9miACLE+SBIkzmL4deL
+         1fZ5l06RW2hdeJiN0ZVTWWzc/1rXS+VuLy1ghPjjbdLb8zQcknqJ1ACW0QHcXroO08Il
+         tDEHzL0t3/b3peB3P/1O/ZqiiqCH9pkgtf1++mno/wF0Mtf1Pe5YiXYzQ3oj7L3hlMlu
+         kpwg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773424869; x=1774029669;
+        d=1e100.net; s=20251104; t=1773425935; x=1774030735;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=kxlvtRu2GCyKP60R4M61GEbEmBeWLZKVhHwCuaFNTE8=;
-        b=k3ZE1UWYWibGHmYoyGglqH2F3SyJe9mOYenVIYk+vvUlq+BpR7/DM7mPLRbp6+Q2Sp
-         g5oKrwQ2hUM/sdtawBlXEUNqdzOEt8ccmic7D8bRJm4dILbr1iq1+OELzkzRWSpouqYd
-         q3Y4fzLNFs+vZVHaBQBTFZM00RZ5dh59vy7Cconwvlw6kd5FB7ADWezLA5cc8uqd8Uy1
-         HztKAorDM8QbyFsnM2g1JYPKG2TQ/+sAfdGqncR5uKEUB5SWjjccZMdbts6allUGFysy
-         YsoObovzCq4DuSeoHyco+a9kxVIm2a7CAedwmwnc4EaKUtbco6pNQjE33no6lfroYD3O
-         fcVQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVpt0nZQUAHSS4phMLX8icfxzdeMAkTQkKQd+kraaDskOafg//w3qCoyxWui6j1HZFq6cqY02P6@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxl8rx//Hz9Bhc0mQvNvdgwAsbfR6qQdDfl2DnJ6NeQjIE9uP9e
-	j94EBv83xebpADWHlw0peX4RXHZyCNXT38OvGUO+sc0bQVrZwZ8/6qhX/eMeo6ba+wVCngTkQd8
-	om3jZzMaTjbmwBTcb/bUhyntZtMRvMAqAa8oPirjhAcwrVGxKs9tdT6lQk7I=
-X-Gm-Gg: ATEYQzwL3CRUhyoZYmHlsgRv0DjnpnEVLvixgZ4draimCAHKv7n7aJhxjFPrt/mIoOO
-	ISmvjr+ZiHirD+de0tke08Sra9Th5PGrtGV94ompgtX6SlftiwXEgA2gPHtKIa5AqwVMTEQzX2v
-	zXuJMQSoMYp5D7xaN3t06C5TtZkyZlgoxqV/XGtBeF9dB9uZejsbkv2i7m/nXOGRkGZNMTvnKj2
-	TFf9g0qOSJem5vLv62uLfBh5DUP3GoP03BmTgNLB0mzEcoowGmLo5KhtjqfPU6xaqB93CQdBNGP
-	pbeeu6AIbWj1dejx7u6jl4uVnwzP2JnizxozKv8z6QO3pYE5TUMvxvYDlsKLPdp5tAeupBKhJmK
-	6Pu26MvL7IsJt79Ox8GyUMlF6rxUjnUXe0k37g0pl8SeKpYY+QctZ8Z76BPkt0Q==
-X-Received: by 2002:a17:903:ac7:b0:2ae:47f9:de12 with SMTP id d9443c01a7336-2aecac84e7fmr39851305ad.46.1773424868650;
-        Fri, 13 Mar 2026 11:01:08 -0700 (PDT)
-X-Received: by 2002:a17:903:ac7:b0:2ae:47f9:de12 with SMTP id d9443c01a7336-2aecac84e7fmr39850845ad.46.1773424868120;
-        Fri, 13 Mar 2026 11:01:08 -0700 (PDT)
+        bh=CfHkBqrrPcwelnP7I3yoE0n27Ml9ocYK3ty32ugod7s=;
+        b=G3w0C57wlpur9vw9+2shfQOyN6TA5KsKg+7+Qlji4N9Iefs8SxkpYSsLIwmW2T2Hck
+         TD6fR1jJzoeL5DZpE0yiQmCl39weDA4BooSkXXqif2KE1wldc2E8fu247A2+M7UThMp9
+         luzhDyKOE5ZLqmYRIFsGZ92lUD7EFBj6U1vYAuOGar4rpzWejGHaZ1XfpPSRGyVxMe8Y
+         l5uZbrfsS9VLQw4zUA8ARlfc9sUNwlvru0K55/63TqknD6Ak0fz24ba7BqV33gZjU8HP
+         rY7lGRz7Yoiws3RAX+GrNIlDXibeAisVQDDRVeepQQymOQM2bzqYhS2p/7+x6g8e67dy
+         iP3Q==
+X-Gm-Message-State: AOJu0YxhdZ3Qc9DKiPrA+h/Wo87vK/MfzbFFVzcKlgd0POE2SLhX60n8
+	/6OtctxIbWxtVqhOfOPi+CBdEEHMwbCVQoUlockaf9h7YW1eJ3EmAHyz7Jwe1ol9xVrdHcZYkhy
+	bGJDQ9v8isKBrlwYhs+4DEeh8CpBJtOaZGLQNk/syiWvCnoiAxNUh7gP6TULl4cd1G74=
+X-Gm-Gg: ATEYQzwLDr20nx8id0edLyVcTsIuyT3eR/4Ja+UvangPQcnByMmTp8SGElg3t/lFtGh
+	8ooWk21A1PNfJEdzx57Ez8qG3ETA2/rKDsy8yEoLULceDNfS+jkfXMZ1eHXGfS2LSmFg45PgZZZ
+	kmmMKf8EpxQ1rwr3Iku13iiB0Ml/DZYAeYR0o5CLaW/b5s/p7ZnYssk8NpXNwlANxj1hczV+Ofs
+	5/JSeO3HfH4XX8xsmeakYcSExntQ8RyvFpfs+gfCYGsvAFvEqGowshCkj00+EbEjVZ9j9easy6y
+	QUZNpcE9cSm+b7FPyQZetZkCNzWHK7FC7koJ0Y6NHUW4VGt9zzE9KC3vMxyP7sklBYeSPmIVl7g
+	xpgt5fWTBdS1+FtDWza1P+uDIkvEJ6X3e1g8tq6UEv9w2pWXLeTSnEjLaUPU/BA==
+X-Received: by 2002:a17:902:d484:b0:2ae:d427:d3ff with SMTP id d9443c01a7336-2aed427d732mr22408975ad.36.1773425935464;
+        Fri, 13 Mar 2026 11:18:55 -0700 (PDT)
+X-Received: by 2002:a17:902:d484:b0:2ae:d427:d3ff with SMTP id d9443c01a7336-2aed427d732mr22408745ad.36.1773425934954;
+        Fri, 13 Mar 2026 11:18:54 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2aece56cb7fsm35710685ad.6.2026.03.13.11.01.05
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2aece85e9dfsm28224545ad.87.2026.03.13.11.18.51
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 13 Mar 2026 11:01:07 -0700 (PDT)
-Date: Sat, 14 Mar 2026 02:01:02 +0800
+        Fri, 13 Mar 2026 11:18:53 -0700 (PDT)
+Date: Sat, 14 Mar 2026 02:18:49 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: jack@suse.cz, fstests@vger.kernel.org, amir73il@gmail.com,
-	gabriel@krisman.be, linux-fsdevel@vger.kernel.org,
-	linux-xfs@vger.kernel.org, hch@lst.de
-Subject: Re: [PATCH 1/1] generic: test fsnotify filesystem error reporting
-Message-ID: <20260313180102.afyzstsgzjioa56j@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <177311403420.1186306.10503664469609309721.stgit@frogsfrogsfrogs>
- <177311403440.1186306.11707487947646813883.stgit@frogsfrogsfrogs>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 01/14] xfs: test health monitoring code
+Message-ID: <20260313181849.pofzy7kuyoplumnc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <177311403712.1186408.7032564474004561606.stgit@frogsfrogsfrogs>
+ <177311403795.1186408.11292081408049550687.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -93,505 +90,127 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <177311403440.1186306.11707487947646813883.stgit@frogsfrogsfrogs>
+In-Reply-To: <177311403795.1186408.11292081408049550687.stgit@frogsfrogsfrogs>
 
-On Mon, Mar 09, 2026 at 08:50:08PM -0700, Darrick J. Wong wrote:
+On Mon, Mar 09, 2026 at 08:50:23PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Test the fsnotify filesystem error reporting.
+> Add some functionality tests for the new health monitoring code.
 > 
 > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
 > ---
->  common/rc              |   25 ++++++
->  doc/group-names.txt    |    1 
->  src/Makefile           |    2 
->  src/fs-monitor.c       |  153 ++++++++++++++++++++++++++++++++++
+>  common/module      |   11 ++++++++++
+>  tests/xfs/1885     |   59 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/1885.out |    5 ++++
+>  3 files changed, 75 insertions(+)
+>  create mode 100755 tests/xfs/1885
+>  create mode 100644 tests/xfs/1885.out
+> 
+> 
+> diff --git a/common/module b/common/module
+> index 697d76ba718bbc..c0529b65ad6e2b 100644
+> --- a/common/module
+> +++ b/common/module
+> @@ -225,3 +225,14 @@ _optional_reload_fs_module()
+>  		_test_loadable_fs_module "$@" 2>&1 | \
+>  		sed -e '/patient module removal/d'
+>  }
+> +
+> +_require_module_refcount()
+> +{
+> +	local refcount_file="/sys/module/$1/refcnt"
+> +	test -e "$refcount_file" || _notrun "cannot find $1 module refcount"
+> +}
+> +
+> +_module_refcount()
+> +{
+> +	cat "/sys/module/$1/refcnt"
+> +}
+> diff --git a/tests/xfs/1885 b/tests/xfs/1885
+> new file mode 100755
+> index 00000000000000..d44b29d1c57e06
+> --- /dev/null
+> +++ b/tests/xfs/1885
+> @@ -0,0 +1,59 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024-2026 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 1885
+> +#
+> +# Make sure that healthmon handles module refcount correctly.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto selfhealing quick
+> +
+> +. ./common/filter
+> +. ./common/module
+> +
+> +_cleanup()
+> +{
+> +	test -n "$healer_pid" && kill $healer_pid &>/dev/null
 
-I'll add "src/fs-monitor" into .gitignore file when I merge this patch.
-Others look good to me.
+I'll add a "wait" at here, and ...
+
+> +	cd /
+> +	rm -r -f $tmp.*
+> +}
+> +
+> +_require_test
+> +_require_xfs_io_command healthmon
+> +_require_module_refcount xfs
+> +
+> +# Capture mod refcount without the test fs mounted
+> +_test_unmount
+> +init_refcount="$(_module_refcount xfs)"
+> +
+> +# Capture mod refcount with the test fs mounted
+> +_test_mount
+> +nomon_mount_refcount="$(_module_refcount xfs)"
+> +
+> +# Capture mod refcount with test fs mounted and the healthmon fd open.
+> +# Pause the xfs_io process so that it doesn't actually respond to events.
+> +$XFS_IO_PROG -c 'healthmon -c -v' $TEST_DIR >> $seqres.full &
+> +healer_pid=$!
+> +sleep 0.5
+> +kill -STOP $healer_pid
+> +mon_mount_refcount="$(_module_refcount xfs)"
+> +
+> +# Capture mod refcount with only the healthmon fd open.
+> +_test_unmount
+> +mon_nomount_refcount="$(_module_refcount xfs)"
+> +
+> +# Capture mod refcount after continuing healthmon (which should exit due to the
+> +# unmount) and killing it.
+> +kill -CONT $healer_pid
+> +kill $healer_pid
+> +wait
+
+unset healer_pid
+
+others look good to me,
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  tests/generic/1838     |  214 ++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/1838.out |   20 ++++
->  6 files changed, 414 insertions(+), 1 deletion(-)
->  create mode 100644 src/fs-monitor.c
->  create mode 100755 tests/generic/1838
->  create mode 100644 tests/generic/1838.out
-> 
-> 
-> diff --git a/common/rc b/common/rc
-> index fd4ca9641822cf..ccb78baf5bd41a 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3013,6 +3013,11 @@ _require_xfs_io_command()
->  		echo $testio | grep -q "Inappropriate ioctl" && \
->  			_notrun "xfs_io $command support is missing"
->  		;;
-> +	"healthmon")
-> +		test -z "$param" && param="-p"
-> +		testio=`$XFS_IO_PROG -c "healthmon $param" $TEST_DIR 2>&1`
-> +		param_checked="$param"
-> +		;;
->  	"label")
->  		testio=`$XFS_IO_PROG -c "label" $TEST_DIR 2>&1`
->  		;;
-> @@ -6149,6 +6154,26 @@ _require_max_file_range_blocks()
->  	esac
->  }
->  
-> +_require_fanotify_ioerrors()
-> +{
-> +	local x
+> +nomon_nomount_refcount="$(_module_refcount xfs)"
 > +
-> +	case "$FSTYP" in
-> +	xfs)
-> +		# added as a part of xfs health monitoring
-> +		_require_xfs_io_command healthmon
-> +		return 0
-> +		;;
-> +	ext4)
-> +		# added at the same time as err_report_sec
-> +		x="$(_get_fs_sysfs_attr $TEST_DEV err_report_sec)"
-> +		test -n "$x" && return 0
-> +		;;
-> +	esac
+> +_within_tolerance "mount refcount" "$nomon_mount_refcount" "$((init_refcount + 1))" 0 -v
+> +_within_tolerance "mount + healthmon refcount" "$mon_mount_refcount" "$((init_refcount + 2))" 0 -v
+> +_within_tolerance "healthmon refcount" "$mon_nomount_refcount" "$((init_refcount + 1))" 0 -v
+> +_within_tolerance "end refcount" "$nomon_nomount_refcount" "$init_refcount" 0 -v
 > +
-> +	_notrun "$FSTYP does not support fanotify ioerrors"
-> +}
-> +
->  ################################################################################
->  # make sure this script returns success
->  /bin/true
-> diff --git a/doc/group-names.txt b/doc/group-names.txt
-> index 10b49e50517797..158f84d36d3154 100644
-> --- a/doc/group-names.txt
-> +++ b/doc/group-names.txt
-> @@ -117,6 +117,7 @@ samefs			overlayfs when all layers are on the same fs
->  scrub			filesystem metadata scrubbers
->  seed			btrfs seeded filesystems
->  seek			llseek functionality
-> +selfhealing		self healing filesystem code
->  selftest		tests with fixed results, used to validate testing setup
->  send			btrfs send/receive
->  shrinkfs		decreasing the size of a filesystem
-> diff --git a/src/Makefile b/src/Makefile
-> index 577d816ae859b6..1c761da0ccff20 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -36,7 +36,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
->  	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
->  	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
-> -	rw_hint
-> +	rw_hint fs-monitor
->  
->  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
->  	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-> diff --git a/src/fs-monitor.c b/src/fs-monitor.c
-> new file mode 100644
-> index 00000000000000..0cf09677a3efda
-> --- /dev/null
-> +++ b/src/fs-monitor.c
-> @@ -0,0 +1,153 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Copyright 2021, Collabora Ltd.
-> + * Copied from https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/samples/fanotify/fs-monitor.c
-> + */
-> +
-> +#include <errno.h>
-> +#include <err.h>
-> +#include <stdlib.h>
-> +#include <stdio.h>
-> +#include <fcntl.h>
-> +#include <sys/fanotify.h>
-> +#include <sys/types.h>
-> +#include <unistd.h>
-> +
-> +#ifndef FAN_FS_ERROR
-> +#define FAN_FS_ERROR		0x00008000
-> +#define FAN_EVENT_INFO_TYPE_ERROR	5
-> +
-> +struct fanotify_event_info_error {
-> +	struct fanotify_event_info_header hdr;
-> +	__s32 error;
-> +	__u32 error_count;
-> +};
-> +#endif
-> +
-> +#ifndef FILEID_INO32_GEN
-> +#define FILEID_INO32_GEN	1
-> +#endif
-> +
-> +#ifndef FILEID_INVALID
-> +#define	FILEID_INVALID		0xff
-> +#endif
-> +
-> +static void print_fh(struct file_handle *fh)
-> +{
-> +	int i;
-> +	uint32_t *h = (uint32_t *) fh->f_handle;
-> +
-> +	printf("\tfh: ");
-> +	for (i = 0; i < fh->handle_bytes; i++)
-> +		printf("%hhx", fh->f_handle[i]);
-> +	printf("\n");
-> +
-> +	printf("\tdecoded fh: ");
-> +	if (fh->handle_type == FILEID_INO32_GEN)
-> +		printf("inode=%u gen=%u\n", h[0], h[1]);
-> +	else if (fh->handle_type == FILEID_INVALID && !fh->handle_bytes)
-> +		printf("Type %d (Superblock error)\n", fh->handle_type);
-> +	else
-> +		printf("Type %d (Unknown)\n", fh->handle_type);
-> +
-> +}
-> +
-> +static void handle_notifications(char *buffer, int len)
-> +{
-> +	struct fanotify_event_metadata *event =
-> +		(struct fanotify_event_metadata *) buffer;
-> +	struct fanotify_event_info_header *info;
-> +	struct fanotify_event_info_error *err;
-> +	struct fanotify_event_info_fid *fid;
-> +	int off;
-> +
-> +	for (; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
-> +
-> +		if (event->mask != FAN_FS_ERROR) {
-> +			printf("unexpected FAN MARK: %llx\n",
-> +							(unsigned long long)event->mask);
-> +			goto next_event;
-> +		}
-> +
-> +		if (event->fd != FAN_NOFD) {
-> +			printf("Unexpected fd (!= FAN_NOFD)\n");
-> +			goto next_event;
-> +		}
-> +
-> +		printf("FAN_FS_ERROR (len=%d)\n", event->event_len);
-> +
-> +		for (off = sizeof(*event) ; off < event->event_len;
-> +		     off += info->len) {
-> +			info = (struct fanotify_event_info_header *)
-> +				((char *) event + off);
-> +
-> +			switch (info->info_type) {
-> +			case FAN_EVENT_INFO_TYPE_ERROR:
-> +				err = (struct fanotify_event_info_error *) info;
-> +
-> +				printf("\tGeneric Error Record: len=%d\n",
-> +				       err->hdr.len);
-> +				printf("\terror: %d\n", err->error);
-> +				printf("\terror_count: %d\n", err->error_count);
-> +				break;
-> +
-> +			case FAN_EVENT_INFO_TYPE_FID:
-> +				fid = (struct fanotify_event_info_fid *) info;
-> +
-> +				printf("\tfsid: %x%x\n",
-> +#if defined(__GLIBC__)
-> +				       fid->fsid.val[0], fid->fsid.val[1]);
-> +#else
-> +				       fid->fsid.__val[0], fid->fsid.__val[1]);
-> +#endif
-> +				print_fh((struct file_handle *) &fid->handle);
-> +				break;
-> +
-> +			default:
-> +				printf("\tUnknown info type=%d len=%d:\n",
-> +				       info->info_type, info->len);
-> +			}
-> +		}
-> +next_event:
-> +		printf("---\n\n");
-> +		fflush(stdout);
-> +	}
-> +}
-> +
-> +int main(int argc, char **argv)
-> +{
-> +	int fd;
-> +
-> +	char buffer[BUFSIZ];
-> +
-> +	if (argc < 2) {
-> +		printf("Missing path argument\n");
-> +		return 1;
-> +	}
-> +
-> +	fd = fanotify_init(FAN_CLASS_NOTIF|FAN_REPORT_FID, O_RDONLY);
-> +	if (fd < 0) {
-> +		perror("fanotify_init");
-> +		errx(1, "fanotify_init");
-> +	}
-> +
-> +	if (fanotify_mark(fd, FAN_MARK_ADD|FAN_MARK_FILESYSTEM,
-> +			  FAN_FS_ERROR, AT_FDCWD, argv[1])) {
-> +		perror("fanotify_mark");
-> +		errx(1, "fanotify_mark");
-> +	}
-> +
-> +	printf("fanotify active\n");
-> +	fflush(stdout);
-> +
-> +	while (1) {
-> +		int n = read(fd, buffer, BUFSIZ);
-> +
-> +		if (n < 0)
-> +			errx(1, "read");
-> +
-> +		handle_notifications(buffer, n);
-> +	}
-> +
-> +	return 0;
-> +}
-> diff --git a/tests/generic/1838 b/tests/generic/1838
-> new file mode 100755
-> index 00000000000000..940811baae3a6e
-> --- /dev/null
-> +++ b/tests/generic/1838
-> @@ -0,0 +1,214 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2024-2026 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 1838
-> +#
-> +# Check that fsnotify can report file IO errors.
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick eio selfhealing
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	cd /
-> +	test -n "$fsmonitor_pid" && kill -TERM $fsmonitor_pid
-> +	rm -f $tmp.*
-> +	_dmerror_cleanup
-> +}
-> +
-> +# Import common functions.
-> +. ./common/fuzzy
-> +. ./common/filter
-> +. ./common/dmerror
-> +. ./common/systemd
-> +
-> +_require_scratch
-> +_require_dm_target error
-> +_require_test_program fs-monitor
-> +_require_xfs_io_command "fiemap"
-> +_require_odirect
-> +_require_fanotify_ioerrors
-> +
-> +# no out of place writes
-> +test "$FSTYP" = "xfs" && _require_no_xfs_always_cow
-> +
-> +# fsnotify only gives us a file handle, the error number, and the number of
-> +# times it was seen in between event deliveries.   The handle is mostly useless
-> +# since we have no generic way to map that to a file path.  Therefore we can
-> +# only coalesce all the I/O errors into one report.
-> +filter_fsnotify_errors() {
-> +	_filter_scratch | \
-> +		grep -E '(FAN_FS_ERROR|Generic Error Record|error: 5)' | \
-> +		sed -e "s/len=[0-9]*/len=XXX/g" | \
-> +		sort | \
-> +		uniq
-> +}
-> +
-> +_scratch_mkfs >> $seqres.full
-> +
-> +#
-> +# The dm-error map added by this test doesn't work on zoned devices because
-> +# table sizes need to be aligned to the zone size, and even for zoned on
-> +# conventional this test will get confused because of the internal RT device.
-> +#
-> +# That check requires a mounted file system, so do a dummy mount before setting
-> +# up DM.
-> +#
-> +_scratch_mount
-> +test $FSTYP = xfs && _require_xfs_scratch_non_zoned
-> +_scratch_unmount
-> +
-> +_dmerror_init
-> +_dmerror_mount >> $seqres.full 2>&1
-> +
-> +test $FSTYP = xfs && _xfs_force_bdev data $SCRATCH_MNT
-> +
-> +# Write a file with 4 file blocks worth of data, figure out the LBA to target
-> +victim=$SCRATCH_MNT/a
-> +file_blksz=$(_get_file_block_size $SCRATCH_MNT)
-> +$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c "fsync" $victim >> $seqres.full
-> +
-> +awk_len_prog='{print $4}'
-> +bmap_str="$($XFS_IO_PROG -c "fiemap -v" $victim | grep "^[[:space:]]*0:")"
-> +echo "$bmap_str" >> $seqres.full
-> +
-> +phys="$(echo "$bmap_str" | $AWK_PROG '{print $3}')"
-> +len="$(echo "$bmap_str" | $AWK_PROG "$awk_len_prog")"
-> +
-> +fs_blksz=$(_get_block_size $SCRATCH_MNT)
-> +echo "file_blksz:$file_blksz:fs_blksz:$fs_blksz" >> $seqres.full
-> +kernel_sectors_per_fs_block=$((fs_blksz / 512))
-> +
-> +# Did we get at least 4 fs blocks worth of extent?
-> +min_len_sectors=$(( 4 * kernel_sectors_per_fs_block ))
-> +test "$len" -lt $min_len_sectors && \
-> +	_fail "could not format a long enough extent on an empty fs??"
-> +
-> +phys_start=$(echo "$phys" | sed -e 's/\.\..*//g')
-> +
-> +echo "$phys:$len:$fs_blksz:$phys_start" >> $seqres.full
-> +echo "victim file:" >> $seqres.full
-> +od -tx1 -Ad -c $victim >> $seqres.full
-> +
-> +# Set the dmerror table so that all IO will pass through.
-> +_dmerror_reset_table
-> +
-> +cat >> $seqres.full << ENDL
-> +dmerror before:
-> +$DMERROR_TABLE
-> +$DMERROR_RTTABLE
-> +<end table>
-> +ENDL
-> +
-> +# All sector numbers that we feed to the kernel must be in units of 512b, but
-> +# they also must be aligned to the device's logical block size.
-> +logical_block_size=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
-> +kernel_sectors_per_device_lba=$((logical_block_size / 512))
-> +
-> +# Mark as bad one of the device LBAs in the middle of the extent.  Target the
-> +# second LBA of the third block of the four-block file extent that we allocated
-> +# earlier, but without overflowing into the fourth file block.
-> +bad_sector=$(( phys_start + (2 * kernel_sectors_per_fs_block) ))
-> +bad_len=$kernel_sectors_per_device_lba
-> +if (( kernel_sectors_per_device_lba < kernel_sectors_per_fs_block )); then
-> +	bad_sector=$((bad_sector + kernel_sectors_per_device_lba))
-> +fi
-> +if (( (bad_sector % kernel_sectors_per_device_lba) != 0)); then
-> +	echo "bad_sector $bad_sector not congruent with device logical block size $logical_block_size"
-> +fi
-> +
-> +# Remount to flush the page cache, start fsnotify, and make the LBA bad
-> +_dmerror_unmount
-> +_dmerror_mount
-> +
-> +$here/src/fs-monitor $SCRATCH_MNT > $tmp.fsmonitor &
-> +fsmonitor_pid=$!
-> +sleep 1
-> +
-> +_dmerror_mark_range_bad $bad_sector $bad_len
-> +
-> +cat >> $seqres.full << ENDL
-> +dmerror after marking bad:
-> +$DMERROR_TABLE
-> +$DMERROR_RTTABLE
-> +<end table>
-> +ENDL
-> +
-> +_dmerror_load_error_table
-> +
-> +# See if buffered reads pick it up
-> +echo "Try buffered read"
-> +$XFS_IO_PROG -c "pread 0 $((4 * file_blksz))" $victim >> $seqres.full
-> +
-> +# See if directio reads pick it up
-> +echo "Try directio read"
-> +$XFS_IO_PROG -d -c "pread 0 $((4 * file_blksz))" $victim >> $seqres.full
-> +
-> +# See if directio writes pick it up
-> +echo "Try directio write"
-> +$XFS_IO_PROG -d -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c fsync $victim >> $seqres.full
-> +
-> +# See if buffered writes pick it up
-> +echo "Try buffered write"
-> +$XFS_IO_PROG -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c fsync $victim >> $seqres.full
-> +
-> +# Now mark the bad range good so that unmount won't fail due to IO errors.
-> +echo "Fix device"
-> +_dmerror_mark_range_good $bad_sector $bad_len
-> +_dmerror_load_error_table
-> +
-> +cat >> $seqres.full << ENDL
-> +dmerror after marking good:
-> +$DMERROR_TABLE
-> +$DMERROR_RTTABLE
-> +<end table>
-> +ENDL
-> +
-> +# Unmount filesystem to start fresh
-> +echo "Kill fsnotify"
-> +_dmerror_unmount
-> +sleep 1
-> +kill -TERM $fsmonitor_pid
-> +unset fsmonitor_pid
-> +echo fsnotify log >> $seqres.full
-> +cat $tmp.fsmonitor >> $seqres.full
-> +cat $tmp.fsmonitor | filter_fsnotify_errors
-> +
-> +# Start fsnotify again so that can verify that the errors don't persist after
-> +# we flip back to the good dm table.
-> +echo "Remount and restart fsnotify"
-> +_dmerror_mount
-> +$here/src/fs-monitor $SCRATCH_MNT > $tmp.fsmonitor &
-> +fsmonitor_pid=$!
-> +sleep 1
-> +
-> +# See if buffered reads pick it up
-> +echo "Try buffered read again"
-> +$XFS_IO_PROG -c "pread 0 $((4 * file_blksz))" $victim >> $seqres.full
-> +
-> +# See if directio reads pick it up
-> +echo "Try directio read again"
-> +$XFS_IO_PROG -d -c "pread 0 $((4 * file_blksz))" $victim >> $seqres.full
-> +
-> +# See if directio writes pick it up
-> +echo "Try directio write again"
-> +$XFS_IO_PROG -d -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c fsync $victim >> $seqres.full
-> +
-> +# See if buffered writes pick it up
-> +echo "Try buffered write again"
-> +$XFS_IO_PROG -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c fsync $victim >> $seqres.full
-> +
-> +# Unmount fs and kill fsnotify, then wait for it to finish
-> +echo "Kill fsnotify again"
-> +_dmerror_unmount
-> +sleep 1
-> +kill -TERM $fsmonitor_pid
-> +unset fsmonitor_pid
-> +cat $tmp.fsmonitor >> $seqres.full
-> +cat $tmp.fsmonitor | filter_fsnotify_errors
-> +
-> +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/generic/1838.out b/tests/generic/1838.out
+> diff --git a/tests/xfs/1885.out b/tests/xfs/1885.out
 > new file mode 100644
-> index 00000000000000..adae590fe0b2ea
+> index 00000000000000..f152cef0525609
 > --- /dev/null
-> +++ b/tests/generic/1838.out
-> @@ -0,0 +1,20 @@
-> +QA output created by 1838
-> +Try buffered read
-> +pread: Input/output error
-> +Try directio read
-> +pread: Input/output error
-> +Try directio write
-> +pwrite: Input/output error
-> +Try buffered write
-> +fsync: Input/output error
-> +Fix device
-> +Kill fsnotify
-> +	Generic Error Record: len=XXX
-> +	error: 5
-> +FAN_FS_ERROR (len=XXX)
-> +Remount and restart fsnotify
-> +Try buffered read again
-> +Try directio read again
-> +Try directio write again
-> +Try buffered write again
-> +Kill fsnotify again
+> +++ b/tests/xfs/1885.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 1885
+> +mount refcount is in range
+> +mount + healthmon refcount is in range
+> +healthmon refcount is in range
+> +end refcount is in range
 > 
 
