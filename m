@@ -1,87 +1,87 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E3A33CB2C8
-	for <fstests@vger.kernel.org>; Fri, 13 Mar 2026 19:28:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 628BC1DF248
+	for <fstests@vger.kernel.org>; Fri, 13 Mar 2026 19:32:25 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773430100; cv=none; b=O+H4UbYyJq8Xvz+MvQYP+lSnsdblmKYKP9DktRgUS/93ORZeF41sOvCfdI1w6OLc0mc1WMaUjJqwQiIohwpxzD1ddKFu3/oxa7K6OuPQ6cUAgqaEpAMddjfBj6jMFFu5HY8VSuZbCvAWNlwAIFcOWgV+LZNzOjIDbC6Yk+6ZVGo=
+	t=1773430347; cv=none; b=BkevndCzZ0j9b9bSaJZGB+BzZ0G+qr9MQYNc3dDbdKjL3om9Nc1h00RWlVZp71fxq1fKd447KZ0BObsWCtcTGeXd05FGH+ktf/OkAKdS0gMqc9l7bWKV4rwclx1FTTt46vHxlcCNrCYg0FOKaRw9vkmU+5ZZOuL98tCufjTWaAQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773430100; c=relaxed/simple;
-	bh=eFg5Ud/pXw9BgN+ZKi4E7gdnqHZnxs7PcavZ3SnTYmc=;
+	s=arc-20240116; t=1773430347; c=relaxed/simple;
+	bh=93FqpVP7QYITBr1jhQR+adipzmbAcbSrUcxWlPGy4q0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=RDLlkOx01ddGqshg6meVQQtNuE4TPgpUUS/sp0pUerzPM46lZY95dy3UHg+DD2XAex9jq7a7K6zvcbZ2wW4xu9TSTg62lh4mYOTtZv/fAFB53jqCfPszYOIsAVtwIxJhmTOxBKpojcgZ6v06e5y5Ps3wk8HJ7VmT+zYRvcEZQmc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fXUxPtED; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=AnN9yml6; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=bwoWAj1NftoFhlKpFaBJA11TjRrgVG+8FeBBDcRM10mfKtn2+bqMAA0pJgqRajbwBbeId4eUBCkmd6b5wobnzOzFAUjebbUehBFvT3HFiYl1Z/Tyrj8m2ldoWM9MJCkJxqniOxY5FNlnoD6rqdUeQW2QaWG4x03xAL4hL7cxDWs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=TnNsrJsn; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=VVIyWpnv; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fXUxPtED";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="AnN9yml6"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="TnNsrJsn";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="VVIyWpnv"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1773430098;
+	s=mimecast20190719; t=1773430344;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=SU195nWeFaO4HZwLZPKAG3hBwqIIai7MC9ln7TpUlOk=;
-	b=fXUxPtEDrdwbx4ShhXclrmd7nCD8jpw1zjRKvv5kKq9JxxEns6CmvGLcrqPqCQGoU6SiSj
-	BHzUKYWwCAl2TxJwOnA2M+Hq1PvMUDVRYFATOILFp2UyyGcdSYxkbM2I0Ia528MN0ymDCv
-	Lf62CP/Mka/JohNqwOpiKm2AD0f451U=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=cID933nmxrU7CYOl4lGdzsQUC3e3+K8hwd9xh3fzkiQ=;
+	b=TnNsrJsnUap/HEvL1eeBVeYc0IDldIMVvSFS9pkJ75ic05/byE4IafQRg8mG9DhpopQnzs
+	tEergrEJHQ92C9aanFcKDP5EgyzykJVMd8s525F6BBEi1mRdmmGG4jWfsEJDoskTNBszxK
+	UsbR5JwncUTlz9MwX/Mlzb4ovwupqTw=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-370-CITpRd2LMpqfCvjfqbbwTA-1; Fri, 13 Mar 2026 15:28:16 -0400
-X-MC-Unique: CITpRd2LMpqfCvjfqbbwTA-1
-X-Mimecast-MFC-AGG-ID: CITpRd2LMpqfCvjfqbbwTA_1773430096
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2aec6c572fbso134498135ad.1
-        for <fstests@vger.kernel.org>; Fri, 13 Mar 2026 12:28:16 -0700 (PDT)
+ us-mta-572-CeBUCu1bNs-omBFLso2dSQ-1; Fri, 13 Mar 2026 15:32:23 -0400
+X-MC-Unique: CeBUCu1bNs-omBFLso2dSQ-1
+X-Mimecast-MFC-AGG-ID: CeBUCu1bNs-omBFLso2dSQ_1773430342
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2ae50463ba8so195500915ad.0
+        for <fstests@vger.kernel.org>; Fri, 13 Mar 2026 12:32:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1773430095; x=1774034895; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1773430341; x=1774035141; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=SU195nWeFaO4HZwLZPKAG3hBwqIIai7MC9ln7TpUlOk=;
-        b=AnN9yml66O45BaZ56vwGhwfHxcPFJNYWpRKy5uRacPj/Kep8KfpEAFHzogfYRV2Pga
-         CJw8oewYQL3SoRIlvKIhwSu3RYOg/wlYcvyQPRHWHSGi5k3S8CiPrBpj7z2Yms9HNSpE
-         JJWPoY6zHBzk4cjQXNZKCMqF2M2HroYuddIqw7xGLEiPwvDbD3hQMnzpJb/42//adjHv
-         M41wb3jLp1O0JG2NYtATqPMK7I0jwZ1OhNi4CNEaWtFS5L8dm9nd1fXFWJ9UQq4ND83A
-         0wt5IjmxbWAFMRcwxg+8NHVFO7HXaT+ntDpi6l0l2QbZPeEx20Fke9OlkFg1ENXVyAt5
-         p6Dw==
+        bh=cID933nmxrU7CYOl4lGdzsQUC3e3+K8hwd9xh3fzkiQ=;
+        b=VVIyWpnvNFKwgYx/Us4HLXiqXZb7bZHINIHIeJb5qh1BhJzNuigfD49ufYXrCyeD65
+         eVvlYBRLDb+33NBGsBVfKniKHygm0QemzkB9NAduhfgfV0hvQlfWjsrq8QDslnH//aoT
+         9BtX/AASn2TaOi4UFPPhzMw/xXOQH6d0PaxcluVCZXpSsml2KrQy1xNUIa+r1+RIQKT2
+         n+ReV3HuuqxXGtoIkgS/m6S9kbfibiyeoekYRwF86wJjDzmfUkebGVmv8szUxyDruRqi
+         kG7MsMg1dokrl14AsK6TXf3PDl7TQH5/uEFEPqvO23tSPL4hWDwxbKOCBt8V37DpMzas
+         E+4A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773430095; x=1774034895;
+        d=1e100.net; s=20251104; t=1773430341; x=1774035141;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=SU195nWeFaO4HZwLZPKAG3hBwqIIai7MC9ln7TpUlOk=;
-        b=dX2hgm3frHf4md/+cp8quuB2ISOjwGks5HcaHsvAvxqtgRsyFZmQRqz03ZLvVaJ0Uc
-         GODkDttkKoHhmWJhxsXEBy+BkLkRi1gCkbXFeLo4BMGiHp2pPCm6pixRz6oEnKjFoXQQ
-         caiTlre7QjccZhjW0hc60P8fiITDt+bRfrkaQKER3hsA4gyu9xDnZ4IPBTakz3adkP9F
-         /vruUvOhrAjIshNwgdS4wY6e2c/RU3m9ZksP16Op94DfQ1STpCPFcBlfDt+wy1+eLHk8
-         vcilc/oH+Pzg2Tm2MuD5Wky2OTJqsXr8GScRtSnYf6DiLkukbCu3TnRZlwK20jhowdhr
-         cHvg==
-X-Gm-Message-State: AOJu0YwDaBelpaciVoa5XS9Xz6l1r8BZ+TDL72tXriyo8Xued888B6M9
-	G6NryFeYSzv9XcLJRpYKK+FS06uz0CUTeHFNU/1jKyrfFUK1+Vrdv8RBpE9BIUbLBUNIPyPo96D
-	6mJL7lHvItkbkdqFgSCcUsca0Vrto0SHer/aEbLnuVEBjnLZwVJN7GBhafKVwQbshFKs=
-X-Gm-Gg: ATEYQzwepzl2KJoEp2Xbz4SedOBhbVDFfnwUKWCI38HNuM+KXGgufMBCbTX34T7bFOY
-	MmtvV2z/5/GuM7E2BBHSwEsfWYtALOHXGxQpja6PGXB3lVul83+iSYN7JUnFiFIb0/2w6b6erAD
-	bJ6F/CjjXPp0LxUkDg6ac0uKnFRw010Uk05d/6jBaKFwsmLftPJKzXcSo4WUethvXOhO0KacR0K
-	csZs9ENvbDjSvPK8vMEL3aN693VRgGZk6ASY/UrGvmS64v5p5ywsoQoYSL8+1gTuU2ymP10PKt7
-	JSVy07+2vsBVt3iHXXHF/vBjU6S3apBxvXhnu7dE0Bte6ifl+QTUfPtelz69nJ6oFScVUE6Sb9v
-	vmL3JlugkRdFtMPEnVTp5jhsMmUhWk5hZiOV+C4E4Ae39IE/wu+OVBcj16qQEVQ==
-X-Received: by 2002:a05:6a21:700d:b0:398:71f2:59d8 with SMTP id adf61e73a8af0-398ecda24a4mr4203660637.56.1773430095383;
-        Fri, 13 Mar 2026 12:28:15 -0700 (PDT)
-X-Received: by 2002:a05:6a21:700d:b0:398:71f2:59d8 with SMTP id adf61e73a8af0-398ecda24a4mr4203646637.56.1773430094920;
-        Fri, 13 Mar 2026 12:28:14 -0700 (PDT)
+        bh=cID933nmxrU7CYOl4lGdzsQUC3e3+K8hwd9xh3fzkiQ=;
+        b=aaLH1+Wo0RImBR/xU9Pk+l5LX/aEjLbxGPK1Lsd88owkeRZnfhK7edV6C7O8cZGVpP
+         yPWYPtdzxDBonwmk5PZszEXVIstVptJz/8/EIPBcFBdzmkwx6yyAEIXtk7T72mS/v/Qc
+         /uxPPX0vK6mxWZonxG36U77hDMC99VB/uWm8Mc/OBSIiPbtITAKl8jvjhChQIeHAqisZ
+         eiJB2uCFe9oDdRl+exh0W836Rs6EFPwgTXtXnkgt6Gbmzg2PJ+jPUsgyGEPXBCcBX52n
+         1CuOQUKbuzVOKJrnsS85u4CTSTxBf3fUOYLpfJl6eeVdPgNzXV3mg18ExhsgMy2mT7AD
+         wuWA==
+X-Gm-Message-State: AOJu0YzZtf7jMkzKE+3Gl6uz2ZWdy/qeYDy0eDx1HieH/b/B+6FAW9Nt
+	cf6ytA8T1sWC3fKleNiNO/o6gXQ5JASHgSskN0fUb7hoVaGcJN29ZIUl0RJvhI7Y0i+jAT+2Yea
+	ll+/RiSfuAVW9zmDK9q8G2VnVUVzy3E3pD8Eqvho6zeCGejvbj8qG+8bKnEE1p4EArfI=
+X-Gm-Gg: ATEYQzzGyly9ghi5OYa2YDzTa0gKqcfDAUjqeptiD6Uh8iz9Bsaunhq3k7x4IEtZRxN
+	QrQjRRhT8pgUU+lYXYb1WaFBxlNw7XOPKJ+08vaqAQzIn2QFqcWGbwPbpXUhcxzfJY8NkWtUAZ/
+	nyOmSRztXd22zw8KXNUxjTrs+SPFhC526iEyO2v1nvqpwx4YQhXIZ+0cMgvFo2tYzkkXbZadWMF
+	CkvOq1ngUMZCFvkd+WPoTDS+IeZyDcUg7xl1eIRydNLzGopNnh94u/7bm8mgj+Yeapy6BjulYPp
+	hMaS//iXmuCYwsHduqlT9P4FiOk9MG5CNUyamtyJhHmCsNlO56u8GGz85myh90PY6YiRpqXX4aj
+	Q6XKYkxTTKZGACqPihSx7S/RQuLBaywEnBejdiXn2GvpHUsnHqjgI3K4p+aVSKQ==
+X-Received: by 2002:a17:903:234e:b0:2b0:41eb:165e with SMTP id d9443c01a7336-2b041eb19b7mr5531015ad.38.1773430341310;
+        Fri, 13 Mar 2026 12:32:21 -0700 (PDT)
+X-Received: by 2002:a17:903:234e:b0:2b0:41eb:165e with SMTP id d9443c01a7336-2b041eb19b7mr5530825ad.38.1773430340882;
+        Fri, 13 Mar 2026 12:32:20 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-82a07382e6csm6608292b3a.54.2026.03.13.12.28.13
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2aece7edc16sm29872965ad.58.2026.03.13.12.32.18
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 13 Mar 2026 12:28:14 -0700 (PDT)
-Date: Sat, 14 Mar 2026 03:28:10 +0800
+        Fri, 13 Mar 2026 12:32:20 -0700 (PDT)
+Date: Sat, 14 Mar 2026 03:32:16 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: "Darrick J. Wong" <djwong@kernel.org>
 Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 06/14] xfs: test xfs_healer can fix a filesystem
-Message-ID: <20260313192810.2mwyyslm65kng3x5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH 07/14] xfs: test xfs_healer can report file I/O errors
+Message-ID: <20260313193216.isih4krwrw352rfz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <177311403712.1186408.7032564474004561606.stgit@frogsfrogsfrogs>
- <177311403886.1186408.6888396407274716678.stgit@frogsfrogsfrogs>
+ <177311403904.1186408.2255205098441030776.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -90,12 +90,12 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <177311403886.1186408.6888396407274716678.stgit@frogsfrogsfrogs>
+In-Reply-To: <177311403904.1186408.2255205098441030776.stgit@frogsfrogsfrogs>
 
-On Mon, Mar 09, 2026 at 08:51:41PM -0700, Darrick J. Wong wrote:
+On Mon, Mar 09, 2026 at 08:51:57PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Make sure that xfs_healer can actually fix an injected metadata corruption.
+> Make sure that xfs_healer can actually report file I/O errors.
 > 
 > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
 > ---
@@ -104,115 +104,255 @@ Tests and looks good to me,
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  tests/xfs/1884     |   89 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/1884.out |    2 +
->  2 files changed, 91 insertions(+)
->  create mode 100755 tests/xfs/1884
->  create mode 100644 tests/xfs/1884.out
+>  tests/xfs/1896     |  210 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/1896.out |   21 +++++
+>  2 files changed, 231 insertions(+)
+>  create mode 100755 tests/xfs/1896
+>  create mode 100644 tests/xfs/1896.out
 > 
 > 
-> diff --git a/tests/xfs/1884 b/tests/xfs/1884
+> diff --git a/tests/xfs/1896 b/tests/xfs/1896
 > new file mode 100755
-> index 00000000000000..1fa6457ad25203
+> index 00000000000000..911e1d5ee8a576
 > --- /dev/null
-> +++ b/tests/xfs/1884
-> @@ -0,0 +1,89 @@
+> +++ b/tests/xfs/1896
+> @@ -0,0 +1,210 @@
 > +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
+> +# SPDX-License-Identifier: GPL-2.0-or-later
 > +# Copyright (c) 2024-2026 Oracle.  All Rights Reserved.
 > +#
-> +# FS QA Test 1884
+> +# FS QA Test No. 1896
 > +#
-> +# Ensure that autonomous self healing fixes the filesystem correctly.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto selfhealing
+> +# Check that xfs_healer can report file IO errors.
 > +
-> +. ./common/filter
+> +. ./common/preamble
+> +_begin_fstest auto quick scrub eio selfhealing
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	_dmerror_cleanup
+> +}
+> +
+> +# Import common functions.
 > +. ./common/fuzzy
+> +. ./common/filter
+> +. ./common/dmerror
 > +. ./common/systemd
 > +
-> +_require_scrub
-> +_require_xfs_io_command "repair"	# online repair support
-> +_require_xfs_db_command "blocktrash"
-> +_require_command "$XFS_HEALER_PROG" "xfs_healer"
-> +_require_command "$XFS_PROPERTY_PROG" "xfs_property"
 > +_require_scratch
+> +_require_scrub
+> +_require_command "$XFS_HEALER_PROG" "xfs_healer"
+> +_require_dm_target error
+> +_require_no_xfs_always_cow	# no out of place writes
+> +
+> +# Ignore everything from the healer except for the four IO error log messages.
+> +# Strip out file handle and range information because the blocksize can vary.
+> +# Writeback and readahead can trigger multiple error messages due to retries,
+> +# hence the uniq.
+> +filter_healer_errors() {
+> +	_filter_scratch | \
+> +		grep -E '(buffered|directio)' | \
+> +		sed \
+> +		    -e 's/ino [0-9]*/ino NUM/g' \
+> +		    -e 's/gen 0x[0-9a-f]*/gen NUM/g' \
+> +		    -e 's/pos [0-9]*/pos NUM/g' \
+> +		    -e 's/len [0-9]*/len NUM/g' \
+> +		    -e 's|SCRATCH_MNT/a|VICTIM|g' \
+> +		    -e 's|SCRATCH_MNT ino NUM gen NUM|VICTIM|g' | \
+> +		sort | \
+> +		uniq
+> +}
 > +
 > +_scratch_mkfs >> $seqres.full
+> +
+> +#
+> +# The dm-error map added by this test doesn't work on zoned devices because
+> +# table sizes need to be aligned to the zone size, and even for zoned on
+> +# conventional this test will get confused because of the internal RT device.
+> +#
+> +# That check requires a mounted file system, so do a dummy mount before setting
+> +# up DM.
+> +#
 > +_scratch_mount
-> +
-> +_xfs_has_feature $SCRATCH_MNT rmapbt || \
-> +	_notrun "reverse mapping required to test directory auto-repair"
-> +_xfs_has_feature $SCRATCH_MNT parent || \
-> +	_notrun "parent pointers required to test directory auto-repair"
-> +_require_xfs_healer $SCRATCH_MNT --repair
-> +
-> +# Configure the filesystem for automatic repair of the filesystem.
-> +$XFS_PROPERTY_PROG $SCRATCH_MNT set autofsck=repair >> $seqres.full
-> +
-> +# Create a largeish directory
-> +dblksz=$(_xfs_get_dir_blocksize "$SCRATCH_MNT")
-> +echo testdata > $SCRATCH_MNT/a
-> +mkdir -p "$SCRATCH_MNT/some/victimdir"
-> +for ((i = 0; i < (dblksz / 255); i++)); do
-> +	fname="$(printf "%0255d" "$i")"
-> +	ln $SCRATCH_MNT/a $SCRATCH_MNT/some/victimdir/$fname
-> +done
-> +
-> +# Did we get at least two dir blocks?
-> +dirsize=$(stat -c '%s' $SCRATCH_MNT/some/victimdir)
-> +test "$dirsize" -gt "$dblksz" || echo "failed to create two-block directory"
-> +
-> +# Break the directory, remount filesystem
+> +_require_xfs_scratch_non_zoned
+> +_require_xfs_healer $SCRATCH_MNT
 > +_scratch_unmount
-> +_scratch_xfs_db -x \
-> +	-c 'path /some/victimdir' \
-> +	-c 'bmap' \
-> +	-c 'dblock 1' \
-> +	-c 'blocktrash -z -0 -o 0 -x 2048 -y 2048 -n 2048' >> $seqres.full
-> +_scratch_mount
 > +
-> +_scratch_invoke_xfs_healer "$tmp.healer" --repair
+> +_dmerror_init
+> +_dmerror_mount >> $seqres.full 2>&1
 > +
-> +# Access the broken directory to trigger a repair, then poll the directory
-> +# for 5 seconds to see if it gets fixed without us needing to intervene.
-> +ls $SCRATCH_MNT/some/victimdir > /dev/null 2> $tmp.err
-> +_filter_scratch < $tmp.err
-> +try=0
-> +while [ $try -lt 50 ] && grep -q 'Structure needs cleaning' $tmp.err; do
-> +	echo "try $try saw corruption" >> $seqres.full
-> +	sleep 0.1
-> +	ls $SCRATCH_MNT/some/victimdir > /dev/null 2> $tmp.err
-> +	try=$((try + 1))
-> +done
-> +echo "try $try no longer saw corruption or gave up" >> $seqres.full
-> +_filter_scratch < $tmp.err
+> +# Write a file with 4 file blocks worth of data, figure out the LBA to target
+> +victim=$SCRATCH_MNT/a
+> +file_blksz=$(_get_file_block_size $SCRATCH_MNT)
+> +$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c "fsync" $victim >> $seqres.full
+> +unset errordev
 > +
-> +# List the dirents of /victimdir to see if it stops reporting corruption
-> +ls $SCRATCH_MNT/some/victimdir > /dev/null 2> $tmp.err
-> +try=0
-> +while [ $try -lt 50 ] && grep -q 'Structure needs cleaning' $tmp.err; do
-> +	echo "retry $try still saw corruption" >> $seqres.full
-> +	sleep 0.1
-> +	ls $SCRATCH_MNT/some/victimdir > /dev/null 2> $tmp.err
-> +	try=$((try + 1))
-> +done
-> +echo "retry $try no longer saw corruption or gave up" >> $seqres.full
+> +awk_len_prog='{print $6}'
+> +if _xfs_is_realtime_file $victim; then
+> +	if ! _xfs_has_feature $SCRATCH_MNT rtgroups; then
+> +		awk_len_prog='{print $4}'
+> +	fi
+> +	errordev="RT"
+> +fi
+> +bmap_str="$($XFS_IO_PROG -c "bmap -elpv" $victim | grep "^[[:space:]]*0:")"
+> +echo "$errordev:$bmap_str" >> $seqres.full
 > +
-> +# Unmount to kill the healer
-> +_scratch_kill_xfs_healer
+> +phys="$(echo "$bmap_str" | $AWK_PROG '{print $3}')"
+> +len="$(echo "$bmap_str" | $AWK_PROG "$awk_len_prog")"
+> +
+> +fs_blksz=$(_get_block_size $SCRATCH_MNT)
+> +echo "file_blksz:$file_blksz:fs_blksz:$fs_blksz" >> $seqres.full
+> +kernel_sectors_per_fs_block=$((fs_blksz / 512))
+> +
+> +# Did we get at least 4 fs blocks worth of extent?
+> +min_len_sectors=$(( 4 * kernel_sectors_per_fs_block ))
+> +test "$len" -lt $min_len_sectors && \
+> +	_fail "could not format a long enough extent on an empty fs??"
+> +
+> +phys_start=$(echo "$phys" | sed -e 's/\.\..*//g')
+> +
+> +echo "$errordev:$phys:$len:$fs_blksz:$phys_start" >> $seqres.full
+> +echo "victim file:" >> $seqres.full
+> +od -tx1 -Ad -c $victim >> $seqres.full
+> +
+> +# Set the dmerror table so that all IO will pass through.
+> +_dmerror_reset_table
+> +
+> +cat >> $seqres.full << ENDL
+> +dmerror before:
+> +$DMERROR_TABLE
+> +$DMERROR_RTTABLE
+> +<end table>
+> +ENDL
+> +
+> +# All sector numbers that we feed to the kernel must be in units of 512b, but
+> +# they also must be aligned to the device's logical block size.
+> +logical_block_size=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
+> +kernel_sectors_per_device_lba=$((logical_block_size / 512))
+> +
+> +# Mark as bad one of the device LBAs in the middle of the extent.  Target the
+> +# second LBA of the third block of the four-block file extent that we allocated
+> +# earlier, but without overflowing into the fourth file block.
+> +bad_sector=$(( phys_start + (2 * kernel_sectors_per_fs_block) ))
+> +bad_len=$kernel_sectors_per_device_lba
+> +if (( kernel_sectors_per_device_lba < kernel_sectors_per_fs_block )); then
+> +	bad_sector=$((bad_sector + kernel_sectors_per_device_lba))
+> +fi
+> +if (( (bad_sector % kernel_sectors_per_device_lba) != 0)); then
+> +	echo "bad_sector $bad_sector not congruent with device logical block size $logical_block_size"
+> +fi
+> +
+> +# Remount to flush the page cache, start the healer, and make the LBA bad
+> +_dmerror_unmount
+> +_dmerror_mount
+> +
+> +_scratch_invoke_xfs_healer "$tmp.healer"
+> +
+> +_dmerror_mark_range_bad $bad_sector $bad_len $errordev
+> +
+> +cat >> $seqres.full << ENDL
+> +dmerror after marking bad:
+> +$DMERROR_TABLE
+> +$DMERROR_RTTABLE
+> +<end table>
+> +ENDL
+> +
+> +_dmerror_load_error_table
+> +
+> +# See if buffered reads pick it up
+> +echo "Try buffered read"
+> +$XFS_IO_PROG -c "pread 0 $((4 * file_blksz))" $victim >> $seqres.full
+> +
+> +# See if directio reads pick it up
+> +echo "Try directio read"
+> +$XFS_IO_PROG -d -c "pread 0 $((4 * file_blksz))" $victim >> $seqres.full
+> +
+> +# See if directio writes pick it up
+> +echo "Try directio write"
+> +$XFS_IO_PROG -d -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c fsync $victim >> $seqres.full
+> +
+> +# See if buffered writes pick it up
+> +echo "Try buffered write"
+> +$XFS_IO_PROG -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c fsync $victim >> $seqres.full
+> +
+> +# Now mark the bad range good so that unmount won't fail due to IO errors.
+> +echo "Fix device"
+> +_dmerror_mark_range_good $bad_sector $bad_len $errordev
+> +_dmerror_load_error_table
+> +
+> +cat >> $seqres.full << ENDL
+> +dmerror after marking good:
+> +$DMERROR_TABLE
+> +$DMERROR_RTTABLE
+> +<end table>
+> +ENDL
+> +
+> +# Unmount filesystem to start fresh
+> +echo "Kill healer"
+> +_scratch_kill_xfs_healer _dmerror_unmount
 > +cat $tmp.healer >> $seqres.full
+> +cat $tmp.healer | filter_healer_errors
 > +
+> +# Start the healer again so that can verify that the errors don't persist after
+> +# we flip back to the good dm table.
+> +echo "Remount and restart healer"
+> +_dmerror_mount
+> +_scratch_invoke_xfs_healer "$tmp.healer"
+> +
+> +# See if buffered reads pick it up
+> +echo "Try buffered read again"
+> +$XFS_IO_PROG -c "pread 0 $((4 * file_blksz))" $victim >> $seqres.full
+> +
+> +# See if directio reads pick it up
+> +echo "Try directio read again"
+> +$XFS_IO_PROG -d -c "pread 0 $((4 * file_blksz))" $victim >> $seqres.full
+> +
+> +# See if directio writes pick it up
+> +echo "Try directio write again"
+> +$XFS_IO_PROG -d -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c fsync $victim >> $seqres.full
+> +
+> +# See if buffered writes pick it up
+> +echo "Try buffered write again"
+> +$XFS_IO_PROG -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c fsync $victim >> $seqres.full
+> +
+> +# Unmount fs to kill healer, then wait for it to finish
+> +echo "Kill healer again"
+> +_scratch_kill_xfs_healer _dmerror_unmount
+> +cat $tmp.healer >> $seqres.full
+> +cat $tmp.healer | filter_healer_errors
+> +
+> +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/xfs/1884.out b/tests/xfs/1884.out
+> diff --git a/tests/xfs/1896.out b/tests/xfs/1896.out
 > new file mode 100644
-> index 00000000000000..929e33da01f92c
+> index 00000000000000..1378d4fad44522
 > --- /dev/null
-> +++ b/tests/xfs/1884.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 1884
-> +ls: reading directory 'SCRATCH_MNT/some/victimdir': Structure needs cleaning
+> +++ b/tests/xfs/1896.out
+> @@ -0,0 +1,21 @@
+> +QA output created by 1896
+> +Try buffered read
+> +pread: Input/output error
+> +Try directio read
+> +pread: Input/output error
+> +Try directio write
+> +pwrite: Input/output error
+> +Try buffered write
+> +fsync: Input/output error
+> +Fix device
+> +Kill healer
+> +VICTIM pos NUM len NUM: buffered_read: Input/output error
+> +VICTIM pos NUM len NUM: buffered_write: Input/output error
+> +VICTIM pos NUM len NUM: directio_read: Input/output error
+> +VICTIM pos NUM len NUM: directio_write: Input/output error
+> +Remount and restart healer
+> +Try buffered read again
+> +Try directio read again
+> +Try directio write again
+> +Try buffered write again
+> +Kill healer again
 > 
 
