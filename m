@@ -1,87 +1,87 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6C803DC4D6
-	for <fstests@vger.kernel.org>; Fri, 13 Mar 2026 19:05:06 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C1801DA23
+	for <fstests@vger.kernel.org>; Fri, 13 Mar 2026 19:19:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773428708; cv=none; b=pDfnd85DuXA5hMU0sTEE7S00MIro9HQIQWay+1I1gN4YRC1ZMcQ9MTy0HtrVrtKavJJzhuabNWRyXY70y7vmU3Np0EuJjIZJZcTq+EYMw0ltQigegPhDlsyguIFv+KDoCPhcNL8lJGY25MP++5k78Jyc1cVMTdN4yN9Ka71J3vI=
+	t=1773429570; cv=none; b=ec3Zn+zw1LyAIEQdiryLMtBs9WdYrnvdNeG6N9dYLpdCdqVtvH7pvJmafOtVOuU/zCLw3BDJIaeRdCqkOchbCFGzHL/jpzC9FiZpFtwkxxCFen8nzTLrAKHZjuLBAlJDechdFqOBw2R2sQcSb4sf24j9uLKUDPvGxaSeEIgxiuA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773428708; c=relaxed/simple;
-	bh=r1zSQ1NuPvbZwJj3bgLhSYGW5vljaD62sq7waoDJw2E=;
+	s=arc-20240116; t=1773429570; c=relaxed/simple;
+	bh=DgLDJwjfN9POXB2fAoyI8G2QRiauMXnd+TBYRBSCsBs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Ip6L8iWjgH91M7mbCNHZPTeGlb/4LPYrvkV97PIpvpBBZ4XvpbkEeK7qzwaQMLoVXG6h7g0slQjwCC/U43Cex96W32GHy5C5QV1RgBGKJyd58Js2YxWdGoC6mlpqTJEcy4ZTf/4cpDSiW/z5rMMuI7QEBZM90Rs+DeInIPvxWAY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Xn/iIs0h; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=fWjoPWB/; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=TTDMbybleF72Qe1YSq17PajdA69Raooz/QTAkB3SA3B9iy3tMIqKbzx+nSTyOWMCecvmDQYJoArVQo8YNST6+zODT7oEgtY7yomRLbI4X5JsOFiD+UL7zA0fwZcn1/6qVmamzZ5Rh4JfIK3i8T28UEvkOyLuH1XmOVfnQXvO0dc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=iPrVlBLi; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=sECpfZgm; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Xn/iIs0h";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="fWjoPWB/"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="iPrVlBLi";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="sECpfZgm"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1773428705;
+	s=mimecast20190719; t=1773429568;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=7FiyrzjKVrw7CP6CNfU6+LcpNHL78CMkpSfVSqkJIJY=;
-	b=Xn/iIs0hxkjZWzUj7YIrFF2bCO8gWfijQWx2GmMJK2IuZ/FWyoJpEuhLwbxdwatia8rp0u
-	rBuFDwmavY8Q/PMDgzBu9ONdE7/Pmog1+IfVgsfMTnTybqo1pY1ZNskBPon81epd+gLCi9
-	izwFAeS1orph0cKzucquJ+x7Q0JDXRg=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=KbAhGVPsBTRCoKAt+2dGuvMTR2ct/lDm5/NumNxug0c=;
+	b=iPrVlBLi+8yEl2Srxc0ZTbZNUxSNOyMcB3IZ6OAHV3cta4IM4HLeZfGqkR7m55iu/ky2HK
+	LV6MQMWD0XgSimL1zq5ivZGFaIT+H9ifwfgXU+jSfIKTnztZaLe+8nUJZjcFRBTo8aoBLD
+	f9zuAl1R5ovJ9GWBghDHIw9gaZ8EsHc=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-230-f8FTU8WWPuauPxMaAcmzPA-1; Fri, 13 Mar 2026 15:05:04 -0400
-X-MC-Unique: f8FTU8WWPuauPxMaAcmzPA-1
-X-Mimecast-MFC-AGG-ID: f8FTU8WWPuauPxMaAcmzPA_1773428703
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-829942cf9deso1963601b3a.0
-        for <fstests@vger.kernel.org>; Fri, 13 Mar 2026 12:05:04 -0700 (PDT)
+ us-mta-96-7-HEEUJcObGXZ_cv82-MXg-1; Fri, 13 Mar 2026 15:19:26 -0400
+X-MC-Unique: 7-HEEUJcObGXZ_cv82-MXg-1
+X-Mimecast-MFC-AGG-ID: 7-HEEUJcObGXZ_cv82-MXg_1773429566
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-35a032cdd78so10883590a91.1
+        for <fstests@vger.kernel.org>; Fri, 13 Mar 2026 12:19:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1773428703; x=1774033503; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1773429565; x=1774034365; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=7FiyrzjKVrw7CP6CNfU6+LcpNHL78CMkpSfVSqkJIJY=;
-        b=fWjoPWB/uTgNxLdwTk2hljo8RFgjF6vwvSCe/xDKtqIA015O+/iO5qDRXwDyiCeziN
-         o3Ld56rtIXF3d3I75w7b/WJ3kB7ly0baDBavbPD24pX68CI/sTpwdLFdZyyFHQlDCiSZ
-         D0v/AToX+x2D60uBcv8Yz8GxMHzPWQDJzjyhXxXGzrlAxtEUNKjMo+MRv33hacHhCOET
-         70urQjS5saXsNyF6FfK3n445s8v39xqUyGDu2/aS2265lvhlyapMltl6gH8tlYHHONcB
-         iSbAcx+FAkBYCVri0CpKD3QYjI7pXCS3XI0aINdaFRFGZOvgi7E1bApy5HvDMLh9e4p2
-         yW1w==
+        bh=KbAhGVPsBTRCoKAt+2dGuvMTR2ct/lDm5/NumNxug0c=;
+        b=sECpfZgm8qonCimGdNXoWFDl3G5PVQMXYic7XcjWge8+f7nwBlqUajbqhaS0Fa93qe
+         cegelbM0OiYf2H91fsXAAyQF8L+eIRQW4Do6X7ExNXlf9pXlsyy85404VTdsa2k6o16+
+         FaO+f+QJLeeOZnsAmAKuul1KfPzfi7VVgtxuP+qH4KCRRvx+OB2hExVah2+WhZGnRyjQ
+         naftW/MV/OYYqhbtErZW7hl28jjA/+QykuI66gvolvw0vD24mW0bhz4mB9OB5gbBBVbu
+         3utFgOer1RMM0/7mhCD4V0Hh6nERU6Ejm7nX/zEmBZmyvk1W0sz+NF+LJogiGcpXNyxq
+         toVw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773428703; x=1774033503;
+        d=1e100.net; s=20251104; t=1773429565; x=1774034365;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=7FiyrzjKVrw7CP6CNfU6+LcpNHL78CMkpSfVSqkJIJY=;
-        b=nW27WD0w6U4iNronlY2m4/3od3WdpabJymUmkEuuuUd72NtOYNOrlauxN3sSLKXOrH
-         eZ4aNaN1tUbLIcvOhetLQner+wIMPZEsaLWuE1qcFZokk0B6fzKwb1fsN9h3bLNuxZtz
-         QXru2FD3ZNZ3HnaAarA3I2KDJshQtmjhPt6ynP15BfuXfSsGIn3G1/ntuOLddEGiD6BD
-         R+CaxkNDL2GtjUUTRF1pf23E5P8GsNdaCflwjLV16Wny6DVTn1WjSc+L5fmyDtuunq0r
-         hdxUkC43+OLKpQf9NLHHJmTgsZ07Fw0Y2rVHK7gC7/dPIYMtQzxnCsxvDG/SknhcpHoT
-         HKRA==
-X-Gm-Message-State: AOJu0YzbF/cpgyGUDw4dTyX6o6sVw1rQsWV3W4xconI1APIFh1F0pJfw
-	ezjErwLYg4up7sa0eBqf/+z7sNXUQdBklutl07oEkNKe1y/gBn8Et1vwBDhhsUVndIswX6DLkN7
-	OTCWw/fORSkLjegThwVMrL+bocKKa3MyFfmdzTDe69lWzeQnzVKera6/2CEMElOCUbHA=
-X-Gm-Gg: ATEYQzy9II7OYecC0pxsngoDgwx7Kqx6cz/6VGCD2idXOS8o1uCbc9gxXGGF60zqKFV
-	TIJPfZY9ZaeucSuN+xQtrdFVm+5fTFUUVI+/TecOmwXgk9fwJ6h4qRmfN3NXt3x2oc5ijJK3fuo
-	eFQMGgWiSMiglawkRn2V+Intju4nzEg3fBaznLOquEgfR5M8IQCmsocf6HYY/A5fmGDBz7f8g9Y
-	qVrQWa0HK0QlBISkByAXaq8txSlRODyxOFHUIfi19pLOQBk9VSYt3B2bMmYSWg2EJ1/dLpzl/uD
-	Tq/0nq4GxLusTOcquxdaB2LKPd2pmJTrL8yvqgHtPZEHg+nBqUD44T6VQeLv+oY3h3kRR+g+0vR
-	U7u8DFAwaT7tc8wU26Miy1uFYWf5Uw4e4PlPxszFDAyDzYkREaK/MNEhm6M2Rbg==
-X-Received: by 2002:a05:6a00:94d1:b0:827:298e:b7c0 with SMTP id d2e1a72fcca58-82a198afd10mr4274844b3a.47.1773428702871;
-        Fri, 13 Mar 2026 12:05:02 -0700 (PDT)
-X-Received: by 2002:a05:6a00:94d1:b0:827:298e:b7c0 with SMTP id d2e1a72fcca58-82a198afd10mr4274825b3a.47.1773428702368;
-        Fri, 13 Mar 2026 12:05:02 -0700 (PDT)
+        bh=KbAhGVPsBTRCoKAt+2dGuvMTR2ct/lDm5/NumNxug0c=;
+        b=JNBwe+jwrRQRpPf2dCJnkhfu3/M35HkfTd0DEZ1GSQpL1RjQxr1Q0e75hEtaRfwFhb
+         6vXrnCvKVvfB7v7TrbweskxlD+Lwjyk23voqjZZOSAFJKfLJwKVEsBwnEj/tC2w5zPJz
+         1oEvg9b7ym59wFE1/spdkVS2d35cmnOGOypju+LNZ34HeUAYh+HVHizAt5egnhlFzCyY
+         wEQh+qDZ/e3M7a/ntCuVbKadYBVMYtGOU3E2AFqVxwHLfGQ9eEMoQOKuCXhxveuethOe
+         PVMjFmurJoDZV8SP5KWwLPS8o779cD/mDD633MiyjiTlTI1OGshRDsypLyn3eqFCqu1Z
+         Liww==
+X-Gm-Message-State: AOJu0YywPLaViz5npwpvCf6wYb2nP2FUTvtGqVkU/6HDp5mU20ylYH8O
+	OsJ+e3kkdYogECMoxhpFupfxFuwdlIh+LAco6BpTY9uwMaTO/cXeTRmXAYa4oj9BhLjt3NdFDMa
+	HOZ9VCaw76aCki+9+b54puE6z0OOkigKpMdthI/BFMvXEXY9ARgFSLSjsEVc=
+X-Gm-Gg: ATEYQzyoubgDgqmfpWsErRFfhE9z4KpIXnU9O9GcycvVYy5NGovB5nf97qsekEypt1j
+	Ah1n76jHi42m8GpCpmy3v19wjxz7a8eNZiglcMpYajWiAQ55oz7k9fZNA0lRkHpBy0kyYVq1/nq
+	9k/SMJQRy+ZeWXBTBNbBJJzhzbaDs63urZVLdwlYdRF1N+1HcoWE7Vtv2/Nfdu/rJQeenBSmvGA
+	fsRoY0tk5WP30I8tYuGaaNmvVuKHHMw+AG2f6xscCXrWEcEn0ypYGqEbl7+boLeJdA4CRmql9Cr
+	slKD5EKzel7jAgN7bPwzPRz8WIt/O7CDUCtj2xjLdxQjkaQXvlqwg5HvY6qIxKtFgn/v/5UbyZ/
+	1TZLETLCPWD/9dQ0l3YkXf1lz6SvjbtDWviPERR8GRVhQVH7QSFRayjQta53lAA==
+X-Received: by 2002:a17:90b:574f:b0:359:fe72:3559 with SMTP id 98e67ed59e1d1-35a21fdd3b7mr3916128a91.21.1773429565362;
+        Fri, 13 Mar 2026 12:19:25 -0700 (PDT)
+X-Received: by 2002:a17:90b:574f:b0:359:fe72:3559 with SMTP id 98e67ed59e1d1-35a21fdd3b7mr3916116a91.21.1773429564998;
+        Fri, 13 Mar 2026 12:19:24 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-82a072612e2sm8718835b3a.21.2026.03.13.12.05.00
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-35a02ffe078sm9596873a91.13.2026.03.13.12.19.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 13 Mar 2026 12:05:01 -0700 (PDT)
-Date: Sat, 14 Mar 2026 03:04:58 +0800
+        Fri, 13 Mar 2026 12:19:24 -0700 (PDT)
+Date: Sat, 14 Mar 2026 03:19:20 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: "Darrick J. Wong" <djwong@kernel.org>
 Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 04/14] xfs: set up common code for testing xfs_healer
-Message-ID: <20260313190458.gih5me7v6v32qkta@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH 05/14] xfs: test xfs_healer's event handling
+Message-ID: <20260313191920.nuec3vcexb44yt3c@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <177311403712.1186408.7032564474004561606.stgit@frogsfrogsfrogs>
- <177311403849.1186408.3223809492518597284.stgit@frogsfrogsfrogs>
+ <177311403867.1186408.18154501598966372334.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -90,14 +90,13 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <177311403849.1186408.3223809492518597284.stgit@frogsfrogsfrogs>
+In-Reply-To: <177311403867.1186408.18154501598966372334.stgit@frogsfrogsfrogs>
 
-On Mon, Mar 09, 2026 at 08:51:10PM -0700, Darrick J. Wong wrote:
+On Mon, Mar 09, 2026 at 08:51:26PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Add a bunch of common code so that we can test the xfs_healer daemon.
-> Most of the changes here are to make it easier to manage the systemd
-> service units for xfs_healer and xfs_scrub.
+> Make sure that xfs_healer can handle every type of event that the kernel
+> can throw at it by initiating a full scrub of a test filesystem.
 > 
 > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
 > ---
@@ -106,229 +105,70 @@ Tests and looks good to me,
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  common/config  |   14 ++++++++
->  common/rc      |    5 +++
->  common/systemd |   39 ++++++++++++++++++++++
->  common/xfs     |   98 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/802  |    4 +-
->  5 files changed, 158 insertions(+), 2 deletions(-)
+>  tests/xfs/1882     |   44 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/1882.out |    2 ++
+>  2 files changed, 46 insertions(+)
+>  create mode 100755 tests/xfs/1882
+>  create mode 100644 tests/xfs/1882.out
 > 
 > 
-> diff --git a/common/config b/common/config
-> index 1420e35ddfee42..8468a60081f50c 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -161,6 +161,20 @@ export XFS_ADMIN_PROG="$(type -P xfs_admin)"
->  export XFS_GROWFS_PROG=$(type -P xfs_growfs)
->  export XFS_SPACEMAN_PROG="$(type -P xfs_spaceman)"
->  export XFS_SCRUB_PROG="$(type -P xfs_scrub)"
+> diff --git a/tests/xfs/1882 b/tests/xfs/1882
+> new file mode 100755
+> index 00000000000000..2fb4589418401e
+> --- /dev/null
+> +++ b/tests/xfs/1882
+> @@ -0,0 +1,44 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024-2026 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 1882
+> +#
+> +# Make sure that xfs_healer correctly handles all the reports that it gets
+> +# from the kernel.  We simulate this by using the --everything mode so we get
+> +# all the events, not just the sickness reports.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto selfhealing
 > +
-> +XFS_HEALER_PROG="$(type -P xfs_healer)"
-> +XFS_HEALER_START_PROG="$(type -P xfs_healer_start)"
+> +. ./common/filter
+> +. ./common/fuzzy
+> +. ./common/systemd
+> +. ./common/populate
 > +
-> +# If not found, try the ones installed in libexec
-> +if [ ! -x "$XFS_HEALER_PROG" ] && [ -e /usr/libexec/xfsprogs/xfs_healer ]; then
-> +	XFS_HEALER_PROG=/usr/libexec/xfsprogs/xfs_healer
-> +fi
-> +if [ ! -x "$XFS_HEALER_START_PROG" ] && [ -e /usr/libexec/xfsprogs/xfs_healer_start ]; then
-> +	XFS_HEALER_START_PROG=/usr/libexec/xfsprogs/xfs_healer_start
-> +fi
-> +export XFS_HEALER_PROG
-> +export XFS_HEALER_START_PROG
+> +_require_scrub
+> +_require_xfs_io_command "scrub"		# online check support
+> +_require_command "$XFS_HEALER_PROG" "xfs_healer"
+> +_require_scratch
 > +
->  export XFS_PARALLEL_REPAIR_PROG="$(type -P xfs_prepair)"
->  export XFS_PARALLEL_REPAIR64_PROG="$(type -P xfs_prepair64)"
->  export __XFSDUMP_PROG="$(type -P xfsdump)"
-> diff --git a/common/rc b/common/rc
-> index ccb78baf5bd41a..0b740595d231b5 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3021,6 +3021,11 @@ _require_xfs_io_command()
->  	"label")
->  		testio=`$XFS_IO_PROG -c "label" $TEST_DIR 2>&1`
->  		;;
-> +	"verifymedia")
-> +		testio=`$XFS_IO_PROG -x -c "verifymedia $* 0 0" 2>&1`
-> +		echo $testio | grep -q "invalid option" && \
-> +			_notrun "xfs_io $command support is missing"
-> +		;;
->  	"open")
->  		# -c "open $f" is broken in xfs_io <= 4.8. Along with the fix,
->  		# a new -C flag was introduced to execute one shot commands.
-> diff --git a/common/systemd b/common/systemd
-> index b2e24f267b2d93..589aad1bef2637 100644
-> --- a/common/systemd
-> +++ b/common/systemd
-> @@ -44,6 +44,18 @@ _systemd_unit_active() {
->  	test "$(systemctl is-active "$1")" = "active"
->  }
->  
-> +# Wait for up to a certain number of seconds for a service to reach inactive
-> +# state.
-> +_systemd_unit_wait() {
-> +	local svcname="$1"
-> +	local timeout="${2:-30}"
+> +# Does this fs support health monitoring?
+> +_scratch_mkfs >> $seqres.full
+> +_scratch_mount
+> +_require_xfs_healer $SCRATCH_MNT
+> +_scratch_unmount
 > +
-> +	for ((i = 0; i < (timeout * 2); i++)); do
-> +		test "$(systemctl is-active "$svcname")" = "inactive" && break
-> +		sleep 0.5
-> +	done
-> +}
+> +# Create a sample fs with all the goodies
+> +_scratch_populate_cached nofill &>> $seqres.full
+> +_scratch_mount
 > +
->  _require_systemd_unit_active() {
->  	_require_systemd_unit_defined "$1"
->  	_systemd_unit_active "$1" || \
-> @@ -71,3 +83,30 @@ _systemd_unit_status() {
->  	_systemd_installed || return 1
->  	systemctl status "$1"
->  }
+> +_scratch_invoke_xfs_healer "$tmp.healer" --everything
 > +
-> +# Start a running systemd unit
-> +_systemd_unit_start() {
-> +	systemctl start "$1"
-> +}
-> +# Stop a running systemd unit
-> +_systemd_unit_stop() {
-> +	systemctl stop "$1"
-> +}
+> +# Run scrub to make some noise
+> +_scratch_scrub -b -n >> $seqres.full
 > +
-> +# Mask or unmask a running systemd unit
-> +_systemd_unit_mask() {
-> +	systemctl mask "$1"
-> +}
-> +_systemd_unit_unmask() {
-> +	systemctl unmask "$1"
-> +}
-> +_systemd_unit_masked() {
-> +	systemctl status "$1" 2>/dev/null | grep -q 'Loaded: masked'
-> +}
+> +_scratch_kill_xfs_healer
+> +cat $tmp.healer >> $seqres.full
 > +
-> +_systemd_service_unit_path() {
-> +	local template="$1"
-> +	local path="$2"
-> +
-> +	systemd-escape --template "$template" --path "$path"
-> +}
-> diff --git a/common/xfs b/common/xfs
-> index 7fa0db2e26b4c9..f276325df8fbac 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -2301,3 +2301,101 @@ _filter_bmap_gno()
->  		if ($ag =~ /\d+/) {print "$ag "} ;
->          '
->  }
-> +
-> +# Run the xfs_healer program on some filesystem
-> +_xfs_healer() {
-> +	$XFS_HEALER_PROG "$@"
-> +}
-> +
-> +# Compute the xfs_healer systemd service instance name for a given path.
-> +# This is easy because xfs_healer has always supported --svcname.
-> +_xfs_healer_svcname()
-> +{
-> +	_xfs_healer --svcname "$@"
-> +}
-> +
-> +# Compute the xfs_scrub systemd service instance name for a given path.  This
-> +# is tricky because xfs_scrub only gained --svcname when xfs_healer was made.
-> +_xfs_scrub_svcname()
-> +{
-> +	local ret
-> +
-> +	if ret="$($XFS_SCRUB_PROG --svcname "$@")"; then
-> +		echo "$ret"
-> +		return 0
-> +	fi
-> +
-> +	# ...but if not, we can fall back to brute force systemd invocations.
-> +	_systemd_service_unit_path "xfs_scrub@.service" "$*"
-> +}
-> +
-> +# Run the xfs_healer program on the scratch fs
-> +_scratch_xfs_healer() {
-> +	_xfs_healer "$@" "$SCRATCH_MNT"
-> +}
-> +
-> +# Turn off the background xfs_healer service if any so that it doesn't fix
-> +# injected metadata errors; then start a background copy of xfs_healer to
-> +# capture that.
-> +_invoke_xfs_healer() {
-> +	local mount="$1"
-> +	local logfile="$2"
-> +	shift; shift
-> +
-> +	if _systemd_is_running; then
-> +		local svc="$(_xfs_healer_svcname "$mount")"
-> +		_systemd_unit_stop "$svc" &>> $seqres.full
-> +	fi
-> +
-> +	$XFS_HEALER_PROG "$mount" "$@" &> "$logfile" &
-> +	XFS_HEALER_PID=$!
-> +
-> +	# Wait 30s for the healer program to really start up
-> +	for ((i = 0; i < 60; i++)); do
-> +		test -e "$logfile" && \
-> +			grep -q 'monitoring started' "$logfile" && \
-> +			break
-> +		sleep 0.5
-> +	done
-> +}
-> +
-> +# Run our own copy of xfs_healer against the scratch device.  Note that
-> +# unmounting the scratch fs causes the healer daemon to exit, so we don't need
-> +# to kill it explicitly from _cleanup.
-> +_scratch_invoke_xfs_healer() {
-> +	_invoke_xfs_healer "$SCRATCH_MNT" "$@"
-> +}
-> +
-> +# Unmount the filesystem to kill the xfs_healer instance started by
-> +# _invoke_xfs_healer, and wait up to a certain amount of time for it to exit.
-> +_kill_xfs_healer() {
-> +	local unmount="$1"
-> +	local timeout="${2:-30}"
-> +	local i
-> +
-> +	# Unmount fs to kill healer, then wait for it to finish
-> +	for ((i = 0; i < (timeout * 2); i++)); do
-> +		$unmount &>> $seqres.full && break
-> +		sleep 0.5
-> +	done
-> +
-> +	test -n "$XFS_HEALER_PID" && \
-> +		kill $XFS_HEALER_PID &>> $seqres.full
-> +	wait
-> +	unset XFS_HEALER_PID
-> +}
-> +
-> +# Unmount the scratch fs to kill a _scratch_invoke_xfs_healer instance.
-> +_scratch_kill_xfs_healer() {
-> +	local unmount="${1:-_scratch_unmount}"
-> +	shift
-> +
-> +	_kill_xfs_healer "$unmount" "$@"
-> +}
-> +
-> +# Does this mounted filesystem support xfs_healer?
-> +_require_xfs_healer()
-> +{
-> +	_xfs_healer --supported "$@" &>/dev/null || \
-> +		_notrun "health monitoring not supported on this kernel"
-> +}
-> diff --git a/tests/xfs/802 b/tests/xfs/802
-> index fc4767acb66a55..18312b15b645bd 100755
-> --- a/tests/xfs/802
-> +++ b/tests/xfs/802
-> @@ -105,8 +105,8 @@ run_scrub_service() {
->  }
->  
->  echo "Scrub Scratch FS"
-> -scratch_path=$(systemd-escape --path "$SCRATCH_MNT")
-> -run_scrub_service xfs_scrub@$scratch_path
-> +svc="$(_xfs_scrub_svcname "$SCRATCH_MNT")"
-> +run_scrub_service "$svc"
->  find_scrub_trace "$SCRATCH_MNT"
->  
->  # Remove the xfs_scrub_all media scan stamp directory (if specified) because we
+> +echo Silence is golden
+> +status=0
+> +exit
+> diff --git a/tests/xfs/1882.out b/tests/xfs/1882.out
+> new file mode 100644
+> index 00000000000000..9b31ccb735cabd
+> --- /dev/null
+> +++ b/tests/xfs/1882.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 1882
+> +Silence is golden
 > 
 
