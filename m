@@ -1,330 +1,159 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF8EC285CAE;
-	Fri, 13 Mar 2026 23:53:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E3E3E2E06E4
+	for <fstests@vger.kernel.org>; Sat, 14 Mar 2026 17:04:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773445981; cv=none; b=YbLzyG1Hqc9k6mf2s1/g5MulHKbziUnLZ1wcmR3meLsNieu87iPXiN/4LkrnghmrRNLFjEfKsHIloHFhgacTcOEXcY1XJykE/j8pHqSKGt6magKKVqS2APFflIQHyK4xGvlcszLCCpvXeIWmoCF5JlwqYqpM771xNOuBTEZQTbU=
+	t=1773507873; cv=none; b=ihLfmB/WBcCqNX165qzv5lYmMXQLfElkg2qPnfn36qEh5kxxm6IgcEkFqrQDeqSU6MbNqnIHewzYSu2ljZEtW2ppfN2Q7HXTmVz22voUP46aKnPbj5namMyXV3VFagasW6av6XccbS6st4qKtaNB1UkIHCGH7Sxu7I+GSd/DuIE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773445981; c=relaxed/simple;
-	bh=5r5j5oLDbMFyq7DrYWhRWxFhJiFPpNWAap2QKg7KDhs=;
+	s=arc-20240116; t=1773507873; c=relaxed/simple;
+	bh=+ysvLkOY/6j/R/TWM/XeHYspBYMAFmbYe1y4eHA9qLA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=oXeq5YYZ39FxAiCJq4gV7KsJb+aZNZG+Kan4mxzSrkI/w6x8Je6OqtHNsfMGmzpol4VNLB/FDBtb6hRt4/SEUMvK7OOswKSKIDLF9jPv5MFpUoDgutxr8TIkxa5hhqFmYEL4lshPzMGoGUXoKl1ieZZOqbVJAyHKEU+/cRCLcD0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CUxeMhqC; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=AyBAxPi0RPP/0RXmKJMuUPMb2UY26YovbvXLEHg+B4Mmiej8chjFYT7JA0QcXpHhXkDy5Ivu9s7fhXO6u0mwXbyY5+6deaNgHUw6s+69WVCJkLxQyAK2tn1o9TpuI5MzEPEVkujzbxS/n0aQJ4PMFqBxhOBDm01weA3BiO/iMbM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XFAHJHTa; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=OZjPWx1p; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CUxeMhqC"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 62260C19421;
-	Fri, 13 Mar 2026 23:53:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1773445980;
-	bh=5r5j5oLDbMFyq7DrYWhRWxFhJiFPpNWAap2QKg7KDhs=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=CUxeMhqCD1bvPi8eMx70VUDJiTsoNxt4QobZZtz33U2AY99VVCyocFUOLcqUKPhqt
-	 36XtbhAC1/aJ5/hswzi2ExgxSnGIzvtggBYNsn8dZdywI5QIRG5F5vXpj8A2wuSaWL
-	 hkL1Niqo/so9kxkWHR8Xs2uGOv0yp2I6ovHZooNeVxdrYFRE2WRkEWwlywS5kZ3ic2
-	 +IOlK6Xw0IIw5hMBGkMz9y6vWq86/9RKgoPSqNFcesjwKgnD3zDOiFi2tM0ArBUi+4
-	 KblOHyK7R+d0jVuW9ehAzMiy2ga9a/XdizZ/H5E3BC3F8BNalcCxmiCk0RO6fsuf2o
-	 3PXseipOO1MSw==
-Date: Fri, 13 Mar 2026 16:52:59 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Pankaj Raghav <p.raghav@samsung.com>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, lukas@herbolt.com,
-	dgc@kernel.org, pankaj.raghav@linux.dev, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] ltp: add support for FALLOC_FL_WRITE_ZEROES to fsx and
- fsstress
-Message-ID: <20260313235259.GH6023@frogsfrogsfrogs>
-References: <20260312195308.738189-1-p.raghav@samsung.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XFAHJHTa";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="OZjPWx1p"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1773507871;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=TY2RZifNMA2+PGDu5d8zIqDKxVt19EdeEHnDXNRBqlI=;
+	b=XFAHJHTaAeAQBZhAm5J0rXPnR7bLAEJ9GWRNusUPymK4K24qMF6LMBjM4fRljXAuw7KbiL
+	tRUyV7Mv3+cEGPp+wmH1tN1h7RD3owChiy17AQXU+23L3RnXQaeDYTowEozO84eoZokmSj
+	Ax83MPPzF5igknceLgk0Mjv4LxRHTWo=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-483-q2EQm89ANfiSlq_eU97JOw-1; Sat, 14 Mar 2026 13:04:29 -0400
+X-MC-Unique: q2EQm89ANfiSlq_eU97JOw-1
+X-Mimecast-MFC-AGG-ID: q2EQm89ANfiSlq_eU97JOw_1773507868
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2b04911610fso4524015ad.3
+        for <fstests@vger.kernel.org>; Sat, 14 Mar 2026 10:04:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1773507868; x=1774112668; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=TY2RZifNMA2+PGDu5d8zIqDKxVt19EdeEHnDXNRBqlI=;
+        b=OZjPWx1pr3ATCwsqXFldQaaMg0jHR3FcYdl4U1d7djGcjDIsz3rjZZnXn+8yFJuyl8
+         YEW+6H2fs4kM4wIyIM0KuEgoYJYXHbM2p+b12NHJp4PwnoYJaPOriyNb2BRxR7DK7ZPe
+         121McMA2KZ7EECJ3LmlV3BmQU7PzhTOaLTnxLGTWnxqdJjvj6s+HXSYKQPAZpcQ83YQf
+         gAqyx15XyqjSEJB/eTLxlvcGDMFzZh3f4zofMG9I1CAMIyVVbpxSJzJMRVANRKzCI9WS
+         HMO96eNQAYIo94bvngQFTEMHvQEFU4TS+fmT3sRxNzEKgyLQuZGTLPQrz5P07pdkoXGj
+         Vwtg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1773507868; x=1774112668;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=TY2RZifNMA2+PGDu5d8zIqDKxVt19EdeEHnDXNRBqlI=;
+        b=a9VXFqAlWCjY2iwQxdVqEZeAaMxkZmtWwJ0hlrxcVkNIPm+N8ICEKYUTPL9qIn6yDS
+         OK/c02nwQld7FQT/syDmDC/L+uZoKQzGYRA8ERdulJ0GG0WJUSSN6qAR1PiJvNosgIbQ
+         dUcbxztpYxHaUKd7owZzZb9l0SHBDpviqg7QoVOskT5OGCYs5ajSe0AGOIwDx8RbEiBH
+         izZ4dkAWdHYHo67DyuqmcWxp+s6bzfMCMcrE4Fg1t78hDckfVU3wtmwJ4TZ2e2VmRgqY
+         4iktGIEVzPunMtdcCPR8quxkCGRNm2XnZvKkrpt0VT34AjQjuQ2W6hnm9jEun2e7naCL
+         T35A==
+X-Forwarded-Encrypted: i=1; AJvYcCVuTNsw1dzZaXBjDmhYtsEtKspiQjUGddsw89CA9jyUK7HleDowX0ccJpH7s8M1VVa2CSLrC7G9@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx16gwCMacxHCrYLTvmlxKyYNQAd24u67OEkCjM98RnJQ4G3a4g
+	ATZqVZ7ZmXlndAv/J5iFgLPbmIz2J5NSO+k4YprnFqvIm1HnW/I/FpS5JaHaaJkTVtPA5N6eNJ7
+	LSv2SEVimCz7ka9jmo7z8fcSwepLD11dXSXI0jwdiA06Kc1eEUTcxGG8hlSA=
+X-Gm-Gg: ATEYQzx0qXOC8m7+KPFEXngjplTtbsYZOVaU+fNBHPVyK8+YJ8Tm4hJDjaGviFvuFNe
+	41j9dTT7GgKIQIjthtbT2Do532ZYN3d7TVmhizss7z5r6c9x2wFJai1eT+0PSA3arHeGHwIsCYP
+	dOGm0l9mt97P/PYKBZsB7N92lpvwvCHT/2dTKagmyIfm14jX6vmn7inqAwZEKdYIMxAC/iHd+K4
+	qjrpBuFlafJkDhSikg4bDsUOOdhfp/Gv7qx6R4g4Unst2LZAxbIxPxZD66yscGGlKXnUvfeTAYb
+	wXqaFDI3yosUw5V6soL9lzyWle0Tj7bqFYcx7de47iwJADapR9qGuAaylqpcCYvttU+xw62uR4O
+	joQMfeofp1xTzm4rzN7qhRGXhCaLy2lKmmbm0k/8yvfnFiADoOd7lEmzH7Vx0QA==
+X-Received: by 2002:a17:902:ef07:b0:2ad:e02b:4629 with SMTP id d9443c01a7336-2aecac81c73mr90329855ad.50.1773507868289;
+        Sat, 14 Mar 2026 10:04:28 -0700 (PDT)
+X-Received: by 2002:a17:902:ef07:b0:2ad:e02b:4629 with SMTP id d9443c01a7336-2aecac81c73mr90329605ad.50.1773507867842;
+        Sat, 14 Mar 2026 10:04:27 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2aece7ed753sm73365325ad.45.2026.03.14.10.04.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 14 Mar 2026 10:04:27 -0700 (PDT)
+Date: Sun, 15 Mar 2026 01:04:22 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Anand Jain <anajain.sg@gmail.com>
+Cc: Anand Jain <asj@kernel.org>, fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 2/9] fstests: add _mkfs_scratch_clone() helper
+Message-ID: <20260314170422.a62qqwqe6agom443@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1772095513.git.asj@kernel.org>
+ <254fdd3e212f6618ea33207ef24db2b316d2d8fc.1772095513.git.asj@kernel.org>
+ <20260309191317.vxcjvqfpoqdiycki@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <43710dd2-4282-4475-a29d-983295fab86f@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20260312195308.738189-1-p.raghav@samsung.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <43710dd2-4282-4475-a29d-983295fab86f@gmail.com>
 
-On Thu, Mar 12, 2026 at 08:53:08PM +0100, Pankaj Raghav wrote:
-> Add FALLOC_FL_WRITE_ZEROES support to both fsx and fsstress.
-> FALLOC_FL_WRITE_ZEROES flag was added in the kernel as a part of Zhang
-> Yi's series [1].
+On Wed, Mar 11, 2026 at 10:32:18AM +0800, Anand Jain wrote:
 > 
-> FALLOC_FL_KEEP_SIZE is not supported when FALLOC_FL_WRITE_ZEROES is
-> used.
+> > What about if ${#devs[@]} > 2 ?
 > 
-> [1] https://lore.kernel.org/linux-fsdevel/20250619111806.3546162-1-yi.zhang@huaweicloud.com/
+> On purpose- so tests using _scratch_mkfs_sized_clone() don't
+> pick a random higher number. If a test needs more than two
+> devices, opens an opportunity to critically review this function.
+> >> +	fi
+> >> +
+> >> +	case "$FSTYP" in
+> >> +	"btrfs")
+> >> +		_scratch_mkfs_sized $size
+> >> +		_scratch_mount
+> >> +		$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/sv1
+> >> +		_scratch_unmount
+> >> +		;;
+> >> +	"xfs"|"ext4")
+> >> +		_scratch_mkfs_sized $size
+> >> +		;;
+> >> +	*)
+> >> +		_notrun "fstests clone op unsupported for FS $FSTYP"
+> >> +		;;
+> >> +	esac
+> >> +
+> >> +	# clone SCRATCH_DEV devs[0] to devs[1].
+> >> +	dd if=$SCRATCH_DEV of=${devs[1]} bs=$size status=none count=1 || \
+> >> +							_fail "Clone failed"
+> > 
+> > I'm wondering if we absolutely need to use SCRATCH_DEV_POOL for this test. Could we clone SCRATCH_DEV
+> > to an image file instead? Or would it be feasible to simply run the test using two image files?
 > 
-> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
+> Using a config file and testing directly on block devices lets
+> us cover a wider range of devices.
+> 
+> When I wrote this test case, I was also considering whether a
+> serial-number–based mount without extra mount option, would be
+> better in the kernel.
+> 
+> The downside is that xfs/ext4 testers now need to use
+> SCRATCH_DEV_POOL. Let me know what you prefer.
 
-Looks like a clone of the ZERO_RANGE code so I think this is ready for
-wider testing...
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+I'm concerned that testers from other filesystems might not be familiar
+with SCRATCH_DEV_POOL, as it's typically not a requirement for their
+testing. I'm not sure if they would be willing to configure and switch
+to SCRATCH_DEV_POOL, just for these few test cases. If we can avoid making
+the pool to be a hard requirement, it might be more user-friendly for other
+fs list. Welcome feedback and review points from other filesystem mailing
+lists :)
 
---D
+Thanks,
+Zorro
 
-> ---
->  ltp/fsstress.c | 15 ++++++++-
->  ltp/fsx.c      | 85 ++++++++++++++++++++++++++++++++++++++++++++++++--
->  src/global.h   |  8 +++++
->  3 files changed, 105 insertions(+), 3 deletions(-)
-> 
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index 9d0ed32f..fe340aea 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -124,6 +124,7 @@ typedef enum {
->  	OP_MWRITE,
->  	OP_PUNCH,
->  	OP_ZERO,
-> +	OP_WRITE_ZEROES,
->  	OP_COLLAPSE,
->  	OP_INSERT,
->  	OP_READ,
-> @@ -257,6 +258,7 @@ void	mread_f(opnum_t, long);
->  void	mwrite_f(opnum_t, long);
->  void	punch_f(opnum_t, long);
->  void	zero_f(opnum_t, long);
-> +void	write_zeroes_f(opnum_t, long);
->  void	collapse_f(opnum_t, long);
->  void	insert_f(opnum_t, long);
->  void	unshare_f(opnum_t, long);
-> @@ -326,6 +328,7 @@ struct opdesc	ops[OP_LAST]	= {
->  	[OP_MWRITE]	   = {"mwrite",	       mwrite_f,	2, 1 },
->  	[OP_PUNCH]	   = {"punch",	       punch_f,		1, 1 },
->  	[OP_ZERO]	   = {"zero",	       zero_f,		1, 1 },
-> +	[OP_WRITE_ZEROES]  = {"write_zeroes",  write_zeroes_f,	1, 1 },
->  	[OP_COLLAPSE]	   = {"collapse",      collapse_f,	1, 1 },
->  	[OP_INSERT]	   = {"insert",	       insert_f,	1, 1 },
->  	[OP_READ]	   = {"read",	       read_f,		1, 0 },
-> @@ -3827,6 +3830,7 @@ struct print_flags falloc_flags [] = {
->  	{ FALLOC_FL_ZERO_RANGE, "ZERO_RANGE"},
->  	{ FALLOC_FL_INSERT_RANGE, "INSERT_RANGE"},
->  	{ FALLOC_FL_UNSHARE_RANGE, "UNSHARE_RANGE"},
-> +	{ FALLOC_FL_WRITE_ZEROES, "WRITE_ZEROES"},
->  	{ -1, NULL}
->  };
->  
-> @@ -3886,7 +3890,8 @@ do_fallocate(opnum_t opno, long r, int mode)
->  		off = roundup_64(off, stb.st_blksize);
->  		len = roundup_64(len, stb.st_blksize);
->  	}
-> -	mode |= FALLOC_FL_KEEP_SIZE & random();
-> +	if (!(mode & FALLOC_FL_WRITE_ZEROES))
-> +		mode |= FALLOC_FL_KEEP_SIZE & random();
->  	e = fallocate(fd, mode, (loff_t)off, (loff_t)len) < 0 ? errno : 0;
->  	if (v)
->  		printf("%d/%lld: fallocate(%s) %s%s [%lld,%lld] %d\n",
-> @@ -4513,6 +4518,14 @@ zero_f(opnum_t opno, long r)
->  #endif
->  }
->  
-> +void
-> +write_zeroes_f(opnum_t opno, long r)
-> +{
-> +#ifdef HAVE_LINUX_FALLOC_H
-> +	do_fallocate(opno, r, FALLOC_FL_WRITE_ZEROES);
-> +#endif
-> +}
-> +
->  void
->  collapse_f(opnum_t opno, long r)
->  {
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 32b9d599..63cdd58e 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -125,6 +125,7 @@ enum {
->  	OP_FALLOCATE,
->  	OP_PUNCH_HOLE,
->  	OP_ZERO_RANGE,
-> +	OP_WRITE_ZEROES,
->  	OP_COLLAPSE_RANGE,
->  	OP_INSERT_RANGE,
->  	OP_CLONE_RANGE,
-> @@ -189,6 +190,7 @@ int     keep_size_calls = 1;            /* -K flag disables */
->  int     unshare_range_calls = 1;        /* -u flag disables */
->  int     punch_hole_calls = 1;           /* -H flag disables */
->  int     zero_range_calls = 1;           /* -z flag disables */
-> +int     write_zeroes_calls = 1;         /* -Y flag disables */
->  int	collapse_range_calls = 1;	/* -C flag disables */
->  int	insert_range_calls = 1;		/* -I flag disables */
->  int	mapped_reads = 1;		/* -R flag disables it */
-> @@ -306,6 +308,7 @@ static const char *op_names[] = {
->  	[OP_FALLOCATE] = "fallocate",
->  	[OP_PUNCH_HOLE] = "punch_hole",
->  	[OP_ZERO_RANGE] = "zero_range",
-> +	[OP_WRITE_ZEROES] = "write_zeroes",
->  	[OP_COLLAPSE_RANGE] = "collapse_range",
->  	[OP_INSERT_RANGE] = "insert_range",
->  	[OP_CLONE_RANGE] = "clone_range",
-> @@ -486,6 +489,13 @@ logdump(void)
->  			if (overlap)
->  				prt("\t******ZZZZ");
->  			break;
-> +		case OP_WRITE_ZEROES:
-> +			prt("WZERO    0x%x thru 0x%x\t(0x%x bytes)",
-> +			    lp->args[0], lp->args[0] + lp->args[1] - 1,
-> +			    lp->args[1]);
-> +			if (overlap)
-> +				prt("\t******ZZZZ");
-> +			break;
->  		case OP_COLLAPSE_RANGE:
->  			prt("COLLAPSE 0x%x thru 0x%x\t(0x%x bytes)",
->  			    lp->args[0], lp->args[0] + lp->args[1] - 1,
-> @@ -1413,6 +1423,59 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
->  }
->  #endif
->  
-> +#ifdef FALLOC_FL_WRITE_ZEROES
-> +void
-> +do_write_zeroes(unsigned offset, unsigned length)
-> +{
-> +	unsigned end_offset;
-> +	int mode = FALLOC_FL_WRITE_ZEROES;
-> +
-> +	if (length == 0) {
-> +		if (!quiet && testcalls > simulatedopcount)
-> +			prt("skipping zero length write zeroes\n");
-> +		log4(OP_WRITE_ZEROES, offset, length, FL_SKIPPED);
-> +		return;
-> +	}
-> +
-> +	end_offset = offset + length;
-> +
-> +	if (end_offset > biggest) {
-> +		biggest = end_offset;
-> +		if (!quiet && testcalls > simulatedopcount)
-> +			prt("write_zeroes to largest ever: 0x%x\n", end_offset);
-> +	}
-> +
-> +	log4(OP_WRITE_ZEROES, offset, length, FL_NONE);
-> +
-> +	if (end_offset > file_size)
-> +		update_file_size(offset, length);
-> +
-> +	if (testcalls <= simulatedopcount)
-> +		return;
-> +
-> +	if ((progressinterval && testcalls % progressinterval == 0) ||
-> +	    (debug && (monitorstart == -1 || monitorend == -1 ||
-> +		      end_offset <= monitorend))) {
-> +		prt("%lld wzero\tfrom 0x%x to 0x%x, (0x%x bytes)\n", testcalls,
-> +			offset, offset+length, length);
-> +	}
-> +	if (fallocate(fd, mode, (loff_t)offset, (loff_t)length) == -1) {
-> +		prt("write zeroes: 0x%x to 0x%x\n", offset, offset + length);
-> +		prterr("do_write_zeroes: fallocate");
-> +		report_failure(161);
-> +	}
-> +
-> +	memset(good_buf + offset, '\0', length);
-> +}
-> +
-> +#else
-> +void
-> +do_write_zeroes(unsigned offset, unsigned length)
-> +{
-> +	return;
-> +}
-> +#endif
-> +
->  #ifdef FALLOC_FL_COLLAPSE_RANGE
->  void
->  do_collapse_range(unsigned offset, unsigned length)
-> @@ -2409,6 +2472,12 @@ have_op:
->  			goto out;
->  		}
->  		break;
-> +	case OP_WRITE_ZEROES:
-> +		if (!write_zeroes_calls) {
-> +			log4(OP_WRITE_ZEROES, offset, size, FL_SKIPPED);
-> +			goto out;
-> +		}
-> +		break;
->  	case OP_COLLAPSE_RANGE:
->  		if (!collapse_range_calls) {
->  			log4(OP_COLLAPSE_RANGE, offset, size, FL_SKIPPED);
-> @@ -2512,6 +2581,10 @@ have_op:
->  		TRIM_OFF_LEN(offset, size, maxfilelen);
->  		do_zero_range(offset, size, keep_size);
->  		break;
-> +	case OP_WRITE_ZEROES:
-> +		TRIM_OFF_LEN(offset, size, maxfilelen);
-> +		do_write_zeroes(offset, size);
-> +		break;
->  	case OP_COLLAPSE_RANGE:
->  		TRIM_OFF_LEN(offset, size, file_size - 1);
->  		offset = rounddown_64(offset, block_size);
-> @@ -2611,7 +2684,7 @@ void
->  usage(void)
->  {
->  	fprintf(stdout, "usage: %s",
-> -		"fsx [-adfhknqxyzBEFHIJKLORWXZ0]\n\
-> +		"fsx [-adfhknqxyzBEFHIJKLORWXZ0Y]\n\
->  	   [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid]\n\
->  	   [-l flen] [-m start:end] [-o oplen] [-p progressinterval]\n\
->  	   [-r readbdy] [-s style] [-t truncbdy] [-w writebdy]\n\
-> @@ -2663,6 +2736,9 @@ usage(void)
->  #ifdef FALLOC_FL_ZERO_RANGE
->  "	-z: Do not use zero range calls\n"
->  #endif
-> +#ifdef FALLOC_FL_WRITE_ZEROES
-> +"	-Y: Do not use write zeroes calls\n"
-> +#endif
->  #ifdef FALLOC_FL_COLLAPSE_RANGE
->  "	-C: Do not use collapse range calls\n"
->  #endif
-> @@ -3160,7 +3236,7 @@ main(int argc, char **argv)
->  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
->  
->  	while ((ch = getopt_long(argc, argv,
-> -				 "0ab:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:TOP:RS:UWXZ",
-> +				 "0ab:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:TOP:RS:UWXZY",
->  				 longopts, NULL)) != EOF)
->  		switch (ch) {
->  		case 'a':
-> @@ -3307,6 +3383,9 @@ main(int argc, char **argv)
->  		case 'z':
->  			zero_range_calls = 0;
->  			break;
-> +		case 'Y':
-> +			write_zeroes_calls = 0;
-> +			break;
->  		case 'C':
->  			collapse_range_calls = 0;
->  			break;
-> @@ -3568,6 +3647,8 @@ main(int argc, char **argv)
->  		punch_hole_calls = test_fallocate(FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE);
->  	if (zero_range_calls)
->  		zero_range_calls = test_fallocate(FALLOC_FL_ZERO_RANGE);
-> +	if (write_zeroes_calls)
-> +		write_zeroes_calls = test_fallocate(FALLOC_FL_WRITE_ZEROES);
->  	if (collapse_range_calls)
->  		collapse_range_calls = test_fallocate(FALLOC_FL_COLLAPSE_RANGE);
->  	if (insert_range_calls)
-> diff --git a/src/global.h b/src/global.h
-> index fbc0a0b5..e07b3703 100644
-> --- a/src/global.h
-> +++ b/src/global.h
-> @@ -179,6 +179,14 @@
->  #define FALLOC_FL_INSERT_RANGE		0x20
->  #endif
->  
-> +#ifndef FALLOC_FL_UNSHARE_RANGE
-> +#define FALLOC_FL_UNSHARE_RANGE		0x40
-> +#endif
-> +
-> +#ifndef FALLOC_FL_WRITE_ZEROES
-> +#define FALLOC_FL_WRITE_ZEROES		0x80
-> +#endif
-> +
->  #endif /* HAVE_LINUX_FALLOC_H */
->  
->  #ifdef HAVE_SYS_MMAN_H
-> 
-> base-commit: 3ded3e13c008326d197d11ac975049ed1f8ec922
-> -- 
-> 2.51.2
 > 
 > 
+> 
+> 
+
