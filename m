@@ -1,70 +1,144 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2E9827EFEE;
-	Wed, 18 Mar 2026 15:20:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 709CE1662E7
+	for <fstests@vger.kernel.org>; Thu, 19 Mar 2026 00:52:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773847217; cv=none; b=kBNcyTQZ3Hwt9yIEw//fx/02QNYhwDIoptFMcqUINBlSAFkwbrluynG2978LnJoweJv2m5w3v8x3NRTUWuHtNm+UydSzvatNvzyAVKwjnTNRnSIVfmy26VulvELLOXSd/t4lnDYuL+5xS25jmagJykox/4q0F7y3qlbuncuR2jE=
+	t=1773881551; cv=none; b=dbwnOEoI/sAL9iLw/pqcvKopKXWeXP+3THTcvBG+XwN9BrK5zRCHHiCnkghmbU4sA8l7Xpz+eWXxlzdAQdFPks6o8/MqAFKEIvBTg49XFtvPXTv1uHa+y8IaV7vKmts37QrFW5P1oOT9cAybi5vGP+5WReyJddokQqEoxsY+JN4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773847217; c=relaxed/simple;
-	bh=jjOZ5Ix/C05VCaQzYTiTMYxFjIXuLb+lb6mt9KewbEM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HPXr2BdQUN9nEq1K+1Ny+N+fefIVwqHxDanz8JgC3AGepbQRshUtWr0i1jVE9Qo7uhrSaWwMpvaAF3ZzyjqwrtniMUvjY/1qbvS/1q2CUcyrVelQrj/8CM/ZNutRyRPQCuGAleOqO6XXwWVgSEAHICupyDn9Tpv6bqqIyFVKnwY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=yb4zyfT5; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1773881551; c=relaxed/simple;
+	bh=5WE0FCrdZnzHE8+gdERdkq87YGXFniWHo5PAIoYhJ74=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ia4JY/YRhx16HCQ4mzvwhcA5jer/EDXuO7fL2YQ33ojQd0kkzsRUHaEm5opsnkwSbm6XONWkLwz9pRwIsud3mnsqEQXVfQPqd2QfGlHO9CoTgY8UwTjg8yuHMk6NmY/bNmM+ylAQo0OBiG+RzwgoodEFCviNald61EVNXEtr/h4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=VycuFEPG; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=X3iUBNKM; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=VycuFEPG; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=X3iUBNKM; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="yb4zyfT5"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Transfer-Encoding
-	:Content-Type:MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:
-	Sender:Reply-To:Content-ID:Content-Description;
-	bh=X2ytg4EAJWYHSjXHnrIQJRt6TcKvRbsXR8fx9K5EsRw=; b=yb4zyfT5zYnu0KCd2OrgF/aIli
-	qMdM0w4DGbLVQGxv4SUXeutZhtoYMxoIBhwnDJrggqHo7j970QrMZnmUD+e2aZl9bKTbkyMmoG5jI
-	S9xUYVVI/vMYw1xvWlWObAdZOxmYuRwIlJKvieb2PhlQmAWKh8SYIw/W0+4l4jYjfDyj0cqaBx8Av
-	ouoMN3HWH07kmR8grouxORyhSnS6AUq7YaN7ohd56qJCYp4VAoB1xy0sCdFHyI1MvZWsqC4nh3h+y
-	Bb5gA2xwRog0RtMdebqSNJu0gJrjNf1Dxvhooi59MGNE0JYN6oBivRfegRWXXAH7MMCLum8n8Us6a
-	9mcgVPFQ==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1w2sgu-00000008gwc-1POl;
-	Wed, 18 Mar 2026 15:20:12 +0000
-Date: Wed, 18 Mar 2026 08:20:12 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-Cc: "Nirjhar Roy (IBM)" <nirjhar@linux.ibm.com>, djwong@kernel.org,
-	hch@infradead.org, cem@kernel.org, david@fromorbit.com,
-	linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-	ritesh.list@gmail.com, ojaswin@linux.ibm.com,
-	hsiangkao@linux.alibaba.com
-Subject: Re: [RFC v1 0/4] xfs: Add support to shrink multiple empty rtgroups
-Message-ID: <abrCrFogLZ_MWTIb@infradead.org>
-References: <20260219055737.769860-1-nirjhar@linux.ibm.com>
- <cover.1771418537.git.nirjhar.roy.lists@gmail.com>
- <0e20766d-5855-4514-a6bd-49e32261c162@gmail.com>
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="VycuFEPG";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="X3iUBNKM";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="VycuFEPG";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="X3iUBNKM"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 7F17A4D1CC;
+	Thu, 19 Mar 2026 00:52:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1773881548; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=sWPXj/DW0Ur/vEHhQyfhU5RLlccA3hk3HaFcAXVk7oc=;
+	b=VycuFEPGLFer0FoZwevy2GoyrsPWUL4LGewPy7ztl4uwLeGG+WvPcKSbvMiM/nF4g9Zdg1
+	5fDYfw5U6SQUXG+3+oHs+/fDSvAnmA+3mK9nlnTyDIQQ8rWUYEwU2PI+l48th8sLe8CAT+
+	WVfkws2zXvLz+KNNe8qoNO1iABzLuGM=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1773881548;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=sWPXj/DW0Ur/vEHhQyfhU5RLlccA3hk3HaFcAXVk7oc=;
+	b=X3iUBNKMWf9B74fLRzJzhh+NVqJlWURJK/s01jncNkPfImkfo1wQPfCAPOM58yPs8IFe+z
+	l5VjLMRa7yQibiAw==
+Authentication-Results: smtp-out1.suse.de;
+	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=VycuFEPG;
+	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=X3iUBNKM
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1773881548; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=sWPXj/DW0Ur/vEHhQyfhU5RLlccA3hk3HaFcAXVk7oc=;
+	b=VycuFEPGLFer0FoZwevy2GoyrsPWUL4LGewPy7ztl4uwLeGG+WvPcKSbvMiM/nF4g9Zdg1
+	5fDYfw5U6SQUXG+3+oHs+/fDSvAnmA+3mK9nlnTyDIQQ8rWUYEwU2PI+l48th8sLe8CAT+
+	WVfkws2zXvLz+KNNe8qoNO1iABzLuGM=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1773881548;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=sWPXj/DW0Ur/vEHhQyfhU5RLlccA3hk3HaFcAXVk7oc=;
+	b=X3iUBNKMWf9B74fLRzJzhh+NVqJlWURJK/s01jncNkPfImkfo1wQPfCAPOM58yPs8IFe+z
+	l5VjLMRa7yQibiAw==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id E47F24273B;
+	Thu, 19 Mar 2026 00:52:26 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id lO4zJcpIu2k8ZgAAD6G6ig
+	(envelope-from <ddiss@suse.de>); Thu, 19 Mar 2026 00:52:26 +0000
+From: David Disseldorp <ddiss@suse.de>
+To: fstests@vger.kernel.org
+Cc: Dave Chinner <david@fromorbit.com>,
+	David Disseldorp <ddiss@suse.de>
+Subject: [PATCH] common/rc: add default _udev_wait timeout
+Date: Thu, 19 Mar 2026 11:51:54 +1100
+Message-ID: <20260319005154.29274-1-ddiss@suse.de>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <0e20766d-5855-4514-a6bd-49e32261c162@gmail.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[99.99%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_CONTAINS_FROM(1.00)[];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	ARC_NA(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:mid,suse.de:dkim,suse.de:email];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	TO_DN_SOME(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	FROM_EQ_ENVFROM(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	URIBL_BLOCKED(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns,suse.de:mid,suse.de:dkim,suse.de:email];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	RCPT_COUNT_THREE(0.00)[3];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	DKIM_TRACE(0.00)[suse.de:+]
+X-Rspamd-Action: no action
+X-Spam-Flag: NO
+X-Spam-Score: -3.01
+X-Spam-Level: 
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Rspamd-Queue-Id: 7F17A4D1CC
 
-On Wed, Mar 18, 2026 at 08:13:28PM +0530, Nirjhar Roy (IBM) wrote:
-> I am preparing a v2 incorporating all the initial review feedback received
-> so far. In parallel, I am looking into adding shrinkfs support for zoned
-> XFS  -  however, it would be great if we can discuss the current design and
-> get a full review of the changes so far to get this work (shrinkfs for
-> non-zoned realtime groups) into proper shape for the upcoming merge window
-> first and submit zoned XFS shrinkfs support separately afterward. Do you
-> think that make sense?
+If udevd isn't running then "udevadm wait" loops endlessly. With a
+--timeout parameter provided, udevadm (udev-254.27) prints to stderr:
+  Timed out for waiting devices being initialized.
 
-What is your plan for actually migrating data out of the to be shrunk
-region, which is really the deal breaker to make this useful.  Outside
-of that zone support should be really trivial as it just means doing a
-little less work.
+The error message causes test failure via golden output mismatch and
+is easier to debug than an infinite loop.
+
+The timeout parameter is also compatible with existing
+args="--removed <dev>" callers.
+
+Signed-off-by: David Disseldorp <ddiss@suse.de>
+---
+ common/rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common/rc b/common/rc
+index fd4ca964..aade0e5b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -5544,7 +5544,7 @@ _udev_wait()
+ 	if [ -z "$UDEV_WAIT_PROG" ]; then
+ 		$UDEV_SETTLE_PROG >/dev/null 2>&1
+ 	else
+-		$UDEV_WAIT_PROG $args
++		$UDEV_WAIT_PROG --timeout 10 $args
+ 	fi
+ }
+ 
+-- 
+2.51.0
 
