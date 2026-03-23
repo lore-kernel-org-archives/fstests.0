@@ -1,152 +1,62 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FEDA2609EE
-	for <fstests@vger.kernel.org>; Mon, 23 Mar 2026 05:12:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1CB382C237E
+	for <fstests@vger.kernel.org>; Mon, 23 Mar 2026 06:07:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774242770; cv=none; b=K6JbNeonrr8mK8Yd6fWchODffReiPSaqXZx8iiHxI5h73aUvN9GVuBU9xGziYbxAMgorzGUjMWg1yZrOhmhKufndH5ih6q8Bmb3YnYxbu7ZxyKkcalUculcpGY+oQteWSb+5cdUQRxgGTzbU/yq9zwfSFZYR0a+8DRp69sY3L/w=
+	t=1774246028; cv=none; b=sGruLsvoj6/1z3iWutuOJnQlATstNv6DQvU2q4AYfSuiVJWYgOjlfhzieE4c+pWU859rLQegG4rW8R+6y0HV3FWCM1lc8YTIFZ4TDETn1rJ0RxHrTQk6CTd+ECL0BxNBCMipnJ2T166/hMMDIikfz+ESDzF33uDK2/EnOngnEjg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774242770; c=relaxed/simple;
-	bh=fiNx+cQ1GLDwBvgpCt8FIazP0RrY27qXpxdu2X/YShc=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=cBMQMrQez41+6SoBv5PB89nqtLZ3Qda/OTKba19nNhX3201SUbow7YudTltGM4maK1GnDKTozI76++kbUj2diJlsErNXuOK2hE8kYyQ3xBpDroJQ7ChXiEVYAZPv1e8J4G9CgwYGZVKx96TCUt1Z7sMZmirOoZNH/JQtw2mpW9I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=XwkgheAH; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=F4/Lo4WW; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=hoL4UHvz; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=GyVMHb9j; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	s=arc-20240116; t=1774246028; c=relaxed/simple;
+	bh=7RGFKd9AUw2ZuPRIq33p6vOYtsURdxAycgrSa2y9vjw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=DsbjRG7P3uTRMJCxYqToyAJn3SOsahnnEAN08bQNkdEbcAnq02l3q/PhGMk8PoVowKb507GE/wRn9fv9zo93bDjfkY5E1DMCegrodKhtXcnBmX47JezpBfEI1omrSYw4aZNtwVViAZg9+mjC5vtyq2wawt+h/WooSoESMdBcGV4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=v2sqQI2N; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="XwkgheAH";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="F4/Lo4WW";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="hoL4UHvz";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="GyVMHb9j"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id DE5BB4D356;
-	Mon, 23 Mar 2026 05:12:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1774242760; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=dRTVmRWSCgI+NysHxuDgkqfyyohq9ODoQR6Qce90rR0=;
-	b=XwkgheAHrwwGtyHFxaW3OxltNPxNXXdg3+U/ouzBSoR2R6j6JNwn0wOTiWpPM5GQ/L4cAb
-	WuZjIBdklUnLpunEamwhafPkiiuY6uxYaF00SqUifPw+RWUjUqprTkZorg0wC/G8aaAgFv
-	pUKKBVXdeYVbXDE8zcRHJ/GUZr2OCeI=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1774242760;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=dRTVmRWSCgI+NysHxuDgkqfyyohq9ODoQR6Qce90rR0=;
-	b=F4/Lo4WWet47KnYduBU4O3+rp+Qqb9lqGs/qMub/KCsDBGSU1tsV/LazFE2VQve1d6iy2Q
-	VnwWzOidl7L22CAQ==
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=hoL4UHvz;
-	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=GyVMHb9j
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1774242759; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=dRTVmRWSCgI+NysHxuDgkqfyyohq9ODoQR6Qce90rR0=;
-	b=hoL4UHvza1qtq/ik3dAKQcxy4uQkxyKgg0SdaNmDGAlS+ZiDV1SHGXEVWQyoFtT+FKDcEk
-	8iY8INB2VDLDiMY3GY8GfJnYkx4N8zCl22YmIb6rBTt2wdePPKfqHkpv2nNOCPDMGl/QgZ
-	GvTbzvG1QEhuUAuROdty6czrr6hAnAE=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1774242759;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=dRTVmRWSCgI+NysHxuDgkqfyyohq9ODoQR6Qce90rR0=;
-	b=GyVMHb9jeAzWbF/ABy0cC/sJADv4xKUiL8EZ+FxJYiRukZbhp1+YwgsojwtCDCXUvGPm3g
-	EF0RsN+lm6lZGYAw==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 53E90436DC;
-	Mon, 23 Mar 2026 05:12:38 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id G+rHAcbLwGmgWQAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Mon, 23 Mar 2026 05:12:38 +0000
-From: David Disseldorp <ddiss@suse.de>
-To: fstests@vger.kernel.org
-Cc: Dave Chinner <david@fromorbit.com>,
-	David Disseldorp <ddiss@suse.de>
-Subject: [PATCH v2] common/rc: add default _udev_wait timeout
-Date: Mon, 23 Mar 2026 15:45:58 +1100
-Message-ID: <20260323044557.2668-2-ddiss@suse.de>
-X-Mailer: git-send-email 2.51.0
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="v2sqQI2N"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=REecvo/1sa5fGVfHVTGqxVjhogG9koEJ0Db+67E9NOo=; b=v2sqQI2N+XX4LI4j6/ks3q6f2C
+	qoAZxqAsNVtdIRpwixs7MdVQeJi7/hm9RUuOIItKXsN8d6snfWc8OQsYIhmVbD/NwweJXYA+iHbZr
+	3EfDIHjz02G3+pGuEifrKoxg2uEC/v4HbuDay92ihK6whPqolhpLGv51lGQgs5G306x8xQNete2/8
+	nN/8OMG6iLnUYg/vzY/9Y0nomPkktHLvEMH8pwYFp+bEd1EYd/gG4ZdvllXGDKYaNDhHkD+iduytU
+	2yXDzBQLuPakj5yJx1sbBsVEB7onTW27smTTaiB4r28U/LAV3XTEGcEQ/5hPl0yfgggTWsq4zGRoW
+	jLUlRVBw==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1w4YRL-0000000G5So-2GbW;
+	Mon, 23 Mar 2026 06:07:03 +0000
+Date: Sun, 22 Mar 2026 23:07:03 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Disha Goel <disgoel@linux.ibm.com>, fstests@vger.kernel.org,
+	zlang@kernel.org
+Subject: Re: [PATCH] generic/730: skip on ext4 when dax is enabled
+Message-ID: <acDYh-Q4gQcR2xRg@infradead.org>
+References: <20260318081812.47870-1-disgoel@linux.ibm.com>
+ <20260320155644.yy4qz2ulujpppaj2@doltdoltdolt>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Rspamd-Action: no action
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Spamd-Result: default: False [-3.01 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	ARC_NA(0.00)[];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	TO_DN_SOME(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	URIBL_BLOCKED(0.00)[suse.de:dkim,suse.de:mid,suse.de:email,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	DNSWL_BLOCKED(0.00)[2a07:de40:b281:104:10:150:64:97:from,2a07:de40:b281:106:10:150:64:167:received];
-	FROM_EQ_ENVFROM(0.00)[];
-	RCPT_COUNT_THREE(0.00)[3];
-	RCVD_TLS_ALL(0.00)[];
-	DKIM_TRACE(0.00)[suse.de:+];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns,suse.de:dkim,suse.de:mid,suse.de:email]
-X-Rspamd-Queue-Id: DE5BB4D356
-X-Spam-Flag: NO
-X-Spam-Score: -3.01
-X-Spam-Level: 
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260320155644.yy4qz2ulujpppaj2@doltdoltdolt>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-If udevd isn't running then "udevadm wait" loops endlessly. With a
---timeout parameter provided, udevadm (udev-254.27) prints to stderr:
-  Timed out for waiting devices being initialized.
+On Fri, Mar 20, 2026 at 11:56:44PM +0800, Zorro Lang wrote:
+> I think this case isn't a DAX related test case, even give it "-o dax=always",
+> it won't test scsi_debug with that either. So why don't we simply skip the test
+> if dax is detected in MOUNT_OPTIONS?
+> 
+>   _exclude_scratch_mount_option dax
+> 
+> Any thoughts on this?
 
-The error message causes test failure via golden output mismatch and
-is easier to debug than an infinite loop.
-
-The timeout parameter is also compatible with existing
-args="--removed <dev>" callers. 60 seconds is relatively arbitrary, but
-should be long enough to avoid premature timeout on regular systems.
-
-Signed-off-by: David Disseldorp <ddiss@suse.de>
----
-Changes since v1:
-- increase timeout from 10 to 60 seconds
-
- common/rc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/common/rc b/common/rc
-index fd4ca964..a490893f 100644
---- a/common/rc
-+++ b/common/rc
-@@ -5544,7 +5544,7 @@ _udev_wait()
- 	if [ -z "$UDEV_WAIT_PROG" ]; then
- 		$UDEV_SETTLE_PROG >/dev/null 2>&1
- 	else
--		$UDEV_WAIT_PROG $args
-+		$UDEV_WAIT_PROG --timeout 60 $args
- 	fi
- }
- 
--- 
-2.51.0
+Agreed to all of the above.
 
