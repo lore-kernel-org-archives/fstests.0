@@ -1,122 +1,137 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yx1-f68.google.com (mail-yx1-f68.google.com [74.125.224.68])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 42EA01A38F9
-	for <fstests@vger.kernel.org>; Mon, 23 Mar 2026 13:32:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1440C36680F
+	for <fstests@vger.kernel.org>; Mon, 23 Mar 2026 20:15:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.68
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774272738; cv=none; b=lJj3JTa1Hc7lxRK38VGbRUXunjNFG9FEGq2SAvV/YxUMSKXZszgKLBDPzNqJffCslpj3igJ6yxDsuS/6eBHDI43Lqjn1ddWDVgZoeQ/s0tzcOkwipTRLDrok2pVoKecdEuCE9T1B8Hlp5PD/xdTtVeJ/3xEukWSpE5cRYeVLTVc=
+	t=1774296937; cv=none; b=RAWE7OmapL6bIRIy6wghVqw5k3rGTGVdRLWfxTXo9hO0Z5FaGDKWx2RY7tNhWRs4m9qPldt1J3aEmtOW0mXmZqYqwrTyS1Bcuf8GSd36fDwbp7KvU4XHvg7Abk7OjcCkd6SkpStWOmtMRCSpf/Vz9Nxd5fcScdcccJOMnRvTyoY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774272738; c=relaxed/simple;
-	bh=Jpdndc/lz9TCArPCQTh2MHRK0i1Yyia6el5LSNGkhOI=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=VjOiIvLlL36JqQxVTwxl+8/dAHt2fzePd3o6YCQTqywx7P3WFZWt8XEhK/cVb8dbGjN5eWmzqJhIckFEu4pa6k6C680FZXtrzs4sAFZ893YBgb6IPkiomY1y229GcO4H5z59lx9sZhEeSwdMVeZe5Kzt/eAMcjbcNrIFbW5buzo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eIaZLX54; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1774296937; c=relaxed/simple;
+	bh=MF1qa2PS5UiXG6+7n9vWd6AOz86MM/IrfgTPqQ/Njv4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=fPD21NuKtfQ00q+Q7ii01zctvjkjZMqeANIm7LojyGLm9oF0YDh56Z0pu3Hwkoc6rFndRDUA3TBnT81VbuCf7zCdjd/W/FPG/LxFxEqVkLISyvgClr/DaJF6f1AKbcoNqpX9e7eDA0vP/suXaWzxHKlsA8jmF21CQXUuDV6AuWw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=OXZhH4Bh; arc=none smtp.client-ip=74.125.224.68
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eIaZLX54"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8DBD7C4CEF7;
-	Mon, 23 Mar 2026 13:32:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1774272738;
-	bh=Jpdndc/lz9TCArPCQTh2MHRK0i1Yyia6el5LSNGkhOI=;
-	h=From:Date:Subject:To:Cc:From;
-	b=eIaZLX545sZ7qQgWbokhN9vldc/AiZchxUwH0x1y2IgjgdbqmZop2GJhW3VN6tSq7
-	 xIf1rKlmCQHYHhFrl+C/NGrgKQotLGruVkMMNJojc/syOSKoMPoE7rA+nXIsE9WX46
-	 iaLjc87bMu1WhBpEg3l628n0X9INQx7wbDOcP2v7dT4IPhVw+K/gjctQWSQEK6YNg9
-	 sAPwtjbbfFfFM/E3G4xrl8RAXaiGyMPQGkePilbDpPfe5zsP+a2g2NHCEiisF4I5xO
-	 HdCoo6QN40ZlJfOn8rndYqC9fZKPhvJzyiCg03yq1wtk+DxAhDex2qGWItOSPL+FFJ
-	 FgGK2zTqtPX+g==
-From: Christian Brauner <brauner@kernel.org>
-Date: Mon, 23 Mar 2026 14:32:15 +0100
-Subject: [PATCH] vfs: fix dumpable race in create_userns_hierarchy()
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OXZhH4Bh"
+Received: by mail-yx1-f68.google.com with SMTP id 956f58d0204a3-64ed548c2f6so722920d50.1
+        for <fstests@vger.kernel.org>; Mon, 23 Mar 2026 13:15:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1774296935; x=1774901735; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=+sA/e4+zJJupwo9/Rw4ZAvXqt0f+FgliyX2OB04OaLQ=;
+        b=OXZhH4Bh8r5Z3G8HTC+wP4vuXu3KFnV9cqIdQH3wxAdobtAn6SMLOtcHukF8KQY7db
+         +54YtQI18wj0iMAiZnz10DlYB9AcxOvsxgzORN7+DV+RwiMlBZ5fIHcgxRhbUTfPZClL
+         BiQiDEVN4UssOJmXRomjfH+PERAV5NAFm22LKOfkobd2G63tDrWYilRkDlWzwde65qGm
+         /pPdxOFxAOLHSl32iDhELubIvQXs3d9Wj1r0eDdZG0FE3577eBRY1dVyAHLxO+LYy/+h
+         pYnnA6keQTkqLj6q+hyokPfNkPhXOcIMjO29iHVGh3YFQe0QGGmdiCul+TYxu6xaujCP
+         yUKQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1774296935; x=1774901735;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=+sA/e4+zJJupwo9/Rw4ZAvXqt0f+FgliyX2OB04OaLQ=;
+        b=k6gPA/lQxAqv2A4QvB4viZC24DGIT+y2kvTBfyOvSqqEjW5NAmKKIAYoUr0vHwveJz
+         XYgsmUotaCW99xd1e2uHWRfbsdBuuTt040XYc/J9qrzndXLTW3/n43a+ZEqfAk3/XH0u
+         mYiMaFoeI3nOeQUmzapdbwTiHYgd7s/tU1IrRZQKONhhV92ULP+ZG8RRAiHc+omkly5O
+         7BsQSGsAiLrBfJZ1UY9mTO7o8ZE4iUjuKNMox2tgQ40B+cPNpepWy4Qzlp20KUhZxnzX
+         xbFeDxrvaLZEC1uXMyVoP25D8SY2cmmr/cmCHH6wUQYtcXDziBHcS2QZlAnYDH0l38OQ
+         WLJg==
+X-Gm-Message-State: AOJu0YxeJVKt8n98a2CPbf/FRv4i/Z3CkC0vOxk4tr7VIGYLMWHYksf8
+	NCMsB72LNigWLRyVwxOE1pr3AQr1/AAiGT53FFuYHCbSIM0w29y4mTJzKfV+DRyo
+X-Gm-Gg: ATEYQzy0uDQg/cT9FylMrTBYfb+1pWjio3LEn9yT8h9dfVOODz9L8O7IsAn6nh5/3xM
+	TOjajP7muJCsudjkW6+S64V4LT7L0m9PpvaFj1yAyuyxI4cdz10wvqh/1mvSzeITYiqtpv/ng0b
+	zOSDyRQTBNqFM1EJpX57IuZBYT+WfvRtd6B4fTLSBgPxREZCt/igKcG8A4phqyMwKAGxVBdDXZS
+	w92U6rusndqQzZdQJW/lgGBzgUAzBjpEroAZerIMc/V/ZNzd75agjlZOlK9F075QV5d1idAKXDH
+	VUqJXR4kB7L2HLM9iAtHyU8do4goAL/uPjXW3PKBSzvI4a4n/301cWOSX2x5yBc9xTOyj6IUyv8
+	7Tj7XZ3WX1yf4DwP5z1DqucjkkMMAJvhoF1Tk026k5pD3LSHXV78LNWxQZGJy9Vs63ej1UBBXYc
+	sOBhgeghhWCogGVCJKAA==
+X-Received: by 2002:a53:cc0e:0:b0:64c:9ec3:d70f with SMTP id 956f58d0204a3-64eaa8455a3mr10425256d50.71.1774296934605;
+        Mon, 23 Mar 2026 13:15:34 -0700 (PDT)
+Received: from localhost ([2a03:2880:25ff:43::])
+        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-64eabbf8503sm6713454d50.0.2026.03.23.13.15.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 23 Mar 2026 13:15:34 -0700 (PDT)
+From: Leo Martins <loemra.dev@gmail.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>,
+	"Darrick J . Wong" <djwong@kernel.org>
+Subject: [RFC] generic/301: flaky failure on btrfs after metadata overcommit change
+Date: Mon, 23 Mar 2026 13:15:29 -0700
+Message-ID: <20260323201533.2648753-1-loemra.dev@gmail.com>
+X-Mailer: git-send-email 2.52.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260323-fix-vfs-bugs-v1-1-76a6aed624d9@kernel.org>
-X-B4-Tracking: v=1; b=H4sIAN5AwWkC/yWMywqDQAxFf0WybsCOYm1/pbiYR0bjYiyJiiD+e
- 2fazYVzXycoCZPCqzpBaGflJWW43yrwk00jIYfMYGrT1Y1pMPKBe1R025iljb1tnyZ04QF58hH
- K+e/uPfxZNzeTX8tHaTirhE5s8lOx4iKY6Fjhur6mJ+RFiwAAAA==
-X-Change-ID: 20260323-fix-vfs-bugs-b4f8a492d6d7
-To: fstests@vger.kernel.org
-Cc: Christian Brauner <brauner@kernel.org>
-X-Mailer: b4 0.15-dev
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2593; i=brauner@kernel.org;
- h=from:subject:message-id; bh=Jpdndc/lz9TCArPCQTh2MHRK0i1Yyia6el5LSNGkhOI=;
- b=owGbwMvMwCU28Zj0gdSKO4sYT6slMWQedHhoJsPHzxKSbGa4Z92tOSe9rLdYbbFZ1ySzXoTlk
- wtHteXOjlIWBjEuBlkxRRaHdpNwueU8FZuNMjVg5rAygQxh4OIUgIm8fM7IcP1aT/XEJEaPed3H
- hM5kHV6wUzfs85c12RFa/CKtTN/fXWT4yZiqPs9qeu3DfRo9qubeIlsqzq35/k1+xsEl2xU//Kp
- WZgMA
-X-Developer-Key: i=brauner@kernel.org; a=openpgp;
- fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
+Content-Transfer-Encoding: quoted-printable
 
-All processes in the userns hierarchy share the same mm_struct due to
-CLONE_VM. When a child calls setresuid() in switch_ids(), the kernel
-clears the dumpable flag on the shared mm. The child immediately
-re-sets it via prctl(PR_SET_DUMPABLE, 1), but there is a window
-between the two where the parent may be opening /proc/PID/ns/user for
-the previous level's child. That open hits ptrace_may_access() which
-checks get_dumpable(mm) and, finding it zero, falls back to
-ptrace_has_cap(mm->user_ns, mode). Since mm->user_ns is init_user_ns
-(the mm was created by real root) and the parent is only ns-root, the
-capability check fails and the open returns -EACCES.
-
-Fix this by extending the existing two-way socketpair handshake into a
-three-way handshake: the child signals the parent after becoming
-dumpable, then blocks until the parent has opened /proc/PID/ns/user
-and signals back. Only then does the child proceed to
-create_userns_hierarchy() for the next level. This guarantees no
-concurrent setresuid() can clear dumpable while the parent's open() is
-in flight.
-
-Signed-off-by: Christian Brauner <brauner@kernel.org>
----
- src/vfs/utils.c | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
-
-diff --git a/src/vfs/utils.c b/src/vfs/utils.c
-index 52bb7e42..0b435afe 100644
---- a/src/vfs/utils.c
-+++ b/src/vfs/utils.c
-@@ -312,6 +312,18 @@ static int userns_fd_cb(void *data)
- 	if (ret < 0)
- 		return syserror("failure: write to socketpair");
- 
-+	/*
-+	 * Wait for the parent to open our /proc/PID/ns/user before
-+	 * proceeding to create the next userns level. Without this,
-+	 * setresuid() in the next-level child clears the dumpable flag
-+	 * on the shared mm (CLONE_VM) and the parent's open() fails the
-+	 * ptrace_may_access() check with -EACCES because mm->user_ns is
-+	 * init_user_ns where userns processes lack CAP_SYS_PTRACE.
-+	 */
-+	ret = read_nointr(h->fd_event, &c, 1);
-+	if (ret < 0)
-+		return syserror("failure: read from socketpair");
-+
- 	ret = create_userns_hierarchy(++h);
- 	if (ret < 0)
- 		return syserror("failure: userns level %d", h->level);
-@@ -377,6 +389,14 @@ int create_userns_hierarchy(struct userns_hierarchy *h)
- 		goto out_wait;
- 	}
- 
-+	/* Tell the child it can now proceed to create the next level. */
-+	bytes = write_nointr(fd_socket[0], "1", 1);
-+	if (bytes < 0) {
-+		kill(pid, SIGKILL);
-+		syserror("failure: write to socketpair");
-+		goto out_wait;
-+	}
-+
- 	fret = 0;
- 
- out_wait:
-
----
-base-commit: 3ded3e13c008326d197d11ac975049ed1f8ec922
-change-id: 20260323-fix-vfs-bugs-b4f8a492d6d7
-
+Hi,=0D
+=0D
+generic/301 has become flaky on btrfs after commit 0dc118b3c327 ("btrfs:=0D
+be less aggressive with metadata overcommit when we can do full=0D
+flushing") which landed in btrfs/for-next. Out of 30 runs, 8 fail with:=0D
+=0D
+    +file2 badly fragmented=0D
+=0D
+I bisected this to the above commit, which reduces the metadata=0D
+overcommit limit from 1/8th to 1/64th of available space for=0D
+full-flushing contexts. This is a legitimate fix for -ENOSPC transaction=0D
+aborts on small filesystems, but as a side effect it causes more=0D
+frequent transaction commits during writeback. The reduced batching=0D
+means the extent allocator has less opportunity to coalesce adjacent CoW=0D
+extents, resulting in higher extent counts that sometimes cross the=0D
+test's threshold.=0D
+=0D
+The fragmentation check in question is:=0D
+=0D
+    test $new_extents -lt $((internal_blks * 2 / 3)) || echo "file2 badly f=
+ragmented"=0D
+=0D
+The 2/3 threshold was introduced in 9184ca155d7c ("xfs: test=0D
+fragmentation characteristics of copy-on-write") as part of a series=0D
+testing XFS's CoW extent size hint (cowextsize) mechanism. For btrfs,=0D
+this threshold is arbitrary =E2=80=94 btrfs doesn't have XFS's cowextsize h=
+int,=0D
+and its CoW extent allocation depends on factors like transaction commit=0D
+frequency and metadata reservation behavior, which is exactly what the=0D
+overcommit commit changed.=0D
+=0D
+I see two possible fixes and would appreciate input on which is=0D
+preferred:=0D
+=0D
+Option A: _notrun for btrfs=0D
+----------------------------=0D
+=0D
+Skip the entire test since the fragmentation threshold is not applicable=0D
+to btrfs:=0D
+=0D
+    test $FSTYP =3D "btrfs" && \=0D
+        _notrun "CoW fragmentation threshold not applicable to btrfs"=0D
+=0D
+Option B: Skip only the extent count assertion for btrfs=0D
+---------------------------------------------------------=0D
+=0D
+Keep the CoW + data integrity portion of the test (the md5sum checks=0D
+after random CoW writes and remount are still useful) and only skip the=0D
+fragmentation assertion:=0D
+=0D
+    if [ "$FSTYP" !=3D "btrfs" ]; then=0D
+        test $new_extents -lt $((internal_blks * 2 / 3)) || \=0D
+            echo "file2 badly fragmented"=0D
+    fi=0D
+=0D
+I lean towards option B since the CoW write + remount + md5sum=0D
+verification is still a reasonable smoke test, but option A is cleaner=0D
+if the consensus is that this test isn't adding value for btrfs.=0D
+=0D
+Thoughts?=0D
+=0D
+Thanks,=0D
+Leo Martins=0D
