@@ -1,138 +1,184 @@
-Received: from mail.burntcomma.com (mail2.burntcomma.com [217.169.27.34])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A7A33B47C9;
-	Wed, 25 Mar 2026 11:02:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.169.27.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E0183D6CA2;
+	Wed, 25 Mar 2026 12:51:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.143.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774436563; cv=none; b=SCOEu62o4zNAaGHK95NP+EJZwJ9Sitg23JjMgkhTwFoN8aYvWKpKNckKhdmBSUdMVTk0uO4EAULSZ86iufbHjH6ERsrToaMOBasO2B+gYhIwHtS7yzCfzONSOaEjrFkL9G7ikqD12d1bZmKuzO9DnyeCL+0YW/ZgJMvm/N4v1G4=
+	t=1774443066; cv=none; b=Ok58MQXtvljB8Un4/DpMaF9qZyOZAzFWDSAHBVOvspmFuJJQturXUZN/RfLA2D8bfdQnq/PH4wbFS6r/aatZ9GfuRKlnjAQj8ymWd5j7wA9UryP2SNotl1OgreaqgrWTY4difFDNwbfuccZ+EfAKGUGnlugHIfZ9T48gxQo8C9k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774436563; c=relaxed/simple;
-	bh=cuBfcZoDG+A53mX/Zw37UyS+5F6zpOonj8CXVMOqhnM=;
-	h=Message-ID:Date:Mime-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=Tikdsy4X6a8vo6BQoez1v4jiEuySMT+8nkcEa5Gv9UNldRAItrOgCd0R007vXUNnrktDcrg7D398YfdMICvtq1wB1NDsMtD5xoSjTTr1ZuImO84tig0gb2faZakt62cm4lORb10fJLJbh5hDoJOwPHNrIBqrHb2KWelWMQ2ab/w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=harmstone.com; spf=pass smtp.mailfrom=harmstone.com; dkim=pass (1024-bit key) header.d=harmstone.com header.i=@harmstone.com header.b=r0sPFVDI; arc=none smtp.client-ip=217.169.27.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=harmstone.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=harmstone.com
+	s=arc-20240116; t=1774443066; c=relaxed/simple;
+	bh=LsCbg7Ygwd8iHg2xO+UCMm7ePoyUX+JnkKLpyH4IEfs=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=B4sLB3kGV97zJU1iKnWPmyXM+JMgPjDQCd/BrF56P16EdBVSPGqIw8WkS2GreBhv4ysehHDTKsV072KGS2Nv6uqiDiIpLW+5jmAbSIcpGxK6JCzzY0r/bfnso7jykzlUaCjB7gNoUtEMhE63qlTrcwQSgaUTl24AZ3Z7dGlQN84=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=gPaPJDfF; arc=none smtp.client-ip=68.232.143.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=harmstone.com header.i=@harmstone.com header.b="r0sPFVDI"
-Received: from [IPV6:2a02:8012:8cf0:0:ce28:aaff:fe0d:6db2] (beren.burntcomma.com [IPv6:2a02:8012:8cf0:0:ce28:aaff:fe0d:6db2])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256
-	 client-signature RSA-PSS (2048 bits) client-digest SHA256)
-	(Client CN "hellas", Issuer "burntcomma.com" (verified OK))
-	by mail.burntcomma.com (Postfix) with ESMTPS id A898F314D83;
-	Wed, 25 Mar 2026 11:02:30 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=harmstone.com;
-	s=mail; t=1774436550;
-	bh=vQVI5UAPP+iX1xnJmWWeIUeddN+hVEWvTwtIDGYAR7k=;
-	h=Date:Subject:To:References:From:In-Reply-To;
-	b=r0sPFVDIYJg/p2UD4ShXdVynjRRJzhvf+U/LCm1cGr+r/BPcC7YqxmpmyzuTcFtyi
-	 N82Yk/PrurdfFAUdWsx7gqUsixclLydv4milohJZ0s8B2JDYSm/uadLvsZPbr1DO7D
-	 h6Iw7YqwE4xDEbyjC05JwODYgkr1TizQFg7kq1qQ=
-Message-ID: <fdd79c85-177c-4a57-a989-97613f94174b@harmstone.com>
-Date: Wed, 25 Mar 2026 11:02:30 +0000
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="gPaPJDfF"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1774443063; x=1805979063;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=LsCbg7Ygwd8iHg2xO+UCMm7ePoyUX+JnkKLpyH4IEfs=;
+  b=gPaPJDfFtkQ9C6I+pIf/3O/dWdVhNvd1b1IkQXEu3f1lABiauUexurgy
+   OWHn1Pu1uKYFpMh4lnHi5hX1uwu5zW6/lXUMoOMKR8/iYzasJgId5e03E
+   f6yOFSHeEKHhLn+375VskefYwWY48Ss/WDF+I9I1ps6QbQwaJkRy4EBxJ
+   S8TinAhbVior6ScUIG+NGmL+sYCyyNmlTS5fBpkJiDBrkXcvyVV0g8t+L
+   61mcBVoIfZkfCLAjv9iv475dm/jW3XA5y4oA5St7wSiWO6hdlKoSlJVSM
+   2gwo4aswmAhE3s+IxkSPH76SIxJg7pQcG0c/cRmhqwrZHt1OsZs16PsHM
+   Q==;
+X-CSE-ConnectionGUID: s2b5FesbS228sXojInE60Q==
+X-CSE-MsgGUID: 9IPjZqQ6RzWqoW9yp6PH1w==
+X-IronPort-AV: E=Sophos;i="6.23,140,1770566400"; 
+   d="scan'208";a="144343442"
+Received: from unknown (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 25 Mar 2026 20:50:57 +0800
+IronPort-SDR: 69c3da15_FVTm11UvjEE+V4VStVdTAWFblwhh4nxnKQnEcj03JxtITt5
+ e5ddIzy3yYR256T2AQkosLZFudZNqgauk+zS4sA==
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 25 Mar 2026 05:50:29 -0700
+WDCIronportException: Internal
+Received: from unknown (HELO gcv.wdc.com) ([10.224.20.47])
+  by uls-op-cesaip01.wdc.com with ESMTP; 25 Mar 2026 05:50:26 -0700
+From: Hans Holmberg <hans.holmberg@wdc.com>
+To: zlang@kernel.org
+Cc: fstests@vger.kernel.org,
+	Christoph Hellwig <hch@lst.de>,
+	Damien Le Moal <dlemoal@kernel.org>,
+	"Darrick J . Wong" <djwong@kernel.org>,
+	linux-xfs@vger.kernel.org,
+	Hans Holmberg <hans.holmberg@wdc.com>
+Subject: [PATCH] xfs: test that zone_gc_low_space writes start gc for rw fses
+Date: Wed, 25 Mar 2026 13:50:13 +0100
+Message-ID: <20260325125013.26631-1-hans.holmberg@wdc.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Subject: Re: [PATCH] btrfs: fix stale errno check in btrfs_encoded_read/write
- helpers
-To: Leo Martins <loemra.dev@gmail.com>, fstests@vger.kernel.org,
- linux-btrfs@vger.kernel.org, kernel-team@fb.com
-References: <39eac6cef5afd99734483fa0e775a3e75407552b.1774303837.git.loemra.dev@gmail.com>
-Content-Language: en-US
-From: Mark Harmstone <mark@harmstone.com>
-Autocrypt: addr=mark@harmstone.com; keydata=
- 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
-In-Reply-To: <39eac6cef5afd99734483fa0e775a3e75407552b.1774303837.git.loemra.dev@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-On 24/03/2026 7.09 pm, Leo Martins wrote:
-> The atoll() error check `if (offset == 0 && errno != 0)` can falsely
-> trigger because errno is not cleared before the call. Library
-> initialization code (e.g. libcap calling prctl(PR_CAPBSET_READ) which
-> fails with EINVAL) can leave errno set to a non-zero value. When the
-> caller passes offset=0 (a valid value), atoll() returns 0 without
-> modifying errno, and the stale errno causes the helper to print usage
-> and exit.
+Test that writes to the systfs attribute zone_gc_low_space triggers
+garbage collection for rw (but not ro) file systems.
 
-Thanks Leo. From 
-https://pubs.opengroup.org/onlinepubs/9699919799/functions/errno.html:
+Signed-off-by: Hans Holmberg <hans.holmberg@wdc.com>
+---
 
- > The following sentence is deleted from the DESCRIPTION: "The value of 
-errno is 0 at program start-up, but is never set to 0 by any XSI function".
+This test will fail currently, but i've submitted a fix:
+https://lore.kernel.org/linux-xfs/20260325124312.26349-1-hans.holmberg@wdc.com/
 
-So yes, apparently you can no longer rely on errno being 0 at the 
-beginning of main. TIL.
+ tests/xfs/999     | 89 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/999.out |  2 ++
+ 2 files changed, 91 insertions(+)
+ create mode 100755 tests/xfs/999
+ create mode 100644 tests/xfs/999.out
 
-Reviewed-by: Mark Harmstone <mark@harmstone.com>
-
-> This caused btrfs/333 to fail consistently on systems where libcap is
-> linked, since every call with offset 0 would bail out.
-> 
-> Fix by clearing errno before the atoll() calls in both
-> btrfs_encoded_read and btrfs_encoded_write helpers.
-> 
-> Signed-off-by: Leo Martins <loemra.dev@gmail.com>
-> ---
->   src/btrfs_encoded_read.c  | 1 +
->   src/btrfs_encoded_write.c | 1 +
->   2 files changed, 2 insertions(+)
-> 
-> diff --git a/src/btrfs_encoded_read.c b/src/btrfs_encoded_read.c
-> index 3ee0d8b0..c7c25b74 100644
-> --- a/src/btrfs_encoded_read.c
-> +++ b/src/btrfs_encoded_read.c
-> @@ -178,6 +178,7 @@ int main(int argc, char *argv[])
->   
->   	filename = argv[2];
->   
-> +	errno = 0;
->   	offset = atoll(argv[3]);
->   	if (offset == 0 && errno != 0) {
->   		usage();
-> diff --git a/src/btrfs_encoded_write.c b/src/btrfs_encoded_write.c
-> index 7e46d9fe..bc05cc3b 100644
-> --- a/src/btrfs_encoded_write.c
-> +++ b/src/btrfs_encoded_write.c
-> @@ -179,6 +179,7 @@ int main(int argc, char *argv[])
->   
->   	filename = argv[2];
->   
-> +	errno = 0;
->   	offset = atoll(argv[3]);
->   	if (offset == 0 && errno != 0) {
->   		usage();
+diff --git a/tests/xfs/999 b/tests/xfs/999
+new file mode 100755
+index 000000000000..f3c2f868cb1e
+--- /dev/null
++++ b/tests/xfs/999
+@@ -0,0 +1,89 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 Western Digital Corporation
++#
++# FS QA Test No. 999
++#
++# Tests that writes to gc_low_space will trigger start of garbage
++# collection for rw (but not ro) file systems
++#
++. ./common/preamble
++_begin_fstest auto rw zone quick
++
++. ./common/zoned
++
++_require_scratch
++_require_odirect
++
++get_scratch_mountstat() {
++	awk -v mount="$SCRATCH_MNT" -v stat="$1" \
++		'$0~"mounted on "mount" with fstype xfs"{f=1} f&&index($0,stat){print $NF;exit}' \
++		/proc/self/mountstats
++}
++
++get_user_available_rt_blocks() {
++	get_scratch_mountstat "user available RT blocks:"
++}
++
++gc_required() {
++	get_scratch_mountstat "RT GC required:"
++}
++
++# figure out if the rt section is internal or not
++if [ -z "$SCRATCH_RTDEV" ]; then
++	zdev=$SCRATCH_DEV
++else
++	zdev=$SCRATCH_RTDEV
++fi
++
++capacity=$(_zone_capacity 0 $zdev)
++_scratch_mkfs_sized $(($capacity * 6)) > $seqres.full 2>&1
++
++# limit max open zones to avoid gc to trigger before we want it to
++export MOUNT_OPTIONS="$MOUNT_OPTIONS -o max_open_zones=2"
++_try_scratch_mount || _notrun "mount option not supported"
++_require_xfs_scratch_zoned
++
++# create three zone-sized files and invalidate 95% of the data
++for i in $(seq 1 3); do
++	filename=$SCRATCH_MNT/data_$i
++	dd if=/dev/zero of=$filename bs=1M oflag=direct\
++		count=$(($capacity / (1024 * 1024))) >> $seqres.full 2>&1
++	truncate -s $(($capacity / 20)) $filename
++done
++
++# remount read-only and set the gc limit to free up unused space
++_scratch_remount ro
++rt_available_pre="$(get_user_available_rt_blocks)"
++_set_fs_sysfs_attr $SCRATCH_DEV "zoned/zonegc_low_space" 100
++
++# reclaiming a zone with 5% used blocks should take way less than 1 second
++sleep 1
++
++# gc should not run for read only file systems
++rt_available_post="$(get_user_available_rt_blocks)"
++[ "$rt_available_post" -gt "$rt_available_pre" ] && _fail "gc should not run while read only"
++
++_set_fs_sysfs_attr $SCRATCH_DEV "zoned/zonegc_low_space" 0
++
++# remount rw and check that gc starts, frees up blocks and stops after
++# the threshold is set to reclaim the unused blocks
++_scratch_remount rw
++
++rt_available_pre="$(get_user_available_rt_blocks)"
++_set_fs_sysfs_attr $SCRATCH_DEV "zoned/zonegc_low_space" 100
++
++i=0
++while [ $(gc_required) -eq "1" ]; do
++	sleep 1
++	let i=$i+1
++	[ $i -gt 3 ] && _fail "gc did not complete within a reasonable time"
++done
++
++rt_available_post="$(get_user_available_rt_blocks)"
++[ "$rt_available_pre" -ge "$rt_available_post" ] && _fail "gc did not free up space"
++
++echo "Silence is golden"
++status=0
++
++exit
+diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+new file mode 100644
+index 000000000000..3b276ca804fc
+--- /dev/null
++++ b/tests/xfs/999.out
+@@ -0,0 +1,2 @@
++QA output created by 999
++Silence is golden
+-- 
+2.34.1
 
