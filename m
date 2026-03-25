@@ -1,74 +1,52 @@
-Received: from mail-yx1-f66.google.com (mail-yx1-f66.google.com [74.125.224.66])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7006C3CAE81
-	for <fstests@vger.kernel.org>; Tue, 24 Mar 2026 23:40:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.66
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 587972EB84E
+	for <fstests@vger.kernel.org>; Wed, 25 Mar 2026 03:59:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774395617; cv=none; b=SBKPjvOPLDx7Wld7PTU9GJgosbAypOnl6KzMct1DHJP4ssflFksE06mrxPAkU7PlnkEogQqhKGXkWhadVryp6lG8yuYlwEMAuisP684eLz3GIU1alD5G3sahDYgJ/xIpIX5yb3Rr9Rm8LLRd314wOURhkJsxuRKTu/Ij6ESJTuA=
+	t=1774411144; cv=none; b=h13i5oTIOp/uNcF2i0IxdqPZ7XiJ+aNgQ8xgoQVSyIesdoed3ezJWuecHDOQdV0vM3iOlb7kY7LufO1A3/9kItvnd02IzZ3ZSLHdMLBt6spJ6H7Zt7nYpH6zaKhQOkKsVsIsFTsuCwNKnfQXHVyCjcwRKF1Qmfa7mH7dTQizulQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774395617; c=relaxed/simple;
-	bh=r9gjSYIjP6ljCTjXQL0cbTWCBIMLbqgC/sBRFaWEca0=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=c4ZTh61wbjztPbMbucva5n2V7AQ1iBg97QKUKCF3jXHDeerr8lp+BqcLk4hK6gpyNaQkMuqaqNF1lQ+Th3A7ppy6vcDUX/vVqhaabOjIsYnGq+cpObVH9f8FNtfV8CkRUEIh6o8gQCl91xUDFO68muBpff+l+giOIV7aC+4VxC4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=cuajoa+3; arc=none smtp.client-ip=74.125.224.66
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1774411144; c=relaxed/simple;
+	bh=yN6SJRaNjklwCyrCFSAcY+Y+DM90V8SD6sa8Z4Hy8NM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=tHycdIwQEVhmY8l1cIo4jC56zjBVq3VKVKoqIIeqwji5uKFHGQLTOEKJHqXa090YLtO+WbA7rIUFZIrJInjw0P365ikkIKBqp41NJ1G2R1M9rYq3TDHR1TPDNTrDqMh0BdcEYUTxNY6ToBTwXx5txIf7h+1EVpCz00NCRhiczYk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YISuYqbR; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cuajoa+3"
-Received: by mail-yx1-f66.google.com with SMTP id 956f58d0204a3-64ad8435f46so5267094d50.1
-        for <fstests@vger.kernel.org>; Tue, 24 Mar 2026 16:40:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1774395615; x=1775000415; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=LCX9KWt3A0asKt7lWJtB0L84UdTOx1zabyzk7QfBhdk=;
-        b=cuajoa+3hmCJsRYqWpOL+joModyHGsPmkjj36DhGlHPPDxvm1PrwogeeRoxX50+mf8
-         z67IBxjC5U4IC9U0qm7+xLoFa3bqZtzJzmJMe4zxEPU4eiAibSuGK8pcrAq0hH62ekIl
-         TeLhCjsbBHuoUf+Hz9/wUrz3O0RNdMV7zCb4yAQASI6oR1oongtPOyfDJp2CuPVAbaA+
-         vEUXIcVzwqz0sJ4LTUSIfHGPVQv/ebrKNv6GAsbJH7J9exI1lzwov0mgs6Ae2fM2UY8b
-         20r5gZAXfiIqyhZxwmoCiiAIatsAykj+u/SiLZpT0ybUfEfnWTVfFZ399TF9KI4Mh1Hg
-         8mhA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774395615; x=1775000415;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=LCX9KWt3A0asKt7lWJtB0L84UdTOx1zabyzk7QfBhdk=;
-        b=mBI3W9NxPLOYdAHB52yXapSECX3aTnq88E4m8HQh8HrFEqXSLS5kRW6FKrUWlP4v19
-         4UHVSUA7lRj0V42eOh0Tjeg6qA9/bO78GpUdF9I+OTPZ/IZ2JD6M0e5OrH+rsyDkEO8L
-         JhLeUvq0yruassMHhT9WZmSoyGcpWzh5gEcKf41eSXF9y+XQVEi03I9DVjemsfbl2RNe
-         hjzK0SjbVC5ZPCcn4dXG5Og5M3wc75LIKx5rquMFLht8DgJ7q8SxVrLbX2pkEklPrS6C
-         Tvd0gMX5ahO1ULhZgO5pecleTqNZJswbJiKEwqPxRqwm/thx/KxWXIcS57eIdrV5CTN/
-         n80Q==
-X-Forwarded-Encrypted: i=1; AJvYcCVy8rY69vntri16V6fB8Efj0WdBNWwz2LD7bwDekn/AZE5xtJyTxfknj6g7MR5UBw9zWAmQBaUu@vger.kernel.org
-X-Gm-Message-State: AOJu0YwqFuKM56RLQWEei3RPtiJl0yCsexHuaKDbuVydjo8P9vZN/t5r
-	hote+EgQ4+wyuNIpXwaf6CzhBac48ZUmPWMiRcHHU1E6Lz0ugI+pKFki
-X-Gm-Gg: ATEYQzyj102d63Tw8Ckyhg9PN1FmKaASbPxv5OF7j/ILMIngbXYkdLtOP5rIOnCXMBY
-	Od+EmkhPEd53dfu/7B7gBxv0UHlfdMY+jlr2HuHhxssn9SdHfHiQVvFJvVTeXPI8ANk+EA9HQZb
-	8+stf/g7lerYvm/b/ZcI2ZCgfZuqF5ozpmRYP/6ht8wjJioiQNJBcPJAHn9o1svhFo0unT3hpMH
-	A6MkdpCGNVi1wrifTZcbyoQh86URaJfoOE5oT+xK3vcNtSnMHA/WM1b42zp5b2DadhLk5645eY/
-	ZS8vc++mzpwUKv3593zV4ZiK14QX6iKSvQxQ1SU9/XK7nnvAju9lyVFeCdrriJoJU2Ol6o4B7Jv
-	ctCt5iS0Ok/2ehUPMXQQKV+28oLeuvjCmcEVBKdhYArpeU+hatrJWKUhXRS9Jx4RHTqm7PtE5kW
-	P6hxEi8HAU6a+HPnmEWg==
-X-Received: by 2002:a05:690e:169e:b0:64e:a2a8:f31d with SMTP id 956f58d0204a3-64ee608475bmr1354110d50.7.1774395615403;
-        Tue, 24 Mar 2026 16:40:15 -0700 (PDT)
-Received: from localhost ([2a03:2880:25ff:5a::])
-        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-64edbfbaac0sm1612125d50.14.2026.03.24.16.40.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 24 Mar 2026 16:40:15 -0700 (PDT)
-From: Leo Martins <loemra.dev@gmail.com>
-To: Leo Martins <loemra.dev@gmail.com>
-Cc: linux-btrfs@vger.kernel.org,
-	kernel-team@fb.com,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/747: handle ENOSPC gracefully during write/delete cycles
-Date: Tue, 24 Mar 2026 16:39:43 -0700
-Message-ID: <20260324234010.590043-1-loemra.dev@gmail.com>
-X-Mailer: git-send-email 2.52.0
-In-Reply-To: <efcb3c8470bf099534fec1c1745780eba445e111.1774394322.git.loemra.dev@gmail.com>
-References: 
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YISuYqbR"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1774411142;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=ARsYv9IJ+1MGqx/6BkWp1A1sf3QW0UYY6nsKkWFV7Pk=;
+	b=YISuYqbRhLj89EAu1hnGDrsGesV9guPgN5wSj7K/8ToBqO8SKkr3ZtvRsF0sXThNrom0Gn
+	cJwpPTmYFERYNdVNARQKz0NbeWlX1+MLCsCcgdEYAwTMO5O6lDw6TvmtjzstjXxBwX67Z4
+	tLYkcHqw+LKHnm4iJbOi68a8dzRK5Tw=
+Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-648-l3U8ackxOYimq1jCEyq4-Q-1; Tue,
+ 24 Mar 2026 23:59:00 -0400
+X-MC-Unique: l3U8ackxOYimq1jCEyq4-Q-1
+X-Mimecast-MFC-AGG-ID: l3U8ackxOYimq1jCEyq4-Q_1774411140
+Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 1C5AA195608D
+	for <fstests@vger.kernel.org>; Wed, 25 Mar 2026 03:59:00 +0000 (UTC)
+Received: from localhost (dell-per750-06-vm-07.rhts.eng.pek2.redhat.com [10.73.180.56])
+	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 4ABFD1955D71;
+	Wed, 25 Mar 2026 03:58:58 +0000 (UTC)
+From: Yongcheng Yang <yoyang@redhat.com>
+To: fstests@vger.kernel.org
+Cc: smayhew@redhat.com,
+	zlang@redhat.com
+Subject: [PATCH] generic/551: prevent OOM on NFS on systems with no swap memory
+Date: Wed, 25 Mar 2026 11:58:22 +0800
+Message-ID: <20260325035854.2262636-1-yoyang@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -76,102 +54,63 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
 
-On Tue, 24 Mar 2026 16:33:26 -0700 Leo Martins <loemra.dev@gmail.com> wrote:
+From: Scott Mayhew <smayhew@redhat.com>
 
-Forgot to CC fstests mailing list.
+We have frequently observed the oom-killer killing aio-dio-write-verify
+when generic/551 is run on NFS filesystems on virtual machines in AWS.
 
-> generic/747 consistently fails on btrfs in my fstests setup, with an
-> ~88% failure rate across multiple runs on kernels ranging from v6.9 to
-> v7.0-rc5. This is not a regression but a pre-existing issue since the
-> test was added.
-> 
-> The test fills a filesystem to 95% then does mixed write/delete cycles,
-> using statfs to decide whether to write or delete. However, statfs
-> f_bavail may overestimate the actual available space. On btrfs, the
-> statfs implementation documents its estimate as "a close approximation"
-> (fs/btrfs/super.c). At high fill levels the discrepancy between what
-> statfs reports and what the filesystem can actually allocate becomes
-> significant, causing dd to hit ENOSPC even though statfs indicated
-> there was room.
-> 
-> This is not a filesystem bug. The filesystem correctly rejects the
-> write when it cannot reserve space. The test's purpose is to stress
-> garbage collection through write/delete churn, not to validate space
-> accounting.
-> 
-> Handle ENOSPC by cleaning up the partial file and making room:
-> 
-> In _direct_fillup: break out of the fill loop (we're full enough).
-> In _mixed_write_delete: delete a file to free space and retry. If
-> writes fail 10 consecutive times, _fail the test as that indicates a
-> real filesystem issue rather than a transient statfs discrepancy.
-> 
-> Redirect dd stderr to seqres.full so errors are preserved for
-> debugging without polluting the expected output.
-> 
-> Signed-off-by: Leo Martins <loemra.dev@gmail.com>
-> ---
->  tests/generic/747 | 28 +++++++++++++++++++---------
->  1 file changed, 19 insertions(+), 9 deletions(-)
-> 
-> diff --git a/tests/generic/747 b/tests/generic/747
-> index 44834186..35de3ccb 100755
-> --- a/tests/generic/747
-> +++ b/tests/generic/747
-> @@ -35,11 +35,7 @@ _create_file() {
->  
->  	POSIXLY_CORRECT=yes dd if=/dev/zero of=${file_name} \
->  		bs=${bs} count=$(( $file_sz / ${bs} )) \
-> -		status=none $dd_extra  2>&1
-> -
-> -	if [ $? -ne 0 ]; then
-> -		_fail "Failed writing $file_name"
-> -	fi
-> +		status=none $dd_extra  2>>$seqres.full
->  }
->  
->  _total_M() {
-> @@ -69,7 +65,10 @@ _direct_fillup () {
->  	while [ $(_used_percent) -lt $fill_percent ]; do
->  		local fsz=$(_get_random_fsz)
->  
-> -		_create_file $testseq $fsz "oflag=direct conv=fsync"
-> +		if ! _create_file $testseq $fsz "oflag=direct conv=fsync"; then
-> +			rm ${SCRATCH_MNT}/data_${testseq}
-> +			break
-> +		fi
->  		testseq=$((${testseq} + 1))
->  	done
->  }
-> @@ -79,14 +78,25 @@ _mixed_write_delete() {
->  	local total_M=$(_total_M)
->  	local to_write_M=$(( ${overwrite_percentage} * ${total_M} / 100 ))
->  	local written_M=0
-> +	local enospc_retries=0
-> +	local max_enospc_retries=10
->  
->  	while [ $written_M -lt $to_write_M ]; do
->  		if [ $(_used_percent) -lt $fill_percent ]; then
->  			local fsz=$(_get_random_fsz)
->  
-> -			_create_file $testseq $fsz "$dd_extra"
-> -			written_M=$((${written_M} + ${fsz}/${M}))
-> -			testseq=$((${testseq} + 1))
-> +			if ! _create_file $testseq $fsz "$dd_extra"; then
-> +				rm ${SCRATCH_MNT}/data_${testseq}
-> +				_delete_random_file
-> +				enospc_retries=$((enospc_retries + 1))
-> +				if [ $enospc_retries -ge $max_enospc_retries ]; then
-> +					_fail "failed to write after $max_enospc_retries consecutive ENOSPC attempts"
-> +				fi
-> +			else
-> +				written_M=$((${written_M} + ${fsz}/${M}))
-> +				testseq=$((${testseq} + 1))
-> +				enospc_retries=0
-> +			fi
->  		else
->  			_delete_random_file
->  		fi
-> -- 
-> 2.52.0
+Virtual machines in AWS typically don't have a swap partition, so check
+for that condition when testing NFS and only use 90% of available memory
+when generating the list of write operations passed to
+aio-dio-write-verify.
+
+Signed-off-by: Scott Mayhew <smayhew@redhat.com>
+---
+ common/rc         | 5 +++++
+ tests/generic/551 | 7 +++++++
+ 2 files changed, 12 insertions(+)
+
+diff --git a/common/rc b/common/rc
+index 92cb6982..f2a4496f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1201,6 +1201,11 @@ _available_memory_bytes()
+ 	fi
+ }
+ 
++_total_swap_bytes()
++{
++	free -b | awk '/^Swap/ { print $2 }'
++}
++
+ _check_minimal_fs_size()
+ {
+ 	local fssize=$1
+diff --git a/tests/generic/551 b/tests/generic/551
+index 267c57ec..9c5ec4b2 100755
+--- a/tests/generic/551
++++ b/tests/generic/551
+@@ -38,11 +38,18 @@ do_test()
+ 	local truncsize
+ 	local total_size=0
+ 	local avail_mem=`_available_memory_bytes`
++	local total_swap=`_total_swap_bytes`
+ 
+ 	# To avoid OOM on tmpfs, subtract the amount of available memory
+ 	# allocated for the tmpfs
+ 	[ "$FSTYP" = "tmpfs" ] && avail_mem=$((avail_mem - free_size_k * 1024))
+ 
++	# To avoid OOM on NFS on systems with no swap memory, only use 90%
++	# of available memory when generating the list of write operations
++	if [ "$FSTYP" = "nfs" -a $total_swap -eq 0 ]; then
++		avail_mem=$((avail_mem - avail_mem / 10))
++	fi
++
+ 	# the number of AIO write operation
+ 	num_oper=$((RANDOM % 64 + 1))
+ 
+-- 
+2.52.0
+
