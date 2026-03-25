@@ -1,73 +1,110 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B46D3F99E1;
-	Wed, 25 Mar 2026 15:09:37 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B8CE322749
+	for <fstests@vger.kernel.org>; Wed, 25 Mar 2026 18:23:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774451377; cv=none; b=A/u6Dod8WGKjAEbs1tA8O7K2if6bfTlZLSxiTelp8r0PgnfkH477BTk4skCh4ujpuK5PBBW+SenL4NevQH5Y5+hgj8TrkmLMYji2FjltrdotED7ezoh0c3C4RcTeCdyt2/T/ce3a17DnzxvVQG4aQlpA/v6tw8H3YOa/ukHqwnE=
+	t=1774462984; cv=none; b=OgDO/MPyzC123vYT8z5zMZ/BziBIJ3uaov6PRIThjTKpP0ceIXy4kZ2wqYDMfqxWcTHkbV+aL4ouTLncjd6Tb5+njWaOxpz7soCPjMIGdfSdVqknqTUvigeAucq7OtTDLhrGnNNdpKNZGrhtTKElFgOWaK+mIRNDotcI0e/XwBA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774451377; c=relaxed/simple;
-	bh=pqb3PJuzB5DFy/kjGWTEYPqLMTtoozJqM6OF7+HH9Bk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=fmEQ+I0VxPutw9ctB0A6278HlvoCze803BpQRbLBajMlQwZ89UH9G1CYyGEl8xpBgdpUJ4x40DJv/ccfltAmhbyiCOg0b6tk/jjyh3ic/pXQAzejrJegv15vkOnDyARpNxmuAXoUQ59gKveiqa0gyhOUDA8qJPJebIPVlPsZJwA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=m4ytdH04; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1774462984; c=relaxed/simple;
+	bh=3ikzGm5rdjR98uwGDXeNtc5L0xRQauCuS5xjjT6JdP4=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=FytNsJ8KuqvrKA1pt8jTtJO05ABj8PO8XOnx64IRCA5WH57/10SS77SM5N5+NlnXUqHHlcsygdT5rmw0PX5GUEgnnbJXUUbbKzI3gZIWhVsdVtToXC3bbbJaTx7AHf7HNjlrsMZsi/Kgyj4TTK9LRCPLA8s5jWPYMI3f5SaPClk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hLA5dp0b; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="m4ytdH04"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E73E9C4CEF7;
-	Wed, 25 Mar 2026 15:09:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hLA5dp0b"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CB633C19423
+	for <fstests@vger.kernel.org>; Wed, 25 Mar 2026 18:23:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1774451377;
-	bh=pqb3PJuzB5DFy/kjGWTEYPqLMTtoozJqM6OF7+HH9Bk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=m4ytdH04FDid4KQ2aOODe/Mf5Uqo6wmRml9zGX4TibIkjXjcECV7jqZP7+i/+ujxW
-	 /ToFD9rIr2iHggpRRL0kodDfOTFJbx/Oh8ttL2pEAt0S5tYLd70sJOKMYL69ySwm0J
-	 iRfBk9jVnFryf3mLpFghUqfA7015Iml5fqY/DV28I6dbEJ9TNkxiaF38Ll+fxUSiVC
-	 HCT5x77EaUBcHXyA/inb3B9AaylJ7PTy1r7om/7SOoiK8lU9EeDyk97nFSaX5QW+JB
-	 ax8mbWjmC18pzVC3YvRPbxjQqsy2KM3P4N65lIcKs5+M58C21gmeZdz60oRMA5pw3r
-	 NpgyU3CevbWJg==
-Date: Wed, 25 Mar 2026 08:09:36 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Yongcheng Yang <yoyang@redhat.com>, fstests@vger.kernel.org,
-	smayhew@redhat.com, zlang@redhat.com, linux-nfs@vger.kernel.org
-Subject: Re: [PATCH] generic/551: prevent OOM on NFS on systems with no swap
- memory
-Message-ID: <20260325150936.GE6212@frogsfrogsfrogs>
-References: <20260325035854.2262636-1-yoyang@redhat.com>
- <acN4BV5QmtP2W_WK@infradead.org>
+	s=k20201202; t=1774462983;
+	bh=3ikzGm5rdjR98uwGDXeNtc5L0xRQauCuS5xjjT6JdP4=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=hLA5dp0bjeiGh4i2FlMqf7DdJ+mceNZiOMjkm/0+wuACp7YLkr+x8uHXZxfsWtq8O
+	 MbdkQ4QHLF6bxIpDYbT9QcMzNaZFD89Up3L3Fy7NlM6m40FjattS6I+Sw61S5JSXM2
+	 vzRkq+NpdFSMY8H8Di13GHIdAU1ERzn8MQ4T2kbGJbyw/ix11A5qn7H4IwCBpQmj/h
+	 JQRM91gJrkaBodQXqEWdglmWDOtEpcsKWYhoQ9ORWlXSoLlPT0cpbPSz1CbCPPZtzK
+	 rN2MwHimtQ9iBrWq/F34ds+xcaiZa9XjcQP76vCDGTmvqgVnTuBLVzml2Z5J6gjdU+
+	 yYqRSYEAXHqjw==
+Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-b8f97c626aaso17565966b.2
+        for <fstests@vger.kernel.org>; Wed, 25 Mar 2026 11:23:03 -0700 (PDT)
+X-Gm-Message-State: AOJu0YzJhbol08z5hhw4HkHdRtkppd1owF3EEO7FBydEVX7WOdoFn+JU
+	UnhLBbQocZNKQ4GH+AwbSvGL3ByxYbX+CrCCoZ1c1FFirv07DfYjdTWDutcTVwCrOHd0i2cIRim
+	bahY+GKTmM54OtO2XjSny9JYDxBzqJ7A=
+X-Received: by 2002:a17:906:a2d8:b0:b98:4c58:f499 with SMTP id
+ a640c23a62f3a-b9a54253a96mr245867566b.28.1774462982274; Wed, 25 Mar 2026
+ 11:23:02 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <acN4BV5QmtP2W_WK@infradead.org>
+References: <20260325101818.3474340-1-robbieko@synology.com>
+In-Reply-To: <20260325101818.3474340-1-robbieko@synology.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Wed, 25 Mar 2026 18:22:25 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H71wE3L14DHYUZ+2cAK-GSd3aU5iY4qypXAdfNNyf9_WA@mail.gmail.com>
+X-Gm-Features: AQROBzCCxKCSR8Kis4L9JLk4IdckGPvOJ5t5U9o__ilBgr5ixJ_zJhwBE2BGJwM
+Message-ID: <CAL3q7H71wE3L14DHYUZ+2cAK-GSd3aU5iY4qypXAdfNNyf9_WA@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: fix incorrect return value after crossing leaf
+ boundary in lookup_extent_data_ref
+To: robbieko <robbieko@synology.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, Mar 24, 2026 at 10:52:05PM -0700, Christoph Hellwig wrote:
-> On Wed, Mar 25, 2026 at 11:58:22AM +0800, Yongcheng Yang wrote:
-> > From: Scott Mayhew <smayhew@redhat.com>
-> > 
-> > We have frequently observed the oom-killer killing aio-dio-write-verify
-> > when generic/551 is run on NFS filesystems on virtual machines in AWS.
-> > 
-> > Virtual machines in AWS typically don't have a swap partition, so check
-> > for that condition when testing NFS and only use 90% of available memory
-> > when generating the list of write operations passed to
-> > aio-dio-write-verify.
-> 
-> I don't think this is a good idea.  The proper fix is reduce whatever
-> crazy large memory allocations this workloads causes in NFS.  I suspect
-> it might be page lists or similar, and just breaking them into somewhat
-> smaller chunks and/or using potentially failing allocations to
-> dynamically adjust would help.
+On Wed, Mar 25, 2026 at 10:28=E2=80=AFAM robbieko <robbieko@synology.com> w=
+rote:
+>
+> After commit 1618aa3c2e01 ("btrfs: simplify return variables in
+> lookup_extent_data_ref()"), the err and ret variables were merged into
+> a single ret variable. However, when btrfs_next_leaf() returns 0
+> (success), ret is overwritten from -ENOENT to 0. If the first key in
+> the next leaf does not match (different objectid or type), the function
+> returns 0 instead of -ENOENT, making the caller believe the lookup
+> succeeded when it did not. This can lead to operations on the wrong
+> extent tree item, potentially causing extent tree corruption.
+>
+> Fix this by returning -ENOENT directly when the key does not match,
+> instead of relying on the ret variable.
+>
+> Fixes: 1618aa3c2e01 ("btrfs: simplify return variables in lookup_extent_d=
+ata_ref()")
+> Signed-off-by: robbieko <robbieko@synology.com>
 
-I run fstests on XFS every night on a fleets of VMs with no swap and
-never hit OOM.
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
-Or at least I didn't until IT mandated CrowdStrike last week and now
-it's anyone's guess if the test results are valid. <grumble>
+Looks good, thanks.
 
---D
+> ---
+>  fs/btrfs/extent-tree.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/fs/btrfs/extent-tree.c b/fs/btrfs/extent-tree.c
+> index 85ee5c79759d..098e64106d02 100644
+> --- a/fs/btrfs/extent-tree.c
+> +++ b/fs/btrfs/extent-tree.c
+> @@ -495,7 +495,7 @@ static noinline int lookup_extent_data_ref(struct btr=
+fs_trans_handle *trans,
+>                 btrfs_item_key_to_cpu(leaf, &key, path->slots[0]);
+>                 if (key.objectid !=3D bytenr ||
+>                     key.type !=3D BTRFS_EXTENT_DATA_REF_KEY)
+> -                       return ret;
+> +                       return -ENOENT;
+>
+>                 ref =3D btrfs_item_ptr(leaf, path->slots[0],
+>                                      struct btrfs_extent_data_ref);
+> --
+> 2.43.0
+>
+>
+> Disclaimer: The contents of this e-mail message and any attachments are c=
+onfidential and are intended solely for addressee. The information may also=
+ be legally privileged. This transmission is sent in trust, for the sole pu=
+rpose of delivery to the intended recipient. If you have received this tran=
+smission in error, any use, reproduction or dissemination of this transmiss=
+ion is strictly prohibited. If you are not the intended recipient, please i=
+mmediately notify the sender by reply e-mail or phone and delete this messa=
+ge and its attachments, if any.
+>
