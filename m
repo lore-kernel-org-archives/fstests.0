@@ -1,71 +1,93 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BEE9437C11A;
-	Thu, 26 Mar 2026 14:12:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AB7F86323;
+	Fri, 27 Mar 2026 12:37:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774534363; cv=none; b=hvPRXxCn6aCqSMZ6zJhJZCcopvVn0IhPdgtyokp5ip4LladcQXpobwB+uLMAaCWHRUor32xq/zJCxU7a+tDXk59OfKZ9u3kXvi0I2aK2XCWZD9KWBDOfubNhxnWMZA3HfK2IBuPbIj1fE2j+sWHxYYyRM2BvSs9HlexkJV/FDPA=
+	t=1774615076; cv=none; b=VgryqU3dcye0QeHW9JMT1mWLlrGCT0lvngaS5PoIDqbMBT7t4d/nDfXiBsDkKQCqcubunmRsglYyKzOQxplfIKmXifGAo1r6KCDAa059XavYw0FroSLuN+1YzNiFAwuF6ipyEjP4NQGvH0mDOs0U8HdeqWIePp6YiCpuxC4fnmE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774534363; c=relaxed/simple;
-	bh=CKsPtaLdac5kF7tHapfWG+Hj/aMagn6vrLOLUd+0zr4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=eVjqIn4X5KjTw6M+Q+08iFM598oZjOA6zkz0774A8jitrDcNvvZjkF+ih39PVOOh6AcLe7RhD6JFUAfSv9P7HBSphcxMQfgDSCvn/LIFwWQcBjqV3qGy+agngnW2Yqv01gFkDkb3C4IRXvXcV0NAvDzo5DCqgrgyT3tKCo7Cx3U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id 1819768CFE; Thu, 26 Mar 2026 15:12:27 +0100 (CET)
-Date: Thu, 26 Mar 2026 15:12:26 +0100
-From: Christoph Hellwig <hch@lst.de>
-To: Hans Holmberg <Hans.Holmberg@wdc.com>
-Cc: Christoph Hellwig <hch@lst.de>, "zlang@kernel.org" <zlang@kernel.org>,
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	s=arc-20240116; t=1774615076; c=relaxed/simple;
+	bh=/duEzlbLlWbaNFl7B2ctZCRDyG5Kb/EZTQqNb53lfyw=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kk7+/yYDJupDIQnz0qrpQBesiCVg9IrOTeKsUSjOFLG6XRYND4jKU77IqoL+aJmqp7uK9ZolzaGkSbA+q34yshm8KVzCoBXFsocgpoWoSPhFs/eMKyNQs6OkBhRwP8aU6+WGtx/qwop6DrBkQl88AK563Ik+kT22Sng/w/Y9Krk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=H4kWK3Fj; arc=none smtp.client-ip=216.71.154.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="H4kWK3Fj"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1774615075; x=1806151075;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=/duEzlbLlWbaNFl7B2ctZCRDyG5Kb/EZTQqNb53lfyw=;
+  b=H4kWK3FjGnyFOHHZHq+vg26YPUyMpslKdj2sO9Q4gQTpKvmvtutgAlIM
+   8zZkpJ4w5YIpdWCRJZOHnaUWr5luIzyvjuouLUZO6RBhm4nOvchAOC5n0
+   N5AdihtfeMYVq0+eZ7N+Zc+G2xMrBGlaQhp4Ed6lVAsghLLVmvdk8btI6
+   g/3/QpB/citYWgLl1SgSrEcU7Ar2lX+lEgtZ1nekSWfUnDseMOI0NKB0S
+   gN5cbEkLknG1/E5mtPBYshaAXBp9TpG8LzgsnJimQdRpgkghZfB5Cvpau
+   EuQBVd8QKNFikR4w0YREbCfXpmcFVt7EJ0Esj/kRgjRSB1cAovZhGaWi9
+   w==;
+X-CSE-ConnectionGUID: kJJzRfp+QAqTuKeZanoKdA==
+X-CSE-MsgGUID: YkJGiOiAQT2HRevXhflrDQ==
+X-IronPort-AV: E=Sophos;i="6.23,144,1770566400"; 
+   d="scan'208";a="139679417"
+Received: from unknown (HELO uls-op-cesaep03.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 27 Mar 2026 20:36:52 +0800
+IronPort-SDR: 69c679d0_dVwVmHjk+vXE/MLOCzUaesIL1/456bDx/z90Nc0DSQC1x20
+ cJfu7gZrReRuFjN2+fwcRNr/BrjCKeZ97wIaQMA==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep03.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 27 Mar 2026 05:36:32 -0700
+WDCIronportException: Internal
+Received: from unknown (HELO gcv.wdc.com) ([10.224.20.49])
+  by uls-op-cesaip02.wdc.com with ESMTP; 27 Mar 2026 05:36:29 -0700
+From: Hans Holmberg <hans.holmberg@wdc.com>
+To: zlang@kernel.org
+Cc: fstests@vger.kernel.org,
+	Christoph Hellwig <hch@lst.de>,
 	Damien Le Moal <dlemoal@kernel.org>,
 	"Darrick J . Wong" <djwong@kernel.org>,
-	"linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] xfs: test that zone_gc_low_space writes start gc for
- rw fses
-Message-ID: <20260326141226.GA15900@lst.de>
-References: <20260325125013.26631-1-hans.holmberg@wdc.com> <20260326061137.GC23733@lst.de> <0a3d3ee7-2545-4f18-9c04-0d7a3348110c@wdc.com>
+	linux-xfs@vger.kernel.org,
+	Hans Holmberg <hans.holmberg@wdc.com>
+Subject: [PATCH v2 0/2] add test for zone_gc_low_space attribute writes
+Date: Fri, 27 Mar 2026 13:34:27 +0100
+Message-ID: <20260327123429.39330-1-hans.holmberg@wdc.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <0a3d3ee7-2545-4f18-9c04-0d7a3348110c@wdc.com>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Content-Transfer-Encoding: 8bit
 
-On Thu, Mar 26, 2026 at 01:41:46PM +0000, Hans Holmberg wrote:
-> That would be useful I think.
-> And make them not specific to scratch?
-> 
-> _xfs_get_mountstats <MOUNTPOINT>
-> _xfs_get_rt_gc_required <MOUNTPOINT>
-> _xfs_get_user_available_rt_blocks <MOUNTPOINT>
+Adds a test for zone_gc_low_space attribute writes and some helpers to
+go along with that.
 
-Sounds good!
+The new test will fail currently, but i've submitted a fix:
+https://lore.kernel.org/linux-xfs/20260325124312.26349-1-hans.holmberg@wdc.com/
 
-> 
-> > 
-> >> +
-> >> +# figure out if the rt section is internal or not
-> >> +if [ -z "$SCRATCH_RTDEV" ]; then
-> >> +	zdev=$SCRATCH_DEV
-> >> +else
-> >> +	zdev=$SCRATCH_RTDEV
-> >> +fi
-> > 
-> > Same for this asa new helper?
-> 
-> Yes, something like:
-> 
-> _xfs_get_scratch_rtdev
+v2:
+- factored out useful helpers to common/xfs
+- style fixes suggested by Christoph
+- added a check that the scratch rt device is zoned before reading zone
+  capacity
 
-Maybe _xfs_get_scratch_rtdev_bdev?  That might sounds a bit redundant,
-but I think that's good to make the usage of this clear.  A comment
-explaining it would also be useful here.
+v1:
+https://lore.kernel.org/fstests/20260325125013.26631-1-hans.holmberg@wdc.com/
+
+Hans Holmberg (2):
+  xfs/647: turn rt dev block device lookup into a common helper
+  xfs: test that zone_gc_low_space writes start gc for rw fses
+
+ common/xfs        | 28 ++++++++++++++++++
+ tests/xfs/647     | 10 +------
+ tests/xfs/999     | 72 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/999.out |  2 ++
+ 4 files changed, 103 insertions(+), 9 deletions(-)
+ create mode 100755 tests/xfs/999
+ create mode 100644 tests/xfs/999.out
+
+-- 
+2.34.1
 
