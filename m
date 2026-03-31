@@ -1,159 +1,156 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 988563EF0BE;
-	Tue, 31 Mar 2026 10:00:42 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B2F8733F8A2;
+	Tue, 31 Mar 2026 14:15:16 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774951242; cv=none; b=na4lZ8/xd/bDZSA2wiuEs4hn6bb0Ycw24jaST7wJQodXtN/ukJTw8/maXO+9ZMKNo20/wzVXMKsHtalNDYcDzjNk3OXJEySl1Za+ecg9gFTcpKSgjoqS6X46kcx4JnwWRvRy1DKyY/clgAZp7QtLhgK6SIMTDKRJgo0/4rQr+kQ=
+	t=1774966516; cv=none; b=WklT2hSqlbzYJ/0rQk5oPncXCZoyt9d1C/0jB0vmv3oPTBxvuoGLhQh6GXmaqXG2MeGG8HNyIS20d+GxoR+/yHbJqff/nkpSLESNWxgCpmt39LPNW7Uz6NLpf5W6xyvir7hEJn1WblsXDuiufNUdYv4cTr+sRwg3ONJzGZENE7I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774951242; c=relaxed/simple;
-	bh=kIfAHdgwqSMiKbfTeZE1/gOwbt4WALA+jcJoJHrTTl0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=fVCZazGtZDQfxR+wpbaE1UzfiCp6ebu27gdHPgPloURi7mw7t6KTI7UVVUhIfY2mptNDHeHYsOVl8Ktp+G1Os4NWWhf/A6UArGQaM/G/034DES18b8lymwajJfkgjyWbIbm3wsGZLXofZqYSXz9DAsyZmxXkqvwjzK62OoDxL4c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BohA6NDm; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1774966516; c=relaxed/simple;
+	bh=sQ0HnxJY4D4EolN35eHo3ARK9oYmcGlRrGEnhgi8k4Q=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=fj0IBsOg4I9e719kGplTdnmpTV1ybdquhqdShTyeBYisQwSvKaraWId1f98lioluPUFuwYdKDzUF+qxiTdPCR4r33MxYMpFjc/tHmuuD4vtM2O1zc99bhqXEndxL83DjPfM46s6mmIblU2TDVrydXUJo/mt8tl+mXlo/S4lwja4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hjCdLoie; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BohA6NDm"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 839BBC2BCB4;
-	Tue, 31 Mar 2026 10:00:41 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hjCdLoie"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F32BC19423;
+	Tue, 31 Mar 2026 14:15:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1774951242;
-	bh=kIfAHdgwqSMiKbfTeZE1/gOwbt4WALA+jcJoJHrTTl0=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=BohA6NDmte7p+pXfoMdFF4uY4nKchDGhz7V6XsBXh/uJ4G1NmKP6kvk0tlo3MRoEx
-	 X4DWpWk/Bbc8mGaF9XWbjv6Alctu4ouKjgblBbD4qZafFPgHqSNq64TcWzucBoYGF5
-	 al/5MltbwduoLwTOliNLW9oVF7RP0YW8NBww5hMYFx43M2XPeHE3+9Lra+xLkDDEm5
-	 hm9utjqeQnS0ZmsZqSluVuuPNlwrMHqE9jl9kc18VqrXGT6HU7YZD2/5SSK3INbrJf
-	 lfhpaqm8YwybVlFUF1B1WYfT2QXxHyjXQD384yGNsqgiy/E8zhlaXHf6hw0vwL5LNw
-	 Fzl5RXkRmaDOQ==
-Message-ID: <26debf2c-7b0c-49bc-b2e6-fc9eb3d8bde0@kernel.org>
-Date: Tue, 31 Mar 2026 19:00:39 +0900
+	s=k20201202; t=1774966516;
+	bh=sQ0HnxJY4D4EolN35eHo3ARK9oYmcGlRrGEnhgi8k4Q=;
+	h=From:To:Cc:Subject:Date:From;
+	b=hjCdLoie/xEc2YZ+7/7rEP6oLufhFyzq3Zw7MMjIBndB9GDF/TuiOAyWomikVZJi/
+	 a0RLb75r95oNvjWxSv/mOvV7yBRRHYMoRVQMIaTeh/5beQ5uD8DTsoYqWR0NIP1l2b
+	 oRDzJ3iHIAiZ7m46Ol/EcW5s0OGezPdjHbbi8V0GYtNUbJyNY1eh+6FmWIZQjTBgQL
+	 ZJQEw8A0Mz2/jTHaNRE1Ra5Fk8C+dI+Jh7njg0e5GZl9+Zz08+kLsMicCP7jQoo+Aa
+	 SBCvlOhDtJJqmOZCnOaULbZXubwuSVuqOyo7SSK8s3VwZFd6dLt4OYsacHhrEziRda
+	 R1iBi4p00KcIg==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] fstests: add kernel commit IDs for patches already merged upstream
+Date: Tue, 31 Mar 2026 15:15:10 +0100
+Message-ID: <63eb507011e1ab2681a8aaa68ec1214896c05b55.1774966392.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] xfs: add a test for number of open zones on conventional
- devices
-To: Christoph Hellwig <hch@lst.de>, zlang@kernel.org
-Cc: djwong@kernel.org, hans.holmberg@wdc.com, fstests@vger.kernel.org,
- linux-xfs@vger.kernel.org
-References: <20260330130029.3902654-1-hch@lst.de>
-Content-Language: en-US
-From: Damien Le Moal <dlemoal@kernel.org>
-Organization: Western Digital Research
-In-Reply-To: <20260330130029.3902654-1-hch@lst.de>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 3/30/26 22:00, Christoph Hellwig wrote:
-> Test that mounts of zoned file systems on conventional devices don't
-> create more open zones than allowed when the last blocks in one or more
-> zones have been invalidated.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/xfs/4201     | 65 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/4201.out |  1 +
->  2 files changed, 66 insertions(+)
->  create mode 100755 tests/xfs/4201
->  create mode 100644 tests/xfs/4201.out
-> 
-> diff --git a/tests/xfs/4201 b/tests/xfs/4201
-> new file mode 100755
-> index 000000000000..a1f30cb7e739
-> --- /dev/null
-> +++ b/tests/xfs/4201
-> @@ -0,0 +1,65 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026 Christoph Hellwig.
-> +#
-> +# FS QA Test No. 4201
-> +#
-> +# Test that mounts of zoned file systems on conventional devices don't create
-> +# more open zones than allowed when the last blocks in one or more zones have
-> +# been invalidated.
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick zone
-> +
-> +_require_scratch
-> +_require_odirect
-> +_require_non_zoned_device $SCRATCH_DEV
-> +_require_non_zoned_device $SCRATCH_RTDEV
-> +
-> +open_zones=5
-> +blocks=65536
-> +bsize=4096
-> +
-> +zone_size_mib=$((blocks * bsize / 1024 / 1024))
-> +file_size_mib=$((zone_size_mib / 2))
-> +nr_files=$((open_zones * 3 - 1))
-> +
-> +echo "zone size: $zone_size_mib" >>$seqres.full
-> +echo "file size: $file_size_mib" >>$seqres.full
-> +echo "nr files: $nr_files" >>$seqres.full
-> +
-> +_scratch_mkfs -b size=${bsize} -r zoned=1,rgsize=${blocks}b \
-> +	> "$seqres.full" 2>&1
-> +_scratch_mount -o max_open_zones=${open_zones}
-> +
-> +_require_fs_sysfs zoned/nr_open_zones
-> +
-> +for i in $(seq 1 $nr_files); do
-> +	dd if=/dev/zero of=$SCRATCH_MNT/$i bs=1M count=$file_size_mib \
-> +		 oflag=direct > /dev/null 2>&1
-> +done
-> +
-> +rm $SCRATCH_MNT/4
-> +rm $SCRATCH_MNT/5
-> +rm $SCRATCH_MNT/6
-> +rm $SCRATCH_MNT/7
+From: Filipe Manana <fdmanana@suse.com>
 
-Hmmm. I think you should delete odd numbered files only since they are going to
-be written at the end of a zone. Otherwise, you make the zone empty, and it will
-thus not be considered as open.
+Several tests mention patches that are already in Linus' git tree, so add
+their commit IDs. For generic/762, also use "fixed_by_fs_commit xfs"
+instead of "_fixed_by_git_commit kernel" since it's a XFS specific commit
+and it does not make sense for the test to report that commit in case it
+fails when running against a filesystem other than XFS.
 
-Something like:
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/340   | 2 +-
+ tests/btrfs/345   | 2 +-
+ tests/btrfs/346   | 2 +-
+ tests/btrfs/347   | 2 +-
+ tests/generic/762 | 2 +-
+ tests/generic/789 | 2 +-
+ tests/generic/790 | 2 +-
+ 7 files changed, 7 insertions(+), 7 deletions(-)
 
-for (( i=0; i<$nr_files; i=$(( i + 2 )) )); do
-	rm $SCRATCH_MNT/$(( i + 1))
-done
-
-should generate enough open zones.
-
-> +
-> +_scratch_unmount
-> +_scratch_mount -o max_open_zones=${open_zones}
-> +
-> +max_open=$(_get_fs_sysfs_attr $SCRATCH_DEV zoned/max_open_zones)
-> +nr_open=$(_get_fs_sysfs_attr $SCRATCH_DEV zoned/nr_open_zones)
-> +
-> +if [ ${max_open} -ne $((open_zones - 1)) ]; then
-> +	_fail "Test needs adjustments for multiple open GC zones"
-> +fi
-> +
-> +if [ ${nr_open} -gt ${max_open} ]; then
-> +	_fail "Too many open zones: $nr_open/$max_open"
-> +fi
-> +
-> +_scratch_unmount
-> +
-> +status=0
-> +exit
-> diff --git a/tests/xfs/4201.out b/tests/xfs/4201.out
-> new file mode 100644
-> index 000000000000..32e395dd4d6d
-> --- /dev/null
-> +++ b/tests/xfs/4201.out
-> @@ -0,0 +1 @@
-> +QA output created by 4201
-
-
+diff --git a/tests/btrfs/340 b/tests/btrfs/340
+index fc3b8d62..872f790c 100755
+--- a/tests/btrfs/340
++++ b/tests/btrfs/340
+@@ -10,7 +10,7 @@
+ . ./common/preamble
+ _begin_fstest auto quick qgroup
+ 
+-_fixed_by_kernel_commit xxxxxxxxxxxx \
++_fixed_by_kernel_commit 68d4b3fa18d7 \
+ 	"btrfs: qgroup: update all parent qgroups when doing quick inherit"
+ 
+ # For the automatic fsck at unmount.
+diff --git a/tests/btrfs/345 b/tests/btrfs/345
+index 75cc3067..58727049 100755
+--- a/tests/btrfs/345
++++ b/tests/btrfs/345
+@@ -17,7 +17,7 @@ _require_scratch
+ _require_btrfs_support_sectorsize 4096
+ _require_btrfs_command "property"
+ 
+-_fixed_by_kernel_commit xxxxxxxxxxxx \
++_fixed_by_kernel_commit e1b18b959025 \
+ 	"btrfs: fix transaction abort when snapshotting received subvolumes"
+ 
+ # Use a 4K node/leaf size to make the test faster.
+diff --git a/tests/btrfs/346 b/tests/btrfs/346
+index ef301ef7..28c1e536 100755
+--- a/tests/btrfs/346
++++ b/tests/btrfs/346
+@@ -14,7 +14,7 @@ _begin_fstest auto quick subvol
+ _require_scratch
+ _require_btrfs_support_sectorsize 4096
+ 
+-_fixed_by_kernel_commit xxxxxxxxxxxx \
++_fixed_by_kernel_commit 2d1ababdedd4 \
+ 	"btrfs: fix transaction abort on file creation due to name hash collision"
+ 
+ # Use a 4K node/leaf size to make the test faster and require less file names
+diff --git a/tests/btrfs/347 b/tests/btrfs/347
+index ebd53d97..9239e99a 100755
+--- a/tests/btrfs/347
++++ b/tests/btrfs/347
+@@ -16,7 +16,7 @@ _require_test_program t_btrfs_received_uuid_ioctl
+ _require_scratch
+ _require_btrfs_support_sectorsize 4096
+ 
+-_fixed_by_kernel_commit xxxxxxxxxxxx \
++_fixed_by_kernel_commit 87f2c46003fc \
+ 	"btrfs: fix transaction abort on set received ioctl due to item overflow"
+ 
+ # Use a 4K node/leaf size to make the test faster.
+diff --git a/tests/generic/762 b/tests/generic/762
+index e3a01de8..bbaf5051 100755
+--- a/tests/generic/762
++++ b/tests/generic/762
+@@ -10,7 +10,7 @@
+ . ./common/preamble
+ _begin_fstest auto quota prealloc
+ 
+-_fixed_by_git_commit kernel XXXXXXXXXXXXXX \
++_fixed_by_fs_commit xfs 4b8d867ca6e2 \
+ 	"xfs: don't over-report free space or inodes in statvfs"
+ 
+ . ./common/filter
+diff --git a/tests/generic/789 b/tests/generic/789
+index 1ed7a885..0e72966e 100755
+--- a/tests/generic/789
++++ b/tests/generic/789
+@@ -24,7 +24,7 @@ _cleanup()
+ _require_scratch
+ _require_dm_target flakey
+ 
+-_fixed_by_fs_commit btrfs xxxxxxxxxxxx \
++_fixed_by_fs_commit btrfs 5254d4181add \
+ 	"btrfs: fix zero size inode with non-zero size after log replay"
+ 
+ _scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
+diff --git a/tests/generic/790 b/tests/generic/790
+index 9aa577f5..28f7faa2 100755
+--- a/tests/generic/790
++++ b/tests/generic/790
+@@ -27,7 +27,7 @@ _cleanup()
+ _require_scratch
+ _require_dm_target flakey
+ 
+-_fixed_by_fs_commit btrfs xxxxxxxxxxxx \
++_fixed_by_fs_commit btrfs 9573a365ff9f \
+ 	"btrfs: log new dentries when logging parent dir of a conflicting inode"
+ 
+ _scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
 -- 
-Damien Le Moal
-Western Digital Research
+2.47.2
+
