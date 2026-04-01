@@ -1,39 +1,39 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFB6C275AEB
-	for <fstests@vger.kernel.org>; Wed,  1 Apr 2026 14:33:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E1F225F7A9;
+	Wed,  1 Apr 2026 14:35:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775053983; cv=none; b=dfjRc5+w0otxrhfpqm9vQEW9++LVogSG/S9jwZcOej+KjdeB1cDCOpLIzU6Fy4M8dBmbRWGNzoz1xL6Ynp1j4eOIztK1AetkIU3S4Nv46FWWiyw8EyaUbuRFjBSFdJDSutkZifkUrHNDTt4ygxuVEKa2wKKA1UP6AUWKyp66YuM=
+	t=1775054133; cv=none; b=NBZYiEvPZcPxdKi+r9GuAOi0Yhnv91lwlLAKOWMGhoauqDnk/Cs+Hzep61YNeTbYIhBlTLVpHLD5efd7zn+UPpZWG+sScbGGHlRrmuCRtBm9xMzCsDH2fJGQukku003CUX/LkgjkJ/3X5Ak6kDChqrOKj40wzjWoz8B+mWP07Jk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775053983; c=relaxed/simple;
-	bh=uIyjk1kZyA6rFtZGwtj+F7LhZN6TRJHkfOWMqB7UwC4=;
+	s=arc-20240116; t=1775054133; c=relaxed/simple;
+	bh=en1FN1eE0L432BK1935FKQUzOC8Zc9VG/uc2HmcKPGQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=MuyxI0jbo+TId6hDUZJCm18j5HbWWOTWB/vg1Bue786dxJ+iTdtmPU+aOQ/jyYQTO3VDhdNh3JWiAnJublnzN90KV6FmOt0lggi3iPSPXb4dh0RqpFxnTqvqzHnX8eEokyOfyXjKkzZT9JtRhU24bSn9h5NV+110z/R35Gownfc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=D41rSe2m; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=q5FczpCKJODReeLNT+Cw6G3t0k/R9wjwTipsbiu6uIpAo1x/oz9YVfK1haL4aelHeSpZizKSvKgL6vfdFDijEzChMJ3a5youah/cyufaHklNH2Mk3SnPymRm6ru4qySuryQfHOJvzfuLeB8Qbm15l2j/F8LVusye/ZRcESfu+mk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TzNi5qbf; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="D41rSe2m"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 42C5DC4CEF7;
-	Wed,  1 Apr 2026 14:33:03 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TzNi5qbf"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 30FEEC4CEF7;
+	Wed,  1 Apr 2026 14:35:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1775053983;
-	bh=uIyjk1kZyA6rFtZGwtj+F7LhZN6TRJHkfOWMqB7UwC4=;
+	s=k20201202; t=1775054133;
+	bh=en1FN1eE0L432BK1935FKQUzOC8Zc9VG/uc2HmcKPGQ=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=D41rSe2mJerGBfGhM/nEMLRPtzP8hZyMJ+g9KeCobnhprZxxNj4fveHksF8EZGDki
-	 yjLlbOwaXST+KUYZGf4dQr5rUdSmx3oijUfkE6xl31TtVxOOGi3CtzvVDXqwZWeU4Q
-	 EhAfIcIpxmsTAPOmS26MdpNhYS8L2Q0HrqnTDy1LusS2kzjRb9k9JDB1FtrNsZvrCH
-	 DBnDFm4hs/M0DtmUI12yymfaaPQ7mP26CohEPlNPWTgvNFEXknzsly3zD4jfLO0tvf
-	 SBp3PDgtT3m11DFuIHqlCPJgMzDv+mJdTLe3HKd05oBfV5CoP953j/kHL4jasOLiu2
-	 OjlvrX3zxMxgQ==
-Date: Wed, 1 Apr 2026 07:33:02 -0700
+	b=TzNi5qbfiLXPgWoChG2BaqMlZuiqegbRogeJM2r9VPluMq5MhWY24gJogZIWUYC/X
+	 kvHCJii+Qsrhp/TMPPRI0RE5f5C33dF2gwTIyMJko77AP6McbxEuW4u/lc0iOg2qDC
+	 AtraZXWA2Du3K+iFp6AguBVYpon6X6Zkfd5RZuhDdtLwrW50Ycqg32P/aGYsz5l7q0
+	 /QJRA2lPnLK+wt12tRWyeRlW1ABaWMRdRhBtT6nH/iXtDAE2AJxM2Zu/DoOxLlySi4
+	 xbRybGwrkx91Uj4QJRRWU3BgE4kMTHEUnLGviEmlwih5D2DyrXaMgNkDvYflVMnaEp
+	 QTwBIGjJDxbYg==
+Date: Wed, 1 Apr 2026 07:35:32 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-	Disha Goel <disgoel@linux.ibm.com>
-Subject: Re: [PATCH 1/4] ext4/061,062: Minor fixes and refactoring
-Message-ID: <20260401143302.GJ6212@frogsfrogsfrogs>
-References: <726e43008315a1bed018c1b43aae2458aebc03bc.1775039135.git.ojaswin@linux.ibm.com>
+To: Long Li <leo.lilong@huawei.com>
+Cc: zlang@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+	yi.zhang@huawei.com, houtao1@huawei.com, yangerkun@huawei.com
+Subject: Re: [PATCH] xfs/018: test log attr replay with zero-length attr value
+Message-ID: <20260401143532.GK6212@frogsfrogsfrogs>
+References: <20260401060632.2085015-1-leo.lilong@huawei.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,161 +42,129 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <726e43008315a1bed018c1b43aae2458aebc03bc.1775039135.git.ojaswin@linux.ibm.com>
+In-Reply-To: <20260401060632.2085015-1-leo.lilong@huawei.com>
 
-On Wed, Apr 01, 2026 at 04:10:47PM +0530, Ojaswin Mujoo wrote:
-> Fix 2 issues in the tests:
+On Wed, Apr 01, 2026 at 02:06:32PM +0800, Long Li wrote:
+> Kernel commit d72f2084e309 ("xfs: fix ri_total validation in
+> xlog_recover_attri_commit_pass2") fixed a bug where setting a
+> zero-length attribute value would cause incorrect ri_total
+> validation during log recovery.
 > 
-> 1. Use fs atomic write limits instead of bdev's
+> Add test cases to xfs/018 to cover this scenario across attr
+> fork formats: extent and remote.
 > 
-> The tests use block device's limits instead of limits advertised
-> by filesystem. This can cause failures because block device might
-> advertise a higher maximum than the FS.  Fix the tests to use
-> filesystem's limits instead.
-> 
-> 2. Fix the test loop range
-> 
-> Fix the test loop start and end so that our calculations for
-> blocksize, clustersize and iosize are correct.
-> 
-> Reported-by: Disha Goel <disgoel@linux.ibm.com>
-> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> Using echo -n "" | attr -s is unreliable for empty values since
+> attr may treat stdin EOF as no value provided. Instead, handle
 
-Looks fine to me,
+Gross. :)
+
+> zero-length values explicitly in test_attr_replay() by using
+> attr -s -V "" when the value is empty.
+> 
+> Signed-off-by: Long Li <leo.lilong@huawei.com>
+
+Thanks for catching adding the empty attr case; I hadn't realized that
+was actually possible.
+
 Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
 --D
 
 > ---
->  tests/ext4/061 | 28 ++++++++++++++++++++--------
->  tests/ext4/062 | 26 +++++++++++++++++++-------
->  2 files changed, 39 insertions(+), 15 deletions(-)
+>  tests/xfs/018     | 26 ++++++++++++++++++++++----
+>  tests/xfs/018.out | 20 ++++++++++++++++++++
+>  2 files changed, 42 insertions(+), 4 deletions(-)
 > 
-> diff --git a/tests/ext4/061 b/tests/ext4/061
-> index 1d61c8b0..69ddeaca 100755
-> --- a/tests/ext4/061
-> +++ b/tests/ext4/061
-> @@ -31,10 +31,19 @@ _require_aiodio
->  FIO_LOAD=$(($(nproc) * 2 * LOAD_FACTOR))
->  SIZE=$((100*1024*1024))
+> diff --git a/tests/xfs/018 b/tests/xfs/018
+> index 9b69c9cb..3a40a85a 100755
+> --- a/tests/xfs/018
+> +++ b/tests/xfs/018
+> @@ -33,10 +33,18 @@ test_attr_replay()
+>  	# Inject error
+>  	_scratch_inject_error $error_tag
 >  
-> -# Calculate fsblocksize as per bdev atomic write units.
-> -bdev_awu_min=$(_get_atomic_write_unit_min $SCRATCH_DEV)
-> -bdev_awu_max=$(_get_atomic_write_unit_max $SCRATCH_DEV)
-> -bs=$(_max 4096 "$bdev_awu_min")
-> +_scratch_mkfs > /dev/null 2>&1 || \
-> +	_notrun "mkfs failed"
-> +_try_scratch_mount || \
-> +	_notrun "mount failed"
+> -	# Set attribute, being careful not to include the trailing newline
+> -	# in the attr value.
+> -	echo -n "$attr_value" | ${ATTR_PROG} -$flag "$attr_name" $testfile 2>&1 | \
+> -			    _filter_scratch
+> +	# Set attribute. For zero-length values, use -V "" explicitly to
+> +	# avoid relying on stdin EOF behavior which is undefined for empty
+> +	# values. Otherwise, being careful not to include the trailing
+> +	# newline in the attr value.
+> +	if [ "$flag" = "s" ] && [ -z "$attr_value" ]; then
+> +		${ATTR_PROG} -s "$attr_name" -V "" $testfile 2>&1 | \
+> +			_filter_scratch
+> +	else
+> +		echo -n "$attr_value" | ${ATTR_PROG} -$flag "$attr_name" \
+> +			$testfile 2>&1 | _filter_scratch
+> +	fi
 > +
-> +touch $SCRATCH_MNT/f
+>  
+>  	# FS should be shut down, touch will fail
+>  	touch $testfile 2>&1 | _filter_scratch
+> @@ -147,6 +155,11 @@ create_test_file inline_file3 1 $attr16
+>  test_attr_replay inline_file3 "attr_name2" $attr64k "s" "larp"
+>  test_attr_replay inline_file3 "attr_name2" $attr64k "r" "larp"
+>  
+> +# extent, zero-length value
+> +create_test_file extent_file0 1 $attr1k
+> +test_attr_replay extent_file0 "attr_name2" "" "s" "larp"
+> +test_attr_replay extent_file0 "attr_name2" "" "r" "larp"
 > +
-> +fs_awu_min=$(_get_atomic_write_unit_min $SCRATCH_MNT/f)
-> +fs_awu_max=$(_get_atomic_write_unit_max $SCRATCH_MNT/f)
-> +bs=$(_max 4096 "$fs_awu_min")
-> +ps=$(_get_page_size)
+>  # extent, internal
+>  create_test_file extent_file1 1 $attr1k
+>  test_attr_replay extent_file1 "attr_name2" $attr1k "s" "larp"
+> @@ -165,6 +178,11 @@ create_test_file extent_file4 1 $attr1k
+>  test_attr_replay extent_file4 "attr_name2" $attr64k "s" "larp"
+>  test_attr_replay extent_file4 "attr_name2" $attr64k "r" "larp"
+>  
+> +# remote, zero-length value
+> +create_test_file remote_file0 1 $attr64k
+> +test_attr_replay remote_file0 "attr_name2" "" "s" "larp"
+> +test_attr_replay remote_file0 "attr_name2" "" "r" "larp"
 > +
-> +_scratch_unmount
+>  # remote, internal
+>  create_test_file remote_file1 1 $attr64k
+>  test_attr_replay remote_file1 "attr_name2" $attr1k "s" "larp"
+> diff --git a/tests/xfs/018.out b/tests/xfs/018.out
+> index be1d6422..11b1c034 100644
+> --- a/tests/xfs/018.out
+> +++ b/tests/xfs/018.out
+> @@ -41,6 +41,16 @@ Could not remove "attr_name2" for SCRATCH_MNT/testdir/inline_file3
+>  touch: cannot touch 'SCRATCH_MNT/testdir/inline_file3': Input/output error
+>  attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
 >  
->  function create_fio_configs()
->  {
-> @@ -97,10 +106,11 @@ run_test_one() {
->  	local cs=$2
->  	local iosize=$3
->  
-> +	echo "== Testing: bs=$bs cs=$cs iosize=$iosize ==" >> $seqres.full
+> +attr_set: Input/output error
+> +Could not set "attr_name2" for SCRATCH_MNT/testdir/extent_file0
+> +touch: cannot touch 'SCRATCH_MNT/testdir/extent_file0': Input/output error
+> +attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
 > +
->  	MKFS_OPTIONS="-O bigalloc -b $bs -C $cs"
->  	_scratch_mkfs_ext4  >> $seqres.full 2>&1 || return
->  	if _try_scratch_mount >> $seqres.full 2>&1; then
-> -		echo "== Testing: bs=$bs cs=$cs iosize=$iosize ==" >> $seqres.full
->  
->  		touch $SCRATCH_MNT/f1
->  		create_fio_configs $iosize
-> @@ -127,7 +137,7 @@ run_test() {
->  	# cluster sizes above 16 x blocksize are experimental so avoid them
->  	# Also, cap cluster size at 128kb to keep it reasonable for large
->  	# blocks size
-> -	max_cs=$(_min $((16 * bs)) "$bdev_awu_max" $((128 * 1024)))
-> +	max_cs=$(_min $((16 * bs)) "$fs_awu_max" $((128 * 1024)))
->  
->  	# Fuzz for combinations of blocksize, clustersize and
->  	# iosize that cover most of the cases
-> @@ -145,8 +155,10 @@ fio_out=$tmp.fio.out
->  create_fio_configs $bs
->  _require_fio $fio_aw_config
->  
-> -for ((bs=$bs; bs <= $(_get_page_size); bs = $bs << 1)); do
-> -	run_test $bs
-> +echo "Awu min: $fs_awu_min Awu max: $fs_awu_max" >> $seqres.full
+> +attr_remove: Input/output error
+> +Could not remove "attr_name2" for SCRATCH_MNT/testdir/extent_file0
+> +touch: cannot touch 'SCRATCH_MNT/testdir/extent_file0': Input/output error
+> +attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
 > +
-> +for ((bs=$fs_awu_min; bs <= $(_min ps fs_awu_max); bs = $bs << 1)); do
-> +	run_test $bs $cs $iosize
->  done
+>  attr_set: Input/output error
+>  Could not set "attr_name2" for SCRATCH_MNT/testdir/extent_file1
+>  touch: cannot touch 'SCRATCH_MNT/testdir/extent_file1': Input/output error
+> @@ -71,6 +81,16 @@ Could not remove "attr_name2" for SCRATCH_MNT/testdir/extent_file4
+>  touch: cannot touch 'SCRATCH_MNT/testdir/extent_file4': Input/output error
+>  attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
 >  
->  # success, all done
-> diff --git a/tests/ext4/062 b/tests/ext4/062
-> index 05cce696..56bf080c 100755
-> --- a/tests/ext4/062
-> +++ b/tests/ext4/062
-> @@ -33,10 +33,19 @@ _require_aiodio
->  FSSIZE=$((360*1024*1024))
->  FIO_LOAD=$(($(nproc) * LOAD_FACTOR))
->  
-> -# Calculate bs as per bdev atomic write units.
-> -bdev_awu_min=$(_get_atomic_write_unit_min $SCRATCH_DEV)
-> -bdev_awu_max=$(_get_atomic_write_unit_max $SCRATCH_DEV)
-> -bs=$(_max 4096 "$bdev_awu_min")
-> +_scratch_mkfs > /dev/null 2>&1 || \
-> +	_notrun "mkfs failed"
-> +_try_scratch_mount || \
-> +	_notrun "mount failed"
+> +attr_set: Input/output error
+> +Could not set "attr_name2" for SCRATCH_MNT/testdir/remote_file0
+> +touch: cannot touch 'SCRATCH_MNT/testdir/remote_file0': Input/output error
+> +attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
 > +
-> +touch $SCRATCH_MNT/f
+> +attr_remove: Input/output error
+> +Could not remove "attr_name2" for SCRATCH_MNT/testdir/remote_file0
+> +touch: cannot touch 'SCRATCH_MNT/testdir/remote_file0': Input/output error
+> +attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
 > +
-> +fs_awu_min=$(_get_atomic_write_unit_min $SCRATCH_MNT/f)
-> +fs_awu_max=$(_get_atomic_write_unit_max $SCRATCH_MNT/f)
-> +bs=$(_max 4096 "$fs_awu_min")
-> +ps=$(_get_page_size)
-> +
-> +_scratch_unmount
->  
->  function create_fio_configs()
->  {
-> @@ -146,10 +155,11 @@ run_test_one() {
->  	local cs=$2
->  	local iosize=$3
->  
-> +	echo "Testing: bs=$bs cs=$cs iosize=$iosize" >> $seqres.full
-> +
->  	MKFS_OPTIONS="-O bigalloc -b $bs -C $cs"
->  	_scratch_mkfs_sized "$FSSIZE" >> $seqres.full 2>&1 || return
->  	if _try_scratch_mount >> $seqres.full 2>&1; then
-> -		echo "Testing: bs=$bs cs=$cs iosize=$iosize" >> $seqres.full
->  
->  		touch $SCRATCH_MNT/f1
->  		create_fio_configs $iosize
-> @@ -175,7 +185,7 @@ run_test() {
->  	# cluster sizes above 16 x blocksize are experimental so avoid them
->  	# Also, cap cluster size at 128kb to keep it reasonable for large
->  	# blocks size
-> -	max_cs=$(_min $((16 * bs)) "$bdev_awu_max" $((128 * 1024)))
-> +	max_cs=$(_min $((16 * bs)) "$fs_awu_max" $((128 * 1024)))
->  
->  	# Fuzz for combinations of blocksize, clustersize and
->  	# iosize that cover most of the cases
-> @@ -193,7 +203,9 @@ fio_out=$tmp.fio.out
->  create_fio_configs $bs
->  _require_fio $fio_aw_config
->  
-> -for ((bs=$bs; bs <= $(_get_page_size); bs = $bs << 1)); do
-> +echo "Awu min: $fs_awu_min Awu max: $fs_awu_max" >> $seqres.full
-> +
-> +for ((bs=$fs_awu_min; bs <= $(_min ps fs_awu_max); bs = $bs << 1)); do
->  	run_test $bs $cs $iosize
->  done
->  
+>  attr_set: Input/output error
+>  Could not set "attr_name2" for SCRATCH_MNT/testdir/remote_file1
+>  touch: cannot touch 'SCRATCH_MNT/testdir/remote_file1': Input/output error
 > -- 
-> 2.53.0
+> 2.39.2
 > 
 > 
