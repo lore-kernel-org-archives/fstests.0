@@ -1,42 +1,94 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E5B131326A
-	for <fstests@vger.kernel.org>; Mon,  6 Apr 2026 15:43:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F61B38B12B
+	for <fstests@vger.kernel.org>; Mon,  6 Apr 2026 17:05:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775490239; cv=none; b=BC6rQD8lsxAZYmUHvUE3JU+arpuUwTJ5wX4Hqzr8XLg9g8Hq0OtX2Tf+mccCD71WfGuXMQ9PMNoaVcTt0nVwFR7kD1jS0oX1OqNlvekTmP13HSplHv8tKeSwb0map6D1rjOEhXPoKeEBfZgizE+jcSrGsYNWnmnd3Ml5EGgzMp4=
+	t=1775495140; cv=none; b=JnkrtxgGlnnzHGmQtveCBYMmZFF7ouZ2E0JwABQk/ertx86LRIas5cAmO1EheYZKSbnhcUwgh0BJKuNjpLJC/o48FTU7i5M91DlkYpsiCzcx1czNGY5kjUL2h1evxaEMVTxwSBEvCc4blVgUnvs3UDh9qSof/iMxXjOHTm9HAB4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775490239; c=relaxed/simple;
-	bh=o9zUO6KiityXCjvIIkmzOd/GYZ6eZEodkf7Lxj7nJ9Y=;
+	s=arc-20240116; t=1775495140; c=relaxed/simple;
+	bh=i1FBzzgd6g25OyRIBCssNPzR0Gi9AaTz7cseTNTRLdE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=hLgQoYsPMM8hXVe/XIMaHZi5bSQSOBQE28ds2qeI7HPCHWkbSwSXWUxyQj8spV0Z26zW6kA0sSifexPpWsSpgCkMevIe3lNrE5veI8FuV38AxBfTHYPZWtIQN9NmJzCR1oLK7+EIEf2vEkkU9rhIjIcTlqYAmiTV6de4G1I6tCc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rr4IQVNd; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=KX9e//+RsftDsvDhfORUQ01VLQQNGjKr78FZERbg5WxUFAEMfa9gHMoCu2LA74cku1xJVPizRW1DN42xslAL4gQvQd1ktnsF3Y/ns/b7zBVfOf49sEay/mhFsVAfBeiCOFkj9gen7smT356SrFa6eDr4O/QnsLL6r1HOSBrBfJU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JgPYCKwZ; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=MvUXOR1A; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rr4IQVNd"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D5313C4CEF7;
-	Mon,  6 Apr 2026 15:43:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1775490238;
-	bh=o9zUO6KiityXCjvIIkmzOd/GYZ6eZEodkf7Lxj7nJ9Y=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=rr4IQVNdpBrJuvSpDu/tqlmzkpQ20iiSCyjU0h568o8XRepCOGAJ45oDP1FF1jCn1
-	 sC3B26IlasVxpW/DdVZJ0McxsczSi/cBNFGdAUR3GZM+97NMpeOOKSpNMXzfeFnqH0
-	 X+pHrHIDjqz3kJ2+eu8hhkjTzOcbS/Anj50JaxkrfeZ1sIVRoDNrCZ3c8n48VcMX6m
-	 AGNTFwXfkgQJUuCmyW6SLU0Ne/OYMDkZY5+ddkdFrA71i0K3sNXMf0SyzeooxtqjJT
-	 A5A9/0DwmRmuf+9gaLC2llbr9+ajXdJgGLkrIQYVe2e2l1thcf/yHD5a27DDoDS+KC
-	 tMoEjDeTHoBbg==
-Date: Mon, 6 Apr 2026 08:43:58 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-	Disha Goel <disgoel@linux.ibm.com>
-Subject: Re: [PATCH 2/4] generic/765: Fix sysfs path for nvme partitions
-Message-ID: <20260406154358.GN6212@frogsfrogsfrogs>
-References: <726e43008315a1bed018c1b43aae2458aebc03bc.1775039135.git.ojaswin@linux.ibm.com>
- <7fe6154353d38b2dc308db16d8125b83a8ed7daf.1775039135.git.ojaswin@linux.ibm.com>
- <20260401140829.GG6212@frogsfrogsfrogs>
- <adJ6oJrKl8BEDqHz@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JgPYCKwZ";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="MvUXOR1A"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1775495138;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=+qTwXZ6MKD56LdsiHGj4K7RlXwiXwOsYAGKNXyywo88=;
+	b=JgPYCKwZAPZil4+/43AGecveQO09b8A2AQFLKSsp09BeHM4ZF5HPksS4fiqxPh/m1pgCpc
+	WRNzWEgKvPVXv5oqSxB6/f+RuQBGVeMkuYLK7r04ejMJeW8oWrcsiKnzbR9Gh0JEGtL5ye
+	Lgv+iGziUJabZuS8vc56P4QyACcXT/c=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-68-qqd6_EUTN8m47qPjb2ZGAw-1; Mon, 06 Apr 2026 13:05:36 -0400
+X-MC-Unique: qqd6_EUTN8m47qPjb2ZGAw-1
+X-Mimecast-MFC-AGG-ID: qqd6_EUTN8m47qPjb2ZGAw_1775495135
+Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-bce224720d8so1922220a12.1
+        for <fstests@vger.kernel.org>; Mon, 06 Apr 2026 10:05:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1775495135; x=1776099935; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=+qTwXZ6MKD56LdsiHGj4K7RlXwiXwOsYAGKNXyywo88=;
+        b=MvUXOR1AyB7bmTLpeI01yeJB04RzWrqt2LTf2MQAzNHArMI0xaZF5U0JeO0y/j2Lcm
+         1zfpYHFSWLk87ViON1BvykL4fe1L2gvdtxnw8gmJYkBc5zKIF4G6VMC1gkWTuXsqiqBv
+         dD40wSqoKGQRE/Mu9Cj54DEdKc8Dhp53OpRC0fjPMMEwRLJ88rFZMk6Am2tVFO+LkYTQ
+         Jq9J8sAvmdLXHdBOYevsF7NphLH0vn87M0sGau5pKFtyPy+Nr0Szs3RVGmqVI1WScYRG
+         FpPKrNuq2VOjcN5kcLB7j4zgAI6Qwqy9tkxpueA9xvjfWgyu7vYVJMbdtoK8nJSBMDOq
+         q2UA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1775495135; x=1776099935;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=+qTwXZ6MKD56LdsiHGj4K7RlXwiXwOsYAGKNXyywo88=;
+        b=OHy6AcNXL1cGPJmhNEOrxR04F8ZNuPrr45YNgaw0WG5Wfz4+uWCCBC41aPSrl3peZL
+         e+ymlP6BcToYYWDK3uSzZVtXETB44YE2XxT2OIbBbt+/BaSZ/FiUgMmpTo6vmBfx4rgX
+         MIp0F80FAJRiZvYCXmuSnpeYUphjHbRdl7SENX2pLJz8ZzT/tw4hn4jtPsNa8OzsHPbV
+         IQ/sHCXccGKrI5spGTw3hseo5kyMvlA6tzLMyOurhlKazPN0WSWseVkQ2RjZLZCGN+Zy
+         oolVW389CvzR4rzeoItavbeLysASRIJ8EyGVU0zSxou6poWhm1EncUTH8dXVU2eyBsCs
+         OJbA==
+X-Forwarded-Encrypted: i=1; AJvYcCWOUnhwC7u22cmucWo+lND9Ik5U51uuda4TthnQU8KxtMp1GEWKP42jvr2LhX5x28WSqvAH0ueT@vger.kernel.org
+X-Gm-Message-State: AOJu0YwrZgXVBLE47jOrKTmKbin//u2w6qyIbKotqILA4XFNvGTzDKlo
+	XNLdsoNZsyJEDzdRP1FM5AgQRu/X1vTCUD9CknsoUoGhicQWsfm9wXICZpWxlZDC0H7VY1E3eUH
+	EBvkQLOWaK80X0cByI59+uL7+ln9+Ol1Qnl1jvQ2SFApePVgh4pY6RCDx5HQ=
+X-Gm-Gg: AeBDievcfvXa5b5dJHiACT5eIy8tqYmqolPZ/sQhF7cbNLjH7/bMeBmbDY2ABLYVPMY
+	G6lVlzKv6SzfSpLPT5OG0rg+QCtI3O55RncyahfJvhLpzoJN3qSBtw8zuCF7XG24/fZU6bFTKwp
+	o13y/F3OYI2aeA8tyxnNIiCTmx/Zfv+X9rKSy3IeHjrBG/Eji5aj/5iv7aW05sfweQqc3tcClZ/
+	IDrt3ULvN0YE673xoJI5+7KFEsiGhBVF4uWpExYAn5MIG3HmZ/HtmN2nffYvClgDPQ0nbYK7n3e
+	qwxeyht63pKkRD8sDgT62ub1zTGj7PfQcingMbawgFUVY3NBaLhsYwmISuF6I+v3NyUJLKXZE56
+	cQnXMF63NPh5attHC/A==
+X-Received: by 2002:a05:6a21:a395:b0:39f:64d7:9372 with SMTP id adf61e73a8af0-39f64d798d7mr6631820637.41.1775495135320;
+        Mon, 06 Apr 2026 10:05:35 -0700 (PDT)
+X-Received: by 2002:a05:6a21:a395:b0:39f:64d7:9372 with SMTP id adf61e73a8af0-39f64d798d7mr6631783637.41.1775495134739;
+        Mon, 06 Apr 2026 10:05:34 -0700 (PDT)
+Received: from doltdoltdolt ([209.132.188.88])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c76c6492097sm12917602a12.10.2026.04.06.10.05.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 06 Apr 2026 10:05:34 -0700 (PDT)
+Date: Tue, 7 Apr 2026 01:05:28 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, djwong@kernel.org, dlemoal@kernel.org,
+	hans.holmberg@wdc.com, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH v2] xfs: add a test for number of open zones on
+ conventional devices
+Message-ID: <20260406170528.sxcm3qcndjhwm7pp@doltdoltdolt>
+References: <20260331152341.4047725-1-hch@lst.de>
+ <20260331211807.gofhlabxlr3mdxnr@doltdoltdolt>
+ <20260401061828.GA24293@lst.de>
+ <20260401075952.ifuz3kqfq3g7c4gf@doltdoltdolt>
+ <20260401140646.GA21703@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,175 +97,40 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <adJ6oJrKl8BEDqHz@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+In-Reply-To: <20260401140646.GA21703@lst.de>
 
-On Sun, Apr 05, 2026 at 08:37:12PM +0530, Ojaswin Mujoo wrote:
-> On Wed, Apr 01, 2026 at 07:08:29AM -0700, Darrick J. Wong wrote:
-> > On Wed, Apr 01, 2026 at 04:10:48PM +0530, Ojaswin Mujoo wrote:
-> > > This tests checks atomic write limits reported by statx() are same as
-> > > the ones reported by sysfs, however nvme partitions don't have the
-> > > /sys/block/nvme0n1p1 style entry and also use the namespace's queue
-> > > limits for atomic writes. This causes the test to fail because it
-> > > expects /sys/block/nvme0n*p* to be present.
+On Wed, Apr 01, 2026 at 04:06:46PM +0200, Christoph Hellwig wrote:
+> On Wed, Apr 01, 2026 at 03:59:52PM +0800, Zorro Lang wrote:
+> > > > > +_scratch_mkfs -b size=${bsize} -r zoned=1,rgsize=${blocks}b \
+> > > > > +	> "$seqres.full" 2>&1
+> > > > 
+> > > > I usually tack on "|| _fail 'mkfs failed'" after _scratch_mount if it's
+> > > > using extra options. That way, we'll know for sure if the mkfs actually
+> > > > failed.
 > > > 
-> > > Hence, in this case, just check against the parent namespace.
-> > > 
-> > > Reported-by: Disha Goel <disgoel@linux.ibm.com>
-> > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> > > ---
-> > >  tests/generic/765 | 23 +++++++++++++++++++----
-> > >  1 file changed, 19 insertions(+), 4 deletions(-)
-> > > 
-> > > diff --git a/tests/generic/765 b/tests/generic/765
-> > > index 8c4e0bd0..4c768783 100755
-> > > --- a/tests/generic/765
-> > > +++ b/tests/generic/765
-> > > @@ -94,16 +94,31 @@ test_atomic_writes()
-> > >      _scratch_unmount
-> > >  }
-> > >  
-> > > -sys_min_write=$(cat "/sys/block/$(_short_dev $SCRATCH_DEV)/queue/atomic_write_unit_min_bytes")
-> > > -sys_max_write=$(cat "/sys/block/$(_short_dev $SCRATCH_DEV)/queue/atomic_write_unit_max_bytes")
+> > > Yes, that is useful here, especially if we want to support older kernels
+> > > before the zoned device support or !CONFIG_XFS_RT kernels.
 > > 
-> > I see this show up in a few other places:
-> > 
-> > $ git grep /sys/block
-> > common/dmlogwrites:64:  local sysfs="/sys/block/$(_short_dev $1)"
-> > common/rc:2567: local sysfs="/sys/block/$(_short_dev $SCRATCH_DEV)"
-> > common/rc:2631: if [ -e /sys/block/${sdev}/queue/zoned ]; then
-> > common/rc:2632:         cat /sys/block/${sdev}/queue/zoned
-> > common/scsi_debug:67:   device=`grep -wl scsi_debug /sys/block/sd*/device/model | awk -F / '{print $4}'`
-> > tests/btrfs/076:31:     zone_append_max=$(cat "/sys/block/$(_short_dev $SCRATCH_DEV)/queue/zone_append_max_bytes")
-> > tests/btrfs/237:48:zone_size=$(($(cat /sys/block/${sdev}/queue/chunk_sectors) << 9))
-> > tests/btrfs/283:29:     zone_append_max=$(cat "/sys/block/$(_short_dev $SCRATCH_DEV)/queue/zone_append_max_bytes")
-> > vests/generic/108:20:   echo running > /sys/block/`_short_dev $SCSI_DEBUG_DEV`/device/state
-> > tests/generic/108:81:echo offline > /sys/block/`_short_dev $SCSI_DEBUG_DEV`/device/state
-> > tests/generic/730:56:echo 1 > /sys/block/$(_short_dev $SCSI_DEBUG_DEV)/device/delete
-> > tests/generic/731:49:echo 1 > /sys/block/`_short_dev $SCSI_DEBUG_DEV`/device/delete
-> > tests/generic/765:97:sys_min_write=$(cat "/sys/block/$(_short_dev $SCRATCH_DEV)/queue/atomic_write_unit_min_bytes")
-> > tests/generic/765:98:sys_max_write=$(cat "/sys/block/$(_short_dev $SCRATCH_DEV)/queue/atomic_write_unit_max_bytes")
-> > 
-> > So I wonder if the same problem exists there as well?
+> > Oh, if so, we might need _require_realtime. But that's still not enough to
+> > check mkfs.xfs and mount.xfs on old system (then notrun), we might need
+> > more _require_* helpers for this test. What do you think?
 > 
-> Okay so seems like there general rule in the kernel is:
 > 
-> File: block/partitions/core.c:336-339
-> 
-> dname = dev_name(ddev);
-> if (isdigit(dname[strlen(dname) - 1]))
->     dev_set_name(pdev, "%sp%d", dname, partno);
-> else
->     dev_set_name(pdev, "%s%d", dname, partno);
-> 
-> So any device where names end with numbers follow the name<%d>p<%d>
-> scheme for partitions.
+> I think _notrun if mkfs or the initial mount fails might be easier and
+> better here.
 
-Eeeeeee thanks for digging that out :)
+How about a _require_xfs_mkfs_zoned ?
 
-> I was not completely sure if this is something only nvmes follow but
-> looking into the code a bit (from my limited understanding of the blkdev
-> code) seems like all  partiions just inherit parent's queues and sysfs
-> "queue" is only for the parent (struct gendisk) rather than partiions.
+And about `_scratch_mount -o max_open_zones=${open_zones}`, if max_open_zones
+mount option isn't supported, _scratch_mount will fail directly. So how about
 
-Yes, partitions just reuse the parent bdev's queues.
+  _try_scratch_mount -o max_open_zones=${open_zones} || \
+          _notrun "max_open_zones option is not supported"
 
-> So I think a more generic way would be to check if dev is a partitions
-> and then get the correct path for it:
-> 
-> dev_is_partition() {
->     local dev
->     dev=$(_short_dev "$1")
-> 
->     [[ -e /sys/class/block/$dev/partition ]]
-> }
-> 
-> dev_get_queue_path() {
->     local dev parent
->     dev=$(_short_dev "$1")
-> 
->     if dev_is_partition "$dev"; then
->         parent=$(basename "$(readlink -f /sys/class/block/$dev/..)")
+Or we can have a helper for that, as xfs/642~644 and xfs/668 also need that.
 
-Heh, that '..' is delectably subtle.
+Thanks,
+Zorro
 
->     else
->         parent="$dev"
->     fi
 > 
->     echo "/sys/block/$parent/queue"
 
-Might want to check that the path actually exists before printing it,
-but yes that looks ok.
-
---D
-
-> }
-> 
-> Does that look okay?
-> 
-> Regards,
-> ojaswin
-> 
-> > 
-> > (Well, maybe not the scsi-debug users)
-> > 
-> > > +# Get the right sysfs dev for the atomic write device
-> > > +get_aw_dev() {
-> > > +    local dev
-> > > +    dev=$(_short_dev "$1")
-> > > +
-> > > +    # Special case: nvme partitions don't have the /sys/block/nvme0n1p1 style
-> > > +    # entry and also use the namespace's queue limits for atomic writes, hence
-> > > +    # just return the parent namespace.
-> > > +    if [[ $dev == nvme* ]]; then
-> > > +        echo "${dev%%p[0-9]*}"
-> > > +    else
-> > > +        echo "$dev"
-> > > +    fi
-> > > +}
-> > 
-> > Perhaps this ought to turn into a common helper to fix them all?
-> > 
-> > _sys_block_path() {
-> > 	local dev=$(_short_dev "$1")
-> > 
-> > 	# Special case: nvme partitions don't have the /sys/block/nvme0n1p1 style
-> > 	# entry and also use the namespace's queue limits for atomic writes, hence
-> > 	# just return the parent namespace.
-> > 	if [[ $dev == nvme* ]]; then
-> > 		echo "/sys/block/${dev%%p[0-9]*}"
-> > 	else
-> > 		echo "/sys/block/$dev"
-> > 	fi
-> > }
-> > 
-> > sys_min_write=$(_sys_block_path $SCRATCH_DEV)/queue/<whatever>)
-> > 
-> > Also, don't some of the other block devices follow this "partition has
-> > pXXX suffix" pattern as well?  Not that I have a clue why scsi doesn't
-> > follow that pattern or even which part of sd.c triggers the sdaX
-> > behavior. :/
-> > 
-> > --D
-> > 
-> > > +
-> > > +sys_min_write=$(cat "/sys/block/$(get_aw_dev $SCRATCH_DEV)/queue/atomic_write_unit_min_bytes")
-> > > +sys_max_write=$(cat "/sys/block/$(get_aw_dev $SCRATCH_DEV)/queue/atomic_write_unit_max_bytes")
-> > >  
-> > >  bdev_min_write=$(_get_atomic_write_unit_min $SCRATCH_DEV)
-> > >  bdev_max_write=$(_get_atomic_write_unit_max $SCRATCH_DEV)
-> > >  
-> > >  echo "sysfs awu_min $sys_min_write" >> $seqres.full
-> > > -echo "sysfs awu_min $sys_max_write" >> $seqres.full
-> > > +echo "sysfs awu_max $sys_max_write" >> $seqres.full
-> > >  echo "bdev awu_min $bdev_min_write" >> $seqres.full
-> > > -echo "bdev awu_min $bdev_max_write" >> $seqres.full
-> > > +echo "bdev awu_max $bdev_max_write" >> $seqres.full
-> > >  
-> > >  # Test that statx atomic values are the same as sysfs values
-> > >  if [ "$sys_min_write" -ne "$bdev_min_write" ]; then
-> > > -- 
-> > > 2.53.0
-> > > 
-> > > 
-> 
