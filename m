@@ -1,94 +1,31 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F61B38B12B
-	for <fstests@vger.kernel.org>; Mon,  6 Apr 2026 17:05:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 948FD37C11B;
+	Tue,  7 Apr 2026 06:27:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775495140; cv=none; b=JnkrtxgGlnnzHGmQtveCBYMmZFF7ouZ2E0JwABQk/ertx86LRIas5cAmO1EheYZKSbnhcUwgh0BJKuNjpLJC/o48FTU7i5M91DlkYpsiCzcx1czNGY5kjUL2h1evxaEMVTxwSBEvCc4blVgUnvs3UDh9qSof/iMxXjOHTm9HAB4=
+	t=1775543232; cv=none; b=CneKpPsTzpiWc9ATx+J1YFOp44WJqoMhTK1YV5Jskm5RUAFb7QuYw9FkmNxAz63J0ujmYFeVqTNDFBde8F1h5yHTUt44tldQKIXq+iE4sABvYcQYRH7jIjKmGXRH9uFEFWBQ7AyiX9zn7h/6OQEYk/A4uDFFnJB2a8Te7w/ylow=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775495140; c=relaxed/simple;
-	bh=i1FBzzgd6g25OyRIBCssNPzR0Gi9AaTz7cseTNTRLdE=;
+	s=arc-20240116; t=1775543232; c=relaxed/simple;
+	bh=UskVC7sNLwX68jWNnuOkgr2jPov8fp4A5nPK54jf8K8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KX9e//+RsftDsvDhfORUQ01VLQQNGjKr78FZERbg5WxUFAEMfa9gHMoCu2LA74cku1xJVPizRW1DN42xslAL4gQvQd1ktnsF3Y/ns/b7zBVfOf49sEay/mhFsVAfBeiCOFkj9gen7smT356SrFa6eDr4O/QnsLL6r1HOSBrBfJU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JgPYCKwZ; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=MvUXOR1A; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JgPYCKwZ";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="MvUXOR1A"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1775495138;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=+qTwXZ6MKD56LdsiHGj4K7RlXwiXwOsYAGKNXyywo88=;
-	b=JgPYCKwZAPZil4+/43AGecveQO09b8A2AQFLKSsp09BeHM4ZF5HPksS4fiqxPh/m1pgCpc
-	WRNzWEgKvPVXv5oqSxB6/f+RuQBGVeMkuYLK7r04ejMJeW8oWrcsiKnzbR9Gh0JEGtL5ye
-	Lgv+iGziUJabZuS8vc56P4QyACcXT/c=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-68-qqd6_EUTN8m47qPjb2ZGAw-1; Mon, 06 Apr 2026 13:05:36 -0400
-X-MC-Unique: qqd6_EUTN8m47qPjb2ZGAw-1
-X-Mimecast-MFC-AGG-ID: qqd6_EUTN8m47qPjb2ZGAw_1775495135
-Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-bce224720d8so1922220a12.1
-        for <fstests@vger.kernel.org>; Mon, 06 Apr 2026 10:05:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1775495135; x=1776099935; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=+qTwXZ6MKD56LdsiHGj4K7RlXwiXwOsYAGKNXyywo88=;
-        b=MvUXOR1AyB7bmTLpeI01yeJB04RzWrqt2LTf2MQAzNHArMI0xaZF5U0JeO0y/j2Lcm
-         1zfpYHFSWLk87ViON1BvykL4fe1L2gvdtxnw8gmJYkBc5zKIF4G6VMC1gkWTuXsqiqBv
-         dD40wSqoKGQRE/Mu9Cj54DEdKc8Dhp53OpRC0fjPMMEwRLJ88rFZMk6Am2tVFO+LkYTQ
-         Jq9J8sAvmdLXHdBOYevsF7NphLH0vn87M0sGau5pKFtyPy+Nr0Szs3RVGmqVI1WScYRG
-         FpPKrNuq2VOjcN5kcLB7j4zgAI6Qwqy9tkxpueA9xvjfWgyu7vYVJMbdtoK8nJSBMDOq
-         q2UA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1775495135; x=1776099935;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=+qTwXZ6MKD56LdsiHGj4K7RlXwiXwOsYAGKNXyywo88=;
-        b=OHy6AcNXL1cGPJmhNEOrxR04F8ZNuPrr45YNgaw0WG5Wfz4+uWCCBC41aPSrl3peZL
-         e+ymlP6BcToYYWDK3uSzZVtXETB44YE2XxT2OIbBbt+/BaSZ/FiUgMmpTo6vmBfx4rgX
-         MIp0F80FAJRiZvYCXmuSnpeYUphjHbRdl7SENX2pLJz8ZzT/tw4hn4jtPsNa8OzsHPbV
-         IQ/sHCXccGKrI5spGTw3hseo5kyMvlA6tzLMyOurhlKazPN0WSWseVkQ2RjZLZCGN+Zy
-         oolVW389CvzR4rzeoItavbeLysASRIJ8EyGVU0zSxou6poWhm1EncUTH8dXVU2eyBsCs
-         OJbA==
-X-Forwarded-Encrypted: i=1; AJvYcCWOUnhwC7u22cmucWo+lND9Ik5U51uuda4TthnQU8KxtMp1GEWKP42jvr2LhX5x28WSqvAH0ueT@vger.kernel.org
-X-Gm-Message-State: AOJu0YwrZgXVBLE47jOrKTmKbin//u2w6qyIbKotqILA4XFNvGTzDKlo
-	XNLdsoNZsyJEDzdRP1FM5AgQRu/X1vTCUD9CknsoUoGhicQWsfm9wXICZpWxlZDC0H7VY1E3eUH
-	EBvkQLOWaK80X0cByI59+uL7+ln9+Ol1Qnl1jvQ2SFApePVgh4pY6RCDx5HQ=
-X-Gm-Gg: AeBDievcfvXa5b5dJHiACT5eIy8tqYmqolPZ/sQhF7cbNLjH7/bMeBmbDY2ABLYVPMY
-	G6lVlzKv6SzfSpLPT5OG0rg+QCtI3O55RncyahfJvhLpzoJN3qSBtw8zuCF7XG24/fZU6bFTKwp
-	o13y/F3OYI2aeA8tyxnNIiCTmx/Zfv+X9rKSy3IeHjrBG/Eji5aj/5iv7aW05sfweQqc3tcClZ/
-	IDrt3ULvN0YE673xoJI5+7KFEsiGhBVF4uWpExYAn5MIG3HmZ/HtmN2nffYvClgDPQ0nbYK7n3e
-	qwxeyht63pKkRD8sDgT62ub1zTGj7PfQcingMbawgFUVY3NBaLhsYwmISuF6I+v3NyUJLKXZE56
-	cQnXMF63NPh5attHC/A==
-X-Received: by 2002:a05:6a21:a395:b0:39f:64d7:9372 with SMTP id adf61e73a8af0-39f64d798d7mr6631820637.41.1775495135320;
-        Mon, 06 Apr 2026 10:05:35 -0700 (PDT)
-X-Received: by 2002:a05:6a21:a395:b0:39f:64d7:9372 with SMTP id adf61e73a8af0-39f64d798d7mr6631783637.41.1775495134739;
-        Mon, 06 Apr 2026 10:05:34 -0700 (PDT)
-Received: from doltdoltdolt ([209.132.188.88])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c76c6492097sm12917602a12.10.2026.04.06.10.05.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Apr 2026 10:05:34 -0700 (PDT)
-Date: Tue, 7 Apr 2026 01:05:28 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Christoph Hellwig <hch@lst.de>
-Cc: zlang@kernel.org, djwong@kernel.org, dlemoal@kernel.org,
-	hans.holmberg@wdc.com, fstests@vger.kernel.org,
+	 Content-Type:Content-Disposition:In-Reply-To; b=RV+Pr7cZDoO1klNFT8O3DLbLDSRxYQ5H0ncEXzwGwg5pJUx2Y06OSPbpWsEaKonPDRfKUf1TSwCqU8otoOz+87lsnq8dPcU4SStTYvUx5ReGrjLfkbe6FO3zShwu2+oxgE77Z8owAYLj3HtdIy38T7N/UhFRst2Llxgc+akForM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 43F5168C4E; Tue,  7 Apr 2026 08:27:07 +0200 (CEST)
+Date: Tue, 7 Apr 2026 08:27:07 +0200
+From: Christoph Hellwig <hch@lst.de>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Christoph Hellwig <hch@lst.de>, zlang@kernel.org, djwong@kernel.org,
+	dlemoal@kernel.org, hans.holmberg@wdc.com, fstests@vger.kernel.org,
 	linux-xfs@vger.kernel.org
 Subject: Re: [PATCH v2] xfs: add a test for number of open zones on
  conventional devices
-Message-ID: <20260406170528.sxcm3qcndjhwm7pp@doltdoltdolt>
-References: <20260331152341.4047725-1-hch@lst.de>
- <20260331211807.gofhlabxlr3mdxnr@doltdoltdolt>
- <20260401061828.GA24293@lst.de>
- <20260401075952.ifuz3kqfq3g7c4gf@doltdoltdolt>
- <20260401140646.GA21703@lst.de>
+Message-ID: <20260407062707.GA6937@lst.de>
+References: <20260331152341.4047725-1-hch@lst.de> <20260331211807.gofhlabxlr3mdxnr@doltdoltdolt> <20260401061828.GA24293@lst.de> <20260401075952.ifuz3kqfq3g7c4gf@doltdoltdolt> <20260401140646.GA21703@lst.de> <20260406170528.sxcm3qcndjhwm7pp@doltdoltdolt>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -97,40 +34,26 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260401140646.GA21703@lst.de>
+In-Reply-To: <20260406170528.sxcm3qcndjhwm7pp@doltdoltdolt>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-On Wed, Apr 01, 2026 at 04:06:46PM +0200, Christoph Hellwig wrote:
-> On Wed, Apr 01, 2026 at 03:59:52PM +0800, Zorro Lang wrote:
-> > > > > +_scratch_mkfs -b size=${bsize} -r zoned=1,rgsize=${blocks}b \
-> > > > > +	> "$seqres.full" 2>&1
-> > > > 
-> > > > I usually tack on "|| _fail 'mkfs failed'" after _scratch_mount if it's
-> > > > using extra options. That way, we'll know for sure if the mkfs actually
-> > > > failed.
-> > > 
-> > > Yes, that is useful here, especially if we want to support older kernels
-> > > before the zoned device support or !CONFIG_XFS_RT kernels.
+On Tue, Apr 07, 2026 at 01:05:28AM +0800, Zorro Lang wrote:
 > > 
-> > Oh, if so, we might need _require_realtime. But that's still not enough to
-> > check mkfs.xfs and mount.xfs on old system (then notrun), we might need
-> > more _require_* helpers for this test. What do you think?
+> > I think _notrun if mkfs or the initial mount fails might be easier and
+> > better here.
 > 
+> How about a _require_xfs_mkfs_zoned ?
 > 
-> I think _notrun if mkfs or the initial mount fails might be easier and
-> better here.
-
-How about a _require_xfs_mkfs_zoned ?
-
-And about `_scratch_mount -o max_open_zones=${open_zones}`, if max_open_zones
-mount option isn't supported, _scratch_mount will fail directly. So how about
-
-  _try_scratch_mount -o max_open_zones=${open_zones} || \
-          _notrun "max_open_zones option is not supported"
-
-Or we can have a helper for that, as xfs/642~644 and xfs/668 also need that.
-
-Thanks,
-Zorro
-
+> And about `_scratch_mount -o max_open_zones=${open_zones}`, if max_open_zones
+> mount option isn't supported, _scratch_mount will fail directly. So how about
 > 
+>   _try_scratch_mount -o max_open_zones=${open_zones} || \
+>           _notrun "max_open_zones option is not supported"
+> 
+> Or we can have a helper for that, as xfs/642~644 and xfs/668 also need that.
+
+I'll take a look.  max_open_zones is always supported for zoned xfs
+file systems - the notrun is intended to cover the case where the kernel
+can't mount zoned file systems - either because it is too old, or because
+XFS_RT is not enabled.
 
