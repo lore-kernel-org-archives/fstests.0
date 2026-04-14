@@ -1,150 +1,291 @@
-Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 86C7626CE1E;
-	Tue, 14 Apr 2026 14:34:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.153.144
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E3B53EC2DD;
+	Tue, 14 Apr 2026 17:17:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776177257; cv=none; b=khrnoQLBQhRiLIkTBT3hYbbMrg4uRjVJ+R4Adj8R1FxhBLYQbiVJEzjlbit/xqsUmtWVU49R+X4puAClv+44mliXb2h6YmcBaDRUBJflwusc2tLMtp7OF8ge36qkU4BpXE37UfsKGlMY+xTPZ9XWyhtAOKZ87OU0pmRl8n8bAUg=
+	t=1776187051; cv=none; b=hl/70xmLQndCyAD4XPaIIabHX75rurZsiJCp9cNm7xASefGIOrYcnscnKZov2Ydoeld7xyJd61wHalc35JRATK7bLyXUmNy+x9uGx8OeUpuUMK4zr6bOmQaIv1t0N2fQxZqn6kk5PAICFyGWKw35q34LGAV2tlHf60lMgGvrJ3s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776177257; c=relaxed/simple;
-	bh=2qjK66LJeGOdOMUrjly8VjRY5mOqnEskXJ7wwrZcI80=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ArdKpCmfhzuS+ZQXPmx+1PqPTp3IYeuRkKhxA2DSIyBh1xOPj05IquVZjrdgGo11W4N/phzf39LEw+BWK+P+4IKvIRxOIYW22OFrXQQwCR+17Ys5RsFBH7ahR1COg1cfzSEP7JKIuVKlbBaCtRVzFkkOkn2+2StM+qMnJLl585M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=lNSDmaxg; arc=none smtp.client-ip=216.71.153.144
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	s=arc-20240116; t=1776187051; c=relaxed/simple;
+	bh=+goAzdfuhEFuwuyL8EXKvINzosr64q+zr5BPSfxEZDs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=mwbPDRY9IIHqFicGEcBdoaahHWnCCzpvbrrtLMUO8TtzX9uyjoRzR50xhctbyof/20/EuHUHzb45j2yVMvAunezbVSdOL4UeJBXQZFCN+cqN4qIRJs1E8yHE4jmI90mkGrAzjdoO5V3Z8krUBSJYmKFtY9HKq9W4FuFJ5LcphyA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fDVJH8g7; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="lNSDmaxg"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1776177255; x=1807713255;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=2qjK66LJeGOdOMUrjly8VjRY5mOqnEskXJ7wwrZcI80=;
-  b=lNSDmaxgbh8KOkbQtdAvb/E80yrTdiWM7Ay4e88WqJwrBilQxORJooWv
-   3V11/WvhTfWYl6x+MkkMSYqkSTTDhivkUMZlri2QbiNRLjK/0KnScc0lx
-   D7qzMgWpO0TOFG6MfN4UgoUcEDJN5gzVQuGHfvbLFW1k+ERaNmF14PquC
-   NpnjyyGGLYhRnrr8+mafZg9vOQwVMG6uQecXkeYNsxcjsxGlIid+lTY/j
-   K8N38ad75gl0nJDHQoRpwMu4Zz8FY0D5iuk55n6pD/mmkNnweFNatwewg
-   gf75Mcnxsncm1UW9EJA/BN2QJhv7+YVHpaoQ2gQYMn0u2X9Ay3YZb3xdE
-   g==;
-X-CSE-ConnectionGUID: iJAtNElURqS0gVYQF23dtA==
-X-CSE-MsgGUID: qnEHXDoJQhGL1DTt6XO7Dg==
-X-IronPort-AV: E=Sophos;i="6.23,179,1770566400"; 
-   d="scan'208";a="144023936"
-Received: from unknown (HELO uls-op-cesaep03.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 14 Apr 2026 22:34:09 +0800
-X-CSE-ConnectionGUID: /XxJDdVwSxKa1J8uSYbqEQ==
-X-CSE-MsgGUID: SUG+oIarRBmwXF2dJ/9smg==
-IronPort-SDR: 69de504c_7L11oYQDNxNj5bbRGXB/3McY4C0vx8zshKJueTfodHocl8n
- UehznfDXwLWJN6jXO2l2sUvPRs+sEX5HIIWSQRQ==
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep03.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 14 Apr 2026 07:33:48 -0700
-X-CSE-ConnectionGUID: gtj1slHmTha8BHAOwra2aw==
-X-CSE-MsgGUID: z9alXVxuRRWU9F2b4NpSRQ==
-WDCIronportException: Internal
-Received: from wdap-r8nvkhmetp.ad.shared (HELO neo.fritz.box) ([10.224.19.25])
-  by uls-op-cesaip01.wdc.com with ESMTP; 14 Apr 2026 07:33:46 -0700
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Naohiro Aota <naohiro.aota@wdc.com>,
-	fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org,
-	Christoph Hellwig <hch@lst.de>,
-	Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Subject: [PATCH v3] fstests: test premature ENOSPC in zoned garbage collection
-Date: Tue, 14 Apr 2026 16:33:41 +0200
-Message-ID: <20260414143341.167875-1-johannes.thumshirn@wdc.com>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fDVJH8g7"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DC300C19425;
+	Tue, 14 Apr 2026 17:17:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1776187050;
+	bh=+goAzdfuhEFuwuyL8EXKvINzosr64q+zr5BPSfxEZDs=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=fDVJH8g7b9z859JTPObwUc3xuzRrPGa6EurrmdVN/f5LKpII5V3m4KoLzj0TSO9i2
+	 NsRMbA0d6juk+S2wiyIV9tatMGIVYOo4khLfGkiZOMRjIDarlcevkb2CSMObLByp28
+	 7KNHZr2ecpZ07rCU02af9hmPW875xHfAX0etcKfbGvJW2MQK3CPowmu/NDRlAPE5u3
+	 DAvrwqhXNkeUQ0faHmVCfsogq/0Y0UKqRoHmh+AtM13IU7g3muwDTnAGHFPTA5e3Hj
+	 dDOgcDWCx4Aas2cUqx5DzNaiX8x5C7pD32zbabWXOqvDRJYwyGvdA4mBaMHq3/YoQK
+	 GkDiEl11InCIQ==
+Date: Tue, 14 Apr 2026 10:17:30 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: zlang@kernel.org, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 2/2] check: capture dmesg of mount failures if test fails
+Message-ID: <20260414171730.GA149968@frogsfrogsfrogs>
+References: <177610262399.115381.16343458870133010450.stgit@frogsfrogsfrogs>
+ <177610262444.115381.1847570200616394322.stgit@frogsfrogsfrogs>
+ <ad3z0FFzJqhIiqVQ@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ad3z0FFzJqhIiqVQ@infradead.org>
 
-This test stresses garbage collection in zoned file systems by
-constantly overwriting the same file. It is inspired by a reproducer for
-a btrfs bugifx.
+On Tue, Apr 14, 2026 at 12:59:12AM -0700, Christoph Hellwig wrote:
+> On Mon, Apr 13, 2026 at 10:51:25AM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Capture the kernel output after a mount failure occurs.  If the test
+> > itself fails, then keep the logging output for further diagnosis.
+> 
+> I have to admit I don't really understand what the xunit and selftests
+> stuff is doing.  Can you explain that a bit in the commit message?
 
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+The xunit.xsd update specifies that there can be a <mount-failure>
+element in the xml output, and that its contents will be the
+$seqres.mountfail file.
+
+The new selftest practices creating the .mountfail file in the test
+output directory after a mount failure.  Annoyingly there's no way for
+the test itself to check that, since the .mountfail file is created in
+check.
+
+How about the following?
+
+--D
+
+From: Darrick J. Wong <djwong@kernel.org>
+Subject: [PATCH] check: capture dmesg of mount failures if test fails
+
+Capture the kernel output after a mount failure occurs.  If the test
+itself fails, then keep the logging output for further diagnosis.  The
+xunit.xsd update adds a <mount-failure> element to the xml output, whose
+contents are the mountfail file.
+
+Note that because the .mountfail file is preserved by ./check, the new
+selftest requires the user to check for the .mountfail file.  This is a
+little awkward.
+
+Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
 ---
-Changes to v1:
-- Rebased onto patches-in-queue
-- Use "generic/999" to avoid any conflicts
-- Change the number of loops to number of seq zones
-- Remove bogus "2>&1"
-- This time really did it...
+ check                  |   22 +++++++++++++++++++++-
+ common/config          |    1 +
+ common/rc              |   26 +++++++++++++++++++++++++-
+ common/report          |    8 ++++++++
+ doc/xunit.xsd          |   12 +++++++++++-
+ tests/selftest/008     |   22 ++++++++++++++++++++++
+ tests/selftest/008.out |    1 +
+ 7 files changed, 89 insertions(+), 3 deletions(-)
+ create mode 100755 tests/selftest/008
+ create mode 100644 tests/selftest/008.out
 
-Link to v1:
-https://lore.kernel.org/all/20260210111103.265664-1-johannes.thumshirn@wdc.com/
- tests/generic/999     | 46 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/999.out |  2 ++
- 2 files changed, 48 insertions(+)
- create mode 100755 tests/generic/999
- create mode 100644 tests/generic/999.out
-
-diff --git a/tests/generic/999 b/tests/generic/999
+diff --git a/check b/check
+index 6ae89feba7c30a..c27cd8d9b81022 100755
+--- a/check
++++ b/check
+@@ -608,7 +608,7 @@ _stash_fail_loop_files() {
+ 	local seq_prefix="${REPORT_DIR}/${1}"
+ 	local cp_suffix="$2"
+ 
+-	for i in ".full" ".dmesg" ".out.bad" ".notrun" ".core" ".hints"; do
++	for i in ".full" ".dmesg" ".out.bad" ".notrun" ".core" ".hints" ".mountfail"; do
+ 		rm -f "${seq_prefix}${i}${cp_suffix}"
+ 		if [ -f "${seq_prefix}${i}" ]; then
+ 			cp "${seq_prefix}${i}" "${seq_prefix}${i}${cp_suffix}"
+@@ -982,6 +982,7 @@ function run_section()
+ 				      echo -n "	$seqnum -- "
+ 			cat $seqres.notrun
+ 			tc_status="notrun"
++			rm -f "$seqres.mountfail?"
+ 			_stash_test_status "$seqnum" "$tc_status"
+ 
+ 			# Unmount the scratch fs so that we can wipe the scratch
+@@ -1051,6 +1052,7 @@ function run_section()
+ 		if [ ! -f $seq.out ]; then
+ 			_dump_err "no qualified output"
+ 			tc_status="fail"
++			rm -f "$seqres.mountfail?"
+ 			_stash_test_status "$seqnum" "$tc_status"
+ 			continue;
+ 		fi
+@@ -1089,6 +1091,24 @@ function run_section()
+ 				rm -f $seqres.hints
+ 			fi
+ 		fi
++
++		if [ -f "$seqres.mountfail?" ]; then
++			if [ "$tc_status" = "fail" ]; then
++				# Let the user know if there were mount
++				# failures on a test that failed because that
++				# could be interesting.
++				mv "$seqres.mountfail?" "$seqres.mountfail"
++				_dump_err "check: possible mount failures (see $seqres.mountfail)"
++				test -f $seqres.mountfail && \
++					maybe_compress_logfile $seqres.mountfail $MAX_MOUNTFAIL_SIZE
++			else
++				# Don't retain mount failure logs for tests
++				# that pass or were skipped because some tests
++				# intentionally drive mount failures.
++				rm -f "$seqres.mountfail?"
++			fi
++		fi
++
+ 		_stash_test_status "$seqnum" "$tc_status"
+ 	done
+ 
+diff --git a/common/config b/common/config
+index 2fa9ba44b8ad6c..5462bc061f3664 100644
+--- a/common/config
++++ b/common/config
+@@ -358,6 +358,7 @@ true "${MAX_OUTPUT_SIZE:=65536}"
+ true "${MAX_FULL_SIZE:=$((MAX_OUTPUT_SIZE * 2))}"
+ true "${MAX_DMESG_SIZE:=${MAX_OUTPUT_SIZE}}"
+ true "${MAX_OUTBAD_SIZE:=${MAX_OUTPUT_SIZE}}"
++true "${MAX_MOUNTFAIL_SIZE:=${MAX_OUTPUT_SIZE}}"
+ 
+ _common_mount_opts()
+ {
+diff --git a/common/rc b/common/rc
+index b11a7d1e404519..7de939d1630dd9 100644
+--- a/common/rc
++++ b/common/rc
+@@ -288,9 +288,33 @@ _get_hugepagesize()
+ 	awk '/Hugepagesize/ {print $2 * 1024}' /proc/meminfo
+ }
+ 
++# Does dmesg have a --since flag?
++_dmesg_detect_since()
++{
++	if [ -z "$DMESG_HAS_SINCE" ]; then
++		test "$DMESG_HAS_SINCE" = "yes"
++		return
++	elif dmesg --help | grep -q -- --since; then
++		DMESG_HAS_SINCE=yes
++	else
++		DMESG_HAS_SINCE=no
++	fi
++}
++
+ _mount()
+ {
+-    $MOUNT_PROG $*
++	$MOUNT_PROG $*
++	ret=$?
++	if [ "$ret" -ne 0 ]; then
++		echo "\"$MOUNT_PROG $*\" failed at $(date)" >> "$seqres.mountfail?"
++		if _dmesg_detect_since; then
++			dmesg --since '30s ago' >> "$seqres.mountfail?"
++		else
++			dmesg | tail -n 100 >> "$seqres.mountfail?"
++		fi
++	fi
++
++	return $ret
+ }
+ 
+ # Call _mount to do mount operation but also save mountpoint to
+diff --git a/common/report b/common/report
+index 7128bbebac8b75..a41a58f790b784 100644
+--- a/common/report
++++ b/common/report
+@@ -199,6 +199,7 @@ _xunit_make_testcase_report()
+ 		local out_src="${SRC_DIR}/${test_name}.out"
+ 		local full_file="${REPORT_DIR}/${test_name}.full"
+ 		local dmesg_file="${REPORT_DIR}/${test_name}.dmesg"
++		local mountfail_file="${REPORT_DIR}/${test_name}.mountfail"
+ 		local outbad_file="${REPORT_DIR}/${test_name}.out.bad"
+ 		if [ -z "$_err_msg" ]; then
+ 			_err_msg="Test $test_name failed, reason unknown"
+@@ -225,6 +226,13 @@ _xunit_make_testcase_report()
+ 			printf ']]>\n'	>>$report
+ 			echo -e "\t\t</system-err>" >> $report
+ 		fi
++		if [ -z "$quiet" -a -f "$mountfail_file" ]; then
++			echo -e "\t\t<mount-failure>" >> $report
++			printf	'<![CDATA[\n' >>$report
++			cat "$mountfail_file" | tr -dc '[:print:][:space:]' | encode_cdata >>$report
++			printf ']]>\n'	>>$report
++			echo -e "\t\t</mount-failure>" >> $report
++		fi
+ 		;;
+ 	*)
+ 		echo -e "\t\t<failure message=\"Unknown test_status=$test_status\" type=\"TestFail\"/>" >> $report
+diff --git a/doc/xunit.xsd b/doc/xunit.xsd
+index d287eaf5a25fb6..efe0badbb338b5 100644
+--- a/doc/xunit.xsd
++++ b/doc/xunit.xsd
+@@ -131,7 +131,7 @@
+                                 </xs:complexType>
+                             </xs:element>
+                         </xs:choice>
+-                        <xs:choice minOccurs="0" maxOccurs="3">
++                        <xs:choice minOccurs="0" maxOccurs="4">
+                             <xs:element name="system-out" minOccurs="0" maxOccurs="1">
+                                 <xs:annotation>
+                                     <xs:documentation xml:lang="en">Data that was written to the .full log file while the test was executed.</xs:documentation>
+@@ -162,6 +162,16 @@
+                                     </xs:restriction>
+                                 </xs:simpleType>
+                             </xs:element>
++                            <xs:element name="mount-failure" minOccurs="0" maxOccurs="1">
++                                <xs:annotation>
++                                    <xs:documentation xml:lang="en">Kernel log recorded when mount failed.</xs:documentation>
++                                </xs:annotation>
++                                <xs:simpleType>
++                                    <xs:restriction base="pre-string">
++                                        <xs:whiteSpace value="preserve"/>
++                                    </xs:restriction>
++                                </xs:simpleType>
++                            </xs:element>
+                         </xs:choice>
+                     </xs:sequence>
+                     <xs:attribute name="name" type="xs:token" use="required">
+diff --git a/tests/selftest/008 b/tests/selftest/008
 new file mode 100755
-index 000000000000..ef2b63abefd7
+index 00000000000000..e6cc87fec99680
 --- /dev/null
-+++ b/tests/generic/999
-@@ -0,0 +1,46 @@
++++ b/tests/selftest/008
+@@ -0,0 +1,22 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Western Digital Corporation.  All Rights Reserved.
++# Copyright (c) 2024-2026 Oracle.  All Rights Reserved.
 +#
-+# FS QA Test 999
++# FS QA Test 008
 +#
-+# This test stresses garbage collection in zoned file systems by constantly
-+# overwriting the same file. It is inspired by a reproducer for a btrfs bugifx.
-+
++# Test mount failure capture.  Test runners will have to look for the
++# 008.mountfail file in the results directory since ./check handles the
++# preservation.
++#
 +. ./common/preamble
-+_begin_fstest auto quick zone
++_begin_fstest selftest
 +
-+. ./common/filter
++_require_command "$WIPEFS_PROG" wipefs
++_require_scratch
 +
-+_require_scratch_size $((16 * 1024 * 1024))
-+_require_zoned_device "$SCRATCH_DEV"
-+_require_command "$BLKZONE_PROG" blkzone
++$WIPEFS_PROG -a $SCRATCH_DEV
++_scratch_mount &>> $seqres.full
 +
-+# This test requires specific data space usage, skip if we have compression
-+# enabled.
-+_require_no_compress
-+
-+_fixed_by_fs_commit btrfs 7bcb04de982f \
-+	"btrfs: zoned: cap delayed refs metadata reservation to avoid overcommit"
-+_fixed_by_fs_commit btrfs 258e46a6385c \
-+	"btrfs: zoned: move partially zone_unusable block groups to reclaim list"
-+_fixed_by_fs_commit btrfs e2a7fd22378f \
-+	"btrfs: zoned: add zone reclaim flush state for DATA space_info"
-+
-+_scratch_mkfs_sized $((16 * 1024 * 1024 * 1024)) &>>$seqres.full
-+_scratch_mount
-+
-+# Overwrite the data "number of seq zones" times, this is arbitrarily chosen
-+# but triggers the original bug reliably
-+loops=$($BLKZONE_PROG report $SCRATCH_DEV | grep -c "SEQ_WRITE_REQUIRED")
-+
-+for (( i = 0; i < $loops; i++ )); do
-+	dd if=/dev/zero of=$SCRATCH_MNT/test bs=1M count=1024 status=none
-+	if [ $? -ne 0 ]; then
-+		_fail "Failed writing on iteration $i"
-+	fi
-+done
-+
-+echo "Silence is golden"
 +# success, all done
-+_exit 0
-diff --git a/tests/generic/999.out b/tests/generic/999.out
++status=0
++exit
+diff --git a/tests/selftest/008.out b/tests/selftest/008.out
 new file mode 100644
-index 000000000000..3b276ca804fc
+index 00000000000000..aaff95f3f48372
 --- /dev/null
-+++ b/tests/generic/999.out
-@@ -0,0 +1,2 @@
-+QA output created by 999
-+Silence is golden
--- 
-2.53.0
-
++++ b/tests/selftest/008.out
+@@ -0,0 +1 @@
++QA output created by 008
