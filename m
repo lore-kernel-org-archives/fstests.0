@@ -1,154 +1,65 @@
 Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B2C48386554;
-	Tue, 14 Apr 2026 07:56:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3643386C0A
+	for <fstests@vger.kernel.org>; Tue, 14 Apr 2026 07:57:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776153380; cv=none; b=FxRgl++4nFTboGKDSoVNTToNjqlf94bX1lsyTJthKxkDt/NIBkxwRrBfa5sERXIhLV4eWwXknD3jnoUroPKroxW3oR4jKGKdqS5MOlnAMWzagGTVPvEVVkJaYyQkhuXesHVGb+QJWChypob2sCobnRSqFhookrXtubVRQK9JlUo=
+	t=1776153424; cv=none; b=up7AjpdClJQnRjuxGtbzxIZaK0UuJkOpEQ6JgX/kPKQGqBuVpPznZxfp5b4qq2GnNqEWzeBE+CtkVfIJI+MfDQCd8Kd+Wz8zEnClEbRaSYrmkhQzK6orhcl8Tr7i3f7a+ErbLFhlaMn7yPzjNq8FleFt6XEgRpmqOjWQSCOSmD0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776153380; c=relaxed/simple;
-	bh=pWVewNiZ+Kb21Y3Sv3VeuIk1Y12Rj/xzuq6odhHVq08=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=myjAT/PRq1F5Jtqq9iggSZbHdnw6ft80iFLUlWuE3ujagtnntmL8cuomCxdNVcHDjb3wCPPxMjKEIxRS8qK3T10XrxzRfPC0Dn5bP4eUswC3PqotRm9QGR+CVpZxYrl79k0OCjqUDknmXYOun1VqZnI13Bn0sR4g4M9ndSR6gls=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=N8oBXd/N; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
+	s=arc-20240116; t=1776153424; c=relaxed/simple;
+	bh=N3H0cc6z1dejTxykF/Qp17QOZHIkq2Xz3UobiqqkSrM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=S667O2wa5lBLLXA6SCyhygq+9LSYduXd7jxNxzGd2GO9XTASb5SdBXx1pVwQdiOwhJnc1V5XkbBYn2IOmgiq7pJ+RC2cSwBQGgYa+PgM4++3zowsUvbwVzz/dB3USGu/YPdJXGOCCwFsSphwAgJgcRujrGRB9KbwC+KObOpkAwc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=vbCctZ39; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="N8oBXd/N"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="vbCctZ39"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-	Content-ID:Content-Description:In-Reply-To:References;
-	bh=WVxMBqL1gFWzzwxQ9lyPCjZhsDPr4E+zJs2+x22l0tM=; b=N8oBXd/NlbjKeY/eh4e8/wJIns
-	yvikCVcCxzRm9QxnRTn35XYr3raCk/+n4hbAGWpdwwDjvG4PtE/W46O747m9NwS9u7c1FPJeePos9
-	2UfODr/A7FOVVlWukNZQSbSCIW17V4fBZMQ3log5KmCDXOSXycT348UEVSmhob+Ki6IObHKEppR67
-	A4VLcKvbGIzrX63ADZU4JWPKcFTtqxZ6tKQsC0ZDAb2XUwuB7pSE0dMBuxCd+Bh2PGDO+d/2zhT3A
-	RMVZB6TYXyNVsaojtnKU0SNUUiBCxNxhdGq0Z69Zy5lw/IvSjIrIJjyL4mf2Xs2I0L2vFp5dWAjnV
-	4RXg5c/Q==;
-Received: from 2a02-8389-2341-5b80-decc-1a96-daaa-a2cc.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:decc:1a96:daaa:a2cc] helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1wCYd7-0000000GvdK-3u07;
-	Tue, 14 Apr 2026 07:56:18 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: zlang@kernel.org
-Cc: djwong@kernel.org,
-	dlemoal@kernel.org,
-	hans.holmberg@wdc.com,
-	fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: [PATCH v3] xfs: add a test for number of open zones on conventional devices
-Date: Tue, 14 Apr 2026 09:55:47 +0200
-Message-ID: <20260414075613.544106-1-hch@lst.de>
-X-Mailer: git-send-email 2.53.0
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=F3K7FttOvq8iXxufEoa5R9Agqd7XYyOWbVVEycm3fGI=; b=vbCctZ39PPVVgUPC8arCrwuVoB
+	T+V1r5AQpU/xk0QwQB/NmGZC0H0W3YW1Mc1vEiivmGxacR3doZXOiZBxF2B3kUz4+acPZumNK6bXb
+	D1cLfDAinsfGLBCCmzv38NcuB3xADnlCAThmAcrYKd5gamw2g0q2CGJ2iXJRBLHgQ3IUmPF4pnz3Y
+	GqS0Uxuo5dlXDEM03O0aY4cmRvEFHQpMzqg5iuARTQYsW8y8a9sO4//exZDULxuTOet3FGuvrZkAR
+	1rrdZir74g+oW0eJ5NJ3VA5TzW0jp9re6q6jBa6Iq6tEy0cZnDOxJyD8nsziRcLYWI8VezJAtl/qQ
+	/Z1T3QrQ==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1wCYdq-0000000Gvhm-1Tus;
+	Tue, 14 Apr 2026 07:57:02 +0000
+Date: Tue, 14 Apr 2026 00:57:02 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: Jan Prusakowski <jprusakowski@google.com>
+Cc: zlang@kernel.org, fstests@vger.kernel.org,
+	linux-f2fs-devel@lists.sourceforge.net, anand.jain@oracle.com,
+	wqu@suse.com
+Subject: Re: [PATCH] generic/050: handle f2fs as nojournal filesystem
+Message-ID: <ad3zThMKaWZ65XE2@infradead.org>
+References: <20260410131821.991005-1-jprusakowski@google.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260410131821.991005-1-jprusakowski@google.com>
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-Test that mounts of zoned file systems on conventional devices don't
-create more open zones than allowed when the last blocks in one or more
-zones have been invalidated.
+On Fri, Apr 10, 2026 at 01:18:20PM +0000, Jan Prusakowski wrote:
+> F2FS uses a checkpoint mechanism for metadata consistency rather than a
+> traditional journal. Roll-forward recovery is only needed if there are
+> fsync'd files since the last checkpoint.
+> 
+> In this test case, files are created without fsync, so there is no
+> roll-forward data to replay during mount.
+> 
+> Therefore, F2FS does not need to write to the device to recover, and
+> successfully mounts on the read-only block device. Thus, it should be
+> treated as nojournal in this case.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
-
-Changes since v2:
- - use raw mkfs to avoid injecting a real RT device
- - _notrun with a useful message when the mkfs or mount fails due to lack
-   of RT device or zoned block device support
-
- tests/xfs/4201     | 69 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/4201.out |  1 +
- 2 files changed, 70 insertions(+)
- create mode 100755 tests/xfs/4201
- create mode 100644 tests/xfs/4201.out
-
-diff --git a/tests/xfs/4201 b/tests/xfs/4201
-new file mode 100755
-index 000000000000..56084bca41c0
---- /dev/null
-+++ b/tests/xfs/4201
-@@ -0,0 +1,69 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Christoph Hellwig.
-+#
-+# FS QA Test No. 4201
-+#
-+# Test that mounts of zoned file systems on conventional devices don't create
-+# more open zones than allowed when the last blocks in one or more zones have
-+# been invalidated.
-+#
-+
-+. ./common/preamble
-+_begin_fstest auto quick zone
-+
-+_require_scratch_nocheck
-+_require_odirect
-+_require_non_zoned_device $SCRATCH_DEV
-+_require_non_zoned_device $SCRATCH_RTDEV
-+
-+open_zones=5
-+blocks=16384
-+bsize=4096
-+
-+zone_size_mib=$((blocks * bsize / 1024 / 1024))
-+file_size_mib=$((zone_size_mib / 2))
-+nr_files=$((open_zones * 3 - 1))
-+
-+echo "zone size: $zone_size_mib" >>$seqres.full
-+echo "file size: $file_size_mib" >>$seqres.full
-+echo "nr files: $nr_files" >>$seqres.full
-+
-+# don't use _scratch_mkfs/_scratch_mount to avoid injection a real RT device
-+$MKFS_XFS_PROG -b size=${bsize} -r zoned=1,rgsize=${blocks}b \
-+	$SCRATCH_DEV > "$seqres.full" 2>&1 || \
-+		_notrun "Zoned mkfs not supported"
-+_mount $SCRATCH_DEV $SCRATCH_MNT -o max_open_zones=${open_zones} || \
-+	_notrun "Zoned allocator not supported"
-+
-+_has_fs_sysfs_attr $SCRATCH_DEV zoned/nr_open_zones || \
-+	_notrun "This test requires /sys/fs/${FSTYP}/$SCRATCH_DEV/zoned/nr_open_zones"
-+
-+for i in $(seq 1 $nr_files); do
-+	dd if=/dev/zero of=$SCRATCH_MNT/$i bs=1M count=$file_size_mib \
-+		 oflag=direct > /dev/null 2>&1
-+done
-+
-+# delete odd numbered files as they should be at the end of the zones
-+for ((i = 0; i < $nr_files; i = $((i + 2)))); do
-+	rm $SCRATCH_MNT/$((i + 1))
-+done
-+
-+_scratch_unmount
-+_mount $SCRATCH_DEV $SCRATCH_MNT -o max_open_zones=${open_zones}
-+
-+max_open=$(_get_fs_sysfs_attr $SCRATCH_DEV zoned/max_open_zones)
-+nr_open=$(_get_fs_sysfs_attr $SCRATCH_DEV zoned/nr_open_zones)
-+
-+if [ ${max_open} -ne $((open_zones - 1)) ]; then
-+	_fail "Test needs adjustments for multiple open GC zones"
-+fi
-+
-+if [ ${nr_open} -gt ${max_open} ]; then
-+	_fail "Too many open zones: $nr_open/$max_open"
-+fi
-+
-+_scratch_unmount
-+
-+status=0
-+exit
-diff --git a/tests/xfs/4201.out b/tests/xfs/4201.out
-new file mode 100644
-index 000000000000..32e395dd4d6d
---- /dev/null
-+++ b/tests/xfs/4201.out
-@@ -0,0 +1 @@
-+QA output created by 4201
--- 
-2.53.0
-
+This looks ok, but I always wonder if we want an opt-in for this
+"journaling" behavior and/or define it clear in common/.
