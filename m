@@ -1,79 +1,220 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3217637A48A
-	for <fstests@vger.kernel.org>; Fri, 17 Apr 2026 07:42:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD5A1373BF6
+	for <fstests@vger.kernel.org>; Fri, 17 Apr 2026 07:49:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776411775; cv=none; b=J5OP4D0PfiJwHZ3YenTgxp+znosQgHfbwn6FGhKxzeWH2bh6YEzuIQAwZ+iG7xDdPDVU8STOvXW4tAeKqEW1KUZpalu0TqVkiXu6mREEmdVHmOAAbf8nRv2/kfQerHoat3rIlX+jQaoPfTCf4reKDTrN/nrBkprwcinI5S8+OnI=
+	t=1776412157; cv=none; b=KKBYoiGCtdtGPQkAxaZN5jKcYLqpe8GWhsxQ7YbVOs5ki+fk8u+iV5b8fzBg2Vaqc9vHV1cyIlkE1GXllEHsYJOJuWABYklr9cKS54qD5RTxVxO4oqHWKFIk7DzGmijQ4HnvKQuqTRYPB+vvdrtVB73eKt/Mmucq8CGMkZ5Yb0k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776411775; c=relaxed/simple;
-	bh=tHsz36xN4Qt5s+4nIWkVCyjw81jrlJcTA8dq7uJ0HTs=;
-	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=lkgijW1ZsRiNzu0bBNBCBQWWgdZxVUJPU6CivoSHR4U5rFdhMz3vjhkU3NyitGHmzGS2BAL0jopQB5/dhlSzFvH4Hr1fe5rWxYdUd7hPHkydcaGABAVLjOhvVoLwRPmgZEY61YL6kYJrfDrUqhJ4F8RigrJtyuyVfMACWRsTLu4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=HZwaUTu+; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1776412157; c=relaxed/simple;
+	bh=IDQHJDvwgJujgFPu8RgNv48pLfvY7uMuxR9l9eObccw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=T38vGWHtSq7fLdPSKlr6KQjnTdXWDM+9ytoVRA/2aMMrc8xtv85ZTMAAy8C2iW8H56fvXgp/VjgHGxytIkf6YdOVgcFA1yOKvte1Qob2vB1Xdx9WHcn0Tu90sSTXAfIG+X/9BgbwBOaegpOWBPfF+jDUquHDYjMscqFF6dBFdGc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lWiGKeqY; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="HZwaUTu+"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:To:From:Date:Sender:Reply-To:Cc:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=0TEJQ5i1u+hzWw0Z9naqmCaEfyBLwUowXxtFdU7bi1M=; b=HZwaUTu+SCANS4vzNyB+XxG+ij
-	EH3LiXNthGj5uxBiwzM61T5wM3OHcZBbHR4RQTKvpa3TyRH0r9/gUi10P7m8eSmKsM1IVXALrmJGS
-	/j36olZd/golaScP3EDrrqdg7LS66BxRKITYvwSJVGTsZs4k764pqvLf1DR/fYISF9u4+b8e7pM3b
-	GoPGFRaQ1E//KIHNtMAkd0Cpe26dKvpBVsNNdds2i9bznFb2jDuBnAj1QyP/BQKz93rFX5QxBNrVI
-	UfY+h27HEAbkT+2tuFy/cHw9lKje6M84sHmxyvmHbj8wDDNgvNNpKlbph6dhGdViCIN8Bi4F3HPbL
-	+B4oKM0A==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1wDdqg-00000003c5L-3xEP;
-	Fri, 17 Apr 2026 07:42:46 +0000
-Date: Fri, 17 Apr 2026 00:42:46 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: Christoph Hellwig <hch@infradead.org>,
-	Jan Prusakowski <jprusakowski@google.com>, fstests@vger.kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net, anand.jain@oracle.com,
-	wqu@suse.com, Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH] generic/050: handle f2fs as nojournal filesystem
-Message-ID: <aeHkdon2GH8UUkE4@infradead.org>
-References: <20260410131821.991005-1-jprusakowski@google.com>
- <ad3zThMKaWZ65XE2@infradead.org>
- <aeER8AIJZecuTLIc@zlang-mailbox>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lWiGKeqY"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BDC63C19425
+	for <fstests@vger.kernel.org>; Fri, 17 Apr 2026 07:49:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1776412156;
+	bh=IDQHJDvwgJujgFPu8RgNv48pLfvY7uMuxR9l9eObccw=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=lWiGKeqYCMuDljwwhlTgSu/Us6W8kzpWOKiEQd2/nNyNZOebLLfwD82t5p7e5XNA2
+	 NIEW4A/G7u7oDReYriOs1PLNwS/eiuohnPEAhToJW6OB5Fe/bc6U98RoaJM4JrxBp/
+	 Daii9/BM5PUufmJRxFHZ2tPbX/msYGIHID3RMvHfFti0RPDsdTIB1JX8l0Ctf3fQak
+	 +0KHXEY0uItlSC2RepLxpOg3mK3J65/p9/+Alqnj4wNLRwAw8/SCeH6ULcN+MVAqgp
+	 oEfUPYh5tZd2Q8QxdpO5Ij2spK9l2vbOSp5BqgAMi0g4heP3ixC8XT7gaufPcXSzMx
+	 MqcVPYwe8wYAQ==
+Received: by mail-ed1-f47.google.com with SMTP id 4fb4d7f45d1cf-66f727d6849so543971a12.1
+        for <fstests@vger.kernel.org>; Fri, 17 Apr 2026 00:49:16 -0700 (PDT)
+X-Gm-Message-State: AOJu0YxNxFIXsrEFpHKttnKU+YARRp7mZqP627wk4O9/Cc2iHCL9PGoP
+	h1r6Kj/Nmce9ybqln5jRNkPBRJMKEYDDo7K1Tziwc1yHFqYoMch1H++oC0ElIJM5Y/o++am6hC8
+	Kf9p/Zd6XSMbUnV2TcLmf9vEQ7G2zDgA=
+X-Received: by 2002:a17:907:9622:b0:b96:996c:8605 with SMTP id
+ a640c23a62f3a-ba41aa16456mr84136266b.23.1776412155221; Fri, 17 Apr 2026
+ 00:49:15 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aeER8AIJZecuTLIc@zlang-mailbox>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+References: <20260417070737.1318926-1-tchou@synology.com>
+In-Reply-To: <20260417070737.1318926-1-tchou@synology.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Fri, 17 Apr 2026 08:48:37 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H7CmQahCU9enFrM4bhTLmdEYrWn0EhXKBUxriMcKdJR0A@mail.gmail.com>
+X-Gm-Features: AQROBzAzMPwuyhVwc_EKpSfZZBaTswEikwiQJ_xZBb1j3w0bKeJ55g3aU2uOH68
+Message-ID: <CAL3q7H7CmQahCU9enFrM4bhTLmdEYrWn0EhXKBUxriMcKdJR0A@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: regression test for duplicated rmdir in
+ incremental send with extrefs
+To: tchou <tchou@synology.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, Apr 17, 2026 at 12:47:09AM +0800, Zorro Lang wrote:
-> > > Therefore, F2FS does not need to write to the device to recover, and
-> > > successfully mounts on the read-only block device. Thus, it should be
-> > > treated as nojournal in this case.
-> > 
-> > This looks ok, but I always wonder if we want an opt-in for this
-> > "journaling" behavior and/or define it clear in common/.
-> 
-> _has_traditional_journal ? _has_journal_replay ? :-D
+On Fri, Apr 17, 2026 at 8:08=E2=80=AFAM tchou <tchou@synology.com> wrote:
+>
+> From: Ting-Chang Hou <tchou@synology.com>
+>
+> Regression test for btrfs incremental send issue where duplicated rmdir
+> instructions were sent when using INODE_EXTREF. This happens when there
+> are many hardlinks to the same file across two directories, causing the
+> INODE_EXTREF items to interleave between directories.
+>
+> This issue is fixed by the following linux kernel btrfs patch:
+>
+> commit 1fabe43b4e1a ("btrfs: send: fix duplicated rmdir operations when u=
+sing extrefs")
+>
+> Signed-off-by: Ting-Chang Hou <tchou@synology.com>
+> ---
+>  tests/btrfs/348     | 99 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/348.out |  1 +
+>  2 files changed, 100 insertions(+)
+>  create mode 100755 tests/btrfs/348
+>  create mode 100644 tests/btrfs/348.out
+>
+> diff --git a/tests/btrfs/348 b/tests/btrfs/348
+> new file mode 100755
+> index 00000000..6e887e77
+> --- /dev/null
+> +++ b/tests/btrfs/348
+> @@ -0,0 +1,99 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 Synology Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. btrfs/348
+> +#
+> +# Regression test for btrfs incremental send issue where duplicated rmdi=
+r
+> +# instructions were sent when using INODE_EXTREF. This happens when ther=
+e
+> +# are many hardlinks to the same file across two directories, causing th=
+e
+> +# INODE_EXTREF items to interleave between directories. The original fix
+> +# in commit 29d6d30f5c8a ("Btrfs: send, don't send rmdir for same target
+> +# multiple times") only handled consecutive rmdir operations for the sam=
+e
+> +# directory, but failed when rmdir operations were not consecutive due t=
+o
+> +# the interleaved INODE_EXTREF ordering.
+> +#
+> +# This issue is fixed by the following linux kernel btrfs patch:
+> +#
+> +#   commit 1fabe43b4e1a ("btrfs: send: fix duplicated rmdir operations w=
+hen using extrefs")
 
-Good question.  We already have _has_metadata_journaling, which is
-used in this test and in _require_metadata_journaling.  Unfortunately
-no one has bother to describe what behavior it is supposed to guard.
+We already have a test case for this since October 2025: btrfs/338
 
-From looking at the _require_metadata_journaling users, it really seems
-to be about providing file system consistency after crash.  So maybe
-_has_metadata_journaling, should be renamed to this effect?
+Also in the future, please specify the commit like this:
 
-Now in generic/050 the check patched here is used to select the golden
-output.  When I wrote the test originally (I can't even remember that),
-it was a XFS-specific test, and Jan then later tested it to add this
-_has_metadata_journaling check, which also needed further btrfs
-workarounds.  AFAICS it is all about failing the mount if log recovery
-is required, but the underlying block device is read-only.  So maybe
-name it after that?
+_fixed_by_kernel_commit 1fabe43b4e1a \
+        "btrfs: send: fix duplicated rmdir operations when using extrefs"
 
+Thanks.
+
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick send
+> +
+> +tmp=3D`mktemp -d`
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +       rm -fr $tmp
+> +}
+> +
+> +. ./common/filter
+> +
+> +_require_scratch
+> +_require_fssum
+> +
+> +_scratch_mkfs >/dev/null 2>&1
+> +_scratch_mount
+> +
+> +mkdir $SCRATCH_MNT/a $SCRATCH_MNT/b
+> +
+> +echo 123 > $SCRATCH_MNT/a/foo
+> +
+> +# Create enough hardlinks to trigger INODE_EXTREF usage.
+> +# When hardlinks exceed what a single INODE_REF item can hold,
+> +# INODE_EXTREF is used. The key of INODE_EXTREF includes a hash
+> +# of the name and parent inode, causing items from different
+> +# directories to interleave.
+> +for ((i =3D 1; i <=3D 1000; i++)); do
+> +       ln $SCRATCH_MNT/a/foo $SCRATCH_MNT/a/foo.$i
+> +       ln $SCRATCH_MNT/a/foo $SCRATCH_MNT/b/foo.$i
+> +done
+> +
+> +# Filesystem looks like:
+> +#
+> +# .                              (ino 256)
+> +# |-- a/                         (ino 257)
+> +# |   |-- foo                    (ino 259)
+> +# |   |-- foo.1 ... foo.1000     (ino 259, hardlinks)
+> +# |
+> +# |-- b/                         (ino 258)
+> +#     |-- foo.1 ... foo.1000     (ino 259, hardlinks)
+> +
+> +_btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap1
+> +
+> +rm -r $SCRATCH_MNT/a $SCRATCH_MNT/b
+> +
+> +# Filesystem now looks like:
+> +#
+> +# .                              (ino 256)
+> +# |-- snap1/                     (read-only snapshot)
+> +
+> +_btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2
+> +
+> +run_check $FSSUM_PROG -A -f -w $tmp/1.fssum $SCRATCH_MNT/snap1
+> +run_check $FSSUM_PROG -A -f -w $tmp/2.fssum -x $SCRATCH_MNT/snap2/snap1 =
+\
+> +       $SCRATCH_MNT/snap2
+> +
+> +_btrfs send -f $tmp/1.snap $SCRATCH_MNT/snap1
+> +_btrfs send -p $SCRATCH_MNT/snap1 -f $tmp/2.snap $SCRATCH_MNT/snap2
+> +
+> +_scratch_unmount
+> +_check_btrfs_filesystem $SCRATCH_DEV
+> +
+> +_scratch_mkfs >/dev/null 2>&1
+> +_scratch_mount
+> +
+> +_btrfs receive -f $tmp/1.snap $SCRATCH_MNT
+> +run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/snap1
+> +
+> +# This used to fail with:
+> +# ERROR: rmdir o<ino>-<gen>-0 failed: No such file or directory
+> +_btrfs receive -f $tmp/2.snap $SCRATCH_MNT
+> +run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/snap2
+> +
+> +_scratch_unmount
+> +_check_btrfs_filesystem $SCRATCH_DEV
+> +
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/348.out b/tests/btrfs/348.out
+> new file mode 100644
+> index 00000000..f5e0b75a
+> --- /dev/null
+> +++ b/tests/btrfs/348.out
+> @@ -0,0 +1 @@
+> +QA output created by 348
+> --
+> 2.34.1
+>
+>
+> Disclaimer: The contents of this e-mail message and any attachments are c=
+onfidential and are intended solely for addressee. The information may also=
+ be legally privileged. This transmission is sent in trust, for the sole pu=
+rpose of delivery to the intended recipient. If you have received this tran=
+smission in error, any use, reproduction or dissemination of this transmiss=
+ion is strictly prohibited. If you are not the intended recipient, please i=
+mmediately notify the sender by reply e-mail or phone and delete this messa=
+ge and its attachments, if any.
+>
