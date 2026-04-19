@@ -1,70 +1,74 @@
-Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
+Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF58C1E9B3D
-	for <fstests@vger.kernel.org>; Sun, 19 Apr 2026 18:52:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 93742298CA5
+	for <fstests@vger.kernel.org>; Sun, 19 Apr 2026 18:52:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776624741; cv=none; b=lTU+TgPOjlo33AV/vPUWU54mrwpinVuL95e3GcUvjEVT1v00lzQrMACLsIXFCeEtAmfksuo8Ncl1jpetf5ieFReLWw2GgDCtrFfZh2uSYx/qLZGHQgNibLK9ILEZgWaikY0iTxuQ1PqLYpoWJC7vQKOpXvi0H2NpHSAQMNbLWQQ=
+	t=1776624742; cv=none; b=uRuVX66uJZ8lWQbnc1lfAhTB/NcjgiJrfkMLESeYCL+YeMF4pEACHhLp1VGG0g8hCiUjJo6Vr6U7ZvnXAmX0F/yL4PdRJxEHEVQ1j9X3wCbp/2+rZjyuvt2jJR9cWGl1Get5FPrbJupBhkYWpXDj6FLun3bzs4Hrq8TPvBo7AZ4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776624741; c=relaxed/simple;
-	bh=e2ZXz9El51g1RD6EKfetxbYKJLS2iylvtEyIUN89uSU=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=claWRtiehpBWCfMfFnVq5NkxgS2elDcpR6x9DC1QyJW/CsBw7fP7SFHpvURU+1Q3nZW67nMkT+egQ6J++RB45wSz2m31hus9g+HxSCAMx687ZmIjVnAUWZQusxBq9YeSzQBdEAbS6SoQ3WHNPrMcOdct0EoAiV7On77fK8aGOTc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TfzKHuAr; arc=none smtp.client-ip=209.85.128.49
+	s=arc-20240116; t=1776624742; c=relaxed/simple;
+	bh=TH+1KVvOdG0Ck9pqvalAAoLcVoUj0MFTTnvpwNe6ltM=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=C4g37wgvnnEUir8fRIhR9E6a3uVd0PflmXtyKH9wVBxjS7mfMIeKUK0Lf/vYL6+U1twsU9TQ7fDbW8vOHbbV9VSNcb6QFIsomWaJZTijmj2D2fdgpJRHLAjqgD5M/3pK0PWpgUzCb71WVZ2RjVhLR56Dfg9wuXb9k7XqkZyQ2UE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kqwWoVRg; arc=none smtp.client-ip=209.85.128.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TfzKHuAr"
-Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-488a88aeec9so36166185e9.2
-        for <fstests@vger.kernel.org>; Sun, 19 Apr 2026 11:52:19 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kqwWoVRg"
+Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-488b0e1b870so34759945e9.2
+        for <fstests@vger.kernel.org>; Sun, 19 Apr 2026 11:52:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1776624738; x=1777229538; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=JOLVEsbAJOmJN5pZrazzA23v63Rjq08BMGljx81/Nek=;
-        b=TfzKHuArBaUrXTJaL0RCAR81Xw0thywXRU5DZGYoXtWroE4byv5C5m+iOlTw1ncp8Q
-         ZV8Taf9SdMsUfwdy/ZCO0nyNfnyKBQpQSR8c5/Xt8D/AMeSLNLgIEsB2jGeILtkGGwTw
-         Us/XQNKX7fM6az29zmnC8Mv4vDQyjQaFevsYd/SwfByEb7gnXCOOYGyuSWMmIqQASSXe
-         oofRDvuiemk495dn+7IDxi+Kb8iBLSqTdKIVQDQ7RALx9aiGKfSs5emrA47Y9cuNq+QI
-         D1YV9UIosZHdW+5Kn+lTmh+txGRHOG702rr6CHxKFYn+qSL7x0ZeXVU57XWjLEnV3cU7
-         rqSw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776624738; x=1777229538;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=gmail.com; s=20251104; t=1776624739; x=1777229539; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=JOLVEsbAJOmJN5pZrazzA23v63Rjq08BMGljx81/Nek=;
-        b=Z2boOW4z+wscrU9+CT5O0Tto1bUP3qsEX3zeumHv1Lae+NgIh7MuhCIz7d8hjzKvre
-         9Ue/JlWXfq63WVX7P4EEND068GCyE1rcZ+uQqC0GqYbcrwxBRifsRrVwp+Pf/sCrnd4M
-         +rgcI/Vs5U2HcIvN2cCm9SxPIl5qzumMDKQsGDZ4aMuLW6nGq8Ssb2KvectjuSTTxZzL
-         OX0gbLh/T6DbHxzSVOSCmr+MxwXh6CJrurfNYZvZ0HpyknE8+KBLEiaA/7MvcTSow35m
-         zGGnSnOwZifw1qoZcwBOfikReaaE5FlRMmUDQrGyxRSlGyMrUv5CvsIb8rTWadSRxuJb
-         AwIA==
-X-Gm-Message-State: AOJu0Yz+AdYg3OUT6uGqIiYy14OmU3s7whFm/IlCWuVmY3xglTxX9dQi
-	qsd0k6snUbQgl/L/WiNqvYzYq8n9J2a54NL0s0HBW0Oiw8jlcHTHpLByw0+nbfm9
-X-Gm-Gg: AeBDieuYD9ZMEbnLo9JZA+/NkhBKJpw8j5G6J0IKyBs7/+gnwiqnqaJYq5XP9LQS3PN
-	mYPzHlFQpA1ITIzN4l7Yp/56sEWtFBzZ+ZXTwQzBw3Qto287ko01zjz8XL0JB9oYIC6gM2YICIL
-	ZjTkknDZru0+TbKAceS7yJG4YUcT/gMKtsNYrmgTborpLXhOEW1UcQUP+WcHWxo/YSwS3r1K4oN
-	R9rhD+fBcwP+kcvilzRcJh0Pqq4N1+yorJJkrjt+4EMB0HisWfZSzLb0KgCfBI6e2W+1cVlKlWF
-	Tc/HlzvZJi9wsDO64qekdxoqqmXwljb0QmRGr0tjs6Lji+Bmf6T92fpQeON1qQb1NY1sFZkPM7r
-	vl9Go3bHQX0o247FZaglqcIU/m6b2xck9IWNz53RcO5RBmrDyNrDTfbRgI2B5nzNvnLYAkuZYtv
-	utLU4pHFqcKBgVFQKzcH/WQ1Jpxkb/nzIPUBmFRRfUkQ==
-X-Received: by 2002:a05:600c:1390:b0:483:709e:f238 with SMTP id 5b1f17b1804b1-488fb78ea6fmr151706415e9.29.1776624737759;
-        Sun, 19 Apr 2026 11:52:17 -0700 (PDT)
+        bh=JizdQQUWo88QZWsvp/MEmuK2lZp6YdT42tANpTBZ+Gc=;
+        b=kqwWoVRgt3om+5/sWo0MGuwYZ5GxoQPQ50KVhkjCUjOiSYKTwuGvsLWA3qwjz9w/KL
+         9FAbvyNhBDvVgE2F1E5PQC4If7ZKmRTuJmfb40ryGnOJ2aOJ6aQeNadfaALd5W3MYPg2
+         jkv0EQLgVx3NOAccYlhIjJVQFCgST4Lh8QGLofxYE14j8Gs6DBlVEF9Z52EoS172eFRF
+         TWl5Kc/XB+XXRlZj3A3kVmh3QsMYcTbokTw24zmOw4rLBSebJkMDf2HLgbhg8cHjDM67
+         NCY0H3VMjMnNCQRiXRjwaRRIgincGy5zMm+XKZnT5nDSLGs5xlND5ksw6AS6g/ZC/VSF
+         4IhQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1776624739; x=1777229539;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=JizdQQUWo88QZWsvp/MEmuK2lZp6YdT42tANpTBZ+Gc=;
+        b=s/yyAiiPhOCgCTRIASoSEQu5llpXJuJZW0+HjdOyDsxVOFhZ0XK7Wam70sDAssT2Cj
+         RL5dAsMtH/B/SNiCs8x6L9kjSvgYH8D8GyrkC+uBCLea+S+Hk7R6napRkbsNXLgfwblt
+         MsFWLqTNUuSaUptA70yNQHx5ciGFoS8m4cl+dM7f9RZdoFXDTVFehakWqTKXY6iXK/+s
+         1WYp8D2U6RRhVCzgIhNz5pOBjgbs+QnG2wVME/C7Y0W9QJJIECBDULuyNeVAnPSp5doT
+         uEQijuOG/ZNwEvguz7j/iQ4gmWAeofSdXrMFiLMdG1CPshLlNLsWJbh0jdl6F1kE18qE
+         lg6w==
+X-Gm-Message-State: AOJu0Yys2eCx1CuArxVwD/X7f7MWAV3n/55dMS0MgZNN8DM6PbFUiZtT
+	U5DhNXwKpj8Tj7RUJw0VXB1XwFsvsqiE9VARRj+eIRDl9azEkUIMioJKRFSX9roI
+X-Gm-Gg: AeBDieuXsQhtMkXp8q6ZDChj03QKZucb1drEkPc2D0BDDEMEwGVAu1275H6jUpof7o0
+	ondsUkZ3Mgjb2kHgFRKQHI5AaSBaLsvLsdupfYbFDrc4eF0YE/fd/+vrARdxeCTDu3zgmc8SvXZ
+	C32Nprz8XOpXMUGRJ+0KRU4EL/AdqaWi+3s7jfikCdw0spPJSeUZh7T8ASsTwiSLEDHmO3+kDx+
+	uHa3oR5GYkpe3OKLyOVBzgqm0RY4hvZwwuM34HTCoxFvAgOHxwJDtHDkN7Cg/G8bRxwAGmo6TiS
+	Sv7Th8kOKou2dVA3u2vsM/cq1jToFP8p9mfX/ENU3MPYk3HK5LsoJ9HPGjcuclqQA+sm2Fg+XIM
+	Y/ZkdJCg8DUKP1ss/0VGlZxVJtLLGHMYKpkeOyO4eP0jKnlTqy0+hFP1bX5NSNDhYGpZWE2i5Le
+	iDgYYFkav15iyONF0RCiKrOHNGNCxtAxX+wQqd1TqWcw==
+X-Received: by 2002:a05:600c:4f13:b0:489:1a65:dd6e with SMTP id 5b1f17b1804b1-4891a65de3emr31210885e9.8.1776624738608;
+        Sun, 19 Apr 2026 11:52:18 -0700 (PDT)
 Received: from Cluster1.local ([2a00:23c7:90c1:9201:ef47:d559:d907:fd0b])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-488fc1c01cfsm234324695e9.10.2026.04.19.11.52.16
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-488fc1c01cfsm234324695e9.10.2026.04.19.11.52.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 19 Apr 2026 11:52:17 -0700 (PDT)
+        Sun, 19 Apr 2026 11:52:18 -0700 (PDT)
 From: Artem Blagodarenko <artem.blagodarenko@gmail.com>
 X-Google-Original-From: Artem Blagodarenko <ablagodarenko@ddn.com>
 To: fstests@vger.kernel.org
 Cc: adilger.kernel@dilger.ca,
 	tytso@mit.edu,
 	Artem Blagodarenko <artem.blagodarenko@gmail.com>
-Subject: [PATCH 1/2] ext4/064 encryption + casefold feature combination WITHOUT dirdata
-Date: Sun, 19 Apr 2026 14:52:08 -0400
-Message-ID: <20260419185209.4526-1-ablagodarenko@ddn.com>
+Subject: [PATCH 2/2] ext4/065 encryption + casefold + dirdata feature combination
+Date: Sun, 19 Apr 2026 14:52:09 -0400
+Message-ID: <20260419185209.4526-2-ablagodarenko@ddn.com>
 X-Mailer: git-send-email 2.43.5
+In-Reply-To: <20260419185209.4526-1-ablagodarenko@ddn.com>
+References: <20260419185209.4526-1-ablagodarenko@ddn.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -75,36 +79,36 @@ Content-Transfer-Encoding: 8bit
 
 From: Artem Blagodarenko <artem.blagodarenko@gmail.com>
 
-This test verifies that files created in directories with both
-encryption and case-insensitive (casefold) attributes work correctly.
-See ext4/065 for the same test WITH dirdata feature enabled.
+Test ext4 encryption + casefold + dirdata feature combination.
+This test verifies that files created in directories with encryption,
+case-insensitive (casefold), and dirdata attributes work correctly.
+See ext4/064 for the same test WITHOUT dirdata feature.
 
 Signed-off-by: Artem Blagodarenko <artem.blagodarenko@gmail.com>
 ---
- tests/ext4/064     | 154 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/064.out |  17 +++++
- 2 files changed, 171 insertions(+)
- create mode 100755 tests/ext4/064
- create mode 100644 tests/ext4/064.out
+ tests/ext4/065     | 208 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/065.out |  17 ++++
+ 2 files changed, 225 insertions(+)
+ create mode 100755 tests/ext4/065
+ create mode 100644 tests/ext4/065.out
 
-diff --git a/tests/ext4/064 b/tests/ext4/064
+diff --git a/tests/ext4/065 b/tests/ext4/065
 new file mode 100755
-index 00000000..6ad865a9
+index 00000000..08863ac0
 --- /dev/null
-+++ b/tests/ext4/064
-@@ -0,0 +1,154 @@
++++ b/tests/ext4/065
+@@ -0,0 +1,208 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+#
 +# Copyright (c) 2026 The Lustre Collective.  All Rights Reserved.
 +# Author: Artem Blagodarenko <ablagodarenko@thelustrecollective.com>
 +#
-+# FS QA Test ext4/064
++# FS QA Test ext4/065
 +#
-+# Test ext4 encryption + casefold feature combination WITHOUT dirdata.
-+# This test verifies that files created in directories with both
-+# encryption and case-insensitive (casefold) attributes work correctly.
-+# See ext4/065 for the same test WITH dirdata feature enabled.
++# Test ext4 encryption + casefold + dirdata feature combination.
++# This test verifies that files created in directories with encryption,
++# case-insensitive (casefold), and dirdata attributes work correctly.
++# See ext4/064 for the same test WITHOUT dirdata feature.
 +#
 +. ./common/preamble
 +_begin_fstest auto quick encrypt casefold
@@ -118,8 +122,42 @@ index 00000000..6ad865a9
 +_exclude_fs ext2
 +_exclude_fs ext3
 +
++# Check if dirdata feature is supported and can be used with encrypt+casefold
++_require_scratch_dirdata()
++{
++	if test ! -f /sys/fs/ext4/features/dirdata ; then
++		_notrun "dirdata feature not supported by kernel"
++	fi
++
++	# Debug: log e2fsprogs tool paths and versions
++	echo "=== _require_scratch_dirdata debug info ===" >> $seqres.full
++	echo "E2FSCK_PROG: $E2FSCK_PROG" >> $seqres.full
++	echo "E2FSCK_PROG resolved: $(type -P e2fsck)" >> $seqres.full
++	echo "MKFS_EXT4_PROG: $MKFS_EXT4_PROG" >> $seqres.full
++	echo "fsck -t ext4 resolves to: $(type -P fsck.ext4)" >> $seqres.full
++	$E2FSCK_PROG -V >> $seqres.full 2>&1
++	$MKFS_EXT4_PROG -V >> $seqres.full 2>&1
++	echo "=== end debug info ===" >> $seqres.full
++
++	# Also verify that mkfs supports dirdata
++	if ! $MKFS_EXT4_PROG -O dirdata -n $SCRATCH_DEV &>>$seqres.full ; then
++		_notrun "mkfs.ext4 does not support dirdata feature"
++	fi
++
++	# Verify kernel can mount filesystem with encrypt+casefold+dirdata
++	echo "Running: _scratch_mkfs -O encrypt,casefold,dirdata" >> $seqres.full
++	if ! _scratch_mkfs -O encrypt,casefold,dirdata &>>$seqres.full ; then
++		_notrun "failed to create filesystem with encrypt+casefold+dirdata"
++	fi
++	if ! _try_scratch_mount &>>$seqres.full ; then
++		_notrun "kernel cannot mount filesystem with encrypt+casefold+dirdata"
++	fi
++	_scratch_unmount
++}
++
 +_require_scratch_nocheck
 +_require_encrypted_casefold
++_require_scratch_dirdata
 +_require_command "$CHATTR_PROG" chattr
 +_require_command "$LSATTR_PROG" lsattr
 +_require_xfs_io_command "set_encpolicy"
@@ -136,12 +174,23 @@ index 00000000..6ad865a9
 +	echo $keyspec
 +}
 +
-+# Create a filesystem with both encrypt and casefold features
-+_scratch_mkfs -O encrypt,casefold &>>$seqres.full
++# Create a filesystem with encrypt, casefold, and dirdata features
++# Debug: log e2fsprogs tool paths and versions
++echo "=== e2fsprogs debug info ===" >> $seqres.full
++echo "E2FSCK_PROG: $E2FSCK_PROG" >> $seqres.full
++echo "E2FSCK_PROG resolved: $(type -P e2fsck)" >> $seqres.full
++echo "MKFS_EXT4_PROG: $MKFS_EXT4_PROG" >> $seqres.full
++echo "FSCK_OPTIONS: $FSCK_OPTIONS" >> $seqres.full
++echo "fsck -t ext4 resolves to: $(type -P fsck.ext4)" >> $seqres.full
++$E2FSCK_PROG -V >> $seqres.full 2>&1
++$MKFS_EXT4_PROG -V >> $seqres.full 2>&1
++echo "=== end e2fsprogs debug info ===" >> $seqres.full
++
++_scratch_mkfs -O encrypt,casefold,dirdata &>>$seqres.full
 +_scratch_mount
 +
 +# Test 1: Create an encrypted + casefolded directory and verify lookups work
-+echo "Test 1: Basic encrypted casefold lookup"
++echo "Test 1: Basic encrypted casefold lookup with dirdata"
 +mkdir $SCRATCH_MNT/test1
 +_setup_encrypted_casefold_dir $SCRATCH_MNT/test1 > /dev/null
 +
@@ -240,21 +289,31 @@ index 00000000..6ad865a9
 +
 +# Cleanup and verify filesystem
 +_scratch_unmount
++
++# Debug: log e2fsprogs tool paths before _check_scratch_fs
++echo "=== e2fsprogs debug info (before _check_scratch_fs) ===" >> $seqres.full
++echo "E2FSCK_PROG: $E2FSCK_PROG" >> $seqres.full
++echo "E2FSCK_PROG resolved: $(type -P e2fsck)" >> $seqres.full
++echo "fsck -t ext4 resolves to: $(type -P fsck.ext4)" >> $seqres.full
++echo "FSCK_OPTIONS: $FSCK_OPTIONS" >> $seqres.full
++$E2FSCK_PROG -V >> $seqres.full 2>&1
++echo "=== end e2fsprogs debug info ===" >> $seqres.full
++
 +_check_scratch_fs
 +
-+echo "Encrypted casefold tests completed"
++echo "Encrypted casefold tests with dirdata completed"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/ext4/064.out b/tests/ext4/064.out
+diff --git a/tests/ext4/065.out b/tests/ext4/065.out
 new file mode 100644
-index 00000000..0197e51e
+index 00000000..e771d884
 --- /dev/null
-+++ b/tests/ext4/064.out
++++ b/tests/ext4/065.out
 @@ -0,0 +1,17 @@
-+QA output created by 064
-+Test 1: Basic encrypted casefold lookup
++QA output created by 065
++Test 1: Basic encrypted casefold lookup with dirdata
 +Case-insensitive lookup works in encrypted dir
 +Original filename preserved
 +Test 2: Conflicting names in encrypted casefold dir
@@ -269,7 +328,7 @@ index 00000000..0197e51e
 +Recreated file has new case
 +Test 7: Hard links in encrypted casefold dir
 +Hard link case-insensitive lookup works
-+Encrypted casefold tests completed
++Encrypted casefold tests with dirdata completed
 -- 
 2.43.5
 
