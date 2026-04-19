@@ -1,194 +1,275 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 863A72566F7
-	for <fstests@vger.kernel.org>; Sun, 19 Apr 2026 16:49:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF58C1E9B3D
+	for <fstests@vger.kernel.org>; Sun, 19 Apr 2026 18:52:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776617378; cv=none; b=eHW1ImvdVGJGrdngqT0zJ1S9gaeGayvrsrR23hSI0Ez2y11afNQ+cbhcbF1w+DkBXrQm48mPbKR49He6ZpHEKtU7Nv/bgQjgyYQoCxggdESPVslV2YPExDwRfgbaqMiZy2FDd828aY5vU4k5HuUp6wmF0qdMaRw6sV2LV0lT8sQ=
+	t=1776624741; cv=none; b=lTU+TgPOjlo33AV/vPUWU54mrwpinVuL95e3GcUvjEVT1v00lzQrMACLsIXFCeEtAmfksuo8Ncl1jpetf5ieFReLWw2GgDCtrFfZh2uSYx/qLZGHQgNibLK9ILEZgWaikY0iTxuQ1PqLYpoWJC7vQKOpXvi0H2NpHSAQMNbLWQQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776617378; c=relaxed/simple;
-	bh=wQga6NlDna0VmwBngVrm+AMO9YNlusDINEerfuM1YLY=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=bfpYakWAnTO439mvd04eByFKMzW5DEI26UVFVdL+AXzPcBp784PK7zldnL9LHOeA6XhkI4Zev9k6S56li2s8PfJvmuvSvQeQkMORG+fUuJGZkDku/v+bKARaFqT1wI9nIfty/WjxohefG32SJuqCvEv5vesB7bXgzwnU9eu2FAg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cMig1Fxj; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1776624741; c=relaxed/simple;
+	bh=e2ZXz9El51g1RD6EKfetxbYKJLS2iylvtEyIUN89uSU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=claWRtiehpBWCfMfFnVq5NkxgS2elDcpR6x9DC1QyJW/CsBw7fP7SFHpvURU+1Q3nZW67nMkT+egQ6J++RB45wSz2m31hus9g+HxSCAMx687ZmIjVnAUWZQusxBq9YeSzQBdEAbS6SoQ3WHNPrMcOdct0EoAiV7On77fK8aGOTc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TfzKHuAr; arc=none smtp.client-ip=209.85.128.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cMig1Fxj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC383C2BCAF;
-	Sun, 19 Apr 2026 16:49:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1776617378;
-	bh=wQga6NlDna0VmwBngVrm+AMO9YNlusDINEerfuM1YLY=;
-	h=Date:From:To:Subject:From;
-	b=cMig1FxjuSKdnzJYnThNRkKKla0+tzvG4Kb4CYTt3scehBhtWfe2kQJlJW6GMV2g6
-	 6LM/k3ny6aVFYnfAtFg0RUh3P700h/GYhN5qB6uR/+bwjYfRItVLvLVMoE1yNSWdql
-	 d6+gA53wPpfjWyZsypxmFXzKdGWyHxQcpmEwbb9Oyl3j9D2NJuQJZFTCL46qL5Rb15
-	 D/9GwN/BeZMJvv3mJ681nrL1FHk5LZoqLaZLvVr7hB5OWInkDsrGebjcliXO/YYdiq
-	 MM/HNCnkIxrb42qaDfcRoLV5Xn2PYnXIbtfsXfhy3jKWYK/vMQdDl39y33R7oXz/cB
-	 McXMfjLuwh0yw==
-Date: Mon, 20 Apr 2026 00:49:32 +0800
-Message-ID: <bc0bc8bc447a8eb8dd0ef53c657e7906@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TfzKHuAr"
+Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-488a88aeec9so36166185e9.2
+        for <fstests@vger.kernel.org>; Sun, 19 Apr 2026 11:52:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1776624738; x=1777229538; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=JOLVEsbAJOmJN5pZrazzA23v63Rjq08BMGljx81/Nek=;
+        b=TfzKHuArBaUrXTJaL0RCAR81Xw0thywXRU5DZGYoXtWroE4byv5C5m+iOlTw1ncp8Q
+         ZV8Taf9SdMsUfwdy/ZCO0nyNfnyKBQpQSR8c5/Xt8D/AMeSLNLgIEsB2jGeILtkGGwTw
+         Us/XQNKX7fM6az29zmnC8Mv4vDQyjQaFevsYd/SwfByEb7gnXCOOYGyuSWMmIqQASSXe
+         oofRDvuiemk495dn+7IDxi+Kb8iBLSqTdKIVQDQ7RALx9aiGKfSs5emrA47Y9cuNq+QI
+         D1YV9UIosZHdW+5Kn+lTmh+txGRHOG702rr6CHxKFYn+qSL7x0ZeXVU57XWjLEnV3cU7
+         rqSw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1776624738; x=1777229538;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=JOLVEsbAJOmJN5pZrazzA23v63Rjq08BMGljx81/Nek=;
+        b=Z2boOW4z+wscrU9+CT5O0Tto1bUP3qsEX3zeumHv1Lae+NgIh7MuhCIz7d8hjzKvre
+         9Ue/JlWXfq63WVX7P4EEND068GCyE1rcZ+uQqC0GqYbcrwxBRifsRrVwp+Pf/sCrnd4M
+         +rgcI/Vs5U2HcIvN2cCm9SxPIl5qzumMDKQsGDZ4aMuLW6nGq8Ssb2KvectjuSTTxZzL
+         OX0gbLh/T6DbHxzSVOSCmr+MxwXh6CJrurfNYZvZ0HpyknE8+KBLEiaA/7MvcTSow35m
+         zGGnSnOwZifw1qoZcwBOfikReaaE5FlRMmUDQrGyxRSlGyMrUv5CvsIb8rTWadSRxuJb
+         AwIA==
+X-Gm-Message-State: AOJu0Yz+AdYg3OUT6uGqIiYy14OmU3s7whFm/IlCWuVmY3xglTxX9dQi
+	qsd0k6snUbQgl/L/WiNqvYzYq8n9J2a54NL0s0HBW0Oiw8jlcHTHpLByw0+nbfm9
+X-Gm-Gg: AeBDieuYD9ZMEbnLo9JZA+/NkhBKJpw8j5G6J0IKyBs7/+gnwiqnqaJYq5XP9LQS3PN
+	mYPzHlFQpA1ITIzN4l7Yp/56sEWtFBzZ+ZXTwQzBw3Qto287ko01zjz8XL0JB9oYIC6gM2YICIL
+	ZjTkknDZru0+TbKAceS7yJG4YUcT/gMKtsNYrmgTborpLXhOEW1UcQUP+WcHWxo/YSwS3r1K4oN
+	R9rhD+fBcwP+kcvilzRcJh0Pqq4N1+yorJJkrjt+4EMB0HisWfZSzLb0KgCfBI6e2W+1cVlKlWF
+	Tc/HlzvZJi9wsDO64qekdxoqqmXwljb0QmRGr0tjs6Lji+Bmf6T92fpQeON1qQb1NY1sFZkPM7r
+	vl9Go3bHQX0o247FZaglqcIU/m6b2xck9IWNz53RcO5RBmrDyNrDTfbRgI2B5nzNvnLYAkuZYtv
+	utLU4pHFqcKBgVFQKzcH/WQ1Jpxkb/nzIPUBmFRRfUkQ==
+X-Received: by 2002:a05:600c:1390:b0:483:709e:f238 with SMTP id 5b1f17b1804b1-488fb78ea6fmr151706415e9.29.1776624737759;
+        Sun, 19 Apr 2026 11:52:17 -0700 (PDT)
+Received: from Cluster1.local ([2a00:23c7:90c1:9201:ef47:d559:d907:fd0b])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-488fc1c01cfsm234324695e9.10.2026.04.19.11.52.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 19 Apr 2026 11:52:17 -0700 (PDT)
+From: Artem Blagodarenko <artem.blagodarenko@gmail.com>
+X-Google-Original-From: Artem Blagodarenko <ablagodarenko@ddn.com>
 To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2026.04.20
+Cc: adilger.kernel@dilger.ca,
+	tytso@mit.edu,
+	Artem Blagodarenko <artem.blagodarenko@gmail.com>
+Subject: [PATCH 1/2] ext4/064 encryption + casefold feature combination WITHOUT dirdata
+Date: Sun, 19 Apr 2026 14:52:08 -0400
+Message-ID: <20260419185209.4526-1-ablagodarenko@ddn.com>
+X-Mailer: git-send-email 2.43.5
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="vgcRDo9pqS98"
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 
+From: Artem Blagodarenko <artem.blagodarenko@gmail.com>
 
---vgcRDo9pqS98
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+This test verifies that files created in directories with both
+encryption and case-insensitive (casefold) attributes work correctly.
+See ext4/065 for the same test WITH dirdata feature enabled.
 
-Hi all,
+Signed-off-by: Artem Blagodarenko <artem.blagodarenko@gmail.com>
+---
+ tests/ext4/064     | 154 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/064.out |  17 +++++
+ 2 files changed, 171 insertions(+)
+ create mode 100755 tests/ext4/064
+ create mode 100644 tests/ext4/064.out
 
-The for-next branch of the xfstests repository at:
+diff --git a/tests/ext4/064 b/tests/ext4/064
+new file mode 100755
+index 00000000..6ad865a9
+--- /dev/null
++++ b/tests/ext4/064
+@@ -0,0 +1,154 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++#
++# Copyright (c) 2026 The Lustre Collective.  All Rights Reserved.
++# Author: Artem Blagodarenko <ablagodarenko@thelustrecollective.com>
++#
++# FS QA Test ext4/064
++#
++# Test ext4 encryption + casefold feature combination WITHOUT dirdata.
++# This test verifies that files created in directories with both
++# encryption and case-insensitive (casefold) attributes work correctly.
++# See ext4/065 for the same test WITH dirdata feature enabled.
++#
++. ./common/preamble
++_begin_fstest auto quick encrypt casefold
++
++# get standard environment and checks
++. ./common/filter
++. ./common/encrypt
++. ./common/casefold
++. ./common/attr
++
++_exclude_fs ext2
++_exclude_fs ext3
++
++_require_scratch_nocheck
++_require_encrypted_casefold
++_require_command "$CHATTR_PROG" chattr
++_require_command "$LSATTR_PROG" lsattr
++_require_xfs_io_command "set_encpolicy"
++_require_xfs_io_command "add_enckey"
++
++# Helper to add a v2 encryption key and set policy on a directory
++_setup_encrypted_casefold_dir()
++{
++	local dir=$1
++	local raw_key=$(_generate_raw_encryption_key)
++	local keyspec=$(_add_enckey $SCRATCH_MNT "$raw_key" | awk '{print $NF}')
++	_set_encpolicy $dir $keyspec
++	_casefold_set_attr $dir
++	echo $keyspec
++}
++
++# Create a filesystem with both encrypt and casefold features
++_scratch_mkfs -O encrypt,casefold &>>$seqres.full
++_scratch_mount
++
++# Test 1: Create an encrypted + casefolded directory and verify lookups work
++echo "Test 1: Basic encrypted casefold lookup"
++mkdir $SCRATCH_MNT/test1
++_setup_encrypted_casefold_dir $SCRATCH_MNT/test1 > /dev/null
++
++# Create file with lowercase, lookup with uppercase
++echo "hello" > $SCRATCH_MNT/test1/testfile.txt
++if [ -f "$SCRATCH_MNT/test1/TESTFILE.TXT" ]; then
++	echo "Case-insensitive lookup works in encrypted dir"
++else
++	echo "FAIL: Case-insensitive lookup failed in encrypted dir"
++fi
++
++# Verify the exact name on disk is preserved
++if _casefold_check_exact_name "$SCRATCH_MNT/test1" "testfile.txt"; then
++	echo "Original filename preserved"
++else
++	echo "FAIL: Original filename not preserved"
++fi
++
++# Test 2: Create files with different case variations
++echo "Test 2: Conflicting names in encrypted casefold dir"
++mkdir $SCRATCH_MNT/test2
++_setup_encrypted_casefold_dir $SCRATCH_MNT/test2 > /dev/null
++
++echo "first" > $SCRATCH_MNT/test2/MyFile.txt
++# This should fail or overwrite since "MYFILE.TXT" is equivalent
++echo "second" > $SCRATCH_MNT/test2/MYFILE.TXT 2>/dev/null
++content=$(cat $SCRATCH_MNT/test2/myfile.txt)
++echo "Content after writes: $content"
++
++# Test 3: Unicode normalization in encrypted casefold dir
++echo "Test 3: Unicode in encrypted casefold dir"
++mkdir $SCRATCH_MNT/test3
++_setup_encrypted_casefold_dir $SCRATCH_MNT/test3 > /dev/null
++
++# Test with UTF-8 characters
++fr_file1=$(echo -e "cafe\xcc\x81.txt")
++fr_file2=$(echo -e "caf\xc3\xa9.txt")
++echo "french" > "$SCRATCH_MNT/test3/$fr_file1"
++if [ -f "$SCRATCH_MNT/test3/$fr_file2" ]; then
++	echo "Unicode normalization works in encrypted dir"
++else
++	echo "FAIL: Unicode normalization failed in encrypted dir"
++fi
++
++# Test 4: Directory operations in encrypted casefold dir
++echo "Test 4: Directory operations in encrypted casefold dir"
++mkdir $SCRATCH_MNT/test4
++_setup_encrypted_casefold_dir $SCRATCH_MNT/test4 > /dev/null
++
++mkdir $SCRATCH_MNT/test4/SubDir
++if [ -d "$SCRATCH_MNT/test4/SUBDIR" ]; then
++	echo "Directory case-insensitive lookup works"
++else
++	echo "FAIL: Directory case-insensitive lookup failed"
++fi
++
++# Test 5: Verify inheritance of casefold+encryption in subdirectories
++echo "Test 5: Inheritance of attributes"
++mkdir $SCRATCH_MNT/test5
++_setup_encrypted_casefold_dir $SCRATCH_MNT/test5 > /dev/null
++
++mkdir $SCRATCH_MNT/test5/child
++echo "data" > $SCRATCH_MNT/test5/child/file.txt
++if [ -f "$SCRATCH_MNT/test5/CHILD/FILE.TXT" ]; then
++	echo "Attributes inherited correctly"
++else
++	echo "FAIL: Attributes not inherited"
++fi
++
++# Test 6: Remove and recreate with different case
++echo "Test 6: Remove and recreate with different case"
++mkdir $SCRATCH_MNT/test6
++_setup_encrypted_casefold_dir $SCRATCH_MNT/test6 > /dev/null
++
++echo "original" > $SCRATCH_MNT/test6/RemoveMe.txt
++rm $SCRATCH_MNT/test6/REMOVEME.TXT
++echo "recreated" > $SCRATCH_MNT/test6/REMOVEME.TXT
++if _casefold_check_exact_name "$SCRATCH_MNT/test6" "REMOVEME.TXT"; then
++	echo "Recreated file has new case"
++else
++	echo "FAIL: Recreated file case incorrect"
++fi
++
++# Test 7: Hard links in encrypted casefold dir
++echo "Test 7: Hard links in encrypted casefold dir"
++mkdir $SCRATCH_MNT/test7
++_setup_encrypted_casefold_dir $SCRATCH_MNT/test7 > /dev/null
++
++echo "linkdata" > $SCRATCH_MNT/test7/original.txt
++ln $SCRATCH_MNT/test7/original.txt $SCRATCH_MNT/test7/hardlink.txt
++if [ -f "$SCRATCH_MNT/test7/HARDLINK.TXT" ]; then
++	echo "Hard link case-insensitive lookup works"
++else
++	echo "FAIL: Hard link case-insensitive lookup failed"
++fi
++
++# Cleanup and verify filesystem
++_scratch_unmount
++_check_scratch_fs
++
++echo "Encrypted casefold tests completed"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ext4/064.out b/tests/ext4/064.out
+new file mode 100644
+index 00000000..0197e51e
+--- /dev/null
++++ b/tests/ext4/064.out
+@@ -0,0 +1,17 @@
++QA output created by 064
++Test 1: Basic encrypted casefold lookup
++Case-insensitive lookup works in encrypted dir
++Original filename preserved
++Test 2: Conflicting names in encrypted casefold dir
++Content after writes: second
++Test 3: Unicode in encrypted casefold dir
++Unicode normalization works in encrypted dir
++Test 4: Directory operations in encrypted casefold dir
++Directory case-insensitive lookup works
++Test 5: Inheritance of attributes
++Attributes inherited correctly
++Test 6: Remove and recreate with different case
++Recreated file has new case
++Test 7: Hard links in encrypted casefold dir
++Hard link case-insensitive lookup works
++Encrypted casefold tests completed
+-- 
+2.43.5
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2026.04.20 release.
-
-Release Notes:
-1) There're 5 new cases in this release.
-2) g/792, g/793 and f2fs/024 provide coverage for known btrfs and f2fs
-   regressions. x/668 and x/669 are new zoned related tests on XFS.
-3) Fix and refactor atomic write test cases.
-
-More ext4, xfs, btrfs, f2fs related fixes and updates refer to below, thanks
-for all these contributions!
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-cac9fe2b8dc3 generic: test premature ENOSPC in zoned garbage collection
-
-New commits:
-
-Christoph Hellwig (1):
-      [d59865ddf8e4] xfs: add a test for number of open zones on conventional devices
-
-Darrick J. Wong (4):
-      [04ee3a4f0d19] common: ignore stderr for the two new svcname helpers
-      [78b8a11f8c2f] xfs/6{59-61}: force xfs_healer to run
-      [c17136d0c6c4] xfs/805: adjust for new autofsck fsproperty defaults
-      [dde983e4419a] xfs/841: actually compare the new filesystem contents to the proto dir
-
-Disha Goel (1):
-      [0bece2e05be1] generic/730: skip test if DAX mount option is enabled
-
-Filipe Manana (2):
-      [c34c06b9728c] fstests: add kernel commit IDs for patches already merged upstream
-      [c4e03688706d] generic: test fsync against a removed directory
-
-Hans Holmberg (2):
-      [7a2fe2c2f7be] xfs/647: turn rt dev block device lookup into a common helper
-      [8deafb5c487e] xfs: test that zone_gc_low_space writes start gc for rw fses
-
-Jan Prusakowski (1):
-      [56b35283cf8e] generic/050: handle f2fs as nojournal filesystem
-
-Johannes Thumshirn (1):
-      [cac9fe2b8dc3] generic: test premature ENOSPC in zoned garbage collection
-
-Leo Martins (2):
-      [a44a26f93b05] generic/301: skip extent count check on btrfs
-      [2d614deaed29] btrfs: fix stale errno check in btrfs_encoded_read/write helpers
-
-Long Li (1):
-      [29dbf0703917] xfs/018: test log attr replay with zero-length attr value
-
-Ojaswin Mujoo (6):
-      [ea4d04e7b676] ext4/061,062: Minor fixes and refactoring
-      [2c002c3a86c0] common/rc: Add _sysfs_queue_path helper with partition support
-      [4dc8a079a670] generic/765: Fix sysfs queue path for nvme partitions
-      [fb11f06d9026] generic/765: Ignore mkfs warning
-      [53e68c2afbb9] generic/775: Fix an infinite loop due to variable name clash
-      [f3e91c87aa9f] treewide: Use _sysfs_queue_path helper in all queue access locations
-
-Yangyang Zang (2):
-      [271d7a1257f7] common/config: export F2FS_RESIZE_PROG
-      [39b31fe6e746] f2fs: add testcase to check resize corrupting root inode
-
-
-Code Diffstat:
-
- common/config             |  1 +
- common/encrypt            |  7 ++---
- common/rc                 | 36 +++++++++++++++++++++---
- common/report             | 20 +++++++------
- common/xfs                | 30 +++++++++++++++++++-
- common/zoned              |  5 ++--
- src/btrfs_encoded_read.c  |  1 +
- src/btrfs_encoded_write.c |  1 +
- src/unlink-fsync.c        | 39 +++++++++++++++++++------
- tests/btrfs/076           | 11 +++++---
- tests/btrfs/237           |  5 ++--
- tests/btrfs/273           |  4 ++-
- tests/btrfs/283           |  4 ++-
- tests/btrfs/340           |  2 +-
- tests/btrfs/345           |  2 +-
- tests/btrfs/346           |  2 +-
- tests/btrfs/347           |  2 +-
- tests/ext4/061            | 28 ++++++++++++------
- tests/ext4/062            | 26 ++++++++++++-----
- tests/f2fs/024            | 39 +++++++++++++++++++++++++
- tests/f2fs/024.out        |  7 +++++
- tests/generic/050         | 12 ++++++++
- tests/generic/301         |  8 +++++-
- tests/generic/730         |  3 ++
- tests/generic/762         |  2 +-
- tests/generic/765         | 12 ++++----
- tests/generic/775         |  3 +-
- tests/generic/789         |  2 +-
- tests/generic/790         |  2 +-
- tests/generic/792         | 69 +++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/792.out     | 10 +++++++
- tests/generic/793         | 53 ++++++++++++++++++++++++++++++++++
- tests/generic/793.out     |  2 ++
- tests/xfs/018             | 26 ++++++++++++++---
- tests/xfs/018.out         | 20 +++++++++++++
- tests/xfs/647             | 10 +------
- tests/xfs/659             |  3 ++
- tests/xfs/660             |  3 ++
- tests/xfs/661             |  4 +++
- tests/xfs/668             | 72 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/668.out         |  2 ++
- tests/xfs/669             | 68 ++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/669.out         |  1 +
- tests/xfs/805             |  7 +----
- tests/xfs/805.out         |  1 -
- tests/xfs/841             | 25 +++++++++++++++-
- 46 files changed, 604 insertions(+), 88 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---vgcRDo9pqS98
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmnlB3MACgkQlNbPkfr2
-tMx6ww//VCOVTJCxICg+maGWpS/A0jm03LNqUUuQkAfyOuruJ/HdvTCeW3JG5mHZ
-pgfq2/tBf/5h97KcmsFanKV9F4ASzxzNVNukX8vugb879HyX7QPNXENZ65eDh4sB
-lSPH33f6KFwi1tWsSQDqs8D7QnPMpx8DBpY2up9KvxB9oNQ7eu5CGhc8+a4OJxFe
-s4/oDf1igutre38FHyfvmqUT5qkG7Z4EJqGmFoT138PH7NX6vo3FH/kKq/JdJywW
-NQj26ZzQKcTFMcJDJVTaAOFYQGrD33NtbXHil/VvxjksPBpp9bJ5pFF49YfVIz3a
-sDLwWdyaEYTRzervCdqWupBLJuS8UQkuxTTr5can28PQbt0VFfuXBCOkzAOEWVMc
-bmu/RSgjpuPi7KKLysvgUYCQwueAUtqV7zDZdBJuVlMpsMd4KZrAlFnC7+igdJ2d
-ip0zCUkiQ0cenq1Sgcohz2QVhPxiw9+Rus0DEMFa1E4cYAf3Kfxc+d7l7xk8QVel
-gcc5xH425JipL7RLakd5Q4rRU4EW4LlNzhUX/46I18tqBNzjjr+kK/0IlbuML5I+
-eGZJxuNlk+2KSuQ4ug3oP/3etFI/Ye2cI2jLcnDF+XuoIuAGZJGSLPDotc8NVdYw
-vPXWrhG7D/PwTiytgz5u5eJcCeHCQqcl/y+LEHQbKxNTmTTUShk=
-=NizU
------END PGP SIGNATURE-----
-
---vgcRDo9pqS98--
