@@ -1,134 +1,240 @@
-Received: from mail-pg1-f170.google.com (mail-pg1-f170.google.com [209.85.215.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E6FA3D16E5
-	for <fstests@vger.kernel.org>; Wed, 22 Apr 2026 11:51:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7869D3C872C
+	for <fstests@vger.kernel.org>; Wed, 22 Apr 2026 13:22:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776858693; cv=none; b=ftWWzgIBlxHq0i1+NORaF0mhoB8rQN7zZ69QdcHl6AOrKJ0owy1h1zX5xIDbtJwRX77uWt/bQL250x9xBDdM/nh8nb0VIfwSReYpJ4SBBs3L77rk3458a1GJvvJVSoxP5G9GUK5NV3F4VB71hxB1OU58WhhcyEezdLQFbUMKm20=
+	t=1776864178; cv=none; b=LgqYDaGrHYVv8+ziTIKSSCI4NBFR7I9L0YHiQ2LynqpFfl+qq5hqfE7j74qfvdMHX212QWtRGGhu/uB7+c3jQuesESkMxx6+awJWTv7rH4NCdDFOk9SIq4rzWkQkKdtIjjnTzEHe3SKo3zEggyQMPIqf2MWYRe5lQopltL5Nzrk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776858693; c=relaxed/simple;
-	bh=XCRMq3Jl28lb7xVzh6vJ99+uZ69SG+aN/hdMvbNBYVc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=BlGsGkIyY1FrIRkS3PaSbIzFzu61wlIywTu2OjeAmK5D7OIp/SsPGsL980BRDN9wkgEJ6iMiRt84wzUYg3zxWd2hXckNwUADYDnxFzOzPw9jYHsnRcoeZ8grrrCmsn67LUrMMxxMDvadtfVVrsBXYPuwzmHmg2fHp7C4mQHcWIY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=OklNU0x0; arc=none smtp.client-ip=209.85.215.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1776864178; c=relaxed/simple;
+	bh=sTbTl1ZyqHMDwGo0rU8YM51F5iFis9FwO8WjmorfwmI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=iBCkolr6ZaoiSg0djNqZEkyHEWTwTs95j32Le5/JajbLZFl0BGW3md8COIdrcillWtG4m6BYh4EjFWluCLSSIlU3lC8D22e2/3KbSWXlQn/lQtzpHvnf39Y41RJGO+lmSX4+VHOOEAFD5nDWN81tgt2ZCzsGH7pqmXMTEl/oZII=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=PL/JgqfD; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OklNU0x0"
-Received: by mail-pg1-f170.google.com with SMTP id 41be03b00d2f7-c76c60c7502so2339596a12.0
-        for <fstests@vger.kernel.org>; Wed, 22 Apr 2026 04:51:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1776858692; x=1777463492; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=g/ZDMUKz4uhk7JHfTz2NQ2cYjK+SrQpOAZldlPX+P6I=;
-        b=OklNU0x00YVMKRZ/+OGO+qSdzxmMqmBbMVR138mlg7rYefDAkrydtF39KKbtrRUpi2
-         PABvkdCUSw+H7eCUvY4C2vcdUyW/E33+IZGWltKe2BUc8mh57SYJsBP2cZVnHgg8Fu5U
-         cIqscv9kv8KeeNFoQBls20CpXwf+0p6xVqu32LmlAfj8GBrgkpW9xm5cR8ufIEhLmly6
-         /30LEIOy3NsgKe6s1mWPG5ACai2bflGm1A3H0z4MdkoI4zToAfYBXuHjsM5t5r06bJ+9
-         sszpCTbfK2g0sNndO9+PtSg+GA+Wmv+34867yYk9eTe0i7sqgf86JvgmHUMPww7CyHhm
-         HKbg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776858692; x=1777463492;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=g/ZDMUKz4uhk7JHfTz2NQ2cYjK+SrQpOAZldlPX+P6I=;
-        b=BmraxtGIFQiMImSm+KL9/UzY2VLM0Dii3zWDmPApyUwNhxsq1IcQjMY1MB/zgdmxTu
-         IprRtX60ZK2Nms9kLXG+eHxSkD/vRArJwhJE53z5CYUdvbAYQwq/CxkWfAqYf2TuxVKb
-         qnLzVmhVsvk9/P4LGpGI7/N7vfUYfUaPvoRo//mnvqDpCWda6OFvT1r8t6o1kG0k7bcB
-         Q1Ty9q0LdIUpilv0TSoQymqMdqU2sUT3RYs3JJWymmuloAyygC6lMZtvkkgZdAjHBWvd
-         3MSRT3q7j3t6KEQMdM9nHNK+/vR7ydU3O8OyIBxUFwBmAGkaLUzla3FcRZfQTR9VwmsV
-         gKLA==
-X-Forwarded-Encrypted: i=1; AFNElJ/J4wXiljbHIU+D8R3O13zMDD57jU9VmoDyr6yfJQObvYxHXXzF9qBRkVJKSXt1CvRW5KZGjJiv@vger.kernel.org
-X-Gm-Message-State: AOJu0YxjGJEekipJcUauZ6Xsv9/Vb809FcpJIlDsCaX4yt435WHrEXaO
-	SFV6VyujpzGQ0Eqz+rdHXLH7+VhgwlImj1RGvkFUvt2/f3tE2EfTjHKf
-X-Gm-Gg: AeBDietx56OOp79OT7YV+z/xTQtlv8FyqCnzNTbLCEq/dqg18QGdtzEySrDyM56QkN7
-	QJXq23wkGDvSd9TuAeXFS27quP0PKJm863k64BOB7K25Fhm9KugcOwTUuaFUc5guLhS29z1jZ2W
-	3KZqoEJcuEc9KcaMvE7UbWU4ZO9AvvFnNDQT48VRguxrY5QssICGq3WF80N03uox7L5oLIATYtW
-	702j+5oBH7ViI9TsAZRIN2zth3J7KyV9g7BaKYJd+/wZ5jFbfsdN3ud790WLYKvC27BJ3PHS6WA
-	zpaiOZwDokdMmeGUXdyiOIO/RBIbnzUvFnndn5QAztOCJLe08V4AusOcAYWH7MCRAbmMoH8JgPr
-	yoYbgGX/ajhlmZt9V06r538TDewhMiqDk15ioHzdDRYMIUPkwl9jjpPxp+w/sSss8XeAhTfXfeW
-	z9qHFMmPFhe2vLRFW3UzC00cklTJxqKFV6CSwQ0w==
-X-Received: by 2002:a05:6a20:7d9f:b0:39f:3559:750d with SMTP id adf61e73a8af0-3a08cca99ddmr19877598637.31.1776858691628;
-        Wed, 22 Apr 2026 04:51:31 -0700 (PDT)
-Received: from [192.168.50.90] ([116.87.14.48])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c797701afeesm12385720a12.15.2026.04.22.04.51.29
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 22 Apr 2026 04:51:31 -0700 (PDT)
-Message-ID: <c27c678b-89b2-40e0-9b12-23b0807f74ed@gmail.com>
-Date: Wed, 22 Apr 2026 19:51:28 +0800
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PL/JgqfD"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1776864175;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=99lpaYvrEMn1O3IXIzKhH6DKTKViuZzIem8oOh6SGRU=;
+	b=PL/JgqfDt0Pz4sAzSEUhOmI2soT78F5gQb+RJExVrfQMIEz4v/bNoI6jiHpT7fSDrXg5p/
+	KtPpPzWeIPlZCqSyeUWImKyPa+ihNalCVJ30VLhbaYNC3GEGkKZ3csJGtvj6FEGwoB76HU
+	Zw6H9qJw3xom0GvIg/gPIm0ORoBvLrk=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-34-Uhp1U9AIMkOWiK6O9CQbFg-1; Wed,
+ 22 Apr 2026 09:22:54 -0400
+X-MC-Unique: Uhp1U9AIMkOWiK6O9CQbFg-1
+X-Mimecast-MFC-AGG-ID: Uhp1U9AIMkOWiK6O9CQbFg_1776864172
+Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 80B6B1955F18;
+	Wed, 22 Apr 2026 13:22:51 +0000 (UTC)
+Received: from bfoster (unknown [10.22.88.73])
+	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id E8C0F19560AB;
+	Wed, 22 Apr 2026 13:22:49 +0000 (UTC)
+Date: Wed, 22 Apr 2026 09:22:47 -0400
+From: Brian Foster <bfoster@redhat.com>
+To: Zhang Yi <yi.zhang@huaweicloud.com>
+Cc: fstests@vger.kernel.org, zlang@kernel.org, linux-ext4@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org, jack@suse.cz, yi.zhang@huawei.com,
+	yizhang089@gmail.com, yangerkun@huawei.com
+Subject: Re: [PATCH] generic/790: test post-EOF gap zeroing persistence
+Message-ID: <aejLp-m2-0h6q0RE@bfoster>
+References: <20260422015246.4132376-1-yi.zhang@huaweicloud.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/2] common/dmlogwrites: add _require_logwrites_size
- helper
-To: Disha Goel <disgoel@linux.ibm.com>, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, ritesh.list@gmail.com,
- ojaswin@linux.ibm.com, djwong@kernel.org, fdmanana@kernel.org,
- quwenruo.btrfs@gmx.com, zlang@kernel.org
-References: <20260414102031.74527-1-disgoel@linux.ibm.com>
-Content-Language: en-US
-From: Anand Jain <anajain.sg@gmail.com>
-In-Reply-To: <20260414102031.74527-1-disgoel@linux.ibm.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260422015246.4132376-1-yi.zhang@huaweicloud.com>
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
 
-On 14/4/26 18:20, Disha Goel wrote:
-> Add a new helper function _require_logwrites_size() to check if the
-> LOGWRITES_DEV meets a minimum size requirement.
+On Wed, Apr 22, 2026 at 09:52:46AM +0800, Zhang Yi wrote:
+> From: Zhang Yi <yi.zhang@huawei.com>
 > 
-> This is useful for tests that use dm-log-writes with additional space
-> requirements, such as creating LVM snapshots during log replay or tests
-> that generate large amounts of logged I/O operations.
+> Test that extending a file past a non-block-aligned EOF correctly
+> zero-fills the gap [old_EOF, block_boundary), and that this zeroing
+> persists through a filesystem shutdown+remount cycle.
 > 
-> The function takes a size parameter in KB and skips the test if
-> LOGWRITES_DEV is smaller than the required size.
+> Stale data beyond EOF can persist on disk when append write data blocks
+> are flushed before the i_size metadata update, or when concurrent append
+> writeback and mmap writes persist non-zero data past EOF. Subsequent
+> post-EOF operations (append write, fallocate, truncate up) must
+> zero-fill and persist the gap to prevent exposing stale data.
 > 
-> Signed-off-by: Disha Goel <disgoel@linux.ibm.com>
+> The test pollutes the file's last physical block (via FIEMAP + raw
+> device write) with a sentinel pattern beyond i_size, then performs each
+> extend operation and verifies the gap is zeroed both in memory and on
+> disk.
+> 
+> Signed-off-by: Zhang Yi <yi.zhang@huawei.com>
 > ---
->  common/dmlogwrites | 9 +++++++++
->  1 file changed, 9 insertions(+)
+> This is the case Jan Kara pointed out during my work on the ext4
+> buffered I/O to iomap conversion. This case is similar to generic/363,
+> but generic/363 doesn't provide persistent testing. For details:
 > 
-> diff --git a/common/dmlogwrites b/common/dmlogwrites
-> index a27e1966..1ce2b2fb 100644
-> --- a/common/dmlogwrites
-> +++ b/common/dmlogwrites
-> @@ -14,6 +14,15 @@ _require_log_writes()
->  	_require_test_program "log-writes/replay-log"
->  }
->  
-> +_require_logwrites_size()
+>  https://lore.kernel.org/linux-ext4/jgotl7vzzuzm6dvz5zfgk6haodxvunb4hq556pzh4hqqwvnhxq@lr3jiedhqh7c/
+> 
+>  tests/generic/790     | 155 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/790.out |   4 ++
+>  2 files changed, 159 insertions(+)
+>  create mode 100755 tests/generic/790
+>  create mode 100644 tests/generic/790.out
+> 
+> diff --git a/tests/generic/790 b/tests/generic/790
+> new file mode 100755
+> index 00000000..5d8f61f9
+> --- /dev/null
+> +++ b/tests/generic/790
+> @@ -0,0 +1,155 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 Huawei.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 790
+> +#
+> +# Test that extending a file past a non-block-aligned EOF correctly zero-fills
+> +# the gap [old_EOF, block_boundary), and that this zeroing persists through a
+> +# filesystem shutdown+remount cycle.
+> +#
+
+Nice test! This is a great idea.
+
+> +# Stale data beyond EOF can persist on disk when:
+> +# 1) append write data blocks are flushed before the i_size metadata update,
+> +#    and the system crashes in this window.
+
+Maybe it's wording or I'm missing something, but how would "append write
+data blocks" be flushed before i_size updates? Wouldn't writeback toss
+them or zero the post-eof range of a folio? Do you mean to refer to
+"on-disk size update" specifically (where I'm reading it as
+inode->i_isize)?
+
+> +# 2) concurrent append writeback and mmap writes persist non-zero data past EOF.
+> +#
+> +# Subsequent post-EOF operations (append write, fallocate, truncate up) must
+> +# zero-fill and persist the gap to prevent exposing stale data.
+> +#
+> +# The test pollutes the file's last physical block (via FIEMAP + raw device
+> +# write) with a sentinel pattern beyond i_size, then performs each extend
+> +# operation and verifies the gap is zeroed both in memory and on disk.
+> +#
+...
+> +_test_eof_zeroing()
 > +{
-> +        [ $# -eq 1 ] || _fail "_require_logwrites_size: expected size param"
+> +	local test_name="$1"
+> +	local extend_cmd="$2"
+> +	local file=$SCRATCH_MNT/testfile_${test_name}
 > +
-> +        local devsize=$(_get_device_size $LOGWRITES_DEV)
-> +        [ $devsize -lt $1 ] && \
-> +                _notrun "LOGWRITES_DEV too small, ${devsize}KB < $1KB"
+> +	echo "$test_name" | tee -a $seqres.full
+> +
+> +	# Compute non-block-aligned EOF offset
+> +	local gap_bytes=16
+> +	local eof_offset=$((blksz - gap_bytes))
+> +
+> +	# Step 1: Write one full block to ensure the filesystem allocates a
+> +	#         physical block for the file instead of using inline data.
+> +	$XFS_IO_PROG -f -c "pwrite -S 0x5a 0 $blksz" -c fsync \
+> +		"$file" >> $seqres.full 2>&1
+> +
+> +	# Step 2: Get physical block offset on device via FIEMAP
+> +	local phys_offset
+> +	phys_offset=$(_get_phys_offset "$file")
+> +	if [ -z "$phys_offset" ]; then
+> +		_fail "$test_name: failed to get physical block offset via fiemap"
+> +	fi
+> +
+> +	# Step 3: Truncate file to non-block-aligned size and fsync.
+> +	#         The on-disk region [eof_offset, blksz) may or may not be
+> +	#         zeroed by the filesystem at this point.
+> +	$XFS_IO_PROG -c "truncate $eof_offset" -c fsync \
+> +		"$file" >> $seqres.full 2>&1
+> +
+> +	# Step 4: Unmount and restore the physical block to all-0x5a on disk.
+> +	#         This bypasses the kernel's pagecache EOF-zeroing to ensure
+> +	#         the stale pattern is present on disk. Then remount.
+> +	_scratch_unmount
+> +	$XFS_IO_PROG -d -c "pwrite -S 0x5a $phys_offset $blksz" \
+> +		$SCRATCH_DEV >> $seqres.full 2>&1
+> +	_scratch_mount >> $seqres.full 2>&1
+> +
+> +	# Verify file size is still eof_offset after remount
+> +	local sz
+> +	sz=$(stat -c %s "$file")
+> +	if [ "$sz" -ne "$eof_offset" ]; then
+> +		_fail "$test_name: file size wrong after remount: $sz != $eof_offset"
+> +	fi
+
+I was initially curious why we'd want to do this, but after further
+thought I wonder if it might make more sense to check file size against
+the extended size after the shutdown/mount cycle below (but before
+checking the gap range). That way we know the size update was
+logged/recovered correctly and we're about to read from a file range
+within eof. Hm?
+
+Those couple nits aside this all looks pretty good to me.
+
+Brian
+
+> +
+> +	# Step 5: Execute the extend operation.
+> +	$XFS_IO_PROG -c "$extend_cmd" "$file" >> $seqres.full 2>&1
+> +
+> +	# Step 6: Verify gap [eof_offset, blksz) is zeroed BEFORE shutdown
+> +	_check_gap_zero "$file" $eof_offset $gap_bytes "before shutdown" || return 1
+> +
+> +	# Step 7: Sync the extended range and shutdown the filesystem with
+> +	#         journal flush. This persists the file size extending, and
+> +	#         the filesystem should persist the zeroed data in the gap
+> +	#         range as well.
+> +	if [ "$extend_cmd" != "${extend_cmd#pwrite}" ]; then
+> +		$XFS_IO_PROG -c "sync_range -w $blksz $blksz" \
+> +			"$file" >> $seqres.full 2>&1
+> +	fi
+> +	_scratch_shutdown -f
+> +
+> +	# Step 8: Remount and verify gap is still zeroed
+> +	_scratch_cycle_mount
+> +	_check_gap_zero "$file" $eof_offset $gap_bytes "after shutdown+remount" || return 1
 > +}
 > +
->  # Starting from v4.15-rc1, DAX support was added to dm-log-writes, but note
->  # that it doesn't track the data that we write via the mmap(), so we can't do
->  # any data integrity checking. We can only verify that the metadata writes for
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +blksz=$(_get_block_size $SCRATCH_MNT)
+> +
+> +# Test three variants of EOF-extending operations
+> +_test_eof_zeroing "append_write" "pwrite -S 0x42 $blksz $blksz"
+> +_test_eof_zeroing "truncate_up" "truncate $((blksz * 2))"
+> +_test_eof_zeroing "fallocate" "falloc $blksz $blksz"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/790.out b/tests/generic/790.out
+> new file mode 100644
+> index 00000000..e5e2cc09
+> --- /dev/null
+> +++ b/tests/generic/790.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 790
+> +append_write
+> +truncate_up
+> +fallocate
+> -- 
+> 2.52.0
+> 
+> 
 
-
-_require_logwrites_size() should be designed something like this
-
-_require_log_writes_sized()
-{
-	local size=$1
-
-	_require_log_writes
-	check $size || _notrun
-}
-
-So, patch 2/2 can simply call `_require_log_writes_sized <>`
-
-Thanks.
