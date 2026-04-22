@@ -1,269 +1,148 @@
-Received: from dggsgout12.his.huawei.com (dggsgout12.his.huawei.com [45.249.212.56])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 453834A23;
-	Wed, 22 Apr 2026 01:59:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.56
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 330BF61FFE;
+	Wed, 22 Apr 2026 05:38:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776823152; cv=none; b=h7Xm6IolN3FGqE5ZpRlgFwcFwpUy2c3OOKBzBgWohgh8TwvuBxblvWSGFb2dZfnK37xi/mO5FAriEJq7Im2uyU6lLMVX9I94exsykgLlLiIbOF4OZlUNTeazX3Uh3QRQO6J6NtvxRkPmRr12W7ZTXcPVwBrS2aI5+AijZehit6w=
+	t=1776836323; cv=none; b=qdpO5FWfhCZXE+b0xP2yLjeiegnuNKBVBMFXqAuq0A/w33pi9kdynfTTOhBZlIsbeOsdWnwFGyazYFVsJ6YxASDv+gOq0NhukY5q9pwPYn98L9pChdn9/EqF4MGMx1u3rWMfEcj4O2t7GOGx3N6Ns0WqTBBxPbYm5vrNZvl15Yw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776823152; c=relaxed/simple;
-	bh=/dYcp8HiUqYhyRhwQpJDUJJRfiSSBDRerwnbELrnQ44=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=uzNcSwZ99FRupt7nX48yqrGGUs5RuRIZxkrTus6fgC8iIZxd57wetkJaRo168gC/bxZkT9waHqEwgWtt/J4TGtIyvaZHErcRTTCzLORRAPVrL5ppaLwe4mFSLe0zIoXEzsYezN9vuo7O5dCAeRzHHvGs+Hkb4WAtYrXtH4W22zQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com; spf=none smtp.mailfrom=huaweicloud.com; arc=none smtp.client-ip=45.249.212.56
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=huaweicloud.com
-Received: from mail.maildlp.com (unknown [172.19.163.170])
-	by dggsgout12.his.huawei.com (SkyGuard) with ESMTPS id 4g0j7T0YzVzKHLt9;
-	Wed, 22 Apr 2026 09:58:45 +0800 (CST)
-Received: from mail02.huawei.com (unknown [10.116.40.252])
-	by mail.maildlp.com (Postfix) with ESMTP id 1B1A1405D2;
-	Wed, 22 Apr 2026 09:59:05 +0800 (CST)
-Received: from huaweicloud.com (unknown [10.50.85.155])
-	by APP3 (Coremail) with SMTP id _Ch0CgC3ZL5bK+hpYcQSBQ--.2895S4;
-	Wed, 22 Apr 2026 09:59:02 +0800 (CST)
-From: Zhang Yi <yi.zhang@huaweicloud.com>
-To: fstests@vger.kernel.org,
-	zlang@kernel.org
-Cc: linux-ext4@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org,
-	jack@suse.cz,
-	yi.zhang@huawei.com,
-	yi.zhang@huaweicloud.com,
-	yizhang089@gmail.com,
-	yangerkun@huawei.com
-Subject: [PATCH] generic/790: test post-EOF gap zeroing persistence
-Date: Wed, 22 Apr 2026 09:52:46 +0800
-Message-ID: <20260422015246.4132376-1-yi.zhang@huaweicloud.com>
-X-Mailer: git-send-email 2.52.0
+	s=arc-20240116; t=1776836323; c=relaxed/simple;
+	bh=SSbTn8nI/sVgR0OSaemvvrlN3XOjDrcQcY0pwBkht7k=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=UoOcT0gEjcVMFRwGA+kyBHrtA3xuZJtOjTdC7NTKX2Yn60Pw9D8FWLy07Jwg1raJSwHAgJ1d56vKX4cLh8mzmUKOrdiOZOp8b7Y4uhjoUyTWlUNAKS4IbCiWDMPC05v2QDlE8mzcVBEANUe8INsj4B6rDsQ4azpt4EUG2qejbbE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=eQaqdnX+; arc=none smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="eQaqdnX+"
+Received: from pps.filterd (m0356517.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 63LImLpl590806;
+	Wed, 22 Apr 2026 05:38:39 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=pp1; bh=d1yIWL
+	xnHFD5U/7t3Z9R2B7Z9KsW8UDapcVpFrHpzKE=; b=eQaqdnX+MQBW3JoHZBuNCr
+	fID92FGQcZs74fBk4MuTVdaOuThVYq/cPz8931g2oKMS0Pw/8mLgpq7KmVVRsGJw
+	rjC2ElC7ALWO6s5eRFG6XyVkfQQjSQYS/npFJB5wzg/4bpvcoMbCwSBiCy3J755V
+	n31cYxplpnyoZar5hl7ezHWOP/2yErcd5IA1DnRrIn48sp21UtdvUh8La+sbQDZH
+	5+2z+fMgnL1qx6vMRzJJnPeBoACJiocyGE5BHrLN4Fc3PoVUQUuJ+X1CAMaziSvq
+	xgQsT1jC6nGdQed1JFafgqQqebO0rRyvKiRyeNoiTBGOt9A3eSFiRvaKaPpLEN+w
+	==
+Received: from ppma12.dal12v.mail.ibm.com (dc.9e.1632.ip4.static.sl-reverse.com [50.22.158.220])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4dpeu21v5g-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 22 Apr 2026 05:38:39 +0000 (GMT)
+Received: from pps.filterd (ppma12.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma12.dal12v.mail.ibm.com (8.18.1.7/8.18.1.7) with ESMTP id 63M5ZMQ5011638;
+	Wed, 22 Apr 2026 05:38:38 GMT
+Received: from smtprelay01.fra02v.mail.ibm.com ([9.218.2.227])
+	by ppma12.dal12v.mail.ibm.com (PPS) with ESMTPS id 4dpjkxrxg2-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 22 Apr 2026 05:38:38 +0000 (GMT)
+Received: from smtpav04.fra02v.mail.ibm.com (smtpav04.fra02v.mail.ibm.com [10.20.54.103])
+	by smtprelay01.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 63M5caps59638136
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Wed, 22 Apr 2026 05:38:36 GMT
+Received: from smtpav04.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id B9BBC20043;
+	Wed, 22 Apr 2026 05:38:36 +0000 (GMT)
+Received: from smtpav04.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 6C78A20040;
+	Wed, 22 Apr 2026 05:38:35 +0000 (GMT)
+Received: from [9.123.4.214] (unknown [9.123.4.214])
+	by smtpav04.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Wed, 22 Apr 2026 05:38:35 +0000 (GMT)
+Message-ID: <1e1e374a-d9ef-4e0f-843d-09f292cddc57@linux.ibm.com>
+Date: Wed, 22 Apr 2026 11:08:34 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:_Ch0CgC3ZL5bK+hpYcQSBQ--.2895S4
-X-Coremail-Antispam: 1UD129KBjvJXoW3Xw17Cr48CryDCryUtry3twb_yoWxuFy3pF
-	ZYgF1Ykr1xKa17X397GF1qqr1ruwn5Zr4j9392grZ0vry8GF1xXa9Fgr1jq3y7Jr1fuw4F
-	va1kKa4xWw17AFJanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUUkG14x267AKxVW8JVW5JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
-	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
-	1l84ACjcxK6xIIjxv20xvE14v26F1j6w1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4U
-	JVWxJr1l84ACjcxK6I8E87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_Gc
-	CE3s1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E
-	2Ix0cI8IcVAFwI0_JrI_JrylYx0Ex4A2jsIE14v26r1j6r4UMcvjeVCFs4IE7xkEbVWUJV
-	W8JwACjcxG0xvY0x0EwIxGrwACjI8F5VA0II8E6IAqYI8I648v4I1lc7CjxVAaw2AFwI0_
-	Jw0_GFyl42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4xG67
-	AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r1q6r43MIIY
-	rxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I0E14
-	v26r1j6r4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxVWUJVW8
-	JwCI42IY6I8E87Iv6xkF7I0E14v26r1j6r4UYxBIdaVFxhVjvjDU0xZFpf9x0JUZYFZUUU
-	UU=
-X-CM-SenderInfo: d1lo6xhdqjqx5xdzvxpfor3voofrz/
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/2] common/dmlogwrites: add _require_logwrites_size
+ helper
+Content-Language: en-GB
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
+        djwong@kernel.org, fdmanana@kernel.org, quwenruo.btrfs@gmx.com,
+        zlang@kernel.org
+References: <20260414102031.74527-1-disgoel@linux.ibm.com>
+From: Disha Goel <disgoel@linux.ibm.com>
+In-Reply-To: <20260414102031.74527-1-disgoel@linux.ibm.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Reinject: loops=2 maxloops=12
+X-Proofpoint-GUID: vrjVkgJlTJB8ySTK6p81ZAgwom7LDSM2
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNDIyMDA1MSBTYWx0ZWRfXw3DNMK6qQ4FP
+ 2991lUcb7biLKU949UuV0FMVVNslR6wCH1Vf8g+sJXpCOGcdtU/VtrFfWo+kD4SXA6oIwGZq3F3
+ M+JpmyBBHcLUgzCm8jRRbaffwiyisBomgUOcz3o+CnKZ4P/KbYEx+0XZcE1HQYkPOQka1vfSBt1
+ 0tf4x0P9/oh8axERgNEKlBW3K51af+SoRvWFy5mefxW1Y8AFdNXRXs1g62WfHEYQpiTH3JaK2uS
+ v5rj0t3z/o4A65QJZKZJHk0jIsPiI4wqZkfxIEq1P4ZoyH7ZBh+RTp5vfwE4E5s0kXj6+TijTD8
+ 3+eWFE2VpDc5XF6M8zCSwqAJR7ytb730p5Hz9Bs706UynViTXlqtaMzqxU1Pn9Fn/JcKruSwRxr
+ I1OD6nt2gseKvlzfuYUSlYhKCjH1fU1H+PQYBJ1pz2ln7dq/ypvVG81uXTM6O74E1TaoIEEcDYu
+ 31sgg5/p2B1o7IrK6rQ==
+X-Authority-Analysis: v=2.4 cv=C8LZDwP+ c=1 sm=1 tr=0 ts=69e85edf cx=c_pps
+ a=bLidbwmWQ0KltjZqbj+ezA==:117 a=bLidbwmWQ0KltjZqbj+ezA==:17
+ a=IkcTkHD0fZMA:10 a=A5OVakUREuEA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=RnoormkPH1_aCDwRdu11:22 a=U7nrCbtTmkRpXpFmAIza:22 a=VnNF1IyMAAAA:8
+ a=-RhjpE4fvuK0Md3SiowA:9 a=QEXdDO2ut3YA:10
+X-Proofpoint-ORIG-GUID: FITPu3K_4MTP37hwkimf5BwZrSsM_IuJ
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
+ definitions=2026-04-21_03,2026-04-21_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ adultscore=0 suspectscore=0 priorityscore=1501 malwarescore=0
+ lowpriorityscore=0 clxscore=1015 bulkscore=0 impostorscore=0 spamscore=0
+ phishscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2604200000
+ definitions=main-2604220051
 
-From: Zhang Yi <yi.zhang@huawei.com>
+Hi,
 
-Test that extending a file past a non-block-aligned EOF correctly
-zero-fills the gap [old_EOF, block_boundary), and that this zeroing
-persists through a filesystem shutdown+remount cycle.
+Looking for review comments on this patch series.
 
-Stale data beyond EOF can persist on disk when append write data blocks
-are flushed before the i_size metadata update, or when concurrent append
-writeback and mmap writes persist non-zero data past EOF. Subsequent
-post-EOF operations (append write, fallocate, truncate up) must
-zero-fill and persist the gap to prevent exposing stale data.
+On 14/04/26 3:50 pm, Disha Goel wrote:
+> Add a new helper function _require_logwrites_size() to check if the
+> LOGWRITES_DEV meets a minimum size requirement.
+> 
+> This is useful for tests that use dm-log-writes with additional space
+> requirements, such as creating LVM snapshots during log replay or tests
+> that generate large amounts of logged I/O operations.
+> 
+> The function takes a size parameter in KB and skips the test if
+> LOGWRITES_DEV is smaller than the required size.
+> 
+> Signed-off-by: Disha Goel <disgoel@linux.ibm.com>
+> ---
+>   common/dmlogwrites | 9 +++++++++
+>   1 file changed, 9 insertions(+)
+> 
+> diff --git a/common/dmlogwrites b/common/dmlogwrites
+> index a27e1966..1ce2b2fb 100644
+> --- a/common/dmlogwrites
+> +++ b/common/dmlogwrites
+> @@ -14,6 +14,15 @@ _require_log_writes()
+>   	_require_test_program "log-writes/replay-log"
+>   }
+>   
+> +_require_logwrites_size()
+> +{
+> +        [ $# -eq 1 ] || _fail "_require_logwrites_size: expected size param"
+> +
+> +        local devsize=$(_get_device_size $LOGWRITES_DEV)
+> +        [ $devsize -lt $1 ] && \
+> +                _notrun "LOGWRITES_DEV too small, ${devsize}KB < $1KB"
+> +}
+> +
+>   # Starting from v4.15-rc1, DAX support was added to dm-log-writes, but note
+>   # that it doesn't track the data that we write via the mmap(), so we can't do
+>   # any data integrity checking. We can only verify that the metadata writes for
 
-The test pollutes the file's last physical block (via FIEMAP + raw
-device write) with a sentinel pattern beyond i_size, then performs each
-extend operation and verifies the gap is zeroed both in memory and on
-disk.
-
-Signed-off-by: Zhang Yi <yi.zhang@huawei.com>
----
-This is the case Jan Kara pointed out during my work on the ext4
-buffered I/O to iomap conversion. This case is similar to generic/363,
-but generic/363 doesn't provide persistent testing. For details:
-
- https://lore.kernel.org/linux-ext4/jgotl7vzzuzm6dvz5zfgk6haodxvunb4hq556pzh4hqqwvnhxq@lr3jiedhqh7c/
-
- tests/generic/790     | 155 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/790.out |   4 ++
- 2 files changed, 159 insertions(+)
- create mode 100755 tests/generic/790
- create mode 100644 tests/generic/790.out
-
-diff --git a/tests/generic/790 b/tests/generic/790
-new file mode 100755
-index 00000000..5d8f61f9
---- /dev/null
-+++ b/tests/generic/790
-@@ -0,0 +1,155 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Huawei.  All Rights Reserved.
-+#
-+# FS QA Test No. 790
-+#
-+# Test that extending a file past a non-block-aligned EOF correctly zero-fills
-+# the gap [old_EOF, block_boundary), and that this zeroing persists through a
-+# filesystem shutdown+remount cycle.
-+#
-+# Stale data beyond EOF can persist on disk when:
-+# 1) append write data blocks are flushed before the i_size metadata update,
-+#    and the system crashes in this window.
-+# 2) concurrent append writeback and mmap writes persist non-zero data past EOF.
-+#
-+# Subsequent post-EOF operations (append write, fallocate, truncate up) must
-+# zero-fill and persist the gap to prevent exposing stale data.
-+#
-+# The test pollutes the file's last physical block (via FIEMAP + raw device
-+# write) with a sentinel pattern beyond i_size, then performs each extend
-+# operation and verifies the gap is zeroed both in memory and on disk.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick rw shutdown
-+
-+. ./common/filter
-+
-+_require_scratch
-+_require_block_device $SCRATCH_DEV
-+_require_scratch_shutdown
-+_require_metadata_journaling $SCRATCH_DEV
-+_require_xfs_io_command "fiemap"
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "pwrite"
-+_require_xfs_io_command "truncate"
-+_require_xfs_io_command "sync_range"
-+
-+# Check that gap region [offset, offset+nbytes) is entirely zero
-+_check_gap_zero()
-+{
-+	local file="$1"
-+	local offset="$2"
-+	local nbytes="$3"
-+	local label="$4"
-+	local data
-+	local stripped
-+
-+	data=$(od -A n -t x1 -j $offset -N $nbytes "$file" 2>/dev/null)
-+
-+	# Remove whitespace and check if any byte is non-zero
-+	stripped=$(echo "$data" | tr -d ' \n\t')
-+	if [ -n "$stripped" ] && ! echo "$stripped" | grep -qE "^0+$"; then
-+		echo "FAIL: non-zero data in gap [$offset,$((offset + nbytes))) $label"
-+		_hexdump -N $((offset + nbytes)) "$file"
-+		return 1
-+	fi
-+	return 0
-+}
-+
-+# Get the physical block offset (in bytes) of the file's first block on device
-+_get_phys_offset()
-+{
-+	local file="$1"
-+	local fiemap_output
-+	local phys_blk
-+
-+	fiemap_output=$($XFS_IO_PROG -r -c "fiemap -v" "$file" 2>/dev/null)
-+	phys_blk=$(echo "$fiemap_output" | _filter_xfs_io_fiemap | head -1 | awk '{print $3}')
-+	if [ -z "$phys_blk" ]; then
-+		echo ""
-+		return
-+	fi
-+	# Convert 512-byte blocks to bytes
-+	echo $((phys_blk * 512))
-+}
-+
-+_test_eof_zeroing()
-+{
-+	local test_name="$1"
-+	local extend_cmd="$2"
-+	local file=$SCRATCH_MNT/testfile_${test_name}
-+
-+	echo "$test_name" | tee -a $seqres.full
-+
-+	# Compute non-block-aligned EOF offset
-+	local gap_bytes=16
-+	local eof_offset=$((blksz - gap_bytes))
-+
-+	# Step 1: Write one full block to ensure the filesystem allocates a
-+	#         physical block for the file instead of using inline data.
-+	$XFS_IO_PROG -f -c "pwrite -S 0x5a 0 $blksz" -c fsync \
-+		"$file" >> $seqres.full 2>&1
-+
-+	# Step 2: Get physical block offset on device via FIEMAP
-+	local phys_offset
-+	phys_offset=$(_get_phys_offset "$file")
-+	if [ -z "$phys_offset" ]; then
-+		_fail "$test_name: failed to get physical block offset via fiemap"
-+	fi
-+
-+	# Step 3: Truncate file to non-block-aligned size and fsync.
-+	#         The on-disk region [eof_offset, blksz) may or may not be
-+	#         zeroed by the filesystem at this point.
-+	$XFS_IO_PROG -c "truncate $eof_offset" -c fsync \
-+		"$file" >> $seqres.full 2>&1
-+
-+	# Step 4: Unmount and restore the physical block to all-0x5a on disk.
-+	#         This bypasses the kernel's pagecache EOF-zeroing to ensure
-+	#         the stale pattern is present on disk. Then remount.
-+	_scratch_unmount
-+	$XFS_IO_PROG -d -c "pwrite -S 0x5a $phys_offset $blksz" \
-+		$SCRATCH_DEV >> $seqres.full 2>&1
-+	_scratch_mount >> $seqres.full 2>&1
-+
-+	# Verify file size is still eof_offset after remount
-+	local sz
-+	sz=$(stat -c %s "$file")
-+	if [ "$sz" -ne "$eof_offset" ]; then
-+		_fail "$test_name: file size wrong after remount: $sz != $eof_offset"
-+	fi
-+
-+	# Step 5: Execute the extend operation.
-+	$XFS_IO_PROG -c "$extend_cmd" "$file" >> $seqres.full 2>&1
-+
-+	# Step 6: Verify gap [eof_offset, blksz) is zeroed BEFORE shutdown
-+	_check_gap_zero "$file" $eof_offset $gap_bytes "before shutdown" || return 1
-+
-+	# Step 7: Sync the extended range and shutdown the filesystem with
-+	#         journal flush. This persists the file size extending, and
-+	#         the filesystem should persist the zeroed data in the gap
-+	#         range as well.
-+	if [ "$extend_cmd" != "${extend_cmd#pwrite}" ]; then
-+		$XFS_IO_PROG -c "sync_range -w $blksz $blksz" \
-+			"$file" >> $seqres.full 2>&1
-+	fi
-+	_scratch_shutdown -f
-+
-+	# Step 8: Remount and verify gap is still zeroed
-+	_scratch_cycle_mount
-+	_check_gap_zero "$file" $eof_offset $gap_bytes "after shutdown+remount" || return 1
-+}
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+blksz=$(_get_block_size $SCRATCH_MNT)
-+
-+# Test three variants of EOF-extending operations
-+_test_eof_zeroing "append_write" "pwrite -S 0x42 $blksz $blksz"
-+_test_eof_zeroing "truncate_up" "truncate $((blksz * 2))"
-+_test_eof_zeroing "fallocate" "falloc $blksz $blksz"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/790.out b/tests/generic/790.out
-new file mode 100644
-index 00000000..e5e2cc09
---- /dev/null
-+++ b/tests/generic/790.out
-@@ -0,0 +1,4 @@
-+QA output created by 790
-+append_write
-+truncate_up
-+fallocate
 -- 
-2.52.0
+Regards,
+Disha
 
