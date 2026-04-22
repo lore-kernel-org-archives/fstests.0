@@ -1,89 +1,42 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0DF820A5F3
-	for <fstests@vger.kernel.org>; Wed, 22 Apr 2026 13:31:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C387035CB73;
+	Wed, 22 Apr 2026 15:55:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776864717; cv=none; b=jXXWIFc7iFawCAuDJGLJW+EEy1OJ0aG8/Rnh5JiVUwVTF5Gem6++tIP0YryqjGr89oblZz/galjvpPw1AgZdG6EwMvQkzsKRZt7uc2SuC5KiRepOj1Pslzc8HojczDGtG8VZtnpewMM6Lv4jWP2gNASPc4JOvn9svuIvlRk6jV4=
+	t=1776873330; cv=none; b=M8ZCEDC5nYLJLV4KCBGZJyenV8Pgc2MHx4dhK+r0uI+eGLc7Lx0fr8+7Af1HvWMFXbnBmFSo/5MPuBB+fCKdQ51W+FhgBxbJ3K+lJuKfVo8+9BcewxgP+9ERV1La6nbf5c+j8hEcfqFSOcJXauK1JdrVjlNXwYvU4ovTGSlI2gg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776864717; c=relaxed/simple;
-	bh=TsylkPPgRWWxPNtCn3oqaJn5OS6yI/eGV1IHmZH306c=;
+	s=arc-20240116; t=1776873330; c=relaxed/simple;
+	bh=H53Pi2+KL5AiARyZw1kDL912O/VbBph3HnqhpcmZpKU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=oDsNalB1TXLkyB9Eq+FkDbywIA+SyBV5fZ9kPEvYgirJHzAAxCrJE/UZmiekxgz2/ZnS+OYCu+j5udX+cJermua1RdRvzdH2SSPTLEVLXF58graFRQ+eXuV7LEumr7+i90Bor0AFQ3gNRE4Vp3g6ndYdXOC1zPDxEHl02bto0BQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=jIdAaSBa; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=J22BTkS5; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=NR2o3Zv1I4MA+R3ayYOdp8PCbcOn/FE7Hi2NmHRYmu/ahMtkNYZtekB9CCh3bPlKCuNXx4NJEJFLF7na2nR7Jdd6QbKY6Zei23edlpdVEIyn6bvaixAke5dxzWTtn2iaXt1pdZdJNq60fdlk2TTUVCxuDiRtcWTrM7gUFD7CvlM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gUxgwOMj; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="jIdAaSBa";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="J22BTkS5"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1776864714;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=r55woItgcSN/921GWGJAOvXIu6ZnxSOsPT1nq4l7hg4=;
-	b=jIdAaSBah6RCbUxnUhDaJtRParOWJNFKemTbvb1pJpmfRss2i2MekF+OdXX8JywF7Mbad5
-	Fxk1KfXmTUXfc7ErD4AvMFckgtG1T0G9AWY2J8GfkJYPZ7yOohoGPoMMtpSR5ZhxfTOPsH
-	bMnS6AfU9lx+o/9Ba1OpVWthoZWba98=
-Received: from mail-wr1-f70.google.com (mail-wr1-f70.google.com
- [209.85.221.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-662-GsDRNlg1MdWg2avO5T5C_w-1; Wed, 22 Apr 2026 09:31:53 -0400
-X-MC-Unique: GsDRNlg1MdWg2avO5T5C_w-1
-X-Mimecast-MFC-AGG-ID: GsDRNlg1MdWg2avO5T5C_w_1776864712
-Received: by mail-wr1-f70.google.com with SMTP id ffacd0b85a97d-440d12a472eso2925110f8f.3
-        for <fstests@vger.kernel.org>; Wed, 22 Apr 2026 06:31:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1776864712; x=1777469512; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=r55woItgcSN/921GWGJAOvXIu6ZnxSOsPT1nq4l7hg4=;
-        b=J22BTkS5QlOBjp8hE8MZzrwg8CNd/x5rsT+hmsxjNy+A/Up5mE6RRmkTvsq7wC6B0W
-         n+3zGJU5hebkIRgC6SeFYotbVyMtGZwLG6rO28muJ+c33dMmo87NCpt1b1lV65cZLEXS
-         7rbxtaLfvNHy0WuNpcK7rPmpRRe5SjinEoxoUwIdJbHHEeFdKWuPiBdPAp07omxUQ4E3
-         rqQ4Zc5jB9tT/GOfne+l6feJElQeuOgz7f80xqvlZZz2+SRK03ENsHIs8+QDFLzMhCTr
-         g6PduNm+hVRakF4Xbc6Ag/SvVRuD4y19mhrZFUOD/2yXLpx0y+i6PxrDPj6eeSjsdlSd
-         ursQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776864712; x=1777469512;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=r55woItgcSN/921GWGJAOvXIu6ZnxSOsPT1nq4l7hg4=;
-        b=cDP5IFxbMirABX6CB0EoZLND6qbzG6Jp+zOYjpKnL7kqVZ7KWfpVATdpm196x2hf4v
-         I/Fra0I4HCk9Gwqoc5A4XINVdXK53TdNy3sfxafxFKKpiLMGK0aae+8nHOe14vqwubRU
-         xIZhx0MJMlbx0u/rHkpr7m5p0aWXnIzFxqxhMlpWsft4OVSfuq31CeMglFEJwdCmCHfn
-         poY+0/PCm2aGtaZHPvXa2mgIFbWtP9Ft/LztOcqVdHOAUYEHmWNQFclh5UwQImsPV00C
-         htYkZ23Ef+YaJJ8S7+k3ya84KrQ0pH2GWsBdZS3cc4Q/l8zTOacyccDIFlkSK2ehOfPy
-         qoIQ==
-X-Forwarded-Encrypted: i=1; AFNElJ9qrEFpJVsejpN5vo3ZMll1a42TnO+EbIgYB7geBihoIlI/V82lJpTqmuyVlw+28yoRyOxBKvLD@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx7RpwuAE4neQRHNhVlUMbB5Y9CCInV6EciVnHR0Yj08XNZoHYn
-	RUjloivemH+zPbmCFMJ+bhfkt/sX26P2g9mvF6EhudenGmgTi5fSFD8nMYZKW7ncTSoxXUKebY4
-	aeQfZNc5BbHlPYQz1gdnYYO/zVl5VkdUeYGhPK/93sEKxkEVxbXxO9PrnES40azTrGg==
-X-Gm-Gg: AeBDies5oBgGJQze/em29keul/2pytLDzxB4yA91cloOkksdx5a8aN4t+2enpuNIDeI
-	548u4SPJ1m5wJIMjJzv4a8aH1yqjXN+sESJ+JCCD2OJ29WV3Zo7rUO6FAVQwWsz9+IJf2AqS6lx
-	mqfiOuXRWxHnbDxjt2y4WAuqSebm1/wwe53lDHIs3yJ0X8j3oXVIzlJgfAJptWhaoBRbHCq0amF
-	MGGWBetspv1MxrjtTwDv5BuIqvPtIeR8tyhRzXHHJaugWby7cS0fgmpCDGbN0TQzK97iPA44iT2
-	UfAoIx6NDWLEUPpUcxt/IC4Cw/kYwOyXKvGdXe5kPYyPToDhZCqKX7kKdzZzaF1rKHC9TtCyv0L
-	+Cj+r4MdVc5pMN0kOaC15Vw==
-X-Received: by 2002:a5d:4111:0:b0:43f:e43a:f4a6 with SMTP id ffacd0b85a97d-43fe43af4ebmr22844680f8f.6.1776864711951;
-        Wed, 22 Apr 2026 06:31:51 -0700 (PDT)
-X-Received: by 2002:a5d:4111:0:b0:43f:e43a:f4a6 with SMTP id ffacd0b85a97d-43fe43af4ebmr22844626f8f.6.1776864711252;
-        Wed, 22 Apr 2026 06:31:51 -0700 (PDT)
-Received: from thinky ([217.30.74.39])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-43fe4e4d5b1sm49690091f8f.30.2026.04.22.06.31.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 22 Apr 2026 06:31:50 -0700 (PDT)
-Date: Wed, 22 Apr 2026 15:31:50 +0200
-From: Andrey Albershteyn <aalbersh@redhat.com>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Andrey Albershteyn <aalbersh@kernel.org>, fstests@vger.kernel.org, 
-	zlang@kernel.org, djwong@kernel.org
-Subject: Re: [PATCH] xfs/653: require realtime
-Message-ID: <cwrs4wnknrwofumnhqjbl3ka3r3rdhvurtrfm4db7ixd2lj7hj@au6vwxxvifqz>
-References: <20260417162245.690716-2-aalbersh@kernel.org>
- <20260422060553.GE5391@lst.de>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gUxgwOMj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6B65AC19425;
+	Wed, 22 Apr 2026 15:55:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1776873330;
+	bh=H53Pi2+KL5AiARyZw1kDL912O/VbBph3HnqhpcmZpKU=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=gUxgwOMjtQWyujrNVOdu5Jk3XELjxEY1m0xXZGBCMVpV+QJFmog+ROPnRT8e0Tlf2
+	 7ioQUp3dmtWAbn2R/D+caNI9uJr9A71aZZvIi5Jqko/ajr54j3qdZUY7SvQOm9lDWi
+	 oLATlfYVlzEzgJ9kHEhj3VU5/KrH4wQXgSBqG5wjUf+rCW7M2JnHN2ubGNqCuLJQEL
+	 Z3wcCsirx6PZ1JgUR+3OXa4Xbllvyf1p+4ixLszpyz+o65o1EFZUoFA5f1uaW858I6
+	 jFUAkchtzPWcN8+lO8F0PVOmYhHEjbLHzOx0aEer+46siohUSXE4x6sSD6YcXD3WDE
+	 SasZR/o8Dps1Q==
+Date: Wed, 22 Apr 2026 08:55:28 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Disha Goel <disgoel@linux.ibm.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	ritesh.list@gmail.com, ojaswin@linux.ibm.com, fdmanana@kernel.org,
+	quwenruo.btrfs@gmx.com, zlang@kernel.org
+Subject: Re: [PATCH 1/2] common/dmlogwrites: add _require_logwrites_size
+ helper
+Message-ID: <20260422155528.GE7739@frogsfrogsfrogs>
+References: <20260414102031.74527-1-disgoel@linux.ibm.com>
+ <1e1e374a-d9ef-4e0f-843d-09f292cddc57@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -92,47 +45,58 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260422060553.GE5391@lst.de>
+In-Reply-To: <1e1e374a-d9ef-4e0f-843d-09f292cddc57@linux.ibm.com>
 
-On 2026-04-22 08:05:53, Christoph Hellwig wrote:
-> On Fri, Apr 17, 2026 at 06:22:43PM +0200, Andrey Albershteyn wrote:
-> > This test fails to mount without CONFIG_XFS_RT.
+On Wed, Apr 22, 2026 at 11:08:34AM +0530, Disha Goel wrote:
+> Hi,
 > 
-> It would also fail without zone device support
+> Looking for review comments on this patch series.
+> 
+> On 14/04/26 3:50 pm, Disha Goel wrote:
+> > Add a new helper function _require_logwrites_size() to check if the
+> > LOGWRITES_DEV meets a minimum size requirement.
+> > 
+> > This is useful for tests that use dm-log-writes with additional space
+> > requirements, such as creating LVM snapshots during log replay or tests
+> > that generate large amounts of logged I/O operations.
+> > 
+> > The function takes a size parameter in KB and skips the test if
+> > LOGWRITES_DEV is smaller than the required size.
+> > 
+> > Signed-off-by: Disha Goel <disgoel@linux.ibm.com>
+> > ---
+> >   common/dmlogwrites | 9 +++++++++
+> >   1 file changed, 9 insertions(+)
+> > 
+> > diff --git a/common/dmlogwrites b/common/dmlogwrites
+> > index a27e1966..1ce2b2fb 100644
+> > --- a/common/dmlogwrites
+> > +++ b/common/dmlogwrites
+> > @@ -14,6 +14,15 @@ _require_log_writes()
+> >   	_require_test_program "log-writes/replay-log"
+> >   }
+> > +_require_logwrites_size()
+> > +{
+> > +        [ $# -eq 1 ] || _fail "_require_logwrites_size: expected size param"
 
-The CONFIG_BLK_DEV_ZONED? Seems to pass if XFS_RT=y
+What are the units of the size parameter?  Bytes?  512b sectors?
 
-> , and the || _notrun
-> should handle that.  I guess it doesn't for you?
+The helper should have a comment clarifying that.
 
-I suppose mkfs.xfs is fine with formatting the device even when
-XFS_RT=n, but mount then fails, so _notrun doesn't catch it.
+--D
 
--- 
-- Andrey
-
--- 
-
-[root@kd:~]# mkfs.xfs -b size=4k -r zoned=1,size=2040928b -f /dev/vdb
-meta-data=/dev/vdb               isize=512    agcount=4, agsize=32768 blks
-         =                       sectsz=512   attr=2, projid32bit=1
-         =                       crc=1        finobt=1, sparse=1, rmapbt=1
-         =                       reflink=0    bigtime=1 inobtcount=1 nrext64=1
-         =                       exchange=1   metadir=1
-data     =                       bsize=4096   blocks=131072, imaxpct=25
-         =                       sunit=0      swidth=0 blks
-naming   =version 2              bsize=4096   ascii-ci=0, ftype=1, parent=1
-log      =internal log           bsize=4096   blocks=16384, version=2
-         =                       sectsz=512   sunit=0 blks, lazy-count=1
-realtime =internal               extsz=4096   blocks=2359296, rtextents=2359296
-         =                       rgcount=36   rgsize=65536 extents
-         =                       zoned=1      start=131072 reserved=56224
-Discarding blocks...Done.
-
-[root@kd:~]# mount /dev/vdb /mnt/scratch
-XFS (vdb): EXPERIMENTAL zoned RT device feature enabled.  Use at your own risk!
-XFS (vdb): Not built with CONFIG_XFS_RT
-XFS (vdb): RT mount failed
-mount: /mnt/scratch: fsconfig() failed: Function not implemented.
-       dmesg(1) may have more information after failed mount system call.
-
+> > +
+> > +        local devsize=$(_get_device_size $LOGWRITES_DEV)
+> > +        [ $devsize -lt $1 ] && \
+> > +                _notrun "LOGWRITES_DEV too small, ${devsize}KB < $1KB"
+> > +}
+> > +
+> >   # Starting from v4.15-rc1, DAX support was added to dm-log-writes, but note
+> >   # that it doesn't track the data that we write via the mmap(), so we can't do
+> >   # any data integrity checking. We can only verify that the metadata writes for
+> 
+> -- 
+> Regards,
+> Disha
+> 
+> 
