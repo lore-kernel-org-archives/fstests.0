@@ -1,125 +1,301 @@
-Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D00D1862;
-	Fri, 24 Apr 2026 11:48:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.153.144
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E5F81A682E
+	for <fstests@vger.kernel.org>; Fri, 24 Apr 2026 13:09:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777031333; cv=none; b=nMpsEEbDkiAsDJG0WUQPV/lRavE0YGK4is4ZPQU31SQtDUsctiAIFAW6NzcFByTqhd53TJGkjSoPnvgtt1HYwIAc2OASJYbbit/AjNQffmpr6BOO8J/TTOK5LLuW3WA7j3Y8XLrJjzQl/L3NZBJU5O5Nfo4z01y14uNV0Uwhrro=
+	t=1777036166; cv=none; b=JNkKTVLXSQEPBRVfVAuosD1NEuAFKyvazkfgOM8w4mzkFqoW42SF1x1jlf5VBIA22XWGbxBkV0QFDzCOMatZMtGkhiMsWDC7h6pcPuM/LZZe78B5cO5RVJLuxycsvrtcXNK/kg4ydMOHh4p6Wu7dl0gq0verdASMCkjgME1x0UM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777031333; c=relaxed/simple;
-	bh=1y8Y1cBqvB7USRIY0dFrQP5ZTRAxdXQAcZUnbcXO6ko=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=S1aa08LuQzho4tqddlVF5eK1tYgExyS/FbH4/d4l+baPhOZUAKIKiTAFw9cSjMnAv8ldLXFTcmPjHRhr55lTJSwRxUymkum+4sF0mEhhFhfcG0qxPgaLNFaHxech+SuM2T3dvq68hDuu1X9gn4eHzm3fcdvq9CUFIdNtGhFhB34=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=Dgz7Wwxs; arc=none smtp.client-ip=216.71.153.144
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	s=arc-20240116; t=1777036166; c=relaxed/simple;
+	bh=v7t8xXDgnZ5P6NVjO2NjHdjf7n2TcaW0th9RWKtWbjY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=BCkU257oBV6rLxXAW248+wirG6T6SMaxT6buQzlF/xTB8NftBFQqvnyBJNpy8m6En/A+FNMXx4qZ252E8V55CqhdjkgKcgzUzqRZJmtTof9HgXyZ/iYw+pxzWWmqgzc5WtRFQ+LicRu6tGIVP54VW0shfP9fHkynMAsV5gvUJwA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Ez67agJ9; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Dgz7Wwxs"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1777031331; x=1808567331;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=1y8Y1cBqvB7USRIY0dFrQP5ZTRAxdXQAcZUnbcXO6ko=;
-  b=Dgz7Wwxs6l3WVN/debAnPqahzuPKS/ZHRTPJz5wY6Gb7hEO1aBONavpB
-   W+c/WKIuiGDxPN5Hz7ET8h51pB2vTwlN2TRRSmGAKSjHPLT3a7jNEy+FO
-   cKvu9EhrpHV7aTaBNpNSw/Gh2NWuK3pKfgGabPhoQIXpKHkWnkEm2MIXT
-   Ga6UvLI9CHPlpQKBjmv1Hykq53dK0fXz1DjPEGeDewOoHdzp4k8/XueR4
-   m/svuuALea/FfDbv8c14fw5pijSl8Y6g9ljk3mCdqDB7Lf3A+s/63Vp1c
-   CzJwBGod19+Ro8DtC0g88Gl91TUYOmpHES+sSpDYeqzOoedYo5RiiQ4wG
-   g==;
-X-CSE-ConnectionGUID: gQjaEl2LQVi9nsaI2YBXXA==
-X-CSE-MsgGUID: x7WOY8ZXSc64tK5cSOxQLQ==
-X-IronPort-AV: E=Sophos;i="6.23,196,1770566400"; 
-   d="scan'208";a="144679701"
-Received: from unknown (HELO uls-op-esad2-o.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 24 Apr 2026 19:48:50 +0800
-X-CSE-ConnectionGUID: 14ZOpjXVTlSmuKwBjY9pww==
-X-CSE-MsgGUID: aYA23wDKQI2qnzaeTF+bdQ==
-IronPort-SDR: 69eb5889_sLNaAOkV/yi4SLHfCqjeSQA4fXmxorownCNqAav/cMrurep
- 1n9e5V+/M+Udql2nOIPOvQVjMChxWyHmdaeVruQ==
-Received: from uls-op-esai2-o.wdc.com ([10.248.3.38])
-  by uls-op-esad2-o.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 24 Apr 2026 04:48:25 -0700
-X-CSE-ConnectionGUID: 7EQfrEUsTSqAC4JPMur4vg==
-X-CSE-MsgGUID: gTww68G+SOOBT0Xi79SWmA==
-WDCIronportException: Internal
-Received: from wdap-u5y2tr2jdw.ad.shared (HELO neo.fritz.box) ([10.224.19.11])
-  by uls-op-esai2-o.wdc.com with ESMTP; 24 Apr 2026 04:48:23 -0700
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Naohiro Aota <naohiro.aota@wdc.com>,
-	fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org,
-	Christoph Hellwig <hch@lst.de>,
-	Hans Holmberg <Hans.Holmberg@wdc.com>,
-	Johannes Thumshirn <johannes.thumshirn@wdc.com>,
-	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Subject: [PATCH v2] generic/793: limit number of overwrites
-Date: Fri, 24 Apr 2026 13:48:19 +0200
-Message-ID: <20260424114819.177805-1-johannes.thumshirn@wdc.com>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ez67agJ9"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1777036164;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=DkpmNTHWhcFsfPJowXveyVB0qmZ+N6Tg3EfaNJNZceY=;
+	b=Ez67agJ9jiGhWfonkYbswH5myhwvcqBc+QzxjS197RvPTISn23ob33g6SLFRNS0SpALfXz
+	+orrvPRwTAeg4G2PAqC5eH1wBJwf3Lz/AT26o5YHxg7LbWTMmISLoVTwZyQ5pk8/OZBN15
+	SDTQuU8zA5btC59lh7ttGudxDnMh2qU=
+Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-359-sIsZSpHANaOxAhPLV8ykyw-1; Fri,
+ 24 Apr 2026 09:09:18 -0400
+X-MC-Unique: sIsZSpHANaOxAhPLV8ykyw-1
+X-Mimecast-MFC-AGG-ID: sIsZSpHANaOxAhPLV8ykyw_1777036156
+Received: from mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.111])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 1A4D319560BD;
+	Fri, 24 Apr 2026 13:09:16 +0000 (UTC)
+Received: from bfoster (unknown [10.22.88.73])
+	by mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 5F59E1800446;
+	Fri, 24 Apr 2026 13:09:14 +0000 (UTC)
+Date: Fri, 24 Apr 2026 09:09:12 -0400
+From: Brian Foster <bfoster@redhat.com>
+To: Zhang Yi <yi.zhang@huaweicloud.com>
+Cc: fstests@vger.kernel.org, zlang@kernel.org, linux-ext4@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org, jack@suse.cz, yi.zhang@huawei.com,
+	yizhang089@gmail.com, yangerkun@huawei.com
+Subject: Re: [PATCH v2] generic/790: test post-EOF gap zeroing persistence
+Message-ID: <aetreLr6tt1Vb-GJ@bfoster>
+References: <20260424092228.1396658-1-yi.zhang@huaweicloud.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260424092228.1396658-1-yi.zhang@huaweicloud.com>
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.111
 
-Testcase generic/793 overwrites a 1GB file "number of sequential zones"
-times in order to trigger a bug in zoned BTRFS' garbage collection. But on
-scratch devices with a huge number of sequential zones (like SMR drives)
-this can cause very long runtimes.
+On Fri, Apr 24, 2026 at 05:22:28PM +0800, Zhang Yi wrote:
+> From: Zhang Yi <yi.zhang@huawei.com>
+> 
+> Test that extending a file past a non-block-aligned EOF correctly
+> zero-fills the gap [old_EOF, block_boundary), and that this zeroing
+> persists through a filesystem shutdown+remount cycle.
+> 
+> Stale data beyond EOF can persist on disk when append write data blocks
+> are flushed before the on-disk file size update, or when concurrent
+> append writeback and mmap writes persist non-zero data past EOF.
+> Subsequent post-EOF operations (append write, fallocate, truncate up)
+> must zero-fill and persist the gap to prevent exposing stale data.
+> 
+> The test pollutes the file's last physical block (via FIEMAP + raw
+> device write) with a sentinel pattern beyond i_size, then performs each
+> extend operation and verifies the gap is zeroed both in memory and on
+> disk.
+> 
+> Signed-off-by: Zhang Yi <yi.zhang@huawei.com>
+> ---
+> v1->v2:
+>  - Add _require_no_realtime to prevent testing on XFS realtime devices,
+>    where file data may reside on $SCRATCH_RTDEV.
+>  - Add _exclude_fs btrfs since FIEMAP returns logical addresses, not
+>    physical device offsets, writing to these offsets on $SCRATCH_DEV
+>    would corrupt the filesystem in multi-device setups. Besides, since
+>    btrfs doesn't support shutdown right now, we can support it later.
+>  - Add -v flag to od in _check_gap_zero() to prevent line folding of
+>    identical consecutive lines.
+>  - Add expected_new_sz parameter to _test_eof_zeroing(), verify file
+>    size was not rolled back after shutdown+remount cycle, and also drop
+>    the unnecessary file size check before the shutdown as well.
+>  - Clarify the comment regarding when stale data beyond EOF can persist.
+> 
 
-As the testcase also limits the filesystem size to 16GB, constraint the
-number of overwrite loops to the number of sequential zones in the
-filesystem. This still guarantees that the file will be overwritten often
-enough to trigger the bug while not exploding the overall test runtime.
+Thanks for the tweaks. This all LGTM from a review standpoint. I gave it
+a quick test on latest master and I see a few failures in a couple runs:
 
-Reported-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
----
- tests/generic/793 | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+- On XFS (mkfs defaults) I saw one unexpected i_size failure and one
+  zeroing failure, both on write extension fwiw.
+- On ext4 I saw a few unexpected i_size failures (both with mkfs
+  defaults and 1k block size).
 
-diff --git a/tests/generic/793 b/tests/generic/793
-index a59e84694309..fcfbc4983d7c 100755
---- a/tests/generic/793
-+++ b/tests/generic/793
-@@ -11,6 +11,7 @@
- _begin_fstest auto quick zone
- 
- . ./common/filter
-+. ./common/zoned
- 
- _require_scratch_size $((16 * 1024 * 1024))
- 
-@@ -21,7 +22,6 @@ else
- fi
- 
- _require_zoned_device "$zoned_dev"
--_require_command "$BLKZONE_PROG" blkzone
- 
- # This test requires specific data space usage, skip if we have compression
- # enabled.
-@@ -34,12 +34,14 @@ _fixed_by_fs_commit btrfs 258e46a6385c \
- _fixed_by_fs_commit btrfs e2a7fd22378f \
- 	"btrfs: zoned: add zone reclaim flush state for DATA space_info"
- 
--_scratch_mkfs_sized $((16 * 1024 * 1024 * 1024)) &>>$seqres.full
-+fssize=$((16 * 1024 * 1024 * 1024))
-+_scratch_mkfs_sized ${fssize} &>>$seqres.full
- _scratch_mount
- 
--# Overwrite the data "number of seq zones" times, this is arbitrarily chosen
-+# Overwrite the data "number of zones in fs" times, this is arbitrarily chosen
- # but triggers the original bug reliably
--loops=$($BLKZONE_PROG report $zoned_dev | grep -c "SEQ_WRITE_REQUIRED")
-+zsize=$(_zone_capacity 0 $zoned_dev)
-+loops=$(( fssize/zsize))
- 
- for (( i = 0; i < $loops; i++ )); do
- 	dd if=/dev/zero of=$SCRATCH_MNT/test bs=1M count=1024 status=none
--- 
-2.53.0
+I haven't dug into anything beyond that. Does this match what you're
+seeing on current kernels or are these unexpected failures?
+
+Brian
+
+>  tests/generic/790     | 164 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/790.out |   4 ++
+>  2 files changed, 168 insertions(+)
+>  create mode 100755 tests/generic/790
+>  create mode 100644 tests/generic/790.out
+> 
+> diff --git a/tests/generic/790 b/tests/generic/790
+> new file mode 100755
+> index 00000000..2adc06f8
+> --- /dev/null
+> +++ b/tests/generic/790
+> @@ -0,0 +1,164 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 Huawei.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 790
+> +#
+> +# Test that extending a file past a non-block-aligned EOF correctly zero-fills
+> +# the gap [old_EOF, block_boundary), and that this zeroing persists through a
+> +# filesystem shutdown+remount cycle.
+> +#
+> +# Stale data beyond EOF can persist on disk when:
+> +# 1) append write data blocks are flushed before the on-disk file size update,
+> +#    and the system crashes in this window.
+> +# 2) concurrent append writeback and mmap writes persist non-zero data past EOF.
+> +#
+> +# Subsequent post-EOF operations (append write, fallocate, truncate up) must
+> +# zero-fill and persist the gap to prevent exposing stale data.
+> +#
+> +# The test pollutes the file's last physical block (via FIEMAP + raw device
+> +# write) with a sentinel pattern beyond i_size, then performs each extend
+> +# operation and verifies the gap is zeroed both in memory and on disk.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick rw shutdown
+> +
+> +. ./common/filter
+> +
+> +_require_scratch
+> +_require_block_device $SCRATCH_DEV
+> +_require_no_realtime
+> +_require_scratch_shutdown
+> +_require_metadata_journaling $SCRATCH_DEV
+> +
+> +# FIEMAP on Btrfs returns logical addresses within the filesystem's address
+> +# space, not physical device offsets. Writing to these offsets on $SCRATCH_DEV
+> +# would corrupt the filesystem in multi-device setups.
+> +_exclude_fs btrfs
+> +
+> +_require_xfs_io_command "fiemap"
+> +_require_xfs_io_command "falloc"
+> +_require_xfs_io_command "pwrite"
+> +_require_xfs_io_command "truncate"
+> +_require_xfs_io_command "sync_range"
+> +
+> +# Check that gap region [offset, offset+nbytes) is entirely zero
+> +_check_gap_zero()
+> +{
+> +	local file="$1"
+> +	local offset="$2"
+> +	local nbytes="$3"
+> +	local label="$4"
+> +	local data
+> +	local stripped
+> +
+> +	data=$(od -A n -t x1 -v -j $offset -N $nbytes "$file" 2>/dev/null)
+> +
+> +	# Remove whitespace and check if any byte is non-zero
+> +	stripped=$(printf '%s' "$data" | tr -d ' \n\t')
+> +	if [ -n "$stripped" ] && ! echo "$stripped" | grep -qE "^0+$"; then
+> +		echo "FAIL: non-zero data in gap [$offset,$((offset + nbytes))) $label"
+> +		_hexdump -N $((offset + nbytes)) "$file"
+> +		return 1
+> +	fi
+> +	return 0
+> +}
+> +
+> +# Get the physical block offset (in bytes) of the file's first block on device
+> +_get_phys_offset()
+> +{
+> +	local file="$1"
+> +	local fiemap_output
+> +	local phys_blk
+> +
+> +	fiemap_output=$($XFS_IO_PROG -r -c "fiemap -v" "$file" 2>/dev/null)
+> +	phys_blk=$(echo "$fiemap_output" | _filter_xfs_io_fiemap | head -1 | awk '{print $3}')
+> +	if [ -z "$phys_blk" ]; then
+> +		echo ""
+> +		return
+> +	fi
+> +	# Convert 512-byte blocks to bytes
+> +	echo $((phys_blk * 512))
+> +}
+> +
+> +_test_eof_zeroing()
+> +{
+> +	local test_name="$1"
+> +	local extend_cmd="$2"
+> +	local expected_new_sz="$3"
+> +	local file=$SCRATCH_MNT/testfile_${test_name}
+> +
+> +	echo "$test_name" | tee -a $seqres.full
+> +
+> +	# Compute non-block-aligned EOF offset
+> +	local gap_bytes=16
+> +	local eof_offset=$((blksz - gap_bytes))
+> +
+> +	# Step 1: Write one full block to ensure the filesystem allocates a
+> +	#         physical block for the file instead of using inline data.
+> +	$XFS_IO_PROG -f -c "pwrite -S 0x5a 0 $blksz" -c fsync \
+> +		"$file" >> $seqres.full 2>&1
+> +
+> +	# Step 2: Get physical block offset on device via FIEMAP
+> +	local phys_offset
+> +	phys_offset=$(_get_phys_offset "$file")
+> +	if [ -z "$phys_offset" ]; then
+> +		_fail "$test_name: failed to get physical block offset via fiemap"
+> +	fi
+> +
+> +	# Step 3: Truncate file to non-block-aligned size and fsync.
+> +	#         The on-disk region [eof_offset, blksz) may or may not be
+> +	#         zeroed by the filesystem at this point.
+> +	$XFS_IO_PROG -c "truncate $eof_offset" -c fsync \
+> +		"$file" >> $seqres.full 2>&1
+> +
+> +	# Step 4: Unmount and restore the physical block to all-0x5a on disk.
+> +	#         This bypasses the kernel's pagecache EOF-zeroing to ensure
+> +	#         the stale pattern is present on disk. Then remount.
+> +	_scratch_unmount
+> +	$XFS_IO_PROG -d -c "pwrite -S 0x5a $phys_offset $blksz" \
+> +		$SCRATCH_DEV >> $seqres.full 2>&1
+> +	_scratch_mount >> $seqres.full 2>&1
+> +
+> +	# Step 5: Execute the extend operation.
+> +	$XFS_IO_PROG -c "$extend_cmd" "$file" >> $seqres.full 2>&1
+> +
+> +	# Step 6: Verify gap [eof_offset, blksz) is zeroed BEFORE shutdown
+> +	_check_gap_zero "$file" $eof_offset $gap_bytes "before shutdown" || return 1
+> +
+> +	# Step 7: Sync the extended range and shutdown the filesystem with
+> +	#         journal flush. This persists the file size extending, and
+> +	#         the filesystem should persist the zeroed data in the gap
+> +	#         range as well.
+> +	if [ "$extend_cmd" != "${extend_cmd#pwrite}" ]; then
+> +		$XFS_IO_PROG -c "sync_range -w $blksz $blksz" \
+> +			"$file" >> $seqres.full 2>&1
+> +	fi
+> +	_scratch_shutdown -f
+> +
+> +	# Step 8: Remount and verify gap is still zeroed
+> +	_scratch_cycle_mount
+> +
+> +	# Verify file size was not rolled back after shutdown+remount
+> +	local sz
+> +	sz=$(stat -c %s "$file")
+> +	if [ "$sz" -ne "$expected_new_sz" ]; then
+> +		_fail "$test_name: file size rolled back after shutdown+remount: $sz != $expected_new_sz"
+> +	fi
+> +
+> +	_check_gap_zero "$file" $eof_offset $gap_bytes "after shutdown+remount" || return 1
+> +}
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +blksz=$(_get_block_size $SCRATCH_MNT)
+> +
+> +# Test three variants of EOF-extending operations
+> +_test_eof_zeroing "append_write" "pwrite -S 0x42 $blksz $blksz" $((blksz * 2))
+> +_test_eof_zeroing "truncate_up" "truncate $((blksz * 2))" $((blksz * 2))
+> +_test_eof_zeroing "fallocate" "falloc $blksz $blksz" $((blksz * 2))
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/790.out b/tests/generic/790.out
+> new file mode 100644
+> index 00000000..e5e2cc09
+> --- /dev/null
+> +++ b/tests/generic/790.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 790
+> +append_write
+> +truncate_up
+> +fallocate
+> -- 
+> 2.52.0
+> 
 
