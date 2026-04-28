@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71ABC351C13;
-	Tue, 28 Apr 2026 06:43:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A383134D4D6;
+	Tue, 28 Apr 2026 06:43:25 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777358601; cv=none; b=h9iws6UHwX8/5ZFlDzNLHJr12IsZdqw0KHR0OKf4hM2mzbKOu2HwineoMA/G/AAH1sCM3csGytjqxmKfdCZBA+it7D4dzldU7BrllTUpRzAlnAxjJEZ1MKeJc0lREnvPqYFM6bOvvgMN/C2gU8tLXDA+uB09daL3zjtEf3JpgMg=
+	t=1777358605; cv=none; b=e9dZtA4h5QLZuV0QJtJHbgmruSjK+6KKnoerqjs7YqpDKo/9CWz3c8J6iUAsF4p+DJareh4UQ5iNW9v11stQ2bbs4glNzQadiF/O+3a7N/75GYZrjr6eUJSTz64xd4akCsKXec84FqBOTWR7b8JHGibSqXnoXPp+ATobHwUkjhs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777358601; c=relaxed/simple;
-	bh=A39fwIamuiQCahpTIIYXpcht58U1LThjSWjT+3wKKzg=;
+	s=arc-20240116; t=1777358605; c=relaxed/simple;
+	bh=1VCsZaLychwUjTglK1LHCohKrYf0PRh0fttrUlRLgl8=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=BTSdVvLRp2wCfGDr1oJhu17O/eVPIThDdjXv515X5uzLvV98gSqnJlFtNrOQg+xYt9YB6PZ/UCiUgHPWQS+h+S6rHYIosTNc6g2pICx4H0TJzr7fqRz+qxCcgK7KTA+JAIhtRWjBGxp3/1VaUSLz7vNHGlbGBbf41s1GjnbQpkg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XsXvJqBd; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=L/DvsH7zw/b7YS7ZIHSVX+ppn43ivLifn04kzioAccZIZW7r8oHzxiFdP8nDAQjRRpzi2DAosvQAygBlR4O1IQegg5kjI4KS/vmk2FBYXyNfJj29w0ciDOJRBA4A2ZfJh+7rtnM/hnvwerBDNxHsCpmuOmJgktbLwD0IpIffFVQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TCnd799q; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XsXvJqBd"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ABF40C2BCAF;
-	Tue, 28 Apr 2026 06:43:19 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TCnd799q"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D0996C2BCAF;
+	Tue, 28 Apr 2026 06:43:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1777358601;
-	bh=A39fwIamuiQCahpTIIYXpcht58U1LThjSWjT+3wKKzg=;
+	s=k20201202; t=1777358605;
+	bh=1VCsZaLychwUjTglK1LHCohKrYf0PRh0fttrUlRLgl8=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=XsXvJqBd6c7UyD/VWDxkPzTPcW3rZ2IlncGPvaK96JP7X/1B289g29XCbw3grYT7y
-	 +0G89aAi53sboA7A9vfOJhB9N0BiKtvrqCOfXac2Ef2V4IkmjGIweaF4tPSCxlg0vB
-	 5VcEQktAz2judFWCCA7CO1m8IGY1U3pE+tlUnw8luqgtvghbcdhVKBo/rARw5sNP2p
-	 ZrBik8yig3bJL6GpfW7t30DCXMHWf/QXZaM2cvqohWl4fw83Ydcy599eEgAHNj5Q1N
-	 50svDWXoU0GrVod26HomuOrDWEcXOHLjqBovE5SXW3Z+YcAUOo2+qATfj9toAKoas5
-	 IFfhUXpowsuHg==
+	b=TCnd799qxvNbq3q0F0JEBDk5WK7Z+6MDiM8AF9EwoWTNGc6WBFqVmU+MomA+xmQqo
+	 6W6kd6yaG70KHAnMMNHY6lmg6cHuvKE+G0EtmZAGOR9CUhqAn9SbsA31YzcP5cCk1p
+	 S8uKg2ARZalZDlmkZO2T2ouhcmeyp5SLypuZ7qXWge7lXr//gWBcnaAaAgs5R/0x33
+	 M5wS98KVltpKSaIaE9WlsGlTxr6Hyi2+mycx6l25DeeqOcXjKNeGRIdNd3Tw+M2EA8
+	 w2aTUTXdJQPLaPUiz4TGuQc7l1dlVPpc2F8bj59tHPAjlvVVcI4Nyml+z4f/vRtQ8T
+	 JqhutziKb6sAQ==
 From: Anand Jain <asj@kernel.org>
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org,
@@ -35,9 +35,9 @@ Cc: linux-btrfs@vger.kernel.org,
 	amir73il@gmail.com,
 	zlang@redhat.com,
 	hch@infradead.org
-Subject: [PATCH v4 4/9] fstests: verify fanotify isolation on cloned filesystems
-Date: Tue, 28 Apr 2026 14:42:54 +0800
-Message-ID: <5857d9f33de7f0ea8ddd12c36334c6463c0bfe0f.1777357321.git.asj@kernel.org>
+Subject: [PATCH v4 6/9] fstests: verify libblkid resolution of duplicate UUIDs
+Date: Tue, 28 Apr 2026 14:42:56 +0800
+Message-ID: <ebe532776d060ac2d8233ca466c96ae9e25efd9c.1777357321.git.asj@kernel.org>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <cover.1777357320.git.asj@kernel.org>
 References: <cover.1777357320.git.asj@kernel.org>
@@ -49,79 +49,67 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Verify that fanotify events are correctly routed to the appropriate
-watcher when cloned filesystems are mounted.
-Helps verify kernel's event notification distinguishes between devices
-sharing the same FSID/UUID.
+Verify how findmnt, df (libblkid) resolve device paths when multiple
+block devices share the same FSUUID.
 
 Signed-off-by: Anand Jain <asj@kernel.org>
 ---
- common/config         |   1 +
- tests/generic/801     | 113 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/801.out |   7 +++
- 3 files changed, 121 insertions(+)
- create mode 100644 tests/generic/801
- create mode 100644 tests/generic/801.out
+ tests/generic/803     | 76 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/803.out | 19 +++++++++++
+ 2 files changed, 95 insertions(+)
+ create mode 100644 tests/generic/803
+ create mode 100644 tests/generic/803.out
 
-diff --git a/common/config b/common/config
-index 605a57947a40..1588bdcb1aa1 100644
---- a/common/config
-+++ b/common/config
-@@ -243,6 +243,7 @@ export PARTED_PROG="$(type -P parted)"
- export XFS_PROPERTY_PROG="$(type -P xfs_property)"
- export FSCRYPTCTL_PROG="$(type -P fscryptctl)"
- export INOTIFYWAIT_PROG="$(type -P inotifywait)"
-+export FSNOTIFYWAIT_PROG="$(type -P fsnotifywait)"
- 
- # udev wait functions.
- #
-diff --git a/tests/generic/801 b/tests/generic/801
+diff --git a/tests/generic/803 b/tests/generic/803
 new file mode 100644
-index 000000000000..e1282f4e3d71
+index 000000000000..36de7887065e
 --- /dev/null
-+++ b/tests/generic/801
-@@ -0,0 +1,113 @@
++++ b/tests/generic/803
+@@ -0,0 +1,76 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2026 Anand Jain <asj@kernel.org>.  All Rights Reserved.
 +#
-+# FS QA Test 801
-+# Verify fanotify FID functionality on cloned filesystems by setting up
-+# watchers and making sure notifications are in the correct logs files.
++# FS QA Test 803
++# Verify how libblkid resolve devices when multiple devices sharing the
++# same FSUUID.
 +
 +. ./common/preamble
++. ./common/filter
 +
 +_begin_fstest auto quick mount clone
 +
 +_require_test
 +_require_block_device $TEST_DEV
 +_require_loop
-+_require_command "$FSNOTIFYWAIT_PROG" fsnotifywait
 +
 +_cleanup()
 +{
 +	cd /
-+	[[ -n $pid1 ]] && { kill -TERM "$pid1" 2> /dev/null; wait $pid1; }
-+	[[ -n $pid2 ]] && { kill -TERM "$pid2" 2> /dev/null; wait $pid2; }
++	rm -r -f $tmp.*
 +	umount $mnt1 $mnt2 2>/dev/null
 +	_loop_image_destroy "${devs[@]}" 2> /dev/null
-+	rm -r -f $tmp.*
 +}
 +
-+monitor_fanotify()
++filter_pool()
 +{
-+	local mmnt=$1
-+	exec stdbuf -oL $FSNOTIFYWAIT_PROG -m -F -S -e create "$mmnt" 2>&1
++	sed -e "s|${devs[0]}|DEV1|g" -e "s|${mnt1}|MNT1|g" \
++	    -e "s|${devs[1]}|DEV2|g" -e "s|${mnt2}|MNT2|g" | _filter_spaces
 +}
 +
-+fsid_to_fid_parts()
++print_info()
 +{
-+	local fsid=$1
-+	# Pad to 16 hex chars (64-bit), then split into two 32-bit halves
-+	local padded=$(printf '%016x' "0x${fsid}")
-+	local hi=$(printf '%x' "0x${padded:0:8}")   # strips leading zeros
-+	local lo=$(printf '%x' "0x${padded:8:8}")   # strips leading zeros
-+	echo "${hi}.${lo}"
++	local mntpt=$1
++	local tgt=$(findmnt -no SOURCE $mntpt)
++	local fsuuid=$(blkid -s UUID -o value $tgt)
++
++	echo "mntpt=$mntpt tgt=$tgt fsuuid=$fsuuid" >> $seqres.full
++	echo
++	findmnt -o SOURCE,TARGET,UUID "$tgt" | tail -n +2 | \
++				sed -e "s/${fsuuid}/FSUUID/g" | filter_pool
++	awk -v dev="$tgt" '$1 == dev { print $1, $2 }' /proc/self/mounts | \
++								filter_pool
++	df --all --output=source,target "$tgt" | tail -n +2 | filter_pool
 +}
 +
 +devs=()
@@ -137,76 +125,48 @@ index 000000000000..e1282f4e3d71
 +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
 +						_fail "Failed to mount dev2"
 +
-+fsid1=$(stat -f -c "%i" $mnt1)
-+fsid2=$(stat -f -c "%i" $mnt2)
++print_info $mnt1
++print_info $mnt2
 +
-+[[ "$fsid1" == "$fsid2" ]] && \
-+	_notrun "Require clone filesystem with unique f_fsid"
++echo
++echo "**** mount cycle ****"
++_unmount $mnt1
++_unmount $mnt2
++_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
++						_fail "Failed to mount dev2"
++_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[0]} $mnt1 || \
++						_fail "Failed to mount dev1"
 +
-+log1=$tmp.fanotify1
-+log2=$tmp.fanotify2
-+
-+pid1=""
-+pid2=""
-+echo "Setup FID fanotify watchers on both mnt1 and mnt2"
-+( monitor_fanotify "$mnt1" > "$log1" ) &
-+pid1=$!
-+( monitor_fanotify "$mnt2" > "$log2" ) &
-+pid2=$!
-+sleep 2
-+
-+echo "Trigger file creation on mnt1"
-+touch $mnt1/file_on_mnt1
-+sync
-+sleep 1
-+
-+echo "Trigger file creation on mnt2"
-+touch $mnt2/file_on_mnt2
-+sync
-+sleep 1
-+
-+echo "Verify fsid in the fanotify"
-+kill $pid1 $pid2
-+wait $pid1 $pid2 2>/dev/null
-+pid1=""
-+pid2=""
-+
-+e_fsid1=$(fsid_to_fid_parts "$fsid1")
-+e_fsid2=$(fsid_to_fid_parts "$fsid2")
-+
-+echo $fsid1 $e_fsid1 $fsid2 $e_fsid2 >> $seqres.full
-+cat $log1 >> $seqres.full
-+cat $log2 >> $seqres.full
-+
-+if grep -qF "$e_fsid1" "$log1" && ! grep -qF "$e_fsid2" "$log1"; then
-+	echo "SUCCESS: mnt1 events found"
-+else
-+	[ ! -s "$log1" ] && echo "  - mnt1 received no events."
-+	grep -qF "$e_fsid2" "$log1" && echo "  - mnt1 received event from mnt2."
-+fi
-+
-+if grep -qF "$e_fsid2" "$log2" && ! grep -qF "$e_fsid1" "$log2"; then
-+	echo "SUCCESS: mnt2 events found"
-+else
-+	[ ! -s "$log2" ] && echo "  - mnt2 received no events."
-+	grep -qF "$e_fsid1" "$log2" && echo "  - mnt2 received event from mnt1."
-+fi
++print_info $mnt1
++print_info $mnt2
 +
 +status=0
 +exit
-diff --git a/tests/generic/801.out b/tests/generic/801.out
+diff --git a/tests/generic/803.out b/tests/generic/803.out
 new file mode 100644
-index 000000000000..d7b318d9f27c
+index 000000000000..20a1cb36a213
 --- /dev/null
-+++ b/tests/generic/801.out
-@@ -0,0 +1,7 @@
-+QA output created by 801
-+Setup FID fanotify watchers on both mnt1 and mnt2
-+Trigger file creation on mnt1
-+Trigger file creation on mnt2
-+Verify fsid in the fanotify
-+SUCCESS: mnt1 events found
-+SUCCESS: mnt2 events found
++++ b/tests/generic/803.out
+@@ -0,0 +1,19 @@
++QA output created by 803
++
++DEV1 MNT1 FSUUID
++DEV1 MNT1
++DEV1 MNT1
++
++DEV2 MNT2 FSUUID
++DEV2 MNT2
++DEV2 MNT2
++
++**** mount cycle ****
++
++DEV1 MNT1 FSUUID
++DEV1 MNT1
++DEV1 MNT1
++
++DEV2 MNT2 FSUUID
++DEV2 MNT2
++DEV2 MNT2
 -- 
 2.43.0
 
