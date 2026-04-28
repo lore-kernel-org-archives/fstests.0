@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A37A4175A72;
-	Tue, 28 Apr 2026 06:43:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0611834D901;
+	Tue, 28 Apr 2026 06:43:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777358605; cv=none; b=MVqqzkampC9nMNjzB8i1flsMzHvt5W/1SpTlmhsFZAlJZDkhahsE4t2c8IGW+wgbLTNs+dZPYVf38ucMSx9PKzn8o3fnq1QQFG8WxPTuCXs3oG2FXqI0SrPaH2Zm5+UH37qZtgaom/piyMIaNPErSGOH1b7QLeLMmAF+w3mRTek=
+	t=1777358608; cv=none; b=PYuDnPsz6oGkV5OprS+3Ii5y8CVZhHo2lqtCszVR7cVIemSS5r0Ejz9VSvTEX4jU+mqUeRc353jMdjCcBJ83kxPv/nBsePJFs7EOrBaPNEmJbUF4CVgy3OzkAjVCOQCFxnGSkEEwADdyQoCKRXhdSnk1ZQkKJJNJNtoizoOnLcY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777358605; c=relaxed/simple;
-	bh=k4GyESEu7MP2NHXYX6ENRfo8qnkcpYjGLDdXL79AQF0=;
+	s=arc-20240116; t=1777358608; c=relaxed/simple;
+	bh=e+dUxwRHiS/KXwaFoKmm2PRdWDcEVAE4PqqycqAupW8=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=W9b19X4uuWc9I0dvVBa8ZL5/oDB8+vdRRWOhfG4e3DxAs2GO55zfPbaubeJy8c7rh2iYE6eVPLOv/1zH6IIAoB2pS+Vo8bt9VBX3/1PjQRdXbKCOetHBL7PMYcC/qQX9WKWLyJ0YEuNJoYgjfJXAATGEaAs5M4fMOEY45BMefks=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bbNeyRLL; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=Z7ugR5Nqm4ZSwFrqvLK0ybcmHTFpSNjfPhrjYVxQ9gUnKGthE7OnAtN69rgFtyelYPygX4d6u8EDOs3XuQ4pGuzWH4LwMssGRQCzo/K4mCL41UuN8ROL9UySHoNOZKQC2ffsf4/pFt8bQgXTLwa53nzvLhL5gdPrwpMDEF7z0E0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IF7EPLR7; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bbNeyRLL"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BDE68C4AF0E;
-	Tue, 28 Apr 2026 06:43:21 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IF7EPLR7"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E58C8C2BCAF;
+	Tue, 28 Apr 2026 06:43:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1777358603;
-	bh=k4GyESEu7MP2NHXYX6ENRfo8qnkcpYjGLDdXL79AQF0=;
+	s=k20201202; t=1777358607;
+	bh=e+dUxwRHiS/KXwaFoKmm2PRdWDcEVAE4PqqycqAupW8=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=bbNeyRLL2O9GoK2WqxffCi0ZMfV2XhGMUmu3cAE2Go/td+frvlrFI52joml6RqDM5
-	 iYsoFd7apsPE8fiYawTvCWnkqFt0g60O2hryKLThdepAXgT3zKjo467u9e3nUJIFPo
-	 d/jmpMBtRCobfml1s4oIX0+sm5LDdCAk2k0hlWtOVpCLf4OB8jQGdJu/X/sPlBSjSD
-	 M3u6kvX/3TiRWtyEksFTMHiE9t0TCg7yhW70p1ZIw8bZfHXR+X1mGgJ0BkrTaXgzjI
-	 HnBGnqufnZBSbZ1A5gXKSCIpfc9Mv5gH6B24/Z3WxJw3qVAYunUpmSklawi/FXM9Xi
-	 jUq90qMqCFzAA==
+	b=IF7EPLR7YLLHKz6YiL4soyZs+IEGi2JQqDj2/MAKU87ZQQi2ueBEvggnVf9C3+3Vc
+	 J9Xwib9+wYMtKk5qVxw32gwAmbqQ7/me3ILDZI58+awTC6QNyKV5CMvAJvcICOAjUE
+	 SVb1sECSZ5CDKGhOcdlLlyuYOE5iRr8mGKE48+mqGhX3VkxFZ4wfaMBi56ie1A1y83
+	 JezMZYmSRbaBmiIx7d7eWgRg1dwa1Aoh62CsMY2Epe04ecyImDgc0s6nHtEGmg2gmv
+	 rtYvghQ2AMCEHVJouczsu2jIINPFvjDktsa1LOTMyAGkt+MPq0LTWznnERGO4XiMRB
+	 AFeoKcUhiMdtQ==
 From: Anand Jain <asj@kernel.org>
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org,
@@ -35,9 +35,9 @@ Cc: linux-btrfs@vger.kernel.org,
 	amir73il@gmail.com,
 	zlang@redhat.com,
 	hch@infradead.org
-Subject: [PATCH v4 5/9] fstests: verify f_fsid for cloned filesystems
-Date: Tue, 28 Apr 2026 14:42:55 +0800
-Message-ID: <90f96625adafa29945c30a35c08ac290a7eaac6a.1777357321.git.asj@kernel.org>
+Subject: [PATCH v4 7/9] fstests: verify IMA isolation on cloned filesystems
+Date: Tue, 28 Apr 2026 14:42:57 +0800
+Message-ID: <645e504d5551d6e100b344998f34737f65797db8.1777357321.git.asj@kernel.org>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <cover.1777357320.git.asj@kernel.org>
 References: <cover.1777357320.git.asj@kernel.org>
@@ -49,33 +49,38 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Verify that the cloned filesystem provides an f_fsid that is persistent
-across mount cycles, yet unique from the original filesystem's f_fsid.
+Add testcase to verify IMA measurement isolation when multiple devices
+share the same FSUUID.
 
 Signed-off-by: Anand Jain <asj@kernel.org>
 ---
- tests/generic/802     | 62 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/802.out |  7 +++++
- 2 files changed, 69 insertions(+)
- create mode 100644 tests/generic/802
- create mode 100644 tests/generic/802.out
+ tests/generic/804     | 103 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/804.out |  10 ++++
+ 2 files changed, 113 insertions(+)
+ create mode 100644 tests/generic/804
+ create mode 100644 tests/generic/804.out
 
-diff --git a/tests/generic/802 b/tests/generic/802
+diff --git a/tests/generic/804 b/tests/generic/804
 new file mode 100644
-index 000000000000..31044695f3a8
+index 000000000000..9f3459015422
 --- /dev/null
-+++ b/tests/generic/802
-@@ -0,0 +1,62 @@
++++ b/tests/generic/804
+@@ -0,0 +1,103 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2026 Anand Jain <asj@kernel.org>.  All Rights Reserved.
 +#
-+# FS QA Test 802
-+# Verify f_fsid and s_uuid of cloned filesystems across mount cycle.
++# FS QA Test 804
++# Verify IMA isolation on cloned filesystems:
++# . Mount two devices sharing the same FSUUID (cloned).
++# . Apply an IMA policy to measure files based on that FSUUID.
++# . Create unique files on each mount point to trigger measurements.
++# . Confirm the IMA log correctly attributes events to the respective mounts.
 +
 +. ./common/preamble
++. ./common/filter
 +
-+_begin_fstest auto quick mount clone
++_begin_fstest auto quick clone
 +
 +_require_test
 +_require_block_device $TEST_DEV
@@ -90,13 +95,57 @@ index 000000000000..31044695f3a8
 +{
 +	cd /
 +	rm -r -f $tmp.*
-+	umount $mnt1 $mnt2 2>/dev/null
++	_unmount $mnt1 2>/dev/null
++	_unmount $mnt2 2>/dev/null
 +	_loop_image_destroy "${devs[@]}" 2> /dev/null
++}
++
++filter_pool()
++{
++	sed -e "s|${devs[0]}|DEV1|g" -e "s|$mnt1|MNT1|g" \
++	    -e "s|${devs[1]}|DEV2|g" -e "s|$mnt2|MNT2|g" | _filter_spaces
++}
++
++do_ima()
++{
++	local ima_policy="/sys/kernel/security/ima/policy"
++	local ima_log="/sys/kernel/security/ima/ascii_runtime_measurements"
++	local fsuuid
++	local mnt=$1
++	local enable=$2
++
++	# Since the in-memory IMA audit log is only cleared upon reboot,
++	# use unique random filenames to avoid log collisions.
++	local foofile=$(mktemp --dry-run foobar_XXXXX)
++
++	echo $mnt $enable | filter_pool
++
++	[ -w "$ima_policy" ] || _notrun "IMA policy not writable"
++
++	fsuuid=$(blkid -s UUID -o value ${devs[0]})
++
++	# Load IMA policy to measure file access specifically for this
++	# filesystem UUID.
++	if [[ $enable -eq 1 ]]; then
++		echo "measure func=FILE_CHECK fsuuid=$fsuuid" > "$ima_policy" || \
++			_notrun "Policy rejected"
++	fi
++
++	# Create a file to trigger measurement and verify its entry in
++	# the IMA log.
++	echo "test_data" > $mnt/$foofile
++
++	# For $ima_log column entry please ref to
++	grep $foofile "$ima_log" | awk '{ print $5 }' | filter_pool | \
++						sed "s/$foofile/FOOBAR_FILE/"
++
++	echo "dbg: $mnt $fsuuid $foofile" >> $seqres.full
++	cat $ima_log | tail -1 >> $seqres.full
++	echo >> $seqres.full
 +}
 +
 +devs=()
 +_loop_image_create_clone devs
-+mkdir -p $TEST_DIR/$seq
 +mnt1=$TEST_DIR/$seq/mnt1
 +mnt2=$TEST_DIR/$seq/mnt2
 +mkdir -p $mnt1
@@ -107,40 +156,35 @@ index 000000000000..31044695f3a8
 +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
 +						_fail "Failed to mount dev2"
 +
-+fsid_scratch=$(stat -f -c "%i" $mnt1)
-+fsid_clone=$(stat -f -c "%i" $mnt2)
++do_ima $mnt1 1
++do_ima $mnt2 0
 +
-+echo "**** fsid initially ****"
-+echo $fsid_scratch | sed -e "s/$fsid_scratch/FSID_SCRATCH/g"
-+echo $fsid_clone | sed -e "s/$fsid_clone/FSID_CLONE/g"
-+
-+# Make sure fsid still match across a mount cycle, also reverse the order.
-+echo "**** fsid after mount cycle ****"
-+_unmount $mnt1
++# Btrfs uses in-memory dynamic temp_fsid
++echo mount cycle
 +_unmount $mnt2
-+_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
-+						_fail "Failed to mount dev2"
-+_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[0]} $mnt1 || \
-+						_fail "Failed to mount dev1"
++_mount $mount_opts ${devs[1]} $mnt2 || _fail "Failed to mount dev2"
 +
-+stat -f -c "%i" $mnt1 | sed -e "s/$fsid_scratch/FSID_SCRATCH/g"
-+stat -f -c "%i" $mnt2 | sed -e "s/$fsid_clone/FSID_CLONE/g"
++do_ima $mnt1 0
++do_ima $mnt2 0
 +
 +status=0
 +exit
-diff --git a/tests/generic/802.out b/tests/generic/802.out
+diff --git a/tests/generic/804.out b/tests/generic/804.out
 new file mode 100644
-index 000000000000..d1e008f122bb
+index 000000000000..9804181d6c17
 --- /dev/null
-+++ b/tests/generic/802.out
-@@ -0,0 +1,7 @@
-+QA output created by 802
-+**** fsid initially ****
-+FSID_SCRATCH
-+FSID_CLONE
-+**** fsid after mount cycle ****
-+FSID_SCRATCH
-+FSID_CLONE
++++ b/tests/generic/804.out
+@@ -0,0 +1,10 @@
++QA output created by 804
++MNT1 1
++MNT1/FOOBAR_FILE
++MNT2 0
++MNT2/FOOBAR_FILE
++mount cycle
++MNT1 0
++MNT1/FOOBAR_FILE
++MNT2 0
++MNT2/FOOBAR_FILE
 -- 
 2.43.0
 
