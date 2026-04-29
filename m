@@ -1,55 +1,38 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4BB293F0760
-	for <fstests@vger.kernel.org>; Wed, 29 Apr 2026 11:24:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4F8E9378D94;
+	Wed, 29 Apr 2026 15:58:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777461863; cv=none; b=QI5dT72bMcdRoBCDPcbO/jrG9CgWKpGfS56GPxoBGNwoMGJPtmbXN0zCFGUWesm298QJL85FQ1eTtDm2nB1meFf+GNqbwSMtvWhxYlyFSU5DcT9IsUJ1lbBnX5N2OIqd7geqKeyre+k0uPoZI0Y9LzIRBpcNumd4uP557QK//yI=
+	t=1777478294; cv=none; b=UVjzMWTTzxv6oMib5T0YWohGZPWNBSFhRXqRXEHGojwj1mSR0we/OzOINBL7M3jomYIaH8ah+yjuxH8M+21KywhZXo1QplBp4/B0121PF6j7EvflIP+Oax2ch72Fd7D7wkPDiFNLVpBOk1meuu1PFAeZgr/2z6aoPsQbr6RAaI0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777461863; c=relaxed/simple;
-	bh=l6GIbj9invJfVrdTPmzAq84XK00me5PiOrfA+W15t0c=;
+	s=arc-20240116; t=1777478294; c=relaxed/simple;
+	bh=KsPVkbPTQvZIiITBc96uAYQ++oG/gAhe9Qiffk/P85Y=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=FUtaOgnA3VhMOYFGHE0xECqYBFu2G6LPoptBdc+Vq0lAP1hSxxj4boFiupnWAAuIQI3ob7INPp2VZiNEKW4jFtJFMUsn2d+8GmQVvnB4kvzytuAfEhaoAdFPj8xfVUKemqt10mwPm2xtpEHXMqijCp4T//jjrvJlNl7Rz5W2aHA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Qgfu02c8; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=EZ1buBuhaOUxGwU5o1S6uwQQ8MUSf/GE0iwuJYkQI7Opueb01JOjXO9hqUksH5ZSKANR+KaABT67xxISGG6KjSJ5FAdRuqTzaiQuKjMjbt4F5YR1m6NbRmsldvLn8hGfj3BLald2voj5JilM4+Mo0H0gQNy4GvL0ruekdOefQlQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aMAoj6Mq; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Qgfu02c8"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1777461857;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=OCiXgsKjkfimPs2i6jQIYt+aP0CX3JHudu9zClDPRD4=;
-	b=Qgfu02c82lHRtSSJWJW1J24FWRRoDvrBXsLRNRFIOl6hgnZpUu6GvjO/4iDI9sjb2LUfl3
-	EbILzd2eyWOYjm8hFdNbtUYTjss2O03wWqRaDURxRUZAK6WjuKR6GxTCL7T94EFGs/gvAN
-	lGjJSufWsOXPcm0HHaMD31Ajo/rtRlo=
-Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-628-2oadqiLEMfmI7ShvMW9N4g-1; Wed,
- 29 Apr 2026 07:24:12 -0400
-X-MC-Unique: 2oadqiLEMfmI7ShvMW9N4g-1
-X-Mimecast-MFC-AGG-ID: 2oadqiLEMfmI7ShvMW9N4g_1777461850
-Received: from mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.111])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id C26D2195609E;
-	Wed, 29 Apr 2026 11:24:09 +0000 (UTC)
-Received: from bfoster (unknown [10.22.64.88])
-	by mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 0F829180034F;
-	Wed, 29 Apr 2026 11:24:07 +0000 (UTC)
-Date: Wed, 29 Apr 2026 07:24:05 -0400
-From: Brian Foster <bfoster@redhat.com>
-To: Zhang Yi <yi.zhang@huaweicloud.com>
-Cc: fstests@vger.kernel.org, zlang@kernel.org, linux-ext4@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org, jack@suse.cz, yi.zhang@huawei.com,
-	yizhang089@gmail.com, yangerkun@huawei.com
-Subject: Re: [PATCH v3] generic/790: test post-EOF gap zeroing persistence
-Message-ID: <afHqVR7WwYgawwVm@bfoster>
-References: <20260428085750.1072612-1-yi.zhang@huaweicloud.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aMAoj6Mq"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DC226C19425;
+	Wed, 29 Apr 2026 15:58:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1777478293;
+	bh=KsPVkbPTQvZIiITBc96uAYQ++oG/gAhe9Qiffk/P85Y=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=aMAoj6Mqk3ZG5lbBajvPAKetVT0ONLYQMou++2W3WY4dgnSaOFB4SnyhRmOO3124t
+	 O3MOWCw6/L8tqcik2gUmkW1WjGSPW4N2V2I08HFymF3W6EDcJxNWLQmnMc0a203ASJ
+	 Z6IKi6GnQiDAWEVuq/DwAcSVG9zj3o0ir2PfhE+ykJwU8qT9IG+EXq53GVo+x0Jw10
+	 SyGqlT64alXKAt0+57OF70Z86EmPKmRqb82uHYbpNGIOt7Y1FELpxZ++aSayW0sqah
+	 k9/i1YLqeqJXaH6UGpwVpTXYSl0fw77TtDD3xr03n3W2jjGJhTFZ4TnSPjKWODM9bs
+	 4tnwa73lQgVcQ==
+Date: Wed, 29 Apr 2026 08:58:13 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, hch@lst.de
+Subject: Re: [bug report] xfs/806 sporadic failure
+Message-ID: <20260429155813.GD7751@frogsfrogsfrogs>
+References: <ae7-c9s0KVBRsSy3@shinmob>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -58,244 +41,189 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260428085750.1072612-1-yi.zhang@huaweicloud.com>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.111
+In-Reply-To: <ae7-c9s0KVBRsSy3@shinmob>
 
-On Tue, Apr 28, 2026 at 04:57:50PM +0800, Zhang Yi wrote:
-> From: Zhang Yi <yi.zhang@huawei.com>
+On Mon, Apr 27, 2026 at 03:16:44PM +0900, Shin'ichiro Kawasaki wrote:
+> Hello Darrick and all,
 > 
-> Test that extending a file past a non-block-aligned EOF correctly
-> zero-fills the gap [old_EOF, block_boundary), and that this zeroing
-> persists through a filesystem shutdown+remount cycle.
+> Recently, I observed a sporadic failure of xfs/806. If does not fail always,
+> but fails in steady manner in the last a few months. I would like to ask if
+> anyone has any insights about the failure.
 > 
-> Stale data beyond EOF can persist on disk when append write data blocks
-> are flushed before the on-disk file size update, or when concurrent
-> append writeback and mmap writes persist non-zero data past EOF.
-> Subsequent post-EOF operations (append write, fallocate, truncate up)
-> must zero-fill and persist the gap to prevent exposing stale data.
+> I started observing that failure in February. It was observed with various test
+> target devices, zoned/non-zoned, null_blk/tcmu/HDD. The failure was not
+> recreated easiliy. Recently, I found that I can recreate the failure in stable
+> manner using dm-crypt on my SMR HDDs and by repeating the test cases from
+> xfs/803 to xfs/806.
 > 
-> The test pollutes the file's last physical block (via FIEMAP + raw
-> device write) with a sentinel pattern beyond i_size, then performs each
-> extend operation and verifies the gap is zeroed both in memory and on
-> disk.
+>    The failure can be recrated by running xfs/806 many times (> 200 times), but
+>    it looks recreated sooner by repeating xfs/803 to xfs/806.
 > 
-> Signed-off-by: Zhang Yi <yi.zhang@huawei.com>
-> ---
+> The failure is observed with recent xfs/for-next branch.
+> 
+> On falure, the fstests console looks like this:
+> ------------------------------------------------------------------------------
+> xfs/803      12s ...  12s
+> xfs/804      12s ...  12s
+> xfs/805      9s ...  9s
+> xfs/806      13s ... - output mismatch (see /home/kts/kernel-test-suite/src/xfstests/results//xfs/806.out.bad)
+>     --- tests/xfs/806.out       2026-03-26 22:40:32.089917897 +0900
+>     +++ /home/kts/kernel-test-suite/src/xfstests/results//xfs/806.out.bad       2026-04-27 09:21:27.164750487 +0900
+>     @@ -1,6 +1,7 @@
+>      QA output created by 806
+>      Info: TEST_DIR/806.mount: Checking and repairing per autofsck directive.
+>     -Info: TEST_DIR/806.mount: Disabling scrub per autofsck directive.
+>     +mount: /var/kts/test/806.mount: /var/kts/test/806.somefile is already mounted.
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+Huh.  It's very strange that the fs is still mounted, yet the unmount
+didn't print anything about that.
 
-> v2->v3:
->  - Add error check for the raw device pwrite, a failed pwrite would
->    silently leave the test continuing with an unpolluted block,
->    producing false-positive passes.
->  - Add sync_range -a to wait until the extending I/O completes and to
->    ensure file size update is persisted before shutdown, preventing
->    unexpected file size errors.
-> v1->v2:
->  - Add _require_no_realtime to prevent testing on XFS realtime devices,
->    where file data may reside on $SCRATCH_RTDEV.
->  - Add _exclude_fs btrfs since FIEMAP returns logical addresses, not
->    physical device offsets, writing to these offsets on $SCRATCH_DEV
->    would corrupt the filesystem in multi-device setups. Besides, since
->    btrfs doesn't support shutdown right now, we can support it later.
->  - Add -v flag to od in _check_gap_zero() to prevent line folding of
->    identical consecutive lines.
->  - Add expected_new_sz parameter to _test_eof_zeroing(), verify file
->    size was not rolled back after shutdown+remount cycle, and also drop
->    the unnecessary file size check before the shutdown as well.
->  - Clarify the comment regarding when stale data beyond EOF can persist.
+>     +Info: TEST_DIR/806.mount: Checking and repairing per autofsck directive.
+>      Info: TEST_DIR/806.mount: Checking per autofsck directive.
+>      Info: TEST_DIR/806.mount: Optimizing per autofsck directive.
+>     ...
+>     (Run 'diff -u /home/kts/kernel-test-suite/src/xfstests/tests/xfs/806.out /home/kts/kernel-test-suite/src/xfstests/results//xfs/806.out.bad'  to see the entire diff)
+> Ran: xfs/803 xfs/804 xfs/805 xfs/806
+> Failures: xfs/806
+> ------------------------------------------------------------------------------
 > 
->  tests/generic/790     | 168 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/790.out |   4 +
->  2 files changed, 172 insertions(+)
->  create mode 100755 tests/generic/790
->  create mode 100644 tests/generic/790.out
+> As you can see, the mount command fails with the "/var/kts/test/806.somefile is
+> already mounted." message. The test case does mount multiple times. The step of
+> mount failure is not always same, but the failure message is same always.
 > 
-> diff --git a/tests/generic/790 b/tests/generic/790
-> new file mode 100755
-> index 00000000..6daf3793
-> --- /dev/null
-> +++ b/tests/generic/790
-> @@ -0,0 +1,168 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026 Huawei.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 790
-> +#
-> +# Test that extending a file past a non-block-aligned EOF correctly zero-fills
-> +# the gap [old_EOF, block_boundary), and that this zeroing persists through a
-> +# filesystem shutdown+remount cycle.
-> +#
-> +# Stale data beyond EOF can persist on disk when:
-> +# 1) append write data blocks are flushed before the on-disk file size update,
-> +#    and the system crashes in this window.
-> +# 2) concurrent append writeback and mmap writes persist non-zero data past EOF.
-> +#
-> +# Subsequent post-EOF operations (append write, fallocate, truncate up) must
-> +# zero-fill and persist the gap to prevent exposing stale data.
-> +#
-> +# The test pollutes the file's last physical block (via FIEMAP + raw device
-> +# write) with a sentinel pattern beyond i_size, then performs each extend
-> +# operation and verifies the gap is zeroed both in memory and on disk.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick rw shutdown
-> +
-> +. ./common/filter
-> +
-> +_require_scratch
-> +_require_block_device $SCRATCH_DEV
-> +_require_no_realtime
-> +_require_scratch_shutdown
-> +_require_metadata_journaling $SCRATCH_DEV
-> +
-> +# FIEMAP on Btrfs returns logical addresses within the filesystem's address
-> +# space, not physical device offsets. Writing to these offsets on $SCRATCH_DEV
-> +# would corrupt the filesystem in multi-device setups.
-> +_exclude_fs btrfs
-> +
-> +_require_xfs_io_command "fiemap"
-> +_require_xfs_io_command "falloc"
-> +_require_xfs_io_command "pwrite"
-> +_require_xfs_io_command "truncate"
-> +_require_xfs_io_command "sync_range"
-> +
-> +# Check that gap region [offset, offset+nbytes) is entirely zero
-> +_check_gap_zero()
-> +{
-> +	local file="$1"
-> +	local offset="$2"
-> +	local nbytes="$3"
-> +	local label="$4"
-> +	local data
-> +	local stripped
-> +
-> +	data=$(od -A n -t x1 -v -j $offset -N $nbytes "$file" 2>/dev/null)
-> +
-> +	# Remove whitespace and check if any byte is non-zero
-> +	stripped=$(printf '%s' "$data" | tr -d ' \n\t')
-> +	if [ -n "$stripped" ] && ! echo "$stripped" | grep -qE "^0+$"; then
-> +		echo "FAIL: non-zero data in gap [$offset,$((offset + nbytes))) $label"
-> +		_hexdump -N $((offset + nbytes)) "$file"
-> +		return 1
-> +	fi
-> +	return 0
-> +}
-> +
-> +# Get the physical block offset (in bytes) of the file's first block on device
-> +_get_phys_offset()
-> +{
-> +	local file="$1"
-> +	local fiemap_output
-> +	local phys_blk
-> +
-> +	fiemap_output=$($XFS_IO_PROG -r -c "fiemap -v" "$file" 2>/dev/null)
-> +	phys_blk=$(echo "$fiemap_output" | _filter_xfs_io_fiemap | head -1 | awk '{print $3}')
-> +	if [ -z "$phys_blk" ]; then
-> +		echo ""
-> +		return
-> +	fi
-> +	# Convert 512-byte blocks to bytes
-> +	echo $((phys_blk * 512))
-> +}
-> +
-> +_test_eof_zeroing()
-> +{
-> +	local test_name="$1"
-> +	local extend_cmd="$2"
-> +	local expected_new_sz="$3"
-> +	local file=$SCRATCH_MNT/testfile_${test_name}
-> +
-> +	echo "$test_name" | tee -a $seqres.full
-> +
-> +	# Compute non-block-aligned EOF offset
-> +	local gap_bytes=16
-> +	local eof_offset=$((blksz - gap_bytes))
-> +
-> +	# Step 1: Write one full block to ensure the filesystem allocates a
-> +	#         physical block for the file instead of using inline data.
-> +	$XFS_IO_PROG -f -c "pwrite -S 0x5a 0 $blksz" -c fsync \
-> +		"$file" >> $seqres.full 2>&1
-> +
-> +	# Step 2: Get physical block offset on device via FIEMAP
-> +	local phys_offset
-> +	phys_offset=$(_get_phys_offset "$file")
-> +	if [ -z "$phys_offset" ]; then
-> +		_fail "$test_name: failed to get physical block offset via fiemap"
-> +	fi
-> +
-> +	# Step 3: Truncate file to non-block-aligned size and fsync.
-> +	#         The on-disk region [eof_offset, blksz) may or may not be
-> +	#         zeroed by the filesystem at this point.
-> +	$XFS_IO_PROG -c "truncate $eof_offset" -c fsync \
-> +		"$file" >> $seqres.full 2>&1
-> +
-> +	# Step 4: Unmount and restore the physical block to all-0x5a on disk.
-> +	#         This bypasses the kernel's pagecache EOF-zeroing to ensure
-> +	#         the stale pattern is present on disk. Then remount.
-> +	_scratch_unmount
-> +	$XFS_IO_PROG -d -c "pwrite -S 0x5a $phys_offset $blksz" \
-> +		$SCRATCH_DEV >> $seqres.full 2>&1
-> +	if [ $? -ne 0 ]; then
-> +		_fail "$test_name: failed to inject stale data on disk"
-> +	fi
-> +	_scratch_mount >> $seqres.full 2>&1
-> +
-> +	# Step 5: Execute the extend operation.
-> +	$XFS_IO_PROG -c "$extend_cmd" "$file" >> $seqres.full 2>&1
-> +
-> +	# Step 6: Verify gap [eof_offset, blksz) is zeroed BEFORE shutdown
-> +	_check_gap_zero "$file" $eof_offset $gap_bytes "before shutdown" || return 1
-> +
-> +	# Step 7: Sync the extended range and shutdown the filesystem with
-> +	#         journal flush. This persists the file size extending, and
-> +	#         the filesystem should persist the zeroed data in the gap
-> +	#         range as well.
-> +	if [ "$extend_cmd" != "${extend_cmd#pwrite}" ]; then
-> +		$XFS_IO_PROG -c "sync_range -w $blksz $blksz" \
-> +			-c "sync_range -a $blksz $blksz" \
-> +			"$file" >> $seqres.full 2>&1
-> +	fi
-> +	_scratch_shutdown -f
-> +
-> +	# Step 8: Remount and verify gap is still zeroed
-> +	_scratch_cycle_mount
-> +
-> +	# Verify file size was not rolled back after shutdown+remount
-> +	local sz
-> +	sz=$(stat -c %s "$file")
-> +	if [ "$sz" -ne "$expected_new_sz" ]; then
-> +		_fail "$test_name: file size rolled back after shutdown+remount: $sz != $expected_new_sz"
-> +	fi
-> +
-> +	_check_gap_zero "$file" $eof_offset $gap_bytes "after shutdown+remount" || return 1
-> +}
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +blksz=$(_get_block_size $SCRATCH_MNT)
-> +
-> +# Test three variants of EOF-extending operations
-> +_test_eof_zeroing "append_write" "pwrite -S 0x42 $blksz $blksz" $((blksz * 2))
-> +_test_eof_zeroing "truncate_up" "truncate $((blksz * 2))" $((blksz * 2))
-> +_test_eof_zeroing "fallocate" "falloc $blksz $blksz" $((blksz * 2))
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/790.out b/tests/generic/790.out
-> new file mode 100644
-> index 00000000..e5e2cc09
-> --- /dev/null
-> +++ b/tests/generic/790.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 790
-> +append_write
-> +truncate_up
-> +fallocate
-> -- 
-> 2.52.0
+> Dmesg does not leave anything looks suspecious to me [1].
 > 
+> FYI, here I share the steps I use to recreate the failure. I use a QEMU test
+> node with Fedora 43. SMR HDDs are exposed to the QEMU VM via PCI passthrough.
 
+Fedora 43, so xfsprogs isn't new enough to have xfs_healer.
+
+>   # Set up dm-crypt on two SMR HDDs, /dev/sdc and /dev/sdd. Offset and size are
+>   # chosen to have 16 conventional zones and 144 sequential write required zones.
+>   $ sudo dd if=/dev/random of=/tmp/keyfile bs=1 count=256
+>   $ sudo cryptsetup open --batch-mode --type plain --cipher aes-cbc-essiv:sha256 --key-size 256 --key-file /tmp/keyfile --offset 382730240 --size 83886080 /dev/sdc test1  
+>   $ sudo cryptsetup open --batch-mode --type plain --cipher aes-cbc-essiv:sha256 --key-size 256 --key-file /tmp/keyfile --offset 382730240 --size 83886080 /dev/sdd test2
+> 
+>   # prepare local.config
+>   $ cat ./local.config
+>   export TEST_DIR=/var/kts/test
+>   export TEST_DEV="/dev/mapper/test1"
+>   export KEEP_DMESG=yes
+>   export FSTYP=xfs
+>   export MKFS_OPTIONS=""
+>   export SCRATCH_MNT=/var/kts/scratch
+>   export SCRATCH_DEV="/dev/mapper/test2"
+>   export FSX_AVOID=-a
+> 
+>   # format TEST_DEV
+>   $ sudo mkfs.xfs /dev/mapper/test1
+> 
+>   # repeat test cases from xfs/803 to xfs/806 200 times.
+>   $ for ((i=0;i<200;i++)); do echo $i; if ! sudo ./check xfs/803 xfs/804 xfs/805 xfs/806; then break; fi; done
+> 
+> With the steps, the failures is recreated at 20th repeat at earliest, or 120th
+> repeat when it takes longer.
+> 
+> Using this environment, I did quick printk debug, and found that do_umount()
+> in fs/namespace.c returns -EBUSY on failure case. But I'm not sure why it
+> happens.
+> 
+> Quote from fs/namespace.c:
+> ------------------------------------------------------------------------------
+>         event++;
+>         if (flags & MNT_DETACH) {
+>                 umount_tree(mnt, UMOUNT_PROPAGATE);
+>                 retval = 0;
+>         } else {
+>                 smp_mb(); // paired with __legitimize_mnt()
+>                 shrink_submounts(mnt);
+>                 retval = -EBUSY;   <===================================== here
+>                 if (!propagate_mount_busy(mnt, 2)) {
+>                         umount_tree(mnt, UMOUNT_PROPAGATE|UMOUNT_SYNC);
+>                         retval = 0;
+>                 }
+>         }
+> ------------------------------------------------------------------------------
+> 
+> Any advice will be welcomed. If I can do anything in my test environment,
+> please let me know.
+
+Hrmm.  Let me try this case (loop image on test fs on dmcrypted smr hdd)
+in the lab when I'm back from travelling tomorrow.  I wonder if there's
+some sort of delay in unmounting, though nothing stands out immediately.
+
+--D
+
+> 
+>   System maintenance is planned for my test machines in the first week of May.
+>   So, my action on my test environment may take some time.
+> 
+> 
+> [1] dmesg
+> 
+> [ 1966.727914] [ T137522] run fstests xfs/803 at 2026-04-27 13:47:54
+> [ 1972.747786] [ T138553] XFS (dm-0): Unmounting Filesystem 4586471c-c0d6-4e61-b808-4ba3976a8732
+> [ 1973.406021] [ T138576] XFS (dm-0): EXPERIMENTAL zoned RT device feature enabled.  Use at your own risk!
+> [ 1973.419142] [ T138576] XFS (dm-0): Mounting V5 Filesystem 4586471c-c0d6-4e61-b808-4ba3976a8732
+> [ 1973.568485] [ T138576] XFS (dm-0): Ending clean mount
+> [ 1973.570947] [ T138576] XFS (dm-0): limiting open zones to 36 due to total zone count (144)
+> [ 1973.577722] [ T138576] XFS (dm-0): 144 zones of 65536 blocks (36 max open zones)
+> [ 1973.937017] [ T138621] XFS (dm-0): Unmounting Filesystem 4586471c-c0d6-4e61-b808-4ba3976a8732
+> [ 1975.775968] [ T137522] run fstests xfs/804 at 2026-04-27 13:48:03
+> [ 1977.795592] [ T139088] XFS (dm-0): EXPERIMENTAL zoned RT device feature enabled.  Use at your own risk!
+> [ 1977.807396] [ T139088] XFS (dm-0): Mounting V5 Filesystem 4586471c-c0d6-4e61-b808-4ba3976a8732
+> [ 1977.922463] [ T139088] XFS (dm-0): Ending clean mount
+> [ 1977.925319] [ T139088] XFS (dm-0): limiting open zones to 36 due to total zone count (144)
+> [ 1977.932679] [ T139088] XFS (dm-0): 144 zones of 65536 blocks (36 max open zones)
+> [ 1978.971340] [ T139191] XFS (dm-0): Unmounting Filesystem 4586471c-c0d6-4e61-b808-4ba3976a8732
+> [ 1980.413770] [ T139283] XFS (dm-0): EXPERIMENTAL zoned RT device feature enabled.  Use at your own risk!
+> [ 1980.426461] [ T139283] XFS (dm-0): Mounting V5 Filesystem 4586471c-c0d6-4e61-b808-4ba3976a8732
+> [ 1980.550420] [ T139283] XFS (dm-0): Ending clean mount
+> [ 1980.552682] [ T139283] XFS (dm-0): limiting open zones to 36 due to total zone count (144)
+> [ 1980.558805] [ T139283] XFS (dm-0): 144 zones of 65536 blocks (36 max open zones)
+> [ 1983.784203] [ T139478] XFS (dm-0): Unmounting Filesystem 4586471c-c0d6-4e61-b808-4ba3976a8732
+> [ 1984.571368] [ T139670] XFS (dm-0): EXPERIMENTAL zoned RT device feature enabled.  Use at your own risk!
+> [ 1984.582316] [ T139670] XFS (dm-0): Mounting V5 Filesystem 4586471c-c0d6-4e61-b808-4ba3976a8732
+> [ 1984.698207] [ T139670] XFS (dm-0): Ending clean mount
+> [ 1984.700759] [ T139670] XFS (dm-0): limiting open zones to 36 due to total zone count (144)
+> [ 1984.708996] [ T139670] XFS (dm-0): 144 zones of 65536 blocks (36 max open zones)
+> [ 1985.237069] [ T137522] run fstests xfs/805 at 2026-04-27 13:48:13
+> [ 1991.545779] [ T140080] XFS (dm-0): Unmounting Filesystem 4586471c-c0d6-4e61-b808-4ba3976a8732
+> [ 1992.390589] [ T140272] XFS (dm-0): EXPERIMENTAL zoned RT device feature enabled.  Use at your own risk!
+> [ 1992.400273] [ T140272] XFS (dm-0): Mounting V5 Filesystem 4586471c-c0d6-4e61-b808-4ba3976a8732
+> [ 1992.510456] [ T140272] XFS (dm-0): Ending clean mount
+> [ 1992.513019] [ T140272] XFS (dm-0): limiting open zones to 36 due to total zone count (144)
+> [ 1992.519907] [ T140272] XFS (dm-0): 144 zones of 65536 blocks (36 max open zones)
+> [ 1993.060516] [ T137522] run fstests xfs/806 at 2026-04-27 13:48:21
+> [ 1996.241717] [ T140594] loop0: detected capacity change from 0 to 20971520
+> [ 1996.286338] [ T140594] XFS (loop0): Mounting V5 Filesystem cdb36045-8330-48c7-b1a4-82c5d7ed21e1
+> [ 1996.308568] [ T140594] XFS (loop0): Ending clean mount
+> [ 1996.388493] [ T140613] XFS (loop0): Unmounting Filesystem cdb36045-8330-48c7-b1a4-82c5d7ed21e1
+> [ 1996.599702] [ T140615] loop0: detected capacity change from 0 to 20971520
+> [ 1996.638831] [ T140615] XFS (loop0): Mounting V5 Filesystem 3218c7d6-c4a4-4f5a-b9bc-c1ba7ada7e6d
+> [ 1996.661288] [ T140615] XFS (loop0): Ending clean mount
+> [ 1996.727650] [ T140630] XFS (loop0): Unmounting Filesystem 3218c7d6-c4a4-4f5a-b9bc-c1ba7ada7e6d
+> [ 1996.927360] [ T140632] loop0: detected capacity change from 0 to 20971520
+> [ 1996.965520] [ T140632] XFS (loop0): Mounting V5 Filesystem 15db07f7-722e-401e-8f22-856ceeedeed6
+> [ 1996.983714] [ T140632] XFS (loop0): Ending clean mount
+> [ 1997.058905] [ T140651] XFS (loop0): Unmounting Filesystem 15db07f7-722e-401e-8f22-856ceeedeed6
+> [ 1997.256820] [ T140653] loop0: detected capacity change from 0 to 20971520
+> [ 1997.294703] [ T140653] XFS (loop0): Mounting V5 Filesystem 98713c32-802b-4179-8ec6-fcc89968b76e
+> [ 1997.312428] [ T140653] XFS (loop0): Ending clean mount
+> [ 1997.385745] [ T140672] XFS (loop0): Unmounting Filesystem 98713c32-802b-4179-8ec6-fcc89968b76e
+> [ 1997.574544] [ T140674] loop0: detected capacity change from 0 to 20971520
+> [ 1997.616104] [ T140674] XFS (loop0): Mounting V5 Filesystem 45368b30-8413-48b4-becc-4e787f833e42
+> [ 1997.638100] [ T140674] XFS (loop0): Ending clean mount
+> [ 1997.916462] [ T140706] XFS (loop0): Unmounting Filesystem 45368b30-8413-48b4-becc-4e787f833e42
+> [ 1998.076829] [ T140708] loop0: detected capacity change from 0 to 20971520
+> [ 1998.113814] [ T140708] XFS (loop0): Mounting V5 Filesystem 2f115ed5-8d6d-4a03-97fb-4b2215947ec6
+> [ 1998.132609] [ T140708] XFS (loop0): Ending clean mount
+> [ 1998.225237] [ T140727] XFS (loop0): Unmounting Filesystem 2f115ed5-8d6d-4a03-97fb-4b2215947ec6
+> [ 2000.147618] [ T140793] XFS (dm-0): Unmounting Filesystem 4586471c-c0d6-4e61-b808-4ba3976a8732
+> [ 2001.085155] [ T140984] XFS (dm-0): EXPERIMENTAL zoned RT device feature enabled.  Use at your own risk!
+> [ 2001.094211] [ T140984] XFS (dm-0): Mounting V5 Filesystem 4586471c-c0d6-4e61-b808-4ba3976a8732
+> [ 2001.212889] [ T140984] XFS (dm-0): Ending clean mount
+> [ 2001.215370] [ T140984] XFS (dm-0): limiting open zones to 36 due to total zone count (144)
+> [ 2001.221959] [ T140984] XFS (dm-0): 144 zones of 65536 blocks (36 max open zones)
+> [ 2001.680831] [ T141027] XFS (dm-0): Unmounting Filesystem 4586471c-c0d6-4e61-b808-4ba3976a8732
+> 
