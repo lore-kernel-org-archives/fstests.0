@@ -1,63 +1,37 @@
-Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
+Received: from mx0.herbolt.com (mx0.herbolt.com [5.59.97.199])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B5542C3259;
-	Wed, 29 Apr 2026 20:48:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.141.245
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF6B641B369
+	for <fstests@vger.kernel.org>; Thu, 30 Apr 2026 13:13:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=5.59.97.199
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777495693; cv=none; b=OzLN9/+awTq9hHDL1ReIyZyG3SdRhVUnSc/IDBMr8CRcURvr7HFnfZytAXtePvEUMx4AI22XRgkvGGg0Hqa4EKnJIh9jYYx+sU76nZke/eZKGnf4hm9JpHDZbS1lG2ZUAY2glejy3HKogZLJDQdeBvU+IrAHkHHXdUN25TXQC9A=
+	t=1777554842; cv=none; b=AmA1yRqXpTFss9xdNpwz58LsyauUy5zZ3zt15WvHgMHMNJK+kyfwJidzcEvOiRnYCl4HoRke7Xwu29USKHxrRKIW4asXXuIzjLx3c9ixgGwKsAXprXvWmxSegcGklMfUJQ0fBa14FcGoSlBPqqU1qtt3aLHGCk9Ezt4Dk9ympKk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777495693; c=relaxed/simple;
-	bh=jD2tnPjT+mVdbbH+mbn2X2InqfNaaAu+t3E47eqgzoc=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=tZCDvAw+pt2/+4F0RAbyIuJlCt0QvHoDpmHyo8b+DDcbYzmv6O6Hjb/j2CxZ7cpTY8V2KKiHNh/IstyByuXEx9q7oz+ywc0pov0Qocp4ngQpnVxaMQNBNp7n4jwuIuX7EBMVYAFZRUuS94BpVkpuOuvXhEOfy4tTgzR91KRSFxE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=G93aqohd; arc=none smtp.client-ip=68.232.141.245
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="G93aqohd"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1777495690; x=1809031690;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=jD2tnPjT+mVdbbH+mbn2X2InqfNaaAu+t3E47eqgzoc=;
-  b=G93aqohdpKCR7LJumIAK6UPAF6xDqPwwYmTGgyuw3z5R0DcDSXMJOf0y
-   kciVN/odXUsiR9u6/1Rf8pvIoGXt1ru165zDtkZAJXJrSu567dyoyAG2F
-   OQE+jC9E8xo8koud2DLvt6AWbqgRvFj9Pxi+w5V7gXBRTS1cYGSGEPNNS
-   GRCupFIYpdjQKmV8/Ls1wu5yYvNUN+o6pgI7dZYIU346yQB+C4hUJdme9
-   cJuqKwnV7E4ss6adRlNJrjsFHvbd9q+SPqELgi6/pSt+IjSDQxzRW0cYd
-   cN97Z7/peLXJjjzeuqacjIyKVrBHcRWw7MxQ9y5kaTPR7Ht4X9hj7yuqJ
-   g==;
-X-CSE-ConnectionGUID: lFUyp3jKTiy7qjdhfJMLJg==
-X-CSE-MsgGUID: uvjt3kgyRR+gTD3B0JfdZw==
-X-IronPort-AV: E=Sophos;i="6.23,206,1770566400"; 
-   d="scan'208";a="145552338"
-Received: from unknown (HELO uls-op-esad2-o.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 30 Apr 2026 04:47:01 +0800
-X-CSE-ConnectionGUID: VaoI5fW7Q2uCI5Ldq0DeRw==
-X-CSE-MsgGUID: qIiS6DwOQyyxYVYCi0xXDQ==
-IronPort-SDR: 69f26e27_K2Su1sHiTThFFlRbjvP01Z3TsKS1i91/X0pRM9oKJvqvjXj
- 4VeO5JEaA38+xrgIVgOgdI8a9+uFclMMCj6Jmtg==
-Received: from uls-op-esai1-o.wdc.com ([10.248.3.45])
-  by uls-op-esad2-o.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 29 Apr 2026 13:46:31 -0700
-X-CSE-ConnectionGUID: yRZbdT35Ru2lUnuN/QJuew==
-X-CSE-MsgGUID: dtzVo67rTFCL2lB4ige/IA==
-WDCIronportException: Internal
-Received: from 5cg1443s5p.ad.shared (HELO neo.fritz.box) ([10.224.28.29])
-  by uls-op-esai1-o.wdc.com with ESMTP; 29 Apr 2026 13:46:29 -0700
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Naohiro Aota <naohiro.aota@wdc.com>,
-	fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org,
-	Christoph Hellwig <hch@lst.de>,
-	Hans Holmberg <Hans.Holmberg@wdc.com>,
-	Johannes Thumshirn <johannes.thumshirn@wdc.com>,
-	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Subject: [PATCH v3] generic/793: limit number of overwrites
-Date: Wed, 29 Apr 2026 22:46:24 +0200
-Message-ID: <20260429204624.807220-1-johannes.thumshirn@wdc.com>
+	s=arc-20240116; t=1777554842; c=relaxed/simple;
+	bh=RcXhpS3dtLAAS/doZBINk+3f4ekRaLAvLJfzHQhPCsw=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=Y4YeyCCAI0yoegXutzGtEgQTfenRd76WjTkHxZOjfXh/Z+qz+XhGFOJ0YaTmEhBUfjO6YDvoTjYBE9cB8X/4751di/MWLWHOe844tsA2fo1aDN9CKRCidBu01Eyd6fYdPOeBNo4OMa+N9NUuX9+puvrPKP/qeI8sbDPJQPnXxBk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=herbolt.com; spf=pass smtp.mailfrom=herbolt.com; arc=none smtp.client-ip=5.59.97.199
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=herbolt.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=herbolt.com
+Received: from mx0.herbolt.com (localhost [127.0.0.1])
+	by mx0.herbolt.com (Postfix) with ESMTP id E5693180F244;
+	Thu, 30 Apr 2026 15:13:52 +0200 (CEST)
+Received: from trufa.intra.herbolt.com.com ([172.168.31.30])
+	by mx0.herbolt.com with ESMTPSA
+	id HBgTK4ZV82m0DRoAKEJqOA:T2
+	(envelope-from <lukas@herbolt.com>); Thu, 30 Apr 2026 15:13:52 +0200
+From: Lukas Herbolt <lukas@herbolt.com>
+To: zlang@kernel.org,
+	djwong@kernel.org
+Cc: fstests@vger.kernel.org,
+	Lukas Herbolt <lukas@herbolt.com>
+Subject: [PATCH 1/4] common/rc:  Add helper to calculate percetage of free space available
+Date: Thu, 30 Apr 2026 15:13:16 +0200
+Message-ID: <20260430131317.693845-4-lukas@herbolt.com>
 X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20260430131317.693845-2-lukas@herbolt.com>
+References: <20260430131317.693845-2-lukas@herbolt.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -66,58 +40,33 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Testcase generic/793 overwrites a 1GB file "number of sequential zones"
-times in order to trigger a bug in zoned BTRFS' garbage collection. But on
-scratch devices with a huge number of sequential zones (like SMR drives)
-this can cause very long runtimes.
+It calculates percentage of filesystem available space and returns it
+in MB. This helper will be used in the following test/generic fixes.
 
-As the testcase also limits the filesystem size to 16GB, constraint the
-number of overwrite loops to the number of sequential zones in the
-filesystem. This still guarantees that the file will be overwritten often
-enough to trigger the bug while not exploding the overall test runtime.
-
-Reported-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Reviewed-by: Christoph Hellwig <hch@lst.de>
-Reviewed-by: Christoph Hellwig <hch@lst.de>
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Signed-off-by: Lukas Herbolt <lukas@herbolt.com>
 ---
+ common/rc | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-Changes to v2:
-- Re-add $BLKZONE_PROG
-
- tests/generic/793 | 9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
-
-diff --git a/tests/generic/793 b/tests/generic/793
-index a59e84694309..0d3b0bfcac5e 100755
---- a/tests/generic/793
-+++ b/tests/generic/793
-@@ -11,6 +11,7 @@
- _begin_fstest auto quick zone
+diff --git a/common/rc b/common/rc
+index 5fe44e2158ff..32c566cdb68a 100644
+--- a/common/rc
++++ b/common/rc
+@@ -6189,6 +6189,14 @@ _require_fanotify_ioerrors()
+ 	_notrun "$FSTYP does not support fanotify ioerrors"
+ }
  
- . ./common/filter
-+. ./common/zoned
- 
- _require_scratch_size $((16 * 1024 * 1024))
- 
-@@ -34,12 +35,14 @@ _fixed_by_fs_commit btrfs 258e46a6385c \
- _fixed_by_fs_commit btrfs e2a7fd22378f \
- 	"btrfs: zoned: add zone reclaim flush state for DATA space_info"
- 
--_scratch_mkfs_sized $((16 * 1024 * 1024 * 1024)) &>>$seqres.full
-+fssize=$((16 * 1024 * 1024 * 1024))
-+_scratch_mkfs_sized ${fssize} &>>$seqres.full
- _scratch_mount
- 
--# Overwrite the data "number of seq zones" times, this is arbitrarily chosen
-+# Overwrite the data "number of zones in fs" times, this is arbitrarily chosen
- # but triggers the original bug reliably
--loops=$($BLKZONE_PROG report $zoned_dev | grep -c "SEQ_WRITE_REQUIRED")
-+zsize=$(_zone_capacity 0 $zoned_dev)
-+loops=$(( fssize/zsize))
- 
- for (( i = 0; i < $loops; i++ )); do
- 	dd if=/dev/zero of=$SCRATCH_MNT/test bs=1M count=1024 status=none
++# Returns percentage of available space on given mount point.
++# usage example:
++# _mb_pct_of_available_space <mount point> <percents>
++#
++_mb_pct_of_available_space()
++{
++        _df_device $1 | $AWK_PROG -v pct=$2 '{printf "%.f", (($5*(pct/100))/1024)}'
++}
+ ################################################################################
+ # make sure this script returns success
+ /bin/true
 -- 
 2.53.0
 
