@@ -1,40 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B15742E8B98
-	for <fstests@vger.kernel.org>; Thu, 30 Apr 2026 16:36:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 896DB428829
+	for <fstests@vger.kernel.org>; Thu, 30 Apr 2026 16:39:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777566996; cv=none; b=nNLtkYqB7820pqtKRh28jRgwsmEPgh1KKqSIXuaGc6QQp+xcwoUybN2mBumsbmv14uYBrUmx1izNK+jYx0PfAu8zZmm+e8GgCs08F58G4QnzVSpnaJIGDdqxqncu+MUu+P85ds4DlG0gDTluJrajpsRfP6xe3PzSQUH3AHuEobE=
+	t=1777567195; cv=none; b=goQv9MkdcpFfva3comWbU50C4cC7foNfhECBOPweg3/ecIQNMyFNDuD+DG+vWnAt6kfjcEFG3RqqUILUpK2Dr88TT+l7bv3TJSVVfxIe1txb4L7sBlr1hCq5uq5tVtegGm8G8yCS52FShSxnrss9Kye2nN0x+O2vBh9FI09OrYM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777566996; c=relaxed/simple;
-	bh=2S6YVgoI9kSnf4qi4UZfK/6M70IixtCtZNeQqc9IPmM=;
+	s=arc-20240116; t=1777567195; c=relaxed/simple;
+	bh=vVpkFJoRbh74VDuRV649+csq58sx7eSjH7KPJE3AOjk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=r/HqyH8kdu1x5ukxI1H3DZU62rj83XHjoK4wREDR5bznydE2KpcAEhII+8QETkJyhjFBr5EpQvWYUapT2R+3yAp7wvrjZMut6YYpb5AzTqOvmJ+MKzut1FGEXW9dooavkuZRhcNWln3FzLZmQsYLa3i1pWWS6RCSQp7OPIYqIYQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ezpk84hw; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=EPCsF0NY7J+XQAsF1qVbQLZ9Q8DQfrQYTUIXfFQ5JhN5VGN8Iu4PWYmMGkBf/UkKvUjNMMnd2dtYwaQph+gzyFisaGE0pJe+z3AVjutoI/itPkWO+ZFMuw/xwdnK+C18oXa+xZi6AjSdPCKdtmkyC03jxjfS7c8EMPJsgCTUQ+0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CUcGZ5dC; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ezpk84hw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A5C39C2BCB3;
-	Thu, 30 Apr 2026 16:36:35 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CUcGZ5dC"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3B525C2BCB3;
+	Thu, 30 Apr 2026 16:39:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1777566995;
-	bh=2S6YVgoI9kSnf4qi4UZfK/6M70IixtCtZNeQqc9IPmM=;
+	s=k20201202; t=1777567195;
+	bh=vVpkFJoRbh74VDuRV649+csq58sx7eSjH7KPJE3AOjk=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=ezpk84hwQYOTGrZwqBWYzXjrp1mHlS2Ai39WYZbE2BjXdQ9WoOcS+09nczXhxiQFM
-	 iT7e3RVm9YiE1s3cgrOKF9ELw595TODvY+KtF+ftrg3dQR4QHljUnYlXw7BF4HQiCV
-	 UppZbY6hGu+dWJKJyok7cSo5VHikJ/nxaBYyov/XipncFuATHURFXXtBWr6JOSvWLW
-	 MQmtNQzzUxZh+ra6XqtIs/aTpupCcYTP8i5gvJ98QjPq64cMMAnxi5SMYzwV46c6Qb
-	 XF0Tiaf75gXCr2amZpmGfvidbMgNNmh/mdgZuCnCjKUhh5i8lCYfiP3htwf0Tw2aSF
-	 53qh17Fa0/e5w==
-Date: Thu, 30 Apr 2026 09:36:35 -0700
+	b=CUcGZ5dCurpcP3/X3zQWrnGwyYztbozTxMZsAal59dmG3NKIXD1g80nntOGnukunT
+	 +p4g6V6VDMP/VcwzeEhR+zh5OK2djMK5vKvjIDLG7aLJSUrLJrN8O0JGpiIS5t+v94
+	 V+FXlbs9uF7JQ490Vh4fKKzPVHfnEh6gHlNjrXWmw2Ah+EAwJ+MRMs7KIXV7WLF7Zi
+	 qdi+1ib8MmSgWu2aAKP/8RE5Q6FlL8wM3JyAjemr0r+GVUgeYkJH772f0isHX7huAl
+	 HV2IZ47245kGAIJy6o5oJXTXYEEf2dUvESz+8dOPPf3OlGASL26a0nivNJmsv81Uzy
+	 WfpDwFvvi0sMA==
+Date: Thu, 30 Apr 2026 09:39:54 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: Lukas Herbolt <lukas@herbolt.com>
 Cc: zlang@kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 4/4] xfs/216 xfs/217 Use default -l conccurency=0 on
- mkfs.xfs that supports it
-Message-ID: <20260430163635.GS7739@frogsfrogsfrogs>
+Subject: Re: [PATCH 2/4] common/xfs: helper function to check if -l/-d/-r
+ concurrecy flags.
+Message-ID: <20260430163954.GT7739@frogsfrogsfrogs>
 References: <20260430131317.693845-2-lukas@herbolt.com>
- <20260430131317.693845-10-lukas@herbolt.com>
+ <20260430131317.693845-6-lukas@herbolt.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,94 +43,53 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260430131317.693845-10-lukas@herbolt.com>
+In-Reply-To: <20260430131317.693845-6-lukas@herbolt.com>
 
-On Thu, Apr 30, 2026 at 03:13:22PM +0200, Lukas Herbolt wrote:
-> The XFS conccurency optimalization breaks the log sizing check on
-
-"concurrency optimization"
-
-> systems with non-rotational disks and high amount of CPUs. Default to
-> the old behavior with -l conccurency=0 and with -d concurrency=0.
-
-"-l concurrency=0"
-
+On Thu, Apr 30, 2026 at 03:13:18PM +0200, Lukas Herbolt wrote:
+> Check if the requested flag is supported by the mkfs.xfs on scratch
+> device.
+> 
 > Signed-off-by: Lukas Herbolt <lukas@herbolt.com>
 > ---
->  tests/xfs/216 |  9 +++++++--
->  tests/xfs/217 | 17 +++++++++++++++--
->  2 files changed, 22 insertions(+), 4 deletions(-)
+>  common/xfs | 6 ++++++
+>  1 file changed, 6 insertions(+)
 > 
-> diff --git a/tests/xfs/216 b/tests/xfs/216
-> index 091c11d08642..8b4610d5a0a6 100755
-> --- a/tests/xfs/216
-> +++ b/tests/xfs/216
-> @@ -21,14 +21,19 @@ _cleanup()
+> diff --git a/common/xfs b/common/xfs
+> index f7a6d2f2f03a..12cf6c273c53 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -2399,3 +2399,9 @@ _require_xfs_healer()
+>  	_xfs_healer --supported "$@" &>/dev/null || \
+>  		_notrun "health monitoring not supported on this kernel"
 >  }
->  
->  _require_scratch
-> -_scratch_mkfs_xfs >/dev/null 2>&1
-> +if _scratch_mkfs_supports_concurrency -l >> $seqres.full 2>&1; then
-> +	_scratch_mkfs_xfs -l concurrency=0 >/dev/null 2>&1
-> +	loop_mkfs_opts="-l concurrency=0"
-> +else
-> +	_scratch_mkfs_xfs >/dev/null 2>&1
-> +	loop_mkfs_opts=
-> +fi
->  _scratch_mount
->  
->  _require_loop
->  LOOP_IMG=$SCRATCH_MNT/test_fs
->  LOOP_MNT=$SCRATCH_MNT/test_fs_dir
->  
-> -loop_mkfs_opts=
->  $MKFS_XFS_PROG 2>&1 | grep -q rmapbt && \
->  	loop_mkfs_opts="$loop_mkfs_opts -m rmapbt=0"
->  $MKFS_XFS_PROG 2>&1 | grep -q reflink && \
-> diff --git a/tests/xfs/217 b/tests/xfs/217
-> index dae6ce55f475..7c7b33b1ccf7 100755
-> --- a/tests/xfs/217
-> +++ b/tests/xfs/217
-> @@ -20,7 +20,20 @@ _cleanup()
->  }
->  
->  _require_scratch
-> -_scratch_mkfs_xfs >/dev/null 2>&1
-> +if _scratch_mkfs_supports_concurrency -l >> $seqres.full 2>&1; then
-> +	_scratch_mkfs_xfs -l concurrency=0 >/dev/null 2>&1
+> +
+> +# Check if -l/-d/-r concurrency is supported.
+> +_scratch_mkfs_supports_concurrency()
 
-Why does the scratch fs need a -lconcurrency option?
+This is specific to xfs, so I think the name should reflect that.
 
-> +	loop_mkfs_opts="-l concurrency=0"
-> +		if _scratch_mkfs_supports_concurrency -d >> $seqres.full 2>&1; then
-> +			# We could go just with -l concurency but then on 512CPUs
-> +			# it gives log size off by one block so better to set
-> +			# -d concurrency to 0.
-> +			loop_mkfs_opts="$loop_mkfs_opts -d concurrency=0"
+_scratch_mkfs_xfs_supports_concurrency
 
-concurrency= was added for -d and -l in the same release (6.7) so you
-don't have to test them separately.
+> +{
+> +        _scratch_mkfs_xfs_supported $1 concurrency=0
+> +}
+
+As I noted downthread, -d and -l gained their concurrency= options in
+the same release so we probably ought to do future fstests authors a
+favor and note that in the comments or just do something dorky like:
+
+_scratch_mkfs_xfs_supports_concurrency()
+{
+	local arg="${1:-d}"
+
+	# -d and -l gained concurrency options at the same time
+	test "$arg" = "-l" && arg="-d"
+
+	_scratch_mkfs_xfs_supported "$arg" concurrency=0
+}
 
 --D
 
-> +
-> +		fi
-> +else
-> +	_scratch_mkfs_xfs >/dev/null 2>&1
-> +	loop_mkfs_opts=
-> +fi
->  _scratch_mount
->  # 16T mkfs requires a bit over 2G free
->  _require_fs_space $SCRATCH_MNT 2202000
-> @@ -34,7 +47,7 @@ _do_mkfs()
->  	for i in $*; do
->  		echo -n "fssize=${i}g "
->  		$MKFS_XFS_PROG -f -b size=4096 -l version=2 \
-> -			-d size=${i}g $loop_dev |grep log
-> +			-d size=${i}g $loop_dev $loop_mkfs_opts |grep log
->  		_mount $loop_dev $LOOP_MNT
->  		echo "test write" > $LOOP_MNT/test
->  		_unmount $LOOP_MNT > /dev/null 2>&1
 > -- 
 > 2.53.0
 > 
