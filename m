@@ -1,34 +1,34 @@
 Received: from mx0.herbolt.com (mx0.herbolt.com [5.59.97.199])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF6B641B369
-	for <fstests@vger.kernel.org>; Thu, 30 Apr 2026 13:13:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28D5439F192
+	for <fstests@vger.kernel.org>; Thu, 30 Apr 2026 13:14:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=5.59.97.199
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777554842; cv=none; b=AmA1yRqXpTFss9xdNpwz58LsyauUy5zZ3zt15WvHgMHMNJK+kyfwJidzcEvOiRnYCl4HoRke7Xwu29USKHxrRKIW4asXXuIzjLx3c9ixgGwKsAXprXvWmxSegcGklMfUJQ0fBa14FcGoSlBPqqU1qtt3aLHGCk9Ezt4Dk9ympKk=
+	t=1777554864; cv=none; b=SR06L7D0nEOTijyVymf2HAEFT7rOtvRmEiXxi3xTPe8d4MAfvcTUaN4o3iIs8JPDt5w7hZAvaTHsH/pxdZabKkQCY7AQkTaa8rXRAUZj9WYqhSMwNPxO4mQVHHV0lS4Tt46YBoKHjMPIINF1JjFyIuMhjvkS/m8Y+FPLIJf5itw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777554842; c=relaxed/simple;
-	bh=RcXhpS3dtLAAS/doZBINk+3f4ekRaLAvLJfzHQhPCsw=;
+	s=arc-20240116; t=1777554864; c=relaxed/simple;
+	bh=NMhKm+DsLUbsCh8H/mL9vfUEH1k1hpnhBfiaSdmLBWE=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Y4YeyCCAI0yoegXutzGtEgQTfenRd76WjTkHxZOjfXh/Z+qz+XhGFOJ0YaTmEhBUfjO6YDvoTjYBE9cB8X/4751di/MWLWHOe844tsA2fo1aDN9CKRCidBu01Eyd6fYdPOeBNo4OMa+N9NUuX9+puvrPKP/qeI8sbDPJQPnXxBk=
+	 MIME-Version; b=ubv0qmLjBXeNXo1skPmRwjEqQMuVA8EgRJ8ikzcTxDNc/fkKn0tyBSGvZL8mSUeU1NV2ZE63GWWSEXrjKXefiU60PgVO1eFJqjcU6hTLlbeeh7AjS6+R7MoytOHIopZMNjXxTXvhva4CyP8GC6SGlOTCUZMmmYhqzuT0MefdqZs=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=herbolt.com; spf=pass smtp.mailfrom=herbolt.com; arc=none smtp.client-ip=5.59.97.199
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=herbolt.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=herbolt.com
 Received: from mx0.herbolt.com (localhost [127.0.0.1])
-	by mx0.herbolt.com (Postfix) with ESMTP id E5693180F244;
-	Thu, 30 Apr 2026 15:13:52 +0200 (CEST)
+	by mx0.herbolt.com (Postfix) with ESMTP id 7F1F6180F244;
+	Thu, 30 Apr 2026 15:14:16 +0200 (CEST)
 Received: from trufa.intra.herbolt.com.com ([172.168.31.30])
 	by mx0.herbolt.com with ESMTPSA
-	id HBgTK4ZV82m0DRoAKEJqOA:T2
-	(envelope-from <lukas@herbolt.com>); Thu, 30 Apr 2026 15:13:52 +0200
+	id HBgTK4ZV82m0DRoAKEJqOA:T3
+	(envelope-from <lukas@herbolt.com>); Thu, 30 Apr 2026 15:14:16 +0200
 From: Lukas Herbolt <lukas@herbolt.com>
 To: zlang@kernel.org,
 	djwong@kernel.org
 Cc: fstests@vger.kernel.org,
 	Lukas Herbolt <lukas@herbolt.com>
-Subject: [PATCH 1/4] common/rc:  Add helper to calculate percetage of free space available
-Date: Thu, 30 Apr 2026 15:13:16 +0200
-Message-ID: <20260430131317.693845-4-lukas@herbolt.com>
+Subject: [PATCH 2/4] common/xfs: helper function to check if -l/-d/-r concurrecy flags.
+Date: Thu, 30 Apr 2026 15:13:18 +0200
+Message-ID: <20260430131317.693845-6-lukas@herbolt.com>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20260430131317.693845-2-lukas@herbolt.com>
 References: <20260430131317.693845-2-lukas@herbolt.com>
@@ -40,33 +40,28 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-It calculates percentage of filesystem available space and returns it
-in MB. This helper will be used in the following test/generic fixes.
+Check if the requested flag is supported by the mkfs.xfs on scratch
+device.
 
 Signed-off-by: Lukas Herbolt <lukas@herbolt.com>
 ---
- common/rc | 8 ++++++++
- 1 file changed, 8 insertions(+)
+ common/xfs | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/common/rc b/common/rc
-index 5fe44e2158ff..32c566cdb68a 100644
---- a/common/rc
-+++ b/common/rc
-@@ -6189,6 +6189,14 @@ _require_fanotify_ioerrors()
- 	_notrun "$FSTYP does not support fanotify ioerrors"
+diff --git a/common/xfs b/common/xfs
+index f7a6d2f2f03a..12cf6c273c53 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -2399,3 +2399,9 @@ _require_xfs_healer()
+ 	_xfs_healer --supported "$@" &>/dev/null || \
+ 		_notrun "health monitoring not supported on this kernel"
  }
- 
-+# Returns percentage of available space on given mount point.
-+# usage example:
-+# _mb_pct_of_available_space <mount point> <percents>
-+#
-+_mb_pct_of_available_space()
++
++# Check if -l/-d/-r concurrency is supported.
++_scratch_mkfs_supports_concurrency()
 +{
-+        _df_device $1 | $AWK_PROG -v pct=$2 '{printf "%.f", (($5*(pct/100))/1024)}'
++        _scratch_mkfs_xfs_supported $1 concurrency=0
 +}
- ################################################################################
- # make sure this script returns success
- /bin/true
 -- 
 2.53.0
 
