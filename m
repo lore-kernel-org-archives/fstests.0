@@ -1,126 +1,99 @@
-Received: from mail-pj1-f48.google.com (mail-pj1-f48.google.com [209.85.216.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77A9B29CE1
-	for <fstests@vger.kernel.org>; Sat,  2 May 2026 02:11:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C2FA273D6D;
+	Mon,  4 May 2026 16:10:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777687913; cv=none; b=i4ijTc2K3NvUPitZl+NRpgG3p66HhBXcbYL5iK4k9P0o83dBfyrQqvjaR/XpESpUsjDORRW/iY69Vq12XjeR9x77aNgIRmmNYaWet9wFwPQ+TlwTaUBkHMn9HEe4DnI5EwgV6k0r8NHZGhVdOQi5I+ninifOqt8aVXnUtUNvsEY=
+	t=1777911003; cv=none; b=IX2TSWq01hNzeEw/+ZuvWrWS5w8Rw7EcwMsDJvzd4TdH0cXi129UKBcg7p0aePhWT0VJ4NP/iu7NIE9MMVe0LTs5Qpi/tOF1roaOH0NTfvVXpNpBC0jhS2eOBejk4GQdSsfc63gM3BYM8Jajtba6WEuMQBx+jIB8vDhj2Wct9+g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777687913; c=relaxed/simple;
-	bh=+35PStDJgkrtqTvRRHRCRpCJSGv6AsaILkRdM2RRolI=;
-	h=From:Date:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=jjYULBeyAtDnPTKBs8rG3IORDtt84h8T45oFATx/PXzXYHxTnKNmQwgOiejxUXb7b4WkgFATxNrAlMKSartpnhLAlH7OgEgLxM/fkveUh+0XFtC77dl4iDw6emePuLhm+GN9XwNou9uCfJWnYN2LVVI0Cb1T3nmePwgJE2HkIKM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Al65P6SX; arc=none smtp.client-ip=209.85.216.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1777911003; c=relaxed/simple;
+	bh=pFViZUbSECeFrklIzjDeoJmMCgBEQRGxLhga3mht244=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=XWugKvb13e5GBbtNUqwDMN+FGe1B6MEoXMpHvWqWP5DvkE+ZeCX9KI4fb6oq080Rhk2AM97FaoU+i8Z3TLDWhP72cKpz/fJnNZpzkjskP66vfZORtDssi3hz4uDKeFR8SEv8wPeYomin6tkuGcR6YHY57yw6e0+AdhzKdYVs9JQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dolOvtHK; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Al65P6SX"
-Received: by mail-pj1-f48.google.com with SMTP id 98e67ed59e1d1-356337f058aso1562686a91.2
-        for <fstests@vger.kernel.org>; Fri, 01 May 2026 19:11:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1777687912; x=1778292712; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references
-         :mail-followup-to:message-id:subject:cc:to:date:from:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=jEjq7D6SQbjq+dm80J2m8C0/q5ysRjrTj0T2q4jFV9Q=;
-        b=Al65P6SX6DuN+9kwgNQgFp6DCtWacmLWfarqPf/45dZ9eZjFs9fOr+JHpnvmbENK9y
-         dECOoQ8+7xn1g5sdG6JWjwXU0ea/LPUT3+oAZ3yjCLz+NW3lFj/QiXm9EKgdOnY6Nuiu
-         LLco++prmts7u3BrERR2VxjYrfolf0z2rCUDPhZAw3L2uwkZPu8BTrk3Qqy1dMqnUJzV
-         p7uolPxAE3H5wokREh8VrKWU3TQFwHAZrDz7ir26s6PyeUidYdzDXiU2i6iYqgO1yYnw
-         7Di/pMUwF0rzNebxJZKpvMGR7pX195Bwu+OAh4yrmru1p6x37zf11ejTjiobhHrgAyE2
-         Y8fg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777687912; x=1778292712;
-        h=in-reply-to:content-disposition:mime-version:references
-         :mail-followup-to:message-id:subject:cc:to:date:from:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=jEjq7D6SQbjq+dm80J2m8C0/q5ysRjrTj0T2q4jFV9Q=;
-        b=WfHoKucBK3Hc2ZG+20JpEq7OMYxEKJ/U2T7UPbvVJzPFBnodOM7GiI37jzx0XNdqvi
-         z4iZC63hAsFuABRLu41PGi7zERYGaGPGzsesySo3b5BaJnEB/9yJWTwwvoWEbCz0n8Wt
-         J1rNWdtVrh9PqL68vIVD3Vsdxl5e64j1WKiNzIx73ljGeW7gXIEVbS+KJJeMkkZYQ0/f
-         MR3/ZB9nfPtZitF8qtapwCcJA59onRsRS03LLVQI564RurVVJ1Va6VjfjpTcVgI/lPlW
-         r3+VUFU4tAdxFpV02X6KIEjiskgC04Bn8UdLfBAiYDKBP9OdOJr+i44yN8FlYxtWWure
-         AYLg==
-X-Gm-Message-State: AOJu0Yxrvbx6lMODzsKNJPsLzFc/YEqK7YZLwALcYN8D0zym3npkLmSK
-	3Md2imoRctnaXEYNIcCz1frXSQEF5xniTL4bVA7rrURXktS5lbWiRYD0nu0js9zdrzY=
-X-Gm-Gg: AeBDievGvV9uhNMhbgrIw8j8xdsGAb1Tgqq61TlmJ4MuxaHrD0oY2Rq0yllxht0nPyR
-	H7ncRrV4baH+Gf/pVLGpSEcg8LPDz2hwuy1nWedfvGtYZXxDy6IZtOlxBv45SnLlBZYHNdCBKSZ
-	8x1YNTFPG3av2NZGHP6W7fICySFnfHRFB/XRDxw1DyT0iIVGpJOoSp/lqu+2Xk1xkB2GTvpE9Pt
-	84bXi+nzind7rxhPp1OygyeDtTx/DixvV+4naztrOUZx0PEyIM+8FMdxv5aIEb0oiDIMR2Shlue
-	V53XT2rS4pirKaZrwq3G/0Bc+bM5qF93r63W78AtBMJq1Y2yt/aF/eaGWyz0+5kj8SYfXuPpvri
-	bWpbrtwhqoleZ5uYlJ5UNNByD6MU5kwrl1Vz19XbNl+zfMnOy+1ckQ9h36Ika/1jzuEwe/z/7Nq
-	nE/adjrOnbjGLGk9Q9DtE5Csqtv2FdXzs=
-X-Received: by 2002:a17:90b:2b45:b0:361:423d:2026 with SMTP id 98e67ed59e1d1-3650cdbcabfmr1488200a91.12.1777687911702;
-        Fri, 01 May 2026 19:11:51 -0700 (PDT)
-Received: from zlang-mailbox ([218.69.128.26])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-364ebd46484sm4877913a91.0.2026.05.01.19.11.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 01 May 2026 19:11:51 -0700 (PDT)
-From: Zorro Lang <zorro.lang@gmail.com>
-X-Google-Original-From: Zorro Lang <zlang@kernel.org>
-Date: Sat, 2 May 2026 10:11:45 +0800
-To: Joanne Chang <joannechien@google.com>
-Cc: fstests@vger.kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>, 
-	linux-f2fs-devel@lists.sourceforge.net, Chao Yu <chao@kernel.org>
-Subject: Re: [PATCH v1] f2fs/{022,023}: clear MOUNT_OPTIONS alongside
- MKFS_OPTIONS
-Message-ID: <afVc-ZxMAKHCpQSR@zlang-mailbox>
-Mail-Followup-To: Joanne Chang <joannechien@google.com>, 
-	fstests@vger.kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>, 
-	linux-f2fs-devel@lists.sourceforge.net, Chao Yu <chao@kernel.org>
-References: <20260428022440.2481342-1-joannechien@google.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dolOvtHK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5BBB6C2BCB8;
+	Mon,  4 May 2026 16:10:02 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1777911003;
+	bh=pFViZUbSECeFrklIzjDeoJmMCgBEQRGxLhga3mht244=;
+	h=From:To:Cc:Subject:Date:From;
+	b=dolOvtHKVo9VOd0AuchkmSrmE0ILaGRYvZ1P3IOXy9oLa48sx0tfnGWNd6LTppsM3
+	 lkgsXoJarbleUtNNhrKbSf5HYJFXs/RisNTGGkwbyY58/25MLLWhXsyKAOKEo1N79H
+	 DfHr1uhPALgGGhCr0L4o9+VuXG+6vR8Q/M8PJr9Bg/AI6u6LhUf2caXkwKskuhLkSK
+	 h+ZoNUY1kmslH9UwqdXS0I9YBPoUWJi1xY9fvdiEvxtH921TA46oBO9HlI0gkl+ugp
+	 0TYXy3j4qDGxiVQXWwUaW1wFrni9MZNutr6GTutJ08uh36VV36It/kv8e18rFNwpwQ
+	 bX/DDf2G3TY/A==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] fstests: add commit IDs for kernel fixes already merged
+Date: Mon,  4 May 2026 17:09:57 +0100
+Message-ID: <db06887383a2a3d34801de9fb180241157177204.1777910956.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260428022440.2481342-1-joannechien@google.com>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Apr 28, 2026 at 02:24:40AM +0000, Joanne Chang wrote:
-> Currently, f2fs/022 and f2fs/023 only clears MKFS_OPTIONS. This causes
-> the tests to fail when leftover MOUNT_OPTIONS depend on unapplied
-> MKFS_OPTIONS. So MOUNT_OPTIONS should also be cleared to ensure reliable
-> mounting.
-> 
-> Signed-off-by: Joanne Chang <joannechien@google.com>
-> ---
+From: Filipe Manana <fdmanana@suse.com>
 
-Hmm, Makes sense to me.
+A few fixes were merged into Linus' tree, so add their commit IDs in the
+respective test cases.
 
-Reviewed-by: Zorro Lang <zlang@kernel.org>
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/343   | 2 +-
+ tests/btrfs/344   | 4 ++--
+ tests/generic/792 | 2 +-
+ 3 files changed, 4 insertions(+), 4 deletions(-)
 
->  tests/f2fs/022 | 1 +
->  tests/f2fs/023 | 1 +
->  2 files changed, 2 insertions(+)
-> 
-> diff --git a/tests/f2fs/022 b/tests/f2fs/022
-> index 728ef4e8..854ec327 100755
-> --- a/tests/f2fs/022
-> +++ b/tests/f2fs/022
-> @@ -23,6 +23,7 @@ _require_inject_f2fs_command node i_nid
->  
->  # remove all mkfs options to avoid layout change of on-disk inode
->  export MKFS_OPTIONS=""
-> +export MOUNT_OPTIONS=""
->  
->  foo_path=$SCRATCH_MNT/foo
->  bar_path=$SCRATCH_MNT/bar
-> diff --git a/tests/f2fs/023 b/tests/f2fs/023
-> index 33108421..f3e8785f 100755
-> --- a/tests/f2fs/023
-> +++ b/tests/f2fs/023
-> @@ -25,6 +25,7 @@ testfile=$SCRATCH_MNT/testfile
->  
->  # remove all mkfs options to avoid layout change of on-disk inode
->  export MKFS_OPTIONS=""
-> +export MOUNT_OPTIONS=""
->  
->  _scratch_mkfs "-O extra_attr,flexible_inline_xattr" >> $seqres.full || _fail "mkfs failed"
->  _scratch_mount "-o inline_xattr_size=512" >>$seqres.full 2>&1
-> -- 
-> 2.54.0.rc2.544.gc7ae2d5bb8-goog
-> 
+diff --git a/tests/btrfs/343 b/tests/btrfs/343
+index 53e6028b..fd38c010 100755
+--- a/tests/btrfs/343
++++ b/tests/btrfs/343
+@@ -13,7 +13,7 @@ _begin_fstest auto quick compress
+ _require_scratch
+ _require_btrfs_command inspect-internal dump-tree
+ 
+-_fixed_by_kernel_commit xxxxxxxxxxxx \
++_fixed_by_kernel_commit 883adb6dcff0 \
+ 	"btrfs: fix the inline compressed extent check in inode_need_compress()"
+ 
+ _scratch_mkfs >>$seqres.full 2>&1
+diff --git a/tests/btrfs/344 b/tests/btrfs/344
+index 932b20d4..6e5d38d6 100755
+--- a/tests/btrfs/344
++++ b/tests/btrfs/344
+@@ -13,8 +13,8 @@ _begin_fstest auto quick compress
+ _require_scratch
+ _require_btrfs_command inspect-internal dump-tree
+ 
+-_fixed_by_kernel_commit xxxxxxxxxxxx \
+-	"btrfs: do not mark inode incompressible after inline attempt failed"
++_fixed_by_kernel_commit 2e0e3716c7b6 \
++	"btrfs: do not mark inode incompressible after inline attempt fails"
+ 
+ _scratch_mkfs >>$seqres.full 2>&1
+ 
+diff --git a/tests/generic/792 b/tests/generic/792
+index 892ca2d8..d1896728 100755
+--- a/tests/generic/792
++++ b/tests/generic/792
+@@ -25,7 +25,7 @@ _require_scratch
+ _require_test_program unlink-fsync
+ _require_dm_target flakey
+ 
+-_fixed_by_fs_commit btrfs xxxxxxxxxxxx \
++_fixed_by_fs_commit btrfs 999757231c49 \
+ 	"btrfs: fix missing last_unlink_trans update when removing a directory"
+ 
+ _scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+-- 
+2.47.2
+
