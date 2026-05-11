@@ -1,157 +1,112 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD83A1624D5;
-	Mon, 11 May 2026 00:47:59 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECC6223EA89;
+	Mon, 11 May 2026 14:32:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778460479; cv=none; b=HNi9gFX5FGQVUikEGhAJOhYRwn4eQsbUrGr/UUeaM5s1aZAQ0g49Bu3Kohw8287ebGT3DOsvDaYXCEM6G5Eb2qohz8kLTvFQwp4hvLpERLjwlNHSSPpw+kLKf6E2pnw16elmSwuRfMHvp1zRdHrAsU+JM3NCe8kCeDfcFSEcpps=
+	t=1778509925; cv=none; b=uW/fRE4zJTPisEiy3lYL6HtBYECXDATM73+hfylsUgj2aKip/ORgHC6am5U/BZkg3aQs7BNUUiSjob6akXJDFjsKlDVd91mZ9b0bn3+VbtdkX8FHr1omLxl3m7xYNdAsaARbTAg0AnTui1UlC0PX8VAsu2js3FsxBV70CqtA2Uo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778460479; c=relaxed/simple;
-	bh=6IdC639V1/YoZSJDa8M4QfeT0oFxAaEfW2S6jZLbpEg=;
+	s=arc-20240116; t=1778509925; c=relaxed/simple;
+	bh=/RKw7kH+KMNf/PQLIMqG0+EaqvwtjPdXEiODgy4J3kk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=RrTKOGITkXd9rSjBLY8r1/KhEshDnC8hD0BMfkzfWTUHgISDPHt9h4r1T8x09rUiM64aBLnaK0wgxdW6wdL4TCoBJ0hqKQjmALViif952etnxCThW6f8igluewM2howfSpfTaGUkf6wsYaCGGvkhMYw0vsCaSaTyWt0HAiEFElE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dq0DrKjN; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=J+MZY1mq7rGBUbTNxw/ylpCIK6J9j/3llqDkTo/QtFspc+wdea5DCUAqIoKTDyyr2e43k5zmbpeVC/NHM0E3GVCdgFYOcPkg/pJ9d2zcvq07Woy4AigIcY65ksyr8BQd72Hm7Xjy7mD5O/rtzijUU2ZiE/uQFAlcjgsA8Bh21P8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EACLXwPy; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dq0DrKjN"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 28385C2BCB8;
-	Mon, 11 May 2026 00:47:56 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EACLXwPy"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D1FABC2BCB0;
+	Mon, 11 May 2026 14:31:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1778460479;
-	bh=6IdC639V1/YoZSJDa8M4QfeT0oFxAaEfW2S6jZLbpEg=;
+	s=k20201202; t=1778509924;
+	bh=/RKw7kH+KMNf/PQLIMqG0+EaqvwtjPdXEiODgy4J3kk=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=dq0DrKjNkRHm5F3mXdSwWuQImUC6Ku2Bq2c6O64PttJc63007m1V4UMNGdHhT/U69
-	 4ZSnzFu93umSIMeMX1mF3+iBzJw1h7eOW8cVmCv1DmyoRVeOUmqoYhfK6RkN+GhCOI
-	 HCUvipTo9zyjB3D24n0UFkxHjSMA+W/TvJsTqvkEMkZOYBjLEYGQ3nHAZtfbN39vbk
-	 VwqnYbgkiGjCvTwpwK7RoR1E/IIftEWJManx4eDT64kI7Glm3eYVhDgn2BK/kwPhCN
-	 Tc/rnjACcMEjHcgYCOt4jIT9ieYHZnRxbat9VIA+7Yo5lQ1vX3fEfQWDX9PAjcEhM5
-	 awJsh/9hoLvhw==
-Date: Mon, 11 May 2026 08:47:53 +0800
+	b=EACLXwPyKgGdW5Ny3+3QBsPeOPxnENk6j9ItoyYziP37dI+npmbdW7DQzNmHfg6IE
+	 unAzq3vB9A03lkvoz3PSSxhziXu0Yxy/xoB0PzTxEEJyrfLgmWHzO2FTyXmNp2lg13
+	 W0YJI0AH0L+wxkamcn8MY+9MmNrV9ynKAEbG75nEK/tR3byuOioXR6mwQy0+jFJmNR
+	 BpVcOpKniAGPpTxeN9lOe4aF+FnPbEeOQZcWZH8Y3nIdpxFmCLtS38RNZqSn8/Cf9H
+	 9f4zePbq9+89QkfR5BfH6knmxf7xvkwP3nyZOQizax7uMkNbM6w/Tyb5iT/4jv9mf+
+	 gnpFK0juxwXxQ==
+Date: Mon, 11 May 2026 22:31:56 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org, 
-	linux-btrfs@vger.kernel.org, Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Subject: Re: [PATCH] fstests: support new mkfs.btrfs help string
-Message-ID: <agEmk7jbaoKi179R@zlang-mailbox>
-Mail-Followup-To: Qu Wenruo <quwenruo.btrfs@gmx.com>, 
-	Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
-	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-References: <20260510001704.68396-1-wqu@suse.com>
- <agDVg6UXhP4DoKK_@zlang-mailbox>
- <b66eb427-bc17-4463-ba3b-a5ef3fa4a317@gmx.com>
+To: Disha Goel <disgoel@linux.ibm.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	ritesh.list@gmail.com, ojaswin@linux.ibm.com, djwong@kernel.org, fdmanana@kernel.org, 
+	quwenruo.btrfs@gmx.com, anajain.sg@gmail.com
+Subject: Re: [PATCH v3 1/2] common/dmlogwrites: add _require_log_writes_sized
+ helper
+Message-ID: <agHm1zCSzmZ1DL4a@zlang-mailbox>
+Mail-Followup-To: Disha Goel <disgoel@linux.ibm.com>, 
+	fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, ritesh.list@gmail.com, 
+	ojaswin@linux.ibm.com, djwong@kernel.org, fdmanana@kernel.org, quwenruo.btrfs@gmx.com, 
+	anajain.sg@gmail.com
+References: <20260508144701.68561-1-disgoel@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <b66eb427-bc17-4463-ba3b-a5ef3fa4a317@gmx.com>
+In-Reply-To: <20260508144701.68561-1-disgoel@linux.ibm.com>
 
-On Mon, May 11, 2026 at 07:18:44AM +0930, Qu Wenruo wrote:
+On Fri, May 08, 2026 at 08:17:00PM +0530, Disha Goel wrote:
+> Add a new helper function _require_log_writes_sized() to check if the
+> LOGWRITES_DEV meets a minimum size requirement.
 > 
+> This is useful for tests that use dm-log-writes with additional space
+> requirements, such as creating LVM snapshots during log replay or tests
+> that generate large amounts of logged I/O operations.
 > 
-> 在 2026/5/11 04:39, Zorro Lang 写道:
-> > On Sun, May 10, 2026 at 09:47:04AM +0930, Qu Wenruo wrote:
-> > > [BUG]
-> > > The latest btrfs-progs release v7.0 breaks a lot of tests, e.g.
-> > > btrfs/003:
-> > > 
-> > > btrfs/003    55s ... [failed, exit status 1]- output mismatch (see /home/kts/kernel-test-suite/src/xfstests/results//btrfs/003.out.bad)
-> > >      --- tests/btrfs/003.out     2026-05-09 03:07:52.952213772 +0900
-> > >      +++ /home/kts/kernel-test-suite/src/xfstests/results//btrfs/003.out.bad     2026-05-09 23:32:17.595751435 +0900
-> > >      @@ -1,2 +1,3 @@
-> > >       QA output created by 003
-> > >      -Silence is golden
-> > >      +mkfs failed
-> > >      +(see /home/kts/kernel-test-suite/src/xfstests/results//btrfs/003.full for details)
-> > >      ...
-> > >      (Run 'diff -u /home/kts/kernel-test-suite/src/xfstests/tests/btrfs/003.out /home/kts/kernel-test-suite/src/xfstests/results//btrfs/003.out.bad'  to see the entire diff)
-> > > 
-> > > [CAUSE]
-> > > Commit ec8324cc4b8b ("btrfs-progs: help: adjust alignment of text") from
-> > > btrfs-progs changed the helpe string output format, the previous help
-> > > string for "-f" option of mkfs.btrfs looks like this:
-> > > 
-> > >      -f|--force                force overwrite of existing filesystem
-> > > 
-> > > There were 4 spaces before the "-f", thus can be matched by
-> > > "[[:space:]]-f[[:space]|,]".
-> > > 
-> > > But now the help string looks like:
-> > > 
-> > > -f, --force               force overwrite of existing filesystem
-> > > 
-> > > Which removed the spaces at the beginning.
-> > > 
-> > > The existing regex to catch "-f" requires at least one space before
-> > > "-f", now it doesn't match the new btrfs help string, and cause mkfs
-> > > failure because we can not overwrite an existing scratch device without
-> > > "-f" option.
-> > > 
-> > > [FIX]
-> > > Change the regex to allow no space before "-f".
-> > > 
-> > > Reported-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-> > > Link: https://lore.kernel.org/linux-btrfs/af9EHC5b-aBdr1zn@shinmob/
-> > > Signed-off-by: Qu Wenruo <wqu@suse.com>
-> > > ---
-> > >   common/config | 2 +-
-> > >   1 file changed, 1 insertion(+), 1 deletion(-)
-> > > 
-> > > diff --git a/common/config b/common/config
-> > > index 1420e35d..339f7767 100644
-> > > --- a/common/config
-> > > +++ b/common/config
-> > > @@ -103,7 +103,7 @@ set_mkfs_prog_path_with_opts()
-> > >   	# Note: mkfs.f2fs doesn't support the --help option yet, but it doesn't
-> > >   	# matter since it also prints the help when an invalid option is given.
-> > >   	if [ "$p" != "" ] && \
-> > > -		$p --help |& grep -q "[[:space:]]-f[[:space:]|,]"; then
-> > > +		$p --help |& grep -q "[[:space:]]*-f[[:space:]|,]"; then
-> > 
-> > Hi Qu,
-> > 
-> > This change looks good to me. But to be a bit nitpicky, the original
-> > "[[:space:]]-f" required *a* mandatory [space] before the -f, whereas
-> > "[[:space:]]*-f" allows for *zero* or more spaces. This changes the
-> > semantics slightly, but it makes sense if you're trying to match cases
-> > where -f appears at the very beginning of a line.
+> The function takes a size parameter in KB, calls _require_log_writes()
+> internally, and skips the test if LOGWRITES_DEV is smaller than the
+> required size.
 > 
-> That's exactly my intention.
-> Also explained in the commit message:
+> Suggested-by: Darrick J. Wong <djwong@kernel.org>
+> Suggested-by: Anand Jain <anajain.sg@gmail.com>
+> Signed-off-by: Disha Goel <disgoel@linux.ibm.com>
+> ---
+> v2 -> v3:
+> - Fixed variable declaration order - declare all local variables at the
+>   beginning of the function
+> - Use $size instead of $1 for clarity in the comparison
 > 
->    The existing regex to catch "-f" requires at least one space before
->    "-f", now it doesn't match the new btrfs help string,
+>  common/dmlogwrites | 16 ++++++++++++++++
+>  1 file changed, 16 insertions(+)
 > 
-> And
-> 
->    Change the regex to allow no space before "-f".
+> diff --git a/common/dmlogwrites b/common/dmlogwrites
+> index a27e1966..b457ef7f 100644
+> --- a/common/dmlogwrites
+> +++ b/common/dmlogwrites
+> @@ -14,6 +14,22 @@ _require_log_writes()
+>  	_require_test_program "log-writes/replay-log"
+>  }
+>  
+> +# Require a log writes device of a minimum size
+> +# $1: minimum size in KB
+> +_require_log_writes_sized()
 
-Great! I agree that's a proper change.
+Makes sense to me. Although I think we can support 'size checking' in original
+_require_log_writes helper too, but I don't have objection on this change. Thanks
 
-> 
-> Thanks,
-> Qu
-> 
-> > 
-> > If that wasn't your intention or if you find this behavior unexpected, let me
-> > know :) Otherwise, I'd like to:
-> > 
-> > Reviewed-by: Zorro Lang <zlang@kernel.org>
+Reviewed-by: Zorro Lang <zlang@kernel.org>
 
-Merged.
-
-> > 
-> > >   		echo "$p -f"
-> > >   	else
-> > >   		echo $p
-> > > -- 
-> > > 2.51.2
-> > > 
-> > > 
-> > 
-> 
+> +{
+> +	local size=$1
+> +	local devsize
+> +
+> +	[ $# -eq 1 ] || _fail "_require_log_writes_sized: expected size param"
+> +
+> +	_require_log_writes
+> +
+> +	devsize=$(_get_device_size $LOGWRITES_DEV)
+> +	[ $devsize -lt $size ] && \
+> +		_notrun "LOGWRITES_DEV too small, ${devsize}KB < ${size}KB"
+> +}
+> +
+>  # Starting from v4.15-rc1, DAX support was added to dm-log-writes, but note
+>  # that it doesn't track the data that we write via the mmap(), so we can't do
+>  # any data integrity checking. We can only verify that the metadata writes for
+> -- 
+> 2.45.1
 > 
