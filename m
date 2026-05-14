@@ -1,60 +1,34 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0.herbolt.com (mx0.herbolt.com [5.59.97.199])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7E093DB642
-	for <fstests@vger.kernel.org>; Thu, 14 May 2026 09:04:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C569323D7DC
+	for <fstests@vger.kernel.org>; Thu, 14 May 2026 11:39:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=5.59.97.199
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778749487; cv=none; b=Bfj+af84Pmvi+KYui/7W6A3dHJJ8GfcPqgRnmtZ19mdmMqUcwW5Ila3oNl5Y1+2RGOVtcLLPYMeMYIMt/ISpCoTHpBOKLQLflZxVkEQwoaFf5fcCgAymxJOAGhzzqOmvOkU46m7VsZV1NDGvfNH7PuWrjY43pa9CvaH1NbcFGMw=
+	t=1778758802; cv=none; b=kpCT6PkIXBnkETR+J5g5m4gVsNjOjd5Dw3jXQeF3SUZi7HIGs/wKWfJu9NHU5YhfEQN8e8sMPpBICupzBPKGFA9cpo7wykkC6pvJEg5e+oY14se9t7WqOjMvDAwgvZ9Zyqf4hz8NyZDBAxV2fZ2Adle1/bcSXQKED+VZuQFdRbo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778749487; c=relaxed/simple;
-	bh=mWow36PIz1m3IGA9uM5DolkNDfJ8/C0baI89bSk6Qyw=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=KUL4MCW4xNatnkoSTSx2XTfVk82/wX2TJ2zsmtJO7bj5W0lNVLaiysQM4fnfdB/Mi2ajgEJVwR2wyFxn+7KLnWQT720CI0RCxlblqgPGfWYuQfvjdS/hjxWcbNUIep/6OL6MP938k0bV7btAlomdO2Dgkr+SL/r2glHTi94lKDU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=fjgBurV8; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=OF+CED2V; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="fjgBurV8";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="OF+CED2V"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id D44635E24C;
-	Thu, 14 May 2026 09:04:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1778749484; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=BO8XCB6SkMsptmnY1DdKlwBubsHBKjcC12oXp/O9KEY=;
-	b=fjgBurV8AhuvWKtNZtOyYkxi7S7JarVPMPQB96hgZbinyQNvrOa7YllOwTYIlS56OXnY1X
-	N6XkQJWFewpZGYoI8esCW6FQYFjBzAHvYhqcMAN4lg6Lygwewpq5rwiOUvX6NLFv0Te+rn
-	XCCqb7BXXZ2A6338cwqN4kOHdWY8H5M=
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=OF+CED2V
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1778749483; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=BO8XCB6SkMsptmnY1DdKlwBubsHBKjcC12oXp/O9KEY=;
-	b=OF+CED2VVi0xUWSs+vrlISjtBr9dctH5mhQkuckMAlpD2hraOLoBbXVX58fSZDoqwLglEK
-	xKjkN+SJ0otpFquvp/qqz+bqX89ExIkl+CJZ8SxtrhibWB8G4LatAfaiFTgoF/zFneCTK/
-	PCLEIC3GDdw9UNvJBVGxq8n52BqzeQY=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 9FB18593A9;
-	Thu, 14 May 2026 09:04:42 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id Lpm5GCqQBWqWbQAAD6G6ig
-	(envelope-from <wqu@suse.com>); Thu, 14 May 2026 09:04:42 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org
-Cc: Long An <lan@suse.com>
-Subject: [PATCH v2] fstests: btrfs/340: add support for older kernels/progs
-Date: Thu, 14 May 2026 18:34:39 +0930
-Message-ID: <ed76cf7d6a0ad2a98e5730015dd4fc6514fc2343.1778749477.git.wqu@suse.com>
+	s=arc-20240116; t=1778758802; c=relaxed/simple;
+	bh=B8EkIJgnoTFnaTIue/ymB+2FovK4q0kXonUWqVlB0gA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=M1qYd18KevO++z3n4SvTz8cxGKzI3MbZxMQ3mPenGZa71wczsbIsh0ln2xuJX3lquySBdj+xTgt9FFCCM+6UflR/ulp7FkBXqlEpLRWPOSDAtgY8NEXRltxJ43X3/BmoTseSLgBDDuA3/RuWOKDirtArWcbR8+GgC8eu6BzUfu4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=herbolt.com; spf=pass smtp.mailfrom=herbolt.com; arc=none smtp.client-ip=5.59.97.199
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=herbolt.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=herbolt.com
+Received: from mx0.herbolt.com (localhost [127.0.0.1])
+	by mx0.herbolt.com (Postfix) with ESMTP id 0C389180F2D5;
+	Thu, 14 May 2026 13:39:54 +0200 (CEST)
+Received: from trufa.intra.herbolt.com.com ([172.168.31.30])
+	by mx0.herbolt.com with ESMTPSA
+	id uaW8NIm0BWoNiioAKEJqOA
+	(envelope-from <lukas@herbolt.com>); Thu, 14 May 2026 13:39:53 +0200
+From: Lukas Herbolt <lukas@herbolt.com>
+To: zlang@kernel.org,
+	djwong@kernel.org
+Cc: fstests@vger.kernel.org,
+	xfs-linux@kernel.org,
+	Lukas Herbolt <lukas@herbolt.com>
+Subject: [PATCH v2 0/4] Fixes for mkfs.xfs with high amount of CPUs and SSDs
+Date: Thu, 14 May 2026 13:39:07 +0200
+Message-ID: <20260514113910.866888-2-lukas@herbolt.com>
 X-Mailer: git-send-email 2.54.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -63,102 +37,33 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spam-Flag: NO
-X-Spam-Score: -3.01
-X-Rspamd-Action: no action
-X-Spamd-Result: default: False [-3.01 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	TO_DN_SOME(0.00)[];
-	ARC_NA(0.00)[];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	MIME_TRACE(0.00)[0:+];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DNSWL_BLOCKED(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	RCPT_COUNT_THREE(0.00)[3];
-	RCVD_TLS_ALL(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:dkim,suse.com:mid,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DKIM_TRACE(0.00)[suse.com:+]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Rspamd-Queue-Id: D44635E24C
-X-Spam-Level: 
 
-The test case will fail on older distros like SLE12-SP5, there are two
-problems on the test case itself:
+Since xfsprogs v6.13.0 mkfs.xfs scales the log size on SSDs with the amount
+of CPUs. This leads to various failures from ENOSPC in generic/102 and generic/172
+(the xfs log can take up to 256MB on 1GB test FS) or depleting the dmthin 
+metadata area in generic/347. Downsize of the percentage change is we cannot 
+longer check the exact amount of data xfs_io wrote in the generic/102 test.
 
-- Requires "--sync" option from "btrfs qgroup show" subcommand
-  That option was introduecd in v4.9.1, thus there are still some older
-  distros using that very old version.
+The xfs/21{6,7} are testing the old behavior before the concurrency option was 
+introduced. Forcing the old behavior on newer mkfs.xfs.
 
-- Not all kernels support quick inherit
-  The kernel commit introducing the quick inherit is 6.9, thus some
-  supported LTS kernels do not have that commit.
+Lukas Herbolt (4):
+  common/rc: Add helper to calculate percentage of free space available
+  common/xfs: helper function to check if -l/-d/-r concurrency flags.
+  generic/{102,172,347}: Adapt test for XFS on systems with 128+CPUs +
+    SSDs
+  xfs/21{6,7} Use default -l concurrency=0 on mkfs.xfs that supports it
 
-  In that case qgroup will just be marked inconsistent, this will cause
-  the later "btrfs qgroup show" command to output a warning due to the
-  inconsistent flag.
+ common/rc             | 10 ++++++++++
+ common/xfs            |  9 +++++++++
+ tests/generic/102     |  5 +++--
+ tests/generic/102.out | 20 ++++++++++----------
+ tests/generic/172     |  8 ++++----
+ tests/generic/347     |  9 ++++++++-
+ tests/xfs/216         |  6 +++++-
+ tests/xfs/217         |  7 ++++++-
+ 8 files changed, 55 insertions(+), 19 deletions(-)
 
-Fix both problems by:
-
-- Require "--sync" option from "btrfs qgroup show" subcommand
-  So older distros will just skip the test.
-
-- Redirect all output from "btrfs qgroup show" to $seqres.full
-  So older kernels can still pass the test case by marking qgroup
-  inconsitent.
-
-Reported-by: Long An <lan@suse.com>
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
-Changelog:
-v2:
-- Fix the mismatch between the commit message and the test case change
-  Forgot to amend the changes before sending.
-
-- Fix a bug in the stderr redirect
-  The stdout redirect should be put last.
----
- tests/btrfs/340 | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
-
-diff --git a/tests/btrfs/340 b/tests/btrfs/340
-index 872f790cb975..eff76d0b633c 100755
---- a/tests/btrfs/340
-+++ b/tests/btrfs/340
-@@ -16,6 +16,7 @@ _fixed_by_kernel_commit 68d4b3fa18d7 \
- # For the automatic fsck at unmount.
- _require_scratch
- _require_btrfs_qgroup_report
-+_require_btrfs_command qgroup show --sync
- 
- # This will imply mkfs and enable regular qgroup.
- _require_scratch_qgroup
-@@ -39,7 +40,12 @@ _btrfs qgroup show -p --sync $SCRATCH_MNT >> $seqres.full
- # without marking qgroup inconsistent.
- _btrfs subv snap -i 1/1 $SCRATCH_MNT/subv1 $SCRATCH_MNT/snap1
- echo "After quick inherit:" >> $seqres.full
--_btrfs qgroup show -p --sync $SCRATCH_MNT >> $seqres.full
-+# Redirect all output to seqres.full including stderr.
-+# For older kernels without quick inherit support, it will mark
-+# qgroup inconsistent, which will output a warning about the inconsistent
-+# numbers. Here we rely on the final btrfs check to catch any qgroup number
-+# errors, thus no need to bother that possible warning.
-+_btrfs qgroup show -p --sync $SCRATCH_MNT >> $seqres.full 2>&1
- 
- echo "Silence is golden"
- _exit 0
 -- 
 2.54.0
 
