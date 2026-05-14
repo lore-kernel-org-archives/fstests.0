@@ -1,122 +1,149 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9282B18AE2;
-	Thu, 14 May 2026 03:34:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5055D308F03
+	for <fstests@vger.kernel.org>; Thu, 14 May 2026 05:55:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778729646; cv=none; b=aaWZKV3EXn+H4kzIwiTscG/z6RI8vAu+6nBoanhZVdLhdhEOpd5x5bB3O5eYtPYuDJ3EJ9Rdo/STZIXiKwEs84SQ9Ftt9kK8CmQfVi2PLEwwGiEKuuwldXfRor5lqMlAjedcgeXELryARJ+yK5BfzsMkAPRGHwcBKdRZ6gHCuKU=
+	t=1778738110; cv=none; b=Gmrp5SI0TcEj+7I21hunOhgMzSB5WVhaNmy7Idy9SkXpDdcdVtwsqDd3QCsQo1VYzCbNkJ7tZyq7TKUtj1oTSekvSneYxDcixVMbrMCvpc78RQEXqJ123G9GdQ+l3QwzB8BRB3ns6r6VHyDnh64sHlwJfJ4E09/z/uFaNbwq3CY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778729646; c=relaxed/simple;
-	bh=bcLFVpIzcU+gZWmvv+bBkbPDwqqNJf749D7HwWyWftg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=E+fiy4axvz2M9S5SsGHVDbP9495V4ngG96Grit2Fp7MbOam5KgC4KaTgXcWoHs7lu6tzFDZ8mYWayAlugP7GLi8io1E5721LxzCNl1GnJus1eFZUJumnb8pxU6UeCclswnOoYG5uL6pW6Dc8aBANq5efyvyU2ZljGM6wgbw0kNE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fKXIdmjp; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1778738110; c=relaxed/simple;
+	bh=+PCxf4kcFOyPT5SEAF3avdxrl5uI8e2JgVZGFo6Ra+A=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=R4AdibNJUzJrWB27pcP6CmTw14eaR7tsCGGbHCuH/zco54gqftQsEPO6Tv0YHIsxCXo3bdcsGuMG/aZ9vmY1KgI4f3B/2UDKeMHnlGk3G2po4YjhghjhiM9mt7uftQHRaKQJ+C08TxWCznpfOk9x0q0ARwPnlMko5eyMppaM93U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=jYS4KEBe; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=jYS4KEBe; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fKXIdmjp"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C26C7C19425;
-	Thu, 14 May 2026 03:34:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1778729646;
-	bh=bcLFVpIzcU+gZWmvv+bBkbPDwqqNJf749D7HwWyWftg=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=fKXIdmjpFH22ZHcnxOSpQKotIW0ESWvWuOA2IdRLaxUCR4w2o12pngiRsHAzFXBgV
-	 JuAl5Cd7pyswO1uM9OrA1BWFEgkuX/rS8PQ52DKbRv4oQbBczj/sG6lsZ9uVm4BBG7
-	 XWjfW07RuywG9UjM8anqhd98DBHK2TllHjLxQ6DSQQ3M0gT7AxOeXQ4uMTz+v65ggl
-	 5bODUwEfa9sGyqfNXnOR1BcBCx5GK7SyvvhYT1BYDl3L0Dtyb6+bQ0zlOqykeScyg3
-	 wP922Tsv+KxeAz4GWeHnTElGoMdLHTFEeg0D6K7IoL41xy3jkeWokxIlNtaD0Qo+v5
-	 ff+5u+URSMQeg==
-Date: Thu, 14 May 2026 11:34:00 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Boris Burkov <boris@bur.io>
-Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com, 
-	fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] btrfs: inline enable_quota helper in test 301
-Message-ID: <agU-k5OnlkvcLiFB@zlang-mailbox>
-Mail-Followup-To: Boris Burkov <boris@bur.io>, linux-btrfs@vger.kernel.org, 
-	kernel-team@fb.com, fstests@vger.kernel.org
-References: <cover.1778632843.git.boris@bur.io>
- <3234af372b0f16511aa5856aa7a3a0ca28397fcb.1778632843.git.boris@bur.io>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="jYS4KEBe";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="jYS4KEBe"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 58D885DCE9;
+	Thu, 14 May 2026 05:55:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1778738107; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=QI0l2ZQIa2Ts0KnUMy5nKAiqw0A3KXCyvjVgLPBBdw4=;
+	b=jYS4KEBeH4CKatqWe7QLRa3dkMKc3IdjmEBaeUQOvCwe4JgmLwwoyJrZ8lnDBF7BpZkZzw
+	rScAKLWzXi5Q52wLHrdKbcdRAQzxxuNTCDjj1gmVEHIKi8UC54jvalXXmNrumySqEywpoY
+	GFiWk63IxZ7oiyNBNXpZiInjFAgSRVw=
+Authentication-Results: smtp-out1.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=jYS4KEBe
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1778738107; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=QI0l2ZQIa2Ts0KnUMy5nKAiqw0A3KXCyvjVgLPBBdw4=;
+	b=jYS4KEBeH4CKatqWe7QLRa3dkMKc3IdjmEBaeUQOvCwe4JgmLwwoyJrZ8lnDBF7BpZkZzw
+	rScAKLWzXi5Q52wLHrdKbcdRAQzxxuNTCDjj1gmVEHIKi8UC54jvalXXmNrumySqEywpoY
+	GFiWk63IxZ7oiyNBNXpZiInjFAgSRVw=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 2591A593A9;
+	Thu, 14 May 2026 05:55:05 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id wpaQNrljBWrRFQAAD6G6ig
+	(envelope-from <wqu@suse.com>); Thu, 14 May 2026 05:55:05 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org
+Cc: Long An <lan@suse.com>
+Subject: [PATCH] fstests: btrfs/340: add support for older kernels/progs
+Date: Thu, 14 May 2026 15:25:02 +0930
+Message-ID: <4fa82130c72f55560967d0deaafb68a69a2e7ccb.1778738100.git.wqu@suse.com>
+X-Mailer: git-send-email 2.54.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <3234af372b0f16511aa5856aa7a3a0ca28397fcb.1778632843.git.boris@bur.io>
+Content-Transfer-Encoding: 8bit
+X-Spam-Flag: NO
+X-Spam-Score: -3.01
+X-Rspamd-Action: no action
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	TO_DN_SOME(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	DNSWL_BLOCKED(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	RCPT_COUNT_THREE(0.00)[3];
+	RCVD_TLS_ALL(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo,suse.com:email,suse.com:dkim,suse.com:mid];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DKIM_TRACE(0.00)[suse.com:+]
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Rspamd-Queue-Id: 58D885DCE9
+X-Spam-Level: 
 
-On Tue, May 12, 2026 at 05:43:33PM -0700, Boris Burkov wrote:
-> The enable_quota helper in btrfs/301 takes a mode argument ('n', 's',
-> or anything else) to switch between "no quota", "simple quota", and
-> "full quota" enable.  Only the simple-quota path is ever exercised by
-> this test, so the dispatch is dead weight and the indirection just
-> obscures the actual btrfs command being run.
-> 
-> Inline the two call sites to call 'btrfs quota enable --simple'
-> directly and drop the helper.
-> 
-> Signed-off-by: Boris Burkov <boris@bur.io>
-> ---
+The test case will fail on older distros like SLE12-SP5, there are two
+problems on the test case itself:
 
-Hahah, to be honest, the title '[PATCH 0/2] squota delete fstests' gave me
-a minor heart attack. I thought it was a critical bug report about fstests
-accidentally deleting itself while running :-D
+- Requires "--sync" option from "btrfs qgroup show" subcommand
+  That option was introduecd in v4.9.1, thus there are still some older
+  distros using that very old version.
 
->  tests/btrfs/301 | 14 ++------------
->  1 file changed, 2 insertions(+), 12 deletions(-)
-> 
-> diff --git a/tests/btrfs/301 b/tests/btrfs/301
-> index 1f72a97b..31243aab 100755
-> --- a/tests/btrfs/301
-> +++ b/tests/btrfs/301
-> @@ -169,16 +169,6 @@ do_enospc_falloc()
->  	do_falloc $file $sz
->  }
->  
-> -enable_quota()
-> -{
-> -	local mode=$1
-> -
-> -	[ $mode == "n" ] && return
-> -	arg=$([ $mode == "s" ] && echo "--simple")
-> -
-> -	$BTRFS_UTIL_PROG quota enable $arg $SCRATCH_MNT
-> -}
-> -
->  get_subvid()
->  {
->  	_btrfs_get_subvolid $SCRATCH_MNT subv
-> @@ -198,7 +188,7 @@ prepare()
->  {
->  	_scratch_mkfs >> $seqres.full
->  	_scratch_mount
-> -	enable_quota "s"
-> +	$BTRFS_UTIL_PROG quota enable --simple $SCRATCH_MNT
->  	$BTRFS_UTIL_PROG subvolume create $subv >> $seqres.full
->  	local subvid=$(get_subvid)
->  	set_subvol_limit $subvid $limit
-> @@ -421,7 +411,7 @@ enable_mature()
->  	# Sync before enabling squotas to reliably *not* count the writes
->  	# we did before enabling.
->  	sync
-> -	enable_quota "s"
-> +	$BTRFS_UTIL_PROG quota enable --simple $SCRATCH_MNT
+- Not all kernels support quick inherit
+  The kernel commit introducing the quick inherit is 6.9, thus some
+  supported LTS kernels do not have that commit.
 
-This change doesn't seem related to patch 2/2. I think we can review
-these 2 patches separately.
+  In that case qgroup will just be marked inconsistent, this will cause
+  the later "btrfs qgroup show" command to output a warning due to the
+  inconsistent flag.
 
-For this patch, I'm fine with or without it. If the btrfs list prefers
-to have it, or move it to be a common helper, I'm good with that.
+Fix both problems by:
 
-Thanks,
-Zorro
+- Require "--sync" option from "btrfs qgroup show" subcommand
+  So older distros will just skip the test.
 
->  	set_subvol_limit $subvid $limit
->  	_scratch_cycle_mount
->  	usage=$(get_subvol_usage $subvid)
-> -- 
-> 2.54.0
-> 
-> 
+- Redirect all output from "btrfs qgroup show" to $seqres.full
+  So older kernels can still pass the test case by marking qgroup
+  inconsitent.
+
+Reported-by: Long An <lan@suse.com>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/340 | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/tests/btrfs/340 b/tests/btrfs/340
+index 872f790cb975..fc0b8d48adaa 100755
+--- a/tests/btrfs/340
++++ b/tests/btrfs/340
+@@ -39,7 +39,14 @@ _btrfs qgroup show -p --sync $SCRATCH_MNT >> $seqres.full
+ # without marking qgroup inconsistent.
+ _btrfs subv snap -i 1/1 $SCRATCH_MNT/subv1 $SCRATCH_MNT/snap1
+ echo "After quick inherit:" >> $seqres.full
+-_btrfs qgroup show -p --sync $SCRATCH_MNT >> $seqres.full
++# Sync the fs so that the qgroup numbers are properly updated.
++_btrfs filesystem sync $SCRATCH_MNT
++
++# Redirect all output to seqres.full including stderr.
++# For older kernels without quick inherit support, it will mark
++# qgroup inconsistent, which can pollute the golden output.
++# Here we rely on the final btrfs check to catch any qgroup number errors.
++_btrfs qgroup show -p $SCRATCH_MNT >> $seqres.full
+ 
+ echo "Silence is golden"
+ _exit 0
+-- 
+2.54.0
+
