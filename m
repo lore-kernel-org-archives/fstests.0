@@ -1,40 +1,42 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FFF139C63E
-	for <fstests@vger.kernel.org>; Fri, 15 May 2026 16:24:41 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8B923FBB70
+	for <fstests@vger.kernel.org>; Fri, 15 May 2026 16:26:40 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778862281; cv=none; b=EIKywBD6fyXHcazDdTTkkXkkoXHQaKt21d5Vp6fhUDIvXkUHGSXu+f2Vu+vwzDAbZNUyiphAZCHm7QE0WX8oa4lrj0b0HJ7Aa+dKu+O57xoGdcLO/eKGmABcoV3wXhZROVxhSVROpLN7SwSCWf3P38LJiBAxRE1wgsZvH40vz9A=
+	t=1778862400; cv=none; b=sBhmlDGqO9SEwaMr59C50ZQf6Wo3XgBHAWeI6dOyX0qpv66YsndNM9x0QRG/h1CJ25EDuCdfH0nZPhZX6z00h9uLdbAzxqGcFOogLYVDQylrBxa3GzPtmURhYYAbufXqF29dBRco5B+38Num6WDYtmopIlb+9LcQSdkceq1DOxQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778862281; c=relaxed/simple;
-	bh=t1qQBrK+cRgELnlc05S5CALyOzD0Mv//pL3ZWuidWzg=;
+	s=arc-20240116; t=1778862400; c=relaxed/simple;
+	bh=WtmKt0lBFbyllVIq57IekUkSgtGwAHJfJthOnBfCREY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IV8B76WubfB7qDzFB0MNGyyUm4DnUt6mwtXUYuEiseXXV1urFVs3gl0hzd2JVqBPLq6KIxUGYUV5jwzxH77DTi+NawI7QLTvpvGY41flaDyqG2NWJ+bn057Pe0Wqf3fxi3wof8nM4GxG3hHqP7IYXuaxHtnJ7qCnb7rRZes3+L4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WF9K/295; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=qUa97Udc1qXEDIIdd8frGsOa6jownDuHY5OMNZYx2l+FyR7VOXgeCI4lbqE459ngQUQRgZI3wjJcQIxPmIP7cSn14vgXMUj4Sc6ST96JXwWeaCsM8vYsUrvTjFF0y881EacKF6ouXzBFWzJ3VF+7sjRH5kHoKIJCxV1yQy3XhWc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KjIfqZEj; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WF9K/295"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2D5C2C2BCC9;
-	Fri, 15 May 2026 16:24:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KjIfqZEj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 013F9C2BCB0;
+	Fri, 15 May 2026 16:26:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1778862281;
-	bh=t1qQBrK+cRgELnlc05S5CALyOzD0Mv//pL3ZWuidWzg=;
+	s=k20201202; t=1778862400;
+	bh=WtmKt0lBFbyllVIq57IekUkSgtGwAHJfJthOnBfCREY=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=WF9K/295BaAk1Jngiv7IBaRPDuJQj2ZN/96vvgHe6b2WQVhfMj4v+sOcRKRQHgTG8
-	 SdiQyctwlDBreXx8cw0d/ofycblCIVbvTJyrpI0IOLZR8Sb5zvkUzpnyKRopH8r36h
-	 qNMls9R0pHVuSlcQIrH4066/73QDQAbbMww/KZCcuv3vaQegVPTq3s0RYLjAe98AFq
-	 oI4M9ZQeGbXKhdFPxVKlFdzRFHkHJ3I6WE4gsWON4iNV3kSqJf+t9Soqh2os9o24qo
-	 IJTph/jqq5QfIbddElE3P6L7z9D2p17cSBySYABeec8Jg1kQG7I7Gm/Cuv/fNnuJGk
-	 VUXVsH0N3mmHQ==
-Date: Sat, 16 May 2026 00:24:36 +0800
+	b=KjIfqZEjZrYI6Zvd0qsEkZS6UQ81XzXlVqbVNG/oKvAbeDW5+xwG7/pGoqXKXa+oE
+	 iy9M31yRFzvIzpHzw7ZS5wWhkek89b1KZGWA14hXLzIgZ/UJyB5I59iwAtHN2c/PC/
+	 3e9ucJMQk3Xqu5wxaF5rTnpxzki8h9TKQetYS+DScuF4d4xjJuPbJivSmCYwcxY3Fw
+	 HEgfOQwfDgg185At/zBCtXd90dI5k5KAdNlouxSajNBDA0fUG2eMOlI6zV1Vj+aiJc
+	 4lsqsX8grdZpmBkGrdxZuDGmtUzhoVrJLzL1HoOj2vIkn2IX3gW03M1ke5izEN6CeS
+	 Z0IhFKuapAz1g==
+Date: Sat, 16 May 2026 00:26:33 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Christian Brauner <brauner@kernel.org>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] vfs: fix dumpable race in create_userns_hierarchy()
-Message-ID: <agdH4QrhxBxGrjQH@zlang-mailbox>
-Mail-Followup-To: Christian Brauner <brauner@kernel.org>, 
-	fstests@vger.kernel.org
-References: <20260323-fix-vfs-bugs-v1-1-76a6aed624d9@kernel.org>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, 
+	Disha Goel <disgoel@linux.ibm.com>
+Subject: Re: [PATCH v2] ext4/307: Calculate donor size to avoid failures for
+ 64k bs
+Message-ID: <agdJEsrKflGff5wq@zlang-mailbox>
+Mail-Followup-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>, 
+	Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, Disha Goel <disgoel@linux.ibm.com>
+References: <20260401100941.76082-1-ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,79 +45,85 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260323-fix-vfs-bugs-v1-1-76a6aed624d9@kernel.org>
+In-Reply-To: <20260401100941.76082-1-ojaswin@linux.ibm.com>
 
-On Mon, Mar 23, 2026 at 02:32:15PM +0100, Christian Brauner wrote:
-> All processes in the userns hierarchy share the same mm_struct due to
-> CLONE_VM. When a child calls setresuid() in switch_ids(), the kernel
-> clears the dumpable flag on the shared mm. The child immediately
-> re-sets it via prctl(PR_SET_DUMPABLE, 1), but there is a window
-> between the two where the parent may be opening /proc/PID/ns/user for
-> the previous level's child. That open hits ptrace_may_access() which
-> checks get_dumpable(mm) and, finding it zero, falls back to
-> ptrace_has_cap(mm->user_ns, mode). Since mm->user_ns is init_user_ns
-> (the mm was created by real root) and the parent is only ns-root, the
-> capability check fails and the open returns -EACCES.
+On Wed, Apr 01, 2026 at 03:39:41PM +0530, Ojaswin Mujoo wrote:
+> Calculating size of donor file based on du output causes the following
+> issue:
 > 
-> Fix this by extending the existing two-way socketpair handshake into a
-> three-way handshake: the child signals the parent after becoming
-> dumpable, then blocks until the parent has opened /proc/PID/ns/user
-> and signals back. Only then does the child proceed to
-> create_userns_hierarchy() for the next level. This guarantees no
-> concurrent setresuid() can clear dumpable while the parent's open() is
-> in flight.
+> e4compact.c:68: do_defrag_range: Assertion `donor->length >= len' failed.
+> ./common/rc: line 4616: 1583182 Aborted                 (core dumped)
 > 
-> Signed-off-by: Christian Brauner <brauner@kernel.org>
+> The issue is that e4compat asserts that the stat.st_size of all files
+> combined shouldn't be more than that of the donor file. In case of 64k
+> blocksize, fsstress often creates sparse files which have >3G size even
+> though their disk utilization is <100M. Since donor file is not big
+> enough, this trips e4compat causing the failure.
+> 
+> Fix this by using stat.st_size rather than du value to get the size.
+> Also, make some changes to avoid future ENOSPC like reducing the -n
+> passed to fsstress to keep the size around 2G and making sure we use the
+> whole SCRATCH disk instead of 500M.
+> 
+> While we are at it, add some new lines to make the code bit more
+> readable.
+> 
+> Reported-by: Disha Goel <disgoel@linux.ibm.com>
+> Tested-by: Disha Goel <disgoel@linux.ibm.com>
+> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 > ---
 
-Sorry, a few unforeseen things came up on my end and I lost track of this patch.
-
+It tests good to me,
 Reviewed-by: Zorro Lang <zlang@kernel.org>
 
->  src/vfs/utils.c | 20 ++++++++++++++++++++
->  1 file changed, 20 insertions(+)
+>  tests/ext4/307 | 18 +++++++++++++-----
+>  1 file changed, 13 insertions(+), 5 deletions(-)
 > 
-> diff --git a/src/vfs/utils.c b/src/vfs/utils.c
-> index 52bb7e42..0b435afe 100644
-> --- a/src/vfs/utils.c
-> +++ b/src/vfs/utils.c
-> @@ -312,6 +312,18 @@ static int userns_fd_cb(void *data)
->  	if (ret < 0)
->  		return syserror("failure: write to socketpair");
->  
-> +	/*
-> +	 * Wait for the parent to open our /proc/PID/ns/user before
-> +	 * proceeding to create the next userns level. Without this,
-> +	 * setresuid() in the next-level child clears the dumpable flag
-> +	 * on the shared mm (CLONE_VM) and the parent's open() fails the
-> +	 * ptrace_may_access() check with -EACCES because mm->user_ns is
-> +	 * init_user_ns where userns processes lack CAP_SYS_PTRACE.
-> +	 */
-> +	ret = read_nointr(h->fd_event, &c, 1);
-> +	if (ret < 0)
-> +		return syserror("failure: read from socketpair");
+> diff --git a/tests/ext4/307 b/tests/ext4/307
+> index 48073347..ed6fc664 100755
+> --- a/tests/ext4/307
+> +++ b/tests/ext4/307
+> @@ -19,18 +19,26 @@ _workout()
+>  	echo ""
+>  	echo "Run fsstress"
+>  	out=$SCRATCH_MNT/fsstress.$$
+> -	args=`_scale_fsstress_args -p4 -n999 -f setattr=1 -d $out`
+> +	args=`_scale_fsstress_args -p4 -n500 -f setattr=1 -d $out`
+>  	echo "fsstress $args" >> $seqres.full
+>  	_run_fsstress $args
 > +
->  	ret = create_userns_hierarchy(++h);
->  	if (ret < 0)
->  		return syserror("failure: userns level %d", h->level);
-> @@ -377,6 +389,14 @@ int create_userns_hierarchy(struct userns_hierarchy *h)
->  		goto out_wait;
->  	}
->  
-> +	/* Tell the child it can now proceed to create the next level. */
-> +	bytes = write_nointr(fd_socket[0], "1", 1);
-> +	if (bytes < 0) {
-> +		kill(pid, SIGKILL);
-> +		syserror("failure: write to socketpair");
-> +		goto out_wait;
-> +	}
+>  	find $out -type f > $out.list
+>  	cat $out.list | xargs  md5sum > $out.md5sum
+> -	# Use -m to get integer MB size to avoid decimals (e.g. 1.5M) which xfs_io rejects
+> -	usage=$(du -sm $out | awk '{print $1}')
 > +
->  	fret = 0;
+> +	# Get the total of stat.st_size of each file to determine the
+> +	# size of donor file. We use st_size here instead of blocks used
+> +	# because thats what e4compat.c checks against.
+> +	bytes=$(xargs -r stat -c %s < $out.list | awk '{s+=$1} END{print s}')
+> +	echo "Total bytes used: $bytes" >> $seqres.full
+> +
+>  	echo "Allocate donor file"
+> -	$XFS_IO_PROG -c "falloc 0 ${usage}m" -f $SCRATCH_MNT/donor | _filter_xfs_io
+> +	$XFS_IO_PROG -c "falloc 0 $bytes" -f $SCRATCH_MNT/donor | _filter_xfs_io
+> +
+>  	echo "Perform compacting"
+>  	cat $out.list | run_check $here/src/e4compact \
+>  		-i -v -f $SCRATCH_MNT/donor  >> $seqres.full 2>&1
+> +
+>  	echo "Check data"
+>  	run_check md5sum -c $out.md5sum
+>  }
+> @@ -42,7 +50,7 @@ _require_scratch
+>  _require_defrag
+>  _require_xfs_io_command "falloc"
 >  
->  out_wait:
-> 
-> ---
-> base-commit: 3ded3e13c008326d197d11ac975049ed1f8ec922
-> change-id: 20260323-fix-vfs-bugs-b4f8a492d6d7
+> -_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
+> +_scratch_mkfs >> $seqres.full 2>&1
+>  _scratch_mount
+>  
+>  _workout
+> -- 
+> 2.52.0
 > 
 > 
