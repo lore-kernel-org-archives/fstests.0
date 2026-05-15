@@ -1,103 +1,89 @@
-Received: from mail-ej1-f73.google.com (mail-ej1-f73.google.com [209.85.218.73])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA56937C11B
-	for <fstests@vger.kernel.org>; Fri, 15 May 2026 08:26:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC04B2DC762
+	for <fstests@vger.kernel.org>; Fri, 15 May 2026 15:59:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778833572; cv=none; b=Nc2rlqFgX8LoI9nAwWNb2cTm17GDMqns1Y2udWk1CBFHUDIawyJLSjsgYVoeIXWNOUYIKxDXEEv+8MWftwQte642eHgpVEQNUP0cskSMMf/6JbAtRc9KSbY4JelZsbeW4+GvuAjLgdhFURo++i6XpljvAyJ/gQKN7b6v6XLw9eo=
+	t=1778860782; cv=none; b=OOEUc2E7/RRsZluzYZ+M8U2JKInhkw5YZTC9eLK5spvElIb0it6QWvDKa+4o7bDRSYVntt6LDNUIFYO+Bq6Ut+kSyggTfTGff4hiMGxksTYKU7RpxFzEeVSkCtPoW3LcRfWPmagvpXRJ9JDp+A9po+73LqCqDgC6id/qMghRsp8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778833572; c=relaxed/simple;
-	bh=nd8MIbsZrWqEGCq3pOsYxmyxjjh5ALMnXxxMg/7olcw=;
-	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=fi0qIvxlH4Ij3YdJc5bRw5jIWNg7o/rAV974hDO6YdZOej/QCVIhnoApKtiUMQFYt0Ka3v09EMaaoxqsGTuupLSqJfOmQ+Lt2IOKyKXf1Fo5O9sPb2wUIY7UE7z0+tfSPXo2v/Y9y1h2Zkhudw/3Zt/JOxkh0H6jxtB9MuwJRFA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=q9Kdj1ip; arc=none smtp.client-ip=209.85.218.73
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com
+	s=arc-20240116; t=1778860782; c=relaxed/simple;
+	bh=3vNxX95IlX+XjjxQLAWGdHScY6w2vivB3ZHgtpPfWA0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=d+wSzrxltlf7oCacCwtUmganzMNZEgRkxOX33bEG1SrdCL6dfwiQTdtuM07cq2QqiFR+1W3jOAYojGBdgtue5QByXOljvunD899zNWcFGi7uWoKzMEHal9xIJCqCeyevqdHHRumSY++DggqQOGV8bKjV64vtkPVH2e+4De1TBM4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cpgSBBVE; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="q9Kdj1ip"
-Received: by mail-ej1-f73.google.com with SMTP id a640c23a62f3a-bcc2320b2deso607578766b.1
-        for <fstests@vger.kernel.org>; Fri, 15 May 2026 01:26:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1778833569; x=1779438369; darn=vger.kernel.org;
-        h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=7MviKwNP+Fy3nkVTooIfs7lmfs9u5oS2cPZjX/OtqFA=;
-        b=q9Kdj1ipKVsR0xRe5CFPKU8153K4IJEtEkj3Et4f2Sdz7mm3xF+zbab6IQd4OBY6Nc
-         tzk8f+us4uqLFxl1NneywLkZFEAe3zGNbtyGgk7ahAm5i9fq9DaGnpTPHdmwu8aKMkKR
-         9U2xFx7UxgIKxwgCZq1Hhtr1fqXSm4A97Am2At8c200wbLi8syh5vBLGl6Q/ePOEyogw
-         XfrQjOvtbyRQ1o5TksyXV6J6z+Q/OSEDFYLecloloa+22959v4tfgXbyWWzxcx5nVInz
-         MUw9GZItCPjfm6Qp3u+53dJUqWmktMZH7shjBWG7c5Ie0UQ6idaaXUeA4Kja3T0oDmeA
-         phEQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778833569; x=1779438369;
-        h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=7MviKwNP+Fy3nkVTooIfs7lmfs9u5oS2cPZjX/OtqFA=;
-        b=rjqp0LRjZPVO+zzm/vBbrAB9nrtbE09hauXkxKI7jpgawTXEmgABxuewsb5eIMcszv
-         ZcRVKZ08o1v4CbNzAPbVpMovXsaAdxJQDLeaBL7USJ9tKvnqPdyhiVchSwwS7gk5b80Z
-         OtLrYX9tmR2oNkutAlJjpQnzbln0Z7dckupqKaY9y3jIzymdR8+EmAY9//wrBRkVAuPu
-         LRKtY988hAGdr7eOC26vPUXOMS98QZPg2ny13uZvcYi2rCB5oAaYbUXjvF0pK9BjzQKU
-         5HWI3UMb+jpQaGIoGrLrg/OBQGNHkh/0A6wodoxzgTECQA09xucn0/Ii3GJqZD06jbru
-         pjjQ==
-X-Forwarded-Encrypted: i=1; AFNElJ+IJglFULxaR3cfRL/1mIdAmW0Bh2AOqVXrFCo0ePPl/hG5RSVXOvhR6PAG3Tlc0ZPeB6GbN6qi@vger.kernel.org
-X-Gm-Message-State: AOJu0YyMbJAsbhOp4sRPmXpSJvCubilA2NUIuWt/Azw3jHuPjnhTcF+5
-	tq2hft5hkgm+8qNRHtduzUMDniwU+IgCIZSbzwFCfK85Uj08Sq6Ndxf9Pz+zQbB1KR3NwQ0OiaL
-	3B9hx+XQqvBDa0ofJ9ZalAC9EO/snbA==
-X-Received: from edcm2.prod.google.com ([2002:a05:6402:4302:b0:67c:76a4:f70a])
- (user=jprusakowski job=prod-delivery.src-stubby-dispatcher) by
- 2002:a17:906:f59e:b0:bd4:8b86:9026 with SMTP id a640c23a62f3a-bd51795bc15mr193664866b.25.1778833568927;
- Fri, 15 May 2026 01:26:08 -0700 (PDT)
-Date: Fri, 15 May 2026 08:26:08 +0000
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cpgSBBVE"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A384DC2BCB3;
+	Fri, 15 May 2026 15:59:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1778860782;
+	bh=3vNxX95IlX+XjjxQLAWGdHScY6w2vivB3ZHgtpPfWA0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=cpgSBBVEKaQh0SV6xYV0C86PiSUJxhPWFegYYVPpue24Z4aJhsIA9lqn8hC2n8n68
+	 RjFUiaDeAL+PKLnRksNgjknbIf+/fNrItsbJgu44LPTaeMRLA2NVJKRNLi4E3rch4q
+	 /U45pxhxW4K765yF0URGflrFPUqdzhhaw8J0fl3B2vnR9UyEjnsyz+5VqWO3/YRL/T
+	 76wEBngNEkI2HnNfHwBDyjE/kHxYGAu6QNOeA2i8xAEO9Xg1jT36s7wJ3cD37BuHiW
+	 3M7dG6E5vLgvtEv9FDlkG+tnHTfTvaTQqcRNJAqLoYMvgdNajNtj9P85EDO0M1V2kp
+	 Wh3e7Rdojq1kQ==
+Date: Fri, 15 May 2026 23:59:34 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Lukas Herbolt <lukas@herbolt.com>
+Cc: djwong@kernel.org, fstests@vger.kernel.org, xfs-linux@vger.kernel.org
+Subject: Re: [PATCH v2 1/4] common/rc: Add helper to calculate percentage of
+ free space available
+Message-ID: <agdCc4iaVWsWUY8e@zlang-mailbox>
+Mail-Followup-To: Lukas Herbolt <lukas@herbolt.com>, djwong@kernel.org, 
+	fstests@vger.kernel.org, xfs-linux@vger.kernel.org
+References: <20260514113910.866888-2-lukas@herbolt.com>
+ <20260514113910.866888-4-lukas@herbolt.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-X-Mailer: git-send-email 2.54.0.563.g4f69b47b94-goog
-Message-ID: <20260515082608.449455-1-jprusakowski@google.com>
-Subject: [PATCH] generic/563: allow read tolerance for f2fs in scenario 3
-From: Jan Prusakowski <jprusakowski@google.com>
-To: Zorro Lang <zlang@kernel.org>, Chao Yu <chao@kernel.org>, fstests@vger.kernel.org
-Cc: Ojaswin Mujoo <ojaswin@linux.ibm.com>, Qu Wenruo <wqu@suse.com>, 
-	"Darrick J . Wong" <djwong@kernel.org>, Nirjhar Roy <nirjhar.roy.lists@gmail.com>, 
-	Jan Prusakowski <jprusakowski@google.com>
-Content-Type: text/plain; charset="UTF-8"
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260514113910.866888-4-lukas@herbolt.com>
 
-F2FS is a log-structured file system that allocates new blocks even for
-overwrites. To perform allocation, it may need to read metadata blocks
-(such as the Node Address Table (NAT) or Segment Info Table (SIT)) if
-they are not already in memory.
+On Thu, May 14, 2026 at 01:39:09PM +0200, Lukas Herbolt wrote:
+> It calculates percentage of filesystem available space and returns it
+> in MB. This helper will be used in the following test/generic fixes.
+> 
+> Signed-off-by: Lukas Herbolt <lukas@herbolt.com>
+> ---
+>  changes v2:
+> 	spelling and description
+>  common/rc | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index 5fe44e2158ff..9fc733ebdcf4 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -6189,6 +6189,16 @@ _require_fanotify_ioerrors()
+>  	_notrun "$FSTYP does not support fanotify ioerrors"
+>  }
+>  
+> +# Computes a percentage of the available space in a filesystem and
+> +# returns that quantity in MB. The percentage must not contain a percent
+> +# sign ("%").
+> +# usage example:
+> +# _mb_pct_of_available_space <mount point> <percent>
+> +#
+> +_mb_pct_of_available_space()
+> +{
+> +        _df_device $1 | $AWK_PROG -v pct=$2 '{printf "%.f", (($5*(pct/100))/1024)}'
 
-In scenario 3 (read -> read/write), unlike scenario 2, there is no prior
-write in the same mount session to load these metadata blocks into memory.
-Therefore, the write operation in the second cgroup triggers metadata
-reads, which are charged to that cgroup.
+Good to me,
 
-Relax the read tolerance for f2fs in scenario 3 to accommodate these
-expected metadata reads, matching the tolerance already used in scenario 2.
+Reviewed-by: Zorro Lang <zlang@kernel.org>
 
-Signed-off-by: Jan Prusakowski <jprusakowski@google.com>
----
- tests/generic/563 | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
-diff --git a/tests/generic/563 b/tests/generic/563
-index c3705c2f..f95eb073 100755
---- a/tests/generic/563
-+++ b/tests/generic/563
-@@ -151,7 +151,10 @@ $XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite -b $blksize 0 $iosize" $SCRATCH_MNT
- switch_cg $cgdir
- $XFS_IO_PROG -c fsync $SCRATCH_MNT/file
- check_cg $cgdir/$seq-cg $iosize $iosize 5% 5%
--check_cg $cgdir/$seq-cg-2 0 0 0 0
-+# F2FS may perform metadata reads during write in this scenario
-+read_tol=0
-+[ "$FSTYP" = "f2fs" ] && read_tol=33792
-+check_cg $cgdir/$seq-cg-2 0 0 $read_tol 0
- 
- if [ "$drop_io_cgroup" = 1 ]; then
- 	echo "-io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
--- 
-2.54.0.563.g4f69b47b94-goog
-
+> +}
+>  ################################################################################
+>  # make sure this script returns success
+>  /bin/true
+> -- 
+> 2.54.0
+> 
