@@ -1,41 +1,42 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AD273CFF66;
-	Fri, 15 May 2026 16:45:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B05440B6D8;
+	Fri, 15 May 2026 16:55:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778863520; cv=none; b=uGaKxZV1JL0Ut5PBPZezzVy7e9zoeB8uxspmXOg1fwv9quttWmC57Xri7vIvnwmkNvrXtUCJCoi8f6B5yPOjRQhMzXsUtKvFv8vqFQ/S8YSewEJoMIK0vaTZ45bCJipG8LB2t524wdAfgnWn/RSQJqTsdO1cnNqql/79kiPhFBI=
+	t=1778864145; cv=none; b=s2slHVJDV7wRN+4ned/XgrySP5vX+7Sb5dHWoKQN7EJsJ56PIQrQUAxDk9rDdlkbOf+IgevTQ/equUM0if9MpZZ6Z6FDjVi+Ovz0kBk79fmyusu6SXlQ009iQbBxLL+shRgCFzQL/YRDgnQM+QW5D05LzK9oIni7nU8AC8Fe8eg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778863520; c=relaxed/simple;
-	bh=DPoeo2DLShOU1aPMHIydfB43ymIdDlU++Zn3SOFtiY0=;
+	s=arc-20240116; t=1778864145; c=relaxed/simple;
+	bh=P7THp2aJWxhHxVi+7cvCLm1OOtK9LcNoKQGsJhZqvn8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=sE99T5TtNy+dAFbltS99ue1fAr3PISxCNm3I34oLyqoJI3OrhWiUfmFJwUoqyeLr/JN0Ohel5UFlOjgABMMLiRJAolBU+h0IcLPAGt5EUSo4+ioNZ1uto2wDBD4Cu6Ltyndz5ldkDNldh0sf+GBmZihOUtMSrW0QynC5+0XKnXQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=vDV8GyRG; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=UBcoIdlJPpxs494uB/QmAF9ARtrsS814q1DOrmHp+wdxd36jN6kYgL++DtHSOE3uI6+svLQinNKlDYO5GpwTxGPsJhPr5dJyKwS2BE4dFHgtpwxqQ5OlfPpUPGn9pdAv9hL0SUckC306LpEBNOqV/9niN/jEUEs/rn0DayYP9rQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PjX0bsT1; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="vDV8GyRG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 55309C2BCB3;
-	Fri, 15 May 2026 16:45:16 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PjX0bsT1"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8D145C2BCB0;
+	Fri, 15 May 2026 16:55:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1778863520;
-	bh=DPoeo2DLShOU1aPMHIydfB43ymIdDlU++Zn3SOFtiY0=;
+	s=k20201202; t=1778864145;
+	bh=P7THp2aJWxhHxVi+7cvCLm1OOtK9LcNoKQGsJhZqvn8=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=vDV8GyRGGySLcOtiqFS/H1BRFYTKxJlxh6JSVZoBSJUYcGph7Ysrp1nCsbHvfEs3I
-	 bDhX8iHIqosMgHeWjc2uLJrGpNT0mEPcGrT+ZKgCSqa6jQMXJ3szvocewdH/WZEZwm
-	 J1jd81OeASDQSwWysHayweJm57Cc2IE1g0+eC3I7lTkYk3Wi4+w+WDE/1p6SGEmcUc
-	 pKwj2abybzrbmtgkPSiObbI5/PB5jY18naDmsRZ7IRyVPD3xzAEcuQ31ObyTY9wyvf
-	 u4Zxp7djcvFknKxgIOT4DoG30bs4kAuOX6mwjDvMMCJ9DowAxkpRQyLhX8felUL+KW
-	 TZG66IWO34PcA==
-Date: Sat, 16 May 2026 00:45:12 +0800
+	b=PjX0bsT13kqxUyNQBJDJbTYQHvU8I7DKOUU+NqUckvIQGhBP+EFWin6w4GrvVSH85
+	 aoMeCKHyBkxMK2El6mqduAfEtPUcY6B3xiNxFEhKr4x5iY7OhCpIs5jpsTar8Vr3G0
+	 ryUM1bty79t4p7Ac+WRvPkVN4QOJ5M0v2uYz8aMGfIODc7gKoxHpxFgDHfCUZ4rBBS
+	 Ys9Eb88/QfcTxVIVf6oSxQ5ChVS+GhiGHrOu9/Bocdpe0wFk9Bq65N0YeMlVx5FWDV
+	 g6n3FS83fwPDWvglQLeXJKZW6+l+rf9PzFNgP/cxVI+U9fOgugJCHuhxDKKPzIGMxL
+	 /fdMe5Z4WbF5Q==
+Date: Sat, 16 May 2026 00:55:39 +0800
 From: Zorro Lang <zlang@kernel.org>
 To: Qu Wenruo <wqu@suse.com>
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
 	Long An <lan@suse.com>
-Subject: Re: [PATCH] fstests: btrfs/340: add support for older kernels/progs
-Message-ID: <agdMkn0SyWLZsj3h@zlang-mailbox>
+Subject: Re: [PATCH v2] fstests: btrfs/340: add support for older
+ kernels/progs
+Message-ID: <agdOBcKgPn3s7_u0@zlang-mailbox>
 Mail-Followup-To: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org, 
 	linux-btrfs@vger.kernel.org, Long An <lan@suse.com>
-References: <4fa82130c72f55560967d0deaafb68a69a2e7ccb.1778738100.git.wqu@suse.com>
+References: <ed76cf7d6a0ad2a98e5730015dd4fc6514fc2343.1778749477.git.wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,9 +45,9 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <4fa82130c72f55560967d0deaafb68a69a2e7ccb.1778738100.git.wqu@suse.com>
+In-Reply-To: <ed76cf7d6a0ad2a98e5730015dd4fc6514fc2343.1778749477.git.wqu@suse.com>
 
-On Thu, May 14, 2026 at 03:25:02PM +0930, Qu Wenruo wrote:
+On Thu, May 14, 2026 at 06:34:39PM +0930, Qu Wenruo wrote:
 > The test case will fail on older distros like SLE12-SP5, there are two
 > problems on the test case itself:
 > 
@@ -74,33 +75,48 @@ On Thu, May 14, 2026 at 03:25:02PM +0930, Qu Wenruo wrote:
 > Reported-by: Long An <lan@suse.com>
 > Signed-off-by: Qu Wenruo <wqu@suse.com>
 > ---
->  tests/btrfs/340 | 9 ++++++++-
->  1 file changed, 8 insertions(+), 1 deletion(-)
+> Changelog:
+> v2:
+> - Fix the mismatch between the commit message and the test case change
+>   Forgot to amend the changes before sending.
+> 
+> - Fix a bug in the stderr redirect
+>   The stdout redirect should be put last.
+
+Sorry, did I miss part of the discussion? Why did v2 switch to notrun for
+older tools instead of using the compatible `btrfs filesystem sync` from v1?
+Was there something wrong with the v1 method :)
+
+Thanks,
+Zorro
+
+> ---
+>  tests/btrfs/340 | 8 +++++++-
+>  1 file changed, 7 insertions(+), 1 deletion(-)
 > 
 > diff --git a/tests/btrfs/340 b/tests/btrfs/340
-> index 872f790cb975..fc0b8d48adaa 100755
+> index 872f790cb975..eff76d0b633c 100755
 > --- a/tests/btrfs/340
 > +++ b/tests/btrfs/340
-> @@ -39,7 +39,14 @@ _btrfs qgroup show -p --sync $SCRATCH_MNT >> $seqres.full
+> @@ -16,6 +16,7 @@ _fixed_by_kernel_commit 68d4b3fa18d7 \
+>  # For the automatic fsck at unmount.
+>  _require_scratch
+>  _require_btrfs_qgroup_report
+> +_require_btrfs_command qgroup show --sync
+>  
+>  # This will imply mkfs and enable regular qgroup.
+>  _require_scratch_qgroup
+> @@ -39,7 +40,12 @@ _btrfs qgroup show -p --sync $SCRATCH_MNT >> $seqres.full
 >  # without marking qgroup inconsistent.
 >  _btrfs subv snap -i 1/1 $SCRATCH_MNT/subv1 $SCRATCH_MNT/snap1
 >  echo "After quick inherit:" >> $seqres.full
 > -_btrfs qgroup show -p --sync $SCRATCH_MNT >> $seqres.full
-> +# Sync the fs so that the qgroup numbers are properly updated.
-> +_btrfs filesystem sync $SCRATCH_MNT
-
-Just out of curiosity, `sync $SCRATCH_MNT` can achieve the same effect here, right?
-Regardless, it definitely makes more sense to use Btrfs's own sync command in this
-context.
-
-Reviewed-by: Zorro Lang <zlang@kernel.org>
-
-> +
 > +# Redirect all output to seqres.full including stderr.
 > +# For older kernels without quick inherit support, it will mark
-> +# qgroup inconsistent, which can pollute the golden output.
-> +# Here we rely on the final btrfs check to catch any qgroup number errors.
-> +_btrfs qgroup show -p $SCRATCH_MNT >> $seqres.full
+> +# qgroup inconsistent, which will output a warning about the inconsistent
+> +# numbers. Here we rely on the final btrfs check to catch any qgroup number
+> +# errors, thus no need to bother that possible warning.
+> +_btrfs qgroup show -p --sync $SCRATCH_MNT >> $seqres.full 2>&1
 >  
 >  echo "Silence is golden"
 >  _exit 0
