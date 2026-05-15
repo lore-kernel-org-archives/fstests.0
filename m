@@ -1,40 +1,41 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4610A3E714A
-	for <fstests@vger.kernel.org>; Fri, 15 May 2026 16:31:37 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AD273CFF66;
+	Fri, 15 May 2026 16:45:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778862697; cv=none; b=PAhFKIigl0TOcolLfhz9OK6it2dpzIrWwcl3e43n8WIAffD3NLN3pn7rOYn/un2hHkqstf7VQ/6rjpaInm5jeEleKPOm8xcjWJMu0uDGml70yUtgThiOjMCk1MAjQtZEI3A6aTdJv3bEdGly/reNt1hmupLGH3rM42y/Nwyh7Qc=
+	t=1778863520; cv=none; b=uGaKxZV1JL0Ut5PBPZezzVy7e9zoeB8uxspmXOg1fwv9quttWmC57Xri7vIvnwmkNvrXtUCJCoi8f6B5yPOjRQhMzXsUtKvFv8vqFQ/S8YSewEJoMIK0vaTZ45bCJipG8LB2t524wdAfgnWn/RSQJqTsdO1cnNqql/79kiPhFBI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778862697; c=relaxed/simple;
-	bh=lhgn9iEYiDqiaZRkpMpRjfgQdyOjIzYzz0y8SbngUo0=;
+	s=arc-20240116; t=1778863520; c=relaxed/simple;
+	bh=DPoeo2DLShOU1aPMHIydfB43ymIdDlU++Zn3SOFtiY0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Kf1gNRTyH3n9poB0JDwZBbunpVKSYLhGrIYid4lllwq9lGcW+3X8sxors7tBFMpuGxu221vN5TFoDVB+HlM1OQE5YR8PEsIqJMNFIAETP92lsXpL+E0YfP0ohQobK+pxjjw5A4sr02ZhfY6FiJgwI4g5ry2CwrPOErT3vO7HE9Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=m84C9KnZ; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=sE99T5TtNy+dAFbltS99ue1fAr3PISxCNm3I34oLyqoJI3OrhWiUfmFJwUoqyeLr/JN0Ohel5UFlOjgABMMLiRJAolBU+h0IcLPAGt5EUSo4+ioNZ1uto2wDBD4Cu6Ltyndz5ldkDNldh0sf+GBmZihOUtMSrW0QynC5+0XKnXQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=vDV8GyRG; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="m84C9KnZ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 72155C2BCB0;
-	Fri, 15 May 2026 16:31:35 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="vDV8GyRG"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 55309C2BCB3;
+	Fri, 15 May 2026 16:45:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1778862697;
-	bh=lhgn9iEYiDqiaZRkpMpRjfgQdyOjIzYzz0y8SbngUo0=;
+	s=k20201202; t=1778863520;
+	bh=DPoeo2DLShOU1aPMHIydfB43ymIdDlU++Zn3SOFtiY0=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=m84C9KnZ2CETghuu4zAmoi3cdKSjmvBs2R0pS/wFhriSaO86sH/7y/8X2LM/mkQgk
-	 Uq2Zmbl2BZoLEc59mk4eIPweMOj+GhOWCLdvKgfuEGa0COXBnRnxtRdTvg/2Mvlgiz
-	 hSeMI0fC1DFPOwq0EPiI0KA+iZAXd85uT7WRuvqDkLpN08wD7rCWHn4Zs8iXPb9ei1
-	 DCRffzGYoFdiBorx+KFNhWonx1CxMS8WoVUBGanT8SQvYPBQnYWRInOlYDXuZjp6yn
-	 UbfWGRg2uLT7hJl2AktcmykMpggeSMcA3GP9PfTfOIlNJMFFEKXaSGqOK1V1Fr/h4K
-	 Z8nxqpkT//MYQ==
-Date: Sat, 16 May 2026 00:31:31 +0800
+	b=vDV8GyRGGySLcOtiqFS/H1BRFYTKxJlxh6JSVZoBSJUYcGph7Ysrp1nCsbHvfEs3I
+	 bDhX8iHIqosMgHeWjc2uLJrGpNT0mEPcGrT+ZKgCSqa6jQMXJ3szvocewdH/WZEZwm
+	 J1jd81OeASDQSwWysHayweJm57Cc2IE1g0+eC3I7lTkYk3Wi4+w+WDE/1p6SGEmcUc
+	 pKwj2abybzrbmtgkPSiObbI5/PB5jY18naDmsRZ7IRyVPD3xzAEcuQ31ObyTY9wyvf
+	 u4Zxp7djcvFknKxgIOT4DoG30bs4kAuOX6mwjDvMMCJ9DowAxkpRQyLhX8felUL+KW
+	 TZG66IWO34PcA==
+Date: Sat, 16 May 2026 00:45:12 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: David Disseldorp <ddiss@suse.de>
-Cc: fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v2] common/rc: add default _udev_wait timeout
-Message-ID: <agdKGqbpc8VABCmi@zlang-mailbox>
-Mail-Followup-To: David Disseldorp <ddiss@suse.de>, 
-	fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>
-References: <20260323044557.2668-2-ddiss@suse.de>
+To: Qu Wenruo <wqu@suse.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	Long An <lan@suse.com>
+Subject: Re: [PATCH] fstests: btrfs/340: add support for older kernels/progs
+Message-ID: <agdMkn0SyWLZsj3h@zlang-mailbox>
+Mail-Followup-To: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org, 
+	linux-btrfs@vger.kernel.org, Long An <lan@suse.com>
+References: <4fa82130c72f55560967d0deaafb68a69a2e7ccb.1778738100.git.wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,48 +44,67 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260323044557.2668-2-ddiss@suse.de>
+In-Reply-To: <4fa82130c72f55560967d0deaafb68a69a2e7ccb.1778738100.git.wqu@suse.com>
 
-On Mon, Mar 23, 2026 at 03:45:58PM +1100, David Disseldorp wrote:
-> If udevd isn't running then "udevadm wait" loops endlessly. With a
-> --timeout parameter provided, udevadm (udev-254.27) prints to stderr:
->   Timed out for waiting devices being initialized.
+On Thu, May 14, 2026 at 03:25:02PM +0930, Qu Wenruo wrote:
+> The test case will fail on older distros like SLE12-SP5, there are two
+> problems on the test case itself:
 > 
-> The error message causes test failure via golden output mismatch and
-> is easier to debug than an infinite loop.
+> - Requires "--sync" option from "btrfs qgroup show" subcommand
+>   That option was introduecd in v4.9.1, thus there are still some older
+>   distros using that very old version.
 > 
-> The timeout parameter is also compatible with existing
-> args="--removed <dev>" callers. 60 seconds is relatively arbitrary, but
-> should be long enough to avoid premature timeout on regular systems.
+> - Not all kernels support quick inherit
+>   The kernel commit introducing the quick inherit is 6.9, thus some
+>   supported LTS kernels do not have that commit.
 > 
-> Signed-off-by: David Disseldorp <ddiss@suse.de>
+>   In that case qgroup will just be marked inconsistent, this will cause
+>   the later "btrfs qgroup show" command to output a warning due to the
+>   inconsistent flag.
+> 
+> Fix both problems by:
+> 
+> - Require "--sync" option from "btrfs qgroup show" subcommand
+>   So older distros will just skip the test.
+> 
+> - Redirect all output from "btrfs qgroup show" to $seqres.full
+>   So older kernels can still pass the test case by marking qgroup
+>   inconsitent.
+> 
+> Reported-by: Long An <lan@suse.com>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 > ---
-> Changes since v1:
-> - increase timeout from 10 to 60 seconds
+>  tests/btrfs/340 | 9 ++++++++-
+>  1 file changed, 8 insertions(+), 1 deletion(-)
 > 
->  common/rc | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index fd4ca964..a490893f 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -5544,7 +5544,7 @@ _udev_wait()
->  	if [ -z "$UDEV_WAIT_PROG" ]; then
->  		$UDEV_SETTLE_PROG >/dev/null 2>&1
->  	else
-> -		$UDEV_WAIT_PROG $args
-> +		$UDEV_WAIT_PROG --timeout 60 $args
+> diff --git a/tests/btrfs/340 b/tests/btrfs/340
+> index 872f790cb975..fc0b8d48adaa 100755
+> --- a/tests/btrfs/340
+> +++ b/tests/btrfs/340
+> @@ -39,7 +39,14 @@ _btrfs qgroup show -p --sync $SCRATCH_MNT >> $seqres.full
+>  # without marking qgroup inconsistent.
+>  _btrfs subv snap -i 1/1 $SCRATCH_MNT/subv1 $SCRATCH_MNT/snap1
+>  echo "After quick inherit:" >> $seqres.full
+> -_btrfs qgroup show -p --sync $SCRATCH_MNT >> $seqres.full
+> +# Sync the fs so that the qgroup numbers are properly updated.
+> +_btrfs filesystem sync $SCRATCH_MNT
 
-60s is good to me. As there's not more review points from others, let's
-have this change.
+Just out of curiosity, `sync $SCRATCH_MNT` can achieve the same effect here, right?
+Regardless, it definitely makes more sense to use Btrfs's own sync command in this
+context.
 
 Reviewed-by: Zorro Lang <zlang@kernel.org>
 
->  	fi
->  }
+> +
+> +# Redirect all output to seqres.full including stderr.
+> +# For older kernels without quick inherit support, it will mark
+> +# qgroup inconsistent, which can pollute the golden output.
+> +# Here we rely on the final btrfs check to catch any qgroup number errors.
+> +_btrfs qgroup show -p $SCRATCH_MNT >> $seqres.full
 >  
+>  echo "Silence is golden"
+>  _exit 0
 > -- 
-> 2.51.0
+> 2.54.0
 > 
 > 
