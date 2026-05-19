@@ -1,71 +1,139 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD6F73BE17B
-	for <fstests@vger.kernel.org>; Tue, 19 May 2026 12:58:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACAEC3FC5D0;
+	Tue, 19 May 2026 17:14:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779195512; cv=none; b=cfBpYB8e4swUesdDbRDRkNHDZBp5UBJZLrDnQbM2Ex4+9Dp1QWWRyGFKeqxfYrTMrDoIyFsRFl9ZuGT1pHLWA4qOE/wUNhXvFSc64NmL+i3J7Gc6Ei7DP3nL2j9BolFSMpZ4gk88oAFgHISpY9t2jC3jPuC2yT2cvK4826SocKg=
+	t=1779210857; cv=none; b=eYheOuDeH2A1mal4ppNij/xjIgGwGZm4EDjfwJXdFLEidBTUkIDAl0IFxcudRUS71kYhfVFZRVQc1lP2E9mnrvXnXXJFgJvE/HbOEWNHLx/Bw5/XElFe/fzZfzISyh9NauYP7bY9mVCCOT/1RoPT7pSLOXR5k8DhPM4mQYOmkpA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779195512; c=relaxed/simple;
-	bh=eU/HSDRFgfHYaC5gbuZ58P1aVrnlFtLfxm8DUySh704=;
-	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pVYwZj5YXRJUUeuUushcG53USU3a0NersdZMjPoU8yIsIFcHQs+xwhn7GZiP97BivzA/xLNT3ObM4/+AWdrU+KY7SNdkHsFdRuUpHwSUq8MxKYaqBxVBV23ogYyHJuGEYEdHCwlWosR0fK//WdjkisWsRrzZlcCBwMIM7DQw3+I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=hr8YVPUZ; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1779210857; c=relaxed/simple;
+	bh=hOR4z3DwoL/gqo9bYmQsjf2l0ZYzJ5P+Z0WBpS1Y1so=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=NBNVqivZwp2W6MaFxNjEuSHjwXHAJzIQs4gsi/VYjko1jroCzL8h3JcDO9KhgHpcwnN5kCG9PSWsw4BRYR9JGKdXNDenNvKUWqyQ1VjcxjJLtSzFhTp20e7foUxmOLUE5P/Ci64aGmGO9kRIfP//rF5b1HXIsryQLboabnjZb2w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ClxKzHza; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="hr8YVPUZ"
-Received: from macsyma.thunk.org (pool-173-48-82-210.bstnma.fios.verizon.net [173.48.82.210])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 64JCw5Mj005327
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 19 May 2026 08:58:06 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1779195489; bh=cx8fhXPJjRD1MrEztQZbOQYrXGJoYgT8NYFkGr63vvc=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=hr8YVPUZIan0bMNPAtIMG4oelQONcL+hoyfSbr84rlUdZdbqPoh/X1dQFgzg1ZAAq
-	 x5s/Rn/tLw37pz5bKxZAw4KeM8at8gTjqbAXlux23G4Ag6h0NEKI4c2glWakKotYe2
-	 7GiPL7tr5EvnShZ9wU48SKLlAqNzrAlDAJUfwUfufYCIXCzR0L+dgJ3ZIXuiiNA45K
-	 bfvhvK/6xkY+ipz8F4bdKUhkpAILFJK7YwR2WdTqhZtev77enEYNNy0CzivNMH1ks7
-	 Hy8koohF6l4dauFQYg/EavtTuyIMm+gPWBUgTo2d2Kk1h1EkYlLGmYdem1ja5WMKDH
-	 N9KcFtlYlCyFw==
-Received: by macsyma.thunk.org (Postfix, from userid 15806)
-	id B63286855F1C; Tue, 19 May 2026 08:57:04 -0400 (EDT)
-Date: Tue, 19 May 2026 08:57:04 -0400
-From: "Theodore Tso" <tytso@mit.edu>
-To: Christoph Hellwig <hch@lst.de>, Carlos Maiolino <cem@kernel.org>,
-        fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        Eric Biggers <ebiggers@kernel.org>
-Subject: Re: [PATCH] generic: add a test that stresses metadata eviction
-Message-ID: <20260519125704.GA30408@macsyma-wired.lan>
-References: <20260518062514.506071-1-hch@lst.de>
- <agsEQ9TjHelfbWXr@nidhogg.toxiclabs.cc>
- <agtbqjAxUsCsLwyr@zlang-mailbox>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ClxKzHza"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1F360C2BCB8;
+	Tue, 19 May 2026 17:14:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1779210857;
+	bh=hOR4z3DwoL/gqo9bYmQsjf2l0ZYzJ5P+Z0WBpS1Y1so=;
+	h=From:To:Cc:Subject:Date:From;
+	b=ClxKzHzaC/+OFGytcSSIiysQXDkRlRIVDiKTV9qClyxwwhpkwswL45puvzD1DyjHK
+	 wND9dqHBd8U8QL+/STnkmih+X/UpmUeRlTE+qjBH9b6GxB3yckuvnXpRH2+DzihwsD
+	 oFKXGsruryB6k6PSNffpxwPPuPqU7zqJF24yJg5AchvgNsXYC3/5AikumeK7RmHcPM
+	 06n1kwDlO6r1t2begmF1Fa2JDsVAeKXX3Wi3JLdOKLt/cEVc38SXlrQvn6VWgFkCEQ
+	 HEJEo2saHK7SkgX1rMPKKcwvmkKMxH6XsqzUHgqvdoIUItUNNg5LUKoM3XOLPdZZIq
+	 xyUbCzEBsflUQ==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic: add a test case for fallocate i_size extension
+Date: Tue, 19 May 2026 18:14:10 +0100
+Message-ID: <a92aea73a82100f1dfde58e6f64191bed1d7f41d.1779210827.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <agtbqjAxUsCsLwyr@zlang-mailbox>
 
-On Tue, May 19, 2026 at 03:03:37AM +0800, Zorro Lang wrote:
-> Currently, we don’t have a formal commit trailer to define this
-> specific scenario, but perhaps this is a good opportunity for us to
-> discuss and agree on one.
+From: Filipe Manana <fdmanana@suse.com>
 
-My suggestion is that this should go in a comment of the forked test, e.g.
+Test an i_size expanding fallocate into a range beyond current i_size that
+already has a preallocated extent, with an unmount and mount after each
+fallocate to verify that no metadata (i_size) and extents were lost.
 
-# Based on generic/579 with fsverity-specific bits removed
+This used to fail on btrfs when not using the no-holes feature (which is
+a default since btrfs-progs 5.15) before this recent kernel fix:
 
-That way, if someone fixes a problem in generic/579 in the future, a
-quick grep might turn up other tests that need a similar adjustment.
-The commit trailer doesn't seem as useful to me since it's harder to
-find.
+  c562ba61fc5e ("btrfs: fix incorrect i_size after remount caused by KEEP_SIZE prealloc gap")
 
-							- Ted
+So in order to reproduce the failure when using an unpatched kernel and
+a btrfs-progs >= 5.15, one must run the test with:
+
+  MKFS_OPTIONS="-O ^no-holes"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/795     | 52 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/795.out |  5 +++++
+ 2 files changed, 57 insertions(+)
+ create mode 100755 tests/generic/795
+ create mode 100644 tests/generic/795.out
+
+diff --git a/tests/generic/795 b/tests/generic/795
+new file mode 100755
+index 00000000..299c8134
+--- /dev/null
++++ b/tests/generic/795
+@@ -0,0 +1,52 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
++#
++# FS QA Test 795
++#
++# Test an i_size expanding fallocate into a range beyond current i_size that
++# already has a preallocated extent, with an unmount and mount after each
++# fallocate to verify that no metadata (i_size) and extents were lost.
++#
++. ./common/preamble
++_begin_fstest auto quick prealloc fiemap
++
++. ./common/punch # for _filter_fiemap
++
++_require_scratch
++_require_xfs_io_command "falloc" "-k"
++_require_xfs_io_command "fiemap"
++
++_fixed_by_fs_commit btrfs c562ba61fc5e \
++	"btrfs: fix incorrect i_size after remount caused by KEEP_SIZE prealloc gap"
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# The fiemap results in the golden output requires file allocations to align to
++# 1M boundaries.
++_require_congruent_file_oplen $SCRATCH_MNT 1048576
++
++# Create our file with a size of 0 and a prealloc extent in the range [4M, 8M].
++$XFS_IO_PROG -f -c "falloc -k 4M 4M" $SCRATCH_MNT/foo
++
++# Unmount and mount again to remove any in memory state of the inode. We will
++# verify later that neither metadata nor extents were lost during unmount.
++_scratch_cycle_mount
++
++# Do an i_size expanding fallocate that overlaps the previous prealloc range
++# and extents past it. This increases the file size to 9M and allocates an
++# extent in the range [8M, 9M].
++$XFS_IO_PROG -c "falloc 7M 2M" $SCRATCH_MNT/foo
++
++# Unmount and mount again to remove any in memory state of the inode. We will
++# verify later that neither metadata nor extents were lost during unmount.
++_scratch_cycle_mount
++
++# File size should be 9M and we should have unwritten extents in range [4M, 9M].
++echo "File size after cycle mounts: $(stat -c %s $SCRATCH_MNT/foo)"
++echo "Fiemap output:"
++$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foo | _filter_fiemap
++
++# Success, all done.
++_exit 0
+diff --git a/tests/generic/795.out b/tests/generic/795.out
+new file mode 100644
+index 00000000..b2f78ac0
+--- /dev/null
++++ b/tests/generic/795.out
+@@ -0,0 +1,5 @@
++QA output created by 795
++File size after cycle mounts: 9437184
++Fiemap output:
++0: [0..8191]: hole
++1: [8192..18431]: unwritten
+-- 
+2.47.2
+
