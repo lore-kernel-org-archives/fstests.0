@@ -1,69 +1,57 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF0053C0635
-	for <fstests@vger.kernel.org>; Wed, 20 May 2026 08:14:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03D9834D3B2
+	for <fstests@vger.kernel.org>; Wed, 20 May 2026 08:20:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779264886; cv=none; b=lkTTtT/2fyhFfY8KDeosXnIEI84lyswXhbd9mK5gn2dg5uL1W433/jro5nEPey84qmeNnS/GnrcbmrjttCWWDmtH54igidt2R1zDpNdILwSIIi7ch68S3y2UB91w0LsRkTRPt9a7R+7JxT+HWefjgUan6xDbfu+oDLsSe8AQm9I=
+	t=1779265253; cv=none; b=N59aJ7R0TArggeRVZLbneWwSgJc4V7ntVEAO34wxNfkO02QQ+HgWcCpS/ufnZvkj4okBjedxdxApizCqGXYyp3T06kO3bfb1Q9Avln2xlVFt/Urvq4KErwehwKghKUZ2Q8ZvZUUlukB1QLPWJakT+kE5Y94prFzO1tjZsE/TsOc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779264886; c=relaxed/simple;
-	bh=0MtyPsfipsyI9MspFzo7yhbzaQMmF6vl+Wa2laFLdYM=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=AkUTeoz9nEQ/dC83pbtvrGP23KNjlaUinK/yCvu/Dsjnr4ggAxnLx8DG+ojqyE9SObAgir1wN3E5TcbAev9FNC3KyCbkjXbDOpUKCLt6fajcdBhexyj7y+49KBjpJG6s6BqmBsfw1oWyv80jiydWeIL4oxqC3Irm20FnOmicaL4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cjhAm2sq; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1779265253; c=relaxed/simple;
+	bh=luSfoqdswX0V+pcH849fJBXv0E7guSSiXRwJzBjLRo4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=IamySN86fnQjLOoS3WzBT0bDkeCfMDYSyTAbFH8Ml5DVueucfMArpYaC/p3z/ZvqdNIbF6wArSADx7i/MntHmas0SCjKg5mcP85VZASfWgYdwZXkXzTCjnWlKsy/Qo8zJHdi6NwVTTbh16C1+iyt0pbfcODdLtKZZ1xxrnd+dAE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=elt+lsGs; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cjhAm2sq"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 403821F000E9;
-	Wed, 20 May 2026 08:14:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1779264885;
-	bh=Tfx+PSlmtT1gDfTrl0TEo7BWR6ahF0uKqZ5bOpUj4vw=;
-	h=Date:Cc:Subject:To:References:From:In-Reply-To;
-	b=cjhAm2sq/B82ImYEagpmIGfuBUwgA9BG6PMZZfLl6eAMGQll3CixUNiQoIZm7TDW5
-	 YjfYxggI23V8DTb8gaxErM9EG/PeN4DB+eM04GtXJHGKxgI7n3DDu0WBsBl476/DN2
-	 lKdo6Gv+BnYhgG9Lr736G9/ZgPsuZu1fnpNMDjrwi+qNwDRX6RCHq6dj11nxrgkUqa
-	 YrYn6VIm92Yg4QyNSp0Kn1izqeL+lIoMS4lLpLCioxn3vJLbyIQf0o8z/abBwbTTdd
-	 jCEGrMoXkF7sI3G4Ll3vznbQ7EZ5NUgtOS0qafHWNUJIZzRZjSNcS12Mn+N/hSARyh
-	 S57yJ9SVbNMaw==
-Message-ID: <f2e2147e-bf60-4a67-83fe-b77d34f7bc8a@kernel.org>
-Date: Wed, 20 May 2026 16:14:20 +0800
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="elt+lsGs"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=LEhRbfDY78iqQAtIjRxmla0Ggf0mDFJCFIrPVkrlI7c=; b=elt+lsGsBj4celB45DNaGIieq2
+	4U3f5C1Rav3gK9LAfvddKaJ5f+fIcTmKboHS+nTusoXjxNwdZj3EU55WxpFJAQyL2EATZBp8VvnDD
+	EmWFNFdFCL9xVhfeQzy4VNm90+fKC9pjUbIXLU/Y2yovPvxlwouk5ZcmyBHtGVkmbnS3wwT+m/1Gm
+	bfKp8mMg3VYamVjFfilrWtCqG6J1e7JwjTlAFCdH9uJJCImqZCX5B1Tl3+yJmQGCFYIcIqolZzSy7
+	2cZFHauxVS1D3bbHneid5mYkDr8bHmO4PQKV2M/ms4o9YWU6PwYhOT3Iu9fGDFrtZtMxlPg2gC6m+
+	7KJGe1LQ==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
+	id 1wPcAV-00000003wTD-2jz3;
+	Wed, 20 May 2026 08:20:43 +0000
+Date: Wed, 20 May 2026 01:20:43 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: Zorro Lang <zlang@kernel.org>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH 0/2] align the "# FS QA Test" format
+Message-ID: <ag1u28zXxrpkaCfG@infradead.org>
+References: <20260520074954.1877984-1-zlang@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: chao@kernel.org, Ojaswin Mujoo <ojaswin@linux.ibm.com>,
- Qu Wenruo <wqu@suse.com>, "Darrick J . Wong" <djwong@kernel.org>,
- Nirjhar Roy <nirjhar.roy.lists@gmail.com>
-Subject: Re: [PATCH] generic/563: allow read tolerance for f2fs in scenario 3
-To: Jan Prusakowski <jprusakowski@google.com>, Zorro Lang <zlang@kernel.org>,
- fstests@vger.kernel.org
-References: <20260515082608.449455-1-jprusakowski@google.com>
-Content-Language: en-US
-From: Chao Yu <chao@kernel.org>
-In-Reply-To: <20260515082608.449455-1-jprusakowski@google.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260520074954.1877984-1-zlang@kernel.org>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On 5/15/2026 4:26 PM, Jan Prusakowski wrote:
-> F2FS is a log-structured file system that allocates new blocks even for
-> overwrites. To perform allocation, it may need to read metadata blocks
-> (such as the Node Address Table (NAT) or Segment Info Table (SIT)) if
-> they are not already in memory.
-> 
-> In scenario 3 (read -> read/write), unlike scenario 2, there is no prior
-> write in the same mount session to load these metadata blocks into memory.
-> Therefore, the write operation in the second cgroup triggers metadata
-> reads, which are charged to that cgroup.
-> 
-> Relax the read tolerance for f2fs in scenario 3 to accommodate these
-> expected metadata reads, matching the tolerance already used in scenario 2.
-> 
-> Signed-off-by: Jan Prusakowski <jprusakowski@google.com>
+On Wed, May 20, 2026 at 03:49:50PM +0800, Zorro Lang wrote:
+> The intent of this patchset is straightforward, to reduce maintenance
+> overhead by unifying the format of the '# FS QA Test' line. This also
+> standardizes the output format of related maintenance tools.
 
-Reviewed-by: Chao Yu <chao@kernel.org>
+Stupid question, but could we just kill the line?  It doesn't really
+add much value, but causes all kinds of issues.
 
-Thanks,
