@@ -1,43 +1,44 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC0AE3CFF66;
-	Wed, 20 May 2026 09:59:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D90B3D8111
+	for <fstests@vger.kernel.org>; Wed, 20 May 2026 10:25:44 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779271191; cv=none; b=FmvQa5VSwc3ZSItYDsyWJZnQShqSxWSaBrNAlUv6uvMIpAXm/kINHAdK7EiEsiIkyEGCJ219KIT76ZzgFkFqsp/+r/t5xGT5Gfz6tjS1Aut/bBlvuSgeB3PRXJH9My5hThmChE1T/nKN5nVoFdVCb0fb+dCvhZrB6r0XESwmMcM=
+	t=1779272749; cv=none; b=lhwof4/bI9CVLdrevFEpyex5Rtj3NhPv7wO+tlj0ONJWQHQaC6i9q6pX8/8OXb491gQUTYs+okUOYtNpU+Y7UhJJ5EhPRs7iMduArHcDd7MPo2O7KY0wa6bXSMrIWO3eIKzmWm5rgxq+8HNo+l8L9s71w0eRtX9TKACS8qmC+N4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779271191; c=relaxed/simple;
-	bh=LdH3tczlmQY6o715SbPZNGIDmfnRCEDAEpMx8qY5KlI=;
+	s=arc-20240116; t=1779272749; c=relaxed/simple;
+	bh=OuOhqil/bCU2y6QkizUMlNOxMRGsKLzXPALTFHdGwEw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=JfX/Q5YWFn3MuJicTbkFcZX2oPbsgXKjWuUkUtdXHE/cgnoUtCCw1mJgY/+lp3hshr0okBBM2pzkIvsADX5e8IfSefBBEOJSLY6RyHT19zuhobJMfyFJZjTRP0TDsdXNLc4qiSPFunYulHGMSEF7Flbpux2B26xC6s0hGAU8rpU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jy6ZQnZ/; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=fBK2/lKLx3auQ88u5umShvmOSJ5HW+jSlmDxe9eEEtw7SGPk1HQJ2rk/LHWX9TGwjCGyuXH9asqcKqisotHd54g9YjbGm50mZQ8mfZUVWte1gityoXe9ZUKDWytZOJyMP+2bST8GFRcxIcxIDLD9GfoSrgLyskJXPh+MjUhlUYc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DgEL3gb7; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jy6ZQnZ/"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 81D4F1F000E9;
-	Wed, 20 May 2026 09:59:48 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DgEL3gb7"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 079321F000E9;
+	Wed, 20 May 2026 10:25:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1779271190;
-	bh=sc4mvbz246dfZBCGithnIuNNBospnINSIgtOQ7dj8qY=;
+	s=k20260515; t=1779272742;
+	bh=g4Bq9S3vxOU3bf6v1qm5NmuE0ocpy1LnL8pr7lwHcfs=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=jy6ZQnZ/cgghVUSKUPf8PWM0eGRHwSAp61bxLuj2d7j7Xme151eVEz9aFTPRYniKO
-	 r6pM+1trt6iQw2URXw35NBN6nknAyBUM2bNIS1YpRhycuP1k/GwDY5TdegHhIxgM2E
-	 MtN4Hckp4qAuBOEQjTsxoTAoHGEW74U3hyKB9khtac8wBOuP37hClNMdJCIVsxZsv6
-	 Q+Tqmy8NNCLjNZsYGfMblhbj6Td1vSFGXAS0FU6tdZT4jSgm8aw854gAfQBhbiYKSt
-	 aTpcBUGt83mTMJxNUrRwVwLOxgwJouz04IF5h9AH8+LHuRl58Ipe+Kmho/g1QrYKpM
-	 PopZo4mbSe4Kg==
-Date: Wed, 20 May 2026 17:59:45 +0800
+	b=DgEL3gb7LzW6WNuSnvlMYDkgXbVwMB+KxmCLWciz3iUFNYezhvJBx8dddg79H/lel
+	 yPm16meSqsK01q564xFts9TpM8u150CbOGi4hB5jv0XlmstwHq6QnnuP1d3MPrTmd+
+	 mVPLtXqEMO3y31aKr5awy5xJ+vP8+FH7L3ToI+Dd+6Vikyg8X7ft8j+Kdz5ex7Q6RK
+	 t8tJd5eWqoyBwpBy7oL2+xdThtR8EmCE0OR2mGu93NQKchGJMkNG8fuC7rFM5FnpWT
+	 hO0d2JosPz7HIqxjCOp9+GeROy+1Owq3e+TtRzVepynSbpDlw13SwTs/JSMWwd89Vf
+	 wGx8lxRi0lLWA==
+Date: Wed, 20 May 2026 18:25:34 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>, 
-	xfs-list <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH 0/2] align the "# FS QA Test" format
-Message-ID: <ag2EiThgxdOXCzIw@zlang-mailbox>
-Mail-Followup-To: Christoph Hellwig <hch@infradead.org>, 
-	fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>, 
-	xfs-list <linux-xfs@vger.kernel.org>
-References: <20260520074954.1877984-1-zlang@kernel.org>
- <ag1u28zXxrpkaCfG@infradead.org>
+To: Jan Prusakowski <jprusakowski@google.com>
+Cc: Chao Yu <chao@kernel.org>, fstests@vger.kernel.org, 
+	Ojaswin Mujoo <ojaswin@linux.ibm.com>, Qu Wenruo <wqu@suse.com>, "Darrick J . Wong" <djwong@kernel.org>, 
+	Nirjhar Roy <nirjhar.roy.lists@gmail.com>
+Subject: Re: [PATCH] generic/563: allow read tolerance for f2fs in scenario 3
+Message-ID: <ag2L_qWTqNbAovw5@zlang-mailbox>
+Mail-Followup-To: Jan Prusakowski <jprusakowski@google.com>, 
+	Chao Yu <chao@kernel.org>, fstests@vger.kernel.org, Ojaswin Mujoo <ojaswin@linux.ibm.com>, 
+	Qu Wenruo <wqu@suse.com>, "Darrick J . Wong" <djwong@kernel.org>, 
+	Nirjhar Roy <nirjhar.roy.lists@gmail.com>
+References: <20260515082608.449455-1-jprusakowski@google.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -46,27 +47,48 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ag1u28zXxrpkaCfG@infradead.org>
+In-Reply-To: <20260515082608.449455-1-jprusakowski@google.com>
 
-On Wed, May 20, 2026 at 01:20:43AM -0700, Christoph Hellwig wrote:
-> On Wed, May 20, 2026 at 03:49:50PM +0800, Zorro Lang wrote:
-> > The intent of this patchset is straightforward, to reduce maintenance
-> > overhead by unifying the format of the '# FS QA Test' line. This also
-> > standardizes the output format of related maintenance tools.
+On Fri, May 15, 2026 at 08:26:08AM +0000, Jan Prusakowski wrote:
+> F2FS is a log-structured file system that allocates new blocks even for
+> overwrites. To perform allocation, it may need to read metadata blocks
+> (such as the Node Address Table (NAT) or Segment Info Table (SIT)) if
+> they are not already in memory.
 > 
-> Stupid question, but could we just kill the line?  It doesn't really
-> add much value, but causes all kinds of issues.
+> In scenario 3 (read -> read/write), unlike scenario 2, there is no prior
+> write in the same mount session to load these metadata blocks into memory.
+> Therefore, the write operation in the second cgroup triggers metadata
+> reads, which are charged to that cgroup.
+> 
+> Relax the read tolerance for f2fs in scenario 3 to accommodate these
+> expected metadata reads, matching the tolerance already used in scenario 2.
+> 
+> Signed-off-by: Jan Prusakowski <jprusakowski@google.com>
+> ---
+>  tests/generic/563 | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/563 b/tests/generic/563
+> index c3705c2f..f95eb073 100755
+> --- a/tests/generic/563
+> +++ b/tests/generic/563
+> @@ -151,7 +151,10 @@ $XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite -b $blksize 0 $iosize" $SCRATCH_MNT
+>  switch_cg $cgdir
+>  $XFS_IO_PROG -c fsync $SCRATCH_MNT/file
+>  check_cg $cgdir/$seq-cg $iosize $iosize 5% 5%
+> -check_cg $cgdir/$seq-cg-2 0 0 0 0
+> +# F2FS may perform metadata reads during write in this scenario
+> +read_tol=0
+> +[ "$FSTYP" = "f2fs" ] && read_tol=33792
+> +check_cg $cgdir/$seq-cg-2 0 0 $read_tol 0
 
-No, I think that's an excellent question! I was too caught up in the issue
-itself, but after looking closer at the code, I realized nothing actually
-depends on this line. Moreover, it doesn't seem to add much value and instead
-introduces unnecessary maintenance overhead.
+Make sense to me,
 
-I'm not sure what the historical reasons are for having this line, if anyone
-has more context, please feel free to share. If there are no external
-dependencies relying on it either, I agree we can remove it.
+Reviewed-by: Zorro Lang <zlang@kernel.org>
 
-Thanks,
-Zorro
-
+>  
+>  if [ "$drop_io_cgroup" = 1 ]; then
+>  	echo "-io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
+> -- 
+> 2.54.0.563.g4f69b47b94-goog
 > 
