@@ -1,38 +1,37 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 776BF3F20E9
-	for <fstests@vger.kernel.org>; Wed, 20 May 2026 14:55:22 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B0D53FE652;
+	Wed, 20 May 2026 18:52:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779288923; cv=none; b=jI+rHj8jHVPwgEuJYkEYnjs+u4sOISPvf4hPoBXurPmJI1YSCcxgsDv4YLFPvbVktijdoRhaE6IEfrI+kiZvgah3fUcRIFGeutaG7Vg4lSXbPOVcF7hXKNsnrxTCTozbj0xDuVq/2pwa+8KNbY6sWUZPsCClq43604lWUURDcWQ=
+	t=1779303124; cv=none; b=tIo9gyue6k8JlzNmCjyscWPqmWpw915ytvDU6evRsdgTAi5J2ZEKyrtZMpBaP9VNLAk7vIrXc3oLswCUBW9LAirSncEVvgSqnh2pTMGPEIe4/jntHtLiEWa9Z2BP0Zt02OXzEg7iHDutm7VoWmpKjADGk4/mjhANiRyiam3L3GQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779288923; c=relaxed/simple;
-	bh=iqf3Q179EFFN0jS6cA+fLOj+88eG6jpVXnBpiahn4Sc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=fz7PdWoz7MEKXoinN/lLdZuOy9nDfqd9LdH3IzwwysSpthf6m9n0WMAqGeVun6uV5hXvU6evMnMsBAQsmI9duXXlh7+2qrl7ueiCivNqnX+e/vzGraT/Ye2NRSc4zYqmYgYyFKH5GiZ+B3TDJhMP3+aTa+OotcyjWUxD398sm9c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UB5eMvNr; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1779303124; c=relaxed/simple;
+	bh=S9IS+5gtJXSSpxuNaGfrSCotdh3Cj09XFPaf9CWKLYc=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=bqO6sY7TTp/TCRQ6/j/pDVrm5ICxk8dbPKv1BGDfcDE5ZleRds9s92sYeznUIaplfQq/5DBokxydJx/A6AUeNA3NeIxfQA7sGUPO7wSVQizcP7iO2dz2dwK4COAgkgYE/17lH5bd0mA6OJcZGkA29kOReDEy8eg+TZ5g2hfWblw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mOdsO7n8; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UB5eMvNr"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 3E2341F00893;
-	Wed, 20 May 2026 14:55:22 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mOdsO7n8"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 59C801F000E9;
+	Wed, 20 May 2026 18:52:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1779288922;
-	bh=Rd+9j0rijBVh0Bt8BdBU3go3SmDvroABNYiaY+YGahE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=UB5eMvNrnDWhs+JZkMRDbv/KWJcxsnYxjVWj8LdUq6Jnv4s8maNxhn5UZqFpOPhly
-	 JHCBydvg0DB9L7wTsvY912sf7DGxQdxnlp/FSGbrdd+qmdIXWR6E1nRUJkIvLS5nTs
-	 X5vOj0pTqAqCCJ4GOj+9CnLGtZScOZimUQoZ1Ak9wA3KRyw+GvHg/3RxdftY5xGSeL
-	 u+MWgkoZ6gKd95W7UPnuf0dDJsouxtiNWaUEkIyCHxTWsRmw/9s0NCci8JCDFGCbA/
-	 3+viXMRrv6F9O0r/uDi35DLrs+uOTOp2/3z00iP49/22uFNonT3639iUH2MvU2OLon
-	 2LtNDhtEpN7dg==
-Date: Wed, 20 May 2026 07:55:21 -0700
+	s=k20260515; t=1779303123;
+	bh=fac7YQtva8Ggeq4uKOSfB2rCA9x80cPq9/PKU8QrQD4=;
+	h=Date:From:To:Cc:Subject;
+	b=mOdsO7n8ZAky+PG1fx54GY4POPndqezFTA+jaoMRDoQS4DOljbFv1RMEe2kRkHU7m
+	 TU58aINCYj0mtSl3wB39XgEtGAioPdszSCLJ5ucOTITIPl66tBMjTiuV+jDYSthEMj
+	 N5MRHViOrAesWZQhPledGWBsTOscdHb02sk/fppnjajB404MwgFxYhKa30EPq0Clbo
+	 1lwe61XC0i6MAyFR8f7P6MiMSv18+oAERawkJWUBg5FGttQTtzwG/5XqtlIaazhcKX
+	 bC2Ou8wdITBdQWt4fNeGIM36l2OphsLYhzu4b29Pv5r6j4rvbSfZqOHw4wqNNQfN1n
+	 OK8gpsSAPDVnw==
+Date: Wed, 20 May 2026 11:52:02 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Andrey Albershteyn <aalbersh@kernel.org>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/791: don't run if kernel misses FANOTIFY
-Message-ID: <20260520145521.GK9568@frogsfrogsfrogs>
-References: <20260520133719.573809-1-aalbersh@kernel.org>
+To: Zorro Lang <zlang@kernel.org>
+Cc: fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>
+Subject: [PATCH 1/2] common/xfs: fix _scratch_mkfs_xfs_supports_concurrency
+Message-ID: <20260520185202.GD9544@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -41,97 +40,44 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260520133719.573809-1-aalbersh@kernel.org>
 
-On Wed, May 20, 2026 at 03:37:15PM +0200, Andrey Albershteyn wrote:
-> If FANOTIFY=no in the kernel, then fs-monitor will fail to start. Fix
-> fs-monitor error codes to detect and skip the test on "Function not
-> implemented" code.
-> 
-> Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
-> ---
->  src/fs-monitor.c  |  9 ++++++---
->  tests/generic/791 | 10 +++++++++-
->  2 files changed, 15 insertions(+), 4 deletions(-)
-> 
-> diff --git a/src/fs-monitor.c b/src/fs-monitor.c
-> index 0cf09677a3ef..28436ec2336f 100644
-> --- a/src/fs-monitor.c
-> +++ b/src/fs-monitor.c
-> @@ -117,6 +117,7 @@ next_event:
->  int main(int argc, char **argv)
->  {
->  	int fd;
-> +	int error;
->  
->  	char buffer[BUFSIZ];
->  
-> @@ -126,15 +127,17 @@ int main(int argc, char **argv)
->  	}
->  
->  	fd = fanotify_init(FAN_CLASS_NOTIF|FAN_REPORT_FID, O_RDONLY);
-> +	error = errno;
->  	if (fd < 0) {
->  		perror("fanotify_init");
-> -		errx(1, "fanotify_init");
-> +		errx(error, "fanotify_init");
->  	}
->  
->  	if (fanotify_mark(fd, FAN_MARK_ADD|FAN_MARK_FILESYSTEM,
->  			  FAN_FS_ERROR, AT_FDCWD, argv[1])) {
-> +		error = errno;
->  		perror("fanotify_mark");
-> -		errx(1, "fanotify_mark");
-> +		errx(errno, "fanotify_mark");
->  	}
->  
->  	printf("fanotify active\n");
-> @@ -144,7 +147,7 @@ int main(int argc, char **argv)
->  		int n = read(fd, buffer, BUFSIZ);
->  
->  		if (n < 0)
-> -			errx(1, "read");
-> +			errx(errno, "read");
->  
->  		handle_notifications(buffer, n);
->  	}
-> diff --git a/tests/generic/791 b/tests/generic/791
-> index 90242292cba2..1d3a6c181011 100755
-> --- a/tests/generic/791
-> +++ b/tests/generic/791
-> @@ -123,10 +123,18 @@ fi
->  _dmerror_unmount
->  _dmerror_mount
->  
-> -$here/src/fs-monitor $SCRATCH_MNT > $tmp.fsmonitor &
-> +$here/src/fs-monitor $SCRATCH_MNT > $tmp.fsmonitor 2>&1 &
->  fsmonitor_pid=$!
->  sleep 1
->  
-> +if ! kill -0 $fsmonitor_pid 2>/dev/null; then
-> +	wait $fsmonitor_pid
-> +	# Function not implemented
-> +	if [ $? -eq 38 ]; then
+From: Darrick J. Wong <djwong@kernel.org>
 
-error numbers aren't the same across architectures, so you generally
-have to strerror/perror and grep for that in the output.
+generic/347 regresses when external logs are in the configuration:
 
-Alternately we could add a getopt loop to main() so that you could pass
-in a --check that would do the setup and exit(0) just before the while
-loop; and then you could add:
+ --- a/generic/347.out		2025-07-15 14:45:15.044714644 -0700
+ +++ b/generic/347.out.bad	2026-05-18 23:17:01.687750781 -0700
+ @@ -1,2 +1,36 @@
+  QA output created by 347
+ -=== completed
+ +Cannot specify both -l logdev and -l concurrency
+ +Usage: mkfs.xfs
 
-$here/src/fs-monitor $SCRATCH_MNT --check &> /dev/null || \
-	_notrun "fanotify too old"
+Since this actually tests running mkfs.xfs with $SCRATCH_OPTIONS, the
+helper ought to have detected that you can't give both.  Unfortunately,
+there's a weird switch that turns -l into -d even though they're not
+quite the same option.  Delete that, and fix the indentation (tabs, not
+spaces) in the helper.
 
---D
+Cc: <fstests@vger.kernel.org> # v2026.05.17
+Fixes: 7f162f5bcf50fc ("common/xfs: helper function to check if -l/-d/-r concurrecy flags.")
+Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+---
+ common/xfs |    5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-> +		_notrun "Kernel doesn't support fanotify"
-> +	fi
-> +fi
-> +
->  _dmerror_mark_range_bad $bad_sector $bad_len
->  
->  cat >> $seqres.full << ENDL
-> -- 
-> 2.51.2
-> 
+diff --git a/common/xfs b/common/xfs
+index 4b3a7f7d153282..88299acdd086be 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -2431,8 +2431,7 @@ _require_xfs_healer()
+ # -l/-d concurrency came in same xfsprogs release v6.7
+  _scratch_mkfs_xfs_supports_concurrency()
+ {
+-    local arg="${1:-d}"
++	local arg="${1:-d}"
+ 
+-    test "$arg" = "-l" && arg="-d"
+-    _scratch_mkfs_xfs_supported "$arg" concurrency=0
++	_scratch_mkfs_xfs_supported "$arg" concurrency=0
+ }
