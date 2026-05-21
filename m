@@ -1,38 +1,43 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8D7934BA5A
-	for <fstests@vger.kernel.org>; Thu, 21 May 2026 08:26:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65C4325B095;
+	Thu, 21 May 2026 13:00:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779352014; cv=none; b=eWCYimTZ+DZlT9jTvxUwG3xhpmbeH7aoREAXLzu5R7fJ1AV/fm5tcuYGNMzwoe1BVJXxgZrDEE+E4IO352ZHM3sScM7m5WdDnrY696FVMCqc7d3fWiM377M5EOfAJrR32hA82IgAZubjIJFmNDgkUaZT5LOowE0oCjZj1xt7UFY=
+	t=1779368419; cv=none; b=pmtudY3xlIwg3o7C7WruogQjaQDVf65ZXtHs9Ddi+gb/fv7kkwTXi0/qgymbYdb1/bzGFcbPTmQBcULeqEIPoc09j7csDJpHdWChqEC1vMKGeoo43oECgvslZAFwZIZGNSQBn6kSvlxH6hNVIlAO/pVhUp+AmbtinUTjaXHvHvI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779352014; c=relaxed/simple;
-	bh=t+dYFwwroJ79g56ofZ3qsKwAvGkXesZ9n+pOyfyXENY=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=nXe3J33bdQi+tkDLpAd3eZubDgj/VPiCw3LKamqk0VHce/UTCT+cH9NGZ6csz2N1uCmiJL/Wf3uhp+VisC50IbVD5q+nleMWaevki5TewIxqHzvn+7Z5bSpMm6KOqzErsP0I8sLodCrIiorwU8XHuUGpD4ojA+krLjW/PFxkVnc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gUwIU+qN; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1779368419; c=relaxed/simple;
+	bh=idos7dKTS7lHhDXf49lbeC5f8DGS7EjSExem0TP69sc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=pQgdq4P25SJPwNOaoJYu+WftYVpIrpPh7nahNmvSUlLhNBv291cuC1OS1jO9a2h7pEoz2pz1tJRbUduj7JIEcUVoNXHr+PlPiPiRcgoVmSzpbCKyLxxnSs1NPqO1sVeTPvwzqZDWRxe4FxtoLCCOa2r1blDCBMPxRx+u9/CE/M8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=R8QkDJTZ; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gUwIU+qN"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 899C11F000E9;
-	Thu, 21 May 2026 08:26:52 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="R8QkDJTZ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 739581F000E9;
+	Thu, 21 May 2026 13:00:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1779352013;
-	bh=naG/5zhiSvTW5dBxlfjMY9yH1v7DNjIU6EpkDGI13ec=;
+	s=k20260515; t=1779368418;
+	bh=kw2UZRDIEaKvsqt9NlP7FIGKTM4BOEgXuuS0tV1nQmM=;
 	h=From:To:Cc:Subject:Date;
-	b=gUwIU+qNU0Wq+sZmqz7xYj9qSxXJs94bHlGDC0MHVw56EVTSJmQR2jEAmTEVfLN+l
-	 v9MZdwxdzZKmvhh7bnST+dursijd7Q0FRjUnb04SirtfS3BRu6mrwDP/nXfqBWbULV
-	 XjyfT9p1jz0SlDiEPSRkFHYOAKA/LAVYcWSQTaQhXmlqT4X7gIPOWocQrcNOgnoGlt
-	 wS/ZNrCUkv7lkqJWh10mfWlMneadZJEaY90AxWjZCvafyOxFLmIklM3CBLvARxaM/Q
-	 y0C1/2+vfYRDoyxM9/ULtqeb0yBm1uAeH5E1toXOwuJvl+6+kgNH0XcGqHRkwbPzIi
-	 X/BTj7ZSRWTUQ==
-From: Andrey Albershteyn <aalbersh@kernel.org>
-To: djwong@kernel.org,
-	fstests@vger.kernel.org
-Cc: Andrey Albershteyn <aalbersh@kernel.org>
-Subject: [PATCH v2] generic/791: don't run if kernel misses FANOTIFY
-Date: Thu, 21 May 2026 10:26:46 +0200
-Message-ID: <20260521082648.843312-1-aalbersh@kernel.org>
-X-Mailer: git-send-email 2.51.2
+	b=R8QkDJTZgTuI0rXgEEopzY3USVPfa0milAZBrl5l0ey9XNfwMTcBJ/sg10x9xujzW
+	 FIql9C4OwgIxy4pE2E4gxEWvTmzoFmCZ+hVTuYnYtQZUrfq/ZW9hOoMo0baGFQ7/pa
+	 cGHD1V2kDN4NfYS+6uHBOhdBW3dBJRXx7lSHZ+afLD4XN/fHv2smiTJ2mLGwDeV6h8
+	 W6hN6ELz2qneOp/9Ewjj8BEquFr8AjcdLBf3tEvDMpDCbLZrXK938Vp77L64ENLXHS
+	 tfpKXxdQXBkqTj+PUsWoc/MaNTQIrSKiP1BF2bFI3lOqiAltnJU5xukQ10bnKi/zQb
+	 WLCMHPwAk3NZA==
+From: Anand Jain <asj@kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org,
+	linux-f2fs@vger.kernel.org,
+	amir73il@gmail.com,
+	zlang@redhat.com,
+	hch@infradead.org
+Subject: [PATCH v5 0/10] fstests: add test coverage for cloned filesystem ids
+Date: Thu, 21 May 2026 20:54:50 +0800
+Message-ID: <cover.1779367627.git.asj@kernel.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -41,79 +46,91 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-If FANOTIFY=no in the kernel, then fs-monitor will fail to start. Fix
-fs-monitor error codes to detect and skip the test on "Function not
-implemented" code.
+v5:
+  XFS supports metadata_uuid, I converted patch 10/10 to a generic
+   test. To do this, I moved the in-test helper to common/rc as
+   `pre_clone_tune_uuid()`.
 
-Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
----
-Changes from v1:
-- Remove returning of errno
-- Instead of checking for error code add new -c argument to fs-monitor
+  I also verified fanotifywait with SELinux in enforcing mode and
+    fixed patch 4/10.
 
----
- src/fs-monitor.c  | 19 ++++++++++++++++++-
- tests/generic/791 |  3 +++
- 2 files changed, 21 insertions(+), 1 deletion(-)
+v4:
+  https://lore.kernel.org/fstests/cover.1777357320.git.asj@kernel.org
 
-diff --git a/src/fs-monitor.c b/src/fs-monitor.c
-index 0cf09677a3ef..dd91a5d7f623 100644
---- a/src/fs-monitor.c
-+++ b/src/fs-monitor.c
-@@ -117,6 +117,8 @@ next_event:
- int main(int argc, char **argv)
- {
- 	int fd;
-+	int opt;
-+	int check = 0;
- 
- 	char buffer[BUFSIZ];
- 
-@@ -125,14 +127,29 @@ int main(int argc, char **argv)
- 		return 1;
- 	}
- 
-+	while ((opt = getopt(argc, argv, "c")) != -1) {
-+		switch (opt) {
-+		case 'c':
-+			check = 1;
-+			break;
-+		default:
-+			fprintf(stderr, "Usage: %s [-c] path\n",
-+				argv[0]);
-+			exit(EXIT_FAILURE);
-+		}
-+	}
-+
- 	fd = fanotify_init(FAN_CLASS_NOTIF|FAN_REPORT_FID, O_RDONLY);
-+	if (check)
-+		exit(fd < 0);
-+
- 	if (fd < 0) {
- 		perror("fanotify_init");
- 		errx(1, "fanotify_init");
- 	}
- 
- 	if (fanotify_mark(fd, FAN_MARK_ADD|FAN_MARK_FILESYSTEM,
--			  FAN_FS_ERROR, AT_FDCWD, argv[1])) {
-+			  FAN_FS_ERROR, AT_FDCWD, argv[optind])) {
- 		perror("fanotify_mark");
- 		errx(1, "fanotify_mark");
- 	}
-diff --git a/tests/generic/791 b/tests/generic/791
-index 90242292cba2..edefbb7767c3 100755
---- a/tests/generic/791
-+++ b/tests/generic/791
-@@ -65,6 +65,9 @@ _dmerror_mount >> $seqres.full 2>&1
- 
- test $FSTYP = xfs && _xfs_force_bdev data $SCRATCH_MNT
- 
-+$here/src/fs-monitor -c $SCRATCH_MNT &> /dev/null || \
-+		_notrun "fanotify too old"
-+
- # Write a file with 4 file blocks worth of data, figure out the LBA to target
- victim=$SCRATCH_MNT/a
- file_blksz=$(_get_file_block_size $SCRATCH_MNT)
+v3:
+  https://lore.kernel.org/fstests/cover.1777281778.git.asj@kernel.org
+
+v2:
+  https://lore.kernel.org/fstests/cover.1774090817.git.asj@kernel.org
+
+v1:
+  https://lore.kernel.org/fstests/cover.1772095513.git.asj@kernel.org
+
+This series adds fstests infrastructure and test cases to verify correct
+filesystem identity when a filesystem is cloned (block-level copy).
+Test covers inotify, fanotify, f_fsid, libblkid, IMA, exportfs file handles
+and libblkid tools verify with metadata_uuid.
+  New helpers:
+  - _mkfs_scratch_sized_clone() helper to create a cloned filesystem
+  - _clone_mount_option() helper to apply per-filesystem clone mount options
+  - pre_clone_tune_uuid() changes the UUID before the clone
+
+  New tests:
+  - inotify and fanotify events are isolated between cloned filesystems
+  - f_fsid is unique across cloned filesystem instances
+  - libblkid correctly resolves duplicate UUIDs to distinct devices
+    with and without metadata_uuid
+  - IMA distinct identity for each cloned filesystem
+  - exportfs file handles resolve correctly on cloned filesystems
+
+Kernel Patches:
+  Requires Btrfs kernel patches for all tests to pass.
+   [1] https://lore.kernel.org/linux-btrfs/cover.1777281686.git.asj@kernel.org
+
+Anand Jain (10):
+  fstests: add _loop_image_create_clone() helper
+  fstests: add _clone_mount_option() helper
+  fstests: add test for inotify isolation on cloned devices
+  fstests: verify fanotify isolation on cloned filesystems
+  fstests: verify f_fsid for cloned filesystems
+  fstests: verify libblkid resolution of duplicate UUIDs
+  fstests: verify IMA isolation on cloned filesystems
+  fstests: verify exportfs file handles on cloned filesystems
+  fstests: add pre_clone_tune_uuid() healper
+  fstests: test UUID consistency for clones with metadata_uuid
+
+ common/config         |   2 +
+ common/rc             |  84 ++++++++++++++++++++++++++++
+ tests/generic/800     |  89 ++++++++++++++++++++++++++++++
+ tests/generic/800.out |   7 +++
+ tests/generic/801     | 125 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/801.out |   7 +++
+ tests/generic/802     |  62 +++++++++++++++++++++
+ tests/generic/802.out |   7 +++
+ tests/generic/803     |  76 +++++++++++++++++++++++++
+ tests/generic/803.out |  19 +++++++
+ tests/generic/804     | 103 ++++++++++++++++++++++++++++++++++
+ tests/generic/804.out |  10 ++++
+ tests/generic/805     |  73 ++++++++++++++++++++++++
+ tests/generic/805.out |   2 +
+ tests/generic/806     |  78 ++++++++++++++++++++++++++
+ tests/generic/806.out |  19 +++++++
+ 16 files changed, 763 insertions(+)
+ create mode 100644 tests/generic/800
+ create mode 100644 tests/generic/800.out
+ create mode 100644 tests/generic/801
+ create mode 100644 tests/generic/801.out
+ create mode 100644 tests/generic/802
+ create mode 100644 tests/generic/802.out
+ create mode 100644 tests/generic/803
+ create mode 100644 tests/generic/803.out
+ create mode 100644 tests/generic/804
+ create mode 100644 tests/generic/804.out
+ create mode 100644 tests/generic/805
+ create mode 100644 tests/generic/805.out
+ create mode 100644 tests/generic/806
+ create mode 100644 tests/generic/806.out
+
 -- 
-2.51.2
+2.43.0
 
