@@ -1,33 +1,85 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 029243438A2
-	for <fstests@vger.kernel.org>; Thu, 21 May 2026 00:26:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E1E52299959
+	for <fstests@vger.kernel.org>; Thu, 21 May 2026 03:53:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779323178; cv=none; b=tyxo69sXgHz0+HDNAYRJg5uTCf48Wz69wQ7DhRSh9ylAzRMvHnF1WYMw/Tc0doJm/+h36c/seg0WRyv/mWMzdi/2C2Fh0e3WEnaA1neZr0Od6U52Yr7fc6L3WH2pcy6A2RIzsnSMLT/PNX1nRx+tgDOtL+S4VrTEx5dmCBdam+k=
+	t=1779335596; cv=none; b=my8MPsql1wjlfhdV8H622u5ga4iPjOj2KckFh7p+Fkg6wapLCCS6GXyHZ8uZeXED+va7ooGxGpfla5eCIKNYCwQbEvasRnlVTu5PRhbZiVZia+AKIAVjQ/1MEdMVyVzQRTqdkwgVsw9WmtnQEu7pDKMY4S9WTHweCgF31VvcGPk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779323178; c=relaxed/simple;
-	bh=IeYsMcfBJj6+1NyQSz5P5ZxwS/25moLbQ8UEorDL0Wo=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=F2VWOOjM6xNKc2YRTs0fe/NHipK+z5uesoIvvRDoBLmpYVlLUczA8iE+cIaTxc6f40VCJQKwKQ8qMKb7YCp8MPw0750ruupdp93fwMJOAlUvpTAh4FfZungL3ckRUgkOpjHxxQJucuP/45DcSRFasi8T4BZ1In50RWO2YMr73po=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LWe+Q7av; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1779335596; c=relaxed/simple;
+	bh=eok54mhCucuigz/kkExUggB/hcLzC5H+qAC9NqM0TWA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=ILX/KK9+6JnEm1Ilga818BHtP4Db/hAcybhJZSDt5zchU/FJu5UEPOUuI+nbxtRTM14yA/vOS39ccFZ2mXQnH6NqN74G4ZlAvW1TmPsX0VaKwOwv+LsD2zdUgtSpXR1aQg2FA10iuFqJ4Vgf/1RAVdA36dkdos3w77pj86u/8Qs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=b2kiLRkD; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=X4Tc+Vin; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LWe+Q7av"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4983E1F000E9;
-	Thu, 21 May 2026 00:26:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1779323175;
-	bh=Qk6vc+HDG6D8dvUIDmq4mkBfCVo0cShiIRU/MQzSCrc=;
-	h=Date:Cc:Subject:To:References:From:In-Reply-To;
-	b=LWe+Q7av5x1o10cQEi4hpGQ+gzoWR68jq+IUsintOO0XBr/i2DvDqMU1U2+awfKUl
-	 OBzhOWBv7k65hdFKZ8GIrzjkqWf52P7228BA2XKYrmR8/w6aWDqPboWnvOKwkIFgEh
-	 ik0KM6+NJlRo4enHdOHg+O1WdKDLBt1SqETf7USdR1wIrqq/uSOCXU4yUKm6PrY8uw
-	 KDwF06CQ5tkbW0gYB44oKv9pfe5YtS5uI6t/DvrcfiZDJyqBytBm6xev3NNl6py9GK
-	 VOaQLIfAdnICE+gbjnyugF77Y9HstimEiZGhr6xSMVqyjEoI33hpqR3a1ki8fQsXII
-	 l8LnIRRllNf1g==
-Message-ID: <76060445-9b71-486b-bfac-9cc8b439d166@kernel.org>
-Date: Thu, 21 May 2026 00:26:12 +0000
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="b2kiLRkD";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="X4Tc+Vin"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1779335593;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=GCau9b/qRv6sn0ASGLiE3kHwpQdsZ+lHvqgPOEmWsVI=;
+	b=b2kiLRkDc824fGQPRgv7Kg8PCA1GAvtw8DxmNtwa1zfqOvqaZVi8jb388QWhSH/fBpb7A+
+	vqknNZj+N0SflZWH5E3AXUgVpyPAIQlT1jL3F1GJIgJS4WOSguN8wZZllz29bHsds2VmKz
+	Qxl/Lqjn7BnrE4a9PnHOu6MXfA2K0fQ=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-41-z9GRK51QPTCVuOv7J24zWw-1; Wed, 20 May 2026 23:53:11 -0400
+X-MC-Unique: z9GRK51QPTCVuOv7J24zWw-1
+X-Mimecast-MFC-AGG-ID: z9GRK51QPTCVuOv7J24zWw_1779335590
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-365ff2ab7beso5816094a91.1
+        for <fstests@vger.kernel.org>; Wed, 20 May 2026 20:53:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1779335590; x=1779940390; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:to:subject:user-agent:mime-version:date:message-id:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=GCau9b/qRv6sn0ASGLiE3kHwpQdsZ+lHvqgPOEmWsVI=;
+        b=X4Tc+VinEJCWkAcQqXOz9kZKpQ2uQe16SGW3ba1TSKrAFdP9bmMWQGtDjDIWIzmJ8N
+         927UfiT8p28KczeMN/SnqaKa1rGVKHCAPwAxXfEHVyzszl74b6aOxd3I5nCnYKmPmMeC
+         7Z7lzJ/JH5EqQsVVaPPC4zUao+8wIjY5F0CkMligoXYSbMiAeWl88bKSCHza7ySjDjes
+         nic5QcscPqNu76DG87O4JMD2wA7DRt5q11TNUN6T9x5YMlRokuLo9ILGjzAf05LrHMoH
+         hDqUpF4gXV23mSq+d1ukrIaAwJaMXboXRCtjvlz3tIf1mQYWmOiBSaDSKxeP0D6IJ3m1
+         WLYA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1779335590; x=1779940390;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=GCau9b/qRv6sn0ASGLiE3kHwpQdsZ+lHvqgPOEmWsVI=;
+        b=sf/D1nqeTNfM1tTwfnhvV4/ai/Vfw3PdVD+8oqWzr/xgbo0MFcROzRHcoMPU9vFPq/
+         +imIe2rc0sFm9lhX7ZFid6919EpyYdN9djJNVYYBRPthBeNyN+2t39uto24wx/lwSg2X
+         BK2wabCHRAepVRYfAI2YlJv+CC1vIRiA7x/hh+jje7M/YH4bwksflFnK5JHN7yfqr5sb
+         4qMLgf4eBQuqT+RiYHhumST1ZL6L1DSXXaIlOsjRquGbAs0x6JVPiT2StCw+82qom5F7
+         nkCkBvWncclkS0jPivbQOQcUVxvBT4djKX6Zaivu/cP7POxWepKWAj2GP2/yyO1QvNW7
+         r3Ow==
+X-Gm-Message-State: AOJu0YzTyRNg8aPrvEs80DYFLVWFpvYnFUVeGyPddaNeI+up0xXD0LnM
+	45NSfldLgEreoD+vKGUocga4J6Djll8MFWuJVrDQDAM2blfywk0A/bUUcR1cxOgfs1AJXfAQ0fq
+	WpbJ+C2jpD48PN2+3HfESc2FYW0/BARJAZ1FOoQhBnmKjrp92P9lkhWAuiZaO4F/NQs3ux7NTfZ
+	nK5FgeFOyndtu/xcKp2zP5XTfqlEUNgU56rn869HZxJS4=
+X-Gm-Gg: Acq92OFZJ9LDq+nyvYrlcWKIe3wkqKeo1JcSrRO/OMQknAiP0M66RqRbY9+CQA8wR0Y
+	66CdOZa7NYqHudFrpNzzFkxWJOxdNToBZfF2etxu3UM/44PluWighfUFb4pJehAj44dLT4Pu/zb
+	vDCTAh6TyKbfiLIq1PdS61W4A5k3BVOj2EEy+vJQZYJSj8zVvIHE3CbQYadMYNKBRdFO9HZECCP
+	USd8rytkJ+II//BNBjWYHRwMnZ0LbLwu25GU4vfDQa+FyiDK2lzPocadZXSP5rzmseHIGMRzV++
+	FQnDfNoSc8QXl1ehA6TXVvFsYoKiFX4FUmexgMMHFyVZu2mNELui9A5eF3Ran0wYx3IQJr/dT7W
+	ZpVuq3AkzbyHNy2x1G8GrUIw+qXCxZnXJvJ9tUa8JHZHIEUr+z2IvsTMccSIvEe+eipfp7/Q=
+X-Received: by 2002:a17:90b:48:b0:369:7944:d723 with SMTP id 98e67ed59e1d1-36a48e237c0mr845143a91.4.1779335589983;
+        Wed, 20 May 2026 20:53:09 -0700 (PDT)
+X-Received: by 2002:a17:90b:48:b0:369:7944:d723 with SMTP id 98e67ed59e1d1-36a48e237c0mr845107a91.4.1779335589362;
+        Wed, 20 May 2026 20:53:09 -0700 (PDT)
+Received: from ?IPV6:2001:8003:4a36:e700:56b6:ee78:9da2:b58f? ([2001:8003:4a36:e700:56b6:ee78:9da2:b58f])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-36a46c1ed73sm294477a91.3.2026.05.20.20.53.07
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 20 May 2026 20:53:08 -0700 (PDT)
+Message-ID: <22768917-d555-44fb-a757-8cd88a6e8553@redhat.com>
+Date: Thu, 21 May 2026 13:53:05 +1000
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -35,187 +87,140 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Cc: chao@kernel.org
-Subject: Re: [PATCH] f2fs/025: test to do sanity check section type correctly
- in f2fs GC
-To: fstests@vger.kernel.org, jaegeuk@kernel.org, jprusakowski@google.com,
- joannechien@google.com, linux-f2fs-devel@lists.sourceforge.net
-References: <20260518101252.445214-1-chao@kernel.org>
- <ag2Rh-4_Tp082XXx@zlang-mailbox>
-Content-Language: en-US
-From: Chao Yu <chao@kernel.org>
-In-Reply-To: <ag2Rh-4_Tp082XXx@zlang-mailbox>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Subject: Re: [PATCH] xfs: test xfsdump subtree restores
+To: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+References: <20260326025443.1569874-1-ddouwsma@redhat.com>
+ <20260326030012.1571545-1-ddouwsma@redhat.com>
+ <afy-9iJYNqDdXgml@zlang-mailbox>
+Content-Language: en-US, en-AU
+From: Donald Douwsma <ddouwsma@redhat.com>
+In-Reply-To: <afy-9iJYNqDdXgml@zlang-mailbox>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 5/20/26 12:28, Zorro Lang wrote:
-> On Mon, May 18, 2026 at 06:12:52PM +0800, Chao Yu wrote:
->> Without commit 520760b9f915 ("f2fs: optimize representative type determination
->> in GC"), f2fs GC will report inconsistent segment type in large section issue,
->> and then it will force to shutdown filesystem.
+G'day Zorro,
+
+On 8/5/26 02:59, Zorro Lang wrote:
+> On Thu, Mar 26, 2026 at 02:00:12PM +1100, Donald Douwsma wrote:
+>> Regression test for cumulative restores where a directory has been
+>> renamed outside of the subtree being restored triggering the assert:
 >>
->> [  768.190903] F2FS-fs (loop51): Inconsistent segment (3) type [1, 0] in SIT and SSA
+>>   xfsrestore: tree.c:1421: noref_elim_recurse: Assertion 'isrealpr' failed
 >>
->> The reason is f2fs kernel will assume all segment type inside large section is
->> the same, during GC it loads type from one segment and compare it to other
->> segments' type, however due to recovery flow, the chosen segment may has zero
->> valid blocks w/ different segment type, since the segment is invalid(free) one,
->> it will never be migrated, so that we should not treat such state as abnormal
->> condition.
->>
->> This testcase is created to simulate above condition to see whether f2fs kernel
->> module can handle it correctly
->>
->> Signed-off-by: Chao Yu <chao@kernel.org>
+>> Signed-off-by: Donald Douwsma <ddouwsma@redhat.com>
 >> ---
->>   tests/f2fs/025     | 88 ++++++++++++++++++++++++++++++++++++++++++++++
->>   tests/f2fs/025.out |  2 ++
->>   2 files changed, 90 insertions(+)
->>   create mode 100644 tests/f2fs/025
->>   create mode 100644 tests/f2fs/025.out
+>>  tests/xfs/995     | 51 +++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/xfs/995.out |  2 ++
+>>  2 files changed, 53 insertions(+)
+>>  create mode 100755 tests/xfs/995
+>>  create mode 100644 tests/xfs/995.out
 >>
->> diff --git a/tests/f2fs/025 b/tests/f2fs/025
->> new file mode 100644
->> index 00000000..1eba7158
+>> diff --git a/tests/xfs/995 b/tests/xfs/995
+>> new file mode 100755
+>> index 00000000..54172572
 >> --- /dev/null
->> +++ b/tests/f2fs/025
->> @@ -0,0 +1,88 @@
+>> +++ b/tests/xfs/995
+>> @@ -0,0 +1,51 @@
 >> +#! /bin/bash
 >> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2026 Chao Yu <chao@kernel.org>
+>> +# Copyright (c) 2026 Red Hat.  All Rights Reserved.
 >> +#
->> +# FS QA Test No. f2fs/025
+>> +# FS QA Test 995
 >> +#
->> +# Check whether f2fs will encounter cp_error (Inconsistent segment type)
->> +# when doing sanity check on type of segments inside large section during
->> +# garbage collection.
+>> +# Regression test for cumulative restores where a directory has been
+>> +# renamed outside of the subtree being restored resulting in
+>> +#
+>> +#   xfsrestore: tree.c:1421: noref_elim_recurse: Assertion 'isrealpr' failed
 >> +#
 >> +. ./common/preamble
->> +_begin_fstest auto quick
+>> +_begin_fstest auto dump
 >> +
->> +_fixed_by_kernel_commit 520760b9f915 \
->> +	"f2fs: optimize representative type determination in GC"
+>> +_fixed_by_git_commit xfsdump XXXXXXX \
+>> +	"xfsrestore: only process subtrees that are selected"
 >> +
->> +. ./common/filter
->> +
+>> +# Override the default cleanup function.
 >> +_cleanup()
 >> +{
+>> +	_cleanup_dump
 >> +	cd /
 >> +	rm -r -f $tmp.*
 >> +}
 >> +
+>> +# Import common functions.
+>> +. ./common/dump
+>> +
+>> +# Modify as appropriate.
 >> +_require_scratch
->> +_require_xfs_io_command "pwrite"
->> +_require_xfs_io_command "truncate"
->> +_require_command "$F2FS_IO_PROG" f2fs_io
->> +_require_check_dmesg
+>> +_scratch_mkfs_xfs >>$seqres.full
+>> +_scratch_mount
 >> +
->> +# Format with 96MB size and 2 segments per section
->> +_scratch_mkfs_sized $((96 * 1024 * 1024)) "" "-s 2" >> $seqres.full 2>&1
+>> +mkdir -p $SCRATCH_MNT/a/b/c/d/e/f/g
+>> +mkdir -p $SCRATCH_MNT/restore_me/B/C/D/E/F/G
 >> +
->> +# Mount with mode=lfs
->> +_scratch_mount -o mode=lfs >> $seqres.full 2>&1
+>> +_do "$XFSDUMP_PROG -L "lab_l0" -M "test" -l0 -f $tmp.dump.l0 $SCRATCH_MNT"
 >> +
->> +# Create files to fill whole filesystem, then segment type will be changed to node type
->> +for ((i=0;i<5120;i++)) do
->> +	touch $SCRATCH_MNT/$i >> $seqres.full 2>&1
+>> +mv $SCRATCH_MNT/a/b/c $SCRATCH_MNT/1
+>> +
+>> +_do "$XFSDUMP_PROG -L "lab_l2" -M "test" -l2 -f $tmp.dump.l2 $SCRATCH_MNT"
+>> +
+>> +dir=$(mktemp -d $SCRATCH_MNT/restore_XXX)
+>> +_do "$XFSRESTORE_PROG -f $tmp.dump.l0 -r -s restore_me $dir"
+>> +_do "$XFSRESTORE_PROG -f $tmp.dump.l2 -r $dir"
 > 
-> 5120 * 4k = 20MB
+> Hi Donald,
 > 
->> +done
->> +sync
->> +
->> +# Remove all files to create free(empty) node segments
->> +rm -f $SCRATCH_MNT/*
->> +sync
->> +
->> +# Allocate free space so that we have chance to reuse free(empty) node segments
->> +$XFS_IO_PROG -f -c "pwrite -b 4k 0 1928k" $SCRATCH_MNT/file >> $seqres.full 2>&1
->> +sync
->> +
->> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
->> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 16M" $SCRATCH_MNT/file >> $seqres.full 2>&1
->> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
->> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 16M" $SCRATCH_MNT/file >> $seqres.full 2>&1
->> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
->> +sync
->> +
->> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 8M" $SCRATCH_MNT/file >> $seqres.full 2>&1
->> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
->> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 32K" $SCRATCH_MNT/file >> $seqres.full 2>&1
->> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
+> I almost forgot we had this _do helper :)
 > 
-> 1928k + 16M + 16M + 8M + 32K ~= 40M
-> 
->> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 2M" -c "fsync" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> 
-> 96M - 40M - 20M = 36M
-> 
-> I'm not a f2fs expert, I think you hope to (almost) fill the fs before this 2M
-> pwrite step. If so, I'm wondering can we ensure that other metadata takes ~36 MB
+> I think your test target is the 2nd xfsrestore command line (about incremental
+> changes), a comment might be good.
 
-Zorro, thanks for the review.
+Ack
 
-Actually, we don't need to write metadata to other ~36 MB space, because node log
-and data log are start from different area of block addresses, more details as below:
+> I saw used four _do calls here. I just checked the logic of the _do helper, I
+> suspect your current usage might prevent the test from catching command failures,
+> allowing it to 'successfully' continue...
 
-warm_node type log starts from beginning of block addresses
-https://git.kernel.org/pub/scm/linux/kernel/git/chao/f2fs-tools.git/tree/mkfs/f2fs_format.c#n662
+*sigh* thanks for pointing this out, I switched to using _do for the ease of
+redirecting to seqres.full. I found having the full output available was useful
+when investigating (coupled with adding -v tree=debug).
 
-warm_data type log starts from middle of block addresses
-https://git.kernel.org/pub/scm/linux/kernel/git/chao/f2fs-tools.git/tree/mkfs/f2fs_format.c#n668
+I couldn't figure out why my failing test started succeeding even though it aborted,
+which is why i added the test.
 
-With lfs mode, warm_data log can allocate forward until to the end of block addresses,
-and then start from beginning of block addresss, then we can expect it reuse the
-area which were used by node log.
+The second two are a duplicate, earlier I had a bunch more cases, including
+restoring without -s, and restoring the l2 dump on its own, must have fumbled a 
+cut-n-pasta, I'll revise to cover these edge cases.
 
-> of space, thereby guaranteeing that this 2 MB write triggers the reuse of that
-> 1928 KB segment (no matter with any MKFS_OPTIONS)?
+> A simple fix would be adding a "note" as a first argument to each _do helper call,
+> e.g:
+>   _do "Full dump" "$XFSDUMP_PROG ..."
 
-Oh, I may miss to consider MKFS_OPTIONS and MOUNT_OPTIONS, what do you think of
-clearing both MKFS_OPTIONS and MOUNT_OPTIONS before the test?
+> Once all four calls are updated this way, we can remove the "test $? -ne 0 && exit"
+> lines too, and rely on golden image matching to detect any failures. What do you
+> think?
 
-Thanks,
+Once i fix _do the coredump control may start working again, in which case we'd see
+a failure with "[dumped core]".
+
+Don
 
 > 
-> Thanks,
-> Zorro
-> 
 >> +
->> +# Shutdown the filesystem without checkpoint
->> +$F2FS_IO_PROG shutdown 2 $SCRATCH_MNT >> $seqres.full 2>&1
+>> +test $? -ne 0 && exit
 >> +
->> +_scratch_unmount >> $seqres.full 2>&1
->> +
->> +_scratch_mount -o mode=lfs >> $seqres.full 2>&1
->> +
->> +# Run urgent_gc mode to trigger garbage collection
->> +dev_name=$(_short_dev $SCRATCH_DEV)
->> +if [ -f /sys/fs/f2fs/$dev_name/gc_urgent ]; then
->> +	echo 1 > /sys/fs/f2fs/$dev_name/gc_urgent
->> +fi
->> +
->> +# Wait background GC thread to wake up to run and potentially encounter the inconsistency
->> +sleep 5
->> +
->> +_scratch_unmount >> $seqres.full 2>&1
->> +
->> +# Check whether the dmesg has the warning indicating the bug
->> +_check_dmesg_for "F2FS-fs \($dev_name\): Inconsistent segment" && \
->> +	_fail "F2FS-fs ($dev_name): Inconsistent segment type detected in dmesg!"
->> +
->> +echo "Silence is golden"
->> +status=0
->> +exit
->> diff --git a/tests/f2fs/025.out b/tests/f2fs/025.out
+>> +echo Silence is golden
+>> +# success, all done
+>> +_exit 0
+>> diff --git a/tests/xfs/995.out b/tests/xfs/995.out
 >> new file mode 100644
->> index 00000000..3d70951e
+>> index 00000000..776fa6f2
 >> --- /dev/null
->> +++ b/tests/f2fs/025.out
+>> +++ b/tests/xfs/995.out
 >> @@ -0,0 +1,2 @@
->> +QA output created by 025
+>> +QA output created by 995
 >> +Silence is golden
 >> -- 
->> 2.49.0
+>> 2.47.3
+>>
 >>
 
