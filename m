@@ -1,66 +1,182 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8ECC53B95F8;
-	Tue, 26 May 2026 06:28:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C69F1311592
+	for <fstests@vger.kernel.org>; Tue, 26 May 2026 07:01:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779776906; cv=none; b=gcvN9g7lPn+gy7iJSFwdebaiD+NycUYGh5+JG5zt36uvS6J92dczK0DyXEbLXyKEPcFCHCQI5nJS4zKmC9B2IPULLWpqFS1Hm/xcOMxkQ2oNOdd1GGOJWCmRG49OnzEbmCDjUT477PZgel8Q5wnP1RYSzuP+4fhR9fpDnqe2b0E=
+	t=1779778877; cv=none; b=K3r9FWtkOe0H1YYG9wWEKEMzi2sHdSIbDxpvnMMAn+zVlwZjnjkGRUKfF6pldiuJmvQoqs9hikESch/YtyV0JB91NDKkBsvoTHdjfRrELKMiG5ePRSoClelt6DwLpH9rYuB/C5KEaEdcLiz09UyuP0SIk2WUfIP0Bxu9U+IQFv8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779776906; c=relaxed/simple;
-	bh=eJ7jRwehY73ImatYjxu/aEAlJNNAbkN9PtVeqywRRB4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=k4eoE/OHmeIiOQUQkrh7HThnd4dNXNgF4yPeaexRiF063G7YWFnEAjf95UUeuyXS790jAFhI6vx4Rpo0m/BlaTdWaWCnNj+mcuBiA8xxBbIemIUjEPEw0TovVq7i0/vDUPmy2hWs4/ZcJs3A3UE/INN48xV53gfTwbC7oT1cIN0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=44e8K56X; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1779778877; c=relaxed/simple;
+	bh=mlU9zCnB+vurOrC3LwF1nJR7dm+3w2IygSJgIvc5kbk=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=VHc5wTLPBkuvWlN/exPDiYpSk0Q7mdPCcsP1TaJJPz907+jxKjDqq3Fv4LmwwxRh3r9GFVVfyielgQjn4Ug6Ze0jdL7jC1Nkzh4TnXdaUePvG7osEQxfeCI65HHZLD46MvdtanKf3nTBUinkafCCbIi3jZgudhGmmn710Eq16FI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=QpvfTQsF; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=p51WonL1; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="44e8K56X"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=xNnhllXN4PH1PswmwIq+byFVY0ywT1w/V53Mn+v+WME=; b=44e8K56XCbSzl9XMYBQBY825Vr
-	Rg9NFcfIL43/WxtRvCAoufWkGF9IWtVVWufHwA58SFNZg0svF8KrVO7Gkr0fN2rM5TqPjR84UWmHP
-	wdVWRfvZ74ad4XNAMQ1/VYb8ov+VUR0SG8nQN1rVODEgntDLHaXe+acrKQhTdIu5jfIDh2+4uxxe6
-	9b665vhyJMBSq0kT8GNuFt8cjTqoqAUWzUe1++evbfOTntPBLRSTAbjKrIMM/i639htOtr4Ett6fQ
-	cvHDmv2Q10owx/Qc2r6fFkasj9dV2kuuvlfBe6KPy0Kn6zxs7lCKDP6+otJcLs7rkx2zakdc6X8+D
-	f6oWgP1w==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wRlH4-00000001ANo-3qjV;
-	Tue, 26 May 2026 06:28:22 +0000
-Date: Mon, 25 May 2026 23:28:22 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: Anand Jain <anajain.sg@gmail.com>
-Cc: Christoph Hellwig <hch@infradead.org>, Anand Jain <asj@kernel.org>,
-	fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
-	amir73il@gmail.com, zlang@redhat.com
-Subject: Re: [PATCH v5 03/10] fstests: add test for inotify isolation on
- cloned devices
-Message-ID: <ahU9hpwrXyZChw9X@infradead.org>
-References: <cover.1779367627.git.asj@kernel.org>
- <1c60be06ce79778404079c8b1c1d2e09f64cb38e.1779367627.git.asj@kernel.org>
- <ahP1tCc81ascjwxJ@infradead.org>
- <edadc872-5796-4cff-934b-cee66fde79d2@gmail.com>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="QpvfTQsF";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="p51WonL1"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id EACC375BD0;
+	Tue, 26 May 2026 07:01:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1779778874; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=RnwfPIU2M74DaRg9xqvwN+2/NQhjOg6LNvYc1bZXxzM=;
+	b=QpvfTQsFciUE+/47tAwKSuA28cGJ8X8ON81hTjXQKh2o7Buff/Y5YoRg7YvbGFpBzWM7uY
+	0J0E7lfxjKFqM8dvDT1Xy1l0I7l/cqY/VlUID7T5p5pPe1LofGQ0vQVUxMX5EECyGoOO8D
+	kSIJQf3q94YCrIdnMphpJcucVpzgwCc=
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=p51WonL1
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1779778873; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=RnwfPIU2M74DaRg9xqvwN+2/NQhjOg6LNvYc1bZXxzM=;
+	b=p51WonL1+UZoR6zIw0fmOeMR1Z79UrxRSru5qsn85DU9V1n5/sTkFXeTK5idF72arMqVx+
+	V7RZLBCl0sKX2Bjw0Yqua0Ww8SkY+K5VRYlpnio91nAxfEIsHpNKjs0lX23zN/RnN9gVKV
+	L1S08fsYeby7brBDYkE40A8a5C1h1MM=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id E788F5A097;
+	Tue, 26 May 2026 07:01:12 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id pfGdKThFFWqYawAAD6G6ig
+	(envelope-from <wqu@suse.com>); Tue, 26 May 2026 07:01:12 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org
+Subject: [PATCH] fstests: generic/362: remove the old file to reflect new mount options
+Date: Tue, 26 May 2026 16:30:55 +0930
+Message-ID: <20260526070055.60193-1-wqu@suse.com>
+X-Mailer: git-send-email 2.54.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <edadc872-5796-4cff-934b-cee66fde79d2@gmail.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Transfer-Encoding: 8bit
+X-Spam-Score: -3.01
+X-Rspamd-Queue-Id: EACC375BD0
+X-Spam-Level: 
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	MIME_TRACE(0.00)[0:+];
+	DNSWL_BLOCKED(0.00)[2a07:de40:b281:104:10:150:64:97:from,2a07:de40:b281:106:10:150:64:167:received];
+	RCPT_COUNT_TWO(0.00)[2];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:dkim,suse.com:email,suse.com:mid,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo];
+	RCVD_TLS_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DKIM_TRACE(0.00)[suse.com:+]
+X-Rspamd-Action: no action
+X-Spam-Flag: NO
 
-On Mon, May 25, 2026 at 04:35:58PM +0800, Anand Jain wrote:
-> > Also any reason to rely on the obsolete inotify instead of fsnotify?
-> 
-> fsnotify is exercised in patch 4/10.
-> IMO, exercising inotify ensures we don't break legacy stuff.
+[HIDDEN BUG]
+There is a btrfs bug that will only trigger on newly formated TEST_DEV,
+with mount option "nodatasum":
 
-fanotity and inotify use exactly the same backends, so I'm not sure
-why testing both matters.  Not that I care very strongly, I'm just a
-bit confused.
+ FSTYP         -- btrfs
+ PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
+ MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
+ MOUNT_OPTIONS -- -o nodatasum /dev/mapper/test-scratch1 /mnt/scratch
+
+ generic/362  0s ... - output mismatch (see /home/adam/xfstests/results//generic/362.out.bad)
+     --- tests/generic/362.out	2024-08-24 15:31:37.200000000 +0930
+     +++ /home/adam/xfstests/results//generic/362.out.bad	2026-05-26 16:24:40.201201849 +0930
+     @@ -1,2 +1,3 @@
+      QA output created by 362
+     +First write failed: Input/output error
+      Silence is golden
+     ...
+     (Run 'diff -u /home/adam/xfstests/tests/generic/362.out /home/adam/xfstests/results//generic/362.out.bad'  to see the entire diff)
+
+But if one has formated TEST_DEV, run test with default mount option,
+then change the mount option to "nodatasum", the test will not fail
+anymore:
+
+ FSTYP         -- btrfs
+ PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
+ MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
+ MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
+
+ generic/362  0s ...  0s
+ Ran: generic/362
+ Passed all 1 tests
+
+ FSTYP         -- btrfs
+ PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
+ MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
+ MOUNT_OPTIONS -- -o nodatasum /dev/mapper/test-scratch1 /mnt/scratch
+
+ generic/362  0s ...  0s
+ Ran: generic/362
+ Passed all 1 tests
+
+[CAUSE]
+Btrfs' nodatasum mount option only affect new files, but the test case
+itself is using TEST_DEV, and never delete the file
+"$TEST_DIR/dio-append-buf-fault"
+
+So if the file is created with default mount option, then all later
+"nodatasum" mount option will not affect that file, thus hide the test
+failure.
+
+[FIX]
+Always delete the target file "$TEST_DIR/dio-append-buf-fault" before
+running dio-append-buf-fault command.
+
+So that the new target file is always newly created and will follow
+btrfs' new mount option and expose the failure for nodatasum.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+I'm already looking into the test failure, because it's mostly hidden by
+the btrfs' falling back to buffered IO behavior.
+
+With the incoming IOMAP_DIO_BOUNCE usage inside btrfs, it will expose
+the failure unconditionally.
+---
+ tests/generic/362 | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/tests/generic/362 b/tests/generic/362
+index 0cfaa726..86191e57 100755
+--- a/tests/generic/362
++++ b/tests/generic/362
+@@ -20,6 +20,10 @@ _require_test_program dio-append-buf-fault
+ _fixed_by_fs_commit btrfs 939b656bc8ab \
+ 	"btrfs: fix corruption after buffer fault in during direct IO append write"
+ 
++# Remove the existing file, so a new inode can be created, and will be
++# affected by changed mount options.
++rm -rf $TEST_DIR/dio-append-buf-fault
++
+ # On error the test program writes messages to stderr, causing a golden output
+ # mismatch and making the test fail.
+ $here/src/dio-append-buf-fault $TEST_DIR/dio-append-buf-fault
+-- 
+2.51.2
 
