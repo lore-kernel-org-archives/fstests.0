@@ -1,182 +1,110 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Received: from mail-pg1-f172.google.com (mail-pg1-f172.google.com [209.85.215.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C69F1311592
-	for <fstests@vger.kernel.org>; Tue, 26 May 2026 07:01:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D2A911C5D5E
+	for <fstests@vger.kernel.org>; Tue, 26 May 2026 15:19:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779778877; cv=none; b=K3r9FWtkOe0H1YYG9wWEKEMzi2sHdSIbDxpvnMMAn+zVlwZjnjkGRUKfF6pldiuJmvQoqs9hikESch/YtyV0JB91NDKkBsvoTHdjfRrELKMiG5ePRSoClelt6DwLpH9rYuB/C5KEaEdcLiz09UyuP0SIk2WUfIP0Bxu9U+IQFv8=
+	t=1779808776; cv=none; b=AiToerKkU7SUG8wbg0WDXmOkFWp2vGw6b7483hzPyxgg1O6ve1jPtc/tMzgFw+a2XYrYu6VanPsLOMpiNioOjkM2u6j3fbFzFfCpakIDwrziB2nB93T6xS6KkwzpAoTkno93/9MeYzFHI1pfUnNu9rxgOovbasVhjqtwZz7i8vk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779778877; c=relaxed/simple;
-	bh=mlU9zCnB+vurOrC3LwF1nJR7dm+3w2IygSJgIvc5kbk=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=VHc5wTLPBkuvWlN/exPDiYpSk0Q7mdPCcsP1TaJJPz907+jxKjDqq3Fv4LmwwxRh3r9GFVVfyielgQjn4Ug6Ze0jdL7jC1Nkzh4TnXdaUePvG7osEQxfeCI65HHZLD46MvdtanKf3nTBUinkafCCbIi3jZgudhGmmn710Eq16FI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=QpvfTQsF; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=p51WonL1; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1779808776; c=relaxed/simple;
+	bh=0ZnjPi7BwnAOrVB91/FYkrKd3xmpByfSExU4BuXXulY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=F4dDR3vtE+JSuWVZnmiq6JPxUknANnnvZ7HrHIns7ncZyUmrOnIznC8a6K3FRBJTdNwBHCrqZndfYwb0nix06iqszDD7vtf2hPU3XUFIYcsQxRLj1J3/v+IRYvreY1O2pBm1gTkf0MnpAZDrz7Nv7oeVljgpeenJQTFr6zIFo2Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=dCcHEc51; arc=none smtp.client-ip=209.85.215.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="QpvfTQsF";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="p51WonL1"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id EACC375BD0;
-	Tue, 26 May 2026 07:01:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1779778874; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=RnwfPIU2M74DaRg9xqvwN+2/NQhjOg6LNvYc1bZXxzM=;
-	b=QpvfTQsFciUE+/47tAwKSuA28cGJ8X8ON81hTjXQKh2o7Buff/Y5YoRg7YvbGFpBzWM7uY
-	0J0E7lfxjKFqM8dvDT1Xy1l0I7l/cqY/VlUID7T5p5pPe1LofGQ0vQVUxMX5EECyGoOO8D
-	kSIJQf3q94YCrIdnMphpJcucVpzgwCc=
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=p51WonL1
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1779778873; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=RnwfPIU2M74DaRg9xqvwN+2/NQhjOg6LNvYc1bZXxzM=;
-	b=p51WonL1+UZoR6zIw0fmOeMR1Z79UrxRSru5qsn85DU9V1n5/sTkFXeTK5idF72arMqVx+
-	V7RZLBCl0sKX2Bjw0Yqua0Ww8SkY+K5VRYlpnio91nAxfEIsHpNKjs0lX23zN/RnN9gVKV
-	L1S08fsYeby7brBDYkE40A8a5C1h1MM=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id E788F5A097;
-	Tue, 26 May 2026 07:01:12 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id pfGdKThFFWqYawAAD6G6ig
-	(envelope-from <wqu@suse.com>); Tue, 26 May 2026 07:01:12 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org
-Subject: [PATCH] fstests: generic/362: remove the old file to reflect new mount options
-Date: Tue, 26 May 2026 16:30:55 +0930
-Message-ID: <20260526070055.60193-1-wqu@suse.com>
-X-Mailer: git-send-email 2.54.0
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="dCcHEc51"
+Received: by mail-pg1-f172.google.com with SMTP id 41be03b00d2f7-c8173b2af32so8337359a12.0
+        for <fstests@vger.kernel.org>; Tue, 26 May 2026 08:19:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1779808774; x=1780413574; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=81JJQRQ2yMbKHbejnSmsG4QSx00hSzBR2QqgEz/z/s4=;
+        b=dCcHEc51DzUejXFJU3CnUz4cmcO4A9DHsnuI2CKbf9ITFWqspVdZziai3B7o9xl5W/
+         wtkpACv10/WcrV1U5wsAcjg1qYa5cIg8JIHId3hxsDTTtOIWFjlKXajYMY2Jfo2A4qeu
+         2eZg6r97gA8prwOlR7gY5dsNdL95tdIwk5MjZdc8ePyN/aHTOk1gnsAKgaHNy2g3aHni
+         w5oS4glZ9wgeDKbOpWhBO6sANzc65qoCEG/61ZT6FEXW2qa+uuV4ftz/r5rawMpicFyB
+         5WGrmaU5KQTPmOgJ5o1uLpEk+j2hTAXIP2a7B8PH0gv1SEDbKpM093lKjKHNKq+fI9ca
+         uu9w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1779808774; x=1780413574;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=81JJQRQ2yMbKHbejnSmsG4QSx00hSzBR2QqgEz/z/s4=;
+        b=goxZzS53E44f2UFN4lBfrW13Y7mt9TlG344ohhWNU6mlFngWZzJP2V+xd5lAcGHlhf
+         dSXSCuCCcTZXnHjYE/2l4CdiBqH4lA+fvSOA2HWxkGikDbNfyFsF6cVfyCTpUMBIUlwj
+         AmP5iQTSVeiM2FQgR56SOoGLq6ioie++InHeCZdNLyTla/wXaFNoPInCtnA07hVfz4xs
+         HeTy8DNHGx40t/owsvdPl/njaU+QlXEwkFSkKLLBlslXoLDxGR7uHRmlAcF4mVUVijnB
+         c0x8qgWYvp6CTUeVsdaydJ7u/2t7avSXBvtL1fiwiHUs/eoyPAeEX4MNMAefcQ9Ewx88
+         79xA==
+X-Forwarded-Encrypted: i=1; AFNElJ+o7e/RtzPVOvN2bbLy2g3i+gWP/m+ASsYNaQTxkzIpb4/Ird/NMxkMaK9IJeMtmNpecDGCJm3B@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy5TPEr7hepLzJmY8IZd7ZyuwghGGTZ+HP8WgncNG2lMPN72TD9
+	2YOM6k1LUBCDyoCTwiaVuPszAjOPQcYDv9sM1VF8atC9pBKkfY6YUDZviHruBA==
+X-Gm-Gg: Acq92OFswnpHS+LEUVLCmG2JorTbRYDzvFqc8KotlG+oAotZ2fWFIuJUB1bLvIqXyQO
+	wfiAzY5wijgIsTDVd/k9j+cusF90fvrPVgFU+Z05RuercB6r2pwPzyyIwVPoTiPyPyo8KP9FIy7
+	LBP1Vt6Ojn0rSxwLUoKzH62lXDahPCEZHDRKSeAZTVKjwipDimQtCfK0+AopxhybMMAMt+7e89u
+	lvlaWtpYgDEHDZWlXyfNOVhEVPGmoAWwGW/5DlmFt9dU3kIe+TpLxRkpvKxDlSoxCFmPRqB8i6b
+	1JoNoG9+znjyG59QG03AL1Z6DGdYUAORohlxckN+hwWM6vFTFJZVhCg5IrmPfoyauvxsCSnXo35
+	qjeprJvihsGcLyKLcyRRVNIy57AhGf73LUAyAnjYqjhc+8iWgYchsLIbtRcLZLFrGCJ+k9yekFs
+	knc8fny/q7pPFKlSt09uoB2P5nYl0=
+X-Received: by 2002:a05:6a21:68f:b0:3b1:a9ce:5095 with SMTP id adf61e73a8af0-3b328d940ebmr19169216637.22.1779808774114;
+        Tue, 26 May 2026 08:19:34 -0700 (PDT)
+Received: from [192.168.50.90] ([116.87.14.48])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c8520561e94sm11447223a12.22.2026.05.26.08.19.31
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 26 May 2026 08:19:33 -0700 (PDT)
+Message-ID: <e8d0caf9-df8b-415e-9f89-bc71e73a0e32@gmail.com>
+Date: Tue, 26 May 2026 23:19:30 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Spam-Score: -3.01
-X-Rspamd-Queue-Id: EACC375BD0
-X-Spam-Level: 
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Spamd-Result: default: False [-3.01 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	ARC_NA(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	MIME_TRACE(0.00)[0:+];
-	DNSWL_BLOCKED(0.00)[2a07:de40:b281:104:10:150:64:97:from,2a07:de40:b281:106:10:150:64:167:received];
-	RCPT_COUNT_TWO(0.00)[2];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:dkim,suse.com:email,suse.com:mid,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo];
-	RCVD_TLS_ALL(0.00)[];
-	TO_DN_NONE(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DKIM_TRACE(0.00)[suse.com:+]
-X-Rspamd-Action: no action
-X-Spam-Flag: NO
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 03/10] fstests: add test for inotify isolation on
+ cloned devices
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Anand Jain <asj@kernel.org>, fstests@vger.kernel.org,
+ linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org,
+ linux-xfs@vger.kernel.org, amir73il@gmail.com, zlang@redhat.com
+References: <cover.1779367627.git.asj@kernel.org>
+ <1c60be06ce79778404079c8b1c1d2e09f64cb38e.1779367627.git.asj@kernel.org>
+ <ahP1tCc81ascjwxJ@infradead.org>
+ <edadc872-5796-4cff-934b-cee66fde79d2@gmail.com>
+ <ahU9hpwrXyZChw9X@infradead.org>
+Content-Language: en-US
+From: Anand Jain <anajain.sg@gmail.com>
+In-Reply-To: <ahU9hpwrXyZChw9X@infradead.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-[HIDDEN BUG]
-There is a btrfs bug that will only trigger on newly formated TEST_DEV,
-with mount option "nodatasum":
 
- FSTYP         -- btrfs
- PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
- MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
- MOUNT_OPTIONS -- -o nodatasum /dev/mapper/test-scratch1 /mnt/scratch
 
- generic/362  0s ... - output mismatch (see /home/adam/xfstests/results//generic/362.out.bad)
-     --- tests/generic/362.out	2024-08-24 15:31:37.200000000 +0930
-     +++ /home/adam/xfstests/results//generic/362.out.bad	2026-05-26 16:24:40.201201849 +0930
-     @@ -1,2 +1,3 @@
-      QA output created by 362
-     +First write failed: Input/output error
-      Silence is golden
-     ...
-     (Run 'diff -u /home/adam/xfstests/tests/generic/362.out /home/adam/xfstests/results//generic/362.out.bad'  to see the entire diff)
+On 26/5/26 14:28, Christoph Hellwig wrote:
+> On Mon, May 25, 2026 at 04:35:58PM +0800, Anand Jain wrote:
+>>> Also any reason to rely on the obsolete inotify instead of fsnotify?
+>>
+>> fsnotify is exercised in patch 4/10.
+>> IMO, exercising inotify ensures we don't break legacy stuff.
+> 
+> fanotity and inotify use exactly the same backends, so I'm not sure
+> why testing both matters. 
 
-But if one has formated TEST_DEV, run test with default mount option,
-then change the mount option to "nodatasum", the test will not fail
-anymore:
+I noticed that back then I decided to keep both.
+Since fsnotifywait -F is only supported from kernel 5.1x.
+inotifywait serves the legacy LTS kernels where required.
 
- FSTYP         -- btrfs
- PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
- MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
- MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
 
- generic/362  0s ...  0s
- Ran: generic/362
- Passed all 1 tests
+> Not that I care very strongly, I'm just a
+> bit confused.
 
- FSTYP         -- btrfs
- PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
- MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
- MOUNT_OPTIONS -- -o nodatasum /dev/mapper/test-scratch1 /mnt/scratch
+I am happy dropping inotifywait if unnecessary and confusing.
 
- generic/362  0s ...  0s
- Ran: generic/362
- Passed all 1 tests
-
-[CAUSE]
-Btrfs' nodatasum mount option only affect new files, but the test case
-itself is using TEST_DEV, and never delete the file
-"$TEST_DIR/dio-append-buf-fault"
-
-So if the file is created with default mount option, then all later
-"nodatasum" mount option will not affect that file, thus hide the test
-failure.
-
-[FIX]
-Always delete the target file "$TEST_DIR/dio-append-buf-fault" before
-running dio-append-buf-fault command.
-
-So that the new target file is always newly created and will follow
-btrfs' new mount option and expose the failure for nodatasum.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
-I'm already looking into the test failure, because it's mostly hidden by
-the btrfs' falling back to buffered IO behavior.
-
-With the incoming IOMAP_DIO_BOUNCE usage inside btrfs, it will expose
-the failure unconditionally.
----
- tests/generic/362 | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/tests/generic/362 b/tests/generic/362
-index 0cfaa726..86191e57 100755
---- a/tests/generic/362
-+++ b/tests/generic/362
-@@ -20,6 +20,10 @@ _require_test_program dio-append-buf-fault
- _fixed_by_fs_commit btrfs 939b656bc8ab \
- 	"btrfs: fix corruption after buffer fault in during direct IO append write"
- 
-+# Remove the existing file, so a new inode can be created, and will be
-+# affected by changed mount options.
-+rm -rf $TEST_DIR/dio-append-buf-fault
-+
- # On error the test program writes messages to stderr, causing a golden output
- # mismatch and making the test fail.
- $here/src/dio-append-buf-fault $TEST_DIR/dio-append-buf-fault
--- 
-2.51.2
-
+Thanks.
