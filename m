@@ -1,111 +1,66 @@
-Received: from mail-pj1-f51.google.com (mail-pj1-f51.google.com [209.85.216.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 615B63E3C75
-	for <fstests@vger.kernel.org>; Mon, 25 May 2026 08:36:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8ECC53B95F8;
+	Tue, 26 May 2026 06:28:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779698163; cv=none; b=R/hUVUtC5vvgAsfztcM2uWv/s8PtCBtwS4pfVmkW74FcTfX026oLy+v8gIpMZcrtxvNawXrECkjBoyGAoThtX3phe/556s1ByKWO27A3XnfqTCRsAG/KdUmh5rtpPjmdDMB2JSB03FvRzz8bAbt8c4b/wdK4GucsLYNDP/IdhTE=
+	t=1779776906; cv=none; b=gcvN9g7lPn+gy7iJSFwdebaiD+NycUYGh5+JG5zt36uvS6J92dczK0DyXEbLXyKEPcFCHCQI5nJS4zKmC9B2IPULLWpqFS1Hm/xcOMxkQ2oNOdd1GGOJWCmRG49OnzEbmCDjUT477PZgel8Q5wnP1RYSzuP+4fhR9fpDnqe2b0E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779698163; c=relaxed/simple;
-	bh=SzJYw18c8BFlSFH74k1KqMsOQhyX6MjkoMGycJDbafw=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=mIEfwIyV6Crj77gO1z1SgkOZY5MWDaUL/tbghyYYQKgMvAHImv3MBGaGRsDUZLj4KQui1bVwQ+q/wnBWC6X9sA5IihxU29FjVv002EHVZqMqtohU9l7g0WsMv4Ls0/LNj/W9eJ1y2KkzNBvH2VpQdDrYMTa9NVGb1VL0gs6j3AA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Fc4hHQBg; arc=none smtp.client-ip=209.85.216.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1779776906; c=relaxed/simple;
+	bh=eJ7jRwehY73ImatYjxu/aEAlJNNAbkN9PtVeqywRRB4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=k4eoE/OHmeIiOQUQkrh7HThnd4dNXNgF4yPeaexRiF063G7YWFnEAjf95UUeuyXS790jAFhI6vx4Rpo0m/BlaTdWaWCnNj+mcuBiA8xxBbIemIUjEPEw0TovVq7i0/vDUPmy2hWs4/ZcJs3A3UE/INN48xV53gfTwbC7oT1cIN0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=44e8K56X; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Fc4hHQBg"
-Received: by mail-pj1-f51.google.com with SMTP id 98e67ed59e1d1-366be8040a9so3975001a91.3
-        for <fstests@vger.kernel.org>; Mon, 25 May 2026 01:36:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1779698161; x=1780302961; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=BntzIZqQfdxwPhWe8imRD5hr3gowJvdxsKaf3qs8y5Q=;
-        b=Fc4hHQBg3vQt7GCA/rr5d/bwuyuv2nOr10SamRzripUmTPg2/abdoFZtOQxeKPoV2K
-         ZlUytxNVjrhTBR+Bu7Q3oaAJLqDXdpgcKayc/6mKSCbFIIr19j3bsusZPN5a51xOZfix
-         1Ci+qxQAgf7526AW7Kp8HHguTDYW2zMlgr5wBZ6P+h/XoG2ddX11LSLBHyVQtv5uvTxt
-         O4pDWDMTiiTVdR2KzVu61mz08we1yuS0uuuYG7uZTqWKSRHcXtVirXKFvYM6uh0zx/VT
-         bswxUsMYSoI0iscKBnbmPhtVF+O9Kwea1f4Dqgcsfu/83+yBA8wUD67ZNoircNcd7mu2
-         H6nw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779698161; x=1780302961;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=BntzIZqQfdxwPhWe8imRD5hr3gowJvdxsKaf3qs8y5Q=;
-        b=DXLx1tnySoGioVsvDKWi+XjaKnbct10vgRX6dzFszW5UtpDpNZbEhp4koXsayhXZic
-         qKypvz51gbCtICesZ9xZIVEF2ywOqwH+vsip3pETCeMYJhSBaPS8OsVpI5plXjfJPIx6
-         o01qnOlYUOGoZwk3n+czzJPNzBKc8a2QrDJ2hO+uY83/U8HJ30lOF+t/p9OWne97LGer
-         7W3LPnowP4AO/j1cyerLCgdatlCSmbLKIf9cPCSWLUHeWdnCgkC5vUdS6WR/RGj00s/p
-         cLl2piaWJZAHI/l0NV89plala3o64aXIUWMj1Vghbcb7ufm5d4ExvPDyjL/oFtMiYNQ1
-         WoeQ==
-X-Gm-Message-State: AOJu0YxuZVkainlJ3y9gh6QoUMfDQZLcf6Q6FVBfjRaKMTHX6INRKGao
-	gsKvL4VF12mJIVIyzK5ILx1OKjP1/pgpvyW9VUR3qPC+3o9H4Bkr0IYG
-X-Gm-Gg: Acq92OFfe28H3CQt9MY8tBrY85m9LcQ6l4X6V+hh7rTEDX6A2Be4qdgSRzrI527iCsT
-	AKHy9cEW9SZBneVFeHpnJcOtgDqUH3rinbZzl/kKckGhf+n6hA55hxiZtAk9bSQa1Pth2MuJWl3
-	4/xcPePxRkORlyrWITOpe/+Z551gxvpq8HdT87BUu0rCPgUnohBPsLkxz1PWFHPDSJZWHGDQE99
-	E4CrVjRLFsV+AEA3zgBH0g3uuls2z7TzMPxqxBhKOrAmk4yNbaCbM4PXKDL9vk8Kc5aNEJUst5x
-	VVpspbvoDAHonHRW04og5D690PiLyCoUOk7RKiqFlKe/Hj51yRC738k3f7ll3EguQyHbNH2sqIT
-	MBb7hC8EsON2fGaTI4/ws1Yc9tJvhcWMGJ9pPQNJ8Ow6mz2O81OEplpgajMv7rLdMSbah7WfnMn
-	EOFiTob99ka+7G9zaAmFyNcq9ULgw=
-X-Received: by 2002:a17:903:1acd:b0:2b9:f59e:aca5 with SMTP id d9443c01a7336-2beb07eac66mr130317725ad.39.1779698161604;
-        Mon, 25 May 2026 01:36:01 -0700 (PDT)
-Received: from [192.168.50.90] ([116.87.14.48])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2beb58b3bb6sm89301805ad.47.2026.05.25.01.35.59
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 25 May 2026 01:36:01 -0700 (PDT)
-Message-ID: <edadc872-5796-4cff-934b-cee66fde79d2@gmail.com>
-Date: Mon, 25 May 2026 16:35:58 +0800
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="44e8K56X"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=xNnhllXN4PH1PswmwIq+byFVY0ywT1w/V53Mn+v+WME=; b=44e8K56XCbSzl9XMYBQBY825Vr
+	Rg9NFcfIL43/WxtRvCAoufWkGF9IWtVVWufHwA58SFNZg0svF8KrVO7Gkr0fN2rM5TqPjR84UWmHP
+	wdVWRfvZ74ad4XNAMQ1/VYb8ov+VUR0SG8nQN1rVODEgntDLHaXe+acrKQhTdIu5jfIDh2+4uxxe6
+	9b665vhyJMBSq0kT8GNuFt8cjTqoqAUWzUe1++evbfOTntPBLRSTAbjKrIMM/i639htOtr4Ett6fQ
+	cvHDmv2Q10owx/Qc2r6fFkasj9dV2kuuvlfBe6KPy0Kn6zxs7lCKDP6+otJcLs7rkx2zakdc6X8+D
+	f6oWgP1w==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
+	id 1wRlH4-00000001ANo-3qjV;
+	Tue, 26 May 2026 06:28:22 +0000
+Date: Mon, 25 May 2026 23:28:22 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: Anand Jain <anajain.sg@gmail.com>
+Cc: Christoph Hellwig <hch@infradead.org>, Anand Jain <asj@kernel.org>,
+	fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
+	amir73il@gmail.com, zlang@redhat.com
+Subject: Re: [PATCH v5 03/10] fstests: add test for inotify isolation on
+ cloned devices
+Message-ID: <ahU9hpwrXyZChw9X@infradead.org>
+References: <cover.1779367627.git.asj@kernel.org>
+ <1c60be06ce79778404079c8b1c1d2e09f64cb38e.1779367627.git.asj@kernel.org>
+ <ahP1tCc81ascjwxJ@infradead.org>
+ <edadc872-5796-4cff-934b-cee66fde79d2@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 03/10] fstests: add test for inotify isolation on
- cloned devices
-To: Christoph Hellwig <hch@infradead.org>, Anand Jain <asj@kernel.org>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
- linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org, amir73il@gmail.com,
- zlang@redhat.com
-References: <cover.1779367627.git.asj@kernel.org>
- <1c60be06ce79778404079c8b1c1d2e09f64cb38e.1779367627.git.asj@kernel.org>
- <ahP1tCc81ascjwxJ@infradead.org>
-Content-Language: en-US
-From: Anand Jain <anajain.sg@gmail.com>
-In-Reply-To: <ahP1tCc81ascjwxJ@infradead.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <edadc872-5796-4cff-934b-cee66fde79d2@gmail.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-
-
-On 25/5/26 15:09, Christoph Hellwig wrote:
->> diff --git a/common/config b/common/config
->> index 4fd4c2c8af11..605a57947a40 100644
->> --- a/common/config
->> +++ b/common/config
->> @@ -242,6 +242,7 @@ export BTRFS_MAP_LOGICAL_PROG=$(type -P btrfs-map-logical)
->>  export PARTED_PROG="$(type -P parted)"
->>  export XFS_PROPERTY_PROG="$(type -P xfs_property)"
->>  export FSCRYPTCTL_PROG="$(type -P fscryptctl)"
->> +export INOTIFYWAIT_PROG="$(type -P inotifywait)"
+On Mon, May 25, 2026 at 04:35:58PM +0800, Anand Jain wrote:
+> > Also any reason to rely on the obsolete inotify instead of fsnotify?
 > 
-> Usually we try to split infrastructure changes like this out into
-> separate patches.
+> fsnotify is exercised in patch 4/10.
+> IMO, exercising inotify ensures we don't break legacy stuff.
 
-Right. I'll split it into a separate patch.
-
-> Also any reason to rely on the obsolete inotify instead of fsnotify?
-
-fsnotify is exercised in patch 4/10.
-IMO, exercising inotify ensures we don't break legacy stuff.
-
-In general, is it fine to keep obsolete command/testcase from
-an LTS kernel perspective? We did that a couple of times before.
-
+fanotity and inotify use exactly the same backends, so I'm not sure
+why testing both matters.  Not that I care very strongly, I'm just a
+bit confused.
 
