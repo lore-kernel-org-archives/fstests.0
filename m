@@ -1,45 +1,60 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 032012FE566;
-	Thu, 28 May 2026 04:06:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 171713446C9
+	for <fstests@vger.kernel.org>; Thu, 28 May 2026 06:59:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779941197; cv=none; b=dcrGSRwNF08xOcPtcdCGYmVGnC0VUQnMaoUuOOMwJAkv6oC7TYRLQScOOmRW2vJZ6xd+qmebqd8PBpz+lji2gNUlUuLVPv5dt7uzSfA9Xb8f33EXZzdvTZXkQPFtnnUF5hkxgKUDZB76FDNKiHn3C0HP9qonuLplQEKnGqGKKZM=
+	t=1779951546; cv=none; b=Ff+VIKYKe3V5ipM8DR1Vsvdyq6ciBALbQRQnosPmFA5tCLXqUDwJk+DT0veDqES9CC914yz6a7YgDci6LqbhE1nMZCKTQHxoGqp9qmVpYzRp9yYBpzz7mwj1vHMvd/Fps7D6iwL4nXkIw+lFuaWERxGeNFPvjkzlsLX+R1FbY7A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779941197; c=relaxed/simple;
-	bh=T3y5Ubl6Z8Tp6IEXPJe2DFjhXXWg7Gvm+jZyW2VSeYc=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=HoUlTEIu/cJHkFLN5FExrzMBKcSc5j7qas3qzpduP7WmFC7wKzNMzvm7akWwhwsTKY9bBLBw7WcHdA53HjW+GPgQkcd0Pvw/emBUV0aBPyBX5aarbrqwjEJR7ifS1ZXPAcw4I2zvLHe9X0bxXFVRvTabf9bfL7T+Ay0HyUfREzQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gzYvDBOU; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1779951546; c=relaxed/simple;
+	bh=Jm4qhX9SGGS1geR6QFSqdq4CN0moJFebFN6nBm+mrwY=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=G23Cpz/o3qxczAQ/z0l4QVYCVwfT2mthc7aZ/2QvsIvgr4VeY0+nXNTEnCD5Q+3kTk+V8JHpH6VIm59aobUfoWCOu87ACcZC0xjMm8FXbFmQ5LjRwIgf9wzOpsOPncwmPmOAR8ko7+QyQzysvLL+bWERZysNPALF3f1LPGV5cuk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=j5OSi/F7; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=j5OSi/F7; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gzYvDBOU"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 053371F00A3A;
-	Thu, 28 May 2026 04:06:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1779941195;
-	bh=kB/sRmK5BV5dTZE/cUtAhVaEQ2ruW0M5KZKPeAAY27g=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=gzYvDBOUQ0T1gYNMYXkfyeC42OZ03c2+jbrlcPl/EVsAlgzaLEXR+YLDkXdx0ssqn
-	 XIyV6I+g0V2VirbeQNOWCNX285oA7CKMkGKJ0gJJeWsw2uDD01clR0yreyBgKZ3luw
-	 9aZY5cGUogShv9kifCaskMwKnim3dixTleMzTz2HDyaixSWW8TcIQdxyYFWnxrABeP
-	 LIN1fqNjmGCEntrogjJjNa5FUp77JV4lj5kiGUzHdmDXrrceIS9yMnRRiMSQTmMn2s
-	 Jcyk8Mfev6g4AdOBdndTb+354j0wHSJsNN8O0Md69vYYXEV4MYXr1k4fkDQM2Ejlic
-	 1IkAIFjCadmoQ==
-From: Anand Jain <asj@kernel.org>
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net,
-	zlang@redhat.com,
-	hch@infradead.org
-Subject: [PATCH v6 11/11] fstests: test UUID consistency for clones with metadata_uuid
-Date: Thu, 28 May 2026 12:05:42 +0800
-Message-ID: <7937f3961e03df55fb358a114dc67cfca3fa5f33.1779939330.git.asj@kernel.org>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <cover.1779939330.git.asj@kernel.org>
-References: <cover.1779939330.git.asj@kernel.org>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="j5OSi/F7";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="j5OSi/F7"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 60D0B6AFA5;
+	Thu, 28 May 2026 06:59:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1779951543; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=G/ZSdxSAZ7ER7yPRGPlO+GmeH383Lhf2G4+6dO1nhGU=;
+	b=j5OSi/F7eCy6M+U7IqFIMcvgFNaH6VrT8SCDMEXYYX2NPzjUsQVFGsh8/M9xPr4Je7I3g5
+	1iZCyLFucfrY3vdaAg2D48VTHF7Wij892GPmxl60UIgKUI2zpJztXLbzSE3tS8boka61TD
+	bB5Omt/DYHkhpUwhE1/84webRrW3yqk=
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1779951543; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=G/ZSdxSAZ7ER7yPRGPlO+GmeH383Lhf2G4+6dO1nhGU=;
+	b=j5OSi/F7eCy6M+U7IqFIMcvgFNaH6VrT8SCDMEXYYX2NPzjUsQVFGsh8/M9xPr4Je7I3g5
+	1iZCyLFucfrY3vdaAg2D48VTHF7Wij892GPmxl60UIgKUI2zpJztXLbzSE3tS8boka61TD
+	bB5Omt/DYHkhpUwhE1/84webRrW3yqk=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 663BD5AC62;
+	Thu, 28 May 2026 06:59:02 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id trObCrbnF2pqLwAAD6G6ig
+	(envelope-from <wqu@suse.com>); Thu, 28 May 2026 06:59:02 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org
+Subject: [PATCH] fstests: remove dio related target file to respect mount options that only affecst new inodes
+Date: Thu, 28 May 2026 16:28:44 +0930
+Message-ID: <20260528065844.71952-1-wqu@suse.com>
+X-Mailer: git-send-email 2.54.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -47,135 +62,180 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Spam-Flag: NO
+X-Spam-Score: -2.80
+X-Spam-Level: 
+X-Spamd-Result: default: False [-2.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	RCPT_COUNT_TWO(0.00)[2];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.com:email,suse.com:mid];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_TLS_ALL(0.00)[]
 
-Btrfs and xfs uses the metadata_uuid superblock feature to change the
-on-disk UUID without rewriting every block header. This patch adds a
-sanity check to ensure UUID consistency when a filesystem with
-metadata_uuid enabled is cloned.
+[BUG]
+Test case generic/362 and generic/365 will fail with nodatasum, but
+that's only when TEST_DEV is newly formated.
 
-Signed-off-by: Anand Jain <asj@kernel.org>
+ FSTYP         -- btrfs
+ PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
+ MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
+ MOUNT_OPTIONS -- -o nodatasum /dev/mapper/test-scratch1 /mnt/scratch
+
+  generic/362  0s ... - output mismatch (see /home/adam/xfstests/results//generic/362.out.bad)
+    --- tests/generic/362.out	2024-08-24 15:31:37.200000000 +0930
+    +++ /home/adam/xfstests/results//generic/362.out.bad	2026-05-28 16:18:33.866141979 +0930
+    @@ -1,2 +1,3 @@
+     QA output created by 362
+    +First write failed: Input/output error
+     Silence is golden
+    ...
+    (Run 'diff -u /home/adam/xfstests/tests/generic/362.out /home/adam/xfstests/results//generic/362.out.bad'  to see the entire diff)
+
+  generic/364  11s ... - output mismatch (see /home/adam/xfstests/results//generic/364.out.bad)
+    --- tests/generic/364.out	2024-09-30 09:09:51.216666681 +0930
+    +++ /home/adam/xfstests/results//generic/364.out.bad	2026-05-28 16:18:34.318532257 +0930
+    @@ -1,2 +1,3 @@
+     QA output created by 364
+    +Fsync failed: Input/output error
+     Silence is golden
+    ...
+    (Run 'diff -u /home/adam/xfstests/tests/generic/364.out /home/adam/xfstests/results//generic/364.out.bad'  to see the entire diff)
+
+But if one has formated TEST_DEV, run test with default mount option,
+then change the mount option to "nodatasum", the test will not fail
+anymore:
+
+ FSTYP         -- btrfs
+ PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
+ MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
+ MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
+
+ generic/362  0s ...  1s
+ generic/364  11s ...  10s
+ Ran: generic/362 generic/364
+ Passed all 2 tests
+
+ FSTYP         -- btrfs
+ PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
+ MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
+ MOUNT_OPTIONS -- -o nodatasum /dev/mapper/test-scratch1 /mnt/scratch
+
+ generic/362  1s ...  0s
+ generic/364  10s ...  11s
+ Ran: generic/362 generic/364
+ Passed all 2 tests
+
+[CAUSE]
+Btrfs' nodatasum mount option only affect new files, but the test cases
+are using TEST_DEV, and never delete the target files
+"$TEST_DIR/dio-append-buf-fault" for generic/362 and
+"$TEST_DIR/dio-write-fsync-same-fd" for generic/364.
+
+So if the files are created with default mount option, then all later
+"nodatasum" mount option will not affect those files, thus hide the test
+failure.
+
+[FIX]
+For all test cases utilizing "$here/src/dio*", add a _cleanup()
+function, to remove target files, so that for mount options that only
+affect new inodes, the mount options will be respected, and expose
+failures.
+
+Now generic/36[24] will properly fail for "nodatasum" mount option on
+btrfs.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- tests/generic/806     | 84 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/806.out | 19 ++++++++++
- 2 files changed, 103 insertions(+)
- create mode 100644 tests/generic/806
- create mode 100644 tests/generic/806.out
+ tests/generic/362 | 6 ++++++
+ tests/generic/364 | 7 +++++++
+ tests/generic/418 | 7 +++++++
+ tests/generic/708 | 6 ++++++
+ 4 files changed, 26 insertions(+)
 
-diff --git a/tests/generic/806 b/tests/generic/806
-new file mode 100644
-index 000000000000..801671fb9ce9
---- /dev/null
-+++ b/tests/generic/806
-@@ -0,0 +1,84 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Anand Jain <asj@kernel.org>.  All Rights Reserved.
-+#
-+# FS QA Test 806
-+#
-+# Verify that the cloned filesystem UUID remains consistent, even when the
-+# `metadata_uuid` feature is enabled.
-+#
-+
-+. ./common/preamble
-+. ./common/filter
-+
-+_begin_fstest auto quick mount clone
-+
-+_require_test
-+_require_block_device $TEST_DEV
-+_require_loop
-+
+diff --git a/tests/generic/362 b/tests/generic/362
+index 0cfaa726..5e8fd534 100755
+--- a/tests/generic/362
++++ b/tests/generic/362
+@@ -10,6 +10,12 @@
+ . ./common/preamble
+ _begin_fstest auto quick
+ 
 +_cleanup()
 +{
 +	cd /
-+	rm -r -f $tmp.*
-+	umount $mnt1 $mnt2 2>/dev/null
-+	_loop_image_destroy "${devs[@]}" 2> /dev/null
++	rm -f "$TEST_DIR/dio-append-buf-fault"
 +}
 +
-+filter_pool()
+ # NFS forbade open with O_APPEND|O_DIRECT
+ _exclude_fs nfs
+ 
+diff --git a/tests/generic/364 b/tests/generic/364
+index f7fb002f..6587cf02 100755
+--- a/tests/generic/364
++++ b/tests/generic/364
+@@ -11,6 +11,13 @@
+ . ./common/preamble
+ _begin_fstest auto quick
+ 
++_cleanup()
 +{
-+	sed -e "s|${devs[0]}|DEV1|g" -e "s|${mnt1}|MNT1|g" \
-+	    -e "s|${devs[1]}|DEV2|g" -e "s|${mnt2}|MNT2|g" | _filter_spaces
++	cd /
++	rm -f "$TEST_DIR/dio-write-fsync-same-fd"
 +}
 +
-+# Collect and print device resolution properties across user-space tools
-+print_info()
++
+ _require_test
+ _require_odirect
+ _require_test_program dio-write-fsync-same-fd
+diff --git a/tests/generic/418 b/tests/generic/418
+index 36789198..024c4682 100755
+--- a/tests/generic/418
++++ b/tests/generic/418
+@@ -26,6 +26,13 @@ _require_block_device $TEST_DEV
+ _require_test_program "dio-invalidate-cache"
+ _require_test_program "feature"
+ 
++_cleanup()
 +{
-+	local mntpt=$1
-+	local tgt=$(findmnt -no SOURCE $mntpt)
-+	local fsuuid=$(blkid -s UUID -o value $tgt)
-+
-+	echo "mntpt=$mntpt tgt=$tgt fsuuid=$fsuuid" >> $seqres.full
-+	echo
-+	findmnt -o SOURCE,TARGET,UUID "$tgt" | tail -n +2 | \
-+				sed -e "s/${fsuuid}/FSUUID/g" | filter_pool
-+	awk -v dev="$tgt" '$1 == dev { print $1, $2 }' /proc/self/mounts | \
-+								filter_pool
-+	df --all --output=source,target "$tgt" | tail -n +2 | filter_pool
++	cd /
++	rm -f $tmp.*
++	rm -f "$testfile"
 +}
 +
-+# Create base loop device and its clone, applying the metadata_uuid tuning
-+# callback to the base filesystem before the copy occurs.
-+devs=()
-+_loop_image_create_clone devs _change_metadata_uuid
-+mkdir -p $TEST_DIR/$seq
-+mnt1=$TEST_DIR/$seq/mnt1
-+mnt2=$TEST_DIR/$seq/mnt2
-+mkdir -p $mnt1
-+mkdir -p $mnt2
+ diotest=$here/src/dio-invalidate-cache
+ testfile=$TEST_DIR/$seq-diotest
+ sectorsize=`$here/src/min_dio_alignment $TEST_DIR $TEST_DEV`
+diff --git a/tests/generic/708 b/tests/generic/708
+index 827dac13..cdaad811 100755
+--- a/tests/generic/708
++++ b/tests/generic/708
+@@ -14,6 +14,12 @@
+ . ./common/preamble
+ _begin_fstest quick auto mmap
+ 
++_cleanup()
++{
++	cd /
++	rm -f "$src" "$dst"
++}
 +
-+# Mount both clone and baseline
-+_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[0]} $mnt1 || \
-+						_fail "Failed to mount dev1"
-+_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
-+						_fail "Failed to mount dev2"
-+
-+print_info $mnt1
-+print_info $mnt2
-+
-+# Cycle mounts and reverse the initialization order to ensure UUID tracking
-+# doesn't mismatch or flip when metadata_uuid optimization is active.
-+echo
-+echo "**** mount cycle ****"
-+_unmount $mnt1
-+_unmount $mnt2
-+_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
-+						_fail "Failed to mount dev2"
-+_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[0]} $mnt1 || \
-+						_fail "Failed to mount dev1"
-+
-+print_info $mnt1
-+print_info $mnt2
-+
-+status=0
-+exit
-diff --git a/tests/generic/806.out b/tests/generic/806.out
-new file mode 100644
-index 000000000000..7315e791ba51
---- /dev/null
-+++ b/tests/generic/806.out
-@@ -0,0 +1,19 @@
-+QA output created by 806
-+
-+DEV1 MNT1 FSUUID
-+DEV1 MNT1
-+DEV1 MNT1
-+
-+DEV2 MNT2 FSUUID
-+DEV2 MNT2
-+DEV2 MNT2
-+
-+**** mount cycle ****
-+
-+DEV1 MNT1 FSUUID
-+DEV1 MNT1
-+DEV1 MNT1
-+
-+DEV2 MNT2 FSUUID
-+DEV2 MNT2
-+DEV2 MNT2
+ _fixed_by_fs_commit btrfs b73a6fd1b1ef \
+ 		"btrfs: split partial dio bios before submit"
+ 
 -- 
-2.43.0
+2.51.2
 
