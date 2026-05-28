@@ -1,212 +1,89 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f175.google.com (mail-pf1-f175.google.com [209.85.210.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A7B53B9D9E
-	for <fstests@vger.kernel.org>; Thu, 28 May 2026 11:31:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2773136B048
+	for <fstests@vger.kernel.org>; Thu, 28 May 2026 23:31:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779967879; cv=none; b=iHkJuGdrYAUtEppGtG1/CI8K2mEbQoLgo36zJHsMNyas5zAKRlL1iSPmEzK4s6DB/PnZfh23ACVJward1OHLr6Pc7H6V7aFTJNCZhr58nCJsm96kuD9zu+4JLXUu+RH1yOzTuSSEXxMa6/gXFuU/zUoVACuShKZf9+krB18Pf8M=
+	t=1780011092; cv=none; b=qk9ihznxfE1roqctAsqeCTfkPkekFUas5d6BNfM9bRQtJY+a9PwHgj/g63ihXKPw5Z5t5+mok7JvEWaqYXfvvoQ1OFN4m8WoSr4wc0qGSasJGp8gTYcodj5kMMlt1Udi6h6COVXJ73GO18LUeRGmMb1a8OSYsadQkEI+m7XSfPc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779967879; c=relaxed/simple;
-	bh=lXRwUibaixZ04dknzbmpynJGxvM8Ng09hjadvQ3OcE8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=MVkbD43qYEIaHxGQD7eLQ+4TIFy4RFqfpIkMSVb266108O0pp1ctB+F+q+64bgPE97h+rx0k6ttv/Xzofq5Vj4WA/HqfB5IICnCb6yNSSRBIueT79tEloMmeSwdJh0Qslhdqm1l2iTcmTkZzVz+vJM5gkmoI5QiC3xaMpdNKas0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=A9tXhk/6; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1780011092; c=relaxed/simple;
+	bh=lqxv8nVHPEdwe2QwwpE33htDLQMxjsFPk2OHMI4P2Sg=;
+	h=From:Message-ID:Date:MIME-Version:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=hfBddnFxrfWThwE+24UOxBQ40vfs6xp2jigEk5KIJiUqr5rclAWb3JrxRD4xZB5g78tC68Ui8IE3sjdbEOrQV6BEwaGoCKZtUHSeGIcpBh1j3SJSoxZJ+yKDpSmdENBcyNdHWjSBIc5bh0wnGDvAswzYEkxkuZcPTIZyuwyh6v4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kO1zR5SL; arc=none smtp.client-ip=209.85.210.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="A9tXhk/6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5585E1F000E9
-	for <fstests@vger.kernel.org>; Thu, 28 May 2026 11:31:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1779967878;
-	bh=Efks/I89hcEG86IYjQdkKm7jS2iXGDq3+U6eCfpK8eg=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=A9tXhk/6zRzAzZ3ZlYPI6NfH7r/tLEjyA6DIh5g0fee70LayAE9redwtk8MXRLKpd
-	 iZzII7MCTq2H9i80YZfEfhtz14rUE6A7If9bWjoTsX8tb8oUHfvKuQ87ekfJohOHST
-	 CQJ44syXAMsxPrbDksPAUT6KO5lNd+sqixhnpTDF64VCrwU7DeqR/+g7w5Dnzal1bA
-	 ZpruWSF32pkV/cUdtjt+j11zhrHOwKm9qYk3pHjv8jC4Zq7TFXp3CqjHLVDaZ0wnbY
-	 dTuPv9ZCNTnjdS/iz8p6ohJDuOPVgGkG2KwrBBdAaBbH7nGYg2bIngCb7PIKA7tJrU
-	 EesGnZ33GtOtw==
-Received: by mail-ej1-f42.google.com with SMTP id a640c23a62f3a-bd11a3729e8so1968482166b.0
-        for <fstests@vger.kernel.org>; Thu, 28 May 2026 04:31:18 -0700 (PDT)
-X-Gm-Message-State: AOJu0YzwkwvXswO/NsJ92Xl2tK7CoIVKj5wTyfUq4Cd6VqGPUp2MB1//
-	qIlCT5pV1oRXNZKQDIu1ymYVcO2z/fWIUf2TDuEs+eKK9orMTThHwa5pGVMnxbcfXrlftMWdoZx
-	meObaR99MT2YNxfCI8lrGuM+0blZOH1c=
-X-Received: by 2002:a17:907:266d:b0:bd9:23c:8ca9 with SMTP id
- a640c23a62f3a-bdd25ce18d4mr1189097066b.28.1779967876916; Thu, 28 May 2026
- 04:31:16 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kO1zR5SL"
+Received: by mail-pf1-f175.google.com with SMTP id d2e1a72fcca58-841882f8f4bso2331770b3a.0
+        for <fstests@vger.kernel.org>; Thu, 28 May 2026 16:31:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1780011090; x=1780615890; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:reply-to:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=lqxv8nVHPEdwe2QwwpE33htDLQMxjsFPk2OHMI4P2Sg=;
+        b=kO1zR5SLHrqM7dLUL4kBg3HB4HhvocZhBEAk6jjGwvaxchGb3k3tS8QHnlS78MaJNk
+         SaOYLkQ3grAzMLMmvzi9E6ybzsGfc/WcA8qEI4UyfvNiHgCB+oOAMFiJrGSYopCEjgJY
+         d6wRPq8wpfnFR/aXjgnH79oZp3MWRiQSMZb0B2mnOmsEw/OsNRZgoK05Zc5REA+0Avu1
+         oX4N5SM35S9JvwbMd4TzKm4cp1uuPLq2FY2BPYzXKdM5RYMLoHzNHYOpB3sunyeLESk5
+         r+iAki/HOMSGiH08yh+1U87fzDYbgui23Gtqv+A/PmNdom3/r/8rKtGUiqF/+fKek0nn
+         /r8g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1780011090; x=1780615890;
+        h=content-transfer-encoding:in-reply-to:reply-to:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=lqxv8nVHPEdwe2QwwpE33htDLQMxjsFPk2OHMI4P2Sg=;
+        b=rWjNQAB/zQQ7QYziW/cr5JsyFfS00KIY539KRZQyf38TM/wZtmk4U/oGBfnS/0Jj/D
+         7JayejM9dv+bPyNdHNP/lDl5bg7eOuWhUcK6ZDP7+knAKqTCW6mvKu1BAT3hohgrwzrA
+         ZrLhX7Ac6XD1pA/bDglZcb6eMudemjjtjJ/NN3foQn6Dkbb44/SrKjG/KnqOxO+zi6Mg
+         gHnpY8WGtyinDOc/5b4o1m2qA0aK37oS8nCty+kk5vlfSToElSP+4TnVfWlmnyrzOoba
+         UDn4IAy5Nj7njPmKu1a01kfFo7JTS+VLC/F9tMH9jV9TK5dB477ULxXM2CmeialXag+U
+         2ILw==
+X-Forwarded-Encrypted: i=1; AFNElJ+RgBOJ3Tp2zlG2pLxom+9nMCSVXTeqX9o4IAi0ZzKNwgQcJF2TtY1KXTCuOVGwIGbi1jl1qgWY@vger.kernel.org
+X-Gm-Message-State: AOJu0YyAx2ItJ12pynIGek4R6akVaclt+lcYSxG3S82md2B2yUF8LUxI
+	T5bl4HI1AJQv89qIeprxiwR+qnFclxo+6eZL+Z+PgQl92xDbQGOhJJDQ11WXVA==
+X-Gm-Gg: Acq92OEXK1A9ShwDtfOemZ0bLZDa49fnRKcXSP6gnskV/5deYpvnbqtBLO4tI3bGHbl
+	raGOAYlsliEOLuY6Lr+NaPS3B9YMwmmRIz+Fpzl1xPc32yJQFhQ9tWtibiRRgIaH1wIg+Elfoul
+	pr26Ga+d3tuR64CKPLGPZL3/bzhqy902Q9qGGbNU5sIKaqtmKymo+Uz7kakOBXh0hFbB/1WKIPI
+	uNkZSj24M3yiKXblGB0auTd/DWXOvFjIDEVSHXNchhlbdmFcD/CvMkqucT/1ySs8TVt1MyW+Zwu
+	Tf+AAwe9yrhQI1pQl5q0IMJLgfbDSiFyFZDz9jCLJTpB0g9Z4IISQqPLrNOPsvCYaumNExsYAJm
+	YZFVuQxh2GiOdx+Um8wE+y0NX008d+MnwUxqXqdje2A77tDzrppd/zhSzkssAUcUfv89N7UGHLs
+	3oHBA2d+wKkfNzDPl4BQgmGhhy8TDEhjVKqBw0Y0Jc
+X-Received: by 2002:a05:6a00:3d07:b0:835:351c:f236 with SMTP id d2e1a72fcca58-84212ba1e7cmr295411b3a.29.1780011090452;
+        Thu, 28 May 2026 16:31:30 -0700 (PDT)
+Received: from [192.168.50.90] ([116.87.14.48])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-84213121564sm76760b3a.24.2026.05.28.16.31.28
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 28 May 2026 16:31:30 -0700 (PDT)
+From: Anand Jain <anajain.sg@gmail.com>
+X-Google-Original-From: Anand Jain <asj@kernel.org>
+Message-ID: <a690deac-20ee-4985-aee4-4cfd819fbd9b@kernel.org>
+Date: Fri, 29 May 2026 07:31:27 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <4b84813ed94332ccf8bb46848ed91f699d75794a.1779964012.git.fdmanana@suse.com>
- <c4b59c1c-1f2f-4d93-b710-eb44a8c5943f@gmx.com>
-In-Reply-To: <c4b59c1c-1f2f-4d93-b710-eb44a8c5943f@gmx.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Thu, 28 May 2026 12:30:39 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H4V8mcisQRkxAro1_w0h+WxqAkapnp9AbKed1geGw6gDQ@mail.gmail.com>
-X-Gm-Features: AVHnY4JcH2pgRIANkwIb3hstKuv1vs7zd_Zrv2K427e_RHYBCnGmA2yZocnokMk
-Message-ID: <CAL3q7H4V8mcisQRkxAro1_w0h+WxqAkapnp9AbKed1geGw6gDQ@mail.gmail.com>
-Subject: Re: [PATCH] generic: add a test case for writes with prealloc extents
- beyond i_size
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
-	Filipe Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2] fstests: remove dio related target file to respect
+ mount options that only affecst new inodes
+To: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org,
+ linux-btrfs@vger.kernel.org
+Cc: Filipe Manana <fdmanana@suse.com>
+References: <20260528111659.87113-1-wqu@suse.com>
+Content-Language: en-US
+Reply-To: asj@kernel.org
+In-Reply-To: <20260528111659.87113-1-wqu@suse.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Thu, May 28, 2026 at 12:23=E2=80=AFPM Qu Wenruo <quwenruo.btrfs@gmx.com>=
- wrote:
->
->
->
-> =E5=9C=A8 2026/5/28 19:57, fdmanana@kernel.org =E5=86=99=E9=81=93:
-> > From: Filipe Manana <fdmanana@suse.com>
-> >
-> > Test writing into a file range containing prealloc extents beyond the c=
-urrent
-> > i_size, with an unmount and mount after fallocate and the write, to ver=
-ify
-> > that the file data, size and extent layout were not lost.
-> >
-> > This used to fail on btrfs when not using the no-holes feature (which i=
-s
-> > a default since btrfs-progs 5.15) before this recent kernel fix:
-> >
-> >     080ecbd05432 ("btrfs: mark file extent range dirty after converting=
- prealloc extents")
-> >
-> > So in order to reproduce the failure when using an unpatched kernel and
-> > a btrfs-progs >=3D 5.15, one must run the test with:
-> >
-> >     MKFS_OPTIONS=3D"-O ^no-holes"
-> >
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
->
-> Reviewed-by: Qu Wenruo <wqu@suse.com>
->
->
-> Just one question related to the specified mkfs option.
->
-> As you mentioned, this bug is only affecting ^no-holes, thus default
-> mount option runs won't trigger it.
->
-> This makes me wondering, should we have a dedicated btrfs test case just
-> exercising the ^no-holes path.
->
-> I know this will cause duplication, thus will not be a good idea to
-> maintain, but we also have dedicated test cases utilizing specified
-> mount option/mkfs options already.
->
-> So what is the prefer method here?
 
-So in the past I attempted tests like that, making them btrfs specific
-and forcing a mount option.
-Some people (non-btrfs people, I don't recall exactly who, to be
-honest) disagreed with the claims that the test was actually generic,
-and that exercising the bug should be done by setting MKFS_OPTIONS in
-the command line.
+In the patch title s/affecst/affect/g
 
-I'm assuming people and our automations run tests with -O ^no-holes. I
-do it frequently in my test vms.
+Reviewed-by: Anand Jain <asj@kernel.org>
 
->
-> Thanks,
-> Qu
-> > ---
-> >   tests/generic/796     | 54 ++++++++++++++++++++++++++++++++++++++++++=
-+
-> >   tests/generic/796.out | 10 ++++++++
-> >   2 files changed, 64 insertions(+)
-> >   create mode 100755 tests/generic/796
-> >   create mode 100644 tests/generic/796.out
-> >
-> > diff --git a/tests/generic/796 b/tests/generic/796
-> > new file mode 100755
-> > index 00000000..c42a4722
-> > --- /dev/null
-> > +++ b/tests/generic/796
-> > @@ -0,0 +1,54 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 796
-> > +#
-> > +# Test writing into a file range containing prealloc extents beyond th=
-e current
-> > +# i_size, with an unmount and mount after fallocate and the write, to =
-verify
-> > +# that the file data, size and extent layout were not lost.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick prealloc preallocrw fiemap
-> > +
-> > +. ./common/filter
-> > +. ./common/punch # for _filter_fiemap
-> > +
-> > +_require_scratch
-> > +_require_xfs_io_command "falloc" "-k"
-> > +_require_xfs_io_command "fiemap"
-> > +
-> > +_fixed_by_fs_commit btrfs 080ecbd05432 \
-> > +     "btrfs: mark file extent range dirty after converting prealloc ex=
-tents"
-> > +
-> > +_scratch_mkfs >>$seqres.full 2>&1
-> > +_scratch_mount
-> > +
-> > +# The fiemap results in the golden output requires file allocations to=
- align to
-> > +# 1M boundaries.
-> > +_require_congruent_file_oplen $SCRATCH_MNT 1048576
-> > +
-> > +# Create our file with a size of 0 and a prealloc extent in the range =
-[0, 2M].
-> > +$XFS_IO_PROG -f -c "falloc -k 0 2M" $SCRATCH_MNT/foo
-> > +
-> > +# Unmount and mount again to remove any in memory state of the inode. =
-We will
-> > +# verify later that neither metadata nor extents were lost during unmo=
-unt.
-> > +_scratch_cycle_mount
-> > +
-> > +# Write into the [0, 1M] range, which increases the inode's i_size.
-> > +$XFS_IO_PROG -c "pwrite -S 0xab -b 1M 0 1M" $SCRATCH_MNT/foo | _filter=
-_xfs_io
-> > +
-> > +# Unmount and mount again to remove any in memory state of the inode. =
-We will
-> > +# verify later that neither metadata nor extents were lost during unmo=
-unt.
-> > +_scratch_cycle_mount
-> > +
-> > +# Check file data (and size).
-> > +echo "File data:"
-> > +_hexdump $SCRATCH_MNT/foo
-> > +
-> > +# Check we have unwritten extents in range [1M, 2M].
-> > +echo "Fiemap output:"
-> > +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foo | _filter_fiemap
-> > +
-> > +# Success, all done.
-> > +_exit 0
-> > diff --git a/tests/generic/796.out b/tests/generic/796.out
-> > new file mode 100644
-> > index 00000000..c6c6e6a8
-> > --- /dev/null
-> > +++ b/tests/generic/796.out
-> > @@ -0,0 +1,10 @@
-> > +QA output created by 796
-> > +wrote 1048576/1048576 bytes at offset 0
-> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > +File data:
-> > +000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab  >.............=
-...<
-> > +*
-> > +100000
-> > +Fiemap output:
-> > +0: [0..2047]: data
-> > +1: [2048..4095]: unwritten
->
