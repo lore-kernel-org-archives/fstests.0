@@ -1,166 +1,331 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qv1-f50.google.com (mail-qv1-f50.google.com [209.85.219.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AAC33438AE;
-	Fri, 29 May 2026 09:44:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 333603A63EF
+	for <fstests@vger.kernel.org>; Fri, 29 May 2026 19:27:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780047844; cv=none; b=VnmiQ5iaJ+q+fPVcBdRntBoFyieeMS4nSKuhnruBFoonxgeNRt0rOgH4WL9S7ztrF4tYUttTILrzSN3kC26ZR1n8Is3Pdw+YzAVHbZhDiKWenjhXulhzMObsgHLzaiHMF9123ubqWz/Gj7r4ozSegA8tbHLQvuGXQZLM3AtaabA=
+	t=1780082849; cv=none; b=GC5AlyACEFP1z1p++c94aTEM18jchKGLRN7BDkIi+PIAJwmAMdAXSdrVjgPJIWPpPL5uhRMNBRX9s1VXWv8Luh8J8UrmmBX4Hw20UBz+YVEIOR6Bp1IGTETO8iVBP2kDcYQQT1bI9ttHBnCR0oaKjbdCobfKz5+EVfNwA887YZE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780047844; c=relaxed/simple;
-	bh=db3FdRcbU1MEaFXIXjET/dr9/wZidQ6n79YDyRjybsg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ELyJYbkvkWKZGb8zo1j+52OGucidAQruXEhFiGjg0oVFja2tMN+lUU924YnjbpvLD9P1bIYDTSBgRntld379e28dVUMA8ygaGE/9Ez3DT6K7ut4uypo/R+lNh+xHznPPtjiGvDVOt7lWIlgQ1bBN70i0meF31JkvbQj1I3QBBLU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MvSSFBJj; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1780082849; c=relaxed/simple;
+	bh=gB1U8bKM/wiOIdkRr9Pd+jw+4hTWsXjbCn/1NejxI1s=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=nxmum/3DmHEAqAzoTKiwKt+0IzVA45mT39bZSru3Y1YLzl5wFesUp27qk12FIpHmBAMDUjZxxeM9lpp3igNr4jyftaHSwRjBy60NnzKe1N64H7GPl+sg2GluT8KJc0y097LUfnmxHmAB+siyPHhh9LdjNCa5WP0DRHiS96tX3lo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redpanda.com; spf=pass smtp.mailfrom=redpanda.com; dkim=pass (2048-bit key) header.d=redpanda.com header.i=@redpanda.com header.b=lGLmdkkV; arc=none smtp.client-ip=209.85.219.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redpanda.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redpanda.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MvSSFBJj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6BA7F1F00893;
-	Fri, 29 May 2026 09:44:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1780047843;
-	bh=sKnwz7Gm8Rh+uRM1r6Z5oSiz/RqFWDqG1PplxNq0KUk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=MvSSFBJjSsoJx34wZcC41qtz5kx5G7eXrJGoozB39zTZfFvYLSpuR36nwdqQbJak0
-	 3qK1oa7YX5Gzbz0eMyTHkDVBqOwv9PB+Zy0XWpU+UeyGh79kACr5SMNloU9lNlFFS7
-	 IsD+fTiOxfj8CBHJ9iMmu0qUfGZUbPRGfnMEnlxuxKLPCwNi4IqdQTfXd8RixSrlNH
-	 FH+sLeqewrmvWKlaVcR2X1uIoSYCLf6mVY87LDVv3S8NDSfSCOaiTMs2rrbUTf4sV+
-	 LjAgfL7yN3EkicyKVtNwfKcNHuJjvyjqNBujE3Vezz0eQh6uEPdcGcZisLJVLN23+8
-	 /csVCo6J+JmKw==
-Date: Fri, 29 May 2026 17:43:57 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH 2/2] xfs/21[67]: fix mkfs log concurrency detection
-Message-ID: <ahleJoQHhZpYwyJW@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>, 
-	fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>
-References: <20260520185202.GD9544@frogsfrogsfrogs>
- <20260520190112.GE9544@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=redpanda.com header.i=@redpanda.com header.b="lGLmdkkV"
+Received: by mail-qv1-f50.google.com with SMTP id 6a1803df08f44-8ccda0ac4fcso20417216d6.2
+        for <fstests@vger.kernel.org>; Fri, 29 May 2026 12:27:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redpanda.com; s=google; t=1780082847; x=1780687647; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=1T7lRX1vJ1Wj9JNwItxpA7mGR6CIeTgq8xgA3eOaQnM=;
+        b=lGLmdkkVigib5vd4v0G36O53/bNSBdZqSqiCGkwab+wzBTx7PnO7bkM1H6nuiKsamm
+         XDv2CuDfv4WOXZWNTUKRyyn73v1bEvUMTUbdikzMDDBpx6gfxst5uWWUCCw8awX3kGrJ
+         pesLvVWESyoBDNqc54zFC1YzDxP0PCRdnmoBZUwpQeXTOyGPdbT8r7UBhfRVZ9om37cI
+         lM3QeT0AxTcMKScT1tiCHVxAPFKb0sj1YXj9vkpkxJRKlk0FKc0mvib9WPwJYGAvQRs8
+         HfOO8UYHhd4aXkC/hRwHQsgnLB2hfkaK44R/svxI/T4m/GYgO02YNTl4MmOvT9wpJFiT
+         e1Ag==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1780082847; x=1780687647;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=1T7lRX1vJ1Wj9JNwItxpA7mGR6CIeTgq8xgA3eOaQnM=;
+        b=MMEOxRRLnWZDiYJ/UYfQJVXSbndCbquJ5RNpy1zkHhvfsy651/HpQMl0ZjbFjLV66I
+         L33C4aw1GIDA9wgDGb526PANhrG6x51qwxIEuGv2dFtvfBgyC+LjiKpaCH8hlOT2iEH9
+         eYH9uIs5lcrs3M+5cZ5XUo/uWWi2tWo1h0G56v7tDNR+QRzvICzwNUU0nnLW/kpoYCQZ
+         ef90I+PDjYD9ETtvlqek7FMjVPX02AqpcnvrWtMqQx86muGmJ4rEkSgDFtIHmO63/uM5
+         02PDw+I9SrwfVq0AxD+AlC2Klg3RRLrbjt53H73JwES2kAq7MSt8eyMv2nKw6BVkCF6Q
+         2ahg==
+X-Gm-Message-State: AOJu0YyPTL0loS+6wDDYM5wJCJvbXO09AgwZuqM6tiZrZjfc6ZRndvOP
+	eWKaZvO2Cs2Yu5QHEwiCObgpuf/Ov48NY8JhHSWfgDXbvoCGOLODFvHYJlQtmgO9pJSfVyFFYZ7
+	dMc3Xw7OJnyZXKFSgWy5ROXu9B7/6i4cnpN/8olUUCQqNJLp+RdHnfr5cAzQ1jlCKhHom76JT
+X-Gm-Gg: Acq92OEhcEi3xW7+w46tHinWEd7bI16k7BTYdTKDI5zoBCCcBb7B+C5K8HMSkSmS5K5
+	epW6up+eMBNmtWjCxVjGOfan3Yy7EtsLKs9owBbbjvM+NMcg7M/r3Wq5R3zMkfjd5Jy8wj/MS0L
+	hpn5VNx/PTDgu1cCnsNDPClOTmVoQvp8xYiyfLIiPNPFYSyBfS9yQ6Hy3MPSAZJKmKvMA6vDAJ7
+	xgVevPP4tz8pHgI1rNOVLA6A9kxa79bSUoD9pI1W/bgvcaPErn7v/Bv18u/gnHyzxkERoKzBfby
+	ZCpN3DC+ETGOIrG/74kzqbqfdjuAORuAFk+W17sV6kNkzJ43rK48arC5sargh3T3hD10gFoId0n
+	2dNMTVIwHMf1ADMKN6fZUI1MkEsXmWShyHNS8fbw4RM9Y7CPO4Co6qtunKga28iCRWTqF6/NvGY
+	fqFGQK7lh2MGumv0rZ8gbaaJulXLELR3TUqv8xCY7XgQQ2jW2H
+X-Received: by 2002:ad4:5b87:0:b0:8cc:3546:262b with SMTP id 6a1803df08f44-8ccefd84a0emr18556836d6.24.1780082846949;
+        Fri, 29 May 2026 12:27:26 -0700 (PDT)
+Received: from fedora.tail5a808e.ts.net ([72.228.86.65])
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8ccea2163b0sm25284466d6.38.2026.05.29.12.27.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 29 May 2026 12:27:26 -0700 (PDT)
+From: Brandon Allard <brandon@redpanda.com>
+To: fstests@vger.kernel.org
+Cc: zlang@kernel.org,
+	linux-xfs@vger.kernel.org,
+	Brandon Allard <brandon@redpanda.com>
+Subject: [PATCH] xfs: test NOWAIT DIO writes that span written/unwritten boundaries
+Date: Fri, 29 May 2026 15:27:14 -0400
+Message-ID: <20260529192714.21602-1-brandon@redpanda.com>
+X-Mailer: git-send-email 2.52.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260520190112.GE9544@frogsfrogsfrogs>
+Content-Transfer-Encoding: 8bit
+X-Gm-Spam: 0
+X-Gm-Phishy: 0
 
-On Wed, May 20, 2026 at 12:01:12PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Both of these tests use _scratch_mkfs_xfs_supports_concurrency to detect
-> if they should be adding -lconcurrency=0 to the mkfs options that are
-> used to format a loop device.
-> 
-> However, this doesn't work in practice because of three factors: 1) the
-> scratch device could have an external log set up; 2) the loop device
-> does /not/ have an external log device; and 3) -lconcurrency isn't
-> compatible with -llogdev.
-> 
-> Fix this by creating a more general mkfs option detection helper and use
-> that once we have the loop device set up.
-> 
-> Cc: <fstests@vger.kernel.org> # v2026.05.17
-> Fixes: ffc8bad17e5b2f ("xfs/21{6,7} Use default -l concurrency=0 on mkfs.xfs that supports it")
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
->  common/xfs    |   15 +++++++++++++++
->  tests/xfs/216 |    9 ++++-----
->  tests/xfs/217 |    9 ++++-----
->  3 files changed, 23 insertions(+), 10 deletions(-)
-> 
-> diff --git a/common/xfs b/common/xfs
-> index 88299acdd086be..232d40fd5e01b1 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -64,6 +64,21 @@ _scratch_mkfs_xfs_opts()
->  	echo "$MKFS_XFS_PROG $SCRATCH_OPTIONS $mkfs_opts"
->  }
->  
-> +_mkfs_xfs_supported()
-> +{
-> +	local mkfs_opts=$*
+Add a regression test exercising IOMAP_NOWAIT direct-IO writes around
+the written/unwritten extent boundary that arises from preallocated
+sequential append workloads.
 
-While it seems mkfs.xfs doesn't currently receive arguments with spaces, or
-using "$@" might be safer, e.g.
+Commit 883a790a8440 ("xfs: don't allow NOWAIT DIO across extent
+boundaries") added a guard in xfs_direct_write_iomap_begin that returns
+-EAGAIN under IOMAP_NOWAIT when the imap returned by xfs_bmapi_read
+does not cover the entire requested range. A subsequent kernel patch
+coalesces a (NORM, UNWRITTEN) pair into a single in-memory iomap when
+the two records are physically contiguous on disk, restoring the
+success path for the workload above.
 
-  local -a mkfs_opts=("$@")
-  $MKFS_XFS_PROG -f -N $MKFS_OPTIONS "${mkfs_opts[@]}"
+The test covers five scenarios:
+  A. NOWAIT DIO inside a single NORM extent must succeed.
+  B. NOWAIT DIO inside a single UNWRITTEN extent must succeed.
+  C. NOWAIT DIO spans NORM->UNWRITTEN, contiguous must succeed
+     (the new code path).
+  D. NOWAIT DIO spans UNWRITTEN->NORM, contiguous must return
+     -EAGAIN (asymmetric guard; only N->U is safe to merge).
+  E. NOWAIT DIO spans NORM->HOLE must return -EAGAIN (hole guard
+     from 883a790a8440 preserved).
 
-> +
-> +	$MKFS_XFS_PROG -f -N $MKFS_OPTIONS $mkfs_opts
-> +	local mkfs_status=$?
-> +
-> +	# a mkfs failure may be caused by conflicts between $MKFS_OPTIONS and
-> +	# $mkfs_opts, try again without $MKFS_OPTIONS
-> +	if [ $mkfs_status -ne 0 -a -n "$mkfs_opts" ]; then
-> +		$MKFS_XFS_PROG -f -N $mkfs_opts
-> +		mkfs_status=$?
-> +	fi
-> +	return $mkfs_status
-> +}
+The scratch filesystem is mounted with -o lazytime so the NOWAIT path
+does not bail in the mtime-update transaction (a separate -EAGAIN
+source unrelated to extent-boundary handling). It is mkfs'd with
+-b size=4096 so byte offsets in the golden output are stable across
+host architectures.
 
-Since we now have _mkfs_xfs_supported, should we call it inside
-_scratch_mkfs_xfs_supported ?
+Signed-off-by: Brandon Allard <brandon@redpanda.com>
 
-Thanks,
-Zorro
+This test exercises behavior introduced by the accompanying kernel
+patch "xfs: coalesce contiguous unwritten suffix into iomap for NOWAIT
+writes" posted to linux-xfs:
+  https://lore.kernel.org/linux-xfs/20260529191100.4142371-1-brandon@redpanda.com/
 
->  
->  _scratch_mkfs_xfs_supported()
->  {
-> diff --git a/tests/xfs/216 b/tests/xfs/216
-> index e3be9f3fe39ee0..bd98ee4dbfe960 100755
-> --- a/tests/xfs/216
-> +++ b/tests/xfs/216
-> @@ -22,11 +22,6 @@ _cleanup()
->  
->  _require_scratch
->  _scratch_mkfs_xfs >/dev/null 2>&1
-> -if _scratch_mkfs_xfs_supports_concurrency -l >> $seqres.full 2>&1; then
-> -	loop_mkfs_opts="-l concurrency=0"
-> -else
-> -	loop_mkfs_opts=""
-> -fi
->  _scratch_mount
->  
->  _require_loop
-> @@ -76,6 +71,10 @@ mkdir $LOOP_MNT
->  
->  loop_dev=$(_create_loop_device $LOOP_IMG)
->  
-> +if _mkfs_xfs_supported $loop_mkfs_opts -l concurrency=0 $loop_dev &>> $seqres.full; then
-> +	loop_mkfs_opts="$loop_mkfs_opts -l concurrency=0"
-> +fi
-> +
->  # walk over standard sizes (up to 256GB)
->  _do_mkfs 1 2 4 8 16 32 64 128 256
->  
-> diff --git a/tests/xfs/217 b/tests/xfs/217
-> index 5b210627b5ed18..5ba0b2198eb84f 100755
-> --- a/tests/xfs/217
-> +++ b/tests/xfs/217
-> @@ -21,11 +21,6 @@ _cleanup()
->  
->  _require_scratch
->  _scratch_mkfs_xfs >/dev/null 2>&1
-> -if _scratch_mkfs_xfs_supports_concurrency -l >> $seqres.full 2>&1; then
-> -	loop_mkfs_opts="-l concurrency=0 -d concurrency=0"
-> -else
-> -	loop_mkfs_opts=""
-> -fi
->  _scratch_mount
->  # 16T mkfs requires a bit over 2G free
->  _require_fs_space $SCRATCH_MNT 2202000
-> @@ -63,6 +58,10 @@ fi
->  
->  loop_dev=$(_create_loop_device $LOOP_IMG)
->  
-> +if _mkfs_xfs_supported $loop_mkfs_opts -l concurrency=0 -d concurrency=0 $loop_dev &>> $seqres.full; then
-> +	loop_mkfs_opts="$loop_mkfs_opts -l concurrency=0 -d concurrency=0"
-> +fi
-> +
->  #
->  # walk over "new" sizes supported by recent xfsprogs.
->  # Note that the last test is for 16TB-1GB as 32bit platforms only support
+Scenario C will fail on kernels that do not include that patch. If the
+kernel patch is accepted, the XXXXXXXXXXXXX placeholder in
+_fixed_by_kernel_commit should be replaced with the real commit SHA.
+---
+ tests/xfs/842     | 152 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/842.out |  42 +++++++++++++
+ 2 files changed, 194 insertions(+)
+ create mode 100755 tests/xfs/842
+ create mode 100644 tests/xfs/842.out
+
+diff --git a/tests/xfs/842 b/tests/xfs/842
+new file mode 100755
+index 0000000..ab93dc3
+--- /dev/null
++++ b/tests/xfs/842
+@@ -0,0 +1,152 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 Redpanda Data, Inc.
++#
++# FS QA Test No. 842
++#
++# Test several scenarios for RWF_NOWAIT direct-IO writes on XFS, focused on
++# the WRITTEN<->UNWRITTEN extent boundary case.
++#
++# Background:
++#   Commit 883a790a8440 ("xfs: don't allow NOWAIT DIO across extent
++#   boundaries") added a guard in xfs_direct_write_iomap_begin that returns
++#   -EAGAIN under IOMAP_NOWAIT when the imap returned by xfs_bmapi_read does
++#   not span the entire requested range. The guard prevents NOWAIT callers
++#   from observing short writes when the range needs multiple bios.
++#
++#   For sequential append-DIO workloads with adaptive preallocation, requests
++#   regularly straddle a NORM extent (just-written head) and a physically
++#   contiguous UNWRITTEN extent (preallocated tail). A single bio covers both
++#   safely; no short-write hazard exists. A subsequent fix coalesces the two
++#   records in the in-memory iomap and reports the merged range as UNWRITTEN
++#   so the completion handler converts the suffix normally.
++#
++# Scenarios:
++#   A. NOWAIT DIO inside a single NORM extent          -- must succeed
++#   B. NOWAIT DIO inside a single UNWRITTEN extent     -- must succeed
++#   C. NOWAIT DIO spans NORM -> UNWRITTEN, physically  -- must succeed
++#      contiguous (the fix)
++#   D. NOWAIT DIO spans UNWRITTEN -> NORM, physically  -- must fail (-EAGAIN)
++#      contiguous (coalesce path is intentionally
++#      asymmetric: only N->U is safe to merge)
++#   E. NOWAIT DIO spans NORM -> HOLE                   -- must fail (-EAGAIN)
++#      (hole guard from 883a790a8440 preserved)
++#
++# The scratch filesystem MUST be mounted with -o lazytime; without it the
++# NOWAIT path bails earlier in the mtime-update transaction (separate
++# -EAGAIN source unrelated to extent-boundary handling) and scenarios B/C
++# would return -EAGAIN for the wrong reason.
++#
++# The scratch filesystem is mkfs'd with -b size=4096 so byte offsets in the
++# golden output are stable across host architectures.
++#
++. ./common/preamble
++_begin_fstest auto quick rw prealloc
++
++# Override the default cleanup function.
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	_scratch_unmount 2>/dev/null
++}
++
++# Import common functions.
++. ./common/filter
++
++_require_scratch
++_require_xfs_io_command "falloc"
++_require_xfs_io_command "fiemap"
++_require_xfs_io_command "pwrite" "-N"
++
++_fixed_by_kernel_commit XXXXXXXXXXXXX \
++	"xfs: coalesce contiguous unwritten suffix into iomap for NOWAIT writes"
++
++_scratch_mkfs_xfs -b size=4096 >> $seqres.full 2>&1
++_scratch_mount "-o lazytime"
++
++# Defensive: confirm mkfs honored the requested block size. The offsets in
++# the golden output assume bsize == 4096.
++bsize=$(_get_file_block_size $SCRATCH_MNT)
++[ "$bsize" -eq 4096 ] || _notrun "fs block size is $bsize, expected 4096"
++
++# All offsets/sizes are multiples of the 4096-byte block size enforced above.
++HEAD_BYTES=4096       # 1 block (NORM head after split)
++TAIL_BYTES=32768      # 8 blocks (UNWRITTEN tail / NORM tail)
++ALLOC_BYTES=36864     # 9 blocks (HEAD + TAIL, one allocation)
++SPAN_BYTES=8192       # 2 blocks (spans a single extent boundary)
++
++# Return 0 if the first two extents in $1 are physically adjacent.
++# _filter_xfs_io_fiemap emits one space-separated record per extent:
++#   first_logical last_logical first_physical last_physical (512-byte sectors).
++_extents_are_contiguous()
++{
++	$XFS_IO_PROG -c "fiemap" "$1" 2>/dev/null \
++		| _filter_xfs_io_fiemap \
++		| awk 'NR==1 { end=$4 } NR==2 { exit !(end + 1 == $3) }'
++}
++
++# Scenario A: NOWAIT DIO inside a single NORM extent. Must succeed.
++echo
++echo "== A: NOWAIT DIO inside a single NORM extent (must succeed) =="
++fa=$SCRATCH_MNT/A
++$XFS_IO_PROG -fd -c "pwrite -S 0xaa 0 $ALLOC_BYTES" $fa | _filter_xfs_io
++$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0xbb -b $SPAN_BYTES 0 $SPAN_BYTES" $fa \
++	| _filter_xfs_io
++od -A d -t x1 -N $SPAN_BYTES $fa
++
++# Scenario B: NOWAIT DIO inside a single UNWRITTEN extent. Must succeed.
++echo
++echo "== B: NOWAIT DIO inside a single UNWRITTEN extent (must succeed) =="
++fb=$SCRATCH_MNT/B
++$XFS_IO_PROG -fdt -c "falloc 0 $ALLOC_BYTES" $fb | _filter_xfs_io
++$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0xcc -b $SPAN_BYTES 0 $SPAN_BYTES" $fb \
++	| _filter_xfs_io
++od -A d -t x1 -N $SPAN_BYTES $fb
++
++# Scenario C: NOWAIT DIO spans NORM -> UNWRITTEN, physically contiguous.
++echo
++echo "== C: NOWAIT DIO spans NORM->UNWRITTEN, contiguous (must succeed) =="
++fc=$SCRATCH_MNT/C
++# The allocator preserves physical contiguity across the split, which is
++# what we need to exercise the coalesce path.
++$XFS_IO_PROG -fdt -c "falloc 0 $ALLOC_BYTES" $fc | _filter_xfs_io
++$XFS_IO_PROG -d -c "pwrite -S 0xdd 0 $HEAD_BYTES" $fc | _filter_xfs_io
++
++if ! _extents_are_contiguous $fc; then
++	_notrun "C: allocator placed split extents non-contiguously, cannot exercise W<->U coalesce on this run"
++fi
++
++$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0xee -b $SPAN_BYTES 0 $SPAN_BYTES" $fc \
++	| _filter_xfs_io
++od -A d -t x1 -N $SPAN_BYTES $fc
++
++# Scenario D: NOWAIT DIO spans UNWRITTEN -> NORM (physically contiguous).
++echo
++echo "== D: NOWAIT DIO spans UNWRITTEN->NORM, contiguous (must EAGAIN) =="
++fd=$SCRATCH_MNT/D
++$XFS_IO_PROG -fdt -c "falloc 0 $ALLOC_BYTES" $fd | _filter_xfs_io
++$XFS_IO_PROG -d -c "pwrite -S 0x11 $TAIL_BYTES $HEAD_BYTES" $fd | _filter_xfs_io
++
++if ! _extents_are_contiguous $fd; then
++	_notrun "D: allocator placed split extents non-contiguously, cannot exercise U<->W asymmetric guard on this run"
++fi
++
++# Span ends at offset (TAIL_BYTES + HEAD_BYTES), crosses the U->N boundary.
++span_d_off=$((TAIL_BYTES - HEAD_BYTES))
++$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0x22 -b $SPAN_BYTES $span_d_off $SPAN_BYTES" $fd
++# Confirm the would-be data was not written: tail block should still be 0x11.
++od -A d -t x1 -j $TAIL_BYTES -N $HEAD_BYTES $fd
++
++# Scenario E: NOWAIT DIO spans NORM -> HOLE.
++echo
++echo "== E: NOWAIT DIO spans NORM->HOLE (must EAGAIN) =="
++fe=$SCRATCH_MNT/E
++$XFS_IO_PROG -fd -c "pwrite -S 0x33 0 $HEAD_BYTES" $fe | _filter_xfs_io
++$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0x44 -b $SPAN_BYTES 0 $SPAN_BYTES" $fe
++# Confirm: head block must still hold the original 0x33 pattern; if the
++# NOWAIT write had partial-committed, we would see 0x44 here instead.
++od -A d -t x1 -N $HEAD_BYTES $fe
++
++status=0
++exit
+diff --git a/tests/xfs/842.out b/tests/xfs/842.out
+new file mode 100644
+index 0000000..6cbfc2a
+--- /dev/null
++++ b/tests/xfs/842.out
+@@ -0,0 +1,42 @@
++QA output created by 842
++
++== A: NOWAIT DIO inside a single NORM extent (must succeed) ==
++wrote 36864/36864 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0000000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
++*
++0008192
++
++== B: NOWAIT DIO inside a single UNWRITTEN extent (must succeed) ==
++wrote 8192/8192 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0000000 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
++*
++0008192
++
++== C: NOWAIT DIO spans NORM->UNWRITTEN, contiguous (must succeed) ==
++wrote 4096/4096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0000000 ee ee ee ee ee ee ee ee ee ee ee ee ee ee ee ee
++*
++0008192
++
++== D: NOWAIT DIO spans UNWRITTEN->NORM, contiguous (must EAGAIN) ==
++wrote 4096/4096 bytes at offset 32768
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++pwrite: Resource temporarily unavailable
++0032768 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11
++*
++0036864
++
++== E: NOWAIT DIO spans NORM->HOLE (must EAGAIN) ==
++wrote 4096/4096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++pwrite: Resource temporarily unavailable
++0000000 33 33 33 33 33 33 33 33 33 33 33 33 33 33 33 33
++*
++0004096
+-- 
+2.52.0
+
