@@ -1,104 +1,224 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 870BA326930;
-	Fri, 29 May 2026 09:02:48 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23FFD3BCD28;
+	Fri, 29 May 2026 09:10:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780045369; cv=none; b=NCIjyON6KfwBTK8G5M3BdtOGJeC+P8x8mamXF7W5+p00Dv+ubIuC8hN5ftbCa71Zas92dX8tjSoD6FaOJbEma3sC7gXxcCm+fUXuzNdzkdytZiMuujEkZLJLNa4v2pG/E0xpZKVZAhl3BnZaxF2qPVyIDTQbZyvQwnxVQPib8sc=
+	t=1780045833; cv=none; b=rXEBk3ddDIYdPLCDYjIEwnskgBTX3nzT3I7ys9HGirbPpNTiRbnlirI0bm2IUU4+4YThk9oEMMxh1bQbiDoie8+hNRgU/Ppx+kz/gAm3WsQZrakHYdsAJOTERzqJzAkrEpSo9jk5jGmnEJR0nQzpqXL7+CKmysTRrFi3Mzndi4A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780045369; c=relaxed/simple;
-	bh=E9SGioHdaiyNDjffWGZLOT3Aud1z7Z5wVnxNK2qa8xc=;
+	s=arc-20240116; t=1780045833; c=relaxed/simple;
+	bh=aonlMLEVfcBpn4g/N1sjkROWm1yRsK4BfsZH2Y3X7ZM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=C7QAfrKH8+Kv7mo1in4bCdk5DngHq7nZcsQ2RQ9QZQkBv/67kcMYW4ijiS0Y2qncBqQnZcyFa4bSJXwCbxUYexKxn3eDLPejLkki7+ZZmOZUclDEJyU0uBvLYMhtGngsOQBAB4NEoKPQApR4IjZZ2QCpsd+pX5zPEiWSMAG0gik=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PdaXX2Xm; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=Hm2MeX59c9PUwwA6jsgtKqubALLpshzCC/B4JV6+8edyKDu6Qh2yDG1Mr8vo8Oa+E1JklM9KH7EaGFJwcqydn7YRAAKw4l/2qC+HoalGc2wZZ8dtCPu0yUn3oYbgOJFrU2zTyGlv8HzmYdivKyPUv+pjcpZNaTp2p8wt9v0qpS0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MHE32YUx; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PdaXX2Xm"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 415B31F00893;
-	Fri, 29 May 2026 09:02:45 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MHE32YUx"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F0CB1F00893;
+	Fri, 29 May 2026 09:10:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1780045368;
-	bh=NY7cw3MXJfHKk5ZESWi1LozZjh67IEzAA25bdaW2LCo=;
+	s=k20260515; t=1780045830;
+	bh=/Pz9iZO0lS1+ATvYXXbmcZ/4TYwA9EwI/hL63xMvjpc=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=PdaXX2XmhTDyeHYufyzLnEZ0Yn5wcKlihQk0tLl5Q1ugNqc+3rL2OypMW8cp9SSLq
-	 VFtu3nb75J+lPrGzoZAQHYNWjqCBQC14u7nHYGAJnUwYo6EQRV/iftO2VmQ6b/Bwh6
-	 ISRkn5YKLvahf1YmSmBzTDBxwoKvcgTlm/wE0St8E86aYROB0xBrxgo7YdjzyyDHvp
-	 jqNNOu0nOjNObb7jW874ae/J5JgeCCEw9bteHZEGdeckAQ1JRbOov1EL7rceW+4PCI
-	 Uyzy2WovhAUOZqfZp2s2G7tsaMSXQK+GR2OAvN9095SeXA8g4AdleO2i4JdPXdWVm/
-	 eZFzrT+UXxwhg==
-Date: Fri, 29 May 2026 17:02:42 +0800
+	b=MHE32YUxrZB5mQCbymiE7u8bFLjK2BcWM7Rl2ia6mWU6O9ewOPGdNuilAZ+fDSP+b
+	 m4F1Gh7PcYd518YQZxczRQ0ZwfyPE/PFw+YlpMehg/mnHb/XH2cmeYxwQHRtzRnXmY
+	 0UDLJfYT9Tk4ePUDa3UNu6HXU9sjgFvEGpRIMKQLRUO/+9kdXd8lVvr/yUWQYSVNvK
+	 Ba7iGKUYI1wvYwhrXDjInkNRMph4C7q6cAkpUjAmtOiJtKWSYbLdDdWS0j621cTmMA
+	 W5Ck9+BvQN54J+oIcEhIgxyStXOoiJqNztHu0XZOnYfICxOoIgUQ5id2l+9Yz08DY9
+	 vD/fhBCipRI2A==
+Date: Fri, 29 May 2026 17:10:24 +0800
 From: Zorro Lang <zlang@kernel.org>
 To: Qu Wenruo <wqu@suse.com>
-Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, 
-	linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: generic/362: remove the old file to reflect new
- mount options
-Message-ID: <ahlU702Bo_QRTCCY@zlang-mailbox>
-Mail-Followup-To: Qu Wenruo <wqu@suse.com>, 
-	Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-References: <20260526070055.60193-1-wqu@suse.com>
- <ahaQjYYQWcuOaRaq@infradead.org>
- <e9fc0374-4a97-4cab-8f9d-9de39587cbec@suse.com>
- <ahbrvyNg65OjGhpS@infradead.org>
- <bea8a50b-4a14-4351-a56a-d295b90750b5@suse.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH v2] fstests: remove dio related target file to respect
+ mount options that only affecst new inodes
+Message-ID: <ahlXBkOh3TF-3mRG@zlang-mailbox>
+Mail-Followup-To: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org, 
+	linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+References: <20260528111659.87113-1-wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <bea8a50b-4a14-4351-a56a-d295b90750b5@suse.com>
+In-Reply-To: <20260528111659.87113-1-wqu@suse.com>
 
-On Thu, May 28, 2026 at 07:12:24AM +0930, Qu Wenruo wrote:
+On Thu, May 28, 2026 at 08:46:59PM +0930, Qu Wenruo wrote:
+> [BUG]
+> Test case generic/362 and generic/365 will fail with nodatasum, but
+> that's only when TEST_DEV is newly formatted.
 > 
+>  FSTYP         -- btrfs
+>  PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
+>  MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
+>  MOUNT_OPTIONS -- -o nodatasum /dev/mapper/test-scratch1 /mnt/scratch
 > 
-> 在 2026/5/27 22:33, Christoph Hellwig 写道:
-> > On Wed, May 27, 2026 at 04:20:38PM +0930, Qu Wenruo wrote:
-> > > > I'd rather add a copy of the test that runs on the scratch device
-> > > > that can control the environment.  Or maybe just change the test
-> > > > to use the scratch device?
-> > > 
-> > > I'm completely happy with using scratch device instead of test dev.
-> > > 
-> > > If no special reason to use test dev, the next update will go scratch dev
-> > > instead.
-> > 
-> > I went back and re-read this.  What is the special mount option you
-> > change?   If you want to always exercise this as nocow, maybe add a new
-> > btrfs test that is a copy and uses the scratch device?  Or am I
-> > misunderstanding something?
-> > 
+>   generic/362  0s ... - output mismatch (see /home/adam/xfstests/results//generic/362.out.bad)
+>     --- tests/generic/362.out	2024-08-24 15:31:37.200000000 +0930
+>     +++ /home/adam/xfstests/results//generic/362.out.bad	2026-05-28 16:18:33.866141979 +0930
+>     @@ -1,2 +1,3 @@
+>      QA output created by 362
+>     +First write failed: Input/output error
+>      Silence is golden
+>     ...
+>     (Run 'diff -u /home/adam/xfstests/tests/generic/362.out /home/adam/xfstests/results//generic/362.out.bad'  to see the entire diff)
 > 
-> My point is, the current script prevent the test case to respect certain
-> mount options, thus reduce the coverage.
+>   generic/364  11s ... - output mismatch (see /home/adam/xfstests/results//generic/364.out.bad)
+>     --- tests/generic/364.out	2024-09-30 09:09:51.216666681 +0930
+>     +++ /home/adam/xfstests/results//generic/364.out.bad	2026-05-28 16:18:34.318532257 +0930
+>     @@ -1,2 +1,3 @@
+>      QA output created by 364
+>     +Fsync failed: Input/output error
+>      Silence is golden
+>     ...
+>     (Run 'diff -u /home/adam/xfstests/tests/generic/364.out /home/adam/xfstests/results//generic/364.out.bad'  to see the entire diff)
 > 
-> E.g. in a multi-section fstests setup, default and nodatasum mount options
-> are defined in different sections, and default mount option will be run
-> first.
+> But if one has formated TEST_DEV, run test with default mount option,
+> then change the mount option to "nodatasum", the test will not fail
+> anymore:
 > 
-> Then the next nodatasum section will still utilize the old inode created
-> with regular default options, thus reduce the coverage.
+>  FSTYP         -- btrfs
+>  PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
+>  MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
+>  MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
 > 
+>  generic/362  0s ...  1s
+>  generic/364  11s ...  10s
+>  Ran: generic/362 generic/364
+>  Passed all 2 tests
 > 
-> Sure, a dedicated btrfs copy will help, but that will introduce duplication.
-> Not sure what is the proper way to handle such situation.
+>  FSTYP         -- btrfs
+>  PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
+>  MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
+>  MOUNT_OPTIONS -- -o nodatasum /dev/mapper/test-scratch1 /mnt/scratch
+> 
+>  generic/362  1s ...  0s
+>  generic/364  10s ...  11s
+>  Ran: generic/362 generic/364
+>  Passed all 2 tests
+> 
+> [CAUSE]
+> Btrfs' nodatasum mount option only affects new files, but the test cases
+> are using TEST_DEV, and never delete the target files
+> "$TEST_DIR/dio-append-buf-fault" for generic/362 and
+> "$TEST_DIR/dio-write-fsync-same-fd" for generic/364.
+> 
+> So if the files are created with default mount options, then all later
+> "nodatasum" mount options will not affect those files, thus hide the test
+> failure.
+> 
+> [FIX]
+> For all test cases utilizing "$here/src/dio*", add a _cleanup()
+> function, to remove target files, so that for mount options that only
+> affect new inodes, the mount options will be respected, and expose
+> failures.
+> 
+> Now generic/36[24] will properly fail for "nodatasum" mount option on
+> btrfs.
 
-If there is a specific btrfs bug (commit) that can be 100% reproduced by
-slightly modifying this case (e.g. use a specific mkfs or mount option),
-I think it’s worth splitting it into a separate test case for better
-test coverage and known issue tracking.
+This patch is good to me,
+
+Reviewed-by: Zorro Lang <zlang@kernel.org>
+
+If you still hope to have a specific test case to uncover this known btrfs
+bug, feel free to add a new one (to use SCRATCH_DEV and "nodatasum").
 
 Thanks,
 Zorro
 
 > 
+> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+> Changelog:
+> v2:
+> - Fix several grammar errors
+> - Remove temporary files in _cleanup()
+> ---
+>  tests/generic/362 | 7 +++++++
+>  tests/generic/364 | 8 ++++++++
+>  tests/generic/418 | 7 +++++++
+>  tests/generic/708 | 7 +++++++
+>  4 files changed, 29 insertions(+)
 > 
-> For now I'll follow Filipe's review to use _cleanup() to delete those
-> involves test cases.
+> diff --git a/tests/generic/362 b/tests/generic/362
+> index 0cfaa726..e54d44b0 100755
+> --- a/tests/generic/362
+> +++ b/tests/generic/362
+> @@ -10,6 +10,13 @@
+>  . ./common/preamble
+>  _begin_fstest auto quick
+>  
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f "$tmp.*"
+> +	rm -f "$TEST_DIR/dio-append-buf-fault"
+> +}
+> +
+>  # NFS forbade open with O_APPEND|O_DIRECT
+>  _exclude_fs nfs
+>  
+> diff --git a/tests/generic/364 b/tests/generic/364
+> index f7fb002f..8f13061f 100755
+> --- a/tests/generic/364
+> +++ b/tests/generic/364
+> @@ -11,6 +11,14 @@
+>  . ./common/preamble
+>  _begin_fstest auto quick
+>  
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f "$tmp.*"
+> +	rm -f "$TEST_DIR/dio-write-fsync-same-fd"
+> +}
+> +
+> +
+>  _require_test
+>  _require_odirect
+>  _require_test_program dio-write-fsync-same-fd
+> diff --git a/tests/generic/418 b/tests/generic/418
+> index 36789198..7ef1ef9f 100755
+> --- a/tests/generic/418
+> +++ b/tests/generic/418
+> @@ -26,6 +26,13 @@ _require_block_device $TEST_DEV
+>  _require_test_program "dio-invalidate-cache"
+>  _require_test_program "feature"
+>  
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f "$tmp.*"
+> +	rm -f "$testfile"
+> +}
+> +
+>  diotest=$here/src/dio-invalidate-cache
+>  testfile=$TEST_DIR/$seq-diotest
+>  sectorsize=`$here/src/min_dio_alignment $TEST_DIR $TEST_DEV`
+> diff --git a/tests/generic/708 b/tests/generic/708
+> index 827dac13..f504ca57 100755
+> --- a/tests/generic/708
+> +++ b/tests/generic/708
+> @@ -14,6 +14,13 @@
+>  . ./common/preamble
+>  _begin_fstest quick auto mmap
+>  
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f "$tmp.*"
+> +	rm -f "$src" "$dst"
+> +}
+> +
+>  _fixed_by_fs_commit btrfs b73a6fd1b1ef \
+>  		"btrfs: split partial dio bios before submit"
+>  
+> -- 
+> 2.51.2
 > 
-> Thanks,
-> Qu
 > 
