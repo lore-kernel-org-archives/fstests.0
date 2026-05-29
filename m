@@ -1,42 +1,41 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23FFD3BCD28;
-	Fri, 29 May 2026 09:10:30 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AAC33438AE;
+	Fri, 29 May 2026 09:44:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780045833; cv=none; b=rXEBk3ddDIYdPLCDYjIEwnskgBTX3nzT3I7ys9HGirbPpNTiRbnlirI0bm2IUU4+4YThk9oEMMxh1bQbiDoie8+hNRgU/Ppx+kz/gAm3WsQZrakHYdsAJOTERzqJzAkrEpSo9jk5jGmnEJR0nQzpqXL7+CKmysTRrFi3Mzndi4A=
+	t=1780047844; cv=none; b=VnmiQ5iaJ+q+fPVcBdRntBoFyieeMS4nSKuhnruBFoonxgeNRt0rOgH4WL9S7ztrF4tYUttTILrzSN3kC26ZR1n8Is3Pdw+YzAVHbZhDiKWenjhXulhzMObsgHLzaiHMF9123ubqWz/Gj7r4ozSegA8tbHLQvuGXQZLM3AtaabA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780045833; c=relaxed/simple;
-	bh=aonlMLEVfcBpn4g/N1sjkROWm1yRsK4BfsZH2Y3X7ZM=;
+	s=arc-20240116; t=1780047844; c=relaxed/simple;
+	bh=db3FdRcbU1MEaFXIXjET/dr9/wZidQ6n79YDyRjybsg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Hm2MeX59c9PUwwA6jsgtKqubALLpshzCC/B4JV6+8edyKDu6Qh2yDG1Mr8vo8Oa+E1JklM9KH7EaGFJwcqydn7YRAAKw4l/2qC+HoalGc2wZZ8dtCPu0yUn3oYbgOJFrU2zTyGlv8HzmYdivKyPUv+pjcpZNaTp2p8wt9v0qpS0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MHE32YUx; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=ELyJYbkvkWKZGb8zo1j+52OGucidAQruXEhFiGjg0oVFja2tMN+lUU924YnjbpvLD9P1bIYDTSBgRntld379e28dVUMA8ygaGE/9Ez3DT6K7ut4uypo/R+lNh+xHznPPtjiGvDVOt7lWIlgQ1bBN70i0meF31JkvbQj1I3QBBLU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MvSSFBJj; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MHE32YUx"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F0CB1F00893;
-	Fri, 29 May 2026 09:10:28 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MvSSFBJj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6BA7F1F00893;
+	Fri, 29 May 2026 09:44:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1780045830;
-	bh=/Pz9iZO0lS1+ATvYXXbmcZ/4TYwA9EwI/hL63xMvjpc=;
+	s=k20260515; t=1780047843;
+	bh=sKnwz7Gm8Rh+uRM1r6Z5oSiz/RqFWDqG1PplxNq0KUk=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=MHE32YUxrZB5mQCbymiE7u8bFLjK2BcWM7Rl2ia6mWU6O9ewOPGdNuilAZ+fDSP+b
-	 m4F1Gh7PcYd518YQZxczRQ0ZwfyPE/PFw+YlpMehg/mnHb/XH2cmeYxwQHRtzRnXmY
-	 0UDLJfYT9Tk4ePUDa3UNu6HXU9sjgFvEGpRIMKQLRUO/+9kdXd8lVvr/yUWQYSVNvK
-	 Ba7iGKUYI1wvYwhrXDjInkNRMph4C7q6cAkpUjAmtOiJtKWSYbLdDdWS0j621cTmMA
-	 W5Ck9+BvQN54J+oIcEhIgxyStXOoiJqNztHu0XZOnYfICxOoIgUQ5id2l+9Yz08DY9
-	 vD/fhBCipRI2A==
-Date: Fri, 29 May 2026 17:10:24 +0800
+	b=MvSSFBJjSsoJx34wZcC41qtz5kx5G7eXrJGoozB39zTZfFvYLSpuR36nwdqQbJak0
+	 3qK1oa7YX5Gzbz0eMyTHkDVBqOwv9PB+Zy0XWpU+UeyGh79kACr5SMNloU9lNlFFS7
+	 IsD+fTiOxfj8CBHJ9iMmu0qUfGZUbPRGfnMEnlxuxKLPCwNi4IqdQTfXd8RixSrlNH
+	 FH+sLeqewrmvWKlaVcR2X1uIoSYCLf6mVY87LDVv3S8NDSfSCOaiTMs2rrbUTf4sV+
+	 LjAgfL7yN3EkicyKVtNwfKcNHuJjvyjqNBujE3Vezz0eQh6uEPdcGcZisLJVLN23+8
+	 /csVCo6J+JmKw==
+Date: Fri, 29 May 2026 17:43:57 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Qu Wenruo <wqu@suse.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH v2] fstests: remove dio related target file to respect
- mount options that only affecst new inodes
-Message-ID: <ahlXBkOh3TF-3mRG@zlang-mailbox>
-Mail-Followup-To: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org, 
-	linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <20260528111659.87113-1-wqu@suse.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH 2/2] xfs/21[67]: fix mkfs log concurrency detection
+Message-ID: <ahleJoQHhZpYwyJW@zlang-mailbox>
+Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>, 
+	fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>
+References: <20260520185202.GD9544@frogsfrogsfrogs>
+ <20260520190112.GE9544@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,180 +44,123 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260528111659.87113-1-wqu@suse.com>
+In-Reply-To: <20260520190112.GE9544@frogsfrogsfrogs>
 
-On Thu, May 28, 2026 at 08:46:59PM +0930, Qu Wenruo wrote:
-> [BUG]
-> Test case generic/362 and generic/365 will fail with nodatasum, but
-> that's only when TEST_DEV is newly formatted.
+On Wed, May 20, 2026 at 12:01:12PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
->  FSTYP         -- btrfs
->  PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
->  MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
->  MOUNT_OPTIONS -- -o nodatasum /dev/mapper/test-scratch1 /mnt/scratch
+> Both of these tests use _scratch_mkfs_xfs_supports_concurrency to detect
+> if they should be adding -lconcurrency=0 to the mkfs options that are
+> used to format a loop device.
 > 
->   generic/362  0s ... - output mismatch (see /home/adam/xfstests/results//generic/362.out.bad)
->     --- tests/generic/362.out	2024-08-24 15:31:37.200000000 +0930
->     +++ /home/adam/xfstests/results//generic/362.out.bad	2026-05-28 16:18:33.866141979 +0930
->     @@ -1,2 +1,3 @@
->      QA output created by 362
->     +First write failed: Input/output error
->      Silence is golden
->     ...
->     (Run 'diff -u /home/adam/xfstests/tests/generic/362.out /home/adam/xfstests/results//generic/362.out.bad'  to see the entire diff)
+> However, this doesn't work in practice because of three factors: 1) the
+> scratch device could have an external log set up; 2) the loop device
+> does /not/ have an external log device; and 3) -lconcurrency isn't
+> compatible with -llogdev.
 > 
->   generic/364  11s ... - output mismatch (see /home/adam/xfstests/results//generic/364.out.bad)
->     --- tests/generic/364.out	2024-09-30 09:09:51.216666681 +0930
->     +++ /home/adam/xfstests/results//generic/364.out.bad	2026-05-28 16:18:34.318532257 +0930
->     @@ -1,2 +1,3 @@
->      QA output created by 364
->     +Fsync failed: Input/output error
->      Silence is golden
->     ...
->     (Run 'diff -u /home/adam/xfstests/tests/generic/364.out /home/adam/xfstests/results//generic/364.out.bad'  to see the entire diff)
+> Fix this by creating a more general mkfs option detection helper and use
+> that once we have the loop device set up.
 > 
-> But if one has formated TEST_DEV, run test with default mount option,
-> then change the mount option to "nodatasum", the test will not fail
-> anymore:
+> Cc: <fstests@vger.kernel.org> # v2026.05.17
+> Fixes: ffc8bad17e5b2f ("xfs/21{6,7} Use default -l concurrency=0 on mkfs.xfs that supports it")
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> ---
+>  common/xfs    |   15 +++++++++++++++
+>  tests/xfs/216 |    9 ++++-----
+>  tests/xfs/217 |    9 ++++-----
+>  3 files changed, 23 insertions(+), 10 deletions(-)
 > 
->  FSTYP         -- btrfs
->  PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
->  MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
->  MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
-> 
->  generic/362  0s ...  1s
->  generic/364  11s ...  10s
->  Ran: generic/362 generic/364
->  Passed all 2 tests
-> 
->  FSTYP         -- btrfs
->  PLATFORM      -- Linux/x86_64 btrfs-vm 7.1.0-rc4-custom+ #381 SMP PREEMPT_DYNAMIC Tue May 26 10:47:14 ACST 2026
->  MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
->  MOUNT_OPTIONS -- -o nodatasum /dev/mapper/test-scratch1 /mnt/scratch
-> 
->  generic/362  1s ...  0s
->  generic/364  10s ...  11s
->  Ran: generic/362 generic/364
->  Passed all 2 tests
-> 
-> [CAUSE]
-> Btrfs' nodatasum mount option only affects new files, but the test cases
-> are using TEST_DEV, and never delete the target files
-> "$TEST_DIR/dio-append-buf-fault" for generic/362 and
-> "$TEST_DIR/dio-write-fsync-same-fd" for generic/364.
-> 
-> So if the files are created with default mount options, then all later
-> "nodatasum" mount options will not affect those files, thus hide the test
-> failure.
-> 
-> [FIX]
-> For all test cases utilizing "$here/src/dio*", add a _cleanup()
-> function, to remove target files, so that for mount options that only
-> affect new inodes, the mount options will be respected, and expose
-> failures.
-> 
-> Now generic/36[24] will properly fail for "nodatasum" mount option on
-> btrfs.
+> diff --git a/common/xfs b/common/xfs
+> index 88299acdd086be..232d40fd5e01b1 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -64,6 +64,21 @@ _scratch_mkfs_xfs_opts()
+>  	echo "$MKFS_XFS_PROG $SCRATCH_OPTIONS $mkfs_opts"
+>  }
+>  
+> +_mkfs_xfs_supported()
+> +{
+> +	local mkfs_opts=$*
 
-This patch is good to me,
+While it seems mkfs.xfs doesn't currently receive arguments with spaces, or
+using "$@" might be safer, e.g.
 
-Reviewed-by: Zorro Lang <zlang@kernel.org>
+  local -a mkfs_opts=("$@")
+  $MKFS_XFS_PROG -f -N $MKFS_OPTIONS "${mkfs_opts[@]}"
 
-If you still hope to have a specific test case to uncover this known btrfs
-bug, feel free to add a new one (to use SCRATCH_DEV and "nodatasum").
+> +
+> +	$MKFS_XFS_PROG -f -N $MKFS_OPTIONS $mkfs_opts
+> +	local mkfs_status=$?
+> +
+> +	# a mkfs failure may be caused by conflicts between $MKFS_OPTIONS and
+> +	# $mkfs_opts, try again without $MKFS_OPTIONS
+> +	if [ $mkfs_status -ne 0 -a -n "$mkfs_opts" ]; then
+> +		$MKFS_XFS_PROG -f -N $mkfs_opts
+> +		mkfs_status=$?
+> +	fi
+> +	return $mkfs_status
+> +}
+
+Since we now have _mkfs_xfs_supported, should we call it inside
+_scratch_mkfs_xfs_supported ?
 
 Thanks,
 Zorro
 
-> 
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
-> Changelog:
-> v2:
-> - Fix several grammar errors
-> - Remove temporary files in _cleanup()
-> ---
->  tests/generic/362 | 7 +++++++
->  tests/generic/364 | 8 ++++++++
->  tests/generic/418 | 7 +++++++
->  tests/generic/708 | 7 +++++++
->  4 files changed, 29 insertions(+)
-> 
-> diff --git a/tests/generic/362 b/tests/generic/362
-> index 0cfaa726..e54d44b0 100755
-> --- a/tests/generic/362
-> +++ b/tests/generic/362
-> @@ -10,6 +10,13 @@
->  . ./common/preamble
->  _begin_fstest auto quick
 >  
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f "$tmp.*"
-> +	rm -f "$TEST_DIR/dio-append-buf-fault"
-> +}
+>  _scratch_mkfs_xfs_supported()
+>  {
+> diff --git a/tests/xfs/216 b/tests/xfs/216
+> index e3be9f3fe39ee0..bd98ee4dbfe960 100755
+> --- a/tests/xfs/216
+> +++ b/tests/xfs/216
+> @@ -22,11 +22,6 @@ _cleanup()
+>  
+>  _require_scratch
+>  _scratch_mkfs_xfs >/dev/null 2>&1
+> -if _scratch_mkfs_xfs_supports_concurrency -l >> $seqres.full 2>&1; then
+> -	loop_mkfs_opts="-l concurrency=0"
+> -else
+> -	loop_mkfs_opts=""
+> -fi
+>  _scratch_mount
+>  
+>  _require_loop
+> @@ -76,6 +71,10 @@ mkdir $LOOP_MNT
+>  
+>  loop_dev=$(_create_loop_device $LOOP_IMG)
+>  
+> +if _mkfs_xfs_supported $loop_mkfs_opts -l concurrency=0 $loop_dev &>> $seqres.full; then
+> +	loop_mkfs_opts="$loop_mkfs_opts -l concurrency=0"
+> +fi
 > +
->  # NFS forbade open with O_APPEND|O_DIRECT
->  _exclude_fs nfs
+>  # walk over standard sizes (up to 256GB)
+>  _do_mkfs 1 2 4 8 16 32 64 128 256
 >  
-> diff --git a/tests/generic/364 b/tests/generic/364
-> index f7fb002f..8f13061f 100755
-> --- a/tests/generic/364
-> +++ b/tests/generic/364
-> @@ -11,6 +11,14 @@
->  . ./common/preamble
->  _begin_fstest auto quick
+> diff --git a/tests/xfs/217 b/tests/xfs/217
+> index 5b210627b5ed18..5ba0b2198eb84f 100755
+> --- a/tests/xfs/217
+> +++ b/tests/xfs/217
+> @@ -21,11 +21,6 @@ _cleanup()
 >  
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f "$tmp.*"
-> +	rm -f "$TEST_DIR/dio-write-fsync-same-fd"
-> +}
+>  _require_scratch
+>  _scratch_mkfs_xfs >/dev/null 2>&1
+> -if _scratch_mkfs_xfs_supports_concurrency -l >> $seqres.full 2>&1; then
+> -	loop_mkfs_opts="-l concurrency=0 -d concurrency=0"
+> -else
+> -	loop_mkfs_opts=""
+> -fi
+>  _scratch_mount
+>  # 16T mkfs requires a bit over 2G free
+>  _require_fs_space $SCRATCH_MNT 2202000
+> @@ -63,6 +58,10 @@ fi
+>  
+>  loop_dev=$(_create_loop_device $LOOP_IMG)
+>  
+> +if _mkfs_xfs_supported $loop_mkfs_opts -l concurrency=0 -d concurrency=0 $loop_dev &>> $seqres.full; then
+> +	loop_mkfs_opts="$loop_mkfs_opts -l concurrency=0 -d concurrency=0"
+> +fi
 > +
-> +
->  _require_test
->  _require_odirect
->  _require_test_program dio-write-fsync-same-fd
-> diff --git a/tests/generic/418 b/tests/generic/418
-> index 36789198..7ef1ef9f 100755
-> --- a/tests/generic/418
-> +++ b/tests/generic/418
-> @@ -26,6 +26,13 @@ _require_block_device $TEST_DEV
->  _require_test_program "dio-invalidate-cache"
->  _require_test_program "feature"
->  
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f "$tmp.*"
-> +	rm -f "$testfile"
-> +}
-> +
->  diotest=$here/src/dio-invalidate-cache
->  testfile=$TEST_DIR/$seq-diotest
->  sectorsize=`$here/src/min_dio_alignment $TEST_DIR $TEST_DEV`
-> diff --git a/tests/generic/708 b/tests/generic/708
-> index 827dac13..f504ca57 100755
-> --- a/tests/generic/708
-> +++ b/tests/generic/708
-> @@ -14,6 +14,13 @@
->  . ./common/preamble
->  _begin_fstest quick auto mmap
->  
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f "$tmp.*"
-> +	rm -f "$src" "$dst"
-> +}
-> +
->  _fixed_by_fs_commit btrfs b73a6fd1b1ef \
->  		"btrfs: split partial dio bios before submit"
->  
-> -- 
-> 2.51.2
-> 
-> 
+>  #
+>  # walk over "new" sizes supported by recent xfsprogs.
+>  # Note that the last test is for 16TB-1GB as 32bit platforms only support
