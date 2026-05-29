@@ -1,42 +1,45 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3DAED2E7391;
-	Fri, 29 May 2026 04:39:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 234573112AB;
+	Fri, 29 May 2026 05:45:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780029597; cv=none; b=bVhZbPvFLnDoyeCUa1B8yUBLQuQi34qIQuyod/96FnkBOlIO5GVojVPFOAH1PO9m0pxuy/cJViXGnFV1+HYEJ6kRJoz6AqyfnE1uRziS5GwdzI8Dhohl1ZY8rvB+TpXS+Bl87ysSbJ9w/cTv3h/7MN4UJgc5mrQjzaQTkzKNuYM=
+	t=1780033512; cv=none; b=GhkBxi67JESYzpurhmrqugSvbp3n4EXIMityy/9/P16bUgRvu6ZglIF8bsTYi/mRV7O+pf+B3cNWwCLNptB6abVm23yswuW+S1tmMA0nqIVxw1StYRzAkp82PEZuPCKeZBrIzvaX/HblKZFq88z4vpp8W7sN5D8aXXTxSrUr0No=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780029597; c=relaxed/simple;
-	bh=0LchzAw0rNobSeSvJsgPyZuJg/OSVCJgLjz7FG0eiGs=;
+	s=arc-20240116; t=1780033512; c=relaxed/simple;
+	bh=6zAwC2PhkquG5vEMrjdxU/LPs3A40xGTpSytS42LEBw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=XWmLIThiS2oBNxkJW3dzMsL/q/khrOUKP5WTldcvEVhH/sZBzVtkbG2eaI+6cJi8vl6Q0E012GuHR0L9Ifd16WiFJZpaKVRXOp8el1GcWTk023x6+zukEgTlyRoaGs/4c/DDXJXOgmCSDeHFdO+bH8l0xwICJWhxdkXR8VsWCi8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OZ+hKT45; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=lDnrWQmsyOKvx8Khuz9PZrDqpMio27DU6YVF9Ox/PcmHNpAGDKqEmzvCfGEMUDXRufcdOK7Hgq5ZBt8pql6HETv8d4m0qTofmO+PfuXR3CWKCGPaiBGmSYmnTpbqF/lH7MhA8tBEOWxdqQzQ5sgK0BHddZbzG4ILAR9XaYoOfCE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=KT8WJD1K; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OZ+hKT45"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id C44AD1F00893;
-	Fri, 29 May 2026 04:39:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1780029595;
-	bh=8W0wLWUEVCd1iMnz4p4LRMZLuTVASNeXNrW/n7LnqKA=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=OZ+hKT45oS1XCcQ318yI/N+b3pMC41KzsYRP8If9zg+AMzclXSDd1tVLyxgsUjzso
-	 XlAd11dr6PzJsYf76l6W92SjuLhFlVoP22/IzyBG30Gveo76GuAOhRQQsWelcWngP+
-	 PvLhjJ4JvHB1iOIjsSvMBxm+ufsBHWYiGJJ3Zq46oTUOV+DeyAZCWEtqGUwoiL+Cxn
-	 poHbidH2TBQS2xbKHW5IITtdWxRwDW/zdPT2zVlvFr8vNWxwuNRcNN8tbA+Lnb4Sh+
-	 D/adQOiWgU9NpphKHRfU6xfvix8X1JbJ4EeUx1A9QstnEbUSHcRXtEK6UiuhpeHkDn
-	 AG4dkB7qPJJOw==
-Date: Thu, 28 May 2026 21:39:55 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Anand Jain <asj@kernel.org>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net, zlang@redhat.com,
-	hch@infradead.org
-Subject: Re: [PATCH v6 06/11] fstests: verify f_fsid for cloned filesystems
-Message-ID: <20260529043955.GG6070@frogsfrogsfrogs>
-References: <cover.1779939330.git.asj@kernel.org>
- <e029755044a32de6ec2a0d3391f3ff0089fc3c30.1779939330.git.asj@kernel.org>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="KT8WJD1K"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=+HtO4cf8uEU69g9b5lAa+gM9C4YNMHMk7SrXlLZzstQ=; b=KT8WJD1KL4FjyDLcrIMyeoIp8j
+	5SBBVS7q4r2Xsw7I8fZOVujzHi8+DsqeZC4DoCzaBg6/v7pRkbIPmm1sah7iryPBkmMyca/TiXGlN
+	7diIZ7GBi0HSwgOOoLwHB6laqDMX1OyMHVP6xpoU0WsNDVjsJvf2WIzCuz31uUPMDnMm7wlcyQrRB
+	5vKQbY+gEtbK56QyLSoMccfhwOtDIrZiiDlbW74Q26W9oMpRnhfsQ6WLEtCcArFQwBE8AXRl5YkBs
+	/o40wfVzCmKU6gRntfUAaEYJAAkdo+O3AL8SQfGFRyN88iLccIWP19j60fp13QqFVIESjPTRQRP4f
+	1ALxvujA==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
+	id 1wSq1u-00000006m3y-2xLl;
+	Fri, 29 May 2026 05:45:10 +0000
+Date: Thu, 28 May 2026 22:45:10 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@infradead.org>, Zorro Lang <zlang@kernel.org>,
+	fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH 2/2] xfs/21[67]: fix mkfs log concurrency detection
+Message-ID: <ahkn5tjDTbVQF9nm@infradead.org>
+References: <20260520185202.GD9544@frogsfrogsfrogs>
+ <20260520190112.GE9544@frogsfrogsfrogs>
+ <ahPiIAJNwjiZ9PTR@infradead.org>
+ <20260529042131.GA6070@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,118 +48,27 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <e029755044a32de6ec2a0d3391f3ff0089fc3c30.1779939330.git.asj@kernel.org>
+In-Reply-To: <20260529042131.GA6070@frogsfrogsfrogs>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Thu, May 28, 2026 at 12:05:37PM +0800, Anand Jain wrote:
-> Verify that the cloned filesystem provides an f_fsid that is persistent
-> across mount cycles, yet unique from the original filesystem's f_fsid.
-
-Might want to add that last part to the test description itself, because
-otherwise I don't know what 'verify' means.
-
-> Signed-off-by: Anand Jain <asj@kernel.org>
-> ---
->  tests/generic/802     | 67 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/802.out |  7 +++++
->  2 files changed, 74 insertions(+)
->  create mode 100644 tests/generic/802
->  create mode 100644 tests/generic/802.out
+On Thu, May 28, 2026 at 09:21:31PM -0700, Darrick J. Wong wrote:
+> On Sun, May 24, 2026 at 10:46:08PM -0700, Christoph Hellwig wrote:
+> > On Wed, May 20, 2026 at 12:01:12PM -0700, Darrick J. Wong wrote:
+> > > +_mkfs_xfs_supported()
+> > 
+> > Can you add a top of function comment explaininging this helper?
 > 
-> diff --git a/tests/generic/802 b/tests/generic/802
-> new file mode 100644
-> index 000000000000..653e74e11b53
-> --- /dev/null
-> +++ b/tests/generic/802
-> @@ -0,0 +1,67 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026 Anand Jain <asj@kernel.org>.  All Rights Reserved.
-> +#
-> +# FS QA Test 802
-> +# Verify f_fsid and s_uuid of cloned filesystems across mount cycle.
-> +
-> +. ./common/preamble
-> +
-> +_begin_fstest auto quick mount clone
-> +
-> +_require_test
-> +_require_block_device $TEST_DEV
-> +_require_loop
-> +
-> +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"btrfs: use on-disk uuid for s_uuid in temp_fsid mounts"
-> +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"btrfs: derive f_fsid from on-disk fsuuid and dev_t"
-
-_fixed_by_fs_commit?
-
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -r -f $tmp.*
-> +	umount $mnt1 $mnt2 2>/dev/null
-> +	_loop_image_destroy "${devs[@]}" 2> /dev/null
-> +}
-> +
-> +# Setup base loop device and its clone
-> +devs=()
-> +_loop_image_create_clone devs
-> +mkdir -p $TEST_DIR/$seq
-> +mnt1=$TEST_DIR/$seq/mnt1
-> +mnt2=$TEST_DIR/$seq/mnt2
-> +mkdir -p $mnt1
-> +mkdir -p $mnt2
-> +
-> +# Mount both filesystems simultaneously using mandatory clone mount options
-> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[0]} $mnt1 || \
-> +						_fail "Failed to mount dev1"
-> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
-> +						_fail "Failed to mount dev2"
-> +
-> +# Capture baseline filesystem IDs for comparison
-> +fsid_scratch=$(stat -f -c "%i" $mnt1)
-> +fsid_clone=$(stat -f -c "%i" $mnt2)
-> +
-> +echo "**** fsid initially ****"
-> +echo $fsid_scratch | sed -e "s/$fsid_scratch/FSID_SCRATCH/g"
-> +echo $fsid_clone | sed -e "s/$fsid_clone/FSID_CLONE/g"
-
-Why echo only to sed?
-
---D
-
-> +
-> +# Verify that the fsids remain stable after a mount cycle, even when the
-> +# mount order is reversed.
-> +echo "**** fsid after mount cycle ****"
-> +_unmount $mnt1
-> +_unmount $mnt2
-> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
-> +						_fail "Failed to mount dev2"
-> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[0]} $mnt1 || \
-> +						_fail "Failed to mount dev1"
-> +
-> +# Compare post mount-cycle values against the baseline
-> +stat -f -c "%i" $mnt1 | sed -e "s/$fsid_scratch/FSID_SCRATCH/g"
-> +stat -f -c "%i" $mnt2 | sed -e "s/$fsid_clone/FSID_CLONE/g"
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/802.out b/tests/generic/802.out
-> new file mode 100644
-> index 000000000000..d1e008f122bb
-> --- /dev/null
-> +++ b/tests/generic/802.out
-> @@ -0,0 +1,7 @@
-> +QA output created by 802
-> +**** fsid initially ****
-> +FSID_SCRATCH
-> +FSID_CLONE
-> +**** fsid after mount cycle ****
-> +FSID_SCRATCH
-> +FSID_CLONE
-> -- 
-> 2.43.0
+> Done:
 > 
-> 
+> # Figure out if the supplied mkfs.xfs options are supported.  A device
+> # or file path must be specified as one of the options, though it will
+> # not be written.
+
+Sounds good.
+
+> Digression: I wonder if _scratch_mkfs_xfs_supported should have a
+> "-f" in its $XFS_MKFS_PROG invocations?
+
+Probably, otherwise if you run this when something else was on the
+device it randomly fails.
+
