@@ -1,331 +1,200 @@
-Received: from mail-qv1-f50.google.com (mail-qv1-f50.google.com [209.85.219.50])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 333603A63EF
-	for <fstests@vger.kernel.org>; Fri, 29 May 2026 19:27:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60E3B1FC8;
+	Mon,  1 Jun 2026 23:25:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.20
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780082849; cv=none; b=GC5AlyACEFP1z1p++c94aTEM18jchKGLRN7BDkIi+PIAJwmAMdAXSdrVjgPJIWPpPL5uhRMNBRX9s1VXWv8Luh8J8UrmmBX4Hw20UBz+YVEIOR6Bp1IGTETO8iVBP2kDcYQQT1bI9ttHBnCR0oaKjbdCobfKz5+EVfNwA887YZE=
+	t=1780356350; cv=none; b=TOZhGq1dwi88TErlU46aQkN7DvzHlGZvsumI3sXNV0e1dBUMrfopZ+uaeRYECHbxhZoD+YHncVvDSOuWX3L98ZutrNg1hKqhYjt28vuuxPVNVwZYpvVj7H3QAmSBtXGIwTjCVtRliKgawQwvtJEhTOPesPOh7d/sGk91qB9k00Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780082849; c=relaxed/simple;
-	bh=gB1U8bKM/wiOIdkRr9Pd+jw+4hTWsXjbCn/1NejxI1s=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=nxmum/3DmHEAqAzoTKiwKt+0IzVA45mT39bZSru3Y1YLzl5wFesUp27qk12FIpHmBAMDUjZxxeM9lpp3igNr4jyftaHSwRjBy60NnzKe1N64H7GPl+sg2GluT8KJc0y097LUfnmxHmAB+siyPHhh9LdjNCa5WP0DRHiS96tX3lo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redpanda.com; spf=pass smtp.mailfrom=redpanda.com; dkim=pass (2048-bit key) header.d=redpanda.com header.i=@redpanda.com header.b=lGLmdkkV; arc=none smtp.client-ip=209.85.219.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redpanda.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redpanda.com
+	s=arc-20240116; t=1780356350; c=relaxed/simple;
+	bh=Asaby4lXrsB07XM55hrY440qnhttSpyPT43wCOlNo9Q=;
+	h=Message-ID:Date:MIME-Version:To:From:Subject:Content-Type; b=rZqv/lLRO7Liz6S/6xo0PMRcMxDt3j5YLadeyuXTWeJOJg7cs0j9Xg9FX3VMXxZnMXdzarR2RhEK8767uuUU7wZYDwZf37XRe4fywU3ugF3Xv0T0eOzD9CvGK4TDTD5fRL6TRm/X7T7BJpBeVBG5UAuF6H7t2nj+BI3mqVW1iQo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=ChnU6p3j; arc=none smtp.client-ip=212.227.17.20
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=redpanda.com header.i=@redpanda.com header.b="lGLmdkkV"
-Received: by mail-qv1-f50.google.com with SMTP id 6a1803df08f44-8ccda0ac4fcso20417216d6.2
-        for <fstests@vger.kernel.org>; Fri, 29 May 2026 12:27:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redpanda.com; s=google; t=1780082847; x=1780687647; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=1T7lRX1vJ1Wj9JNwItxpA7mGR6CIeTgq8xgA3eOaQnM=;
-        b=lGLmdkkVigib5vd4v0G36O53/bNSBdZqSqiCGkwab+wzBTx7PnO7bkM1H6nuiKsamm
-         XDv2CuDfv4WOXZWNTUKRyyn73v1bEvUMTUbdikzMDDBpx6gfxst5uWWUCCw8awX3kGrJ
-         pesLvVWESyoBDNqc54zFC1YzDxP0PCRdnmoBZUwpQeXTOyGPdbT8r7UBhfRVZ9om37cI
-         lM3QeT0AxTcMKScT1tiCHVxAPFKb0sj1YXj9vkpkxJRKlk0FKc0mvib9WPwJYGAvQRs8
-         HfOO8UYHhd4aXkC/hRwHQsgnLB2hfkaK44R/svxI/T4m/GYgO02YNTl4MmOvT9wpJFiT
-         e1Ag==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780082847; x=1780687647;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=1T7lRX1vJ1Wj9JNwItxpA7mGR6CIeTgq8xgA3eOaQnM=;
-        b=MMEOxRRLnWZDiYJ/UYfQJVXSbndCbquJ5RNpy1zkHhvfsy651/HpQMl0ZjbFjLV66I
-         L33C4aw1GIDA9wgDGb526PANhrG6x51qwxIEuGv2dFtvfBgyC+LjiKpaCH8hlOT2iEH9
-         eYH9uIs5lcrs3M+5cZ5XUo/uWWi2tWo1h0G56v7tDNR+QRzvICzwNUU0nnLW/kpoYCQZ
-         ef90I+PDjYD9ETtvlqek7FMjVPX02AqpcnvrWtMqQx86muGmJ4rEkSgDFtIHmO63/uM5
-         02PDw+I9SrwfVq0AxD+AlC2Klg3RRLrbjt53H73JwES2kAq7MSt8eyMv2nKw6BVkCF6Q
-         2ahg==
-X-Gm-Message-State: AOJu0YyPTL0loS+6wDDYM5wJCJvbXO09AgwZuqM6tiZrZjfc6ZRndvOP
-	eWKaZvO2Cs2Yu5QHEwiCObgpuf/Ov48NY8JhHSWfgDXbvoCGOLODFvHYJlQtmgO9pJSfVyFFYZ7
-	dMc3Xw7OJnyZXKFSgWy5ROXu9B7/6i4cnpN/8olUUCQqNJLp+RdHnfr5cAzQ1jlCKhHom76JT
-X-Gm-Gg: Acq92OEhcEi3xW7+w46tHinWEd7bI16k7BTYdTKDI5zoBCCcBb7B+C5K8HMSkSmS5K5
-	epW6up+eMBNmtWjCxVjGOfan3Yy7EtsLKs9owBbbjvM+NMcg7M/r3Wq5R3zMkfjd5Jy8wj/MS0L
-	hpn5VNx/PTDgu1cCnsNDPClOTmVoQvp8xYiyfLIiPNPFYSyBfS9yQ6Hy3MPSAZJKmKvMA6vDAJ7
-	xgVevPP4tz8pHgI1rNOVLA6A9kxa79bSUoD9pI1W/bgvcaPErn7v/Bv18u/gnHyzxkERoKzBfby
-	ZCpN3DC+ETGOIrG/74kzqbqfdjuAORuAFk+W17sV6kNkzJ43rK48arC5sargh3T3hD10gFoId0n
-	2dNMTVIwHMf1ADMKN6fZUI1MkEsXmWShyHNS8fbw4RM9Y7CPO4Co6qtunKga28iCRWTqF6/NvGY
-	fqFGQK7lh2MGumv0rZ8gbaaJulXLELR3TUqv8xCY7XgQQ2jW2H
-X-Received: by 2002:ad4:5b87:0:b0:8cc:3546:262b with SMTP id 6a1803df08f44-8ccefd84a0emr18556836d6.24.1780082846949;
-        Fri, 29 May 2026 12:27:26 -0700 (PDT)
-Received: from fedora.tail5a808e.ts.net ([72.228.86.65])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8ccea2163b0sm25284466d6.38.2026.05.29.12.27.25
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 29 May 2026 12:27:26 -0700 (PDT)
-From: Brandon Allard <brandon@redpanda.com>
-To: fstests@vger.kernel.org
-Cc: zlang@kernel.org,
-	linux-xfs@vger.kernel.org,
-	Brandon Allard <brandon@redpanda.com>
-Subject: [PATCH] xfs: test NOWAIT DIO writes that span written/unwritten boundaries
-Date: Fri, 29 May 2026 15:27:14 -0400
-Message-ID: <20260529192714.21602-1-brandon@redpanda.com>
-X-Mailer: git-send-email 2.52.0
+	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="ChnU6p3j"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
+	s=s31663417; t=1780356346; x=1780961146; i=quwenruo.btrfs@gmx.com;
+	bh=eFDh9UUfDdkc4FvoOjJ9TTVQzpR4DEW46vvIt3bO4As=;
+	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:To:From:Subject:
+	 Content-Type:Content-Transfer-Encoding:cc:
+	 content-transfer-encoding:content-type:date:from:message-id:
+	 mime-version:reply-to:subject:to;
+	b=ChnU6p3jlL9RRgEX61RqmMONTgdOXv3+KRYvQPuscx84dsBRTM3eFnZTvQE674u5
+	 hyeFuwA2BwL78llK9Q8rFvwFLh1LmUbb2ZJ1yza5nfvHZGNMv1dwqeuNUnH9sMziX
+	 6qHNseHwCzzOJQEnCY9GZQLbBZfPLf5NPQG6P1tKSUvBn1Ei3m+SRBUNAvfb3USaO
+	 EhMMSt4oCx5SSJyfs3VNO2cpp6NrHbT5uBEo7Rn/AYR9k/dZ5+LDqhknGGaIKei83
+	 Hje55ChIJapwb7fnxbPgl4Y/SRKPyMonldBjj56GEc3H+tcOAtYd8XVLfNKx4hFX5
+	 2mIlsd8aTwwahmT//w==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from client.hidden.invalid by mail.gmx.net (mrgmx105
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1MbzuB-1wzxaw2YwB-00fIaN; Tue, 02
+ Jun 2026 01:25:46 +0200
+Message-ID: <8550fde2-bcc6-4e8a-aa57-49944acba415@gmx.com>
+Date: Tue, 2 Jun 2026 08:55:42 +0930
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Gm-Spam: 0
-X-Gm-Phishy: 0
+User-Agent: Mozilla Thunderbird
+Content-Language: en-US
+To: linux-btrfs <linux-btrfs@vger.kernel.org>,
+ "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Subject: Inconsistent mount option for TEST_DIR after _test_cycle_mount()
+Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
+ BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
+ sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
+ xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
+ naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
+ tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
+ 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
+ VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
+ CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
+ /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
+ GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
+ q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
+ ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
+ CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
+ B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
+ Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
+ +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
+ HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:AtX0dNpHQKpLzNCrgE904RyKnCH1WAvapPVmH67aGbMSYvp9bP0
+ 2spM9/L106U553dAZrxwVsvcchAiObi42incEsPPEeG0J1NpUjx/DxjtK73g3hCXVwdm+n2
+ zkED0ZDXwhwN0atgBSOYVWnLXdsWL7ZzOoj9C2scD8/LlczgcwsHf+Rt5UFwmVhlsO6RM5m
+ pXQpqjIGggnDp4diMq6bg==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:wJbG5c5wk2M=;EyT2sB8pK+eVHz9COB2OlvEyFaX
+ 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
+ Dpotkg==
 
-Add a regression test exercising IOMAP_NOWAIT direct-IO writes around
-the written/unwritten extent boundary that arises from preallocated
-sequential append workloads.
+Hi,
 
-Commit 883a790a8440 ("xfs: don't allow NOWAIT DIO across extent
-boundaries") added a guard in xfs_direct_write_iomap_begin that returns
--EAGAIN under IOMAP_NOWAIT when the imap returned by xfs_bmapi_read
-does not cover the entire requested range. A subsequent kernel patch
-coalesces a (NORM, UNWRITTEN) pair into a single in-memory iomap when
-the two records are physically contiguous on disk, restoring the
-success path for the workload above.
+Recently I'm testing btrfs with its nodatasum options to verify some=20
+direct IO bugs.
 
-The test covers five scenarios:
-  A. NOWAIT DIO inside a single NORM extent must succeed.
-  B. NOWAIT DIO inside a single UNWRITTEN extent must succeed.
-  C. NOWAIT DIO spans NORM->UNWRITTEN, contiguous must succeed
-     (the new code path).
-  D. NOWAIT DIO spans UNWRITTEN->NORM, contiguous must return
-     -EAGAIN (asymmetric guard; only N->U is safe to merge).
-  E. NOWAIT DIO spans NORM->HOLE must return -EAGAIN (hole guard
-     from 883a790a8440 preserved).
+But it turns out _test_cycle_mount() doesn't respect $MOUNT_OPTIONS, and=
+=20
+will cause mount options that affect new files to be not applied.
 
-The scratch filesystem is mounted with -o lazytime so the NOWAIT path
-does not bail in the mtime-update transaction (a separate -EAGAIN
-source unrelated to extent-boundary handling). It is mkfs'd with
--b size=4096 so byte offsets in the golden output are stable across
-host architectures.
+E.g, there is a super simple test case:
 
-Signed-off-by: Brandon Allard <brandon@redpanda.com>
+  . ./common/preamble
+  _begin_fstest auto
+  _require_test
+  mount | grep "$TEST_DIR"
+  _test_cycle_mount
+  mount | grep "$TEST_DIR"
+  _exit 0
 
-This test exercises behavior introduced by the accompanying kernel
-patch "xfs: coalesce contiguous unwritten suffix into iomap for NOWAIT
-writes" posted to linux-xfs:
-  https://lore.kernel.org/linux-xfs/20260529191100.4142371-1-brandon@redpanda.com/
+With MOUNT_OPTIONS set to "-o nodatasum", the output looks like the=20
+following:
 
-Scenario C will fail on kernels that do not include that patch. If the
-kernel patch is accepted, the XXXXXXXXXXXXX placeholder in
-_fixed_by_kernel_commit should be replaced with the real commit SHA.
----
- tests/xfs/842     | 152 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/842.out |  42 +++++++++++++
- 2 files changed, 194 insertions(+)
- create mode 100755 tests/xfs/842
- create mode 100644 tests/xfs/842.out
+/dev/mapper/test-test on /mnt/test type btrfs=20
+(rw,relatime,nodatasum,discard=3Dasync,space_cache=3Dv2,subvolid=3D5,subvo=
+l=3D/)
+/dev/mapper/test-test on /mnt/test type btrfs=20
+(rw,relatime,discard=3Dasync,space_cache=3Dv2,subvolid=3D5,subvol=3D/)
 
-diff --git a/tests/xfs/842 b/tests/xfs/842
-new file mode 100755
-index 0000000..ab93dc3
---- /dev/null
-+++ b/tests/xfs/842
-@@ -0,0 +1,152 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Redpanda Data, Inc.
-+#
-+# FS QA Test No. 842
-+#
-+# Test several scenarios for RWF_NOWAIT direct-IO writes on XFS, focused on
-+# the WRITTEN<->UNWRITTEN extent boundary case.
-+#
-+# Background:
-+#   Commit 883a790a8440 ("xfs: don't allow NOWAIT DIO across extent
-+#   boundaries") added a guard in xfs_direct_write_iomap_begin that returns
-+#   -EAGAIN under IOMAP_NOWAIT when the imap returned by xfs_bmapi_read does
-+#   not span the entire requested range. The guard prevents NOWAIT callers
-+#   from observing short writes when the range needs multiple bios.
-+#
-+#   For sequential append-DIO workloads with adaptive preallocation, requests
-+#   regularly straddle a NORM extent (just-written head) and a physically
-+#   contiguous UNWRITTEN extent (preallocated tail). A single bio covers both
-+#   safely; no short-write hazard exists. A subsequent fix coalesces the two
-+#   records in the in-memory iomap and reports the merged range as UNWRITTEN
-+#   so the completion handler converts the suffix normally.
-+#
-+# Scenarios:
-+#   A. NOWAIT DIO inside a single NORM extent          -- must succeed
-+#   B. NOWAIT DIO inside a single UNWRITTEN extent     -- must succeed
-+#   C. NOWAIT DIO spans NORM -> UNWRITTEN, physically  -- must succeed
-+#      contiguous (the fix)
-+#   D. NOWAIT DIO spans UNWRITTEN -> NORM, physically  -- must fail (-EAGAIN)
-+#      contiguous (coalesce path is intentionally
-+#      asymmetric: only N->U is safe to merge)
-+#   E. NOWAIT DIO spans NORM -> HOLE                   -- must fail (-EAGAIN)
-+#      (hole guard from 883a790a8440 preserved)
-+#
-+# The scratch filesystem MUST be mounted with -o lazytime; without it the
-+# NOWAIT path bails earlier in the mtime-update transaction (separate
-+# -EAGAIN source unrelated to extent-boundary handling) and scenarios B/C
-+# would return -EAGAIN for the wrong reason.
-+#
-+# The scratch filesystem is mkfs'd with -b size=4096 so byte offsets in the
-+# golden output are stable across host architectures.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick rw prealloc
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	_scratch_unmount 2>/dev/null
-+}
-+
-+# Import common functions.
-+. ./common/filter
-+
-+_require_scratch
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "fiemap"
-+_require_xfs_io_command "pwrite" "-N"
-+
-+_fixed_by_kernel_commit XXXXXXXXXXXXX \
-+	"xfs: coalesce contiguous unwritten suffix into iomap for NOWAIT writes"
-+
-+_scratch_mkfs_xfs -b size=4096 >> $seqres.full 2>&1
-+_scratch_mount "-o lazytime"
-+
-+# Defensive: confirm mkfs honored the requested block size. The offsets in
-+# the golden output assume bsize == 4096.
-+bsize=$(_get_file_block_size $SCRATCH_MNT)
-+[ "$bsize" -eq 4096 ] || _notrun "fs block size is $bsize, expected 4096"
-+
-+# All offsets/sizes are multiples of the 4096-byte block size enforced above.
-+HEAD_BYTES=4096       # 1 block (NORM head after split)
-+TAIL_BYTES=32768      # 8 blocks (UNWRITTEN tail / NORM tail)
-+ALLOC_BYTES=36864     # 9 blocks (HEAD + TAIL, one allocation)
-+SPAN_BYTES=8192       # 2 blocks (spans a single extent boundary)
-+
-+# Return 0 if the first two extents in $1 are physically adjacent.
-+# _filter_xfs_io_fiemap emits one space-separated record per extent:
-+#   first_logical last_logical first_physical last_physical (512-byte sectors).
-+_extents_are_contiguous()
-+{
-+	$XFS_IO_PROG -c "fiemap" "$1" 2>/dev/null \
-+		| _filter_xfs_io_fiemap \
-+		| awk 'NR==1 { end=$4 } NR==2 { exit !(end + 1 == $3) }'
-+}
-+
-+# Scenario A: NOWAIT DIO inside a single NORM extent. Must succeed.
-+echo
-+echo "== A: NOWAIT DIO inside a single NORM extent (must succeed) =="
-+fa=$SCRATCH_MNT/A
-+$XFS_IO_PROG -fd -c "pwrite -S 0xaa 0 $ALLOC_BYTES" $fa | _filter_xfs_io
-+$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0xbb -b $SPAN_BYTES 0 $SPAN_BYTES" $fa \
-+	| _filter_xfs_io
-+od -A d -t x1 -N $SPAN_BYTES $fa
-+
-+# Scenario B: NOWAIT DIO inside a single UNWRITTEN extent. Must succeed.
-+echo
-+echo "== B: NOWAIT DIO inside a single UNWRITTEN extent (must succeed) =="
-+fb=$SCRATCH_MNT/B
-+$XFS_IO_PROG -fdt -c "falloc 0 $ALLOC_BYTES" $fb | _filter_xfs_io
-+$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0xcc -b $SPAN_BYTES 0 $SPAN_BYTES" $fb \
-+	| _filter_xfs_io
-+od -A d -t x1 -N $SPAN_BYTES $fb
-+
-+# Scenario C: NOWAIT DIO spans NORM -> UNWRITTEN, physically contiguous.
-+echo
-+echo "== C: NOWAIT DIO spans NORM->UNWRITTEN, contiguous (must succeed) =="
-+fc=$SCRATCH_MNT/C
-+# The allocator preserves physical contiguity across the split, which is
-+# what we need to exercise the coalesce path.
-+$XFS_IO_PROG -fdt -c "falloc 0 $ALLOC_BYTES" $fc | _filter_xfs_io
-+$XFS_IO_PROG -d -c "pwrite -S 0xdd 0 $HEAD_BYTES" $fc | _filter_xfs_io
-+
-+if ! _extents_are_contiguous $fc; then
-+	_notrun "C: allocator placed split extents non-contiguously, cannot exercise W<->U coalesce on this run"
-+fi
-+
-+$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0xee -b $SPAN_BYTES 0 $SPAN_BYTES" $fc \
-+	| _filter_xfs_io
-+od -A d -t x1 -N $SPAN_BYTES $fc
-+
-+# Scenario D: NOWAIT DIO spans UNWRITTEN -> NORM (physically contiguous).
-+echo
-+echo "== D: NOWAIT DIO spans UNWRITTEN->NORM, contiguous (must EAGAIN) =="
-+fd=$SCRATCH_MNT/D
-+$XFS_IO_PROG -fdt -c "falloc 0 $ALLOC_BYTES" $fd | _filter_xfs_io
-+$XFS_IO_PROG -d -c "pwrite -S 0x11 $TAIL_BYTES $HEAD_BYTES" $fd | _filter_xfs_io
-+
-+if ! _extents_are_contiguous $fd; then
-+	_notrun "D: allocator placed split extents non-contiguously, cannot exercise U<->W asymmetric guard on this run"
-+fi
-+
-+# Span ends at offset (TAIL_BYTES + HEAD_BYTES), crosses the U->N boundary.
-+span_d_off=$((TAIL_BYTES - HEAD_BYTES))
-+$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0x22 -b $SPAN_BYTES $span_d_off $SPAN_BYTES" $fd
-+# Confirm the would-be data was not written: tail block should still be 0x11.
-+od -A d -t x1 -j $TAIL_BYTES -N $HEAD_BYTES $fd
-+
-+# Scenario E: NOWAIT DIO spans NORM -> HOLE.
-+echo
-+echo "== E: NOWAIT DIO spans NORM->HOLE (must EAGAIN) =="
-+fe=$SCRATCH_MNT/E
-+$XFS_IO_PROG -fd -c "pwrite -S 0x33 0 $HEAD_BYTES" $fe | _filter_xfs_io
-+$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0x44 -b $SPAN_BYTES 0 $SPAN_BYTES" $fe
-+# Confirm: head block must still hold the original 0x33 pattern; if the
-+# NOWAIT write had partial-committed, we would see 0x44 here instead.
-+od -A d -t x1 -N $HEAD_BYTES $fe
-+
-+status=0
-+exit
-diff --git a/tests/xfs/842.out b/tests/xfs/842.out
-new file mode 100644
-index 0000000..6cbfc2a
---- /dev/null
-+++ b/tests/xfs/842.out
-@@ -0,0 +1,42 @@
-+QA output created by 842
-+
-+== A: NOWAIT DIO inside a single NORM extent (must succeed) ==
-+wrote 36864/36864 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+0000000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
-+*
-+0008192
-+
-+== B: NOWAIT DIO inside a single UNWRITTEN extent (must succeed) ==
-+wrote 8192/8192 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+0000000 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
-+*
-+0008192
-+
-+== C: NOWAIT DIO spans NORM->UNWRITTEN, contiguous (must succeed) ==
-+wrote 4096/4096 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+0000000 ee ee ee ee ee ee ee ee ee ee ee ee ee ee ee ee
-+*
-+0008192
-+
-+== D: NOWAIT DIO spans UNWRITTEN->NORM, contiguous (must EAGAIN) ==
-+wrote 4096/4096 bytes at offset 32768
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+pwrite: Resource temporarily unavailable
-+0032768 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11
-+*
-+0036864
-+
-+== E: NOWAIT DIO spans NORM->HOLE (must EAGAIN) ==
-+wrote 4096/4096 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+pwrite: Resource temporarily unavailable
-+0000000 33 33 33 33 33 33 33 33 33 33 33 33 33 33 33 33
-+*
-+0004096
--- 
-2.52.0
+Note the missing "nodatasum" mount option after the _test_cycle_mount.
 
+However I failed to find out how the initial _require_test is different=20
+from the later _test_cycle_mount.
+
+They all call the same _test_mount(), and that function never really=20
+respect $MOUNT_OPTIONS, but still the first test mount still got the=20
+correct "nodatasum" option.
+
+Any clue on how to fix this weird problem?
+
+Thanks,
+Qu
