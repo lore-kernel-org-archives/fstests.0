@@ -1,179 +1,87 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF3963D5656
-	for <fstests@vger.kernel.org>; Tue,  2 Jun 2026 10:39:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A60CD145FE0;
+	Tue,  2 Jun 2026 20:09:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780396767; cv=none; b=R5qrFJ4wA9xnm+m6Dyfib30scc32U1oYKacaDH2O5FVMwyyJoUGXwaQsEbjyGnuqQe/ruV/cEA1BgeRWttnY3Ilt/sGtA/P0m209aZKb7z6NKDQH0HmVFi+zuIGjk8Yhx48M+jihbYpxOqFi9P7FbyqqCkEX7fc97aKgM7Pygdg=
+	t=1780430972; cv=none; b=q3XulPBu0ICLOvAEOogky0CGvSUMJbNdehUNJNNA9794TNyDjha8V7S8/jW/wWiKKi/SeFlUfx0rWVR/2QKAqr9T1LsXokYW5ABilMWamF+US4gRa+VKlBGrm+a4R2UoTDSN4F5QXZF9f7aGZA6F36L1wsWkkuNH8dmqTSX0QD4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780396767; c=relaxed/simple;
-	bh=5/t1s4WQtESSU+/PPjkOFmorKpNar/59+lFpju1HSiE=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=NKi/b4MzJ8NbwL2ygk85F3ztEoI7xOeLha9Sg5jzofulCFm382A7HHsZpUFhsnSvYnYNDRpy4AQKlYZwbaR/x/reHGC7h/a5KtRB0mfd41EZUO4w1A34z/OFHxzWieRafTOkJqsX7jvWrdVv8+YPywtlkdB2ppZ+PJcL5Awfjrc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=iWPC9GZm; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=VAJbP4Dy; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1780430972; c=relaxed/simple;
+	bh=dse0fSeQIzHmXLihQLU4iYzX1+cWq3tl1wF5/UYdSKc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=b3FmJvE6F2zwzsYjgIPTz+DwrWx6wmsOK5jGrJal0Ojw8GFkSgRmJe2l2xf3obo36IojhUQlyzDme8ZmB9uM7VBEzygwF7NBTO8HIKW/YtYReYKfU97/8ByGp10uIeowRBoj7p7Q9KvUxKQcmJDcOS4NWUwJrjpbqUNOwq+kHk4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BvpO3Eb7; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="iWPC9GZm";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="VAJbP4Dy"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id C33436A9CC;
-	Tue,  2 Jun 2026 10:39:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1780396764; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=MAzD1JRfnAoeRlp40ywpUHAf/ORU7ic+vjXziwIVFSA=;
-	b=iWPC9GZmfgsgDIL4NiYaPivFnasWvjQjXiuN1yjXsS8tQ0ZX8h3wR/QAd8PLb9M/J2vQKm
-	eX0jYRq5VkdnPL4s8iO8WXRBBN62Q4GEU26w2F4crgCeYcMuUyRA8I2vleL8lcF5/Kj2Nw
-	NvPTz+ogaqJ4YfRrlrHy98Ho46XusRQ=
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1780396762; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=MAzD1JRfnAoeRlp40ywpUHAf/ORU7ic+vjXziwIVFSA=;
-	b=VAJbP4Dy+utsoNe9WnfrTcqt4g6AvYcUemKQI0IViLgTmJd73AXb+x34PmJKDh8M52ABR0
-	dVI7TRjCw3BeAnn42h5WdXfS8V440wwti6sUBvhNHMjoMvFouWmMuQtMpS8qkV6c4TGe4Y
-	h9iaiJisurHO8LnB10CT68MP+e7gofs=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 4E2D2779A7;
-	Tue,  2 Jun 2026 10:39:21 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id nsCbBNmyHmoOEwAAD6G6ig
-	(envelope-from <wqu@suse.com>); Tue, 02 Jun 2026 10:39:21 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org
-Cc: Su Yue <glass.su@suse.com>,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v2] fstests: btrfs: add a new test case for fstrim crash
-Date: Tue,  2 Jun 2026 20:09:03 +0930
-Message-ID: <20260602103903.93754-1-wqu@suse.com>
-X-Mailer: git-send-email 2.54.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BvpO3Eb7"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 677AF1F00893;
+	Tue,  2 Jun 2026 20:09:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1780430971;
+	bh=RCTqdMUIQL2wPOqBPUz/XcErDodBJvj0B3QqO1rdp0s=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=BvpO3Eb7BPEzluCrqCkH6rc3op61E+WQQNdp6Wrul7YVkgjPb9iGzbb8nx4aRzq1k
+	 7WKSykOfbdkIm0doMDJ7D49fjaAdH2edxb860X94/FKyZN5dR3IzNjvTWUNOY/dd+i
+	 KLoZM6ywHHypWr/X51FxTpjjni9U6DlCijss6pt5OYtdguTTQgZizdeQgkETXJffCU
+	 1fjWCwMnLmUAuHa8tMWRgJ4bi2Ia4zZ5vXyYrRNfLnXb9hnevvz+7BqUfU1G5fMucL
+	 gCSv363bK4/GQQnIGxxcZ1hkc5BQUSntVyuJZY3z9WuhDcWyKHuCCJkfUqTo4HO8Fc
+	 VW5WjoSNEMBMg==
+Date: Tue, 2 Jun 2026 13:09:30 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Disha Goel <disgoel@linux.ibm.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org, ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com, xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH] common/defrag: Skip defrag tests on DAX-enabled
+ filesystems
+Message-ID: <20260602200930.GB6054@frogsfrogsfrogs>
+References: <20260602101418.55131-1-disgoel@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Spam-Flag: NO
-X-Spamd-Result: default: False [-2.80 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-0.996];
-	MIME_GOOD(-0.10)[text/plain];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	ARC_NA(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	TO_DN_SOME(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:mid,imap1.dmz-prg2.suse.org:helo];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	RCPT_COUNT_THREE(0.00)[4];
-	RCVD_TLS_ALL(0.00)[]
-X-Spam-Level: 
-X-Spam-Score: -2.80
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260602101418.55131-1-disgoel@linux.ibm.com>
 
-There is a bug report that btrfs/242 can crash very randomly.
+On Tue, Jun 02, 2026 at 03:44:18PM +0530, Disha Goel wrote:
+> Online defragmentation is not supported on DAX-enabled filesystems
+> because DAX bypasses the page cache required for defrag operations.
+> 
+> Add check in _require_defrag() to skip tests when DAX is enabled,
+> avoiding false failures on ext4/301-304, ext4/308 and generic/018.
+> 
+> Signed-off-by: Disha Goel <disgoel@linux.ibm.com>
+> ---
+>  common/defrag | 4 ++++
+>  1 file changed, 4 insertions(+)
+> 
+> diff --git a/common/defrag b/common/defrag
+> index 055d0d0e..28db2f7a 100644
+> --- a/common/defrag
+> +++ b/common/defrag
+> @@ -6,6 +6,10 @@
+>  
+>  _require_defrag()
+>  {
+> +    # Defragmentation is not supported on DAX-enabled filesystems
+> +    if echo "$MOUNT_OPTIONS" | grep -qw "dax"; then
+> +        _notrun "Defragmentation not supported on DAX-enabled filesystem"
+> +    fi
 
-It turns out the crash is caused by a re-appearing missing device, which
-screwed up several checks in fstrim.
+Defrag doesn't work on XFS on DAX as well?  It seems to work fine on my
+VMs...
 
-This new test case is a more reliable version, dedicated for such crash,
-which will:
+<confused>
 
-- Create a raid1 btrfs
-- Mount with a single device in degraded mode
-- Let the missing device to re-appear
-- Run fstrim
+--D
 
-Which is reliably crashing in my environment without the submitted fix.
-And with the submitted fix, the test no longer crashes.
-
-Reported-by: Su Yue <glass.su@suse.com>
-Link: https://lore.kernel.org/linux-btrfs/wlwir19t.fsf@damenly.org/
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
-Changelog:
-v2:
-- Fix two grammar errors
-- Add the missing _scratch_dev_pool_put at the end
-- Add Filipe's reviewed-by tag
----
- tests/btrfs/350     | 39 +++++++++++++++++++++++++++++++++++++++
- tests/btrfs/350.out |  2 ++
- 2 files changed, 41 insertions(+)
- create mode 100755 tests/btrfs/350
- create mode 100644 tests/btrfs/350.out
-
-diff --git a/tests/btrfs/350 b/tests/btrfs/350
-new file mode 100755
-index 00000000..7cc04b63
---- /dev/null
-+++ b/tests/btrfs/350
-@@ -0,0 +1,39 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-+#
-+# FS QA Test 350
-+#
-+# Make sure fstrim will not crash when a missing device re-appeared.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick volume trim raid
-+
-+_fixed_by_kernel_commit XXXXXXXXXXXX \
-+	"btrfs: do not trim a device which is not writeable"
-+
-+_require_btrfs_forget_or_module_loadable
-+_require_scratch_dev_pool 2
-+_scratch_dev_pool_get 2
-+dev1=$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{ print $1 }')
-+dev2=$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{ print $2 }')
-+
-+_scratch_pool_mkfs "-m raid1 -d raid1"
-+_require_batched_discard $SCRATCH_MNT
-+
-+# Mount the filesystem in degraded mode
-+_btrfs_forget_or_module_reload
-+_mount -o degraded $dev1 $SCRATCH_MNT
-+
-+# Now let devid 2 reappear
-+_btrfs device scan $dev2
-+
-+# Run fstrim, it should skip the re-appeared device, as it still
-+# lacks WRITEBALE flag and a proper bdev pointer.
-+#
-+# For unpatched kernel, it will crash with a NULL pointer dereference.
-+$FSTRIM_PROG $SCRATCH_MNT
-+
-+_scratch_dev_pool_put
-+echo "Silence is golden"
-+_exit 0
-diff --git a/tests/btrfs/350.out b/tests/btrfs/350.out
-new file mode 100644
-index 00000000..e9aad823
---- /dev/null
-+++ b/tests/btrfs/350.out
-@@ -0,0 +1,2 @@
-+QA output created by 350
-+Silence is golden
--- 
-2.51.2
-
+>      case "$FSTYP" in
+>      xfs)
+>          # xfs_fsr does preallocates, require "falloc"
+> -- 
+> 2.45.1
+> 
+> 
