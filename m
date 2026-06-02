@@ -1,70 +1,125 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f74.google.com (mail-pj1-f74.google.com [209.85.216.74])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 893313A6F04;
-	Tue,  2 Jun 2026 06:13:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 10317357D01
+	for <fstests@vger.kernel.org>; Tue,  2 Jun 2026 07:20:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780380785; cv=none; b=bv2BwNT9FgA/l7WndJOai3EdS6VitLmG/JTUjkubES0+WidlrTG3IKXeRs4mTyLTGPgk+QtJor3hW/IRNwGIUy6MjjrVA+NA9zugCxjwtr5G1gz6KiUF1nN1TnuC3PGX4XeKPnPCX1HMOreRz5ttYbyxU5O/PZSr05pBwsBtpso=
+	t=1780384824; cv=none; b=ZwugluZKJEapNYxCuXMfuSRK/Nl/Tsbt67SFqhLLTST48fTs+50DDGX4ltcJEqkYJWXvvsz2tULp+bJMXYaMwOoBDPQ5b9xurOKsh53agyKeibNUy0/hQ4wyD4Q5vUVMPrmc7rSsZsvckA6UmmPfauHNYEJNpKEYaJV+9MKgQDY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780380785; c=relaxed/simple;
-	bh=XSMA9BXrG0bDvarLtBSu1VgN6obS+n+5XO45gAqvudM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=C5RTIYX8GtJ09dzx8SLWFdACLfriAyIG21axphi/F55XE+lwpXe0kPUiUcDVzGk3Vg6JjhSUYOXA7aaMqfxphWqwZIzOgAi9b8Zx/pn3jZebtcWHg0VshNKTwCBd/GBDkUBHsxWufWpww0EYuuvgFiYrwLZVjnDv6UGl1CeAypc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=IjOsYKdy; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1780384824; c=relaxed/simple;
+	bh=697k+mg9eApcxRBABdirczqWPUcv+i0MaEM53NbUY7Q=;
+	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=q3q8BinNUn9CTEjmxikkAwKR4tWyuczusofiyP83JabV6haZwGWQi3/fvnxxkNuCZuwOLNnbgWAgP0vAfhI9ElSz9iYMhHqxBTgxq9mWwd/kxbebl4ThFxG80vW98OJJISRqzb4dmUcyB/F07hQvZg9RcMe9s6fEzxH7WmlWLRc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--joannechien.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=B1bi98IH; arc=none smtp.client-ip=209.85.216.74
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--joannechien.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="IjOsYKdy"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=XSMA9BXrG0bDvarLtBSu1VgN6obS+n+5XO45gAqvudM=; b=IjOsYKdyb9evC0sFH+6KxUuzSb
-	xJotSMxa+5kBzb9YzznXKLJWTBuQkFaI3Dq52cW3k9h/nXX2rB1kJ8KYwOketz9ydH4pF04LfZhVP
-	4RJKLh0gZWENC1KBTeThTWmYysEwnmlXVO3FprkMX0NARRrklMDK5r35aUcGnd7iLNS9+ubRwCNUk
-	wDRbpE6XK472irY3TYd835gYcc0cHNnHigFbwQ1bqQKyNofOjkY42CIh5BJNSGKcyvAkzgoE4yoSR
-	r8/T5MruVXRkoSKE5FDR16mjOxFUIbWDByXs0tIitMDc3tdvl736qMm+m4791LJDMwu9TVk49jBRh
-	CnQPL47A==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wUIN3-0000000CN7B-1WK7;
-	Tue, 02 Jun 2026 06:13:01 +0000
-Date: Mon, 1 Jun 2026 23:13:01 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: Qu Wenruo <wqu@suse.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Xiao Yang <yangx.jy@fujitsu.com>
-Subject: Re: [PATCH RFC] fstests: use MOUNT_OPTIONS to populate
- TEST_FS_MOUNT_OPTS if possible
-Message-ID: <ah50bZRaH6YWTJXc@infradead.org>
-References: <20260602001422.24364-1-wqu@suse.com>
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="B1bi98IH"
+Received: by mail-pj1-f74.google.com with SMTP id 98e67ed59e1d1-36b7f696b40so4381052a91.1
+        for <fstests@vger.kernel.org>; Tue, 02 Jun 2026 00:20:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20251104; t=1780384822; x=1780989622; darn=vger.kernel.org;
+        h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=zvADwMamOgSgMnsZzgfxJFHbU/mitHRiQMKS8+1jQKo=;
+        b=B1bi98IHHB/9i5Cwp8WSJmzpO9kiA7bw3QIoNBrBmxvqXb93rKhQTpTPhC1rpfq6Yt
+         48BFW1lLkeP1Y8C6OK2Mzd67EIC025Fn4iHX8OBi10+VvtNf0ZMnSepX33YQhhinOY+v
+         2IXTLgjW33RisJRjiQVAF4dyMblUn+rsUhb0eCdrDxruOnS1ABcm3tnQr7RqXOyGgMjq
+         KXJvbEKcs2ZrpM6tYHwAMSbHvSuGZH76G69gSfgLvU79CzBF8XcbBgO/ZyyBA2ABS/Vu
+         1rIzhfYEopoaeaGPIkDAkboEmpBd4Tsvqozy5jzBoP8H75FpzVd1hL9WTajPbbTqrQGe
+         F1dg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1780384822; x=1780989622;
+        h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=zvADwMamOgSgMnsZzgfxJFHbU/mitHRiQMKS8+1jQKo=;
+        b=WSrnHQaVuu4NLKGrOc5wVLaYrHBFgghiwLFaQQ9yIN1dShXIRJEAguH3/HVzHqeQBg
+         2WPI4IdkQgKpaGBSmxQ0rEp7MKfHyWFqrckOatu/Dqdmt4qlT46desrZG0LUmc+AL/+3
+         +RbKG2azYbTfJQSl+ug8dMX5dhFOYpjjXrSEs1y4P6tVJkvWavje08nItuvURVUzmp1h
+         ZGKKJ0Hr0rPxLo+G5QQBJt7Vd6uOfZVK/LjUjgk675eTIFZGQ9jxLO0Mek//V5mL1RHy
+         n4SrnCGwwgDKOCFxeiEliyIeQo81G7dQRkQlKk9biq/YcqUH/qPnEzZzWlf0fiEt7nZn
+         IkAw==
+X-Forwarded-Encrypted: i=1; AFNElJ+YLA12Np/MfxqeunAeCHzOE4Ia32K3P2gJxZBeGF5PVnqsgVJWihlsmMfej48NltSxX1QPnMSW@vger.kernel.org
+X-Gm-Message-State: AOJu0YzDL5lxNQgM0tjWjWzNy2UpxO2yqAmglFA3rhvBpsd8hHF6ePzS
+	zwiQMFEkPJuX9yhb35jXt70HOSrB7AQj/zlqAHJUrAxbhFh8TyAzJOIap54mvvZOrsshPy4zGU9
+	z/L/nvwIRGKvUJXEaMfYaEwZ+Uw==
+X-Received: from pjtf7.prod.google.com ([2002:a17:90a:c287:b0:36b:8553:3c3a])
+ (user=joannechien job=prod-delivery.src-stubby-dispatcher) by
+ 2002:a17:90a:d603:b0:36b:9835:cf96 with SMTP id 98e67ed59e1d1-36c4ff249bcmr13601837a91.2.1780384821909;
+ Tue, 02 Jun 2026 00:20:21 -0700 (PDT)
+Date: Tue,  2 Jun 2026 07:19:11 +0000
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260602001422.24364-1-wqu@suse.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.54.0.929.g9b7fa37559-goog
+Message-ID: <20260602071911.3652151-1-joannechien@google.com>
+Subject: [PATCH v1] generic/63{4,5}: Modify criteria for passing test
+From: Joanne Chang <joannechien@google.com>
+To: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Cc: djwong@kernel.org, Joanne Chang <joannechien@google.com>
+Content-Type: text/plain; charset="UTF-8"
 
-On Tue, Jun 02, 2026 at 09:44:22AM +0930, Qu Wenruo wrote:
-> If the test config only specifies "MOUNT_OPTIONS", but not
-> "TEST_FS_MOUNT_OPTS", the mount for TEST_DIR can have inconsistent flag
-> after _test_cycle_mount().
+The two tests pass when a timestamp is not preserved after the remount,
+because "cmp -s" does not print to the output file, and status is set to
+0 regardless of the return value of cmp. So, use "diff" instead to
+correctly fail the test and flag the error case in the output file.
 
-AFAIK TEST_FS_MOUNT_OPTS gets overriden and isn't even a public option.
-It gets filled by fstype-sepcific options in _common_mount_opts.
+Also, as the tests are focused on timestamps, don't print file contents
+so the tests can still pass if only the file contents differ.
 
-This started to really confuse me lately when I was trying to test with
-mount options on the test fs.
+Signed-off-by: Joanne Chang <joannechien@google.com>
+---
+ tests/generic/634 | 4 ++--
+ tests/generic/635 | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
 
-I've looked at bit into the area but haven't come to a conclusion yet.
-The most recent change in this area is 1dd7395623cb ("common/config:
-Make test and scratch devices use the same mount options"), which didn't
-really make them common, adding to my confusion.
+diff --git a/tests/generic/634 b/tests/generic/634
+index 8a4210a3..d7dd9dd8 100755
+--- a/tests/generic/634
++++ b/tests/generic/634
+@@ -52,7 +52,7 @@ touchme() {
+ report() {
+ 	local files=($SCRATCH_MNT/t_*)
+ 	for file in "${files[@]}"; do
+-		echo "${file}: $(cat "${file}")"
++		echo "${file}:"
+ 		TZ=UTC stat -c '%y %Y %n' "${file}"
+ 		test $test_statx -gt 0 && \
+ 			$XFS_IO_PROG -c 'statx -r' "${file}" | grep 'stat.mtime'
+@@ -98,7 +98,7 @@ report > $tmp.after_remount
+ cat $tmp.after_remount >> $seqres.full
+ 
+ # Did they match?
+-cmp -s $tmp.before_remount $tmp.after_remount
++diff $tmp.before_remount $tmp.after_remount
+ 
+ # success, all done
+ echo Silence is golden.
+diff --git a/tests/generic/635 b/tests/generic/635
+index 018b868c..f74d0cd7 100755
+--- a/tests/generic/635
++++ b/tests/generic/635
+@@ -55,7 +55,7 @@ touchme() {
+ report() {
+ 	local files=($SCRATCH_MNT/t_*)
+ 	for file in "${files[@]}"; do
+-		echo "${file}: $(cat "${file}")"
++		echo "${file}:"
+ 		TZ=UTC stat -c '%y %Y %n' "${file}"
+ 		test $test_statx -gt 0 && \
+ 			$XFS_IO_PROG -c 'statx -r' "${file}" | grep 'stat.mtime'
+@@ -102,7 +102,7 @@ report > $tmp.after_crash
+ cat $tmp.after_crash >> $seqres.full
+ 
+ # Did they match?
+-cmp -s $tmp.before_crash $tmp.after_crash
++diff $tmp.before_crash $tmp.after_crash
+ 
+ # success, all done
+ status=0
+-- 
+2.54.0.929.g9b7fa37559-goog
 
-So I really think we need to fix things here, but right now I'm not sure
-how much of the current situation is intentional, and what our final
-goal is :(
