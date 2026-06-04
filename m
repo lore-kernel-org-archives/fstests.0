@@ -1,210 +1,118 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qv1-f51.google.com (mail-qv1-f51.google.com [209.85.219.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E1AD935B650;
-	Thu,  4 Jun 2026 17:48:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780595309; cv=none; b=G9Q/uN02tpa9pS/qCGj46FZhCON2nZocDWYqVB3C4UxwjERuu3HrostHcnOmailU4eQdNd/2jCe/I80+7DUgmyFbaBYEiSk0wJQCYq7JtGrqiWDfdP3vbD0GTWs1vP/6DX6hUZU3ztkSMEAMS2rk9XP/7yMf0+6QYNe0z8Vgr5w=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780595309; c=relaxed/simple;
-	bh=7kPe8NOhpEMTwelX0GuYFNbMygoUtCBc2ZTcVFNckYg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cf+i56X2o5k/d4AOJzmi/0Z9kcCxhUrb14h6c80U2cwT2uTfslJxyRgUW262bPfWrEFpgD/DndCC2L89rxXGXMbTbuRbqsSPgqCgLb1z8cq4pgV9Sep4F15loEe3sw/R04k0CN34aaH5Q3sujUA7BUQn6IlDYygwCfpmiS8pEkA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=F6zgR+1c; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDCAC3E51D8
+	for <fstests@vger.kernel.org>; Thu,  4 Jun 2026 21:34:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.219.51
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1780608852; cv=pass; b=X3ldgifMi6y1mqc8nyOqzf/Tn8rHekB37BqqSwgpHQV+VmKyki/QA5WBdY0ni+4HR4BjtxwWgjgzGw+fn0z42tMJxkAoXCCn+D4xcjigx+wGenOyPaI2VAoIgQb13q2vEwuQEMxIGN5/030kEVM3IpRIIDfx11noRfpnZpCYuiU=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1780608852; c=relaxed/simple;
+	bh=DmVXT1Eux92WsQ7MM4AfhTDPRl8P6+Dxaa8CkY9JKZk=;
+	h=MIME-Version:From:Date:Message-ID:Subject:To:Cc:Content-Type; b=VP4Qq7U259OvYUCs0pBh4SNp5QA3rdzGBT2X1B4MREmxoq2oNns/JuKP6Gh9sJVPan23Xv1aRxvOy8or0kmMJebWYF5eD0OBeSvSPIlQWmNdWsSs9MgCZu58tdH1DXzEWa9qDyhscTeo8tYQZkd5ijLRPT2bSielH8c6N7iwReU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FbJctDQx; arc=pass smtp.client-ip=209.85.219.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="F6zgR+1c"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 857B41F00893;
-	Thu,  4 Jun 2026 17:48:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1780595307;
-	bh=qF7KJRghuSGQhH5TV/sbNtM9GCZOy6fOueBHMARPXBU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=F6zgR+1ccpq+3q4vXCIZ6VpeIbcRJMOFlva+dF15+YxPz6q3HPpS3g68qIYNFlNTV
-	 d93PgJVT421vPIyhYaHZ8bzJbWAVESQujIbP1Lrivi5xa34J0ER4o5tfCH3yLmODvm
-	 bZlaNUWSc+sjdwzhXE1oTOe1Su24uDpZXtKtbj8lrjDCYCmxsXwBjcSa4jond2oPxo
-	 MJMTxsnf0xGeAcPXhWp/WJ1SCRX6djo0FgfvGXVRDesjxNrqBss9Dz0rnnJ7eSQpr9
-	 ZKBKn1DwZzr0i9dib2D6jrKrxGO9rbkJXurdvwbrnyujd0Q0zuFqtLKXKMbpZxe/Wo
-	 8owgcycc2GoLw==
-Date: Fri, 5 Jun 2026 01:48:22 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Qu Wenruo <wqu@suse.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
-	Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH RFC] fstests: use MOUNT_OPTIONS to populate
- TEST_FS_MOUNT_OPTS if possible
-Message-ID: <aiGsok9xtmdM-q9c@zlang-mailbox>
-Mail-Followup-To: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org, 
-	linux-btrfs@vger.kernel.org, Dave Chinner <david@fromorbit.com>
-References: <20260602001422.24364-1-wqu@suse.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FbJctDQx"
+Received: by mail-qv1-f51.google.com with SMTP id 6a1803df08f44-8ce9df31840so8619776d6.1
+        for <fstests@vger.kernel.org>; Thu, 04 Jun 2026 14:34:05 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1780608844; cv=none;
+        d=google.com; s=arc-20240605;
+        b=d6loU2Cr6995bRDQq/ATlks7PaUE5JOsRqn2u+m9GG9C3s99/hSMExHKKNuaz0tQLf
+         Vl4hDN7BaauIhoWYkLjT4Wvq4vQAq3LaXuSJk2ENZgo4JHfVe8zNP1JWLksyoV8BCl9x
+         8NLubpJc9n86q8F7QrypsTdqbOUNMPobbvZZ8X3NYko5sowK9adP/LQIMbxDOvGhsTfR
+         BI0iZaa7/NB4kVVi08bOp9h7KIg1IpTlU9ovImeD+t/Fsv28dGXb5YJi+3VcFnGp9bkR
+         UlDMLreJMYBNDw/jxTZIwDexdPXWat+CN/AkltI9VTPwAOjJ4q2Y6RTlWEV1tmXxAj1Y
+         S7Eg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=fWOIZTwHtOansRSYZiUMmblIvF/GkvzBekYQ1yitKkM=;
+        fh=kaPSe7D36jO4lI2D8Pk1gRsgN0GugmxT8NbOyXqaYGA=;
+        b=IKHqPVGAJl65x2Bv0EvoyTPqHfoQ6tcsD0riyDf0RrJYQBgwv8S54bF0RihaAtJ68T
+         XLqN2+yhSODJ1x5Y7KVhCAK3Y1Sa3WYnHunAun04FD057a3LbkF+XVFVcGNkf22V37Ul
+         wVpZU0qu/vQ/EzxBXI9LG3Z0vwlqIqO8O85aqFpkW2KQ4RUuSUbKQwL/KnvpbtVfUpEq
+         msPVZwqFmGyPSwINA2jIHsHPSbf7gb65BE+0XVgpBvSAP/KrvtepGSVqaom8qJOK9D83
+         bVvI0u8+mrar1wvCHghEx/RP1H4wC5ZFXyyzO5pbqelhUym20pDaSHIf36HZthKdo9KZ
+         OLcg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1780608844; x=1781213644; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=fWOIZTwHtOansRSYZiUMmblIvF/GkvzBekYQ1yitKkM=;
+        b=FbJctDQxfUIx/q3IiUiGxh8qf77hMv2ulYWcTlfc+WZKcj9/sHk7OwLioG51DJIrpk
+         JJGAntFA96PwzpnlrBBWDmYUMCEIl+o1XXv8pxSSdNgnUGgu7RqAvzotDQcd0TCWlIks
+         Uqa5+e1s2GxTsE28wZ+UbgVKZyhpJTfTzxIJ4bUkGrhVDmmurxktFBw19RErJiDPygv8
+         OA7hBDaLJ/OsiUgJULOb5aEhOGB8MuokTEAIW9KSaZWZI+4wy0IhbjPBJpRwpxi24Zvj
+         Ub6LRp6Or53UGmRQ/TqLc45VL4Ybu0X2ICl1llsLD+QZ1EzbGg+99+7KePes6+PZtNXA
+         cm9A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1780608844; x=1781213644;
+        h=cc:to:subject:message-id:date:from:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=fWOIZTwHtOansRSYZiUMmblIvF/GkvzBekYQ1yitKkM=;
+        b=CDABND6BePtt/sOXqcfuqpBAK4BNo7N29pH9rLbywQ5rnoGz6X4MYOViXTKzq2WLE6
+         EoSteGw8cUYb7mAQS1MPhG2hDk1eYiL1jubzBkxeZKHPvo3rv25bZ5h0hch4WKd9xHsQ
+         K3BMq2JiFFJDk3UajmbX//mJA0qMTZk75ULJwcpMLJ/3iCD4kNebaa9vvScW9kjukOf5
+         Ce7JV6AjTOSdSWx7aSvCQSB/yAGzS029QS890KVR8F356RiiiK1kHEbaywSuw5M2Nnnz
+         DPSj+SgZWxzxQXEn317TBcEHaGZGQCYcem3TsbEl08b/FFsVYFK8DPq7RB7/DZ5YTfVd
+         ZDTg==
+X-Gm-Message-State: AOJu0YyD6cYMQwqJamdJVxxKWt15rFtXKdUReE6QyCDTwJlEVyPyDiHs
+	/zkBgzYHQSQdZ5K/L3o7fwi+nbcAm8IgS8NMtFQ9JW/ZX/8H48/LNmsPsaWfJd2cR1J+CgYAcgY
+	QRZyGyV0ywMUZ9AoD51G43ufncXfzXMpN6d3Man0=
+X-Gm-Gg: Acq92OHTEnhtvSqk4eMhxToLPEEYKs9++kYtrG7d6dgAwpOUIDI+CEyS5T7tjmqUrHu
+	zbV/rKDZ8higQRBrwObV7MR7mLLVAUtNA49Fe8rHsxiFnhQCfmjNHXur5iYScKPm+RXUaUxpmQ6
+	KvWij9HBiV+uvuQH9/jsaAinm/N5o3KBbG9YGK/ed87a480VbSsbC2HA1XFrf+IUYALi2nJUTs8
+	bLpiX3g2fSYNPaZaEz5tqAkqZZECAF19wJldD5IDQg9l2Q0bNnW92SyjQAPWObV6C7rM/4Iwpi/
+	uCHhoj14JR4qhElFOtNrTU53zb25ojJXucsG7HLDp47Ex3akuJldroyqcyL9RWkuok0ipQVOdxB
+	aCKs22a3a44aoqeISRPbHEDxmEackovPR5d6H1gd0Z+OAa+MtYQk4A08VLfrkzgZ8bOHdq/flW5
+	qpwFVDN/kLwUrtk11Lryq3keu8kjen71s+
+X-Received: by 2002:a05:6214:1774:b0:8a4:21d9:bbf2 with SMTP id
+ 6a1803df08f44-8cee6134812mr13161896d6.33.1780608844514; Thu, 04 Jun 2026
+ 14:34:04 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260602001422.24364-1-wqu@suse.com>
+From: Steve French <smfrench@gmail.com>
+Date: Thu, 4 Jun 2026 16:33:51 -0500
+X-Gm-Features: AVVi8CcyJI7OL4p2TPs6fNmO2MQmFcnt0X2ajQ02vS9HaU6CL652fIlIMZwem08
+Message-ID: <CAH2r5muhUCkLV7=-YAJuj+HmNHPm3+cokgP36XFkkXF6pk6dYQ@mail.gmail.com>
+Subject: coreutils problem with xfstest generic/452
+To: fstests@vger.kernel.org
+Cc: LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 
-On Tue, Jun 02, 2026 at 09:44:22AM +0930, Qu Wenruo wrote:
-> If the test config only specifies "MOUNT_OPTIONS", but not
-> "TEST_FS_MOUNT_OPTS", the mount for TEST_DIR can have inconsistent flag
-> after _test_cycle_mount().
-> 
-> Here is an very simple test case to show the problem:
-> 
->  . ./common/preamble
->  _begin_fstest auto
->  _require_test
-> 
->  mount | grep "$TEST_DIR"
->  _test_cycle_mount
+coreutils behavior seems to have changed breaking xfstest generic/452
+which copies the symlink to "ls" to a different directory to run in
+the test.   It works with Fedora and some older Ubuntu but with
+current Ubuntu (26.04) it looks like coreutils has changed breaking
+the test.  Any ideas?
 
-AFAIK, TEST_FS_MOUNT_OPTS is designed to be the exact counterpart to
-MOUNT_OPTIONS. The former applies to TEST_DEV, while the latter affects
-SCRATCH_DEV and any other manually created devices (such as loop or dm
-devices). Therefore, when testing custom mount options, better to specify
-both parameters.
+generic/452  0s ... - output mismatch (see
+/home/smfrench/xfstests-dev/results//sambamfs/generic/452.out.bad)
+    --- tests/generic/452.out 2025-08-22 09:54:32.316786174 -0500
+    +++ /home/smfrench/xfstests-dev/results//sambamfs/generic/452.out.bad
+2026-06-04 16:29:58.768874029 -0500
+    @@ -1,3 +1,3 @@
+     QA output created by 452
+    -SCRATCH_MNT/ls_on_scratch
+    -SCRATCH_MNT/ls_on_scratch
+    +coreutils: unknown program 'ls_on_scratch'
+    +coreutils: unknown program 'ls_on_scratch'
 
->  mount | grep "$TEST_DIR"
->  _exit 0
-> 
-> And with "MOUNT_OPTIONS" set to "-o nodatasum" (one of the btrfs mount
-> option that affects new inodes), but "TEST_FS_MOUNT_OPTS" not set, then
-> running the test, the output will be:
-> 
->  QA output created by 348
->  /dev/mapper/test-test on /mnt/test type btrfs (rw,relatime,nodatasum,discard=async,space_cache=v2,subvolid=5,subvol=/)
->  /dev/mapper/test-test on /mnt/test type btrfs (rw,relatime,discard=async,space_cache=v2,subvolid=5,subvol=/)
-> 
-> This changed mount option will cause several test cases to fail on btrfs
-> with MOUNT_OPTIONS="-o nodatasum" set:
-> 
-> - generic/143
-> - generic/154
-> - generic/155
-> - generic/463
-> 
-> All above test case fails because the reflink source is from the initial
-> test mount, which has "nodatasum" mount option.
-> But later after _test_cycle_mount(), no more "nodatasum" flags, causing
-> reflink source and destination have different "nodatasum" flags.
-> And btrfs will reject such reflink, causing golden output mismatch.
-> 
-> One way to avoid such problem is to set TEST_FS_MOUNT_OPTS to the same
-> as MOUNT_OPTIONS, but I'm not sure if we really want different options
-> for test and scratch mounts.
-> 
-> So here as a compromise, set TEST_FS_MOUNT_OPTS to MOUNT_OPTIONS if
-> the former is not set but the latter is already set by the user.
-> 
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
-> Reason for RFC:
-> 
-> - Still didn't get why the initial test mount respects MOUNT_OPTIONS
->   If test mount only respects TEST_FS_MOUNT_OPTS, the first mount should
->   not get the MOUNT_OPTIONS.
-> 
-> - Not sure if TEST_FS_MOUNT_OPTS is needed
->   If not provided, the default config for TEST_FS_MOUNT_OPTS and
->   MOUNT_OPTIONS are the same.
->
->   The introduction of TEST_FS_MOUNT_OPTS is from commit 0e9141e49d4a
->   ("common: add cifs support"), with extra handling for
->   _test_mount_opts().
+# coreutils --version
+coreutils 0.8.0 (multi-call binary)
+# ls --version
+ls (uutils coreutils) 0.8.0
 
-No, actually TEST_FS_MOUNT_OPTS is far more than that. For example, you can
-check commit 3839d29973, it has TEST_FS_MOUNT_OPTS in _test_mount. But at
-that time xfstests was still under its original form, there was not common/
-directory.
 
-Then 8c4905a4 create common/ directory and common/rc, then TEST_FS_MOUNT_OPTS
-started to appear in common/rc:_test_mount().
 
-Then commit 0e9141e4 brought in _test_mount_opts for CIFS, but it didn't change
-the logic of TEST_FS_MOUNT_OPTS for TEST_DEV mount. And we can learn about why
-CIFS need a seperated TEST_FS_MOUNT_OPTS from its wiki link:
-
-  https://wiki.samba.org/images/9/99/Xfstests.local.config.txt
-
-Therefore, TEST_FS_MOUNT_OPTS has been dedicated entirely to TEST_DEV by design
-since the very inception of xfstests, and this principle seems to have remained
-unchanged. The real issue now is that we run into a conflict between
-TEST_FS_MOUNT_OPTS and MOUNT_OPTIONS when the helpers try to detect features,
-particularly those that depend on mount options.
-
-As for whether TEST_FS_MOUNT_OPTS is still necessary, I feel we need more
-discussion on this. Some upper filesystems might still need it, and the original
-purpose of keeping it separate for XFS testing probably deserves a deeper look.
-(CC'ing Dave Chinner, who might know more that that history :)
-
-About your current Btrfs tests, I would highly recommend specifying both
-TEST_FS_MOUNT_OPTS and MOUNT_OPTIONS at the same time. (I always do that
-actually).
-
-Regarding the feature detection mismatch, a quick fix could be making TEST_FS_MOUNT_OPTS
-default to MOUNT_OPTIONS when it's not set. That said, it is still worth double-checking
-the initial purpose of TEST_FS_MOUNT_OPTS, just in case I miss something.
-
+-- 
 Thanks,
-Zorro
 
-> 
->   But nowadays the special handling is moved to _common_mount_opts(),
->   shared by both scratch and test mounts.
->   Not sure if there is any fs that requires split options for test and
->   scratch.
-> 
-> - Possible reduced coverage
->   Ignoring MOUNT_OPTIONS and requiring extra TEST_FS_MOUNT_OPTS can cause
->   reduced coverage, as one may expect MOUNT_OPTIONS to affect both test
->   and scratch devices.
-> ---
->  common/config | 10 ++++++++--
->  1 file changed, 8 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/config b/common/config
-> index d5299d5b..12e94088 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -419,8 +419,14 @@ _mount_opts()
->  	export MOUNT_OPTIONS=$(_common_mount_opts)
->  }
->  
-> +# Must be called before _mount_opts().
->  _test_mount_opts()
->  {
-> +	# Use $MOUNT_OPTIONS if provided.
-> +	if [ ! -z "$MOUNT_OPTIONS" ]; then
-> +		export TEST_FS_MOUNT_OPTS="$MOUNT_OPTIONS"
-> +		return
-> +	fi
->  	export TEST_FS_MOUNT_OPTS=$(_common_mount_opts)
->  }
->  
-> @@ -823,8 +829,8 @@ get_next_config() {
->  
->  	parse_config_section $1
->  	if [ ! -z "$OLD_FSTYP" ] && [ $OLD_FSTYP != $FSTYP ]; then
-> -		[ -z "$MOUNT_OPTIONS" ] && _mount_opts
->  		[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
-> +		[ -z "$MOUNT_OPTIONS" ] && _mount_opts
->  		[ -z "$MKFS_OPTIONS" ] && _mkfs_opts
->  		[ -z "$FSCK_OPTIONS" ] && _fsck_opts
->  
-> @@ -915,8 +921,8 @@ if [ -z "$CONFIG_INCLUDED" ]; then
->  	fi
->  	FSTYP=${FSTYP:=xfs}
->  	export FSTYP
-> -	[ -z "$MOUNT_OPTIONS" ] && _mount_opts
->  	[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
-> +	[ -z "$MOUNT_OPTIONS" ] && _mount_opts
->  	[ -z "$MKFS_OPTIONS" ] && _mkfs_opts
->  	[ -z "$FSCK_OPTIONS" ] && _fsck_opts
->  else
-> -- 
-> 2.51.2
-> 
-> 
+Steve
