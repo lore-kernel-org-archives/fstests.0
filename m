@@ -1,135 +1,54 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 147602D5925
-	for <fstests@vger.kernel.org>; Sun,  7 Jun 2026 23:38:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6D933876C1;
+	Mon,  8 Jun 2026 06:49:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780875513; cv=none; b=KtEtZczl6VRLd9hAKMMBfWymA3oQYrVE+9ItqyQli9OT2cfMw4HOIA22Js9zCWlZjPj1XctRrzgYqt3vxbPgNOGbY7Rx2kmT4DLP/pUw0PeMUWU0TA+/uwDphfYTVfKUkGh++5xsb0/D1XymksqsGjViMvECgmxQchuofSi1uSU=
+	t=1780901359; cv=none; b=nW2rl03EiWRwpkXY6TUGfIMCIosdYJgMmJ9X9ajvEynbQ9Q7Z9yX1lN/Y51A3qf7e06rcwyU17yl32PeOiopJIGBZRG6YPO8kk+x1+qq082QRa5O/2Z9TeEI6Sgbs5ZR6rAQ+XaGkkXQq/O9i4+yl1qqjsMB3y9b3MAGyssW588=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780875513; c=relaxed/simple;
-	bh=EZTkA0hvXYsPluLa/VlzTIwEg6DrPFsVlovq4QdqUnA=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=twcBJCZlGA5L8oAVTguglwNEa3bUDbJtE55sqhz2oQ9JwXLT1EpMrmrU2/BzlNc+vqDKdysmb7GouzIEXYcT6fLoUDSXM1UVcyWGMbIigY5c7Vy/Uh/fJmfDdGC1Et5sU2JakaVSZQUlKMDOHqEnZwnK5BYeR01yveq7RcP9PAI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=pxTxRZkB; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=pxTxRZkB; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1780901359; c=relaxed/simple;
+	bh=WhhmgIw66TK+WBhkMsZlbIksShGYf+LH7SgNLe4pFHY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=YYwB6F/DbiSgSrIb8wlIGEpUBxFeh7Owd2BMka9olau+M/OlVe/sA7eHD9ldQ5zCNYytmLQoKIRK4QqkG8lk50YLGblx2rMe078SG+iC2F+kXT2t4yx1mbm9x3BUnppcAmg733jfRuND7og373Rw8Gdov8IJH6bAGCCB5y6i298=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CS/H3Srf; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="pxTxRZkB";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="pxTxRZkB"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 7021C6A93B;
-	Sun,  7 Jun 2026 23:38:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1780875509; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=fawGLGEhqzxZD8pBHImPRmNV1DinKe4G/1LGNGvUdg0=;
-	b=pxTxRZkBOpL27CbcZ7lAuCsbJ4YStQ+dtgfvQU7TaUbycmKnkaYcadAoBRMyV+7vH9IqHt
-	uJtR8BsLb7W+JSQn0uvu3ORrx/FeUyxXCixLeQJCcYWYox5Za8hCPPQ/8EZ2QC9jiKySgV
-	IvvZX9fYgzKX6m/Hmj1vPcd/XEF9wwM=
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1780875509; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=fawGLGEhqzxZD8pBHImPRmNV1DinKe4G/1LGNGvUdg0=;
-	b=pxTxRZkBOpL27CbcZ7lAuCsbJ4YStQ+dtgfvQU7TaUbycmKnkaYcadAoBRMyV+7vH9IqHt
-	uJtR8BsLb7W+JSQn0uvu3ORrx/FeUyxXCixLeQJCcYWYox5Za8hCPPQ/8EZ2QC9jiKySgV
-	IvvZX9fYgzKX6m/Hmj1vPcd/XEF9wwM=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 1A841779A7;
-	Sun,  7 Jun 2026 23:38:27 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id qSg6LvMAJmrAPAAAD6G6ig
-	(envelope-from <wqu@suse.com>); Sun, 07 Jun 2026 23:38:27 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org
-Subject: [PATCH] fstests: btrfs/138: add requirement for datacsum
-Date: Mon,  8 Jun 2026 09:08:01 +0930
-Message-ID: <20260607233801.18453-1-wqu@suse.com>
-X-Mailer: git-send-email 2.54.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CS/H3Srf"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5EDD21F00893;
+	Mon,  8 Jun 2026 06:49:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1780901357;
+	bh=WhhmgIw66TK+WBhkMsZlbIksShGYf+LH7SgNLe4pFHY=;
+	h=Date:Subject:To:References:From:In-Reply-To;
+	b=CS/H3Srficyd87oQJfXGMRQIduf0rVyfKj8tpkbnsY87WsE/XvS64JvuVxc/nmUE9
+	 DqzKA2C3rWcEDgAqQDkkpnqz9dR5xFRRZkp738GyPmJN59t++peI2BMMw2R07cRdYj
+	 T2lHIgG2iRbGbIALXVxTWqP8lUcIoLUiloYhOclBb3HE7p+hZs1H+b8dNwBRZauVw4
+	 EEwz4vZjEkbRuPB7vTSJRc6MaRU0lfKVCZP2R6dDQOEcf5qW+2ORaQ95zSVlMRjOmh
+	 giZyyjut8GBbujnTkLiSy+6hRUNtVU8++k+DW1msqqha9/vjX8hOMs6/48wZcvKNxu
+	 jq6yGYsJn+iYw==
+Message-ID: <43f292ae-7a88-4b9e-bf2f-d4cc302f9cff@kernel.org>
+Date: Mon, 8 Jun 2026 14:48:57 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Spam-Flag: NO
-X-Spam-Score: -2.79
-X-Spamd-Result: default: False [-2.79 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.19)[-0.973];
-	MIME_GOOD(-0.10)[text/plain];
-	RCPT_COUNT_TWO(0.00)[2];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	ARC_NA(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:mid];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	TO_DN_NONE(0.00)[];
-	RCVD_TLS_ALL(0.00)[]
-X-Spam-Level: 
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] fstests: btrfs/138: add requirement for datacsum
+To: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org,
+ linux-btrfs@vger.kernel.org
+References: <20260607233801.18453-1-wqu@suse.com>
+Content-Language: en-US
+From: Anand Suveer Jain <asj@kernel.org>
+In-Reply-To: <20260607233801.18453-1-wqu@suse.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-[FALSE ALERT]
-If one has specified "-o nodatasum" as mount options, the test case
-btrfs/138 will fail with the following error:
 
- MOUNT_OPTIONS -- -o nodatasum /dev/mapper/test-scratch1 /mnt/scratch
+LGTM
 
- btrfs/138    34s ... - output mismatch (see /home/adam/xfstests/results//btrfs/138.out.bad)
-    --- tests/btrfs/138.out	2022-05-11 11:25:30.743333331 +0930
-    +++ /home/adam/xfstests/results//btrfs/138.out.bad	2026-06-08 09:04:30.627143086 +0930
-    @@ -1,2 +1,5 @@
-     QA output created by 138
-    +ERROR: failed to set compression for /mnt/scratch/zlib: Invalid argument
-    +ERROR: failed to set compression for /mnt/scratch/lzo: Invalid argument
-    +ERROR: failed to set compression for /mnt/scratch/zstd: Invalid argument
-     Silence is golden
-    ...
+Reviewed-by: Anand Jain <asj@kernel.org>
 
-[CAUSE]
-Btrfs compression requires both datacow and datasum, thus nodatasum
-mount option will reject compression completely, causing the above
-failures.
 
-[FIX]
-Add _require_btrfs_no_nodatasum for the test case, so that for nodatasum
-mount option the test case can be properly skipped other than causing
-false failure.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- tests/btrfs/138 | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/tests/btrfs/138 b/tests/btrfs/138
-index 17bbe28e..57ab1bd3 100755
---- a/tests/btrfs/138
-+++ b/tests/btrfs/138
-@@ -15,6 +15,7 @@ _begin_fstest auto compress
- _require_scratch
- _require_btrfs_command property
- _require_btrfs_no_nodatacow
-+_require_btrfs_no_nodatasum
- 
- algos=($(_btrfs_compression_algos))
- 
--- 
-2.51.2
 
