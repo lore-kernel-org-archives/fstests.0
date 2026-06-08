@@ -1,41 +1,66 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24D5238BF72
-	for <fstests@vger.kernel.org>; Mon,  8 Jun 2026 07:00:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB0BC3B8BA5;
+	Mon,  8 Jun 2026 10:23:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780902019; cv=none; b=DoUgWxvTtrlkgwvxvlf+A4SQUF/nxUVDchDzIL1n6/scEJ7ZRPG5kA7RJT5Elc16DousDARcx2Ocri5OH1syX7V9lE6AETMUxmIgfToZy1lgZW9wuiBN62MrpqzuCF9BRVZNB3mpW06EVgqMgpbMJVONs5mC9+comQQo0aQ2ksg=
+	t=1780914231; cv=none; b=nfqZnwGJq5Qbtvd2inHrI98V+BM+6cU6E7TLq2LXAtD5q2xcwLncY8hpg+V8007WXxstA/nCykD2SMoHSL75unl7eZYUn8V5J0ZIid5Q7buHE4gKhptDDCJyieF98KN5a5WGLMA16qFfo7DpiWTgx2MsH/RuXHHDM3wKfhmW+Is=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780902019; c=relaxed/simple;
-	bh=x2mSJhrK1anqIbNz/MDg4oFkDncEid5Gj6L9g/NGlZ8=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=rO84KsY8TuufRhruEcMQ/mJT9s5JQqVvm8mYjyDECk2c2wC2eXWEz6FgWhvGQlnEf3iBDa3lajPQEwtj7YnqOiJtzmDrAE3bEtr+zdmvMTmf5btgrnCdv5lOeH1V7kzQIm3B2ru5Zz7L8A8MAcXqJoRf5mN9LjB0hRwPdxizfVM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=KIWYafEM; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1780914231; c=relaxed/simple;
+	bh=yFroTsxMoyGyLVbYUE4ZAISy4tR84QoNnQ6Pd2QnGiY=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=PDQpYTGJuZPXNIp1tjkkmWyA5EJvFEhqMX5nbZ+HdJzrLIy4b2+TUPE7lBMbwHilOPwTK7tggcpd4Te28KmRJIToUyuQZVUclCSsiFKPnaD2kiIJkj3znJfZ0/hPFD8l56U9ACrXwWawVghPKF1SMZ1F9KiaUYGX4oqOwEH/ioM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=MNxAD268; arc=none smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="KIWYafEM"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-	Content-ID:Content-Description:In-Reply-To:References;
-	bh=FwhKuCDvl6yKCLFs5R4IW0DxiEX03S7x8oAsnKlnWRE=; b=KIWYafEMNpe84NqL0vGI85eXq6
-	FOqJF2NYJqLSa+CwF/MeomtkVqLTBqjOL3hoUErcf+DbZEpA5VykS91S7RiCHv9zYVYkkPs9StkpX
-	1s54rZuDODr6KkweMRNtl2QxNSfmuCKCrPEjbDi1CGzBH4vbaQuIu+0ld0ZJLenJoCnqRlLO9PIie
-	hwacJudAv5eXYOYeHCpXmBy6DOCU/SkDWvVuAadErA7c8nrMvQK2heDb7mAr5gid5z4T0KtLs6IJD
-	1wV+r7K0OuuUVuiI1VO2CNMPECGK7SQ2W1P0awdB2GAKvDWZ04LXMf+p5BHbVge+yH8J+EL7wsPrv
-	Q4Qce5Bg==;
-Received: from 2a02-8389-2341-5b80-decc-1a96-daaa-a2cc.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:decc:1a96:daaa:a2cc] helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wWTy1-00000002vwU-42jD;
-	Mon, 08 Jun 2026 07:00:14 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: zlang@kernel.org
-Cc: fstests@vger.kernel.org
-Subject: [PATCH] generic/366: check minimum dio size correctly
-Date: Mon,  8 Jun 2026 09:00:10 +0200
-Message-ID: <20260608070010.1285677-1-hch@lst.de>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="MNxAD268"
+Received: from pps.filterd (m0360083.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 657JF1CO3711216;
+	Mon, 8 Jun 2026 10:23:49 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=pp1; bh=Xh9qce66+IJFbnXRatQkRCySdWtsqLisqhjzMZqwu
+	PY=; b=MNxAD268UqhJiTkpGM9EmxBCgIyzkO6x4sYrIcLTHT+9/ZpdQAYD49W+Z
+	JZCgnVqCocXpBlN9xY8LlcFpEqV4mOCSmWSoQhdKHYyXzKcw6wBXIaSyxDULUF0A
+	VuSc4gNdzHS/Tk+l0xOv5EGfg6mfrPNayF2g8eMwxof0QjX3ykwVywtCoaJE4PYV
+	64uRs3qhPLlFjZyuAwp2FweJXtTYC3heg7Hlk2L7UJcNVx3C0z1VRCvL9o3CWjSt
+	GtHFmQH2bcIIKqLLRXfC/e4/7Q5rEoo1DZq/GSJHSprD3G/GZoGR2GMHSEIjQGdh
+	cK7r9yKyPOSpsMiRkZwpg7bkrkMFQ==
+Received: from ppma22.wdc07v.mail.ibm.com (5c.69.3da9.ip4.static.sl-reverse.com [169.61.105.92])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4emb23psut-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 08 Jun 2026 10:23:48 +0000 (GMT)
+Received: from pps.filterd (ppma22.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma22.wdc07v.mail.ibm.com (8.18.1.7/8.18.1.7) with ESMTP id 658AJdNp009127;
+	Mon, 8 Jun 2026 10:23:47 GMT
+Received: from smtprelay03.fra02v.mail.ibm.com ([9.218.2.224])
+	by ppma22.wdc07v.mail.ibm.com (PPS) with ESMTPS id 4emx8vvy90-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 08 Jun 2026 10:23:47 +0000 (GMT)
+Received: from smtpav07.fra02v.mail.ibm.com (smtpav07.fra02v.mail.ibm.com [10.20.54.106])
+	by smtprelay03.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 658ANhpe57344426
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Mon, 8 Jun 2026 10:23:43 GMT
+Received: from smtpav07.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 89A3E2004E;
+	Mon,  8 Jun 2026 10:23:43 +0000 (GMT)
+Received: from smtpav07.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 86C4F20040;
+	Mon,  8 Jun 2026 10:23:41 +0000 (GMT)
+Received: from localhost.localdomain (unknown [9.39.26.125])
+	by smtpav07.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Mon,  8 Jun 2026 10:23:41 +0000 (GMT)
+From: Disha Goel <disgoel@linux.ibm.com>
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
+        ojaswin@linux.ibm.com, djwong@kernel.org,
+        Disha Goel <disgoel@linux.ibm.com>
+Subject: [PATCH v3] common/defrag: skip defrag tests on DAX-enabled filesystems
+Date: Mon,  8 Jun 2026 15:53:28 +0530
+Message-ID: <20260608102328.40916-1-disgoel@linux.ibm.com>
+X-Mailer: git-send-email 2.45.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,52 +68,66 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+X-TM-AS-GCONF: 00
+X-Proofpoint-Reinject: loops=2 maxloops=12
+X-Authority-Analysis: v=2.4 cv=b4uCJNGx c=1 sm=1 tr=0 ts=6a269834 cx=c_pps
+ a=5BHTudwdYE3Te8bg5FgnPg==:117 a=5BHTudwdYE3Te8bg5FgnPg==:17
+ a=FelO9ux0wxsA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
+ a=iQ6ETzBq9ecOQQE5vZCe:22 a=VwQbUJbxAAAA:8 a=VnNF1IyMAAAA:8
+ a=2rdxVvfoxuaEPwCrBBkA:9
+X-Proofpoint-ORIG-GUID: 4ii1CnxzA8vtLckAbLZqJ8d3HSKTa5kJ
+X-Proofpoint-GUID: TgcKqz0t2BK30RAAgJdOw7s3tf1xfPZp
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjA4MDA5NCBTYWx0ZWRfX2JZd5nHWfkUk
+ 73DfNB+TciWzhL1XiPE4LYhvmGFbllidhKgz6iVy6Ias2eHaMmrdEozSCsj1ha5GfgG5zagX0OI
+ W6Y6xXQFQlVXhh4pL5gxQXXgNPPJaZcBqAX06cbvsp6VSZCuqo0eQAM6ZyaebBwCYDDtKNkrCA6
+ Iu+QCO5TBfMj2DkksF5jHseQX/83pS0uLWFi27JU2uZvhXyLcd4Twgb7EIrIbqF9v+37ju37pE+
+ ehhQk8FC6M3P9FMop/sWx/U3AbuoN5W88vezBahWzCit0EZ1IN+fiILZly8624i7vqtLUI5Ezzq
+ RUpDfk2ZPcZltzqOICrDkQiy2s0mz8a0FMfEkr1uq+0bJNL8SkJrrn+n3nlKUTmZsOhgn1k8ANF
+ CvoRTvIz7im8tQ6ZejZ1lU498TOIrYLm5XOtMdvLsswO3p1Gs4Q0k4ZnC4lQxljzOw0slE+s7vd
+ 6roo+OLScZiD4rtZ7Kw==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
+ definitions=2026-06-08_02,2026-06-05_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ clxscore=1015 spamscore=0 bulkscore=0 phishscore=0 priorityscore=1501
+ lowpriorityscore=0 adultscore=0 malwarescore=0 impostorscore=0 suspectscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2605210000 definitions=main-2606080094
 
-min_dio_alignment requires the file system to be checked to be mounted,
-so move the call into the main loop.  Drop the pointless blocksize
-argument to _require_odirect, which is only tested on the test device.
+Online defragmentation is not supported on ext4 DAX-enabled filesystems.
+The ext4 defrag ioctl (EXT4_IOC_MOVE_EXT) returns EOPNOTSUPP when used
+on DAX files.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+Add an ext4-specific check in _require_defrag() to skip tests when DAX
+is enabled, avoiding false failures on ext4/301-304, ext4/308, and
+generic/018.
+
+XFS defrag works with DAX, so this check is ext4-specific.
+
+Suggested-by: Darrick J. Wong <djwong@kernel.org>
+Signed-off-by: Disha Goel <disgoel@linux.ibm.com>
+Reviewed-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 ---
- tests/generic/366 | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+Changes in v3:
+- Move the DAX check inside the ext4 case statement as
+  suggested by Darrick
 
-diff --git a/tests/generic/366 b/tests/generic/366
-index 271a01bc2eac..ef69bf09d6ff 100755
---- a/tests/generic/366
-+++ b/tests/generic/366
-@@ -20,7 +20,7 @@ _begin_fstest auto quick rw
- . ./common/filter
- 
- _require_scratch
--_require_odirect 512	# see fio job1 config below
-+_require_odirect
- _require_aio
- 
- _fixed_by_fs_commit btrfs xxxxxxxxxxxx \
-@@ -30,7 +30,7 @@ iterations=$((32 * LOAD_FACTOR))
- 
- fio_config=$tmp.fio
- fio_out=$tmp.fio.out
--blksz=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
+ common/defrag | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/common/defrag b/common/defrag
+index 055d0d0e..baf05d94 100644
+--- a/common/defrag
++++ b/common/defrag
+@@ -13,6 +13,8 @@ _require_defrag()
+         DEFRAG_PROG="$XFS_FSR_PROG"
+ 	;;
+     ext4)
++        __scratch_uses_fsdax && _notrun "ext4 online defrag not supported with DAX"
 +
- cat >$fio_config <<EOF
- [global]
- bs=8k
-@@ -60,6 +60,12 @@ _require_fio $fio_config
- for (( i = 0; i < $iterations; i++)); do
- 	_scratch_mkfs >>$seqres.full 2>&1
- 	_scratch_mount
-+
-+	blksz=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
-+	if [[ $blksz -gt 512 ]]; then
-+		_notrun "512 byte dio alignment required"
-+	fi
-+
- 	# There's a known EIO failure to report collisions between directio and buffered
- 	# writes to userspace, refer to upstream linux 5a9d929d6e13. So ignore EIO error
- 	# at here.
+ 	testfile="$TEST_DIR/$$-test.defrag"
+ 	donorfile="$TEST_DIR/$$-donor.defrag"
+ 	bsize=`_get_block_size $TEST_DIR`
 -- 
-2.53.0
+2.45.1
 
