@@ -1,138 +1,176 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D8BC3E5576;
-	Tue,  9 Jun 2026 08:01:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A67652E1F06;
+	Tue,  9 Jun 2026 14:37:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780992062; cv=none; b=nqiaLaHEPk/uT+x5K2bOQ4ZGyNoZh4x4Dp+ZHIM5ubFSa7Gu9ij67+P/yCiVYl/A8wU522wMPkJeXlXk+pUdfs6V8jl7zUrw1vzbfjiAzE1rPrTCNuXnchjrjdGMG26PxS2Ob8DDv0UejYwQmt4uhCWQcuFnUvnWrUN+X1oYPnk=
+	t=1781015868; cv=none; b=ttYT3W0X3hGV8S457QWhDdZOCsLZNQAabYy8yENfYDkzpydMXaBEhWsh3Os4suKqc/KC+9I2sXkilWVRIXF8Vi2t+z5reNHXltBczet1YmE8kd7hpl746U0tbhsDvFgcw9vd5UgOG+2gQtmHW+ZFcFLS3P+1mOkZU9OFtUuC0Ik=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780992062; c=relaxed/simple;
-	bh=tBacwFS/BczM+sHs9KSU/gyEhz4Qw2HgZPcQn44qgYk=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=GnK6Hr009BJ8eNfR0dPWTN2r+4WmNs21BWkemGWubqKPLwe0qEH8bnK2OzrsomHVP958qjRH2YHvfiJXLckNXdXvGg6yJcT1ZzsbDHjwQ51km0NQFUyj6AOpZewBQmWM+yPe0j3uD06bifSoC6lF6/VKqj+tBmOw+uYApUUNAkE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=eQDsng5R; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1781015868; c=relaxed/simple;
+	bh=5V7YN0sGJU82TW7Hx4zLzYRmIOeFqeizIyoHB+R4xH0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=gtJZe5SlN0Dfu1TsJCURXKJn91bLkkIhYbHQr29ZrRUN8UZhyqjW9Nk++YN3JT6RclZBt00Ph6gRWBb71AdrFpY4zcVTCeqhVmq9elkdQEle5WP7tu6UIoeoW5aBUPoMSo5nODGcxKEQUjxhGXndjhdcuChBovSFeh61HTOnrj4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=X6+bIDKL; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="eQDsng5R"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender
-	:Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=1029TNOsgX61sWwEzzed/mZCzr7LZfpAn8vlfI5rH6E=; b=eQDsng5RZ8XJnXoqyyH8hdfE78
-	/DRKpFNIiUfsLghCT2v89OHE1FfAZ+IJyTeD2GKRJa7MWPG2NBiBSJtnHw45dd78QXIzhreKVbdeA
-	jAUqUD1EM9953NaDYt2cHitMvMplHzYm5oW5IyyirLMCrJ0YWkTnYevLFzWenFdv63wnI5Menvo5B
-	5cHlIjdwCvSoitDebyETYYWvPtw3DHTlkANSk8UJaCH9fm63fctiSFOAQwU3ZoL4EK/AWTOLba1eG
-	/TF3UkgZf622yee/vaj7Sh1OCipOuGl352D/h53O8yD7GIFpJmV3Yq57JlkEXlxFnY2doU0xTVkQd
-	kxyzho6w==;
-Received: from 2a02-8389-2341-5b80-decc-1a96-daaa-a2cc.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:decc:1a96:daaa:a2cc] helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wWrOO-000000051Gy-25k3;
-	Tue, 09 Jun 2026 08:01:01 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: Zorro Lang <zlang@kernel.org>
-Cc: "Darrick J. Wong" <djwong@kernel.org>,
-	fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: [PATCH 2/2] xfs: test that a grown RT section can be filled
-Date: Tue,  9 Jun 2026 10:00:44 +0200
-Message-ID: <20260609080051.1712103-3-hch@lst.de>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260609080051.1712103-1-hch@lst.de>
-References: <20260609080051.1712103-1-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="X6+bIDKL"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 3A4791F00893;
+	Tue,  9 Jun 2026 14:37:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1781015867;
+	bh=lL08VxpC+fvKfvxxiZW5i89/CQrjnPa2IrCmxpJFjzU=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=X6+bIDKLdkj2W0Lb7IltN17ZG2SOht70RK/4CN90rs/RaFDcXTKPK90ZKgElO8hCT
+	 o9/5CpKIkEISeBQZKusBNnqymcuLjpOYZShxN7CSIq+9fVe/B0lw7FvygEoWlN071n
+	 AoYxrdFZ7Nv2s0FAWgiYFwkbWxroS0smkPCU0UuERhs67aooJYOi5QwmmWl1El5jz4
+	 PM4xcwc+U0QrAZGBvulYq2JfVzUWEjz73k6IvLs/fhIV/ZMpXDPn3tWNVzIB5vWWql
+	 bzUSvmXvNCvSEiHPaPt3sKcHofH04djqtyChyd2wTUpGf9r5cNkLs9HFMdSbI8akKH
+	 mavK6tlp7TALw==
+Date: Tue, 9 Jun 2026 07:37:46 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Anand Suveer Jain <asj@kernel.org>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
+	linux-f2fs-devel@lists.sourceforge.net, zlang@redhat.com,
+	hch@infradead.org
+Subject: Re: [PATCH v6 01/11] fstests: add _loop_image_create_clone() helper
+Message-ID: <20260609143746.GL6070@frogsfrogsfrogs>
+References: <cover.1779939330.git.asj@kernel.org>
+ <421c7cdd5aae27b99d04dddf08c5d9df79c2f790.1779939330.git.asj@kernel.org>
+ <20260529042743.GB6070@frogsfrogsfrogs>
+ <9c0989d8-202f-42ab-9347-df082c25aa72@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <9c0989d8-202f-42ab-9347-df082c25aa72@kernel.org>
 
-This reproduces issues with zoned growfs.
+On Mon, Jun 08, 2026 at 10:39:04PM +0800, Anand Suveer Jain wrote:
+> On 29/5/26 12:27, Darrick J. Wong wrote:
+> > On Thu, May 28, 2026 at 12:05:32PM +0800, Anand Jain wrote:
+> > > Introduce _loop_image_create_clone() and _loop_image_destroy() to mkfs an
+> > > image file and clone it to another image file, and attach a loop device to
+> > > them. And its destroy part.
+> > > 
+> > > Signed-off-by: Anand Jain <asj@kernel.org>
+> > > ---
+> > >  common/rc | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  1 file changed, 63 insertions(+)
+> > > 
+> > > diff --git a/common/rc b/common/rc
+> > > index 79189e7e6e94..d7e3e0bdfb1e 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -1520,6 +1520,69 @@ _scratch_resvblks()
+> > >  	esac
+> > >  }
+> > > +# Create a small loop image, run an optional tuning function ($2) on it,
+> > > +# clone it, and attach both to loop devices, returned in ($1).
+> > > +# Args:
+> > > +#   $1: Nameref to return the array of allocated loop devices [base, clone].
+> > > +#   $2: Optional callback function to tune the base filesystem before cloning.
+> > > +_loop_image_create_clone()
+> > > +{
+> > > +	local -n _ret=$1
+> > 
+> > That switch   ^^ is very clever.  I always wondered how one did indirect
+> > variables in bash.
+> > 
+> > > +	local pre_clone_tune_func="$2"
+> > > +	local img_file=$TEST_DIR/${seq}.img
+> > > +	local img_file_clone=$TEST_DIR/${seq}_clone.img
+> > > +	local size=$(_small_fs_size_mb 128) # Smallest possible
+> > > +	local loop_devs
+> > > +
+> > > +	# Since we copy the block device image, we keep its size small.
+> > > +	_require_fs_space $TEST_DIR $((size * 1024))
+> > > +
+> > > +	_create_file_sized $((size * 1024 * 1024)) $img_file ||
+> > > +				_fail "Failed: Create $img_file $size"
+> > > +
+> > > +	loop_devs=$(_create_loop_device $img_file)
+> > > +	_ret=($loop_devs)
+> > 
+> > Should this check that a loopdev actually got created?
+> > 
+> 
+> Hmm, in the function _create_loop_device(), we are
+> calling _fail if create fails, so no need to duplicate, right?
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- tests/xfs/4201     | 58 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/4201.out |  3 +++
- 2 files changed, 61 insertions(+)
- create mode 100755 tests/xfs/4201
- create mode 100644 tests/xfs/4201.out
+Oh right.  Question withdrawn.
 
-diff --git a/tests/xfs/4201 b/tests/xfs/4201
-new file mode 100755
-index 000000000000..1f1c8e7eb140
---- /dev/null
-+++ b/tests/xfs/4201
-@@ -0,0 +1,58 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+# Copyright (c) 2026 Christoph Hellwig.
-+#
-+# FS QA Test No. 4201
-+#
-+# Test that the entire device capacity can be used after resizing a realtime
-+# device.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick realtime growfs zone
-+
-+. ./common/filter
-+. ./common/zoned
-+
-+_require_scratch
-+_require_external_realtime_device
-+
-+minrtdevsize=$((5 * 1024 * 1024)) #kB
-+rtdevsize=`_get_device_size $SCRATCH_RTDEV`
-+if [ $rtdevsize -lt $minrtdevsize ]; then
-+	_notrun "SCRATCH_RTDEV device too small, $rtdevsize < $minrtdevsize"
-+fi
-+
-+_scratch_mkfs -r size=1g  >> $seqres.full 2>&1
-+rblocks=`_scratch_xfs_get_sb_field rblocks`
-+
-+_scratch_mount
-+_xfs_force_bdev realtime $SCRATCH_MNT
-+free_zones_pre=$(_xfs_get_mountstat $SCRATCH_MNT "free zones:")
-+
-+echo "Growing file system"
-+$XFS_GROWFS_PROG $SCRATCH_MNT -R $((2 * rblocks)) >> $seqres.full 2>&1 || \
-+	_fail "growfs failed"
-+
-+# For zoned file systems, check that the growfs did increase the available free
-+# zones.  This avoids a hang on unfixed kernels when filling later.
-+free_zones_post=$(_xfs_get_mountstat $SCRATCH_MNT "free zones:")
-+if _has_fs_sysfs_attr $SCRATCH_DEV "zoned/max_open_zones"; then
-+	if [ "$free_zones_pre" == "$free_zones_post" ]; then
-+		_fail "growfs did not increase free zones"
-+	fi
-+fi
-+
-+echo "Filling grown file system"
-+writesize_mb=32
-+dd if=/dev/zero of=$SCRATCH_MNT/fill bs=${writesize_mb}M oflag=direct \
-+	>> $seqres.full 2>&1
-+
-+blocksize=$(_get_block_size $SCRATCH_MNT)
-+free_blocks=$(stat -f $SCRATCH_MNT -c '%f')
-+
-+# check that we really mostly filled the file system
-+_within_tolerance "free space after fill" \
-+	$free_blocks $((writesize_mb * 1024 * 1024 / blocksize)) 100%
-+
-+status=0
-+exit
-diff --git a/tests/xfs/4201.out b/tests/xfs/4201.out
-new file mode 100644
-index 000000000000..2e7ac4019f3f
---- /dev/null
-+++ b/tests/xfs/4201.out
-@@ -0,0 +1,3 @@
-+QA output created by 4201
-+Growing file system
-+Filling grown file system
--- 
-2.53.0
+> > > +	case $FSTYP in
+> > > +	xfs)
+> > > +		_mkfs_dev "-s size=4096" ${loop_devs[0]}
+> > > +		;;
+> > > +	btrfs)
+> > > +		_mkfs_dev ${loop_devs[0]}
+> > > +		;;
+> > > +	*)
+> > > +		_mkfs_dev ${loop_devs[0]}
+> > > +		;;
+> > > +	esac
+> > > +
+> > > +	# Only execute if the function argument is not empty
+> > > +	if [ -n "$pre_clone_tune_func" ]; then
+> > > +		$pre_clone_tune_func ${loop_devs[0]}
+> > > +	fi
+> > > +
+> > > +	sync ${loop_devs[0]}
+> > > +	cp $img_file $img_file_clone
+> > > +
+> 
+> 
+> > > +	loop_devs="$loop_devs $(_create_loop_device $img_file_clone)"
+> > 
+> > 	local lodev="$(_create_loop_device ...)"
+> > 
+> > 	test -z "$lodev" && _fail "second loopdev not created"
+> > 	_ret+=("$lodev")
+> > 
+> > ?
+> 
+> If the second `_create_loop_device()` happens to fail, it will
+> already have called `_fail`, so "second loopdev..." won't be
+> used at all.
 
+<nod> Both comments withdrawn :)
+
+--D
+
+> 
+> Thanks, Anand
+> 
+> 
+> 
+> > > +
+> > > +	_ret=($loop_devs)
+> > > +}
+> > > +
+> > > +# Teardown loop devices and delete their underlying backing image files.
+> > > +# Accepts a list of loop device paths (e.g., /dev/loop0 /dev/loop1).
+> > > +_loop_image_destroy()
+> > > +{
+> > > +	for d in "$@"; do
+> > > +		# Retrieve the path of the backing file
+> > > +		local f=$(losetup --noheadings --output BACK-FILE $d)
+> > > +
+> > > +		# Detach the loop device from the backing file
+> > > +		_destroy_loop_device "$d"
+> > > +
+> > > +		# Clean up the backing disk image file
+> > > +		[ -n "$f" ] && rm -f "$f"
+> > > +	done
+> > > +}
+> > >  # Repair scratch filesystem.  Returns 0 if the FS is good to go (either no
+> > >  # errors found or errors were fixed) and nonzero otherwise; also spits out
+> > > -- 
+> > > 2.43.0
+> > > 
+> > > 
+> 
+> 
