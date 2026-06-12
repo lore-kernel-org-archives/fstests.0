@@ -1,40 +1,61 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mailgw.kylinos.cn (mailgw.kylinos.cn [124.126.103.232])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1FDA5474F
-	for <fstests@vger.kernel.org>; Fri, 12 Jun 2026 00:58:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 10A5A3DA7D0;
+	Fri, 12 Jun 2026 07:43:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=124.126.103.232
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781225895; cv=none; b=NlJx0JuLrhtrUJ3422cVeG/WxTQzlD0fH4bvxdusSp6CV8tbA5Wsdn8Y9STevyV0F0rd5Ki2y4s6UoyB7L0Umtyi8cNbaIaSdcQj/OlO/yNWsd5usQDdl+P4rLk+D1zGily0Sy6iKsDpp6yR2USVKE/NqOpmCiULsNuTI9LdeTs=
+	t=1781250222; cv=none; b=fFpYiizWhG4FDmNcOWa8kYVnQY+rn0N5998Toh1F2ORx9n4yet5cw5jQUrAuGUEuifHeFSt8TLjmoVXrD7xVPEBwHcm4m305aDyiZsBwIuoAmir2eTG5hMl1bcPYfLIKcwiJDlZioLusMFzkQlUWGyVFK4YlV+oCqwbUAqu02+0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781225895; c=relaxed/simple;
-	bh=A2jvrneakaxB27rewBPC4T4ivkSBJQt2om3kFnUP2Xc=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=glbPIZCY9I4GM0ki37SFpJv8R8/P/Dh/6W0qUT1yK4POwgfOnZrD4M70MwRtp9+F8bi/VIPT0dzmspVpBprsA4Ye995FMgTLDpjJIwQG5IpNZpaGcjpSIeEZ1dgFvRbcPkPWcosWGQE7onTluTx/bwBDFYcZKueMCFO/VDEfhIo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ow1Qfz75; arc=none smtp.client-ip=100.103.45.18
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ow1Qfz75"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4CF5F1F000E9;
-	Fri, 12 Jun 2026 00:58:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1781225894;
-	bh=dfDy9y8MBcN9aGZ/09GVmidJB5V72Rd2TakHFbjxYVY=;
-	h=From:To:Cc:Subject:Date;
-	b=Ow1Qfz75tjysrFCLg+o1ySUv653ohSHYqixOQmVd4/6dlpLjxf6bBSB65grSS+NM8
-	 VfjgaZHH7rzwEOxRsqwmJnoPr6unS+qAQSHWDT54hLczUOaPmH50dWQKurelYxo6ei
-	 pyUjVkhylwTKR2O+f3WoGvqr8UPmbcryn6vhyxsCYxEMYUmEV8GEidSzFGGmHouonR
-	 hts6gmLdaYKUcYCd+3dvzRuUsjvefgxYzcYcTCfsxjMt9d/jnYK1NpTaay7Sh+Vzi1
-	 Ap0KzyGtB4mbSKaeq5WcCcPyDMKklQj9BfDXcL1BPfSB6zW1UNz7EoDmgCdd356ZJC
-	 BOZFRXT2LiUwg==
-From: Chao Yu <chao@kernel.org>
-To: Zorro Lang <zlang@kernel.org>,
-	fstests@vger.kernel.org
-Cc: jaegeuk@kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net,
-	Chao Yu <chao@kernel.org>
-Subject: [PATCH] f2fs/025: test to do sanity check section type correctly in f2fs GC
-Date: Fri, 12 Jun 2026 00:58:02 +0000
-Message-ID: <20260612005802.3017709-1-chao@kernel.org>
-X-Mailer: git-send-email 2.54.0.1136.gdb2ca164c4-goog
+	s=arc-20240116; t=1781250222; c=relaxed/simple;
+	bh=VG6R73vj38v4bMGBH44EEnKJz6dPxiGNA/LWNXnfvRE=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=ivVDVJQF3ujYGSAOcfiRE/Sdu49c+ScTUuHcok0vtcs5Zfb3OkjGABOLiWhPNB0p7x4SiIzcz1s4co3Nm4cpmfmIIqVJrT5gqTALrM7HRGQs0cOsTWOwiXwWNFXaFh4pHeUS4kFYA8dIYhCirt/u9YqoHFucBLduxXvZE4hczhI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn; spf=pass smtp.mailfrom=kylinos.cn; arc=none smtp.client-ip=124.126.103.232
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kylinos.cn
+X-UUID: 4d83e2ca663211f1aa26b74ffac11d73-20260612
+X-CTIC-Tags:
+	HR_CC_COUNT, HR_CC_DOMAIN_COUNT, HR_CC_NAME, HR_CC_NO_NAME, HR_CTE_8B
+	HR_CTT_MISS, HR_DATE_H, HR_DATE_WKD, HR_DATE_ZONE, HR_FROM_NAME
+	HR_SJ_DIGIT_LEN, HR_SJ_LANG, HR_SJ_LEN, HR_SJ_LETTER, HR_SJ_NOR_SYM
+	HR_SJ_PHRASE, HR_SJ_PHRASE_LEN, HR_SJ_WS, HR_TO_COUNT, HR_TO_DOMAIN_COUNT
+	HR_TO_NO_NAME, IP_TRUSTED, SRC_TRUSTED, DN_TRUSTED, SA_EXISTED
+	SN_EXISTED, SPF_NOPASS, DKIM_NOPASS, DMARC_NOPASS, CIE_GOOD
+	CIE_GOOD_SPF, GTI_FG_BS, GTI_RG_INFO, GTI_C_BU, AMN_T1
+	AMN_GOOD, ABX_MISS_RDNS
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.3.12,REQID:0e0a7a4d-2d18-4871-8de8-6e176657b36d,IP:10,
+	URL:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
+	:release,TS:10
+X-CID-INFO: VERSION:1.3.12,REQID:0e0a7a4d-2d18-4871-8de8-6e176657b36d,IP:10,UR
+	L:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION:r
+	elease,TS:10
+X-CID-META: VersionHash:e7bac3a,CLOUDID:3e24d094d192f14e502cfa40745704fd,BulkI
+	D:260612154328WK595Y91,BulkQuantity:0,Recheck:0,SF:10|66|78|102|127|850|86
+	5|898,TC:nil,Content:0|15|50,EDM:-3,IP:-2,URL:99|1,File:nil,RT:nil,Bulk:ni
+	l,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE
+	:0,ARC:0
+X-CID-BVR: 2,SSN|SDN
+X-CID-BAS: 2,SSN|SDN,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR,TF_CID_SPAM_ULS
+X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
+X-UUID: 4d83e2ca663211f1aa26b74ffac11d73-20260612
+X-User: sangyao@kylinos.cn
+Received: from localhost.localdomain [(223.70.159.239)] by mailgw.kylinos.cn
+	(envelope-from <sangyao@kylinos.cn>)
+	(Generic MTA with TLSv1.3 TLS_AES_256_GCM_SHA384 256/256)
+	with ESMTP id 1067879763; Fri, 12 Jun 2026 15:42:46 +0800
+From: Yao Sang <sangyao@kylinos.cn>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org,
+	hch@lst.de,
+	djwong@kernel.org,
+	zlang@kernel.org,
+	Yao Sang <sangyao@kylinos.cn>
+Subject: [PATCH] xfs/333: test zoned realtime writeback EIO shutdown
+Date: Fri, 12 Jun 2026 15:42:31 +0800
+Message-Id: <20260612074231.1109213-1-sangyao@kylinos.cn>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,138 +64,112 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Without commit 520760b9f915 ("f2fs: optimize representative type determination
-in GC"), f2fs GC will report inconsistent segment type in large section issue,
-and then it will force to shutdown filesystem.
+Create a zoned realtime filesystem with a single user data open zone,
+dirty one zone worth of data, and inject a writeback error on the
+realtime device.
 
-[  768.190903] F2FS-fs (loop51): Inconsistent segment (3) type [1, 0] in SIT and SSA
+After disabling fault injection, fsync a second write.  The filesystem
+must already be shut down so that the second fsync fails quickly instead
+of waiting for zoned allocation progress.
 
-The reason is f2fs kernel will assume all segment type inside large section is
-the same, during GC it loads type from one segment and compare it to other
-segments' type, however due to recovery flow, the chosen segment may has zero
-valid blocks w/ different segment type, since the segment is invalid(free) one,
-it will never be migrated, so that we should not treat such state as abnormal
-condition.
-
-This testcase is created to simulate above condition to see whether f2fs kernel
-module can handle it correctly
-
-Signed-off-by: Chao Yu <chao@kernel.org>
+Signed-off-by: Yao Sang <sangyao@kylinos.cn>
 ---
-v2:
-- clear MKFS_OPTIONS and MOUNT_OPTIONS to guarantee block allocation is as expected.
- tests/f2fs/025     | 92 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/f2fs/025.out |  2 +
- 2 files changed, 94 insertions(+)
- create mode 100644 tests/f2fs/025
- create mode 100644 tests/f2fs/025.out
+This is a test for the XFS zoned writeback shutdown fix posted as:
+https://lore.kernel.org/all/20260611015305.1583003-1-sangyao@kylinos.cn/
 
-diff --git a/tests/f2fs/025 b/tests/f2fs/025
-new file mode 100644
-index 000000000..397e5439a
+Tested on a ZNS realtime XFS setup with fail_make_request enabled.  The
+test passes with the v2 XFS fix applied.  On a kernel without that fix,
+the second fsync waits behind the consumed open zone and reproduces the
+hung writer condition.
+
+ tests/xfs/333     | 69 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/333.out |  1 +
+ 2 files changed, 70 insertions(+)
+ create mode 100755 tests/xfs/333
+ create mode 100644 tests/xfs/333.out
+
+diff --git a/tests/xfs/333 b/tests/xfs/333
+new file mode 100755
+index 00000000..aafee4c3
 --- /dev/null
-+++ b/tests/f2fs/025
-@@ -0,0 +1,92 @@
++++ b/tests/xfs/333
+@@ -0,0 +1,69 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Chao Yu <chao@kernel.org>
++# Copyright (c) 2026 Kylin Software.
 +#
-+# FS QA Test No. f2fs/025
++# FS QA Test No. 333
 +#
-+# Check whether f2fs will encounter cp_error (Inconsistent segment type)
-+# when doing sanity check on type of segments inside large section during
-+# garbage collection.
++# Check that an unrecoverable writeback error on a zoned realtime device shuts
++# down the filesystem.
 +#
 +. ./common/preamble
-+_begin_fstest auto quick
-+
-+_fixed_by_kernel_commit 520760b9f915 \
-+	"f2fs: optimize representative type determination in GC"
++_begin_fstest auto quick rw zone eio
 +
 +. ./common/filter
++. ./common/fail_make_request
++. ./common/zoned
++
++_require_debugfs
++_require_scratch_nocheck
++_require_realtime
++_require_block_device $SCRATCH_RTDEV
++_require_zoned_device $SCRATCH_RTDEV
++_require_command "$BLKZONE_PROG" blkzone
++_require_fail_make_request
 +
 +_cleanup()
 +{
++	[ -n "$SCRATCH_RTDEV" ] && \
++		_bdev_fail_make_request $SCRATCH_RTDEV 0 > /dev/null 2>&1
++	_disallow_fail_make_request > /dev/null 2>&1
++	_scratch_unmount > /dev/null 2>&1
 +	cd /
 +	rm -r -f $tmp.*
 +}
++_register_cleanup _cleanup
 +
-+_require_scratch
-+_require_xfs_io_command "pwrite"
-+_require_xfs_io_command "truncate"
-+_require_command "$F2FS_IO_PROG" f2fs_io
-+_require_check_dmesg
++zone_capacity=$(_zone_capacity 0 $SCRATCH_RTDEV)
++echo "zone capacity: $zone_capacity" >> $seqres.full
 +
-+# Clear options to avoid interference from external configurations
-+export MKFS_OPTIONS=""
-+export MOUNT_OPTIONS=""
++_scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
 +
-+# Format with 96MB size and 2 segments per section
-+_scratch_mkfs_sized $((96 * 1024 * 1024)) "" "-s 2" >> $seqres.full 2>&1
++# Leave only one open zone for user data.  If writeback fails after consuming
++# it, further writers must either see shutdown or wait forever for zone space.
++export MOUNT_OPTIONS="$MOUNT_OPTIONS -o max_open_zones=2"
++_try_scratch_mount || _notrun "mount option not supported"
++_require_xfs_scratch_zoned 1
 +
-+# Mount with mode=lfs
-+_scratch_mount -o mode=lfs >> $seqres.full 2>&1
++_prepare_for_eio_shutdown $SCRATCH_DEV
 +
-+# Create files to fill whole filesystem, then segment type will be changed to node type
-+for ((i=0;i<5120;i++)) do
-+	touch $SCRATCH_MNT/$i >> $seqres.full 2>&1
-+done
-+sync
++testfile=$SCRATCH_MNT/writeback-error
++waitfile=$SCRATCH_MNT/wait-for-zone
 +
-+# Remove all files to create free(empty) node segments
-+rm -f $SCRATCH_MNT/*
-+sync
++$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $zone_capacity" $testfile \
++	>> $seqres.full 2>&1 || _fail "failed to dirty test file"
 +
-+# Allocate free space so that we have chance to reuse free(empty) node segments
-+$XFS_IO_PROG -f -c "pwrite -b 4k 0 1928k" $SCRATCH_MNT/file >> $seqres.full 2>&1
-+sync
++_allow_fail_make_request 100 100000 0 > /dev/null
++_bdev_fail_make_request $SCRATCH_RTDEV 1 > /dev/null
 +
-+$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
-+$XFS_IO_PROG -d -c "pwrite -b 4k 0 16M" $SCRATCH_MNT/file >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
-+$XFS_IO_PROG -d -c "pwrite -b 4k 0 16M" $SCRATCH_MNT/file >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
-+sync
++$XFS_IO_PROG -c "fsync" $testfile >> $seqres.full 2>&1 && \
++	_fail "fsync succeeded despite realtime device error"
 +
-+$XFS_IO_PROG -d -c "pwrite -b 4k 0 8M" $SCRATCH_MNT/file >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
-+$XFS_IO_PROG -d -c "pwrite -b 4k 0 32K" $SCRATCH_MNT/file >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
-+$XFS_IO_PROG -d -c "pwrite -b 4k 0 2M" -c "fsync" $SCRATCH_MNT/file >> $seqres.full 2>&1
++_bdev_fail_make_request $SCRATCH_RTDEV 0 > /dev/null
++_disallow_fail_make_request > /dev/null
 +
-+# Shutdown the filesystem without checkpoint
-+$F2FS_IO_PROG shutdown 2 $SCRATCH_MNT >> $seqres.full 2>&1
++$XFS_IO_PROG -f -c "pwrite -S 0x59 0 4k" -c "fsync" $waitfile \
++	>> $seqres.full 2>&1 && \
++	_fail "filesystem did not shut down after zoned writeback error"
 +
-+_scratch_unmount >> $seqres.full 2>&1
-+
-+_scratch_mount -o mode=lfs >> $seqres.full 2>&1
-+
-+# Run urgent_gc mode to trigger garbage collection
-+dev_name=$(_short_dev $SCRATCH_DEV)
-+if [ -f /sys/fs/f2fs/$dev_name/gc_urgent ]; then
-+	echo 1 > /sys/fs/f2fs/$dev_name/gc_urgent
-+fi
-+
-+# Wait background GC thread to wake up to run and potentially encounter the inconsistency
-+sleep 5
-+
-+_scratch_unmount >> $seqres.full 2>&1
-+
-+# Check whether the dmesg has the warning indicating the bug
-+_check_dmesg_for "F2FS-fs \($dev_name\): Inconsistent segment" && \
-+	_fail "F2FS-fs ($dev_name): Inconsistent segment type detected in dmesg!"
-+
-+echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/f2fs/025.out b/tests/f2fs/025.out
+diff --git a/tests/xfs/333.out b/tests/xfs/333.out
 new file mode 100644
-index 000000000..3d70951ef
+index 00000000..3e11d156
 --- /dev/null
-+++ b/tests/f2fs/025.out
-@@ -0,0 +1,2 @@
-+QA output created by 025
-+Silence is golden
++++ b/tests/xfs/333.out
+@@ -0,0 +1 @@
++QA output created by 333
 -- 
-2.49.0
+2.25.1
 
