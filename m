@@ -1,235 +1,197 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04ADD257844
-	for <fstests@vger.kernel.org>; Sun, 14 Jun 2026 17:16:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D84723C516;
+	Sun, 14 Jun 2026 17:19:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781457396; cv=none; b=V74BvbDNsqyic3nqO4IV2B16SEU+Ihj8ZKEEppK9XH0+JLd6wkde73HNn86qJsAZaM/03fk7prhKzSYxv7rMAUVsQ2Xub1S48kbuyXCPbh8PmuS2VoZVGUPT8qUYmJggWD4+p/az1JeUiYYyv/2KVkHVGbwFBx+4AjlOaA/Qq8I=
+	t=1781457572; cv=none; b=koUpgIFRC7M2v3xzkdPRYKCbQ9aSp/ga/Y3kVqrn6FNw5cF2H7k0IEi2SghYHML9zP7nH/mpnpQHITcgfGGH1of+HQqHFFuuqbgePMo3YNSG28zhy/CmtnyeP7TiU466sdGDHSZBOA/+VY+fMzu0lALDnIawz7A+3R3CKQ9xm50=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781457396; c=relaxed/simple;
-	bh=IfBkngfVB5n8MUCaE4D/Rc73YDsw9f+qdv/Q0QGsdQA=;
+	s=arc-20240116; t=1781457572; c=relaxed/simple;
+	bh=LVJlTBz5w/gtyttfCltBOTNj+p9wfB0O0/SZWKBxB3o=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=YdQG2ecDRhGmBDATyW4+lrBUFycteGih2T5elmLajfd5GAynP9ynT3gijMTYl19gCCBWV//IUIZFDQrgeY3EAfplT2/a4Q4owS6I1sxBOVfaLGE82Hq+T1UooS+wYlYlFT2WnVC+7zBAOXhireu3HmEEX7mDlr3M0uDqm+RaZQM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Z4XAkkZ4; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=boVYbDTNDS1h4WsfH8I8i7qenle6oXcD/YEB+7H4fVDdTBbKsHmiCX+7/K1t1PSrenYAJSZPekmCYhnwElrN5eIaFlGgkUpbR2VRPl+GQ/ZJEHbn+mvTJh6InqaWeWX/sMlrCagUK8q/m5ddH/DF8R91oRAvOXd1m3MDIgvs9tA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JFWT95ul; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Z4XAkkZ4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 873F11F000E9;
-	Sun, 14 Jun 2026 17:16:32 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JFWT95ul"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5559C1F000E9;
+	Sun, 14 Jun 2026 17:19:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1781457394;
-	bh=RZAnhAitdy9O9O9fVyXz8ikfzogvQdFrgRNB/T3l5pA=;
+	s=k20260515; t=1781457570;
+	bh=+JpSYa8yNSTX4l4xtUJzcVpl27WjiwEe7nusY6pn80U=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=Z4XAkkZ4brnHI0Tn2DfbUoXO/PBddllmCBj+B1kXGdLgiPbG8PbeXcPIAoduX8uVW
-	 nLQb0fGcFxPV5MpwB4vrS905MEnJu1PapuNs68xvHknPF04RBnOwh/lTjjTTxharSI
-	 hfdpTSc7UUomhdbursv1go3P9xrt6LHVJbBgi3QgP7IScfCMiMdpOgxxQMYIrXRe15
-	 QNKEG6MfBtEcSTaYX31wkrXAAXFJInwMTgYBm8HN+Rs64gpTzk1tEIx+fRv3y5lkaq
-	 g+t0b8U9d44nJPtZyKI0RDFWk+bYZKHPG8i1oSh/UMmuJxsVhvtE9I7ttHyG7iWT9h
-	 ibEdf6crVRSXg==
-Date: Mon, 15 Jun 2026 01:16:28 +0800
+	b=JFWT95ulVkoiwHOoaT9HYXoHTigqI8yvgjHzDETS7P8j9Pc9AnLterbq8y4FxJl+u
+	 k5orsXV0HT2dIPIpG+iRmji3TmSmTKQ+Q0UVqUp0+4Ag88LwCytZwS7FsdP0AtFxj+
+	 jQiIi6Y0DQ74HkcqSQ/XzR4CoNVsqI5OvDseFoJG6BeyaT8BLMM3GsCSmvSUi78XP/
+	 +2tj8aavcGTVhXOgsMNd7yBFSNKEKPY4YrXqU8S9Y4B97yq4+5sv33/7p9B6HDklsB
+	 OBI7mzf8JJyuoo/TWQNYQJb2RzxPqJ3zVBThWduGm9OlXJacRBsSRu6UF2g0aBTaBn
+	 CD4N4BRgvhQkw==
+Date: Mon, 15 Jun 2026 01:19:25 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Chao Yu <chao@kernel.org>
-Cc: fstests@vger.kernel.org, jaegeuk@kernel.org, 
-	linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH] f2fs/025: test to do sanity check section type correctly
- in f2fs GC
-Message-ID: <ai7YFkAK8sBL4jXm@zlang-mailbox>
-Mail-Followup-To: Chao Yu <chao@kernel.org>, fstests@vger.kernel.org, 
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-References: <20260612005802.3017709-1-chao@kernel.org>
+To: Yao Sang <sangyao@kylinos.cn>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, hch@lst.de, 
+	djwong@kernel.org
+Subject: Re: [PATCH] xfs/333: test zoned realtime writeback EIO shutdown
+Message-ID: <ai7iISyutG9agTkU@zlang-mailbox>
+Mail-Followup-To: Yao Sang <sangyao@kylinos.cn>, fstests@vger.kernel.org, 
+	linux-xfs@vger.kernel.org, hch@lst.de, djwong@kernel.org
+References: <20260612074231.1109213-1-sangyao@kylinos.cn>
+ <ai7LiV1TrX5D_E2J@zlang-mailbox>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20260612005802.3017709-1-chao@kernel.org>
+In-Reply-To: <ai7LiV1TrX5D_E2J@zlang-mailbox>
 
-On Fri, Jun 12, 2026 at 12:58:02AM +0000, Chao Yu wrote:
-> Without commit 520760b9f915 ("f2fs: optimize representative type determination
-> in GC"), f2fs GC will report inconsistent segment type in large section issue,
-> and then it will force to shutdown filesystem.
+On Mon, Jun 15, 2026 at 12:19:09AM +0800, Zorro Lang wrote:
+> On Fri, Jun 12, 2026 at 03:42:31PM +0800, Yao Sang wrote:
+> > Create a zoned realtime filesystem with a single user data open zone,
+> > dirty one zone worth of data, and inject a writeback error on the
+> > realtime device.
+> > 
+> > After disabling fault injection, fsync a second write.  The filesystem
+> > must already be shut down so that the second fsync fails quickly instead
+> > of waiting for zoned allocation progress.
+> > 
+> > Signed-off-by: Yao Sang <sangyao@kylinos.cn>
+> > ---
+> > This is a test for the XFS zoned writeback shutdown fix posted as:
+> > https://lore.kernel.org/all/20260611015305.1583003-1-sangyao@kylinos.cn/
+> > 
+> > Tested on a ZNS realtime XFS setup with fail_make_request enabled.  The
+> > test passes with the v2 XFS fix applied.  On a kernel without that fix,
+> > the second fsync waits behind the consumed open zone and reproduces the
+> > hung writer condition.
+> > 
+> >  tests/xfs/333     | 69 +++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/333.out |  1 +
+> >  2 files changed, 70 insertions(+)
+> >  create mode 100755 tests/xfs/333
+> >  create mode 100644 tests/xfs/333.out
+> > 
+> > diff --git a/tests/xfs/333 b/tests/xfs/333
+> > new file mode 100755
+> > index 00000000..aafee4c3
+> > --- /dev/null
+> > +++ b/tests/xfs/333
+> > @@ -0,0 +1,69 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2026 Kylin Software.
+> > +#
+> > +# FS QA Test No. 333
+> > +#
+> > +# Check that an unrecoverable writeback error on a zoned realtime device shuts
+> > +# down the filesystem.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick rw zone eio
+> > +
+> > +. ./common/filter
+> > +. ./common/fail_make_request
+> > +. ./common/zoned
+> > +
+> > +_require_debugfs
+> > +_require_scratch_nocheck
+> > +_require_realtime
+> > +_require_block_device $SCRATCH_RTDEV
+> > +_require_zoned_device $SCRATCH_RTDEV
+> > +_require_command "$BLKZONE_PROG" blkzone
+> > +_require_fail_make_request
+> > +
+> > +_cleanup()
+> > +{
+> > +	[ -n "$SCRATCH_RTDEV" ] && \
+> > +		_bdev_fail_make_request $SCRATCH_RTDEV 0 > /dev/null 2>&1
+> > +	_disallow_fail_make_request > /dev/null 2>&1
+> > +	_scratch_unmount > /dev/null 2>&1
+> > +	cd /
+> > +	rm -r -f $tmp.*
+> > +}
+> > +_register_cleanup _cleanup
+>    ^^^^^^^^^^^^^^^^^
+> This line isn't necessary. Since "_register_cleanup _cleanup" is called in
+> _begin_fstest, it only registers the function name (not function instance).
+> The latest definition will be called automatically, so there's no need to
+> worry.
 > 
-> [  768.190903] F2FS-fs (loop51): Inconsistent segment (3) type [1, 0] in SIT and SSA
+> > +
+> > +zone_capacity=$(_zone_capacity 0 $SCRATCH_RTDEV)
+> > +echo "zone capacity: $zone_capacity" >> $seqres.full
+> > +
+> > +_scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
+> > +
+> > +# Leave only one open zone for user data.  If writeback fails after consuming
+> > +# it, further writers must either see shutdown or wait forever for zone space.
+> > +export MOUNT_OPTIONS="$MOUNT_OPTIONS -o max_open_zones=2"
+> > +_try_scratch_mount || _notrun "mount option not supported"
+> > +_require_xfs_scratch_zoned 1
+> > +
+> > +_prepare_for_eio_shutdown $SCRATCH_DEV
+>    ^^^^^^^^^^^^^^^^^^^^^^^^^
+> This line is already called in _try_scratch_mount, don't need to call it again,
+> except you want to run it on another device.
 > 
-> The reason is f2fs kernel will assume all segment type inside large section is
-> the same, during GC it loads type from one segment and compare it to other
-> segments' type, however due to recovery flow, the chosen segment may has zero
-> valid blocks w/ different segment type, since the segment is invalid(free) one,
-> it will never be migrated, so that we should not treat such state as abnormal
-> condition.
+> > +
+> > +testfile=$SCRATCH_MNT/writeback-error
+> > +waitfile=$SCRATCH_MNT/wait-for-zone
+> > +
+> > +$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $zone_capacity" $testfile \
+> > +	>> $seqres.full 2>&1 || _fail "failed to dirty test file"
+> > +
+> > +_allow_fail_make_request 100 100000 0 > /dev/null
+> > +_bdev_fail_make_request $SCRATCH_RTDEV 1 > /dev/null
+> > +
+> > +$XFS_IO_PROG -c "fsync" $testfile >> $seqres.full 2>&1 && \
+> > +	_fail "fsync succeeded despite realtime device error"
+> > +
+> > +_bdev_fail_make_request $SCRATCH_RTDEV 0 > /dev/null
+> > +_disallow_fail_make_request > /dev/null
+> > +
+> > +$XFS_IO_PROG -f -c "pwrite -S 0x59 0 4k" -c "fsync" $waitfile \
+> > +	>> $seqres.full 2>&1 && \
+> > +	_fail "filesystem did not shut down after zoned writeback error"
 > 
-> This testcase is created to simulate above condition to see whether f2fs kernel
-> module can handle it correctly
+> OK, others looks good to me.
 > 
-> Signed-off-by: Chao Yu <chao@kernel.org>
-> ---
-> v2:
-> - clear MKFS_OPTIONS and MOUNT_OPTIONS to guarantee block allocation is as expected.
-
-Hi Chao,
-
-Sorry, I just noticed your reply to my review on the previous patch version.
-Due to some unexpected shake-ups recently, I’ve been bogged down with setting
-up and modifying various new system environments, and I accidentally marked
-some unread emails as read.
-
-The patch looks good to me, with just a few picky review points below:
-
->  tests/f2fs/025     | 92 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/f2fs/025.out |  2 +
->  2 files changed, 94 insertions(+)
->  create mode 100644 tests/f2fs/025
->  create mode 100644 tests/f2fs/025.out
+> Since above changes are straightforward, if you don't have any other updates
+> that require a V2, I can just remove those two redundant lines for you when
+> merging.
 > 
-> diff --git a/tests/f2fs/025 b/tests/f2fs/025
-> new file mode 100644
-> index 000000000..397e5439a
-> --- /dev/null
-> +++ b/tests/f2fs/025
-> @@ -0,0 +1,92 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026 Chao Yu <chao@kernel.org>
-> +#
-> +# FS QA Test No. f2fs/025
-> +#
-> +# Check whether f2fs will encounter cp_error (Inconsistent segment type)
-> +# when doing sanity check on type of segments inside large section during
-> +# garbage collection.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +_fixed_by_kernel_commit 520760b9f915 \
-> +	"f2fs: optimize representative type determination in GC"
-> +
-> +. ./common/filter
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
+> Reviewed-by: Zorro Lang <zlang@kernel.org>
+> 
+> Thanks,
+> Zorro
+> 
+> > +
+> > +status=0
+> > +exit
 
-This _cleanup() function is same as default. It can be removed.
+And,
 
-> +
-> +_require_scratch
-> +_require_xfs_io_command "pwrite"
-> +_require_xfs_io_command "truncate"
-> +_require_command "$F2FS_IO_PROG" f2fs_io
-> +_require_check_dmesg
-> +
-> +# Clear options to avoid interference from external configurations
-> +export MKFS_OPTIONS=""
-> +export MOUNT_OPTIONS=""
-> +
-> +# Format with 96MB size and 2 segments per section
-> +_scratch_mkfs_sized $((96 * 1024 * 1024)) "" "-s 2" >> $seqres.full 2>&1
-> +
-> +# Mount with mode=lfs
-> +_scratch_mount -o mode=lfs >> $seqres.full 2>&1
-                              ^^^^^^^^^^^^^^^^^^^^
-It's helpless, due to if _scratch_mount fails, it exit() directly.
+echo "Silence is golden"
+_exit 0
 
-> +
-> +# Create files to fill whole filesystem, then segment type will be changed to node type
-> +for ((i=0;i<5120;i++)) do
-> +	touch $SCRATCH_MNT/$i >> $seqres.full 2>&1
-> +done
-> +sync
-> +
-> +# Remove all files to create free(empty) node segments
-> +rm -f $SCRATCH_MNT/*
-> +sync
-> +
-> +# Allocate free space so that we have chance to reuse free(empty) node segments
-> +$XFS_IO_PROG -f -c "pwrite -b 4k 0 1928k" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> +sync
-> +
-> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 16M" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 16M" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> +sync
-> +
-> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 8M" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 32K" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 2M" -c "fsync" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> +
-> +# Shutdown the filesystem without checkpoint
-> +$F2FS_IO_PROG shutdown 2 $SCRATCH_MNT >> $seqres.full 2>&1
+> > diff --git a/tests/xfs/333.out b/tests/xfs/333.out
+> > new file mode 100644
+> > index 00000000..3e11d156
+> > --- /dev/null
+> > +++ b/tests/xfs/333.out
+> > @@ -0,0 +1 @@
+> > +QA output created by 333
 
-I'm wondering if we can have f2fs supporting in common _scratch_shutdown
-helper :)
+Silence is golden
 
-> +
-> +_scratch_unmount >> $seqres.full 2>&1
-                    ^^^^^^^^^^^^^^^^^^^^
-
-If unmount fails, how about let it output the errors, to break the golden image?
-
-> +
-> +_scratch_mount -o mode=lfs >> $seqres.full 2>&1
-                              ^^^^^^^^^^^^^^^^^^^^
-                              helpless
-
-> +
-> +# Run urgent_gc mode to trigger garbage collection
-> +dev_name=$(_short_dev $SCRATCH_DEV)
-> +if [ -f /sys/fs/f2fs/$dev_name/gc_urgent ]; then
-> +	echo 1 > /sys/fs/f2fs/$dev_name/gc_urgent
-> +fi
-
-Hmm... what if there's not /sys/fs/f2fs/$dev_name/gc_urgent? Does it
-affect the test result?
-
-If it does, this's a necessary requirement for this test, we shouldn't
-ignore it and keep running. Does $F2FS_IO_PROG provide a command to
-make a force GC? Or we need to check this file and _notrun if it's
-not existed.
-
-> +
-> +# Wait background GC thread to wake up to run and potentially encounter the inconsistency
-> +sleep 5
-
-Does this sleep try to wait above "echo 1 > /sys/fs/f2fs/$dev_name/gc_urgent"?
-If so, it makes more sense to move it into the "if-then" logic.
-
-> +
-> +_scratch_unmount >> $seqres.full 2>&1
-                    ^^^^^^^^^^^^^^^^^^^^
-Same as above.
-
-> +
-> +# Check whether the dmesg has the warning indicating the bug
-> +_check_dmesg_for "F2FS-fs \($dev_name\): Inconsistent segment" && \
-> +	_fail "F2FS-fs ($dev_name): Inconsistent segment type detected in dmesg!"
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-
-We've replaced "status=0;exit;" with "_exit 0".
+I'll help to make all these changes when I merge it.
 
 Thanks,
 Zorro
 
-> diff --git a/tests/f2fs/025.out b/tests/f2fs/025.out
-> new file mode 100644
-> index 000000000..3d70951ef
-> --- /dev/null
-> +++ b/tests/f2fs/025.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 025
-> +Silence is golden
-> -- 
-> 2.49.0
+> > -- 
+> > 2.25.1
+> > 
 > 
