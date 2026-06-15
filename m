@@ -1,97 +1,285 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 659113033D6
-	for <fstests@vger.kernel.org>; Sun, 14 Jun 2026 18:58:16 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1CC93C2B8D
+	for <fstests@vger.kernel.org>; Mon, 15 Jun 2026 08:22:37 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781463497; cv=none; b=jiDwiLfo/itXIk0bcUsdVPxXBwPXA7s0yXzhn0SM090Z+vTjgUjD/QG/SDVBaFSw7R5zmgKb45ycJ20lbUH22IsH10du8qppr67lkismVw1Yj4ozh6i2dvN+Y77D9pODsL4HUdpAoouGp2OkmdRIZODjaDaxC+tpF7u7upuHbZQ=
+	t=1781511759; cv=none; b=aHYBg9fG5b8EzhmBB8hgM3JqmXkcJNrEqlEK7J5Kqh5+pz21LyUzSsGR8teFpBknOkHDSCBAShvWn1qavrHSsw2LpgjVlZZXqYPkyMSzdEfCqOEEHv/U1w22H6GX4xYfeeIfnFZN80zANWpAOBcA4hZQmMI5u2m3zXsKO9KvkEU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781463497; c=relaxed/simple;
-	bh=rj6wmHfSsd8M/eVB6MIieptVuf42dCjtkMVIEm0zPsE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Lj1nsmDUnoznbsvOxqPmyTr/UHQvM1GLnG2evVc0q3mtjQ77wPUozYUV1xy4V/3XQG7z7vPUFOPUUJAVFtqqnFxYnFEPGxKqINV+jeFjovSzjELRza+jFLXYejC/TIJtOVkcLUYWYYttdZEZie91jrwNvoRPnbvB2gZWdm4W+Ck=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=M/cy1ko8; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1781511759; c=relaxed/simple;
+	bh=3TecIITL+P3L++sAROJvVFXgRFF9WLz1YIQk59tCOqg=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=c4Ih63XHQwBQjqhSpfcivNiEnYSnNiqr82bSpVOAUmYyGSqVT7rx7CnU9dXUyhEXz8tfsxbM0BSDAberIdl94AWuexkXOjQK7MgrpnTJdc+70QZU7kCvIhzdrowmgzqdZx9yMxrBAudOhlUdoEh69h/u/1Bg7gWpiTcWh6uxxSo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=E/v9FV3P; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="M/cy1ko8"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A27831F000E9;
-	Sun, 14 Jun 2026 18:58:14 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="E/v9FV3P"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A91221F000E9;
+	Mon, 15 Jun 2026 08:22:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1781463495;
-	bh=p+y65GekcUKzCLsvRS9EY86m5/xT1vXZujkSb0rr5/4=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=M/cy1ko8ZI30LRjceuIuDTx10DHQotaZZ7AB7ZA+H1h7HlmxOCX0DQseNftojthhh
-	 NEHZPn7IswQdhJmsuIHNOe7tYYdaY5RuismOpIg+x+pq+rlPkk9m3aVAx8S6pGYJwD
-	 TXL4If2OIjrsKwUmG4kYtAXBCowbSeo8QSnW8fFb5s1hScpLmSWiZ1oK4piNPN6Hbt
-	 Zun8v7SEV0PnrkiRoMCZgnMptJOy52mqGZPOS/oz5XLvHuCNud2IClEdwIRe/lUXFL
-	 2dndhXKFOVTVyoiFeM0CkBYfvFuBx8SRF4sfvFmDVdXlLN5YTvoR9/EVI292zIY++g
-	 hKqWX2rR4ORRw==
-Date: Mon, 15 Jun 2026 02:58:11 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/366: check minimum dio size correctly
-Message-ID: <ai75PcdwbK7kYBTU@zlang-mailbox>
-Mail-Followup-To: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
-References: <20260608070010.1285677-1-hch@lst.de>
+	s=k20260515; t=1781511757;
+	bh=cNisCqsmRE0g3R98tB+voXcu0x16Y9JOfUCRBhHX4ew=;
+	h=Date:Cc:Subject:To:References:From:In-Reply-To;
+	b=E/v9FV3PWo/UNvZ38EJl02rsd/op9OXbaoBH9VbUpJPhWECZet539Z9GZHUurVAgK
+	 nXI39ZYmlS+WfhTVteDvB1MTtzDBR8lU9bSnIp1epfkvpakXhAqEuAev1tE4sLtcx1
+	 oN/MpXntdB/wMk7NST2oE207P/+D+82tYPgMZNU2S+v4TGP0JbCWlUE4YY7bd3ZN5d
+	 nAVipk26W1lLxQq4JxYcK5Mp5k9eP68S7ac/u2P4zCMSzgZcs+FBWs+5tiUmkwE0Ua
+	 hc+xCxUQt/XvxI1rkKwdB/i30cJcrUmfPcK3d5odYCD1nE0HZM/4RXclia9qaFbBWp
+	 ez81zPUP3o1Wg==
+Message-ID: <b32998c0-17e3-4b81-a474-4a408aa7fa32@kernel.org>
+Date: Mon, 15 Jun 2026 16:22:34 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260608070010.1285677-1-hch@lst.de>
+User-Agent: Mozilla Thunderbird
+Cc: chao@kernel.org
+Subject: Re: [PATCH] f2fs/025: test to do sanity check section type correctly
+ in f2fs GC
+To: fstests@vger.kernel.org, jaegeuk@kernel.org,
+ linux-f2fs-devel@lists.sourceforge.net
+References: <20260612005802.3017709-1-chao@kernel.org>
+ <ai7YFkAK8sBL4jXm@zlang-mailbox>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <ai7YFkAK8sBL4jXm@zlang-mailbox>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Mon, Jun 08, 2026 at 09:00:10AM +0200, Christoph Hellwig wrote:
-> min_dio_alignment requires the file system to be checked to be mounted,
-> so move the call into the main loop.  Drop the pointless blocksize
-> argument to _require_odirect, which is only tested on the test device.
+On 6/15/26 01:16, Zorro Lang wrote:
+> On Fri, Jun 12, 2026 at 12:58:02AM +0000, Chao Yu wrote:
+>> Without commit 520760b9f915 ("f2fs: optimize representative type determination
+>> in GC"), f2fs GC will report inconsistent segment type in large section issue,
+>> and then it will force to shutdown filesystem.
+>>
+>> [  768.190903] F2FS-fs (loop51): Inconsistent segment (3) type [1, 0] in SIT and SSA
+>>
+>> The reason is f2fs kernel will assume all segment type inside large section is
+>> the same, during GC it loads type from one segment and compare it to other
+>> segments' type, however due to recovery flow, the chosen segment may has zero
+>> valid blocks w/ different segment type, since the segment is invalid(free) one,
+>> it will never be migrated, so that we should not treat such state as abnormal
+>> condition.
+>>
+>> This testcase is created to simulate above condition to see whether f2fs kernel
+>> module can handle it correctly
+>>
+>> Signed-off-by: Chao Yu <chao@kernel.org>
+>> ---
+>> v2:
+>> - clear MKFS_OPTIONS and MOUNT_OPTIONS to guarantee block allocation is as expected.
 > 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/generic/366 | 10 ++++++++--
->  1 file changed, 8 insertions(+), 2 deletions(-)
+> Hi Chao,
 > 
-> diff --git a/tests/generic/366 b/tests/generic/366
-> index 271a01bc2eac..ef69bf09d6ff 100755
-> --- a/tests/generic/366
-> +++ b/tests/generic/366
-> @@ -20,7 +20,7 @@ _begin_fstest auto quick rw
->  . ./common/filter
->  
->  _require_scratch
-> -_require_odirect 512	# see fio job1 config below
-> +_require_odirect
->  _require_aio
->  
->  _fixed_by_fs_commit btrfs xxxxxxxxxxxx \
-> @@ -30,7 +30,7 @@ iterations=$((32 * LOAD_FACTOR))
->  
->  fio_config=$tmp.fio
->  fio_out=$tmp.fio.out
-> -blksz=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
-> +
->  cat >$fio_config <<EOF
->  [global]
->  bs=8k
-> @@ -60,6 +60,12 @@ _require_fio $fio_config
->  for (( i = 0; i < $iterations; i++)); do
->  	_scratch_mkfs >>$seqres.full 2>&1
->  	_scratch_mount
-> +
-> +	blksz=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
-> +	if [[ $blksz -gt 512 ]]; then
-> +		_notrun "512 byte dio alignment required"
-> +	fi
+> Sorry, I just noticed your reply to my review on the previous patch version.
+> Due to some unexpected shake-ups recently, I’ve been bogged down with setting
+> up and modifying various new system environments, and I accidentally marked
+> some unread emails as read.
 
-Do we need to check this in every iteration?
+No worries. :)
 
-> +
->  	# There's a known EIO failure to report collisions between directio and buffered
->  	# writes to userspace, refer to upstream linux 5a9d929d6e13. So ignore EIO error
->  	# at here.
-> -- 
-> 2.53.0
 > 
+> The patch looks good to me, with just a few picky review points below:
+
+Thanks Zorro for taking a look.
+
+> 
+>>  tests/f2fs/025     | 92 ++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/f2fs/025.out |  2 +
+>>  2 files changed, 94 insertions(+)
+>>  create mode 100644 tests/f2fs/025
+>>  create mode 100644 tests/f2fs/025.out
+>>
+>> diff --git a/tests/f2fs/025 b/tests/f2fs/025
+>> new file mode 100644
+>> index 000000000..397e5439a
+>> --- /dev/null
+>> +++ b/tests/f2fs/025
+>> @@ -0,0 +1,92 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2026 Chao Yu <chao@kernel.org>
+>> +#
+>> +# FS QA Test No. f2fs/025
+>> +#
+>> +# Check whether f2fs will encounter cp_error (Inconsistent segment type)
+>> +# when doing sanity check on type of segments inside large section during
+>> +# garbage collection.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick
+>> +
+>> +_fixed_by_kernel_commit 520760b9f915 \
+>> +	"f2fs: optimize representative type determination in GC"
+>> +
+>> +. ./common/filter
+>> +
+>> +_cleanup()
+>> +{
+>> +	cd /
+>> +	rm -r -f $tmp.*
+>> +}
+> 
+> This _cleanup() function is same as default. It can be removed.
+
+Will remove.
+
+> 
+>> +
+>> +_require_scratch
+>> +_require_xfs_io_command "pwrite"
+>> +_require_xfs_io_command "truncate"
+>> +_require_command "$F2FS_IO_PROG" f2fs_io
+>> +_require_check_dmesg
+>> +
+>> +# Clear options to avoid interference from external configurations
+>> +export MKFS_OPTIONS=""
+>> +export MOUNT_OPTIONS=""
+>> +
+>> +# Format with 96MB size and 2 segments per section
+>> +_scratch_mkfs_sized $((96 * 1024 * 1024)) "" "-s 2" >> $seqres.full 2>&1
+>> +
+>> +# Mount with mode=lfs
+>> +_scratch_mount -o mode=lfs >> $seqres.full 2>&1
+>                               ^^^^^^^^^^^^^^^^^^^^
+> It's helpless, due to if _scratch_mount fails, it exit() directly.
+
+Right, will fix.
+
+> 
+>> +
+>> +# Create files to fill whole filesystem, then segment type will be changed to node type
+>> +for ((i=0;i<5120;i++)) do
+>> +	touch $SCRATCH_MNT/$i >> $seqres.full 2>&1
+>> +done
+>> +sync
+>> +
+>> +# Remove all files to create free(empty) node segments
+>> +rm -f $SCRATCH_MNT/*
+>> +sync
+>> +
+>> +# Allocate free space so that we have chance to reuse free(empty) node segments
+>> +$XFS_IO_PROG -f -c "pwrite -b 4k 0 1928k" $SCRATCH_MNT/file >> $seqres.full 2>&1
+>> +sync
+>> +
+>> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
+>> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 16M" $SCRATCH_MNT/file >> $seqres.full 2>&1
+>> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
+>> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 16M" $SCRATCH_MNT/file >> $seqres.full 2>&1
+>> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
+>> +sync
+>> +
+>> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 8M" $SCRATCH_MNT/file >> $seqres.full 2>&1
+>> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
+>> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 32K" $SCRATCH_MNT/file >> $seqres.full 2>&1
+>> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
+>> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 2M" -c "fsync" $SCRATCH_MNT/file >> $seqres.full 2>&1
+>> +
+>> +# Shutdown the filesystem without checkpoint
+>> +$F2FS_IO_PROG shutdown 2 $SCRATCH_MNT >> $seqres.full 2>&1
+> 
+> I'm wondering if we can have f2fs supporting in common _scratch_shutdown
+> helper :)
+
+I think we can change f2fs testcase to use _scratch_shutdown because the definition of
+nologflush shutdown interface is the same as xfs':
+
+/*
+ * should be same as XFS_IOC_GOINGDOWN.
+ * Flags for going down operation used by FS_IOC_GOINGDOWN
+ */
+#define F2FS_IOC_SHUTDOWN	_IOR('X', 125, __u32)	/* Shutdown */
+#define F2FS_GOING_DOWN_NOSYNC		0x2	/* going down */
+
+#define XFS_IOC_GOINGDOWN	     _IOR ('X', 125, uint32_t)
+#define XFS_FSOP_GOING_FLAGS_NOLOGFLUSH		0x2	/* don't flush log nor data */
+
+> 
+>> +
+>> +_scratch_unmount >> $seqres.full 2>&1
+>                     ^^^^^^^^^^^^^^^^^^^^
+> 
+> If unmount fails, how about let it output the errors, to break the golden image?
+
+Yes, it's better.
+
+> 
+>> +
+>> +_scratch_mount -o mode=lfs >> $seqres.full 2>&1
+>                               ^^^^^^^^^^^^^^^^^^^^
+>                               helpless
+
+Will fix.
+
+> 
+>> +
+>> +# Run urgent_gc mode to trigger garbage collection
+>> +dev_name=$(_short_dev $SCRATCH_DEV)
+>> +if [ -f /sys/fs/f2fs/$dev_name/gc_urgent ]; then
+>> +	echo 1 > /sys/fs/f2fs/$dev_name/gc_urgent
+>> +fi
+> 
+> Hmm... what if there's not /sys/fs/f2fs/$dev_name/gc_urgent? Does it
+> affect the test result?
+> 
+> If it does, this's a necessary requirement for this test, we shouldn't
+> ignore it and keep running. Does $F2FS_IO_PROG provide a command to
+> make a force GC? Or we need to check this file and _notrun if it's
+> not existed.
+
+Ah, right, that's good point!
+
+We can use "$F2FS_IO_PROG gc_urgent <dev_name> run 5" instead, it will do below commands:
+1. echo 1 > /sys/fs/f2fs/$dev_name/gc_urgent
+2. sleep 5 seconds
+3. echo 0 > /sys/fs/f2fs/$dev_name/gc_urgent
+
+> 
+>> +
+>> +# Wait background GC thread to wake up to run and potentially encounter the inconsistency
+>> +sleep 5
+> 
+> Does this sleep try to wait above "echo 1 > /sys/fs/f2fs/$dev_name/gc_urgent"?
+> If so, it makes more sense to move it into the "if-then" logic.
+> 
+>> +
+>> +_scratch_unmount >> $seqres.full 2>&1
+>                     ^^^^^^^^^^^^^^^^^^^^
+> Same as above.
+
+Will fix.
+
+> 
+>> +
+>> +# Check whether the dmesg has the warning indicating the bug
+>> +_check_dmesg_for "F2FS-fs \($dev_name\): Inconsistent segment" && \
+>> +	_fail "F2FS-fs ($dev_name): Inconsistent segment type detected in dmesg!"
+>> +
+>> +echo "Silence is golden"
+>> +status=0
+>> +exit
+> 
+> We've replaced "status=0;exit;" with "_exit 0".
+
+Will fix.
+
+Thanks,
+
+> 
+> Thanks,
+> Zorro
+> 
+>> diff --git a/tests/f2fs/025.out b/tests/f2fs/025.out
+>> new file mode 100644
+>> index 000000000..3d70951ef
+>> --- /dev/null
+>> +++ b/tests/f2fs/025.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 025
+>> +Silence is golden
+>> -- 
+>> 2.49.0
+>>
+
