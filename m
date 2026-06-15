@@ -1,133 +1,114 @@
-Received: from fout-a5-smtp.messagingengine.com (fout-a5-smtp.messagingengine.com [103.168.172.148])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8048402B82;
-	Mon, 15 Jun 2026 15:24:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.148
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8BADE404BE1;
+	Mon, 15 Jun 2026 15:33:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781537090; cv=none; b=VbydAC2cnA9jwtsaKE96lWv8N4Gv91ztwTV+PtF5G8Ra1+S8hpWGbkhMKGml8GXNISCNCDKmkGtqQddbx7Gl5MyELmWj0MK9SpksE6zg9eYDp2M7rzM0sbfqRdZ8TFAxk16KTET+z4DSovCM6uphbyOn5iZmeNyZeUqMIz9MB5c=
+	t=1781537616; cv=none; b=WuLo0OUaVcyhd0pktdlA4pbJ/j030QniIzmXlQfWBkWzOPAxg36vwa/r8Pr99nYM9DGXrTxfnUVYJUWXDScnbEWqkB9rA+Sn21HaQWBIS6jS8FRDJNA4booKt1Obb7XO8gKxrzXHuHB/JPycy43pbCnzCdsI7wEb+P9QxHTQC7Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781537090; c=relaxed/simple;
-	bh=nIK/39fAmPpgHmpMGK1/7OvAJKB6XeLZLO09qm430Jo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=XmPkWD+nfLR9CxyKdHupw5Mwzp++edCm19irTsj0CoB73r29oWU6+UGFLste+887XmA6UxNNZ5/iqYGKwqD4wSTFPJQ8U1Wq18mZMkbfwmAqBbppFnbo9I3baNhF+PXJnAPpsJqCDWzBWZX9yT2fBRDjJ884b7k71+jv8ieJYlM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net; spf=pass smtp.mailfrom=sandeen.net; dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b=Z+0GJ+b8; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=LOxosUqP; arc=none smtp.client-ip=103.168.172.148
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandeen.net
+	s=arc-20240116; t=1781537616; c=relaxed/simple;
+	bh=YAVz9xyKeCfQVLFkJDAW/DH8m5ZtB02pAE2V1nOU/ws=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=TRu+4dwfsbtSF54fWQyjk0hnbpD8toGnSojM6/U02C2wbMqaVRftndkcJDUclOo+mms8oTwgsLQrvwgVY8j8i9LoZ15YQRBbNqEY2ypJJHxW+hnBR7OV86LwnrHdGO2PvSBOF46S7MveZmWfq7vE5fZbPcYxB87AhjC7byv288A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QHYPomsn; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b="Z+0GJ+b8";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="LOxosUqP"
-Received: from phl-compute-02.internal (phl-compute-02.internal [10.202.2.42])
-	by mailfout.phl.internal (Postfix) with ESMTP id D75D4EC014B;
-	Mon, 15 Jun 2026 11:24:47 -0400 (EDT)
-Received: from phl-frontend-03 ([10.202.2.162])
-  by phl-compute-02.internal (MEProxy); Mon, 15 Jun 2026 11:24:47 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net; h=
-	cc:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm1; t=1781537087;
-	 x=1781623487; bh=rL4ZvtW2mK43ifRCN39O3VR6qGcctpUk5i7p9Klw4+M=; b=
-	Z+0GJ+b8/iL0RDhErmsq8KRg+/XmR5AirXKjCLKxj5CbFDEZqv05nUFQUVvpcswQ
-	4wjLLQxzAeaX3gomoFmWcTEx5Qqvq69nmg9nn+Z0sLaMR+ZoUykith4UuyyQkvSa
-	tQBjcDKr5rNkaGT7wSkUGbZbt2BjclJ1dTU/7o8IOHphScAHyjme7TV32oT+TqC5
-	YFHdEcTZb/kRjU6y/ZrUl1d1DC0CXYg+JJ6xIYg6bEi+GjrCtHWGUBexRbCKG+SS
-	QiNKsidOgSgRgFStV77m2sYexzbIwG/ZGiI7gE6E6wJvOLNtWt+OqNaEB4YQSmPY
-	vz0CfetUpxUXwI10uEYlIw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1781537087; x=
-	1781623487; bh=rL4ZvtW2mK43ifRCN39O3VR6qGcctpUk5i7p9Klw4+M=; b=L
-	OxosUqPmCa7UpS4B9qmj/KzFe/0foMM5JHihmuLtkKHZqIHXY5fzmeRtH3vI5LBG
-	sDGCM9Im275q58M8SGTnh5mQsDKH0xX8ScXoiFVwlk44utIFfWvQXxfAlvM/OQ1G
-	3mzZxhOrsSlJqoDjoq/fLarelbVuc8A31AF4GsAO7AevM7p00H9lc+jvCj3roVew
-	rzlApuoigkvmR07qvq22vLc/9xPRFUDAylQcdadVoECjM6MT9LsdfAoWL/cZqEjF
-	4GkV4pY0itDRc0pUA14EsWCKBMRq4+KWAFozgNm6i69nvxZq8T1My2GIadxlldS3
-	sNoJp3haukIC9izKMkm0g==
-X-ME-Sender: <xms:PxkwaiIQenhR-1U9_vQS9s3zdXMOLWdjvyxKpG860KETFgYedxC1nA>
-    <xme:PxkwarqUcNflhbZHXRlfUhg4I8y4AsJmVh2Bg-xa_Ce5Eq6UUAA8dsOu0o41L-sfI
-    FkudoK0whpx9FJqG1XFT0f5hJkZdXCtJK2dDBnQFdYh5GoLsw5P05U>
-X-ME-Received: <xmr:PxkwaiwsHH3rdKjkoi4M_9iDWIiJmLT-5TVHsaNWD0xV11dwi1x-DrHXo5HG0de6wvDeyYcdPD4XRzhtTbB5o0PgFqspiw>
-X-ME-Proxy-Cause: dmFkZTGAilDK4TSrjUGt+EPIo2lbAuo73AG4lrWPBIgFXUw1l/Xi6yCybZIrexuRG5hdg3
-    8poM9p1u3xDALSzdFdV1doCm1uCUIDAUzs9hHVlnC2/O2M6Xno/RkCixej9sFN9HzJqsbQ
-    Iv88Q/qYcO/YSZNhl8u8nNbU/1VSzBVxd143ZliM3Y6Upxc/Dq3k+3kTq8QpkHnaVArqen
-    42eIorZm1LsEJYiFpa2vCEqaITWhZPwuRrXDUxGEeHUPjy/1SrcXp4nlW5dzl+xIAaW+dK
-    mAv/I/S3RKI6CduJBRkFKcVAvNmu1RYTXOr014YhM5bj8GbaGJTWmw+izlIc+QOx1yQIpf
-    M9xQJlq/xn+NSeoDMcBz3OMQdbR0FpNYXadZWJggzO5hL6v+EyYbxe/IzJK6CW0Uzfz5OP
-    VFn2O3UabzWxpBHyKX/dbq07OGSNhDRt+WjESLm9MhltfVW0p8johflZDF8bytVmyCJeC1
-    tVpEE8HVFPSGFnDC5aBuf1Dk9TzzH4keAPLj1E/HCIiDqECsdNUyUwJ4sqo490xR+PP02j
-    Wrc3Mbj3EQeOa5VIFUSsF9R/tHKdkb4gav0hGbM3/KN/5v5UBrlO+tsHdwH5869zWc1E/Q
-    m/wA6NNWcpGgP3hcTHSb8Qqq2yYzeMcFgQlfxtpZNTiJ04eeGkwFHFqhw8Ew
-X-ME-Proxy: <xmx:PxkwanOwOnmAVR0M1y1yF-7kQxBK2Wj9t4kkxa_ehwq8473XMsnX8g>
-    <xmx:Pxkwav66wRKRyicf2jkGZC9Mebc_q_2Vt5vQxg4P4rQPhJywJR2IUg>
-    <xmx:PxkwaokTFqiC8q4R3v1vRm-U0SUf4dbi6GOY5JitMVmzE3-Ev5UeMw>
-    <xmx:PxkwagTCAoB34pSLM8nIIZuxZj0FP3NoR02b-oXVFDIXuCjNPs78eA>
-    <xmx:Pxkwala_e_02nS7wuQPb5q1yTHbPMjTx5Yh5sh80Sa0NjUOaGPvYkhax>
-Feedback-ID: i2b59495a:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Mon,
- 15 Jun 2026 11:24:47 -0400 (EDT)
-Message-ID: <acb2b053-e987-4c3d-a672-6e1f0d0f5a94@sandeen.net>
-Date: Mon, 15 Jun 2026 10:24:46 -0500
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QHYPomsn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC4F21F00A3A;
+	Mon, 15 Jun 2026 15:33:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1781537615;
+	bh=YR8d1sU68vjg6nO93UgPSiFfS13ANOnhT9n1aPx9rjw=;
+	h=From:Subject:Date:To:Cc;
+	b=QHYPomsnvmrgCoa2DmS6X03Iac2YhKUwVLqUM1U1HRdMdo/vacbta6P3f9qZ9YgE3
+	 FiBk0zcga3AYUkJflGcPfVREO8mjHcerH3dG+pzyXPTxw+R861Z02vNFIAAa0HVIzc
+	 3QbnR0Ra5pa2gCuLDNbBsFGAsUj4lZVWFCG9S6Gpxnyj74e36ZptB509jJ15z3zMEE
+	 0DLB/ifoNUPgxr6SiW+xfi7QaiHxwFRn4+LUa44G49s5KvJ2uQgyoF4BfSI8+iXcKy
+	 DdeYZX39/N6hVuU59qSMikL2Eu23FCNfNPJObYxcpAKS23dfaWxUiMcdN4IB677TFJ
+	 Kzx+9QyuS/W1A==
+From: Christian Brauner <brauner@kernel.org>
+Subject: [PATCH 0/2] Support overlayfs in the idmapped mount tests
+Date: Mon, 15 Jun 2026 17:33:28 +0200
+Message-Id: <20260615-overlay-idmapped-vfstest-v1-0-c6b3b2228092@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: mkfs.xfs "concurrency" change concerns
-To: Christoph Hellwig <hch@infradead.org>
-Cc: "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
- "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
- "Darrick J. Wong" <djwong@kernel.org>,
- Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-References: <84c8a5e5-938d-4745-996d-4237009c9cc5@sandeen.net>
- <ajAJ6lXJWcko4epj@infradead.org>
-Content-Language: en-US
-From: Eric Sandeen <sandeen@sandeen.net>
-In-Reply-To: <ajAJ6lXJWcko4epj@infradead.org>
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAEgbMGoC/yWMQQ7CIBQFr9L8tSQUlRivYlxAeViMQsOnTU3Tu
+ wu6nMl7sxEjBzBdu40ylsAhxQr9oaNhNPEBEVxlUlJpqfuzSAvyy3yqfptpghOL5wIuwiqt3FF
+ eToChep8yfFh/6dv9zzzbJ4bSem1hDUPYbOIwNuVTFhFroX3/AgQ5AxiXAAAA
+X-Change-ID: 20260615-overlay-idmapped-vfstest-b262d3084eea
+To: Miklos Szeredi <miklos@szeredi.hu>, Amir Goldstein <amir73il@gmail.com>, 
+ Zorro Lang <zlang@kernel.org>
+Cc: linux-unionfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+ fstests@vger.kernel.org, 
+ "Christian Brauner (Amutable)" <brauner@kernel.org>
+X-Mailer: b4 0.16-dev-f5839
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2655; i=brauner@kernel.org;
+ h=from:subject:message-id; bh=YAVz9xyKeCfQVLFkJDAW/DH8m5ZtB02pAE2V1nOU/ws=;
+ b=owGbwMvMwCU28Zj0gdSKO4sYT6slMWQZSPua+AoujK/3Xs4stSa35MhE8VC/32eWn95lGr8ju
+ c9g84y6jlIWBjEuBlkxRRaHdpNwueU8FZuNMjVg5rAygQxh4OIUgImITWb4n8mUf9gh9aNgaNqq
+ GCdPlTfB+46Wtv1N0fyz7FtZk1BYDCPDfb7379dz2K1Oqz5oybNoz0OHzbNjG3wUGKbXKk5uapn
+ PBAA=
+X-Developer-Key: i=brauner@kernel.org; a=openpgp;
+ fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
 
-On 6/15/26 9:19 AM, Christoph Hellwig wrote:
-> On Thu, Oct 09, 2025 at 03:13:47PM -0500, Eric Sandeen wrote:
->> Hey all -
->>
->> this got long, so tl;dr:
->>
->> 1) concurrency geometry breaks some xfstests for me
->> 2) concurrency behavior is not consistent w/ loopback vs. imagefile
->> 3) concurrency defaults to the mkfs machine not the mount machine
->>
->> In detail:
->>
->> So, I realize I'm late to the game here and didn't review the patches
->> before they went in, but it looks like the "concurrency" mkfs.xfs
->> arguments and defaults are breaking several xfstests.
->>
->> 4738ff0 mkfs: allow sizing realtime allocation groups for concurrency
->> c02a1873 mkfs: allow sizing internal logs for concurrency
->> 9338bc8b mkfs: allow sizing allocation groups for concurrency
->>
->> Specifically, xfs/078, xfs/216, and xfs/217 are failing for us
->> on various machines with between 8 and 128 CPUS, due to the
->> fundamental change in geometry that results from the new
->> concurrency behavior, which makes any consistent golden
->> output that involves geometry details quite difficult.
-> 
-> Did anything ever come out of this?  We're hitting errors in exactly
-> those tests in the zoned XFS CI (which also tests regular XFS).
-> Shin'ichiro recently spent some time tracking these down, which
-> finally made me remember this thread.
+This change is required to make the series in [1] which makes idmapped
+overlayfs mounts work compatible with the idmapped mount test suite.
 
-No not really. IIRC, I don't think Darrick felt that there was any
-problem with the code as it is, I wasn't getting my points across,
-and I decided not to pursue it further. (That's the sanitized version,
-in reality I got pretty grumpy about it, sorry.)
+The vfstest idmapped mount tests behind generic/633, generic/696 and
+generic/697 fail on overlayfs for two reasons that are specific to
+overlayfs and unrelated to idmapped mount semantics:
 
-If we have more evidence that this really is a problem, happy to re-
-engage with discussion about a path forward to resolve it.
+  - They create a whiteout device, mknod(S_IFCHR, makedev(0, 0)), as a
+    fixture -- it is the only character device an unprivileged caller may
+    create, being exempt from the CAP_MKNOD check. overlayfs reserves a
+    0:0 character device as its on-disk whiteout marker, so ovl_mknod()
+    returns -EPERM and the fixture cannot be created.
 
--Eric
+  - openat_tmpfile_supported() probes O_TMPFILE on the idmapped mount as
+    the test's fsuid, which that mount does not map. On overlayfs the
+    backing tmpfile then ends up owned by an unmapped id, overlayfs opens
+    it with O_NOATIME, and may_open() returns -EPERM, so the probe
+    wrongly concludes O_TMPFILE is unsupported and the tmpfile sub-tests
+    are skipped.
+
+Patch 1 fixes the probe: O_TMPFILE support is a property of the
+filesystem, not of the idmapped mount or the caller's mapping, so it
+probes info->t_dir1_fd (the base mount, which the caller owns) just like
+the non-idmapped setgid tests already do. This is a general correctness
+fix and a no-op on every other filesystem.
+
+Patch 2 adds an is_overlayfs() helper and skips the whiteout-device
+fixtures (and the checks that depend on them) on overlayfs, which
+genuinely cannot create them; the makedev(5, 1) "creation must fail"
+probes keep running.
+
+With both patches generic/633, generic/696 and generic/697 pass on an
+idmapped overlayfs mount with no change on any other filesystem; tested
+on overlayfs and tmpfs.
+
+The underlying overlayfs O_NOATIME behaviour that turns an unmapped-fsuid
+O_TMPFILE into -EPERM is being addressed separately on the kernel side;
+these test changes are independent of it.
+
+Link:
+https://patch.msgid.link/20260615-work-idmapped-overlayfs-v1-0-7381632aa402@kernel.org [1]
+
+Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+---
+Christian Brauner (2):
+      src/vfs: probe O_TMPFILE support on the base mount in the idmapped tests
+      src/vfs: skip whiteout-device fixtures on overlayfs
+
+ src/vfs/idmapped-mounts.c | 166 ++++++++++++++++++++++++----------------------
+ src/vfs/utils.c           |   5 ++
+ src/vfs/utils.h           |   1 +
+ 3 files changed, 93 insertions(+), 79 deletions(-)
+---
+base-commit: ffc8bad17e5b2f56e48dbac43f7c5ae8ac368fe5
+change-id: 20260615-overlay-idmapped-vfstest-b262d3084eea
+
