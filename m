@@ -1,328 +1,63 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05BAF17555
-	for <fstests@vger.kernel.org>; Tue, 16 Jun 2026 03:33:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AA2D352C5C;
+	Tue, 16 Jun 2026 05:24:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781580805; cv=none; b=Wz9AnxcQ8qbCe4L2AB2iwzVEIXfJA9KFbii0FCRRVmRFRt360PSnn+JqWU9af+U0XHZWhEYOBRsgx6qAhoKU6cEMRJwdLbWBJWRWsz1x3+hMfznKwmvoCZ7/khoZolX+h+BrpoV0xFzWafILv39Crvu0/cFxahV/4OKimD0guIQ=
+	t=1781587459; cv=none; b=fc8+g+bP/P89pcySL+yEtMFScVRzmQ4WsPMXvoLk92EWLI7z5ZvS7xMEsic51Vjw8doXiy8hbq7Knic5aGFVg3I8R471nWVpwYDdX02sG4kXlA1D7n+HacbnWigfJX/Iy6E0rsp1GzpTD8krbfqnAsxo1L5Vta+DaJP2LLywYNk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781580805; c=relaxed/simple;
-	bh=zF6hqx1ra7GG/J8W1nlETBKJgYLoW2WznXGBfV5q+HE=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=AelNebVv8VILOhxngBhiTkyZic1GD0gUECjMMnbWlPT4p+meTPChZPNKyjlvXI4BUzMCCNgIYdkFxzu9OE2UqNmlm9TN3ZzcROUAj/dd09agTMqb2VwktpQzgSeGRbXrlXvYXGBGBui45iUc+nVT2UFcMIagAVMCmCsS7ZnIUN4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Of68jNtw; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1781587459; c=relaxed/simple;
+	bh=A8g0anbaYDKg9PH8cSs4YMB8cBHGJF1Sc1VTItDADdc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ZZ++YmodieP34Sf9sBKUHfRnT+mTuDRw0GfUB+3xAUbSSGNxhGYouvoRTKOeGH3hTSbB5DzX7ttshkEOMv1N8sJzJlls8DfI+bMBVukXW0iTDHJwb0Bulhj6xKvtUp5rSOiyet+hoTPfzwUUq+yglzUjXQA1YLjZo3e60tRof3o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=DXhPkN3a; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Of68jNtw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 158421F000E9;
-	Tue, 16 Jun 2026 03:33:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1781580803;
-	bh=rXV1AfD2VPtL1VYvZN3tbd31ULGRpvq9A/rjFnaZQCk=;
-	h=Date:Cc:Subject:To:References:From:In-Reply-To;
-	b=Of68jNtw+7/IOaFSkEtAcCT57lPE6wFWl/ekIjgOiXi5k55ooZCfxeFLIvMCOUax/
-	 8Z6TqidXKr8+QkxuBOTHLZlqwQVJnHE3qznhttqL2eM2lfBeTTqahaNziUwtNonyVx
-	 Myin48MF6HvBT2t9tgmMpUNsYUh+mEghRBFk1dEkx6i4TEwblOQ7tF2dxOfCbKN3ug
-	 EYi3nUd4y5MnuGLY02afgv1ZkVBwZd0etMmQYWLJ5qZrEAGxuTqESaxZkYv/k9ED6y
-	 9ZarG87VRZ7+cZXQ42+cW9HXXNT+7oaeh1QtBaqWZGG6ZDCwsy3FKucmI3HKIRwoPK
-	 RSRhzttVli0xA==
-Message-ID: <e4a31590-e173-4f43-8d70-16e83bd52bed@kernel.org>
-Date: Tue, 16 Jun 2026 11:33:20 +0800
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="DXhPkN3a"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=DbuGFDRb1m73RQAM1n526x7yX/8fbwGqIbwf2jihmfM=; b=DXhPkN3aKnnC/BLAPIhAuy/zJU
+	QSrAzP8egEzYesTTscbBya1qbiWfjoknqojPwcSmVWx1vHivIh9JJTkm/1ocyV0lKe4gGomrYNE4c
+	ytC96TfhcYhGIE2Wabk/MCTtsD8VhP0RoX9O0MLvgYdct9bhUrbhSuQFo2eOzvZMzCjirq9GUhDJQ
+	iRMed104ZNFhQEd2GqRz76cu7TNoJgzOe5P8V+EGu0CYRNPWyuMfbqlFm4llEpsgM+zrFbvmMermI
+	M/l2hma4p3qPQ7hIdCuwnlljgCywoKvW+8DfHEV0fVBszLW+Y7eZVEtGRUEtBuoW08stAMx267lPg
+	tF7ODN4A==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
+	id 1wZMHZ-0000000FFEp-3zDP;
+	Tue, 16 Jun 2026 05:24:17 +0000
+Date: Mon, 15 Jun 2026 22:24:17 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@infradead.org>,
+	Eric Sandeen <sandeen@sandeen.net>,
+	"linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+Subject: Re: mkfs.xfs "concurrency" change concerns
+Message-ID: <ajDeAYs79j4enacm@infradead.org>
+References: <84c8a5e5-938d-4745-996d-4237009c9cc5@sandeen.net>
+ <ajAJ6lXJWcko4epj@infradead.org>
+ <20260615154048.GW6095@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: chao@kernel.org
-Subject: Re: [PATCH] f2fs/025: test to do sanity check section type correctly
- in f2fs GC
-To: fstests@vger.kernel.org, jaegeuk@kernel.org,
- linux-f2fs-devel@lists.sourceforge.net
-References: <20260612005802.3017709-1-chao@kernel.org>
- <ai7YFkAK8sBL4jXm@zlang-mailbox>
- <b32998c0-17e3-4b81-a474-4a408aa7fa32@kernel.org>
- <ajBZEtrLmRZt0AA1@zlang-mailbox>
-Content-Language: en-US
-From: Chao Yu <chao@kernel.org>
-In-Reply-To: <ajBZEtrLmRZt0AA1@zlang-mailbox>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260615154048.GW6095@frogsfrogsfrogs>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On 6/16/26 04:05, Zorro Lang wrote:
-> On Mon, Jun 15, 2026 at 04:22:34PM +0800, Chao Yu wrote:
->> On 6/15/26 01:16, Zorro Lang wrote:
->>> On Fri, Jun 12, 2026 at 12:58:02AM +0000, Chao Yu wrote:
->>>> Without commit 520760b9f915 ("f2fs: optimize representative type determination
->>>> in GC"), f2fs GC will report inconsistent segment type in large section issue,
->>>> and then it will force to shutdown filesystem.
->>>>
->>>> [  768.190903] F2FS-fs (loop51): Inconsistent segment (3) type [1, 0] in SIT and SSA
->>>>
->>>> The reason is f2fs kernel will assume all segment type inside large section is
->>>> the same, during GC it loads type from one segment and compare it to other
->>>> segments' type, however due to recovery flow, the chosen segment may has zero
->>>> valid blocks w/ different segment type, since the segment is invalid(free) one,
->>>> it will never be migrated, so that we should not treat such state as abnormal
->>>> condition.
->>>>
->>>> This testcase is created to simulate above condition to see whether f2fs kernel
->>>> module can handle it correctly
->>>>
->>>> Signed-off-by: Chao Yu <chao@kernel.org>
->>>> ---
->>>> v2:
->>>> - clear MKFS_OPTIONS and MOUNT_OPTIONS to guarantee block allocation is as expected.
->>>
->>> Hi Chao,
->>>
->>> Sorry, I just noticed your reply to my review on the previous patch version.
->>> Due to some unexpected shake-ups recently, I’ve been bogged down with setting
->>> up and modifying various new system environments, and I accidentally marked
->>> some unread emails as read.
->>
->> No worries. :)
->>
->>>
->>> The patch looks good to me, with just a few picky review points below:
->>
->> Thanks Zorro for taking a look.
->>
->>>
->>>>  tests/f2fs/025     | 92 ++++++++++++++++++++++++++++++++++++++++++++++
->>>>  tests/f2fs/025.out |  2 +
->>>>  2 files changed, 94 insertions(+)
->>>>  create mode 100644 tests/f2fs/025
->>>>  create mode 100644 tests/f2fs/025.out
->>>>
->>>> diff --git a/tests/f2fs/025 b/tests/f2fs/025
->>>> new file mode 100644
->>>> index 000000000..397e5439a
->>>> --- /dev/null
->>>> +++ b/tests/f2fs/025
->>>> @@ -0,0 +1,92 @@
->>>> +#! /bin/bash
->>>> +# SPDX-License-Identifier: GPL-2.0
->>>> +# Copyright (c) 2026 Chao Yu <chao@kernel.org>
->>>> +#
->>>> +# FS QA Test No. f2fs/025
->>>> +#
->>>> +# Check whether f2fs will encounter cp_error (Inconsistent segment type)
->>>> +# when doing sanity check on type of segments inside large section during
->>>> +# garbage collection.
->>>> +#
->>>> +. ./common/preamble
->>>> +_begin_fstest auto quick
->>>> +
->>>> +_fixed_by_kernel_commit 520760b9f915 \
->>>> +	"f2fs: optimize representative type determination in GC"
->>>> +
->>>> +. ./common/filter
->>>> +
->>>> +_cleanup()
->>>> +{
->>>> +	cd /
->>>> +	rm -r -f $tmp.*
->>>> +}
->>>
->>> This _cleanup() function is same as default. It can be removed.
->>
->> Will remove.
->>
->>>
->>>> +
->>>> +_require_scratch
->>>> +_require_xfs_io_command "pwrite"
->>>> +_require_xfs_io_command "truncate"
->>>> +_require_command "$F2FS_IO_PROG" f2fs_io
->>>> +_require_check_dmesg
->>>> +
->>>> +# Clear options to avoid interference from external configurations
->>>> +export MKFS_OPTIONS=""
->>>> +export MOUNT_OPTIONS=""
->>>> +
->>>> +# Format with 96MB size and 2 segments per section
->>>> +_scratch_mkfs_sized $((96 * 1024 * 1024)) "" "-s 2" >> $seqres.full 2>&1
->>>> +
->>>> +# Mount with mode=lfs
->>>> +_scratch_mount -o mode=lfs >> $seqres.full 2>&1
->>>                               ^^^^^^^^^^^^^^^^^^^^
->>> It's helpless, due to if _scratch_mount fails, it exit() directly.
->>
->> Right, will fix.
->>
->>>
->>>> +
->>>> +# Create files to fill whole filesystem, then segment type will be changed to node type
->>>> +for ((i=0;i<5120;i++)) do
->>>> +	touch $SCRATCH_MNT/$i >> $seqres.full 2>&1
->>>> +done
->>>> +sync
->>>> +
->>>> +# Remove all files to create free(empty) node segments
->>>> +rm -f $SCRATCH_MNT/*
->>>> +sync
->>>> +
->>>> +# Allocate free space so that we have chance to reuse free(empty) node segments
->>>> +$XFS_IO_PROG -f -c "pwrite -b 4k 0 1928k" $SCRATCH_MNT/file >> $seqres.full 2>&1
->>>> +sync
->>>> +
->>>> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
->>>> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 16M" $SCRATCH_MNT/file >> $seqres.full 2>&1
->>>> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
->>>> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 16M" $SCRATCH_MNT/file >> $seqres.full 2>&1
->>>> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
->>>> +sync
->>>> +
->>>> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 8M" $SCRATCH_MNT/file >> $seqres.full 2>&1
->>>> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
->>>> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 32K" $SCRATCH_MNT/file >> $seqres.full 2>&1
->>>> +$XFS_IO_PROG -c "truncate 0" $SCRATCH_MNT/file >> $seqres.full 2>&1
->>>> +$XFS_IO_PROG -d -c "pwrite -b 4k 0 2M" -c "fsync" $SCRATCH_MNT/file >> $seqres.full 2>&1
->>>> +
->>>> +# Shutdown the filesystem without checkpoint
->>>> +$F2FS_IO_PROG shutdown 2 $SCRATCH_MNT >> $seqres.full 2>&1
->>>
->>> I'm wondering if we can have f2fs supporting in common _scratch_shutdown
->>> helper :)
->>
->> I think we can change f2fs testcase to use _scratch_shutdown because the definition of
->> nologflush shutdown interface is the same as xfs':
->>
->> /*
->>  * should be same as XFS_IOC_GOINGDOWN.
->>  * Flags for going down operation used by FS_IOC_GOINGDOWN
->>  */
->> #define F2FS_IOC_SHUTDOWN	_IOR('X', 125, __u32)	/* Shutdown */
->> #define F2FS_GOING_DOWN_NOSYNC		0x2	/* going down */
->>
->> #define XFS_IOC_GOINGDOWN	     _IOR ('X', 125, uint32_t)
->> #define XFS_FSOP_GOING_FLAGS_NOLOGFLUSH		0x2	/* don't flush log nor data */
->>
->>>
->>>> +
->>>> +_scratch_unmount >> $seqres.full 2>&1
->>>                     ^^^^^^^^^^^^^^^^^^^^
->>>
->>> If unmount fails, how about let it output the errors, to break the golden image?
->>
->> Yes, it's better.
->>
->>>
->>>> +
->>>> +_scratch_mount -o mode=lfs >> $seqres.full 2>&1
->>>                               ^^^^^^^^^^^^^^^^^^^^
->>>                               helpless
->>
->> Will fix.
->>
->>>
->>>> +
->>>> +# Run urgent_gc mode to trigger garbage collection
->>>> +dev_name=$(_short_dev $SCRATCH_DEV)
->>>> +if [ -f /sys/fs/f2fs/$dev_name/gc_urgent ]; then
->>>> +	echo 1 > /sys/fs/f2fs/$dev_name/gc_urgent
->>>> +fi
->>>
->>> Hmm... what if there's not /sys/fs/f2fs/$dev_name/gc_urgent? Does it
->>> affect the test result?
->>>
->>> If it does, this's a necessary requirement for this test, we shouldn't
->>> ignore it and keep running. Does $F2FS_IO_PROG provide a command to
->>> make a force GC? Or we need to check this file and _notrun if it's
->>> not existed.
->>
->> Ah, right, that's good point!
->>
->> We can use "$F2FS_IO_PROG gc_urgent <dev_name> run 5" instead, it will do below commands:
-> 
-> Great, I just hope the *gc_urgent* isn't a new feature which needs something likes:
+On Mon, Jun 15, 2026 at 08:40:48AM -0700, Darrick J. Wong wrote:
+> Lukas Herbolt posted some fixes for a few of the fstests to inject
+> concurrency=0 into mkfs.  IIRC there weren't any changes for 078, but
+> you might ask him if he has more bugs to address.
 
-I guess it's not a new subcommand for f2fs_io,
-
-commit 22d758e2e6af210dc9e6cdf99438f063383ba72f
-Author: Jaegeuk Kim <jaegeuk@kernel.org>
-Date:   Tue Feb 19 19:07:21 2019 -0800
-
-    f2fs_io: add gc_urgent
-
-    e.g.,
-    f2fs_io gc_urgent dm-4 [start/end/run] [time in sec]
-
-    This controls sysfs/gc_urgent to run f2fs_gc urgently.
-
-    Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
-
-> `_require_f2fs_io gc_urgent` (there's not _require_f2fs_io:)
-
-Agreed, we need to introduce _require_f2fs_io(), let me work on this.
-
-> 
->> 1. echo 1 > /sys/fs/f2fs/$dev_name/gc_urgent
->> 2. sleep 5 seconds
->> 3. echo 0 > /sys/fs/f2fs/$dev_name/gc_urgent
-> 
-> It also depends on the /sys/fs/f2fs/$dev_name/gc_urgent too. So we have to face
-> the same question:
->   If this file doesn't exist, should this test case _notrun?
-
-Oh, right, maybe we can introduce _require_f2fs_sysfs() to check whether f2fs kernel
-module has supported target sysfs node?
-
-Thanks,
-
-> 
-> Thanks,
-> Zorro
-> 
->>
->>>
->>>> +
->>>> +# Wait background GC thread to wake up to run and potentially encounter the inconsistency
->>>> +sleep 5
->>>
->>> Does this sleep try to wait above "echo 1 > /sys/fs/f2fs/$dev_name/gc_urgent"?
->>> If so, it makes more sense to move it into the "if-then" logic.
->>>
->>>> +
->>>> +_scratch_unmount >> $seqres.full 2>&1
->>>                     ^^^^^^^^^^^^^^^^^^^^
->>> Same as above.
->>
->> Will fix.
->>
->>>
->>>> +
->>>> +# Check whether the dmesg has the warning indicating the bug
->>>> +_check_dmesg_for "F2FS-fs \($dev_name\): Inconsistent segment" && \
->>>> +	_fail "F2FS-fs ($dev_name): Inconsistent segment type detected in dmesg!"
->>>> +
->>>> +echo "Silence is golden"
->>>> +status=0
->>>> +exit
->>>
->>> We've replaced "status=0;exit;" with "_exit 0".
->>
->> Will fix.
->>
->> Thanks,
->>
->>>
->>> Thanks,
->>> Zorro
->>>
->>>> diff --git a/tests/f2fs/025.out b/tests/f2fs/025.out
->>>> new file mode 100644
->>>> index 000000000..3d70951ef
->>>> --- /dev/null
->>>> +++ b/tests/f2fs/025.out
->>>> @@ -0,0 +1,2 @@
->>>> +QA output created by 025
->>>> +Silence is golden
->>>> -- 
->>>> 2.49.0
->>>>
->>
->>
+Shin'ichiro, can you check if inserting concurrency=0 fixes xfs/078
+and xfs/216 for you?  (and IIRC xfs/217 which lingers in some reports).
 
