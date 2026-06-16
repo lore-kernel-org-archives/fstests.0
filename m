@@ -1,41 +1,43 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 36B7D3DA7C5
-	for <fstests@vger.kernel.org>; Tue, 16 Jun 2026 06:06:27 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A1533D903A
+	for <fstests@vger.kernel.org>; Tue, 16 Jun 2026 06:13:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781589990; cv=none; b=WPg42ogrI8xc5WVUtq09ghBPsT6xb3NVVKqlGMayU3RVmwEjsNPQThkfBONv+8ZlJcZfeF+zwY73dlX+zHJlPnyP1paoXTcKvC5lcSeXPn317GJ3IZUEfAv9VMmmfdeIscXTTqwWbojwYg6q3kNN3g3nfKuhxDUoJkzbzQsN97U=
+	t=1781590437; cv=none; b=HebZJt2QWVADnQE4u6qvqhmt9fLEYgqm8cIpKOC39Pq79qV1DyIwIR1gNHLrnaaEEtcP/1pIcYT85IgNvnaEaTDkXcKUqWdq+mytxZNRZTMnDT/9d4aasa+iYFHx7N07YaIgJ6ddvCJwciZyt+1clroWhgqrqwkwwpxAEvx0OJ8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781589990; c=relaxed/simple;
-	bh=dw2Cvn/ur32UD/gG5oDf/gzwD6BhR9uWldc8FNj2h3o=;
+	s=arc-20240116; t=1781590437; c=relaxed/simple;
+	bh=8m65cvfGCQDa7p2lQQqZsdfIXxNQTEzBueextNtfrIg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Id025YRSNZGXGrFQ/+bCJTXcLFcoqhH1rJqvFbFtiLkQyJBSPUhVDEReZ0mPsFcO1dsCQT8SOd6NQKkE3myUDSu/Dk7shhxOO+xL9ojLqpumZmswSQ6U3dA6NI1SIavqknltycB/prlrgSlOp8W+83sW1bJy2681IbMDeZPGgpA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ys0gv1As; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=tsVUM/Qy09iMwOve57jEfr1/16w+X+f88sUe6V/p8MmNWoskGH/89B0GGMdr9HOaDLZ6jJEazLjDe2lXvoPYZntQ+RTPyMgihBUqOlE6q6a3NSGYR/h1nZG3GpfuThulMB9X94xvpHT29mutfi1WLyBfbkMLMBcgkHcZCWyza4U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aRsm4lwS; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ys0gv1As"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CB6AA1F000E9;
-	Tue, 16 Jun 2026 06:06:24 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aRsm4lwS"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7373C1F000E9;
+	Tue, 16 Jun 2026 06:13:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1781589987;
-	bh=8skaFAn8iWz1oYQUx+F0nQwHC7XAZ27/HYL8nRZKzuQ=;
+	s=k20260515; t=1781590436;
+	bh=Vgnw8P6OyEhi7knfh0r2SbClbXHv9kU8JVoBMCqOq1I=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=Ys0gv1AsAR4Uu3fqzwbinne90Nsc6ytcdAegYIFHH3MqIo9dEcl0IAYzI2+5NUTha
-	 jbC1oYuQbv7dXsIvyRDVZAzknrhNxJDmS2vReOFJNux9OT3wGyxEjfuoYs2O1egBqs
-	 uOHca+WBtXUzVXsjjxZEOQjIw8KIjYOXbxnxnSbHzx0jDnMyAKrUOsqz3h3ay3/Pa/
-	 VYd4OGq+htQsC3AWEoMwBuSDeyJQTTpkyY0UcjI8fxmfWWxgCcCsvmxVIz/BpzTf1j
-	 KHDAcR0z9uM25x1tobgF5QFTrhID08i4hfGtNXyJgOf/fwoffLPfrNcBaJdivwAaE8
-	 4yJJLfGoVGLyQ==
-Date: Tue, 16 Jun 2026 14:06:21 +0800
+	b=aRsm4lwSInf773y2YavThWsCOZlOmfXBkfwHrrO/wwtue+3iwPOqTl6Qsxj+C530e
+	 PNsMM1HgkwI2rBcGCCPkNoQ6sp8WaWmPIv89Tr1FJ23O7nLcRLv+haMWAfBuwIba7l
+	 Wn/1Jbx+8p1Ifwc6Yfm0Y/MhsVrLygC0amecS23Eh4vCkl6u3Te9oWEUI0qQPG5HUN
+	 MrRkfSoTqcU0RfkwfsrglUM7qqxvZ2HfZ10q8/nHfeOkoBUubgDfSltFMUFJU6CepU
+	 Tqx89MNBVxcalJdDVfqEp2WwjmH5sxdfRYk8qW3xBEl1Y3DHNze6Do9+jWSag1g3Fb
+	 Unu6Cxi4Fckmg==
+Date: Tue, 16 Jun 2026 14:13:50 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Chao Yu <chao@kernel.org>
-Cc: fstests@vger.kernel.org, jaegeuk@kernel.org, 
-	linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH] f2fs/009: use common _scratch_shutdown helper
-Message-ID: <ajDkil_W3kK-jW8c@zlang-mailbox>
-Mail-Followup-To: Chao Yu <chao@kernel.org>, fstests@vger.kernel.org, 
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-References: <20260615090558.1627456-1-chao@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/366: check minimum dio size correctly
+Message-ID: <ajDoebRTr8wjaV-Q@zlang-mailbox>
+Mail-Followup-To: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
+References: <20260608070010.1285677-1-hch@lst.de>
+ <ai75PcdwbK7kYBTU@zlang-mailbox>
+ <20260615133331.GA26132@lst.de>
+ <ajBbo5LX-1tk-y3_@zlang-mailbox>
+ <20260616052831.GA23960@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,45 +46,33 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260615090558.1627456-1-chao@kernel.org>
+In-Reply-To: <20260616052831.GA23960@lst.de>
 
-On Mon, Jun 15, 2026 at 09:05:58AM +0000, Chao Yu wrote:
-> f2fs has supported ioctl(_IOR ('X', 125, uint32_t)), so that
-> "f2fs_io shutdown" can be completely replaced w/ _scratch_shutdown(),
-> let's clean up in f2fs/009.
+On Tue, Jun 16, 2026 at 07:28:31AM +0200, Christoph Hellwig wrote:
+> On Tue, Jun 16, 2026 at 04:13:22AM +0800, Zorro Lang wrote:
+> > Oh, if we only need to run it once, how about:
+> > 
+> > blksz=""
+> > for (( i = 0; i < $iterations; i++)); do
+> >     ...
+> >     if [ -z "$blksz" ];then
+> > 	    blksz=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
+> >         if [[ $blksz -gt 512 ]]; then
+> >             _notrun "512 byte dio alignment required"
+> >         fi
+> >     fi
+> > ...
 > 
-> Suggested-by: Zorro Lang <zlang@kernel.org>
-> Signed-off-by: Chao Yu <chao@kernel.org>
-> ---
->  tests/f2fs/009 | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/tests/f2fs/009 b/tests/f2fs/009
-> index fa4a39d16..39a4bad3d 100755
-> --- a/tests/f2fs/009
-> +++ b/tests/f2fs/009
-> @@ -12,6 +12,7 @@
->  _begin_fstest auto quick
->  
->  _require_scratch
-> +_require_scratch_shutdown
->  _require_inject_f2fs_command node i_links
->  _require_command "$(type -P socket)" socket
->  
-> @@ -106,7 +107,7 @@ ino=`stat -c '%i' $filename`
->  $F2FS_IO_PROG write 1 0 1 zero atomic_commit $filename 5000 >> $seqres.full 2>&1 &
->  stat $filename >> $seqres.full
->  rm $filename
-> -$F2FS_IO_PROG shutdown 1 $SCRATCH_MNT/ >> $seqres.full
-> +_scratch_shutdown -f
+> I can look into it.  But to me this doesn't really seem worth the
+> effort as calling min_dio_alignment is so cheap compared to the
+> mount/unmount cycle never mind everything else we do in the loop.
 
-Great! Glad to see fs specific code being replaced by common helper.
+Sure Christoph :) If you feel that's a bit of a time sink, we could also
+just add a comment explaining that re-checking the DIO alignment on every
+iteration isn't strictly necessary. I'm just concerned that future developers
+might mistake it for a hard requirement when modifying this test.
 
-Reviewed-by: Zorro Lang <zlang@kernel.org>
+Thanks,
+Zorro
 
->  sleep 6
->  check_links 1 0 $ino
->  
-> -- 
-> 2.49.0
 > 
