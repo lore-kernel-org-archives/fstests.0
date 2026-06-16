@@ -1,47 +1,28 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AA2D352C5C;
-	Tue, 16 Jun 2026 05:24:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A6ED3CF677
+	for <fstests@vger.kernel.org>; Tue, 16 Jun 2026 05:28:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781587459; cv=none; b=fc8+g+bP/P89pcySL+yEtMFScVRzmQ4WsPMXvoLk92EWLI7z5ZvS7xMEsic51Vjw8doXiy8hbq7Knic5aGFVg3I8R471nWVpwYDdX02sG4kXlA1D7n+HacbnWigfJX/Iy6E0rsp1GzpTD8krbfqnAsxo1L5Vta+DaJP2LLywYNk=
+	t=1781587717; cv=none; b=MpznPfgdPLSBBTgkg0FET7ucLFdgkrWi3UDEXyl+gGUnJ9nNvdNTbPui2s7ERbrW7zguVXTPhmtAK5Ytj6BzyadPrUkiSoCNb15hbS4XxDPbTx0Sja/j6N5+e/5SrInlAUMNS55i+vC9RpxGV+F+hd1pBb48eM9KFDmZJn0QQa4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781587459; c=relaxed/simple;
-	bh=A8g0anbaYDKg9PH8cSs4YMB8cBHGJF1Sc1VTItDADdc=;
+	s=arc-20240116; t=1781587717; c=relaxed/simple;
+	bh=X9oU/cDp6K3RJ+U6JUFVSnmnUIQtDRO3QTi6qXQSRoQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZZ++YmodieP34Sf9sBKUHfRnT+mTuDRw0GfUB+3xAUbSSGNxhGYouvoRTKOeGH3hTSbB5DzX7ttshkEOMv1N8sJzJlls8DfI+bMBVukXW0iTDHJwb0Bulhj6xKvtUp5rSOiyet+hoTPfzwUUq+yglzUjXQA1YLjZo3e60tRof3o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=DXhPkN3a; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="DXhPkN3a"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=DbuGFDRb1m73RQAM1n526x7yX/8fbwGqIbwf2jihmfM=; b=DXhPkN3aKnnC/BLAPIhAuy/zJU
-	QSrAzP8egEzYesTTscbBya1qbiWfjoknqojPwcSmVWx1vHivIh9JJTkm/1ocyV0lKe4gGomrYNE4c
-	ytC96TfhcYhGIE2Wabk/MCTtsD8VhP0RoX9O0MLvgYdct9bhUrbhSuQFo2eOzvZMzCjirq9GUhDJQ
-	iRMed104ZNFhQEd2GqRz76cu7TNoJgzOe5P8V+EGu0CYRNPWyuMfbqlFm4llEpsgM+zrFbvmMermI
-	M/l2hma4p3qPQ7hIdCuwnlljgCywoKvW+8DfHEV0fVBszLW+Y7eZVEtGRUEtBuoW08stAMx267lPg
-	tF7ODN4A==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wZMHZ-0000000FFEp-3zDP;
-	Tue, 16 Jun 2026 05:24:17 +0000
-Date: Mon, 15 Jun 2026 22:24:17 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@infradead.org>,
-	Eric Sandeen <sandeen@sandeen.net>,
-	"linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Subject: Re: mkfs.xfs "concurrency" change concerns
-Message-ID: <ajDeAYs79j4enacm@infradead.org>
-References: <84c8a5e5-938d-4745-996d-4237009c9cc5@sandeen.net>
- <ajAJ6lXJWcko4epj@infradead.org>
- <20260615154048.GW6095@frogsfrogsfrogs>
+	 Content-Type:Content-Disposition:In-Reply-To; b=OEV5tvjVSe8O0Y2ARvwPiw7lYLffqUiFBrVYov8Jr2kuBU62L5fQUWB7g0LSedowgtcHWVVEbL9N8A9Tfl2of/PWJZKEGpP26zXD9rpK8sCfVpnURopK2SwQvoKzr+pTyCMHXbKDV54fMrwxKzdGLJkmBGECWFxAzKQJSFWVf/Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 9857E68BFE; Tue, 16 Jun 2026 07:28:31 +0200 (CEST)
+Date: Tue, 16 Jun 2026 07:28:31 +0200
+From: Christoph Hellwig <hch@lst.de>
+To: Zorro Lang <zlang@kernel.org>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/366: check minimum dio size correctly
+Message-ID: <20260616052831.GA23960@lst.de>
+References: <20260608070010.1285677-1-hch@lst.de> <ai75PcdwbK7kYBTU@zlang-mailbox> <20260615133331.GA26132@lst.de> <ajBbo5LX-1tk-y3_@zlang-mailbox>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -50,14 +31,24 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260615154048.GW6095@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <ajBbo5LX-1tk-y3_@zlang-mailbox>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-On Mon, Jun 15, 2026 at 08:40:48AM -0700, Darrick J. Wong wrote:
-> Lukas Herbolt posted some fixes for a few of the fstests to inject
-> concurrency=0 into mkfs.  IIRC there weren't any changes for 078, but
-> you might ask him if he has more bugs to address.
+On Tue, Jun 16, 2026 at 04:13:22AM +0800, Zorro Lang wrote:
+> Oh, if we only need to run it once, how about:
+> 
+> blksz=""
+> for (( i = 0; i < $iterations; i++)); do
+>     ...
+>     if [ -z "$blksz" ];then
+> 	    blksz=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
+>         if [[ $blksz -gt 512 ]]; then
+>             _notrun "512 byte dio alignment required"
+>         fi
+>     fi
+> ...
 
-Shin'ichiro, can you check if inserting concurrency=0 fixes xfs/078
-and xfs/216 for you?  (and IIRC xfs/217 which lingers in some reports).
+I can look into it.  But to me this doesn't really seem worth the
+effort as calling min_dio_alignment is so cheap compared to the
+mount/unmount cycle never mind everything else we do in the loop.
 
