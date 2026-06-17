@@ -1,62 +1,40 @@
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59E1E39FCAE
-	for <fstests@vger.kernel.org>; Wed, 17 Jun 2026 05:42:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 951863B14D8
+	for <fstests@vger.kernel.org>; Wed, 17 Jun 2026 06:04:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781674948; cv=none; b=evx2yxtmiNAcfWpomHlREAaCHez3b0RFiUyO0mfEIkU3PEk9RCW7kTgPLk53piBYzSj33AaG+cYFZpmMQNAxawHItspTW6BX1WCo6v1oe92UqnqNZ6PSrz2gqPlyDStLMa52BPLvVgUzYjlIHmfV18IjmT55UACmGtawO22enkw=
+	t=1781676318; cv=none; b=h1UWammODlARBnPiHryoKTkHaFW1JQiEhofHXDiYf8wzOLylp0UIBz9quwzXz7shzlpNqXzIf26by7okOUjK7jYHqnrAJaVVj/ayu1SonauJXJ0E6CBWFaYO3go2SC/agLySWfeQEg/e1skeCvlIPB4VuLgkZaH4k/BNPYBW93c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781674948; c=relaxed/simple;
-	bh=4ofbag1TIhCjlsD4hePlh4ydNN0PgNcPZTYiTUDO+WM=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=YqHJXMQ5IiOuMpFe7MRg5DYuotw7cfFXzVY1T2m4D9WYbTa4mNF2wylkT5nxXCEOqYNRy7Ijp8+TNZUValcZIJM0LA9RXtPiBy1vm3STuWWlrLhseJQz+TxQkXG1WhG1Hx/Sy9jm1iqr4uuK5DwkmtP07o0bpCY2uFajeU8m9Jg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=RRwnwD0M; arc=none smtp.client-ip=148.163.156.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	s=arc-20240116; t=1781676318; c=relaxed/simple;
+	bh=It7VEIg/Jt8Wsu1OHf/5FiUyhRCleJU5GyIUEe9xMmY=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ZxVlf1FrvSYU6v5itvgsl6SKecdCM/bEte/thgxMQgbYk9O3odCd2/atI+mnAK63wFlKbp/jNW8f8rcDVOYfsWLn5/MPgefdvLyWBN6r34MqQogPWLyTmbxXP87bHLyOLCmyveOL7qlrDrMn3AlNUgfnwH85drVvO6qNmuXdLbc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=4g6pJfoV; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="RRwnwD0M"
-Received: from pps.filterd (m0353729.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 65GLnHv82895756;
-	Wed, 17 Jun 2026 05:42:24 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=pp1; bh=0I+hqHY5/s6z8yIIo7jhdMHPmFyUiK+bP1GkTtnPL
-	3s=; b=RRwnwD0Mc7ctQekud8n3QyL9AwgsrOsme9u1gGGDcIpFWbZech9zoFZU+
-	PPG5luIhZnFBXs1+v5Yoyl3N/ZM+URRTBWqZ+Ttlq3ZKHeZO+es2CdSWjFZM1wR8
-	tUA42qOyICX9ib8x+14c8b4WvLVcT7bFIjrOq1JROHWs0/uRbEy5RE3lNFR+MhF8
-	Mmts1OGIgAclqrBTM/ZEa74sWBOqpFwzKgbiMALhDLoRSemwMMqNh3M/0zKno87b
-	0C/1E+vcX1UUxRQysEQTQmH/vb0ut2TMC/p3EQtDYn+3LFPmIIyvsgHQJdl0ylC1
-	XlgLNAueU9LYhDGBacKfDMoxf1ckw==
-Received: from ppma21.wdc07v.mail.ibm.com (5b.69.3da9.ip4.static.sl-reverse.com [169.61.105.91])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4euequ1cn1-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 17 Jun 2026 05:42:24 +0000 (GMT)
-Received: from pps.filterd (ppma21.wdc07v.mail.ibm.com [127.0.0.1])
-	by ppma21.wdc07v.mail.ibm.com (8.18.1.7/8.18.1.7) with ESMTP id 65H5Yupj015296;
-	Wed, 17 Jun 2026 05:42:23 GMT
-Received: from smtprelay02.fra02v.mail.ibm.com ([9.218.2.226])
-	by ppma21.wdc07v.mail.ibm.com (PPS) with ESMTPS id 4eudva9p57-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 17 Jun 2026 05:42:23 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
-	by smtprelay02.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 65H5gJ5Q46661974
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 17 Jun 2026 05:42:19 GMT
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id AA90920043;
-	Wed, 17 Jun 2026 05:42:19 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 71C7220040;
-	Wed, 17 Jun 2026 05:42:18 +0000 (GMT)
-Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.39.28.216])
-	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Wed, 17 Jun 2026 05:42:18 +0000 (GMT)
-From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
-Cc: Disha Goel <disgoel@linux.ibm.com>
-Subject: [PATCH] generic/645: Confirm availability of free inodes
-Date: Wed, 17 Jun 2026 11:12:16 +0530
-Message-ID: <20260617054216.3186441-1-ojaswin@linux.ibm.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="4g6pJfoV"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=0Fj2zwTlXqQRv8sje+dq3pNi4TYx6SafRIXr7ZWIvm8=; b=4g6pJfoVQYg17o9djx5D7sejvA
+	wh/Utm/sLeDIhKQhMvE7dH/6LDTS2+wcG/lH4Yna93Rz0GTM0Bo1FoajFklNMkCQMEHKKkUM6MxTr
+	hCkQuYS6OJbK9CdUgqYDkJfjaGltakMS1rJDiJ2bqtDTOkiaDL0uW1tPRflaEteAwC5sfJarO/6ZV
+	njegIW0tLEsO6+rOWXnJRgVnGsj1wqz1itap3yz1aqYv6zYKRW2O+di9NJERmlSQoR5uIEgTm1Weq
+	JHZzo9nhLDI1SSg+mBQCpG4yYfFo0YhFc2Zp1JakwhAXcQEM+j0vDVpdUHAIk3SyIQRYlYuhXCxmk
+	TwGa01HQ==;
+Received: from 2a02-8389-2341-5b80-decc-1a96-daaa-a2cc.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:decc:1a96:daaa:a2cc] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.99.1 #2 (Red Hat Linux))
+	id 1wZjOU-0000000GgQb-3jIj;
+	Wed, 17 Jun 2026 06:04:59 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: zlang@kernel.org
+Cc: fstests@vger.kernel.org
+Subject: [PATCH v2] generic/366: check minimum dio size correctly
+Date: Wed, 17 Jun 2026 08:04:17 +0200
+Message-ID: <20260617060456.3843384-1-hch@lst.de>
 X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -65,66 +43,64 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNjE3MDA0NiBTYWx0ZWRfX2zmaCnJzb0ly
- 0SOjKbVEDUMrA7bM2IDwDXDnoPRntEfKbZZON1zYi+pGDGBoXxbztRl+6cTD3m2FSXkMam3DVex
- OCVCyLgEQFxVp/7CD+xF5yFTxDcE+TI=
-X-Proofpoint-ORIG-GUID: k61M510nET1bcg23ecw65yQdZ17dLiIk
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjE3MDA0NiBTYWx0ZWRfXz0BIuCBErWKq
- 7C+0P/051hshcGZ3zXxMfHy1vVpwTtS3hd+my1ICDz4cL5GLDK1cFKySpWoNVdhVcylQFqoEld+
- mzxWcNAbRyYzeXuXWtbVid5s/Dd+wZgI1Pz0tGXMYVMw7OGP4LxEWZM9MnWxmHkhSLmCwRNsMPc
- wEccIR5m6PG9HOWBb2YRmLqqn8IBY7jBfALKBdvdk72nKaTJQvYW2xIf/+FdtQOwKagPdb7xFrM
- RYy3Z65rVw3ytXiAT4HTpB4GQp7GzzHuriH6wLMmSJfS/loOlSq2q9Q1rtyxghN+MapoHyVGenk
- Ahk2loXVfrYqsmQ3QlMAWaJU6Q34Y0nJBhBPWNxhZAbDwQHlzW99uRJbN/XTXlktVzfCaOukiFZ
- Bfiir8xMsKOMRkJ+VgLYglZw2KTNrUnso2fTRLZW86I0GgUn41g49neP1psYfgsZCCN6uk1emgw
- reNtc9Of++YEGTV+zWA==
-X-Proofpoint-GUID: k61M510nET1bcg23ecw65yQdZ17dLiIk
-X-Authority-Analysis: v=2.4 cv=L9gtheT8 c=1 sm=1 tr=0 ts=6a3233c0 cx=c_pps
- a=GFwsV6G8L6GxiO2Y/PsHdQ==:117 a=GFwsV6G8L6GxiO2Y/PsHdQ==:17
- a=FelO9ux0wxsA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
- a=uAbxVGIbfxUO_5tXvNgY:22 a=VnNF1IyMAAAA:8 a=NyWC17klOB7_xQ97rUoA:9
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
- definitions=2026-06-16_05,2026-06-16_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- bulkscore=0 impostorscore=0 malwarescore=0 clxscore=1015 adultscore=0
- phishscore=0 lowpriorityscore=0 suspectscore=0 priorityscore=1501 spamscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2606170046
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-When running generic/645 with ext4 using 64k block size + bigalloc, the
-test fails with ENOSPC because the filesystem runs out of inodes before
-the test completes.
+min_dio_alignment requires the file system to be checked to be mounted,
+so move the call into the main loop.  Drop the pointless blocksize
+argument to _require_odirect, which is only tested on the test device.
 
-The test creates approximately 10,001 files, however, in this particular
-configuration a standard 5G FS only has around ~5100 inodes resulting in
-the ENOSPC failure.
-
-Add a check using _get_free_inode() to verify sufficient inodes are
-available before running the test, else skip it.
-
-Reported-by: Disha Goel <disgoel@linux.ibm.com>
-Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- tests/generic/645 | 6 ++++++
- 1 file changed, 6 insertions(+)
 
-diff --git a/tests/generic/645 b/tests/generic/645
-index d6eb75e6..944b33db 100755
---- a/tests/generic/645
-+++ b/tests/generic/645
-@@ -19,6 +19,12 @@ _require_chown
- _wants_kernel_commit dacfd001eaf2 \
- 	"fs/mnt_idmapping.c: Return -EINVAL when no map is written"
+Changes since v1:
+ - only calculate the block size once, based on a code snipplet from
+   Zorro Lang
+
+ tests/generic/366 | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/tests/generic/366 b/tests/generic/366
+index 271a01bc2eac..cb183c1bfe21 100755
+--- a/tests/generic/366
++++ b/tests/generic/366
+@@ -20,7 +20,7 @@ _begin_fstest auto quick rw
+ . ./common/filter
  
-+_free_inodes=$(_get_free_inode $TEST_DIR)
-+if [ $_free_inodes -ne 0 ] && [ $_free_inodes -lt 10001 ]; then
-+	_notrun "Insufficient free inodes ($_free_inodes), need at least 10001"
-+fi
+ _require_scratch
+-_require_odirect 512	# see fio job1 config below
++_require_odirect
+ _require_aio
+ 
+ _fixed_by_fs_commit btrfs xxxxxxxxxxxx \
+@@ -30,7 +30,7 @@ iterations=$((32 * LOAD_FACTOR))
+ 
+ fio_config=$tmp.fio
+ fio_out=$tmp.fio.out
+-blksz=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
 +
- echo "Silence is golden"
+ cat >$fio_config <<EOF
+ [global]
+ bs=8k
+@@ -57,9 +57,19 @@ filename=file1
+ EOF
+ _require_fio $fio_config
  
- $here/src/vfs/vfstest --test-nested-userns \
++blksz=""
++
+ for (( i = 0; i < $iterations; i++)); do
+ 	_scratch_mkfs >>$seqres.full 2>&1
+ 	_scratch_mount
++
++	if [ -z "$blksz" ]; then
++		blksz=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
++		if [[ $blksz -gt 512 ]]; then
++			_notrun "512 byte dio alignment required"
++		fi
++	fi
++
+ 	# There's a known EIO failure to report collisions between directio and buffered
+ 	# writes to userspace, refer to upstream linux 5a9d929d6e13. So ignore EIO error
+ 	# at here.
 -- 
 2.53.0
 
