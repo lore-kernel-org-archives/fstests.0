@@ -1,86 +1,86 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 27B8A3E9C1A
-	for <fstests@vger.kernel.org>; Thu, 18 Jun 2026 10:12:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BE443E6399
+	for <fstests@vger.kernel.org>; Thu, 18 Jun 2026 10:12:59 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781777586; cv=none; b=stq77GMkO5RokUUjzbYadqcEK7oKQKrSV+IPQJpccxWkOVNt1IzLZziypL0Y5YnZPUvx3wUOfmx6WOlCVHn33iT47vtw8wrrg6+4a0DQsPhdU0jmg6NJdaYHEdXRxIUMdRY1V38gfX/7G5rzNV2Ls7jLDNvHia3BrsbwSD+KNnE=
+	t=1781777587; cv=none; b=XQfJ5OLJjs8I4dwB1Or1V/mdO7FjLln09IJfri0FIkSuPYSmWElFYeE6B4jKUUfepLcellMc1NMPrcIgmwXM/yvYtmlWUHJ2kG7xAIzf+pDo4APSQBPFdI3UoukXOqFZ+Wv7E8ifQdxuikZuQjrt/8cDE8tJ6emaxDDWmoOqY7Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781777586; c=relaxed/simple;
-	bh=mcoKrYorVNnm76YRTwx167W5hp2wd/TWvYr7oERQuNQ=;
+	s=arc-20240116; t=1781777587; c=relaxed/simple;
+	bh=Sydr13YG+LkxSxLb+VuMhlfM2ZmKIZRGOQOOc2KpBoQ=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=kJxgR1qheFp6q9eonppLUf0Oy6uzeBlmOVFmF/tEqpPM4GscrH2/Sl8xEGssNB+j7euY7Jw0d9R8jFkHL65shtLCl5Vycw7Dbwc6roTg3NPeGz072X80IIUknclLY5VbHjLlErUcmcimK10CAAcqftDODQafTlEMKSgT6EqbenY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Phrc9D3F; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=ofJWmf0+; arc=none smtp.client-ip=170.10.129.124
+	 In-Reply-To:To:Cc; b=Mn3yhCp+VaytuGEJ36CkcIlT8jaHAygdTdYXchQI4n5cePTgr8lq7jonhpjv3xRPdSDIAUPuQ2MRAQjK8oWh97Q9Da+lCBEANAH7emoOuPI/6f0axI07T+0FbEigURjBGAToU1KUxlUsLbineDSg3IH4XSie/cC2AP+2n2/bo5I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=K7yUelkU; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=JU7PgXEQ; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Phrc9D3F";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="ofJWmf0+"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="K7yUelkU";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="JU7PgXEQ"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1781777577;
+	s=mimecast20190719; t=1781777578;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=syVyWPNbQoi40k5vUXKNpOcBPXysG+YdLIEvJjGu1vc=;
-	b=Phrc9D3FVDXv6Tl33DlNX8L8bp9bAiGlsrmH9wgrJ2XWiI9Wo/WRoMUW7HPPhRcQwiP9yc
-	dZj1aHRXYYKE80v3+CCtQjjCy93YJ+/z7c/g+boFcFuhl4RwhyEPIea8X80gphF2WcPx5C
-	y7OZVY+VmGYUgpYgXah/vxlDaEdzVlU=
-Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com
- [209.85.221.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=UfQC3jb/IcagHhe/VvLJeUD93AwtwhorZYSoiCqw/vw=;
+	b=K7yUelkUavrMI6TBUPgZfZFT8cLK/NrWlUhIjflu4MHCJE/3eKjIOT6Lrvg5qoLdPqL+Nu
+	t9zmWUg1DOpSWf6M278VqKpa93mAj5C6jv0eyDq7MeMRGd060bCmKTug+meDuwufynBt/l
+	W1ZYhM7op9TtMZIp+nEED1pQFfLJg50=
+Received: from mail-wm1-f70.google.com (mail-wm1-f70.google.com
+ [209.85.128.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-63-G5vyniL2M82iBQdQpRgmsQ-1; Thu, 18 Jun 2026 06:12:55 -0400
-X-MC-Unique: G5vyniL2M82iBQdQpRgmsQ-1
-X-Mimecast-MFC-AGG-ID: G5vyniL2M82iBQdQpRgmsQ_1781777574
-Received: by mail-wr1-f71.google.com with SMTP id ffacd0b85a97d-46010392f89so714501f8f.2
-        for <fstests@vger.kernel.org>; Thu, 18 Jun 2026 03:12:55 -0700 (PDT)
+ us-mta-173-IG9OfQTgM6-8mGurXnbCMw-1; Thu, 18 Jun 2026 06:12:56 -0400
+X-MC-Unique: IG9OfQTgM6-8mGurXnbCMw-1
+X-Mimecast-MFC-AGG-ID: IG9OfQTgM6-8mGurXnbCMw_1781777575
+Received: by mail-wm1-f70.google.com with SMTP id 5b1f17b1804b1-490b9cd54f3so4647355e9.2
+        for <fstests@vger.kernel.org>; Thu, 18 Jun 2026 03:12:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1781777574; x=1782382374; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1781777575; x=1782382375; darn=vger.kernel.org;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=syVyWPNbQoi40k5vUXKNpOcBPXysG+YdLIEvJjGu1vc=;
-        b=ofJWmf0+icitUurzLn8S4m+ZAEWCJHBltpjOWpoLMW5P/Ge1lpD4JplZLHI+kjW1wx
-         NxdKc0q+vRIKP+U9ZLrBm+XD47vQDVxfYnXcOgcd+qiYQrSudp1cDSYBOa1O/0SOLB3R
-         3NXkwq4XQ8oalc/4ZST6h2Y7kDx2qDaqZGX7v0i3uzzK4p0aPuSKRPyh7wNbcsg5Ijl+
-         vyNjEmap8qR1KuFT0QRyQpMydN7Fyu8DYYcy0PRh0oZwqCYDdE8Z+umhWnGCnVQEQhN1
-         V+azIySyS89Tk/ls8yfgcVNmKc+qINsMcm0QH0gxZ4Y17wuNmHazZ84J57JclI382BrM
-         FGdA==
+        bh=UfQC3jb/IcagHhe/VvLJeUD93AwtwhorZYSoiCqw/vw=;
+        b=JU7PgXEQ6wrjpSwX7zc9I7/74IAXdNkzaFbWiO8CSDIQfcPEIY8ftNuiKznfHR9dp4
+         C92w5AEP+8T6xREW+x1JP6/8DRG3ivF/X/ApIzP3TFn9Noh21EJi0ZMF6skhfYVlIGLm
+         4rAczC1friBs6TQHgfd84onOWAL0Vqm2RUlnwXyWTPM8H0mBEeyrgerY/1Ef3557jAky
+         9uqJURszRo/oIO072iTIhJvYWUQQiiFqYtzfA8xD7s5yRRxeITTKd6VPjZksAG+rhna0
+         sArdkWA2X+zDlJkAdvE0THMART64doB9/x6VTKSdk2Rw6upfiLGWNcY3R4JJ2Sv7N/BQ
+         lAhQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1781777574; x=1782382374;
+        d=1e100.net; s=20251104; t=1781777575; x=1782382375;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=syVyWPNbQoi40k5vUXKNpOcBPXysG+YdLIEvJjGu1vc=;
-        b=hBBfbjy1vLDSzHS9/Yeyy6wk7JLGRcUi0R2Z8e6xIE6IPlWgdNm5hVSgepYFWl9uPw
-         6S1LhQE9Bl2x6MKX/JhHtG05qRaKElFv/jg0jvS/6Epmr0BX+zWBy6iixj0D4aFMDGIi
-         jGNJpN7A3sRt+o7XX2CU1f4B/JJwLU7RYTeJcBE3i5NUQPpXy5/Nu6o5McL7aQavWFI1
-         HU8Q+W48cR1eZHdWo+fpYM779r0EJA3GombUg6b5oxTeGyCNyFGiZ//tE3QVGTvD0wpB
-         IxAvY3MfxqPLXlTCQFfyqUYqaHlCvXmdTfSHSoy5vPKEMvK9UoUAn9kTICVsC74P9xa+
-         Y4Aw==
-X-Gm-Message-State: AOJu0YxxWLbcuNgefkvnAFw4j+AmUBpvcZ7tFUlg7Vqt1msM9y+a6csj
-	cfuGVAoaIsXFTTI0eSqsAsJB1YISOY0hpEYz2xLxPqr8nklq6/7MRT+ld0gKq/TBGcjAeQHtOoU
-	oDD9akI9HfkSUIM8zfOUs/U/rxQc5nMc3mm4vEYFdC/tCxXYgK3k84qMvzZP4vQsppojyNHXfoz
-	S7l9PD89CYrcjCz8XRn8XhR+HBeNLmwbcM+qLLJDpkZcvf
-X-Gm-Gg: AfdE7ckfbm898R+j59wsYGHCTE4UinI0gSbV2Sj08qLs046xqZ3SoWpSj38SlJp61kl
-	mrGJqYidEXrUOBAVmHqiblBCFIoiS4VWL7wflNlSGc5/Dwx0RFK1ftap7Dgd4b4AXCrLPLyUGqU
-	BLnjYPpH4fqJMZSX0wK0AeY46iGDZAWLf2MCuzOViLclK2m4BRBOz5CP+urDoLiFR5gsfUlg827
-	P2Dr319X9muiz26Hl3BqTtuwel4KZjJwwzBEYnQoq8VS1kCzTfIghNpgPCy4UApEq/kQIxyx+hy
-	+1jKB7a/Ms4nvky3ICIAneRy+vErR9yRd/1zCHqJcTqV++Avo7gvSCtom0zqV4mJe6JDol7oUmo
-	ys9AOwgwi9GfiMEM8C9ZpkGe+KDs3/dcoktZLZCKQlss=
-X-Received: by 2002:a05:600d:8443:20b0:490:44eb:c1dd with SMTP id 5b1f17b1804b1-492341328b7mr83393515e9.29.1781777574341;
+        bh=UfQC3jb/IcagHhe/VvLJeUD93AwtwhorZYSoiCqw/vw=;
+        b=qvOnA0BW/XGEoKuhRMkFzs2ZsC4AEX3+mX/Ayp5PzOnEcm9wEP2oEj70SrDQcdcsmv
+         TDYJxlRBXlHpNcq6fBY7mW+9vyK6eQZ0BeuVCffI8nnpd1VTWxyfa2eQTWimYqVlSYz2
+         xLfsYCcv/Y4/HVkDeHBz6UmODyG+BbMVvTvlu1gJ2JycclPPvH9fkNYB5aBsrX6D6MbB
+         mRpP+uw8g2M97RR0k0/Y9msDE9EUJyIPd4q7gYepRxbFJarraQCEMfwRx0jJ5/Z/yspW
+         KH03wPWJe4sRe9VRUN0jlFEobV77QDDjCo+VJDU0U6qMpLHsndpNGP4wO6RnWrjhUFL/
+         omOQ==
+X-Gm-Message-State: AOJu0YyM+V0WhuIvSLJu15narNcyi33WlKpCMky9TWGeW8SQQNnuo0tY
+	QCzlnkfHFquqte5UTtxdkAaHpREz1IcIAulexOnKw5xFSqAfxxpv2q2IDvLx0heUMVLsDlywBjl
+	+W2tKq5y0YapI35DmJ5HEmixZmtiH8cz+/G9KS9PIl8v6GXT+wtMLNWhA8G7AWSylai49kRer9e
+	a2nF5yceyj6oHafmlIY3m1/c5TFOZig5c+J62Ln6l3JwD8
+X-Gm-Gg: AfdE7cnWNsyVIQ3uP1qHPuYLg4/aF/9JbenrICzdtHjsIlcGNhdafeRGVqMG+LGL13N
+	+jvRUjj8GXCdRIy+Mzq68i89kkp1EEnhUqEdaH+HQNYc7mXXCEd5fxDJslc6ltxNgdv2npZE/tf
+	x1IL4h6BDafh7D/FVXa7PZUJl3UhAi+NVstRbvITIKN6tDMcxzq14WZnem0M+ImzxuzapCpi5iN
+	s324yFO7XcLQtAx5SzUDGObATMIMJQLp2QVbLxEolLUrzoNaIJ1PzNrLU2PMSRkJQ+Pg/jgNzIj
+	rcAcL8DJ/GTqry66XGH6KCjY4WVatzdu+ktwNCwe5AP99mNlkDLZqCo91DLjQYtlkJsvArhaNbE
+	MkZL7/XOGffLhSxWGTenI5iZLsy2dnoRz+V9UQZr0aNg=
+X-Received: by 2002:a05:600c:83cf:b0:492:2e1c:1d19 with SMTP id 5b1f17b1804b1-49238225f8bmr45515495e9.31.1781777575483;
+        Thu, 18 Jun 2026 03:12:55 -0700 (PDT)
+X-Received: by 2002:a05:600c:83cf:b0:492:2e1c:1d19 with SMTP id 5b1f17b1804b1-49238225f8bmr45515005e9.31.1781777574985;
         Thu, 18 Jun 2026 03:12:54 -0700 (PDT)
-X-Received: by 2002:a05:600d:8443:20b0:490:44eb:c1dd with SMTP id 5b1f17b1804b1-492341328b7mr83393135e9.29.1781777573835;
-        Thu, 18 Jun 2026 03:12:53 -0700 (PDT)
 Received: from 192.168.1.130 (cm-93-156-201-22.telecable.es. [93.156.201.22])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49230a96d14sm216388815e9.12.2026.06.18.03.12.52
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49230a96d14sm216388815e9.12.2026.06.18.03.12.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 18 Jun 2026 03:12:53 -0700 (PDT)
+        Thu, 18 Jun 2026 03:12:54 -0700 (PDT)
 From: German Maglione <gmaglione@redhat.com>
-Date: Thu, 18 Jun 2026 12:11:53 +0200
-Subject: [PATCH 1/2] vfstest: move sys_umount2() to cleanup path in
- tcore_acls()
+Date: Thu, 18 Jun 2026 12:11:54 +0200
+Subject: [PATCH 2/2] generic/633: add _require_acls for tcore_acls() ACL
+ dependency
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -89,52 +89,42 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260618-xfstests-tcore-acls-fixes-v1-1-45a1aec1d99d@redhat.com>
+Message-Id: <20260618-xfstests-tcore-acls-fixes-v1-2-45a1aec1d99d@redhat.com>
 References: <20260618-xfstests-tcore-acls-fixes-v1-0-45a1aec1d99d@redhat.com>
 In-Reply-To: <20260618-xfstests-tcore-acls-fixes-v1-0-45a1aec1d99d@redhat.com>
 To: fstests@vger.kernel.org
 Cc: German Maglione <gmaglione@redhat.com>, brauner@kernel.org, 
  linux-fsdevel@vger.kernel.org, zlang@kernel.org
 X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1781777571; l=1163;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1781777571; l=683;
  i=gmaglione@redhat.com; s=20260618; h=from:subject:message-id;
- bh=mcoKrYorVNnm76YRTwx167W5hp2wd/TWvYr7oERQuNQ=;
- b=QGOYDmDELQCxB9qbFg6syednsahwTLKuyJEfQcWWfr6AERdtOiEW6xRPApXGAPbUng5tJeFu8
- NJ5v29wCj8kAVMJUcinRHkbwlF5j/J+4HFnN0arI9WaqGeJs/1zXmAO
+ bh=Sydr13YG+LkxSxLb+VuMhlfM2ZmKIZRGOQOOc2KpBoQ=;
+ b=9m7U4QL2Dq0hpstvEpBvhq+iw3qnU71AL/fKsHUlU64ciQaOMdi/CjYBb/uQog0Fg3G5FkTj5
+ 5tQMvDf0GHbBC9yo13Gn3wUTNactXxe2HAP/MMD2uOswkcf2U7HWTs1
 X-Developer-Key: i=gmaglione@redhat.com; a=ed25519;
  pk=EgoGsSGnVamWcruH9kiHxwzZf0dPTHHxIjd1Gigd+yo=
 
-sys_umount2() in tcore_acls() only runs on the success path. If setfacl
-fails (e.g. no ACL support), the mount on DIR2 is left behind and
-test_cleanup() can't remove T_DIR1. This causes every subsequent test
-to fail with EEXIST on mkdirat(T_DIR1).
-
-Move sys_umount2() into the out: block so it always runs.
+generic/633 runs --test-core which includes tcore_acls(). Without
+_require_acls, the test fails instead of being skipped on filesystems
+that lack ACL support.
 
 Signed-off-by: German Maglione <gmaglione@redhat.com>
 ---
- src/vfs/idmapped-mounts.c | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+ tests/generic/633 | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/src/vfs/idmapped-mounts.c b/src/vfs/idmapped-mounts.c
-index ed9992f975c14b57c5d6d1634ca011b015b78bcb..d0630f5931ade713a99f5dec1cbe24bdaa75d35d 100644
---- a/src/vfs/idmapped-mounts.c
-+++ b/src/vfs/idmapped-mounts.c
-@@ -240,12 +240,11 @@ int tcore_acls(const struct vfstest_info *info)
- 		goto out;
- 	}
+diff --git a/tests/generic/633 b/tests/generic/633
+index d75d4dc860d3b78e5fe11b538e3aba4e9ab477e1..90d24f099bc732d5db209f8d014ddaeb042985b2 100755
+--- a/tests/generic/633
++++ b/tests/generic/633
+@@ -14,6 +14,7 @@ _begin_fstest auto quick atime attr cap idmapped io_uring mount perms rw unlink
  
--	snprintf(t_buf, sizeof(t_buf), "%s/" T_DIR1 "/" DIR2, info->t_mountpoint);
--	sys_umount2(t_buf, MNT_DETACH);
--
- 	fret = 0;
- 	log_debug("Ran test");
- out:
-+	snprintf(t_buf, sizeof(t_buf), "%s/" T_DIR1 "/" DIR2, info->t_mountpoint);
-+	sys_umount2(t_buf, MNT_DETACH);
- 	safe_close(attr.userns_fd);
- 	safe_close(dir1_fd);
- 	safe_close(open_tree_fd);
+ _require_test
+ _require_chown
++_require_acls
+ 
+ echo "Silence is golden"
+ 
 
 -- 
 2.49.0
