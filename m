@@ -1,335 +1,134 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 149CE319851
-	for <fstests@vger.kernel.org>; Thu, 18 Jun 2026 10:05:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1CA2A3E7BA6
+	for <fstests@vger.kernel.org>; Thu, 18 Jun 2026 10:12:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781777145; cv=none; b=r+vSIhI8gQ7xaW3u2zvUaPt42WB6p5ZB+llHOTL+b+1Cj7TraCYncLx/LyWljsw1Lu6Z5C7sRIfOcGKq8Z1xu4dfFAD2bcLNJkujDzP1IFxJXHG05lVaH+KJD05OJ0EIDKAZVmPvugZKNlpH72LnTr9tf0sKgzw3ud7QscDqW4U=
+	t=1781777584; cv=none; b=hpuJJrM9WJ/sXVsAcYeF8twu+fyC4K+vv1eX0mr++SOc1sCD5GkzFhxrewRxv70lGA8iFzqpONO/VtUQygWsZ1mUrMeMthI5W046SmzJyw8tsExNMy7xHw//aUzXBp6ICR5Y5+ZV8cqgmEHijgA/IjDwZkAiR2aj78LytgaJRAQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781777145; c=relaxed/simple;
-	bh=n4jpWT+of/FKbklG3temyOdlIWm9QuId6SZyG0ZTE0Y=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=ENUKJn6b66A/A+O2j+BNpTdKrP59v9Tt8GI4L3L/BDeBwGq5LmNogjnBzFLNwcpNxcJYfRWbiRlEIHbyqx2vgsmXkMkcibaW+4JWBVUoQA6X2vRWmf3XrTuGZUg1APHL0O/TRGarlz8F2V+IO5NTr0LlS0GNcWj+j1b4zVQuWKk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=UJxaT2z0; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=PCbx0YSz; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1781777584; c=relaxed/simple;
+	bh=Ek8NQg1KPtSH0kD/SJcZzwssAOfa4BS/6ucq88mx4y4=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=dPiF/yUz3xT9AYe4kPHLMp3pn4GUZ5ZXqinelP1541gulQVp0pahabOPNw2rAJ+GBaE3SifPR6hShqo4mSbfoCFEd+WTjrzY+tSvZK0YEOtqPlOto6Drf171ZWFwIS+MfHbewhg0JHsm7QeYnpeYlg7zRnk5wGiarhLIWWLNSV0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=do2moQfk; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=cfhyW5ix; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="UJxaT2z0";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="PCbx0YSz"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 15E2B6D1BD;
-	Thu, 18 Jun 2026 10:05:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1781777142; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=LDPRqDyM2I6KpN/mvxylTJDHGGe0TGRrm2+VX34NqJg=;
-	b=UJxaT2z0K5UBjzOjIEV3t5osSviPqkHOTPsdcsY4ZCbiHD4goUb+7bB8HYuifFhlrXA5+R
-	cMBJyIUTAGwgIC/wEDh+3IbaRj8AQP/9JEzl8ZXc0iP00IMm9Am87ONOw8769eImJ4b6L0
-	Qb07GMQieKB8oZQNLRLTvCI2WHvnEzo=
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=PCbx0YSz
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1781777141; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=LDPRqDyM2I6KpN/mvxylTJDHGGe0TGRrm2+VX34NqJg=;
-	b=PCbx0YSzfd1X0JGcpesvMidi/Y6AbMv9WURoFD8K83WdjD2tKsNDxHdb0SR3T5jwJ5Bb/V
-	9NsP/sNlMSelK7phOfUW5Ma8NKw610uNtEGZ32VcfHdP3kNMFsrVQKguIf4Ef46xRmCgOz
-	5eZ3dVvXIJsa29gS4tG+yBgrztt1P4E=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id B5508779A8;
-	Thu, 18 Jun 2026 10:05:39 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id 1OGIGPPCM2orEgAAD6G6ig
-	(envelope-from <wqu@suse.com>); Thu, 18 Jun 2026 10:05:39 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org
-Subject: [PATCH] fstests: add a test case for btrfs get_subvol_info ioctl
-Date: Thu, 18 Jun 2026 19:35:21 +0930
-Message-ID: <20260618100521.91162-1-wqu@suse.com>
-X-Mailer: git-send-email 2.54.0
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="do2moQfk";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="cfhyW5ix"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1781777575;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=bVeLhPgXkRL9YuY380vyxTPxAt6EUze1B3shKhUzapA=;
+	b=do2moQfkEi8QnuD203rd5MvRjnKPJWy0NvfcJStQzJjHXzHHPoNPV6upL64fXD6BvyjCaR
+	tEaMcQwc9P7DQwgUWxBIobBmk2dGRnGXWZYhuuryj/5x4hSTMBR796Lkg2J7uTXCxiMa7+
+	nvoF1NeUO1iXe89lTYO0nNxwIoLth+U=
+Received: from mail-wm1-f71.google.com (mail-wm1-f71.google.com
+ [209.85.128.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-45-5Xj6Ls_zNVOMv26q0X9L3w-1; Thu, 18 Jun 2026 06:12:54 -0400
+X-MC-Unique: 5Xj6Ls_zNVOMv26q0X9L3w-1
+X-Mimecast-MFC-AGG-ID: 5Xj6Ls_zNVOMv26q0X9L3w_1781777573
+Received: by mail-wm1-f71.google.com with SMTP id 5b1f17b1804b1-490b0682d2fso5448485e9.0
+        for <fstests@vger.kernel.org>; Thu, 18 Jun 2026 03:12:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=redhat.com; s=google; t=1781777573; x=1782382373; darn=vger.kernel.org;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=bVeLhPgXkRL9YuY380vyxTPxAt6EUze1B3shKhUzapA=;
+        b=cfhyW5ix5o57TlKMhoSH8KdPN9lqEBauSeh2XPQgb9AXfYEWYm7pKFtcUV3d5U1DKx
+         +rMDwoshVgmWMNK77WnhudylwSBczToWrW1j1ynAb7W5kHp9/aAM75GUwpzTf5nxlbQ9
+         9wrXix0vfBKesct+xuWxOaLZwBJEd0BL3MDDyIBtzHORez/z7xIwQzgjbRdl6Cv6guxh
+         k6jsQbg7DRsEaRn1m3SuLVXyu9nJucD6VceYJns36SLLtvteTppB06F9hjkUwrb5caS+
+         xjyHSMyo4657Xf/nx5GjruqB/X080GUTEtwGFabnSBB1hLiMZJdNU5Ctj9+71rGK+Dt7
+         jhig==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1781777573; x=1782382373;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=bVeLhPgXkRL9YuY380vyxTPxAt6EUze1B3shKhUzapA=;
+        b=mHMVTuDnoRvKqD/fcfHOkxdXS++vntC0ZO97KJ+r2ncWxeuR9Dj73O2qYEmglLk9gP
+         fOgBjZV7zF+gMRV+LRGBFgmFanFZ+25D9Op+HSBuXntfe9xSj6SpbYcHjsc+iSJ2Ez/N
+         ilGgryu1JEKw1dpGRzucSQ1deDrY/3qKeojYYommOS3ZcAh4kAugxjNCxkVQ7BXNFfuU
+         KA0jOrkXHWqVX14DYJtr1vgBzFIhEHDztZ2Fhf/D4q8e1wkFH9tp0FwR8baeJwHeKHx3
+         xA3JD4MB1ZJ+BtOSPtC/DypD6eXLXcyO5E0z/cmcAgW/YQpzVKqwIUYe0qGlMuvtsQar
+         P+4g==
+X-Gm-Message-State: AOJu0YyLtxY4Xt9SWN+qoyxy1Hc0vAfG3dYOayTXRzomwUbR0NhnpXDP
+	RkaetgGiQ6juLQL771grbiS0mAsGlqvSGafrPhVZDsOX/a5VyJbFeRhG5Dwza+bxePKM61huHKl
+	0YjDbbFGeT1Y/ZncranzmuwyFpjdGIKP1zQEIX8qhlRpB5FemjjNRV7mt0Jr2h5Wb/bYLAyLBap
+	oT7dsuTBDRhCR4bTSra3cjTWFdO6dqjWcA6XL8fJi1MyoW
+X-Gm-Gg: AfdE7ckSMfAPE0boejsxPsJyk7ca7jceBRFP59uXmHzAK5rdEsslRk5EFPLjB+8OEwS
+	dCoqWkC7ksyZbX4KkLzlN6LiSdHA0P344+QqXva/mCDujxkuyYoJQrFYqky3+TLMa2tL2Wr+Z3o
+	w7UuD16QLyaFpfRRl05j2yr+IzhYGMx5JXyPHgOfH0ejbfJZCypqUPdoXaa9iDLQDHXFB1I4q7B
+	8cnwHGG0A6m58pb+RMR2A5jXVAGolBJk0PJe+2We9qAOlTP6oYzHlWosibCbB5c8giKvcWqTAhJ
+	+6UfAur/sw6vxXF/TKsprO/w0U65azuhNE1zey8O0FY5wWmRocvCON7hiBQsk2J1eDa8G4hmvBf
+	HaliTeDBsYJ7t30vFi7n9jfyVWnz00AGfLnapNGhv9Ho=
+X-Received: by 2002:a05:600c:1d12:b0:48a:f18:ece4 with SMTP id 5b1f17b1804b1-49238226374mr47726115e9.24.1781777573110;
+        Thu, 18 Jun 2026 03:12:53 -0700 (PDT)
+X-Received: by 2002:a05:600c:1d12:b0:48a:f18:ece4 with SMTP id 5b1f17b1804b1-49238226374mr47725485e9.24.1781777572613;
+        Thu, 18 Jun 2026 03:12:52 -0700 (PDT)
+Received: from 192.168.1.130 (cm-93-156-201-22.telecable.es. [93.156.201.22])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49230a96d14sm216388815e9.12.2026.06.18.03.12.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 18 Jun 2026 03:12:52 -0700 (PDT)
+From: German Maglione <gmaglione@redhat.com>
+Subject: [PATCH 0/2] vfstest: fix tcore_acls() cleanup bug and missing
+ _require_acls
+Date: Thu, 18 Jun 2026 12:11:52 +0200
+Message-Id: <20260618-xfstests-tcore-acls-fixes-v1-0-45a1aec1d99d@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Rspamd-Action: no action
-X-Rspamd-Queue-Id: 15E2B6D1BD
-X-Spam-Flag: NO
-X-Spam-Score: -3.01
-X-Spam-Level: 
-X-Spamd-Result: default: False [-3.01 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_CONTAINS_FROM(1.00)[];
-	R_MISSING_CHARSET(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	ARC_NA(0.00)[];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	FROM_HAS_DN(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	DNSWL_BLOCKED(0.00)[2a07:de40:b281:104:10:150:64:97:from,2a07:de40:b281:106:10:150:64:167:received];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo,suse.com:dkim,suse.com:email,suse.com:mid];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	TO_DN_NONE(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	RCPT_COUNT_TWO(0.00)[2];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	DKIM_TRACE(0.00)[suse.com:+]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAGjEM2oC/x3LQQqAIBBA0avErBtQoaG6SrQQG2sgKhyJQLp70
+ vLx+QWUk7DC2BRIfIvKeVTYtoGw+WNllKUanHFkyPb4RM2sWTGHMzH6sCtGeViRFtt5GihS56D
+ +V+I/1H2a3/cDVquZmGsAAAA=
+X-Change-ID: 20260618-xfstests-tcore-acls-fixes-6d15a696f652
+To: fstests@vger.kernel.org
+Cc: German Maglione <gmaglione@redhat.com>, brauner@kernel.org, 
+ linux-fsdevel@vger.kernel.org, zlang@kernel.org
+X-Mailer: b4 0.14.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1781777571; l=925;
+ i=gmaglione@redhat.com; s=20260618; h=from:subject:message-id;
+ bh=Ek8NQg1KPtSH0kD/SJcZzwssAOfa4BS/6ucq88mx4y4=;
+ b=dQYQZ/QUachk/547w9dv7+oO3MVvDJABHn6RGE6Zd9kz5wz7kSZCpP+pCvICaU7fucbvMfO0s
+ w5MqBCSgka3DG74/l6o3vKwas2VnbNXf9Y7lJuKFjQxAhGCRaBaiOBV
+X-Developer-Key: i=gmaglione@redhat.com; a=ed25519;
+ pk=EgoGsSGnVamWcruH9kiHxwzZf0dPTHHxIjd1Gigd+yo=
 
-There is a regression caused by upstream kernel commit 538e5bdbc899
-("btrfs: add 32-bit compat ioctl for BTRFS_IOC_GET_SUBVOL_INFO"), where
-the unprivileged get_subvol_info ioctl is returning incorrect results.
+Hi,
 
-Unfortunately that bug is not covered by fstests, and only exposed by
-btrfs-progs libbtrfsutil python tests, which is not a short run.
+Running xfstests over virtiofs I hit failures in generic/633, 644,
+645, 656 and 696. Two issues in tcore_acls():
 
-So add a new test case for such btrfs ioctl:
+1) sys_umount2() only runs on the success path. When setfacl fails,
+   the mount is left behind and every test after that fails with
+   EEXIST.
 
-- Introduce a helper program, btrfs_ioctl
-  Which will call the dedicated ioctl, print all of its structure
-  members.
+2) generic/633 doesn't declare _require_acls, so it fails instead
+   of being skipped on filesystems without ACL support.
 
-  For now only get_subvol_info is supported, but it can be easily
-  appended for new ones.
-
-- Mkfs and create a subvolume on btrfs
-
-- Use "_btrfs_get_subvolid()" to grab the subvolid
-  That function is utilizing "btrfs subvolume list" to grab the info,
-  which is not utilizing the unprivileged ioctl.
-
-- Use "btrfs_ioctl get_subvol_info" to grab the subvolid
-
-- Compare the two subvolids
-
-This should be enough to detect the regression.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
+Signed-off-by: German Maglione <gmaglione@redhat.com>
 ---
- .gitignore          |   1 +
- src/Makefile        |   2 +-
- src/btrfs_ioctl.c   | 103 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/351     |  47 ++++++++++++++++++++
- tests/btrfs/351.out |   2 +
- 5 files changed, 154 insertions(+), 1 deletion(-)
- create mode 100644 src/btrfs_ioctl.c
- create mode 100755 tests/btrfs/351
- create mode 100644 tests/btrfs/351.out
+German Maglione (2):
+      vfstest: move sys_umount2() to cleanup path in tcore_acls()
+      generic/633: add _require_acls for tcore_acls() ACL dependency
 
-diff --git a/.gitignore b/.gitignore
-index dd77ee30..0b6b9452 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -215,6 +215,7 @@ tags
- /src/file_attr
- /src/truncate
- /src/t_btrfs_received_uuid_ioctl
-+/src/btrfs_ioctl
- 
- # Symlinked files
- /tests/generic/035.out
-diff --git a/src/Makefile b/src/Makefile
-index 31ac43b2..76cf50c3 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -36,7 +36,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
- 	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
- 	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
--	rw_hint fs-monitor
-+	rw_hint fs-monitor btrfs_ioctl
- 
- EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
- 	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-diff --git a/src/btrfs_ioctl.c b/src/btrfs_ioctl.c
-new file mode 100644
-index 00000000..4114fa88
---- /dev/null
-+++ b/src/btrfs_ioctl.c
-@@ -0,0 +1,103 @@
-+// SPDX-License-Identifier: GPL-2.0
-+// Copyright (c) SUSE S.A.
-+
-+#include <stdio.h>
-+#include <string.h>
-+#include <fcntl.h>
-+#include <unistd.h>
-+#include <sys/ioctl.h>
-+#include <uuid/uuid.h>
-+#include <linux/btrfs.h>
-+
-+#define subvol_info_printf_u64(info, name)	\
-+	printf(#name ": %llu\n", (info).name)
-+
-+#define subvol_info_printf_timestamp(info, name)	\
-+	printf(#name ": %llu.%09u\n", (info).name.sec, (info.name.nsec))
-+
-+#define subvol_info_printf_uuid(info, name)	\
-+{						\
-+	char uuidbuf[UUID_STR_LEN];		\
-+						\
-+	uuid_unparse((info).name, uuidbuf);	\
-+	printf(#name ": %s\n", (info).name);	\
-+}
-+
-+void get_subvol_info(int fd)
-+{
-+	struct btrfs_ioctl_get_subvol_info_args info = { 0 };
-+	int ret;
-+
-+	ret = ioctl(fd, BTRFS_IOC_GET_SUBVOL_INFO, &info);
-+	if (ret < 0) {
-+		fprintf(stderr, "ioctl failed: %m\n");
-+		return;
-+	}
-+
-+	subvol_info_printf_u64(info, treeid);
-+	printf("name: %.*s\n", BTRFS_VOL_NAME_MAX, info.name);
-+	subvol_info_printf_u64(info, parent_id);
-+	subvol_info_printf_u64(info, dirid);
-+	subvol_info_printf_u64(info, generation);
-+	printf("flags: 0x%llx\n", info.flags);
-+	subvol_info_printf_uuid(info, uuid);
-+	subvol_info_printf_uuid(info, parent_uuid);
-+	subvol_info_printf_uuid(info, received_uuid);
-+	subvol_info_printf_u64(info, ctransid);
-+	subvol_info_printf_u64(info, otransid);
-+	subvol_info_printf_u64(info, stransid);
-+	subvol_info_printf_u64(info, rtransid);
-+	subvol_info_printf_timestamp(info, ctime);
-+	subvol_info_printf_timestamp(info, otime);
-+	subvol_info_printf_timestamp(info, stime);
-+	subvol_info_printf_timestamp(info, rtime);
-+}
-+
-+const struct ioctl {
-+	const char *name;
-+	void (*func)(int fd);
-+} supported_ioctls[] = {
-+	{
-+		.name = "get_subvol_info",
-+		.func = get_subvol_info,
-+	},
-+};
-+
-+static void usage()
-+{
-+	fprintf(stderr, "Usage: btrfs_ioctl <ioctl_name> <path>\n");
-+}
-+int main(int argc, char **argv)
-+{
-+	const char *ioctl_name;
-+	int done = 0;
-+	int fd;
-+	int ret = 0;
-+
-+	if (argc != 3) {
-+		usage();
-+		return ret;
-+	}
-+	fd = open(argv[2], O_RDONLY);
-+	if (fd < 0) {
-+		fprintf(stderr, "failed to open %s: %m", argv[2]);
-+		return 1;
-+	}
-+	ioctl_name = argv[1];
-+
-+	for (int i = 0; i < sizeof(supported_ioctls) / sizeof(supported_ioctls[0]); i++) {
-+		const struct ioctl *ioctl = &supported_ioctls[i];
-+
-+		if (!strncasecmp(ioctl->name, ioctl_name, strlen(ioctl->name))) {
-+			ioctl->func(fd);
-+			done = 1;
-+			break;
-+		}
-+	}
-+	if (!done) {
-+		fprintf(stderr, "ioctl \"%s\" is not recognized\n", ioctl_name);
-+		ret = 1;
-+	}
-+	close(fd);
-+	return ret;
-+}
-diff --git a/tests/btrfs/351 b/tests/btrfs/351
-new file mode 100755
-index 00000000..e92ddf1b
---- /dev/null
-+++ b/tests/btrfs/351
-@@ -0,0 +1,47 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-+#
-+# FS QA Test 351
-+#
-+# Make sure the unprivileged get_subvol_info ioctl is providing the correct
-+# result.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+_fixed_by_kernel_commit XXXXXXXXXXXX \
-+	"Revert \"btrfs: add 32-bit compat ioctl for BTRFS_IOC_GET_SUBVOL_INFO\""
-+
-+_require_test_program btrfs_ioctl
-+_require_scratch
-+
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount
-+
-+_btrfs subvolume create $SCRATCH_MNT/subv1
-+
-+# The id is get through "btrfs subvolume list" command, which doesn't utilize the
-+# unprivileged version.
-+subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT subv1)
-+echo "subvolid=$subvolid" >> $seqres.full
-+
-+# Do a basic check in case "btrfs subvolume list" doesn't get a correct subvolid
-+if [ -z "$subvolid" -o "$subvolid" -lt 256 ]; then
-+	_fail "\"btrfs subvolume list\" returned an invalid subvolid"
-+fi
-+
-+# Get the id again through the unprivileged get_subvol_info ioctl
-+$here/src/btrfs_ioctl get_subvol_info $SCRATCH_MNT/subv1 >> $tmp.output
-+cat $tmp.output >> $seqres.full
-+ioctl_subvolid=$(grep treeid: $tmp.output | cut -f 2 -d\ )
-+
-+if [ "$ioctl_subvolid" -ne "$subvolid" ]; then
-+	_fail "get_subvol_info ioctl returned an incorrect treeid"
-+fi
-+
-+_scratch_unmount
-+
-+echo "Silence is golden"
-+# success, all done
-+_exit 0
-diff --git a/tests/btrfs/351.out b/tests/btrfs/351.out
-new file mode 100644
-index 00000000..49b14639
---- /dev/null
-+++ b/tests/btrfs/351.out
-@@ -0,0 +1,2 @@
-+QA output created by 351
-+Silence is golden
+ src/vfs/idmapped-mounts.c | 5 ++---
+ tests/generic/633         | 1 +
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+---
+base-commit: cac9fe2b8dc3e6dbc0c2383b9e3b4d3c1b9e7dd0
+change-id: 20260618-xfstests-tcore-acls-fixes-6d15a696f652
+
+Best regards,
 -- 
-2.51.2
+German Maglione <gmaglione@redhat.com>
 
