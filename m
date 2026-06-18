@@ -1,131 +1,157 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BE443E6399
-	for <fstests@vger.kernel.org>; Thu, 18 Jun 2026 10:12:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D3793F825F;
+	Thu, 18 Jun 2026 13:45:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781777587; cv=none; b=XQfJ5OLJjs8I4dwB1Or1V/mdO7FjLln09IJfri0FIkSuPYSmWElFYeE6B4jKUUfepLcellMc1NMPrcIgmwXM/yvYtmlWUHJ2kG7xAIzf+pDo4APSQBPFdI3UoukXOqFZ+Wv7E8ifQdxuikZuQjrt/8cDE8tJ6emaxDDWmoOqY7Q=
+	t=1781790338; cv=none; b=XRU1niZzGw3rOoVnvINFky5XWdfKtbcs1cuA5A+6PX9U49lrdhurUocFfcldPbwOcWiNL3FgCJBkysY1Wxp0vtN0KgoOfn/X+41XCNwE2EhUbwHBfbMBJon3LSIxQu4A6k5KX0f8aSvd6lkdw/Wsk9UB7HR4SiCw6bA5cOwgSmM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781777587; c=relaxed/simple;
-	bh=Sydr13YG+LkxSxLb+VuMhlfM2ZmKIZRGOQOOc2KpBoQ=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Mn3yhCp+VaytuGEJ36CkcIlT8jaHAygdTdYXchQI4n5cePTgr8lq7jonhpjv3xRPdSDIAUPuQ2MRAQjK8oWh97Q9Da+lCBEANAH7emoOuPI/6f0axI07T+0FbEigURjBGAToU1KUxlUsLbineDSg3IH4XSie/cC2AP+2n2/bo5I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=K7yUelkU; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=JU7PgXEQ; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1781790338; c=relaxed/simple;
+	bh=K9Zz/7v26SvrB4zXq9MpOsa+2jzsrbDUio3lztW657M=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=PxF5J9ZxaZj9agv4E90OTc12IaPiHI/2ynETMxJU58qsHd6q9m5xkyoIPS0GpO+rAHHV4HQKChzHgNllx4Lvlx14y47Q1KE2yGyQ6d6ZMh/pJwlOVyWlW3KbaSYekNTE9z/kazaPPPla5F4r2uxnFkvCzZoyF4Jr6MRZ2lxOZEg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=HakXRBOt; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="K7yUelkU";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="JU7PgXEQ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1781777578;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=UfQC3jb/IcagHhe/VvLJeUD93AwtwhorZYSoiCqw/vw=;
-	b=K7yUelkUavrMI6TBUPgZfZFT8cLK/NrWlUhIjflu4MHCJE/3eKjIOT6Lrvg5qoLdPqL+Nu
-	t9zmWUg1DOpSWf6M278VqKpa93mAj5C6jv0eyDq7MeMRGd060bCmKTug+meDuwufynBt/l
-	W1ZYhM7op9TtMZIp+nEED1pQFfLJg50=
-Received: from mail-wm1-f70.google.com (mail-wm1-f70.google.com
- [209.85.128.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-173-IG9OfQTgM6-8mGurXnbCMw-1; Thu, 18 Jun 2026 06:12:56 -0400
-X-MC-Unique: IG9OfQTgM6-8mGurXnbCMw-1
-X-Mimecast-MFC-AGG-ID: IG9OfQTgM6-8mGurXnbCMw_1781777575
-Received: by mail-wm1-f70.google.com with SMTP id 5b1f17b1804b1-490b9cd54f3so4647355e9.2
-        for <fstests@vger.kernel.org>; Thu, 18 Jun 2026 03:12:56 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1781777575; x=1782382375; darn=vger.kernel.org;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=UfQC3jb/IcagHhe/VvLJeUD93AwtwhorZYSoiCqw/vw=;
-        b=JU7PgXEQ6wrjpSwX7zc9I7/74IAXdNkzaFbWiO8CSDIQfcPEIY8ftNuiKznfHR9dp4
-         C92w5AEP+8T6xREW+x1JP6/8DRG3ivF/X/ApIzP3TFn9Noh21EJi0ZMF6skhfYVlIGLm
-         4rAczC1friBs6TQHgfd84onOWAL0Vqm2RUlnwXyWTPM8H0mBEeyrgerY/1Ef3557jAky
-         9uqJURszRo/oIO072iTIhJvYWUQQiiFqYtzfA8xD7s5yRRxeITTKd6VPjZksAG+rhna0
-         sArdkWA2X+zDlJkAdvE0THMART64doB9/x6VTKSdk2Rw6upfiLGWNcY3R4JJ2Sv7N/BQ
-         lAhQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1781777575; x=1782382375;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=UfQC3jb/IcagHhe/VvLJeUD93AwtwhorZYSoiCqw/vw=;
-        b=qvOnA0BW/XGEoKuhRMkFzs2ZsC4AEX3+mX/Ayp5PzOnEcm9wEP2oEj70SrDQcdcsmv
-         TDYJxlRBXlHpNcq6fBY7mW+9vyK6eQZ0BeuVCffI8nnpd1VTWxyfa2eQTWimYqVlSYz2
-         xLfsYCcv/Y4/HVkDeHBz6UmODyG+BbMVvTvlu1gJ2JycclPPvH9fkNYB5aBsrX6D6MbB
-         mRpP+uw8g2M97RR0k0/Y9msDE9EUJyIPd4q7gYepRxbFJarraQCEMfwRx0jJ5/Z/yspW
-         KH03wPWJe4sRe9VRUN0jlFEobV77QDDjCo+VJDU0U6qMpLHsndpNGP4wO6RnWrjhUFL/
-         omOQ==
-X-Gm-Message-State: AOJu0YyM+V0WhuIvSLJu15narNcyi33WlKpCMky9TWGeW8SQQNnuo0tY
-	QCzlnkfHFquqte5UTtxdkAaHpREz1IcIAulexOnKw5xFSqAfxxpv2q2IDvLx0heUMVLsDlywBjl
-	+W2tKq5y0YapI35DmJ5HEmixZmtiH8cz+/G9KS9PIl8v6GXT+wtMLNWhA8G7AWSylai49kRer9e
-	a2nF5yceyj6oHafmlIY3m1/c5TFOZig5c+J62Ln6l3JwD8
-X-Gm-Gg: AfdE7cnWNsyVIQ3uP1qHPuYLg4/aF/9JbenrICzdtHjsIlcGNhdafeRGVqMG+LGL13N
-	+jvRUjj8GXCdRIy+Mzq68i89kkp1EEnhUqEdaH+HQNYc7mXXCEd5fxDJslc6ltxNgdv2npZE/tf
-	x1IL4h6BDafh7D/FVXa7PZUJl3UhAi+NVstRbvITIKN6tDMcxzq14WZnem0M+ImzxuzapCpi5iN
-	s324yFO7XcLQtAx5SzUDGObATMIMJQLp2QVbLxEolLUrzoNaIJ1PzNrLU2PMSRkJQ+Pg/jgNzIj
-	rcAcL8DJ/GTqry66XGH6KCjY4WVatzdu+ktwNCwe5AP99mNlkDLZqCo91DLjQYtlkJsvArhaNbE
-	MkZL7/XOGffLhSxWGTenI5iZLsy2dnoRz+V9UQZr0aNg=
-X-Received: by 2002:a05:600c:83cf:b0:492:2e1c:1d19 with SMTP id 5b1f17b1804b1-49238225f8bmr45515495e9.31.1781777575483;
-        Thu, 18 Jun 2026 03:12:55 -0700 (PDT)
-X-Received: by 2002:a05:600c:83cf:b0:492:2e1c:1d19 with SMTP id 5b1f17b1804b1-49238225f8bmr45515005e9.31.1781777574985;
-        Thu, 18 Jun 2026 03:12:54 -0700 (PDT)
-Received: from 192.168.1.130 (cm-93-156-201-22.telecable.es. [93.156.201.22])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49230a96d14sm216388815e9.12.2026.06.18.03.12.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 18 Jun 2026 03:12:54 -0700 (PDT)
-From: German Maglione <gmaglione@redhat.com>
-Date: Thu, 18 Jun 2026 12:11:54 +0200
-Subject: [PATCH 2/2] generic/633: add _require_acls for tcore_acls() ACL
- dependency
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="HakXRBOt"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=Apv4zh6EbP8jKEdx2cIAOflIjRa/LWfrNneWGMpi0Dk=; b=HakXRBOt2S5bYMpCHGPmmM/6+G
+	Td0T8NyNgMRAwT2CtzuHUpKXDY5b2QbvlJhvJ63VE3DmC8shn4AAoLJds7ErSQL3cwvAFB7Ieh72l
+	edQLD74FjuUq90xI7XfsAhgDvVxWie0cTIMPYAoKrfpALKu94F9vrUAiJO55SK5Vf5GgjluVbVR8j
+	+SoyrPWUXNcsW31JNxcx+2YRVfxOHW4R7oGUiuVLpXG7FIczPs5CCcpHtCAJQpCdbmyC+oT3+tQW4
+	arBby773G/mGpxw673IL7uy6+cEnHIvZs2txg429grlM3T6D56wkp6W4yc4TJNW18i5BcaIJpDXXc
+	t+rrCNXA==;
+Received: from 2a02-8389-2341-5b80-decc-1a96-daaa-a2cc.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:decc:1a96:daaa:a2cc] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.99.1 #2 (Red Hat Linux))
+	id 1waD3m-00000001NwY-0HTo;
+	Thu, 18 Jun 2026 13:45:34 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: zlang@kernel.org
+Cc: djwong@kernel.org,
+	fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: [PATCH] xfs: remove the v2log group
+Date: Thu, 18 Jun 2026 15:45:28 +0200
+Message-ID: <20260618134528.237508-1-hch@lst.de>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260618-xfstests-tcore-acls-fixes-v1-2-45a1aec1d99d@redhat.com>
-References: <20260618-xfstests-tcore-acls-fixes-v1-0-45a1aec1d99d@redhat.com>
-In-Reply-To: <20260618-xfstests-tcore-acls-fixes-v1-0-45a1aec1d99d@redhat.com>
-To: fstests@vger.kernel.org
-Cc: German Maglione <gmaglione@redhat.com>, brauner@kernel.org, 
- linux-fsdevel@vger.kernel.org, zlang@kernel.org
-X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1781777571; l=683;
- i=gmaglione@redhat.com; s=20260618; h=from:subject:message-id;
- bh=Sydr13YG+LkxSxLb+VuMhlfM2ZmKIZRGOQOOc2KpBoQ=;
- b=9m7U4QL2Dq0hpstvEpBvhq+iw3qnU71AL/fKsHUlU64ciQaOMdi/CjYBb/uQog0Fg3G5FkTj5
- 5tQMvDf0GHbBC9yo13Gn3wUTNactXxe2HAP/MMD2uOswkcf2U7HWTs1
-X-Developer-Key: i=gmaglione@redhat.com; a=ed25519;
- pk=EgoGsSGnVamWcruH9kiHxwzZf0dPTHHxIjd1Gigd+yo=
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-generic/633 runs --test-core which includes tcore_acls(). Without
-_require_acls, the test fails instead of being skipped on filesystems
-that lack ACL support.
+v2log have been the default for more than a decade.  Merge all xfs log
+tests into the log group instead of splitting them up (with a lot of
+overlap).
 
-Signed-off-by: German Maglione <gmaglione@redhat.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- tests/generic/633 | 1 +
- 1 file changed, 1 insertion(+)
+ doc/group-names.txt | 1 -
+ tests/generic/054   | 2 +-
+ tests/generic/055   | 2 +-
+ tests/xfs/095       | 2 +-
+ tests/xfs/119       | 2 +-
+ tests/xfs/135       | 2 +-
+ tests/xfs/137       | 2 +-
+ 7 files changed, 6 insertions(+), 7 deletions(-)
 
-diff --git a/tests/generic/633 b/tests/generic/633
-index d75d4dc860d3b78e5fe11b538e3aba4e9ab477e1..90d24f099bc732d5db209f8d014ddaeb042985b2 100755
---- a/tests/generic/633
-+++ b/tests/generic/633
-@@ -14,6 +14,7 @@ _begin_fstest auto quick atime attr cap idmapped io_uring mount perms rw unlink
+diff --git a/doc/group-names.txt b/doc/group-names.txt
+index 158f84d36d31..424e2c4a1ca6 100644
+--- a/doc/group-names.txt
++++ b/doc/group-names.txt
+@@ -142,7 +142,6 @@ union			tests from the unionmount test suite
+ unlink			O_TMPFILE unlinked files
+ unreliable_in_parallel	randomly fail when run in parallel with other tests
+ unshare			fallocate FALLOC_FL_UNSHARE_RANGE
+-v2log			XFS v2 log format tests
+ verity			fsverity
+ volume			btrfs volume management
+ whiteout		overlayfs whiteout functionality
+diff --git a/tests/generic/054 b/tests/generic/054
+index 0649b25930c6..f6eb8975b32e 100755
+--- a/tests/generic/054
++++ b/tests/generic/054
+@@ -9,7 +9,7 @@
+ # In another qa test we can do more e.g. use fsstress.
+ #
+ . ./common/preamble
+-_begin_fstest shutdown log v2log auto
++_begin_fstest shutdown log auto
  
- _require_test
- _require_chown
-+_require_acls
+ # Import common functions.
+ . ./common/filter
+diff --git a/tests/generic/055 b/tests/generic/055
+index e57f95faf897..f87fd7fb1850 100755
+--- a/tests/generic/055
++++ b/tests/generic/055
+@@ -9,7 +9,7 @@
+ # * also can interrupt metadata with godown
+ #
+ . ./common/preamble
+-_begin_fstest shutdown log v2log auto quota stress
++_begin_fstest shutdown log auto quota stress
  
- echo "Silence is golden"
+ # Import common functions.
+ . ./common/filter
+diff --git a/tests/xfs/095 b/tests/xfs/095
+index da0d2ae4bb57..ab2ccfc7361c 100755
+--- a/tests/xfs/095
++++ b/tests/xfs/095
+@@ -7,7 +7,7 @@
+ # Test upgrading the XFS log to v2
+ #
+ . ./common/preamble
+-_begin_fstest log v2log auto
++_begin_fstest log auto
  
-
+ # Import common functions.
+ . ./common/filter
+diff --git a/tests/xfs/119 b/tests/xfs/119
+index 7c1cd6a50ce5..e44d5a996a96 100755
+--- a/tests/xfs/119
++++ b/tests/xfs/119
+@@ -9,7 +9,7 @@
+ # This can hang when things aren't working
+ #
+ . ./common/preamble
+-_begin_fstest log v2log auto freeze
++_begin_fstest log auto freeze
+ 
+ # Override the default cleanup function.
+ _cleanup()
+diff --git a/tests/xfs/135 b/tests/xfs/135
+index ec0b54ab45c3..e8c490a0c13f 100755
+--- a/tests/xfs/135
++++ b/tests/xfs/135
+@@ -9,7 +9,7 @@
+ # and verified with xfs_logprint.
+ #
+ . ./common/preamble
+-_begin_fstest auto logprint quick v2log
++_begin_fstest auto logprint quick log
+ 
+ # Import common functions.
+ . ./common/log
+diff --git a/tests/xfs/137 b/tests/xfs/137
+index d97942bf671a..20d46f439b8a 100755
+--- a/tests/xfs/137
++++ b/tests/xfs/137
+@@ -12,7 +12,7 @@
+ # xfs_repair detect the problem.
+ #
+ . ./common/preamble
+-_begin_fstest auto metadata v2log
++_begin_fstest auto metadata log
+ 
+ # Import common functions.
+ 
 -- 
-2.49.0
+2.53.0
 
