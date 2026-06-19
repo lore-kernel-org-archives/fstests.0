@@ -1,67 +1,75 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7471F31E842;
-	Fri, 19 Jun 2026 08:02:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D95E13590A9;
+	Fri, 19 Jun 2026 08:21:06 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781856161; cv=none; b=iCDUf0Ql+tnhgbiPftAelQDZuPiyLmJD6HCISNnNTzyxq6qlRH5gwxJi4P12/szBb87TeWh2g9/3TpP7FGG4qxAkPb9Kc5kxB51fLY+oLAuBN4XQIS778/2zujYZ3r2U/K2Ll0x9tT+ze0yZcnK21FtwOWI8XyXix2jNmGs5w54=
+	t=1781857267; cv=none; b=U3/qseMEE/JVpUjLfLOIr62fJQYSZC6AG2XdhEvVczdzsnxZWNfb2aDVhCIUdmE8KUi1osfkgljLVbB0eHhGHoY8a/wq8to7s2FqLyQ0VFH9o6SYuNvAX6DLpq4eQ426YhUMsjoCzhWekD+TRtViW8MnigPbPPDC+USh2uXLFbA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781856161; c=relaxed/simple;
-	bh=4Bxx9TXDu2YuL920I3/NwgMApmrXEQtu2SW1f9t152c=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=E0opOh7/fuCY+Ki9zo7FrKm/m1iJ5LGjNE/gDnAvuf2241ax7s5QjDFWpX5lFB4rpv85UfVgTkAJzZnq5OsiyUdGHDAqB+chXYwEohJzCyYHRutI9uTEhTI3Cn1L1UqKGXbWje1Yd1EksUE0Qp6dm36AqYBYo0ULa+aZwwPKDg0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RpfadkuS; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1781857267; c=relaxed/simple;
+	bh=MMYZ7Tv90XOOpkYGuLomRVP91ZwvEzQNGXTLycz+e5A=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=KBY7ZvINtIP4ydr/Ze/6zd34wuzwll7YCVjuYVzQz1YeknvQWJIe4730LlwqGxDcWwP1aJ1Oz3EKQmSWhijHXwH5OF6trNvLGSIfsYVbtTjzmGoVsAcrj6sdCfzk0LQALFToWGnPoTzbYRRH0ZxHgPSsP0Z+j5aVmaboxn3HUXA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=S0R3Y0OV; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RpfadkuS"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 796B41F000E9;
-	Fri, 19 Jun 2026 08:02:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="S0R3Y0OV"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 533911F000E9;
+	Fri, 19 Jun 2026 08:21:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1781856160;
-	bh=YeZbV0GE34LxmENk8KvRi6+Yl43RXQtCy3FFhfS4IOI=;
-	h=Date:Subject:To:References:From:In-Reply-To;
-	b=RpfadkuSBaz71aEJdmni1/zkOO4C18CavJ4KHjh8+HWC/RWRAduIbccHYXM6vnXk9
-	 GRDtRxzj3+IoAIROCZHTxNQ0ZZPrr9WBGiM9gTfMZFtMBSOzPi6667tImcgLKn1vtc
-	 Oq0kDlLUIotYGe8DvMYgAXYzC2QnW7i6BFHqHu/LzkE9JCDF47d0fU8HxIHvHayo8V
-	 PJGhX4zzPI1epDnvQKC+34GP1rFxMAvrxyItdIEwA/jCle+/Wzc2FR2B8f4GVp7Qmf
-	 rwcj8ZBr4xlG0Ywcn5aSabUqflNPT91ZzFBpYwQB4gxPmGuvI5ARDmVOfg71XsGO6s
-	 6Jm1YM/2LeDSQ==
-Message-ID: <a2eb29de-1ea4-49a3-b298-2a4583a83969@kernel.org>
-Date: Fri, 19 Jun 2026 16:02:37 +0800
+	s=k20260515; t=1781857266;
+	bh=vS719iN1YtvGS4K63HdJhaUr09/hQHxjoBcGi+JpFxw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=S0R3Y0OVdmT4XSTqIWt4kargo5qOx+eHLYYzcg1rqQHupfNwIWK3Nw9mgI2NWkcbx
+	 nS4mSq5MCNUEVZ9KX/ApstH+k5Gj8RFkYuqo2gpDjXGVdwH3mUtGkDCuHFi9647maE
+	 mclrQsmtgXMCCVZmNP5+9o3rAgk+M2mqv79NZmquXxCBLJ9bpfPB+2FCGgLtrLb4Tr
+	 uZxA6bASejHabaUyknqZmQwXTiU00Q0zWrxi2mbfSrMYbOTTaeWAEyi7zJSiM+AXGJ
+	 R8KjsXT00TMoUUeyqAWCIgbg6Rxu00UcQ/YGEN+kTQ7WsdzYkLWqKIyncDhCiufd3G
+	 3h7FI9i/LIPQQ==
+Date: Fri, 19 Jun 2026 10:21:03 +0200
+From: Christian Brauner <brauner@kernel.org>
+To: German Maglione <gmaglione@redhat.com>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+	zlang@kernel.org
+Subject: Re: [PATCH 0/2] vfstest: fix tcore_acls() cleanup bug and missing
+ _require_acls
+Message-ID: <20260619-urgestein-ankam-bespannt-bd1b58edd2a8@brauner>
+References: <20260618-xfstests-tcore-acls-fixes-v1-0-45a1aec1d99d@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] fstests: add a test case for btrfs get_subvol_info
- ioctl
-To: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org,
- linux-btrfs@vger.kernel.org
-References: <20260618212553.9564-1-wqu@suse.com>
-Content-Language: en-US
-From: Anand Suveer Jain <asj@kernel.org>
-In-Reply-To: <20260618212553.9564-1-wqu@suse.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20260618-xfstests-tcore-acls-fixes-v1-0-45a1aec1d99d@redhat.com>
 
-
-> v2:
-> - Fix an incorrect bracket for timestamp output
->   It's only a style problem, all the call sites are passing a
->   subvol_info structure directly, so it doesn't cause any problem.
+On Thu, Jun 18, 2026 at 12:11:52PM +0200, German Maglione wrote:
+> Hi,
 > 
-> - Fix the incorrect uuid output
+> Running xfstests over virtiofs I hit failures in generic/633, 644,
+> 645, 656 and 696. Two issues in tcore_acls():
 > 
-> - Fix the return value when not enough args are provided
+> 1) sys_umount2() only runs on the success path. When setfacl fails,
+>    the mount is left behind and every test after that fails with
+>    EEXIST.
 > 
-> - Add a missing newline for the message of open() failure
+> 2) generic/633 doesn't declare _require_acls, so it fails instead
+>    of being skipped on filesystems without ACL support.
+> 
+> Signed-off-by: German Maglione <gmaglione@redhat.com>
+> ---
+> German Maglione (2):
+>       vfstest: move sys_umount2() to cleanup path in tcore_acls()
+>       generic/633: add _require_acls for tcore_acls() ACL dependency
+> 
+>  src/vfs/idmapped-mounts.c | 5 ++---
+>  tests/generic/633         | 1 +
+>  2 files changed, 3 insertions(+), 3 deletions(-)
+> ---
+> base-commit: cac9fe2b8dc3e6dbc0c2383b9e3b4d3c1b9e7dd0
+> change-id: 20260618-xfstests-tcore-acls-fixes-6d15a696f652
 
-
-
-LGTM.
-
-Reviewed-by: Anand Jain <asj@kernel.org>
-
-
+Thanks!
+Reviewed-by: Christian Brauner (Amutable) <brauner@kernel.org>
