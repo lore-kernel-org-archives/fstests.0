@@ -1,82 +1,67 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1662F2BD030;
-	Fri, 19 Jun 2026 05:09:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7471F31E842;
+	Fri, 19 Jun 2026 08:02:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781845791; cv=none; b=ic7FGGad5lLWXQGle+LC0KtrWku9XswKBOwEOJYxbUnjcGv7dCkqmEOCJFdeeBXlf61CWyTytZTXfw8MwgIhj+AZ0jmfWyOU/CAY8O/N1Vp50zWnyO22tvH31YqW0QIIG4D2/viC0c4SB9kbKdyX6nwyY4PO4nc8vz5rhiZP/cM=
+	t=1781856161; cv=none; b=iCDUf0Ql+tnhgbiPftAelQDZuPiyLmJD6HCISNnNTzyxq6qlRH5gwxJi4P12/szBb87TeWh2g9/3TpP7FGG4qxAkPb9Kc5kxB51fLY+oLAuBN4XQIS778/2zujYZ3r2U/K2Ll0x9tT+ze0yZcnK21FtwOWI8XyXix2jNmGs5w54=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781845791; c=relaxed/simple;
-	bh=XBrtyquqMbAyHwcnhhrI9Zqt0xI8ELrbifDkTSPA0jI=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Qa5zOIC0TRcNmcpi6QwVMnkv+5RcWr8WiTRzucYEweFmLWA1xOqFNI26xCfiMsSxil8YbW4AVdAJ/V96/IEBuycVpNKL75h5+KkS5nojiqUiviyaxdHAk6+n0H2/iotKeuLGLuknzREuSDXAJ4tztVht+DhrrL5XZ5tjJTU3FwU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=si53DRt4; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1781856161; c=relaxed/simple;
+	bh=4Bxx9TXDu2YuL920I3/NwgMApmrXEQtu2SW1f9t152c=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=E0opOh7/fuCY+Ki9zo7FrKm/m1iJ5LGjNE/gDnAvuf2241ax7s5QjDFWpX5lFB4rpv85UfVgTkAJzZnq5OsiyUdGHDAqB+chXYwEohJzCyYHRutI9uTEhTI3Cn1L1UqKGXbWje1Yd1EksUE0Qp6dm36AqYBYo0ULa+aZwwPKDg0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RpfadkuS; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="si53DRt4"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender
-	:Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=NVXOgHUS+LduAtENeg+2GVeOuWCVyGbfS0c0OCg9MMk=; b=si53DRt4IozxllBd8PoRjfJ9eM
-	sk21mgljShTHQE9cpoPK2ITntOOhRfd/6n25idUM65gF33CB3/Ps/TOQtzKxzoqYnsUBqRSY11i8F
-	rgan/mDvPUoDgrXsdXvos+GEVU93jj5TLfgNESh+pTQtl8qH8RDjaT0VxdSOM+360pusjMHbxpry/
-	ULZ9yDf0rfzKUX3QoF8KOsuE015t+533cE7/XVIITdHTUpK3usgR2ClX7rZZJRunidZ7BWxgA7XBu
-	FsglKj12goXOz7dtuIm+yUJAqolgn7liC8odJEYVtAp/HfyJRURaCu3/WGpbpczCI2kHvTWm7Ez0E
-	c0yDrqrw==;
-Received: from 2a02-8389-2341-5b80-decc-1a96-daaa-a2cc.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:decc:1a96:daaa:a2cc] helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1waRUC-00000001zqT-3oXC;
-	Fri, 19 Jun 2026 05:09:49 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: Zorro Lang <zlang@kernel.org>
-Cc: "Darrick J. Wong" <djwong@kernel.org>,
-	Lukas Herbolt <lukas@herbolt.com>,
-	Eric Sandeen <sandeen@sandeen.net>,
-	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>,
-	linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH 2/2] xfs/216: disable all concurrency scaling
-Date: Fri, 19 Jun 2026 07:09:29 +0200
-Message-ID: <20260619050937.444488-3-hch@lst.de>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260619050937.444488-1-hch@lst.de>
-References: <20260619050937.444488-1-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RpfadkuS"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 796B41F000E9;
+	Fri, 19 Jun 2026 08:02:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1781856160;
+	bh=YeZbV0GE34LxmENk8KvRi6+Yl43RXQtCy3FFhfS4IOI=;
+	h=Date:Subject:To:References:From:In-Reply-To;
+	b=RpfadkuSBaz71aEJdmni1/zkOO4C18CavJ4KHjh8+HWC/RWRAduIbccHYXM6vnXk9
+	 GRDtRxzj3+IoAIROCZHTxNQ0ZZPrr9WBGiM9gTfMZFtMBSOzPi6667tImcgLKn1vtc
+	 Oq0kDlLUIotYGe8DvMYgAXYzC2QnW7i6BFHqHu/LzkE9JCDF47d0fU8HxIHvHayo8V
+	 PJGhX4zzPI1epDnvQKC+34GP1rFxMAvrxyItdIEwA/jCle+/Wzc2FR2B8f4GVp7Qmf
+	 rwcj8ZBr4xlG0Ywcn5aSabUqflNPT91ZzFBpYwQB4gxPmGuvI5ARDmVOfg71XsGO6s
+	 6Jm1YM/2LeDSQ==
+Message-ID: <a2eb29de-1ea4-49a3-b298-2a4583a83969@kernel.org>
+Date: Fri, 19 Jun 2026 16:02:37 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2] fstests: add a test case for btrfs get_subvol_info
+ ioctl
+To: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org,
+ linux-btrfs@vger.kernel.org
+References: <20260618212553.9564-1-wqu@suse.com>
+Content-Language: en-US
+From: Anand Suveer Jain <asj@kernel.org>
+In-Reply-To: <20260618212553.9564-1-wqu@suse.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-This test currently disables log concurrency scaling, but even the
-data device concurrency scaling can create mismatching output on
-systems with a large CPU count.
 
-Reported-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Signed-off-by: Christoph Hellwig <hch@lst.de>
-Tested-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
----
- tests/xfs/216 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> v2:
+> - Fix an incorrect bracket for timestamp output
+>   It's only a style problem, all the call sites are passing a
+>   subvol_info structure directly, so it doesn't cause any problem.
+> 
+> - Fix the incorrect uuid output
+> 
+> - Fix the return value when not enough args are provided
+> 
+> - Add a missing newline for the message of open() failure
 
-diff --git a/tests/xfs/216 b/tests/xfs/216
-index 1749647c11f7..ce8bb528410b 100755
---- a/tests/xfs/216
-+++ b/tests/xfs/216
-@@ -23,7 +23,7 @@ _cleanup()
- _require_scratch
- _scratch_mkfs_xfs >/dev/null 2>&1
- if _scratch_mkfs_xfs_supports_concurrency -l >> $seqres.full 2>&1; then
--	loop_mkfs_opts="-l concurrency=0"
-+	loop_mkfs_opts="-d concurrency=0 -l concurrency=0 -r concurrency=0"
- else
- 	loop_mkfs_opts=""
- fi
--- 
-2.53.0
+
+
+LGTM.
+
+Reviewed-by: Anand Jain <asj@kernel.org>
+
 
