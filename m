@@ -1,347 +1,197 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A1ED33D4F2
-	for <fstests@vger.kernel.org>; Thu, 18 Jun 2026 21:26:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781817980; cv=none; b=egxAseOo0OUbF1Uza1moTkei3TDVVNFt2QINhFfj/xv3Wy85HR4/nhJY8qniU5H7VuEBgfFlTEN8tPkIwsmmCEWyiQjgU/xtastiSQ1CuAbnwGKZxFAoguAS7O5k0r1Y7fVJlZWsjjNiYmQjN8dHtrEnaNci1MS9e01jDMuRJ5o=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781817980; c=relaxed/simple;
-	bh=9D+SRwOyVh2l68uCLqeyKpG8awEKc5VSZ67/3U6UcDo=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=MIGHBcjqOcQBEK3f8ZdEuzQckZ8FQlOKjvRfzqqe1PPvTjvOkT2zWWX0YeAYSAN+BhPbPuwGHRuEwE2Sl++eecsoeBBUuuKk64FNqYBz2glll0jFHUjhH6AhTZiVwKwwUIlnwlPnif5A/Fsg8nHXWyycKChtkol5n4RecdGRAzs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=Cg6gRL5k; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=Cg6gRL5k; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 921A7846F;
+	Fri, 19 Jun 2026 01:56:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.154.42
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1781834204; cv=fail; b=sv0FdeL6uIJywBM8R1XSvR41U7NBNq7c+Hk+yN/OfAzWVrA4RBRDCafbvu/EsUlo4UvlbGdPU03+fsXKUATrI3rdA1UjcqbO8GJ5BbpcWL5Occ3K0kfgeHqcaTgcW7YeXrsST7yiLewWrO0t9ZPNXfNp6QJ1vI9hvR2z6EqsLec=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1781834204; c=relaxed/simple;
+	bh=8ycy6Z0BgDwDF7Q7dx1ieK0Pf2yNuP5ZHzyfMGkBe9M=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
+	 Content-Disposition:In-Reply-To:MIME-Version; b=qaOp6u/1MMKHIbC9FaSW1MF0p4NnUHqzRNVicu2bMmvXnJAAoHIoz7Eyti9Byg1oVlFqiupuCjWhYFZJ/vnG9QAwWtCHNoxfiI4pQtHpACZ325aYgigapmag0KKuxf/VXglbB3JHmH933lAeVeL/triyJraaC0W8qd1O+45HDlE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=OYedtu9O; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=JfaAntyS; arc=fail smtp.client-ip=216.71.154.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Cg6gRL5k";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Cg6gRL5k"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 1A55975E84;
-	Thu, 18 Jun 2026 21:26:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1781817977; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=xX7nir7uloES2uZl5OcgLFm5vbGB1wvsKkepP90F+ro=;
-	b=Cg6gRL5krSPq7E554kZL2cmUnr6unQVRwAecrH4tD+HFd8MqhDmO20dqMO6F01eRcj2b1z
-	fJ0iXO+4t2JeNWcNfveMmcY9yJNnX4wGaBjqFedUxt8GwKEK6UpZam+Ksl8VzGz+wF/Miu
-	sgRp58ntmHIbkplAs6sjv3dFK4s+8gg=
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=Cg6gRL5k
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1781817977; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=xX7nir7uloES2uZl5OcgLFm5vbGB1wvsKkepP90F+ro=;
-	b=Cg6gRL5krSPq7E554kZL2cmUnr6unQVRwAecrH4tD+HFd8MqhDmO20dqMO6F01eRcj2b1z
-	fJ0iXO+4t2JeNWcNfveMmcY9yJNnX4wGaBjqFedUxt8GwKEK6UpZam+Ksl8VzGz+wF/Miu
-	sgRp58ntmHIbkplAs6sjv3dFK4s+8gg=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id B7576779A8;
-	Thu, 18 Jun 2026 21:26:15 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id QY3BF3diNGrtLgAAD6G6ig
-	(envelope-from <wqu@suse.com>); Thu, 18 Jun 2026 21:26:15 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org
-Subject: [PATCH v2] fstests: add a test case for btrfs get_subvol_info ioctl
-Date: Fri, 19 Jun 2026 06:55:53 +0930
-Message-ID: <20260618212553.9564-1-wqu@suse.com>
-X-Mailer: git-send-email 2.54.0
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="OYedtu9O";
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="JfaAntyS"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1781834202; x=1813370202;
+  h=date:from:to:cc:subject:message-id:references:
+   in-reply-to:mime-version;
+  bh=8ycy6Z0BgDwDF7Q7dx1ieK0Pf2yNuP5ZHzyfMGkBe9M=;
+  b=OYedtu9O6ql53dUB/OgZHp/WwsGf3slLI2DQqsypcQ61aSsLFgPlV9TH
+   10WjRilnx2cvdX8yVoiHH3gr4PwfM4plWChPIzACXRi5QsWvUhu8HfGOz
+   dzDRMrber1fiASuXUsMkWv911T/DAghEvTtXrudAa8X/tyRdHNMZrQUUr
+   Bz4z6+JTJNKFlGLN3jQ0AofRdNiRxFoW2rDbFlNAOZYahY6cWFjD5IpdP
+   pVeeHkq8nmuoQEsHlk0E4QMdeRzAZ0SpyPwGjgTdN318NH6Ffq0gqCIyx
+   6m8gp7QkHv5Eb4a04Bu4y0KIwbQYW49N+H73hRdTGwB1Z+CZ5Gxf9Rmz6
+   w==;
+X-CSE-ConnectionGUID: BUelgHRRTJaY+4kbo0av9A==
+X-CSE-MsgGUID: Vsv7JoQXSdGvWGGxxO6b0A==
+X-IronPort-AV: E=Sophos;i="6.24,212,1774281600"; 
+   d="scan'208";a="145305503"
+Received: from mail-westcentralusazon11013026.outbound.protection.outlook.com (HELO CY3PR05CU001.outbound.protection.outlook.com) ([40.93.201.26])
+  by ob1.hgst.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 19 Jun 2026 09:56:41 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=k7cDBKIKc9ZVU4VTvql+KY+3+DhmIS1nME7HbuqmUAi93/i5ekTWAyNokdUXLZB1ZDm/ODw0TC+BIFMb9f96EtnqguwGLbC4jbS0ftDkz/zTdGSVRpubv1rRUSvZTrN1jAF9oJAUAcXorzYujJiB8GwyWwd6Ptc8IpgVnUqH0tW0PrDGCZ3uwgdywaqyZ9b24aGO0ixh0WrBbnRsgn1PTB3uQ31k5sbhzlrAqnYhoeP4Yg+/2Av5FbcI1F+bqAEg0JtHGD9p3mjVTWlYdMrbjr5eEw9+34XzjuI2kiJEzgjezYZo+7jGSsjjIPNPFCYHnn+5MBjnDX+05AgX05NT/A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=ukzXoFjZ20/BgjgMdQ0ovZf2Ifod7MCZ/qRAtiEFA4M=;
+ b=qBmsmHohxD7fwLkX5iob/FBKL77hlZfCwObw1SSlHYc7Xo+tTWT+LR4T3n01qz+Z3+/wXhrs6iw8d1TGEwTo3ZBAaIymldOT1lNtf0EtA3giDFXi+o5lsLXcoY13Zk9QN+NwIBGo2LJZjOmWeTZV9Y+vBsis45bEzKqw9orRCJqj+A+auYsYD6v5MKTLC6a9rxHGY/owkackJhdtoIeW/kcdRBZcvHTECrNkPIZ0FrxYw1lVoiXcdcK2UJm7cerVyXrky/4hc4iUEdPknZ5J+rOpNk8HEZwX9n0DGGS/qmpNKSselatkHBx+Nye1px2fkygWJUUfDYUxNeBOPzHGtA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ukzXoFjZ20/BgjgMdQ0ovZf2Ifod7MCZ/qRAtiEFA4M=;
+ b=JfaAntySjX/D7hFBtoRGvV4no2i3356T4zdS4M+Z4o5Jjbv7hDCbq1klWZoJwREONtbqEIG5Wl9zz5qu9ylK5yTCmxJ2aSYI4lYV/2YMIervfSiEHU/rK6mGvVbDi+Ya893ajRv4pd11NukPkr98WvbWPAEHVNFDsNmTdvA18Jg=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+Received: from SA1PR04MB10065.namprd04.prod.outlook.com
+ (2603:10b6:806:4dd::14) by SA0PR04MB7465.namprd04.prod.outlook.com
+ (2603:10b6:806:da::10) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.139.11; Fri, 19 Jun
+ 2026 01:56:40 +0000
+Received: from SA1PR04MB10065.namprd04.prod.outlook.com
+ ([fe80::9b98:bf8a:b0b1:ef85]) by SA1PR04MB10065.namprd04.prod.outlook.com
+ ([fe80::9b98:bf8a:b0b1:ef85%6]) with mapi id 15.21.0139.009; Fri, 19 Jun 2026
+ 01:56:39 +0000
+Date: Fri, 19 Jun 2026 10:55:21 +0900
+From: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>, 
+	"Darrick J. Wong" <djwong@kernel.org>, Lukas Herbolt <lukas@herbolt.com>, linux-xfs@vger.kernel.org, 
+	fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] xfs/078: disable all concurrency scaling
+Message-ID: <ajSgfekizOMFT0SB@shinmob>
+References: <20260618134834.237647-1-hch@lst.de>
+ <20260618134834.237647-2-hch@lst.de>
+ <997e50d2-83d8-4b41-9c2a-749e5c85bf4b@sandeen.net>
+ <325bdef5-487e-49d7-90d4-3418e2ae7799@sandeen.net>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <325bdef5-487e-49d7-90d4-3418e2ae7799@sandeen.net>
+X-ClientProxiedBy: TY6P301CA0026.JPNP301.PROD.OUTLOOK.COM
+ (2603:1096:405:3bf::13) To SA1PR04MB10065.namprd04.prod.outlook.com
+ (2603:10b6:806:4dd::14)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Rspamd-Action: no action
-X-Rspamd-Queue-Id: 1A55975E84
-X-Spam-Flag: NO
-X-Spam-Score: -3.01
-X-Spam-Level: 
-X-Spamd-Result: default: False [-3.01 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	ARC_NA(0.00)[];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[scaleread.sh:url,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo,popdir.pl:url,info.name:url,btrfs_crc32c_forged_name.py:url,suse.com:dkim,suse.com:email,suse.com:mid,popattr.py:url];
-	RCPT_COUNT_TWO(0.00)[2];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	RCVD_TLS_ALL(0.00)[];
-	TO_DN_NONE(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DKIM_TRACE(0.00)[suse.com:+]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: SA1PR04MB10065:EE_|SA0PR04MB7465:EE_
+X-MS-Office365-Filtering-Correlation-Id: 5c1ba92e-cbbc-4cc4-d8c0-08decda60109
+WDCIPOUTBOUND: EOP-TRUE
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|366016|19092799006|1800799024|376014|23010399003|11063799006|56012099006|4143699003|22082099003|18002099003|3023799007;
+X-Microsoft-Antispam-Message-Info:
+	kHQmKdfmvsCcdxbja1pwmy+DjsXXuQpPP3a2Dma8H5cUVgwYEU1EDd/C0jfa6KBr1vs3yYNl/OLm/qSImtHAyth35UHteFZAW8qKeJ/IkUzgrwE7q+5kwqdDhP85YXOsO2R5d54LxpynWJb2DTEeasp8Oz5WIoJvIe92n3w50FqYqQUj4FeqBBfba8iFmmGPTAm9q3IhPVMPH9zYMq4IrNGdm4nqhrmhoFWgK8fxAUNwyyydlWV3HEomQvikSa3LQNmSdArLu3sSFk4z+rf8Qba9KPce2qi0yIekn3UTEKuvZa6gob4YlBI3f+pkEm8AjkGrVbu2u/fno0nQ3qlN2S0/4ZSqCrDOVbW6c9ZKSxodJONkdNYYkcZZZqwR5L5g4sW1zCYPnRYE3vLpwY639K/13ugm7VE9eMn5C5umYqlQqQ3ecqpAMrrRW8N2Vjemv9VIOyuCxyqrktQ9WqG6Kj6tRA/+cX5EaHINGMJI24yRJwD+SqpjHkbWmHUSRgh9JuILbBqChl8JiHqwV7YOw/n8pSEVYrOAj2uFPQZL8jb51Srb9QERoi2W2pV1Rs89sLjXrpAQC/4EuPofWX1NqanrFKV9TVo4EPRmQTaWKCrQx2SOgGi2p8QtMPaSuEgWRVTWIK7Tq00tYmcO9FGL9gNMuHvqX25jHuaupsWG6Po=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR04MB10065.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(19092799006)(1800799024)(376014)(23010399003)(11063799006)(56012099006)(4143699003)(22082099003)(18002099003)(3023799007);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?aHUq+i9EZvWU3iF3W34NYuYaPJN0T4oiEhwN8GjXLiZxNKZarjWD1kBy2uqs?=
+ =?us-ascii?Q?JzFyExMc47WFJ/CiVr/XNd3qgzFSHvfaWO+1Pj3RplHN9B8vih/5I7iAhPmG?=
+ =?us-ascii?Q?o7s4Qi2zL5YnsQlEMG+4keDW08X5o297r21VnYUIxgYsHtfMcohnRDAhKNJe?=
+ =?us-ascii?Q?GFUSU9i1ccQ0vd8v5IGMZluMTJARx+qtHX035YtGnup7rr0QamG1QF9jBSrx?=
+ =?us-ascii?Q?Ud+5oLRd6Hkvs/BdZAXNA7ig7lfx+netOIfN2yCuwm7SsegeL09iMYP9mWvb?=
+ =?us-ascii?Q?thny5jneef9PP4cXqZ+6Jxc2RPS7s3eEbQrGC0N4shK1o4oRQSCQYYqqIif/?=
+ =?us-ascii?Q?44rOWcpB6jkjaRuULPDuZHwWGwEAfPQ2JfqRRq9XbwWUlLW7mWwxQKhi53sq?=
+ =?us-ascii?Q?Gf2gSh2M5gGZj54jRTZb7EX7nGAe+baAwVm9DCCMrdkwROYaX85F6SxshYHL?=
+ =?us-ascii?Q?jMzfc+SOiR97iQwZxXps8UgxFBvCmoPI/iKCbMjE52OVMnnfWdDLOxyBJehw?=
+ =?us-ascii?Q?QxLLGXzuvPJ1GUKsGGHMNyB/j4AuEvBUYHzTL3FDtECXp/Xvc+CtuyNKeUCI?=
+ =?us-ascii?Q?7/7ZaCAd5c8S3OEmk6dwHACbff4YyGDcLyBzHOMDUgIB8Ud/MAHpqrTjh1rv?=
+ =?us-ascii?Q?BiaTkduWCTZCDuKKAFrD3RVGKzRZJXlOhjMyiPTCoMqzMibJGc8BDPYFkIA4?=
+ =?us-ascii?Q?w45LAH0CRFZjmhxzU5l21B+CAVB3fEv9OnEuQD/nD5gg2iS8Illh83DbYbcw?=
+ =?us-ascii?Q?Rkokx2I+gyspN3/RKFc1zfSSsPxWla7lK2Kr/9diFzavsWiA4/N6+HPZdVAJ?=
+ =?us-ascii?Q?sHFgJQAeZAKl+roMotRrgkZbD0HezS/w/ScteV3BRrcZJox643hSEtvzQtr0?=
+ =?us-ascii?Q?AaLxjarenIptJ13+q79DBtg9q8BqWT8p/a5E0hYehTWfvwHZ+ab0N39gmXIY?=
+ =?us-ascii?Q?1wT9sn2t3dI/N/ElVnb+YOmoNfZu+6XsyzntGtP5KzduD+9Q4aHklQwNfG0R?=
+ =?us-ascii?Q?Vu6Yh9uVDZbjN+Q4xtfEhrrEOGumKnhzxVtFaUc61Cw7QI3gAPkXSvPNQd4Y?=
+ =?us-ascii?Q?9CL0g8v4JWNgcppUWLxSDl9WiYI1aYNlqMKBMj6K6Ue7oXfPuyM8ZAcsjUx5?=
+ =?us-ascii?Q?fd7sa6YEa+gUS9ogSXq42Ce31b2syNE4HQEDSVqheFgBPr9wdDDlPpprhm/z?=
+ =?us-ascii?Q?7A4eWPs11UGHIiEmxvsjlz/p/BdGdAV44xgkvj8Kewaea5XEi9pVh+mySL7L?=
+ =?us-ascii?Q?2cU+D00Sd/2LhPRsQ0OQAxduT9ZS2tr5c0/RcesOmdPdaKAY0TvkIbZspC8h?=
+ =?us-ascii?Q?z8eEzCplcpLrVJKJHnR3diz3umMw4e2IOwES78xWwq1+BbZDaH4P41N0DmqU?=
+ =?us-ascii?Q?4IXZzmZ0t8mhbqtPVAXQRQEv+g92y0n8SQxCxL9Q5j0DmG26mPn6R+qrufm+?=
+ =?us-ascii?Q?3xqZv2zWpYvvcxk8dyUsf40BQ6VsMO3/HkbNX8Bq1hvIyAtiFSC1B60mrGND?=
+ =?us-ascii?Q?H/jU2IwKRsN00TtlWbBiwUftRpr7MZhb9eD+bMPMgK5+aRweekYzfV9cwIOs?=
+ =?us-ascii?Q?C/uqmaPk2AHDv9BkiNSRlRSDJMEpaYd7l9H1a52X9CxwPJu9RRr9aW7ystN6?=
+ =?us-ascii?Q?/2z6ohB+NN7dF+Qm7Q/V3km22/FaC74q8X8k5/hoRGbsV0m5HFWEnynzX153?=
+ =?us-ascii?Q?WuMuQK4usthne5oKQ85nKyxAn7zB13wUHyg/a1q/D6jknHM8erxY3lvslBBc?=
+ =?us-ascii?Q?NdFSd3Of1zFXm8PK6Yv51xIFw4NxlUE=3D?=
+X-Exchange-RoutingPolicyChecked:
+	k5SucERNa7cplKprmxkqQFqPWh9s7+9IZF37sWbpFEyYBgA2sy2Dxpt61EecBL2glbH0HGy6byFyGrum+xyj6bk1kE8CIGcUGB4aBgqbvWA4Uvacq0NWHJfac1SHHkxvmsdj8HWj+HUMz2dSXJmczqFNbSnc+2nmFN0Yl1Xu1/TiRhin9399oXOIq1S5xVi5T532+KeeTm+HZQE7DNtwd2kkDhooKIV8HWkoUzNIMtsUaW0KTc9dpl1J39jE2gzEiOvE3tryAaaTXivFmEMV4zdVJfwcz0liW2zdIyRBN90zVN1Ewb5WtFWelQ0bPfKXTW7W+GQ968+EuPi1Gi8CHA==
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	6JXT4WntFujahUaDljwb3xh7WocqZWF92FBl/w8A+ZUXBpNB99DeQFmvRClgpI3cu22Ro9TXmKFcgjq2dDLlsNR0hdAXuzxm0MhipYtQ56CTCXSdmsXJ7JWZaBGwrx3jOMULltQfVaQsLPvDIxYkQcElYyTnhb85mpJn2QDpWy9zmzVQ0n+nYznZvf6NcceiNDsGbAgegiKk5+lCX13wNqMl+DxSGMe48di2IkUT+az888masI3sD0FntZe4pVI/6HMjOTsvbcAOLZ78vPzn3hrgxiLDerO0gRfpKZpQhydrceBaxRIXBfLIAJKMjh+U5HGsQqHPY2LUH4iKMdQOsO1naYliKm2xqgFQOEfwWzLoe92hsuX+xumcC2/W2ZHu6iip/tP/8YbSe9yIrt6ucOhgsugeLd5r6pl4/lzBTDUH+oTLAzo3SEEn8Tfi6POuDM6DClN0sPccrYqsG6KeEuKTMWQqYdPUh838/zhZuvGSgq7ZitkRGRlAHmHr/8y+IkHUP0205mBCmnT6FHzAdk9jhwqcU6TUa+1Hr7VjqhrbL3Fg8C9oSZ35UWJpx4P9wYwXSW65DleBy3ppyp3i37UEW092qGS03iBuAJB7imQOtPynohs2URZalv394IFV
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 5c1ba92e-cbbc-4cc4-d8c0-08decda60109
+X-MS-Exchange-CrossTenant-AuthSource: SA1PR04MB10065.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Jun 2026 01:56:39.9486
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 2abc1uI1yThl6Tz+X+qvttAu1oW5haJexRKxeAn0Ocz+nGU4YGZaNcxlgDjCv8cJkImjwp1ESFqCzMHbLX7iX2Vy+OeWpSEqYaWaXVsK4Sc=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA0PR04MB7465
 
-There is a regression caused by upstream kernel commit 538e5bdbc899
-("btrfs: add 32-bit compat ioctl for BTRFS_IOC_GET_SUBVOL_INFO"), where
-the unprivileged get_subvol_info ioctl is returning incorrect results.
+On Jun 18, 2026 / 09:23, Eric Sandeen wrote:
+> On 6/18/26 8:54 AM, Eric Sandeen wrote:
+> > On 6/18/26 8:48 AM, Christoph Hellwig wrote:
+> >> Disable concurrency scaling to avoid mismatching output on systems with
+> >> a large CPU count.
+> >>
+> >> Reported-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+> >> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> > 
+> > I think this papers over what I still feel is a problem in mkfs.xfs
+> > behavior, but that's a different issue and making tests pass is good, so:
+> > 
+> > Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+> 
+> Er, hang on - let me retract that. Lukas sent a series to address
+> this problem too, right, and one of the things he added in his series
+> is a helper to determine whether the concurrency options even exist,
+> so that this can continue to run on older xfsprogs, which seems like
+> a good idea, no?
+> 
+> https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?h=for-next&id=7f162f5bcf50fc32c7e3b432e7ff189571a3151f
+> 
+> which added _scratch_mkfs_xfs_supports_concurrency()
 
-Unfortunately that bug is not covered by fstests, and only exposed by
-btrfs-progs libbtrfsutil python tests, which is not a short run.
+I agree, I think we can add the change below on top of this patch.
+Regardless of the change, I confirmed that this patch avoids the failure
+that I reported. Thanks!
 
-So add a new test case for such btrfs ioctl:
+Tested-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
 
-- Introduce a helper program, btrfs_ioctl
-  Which will call the dedicated ioctl, print all of its structure
-  members.
-
-  For now only get_subvol_info is supported, but it can be easily
-  appended for new ones.
-
-- Mkfs and create a subvolume on btrfs
-
-- Use "_btrfs_get_subvolid()" to grab the subvolid
-  That function is utilizing "btrfs subvolume list" to grab the info,
-  which is not utilizing the unprivileged ioctl.
-
-- Use "btrfs_ioctl get_subvol_info" to grab the subvolid
-
-- Compare the two subvolids
-
-This should be enough to detect the regression.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
-Changelog:
-v2:
-- Fix an incorrect bracket for timestamp output
-  It's only a style problem, all the call sites are passing a
-  subvol_info structure directly, so it doesn't cause any problem.
-
-- Fix the incorrect uuid output
-
-- Fix the return value when not enough args are provided
-
-- Add a missing newline for the message of open() failure
----
- .gitignore          |   1 +
- src/Makefile        |   2 +-
- src/btrfs_ioctl.c   | 104 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/351     |  47 ++++++++++++++++++++
- tests/btrfs/351.out |   2 +
- 5 files changed, 155 insertions(+), 1 deletion(-)
- create mode 100644 src/btrfs_ioctl.c
- create mode 100755 tests/btrfs/351
- create mode 100644 tests/btrfs/351.out
-
-diff --git a/.gitignore b/.gitignore
-index dd77ee30..0b6b9452 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -215,6 +215,7 @@ tags
- /src/file_attr
- /src/truncate
- /src/t_btrfs_received_uuid_ioctl
-+/src/btrfs_ioctl
+diff --git a/tests/xfs/078 b/tests/xfs/078
+index 8ef5261..dc0668e 100755
+--- a/tests/xfs/078
++++ b/tests/xfs/078
+@@ -59,7 +59,11 @@ _grow_loop()
  
- # Symlinked files
- /tests/generic/035.out
-diff --git a/src/Makefile b/src/Makefile
-index 31ac43b2..76cf50c3 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -36,7 +36,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
- 	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
- 	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
--	rw_hint fs-monitor
-+	rw_hint fs-monitor btrfs_ioctl
- 
- EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
- 	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-diff --git a/src/btrfs_ioctl.c b/src/btrfs_ioctl.c
-new file mode 100644
-index 00000000..d199be7d
---- /dev/null
-+++ b/src/btrfs_ioctl.c
-@@ -0,0 +1,104 @@
-+// SPDX-License-Identifier: GPL-2.0
-+// Copyright (c) SUSE S.A.
-+
-+#include <stdio.h>
-+#include <string.h>
-+#include <fcntl.h>
-+#include <unistd.h>
-+#include <sys/ioctl.h>
-+#include <uuid/uuid.h>
-+#include <linux/btrfs.h>
-+
-+#define subvol_info_printf_u64(info, name)	\
-+	printf(#name ": %llu\n", (info).name)
-+
-+#define subvol_info_printf_timestamp(info, name)	\
-+	printf(#name ": %llu.%09u\n", (info).name.sec, (info).name.nsec)
-+
-+#define subvol_info_printf_uuid(info, name)	\
-+{						\
-+	char uuidbuf[UUID_STR_LEN];		\
-+						\
-+	uuid_unparse((info).name, uuidbuf);	\
-+	printf(#name ": %s\n", uuidbuf);	\
-+}
-+
-+void get_subvol_info(int fd)
-+{
-+	struct btrfs_ioctl_get_subvol_info_args info = { 0 };
-+	int ret;
-+
-+	ret = ioctl(fd, BTRFS_IOC_GET_SUBVOL_INFO, &info);
-+	if (ret < 0) {
-+		fprintf(stderr, "ioctl failed: %m\n");
-+		return;
-+	}
-+
-+	subvol_info_printf_u64(info, treeid);
-+	printf("name: %.*s\n", BTRFS_VOL_NAME_MAX, info.name);
-+	subvol_info_printf_u64(info, parent_id);
-+	subvol_info_printf_u64(info, dirid);
-+	subvol_info_printf_u64(info, generation);
-+	printf("flags: 0x%llx\n", info.flags);
-+	subvol_info_printf_uuid(info, uuid);
-+	subvol_info_printf_uuid(info, parent_uuid);
-+	subvol_info_printf_uuid(info, received_uuid);
-+	subvol_info_printf_u64(info, ctransid);
-+	subvol_info_printf_u64(info, otransid);
-+	subvol_info_printf_u64(info, stransid);
-+	subvol_info_printf_u64(info, rtransid);
-+	subvol_info_printf_timestamp(info, ctime);
-+	subvol_info_printf_timestamp(info, otime);
-+	subvol_info_printf_timestamp(info, stime);
-+	subvol_info_printf_timestamp(info, rtime);
-+}
-+
-+const struct ioctl {
-+	const char *name;
-+	void (*func)(int fd);
-+} supported_ioctls[] = {
-+	{
-+		.name = "get_subvol_info",
-+		.func = get_subvol_info,
-+	},
-+};
-+
-+static void usage()
-+{
-+	fprintf(stderr, "Usage: btrfs_ioctl <ioctl_name> <path>\n");
-+}
-+
-+int main(int argc, char **argv)
-+{
-+	const char *ioctl_name;
-+	int done = 0;
-+	int fd;
-+	int ret = 0;
-+
-+	if (argc != 3) {
-+		usage();
-+		return 1;
-+	}
-+	fd = open(argv[2], O_RDONLY);
-+	if (fd < 0) {
-+		fprintf(stderr, "failed to open %s: %m\n", argv[2]);
-+		return 1;
-+	}
-+	ioctl_name = argv[1];
-+
-+	for (int i = 0; i < sizeof(supported_ioctls) / sizeof(supported_ioctls[0]); i++) {
-+		const struct ioctl *ioctl = &supported_ioctls[i];
-+
-+		if (!strncasecmp(ioctl->name, ioctl_name, strlen(ioctl->name))) {
-+			ioctl->func(fd);
-+			done = 1;
-+			break;
-+		}
-+	}
-+	if (!done) {
-+		fprintf(stderr, "ioctl \"%s\" is not recognized\n", ioctl_name);
-+		ret = 1;
-+	}
-+	close(fd);
-+	return ret;
-+}
-diff --git a/tests/btrfs/351 b/tests/btrfs/351
-new file mode 100755
-index 00000000..e92ddf1b
---- /dev/null
-+++ b/tests/btrfs/351
-@@ -0,0 +1,47 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-+#
-+# FS QA Test 351
-+#
-+# Make sure the unprivileged get_subvol_info ioctl is providing the correct
-+# result.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+_fixed_by_kernel_commit XXXXXXXXXXXX \
-+	"Revert \"btrfs: add 32-bit compat ioctl for BTRFS_IOC_GET_SUBVOL_INFO\""
-+
-+_require_test_program btrfs_ioctl
-+_require_scratch
-+
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount
-+
-+_btrfs subvolume create $SCRATCH_MNT/subv1
-+
-+# The id is get through "btrfs subvolume list" command, which doesn't utilize the
-+# unprivileged version.
-+subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT subv1)
-+echo "subvolid=$subvolid" >> $seqres.full
-+
-+# Do a basic check in case "btrfs subvolume list" doesn't get a correct subvolid
-+if [ -z "$subvolid" -o "$subvolid" -lt 256 ]; then
-+	_fail "\"btrfs subvolume list\" returned an invalid subvolid"
-+fi
-+
-+# Get the id again through the unprivileged get_subvol_info ioctl
-+$here/src/btrfs_ioctl get_subvol_info $SCRATCH_MNT/subv1 >> $tmp.output
-+cat $tmp.output >> $seqres.full
-+ioctl_subvolid=$(grep treeid: $tmp.output | cut -f 2 -d\ )
-+
-+if [ "$ioctl_subvolid" -ne "$subvolid" ]; then
-+	_fail "get_subvol_info ioctl returned an incorrect treeid"
-+fi
-+
-+_scratch_unmount
-+
-+echo "Silence is golden"
-+# success, all done
-+_exit 0
-diff --git a/tests/btrfs/351.out b/tests/btrfs/351.out
-new file mode 100644
-index 00000000..49b14639
---- /dev/null
-+++ b/tests/btrfs/351.out
-@@ -0,0 +1,2 @@
-+QA output created by 351
-+Silence is golden
--- 
-2.51.2
+ 	# Disable concurrency scaling to avoid output differences due to large
+ 	# CPU counts.
+-	mkfs_opts="-d concurrency=0 -l concurrency=0 -r concurrency=0"
++	if _scratch_mkfs_xfs_supports_concurrency -l >> $seqres.full 2>&1; then
++		mkfs_opts="-d concurrency=0 -l concurrency=0 -r concurrency=0"
++	else
++		mkfs_opts=""
++	fi
+ 	if [ -n "$agsize" ]; then
+ 		mkfs_opts="$mkfs_opts -d agsize=$agsize"
+ 	fi
 
