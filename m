@@ -1,39 +1,39 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94B7F25B0B9
-	for <fstests@vger.kernel.org>; Mon, 22 Jun 2026 01:58:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C0C313D8B1
+	for <fstests@vger.kernel.org>; Mon, 22 Jun 2026 02:05:24 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782093515; cv=none; b=QObbpNIl/r6PMSZKxO34SvaeRogh+JmBYflxmdXXe5tWdNRVQEZabBLgnevP+zhTNroE/Z2cxuI0UCcnE7o3TSMII/kpV9jUc+u451f1SwRO9GiBTwVFGFl7gcmZqrFihUIMxP6qrKtbaFCOKt8XMpA/x8vH2tZ26H9x0eByMJc=
+	t=1782093926; cv=none; b=CjKqwnW9x6eSWwbjWBq77YMnc7Kom1jbz6gOBG9pbRkRdWY+0hXGu3eGzoAy+N5pKsO7OYIl3IbOEWBFiM55MDNSqz+aGrPq/jW/p0ryjydEaIP9zPqj0dCONVymt+9zCQQSo0jPsxcvL+cwblC8bNvwHE/uGiHXqN/vEX+3lsM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782093515; c=relaxed/simple;
-	bh=xbX2/a2cQEZmSSFe5dUxj6JHKL0m5G8k9l6/v/UjbCo=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=pXSSFuA70nuueWPtlOA/YgnhRG5+HhyfxhHgHWbl8tnotXjIlCDK0cEK5B4duO8bALIgThRW5fLllYwnX3RqM0AlnyCKb3hZ5sl7Lii8cQNJmOIj7X4V6Tnjh5zsqmfo+s1oWTrQUeoy6iK6HsMgcU/iJ/74KCg3uHDBte3Gr/E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=c2gjm5hI; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1782093926; c=relaxed/simple;
+	bh=GlaUE0lfmpCetvpeDRbwWs6J6u5i0Lm+/5MJSps1oM0=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=StfMUciVYsdXxg2aqxC+glzrlxaMdXcv79iV9C1057SvQrbL1InqIbAdELdwpJ7qFkpd3wzdfF5zdu5bfckX1wL/+cL42Stiaf/psx6y2CYVmB+vaGqwIkAHBrZHM+SuHZHzpZD1ePVIMaldFz06A2bxL2eO1H2lkGfRPyqznUw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LR8Y8W7z; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="c2gjm5hI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 87F911F000E9;
-	Mon, 22 Jun 2026 01:58:33 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LR8Y8W7z"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CEE8A1F000E9;
+	Mon, 22 Jun 2026 02:05:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1782093514;
-	bh=Dtf5/pJLwpCVA1mBxYREJNiC2NC0806gE2r8IszMhpw=;
+	s=k20260515; t=1782093924;
+	bh=Lu5iU7fBtv4Chc3ojEDmb6o6SqWI3VKMJzPc8hK6LqQ=;
 	h=From:To:Cc:Subject:Date;
-	b=c2gjm5hIWPXYwq8yzjQBnE1OF/jcg2/YR1rbsrPtaHmHDjbJc5scjBnOL0d2MzOG+
-	 cuBs4k5av9eDULrRA2QsH4MRqfOuTSMmLiXuSQEUIFf8D4VpTNe7BZ0b5A48bvDjYp
-	 E8mXRsjLdKv5YjTLoJiHLVRZ4j1/8k8dbvFJVJFc9I4SBultXgqSpgQg/0vkxHqUKK
-	 p7iHsbvj1IZYnDHuJtJQjkYBuy4jechs1xC2wqrhL9IWVEE63GYbbKmQsCYyYaiv2i
-	 xQW/aBWynuMWqwxQpemJJVlidajuBhBgQTQwOYI8kCCsqgGE/D8Pqr07B701FCFVxX
-	 8k7sqrNtZ8QcA==
+	b=LR8Y8W7zFK6TydC2zO+xSIFnWFpzqSY3NZMRh4jT2TxVMn7+CeeSBijiFkjomLgsU
+	 jfD2Y5smk22rkUClGwQ1fNlj2J+oe+e58WhFP7hcwZLkFX04SjyCUG+Tdom7GlKSYB
+	 +octpONMW4v4NQy6flDiL4tFGgMQDhKY8LwlHWfKsgLPJYldim5zkf5pvZl3tn1Bel
+	 KdqpqBL21dxGXQHidvkercGf4uYT6SkX2dJqa+ExIxh0E0nuaOhaCDPxweLHFGBY9H
+	 hq2iQMizIg8fykZaJptiikBVegwJQ6ivopLs6Kv1lzE2+3qsUC2NS+CE6HX75xXt4T
+	 VIw0u1eB182yg==
 From: Chao Yu <chao@kernel.org>
 To: Zorro Lang <zlang@kernel.org>,
 	fstests@vger.kernel.org
 Cc: jaegeuk@kernel.org,
 	linux-f2fs-devel@lists.sourceforge.net,
 	Chao Yu <chao@kernel.org>
-Subject: [PATCH] common/f2fs: introduce _require_f2fs_io_command
-Date: Mon, 22 Jun 2026 01:58:23 +0000
-Message-ID: <20260622015823.2361449-1-chao@kernel.org>
+Subject: [PATCH v2] common/f2fs: introduce _require_f2fs_io_command
+Date: Mon, 22 Jun 2026 02:05:16 +0000
+Message-ID: <20260622020516.2372277-1-chao@kernel.org>
 X-Mailer: git-send-email 2.55.0.rc0.738.g0c8ab3ebcc-goog
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -47,8 +47,10 @@ Update existing f2fs testcases to utilize the new
 _require_f2fs_io_command() helper for verifying required f2fs_io
 subcommands instead of basic executable checks or open coding.
 
+Suggested-by: Zorro Lang <zlang@kernel.org>
 Signed-off-by: Chao Yu <chao@kernel.org>
 ---
+v2: add Suggested-by tag of Zorro
  common/f2fs    | 16 ++++++++++++++++
  tests/f2fs/003 |  1 +
  tests/f2fs/004 |  1 +
