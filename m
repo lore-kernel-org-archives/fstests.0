@@ -1,109 +1,163 @@
-Received: from mail-ej1-f74.google.com (mail-ej1-f74.google.com [209.85.218.74])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mailgw.kylinos.cn (mailgw.kylinos.cn [124.126.103.232])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B67EC351C14
-	for <fstests@vger.kernel.org>; Mon, 22 Jun 2026 07:05:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.74
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A0DD3A16B9
+	for <fstests@vger.kernel.org>; Tue, 23 Jun 2026 06:26:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=124.126.103.232
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782111906; cv=none; b=oJZqpS3ZfpSq640H2ebaGj2z8fzaYCB3lBXr87QfXTyXcg4/hfZ9E+H/0vnsbOoIGkJElbvhsTHuvFWu6T7+g8ZSD0yCEOqCCK5ARWZnGE8tdf87/6RiEpgMCZ206fuZWJoH9BG19PrZUALiBMpZG72HRe0X1AgSs11mxq/7fg4=
+	t=1782196008; cv=none; b=XovsqzcJjgGjUhrYn6FbKCOpn5ilXG/OAigrvNEaQDuKD2C58WVlhrhnd1SDavX3LOtkN/RYc8Er3LeEvp8jKrXqU7NPITPGKYjA7x5X1970se4FeruwecP5Mg9hUxNHfDQTXTg65LTGc0WA+1noEpjs7R/rMtA7Y5ShyEdyujY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782111906; c=relaxed/simple;
-	bh=lR2DKc3uUKYbJATesFe9dJ4qVX5E+i16sBGIybKqn+Q=;
-	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=rYetqONH9uLcA/VuahCVIg15GZfgRnba/jfrZQU1TYvyWOo/aEV7RiaxvbuSZh1k2orJRarJr0yvfZcQRJBfDV5rn44VJ4QfQ5uN/XOoMoN9vQViCNaBli65UZxY1wyNjhB1K1hOHMoUFOl1M6uMrFQHfX1u/iynqHpq6eDfM0o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=YyJjM955; arc=none smtp.client-ip=209.85.218.74
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="YyJjM955"
-Received: by mail-ej1-f74.google.com with SMTP id a640c23a62f3a-bf5ea9d13f9so468715566b.0
-        for <fstests@vger.kernel.org>; Mon, 22 Jun 2026 00:05:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1782111903; x=1782716703; darn=vger.kernel.org;
-        h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=ujIs4t5hz58eh39dBAa6anbidVLmJ4StFcuVqSWPC0o=;
-        b=YyJjM955W9qn/qwGp7bPLmn8aFw8zGVaaSwaAj7E2h1OBYln0ns+WHlAbO+rwF8h0q
-         M7FsMPpqqipvi/BfhpFqRRYgkmVrnktMWnGDgl3ue32eNKA5x+7KudCRFG5Fx8e3j+il
-         vQkMq+qraeNAgqQ3CFELtqLcn9vIDk3pdfHU2kLxvnQqPtWH1r2aH78ja6neIbme/V0M
-         LWNmx6YD5RRjnmd+C3sWCMk+n30smrMDE7T2pQkFGY8eG1NYTMAnpQubzDqEZAQed71b
-         mDUM6lMtbvxatpcAO33Uold5ep4Wz5R9ghMr4/+5/A3hxNTrIQfGv0jVZeIDMlD3MRmm
-         mpsw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1782111903; x=1782716703;
-        h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=ujIs4t5hz58eh39dBAa6anbidVLmJ4StFcuVqSWPC0o=;
-        b=UIOfJjhZrgy589xImItXwsEr4rs2XTDxRkvvJS5Ii5Y4lvN9Ab7qBzgDTa6TvJcjcU
-         BoAA+Ic0+g7jFhF59maa5IgjIvaO+vgciXo+OPr6zoydrLoQPOwaB9885Q6YxU9gjmKi
-         xa36HswulVOoYYhffmEsbuA9Kl7ELrYxsYKTApyWKOeMMyHyPv+m1GvWCT6N7MJrptnq
-         T7rsOktjZBV4K/TXfZod0ooBNaXvKP9XlXyY/Q4ZO7FjVRZW4cSFSz0+iJiBvpjUwgOZ
-         GzjYhEUUhONE8zfXE0kVD2Q47NEGVvYeCuILdmT1HCp+GQrG5/U8CDEZudDtOtbQeKyd
-         xtlg==
-X-Gm-Message-State: AOJu0YwW7Je9Pfdc77pyIw3Ny+Zy1wTqYq5QFhsMR/f3Y/ldtKYLMOY2
-	C/8Dxo8qX0kCzOibJXXfsMtniZhAPEAycTL5LoNVAVFtL+EZtoJcRYdNNizWHXvx6hkDv2UR2Wz
-	ZfmCglrxJuW2JAKjYEYtRtQg1kay65oBqagh8Bnko4k5v2R+dHwGb3XdYe7sgnQf1kkSbXzpzkB
-	dg6YZ3tPRr9jgmWViLGvnhfyOrIWXr96eNzKpQLQRMb/5BkydeWUr/TnyD/YPQoR/G6ib4mQ==
-X-Received: from ejbck25.prod.google.com ([2002:a17:906:c459:b0:c0f:76a8:6c5c])
- (user=jprusakowski job=prod-delivery.src-stubby-dispatcher) by
- 2002:a17:907:fdc1:b0:bee:323d:1239 with SMTP id a640c23a62f3a-c0989ce9151mr667323666b.38.1782111902585;
- Mon, 22 Jun 2026 00:05:02 -0700 (PDT)
-Date: Mon, 22 Jun 2026 07:04:38 +0000
+	s=arc-20240116; t=1782196008; c=relaxed/simple;
+	bh=g25ChgBZeGnpbDciXwL/kKbTm7gfxraEmKHkiFTbKDw=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=tb6g08zO/8OB+knuj5emdzQH49lAWDRDiRconQ9SawMYWIfqCXdgcwHmrJb8O946RXeTKfsfSOl4uyfHw9MzxadD7sqC2ZxZ7O3+Za4+M+W0WZSpOQvrmw1nKjBzwQCqDSF5Pp0yX73IdT0Daval3QhfWH6czXQud4zfjpo+HGU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn; spf=pass smtp.mailfrom=kylinos.cn; arc=none smtp.client-ip=124.126.103.232
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kylinos.cn
+X-UUID: 7cbff6446ecc11f1aa26b74ffac11d73-20260623
+X-CTIC-Tags:
+	HR_CC_COUNT, HR_CC_DOMAIN_COUNT, HR_CC_NAME, HR_CC_NO_NAME, HR_CTE_8B
+	HR_CTT_MISS, HR_DATE_H, HR_DATE_WKD, HR_DATE_ZONE, HR_FROM_NAME
+	HR_SJ_LANG, HR_SJ_LEN, HR_SJ_LETTER, HR_SJ_NOR_SYM, HR_SJ_PHRASE
+	HR_SJ_PHRASE_LEN, HR_SJ_WS, HR_TO_COUNT, HR_TO_DOMAIN_COUNT, HR_TO_NO_NAME
+	IP_TRUSTED, SRC_TRUSTED, DN_TRUSTED, SA_TRUSTED, SA_EXISTED
+	SN_TRUSTED, SN_EXISTED, SPF_NOPASS, DKIM_NOPASS, DMARC_NOPASS
+	CIE_GOOD, CIE_GOOD_SPF, GTI_FG_BS, GTI_RG_INFO, GTI_C_BU
+	AMN_T1, AMN_GOOD, ABX_MISS_RDNS
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.3.12,REQID:980f4442-c786-4ef2-9480-b50740baa9ef,IP:20,
+	URL:0,TC:0,Content:0,EDM:25,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTIO
+	N:release,TS:45
+X-CID-INFO: VERSION:1.3.12,REQID:980f4442-c786-4ef2-9480-b50740baa9ef,IP:20,UR
+	L:0,TC:0,Content:0,EDM:25,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION:
+	release,TS:45
+X-CID-META: VersionHash:e7bac3a,CLOUDID:78f6dc67a5c1ea6ab2476b75694d1104,BulkI
+	D:26062314122055B2NCCP,BulkQuantity:1,Recheck:0,SF:10|66|78|102|127|850|86
+	5|898,TC:nil,Content:0|15|50,EDM:5,IP:-2,URL:99|1,File:nil,RT:nil,Bulk:40,
+	QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0
+	,ARC:0
+X-CID-BVR: 2,SSN|SDN
+X-CID-BAS: 2,SSN|SDN,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR,TF_CID_SPAM_ULS
+X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
+X-UUID: 7cbff6446ecc11f1aa26b74ffac11d73-20260623
+X-User: sangyao@kylinos.cn
+Received: from localhost.localdomain [(223.70.159.239)] by mailgw.kylinos.cn
+	(envelope-from <sangyao@kylinos.cn>)
+	(Generic MTA with TLSv1.3 TLS_AES_256_GCM_SHA384 256/256)
+	with ESMTP id 515989491; Tue, 23 Jun 2026 14:26:37 +0800
+From: Yao Sang <sangyao@kylinos.cn>
+To: fstests@vger.kernel.org
+Cc: hch@lst.de,
+	zlang@kernel.org,
+	Yao Sang <sangyao@kylinos.cn>
+Subject: [PATCH] common: skip data write EIO survival tests on fatal configs
+Date: Tue, 23 Jun 2026 14:26:16 +0800
+Message-Id: <20260623062616.1994466-1-sangyao@kylinos.cn>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-X-Mailer: git-send-email 2.55.0.rc0.786.g65d90a0328-goog
-Message-ID: <20260622070438.1542638-1-jprusakowski@google.com>
-Subject: [PATCH] generic/064: allow 50 extents on F2FS after fcollapse
-From: Jan Prusakowski <jprusakowski@google.com>
-To: fstests@vger.kernel.org
-Cc: zlang@kernel.org, jaegeuk@kernel.org, 
-	linux-f2fs-devel@lists.sourceforge.net, 
-	Jan Prusakowski <jprusakowski@google.com>
-Content-Type: text/plain; charset="UTF-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-On F2FS, generic/064 fails with "extents mismatched before = 1 after =
-50" following multiple fcollapse (collapse range) operations.
+generic/441 and xfs/656 inject data write errors after mounting the scratch
+filesystem on dm-error. These tests do not verify whether a filesystem may
+shut down after media errors. They require the filesystem to survive long
+enough to report the error through the path under test: generic/441 checks
+fsync(2) writeback error reporting, and xfs/656 checks healthmon per-I/O
+error events.
 
-To ensure crash consistency and checkpoint integrity, F2FS forbids
-in-place SSR (Summary Standalone Replacement) overwrites on valid
-checkpointed blocks. When collapse range shifts blocks, F2FS allocates
-new data pages in LFS mode (out-of-place log writes). As a result,
-sequential collapse range calls rewrite shifted blocks at new log
-locations, intentionally leaving the file with 50 extents.
+That expectation is not valid for filesystem configurations where a data
+write error is fatal. Zoned XFS is one such case because a failed data write
+can leave the in-core zone allocation state untrustworthy, so shutting down
+the mount is expected behavior.
 
-Adjust the extent verification in generic/064 to expect exactly 50
-extents on F2FS, while preserving the strict 1-extent requirement for
-all other filesystems. Data integrity continues to be verified via byte
-comparison.
+Add a common helper for tests that require data write EIO to be reported
+without shutting down the mounted filesystem, and use it after mounting the
+dm-error device in both tests. The helper currently detects zoned XFS by
+checking the XFS per-mount zoned/max_open_zones sysfs attribute for the
+mounted device, so the check follows the filesystem instance rather than the
+underlying block queue alone.
 
-Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
-Signed-off-by: Jan Prusakowski <jprusakowski@google.com>
+Fatal-on-data-write-error configurations are reported as notrun instead of
+test failures.
+
+Signed-off-by: Yao Sang <sangyao@kylinos.cn>
 ---
- tests/generic/064 | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+Changes since RFC:
+- Replace the separate fatal predicate and survival requirement helpers with
+  a single _require_fs_survives_data_write_eio helper.
+- Drop the FS_DATA_WRITE_EIO_SHUTDOWN override.
+- Require callers to pass the mounted device explicitly.
+- Remove _scratch from the helper name.
+- Keep the XFS per-mount zoned/max_open_zones detection.
 
-diff --git a/tests/generic/064 b/tests/generic/064
-index aed13970..b77eccb4 100755
---- a/tests/generic/064
-+++ b/tests/generic/064
-@@ -59,7 +59,13 @@ for (( j=0; j < $(($BLOCKS/2)); j++ )); do
- done
+RFC Link:
+https://lore.kernel.org/fstests/20260618034756.615426-1-sangyao@kylinos.cn/
+
+ common/rc         | 22 ++++++++++++++++++++++
+ tests/generic/441 |  1 +
+ tests/xfs/656     |  1 +
+ 3 files changed, 24 insertions(+)
+
+diff --git a/common/rc b/common/rc
+index 9632b211..4bf0861b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4162,6 +4162,28 @@ _require_scratch_shutdown_and_syncfs()
+ 	_require_scratch_shutdown
+ }
  
- extent_after=`_count_extents $dest`
--if [ $extent_before -ne $extent_after ]; then
++# Require that the mounted filesystem survive data write errors long enough to
++# report them through the regular error reporting path.
++_require_fs_survives_data_write_eio()
++{
++	local dev=$1
 +
-+if [ "$FSTYP" == "f2fs" ];
-+then
-+	if [ $extent_before -ne 1 ] || [ $extent_after -ne 50 ]; then
-+		echo "extents mismatched before = $extent_before after = $extent_after"
++	if [ ! -b "$dev" ]; then
++		_fail "Usage: _require_fs_survives_data_write_eio <mounted_device>"
 +	fi
-+elif [ $extent_before -ne $extent_after ]; then
- 	echo "extents mismatched before = $extent_before after = $extent_after"
- fi
++
++	case "$FSTYP" in
++	xfs)
++		# This is an XFS per-mount sysfs attribute, not a block queue
++		# attribute.  Its existence means XFS mounted this instance with
++		# zoned filesystem semantics.
++		if _has_fs_sysfs_attr "$dev" "zoned/max_open_zones"; then
++			_notrun "zoned XFS shuts down on data write EIO"
++		fi
++		;;
++	esac
++}
++
+ _check_s_dax()
+ {
+ 	local target=$1
+diff --git a/tests/generic/441 b/tests/generic/441
+index 6b48fc9e..cc370bea 100755
+--- a/tests/generic/441
++++ b/tests/generic/441
+@@ -53,6 +53,7 @@ echo "Format and mount"
+ _scratch_mkfs > $seqres.full 2>&1
+ _dmerror_init no_log
+ _dmerror_mount
++_require_fs_survives_data_write_eio $DMERROR_DEV
+ 
+ _require_fs_space $SCRATCH_MNT 65536
+ 
+diff --git a/tests/xfs/656 b/tests/xfs/656
+index 3a867692..3830d719 100755
+--- a/tests/xfs/656
++++ b/tests/xfs/656
+@@ -48,6 +48,7 @@ echo "Format and mount"
+ _scratch_mkfs > $seqres.full 2>&1
+ _dmerror_init no_log
+ _dmerror_mount
++_require_fs_survives_data_write_eio $DMERROR_DEV
+ 
+ _require_fs_space $SCRATCH_MNT 65536
  
 -- 
-2.55.0.rc0.786.g65d90a0328-goog
-
+2.25.1
