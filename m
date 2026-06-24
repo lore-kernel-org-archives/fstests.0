@@ -1,42 +1,42 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BF7A36B076
-	for <fstests@vger.kernel.org>; Wed, 24 Jun 2026 07:46:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2BC031EDA0F;
+	Wed, 24 Jun 2026 17:44:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782287166; cv=none; b=hqkstUkDY3BTZWAdfh9QKNIv8gxCDtETMoYNU+fZgZ3brk8HW7YtICmEAjLFF/PrlYePmRM5vUJuF8NTt+/oOspmyTexvvCcoQxe2Bvsq0uAWvgJcycsC+1NtRtzdOqWIYUGtLDZTyjPnw+qSV/5kV51EU3p/4O+w30rRrtcnSM=
+	t=1782323046; cv=none; b=rm2UIQsk8Z/JQtRs8kg4N3/VJT9mfIisZKuPOhyiFrAdiS16N0gsKF5b6Ueq+m9m+5+FI7/J05Tc1nAqqCtwCVSYkwxn6HJyWjJvOvWr87sDNyBFGTdVL6V8KyqyjAPSJSnswdToSArRdwuPPDaZMW94qzHq6gj/Dbk95p+opoQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782287166; c=relaxed/simple;
-	bh=iLn+dajUvk3A9JnZPGYe5Xx8LYBhy6OUPYhdFq+7Lq8=;
+	s=arc-20240116; t=1782323046; c=relaxed/simple;
+	bh=ejFr/WxL7j84oEJrJ7vPadBIqFQuXa6rjbGKo8YgsDU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IpikzaRtQtgc+GbncTamqiTfAYDnd0k07WQyt+MjyNzhYk2Cii2X5hnIAt8X4xHMDy4KezpK/4Hz107EbK8nC6y4ogzGWDDYEKReOP+KNMx6AOiyixmf8VnURVa8irDji5bQGLoriC7L7P/qMmgEqCbUQtB48gF9p/Tya1YbDvE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=wsrZS24e; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=HXOu5ke7WprvcuCG8YDtHJ+hHWdQUI2F/Tui2cSPEJHyV8mZ9nWQvVdlISMVasYzj8GI74vadOIXccklGt5IirQ/lFnPOhtvEWWgsj1sneId6YaIT2foXsGK2xh5LImmpE1Q4R84fHnqVrJgCB264JgOHvWLYZB/ELCz7zCKDZs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Oz6HVjQ8; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="wsrZS24e"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=5SQ2ceOLmQorTQ/rIGAZVtdIP0obDHikYx9CZqlXZ4w=; b=wsrZS24efcnk+Bk5fbKf9298JM
-	Lphj2FrgoMJ5q3B9K2UimUGJPyIJSTULUUMaMpUp6t9EeMdEspHBVVZC+NOv0fj+WYnvNXnDY8Bku
-	3CnmLqPpMAibDC9/WId1ReugEhQLevVKe0DRgKsFqD8x76tVO4+ck1kk3ghVw1hAnrqol2KobwRTw
-	/4Zg0F5BVJZ6TpWzB8hgVCnvEhL3FhG+CEJDQdnoJtwjogHleJAgnHcc0go0GXTohWBhetUpFuxdU
-	lJyf9I/yY5P0wM0WrQG8WOBnyiwXsiWjq1eH5MvYiLrH5B9dJ1Nzq7YEQmHWyvPr29K507+blCJ9A
-	VG0l0r5A==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wcIJ7-00000007LHS-3i7c;
-	Wed, 24 Jun 2026 07:46:01 +0000
-Date: Wed, 24 Jun 2026 00:46:01 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: Jan Prusakowski <jprusakowski@google.com>
-Cc: fstests@vger.kernel.org, zlang@kernel.org, jaegeuk@kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH] generic/064: allow 50 extents on F2FS after fcollapse
-Message-ID: <ajuLORVplOvEXvnI@infradead.org>
-References: <20260622070438.1542638-1-jprusakowski@google.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Oz6HVjQ8"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id A9FF11F00A3A;
+	Wed, 24 Jun 2026 17:44:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1782323044;
+	bh=WfK2N2oJ3+2u8ky1p9lFxKQAgmuLNyiZ0yVYPK0yXjk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=Oz6HVjQ8r33PR4253lkslWCPbsuyQsRTiWn1cXDwpUpN5s9QLMvANKg69hv0XWNKL
+	 78+kf2Pg0prHjCCw9CuOR2IdGoDDqvspVUVvG+C2+HoxrKAQeddEXdKH2HRrleNwoz
+	 oH0thQMjx1UFWYdBQQhX5fXb7deKweu7CFusp/TcrOCyK36wXvImoBk1B376ILi9XR
+	 PX2FJFq/gvTuA6BMBcCBceIlzAx2NTLpjeOX0hahJOF/deCDniPAiaq/wxo1TcD5rS
+	 Jrf+VcgTx7oZfTMaNEJsQBT7IG/PDL68taoul2Ar0BVfp/vTkKgic1OvKLc2F/Ebad
+	 T4r38I5pm8bQg==
+Date: Wed, 24 Jun 2026 10:44:04 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, Lukas Herbolt <lukas@herbolt.com>,
+	Eric Sandeen <sandeen@sandeen.net>,
+	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>,
+	linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 2/2] xfs/216: disable all concurrency scaling
+Message-ID: <20260624174404.GS6078@frogsfrogsfrogs>
+References: <20260619050937.444488-1-hch@lst.de>
+ <20260619050937.444488-3-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,26 +45,42 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260622070438.1542638-1-jprusakowski@google.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <20260619050937.444488-3-hch@lst.de>
 
-On Mon, Jun 22, 2026 at 07:04:38AM +0000, Jan Prusakowski wrote:
-> On F2FS, generic/064 fails with "extents mismatched before = 1 after =
-> 50" following multiple fcollapse (collapse range) operations.
+On Fri, Jun 19, 2026 at 07:09:29AM +0200, Christoph Hellwig wrote:
+> This test currently disables log concurrency scaling, but even the
+> data device concurrency scaling can create mismatching output on
+> systems with a large CPU count.
 > 
-> To ensure crash consistency and checkpoint integrity, F2FS forbids
-> in-place SSR (Summary Standalone Replacement) overwrites on valid
-> checkpointed blocks. When collapse range shifts blocks, F2FS allocates
-> new data pages in LFS mode (out-of-place log writes). As a result,
-> sequential collapse range calls rewrite shifted blocks at new log
-> locations, intentionally leaving the file with 50 extents.
+> Reported-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> Tested-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+> ---
+>  tests/xfs/216 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tests/xfs/216 b/tests/xfs/216
+> index 1749647c11f7..ce8bb528410b 100755
+> --- a/tests/xfs/216
+> +++ b/tests/xfs/216
+> @@ -23,7 +23,7 @@ _cleanup()
+>  _require_scratch
+>  _scratch_mkfs_xfs >/dev/null 2>&1
+>  if _scratch_mkfs_xfs_supports_concurrency -l >> $seqres.full 2>&1; then
+> -	loop_mkfs_opts="-l concurrency=0"
+> +	loop_mkfs_opts="-d concurrency=0 -l concurrency=0 -r concurrency=0"
 
-This sounds odd.  The test allocates a contigous range and then just does
-insert/collapse on it, which should not lead to any new data block
-allocations.  Given that the test works fine on zoned XFS and btrfs
-with strict out of place write policies we know it does not require
-overwriting blocks to work as well.
+/me notes that -lconcurrency is not compatible with -llogdev and the
+loopdev is not formatted with SCRATCH_MKFS_OPTIONS, so this won't work
+to disable the concurrency= mkfs options if fstests is being run with
+SCRATCH_LOGDEV set.
 
-So I think something is fishy in f2fs if needs to allocate data blocks
-here.
+--D
 
+>  else
+>  	loop_mkfs_opts=""
+>  fi
+> -- 
+> 2.53.0
+> 
+> 
