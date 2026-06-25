@@ -1,39 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8A9332B113
-	for <fstests@vger.kernel.org>; Thu, 25 Jun 2026 18:43:00 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8FD128C5CB
+	for <fstests@vger.kernel.org>; Thu, 25 Jun 2026 18:45:16 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782412981; cv=none; b=bZIcm94KuXsrndhnM52QSDAo12OUbg+IWzh+gMLOwi9jeKuLI7BLdzUC/uxqpszZfzbcMOqDALE4g4T9n7oB1qSvhxzpIs2e0wpsl9jmbwneTpnVf8qf1heFmnxA2sRNDZbPCCdio/3KWWFUBvdsmdpUf8a6Hey/WtZg5Gly2HM=
+	t=1782413117; cv=none; b=X/gSNjKcB+Di7tYV7dbJExLu9iMcOktkZs79tI2AQc8UDleYqkteqGIZ0NOrUtImZYm29hRHYTcV1k9IRuX2wRVTVgBGLLEmRd5hPquWRswiSmz4tgdj17tViS4deRk9gQHOTNCkKp57IoBWxUrJpotYzxCg/heYI9Gdx3vieeY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782412981; c=relaxed/simple;
-	bh=lRoCf8FtOyZeghTZ2YHmbCBqNGRqyDPBiJrcjmHARU8=;
+	s=arc-20240116; t=1782413117; c=relaxed/simple;
+	bh=wYAWT98k6S+nZE40YhjaMpXOzLWdLlThiF1Fo8Nietg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=aS6Cm43mLQG0WFCBVh9MxDzUrIuq4wvszOypaJJFLKUIUJ+F+gvd2Je8MwOKsxyAyPT5AuHab3Vqrwsz6l7C1338PIIM/lOMAf01cXOHPsIhGoEhi/BskHwMxdiEUpoJemxYIiGIVJ9t4yJhbB78iAxEaYMItXkFNoMb5jSuL3A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jI4UoEaT; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=PaP5qcxbQq23sje/8WfZ9X/ihZQo+54hoz76azK0mAhmizzYOwisT5tznnyNyoLbQsykYciwdWQdjOqJKNjAQ07q9XojvxybzZtZbEemRU3AYRn8whap+BP7H7UZ2xpdaML9VuKXC4j1OXZZLxAS70Wza7zR6rk0PI1RHT9dQZc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DCVX2TJi; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jI4UoEaT"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 822AF1F000E9;
-	Thu, 25 Jun 2026 18:43:00 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DCVX2TJi"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id B50DC1F000E9;
+	Thu, 25 Jun 2026 18:45:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1782412980;
-	bh=YBTEDM8VSdUY/q3LRrA0neo0b/AjBm30uZgqH3n0xRY=;
+	s=k20260515; t=1782413116;
+	bh=V3GP5bgfFjJ/BOXY9Sh4Vq+cenhWON+j/yvnyRRISn8=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=jI4UoEaTrN3cHD+LiC9oER7WFsNCalm5BsD2dRAB/2i+haSHgO8/3obvX43ScJohp
-	 OJKYIoG8BHZhCoaxKmkbA6yKj0LLFO6P3H7W0yYLYGJY706hInHXB4Rf0oGfrlMob+
-	 f8deuAxAhtNtQt4vIAls9RbWSFEjWkAJTll8okDK5njBAv/Hc+aQzGOa4eFGbS8vuN
-	 u4kV0F1TDGmSc4JadHr+/NjisG8YH8K2mI6XkKuBun50yY8h26IArj3a6+Q6qna+uV
-	 YrjYtvX0jT775MS98RIjWhg16Tfuz+az92YMbn6grSzp++ZQHREMNEfqgL0aLQv/rC
-	 saWQJg8qp1KqA==
-Date: Thu, 25 Jun 2026 11:42:59 -0700
+	b=DCVX2TJi9bngbyM0F4H2muUydJHoyfEs5+ig+FKFwiihhpFzkkXQ7T7nAk83uG5Fo
+	 dvGGrOj4RKliTtT94vJEIUtYQocch+nRib4Ytt//9QUV0bKZ0RMXJOYzJTKDL4zUW6
+	 Z0NJl1cSHJDKciSgepx0MuJKIdjFRErQwB8eWkuQkxPCJuIMeZmTfoZPRk46WqtGA1
+	 wzcJk/fgpQJuOr+1Y3bD1Js/wyAIWe570PUd9/n/9hiGhtP74ikZmOWqsaVwv+gzYT
+	 L3yAOJsohR7oi6ql1N4olYVPbYnWG7h1veHv999pNgxEqFoF7MoRson4rb/jTXCfr8
+	 UbY+zOLxiaJmg==
+Date: Thu, 25 Jun 2026 11:45:16 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-	Disha Goel <disgoel@linux.ibm.com>
-Subject: Re: [PATCH] generic/645: Confirm availability of free inodes
-Message-ID: <20260625184259.GP6070@frogsfrogsfrogs>
-References: <20260617054216.3186441-1-ojaswin@linux.ibm.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: David Timber <dxdt@dev.snart.me>, Zorro Lang <zlang@kernel.org>,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] generic/740: set env for mkfs.exfat
+Message-ID: <20260625184516.GQ6070@frogsfrogsfrogs>
+References: <20260618192236.654082-1-dxdt@dev.snart.me>
+ <20260619045306.GA24829@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,69 +43,58 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260617054216.3186441-1-ojaswin@linux.ibm.com>
+In-Reply-To: <20260619045306.GA24829@lst.de>
 
-On Wed, Jun 17, 2026 at 11:12:16AM +0530, Ojaswin Mujoo wrote:
-> When running generic/645 with ext4 using 64k block size + bigalloc, the
-> test fails with ENOSPC because the filesystem runs out of inodes before
-> the test completes.
+On Fri, Jun 19, 2026 at 06:53:06AM +0200, Christoph Hellwig wrote:
+> On Fri, Jun 19, 2026 at 04:22:35AM +0900, David Timber wrote:
+> > Foreign filesystem detection is added in exfatprogs version 1.4.1. To
+> > maintain backward compatibility, mkfs.exfat refuses to format the device
+> > only when it's run from terminal with a tty associated to it.
+> > 
+> > This is similar to how e2fsprogs work around the issue. However,
+> > with exfatprogs, this behaviour can be overridden with the special
+> > environment variable EXFAT_TTY_OVERRIDE to simulate shell invocation by
+> > user.
+> > 
+> > Signed-off-by: David Timber <dxdt@dev.snart.me>
+> > ---
+> >  tests/generic/740 | 15 ++++++++++++++-
+> >  1 file changed, 14 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/tests/generic/740 b/tests/generic/740
+> > index ce55200f..4f8bf099 100755
+> > --- a/tests/generic/740
+> > +++ b/tests/generic/740
+> > @@ -28,6 +28,18 @@ _require_block_device "${SCRATCH_DEV}"
+> >  # not all the FS support zoned block device
+> >  _require_non_zoned_device "${SCRATCH_DEV}"
+> >  
+> > +mkfs_preop=""
+> > +mkfs_preargs=""
+> > +mkfs_postargs=""
+> > +
+> > +case "$FSTYP" in
+> > +exfat)
+> > +	# For backward compatibility, mkfs.exfat refuses to format only when run
+> > +	# from a tty. This env var should override the behaviour if supported.
+> > +	mkfs_preop="EXFAT_TTY_OVERRIDE=1"
+> > +	;;
+> > +esac
+> > +
+> >  echo "Silence is golden."
+> >  for fs in `echo ${MKFS_PROG}.* | sed -e "s:${MKFS_PROG}.::g"`
+> >  do
+> > @@ -83,7 +95,8 @@ do
+> >  		# next, ensure we don't overwrite it
+> >  
+> >  		echo "=== Attempting $FSTYP overwrite of $fs..." >>$seqres.full
+> > -		${MKFS_PROG} -t $FSTYP $SCRATCH_DEV >>$seqres.full 2>&1
+> > +		eval $mkfs_preop ${MKFS_PROG} -t $FSTYP $mkfs_preargs $SCRATCH_DEV $mkfs_postargs \
 > 
-> The test creates approximately 10,001 files, however, in this particular
-> configuration a standard 5G FS only has around ~5100 inodes resulting in
-> the ENOSPC failure.
-> 
-> Add a check using _get_free_inode() to verify sufficient inodes are
-> available before running the test, else skip it.
-> 
-> Reported-by: Disha Goel <disgoel@linux.ibm.com>
-> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> ---
->  tests/generic/645 | 6 ++++++
->  1 file changed, 6 insertions(+)
-> 
-> diff --git a/tests/generic/645 b/tests/generic/645
-> index d6eb75e6..944b33db 100755
-> --- a/tests/generic/645
-> +++ b/tests/generic/645
-> @@ -19,6 +19,12 @@ _require_chown
->  _wants_kernel_commit dacfd001eaf2 \
->  	"fs/mnt_idmapping.c: Return -EINVAL when no map is written"
->  
-> +_free_inodes=$(_get_free_inode $TEST_DIR)
-> +if [ $_free_inodes -ne 0 ] && [ $_free_inodes -lt 10001 ]; then
+> breaking up the long line still would be nice here, i.e. keep at 80
+> characters.  Else looks good.
 
-I'm assuming the > 0 check here is to cover weird filesystems like fat
-that don't advertise any inodes?  /me wonders if that ought to be a
-common helper where we can record that justification:
-
-_require_free_inodes() {
-	local path="$1"
-	local nr="$2"
-
-	local _free_inodes=$(_get_free_inode "$path")
-
-	# Weird filesystems like vfat don't report any inodes, so we
-	# can't check for sufficient free inodes; IOWs, FAFO.
-	test "$_free_inodes" -eq 0 && return
-
-	test "$_free_inodes" -lt "$nr" && \
-		_notrun "Insufficient free inodes ($_free_inodes), need at least $nr"
-}
-
-
-_require_free_inodes $TEST_DIR 10001
-
-(maybe clean up the comment a bit)
+I wonder why we don't just redirect stdin from /dev/null, it's not like
+we want to capture user input anyway...
 
 --D
-
-> +	_notrun "Insufficient free inodes ($_free_inodes), need at least 10001"
-> +fi
-> +
->  echo "Silence is golden"
->  
->  $here/src/vfs/vfstest --test-nested-userns \
-> -- 
-> 2.53.0
-> 
-> 
