@@ -1,44 +1,39 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A48727707;
-	Thu, 25 Jun 2026 16:53:41 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8A9332B113
+	for <fstests@vger.kernel.org>; Thu, 25 Jun 2026 18:43:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782406422; cv=none; b=gHSzfQ6ncKoqN6eFH/+7SWvMQAYQNWNFG40rMB07izsNFECzU/XfM4rpuq0fvn++0xCmZZudWRGBOvv5wudbaafDzL4lL4mEUYoaFqnwiSi8JnuHAI8iCEl9GAPyTg1saW1QxOr+gDSoKdxvcQze/LgV54LVO7OyRcDbo4NNdS8=
+	t=1782412981; cv=none; b=bZIcm94KuXsrndhnM52QSDAo12OUbg+IWzh+gMLOwi9jeKuLI7BLdzUC/uxqpszZfzbcMOqDALE4g4T9n7oB1qSvhxzpIs2e0wpsl9jmbwneTpnVf8qf1heFmnxA2sRNDZbPCCdio/3KWWFUBvdsmdpUf8a6Hey/WtZg5Gly2HM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782406422; c=relaxed/simple;
-	bh=9ki/XtnbHVh9Vz0uSdwBFSMy7eGGVC6HNYhoEmaCvZk=;
+	s=arc-20240116; t=1782412981; c=relaxed/simple;
+	bh=lRoCf8FtOyZeghTZ2YHmbCBqNGRqyDPBiJrcjmHARU8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=M1zDH6x0safVHnGRzCUPHTOjGnHPmR5Xcq1bEqCW4+LCUzZvmatitSSlEEZQCH7k4QPzXNWgJn69xvYylclgQcvUgXY/oQm/NrgUld+EqqO8AEmpbDBbx9NPJ3zE2aotHQIc01EjfkgCagZgph1ZbYAV8+DxP4/gD5VkWd7jaHc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=odsMr+02; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=aS6Cm43mLQG0WFCBVh9MxDzUrIuq4wvszOypaJJFLKUIUJ+F+gvd2Je8MwOKsxyAyPT5AuHab3Vqrwsz6l7C1338PIIM/lOMAf01cXOHPsIhGoEhi/BskHwMxdiEUpoJemxYIiGIVJ9t4yJhbB78iAxEaYMItXkFNoMb5jSuL3A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jI4UoEaT; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="odsMr+02"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 08BB11F00A3D;
-	Thu, 25 Jun 2026 16:53:41 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jI4UoEaT"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 822AF1F000E9;
+	Thu, 25 Jun 2026 18:43:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1782406421;
-	bh=h6t9Nwx78eovJxmrFXwQNqtgcUKJ2pyGLQ3YWCIlC7o=;
+	s=k20260515; t=1782412980;
+	bh=YBTEDM8VSdUY/q3LRrA0neo0b/AjBm30uZgqH3n0xRY=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=odsMr+024Rzi4D+QuDKWQElEi5xAXmh9dB4nS9cn8mSkGIQXBM350IQDQY0ogjfP0
-	 gKcRQ82npdzs2EW1/E5Us7xGcOIxXKkje8jZJNB/d7XYRZ/G5wXKwdh+Y0VUJ1ylnf
-	 4D53HeMwg0rXIdYm/kwgAgTwkkw7Lfyu9BslHL+ztCnAef8wyuoSgHARO4U8Ju5FYp
-	 mSqlJwY+xO5gapH0/KmTsopZ5RWi7UPItNBH14KhcP7tekmyuf7Vz+QPCEGVFrqYF8
-	 pW44++Hfz2oAgF//pSFPja9vt4PsgpS5FBLG5agjL0OjraXG8FTg1SyLjG70RrxRUq
-	 y9ES4Bw/Fl4cw==
-Date: Thu, 25 Jun 2026 09:53:40 -0700
+	b=jI4UoEaTrN3cHD+LiC9oER7WFsNCalm5BsD2dRAB/2i+haSHgO8/3obvX43ScJohp
+	 OJKYIoG8BHZhCoaxKmkbA6yKj0LLFO6P3H7W0yYLYGJY706hInHXB4Rf0oGfrlMob+
+	 f8deuAxAhtNtQt4vIAls9RbWSFEjWkAJTll8okDK5njBAv/Hc+aQzGOa4eFGbS8vuN
+	 u4kV0F1TDGmSc4JadHr+/NjisG8YH8K2mI6XkKuBun50yY8h26IArj3a6+Q6qna+uV
+	 YrjYtvX0jT775MS98RIjWhg16Tfuz+az92YMbn6grSzp++ZQHREMNEfqgL0aLQv/rC
+	 saWQJg8qp1KqA==
+Date: Thu, 25 Jun 2026 11:42:59 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Zorro Lang <zlang@kernel.org>, Lukas Herbolt <lukas@herbolt.com>,
-	Eric Sandeen <sandeen@sandeen.net>,
-	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>,
-	linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] xfs/216: disable all concurrency scaling
-Message-ID: <20260625165340.GA6078@frogsfrogsfrogs>
-References: <20260619050937.444488-1-hch@lst.de>
- <20260619050937.444488-3-hch@lst.de>
- <20260624174404.GS6078@frogsfrogsfrogs>
- <20260625132251.GA24598@lst.de>
+To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+	Disha Goel <disgoel@linux.ibm.com>
+Subject: Re: [PATCH] generic/645: Confirm availability of free inodes
+Message-ID: <20260625184259.GP6070@frogsfrogsfrogs>
+References: <20260617054216.3186441-1-ojaswin@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -47,57 +42,69 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260625132251.GA24598@lst.de>
+In-Reply-To: <20260617054216.3186441-1-ojaswin@linux.ibm.com>
 
-On Thu, Jun 25, 2026 at 03:22:51PM +0200, Christoph Hellwig wrote:
-> On Wed, Jun 24, 2026 at 10:44:04AM -0700, Darrick J. Wong wrote:
-> > On Fri, Jun 19, 2026 at 07:09:29AM +0200, Christoph Hellwig wrote:
-> > > This test currently disables log concurrency scaling, but even the
-> > > data device concurrency scaling can create mismatching output on
-> > > systems with a large CPU count.
-> > > 
-> > > Reported-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-> > > Signed-off-by: Christoph Hellwig <hch@lst.de>
-> > > Tested-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-> > > ---
-> > >  tests/xfs/216 | 2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > > 
-> > > diff --git a/tests/xfs/216 b/tests/xfs/216
-> > > index 1749647c11f7..ce8bb528410b 100755
-> > > --- a/tests/xfs/216
-> > > +++ b/tests/xfs/216
-> > > @@ -23,7 +23,7 @@ _cleanup()
-> > >  _require_scratch
-> > >  _scratch_mkfs_xfs >/dev/null 2>&1
-> > >  if _scratch_mkfs_xfs_supports_concurrency -l >> $seqres.full 2>&1; then
-> > > -	loop_mkfs_opts="-l concurrency=0"
-> > > +	loop_mkfs_opts="-d concurrency=0 -l concurrency=0 -r concurrency=0"
-> > 
-> > /me notes that -lconcurrency is not compatible with -llogdev and the
-> > loopdev is not formatted with SCRATCH_MKFS_OPTIONS, so this won't work
-> > to disable the concurrency= mkfs options if fstests is being run with
-> > SCRATCH_LOGDEV set.
+On Wed, Jun 17, 2026 at 11:12:16AM +0530, Ojaswin Mujoo wrote:
+> When running generic/645 with ext4 using 64k block size + bigalloc, the
+> test fails with ENOSPC because the filesystem runs out of inodes before
+> the test completes.
 > 
-> Arrg.  I hate our option parsing mess.  Any good idea how we'd get
-> the desired result?  Unless there's something easy I'd be tempted to
-> leave it to the first person using an external log device and large
-> cpu counts..
+> The test creates approximately 10,001 files, however, in this particular
+> configuration a standard 5G FS only has around ~5100 inodes resulting in
+> the ENOSPC failure.
+> 
+> Add a check using _get_free_inode() to verify sufficient inodes are
+> available before running the test, else skip it.
+> 
+> Reported-by: Disha Goel <disgoel@linux.ibm.com>
+> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> ---
+>  tests/generic/645 | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> diff --git a/tests/generic/645 b/tests/generic/645
+> index d6eb75e6..944b33db 100755
+> --- a/tests/generic/645
+> +++ b/tests/generic/645
+> @@ -19,6 +19,12 @@ _require_chown
+>  _wants_kernel_commit dacfd001eaf2 \
+>  	"fs/mnt_idmapping.c: Return -EINVAL when no map is written"
+>  
+> +_free_inodes=$(_get_free_inode $TEST_DIR)
+> +if [ $_free_inodes -ne 0 ] && [ $_free_inodes -lt 10001 ]; then
 
-Yeah, that's me. :)
+I'm assuming the > 0 check here is to cover weird filesystems like fat
+that don't advertise any inodes?  /me wonders if that ought to be a
+common helper where we can record that justification:
 
-I just sent my latest batch of random fixes:
-https://lore.kernel.org/fstests/178240619625.1665857.3954516357764795627.stgit@frogsfrogsfrogs/
+_require_free_inodes() {
+	local path="$1"
+	local nr="$2"
 
-I don't know that it's necessary to add -dconcurrency=0 for xfs/216
-after that (it seemed to work for me) but I don't have any objections to
-adding more:
+	local _free_inodes=$(_get_free_inode "$path")
 
-if _mkfs_xfs_supported $loop_mkfs_opts -l concurrency=0 $loop_dev &>> $seqres.full; then
-	loop_mkfs_opts="$loop_mkfs_opts -l concurrency=0"
-fi
-if _mkfs_xfs_supported $loop_mkfs_opts -d concurrency=0 $loop_dev &>> $seqres.full; then
-	loop_mkfs_opts="$loop_mkfs_opts -d concurrency=0"
-fi
+	# Weird filesystems like vfat don't report any inodes, so we
+	# can't check for sufficient free inodes; IOWs, FAFO.
+	test "$_free_inodes" -eq 0 && return
+
+	test "$_free_inodes" -lt "$nr" && \
+		_notrun "Insufficient free inodes ($_free_inodes), need at least $nr"
+}
+
+
+_require_free_inodes $TEST_DIR 10001
+
+(maybe clean up the comment a bit)
 
 --D
+
+> +	_notrun "Insufficient free inodes ($_free_inodes), need at least 10001"
+> +fi
+> +
+>  echo "Silence is golden"
+>  
+>  $here/src/vfs/vfstest --test-nested-userns \
+> -- 
+> 2.53.0
+> 
+> 
