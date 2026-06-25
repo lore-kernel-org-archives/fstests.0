@@ -1,85 +1,104 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D9AF25771
-	for <fstests@vger.kernel.org>; Thu, 25 Jun 2026 18:45:45 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B95972868B5;
+	Thu, 25 Jun 2026 19:20:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782413146; cv=none; b=ea1XMtDPFVKn4BDXKZO8MMhygnI0un4stqF3jt6II72ENdb+0QoDNbdg07dxr2kCc/OihJ0clw3IgUYZQwDeFLnMgioT7nKU9SppAkXDoF3RXU+RhXmFhPM24FYs+FSS3t8Foa1be93Gp+rAA+Z+n+SVG0/Au2+E/54K9vY/6jk=
+	t=1782415232; cv=none; b=bnIHXKKZy6intdUB8UyE9BINsCrATfwXwyQn1rMnv1TE1UcQJBPoWgfh0hmNo2DCLbPgboUDW49K6w2z3F6kujxmWpKJiAvjvgIw6cwXLjomXrJF9mRhWHIhQMrtG6eFRL9eC4XDRcExxjNvTUz19nwjDWPAnVpTlgG2MpDto2U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782413146; c=relaxed/simple;
-	bh=hpkyzaxMJSy8ndWYm0Xwq5L0XefdjdU0B4obUcOP5yg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Qe3P0+FtaFeY9gsSkOaYBNMN42wHu/bKXCPyuTrGIXj0GAWmJrWGxsHGWZfLAhd2TNX8wVaJ8X1IfhIG3bCPrFV2dA34WAj9fvyPU6B+xdH8K7QffyVI3fW2RODpaVCPEuR4fok99lGe+2RrF8gSgN/ofqY0SWiQrcxAGVdzmQc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XXBXLhWS; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1782415232; c=relaxed/simple;
+	bh=MXodRKSPdBFaJoiA6TINsElb3Su+tvkQniI7FCv7Dok=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=N0B9aWxHSEv/lzb9FPlxqWVoD686QsgtfJoBQTSR5+dAAanTPGO4JVX/i3WFFG9AT4XzEIkBsm2IFzUK15ngyyeHad9xPQGo2RIWqWb7/VGLGk9H09MDw8DIGQ/2Tij6ap3oA7MXpyTGcV55GCBr8HXteyjZc4+eM4JF80LLKQ8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=C42QyEof; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XXBXLhWS"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 469D51F000E9;
-	Thu, 25 Jun 2026 18:45:45 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="C42QyEof"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 976D51F000E9;
+	Thu, 25 Jun 2026 19:20:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1782413145;
-	bh=p4/+JjWObhIiSyUZ+OROdkIzYFTARGUTR8GtHSzJL5g=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=XXBXLhWSwdBuG1ovEJ9gaWg/aF1UU3afoCFtM7PNHk/Cfzkw6O58xcaOCaXw9gTlU
-	 VOoY1sWCpsZIFfyEVZww5pxjo6hXghaEYQuxgTxY9NHevGg+k8gdITqhr58zNeuL/C
-	 lejMAN27/K11pXvZQqLwFpwzyjJqNfRVIsnE9yMIyGtASopk3DhTIKrRtjLXAnBVH2
-	 pwN4s+xN5A2UO9s02V1qnRI+Bq3ANCKzA3EWuodwrWnw4WbJPhf709SjdiROpi/c1l
-	 R6fSL6PdOCyLduOapxgk4XiXDonVYkH+m1KiRL/ktGVnTOPnXCM53Ee4sVSFnbN88m
-	 UVjq36KcMzoaA==
-Date: Thu, 25 Jun 2026 11:45:44 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: David Timber <dxdt@dev.snart.me>
-Cc: Zorro Lang <zlang@kernel.org>, Christoph Hellwig <hch@lst.de>,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] generic/740: add --force option to mkfs.ntfs
-Message-ID: <20260625184544.GR6070@frogsfrogsfrogs>
-References: <20260618192236.654082-1-dxdt@dev.snart.me>
- <20260618192236.654082-2-dxdt@dev.snart.me>
+	s=k20260515; t=1782415231;
+	bh=qR27asvEKm1vPNzZyHCkEpLqSujppN25EiK6rTbRrEo=;
+	h=From:To:Cc:Subject:Date;
+	b=C42QyEof/2r0v7MjyWa5bJM/m7KeP7B6VH49Lb444zE6eOyB29V1vl6eMQpxmeh69
+	 9cIZTv8dgBcuX+SIBQD2HFWwSNrLJZaGREg+4v9C9JccihL2eLOnlgovPZa+crBdSk
+	 BcvHdaJch3640hTAw6/L/DjI7rpmT0pyrzBRAQJv/kuXdMyR6UYoYfcAakPCCBqC2l
+	 297guO4ki1lsL7yxbtcDcHFx5YXUy+WBJoW5rTJtXrxyRIPbhjweu0BKQnm4FmSV10
+	 X3O4c2ROB5hJU7/ugIVZg68i4rWqZMBPXWtTrEjf5AdndcuLvZN0SwLkI3k7WIFKEI
+	 UN8uGUabM161w==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: skip tests that fail when autodefrag is enabled
+Date: Thu, 25 Jun 2026 20:20:26 +0100
+Message-ID: <f0dedcfbe5d78d950325b293cfbb9d4fbab49a55.1782406920.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260618192236.654082-2-dxdt@dev.snart.me>
+Content-Transfer-Encoding: 8bit
 
-On Fri, Jun 19, 2026 at 04:22:36AM +0900, David Timber wrote:
-> mkntfs refuses to format the target if it's backed by a "real" device
-> but not a partition to maintain compatibility with Windows. When
-> formatting the scratch device in NTFS for testing, this behaviour has
-> to be overridden so that any type of blockdev can be used as a scratch
-> device.
-> 
-> Signed-off-by: David Timber <dxdt@dev.snart.me>
-> ---
->  tests/generic/740 | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/generic/740 b/tests/generic/740
-> index 4f8bf099..718d983d 100755
-> --- a/tests/generic/740
-> +++ b/tests/generic/740
-> @@ -72,8 +72,10 @@ do
->  		postargs=2000
->  		;;
->  	ntfs)
-> -		# "quick" format that doesn't zero the entire device
-> -		postargs="--quick"
-> +		# "quick" format that doesn't zero the entire device. Use -F so
+From: Filipe Manana <fdmanana@suse.com>
 
-"Use --force..." ?
+A couple tests, btrfs/004 and btrfs/308, fail if we pass "-o autodefrag"
+in MOUNT_OPTIONS, due to changes in extent layouts. So make sure the
+tests are skipped if autodefrag is enabled.
 
---D
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ common/btrfs    | 7 +++++++
+ tests/btrfs/004 | 3 +++
+ tests/btrfs/308 | 2 ++
+ 3 files changed, 12 insertions(+)
 
-> +		# that NTFS-3G mkfs formats the volume even if the scratch
-> +		# blockdev is not a partition.
-> +		postargs="--quick --force"
->  		;;
->  	reiser4)
->  		preop="echo y |"
-> -- 
-> 2.54.0
-> 
-> 
+diff --git a/common/btrfs b/common/btrfs
+index 30288f07..a75fbf1c 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -141,6 +141,13 @@ _require_btrfs_no_nodatasum()
+ 	fi
+ }
+ 
++_require_btrfs_no_autodefrag()
++{
++	if _normalize_mount_options "$MOUNT_OPTIONS" | grep -q "autodefrag"; then
++		_notrun "This test requires autodefrag to be disabled"
++	fi
++}
++
+ _require_btrfs_free_space_tree()
+ {
+ 	_scratch_mkfs > /dev/null 2>&1
+diff --git a/tests/btrfs/004 b/tests/btrfs/004
+index 06eedde2..1c8b06f5 100755
+--- a/tests/btrfs/004
++++ b/tests/btrfs/004
+@@ -30,6 +30,9 @@ _require_no_large_scratch_dev
+ _require_btrfs_command inspect-internal logical-resolve
+ _require_btrfs_command inspect-internal inode-resolve
+ _require_command "$FILEFRAG_PROG" filefrag
++# Autodefrag will randomly change the extent layout so filefrag can give us
++# different results from what we expect.
++_require_btrfs_no_autodefrag
+ 
+ FILEFRAG_FILTER='
+ 	if (/blocks? of (\d+) bytes/) {
+diff --git a/tests/btrfs/308 b/tests/btrfs/308
+index 3c8d410a..c4ccaa0f 100755
+--- a/tests/btrfs/308
++++ b/tests/btrfs/308
+@@ -22,6 +22,8 @@ _require_btrfs_fs_feature "free_space_tree"
+ _require_btrfs_free_space_tree
+ _require_btrfs_no_compress
+ _require_btrfs_no_nodatacow
++# We test for a specific stripe layout and autodefrag will change it.
++_require_btrfs_no_autodefrag
+ 
+ test $(_get_page_size) -eq 4096 || _notrun "this tests requires 4k pagesize"
+ 
+-- 
+2.47.2
+
