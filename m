@@ -1,54 +1,42 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D034274FD1;
-	Thu, 25 Jun 2026 22:36:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02DD924A076;
+	Fri, 26 Jun 2026 04:52:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782426978; cv=none; b=HWS1J5n+b07Xi93cyQLqTtui3TWOLHe0/zhQBJDGzMwrJHzAvgudHKF2Wi5s/Ge/Ey+jxF8Wk2wYrgrUq3vJ6IpVSknC0dkh1AOY6O74TuCJ2BolNU+GXwCrrAVoGRzx4LIOqf7RG5MHBqut6VOffClsDcVIJnxqEIJxPGQQtsc=
+	t=1782449544; cv=none; b=FcIuHH2r1lIgT3O+okjNJkQQFaeDJL7iksiFYSB1xMb14tUu65DtxluDBa3JxG3f11fFPNunJLjQZFo/zwUaU9xMIXFaVenOoNByd3I4Od9kjmyciu/1524nxnzxtkGni1ttM3MvR2bf7w7WMpdGsCXCAMaG2M2uD+MtVjuLeDo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782426978; c=relaxed/simple;
-	bh=WhhmgIw66TK+WBhkMsZlbIksShGYf+LH7SgNLe4pFHY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=gvAi0fWB51DxzdEFX2eMpmtPTFY/TyYPsFfANVArFRl2+4Ivu+6tk5WzfjdOg6jSHbiM7Qu/PKXiBpok06A0c3G+dUOAIYFVFyOFCHuhhv8LxxtaoVxoNe07PCN6b6j83VjKpckA1YFkqxVCPXZEVRbPuyoLSqEdizAFpegOouw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=H4LiEv2X; arc=none smtp.client-ip=100.103.45.18
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="H4LiEv2X"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 038F11F000E9;
-	Thu, 25 Jun 2026 22:36:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1782426977;
-	bh=WhhmgIw66TK+WBhkMsZlbIksShGYf+LH7SgNLe4pFHY=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=H4LiEv2Xt9MBmEfBWW2nm2/XkEY1aKQg+GQUq9+5qNJXFjToi4upO0UwQ9yCSJSM6
-	 Dbo5gK/lOR+Au6N798MHiblHbqcT/aU+L2EvYj0h6ZEDvcvFFL9qXCoR8zHnzWCsYe
-	 KJ/vE+niob4kQ7QmpjJZ1Djmlh59TPL/oxR4TBiZf7KkUg+F3z7N41O1HnEsZCv5jd
-	 woWBovIMhJlK8sV6R1lMF52RgFxX9Sys3NouYKOZtA2mHA/sxNA+w9W9b2sGNr5n6e
-	 I/H5w6VrK4iYtHvJ1CWAbbMuHjCquNLnWYp8MFCdMlytOoP8ogF/Ma7aHewKvZ9WSk
-	 X+QvPdmzmPoww==
-Message-ID: <a17bf9be-b32f-4d37-b6f9-fb8c6d77cc1d@kernel.org>
-Date: Fri, 26 Jun 2026 06:36:14 +0800
+	s=arc-20240116; t=1782449544; c=relaxed/simple;
+	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=XH9k1ZXarn5n0GAEgT5br2lS54C2aLuFMDM0MDW8Qvxr0SmmNhhaJ+TWEFtKczZPM5OPD8B+cMk1WQZaEWVJ7ibwBY+NrEwfHuu6YR4/bWMWNiaKNHQKGL7gI/4bNhZE+EM4afgq+cJG9sq6pf7dMe6GUgnEXAd7ReuV+YTXsnY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 862AC68B05; Fri, 26 Jun 2026 06:52:20 +0200 (CEST)
+Date: Fri, 26 Jun 2026 06:52:20 +0200
+From: Christoph Hellwig <hch@lst.de>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: zlang@kernel.org, fstests@vger.kernel.org, hch@lst.de,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/2] common/xfs: fix
+ _scratch_mkfs_xfs_supports_concurrency
+Message-ID: <20260626045220.GE8613@lst.de>
+References: <178240619625.1665857.3954516357764795627.stgit@frogsfrogsfrogs> <178240619650.1665857.270820682280764430.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] btrfs: skip tests that fail when autodefrag is enabled
-To: fdmanana@kernel.org, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <f0dedcfbe5d78d950325b293cfbb9d4fbab49a55.1782406920.git.fdmanana@suse.com>
-Content-Language: en-US
-From: Anand Suveer Jain <asj@kernel.org>
-In-Reply-To: <f0dedcfbe5d78d950325b293cfbb9d4fbab49a55.1782406920.git.fdmanana@suse.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <178240619650.1665857.270820682280764430.stgit@frogsfrogsfrogs>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
+Looks good:
 
-LGTM
-
-Reviewed-by: Anand Jain <asj@kernel.org>
-
-
+Reviewed-by: Christoph Hellwig <hch@lst.de>
 
