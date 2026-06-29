@@ -1,43 +1,41 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6886140315B
-	for <fstests@vger.kernel.org>; Mon, 29 Jun 2026 16:37:35 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52D422ED872;
+	Mon, 29 Jun 2026 17:53:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782751056; cv=none; b=RNpYOkBijqlmIX+Lp9Af0GUCmyIqZ8dwBOLC0byxnIJE3TmkVwfdPLHCtF6Qk5hZeFycKgbHWXB132CEK0A3gWSbeB5kYpCWgDetAYFDeCcQc46Az1ajwUO2AzF2MmqIrKnlIkTTx3BAWpv4XtxLYSU4vOS0h4rwpWoJuz9wA4k=
+	t=1782755626; cv=none; b=fQu/Wpii2a99YIxLsxIZu84OsXVLJPFRtnmKPDl7UmXH4iPJ/jE+Fj6to/QmGxg7221uYznDGQaTwnw4q8W2fPiigGDBdWiMPJZhvlAGbZyR3PVmKaH+vnQaQk5eGOB54OBtDghaJje+a2lDiHWXsvayuQgb7Q0WOuItneTScuk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782751056; c=relaxed/simple;
-	bh=Ly2eM5usbijVbR3s3cQl200vfsIvIuCXQcLe7fOGQnM=;
+	s=arc-20240116; t=1782755626; c=relaxed/simple;
+	bh=aRzkFR0wX1ZP1nyB5LYG9lCaxnau0wBFUUVr5JJEi6I=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=SmPmySAFtvpTlsIJgiJ4po8yKZMr5nGNzGxE3leDJ26CHkRlZ5o9QUjtdZHWvm7KfVnLU4oWYitzmSfJlLz8wo4B1pWnqWhuOV9zvIgsB4zVasvknmDgHDAi2Wveor5BH1cJoPaCgvsM5iEtqFPGAXQCojXwK4TdFuD05FwEQ08=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=a69pGlB4; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=oFwYUKowEEkPrzov71lvimU8U/WoP9VlR2450td44C4khYFJna4LBtqaKY2kkVSdg9w/1HysVZNn8K1+0IVA8lDyZk0zIZI/+63EgQIZaCg3xzDvVw/S1oetJ9I5oRJkrtNV12CuIviPL5nOG8juTMStiff875cSz10tIkR+SU0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=P6koCgTg; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="a69pGlB4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BDAED1F000E9;
-	Mon, 29 Jun 2026 16:37:32 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="P6koCgTg"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EB7D01F000E9;
+	Mon, 29 Jun 2026 17:53:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1782751055;
-	bh=7JHewKYa5/FTTPDRStSCJXtjBGuHptHfKbTCR8wXYao=;
+	s=k20260515; t=1782755624;
+	bh=orP2jCo8G5phB1xaK0T1ycHQ3bSMb9bBoGTglr3NaEA=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=a69pGlB4jKPrTsc+I/siJAuw8v/xiP50xITuIxUZv7uXRzugRpCea1B0Ft9FLa01J
-	 3aSWZqW7Ix0lmLmF3NF9XVKH/1McKzT2BoQQAQiVeyMUYdKl0rMIaY9LVunZjUPSxZ
-	 vIO3uTlKlAPO84EPoNMo0wWq4aRtDwV4G4evF3ij79hy3HQSLbwMghZRdKc0LRNDcX
-	 56WWWmKBqEMjtzuSrAQnAv+2IIrm5JiUtd+fNzROy3jU6ie1bTwl2kvgfAmxFK2V6A
-	 HJiVmvcdfYS6T/oH/9gABsW75rT/07LcWgNF2fIdmju9ZtavTELMm7wgcfr7rQ1Lds
-	 PDY7gq6Ns8hYQ==
-Date: Tue, 30 Jun 2026 00:37:29 +0800
+	b=P6koCgTgtlwGEtIM7HyuNMAgXzpfEkOADeQfeLeViZYi2cOBIRsTVE6iLwVQ0Nmem
+	 Mbe0sTNaCThx8V8mm8hPLNBBNdWXU32tKxpGXWIF8vOx48Zwxe4jQ54CFDP0BAFzg0
+	 QCP/Qaa/V5C5pQN5I11WgRGxXa2eyBZaRq1NtL1UK5YlO4zTqp9uxVtZGcXRcdGgZr
+	 +UtLf5JiOn3A6Hnw1MwvcrP2HKXitUr3bYNAZOoT2NIsayEPeLHTg34RHjHErbPq6L
+	 XyFRQLWaFZbxyuX+TkmELhgQIpvJ9ciarfZ3lDkbivzcZ6U/HuAx8/64t9H8mI6ULl
+	 3ryo769RquZyw==
+Date: Tue, 30 Jun 2026 01:53:38 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Jan Prusakowski <jprusakowski@google.com>
-Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, 
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH] generic/064: allow 50 extents on F2FS after fcollapse
-Message-ID: <akKd2IImO7bRjVV2@zlang-mailbox>
-Mail-Followup-To: Jan Prusakowski <jprusakowski@google.com>, 
-	Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, jaegeuk@kernel.org, 
-	linux-f2fs-devel@lists.sourceforge.net
-References: <20260622070438.1542638-1-jprusakowski@google.com>
- <ajuLORVplOvEXvnI@infradead.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, hch@lst.de, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 2/2] xfs/21[67]: fix mkfs log concurrency detection
+Message-ID: <akKvzArcNLWKCACL@zlang-mailbox>
+Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>, 
+	fstests@vger.kernel.org, hch@lst.de, linux-xfs@vger.kernel.org
+References: <178240619625.1665857.3954516357764795627.stgit@frogsfrogsfrogs>
+ <178240619668.1665857.17134786745403757824.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -46,30 +44,115 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ajuLORVplOvEXvnI@infradead.org>
+In-Reply-To: <178240619668.1665857.17134786745403757824.stgit@frogsfrogsfrogs>
 
-On Wed, Jun 24, 2026 at 12:46:01AM -0700, Christoph Hellwig wrote:
-> On Mon, Jun 22, 2026 at 07:04:38AM +0000, Jan Prusakowski wrote:
-> > On F2FS, generic/064 fails with "extents mismatched before = 1 after =
-> > 50" following multiple fcollapse (collapse range) operations.
-> > 
-> > To ensure crash consistency and checkpoint integrity, F2FS forbids
-> > in-place SSR (Summary Standalone Replacement) overwrites on valid
-> > checkpointed blocks. When collapse range shifts blocks, F2FS allocates
-> > new data pages in LFS mode (out-of-place log writes). As a result,
-> > sequential collapse range calls rewrite shifted blocks at new log
-> > locations, intentionally leaving the file with 50 extents.
+On Thu, Jun 25, 2026 at 09:51:17AM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> This sounds odd.  The test allocates a contigous range and then just does
-> insert/collapse on it, which should not lead to any new data block
-> allocations.  Given that the test works fine on zoned XFS and btrfs
-> with strict out of place write policies we know it does not require
-> overwriting blocks to work as well.
+> Both of these tests use _scratch_mkfs_xfs_supports_concurrency to detect
+> if they should be adding -lconcurrency=0 to the mkfs options that are
+> used to format a loop device.
 > 
-> So I think something is fishy in f2fs if needs to allocate data blocks
-> here.
+> However, this doesn't work in practice because of three factors: 1) the
+> scratch device could have an external log set up; 2) the loop device
+> does /not/ have an external log device; and 3) -lconcurrency isn't
+> compatible with -llogdev.
+> 
+> Fix this by creating a more general mkfs option detection helper and use
+> that once we have the loop device set up.
+> 
+> Cc: <fstests@vger.kernel.org> # v2026.05.17
+> Fixes: ffc8bad17e5b2f ("xfs/21{6,7} Use default -l concurrency=0 on mkfs.xfs that supports it")
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> ---
+>  common/xfs    |    6 ++++++
+>  tests/xfs/216 |    9 ++++-----
+>  tests/xfs/217 |    9 ++++-----
+>  3 files changed, 14 insertions(+), 10 deletions(-)
+> 
+> 
+> diff --git a/common/xfs b/common/xfs
+> index 88299acdd086be..81add2086866c8 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -64,6 +64,12 @@ _scratch_mkfs_xfs_opts()
+>  	echo "$MKFS_XFS_PROG $SCRATCH_OPTIONS $mkfs_opts"
+>  }
+>  
+> +# Figure out if the supplied mkfs.xfs options are supported.  A device or file
+> +# path must be specified as one of the options, though it will not be written.
+> +_mkfs_xfs_supported()
+> +{
+> +	$MKFS_XFS_PROG -f -N "$@"
+> +}
+>  
+>  _scratch_mkfs_xfs_supported()
+>  {
+> diff --git a/tests/xfs/216 b/tests/xfs/216
+> index 1749647c11f716..48657242e65daf 100755
+> --- a/tests/xfs/216
+> +++ b/tests/xfs/216
+> @@ -22,11 +22,6 @@ _cleanup()
+>  
+>  _require_scratch
+>  _scratch_mkfs_xfs >/dev/null 2>&1
+> -if _scratch_mkfs_xfs_supports_concurrency -l >> $seqres.full 2>&1; then
+> -	loop_mkfs_opts="-l concurrency=0"
+> -else
+> -	loop_mkfs_opts=""
+> -fi
+>  _scratch_mount
+>  
+>  _require_loop
+> @@ -76,6 +71,10 @@ mkdir $LOOP_MNT
+>  
+>  loop_dev=$(_create_loop_device $LOOP_IMG)
+>  
+> +if _mkfs_xfs_supported $loop_mkfs_opts -l concurrency=0 $loop_dev &>> $seqres.full; then
+> +	loop_mkfs_opts="$loop_mkfs_opts -l concurrency=0"
 
-I have the same question with Christoph. Shouldn't fcollapse in F2FS just
-remap the metadata instead of allocating new data blocks?
+Hi Darrick,
 
+This patch conflicts with Christoph's patch:
+https://lore.kernel.org/fstests/20260618134834.237647-3-hch@lst.de/
+
+I've merged that patch into patches-in-queue branch, if you don't have
+objections to that change, could you rebase on latest patches-in-queue
+and send this patch again with Christoph's RVB :)
+
+Thanks,
+Zorro
+
+> +fi
+> +
+>  # walk over standard sizes (up to 256GB)
+>  _do_mkfs 1 2 4 8 16 32 64 128 256
+>  
+> diff --git a/tests/xfs/217 b/tests/xfs/217
+> index 23aae842d1fb61..34ac8dae8ef43f 100755
+> --- a/tests/xfs/217
+> +++ b/tests/xfs/217
+> @@ -21,11 +21,6 @@ _cleanup()
+>  
+>  _require_scratch
+>  _scratch_mkfs_xfs >/dev/null 2>&1
+> -if _scratch_mkfs_xfs_supports_concurrency -l >> $seqres.full 2>&1; then
+> -	loop_mkfs_opts="-l concurrency=0 -d concurrency=0"
+> -else
+> -	loop_mkfs_opts=""
+> -fi
+>  _scratch_mount
+>  # 16T mkfs requires a bit over 2G free
+>  _require_fs_space $SCRATCH_MNT 2202000
+> @@ -63,6 +58,10 @@ fi
+>  
+>  loop_dev=$(_create_loop_device $LOOP_IMG)
+>  
+> +if _mkfs_xfs_supported $loop_mkfs_opts -l concurrency=0 -d concurrency=0 $loop_dev &>> $seqres.full; then
+> +	loop_mkfs_opts="$loop_mkfs_opts -l concurrency=0 -d concurrency=0"
+> +fi
+> +
+>  #
+>  # walk over "new" sizes supported by recent xfsprogs.
+>  # Note that the last test is for 16TB-1GB as 32bit platforms only support
 > 
