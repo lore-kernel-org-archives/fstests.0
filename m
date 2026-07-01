@@ -1,113 +1,137 @@
-Received: from mail-ej1-f52.google.com (mail-ej1-f52.google.com [209.85.218.52])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 173163644A3
-	for <fstests@vger.kernel.org>; Wed,  1 Jul 2026 06:14:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 637D53A48C2;
+	Wed,  1 Jul 2026 08:22:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782886472; cv=none; b=h2bueLL7NQatWmLL2u5CmShbexaK0hRyKA6cqR4FpNC/bDzpuXXwGrnJvndzOjp8+Xz8v6Z2rKa/bMv1vmxYCEa5V2noBQ8Ba53SEaKxHRRS2SNQPA+mWRiO0eUunVqgwYS/h7PsV2yCH+V+n2FO93RysAlKJ7VMAoc4i0uGyRE=
+	t=1782894157; cv=none; b=FAGwYqEVYYZ1ux5SHB+ElB7h/3y0M0poNH1A4FL9lPdbfee0YrAp3gT6AeMBRph1DqS4/JhrWJBCAJUMd91tTCO6L+dIWvo3oGinrqPqhQ9624ibnX7JPBVK7ea0oOJ4DTioMjVNUaFe0UpSD4BIILjG/Tgpq321GvlPOQNUDYA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782886472; c=relaxed/simple;
-	bh=G+0uN1i+t/C/44VRhaxD+nDHk/ECrNN0MO0YpN7OyGw=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=X3nU+Du9N214uvmLfVBCYlAPtqS3koBjSif5hpEoohOG9baTygjNIoEjbrUvFWkui/keKDK9ayo+Tpr2C8iC4mbeG9g/Rv2ztcsY7Mxd2H0IPYjsN44rUjfk6aiK1JoSPZ2WN1VTDeZIz3GCoKgwxST0gsjuLZECSxYiJO27hSI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=KVBWvD+t; arc=none smtp.client-ip=209.85.218.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1782894157; c=relaxed/simple;
+	bh=HZ03r89dHiGdgs7Wjvpdbt7BSOOuOkL0oF4z+0mcAcE=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=CI4wOiJi4IR8+6v6AiD0SeOsBMH+gBHDz/5Cce4pnY0ZPWvZkJkLYsNyTdi5wgP2xdrH7s7/AVcMliJm2JXoTpvJQOXMuCO2Z6cFmYkYWAVIG67DR7ccfI6kwF3WL2iW3GehwnPzjIRunwb7Yag/0pizGRsil9PB/Q1eo/VjXMI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KVEFr2+k; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="KVBWvD+t"
-Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-c12629c937eso38659666b.3
-        for <fstests@vger.kernel.org>; Tue, 30 Jun 2026 23:14:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1782886467; x=1783491267; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=fsx6EpGKwFJpk9GmGZZR+Oo0q/8vVBmCZdbszGhCwog=;
-        b=KVBWvD+tUlHrTPYfHzJfFrl+H16Vnvqgm+RNkEQUV7oV8gv0EDTKnRVvTjZNwbTFhk
-         KNej5x3lfCOtiG/k6sGxUf3UQokcMzs9LL/5mY/deWLIkgSlJCRV1MfdoeJn2C3WivDl
-         +HUk2+rKu6iKrSh0Rgkhy8uf+FDGSaUrcTfrKlpTDxCMn1gtWRgyaoR23QkBSDLhk4Z5
-         KR852e3YQ+WbJtIUc22itv05bDi2U2RwMy+fbdYKRNSR7RipnNlJuFIaRHGOL3cd3Pob
-         O98p1nawl6jcJ15CDzyhFUWge5VXuFQnMbLN8n14ML2dVAAWlIQJnu3k1TgXr94rfZwy
-         lR7g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1782886467; x=1783491267;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=fsx6EpGKwFJpk9GmGZZR+Oo0q/8vVBmCZdbszGhCwog=;
-        b=Y4Kba4m+KmgFMc/H1nTny/6aM5x8TW+82xeF+orpfmulCKhwTK9aFyBryGIO8kFVYU
-         /bc0VxRLaYTrKOZIfGyu9ioNksuflSG+UGo+r2BbW9pL0G2XAkZ8td6ZSSHe3d4mW4ta
-         Zf82LSIcEyN8luglKGWUYVQqYdOlmOV+9DOSGe/eOnrWaRJPkYs+NRKQXLXaklQxRETm
-         vjUMDxUymMZpC9ippScA2jaJIqwm86gTKk3WFPKxM3ggXKToKPe2YiDxlkrATC6smRKR
-         g55eGU88dKv7W0LjBVTIxpuUmq5m8qjyHDUmin5bVXfIy86OT4lVesjtB36fjYzs6JzZ
-         teMA==
-X-Forwarded-Encrypted: i=1; AFNElJ9uvJtEdoGkunOMnENFqZ7CtwtUqmRkWZPtzIhfDPaTSBXH9jgyVRIC7QXG1OxMHP4Uifz6bB0J@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy7KKvCs/9lfuBwwIB6t7zAz+Q5sBNSRRupz+z/Bc2eLLmGogbA
-	s4sXPTjtloSvBr2JnzV6ZAZRvffdLnKyeU5x/wjxtKYd6HTZMz3uaWXGaa/ufz0WkeQ=
-X-Gm-Gg: AfdE7cm3ska9Uy5p/6t+/8HS+d4ZtAG8kG/oc+q1Jo8y1pJPMeAeh2oUNmEpadIx5GY
-	W/NLR0OP7IjXoA8CWBqvxRFvlXRPLcsJpkMTp10zzQCJuAmxM5WYyUpAQHgT7Mfl+13xhtWi8fz
-	siYBf/gIkDLAAQEqd6lgIMYyM8WSTtFYG37+ZZBKnWLna7CBkCB8nq48+YZfKMXVaVu56tktgOs
-	5Sh2mjFYekqZy+IkbcLi0OiGvgz/a87QTDfojQf0zIZaRJsk5XaTcojsHZWOg/bJxh+c+OBH9KJ
-	asaLG7yvG929xJanOaeurdkFeKkrKnlUahYmqkJoVrzWYLNA1Qk1nFdtVnBkH2k7nu5zRiIZerY
-	5KsEKjt7MV2kHTwtjm2iOg9k/tikGzaSX/JyA9AWGbG5lws/mQ3YCxU05WgotBpwjlTsq2ZF6BL
-	pSkwOu4LkAPfVKQJmCl53ZbQ==
-X-Received: by 2002:a17:906:3b0b:b0:c05:3c55:ee86 with SMTP id a640c23a62f3a-c12aa175d53mr3081366b.46.1782886467272;
-        Tue, 30 Jun 2026 23:14:27 -0700 (PDT)
-Received: from localhost.localdomain.com ([240e:304:4bb9:5900:2473:1306:a293:a912])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-847a0329c08sm3324786b3a.42.2026.06.30.23.14.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 30 Jun 2026 23:14:25 -0700 (PDT)
-From: lan@suse.com
-To: djwong@kernel.org,
-	fstests@vger.kernel.org
-Cc: An Long <lan@suse.com>
-Subject: [PATCH v2] common/rc: fix mount options quoting in _mount
-Date: Wed,  1 Jul 2026 14:14:07 +0800
-Message-ID: <20260701061413.10531-1-lan@suse.com>
-X-Mailer: git-send-email 2.51.0
-In-Reply-To: <20260629155812.GW6070@frogsfrogsfrogs>
-References: <20260629155812.GW6070@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KVEFr2+k"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F21CD1F000E9;
+	Wed,  1 Jul 2026 08:22:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1782894153;
+	bh=hrJMDyzsiXGM+qo9pHWwqxLVblQQb1h6SX0y913VALE=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References;
+	b=KVEFr2+kSIloj1ZKE7fvW5zvaN6Kx9oY6ux54H2llciY/4rgngMNc3GCQjPB8UE5m
+	 zYVJ7KPdRLHbhzPyzHTGzgwCwFpvrHXTs1uIkaQBgjFJeRjW7teNJpxTceFVHTzF16
+	 bh8vRaxIGoxr/8IjJ5nX83K6gshh9GEJCGqGox9jhqp6iEFkTLCWNPgaBmJ0qLLtGg
+	 4kAfXnTkoqHJfpromW84m8TWHH79vEVtHrVw4x2jzlcqHTSAnxALbtr8vv1EUWbKg1
+	 geHG+u0tiCRMIfRFp8WZFPfxm+6V49B5k85hRt2UGfN7IhtCSrwLcs/nHZcA8Qmz0w
+	 mP98LAn98kPpw==
+Date: 
+From: Daniel Gomez <da.gomez@kernel.org>
+To: Jeff Layton <jlayton@kernel.org>
+Cc: Luis Chamberlain <mcgrof@kernel.org>, Chuck Lever <cel@kernel.org>, kdevops@lists.linux.dev, tools@kernel.org, GOST <gost.dev@samsung.com>, Josef Bacik <josef@toxicpanda.com>, Amir Goldstein <amir73il@gmail.com>, Carlos Maiolino <cem@kernel.org>, Chandan Babu R <chandanbabu@kernel.org>, David Sterba <dsterba@suse.com>, Song Liu <liu.song.a23@gmail.com>, Scott Mayhew <smayhew@redhat.com>, Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>, Konstantin Ryabitsev <mricon@kernel.org>, linux-xfs@vger.kernel.org, Darrick J. Wong <djwong@kernel.org>, Carlos Maiolino <cem@kernel.org>, Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Subject: Re: kdevops-ng: graduating kdevops beyond Ansible
+Message-ID: <20260701011751.0-da.gomez@kernel.org>
+In-Reply-To: a9e73c72b603e64724bf64fb1a7b4e6a045ed386.camel@kernel.org
+References: 9f64bee9-ecc3-4587-9645-2190223cbc4e@kernel.org a9e73c72b603e64724bf64fb1a7b4e6a045ed386.camel@kernel.org
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+X-Mailer: lorebird
 
-From: An Long <lan@suse.com>
 
-In commit 078f320 ("treewide: convert all $MOUNT_PROG to _mount"),
-direct calls to $MOUNT_PROG were converted to call the helper function
-_mount.
-However, the _mount helper was implemented using `$*` instead of `"$@"`.
-This unquoted argument expansion triggers word splitting on any arguments
-containing spaces (such as the overlay mount options containing spaces in
-tests `overlay/083` and `overlay/086`), causing the mount to fail with
-"mount: bad usage".
-Fix this regression by using `"$@"` in the _mount helper, which correctly
-preserves argument boundaries exactly as they were provided by the caller.
 
-Signed-off-by: An Long <lan@suse.com>
----
-v2: Revert the error log to "$*"
- common/rc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+On 2026-06-18T08:31:51-04:00, Jeff Layton <jlayton@kernel.org> wrote:
+> On Thu, 2026-06-18 at 11:30 +0200, Daniel Gomez wrote:
+> > kdevops is a framework for Linux kernel development and test automation.
+> > Its core features, namely workflow reproducibility, variability, and
+> > scalability, are delivered through Kconfig, the variability language,
+> > and Ansible, which provides host and guest idempotency along with
+> > workflow orchestration at scale, whether on baremetal, local VMs, or
+> > the cloud.
+> > 
+> > kdevops supports rolling distributions such as Debian testing, Fedora,
+> > and openSUSE. Recently we extended Nix support, which raised the
+> > question: how do we drive Nix's declarative language from Ansible? We
+> > answered by wiring Nix in under Ansible and its templates, as one more
+> > way to declare host and guest environments. But that was the wrong
+> > framing: we had bolted Nix onto today's toolkit instead of rethinking
+> > it. Reproducibility and idempotency now come from Nix by construction,
+> > so I think Ansible's original reason for being in kdevops falls away.
+> > The better question is: how do we keep kdevops's core principles, lean
+> > on Nix, and drop Ansible?
+> > 
+> > What remains once you do is not the configuration management plane. It
+> > is development workflow orchestration: build QEMU, build the kernel,
+> > build a guest rootfs/closure, boot it, run a test, collect results,
+> > diff against a baseline. That work is imperative and sequenced, work
+> > for a workflow engine, which is where tools like Windmill [1] come in.
+> > Windmill calls itself as "the fastest workflow engine" and an
+> > "open-source developer platform to power your entire infra and turn
+> > scripts into webhooks, workflows and UIs." Choosing to move kdevops
+> > onto Windmill would keep what made kdevops kdevops, namely workflows,
+> > quick bring-ups, baselines, and A/B regression detection, while trading
+> > Kconfig, Make, Ansible, and host-distro provisioning for typed
+> > run-forms, flows as code, and a worker queue. Nix supplies the
+> > environment, much like a container or venv/poetry, along with the guest
+> > OS system closure: declarative and portable. Windmill orchestrates the
+> > whole pipeline end to end, graduating kdevops into a fully reproducible,
+> > scalable, and configurable kernel-development framework, with both a UI
+> > and a CLI, that runs locally or in the cloud. Defined as code and driven
+> > by schedules and triggers, the same flows also make it a continuous
+> > integration pipeline. Because steps can be written in any language
+> > Windmill supports, including Ansible, Bash, Go, Python, and Rust,
+> > developers can not only use kdevops but extend it with their own
+> > scripts, turning it into a workflow hub. Note that choosing this path
+> > does not mean NixOS is required on the controller node; Nix is simply a
+> > runtime dependency that can be installed alongside your distro of
+> > choice.
+> > 
+> > It'd be good to know what folks think about the possibility of evolving
+> > kdevops in this direction, deprecating Ansible along with Kconfig and
+> > Makefiles in favor of the new approach. To that end, I suggest a demo
+> > day where I can show why I think this is the next step worth taking, and
+> > whether it's a tradeoff users and maintainers are willing to make.
+> >
+> > If this is of interest and you'd like a look, I've ported equivalents of
+> > bootlinux (direct boot), qemu-build, and the systemd/QEMU bringup (QSU),
+> > plus an fstests run for XFS in the proof-of-concept demo project [2].
+> > You can also find some screenshots in [3].
+> > 
+> > A note on licensing. Windmill's engine is AGPLv3; its OpenFlow flow
+> > format and client libraries are Apache-2.0. kdevops-ng runs Windmill
+> > unmodified and self-hosted as a separate service, and the flows and
+> > scripts are kdevops-ng's own copyleft-next-0.3.1 code, executed by
+> > Windmill rather than derived from it, so there shouldn't be any
+> > licensing concerns.
+> > 
+> > [1] https://windmill.dev
+> > [2] https://github.com/dagomez137/kdevops-ng
+> > [3] https://github.com/dagomez137/kdevops-ng/tree/main/screenshots
+>
+> Some thoughts:
+>
+> I'd be interested to see the demo.  It's a little hard to make a
+> judgment about moving it in this direction without knowing specifically
+> what it would look like.  I took a quick look at the git repo and the
+> windmill site, but I don't really "get it" yet.
 
-diff --git a/common/rc b/common/rc
-index 79189e7e..b9a07324 100644
---- a/common/rc
-+++ b/common/rc
-@@ -296,7 +296,7 @@ _has_dmesg_since_option()
- 
- _mount()
- {
--	$MOUNT_PROG $*
-+	$MOUNT_PROG "$@"
- 	ret=$?
- 	if [ "$ret" -ne 0 ]; then
- 		echo "\"$MOUNT_PROG $*\" failed at $(date)" >> "$seqres.mountfail?"
--- 
-2.51.0
++cc xfs folks.
+
+I have published a documentation website here:
+https://kdevops-ng.readthedocs.io/en/latest/
+
+It covers the project's concepts, terminology, deployment, roadmap and more.
+I've also included a demo video to showcasing how to build the kernel
+and run the fstest suite for XFS and review the results (all in Windmill UI):
+
+https://kdevops-ng.readthedocs.io/en/latest/getting-started/demos.html
+
+I'd also like to suggest holding an office hours session toward the end of 
+this month (in about four weeks), so we can discuss about this, questions, etc.
+
 
