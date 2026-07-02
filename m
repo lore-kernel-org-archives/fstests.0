@@ -1,38 +1,29 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3949331355D;
-	Thu,  2 Jul 2026 03:58:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 08D5C355F57;
+	Thu,  2 Jul 2026 10:33:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782964681; cv=none; b=eUJHnHw+3oUCKyg2zaA6YkVuAWesUaZ/O5BvSHv5iddWZeg3qJMbVwnhFNGrEBJVwfM5mQ4u8OiRbJqVU5u4nbIuwH6y8PEwJUsprsnfKDAI7hDVaKcCkzyalS+xXH2f2RcB3zUWuOobQNzApJ+W/yI111geyRWnJYq0f/0iO3w=
+	t=1782988408; cv=none; b=N+cLY+e1XYCRE5V2duWE3uYhgy8w+X6V3RKPAjt1J0hhEbYhKpsYB7HqotSRfBIBxvtgXe1bOYzwg7du3qt2Oy8tsjhBaOGZua4dGGWYWThIVZinKsAGoExhODyigP1rI7h4qv16ozXO3ljnkYvbmECXLSZrObXILwTWS4Z0+3E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782964681; c=relaxed/simple;
-	bh=WhzWlFnu6IBC9eYJNClKpeNc/2A052zBvtJVlsgemYs=;
+	s=arc-20240116; t=1782988408; c=relaxed/simple;
+	bh=kTdmsL0veQk8gkspfGDD5PVyi3A+Lj2c1sAQ0JgXB5s=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=XhC305VjMiM07O3UDFRzLZYsYNJKXzqfmfAn1LTZh55zryqiBGK2XlPDRuAE0CyfcMGOrcrOLHq5pEjmMvyTakKE52ZNBGAWEMTYqX4AITZ0Q4zZ7dGZlIeDLKoUZvYsxyLJZoCXsqAcrBBwIfAY3Jyd2uolgvupRHA7VAC+B4A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MheCOwVz; arc=none smtp.client-ip=100.103.45.18
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MheCOwVz"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id F2FA41F000E9;
-	Thu,  2 Jul 2026 03:57:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1782964680;
-	bh=36RtH3OPZV3uXCMbtG148eWFhq5Gh1ziqBmvF+CPq/s=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=MheCOwVzIk/+VZSlHTP4j9DjUWDSlFAL/P+5RqGTKRnBzwyeDyThlQzpUX65KSf+p
-	 gCODxhjvJfq1L3BlwqFR7kR7pCu54sjjmkFLUK1d5UMN5iMzX/uzzv25X0YzDkslnE
-	 2ewEZ6yPaApCPbAtFA7h3Qxet3/jBLfYpeFox6PK9iAGax6bnh5L/tSgdwu5ptmU4u
-	 GIJWaNo8ZQTTk/evTC58H4mC8aODr9o17jRtySeIWUCnG3Y8m1VduYabYuvoB73dOZ
-	 suJjQVdaZrsr2jUfHuTMc+lfmsaU7fG82r3BzceEf9h5oaQUWb5DFxYdy/7b4szSxw
-	 PW0ymCjbVMK5Q==
-Date: Wed, 1 Jul 2026 20:57:59 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: [PATCH 2/2] xfs/65[56]: don't unset SCRATCH_RTDEV here
-Message-ID: <20260702035759.GB9381@frogsfrogsfrogs>
-References: <20260702035523.GA9381@frogsfrogsfrogs>
+	 Content-Type:Content-Disposition:In-Reply-To; b=GLdKebOqNCzAm9mw0QUuTQx8x9rxfjCgFS/fLSBA18LhmvffFtDBliqMUgi1WIHybL7EwkhirExK+rRtYqDqlxXD9LbEkHR1BArS1nlnfFvnxDtMzuFnMhF5JnmhakvYCoWt0tVTMBJwlbalPDNUS2KbaOOQyqxmFkFv+QfW8dE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 0E8FE68BEB; Thu,  2 Jul 2026 12:33:24 +0200 (CEST)
+Date: Thu, 2 Jul 2026 12:33:23 +0200
+From: Christoph Hellwig <hch@lst.de>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@lst.de>, zlang@kernel.org,
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] formalize and fix disabling the RT subvolume
+Message-ID: <20260702103323.GA6816@lst.de>
+References: <20260630113526.3601287-1-hch@lst.de> <20260630184018.GB6544@frogsfrogsfrogs> <20260701105407.GA14404@lst.de> <20260701165114.GD6517@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -41,49 +32,36 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260702035523.GA9381@frogsfrogsfrogs>
+In-Reply-To: <20260701165114.GD6517@frogsfrogsfrogs>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Wed, Jul 01, 2026 at 09:51:14AM -0700, Darrick J. Wong wrote:
+> Ahaha ok with this patch applied, the regressions I see in generic/441
+> and xfs/656 go away.  generic/441 chokes because the scratch fs goes
+> down due to writeback error, so I assume it's ok to start excluding this
+> test.
 
-Both of these tests claim that they have to unset SCRATCH_RTDEV to avoid
-formatting failures due to the rt bitmap consuming all the space in the
-"small" data device.  However, the format doesn't constrain the size of
-the data device, so the justification doesn't apply.  Remove the whole
-thing.
+There also is a dedicated patch disabling them for zoned on the list":
 
-Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
----
- tests/xfs/655 |    4 ----
- tests/xfs/656 |    4 ----
- 2 files changed, 8 deletions(-)
+"common: skip data write EIO survival tests on fatal configs"
 
-diff --git a/tests/xfs/655 b/tests/xfs/655
-index a4162d70b321f9..9d09cc00053138 100755
---- a/tests/xfs/655
-+++ b/tests/xfs/655
-@@ -24,10 +24,6 @@ _require_scratch_nocheck
- _require_scratch_xfs_crc # can't detect minor corruption w/o crc
- _require_xfs_io_command healthmon
- 
--# Disable the scratch rt device to avoid test failures relating to the rt
--# bitmap consuming all the free space in our small data device.
--unset SCRATCH_RTDEV
--
- echo "Format and mount"
- _scratch_mkfs -d agcount=1 | _filter_mkfs 2> $tmp.mkfs >> $seqres.full
- . $tmp.mkfs
-diff --git a/tests/xfs/656 b/tests/xfs/656
-index df91bbdacea222..5d2d2e55c3d21c 100755
---- a/tests/xfs/656
-+++ b/tests/xfs/656
-@@ -40,10 +40,6 @@ filter_healer_errors() {
- 		uniq
- }
- 
--# Disable the scratch rt device to avoid test failures relating to the rt
--# bitmap consuming all the free space in our small data device.
--unset SCRATCH_RTDEV
--
- echo "Format and mount"
- _scratch_mkfs > $seqres.full 2>&1
- _dmerror_init no_log
+from Yao Sang.
+
+> I'm guessing that the write failure takes down the filesystem, which is
+> why the subsequent xfs_io pread can't even open the file.
+
+Yes.
+
+> 
+> Also the comment in xfs/655 and 656 doesn't make sense:
+> 
+>  # Disable the scratch rt device to avoid test failures relating to the
+>  # rt bitmap consuming all the free space in our small data device.
+>  unset SCRATCH_RTDEV
+> 
+> We're creating a regular sized data device, so this shouldn't be an
+> issue.
+
+I think this has been copy and pasted with the unsetting of SCRATCH_RTDEV,
+as several tests have it..
+
