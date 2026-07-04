@@ -1,42 +1,60 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6EF6D3C98BE
-	for <fstests@vger.kernel.org>; Fri,  3 Jul 2026 13:45:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D957C3955F4
+	for <fstests@vger.kernel.org>; Sat,  4 Jul 2026 08:52:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783086309; cv=none; b=aQKYNNOqhGhPpzgMabFOu0gdaegRi58dPMMIZ360uWNKro8QhLqztyJieC/kdHb2+sLzMY7YnbYPhQd8vwYLn/mrH9hcg1rw0H9iYd4JS1g/o1ScFYJ9pCyI/DCHm5pZcmKxykFOJvqm/prxQQvvEPzO/Q5fFWcva1LEVidVRSI=
+	t=1783155155; cv=none; b=FUHmiaW4jk5PXUPCLY0VBVSO8CPvlYj690XHgPwBt0f1+z1oa94223ICc5r4dLQzK4KbrIEBqa0tNc8UJhpnLpEMktxTlk7dhSGrD5YzFv7hbt60LHTpnMVHrDIl2hzzK4qwtN3qegsXUHDhSbSlVvdqkpwF9sVX1lpDyFztZno=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783086309; c=relaxed/simple;
-	bh=7GHrZedaba9UwV9E7+ieccLRHjyw444gjzicV3CK/X8=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=YCYBWf0uyJaGoqJNlYQV/yQLjFaeoVg0W1VV8TGyAWNgOGg2rBWVmVs9Nx/XGKW4mRjaN3j3JdysFm/6cOpMRWru5lmjw5QxlvLQRiTr8NhVr8H0MGOfeIsoXbYwUWnceNG/tbAufH9B2F7oESg6P7DtsODtzBpAzNThOrioQsU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=motw6gND; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1783155155; c=relaxed/simple;
+	bh=0hnKQVFhB1yiDdcGmmHoGPwTly0zXhHkS+jLQSyV3Wo=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=qQmyB0nsg/aNIg+pa6pJVPgBcPRZAnyEFO1iL21cftI+vlgNjg4qUmQErENQTaWXpJO0NHulUuIH2xfjVO6lWVhmmAyuj9128MAzm8mXsAWJHsGcKSmzcAWVlnZtDnLqs3HOeXP/vXD/IJDO5fSRYqzbk8xj6VgMzOhvP7ij6r4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=b/4E1dBE; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=b/4E1dBE; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="motw6gND"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-	Content-ID:Content-Description:In-Reply-To:References;
-	bh=nE3CUHgU3MEptUxDqD06EkZvkeC/jZS8w8piUApNMRI=; b=motw6gNDM7lPYvboHf2VjfNWU+
-	EqeFefybjNiOu1L7c7YbxcWznZu14l2YMPuQIWDnn3aKfszmsPuvyW+34OmbSKTXZZKb2rww6etgv
-	U3wWts99zjTyGg1ed0oH+mChtP4btyenwt8IYN5rfIERVf8LiTOGzpe6Rj0GwYnIu95Ub/myxM2Ia
-	xqNQS6Ev3Vkvv2xKJGm0AxGchKdA0idRRU/u36unXudjgSvNW6Jti4ZDGves0koDYbR4FSfAfpz40
-	UisQE5CrLwo0BBOWRPVj23wgf0jdBrTOVcx1Vl/IxSBJ18b2ssyLFT0/TBQ/huFLvFe80s/hh0gkJ
-	Z5vAivvg==;
-Received: from [45.156.240.119] (helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wfeCX-0000000782H-0F0I;
-	Fri, 03 Jul 2026 13:45:05 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: zlang@kernel.org
-Cc: djwong@kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH v2] common: log mkfs output in _test_streams
-Date: Fri,  3 Jul 2026 15:44:38 +0200
-Message-ID: <20260703134459.4075731-1-hch@lst.de>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="b/4E1dBE";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="b/4E1dBE"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 3640D7595E;
+	Sat,  4 Jul 2026 08:52:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1783155152; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=vsz/x+WZjzT8exbmNckbIKbXaimlEGthEBilhbKJUnY=;
+	b=b/4E1dBE8flMsGBuG/MjIfGcTtdkgeZTJ/TQwU9wrZ69eXia6VLm4K8clv1gNshVPEEfPY
+	tB4LYCHkthWjuL5JHphKSG/24EuYnh6ITbESDlwY15cqtI4gb3P5ycGDwUjsMlBxWFASZJ
+	4GhNYkdm6fmvQCJy1Wz3Q4jAqzp4xSI=
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1783155152; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=vsz/x+WZjzT8exbmNckbIKbXaimlEGthEBilhbKJUnY=;
+	b=b/4E1dBE8flMsGBuG/MjIfGcTtdkgeZTJ/TQwU9wrZ69eXia6VLm4K8clv1gNshVPEEfPY
+	tB4LYCHkthWjuL5JHphKSG/24EuYnh6ITbESDlwY15cqtI4gb3P5ycGDwUjsMlBxWFASZJ
+	4GhNYkdm6fmvQCJy1Wz3Q4jAqzp4xSI=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id DF49A779AA;
+	Sat,  4 Jul 2026 08:52:30 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id UkuBIs7JSGrLFAAAD6G6ig
+	(envelope-from <wqu@suse.com>); Sat, 04 Jul 2026 08:52:30 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org
+Subject: [PATCH] fstests: btrfs: new test case for leaking BTRFS_FS_STATE_REMOUNTING flag
+Date: Sat,  4 Jul 2026 18:22:08 +0930
+Message-ID: <20260704085208.86039-1-wqu@suse.com>
+X-Mailer: git-send-email 2.54.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,33 +62,113 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+X-Spam-Flag: NO
+X-Spam-Score: -2.80
+X-Spamd-Result: default: False [-2.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	RCPT_COUNT_TWO(0.00)[2];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.com:email,suse.com:mid];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_TLS_ALL(0.00)[]
+X-Spam-Level: 
 
-Log the mkfs output to allow debugging the mkfs paramters,
-especially when mkfs and thus the test fails.
+This is a regression test for the patch "btrfs: fix leaking
+BTRFS_FS_STATE_REMOUNTING flag", where conflicting mount options can
+cause btrfs leave BTRFS_FS_STATE_REMOUNTING set.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+Such set BTRFS_FS_STATE_REMOUNTING will interrupt several features, and
+the test case will use "btrfs qgroup rescan" to catch the
+BTRFS_FS_STATE_REMOUNTING flag.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
+ tests/btrfs/352     | 53 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/352.out |  2 ++
+ 2 files changed, 55 insertions(+)
+ create mode 100755 tests/btrfs/352
+ create mode 100644 tests/btrfs/352.out
 
-Changes since v1:
- - append to  $seqres.full instead of overwriting it
-
- common/filestreams | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/common/filestreams b/common/filestreams
-index 459de8c6b6a6..c40b33e4b0b8 100644
---- a/common/filestreams
-+++ b/common/filestreams
-@@ -89,7 +89,7 @@ _test_streams() {
- 	# Skip these tests on zoned file systems as filestreams don't work
- 	# with the zoned allocator, and the operation below would force it into
- 	# the tiny data section only used for metadata anyway.
--	_try_scratch_mkfs_xfs >/dev/null 2>&1 || _fail "mkfs failed"
-+	_try_scratch_mkfs_xfs 2>$seqres.full 2>&1 || _fail "mkfs failed"
- 	_scratch_mount
- 	_require_xfs_scratch_non_zoned
- 	_scratch_unmount 2>/dev/null
+diff --git a/tests/btrfs/352 b/tests/btrfs/352
+new file mode 100755
+index 00000000..2ccf7fab
+--- /dev/null
++++ b/tests/btrfs/352
+@@ -0,0 +1,53 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
++#
++# FS QA Test 352
++#
++# A regression test to make sure failed remount won't leave
++# BTRFS_FS_STATE_REMOUNTING flag set, which can interrupt several features,
++# one of them is btrfs qgroup rescan.
++#
++. ./common/preamble
++_begin_fstest auto quick remount
++
++_fixed_by_kernel_commit XXXXXXXXXXXX \
++	"btrfs: fix leaking BTRFS_FS_STATE_REMOUNTING flag"
++
++rescue_opts="/sys/fs/btrfs/features/supported_rescue_options"
++if [ ! -f "$rescue_opts" ]; then
++	_notrun "No supported_rescue_options sysfs interface"
++fi
++
++if ! grep -q "ignorebadroots" "$rescue_opts"; then
++	_notrun "\"rescue=ignorebadroots\" mount option not supported"
++fi
++
++_require_btrfs_command quota rescan -w
++_require_scratch
++_scratch_mkfs >> $seqres.full
++_scratch_mount
++
++# Enable regular quota mode, and do a rescan.
++# Although the regression is affecting multiple features, qgroup rescan is the
++# easiest to verify.
++_btrfs quota enable $SCRATCH_MNT
++_btrfs quota rescan -w $SCRATCH_MNT
++
++# The following mount must fail, as the following rescue mount option requires
++# a full RO mount, thus it can not be set for the existing RW mount.
++_scratch_remount "rescue=ignorebadroots" >> $seqres.full 2>&1
++if [ $? -eq 0 ]; then
++	_fail "\"rescue=ignorebadroots\" is applied to RW mount unexpectedly"
++fi
++
++# For unpatched kernel, qgroup rescan will be interrupted immediately.
++_btrfs quota rescan -w $SCRATCH_MNT
++
++# We want capture the stderr output, so use $BTRFS_UTIL_PROG instead of _btrfs
++$BTRFS_UTIL_PROG qgroup show $SCRATCH_MNT >> $seqres.full
++
++echo "Silence is golden"
++
++# success, all done
++_exit 0
+diff --git a/tests/btrfs/352.out b/tests/btrfs/352.out
+new file mode 100644
+index 00000000..11826ba5
+--- /dev/null
++++ b/tests/btrfs/352.out
+@@ -0,0 +1,2 @@
++QA output created by 352
++Silence is golden
 -- 
-2.53.0
+2.51.2
 
