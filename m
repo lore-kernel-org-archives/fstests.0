@@ -1,174 +1,81 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D957C3955F4
-	for <fstests@vger.kernel.org>; Sat,  4 Jul 2026 08:52:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 37E592D3A60
+	for <fstests@vger.kernel.org>; Sat,  4 Jul 2026 17:15:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783155155; cv=none; b=FUHmiaW4jk5PXUPCLY0VBVSO8CPvlYj690XHgPwBt0f1+z1oa94223ICc5r4dLQzK4KbrIEBqa0tNc8UJhpnLpEMktxTlk7dhSGrD5YzFv7hbt60LHTpnMVHrDIl2hzzK4qwtN3qegsXUHDhSbSlVvdqkpwF9sVX1lpDyFztZno=
+	t=1783185332; cv=none; b=CRd6ESdTlkNz3OhSfo5aK6ZlyPqGLubQ7I0apmL2wQZrDMgJ3LYv1SKKSMsYfw00Whza5vUD0M6+M2IjQZSHdhgQgvDMZcLGWbs4ZjqcOhrMa1IIIBhLMydd6eSZEz1uz9bU8BqkUlMcyQh/9QXpSgoWOA3wZFPi0yn3F31T5XU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783155155; c=relaxed/simple;
-	bh=0hnKQVFhB1yiDdcGmmHoGPwTly0zXhHkS+jLQSyV3Wo=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=qQmyB0nsg/aNIg+pa6pJVPgBcPRZAnyEFO1iL21cftI+vlgNjg4qUmQErENQTaWXpJO0NHulUuIH2xfjVO6lWVhmmAyuj9128MAzm8mXsAWJHsGcKSmzcAWVlnZtDnLqs3HOeXP/vXD/IJDO5fSRYqzbk8xj6VgMzOhvP7ij6r4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=b/4E1dBE; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=b/4E1dBE; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1783185332; c=relaxed/simple;
+	bh=s8f7PVSNHjwn4yKrSWpspUHS/hQKinFS3Kxizl7hsNg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=AW3jhjC7qgtvFSYCNfzLUZQO5jgN4I23j3cBazl/uiVd4hkMnN19hvhcgSDx6kxz40DZ0n4a1yZzMJPooy/CxZrPbkXttpmnxU3G9kG9hNiFHkhitOI1zD83sO9/WxbBceGn9dVLH26uoxJZ3Ov4LFtMryiYv/Hlr2KTEObnQyY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=d0v4IkHe; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="b/4E1dBE";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="b/4E1dBE"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 3640D7595E;
-	Sat,  4 Jul 2026 08:52:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1783155152; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=vsz/x+WZjzT8exbmNckbIKbXaimlEGthEBilhbKJUnY=;
-	b=b/4E1dBE8flMsGBuG/MjIfGcTtdkgeZTJ/TQwU9wrZ69eXia6VLm4K8clv1gNshVPEEfPY
-	tB4LYCHkthWjuL5JHphKSG/24EuYnh6ITbESDlwY15cqtI4gb3P5ycGDwUjsMlBxWFASZJ
-	4GhNYkdm6fmvQCJy1Wz3Q4jAqzp4xSI=
-Authentication-Results: smtp-out2.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1783155152; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=vsz/x+WZjzT8exbmNckbIKbXaimlEGthEBilhbKJUnY=;
-	b=b/4E1dBE8flMsGBuG/MjIfGcTtdkgeZTJ/TQwU9wrZ69eXia6VLm4K8clv1gNshVPEEfPY
-	tB4LYCHkthWjuL5JHphKSG/24EuYnh6ITbESDlwY15cqtI4gb3P5ycGDwUjsMlBxWFASZJ
-	4GhNYkdm6fmvQCJy1Wz3Q4jAqzp4xSI=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id DF49A779AA;
-	Sat,  4 Jul 2026 08:52:30 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id UkuBIs7JSGrLFAAAD6G6ig
-	(envelope-from <wqu@suse.com>); Sat, 04 Jul 2026 08:52:30 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org
-Subject: [PATCH] fstests: btrfs: new test case for leaking BTRFS_FS_STATE_REMOUNTING flag
-Date: Sat,  4 Jul 2026 18:22:08 +0930
-Message-ID: <20260704085208.86039-1-wqu@suse.com>
-X-Mailer: git-send-email 2.54.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="d0v4IkHe"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id C8BE91F000E9;
+	Sat,  4 Jul 2026 17:15:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1783185330;
+	bh=r/jT6uR4kGlVEW51lmEJc1ZVmSYSBor1gMA0mn1uUeg=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=d0v4IkHe8Y00eGz90Co5kvjdaYNacOSv+py4ugC46f/Bnn4L+gahY3cDQ5UxZeBnr
+	 F+skPTJFZcblNxQ9yZDzKIs+LU891f9Ncc/0jdNpZegZmTM07lNQy+McGIm/G2D65k
+	 +mI04WxgUvKlEqSupcqoqwzP8q2Sc7vr6AVhAWxJEW3AECK5SNT+6rJCKciyY4cghb
+	 gzGc0Idzg/H7hHxjAkJa7bDrnOpwBVUj5VGuzwq/s0dQcp/dPQym9ZdusuYDA9eDCW
+	 nqV+sYPlytmcCSqzUdfM9/sZQHEbG6wMIhid4GBY6zdVDdiu6ZfWgKitwT5IuCdKu4
+	 sZiM+IVoNEwSQ==
+Date: Sat, 4 Jul 2026 10:15:30 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v2] common: log mkfs output in _test_streams
+Message-ID: <20260704171530.GD9407@frogsfrogsfrogs>
+References: <20260703134459.4075731-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Spam-Flag: NO
-X-Spam-Score: -2.80
-X-Spamd-Result: default: False [-2.80 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	RCPT_COUNT_TWO(0.00)[2];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	ARC_NA(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.com:email,suse.com:mid];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	TO_DN_NONE(0.00)[];
-	RCVD_TLS_ALL(0.00)[]
-X-Spam-Level: 
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260703134459.4075731-1-hch@lst.de>
 
-This is a regression test for the patch "btrfs: fix leaking
-BTRFS_FS_STATE_REMOUNTING flag", where conflicting mount options can
-cause btrfs leave BTRFS_FS_STATE_REMOUNTING set.
+On Fri, Jul 03, 2026 at 03:44:38PM +0200, Christoph Hellwig wrote:
+> Log the mkfs output to allow debugging the mkfs paramters,
+> especially when mkfs and thus the test fails.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+> 
+> Changes since v1:
+>  - append to  $seqres.full instead of overwriting it
+> 
+>  common/filestreams | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/common/filestreams b/common/filestreams
+> index 459de8c6b6a6..c40b33e4b0b8 100644
+> --- a/common/filestreams
+> +++ b/common/filestreams
+> @@ -89,7 +89,7 @@ _test_streams() {
+>  	# Skip these tests on zoned file systems as filestreams don't work
+>  	# with the zoned allocator, and the operation below would force it into
+>  	# the tiny data section only used for metadata anyway.
+> -	_try_scratch_mkfs_xfs >/dev/null 2>&1 || _fail "mkfs failed"
+> +	_try_scratch_mkfs_xfs 2>$seqres.full 2>&1 || _fail "mkfs failed"
 
-Such set BTRFS_FS_STATE_REMOUNTING will interrupt several features, and
-the test case will use "btrfs qgroup rescan" to catch the
-BTRFS_FS_STATE_REMOUNTING flag.
+                              ^^ this still truncates seqres.full
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- tests/btrfs/352     | 53 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/352.out |  2 ++
- 2 files changed, 55 insertions(+)
- create mode 100755 tests/btrfs/352
- create mode 100644 tests/btrfs/352.out
+What you want here is:        2>>$seqres.full
 
-diff --git a/tests/btrfs/352 b/tests/btrfs/352
-new file mode 100755
-index 00000000..2ccf7fab
---- /dev/null
-+++ b/tests/btrfs/352
-@@ -0,0 +1,53 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-+#
-+# FS QA Test 352
-+#
-+# A regression test to make sure failed remount won't leave
-+# BTRFS_FS_STATE_REMOUNTING flag set, which can interrupt several features,
-+# one of them is btrfs qgroup rescan.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick remount
-+
-+_fixed_by_kernel_commit XXXXXXXXXXXX \
-+	"btrfs: fix leaking BTRFS_FS_STATE_REMOUNTING flag"
-+
-+rescue_opts="/sys/fs/btrfs/features/supported_rescue_options"
-+if [ ! -f "$rescue_opts" ]; then
-+	_notrun "No supported_rescue_options sysfs interface"
-+fi
-+
-+if ! grep -q "ignorebadroots" "$rescue_opts"; then
-+	_notrun "\"rescue=ignorebadroots\" mount option not supported"
-+fi
-+
-+_require_btrfs_command quota rescan -w
-+_require_scratch
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount
-+
-+# Enable regular quota mode, and do a rescan.
-+# Although the regression is affecting multiple features, qgroup rescan is the
-+# easiest to verify.
-+_btrfs quota enable $SCRATCH_MNT
-+_btrfs quota rescan -w $SCRATCH_MNT
-+
-+# The following mount must fail, as the following rescue mount option requires
-+# a full RO mount, thus it can not be set for the existing RW mount.
-+_scratch_remount "rescue=ignorebadroots" >> $seqres.full 2>&1
-+if [ $? -eq 0 ]; then
-+	_fail "\"rescue=ignorebadroots\" is applied to RW mount unexpectedly"
-+fi
-+
-+# For unpatched kernel, qgroup rescan will be interrupted immediately.
-+_btrfs quota rescan -w $SCRATCH_MNT
-+
-+# We want capture the stderr output, so use $BTRFS_UTIL_PROG instead of _btrfs
-+$BTRFS_UTIL_PROG qgroup show $SCRATCH_MNT >> $seqres.full
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+_exit 0
-diff --git a/tests/btrfs/352.out b/tests/btrfs/352.out
-new file mode 100644
-index 00000000..11826ba5
---- /dev/null
-+++ b/tests/btrfs/352.out
-@@ -0,0 +1,2 @@
-+QA output created by 352
-+Silence is golden
--- 
-2.51.2
+--D
 
+>  	_scratch_mount
+>  	_require_xfs_scratch_non_zoned
+>  	_scratch_unmount 2>/dev/null
+> -- 
+> 2.53.0
+> 
