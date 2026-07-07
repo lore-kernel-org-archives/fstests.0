@@ -1,67 +1,33 @@
-Received: from mail-wm1-f46.google.com (mail-wm1-f46.google.com [209.85.128.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D26A3905EC
-	for <fstests@vger.kernel.org>; Tue,  7 Jul 2026 09:10:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7F3B3B5306;
+	Tue,  7 Jul 2026 09:45:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783415439; cv=none; b=K9E0E0LUAL86p3HRUo3x9du5UBha0AM7JTBPQK3302xwzHql7N5lVBmKU2XljrIa1rjgP5QktoNM6uvG9iONDOpNfpkABeN6OvgYW7Fuj90sDzl9oBuN+JdkN/ehGLBnwTcFuDNIrbkV/6bS0dAi+JvyEOADUsXUIwWyrOxW5Ag=
+	t=1783417502; cv=none; b=cgbmIYRv1e0CUrWpUEf1NkNo34zHx7Qjg3RlYb9aUmYD4E8/OgcIdioLg80jQTPiv8NzWqX0+Yvsq17Flrb3FRoNGpMReZgc6WMw3LPMo0/TieMQEc9MP3+KcbtohfSa6YKeyOFEcH83HV+BeNjR39zd7Ueh20iXNN4V+57ziz8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783415439; c=relaxed/simple;
-	bh=VPb+ahFuBMgrl9OAnxZTm/wRKfAn4mrMAjQlyLe7q04=;
-	h=Message-ID:Date:MIME-Version:Subject:From:To:References:
-	 In-Reply-To:Content-Type; b=XX3d14ZUwKXOsrXwQtVHVjqRU2hTOivFWb/PfO1I+D8R6KYkXO74bcIlHYpXR7QfUOSKsCF8DxxJ1mpEoqq2pdxkEdtwL7+5WvGmL5Obv2JkM5PUCwVmhJtSrb0VvNgxjQohmPC4Enq+yz919bcvhjxD9RCcXiYPFgkq96I6udY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Lz/etgLl; arc=none smtp.client-ip=209.85.128.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1783417502; c=relaxed/simple;
+	bh=2S9yd9fLAO85LsOBO7roqAB0derg/n3kyJ+bXKqa0+k=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=tbP/jJbAWO0Kqic0Dv2+7YDhQcrBbJqLQmCbaKBR47FPIOfGPuSRJqCeEE/ebbzx5+h0yo9oiiMUUDCZLNX2o3RqINS40Utt54rxNY0AV4DOrJRQ7WrbdKPMv+5F5U/Vd4QXKCWCODFncoNRtQ1Wdtn2oL73nG9rzehNZ4JGl9Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mNeiJR45; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Lz/etgLl"
-Received: by mail-wm1-f46.google.com with SMTP id 5b1f17b1804b1-493ba701891so31359775e9.3
-        for <fstests@vger.kernel.org>; Tue, 07 Jul 2026 02:10:37 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1783415436; x=1784020236; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:autocrypt
-         :content-language:references:to:from:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=kMv73KxUaqJiUgzQNIjwVA2ADE+OY9HWdRamYX/WJHY=;
-        b=Lz/etgLlelv49IBr1K3SBaE341TeF2qJA0LZKVmUBaBwbDMiHWBsHMb2B8Yo7oz07J
-         GuNlPSlRIut07SB+g4/FdsJtaMYBxxatDhtS9DIT2acKBnDhSAWooesNtnRCKYu8HTyo
-         XnuaoIisZJLVNqaHnr9KSQvs8dPsHBxvXfH31ytM+UGAFvHoE2VWVGIN3CDXUoWyyJ77
-         q4Td+kDr+ukHisIvx05ccXxlpCnHaGX8MwbOTyCHKNYhRSCcGpdVTyoP3CmX12PR1PRH
-         g+r6eOa5iE79fTLP+S69p73Npfl8v8F7AwXRLG6LBOTuZFWW/OoUN7Iy6ZWhhAeyJo03
-         jtoQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783415436; x=1784020236;
-        h=content-transfer-encoding:content-type:in-reply-to:autocrypt
-         :content-language:references:to:from:subject:user-agent:mime-version
-         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=kMv73KxUaqJiUgzQNIjwVA2ADE+OY9HWdRamYX/WJHY=;
-        b=sSC0RlQCOIvSXiijFKsqHO2QhiYEheF3G+g6twxGB9lgrmSfrGbxdJRmUxw+XHjOYL
-         lZTOMRT04t0LpJMIRbAFwxB5y5fiiP+67PDZh5uvjIfIxIShJ8xqvqTQmVBxPO8kyQKl
-         jAJn3G4gROrYl2xr4TgiEupe3Hn/JB+XUlmSGsU6ZBp+rtzsSuWVzO2NS14OPL3hVWKz
-         F2JIVoJisMp1XiSE+azCbKvKkduL2irhCeg84MrExx3rRgG2X5XL39SbB0r5TzPj5wDM
-         4pUxC4Ta+cw6ZbQ0aAEGt1IH2NWdOzYCrjcryhnYSkXWqMC+14guEa0xg6GqPI/rxKaz
-         YvQA==
-X-Gm-Message-State: AOJu0YwF/jdRWDell5crhyEdzaD01Yqr0vjgKM+JM2uPFXZGUMhQCwgC
-	IempNNhQxlYCAea8HNNo9CH4f2RShr3rYQCk9LyawPRhrM/91VZDy6il5eTadMD1h5KQQ8WX/Ug
-	UN/n+zYU=
-X-Gm-Gg: AfdE7cms57esoVAYWO6Z9LRnR672x+ozgDw03NlRdIVlYDUiaTfRBqVSWXIs7l+UCaJ
-	uOTlYokIA20E89qc/qTxBkmcTdoOJCDQXkjLb/fcuLshU/RXJqiidJt69U4UVc8qulU7ms3BOdg
-	JYgDZWH5KQ8n0gakWYlQlH6OD7Rm1pvAUmv1pNnMRO3hditeVUhP6GobIqdt6i9/XOqtBCyNmUA
-	+TIuRBVRSF9q+6xfS7GnWk7W9X+uR13A8SyBHuqBdBSeI75pDgRMQJiIz2zPl8h3Fd8JeNL8xH2
-	btEAUL2tQqBLE9uoaE0OAxMq2y5X3M++zjhK5/UZcTW4Cr6444nhIYSzZk2QDWE4jfALJt3zSDP
-	uN/sK1xQsRmGa5YJgbGjvPnACQ74La/YEbPwEWcL5jmkr/E3uXlEQhUE5l5i8Vy20K4aoagkInL
-	rGgOU8eIRxHufpk3oK
-X-Received: by 2002:a05:600c:4505:b0:493:e006:3153 with SMTP id 5b1f17b1804b1-493e00634cdmr30952075e9.34.1783415435622;
-        Tue, 07 Jul 2026 02:10:35 -0700 (PDT)
-Received: from [172.16.0.229] ([159.196.52.54])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-13b659c865asm6448861c88.11.2026.07.07.02.10.33
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 07 Jul 2026 02:10:34 -0700 (PDT)
-Message-ID: <be633a11-6870-429f-a463-508099b96886@suse.com>
-Date: Tue, 7 Jul 2026 18:40:30 +0930
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mNeiJR45"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D93331F000E9;
+	Tue,  7 Jul 2026 09:44:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1783417500;
+	bh=kiDc7shEh7OxRVl3ZerxDgGIpR2Va9iAm1QgqF51tTc=;
+	h=Date:Subject:To:References:From:In-Reply-To;
+	b=mNeiJR45zZPlPgkjVCgbc9hz/toQwssGu4qIke2fVijFvN5ZcSwYZ7pos3AvnNlH9
+	 4X/riPB13yc46GfJkX3eoILg0wfLOw+oX7fyO/dEDEZMmxEW/n9JOnQsRhZMYR3JPT
+	 JkIy5PVnua/R91X2bB8QjVJMdjDtqIbsQy0c6cPm8bXkO+xkxYiUkQlJUSY3kJ7LPQ
+	 nUdwUWjwOxtvHjEb/SY/EIQrvD9b+6+mFOZFbOlII8MpeZkO1Q5qHkex7fwK8uqLKN
+	 nApfhxBe7kqy0J/cBvVjTr80x84n3275C/o0ad47fNwn/leLE7FJULgIxuhBoxjm6k
+	 o8auZ1ZlUSxeg==
+Message-ID: <8aa304b0-99bb-4940-923a-27abf9bd6b9b@kernel.org>
+Date: Tue, 7 Jul 2026 17:44:57 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -69,104 +35,136 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: generic/062: avoid warning from polluting the
- golden output
-From: Qu Wenruo <wqu@suse.com>
-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-References: <7df0f6d0323abed08ffb1f40775474e4b39fef19.1783414762.git.wqu@suse.com>
+Subject: Re: [PATCH] fstests: btrfs: new test case for leaking
+ BTRFS_FS_STATE_REMOUNTING flag
+To: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org,
+ linux-btrfs@vger.kernel.org
+References: <20260704085208.86039-1-wqu@suse.com>
 Content-Language: en-US
-Autocrypt: addr=wqu@suse.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
- FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXVgBQkQ/lqxAAoJEMI9kfOh
- Jf6o+jIH/2KhFmyOw4XWAYbnnijuYqb/obGae8HhcJO2KIGcxbsinK+KQFTSZnkFxnbsQ+VY
- fvtWBHGt8WfHcNmfjdejmy9si2jyy8smQV2jiB60a8iqQXGmsrkuR+AM2V360oEbMF3gVvim
- 2VSX2IiW9KERuhifjseNV1HLk0SHw5NnXiWh1THTqtvFFY+CwnLN2GqiMaSLF6gATW05/sEd
- V17MdI1z4+WSk7D57FlLjp50F3ow2WJtXwG8yG8d6S40dytZpH9iFuk12Sbg7lrtQxPPOIEU
- rpmZLfCNJJoZj603613w/M8EiZw6MohzikTWcFc55RLYJPBWQ+9puZtx1DopW2jOwE0EWdWB
- rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
- Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
- E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
- vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
- g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
- AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
- cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
- qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
- /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
- o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
- JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
-In-Reply-To: <7df0f6d0323abed08ffb1f40775474e4b39fef19.1783414762.git.wqu@suse.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+From: Anand Suveer Jain <asj@kernel.org>
+In-Reply-To: <20260704085208.86039-1-wqu@suse.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Please discard this one.
-
-Avinesh has already submitted a better solution doing the runtime check.
-
-Thanks,
-Qu
-
-在 2026/7/7 18:29, Qu Wenruo 写道:
-> [FAILURE]
-> With the latest setfattr (provided by attr 2.6.0), the test case
-> generic/062 will fail like the following:
+On 4/7/26 16:52, Qu Wenruo wrote:
+> This is a regression test for the patch "btrfs: fix leaking
+> BTRFS_FS_STATE_REMOUNTING flag", where conflicting mount options can
+> cause btrfs leave BTRFS_FS_STATE_REMOUNTING set.
 > 
->   FSTYP         -- btrfs
->   PLATFORM      -- Linux/aarch64 btrfs-aarch64 7.2.0-rc1-custom-64k+ #22 SMP PREEMPT_DYNAMIC Tue Jul  7 16:05:57 ACST 2026
->   MKFS_OPTIONS  -- -O bgt -K /dev/mapper/test-scratch1
->   MOUNT_OPTIONS -- /dev/mapper/test-scratch1 /mnt/scratch
-> 
->   generic/062  1s ... - output mismatch (see /home/adam/xfstests-dev/results//generic/062.out.bad)
->       --- tests/generic/062.out	2024-04-25 18:13:45.101553098 +0930
->       +++ /home/adam/xfstests-dev/results//generic/062.out.bad	2026-07-07 18:22:12.384539920 +0930
->       @@ -649,6 +649,7 @@
->        SCRATCH_MNT/lnk
->        SCRATCH_MNT/reg
->        *** restore everything
->       +Warning: option --restore=file is unsafe without option -P (--physical) as it traverses symbolic links in pathnames
->        *** compare before and after backups
-> 
->        *** unmount
->       ...
->       (Run 'diff -u /home/adam/xfstests-dev/tests/generic/062.out /home/adam/xfstests-dev/results//generic/062.out.bad'  to see the entire diff)
->   Ran: generic/062
->   Failures: generic/062
->   Failed 1 of 1 tests
-> 
-> [CAUSE]
-> That output is a warning from the latest attr, introduced by attr commit
-> 3fb06b9ba314 ("harden setfattr --restore").
-> 
-> There is also a compile time flag to toggle that warning.
-> 
-> [FIX]
-> Since we have no way to know if the setfattr command from the running
-> environment has that hardening or not, and the way to disable that
-> warning is to use "-P" option, which does not exist in older versions,
-> just redirect the stdout into seqres.full to avoid pollution.
+> Such set BTRFS_FS_STATE_REMOUNTING will interrupt several features, and
+> the test case will use "btrfs qgroup rescan" to catch the
+> BTRFS_FS_STATE_REMOUNTING flag.
 > 
 > Signed-off-by: Qu Wenruo <wqu@suse.com>
 > ---
->   tests/generic/062 | 4 +++-
->   1 file changed, 3 insertions(+), 1 deletion(-)
+>  tests/btrfs/352     | 53 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/352.out |  2 ++
+>  2 files changed, 55 insertions(+)
+>  create mode 100755 tests/btrfs/352
+>  create mode 100644 tests/btrfs/352.out
 > 
-> diff --git a/tests/generic/062 b/tests/generic/062
-> index 896590403fda..faeb9650c608 100755
-> --- a/tests/generic/062
-> +++ b/tests/generic/062
-> @@ -186,7 +186,9 @@ _create_test_bed
->   _extend_test_bed
->   
->   echo "*** restore everything"
-> -setfattr -h --restore=$tmp.backup1
-> +# For attr 2.6.0, --restore= without -P will output a warning.
-> +# Redirect it to avoid polluting the golden output.
-> +setfattr -h --restore=$tmp.backup1 >> $seqres.full
->   _backup $tmp.backup2
->   
->   echo "AFTER RESTORE" >>$seqres.full
+> diff --git a/tests/btrfs/352 b/tests/btrfs/352
+> new file mode 100755
+> index 00000000..2ccf7fab
+> --- /dev/null
+> +++ b/tests/btrfs/352
+> @@ -0,0 +1,53 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
+> +#
+> +# FS QA Test 352
+> +#
+> +# A regression test to make sure failed remount won't leave
+> +# BTRFS_FS_STATE_REMOUNTING flag set, which can interrupt several features,
+> +# one of them is btrfs qgroup rescan.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick remount
+> +
+> +_fixed_by_kernel_commit XXXXXXXXXXXX \
+> +	"btrfs: fix leaking BTRFS_FS_STATE_REMOUNTING flag"
+> +
+
+
+
+We can replace this section with the existing helpers or,
+even better, with a new one as shown below. I am not too
+particular about creating a new helper, that is up to you.
+However, the use of existing helpers such as
+_require_btrfs_fs_sysfs and _require_btrfs_fs_feature
+will be better. Thanks
+
+
+> +rescue_opts="/sys/fs/btrfs/features/supported_rescue_options"
+> +if [ ! -f "$rescue_opts" ]; then
+> +	_notrun "No supported_rescue_options sysfs interface"
+> +fi
+> +
+> +if ! grep -q "ignorebadroots" "$rescue_opts"; then
+> +	_notrun "\"rescue=ignorebadroots\" mount option not supported"
+> +fi
+> +
+
+
+diff --git a/common/btrfs b/common/btrfs
+index 30288f07b61a..57453fb39893 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -100,6 +100,29 @@ _require_btrfs_mkfs_uuid_option()
+ 	fi
+ }
+
++# Check for the availability of a specific option within a btrfs
+feature set
++# Arguments:
++#   $1 - Feature attribute of /sys/fs/btrfs/features/
++#   $2 - Option string to verify inside that file
++_require_btrfs_fs_feature_option()
++{
++	local feat=$1
++	local feat_type=$2
++
++	if [ -z "$feat" ] || [ -z "$feat_type" ]; then
++		echo "Missing argument(s) for _require_btrfs_fs_feature_type"
++		_exit 1
++	fi
++
++	modprobe btrfs > /dev/null 2>&1
++
++	_require_btrfs_fs_feature "$feat"
++
++	if ! grep -qw "$feat_type" "/sys/fs/btrfs/features/$feat"; then
++		_notrun "Feature type '$feat_type' not supported by the available
+btrfs version"
++	fi
++}
++
+ _require_btrfs_fs_feature()
+ {
+ 	if [ -z $1 ]; then
+diff --git a/tests/btrfs/352 b/tests/btrfs/352
+index 2ccf7fabdb71..14e357dbaa37 100755
+--- a/tests/btrfs/352
++++ b/tests/btrfs/352
+@@ -14,15 +14,8 @@ _begin_fstest auto quick remount
+ _fixed_by_kernel_commit XXXXXXXXXXXX \
+ 	"btrfs: fix leaking BTRFS_FS_STATE_REMOUNTING flag"
+
+-rescue_opts="/sys/fs/btrfs/features/supported_rescue_options"
+-if [ ! -f "$rescue_opts" ]; then
+-	_notrun "No supported_rescue_options sysfs interface"
+-fi
+-
+-if ! grep -q "ignorebadroots" "$rescue_opts"; then
+-	_notrun "\"rescue=ignorebadroots\" mount option not supported"
+-fi
+-
++_require_btrfs_fs_sysfs
++_require_btrfs_fs_feature_option "supported_rescue_options"
+"ignorebadroots"
+ _require_btrfs_command quota rescan -w
+ _require_scratch
+ _scratch_mkfs >> $seqres.full
+
 
