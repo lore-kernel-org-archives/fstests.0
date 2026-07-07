@@ -1,72 +1,60 @@
-Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A63FE3BBFB5
-	for <fstests@vger.kernel.org>; Mon,  6 Jul 2026 19:13:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D4C31A6813
+	for <fstests@vger.kernel.org>; Tue,  7 Jul 2026 00:18:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783365211; cv=none; b=VhcO8x515BMHq5Dryh5LDTILjuhc0GOa82Tu83JQw9DU/ngbX5giJGiI3dkGnpncklMcecOIITF9ke94O1CkKHkfUkjACX/QzQt/S1A9KhkEmkbcLys49eA1t+lH+VrZRM/ypWu+rS0QUv28FyIyWzWS4M6UNifxhMzfeqjWikI=
+	t=1783383515; cv=none; b=aI/CPi2pHIs+4HmVTvRlznZdr7USe3jwjLIY30pz3xGWxBYbcTBREbWp3wN8KIWjQ+MCcH0j3rJCY29w+ufSocWUOedL0blXibbPIbWJDqSpdgVooDCIrwAuwrQ54Zv2x1kWYjj6LgOCL4ZsWBTb74XxzjndejvRre4cg4NcFkc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783365211; c=relaxed/simple;
-	bh=MhpF4KJ/YbMsJoognPaO5gSvgED7AAobWObQ9gCWIik=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=qkvr39jJHYVntz+rjwKcoF1xUgwS1PWdc9Mxmjmo5082Xu3dJfN1EqCxxPjtiMeksJOSWeLco0cWs20ooLiVzGT7lniXIeFC1DqRODGEkq52VGucMU6YlayLRO3XOVvSfsknz4+wVP7KnE/nq8YXpAdwyfhvvTFIfLfrrtRtdm0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Cbfdc8N1; arc=none smtp.client-ip=209.85.128.53
+	s=arc-20240116; t=1783383515; c=relaxed/simple;
+	bh=6MH/e+eYSds5jtJXpSJNVmNn65VzVCe5Le6N1TprL+0=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=QiLOrZ+grZd0OfXuXx1btcTSjfvzjxLTQKxZCIu8rNcxv1P/AMrnpotkg+zV4wLYXov9hc6E9cw4R0X7E3Yv520qer9h1OmF3KSGdMwwi4Do0n37elm2ffgNeQH6+WHZOr/MbpEkgi+QJlfJJJzQIyNj7le0HXuieDutTp/t4MQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=nl/5+zt7; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=nl/5+zt7; arc=none smtp.client-ip=195.135.223.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Cbfdc8N1"
-Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-4921eed3fa2so23631075e9.0
-        for <fstests@vger.kernel.org>; Mon, 06 Jul 2026 12:13:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1783365208; x=1783970008; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=RPiUTZJfQDYEPkKxNurLX/POyRzctvKyNbWcsmHIGwA=;
-        b=Cbfdc8N1jMbl4C1mJ4P+IZ3Ij0/eZYUAlH0QezekCPVc2gtIh1PY3ypg5WstFyA/50
-         qlH3KJPOeiYY0ouJIPE5oYQH2Lybj7QcWkv3t2j5s8I+iOFDZ6TvWKCQB07RxsVcXBxL
-         ux/kCFcSz4HTJBJiSeHWceaB4mPGpcq07uvmTbOaGyRG+UyimzmNmiLd1YNlGnt0fr9u
-         4g5etpbJlndRyfy9/dfk5QoUPiyZQLg6zss1zrJxXk3se+4kW89FhT+LkqqpNJ4Kf63u
-         mlpDiJdiGhtAOid5KAgoMWmJV8TymF4cI6qvis5+Di0FabgiTnM8KpeIPJvIS5xk07+s
-         /azA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783365208; x=1783970008;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=RPiUTZJfQDYEPkKxNurLX/POyRzctvKyNbWcsmHIGwA=;
-        b=BXawiHuDb9G5L4aiVYcFyLuvamN8g1FWR6Kwk/57QUnrCM5KFJcyrbwDXzWKKhgSQV
-         pjVcDlgTo5+ytYdqJkxo5qGmPZoaRKjN1Cs7HMGr7MZlW9+XuewVl1j54KdRMYGBsMur
-         bG1Zjz2M6dnDl5pMHw4++MaLfRtg0iuplwwee0WlBlKAgofsEljcQRLDNqaD16hpruJH
-         qCwCdMzSyt8ix2Tb7Zy+Y5h2xCpjK/3oQj3Hs3ecLJuMeJbjKbps5eeiXQHQ6hZPxZxq
-         iyZU+cRX9R77ZCf0q1AuBTxdp0WU5XGYjOpCOTLONytAaL2jGMAQLeKO5eX1ebc2c9x+
-         3DYQ==
-X-Gm-Message-State: AOJu0YxJCeUqIdbicwDoMLQpoTN1ktdvFkIdqsy3DIPStvypprwi1KyZ
-	Uflu9slxBuFKtk7Pv3L4j2A3bYb7g40Z8lmkBs4WU5idC6D8nkVjixwDrCHaAX5Yc3trtmviybp
-	Rk3Dx1ec=
-X-Gm-Gg: AfdE7cm/zHCSGN3y2Jh5St2s2nhbZ3Nm6a5nPoKwKAoqgqF/n3k4h6kjGnvsYWDkhov
-	RrgMLe+uQHD62UisWRxyE1pAmnpZVBglY0GxyaxNqU59AeLumC2A6qRb1nT8YQu820PiPy0Lzi6
-	Re4khFCYZMlNhflwaBsuUDP3ZtEj5oNNRcjuIJBf5c7yMrxMRyGESRr/g9VehD3I5CaoyuEeGfF
-	5zdk+/3C+w/BR6/edum5ixlqS1YrerNhpDLt08bnT+jTdWax0A71ny4K1X/wDmniLrnmm/IQF8F
-	HTGMWQa7mUibiASuwgRYcvGE5wuSqRMVQKCAjsm40XOsymkQ1ai1b8ESGKQsYaYuIcwZxSMQi6h
-	+pr9vqYWiZEP1XVlESbw1fw9zSD12873tfQjxfT+WDwtSLDY89mUGtWmi+INCY9HTfVyGRtGsF1
-	U=
-X-Received: by 2002:a05:600c:8286:b0:492:4911:8a with SMTP id 5b1f17b1804b1-493df040410mr21492575e9.12.1783365207798;
-        Mon, 06 Jul 2026 12:13:27 -0700 (PDT)
-Received: from localhost ([2a07:b241:1004:8300::1000])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-493e01f570bsm4802555e9.10.2026.07.06.12.13.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Jul 2026 12:13:27 -0700 (PDT)
-From: Avinesh Kumar <avinesh.kumar@suse.com>
-To: fstests@vger.kernel.org
-Cc: zlang@kernel.org
-Subject: [PATCH v2] generic/062: filter setfattr --restore symlink-safety warning
-Date: Mon,  6 Jul 2026 21:13:26 +0200
-Message-ID: <20260706191326.122555-1-avinesh.kumar@suse.com>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="nl/5+zt7";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="nl/5+zt7"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 95A4475B87;
+	Tue,  7 Jul 2026 00:18:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1783383511; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=xq4sQwrykzSOF1Rd3vwNRL13N7wDHm6ujH7X60xcLNo=;
+	b=nl/5+zt7viGZ4/g2s3D2MMNz8zqsJk/TrK/2o75Kr+RNEYfhrukGuVGbYjATOqQUhxZzS5
+	OIvwDnGD7kuKyFL49aG+ZyxQWpn9B2bsbWz2Hvh3k7VQeCB3xj2e3jkDVUW41tuW5FAS3O
+	s+EBMIjRMicjmRJzSg2yAlYZmsAysMg=
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b="nl/5+zt7"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1783383511; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=xq4sQwrykzSOF1Rd3vwNRL13N7wDHm6ujH7X60xcLNo=;
+	b=nl/5+zt7viGZ4/g2s3D2MMNz8zqsJk/TrK/2o75Kr+RNEYfhrukGuVGbYjATOqQUhxZzS5
+	OIvwDnGD7kuKyFL49aG+ZyxQWpn9B2bsbWz2Hvh3k7VQeCB3xj2e3jkDVUW41tuW5FAS3O
+	s+EBMIjRMicjmRJzSg2yAlYZmsAysMg=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 4C084779AE;
+	Tue,  7 Jul 2026 00:18:29 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id g4EbO9VFTGo6QwAAD6G6ig
+	(envelope-from <wqu@suse.com>); Tue, 07 Jul 2026 00:18:29 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org
+Subject: [PATCH] fstests: generic: add a basic cachestat test case
+Date: Tue,  7 Jul 2026 09:48:07 +0930
+Message-ID: <20260707001807.31931-1-wqu@suse.com>
 X-Mailer: git-send-email 2.54.0
-In-Reply-To: <20260706061102.90603-1-avinesh.kumar@suse.com>
-References: <20260706061102.90603-1-avinesh.kumar@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -74,40 +62,130 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Rspamd-Action: no action
+X-Rspamd-Queue-Id: 95A4475B87
+X-Spam-Flag: NO
+X-Spam-Score: -3.01
+X-Spam-Level: 
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo,suse.com:mid,suse.com:dkim,suse.com:email,suse.com:url];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	ARC_NA(0.00)[];
+	RCPT_COUNT_TWO(0.00)[2];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	RCVD_TLS_ALL(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	URIBL_BLOCKED(0.00)[imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo,suse.com:mid,suse.com:dkim,suse.com:email,suse.com:url];
+	DKIM_TRACE(0.00)[suse.com:+]
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
 
-From: Avinesh Kumar <avinesh.kumar@suse.com>
+The test case is inspired by LTP, where there is a regression on 64K
+page size systems with btrfs, that after a fsync, cachestat() still
+report dirty pages.
 
-attr 2.6.0 (CVE-2026-54371 fix)[0] makes "setfattr --restore" warn when
-used without -P and the dump contains a symlink, which generic/062 does.
-The warning leaks into the compared output via the setfattr() wrapper
-and fails the test. Adding -P isn't portable (older attr doesn't have it),
-so filter the warning in the wrapper instead.
+The test case itself is pretty simple, fill the file with a buffered write that is
+1/2/4/8/16 page sized, call cachestat() to make sure the cached/dirtied
+number match the page number.
 
-[0] https://cgit.git.savannah.nongnu.org/cgit/attr.git/commit/?id=3fb06b9ba314d37035d0877e6de313de754f1ac8
+Then do a fsync(), and make sure the dirty page number reduced to 0
+meanwhile cached is still the same.
 
-Signed-off-by: Avinesh Kumar <avinesh.kumar@suse.com>
+Link: https://bugzilla.suse.com/show_bug.cgi?id=1270397
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- tests/generic/062 | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+ tests/generic/798     | 57 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/798.out |  2 ++
+ 2 files changed, 59 insertions(+)
+ create mode 100755 tests/generic/798
+ create mode 100644 tests/generic/798.out
 
-diff --git a/tests/generic/062 b/tests/generic/062
-index 89659040..ddf0a478 100755
---- a/tests/generic/062
-+++ b/tests/generic/062
-@@ -30,7 +30,12 @@ getfattr()
- 
- setfattr()
- {
--    $SETFATTR_PROG $@ 2>&1 | _filter_scratch
-+    # attr >= 2.6.0 (CVE-2026-54371 fix) warns that "setfattr --restore" without
-+    # -P/--physical is unsafe because it can traverse symlinks. Older attr does
-+    # not accept -P, so just filter the warning to stay version-agnostic.
-+    $SETFATTR_PROG $@ 2>&1 | \
-+        sed -e '/^Warning: option --restore=file is unsafe without option/d' | \
-+        _filter_scratch
- }
- 
- _create_test_bed()
+diff --git a/tests/generic/798 b/tests/generic/798
+new file mode 100755
+index 00000000..4328475e
+--- /dev/null
++++ b/tests/generic/798
+@@ -0,0 +1,57 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
++#
++# FS QA Test 798
++#
++# Basic tests for cachestate()
++#
++. ./common/preamble
++_begin_fstest auto quick
++
++_require_xfs_io_command "cachestat"
++_require_scratch
++
++pagesize=$(_get_page_size)
++
++for num_page in 1 2 4 8 16; do
++	size=$(($pagesize * $num_page))
++
++	echo "=== Test with $num_page pages ===" >> $seqres.full
++	_scratch_mkfs > /dev/null
++	_scratch_mount
++
++	# Basic cached number reporting
++	$XFS_IO_PROG -f -c "pwrite -b $pagesize 0 $size" \
++		$SCRATCH_MNT/foobar >> $seqres.full
++	$XFS_IO_PROG -c "cachestat 0 $size" $SCRATCH_MNT/foobar > $tmp.output
++	cat $tmp.output >> $seqres.full
++	cached=$(cat $tmp.output | cut -f1 -d, | awk '{print $2}')
++	dirtied=$(cat $tmp.output | cut -f2 -d, | awk '{print $2}')
++
++	if [ "$cached" -ne "$num_page" ]; then
++		_fail "cached not matching the page number"
++	fi
++
++	if [ "$cached" -ne "$dirtied" ]; then
++		_fail "dirited not matching the page number"
++	fi
++	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foobar >> $seqres.full
++
++	# Test dirty page number reporting after a fsync.
++	$XFS_IO_PROG -c "cachestat 0 $size" $SCRATCH_MNT/foobar > $tmp.output
++	cat $tmp.output >> $seqres.full
++	_scratch_unmount
++	cached=$(cat $tmp.output | cut -f1 -d, | awk '{print $2}')
++	dirtied=$(cat $tmp.output | cut -f2 -d, | awk '{print $2}')
++
++	if [ "$cached" -ne "$num_page" ]; then
++		_fail "cached not matching the page number"
++	fi
++	if [ "$dirtied" -ne 0 ]; then
++		_fail "dirtied pages not zero"
++	fi
++done
++
++echo "Silence is golden"
++_exit 0
+diff --git a/tests/generic/798.out b/tests/generic/798.out
+new file mode 100644
+index 00000000..216d6e93
+--- /dev/null
++++ b/tests/generic/798.out
+@@ -0,0 +1,2 @@
++QA output created by 798
++Silence is golden
 -- 
-2.54.0
+2.51.2
 
