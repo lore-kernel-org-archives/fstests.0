@@ -1,70 +1,70 @@
 Received: from mail-pj2-f3.google.com (mail-pj2-f3.google.com [74.125.227.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AD543DB655
-	for <fstests@vger.kernel.org>; Mon, 13 Jul 2026 09:17:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A265299943
+	for <fstests@vger.kernel.org>; Mon, 13 Jul 2026 09:46:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.227.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783934246; cv=none; b=KOmpalj0toB1eVaCMJ+5tqGUeS0nrDSp8LvwX1piG2oIZP6yeK6gXeZYEuUPz+hWQ7/0RUhfnfsKi3HRwG4tbxRvZa+5oFkWRyrvtS/okOEKoYf72Ll54c6lwYvpben+BQ6175ZfYkYHHQBvth/FtuKm0ZLhZTvNcOykRa8NNkE=
+	t=1783935992; cv=none; b=NnrFxr8zapMzNjXGh+yF1LYN/2z3rtqdmHTcU1GWLtUEt6j542AxT/xDwDeE0/LTmtLPUfACHJQAofD/FYMKHREMAU3kmwChdqmZSjvPklHEA56X8EkCJ+Pln7m/HdQMCyzGKfkWJx9y3GSgimft34V4EOWQmjDsLtQGv00A858=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783934246; c=relaxed/simple;
-	bh=nGJVNWIGTlh3Ve2rtxXhO8Lwyjsbz0tmH8VzXSPm6zQ=;
+	s=arc-20240116; t=1783935992; c=relaxed/simple;
+	bh=j1OujOAkhmdEz9wIazkkKYKxu5okbrWlVFw8M3oM23g=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=qiOWl4j2q165aPlWkVBPTbGf45KMcPJZeSmpvGf5yr7qkynNaCT7I0NDmLr3O1GD27FnajEo/d5vJfUe+dOpTElKCmTP7ZUsQiMvc/sCElkcCim3hSg4LtCLVm2m5Ihk+u1BplAQK/A+wUekO0bLt07B54pcfdj2TQLRoesYgd8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ojNH0b8s; arc=none smtp.client-ip=74.125.227.131
+	 MIME-Version; b=DnODUn/R5BlWOFmi8+p75y33NugpUFh9fYUaN08UBQGJ3pVR0LC6UqHme/QxW2O2SNVr+TwV1wfztlVcwzSpWkWykH1NiJvK/P8esZp3MvvH9kD1Q4+jKcUba6Kv1FzL1VlGnOTLbXmTFLZ/qe7+QD4BaQWAlk0ToIWUYx3oH8c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Gws5VJq+; arc=none smtp.client-ip=74.125.227.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ojNH0b8s"
-Received: by mail-pj2-f3.google.com with SMTP id 98e67ed59e1d1-3814e2e7d79so304336a91.1
-        for <fstests@vger.kernel.org>; Mon, 13 Jul 2026 02:17:23 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Gws5VJq+"
+Received: by mail-pj2-f3.google.com with SMTP id d9443c01a7336-2cc80c24be6so5020595ad.0
+        for <fstests@vger.kernel.org>; Mon, 13 Jul 2026 02:46:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1783934243; x=1784539043; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1783935990; x=1784540790; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=YS9HSQYLWxfpBGl81FLqKvaHWT/gifA7Uzz1bJeYLjU=;
-        b=ojNH0b8sYyIJR6EIfay50FOmQkM2jpj2qkVfWPxLUDO1SiN8qzHdD4kIQlKIYGdL/f
-         mR4KVjUSl1XHgLX9zPSeMoVVnZGQCXxa5u+JoXhhZeh91035gJsUvbW4NiJ2mob//oMs
-         7C6Fd5YKAK6WPSPKVRqxIo6YxAhZG34aOi0d7/va1T6dHSTYr0+xeg1vYYNC/+byr9Vo
-         h5FgqZu1iayYJh2jpdE5FIiD94aBdsr0vD0IXu4d7uJ/NY+mQLtT/X/CPoxzYeDOtl7r
-         /ovpGh4HkiNFlCBAz5bFmPHD33192JEex3FunOr5RAeFFqkuXueFaw+JaOI9ekurScgw
-         r6vg==
+        bh=93sI+IwfvRptO+HYoHBUpfJ+E/bC1rcpl579TmR5Dzo=;
+        b=Gws5VJq+ZPknmtwZclxnKSOYMFs9X0Up84ZOk4b83HWVXy8dc0gTy71Kkkt3lFjK+A
+         XAhjUaEYt21KnBQ+SqtkJ9skOgMVVhyhWHsuAULX0XaBARs2FaxSmIx5skWtVpGSPP3Z
+         5BZSyn+0XUd/A2SzO/MGDAM/FuULxzisRFB96PVCpDnj77LjqgpCC7zYDceIeuOjQe1i
+         ibCsLMQcemuGOj28aJLTc/UUyQrbf1SOrVrDvDXlQvKTS8xFyo+wUfJUXyYSPmxJIiKG
+         9BBJZzkzh7sfP+eHZBcUIRIR+SFwZHmEqAemjqRqjpH8CnuYI4EkvLdKzTRgwP/OqQNa
+         8u2g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783934243; x=1784539043;
+        d=1e100.net; s=20251104; t=1783935990; x=1784540790;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=YS9HSQYLWxfpBGl81FLqKvaHWT/gifA7Uzz1bJeYLjU=;
-        b=clAir9vl85QFEgSZ56AKn6H2WReowDmKujdE0Ex9DXHaZyemg4MnAB6KtD+NpswGXH
-         o13Cm2arnOWze/rlBcOIUMUE793ZIglKXaCCZVGssjNpqVFJemhcXefsZT7OuCZPADFZ
-         /Nx9bjL3y86NiONwDN3xA/p8a+ZZCL3T0H82Rp7Tp0NxAdPMl+Etyq3oCrJIAh3+54z+
-         nSfWMQwIXS9UYqg5zS1LtSqecCNtwJPEyofYfkvYKgYmmnrv0P3PAPhGE6wz3cTMIJ21
-         9QUYQjWnrYH/eLLtFJ4JrHrGnzBzG5/LiK9n9QjSlLU1f+YBayrEzFEeuX+t3840Zh34
-         Y/Ew==
-X-Forwarded-Encrypted: i=1; AHgh+Rqk+qBCCKwppGTPDTNnx/+cxDEYQbTuI0U/sKofDHVa/7MCO+UOHAaA1azilTv1HdQQ8pEzxbLJ@vger.kernel.org
-X-Gm-Message-State: AOJu0YyosS2mMu/8C7kwZSOBtDIfjYJuQehET0R5+ocFfCjo3J183WS6
-	hnQIdkSQK7Xz22dVvYvrWTzZsdgPx2vn7XlPh4fRA87WhiAYx4ZWZ9SpcGmXSSwQAsSNVw==
-X-Gm-Gg: AfdE7cmJVXWrmPetDSBda0UH1HgQJbIfzqwPXnaYpi4wUqLDOiUJUWmzjWWgUmxIj5Z
-	XgW+sLqTLHnwevlZyE5Mvg9UIn3S0reWG3oEt4aV+ZpvewYciNO6KJdDGTibhVzrYL6aP1F8LTF
-	dX/Fp68MhHROD04CPmUQm29YRLBmL3WS6kDswFwq1Dp1RWVSWrZik/b+UYk26lR1YOmVe+hDtfZ
-	ezYa9eXGec6BlYBx1JABoPXI+VeTxYTNeyfi/eg5sKDGbO8I1Q0pOeO9q5EWUpMA/VnadU7dhiv
-	eQiPXys2VV3qqALONzQeZgnT7Ujw0+4UBcBfVbQHLF8LZ21YRJOskV3NI5iM34kS10Pc3VHWvCL
-	QIoIW9d3ntN41osYhJe3xBXx1tLYHGntcZyT49WcwTgHcO46gJI8w6kFJ8DBPfG6lHzxLZaNzxm
-	WihruvJ7vVynxgCGuIzEXhkAckmD/VMSFIhCb1s+pi
-X-Received: by 2002:a05:6a00:4b4e:b0:848:7e85:f210 with SMTP id d2e1a72fcca58-8488985ddf7mr5437136b3a.4.1783934242683;
-        Mon, 13 Jul 2026 02:17:22 -0700 (PDT)
+        bh=93sI+IwfvRptO+HYoHBUpfJ+E/bC1rcpl579TmR5Dzo=;
+        b=rcPEfCS+BI4Q5cwto0Rc/sIHDCVoGaHcL/JRSezMZsvEmbig0id6ta9suqtB4qm4mU
+         /dnWCf89x1nUYeaGf3pGpHBie0IzNJ7axmpTbQvGX+vOsNK0ofO18hdaxccF04EKcqb3
+         1NN8EZWFoLIEURkBaJL9a0vK/8nSuRVfZVlnFWh8WhM2tTKlVs0fGw9SSDdLf1d2H9bB
+         PCtOsVJN4Ztxvf5tPWtxdq7aFJpeA13/soGndDeJq9NBYr6aMZ5nm2kshElRMirLGDL0
+         nJsFQuVhfKBThi/wCCLG4dVG63fKlGvffVfZPjhyRnd8qIIJ+Xwk0iHx6ZAH+RDnVnZS
+         VJag==
+X-Forwarded-Encrypted: i=1; AHgh+RohVpZpz1GaSOiGdBiaBSCKd+sYYOd07bEfSykQAQl5dJJ82iQhDVs9KHAk6vAEHnVNMQKyPlB5@vger.kernel.org
+X-Gm-Message-State: AOJu0YwoSZxirShMHDOvg5b+EbjKCJIlUEjgD2oTwQvN51z24GhwkqeZ
+	ii85r6FEk2nm4LM6aX7+OeKuPJWG0XBIV1tm/06qjmehbWT9+nSkoMft
+X-Gm-Gg: AfdE7cl4YclducgNQFGERxZPxk2+at5hYmSP+bHZebdNW0PGBxR9OuqRX7xAXlGiwXE
+	Jya3spZjRYtwssh1SkyM3I0rAhJHsDfcOqARX27DnwqpHVsNJ07UrzIp4COzap4kP3O8IIRrE+e
+	SqGxvunnVxMaEtstUWSIfwCk3DnX3AEiLX2jWetflKrFXhdzThNbtRaVR3cqiJFx0t/vPY+qV3x
+	WrXTsXVDSwMdAioAKyuohO7HOXHS/nAvGaCD9B3z6LBJ9zvIr8H+txUwvCjH65MH2ZkgChE8kng
+	z84Wc+ZK0Jc0T6UVDvVvOO+0084h4U+DZ3aYRwftUDPpAC0z/spCsMV3ta2lKKRFaWwTWKJL9CT
+	jx0nwjb10yysVCQbnXrUFb7zzbhnDpBF4ExzMxFdzYXC9GGsvv9h/hTNkcSOmOTW5w4+qYs0ajS
+	2VDFECWwDgQl4wGQ80OvuwktyIo5xsNfCiqWZffI2L
+X-Received: by 2002:a17:90b:2dc1:b0:37f:e7e7:ad1 with SMTP id 98e67ed59e1d1-38dc7c0eb95mr6214329a91.5.1783935990320;
+        Mon, 13 Jul 2026 02:46:30 -0700 (PDT)
 Received: from SaltyKitkat ([154.83.91.239])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-847f6b975a0sm13768349b3a.14.2026.07.13.02.17.21
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-38a5574ca88sm6167713a91.7.2026.07.13.02.46.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Jul 2026 02:17:22 -0700 (PDT)
+        Mon, 13 Jul 2026 02:46:29 -0700 (PDT)
 From: Sun YangKai <sunk67188@gmail.com>
 To: linux-btrfs@vger.kernel.org,
 	fstests@vger.kernel.org
 Cc: Sun YangKai <sunyangkai@fnnas.com>
-Subject: [PATCH] btrfs: test POSIX ACL changes for RO btrfs property
-Date: Mon, 13 Jul 2026 17:06:45 +0800
-Message-ID: <20260713091659.4981-1-sunk67188@gmail.com>
+Subject: [PATCH v2] btrfs: test POSIX ACL changes for RO btrfs property
+Date: Mon, 13 Jul 2026 17:44:45 +0800
+Message-ID: <20260713094611.19703-1-sunk67188@gmail.com>
 X-Mailer: git-send-email 2.54.0
 In-Reply-To: <20260709082500.17907-2-sunk67188@gmail.com>
 References: <20260709082500.17907-2-sunk67188@gmail.com>
@@ -78,24 +78,38 @@ Content-Transfer-Encoding: 8bit
 
 From: Sun YangKai <sunyangkai@fnnas.com>
 
-Test creation, modification and deletion of POSIX ACLs for a btrfs
-filesystem which has the read-only property set to true.
+Test creation, modification and deletion of POSIX ACLs on a btrfs
+filesystem that has the read-only property set to true, and re-test the
+same after the property is cleared.
 
-Re-test the same after the read-only property is set to false.
-
-This complements btrfs/275, which covers the generic ->setxattr path.
-POSIX ACLs are set and removed through the ->set_acl inode operation
-(btrfs_set_acl), which is a separate code path that is not covered by
-the RO check added for security xattrs in commit b51111271b03 ("btrfs:
-check if root is readonly while setting security xattr").  As a result,
-ACLs could still be modified on a read-only subvolume, bypassing the RO
+Commit 353c2ea735e4 ("btrfs: remove redundant readonly root check in
+btrfs_setxattr_trans") removed the read-only root check from
+btrfs_setxattr_trans() under the assumption that none of its callers can
+run on a read-only root.  That assumption does not hold for the ->set_acl
+path: btrfs_set_acl() -> __btrfs_set_acl() reaches
+btrfs_setxattr_trans() directly, bypassing the handler-level read-only
+checks that were later (re)added by commit b51111271b03 ("btrfs: check
+if root is readonly while setting security xattr").  As a result, ACLs
+could still be set or removed on a read-only subvolume, bypassing the RO
 protection that applies to every other xattr.
+
+The restoring kernel fix adds the read-only check directly to
+btrfs_set_acl().  This test complements btrfs/275, which covers the
+generic ->setxattr path.
 
 The test exercises the set, get and remove cycle of an access ACL on a
 regular file, and expects all modifications to fail with EROFS while the
-subvolume is read-only.
+subvolume is read-only, then succeed once it is writable again.
 
 Signed-off-by: Sun YangKai <sunyangkai@fnnas.com>
+---
+Changes from v1:
+
+- fix copywrite header
+- better wording for commit message
+
+Sorry for bothering.
+
 ---
  tests/btrfs/353     | 97 +++++++++++++++++++++++++++++++++++++++++++++
  tests/btrfs/353.out | 39 ++++++++++++++++++
@@ -105,13 +119,13 @@ Signed-off-by: Sun YangKai <sunyangkai@fnnas.com>
 
 diff --git a/tests/btrfs/353 b/tests/btrfs/353
 new file mode 100755
-index 00000000..60059d4a
+index 00000000..586f722a
 --- /dev/null
 +++ b/tests/btrfs/353
 @@ -0,0 +1,97 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2026 YOUR NAME HERE. All Rights Reserved.
++# Copyright (C) 2026 Fygo OS. All Rights Reserved.
 +#
 +# FS QA Test No. 353
 +#
