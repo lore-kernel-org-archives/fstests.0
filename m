@@ -1,193 +1,98 @@
-Received: from mail-ed1-f45.google.com (mail-ed1-f45.google.com [209.85.208.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from out-170.mta0.migadu.com (out-170.mta0.migadu.com [91.218.175.170])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B28CD271A71
-	for <fstests@vger.kernel.org>; Sun, 12 Jul 2026 22:01:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F1A237204A;
+	Mon, 13 Jul 2026 07:28:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783893676; cv=none; b=Qb22UwUcs3ID2lWDZtpIdnd4PC2ZLv7AJ3MJ+wSki9TXETjq1kcsxY10VYTVMjSffi14xVohLV5IIbcwcKR/s1PHffOEAVKEffXRj9gCOoXlbxOjFhLyP7/99PSEbl9qDsjQoRyTXgBSuQaPzxl6Xqy49EDsUjTf1KZzPfvyn14=
+	t=1783927718; cv=none; b=ZEpCcspigOwlesRNNYebCDFpWA8KKFxjdl7mL/MuhJ/bkm/xuRf2yL41Lcl9Uv9/iwb6SSmjYBTwhLDOX4/tUj0gcrUVTWx52r0loGl8Ngs91aXPmmDelICYkfM5Ja4Ch01zV4vlt72kHvgYACSLB8R2RjeAyFBWSDPZi/EXNs8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783893676; c=relaxed/simple;
-	bh=BOpVYrTNhjghP5/enVXtFM+9uuSVo5HZFb0YmZtFevM=;
+	s=arc-20240116; t=1783927718; c=relaxed/simple;
+	bh=xJywuG49mGXloVCmy0qyuTeaUe2GnFcAKUaomnOOIO8=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=RF9aOdYTqE4eG6zNUjB08jSXUwUBgCkeV1ZqWDfFraGCmsidZAsm9DCslF9Yz+1VIVlFUSd1rjC+iKYD972UKV3R7zac+eRT6Rs0ZsvIbANnziHH0HG8w7Awj0ZqTnzlLhBuuaeaeelZVTy3F4A2FBkWEp45ZjBZFi9FCzQlHtk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Xpz6aSE8; arc=none smtp.client-ip=209.85.208.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	 In-Reply-To:Content-Type; b=PY9dFa7pY+OE98x09yWmasmZc8Am9tGF0+YMQrvU7cWP7KopIor89NJeWf5nmEgY1k6LIekge1P6gd8pLvuRV4tRNUY/to7wNbFypZT7RYDIY73Gc1Hx2ytnjPjYvkIQSaRryQRVCVMV7BqFHtV3PwclwqDl/BxTRdwm/knDhWA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=DQW+Vbzb; arc=none smtp.client-ip=91.218.175.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Xpz6aSE8"
-Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-69a5ecbbfb2so3739405a12.2
-        for <fstests@vger.kernel.org>; Sun, 12 Jul 2026 15:01:14 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1783893673; x=1784498473; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=Xq9qAMC5A/wvIZiuTMSrFsa3uUeo5oL44ebMOxmKbgE=;
-        b=Xpz6aSE8Mb/d4TmKCz1oobcguMtIJJBcUgml2oriYKTaQ5R2s7r1VgE6JzopC4iDzG
-         R4w450zOyR3fijktt5e/ix32WXKXEC8XwoRvh+CbkuhER2jE9QOYm1MudTWYNbfxI8uG
-         invk+1tx/gTmMorqzUS0nyfIsjtVpiovyTqBfH+aDx0YDEkpwVrgTffqiGxhUV3D0XYI
-         nzabBiovAiOQP02FQsv4Ba21ZU6B6XO+o1QMAxF0t4Q5wJWlDlSpf0VsCTQJTDxOGn8b
-         Mh1pSUgGmsx+Eiq1F8cMxHZo/jBPtIHnrtJ96xCSyMEOvN0yVRnbrAk8yUikGkA2C39u
-         VZ3g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783893673; x=1784498473;
-        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=Xq9qAMC5A/wvIZiuTMSrFsa3uUeo5oL44ebMOxmKbgE=;
-        b=lljEgwEbcft/Bi1ZXPU0rX2FLH9PBy15tpCE64rZxh4mI9XeQgPvfjeVNFWZXUIFiz
-         Mn6PZQpI7M99x/y7yZBayC1BcWNbWy2udkiCR6KfAuZjXFa3079uU5Ku2auxpwL5fy2C
-         t1tRPo8qZILsU4Dt+h1J5hhE1hlKDwlOB4bPHx+a/bPCQ1UcevgBQcONk/7lLmFYhc7a
-         +0eBB2Jy268SVuRwPm0/HQSHe4SE/eplo+RkQSYCXcQF8i89xOqlPJZLrLtEeWMCDTGd
-         DFP1S8hH9U/CPngAE7WMmfKp7Ic9F+a/C6vPrZQUVnmKN8FAYbfxKiC+cFMzbquwsqYp
-         BgkQ==
-X-Gm-Message-State: AOJu0YyStuQzqtGcBZktYiqiTLUkgCO5ZadVrVQ3QXqxIyQKyJv8mPhE
-	LtNwddS42Szd4SG4QMQQN2bk/s0CDZHrABf4rvPZ9TdPIh0ohY09XakLfYl03TtlXDo=
-X-Gm-Gg: AfdE7ckAhsWnjQtAowv7g0XbfOml4d9NbQ+WlJVqiHiqDoH27/ZY+eSAllX1iheZgEj
-	M7FmCzay/TZ/yebfdbqJ6uFkSF0jwfgp0h9meQ8TG9s8vygJPWuEEpvKuaSaIA56+njV4y/IoYS
-	NKV6jXc2oYSSWkVZhtuB46OpdO6847y5j4phNOzisWFi7CsQhIAcFE5EvbHybvmri1dmJvfP+/d
-	w7Tw1jMYd3hmQ7u+vl8aIrCbYj4YXjlteIzoOJOkL5ciRK48KVfrtuvLoNSVm9n+PbEhMb9Qa86
-	9l+EZuE9JnoGKKJqCPEcaMxHkNw/El/UavDJ56e/kpvAdTC/JTNahJyca6uxkmhdqBaH4SahU4G
-	p8StkyAxBayw37mRdck4raGM2WEzffyKg84G2WCqf6zheKO5hNhg1lJwL8Hsm0ZHnsEvNfJTcHO
-	KdwUHaAGxfFYsInTAnqULge53eyqE=
-X-Received: by 2002:a17:907:97d5:b0:c12:b2dc:4834 with SMTP id a640c23a62f3a-c161ea6d217mr293621166b.57.1783893672938;
-        Sun, 12 Jul 2026 15:01:12 -0700 (PDT)
-Received: from [172.16.0.229] ([159.196.52.54])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ccc9bdcbe2sm90703955ad.9.2026.07.12.15.01.09
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 12 Jul 2026 15:01:11 -0700 (PDT)
-Message-ID: <95fb922f-996d-4f3b-90fe-ab0b8db1388b@suse.com>
-Date: Mon, 13 Jul 2026 07:31:05 +0930
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="DQW+Vbzb"
+Message-ID: <58ef1a46-799a-403c-8b7b-1d9656a015b6@linux.dev>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
+	t=1783927714;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=hNwwPQEnDjeQZGdestCtajSazEvrm19mxHx7uGcUEIw=;
+	b=DQW+Vbzb4uIr/2c6xtUbQmJJkHcYuTDsNAN0nhOUT1Y9TjIotOnPs2FBlcK4LSNCIiqrQR
+	/tH2kTrn1IPqAx5yvF6xkR7tK8Mx/6r/9k1YLXN3k5rmAqw14ZJhnFZ6f0sLssl93ogE8d
+	DpXSd6nTgJtvySS277wBDp2E638drFU=
+Date: Mon, 13 Jul 2026 09:28:31 +0200
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] btrfs: test checksum handling for clone, dedupe and swap
- on NOCOW files
-To: daan@amutable.com, Zorro Lang <zlang@kernel.org>,
- Anand Jain <asj@kernel.org>, Filipe Manana <fdmanana@suse.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-References: <20260712-push-kwzqkrlxwvnv-v1-1-e2466aff1bfd@amutable.com>
+Subject: Re: [PATCH v2] generic/795: add unaligned boundary test cases for
+ WRITE_ZEROES
+To: Zhang Yi <yi.zhang@huaweicloud.com>, Pankaj Raghav
+ <p.raghav@samsung.com>, zlang@kernel.org
+Cc: linux-xfs@vger.kernel.org, hch@lst.de, fstests@vger.kernel.org,
+ djwong@kernel.org, yi.zhang@huawei.com,
+ Ext4 Developers List <linux-ext4@vger.kernel.org>
+References: <20260709083048.3849610-1-p.raghav@samsung.com>
+ <1adabe60-17d5-49ff-a6e6-33f90debf6fe@huaweicloud.com>
 Content-Language: en-US
-From: Qu Wenruo <wqu@suse.com>
-Autocrypt: addr=wqu@suse.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
- FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXVgBQkQ/lqxAAoJEMI9kfOh
- Jf6o+jIH/2KhFmyOw4XWAYbnnijuYqb/obGae8HhcJO2KIGcxbsinK+KQFTSZnkFxnbsQ+VY
- fvtWBHGt8WfHcNmfjdejmy9si2jyy8smQV2jiB60a8iqQXGmsrkuR+AM2V360oEbMF3gVvim
- 2VSX2IiW9KERuhifjseNV1HLk0SHw5NnXiWh1THTqtvFFY+CwnLN2GqiMaSLF6gATW05/sEd
- V17MdI1z4+WSk7D57FlLjp50F3ow2WJtXwG8yG8d6S40dytZpH9iFuk12Sbg7lrtQxPPOIEU
- rpmZLfCNJJoZj603613w/M8EiZw6MohzikTWcFc55RLYJPBWQ+9puZtx1DopW2jOwE0EWdWB
- rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
- Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
- E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
- vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
- g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
- AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
- cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
- qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
- /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
- o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
- JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
-In-Reply-To: <20260712-push-kwzqkrlxwvnv-v1-1-e2466aff1bfd@amutable.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+From: Pankaj Raghav <pankaj.raghav@linux.dev>
+In-Reply-To: <1adabe60-17d5-49ff-a6e6-33f90debf6fe@huaweicloud.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Migadu-Flow: FLOW_OUT
 
-
-
-在 2026/7/13 00:07, Daan De Meyer via B4 Relay 写道:
-> From: Daan De Meyer <daan@amutable.com>
+On 7/10/26 10:23, Zhang Yi wrote:
+> +CC ext4 list
 > 
-> Add two tests covering how checksummed and NOCOW extents interact.
+> On 7/9/2026 4:30 PM, Pankaj Raghav wrote:
+>> During the review of WRITE_ZEROES support to XFS, Zhang Yi pointed out
+>> some important semantics for the boundary blocks when WRITE_ZEROES
+>> command is used.[1]
+>>
+>> The test cases check the boundary blocks when they are in different
+>> states and WRITE_ZEROES are issued that straddle the boundary. Along with that,
+>> test cases have been added when a EoF straddles an allocation unit.
+>>
+>> [1] https://lore.kernel.org/linux-xfs/0b7f1a4f-da1c-4297-8099-98d738070ab7@huaweicloud.com/
+>>
+>> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
 > 
-> btrfs/348 verifies that checksummed extents can be cloned and
-> deduplicated into NOCOW files, and that the reverse direction stays
-> rejected because NOCOW extents do not have checksums.
-
-I strongly doubt if you have run the test btrfs/348.
-
-As a very basic reflink clone from a datasum inode into nodatasum inode 
-will cause btrfs check errors, with your kernel patch applied:
-
-  # mkfs.btrfs -f $dev
-  # mount $dev $mnt
-  # xfs_io -f -c "pwrite 0 64k" -c sync $mnt/file1
-  # mount -o remount,nodatasum $mnt
-  # touch $mnt/file2
-  # xfs_io -c "reflink $mnt/file1" $mnt/file2
-  # umount $mnt
-  # btrfs check $dev
-Opening filesystem to check...
-Checking filesystem on /dev/test/scratch1
-UUID: efcb3cdd-5dd9-416d-89ac-33071c59c9e7
-[1/8] checking log skipped (none written)
-[2/8] checking root items
-[3/8] checking extents
-[4/8] checking free space tree
-[5/8] checking fs roots
-root 5 inode 258 errors 800, odd csum item
-ERROR: errors found in fs roots
-found 229376 bytes used, error(s) found
-
+> Thank you for the test! The changes look good to me, and it works well
+> with my ext4 fixes as well.
 > 
-> btrfs/349 verifies that a NOCOW swap file containing a checksummed
-> extent is rejected even after the checksummed source is deleted and the
-> extent is no longer shared.
+> Reviewed-by: Zhang Yi <yi.zhang@huawei.com>
 > 
-> Signed-off-by: Daan De Meyer <daan@amutable.com>
-> ---
-> These tests cover the kernel series available at:
-> https://lore.kernel.org/linux-btrfs/20260712-reflink-into-nodatasum-v1-0-9f27ef836073@amutable.com/
-> ---
->   tests/btrfs/348     | 180 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->   tests/btrfs/348.out |   2 +
->   tests/btrfs/349     |  73 +++++++++++++++++++++
->   tests/btrfs/349.out |   2 +
->   4 files changed, 257 insertions(+)
-> 
-> diff --git a/tests/btrfs/348 b/tests/btrfs/348
-> new file mode 100755
-> index 00000000..4faf994e
-> --- /dev/null
-> +++ b/tests/btrfs/348
-> @@ -0,0 +1,180 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026 Daan De Meyer. All Rights Reserved.
-> +#
-> +# FS QA Test 348
-> +#
-> +# Verify that checksummed extents can be cloned and deduplicated into NOCOW
-> +# files.  The reverse direction must remain rejected because NOCOW extents do
-> +# not have checksums.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick clone dedupe scrub
-> +
-> +. ./common/reflink
-> +
-> +_require_scratch_reflink
-> +_require_scratch_dedupe
-> +_require_chattr C
-> +_require_btrfs_no_nodatacow
-> +_require_btrfs_no_nodatasum
-> +_require_btrfs_command inspect-internal dump-tree
-> +
-> +_fixed_by_kernel_commit 28ce1d263f4d \
-> +	"btrfs: allow reflinking from checksummed files into nodatasum files"
 
-Nope, this is not a fix, nor the commit is upstreamed.
+Thanks.
 
-A proper test case should detect older kernels and skip if it doesn't 
-support a new feature.
+> Unfortunately, I've found a bug in filefrag that causes delalloc extents
+> to be reported with a length of 0. This means this test case can miss
+> delalloc extents. The issue is in misc/filefrag.c's print_extent_info(),
+> where ext_len is incorrectly set to 0 for the FIEMAP_EXTENT_UNKNOWN or
+> EXT4_FIEMAP_EXTENT_HOLE cases. Could you please send a patch to fix this
+> as well?
+>
+
+
+I think I see it here:
+	if ((fm_extent->fe_flags & FIEMAP_EXTENT_UNKNOWN) ||
+	    (fm_extent->fe_flags & EXT4_FIEMAP_EXTENT_HOLE)) {
+		ext_len = 0;
+		ext_blks_phys = 0;
+	} else
+		ext_blks_phys = ext_blks;
+
+I will send a fix soon as a separate patch.
+
+--
+Pankaj
