@@ -1,59 +1,75 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from out-187.mta1.migadu.com (out-187.mta1.migadu.com [95.215.58.187])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24F8137A84A;
-	Mon, 13 Jul 2026 10:04:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11C33435EFA
+	for <fstests@vger.kernel.org>; Mon, 13 Jul 2026 13:21:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.187
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783937060; cv=none; b=Ju7Qq5LM5zThghY/yX3HWfhA1W8DPMv5j22Xhmdrp/pr5rK6kbvuJ+ax1KWk0vv7EddcYykM2VNFMoDk/Fo6CLkgPP/RSe+WuJ+g3Ig42TBP+8P9g1oCQQEVzBHeh75RKDup/Dd5jTYWoTEBHlAjR1tvAaw14Hzbd4+KRr7/wQg=
+	t=1783948907; cv=none; b=Otz/c2cbhFIlMAv3iX+73W9lOAPuHqJTYqiCnFwYg+zy708uNDU6mnr/alXjUhLxVK388GWGVXvSe2Q9KXwyEapbJn2aK2huWp91O+2eF9TjamfQzLc9dhv/AOZGAkrHY4rqNCIspTLagx+Ly4+RAjGmg4jeIqLDq0FKFT2Jkog=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783937060; c=relaxed/simple;
-	bh=VgBiPBWeo4HmSIIjDpKu69PrpGRLPzcwcVo89dqKRiw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=G0OmROj7v9WVnZYZrY+mbsdi1We401hNm38xZ3n5ZSU4lo2s6jUYrWWHET7H3RQQh5DGT8sYzt6j+ZkBFCy/6w32+mGv4DEXWQJft/VvBTPawfLhLmdc86hvu7SpZT13PFbLou9Np0VtXb/gros/Tmu4Rp7kzwfsRPV3lRUL7os=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id A65F468C4E; Mon, 13 Jul 2026 12:04:14 +0200 (CEST)
-Date: Mon, 13 Jul 2026 12:04:14 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: Zhang Yi <yi.zhang@huaweicloud.com>
-Cc: Pankaj Raghav <p.raghav@samsung.com>, zlang@kernel.org,
-	linux-xfs@vger.kernel.org, hch@lst.de, pankaj.raghav@linux.dev,
-	fstests@vger.kernel.org, djwong@kernel.org, yi.zhang@huawei.com,
-	Ext4 Developers List <linux-ext4@vger.kernel.org>
-Subject: Re: [PATCH v2] generic/795: add unaligned boundary test cases for
- WRITE_ZEROES
-Message-ID: <20260713100414.GA11013@lst.de>
-References: <20260709083048.3849610-1-p.raghav@samsung.com> <1adabe60-17d5-49ff-a6e6-33f90debf6fe@huaweicloud.com>
+	s=arc-20240116; t=1783948907; c=relaxed/simple;
+	bh=Y00l/aSmPOJBHXtT2VBY6pzYYLDYF4f40DvYsjUxc28=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=haKYmtnOJOVk5hktYOLS28gHo1hn4KXiZgtBSQqWWDRECRPf7cJef+rBpsi4G2Sl7WSViteOhvo+IYre5p1uKczZafIasS9mRYhsM6Hs0OXqIUsaJZJZKyZjqyGGmwZ/h/rQ4ItYXMpaqQl4yoI1iyWlcTDER/IOtldibgDxjAY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=Cov13TH/; arc=none smtp.client-ip=95.215.58.187
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="Cov13TH/"
+Message-ID: <db3ed600-8a4a-4932-9e4e-2f5a5d27cdd9@linux.dev>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
+	t=1783948903;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=FbcdiqhBJyEUTJK4S+yiy3XNkF/rw3bRMaKqh1gl8bc=;
+	b=Cov13TH/mP0LQyWsxmG9YTHikhR72V4sUNZvXvGhgKIareSiwn1d9oP2yjuoAqBEyrFOov
+	ug9ZU7Bj99oKW48EXUC2NTAV/tnxonGMYfJf5NTl6Ppijqjecq62wFeDeQG8jKkRUWm7ZK
+	Hu8aL9Vd8CapV94IgiiWvkDUX28Yg/Q=
+Date: Mon, 13 Jul 2026 15:21:36 +0200
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1adabe60-17d5-49ff-a6e6-33f90debf6fe@huaweicloud.com>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Subject: Re: [PATCH v2] generic/795: add unaligned boundary test cases for
+ WRITE_ZEROES
+To: Christoph Hellwig <hch@lst.de>, Zhang Yi <yi.zhang@huaweicloud.com>
+Cc: Pankaj Raghav <p.raghav@samsung.com>, zlang@kernel.org,
+ linux-xfs@vger.kernel.org, fstests@vger.kernel.org, djwong@kernel.org,
+ yi.zhang@huawei.com, Ext4 Developers List <linux-ext4@vger.kernel.org>
+References: <20260709083048.3849610-1-p.raghav@samsung.com>
+ <1adabe60-17d5-49ff-a6e6-33f90debf6fe@huaweicloud.com>
+ <20260713100414.GA11013@lst.de>
+Content-Language: en-US
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+From: Pankaj Raghav <pankaj.raghav@linux.dev>
+In-Reply-To: <20260713100414.GA11013@lst.de>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Migadu-Flow: FLOW_OUT
 
-On Fri, Jul 10, 2026 at 04:23:27PM +0800, Zhang Yi wrote:
-> Thank you for the test! The changes look good to me, and it works well
-> with my ext4 fixes as well.
+
+>> Unfortunately, I've found a bug in filefrag that causes delalloc extents
+>> to be reported with a length of 0. This means this test case can miss
+>> delalloc extents. The issue is in misc/filefrag.c's print_extent_info(),
+>> where ext_len is incorrectly set to 0 for the FIEMAP_EXTENT_UNKNOWN or
+>> EXT4_FIEMAP_EXTENT_HOLE cases. Could you please send a patch to fix this
+>> as well?
 > 
-> Reviewed-by: Zhang Yi <yi.zhang@huawei.com>
+> We can't really rely on having a bleeding edge filefrag for xfstests
+> (well, at least without a feature check for it, but even that
+> would not a good usability story).  I guess at least for now
+> we might have to add  a little tool that just calls FIEMAP for
+> us to xfstests?
 > 
-> Unfortunately, I've found a bug in filefrag that causes delalloc extents
-> to be reported with a length of 0. This means this test case can miss
-> delalloc extents. The issue is in misc/filefrag.c's print_extent_info(),
-> where ext_len is incorrectly set to 0 for the FIEMAP_EXTENT_UNKNOWN or
-> EXT4_FIEMAP_EXTENT_HOLE cases. Could you please send a patch to fix this
-> as well?
 
-We can't really rely on having a bleeding edge filefrag for xfstests
-(well, at least without a feature check for it, but even that
-would not a good usability story).  I guess at least for now
-we might have to add  a little tool that just calls FIEMAP for
-us to xfstests?
+What about adding an option to io/filemap.c to take a flag that allows calling
+fiemap without FIEMAP_FLAG_SYNC? So this test could depend on xfs_io fiemap command
+with the flag support enabled? I can revert this test to the previous version which uses
+xfs io fiemap instead of filefrag.
 
+--
+Pankaj
