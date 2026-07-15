@@ -1,240 +1,206 @@
-Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 86AB3329C71
-	for <fstests@vger.kernel.org>; Wed, 15 Jul 2026 22:23:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8849943F0BB
+	for <fstests@vger.kernel.org>; Wed, 15 Jul 2026 22:37:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784154241; cv=none; b=Z2LDPSzKmBTVchfQ5dtnCWfDPJQeiOeaBPRQKjo7NmunEeK5zxCI5iLypZuEf/45bGQXGXjqgzm8qeVLMrmZpUqrVMZ3I10Z8xBdkK2GXazLRoeo51s5gA01QUqJbCFTIPuwHy95NtXyp5DdBNk6RjoT/r/V5ogobo4UzqDrjCE=
+	t=1784155068; cv=none; b=S8ZIdwqeCZn73QU2ApITqQy6xO+pmD6abhRrfIBjMs9BWfOolq0mzELstOGCTynaY+z8tKgP8H6WjoavUasrrarjg9V5+Qx44QLX39xzPUDgl/8KfJ3oX7pnFc3MZ81QOXBjZguVNRlkx8KpKepMJoQcriWEDpbvanl4yQ2z8ZI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784154241; c=relaxed/simple;
-	bh=W0JzndEIUW7TYvjEQpwk6CvGB9/mqfBPf0wk0JdavsI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=L/MkYOv91BIjHWfOPpnschgy3sEKs/ZWYA+6isApmtnk8dY1qk+SOr+dWMxgoG7UrVH3IW9QRjnQrBUhntbXTtCctHH8dc2YicrUaYcqlvKbhYSbtwF2vBUoATbqb1U+lbd+TPjpptUgmac3yx9lCzrkPKP1wv5CfTZhVZgmDQE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=BRk2rYUK; arc=none smtp.client-ip=209.85.128.43
+	s=arc-20240116; t=1784155068; c=relaxed/simple;
+	bh=QHM/lOWkuX8GJgsKVUcNlUvtp249kxd4fdYE/V98ei0=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=cmOAt2A0gLJnMP3cA5bQCXccW9MW8N4oEiWihzGd+ry/ivBB05dlcchP2Qjt6ou7XoA1jEVX18APodMHulyy1/+JLGfTgSnM+h15uVbwlZy8YkPkS+E2XIMHbkLUPtJ/Yj7SqAgLE26cqgGsUksa/iOtx89loQ/PmQPPb1T00EE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=XbOmJU79; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=XbOmJU79; arc=none smtp.client-ip=195.135.223.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="BRk2rYUK"
-Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-493bfe9f886so32200595e9.0
-        for <fstests@vger.kernel.org>; Wed, 15 Jul 2026 15:23:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1784154238; x=1784759038; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=UCFk58xT5btOtDL6jTbxhoixl4xuY2NmPnwOSlsMN3g=;
-        b=BRk2rYUKhLoQsHkDjs0VUV1bmACMEkNtyl4M0jVvWBw1yW0Mp3Hbc279fIkRqltahi
-         8UbAA7aDa/HG1tM2IL9gQOEMHyg7+D3790js2/X0YX9/m9Gc11zJlEsXIjPc1UTuyW3C
-         u94IHcCBZlSyEu/ocnGrikc/396TpB7gQay7sfHJUao3m08O+jeLOA9kN6pEzSmRsOkf
-         p9ln0n+oXrqw25IkNhJyTEebAKbs/ODmB/IAPyRMWo5L32tsCiT1uy+4xQhmM4kTdDka
-         BTQWV85wtIJ+N4a38v8eF8mnUmMpDuDUf/kkyYFLOIE0xyy+hGuEVauxlN/X5VhuhyJF
-         6q8Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784154238; x=1784759038;
-        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=UCFk58xT5btOtDL6jTbxhoixl4xuY2NmPnwOSlsMN3g=;
-        b=si2vKIg+wjEEPQwN49/kgR6owXtl7I54nxMQtWyFd9KsvsleHHQn9CIwRud0zW43mT
-         cErvleoqo/qDMq4fynN9inJZanvTC44mzLz9G+OxHqjpakIYI5C9co+nc0oM6ApUlQTt
-         tNdrDK1r+IxOvFQWJVC2qeL4I+BWDDiJJtPfUiH82gNRRiTsDGhTTj8ZJgP+yCjLb/yk
-         xEWMer4tHSgkwe333xEv2tRw+B2bZPfxRem1CEqfwWKMEg+QIJua7HIbyYTqg1oGdEgG
-         pY3yyReRb62F9LeCmrcHwl9c3mcP9Ubvp5ligEsin5cFIjpqkqXttK/XLEcpqVS0pKfl
-         dUxQ==
-X-Gm-Message-State: AOJu0Yy6m9EP/ysKTEwUVg8pIc234cu8JorYsevHho8Z5xg+Bc3p8QlE
-	n40BQemraV9QMqM72BBLY64WVp7RKfDTs4FkQ7oO66/OQENJeCMuCtKepGqufCPjFqQ=
-X-Gm-Gg: AfdE7ck3MLY3afrEK8WYTfGm6MKS2AULirikB2fvXK66HN7dblSSmcj9zUayvHnJUVM
-	trUznDK1AoFKiKTcTtWwZgzeiJz+4KwlxY2++emRIp1/JNhOK2t0Pqswj8Ds7DO5c5gpOt9AfVe
-	80MPb+nfTB3wIh+6mKYRJFfuvaoMjlG8sOjmo47iciv1z1P0CVgYoCKUmGi+3qwkB0mZ2UWnJgY
-	qL0UaXmCogkGw3FjoId5k5o6N8LZO8WRZwTzePtfUNZgH9sTQe5t1QFJtnYNQH/B5DB94JX1Kf9
-	FOD90IHQ+QhmQdUm0jJ3gbx/FNBThKap5OitQuDWKVfk+QTkAejkAbzbXc2IURmxFpz6tGqBMkm
-	GeRvFpE45DMNvN9lJi6ZqpQfBQphLEEboc4zYpauVUHDjjF4PI4hHHTrLARGY+0mTbGBL2E3Q0D
-	7f47cwAg==
-X-Received: by 2002:a05:600c:2909:b0:493:df44:2342 with SMTP id 5b1f17b1804b1-4953c14efbdmr33610795e9.5.1784154237805;
-        Wed, 15 Jul 2026 15:23:57 -0700 (PDT)
-Received: from [172.16.0.229] ([159.196.52.54])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3140e4fcd31sm5154832eec.4.2026.07.15.15.23.54
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 15 Jul 2026 15:23:56 -0700 (PDT)
-Message-ID: <2c8c2fb6-7b4a-4360-9216-de8e19fe4a5f@suse.com>
-Date: Thu, 16 Jul 2026 07:53:51 +0930
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="XbOmJU79";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="XbOmJU79"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 5404F3E32;
+	Wed, 15 Jul 2026 22:37:44 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1784155064; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=Wsow2x/PFYLyOT7adFwiW56NTFy4e0sLDcL4EkZ8Peg=;
+	b=XbOmJU79etT3HTDhZlGs+S46/WOCP8+HssY73Ztf6FvljmPXm+dS9FccnPib0TX4BegkMB
+	t8MmoEF+AfTjQUqNtcMbGQXNjqBAzGWT7IMoVnskGURfXFfaMPdgJ1UfFhAB4DRjw2PRjY
+	yXE+JI6lozDdyqsCoF+sCImz+y0C0vU=
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=XbOmJU79
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1784155064; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=Wsow2x/PFYLyOT7adFwiW56NTFy4e0sLDcL4EkZ8Peg=;
+	b=XbOmJU79etT3HTDhZlGs+S46/WOCP8+HssY73Ztf6FvljmPXm+dS9FccnPib0TX4BegkMB
+	t8MmoEF+AfTjQUqNtcMbGQXNjqBAzGWT7IMoVnskGURfXFfaMPdgJ1UfFhAB4DRjw2PRjY
+	yXE+JI6lozDdyqsCoF+sCImz+y0C0vU=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 97699779AD;
+	Wed, 15 Jul 2026 22:37:42 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id qmxzFrYLWGqQJgAAD6G6ig
+	(envelope-from <wqu@suse.com>); Wed, 15 Jul 2026 22:37:42 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org
+Cc: bfoster@redhat.com,
+	Anand Jain <asj@kernel.org>,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] fstests: generic: add a basic cachestat test case
+Date: Thu, 16 Jul 2026 08:07:16 +0930
+Message-ID: <20260715223716.5965-1-wqu@suse.com>
+X-Mailer: git-send-email 2.54.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] fstests: generic: add a basic cachestat test case
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
- Anand Jain <asj@kernel.org>
-References: <20260707113454.120001-1-wqu@suse.com> <alfiLTZaQeqG-7J1@bfoster>
-Content-Language: en-US
-From: Qu Wenruo <wqu@suse.com>
-Autocrypt: addr=wqu@suse.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
- FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXVgBQkQ/lqxAAoJEMI9kfOh
- Jf6o+jIH/2KhFmyOw4XWAYbnnijuYqb/obGae8HhcJO2KIGcxbsinK+KQFTSZnkFxnbsQ+VY
- fvtWBHGt8WfHcNmfjdejmy9si2jyy8smQV2jiB60a8iqQXGmsrkuR+AM2V360oEbMF3gVvim
- 2VSX2IiW9KERuhifjseNV1HLk0SHw5NnXiWh1THTqtvFFY+CwnLN2GqiMaSLF6gATW05/sEd
- V17MdI1z4+WSk7D57FlLjp50F3ow2WJtXwG8yG8d6S40dytZpH9iFuk12Sbg7lrtQxPPOIEU
- rpmZLfCNJJoZj603613w/M8EiZw6MohzikTWcFc55RLYJPBWQ+9puZtx1DopW2jOwE0EWdWB
- rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
- Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
- E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
- vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
- g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
- AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
- cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
- qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
- /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
- o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
- JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
-In-Reply-To: <alfiLTZaQeqG-7J1@bfoster>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
+X-Rspamd-Action: no action
+X-Rspamd-Queue-Id: 5404F3E32
+X-Spam-Flag: NO
+X-Spam-Score: -3.01
+X-Spam-Level: 
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:dkim,suse.com:email,suse.com:url,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	TO_DN_SOME(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	FROM_EQ_ENVFROM(0.00)[];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	RCVD_COUNT_TWO(0.00)[2];
+	RCVD_TLS_ALL(0.00)[];
+	RCPT_COUNT_FIVE(0.00)[5];
+	DKIM_TRACE(0.00)[suse.com:+]
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
 
+The test case is inspired by LTP, where there is a regression on 64K
+page size systems with btrfs, that after a fsync, cachestat() still
+report dirty pages.
 
+The test case itself is pretty simple, fill the file with a buffered write that is
+1/2/4/8/16 page sized, call cachestat() to make sure the cached/dirtied
+number match the page number.
 
-在 2026/7/16 05:10, Brian Foster 写道:
-> On Tue, Jul 07, 2026 at 09:04:54PM +0930, Qu Wenruo wrote:
->> The test case is inspired by LTP, where there is a regression on 64K
->> page size systems with btrfs, that after a fsync, cachestat() still
->> report dirty pages.
->>
->> The test case itself is pretty simple, fill the file with a buffered write that is
->> 1/2/4/8/16 page sized, call cachestat() to make sure the cached/dirtied
->> number match the page number.
->>
->> Then do a fsync(), and make sure the dirty page number reduced to 0
->> meanwhile cached is still the same.
->>
->> Link: https://bugzilla.suse.com/show_bug.cgi?id=1270397
->> Reviewed-by: Anand Jain <asj@kernel.org>
->> Signed-off-by: Qu Wenruo <wqu@suse.com>
->> ---
->> Changelog:
->> v2:
->> - Reject "sync" and "dax" mount options
->>    Those mount options write back data synchronously, will screw up the
->>    buffered write dirtied page reporting.
->>
->> - Use AWK_PROG everywhere.
->>
->> - Remove the unnecessary redirection for fsync
->> ---
->>   tests/generic/798     | 61 +++++++++++++++++++++++++++++++++++++++++++
->>   tests/generic/798.out |  2 ++
->>   2 files changed, 63 insertions(+)
->>   create mode 100755 tests/generic/798
->>   create mode 100644 tests/generic/798.out
->>
->> diff --git a/tests/generic/798 b/tests/generic/798
->> new file mode 100755
->> index 00000000..8888f6a3
->> --- /dev/null
->> +++ b/tests/generic/798
->> @@ -0,0 +1,61 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
->> +#
->> +# FS QA Test 798
->> +#
->> +# Basic tests for cachestat()
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick
->> +
->> +_require_xfs_io_command "cachestat"
->> +_require_scratch
->> +# Any mount option that writes data back synchronously should be rejected.
->> +# Or it will screw up the dirtied page reporting for buffered writes.
->> +_exclude_scratch_mount_option "dax"
->> +_exclude_scratch_mount_option "sync"
->> +
->> +pagesize=$(_get_page_size)
->> +
->> +for num_page in 1 2 4 8 16; do
->> +	size=$(($pagesize * $num_page))
->> +
->> +	echo "=== Test with $num_page pages ===" >> $seqres.full
->> +	_scratch_mkfs > /dev/null
->> +	_scratch_mount
->> +
-> 
-> Do we need a mkfs and remount for each size we're testing? It seems like
-> we should be able to mkfs and mount once and then just remove the file
-> per iteration.
-> 
->> +	# Basic cached number reporting
->> +	$XFS_IO_PROG -f -c "pwrite -b $pagesize 0 $size" \
->> +		$SCRATCH_MNT/foobar >> $seqres.full
->> +	$XFS_IO_PROG -c "cachestat 0 $size" $SCRATCH_MNT/foobar > $tmp.output
->> +	cat $tmp.output >> $seqres.full
->> +	cached=$(cat $tmp.output | cut -f1 -d, | $AWK_PROG '{print $2}')
->> +	dirtied=$(cat $tmp.output | cut -f2 -d, | $AWK_PROG '{print $2}')
->> +
->> +	if [ "$cached" -ne "$num_page" ]; then
->> +		_fail "cached not matching the page number"
->> +	fi
->> +
->> +	if [ "$cached" -ne "$dirtied" ]; then
->> +		_fail "dirtied not matching the page number"
->> +	fi
-> 
-> We should expect consistent values for cached and dirtied throughout the
-> test, right? If so, it might be more useful (and maybe more simple) to
-> just print the cachestat output on each iteration and let the comparison
-> to the golden .out file determine pass or failure. Hm?
+Then do a fsync(), and make sure the dirty page number reduced to 0
+meanwhile cached is still the same.
 
-Right, will update the test case the address both comments.
+Link: https://bugzilla.suse.com/show_bug.cgi?id=1270397
+Reviewed-by: Anand Jain <asj@kernel.org>
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+Changelog:
+v3:
+- Use golden output to greatly simplify the test case
 
-Thanks,
-Qu
+- Do not mkfs for each size, just remove the original file
 
-> 
-> Brian
-> 
->> +	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foobar
->> +
->> +	# Test dirty page number reporting after a fsync.
->> +	$XFS_IO_PROG -c "cachestat 0 $size" $SCRATCH_MNT/foobar > $tmp.output
->> +	cat $tmp.output >> $seqres.full
->> +	_scratch_unmount
->> +	cached=$(cat $tmp.output | cut -f1 -d, | $AWK_PROG '{print $2}')
->> +	dirtied=$(cat $tmp.output | cut -f2 -d, | $AWK_PROG '{print $2}')
->> +
->> +	if [ "$cached" -ne "$num_page" ]; then
->> +		_fail "cached not matching the page number"
->> +	fi
->> +	if [ "$dirtied" -ne 0 ]; then
->> +		_fail "dirtied pages not zero"
->> +	fi
->> +done
->> +
->> +echo "Silence is golden"
->> +_exit 0
->> diff --git a/tests/generic/798.out b/tests/generic/798.out
->> new file mode 100644
->> index 00000000..216d6e93
->> --- /dev/null
->> +++ b/tests/generic/798.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 798
->> +Silence is golden
->> -- 
->> 2.51.2
->>
->>
-> 
+v2:
+- Reject "sync" and "dax" mount options
+  Those mount options write back data synchronously, will screw up the
+  buffered write dirtied page reporting.
+
+- Use AWK_PROG everywhere.
+
+- Remove the unnecessary redirection for fsync
+---
+ tests/generic/798     | 39 +++++++++++++++++++++++++++++++++++++++
+ tests/generic/798.out | 16 ++++++++++++++++
+ 2 files changed, 55 insertions(+)
+ create mode 100755 tests/generic/798
+ create mode 100644 tests/generic/798.out
+
+diff --git a/tests/generic/798 b/tests/generic/798
+new file mode 100755
+index 00000000..0fe37646
+--- /dev/null
++++ b/tests/generic/798
+@@ -0,0 +1,39 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
++#
++# FS QA Test 798
++#
++# Basic tests for cachestat()
++#
++. ./common/preamble
++_begin_fstest auto quick
++
++_require_xfs_io_command "cachestat"
++_require_scratch
++# Any mount option that writes data back synchronously should be rejected.
++# Or it will screw up the dirtied page reporting for buffered writes.
++_exclude_scratch_mount_option "dax"
++_exclude_scratch_mount_option "sync"
++
++pagesize=$(_get_page_size)
++
++_scratch_mkfs > /dev/null
++_scratch_mount
++
++for num_page in 1 2 4 8 16; do
++	size=$(($pagesize * $num_page))
++
++	echo "=== Test with $num_page pages ==="
++
++	rm -f $SCRATCH_MNT/foobar
++	$XFS_IO_PROG -f -c "pwrite -b $pagesize 0 $size" $SCRATCH_MNT/foobar > /dev/null
++	# Basic cached number reporting
++	$XFS_IO_PROG -c "cachestat 0 $size" $SCRATCH_MNT/foobar
++
++	# Test dirty page number reporting after a fsync.
++	$XFS_IO_PROG -c "fsync" -c "cachestat 0 $size" $SCRATCH_MNT/foobar
++done
++
++_scratch_unmount
++_exit 0
+diff --git a/tests/generic/798.out b/tests/generic/798.out
+new file mode 100644
+index 00000000..ca6ead3c
+--- /dev/null
++++ b/tests/generic/798.out
+@@ -0,0 +1,16 @@
++QA output created by 798
++=== Test with 1 pages ===
++Cached: 1, Dirty: 1, Writeback: 0, Evicted: 0, Recently Evicted: 0
++Cached: 1, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
++=== Test with 2 pages ===
++Cached: 2, Dirty: 2, Writeback: 0, Evicted: 0, Recently Evicted: 0
++Cached: 2, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
++=== Test with 4 pages ===
++Cached: 4, Dirty: 4, Writeback: 0, Evicted: 0, Recently Evicted: 0
++Cached: 4, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
++=== Test with 8 pages ===
++Cached: 8, Dirty: 8, Writeback: 0, Evicted: 0, Recently Evicted: 0
++Cached: 8, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
++=== Test with 16 pages ===
++Cached: 16, Dirty: 16, Writeback: 0, Evicted: 0, Recently Evicted: 0
++Cached: 16, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
+-- 
+2.51.2
 
