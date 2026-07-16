@@ -1,61 +1,64 @@
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
+Received: from mailgw.kylinos.cn (mailgw.kylinos.cn [124.126.103.232])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C291743F0A9;
-	Thu, 16 Jul 2026 01:38:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.143.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A554313550;
+	Thu, 16 Jul 2026 06:29:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=124.126.103.232
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784165892; cv=none; b=FkjeHwAAarKGptFYD2vdqTh78lqPaZUcFP8NDXz8YTpvLPVf7VjVAyw+7ysWbpFcij5phcKpjKmvqlBkOSHYCx60DbSrADAOez25wCER/fRPsI6W7rExMVRNYL9V4lLQ+HYZw3w7Z1wuvWAz/EwjWAqFBNA901etmRxGgkvNw1o=
+	t=1784183359; cv=none; b=djy54BsnXqaccPbk3UPMB0MZTqvNIRGfEjDh0xVSkh9VfZBqEP+eJqPRdt0cIQ4duy3XrAPHA4IhliM3zCAuyEl+VDQYdLgBDCy4bgdpzfVD0G6+UYS0Pr5HgrIdAa9xftXZ9tQpvcuCEHCE5qp17MccJcXSmqJsK1nCABNcQJE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784165892; c=relaxed/simple;
-	bh=bfe5YijdD+G8B7V+RZp8vVrAtE3Vwwb7v/BeuK5C6Xg=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Yol7qYRtiRTjx2E+vyzYqjgut3vg8/6Zry1Zz7Ems58aByTmi3KF6Iq5z9wNqRlzxp9m/fw7+wNvU/UeiwkqdBA6C/7cJxcrARc8aMdHsX9H8k/gX4v3F8eSVMI9vgXttbH7rkpYjsAI4Rlo0zjkABHZIvOF/hPv7KlOU5rJPYg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=AWKeBgjV; arc=none smtp.client-ip=68.232.143.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="AWKeBgjV"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1784165890; x=1815701890;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=bfe5YijdD+G8B7V+RZp8vVrAtE3Vwwb7v/BeuK5C6Xg=;
-  b=AWKeBgjVd8BJsPF2QSpnrjJhoK4Ch1R2HdkFMKBwLVs4OdC3btge1Dln
-   2t71tNMxb1mVXMjXHLOpU4yD7jOsRLhFZQvR4RWVcCRjaTX9hXCjGJwof
-   EAPyrzuU8XtIxKA6XcWiLZ941+xHUcwyyB2YKZid8+yuQ7DUqLpjkhKng
-   ArF9pldfKzqaDT9OxVdwjr0XorXjDFgw+RwwwBZYQLItdl/GNpwmoH5Xx
-   HGjcIJD8E+KCYKEZ4Ig/jjEZkqLjSU1j2FZuMYoOIxksPjtiwh/qQk/jC
-   fKmPzzNZxF7oqyA1MXCmtQRsdXZCGeT+gbWJNW8/oSulmTEd6r9W8hWei
-   g==;
-X-CSE-ConnectionGUID: Js/jkwlnRzWiKKZHnCnHXA==
-X-CSE-MsgGUID: lRx60GI0S2m6z1a9aacHvw==
-X-IronPort-AV: E=Sophos;i="6.25,166,1779120000"; 
-   d="scan'208";a="152027378"
-Received: from unknown (HELO uls-op-esad3-o.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 16 Jul 2026 09:38:04 +0800
-X-CSE-ConnectionGUID: jtEX3HzpSaSpP+QxMSlZ/A==
-X-CSE-MsgGUID: N9ZspUTsQVSYidyONzXgaQ==
-IronPort-SDR: 6a5835ed_zX2fxtR3fUFL9taK3hm3UVfI15z3opNJPohntoSjReK2UWh
- NvUz2N/Myo4J1ropFOEpMVUOizDZzoh52IF1ruQ==
-Received: from uls-op-esai1-o.wdc.com ([10.248.3.45])
-  by uls-op-esad3-o.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 15 Jul 2026 18:37:49 -0700
-X-CSE-ConnectionGUID: pEmxLEVWQcGSNjs5EXKWFQ==
-X-CSE-MsgGUID: aDPp3ebCSAGz9bADDw+kEg==
-WDCIronportException: Internal
-Received: from unknown (HELO shindev.ssa.fujisawa.hgst.com) ([10.149.67.30])
-  by uls-op-esai1-o.wdc.com with ESMTP; 15 Jul 2026 18:37:48 -0700
-From: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-To: fstests@vger.kernel.org,
-	Zorro Lang <zlang@kernel.org>
-Cc: linux-xfs@vger.kernel.org,
-	Yao Sang <sangyao@kylinos.cn>,
-	Christoph Hellwig <hch@lst.de>,
-	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Subject: [PATCH] xfs/333: require external scratch device
-Date: Thu, 16 Jul 2026 10:37:47 +0900
-Message-ID: <20260716013747.1288925-1-shinichiro.kawasaki@wdc.com>
-X-Mailer: git-send-email 2.54.0
+	s=arc-20240116; t=1784183359; c=relaxed/simple;
+	bh=NyvYIScMGaKZYb27RvMW5m/kQAsBIbpoPTyb4yzW99c=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=fTBu6hGQENJPFVAYyB+h4NG+PGqIBYb/iRBmj+a2mksROYDa3u4g/CX5Irr4dPl8XEFpxkPjWllk7d9Qu6HTsjfMDn7cSrqJO+EQXfcaKEHNgkig4tIGumKbMvhN9WvsyMyFx+wRwoToA+jmQt1amqYqHjBTvSCh/GuymUNyUZA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn; spf=pass smtp.mailfrom=kylinos.cn; arc=none smtp.client-ip=124.126.103.232
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kylinos.cn
+X-UUID: a5133c9e80df11f1aa26b74ffac11d73-20260716
+X-CTIC-Tags:
+	HR_CC_COUNT, HR_CC_DOMAIN_COUNT, HR_CC_NO_NAME, HR_CTE_8B, HR_CTT_MISS
+	HR_DATE_H, HR_DATE_WKD, HR_DATE_ZONE, HR_FROM_NAME, HR_SJ_DIGIT_LEN
+	HR_SJ_LANG, HR_SJ_LEN, HR_SJ_LETTER, HR_SJ_NOR_SYM, HR_SJ_PHRASE
+	HR_SJ_PHRASE_LEN, HR_SJ_PRE_RE, HR_SJ_WS, HR_TO_COUNT, HR_TO_DOMAIN_COUNT
+	HR_TO_NO_NAME, IP_TRUSTED, SRC_TRUSTED, DN_TRUSTED, SA_TRUSTED
+	SA_EXISTED, SN_TRUSTED, SN_EXISTED, SPF_NOPASS, DKIM_NOPASS
+	DMARC_NOPASS, CIE_GOOD, CIE_GOOD_SPF, GTI_FG_BS, GTI_RG_INFO
+	GTI_C_BU, AMN_GOOD, ABX_MISS_RDNS
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.3.12,REQID:75492334-b140-4bed-b174-67b71ca262f4,IP:10,
+	URL:0,TC:0,Content:18,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTIO
+	N:release,TS:28
+X-CID-INFO: VERSION:1.3.12,REQID:75492334-b140-4bed-b174-67b71ca262f4,IP:10,UR
+	L:0,TC:0,Content:18,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION:
+	release,TS:28
+X-CID-META: VersionHash:e7bac3a,CLOUDID:994016d673ddcf58d7422cf99569db36,BulkI
+	D:260716142759SUU37U7G,BulkQuantity:1,Recheck:0,SF:10|66|78|81|82|83|102|1
+	27|850|865|898,TC:nil,Content:3|15|50,EDM:-3,IP:-2,URL:0,File:nil,RT:nil,B
+	ulk:40,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,SPR:NO,DKR:0,DKP:0,BRR:
+	0,BRE:0,ARC:0
+X-CID-BVR: 2,SSN|SDN
+X-CID-BAS: 2,SSN|SDN,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR
+X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
+X-UUID: a5133c9e80df11f1aa26b74ffac11d73-20260716
+X-User: sangyao@kylinos.cn
+Received: from localhost.localdomain [(223.70.159.239)] by mailgw.kylinos.cn
+	(envelope-from <sangyao@kylinos.cn>)
+	(Generic MTA with TLSv1.3 TLS_AES_256_GCM_SHA384 256/256)
+	with ESMTP id 176749619; Thu, 16 Jul 2026 14:29:06 +0800
+From: Yao Sang <sangyao@kylinos.cn>
+To: shinichiro.kawasaki@wdc.com
+Cc: fstests@vger.kernel.org,
+	hch@lst.de,
+	linux-xfs@vger.kernel.org,
+	sangyao@kylinos.cn,
+	zlang@kernel.org
+Subject: Re: [PATCH] xfs/333: require external scratch device
+Date: Thu, 16 Jul 2026 14:28:48 +0800
+Message-Id: <20260716062848.1768294-1-sangyao@kylinos.cn>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20260716013747.1288925-1-shinichiro.kawasaki@wdc.com>
+References: <20260716013747.1288925-1-shinichiro.kawasaki@wdc.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -64,36 +67,6 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-The test case xfs/333 uses the external scratch device SCRATCH_RTDEV.
-When SCRATCH_RTDEV is not specified, the test case fails at
-"_require_block_device $SCRATCH_RTDEV". To confirm the requirement, the
-test case calls the helper function _require_realtime(). However, it
-does not check SCRATCH_RTDEV when the zone type of SCRATCH_DEV is
-'none'.
+Looks good to me.
 
-To avoid the failure, ensure the SCRATCH_RTDEV check by calling
-_require_external_realtime_device() instead of _require_realtime(). With
-this, the test case is skipped when SCRATCH_RTDEV is not specified
-regardless of the zone type of SCRATCH_DEV.
-
-Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
----
- tests/xfs/333 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tests/xfs/333 b/tests/xfs/333
-index f2d4077d..7235dc24 100755
---- a/tests/xfs/333
-+++ b/tests/xfs/333
-@@ -16,7 +16,7 @@ _begin_fstest auto quick rw zone eio
- 
- _require_debugfs
- _require_scratch_nocheck
--_require_realtime
-+_require_external_realtime_device
- _require_block_device $SCRATCH_RTDEV
- _require_zoned_device $SCRATCH_RTDEV
- _require_command "$BLKZONE_PROG" blkzone
--- 
-2.54.0
-
+Reviewed-by: Yao Sang <sangyao@kylinos.cn>
