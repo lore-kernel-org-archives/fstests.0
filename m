@@ -1,54 +1,41 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D0D03CC31F
-	for <fstests@vger.kernel.org>; Thu, 16 Jul 2026 10:05:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E99142BEA4;
+	Thu, 16 Jul 2026 15:13:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784196314; cv=none; b=uKib59ZBpXd7etl0JD5d5NAwrN9YS7RopCtUcUkc3X1qse0lwadcjC1OX4nMIBaFMjwTGgrmbfLF40OCWZgRAEI6oUxgDjz2vq/qAMNbPRLyOX6KPbOJB3iYktCCzk57m9pE4G2MxNJuxbt30Eipc2dLTn9PRg4wwGBjH+oicqU=
+	t=1784214814; cv=none; b=FgcoHPud235k8u27GbdACgCZ+yg54ADzh+X5YoJ3vwPHQiG2Md1/zvQa9drZ6knueEOtPzI9MpBtOrqJ9Qnn9A9eNBY8bE3PU1CHpyoVC+i+4xJFVBg4dpEOAS8oSa0crMqPBj9+9VqFXyCkDnG3GsRUAPaS09rbLkuaPCX947Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784196314; c=relaxed/simple;
-	bh=BgBToixEvidZUtjJ0CRiH8gNaOivp4xK6i/KkYkQ6ZM=;
+	s=arc-20240116; t=1784214814; c=relaxed/simple;
+	bh=Dg3PimtZ3YU9WQzgCHjBfTgZrQnXzSp+xYrMN1mqk8U=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=nyPGt9DfOyjmmAj0njq1WAuPJWC9oV8SbXkIJPJqt+4osk5MHKF1O/5TIKnZ2WMCQ6CbwGBOUVxMtVLUN+UsazyLs8HUeNC2uaCRdcAxOrrOchjz78jZoFG7EHw/jIPR9LircUqW2hqsR3sNZFZheO1rR/FYrZgCluXdSRT06A0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=bTd8lB4J; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=OEOOLP3TSg/XLqMDY6Ut4vIH2duY7CnlP+372SSDb9l6Z3OdaIkoo47R9IEA2OW0nmD5D+ZRgRaNy8PaIC6O82FUaxb/gadCoHwL8OLYiCpd6HG7gMbVCnnFRAyAXjP3Js+vjH5f4tRJ7W1twNR15T1Wahmc6KjGgH28fV0i8tc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SpJ1ApkF; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bTd8lB4J"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1784196312;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=DI+PDORv1aJVAQtbMTNnHI2lUR6TrryOZGxBa77OmvQ=;
-	b=bTd8lB4JxlTnPjoT8mE5OReUtcStwC32trTzCXcVNNFh22DL3o2pMB3lSN0EaFmsoJzH/c
-	OeMnPVWiJnncRj8OY5CnhMwGTwC1F4ebE18wVFPh8BtIiXsaBQGCgf0iAGVE+Md+cLkEj5
-	+ESXX8ItnXElxy6tNl5FPHUJZwM8Z4s=
-Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-623-p1E7IKNGMo6nFj3jYYpVEA-1; Thu,
- 16 Jul 2026 06:05:09 -0400
-X-MC-Unique: p1E7IKNGMo6nFj3jYYpVEA-1
-X-Mimecast-MFC-AGG-ID: p1E7IKNGMo6nFj3jYYpVEA_1784196307
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id C478B1956053;
-	Thu, 16 Jul 2026 10:05:07 +0000 (UTC)
-Received: from bfoster (unknown [10.22.88.111])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id E6B771955F74;
-	Thu, 16 Jul 2026 10:05:06 +0000 (UTC)
-Date: Thu, 16 Jul 2026 06:05:04 -0400
-From: Brian Foster <bfoster@redhat.com>
-To: Qu Wenruo <wqu@suse.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Anand Jain <asj@kernel.org>, Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] fstests: generic: add a basic cachestat test case
-Message-ID: <alis0DbcUX9Dd897@bfoster>
-References: <20260715223716.5965-1-wqu@suse.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SpJ1ApkF"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 65DC61F000E9;
+	Thu, 16 Jul 2026 15:13:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1784214810;
+	bh=Nq0o8IkFTSpTPiywOhNUd0Fd8PqK4m+L+GHFzFxFWFs=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=SpJ1ApkFaNCt0lDWPQBfR1F/YdT8kTt9L2dCVh2Db5gLLYhsf87r4iDbOyQbBqXgq
+	 KuZ6zgFyiEQDaCZC9to9zRiXEo3dNVAT+IK09QfnyXfG5t6v+lCpYEKlgO8rAWaYbM
+	 tNywgi9CKXqcA0dM3DGW3EkWXUVeFyVDCSdAz54/Dq6szLgZ5lBcz/5EHWzCKwDbtT
+	 QEo08hHH7aP9cbdYsCBze0+9GnTHogbGa0XQDIgu78ALlP7I+DIkdIH+8s3lOv7UG5
+	 vXg4Wx1HhWAUYE5opl4c05csB/7roxQB7XxPCAoPsKcZVL/yyJiP0txtDgeYWO3Se4
+	 e7r3xnT6RimaA==
+Date: Thu, 16 Jul 2026 08:13:29 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Avinesh Kumar <avinesh.kumar@suse.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, cem@kernel.org
+Subject: Re: [RFC PATCH] libfrog: make cmn_err() emit each message atomically
+ to avoid torn output
+Message-ID: <20260716151329.GA7371@frogsfrogsfrogs>
+References: <20260715173114.359368-1-avinesh.kumar@suse.com>
+ <20260715190949.GP7380@frogsfrogsfrogs>
+ <3d71046a-2fab-4eab-8f0d-d97c3a5bab88@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -57,120 +44,101 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260715223716.5965-1-wqu@suse.com>
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
+In-Reply-To: <3d71046a-2fab-4eab-8f0d-d97c3a5bab88@suse.com>
 
-On Thu, Jul 16, 2026 at 08:07:16AM +0930, Qu Wenruo wrote:
-> The test case is inspired by LTP, where there is a regression on 64K
-> page size systems with btrfs, that after a fsync, cachestat() still
-> report dirty pages.
+On Thu, Jul 16, 2026 at 09:44:28AM +0200, Avinesh Kumar wrote:
+> Hello Darrick,
 > 
-> The test case itself is pretty simple, fill the file with a buffered write that is
-> 1/2/4/8/16 page sized, call cachestat() to make sure the cached/dirtied
-> number match the page number.
 > 
-> Then do a fsync(), and make sure the dirty page number reduced to 0
-> meanwhile cached is still the same.
-> 
-> Link: https://bugzilla.suse.com/show_bug.cgi?id=1270397
-> Reviewed-by: Anand Jain <asj@kernel.org>
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
-> Changelog:
-> v3:
-> - Use golden output to greatly simplify the test case
-> 
-> - Do not mkfs for each size, just remove the original file
-> 
-> v2:
-> - Reject "sync" and "dax" mount options
->   Those mount options write back data synchronously, will screw up the
->   buffered write dirtied page reporting.
-> 
-> - Use AWK_PROG everywhere.
-> 
-> - Remove the unnecessary redirection for fsync
-> ---
+> On 7/15/26 9:09 PM, Darrick J. Wong wrote:
+> > On Wed, Jul 15, 2026 at 07:28:21PM +0200, Avinesh Kumar wrote:
+> > > From: Avinesh Kumar <avinesh.kumar@suse.com>
+> > > 
+> > > fstests xfs/033 fails sporadically with a spurious blank line in the
+> > > xfs_repair output:
+> > > 
+> > > - output mismatch (see /opt/xfstests/results//xfs/033.out.bad)
+> > >      --- tests/xfs/033.out	2026-06-24 15:52:51.000000000 -0400
+> > >      +++ /opt/xfstests/results//xfs/033.out.bad	2026-07-14 18:54:46.582495041 -0400
+> > >      @@ -103,6 +103,7 @@
+> > >       Phase 3 - for each AG...
+> > >               - scan and clear agi unlinked lists...
+> > >               - process known inodes and perform inode discovery...
+> > >      +
+> > >       bad magic number 0xffff on inode INO
+> > >       bad version number 0xffffffff on inode INO
+> > >       inode identifier 18446744073709551615 mismatch on inode INO
+> > > 
+> > > Root cause is in cmn_err() (libfrog/util.c), which emits a message
+> > > and its newline as two separate writes to unbuffered stderr.
+> > > xfs_repair's threads all share stderr. If one is preempted between the
+> > > two writes, another thread's line lands in between:
+> > > 
+> > > (snips from `cat -A 033.raw`) -
+> > > Phase 3 - for each AG...$
+> > >          - scan and clear agi unlinked lists...$
+> > >          - process known inodes and perform inode discovery...$
+> > > Metadata corruption detected at 0x445dd3, xfs_inode block 0x80/0x4000        - agno = 0$
+> > > $
+> > > bad CRC for inode 128$
+> > > bad magic number 0x0 on inode 128$
+> > > 
+> > > which should be like -
+> > > 
+> > > Phase 3 - for each AG...$
+> > >          - scan and clear agi unlinked lists...$
+> > >          - process known inodes and perform inode discovery...$
+> > > Metadata corruption detected at 0x445dd3, xfs_inode block 0x80/0x4000$
+> > >          - agno = 0$
+> > > bad CRC for inode 130$
+> > > bad magic number 0x0 on inode 130$
+> > > 
+> > > _filter_repair() strips the noise line it glued onto but not the lone
+> > > newline, which then fails the golden diff.
+> > > 
+> > > Make the two writes atomic.
+> > > 
+> > > Signed-off-by: Avinesh Kumar <avinesh.kumar@suse.com>
+> > > ---
+> > > 
+> > > Hi, please give feedback if this should be fixed in a different way.
+> > > Thanks!
+> > > 
+> > >   libfrog/util.c | 2 ++
+> > >   1 file changed, 2 insertions(+)
+> > > 
+> > > diff --git a/libfrog/util.c b/libfrog/util.c
+> > > index 5bae5bab..3b6df917 100644
+> > > --- a/libfrog/util.c
+> > > +++ b/libfrog/util.c
+> > > @@ -116,8 +116,10 @@ cmn_err(int level, char *fmt, ...)
+> > >   	va_list	ap;
+> > >   	va_start(ap, fmt);
+> > > +	flockfile(stderr);
+> > >   	vfprintf(stderr, fmt, ap);
+> > >   	fputs("\n", stderr);
+> > > +	funlockfile(stderr);
+> > 
+> > I think do_error() in xfs_repair.c is going to need the same treatment
+> > but otherwise this chunk looks ok to me.
+> > 
+> Thanks for the review. I can send a follow up patch for do_error(),
+> or do you want these to go in the same patch?
 
-Nice. Thanks for the tweaks!
+They probably ought to be in the same patch.
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+--D
 
->  tests/generic/798     | 39 +++++++++++++++++++++++++++++++++++++++
->  tests/generic/798.out | 16 ++++++++++++++++
->  2 files changed, 55 insertions(+)
->  create mode 100755 tests/generic/798
->  create mode 100644 tests/generic/798.out
+> Regards,
+> Avinesh
 > 
-> diff --git a/tests/generic/798 b/tests/generic/798
-> new file mode 100755
-> index 00000000..0fe37646
-> --- /dev/null
-> +++ b/tests/generic/798
-> @@ -0,0 +1,39 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-> +#
-> +# FS QA Test 798
-> +#
-> +# Basic tests for cachestat()
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +_require_xfs_io_command "cachestat"
-> +_require_scratch
-> +# Any mount option that writes data back synchronously should be rejected.
-> +# Or it will screw up the dirtied page reporting for buffered writes.
-> +_exclude_scratch_mount_option "dax"
-> +_exclude_scratch_mount_option "sync"
-> +
-> +pagesize=$(_get_page_size)
-> +
-> +_scratch_mkfs > /dev/null
-> +_scratch_mount
-> +
-> +for num_page in 1 2 4 8 16; do
-> +	size=$(($pagesize * $num_page))
-> +
-> +	echo "=== Test with $num_page pages ==="
-> +
-> +	rm -f $SCRATCH_MNT/foobar
-> +	$XFS_IO_PROG -f -c "pwrite -b $pagesize 0 $size" $SCRATCH_MNT/foobar > /dev/null
-> +	# Basic cached number reporting
-> +	$XFS_IO_PROG -c "cachestat 0 $size" $SCRATCH_MNT/foobar
-> +
-> +	# Test dirty page number reporting after a fsync.
-> +	$XFS_IO_PROG -c "fsync" -c "cachestat 0 $size" $SCRATCH_MNT/foobar
-> +done
-> +
-> +_scratch_unmount
-> +_exit 0
-> diff --git a/tests/generic/798.out b/tests/generic/798.out
-> new file mode 100644
-> index 00000000..ca6ead3c
-> --- /dev/null
-> +++ b/tests/generic/798.out
-> @@ -0,0 +1,16 @@
-> +QA output created by 798
-> +=== Test with 1 pages ===
-> +Cached: 1, Dirty: 1, Writeback: 0, Evicted: 0, Recently Evicted: 0
-> +Cached: 1, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
-> +=== Test with 2 pages ===
-> +Cached: 2, Dirty: 2, Writeback: 0, Evicted: 0, Recently Evicted: 0
-> +Cached: 2, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
-> +=== Test with 4 pages ===
-> +Cached: 4, Dirty: 4, Writeback: 0, Evicted: 0, Recently Evicted: 0
-> +Cached: 4, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
-> +=== Test with 8 pages ===
-> +Cached: 8, Dirty: 8, Writeback: 0, Evicted: 0, Recently Evicted: 0
-> +Cached: 8, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
-> +=== Test with 16 pages ===
-> +Cached: 16, Dirty: 16, Writeback: 0, Evicted: 0, Recently Evicted: 0
-> +Cached: 16, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
-> -- 
-> 2.51.2
+> > --D
+> > 
+> > >   	va_end(ap);
+> > >   }
+> > > -- 
+> > > 2.55.0
+> > > 
+> > > 
 > 
-
+> 
