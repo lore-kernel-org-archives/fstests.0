@@ -1,40 +1,42 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 951473EB111;
-	Fri, 17 Jul 2026 08:37:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0179E37267E
+	for <fstests@vger.kernel.org>; Fri, 17 Jul 2026 09:22:16 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784277445; cv=none; b=Fp104hjaCSR/wcuvTaDkv0A2MobFzdxNcW13TH7Lbi9bptj7YkCKW50afUqWH4d3R+N4IY5TJ3xFm3P6/tT6ojWyLNsH26r4MbaBIpl/1JZUf7NZmyP7oVudbxZItJ2D0k/tJLT6l2A4NAxowTtPaNsXNJmH2FuffeUmjFpJJu8=
+	t=1784280138; cv=none; b=eaytvo6HT1ejWwwKYp2acYx+eNtIN/enQntJ9Bcp0ikc/S9JWhGNEOtbdt77bQiA/+35xYLMPMCpIB/HO77Bpp7taFuuHhGWL15QyHap0mZNw7ODkePPvwzIf0J13/m09uX/+g3eZol1jmo8Hvm3MPjGrGDKS587v/cu+oEw150=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784277445; c=relaxed/simple;
-	bh=2AVowX6wwAccUq48nS/ios/4u/Ojd1E3f6atrFw4akY=;
+	s=arc-20240116; t=1784280138; c=relaxed/simple;
+	bh=/loaCfdl7dj5eXod4M+AZQGBoKKw1DGeiRESug2iHG4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ktuAqBLhyLacZ1mNpOpDFQH9P1lOOR5RI59WXaijB2ZigikhoHMVonSegs1HhkeKkuZKO7/IkcMq/TDHgKS9nAh1TLmyvZl0nHUUY27Ok8+cbNrV/5S12RpZwoZ7oljJPeaz96FCimGp3/OTKr8Ng8rGXI/7rW7URpL1oyknhGA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HVu1mj5M; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=WaV653GQcMf+j7i0BtE2qluHW6ZVw0sgfE+nEqDXJ8T2QdermF4P0KECX7KJtt3BFitTw9I6nUWaWHHGjHz4RtiDjnx4w/QWaHnEO7QWOiRQujXfW6TKDF6AYqLSDzeP5VTRRBG57pUroHfl1o46vnNyOlnFkM8OEhB2mpjjTAU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=e8is7I0l; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HVu1mj5M"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 103981F01558;
-	Fri, 17 Jul 2026 08:37:20 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="e8is7I0l"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6C1411F000E9;
+	Fri, 17 Jul 2026 09:22:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1784277443;
-	bh=i/aT8SXy5YBoNHA/kYt9JXspr+yLgH28h45fUVolXJA=;
+	s=k20260515; t=1784280136;
+	bh=w0y0E50384hKrsODlpwmviHqrsNr9UJFgIeGMMLZutM=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=HVu1mj5Mo+ZefVQhh9DLGEP4h8u0cs7SDt1RUfhKJNV2unFb+dhD/v4c+lXZcR1DF
-	 GA3T9iu+fWrLFK0nwYdJfq87dboCRKHTHCQgp3jwgc6/DalKO/EfPPeKKiCgvNJehh
-	 3+GzzB4rzP/ptwtziu7yjE+YWq7KrPaF4lAdp3vZrsGq1AEloypowUVnOqQ+jpWz4F
-	 uJcXWNaHBZBQmDlG4L3NLpG9AV3TcKRlMGyjfOEI75Ot4Xdpw0BtnioA5QB4Ca9B1F
-	 ugz2E8MgrxEu3cyoR3MqjqyZd49zkZwEWuVUb4FLh5LQLcyl+CGJ+0F2X4UbQrZ2At
-	 ZzN11t52InXBA==
-Date: Fri, 17 Jul 2026 16:37:17 +0800
+	b=e8is7I0lKMHgc5Eghb2PIgvkzAUvIXOPI14XxoTwltvIy0naPwZurmYM9gQ/o9bvl
+	 8W/68iMaoVRbwiTKrbs85uwULuq2EJgf3OcbReGsV4AHVOhsf8M6gKAPKGNCdLDb1n
+	 cQiYm14hG8CKsZlF/C6nmkZYQdry+2yOnHSg9UJxyZLHr5j75x2JqNO+Pai1/dpz4B
+	 Hz7tM+B7Qs3A5uiichQxeW8V4LRCKhzflfCklZEtNk/+Xp+ngYPC9DFqWIqg8MDRrS
+	 ynIJtDQYihGvRgTErRGcKCf3mAIIv8tEccsVVlGWZ7wvMFioV7TI1H9EU7qQAnTKtV
+	 U+4lXadpEv3uA==
+Date: Fri, 17 Jul 2026 17:22:11 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: djwong@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs: remove the v2log group
-Message-ID: <alnpAUM8YfxmHcMv@zlang-mailbox>
-Mail-Followup-To: Christoph Hellwig <hch@lst.de>, djwong@kernel.org, 
-	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-References: <20260618134528.237508-1-hch@lst.de>
+To: Avinesh Kumar <avinesh.kumar@suse.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH v2] generic/062: filter setfattr --restore symlink-safety
+ warning
+Message-ID: <alnu6gq9a1bJJF8b@zlang-mailbox>
+Mail-Followup-To: Avinesh Kumar <avinesh.kumar@suse.com>, 
+	fstests@vger.kernel.org
+References: <20260706061102.90603-1-avinesh.kumar@suse.com>
+ <20260706191326.122555-1-avinesh.kumar@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,121 +45,55 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260618134528.237508-1-hch@lst.de>
+In-Reply-To: <20260706191326.122555-1-avinesh.kumar@suse.com>
 
-On Thu, Jun 18, 2026 at 03:45:28PM +0200, Christoph Hellwig wrote:
-> v2log have been the default for more than a decade.  Merge all xfs log
-> tests into the log group instead of splitting them up (with a lot of
-> overlap).
+On Mon, Jul 06, 2026 at 09:13:26PM +0200, Avinesh Kumar wrote:
+> From: Avinesh Kumar <avinesh.kumar@suse.com>
 > 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
+> attr 2.6.0 (CVE-2026-54371 fix)[0] makes "setfattr --restore" warn when
+> used without -P and the dump contains a symlink, which generic/062 does.
+> The warning leaks into the compared output via the setfattr() wrapper
+> and fails the test. Adding -P isn't portable (older attr doesn't have it),
+> so filter the warning in the wrapper instead.
+> 
+> [0] https://cgit.git.savannah.nongnu.org/cgit/attr.git/commit/?id=3fb06b9ba314d37035d0877e6de313de754f1ac8
 
-Highly welcome the reorganization of the groups. As the number of test
-cases in xfstests grows, a clearer and more effective group classification
-will definitely be helpful.
+For generic/062, modifying the g/062 itself seems fine and logical, as
+_extend_test_bed() explicitly introduces complex symlink paths for
+testing purposes.
+
+Have you run xfstests on XFS with attr 2.6.0? There are quite a few
+setfattr --restore invocations in common/populate. If those also trigger
+the new unsafe restore warnings, we might want to consider introducing
+a helper function, such as _setfattr or _setfattr_restore to handle to
+-h and -P things.
 
 Reviewed-by: Zorro Lang <zlang@kernel.org>
 
->  doc/group-names.txt | 1 -
->  tests/generic/054   | 2 +-
->  tests/generic/055   | 2 +-
->  tests/xfs/095       | 2 +-
->  tests/xfs/119       | 2 +-
->  tests/xfs/135       | 2 +-
->  tests/xfs/137       | 2 +-
->  7 files changed, 6 insertions(+), 7 deletions(-)
 > 
-> diff --git a/doc/group-names.txt b/doc/group-names.txt
-> index 158f84d36d31..424e2c4a1ca6 100644
-> --- a/doc/group-names.txt
-> +++ b/doc/group-names.txt
-> @@ -142,7 +142,6 @@ union			tests from the unionmount test suite
->  unlink			O_TMPFILE unlinked files
->  unreliable_in_parallel	randomly fail when run in parallel with other tests
->  unshare			fallocate FALLOC_FL_UNSHARE_RANGE
-> -v2log			XFS v2 log format tests
->  verity			fsverity
->  volume			btrfs volume management
->  whiteout		overlayfs whiteout functionality
-> diff --git a/tests/generic/054 b/tests/generic/054
-> index 0649b25930c6..f6eb8975b32e 100755
-> --- a/tests/generic/054
-> +++ b/tests/generic/054
-> @@ -9,7 +9,7 @@
->  # In another qa test we can do more e.g. use fsstress.
->  #
->  . ./common/preamble
-> -_begin_fstest shutdown log v2log auto
-> +_begin_fstest shutdown log auto
+> Signed-off-by: Avinesh Kumar <avinesh.kumar@suse.com>
+> ---
+>  tests/generic/062 | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/062 b/tests/generic/062
+> index 89659040..ddf0a478 100755
+> --- a/tests/generic/062
+> +++ b/tests/generic/062
+> @@ -30,7 +30,12 @@ getfattr()
 >  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/055 b/tests/generic/055
-> index e57f95faf897..f87fd7fb1850 100755
-> --- a/tests/generic/055
-> +++ b/tests/generic/055
-> @@ -9,7 +9,7 @@
->  # * also can interrupt metadata with godown
->  #
->  . ./common/preamble
-> -_begin_fstest shutdown log v2log auto quota stress
-> +_begin_fstest shutdown log auto quota stress
+>  setfattr()
+>  {
+> -    $SETFATTR_PROG $@ 2>&1 | _filter_scratch
+> +    # attr >= 2.6.0 (CVE-2026-54371 fix) warns that "setfattr --restore" without
+> +    # -P/--physical is unsafe because it can traverse symlinks. Older attr does
+> +    # not accept -P, so just filter the warning to stay version-agnostic.
+> +    $SETFATTR_PROG $@ 2>&1 | \
+> +        sed -e '/^Warning: option --restore=file is unsafe without option/d' | \
+> +        _filter_scratch
+>  }
 >  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/095 b/tests/xfs/095
-> index da0d2ae4bb57..ab2ccfc7361c 100755
-> --- a/tests/xfs/095
-> +++ b/tests/xfs/095
-> @@ -7,7 +7,7 @@
->  # Test upgrading the XFS log to v2
->  #
->  . ./common/preamble
-> -_begin_fstest log v2log auto
-> +_begin_fstest log auto
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/119 b/tests/xfs/119
-> index 7c1cd6a50ce5..e44d5a996a96 100755
-> --- a/tests/xfs/119
-> +++ b/tests/xfs/119
-> @@ -9,7 +9,7 @@
->  # This can hang when things aren't working
->  #
->  . ./common/preamble
-> -_begin_fstest log v2log auto freeze
-> +_begin_fstest log auto freeze
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/xfs/135 b/tests/xfs/135
-> index ec0b54ab45c3..e8c490a0c13f 100755
-> --- a/tests/xfs/135
-> +++ b/tests/xfs/135
-> @@ -9,7 +9,7 @@
->  # and verified with xfs_logprint.
->  #
->  . ./common/preamble
-> -_begin_fstest auto logprint quick v2log
-> +_begin_fstest auto logprint quick log
->  
->  # Import common functions.
->  . ./common/log
-> diff --git a/tests/xfs/137 b/tests/xfs/137
-> index d97942bf671a..20d46f439b8a 100755
-> --- a/tests/xfs/137
-> +++ b/tests/xfs/137
-> @@ -12,7 +12,7 @@
->  # xfs_repair detect the problem.
->  #
->  . ./common/preamble
-> -_begin_fstest auto metadata v2log
-> +_begin_fstest auto metadata log
->  
->  # Import common functions.
->  
+>  _create_test_bed()
 > -- 
-> 2.53.0
+> 2.54.0
 > 
