@@ -1,150 +1,172 @@
-Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 99BE43CEBAA
-	for <fstests@vger.kernel.org>; Fri, 17 Jul 2026 12:04:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4DAD342A158;
+	Fri, 17 Jul 2026 16:20:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784289865; cv=none; b=TcjAY8tujW7MPRSzGZ4GYSdOpVzSAmohMySNzynq8ExZ539ajT6Q0U3ZJkmXT7cl3MkkK0Fx3DYpeYFeQtfN+8xxeRDMMu0veQnfWSB2cq8g7mTHrFlaP6x7Be2dpXVyInoZqRmE7A6Fo/FCFN35bFQ/6PR2AX5JZaOvMzU/+ps=
+	t=1784305204; cv=none; b=QVqG2w9z2Nv3+ItDtnZiOPb/JUV/qGVSeiHMcs5tJfiTZvx7ENjuMs26FHliDsZoPozHHCf5h9rNUwqmxrM/A4rqfLhPS4DbFj2mNrEVJp8sJAHYu7hEol/uWIKUXs15kASbpbGEa28Pf45d5ahfNZgq1sGrowJdMjO6Ly562c0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784289865; c=relaxed/simple;
-	bh=iQzX2N9ERjtVyNbTRivYLthX5j0B3TooXgqTIzwxLVc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=ZIYt8mJZ5QE64vBXvbvFxVANWsRfXRhT+HHHeL++JTna8OFD00sQILsr+GDPLyzLDfgUtW8xvnA93gK1wE4OGosvStD7VjGLDfP0aIV5hQT2ZGs7bpyn+EpYy43b3+wVBKrRgw2atgfhe1P6URUK7bPioFvwdSEzyHk8Bjb+JMs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=d7w/uHuK; arc=none smtp.client-ip=209.85.221.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1784305204; c=relaxed/simple;
+	bh=gwYYfaBPvkkdTBEGfghTg5/RzhaRVi35iovpcnmw8Z0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=fEP5ML4+2aS5Ahxr+2Nue53qqOf9Od0rQJrrV8ZhLY4/kkPtLky3o8/tD72WYAVJoZOjVliLNxm9Dis+Yk3e1GniA3r6TQCo9IVRdsDITtRTKFKdo2jVSzdkta4TrFEkUQIT/SenhCO8ioLu8BEncxWw6D28fZ4fIziaWHG//sA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QSVzyISa; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="d7w/uHuK"
-Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-47defd0c1c5so3462947f8f.3
-        for <fstests@vger.kernel.org>; Fri, 17 Jul 2026 05:04:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1784289862; x=1784894662; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:from
-         :content-language:references:to:subject:user-agent:mime-version:date
-         :message-id:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=pf+GsaiLXl1dG+ZzD7foaIYNKnVSN9/J67lz0tqkkyw=;
-        b=d7w/uHuKfM9vkseEmL3B6AWXNRzQvy+oczcHsDve4jI5hUpppnKi9XoJvuUl1fSIDh
-         EH+rEYLp+pDZimRez3cDkrs8g2hJZEwzg8hX7EryqPk7JPvIkF6CFLssI8T/vEy1wirK
-         wxWmLIhFKX/RA1jREdYhRgra4iDh0xfsDkDdhDf9tJ/HOcxK8K3Fa6eyn0yZpnEUpxlg
-         mTC23zQrHb8ep2701SrJrIOBfl9Y4p4ZI1kAiAWagSaj3M3X3iyGlCpPKmjkcfU1d6iB
-         eVXjDOd4XDjLAJRuFsrGLQ32EO0mBsFFloYzEjrCYvPQbFF6utcXOewb3GYDgYImA/kO
-         685Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784289862; x=1784894662;
-        h=content-transfer-encoding:content-type:in-reply-to:from
-         :content-language:references:to:subject:user-agent:mime-version:date
-         :message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=pf+GsaiLXl1dG+ZzD7foaIYNKnVSN9/J67lz0tqkkyw=;
-        b=ZPKbnDdDZNBQLPrO1JurnE/j4OKWsMJnbukrlsiOua0I2ClV7J8V1AwUrhOB3HGi0Q
-         vmw5Ivk5tXch3KoC0N+0pT+geFfG9iQY3P+sW3MsHpk7H0X7CUTPF/Z1OAaW/lTXuILs
-         zzsFlCxJt3UGAUGNvEdp8aWXqNOpnwW9LdSJl/TKHs3yyQeaNZHclM+IX3JFCS4uPO6T
-         thcXZE+VvNtwqDgN+YqW0lPU3ZpgbLIoc/5cdWBHohryJamATyVOllQQcirMskiqsXcP
-         m4o670beK6KtGetnjE7nur9v3V75DXAfQiKBS2ZEs9paJHXrU2JvO+UmHWqDAAzO7i5r
-         A28A==
-X-Gm-Message-State: AOJu0YwIs0M29g3TWVLxJtMvBX+LmBFqRZkyNLLPUqA0SpoLTWA3Wqs0
-	fjkcjjjHX/pzomgSVXR/91ojm8pZGWsLN3lxzYGhEveq+jyar9zkBgBeh3NX2jivot5X6cgPkuY
-	PXfqtXkw=
-X-Gm-Gg: AfdE7cmh+WKOiLXuvHf/7KfBw7VS8JILmuTyJaY3mdk8aFSzUP3tQaCTCI0Monjxbo5
-	gW6KsXKQqSctJs1AD9igVDhytxbWUQUUwUAk4sSjAeGAo72Q8VZRha+0YjPDu9Se+mtEibAUC86
-	5HxidZicg9UTuNnV6PWePNeEJeYWqDqXYqKGTcGiODVLf3GDWDudrUVtKi21RolfD4qs/gL3voF
-	gSyr91OI67PpQzh0aKMdzgQQOg1MWHZat1Zh1HNEyH8u7qggsppO5rK+7uhvi9IxLfFZxWdXCVX
-	WMhgKV23cy0zhyhASCnEdWNFW7QPgyq0vv7HyZStC8hvqeMA0rPM5oRFEXBt0h2kmL9VkGmGiTL
-	0V78u3NRbwidZw7MfX4ATOhinWUesSIIiRnEYofzhMS4tr13KHi7/zi1xYhHeJqLruiCJnWElGw
-	GpXVLXEkvwUezI7hpof7OJTXom8BoIZA==
-X-Received: by 2002:a05:600c:5493:b0:493:f80c:5455 with SMTP id 5b1f17b1804b1-4954a3d0cb1mr27613485e9.5.1784289861542;
-        Fri, 17 Jul 2026 05:04:21 -0700 (PDT)
-Received: from ?IPV6:2a07:b241:1004:8300::1000? ([2a07:b241:1004:8300::1000])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4954d384146sm8563155e9.14.2026.07.17.05.04.20
-        for <fstests@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 17 Jul 2026 05:04:21 -0700 (PDT)
-Message-ID: <bbcbd145-47eb-4336-b9e2-588b68cdb41b@suse.com>
-Date: Fri, 17 Jul 2026 14:04:20 +0200
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QSVzyISa"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7FF4D1F000E9;
+	Fri, 17 Jul 2026 16:19:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1784305202;
+	bh=mXxuUX6egP3L+HigzQLjcN5r+sZSo1AI07VgYToFH78=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=QSVzyISandzbX11SbK+wAkXqDYi025m2IT0UbMBA734fAHH16Fb1IotN6DwmnZpet
+	 L2Ii24RIwTRAYL7ut8RJYizGtszcGzWE4TpVf/8uH9OCuHyEyj2eklOlFzS524/ZYo
+	 wfI3a1A8Uj8gaP29CCOtHeI669ofDi0mtUsg0cnbxAYeywvz7/xvtJTC6SqWK9p9PN
+	 H16LWMD5ZdYBHLwEDiMZZtOP3FjFlLvcYa/MIIHn5kJKHLiHLs8f+4iauVT1ziZq6x
+	 m7djRh73b9pIwT9+A+FuVT1ZxVCT2Y/WNUrLkgeoAldba7GVwVjmDKxcM37r2/ZjKh
+	 odSfHNGEgIw6w==
+Date: Sat, 18 Jul 2026 00:19:52 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, 
+	"linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "slava@dubeyko.com" <slava@dubeyko.com>
+Subject: Re: Should we consider disable generic/563 for file systems that do
+ not support cgroup2?
+Message-ID: <alpUADtQccA2zmWh@zlang-mailbox>
+Mail-Followup-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>, 
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, 
+	"slava@dubeyko.com" <slava@dubeyko.com>
+References: <ff1c0710cbb31f8ebf51457c0629a496ea6f658e.camel@ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] generic/062: filter setfattr --restore symlink-safety
- warning
-To: fstests@vger.kernel.org
-References: <20260706061102.90603-1-avinesh.kumar@suse.com>
- <20260706191326.122555-1-avinesh.kumar@suse.com>
- <alnu6gq9a1bJJF8b@zlang-mailbox>
-Content-Language: en-US
-From: Avinesh Kumar <avinesh.kumar@suse.com>
-In-Reply-To: <alnu6gq9a1bJJF8b@zlang-mailbox>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ff1c0710cbb31f8ebf51457c0629a496ea6f658e.camel@ibm.com>
 
-Hello Zorro,
-
-Thanks for the review.
-
-On 7/17/26 11:22 AM, Zorro Lang wrote:
-> On Mon, Jul 06, 2026 at 09:13:26PM +0200, Avinesh Kumar wrote:
->> From: Avinesh Kumar <avinesh.kumar@suse.com>
->>
->> attr 2.6.0 (CVE-2026-54371 fix)[0] makes "setfattr --restore" warn when
->> used without -P and the dump contains a symlink, which generic/062 does.
->> The warning leaks into the compared output via the setfattr() wrapper
->> and fails the test. Adding -P isn't portable (older attr doesn't have it),
->> so filter the warning in the wrapper instead.
->>
->> [0] https://cgit.git.savannah.nongnu.org/cgit/attr.git/commit/?id=3fb06b9ba314d37035d0877e6de313de754f1ac8
+On Fri, Jul 10, 2026 at 07:10:43PM +0000, Viacheslav Dubeyko wrote:
+> Hello,
 > 
-> For generic/062, modifying the g/062 itself seems fine and logical, as
-> _extend_test_bed() explicitly introduces complex symlink paths for
-> testing purposes.
+> As far as I can see, the generic/563 test is dedicated to cgroup v2
+> functionality. And several file systems fails to execute the test:
 > 
-> Have you run xfstests on XFS with attr 2.6.0? There are quite a few
-> setfattr --restore invocations in common/populate. If those also trigger
-> the new unsafe restore warnings, we might want to consider introducing
-> a helper function, such as _setfattr or _setfattr_restore to handle to
-> -h and -P things.
+> sudo ./check generic/563
+> FSTYP         -- hfsplus
+> PLATFORM      -- Linux/x86_64 hfsplus-testing-0001 7.2.0-rc1+ #55 SMP
+> PREEMPT_DYNAMIC Fri Jul 10 11:21:38 PDT 2026
+> MKFS_OPTIONS  -- /dev/loop51
+> MOUNT_OPTIONS -- /dev/loop51 /mnt/scratch
 > 
-> Reviewed-by: Zorro Lang <zlang@kernel.org>
+> generic/563        - output mismatch (see xfstests-
+> dev/results//generic/563.out.bad)
+>     --- tests/generic/563.out	2026-04-07 14:19:04.785079940 -0700
+>     +++ xfstests-dev/results//generic/563.out.bad	2026-07-10
+> 11:33:14.231562955 -0700
+>     @@ -4,11 +4,13 @@
+>      write is in range
+>      write -> read/write
+>      read is in range
+>     -write is in range
+>     +write has value of 0
+>     +write is NOT in range 15938355.2 .. 17616076.8
+>      read is in range
+>     ...
+>     (Run 'diff -u xfstests-dev/tests/generic/563.out xfstests-
+> dev/results//generic/563.out.bad'  to see the entire diff)
+> Ran: generic/563
+> Failures: generic/563
+> Failed 1 of 1 tests
+> 
+> sudo ./check generic/563
+> FSTYP         -- vfat
+> PLATFORM      -- Linux/x86_64 hfsplus-testing-0001 7.2.0-rc1+ #55 SMP
+> PREEMPT_DYNAMIC Fri Jul 10 11:21:38 PDT 2026
+> MKFS_OPTIONS  -- /dev/loop51
+> MOUNT_OPTIONS -- /dev/loop51 /mnt/scratch
+> 
+> generic/563        - output mismatch (see xfstests-
+> dev/results//generic/563.out.bad)
+>     --- tests/generic/563.out	2026-04-07 14:19:04.785079940 -0700
+>     +++ xfstests-dev/results//generic/563.out.bad	2026-07-10
+> 11:36:02.221320239 -0700
+>     @@ -1,14 +1,19 @@
+>      QA output created by 563
+>      read/write
+>     -read is in range
+>     +read has value of 22014464
+>     +read is NOT in range 15938355.2 .. 17616076.8
+>      write is in range
+>      write -> read/write
+>     ...
+>     (Run 'diff -u xfstests-dev/tests/generic/563.out xfstests-
+> dev/results//generic/563.out.bad'  to see the entire diff)
+> Ran: generic/563
+> Failures: generic/563
+> Failed 1 of 1 tests
+> 
+> sudo ./check generic/563
+> FSTYP         -- nilfs2
+> PLATFORM      -- Linux/x86_64 hfsplus-testing-0001 7.2.0-rc1+ #55 SMP
+> PREEMPT_DYNAMIC Fri Jul 10 11:21:38 PDT 2026
+> MKFS_OPTIONS  -- /dev/loop51
+> MOUNT_OPTIONS -- /dev/loop51 /mnt/scratch
+> 
+> generic/563        - output mismatch (see xfstests-
+> dev/results//generic/563.out.bad)
+>     --- tests/generic/563.out	2026-04-07 14:19:04.785079940 -0700
+>     +++ xfstests-dev/results//generic/563.out.bad	2026-07-10
+> 11:37:57.633280743 -0700
+>     @@ -1,14 +1,18 @@
+>      QA output created by 563
+>      read/write
+>      read is in range
+>     -write is in range
+>     +write has value of 0
+>     +write is NOT in range 15938355.2 .. 17616076.8
+>      write -> read/write
+>     ...
+>     (Run 'diff -u xfstests-dev/tests/generic/563.out xfstests-
+> dev/results//generic/563.out.bad'  to see the entire diff)
+> Ran: generic/563
+> Failures: generic/563
+> Failed 1 of 1 tests
+> 
+> Should file system (like HFS/HFS+, for example) implement cgroup2 support to
+> pass the  generic/563 successfully? Is it generic enough test-case? Should we
+> consider disable generic/563 for file systems that do not support cgroup2?
 
-I am sorry, I forgot to reply to my patch here. I got same feedback from
-Darrick when I sent patch for xfs/083 for the same issue. So this is
-being handled with a wrapper. Please review here and this patch can
-be ignored -
-https://lore.kernel.org/fstests/9b95ab03-34c0-4d2f-b4d7-fdb9c8cbb193@suse.com/T/#m3bef5e49d3ca17f845a3ccab8b6dea5b67c00d86
+Hi Viacheslav,
 
+I completely understand your frustration. The "generic" test suite in fstests
+isn't a universal requirement document, so I can't really answer whether HFS+
+should support cgroup2 or not..
 
-Regards,
-Avinesh
+File systems that are not supported by fstests good enough, frequently run into
+false failures. When facing a test that is "destined" to fail on a specific
+$FSTYP, you have below options (maybe more):
+
+1. You can add this specific test (e.g., generic/563) to your daily local test
+   exclusion list, refer to the -e or -E options with the ./check script.
+
+2. You can modify the test case to explicitly skip a specific $FSTYP using the
+   _exclude_fs helper, along with a short comment explaining why.
+
+3. You can use or implement a _require_ function to check if a specific feature
+   is supported, which will gracefully _notrun the test if it's missing. While
+   _require_cgroup2() already exists, its granularity is currently too coarse to
+   _notrun for HFS. You might want to consider refining it or introducing a new
+   helper to help file systems like HFS+ _notrun properly.
+
+I hope my reply help to clear something for you, please let me know if you have
+any further questions.
+
+Thanks,
+Zorro
 
 > 
->>
->> Signed-off-by: Avinesh Kumar <avinesh.kumar@suse.com>
->> ---
->>   tests/generic/062 | 7 ++++++-
->>   1 file changed, 6 insertions(+), 1 deletion(-)
->>
->> diff --git a/tests/generic/062 b/tests/generic/062
->> index 89659040..ddf0a478 100755
->> --- a/tests/generic/062
->> +++ b/tests/generic/062
->> @@ -30,7 +30,12 @@ getfattr()
->>   
->>   setfattr()
->>   {
->> -    $SETFATTR_PROG $@ 2>&1 | _filter_scratch
->> +    # attr >= 2.6.0 (CVE-2026-54371 fix) warns that "setfattr --restore" without
->> +    # -P/--physical is unsafe because it can traverse symlinks. Older attr does
->> +    # not accept -P, so just filter the warning to stay version-agnostic.
->> +    $SETFATTR_PROG $@ 2>&1 | \
->> +        sed -e '/^Warning: option --restore=file is unsafe without option/d' | \
->> +        _filter_scratch
->>   }
->>   
->>   _create_test_bed()
->> -- 
->> 2.54.0
->>
-
+> Thanks,
+> Slava.
