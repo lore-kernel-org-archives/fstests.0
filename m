@@ -1,143 +1,150 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC4B13DDB02
-	for <fstests@vger.kernel.org>; Fri, 17 Jul 2026 10:47:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 99BE43CEBAA
+	for <fstests@vger.kernel.org>; Fri, 17 Jul 2026 12:04:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784285261; cv=none; b=HJCGcwhrcfpI4t/oyQL7SmKkm8CKlzV9TEi1CgTi2tqi8nGv9Vc8/sDyw9r8oggjK0xA0K99kRrKMO903nJEpPIbYw00pMS4HJsiNIZjp6CBgXNTzf7ECRXCnO6FxfaCA1RSmCjoCIJSca4yKFcIGUywTd0R+pg67sUPDL0oTLE=
+	t=1784289865; cv=none; b=TcjAY8tujW7MPRSzGZ4GYSdOpVzSAmohMySNzynq8ExZ539ajT6Q0U3ZJkmXT7cl3MkkK0Fx3DYpeYFeQtfN+8xxeRDMMu0veQnfWSB2cq8g7mTHrFlaP6x7Be2dpXVyInoZqRmE7A6Fo/FCFN35bFQ/6PR2AX5JZaOvMzU/+ps=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784285261; c=relaxed/simple;
-	bh=jeH2zw4BGNRXHlLehDIqu3eWxux0A2kBrwIhX6tMTfk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ovTf3oTrQieEAY4IsH9FJdnpvXzdgi+2MzIm3tJGUN3Y8F95uzgOrYPsLWDklreWoPsFPVgJgGRTIdurgdPEXfnp4/uyRcFi4iFPmC3DyEziyiwXIQ7AoGX48lVFJYl1Ph869zPN5x7Oo0pqW2e06VkssYDKYTugOBnmDuBINWg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bgsT2q8B; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1784289865; c=relaxed/simple;
+	bh=iQzX2N9ERjtVyNbTRivYLthX5j0B3TooXgqTIzwxLVc=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=ZIYt8mJZ5QE64vBXvbvFxVANWsRfXRhT+HHHeL++JTna8OFD00sQILsr+GDPLyzLDfgUtW8xvnA93gK1wE4OGosvStD7VjGLDfP0aIV5hQT2ZGs7bpyn+EpYy43b3+wVBKrRgw2atgfhe1P6URUK7bPioFvwdSEzyHk8Bjb+JMs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=d7w/uHuK; arc=none smtp.client-ip=209.85.221.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bgsT2q8B"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 88C3F1F000E9;
-	Fri, 17 Jul 2026 10:47:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1784285258;
-	bh=eGkSRp4teI72/jI7XMKfV3fBWLaaZ8qcn87O2VoAlz0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=bgsT2q8B7l8GSJIcINJTO6jRK3jIi+NiWEpy+hp2BX9RD/9UjbzBQ4RurxHf31sBq
-	 gCkwXYyrLIbeZGkSPXI2iKnya1r1cp9vFlzGL9JZ4CgZCjzWgG4HIF4qsx5gpdhHWR
-	 xWrMr9DUedhNhRcymJ1HQW3kVFvubPi1LFC16NIAgRo0MvBn5S7aIgOhRNaXttxCH1
-	 nXgp7ty0I85LQFMPrh4fVrC9IOw0eeSC0r0gKATZFhKnwlPnL1kgNIJDkfaGvE/xKj
-	 Pkda7tpl/To2Hbd/IaDQif5ScMyQqBS/qRBwONV3Gsv/1qgH2hZ8yWt1m0Lmej1jEh
-	 +oSuTo9O9DU+A==
-Date: Fri, 17 Jul 2026 18:47:30 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Chao Yu <chao@kernel.org>
-Cc: Anand Suveer Jain <asj@kernel.org>, fstests@vger.kernel.org, 
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net, 
-	"Darrick J. Wong" <djwong@kernel.org>
-Subject: Re: [PATCH v2] common/rc: support f2fs in
- _require_fanotify_ioerrors()
-Message-ID: <aloCfjjqesxpzL9z@zlang-mailbox>
-Mail-Followup-To: Chao Yu <chao@kernel.org>, 
-	Anand Suveer Jain <asj@kernel.org>, fstests@vger.kernel.org, jaegeuk@kernel.org, 
-	linux-f2fs-devel@lists.sourceforge.net, "Darrick J. Wong" <djwong@kernel.org>
-References: <20260706064326.3657995-1-chao@kernel.org>
- <af5f0eb1-0197-4952-a37b-0602799929ec@kernel.org>
- <5c11cd98-bb41-46e0-9765-e2aad57a08e4@kernel.org>
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="d7w/uHuK"
+Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-47defd0c1c5so3462947f8f.3
+        for <fstests@vger.kernel.org>; Fri, 17 Jul 2026 05:04:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1784289862; x=1784894662; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:to:subject:user-agent:mime-version:date
+         :message-id:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=pf+GsaiLXl1dG+ZzD7foaIYNKnVSN9/J67lz0tqkkyw=;
+        b=d7w/uHuKfM9vkseEmL3B6AWXNRzQvy+oczcHsDve4jI5hUpppnKi9XoJvuUl1fSIDh
+         EH+rEYLp+pDZimRez3cDkrs8g2hJZEwzg8hX7EryqPk7JPvIkF6CFLssI8T/vEy1wirK
+         wxWmLIhFKX/RA1jREdYhRgra4iDh0xfsDkDdhDf9tJ/HOcxK8K3Fa6eyn0yZpnEUpxlg
+         mTC23zQrHb8ep2701SrJrIOBfl9Y4p4ZI1kAiAWagSaj3M3X3iyGlCpPKmjkcfU1d6iB
+         eVXjDOd4XDjLAJRuFsrGLQ32EO0mBsFFloYzEjrCYvPQbFF6utcXOewb3GYDgYImA/kO
+         685Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1784289862; x=1784894662;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:to:subject:user-agent:mime-version:date
+         :message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=pf+GsaiLXl1dG+ZzD7foaIYNKnVSN9/J67lz0tqkkyw=;
+        b=ZPKbnDdDZNBQLPrO1JurnE/j4OKWsMJnbukrlsiOua0I2ClV7J8V1AwUrhOB3HGi0Q
+         vmw5Ivk5tXch3KoC0N+0pT+geFfG9iQY3P+sW3MsHpk7H0X7CUTPF/Z1OAaW/lTXuILs
+         zzsFlCxJt3UGAUGNvEdp8aWXqNOpnwW9LdSJl/TKHs3yyQeaNZHclM+IX3JFCS4uPO6T
+         thcXZE+VvNtwqDgN+YqW0lPU3ZpgbLIoc/5cdWBHohryJamATyVOllQQcirMskiqsXcP
+         m4o670beK6KtGetnjE7nur9v3V75DXAfQiKBS2ZEs9paJHXrU2JvO+UmHWqDAAzO7i5r
+         A28A==
+X-Gm-Message-State: AOJu0YwIs0M29g3TWVLxJtMvBX+LmBFqRZkyNLLPUqA0SpoLTWA3Wqs0
+	fjkcjjjHX/pzomgSVXR/91ojm8pZGWsLN3lxzYGhEveq+jyar9zkBgBeh3NX2jivot5X6cgPkuY
+	PXfqtXkw=
+X-Gm-Gg: AfdE7cmh+WKOiLXuvHf/7KfBw7VS8JILmuTyJaY3mdk8aFSzUP3tQaCTCI0Monjxbo5
+	gW6KsXKQqSctJs1AD9igVDhytxbWUQUUwUAk4sSjAeGAo72Q8VZRha+0YjPDu9Se+mtEibAUC86
+	5HxidZicg9UTuNnV6PWePNeEJeYWqDqXYqKGTcGiODVLf3GDWDudrUVtKi21RolfD4qs/gL3voF
+	gSyr91OI67PpQzh0aKMdzgQQOg1MWHZat1Zh1HNEyH8u7qggsppO5rK+7uhvi9IxLfFZxWdXCVX
+	WMhgKV23cy0zhyhASCnEdWNFW7QPgyq0vv7HyZStC8hvqeMA0rPM5oRFEXBt0h2kmL9VkGmGiTL
+	0V78u3NRbwidZw7MfX4ATOhinWUesSIIiRnEYofzhMS4tr13KHi7/zi1xYhHeJqLruiCJnWElGw
+	GpXVLXEkvwUezI7hpof7OJTXom8BoIZA==
+X-Received: by 2002:a05:600c:5493:b0:493:f80c:5455 with SMTP id 5b1f17b1804b1-4954a3d0cb1mr27613485e9.5.1784289861542;
+        Fri, 17 Jul 2026 05:04:21 -0700 (PDT)
+Received: from ?IPV6:2a07:b241:1004:8300::1000? ([2a07:b241:1004:8300::1000])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4954d384146sm8563155e9.14.2026.07.17.05.04.20
+        for <fstests@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 17 Jul 2026 05:04:21 -0700 (PDT)
+Message-ID: <bbcbd145-47eb-4336-b9e2-588b68cdb41b@suse.com>
+Date: Fri, 17 Jul 2026 14:04:20 +0200
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <5c11cd98-bb41-46e0-9765-e2aad57a08e4@kernel.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2] generic/062: filter setfattr --restore symlink-safety
+ warning
+To: fstests@vger.kernel.org
+References: <20260706061102.90603-1-avinesh.kumar@suse.com>
+ <20260706191326.122555-1-avinesh.kumar@suse.com>
+ <alnu6gq9a1bJJF8b@zlang-mailbox>
+Content-Language: en-US
+From: Avinesh Kumar <avinesh.kumar@suse.com>
+In-Reply-To: <alnu6gq9a1bJJF8b@zlang-mailbox>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Wed, Jul 08, 2026 at 11:25:37AM +0800, Chao Yu wrote:
-> On 7/7/26 18:13, Anand Suveer Jain wrote:
-> > On 6/7/26 14:43, Chao Yu wrote:
-> >> f2fs has supported to report fserror, this patch adds support for f2fs
-> >> in _require_fanotify_ioerrors(), so that we can run generic/791 on f2fs.
-> >>
-> >> Cc: Darrick J. Wong <djwong@kernel.org>
-> >> Signed-off-by: Chao Yu <chao@kernel.org>
-> >> ---
-> >>  common/rc | 3 +++
-> >>  1 file changed, 3 insertions(+)
-> >>
-> >> diff --git a/common/rc b/common/rc
-> >> index 494725547..f51ad59f3 100644
-> >> --- a/common/rc
-> >> +++ b/common/rc
-> >> @@ -6257,6 +6257,9 @@ _require_fanotify_ioerrors()
-> >>  		x="$(_get_fs_sysfs_attr $TEST_DEV err_report_sec)"
-> >>  		test -n "$x" && return 0
-> >>  		;;
-> > 
-> > 
-> >> +	f2fs)
-> >> +		x="$(cat /sys/fs/f2fs/features/fserror)"
-> >> +		test -n "$x" && return 0
-> > 
-> > Don't we need to check if /sys/fs/f2fs/features/fserror
-> > is present in the running kernel (there are helpers)
+Hello Zorro,
+
+Thanks for the review.
+
+On 7/17/26 11:22 AM, Zorro Lang wrote:
+> On Mon, Jul 06, 2026 at 09:13:26PM +0200, Avinesh Kumar wrote:
+>> From: Avinesh Kumar <avinesh.kumar@suse.com>
+>>
+>> attr 2.6.0 (CVE-2026-54371 fix)[0] makes "setfattr --restore" warn when
+>> used without -P and the dump contains a symlink, which generic/062 does.
+>> The warning leaks into the compared output via the setfattr() wrapper
+>> and fails the test. Adding -P isn't portable (older attr doesn't have it),
+>> so filter the warning in the wrapper instead.
+>>
+>> [0] https://cgit.git.savannah.nongnu.org/cgit/attr.git/commit/?id=3fb06b9ba314d37035d0877e6de313de754f1ac8
 > 
-> Hi Anand,
+> For generic/062, modifying the g/062 itself seems fine and logical, as
+> _extend_test_bed() explicitly introduces complex symlink paths for
+> testing purposes.
 > 
-> You mean _has_fs_sysfs_attr()? however, it forces to check first parameter $dev
-> w/ block device type:
+> Have you run xfstests on XFS with attr 2.6.0? There are quite a few
+> setfattr --restore invocations in common/populate. If those also trigger
+> the new unsafe restore warnings, we might want to consider introducing
+> a helper function, such as _setfattr or _setfattr_restore to handle to
+> -h and -P things.
 > 
-> 	if [ ! -b "$dev" -o -z "$attr" ];then
-> 		_fail "Usage: _has_fs_sysfs_attr <mounted_device> <attr>"
-> 	fi
+> Reviewed-by: Zorro Lang <zlang@kernel.org>
 
-Hi Chao and Anand,
+I am sorry, I forgot to reply to my patch here. I got same feedback from
+Darrick when I sent patch for xfs/083 for the same issue. So this is
+being handled with a wrapper. Please review here and this patch can
+be ignored -
+https://lore.kernel.org/fstests/9b95ab03-34c0-4d2f-b4d7-fdb9c8cbb193@suse.com/T/#m3bef5e49d3ca17f845a3ccab8b6dea5b67c00d86
 
-The *_fs_sysfs related helpers were brought in by me in:
-  commit 2a7b77abcd1dde735186b363da24540706c43b73
-  Author: Zorro Lang <zlang@redhat.com>
-  Date:   Tue Jul 5 17:30:24 2016 +0800
 
-    xfs: configurable behavior on errors at unmount time
+Regards,
+Avinesh
 
-At that time, I didn't think about the "features/" directory.
-
-Now, let me rethink this set of helpers. I feel that the *_fs_sysfs
-family of functions shouldn't be restricted to the $dev directory,
-we should remove this restriction.
-
-Following that, we bring in *_fs_sysfs_device (appending the _device suffix)
-helpers which call *_fs_sysfs(). Also change the test cases who call these
-functions.
-
-Finally, we can introduce the *_fs_sysfs_features functions (or simply use
-*_fs_sysfs directly).
-
-Also, we have both *_fs_sysfs_attr and *_fs_sysfs, and the logic between
-them is somewhat confusing and easy to mix up.
-
-I need to write a series of patches to clean up these logic. For this current
-patch, we can start with a small-scale change first. What do you think?
-
-Thanks,
-Zorro
-
->
 > 
-> > before reading it?
-> 
-> How about this?
-> 
-> f2fs)
->     local feat_file="/sys/fs/f2fs/features/fserror"
->     if [ -f "$feat_file" ] && [ "$(cat "$feat_file")" = "supported" ]; then
->         return 0
->     fi
->     ;;
-> 
-> > 
-> > 
-> > 
-> >>  	esac
-> >>  
-> >>  	_notrun "$FSTYP does not support fanotify ioerrors"
-> > 
-> 
+>>
+>> Signed-off-by: Avinesh Kumar <avinesh.kumar@suse.com>
+>> ---
+>>   tests/generic/062 | 7 ++++++-
+>>   1 file changed, 6 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/tests/generic/062 b/tests/generic/062
+>> index 89659040..ddf0a478 100755
+>> --- a/tests/generic/062
+>> +++ b/tests/generic/062
+>> @@ -30,7 +30,12 @@ getfattr()
+>>   
+>>   setfattr()
+>>   {
+>> -    $SETFATTR_PROG $@ 2>&1 | _filter_scratch
+>> +    # attr >= 2.6.0 (CVE-2026-54371 fix) warns that "setfattr --restore" without
+>> +    # -P/--physical is unsafe because it can traverse symlinks. Older attr does
+>> +    # not accept -P, so just filter the warning to stay version-agnostic.
+>> +    $SETFATTR_PROG $@ 2>&1 | \
+>> +        sed -e '/^Warning: option --restore=file is unsafe without option/d' | \
+>> +        _filter_scratch
+>>   }
+>>   
+>>   _create_test_bed()
+>> -- 
+>> 2.54.0
+>>
+
