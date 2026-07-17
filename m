@@ -1,137 +1,163 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 61E6D3DA7F9
-	for <fstests@vger.kernel.org>; Fri, 17 Jul 2026 07:07:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 951473EB111;
+	Fri, 17 Jul 2026 08:37:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784272059; cv=none; b=eT0qPHwDj4qNpPWMHYFGe6MTnBsq9foFS5VUYpiJDO+hIADYfsNhg2WU164nK5V+suaG0GD+yXOsGBzo70CLUsnUEG3YbI3kHj0JMeuRK4c3FTcjYZ02PoQDYWWWeJNeBKgeUp44mdhGNwxmdOvUvgQFi66gr5E3sM12s4CbQhs=
+	t=1784277445; cv=none; b=Fp104hjaCSR/wcuvTaDkv0A2MobFzdxNcW13TH7Lbi9bptj7YkCKW50afUqWH4d3R+N4IY5TJ3xFm3P6/tT6ojWyLNsH26r4MbaBIpl/1JZUf7NZmyP7oVudbxZItJ2D0k/tJLT6l2A4NAxowTtPaNsXNJmH2FuffeUmjFpJJu8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784272059; c=relaxed/simple;
-	bh=Se6FgeiLE4IJBAdWrogPZ4SMnscez9Le0lcFNl/LIiQ=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=EB6AjsbGyZD+ZVL9LOZi42ABi8bd9sy/ZWROxGKttVU07MyYWnJo7i+3s49ryDc4d0LoRc2+YHMqi+ig1MOzzvSRrYa7ncNoFC+sy+1tZ/IS1IHEwTeYKt2miuispJoiOYkB0qrGwv6N5xiHFPhzaE0+h9uyqp0UAIHSRPPVvQ8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=b8Kw7Jgu; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=b8Kw7Jgu; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1784277445; c=relaxed/simple;
+	bh=2AVowX6wwAccUq48nS/ios/4u/Ojd1E3f6atrFw4akY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ktuAqBLhyLacZ1mNpOpDFQH9P1lOOR5RI59WXaijB2ZigikhoHMVonSegs1HhkeKkuZKO7/IkcMq/TDHgKS9nAh1TLmyvZl0nHUUY27Ok8+cbNrV/5S12RpZwoZ7oljJPeaz96FCimGp3/OTKr8Ng8rGXI/7rW7URpL1oyknhGA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HVu1mj5M; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="b8Kw7Jgu";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="b8Kw7Jgu"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 7ECD678D88;
-	Fri, 17 Jul 2026 07:07:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1784272056; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=kQFcQBfrd1ei6Xfh9tdrBykU2TBH0pZct8isXwZ9F2o=;
-	b=b8Kw7JguBm2lFv4cRntULYt1T9sLhPoXyyMze+KpK2UL1on4/NvueK9lOjQ4C3Pzo8UsM6
-	ITMRBT7ZIAXa4VWj88+XQ24A6RufgXNIvcj9JXr/RoTyJFzxF/KdfwV3Iq9tYs4XA+h7kz
-	rQEN9pH9PCW+V7a9uMP/DVd/iK72oUc=
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1784272056; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=kQFcQBfrd1ei6Xfh9tdrBykU2TBH0pZct8isXwZ9F2o=;
-	b=b8Kw7JguBm2lFv4cRntULYt1T9sLhPoXyyMze+KpK2UL1on4/NvueK9lOjQ4C3Pzo8UsM6
-	ITMRBT7ZIAXa4VWj88+XQ24A6RufgXNIvcj9JXr/RoTyJFzxF/KdfwV3Iq9tYs4XA+h7kz
-	rQEN9pH9PCW+V7a9uMP/DVd/iK72oUc=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 84161779AA;
-	Fri, 17 Jul 2026 07:07:35 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id A7TsEbfUWWodbwAAD6G6ig
-	(envelope-from <wqu@suse.com>); Fri, 17 Jul 2026 07:07:35 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org
-Subject: [PATCH] fstests: vfstest: skip rejected tmpfile creation
-Date: Fri, 17 Jul 2026 16:37:17 +0930
-Message-ID: <20260717070717.113517-1-wqu@suse.com>
-X-Mailer: git-send-email 2.54.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HVu1mj5M"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 103981F01558;
+	Fri, 17 Jul 2026 08:37:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1784277443;
+	bh=i/aT8SXy5YBoNHA/kYt9JXspr+yLgH28h45fUVolXJA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=HVu1mj5Mo+ZefVQhh9DLGEP4h8u0cs7SDt1RUfhKJNV2unFb+dhD/v4c+lXZcR1DF
+	 GA3T9iu+fWrLFK0nwYdJfq87dboCRKHTHCQgp3jwgc6/DalKO/EfPPeKKiCgvNJehh
+	 3+GzzB4rzP/ptwtziu7yjE+YWq7KrPaF4lAdp3vZrsGq1AEloypowUVnOqQ+jpWz4F
+	 uJcXWNaHBZBQmDlG4L3NLpG9AV3TcKRlMGyjfOEI75Ot4Xdpw0BtnioA5QB4Ca9B1F
+	 ugz2E8MgrxEu3cyoR3MqjqyZd49zkZwEWuVUb4FLh5LQLcyl+CGJ+0F2X4UbQrZ2At
+	 ZzN11t52InXBA==
+Date: Fri, 17 Jul 2026 16:37:17 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: djwong@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs: remove the v2log group
+Message-ID: <alnpAUM8YfxmHcMv@zlang-mailbox>
+Mail-Followup-To: Christoph Hellwig <hch@lst.de>, djwong@kernel.org, 
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+References: <20260618134528.237508-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Spam-Flag: NO
-X-Spamd-Result: default: False [-2.80 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-0.999];
-	MIME_GOOD(-0.10)[text/plain];
-	RCPT_COUNT_TWO(0.00)[2];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	ARC_NA(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:mid,imap1.dmz-prg2.suse.org:helo];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	TO_DN_NONE(0.00)[];
-	RCVD_TLS_ALL(0.00)[]
-X-Spam-Level: 
-X-Spam-Score: -2.80
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260618134528.237508-1-hch@lst.de>
 
-Since kernel commit 539dce114465 ("fs: refuse O_TMPFILE creation with an
-unmapped fsuid or fsgid"), tmpfile creation can be rejected with
-EOVERFLOW, so also skip that error number to avoid false alerts like the
-following:
+On Thu, Jun 18, 2026 at 03:45:28PM +0200, Christoph Hellwig wrote:
+> v2log have been the default for more than a decade.  Merge all xfs log
+> tests into the log group instead of splitting them up (with a lot of
+> overlap).
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
 
- FSTYP         -- ext4
- PLATFORM      -- Linux/x86_64 btrfs-vm 7.2.0-rc3-custom+ #411 SMP PREEMPT_DYNAMIC Fri Jul 17 16:24:34 ACST 2026
- MKFS_OPTIONS  -- -F /dev/mapper/test-scratch1
- MOUNT_OPTIONS -- -o acl,user_xattr /dev/mapper/test-scratch1 /mnt/scratch
+Highly welcome the reorganization of the groups. As the number of test
+cases in xfstests grows, a clearer and more effective group classification
+will definitely be helpful.
 
- generic/633  1s ... - output mismatch (see /home/adam/xfstests/results//generic/633.out.bad)
-    --- tests/generic/633.out	2022-05-11 11:25:30.816666664 +0930
-    +++ /home/adam/xfstests/results//generic/633.out.bad	2026-07-17 16:25:45.033967541 +0930
-    @@ -1,2 +1,4 @@
-     QA output created by 633
-     Silence is golden
-    +utils.c: 948: openat_tmpfile_supported - Value too large for defined data type - failure: create
-    +utils.c: 948: openat_tmpfile_supported - Value too large for defined data type - failure: create
-    ...
-    (Run 'diff -u /home/adam/xfstests/tests/generic/633.out /home/adam/xfstests/results//generic/633.out.bad'  to see the entire diff)
- Ran: generic/633
- Failures: generic/633
- Failed 1 of 1 tests
+Reviewed-by: Zorro Lang <zlang@kernel.org>
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- src/vfs/utils.c | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
-
-diff --git a/src/vfs/utils.c b/src/vfs/utils.c
-index 0b435afe..d2922cc3 100644
---- a/src/vfs/utils.c
-+++ b/src/vfs/utils.c
-@@ -941,7 +941,11 @@ bool openat_tmpfile_supported(int dirfd)
- 
- 	fd = openat(dirfd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
- 	if (fd == -1) {
--		if (errno == ENOTSUP) {
-+		/*
-+		 * Kernel commit 539dce114465 ("fs: refuse O_TMPFILE creation
-+		 * with an unmapped fsuid or fsgid") will reject such operation.
-+		 */
-+		if (errno == ENOTSUP || errno == EOVERFLOW) {
- 			errno = 0; /* Don't report misleading errno. */
- 			return false;
- 		} else {
--- 
-2.51.2
-
+>  doc/group-names.txt | 1 -
+>  tests/generic/054   | 2 +-
+>  tests/generic/055   | 2 +-
+>  tests/xfs/095       | 2 +-
+>  tests/xfs/119       | 2 +-
+>  tests/xfs/135       | 2 +-
+>  tests/xfs/137       | 2 +-
+>  7 files changed, 6 insertions(+), 7 deletions(-)
+> 
+> diff --git a/doc/group-names.txt b/doc/group-names.txt
+> index 158f84d36d31..424e2c4a1ca6 100644
+> --- a/doc/group-names.txt
+> +++ b/doc/group-names.txt
+> @@ -142,7 +142,6 @@ union			tests from the unionmount test suite
+>  unlink			O_TMPFILE unlinked files
+>  unreliable_in_parallel	randomly fail when run in parallel with other tests
+>  unshare			fallocate FALLOC_FL_UNSHARE_RANGE
+> -v2log			XFS v2 log format tests
+>  verity			fsverity
+>  volume			btrfs volume management
+>  whiteout		overlayfs whiteout functionality
+> diff --git a/tests/generic/054 b/tests/generic/054
+> index 0649b25930c6..f6eb8975b32e 100755
+> --- a/tests/generic/054
+> +++ b/tests/generic/054
+> @@ -9,7 +9,7 @@
+>  # In another qa test we can do more e.g. use fsstress.
+>  #
+>  . ./common/preamble
+> -_begin_fstest shutdown log v2log auto
+> +_begin_fstest shutdown log auto
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/055 b/tests/generic/055
+> index e57f95faf897..f87fd7fb1850 100755
+> --- a/tests/generic/055
+> +++ b/tests/generic/055
+> @@ -9,7 +9,7 @@
+>  # * also can interrupt metadata with godown
+>  #
+>  . ./common/preamble
+> -_begin_fstest shutdown log v2log auto quota stress
+> +_begin_fstest shutdown log auto quota stress
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/xfs/095 b/tests/xfs/095
+> index da0d2ae4bb57..ab2ccfc7361c 100755
+> --- a/tests/xfs/095
+> +++ b/tests/xfs/095
+> @@ -7,7 +7,7 @@
+>  # Test upgrading the XFS log to v2
+>  #
+>  . ./common/preamble
+> -_begin_fstest log v2log auto
+> +_begin_fstest log auto
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/xfs/119 b/tests/xfs/119
+> index 7c1cd6a50ce5..e44d5a996a96 100755
+> --- a/tests/xfs/119
+> +++ b/tests/xfs/119
+> @@ -9,7 +9,7 @@
+>  # This can hang when things aren't working
+>  #
+>  . ./common/preamble
+> -_begin_fstest log v2log auto freeze
+> +_begin_fstest log auto freeze
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/xfs/135 b/tests/xfs/135
+> index ec0b54ab45c3..e8c490a0c13f 100755
+> --- a/tests/xfs/135
+> +++ b/tests/xfs/135
+> @@ -9,7 +9,7 @@
+>  # and verified with xfs_logprint.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto logprint quick v2log
+> +_begin_fstest auto logprint quick log
+>  
+>  # Import common functions.
+>  . ./common/log
+> diff --git a/tests/xfs/137 b/tests/xfs/137
+> index d97942bf671a..20d46f439b8a 100755
+> --- a/tests/xfs/137
+> +++ b/tests/xfs/137
+> @@ -12,7 +12,7 @@
+>  # xfs_repair detect the problem.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto metadata v2log
+> +_begin_fstest auto metadata log
+>  
+>  # Import common functions.
+>  
+> -- 
+> 2.53.0
+> 
