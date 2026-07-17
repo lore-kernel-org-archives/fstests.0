@@ -1,42 +1,46 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0179E37267E
-	for <fstests@vger.kernel.org>; Fri, 17 Jul 2026 09:22:16 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC4B13DDB02
+	for <fstests@vger.kernel.org>; Fri, 17 Jul 2026 10:47:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784280138; cv=none; b=eaytvo6HT1ejWwwKYp2acYx+eNtIN/enQntJ9Bcp0ikc/S9JWhGNEOtbdt77bQiA/+35xYLMPMCpIB/HO77Bpp7taFuuHhGWL15QyHap0mZNw7ODkePPvwzIf0J13/m09uX/+g3eZol1jmo8Hvm3MPjGrGDKS587v/cu+oEw150=
+	t=1784285261; cv=none; b=HJCGcwhrcfpI4t/oyQL7SmKkm8CKlzV9TEi1CgTi2tqi8nGv9Vc8/sDyw9r8oggjK0xA0K99kRrKMO903nJEpPIbYw00pMS4HJsiNIZjp6CBgXNTzf7ECRXCnO6FxfaCA1RSmCjoCIJSca4yKFcIGUywTd0R+pg67sUPDL0oTLE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784280138; c=relaxed/simple;
-	bh=/loaCfdl7dj5eXod4M+AZQGBoKKw1DGeiRESug2iHG4=;
+	s=arc-20240116; t=1784285261; c=relaxed/simple;
+	bh=jeH2zw4BGNRXHlLehDIqu3eWxux0A2kBrwIhX6tMTfk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=WaV653GQcMf+j7i0BtE2qluHW6ZVw0sgfE+nEqDXJ8T2QdermF4P0KECX7KJtt3BFitTw9I6nUWaWHHGjHz4RtiDjnx4w/QWaHnEO7QWOiRQujXfW6TKDF6AYqLSDzeP5VTRRBG57pUroHfl1o46vnNyOlnFkM8OEhB2mpjjTAU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=e8is7I0l; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=ovTf3oTrQieEAY4IsH9FJdnpvXzdgi+2MzIm3tJGUN3Y8F95uzgOrYPsLWDklreWoPsFPVgJgGRTIdurgdPEXfnp4/uyRcFi4iFPmC3DyEziyiwXIQ7AoGX48lVFJYl1Ph869zPN5x7Oo0pqW2e06VkssYDKYTugOBnmDuBINWg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bgsT2q8B; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="e8is7I0l"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6C1411F000E9;
-	Fri, 17 Jul 2026 09:22:14 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bgsT2q8B"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 88C3F1F000E9;
+	Fri, 17 Jul 2026 10:47:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1784280136;
-	bh=w0y0E50384hKrsODlpwmviHqrsNr9UJFgIeGMMLZutM=;
+	s=k20260515; t=1784285258;
+	bh=eGkSRp4teI72/jI7XMKfV3fBWLaaZ8qcn87O2VoAlz0=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=e8is7I0lKMHgc5Eghb2PIgvkzAUvIXOPI14XxoTwltvIy0naPwZurmYM9gQ/o9bvl
-	 8W/68iMaoVRbwiTKrbs85uwULuq2EJgf3OcbReGsV4AHVOhsf8M6gKAPKGNCdLDb1n
-	 cQiYm14hG8CKsZlF/C6nmkZYQdry+2yOnHSg9UJxyZLHr5j75x2JqNO+Pai1/dpz4B
-	 Hz7tM+B7Qs3A5uiichQxeW8V4LRCKhzflfCklZEtNk/+Xp+ngYPC9DFqWIqg8MDRrS
-	 ynIJtDQYihGvRgTErRGcKCf3mAIIv8tEccsVVlGWZ7wvMFioV7TI1H9EU7qQAnTKtV
-	 U+4lXadpEv3uA==
-Date: Fri, 17 Jul 2026 17:22:11 +0800
+	b=bgsT2q8B7l8GSJIcINJTO6jRK3jIi+NiWEpy+hp2BX9RD/9UjbzBQ4RurxHf31sBq
+	 gCkwXYyrLIbeZGkSPXI2iKnya1r1cp9vFlzGL9JZ4CgZCjzWgG4HIF4qsx5gpdhHWR
+	 xWrMr9DUedhNhRcymJ1HQW3kVFvubPi1LFC16NIAgRo0MvBn5S7aIgOhRNaXttxCH1
+	 nXgp7ty0I85LQFMPrh4fVrC9IOw0eeSC0r0gKATZFhKnwlPnL1kgNIJDkfaGvE/xKj
+	 Pkda7tpl/To2Hbd/IaDQif5ScMyQqBS/qRBwONV3Gsv/1qgH2hZ8yWt1m0Lmej1jEh
+	 +oSuTo9O9DU+A==
+Date: Fri, 17 Jul 2026 18:47:30 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Avinesh Kumar <avinesh.kumar@suse.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH v2] generic/062: filter setfattr --restore symlink-safety
- warning
-Message-ID: <alnu6gq9a1bJJF8b@zlang-mailbox>
-Mail-Followup-To: Avinesh Kumar <avinesh.kumar@suse.com>, 
-	fstests@vger.kernel.org
-References: <20260706061102.90603-1-avinesh.kumar@suse.com>
- <20260706191326.122555-1-avinesh.kumar@suse.com>
+To: Chao Yu <chao@kernel.org>
+Cc: Anand Suveer Jain <asj@kernel.org>, fstests@vger.kernel.org, 
+	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net, 
+	"Darrick J. Wong" <djwong@kernel.org>
+Subject: Re: [PATCH v2] common/rc: support f2fs in
+ _require_fanotify_ioerrors()
+Message-ID: <aloCfjjqesxpzL9z@zlang-mailbox>
+Mail-Followup-To: Chao Yu <chao@kernel.org>, 
+	Anand Suveer Jain <asj@kernel.org>, fstests@vger.kernel.org, jaegeuk@kernel.org, 
+	linux-f2fs-devel@lists.sourceforge.net, "Darrick J. Wong" <djwong@kernel.org>
+References: <20260706064326.3657995-1-chao@kernel.org>
+ <af5f0eb1-0197-4952-a37b-0602799929ec@kernel.org>
+ <5c11cd98-bb41-46e0-9765-e2aad57a08e4@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,55 +49,95 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260706191326.122555-1-avinesh.kumar@suse.com>
+In-Reply-To: <5c11cd98-bb41-46e0-9765-e2aad57a08e4@kernel.org>
 
-On Mon, Jul 06, 2026 at 09:13:26PM +0200, Avinesh Kumar wrote:
-> From: Avinesh Kumar <avinesh.kumar@suse.com>
+On Wed, Jul 08, 2026 at 11:25:37AM +0800, Chao Yu wrote:
+> On 7/7/26 18:13, Anand Suveer Jain wrote:
+> > On 6/7/26 14:43, Chao Yu wrote:
+> >> f2fs has supported to report fserror, this patch adds support for f2fs
+> >> in _require_fanotify_ioerrors(), so that we can run generic/791 on f2fs.
+> >>
+> >> Cc: Darrick J. Wong <djwong@kernel.org>
+> >> Signed-off-by: Chao Yu <chao@kernel.org>
+> >> ---
+> >>  common/rc | 3 +++
+> >>  1 file changed, 3 insertions(+)
+> >>
+> >> diff --git a/common/rc b/common/rc
+> >> index 494725547..f51ad59f3 100644
+> >> --- a/common/rc
+> >> +++ b/common/rc
+> >> @@ -6257,6 +6257,9 @@ _require_fanotify_ioerrors()
+> >>  		x="$(_get_fs_sysfs_attr $TEST_DEV err_report_sec)"
+> >>  		test -n "$x" && return 0
+> >>  		;;
+> > 
+> > 
+> >> +	f2fs)
+> >> +		x="$(cat /sys/fs/f2fs/features/fserror)"
+> >> +		test -n "$x" && return 0
+> > 
+> > Don't we need to check if /sys/fs/f2fs/features/fserror
+> > is present in the running kernel (there are helpers)
 > 
-> attr 2.6.0 (CVE-2026-54371 fix)[0] makes "setfattr --restore" warn when
-> used without -P and the dump contains a symlink, which generic/062 does.
-> The warning leaks into the compared output via the setfattr() wrapper
-> and fails the test. Adding -P isn't portable (older attr doesn't have it),
-> so filter the warning in the wrapper instead.
+> Hi Anand,
 > 
-> [0] https://cgit.git.savannah.nongnu.org/cgit/attr.git/commit/?id=3fb06b9ba314d37035d0877e6de313de754f1ac8
-
-For generic/062, modifying the g/062 itself seems fine and logical, as
-_extend_test_bed() explicitly introduces complex symlink paths for
-testing purposes.
-
-Have you run xfstests on XFS with attr 2.6.0? There are quite a few
-setfattr --restore invocations in common/populate. If those also trigger
-the new unsafe restore warnings, we might want to consider introducing
-a helper function, such as _setfattr or _setfattr_restore to handle to
--h and -P things.
-
-Reviewed-by: Zorro Lang <zlang@kernel.org>
-
+> You mean _has_fs_sysfs_attr()? however, it forces to check first parameter $dev
+> w/ block device type:
 > 
-> Signed-off-by: Avinesh Kumar <avinesh.kumar@suse.com>
-> ---
->  tests/generic/062 | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
+> 	if [ ! -b "$dev" -o -z "$attr" ];then
+> 		_fail "Usage: _has_fs_sysfs_attr <mounted_device> <attr>"
+> 	fi
+
+Hi Chao and Anand,
+
+The *_fs_sysfs related helpers were brought in by me in:
+  commit 2a7b77abcd1dde735186b363da24540706c43b73
+  Author: Zorro Lang <zlang@redhat.com>
+  Date:   Tue Jul 5 17:30:24 2016 +0800
+
+    xfs: configurable behavior on errors at unmount time
+
+At that time, I didn't think about the "features/" directory.
+
+Now, let me rethink this set of helpers. I feel that the *_fs_sysfs
+family of functions shouldn't be restricted to the $dev directory,
+we should remove this restriction.
+
+Following that, we bring in *_fs_sysfs_device (appending the _device suffix)
+helpers which call *_fs_sysfs(). Also change the test cases who call these
+functions.
+
+Finally, we can introduce the *_fs_sysfs_features functions (or simply use
+*_fs_sysfs directly).
+
+Also, we have both *_fs_sysfs_attr and *_fs_sysfs, and the logic between
+them is somewhat confusing and easy to mix up.
+
+I need to write a series of patches to clean up these logic. For this current
+patch, we can start with a small-scale change first. What do you think?
+
+Thanks,
+Zorro
+
+>
 > 
-> diff --git a/tests/generic/062 b/tests/generic/062
-> index 89659040..ddf0a478 100755
-> --- a/tests/generic/062
-> +++ b/tests/generic/062
-> @@ -30,7 +30,12 @@ getfattr()
->  
->  setfattr()
->  {
-> -    $SETFATTR_PROG $@ 2>&1 | _filter_scratch
-> +    # attr >= 2.6.0 (CVE-2026-54371 fix) warns that "setfattr --restore" without
-> +    # -P/--physical is unsafe because it can traverse symlinks. Older attr does
-> +    # not accept -P, so just filter the warning to stay version-agnostic.
-> +    $SETFATTR_PROG $@ 2>&1 | \
-> +        sed -e '/^Warning: option --restore=file is unsafe without option/d' | \
-> +        _filter_scratch
->  }
->  
->  _create_test_bed()
-> -- 
-> 2.54.0
+> > before reading it?
+> 
+> How about this?
+> 
+> f2fs)
+>     local feat_file="/sys/fs/f2fs/features/fserror"
+>     if [ -f "$feat_file" ] && [ "$(cat "$feat_file")" = "supported" ]; then
+>         return 0
+>     fi
+>     ;;
+> 
+> > 
+> > 
+> > 
+> >>  	esac
+> >>  
+> >>  	_notrun "$FSTYP does not support fanotify ioerrors"
+> > 
 > 
