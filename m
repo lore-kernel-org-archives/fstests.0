@@ -1,136 +1,178 @@
-Received: from fout-b7-smtp.messagingengine.com (fout-b7-smtp.messagingengine.com [202.12.124.150])
+Received: from out-174.mta0.migadu.com (out-174.mta0.migadu.com [91.218.175.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D38783890EF;
-	Fri, 17 Jul 2026 20:19:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.150
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 281A334750E
+	for <fstests@vger.kernel.org>; Sat, 18 Jul 2026 15:08:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784319565; cv=none; b=bBPlxRKdBGj6n71QnXf+jCqXdQpoVhY24ZfVbGMugp4gMAyue5728twv2eqT5kaiay5hn2Hu7J8s85Po3X6Cvdj1LYrY/gg9zdx8hJdU9+7BTcsrNicTo6vgJFR7q0mu4QOyzLDtL+A5sVxA9VGOd4xkB77d8VRxKgjx8+8dojk=
+	t=1784387301; cv=none; b=enyLOMbviluMVc8rOxEV0QJ0zqbwA7h1MoW1vCbTrTnPRF0slVSxcjoYOx3OoBSNHjudWN8AX/Z9OuMFU2c+1z2fNbCVUipNNWCy38eUr5gaiZxiDuzah9aO797p2CAMU8QcTjjaYC9RohJPZPTp72FcKcXpvegSPLklzUoHHro=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784319565; c=relaxed/simple;
-	bh=nQSzkIaSW8QzyrsLMgKcH7jhsBlah+NRAkip2KcthAo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=fi7FB6BIRhQ9gOyFn8hxmekNO2rTAciptFxKb5afygcWdp0ODT7D1kP+pJji6YFt7r77J5Wdv3c2T87w1GzcpfHo9m/nfk+vMPJtg+ljLSGjjc9dYYIXXq7blJCwAjc0T5BCVepc+tNlY+YqAFD2a73QKcEerdDmDYKlOJBt4mc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io; spf=pass smtp.mailfrom=bur.io; dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b=FEwwJ5J/; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=OO/iPXsw; arc=none smtp.client-ip=202.12.124.150
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bur.io
+	s=arc-20240116; t=1784387301; c=relaxed/simple;
+	bh=pwJvRj2ZV1inTK2aAj9Ev1S/qsQRzZ4AApYB5eoy0DU=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:Cc:From:
+	 In-Reply-To:Content-Type; b=bXjGB2eg7+B+UevwcvB4dnJgonL20mNWzgYsyOB+WS9ki2DIzXFDQXa1edH0R8apbovTWG9DfsSisKnVrrBH96Ua86YhDJ5RhNZ2eqTwsEtkrXmiIC33si33gJlLa/xlqQ7mmLLH7NDjOiJHYzESbSR2RNH1Bn76fi2gBFRXBrE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=chenxiaosong.com; spf=pass smtp.mailfrom=chenxiaosong.com; dkim=pass (2048-bit key) header.d=chenxiaosong.com header.i=@chenxiaosong.com header.b=o/wPaaV8; arc=none smtp.client-ip=91.218.175.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=chenxiaosong.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chenxiaosong.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="FEwwJ5J/";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="OO/iPXsw"
-Received: from phl-compute-05.internal (phl-compute-05.internal [10.202.2.45])
-	by mailfout.stl.internal (Postfix) with ESMTP id 5356F1D0011A;
-	Fri, 17 Jul 2026 16:19:18 -0400 (EDT)
-Received: from phl-frontend-04 ([10.202.2.163])
-  by phl-compute-05.internal (MEProxy); Fri, 17 Jul 2026 16:19:18 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc:cc
-	:content-type:content-type:date:date:from:from:in-reply-to
-	:in-reply-to:message-id:mime-version:references:reply-to:subject
-	:subject:to:to; s=fm3; t=1784319558; x=1784405958; bh=XwWhpKe+zg
-	oCPc+X2dDWX0mC4YEUiVRkJqlgHL92Ub4=; b=FEwwJ5J/eK4+rkG8ttDrnvDl69
-	0wW+VngOCC3NSGovdv9ipqd0Vygamnx2KdjUKFnr59OFjOm86NjFvYD2uW7R3Bit
-	SmOAQ0653DgTy+G6NHwvo7zUkelIl1SaowjTMVg+znO/TV9Fo3T8X4KsCA73bLt5
-	pI2CfiYsjclJLbfXuX3Azkj3HXqtM4s1dkzwFzApsMrZ2ewn/b0RdulwKqv5zJnP
-	TKCoFKefMwgMAU1UJLTwOE/5PqlpZxzjS/uAdFiimuO/GK5e7SyLUJManLanst5R
-	z5SLCnmN35d3d8FYMBFDY4apHpb8Ni+kw6NIVtbuAcFgR3diB3eyXIX895VA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-type:content-type:date:date
-	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
-	:message-id:mime-version:references:reply-to:subject:subject:to
-	:to:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=
-	1784319558; x=1784405958; bh=XwWhpKe+zgoCPc+X2dDWX0mC4YEUiVRkJql
-	gHL92Ub4=; b=OO/iPXswkwX0QnYyewJnfM4T2U+KRcPE2Wl5ouObqRTSflV8DW3
-	olivurzwQ6z79jfT4HecCsvLTuySw+AjRlcMqidG0GCd9kCK42dWUlF7ke5Fcn7k
-	dvhMNZJGizL8CN93xImZCq5yc47+01kt/Re/QZ6695Pth9sHvBP249kD+e9km9K1
-	XiI6DyilH/DmGe4wcQtqH6XqT/SqknGTJbtyIP0PmaPA4loVHURCfzPNR3sOMQq/
-	ke9pkWFJlHkZusiUnXCSSErjzc8k9QhqtAcG7z/jWtlq8hC9EtGinxCpLM9pLvVh
-	azwXMRUpv0fBLuejpmOgQLC99N61ZjYevKw==
-X-ME-Sender: <xms:Ro5aap0-ptsfpitivo3Utolob7_UVkNcQIXm3piarn2o4qjPiYAOZg>
-    <xme:Ro5aan06kKlkx-GDuzRNE4pAleI67cMAYPDF_pzG721Ylav3Th-UgSwcQZxu54HAW
-    zELJ1-a9KZYaNbF6FCnL78QVtXqEupgBcIoocFLdEZLtQSh_etKC20>
-X-ME-Received: <xmr:Ro5aas-wkoLx5DCnI_EZLKZXHnhRQw4iOzbl9Lug9-iaIaQ4m8oYCohL4dP1ciILGVEmpYjW-C0_WjjpP9Ar8F7FyBw>
-X-ME-Proxy-Cause: dmFkZTEp4VLN8UNatxjtjNlXDw615hXCDJXjEmAyUzet/LRA+2UxfLLbcFMZlLIepOi46m
-    vQd+o3RLDS7L0SabDxla/wPUb+OgzyjwAvO+CHOjK0oAvpnGKN/0Wlnx3xG1UhpAsXqtv5
-    TIc/soGpVwrMq+wH7OhndGU54lHK8AJ8UUW/iM0lmrf0GlVTwZPnKRnvOcqpB0Jko69BCq
-    eJrvOrABlZDAm+IzgUtHACR6QVIs2IDG5LsefZULpsyGvSLhTf6o1s93MMkse01CwhFCgE
-    kRpMvqZE+o6FOZ8jvJxGI+q1Y2TYoS+TRpGs3PJTH8L05gJNikKijJGfJu4S1ViFZVpWNA
-    RTHVIEG6Yv79AisuFGKZE66cdk7kgZ+u9dJ/Q2zbgJEQxsCBEPvMiqVcULZLU5ffFiCaKI
-    kGY5cBRQbcSikh9AewgWllgYhriSDxV73rk/xucju78MI8ra+Y3uskThwmTJ5FuZ+lOKfw
-    xfI4RDWlkRMMgyQSsz4gDzAV4+P6Y1MSDYA/vC0EfR7j3rlR339uiYrh7afVe09NDbQgMj
-    86xYLTXbzBME5r6/Fr4QHhhjTBi6OgLEC9QwJnGV8CMh08GzXqST1Hetiqqk45fBVGmDoa
-    e+1ks72rsZRMZEDKig2w4T5+7i08/icvZZHKK9yhppSfKxQ2K5+p8HniTu3Q
-X-ME-Proxy: <xmx:Ro5aak3DtO6k80vfKRW0heXi2IEvJ7U1AsX8U4lipLm0CpErcAq72A>
-    <xmx:Ro5aap9fPUljNvGZAH9uHuMszN8YzHNXItv5Mu_CGCXHMO91A053hg>
-    <xmx:Ro5aaktRzb4hLRJ0fQK9JPcsmr_HupRXLUx5pZaHTk2PehNYYaVlnA>
-    <xmx:Ro5aasAMgx3cVp29JJ3wRe4sbCfVmbaaWnTAWZfzVd5qzzOm9Q4Ibw>
-    <xmx:Ro5aatknAwKoQ9c0wH5BvpXtz-FhFmSla7bA4J7naBXUHwUF0eUzPrGn>
-Feedback-ID: i083147f8:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Fri,
- 17 Jul 2026 16:19:17 -0400 (EDT)
-Date: Fri, 17 Jul 2026 13:19:16 -0700
-From: Boris Burkov <boris@bur.io>
-To: Qu Wenruo <wqu@suse.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: vfstest: skip rejected tmpfile creation
-Message-ID: <20260717201916.GC142812@zen.localdomain>
-References: <20260717070717.113517-1-wqu@suse.com>
+	dkim=pass (2048-bit key) header.d=chenxiaosong.com header.i=@chenxiaosong.com header.b="o/wPaaV8"
+Message-ID: <a8771f15-7cb6-44a1-a592-8055818f57f1@chenxiaosong.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=chenxiaosong.com;
+	s=key1; t=1784387284;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=jN50fVN6+o5HI8KCUIVOS5BrLYtZgCx068FNYYU3Ocs=;
+	b=o/wPaaV8yt3QeafHmXgo3tH3LRyAerVeQS6rtakoxGaqGXA0MZU7+OnsDo83BrCo6j/sDH
+	4bBlexu/Y/DSnq6Ipk8amcwhO9bMqBJJMpV/Wbl6auoVyI1wjyVDVb7ta+s35UxyBWY7vR
+	OMSTpq8v3MHfFuAT36FvDJqGo4r1xZyGcBEhjDor/FRV8AGSys5MvFk5QKhHBYWrNV9qMH
+	8S4FIuXFqbV/ljYWofzJtkV2K2u3+Hfl4OoKGJuCx4CUSbItW/fUJJIhoyWQpP/hnAmS6e
+	uY/Oci9OlwGWsPUxkDHWaQLgx5Ng11kZMQ95yUAVcDONCffqHiTWeEqXzQNWAw==
+Date: Sat, 18 Jul 2026 23:08:05 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260717070717.113517-1-wqu@suse.com>
+Subject: Re: [PATCH] cifs/002: check nlink returned by fstat()
+To: Zorro Lang <zlang@kernel.org>
+References: <20260713151658.533155-1-chenxiaosong@chenxiaosong.com>
+ <alpZg9nrDzS3T9cL@zlang-mailbox>
+Cc: lukas@herbolt.com, smfrench@gmail.com, linkinjeon@kernel.org,
+ pc@manguebit.org, ronniesahlberg@gmail.com, sprasad@microsoft.com,
+ tom@talpey.com, bharathsm@microsoft.com, senozhatsky@chromium.org,
+ dhowells@redhat.com, metze@samba.org, linux-cifs@vger.kernel.org,
+ fstests@vger.kernel.org, ChenXiaoSong <chenxiaosong@kylinos.cn>
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+From: ChenXiaoSong <chenxiaosong@chenxiaosong.com>
+In-Reply-To: <alpZg9nrDzS3T9cL@zlang-mailbox>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Migadu-Flow: FLOW_OUT
 
-On Fri, Jul 17, 2026 at 04:37:17PM +0930, Qu Wenruo wrote:
-> Since kernel commit 539dce114465 ("fs: refuse O_TMPFILE creation with an
-> unmapped fsuid or fsgid"), tmpfile creation can be rejected with
-> EOVERFLOW, so also skip that error number to avoid false alerts like the
-> following:
+Thanks for your suggestions. I will send the next version soon.
+
+在 2026/7/18 1:07, Zorro Lang 写道:
+>> +# FS QA Test No. cifs/002
 > 
->  FSTYP         -- ext4
->  PLATFORM      -- Linux/x86_64 btrfs-vm 7.2.0-rc3-custom+ #411 SMP PREEMPT_DYNAMIC Fri Jul 17 16:24:34 ACST 2026
->  MKFS_OPTIONS  -- -F /dev/mapper/test-scratch1
->  MOUNT_OPTIONS -- -o acl,user_xattr /dev/mapper/test-scratch1 /mnt/scratch
+> Although we are considering removing this specific line in the future, it is
+> currently still required to follow the standard format. Therefore, it should
+> be formatted as: FS QA Test 002
 > 
->  generic/633  1s ... - output mismatch (see /home/adam/xfstests/results//generic/633.out.bad)
->     --- tests/generic/633.out	2022-05-11 11:25:30.816666664 +0930
->     +++ /home/adam/xfstests/results//generic/633.out.bad	2026-07-17 16:25:45.033967541 +0930
->     @@ -1,2 +1,4 @@
->      QA output created by 633
->      Silence is golden
->     +utils.c: 948: openat_tmpfile_supported - Value too large for defined data type - failure: create
->     +utils.c: 948: openat_tmpfile_supported - Value too large for defined data type - failure: create
->     ...
->     (Run 'diff -u /home/adam/xfstests/tests/generic/633.out /home/adam/xfstests/results//generic/633.out.bad'  to see the entire diff)
->  Ran: generic/633
->  Failures: generic/633
->  Failed 1 of 1 tests
+>> +#  from
+>> +#  tests/generic/002
 > 
-Reviewed-by: Boris Burkov <boris@bur.io>
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->  src/vfs/utils.c | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
+> The original test case is a generic test case, this one looks similar, doesn't
+> has any cifs specific test steps. So I think this can be a generic test case too
 > 
-> diff --git a/src/vfs/utils.c b/src/vfs/utils.c
-> index 0b435afe..d2922cc3 100644
-> --- a/src/vfs/utils.c
-> +++ b/src/vfs/utils.c
-> @@ -941,7 +941,11 @@ bool openat_tmpfile_supported(int dirfd)
->  
->  	fd = openat(dirfd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
->  	if (fd == -1) {
-> -		if (errno == ENOTSUP) {
-> +		/*
-> +		 * Kernel commit 539dce114465 ("fs: refuse O_TMPFILE creation
-> +		 * with an unmapped fsuid or fsgid") will reject such operation.
-> +		 */
-> +		if (errno == ENOTSUP || errno == EOVERFLOW) {
->  			errno = 0; /* Don't report misleading errno. */
->  			return false;
->  		} else {
-> -- 
-> 2.51.2
+>> +#  Copyright (c) 2000-2001 Silicon Graphics, Inc.  All Rights Reserved.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest metadata auto quick
 > 
+> I think it also belong to "hardlink" group.
+> 
+>> +
+>> +# Override the default cleanup function.
+>> +_cleanup()
+>> +{
+>> +	rm -f $tmp.*
+>> +	rm -rf $TEST_DIR/$$
+> 
+>          cd /
+>          rm -r -f $tmp.*
+>          [ -d "$testdir" ] && rm -rf $testdir
+> 
+>> +}
+>> +
+>> +status=0	# success is the default!
+>> +
+>> +_require_test
+>> +_require_hardlinks
+>> +_require_test_program fstat
+> 
+> _fixed_by_fs_commit cifs 9dd1964ac59d \
+> 	"smb/client: fix incorrect nlink returned by fstat()"
+> 
+>> +
+>> +echo "Silence is goodness ..."
+> 
+> If no specical reason, please keep the "Silence is golden".
+> 
+>> +
+>> +testdir=$TEST_DIR/$$
+>> +mkdir -p $testdir
+>> +
+>> +touch $testdir/tmp.1
+>> +for l in 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+>> +do
+> 
+> for l in $(seq 2 20);do
+> 
+> or
+> 
+> for ((l=2; l<=20; l++))
+> 
+>> +	ln $testdir/tmp.1 $testdir/tmp.$l
+>> +	x=`$here/src/fstat $testdir/tmp.1 | sed -n -e '/ Links: /s/.*Links: *//p'`
+> 
+> I'm wondering if a specific src/fstat.c is needed. Can we replace the whole
+> src/fstat.c with `xfs_io -c stat ` ? Can you give it a try?
+> 
+>> +	if [ "$l" -ne $x ]
+>> +	then
+> 
+> if [ "$l" -ne $x ];then
+> 
+>> +		echo "Arrgh, created link #$l and fstat looks like ..."
+>> +		$here/src/fstat $testdir/tmp.1
+>> +		status=1
+>> +	fi
+>> +done
+>> +
+>> +for l in 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1
+>> +do
+> 
+> for l in $(seq 20 -1 1);do
+> 
+> or
+> 
+> for ((l=20; l>=1; l--))
+> 
+>> +	x=`$here/src/fstat $testdir/tmp.1 | sed -n -e '/ Links: /s/.*Links: *//p'`
+>> +	if [ "$l" -ne $x ]
+>> +	then
+>> +		echo "Arrgh, about to remove link #$l and fstat looks like ..."
+>> +		$here/src/fstat $testdir/tmp.1
+>> +		status=1
+>> +	fi
+>> +	rm -f $testdir/tmp.$l
+>> +done
+>> +
+>> +exit
+> 
+> _exit 0
+> 
+> Thanks,
+> Zorro
+> 
+>> diff --git a/tests/cifs/002.out b/tests/cifs/002.out
+>> new file mode 100644
+>> index 00000000..11426b54
+>> --- /dev/null
+>> +++ b/tests/cifs/002.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 002
+>> +Silence is goodness ...
+>> -- 
+>> 2.43.0
+>>
+>>
+
+-- 
+ChenXiaoSong <chenxiaosong@chenxiaosong.com>
+Chinese Homepage: https://chenxiaosong.com
+English Homepage: https://chenxiaosong.com/en
+
