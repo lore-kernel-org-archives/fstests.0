@@ -1,87 +1,118 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3E912C15BE
-	for <fstests@vger.kernel.org>; Sun, 19 Jul 2026 16:53:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C657C175A6D
+	for <fstests@vger.kernel.org>; Sun, 19 Jul 2026 18:52:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784480039; cv=none; b=btv6xSENzl7uAA4ZHl/VILukg4l7wxN7jlb9Ywmcord2uoeGJ949JsGWqdj+UGb7uFVDZjVQg6naRZruFeJTHpjhv6M/JET/0RDEfKcpVzpx4T7caIHkUB3JYoTUuXWVKBGHw8/g94p96gT2gyt5BYGgmEJUIqhG7NwhkRV+Ve8=
+	t=1784487169; cv=none; b=Q29PM2/IqxYI408sXdaYctqIf15HqydiozOv3spDfBtAnSb3JNqDjmhHXwjleh/woyT9fYuZoWYkVGj559/MMeq5dixK1rEFsIckzQP6GCl8dfKHWwXIKWGx/4SPcASHwvY+TTbt0DKD9s5JlgODU3VzmELCXhHVHHkUhtUhdvY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784480039; c=relaxed/simple;
-	bh=OR6238KyDI7VBDKNv/XrlL9jFcMKRTOny5+F5ErJlOI=;
-	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=PdFxxFBOXdH8wPONg1+CQsgCIERgNGcuDS5f0m3eSDfclS3FP4gWgy7ZGNDCAgVe6lnQQESe7o9JDL1//VrS6B37Tw33PR4f71gbJCihprPxBEwcbRJ2+n7ysC+o9Sq6xaS592sRQPDpzty+mzHjt56sQLWQtprabomanOdd54g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=GR4EOGzH; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1784487169; c=relaxed/simple;
+	bh=IG+aZ58wI0bvaLjDYBSQzWhuMEI0fIBg5E26WRQ2Cc0=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=AB9tBy35iQlzVtSLlVgdaLGGNTmiE5xBCPwW8uTpqRmC/invwhbzTTinKyCYR2wPeWdD56nkqEDqs6Rb3I49vdbjERz4kiB+nrOePDvTnnR+kk0pPM/NYQZLmJhugD9emc6NALatqHSqkbKaeWiVzVnwsjKV0M2iTS1to0/wpCM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=R3nKhwwP; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="GR4EOGzH"
-Received: from macsyma.thunk.org (pool-108-49-65-18.bstnma.fios.verizon.net [108.49.65.18])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 66JGrpBI008589
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Sun, 19 Jul 2026 12:53:52 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1784480033; bh=XFg10I3KOcDI21xuB3OqUiEPcvRIr7GNlWX72motYo0=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=GR4EOGzHCgpG6OaD93br5/huFmiHSEmi2lPYCF52gAAotznaZnOhgoy0P2W2NgKgs
-	 gfhQ3qsuGQCx/kqciCCX2gtzGEpPQmCHJzyCcc+a3AOU5T3eTIIIXcVog5lc3F5EBp
-	 dlk1v+VomtmWFCA0iuyxgSHk+u6AVI7d2FWLf0tMivXmrw7VFi95rVLqZku/U4uggI
-	 JDzKWTriVwWb8QBlhEt5ggck1j5QMNcIyWj8Em3to47UOw5uaFfrpiFDtt941MJond
-	 Sh//ISMajIG6syPNp8Tf09SKptL9GBfpu3phLIwYXal67U0Y2S1lqaCEqG25Z92ctD
-	 ktduQjaWT4KCA==
-Received: by macsyma.thunk.org (Postfix, from userid 15806)
-	id B9302AD0152; Sun, 19 Jul 2026 12:52:50 -0400 (EDT)
-Date: Sun, 19 Jul 2026 12:52:50 -0400
-From: "Theodore Tso" <tytso@mit.edu>
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
-        "slava@dubeyko.com" <slava@dubeyko.com>
-Subject: Re: Should we consider disable generic/563 for file systems that do
- not support cgroup2?
-Message-ID: <alz_HixXWhKTIfRV@mit.edu>
-References: <ff1c0710cbb31f8ebf51457c0629a496ea6f658e.camel@ibm.com>
- <alpUADtQccA2zmWh@zlang-mailbox>
- <alzYSGVz86d7wDXn@mit.edu>
- <alzzQA9SR55FynDu@zlang-mailbox>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="R3nKhwwP"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 701DC1F000E9
+	for <fstests@vger.kernel.org>; Sun, 19 Jul 2026 18:52:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1784487168;
+	bh=PxHXgDqXp7iCdxVllPe7rqbTo08sKxfyPHuP9JuttLk=;
+	h=From:To:Subject:Date;
+	b=R3nKhwwP/LPRrasCcBeUkOE0xKECWjUZvizlxBFtkjwYgcrGhsbNyK492deVI15SN
+	 3BWZ0sv+Oxn3d0wGibxN/3Jtf/OSXy+zA3KBwcNIqCijcCyRbfJxrGlU6DrWowyASa
+	 FIWGkfN7F2xtFHviobslououmHl/BukWByDXw/idjcuIid8MdbCj7Gx0WHMW1Aubz+
+	 UBY3Ik81cgsnW5t4Y1UVU+vI6iCTk5noVVb+ccJpUmRZ4m2Cf0RAbT5yGjRtqyPgRk
+	 WydvJTTo7xA8mvk3uo5h0EnTn45BXo0Vb5i0sNOPa8nf+oK9Tsezv2k0IKhDd+g8gX
+	 GnuiAPvrx+yqw==
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [RFC PATCH] src/locktest.c: fix build failure of struct delegation
+Date: Mon, 20 Jul 2026 02:52:38 +0800
+Message-ID: <20260719185238.52370-1-zlang@kernel.org>
+X-Mailer: git-send-email 2.55.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <alzzQA9SR55FynDu@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
 
-On Sun, Jul 19, 2026 at 11:57:04PM -0500, Zorro Lang wrote:
-> Thank you for your reply. You are right. I was just listing some
-> possible options, and I did not mean we must change the kernel for
-> testing. Changing the kernel just for a _notrun is indeed not worth
-> it. If there is no simple way to implement the _require_* function,
-> we can `_exclude_fs hfs` directly :)
+Since glibc commit f2e3dacbff88 ("Add new constants from Linux 6.12,
+6.18 and 6.19 to bits/fcntl-linux.h"), the F_GETDELEG and F_SETDELEG
+constants from Linux 6.19 have been added directly into <fcntl.h>.
+However, the corresponding full definition for 'struct delegation'
+was not included in glibc's userspace wrapper. That causes below
+build error:
 
-I wouldn't necessarily rule out changing the kernel so that file
-systems can declare whether they can support cgroupv2.  The advantage
-is that we wouldn't need to keep adding "_exclude_fs xxx" each time we
-try to make fstets work on the simpler file systems.  It also means
-that if a file system adds support for cgroupv2, we wouldn't need to
-change fstests --- also, if the patch gets backported to an older
-kernel (either an LTS or an enterprise distro kernel) we don't need to
-try to modulate the _exclude_fs using kernel version numbers (which
-isn't guaranteed to work given the backporting possibility).
+ locktest.c:1065:16: error: variable 'deleg' has initializer but incomplete type
+  1065 |         struct delegation deleg = { .d_type = F_UNLCK };
+ ...
 
-This is a philosophical issue, and reasonable people could disagree on
-this approach.  For my part, I created /sys/fs/ext4/features/*
-precisely so that userspace (and fstests) so we can test if a
-particular feature is available on a particular kernel.  Otherwise, a
-test to see whether a particular feature "works" might have a false
-positive if the feature is broken, and the way we test whether the
-feature is present is basically what was accidentally broken with by a
-regression.
+Fix this by isolating the definition of 'struct delegation' from the
+command macros via autoconf capability probing:
 
-Cheers,
+1. Add an AC_CHECK_TYPES check for 'struct delegation' in configure.ac.
+2. In locktest.c, unbind 'struct delegation' from the '#ifndef F_GETDELEG'
+   guard and wrap it with '#ifndef HAVE_STRUCT_DELEGATION' instead.
 
-					- Ted
+Signed-off-by: Zorro Lang <zlang@kernel.org>
+---
+
+Hi,
+
+fstests currently fails to build against the latest glibc, with the root
+cause detailed in the commit log above. I'm tagging this patch as an RFC
+since I'd like to get more feedback on whether this is the right approach.
+
+The glibc now defines F_GETDELEG and F_SETDELEG, but leaves out the actual
+'struct delegation' definition. The complete struct is available in <linux/fcntl.h>,
+but we cannot simply include both <fcntl.h> and <linux/fcntl.h> due to nasty
+namespace redefinition conflicts.
+
+I am not entirely sure if glibc will bring in 'struct delegation', so for now,
+I chose to decouple and handle the structure definition independently via
+autoconf. 
+
+Any thoughts or better suggestions on how we should handle this transition?
+
+Thanks,
+Zorro
+
+ configure.ac   | 4 ++++
+ src/locktest.c | 2 ++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/configure.ac b/configure.ac
+index 441f543c..8967f117 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -110,6 +110,10 @@ AC_CHECK_TYPES([struct btrfs_ioctl_received_subvol_args], [], [], [[
+ #include <stddef.h>
+ #include <linux/btrfs.h>
+ ]])
++AC_CHECK_TYPES([struct delegation], [], [], [[
++#include <stddef.h>
++#include <fcntl.h>
++]])
+ AC_CHECK_HEADERS([linux/btrfs.h linux/btrfs_tree.h])
+ AC_CHECK_MEMBERS([struct btrfs_ioctl_vol_args_v2.subvolid], [], [], [[
+ #include <stddef.h>
+diff --git a/src/locktest.c b/src/locktest.c
+index 54ee1f07..d0264c94 100644
+--- a/src/locktest.c
++++ b/src/locktest.c
+@@ -80,7 +80,9 @@ extern int h_errno;
+ #ifndef F_GETDELEG
+ #define F_GETDELEG	(1024 + 15)
+ #define F_SETDELEG	(1024 + 16)
++#endif
+ 
++#ifndef HAVE_STRUCT_DELEGATION
+ struct delegation {
+ 	uint32_t d_flags;
+ 	uint16_t d_type;
+-- 
+2.55.0
+
