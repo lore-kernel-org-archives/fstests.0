@@ -1,49 +1,46 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A4D6266565
-	for <fstests@vger.kernel.org>; Sun, 19 Jul 2026 14:04:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 486212C3245;
+	Sun, 19 Jul 2026 15:57:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784469846; cv=none; b=EuJKK2nVYWwMf3J7VQkIjh6MAR4tfrkLCGOgLSfV39Rd9LQ1ygSW1W9ytbMbZzP7/pDt7b/Hp1e58I505LstzNxHc1riCOl8tghgR9C+868XPU33mZXxFza/+dsoTDD1PGwEgvzYSAoAqW9xqxv5ABmX3DJbD04IZRp9S0tlFHU=
+	t=1784476632; cv=none; b=VYoU5ApeNsQSpMBEeYqAHc2TRq99REJXx3W+JvTh1sGRMAxRsrMkpUUdhQZuYmJbPF7nbCSpYFmIozMdnqjlDU4ANb1SJQ2hJocgrL+obbwxQcjddP5GcNHP38gM3Lz3a0yx2UX59VEIWiDQEcScCnXurW939KSJ6qqPAlzFBvY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784469846; c=relaxed/simple;
-	bh=osyROd93POfyOOAZk4u5xr6vi8R3kY/gxQkaNFM3o1Y=;
-	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=a+1rRAsysO6VE70xrOamjxthmemoN3izfdhhs0Amb5hdKBvx3MuJiE1RfS58ciEz/R3wvlA9ispbw7XX+6ftwnK3Dbgr3iGMbFlc7vN7X7GscrMSFRWjIfh/dagqy/TAS8OAh9ldzCf02oGjoA/z1S7650MDkjNs4o7lVGxJV/U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=pED9gOSP; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1784476632; c=relaxed/simple;
+	bh=KfCinnlrdCWPlf03D00+fC9wNIqXXrnk1zB5uv2L0zg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=RNgyq5ff4bu/lUh120sGAztyVm0Jy1xoYjP7M1FoGstsoQoQgFPbt8rKce7D0MGBJzZylGLmmotqOCyJxAM+xXuDakyj+Y/VoSpP8dvvDKx+Mx4hpg6kA+Kl8QhmcHwu7bV3of84pEVnho/A22b3FGBnAE3rI99Eujm5sKLVQHc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=apXTj4gv; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="pED9gOSP"
-Received: from macsyma.thunk.org (pool-108-49-65-18.bstnma.fios.verizon.net [108.49.65.18])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 66JE3lWQ014013
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Sun, 19 Jul 2026 10:03:51 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1784469831; bh=5olBAkXzioxEkCEOsftyBbRRLWd9ApMth+0d0VfGEHw=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=pED9gOSP1QKoQVD6ADUgX/OCS5TnuUDrWwaLzmUiHH7FXcSVE9lydv2ROq4LJMk5n
-	 qBLxIUWhTBY8aAUtNYyq7E9T5t+Glsejwt60+TQ0VFeFw1/anPyFu7INY5hHA73TC9
-	 VK1ZD4Swn+ISkNYKlIlhHqcPlxSpRw59tI7uVz05KeVzmo4C2U/ZiYFfz1wkcPwU3E
-	 I3fHinWAfWJiAZPTlu6BceqWyD4BrkSXpip1Qxt79Mxh/ZMVAZQOtRW3iKgdDnKi7K
-	 KYlp12ff6DOtvVwc0BpCZtW9AF+J/GpfcqlD+cRYoWEMjRYThmjXxy2OKusDFSAoYH
-	 kMJ2Kt+X9tAfg==
-Received: by macsyma.thunk.org (Postfix, from userid 15806)
-	id 6F012ACB2F4; Sun, 19 Jul 2026 10:02:47 -0400 (EDT)
-Date: Sun, 19 Jul 2026 10:02:47 -0400
-From: "Theodore Tso" <tytso@mit.edu>
-To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
-        "slava@dubeyko.com" <slava@dubeyko.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="apXTj4gv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 73D1C1F000E9;
+	Sun, 19 Jul 2026 15:57:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1784476630;
+	bh=jMN3LPNkhWo8HhkBYCl/0vtiBzQdc6t0rRMOnTS9YwA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=apXTj4gvZjfosneHSr5HRNYPRVRPzFM8NDFvHPHe5ZPdmPsaEbo+rvJ7doxj1p+HC
+	 7LPhX94ccWzzzh7Rwe/SWLwvwK5dSFBoBaJbcVKWFpg+dQiwpeYwh5Cqj0unkPtlSo
+	 9QuXxClgRH3fEs1rCuP2mK0OkesPvjhydJafv6skgeMnXawruIz/TWUP0frCCjSd8j
+	 mJHVxkHwReQ1N/pW3X6TH2wtpkuM85g2eUT04HyTLgk0OTnCMqTLxFHGjJEXT1ECbX
+	 Fre/oLi2yHzBeoXcsc9hC1MGy5uVY/g7JVd+LopeZklVO+Lxgc52ZylHeC5wP0FnbS
+	 ZE2Od9YA/T92w==
+Date: Sun, 19 Jul 2026 23:57:04 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Theodore Tso <tytso@mit.edu>
+Cc: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>, 
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, 
+	"slava@dubeyko.com" <slava@dubeyko.com>
 Subject: Re: Should we consider disable generic/563 for file systems that do
  not support cgroup2?
-Message-ID: <alzYSGVz86d7wDXn@mit.edu>
+Message-ID: <alzzQA9SR55FynDu@zlang-mailbox>
+Mail-Followup-To: Theodore Tso <tytso@mit.edu>, 
+	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>, 
+	"linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "slava@dubeyko.com" <slava@dubeyko.com>
 References: <ff1c0710cbb31f8ebf51457c0629a496ea6f658e.camel@ibm.com>
  <alpUADtQccA2zmWh@zlang-mailbox>
+ <alzYSGVz86d7wDXn@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -52,20 +49,33 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <alpUADtQccA2zmWh@zlang-mailbox>
+In-Reply-To: <alzYSGVz86d7wDXn@mit.edu>
 
-On Sat, Jul 18, 2026 at 12:19:52AM -0500, Zorro Lang wrote:
+On Sun, Jul 19, 2026 at 10:02:47AM -0400, Theodore Tso wrote:
+> On Sat, Jul 18, 2026 at 12:19:52AM -0500, Zorro Lang wrote:
+> > 
+> > 3. You can use or implement a _require_ function to check if a specific feature
+> >    is supported, which will gracefully _notrun the test if it's missing. While
+> >    _require_cgroup2() already exists, its granularity is currently too coarse to
+> >    _notrun for HFS. You might want to consider refining it or introducing a new
+> >    helper to help file systems like HFS+ _notrun properly.
 > 
-> 3. You can use or implement a _require_ function to check if a specific feature
->    is supported, which will gracefully _notrun the test if it's missing. While
->    _require_cgroup2() already exists, its granularity is currently too coarse to
->    _notrun for HFS. You might want to consider refining it or introducing a new
->    helper to help file systems like HFS+ _notrun properly.
+> It may be rather challenging to determine whether the file system is
+> supposed to support cgroupv2, unless we want to define a VFS specific
+> flag and a way to query it via sysfs.  If we want to encourage the use
+> of the simpler file systems to use xfstests, we may want to consider
+> that approach.
 
-It may be rather challenging to determine whether the file system is
-supposed to support cgroupv2, unless we want to define a VFS specific
-flag and a way to query it via sysfs.  If we want to encourage the use
-of the simpler file systems to use xfstests, we may want to consider
-that approach.
+Hi Ted,
 
-						- Ted
+Thank you for your reply. You are right. I was just listing some possible
+options, and I did not mean we must change the kernel for testing. Changing
+the kernel just for a _notrun is indeed not worth it. If there is no simple
+way to implement the _require_* function, we can `_exclude_fs hfs` directly :)
+
+Thanks,
+Zorro
+
+> 
+> 						- Ted
+> 
