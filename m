@@ -1,48 +1,43 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C4DA3DF6C;
-	Sun, 19 Jul 2026 19:15:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 63CF318B0F;
+	Sun, 19 Jul 2026 19:31:15 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784488554; cv=none; b=BDQ0bTqeTiJ/bG5b975ObsGQeoc1PuUSe+g8DNt0KimOp3BwKRvv0Vq7JzvIysxs/SGHzWzpzXt/PvAhGDfrlK/7yFaQ111EdFKRgx6UrJNfk0/mseRSDqLB9Ig9xbBl6qutd7CQ+34vRgWLhRup9NLXSAV9rJrE1+nyke7ytKQ=
+	t=1784489476; cv=none; b=pHwrJ4dlzySaFCAdblIZrnWFJKBTAuEVi8/tNnOMm661Shlzyq1Vy6yjNuk/7CukFrMSnz2zLrLBfXyQM3RuM85jI2JUqva3lrpOFiaeF0RkNy5qMR9x3RKZQb4zy4DOXshpl/tZKUy//1HbIP8j9MmOS1d5sB5oRFkIbfSAMEI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784488554; c=relaxed/simple;
-	bh=CoeblyX7URmqo2OgT2fyxEf0BplPJTbaw+9JtRpn3h8=;
+	s=arc-20240116; t=1784489476; c=relaxed/simple;
+	bh=fYmxvvHdweN0lebZsyJ0KedE3CL+WhIq1pPF5OOc8PM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EAAXfshiip6IS8J/abs7uCXRDjQ+DYV/2XGQn4VFasOEqRoUbVSI3+ThdKS2S9BuVPr4EDDfrNySKySA38FI+VAIgGjiMHcRmVB3cnctDOWAhGiNeAuUjr++/5HqQ6XjByTWs1xsQoMbT7An6HKN+FabIQjThYeYEAhvn0ep2JQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IHqmOTZK; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=DTMPk6lWn21yxhJLg77OtA19KD9I5R0wQeZ80i9XnZJpkvkMv0VBQE+vKXjrKP+LuYiNWJhPR+xKPrzA7gZZQYntnVVTaS9tam6j1g9HHRj/Famo0UmNM1+JJcmj+9Ve7a+Cg69GUbHvR8UhuuNIAn/xQHy+rsv/nPCZnJ37PK4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=d1KP40UZ; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IHqmOTZK"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D65421F000E9;
-	Sun, 19 Jul 2026 19:15:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="d1KP40UZ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 18E761F000E9;
+	Sun, 19 Jul 2026 19:31:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1784488553;
-	bh=y5GE3u+pzknKTvUUnbMKdfnhSgkeSIQwUggIhUAsMLE=;
+	s=k20260515; t=1784489475;
+	bh=E19OCiP3Y58C5dTcmMSveUT7kFfCyIWK6f286JxhVeo=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=IHqmOTZKzKUEYbFbV/qQSi6u57Ruek0qbzy7mqFSqiBGzcFw+1xOxx6tvEYWxprNI
-	 HBWWca+kk2vxG6LcTj5fn6LIqRrCkjJ98EjOZZOjrMWWOxXuEO1L2jH//njbKOpj8h
-	 d7fAexu30aaXdgegQaAz/yX7OuNXDuiryFdbUILPIl8xgTLZGLAkf2stkyeMcWb4ym
-	 uN6iOoyy7sDOrmuSyG6R4my5Xvb0vlqV9VE9yI7ADK/ycdphOvwBTI0JpoMf5YhTi+
-	 ahGjUbsvlFszmc8f8eKewwdPU5XRyzCDMiNQJMGP/whnFfkG0rf/KmwFqFhZROWBfU
-	 EcXDbWl5oKcHA==
-Date: Mon, 20 Jul 2026 03:15:47 +0800
+	b=d1KP40UZqURY9ANd2NvEw/zwopekVYEpazUyA/npJMrkqD8cJocGcV+HZprfCVmbl
+	 zGi5lLV0ZWkVZNf+rNNKIu/sIgkfdNZ6xtd3x0f+1MwZbN/lAGok57FgJoeuc6VhSG
+	 gyhUw4Dyu+Kh5iM4vjv0OogTxgDiFc2uVZCt+NPyZVi/MynA7GSefHruLn5gfgX29v
+	 uROczOun25rGQRgcKzgKZeoHD9f5gVAvYMtT69uFqkgKtAArwktZYa20x3yjc40JQm
+	 kaSQBqH07JlYfByI5md10j4sTRvCI4wOMdy51UNGp569mZ2HlutAuMAszYmDEghXcz
+	 bOzCugvbYXCEA==
+Date: Mon, 20 Jul 2026 03:31:09 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Theodore Tso <tytso@mit.edu>
-Cc: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>, 
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, 
-	"slava@dubeyko.com" <slava@dubeyko.com>
-Subject: Re: Should we consider disable generic/563 for file systems that do
- not support cgroup2?
-Message-ID: <al0d2btWzQaFmcI5@zlang-mailbox>
-Mail-Followup-To: Theodore Tso <tytso@mit.edu>, 
-	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>, 
-	"linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "slava@dubeyko.com" <slava@dubeyko.com>
-References: <ff1c0710cbb31f8ebf51457c0629a496ea6f658e.camel@ibm.com>
- <alpUADtQccA2zmWh@zlang-mailbox>
- <alzYSGVz86d7wDXn@mit.edu>
- <alzzQA9SR55FynDu@zlang-mailbox>
- <alz_HixXWhKTIfRV@mit.edu>
+To: Christoph Hellwig <hch@lst.de>
+Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org, 
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/3] xfs/656: rearrange directio pread/pwrite for zoned
+ filesystems
+Message-ID: <al0l5_nNes-8HM-l@zlang-mailbox>
+Mail-Followup-To: Christoph Hellwig <hch@lst.de>, 
+	"Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+References: <20260710052747.1841555-1-hch@lst.de>
+ <20260710052747.1841555-2-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -51,53 +46,75 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <alz_HixXWhKTIfRV@mit.edu>
+In-Reply-To: <20260710052747.1841555-2-hch@lst.de>
 
-On Sun, Jul 19, 2026 at 12:52:50PM -0400, Theodore Tso wrote:
-> On Sun, Jul 19, 2026 at 11:57:04PM -0500, Zorro Lang wrote:
-> > Thank you for your reply. You are right. I was just listing some
-> > possible options, and I did not mean we must change the kernel for
-> > testing. Changing the kernel just for a _notrun is indeed not worth
-> > it. If there is no simple way to implement the _require_* function,
-> > we can `_exclude_fs hfs` directly :)
+On Fri, Jul 10, 2026 at 07:27:33AM +0200, Christoph Hellwig wrote:
+> From: "Darrick J. Wong" <djwong@kernel.org>
 > 
-> I wouldn't necessarily rule out changing the kernel so that file
-> systems can declare whether they can support cgroupv2.  The advantage
-> is that we wouldn't need to keep adding "_exclude_fs xxx" each time we
-> try to make fstets work on the simpler file systems.  It also means
-> that if a file system adds support for cgroupv2, we wouldn't need to
-> change fstests --- also, if the patch gets backported to an older
-> kernel (either an LTS or an enterprise distro kernel) we don't need to
-> try to modulate the _exclude_fs using kernel version numbers (which
-> isn't guaranteed to work given the backporting possibility).
-
-Sure, hardcoding a _notrun based on FSTYP is a last resort, and it would
-definitely be better if we had a more elegant way to trigger the _notrun.
-As a test suite, I cannot enforce or dictate what features a specific
-filesystem must export just for the convenience of testing :)
-
+> On zoned filesystems, a write failure shuts down the filesystem, which
+> makes this test fail with:
 > 
-> This is a philosophical issue, and reasonable people could disagree on
-> this approach.  For my part, I created /sys/fs/ext4/features/*
-> precisely so that userspace (and fstests) so we can test if a
-> particular feature is available on a particular kernel.  Otherwise, a
-> test to see whether a particular feature "works" might have a false
-> positive if the feature is broken, and the way we test whether the
-> feature is present is basically what was accidentally broken with by a
-> regression.
-
-/sys/fs/$FSTYP/features/ is indeed incredibly helpful! Just a couple of
-days ago, I was actually discussing expanding _require_fs_sysfs to support
-features/ checks there, since our current checks are limited to the
-/sys/fs/$FSTYP/$device/ directory:
-
-https://lore.kernel.org/fstests/aloCfjjqesxpzL9z@zlang-mailbox/T/#mc5a0492cc00550467256951042828bef5d7fa38d
-
-Thanks,
-Zorro
-
+>  --- /run/fstests/bin/tests/xfs/656.out	2026-03-13 16:19:08.152939212 -0700
+>  +++ /run/fstests/logs/xfs/656.out.bad	2026-06-30 18:16:43.847849604 -0700
+>  @@ -1,10 +1,9 @@
+>   QA output created by 656
+>   Format and mount
+>   pwrite: Input/output error
+>  -pread: Input/output error
+>  +stat: Input/output error
+>   pread: Input/output error
+>   fsync: Input/output error
+>   VICTIM pos NUM len NUM: directio_write: Input/output error
+>  -VICTIM pos NUM len NUM: directio_read: Input/output error
+>   VICTIM pos NUM len NUM: buffered_read: Input/output error
+>   VICTIM pos NUM len NUM: buffered_write: Input/output error
 > 
-> Cheers,
+> Reorder the directio pread and pwrite to avoid this unnecessary failure.
+> Note that we cycle the mount between the direct and buffered io tests,
+> which is why we only need to fix the directio test.
 > 
-> 					- Ted
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+
+Looks good to me,
+Reviewed-by: Zorro Lang <zlang@kernel.org>
+
+>  tests/xfs/656     | 2 +-
+>  tests/xfs/656.out | 4 ++--
+>  2 files changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/tests/xfs/656 b/tests/xfs/656
+> index 3830d7193fcb..c01276eb384b 100755
+> --- a/tests/xfs/656
+> +++ b/tests/xfs/656
+> @@ -66,8 +66,8 @@ $XFS_IO_PROG -c 'healthmon -c -v' $SCRATCH_MNT >> $tmp.healthmon &
+>  healer_pid=$!
+>  sleep 1	# wait for program to start up
+>  _dmerror_load_error_table
+> -$XFS_IO_PROG -d -c 'pwrite -b 256k 12k 16k' $testfile >> $seqres.full
+>  $XFS_IO_PROG -d -c 'pread -b 256k 10g 16k' $testfile >> $seqres.full
+> +$XFS_IO_PROG -d -c 'pwrite -b 256k 12k 16k' $testfile >> $seqres.full
+>  _dmerror_load_working_table
+>  
+>  _dmerror_unmount
+> diff --git a/tests/xfs/656.out b/tests/xfs/656.out
+> index 83b2f5948a77..4d6633060acd 100644
+> --- a/tests/xfs/656.out
+> +++ b/tests/xfs/656.out
+> @@ -1,10 +1,10 @@
+>  QA output created by 656
+>  Format and mount
+> -pwrite: Input/output error
+>  pread: Input/output error
+> +pwrite: Input/output error
+>  pread: Input/output error
+>  fsync: Input/output error
+> -VICTIM pos NUM len NUM: directio_write: Input/output error
+>  VICTIM pos NUM len NUM: directio_read: Input/output error
+> +VICTIM pos NUM len NUM: directio_write: Input/output error
+>  VICTIM pos NUM len NUM: buffered_read: Input/output error
+>  VICTIM pos NUM len NUM: buffered_write: Input/output error
+> -- 
+> 2.53.0
 > 
