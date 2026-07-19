@@ -1,47 +1,49 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72F3E3563EB
-	for <fstests@vger.kernel.org>; Sun, 19 Jul 2026 09:24:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A4D6266565
+	for <fstests@vger.kernel.org>; Sun, 19 Jul 2026 14:04:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784453096; cv=none; b=KWd2bVioyO51Yaihbf2Ms26IY5J+5IQmHwxBV3msveCqqyfsHwFTVvRPFKhfHYZiOLP0PnuzWq6vD3syO0dGqhQnAy7MjMM7UQ9R5fjKT9sMIhCFnZWXWYVr6mZIXw+ySiTqwszby3KTb8XPcTTId13wGBP340Tey+lqkaEjFp4=
+	t=1784469846; cv=none; b=EuJKK2nVYWwMf3J7VQkIjh6MAR4tfrkLCGOgLSfV39Rd9LQ1ygSW1W9ytbMbZzP7/pDt7b/Hp1e58I505LstzNxHc1riCOl8tghgR9C+868XPU33mZXxFza/+dsoTDD1PGwEgvzYSAoAqW9xqxv5ABmX3DJbD04IZRp9S0tlFHU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784453096; c=relaxed/simple;
-	bh=DCa1FLbyZR7oAhtU95iGLowMZzs2UhTe9+JO054TGSQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=g8yQPwvcmCEfaRIBOEWj1m2lG72+XkPWLp7Neyxoy6ct9W+ncT1tSoM3mHqk4YRrc0mC5aLw27RaHW9j6d4mxWWHqumgBidbINAB0KC4BDCBl9633tPM980OWpCqVT29vOyQX+zDGKcuzK6EqfL4+2fFQEn0xQrEUqQ49VGMEMM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=K99RGjD/; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1784469846; c=relaxed/simple;
+	bh=osyROd93POfyOOAZk4u5xr6vi8R3kY/gxQkaNFM3o1Y=;
+	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=a+1rRAsysO6VE70xrOamjxthmemoN3izfdhhs0Amb5hdKBvx3MuJiE1RfS58ciEz/R3wvlA9ispbw7XX+6ftwnK3Dbgr3iGMbFlc7vN7X7GscrMSFRWjIfh/dagqy/TAS8OAh9ldzCf02oGjoA/z1S7650MDkjNs4o7lVGxJV/U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=pED9gOSP; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="K99RGjD/"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1926E1F000E9;
-	Sun, 19 Jul 2026 09:24:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1784453095;
-	bh=hlcFkYOTVjgj40EJYE2FLarQkNMyiNL2f8HWPLYDJMg=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=K99RGjD/nSQfF9NCIJd3xX3vHo7jXLmrcabEIWyknnuTAFkjysjXG7d83Qeiwpw31
-	 iENrDt5uFoDhlRzBcw3iKhTHIU377vTFt+5YoKpUidvvwUXBiif9IKxZEtzHunxd69
-	 HZtmrP2xLFM0dNkXxlDkrWCGEIsbawGMObD836YUqskCMEP/PLtaaA7eqdTZeNFJcn
-	 QL7Xtr2PomXpCHoe06E2+znYWHXhwa3TrCULJ4iafgwBQ1qljgfESdnzmsJ5U9YQWK
-	 CGuLUE/Qadyq5dR5StVMgftyzgOs30BmNlxMG35wGDWlZoMuktVelANaIPWQzOFkJc
-	 GslivruuomQbA==
-Date: Sun, 19 Jul 2026 17:24:45 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Chao Yu <chao@kernel.org>
-Cc: Christoph Hellwig <hch@infradead.org>, 
-	Jan Prusakowski <jprusakowski@google.com>, linux-f2fs-devel@lists.sourceforge.net, fstests@vger.kernel.org, 
-	jaegeuk@kernel.org
-Subject: Re: [f2fs-dev] [PATCH] generic/064: allow 50 extents on F2FS after
- fcollapse
-Message-ID: <alyS3PRtALHIV5no@zlang-mailbox>
-Mail-Followup-To: Chao Yu <chao@kernel.org>, 
-	Christoph Hellwig <hch@infradead.org>, Jan Prusakowski <jprusakowski@google.com>, 
-	linux-f2fs-devel@lists.sourceforge.net, fstests@vger.kernel.org, jaegeuk@kernel.org
-References: <20260622070438.1542638-1-jprusakowski@google.com>
- <ajuLORVplOvEXvnI@infradead.org>
- <akKd2IImO7bRjVV2@zlang-mailbox>
- <e7a57c5e-62de-401d-8e39-f7409f398a84@kernel.org>
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="pED9gOSP"
+Received: from macsyma.thunk.org (pool-108-49-65-18.bstnma.fios.verizon.net [108.49.65.18])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 66JE3lWQ014013
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sun, 19 Jul 2026 10:03:51 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1784469831; bh=5olBAkXzioxEkCEOsftyBbRRLWd9ApMth+0d0VfGEHw=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=pED9gOSP1QKoQVD6ADUgX/OCS5TnuUDrWwaLzmUiHH7FXcSVE9lydv2ROq4LJMk5n
+	 qBLxIUWhTBY8aAUtNYyq7E9T5t+Glsejwt60+TQ0VFeFw1/anPyFu7INY5hHA73TC9
+	 VK1ZD4Swn+ISkNYKlIlhHqcPlxSpRw59tI7uVz05KeVzmo4C2U/ZiYFfz1wkcPwU3E
+	 I3fHinWAfWJiAZPTlu6BceqWyD4BrkSXpip1Qxt79Mxh/ZMVAZQOtRW3iKgdDnKi7K
+	 KYlp12ff6DOtvVwc0BpCZtW9AF+J/GpfcqlD+cRYoWEMjRYThmjXxy2OKusDFSAoYH
+	 kMJ2Kt+X9tAfg==
+Received: by macsyma.thunk.org (Postfix, from userid 15806)
+	id 6F012ACB2F4; Sun, 19 Jul 2026 10:02:47 -0400 (EDT)
+Date: Sun, 19 Jul 2026 10:02:47 -0400
+From: "Theodore Tso" <tytso@mit.edu>
+To: Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
+        "slava@dubeyko.com" <slava@dubeyko.com>
+Subject: Re: Should we consider disable generic/563 for file systems that do
+ not support cgroup2?
+Message-ID: <alzYSGVz86d7wDXn@mit.edu>
+References: <ff1c0710cbb31f8ebf51457c0629a496ea6f658e.camel@ibm.com>
+ <alpUADtQccA2zmWh@zlang-mailbox>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -50,55 +52,20 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <e7a57c5e-62de-401d-8e39-f7409f398a84@kernel.org>
+In-Reply-To: <alpUADtQccA2zmWh@zlang-mailbox>
 
-On Tue, Jun 30, 2026 at 08:09:19PM +0800, Chao Yu wrote:
-> On 6/30/26 00:37, Zorro Lang via Linux-f2fs-devel wrote:
-> > On Wed, Jun 24, 2026 at 12:46:01AM -0700, Christoph Hellwig wrote:
-> >> This sounds odd.  The test allocates a contigous range and then just does
-> >> insert/collapse on it, which should not lead to any new data block
-> >> allocations.  Given that the test works fine on zoned XFS and btrfs
-> >> with strict out of place write policies we know it does not require
-> >> overwriting blocks to work as well.
-> >>
-> >> So I think something is fishy in f2fs if needs to allocate data blocks
-> >> here.
-> > 
-> > I have the same question with Christoph. Shouldn't fcollapse in F2FS just
-> > remap the metadata instead of allocating new data blocks?
+On Sat, Jul 18, 2026 at 12:19:52AM -0500, Zorro Lang wrote:
 > 
-> Hi Christoph, Zorro,
-> 
-> Let me explain it briefly, this is because f2fs has only one copy of reverse
-> mapping table (aka SSA), for any checkpointed data, we can not modify SSA info
-> directly during remap, otherwise, after sudden power-cut, we will suffer
-> inconsistent issue in between reverse mapping table and mapping table. So, f2fs
-> choose to rewrite for any checkpointed data.
+> 3. You can use or implement a _require_ function to check if a specific feature
+>    is supported, which will gracefully _notrun the test if it's missing. While
+>    _require_cgroup2() already exists, its granularity is currently too coarse to
+>    _notrun for HFS. You might want to consider refining it or introducing a new
+>    helper to help file systems like HFS+ _notrun properly.
 
-Hi Chao,
+It may be rather challenging to determine whether the file system is
+supposed to support cgroupv2, unless we want to define a VFS specific
+flag and a way to query it via sysfs.  If we want to encourage the use
+of the simpler file systems to use xfstests, we may want to consider
+that approach.
 
-Thank you for the detailed explanation. I now see why F2FS handles this
-differently.
-
-Since this is by design for F2FS, I'd like to merge this fix to help f2fs
-avoid this test failure at first. As for the potential write amplification
-and performance overhead introduced by this rewrite strategy, that can be
-discussed further on the f2fs list if necessary.
-
-I will merge the patch with some clarifying comments:
-
-/*
- * F2FS uses a rewrite strategy for fcollapse/finsert on checkpointed data.
- * Since F2FS has only a single copy of the reverse mapping table (SSA),
- * directly remapping checkpointed metadata could cause inconsistency
- * issues after a sudden power-cut.
- */
-
-Is this ^^ good to you, or feel free to give me a proper comment to add into
-this patch.
-
-Thanks,
-Zorro
-
-> 
-> Thanks,
+						- Ted
