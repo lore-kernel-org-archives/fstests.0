@@ -1,48 +1,50 @@
 Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58E112F549F
-	for <fstests@vger.kernel.org>; Mon, 20 Jul 2026 08:04:04 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B61BF3AE718;
+	Mon, 20 Jul 2026 08:07:41 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784534646; cv=none; b=WG9zgmWJtqow41gfLvwKBbqZNKrQ/FKNYNLreXUfg12qlSAYhUmQVGwQ6a1HeWlwrqayR5/xRhE4lFM/vN0EK1bwXXetx+pNt5KPJzCA7bj4qVgrJABa6czo0zKIqTNeJd340Cw7M2aYgtzNqV0karx8y22WPfCgZYEDxkGIJ/U=
+	t=1784534864; cv=none; b=Vs16Rav0E73tz/B7auGmfuR0gbhBowuzDx8DAAZNRfspn7XqvUcV/5a6/W84X5GUJZcSBOofXQvUyissnabfPPDQGDvWka8E359ElOcGi7aXsjTb0U3WD3/5f2dCLZXDUHOoWv4aWSMxy3nEZQ/1MdW+u3krl/72IPBEOarofNA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784534646; c=relaxed/simple;
-	bh=BQ1gp9p3aYvAui7EH5ROM9JM3ievSj52ezm/pEldpXU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Swb7yJ3Y+IrGv4YPDLnjsKpSGqY3TQy+elKirwf1nZH0QxkVY748hPEMtZkihNS+4XJ1Ut/+27P1Pe9Mys8P3ZB8UXWAc3+4r6gidjwlJwG4xtBeMSgAeWsUVdMFsm1lpTvsIs0IxICFYYHfKOaMtlgrDFAq4qPshufg6V7BLnc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=pjBU6g1b; arc=none smtp.client-ip=198.137.202.133
+	s=arc-20240116; t=1784534864; c=relaxed/simple;
+	bh=oX9m+LskLxwKLhDWP8omE/1987HKE52GUPJqsmlpb5Y=;
+	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=YI+ECkDZw1t8NCfB6lRgU23TWcOpG061wCGHAPt3C+yzBTKWkmAMFq9oNKXCBoJlPVthHMtNtZZNUWZRGqTL4dV/+F/gqaKV6SCcsgxhWd3SJ+coHK1CYhHQQ277j2IKuuoX1d4eOgyigP3mrRZTMA6STR8aXYcBJfkyNo1b9vk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=izn5mV/D; arc=none smtp.client-ip=198.137.202.133
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="pjBU6g1b"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="izn5mV/D"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	:References:Message-ID:Subject:To:From:Date:Sender:Reply-To:Cc:
 	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=+k/S57ilndGjoJss1cqjmQ22UwAd2c+Gg+Fclh9PZOU=; b=pjBU6g1bY/5CCKbkWnRO68c+lZ
-	hN+mOASOwbENw9K3BviGH93pyvJIgn8pjfVKR5gDS2Sw8kVKSAw15MWDzUM1UsYVFOXB8lQOeKMT2
-	QeMk9wl83lEG/h3aKcExIlga32UzGiy+8fqX9cWEpht1MfzZokqHdm0ZVpeknqkkpiPSe19/Fg/GY
-	GMueV8iBvh8MA8z2N8be60rj5R1yInaoG81s2GIzNDzBZ+R/LcccReOLXP2yKXacrzZmYGTCH5+zM
-	GYz00WY02oSpeSDqGHwN5YpBDq7pJunwUxTxDH4muBcZgPtfsWUNv74RNayKJIAKZR4ZeaBGykASu
-	AQ3YyU8g==;
+	bh=f3CSOTh2GOqz5QwuSOIwM7/sExcCmKBDuMS/W2XlGAg=; b=izn5mV/DWeK7FKk75OiMAxuTA1
+	WcGLTHdsooMjMR9xpn0PojhaA2xTUq6Q13+ezolk57BEjJDUqHBI4v+s2G7VFS9R7LbYdMYSg+2Kf
+	JAVTmydtYUDVDzLv3XCo8GxnQahsLRWmwgvTYwsieUbfG4ABGIVcNT4hiU/vCc2CGF/m3UvhADa2/
+	hMdq9KFKzuRHf/ybNCB6Q+LigoDsC0e125fIL375KRTC2lktFpAM6wnmotzcFvLCoVfDfA/wslDp8
+	P155dTpFtsOfAuBHkI/CmZs9wofM3Xl3g6rBhb5JpTc4vRkYut3XGamYUV7ovrefazsREgYC7GwPH
+	r36N2pFQ==;
 Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wliyp-000000069mR-0zhX;
-	Mon, 20 Jul 2026 08:04:03 +0000
-Date: Mon, 20 Jul 2026 01:04:03 -0700
+	id 1wlj2J-00000006A3S-49hl;
+	Mon, 20 Jul 2026 08:07:40 +0000
+Date: Mon, 20 Jul 2026 01:07:39 -0700
 From: Christoph Hellwig <hch@infradead.org>
-To: Chao Yu <chao@kernel.org>
-Cc: Christoph Hellwig <hch@infradead.org>, Zorro Lang <zlang@kernel.org>,
-	Jan Prusakowski <jprusakowski@google.com>,
-	linux-f2fs-devel@lists.sourceforge.net, fstests@vger.kernel.org,
-	jaegeuk@kernel.org
-Subject: Re: [f2fs-dev] [PATCH] generic/064: allow 50 extents on F2FS after
- fcollapse
-Message-ID: <al3Wcz5pIujPdTrL@infradead.org>
-References: <20260622070438.1542638-1-jprusakowski@google.com>
- <ajuLORVplOvEXvnI@infradead.org>
- <akKd2IImO7bRjVV2@zlang-mailbox>
- <e7a57c5e-62de-401d-8e39-f7409f398a84@kernel.org>
+To: Theodore Tso <tytso@mit.edu>,
+	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	"linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
+	"slava@dubeyko.com" <slava@dubeyko.com>
+Subject: Re: Should we consider disable generic/563 for file systems that do
+ not support cgroup2?
+Message-ID: <al3XS4P7Z9lHSb_j@infradead.org>
+References: <ff1c0710cbb31f8ebf51457c0629a496ea6f658e.camel@ibm.com>
+ <alpUADtQccA2zmWh@zlang-mailbox>
+ <alzYSGVz86d7wDXn@mit.edu>
+ <alzzQA9SR55FynDu@zlang-mailbox>
+ <alz_HixXWhKTIfRV@mit.edu>
+ <al0d2btWzQaFmcI5@zlang-mailbox>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -51,20 +53,25 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <e7a57c5e-62de-401d-8e39-f7409f398a84@kernel.org>
+In-Reply-To: <al0d2btWzQaFmcI5@zlang-mailbox>
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Tue, Jun 30, 2026 at 08:09:19PM +0800, Chao Yu wrote:
-> 
-> Let me explain it briefly, this is because f2fs has only one copy of reverse
-> mapping table (aka SSA), for any checkpointed data, we can not modify SSA info
-> directly during remap, otherwise, after sudden power-cut, we will suffer
-> inconsistent issue in between reverse mapping table and mapping table. So, f2fs
-> choose to rewrite for any checkpointed data.
+On Mon, Jul 20, 2026 at 03:15:47AM +0800, Zorro Lang wrote:
+> Sure, hardcoding a _notrun based on FSTYP is a last resort, and it would
+> definitely be better if we had a more elegant way to trigger the _notrun.
+> As a test suite, I cannot enforce or dictate what features a specific
+> filesystem must export just for the convenience of testing :)
 
-So looking at this explanation and the code, f2fs does not actually
-support COLLAPSE_RANGE at all, but emulates by doing a full data
-copy.  What is the point of this and lying to the user that it supports
-and operation that isn't actually supported as the intended metadata
-only swizzle?
+Yes.  And if we have to do that it should at least be in a common helper
+and not sprinkled over the tests.
+
+> /sys/fs/$FSTYP/features/ is indeed incredibly helpful! Just a couple of
+> days ago, I was actually discussing expanding _require_fs_sysfs to support
+> features/ checks there, since our current checks are limited to the
+> /sys/fs/$FSTYP/$device/ directory:
+> 
+> https://lore.kernel.org/fstests/aloCfjjqesxpzL9z@zlang-mailbox/T/#mc5a0492cc00550467256951042828bef5d7fa38d
+
+features can very much depend on the actual file system instance.
+Trying to expose them globally doesn't make much sense.
 
