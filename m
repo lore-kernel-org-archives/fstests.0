@@ -1,50 +1,45 @@
 Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B61BF3AE718;
-	Mon, 20 Jul 2026 08:07:41 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5421A2E8B64;
+	Mon, 20 Jul 2026 08:10:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784534864; cv=none; b=Vs16Rav0E73tz/B7auGmfuR0gbhBowuzDx8DAAZNRfspn7XqvUcV/5a6/W84X5GUJZcSBOofXQvUyissnabfPPDQGDvWka8E359ElOcGi7aXsjTb0U3WD3/5f2dCLZXDUHOoWv4aWSMxy3nEZQ/1MdW+u3krl/72IPBEOarofNA=
+	t=1784535058; cv=none; b=TAGPNhzKSNwjTNM5qDeQR0rGPkHNXCszlSVO0mdjRvU3FH6i0L3TnS5uo+aS3dm/em92cMX7AWQJNOcVkDGRrTLrKKAtFm9wQ6b8WH3O0DiKYdV2mElfOGJfELO4JNeF2zuGYFUfipKqLqFa25saY5HML0tGnNjEpOh2zCygpBE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784534864; c=relaxed/simple;
-	bh=oX9m+LskLxwKLhDWP8omE/1987HKE52GUPJqsmlpb5Y=;
-	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=YI+ECkDZw1t8NCfB6lRgU23TWcOpG061wCGHAPt3C+yzBTKWkmAMFq9oNKXCBoJlPVthHMtNtZZNUWZRGqTL4dV/+F/gqaKV6SCcsgxhWd3SJ+coHK1CYhHQQ277j2IKuuoX1d4eOgyigP3mrRZTMA6STR8aXYcBJfkyNo1b9vk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=izn5mV/D; arc=none smtp.client-ip=198.137.202.133
+	s=arc-20240116; t=1784535058; c=relaxed/simple;
+	bh=d1ZIBzZ7DZEPJ40m2p6lt+h9nj5+FKHRA9o0cwHNigw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=NvrxICquPs3IaOele3cS57Xtz7wYXpKwh5ABb9Qjf5dl9jNLiUUiR/oaXPIc+gDXi9v5fo+2F6/5+FbmzUgRZB6L6c//5G11tkmEAIhRZ0UsGHzW/RtsZURxV29iGJXLnyBUmOgVdctlFRX38jDG3+7W/8k6/kRJ11CtKQjX4NA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=P7JHnyu5; arc=none smtp.client-ip=198.137.202.133
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="izn5mV/D"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="P7JHnyu5"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:To:From:Date:Sender:Reply-To:Cc:
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
 	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=f3CSOTh2GOqz5QwuSOIwM7/sExcCmKBDuMS/W2XlGAg=; b=izn5mV/DWeK7FKk75OiMAxuTA1
-	WcGLTHdsooMjMR9xpn0PojhaA2xTUq6Q13+ezolk57BEjJDUqHBI4v+s2G7VFS9R7LbYdMYSg+2Kf
-	JAVTmydtYUDVDzLv3XCo8GxnQahsLRWmwgvTYwsieUbfG4ABGIVcNT4hiU/vCc2CGF/m3UvhADa2/
-	hMdq9KFKzuRHf/ybNCB6Q+LigoDsC0e125fIL375KRTC2lktFpAM6wnmotzcFvLCoVfDfA/wslDp8
-	P155dTpFtsOfAuBHkI/CmZs9wofM3Xl3g6rBhb5JpTc4vRkYut3XGamYUV7ovrefazsREgYC7GwPH
-	r36N2pFQ==;
+	bh=676mDiYdVq+8m8W+DCKeVPJrfn/i7x13tlWu3pwThd8=; b=P7JHnyu5vDvZHGBztjNibMquQD
+	BXcPZDKjqNT4XCdMG6N5aV2Xf8OVo1syMoH/gNyDe95tIWEH24u/aTmsl7Pinnsm5sVYRIHupCgAm
+	/XDron7oHhdlH/8y7OaItSrydXTRy+PJ+exI/1EqsGVlNlx/Md9f6LQrNICarbJSiU9019SGKOh4U
+	X1rFzjkdNxLWI+L3xA8rL8UBoAkcOe81WPlLPexRAZM/jsSIwhfor3NQbVn4Ya5Z7DlSfJeGfG86N
+	i6hdBQFUjKmyyUbomsfv1cRGwmAQjgDq0eX1UcQ7Ttw1cKLV9jxIoML72s4IDnsYEwEtBiyDoQ8qD
+	BmxvJ/jQ==;
 Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wlj2J-00000006A3S-49hl;
-	Mon, 20 Jul 2026 08:07:40 +0000
-Date: Mon, 20 Jul 2026 01:07:39 -0700
+	id 1wlj5S-00000006AET-1vxT;
+	Mon, 20 Jul 2026 08:10:54 +0000
+Date: Mon, 20 Jul 2026 01:10:54 -0700
 From: Christoph Hellwig <hch@infradead.org>
-To: Theodore Tso <tytso@mit.edu>,
-	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	"linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
-	"slava@dubeyko.com" <slava@dubeyko.com>
-Subject: Re: Should we consider disable generic/563 for file systems that do
- not support cgroup2?
-Message-ID: <al3XS4P7Z9lHSb_j@infradead.org>
-References: <ff1c0710cbb31f8ebf51457c0629a496ea6f658e.camel@ibm.com>
- <alpUADtQccA2zmWh@zlang-mailbox>
- <alzYSGVz86d7wDXn@mit.edu>
- <alzzQA9SR55FynDu@zlang-mailbox>
- <alz_HixXWhKTIfRV@mit.edu>
- <al0d2btWzQaFmcI5@zlang-mailbox>
+To: Qu Wenruo <wqu@suse.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Christian Brauner <brauner@kernel.org>,
+	Miklos Szeredi <miklos@szeredi.hu>,
+	Amir Goldstein <amir73il@gmail.com>, linux-unionfs@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org
+Subject: Re: [PATCH] fstests: vfstest: skip rejected tmpfile creation
+Message-ID: <al3YDuYk81NY9mBE@infradead.org>
+References: <20260717070717.113517-1-wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -53,25 +48,65 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <al0d2btWzQaFmcI5@zlang-mailbox>
+In-Reply-To: <20260717070717.113517-1-wqu@suse.com>
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Mon, Jul 20, 2026 at 03:15:47AM +0800, Zorro Lang wrote:
-> Sure, hardcoding a _notrun based on FSTYP is a last resort, and it would
-> definitely be better if we had a more elegant way to trigger the _notrun.
-> As a test suite, I cannot enforce or dictate what features a specific
-> filesystem must export just for the convenience of testing :)
+Christian indicated the fixes for this are in the (somewhat confusingly
+titled) "[PATCH 0/2] Support overlayfs in the idmapped mount tests"
+series.
 
-Yes.  And if we have to do that it should at least be in a common helper
-and not sprinkled over the tests.
+It would be good to get a proper review for this as it's beyond my
+pay grade.
 
-> /sys/fs/$FSTYP/features/ is indeed incredibly helpful! Just a couple of
-> days ago, I was actually discussing expanding _require_fs_sysfs to support
-> features/ checks there, since our current checks are limited to the
-> /sys/fs/$FSTYP/$device/ directory:
+On Fri, Jul 17, 2026 at 04:37:17PM +0930, Qu Wenruo wrote:
+> Since kernel commit 539dce114465 ("fs: refuse O_TMPFILE creation with an
+> unmapped fsuid or fsgid"), tmpfile creation can be rejected with
+> EOVERFLOW, so also skip that error number to avoid false alerts like the
+> following:
 > 
-> https://lore.kernel.org/fstests/aloCfjjqesxpzL9z@zlang-mailbox/T/#mc5a0492cc00550467256951042828bef5d7fa38d
-
-features can very much depend on the actual file system instance.
-Trying to expose them globally doesn't make much sense.
-
+>  FSTYP         -- ext4
+>  PLATFORM      -- Linux/x86_64 btrfs-vm 7.2.0-rc3-custom+ #411 SMP PREEMPT_DYNAMIC Fri Jul 17 16:24:34 ACST 2026
+>  MKFS_OPTIONS  -- -F /dev/mapper/test-scratch1
+>  MOUNT_OPTIONS -- -o acl,user_xattr /dev/mapper/test-scratch1 /mnt/scratch
+> 
+>  generic/633  1s ... - output mismatch (see /home/adam/xfstests/results//generic/633.out.bad)
+>     --- tests/generic/633.out	2022-05-11 11:25:30.816666664 +0930
+>     +++ /home/adam/xfstests/results//generic/633.out.bad	2026-07-17 16:25:45.033967541 +0930
+>     @@ -1,2 +1,4 @@
+>      QA output created by 633
+>      Silence is golden
+>     +utils.c: 948: openat_tmpfile_supported - Value too large for defined data type - failure: create
+>     +utils.c: 948: openat_tmpfile_supported - Value too large for defined data type - failure: create
+>     ...
+>     (Run 'diff -u /home/adam/xfstests/tests/generic/633.out /home/adam/xfstests/results//generic/633.out.bad'  to see the entire diff)
+>  Ran: generic/633
+>  Failures: generic/633
+>  Failed 1 of 1 tests
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>  src/vfs/utils.c | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+> 
+> diff --git a/src/vfs/utils.c b/src/vfs/utils.c
+> index 0b435afe..d2922cc3 100644
+> --- a/src/vfs/utils.c
+> +++ b/src/vfs/utils.c
+> @@ -941,7 +941,11 @@ bool openat_tmpfile_supported(int dirfd)
+>  
+>  	fd = openat(dirfd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
+>  	if (fd == -1) {
+> -		if (errno == ENOTSUP) {
+> +		/*
+> +		 * Kernel commit 539dce114465 ("fs: refuse O_TMPFILE creation
+> +		 * with an unmapped fsuid or fsgid") will reject such operation.
+> +		 */
+> +		if (errno == ENOTSUP || errno == EOVERFLOW) {
+>  			errno = 0; /* Don't report misleading errno. */
+>  			return false;
+>  		} else {
+> -- 
+> 2.51.2
+> 
+> 
+---end quoted text---
