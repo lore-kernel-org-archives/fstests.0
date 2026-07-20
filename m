@@ -1,91 +1,145 @@
-Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9955330D22;
-	Mon, 20 Jul 2026 11:19:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.141.245
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96700414DE9;
+	Mon, 20 Jul 2026 12:22:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784546358; cv=none; b=sWBN99AbW3z5UK7lALkNlzdY29G/111MRWVoHlNBPDxC+vJVF0HshiXfjOaoJ+7Wr6M6O4Si4KBUJ0jPMdh5XLwjIsrXjfbuD3JXmh2oLCNNqttfOkLm6eicHJSNF8jD9R2KWjRMXfobNm/ObXNw6ioE2QYpv6i+kAILOZ8PQ68=
+	t=1784550151; cv=none; b=Fe3mfzpwSpyDBw9l/muUyhO6GY8m9s7/pYw2CnbhnHdQRCVBxh6B9UQDnL4zghYtES5uADfHTFaWNw3JDNbSR8QGBKwaUDd6cpe3Nk0WKOAwl8A4/nJL5CNt7vDxTg+JoP+XWc+xKlp5ibdUkPdT+YHcPn8JxpIv+U/GU5w4QHQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784546358; c=relaxed/simple;
-	bh=24mzGDxXh2c1EAK8i2AdW9WnWlDwGJqAthP917bjLA0=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=jt6jRMyB/D6oytawLG5FIVSIb/U0pF68KskduMOd7aHM4nn2QaAZb46U5HOtXeNWVh4qf5kxW3Kq32gufm8uzGguZHTUS8LWbJdNX2p0HEsdwQ/IRFPbprDA4NQUdDWN/HHFWyyxyC5VO6jqcWrGBOuSabkJ2y3hEsS1vz9CI38=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=BHsRgEdP; arc=none smtp.client-ip=68.232.141.245
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	s=arc-20240116; t=1784550151; c=relaxed/simple;
+	bh=aLGXAaU53G4liHAWciP2AQL+FuzaVII7WXdNwuNh6i0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=EjZqTqCC0RLtzzz6I5a+CYUT44pJsGCCs0h5osP2ayEpp4VTzQnbbRbTIwYULnUAYcPu4Iydm/5zrLAUVp+5GZqzfzpIDy9kuGqqcALI3yVV77Raw8y+M46Abj+MCFzW2xSvYQiWafwJ70IH5xIRuszVuOmeLT+SdU0hb/ywoWY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Tv0PNXwg; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="BHsRgEdP"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1784546355; x=1816082355;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=24mzGDxXh2c1EAK8i2AdW9WnWlDwGJqAthP917bjLA0=;
-  b=BHsRgEdP48/vKm3cDbR+Vva6X6U5byU5Qdyve9q4HRQ4YH7ZyzgE7dIa
-   4/VHUf+3K8nyczw4Kmz/cNVD6OdxKMPIIqqxKscGu55Zf35fFK3X51XE2
-   RKiSuGGj5cMBl5xkQx2IvDdftFj0FsMxva6jfFNaCDWC7EH8+bG7LUDCK
-   FP84wLQLmExanfl76H2U+6GIIvMCRTdnxR7k4j0S9SIKKswmJDVtZ2Wgz
-   VucY5grIxXGEkAJEL2nXKqPh/QYYH1fX9Vdyjyz7479kDre3QMCG18043
-   L7kUiCjRzOW5Kbx8M3taE3R/u/mrYNwSSv8oFzSVRi67/7M5OviuHkd+w
-   A==;
-X-CSE-ConnectionGUID: kzAmeRrrRouaVRV41uSUAA==
-X-CSE-MsgGUID: uFZJEYCETO+5XdXENKDcyw==
-X-IronPort-AV: E=Sophos;i="6.25,174,1779120000"; 
-   d="scan'208";a="151105677"
-Received: from unknown (HELO uls-op-esad2-o.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 20 Jul 2026 19:19:12 +0800
-X-CSE-ConnectionGUID: wDJXu4dNSwa5KhwLMzPGPA==
-X-CSE-MsgGUID: 3IaxFiXeQfKErushVF5hHg==
-IronPort-SDR: 6a5e0428_6ix/VR3KdORjcEYnMQiBAMJPzlHsw5Di4r59ETVm3cBHHzw
- Br4yqJXjomgaGV/3M8R+UCWtOg0T/d3bKJEhtOg==
-Received: from uls-op-esai1-o.wdc.com ([10.248.3.45])
-  by uls-op-esad2-o.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 20 Jul 2026 04:19:04 -0700
-X-CSE-ConnectionGUID: OOZhr5C4SOWw7VgoKSH8oQ==
-X-CSE-MsgGUID: KBd698F9SAWTNRYSWnGftA==
-WDCIronportException: Internal
-Received: from wdap-kyufgunycc.ad.shared (HELO neo.fritz.box) ([10.224.19.3])
-  by uls-op-esai1-o.wdc.com with ESMTP; 20 Jul 2026 04:19:02 -0700
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org,
-	Johannes Thumshirn <johannes.thumshirn@wdc.com>,
-	Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 5/5] generic/781: fix copyright
-Date: Mon, 20 Jul 2026 13:18:49 +0200
-Message-ID: <20260720111849.1659111-6-johannes.thumshirn@wdc.com>
-X-Mailer: git-send-email 2.54.0
-In-Reply-To: <20260720111849.1659111-1-johannes.thumshirn@wdc.com>
-References: <20260720111849.1659111-1-johannes.thumshirn@wdc.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Tv0PNXwg"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 315D31F00A3D;
+	Mon, 20 Jul 2026 12:22:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1784550150;
+	bh=LvN2cBCsf57ixj9+DrKKW77t6GwVzblI4LjoZXI/niw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=Tv0PNXwgV2OLn/b98WhcGeCGSiOtgOP61fYyX8ipd1SsXz7azSBGW0UFc5qPY62P1
+	 XVpnFkKEL/G62msf++858X5sPnjaJ0fnfu0COdMIr2lnjQrIFITd0sSlnepryZSQ6y
+	 FaSgsUQs9YSg2n0YqIzb+nSMQDZaMo3f0U1StAiA/Wz3L4240OSM8ucrGkTEaFv0CF
+	 K1rWnqmAD5NPBK4sKmLoDGdMUcPxGQA9Op3BSvdVhrZrVQQUs4wxlKlJ0ghJ+u/tPe
+	 YuA687FkXsafE4534Dd3sToPboY9wI57K4hiLa7aglvZ3oyQIsdyOK9hWTpERps+w7
+	 DIrxBr9obG70g==
+Date: Mon, 20 Jul 2026 14:22:26 +0200
+From: Carlos Maiolino <cem@kernel.org>
+To: Avinesh Kumar <avinesh.kumar@suse.com>
+Cc: djwong@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org, 
+	aalbersh@kernel.org
+Subject: Re: [PATCH v2] libfrog: make cmn_err() emit each message atomically
+ to avoid torn output
+Message-ID: <al4S5aazg1G8kc06@nidhogg.toxiclabs.cc>
+References: <20260716151329.GA7371@frogsfrogsfrogs>
+ <20260716194723.191090-1-avinesh.kumar@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260716194723.191090-1-avinesh.kumar@suse.com>
 
-My employer is called Western Digital not Wesgtern Digital. I'm sorry.
+On Thu, Jul 16, 2026 at 09:45:49PM +0200, Avinesh Kumar wrote:
+> From: Avinesh Kumar <avinesh.kumar@suse.com>
+> 
 
-Spotted-by: Christoph Hellwig <hch@lst.de>
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
----
- tests/generic/781 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Adding Andrey to the thread as he's maintaining xfsprogs.
 
-diff --git a/tests/generic/781 b/tests/generic/781
-index 575cc4abfb7b..38536d64e3cd 100755
---- a/tests/generic/781
-+++ b/tests/generic/781
-@@ -1,6 +1,6 @@
- #! /bin/bash
- # SPDX-License-Identifier: GPL-2.0
--# Copyright (c) 2025 Wesgtern Digital Corporation.  All Rights Reserved.
-+# Copyright (c) 2025 Western Digital Corporation.  All Rights Reserved.
- #
- # FS QA Test No. 781
- #
--- 
-2.54.0
 
+> fstests xfs/033 fails sporadically with a spurious blank line in the
+> xfs_repair output:
+> 
+> - output mismatch (see /opt/xfstests/results//xfs/033.out.bad)
+>     --- tests/xfs/033.out	2026-06-24 15:52:51.000000000 -0400
+>     +++ /opt/xfstests/results//xfs/033.out.bad	2026-07-14 18:54:46.582495041 -0400
+>     @@ -103,6 +103,7 @@
+>      Phase 3 - for each AG...
+>              - scan and clear agi unlinked lists...
+>              - process known inodes and perform inode discovery...
+>     +
+>      bad magic number 0xffff on inode INO
+>      bad version number 0xffffffff on inode INO
+>      inode identifier 18446744073709551615 mismatch on inode INO
+> 
+> Root cause is in cmn_err() (libfrog/util.c), which emits a message
+> and its newline as two separate writes to unbuffered stderr.
+> xfs_repair's threads all share stderr. If one is preempted between the
+> two writes, another thread's line lands in between:
+> 
+> (snips from `cat -A 033.raw`) -
+> Phase 3 - for each AG...$
+>         - scan and clear agi unlinked lists...$
+>         - process known inodes and perform inode discovery...$
+> Metadata corruption detected at 0x445dd3, xfs_inode block 0x80/0x4000        - agno = 0$
+> $
+> bad CRC for inode 128$
+> bad magic number 0x0 on inode 128$
+> 
+> which should be like -
+> 
+> Phase 3 - for each AG...$
+>         - scan and clear agi unlinked lists...$
+>         - process known inodes and perform inode discovery...$
+> Metadata corruption detected at 0x445dd3, xfs_inode block 0x80/0x4000$
+>         - agno = 0$
+> bad CRC for inode 130$
+> bad magic number 0x0 on inode 130$
+> 
+> _filter_repair() strips the noise line it glued onto but not the lone
+> newline, which then fails the golden diff.
+> 
+> Make the two writes atomic.
+> 
+> do_error() in xfs_repair.c also has same issue, fix that too.
+> 
+> Signed-off-by: Avinesh Kumar <avinesh.kumar@suse.com>
+> ---
+> v2: fix the do_error() in xfs_repair.c too.
+> 
+>  libfrog/util.c      | 2 ++
+>  repair/xfs_repair.c | 2 ++
+>  2 files changed, 4 insertions(+)
+> 
+> diff --git a/libfrog/util.c b/libfrog/util.c
+> index 5bae5bab..3b6df917 100644
+> --- a/libfrog/util.c
+> +++ b/libfrog/util.c
+> @@ -116,8 +116,10 @@ cmn_err(int level, char *fmt, ...)
+>  	va_list	ap;
+>  
+>  	va_start(ap, fmt);
+> +	flockfile(stderr);
+>  	vfprintf(stderr, fmt, ap);
+>  	fputs("\n", stderr);
+> +	funlockfile(stderr);
+>  	va_end(ap);
+>  }
+>  
+> diff --git a/repair/xfs_repair.c b/repair/xfs_repair.c
+> index 6b97a806..dd758ebc 100644
+> --- a/repair/xfs_repair.c
+> +++ b/repair/xfs_repair.c
+> @@ -458,10 +458,12 @@ do_error(char const *msg, ...)
+>  {
+>  	va_list args;
+>  
+> +	flockfile(stderr);
+>  	fprintf(stderr, _("\nfatal error -- "));
+>  
+>  	va_start(args, msg);
+>  	vfprintf(stderr, msg, args);
+> +	funlockfile(stderr);
+>  	if (dumpcore)
+>  		abort();
+>  	exit(1);
+> -- 
+> 2.55.0
+> 
+> 
