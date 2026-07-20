@@ -1,225 +1,108 @@
-Received: from out-181.mta0.migadu.com (out-181.mta0.migadu.com [91.218.175.181])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03E8544210A;
-	Mon, 20 Jul 2026 16:43:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88DF6442FBC
+	for <fstests@vger.kernel.org>; Mon, 20 Jul 2026 16:45:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784565794; cv=none; b=auUO0ci7bQz13P2869Nl4h9iqtegDQkADWiSO64cNqxANMNwMRwMtg753NDYKzzGCCJUztRuzxJm6QG15W7t1TKxV3zwkiYCpUC7siFjE4BShP6qFVXbJ49v2bYzZIGSoDQBdIRxsoqtvu0QBxUDgf7qMyVKdRDoNqwSK/McKBY=
+	t=1784565924; cv=none; b=QOzEgouE1G5yaykQwlBKnjgNUAOuF4pWqyqbcRLwyc+Q3hj4qCZlwb3TZP5JfBNDfMTgUCawSXAkIWqNAlnTydW9fqb/tnf3H45gaGELjJfyB1rCgDS2PCHD4HoOhEHGsB7Bm9Wwp5MX37h7jX6+cut6IhhVAECJgj1qhzvSUk8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784565794; c=relaxed/simple;
-	bh=hHtxf/lIqO2ZRvyRlXj0+JLSxQv2bRaz/Vg+c14XjGU=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=NfMwodDsgPaqh0rPOh4ancRR9t7IoC4dJNNvVY0bU1bMDtLUjyAvwg5SS4sezcEFqpN10wL+8yztb4g/vZfiM6vbB34cXnbZCxOuabRq1D4LPx6zOYMG8+NM6l9K+p/CRSYDbHm+Ot3NL0YZKR5avlqZHYxCzKQ8ieAuZTQwHns=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=chenxiaosong.com; spf=pass smtp.mailfrom=chenxiaosong.com; dkim=pass (2048-bit key) header.d=chenxiaosong.com header.i=@chenxiaosong.com header.b=mDeA1zSf; arc=none smtp.client-ip=91.218.175.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=chenxiaosong.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chenxiaosong.com
+	s=arc-20240116; t=1784565924; c=relaxed/simple;
+	bh=S+2GN7PTWYlX7vIi5meRzAftOiynEnpvDUBmD5vbmew=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=E3ebRTA1dsDIwsAwTJQOFEfR5H0YTTtN3e+b8iquGxgOwVs0lpzyZKBDVQtq7K1GG/RVmjWNemh5Rt9bN9oGav5V89neFagA2yUV58LD4sYeYtWivUwOy8htuIIc+OcWIj4F6Pbf5JRUSc5usz6lJmO+JJLH7A6uYEDls+owfOY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JzrAaqFv; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=chenxiaosong.com header.i=@chenxiaosong.com header.b="mDeA1zSf"
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=chenxiaosong.com;
-	s=key1; t=1784565789;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=PuGKEYhiVlfOcyIvG191ZqxErZC4tp63ydbY2/P8S5c=;
-	b=mDeA1zSfO/jNTJ5emtWxpna1kY6UKwKZNubFDuRpKI8M+py5ioP8TQogOmBmPq8fWSWSlh
-	lJY8WuCDOj2ndg6Te+v/WqwzjsB9X13IV3OPObcd8x7KNbS5II/Cu2hQF3YS2lC2xu8Ne1
-	35+M+w0GmHie0yW+Q2MYkellaWJecmhJzHS6DR4fIM8cqam0P/IMNiG4oUPE7MFG9oj1af
-	Pk14Jh49zG0Al4RD04b2l5Ac4IvGS2zacv8zGZWf5a+W2kJu1V5RMbMAnn44H1uFsrf0Hp
-	Xh9BRsDUsDLhO81/FDcHW4fi55BqMCo7jpUzchb9hzVFYKrkHuyci9+o1gRxVw==
-From: ChenXiaoSong <chenxiaosong@chenxiaosong.com>
-To: smfrench@gmail.com,
-	linkinjeon@kernel.org,
-	pc@manguebit.org,
-	ronniesahlberg@gmail.com,
-	sprasad@microsoft.com,
-	tom@talpey.com,
-	bharathsm@microsoft.com,
-	senozhatsky@chromium.org,
-	dhowells@redhat.com,
-	metze@samba.org,
-	zlang@kernel.org,
-	lukas@herbolt.com
-Cc: linux-cifs@vger.kernel.org,
-	fstests@vger.kernel.org,
-	ChenXiaoSong <chenxiaosong@kylinos.cn>
-Subject: [PATCH v2 xfstests resend 3/3] generic/795: check nlink returned by fstat()
-Date: Mon, 20 Jul 2026 16:42:07 +0000
-Message-ID: <20260720164207.732522-4-chenxiaosong@chenxiaosong.com>
-In-Reply-To: <20260720164207.732522-1-chenxiaosong@chenxiaosong.com>
-References: <20260720164207.732522-1-chenxiaosong@chenxiaosong.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JzrAaqFv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1C5C31F00A3D
+	for <fstests@vger.kernel.org>; Mon, 20 Jul 2026 16:45:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1784565923;
+	bh=cHFlNo4zqNw/rYUEiaWFNi3p3wuS381dNIxu5PJ3hUA=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc;
+	b=JzrAaqFvuAWT66jeNe0ahhF1eGCsq/QcfwWfShKUl2JwAVdGRf1laOyhD3qcR1pyG
+	 dehjWY47h53Kl3wUgidFsKeOhu1wzuC2s1Tq47vBQDrXOOYzB6bhBk0kjtEnYt/1rc
+	 MgtyHzVQ8V/Zj0vuiD0iAmAnNrSCuqpf6c/b/q4D8kECI+FGLcG6UYsOtF7e5J4SNA
+	 Gn2wfDVZEvflANMdo7fV87vDJRC8mFG0tO+vkmB0COTGzGV2JXns09JpQqUXBLcMAi
+	 /GtP6woXUjj8QD6QMhfhZAz/XSqWW+1KIg/zc5VSUWKnFAUCMSRWwQuFUewVb19jVq
+	 avurs4KeEYAgA==
+Received: by mail-vk1-f182.google.com with SMTP id 71dfb90a1353d-5bbc717c52aso2978365e0c.0
+        for <fstests@vger.kernel.org>; Mon, 20 Jul 2026 09:45:23 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AHgh+RoBemHfnWfIUWBqvdrDm1yfnBxhe0O2QaxuiEqhlAmcOTDfk1ICvnEG5jwW8khYUvVYLn8ofUQB@vger.kernel.org
+X-Gm-Message-State: AOJu0YwNiClPto3LvRrSCp0J1ip5K8HIy8UVtk18oixhQiovRn0viVGy
+	0ZnBUK0FRBSQ7RlqJn22/jVQVjaszJavOVb0kiNdOd+NCKh591Om3vLARB6uG6xxI+CRxDYf69U
+	XG76flEwy+1WpZ3YYbbVdf/Nxvkpms4Q=
+X-Received: by 2002:a05:6102:3e27:b0:73e:5068:824d with SMTP id
+ ada2fe7eead31-747536302fdmr3803746137.14.1784565922332; Mon, 20 Jul 2026
+ 09:45:22 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Migadu-Flow: FLOW_OUT
+References: <20260720111849.1659111-1-johannes.thumshirn@wdc.com> <20260720111849.1659111-2-johannes.thumshirn@wdc.com>
+In-Reply-To: <20260720111849.1659111-2-johannes.thumshirn@wdc.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Mon, 20 Jul 2026 17:44:46 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H7dvTuj+cuemk9qo3YK5Hqec6nM94HaaLjBHnRDL1hwrw@mail.gmail.com>
+X-Gm-Features: AUfX_mz-qclxKGeOYnqm94uBWYv9X1MwfNp6KakmeSMJPIBfwemXW06FWAr5vwc
+Message-ID: <CAL3q7H7dvTuj+cuemk9qo3YK5Hqec6nM94HaaLjBHnRDL1hwrw@mail.gmail.com>
+Subject: Re: [PATCH 1/5] common/btrfs: fix awk field separator in _check_temp_fsid
+To: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: ChenXiaoSong <chenxiaosong@kylinos.cn>
+On Mon, Jul 20, 2026 at 12:34=E2=80=AFPM Johannes Thumshirn
+<johannes.thumshirn@wdc.com> wrote:
+>
+> _check_temp_fsid() extracted the on-disk fsid with "awk -d\" \"",
+> but -d is gawk's --dump-variables option, not a field separator.
+> As a result awk tried to open a file named " " for writing and dumped
+> its variable list, polluting the test output with messages like:
+>
+>   awk: warning: could not open ' ' for writing: Read-only file system
+>   awk: warning: sending variable list to standard error
+>   ARGC: 1
+>   ARGIND: 0
+>   ...
+>
+> which made btrfs/311 (the only test currently exercising this helper)
+> fail. Use -F" " to set the field separator as intended.
 
-Add a test to verify that fstat(2) returns the expected
-st_nlink value as hardlinks are created and removed.
+This is all correct and makes sense.
 
-Suggested-by: Zorro Lang <zlang@kernel.org>
-Signed-off-by: ChenXiaoSong <chenxiaosong@kylinos.cn>
----
- src/Makefile          |  4 +--
- src/fstat.c           | 42 ++++++++++++++++++++++++++++++
- tests/generic/795     | 60 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/795.out |  2 ++
- 4 files changed, 106 insertions(+), 2 deletions(-)
- create mode 100644 src/fstat.c
- create mode 100755 tests/generic/795
- create mode 100644 tests/generic/795.out
+I wonder why the test doesn't fail on my Debian box.
+My awk is a symlink to gawk and the man page, as well as running 'awk
+--help', confirms -d is to dump variables to a file and -F is the
+field separator as you say here.
 
-diff --git a/src/Makefile b/src/Makefile
-index 7fab5d05..fd2622e8 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -6,7 +6,7 @@
- TOPDIR = ..
- include $(TOPDIR)/include/builddefs
- 
--TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
-+TARGETS = dirstress fill fill2 getpagesize holes lstat64 fstat \
- 	nametest permname randholes runas truncfile usemem \
- 	mmapcat append_reader append_writer dirperf metaperf \
- 	devzero feature alloc fault fstest t_access_root \
-@@ -130,7 +130,7 @@ fssum: fssum.c md5.c
- 	@echo "    [CC]    $@"
- 	$(Q)$(LTLINK) fssum.c md5.c -o $@ $(CFLAGS) $(LDFLAGS) $(LDLIBS)
- 
--STAT_TARGETS = lstat64
-+STAT_TARGETS = lstat64 fstat
- 
- $(STAT_TARGETS): %: %.c stat_common.c stat_common.h $(LIBTEST)
- 	@echo "    [CC]    $@"
-diff --git a/src/fstat.c b/src/fstat.c
-new file mode 100644
-index 00000000..fb878f77
---- /dev/null
-+++ b/src/fstat.c
-@@ -0,0 +1,42 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Copyright (C) 2026 KylinSoft Co., Ltd. All rights reserved.
-+ * Author(s): ChenXiaoSong <chenxiaosong@kylinos.cn>
-+ *
-+ *  from
-+ *  src/lstat64.c
-+ *  Copyright (c) 2000-2002 Silicon Graphics, Inc.
-+ *  All Rights Reserved.
-+ */
-+
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <sys/stat.h>
-+#include <unistd.h>
-+
-+#include "stat_common.h"
-+
-+static int
-+get_fstat(const char *path, struct stat64 *sbuf)
-+{
-+	int	fd;
-+	int	ret;
-+	int	saved_errno;
-+
-+	fd = open(path, O_RDONLY | O_NONBLOCK);
-+	if (fd < 0)
-+		return -1;
-+
-+	ret = fstat64(fd, sbuf);
-+	saved_errno = errno;
-+	close(fd);
-+	errno = saved_errno;
-+
-+	return ret;
-+}
-+
-+int
-+main(int argc, char **argv)
-+{
-+	return handle_stat(argc, argv, "fstat", get_fstat);
-+}
-diff --git a/tests/generic/795 b/tests/generic/795
-new file mode 100755
-index 00000000..0fc9a9bc
---- /dev/null
-+++ b/tests/generic/795
-@@ -0,0 +1,60 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2026 KylinSoft Co., Ltd. All rights reserved.
-+# Author(s): ChenXiaoSong <chenxiaosong@kylinos.cn>
-+#
-+# FS QA Test 795
-+#
-+# Check that fstat(2) returns the correct hard link count for a regular file.
-+# Regression test for kernel commit:
-+# 9dd1964ac59d ("smb/client: fix incorrect nlink returned by fstat()")
-+#
-+#  from
-+#  tests/generic/002
-+#  Copyright (c) 2000-2001 Silicon Graphics, Inc.  All Rights Reserved.
-+#
-+. ./common/preamble
-+_begin_fstest metadata auto quick hardlink
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	[ -d "$testdir" ] && rm -rf $testdir
-+}
-+
-+status=0	# success is the default!
-+
-+_require_test
-+_require_hardlinks
-+_require_test_program fstat
-+
-+_fixed_by_fs_commit cifs 9dd1964ac59d \
-+	"smb/client: fix incorrect nlink returned by fstat()"
-+
-+testdir=$TEST_DIR/$$
-+mkdir -p $testdir
-+
-+touch $testdir/tmp.1
-+for ((l = 2; l <= 20; l++)); do
-+	ln $testdir/tmp.1 $testdir/tmp.$l
-+	x=`$here/src/fstat $testdir/tmp.1 | sed -n -e '/ Links: /s/.*Links: *//p'`
-+	if [ "$l" -ne $x ]; then
-+		echo "Arrgh, created link #$l and fstat looks like ..."
-+		$here/src/fstat $testdir/tmp.1
-+		status=1
-+	fi
-+done
-+
-+for ((l = 20; l >= 1; l--)); do
-+	x=`$here/src/fstat $testdir/tmp.1 | sed -n -e '/ Links: /s/.*Links: *//p'`
-+	if [ "$l" -ne $x ]; then
-+		echo "Arrgh, about to remove link #$l and fstat looks like ..."
-+		$here/src/fstat $testdir/tmp.1
-+		status=1
-+	fi
-+	rm -f $testdir/tmp.$l
-+done
-+
-+echo "Silence is golden"
-+exit $status
-diff --git a/tests/generic/795.out b/tests/generic/795.out
-new file mode 100644
-index 00000000..cb357003
---- /dev/null
-+++ b/tests/generic/795.out
-@@ -0,0 +1,2 @@
-+QA output created by 795
-+Silence is golden
--- 
-2.43.0
+So I'm puzzled. Any idea?
 
+>
+> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+> ---
+>  common/btrfs | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/common/btrfs b/common/btrfs
+> index 30288f07b61a..d477bd9e38ea 100644
+> --- a/common/btrfs
+> +++ b/common/btrfs
+> @@ -980,7 +980,7 @@ _check_temp_fsid()
+>
+>         # on disk fsid
+>         fsid=3D$($BTRFS_UTIL_PROG inspect-internal dump-super $dev1 | \
+> -                               grep ^fsid | $AWK_PROG -d" " '{print $2}'=
+)
+> +                               grep ^fsid | $AWK_PROG -F" " '{print $2}'=
+)
+>         echo -e "On disk fsid:\t\t$fsid" | sed -e "s/$fsid/FSID/g"
+>
+>         # Print FSID even if it is not the same as metadata_uuid because =
+it has
+> --
+> 2.54.0
+>
+>
