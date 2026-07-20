@@ -1,42 +1,48 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7817618B0F;
-	Sun, 19 Jul 2026 19:31:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58E112F549F
+	for <fstests@vger.kernel.org>; Mon, 20 Jul 2026 08:04:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784489513; cv=none; b=n6BcZVuvL6+sBZ+Air6x66ewCl5BZ+TDuxsOtk/Q7D6stN3211xAFRVNge5GwRqyehyKeiF//mOnnAdhDkhXUZwdMb9Oy3SnmqRfJ7Fb0O3VgrzPyBwkkUy/F6r5Xuo+gPgLmVRO/Trvmek6TMco8WMVEuNM6PhZRuVDAzHiyUI=
+	t=1784534646; cv=none; b=WG9zgmWJtqow41gfLvwKBbqZNKrQ/FKNYNLreXUfg12qlSAYhUmQVGwQ6a1HeWlwrqayR5/xRhE4lFM/vN0EK1bwXXetx+pNt5KPJzCA7bj4qVgrJABa6czo0zKIqTNeJd340Cw7M2aYgtzNqV0karx8y22WPfCgZYEDxkGIJ/U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784489513; c=relaxed/simple;
-	bh=Ug4PRMADdQnkdgyd86RUV6DvkIlLZZK6zv4EvR4gvOU=;
+	s=arc-20240116; t=1784534646; c=relaxed/simple;
+	bh=BQ1gp9p3aYvAui7EH5ROM9JM3ievSj52ezm/pEldpXU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OYYyuAUs0bzHuwud+HvElqQbb5I2awWeNRCChXnXsWp+9zWZWXn/+B0E/J/hE2idCIBZAJLf9AICBOA6r7vs6YGrvT3C+S31c+73MYC6IMWxjkF8OvVir/J0xZXpA1GPTamDs4gH5PA/mgLzE6XuA3ikTXTfRh8xkPjLFVvc3rQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dkoMre0y; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=Swb7yJ3Y+IrGv4YPDLnjsKpSGqY3TQy+elKirwf1nZH0QxkVY748hPEMtZkihNS+4XJ1Ut/+27P1Pe9Mys8P3ZB8UXWAc3+4r6gidjwlJwG4xtBeMSgAeWsUVdMFsm1lpTvsIs0IxICFYYHfKOaMtlgrDFAq4qPshufg6V7BLnc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=pjBU6g1b; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dkoMre0y"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3FD101F000E9;
-	Sun, 19 Jul 2026 19:31:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1784489512;
-	bh=e+RZqZpeSv4JPEXdsCwBuoOWqk76eZQsPlARLjkflD8=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=dkoMre0yLqk5NHudQ8rVkF5FT2/RBu33+RB2IwcXcHEuQxbNeO7+CipgmNxN3k8QV
-	 wiPlEuQN/WRpvCovIk1k5Ai4EOyaUWztjzsFDAhtDaRZh6ba+hUCBASC3t3yAqz0vO
-	 3VH1GJv+HWcaxH4/x65OG+a2CWJtCxGJLHCojwdNjcFeXzwFN+wCEYD2mfDOod9b2k
-	 2pXPC8Pre0zxAB/FfjgZhX5y7QUzK2d9EZUFrdTvP55bfRCoAnTTukQfSni0nmU/En
-	 KRu8prL66Bsw6fPpzxYE+uEYfj/6sGIVR8FVevd2bfSQ0OkyC0aLaaKzf0RvqSD7ma
-	 BXkue6IoTpYxA==
-Date: Mon, 20 Jul 2026 03:31:47 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org, 
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 2/3] xfs/65[56]: don't unset SCRATCH_RTDEV here
-Message-ID: <al0mCn2FhFGuiCGa@zlang-mailbox>
-Mail-Followup-To: Christoph Hellwig <hch@lst.de>, 
-	"Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-References: <20260710052747.1841555-1-hch@lst.de>
- <20260710052747.1841555-3-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="pjBU6g1b"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=+k/S57ilndGjoJss1cqjmQ22UwAd2c+Gg+Fclh9PZOU=; b=pjBU6g1bY/5CCKbkWnRO68c+lZ
+	hN+mOASOwbENw9K3BviGH93pyvJIgn8pjfVKR5gDS2Sw8kVKSAw15MWDzUM1UsYVFOXB8lQOeKMT2
+	QeMk9wl83lEG/h3aKcExIlga32UzGiy+8fqX9cWEpht1MfzZokqHdm0ZVpeknqkkpiPSe19/Fg/GY
+	GMueV8iBvh8MA8z2N8be60rj5R1yInaoG81s2GIzNDzBZ+R/LcccReOLXP2yKXacrzZmYGTCH5+zM
+	GYz00WY02oSpeSDqGHwN5YpBDq7pJunwUxTxDH4muBcZgPtfsWUNv74RNayKJIAKZR4ZeaBGykASu
+	AQ3YyU8g==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
+	id 1wliyp-000000069mR-0zhX;
+	Mon, 20 Jul 2026 08:04:03 +0000
+Date: Mon, 20 Jul 2026 01:04:03 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: Chao Yu <chao@kernel.org>
+Cc: Christoph Hellwig <hch@infradead.org>, Zorro Lang <zlang@kernel.org>,
+	Jan Prusakowski <jprusakowski@google.com>,
+	linux-f2fs-devel@lists.sourceforge.net, fstests@vger.kernel.org,
+	jaegeuk@kernel.org
+Subject: Re: [f2fs-dev] [PATCH] generic/064: allow 50 extents on F2FS after
+ fcollapse
+Message-ID: <al3Wcz5pIujPdTrL@infradead.org>
+References: <20260622070438.1542638-1-jprusakowski@google.com>
+ <ajuLORVplOvEXvnI@infradead.org>
+ <akKd2IImO7bRjVV2@zlang-mailbox>
+ <e7a57c5e-62de-401d-8e39-f7409f398a84@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,57 +51,20 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260710052747.1841555-3-hch@lst.de>
+In-Reply-To: <e7a57c5e-62de-401d-8e39-f7409f398a84@kernel.org>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Fri, Jul 10, 2026 at 07:27:34AM +0200, Christoph Hellwig wrote:
-> From: "Darrick J. Wong" <djwong@kernel.org>
+On Tue, Jun 30, 2026 at 08:09:19PM +0800, Chao Yu wrote:
 > 
-> Both of these tests claim that they have to unset SCRATCH_RTDEV to avoid
-> formatting failures due to the rt bitmap consuming all the space in the
-> "small" data device.  However, the format doesn't constrain the size of
-> the data device, so the justification doesn't apply.  Remove the whole
-> thing.
-> 
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
+> Let me explain it briefly, this is because f2fs has only one copy of reverse
+> mapping table (aka SSA), for any checkpointed data, we can not modify SSA info
+> directly during remap, otherwise, after sudden power-cut, we will suffer
+> inconsistent issue in between reverse mapping table and mapping table. So, f2fs
+> choose to rewrite for any checkpointed data.
 
-Reviewed-by: Zorro Lang <zlang@kernel.org>
+So looking at this explanation and the code, f2fs does not actually
+support COLLAPSE_RANGE at all, but emulates by doing a full data
+copy.  What is the point of this and lying to the user that it supports
+and operation that isn't actually supported as the intended metadata
+only swizzle?
 
->  tests/xfs/655 | 4 ----
->  tests/xfs/656 | 4 ----
->  2 files changed, 8 deletions(-)
-> 
-> diff --git a/tests/xfs/655 b/tests/xfs/655
-> index a4162d70b321..9d09cc000531 100755
-> --- a/tests/xfs/655
-> +++ b/tests/xfs/655
-> @@ -24,10 +24,6 @@ _require_scratch_nocheck
->  _require_scratch_xfs_crc # can't detect minor corruption w/o crc
->  _require_xfs_io_command healthmon
->  
-> -# Disable the scratch rt device to avoid test failures relating to the rt
-> -# bitmap consuming all the free space in our small data device.
-> -unset SCRATCH_RTDEV
-> -
->  echo "Format and mount"
->  _scratch_mkfs -d agcount=1 | _filter_mkfs 2> $tmp.mkfs >> $seqres.full
->  . $tmp.mkfs
-> diff --git a/tests/xfs/656 b/tests/xfs/656
-> index c01276eb384b..5114a6c24003 100755
-> --- a/tests/xfs/656
-> +++ b/tests/xfs/656
-> @@ -40,10 +40,6 @@ filter_healer_errors() {
->  		uniq
->  }
->  
-> -# Disable the scratch rt device to avoid test failures relating to the rt
-> -# bitmap consuming all the free space in our small data device.
-> -unset SCRATCH_RTDEV
-> -
->  echo "Format and mount"
->  _scratch_mkfs > $seqres.full 2>&1
->  _dmerror_init no_log
-> -- 
-> 2.53.0
-> 
