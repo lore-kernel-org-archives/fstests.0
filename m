@@ -1,39 +1,48 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 513F84D2EFD
-	for <fstests@vger.kernel.org>; Tue, 21 Jul 2026 15:00:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F52A44AB99;
+	Tue, 21 Jul 2026 21:21:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784646041; cv=none; b=sz5WZXL44m6DiBAZcV2/f3SrTY91zbKHxY4CsKfzGH3RCwJF00guvhPiHFm9alHpifKf+7gYI58O7i4u9va2mFI8aUlSlAO8h4dRR25ZiKEvBG6KTpt45omqge5A+JomD3/5xiWnftYzVRzE38cr0vQs16R0EvCubjzMuDRoAaM=
+	t=1784668893; cv=none; b=G55HDed52g29shtexsZvqLBtSKwvKR9GdpHCMhKWPkpfN6mFF8VQWjijRT37yhSTXe0oQdM51gvA0PKTmQ8wiuVZDFZH9CbbPk9XGfFCN38PRY+ULpQr79r1AVrmd+tgtc+hwveqCs9srWAvJe2t5oXYGA6PcJYVw9qzYjh64qI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784646041; c=relaxed/simple;
-	bh=/YrybYQsGozpnszQC9d+lXLd3abzHsYTtrsJr4pg6C4=;
+	s=arc-20240116; t=1784668893; c=relaxed/simple;
+	bh=+Gqsm4gqLMwFNZ0AshqdF1RuqOVGIAZJQ31a7z5jhGs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=XHObtCDM78N/j/82BwULhVLuAEaxUwwbh0lZnCSFX5xLajNPcSe8zWbi+XUnnCP2XAeZTJTDJEcYv+6Wji8r7945krrTOwhDB44aD+UNyBAQsbPO0YZhupQMstMbWQRlfmeAivtN/e69q+FKeNu7G2XRr8B6OOAXQ335LegSQp4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WvzP8/xs; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=Ar6/h2rIZnyHFGDVvFi1JPknKkWkGSI8QL+/YgZU9Ra2WK32KJTsZ8v5okpQ9I9EsAkLrQMUepnLaDf1V6khTEhET8JQfMt3++p3Bed5f8zYxi8cy7Twst0tpB+abSpLx07oATIhZE4Vy7gdLoIC7A48drEXhQxuWBLzEch12fw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=H/HjMpiG; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WvzP8/xs"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id DB89D1F000E9;
-	Tue, 21 Jul 2026 15:00:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="H/HjMpiG"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EA8B61F000E9;
+	Tue, 21 Jul 2026 21:21:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1784646040;
-	bh=oinVK/zhkRuY47DDo/XQnXQN9UPV8927aECbkTeeyW0=;
+	s=k20260515; t=1784668891;
+	bh=mNAYL66qhgcA6JDYg6N3671A+c/SLVrzYAycekrZvxQ=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=WvzP8/xsIvA7Qv8ImjVoBPMwVpGdvmrhccuSWHTCHTrOBQMr5VBRWadtY1aIouzTh
-	 WGaeR6ZSg1OpeVFrp5FeUIvgOB6Z7OYbf6UHalrVbrtKhUhE5EqalkrszKlhTvBqrU
-	 AnFaWq/zgtxSY4EFUz31gjZy0PVE99oLpnjHe7vGKVNnpeKmMi1VGBuTz0uz1D/eqo
-	 Zvm0h1da57cmJzfXwuK0KDqkXhJtudhZxlMoHGmemXro7A8egMez52wU3yny4xaHzy
-	 rHzu0cJqJZjDiJpMq5LXgHAfumSAA1ra+ZTrnOZFkKipnfjky7/vmLGpYlmfLZuFtj
-	 AamUTLx0NCF5A==
-Date: Tue, 21 Jul 2026 08:00:39 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Avinesh Kumar <avinesh.kumar@suse.com>
-Cc: zlang@kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v3] common: strip attr 2.6.0 --restore safety warnings
-Message-ID: <20260721150039.GP7398@frogsfrogsfrogs>
-References: <alpihbK3XQn3I5vR@zlang-mailbox>
- <20260721102059.93453-1-avinesh.kumar@suse.com>
+	b=H/HjMpiGsS8p72ql1jiQsC6WmJiVqI2nS3qsMmWK0HCFO7HtPc4BQrSyXB6WlDMS+
+	 sntGSOuBd7lVdIa4dG+7iLjmsC0n+oFI5rKiMp7SC1VzUbrLvJM1HIAoNWLGAPId7D
+	 efkIG+/Ar5zh65qPyLgRJiiqjEUHrHN03rP2ChbuLKAJveF2hTPypVkKE3xm7aSwXW
+	 LeaYMOjshbmMFnLoZfLT/qsDDkVNJ/1oG9Gy5nNU+sfoG6nIEb+hR9/De3XylCkP+o
+	 jTFAwW3MYOXruUqiWE8ekwBUqzaUcrTRb/Z3+oBL3cbNL/HT3z/NPmoeC2XnTyKAA1
+	 heklvUPszuUTg==
+Date: Wed, 22 Jul 2026 05:21:22 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: ChenXiaoSong <chenxiaosong@chenxiaosong.com>
+Cc: smfrench@gmail.com, linkinjeon@kernel.org, pc@manguebit.org, 
+	ronniesahlberg@gmail.com, sprasad@microsoft.com, tom@talpey.com, bharathsm@microsoft.com, 
+	senozhatsky@chromium.org, dhowells@redhat.com, metze@samba.org, linux-cifs@vger.kernel.org, 
+	ChenXiaoSong <chenxiaosong@kylinos.cn>, fstests@vger.kernel.org
+Subject: Re: [PATCH v2 xfstests 0/3] add generic/795
+Message-ID: <al_e-tLidEugZyY2@zlang-mailbox>
+Mail-Followup-To: ChenXiaoSong <chenxiaosong@chenxiaosong.com>, 
+	smfrench@gmail.com, linkinjeon@kernel.org, pc@manguebit.org, 
+	ronniesahlberg@gmail.com, sprasad@microsoft.com, tom@talpey.com, bharathsm@microsoft.com, 
+	senozhatsky@chromium.org, dhowells@redhat.com, metze@samba.org, linux-cifs@vger.kernel.org, 
+	ChenXiaoSong <chenxiaosong@kylinos.cn>, fstests@vger.kernel.org
+References: <20260720163502.732454-1-chenxiaosong@chenxiaosong.com>
+ <al8nX7MnPDzmUA5W@zlang-mailbox>
+ <4021e03f-6d80-4a26-9112-1dc20abeed12@chenxiaosong.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,113 +51,112 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260721102059.93453-1-avinesh.kumar@suse.com>
+In-Reply-To: <4021e03f-6d80-4a26-9112-1dc20abeed12@chenxiaosong.com>
 
-On Tue, Jul 21, 2026 at 12:20:59PM +0200, Avinesh Kumar wrote:
-> From: Avinesh Kumar <avinesh.kumar@suse.com>
+On Tue, Jul 21, 2026 at 04:31:59PM +0800, ChenXiaoSong wrote:
+> Hi Zorro,
 > 
-> attr 2.6.0 (CVE-2026-54371 hardening) makes "setfattr --restore" print a
-> warning to stderr when options -P and -h are not given, claiming it may
-> traverse or dereference symlinks in the dump's pathnames [0]. This warning
-> leaks into test output and breaks generic/062 and xfs/083 (via
-> _scratch_populate).
-> 
-> Add a _setfattr_restore helper that takes the restore source as its first
-> argument, filters out just the expected warning line, and preserves any
-> other (unexpected) stderr. Convert the callers in common/populate,
-> common/overlay and generic/062 to use it.
-> 
-> [0] https://cgit.git.savannah.nongnu.org/cgit/attr.git/commit/?id=3fb06b9ba314d37035d0877e6de313de754f1ac8
-> 
-> Suggested-by: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Avinesh Kumar <avinesh.kumar@suse.com>
-> ---
->  common/overlay    |  2 +-
->  common/populate   |  4 ++--
->  common/rc         | 15 +++++++++++++++
->  tests/generic/062 |  2 +-
->  4 files changed, 19 insertions(+), 4 deletions(-)
-> 
-> diff --git a/common/overlay b/common/overlay
-> index d32f3219..8e89d6e4 100644
-> --- a/common/overlay
-> +++ b/common/overlay
-> @@ -494,7 +494,7 @@ _overlay_trusted_to_user()
->  	local dir=$1
->  
->  	for file in `find $dir`; do
-> -		_getfattr --absolute-names -d -m '^trusted.overlay.(redirect|metacopy)$' $file  | sed 's/^trusted/user/' | $SETFATTR_PROG --restore=-
-> +		_getfattr --absolute-names -d -m '^trusted.overlay.(redirect|metacopy)$' $file  | sed 's/^trusted/user/' | _setfattr_restore -
->  		for xattr in `_getfattr --absolute-names -d -m '^trusted.overlay.' $file  | tail -n +2 | cut -d= -f1`; do
->  			$SETFATTR_PROG -x $xattr $file;
->  		done
-> diff --git a/common/populate b/common/populate
-> index 1c0dd03e..f3672c1a 100644
-> --- a/common/populate
-> +++ b/common/populate
-> @@ -151,7 +151,7 @@ __populate_create_attr() {
->  		echo "# file: ${name}";
->  		seq --format "user.%08g=\"abcdefgh\"" 0 "${nr}"
->  		echo
-> -	) | setfattr --restore -
-> +	) | _setfattr_restore -
->  
->  	test -z "${missing}" && return
->  	seq 1 2 "${nr}" | while read d; do
-> @@ -200,7 +200,7 @@ __populate_xfs_create_btree_attr() {
->  			seq --format "user.%08g=\"abcdefgh\"" "${nr}" "$((nr + incr + 1))"
->  			echo "user.v$(printf "%.08d" "$nr")=\"${bigval}\""
->  			echo
-> -		) | setfattr --restore -
-> +		) | _setfattr_restore -
->  	done
->  
->  	# ... and in the second loop we delete all the remote attrs to
-> diff --git a/common/rc b/common/rc
-> index 79189e7e..38b77bef 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -132,6 +132,21 @@ _test_fsxattr_xflag()
->  	grep -q "fsxattr.xflags.*\[.*$2.*\]" <($XFS_IO_PROG -c "stat -v" "$1")
->  }
->  
-> +# Restore xattrs from a getfattr-style dump given as $1 (a dump file, or "-"
-> +# for stdin); any extra setfattr options follow.  attr 2.6.0 (CVE-2026-54371)
-> +# makes --restore warn unless both -P and -h are given, so filter out just
-> +# those warning lines, keep other unexpected stderr.
-> +_setfattr_restore()
-> +{
-> +	local restore_from="$1"
-> +	shift
-> +
-> +	$SETFATTR_PROG "$@" --restore="$restore_from" 2> $tmp.setfattr
-> +	local ret=$?
-> +	sed -e '/--restore=.*unsafe.*without/d' "$tmp.setfattr" 1>&2
-> +	return $ret
-> +}
+> The stat command uses the statx() syscall rather than fstat(), so we have to
+> use a C program to call fstat().
 
-Looks good to me,
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+I'm not sure how you got at that conclusion.
 
---D
+> 
+> On 7/21/26 16:25, Zorro Lang wrote:
+> > I might not have explained clearly during the review. I wasn't asking you to
+> > rewrite g/002 and lstat64.c. I was suggesting checking whether src/fstat.c in
+> > your previous patch could be replaced by the stat command in xfs_io [1]. Check
+> > `man xfs_io` for the "stat" command to see if it can fulfill your test
+> > requirement.
+> > 
+> > Due to I noticed you need information like st_nlink from struct stat, so
+> > `xfs_io -c "stat -r" ...` should meet your requirements. Please
+     ^^^^^^^^^^^^^^^^^^
 
-> +
->  # This test requires extsize support on the  filesystem
->  _require_scratch_extsize()
->  {
-> diff --git a/tests/generic/062 b/tests/generic/062
-> index 89659040..845d62f2 100755
-> --- a/tests/generic/062
-> +++ b/tests/generic/062
-> @@ -186,7 +186,7 @@ _create_test_bed
->  _extend_test_bed
->  
->  echo "*** restore everything"
-> -setfattr -h --restore=$tmp.backup1
-> +_setfattr_restore "$tmp.backup1" -h 2>&1 | _filter_scratch
->  _backup $tmp.backup2
->  
->  echo "AFTER RESTORE" >>$seqres.full
+Please note that I have been talking about xfs_io stat subcommand all along, rather
+than the coreutils' stat command. I suspect there might be a misunderstanding here.
+
+xfstests inherently depends on xfsprogs, particularly the xfs_io command.
+I just checked this for you, the stat subcommand in xfs_io does indeed use
+the fstat system call [1][2], not statx, and its -r option will print out fields
+like st_nlink.
+
+Please double-check this on your end, make sure it works for you.
+
+Thanks,
+Zorro
+
+[1]
+xfsprogs/io/stat.c:stat_f() :
+  int
+  stat_f(
+          int             argc,
+          char            **argv)
+  {
+          struct stat     st;
+          int             c, verbose = 0, raw = 0;
+
+          while ((c = getopt(argc, argv, "rv")) != EOF) {
+                  switch (c) {
+                  case 'r':
+                          raw = 1;
+                          break;
+                  case 'v':
+                          verbose = 1;
+                          break;
+                  default:
+                          exitcode = 1;
+                          return command_usage(&stat_cmd);
+                  }
+          }
+
+          if (fstat(file->fd, &st) < 0) {
+                  perror("fstat");
+                  exitcode = 1;
+                  return 0;
+          }
+
+          if (raw)
+                  return dump_raw_stat(&st);
+  ...
+
+[2]
+$ strace xfs_io -c "stat -r" README 2>&1|grep -E "statx|fstat"
+fstat(3, {st_mode=S_IFREG|0644, st_size=106979, ...}) = 0
+fstat(3, {st_mode=S_IFREG|0755, st_size=36680, ...}) = 0
+fstat(3, {st_mode=S_IFREG|0755, st_size=236720, ...}) = 0
+fstat(3, {st_mode=S_IFREG|0755, st_size=2482096, ...}) = 0
+fstat(3, {st_mode=S_IFREG|0755, st_size=187232, ...}) = 0
+fstat(3, {st_mode=S_IFREG|0644, st_size=233380912, ...}) = 0
+fstat(3, {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
+newfstatat(AT_FDCWD, "/", {st_mode=S_IFDIR|0555, st_size=154, ...}, 0) = 0
+newfstatat(AT_FDCWD, "/", {st_mode=S_IFDIR|0555, st_size=154, ...}, 0) = 0
+newfstatat(AT_FDCWD, "/home", {st_mode=S_IFDIR|0755, st_size=10, ...}, 0) = 0
+newfstatat(AT_FDCWD, "/home", {st_mode=S_IFDIR|0755, st_size=10, ...}, 0) = 0
+newfstatat(AT_FDCWD, "/boot", {st_mode=S_IFDIR|0555, st_size=4096, ...}, 0) = 0
+newfstatat(AT_FDCWD, "/boot", {st_mode=S_IFDIR|0555, st_size=4096, ...}, 0) = 0
+newfstatat(AT_FDCWD, "/boot/efi", {st_mode=S_IFDIR|0700, st_size=4096, ...}, 0) = 0
+newfstatat(AT_FDCWD, "/boot/efi", {st_mode=S_IFDIR|0700, st_size=4096, ...}, 0) = 0
+newfstatat(AT_FDCWD, "README", {st_mode=S_IFREG|0644, st_size=27145, ...}, 0) = 0
+fstatfs(3, {f_type=BTRFS_SUPER_MAGIC, f_bsize=4096, f_blocks=249372928, f_bfree=196292374, f_bavail=195356006, f_files=0, f_ffree=0, f_fsid={val=[0xfb10ffbe, 0x278a3f4f]}, f_namelen=255, f_frsize=4096, f_flags=ST_VALID|ST_RELATIME}) = 0
+fstat(3, {st_mode=S_IFREG|0644, st_size=27145, ...}) = 0
+newfstatat(AT_FDCWD, "README", {st_mode=S_IFREG|0644, st_size=27145, ...}, 0) = 0
+fstatfs(3, {f_type=BTRFS_SUPER_MAGIC, f_bsize=4096, f_blocks=249372928, f_bfree=196292374, f_bavail=195356006, f_files=0, f_ffree=0, f_fsid={val=[0xfb10ffbe, 0x278a3f4f]}, f_namelen=255, f_frsize=4096, f_flags=ST_VALID|ST_RELATIME}) = 0
+fstat(3, {st_mode=S_IFREG|0644, st_size=27145, ...}) = 0
+fstat(4, {st_mode=S_IFREG|0644, st_size=2998, ...}) = 0
+fstat(3, {st_mode=S_IFREG|0644, st_size=27145, ...}) = 0
+fstat(1, {st_mode=S_IFIFO|0600, st_size=0, ...}) = 0
+
+
+> > give it a try, if it works, it will make the whole patch much cleaner.
+> >
+> > P.S. For a new test case, please don't use a specific case number (like
+> > generic/795) in the subject or commit log, as it might get assigned a
+> > different number when merged. You can just use something like:
+> > "[PATCH] generic: new test to ..."
+> 
 > -- 
-> 2.55.0
+> ChenXiaoSong <chenxiaosong@chenxiaosong.com>
+> Chinese Homepage: https://chenxiaosong.com
+> English Homepage: https://chenxiaosong.com/en
 > 
