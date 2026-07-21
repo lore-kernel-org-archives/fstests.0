@@ -1,188 +1,182 @@
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25C5E3403E0;
-	Tue, 21 Jul 2026 06:43:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=68.232.143.124
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784616234; cv=fail; b=WWvTf274vUCMdubS2erWvTF6OYSJDSuEUekcadxpK45t+ymu44ey1rL8G4zi4Wu5V6WPMwTx7yxbdfp49VZODp5APS7xM1kujJIIfwdTMsnNZH5opYpyWpaS2hpbZKvtFSoFxgK7Xrh1HO73en0gi4LZt80/X5r6zaenYeIlupM=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784616234; c=relaxed/simple;
-	bh=P+paPPbRFK4PzIRKKFhOTJNkdDsF3GDTypKHONK/KVU=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=TuUPirDMG7x2PSDJaVuB8J3q0mnW85sLI1hDREXng7voDGcO++6lAjaxewBVOsVpqGrBOSETC7/TH6+zUe+OcoaXtmR/462+CZeLQMyZWM9BpG6B39kj0wadcsZSF7a7HDbl+sYqlDR5CrF8tsJR7RGJlQHl5hizfvmycOnWmsc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=RONo7MB1; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=vfkBH2kc; arc=fail smtp.client-ip=68.232.143.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8A0C3BADB2
+	for <fstests@vger.kernel.org>; Tue, 21 Jul 2026 08:33:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1784622804; cv=none; b=YgWv4DEWsu+JcicaIh0RFzjGEE0/dFacinE463tuswY61sSB/tvPpH+Ndy6RnD1DcH5aSTt/UuTp+6QNVrP0y5gFuHIRlIc6CjEORVzjn/4WX/WIv6MWPiBaaVsWGCvmNuYCU1S4gqaIYB4oVVmEf3gp9RmQrWMDxvDmpjQU/bQ=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1784622804; c=relaxed/simple;
+	bh=C2TR7QZjMCPzr/lXcFSICxJA7+AANydMQ/K9zb8auLE=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=uVROrqwGeV/p6vXn+OdHI/ZADtnzqPymwY51mpjjdlE68qGBOQ2ZhimMo2hT69SYXVPq38AWd9+AjXCKMt210GLmxktLowUmMkXYTxH15UFEsaU/O8MM7Umz83v1vG4a8Q9ve8p1mcKfZURCUefzSYIk5rIH60RKwvAA0aQfTt4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dGcUyx+r; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="RONo7MB1";
-	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="vfkBH2kc"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1784616233; x=1816152233;
-  h=message-id:date:subject:to:cc:references:from:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=P+paPPbRFK4PzIRKKFhOTJNkdDsF3GDTypKHONK/KVU=;
-  b=RONo7MB1+fLv7r66iHue7HkXf+mXIZS8mUIjD6sY3CFWEGd2Wh+RBcER
-   OfQfhYIgiwYzTytu81nuLqkAaD2MpeCB6WPj81WvZgi/cW0SPP8eHg+/Y
-   KgqgGW2Qqd6LqmgiL9pky/GyynUdNmHNWwmURIT0fok1jfTRlRLxbbXvH
-   wyZPR/r1gPQnGJ05CEafVUkO3kjaQ7hNn5nCnf5kGuvqTxK23GSbh4QEZ
-   FMYWq4WrKdyg85azgcWBguILn5Qi1XPvjqPVL6z724xtI0rY+AX1JuFYe
-   pR8MxpUzA75HCZlxGJbziqSUczhTA3tui3FADNgC1REmhve67FUvFSown
-   Q==;
-X-CSE-ConnectionGUID: d9uYPgeWTtat5LgkGWR/gg==
-X-CSE-MsgGUID: Rutid8IoQSiPgZP3mVrndw==
-X-IronPort-AV: E=Sophos;i="6.25,176,1779120000"; 
-   d="scan'208";a="152365588"
-Received: from mail-eastusazon11011033.outbound.protection.outlook.com (HELO BL2PR02CU003.outbound.protection.outlook.com) ([52.101.52.33])
-  by ob1.hgst.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 21 Jul 2026 14:43:46 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=bRHUX6GeEyCLQ6M9X15QYwh/6Gk+HYkdycV0SXnaDt7aiZNAWBGsJtlve6JGsUA4L9xWDxiAJvds0hThA2tzXrl8X27bGyDaPvybzOiTxS2bMf9LC2qL3hpcPf/iwAPSo4f+8sv//W17DZbb/wp6XF8kK7Jtwmgmkq4vmW6ZYqR1wD+r99luzmUI5ICoFzbBo8Jq1qQaqnC76/47mWrmaSJHmgnVNvObpWLT/zUugqqtRuzNtmQmKKmUhAG7swczFYOU/LwSecLoJpVxtNXXuH3i2bsPkFOwh4lsWf5KnFnCwCMpwHdJEsYL2JRyOze2SBMSuL9P199PKXPVvGvj5A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=0Q96yFJItHal/7lga3Qsm0CZDMHe2wbtp44mDGchwAU=;
- b=nr3SMKtAGIfQRemLh4AfR2Cdg5LdvHDzRZFm0mtVzqhimUUjKtJk3K5Qj4U1qmgnQ7ko1gQaSHC0Xiur24eDYjgjfG40Fu1GZEVnzcHzdAaZGJBLSSSfnE75jsHyHrInIrjdjqhxAZWG5iOrUqfM5jydBj4Jke5ZUlNA9yYOXFCKIhP5R140TjCuRpbw3eU9mNEd2pr7EIOgGfyzSY9buGEq/YgmTjkbxyCILXHQeMKw72MJn0Z6v8DXeB8osuK7xDxIWx0phnjzRie9k9/PORcPZ9lZV0V2zTz3exskQ8S0bv6mIb7QwTbyGH5xAUUlivZMz9I2j9rrUSFe0WJ91Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=0Q96yFJItHal/7lga3Qsm0CZDMHe2wbtp44mDGchwAU=;
- b=vfkBH2kcBVW4qOpSs6e31Q8x+eVXpSjB1vOjj8wtKfAvCjZw/nGds8odbqC4lTR/ObGBzYvnSmGt8H6SXNrApfLCEC8GRFBVG+P07bsTFqu3pDUtKZ9wBFWq79mGu4UuX/9e/iQ8UUHUfJyQ68Lt+c47FUGRNFCD+lfzWUcW/9c=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-Received: from SA6PR04MB9447.namprd04.prod.outlook.com (2603:10b6:806:436::21)
- by SA1PR04MB9899.namprd04.prod.outlook.com (2603:10b6:806:4a1::10) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.223.18; Tue, 21 Jul
- 2026 06:43:44 +0000
-Received: from SA6PR04MB9447.namprd04.prod.outlook.com
- ([fe80::14c6:1c14:485f:1825]) by SA6PR04MB9447.namprd04.prod.outlook.com
- ([fe80::14c6:1c14:485f:1825%6]) with mapi id 15.21.0223.017; Tue, 21 Jul 2026
- 06:43:44 +0000
-Message-ID: <fab7934e-8561-4eac-9b54-1fcf71a75af1@wdc.com>
-Date: Tue, 21 Jul 2026 08:43:40 +0200
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/5] common/btrfs: fix awk field separator in
- _check_temp_fsid
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
- linux-btrfs@vger.kernel.org
-References: <20260720111849.1659111-1-johannes.thumshirn@wdc.com>
- <20260720111849.1659111-2-johannes.thumshirn@wdc.com>
- <CAL3q7H7dvTuj+cuemk9qo3YK5Hqec6nM94HaaLjBHnRDL1hwrw@mail.gmail.com>
-Content-Language: en-GB
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-In-Reply-To: <CAL3q7H7dvTuj+cuemk9qo3YK5Hqec6nM94HaaLjBHnRDL1hwrw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: FR5P281CA0041.DEUP281.PROD.OUTLOOK.COM
- (2603:10a6:d10:f3::19) To SA6PR04MB9447.namprd04.prod.outlook.com
- (2603:10b6:806:436::21)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dGcUyx+r"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 765511F00A3A
+	for <fstests@vger.kernel.org>; Tue, 21 Jul 2026 08:33:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1784622803;
+	bh=ylm9wlyJ+1dm3BpgXDrmMGNw9AIv+ZpYHwdcjKJ0Wm4=;
+	h=Date:From:To:Subject;
+	b=dGcUyx+reWNk/C0u0i9+Yw8TkzERLWvThSg3L6oUh5FEQ7XUc6FROWR6P6vKT4dfR
+	 T+Zzxm5h+y7u5vzv90n+W3MaAtdMwtzQGqHWKuvH/Ym6XFHdecapXnIqHgQ+z9Dgoy
+	 HkjL53RQvJOLgNSTdtWTPkj+h+hNCmufxcVq/Ah2a1k3SchfN3gUA7nJ8k24rTQU7+
+	 kqgatbHuL5u0QSb339/N4vW6XpdDISvjmBpajh0UalPEvZy/dGcJia1kGFXS+s7oQu
+	 tcdOGvQUaYE8disIDht3NbYeFutwCRxj7g637OMZN00tY25ueu5L8VOhmDAlDvrXMB
+	 +kg3MVJFHS2/g==
+Date: Tue, 21 Jul 2026 16:33:18 +0800
+Message-ID: <6562bac89ba8a61d6cb92f360a0dbec7@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2026.06.21 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SA6PR04MB9447:EE_|SA1PR04MB9899:EE_
-X-MS-Office365-Filtering-Correlation-Id: 2d98001f-d7be-45b5-6d22-08dee6f368d5
-WDCIPOUTBOUND: EOP-TRUE
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|376014|23010399003|10070799003|1800799024|19092799006|6133799003|22082099003|18002099003|3023799007|56012099006|11063799006|10067099003|4143699003;
-X-Microsoft-Antispam-Message-Info:
-	dF+mSSiw9cljbIPkuRnXr0fzXy5TgCWnUS9pax+vtS2YbXJ9fSLdZyKu4BVHnzTRMUT7guv5o6u6YpQXRS7e0Itw8qQC9BAo92Sc9MdqCdF1S4i+vFUdwfnuXvdtUjrD62ishvj7dJ/U/LXImksS5KDoXt84idsz0Jj3A9Ig9PEu8rKBtAgxpPY2jO+n52N42HbEVVWyUmel0fydm5EIHcK0av6ShgFj9RrYnUXWIXQ5YJVzvdjVjeiveNy7I8Ds3w5l+tL3Js1JpzzcI95sAZbgXsk1Sv1QL5bobUew1o+Vf57N8ffW0doRZqGSEJriOMoZ9kwIILCinu4jCWrgzVYB1dOdzlhsDPmYvELiCyml9plC/F02tssBg4FdEubCTgyx/ZG/EXYmjihZwS9w6RbSP8Mj+hRN+mX7G04dPZ4MJfBcdtqwLj/g7w+3DLwl+yp9aTE/ruS4Gk6cMMLkMRGQw8VAqkp05LaJDVbjuG5SHXTk6HUzFLqVPpEiTE/AWIz/eP1kBBiv6aYMycdoV2AXkjue0oY9/8FSTH0B4cA2uZ0C6WCaIiSfHYIK+UxdxBmkbprASe9kBMLWTjO3hisUcBuzKmYh//72NacW63TaDK5ucU7wbj0X4BS2cthKd8y5gBtzEE71sw5DjBG996/DT5LDQsqQkyHq4E/7dgs=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA6PR04MB9447.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(23010399003)(10070799003)(1800799024)(19092799006)(6133799003)(22082099003)(18002099003)(3023799007)(56012099006)(11063799006)(10067099003)(4143699003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 2
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?czA1VlhkVGh3eTNSRUtlc3RBdmRpVm91VkY2ZDFjNjVtRmJMalJZc1NwNkw1?=
- =?utf-8?B?aTE5aWdpTjhKRzFwb0d0SitTSTFCRXhBQi8yc2NtZkJkRDhoMUpORUJpU3pU?=
- =?utf-8?B?UkhJZ0haZEdFT1pkVyt6elRkQkgxbjJ3dWJSNlhYRTRtejdoNWFyS0hPZ2Fh?=
- =?utf-8?B?dVFDMVBPV2lKbEdWckh2UlVCeGVuck82OVJraUQxcTJQeE9GRnlOS29iMTBi?=
- =?utf-8?B?bDIrR0xUNnpQbmJpVDRYeGc2TStiWldkeEhNQW8zeFp4Q3Z1VEF5dElsRFUr?=
- =?utf-8?B?T0ZkeDB5bjFkbDRFWGRmNVBubFJEem9XYmhVdW9neWdoODV3ZDdwaklRcUFW?=
- =?utf-8?B?Z3lacDhaV1Q4SnlSMFdneUJVcmxQb21uL2JXcmNyajR5a2ViQjFiSWJLUEZL?=
- =?utf-8?B?Y0F5MVJQTVNteW90NzU4MkVnZWN2SVZSSjljVlR1K29QUDFuejlsUkRJeWI0?=
- =?utf-8?B?MmRBK3MxbDJjL1dDMWY2NVg5QVpSZ1BZa052RkNFTTZiY1JrRmoxWEVhYm5p?=
- =?utf-8?B?UXRmVGg2Q1NsdjVTanJhNG9sSlRWYk8zUlFkbE1YTEtxUmZ1bzNML2ljdmh0?=
- =?utf-8?B?Mkx1dGFuRm4zZkNWQ1ZEYW8rSHlhMXR1MFYyeW93cmZINGppRmd2ZDRSaDhm?=
- =?utf-8?B?Z3ZXNnFieWQ3MzRoWmo5MzB0cnJHRWNrWHFobXNaRWR6UmhxMGtqVUxtbWti?=
- =?utf-8?B?UDBVZWtZelM3OEo3QjZOVGljS1BZQ0w3MFpPR0ZpUkVKYklJZkdkMVNyMFFY?=
- =?utf-8?B?NjE1Tk51VzZuSXBNNE84eE1vTWZBaXdySXRMRnJXck9lSWRxa2FNdUJwSFFo?=
- =?utf-8?B?OG9vRTNzaTlYN3Vvek9ESGdjckFnVkRiVlROZnJqUU5SZ0dNaXd2YjVMMWNs?=
- =?utf-8?B?Qk01UzgzcTVKb1ZLcTdmR0NBUXlTc0xIcVV1NWdYcGdqanN1blpXYTlXNk9p?=
- =?utf-8?B?QzNVNml1RmQ3WFZuWW00MTdiWmI0dkZrbVp4WWdvYVRzVTlJa2FPWFMvaXpX?=
- =?utf-8?B?YkgyUzhWZmNObHhVVGNFRU15dHM0cFM1emY4ZWNQMnl0Sm0yQmxPanc3bXJh?=
- =?utf-8?B?dS83OE9YdTBPTHFSSDExT0JjSk5CL1laUUZuWDFWcHdHTzZiUkVmUGsvU2o1?=
- =?utf-8?B?YkQ4ZHlhcU5TOFp3Ti9KS1JIdnk2azBQcDh3ZzU4N2Q4ZjFveFRibzlmYVVk?=
- =?utf-8?B?YWRVeDVyUk1Ud3JEb0Y2YUU2RFIwOXFod3BDemx1ZWo4blZkdURJZS9aZExy?=
- =?utf-8?B?Q292bVRMYWkwOVRJTEVYTTR6MmxWbnU3MDg2a1BnZ3d1UGttLzkxNGsyOWVr?=
- =?utf-8?B?bm11bFpCbkdCbDRmNmY1WEpaMUpxa1kvZnQ5RHpMNWlEdGdjQjlNN0xEQThL?=
- =?utf-8?B?TGdBK1dzcFdkZzR3Vlp4Sm9aUkZ5cXpkbmdGTi9UMGRVVyt3aHR4cDdhSWh3?=
- =?utf-8?B?SUhaT0RLWURUQ3Jhc0Njc1JGSUFYdVF1VlAxQVNnMStBL3IxRU8xUWpqclRO?=
- =?utf-8?B?dVRGeVZ6UVVOK2wzQVN3VmFEK3JKenJiVUNaOTErZTk5VUh0NEYrQU9zRkNx?=
- =?utf-8?B?YzBNVHRsQmZqN1I2azJlb3U0K0lZQ1JGNzZ5UGU0YTlPcmJzYlJibWNhdkd1?=
- =?utf-8?B?QWNrV254NWx3MzlkdkFBaWdIejB0QW5BbFowdmhxejlEM2VJeGtJMjd5RW1H?=
- =?utf-8?B?bEUxL0YxbG5BalNKWU1XRlVMZERjUjY5bnAyMkVHOGpDa1dMRUZkL1RHVkVi?=
- =?utf-8?B?N2g0VUVKRklxa0xOS1JERDU1dHhnMk9vWThZSFVhcXFwaVYvcUxnZG42cHB1?=
- =?utf-8?B?WXM0V2Fkc3NUbnowM2ZGQm95Z2FKWjFkOEF4eDJ5emlLd2NMWVdsNlJGZ1RV?=
- =?utf-8?B?UDR4blVTR0hyeExnUmVqL2V0Q0pNVmluRE0reGRnZ1Nremdhd1BGRlEyVTVW?=
- =?utf-8?B?SjVKcE5IN2VkQmpOeDRTSTlubnBTUzV1bTZvUStHa0hNYmRySUpObkpPYWhk?=
- =?utf-8?B?Qmt0V0d4ekdWYVhmbzhNWlg4TFNmNVc4VDNnYjVyT2FHVEQzK2ZBeWdxdDBi?=
- =?utf-8?B?ek5HME9YRkk5bG5OUGZvOFh4MzBvekUxc29vb0JZN2FqclRaUHhBNTM5U1l1?=
- =?utf-8?B?SjgvRzBQTjZlMVJrSkpCSmFtRVJlWUprSFAyK1NMN1lSOFhHQ2tlaXFxcDQx?=
- =?utf-8?B?RW1VVlEvM2pjbW00VEViUkpGMlRacFVPMzdrRHE3RHFEYmZpYVpOUFFpSDFG?=
- =?utf-8?B?VDhINnJ5dFBITmZwbmx2V2RKS0plMlN6RHFYbmp1bWpzODZkYXRCcTNBa1RI?=
- =?utf-8?B?eCtVZGhxc002d0lWMzQ3b0p0OGl3cTNTTGgxaUhNYkt1bWc3L0JFQkZLN0RL?=
- =?utf-8?Q?oGDeBowYAkBsNnhaM8kvORz++FBTX+aatDPhDJ0cEiXXs?=
-X-MS-Exchange-AntiSpam-MessageData-1: npTyTAjcgj77FB3PiHqGwGWHZvSvn6tKGGc=
-X-Exchange-RoutingPolicyChecked:
-	fC6NsknTrGvaXEYWFFsFwJ1cPy/Jjc+vVQlhgl9xS8yEHkpn07xqq1WfcOu+GGS0uo2+MPIKQOsO2ljYX2bBRsNv1bKr74GtssdHGez9BoB3frtbBbgNn6VYCsV029hcwJKidrHTy0lQzmYityE/PMlpuvtg4JFbnvHYYOXPNBeu8z0p+Z1rJazer8K38XvqIneQN3JbV2DBBry4MRxyMgABT4J14fbmVniA5lvafPZzvTBoYOEFPhSMtpHBhYVj+VO8Koa3TrZM9MwaixBqfFKWFU+SuKcAj4RoJ3ysFtjTHfNmTR2WCu67Sk9UYqbb4ysVVDIyPH4OQHgDGaVxqQ==
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	V7XYCQjYA1T1+2ghBiK4Es09eZE1ZoXkJiMelMW/UvKNRvQnLSa4gOTKOADMoZ4aJbjrqaCn6P0iuEx3EARRoYF5jyzkzuEpOOUg+YOAcctYazh1ckeE1JsrBjui2TEHEsnwvl0+jC864j8891EnZI+eSaUtCqezrT0espYPTsHuQn9Th0EC1eapWoVtlbukCPV16l/bZhSD7VUm5C1B1Wvg6l28sJqlnHdK4Ccsiwh2nF5K6Zj+8mxIvZ31DPSAZ2gZyU8aarK0PRvdQU4o4EvowcZDbQIXrSFCkXZqGSv6oHO+OUhA5WEnA0YzQdnxpedsM/bOsr1hZMgVbXTDX49sWvXMx/wr1nDWaw7sSELOGxEs7ESBFfQYmQBfO5GkllWaOrva8J1CCVP/25lqWnEvqbZx2SbhA1kqmjPgAeTImhHjXX8nUGuV9mA602OHiUCuw90luR0bozQQsvyIwnqTiBGx+zOp5Ez17qocU+eUx1v7AxYe4CvvkbiFI73djdKh0l+J78m0mVQmgu8XwK4ugtfomZkwHvzboi9amfpgZTYYn+fFpgqcra99rn+ntSinz9sIZgwRH9eh8PkQ3wiH4uaF3bpkVxuuNeWh/ptxkVRQ3mQCrgXmw6jvHH+E
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2d98001f-d7be-45b5-6d22-08dee6f368d5
-X-MS-Exchange-CrossTenant-AuthSource: SA6PR04MB9447.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 Jul 2026 06:43:44.5487
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: q2i341lAjVxIFWEIU703PrHhP8+GngPBxGXOMdj8p6j85RxdcLykC+4tbVavYLSmXf1PDR/QYoeGws5wq27qXF3DDfub+EggYIKmb/+grLI=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA1PR04MB9899
+Content-Type: multipart/signed; micalg=pgp-sha256;
+  protocol="application/pgp-signature"; boundary="v5CH4hLhj7yo"
+Content-Disposition: inline
 
-On 20.07.26 18:44, Filipe Manana wrote:
-> On Mon, Jul 20, 2026 at 12:34 PM Johannes Thumshirn
-> <johannes.thumshirn@wdc.com> wrote:
->>
->> _check_temp_fsid() extracted the on-disk fsid with "awk -d\" \"",
->> but -d is gawk's --dump-variables option, not a field separator.
->> As a result awk tried to open a file named " " for writing and dumped
->> its variable list, polluting the test output with messages like:
->>
->>    awk: warning: could not open ' ' for writing: Read-only file system
->>    awk: warning: sending variable list to standard error
->>    ARGC: 1
->>    ARGIND: 0
->>    ...
->>
->> which made btrfs/311 (the only test currently exercising this helper)
->> fail. Use -F" " to set the field separator as intended.
-> 
-> This is all correct and makes sense.
-> 
-> I wonder why the test doesn't fail on my Debian box.
-> My awk is a symlink to gawk and the man page, as well as running 'awk
-> --help', confirms -d is to dump variables to a file and -F is the
-> field separator as you say here.
-> 
-> So I'm puzzled. Any idea?
-I have no idea. Fails reliably on all my Fedora boxes.
+--v5CH4hLhj7yo
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated to v2026.06.21 version.
+
+Thanks,
+Zorro
+
+The new head of the master branch is commit:
+
+acb6d4cb8420 common/defrag: skip defrag tests on DAX-enabled filesystems
+
+New commits:
+
+Andrey Albershteyn (1):
+      [c1dcfe62b3f9] generic/791: don't run if kernel misses FANOTIFY
+
+Boris Burkov (2):
+      [d65330dd7de4] btrfs: inline enable_quota helper in test 301
+      [26c2b701724a] btrfs: test qgroup deletion races with squota writes
+
+Chao Yu (2):
+      [4f599bae27e4] f2fs/025: test to do sanity check section type correctly in f2fs GC
+      [88b140d74b3e] f2fs/009: use common _scratch_shutdown helper
+
+Christoph Hellwig (4):
+      [ce4e96a89a2b] generic: add a test that stresses metadata eviction
+      [1104c45b26d0] common: add a _require_external_realtime_device helper
+      [120ff814a4c9] xfs: test that a grown RT section can be filled
+      [26eb955e4243] generic/366: check minimum dio size correctly
+
+Disha Goel (1):
+      [acb6d4cb8420] common/defrag: skip defrag tests on DAX-enabled filesystems
+
+Filipe Manana (2):
+      [32b4dfffbc08] generic: add a test case for fallocate i_size extension
+      [973512e9c240] generic: add a test case for writes with prealloc extents beyond i_size
+
+Jan Prusakowski (1):
+      [d66e76fc5ab6] generic/563: allow read tolerance for f2fs in scenario 3
+
+Joanne Chang (3):
+      [55d8071bc4a8] f2fs/015: Fix mount syntax for disabling jquota
+      [c5ddd1789ae1] f2fs/021: Fix mount syntax for disabling jquota
+      [65caee6192ce] generic/63{4,5}: Modify criteria for passing test
+
+Qu Wenruo (5):
+      [748ae5ab4076] btrfs/340: add support for older kernels/progs
+      [1418baaef1fa] fstests: btrfs: add a new test case for single data RAID56
+      [239cc1d59866] fstests: cleanup old files to respect mount options needing new inodes
+      [80d250af40ca] fstests: btrfs: add a new test case for fstrim crash
+      [ace8d9c9dee5] fstests: btrfs/138: add requirement for datacsum
+
+Shin'ichiro Kawasaki (2):
+      [5d68212a7373] common/filestreams: check zoned device before mkfs with small dsize
+      [6c5d1992fb3b] xfs/013: fix ENOSPC handling
+
+Viacheslav Dubeyko (1):
+      [d5fb5bbbd22d] common/rc: exclude HFS from atime testing
+
+Yao Sang (1):
+      [ec6d49da5d27] xfs: test zoned realtime writeback EIO shutdown
+
+
+Code Diffstat:
+
+ common/defrag         |   2 +
+ common/filestreams    |  13 +++--
+ common/rc             |  20 +++++---
+ src/fs-monitor.c      |  19 ++++++-
+ tests/btrfs/138       |   1 +
+ tests/btrfs/301       |  14 +-----
+ tests/btrfs/340       |   8 ++-
+ tests/btrfs/348       |  68 +++++++++++++++++++++++++
+ tests/btrfs/348.out   |   2 +
+ tests/btrfs/349       | 136 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/349.out   |  10 ++++
+ tests/btrfs/350       |  39 +++++++++++++++
+ tests/btrfs/350.out   |   2 +
+ tests/f2fs/009        |   3 +-
+ tests/f2fs/015        |  13 +++--
+ tests/f2fs/015.out    |   6 +--
+ tests/f2fs/021        |   4 +-
+ tests/f2fs/025        |  82 ++++++++++++++++++++++++++++++
+ tests/f2fs/025.out    |   2 +
+ tests/generic/362     |   7 +++
+ tests/generic/364     |   7 +++
+ tests/generic/366     |  14 +++++-
+ tests/generic/418     |   7 +++
+ tests/generic/563     |   5 +-
+ tests/generic/634     |   4 +-
+ tests/generic/635     |   4 +-
+ tests/generic/708     |   7 +++
+ tests/generic/791     |   3 ++
+ tests/generic/795     | 108 +++++++++++++++++++++++++++++++++++++++
+ tests/generic/795.out |   2 +
+ tests/generic/796     |  52 +++++++++++++++++++
+ tests/generic/796.out |   5 ++
+ tests/generic/797     |  54 ++++++++++++++++++++
+ tests/generic/797.out |  10 ++++
+ tests/xfs/013         |   4 +-
+ tests/xfs/333         |  66 ++++++++++++++++++++++++
+ tests/xfs/333.out     |   2 +
+ tests/xfs/670         |  58 +++++++++++++++++++++
+ tests/xfs/670.out     |   3 ++
+ 39 files changed, 822 insertions(+), 44 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--v5CH4hLhj7yo
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Disposition: inline; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmpfLr4ACgkQlNbPkfr2
+tMyrXA//QozHLFnJCsa6dFLz3J5OL37WzcjWSBZ+3Osmt0S6EYbdQeQ2nZaKGxnf
+xsH+JdwowrDFpIDgU+HW+niL6rKKUpUeJsM42uySBVngvNHvcNj1jxmLnHQRX5bI
+zqNIJld6RqtRtosAnWY7cwMTz6UZ1+mqzNxPdw2sgmQvVtc2iA2Ndm6+tKIiOKrj
+vqBSZgL/6xWfH/+k3/jnKM31osLBSyoZpjd0TfAa+n9RXv7dWF6ZFAIF8Zr35lxi
+A9YPlvz40H+4gqjOmFrwbUODd2Qt7jYJQFIN4kh09jmBWA7D8+YC9EQmE6YF23o+
+lDDpjwEXwq9OofSnNpmIjYzQnD7VUEOAh3xgc+fb4J7LaA7s2GoGxr3HOK+SxzhQ
+gPR7kSt23PAia26suYxBe5G1Zt3Xt3UPbqdlaDBlhB9wf5jRY1cfFvSFgaiS74PJ
+QdNw6UMe7FIRroL3GwCub6d9CGy0M6S9qTyLFhzQQWUsXkQALidkh5Cy/4bh8Won
+zdt32GgyY89C4YwByzPUOm61G8UqrjTCR3p9GC0VIWsyLsUrKUJL0OoWKqjz+mgs
+7WuOsfsxTbf011tG1gr826m2HQatpvlS2qv2O1bnsPdAmheDlZSS2Re8HrsU3H06
+VQ9biHxhsS1ZDwJJ3PxP+T/2Y0jFcyWJdV1NhUNvvjyqGwCOMPw=
+=a390
+-----END PGP SIGNATURE-----
+
+--v5CH4hLhj7yo--
