@@ -1,117 +1,295 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from va-2-27.ptr.blmpb.com (va-2-27.ptr.blmpb.com [209.127.231.27])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E5C934C98C
-	for <fstests@vger.kernel.org>; Wed, 22 Jul 2026 01:22:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01EBA35E958
+	for <fstests@vger.kernel.org>; Wed, 22 Jul 2026 01:41:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.127.231.27
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784683352; cv=none; b=dhWsrPPGKoowjc9U5s4NrF8c/vstM0WK0tT+vLEEUe6J8EdoV97C4Qb5xBPLWFdLcFuZjNKMtIp5NyjvemQd9ZMXbBeEM28ZGyssS8QD4zC7rOKu8S/wQBzYRCOBPkGaDvK753N4Np+bHnDvUfnz4iid/AdW4tf90U1A2MZ8JuQ=
+	t=1784684482; cv=none; b=mIKDeq72Eyhb06n1FrwPoygxp238HjuX9HHW8s5J889QF7CytUdEur6w7kG4qVq7KvZNZgsrO7Swrplg11JdqO0ALB2ou77LRTXju/3zRwxfPHIj/S2LV1Fhiw+z/B1GUQ/yKUUp2LdqGpNEMs1Ky1ykP96KnLQ8uLXNDXrGcjw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784683352; c=relaxed/simple;
-	bh=/Z4kdgxKQCeiFsoamHKOWe6dtjkBnTbiGgCEPrpeogw=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=tHUQDQEdJijlGTpjQBipEicx+hDZFGuw2iFfSfJuErsNZGmqZu18E9m2U84+SP1kzqanusbrOTMc1i/eFtCgQ6tlyY39Ry66b2qz/AyllQ+VtMr08w6gf/6pHePS3s405bDuBHYdQy8MbLHA67qujVZL6ryeS5/WjZone0vrP1c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GMVRgGEq; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1784684482; c=relaxed/simple;
+	bh=JRyjwZaJvakR50fv/H9rJrvH8iIRDicO8iEjIrG2Y7w=;
+	h=Cc:Date:Message-Id:In-Reply-To:To:Subject:References:From:
+	 Mime-Version:Content-Type; b=gQFtDPsIt9xhA2haMjiRYGILkC9k2dswXobKrj7QbCTTG7HZNYi+xG+KXCuuepK+Ue+PaFU2kgRT6hSJMfiqnEcN4OLGDfidFTxTpGpWQdNRNgNtPDnoeojH3tg4Vs9T51Ruia+PgcMZIcgmHJIae8GYAmQLK2/bnbdL/FRFxGw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=fnnas.com; spf=pass smtp.mailfrom=fnnas.com; dkim=pass (2048-bit key) header.d=fnnas-com.20200927.dkim.feishu.cn header.i=@fnnas-com.20200927.dkim.feishu.cn header.b=L0psx1bE; arc=none smtp.client-ip=209.127.231.27
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=fnnas.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fnnas.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GMVRgGEq"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 258531F000E9;
-	Wed, 22 Jul 2026 01:22:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1784683349;
-	bh=/mdT7jkMjc7sjvrquAnjFRY5QkVWbjefxRKNNQNYOUc=;
-	h=Date:Cc:Subject:To:References:From:In-Reply-To;
-	b=GMVRgGEq0Ekm/HdYqrmx+Jd1ZvgwMvLyNrZUrhg31y4yrN6SqkrQz6bc3Z+b1Tfnw
-	 mPdu4tEQ0m//1DN5Svt4iar52Lx3SAIwsRbuGSZfoekShzKy5hbk5wwF/LhPcjR2Qz
-	 M/wD6s3PkmYBoKcNU58zTNt1H2kK3Z5jIz7jtgi0rxxdVpwBcjegWhVJyq/+FywIpv
-	 ty8YcL2fVrgIc9by7g3lATAiZluiFM5OGByz77eTAbqVdQwhuoeygVy9ngOzIRg7pR
-	 zBNfVdnk8ClWKMfjBX4n7JQSzQgkhA5COJ5e3sPUiHMi6YOx73odJUnGH2QCZEM1ji
-	 jsdBhtIjAZlAw==
-Message-ID: <d3500e74-6e7f-4535-baba-36c63f0601c8@kernel.org>
-Date: Wed, 22 Jul 2026 09:22:26 +0800
+	dkim=pass (2048-bit key) header.d=fnnas-com.20200927.dkim.feishu.cn header.i=@fnnas-com.20200927.dkim.feishu.cn header.b="L0psx1bE"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+ s=s1; d=fnnas-com.20200927.dkim.feishu.cn; t=1784684473;
+  h=from:subject:mime-version:from:date:message-id:subject:to:cc:
+ reply-to:content-type:mime-version:in-reply-to:message-id;
+ bh=BrA68DRO+4HbSp9tlbSGx3d+JQI6YM9S/PalwWuElcE=;
+ b=L0psx1bE4QpT8wKR09BUL7665Rgv1ef6V1TBKzqUFz556Lirgf4Ipw52K8bb103dx3ls2w
+ uptAulTrPDmBmZz0+roNWctCQv0dpfg7gKPp2SBUBcXGzALmBbETwb8Woz613Q7gSHByw0
+ vFIY9ebT2+tamx++UNgoc3qNQesZyRwmAsLE5lO/vW6EWGSx7unuSmtppqqyTevkyGvRZA
+ Oa3xf1y+5Xp0nsim0Y4NpOUeTyBRoYqmtYwy4N2i4Q2bcLGTE9aM0oVy2Zp/IglmzJzV3a
+ zHuX3nt8dkpaJ0zMiuh8QfPxs/e/rGIrbynEz772QXM9NBiOklLNB+iUsj/MiA==
+Cc: <linux-btrfs@vger.kernel.org>, <fstests@vger.kernel.org>, 
+	"Sun YangKai" <sunyangkai@fnnas.com>
+Date: Wed, 22 Jul 2026 09:41:03 +0800
+Message-Id: <202dfd21-9876-4092-9ed6-99e9ba73bb74@fnnas.com>
+Content-Language: en-US
+In-Reply-To: <CAL3q7H7WBKk70cRmURvwx5O+hHouFH-Dt_6W3pJmsR85ODP4sw@mail.gmail.com>
+To: "Filipe Manana" <fdmanana@kernel.org>
+Subject: Re: [PATCH v2] btrfs: test POSIX ACL changes for RO btrfs property
+Received: from [192.168.10.244] ([183.34.163.75]) by smtp.feishu.cn with ESMTPS; Wed, 22 Jul 2026 09:41:10 +0800
+References: <20260709082500.17907-2-sunk67188@gmail.com> <20260713094611.19703-1-sunk67188@gmail.com> <CAL3q7H7WBKk70cRmURvwx5O+hHouFH-Dt_6W3pJmsR85ODP4sw@mail.gmail.com>
+From: "Sun YangKai" <sunyangkai@fnnas.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
+Mime-Version: 1.0
+X-Original-From: Sun YangKai <sunyangkai@fnnas.com>
+Content-Transfer-Encoding: quoted-printable
 User-Agent: Mozilla Thunderbird
-Cc: chao@kernel.org, Christoph Hellwig <hch@infradead.org>,
- Jan Prusakowski <jprusakowski@google.com>,
- linux-f2fs-devel@lists.sourceforge.net, fstests@vger.kernel.org,
- jaegeuk@kernel.org
-Subject: Re: [f2fs-dev] [PATCH] generic/064: allow 50 extents on F2FS after
- fcollapse
-To: Zorro Lang <zlang@kernel.org>
-References: <20260622070438.1542638-1-jprusakowski@google.com>
- <ajuLORVplOvEXvnI@infradead.org> <akKd2IImO7bRjVV2@zlang-mailbox>
- <e7a57c5e-62de-401d-8e39-f7409f398a84@kernel.org>
- <alyS3PRtALHIV5no@zlang-mailbox>
-Content-Language: en-US
-From: Chao Yu <chao@kernel.org>
-In-Reply-To: <alyS3PRtALHIV5no@zlang-mailbox>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+X-Lms-Return-Path: <lba+26a601fb7+9085b6+vger.kernel.org+sunyangkai@fnnas.com>
 
-Hi Zorro,
+This is my first time to contribute to fstests project so thanks a lot=20
+for pointing those things out and it really helps a lot. I'll fix them=20
+and send a v2 version later.
 
-On 7/19/2026 5:24 PM, Zorro Lang wrote:
-> On Tue, Jun 30, 2026 at 08:09:19PM +0800, Chao Yu wrote:
->> On 6/30/26 00:37, Zorro Lang via Linux-f2fs-devel wrote:
->>> On Wed, Jun 24, 2026 at 12:46:01AM -0700, Christoph Hellwig wrote:
->>>> This sounds odd.  The test allocates a contigous range and then just does
->>>> insert/collapse on it, which should not lead to any new data block
->>>> allocations.  Given that the test works fine on zoned XFS and btrfs
->>>> with strict out of place write policies we know it does not require
->>>> overwriting blocks to work as well.
->>>>
->>>> So I think something is fishy in f2fs if needs to allocate data blocks
->>>> here.
->>>
->>> I have the same question with Christoph. Shouldn't fcollapse in F2FS just
->>> remap the metadata instead of allocating new data blocks?
+Thanks,
+Sun YangKai
+
+On 2026/7/21 00:16, Filipe Manana wrote:
+> On Mon, Jul 13, 2026 at 10:50=E2=80=AFAM Sun YangKai <sunk67188@gmail.com=
+> wrote:
 >>
->> Hi Christoph, Zorro,
+>> From: Sun YangKai <sunyangkai@fnnas.com>
 >>
->> Let me explain it briefly, this is because f2fs has only one copy of reverse
->> mapping table (aka SSA), for any checkpointed data, we can not modify SSA info
->> directly during remap, otherwise, after sudden power-cut, we will suffer
->> inconsistent issue in between reverse mapping table and mapping table. So, f2fs
->> choose to rewrite for any checkpointed data.
-> 
-> Hi Chao,
-> 
-> Thank you for the detailed explanation. I now see why F2FS handles this
-> differently.
-> 
-> Since this is by design for F2FS, I'd like to merge this fix to help f2fs
-> avoid this test failure at first. As for the potential write amplification
-> and performance overhead introduced by this rewrite strategy, that can be
-> discussed further on the f2fs list if necessary.
-
-It makes sense to me, we can discuss about the detailed implementation in f2fs
-list if there is any concern.
-
-> 
-> I will merge the patch with some clarifying comments:
-> 
-> /*
->   * F2FS uses a rewrite strategy for fcollapse/finsert on checkpointed data.
->   * Since F2FS has only a single copy of the reverse mapping table (SSA),
->   * directly remapping checkpointed metadata could cause inconsistency
->   * issues after a sudden power-cut.
->   */
-> 
-> Is this ^^ good to you, or feel free to give me a proper comment to add into
-> this patch.
-
-Looks good, thanks for the help!
-
-Thanks
-
-> 
-> Thanks,
-> Zorro
-> 
+>> Test creation, modification and deletion of POSIX ACLs on a btrfs
+>> filesystem that has the read-only property set to true, and re-test the
+>> same after the property is cleared.
 >>
->> Thanks,
+>> Commit 353c2ea735e4 ("btrfs: remove redundant readonly root check in
+>> btrfs_setxattr_trans") removed the read-only root check from
+>> btrfs_setxattr_trans() under the assumption that none of its callers can
+>> run on a read-only root.  That assumption does not hold for the ->set_ac=
+l
+>> path: btrfs_set_acl() -> __btrfs_set_acl() reaches
+>> btrfs_setxattr_trans() directly, bypassing the handler-level read-only
+>> checks that were later (re)added by commit b51111271b03 ("btrfs: check
+>> if root is readonly while setting security xattr").  As a result, ACLs
+>> could still be set or removed on a read-only subvolume, bypassing the RO
+>> protection that applies to every other xattr.
+>=20
+> You don't need to explain this in a test case, those are details for
+> the kernel patch...
+>=20
+> Just say what the test does and that it exercises a bug fixed by a
+> kernel patch that has the subject:
+>=20
+>       "btrfs: check if root is readonly when setting posix acl"
 
+>>
+>> The restoring kernel fix adds the read-only check directly to
+>> btrfs_set_acl().  This test complements btrfs/275, which covers the
+>> generic ->setxattr path.
+>>
+>> The test exercises the set, get and remove cycle of an access ACL on a
+>> regular file, and expects all modifications to fail with EROFS while the
+>> subvolume is read-only, then succeed once it is writable again.
+>>
+>> Signed-off-by: Sun YangKai <sunyangkai@fnnas.com>
+>> ---
+>> Changes from v1:
+>>
+>> - fix copywrite header
+>> - better wording for commit message
+>>
+>> Sorry for bothering.
+>>
+>> ---
+>>   tests/btrfs/353     | 97 +++++++++++++++++++++++++++++++++++++++++++++
+>>   tests/btrfs/353.out | 39 ++++++++++++++++++
+>>   2 files changed, 136 insertions(+)
+>>   create mode 100755 tests/btrfs/353
+>>   create mode 100644 tests/btrfs/353.out
+>>
+>> diff --git a/tests/btrfs/353 b/tests/btrfs/353
+>> new file mode 100755
+>> index 00000000..586f722a
+>> --- /dev/null
+>> +++ b/tests/btrfs/353
+>> @@ -0,0 +1,97 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (C) 2026 Fygo OS. All Rights Reserved.
+>> +#
+>> +# FS QA Test No. 353
+>> +#
+>> +# Test that POSIX ACLs cannot be changed once a btrfs subvolume has the
+>> +# read-only property set.
+>> +#
+>> +# Setting or removing a POSIX ACL goes through the ->set_acl inode
+>> +# operation, which is a different code path from the generic ->setxattr
+>> +# one covered by btrfs/275.  It used to be allowed on a read-only
+>> +# subvolume and thus bypassed the RO protection.  Such modifications mu=
+st
+>> +# fail with EROFS, just like any other xattr.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick acl attr
+>> +
+>> +. ./common/filter
+>> +. ./common/attr
+>> +
+>> +# TODO: fill in the kernel commit hash that fixes the ->set_acl path on=
+ce
+>> +# it is merged.
+>> +# _fixed_by_kernel_commit <HASH> \
+>> +#      "btrfs: check if root is readonly when setting posix acl"
+>=20
+> That's not how we handle patches not yet in Linus' tree.
+> First don't comment it, second use xxxxxxxxxxxx for the hash.
+> Like this:
+>=20
+> _fixed_by_kernel_commit xxxxxxxxxxxx \
+>       "btrfs: check if root is readonly when setting posix acl"
+>=20
+> We normally find and update tests that need the hash by greping with
+> something like:  egrep -ri 'commit xxxxx' tests/
+>=20
+>=20
+>=20
+>> +
+>> +_require_acls
+>> +_require_btrfs_command "property"
+>> +_require_scratch
+>> +
+>> +_scratch_mkfs >> $seqres.full 2>&1
+>=20
+> Nowadays we have the practice of also adding:   || _fail "mkfs failed"
+>=20
+>> +_scratch_mount
+>> +
+>> +FILENAME=3D$SCRATCH_MNT/foo
+>=20
+> Don't use upper case variable names.
+>=20
+> With that fixed:
+>=20
+> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+>=20
+> Thanks.
+>=20
+>=20
+>> +
+>> +set_acl()
+>> +{
+>> +       local perm=3D$1
+>> +
+>> +       # Use -n so setfacl does not recalculate the mask, keeping the
+>> +       # golden output deterministic regardless of the named user's
+>> +       # permissions.
+>> +       setfacl -n -m u:$acl2:$perm,m::rwx $FILENAME 2>&1 | _filter_scra=
+tch
+>> +}
+>> +
+>> +get_acl()
+>> +{
+>> +       getfacl --absolute-names -n $FILENAME | _filter_scratch | _getfa=
+cl_filter_id
+>> +}
+>> +
+>> +del_acl()
+>> +{
+>> +       setfacl -b $FILENAME 2>&1 | _filter_scratch
+>> +}
+>> +
+>> +_acl_setup_ids
+>> +
+>> +# Create a test file.
+>> +echo "hello world" > $FILENAME
+>> +
+>> +# Set an initial ACL while the subvolume is writable.
+>> +set_acl rwx
+>> +
+>> +# Attempt to change the ACL once the subvolume is read-only.  This must
+>> +# fail with EROFS.
+>> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT ro true
+>> +$BTRFS_UTIL_PROG property get $SCRATCH_MNT ro
+>> +
+>> +set_acl r--
+>> +
+>> +# The ACL must not have changed.
+>> +get_acl
+>> +
+>> +# Attempt to remove the ACL from the read-only subvolume.  This must
+>> +# fail with EROFS as well.
+>> +del_acl
+>> +
+>> +# The ACL must still be present.
+>> +get_acl
+>> +
+>> +# Make the subvolume writable again.
+>> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT ro false
+>> +$BTRFS_UTIL_PROG property get $SCRATCH_MNT ro
+>> +
+>> +# Now changing the ACL must succeed.
+>> +set_acl r--
+>> +
+>> +get_acl
+>> +
+>> +# And removing it must succeed too.
+>> +del_acl
+>> +
+>> +# Check the ACL is really gone.
+>> +get_acl
+>> +
+>> +status=3D0
+>> +exit
+>> diff --git a/tests/btrfs/353.out b/tests/btrfs/353.out
+>> new file mode 100644
+>> index 00000000..66f4a0e5
+>> --- /dev/null
+>> +++ b/tests/btrfs/353.out
+>> @@ -0,0 +1,39 @@
+>> +QA output created by 353
+>> +ro=3Dtrue
+>> +setfacl: SCRATCH_MNT/foo: Read-only file system
+>> +# file: SCRATCH_MNT/foo
+>> +# owner: 0
+>> +# group: 0
+>> +user::rw-
+>> +user:id2:rwx
+>> +group::r--
+>> +mask::rwx
+>> +other::r--
+>> +
+>> +setfacl: SCRATCH_MNT/foo: Read-only file system
+>> +# file: SCRATCH_MNT/foo
+>> +# owner: 0
+>> +# group: 0
+>> +user::rw-
+>> +user:id2:rwx
+>> +group::r--
+>> +mask::rwx
+>> +other::r--
+>> +
+>> +ro=3Dfalse
+>> +# file: SCRATCH_MNT/foo
+>> +# owner: 0
+>> +# group: 0
+>> +user::rw-
+>> +user:id2:r--
+>> +group::r--
+>> +mask::rwx
+>> +other::r--
+>> +
+>> +# file: SCRATCH_MNT/foo
+>> +# owner: 0
+>> +# group: 0
+>> +user::rw-
+>> +group::r--
+>> +other::r--
+>> +
+>> --
+>> 2.54.0
+>>
+>>
