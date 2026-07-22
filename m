@@ -1,79 +1,127 @@
-Received: from out-181.mta1.migadu.com (out-181.mta1.migadu.com [95.215.58.181])
+Received: from mx0.herbolt.com (mx0.herbolt.com [5.59.97.199])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79CC3299943
-	for <fstests@vger.kernel.org>; Wed, 22 Jul 2026 02:49:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B8BC285060
+	for <fstests@vger.kernel.org>; Wed, 22 Jul 2026 05:37:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=5.59.97.199
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784688602; cv=none; b=YGLrE6IqiniIfunR1+hgzH4mtd2RixdN7tI3tpXRlRN/daLvidV1GfRtttCIQLxeV7JWcH3jckwYkW5iV998txm54D4PvL/5fohWeBe+R60+7L1Edl8bPF/wLgv8PBAd7mEulYgeyrf5GCJrWXtYWZIWgMqiZkJ9/Vel+wItG0c=
+	t=1784698684; cv=none; b=Rej/ORjUEIOJ6UQ0WjlNzpPkX7zdOAfeILgWTuVuxdZVLyGW25M5B2/TGlYiwlcLuIa02m4fWXgdY/5nnTOCksD4W++VZFP3h1DMH3I8fvM2CgiPO22UMZLx7qQ7N/g0pF1ty4vJKZXWZYDAic1cI2SN0SkV5Mju8lSdxjjHCCc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784688602; c=relaxed/simple;
-	bh=SHY3opjHnuRagYcUhN9K9wCo4lS3QwJc5qVE5nkxbvk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:Cc:
-	 In-Reply-To:Content-Type; b=a6Jms94MfJuNe0HclJU5+f29ZiYnTRW1CoNpa9Z930hy1AW4NiIt7FsKcK+TztCj0j7DYhvNhTDDHstYI5C/0OXsWQz284bPSgdW6ZjhhAtbOzroBJ+hxXq9ACwS5hUXsRsGg0RK/8MXD4p2FgExMqqxDz/7Q+8IOyRthZJ9S3Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=chenxiaosong.com; spf=pass smtp.mailfrom=chenxiaosong.com; dkim=pass (2048-bit key) header.d=chenxiaosong.com header.i=@chenxiaosong.com header.b=tIhEe/sN; arc=none smtp.client-ip=95.215.58.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=chenxiaosong.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chenxiaosong.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=chenxiaosong.com header.i=@chenxiaosong.com header.b="tIhEe/sN"
-Message-ID: <7ac56d75-1033-4039-8485-afdd57e21731@chenxiaosong.com>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=chenxiaosong.com;
-	s=key1; t=1784688585;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=gXLYQgPKmrfBOY0YgOKwCzPt2DFoEy1eTW1xaR2k2TY=;
-	b=tIhEe/sNfY6saDUHQ7H9H1vIQ/0LikQuKV8AQeZUwj1PZFblrx6EimqVSNgl00e95uBmTS
-	O8Q5WqTEXhIjyomZVJ+5Bu2u0d88Jr0wqA8zbSMLmY0W9tEXgiYCa52+ySAPmasKz0hwfp
-	KEkO6upTM2tpwOWh5KsRWBVHSaQYd5sOCu85s1uVnCGr6CF81BeGbneuU962SW5XF4XkBa
-	JwTXxh7OwrLbhD5OICzsQJxx33cILhd81K11STDgN8BZhObRWnkCqYdFarrdot3B4Hh+sV
-	5JWg4huzquhIrSGMdMgT2ghawXHk6q/OlVQKGLfIee/ze0H8qtoniCdYviBZ6A==
-Date: Wed, 22 Jul 2026 10:50:00 +0800
+	s=arc-20240116; t=1784698684; c=relaxed/simple;
+	bh=EHcPx2YELPldCRWTo9mKHrB5rqo4jIimwIV+AHT15VY=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=SIBPdcLvLmEYuDHjQggHMTHx/fMoRycjOUU3P/RlUpi8rfjUSs2AXwzl39UC1v/mVE1km2qqa4oPaSugbg4w1pnLVWeBY0fvByM6VhPJm34lDwTc58McL7yrL73AEJt9ks7RJSWtuSjSFA9aw/fKLRnuOT7imxCyVZgWSdO8ktQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=herbolt.com; spf=pass smtp.mailfrom=herbolt.com; arc=none smtp.client-ip=5.59.97.199
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=herbolt.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=herbolt.com
+Received: from mx0.herbolt.com (localhost [127.0.0.1])
+	by mx0.herbolt.com (Postfix) with ESMTP id 65713180F2C1;
+	Wed, 22 Jul 2026 07:27:59 +0200 (CEST)
+Received: from trufa.intra.herbolt.com.com ([172.16.31.30])
+	by mx0.herbolt.com with ESMTPSA
+	id v5CjEN9UYGqXvAMAKEJqOA
+	(envelope-from <lukas@herbolt.com>); Wed, 22 Jul 2026 07:27:59 +0200
+From: Lukas Herbolt <lukas@herbolt.com>
+To: fstests@vger.kernel.org
+Cc: zlang@kernel.org,
+	Lukas Herbolt <lukas@herbolt.com>
+Subject: [PATCH] fstests Fix build errors on kernels before v5.1
+Date: Wed, 22 Jul 2026 07:22:58 +0200
+Message-ID: <20260722052256.2406451-3-lukas@herbolt.com>
+X-Mailer: git-send-email 2.55.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Subject: Re: [PATCH v2 xfstests 0/3] add generic/795
-To: Zorro Lang <zlang@kernel.org>
-References: <20260720163502.732454-1-chenxiaosong@chenxiaosong.com>
- <al8nX7MnPDzmUA5W@zlang-mailbox>
- <4021e03f-6d80-4a26-9112-1dc20abeed12@chenxiaosong.com>
- <al_e-tLidEugZyY2@zlang-mailbox>
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-From: ChenXiaoSong <chenxiaosong@chenxiaosong.com>
-Cc: ChenXiaoSong <chenxiaosong@chenxiaosong.com>, smfrench@gmail.com,
- linkinjeon@kernel.org, pc@manguebit.org, ronniesahlberg@gmail.com,
- sprasad@microsoft.com, tom@talpey.com, bharathsm@microsoft.com,
- senozhatsky@chromium.org, dhowells@redhat.com, metze@samba.org,
- linux-cifs@vger.kernel.org, fstests@vger.kernel.org
-In-Reply-To: <al_e-tLidEugZyY2@zlang-mailbox>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-Migadu-Flow: FLOW_OUT
 
-Yes, I checked the xfs_io source code, and it does indeed call the 
-fstat() system call. Thanks for your suggestion! I will send the next 
-version soon.
+The FAN_REPORT_FID and fanotify_event_info_fid were introduced
+in v5.1. Currently there is no check if the kernel supports it
+making xfstests build to fail on older kernels.
 
-https://git.kernel.org/pub/scm/fs/xfs/xfsprogs-dev.git/tree/io/stat.c#n552
-https://git.kernel.org/pub/scm/fs/xfs/xfsprogs-dev.git/tree/io/stat.c#n166
+Fixes: 29d120e41c3d ("generic: test fsnotify filesystem error reporting")
 
-在 2026/7/22 5:21, Zorro Lang 写道:
-> Please note that I have been talking about xfs_io stat subcommand all along, rather
-> than the coreutils' stat command. I suspect there might be a misunderstanding here.
-> 
-> xfstests inherently depends on xfsprogs, particularly the xfs_io command.
-> I just checked this for you, the stat subcommand in xfs_io does indeed use
-> the fstat system call [1][2], not statx, and its -r option will print out fields
-> like st_nlink.
-> 
-> Please double-check this on your end, make sure it works for you.
+Signed-off-by: Lukas Herbolt <lukas@herbolt.com>
+---
+ configure.ac          |  1 +
+ include/builddefs.in  |  1 +
+ m4/package_libcdev.m4 | 14 ++++++++++++++
+ src/Makefile          |  6 +++++-
+ 4 files changed, 21 insertions(+), 1 deletion(-)
 
+diff --git a/configure.ac b/configure.ac
+index 441f543c6089..feb24ddd8854 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -74,6 +74,7 @@ AC_NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE
+ AC_HAVE_FICLONE
+ AC_HAVE_TRIVIAL_AUTO_VAR_INIT
+ AC_HAVE_FILE_GETATTR
++AC_HAVE_FANOTIFY_FID
+ 
+ AC_CHECK_FUNCS([renameat2])
+ AC_CHECK_FUNCS([reallocarray])
+diff --git a/include/builddefs.in b/include/builddefs.in
+index 708d75b24d76..8e9e2e3b4113 100644
+--- a/include/builddefs.in
++++ b/include/builddefs.in
+@@ -75,6 +75,7 @@ HAVE_RLIMIT_NOFILE = @have_rlimit_nofile@
+ NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE = @need_internal_xfs_ioc_exchange_range@
+ HAVE_FICLONE = @have_ficlone@
+ HAVE_FILE_GETATTR = @have_file_getattr@
++HAVE_FANOTIFY_FID = @have_fanotify_fid@
+ 
+ GCCFLAGS = -std=gnu11 -funsigned-char -fno-strict-aliasing -Wall
+ SANITIZER_CFLAGS += @autovar_init_cflags@
+diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
+index 17f57f427410..340cdad3faf9 100644
+--- a/m4/package_libcdev.m4
++++ b/m4/package_libcdev.m4
+@@ -102,3 +102,17 @@ AC_DEFUN([AC_HAVE_FILE_GETATTR],
+        AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+     AC_SUBST(have_file_getattr)
+   ])
++
++# Check if we have fanotify FID support (Linux 5.1+)
++AC_DEFUN([AC_HAVE_FANOTIFY_FID],
++  [ AC_MSG_CHECKING([for fanotify FID support])
++    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
++#include <sys/fanotify.h>
++    ]], [[
++       int x = FAN_REPORT_FID;
++       struct fanotify_event_info_fid fid;
++       (void)x; (void)fid;
++    ]])],[have_fanotify_fid=yes
++       AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
++    AC_SUBST(have_fanotify_fid)
++  ])
+diff --git a/src/Makefile b/src/Makefile
+index 31ac43b215e9..847fb168181e 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -36,7 +36,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+ 	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
+ 	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
+-	rw_hint fs-monitor
++	rw_hint
+ 
+ EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+ 	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+@@ -107,6 +107,10 @@ ifeq ($(HAVE_FICLONE),yes)
+      TARGETS += t_reflink_read_race
+ endif
+ 
++ifeq ($(HAVE_FANOTIFY_FID),yes)
++     TARGETS += fs-monitor
++endif
++
+ ifeq ($(HAVE_LIBBTRFSUTIL), true)
+      LINUX_TARGETS += t_btrfs_received_uuid_ioctl
+ endif
+
+base-commit: acb6d4cb84205a8e3f19ca470cfcf7bf6d93a509
 -- 
-ChenXiaoSong <chenxiaosong@chenxiaosong.com>
-Chinese Homepage: https://chenxiaosong.com
-English Homepage: https://chenxiaosong.com/en
+2.55.0
 
