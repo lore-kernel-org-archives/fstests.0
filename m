@@ -1,295 +1,79 @@
-Received: from va-2-27.ptr.blmpb.com (va-2-27.ptr.blmpb.com [209.127.231.27])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from out-181.mta1.migadu.com (out-181.mta1.migadu.com [95.215.58.181])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01EBA35E958
-	for <fstests@vger.kernel.org>; Wed, 22 Jul 2026 01:41:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.127.231.27
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79CC3299943
+	for <fstests@vger.kernel.org>; Wed, 22 Jul 2026 02:49:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784684482; cv=none; b=mIKDeq72Eyhb06n1FrwPoygxp238HjuX9HHW8s5J889QF7CytUdEur6w7kG4qVq7KvZNZgsrO7Swrplg11JdqO0ALB2ou77LRTXju/3zRwxfPHIj/S2LV1Fhiw+z/B1GUQ/yKUUp2LdqGpNEMs1Ky1ykP96KnLQ8uLXNDXrGcjw=
+	t=1784688602; cv=none; b=YGLrE6IqiniIfunR1+hgzH4mtd2RixdN7tI3tpXRlRN/daLvidV1GfRtttCIQLxeV7JWcH3jckwYkW5iV998txm54D4PvL/5fohWeBe+R60+7L1Edl8bPF/wLgv8PBAd7mEulYgeyrf5GCJrWXtYWZIWgMqiZkJ9/Vel+wItG0c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784684482; c=relaxed/simple;
-	bh=JRyjwZaJvakR50fv/H9rJrvH8iIRDicO8iEjIrG2Y7w=;
-	h=Cc:Date:Message-Id:In-Reply-To:To:Subject:References:From:
-	 Mime-Version:Content-Type; b=gQFtDPsIt9xhA2haMjiRYGILkC9k2dswXobKrj7QbCTTG7HZNYi+xG+KXCuuepK+Ue+PaFU2kgRT6hSJMfiqnEcN4OLGDfidFTxTpGpWQdNRNgNtPDnoeojH3tg4Vs9T51Ruia+PgcMZIcgmHJIae8GYAmQLK2/bnbdL/FRFxGw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=fnnas.com; spf=pass smtp.mailfrom=fnnas.com; dkim=pass (2048-bit key) header.d=fnnas-com.20200927.dkim.feishu.cn header.i=@fnnas-com.20200927.dkim.feishu.cn header.b=L0psx1bE; arc=none smtp.client-ip=209.127.231.27
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=fnnas.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fnnas.com
+	s=arc-20240116; t=1784688602; c=relaxed/simple;
+	bh=SHY3opjHnuRagYcUhN9K9wCo4lS3QwJc5qVE5nkxbvk=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:Cc:
+	 In-Reply-To:Content-Type; b=a6Jms94MfJuNe0HclJU5+f29ZiYnTRW1CoNpa9Z930hy1AW4NiIt7FsKcK+TztCj0j7DYhvNhTDDHstYI5C/0OXsWQz284bPSgdW6ZjhhAtbOzroBJ+hxXq9ACwS5hUXsRsGg0RK/8MXD4p2FgExMqqxDz/7Q+8IOyRthZJ9S3Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=chenxiaosong.com; spf=pass smtp.mailfrom=chenxiaosong.com; dkim=pass (2048-bit key) header.d=chenxiaosong.com header.i=@chenxiaosong.com header.b=tIhEe/sN; arc=none smtp.client-ip=95.215.58.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=chenxiaosong.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chenxiaosong.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fnnas-com.20200927.dkim.feishu.cn header.i=@fnnas-com.20200927.dkim.feishu.cn header.b="L0psx1bE"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
- s=s1; d=fnnas-com.20200927.dkim.feishu.cn; t=1784684473;
-  h=from:subject:mime-version:from:date:message-id:subject:to:cc:
- reply-to:content-type:mime-version:in-reply-to:message-id;
- bh=BrA68DRO+4HbSp9tlbSGx3d+JQI6YM9S/PalwWuElcE=;
- b=L0psx1bE4QpT8wKR09BUL7665Rgv1ef6V1TBKzqUFz556Lirgf4Ipw52K8bb103dx3ls2w
- uptAulTrPDmBmZz0+roNWctCQv0dpfg7gKPp2SBUBcXGzALmBbETwb8Woz613Q7gSHByw0
- vFIY9ebT2+tamx++UNgoc3qNQesZyRwmAsLE5lO/vW6EWGSx7unuSmtppqqyTevkyGvRZA
- Oa3xf1y+5Xp0nsim0Y4NpOUeTyBRoYqmtYwy4N2i4Q2bcLGTE9aM0oVy2Zp/IglmzJzV3a
- zHuX3nt8dkpaJ0zMiuh8QfPxs/e/rGIrbynEz772QXM9NBiOklLNB+iUsj/MiA==
-Cc: <linux-btrfs@vger.kernel.org>, <fstests@vger.kernel.org>, 
-	"Sun YangKai" <sunyangkai@fnnas.com>
-Date: Wed, 22 Jul 2026 09:41:03 +0800
-Message-Id: <202dfd21-9876-4092-9ed6-99e9ba73bb74@fnnas.com>
-Content-Language: en-US
-In-Reply-To: <CAL3q7H7WBKk70cRmURvwx5O+hHouFH-Dt_6W3pJmsR85ODP4sw@mail.gmail.com>
-To: "Filipe Manana" <fdmanana@kernel.org>
-Subject: Re: [PATCH v2] btrfs: test POSIX ACL changes for RO btrfs property
-Received: from [192.168.10.244] ([183.34.163.75]) by smtp.feishu.cn with ESMTPS; Wed, 22 Jul 2026 09:41:10 +0800
-References: <20260709082500.17907-2-sunk67188@gmail.com> <20260713094611.19703-1-sunk67188@gmail.com> <CAL3q7H7WBKk70cRmURvwx5O+hHouFH-Dt_6W3pJmsR85ODP4sw@mail.gmail.com>
-From: "Sun YangKai" <sunyangkai@fnnas.com>
+	dkim=pass (2048-bit key) header.d=chenxiaosong.com header.i=@chenxiaosong.com header.b="tIhEe/sN"
+Message-ID: <7ac56d75-1033-4039-8485-afdd57e21731@chenxiaosong.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=chenxiaosong.com;
+	s=key1; t=1784688585;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=gXLYQgPKmrfBOY0YgOKwCzPt2DFoEy1eTW1xaR2k2TY=;
+	b=tIhEe/sNfY6saDUHQ7H9H1vIQ/0LikQuKV8AQeZUwj1PZFblrx6EimqVSNgl00e95uBmTS
+	O8Q5WqTEXhIjyomZVJ+5Bu2u0d88Jr0wqA8zbSMLmY0W9tEXgiYCa52+ySAPmasKz0hwfp
+	KEkO6upTM2tpwOWh5KsRWBVHSaQYd5sOCu85s1uVnCGr6CF81BeGbneuU962SW5XF4XkBa
+	JwTXxh7OwrLbhD5OICzsQJxx33cILhd81K11STDgN8BZhObRWnkCqYdFarrdot3B4Hh+sV
+	5JWg4huzquhIrSGMdMgT2ghawXHk6q/OlVQKGLfIee/ze0H8qtoniCdYviBZ6A==
+Date: Wed, 22 Jul 2026 10:50:00 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-X-Original-From: Sun YangKai <sunyangkai@fnnas.com>
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Mozilla Thunderbird
-Content-Type: text/plain; charset=UTF-8
-X-Lms-Return-Path: <lba+26a601fb7+9085b6+vger.kernel.org+sunyangkai@fnnas.com>
+MIME-Version: 1.0
+Subject: Re: [PATCH v2 xfstests 0/3] add generic/795
+To: Zorro Lang <zlang@kernel.org>
+References: <20260720163502.732454-1-chenxiaosong@chenxiaosong.com>
+ <al8nX7MnPDzmUA5W@zlang-mailbox>
+ <4021e03f-6d80-4a26-9112-1dc20abeed12@chenxiaosong.com>
+ <al_e-tLidEugZyY2@zlang-mailbox>
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+From: ChenXiaoSong <chenxiaosong@chenxiaosong.com>
+Cc: ChenXiaoSong <chenxiaosong@chenxiaosong.com>, smfrench@gmail.com,
+ linkinjeon@kernel.org, pc@manguebit.org, ronniesahlberg@gmail.com,
+ sprasad@microsoft.com, tom@talpey.com, bharathsm@microsoft.com,
+ senozhatsky@chromium.org, dhowells@redhat.com, metze@samba.org,
+ linux-cifs@vger.kernel.org, fstests@vger.kernel.org
+In-Reply-To: <al_e-tLidEugZyY2@zlang-mailbox>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Migadu-Flow: FLOW_OUT
 
-This is my first time to contribute to fstests project so thanks a lot=20
-for pointing those things out and it really helps a lot. I'll fix them=20
-and send a v2 version later.
+Yes, I checked the xfs_io source code, and it does indeed call the 
+fstat() system call. Thanks for your suggestion! I will send the next 
+version soon.
 
-Thanks,
-Sun YangKai
+https://git.kernel.org/pub/scm/fs/xfs/xfsprogs-dev.git/tree/io/stat.c#n552
+https://git.kernel.org/pub/scm/fs/xfs/xfsprogs-dev.git/tree/io/stat.c#n166
 
-On 2026/7/21 00:16, Filipe Manana wrote:
-> On Mon, Jul 13, 2026 at 10:50=E2=80=AFAM Sun YangKai <sunk67188@gmail.com=
-> wrote:
->>
->> From: Sun YangKai <sunyangkai@fnnas.com>
->>
->> Test creation, modification and deletion of POSIX ACLs on a btrfs
->> filesystem that has the read-only property set to true, and re-test the
->> same after the property is cleared.
->>
->> Commit 353c2ea735e4 ("btrfs: remove redundant readonly root check in
->> btrfs_setxattr_trans") removed the read-only root check from
->> btrfs_setxattr_trans() under the assumption that none of its callers can
->> run on a read-only root.  That assumption does not hold for the ->set_ac=
-l
->> path: btrfs_set_acl() -> __btrfs_set_acl() reaches
->> btrfs_setxattr_trans() directly, bypassing the handler-level read-only
->> checks that were later (re)added by commit b51111271b03 ("btrfs: check
->> if root is readonly while setting security xattr").  As a result, ACLs
->> could still be set or removed on a read-only subvolume, bypassing the RO
->> protection that applies to every other xattr.
->=20
-> You don't need to explain this in a test case, those are details for
-> the kernel patch...
->=20
-> Just say what the test does and that it exercises a bug fixed by a
-> kernel patch that has the subject:
->=20
->       "btrfs: check if root is readonly when setting posix acl"
+在 2026/7/22 5:21, Zorro Lang 写道:
+> Please note that I have been talking about xfs_io stat subcommand all along, rather
+> than the coreutils' stat command. I suspect there might be a misunderstanding here.
+> 
+> xfstests inherently depends on xfsprogs, particularly the xfs_io command.
+> I just checked this for you, the stat subcommand in xfs_io does indeed use
+> the fstat system call [1][2], not statx, and its -r option will print out fields
+> like st_nlink.
+> 
+> Please double-check this on your end, make sure it works for you.
 
->>
->> The restoring kernel fix adds the read-only check directly to
->> btrfs_set_acl().  This test complements btrfs/275, which covers the
->> generic ->setxattr path.
->>
->> The test exercises the set, get and remove cycle of an access ACL on a
->> regular file, and expects all modifications to fail with EROFS while the
->> subvolume is read-only, then succeed once it is writable again.
->>
->> Signed-off-by: Sun YangKai <sunyangkai@fnnas.com>
->> ---
->> Changes from v1:
->>
->> - fix copywrite header
->> - better wording for commit message
->>
->> Sorry for bothering.
->>
->> ---
->>   tests/btrfs/353     | 97 +++++++++++++++++++++++++++++++++++++++++++++
->>   tests/btrfs/353.out | 39 ++++++++++++++++++
->>   2 files changed, 136 insertions(+)
->>   create mode 100755 tests/btrfs/353
->>   create mode 100644 tests/btrfs/353.out
->>
->> diff --git a/tests/btrfs/353 b/tests/btrfs/353
->> new file mode 100755
->> index 00000000..586f722a
->> --- /dev/null
->> +++ b/tests/btrfs/353
->> @@ -0,0 +1,97 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (C) 2026 Fygo OS. All Rights Reserved.
->> +#
->> +# FS QA Test No. 353
->> +#
->> +# Test that POSIX ACLs cannot be changed once a btrfs subvolume has the
->> +# read-only property set.
->> +#
->> +# Setting or removing a POSIX ACL goes through the ->set_acl inode
->> +# operation, which is a different code path from the generic ->setxattr
->> +# one covered by btrfs/275.  It used to be allowed on a read-only
->> +# subvolume and thus bypassed the RO protection.  Such modifications mu=
-st
->> +# fail with EROFS, just like any other xattr.
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick acl attr
->> +
->> +. ./common/filter
->> +. ./common/attr
->> +
->> +# TODO: fill in the kernel commit hash that fixes the ->set_acl path on=
-ce
->> +# it is merged.
->> +# _fixed_by_kernel_commit <HASH> \
->> +#      "btrfs: check if root is readonly when setting posix acl"
->=20
-> That's not how we handle patches not yet in Linus' tree.
-> First don't comment it, second use xxxxxxxxxxxx for the hash.
-> Like this:
->=20
-> _fixed_by_kernel_commit xxxxxxxxxxxx \
->       "btrfs: check if root is readonly when setting posix acl"
->=20
-> We normally find and update tests that need the hash by greping with
-> something like:  egrep -ri 'commit xxxxx' tests/
->=20
->=20
->=20
->> +
->> +_require_acls
->> +_require_btrfs_command "property"
->> +_require_scratch
->> +
->> +_scratch_mkfs >> $seqres.full 2>&1
->=20
-> Nowadays we have the practice of also adding:   || _fail "mkfs failed"
->=20
->> +_scratch_mount
->> +
->> +FILENAME=3D$SCRATCH_MNT/foo
->=20
-> Don't use upper case variable names.
->=20
-> With that fixed:
->=20
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
->=20
-> Thanks.
->=20
->=20
->> +
->> +set_acl()
->> +{
->> +       local perm=3D$1
->> +
->> +       # Use -n so setfacl does not recalculate the mask, keeping the
->> +       # golden output deterministic regardless of the named user's
->> +       # permissions.
->> +       setfacl -n -m u:$acl2:$perm,m::rwx $FILENAME 2>&1 | _filter_scra=
-tch
->> +}
->> +
->> +get_acl()
->> +{
->> +       getfacl --absolute-names -n $FILENAME | _filter_scratch | _getfa=
-cl_filter_id
->> +}
->> +
->> +del_acl()
->> +{
->> +       setfacl -b $FILENAME 2>&1 | _filter_scratch
->> +}
->> +
->> +_acl_setup_ids
->> +
->> +# Create a test file.
->> +echo "hello world" > $FILENAME
->> +
->> +# Set an initial ACL while the subvolume is writable.
->> +set_acl rwx
->> +
->> +# Attempt to change the ACL once the subvolume is read-only.  This must
->> +# fail with EROFS.
->> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT ro true
->> +$BTRFS_UTIL_PROG property get $SCRATCH_MNT ro
->> +
->> +set_acl r--
->> +
->> +# The ACL must not have changed.
->> +get_acl
->> +
->> +# Attempt to remove the ACL from the read-only subvolume.  This must
->> +# fail with EROFS as well.
->> +del_acl
->> +
->> +# The ACL must still be present.
->> +get_acl
->> +
->> +# Make the subvolume writable again.
->> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT ro false
->> +$BTRFS_UTIL_PROG property get $SCRATCH_MNT ro
->> +
->> +# Now changing the ACL must succeed.
->> +set_acl r--
->> +
->> +get_acl
->> +
->> +# And removing it must succeed too.
->> +del_acl
->> +
->> +# Check the ACL is really gone.
->> +get_acl
->> +
->> +status=3D0
->> +exit
->> diff --git a/tests/btrfs/353.out b/tests/btrfs/353.out
->> new file mode 100644
->> index 00000000..66f4a0e5
->> --- /dev/null
->> +++ b/tests/btrfs/353.out
->> @@ -0,0 +1,39 @@
->> +QA output created by 353
->> +ro=3Dtrue
->> +setfacl: SCRATCH_MNT/foo: Read-only file system
->> +# file: SCRATCH_MNT/foo
->> +# owner: 0
->> +# group: 0
->> +user::rw-
->> +user:id2:rwx
->> +group::r--
->> +mask::rwx
->> +other::r--
->> +
->> +setfacl: SCRATCH_MNT/foo: Read-only file system
->> +# file: SCRATCH_MNT/foo
->> +# owner: 0
->> +# group: 0
->> +user::rw-
->> +user:id2:rwx
->> +group::r--
->> +mask::rwx
->> +other::r--
->> +
->> +ro=3Dfalse
->> +# file: SCRATCH_MNT/foo
->> +# owner: 0
->> +# group: 0
->> +user::rw-
->> +user:id2:r--
->> +group::r--
->> +mask::rwx
->> +other::r--
->> +
->> +# file: SCRATCH_MNT/foo
->> +# owner: 0
->> +# group: 0
->> +user::rw-
->> +group::r--
->> +other::r--
->> +
->> --
->> 2.54.0
->>
->>
+-- 
+ChenXiaoSong <chenxiaosong@chenxiaosong.com>
+Chinese Homepage: https://chenxiaosong.com
+English Homepage: https://chenxiaosong.com/en
+
