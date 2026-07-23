@@ -1,153 +1,165 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mx0.herbolt.com (mx0.herbolt.com [5.59.97.199])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2603D3EDE77
-	for <fstests@vger.kernel.org>; Thu, 23 Jul 2026 09:09:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 61A0F3BCD3F
+	for <fstests@vger.kernel.org>; Thu, 23 Jul 2026 10:48:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=5.59.97.199
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784797763; cv=none; b=o8FQ3NlIabM3xjsT9WkPIXT4mEEMKYjd0Mb1EXSfNUEeVAV2zCoie//ZQ4G+Uj3pk2X1iwZIwb0FoKarpmgxCm+DwAvRK4+FJU5/tr8IECS9nOx/xEwTeRppgxbYIJPCS2EeFIOH5ukipIyz/UzZOUCFXolN6uxlBIB5BPQ6Tp8=
+	t=1784803711; cv=none; b=Qd8m4iRQnKE0w/nKXh+wVYQ9IhCDsGeBy8GBbhuQGQ7s2gCPS/icwiijo42NufVF5Q3F87wwg927t2msx1ibxkb5tST7mC5p7e4GMqsAlXzlyG4uK4/PMuSu4crYwMr+6Ob6CULetSUHL3AT0WbrWG51jQjzd2GY1PJmJ18nvqg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784797763; c=relaxed/simple;
-	bh=JIDV8ufu5CaMdKMvf9AWU0wQ2PQmEJ5FKAdHwip4B2I=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=LGFAYGsMDH/uYqhsfbYAb1qz4cBJBsC/FEleWPnktYPVzKz/M7vwfIk6Qv5IjNHebDm8koWHrAJ1psFxeNyAE6ZjKzDiOofyAe9WQqvqYqPSXryaBZtqCBGtGF0kcMJKDzA+pwCa5u9Y6s5vbWXEqXBAB/RYNOgdAJs+wY3iuDY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 574F61F000E9;
-	Thu, 23 Jul 2026 09:09:20 +0000 (UTC)
-Message-ID: <a081f7cf-bd47-459d-baee-de772d816af4@kernel.org>
-Date: Thu, 23 Jul 2026 17:09:12 +0800
+	s=arc-20240116; t=1784803711; c=relaxed/simple;
+	bh=/+bpU0STVMYLl0AXPLrd4gLQuzLU+Z/GbiHoLYGzeD4=;
+	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
+	 Message-ID:Content-Type; b=U4HUZM9UYQnW3l5gTku9sO93kEPGCIo8AzxuvJdK1F2bxeqqOpPGbP+Q/hZkH1OFTNqEv3LYF9nb+30ThMH1UGRGHDiBFSKAJvRtDIJB79QeBeNfvVKmIhLyp6RNh2nF5cqdgyo1z7T5+OQ6Kohn/jaEAwAuBY5h1S5zRTr7Tx0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=herbolt.com; spf=pass smtp.mailfrom=herbolt.com; arc=none smtp.client-ip=5.59.97.199
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=herbolt.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=herbolt.com
+Received: from mx0.herbolt.com (localhost [127.0.0.1])
+	by mx0.herbolt.com (Postfix) with ESMTP id B4010180F2C1;
+	Thu, 23 Jul 2026 12:48:13 +0200 (CEST)
+Received: from mail.herbolt.com ([172.16.31.10])
+	by mx0.herbolt.com with ESMTPSA
+	id 1YUPIm3xYWoztAQAKEJqOA
+	(envelope-from <lukas@herbolt.com>); Thu, 23 Jul 2026 12:48:13 +0200
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: chao@kernel.org, Anand Suveer Jain <asj@kernel.org>,
- fstests@vger.kernel.org, jaegeuk@kernel.org,
- linux-f2fs-devel@lists.sourceforge.net, "Darrick J. Wong" <djwong@kernel.org>
-Subject: Re: [PATCH v2] common/rc: support f2fs in
- _require_fanotify_ioerrors()
-To: Zorro Lang <zlang@kernel.org>
-References: <20260706064326.3657995-1-chao@kernel.org>
- <af5f0eb1-0197-4952-a37b-0602799929ec@kernel.org>
- <5c11cd98-bb41-46e0-9765-e2aad57a08e4@kernel.org>
- <aloCfjjqesxpzL9z@zlang-mailbox>
-Content-Language: en-US
-From: Chao Yu <chao@kernel.org>
-In-Reply-To: <aloCfjjqesxpzL9z@zlang-mailbox>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Date: Thu, 23 Jul 2026 12:48:13 +0200
+From: Lukas Herbolt <lukas@herbolt.com>
+To: Andrey Albershteyn <aalbersh@redhat.com>
+Cc: Donald Douwsma <ddouwsma@redhat.com>, fstests@vger.kernel.org,
+ zlang@kernel.org
+Subject: Re: [PATCH] fstests Fix build errors on kernels before v5.1
+In-Reply-To: <amHPADzkqM9F25Rm@aalbersh-thinkpadx1carbongen13.rmtcz.csb>
+References: <20260722052256.2406451-3-lukas@herbolt.com>
+ <amCMdrK8EscbPTAp@aalbersh-thinkpadx1carbongen13.rmtcz.csb>
+ <26d5ba218032a5468d359fb598234b99@herbolt.com>
+ <d5f276e5-a3ef-4f5e-aa68-aafeec595ee4@redhat.com>
+ <amHPADzkqM9F25Rm@aalbersh-thinkpadx1carbongen13.rmtcz.csb>
+Message-ID: <90eb4946a437a4618fb1a36bb87895c1@herbolt.com>
+X-Sender: lukas@herbolt.com
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 8bit
 
-On 7/17/26 18:47, Zorro Lang wrote:
-> On Wed, Jul 08, 2026 at 11:25:37AM +0800, Chao Yu wrote:
->> On 7/7/26 18:13, Anand Suveer Jain wrote:
->>> On 6/7/26 14:43, Chao Yu wrote:
->>>> f2fs has supported to report fserror, this patch adds support for f2fs
->>>> in _require_fanotify_ioerrors(), so that we can run generic/791 on f2fs.
->>>>
->>>> Cc: Darrick J. Wong <djwong@kernel.org>
->>>> Signed-off-by: Chao Yu <chao@kernel.org>
->>>> ---
->>>>  common/rc | 3 +++
->>>>  1 file changed, 3 insertions(+)
->>>>
->>>> diff --git a/common/rc b/common/rc
->>>> index 494725547..f51ad59f3 100644
->>>> --- a/common/rc
->>>> +++ b/common/rc
->>>> @@ -6257,6 +6257,9 @@ _require_fanotify_ioerrors()
->>>>  		x="$(_get_fs_sysfs_attr $TEST_DEV err_report_sec)"
->>>>  		test -n "$x" && return 0
->>>>  		;;
->>>
->>>
->>>> +	f2fs)
->>>> +		x="$(cat /sys/fs/f2fs/features/fserror)"
->>>> +		test -n "$x" && return 0
->>>
->>> Don't we need to check if /sys/fs/f2fs/features/fserror
->>> is present in the running kernel (there are helpers)
->>
->> Hi Anand,
->>
->> You mean _has_fs_sysfs_attr()? however, it forces to check first parameter $dev
->> w/ block device type:
->>
->> 	if [ ! -b "$dev" -o -z "$attr" ];then
->> 		_fail "Usage: _has_fs_sysfs_attr <mounted_device> <attr>"
->> 	fi
+On 2026-07-23 10:26, Andrey Albershteyn wrote:
+> On 2026-07-23 15:27:13, Donald Douwsma wrote:
+>> On 23/7/26 03:49, Lukas Herbolt wrote:
+>> > On 2026-07-22 11:35, Andrey Albershteyn wrote:
+>> >> On 2026-07-22 07:22:58, Lukas Herbolt wrote:
+>> >>> The FAN_REPORT_FID and fanotify_event_info_fid were introduced
+>> >>> in v5.1. Currently there is no check if the kernel supports it
+>> >>> making xfstests build to fail on older kernels.
+>> >>>
+>> >>> Fixes: 29d120e41c3d ("generic: test fsnotify filesystem error reporting")
+>> >>>
+>> >>> Signed-off-by: Lukas Herbolt <lukas@herbolt.com>
+>> >>
+>> >> Looks good to me
+>> >> Reviewed-by: Andrey Albershteyn <aalbersh@kernel.org>
+>> >>
+>> >>> ---
+>> >>>  configure.ac          |  1 +
+>> >>>  include/builddefs.in  |  1 +
+>> >>>  m4/package_libcdev.m4 | 14 ++++++++++++++
+>> >>>  src/Makefile          |  6 +++++-
+>> >>>  4 files changed, 21 insertions(+), 1 deletion(-)
+>> >>>
+>> >>> diff --git a/configure.ac b/configure.ac
+>> >>> index 441f543c6089..feb24ddd8854 100644
+>> >>> --- a/configure.ac
+>> >>> +++ b/configure.ac
+>> >>> @@ -74,6 +74,7 @@ AC_NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE
+>> >>>  AC_HAVE_FICLONE
+>> >>>  AC_HAVE_TRIVIAL_AUTO_VAR_INIT
+>> >>>  AC_HAVE_FILE_GETATTR
+>> >>> +AC_HAVE_FANOTIFY_FID
+>> >>>
+>> >>>  AC_CHECK_FUNCS([renameat2])
+>> >>>  AC_CHECK_FUNCS([reallocarray])
+>> >>> diff --git a/include/builddefs.in b/include/builddefs.in
+>> >>> index 708d75b24d76..8e9e2e3b4113 100644
+>> >>> --- a/include/builddefs.in
+>> >>> +++ b/include/builddefs.in
+>> >>> @@ -75,6 +75,7 @@ HAVE_RLIMIT_NOFILE = @have_rlimit_nofile@
+>> >>>  NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE = @need_internal_xfs_ioc_exchange_range@
+>> >>>  HAVE_FICLONE = @have_ficlone@
+>> >>>  HAVE_FILE_GETATTR = @have_file_getattr@
+>> >>> +HAVE_FANOTIFY_FID = @have_fanotify_fid@
+>> >>>
+>> >>>  GCCFLAGS = -std=gnu11 -funsigned-char -fno-strict-aliasing -Wall
+>> >>>  SANITIZER_CFLAGS += @autovar_init_cflags@
+>> >>> diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
+>> >>> index 17f57f427410..340cdad3faf9 100644
+>> >>> --- a/m4/package_libcdev.m4
+>> >>> +++ b/m4/package_libcdev.m4
+>> >>> @@ -102,3 +102,17 @@ AC_DEFUN([AC_HAVE_FILE_GETATTR],
+>> >>>         AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+>> >>>      AC_SUBST(have_file_getattr)
+>> >>>    ])
+>> >>> +
+>> >>> +# Check if we have fanotify FID support (Linux 5.1+)
+>> >>> +AC_DEFUN([AC_HAVE_FANOTIFY_FID],
+>> >>> +  [ AC_MSG_CHECKING([for fanotify FID support])
+>> >>> +    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+>> >>> +#include <sys/fanotify.h>
+>> >>> +    ]], [[
+>> >>> +       int x = FAN_REPORT_FID;
+>> >>> +       struct fanotify_event_info_fid fid;
+>> >>> +       (void)x; (void)fid;
+>> >>> +    ]])],[have_fanotify_fid=yes
+>> >>> +       AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+>> >>> +    AC_SUBST(have_fanotify_fid)
+>> >>> +  ])
+>> >>> diff --git a/src/Makefile b/src/Makefile
+>> >>> index 31ac43b215e9..847fb168181e 100644
+>> >>> --- a/src/Makefile
+>> >>> +++ b/src/Makefile
+>> >>> @@ -36,7 +36,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>> >>>      fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+>> >>>      detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
+>> >>>      uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
+>> >>> -    rw_hint fs-monitor
+>> >>> +    rw_hint
+>> >>>
+>> >>>  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+>> >>>            btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+>> >>> @@ -107,6 +107,10 @@ ifeq ($(HAVE_FICLONE),yes)
+>> >>>       TARGETS += t_reflink_read_race
+>> >>>  endif
+>> >>>
+>> >>> +ifeq ($(HAVE_FANOTIFY_FID),yes)
+>> >>> +     TARGETS += fs-monitor
+>> >> ...
+>> >>>       LINUX_TARGETS += t_btrfs_received_uuid_ioctl
+>> >>
+>> >> hah just noticed that fstests "supports" different targets (darwin,
+>> >> freebsd), not sure if it works at all
+>> >
+>> > Ugh! Indeed that should be LINUX_TARGETS += fs-monitor
+>> > I will send v2
+>> 
+>> I think this was mainly to allow for IRIX back when fstests ran there, 
+>> the
+>> last of which were removed by
+>> 
+>> bc2568f9 fstests: remove IRIX test program open_unlink
+>> 
+>> A lot of the more recent programs in TARGETS look like they wouldn't 
+>> apply
+>> to anything outside of linux, i.e. t_ext4_dax_journal_corruption and
+>> t_ext4_dax_inline_corruption.
+>> 
+>> Given the use of configure to decide what to compile in it may be 
+>> clearer
+>> if this was just simplified to use TARGETS in the long term.
 > 
-> Hi Chao and Anand,
-> 
-> The *_fs_sysfs related helpers were brought in by me in:
->   commit 2a7b77abcd1dde735186b363da24540706c43b73
->   Author: Zorro Lang <zlang@redhat.com>
->   Date:   Tue Jul 5 17:30:24 2016 +0800
-> 
->     xfs: configurable behavior on errors at unmount time
-> 
-> At that time, I didn't think about the "features/" directory.
-> 
-> Now, let me rethink this set of helpers. I feel that the *_fs_sysfs
-> family of functions shouldn't be restricted to the $dev directory,
-> we should remove this restriction.
-> 
-> Following that, we bring in *_fs_sysfs_device (appending the _device suffix)
-> helpers which call *_fs_sysfs(). Also change the test cases who call these
-> functions.
-> 
-> Finally, we can introduce the *_fs_sysfs_features functions (or simply use
-> *_fs_sysfs directly).
-> 
-> Also, we have both *_fs_sysfs_attr and *_fs_sysfs, and the logic between
-> them is somewhat confusing and easy to mix up.
-
-Zorro,
-
-It makes sense, and good news to their user. Thanks for the proposal.
-
-> 
-> I need to write a series of patches to clean up these logic. For this current
-> patch, we can start with a small-scale change first. What do you think?
-
-So I will use this first:
-
-f2fs)
-    local feat_file="/sys/fs/f2fs/features/fserror"
-    if [ -f "$feat_file" ] && [ "$(cat "$feat_file")" = "supported" ]; then
-        return 0
-    fi
-    ;;
-
-And then waiting for your cleanup? or if you want to clean up this, please do it
-directly while merging.
-
-Thanks,
-
-> 
-> Thanks,
-> Zorro
-> 
->>
->>
->>> before reading it?
->>
->> How about this?
->>
->> f2fs)
->>     local feat_file="/sys/fs/f2fs/features/fserror"
->>     if [ -f "$feat_file" ] && [ "$(cat "$feat_file")" = "supported" ]; then
->>         return 0
->>     fi
->>     ;;
->>
->>>
->>>
->>>
->>>>  	esac
->>>>  
->>>>  	_notrun "$FSTYP does not support fanotify ioerrors"
->>>
->>
-
+> Yeah, it just need a cleanup
+Ok, let's just stick with this version and I will try too look into 
+unifying
+of the targets.
+-- 
+-lhe
