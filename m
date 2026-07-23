@@ -1,567 +1,192 @@
-Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32D873749F4
-	for <fstests@vger.kernel.org>; Thu, 23 Jul 2026 04:12:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0CB9C383338
+	for <fstests@vger.kernel.org>; Thu, 23 Jul 2026 05:03:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784779958; cv=none; b=SVupY5bMc/HLDir1622pDdJDsgBfKFvZAs3L1QmmZJ6jtuy0z7V3tqhXG4lIctm8pIaxO5+/fDubj10hWDOnNXwKN/1R2ncEp82GqTiE/B9yLcWiK5osYWG+cCo43OPqLwtNT+zCREKyoEPRvNuTXDpOVcfpnvpeJ6PVzghu8NM=
+	t=1784782991; cv=none; b=b8l5XwRUQH0k2Nyvd5E8Zwnh8GO/Sq5+PYnm0GI5MxOcoj+HNQzoRpIUZrAE8vhmYUegK7vdYmSQvEXw2+SKJ889ue6vMPll6x1HtrPZ3FfmG/G/12EXKyex1RtqcH608x7mYeLA/h4XkL0MzySHuxkB1TJ/VYeTBmJ+Pqc0ugQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784779958; c=relaxed/simple;
-	bh=pr4SvlAkSg6noMLEFgyTNeAjrgvLZ23s/faGSyJGDXk=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=g4a1+kwnlsKq4sUT+iF+DnnYSe/ZzsnvVqEVItvbJOpSV243J42GSOmOzAYpySFquZiSqxfyY28kWxq6ml4JIvC6C+SyChV95IkjrCFM+/DUZZKhIY9HtCcfSamuh0c6YXqxCs/A/bfXlGXwJjVqQSHJoE2Tv5KShSu3ta4O3mY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=e2CYl/QJ; arc=none smtp.client-ip=209.85.214.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1784782991; c=relaxed/simple;
+	bh=DHuT/Ef4iroXC1LwpBjyYb7A8miGPe2FJLofPy4E7L4=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=DdqKIsd23beaAD+4nnFrwLIFQzumkzJdFbfQfYfrjP6O9/MF82ln42kg6LD7KoYicYTg0wS/chsdSb+Gw4uDt3bQEg9X5ytPE/z9kJ+o04hbLnLR/IhxER6VCsl9FDPFkrchYOrPIegie6cb2GgMugvoZ4ilVU1k/yqARWfH+s4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=DkkE6fmx; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=MThFIDRi; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="e2CYl/QJ"
-Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-2ceae1ed204so1963975ad.0
-        for <fstests@vger.kernel.org>; Wed, 22 Jul 2026 21:12:21 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="DkkE6fmx";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="MThFIDRi"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1784782988;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=bz0h5K99nYXH5rax0VMHXemolIOZ/T15rGxJ7ldiQHM=;
+	b=DkkE6fmxZiIEHPbtnV3ELLA9zPGpA4SqjFtWwdnXZTOnM87sUIvXxuOi0BeFbocVImZuC3
+	w7fE4XCJmBuzzaC/JYmhpzRiv2J17X76qf7+6pvS4EWW64M3+fLjzvdXGJrJVhuxAbnikS
+	Xqcg1tfqJ8xfrSDH7h0yVaU+ah0wpyg=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-297-EOaaesKzN3efnBwlKX6Gdw-1; Thu, 23 Jul 2026 01:03:07 -0400
+X-MC-Unique: EOaaesKzN3efnBwlKX6Gdw-1
+X-Mimecast-MFC-AGG-ID: EOaaesKzN3efnBwlKX6Gdw_1784782986
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2cc7e86e7c5so5360145ad.3
+        for <fstests@vger.kernel.org>; Wed, 22 Jul 2026 22:03:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1784779932; x=1785384732; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=0aQM/769vuHKyh/k/lSh+NiKLupUcCY8oTxZt4p5jfc=;
-        b=e2CYl/QJgjLVjZB7KGiAcxddoaTPNmhlp4z0uZJZJN4mT3wEMWr19fm85OsaoGv3Nm
-         RwGUhAQzwJzSra97rfLKMUeZ30Kd0W/Akf9f1cwNmM17tjx6vm3PJmmiTtkkt+cAatJN
-         LXm6OwCP9raCxym34a+X85Gh+lpCAWxSaF5un0epTITp9pcwaI1eVrTnPCg2+mjjxvpT
-         Zvv7F1qp/c3wtv/rOCFfcLZlsytybmJOexPm3TKd04prurUm1GQ8iZQv2lgD5pLkeb6W
-         O9cMAYtmQXs15mBDS5KNhKgXjeyaJorXvIX5D71h0jR/aRQwQxo10IGsayGs6vLGqM46
-         qxMA==
+        d=redhat.com; s=google; t=1784782986; x=1785387786; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=bz0h5K99nYXH5rax0VMHXemolIOZ/T15rGxJ7ldiQHM=;
+        b=MThFIDRikycQQXLgZxxingGjBiC0swvqxxC75YGvYFChlqNqn3YVT/zJNnTS4vdyDi
+         6AXmlLk2pzhi9TlkLTesAq2eMlqHpmI8SINUQIOmT0vXrkkVUVqeLzt0rqLq7LN1AnHJ
+         M5xjk33PZvWMueZoHsMkttd8jMjU3WAMDtEUPxA5A1MC4zyOMBA3chGSG6NJUUjxZnkv
+         h0sBK/cuc/2Je+H3q+99wwEgqcSLI8hgqQL4c4BgVpWa1FHvVP8I2w+o43yW/rSbekny
+         BzpxIBqqX/N7BSOUYrwa2zg1rMxrX4xDMur6F88f6Khv0ucaOfHwR3StfPLw9ZTwHLvY
+         Gw3Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784779932; x=1785384732;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=1e100.net; s=20251104; t=1784782986; x=1785387786;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=0aQM/769vuHKyh/k/lSh+NiKLupUcCY8oTxZt4p5jfc=;
-        b=ssO+AfJf226uh9qPL1+/hmqb0E+xyuMxnRG1fQ6NBQ/MalZuiohi5YlptXxJsXhfVj
-         hYliENE8l2f7uaTF/ZxhIFVLPs8SVSJpK9bBjCBjt1RDQhvcEKCX0H9Y94IjaibmSq/p
-         pt2aZ6wE1KfTTQHEOMn3Gh8Jpm0xxI6uQf94/NcN8dQlwax6jFnsJMGOiffI65ntIlt1
-         zuIBfKzJH/6jrunnMA92prBTlcxq4cIDndF7oGO1WvtnLxtNO4Xc0QSyxwBsXEakoEBi
-         TJ3Y6QPgafjpoefqplWt9aryUkrgG4Mn9RUTP8YRbYjhYd5DL33VEgcKqqqddbX64dLZ
-         /hug==
-X-Gm-Message-State: AOJu0YzSUmUZaiEYFc1A41s63nXn1qsdzD4C+0IXZlB/zFSc3wTYDau7
-	jfNUVwX2LpEpRrg0EhABYYmGroTFiH5AL8cssNQ47ouTK1QV+c1HQUtcBxcVGsk=
-X-Gm-Gg: AR+sD12yzRu2x2QKIZymlFdLwOA4vW/PI9aheX42z7F8VD2MiQ3j1GlEbeBNMiAmQS5
-	fwZKPfVsa4jNkvifpADp/+STar3riNrLtfBJKbA6pTulrssCHSwqKaSykN6wkutQuNU0Kq905YR
-	LfI04zn0dYdDWArgQ6GDZHgshTCvtkuJ6H05vrehGslGIZRQUj4VAmUWDepsOef6l8u77QtjizV
-	ikrFrtdrLPAfMsqvmpoXfri+kUmzwtlwk+r5fB1ecx8HsYBZ8p8kYz+dYTVExnC1Rmee88dErXt
-	OVtZiD6cx5NVFosOcp487Qp8r5qGC+v9qjkBf5h9kve8Fic9yWGynubythdsi1oVOpxOcL+JZ3l
-	CIuwogXmF9pD/WK+QlfjVYOoWNSJEGk8p1YXIzcZ3uwSQUGjPoA9ZMWFBpA3AAvBmQtZe9DGA5h
-	fb0Gb4qzJ3isZSK+6x+AKRUB2BZyneiDpXjHWwjDhr0VU=
-X-Received: by 2002:a17:902:d4d2:b0:2ca:f21a:a6c5 with SMTP id d9443c01a7336-2cfa6a546bcmr18649245ad.1.1784779932310;
-        Wed, 22 Jul 2026 21:12:12 -0700 (PDT)
-Received: from localhost.localdomain ([2600:1700:88b0:bed0:519e:b032:eee0:b431])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3147df09a9dsm14429656eec.19.2026.07.22.21.12.10
-        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Wed, 22 Jul 2026 21:12:11 -0700 (PDT)
-From: Rochan Avlur <rochan.avlur@gmail.com>
-To: fstests@vger.kernel.org
-Cc: linkinjeon@kernel.org,
-	Yuezhang.Mo@sony.com,
-	zlang@kernel.org,
-	Rochan Avlur <rochan.avlur@gmail.com>
-Subject: [PATCH] exfat/001: test that rename and move preserve benign secondary entries
-Date: Wed, 22 Jul 2026 21:11:55 -0700
-Message-ID: <20260723041155.20740-1-rochan.avlur@gmail.com>
-X-Mailer: git-send-email 2.50.1
+        bh=bz0h5K99nYXH5rax0VMHXemolIOZ/T15rGxJ7ldiQHM=;
+        b=tFjk2isir/RXGUgkdq5imJ2l1JUy6sz9My2i5IquMoncCW4G+ViQYxHDUsJnLZKoqG
+         xwkAqideW5X03/VzKHGno+yyFUTCNka2JoZWReyHipvi2IlLaLZo4jl07rrwUcxAajq1
+         rHs6wSL7+sCSUhd7QmLKQuFXFCIlsuFZm65HKhtN/Y3hGCK2Tnsmcn2Z/vajnKQMCt10
+         +f9fG4qSNopl5slF8ABRYuHYjl5eNmL3y1G2qoDTD45CTJNjuxmgxCczwIVPr9tYXzZq
+         rdjr3yzbLqI3YLbYljyWvwuio/uChVUKBqqLBvY14Xc9+9ZtdwUSe5VOPtkbKrT5v0Q3
+         X/1w==
+X-Forwarded-Encrypted: i=1; AHgh+RrIZGEB1Z9Es8VDr9zFxmhpzOPkQ1J7VVQ3jIfuItLfVsMQnoUM7jsiRgTJ4hmZsjvlamIOxafb@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw91cuW/zgL3+cCjMfTzwYqWK3gUnaDsnSf5NatAHBWrovcpLHY
+	DV0+8tZoXITGM96XfWS97W/BjOmT620mQkwPgAMagJ6wuAjg11czZtebh3I5nP5DnGokdd9OA7F
+	O9EgCWGrVAdiziFB4ILPKjjCtnQQxz6ZIfsu5ghcs+sW/qC/B5IgtdBNVej46hGX7ZhE=
+X-Gm-Gg: AR+sD11JzP0lshMOUG87zmSMEdLaaBOhJHAUNb+xiL4F0/RAS1KKAYYI3TVYch7madJ
+	HmADMGUDakCrtXPpkZZ31yFW52zni0CDeXiAJJBFetJInngHn4+DF/cg3+SxOMF+G9kE4JcdkU1
+	8hY35IauO+BpvOmYSdnCrWcVv/Vct61BJUQaCfcakOZRGRF3gkBht7kQ5bPjL+cF+rywPps/zpL
+	+jJXOB6v8taQau7u3zU8xjrfMfQtGIzT0HfTiUYMkmeyoG5Q7gLyldBlunlVJ1Euh9pjH3d6Ewz
+	3e4A6ZrdXEesnVg5nTcP7kDbtCZy5bZ5zv+kK4iPleyyHUzohay31llvk4DaUXaZcK2c0ZC033o
+	ye49W40x0taMb1O16hXm+PBQVzM4P+xY3hGj5u/zUMFECPLY=
+X-Received: by 2002:a17:902:e841:b0:2cf:a1c1:c60e with SMTP id d9443c01a7336-2cfa6a5a0a3mr22246005ad.1.1784782986054;
+        Wed, 22 Jul 2026 22:03:06 -0700 (PDT)
+X-Received: by 2002:a17:902:e841:b0:2cf:a1c1:c60e with SMTP id d9443c01a7336-2cfa6a5a0a3mr22245655ad.1.1784782985588;
+        Wed, 22 Jul 2026 22:03:05 -0700 (PDT)
+Received: from ?IPV6:2001:8003:4b1b:d900:266e:8be8:569:ffa6? ([2001:8003:4b1b:d900:266e:8be8:569:ffa6])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2cfa57542e0sm7418315ad.67.2026.07.22.22.03.03
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 22 Jul 2026 22:03:04 -0700 (PDT)
+Message-ID: <a2ed9331-795f-4604-9267-d2946e4beb35@redhat.com>
+Date: Thu, 23 Jul 2026 15:03:01 +1000
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] fstests Fix build errors on kernels before v5.1
+To: Lukas Herbolt <lukas@herbolt.com>, fstests@vger.kernel.org
+Cc: zlang@kernel.org
+References: <20260722052256.2406451-3-lukas@herbolt.com>
+Content-Language: en-US, en-AU
+From: Donald Douwsma <ddouwsma@redhat.com>
+In-Reply-To: <20260722052256.2406451-3-lukas@herbolt.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Verify that unrecognized benign secondary directory entries (such as
-vendor extensions) survive same-directory rename, cross-directory move,
-in-place rename to a shorter name, rename overwriting an existing file,
-and operations on files with multiple benign entries.
+On 22/7/26 15:22, Lukas Herbolt wrote:
+> The FAN_REPORT_FID and fanotify_event_info_fid were introduced
+> in v5.1. Currently there is no check if the kernel supports it
+> making xfstests build to fail on older kernels.
+> 
+> Fixes: 29d120e41c3d ("generic: test fsnotify filesystem error reporting")
+> 
+> Signed-off-by: Lukas Herbolt <lukas@herbolt.com>
 
-exFAT spec section 8.2 [1] requires implementations to preserve benign
-secondary entries they do not recognize.  This is a regression test for
-kernel commit 8258ef28001a ("exfat: handle unreconized benign secondary
-entries") which incorrectly freed benign entry clusters in the rename
-and move paths.
+Looks good!
+Reviewed-by: Donald Douwsma <ddouwsma@redhat.com>
 
-[1]: https://learn.microsoft.com/en-us/windows/win32/fileio/exfat-specification#8-implementation-notes
-
-Signed-off-by: Rochan Avlur <rochan.avlur@gmail.com>
----
- src/Makefile                   |   3 +-
- src/exfat_inject_vendor_ext.py | 155 ++++++++++++++++++++++++++++++
- src/exfat_verify_vendor_ext.py |  62 ++++++++++++
- tests/exfat/001                | 171 +++++++++++++++++++++++++++++++++
- tests/exfat/001.out            |   6 ++
- tests/exfat/Makefile           |  23 +++++
- 6 files changed, 419 insertions(+), 1 deletion(-)
- create mode 100755 src/exfat_inject_vendor_ext.py
- create mode 100755 src/exfat_verify_vendor_ext.py
- create mode 100755 tests/exfat/001
- create mode 100644 tests/exfat/001.out
- create mode 100644 tests/exfat/Makefile
-
-diff --git a/src/Makefile b/src/Makefile
-index 31ac43b2..a42cf96f 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -40,7 +40,8 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 
- EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
- 	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
--	      soak_duration.awk parse-dev-tree.awk parse-free-space.py
-+	      soak_duration.awk parse-dev-tree.awk parse-free-space.py \
-+	      exfat_inject_vendor_ext.py exfat_verify_vendor_ext.py
- 
- SUBDIRS = log-writes perf
- 
-diff --git a/src/exfat_inject_vendor_ext.py b/src/exfat_inject_vendor_ext.py
-new file mode 100755
-index 00000000..81350da8
---- /dev/null
-+++ b/src/exfat_inject_vendor_ext.py
-@@ -0,0 +1,155 @@
-+#!/usr/bin/python3
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# Inject vendor extension (0xE0) benign secondary entries into an exFAT
-+# directory entry set on an unmounted filesystem image or block device.
-+#
-+# Usage: exfat_inject_vendor_ext.py <device> <marker> <filename> [count]
-+#
-+# Adds <count> (default 1) vendor_ext entries carrying <marker> into the
-+# entry set of <filename>.  The marker is stored in the custom-defined
-+# area so it can be verified after kernel operations.
-+#
-+# exFAT on-disk directory entry layout (each entry is 32 bytes):
-+#
-+#   Entry set for a file:
-+#     [0] File entry        (type 0x85)
-+#         byte 1: num_ext (number of secondary entries following)
-+#         bytes 2-3: entry set checksum (covers all entries, skipping these bytes)
-+#     [1] Stream extension  (type 0xC0)
-+#         byte 3: name_len (filename length in Unicode characters)
-+#         bytes 4-7: name_hash
-+#     [2..N] Filename entries (type 0xC1, each holds up to 15 UTF-16LE chars)
-+#         bytes 2-31: 15 UTF-16LE characters
-+#     [N+1..] Benign secondary entries (type 0xA0-0xFF, e.g. vendor_ext 0xE0)
-+#         Implementations MUST preserve these even if unrecognized (spec s8.2)
-+#
-+#   Vendor extension entry (type 0xE0):
-+#     byte 0: 0xE0 (entry type)
-+#     bytes 2-15: vendor GUID (we store our marker here)
-+#     bytes 18-31: vendor-defined data (we duplicate the marker here)
-+#
-+#   Free/unused directory slot: all 32 bytes are 0x00 (type byte == 0x00)
-+#
-+
-+import struct
-+import sys
-+
-+ENTRY_SIZE = 32
-+
-+# exFAT directory entry type codes
-+TYPE_FILE = 0x85
-+TYPE_STREAM = 0xC0
-+TYPE_FILENAME = 0xC1
-+TYPE_VENDOR_EXT = 0xE0
-+TYPE_FREE = 0x00
-+
-+# Offsets within specific entry types
-+FILE_NUM_EXT_OFF = 1        # byte offset of num_ext in file entry
-+FILE_CHECKSUM_OFF = 2       # byte offset of checksum in file entry
-+STREAM_NAME_LEN_OFF = 3    # byte offset of name_len in stream entry
-+FILENAME_CHARS_OFF = 2      # byte offset of first char in filename entry
-+CHARS_PER_NAME_ENTRY = 15   # UTF-16LE characters per filename entry
-+
-+
-+def find_entry_set(data, fname):
-+    """Scan raw data for a FILE+STREAM+NAME entry set matching fname."""
-+    pos = 0
-+    while pos < len(data) - ENTRY_SIZE * 3:
-+        if (data[pos] == TYPE_FILE and
-+                data[pos + ENTRY_SIZE] == TYPE_STREAM and
-+                data[pos + ENTRY_SIZE * 2] == TYPE_FILENAME):
-+            name_len = data[pos + ENTRY_SIZE + STREAM_NAME_LEN_OFF]
-+            num_name_entries = (name_len + CHARS_PER_NAME_ENTRY - 1) // \
-+                CHARS_PER_NAME_ENTRY
-+            chars = []
-+            for ne in range(num_name_entries):
-+                ne_off = pos + ENTRY_SIZE * (2 + ne)
-+                for c in range(CHARS_PER_NAME_ENTRY):
-+                    if len(chars) >= name_len:
-+                        break
-+                    ch = struct.unpack_from('<H', data,
-+                                           ne_off + FILENAME_CHARS_OFF +
-+                                           c * 2)[0]
-+                    chars.append(chr(ch))
-+            if ''.join(chars) == fname:
-+                return pos
-+        pos += ENTRY_SIZE
-+    return -1
-+
-+
-+def build_vendor_ext(marker_bytes, index):
-+    """Build a single vendor_ext directory entry with marker payload."""
-+    entry = bytearray(ENTRY_SIZE)
-+    entry[0] = TYPE_VENDOR_EXT
-+    tag = marker_bytes + struct.pack('B', index)
-+    # Store marker in both the GUID field (bytes 2-15) and
-+    # vendor-defined field (bytes 18-31)
-+    entry[2:2 + min(len(tag), 14)] = tag[:14]
-+    entry[18:18 + min(len(tag), 14)] = tag[:14]
-+    return entry
-+
-+
-+def update_checksum(data, file_off, num_ext):
-+    """Recompute entry set checksum (skip bytes 2-3 of file entry)."""
-+    es_len = ENTRY_SIZE * (1 + num_ext)
-+    es_data = data[file_off:file_off + es_len]
-+    chksum = 0
-+    for i in range(len(es_data)):
-+        if i == FILE_CHECKSUM_OFF or i == FILE_CHECKSUM_OFF + 1:
-+            continue
-+        chksum = (((chksum << 15) | (chksum >> 1)) + es_data[i]) & 0xFFFF
-+    return chksum
-+
-+
-+def main():
-+    if len(sys.argv) < 4:
-+        print("Usage: %s <device> <marker> <filename> [count]" % sys.argv[0],
-+              file=sys.stderr)
-+        sys.exit(1)
-+
-+    dev, marker_str, fname = sys.argv[1], sys.argv[2], sys.argv[3]
-+    count = int(sys.argv[4]) if len(sys.argv) > 4 else 1
-+    marker = marker_str.encode('ascii')
-+
-+    with open(dev, 'r+b') as f:
-+        data = bytearray(f.read())
-+
-+    file_off = find_entry_set(data, fname)
-+    if file_off < 0:
-+        print("ERROR: could not find file '%s'" % fname, file=sys.stderr)
-+        sys.exit(1)
-+
-+    num_ext = data[file_off + FILE_NUM_EXT_OFF]
-+    es_end = file_off + ENTRY_SIZE * (1 + num_ext)
-+
-+    # Verify free slots exist after the entry set
-+    for i in range(count):
-+        slot = es_end + i * ENTRY_SIZE
-+        if slot + ENTRY_SIZE > len(data) or data[slot] != TYPE_FREE:
-+            print("ERROR: no free slot at offset %d for entry %d" %
-+                  (slot, i), file=sys.stderr)
-+            sys.exit(1)
-+
-+    # Write vendor_ext entries into the free slots
-+    for i in range(count):
-+        slot = es_end + i * ENTRY_SIZE
-+        entry = build_vendor_ext(marker, i)
-+        data[slot:slot + ENTRY_SIZE] = entry
-+
-+    # Update num_ext in the file entry and recompute checksum
-+    num_ext += count
-+    data[file_off + FILE_NUM_EXT_OFF] = num_ext
-+
-+    chksum = update_checksum(data, file_off, num_ext)
-+    struct.pack_into('<H', data, file_off + FILE_CHECKSUM_OFF, chksum)
-+
-+    with open(dev, 'r+b') as f:
-+        f.write(data)
-+
-+    print("Injected %d vendor_ext entries for '%s' at offset %d, num_ext=%d" %
-+          (count, fname, es_end, num_ext))
-+
-+
-+if __name__ == '__main__':
-+    main()
-diff --git a/src/exfat_verify_vendor_ext.py b/src/exfat_verify_vendor_ext.py
-new file mode 100755
-index 00000000..2d7eb048
---- /dev/null
-+++ b/src/exfat_verify_vendor_ext.py
-@@ -0,0 +1,62 @@
-+#!/usr/bin/python3
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# Verify that vendor extension (0xE0) benign secondary entries with a
-+# given marker are present in an exFAT filesystem image or block device.
-+#
-+# Usage: exfat_verify_vendor_ext.py <device> <marker> [count]
-+#
-+# Scans for a live (non-deleted) FILE entry set containing <count>
-+# (default 1) vendor_ext entries with <marker>.  Prints "PASS" or "FAIL".
-+#
-+# See exfat_inject_vendor_ext.py for the on-disk layout description.
-+
-+import sys
-+
-+ENTRY_SIZE = 32
-+
-+# exFAT directory entry type codes
-+TYPE_FILE = 0x85
-+TYPE_VENDOR_EXT = 0xE0
-+
-+# Offsets within the file entry
-+FILE_NUM_EXT_OFF = 1
-+
-+
-+def main():
-+    if len(sys.argv) < 3:
-+        print("Usage: %s <device> <marker> [count]" % sys.argv[0],
-+              file=sys.stderr)
-+        sys.exit(1)
-+
-+    dev, marker_str = sys.argv[1], sys.argv[2]
-+    expected = int(sys.argv[3]) if len(sys.argv) > 3 else 1
-+    marker = marker_str.encode('ascii')
-+
-+    with open(dev, 'rb') as f:
-+        data = f.read()
-+
-+    # Walk directory entries looking for a FILE entry set that contains
-+    # the expected number of vendor_ext entries with our marker.
-+    for i in range(0, len(data) - ENTRY_SIZE, ENTRY_SIZE):
-+        if data[i] != TYPE_FILE:
-+            continue
-+        num_ext = data[i + FILE_NUM_EXT_OFF]
-+        found = 0
-+        for j in range(1, num_ext + 1):
-+            off = i + j * ENTRY_SIZE
-+            if off + ENTRY_SIZE > len(data):
-+                break
-+            if data[off] == TYPE_VENDOR_EXT and \
-+                    marker in data[off:off + ENTRY_SIZE]:
-+                found += 1
-+        if found >= expected:
-+            print("PASS")
-+            sys.exit(0)
-+
-+    print("FAIL")
-+    sys.exit(1)
-+
-+
-+if __name__ == '__main__':
-+    main()
-diff --git a/tests/exfat/001 b/tests/exfat/001
-new file mode 100755
-index 00000000..858e9750
---- /dev/null
-+++ b/tests/exfat/001
-@@ -0,0 +1,171 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Rochan Avlur.  All Rights Reserved.
-+#
-+# FS QA Test No. exfat/001
-+#
-+# Verify that rename and cross-directory move do not destroy
-+# unrecognized benign secondary directory entries.  exFAT spec section 8.2
-+# requires implementations to preserve benign secondary entries they
-+# do not recognize.
-+#
-+# Regression test for kernel commit 8258ef28001a
-+# ("exfat: handle unreconized benign secondary entries") which added
-+# cluster freeing for benign secondary entries inside
-+# exfat_remove_entries(), but that function is also called by the
-+# rename and move paths where freeing is incorrect.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	_unmount $loop_mnt 2>/dev/null
-+	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-+	rm -rf $loop_mnt $img_file $tmp.*
-+}
-+
-+_fixed_by_kernel_commit 942296784b2a \
-+	"exfat: preserve benign secondary entries during rename and move"
-+
-+_require_test
-+_require_loop
-+_require_command "$PYTHON3_PROG" python3
-+
-+img_file=$TEST_DIR/$seq.exfat.img
-+loop_mnt=$TEST_DIR/$seq.mnt
-+loop_dev=""
-+
-+INJECT=$here/src/exfat_inject_vendor_ext.py
-+VERIFY=$here/src/exfat_verify_vendor_ext.py
-+MARKER="XFST_BENIGN_01"
-+
-+create_exfat_image()
-+{
-+	rm -f $img_file
-+	truncate -s 10M $img_file
-+	loop_dev=$(_create_loop_device $img_file)
-+	_mkfs_dev $loop_dev >> $seqres.full 2>&1
-+	mkdir -p $loop_mnt
-+}
-+
-+mount_image()
-+{
-+	_mount $loop_dev $loop_mnt
-+}
-+
-+unmount_image()
-+{
-+	_unmount $loop_mnt
-+}
-+
-+teardown_image()
-+{
-+	_unmount $loop_mnt 2>/dev/null
-+	_destroy_loop_device $loop_dev
-+	loop_dev=""
-+}
-+
-+verify_benign_preserved()
-+{
-+	local label="$1"
-+	local count="${2:-1}"
-+
-+	result=$($PYTHON3_PROG $VERIFY $loop_dev "$MARKER" "$count" \
-+		2>>$seqres.full)
-+	if [ "$result" = "PASS" ]; then
-+		echo "PASS: benign secondary entries preserved after $label"
-+	else
-+		echo "FAIL: benign secondary entries destroyed by $label"
-+	fi
-+}
-+
-+# Test 1: rename to longer name (entry set must be relocated)
-+create_exfat_image
-+mount_image
-+echo "payload" > $loop_mnt/a
-+unmount_image
-+
-+$PYTHON3_PROG $INJECT $loop_dev "$MARKER" a \
-+	>> $seqres.full 2>&1 || _fail "inject failed for test 1"
-+
-+mount_image
-+mv $loop_mnt/a "$loop_mnt/a_long_name_to_force_entry_set_relocation"
-+unmount_image
-+
-+verify_benign_preserved "rename to longer name"
-+teardown_image
-+
-+# Test 2: cross-directory move
-+create_exfat_image
-+mount_image
-+echo "payload" > $loop_mnt/b
-+unmount_image
-+
-+$PYTHON3_PROG $INJECT $loop_dev "$MARKER" b \
-+	>> $seqres.full 2>&1 || _fail "inject failed for test 2"
-+
-+mount_image
-+mkdir $loop_mnt/subdir
-+mv $loop_mnt/b $loop_mnt/subdir/b
-+unmount_image
-+
-+verify_benign_preserved "cross-directory move"
-+teardown_image
-+
-+# Test 3: rename to shorter name (entry set is updated in place)
-+create_exfat_image
-+mount_image
-+echo "payload" > "$loop_mnt/a_long_name_to_force_multiple_name_entries"
-+unmount_image
-+
-+$PYTHON3_PROG $INJECT $loop_dev "$MARKER" \
-+	a_long_name_to_force_multiple_name_entries \
-+	>> $seqres.full 2>&1 || _fail "inject failed for test 3"
-+
-+mount_image
-+mv "$loop_mnt/a_long_name_to_force_multiple_name_entries" $loop_mnt/c
-+unmount_image
-+
-+verify_benign_preserved "rename to shorter name"
-+teardown_image
-+
-+# Test 4: rename overwriting an existing file (source's benign entries
-+#         must survive even though the target's entries are deleted)
-+create_exfat_image
-+mount_image
-+echo "target" > $loop_mnt/dst
-+echo "source" > $loop_mnt/src
-+unmount_image
-+
-+$PYTHON3_PROG $INJECT $loop_dev "$MARKER" src \
-+	>> $seqres.full 2>&1 || _fail "inject failed for test 4 (src)"
-+
-+mount_image
-+mv $loop_mnt/src $loop_mnt/dst
-+unmount_image
-+
-+verify_benign_preserved "rename overwriting existing file"
-+teardown_image
-+
-+# Test 5: multiple benign entries (verifies all are copied, not just one)
-+create_exfat_image
-+mount_image
-+echo "payload" > $loop_mnt/m
-+unmount_image
-+
-+$PYTHON3_PROG $INJECT $loop_dev "$MARKER" m 3 \
-+	>> $seqres.full 2>&1 || _fail "inject failed for test 5"
-+
-+mount_image
-+mv $loop_mnt/m "$loop_mnt/m_longer_name_for_relocation"
-+unmount_image
-+
-+verify_benign_preserved "rename with multiple benign entries" 3
-+teardown_image
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/exfat/001.out b/tests/exfat/001.out
-new file mode 100644
-index 00000000..f82ea010
---- /dev/null
-+++ b/tests/exfat/001.out
-@@ -0,0 +1,6 @@
-+QA output created by 001
-+PASS: benign secondary entries preserved after rename to longer name
-+PASS: benign secondary entries preserved after cross-directory move
-+PASS: benign secondary entries preserved after rename to shorter name
-+PASS: benign secondary entries preserved after rename overwriting existing file
-+PASS: benign secondary entries preserved after rename with multiple benign entries
-diff --git a/tests/exfat/Makefile b/tests/exfat/Makefile
-new file mode 100644
-index 00000000..9322f797
---- /dev/null
-+++ b/tests/exfat/Makefile
-@@ -0,0 +1,23 @@
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Rochan Avlur.  All Rights Reserved.
-+
-+TOPDIR = ../..
-+include $(TOPDIR)/include/builddefs
-+include $(TOPDIR)/include/buildgrouplist
-+
-+EXFAT_DIR = exfat
-+TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(EXFAT_DIR)
-+DIRT = group.list
-+
-+default: $(DIRT)
-+
-+include $(BUILDRULES)
-+
-+install: default
-+	$(INSTALL) -m 755 -d $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-+	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
-+
-+# Nothing.
-+install-dev install-lib:
--- 
-2.45.2
+> ---
+>  configure.ac          |  1 +
+>  include/builddefs.in  |  1 +
+>  m4/package_libcdev.m4 | 14 ++++++++++++++
+>  src/Makefile          |  6 +++++-
+>  4 files changed, 21 insertions(+), 1 deletion(-)
+> 
+> diff --git a/configure.ac b/configure.ac
+> index 441f543c6089..feb24ddd8854 100644
+> --- a/configure.ac
+> +++ b/configure.ac
+> @@ -74,6 +74,7 @@ AC_NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE
+>  AC_HAVE_FICLONE
+>  AC_HAVE_TRIVIAL_AUTO_VAR_INIT
+>  AC_HAVE_FILE_GETATTR
+> +AC_HAVE_FANOTIFY_FID
+>  
+>  AC_CHECK_FUNCS([renameat2])
+>  AC_CHECK_FUNCS([reallocarray])
+> diff --git a/include/builddefs.in b/include/builddefs.in
+> index 708d75b24d76..8e9e2e3b4113 100644
+> --- a/include/builddefs.in
+> +++ b/include/builddefs.in
+> @@ -75,6 +75,7 @@ HAVE_RLIMIT_NOFILE = @have_rlimit_nofile@
+>  NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE = @need_internal_xfs_ioc_exchange_range@
+>  HAVE_FICLONE = @have_ficlone@
+>  HAVE_FILE_GETATTR = @have_file_getattr@
+> +HAVE_FANOTIFY_FID = @have_fanotify_fid@
+>  
+>  GCCFLAGS = -std=gnu11 -funsigned-char -fno-strict-aliasing -Wall
+>  SANITIZER_CFLAGS += @autovar_init_cflags@
+> diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
+> index 17f57f427410..340cdad3faf9 100644
+> --- a/m4/package_libcdev.m4
+> +++ b/m4/package_libcdev.m4
+> @@ -102,3 +102,17 @@ AC_DEFUN([AC_HAVE_FILE_GETATTR],
+>         AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+>      AC_SUBST(have_file_getattr)
+>    ])
+> +
+> +# Check if we have fanotify FID support (Linux 5.1+)
+> +AC_DEFUN([AC_HAVE_FANOTIFY_FID],
+> +  [ AC_MSG_CHECKING([for fanotify FID support])
+> +    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+> +#include <sys/fanotify.h>
+> +    ]], [[
+> +       int x = FAN_REPORT_FID;
+> +       struct fanotify_event_info_fid fid;
+> +       (void)x; (void)fid;
+> +    ]])],[have_fanotify_fid=yes
+> +       AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+> +    AC_SUBST(have_fanotify_fid)
+> +  ])
+> diff --git a/src/Makefile b/src/Makefile
+> index 31ac43b215e9..847fb168181e 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -36,7 +36,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+>  	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
+>  	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
+> -	rw_hint fs-monitor
+> +	rw_hint
+>  
+>  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+>  	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+> @@ -107,6 +107,10 @@ ifeq ($(HAVE_FICLONE),yes)
+>       TARGETS += t_reflink_read_race
+>  endif
+>  
+> +ifeq ($(HAVE_FANOTIFY_FID),yes)
+> +     TARGETS += fs-monitor
+> +endif
+> +
+>  ifeq ($(HAVE_LIBBTRFSUTIL), true)
+>       LINUX_TARGETS += t_btrfs_received_uuid_ioctl
+>  endif
+> 
+> base-commit: acb6d4cb84205a8e3f19ca470cfcf7bf6d93a509
 
