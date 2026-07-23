@@ -1,165 +1,59 @@
-Received: from mx0.herbolt.com (mx0.herbolt.com [5.59.97.199])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 61A0F3BCD3F
-	for <fstests@vger.kernel.org>; Thu, 23 Jul 2026 10:48:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=5.59.97.199
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6367B3630B2;
+	Thu, 23 Jul 2026 14:29:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784803711; cv=none; b=Qd8m4iRQnKE0w/nKXh+wVYQ9IhCDsGeBy8GBbhuQGQ7s2gCPS/icwiijo42NufVF5Q3F87wwg927t2msx1ibxkb5tST7mC5p7e4GMqsAlXzlyG4uK4/PMuSu4crYwMr+6Ob6CULetSUHL3AT0WbrWG51jQjzd2GY1PJmJ18nvqg=
+	t=1784816945; cv=none; b=IvtOOQiYuayF0J1LlhoQGcPlE6fjkRIK/PiYfdk4Z56+1rMgTpTHgTbzwVKbj2xUhcyKWkHUYzsBAdobFTnXh3rMRFiVDD8jhpKh/lH+wgspV/+KHoPm7XNOCOthQBKse0tLDNTNFwLpjrT9pTv608mL/7F6RgVSG676K3hhnDQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784803711; c=relaxed/simple;
-	bh=/+bpU0STVMYLl0AXPLrd4gLQuzLU+Z/GbiHoLYGzeD4=;
-	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
-	 Message-ID:Content-Type; b=U4HUZM9UYQnW3l5gTku9sO93kEPGCIo8AzxuvJdK1F2bxeqqOpPGbP+Q/hZkH1OFTNqEv3LYF9nb+30ThMH1UGRGHDiBFSKAJvRtDIJB79QeBeNfvVKmIhLyp6RNh2nF5cqdgyo1z7T5+OQ6Kohn/jaEAwAuBY5h1S5zRTr7Tx0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=herbolt.com; spf=pass smtp.mailfrom=herbolt.com; arc=none smtp.client-ip=5.59.97.199
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=herbolt.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=herbolt.com
-Received: from mx0.herbolt.com (localhost [127.0.0.1])
-	by mx0.herbolt.com (Postfix) with ESMTP id B4010180F2C1;
-	Thu, 23 Jul 2026 12:48:13 +0200 (CEST)
-Received: from mail.herbolt.com ([172.16.31.10])
-	by mx0.herbolt.com with ESMTPSA
-	id 1YUPIm3xYWoztAQAKEJqOA
-	(envelope-from <lukas@herbolt.com>); Thu, 23 Jul 2026 12:48:13 +0200
+	s=arc-20240116; t=1784816945; c=relaxed/simple;
+	bh=NqeNO/i7dnzPHrmkKJaFJsyEWzg+od9IZwv2xB9NpXU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=t/Fek9mTR/POOLoj4Mb0184vi7MT9U4nu70O3yrVubLx0MerGPP3LeytTqkeTBujneUy7KVQUUr3KNE3in3lVHHtjK2tqlWBmo6txeDBCGv+cCfoIVSogZM6pOyvNLVAkd8+j3CwlrudRLTNN6nSmHu0GyMxDz2XvPR8E5bDBaY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=N8PoPfD0; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="N8PoPfD0"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=NqeNO/i7dnzPHrmkKJaFJsyEWzg+od9IZwv2xB9NpXU=; b=N8PoPfD0X11cSXFQJvDBwriNFb
+	O9Jk8lgiIGviLE7WaYMXqbqN3XMpgZ3zIHJHQsOqwAgv5PyersaToIuFUaJsxxYL5XAaaE2jilXkm
+	W0AOe8bGrXbbi0x5TcsnBCY0QU4il7E+OuPNHV8LEPSyhKY1Fs0L/YDGcrxCt936tS0NMIemF5ZGI
+	92Kv4yS2ABWItfJ1hLaa7KKgI46UGM4jPUXPU0sBbwL+l2Y7gJy0S6BQGOk7uB/n+D/skZYQAiw9W
+	AEJDfPvKVx/Mp3vFE3iHN8UfS55aLlAgNuXcndEFjtNJLlJym4tbZ6L6WvS8mIfN9ujAhUMf6lM5d
+	ZLH0OLQA==;
+Received: from [2001:4bb8:2e9:b20c:3d3c:bb0:5e13:19af] (helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.99.1 #2 (Red Hat Linux))
+	id 1wmuPz-0000000EV8B-2zGy;
+	Thu, 23 Jul 2026 14:29:00 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: Zorro Lang <zlang@kernel.org>
+Cc: fstests@vger.kernel.org,
+	"Martin K. Petersen" <martin.petersen@oracle.com>,
+	Kanchan Joshi <joshi.k@samsung.com>,
+	Anuj Gupta <anuj20.g@samsung.com>,
+	linux-scsi@vger.kernel.org
+Subject: add tests for file system on devices using protection information
+Date: Thu, 23 Jul 2026 16:28:43 +0200
+Message-ID: <20260723142856.108193-1-hch@lst.de>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Thu, 23 Jul 2026 12:48:13 +0200
-From: Lukas Herbolt <lukas@herbolt.com>
-To: Andrey Albershteyn <aalbersh@redhat.com>
-Cc: Donald Douwsma <ddouwsma@redhat.com>, fstests@vger.kernel.org,
- zlang@kernel.org
-Subject: Re: [PATCH] fstests Fix build errors on kernels before v5.1
-In-Reply-To: <amHPADzkqM9F25Rm@aalbersh-thinkpadx1carbongen13.rmtcz.csb>
-References: <20260722052256.2406451-3-lukas@herbolt.com>
- <amCMdrK8EscbPTAp@aalbersh-thinkpadx1carbongen13.rmtcz.csb>
- <26d5ba218032a5468d359fb598234b99@herbolt.com>
- <d5f276e5-a3ef-4f5e-aa68-aafeec595ee4@redhat.com>
- <amHPADzkqM9F25Rm@aalbersh-thinkpadx1carbongen13.rmtcz.csb>
-Message-ID: <90eb4946a437a4618fb1a36bb87895c1@herbolt.com>
-X-Sender: lukas@herbolt.com
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
 Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On 2026-07-23 10:26, Andrey Albershteyn wrote:
-> On 2026-07-23 15:27:13, Donald Douwsma wrote:
->> On 23/7/26 03:49, Lukas Herbolt wrote:
->> > On 2026-07-22 11:35, Andrey Albershteyn wrote:
->> >> On 2026-07-22 07:22:58, Lukas Herbolt wrote:
->> >>> The FAN_REPORT_FID and fanotify_event_info_fid were introduced
->> >>> in v5.1. Currently there is no check if the kernel supports it
->> >>> making xfstests build to fail on older kernels.
->> >>>
->> >>> Fixes: 29d120e41c3d ("generic: test fsnotify filesystem error reporting")
->> >>>
->> >>> Signed-off-by: Lukas Herbolt <lukas@herbolt.com>
->> >>
->> >> Looks good to me
->> >> Reviewed-by: Andrey Albershteyn <aalbersh@kernel.org>
->> >>
->> >>> ---
->> >>>  configure.ac          |  1 +
->> >>>  include/builddefs.in  |  1 +
->> >>>  m4/package_libcdev.m4 | 14 ++++++++++++++
->> >>>  src/Makefile          |  6 +++++-
->> >>>  4 files changed, 21 insertions(+), 1 deletion(-)
->> >>>
->> >>> diff --git a/configure.ac b/configure.ac
->> >>> index 441f543c6089..feb24ddd8854 100644
->> >>> --- a/configure.ac
->> >>> +++ b/configure.ac
->> >>> @@ -74,6 +74,7 @@ AC_NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE
->> >>>  AC_HAVE_FICLONE
->> >>>  AC_HAVE_TRIVIAL_AUTO_VAR_INIT
->> >>>  AC_HAVE_FILE_GETATTR
->> >>> +AC_HAVE_FANOTIFY_FID
->> >>>
->> >>>  AC_CHECK_FUNCS([renameat2])
->> >>>  AC_CHECK_FUNCS([reallocarray])
->> >>> diff --git a/include/builddefs.in b/include/builddefs.in
->> >>> index 708d75b24d76..8e9e2e3b4113 100644
->> >>> --- a/include/builddefs.in
->> >>> +++ b/include/builddefs.in
->> >>> @@ -75,6 +75,7 @@ HAVE_RLIMIT_NOFILE = @have_rlimit_nofile@
->> >>>  NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE = @need_internal_xfs_ioc_exchange_range@
->> >>>  HAVE_FICLONE = @have_ficlone@
->> >>>  HAVE_FILE_GETATTR = @have_file_getattr@
->> >>> +HAVE_FANOTIFY_FID = @have_fanotify_fid@
->> >>>
->> >>>  GCCFLAGS = -std=gnu11 -funsigned-char -fno-strict-aliasing -Wall
->> >>>  SANITIZER_CFLAGS += @autovar_init_cflags@
->> >>> diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
->> >>> index 17f57f427410..340cdad3faf9 100644
->> >>> --- a/m4/package_libcdev.m4
->> >>> +++ b/m4/package_libcdev.m4
->> >>> @@ -102,3 +102,17 @@ AC_DEFUN([AC_HAVE_FILE_GETATTR],
->> >>>         AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
->> >>>      AC_SUBST(have_file_getattr)
->> >>>    ])
->> >>> +
->> >>> +# Check if we have fanotify FID support (Linux 5.1+)
->> >>> +AC_DEFUN([AC_HAVE_FANOTIFY_FID],
->> >>> +  [ AC_MSG_CHECKING([for fanotify FID support])
->> >>> +    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
->> >>> +#include <sys/fanotify.h>
->> >>> +    ]], [[
->> >>> +       int x = FAN_REPORT_FID;
->> >>> +       struct fanotify_event_info_fid fid;
->> >>> +       (void)x; (void)fid;
->> >>> +    ]])],[have_fanotify_fid=yes
->> >>> +       AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
->> >>> +    AC_SUBST(have_fanotify_fid)
->> >>> +  ])
->> >>> diff --git a/src/Makefile b/src/Makefile
->> >>> index 31ac43b215e9..847fb168181e 100644
->> >>> --- a/src/Makefile
->> >>> +++ b/src/Makefile
->> >>> @@ -36,7 +36,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->> >>>      fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
->> >>>      detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
->> >>>      uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
->> >>> -    rw_hint fs-monitor
->> >>> +    rw_hint
->> >>>
->> >>>  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
->> >>>            btrfs_crc32c_forged_name.py popdir.pl popattr.py \
->> >>> @@ -107,6 +107,10 @@ ifeq ($(HAVE_FICLONE),yes)
->> >>>       TARGETS += t_reflink_read_race
->> >>>  endif
->> >>>
->> >>> +ifeq ($(HAVE_FANOTIFY_FID),yes)
->> >>> +     TARGETS += fs-monitor
->> >> ...
->> >>>       LINUX_TARGETS += t_btrfs_received_uuid_ioctl
->> >>
->> >> hah just noticed that fstests "supports" different targets (darwin,
->> >> freebsd), not sure if it works at all
->> >
->> > Ugh! Indeed that should be LINUX_TARGETS += fs-monitor
->> > I will send v2
->> 
->> I think this was mainly to allow for IRIX back when fstests ran there, 
->> the
->> last of which were removed by
->> 
->> bc2568f9 fstests: remove IRIX test program open_unlink
->> 
->> A lot of the more recent programs in TARGETS look like they wouldn't 
->> apply
->> to anything outside of linux, i.e. t_ext4_dax_journal_corruption and
->> t_ext4_dax_inline_corruption.
->> 
->> Given the use of configure to decide what to compile in it may be 
->> clearer
->> if this was just simplified to use TARGETS in the long term.
-> 
-> Yeah, it just need a cleanup
-Ok, let's just stick with this version and I will try too look into 
-unifying
-of the targets.
--- 
--lhe
+Hi all,
+
+this series adds support to exercise I/O on file systems using protection
+information in the device, including that corruption is properly
+reported.
+
+The second test requires a patch to inject corruption into scsi_debug
+that was posted to the linux-scsi list.
