@@ -1,230 +1,195 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA2B22D97AA
-	for <fstests@vger.kernel.org>; Fri, 24 Jul 2026 13:34:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B584E392C32
+	for <fstests@vger.kernel.org>; Fri, 24 Jul 2026 22:07:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784900066; cv=none; b=k2txsZSNn0DcXAtgHi603CZP5iQPE7i5joyJWMez9q7KbMxEGiu6pYUgzd///7ZlqNDwMooLeXr/NGObuzgCYPIq6wtxTzYwEVM2Zu/qaE0/hEkaForHa6Da0AhKnDdKVByVW1P2N5pHXDh96v/qdVyqDdVm7mNeYFVDXfauN38=
+	t=1784930830; cv=none; b=lCCd3XNPLhwvE++rjjmfnOK/NB5Y5sEuFZoXwRw9fi5GqvTiNaZ2LDaakFyCCojsYtEojvhiH0c/KoYl8lnzraB0FzIy7HZaHLvO/sgwpWyh0VV4criDTj1U3rCvSNSdZU+2GLpuQ6FX2sLMdpmwtV3oxEQBi1t2ab1xXQK7Wi4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784900066; c=relaxed/simple;
-	bh=9Nj1HJFNNnXzhDb8AqOtezWmWqI7/yR76Fhule7NxAU=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=kKsi7xCp7AyDVsqwUM2ewj7Cz7zynfePOYnEhV41rVkW49zO+31Z7i1NTeIaYQ5ZjUtKhZ1l3EXoM3BAaOESbN2aUeadBSHgNiFN740Go+v/OP/TaLmSerrl2MJzp2ddA+B9Y/Z2coJ3cH/DPnYJKwapIxvTn0vUgtwcOQFr4QE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=lWjEejBT; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=oxP8WtU5; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1784930830; c=relaxed/simple;
+	bh=+tgWUmE/aG5prFIkzaZog1uw4h2WHmIP4nYxDchqoWM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=nwRvJBikAb/Zkl80OVpDWSPXZrHczwyc+lNwlcYcQP7B0WBZdN5bj3ynakrJeG/V1eT7xe4qs7PMsUbzarKPaFIzFKMf8XM+kYHObhd57SCJ7OHB+0Q7Ehck2Z5nUfI9n9bTVqnqVFero6lX6kPdwe40zanrhmV/bupFhi6QTxk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=PTpHaunA; arc=none smtp.client-ip=212.227.17.21
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="lWjEejBT";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="oxP8WtU5"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id E75AC7B88D;
-	Fri, 24 Jul 2026 13:33:52 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1784900033; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=wHYzh95fp5Ho3waLGLALi8fDx3ZIDOeiqjyS1BQ77MA=;
-	b=lWjEejBT2lAlSm/BCIaA4PDeqUUcT3JmOv/bu/KJDFYiTNi9ZleVHh/NsAgTqNB7LYo3Tx
-	ANiprnlza9lVTm6RcLERjq0P4JCuepKfH67HjggfgbYFLob2WuP9sV0VDSehOI3dQGWK5V
-	ttSWMMRJRnZlcQZP0R0p9mnaj3Sb21I=
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=oxP8WtU5
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1784900032; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=wHYzh95fp5Ho3waLGLALi8fDx3ZIDOeiqjyS1BQ77MA=;
-	b=oxP8WtU5c9OkZtG/R65GRRQn+WXEJSkGHuUIB1LALz78yMXKEMZWFYHMB+rqXyoIsoPakb
-	e+pKLAdx+M+t4wpXckzDkt3A7th7T89KO2urbmQrTQWkl37fksTpbXpQmyfJgtKUye49Ya
-	z76VlKsWhLiTPAUzqznize855s+b+4Q=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 6B300779C4;
-	Fri, 24 Jul 2026 13:33:52 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id cGJzCsBpY2pIJgAAD6G6ig
-	(envelope-from <neelx@suse.com>); Fri, 24 Jul 2026 13:33:52 +0000
-From: Daniel Vacek <neelx@suse.com>
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net,
-	zlang@redhat.com,
-	hch@infradead.org,
-	djwong@kernel.org,
-	David Sterba <dsterba@suse.com>,
-	Daniel Vacek <neelx@suse.com>,
-	linux-fscrypt@vger.kernel.org
-Subject: [PATCH 12/12] fscrypt-crypt-util: add support for per extent KDF
-Date: Fri, 24 Jul 2026 15:33:28 +0200
-Message-ID: <20260724133328.1837318-13-neelx@suse.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260724133328.1837318-1-neelx@suse.com>
-References: <20260724133328.1837318-1-neelx@suse.com>
+	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="PTpHaunA"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
+	s=s31663417; t=1784930818; x=1785535618; i=quwenruo.btrfs@gmx.com;
+	bh=npswX9u4HewnFZZbF/dHfwohEEdIMfmATF8giOH8fC8=;
+	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
+	 References:From:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding:cc:content-transfer-encoding:
+	 content-type:date:from:message-id:mime-version:reply-to:subject:
+	 to;
+	b=PTpHaunAgHsBsroi2izJ1eb7hlNZrAx2botIDS8ISBHHLXy9BEKLAb9Ncn82Q1lv
+	 UENfpuJB1gIT9/gJ6aaed+FGeP04dG4PTcnZIuMSi1JcXKgclJ0piuD30THLp/B+f
+	 jIKiS/M+abIZiX2uDim5NRdUs6WgtQLau9zMWM77DPvFpClbrrMMX6+qzTFFUgxE8
+	 mavnK4E4NvQeSf6uCVSrL2a2qMxTiMGESC8egkCZ+FxnvYZFIABEiUpCUK86+FR0+
+	 YZXSz3E+ZHbTOqXaobbBnp6KEhGj3STZpK16qyUoo1RseUZq4ueqPjvH+xRdaxHmi
+	 qmOMFHOQZwE6b9xvbw==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from client.hidden.invalid by mail.gmx.net (mrgmx105
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1MKsj7-1wYl4e2yQX-00OY54; Sat, 25
+ Jul 2026 00:06:58 +0200
+Message-ID: <1abbec27-e719-4671-98ae-6ec877106927@gmx.com>
+Date: Sat, 25 Jul 2026 07:36:54 +0930
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Spamd-Result: default: False [-3.01 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_CONTAINS_FROM(1.00)[];
-	R_MISSING_CHARSET(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	NEURAL_HAM_SHORT(-0.20)[-0.999];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	TO_DN_SOME(0.00)[];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	MIME_TRACE(0.00)[0:+];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	DNSWL_BLOCKED(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	R_RATELIMIT(0.00)[to_ip_from(RLqxq1d8k46pqxsbwde44x1q39)];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	RCPT_COUNT_SEVEN(0.00)[11];
-	RCVD_TLS_ALL(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	DKIM_TRACE(0.00)[suse.com:+]
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] generic/761: add to the rw group
+To: Christoph Hellwig <hch@lst.de>, zlang@kernel.org
+Cc: wqu@suse.com, fstests@vger.kernel.org
+References: <20260724125106.433118-1-hch@lst.de>
+Content-Language: en-US
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
+ BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
+ sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
+ xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
+ naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
+ tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
+ 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
+ VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
+ CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
+ /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
+ GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
+ q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
+ ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
+ CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
+ B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
+ Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
+ +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
+ HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
+In-Reply-To: <20260724125106.433118-1-hch@lst.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:fg+LOmheOPVlBV3k4TzRvvS5csjX8Mo9IuWDh8FEhEBkHPJtbgt
+ fiLz83IEQ3lfNGcueXbQHJ+vOrpyndTdsEx3FUklN91Zpjr4eXrT6NL3AmHMpZgBVCc9J7y
+ JWM658vUASnUsiNOdm0CVl++6gpAjrzUetG/hSuM6m4b3vo34dTxN2ikvBCJUGS7A/TZyY6
+ GekM8jB6ypBgI9Bv33t+w==
 X-Spam-Flag: NO
-X-Spam-Score: -3.01
-X-Spam-Level: 
-X-Rspamd-Queue-Id: E75AC7B88D
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Rspamd-Action: no action
+UI-OutboundReport: notjunk:1;M01:P0:+Qg1gQlERUg=;Zchl9uc4rWYb0Nqzd0Lp6a+Z4Vu
+ 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
+ 1XEqsbzH56sGLz8wlCZ7GVh4aN61dE
 
-When deriving a key for extent, fscrypt uses different salt. Add the
-support for this.
 
-Signed-off-by: Daniel Vacek <neelx@suse.com>
----
- common/encrypt           | 13 +++++++++----
- src/fscrypt-crypt-util.c | 12 +++++++++++-
- 2 files changed, 20 insertions(+), 5 deletions(-)
 
-diff --git a/common/encrypt b/common/encrypt
-index 4c3fd904..2485b69a 100644
---- a/common/encrypt
-+++ b/common/encrypt
-@@ -836,7 +836,7 @@ _do_verify_ciphertext_for_encryption_policy()
- 	local blocksize=$(_get_block_size $SCRATCH_MNT)
- 	local test_contents_files=()
- 	local test_filenames_files=()
--	local i src dir dst inode blocklist \
-+	local i src dir dst inode blocklist context_per_extent \
- 	      padding_flag padding dir_inode len name f nonce decrypted_name
- 
- 	# Create files whose encrypted contents we'll verify.  For each, save
-@@ -891,19 +891,24 @@ _do_verify_ciphertext_for_encryption_policy()
- 	# Now unmount the filesystem and verify the ciphertext we just wrote.
- 	_scratch_unmount
- 
-+	case $FSTYP in
-+	btrfs)	context_per_extent=--context-per-extent;;
-+	*)	context_per_extent=;;
-+	esac
-+
- 	echo "Verifying encrypted file contents" >> $seqres.full
- 	for f in "${test_contents_files[@]}"; do
- 		read -r src inode blocklist <<< "$f"
- 		nonce=$(_get_encryption_data_nonce $SCRATCH_DEV $inode)
- 		_dump_ciphertext_blocks $SCRATCH_DEV $blocklist > $tmp.actual_contents
- 		$crypt_contents_cmd $contents_encryption_mode $raw_key_hex \
--			--file-nonce=$nonce --inode-number=$inode \
--                        < $src > $tmp.expected_contents
-+			--file-nonce=$nonce $context_per_extent --inode-number=$inode \
-+			< $src > $tmp.expected_contents
- 		if ! cmp $tmp.expected_contents $tmp.actual_contents; then
- 			_fail "Expected encrypted contents != actual encrypted contents.  File: $f"
- 		fi
- 		$crypt_contents_cmd $contents_encryption_mode $raw_key_hex \
--			--decrypt --file-nonce=$nonce --inode-number=$inode \
-+			--decrypt --file-nonce=$nonce $context_per_extent --inode-number=$inode \
- 			< $tmp.actual_contents > $tmp.decrypted_contents
- 		if ! cmp $src $tmp.decrypted_contents; then
- 			_fail "Contents decryption sanity check failed.  File: $f"
-diff --git a/src/fscrypt-crypt-util.c b/src/fscrypt-crypt-util.c
-index f51b3669..1403edb5 100644
---- a/src/fscrypt-crypt-util.c
-+++ b/src/fscrypt-crypt-util.c
-@@ -75,6 +75,7 @@ static void usage(FILE *fp)
- "                                replicate the en/decryption that is done when\n"
- "                                the filesystem is given a hardware-wrapped key.\n"
- "  --file-nonce=NONCE          File's nonce as a 32-character hex string\n"
-+"  --context-per-extent        Derive the key for per extent context.\n"
- "  --fs-uuid=UUID              The filesystem UUID as a 32-character hex string.\n"
- "                                Required for --iv-ino-lblk-32 and\n"
- "                                --iv-ino-lblk-64; otherwise is unused.\n"
-@@ -2162,6 +2163,7 @@ struct key_and_iv_params {
- 	bool direct_key;
- 	bool iv_ino_lblk_64;
- 	bool iv_ino_lblk_32;
-+	bool context_per_extent;
- 	u64 data_unit_index;
- 	u64 inode_number;
- 	u8 fs_uuid[UUID_SIZE];
-@@ -2176,6 +2178,7 @@ struct key_and_iv_params {
- #define HKDF_CONTEXT_IV_INO_LBLK_32_KEY	6
- #define HKDF_CONTEXT_INODE_HASH_KEY	7
- #define HKDF_CONTEXT_KEY_IDENTIFIER_FOR_HW_WRAPPED_KEY 8
-+#define HKDF_CONTEXT_PER_EXTENT_ENC_KEY	9
- 
- /* Hash the file's inode number using SipHash keyed by a derived key */
- static u32 hash_inode_number(const struct key_and_iv_params *params)
-@@ -2366,7 +2369,9 @@ static void derive_real_key(const struct key_and_iv_params *params,
- 		} else {
- 			if (!params->file_nonce_specified)
- 				die("--kdf=HKDF-SHA512 requires --file-nonce or --iv-ino-lblk-{64,32}");
--			info[infolen++] = HKDF_CONTEXT_PER_FILE_ENC_KEY;
-+			info[infolen++] = params->context_per_extent?
-+						HKDF_CONTEXT_PER_EXTENT_ENC_KEY:
-+						HKDF_CONTEXT_PER_FILE_ENC_KEY;
- 			memcpy(&info[infolen], params->file_nonce,
- 			       FILE_NONCE_SIZE);
- 			infolen += FILE_NONCE_SIZE;
-@@ -2481,6 +2486,7 @@ enum {
- 	OPT_DUMP_KEY_IDENTIFIER,
- 	OPT_ENABLE_HW_KDF,
- 	OPT_FILE_NONCE,
-+	OPT_CONTEXT_PER_EXTENT,
- 	OPT_FS_UUID,
- 	OPT_HELP,
- 	OPT_INODE_NUMBER,
-@@ -2500,6 +2506,7 @@ static const struct option longopts[] = {
- 	{ "dump-key-identifier", no_argument,   NULL, OPT_DUMP_KEY_IDENTIFIER },
- 	{ "enable-hw-kdf",   no_argument,       NULL, OPT_ENABLE_HW_KDF },
- 	{ "file-nonce",      required_argument, NULL, OPT_FILE_NONCE },
-+	{ "context-per-extent", no_argument,    NULL, OPT_CONTEXT_PER_EXTENT },
- 	{ "fs-uuid",         required_argument, NULL, OPT_FS_UUID },
- 	{ "help",            no_argument,       NULL, OPT_HELP },
- 	{ "inode-number",    required_argument, NULL, OPT_INODE_NUMBER },
-@@ -2572,6 +2579,9 @@ int main(int argc, char *argv[])
- 				die("Invalid file nonce: %s", optarg);
- 			params.file_nonce_specified = true;
- 			break;
-+		case OPT_CONTEXT_PER_EXTENT:
-+			params.context_per_extent = true;
-+			break;
- 		case OPT_FS_UUID:
- 			if (hex2bin(optarg, params.fs_uuid, UUID_SIZE)
- 			    != UUID_SIZE)
--- 
-2.53.0
+=E5=9C=A8 2026/7/24 22:21, Christoph Hellwig =E5=86=99=E9=81=93:
+> This tests the read-write path, so add it to the proper group.
+>=20
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+
+Reviewed-by: Qu Wenruo <wqu@suse.com>
+
+Thanks,
+Qu
+
+> ---
+>   tests/generic/761 | 2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
+>=20
+> diff --git a/tests/generic/761 b/tests/generic/761
+> index e9030f3c6ab3..d9e095f7a4fc 100755
+> --- a/tests/generic/761
+> +++ b/tests/generic/761
+> @@ -13,7 +13,7 @@
+>   #
+>  =20
+>   . ./common/preamble
+> -_begin_fstest auto quick
+> +_begin_fstest auto quick rw
+>  =20
+>   _require_scratch
+>   _require_odirect
 
