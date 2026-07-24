@@ -1,41 +1,68 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D1D3F242D62
-	for <fstests@vger.kernel.org>; Fri, 24 Jul 2026 12:51:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 47D052D97AA
+	for <fstests@vger.kernel.org>; Fri, 24 Jul 2026 13:33:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784897476; cv=none; b=aNRy2fDS9CBectCBYweGVi4zG+3LRbkVJaIVUNPPWVafjwFGes3x3A7FOjKXEY2kZ03HEwegCueWFIBJAB33u9utmoZpcn0X9EUY1eWvy7jrqBi27i2AqjnG9c1r0RknRskdZKvtKS3g3JEZge3oTa9iMT31eIQ80GAQTJuOTsw=
+	t=1784900024; cv=none; b=gjFh8otzr0f41lqMzlqn8208S2LvzYujVGrnGfNxPpXwWAC/GyHk4TMbitMnAHjLKlrs5xer9rxGl5qKCBu5aTwZBhAS4b5av28d6IG2uyr4JOsT4cuik3WImKMFlSDl3A9eaL3lzaOK8FRGOQ04tPYFaWkMYbtg0fVpmmE6BQ0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784897476; c=relaxed/simple;
-	bh=PEdZyzxD/oC/F78eYaa9Bx1QBtem+zqH+EWNU7nPouU=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=UuGYlNiuBd6N4lAv12TyiICcfnFGiIonUzJBlwcgRSDPAv0FZrXlBvmGOTtRisc54YOANCdCbY2Yna7WD+4rZNzJlxzk8YSXNyJy5JGhKtQJi8UuOfj41l/DVITralWtZPs6Hyx8npFyDt7UBWXkIZd2Ua54S9cz+wRiUNTsXCw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=VidoB4qz; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1784900024; c=relaxed/simple;
+	bh=Oho22ogpd79FN59/VMKoDYgBS/cSrYQqb3jikjHjFcI=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Dph5A2eSX5haFLCIHM7bDRuYRhYmewmdfu2jsv6pZgBQsqFBoPMIAmy5QoiR8DyNc4h6Fm3l03EkcTt2DGxyghH7yclodROllR2goAJBnFJ9/4VGzcSJkDdh9k9lN+HT+tBOUIRA5r43ekv2MZPts3JFAwzKTOelnb539w2m65g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=hMHi3EVW; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=hMHi3EVW; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="VidoB4qz"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-	Content-ID:Content-Description:In-Reply-To:References;
-	bh=VPqgRjkaMe4SKEjCSHh68nLzmS1ZjOcHBRiV6hQ2aQM=; b=VidoB4qzml9t9FxJDAW7LVX30s
-	ljEXPlaHVCmsigtf0qKgJL4H4+lRGYWnPGomQMj5uBG2iiO6WvoHGYb6GWI/34eSN8I6IR6+OGfR4
-	J4YokmyodIP4PewZFTWvBUU1lEIG5IrPUtiblplWHiRs5gauZ48UPGjf38OHgaC5FTO1xdklP02Qn
-	q7qJSNqWfXOwYaZNIx97fGw+7N50WRi7wRZAVaw5NiYk4bJ5VN27hrfeU4TjqmNSi44EiygA9ullj
-	GmOq2N1xaY3gMHVfsDetfqHIueZdoN2nzjLIJlQbzJmrMny1z3iOR6WloTeBD3C46MN9VpmHJXwjh
-	rGSE3X7Q==;
-Received: from [2001:4bb8:2d1:bd34:bc05:3da8:f7ec:c468] (helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wnFMr-0000000GQPg-2lug;
-	Fri, 24 Jul 2026 12:51:10 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: zlang@kernel.org
-Cc: wqu@suse.com,
-	fstests@vger.kernel.org
-Subject: [PATCH] generic/761: add to the rw group
-Date: Fri, 24 Jul 2026 14:51:06 +0200
-Message-ID: <20260724125106.433118-1-hch@lst.de>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="hMHi3EVW";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="hMHi3EVW"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 59EDB7B88B;
+	Fri, 24 Jul 2026 13:33:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1784900021; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=87KJldLVO12YI6/aqcMypvZbGEc4Q23o2OfJPWjlafE=;
+	b=hMHi3EVWgudVW3Rtpsa9f6sJYDStIiDsU507vjY2B72mqcuP4Ckx6E3eLT1b9Gf/Ng1Fyw
+	Cr7k0Oz79bSZpwo0QMCO3Arc+4IUNQv1SdkQANJl14+v+otVdWWDxNWuWR55+Idz478ODU
+	D5WWY893wSPTtMERn8fnFt0W4Lz12SM=
+Authentication-Results: smtp-out1.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=hMHi3EVW
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1784900021; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=87KJldLVO12YI6/aqcMypvZbGEc4Q23o2OfJPWjlafE=;
+	b=hMHi3EVWgudVW3Rtpsa9f6sJYDStIiDsU507vjY2B72mqcuP4Ckx6E3eLT1b9Gf/Ng1Fyw
+	Cr7k0Oz79bSZpwo0QMCO3Arc+4IUNQv1SdkQANJl14+v+otVdWWDxNWuWR55+Idz478ODU
+	D5WWY893wSPTtMERn8fnFt0W4Lz12SM=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 12998779C3;
+	Fri, 24 Jul 2026 13:33:38 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id redGM7JpY2pIJgAAD6G6ig
+	(envelope-from <neelx@suse.com>); Fri, 24 Jul 2026 13:33:38 +0000
+From: Daniel Vacek <neelx@suse.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org,
+	linux-f2fs-devel@lists.sourceforge.net,
+	zlang@redhat.com,
+	hch@infradead.org,
+	djwong@kernel.org,
+	David Sterba <dsterba@suse.com>,
+	Daniel Vacek <neelx@suse.com>,
+	linux-fscrypt@vger.kernel.org
+Subject: [PATCH 00/12] fstests: introduce fscrypt support for btrfs
+Date: Fri, 24 Jul 2026 15:33:16 +0200
+Message-ID: <20260724133328.1837318-1-neelx@suse.com>
 X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -44,28 +71,93 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	ARC_NA(0.00)[];
+	TO_DN_SOME(0.00)[];
+	RCPT_COUNT_SEVEN(0.00)[11];
+	DNSWL_BLOCKED(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	RCVD_TLS_ALL(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	DKIM_TRACE(0.00)[suse.com:+]
+X-Spam-Flag: NO
+X-Spam-Score: -3.01
+X-Spam-Level: 
+X-Rspamd-Queue-Id: 59EDB7B88B
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Rspamd-Action: no action
 
-This tests the read-write path, so add it to the proper group.
+This is a rebase and cleanup of older patches [0] from Sweet Tea and Josef
+fixed to work with the recent kernel and btrfs-progs changes.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- tests/generic/761 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+[0] https://github.com/btrfs/fstests/tree/fscrypt (227ac42)
 
-diff --git a/tests/generic/761 b/tests/generic/761
-index e9030f3c6ab3..d9e095f7a4fc 100755
---- a/tests/generic/761
-+++ b/tests/generic/761
-@@ -13,7 +13,7 @@
- #
- 
- . ./common/preamble
--_begin_fstest auto quick
-+_begin_fstest auto quick rw
- 
- _require_scratch
- _require_odirect
+Daniel Vacek (1):
+  fscrypt-crypt-util: add support for per extent KDF
+
+Josef Bacik (4):
+  fstests: properly test for v1 encryption policies in encrypt tests
+  fstests: split generic/580 into two tests
+  fstests: split generic/581 into two tests
+  fstests: split generic/613 into two tests
+
+Sweet Tea Dorminy (7):
+  common/encrypt: separate data and inode nonces
+  common/encrypt: add btrfs to get_encryption_*nonce
+  common/encrypt: add btrfs to get_ciphertext_filename
+  common/encrypt: enable making a encrypted btrfs filesystem
+  common/verity: explicitly don't allow btrfs encryption
+  btrfs: add simple test of reflink of encrypted data
+  btrfs: test snapshotting encrypted subvol
+
+ common/encrypt           |  94 ++++++++++++++++++++++++----
+ common/verity            |   4 ++
+ src/fscrypt-crypt-util.c |  12 +++-
+ tests/btrfs/613          |  54 ++++++++++++++++
+ tests/btrfs/613.out      |  13 ++++
+ tests/btrfs/614          |  73 ++++++++++++++++++++++
+ tests/btrfs/614.out      | 111 ++++++++++++++++++++++++++++++++
+ tests/f2fs/002           |   2 +-
+ tests/generic/580        | 118 +++++++++++++++-------------------
+ tests/generic/580.out    |  40 ------------
+ tests/generic/581        |  89 +-------------------------
+ tests/generic/581.out    |  50 ---------------
+ tests/generic/593        |   1 +
+ tests/generic/613        |  24 +++----
+ tests/generic/613.out    |   5 +-
+ tests/generic/798        |  77 +++++++++++++++++++++++
+ tests/generic/798.out    |  44 +++++++++++++
+ tests/generic/799        | 132 +++++++++++++++++++++++++++++++++++++++
+ tests/generic/799.out    |  51 +++++++++++++++
+ tests/generic/800        | 115 ++++++++++++++++++++++++++++++++++
+ tests/generic/800.out    |  14 +++++
+ 21 files changed, 845 insertions(+), 278 deletions(-)
+ create mode 100755 tests/btrfs/613
+ create mode 100644 tests/btrfs/613.out
+ create mode 100755 tests/btrfs/614
+ create mode 100644 tests/btrfs/614.out
+ create mode 100755 tests/generic/798
+ create mode 100644 tests/generic/798.out
+ create mode 100755 tests/generic/799
+ create mode 100644 tests/generic/799.out
+ create mode 100755 tests/generic/800
+ create mode 100644 tests/generic/800.out
+
 -- 
 2.53.0
 
