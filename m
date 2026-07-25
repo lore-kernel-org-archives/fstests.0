@@ -1,45 +1,61 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3764A2931C4;
-	Sat, 25 Jul 2026 07:40:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11D6A345EAA
+	for <fstests@vger.kernel.org>; Sat, 25 Jul 2026 11:07:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784965223; cv=none; b=HUcTyni/SZSqLAs3KGIRwyqfvbuoLMk1+7eePo+9w5MW2+aqFaTu6A255pp9TR+y0V/Sh5w4nVhDXPfJATl1Tnj5MWkntJ4oKbHwDJPSmLVDlJmywKvV2Vn+NYeyQpgNrqYSgQFMEx2P/NTqeM99FDOdvBfn3KqklRImjiJ3Qds=
+	t=1784977678; cv=none; b=P45LQER69T0hekteR7IlNC4UrRZj5qEgExwWSIaexwdZsyRZFXgHmMHTyW44adqdfWe+rAWCRNUfHKqlVjtVLR4obSHmOeCywLj8aWhJ38AHXb6uRUY4Yt/UfmU96nmIGHUXo0LpR6QhtW9CYK9edM3ZyxwwscBCaBhMYvPP7RY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784965223; c=relaxed/simple;
-	bh=tP+rzeiwVmUa4nR6xHtbZjF3mtJAU9ICVrvCdW3HQX8=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=qyi5Gz6sqxUNGcbTPbywBwZM08RK6xPu+MLRA1Z/WccrODrWsYjpuVnlt71KQP4POnjWOssqR929EX/yPGt7wXzU6p6O264rlXPrBBIp990sAkN9kkhLkdwBaE3QwinU/4ul6esm4QkNCLP9b1Sqat/DgHgKPh6AfhvEH+ToNMM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=almUkf+i; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1784977678; c=relaxed/simple;
+	bh=7Cw1ziZ1tqjn3rAbrM8UJ2Dus02fWx8KcLfj7i6MyV8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=r2yJTZAcJVD9KUgJ8Ot5HeDA74Kzfyi6zD1gJdqy5IjGPN+c9WkVO/cN+Vep5aiG5vqE1dKnVLb1F6/NwR1CCs8sasROnFrcP0gLnkHRPpSGtzl5GefYU9tusvBUBrP/QakwBkNhLFWj9scg8Gl1N4C3PLl7+UcqtMZwSTbY/n0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=qahssnS2; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=qahssnS2; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="almUkf+i"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6C36B1F000E9;
-	Sat, 25 Jul 2026 07:40:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1784965221;
-	bh=qcH4sN23EYZsX+hkptHPBiYMtvNCnMjEtuTUDDaOdLg=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=almUkf+iQVK3XYMIc2kTxamUlbqr+NsfVj7RhpotbB4faZozskIyQO3/IHe+HLVaQ
-	 LwYC4/tYSnPEQWp2K8PsMn764/lPZJc1j7/64nAaGV5bW6bBVf/KWEuPkhcnThHTh9
-	 G84vI4HOC/d/OcdYC0TjjWDaF0y59pwYDqZduYG0Z2rUzGDj7k/KYAphQWAQQu/07/
-	 VA7vf5qx6C9wGYvZjAirlGcuI9iIaDPmIO9u8O24VvzgTM7EN2HfFyKrVjbwzsaBIz
-	 F6rJjzwzhMGBjVZiPSCxyF9vJbOXoMOKoIQPHWpxdrk/WipoevFZmZyYTrvehsZ0nE
-	 sy06HekvfB6eQ==
-From: Anand Jain <asj@kernel.org>
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net,
-	zlang@kernel.org,
-	djwong@kernel.org
-Subject: [PATCH v8 13/13] fstests: test UUID consistency for clones with metadata_uuid
-Date: Sat, 25 Jul 2026 15:39:10 +0800
-Message-ID: <905a961a3bb2ec345285f056053e3016ad3bef6e.1784949155.git.asj@kernel.org>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <cover.1784949154.git.asj@kernel.org>
-References: <cover.1784949154.git.asj@kernel.org>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="qahssnS2";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="qahssnS2"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 97AC07C845;
+	Sat, 25 Jul 2026 11:07:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1784977668; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=Ipiji5dXJaoJSst2FmAGhuUOvSXHh5XA8A7fXz+MM3c=;
+	b=qahssnS2elXCXGCQsF34gx+lOB1ckAw8ie8FmfaVGGzsyqMcO2xDPF/A3U9Yd4bccoLEYD
+	qMgib3VLXGn+zydjqCPTxbioyPO6pGgvYPIdLs7mKzg3E0u0TZP936tHx7p7kzozjGdV4C
+	zrhjuaaHNZbpBM4Yg+pBspoMA4/Bnjc=
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1784977668; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=Ipiji5dXJaoJSst2FmAGhuUOvSXHh5XA8A7fXz+MM3c=;
+	b=qahssnS2elXCXGCQsF34gx+lOB1ckAw8ie8FmfaVGGzsyqMcO2xDPF/A3U9Yd4bccoLEYD
+	qMgib3VLXGn+zydjqCPTxbioyPO6pGgvYPIdLs7mKzg3E0u0TZP936tHx7p7kzozjGdV4C
+	zrhjuaaHNZbpBM4Yg+pBspoMA4/Bnjc=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id F2A9C779B9;
+	Sat, 25 Jul 2026 11:07:46 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id d5zRJwKZZGqWSQAAD6G6ig
+	(envelope-from <wqu@suse.com>); Sat, 25 Jul 2026 11:07:46 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org
+Cc: Christian Borntraeger <borntraeger@linux.ibm.com>
+Subject: [PATCH] fstests: add a dio-read-into-mmap and sync race test case
+Date: Sat, 25 Jul 2026 20:37:24 +0930
+Message-ID: <20260725110724.75124-1-wqu@suse.com>
+X-Mailer: git-send-email 2.54.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -47,112 +63,278 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Spam-Score: -2.80
+X-Spam-Level: 
+X-Spam-Flag: NO
+X-Spamd-Result: default: False [-2.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-0.993];
+	MIME_GOOD(-0.10)[text/plain];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	TO_DN_SOME(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:mid,imap1.dmz-prg2.suse.org:helo];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	RCPT_COUNT_THREE(0.00)[3];
+	RCVD_TLS_ALL(0.00)[]
 
-Btrfs and xfs uses the metadata_uuid superblock feature to change the
-on-disk UUID without rewriting every block header. This patch adds a
-sanity check to ensure UUID consistency when a filesystem with
-metadata_uuid enabled is cloned.
+There is a report that on btrfs, if the following workload are running,
+btrfs can fail:
 
-Signed-off-by: Anand Jain <asj@kernel.org>
+- A dio read into a mmaped range
+  Only the mmap range needs to be on btrfs.
+  The dio read source makes no difference.
+
+- Sync_range on the mapped range
+
+The btrfs errors include:
+
+- Hang during data writeback
+- Filesystem flips RO
+
+The mmap range is dirtied but written back by the sync_range process,
+then dio read finished and found that the folios are no longer dirty,
+so dio endio will mark those folios dirty again so that the fs can write
+them back again.
+
+However for non-experimental btrfs with 4K block size and 4K page size,
+there is a regression in v7.2 that such case is no longer handled
+properly, due to the enablement of large folios and removal of cow
+fixup.
+And btrfs can never handle it for bs < ps from day 1.
+
+Add a regression test for it.
+
+Reported-by: Christian Borntraeger <borntraeger@linux.ibm.com>
+Link: https://lore.kernel.org/linux-btrfs/20260721191152.101118-1-borntraeger@linux.ibm.com/
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- tests/generic/806     | 74 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/806.out |  6 ++++
- 2 files changed, 80 insertions(+)
- create mode 100644 tests/generic/806
- create mode 100644 tests/generic/806.out
+ .gitignore               |  1 +
+ src/Makefile             |  2 +-
+ src/dio-read-into-mmap.c | 81 ++++++++++++++++++++++++++++++++++++++++
+ tests/generic/799        | 81 ++++++++++++++++++++++++++++++++++++++++
+ tests/generic/799.out    |  2 +
+ 5 files changed, 166 insertions(+), 1 deletion(-)
+ create mode 100644 src/dio-read-into-mmap.c
+ create mode 100755 tests/generic/799
+ create mode 100644 tests/generic/799.out
 
-diff --git a/tests/generic/806 b/tests/generic/806
+diff --git a/.gitignore b/.gitignore
+index 0b6b9452..d52ba4ad 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -216,6 +216,7 @@ tags
+ /src/truncate
+ /src/t_btrfs_received_uuid_ioctl
+ /src/btrfs_ioctl
++/src/dio-read-into-mmap
+ 
+ # Symlinked files
+ /tests/generic/035.out
+diff --git a/src/Makefile b/src/Makefile
+index 76cf50c3..f64e153a 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -21,7 +21,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
+ 	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test \
+ 	readdir-while-renames dio-append-buf-fault dio-write-fsync-same-fd \
+-	dio-writeback-race unlink-fsync truncate
++	dio-writeback-race unlink-fsync truncate dio-read-into-mmap
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/dio-read-into-mmap.c b/src/dio-read-into-mmap.c
 new file mode 100644
-index 000000000000..6d3166491006
+index 00000000..07842c48
 --- /dev/null
-+++ b/tests/generic/806
-@@ -0,0 +1,74 @@
++++ b/src/dio-read-into-mmap.c
+@@ -0,0 +1,81 @@
++// SPDX-License-Identifier: GPL-2.0
++// Copyright (c) SUSE S.A.
++
++#include <fcntl.h>
++#include <stdlib.h>
++#include <stdio.h>
++#include <unistd.h>
++#include <string.h>
++#include <errno.h>
++#include <sys/mman.h>
++#include <sys/stat.h>
++#include <err.h>
++
++static int read_source_fd = -1;
++static int mmap_dest_fd = -1;
++static void *buf = NULL;
++static int iosize = 4 * 1024 * 1024;
++
++static void usage()
++{
++	fprintf(stderr,
++	"Usage: dio-read-into-mmap <read_source> <mmap_dest>\n");
++}
++
++int main(int argc, char **argv)
++{
++	int ret = -EINVAL;
++	const int pagesize = sysconf(_SC_PAGESIZE);
++	unsigned int cur = 0;
++
++	if (argc != 3) {
++		usage();
++		goto error;
++	}
++	if (iosize < pagesize) {
++		ret = -EINVAL;
++		fprintf(stderr, "blocksize smaller than pagesize\n");
++		goto error;
++	}
++
++	read_source_fd = open(argv[1], O_RDONLY | O_DIRECT, 0600);
++	if (read_source_fd < 0) {
++		ret = -errno;
++		fprintf(stderr, "failed to open '%s': %m", argv[1]);
++		goto error;
++	}
++	mmap_dest_fd = open(argv[2], O_RDWR, 0600);
++	if (mmap_dest_fd < 0) {
++		ret = -errno;
++		fprintf(stderr, "failed to open '%s': %m", argv[2]);
++		goto error;
++	}
++	buf = mmap(NULL, iosize, PROT_WRITE, MAP_SHARED, mmap_dest_fd, 0);
++	if (buf == MAP_FAILED) {
++		buf = NULL;
++		fprintf(stderr, "failed to mmap: %m");
++		return -errno;
++	}
++	while (cur < iosize) {
++		ret = pread(read_source_fd, buf, iosize - cur, cur);
++		if (ret == 0) {
++			ret = -EINVAL;
++			fprintf(stderr, "reached EOF");
++			goto error;
++		}
++		if (ret < 0) {
++			ret = -errno;
++			fprintf(stderr, "failed to read: %m");
++			goto error;
++		}
++		cur += ret;
++	}
++error:
++	close(read_source_fd);
++	close(mmap_dest_fd);
++	if (buf)
++		munmap(buf, iosize);
++	if (ret < 0)
++		return EXIT_FAILURE;
++	return EXIT_SUCCESS;
++}
+diff --git a/tests/generic/799 b/tests/generic/799
+new file mode 100755
+index 00000000..b6851f69
+--- /dev/null
++++ b/tests/generic/799
+@@ -0,0 +1,81 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Anand Jain <asj@kernel.org>.  All Rights Reserved.
++# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
 +#
-+# FS QA Test 806
++# FS QA Test 799
 +#
-+# Verify that the cloned filesystem UUID remains consistent, even when the
-+# `metadata_uuid` feature is enabled.
++# Test direct read into a mmaped range meanwhile doing data sync for the mmaped
++# range.
++# Such racy workload should cause direct endio function to mark the folio
++# dirty without going through buffered write nor page_mkwrite().
 +#
-+
++# Make sure the fs can handle such ->dirty_folio() callback correctly.
++#
 +. ./common/preamble
 +. ./common/filter
++_begin_fstest auto rw mmap
 +
-+_begin_fstest auto quick mount clone
-+
++_require_test_program dio-read-into-mmap
++_require_scratch
 +_require_test
-+_require_block_device $TEST_DEV
-+_require_loop
++
++_fixed_by_fs_commit btrfs xxxxxxxxxxxxxx \
++	"btrfs: trigger cow fixup via dirty_folio()"
 +
 +_cleanup()
 +{
 +	cd /
-+	rm -r -f $tmp.*
-+	umount $mnt1 $mnt2 2>/dev/null
-+	_loop_image_destroy "${devs[@]}" 2> /dev/null
++	[ -n "$mount_pid" ] && kill $mount_pid &> /dev/null
++	[ -n "$remount_pid" ] && kill $remount_pid &> /dev/null
++	wait
 +}
 +
-+filter_pool()
++trap "_cleanup; exit \$status" SIGINT SIGTERM
++_scratch_mkfs >> $seqres.full
++_scratch_mount
++
++# Create the 4MiB target file on TEST_MNT as the read source.
++$XFS_IO_PROG -f -c "pwrite -i /dev/urandom 0 4M" "$TEST_MNT/dio-read-source" >> $seqres.full
++
++# Another 4MiB target file on SCRATCH_MNT as the mmap dest
++$XFS_IO_PROG -f -c "pwrite 0 4M" "$SCRATCH_MNT/mmap-dest" >> $seqres.full
++
++read_workload()
 +{
-+	sed -e "s|${devs[0]}|DEV1|g" -e "s|${mnt1}|MNT1|g" \
-+	    -e "s|${devs[1]}|DEV2|g" -e "s|${mnt2}|MNT2|g" | _filter_spaces
++	trap "wait; exit" SIGTERM
++	while true; do
++		$here/src/dio-read-into-mmap "$TEST_MNT/dio-read-source" \
++			"$SCRATCH_MNT/mmap-dest" &> /dev/null
++		if [ $? -ne 0 ]; then
++			echo "dio read failed"
++			break;
++		fi
++	done
 +}
 +
-+# Create base loop device and its clone, applying the metadata_uuid tuning
-+# callback to the base filesystem before the copy occurs.
-+devs=()
-+_loop_image_create_clone devs _change_metadata_uuid
-+mkdir -p $TEST_DIR/$seq
-+mnt1=$TEST_DIR/$seq/mnt1
-+mnt2=$TEST_DIR/$seq/mnt2
-+mkdir -p $mnt1
-+mkdir -p $mnt2
++sync_workload()
++{
++	trap "wait; exit" SIGTERM
++	while true; do
++		$XFS_IO_PROG -c "sync_range 0 4m" "$SCRATCH_MNT/mmap-dest"
++		if [ $? -ne 0 ]; then
++			echo "sync_range failed"
++			break;
++		fi
++	done
++}
 +
-+# Get the uuid from the source device
-+fsuuid=$(blkid -s UUID -o value ${devs[0]})
++read_workload &
++read_pid=$!
 +
-+# Mount both clone and baseline
-+_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[0]} $mnt1 || \
-+						_fail "Failed to mount dev1"
-+_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
-+						_fail "Failed to mount dev2"
++sync_workload &
++sync_pid=$!
 +
-+findmnt -o SOURCE,TARGET,UUID "${devs[0]}" | tail -n +2 | \
-+				sed -e "s/${fsuuid}/FSUUID/g" | filter_pool
-+findmnt -o SOURCE,TARGET,UUID "${devs[1]}" | tail -n +2 | \
-+				sed -e "s/${fsuuid}/FSUUID/g" | filter_pool
++sleep $((15 * $TIME_FACTOR))
 +
-+# Cycle mounts and reverse the initialization order to ensure UUID tracking
-+# doesn't mismatch or flip when metadata_uuid optimization is active.
-+echo "**** mount cycle ****"
-+_unmount $mnt1
-+_unmount $mnt2
-+_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
-+						_fail "Failed to mount dev2"
-+_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[0]} $mnt1 || \
-+						_fail "Failed to mount dev1"
++kill "$read_pid" "$sync_pid" &> /dev/null
++unset "$read_pid" "$sync_pid"
++wait
 +
-+findmnt -o SOURCE,TARGET,UUID "${devs[0]}" | tail -n +2 | \
-+				sed -e "s/${fsuuid}/FSUUID/g" | filter_pool
-+findmnt -o SOURCE,TARGET,UUID "${devs[1]}" | tail -n +2 | \
-+				sed -e "s/${fsuuid}/FSUUID/g" | filter_pool
-+
-+status=0
-+exit
-diff --git a/tests/generic/806.out b/tests/generic/806.out
++echo "Silence is golden"
++_exit 0
+diff --git a/tests/generic/799.out b/tests/generic/799.out
 new file mode 100644
-index 000000000000..918f422ecddf
+index 00000000..f3fd9fa2
 --- /dev/null
-+++ b/tests/generic/806.out
-@@ -0,0 +1,6 @@
-+QA output created by 806
-+DEV1 MNT1 FSUUID
-+DEV2 MNT2 FSUUID
-+**** mount cycle ****
-+DEV1 MNT1 FSUUID
-+DEV2 MNT2 FSUUID
++++ b/tests/generic/799.out
+@@ -0,0 +1,2 @@
++QA output created by 799
++Silence is golden
 -- 
-2.43.0
+2.51.2
 
