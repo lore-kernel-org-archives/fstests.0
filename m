@@ -1,195 +1,186 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f53.google.com (mail-pj1-f53.google.com [209.85.216.53])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D014E27467F
-	for <fstests@vger.kernel.org>; Tue, 28 Jul 2026 06:49:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CF5B3CE099
+	for <fstests@vger.kernel.org>; Tue, 28 Jul 2026 07:16:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785221368; cv=none; b=O60zQtDKN7RNpcRcXlx7DxgV36c3qlavcvJ11eFK28YnRUfM+f2E1WmI03nF6ngL1JmORshTCHszhTrTHONKAQ+9j6q5lmz7P3CABD9AQFlR0rW4Vd3v8Icf1F+PwnDRuvymLRJXsg19ycf0JyXZhUfuXNjW2yQV/UJo1a7k5EQ=
+	t=1785222996; cv=none; b=FR4ncn+TNSR4ZBYmgqJ9DwXUmpP/NqslAXbGadEW3lSLwjy8TPzSFTg33x92qmmU4vmrK+q/U7hB+N/sXHD94fRjikHHvBf0eUJ7YzWXR2HMW5fzeV9HklMyWSdCcynVUDL4nUYhJRu4gIlAXfHKEm7Cl2zUZItyRDi78sHQNNo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785221368; c=relaxed/simple;
-	bh=1oK5DrIvwtXFuemO7wCgo7L5+Man6PI6yHMf/xhTn94=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qV4ju/pq65NtwbFuJ7yjE3wb2YeYjzoJ82d6ZvNzTMFTck8zyn68e7IK5dzoVy1oUSYIJmNeffymHl/g+tSOw+0kn6Idesydt5sv8Eskv7G7RyF54DgjpDPtBumEDW4DEbxyl+ZBPiAoN/y+kJ1uXAzwaUadegUInIE96RmXm0U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ThvyjwIp; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1785222996; c=relaxed/simple;
+	bh=OeULwsnZg2MQZW9L1hPAE/oBsX4TljyHoz6mxe1+Jjs=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=FhjPYdPJr5W6WvSb8q7MFZ1As1RJARM9gEB30NZ7+mZS0VAagC0B2RfPjOs8OONK8m19ypMRz+P0wISdvvOr0+Uc6jqIVLFD5GaiZkJWNAgQGwArQSppOtkkraiSDAX8K2AAjKnG2cTCBayLc0rnaBwl6l+fRWxnLvYAce2WsEs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=KdPbCK19; arc=none smtp.client-ip=209.85.216.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ThvyjwIp"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0FB4B1F000E9;
-	Tue, 28 Jul 2026 06:49:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1785221366;
-	bh=tlfKZiyYkrkM7p7iQu/UMLwgod3tcR5QMt0gjlecmY0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=ThvyjwIpwAtUlNyN9OwobltIqW9264KDgSHPy844jH4j1oENNIeMmkw8dJPWDRmIm
-	 vMFE57babQhn1eic5iupYG8t3Ox8owxx5JeRqFudQbUZ9qNZu1DxHcPsmXPAj4TfWL
-	 72pt9YeqFH//NEmsAibg8rQoURl6RzSVkbASBIIh5Hfo+f676w/qDdLpqd1C5i5xva
-	 /OVr6SzxotvJ8qQVAkyRBJ2Mo5Vn/lAKdEmXbMIUMLWafEXDdmV+I1W1RcHs9Z0qlE
-	 0J3aN+v4K3tKJN5UhKAPBV4Ilb4Z9idNKvEzxIPDi393vmBYfHLDiUZ0IuOGqJWMf0
-	 NXNLWxzoCwcTQ==
-Date: Tue, 28 Jul 2026 14:49:19 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Chao Yu <chao@kernel.org>
-Cc: Anand Suveer Jain <asj@kernel.org>, fstests@vger.kernel.org, 
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net, 
-	"Darrick J. Wong" <djwong@kernel.org>
-Subject: Re: [PATCH v2] common/rc: support f2fs in
- _require_fanotify_ioerrors()
-Message-ID: <amhKovVDjwawoWdQ@zlang-mailbox>
-Mail-Followup-To: Chao Yu <chao@kernel.org>, 
-	Anand Suveer Jain <asj@kernel.org>, fstests@vger.kernel.org, jaegeuk@kernel.org, 
-	linux-f2fs-devel@lists.sourceforge.net, "Darrick J. Wong" <djwong@kernel.org>
-References: <20260706064326.3657995-1-chao@kernel.org>
- <af5f0eb1-0197-4952-a37b-0602799929ec@kernel.org>
- <5c11cd98-bb41-46e0-9765-e2aad57a08e4@kernel.org>
- <aloCfjjqesxpzL9z@zlang-mailbox>
- <a081f7cf-bd47-459d-baee-de772d816af4@kernel.org>
- <ameajJf8iiAQYWA3@zlang-mailbox>
- <99220f8b-05d4-427f-998d-7f15a84c8805@kernel.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KdPbCK19"
+Received: by mail-pj1-f53.google.com with SMTP id 98e67ed59e1d1-381216921aaso3416247a91.1
+        for <fstests@vger.kernel.org>; Tue, 28 Jul 2026 00:16:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1785222992; x=1785827792; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=apHCprtntQyjNX5/kfnKjQo7eiikWtSh5sFZ2UP2db0=;
+        b=KdPbCK19cS162Ibo28YqQjjVJkahei+kifSlzBBWexu5UvxpoSK0ISTqsbiINR95bm
+         /v9cUT9k4F/tJRhTtB5z2tajnbTdGbGXEi3dcXv29gcop2Gjon0zZTqilW8GBv/09nq/
+         B45Fe84tvU3HnNDxQg/73H2lJOB4pewKon4OllxO/DAKHfS0Vyn3Gq54QhsRG2O+pz2E
+         wpOxaEEqqw3T9vloDXpFrN7tQO9rwsrISCwoHtQq26MKMKsLmIev7MsKvI2x98S4IhAL
+         IvcSm8iIONHn3F7tL8DMUROSOFAhSfw8qrIu0H458oNgzQFwbJnx0+jRw8UXqt3ZHEao
+         T0dg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785222992; x=1785827792;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=apHCprtntQyjNX5/kfnKjQo7eiikWtSh5sFZ2UP2db0=;
+        b=Ts0RwczCfjmpYHUu1VFKujgHQ83tTObJulydfdfG7F+nGIymhqnYS2LDdqWR0ueOI0
+         gvjfKnms110zlvmjkpXtBNd/d0yij9xdkmaYniRS//so2/CWwRBwZGn2OARZ/743vFGH
+         ZypWZ2hhsB79bcWzyJX2xhdAnwy7Sslonfb4JrWmcQU5QFnomF2Meeu6R7NEc2hNffSK
+         w0bFzvjwXWdIXDTKpchIeuw/t3uvfaT40dRXFSCT5MwYcJJfog05xUcAmxuGJ8eXbRKj
+         S7qyxJx0h00xfyWw+LwP3zLADH3etQ9cOynAQLMz/U2007BPKfcB9IYyHlPVKLPqHmS3
+         bEbg==
+X-Forwarded-Encrypted: i=1; AHgh+Rp4sgtBgTSXzV09t43jmraLx0ITjb6hgmcaxbCQeV8IQFOUeyT32Jz4hfEWl4W/aFlTs48ISM1x@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw5AqwmR/X466xifLLxUtOJSItctD4w45muCMgHV2ixuq0VQnpY
+	YWtHMCMLNehqYySMGFjLIGaRvBZsUln66g4qI4W/kixFoMXr/sYTI8U/
+X-Gm-Gg: AR+sD11LC3v+Vf2b+lp8gzcEWNz9JmgmbcmQlZ/QdQ7KBurdPUrCytkjeRPTu/jA/Fl
+	dphFSqwdPxwxUp5Q0kN71PHSxNg42eQVysHUIFd7MFed9xOH+k1JjzAAIZgTB5c2cRuGuPD75Vf
+	hTHytBbRbwH5ji3JSFdXvtJv4lwdo9BEkR3weeQcIk891HY3FDwefVNZi6eKZX2sY/xZ8jvuXWT
+	GqTBjA74800MXE95cRH2DXAEsZow+Qj4UHwpnIho5u9rKLHSJLvpeEG+f6ejlKbcvN+6BcltK1R
+	LE8UKZowRrzKEZ/nJPBAoQBolOXrtZ4j4zSTuTRi22drvEp8HNu4FLi4vqDBWHKZMJru41+Ggwa
+	nwXQqy3V3wDfqFM7DQxxHr8J/bQIDwyQKWYEMzPBK7fmAHPOqsm9+2thlqEeMNARNPVYuIdVCt7
+	MJVn7gRArCqfiOhIeJUIAiGiVbpK+8vqFE3sVxMWvumec5
+X-Received: by 2002:a17:90b:1b06:b0:37f:c97a:939f with SMTP id 98e67ed59e1d1-38f6a30c84dmr1315801a91.7.1785222991897;
+        Tue, 28 Jul 2026 00:16:31 -0700 (PDT)
+Received: from JIAPENGLIN-MC0.tencent.com ([43.132.141.24])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-38f08968de4sm4152456a91.2.2026.07.28.00.16.29
+        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
+        Tue, 28 Jul 2026 00:16:31 -0700 (PDT)
+From: Lin Jiapeng <ljp1205831794@gmail.com>
+X-Google-Original-From: Lin Jiapeng <jiapenglin@tencent.com>
+To: zlang@kernel.org,
+	hch@lst.de
+Cc: linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org,
+	djwong@kernel.org,
+	jiapenglin@tencent.com
+Subject: [PATCH] xfs/842: verify CoW after exchangerange with FILE1_WRITTEN on shared extents
+Date: Tue, 28 Jul 2026 15:16:20 +0800
+Message-ID: <20260728071625.79516-1-jiapenglin@tencent.com>
+X-Mailer: git-send-email 2.50.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <99220f8b-05d4-427f-998d-7f15a84c8805@kernel.org>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Jul 28, 2026 at 10:24:10AM +0800, Chao Yu wrote:
-> On 7/28/26 01:57, Zorro Lang wrote:
-> > On Thu, Jul 23, 2026 at 05:09:12PM +0800, Chao Yu wrote:
-> > > On 7/17/26 18:47, Zorro Lang wrote:
-> > > > On Wed, Jul 08, 2026 at 11:25:37AM +0800, Chao Yu wrote:
-> > > > > On 7/7/26 18:13, Anand Suveer Jain wrote:
-> > > > > > On 6/7/26 14:43, Chao Yu wrote:
-> > > > > > > f2fs has supported to report fserror, this patch adds support for f2fs
-> > > > > > > in _require_fanotify_ioerrors(), so that we can run generic/791 on f2fs.
-> > > > > > > 
-> > > > > > > Cc: Darrick J. Wong <djwong@kernel.org>
-> > > > > > > Signed-off-by: Chao Yu <chao@kernel.org>
-> > > > > > > ---
-> > > > > > >   common/rc | 3 +++
-> > > > > > >   1 file changed, 3 insertions(+)
-> > > > > > > 
-> > > > > > > diff --git a/common/rc b/common/rc
-> > > > > > > index 494725547..f51ad59f3 100644
-> > > > > > > --- a/common/rc
-> > > > > > > +++ b/common/rc
-> > > > > > > @@ -6257,6 +6257,9 @@ _require_fanotify_ioerrors()
-> > > > > > >   		x="$(_get_fs_sysfs_attr $TEST_DEV err_report_sec)"
-> > > > > > >   		test -n "$x" && return 0
-> > > > > > >   		;;
-> > > > > > 
-> > > > > > 
-> > > > > > > +	f2fs)
-> > > > > > > +		x="$(cat /sys/fs/f2fs/features/fserror)"
-> > > > > > > +		test -n "$x" && return 0
-> > > > > > 
-> > > > > > Don't we need to check if /sys/fs/f2fs/features/fserror
-> > > > > > is present in the running kernel (there are helpers)
-> > > > > 
-> > > > > Hi Anand,
-> > > > > 
-> > > > > You mean _has_fs_sysfs_attr()? however, it forces to check first parameter $dev
-> > > > > w/ block device type:
-> > > > > 
-> > > > > 	if [ ! -b "$dev" -o -z "$attr" ];then
-> > > > > 		_fail "Usage: _has_fs_sysfs_attr <mounted_device> <attr>"
-> > > > > 	fi
-> > > > 
-> > > > Hi Chao and Anand,
-> > > > 
-> > > > The *_fs_sysfs related helpers were brought in by me in:
-> > > >    commit 2a7b77abcd1dde735186b363da24540706c43b73
-> > > >    Author: Zorro Lang <zlang@redhat.com>
-> > > >    Date:   Tue Jul 5 17:30:24 2016 +0800
-> > > > 
-> > > >      xfs: configurable behavior on errors at unmount time
-> > > > 
-> > > > At that time, I didn't think about the "features/" directory.
-> > > > 
-> > > > Now, let me rethink this set of helpers. I feel that the *_fs_sysfs
-> > > > family of functions shouldn't be restricted to the $dev directory,
-> > > > we should remove this restriction.
-> > > > 
-> > > > Following that, we bring in *_fs_sysfs_device (appending the _device suffix)
-> > > > helpers which call *_fs_sysfs(). Also change the test cases who call these
-> > > > functions.
-> > > > 
-> > > > Finally, we can introduce the *_fs_sysfs_features functions (or simply use
-> > > > *_fs_sysfs directly).
-> > > > 
-> > > > Also, we have both *_fs_sysfs_attr and *_fs_sysfs, and the logic between
-> > > > them is somewhat confusing and easy to mix up.
-> > > 
-> > > Zorro,
-> > > 
-> > > It makes sense, and good news to their user. Thanks for the proposal.
-> > > 
-> > > > 
-> > > > I need to write a series of patches to clean up these logic. For this current
-> > > > patch, we can start with a small-scale change first. What do you think?
-> > > 
-> > > So I will use this first:
-> > > 
-> > > f2fs)
-> > >      local feat_file="/sys/fs/f2fs/features/fserror"
-> > >      if [ -f "$feat_file" ] && [ "$(cat "$feat_file")" = "supported" ]; then
-> > >          return 0
-> > >      fi
-> > >      ;;
-> > > 
-> > > And then waiting for your cleanup? or if you want to clean up this, please do it
-> > > directly while merging.
-> > 
-> > If f2fs wants to test this feature right away, I can merge your patch now and
-> > clean it up later. If it's not urgent, I'll take care of it all together.
-> 
-> Zorro,
-> 
-> Could you please help to merge it first? so that we can test 791 w/ last
-> upstream code, and also in case we missed to track its status to lose it. :P
+When a full-file exchangerange is requested with FILE1_WRITTEN for a
+fully sparse donor file, every mapping pair is skipped, so no extents
+actually move.  However, the kernel decides to swap the reflink inode
+flag based on the request geometry alone, so the target file used to
+lose its reflink flag while still owning shared extents.  A subsequent
+write then took the non-reflink write path and modified the shared
+physical blocks in place, silently corrupting the other file sharing
+them:
 
-Sure, I'm good to have this first. Could you send a new patch version, if you'd
-like to change it?
+ --- tests/xfs/842.out
+ +++ results/xfs/842.out.bad
+ @@ -1,2 +1,3 @@
+  QA output created by 842
+ +orig changed: md5 e6065c4aa2ab1603008fc18410f579d4 -> 32c5189478e6bafa1cc76423f06c88f2 (write hit shared blocks in place)
+  Silence is golden
 
-Thanks,
-Zorro
+This test clones a file so that both share extents, swaps the clone
+against a sparse donor with FILE1_WRITTEN, writes to the clone, and
+verifies after a mount cycle that the original file's data is intact,
+i.e. the write was redirected through CoW.
 
-> 
-> Thanks,
-> 
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > Thanks,
-> > > 
-> > > > 
-> > > > Thanks,
-> > > > Zorro
-> > > > 
-> > > > > 
-> > > > > 
-> > > > > > before reading it?
-> > > > > 
-> > > > > How about this?
-> > > > > 
-> > > > > f2fs)
-> > > > >      local feat_file="/sys/fs/f2fs/features/fserror"
-> > > > >      if [ -f "$feat_file" ] && [ "$(cat "$feat_file")" = "supported" ]; then
-> > > > >          return 0
-> > > > >      fi
-> > > > >      ;;
-> > > > > 
-> > > > > > 
-> > > > > > 
-> > > > > > 
-> > > > > > >   	esac
-> > > > > > >   	_notrun "$FSTYP does not support fanotify ioerrors"
-> > > > > > 
-> > > > > 
-> > > 
-> > > 
-> 
+The kernel fix "xfs: fix exchange-range reflink flag clearing issue
+with INO1_WRITTEN" refuses the reflink flag exchange whenever
+FILE1_WRITTEN is requested, which makes this test pass.
+
+Reported-by: Lin Jiapeng(TencentOS Red Team) <jiapenglin@tencent.com>
+Link: https://lore.kernel.org/r/amgekiNKKoAdACnc@infradead.org
+Suggested-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Lin Jiapeng <jiapenglin@tencent.com>
+---
+ tests/xfs/842     | 55 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/842.out |  2 ++
+ 2 files changed, 57 insertions(+)
+ create mode 100755 tests/xfs/842
+ create mode 100644 tests/xfs/842.out
+
+diff --git a/tests/xfs/842 b/tests/xfs/842
+new file mode 100755
+index 0000000..6d5bcab
+--- /dev/null
++++ b/tests/xfs/842
+@@ -0,0 +1,55 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0-or-later
++# Copyright (c) 2026 Tencent.  All Rights Reserved.
++#
++# FS QA Test No. 842
++#
++# Make sure that a full-file exchangerange under FILE1_WRITTEN does not strip
++# the reflink flag from a file that still owns shared extents.  When the
++# donor file is fully sparse, every mapping pair is skipped, so no extents
++# actually move; the target file must keep its reflink flag, and a later
++# write must go through CoW instead of modifying the shared blocks in place.
++
++. ./common/preamble
++_begin_fstest auto quick fiexchange
++
++# Import common functions.
++. ./common/filter
++. ./common/reflink
++
++_require_xfs_io_command exchangerange
++_require_scratch_reflink
++_require_scratch
++
++_scratch_mkfs >> $seqres.full
++_scratch_mount
++
++# Create the original file with a known pattern and clone it, so that both
++# files share the same extents.
++_pwrite_byte 0x41 0 1m $SCRATCH_MNT/orig >> $seqres.full
++_reflink $SCRATCH_MNT/orig $SCRATCH_MNT/clone >> $seqres.full
++
++# Create a fully sparse donor file of the same size.
++$XFS_IO_PROG -f -c 'truncate 1m' $SCRATCH_MNT/donor
++
++md5_before=$(md5sum $SCRATCH_MNT/orig | awk '{print $1}')
++
++# Swap the clone against the sparse donor, claiming the donor is fully
++# written (-w).  Every donor mapping is a hole, so all pairs are skipped
++# and the clone keeps its shared extents in place.
++$XFS_IO_PROG -c "exchangerange -f -w $SCRATCH_MNT/donor" $SCRATCH_MNT/clone \
++	>> $seqres.full
++
++# Overwrite part of the clone.  With the reflink flag correctly retained,
++# this must go through CoW and leave the shared blocks of orig untouched.
++_pwrite_byte 0x42 0 64k $SCRATCH_MNT/clone >> $seqres.full
++_scratch_cycle_mount
++
++md5_after=$(md5sum $SCRATCH_MNT/orig | awk '{print $1}')
++
++test "$md5_before" != "$md5_after" && \
++	echo "orig changed: md5 $md5_before -> $md5_after (write hit shared blocks in place)"
++
++echo Silence is golden
++status=0
++exit
+diff --git a/tests/xfs/842.out b/tests/xfs/842.out
+new file mode 100644
+index 0000000..643d052
+--- /dev/null
++++ b/tests/xfs/842.out
+@@ -0,0 +1,2 @@
++QA output created by 842
++Silence is golden
+-- 
+2.50.1 (Apple Git-155)
+
