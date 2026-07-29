@@ -1,73 +1,188 @@
-Received: from casper.infradead.org (casper.infradead.org [90.155.50.34])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9EBF47ACE9;
-	Wed, 29 Jul 2026 12:59:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=90.155.50.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D33EE3AAF53;
+	Wed, 29 Jul 2026 15:25:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785330002; cv=none; b=K8bzPAM1sf06/279i4vMmxA3eZaIZiRwEWi94iM1zYKrgzMTsX8LNCc29hZThs1qxP3TooUqo/8QLzorWKSBJUDi0xzx8b6c2Kw40+S3PCJiVygfE/IAkz5JZDVhpL3T8OYHwC5pYVSizx3E86xAtmjHATMPkKvJnT9HCIN5+o8=
+	t=1785338739; cv=none; b=IjZrVQG3MOpNiIOV/NSipMaoRwpi+qVUGfmvBjrCeCzTb6PgzbnGOPfsmO6XGrckfiLeDQsggzaVDsMJ9Yp4KPhGE35KwN9mN7goTNu7Yzd4czF+PwpdNYc+DIcQwY+TwavPEhNmOqJsAv1PYxko/j0zmshT80qPmLX+RhLx0xg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785330002; c=relaxed/simple;
-	bh=/PzP6JGaPydfWNUraZYBJo6tpdlWALHrb5m+kgD4kiY=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=uX0M4EhiytwbLYMNtsCgSVfJ81YtQdMIuI/i1zMtnOMo1QNGY4BKkfCcxSFXeVV5Cw1qO/nnAFl96mW0YCDoojVjoJLovcUTuA68zbxDkX+EGJxUDl+p91/WHwx45AwmQMUDmaNYlqlGz1OWiS0GdAX7kuWU3xSOIT3GIttOCQY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=casper.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=olLFogHE; arc=none smtp.client-ip=90.155.50.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=casper.srs.infradead.org
+	s=arc-20240116; t=1785338739; c=relaxed/simple;
+	bh=Zf3WvbDZYnx1kIzlBEqKTlMP2KfmbFNEf2x1Y2k5DFk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=E/VMnD4b9S0LVOhZ7tmOaDytDVKAuDuwXtN+da6xrEu8VGyxGb5F9UPtx1tRJaqLInztH7+nHCXJ+W+UPWFygAZ2tcp0Jq1XyZskRzt6QSdgYrNaQXpfiEs8TBkGvza+5OOXDz/Y7B8Ovlzf/pLIr95gRzlbvtkjPIwK/0iC5qE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Gf6GTeTB; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="olLFogHE"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
-	Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
-	Content-Description:In-Reply-To:References;
-	bh=CvDfiUhj0/rbRz/sFU2oR+wTKJag6K5qy+m30gW7YyM=; b=olLFogHEsLuQrFn3Yi5l4jeIZB
-	CfhWkGowiOYLkUie4UaYaxejybsTAPqAHTXu+MYECzpxGRkWDSnyvN8QPRufMG7/xbiGPuIKM6fu7
-	X+v9m+O0Z3n56/8shn4+mNGRhdT8+vX7jMvDOZPA9MjLVXOFnFb3HndYzR3oDdFUD6SBN3LMTyTXo
-	FCflOY4mVF7kdejxfA5TolRcx8jLxaDCj551G/qGusIVWof/Qp9Bkf2EcdhGa1jQK3Myipcmd8MSx
-	noTY/LSg0/gIxbNyTSeBPnJ09kva+O+w4a5X2+pxGCkYJaU2s/nPeyoNx7vtS8a7HBFYXhOG8edGj
-	wSEXvyyg==;
-Received: from 85-127-110-197.dsl.dynamic.surfer.at ([85.127.110.197] helo=localhost)
-	by casper.infradead.org with esmtpsa (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wp3t7-00000004PId-3Cq4;
-	Wed, 29 Jul 2026 12:59:57 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: zlang@kernel.org
-Cc: fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: [PATCH] xfs/507: use mount -t xfs
-Date: Wed, 29 Jul 2026 14:59:55 +0200
-Message-ID: <20260729125955.2281762-1-hch@lst.de>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Gf6GTeTB"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 6E02C1F000E9;
+	Wed, 29 Jul 2026 15:25:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1785338737;
+	bh=k2sc3553XcuoMak8eBneXA7+/J30oR6eDVEnzfddeqw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=Gf6GTeTBs7jiF7aGfps+3k4DVT96MhRCwg1dddpodiK45+jK718dBI9orM765babx
+	 HG7isQ8Lf3mPXJY6E+cNS2R0XvJZ1LOBtUA4srSJpdnwW9/8ziRoA5oRMTIDgTshdm
+	 yzD85TKMJCbpCcT+E3jX2s82iCZsLcHM3fl1DZwElLvufQi4PcUiOcsgPV3EjCw382
+	 vz9qf8T0T8lYwsF/+mM1ZCiLRqAwlkedyXsCQ+ERVeQVkKa+qkm59UGjM4RNkD/gTY
+	 k2luGI5EcJeG4CJk4JNOmS/tevUrOOWzjI8gXqVDSpeMkowMD1K3saYak0koxUEAsk
+	 KrN318HJlQ95g==
+Date: Wed, 29 Jul 2026 08:25:36 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Lin Jiapeng <ljp1205831794@gmail.com>
+Cc: zlang@kernel.org, hch@lst.de, linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org, jiapenglin@tencent.com
+Subject: Re: [PATCH v3] xfs/842: verify CoW after exchangerange with
+ FILE1_WRITTEN on shared extents
+Message-ID: <20260729152536.GU2901224@frogsfrogsfrogs>
+References: <20260729063956.3664-1-jiapenglin@tencent.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260729063956.3664-1-jiapenglin@tencent.com>
 
-Sometimes mount wants to try every other file system but XFS when
-mounting the loop image, making this test fail.  Force mounting as XFS
-to make it reliably pass.
+On Wed, Jul 29, 2026 at 02:39:52PM +0800, Lin Jiapeng wrote:
+> When a full-file exchangerange is requested with FILE1_WRITTEN for a
+> fully sparse donor file, every mapping pair is skipped, so no extents
+> actually move.  However, the kernel decides to swap the reflink inode
+> flag based on the request geometry alone, so the target file used to
+> lose its reflink flag to the donor while still owning shared extents.
+> A subsequent write then took the non-reflink write path and modified
+> the shared physical blocks in place, silently corrupting the other
+> file sharing them:
+> 
+>  --- tests/xfs/842.out
+>  +++ results/xfs/842.out.bad
+>  @@ -1,4 +1,5 @@
+>   QA output created by 842
+>  +vX.reflink = 0
+>   vX.reflink = 1
+>  -vX.reflink = 1
+>  +orig changed: md5 e6065c4aa2ab1603008fc18410f579d4 -> 32c5189478e6bafa1cc76423f06c88f2 (write hit shared blocks in place)
+>   Silence is golden
+> 
+> This test clones a file so that both share extents, swaps the clone
+> against a sparse donor with FILE1_WRITTEN, and then checks the defect
+> twice.  First it inspects the inodes directly with xfs_db: the clone
+> must still be flagged reflink after the exchange (the donor carrying
+> the flag too is the conservative outcome of the fix and is harmless).
+> Then it writes to the clone and verifies after a mount cycle that the
+> original file's data is intact, i.e. the write was redirected through
+> CoW.
+> 
+> The kernel fix "xfs: fix exchange-range reflink flag clearing issue
+> with INO1_WRITTEN" refuses the reflink flag exchange whenever
+> FILE1_WRITTEN is requested, which makes this test pass.
+> 
+> Reported-by: Lin Jiapeng(TencentOS Red Team) <jiapenglin@tencent.com>
+> Link: https://lore.kernel.org/r/amgekiNKKoAdACnc@infradead.org
+> Suggested-by: Christoph Hellwig <hch@lst.de>
+> Suggested-by: "Darrick J. Wong" <djwong@kernel.org>
+> Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
+> Signed-off-by: Lin Jiapeng <jiapenglin@tencent.com>
+> ---
+>  tests/xfs/842     | 65 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/842.out |  4 +++
+>  2 files changed, 69 insertions(+)
+>  create mode 100755 tests/xfs/842
+>  create mode 100644 tests/xfs/842.out
+> 
+> diff --git a/tests/xfs/842 b/tests/xfs/842
+> new file mode 100755
+> index 0000000..c4c2be9
+> --- /dev/null
+> +++ b/tests/xfs/842
+> @@ -0,0 +1,65 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2026 Tencent.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 842
+> +#
+> +# Make sure that a full-file exchangerange under FILE1_WRITTEN does not strip
+> +# the reflink flag from a file that still owns shared extents.  When the
+> +# donor file is fully sparse, every mapping pair is skipped, so no extents
+> +# actually move; the target file must keep its reflink flag, and a later
+> +# write must go through CoW instead of modifying the shared blocks in place.
+> +
+> +. ./common/preamble
+> +_begin_fstest auto quick fiexchange
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/reflink
+> +
+> +_require_xfs_io_command exchangerange
+> +_require_scratch_reflink
+> +_require_scratch
+> +
+> +_scratch_mkfs >> $seqres.full
+> +_scratch_mount
+> +
+> +# Create the original file with a known pattern and clone it, so that both
+> +# files share the same extents.
+> +_pwrite_byte 0x41 0 1m $SCRATCH_MNT/orig >> $seqres.full
+> +_reflink $SCRATCH_MNT/orig $SCRATCH_MNT/clone >> $seqres.full
+> +
+> +# Create a fully sparse donor file of the same size.
+> +$XFS_IO_PROG -f -c 'truncate 1m' $SCRATCH_MNT/donor
+> +
+> +md5_before=$(md5sum $SCRATCH_MNT/orig | awk '{print $1}')
+> +
+> +# Swap the clone against the sparse donor, claiming the donor is fully
+> +# written (-w).  Every donor mapping is a hole, so all pairs are skipped
+> +# and the clone keeps its shared extents in place.
+> +$XFS_IO_PROG -c "exchangerange -f -w $SCRATCH_MNT/donor" $SCRATCH_MNT/clone \
+> +	>> $seqres.full
+> +
+> +# Directly confirm the inode flag state after the exchange: the clone
+> +# must still be flagged reflink.  The donor may also carry the flag, which
+> +# is the conservative outcome of refusing the flag exchange under
+> +# FILE1_WRITTEN; the extra flag is harmless and can be dropped later by
+> +# the regular reflink flag cleanup path.
+> +_scratch_unmount
+> +_scratch_xfs_db -c "path /clone" -c print -c "path /donor" -c print | \
+> +	grep reflink | sed -e 's/^v[0-9]*/vX/g'
+> +_scratch_mount
+> +
+> +# Overwrite part of the clone.  With the reflink flag correctly retained,
+> +# this must go through CoW and leave the shared blocks of orig untouched.
+> +_pwrite_byte 0x42 0 64k $SCRATCH_MNT/clone >> $seqres.full
+> +_scratch_cycle_mount
+> +
+> +md5_after=$(md5sum $SCRATCH_MNT/orig | awk '{print $1}')
+> +
+> +test "$md5_before" != "$md5_after" && \
+> +	echo "orig changed: md5 $md5_before -> $md5_after (write hit shared blocks in place)"
+> +
+> +echo Silence is golden
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- tests/xfs/507 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Nitpick: If the test generates any .out output, you don't need the
+"Silence is golden" marker.
 
-diff --git a/tests/xfs/507 b/tests/xfs/507
-index e1450f4f8f94..a9eb8646680b 100755
---- a/tests/xfs/507
-+++ b/tests/xfs/507
-@@ -86,7 +86,7 @@ loop_dev=$(_create_loop_device $loop_file)
- 
- _mkfs_dev -d cowextsize=$MAXEXTLEN -l size=256m $loop_dev >> $seqres.full
- mkdir $loop_mount
--_mount $loop_dev $loop_mount
-+_mount -t xfs $loop_dev $loop_mount
- 
- echo "Create crazy huge file"
- huge_file="$loop_mount/a"
--- 
-2.53.0
+The test itself looks ok and the above is a minor point so:
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
+--D
+
+> +status=0
+> +exit
+> diff --git a/tests/xfs/842.out b/tests/xfs/842.out
+> new file mode 100644
+> index 0000000..1e6345a
+> --- /dev/null
+> +++ b/tests/xfs/842.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 842
+> +vX.reflink = 1
+> +vX.reflink = 1
+> +Silence is golden
+> -- 
+> 2.50.1 (Apple Git-155)
+> 
+> 
