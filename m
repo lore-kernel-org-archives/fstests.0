@@ -1,208 +1,201 @@
-Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8F4138AC7B
-	for <fstests@vger.kernel.org>; Wed, 29 Jul 2026 02:55:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 233BD3B52F4
+	for <fstests@vger.kernel.org>; Wed, 29 Jul 2026 05:37:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785293714; cv=none; b=dYGzw0JLztx8I4DHYJzNo/5UkCDht2+fpVX2PAknzGMY5KodQSxmXlshTsZm3ltCZHYY3HOftS+jllBHwemFeiB82uq0JBd/b2PQzS30fQEZKLIBFBFlKzkPurgJSHIeeRCCsP/vB+ej0PKy0fzzS6ObwAQDvXbstH1z09OVMc0=
+	t=1785303435; cv=none; b=uqc93h8jWWJcBzR4FoRCr4Oq6OHo7s5F7n9FF3Zy4wq/bAE16D9F9283ddec6CXUVvVlJfwrWptbAF8n25IiUgrElyzKv8qpSjnZIRxUEhOQrzGDhT7QQbzAvtQUka2D+sdo1GmoOSwgUMHE97eSicE0jergw7PiHMLBJvG/9/Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785293714; c=relaxed/simple;
-	bh=9sx8KpJQ8zZQIkq2TbqTseJ6M3MToG8lQm26RBQHbHc=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=hdsRogeYLukZbCkGCoOPWTo0ZjIyisUqmhSVbLKXXMIdu6FAF0xnzWS13KgRpwhCggb8RSChnNWjDAK4KrIN/VhbjR5BLIlKaJV/IWJOrtKdvbPm9MZabc9rNxDTBzpqTHfyAGI1rbFGVFe5OQzcxRCboa/cPuFkmjsx/600Uqc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Ob7aGGxV; arc=none smtp.client-ip=209.85.214.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1785303435; c=relaxed/simple;
+	bh=grnVtKxjvJBMykFe/tYEIKYJw0YqyY5clMYMNT1BllY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=CjVc3LqScKhm+4RK0AiqAxSZf1nEm19RtU9pOgBkOrPFnlmOhO8uWr89gfiuLNKUk/1abAQ5qE7BJgY/IvkpyfVlQsn7xDPITR5ssKG0I/ZC+Uq32xPo6PV9gs8Kp/4Um5PzHAIRn+j6E2+snTQF2MWYOgc7q3y4m6mgtqd6Q8o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=hMhRlRx8; arc=none smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ob7aGGxV"
-Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-2caea3f742bso6827205ad.0
-        for <fstests@vger.kernel.org>; Tue, 28 Jul 2026 19:55:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1785293712; x=1785898512; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=eXPU/pRau728ab5U6cQmQyA1jJ+oymXCadSZuiVyCcg=;
-        b=Ob7aGGxV/iN17P+Zh1fvCj0WZif1NW5tAwx6C1X9Gv3+aPW2cINQYBWTyYEO/R/F77
-         iuZSQGJc7BjwCd9o7ZHoQxlFIEo76pE/O0IYnTcGIE8/fwXtfoNCHVjg83YoaWQsD+rS
-         j1kaVasv3jQDlaTKjhhgAyrxjA7diQJhzM9Y+3IKB7ZCyRzxgNEfEA5Lm4UA8z7FIcLF
-         Jpu1Ia62tbrXQp+rkfQ87dWMBrsTdnJZIX2FkGqJcyUhBxSVIejnPuNXmOAASb4T3kn/
-         8KLGXNNx0pM1bIZluFZm0Xjwp5xrCtEwwLuLlzKCUoBK01lD2hNqEwG7E4B6QyJW/kx9
-         mlaQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1785293712; x=1785898512;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=eXPU/pRau728ab5U6cQmQyA1jJ+oymXCadSZuiVyCcg=;
-        b=drBwedXWOuzijI5qOA7KAoE+BbiGoDiq20ed9dalHiD0ZOelxtaEe3vRm3sQ8Jeuro
-         kzU4fS+17W/EsIe2k39zXOUiYllrekOoa9lvJZqymBlePK6Uw4DDNQxwc1JZ/GRkc0x2
-         Gt6BqMESnATTFmGf8GOqqOQgt8vDNnfXpEJ4jGb2a1/AxA3I4vSM1OfUJ9BR6gAHiKha
-         s6h+7FIQYZZTIBTx6vYDencHpeDomzsVi0FVguDc3LTkakv1FbVLy+kY3Ier7Hr9P4pw
-         MI+r2nJRnIo5B5PEwTJMp1DOB5LwqmmOSNbbfuLvI0gJK0ZDDf2oZCTZnkZREQeoPbqX
-         rktA==
-X-Forwarded-Encrypted: i=1; AHgh+RosjQ+WZ6oy0LuUtiS9ULDJVHJ4HhXp/op5nV8asDmj/0FibUtXqAYn4jllMu319zO0XvXWCMvz@vger.kernel.org
-X-Gm-Message-State: AOJu0YxogppuNlvJnlJYbS9qlj6raleWtvDCWxmt2G26MDx9xg4ouPt0
-	s5mnah4mFKpyNd6mdV297u/W2F9sjMSfreSOfM5Dk6fDXk4eMcwFUzER3vGUeN/sE1V2IdQc
-X-Gm-Gg: AR+sD132A1UAE8E732Dp3UVBbAO1XaUvgYSSTZu8T8/ckwNPL/OeZLCnaXFCm//9lfu
-	h0y1I8FQ6AD7yBqDNv6u0x9N2HmnoXDJ6gTUQKZtG37Uux1khPPWVtZv+/A/HWvIwaqFQ0adytJ
-	/jIwAEEUWhNVH3uE9YONuYliJi4LQdtUcLV1551nw1F4/i4YNFDJlKiw0cLiTV+Rkh8Ff6otsGV
-	zHStafH9aoTqWwDd8FNGR2TBA4lL6VlJlMK1cP9iZGtcT2mprWq8zLNYtoNMPT0GQbGZOAOaa3E
-	JAGaRyRigk6LYq/vxUAYJDAFUl6MwhQtW6fEeMOVxY2aHvBnkp6rNFzRun/uRCp7gSuMk5LPvnA
-	e3sQ19CLcvp1JyKcWEpMXH5vkKUrmh8vZjIGPhH6QLAZAL3YkWLHvPC1l/p4Pw3qDaTMmpta0sb
-	HetF/FeOI5Tjx25k683SPG+HLJFltRjQ+8k9IxbtqxKnVoEw0mTaLfDJtMRraUkgUdiTeeW/9yJ
-	b38D3zACmNLUsjFZkI1VCTtv4VqFwk=
-X-Received: by 2002:a17:903:38c3:b0:2c9:b396:1a55 with SMTP id d9443c01a7336-2d015af7f8cmr59186925ad.12.1785293712040;
-        Tue, 28 Jul 2026 19:55:12 -0700 (PDT)
-Received: from JIAPENGLIN-MC0.tencent.com ([43.132.141.24])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2d022bc9fe9sm3999745ad.51.2026.07.28.19.55.10
-        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Tue, 28 Jul 2026 19:55:11 -0700 (PDT)
-From: Lin Jiapeng <ljp1205831794@gmail.com>
-X-Google-Original-From: Lin Jiapeng <jiapenglin@tencent.com>
-To: zlang@kernel.org,
-	hch@lst.de
-Cc: linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org,
-	djwong@kernel.org,
-	jiapenglin@tencent.com
-Subject: [PATCH v2] xfs/842: verify CoW after exchangerange with FILE1_WRITTEN on shared extents
-Date: Wed, 29 Jul 2026 10:54:54 +0800
-Message-ID: <20260729025504.54586-1-jiapenglin@tencent.com>
-X-Mailer: git-send-email 2.50.1
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="hMhRlRx8"
+Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66T4m3nA3131123;
+	Wed, 29 Jul 2026 05:37:03 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=pp1; bh=IXgycE/mRLCAYt3He11ghYayhnkI8r
+	hWiAVAk9byWGE=; b=hMhRlRx8OakkugVZ8v3s+501AK+2oUvGZucnmNmMM0T440
+	m9wnjP3MnwoIn+FwoIvW4i0dLd97S5/i/lKlfJMuqmnY3TrCN0rYZQIvqIRILwe9
+	fryyn/muTMNu1dIxjYUAGeS1ZqFBy7dRjIRgLVSXuH4RVbW0zXPu7ma96mL6ykHE
+	5+3RBjFVlSBcBnePtQ1yd4tLTIgbiujItoE2agovlLIHp2Iw3kvwm2pHwkhi/GdO
+	ZrEXv9qA4dvc70IGK0dxcGZ/f9AVQ25fLUdQlcquORaGVoNS/33W1st+dGoRdshd
+	FwMzhCx5MQUA5dNYlrO1rOMdkuM/yRu8OCJ70WTA==
+Received: from ppma12.dal12v.mail.ibm.com (dc.9e.1632.ip4.static.sl-reverse.com [50.22.158.220])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4fmv0nr8xd-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 29 Jul 2026 05:37:03 +0000 (GMT)
+Received: from pps.filterd (ppma12.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma12.dal12v.mail.ibm.com (8.18.1.7/8.18.1.7) with ESMTP id 66T5QZ2g006777;
+	Wed, 29 Jul 2026 05:37:02 GMT
+Received: from smtprelay06.fra02v.mail.ibm.com ([9.218.2.230])
+	by ppma12.dal12v.mail.ibm.com (PPS) with ESMTPS id 4fn7fqdgan-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 29 Jul 2026 05:37:02 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
+	by smtprelay06.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 66T5b0Qm29884902
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Wed, 29 Jul 2026 05:37:00 GMT
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 9D40220043;
+	Wed, 29 Jul 2026 05:37:00 +0000 (GMT)
+Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 9683720040;
+	Wed, 29 Jul 2026 05:36:59 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.123.13.2])
+	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Wed, 29 Jul 2026 05:36:59 +0000 (GMT)
+Date: Wed, 29 Jul 2026 11:06:57 +0530
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+        Disha Goel <disgoel@linux.ibm.com>
+Subject: Re: [PATCH] generic/645: Confirm availability of free inodes
+Message-ID: <ammQvzfsFTx9EEmm@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+References: <20260617054216.3186441-1-ojaswin@linux.ibm.com>
+ <20260625184259.GP6070@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260625184259.GP6070@frogsfrogsfrogs>
+X-TM-AS-GCONF: 00
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzI5MDA0MCBTYWx0ZWRfX0dJQeQIb/g5F
+ wbEurdUtot4qCH7yxQu1veupyBukvw1zfBM8yZmiOLHRBF89Ab0b8weQbTTq6nlKHhpBTX8oWpw
+ /Ia5hcy/Dvd122hfxkmefpCeItXDzvc=
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzI5MDA0MCBTYWx0ZWRfXzJvdFs/wP64f
+ PZHNfokrvyGO4e0A5qZvQ2FT0aD9t5P5qTstUZ8aIZuI3NUm3H5eOZvUbRuckrNls2Vd878WRqP
+ gDxcsxW5Brecds4s3F/+X6SXtyZo8bTkl4T/E0Kvx4crXHmFf+bBMRzcO+sbaIIoWsjGkgUnqae
+ w6dNpKTFdlsF8o1P7ki5sUji1NaKwiq3w1FxoUOlrPIq0cRkEsnN3ur+HBcTKvRZm0VQ2Vm0HHh
+ VhL70gzcMywSmeIHW9GuZqxKy81SsyBM2clLTl9KBAHy8bmsO34xb9L9wLnOw6oN+JiRt+nzTyp
+ M9FzF1HgvuMbpT/kf3FTtBdjWAirruHiDkzmsMWkGiNhGd+gPkU9UDIRyDcdF5loVoOaK9fmcI/
+ UoVXntKK0cMepOp8KtthtXL1S2wvjaHut/Hwt8LwOiPIcvbaHddeSUcXaoy8t81uUDlW7YEDpEA
+ IKeFPpgetdMsX5ZeKsw==
+X-Authority-Analysis: v=2.4 cv=b5WCJNGx c=1 sm=1 tr=0 ts=6a69917f cx=c_pps
+ a=bLidbwmWQ0KltjZqbj+ezA==:117 a=bLidbwmWQ0KltjZqbj+ezA==:17
+ a=kj9zAlcOel0A:10 a=RAioF0-LDSMA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=RnoormkPH1_aCDwRdu11:22 a=V8glGbnc2Ofi9Qvn3v5h:22 a=VnNF1IyMAAAA:8
+ a=7-qt6Rif_XC_LU5olugA:9 a=CjuIK1q_8ugA:10
+X-Proofpoint-GUID: Gxel6a3hBohUkVOqpI9KE_c8iwACoTC_
+X-Proofpoint-ORIG-GUID: Gxel6a3hBohUkVOqpI9KE_c8iwACoTC_
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-07-29_02,2026-07-28_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 spamscore=0 adultscore=0 malwarescore=0 impostorscore=0
+ bulkscore=0 phishscore=0 suspectscore=0 clxscore=1015 lowpriorityscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607290040
 
-When a full-file exchangerange is requested with FILE1_WRITTEN for a
-fully sparse donor file, every mapping pair is skipped, so no extents
-actually move.  However, the kernel decides to swap the reflink inode
-flag based on the request geometry alone, so the target file used to
-lose its reflink flag to the donor while still owning shared extents.
-A subsequent write then took the non-reflink write path and modified
-the shared physical blocks in place, silently corrupting the other
-file sharing them:
+On Thu, Jun 25, 2026 at 11:42:59AM -0700, Darrick J. Wong wrote:
+> On Wed, Jun 17, 2026 at 11:12:16AM +0530, Ojaswin Mujoo wrote:
+> > When running generic/645 with ext4 using 64k block size + bigalloc, the
+> > test fails with ENOSPC because the filesystem runs out of inodes before
+> > the test completes.
+> > 
+> > The test creates approximately 10,001 files, however, in this particular
+> > configuration a standard 5G FS only has around ~5100 inodes resulting in
+> > the ENOSPC failure.
+> > 
+> > Add a check using _get_free_inode() to verify sufficient inodes are
+> > available before running the test, else skip it.
+> > 
+> > Reported-by: Disha Goel <disgoel@linux.ibm.com>
+> > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> > ---
+> >  tests/generic/645 | 6 ++++++
+> >  1 file changed, 6 insertions(+)
+> > 
+> > diff --git a/tests/generic/645 b/tests/generic/645
+> > index d6eb75e6..944b33db 100755
+> > --- a/tests/generic/645
+> > +++ b/tests/generic/645
+> > @@ -19,6 +19,12 @@ _require_chown
+> >  _wants_kernel_commit dacfd001eaf2 \
+> >  	"fs/mnt_idmapping.c: Return -EINVAL when no map is written"
+> >  
+> > +_free_inodes=$(_get_free_inode $TEST_DIR)
+> > +if [ $_free_inodes -ne 0 ] && [ $_free_inodes -lt 10001 ]; then
+> 
+> I'm assuming the > 0 check here is to cover weird filesystems like fat
+> that don't advertise any inodes?  /me wonders if that ought to be a
 
- --- tests/xfs/842.out
- +++ results/xfs/842.out.bad
- @@ -1,4 +1,5 @@
-  QA output created by 842
- +vX.reflink = 0
-  vX.reflink = 1
- -vX.reflink = 1
- +orig changed: md5 e6065c4aa2ab1603008fc18410f579d4 -> 32c5189478e6bafa1cc76423f06c88f2 (write hit shared blocks in place)
-  Silence is golden
+Hey Darrick, sorry I missed this email earlier. Yes that's the idea. I
+see there is a helper already
 
-This test clones a file so that both share extents, swaps the clone
-against a sparse donor with FILE1_WRITTEN, and then checks the defect
-twice.  First it inspects the inodes directly with xfs_db: the clone
-must still be flagged reflink after the exchange (the donor carrying
-the flag too is the conservative outcome of the fix and is harmless).
-Then it writes to the clone and verifies after a mount cycle that the
-original file's data is intact, i.e. the write was redirected through
-CoW.
+_require_inode_limits()
+{
+	if [ $(_get_free_inode $TEST_DIR) -eq 0 ]; then
+		_notrun "$FSTYP does not have a fixed number of inodes available"
+	fi
+}
 
-The kernel fix "xfs: fix exchange-range reflink flag clearing issue
-with INO1_WRITTEN" refuses the reflink flag exchange whenever
-FILE1_WRITTEN is requested, which makes this test pass.
+But this will end up skipping the FSes that don't have a concept of
+free inodes.
 
-Reported-by: Lin Jiapeng(TencentOS Red Team) <jiapenglin@tencent.com>
-Link: https://lore.kernel.org/r/amgekiNKKoAdACnc@infradead.org
-Suggested-by: Christoph Hellwig <hch@lst.de>
-Suggested-by: "Darrick J. Wong" <djwong@kernel.org>
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
-Signed-off-by: Lin Jiapeng <jiapenglin@tencent.com>
----
- tests/xfs/842     | 65 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/842.out |  4 +++
- 2 files changed, 69 insertions(+)
- create mode 100755 tests/xfs/842
- create mode 100644 tests/xfs/842.out
+> common helper where we can record that justification:
+> 
+> _require_free_inodes() {
+> 	local path="$1"
+> 	local nr="$2"
+> 
+> 	local _free_inodes=$(_get_free_inode "$path")
+> 
+> 	# Weird filesystems like vfat don't report any inodes, so we
+> 	# can't check for sufficient free inodes; IOWs, FAFO.
+> 	test "$_free_inodes" -eq 0 && return
 
-diff --git a/tests/xfs/842 b/tests/xfs/842
-new file mode 100755
-index 0000000..c4c2be9
---- /dev/null
-+++ b/tests/xfs/842
-@@ -0,0 +1,65 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+# Copyright (c) 2026 Tencent.  All Rights Reserved.
-+#
-+# FS QA Test No. 842
-+#
-+# Make sure that a full-file exchangerange under FILE1_WRITTEN does not strip
-+# the reflink flag from a file that still owns shared extents.  When the
-+# donor file is fully sparse, every mapping pair is skipped, so no extents
-+# actually move; the target file must keep its reflink flag, and a later
-+# write must go through CoW instead of modifying the shared blocks in place.
-+
-+. ./common/preamble
-+_begin_fstest auto quick fiexchange
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/reflink
-+
-+_require_xfs_io_command exchangerange
-+_require_scratch_reflink
-+_require_scratch
-+
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount
-+
-+# Create the original file with a known pattern and clone it, so that both
-+# files share the same extents.
-+_pwrite_byte 0x41 0 1m $SCRATCH_MNT/orig >> $seqres.full
-+_reflink $SCRATCH_MNT/orig $SCRATCH_MNT/clone >> $seqres.full
-+
-+# Create a fully sparse donor file of the same size.
-+$XFS_IO_PROG -f -c 'truncate 1m' $SCRATCH_MNT/donor
-+
-+md5_before=$(md5sum $SCRATCH_MNT/orig | awk '{print $1}')
-+
-+# Swap the clone against the sparse donor, claiming the donor is fully
-+# written (-w).  Every donor mapping is a hole, so all pairs are skipped
-+# and the clone keeps its shared extents in place.
-+$XFS_IO_PROG -c "exchangerange -f -w $SCRATCH_MNT/donor" $SCRATCH_MNT/clone \
-+	>> $seqres.full
-+
-+# Directly confirm the inode flag state after the exchange: the clone
-+# must still be flagged reflink.  The donor may also carry the flag, which
-+# is the conservative outcome of refusing the flag exchange under
-+# FILE1_WRITTEN; the extra flag is harmless and can be dropped later by
-+# the regular reflink flag cleanup path.
-+_scratch_unmount
-+_scratch_xfs_db -c "path /clone" -c print -c "path /donor" -c print | \
-+	grep reflink | sed -e 's/^v[0-9]*/vX/g'
-+_scratch_mount
-+
-+# Overwrite part of the clone.  With the reflink flag correctly retained,
-+# this must go through CoW and leave the shared blocks of orig untouched.
-+_pwrite_byte 0x42 0 64k $SCRATCH_MNT/clone >> $seqres.full
-+_scratch_cycle_mount
-+
-+md5_after=$(md5sum $SCRATCH_MNT/orig | awk '{print $1}')
-+
-+test "$md5_before" != "$md5_after" && \
-+	echo "orig changed: md5 $md5_before -> $md5_after (write hit shared blocks in place)"
-+
-+echo Silence is golden
-+status=0
-+exit
-diff --git a/tests/xfs/842.out b/tests/xfs/842.out
-new file mode 100644
-index 0000000..1e6345a
---- /dev/null
-+++ b/tests/xfs/842.out
-@@ -0,0 +1,4 @@
-+QA output created by 842
-+vX.reflink = 1
-+vX.reflink = 1
-+Silence is golden
--- 
-2.50.1 (Apple Git-155)
+If we do this, won't we pass the check for the case where say xfs has 0
+free inodes. It's a rare chance IMObut still wondering if we want to
+keep that edge case open.
 
+What do you think in these options:
+- use the above check
+- use _require_free_inodes which will cause notruns on some FSes
+- Maybe have a new helper to check if FS advertises free inodes and then
+  use somthing like
+
+  if ! __fs_advertises_free_inodes
+    return
+  else
+    test "$_free_inodes" -lt "$nr" && \
+    _notrun "Insufficient free inodes ($_free_inodes), need at least $nr"
+
+
+Regards,
+ojaswin
+
+> 
+> 	test "$_free_inodes" -lt "$nr" && \
+> 		_notrun "Insufficient free inodes ($_free_inodes), need at least $nr"
+> }
+> 
+> 
+> _require_free_inodes $TEST_DIR 10001
+> 
+> (maybe clean up the comment a bit)
+
+> 
+> --D
+> 
+> > +	_notrun "Insufficient free inodes ($_free_inodes), need at least 10001"
+> > +fi
+> > +
+> >  echo "Silence is golden"
+> >  
+> >  $here/src/vfs/vfstest --test-nested-userns \
+> > -- 
+> > 2.53.0
+> > 
+> > 
