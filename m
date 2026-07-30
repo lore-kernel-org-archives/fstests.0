@@ -1,242 +1,780 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C7F1401484
-	for <fstests@vger.kernel.org>; Thu, 30 Jul 2026 11:03:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4BFFC437869
+	for <fstests@vger.kernel.org>; Thu, 30 Jul 2026 13:45:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785409430; cv=none; b=Zaa01zHsFckgy2zbrQwgcEk5ggJZIP0ZAhVIsqlQNX6XYSMbePT0/03vV8hkODs1PVUvZzUyUk/pA2WFcwMBw5a7Ce6o26ZiMFDX/QD7SQYbp/ayf/w/qQOkYRhwwlWVBvE17gGz3H4VXBKXNpJO6TiOxywxm0jRwMbGVmXJ/2U=
+	t=1785419127; cv=none; b=FlrjYLcw7EEcWehuCVzQW/Zv/MKSh7faa6OuvuvG1Aw52Y7OX5LLCy3hR/0k3nvMOqC4PMVZWy0FFb2tnL2UKTJQcuHlS2d5W8sKwI+p+TjZBoYsd0ohPE4Ft/hXYvZjBCt1YSaW1qomORscuLHJMhFrlMYNHOFShSmH/EqpRko=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785409430; c=relaxed/simple;
-	bh=gz6eCFx3nggcKDxg4iN5gZd4Y0YZASUX0p03MSjWjes=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IIkp1LPoPg6WVZhuZdJLAQZmI40zDqyzQS6UBub3o4N8lBfzDau0K8yn+MaMVEbxl2o6vF/4TfnR5J9zt3vV1hSgEVovtwKILJ5yj0XnfYAaqD/wjToOV9lqG5q9ZjUhpbkBDsWL0KmYJ2vumpp5VNg6u5wJb4uI5i4TD278ON8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=Axn9XG9A; arc=none smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	s=arc-20240116; t=1785419127; c=relaxed/simple;
+	bh=6M7AabTlQmOgaL5QKtt8cFUarHyIr6m4JwJGidfp79o=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=fYsosZt0sTekanmy2ANRx0zdozLJ9CIO+WsEX/5cFirU8lA4vHtMOJe+2Z18+A1561T7sSW0vDSyYt3MIYm7QYHw2cBnq2XgRlAW3ckYtTbp1UQpj6diI7s53RQ4j3J2fng3UGZozlicLmp6CThgeQvowLFSMZvcoIyODP9ByRg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=readmodwrite.com; spf=none smtp.mailfrom=readmodwrite.com; dkim=pass (2048-bit key) header.d=readmodwrite-com.20251104.gappssmtp.com header.i=@readmodwrite-com.20251104.gappssmtp.com header.b=Q1m0uJIs; arc=none smtp.client-ip=209.85.128.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=readmodwrite.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=readmodwrite.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="Axn9XG9A"
-Received: from pps.filterd (m0360072.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66UAIZor2761702;
-	Thu, 30 Jul 2026 11:03:44 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=pp1; bh=2Pu8npLzZ1Uc32eKyNTv4TXyunHBOK
-	zBMzrIvyBdTLQ=; b=Axn9XG9AUPSbt9UqYvGaftubPHxWy7c8HV8gJHYc45LHV6
-	dhUaZCtsOTs0XVtpvMVREPZ/sWUncE18OMfL4BxkOkMhDiOq8GqCtKT+4ngRo10+
-	AWIspRwOZ0C6NwWroY05NxC10E+aH5OXqpcA3qI8heqelvLTyi65hhlLOJqMBCkO
-	CYKPM0ynhVmF/h3CCl6zbnHga1wq06KIYC/uvbtktcCqbjvlNUt6oXynPCClDC1j
-	zhfcavC5DmqeGeV/KoeEWoxQuvFE23fjjGhJxAxpwPQS8gIQtaVtfrxQKI5cdXUm
-	kKNMSwSaS1c8hqb53do4Do2mN8/mz4MrCyx9fhJg==
-Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4fmuwd6fwv-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 30 Jul 2026 11:03:44 +0000 (GMT)
-Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
-	by ppma11.dal12v.mail.ibm.com (8.18.1.7/8.18.1.7) with ESMTP id 66UAuUHE002593;
-	Thu, 30 Jul 2026 11:03:43 GMT
-Received: from smtprelay06.fra02v.mail.ibm.com ([9.218.2.230])
-	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 4fna5yaqds-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 30 Jul 2026 11:03:43 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
-	by smtprelay06.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 66UB3fD927394370
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 30 Jul 2026 11:03:41 GMT
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 9F64820040;
-	Thu, 30 Jul 2026 11:03:41 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 3B0132004E;
-	Thu, 30 Jul 2026 11:03:40 +0000 (GMT)
-Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.39.25.46])
-	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
-	Thu, 30 Jul 2026 11:03:39 +0000 (GMT)
-Date: Thu, 30 Jul 2026 16:33:37 +0530
-From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-        Disha Goel <disgoel@linux.ibm.com>
-Subject: Re: [PATCH] generic/645: Confirm availability of free inodes
-Message-ID: <amsviaOypNwLCtnM@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
-References: <20260617054216.3186441-1-ojaswin@linux.ibm.com>
- <20260625184259.GP6070@frogsfrogsfrogs>
- <ammQvzfsFTx9EEmm@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
- <20260729154451.GB7371@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=readmodwrite-com.20251104.gappssmtp.com header.i=@readmodwrite-com.20251104.gappssmtp.com header.b="Q1m0uJIs"
+Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-4921eed3fa2so14694035e9.0
+        for <fstests@vger.kernel.org>; Thu, 30 Jul 2026 06:45:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=readmodwrite-com.20251104.gappssmtp.com; s=20251104; t=1785419123; x=1786023923; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=ZT24kAIVuTjDlFHcKpuzH42zP/PuFzG1Btnvr+nrYtk=;
+        b=Q1m0uJIsetBPTU9VzZskRHxSkmVZd2Vo9SwXQ49CfYbxkf/+NzAMf3tsmgA2KfnyTW
+         JdvMN+RTB+4WeJEzra7I0FS/SLrDzo6IyRFikZ8QdfktAMStyNBH//9xsCh/8EaVLG1H
+         25F9aa0QFDu87Fd/TMZEaMGL9EHHBob95pvhk7XeeK5pvTtvDn7HBjDzG1FHFv3v9Z7R
+         4XvyWnSxkewJjcIqtbTkpR9NKnCPDuWlNaviilo90wsR4WA/0/eJkLi1ERebRRmRX6+L
+         2WCC0KXd+lTmxmJtS2YDxmyb0H/sBlghnTz8iKfmfuz/iMJfT0kE/UFIVdbZdF5ytIwz
+         Teog==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785419123; x=1786023923;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=ZT24kAIVuTjDlFHcKpuzH42zP/PuFzG1Btnvr+nrYtk=;
+        b=Mk6VKpOLsCO6y8RkqXLRrc/zpjgUxSdgfx5rCtMjTcRR1psmGP75tPDSo5wXWldQ/E
+         8P5YpNmhOg+7J1Gzid0BpSi5VuaoIQge+WeGeOQc8kLQW0whc3RR/r+t7UsBI0T3Lv7n
+         Wko3oeEX/0rI9IMNF5gAeGWCSJP79SKI3C7DKkbCM8tid1OxYOpytIURv7eHI6gHWyZ+
+         N8AARVO4tuYRGyBKMITpYeeWwVJuErwQH9/4FzToxapRVopOtyuyyzatapzZbx9eoGAS
+         cWaqMiIKYE2UnwTQ7IHErawHG9ER0wvRAuONd1VaA+u8JohYZ0e/q9dg1rlREjEbtHkB
+         EMUA==
+X-Gm-Message-State: AOJu0YzydCI0g6/nWn3uzqgQkR4CukzdAym7SeK64oKM1zR1scnU4moM
+	6SLtGBAnlQl/6YmZbSW1a9F0S4SEoYwESpE06BSLd3D+sQgulEdENx1iGLRiB7N5rUJ6N1oe5OK
+	kKOM5m4o=
+X-Gm-Gg: AR+sD11ypknQTrKSeCT8DhdidMoDuke62rK8JVf5naiQKZWTqm+KGSfIgVLhG9BQORZ
+	Cx0s+fiWYHHTz7q/fCoNSUitsMl0nz0h/hxJcgeIL15X2GjDcvCWYSmwnRBSfa5vk1MMDRo/61F
+	y0eEA3QSOnuzBYsNIyDSm13lMokqpQTdBo0sfJAxfncC9hfdmQPuDAcPCVjwr4za+2lngODMuRl
+	PK5cvYvJMOPyobLQ4vHcVSfnfMRdNJpvt7r1DHU3Yn3uTKeF91I2dhzkt7dQEyaQZpZWBHZK9cp
+	9aBAWf8v591ucsHwgSWb3aaS1O1aMXuq44zTAAxjarutxm3cC4G+tv5YPhvg5Qnz5NyySwPxH/v
+	g66yKCLC8LnqjzRMrYrKTk/ODW50reGd5RxWUhiMrs2hrAo9RU49DEEJjiwAHayabzr6T1MnNX8
+	ajqPEG67fwm8MKqbbVsVht+NaRTgAfVJmjxDnT2sZOpcoZnAQidg0K+Agj4rDQljMqx+FJDFjcj
+	g==
+X-Received: by 2002:a05:600c:c8d:b0:495:401d:9f4f with SMTP id 5b1f17b1804b1-49800ea20e7mr35521675e9.25.1785419122989;
+        Thu, 30 Jul 2026 06:45:22 -0700 (PDT)
+Received: from matt-Precision-5490.. ([2a09:bac6:37a8:ebe::178:11c])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-49800f19bb3sm59295705e9.4.2026.07.30.06.45.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 30 Jul 2026 06:45:22 -0700 (PDT)
+From: Matt Fleming <matt@readmodwrite.com>
+To: fstests@vger.kernel.org
+Cc: Zorro Lang <zlang@kernel.org>,
+	"Darrick J. Wong" <djwong@kernel.org>,
+	linux-xfs@vger.kernel.org,
+	Brian Foster <bfoster@redhat.com>,
+	Christoph Hellwig <hch@lst.de>,
+	kernel-team@cloudflare.com
+Subject: [PATCH] xfs: Test sparse inode allocation near AGFL limits
+Date: Thu, 30 Jul 2026 14:45:20 +0100
+Message-ID: <20260730134520.3556786-1-matt@readmodwrite.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260729154451.GB7371@frogsfrogsfrogs>
-X-TM-AS-GCONF: 00
-X-Proofpoint-ORIG-GUID: Yd44lk5BwHyJDfmNmGCYvXtONMe1K_aF
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNzMwMDA4MCBTYWx0ZWRfX2LWDXFwEod5g
- zz+9K2fSLMmtMZlVvXPJeUaXr91k8eJvuAiUwCVLxNkqmklSMI4474e25tol/4Rkx7EPRNmQiUl
- OgYFtKeiTsseDKPthEFe23CRRYo6AYg=
-X-Authority-Analysis: v=2.4 cv=E/z9Y6dl c=1 sm=1 tr=0 ts=6a6b2f90 cx=c_pps
- a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17
- a=kj9zAlcOel0A:10 a=RAioF0-LDSMA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=RnoormkPH1_aCDwRdu11:22 a=RzCfie-kr_QcCd8fBx8p:22 a=VnNF1IyMAAAA:8
- a=G4Q8l6HB2Q3NXiakdPIA:9 a=CjuIK1q_8ugA:10
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzMwMDA4MCBTYWx0ZWRfX+FPik2xls116
- PfstPdiFUi8ramYSlXD2Bus9aT3pB9ew+gpNzUHR2hEAeRya1stz6K+PMTS1sHXg56aHjeDLZRP
- WiNNtEhtPCHaiIQvTWKq2oojw8GM0X3rdyLP8b37HZ1+JHpYgpQ47eMtTV/NX4OubjukFi1EJju
- BQhBZAgL8G1O+44yErudKU8XLA9FSvDkuWKmFKIWXC+5DRTawUWMj5/eyQJ62cjqUhwMCb+zeYP
- ZZplwsdadIFjVSWTLN00umLeMaiBSCT7IyNE7AC+Y811eL37jlmEU+EOJh8TbwEqvQz32H4qdDD
- kSrgJJsRLryqmYJ1izJsN2WFHu3tuR/20fgcqsK5COGnKPKtxhVjThYK3HPH0SWZiCcabbfTi0N
- wSGcwQWYUXUahN4vqAtfBIRUFLvfngGKuVmOGNjsWDfxz4wHuai/lKgDsjCU0TA3EUvxFOsujaj
- hOIJhNSc17cu00lXLwQ==
-X-Proofpoint-GUID: Yd44lk5BwHyJDfmNmGCYvXtONMe1K_aF
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-07-30_03,2026-07-29_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- adultscore=0 priorityscore=1501 spamscore=0 clxscore=1011 phishscore=0
- lowpriorityscore=0 bulkscore=0 malwarescore=0 impostorscore=0 suspectscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607300080
+Content-Transfer-Encoding: 8bit
 
-On Wed, Jul 29, 2026 at 08:44:51AM -0700, Darrick J. Wong wrote:
-> On Wed, Jul 29, 2026 at 11:06:57AM +0530, Ojaswin Mujoo wrote:
-> > On Thu, Jun 25, 2026 at 11:42:59AM -0700, Darrick J. Wong wrote:
-> > > On Wed, Jun 17, 2026 at 11:12:16AM +0530, Ojaswin Mujoo wrote:
-> > > > When running generic/645 with ext4 using 64k block size + bigalloc, the
-> > > > test fails with ENOSPC because the filesystem runs out of inodes before
-> > > > the test completes.
-> > > > 
-> > > > The test creates approximately 10,001 files, however, in this particular
-> > > > configuration a standard 5G FS only has around ~5100 inodes resulting in
-> > > > the ENOSPC failure.
-> > > > 
-> > > > Add a check using _get_free_inode() to verify sufficient inodes are
-> > > > available before running the test, else skip it.
-> > > > 
-> > > > Reported-by: Disha Goel <disgoel@linux.ibm.com>
-> > > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> > > > ---
-> > > >  tests/generic/645 | 6 ++++++
-> > > >  1 file changed, 6 insertions(+)
-> > > > 
-> > > > diff --git a/tests/generic/645 b/tests/generic/645
-> > > > index d6eb75e6..944b33db 100755
-> > > > --- a/tests/generic/645
-> > > > +++ b/tests/generic/645
-> > > > @@ -19,6 +19,12 @@ _require_chown
-> > > >  _wants_kernel_commit dacfd001eaf2 \
-> > > >  	"fs/mnt_idmapping.c: Return -EINVAL when no map is written"
-> > > >  
-> > > > +_free_inodes=$(_get_free_inode $TEST_DIR)
-> > > > +if [ $_free_inodes -ne 0 ] && [ $_free_inodes -lt 10001 ]; then
-> > > 
-> > > I'm assuming the > 0 check here is to cover weird filesystems like fat
-> > > that don't advertise any inodes?  /me wonders if that ought to be a
-> > 
-> > Hey Darrick, sorry I missed this email earlier. Yes that's the idea. I
-> > see there is a helper already
-> > 
-> > _require_inode_limits()
-> > {
-> > 	if [ $(_get_free_inode $TEST_DIR) -eq 0 ]; then
-> > 		_notrun "$FSTYP does not have a fixed number of inodes available"
-> > 	fi
-> > }
-> > 
-> > But this will end up skipping the FSes that don't have a concept of
-> > free inodes.
-> > 
-> > > common helper where we can record that justification:
-> > > 
-> > > _require_free_inodes() {
-> > > 	local path="$1"
-> > > 	local nr="$2"
-> > > 
-> > > 	local _free_inodes=$(_get_free_inode "$path")
-> > > 
-> > > 	# Weird filesystems like vfat don't report any inodes, so we
-> > > 	# can't check for sufficient free inodes; IOWs, FAFO.
-> > > 	test "$_free_inodes" -eq 0 && return
-> > 
-> > If we do this, won't we pass the check for the case where say xfs has 0
-> > free inodes. It's a rare chance IMObut still wondering if we want to
-> > keep that edge case open.
-> > 
-> > What do you think in these options:
-> > - use the above check
-> > - use _require_free_inodes which will cause notruns on some FSes
-> > - Maybe have a new helper to check if FS advertises free inodes and then
-> >   use somthing like
-> > 
-> >   if ! __fs_advertises_free_inodes
-> >     return
-> >   else
-> >     test "$_free_inodes" -lt "$nr" && \
-> >     _notrun "Insufficient free inodes ($_free_inodes), need at least $nr"
-> > 
-> 
-> Hmmm.  This is getting complicated, because generic tests can run on any
-> filesystem and we have no idea how much space an inode actually
-> consumes, or if the filesystem even has any real concept of inodes.
-> 
-> Can we instead check the vfstest output for the ENOSPC error message and
-> _notrun it if that is found?
+From: Matt Fleming <mfleming@cloudflare.com>
 
-Yes this sounds simple enough. The below diff works for me:
+Add a regression test for a shutdown in the sparse inode allocation
+path. The test builds an AG with no free inodes, a full inobt leaf, full
+bnobt/cntbt leaves, and little allocatable space outside the AG
+reservations.
 
-  diff --git a/tests/generic/645 b/tests/generic/645
-  index d6eb75e6..3d8ca905 100755
-  --- a/tests/generic/645
-  +++ b/tests/generic/645
-  @@ -22,7 +22,14 @@ _wants_kernel_commit dacfd001eaf2 \
-   echo "Silence is golden"
-  
-   $here/src/vfs/vfstest --test-nested-userns \
-  -       --device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
-  +       --device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP" \
-  +       > $tmp.vfstest 2>&1
-  
-  +if grep -q "No space left on device" $tmp.vfstest; then
-  +       _notrun "No space left on device"
-  +fi
-  +
-  +cat $tmp.vfstest
-   status=$?
+The final create reaches the sparse inode fallback. Removing that extent
+from free space can grow the free-space btrees and drain the AGFL. The
+subsequent inobt insert currently trips a corruption check and shuts
+down the filesystem:
 
-If this looks good I cans send a formal patch.
+  Internal error i != 1 at line 3768 of file fs/xfs/libxfs/xfs_btree.c.
 
-Regards,
-ojaswin 
+Link: https://lore.kernel.org/linux-xfs/20260717130429.1838767-1-matt@readmodwrite.com/
+Signed-off-by: Matt Fleming <mfleming@cloudflare.com>
+---
+ .gitignore            |   1 +
+ src/Makefile          |   2 +-
+ src/xfs_inode_alloc.c | 285 +++++++++++++++++++++++++++++++++++
+ tests/xfs/842         | 341 ++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/842.out     |   2 +
+ 5 files changed, 630 insertions(+), 1 deletion(-)
+ create mode 100644 src/xfs_inode_alloc.c
+ create mode 100755 tests/xfs/842
+ create mode 100644 tests/xfs/842.out
 
-> 
-> --D
-> 
-> > Regards,
-> > ojaswin
-> > 
-> > > 
-> > > 	test "$_free_inodes" -lt "$nr" && \
-> > > 		_notrun "Insufficient free inodes ($_free_inodes), need at least $nr"
-> > > }
-> > > 
-> > > 
-> > > _require_free_inodes $TEST_DIR 10001
-> > > 
-> > > (maybe clean up the comment a bit)
-> > 
-> > > 
-> > > --D
-> > > 
-> > > > +	_notrun "Insufficient free inodes ($_free_inodes), need at least 10001"
-> > > > +fi
-> > > > +
-> > > >  echo "Silence is golden"
-> > > >  
-> > > >  $here/src/vfs/vfstest --test-nested-userns \
-> > > > -- 
-> > > > 2.53.0
-> > > > 
-> > > > 
-> > 
+diff --git a/.gitignore b/.gitignore
+index dd77ee30..7c92e5eb 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -185,6 +185,7 @@ tags
+ /src/uuid_ioctl
+ /src/writemod
+ /src/writev_on_pagefault
++/src/xfs_inode_alloc
+ /src/xfsctl
+ /src/xfsfind
+ /src/aio-dio-regress/aio-dio-append-write-fallocate-race
+diff --git a/src/Makefile b/src/Makefile
+index 31ac43b2..9e26ebd1 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -36,7 +36,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+ 	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
+ 	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
+-	rw_hint fs-monitor
++	rw_hint fs-monitor xfs_inode_alloc
+ 
+ EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+ 	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+diff --git a/src/xfs_inode_alloc.c b/src/xfs_inode_alloc.c
+new file mode 100644
+index 00000000..9995a047
+--- /dev/null
++++ b/src/xfs_inode_alloc.c
+@@ -0,0 +1,285 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++#include <errno.h>
++#include <fcntl.h>
++#include <inttypes.h>
++#include <linux/falloc.h>
++#include <stdbool.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/prctl.h>
++#include <sys/stat.h>
++#include <sys/types.h>
++#include <unistd.h>
++
++#define BLOCK_SIZE 4096ULL
++#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
++
++static void usage(const char *prog)
++{
++	fprintf(stderr,
++		"usage: %s --selftest\n"
++		"       %s create DIR COUNT\n"
++		"       %s fill FILE\n"
++		"       %s consume FILE BLOCKS\n"
++		"       %s fragment DIR COUNT\n"
++		"       %s punch FILE OFFSET_BLOCKS LENGTH_BLOCKS\n"
++		"       %s trigger DIR\n",
++		prog, prog, prog, prog, prog, prog, prog);
++}
++
++static unsigned long long parse_ull(const char *value, const char *what)
++{
++	char *end;
++	unsigned long long result;
++
++	errno = 0;
++	result = strtoull(value, &end, 0);
++	if (errno || *value == '\0' || *end != '\0') {
++		fprintf(stderr, "invalid %s: %s\n", what, value);
++		exit(EXIT_FAILURE);
++	}
++	return result;
++}
++
++static int create_files(const char *dir, unsigned long long count)
++{
++	char path[4096];
++	unsigned long long i;
++
++	for (i = 0; i < count; i++) {
++		int fd;
++		int len = snprintf(path, sizeof(path), "%s/inode-%08llu", dir, i);
++
++		if (len < 0 || (size_t)len >= sizeof(path)) {
++			fprintf(stderr, "path too long\n");
++			return 1;
++		}
++		fd = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
++		if (fd < 0) {
++			fprintf(stderr, "create %s failed after %llu files: %s\n",
++				path, i, strerror(errno));
++			return 1;
++		}
++		close(fd);
++		if ((i + 1) % 1024 == 0)
++			printf("repro: created %llu/%llu files\n", i + 1, count);
++	}
++	printf("repro: created %llu files\n", count);
++	return 0;
++}
++
++static int fill_file(const char *path)
++{
++	static const unsigned long long chunks[] = {
++		256ULL << 20, 64ULL << 20, 16ULL << 20, 4ULL << 20,
++		1ULL << 20, 256ULL << 10, 64ULL << 10, 16ULL << 10,
++		BLOCK_SIZE,
++	};
++	struct stat st;
++	off_t offset;
++	int fd;
++	size_t i;
++
++	fd = open(path, O_RDWR | O_CREAT | O_CLOEXEC, 0600);
++	if (fd < 0) {
++		perror("open filler");
++		return 1;
++	}
++	if (fstat(fd, &st) < 0) {
++		perror("fstat filler");
++		close(fd);
++		return 1;
++	}
++	offset = st.st_size;
++
++	for (i = 0; i < ARRAY_SIZE(chunks); i++) {
++		unsigned long long allocated = 0;
++		unsigned long long chunk = chunks[i];
++
++		for (;;) {
++			if (fallocate(fd, 0, offset, (off_t)chunk) == 0) {
++				offset += (off_t)chunk;
++				allocated += chunk;
++				if (allocated >= (256ULL << 20)) {
++					printf("repro: filler size=%" PRIu64 " MiB\n",
++						(uint64_t)offset >> 20);
++					allocated = 0;
++				}
++				continue;
++			}
++			if (errno != ENOSPC) {
++				fprintf(stderr, "fallocate %llu bytes at %jd: %s\n",
++					chunk, (intmax_t)offset, strerror(errno));
++				close(fd);
++				return 1;
++			}
++			break;
++		}
++		printf("repro: allocation stopped at chunk=%llu bytes, size=%" PRIu64
++		       " MiB\n", chunk, (uint64_t)offset >> 20);
++	}
++	if (fsync(fd) < 0)
++		perror("fsync filler");
++	close(fd);
++	return 0;
++}
++
++static int fragment_free_space(const char *dir, unsigned long long count)
++{
++	char path[4096];
++	unsigned long long i;
++	int dirfd;
++
++	for (i = 0; i < count; i++) {
++		int fd;
++
++		snprintf(path, sizeof(path), "%s/inode-%08llu", dir, i);
++		fd = open(path, O_RDWR | O_CLOEXEC);
++		if (fd < 0 || fallocate(fd, 0, 0, BLOCK_SIZE) < 0) {
++			fprintf(stderr, "fragment allocation %s failed: %s\n",
++				path, strerror(errno));
++			if (fd >= 0)
++				close(fd);
++			return 1;
++		}
++		close(fd);
++		if ((i + 1) % 2048 == 0)
++			printf("repro: allocated fragment blocks %llu/%llu\n",
++			       i + 1, count);
++	}
++
++	for (i = 0; i < count; i += 2) {
++		int fd;
++
++		snprintf(path, sizeof(path), "%s/inode-%08llu", dir, i);
++		fd = open(path, O_RDWR | O_CLOEXEC);
++		if (fd < 0 || fallocate(fd, FALLOC_FL_PUNCH_HOLE |
++					      FALLOC_FL_KEEP_SIZE,
++					      0, BLOCK_SIZE) < 0) {
++			fprintf(stderr, "fragment punch %s failed: %s\n",
++				path, strerror(errno));
++			if (fd >= 0)
++				close(fd);
++			return 1;
++		}
++		close(fd);
++	}
++
++	dirfd = open(dir, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
++	if (dirfd >= 0) {
++		syncfs(dirfd);
++		close(dirfd);
++	}
++	printf("repro: created %llu one-block free-space fragments\n",
++	       (count + 1) / 2);
++	return 0;
++}
++
++static int consume_blocks(const char *path, unsigned long long blocks)
++{
++	struct stat st;
++	unsigned long long i;
++	off_t offset;
++	int fd = open(path, O_RDWR | O_CLOEXEC);
++
++	if (fd < 0 || fstat(fd, &st) < 0) {
++		perror("open consumer file");
++		if (fd >= 0)
++			close(fd);
++		return 1;
++	}
++	offset = st.st_size;
++	for (i = 0; i < blocks; i++) {
++		if (fallocate(fd, 0, offset, BLOCK_SIZE) < 0) {
++			fprintf(stderr, "one-block allocation failed at %llu/%llu: %s\n",
++				i, blocks, strerror(errno));
++			close(fd);
++			return 1;
++		}
++		offset += BLOCK_SIZE;
++		if ((i + 1) % 512 == 0)
++			printf("repro: consumed %llu/%llu blocks\n", i + 1, blocks);
++	}
++	fsync(fd);
++	close(fd);
++	printf("repro: consumed %llu blocks\n", blocks);
++	return 0;
++}
++
++static int punch_file(const char *path, unsigned long long offset_blocks,
++		      unsigned long long length_blocks)
++{
++	off_t offset = (off_t)(offset_blocks * BLOCK_SIZE);
++	off_t length = (off_t)(length_blocks * BLOCK_SIZE);
++	int fd = open(path, O_RDWR | O_CLOEXEC);
++
++	if (fd < 0) {
++		perror("open filler for punch");
++		return 1;
++	}
++	if (fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
++		      offset, length) < 0) {
++		perror("punch hole");
++		close(fd);
++		return 1;
++	}
++	if (fsync(fd) < 0)
++		perror("fsync punched filler");
++	close(fd);
++	printf("repro: punched %llu blocks at file block %llu\n",
++	       length_blocks, offset_blocks);
++	return 0;
++}
++
++static int trigger_create(const char *dir)
++{
++	char path[4096];
++	int fd;
++
++	if (prctl(PR_SET_NAME, "xfs-ialloc-test", 0, 0, 0) < 0) {
++		perror("prctl PR_SET_NAME");
++		return 1;
++	}
++	if (snprintf(path, sizeof(path), "%s/trigger", dir) >= (int)sizeof(path)) {
++		fprintf(stderr, "trigger path too long\n");
++		return 1;
++	}
++	fd = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
++	if (fd < 0) {
++		printf("trigger create failed: errno=%d (%s)\n",
++		       errno, strerror(errno));
++		/* Clean ENOSPC is an acceptable result after the bug is fixed. */
++		return errno == ENOSPC ? 0 : 1;
++	}
++	close(fd);
++	printf("trigger create succeeded\n");
++	return 0;
++}
++
++int main(int argc, char **argv)
++{
++	setvbuf(stdout, NULL, _IOLBF, 0);
++
++	if (argc == 2 && strcmp(argv[1], "--selftest") == 0) {
++		puts("selftest: ok");
++		return 0;
++	}
++	if (argc == 4 && strcmp(argv[1], "create") == 0)
++		return create_files(argv[2], parse_ull(argv[3], "file count"));
++	if (argc == 3 && strcmp(argv[1], "fill") == 0)
++		return fill_file(argv[2]);
++	if (argc == 4 && strcmp(argv[1], "consume") == 0)
++		return consume_blocks(argv[2], parse_ull(argv[3], "block count"));
++	if (argc == 4 && strcmp(argv[1], "fragment") == 0)
++		return fragment_free_space(argv[2],
++					   parse_ull(argv[3], "file count"));
++	if (argc == 5 && strcmp(argv[1], "punch") == 0)
++		return punch_file(argv[2], parse_ull(argv[3], "hole offset"),
++				  parse_ull(argv[4], "hole length"));
++	if (argc == 3 && strcmp(argv[1], "trigger") == 0)
++		return trigger_create(argv[2]);
++
++	usage(argv[0]);
++	return 2;
++}
+diff --git a/tests/xfs/842 b/tests/xfs/842
+new file mode 100755
+index 00000000..fdab240a
+--- /dev/null
++++ b/tests/xfs/842
+@@ -0,0 +1,341 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 Cloudflare, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 842
++#
++# Regression test for an inode allocation failure after a sparse inode extent
++# grows full free-space btrees and raises the AGFL minimum.  The subsequent
++# inobt leaf split must not trip the i != 1 corruption check.
++#
++. ./common/preamble
++_begin_fstest auto enospc punch prealloc
++
++_cleanup()
++{
++	cd /
++	_scratch_unmount 2>/dev/null
++	rm -f "$tmp".*
++}
++
++. ./common/filter
++
++_require_scratch
++_require_scratch_size $((1024 * 1024))
++_require_check_dmesg
++_require_xfs_db_command agresv
++_require_xfs_io_command bmap
++_require_xfs_io_command fsync
++
++# The state builder depends on an internal log and no realtime section.
++unset SCRATCH_LOGDEV
++unset SCRATCH_RTDEV
++
++_require_xfs_sparse_inodes
++_require_xfs_mkfs_finobt
++
++REPRO=$here/src/xfs_inode_alloc
++TARGET_ALLOCATED=16128 # 252 inode records * 64 inodes
++INOBT_MAXLEVELS=2
++FRAGMENT_FILES=1002
++
++[[ -x $REPRO ]] || _notrun "xfs_inode_alloc helper is not built"
++
++mkfs_opts="-q -K -s size=4096 \
++	-m crc=1,finobt=1,rmapbt=1,reflink=1,inobtcount=1,bigtime=1 \
++	-i size=512,sparse=1,maxpct=25,nrext64=1 \
++	-d size=1g,agcount=2,su=512k,sw=2"
++_scratch_mkfs_xfs_supported $mkfs_opts >/dev/null 2>&1 || \
++	_notrun "mkfs.xfs does not support the required feature set"
++
++min_value()
++{
++	if [ "$1" -lt "$2" ]; then
++		printf '%s\n' "$1"
++	else
++		printf '%s\n' "$2"
++	fi
++}
++
++min_freelist()
++{
++	local bno_level=$1 cnt_level=$2 rmap_level=$3
++	local alloc_maxlevels=$4 rmap_maxlevels=$5 has_rmap=$6
++	local bno_next cnt_next rmap_next total
++
++	bno_next=$(min_value $((bno_level + 1)) "$alloc_maxlevels")
++	cnt_next=$(min_value $((cnt_level + 1)) "$alloc_maxlevels")
++	total=$((bno_next * 2 - 2 + cnt_next * 2 - 2))
++	if [ "$has_rmap" -ne 0 ]; then
++		rmap_next=$(min_value $((rmap_level + 1)) "$rmap_maxlevels")
++		total=$((total + rmap_next * 2 - 2))
++	fi
++	printf '%s\n' "$total"
++}
++
++space_available()
++{
++	local freeblks=$1 flcount=$2 reservation=$3 min_free=$4 minleft=$5
++	local agflcount
++
++	agflcount=$(min_value "$flcount" "$min_free")
++	printf '%s\n' $((freeblks + agflcount - reservation - min_free - minleft))
++}
++
++agi_field()
++{
++	local field=$1
++	$XFS_DB_PROG -r -c 'agi 0' -c "p $field" "$SCRATCH_DEV" 2>/dev/null |
++		awk -v key="$field" '$1 == key { print $3; exit }'
++}
++
++inobt_root_field()
++{
++	local field=$1
++	$XFS_DB_PROG -r -c 'agi 0' -c 'addr root' -c "p $field" \
++		"$SCRATCH_DEV" 2>/dev/null |
++		awk -v key="$field" '$1 == key { print $3; exit }'
++}
++
++agf_field()
++{
++	local field=$1
++	$XFS_DB_PROG -r -c 'agf 0' -c "p $field" "$SCRATCH_DEV" 2>/dev/null |
++		awk -v key="$field" '$1 == key { print $3; exit }'
++}
++
++alloc_root_field()
++{
++	local root=$1 field=$2
++	$XFS_DB_PROG -r -c 'agf 0' -c "addr $root" -c "p $field" \
++		"$SCRATCH_DEV" 2>/dev/null |
++		awk -v key="$field" '$1 == key { print $3; exit }'
++}
++
++ag0_reservation_state()
++{
++	$XFS_DB_PROG -r -c agresv "$SCRATCH_DEV" 2>/dev/null |
++		awk '$1 == "AG" && $2 == "0:" { print $6, $8, $10; exit }'
++}
++
++free_record_covering()
++{
++	local agbno=$1
++	$XFS_DB_PROG -r -c 'agf 0' -c 'addr bnoroot' -c 'type bnobt' \
++		-c 'btdump -i' "$SCRATCH_DEV" 2>/dev/null |
++		awk -v target="$agbno" '/^[0-9]+:\[/ {
++			record = $0
++			sub(/^[^[]*\[/, "", record)
++			sub(/\].*$/, "", record)
++			split(record, value, /,/)
++			start = value[1] + 0
++			blocks = value[2] + 0
++			if (start <= target && target < start + blocks) {
++				print 0, start, blocks
++				exit
++			}
++		}'
++}
++
++largest_ag0_free_extent()
++{
++	$XFS_DB_PROG -r -c 'agf 0' -c 'addr bnoroot' -c 'type bnobt' \
++		-c 'btdump -i' "$SCRATCH_DEV" 2>/dev/null |
++		awk '/^[0-9]+:\[/ {
++			record = $0
++			sub(/^[^[]*\[/, "", record)
++			sub(/\].*$/, "", record)
++			split(record, value, /,/)
++			if (value[2] + 0 > max) {
++				start = value[1] + 0
++				max = value[2] + 0
++			}
++		} END { if (max) print start, max }'
++}
++
++inspect_unmounted()
++{
++	sync -f "$SCRATCH_MNT"
++	_scratch_unmount
++}
++
++mount_fs()
++{
++	_scratch_mount -o noatime,inode64,logbufs=8,logbsize=32k,noquota
++}
++
++release_ag1()
++{
++	local cutoff bytes
++
++	cutoff=$($XFS_IO_PROG -r -c 'bmap -v' "$SCRATCH_MNT/filler" |
++		awk '$4 == 1 {
++			range = $2
++			gsub(/[\[\]:]/, "", range)
++			split(range, sector, /\.\./)
++			printf "%.0f\n", sector[1] / 8
++			exit
++		}')
++	[[ -n $cutoff ]] || return 1
++	bytes=$((cutoff * 4096))
++	truncate -s "$bytes" "$SCRATCH_MNT/filler"
++	$XFS_IO_PROG -c fsync "$SCRATCH_MNT/filler"
++}
++
++align_filler_eof()
++{
++	local target=$1 cutoff current bytes
++
++	cutoff=$($XFS_IO_PROG -r -c 'bmap -v' "$SCRATCH_MNT/filler" 2>/dev/null |
++		awk -v target="$target" '$4 == 0 {
++			file_range = $2
++			ag_range = $5
++			gsub(/[\[\]:]/, "", file_range)
++			gsub(/[()]/, "", ag_range)
++			split(file_range, file_sector, /\.\./)
++			split(ag_range, ag_sector, /\.\./)
++			if (int(ag_sector[2] / 8) + 1 == target) {
++				printf "%.0f\n", (file_sector[2] + 1) / 8
++				exit
++			}
++		}')
++	[[ -n $cutoff ]] || return 1
++	current=$(( $(_get_filesize "$SCRATCH_MNT/filler") / 4096 ))
++	if (( cutoff < current )); then
++		bytes=$((cutoff * 4096))
++		truncate -s "$bytes" "$SCRATCH_MNT/filler"
++		$XFS_IO_PROG -c fsync "$SCRATCH_MNT/filler"
++	fi
++}
++
++find_trigger_hole_offset()
++{
++	$XFS_IO_PROG -r -c 'bmap -v' "$SCRATCH_MNT/filler" |
++		awk '$4 == 0 {
++			file_range = $2
++			ag_range = $5
++			gsub(/[\[\]:]/, "", file_range)
++			gsub(/[()]/, "", ag_range)
++			split(file_range, f, /\.\./)
++			split(ag_range, a, /\.\./)
++			file_start = f[1] / 8
++			ag_start = a[1] / 8
++			map_blocks = (f[2] - f[1] + 1) / 8
++			delta = (2 - (ag_start % 8) + 8) % 8
++			if (map_blocks >= delta + 16) {
++				printf "%.0f %.0f\n", file_start + delta, ag_start + delta
++				exit
++			}
++		}'
++}
++
++consume_ag0_headroom()
++{
++	local values free reserved used outside
++
++	values=$(ag0_reservation_state)
++	read -r free reserved used <<<"$values"
++	outside=$((free - (reserved - used)))
++	(( outside <= 0 )) && return 0
++
++	mount_fs
++	"$REPRO" consume "$SCRATCH_MNT/filler" "$outside" >>"$seqres.full" 2>&1 || true
++	inspect_unmounted
++}
++
++_scratch_mkfs_xfs $mkfs_opts >>"$seqres.full" 2>&1
++mount_fs
++: > "$SCRATCH_MNT/filler"
++inspect_unmounted
++
++count=$(agi_field count)
++freecount=$(agi_field freecount)
++allocated=$((count - freecount))
++need=$((TARGET_ALLOCATED - allocated))
++(( need > 0 )) || _fail "invalid initial inode state"
++
++mount_fs
++"$REPRO" create "$SCRATCH_MNT" "$need" >>"$seqres.full" 2>&1 || \
++	_fail "inode population failed"
++inspect_unmounted
++
++count=$(agi_field count)
++freecount=$(agi_field freecount)
++inobt_level=$(inobt_root_field level)
++inobt_recs=$(inobt_root_field numrecs)
++if (( count != TARGET_ALLOCATED || freecount != 0 ||
++      inobt_level != 0 || inobt_recs != 252 )); then
++	_fail "failed to build one full inobt leaf"
++fi
++
++mount_fs
++"$REPRO" fragment "$SCRATCH_MNT" "$FRAGMENT_FILES" >>"$seqres.full" 2>&1 || \
++	_fail "free-space fragmentation failed"
++"$REPRO" fill "$SCRATCH_MNT/filler" >>"$seqres.full" 2>&1 || \
++	_fail "free-space fill failed"
++release_ag1 || _fail "failed to release AG1 filler mappings"
++inspect_unmounted
++
++consume_ag0_headroom
++read -r largest_start _ <<<"$(largest_ag0_free_extent)"
++mount_fs
++align_filler_eof "$largest_start" || _fail "cannot align filler EOF"
++inspect_unmounted
++consume_ag0_headroom
++
++mount_fs
++read -r file_offset agblock <<<"$(find_trigger_hole_offset)"
++[[ -n $file_offset && -n $agblock ]] || _fail "no suitable sparse inode extent"
++"$REPRO" punch "$SCRATCH_MNT/filler" "$file_offset" 8 >>"$seqres.full" 2>&1 || \
++	_fail "failed to create sparse inode extent"
++inspect_unmounted
++
++read -r free reserved used <<<"$(ag0_reservation_state)"
++reservation=$((reserved - used))
++outside=$((free - reservation))
++bno_level=$(agf_field bnolevel)
++cnt_level=$(agf_field cntlevel)
++rmap_level=$(agf_field rmaplevel)
++flcount=$(agf_field flcount)
++bno_recs=$(alloc_root_field bnoroot numrecs)
++cnt_recs=$(alloc_root_field cntroot numrecs)
++inobt_level=$(inobt_root_field level)
++inobt_recs=$(inobt_root_field numrecs)
++minfree=$(min_freelist "$bno_level" "$cnt_level" "$rmap_level" 5 5 1)
++pagf_free=$((free - flcount))
++available=$(space_available "$pagf_free" "$flcount" "$reservation" \
++	"$minfree" "$INOBT_MAXLEVELS")
++cover=$(free_record_covering "$agblock")
++
++printf 'gate free=%d reservation=%d outside=%d fl=%d minfree=%d available=%d levels=%d/%d/%d alloc_recs=%d/%d inobt=%d/%d hole=%d record="%s"\n' \
++	"$free" "$reservation" "$outside" "$flcount" "$minfree" \
++	"$available" "$bno_level" "$cnt_level" "$rmap_level" \
++	"$bno_recs" "$cnt_recs" "$inobt_level" "$inobt_recs" \
++	"$agblock" "$cover" >>"$seqres.full"
++
++if (( available < 7 || available >= 15 || bno_level != 1 ||
++      cnt_level != 1 || bno_recs != 505 || cnt_recs != 505 ||
++      inobt_level != 0 || inobt_recs != 252 || flcount != minfree )) ||
++   [[ $cover != "0 $agblock 8" ]]; then
++	_fail "combined inode allocation precondition not met"
++fi
++
++mount_fs
++set +e
++"$REPRO" trigger "$SCRATCH_MNT" >>"$seqres.full" 2>&1
++trigger_status=$?
++set -e
++sleep 1
++
++if _check_dmesg_for 'Internal error i != 1|invalid sparse inode record|Shutting down filesystem'; then
++	_fail "sparse inode allocation shut down the filesystem"
++fi
++(( trigger_status == 0 )) || _fail "inode allocation failed with an unexpected error"
++
++# Verify that the filesystem remains usable after the allocation attempt.
++$XFS_IO_PROG -c stat "$SCRATCH_MNT" >>"$seqres.full" 2>&1 || \
++	_fail "filesystem is not usable after inode allocation"
++
++echo Silence is golden
++status=0
++exit
+diff --git a/tests/xfs/842.out b/tests/xfs/842.out
+new file mode 100644
+index 00000000..643d0528
+--- /dev/null
++++ b/tests/xfs/842.out
+@@ -0,0 +1,2 @@
++QA output created by 842
++Silence is golden
+-- 
+2.43.0
+
