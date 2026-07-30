@@ -1,196 +1,142 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D90B43F8CB
-	for <fstests@vger.kernel.org>; Thu, 30 Jul 2026 15:32:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1792442B1A
+	for <fstests@vger.kernel.org>; Thu, 30 Jul 2026 17:22:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785425578; cv=none; b=qFIA+sldwe+X5dbkgbBM4griMY4iF4PCxut3GE0FgW1tPo0gMKALsW5hQvDRvRUSp94LDsz2Aq+BHusZalxR5j8M1ct1/JTKyk3U697ewpBtfZjSQzjqbvfhgb4ZXS+fFjJxyxqqL/A7i3ubnnm2p12COoyQVTYMeWG5E4gn4h4=
+	t=1785432137; cv=none; b=Fs1q/fkfUuU2HxkZTcVhB5qA1XsJpwE6JFp1R5V6hVdhnwDBlfrpVq9rjOGprGfjpAWe5/Po54lSjRF7XeD23px29L4PtPeDypm8ekgznsK6TR/kWYzcwHOBIYO4zhykZ1K/mFvPqo6ZOBUTkhYJMyR0X+uFcN6oMz3hnvZKhMc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785425578; c=relaxed/simple;
-	bh=6cbOXHxCKMl73fQ5yZ+PcB/SbS2RUmJJN8vTzHWkvc4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=iiWdkiajHxmmGGUlb/rFLTp2PFXmMRb7fzElzJQk4vyh199uCowcDNAaI18Beo37Bs8focIb4ssnJj67JMZoqYP8hQxI8KS7CB9xAMFWcMN2rfKlv3VpGMXev8lUVfovGOOc+vjFhaUz91E3TpgX55o8fr0y9b0S2cZaAtRU7sw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kews2Ert; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1785432137; c=relaxed/simple;
+	bh=M6BZx1YxcFhe2zDgOp87LxGOPfuYB/P1/u/4kRmSOwk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=bITEoKIBLcoAA9i4tjioGFeNMAl1KmTPofEGvjJHiJYUoDaI1BS9pcqlDCIS+TkuGl0qV1oPdgtSHrhXhuai7Ldk7Im3ZOmpzIp/rkZqxjZRpeU/5ivFZU1lZ/qkiq1BLEBkOF+9Kku2zJc64ypQaGdZJYyikXP5RAiYbACrFOM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=CB3qosFE; arc=none smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kews2Ert"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 58B351F00A3A;
-	Thu, 30 Jul 2026 15:32:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1785425577;
-	bh=p1DPIF/Ps6IuvIPFGGVMbS/DW69QIQ47urdUCgZZ9PI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=kews2Ert5Er2EZ6+AC3A3FCnhrLSwvPT9/chwc+4zU3wbIGOX9/d4lVCiOGJpgtzq
-	 wo8/fZP9Oy6u1fpiwCdyRklv9buVXdVj+0aRPSmp9iZVB7utmm6uA9QTEQeeN9Zx/W
-	 vIU3KcPdXk6CGSeevhiBwWyZM2tWP1Gk5f1cTW/4EeEqfLL9lGgA7XPMgp9IRkKYk3
-	 uMWTD53xT4JRcU/A/3Hr3Ai4Zh4dGX3Kn2i0nL6F/JpEtzSsKbVnRMQGCCvTKXUknW
-	 nJpmoFuamDYub6kOtOYjuh1w0Ospz+7mJO7eJ/yw5f7It0xKVr032pxRJ3e387RpP8
-	 4TR+AdWcNy+Hw==
-Date: Thu, 30 Jul 2026 08:32:56 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-	Disha Goel <disgoel@linux.ibm.com>
-Subject: Re: [PATCH] generic/645: Confirm availability of free inodes
-Message-ID: <20260730153256.GJ7398@frogsfrogsfrogs>
-References: <20260617054216.3186441-1-ojaswin@linux.ibm.com>
- <20260625184259.GP6070@frogsfrogsfrogs>
- <ammQvzfsFTx9EEmm@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
- <20260729154451.GB7371@frogsfrogsfrogs>
- <amsviaOypNwLCtnM@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="CB3qosFE"
+Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66UGmMJw3487681;
+	Thu, 30 Jul 2026 17:22:12 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=pp1; bh=quti2JBsVDuhOf9qHYZ/usRcLaaMDsLD2AiZ3SxEk
+	EE=; b=CB3qosFEktidtI1hBEm24OZ5FwK85l1lkdEoh0Ofh03TSwVvYJv+mBWyP
+	VhY6cWM0NQ8MJpzKsdSSQaC/Lv+Eg1257bakV1z/aKMqhDxsKI5hMF/ux6R9kwab
+	GAXio15cJK2ntYAlBsINTTp4iD3n+BtO2mHNh0T5dffTkjDFY/0+t5P4ciUMbt8/
+	STHNFq8LTyZixvuJNDmfLeG9iOCjvmRsnoTfxlqRWl7yQ5m6VmCmGkpXUDrWBJ+Y
+	qBjIhHThX77KRXKIfVHabo7JcaAG9MIWqyghkS5FJfzZ6yFwIFmxbdK1zMV8wKj1
+	6tRncz8fa/TML+fEHqUeI7EsNTunQ==
+Received: from ppma12.dal12v.mail.ibm.com (dc.9e.1632.ip4.static.sl-reverse.com [50.22.158.220])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4fmv0p03dy-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 30 Jul 2026 17:22:12 +0000 (GMT)
+Received: from pps.filterd (ppma12.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma12.dal12v.mail.ibm.com (8.18.1.7/8.18.1.7) with ESMTP id 66UHBFkV004941;
+	Thu, 30 Jul 2026 17:22:11 GMT
+Received: from smtprelay04.fra02v.mail.ibm.com ([9.218.2.228])
+	by ppma12.dal12v.mail.ibm.com (PPS) with ESMTPS id 4fn7fqmgqt-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 30 Jul 2026 17:22:11 +0000 (GMT)
+Received: from smtpav04.fra02v.mail.ibm.com (smtpav04.fra02v.mail.ibm.com [10.20.54.103])
+	by smtprelay04.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 66UHM9Qj22151930
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Thu, 30 Jul 2026 17:22:09 GMT
+Received: from smtpav04.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id C711420043;
+	Thu, 30 Jul 2026 17:22:09 +0000 (GMT)
+Received: from smtpav04.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 9F2D020040;
+	Thu, 30 Jul 2026 17:22:08 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.39.25.82])
+	by smtpav04.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Thu, 30 Jul 2026 17:22:08 +0000 (GMT)
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Cc: "Darrick J . Wong" <djwong@kernel.org>, Disha Goel <disgoel@linux.ibm.com>
+Subject: [PATCH v2] generic/645: notrun if FS doesn't have enough free inodes/blocks
+Date: Thu, 30 Jul 2026 22:52:07 +0530
+Message-ID: <20260730172207.1937537-1-ojaswin@linux.ibm.com>
+X-Mailer: git-send-email 2.55.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <amsviaOypNwLCtnM@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzMwMDEyOSBTYWx0ZWRfX9DqoaBQMnRfJ
+ kdW991mA/3sNc9Q7+wj/t2JjCUv9v+PlQ1R5uFYF+Z+Ws9VZ2QpGlFIC3VXhQuFDRrGrbatwhpw
+ LUCo2RPNj09tD0wPgXFhBjPjV4Vcn9Q=
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzMwMDEyOSBTYWx0ZWRfX0myQpVOwZDTG
+ D9EzVjkfc00ykmduOU725w3mJ5uMzVDk63LQxTjXt/GzxkaXf2TwDaBPJdBvvLhHXnKi3GVYG0w
+ Gw9tC4T+6BjqEH3AjGbZAGdiyzny+CAqwJnbnMB5D+Z7xXcCCsHVCiQbraCGtqcNvFn3WsfsFMv
+ ZIcfIy85EjceynFIdjb1gOxF9KZELyJaf/Oauhhe6LwV6uvcJXlWijAlbjyEkPF+L9hbysm2jSx
+ b5b7T1VBXoWkf0kFCURHiIfcxKsHnSWpreRxoP3hVrUiWuPEMqnwpRsvjSouaDggUCI8bp8SJZA
+ 8ZUPCJAIx4SNz9XkMiG5z23wooWpHznscvpWRf2Ok2omskvyBolC9D8U8s1hqMThg3sHs310mMn
+ /ZTltkFoTVG29Ix1uoxg4gBjQhB+Tyu/6DuKFQFJFBfNv+FEM7VcAH36n1//hwYO1x7/5ImDMuo
+ C5MxywHcque1K05vA8A==
+X-Authority-Analysis: v=2.4 cv=b5WCJNGx c=1 sm=1 tr=0 ts=6a6b8844 cx=c_pps
+ a=bLidbwmWQ0KltjZqbj+ezA==:117 a=bLidbwmWQ0KltjZqbj+ezA==:17
+ a=RAioF0-LDSMA:10 a=VkNPw1HP01LnGYTKEx00:22 a=RnoormkPH1_aCDwRdu11:22
+ a=V8glGbnc2Ofi9Qvn3v5h:22 a=VwQbUJbxAAAA:8 a=VnNF1IyMAAAA:8
+ a=NyWC17klOB7_xQ97rUoA:9
+X-Proofpoint-GUID: zWe5-A0I3u1pyLscNdsJTQcTkid-g2mH
+X-Proofpoint-ORIG-GUID: zWe5-A0I3u1pyLscNdsJTQcTkid-g2mH
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-07-30_05,2026-07-30_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 spamscore=0 adultscore=0 malwarescore=0 impostorscore=0
+ bulkscore=0 phishscore=0 suspectscore=0 clxscore=1011 lowpriorityscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607300129
 
-On Thu, Jul 30, 2026 at 04:33:37PM +0530, Ojaswin Mujoo wrote:
-> On Wed, Jul 29, 2026 at 08:44:51AM -0700, Darrick J. Wong wrote:
-> > On Wed, Jul 29, 2026 at 11:06:57AM +0530, Ojaswin Mujoo wrote:
-> > > On Thu, Jun 25, 2026 at 11:42:59AM -0700, Darrick J. Wong wrote:
-> > > > On Wed, Jun 17, 2026 at 11:12:16AM +0530, Ojaswin Mujoo wrote:
-> > > > > When running generic/645 with ext4 using 64k block size + bigalloc, the
-> > > > > test fails with ENOSPC because the filesystem runs out of inodes before
-> > > > > the test completes.
-> > > > > 
-> > > > > The test creates approximately 10,001 files, however, in this particular
-> > > > > configuration a standard 5G FS only has around ~5100 inodes resulting in
-> > > > > the ENOSPC failure.
-> > > > > 
-> > > > > Add a check using _get_free_inode() to verify sufficient inodes are
-> > > > > available before running the test, else skip it.
-> > > > > 
-> > > > > Reported-by: Disha Goel <disgoel@linux.ibm.com>
-> > > > > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> > > > > ---
-> > > > >  tests/generic/645 | 6 ++++++
-> > > > >  1 file changed, 6 insertions(+)
-> > > > > 
-> > > > > diff --git a/tests/generic/645 b/tests/generic/645
-> > > > > index d6eb75e6..944b33db 100755
-> > > > > --- a/tests/generic/645
-> > > > > +++ b/tests/generic/645
-> > > > > @@ -19,6 +19,12 @@ _require_chown
-> > > > >  _wants_kernel_commit dacfd001eaf2 \
-> > > > >  	"fs/mnt_idmapping.c: Return -EINVAL when no map is written"
-> > > > >  
-> > > > > +_free_inodes=$(_get_free_inode $TEST_DIR)
-> > > > > +if [ $_free_inodes -ne 0 ] && [ $_free_inodes -lt 10001 ]; then
-> > > > 
-> > > > I'm assuming the > 0 check here is to cover weird filesystems like fat
-> > > > that don't advertise any inodes?  /me wonders if that ought to be a
-> > > 
-> > > Hey Darrick, sorry I missed this email earlier. Yes that's the idea. I
-> > > see there is a helper already
-> > > 
-> > > _require_inode_limits()
-> > > {
-> > > 	if [ $(_get_free_inode $TEST_DIR) -eq 0 ]; then
-> > > 		_notrun "$FSTYP does not have a fixed number of inodes available"
-> > > 	fi
-> > > }
-> > > 
-> > > But this will end up skipping the FSes that don't have a concept of
-> > > free inodes.
-> > > 
-> > > > common helper where we can record that justification:
-> > > > 
-> > > > _require_free_inodes() {
-> > > > 	local path="$1"
-> > > > 	local nr="$2"
-> > > > 
-> > > > 	local _free_inodes=$(_get_free_inode "$path")
-> > > > 
-> > > > 	# Weird filesystems like vfat don't report any inodes, so we
-> > > > 	# can't check for sufficient free inodes; IOWs, FAFO.
-> > > > 	test "$_free_inodes" -eq 0 && return
-> > > 
-> > > If we do this, won't we pass the check for the case where say xfs has 0
-> > > free inodes. It's a rare chance IMObut still wondering if we want to
-> > > keep that edge case open.
-> > > 
-> > > What do you think in these options:
-> > > - use the above check
-> > > - use _require_free_inodes which will cause notruns on some FSes
-> > > - Maybe have a new helper to check if FS advertises free inodes and then
-> > >   use somthing like
-> > > 
-> > >   if ! __fs_advertises_free_inodes
-> > >     return
-> > >   else
-> > >     test "$_free_inodes" -lt "$nr" && \
-> > >     _notrun "Insufficient free inodes ($_free_inodes), need at least $nr"
-> > > 
-> > 
-> > Hmmm.  This is getting complicated, because generic tests can run on any
-> > filesystem and we have no idea how much space an inode actually
-> > consumes, or if the filesystem even has any real concept of inodes.
-> > 
-> > Can we instead check the vfstest output for the ENOSPC error message and
-> > _notrun it if that is found?
-> 
-> Yes this sounds simple enough. The below diff works for me:
-> 
->   diff --git a/tests/generic/645 b/tests/generic/645
->   index d6eb75e6..3d8ca905 100755
->   --- a/tests/generic/645
->   +++ b/tests/generic/645
->   @@ -22,7 +22,14 @@ _wants_kernel_commit dacfd001eaf2 \
->    echo "Silence is golden"
->   
->    $here/src/vfs/vfstest --test-nested-userns \
->   -       --device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
->   +       --device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP" \
->   +       > $tmp.vfstest 2>&1
->   
->   +if grep -q "No space left on device" $tmp.vfstest; then
->   +       _notrun "No space left on device"
->   +fi
->   +
->   +cat $tmp.vfstest
->    status=$?
-> 
-> If this looks good I cans send a formal patch.
+When running generic/645 with ext4 using 64k block size + bigalloc, the
+test fails with ENOSPC because the filesystem runs out of inodes before
+the test completes.
 
-Yes! :)
+The test creates approximately 10,001 files, however, in this particular
+configuration a standard 5G FS only has around ~5100 inodes resulting in
+the ENOSPC failure.
 
---D
+Parse vfstest output to notrun the test incase we encounter this ENOSPC
+instead of reporting it as a failure.
 
-> 
-> Regards,
-> ojaswin 
-> 
-> > 
-> > --D
-> > 
-> > > Regards,
-> > > ojaswin
-> > > 
-> > > > 
-> > > > 	test "$_free_inodes" -lt "$nr" && \
-> > > > 		_notrun "Insufficient free inodes ($_free_inodes), need at least $nr"
-> > > > }
-> > > > 
-> > > > 
-> > > > _require_free_inodes $TEST_DIR 10001
-> > > > 
-> > > > (maybe clean up the comment a bit)
-> > > 
-> > > > 
-> > > > --D
-> > > > 
-> > > > > +	_notrun "Insufficient free inodes ($_free_inodes), need at least 10001"
-> > > > > +fi
-> > > > > +
-> > > > >  echo "Silence is golden"
-> > > > >  
-> > > > >  $here/src/vfs/vfstest --test-nested-userns \
-> > > > > -- 
-> > > > > 2.53.0
-> > > > > 
-> > > > > 
-> > > 
+Reported-by: Disha Goel <disgoel@linux.ibm.com>
+Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+---
+
+* Changes since v1 [1] *
+
+- Instead of using a helper, check for ENOSPC in vfstest output
+  (Thanks for Darrick for suggestion)
+
+
+[1] https://lore.kernel.org/fstests/20260617054216.3186441-1-ojaswin@linux.ibm.com/
+ tests/generic/645 | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/tests/generic/645 b/tests/generic/645
+index d6eb75e6..6498efe1 100755
+--- a/tests/generic/645
++++ b/tests/generic/645
+@@ -22,7 +22,13 @@ _wants_kernel_commit dacfd001eaf2 \
+ echo "Silence is golden"
+ 
+ $here/src/vfs/vfstest --test-nested-userns \
+-	--device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
++	--device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP" \
++	> $tmp.vfstest 2>&1
+ 
++if grep -q "No space left on device" $tmp.vfstest; then
++	_notrun "$TEST_DEV ran out of free blocks/inodes"
++fi
++
++cat $tmp.vfstest
+ status=$?
+ exit
+-- 
+2.55.0
+
