@@ -1,101 +1,246 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from dggsgout11.his.huawei.com (dggsgout11.his.huawei.com [45.249.212.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12C113AB273
-	for <fstests@vger.kernel.org>; Thu, 30 Jul 2026 17:39:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2543C38DC68
+	for <fstests@vger.kernel.org>; Fri, 31 Jul 2026 09:12:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785433176; cv=none; b=FQA6xmge9M3ZAOVCgT3qwwoDd5tPq5Amiovn9A2MZME5DZI9aB0kXuzjHqOXGtPYYIxtHf9iPWFAQsj8rsvDmY1/BSBFqV2JXiuDKqJ4mIpIT9Bd6Sq4jvs7FokdkeO62BwMcLLztvo64oeWusIcBGYbD1dYA0XNqHrb2tcpl6c=
+	t=1785489137; cv=none; b=S86rReTSpBrTMSFYpU0f5d0eoajKJPvvJlOMscFx2RFGOMXo4WzCTgwEXzjIkm9A3KRkZIl76SrJK39Ghi8GSY7JoxXWcolHPaH4nan1NhlalJfqjOzh4vOs1RWPvd23Rvol6bZo4eCz7+WAvTSLgtSaBQg8XnSdZXBmTuvvs9A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785433176; c=relaxed/simple;
-	bh=GlyxQ+rB7OcNd3NLMBI2fn2UWwqlVAjCr+8Os9SXtm0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=YDet/H04Pw7cZpc5cFxvzKMbES69yDpqSAsyXpXmWQUH8V7yL2wep4QNCs8trz849szwv+e20RW7ULtHWSwyn8s583meDkR7rwXUl82lJ9/Eh75ZyZbwcQ41FXp1h0nxl8u5m6u1RX/aiqMqXhaTn87UGjnzBHybxEWELKZFlLA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PSp2Z4sE; arc=none smtp.client-ip=100.103.45.18
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PSp2Z4sE"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id A28981F000E9;
-	Thu, 30 Jul 2026 17:39:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1785433174;
-	bh=/ijJ+s3fbAHvk39TPv8dI6eBaiM+vqxTpcwLlUPdh8k=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=PSp2Z4sERkd/nEO2idkYoiKozvyOntkm1EW0q37JBBBq1V0Tzow1SsbVwqKq89OfD
-	 FnKLu8CIajH0OtnGDSbtq4eJTdTbGiSB8N+0pzieQjmvYSkGzmk8mheU4Y9bFFkOQb
-	 VLyXngE+38NC5T4vsvXYofWygZJEcDN3FxXPIoznKHo6JHFzqlVcIoZTa3Cb35jUZE
-	 ltZ/tXVwX1MhHgEtdSbLoaMhfxlr1vSvQZABtuIuuSRFRxXU/BNahX+JbGDMwYyAVz
-	 gQw8Knpq2zfVo6LW20/c2GLP/6gdygrzYyPpBAO/Rtn21VQrznacm83hDTJ5LpuYEW
-	 WWYcDeiSlOuUQ==
-Date: Thu, 30 Jul 2026 10:39:34 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	Disha Goel <disgoel@linux.ibm.com>
-Subject: Re: [PATCH v2] generic/645: notrun if FS doesn't have enough free
- inodes/blocks
-Message-ID: <20260730173934.GK7398@frogsfrogsfrogs>
-References: <20260730172207.1937537-1-ojaswin@linux.ibm.com>
+	s=arc-20240116; t=1785489137; c=relaxed/simple;
+	bh=uNu4IYoa3tOQzzVvjvAk3akKqe5wlnUl0kRFzxD9UHY=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=gxJjbVuGIeli7R9e619FUXjxE8eXR0KN9W/9E9ovtjxMBS1fqcysMrKwK/mdefClTorLnY8YNycEV1GgaY2TYW2VLQJ9XM2loTBpD0LZ0SKkTmWzgEuPMfZo16ztOpfIca7COAW5G7GjaiTIfBmbVZhc9+TcUs7NZ8H+9JQgRO4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com; spf=pass smtp.mailfrom=huaweicloud.com; arc=none smtp.client-ip=45.249.212.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huaweicloud.com
+Received: from mail.maildlp.com (unknown [172.19.163.177])
+	by dggsgout11.his.huawei.com (SkyGuard) with ESMTPS id 4hBL0P0jJQzYQthS
+	for <fstests@vger.kernel.org>; Fri, 31 Jul 2026 17:11:17 +0800 (CST)
+Received: from mail02.huawei.com (unknown [10.116.40.252])
+	by mail.maildlp.com (Postfix) with ESMTP id 4DE0E4057D
+	for <fstests@vger.kernel.org>; Fri, 31 Jul 2026 17:12:01 +0800 (CST)
+Received: from huaweicloud.com (unknown [10.50.85.155])
+	by APP3 (Coremail) with UTF8SMTPSA id _Ch0CgCX0kHfZmxqzCphAg--.6418S4;
+	Fri, 31 Jul 2026 17:12:01 +0800 (CST)
+From: Zizhi Wo <wozizhi@huaweicloud.com>
+To: zlang@kernel.org,
+	brauner@kernel.org,
+	fstests@vger.kernel.org
+Cc: yangerkun@huawei.com,
+	chengzhihao1@huawei.com,
+	wozizhi@huawei.com
+Subject: [PATCH] idmapped-mounts: probe O_TMPFILE support with the caller's mapped id
+Date: Fri, 31 Jul 2026 17:02:53 +0800
+Message-ID: <20260731090253.1665192-1-wozizhi@huaweicloud.com>
+X-Mailer: git-send-email 2.52.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260730172207.1937537-1-ojaswin@linux.ibm.com>
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:_Ch0CgCX0kHfZmxqzCphAg--.6418S4
+X-Coremail-Antispam: 1UD129KBjvJXoW3ArW7Zr1fXFWxur4kZrW8WFg_yoWxur18pa
+	9Yqr98trWxtF1agw1DJFn7KFW3Kr4rGw1jqrnFkayfA3ZIkF9avr4IyF10y3s8CryfWa47
+	XaykJ34UW3y3GF7anT9S1TB71UUUUUJqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUklb4IE77IF4wAFF20E14v26r4j6ryUM7CY07I20VC2zVCF04k2
+	6cxKx2IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4
+	vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Jr0_JF4l84ACjcxK6xIIjxv20xvEc7Cj
+	xVAFwI0_Gr0_Cr1l84ACjcxK6I8E87Iv67AKxVWxJr0_GcWl84ACjcxK6I8E87Iv6xkF7I
+	0E14v26rxl6s0DM2kKe7AKxVWUXVWUAwAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40E
+	FcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAFwI0_Jr
+	0_Gr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7VAKI48JMxkF7I0En4kS14v26rWY
+	6Fy7MxAIw28IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI
+	0_Jr0_Jr4lx2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUAVWUtwCIc40Y
+	0x0EwIxGrwCI42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxV
+	WUJVW8JwCI42IY6xAIw20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Jr0_Gr1l
+	IxAIcVC2z280aVCY1x0267AKxVW8JVW8JrUvcSsGvfC2KfnxnUUI43ZEXa7IUnrnY7UUUU
+	U==
+X-CM-SenderInfo: pzr2x6tkl6x35dzhxuhorxvhhfrp/
 
-On Thu, Jul 30, 2026 at 10:52:07PM +0530, Ojaswin Mujoo wrote:
-> When running generic/645 with ext4 using 64k block size + bigalloc, the
-> test fails with ENOSPC because the filesystem runs out of inodes before
-> the test completes.
-> 
-> The test creates approximately 10,001 files, however, in this particular
-> configuration a standard 5G FS only has around ~5100 inodes resulting in
-> the ENOSPC failure.
-> 
-> Parse vfstest output to notrun the test incase we encounter this ENOSPC
-> instead of reporting it as a failure.
-> 
-> Reported-by: Disha Goel <disgoel@linux.ibm.com>
-> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+From: Zizhi Wo <wozizhi@huawei.com>
 
-Looks good to me,
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+Kernel commit 539dce114465 ("fs: refuse O_TMPFILE creation with an
+unmapped fsuid or fsgid") made vfs_tmpfile() return -EOVERFLOW when the
+caller's fsuid/fsgid has no mapping in the filesystem's user namespace
+after applying the mount's idmapping. This is a no-op on non-idmapped
+mounts and only takes effect on an idmapped mount that does not map the
+caller.
 
---D
+The idmapped-mount testcases behind generic/696 and generic/697 build an
+idmapping (e.g. "0 10000 10000") that covers host uid 10000-19999 but
+not uid 0, then call openat_tmpfile_supported() from the parent process
+that is still real root (fsuid 0). The probe now gets -EOVERFLOW, falls
+into the log_errno() branch, and prints
 
-> ---
-> 
-> * Changes since v1 [1] *
-> 
-> - Instead of using a helper, check for ENOSPC in vfstest output
->   (Thanks for Darrick for suggestion)
-> 
-> 
-> [1] https://lore.kernel.org/fstests/20260617054216.3186441-1-ojaswin@linux.ibm.com/
->  tests/generic/645 | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/645 b/tests/generic/645
-> index d6eb75e6..6498efe1 100755
-> --- a/tests/generic/645
-> +++ b/tests/generic/645
-> @@ -22,7 +22,13 @@ _wants_kernel_commit dacfd001eaf2 \
->  echo "Silence is golden"
->  
->  $here/src/vfs/vfstest --test-nested-userns \
-> -	--device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
-> +	--device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP" \
-> +	> $tmp.vfstest 2>&1
->  
-> +if grep -q "No space left on device" $tmp.vfstest; then
-> +	_notrun "$TEST_DEV ran out of free blocks/inodes"
-> +fi
-> +
-> +cat $tmp.vfstest
->  status=$?
->  exit
-> -- 
-> 2.55.0
-> 
+  utils.c: 928: openat_tmpfile_supported - Value too large for defined \
+data type - failure: create
+
+to stderr. Both testcases expect "Silence is golden", so this spurious
+output fails them, even though the kernel behavior is correct and the
+testcases' own assertions all pass.
+
+Move each openat_tmpfile_supported() call into the child, after
+switch_ids()/switch_userns(), so it probes with the mapped identity the
+tmpfile section uses. Silencing EOVERFLOW in openat_tmpfile_supported()
+would make it indistinguishable whether the idmapping genuinely has no
+mapping for any caller, or the probe just ran in the unmapped parent before
+the switch.
+
+Signed-off-by: Zizhi Wo <wozizhi@huawei.com>
+---
+ src/vfs/idmapped-mounts.c | 32 ++++++++++++++++++++------------
+ 1 file changed, 20 insertions(+), 12 deletions(-)
+
+diff --git a/src/vfs/idmapped-mounts.c b/src/vfs/idmapped-mounts.c
+index ed9992f9..bfbe9042 100644
+--- a/src/vfs/idmapped-mounts.c
++++ b/src/vfs/idmapped-mounts.c
+@@ -3838,8 +3838,6 @@ int tcore_setgid_create_idmapped(const struct vfstest_info *info)
+ 		goto out;
+ 	}
+ 
+-	supported = openat_tmpfile_supported(open_tree_fd);
+-
+ 	pid = fork();
+ 	if (pid < 0) {
+ 		log_stderr("failure: fork");
+@@ -3849,6 +3847,8 @@ int tcore_setgid_create_idmapped(const struct vfstest_info *info)
+ 		if (!switch_ids(10000, 11000))
+ 			die("failure: switch fsids");
+ 
++		supported = openat_tmpfile_supported(open_tree_fd);
++
+ 		/* create regular file via open() */
+ 		file1_fd = openat(open_tree_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, S_IXGRP | S_ISGID);
+ 		if (file1_fd < 0)
+@@ -4014,8 +4014,6 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ 		goto out;
+ 	}
+ 
+-	supported = openat_tmpfile_supported(open_tree_fd);
+-
+ 	pid = fork();
+ 	if (pid < 0) {
+ 		log_stderr("failure: fork");
+@@ -4025,6 +4023,8 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (!switch_userns(attr.userns_fd, 0, 0, false))
+ 			die("failure: switch_userns");
+ 
++		supported = openat_tmpfile_supported(open_tree_fd);
++
+ 		/* create regular file via open() */
+ 		file1_fd = openat(open_tree_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, S_IXGRP | S_ISGID);
+ 		if (file1_fd < 0)
+@@ -4133,6 +4133,8 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (!switch_userns(attr.userns_fd, 0, 0, false))
+ 			die("failure: switch_userns");
+ 
++		supported = openat_tmpfile_supported(open_tree_fd);
++
+ 		if (!caps_down_fsetid())
+ 			die("failure: caps_down_fsetid");
+ 
+@@ -4257,6 +4259,8 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (!switch_userns(attr.userns_fd, 0, 1000, false))
+ 			die("failure: switch_userns");
+ 
++		supported = openat_tmpfile_supported(open_tree_fd);
++
+ 		if (!caps_down_fsetid())
+ 			die("failure: caps_down_fsetid");
+ 
+@@ -7733,8 +7737,6 @@ static int setgid_create_umask_idmapped(const struct vfstest_info *info)
+ 		goto out;
+ 	}
+ 
+-	supported = openat_tmpfile_supported(open_tree_fd);
+-
+ 	pid = fork();
+ 	if (pid < 0) {
+ 		log_stderr("failure: fork");
+@@ -7752,6 +7754,8 @@ static int setgid_create_umask_idmapped(const struct vfstest_info *info)
+ 		if (!switch_ids(10000, 11000))
+ 			die("failure: switch fsids");
+ 
++		supported = openat_tmpfile_supported(open_tree_fd);
++
+ 		/* create regular file via open() */
+ 		file1_fd = openat(open_tree_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, S_IXGRP | S_ISGID);
+ 		if (file1_fd < 0)
+@@ -7947,8 +7951,6 @@ static int setgid_create_umask_idmapped_in_userns(const struct vfstest_info *inf
+ 		goto out;
+ 	}
+ 
+-	supported = openat_tmpfile_supported(open_tree_fd);
+-
+ 	/*
+ 	 * Below we verify that setgid inheritance for a newly created file or
+ 	 * directory works correctly. As part of this we need to verify that
+@@ -7984,6 +7986,8 @@ static int setgid_create_umask_idmapped_in_userns(const struct vfstest_info *inf
+ 		if (!switch_userns(attr.userns_fd, 0, 0, false))
+ 			die("failure: switch_userns");
+ 
++		supported = openat_tmpfile_supported(open_tree_fd);
++
+ 		if (!caps_down_fsetid())
+ 			die("failure: caps_down_fsetid");
+ 
+@@ -8181,8 +8185,6 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+ 		goto out;
+ 	}
+ 
+-	supported = openat_tmpfile_supported(open_tree_fd);
+-
+ 	pid = fork();
+ 	if (pid < 0) {
+ 		log_stderr("failure: fork");
+@@ -8207,6 +8209,8 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+ 		if (!switch_ids(10000, 11000))
+ 			die("failure: switch fsids");
+ 
++		supported = openat_tmpfile_supported(open_tree_fd);
++
+ 		/* create regular file via open() */
+ 		file1_fd = openat(open_tree_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, S_IXGRP | S_ISGID);
+ 		if (file1_fd < 0)
+@@ -8342,6 +8346,8 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+ 		if (!switch_ids(10000, 11000))
+ 			die("failure: switch fsids");
+ 
++		supported = openat_tmpfile_supported(open_tree_fd);
++
+ 		/* create regular file via open() */
+ 		file1_fd = openat(open_tree_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, S_IXGRP | S_ISGID);
+ 		if (file1_fd < 0)
+@@ -8536,8 +8542,6 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
+ 		goto out;
+ 	}
+ 
+-	supported = openat_tmpfile_supported(open_tree_fd);
+-
+ 	/*
+ 	 * Below we verify that setgid inheritance for a newly created file or
+ 	 * directory works correctly. As part of this we need to verify that
+@@ -8580,6 +8584,8 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (!switch_userns(attr.userns_fd, 0, 0, false))
+ 			die("failure: switch_userns");
+ 
++		supported = openat_tmpfile_supported(open_tree_fd);
++
+ 		if (!caps_down_fsetid())
+ 			die("failure: caps_down_fsetid");
+ 
+@@ -8723,6 +8729,8 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (!switch_userns(attr.userns_fd, 0, 0, false))
+ 			die("failure: switch_userns");
+ 
++		supported = openat_tmpfile_supported(open_tree_fd);
++
+ 		if (!caps_down_fsetid())
+ 			die("failure: caps_down_fsetid");
+ 
+-- 
+2.52.0
+
