@@ -1,158 +1,233 @@
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28C1D3EF0A0
-	for <fstests@vger.kernel.org>; Fri, 31 Jul 2026 11:26:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB1791F2380;
+	Sun,  2 Aug 2026 10:02:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785497214; cv=none; b=urBp1C+KMuS3VDLDREmrWt5zXP9xu7A99EHXtg2vWg0P9Bi11G8tmgJUTKNuZlzQR13HygCpbnpqTtqgUW+Re5yZeK3wsHDxwAob0ruY5r32XoKm08tjay5jFMB7pzZH0ADTJzGab/lM/EY3AKZTp6WitYUeTlV8WEaMNvv/GUI=
+	t=1785664932; cv=none; b=siUc1ikIFPlCOfUQGkoBS4Ki0uyPovsKVXmB0k7f/O9ryyo96QfN3MZfd2VV8jAE3fSx/y1PqEgJzo5ZaYLN6vkqj4GYU/rPGiy5LNHCCJfd+WozIKZAO2sMhDHpFUitv6K/ckh1ADnbW0c9pF66rLEaVoMO1tP8T2L4kP71e0M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785497214; c=relaxed/simple;
-	bh=te4diykADmiSqYmMBKQY07oCQ+FTFmJzURJ9jeCSv8o=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Y5fXVVKVL60G78WH94qUgpQnJTAWLiDIpD65e1bfZEucozUBrpr+TPyuImyASqY3X44/1gxkpNuL2q3gCQoRPza0a5//4ZHCdAMqn6ZJVp1H4NmUZqpsP3zqSx0O6KsDgPJYXkqxutGA4a5OTsTzHgc4sphWIt5HB/fP/fLZ4EU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=acaClXLU; arc=none smtp.client-ip=148.163.156.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	s=arc-20240116; t=1785664932; c=relaxed/simple;
+	bh=1r6wMMqs0wLC5I3DwPhqdui1QguOAUmSRsw+MiOQ0UI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Jgx3aYjtMpw0TLcmXALO0bVzUBomuHGwvRrKgtAOZ9Zth01NGOhfq3QJvwSKOszhaKmSQOgvlZ26e/93aVG7Ww4Ht2KXlT0M+BtcCACuPba6d17cR8zB5RT2fOHcz63NTZdivj8woTNn7ebz4COEjTXrOsxpvU0qjaCNOe5Yluc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=d341c/vg; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="acaClXLU"
-Received: from pps.filterd (m0353729.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66V8Hh863629967;
-	Fri, 31 Jul 2026 11:26:51 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pp1; bh=OwQu1K
-	4tNCpLh32TioA75NRa6GUBXcBColvEk77aIjs=; b=acaClXLUKVx/gcuafSRDHn
-	jfpBeAU4QRzQsjEQ6NVromwl03bnXs0nZ2mjcAVpX8JILhVc/b2XHIG694u/atRb
-	y4hAoAMTuNvCdZgNBQaook5A1DkzaXy0RidvV86pN0C+etEHOklV0avrtRJjyOjM
-	CAUav/zO3O/j84axuTXu+3rSLdY2o1qbmiwaZW6sYYmIIu3Sn5hsdBGvI3QpgTPz
-	wwYAldkrw0bd3j+U8up0zYFV6k7WPhe5KQCVPHGy3MuA+Ox5lXuNZpHLKiO6W2yi
-	z6q9ejxupgBxXODWXCNSNj1BsMZHgpGCJjo4z25n+UnwZp0ebMciQOlQG4rBPI2A
-	==
-Received: from ppma22.wdc07v.mail.ibm.com (5c.69.3da9.ip4.static.sl-reverse.com [169.61.105.92])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4fmuycvn7h-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 31 Jul 2026 11:26:51 +0000 (GMT)
-Received: from pps.filterd (ppma22.wdc07v.mail.ibm.com [127.0.0.1])
-	by ppma22.wdc07v.mail.ibm.com (8.18.1.7/8.18.1.7) with ESMTP id 66VBQgsA015054;
-	Fri, 31 Jul 2026 11:26:50 GMT
-Received: from smtprelay04.fra02v.mail.ibm.com ([9.218.2.228])
-	by ppma22.wdc07v.mail.ibm.com (PPS) with ESMTPS id 4fn7uwfskk-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 31 Jul 2026 11:26:49 +0000 (GMT)
-Received: from smtpav01.fra02v.mail.ibm.com (smtpav01.fra02v.mail.ibm.com [10.20.54.100])
-	by smtprelay04.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 66VBQl9211272654
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 31 Jul 2026 11:26:47 GMT
-Received: from smtpav01.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id C6F732004B;
-	Fri, 31 Jul 2026 11:26:47 +0000 (GMT)
-Received: from smtpav01.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 7554E20040;
-	Fri, 31 Jul 2026 11:26:46 +0000 (GMT)
-Received: from [9.39.25.127] (unknown [9.39.25.127])
-	by smtpav01.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Fri, 31 Jul 2026 11:26:46 +0000 (GMT)
-Message-ID: <46dcfb0c-209e-43fa-a713-b39d3c2d6748@linux.ibm.com>
-Date: Fri, 31 Jul 2026 16:56:45 +0530
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="d341c/vg"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 87B7F1F000E9;
+	Sun,  2 Aug 2026 10:02:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1785664930;
+	bh=6xLY+/gzaI2p32FqUFncbXzwcspctY8No06jdHaWzDI=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=d341c/vgPwzbIzSQpiCIAUK2utsZSJMZa+V6rmuPVXCCifRDsYYj8nwpbiN91vRgR
+	 8xIQLHkzCUaG4l7K+U0PF/9ZL+qLc+VyQnR6U0YzWV8Z9lmeB27pp759nr+lgiKAca
+	 9BbG+cLXJJnx+YlI1hZqtsFOrmZ9pf4mgzH2CRKz8LzvMtVRDfBu6HWicUZFUSp1VL
+	 uHzndyWSNAQOJMz8pdfkMYdPi9608C6aVr7AnN6b7WmCBdJZ09/Rq/095PdFwluD7m
+	 T4o79AYXlAuSyi1mrawcVa1pe5ew8jif3tDnvBcQ7/q1VtGhqUiaNjySKBSVKw0pMO
+	 U3XpkXaLHNtyQ==
+Date: Sun, 2 Aug 2026 18:02:02 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Sun YangKai <sunk67188@gmail.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, 
+	sunyangkai@fygo.io, Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH v3] btrfs: test POSIX ACL changes for RO btrfs property
+Message-ID: <am8JhAnr7H1-Ovw9@zlang-mailbox>
+Mail-Followup-To: Sun YangKai <sunk67188@gmail.com>, 
+	linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, sunyangkai@fygo.io, 
+	Filipe Manana <fdmanana@suse.com>
+References: <20260709082500.17907-2-sunk67188@gmail.com>
+ <20260722075347.26639-1-sunk67188@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] generic/645: notrun if FS doesn't have enough free
- inodes/blocks
-Content-Language: en-GB
-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>, Zorro Lang <zlang@kernel.org>,
-        fstests@vger.kernel.org
-Cc: "Darrick J . Wong" <djwong@kernel.org>
-References: <20260730172207.1937537-1-ojaswin@linux.ibm.com>
-From: Disha Goel <disgoel@linux.ibm.com>
-In-Reply-To: <20260730172207.1937537-1-ojaswin@linux.ibm.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-ORIG-GUID: EGS7mTEJ199EHTfIqUrgvF44kcEwS8a-
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzMxMDA4NSBTYWx0ZWRfX5EWuF3T2bxuM
- ZALdxl+XsdMhVYfIvUChkHZfeWlNUfTfhfBN9WaM8MVYf+rN0mLXJL+7aEBPF/e3wVZNtAy0jyC
- 7DOMOa54hEmW+EHZ7B6cb4+lVKSC9/X8jAk9BV7nu5xS2BmtsHZ1WJ5VLJgbkTQG0OeuPSi1a2f
- 1Li8jDZAm4RcT+6m0ZYcwoR7YbQejP5sR/9mDhLo2GiqFqsPczZferv0+mzK8MUraNBzvMWTszQ
- tTmB5NyLyTzIHz9zDrElpnpAX+U3u0yA9bde5bsTvJ7ocFmDOrtyrw9m9TswuVu5ljcmvTtji95
- OpYChPHUbrWjnWSw0o9rKwX7T4sRKN4IoywMs7a0QfDDhJ8ii4wZhYMUKVXJNRKM4OkB8F5pP/k
- uwN16MepW4f5Uqn3tXaDAuaVv7bOCMfwb95XkAf04+j9b41pNg7SCQ698YXHJM5qdpN/wHvZlq7
- vTkC/Z3Qhe45hbe963Q==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNzMxMDA4NSBTYWx0ZWRfXz2WmS7aHBHJf
- HMSDbdqAS+WJPNbCGD1wl0408+ccFJFldBjjlY469A3f90MsbXWodFAs9LGhSmYt1mp4R38HgZ9
- whLBcvbcAkXIL+mc1A+wbmN8QIcKB4s=
-X-Authority-Analysis: v=2.4 cv=AZeB2XXG c=1 sm=1 tr=0 ts=6a6c867b cx=c_pps
- a=5BHTudwdYE3Te8bg5FgnPg==:117 a=5BHTudwdYE3Te8bg5FgnPg==:17
- a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=RnoormkPH1_aCDwRdu11:22 a=uAbxVGIbfxUO_5tXvNgY:22 a=VwQbUJbxAAAA:8
- a=VnNF1IyMAAAA:8 a=p2ZZ_g01jCg9CbmMwhAA:9 a=QEXdDO2ut3YA:10
-X-Proofpoint-GUID: EGS7mTEJ199EHTfIqUrgvF44kcEwS8a-
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-07-31_03,2026-07-30_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- spamscore=0 priorityscore=1501 phishscore=0 adultscore=0 impostorscore=0
- clxscore=1015 malwarescore=0 suspectscore=0 lowpriorityscore=0 bulkscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607310085
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260722075347.26639-1-sunk67188@gmail.com>
 
-On 30/07/26 10:52 pm, Ojaswin Mujoo wrote:
-> When running generic/645 with ext4 using 64k block size + bigalloc, the
-> test fails with ENOSPC because the filesystem runs out of inodes before
-> the test completes.
+On Wed, Jul 22, 2026 at 03:52:47PM +0800, Sun YangKai wrote:
+> From: Sun YangKai <sunyangkai@fygo.io>
 > 
-> The test creates approximately 10,001 files, however, in this particular
-> configuration a standard 5G FS only has around ~5100 inodes resulting in
-> the ENOSPC failure.
+> Test creation, modification and deletion of POSIX ACLs on a btrfs
+> filesystem that has the read-only property set to true.
 > 
-> Parse vfstest output to notrun the test incase we encounter this ENOSPC
-> instead of reporting it as a failure.
+> This exercises a bug fixed by the kernel patch with subject:
+> "btrfs: check if root is readonly when setting posix acl"
 > 
-> Reported-by: Disha Goel <disgoel@linux.ibm.com>
-> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> Signed-off-by: Sun YangKai <sunyangkai@fygo.io>
+> Reviewed-by: Filipe Manana <fdmanana@suse.com>
 > ---
+> Changes since v2:
 > 
-Tested with ext4 + 64k block size + bigalloc on a 9G filesystem.
-generic/645 now correctly notruns instead of failing with ENOSPC.
+> - updated commit message
+> - proper format for fixed_by_kernel_commit
+> - lower case variable name
+> - handle mkfs failure
+> 
+> Suggested by Filipe Manana
+> ---
 
-Tested-by: Disha Goel <disgoel@linux.ibm.com>
+This version is good to me, if no more review points form btrfs list, I'll
+merge it.
 
-> * Changes since v1 [1] *
+Reviewed-by: Zorro Lang <zlang@kernel.org>
+
+>  tests/btrfs/353     | 95 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/353.out | 39 +++++++++++++++++++
+>  2 files changed, 134 insertions(+)
+>  create mode 100755 tests/btrfs/353
+>  create mode 100644 tests/btrfs/353.out
 > 
-> - Instead of using a helper, check for ENOSPC in vfstest output
->    (Thanks for Darrick for suggestion)
-> 
-> 
-> [1] https://lore.kernel.org/fstests/20260617054216.3186441-1-ojaswin@linux.ibm.com/
->   tests/generic/645 | 8 +++++++-
->   1 file changed, 7 insertions(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/645 b/tests/generic/645
-> index d6eb75e6..6498efe1 100755
-> --- a/tests/generic/645
-> +++ b/tests/generic/645
-> @@ -22,7 +22,13 @@ _wants_kernel_commit dacfd001eaf2 \
->   echo "Silence is golden"
->   
->   $here/src/vfs/vfstest --test-nested-userns \
-> -	--device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
-> +	--device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP" \
-> +	> $tmp.vfstest 2>&1
->   
-> +if grep -q "No space left on device" $tmp.vfstest; then
-> +	_notrun "$TEST_DEV ran out of free blocks/inodes"
-> +fi
+> diff --git a/tests/btrfs/353 b/tests/btrfs/353
+> new file mode 100755
+> index 00000000..63ba4681
+> --- /dev/null
+> +++ b/tests/btrfs/353
+> @@ -0,0 +1,95 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2026 Fygo OS. All Rights Reserved.
+> +#
+> +# FS QA Test No. 353
+> +#
+> +# Test that POSIX ACLs cannot be changed once a btrfs subvolume has the
+> +# read-only property set.
+> +#
+> +# Setting or removing a POSIX ACL goes through the ->set_acl inode
+> +# operation, which is a different code path from the generic ->setxattr
+> +# one covered by btrfs/275.  It used to be allowed on a read-only
+> +# subvolume and thus bypassed the RO protection.  Such modifications must
+> +# fail with EROFS, just like any other xattr.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick acl attr
 > +
-> +cat $tmp.vfstest
->   status=$?
->   exit
-
--- 
-Regards,
-Disha
-
+> +. ./common/filter
+> +. ./common/attr
+> +
+> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +	"btrfs: check if root is readonly when setting posix acl"
+> +
+> +_require_acls
+> +_require_btrfs_command "property"
+> +_require_scratch
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+> +_scratch_mount
+> +
+> +filename=$SCRATCH_MNT/foo
+> +
+> +set_acl()
+> +{
+> +	local perm=$1
+> +
+> +	# Use -n so setfacl does not recalculate the mask, keeping the
+> +	# golden output deterministic regardless of the named user's
+> +	# permissions.
+> +	setfacl -n -m u:$acl2:$perm,m::rwx $filename 2>&1 | _filter_scratch
+> +}
+> +
+> +get_acl()
+> +{
+> +	getfacl --absolute-names -n $filename | _filter_scratch | _getfacl_filter_id
+> +}
+> +
+> +del_acl()
+> +{
+> +	setfacl -b $filename 2>&1 | _filter_scratch
+> +}
+> +
+> +_acl_setup_ids
+> +
+> +# Create a test file.
+> +echo "hello world" > $filename
+> +
+> +# Set an initial ACL while the subvolume is writable.
+> +set_acl rwx
+> +
+> +# Attempt to change the ACL once the subvolume is read-only.  This must
+> +# fail with EROFS.
+> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT ro true
+> +$BTRFS_UTIL_PROG property get $SCRATCH_MNT ro
+> +
+> +set_acl r--
+> +
+> +# The ACL must not have changed.
+> +get_acl
+> +
+> +# Attempt to remove the ACL from the read-only subvolume.  This must
+> +# fail with EROFS as well.
+> +del_acl
+> +
+> +# The ACL must still be present.
+> +get_acl
+> +
+> +# Make the subvolume writable again.
+> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT ro false
+> +$BTRFS_UTIL_PROG property get $SCRATCH_MNT ro
+> +
+> +# Now changing the ACL must succeed.
+> +set_acl r--
+> +
+> +get_acl
+> +
+> +# And removing it must succeed too.
+> +del_acl
+> +
+> +# Check the ACL is really gone.
+> +get_acl
+> +
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/353.out b/tests/btrfs/353.out
+> new file mode 100644
+> index 00000000..66f4a0e5
+> --- /dev/null
+> +++ b/tests/btrfs/353.out
+> @@ -0,0 +1,39 @@
+> +QA output created by 353
+> +ro=true
+> +setfacl: SCRATCH_MNT/foo: Read-only file system
+> +# file: SCRATCH_MNT/foo
+> +# owner: 0
+> +# group: 0
+> +user::rw-
+> +user:id2:rwx
+> +group::r--
+> +mask::rwx
+> +other::r--
+> +
+> +setfacl: SCRATCH_MNT/foo: Read-only file system
+> +# file: SCRATCH_MNT/foo
+> +# owner: 0
+> +# group: 0
+> +user::rw-
+> +user:id2:rwx
+> +group::r--
+> +mask::rwx
+> +other::r--
+> +
+> +ro=false
+> +# file: SCRATCH_MNT/foo
+> +# owner: 0
+> +# group: 0
+> +user::rw-
+> +user:id2:r--
+> +group::r--
+> +mask::rwx
+> +other::r--
+> +
+> +# file: SCRATCH_MNT/foo
+> +# owner: 0
+> +# group: 0
+> +user::rw-
+> +group::r--
+> +other::r--
+> +
+> -- 
+> 2.54.0
+> 
+> 
