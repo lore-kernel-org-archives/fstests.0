@@ -1,87 +1,250 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 567B83644DE
-	for <fstests@vger.kernel.org>; Sun,  2 Aug 2026 13:25:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 158AE3B38BC
+	for <fstests@vger.kernel.org>; Sun,  2 Aug 2026 13:59:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785677122; cv=none; b=Ajd+oUZSz6Ixndq9WKQ/2RiUMGg12H53Iiv5rMGNHmXaMBbAKr7wFCLfHz2PG8f7X8xlM4aL4b70d8d059kIMLcnarReWCXLAbzejLX3MXG3AIwGgcIQEc0yIOwOgY9xeAqK4iykqV/5dzDKDmXo7Hj3y/uHd1K5gQCRKLWYwr4=
+	t=1785679165; cv=none; b=NGwsXt79TTm9wn5TwYkJeGfsp0dWNXGd6wRIpKMY71H7kMmGE0U920982X1QhLrfKzsAuEIoLlYE07ziSbCd6ZNi4aK1Rx0MQEg7POvqhrMZG7DZqcqWEZjf4nN8NM4f+/84VHKEq05HVJDhun3iQJ8jHJ1s/6zgxusLFDWtg6M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785677122; c=relaxed/simple;
-	bh=TEHKL32FNCImkG/6c05q87aXwS6FlzEm1fWBaIYLmb0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=JUj8tbmgrb8VN0/2p752mZ8J2GLdt3p1oznno/7mqueJqq91Xa2EYaZaHiq2RrPuo4QtBGJlmYae45zWjX1xLwNKpgVR1NwzZ214YynApkLo26E04iw29JqUwDLGYwsPxFxh+9Ewano3v+XGJ+mDyhpQfbuIyYsCMcoDrSZ+kDk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=anBfds/1; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1785679165; c=relaxed/simple;
+	bh=hdcY4dTGJmw8bqNfVkzvBGt64uAp2SwKZ2pm4E6r6QA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=IiK58/JdlpVaDuk0WiEdlTf7NcXqstCN0oV3Qp8S0hKGdNlxP4KGbLx8SOe6KTBVXYotb+YAhTwKyl2Eiw7tVyqCjp5JZ6Eee7MWIsB5KxqU2GEbTwP3nIikYtFOmdRSZgTeNAVt3NzsPxl90PA1kh/WrVkFygxlCaukVJerK3I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ggKjL1HN; arc=none smtp.client-ip=209.85.214.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="anBfds/1"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EFFA81F000E9;
-	Sun,  2 Aug 2026 13:25:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1785677121;
-	bh=ft0Gl+O+Y3hvzCpKZZ6PTq7ZSvmTd2z/bSOeZuYNWsk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=anBfds/128pgwodCvkTGm1LyIlyJzwC66Bq41ur7OI7rSUCBTukZYKq66ej1tsj1j
-	 0tBtDMZx9kc3myvY6xwx5mpU3+3Zl+3cFLUzGAl4gJHuJYAbFIbk+hp1vGQr5FN5Y4
-	 Aye6QBwbglMV8vkoEw2W51yaI5KzVHfbwKltFaiAUF0eEbTpp26KDq9SxG0ZRCZlXr
-	 Qk9w2d3hNn/1nUD/dL2K0BhaGyzPVurCaWUaGpnG46295j/O/XD0XFNYUWFx/iCxJV
-	 9qwcAelYMxAnJrSP8fnuDWweDB6jz8qTKD2kByKurkeXHybVXgOf1XqAI7NO70OlL6
-	 8B+Cvb0zeCnNw==
-Date: Sun, 2 Aug 2026 21:25:14 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Chao Yu <chao@kernel.org>
-Cc: fstests@vger.kernel.org, jaegeuk@kernel.org, 
-	linux-f2fs-devel@lists.sourceforge.net, "Darrick J. Wong" <djwong@kernel.org>
-Subject: Re: [PATCH v3] common/rc: support f2fs in
- _require_fanotify_ioerrors()
-Message-ID: <am9FEmgp25SzUv-L@zlang-mailbox>
-Mail-Followup-To: Chao Yu <chao@kernel.org>, fstests@vger.kernel.org, 
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net, 
-	"Darrick J. Wong" <djwong@kernel.org>
-References: <20260729094909.1499590-1-chao@kernel.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ggKjL1HN"
+Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-2d02b4c3601so28326775ad.3
+        for <fstests@vger.kernel.org>; Sun, 02 Aug 2026 06:59:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1785679161; x=1786283961; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:from:references
+         :to:subject:user-agent:mime-version:date:message-id:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=9Da5Mp6cPD9Jb/vLE/PR2MaaVMTY4x6eyKuKP418AzQ=;
+        b=ggKjL1HNFrJBysalET7M4Ys1eu4cxroVOo5OOLNA45FW+FrQIfSLTi7A0lNUSEUyCf
+         UKoNTJZU0sFLcJzf3dMQV0Sqyj62djYJQie3v8RYTpZr+hpgAcOrqiiUiLtR3isPdDry
+         NVK5mVkxe1MOxlp8y+OBZdjqDvro1W3dxCPnw7ceL16tzuq5qKnIodvB4hOkSVAWxbSJ
+         TQRliRueLdWIkWOnooeMlaEW3QEFGQLJtTPs6R/fKZBgbA35jWR3nmU+8aRs0t3zpNJm
+         Y7cbSxMODzO1qixDn/1V6CeGejOIy7DBiWt3Wd0/S+L2OB8Q7HcZN35aebWQ/jeCMn+K
+         eQ+Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785679161; x=1786283961;
+        h=content-transfer-encoding:content-type:in-reply-to:from:references
+         :to:subject:user-agent:mime-version:date:message-id:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=9Da5Mp6cPD9Jb/vLE/PR2MaaVMTY4x6eyKuKP418AzQ=;
+        b=oQj7jZkUnQOHSFDJDTJAvCiKnUEOzV5EYlo3zdNdRKkYtLO0T3t0PzCkORdsrQkJBI
+         KxZ0YrqfNc+d5hnLnF1F0whf2N1YCrAQZrn6YJcfe2pSJc8UlhIFz5NXmshr9Z3TtZjU
+         X8LlUQNAIR4qH9UhvBX9XpnvlqIWp3AcrQfjKdugb1RsogStoJRrZp/vQeIrATrLFS6Z
+         2JgnswMWCIPF//B1x8WjVbFrZ8xdCn38q5oGPrlpn8JEUWpnigogVG8uiOd9pnO65qmp
+         YCiM8rzDN5x9+nvuAVNEjQb7JX4XGWnQw3FwGtskNVOWfcUvoxoxE0D6vk5avUMgyzsW
+         eS0g==
+X-Forwarded-Encrypted: i=1; AHgh+Rpjr48HtjZcuAdMGQkAwIzfqTBxSeOWtIfSn4FCkR2N2/HPIt+dIRqBe5tqJyPbZ7YA/AW8wktv@vger.kernel.org
+X-Gm-Message-State: AOJu0YwFbdpt1WQpXEe6W/4UjJjCnrlr1jIPo8le3L5JQUcvFr+/XzJK
+	4qiXY9sQVvtuaQblbUmJe0rtTkJNs7anKG12qi2nN7yMzyp+imEKNW9X
+X-Gm-Gg: AR+sD11NM8UBhS2cr8TG6Ti2BiSaH/p1C5Yfexi2+4sbeUEqd93qrZjp7PFviJD0NcD
+	3Ck/liHiF68rbyYD02ebIsEvwtsxL3+qRiFtwbFohSZfmYKe/drnfGpmZ77Msevq3RjzT2GhwnX
+	pBjcSzWAFRplMc///X16qsBVXsc06d3jGN6To6nhLmIYWOY06qtI7yfdx8o1Wwytc+PfQ4xenU5
+	DsyJ/ShGDKWtO4kKzJTUTzB37+1qqsx3ndi2GY1RSTZYsUUCWbVAFZEJdDN0vLTxzykzR4ChNCp
+	AbxzSPSjWrwF4DAhOHU9oVjNaxJ3uRbp/wTVSSKmOX2P8GmYBqxalmmg8eOIxbhh7GsXX4wQmRx
+	gTyrC9n3Mk7dIhpu9wrV9AVnZIWYbQJujGlhAdxwLBIDGVKWAzczck+Zvhrd1A7vQmI+Q1vkYdH
+	yGy2fHSxe0Ny1nTBFmv30BcC97YhGMT1+r1PUEwwbPIX53E99BGRKPWIMClO9TeNrdugwa2Wd87
+	xJCEKs+
+X-Received: by 2002:a17:902:e945:b0:2cc:9179:335 with SMTP id d9443c01a7336-2d0521e87a4mr67586515ad.8.1785679161335;
+        Sun, 02 Aug 2026 06:59:21 -0700 (PDT)
+Received: from [192.168.255.10] ([223.74.150.56])
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3153e045022sm26754534eec.18.2026.08.02.06.59.18
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 02 Aug 2026 06:59:20 -0700 (PDT)
+Message-ID: <ddc3741c-612a-4d0b-bc58-bc5f54a4080b@gmail.com>
+Date: Sun, 2 Aug 2026 21:59:16 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260729094909.1499590-1-chao@kernel.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2] xfs/842: verify CoW after exchangerange with
+ FILE1_WRITTEN on shared extents
+To: hch@lst.de, linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+ djwong@kernel.org, jiapenglin@tencent.com
+References: <20260729025504.54586-1-jiapenglin@tencent.com>
+ <am8xmal5nCP4ZvlN@zlang-mailbox>
+From: Lin Jiapeng <ljp1205831794@gmail.com>
+In-Reply-To: <am8xmal5nCP4ZvlN@zlang-mailbox>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On Wed, Jul 29, 2026 at 09:49:09AM +0000, Chao Yu wrote:
-> f2fs has supported to report fserror, this patch adds support for f2fs
-> in _require_fanotify_ioerrors(), so that we can run generic/791 on f2fs.
+
+
+在 2026/8/2 20:12, Zorro Lang 写道:
+> On Wed, Jul 29, 2026 at 10:54:54AM +0800, Lin Jiapeng wrote:
+>> When a full-file exchangerange is requested with FILE1_WRITTEN for a
+>> fully sparse donor file, every mapping pair is skipped, so no extents
+>> actually move.  However, the kernel decides to swap the reflink inode
+>> flag based on the request geometry alone, so the target file used to
+>> lose its reflink flag to the donor while still owning shared extents.
+>> A subsequent write then took the non-reflink write path and modified
+>> the shared physical blocks in place, silently corrupting the other
+>> file sharing them:
+>>
+>>   --- tests/xfs/842.out
+>>   +++ results/xfs/842.out.bad
+>>   @@ -1,4 +1,5 @@
+>>    QA output created by 842
+>>   +vX.reflink = 0
+>>    vX.reflink = 1
+>>   -vX.reflink = 1
+>>   +orig changed: md5 e6065c4aa2ab1603008fc18410f579d4 -> 32c5189478e6bafa1cc76423f06c88f2 (write hit shared blocks in place)
+>>    Silence is golden
+>>
+>> This test clones a file so that both share extents, swaps the clone
+>> against a sparse donor with FILE1_WRITTEN, and then checks the defect
+>> twice.  First it inspects the inodes directly with xfs_db: the clone
+>> must still be flagged reflink after the exchange (the donor carrying
+>> the flag too is the conservative outcome of the fix and is harmless).
+>> Then it writes to the clone and verifies after a mount cycle that the
+>> original file's data is intact, i.e. the write was redirected through
+>> CoW.
+>>
+>> The kernel fix "xfs: fix exchange-range reflink flag clearing issue
+>> with INO1_WRITTEN" refuses the reflink flag exchange whenever
 > 
-> Cc: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Chao Yu <chao@kernel.org>
-> ---
-> v3:
-> - fix to chech sysfs node correctly
-
-Thanks, let's have this at first.
-
-Reviewed-by: Zorro Lang <zlang@kernel.org>
-
->  common/rc | 6 ++++++
->  1 file changed, 6 insertions(+)
+> So this patch/case uncovers a known bug which is fixed by:
+>    "xfs: fix exchange-range reflink flag clearing issue with INO1_WRITTEN" ?
 > 
-> diff --git a/common/rc b/common/rc
-> index 106f044ad..3a8f03412 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -6266,6 +6266,12 @@ _require_fanotify_ioerrors()
->  		x="$(_get_fs_sysfs_attr $TEST_DEV err_report_sec)"
->  		test -n "$x" && return 0
->  		;;
-> +	f2fs)
-> +		local feat_file="/sys/fs/f2fs/features/fserror"
-> +		if [ -f "$feat_file" ] && [ "$(cat "$feat_file")" = "supported" ]; then
-> +			return 0
-> +		fi
-> +		;;
->  	esac
->  
->  	_notrun "$FSTYP does not support fanotify ioerrors"
-> -- 
-> 2.49.0
+> If so please add:
+>    _fixed_by_fs_commit xfs xxxxxxxxxxxx \
+>          "xfs: fix exchange-range reflink flag clearing issue with INO1_WRITTEN"
 > 
+>> FILE1_WRITTEN is requested, which makes this test pass.
+>>
+>> Reported-by: Lin Jiapeng(TencentOS Red Team) <jiapenglin@tencent.com>
+>> Link: https://lore.kernel.org/r/amgekiNKKoAdACnc@infradead.org
+>> Suggested-by: Christoph Hellwig <hch@lst.de>
+>> Suggested-by: "Darrick J. Wong" <djwong@kernel.org>
+>> Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+>> Signed-off-by: Lin Jiapeng <jiapenglin@tencent.com>
+>> ---
+>>   tests/xfs/842     | 65 +++++++++++++++++++++++++++++++++++++++++++++++
+>>   tests/xfs/842.out |  4 +++
+>>   2 files changed, 69 insertions(+)
+>>   create mode 100755 tests/xfs/842
+>>   create mode 100644 tests/xfs/842.out
+>>
+>> diff --git a/tests/xfs/842 b/tests/xfs/842
+>> new file mode 100755
+>> index 0000000..c4c2be9
+>> --- /dev/null
+>> +++ b/tests/xfs/842
+>> @@ -0,0 +1,65 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0-or-later
+>> +# Copyright (c) 2026 Tencent.  All Rights Reserved.
+>> +#
+>> +# FS QA Test No. 842
+>> +#
+>> +# Make sure that a full-file exchangerange under FILE1_WRITTEN does not strip
+>> +# the reflink flag from a file that still owns shared extents.  When the
+>> +# donor file is fully sparse, every mapping pair is skipped, so no extents
+>> +# actually move; the target file must keep its reflink flag, and a later
+>> +# write must go through CoW instead of modifying the shared blocks in place.
+>> +
+>> +. ./common/preamble
+>> +_begin_fstest auto quick fiexchange
+>> +
+>> +# Import common functions.
+>> +. ./common/filter
+>> +. ./common/reflink
+>> +
+>> +_require_xfs_io_command exchangerange
+>> +_require_scratch_reflink
+>> +_require_scratch
+> 
+> _require_scratch_reflink contains _require_scratch, so you can save the
+> _require_scratch.
+> 
+>> +
+>> +_scratch_mkfs >> $seqres.full
+>> +_scratch_mount
+>> +
+>> +# Create the original file with a known pattern and clone it, so that both
+>> +# files share the same extents.
+>> +_pwrite_byte 0x41 0 1m $SCRATCH_MNT/orig >> $seqres.full
+>> +_reflink $SCRATCH_MNT/orig $SCRATCH_MNT/clone >> $seqres.full
+>> +
+>> +# Create a fully sparse donor file of the same size.
+>> +$XFS_IO_PROG -f -c 'truncate 1m' $SCRATCH_MNT/donor
+>> +
+>> +md5_before=$(md5sum $SCRATCH_MNT/orig | awk '{print $1}')
+>> +
+>> +# Swap the clone against the sparse donor, claiming the donor is fully
+>> +# written (-w).  Every donor mapping is a hole, so all pairs are skipped
+>> +# and the clone keeps its shared extents in place.
+>> +$XFS_IO_PROG -c "exchangerange -f -w $SCRATCH_MNT/donor" $SCRATCH_MNT/clone \
+>> +	>> $seqres.full
+>> +
+>> +# Directly confirm the inode flag state after the exchange: the clone
+>> +# must still be flagged reflink.  The donor may also carry the flag, which
+>> +# is the conservative outcome of refusing the flag exchange under
+>> +# FILE1_WRITTEN; the extra flag is harmless and can be dropped later by
+>> +# the regular reflink flag cleanup path.
+>> +_scratch_unmount
+>> +_scratch_xfs_db -c "path /clone" -c print -c "path /donor" -c print | \
+>> +	grep reflink | sed -e 's/^v[0-9]*/vX/g'
+>> +_scratch_mount
+>> +
+>> +# Overwrite part of the clone.  With the reflink flag correctly retained,
+>> +# this must go through CoW and leave the shared blocks of orig untouched.
+>> +_pwrite_byte 0x42 0 64k $SCRATCH_MNT/clone >> $seqres.full
+>> +_scratch_cycle_mount
+>> +
+>> +md5_after=$(md5sum $SCRATCH_MNT/orig | awk '{print $1}')
+>> +
+>> +test "$md5_before" != "$md5_after" && \
+>> +	echo "orig changed: md5 $md5_before -> $md5_after (write hit shared blocks in place)"
+>> +
+>> +echo Silence is golden
+> 
+> This case has expected output, so it's not "Silence is golden",
+> please remove this line.
+> 
+>> +status=0
+>> +exit
+> 
+> I remember we've changed xfstests/new script, it should give "_exit 0" at here.
+> 
+> Thanks,
+> Zorro
+> 
+>> diff --git a/tests/xfs/842.out b/tests/xfs/842.out
+>> new file mode 100644
+>> index 0000000..1e6345a
+>> --- /dev/null
+>> +++ b/tests/xfs/842.out
+>> @@ -0,0 +1,4 @@
+>> +QA output created by 842
+>> +vX.reflink = 1
+>> +vX.reflink = 1
+>> +Silence is golden
+>> -- 
+>> 2.50.1 (Apple Git-155)
+>>
+
+Thanks a lot for your review!
+
+Yes, this test case uncovers the bug fixed by "xfs: fix exchange-range 
+reflink flag clearing issue with INO1_WRITTEN". However, that fix is 
+still under review on linux-xfs and has not landed in for-next / 
+xfs-7.2-fixes yet, so there is no stable commit ID to reference. I will 
+add the _fixed_by_fs_commit annotation as soon as the fix is merged.
+
+The other comments will be addressed in v4.
+
+Lin Jiapeng
+
