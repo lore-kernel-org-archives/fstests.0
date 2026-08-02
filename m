@@ -1,45 +1,43 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9B7335CB76;
-	Sun,  2 Aug 2026 11:57:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03A20394471;
+	Sun,  2 Aug 2026 12:12:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785671833; cv=none; b=Q3D/8Nd/ntraunaCb2irIGREjOrae5UiqRR00WL88ay/lk/heGN4pTHefEYIbskTy//O16o+D/n/cX/NW3TzeNoYQKyhk4ldzNZMCr38E6Yxoz+BUZh/HP86jKd3eQ9pwZiUcPwQf2Rp9HsJaMU1SsWU4BN5J7cIIxo6lkZl4Cg=
+	t=1785672767; cv=none; b=ua7Mw9RyQa9XBNulZ1+POocZTrZR/S6GawmCHhAm9/FapX7EejtCPYNFavCRuqlF26rwHsX+WOk1VvXgShAQQehTthHeFDcT4u17SICs0bpeztzX8cMXM3ptLkXp7jeBaLe7PC0BueqPgKg9NkdbkSTXysSUTLy612jpYWUX88M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785671833; c=relaxed/simple;
-	bh=ZvXXRf14m5AWY/HOtHl/8Gy2thue1Cb356UdymQJQpY=;
+	s=arc-20240116; t=1785672767; c=relaxed/simple;
+	bh=qip+Kprzqn2YKns8DGI0WU7nL6cLJFjUctabAvrwOls=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GeqUHNTkFXNPVIhLFtdFWcApqkCSjAk6KXMMTfZrYAREkIXBkljxWF5hdiKInmwmWeVeyvDbIQyaPoVYt4/xDFxvBvyLZBDPr3VAUMCLEtiu/LapfRfbcV6+wPGM0gUSyX90aep0AmFoBL6VTWC4Q3/7crz9g5naY4fCVC7GUek=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=oiv6Soz9; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=jt4CqF/xJHhAxnJmL2WASJhqPi/ijJ1+Cmwt4vUispDKNSMC6Rzl89B48CpclGTb0bdFCqE8pKIn1ciTabxcvjgArKX0vBu10kPYT92EVzAks0dBcgVy8eNm4G45TLsp2NI8cR8b9g57LhSAi+LxeZu64GXkOFeorVVZRHKp9GA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UQgyNJjV; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="oiv6Soz9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 976311F000E9;
-	Sun,  2 Aug 2026 11:57:07 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UQgyNJjV"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CDB081F00A3A;
+	Sun,  2 Aug 2026 12:12:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1785671831;
-	bh=dQdxaALiF695sxgGHQBEtazpr6H9yEjXBUJix3EUrS4=;
+	s=k20260515; t=1785672765;
+	bh=C3lCWflyUkl75Hc6AtfOhzt9Nhbp572GU9Gs33TPepM=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=oiv6Soz9EnuidSAX1uUfd9C8opCCxq02ckqs2CNaesA5JavI9obLPcJIvuSMGxMTT
-	 2WdLMdQL6PlVuAODr4WND7YGD593PpASVtqydSER3lgvHJumnM/pRRHEUFwIOfKIUR
-	 /n+cctY0SGHa4IY2sCJ7NbZMw5cd1cWpT2agD7d7XnWd8SZVaC6NvgAuHY9JN0wbk9
-	 pi0CUztt6DiD+UahGGnzHCj1Yi+Fkm5PIAAa1MXv9L9C+Noqo3ce8peJq+/AHQPky+
-	 3PhZ4CFO6YCdtFiX4j1FL1iIXpp2Kj9HAJML37ynRaU/EMg381/5N6YUQ1u4FvpZWX
-	 2SRRNK3cxtnaQ==
-Date: Sun, 2 Aug 2026 19:57:04 +0800
+	b=UQgyNJjVst/88Pq9hd7I8Uyy8gND+ZXLHNDC52CMbIlabD30UNUJMfK4lqvngZbHE
+	 8EG9SPHxGjCZIodtUXW/AWYmTYFb2BobR7cpKtgLJEr6SYD4D2corDKI5UfOhjuuC7
+	 CHW75Dr6cuEtDSyZS5PQfo3T+znqRWw1E2SUK68d7n4Or5d0R/aVRZ7QshBbW++p6J
+	 pW7J7GukIShjiDRYad9yRWMuCEbmbaYOTo7O6v7CyldE8aL9hXieqxaS7uwEsO9rAl
+	 qm86PasyKaoIF3ZMHt8FMXqR//AmKu6ojpOIfNfgHM7XU9Ax504fIojuuUlFJUSY2O
+	 +W+2MxQKwJlIQ==
+Date: Sun, 2 Aug 2026 20:12:38 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org, 
-	"Martin K. Petersen" <martin.petersen@oracle.com>, Kanchan Joshi <joshi.k@samsung.com>, 
-	Anuj Gupta <anuj20.g@samsung.com>, linux-scsi@vger.kernel.org
-Subject: Re: [PATCH 4/4] generic: test corruption detection using T10
- protection information
-Message-ID: <am8s1_vH6tqpjl1l@zlang-mailbox>
-Mail-Followup-To: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, 
-	"Martin K. Petersen" <martin.petersen@oracle.com>, Kanchan Joshi <joshi.k@samsung.com>, 
-	Anuj Gupta <anuj20.g@samsung.com>, linux-scsi@vger.kernel.org
-References: <20260723142856.108193-1-hch@lst.de>
- <20260723142856.108193-5-hch@lst.de>
+To: Lin Jiapeng <ljp1205831794@gmail.com>
+Cc: hch@lst.de, linux-xfs@vger.kernel.org, fstests@vger.kernel.org, 
+	djwong@kernel.org, jiapenglin@tencent.com
+Subject: Re: [PATCH v2] xfs/842: verify CoW after exchangerange with
+ FILE1_WRITTEN on shared extents
+Message-ID: <am8xmal5nCP4ZvlN@zlang-mailbox>
+Mail-Followup-To: Lin Jiapeng <ljp1205831794@gmail.com>, hch@lst.de, 
+	linux-xfs@vger.kernel.org, fstests@vger.kernel.org, djwong@kernel.org, 
+	jiapenglin@tencent.com
+References: <20260729025504.54586-1-jiapenglin@tencent.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -48,215 +46,157 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260723142856.108193-5-hch@lst.de>
+In-Reply-To: <20260729025504.54586-1-jiapenglin@tencent.com>
 
-On Thu, Jul 23, 2026 at 04:28:47PM +0200, Christoph Hellwig wrote:
-> Add a test that simulates bit flips in data and misdirected writes and
-> checks that file systems detect it when run on devices using protection
-> information.
+On Wed, Jul 29, 2026 at 10:54:54AM +0800, Lin Jiapeng wrote:
+> When a full-file exchangerange is requested with FILE1_WRITTEN for a
+> fully sparse donor file, every mapping pair is skipped, so no extents
+> actually move.  However, the kernel decides to swap the reflink inode
+> flag based on the request geometry alone, so the target file used to
+> lose its reflink flag to the donor while still owning shared extents.
+> A subsequent write then took the non-reflink write path and modified
+> the shared physical blocks in place, silently corrupting the other
+> file sharing them:
 > 
-> This requires the new scsi_debug corruption injection.
+>  --- tests/xfs/842.out
+>  +++ results/xfs/842.out.bad
+>  @@ -1,4 +1,5 @@
+>   QA output created by 842
+>  +vX.reflink = 0
+>   vX.reflink = 1
+>  -vX.reflink = 1
+>  +orig changed: md5 e6065c4aa2ab1603008fc18410f579d4 -> 32c5189478e6bafa1cc76423f06c88f2 (write hit shared blocks in place)
+>   Silence is golden
 > 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> This test clones a file so that both share extents, swaps the clone
+> against a sparse donor with FILE1_WRITTEN, and then checks the defect
+> twice.  First it inspects the inodes directly with xfs_db: the clone
+> must still be flagged reflink after the exchange (the donor carrying
+> the flag too is the conservative outcome of the fix and is harmless).
+> Then it writes to the clone and verifies after a mount cycle that the
+> original file's data is intact, i.e. the write was redirected through
+> CoW.
+> 
+> The kernel fix "xfs: fix exchange-range reflink flag clearing issue
+> with INO1_WRITTEN" refuses the reflink flag exchange whenever
+
+So this patch/case uncovers a known bug which is fixed by:
+  "xfs: fix exchange-range reflink flag clearing issue with INO1_WRITTEN" ?
+
+If so please add:
+  _fixed_by_fs_commit xfs xxxxxxxxxxxx \
+        "xfs: fix exchange-range reflink flag clearing issue with INO1_WRITTEN"
+
+> FILE1_WRITTEN is requested, which makes this test pass.
+> 
+> Reported-by: Lin Jiapeng(TencentOS Red Team) <jiapenglin@tencent.com>
+> Link: https://lore.kernel.org/r/amgekiNKKoAdACnc@infradead.org
+> Suggested-by: Christoph Hellwig <hch@lst.de>
+> Suggested-by: "Darrick J. Wong" <djwong@kernel.org>
+> Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+> Signed-off-by: Lin Jiapeng <jiapenglin@tencent.com>
 > ---
->  tests/generic/2302     | 143 +++++++++++++++++++++++++++++++++++++++++
->  tests/generic/2302.out |  21 ++++++
->  2 files changed, 164 insertions(+)
->  create mode 100755 tests/generic/2302
->  create mode 100644 tests/generic/2302.out
+>  tests/xfs/842     | 65 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/842.out |  4 +++
+>  2 files changed, 69 insertions(+)
+>  create mode 100755 tests/xfs/842
+>  create mode 100644 tests/xfs/842.out
 > 
-> diff --git a/tests/generic/2302 b/tests/generic/2302
+> diff --git a/tests/xfs/842 b/tests/xfs/842
 > new file mode 100755
-> index 000000000000..5fff1f5e5015
+> index 0000000..c4c2be9
 > --- /dev/null
-> +++ b/tests/generic/2302
-> @@ -0,0 +1,143 @@
+> +++ b/tests/xfs/842
+> @@ -0,0 +1,65 @@
 > +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026 Christoph Hellwig
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2026 Tencent.  All Rights Reserved.
 > +#
-> +# FS QA Test No. 2302
+> +# FS QA Test No. 842
 > +#
-> +# Test that T10 DIF detects bitflips and misplaced writes.
-> +#
+> +# Make sure that a full-file exchangerange under FILE1_WRITTEN does not strip
+> +# the reflink flag from a file that still owns shared extents.  When the
+> +# donor file is fully sparse, every mapping pair is skipped, so no extents
+> +# actually move; the target file must keep its reflink flag, and a later
+> +# write must go through CoW instead of modifying the shared blocks in place.
+> +
 > +. ./common/preamble
-> +_begin_fstest auto rw
+> +_begin_fstest auto quick fiexchange
 > +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -r -f $tmp.*
-> +	[ -d "$SCSI_DEBUG_MNT" ] && _unmount $SCSI_DEBUG_MNT 2>/dev/null
-> +	_put_scsi_debug_dev
-> +}
-> +
-> +. ./common/scsi_debug
+> +# Import common functions.
 > +. ./common/filter
+> +. ./common/reflink
 > +
-> +_require_scsi_debug
-> +# If TEST_DEV is block device, make sure current fs is a localfs which can be
-> +# written on scsi_debug device
-> +_require_test
-> +_require_block_device $TEST_DEV
-> +
-> +# FIEMAP on Btrfs returns logical addresses within the filesystem's address
-> +# space, not physical device offsets. Writing to these offsets on $SCRATCH_DEV
-> +# would corrupt the filesystem in multi-device setups.
-> +_exclude_fs btrfs
-> +
-> +size=$(_small_fs_size_mb 256)
-> +
-> +# Get the physical block offset (in bytes) of the file's first block on device
-> +get_phys_blk()
-> +{
-> +	local file="$1"
-> +	local fiemap_output
-> +	local phys_blk
-> +
-> +	fiemap_output=$($XFS_IO_PROG -r -c "fiemap -v" "$file" 2>/dev/null)
+> +_require_xfs_io_command exchangerange
+> +_require_scratch_reflink
+> +_require_scratch
 
-_require_xfs_io_command fiemap
-
-> +	phys_blk=$(echo "$fiemap_output" | _filter_xfs_io_fiemap | head -1 | awk '{print $3}')
-
-This logic looks like common/rc:_get_file_extent_sector(), can this
-function help?
-
-> +	if [ -z "$phys_blk" ]; then
-> +		echo ""
-> +		return
-> +	fi
-> +	echo $phys_blk
-> +}
-> +
-> +test_dif()
-> +{
-> +	local pi_type=$1
-> +	local last=$2
-> +	local bit_errors=$3
-> +	local reftag_adjust=$4
-> +
-> +	echo -n "Testing DIF type $pi_type "
-> +	if [ "$bit_errors" -gt "0" ]; then
-> +		echo -n "bit errors ($bit_errors) in "
-> +	fi
-> +	if [ "$reftag_adjust" -ne "0" ]; then
-> +		echo -n "reftag adjustment by $reftag_adjust in "
-> +	fi
-> +	if [ "$last" -eq 1 ]; then
-> +		echo "last sector"
-> +	else
-> +		echo "first sector"
-> +	fi
-> +
-> +	scsi_debug_pi_opts="write_same_length=0 dif=${pi_type} dix=1"
-> +	SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 $size $scsi_debug_pi_opts`
-> +
-> +	SCSI_DEBUG_MNT="$TEST_DIR/scsi_debug_$seq"
-> +	rm -rf $SCSI_DEBUG_MNT
-> +	mkdir $SCSI_DEBUG_MNT
-> +
-> +	_mkfs_dev $SCSI_DEBUG_DEV || \
-> +		_fail "Can't make $FSTYP on DIF-enabled scsi_debug device"
-> +	run_check _mount $SCSI_DEBUG_DEV $SCSI_DEBUG_MNT
-> +
-> +	local blksz=$(_get_block_size $SCSI_DEBUG_MNT)
-> +	local testfile="$SCSI_DEBUG_MNT/test"
-> +
-> +	$XFS_IO_PROG -d -f \
-
-_require_odirect ?
-
-> +		-c "pwrite -S 0x66 0 $((128 * blksz))" \
-> +		-c fsync \
-> +		$testfile >> $seqres.full 2>&1
-> +
-> +	local phys_blk=$(get_phys_blk $testfile)
-> +	if [ -z "$phys_blk" ]; then
-> +		_fail "$test_name: failed to get physical block offset via fiemap"
-> +	fi
-> +
-> +	local dev=$(_short_dev $SCSI_DEBUG_DEV)
-> +	local debugfs_dir=$(ls /sys/block/$dev/device/scsi_device/)
-> +	local debugfs_file="/sys/kernel/debug/scsi_debug/$debugfs_dir/corrupt"
-
-_require_debugfs
+_require_scratch_reflink contains _require_scratch, so you can save the
+_require_scratch.
 
 > +
-> +	if [ ! -f "$debugfs_file" ]; then
-> +		_notrun "scsi_debug corruption injection not supported"
-> +	fi
+> +_scratch_mkfs >> $seqres.full
+> +_scratch_mount
 > +
-> +	if [ "$last" -eq 1 ]; then
-> +		echo "adding to $phys_blk" >> $seqres.full
-> +		phys_blk=$((phys_blk + 127))
-> +	fi
+> +# Create the original file with a known pattern and clone it, so that both
+> +# files share the same extents.
+> +_pwrite_byte 0x41 0 1m $SCRATCH_MNT/orig >> $seqres.full
+> +_reflink $SCRATCH_MNT/orig $SCRATCH_MNT/clone >> $seqres.full
 > +
-> +	echo "lba=$phys_blk,num=1,bit_errors=$bit_errors,reftag_adjust=$reftag_adjust" \
-> +		 > $debugfs_file
+> +# Create a fully sparse donor file of the same size.
+> +$XFS_IO_PROG -f -c 'truncate 1m' $SCRATCH_MNT/donor
 > +
-> +	$XFS_IO_PROG -d -f \
-> +		-c "pread 0 $((128 * blksz))" \
-> +		$testfile
+> +md5_before=$(md5sum $SCRATCH_MNT/orig | awk '{print $1}')
 > +
-> +	[ -d "$SCSI_DEBUG_MNT" ] && _unmount $SCSI_DEBUG_MNT 2>/dev/null
-> +	_put_scsi_debug_dev
-> +}
+> +# Swap the clone against the sparse donor, claiming the donor is fully
+> +# written (-w).  Every donor mapping is a hole, so all pairs are skipped
+> +# and the clone keeps its shared extents in place.
+> +$XFS_IO_PROG -c "exchangerange -f -w $SCRATCH_MNT/donor" $SCRATCH_MNT/clone \
+> +	>> $seqres.full
 > +
-> +# test data corruption in first block
-> +test_dif 1 0 2 0
-> +test_dif 2 0 2 0
-> +test_dif 3 0 2 0
+> +# Directly confirm the inode flag state after the exchange: the clone
+> +# must still be flagged reflink.  The donor may also carry the flag, which
+> +# is the conservative outcome of refusing the flag exchange under
+> +# FILE1_WRITTEN; the extra flag is harmless and can be dropped later by
+> +# the regular reflink flag cleanup path.
+> +_scratch_unmount
+> +_scratch_xfs_db -c "path /clone" -c print -c "path /donor" -c print | \
+> +	grep reflink | sed -e 's/^v[0-9]*/vX/g'
+> +_scratch_mount
 > +
-> +# test data corruption in last block
-> +test_dif 1 1 2 0
-> +test_dif 2 1 2 0
-> +test_dif 3 1 2 0
+> +# Overwrite part of the clone.  With the reflink flag correctly retained,
+> +# this must go through CoW and leave the shared blocks of orig untouched.
+> +_pwrite_byte 0x42 0 64k $SCRATCH_MNT/clone >> $seqres.full
+> +_scratch_cycle_mount
 > +
+> +md5_after=$(md5sum $SCRATCH_MNT/orig | awk '{print $1}')
 > +
-> +# Note: Type 3 doesn't have a refrag, so don't test it
+> +test "$md5_before" != "$md5_after" && \
+> +	echo "orig changed: md5 $md5_before -> $md5_after (write hit shared blocks in place)"
 > +
-> +# reftag mismatch in first block
-> +test_dif 1 0 0 8
-> +test_dif 2 0 0 8
-> +
-> +# reftag mismatch in last block
-> +test_dif 1 1 0 8
-> +test_dif 2 1 0 8
-> +
-> +# success, all done
+> +echo Silence is golden
+
+This case has expected output, so it's not "Silence is golden",
+please remove this line.
+
 > +status=0
 > +exit
 
-_exit 0
+I remember we've changed xfstests/new script, it should give "_exit 0" at here.
 
-> diff --git a/tests/generic/2302.out b/tests/generic/2302.out
+Thanks,
+Zorro
+
+> diff --git a/tests/xfs/842.out b/tests/xfs/842.out
 > new file mode 100644
-> index 000000000000..03b68d904943
+> index 0000000..1e6345a
 > --- /dev/null
-> +++ b/tests/generic/2302.out
-> @@ -0,0 +1,21 @@
-> +QA output created by 2302
-> +Testing DIF type 1 bit errors (2) in first sector
-> +pread: Invalid or incomplete multibyte or wide character
-> +Testing DIF type 2 bit errors (2) in first sector
-> +pread: Invalid or incomplete multibyte or wide character
-> +Testing DIF type 3 bit errors (2) in first sector
-> +pread: Invalid or incomplete multibyte or wide character
-> +Testing DIF type 1 bit errors (2) in last sector
-> +pread: Invalid or incomplete multibyte or wide character
-> +Testing DIF type 2 bit errors (2) in last sector
-> +pread: Invalid or incomplete multibyte or wide character
-> +Testing DIF type 3 bit errors (2) in last sector
-> +pread: Invalid or incomplete multibyte or wide character
-> +Testing DIF type 1 reftag adjustment by 8 in first sector
-> +pread: Invalid or incomplete multibyte or wide character
-> +Testing DIF type 2 reftag adjustment by 8 in first sector
-> +pread: Invalid or incomplete multibyte or wide character
-> +Testing DIF type 1 reftag adjustment by 8 in last sector
-> +pread: Invalid or incomplete multibyte or wide character
-> +Testing DIF type 2 reftag adjustment by 8 in last sector
-> +pread: Invalid or incomplete multibyte or wide character
+> +++ b/tests/xfs/842.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 842
+> +vX.reflink = 1
+> +vX.reflink = 1
+> +Silence is golden
 > -- 
-> 2.53.0
+> 2.50.1 (Apple Git-155)
 > 
