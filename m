@@ -1,205 +1,107 @@
-Received: from mail-pl1-f182.google.com (mail-pl1-f182.google.com [209.85.214.182])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAA512E6CAB
-	for <fstests@vger.kernel.org>; Mon,  3 Aug 2026 02:56:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03AD03ACA6C
+	for <fstests@vger.kernel.org>; Mon,  3 Aug 2026 08:27:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785725790; cv=none; b=qGnxeX+enFw/jyTTTSlZ433Sxm2ln0JFVI7o/Alxi34MAySBbSCyBglvxFPO7nxE8gIYN44d8RXXOW3mhv02uGI7eAB3OTb5RqrqjmmSRrgyvg5jaRF9jl+kTeBx64Hsii/S1+1XJXpoM7HXF6ZqjxVvacJGiI653dqZ3l7yyCI=
+	t=1785745642; cv=none; b=i+S61bJtu2P/15alTeq5jOiTEFOxgT6hV0VB8GnC+pTXVI0UwYVpYXFQs7vRqqjaq29dSCDPu62iESLMxbBS1Ga7xuOAoDVA7eXBQzmXDsLrFzNmQhCmw8m3AZp2V14ZZf97nhTEeReW/3v/oO8Us7Fo60ktIuAMoNblEo7ICn8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785725790; c=relaxed/simple;
-	bh=9JksVlenLD/tn/RgNkrISaIa/9t4UiEjQRJ5MpQAwd0=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=FJlkdzBINJXTqPXibniWtVQpdesOjm6S72bsQdjQDY9c/dDKfGbiIIEbAKOsrrL1Zo+93wEcn+43XuKPUTPOc1/+BltYDG5Z/5CXMkI0sFeJ09p0TeQoixW2uBD3umV+mMlq1fcOl6ZvNJasL0DZ9AFWWV//3l5H0r0AE3VEyak=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=YV57td0A; arc=none smtp.client-ip=209.85.214.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1785745642; c=relaxed/simple;
+	bh=WMVirjFkWmW4Qok8Jujgl7ZismtwxK8kRGzKeEB8Mzs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=J+NND8JkwDiffSnlSRhBpYgJiJ6d9kdFmkUolKOc1pKZ7VopyaoMNvtN6XYoK3Qv5MPYA2E/qfIshtyuNrcAxy8e2NXb1gdwvSsqIA0lv/RQnvOY11er/9a1egFwZ7p+HZ54AX7wb2yvy1KWO4N25nHQ2S7UtCUvri/21mCV2hs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FviHU7ce; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YV57td0A"
-Received: by mail-pl1-f182.google.com with SMTP id d9443c01a7336-2cf452def93so26923735ad.1
-        for <fstests@vger.kernel.org>; Sun, 02 Aug 2026 19:56:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1785725788; x=1786330588; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=5dShAQ1lYMtkqytfZFTDLWc+qcDcWtf1Ahs1bgrAph4=;
-        b=YV57td0AF2rD8UOMBcKQIdUlaFXckgLXA4DyTDxsehta5XsfeH8Pp3nCnM4/K3216V
-         J+zOFddtuBAiLfOuu+4TGHbZUr6C0DNQVrei8Ne5ZWfOPGkOB7yqvRHY0LjZiMyD0J6d
-         atELreA+yOzSMBL8Myc1ZhQ2F+fOqNmAeq4DkfsDGgiqmS7euSv8JmkbNP0NXPhhbfoO
-         EVDx1tvk/6UdnT8DbLXV5VHr+7c01rrv+lx6OCiRtAHaZRlUb2vmgnwuDDKfqF+2EowX
-         LALbCCaWC5ijs9QYD5BdqfYXxqMjCjA3qsmSX9Mf2ut+95IrlnEqaAYeLxIu7VMjdlHr
-         n9AQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1785725788; x=1786330588;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=5dShAQ1lYMtkqytfZFTDLWc+qcDcWtf1Ahs1bgrAph4=;
-        b=QSwCWrNdsnnvYoV0cQnySmoCPbhodMz8N0hkp4nTh/htuxSUkm5e/AsWFG0mumaYm0
-         sR9DXDTYddmdN52h/wd8ati2LRmO2iDPVpEm7oNuOwGTPi4BIaZlBDNck+gRaXy9RB1m
-         +lR5gW57tXa0gcb1MtaS+64Ibh/dX6Jk1sSt2LXY4Xg92RB6ND13iNjSfEL7vLrD4s0U
-         r+aG/Xba9h805pRKOxxoU0JStXQEANTAAdl1SeRK/ngHB9FVUxmZgB5HXXV2CigfirGc
-         Qe9PspNRpXUzGGQDZLIu4PY1W5o+Z9+z4gRzOuqqKTUe4ljlBI63dk/HSX+Udq/RC633
-         gnVw==
-X-Forwarded-Encrypted: i=1; AHgh+RrxQ3Xa+HcduJNHo8aBgZqJyb5j0WsGXTsnJ+3XjtFTbaNlxp+gYdHlRooZn8bWxWYkidOVLWfi@vger.kernel.org
-X-Gm-Message-State: AOJu0YwQFo0+6Mcoyh31/g3Vl3zIT0ATxxPVwVf0dvICHdBqZEllKqUf
-	y+toLMWZT1bGsVe4eoJLW58kibSeWKTRGHD4xfvtYBw4G+QKGN4I+rfQ
-X-Gm-Gg: AR+sD133pf2BkHwEz93XwwQZ+S00Ps2EDQWF8dTaWes6Nr0j6XshJH2OABb5f+RjWSz
-	TmIzh8aYwSTEJ+TmdUtGJ2hcdklRhFsBEyn1LufawWdoXaFJ0tGetNxchJfKM1M8F3uogFWrZZS
-	GbhGYKg/qt0OdVat/HySytokHBVSrH+4H58Bvz5hkZJp7uBTOWFtkCjWGJC3FBF0oCV2rsfyUyt
-	UlviuSxkA+0lbxHLnRoR1S4b2IwN6AW2oOLtKXzFnnF4hbrXy7rjvM0eUrGYMDsElLjZE5KOYuU
-	zhCHP4mesEFnMLAvpLGkzDQo3I6GiWilMMNzGN+lNqqP/dm9OxlnADzPrKSu1yRTeVnFO52You7
-	vVxpRjBgIthUMJbmAMS0DipnHeD18rS3CiK6XFf1wFqsnb6Wvg8ZSq14LwTkBSr7/EiYWW6r/AG
-	ou4Ftf58hqpePIJNuEC9ESA+Vv+XZvYEe+KZLq6v8TF/vwFz0ktpa1IsG+DObva+Pg4CyO6qb0i
-	4xVePrPkIoxFCVFoUEI08UfHcbKXYU=
-X-Received: by 2002:a17:902:e551:b0:2cc:92ae:b36 with SMTP id d9443c01a7336-2d047e88baemr102252165ad.24.1785725787782;
-        Sun, 02 Aug 2026 19:56:27 -0700 (PDT)
-Received: from JIAPENGLIN-MC0.tencent.com ([43.132.141.24])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2d04ae19ba5sm31369665ad.17.2026.08.02.19.56.25
-        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Sun, 02 Aug 2026 19:56:27 -0700 (PDT)
-From: Lin Jiapeng <ljp1205831794@gmail.com>
-X-Google-Original-From: Lin Jiapeng <jiapenglin@tencent.com>
-To: zlang@kernel.org
-Cc: hch@lst.de,
-	linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org,
-	djwong@kernel.org,
-	jiapenglin@tencent.com
-Subject: [PATCH v4] xfs/842: verify CoW after exchangerange with FILE1_WRITTEN on shared extents
-Date: Mon,  3 Aug 2026 10:56:13 +0800
-Message-ID: <20260803025621.52453-1-jiapenglin@tencent.com>
-X-Mailer: git-send-email 2.50.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FviHU7ce"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 659D01F000E9;
+	Mon,  3 Aug 2026 08:27:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1785745640;
+	bh=HNTSPN2MiljhBeUFb+aT2w264xnKeHouhX6mZYMreBg=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=FviHU7ceWWM2pmB3/Oav7pd723fLeRscnSqy7H4C4a/kqiPfMEmMGgihlevcklHU6
+	 SNq7VZSdwzK93DIVqrTdwmUdFdimeGe/Eq6UE/98iB4GnmkNqjUl2TAzUTVgKZEiOX
+	 0fAAY7RwKoQSXNOFuTHX6JkcKFkLHlSVaWq2mOqGi2uDchBsM8sLyHLUc/+9QC0btg
+	 L99eUnqjE4HMwHnD1Ztat8X3xCSma+f6nYKDNyqRBV/PCL/TdcwfKDha5ml2sSb0NP
+	 SiSAV5nsDINBy/TuPrPmE9ymMRY9fzVsQrM6CDcpWPREBGdkjOec28W9eOBvBVq6QG
+	 QjnNjZCJc9Vlg==
+Date: Mon, 3 Aug 2026 16:27:15 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Jan Kara <jack@suse.cz>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/347: Fix sporadic test failures
+Message-ID: <anBNLS4JmtT8GHGu@zlang-mailbox>
+Mail-Followup-To: Jan Kara <jack@suse.cz>, fstests@vger.kernel.org
+References: <20260730151817.4120874-1-jack@suse.cz>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260730151817.4120874-1-jack@suse.cz>
 
-When a full-file exchangerange is requested with FILE1_WRITTEN for a
-fully sparse donor file, every mapping pair is skipped, so no extents
-actually move.  However, the kernel decides to swap the reflink inode
-flag based on the request geometry alone, so the target file used to
-lose its reflink flag to the donor while still owning shared extents.
-A subsequent write then took the non-reflink write path and modified
-the shared physical blocks in place, silently corrupting the other
-file sharing them:
+On Thu, Jul 30, 2026 at 05:18:17PM +0200, Jan Kara wrote:
+> generic/347 was occasionally failing on ext4 in our QA due to ext4
+> aborting its journal when the filesystem on thinp device was overfilled.
+> I have tracked the problem down to journal checkpointing failing to
+> write a metadata block to its final location due to ENOSPC failure from
+> the thinp device. Modify the test to first preallocate blocks for the
+> files and remount the filesystem which practically makes sure all
+> involved metadata blocks were written and so their further modifications
+> will not fail.
+> 
+> Signed-off-by: Jan Kara <jack@suse.cz>
+> ---
+>  tests/generic/347 | 12 +++++++++++-
+>  1 file changed, 11 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/347 b/tests/generic/347
+> index 06df0cf9eddc..56538c160392 100755
+> --- a/tests/generic/347
+> +++ b/tests/generic/347
+> @@ -38,7 +38,17 @@ _setup_thin()
+>  
+>  _workout()
+>  {
+> -	# Overfill it by a bit
+> +	# Preallocate space to avoid failure for metadata writeback
+> +	for I in `seq 1 500`; do
+> +		$XFS_IO_PROG -f -c "falloc 0 1M" $SCRATCH_MNT/file$I &>/dev/null
 
- --- tests/xfs/842.out
- +++ results/xfs/842.out.bad
- @@ -1,3 +1,4 @@
-  QA output created by 842
- +vX.reflink = 0
-  vX.reflink = 1
- -vX.reflink = 1
- +orig changed: md5 e6065c4aa2ab1603008fc18410f579d4 -> 32c5189478e6bafa1cc76423f06c88f2 (write hit shared blocks in place)
+Hi Jan,
 
-This test clones a file so that both share extents, swaps the clone
-against a sparse donor with FILE1_WRITTEN, and then checks the defect
-twice.  First it inspects the inodes directly with xfs_db: the clone
-must still be flagged reflink after the exchange (the donor carrying
-the flag too is the conservative outcome of the fix and is harmless).
-Then it writes to the clone and verifies after a mount cycle that the
-original file's data is intact, i.e. the write was redirected through
-CoW.
+Thanks for this fix! Adding fallocate introduces an extra dependency via
+_require_xfs_io_command "falloc", which will limit some filesystems can
+run this test.
 
-The kernel fix "xfs: fix exchange-range reflink flag clearing issue
-with INO1_WRITTEN" refuses the reflink flag exchange whenever
-FILE1_WRITTEN is requested, which makes this test pass.
+Additionally, since the underlying storage is a thinp device, I doubt
+`falloc 0 1M` actually triggers physical block allocation on the thin
+pool (correct me if I'm wrong). If so, I suspect this 1M * 500 preallocation
+might exhaust the 500M BACKING_SIZE prematurely (along with file system
+metadata overhead), similar to the pwrite loop below.
 
-Reported-by: Lin Jiapeng(TencentOS Red Team) <jiapenglin@tencent.com>
-Link: https://lore.kernel.org/r/amgekiNKKoAdACnc@infradead.org
-Suggested-by: Zorro Lang <zlang@kernel.org>
-Suggested-by: Christoph Hellwig <hch@lst.de>
-Suggested-by: "Darrick J. Wong" <djwong@kernel.org>
-Signed-off-by: Lin Jiapeng <jiapenglin@tencent.com>
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
----
- tests/xfs/842     | 63 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/842.out |  3 +++
- 2 files changed, 66 insertions(+)
- create mode 100755 tests/xfs/842
- create mode 100644 tests/xfs/842.out
+Do you think changing it to something smaller, like fallocate 0 64k, would
+be better to populate the metadata structures without prematurely running
+out of thin pool space?
 
-diff --git a/tests/xfs/842 b/tests/xfs/842
-new file mode 100755
-index 0000000..e9d01f8
---- /dev/null
-+++ b/tests/xfs/842
-@@ -0,0 +1,63 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+# Copyright (c) 2026 Tencent.  All Rights Reserved.
-+#
-+# FS QA Test No. 842
-+#
-+# Make sure that a full-file exchangerange under FILE1_WRITTEN does not strip
-+# the reflink flag from a file that still owns shared extents.  When the
-+# donor file is fully sparse, every mapping pair is skipped, so no extents
-+# actually move; the target file must keep its reflink flag, and a later
-+# write must go through CoW instead of modifying the shared blocks in place.
-+
-+. ./common/preamble
-+_begin_fstest auto quick fiexchange
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/reflink
-+
-+_require_xfs_io_command exchangerange
-+_require_scratch_reflink
-+
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount
-+
-+# Create the original file with a known pattern and clone it, so that both
-+# files share the same extents.
-+_pwrite_byte 0x41 0 1m $SCRATCH_MNT/orig >> $seqres.full
-+_reflink $SCRATCH_MNT/orig $SCRATCH_MNT/clone >> $seqres.full
-+
-+# Create a fully sparse donor file of the same size.
-+$XFS_IO_PROG -f -c 'truncate 1m' $SCRATCH_MNT/donor
-+
-+md5_before=$(md5sum $SCRATCH_MNT/orig | awk '{print $1}')
-+
-+# Swap the clone against the sparse donor, claiming the donor is fully
-+# written (-w).  Every donor mapping is a hole, so all pairs are skipped
-+# and the clone keeps its shared extents in place.
-+$XFS_IO_PROG -c "exchangerange -f -w $SCRATCH_MNT/donor" $SCRATCH_MNT/clone \
-+	>> $seqres.full
-+
-+# Directly confirm the inode flag state after the exchange: the clone
-+# must still be flagged reflink.  The donor may also carry the flag, which
-+# is the conservative outcome of refusing the flag exchange under
-+# FILE1_WRITTEN; the extra flag is harmless and can be dropped later by
-+# the regular reflink flag cleanup path.
-+_scratch_unmount
-+_scratch_xfs_db -c "path /clone" -c print -c "path /donor" -c print | \
-+	grep reflink | sed -e 's/^v[0-9]*/vX/g'
-+_scratch_mount
-+
-+# Overwrite part of the clone.  With the reflink flag correctly retained,
-+# this must go through CoW and leave the shared blocks of orig untouched.
-+_pwrite_byte 0x42 0 64k $SCRATCH_MNT/clone >> $seqres.full
-+_scratch_cycle_mount
-+
-+md5_after=$(md5sum $SCRATCH_MNT/orig | awk '{print $1}')
-+
-+test "$md5_before" != "$md5_after" && \
-+	echo "orig changed: md5 $md5_before -> $md5_after (write hit shared blocks in place)"
-+
-+# success, all done
-+_exit 0
-diff --git a/tests/xfs/842.out b/tests/xfs/842.out
-new file mode 100644
-index 0000000..69049d5
---- /dev/null
-+++ b/tests/xfs/842.out
-@@ -0,0 +1,3 @@
-+QA output created by 842
-+vX.reflink = 1
-+vX.reflink = 1
--- 
-2.50.1 (Apple Git-155)
+Thanks,
+Zorro
 
+> +	done
+> +
+> +	# Unmount and check the device to make sure all metadata is written
+> +	_dmthin_check_fs
+> +	_dmthin_mount
+> +
+> +	# Write the data blocks to force thinp space allocation.
+> +	# Overfill it by a bit.
+>  	for I in `seq 1 500`; do
+>  		$XFS_IO_PROG -f -c "pwrite -W 0 1M" $SCRATCH_MNT/file$I &>/dev/null
+>  	done
+> -- 
+> 2.51.0
+> 
