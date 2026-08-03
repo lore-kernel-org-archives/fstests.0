@@ -1,46 +1,43 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from out-179.mta1.migadu.com (out-179.mta1.migadu.com [95.215.58.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B4AD2DB7B4
-	for <fstests@vger.kernel.org>; Mon,  3 Aug 2026 12:01:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5439040F74C
+	for <fstests@vger.kernel.org>; Mon,  3 Aug 2026 12:46:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785758467; cv=none; b=SASPbN8MSbxc/qhj7MS0c0qPQXinS7eeJm5Q7sQOka+LKMNMiVxOmmAObWjdp80DewjRM7XjOcux2Ma7Rqk4s6pzVzKzlrj+H3ZIYVuk09CfYpsxW420YM1dNgAVuU5ldNX9Vik/ijFaZ5/RVHHfpHi3RrPyXgCW6C6nPAaDkb4=
+	t=1785761172; cv=none; b=N6hA3Z6e8OVo5FeVTTNgJeHrbNAc2lnO0UcwYBvEzyTzTdGI6DV8gZisMj/VU8KP73IlrRerTDyZZxuRxI1AU3378cEC+cBb/wkrevbPVcqc25G8bCVtQRypODQE6hokCYC62D2GqSWWWXv2UStZpD8TnS7CIoc4VoX9C8PA1UI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785758467; c=relaxed/simple;
-	bh=a60X0M+1uRJrbbXUWcAlZZWHatS8DnR42KwUA+F72VU=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=ra+eTi/dzc0abY+RWIKbtXsi1dc/iV9NfPeBwmRCwQYarh3Lv+Bsni3lvyfQpG6315+RfO4rMcXW1mU+aisjvu6ztpZJMrPceSZ918UyY9X9s6duLttCXZ1c2T48uulVYBlF+X6XXCYMoFk/YNujzNSdX6iQfybqeyIKL1ntoXE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=u9QADXXx; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=bUByuuCE; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1785761172; c=relaxed/simple;
+	bh=+5HfwxnoU7G89Vk4LVxvFgzEKrjEF9YRnVrCIJMG4Bg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=IeI84FVkmFCrv3tnAWFBwkDb5jS72nKs10fFlXy5FaU19Pf/UqmnzggnheKHX/zvRhAjvTC9q3llfDvX5lY2VrDoYY0XhLloa/VV9BuEMUytzYlFdxM2/sEku6qhnEZUm2AJ8Z4Wm/khUyBdf4UrqxqynARY/23XVxkNe8uNLUU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=chenxiaosong.com; spf=pass smtp.mailfrom=chenxiaosong.com; dkim=pass (2048-bit key) header.d=chenxiaosong.com header.i=@chenxiaosong.com header.b=iAzQub5G; arc=none smtp.client-ip=95.215.58.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=chenxiaosong.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chenxiaosong.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="u9QADXXx";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="bUByuuCE"
-Received: from localhost.localdomain (unknown [10.128.32.2])
-	by smtp-out2.suse.de (Postfix) with ESMTP id E266A3FFF
-	for <fstests@vger.kernel.org>; Mon,  3 Aug 2026 12:00:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1785758460; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=9J01DHN7hRkQ1hBKHfXpSZ8xmLxnmRfn58soisiWCco=;
-	b=u9QADXXxAwthvYB6JA4G3hXDgHjfPlM0DfsSbL26VnM5xunz6WWMMGM5dRSkozKzSrsNNF
-	FGQnLLHBGmf7CjMxBlBMkxkvWDV5lV9ymY4MEg2R6quKdRR/omTXEFHiM6QveeJdZUk7JA
-	5PSk1XxxT10grBQnV6OXtWPnhZsqwok=
-Authentication-Results: smtp-out2.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1785758455; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=9J01DHN7hRkQ1hBKHfXpSZ8xmLxnmRfn58soisiWCco=;
-	b=bUByuuCEb4M3Ck88i7pCEBhX6euN7DO62kWHhK+8rNcx7QLaM5rTkdJhEB55NvfGVluSFb
-	i7CoYnez79SqsfR5TOs827RKJOE80dbajEZnrd5GP3pLKyCKFgzCu6rE81VAW/LPiSRzr2
-	hJl7Qevto/K7vEKHpD0v/JojICR4Bng=
-From: Anthony Iliopoulos <ailiop@suse.com>
-To: fstests@vger.kernel.org
-Subject: [PATCH] xfs: use -w instead of --path for man program portability
-Date: Mon,  3 Aug 2026 13:58:19 +0200
-Message-ID: <20260803115819.17110-1-ailiop@suse.com>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (2048-bit key) header.d=chenxiaosong.com header.i=@chenxiaosong.com header.b="iAzQub5G"
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=chenxiaosong.com;
+	s=key1; t=1785761166;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=m9x9OZeqKA43VmdzLgAjofy3Ft+7/yhL4+yJje3kXHE=;
+	b=iAzQub5G2tPSlz/hYgJetMLzBsms8z7br6hnGToeZTTRkePWXz3VNoCOJWseaf37y780MM
+	z38NQrsN3iKYgmGOE2aGsrQCbO7+SGT8S0YsBAv4GOxRtRkXBN3KN68ErO/zenJey6vvg7
+	vHQuyLuyT0YL49stUCT9OijhoRXGyFCCe7z8hnRonMHUVUgi7MW5/D3PL9AJ5IQRjzIfWV
+	bMb476fC4/hv1ym3moznvUw8GaW9LtlD45s3eibGFjDvRxjxrPET1UDsbz9VobgqFyA2LH
+	X6ow7WkGcrylFnBHVVljFC+RWFGDEAY3OTqUS6MDBFCv1wu8FxTB4EKL8/Aipw==
+From: ChenXiaoSong <chenxiaosong@chenxiaosong.com>
+To: smfrench@gmail.com,
+	linkinjeon@kernel.org,
+	hch@lst.de,
+	zlang@kernel.org
+Cc: linux-cifs@vger.kernel.org,
+	fstests@vger.kernel.org,
+	ChenXiaoSong <chenxiaosong@kylinos.cn>
+Subject: [PATCH xfstests v4 resend 0/2] generic: new test to check nlink returned by fstat()
+Date: Mon,  3 Aug 2026 12:45:21 +0000
+Message-ID: <20260803124523.238457-1-chenxiaosong@chenxiaosong.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -48,96 +45,32 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spamd-Result: default: False [-2.80 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-0.998];
-	MIME_GOOD(-0.10)[text/plain];
-	RCPT_COUNT_ONE(0.00)[1];
-	ARC_NA(0.00)[];
-	RCVD_COUNT_ZERO(0.00)[0];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	URIBL_BLOCKED(0.00)[suse.com:mid,suse.com:email,localhost.localdomain:helo];
-	FROM_HAS_DN(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	FROM_EQ_ENVFROM(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	TO_DN_NONE(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:email,localhost.localdomain:helo]
-X-Spam-Flag: NO
-X-Spam-Score: -2.80
-X-Spam-Level: 
+X-Migadu-Flow: FLOW_OUT
 
-Some implementations of man(1) do not support the long option --path to
-display the actual location of a man page, which can cause these tests
-to fail on systems using alternative man packages, such as mandoc.
+From: ChenXiaoSong <chenxiaosong@kylinos.cn>
 
-Switch to using the more standard -w flag across these tests to improve
-portability while maintaining the same behavior, given that the --path
-option is just an alias to -w in the standard man-db utility.
+Resend it to fstests@vger.kernel.org.
 
-Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
----
- tests/xfs/293 | 2 +-
- tests/xfs/505 | 2 +-
- tests/xfs/514 | 2 +-
- tests/xfs/515 | 2 +-
- 4 files changed, 4 insertions(+), 4 deletions(-)
+Christoph's review:
+  - https://lore.kernel.org/linux-cifs/amgkQi1o99dX9meD@infradead.org/
 
-diff --git a/tests/xfs/293 b/tests/xfs/293
-index 3e887f1c40cf..9735c441ab32 100755
---- a/tests/xfs/293
-+++ b/tests/xfs/293
-@@ -19,7 +19,7 @@ _require_command "$MAN_PROG" man
- 
- echo "Silence is golden"
- 
--MANPAGE=`$MAN_PROG --path xfs_io`
-+MANPAGE=`$MAN_PROG -w xfs_io`
- 
- case "$MANPAGE" in
- *.gz|*.z\|*.Z)	CAT=zcat;;
-diff --git a/tests/xfs/505 b/tests/xfs/505
-index 81f53ffac23d..f0f435241dda 100755
---- a/tests/xfs/505
-+++ b/tests/xfs/505
-@@ -16,7 +16,7 @@ _require_command "$MAN_PROG" man
- 
- echo "Silence is golden"
- 
--MANPAGE=$($MAN_PROG --path xfs_spaceman)
-+MANPAGE=$($MAN_PROG -w xfs_spaceman)
- 
- case "$MANPAGE" in
- *.gz|*.z\|*.Z)	CAT=zcat;;
-diff --git a/tests/xfs/514 b/tests/xfs/514
-index d3641c3e1af6..215ae5e7cc5a 100755
---- a/tests/xfs/514
-+++ b/tests/xfs/514
-@@ -24,7 +24,7 @@ _require_test
- 
- echo "Silence is golden"
- 
--MANPAGE=$($MAN_PROG --path xfs_db)
-+MANPAGE=$($MAN_PROG -w xfs_db)
- 
- case "$MANPAGE" in
- *.gz|*.z\|*.Z)	CAT=zcat;;
-diff --git a/tests/xfs/515 b/tests/xfs/515
-index 7d6e99405972..0596457e5adc 100755
---- a/tests/xfs/515
-+++ b/tests/xfs/515
-@@ -24,7 +24,7 @@ _require_test
- 
- echo "Silence is golden"
- 
--MANPAGE=$($MAN_PROG --path xfs_quota)
-+MANPAGE=$($MAN_PROG -w xfs_quota)
- 
- case "$MANPAGE" in
- *.gz|*.z\|*.Z)	CAT=zcat;;
+Zorro's reviews:
+  - https://lore.kernel.org/linux-cifs/anBwHPuds0VQjHuu@zlang-mailbox/
+  - https://lore.kernel.org/linux-cifs/anBvmrwo6SvhVFuu@zlang-mailbox/
+
+v4 on smb mailing list: https://lore.kernel.org/linux-cifs/20260730021238.51634-1-chenxiaosong@chenxiaosong.com/
+
+ChenXiaoSong (2):
+  generic/002: add test to hardlink group
+  generic: new test to check nlink returned by fstat()
+
+ tests/generic/002     |  2 +-
+ tests/generic/798     | 59 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/798.out |  2 ++
+ 3 files changed, 62 insertions(+), 1 deletion(-)
+ create mode 100755 tests/generic/798
+ create mode 100644 tests/generic/798.out
+
 -- 
-2.49.0
+2.43.0
 
