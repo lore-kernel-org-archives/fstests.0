@@ -1,139 +1,116 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Received: from mail-pj1-f42.google.com (mail-pj1-f42.google.com [209.85.216.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24BA333FE15
-	for <fstests@vger.kernel.org>; Tue,  4 Aug 2026 12:16:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD9783DD532
+	for <fstests@vger.kernel.org>; Wed,  5 Aug 2026 07:18:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785845805; cv=none; b=JbUsHQE/icgnps3g4dZfZhVpr6YRNg+jPPMlCdYS0pWn7WZqeotiPZEaiZXhhTEvWUibk+2czhgz1HjYE+Dg+BpZynI/0f0/k1YdkLUkIap6+w91Cn/QrGPPUzIxS9hqKjLdrL9FqH3RChEikaeFuOsi0FwP9eZaEmn4PSHTUdc=
+	t=1785914325; cv=none; b=uvrOMtmv0SumcavhHZYPyiQeXtDYlO/AwsAdDGlCe0FhCmk29izgWHnt8O1PoL0oNttAnltJtfVGyfYq69C5caKGrYxevVE+NX9pIPQEAuR+dg2YbHV1ASjY3HA4IvmmhKRb6cLFPYCDQXdX2zPEFkRR8bufIdnXA8omeDFEBQo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785845805; c=relaxed/simple;
-	bh=9GssKbEx/DKlYYxzUg7xBi6wbt23eV3SQ2I57yTh5mk=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=Ij/58f1dfA04LKDOEiJ9LRPqwg5Ph3rt/wWXS+39rIP956RMDgb74hH3QQOZmYaP1oX/7cbJr0lftBV7Uu6JgGgWdawg2GgGxo9OYWBW/y3CDgoqE03xndh9IZHLA6Afwr5NLfWil44K8HqjUwjY0QxmTtCfdiNVZj3pjhXMJg0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=u7BEg95p; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=wXSWIGkb; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=b3goLrag; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=bQVv+th1; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	s=arc-20240116; t=1785914325; c=relaxed/simple;
+	bh=uOWIMGEsC7423FfrQngMl4wBp6ka1DDD6emQGrQwbeQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=qaXKOdDMX7xki12sv17p13dzHt9uOV5H1vjwV8MS6tmeehXej2KUogk7K/TvMtFbPZjLrNbSe353TjGRxSc5IV1zo6Y1sgdigxNk0V1KCP6TcpmBmkNV+Ms7hEK8yWuMcjKTdrGCGa8E+t7p4AD7fnLExcupG2PFfcHWooBAH70=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=LUjAUzMX; arc=none smtp.client-ip=209.85.216.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="u7BEg95p";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="wXSWIGkb";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="b3goLrag";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="bQVv+th1"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 9A45D3FBB;
-	Tue,  4 Aug 2026 12:16:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1785845795; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=OyrEhPNdu87U6Xrof56kU5t3PZ1KxuGk3h8QCRJ7qU4=;
-	b=u7BEg95pdbObpt4hYQ7G5t0tgEkIcVq/noCY8Dd9M+tkwGzdKr8E7QCRCHOuVvrap1CJtP
-	dhh8xllRP6VQOsn5IsBH5RoEibdc4xgnsm64N5AyYwLr0EOuxl1iPWl/3YBIqmtnc/zd9s
-	wfjmkF6IRNzd/jHfgUQG2xsAHy7nCnA=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1785845795;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=OyrEhPNdu87U6Xrof56kU5t3PZ1KxuGk3h8QCRJ7qU4=;
-	b=wXSWIGkbX26p5DaQjK2RlYa3myEZpaBesGUxx4YT2x52rRACbE32N6jqsCYTgDKhfE4oaJ
-	OMKg/9Ysf8l0IKAg==
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=b3goLrag;
-	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=bQVv+th1
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1785845791; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=OyrEhPNdu87U6Xrof56kU5t3PZ1KxuGk3h8QCRJ7qU4=;
-	b=b3goLragu0kyI9xSeR2UAdObJ5FJLqLYIGwJPSUPB5j+R0ZUI8WeAqIoV1abFt3G/Esa3c
-	bSLN3TUlzmYgqh+bBTqnFhIi6UfnuNgGjjj9LBjjMAudNccYO6dPbKgL8BNh9ugzbBAJea
-	7uy79JkFATsFpmWBrAcijJcOV/2HqpQ=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1785845791;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=OyrEhPNdu87U6Xrof56kU5t3PZ1KxuGk3h8QCRJ7qU4=;
-	b=bQVv+th1wlsi4hev1eGXQGimKgzbLMPCRR6zTWBTU+0CiVztiafPHMbXkCZJ+16f2Zg+xe
-	59oi3CZALDGvCkDg==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 2C490779BB;
-	Tue,  4 Aug 2026 12:16:29 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id 5M7NMh3YcWoaPwAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Tue, 04 Aug 2026 12:16:29 +0000
-Date: Tue, 4 Aug 2026 22:16:03 +1000
-From: David Disseldorp <ddiss@suse.de>
-To: Anthony Iliopoulos <ailiop@suse.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs: use -w instead of --path for man program
- portability
-Message-ID: <20260804221603.0d48ad17.ddiss@suse.de>
-In-Reply-To: <20260803115819.17110-1-ailiop@suse.com>
-References: <20260803115819.17110-1-ailiop@suse.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LUjAUzMX"
+Received: by mail-pj1-f42.google.com with SMTP id 98e67ed59e1d1-38759bcd877so684400a91.2
+        for <fstests@vger.kernel.org>; Wed, 05 Aug 2026 00:18:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1785914323; x=1786519123; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=7OH1Adj6KGkDmwwYAQROKRkU3gY6ZAfzxjTeuyOIM8o=;
+        b=LUjAUzMX0PAPAyfciITvFRyj5cmz/AHJR9KpLagjYIeo4h2GWEq3eePnqnup82U3s9
+         VL11/SIaNXK1pGD4cZs0bnDDOutMBgne6ookh8q9Krh4UfyVXId3o2CnVRDh0iiY8fFw
+         5CjA57fCij12/Zvn7jlQOfws5bgvCAaaRMSzP3gt2q7p/P9SHwWWcbbvzqXXbOM2Jef+
+         DbvNuxUrFImlE8rGjCArBh8YMxmnfwYmgIyvPC4fyq44Q3NDCJe+9OMRGhGVkAfMtHZW
+         mT4LMFnBIzsL3Dtb5ie7C/bBdgJ9I9/fGuwI6CXrj4nEoi3SzcoOAt6C4BW1KnpPQUon
+         lGSQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785914323; x=1786519123;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=7OH1Adj6KGkDmwwYAQROKRkU3gY6ZAfzxjTeuyOIM8o=;
+        b=Whpm1TO1bL4sk1hgbfiB+pzoW/fJKMRC/5RxcldbkcZJ65Zexk4g8FBWJbAmDjYJ7Q
+         HeFhla6dwIVi0KRfaUGdXg1WnjRMSTpoVANICPP6mmvCRiABGKdfrsEAQTVdMEDXcFGV
+         9+Gsvn89A8WRElgGiiBYo+nZqxyEHStGgg+H/qVTko1c6goplvHajFVUlFH2Pn5RPg+r
+         AgicU+sBJmCiw6CXb/VV6o2/LyedU4A5L9XUQJOw2too6enSoqIw9L5wgpCI/kBEBn5q
+         gcpxsXSbxnVTbG733wC+PU5ChNu5trdACDT9iHzwgrFvvfe9P3XNPth7fkEGdsgwQySc
+         NPVA==
+X-Gm-Message-State: AOJu0YyrzCuJULngqXIrYm9BhpaM85HKuBUqmUqSAnj1uuel+tS0+yHZ
+	Mohjy33FGfoKVza7rQEZ+EiBgi9612jkZyDak+7P0JFKyDRPFUznNWmZhv1nUdmg
+X-Gm-Gg: AR+sD13bkVHuQ0rbY5rpeYbJwUOCtIxxfS/pEbVsZC9MM/XBSvE/a8gsRhomg8CKcvQ
+	XRhMK4BfmRDLmY0L/GrA91HGz4Q0uLXJNlxjoFeHbocVoKenI3kSjCqiO9Hjr8rGl4R6FW4Z0vE
+	eqWrVtRf3M2PYGfFvuOe0jzH3QKH4SMC/7h0Zq960ulyWzt1Y2DEY9CV5dpPwUjrCgw4DUzkW1G
+	XptmTZhYXFmlBwQM5XG5ca1AgDmoNvVbu8NjsE7YY8z/qzF1NsMjCKGGJbuJDhegpj+eCbJeez7
+	u4n7BVDCMmuEbKKtRksQJlx3PbsAJXrKXVKGYBUruMhLT5YAxCvqOCCrP01gYPnMKACNP1rGM/m
+	UhDAVp2GdhoF8PY/15H2ESuKiSCjgh82rrkBl8aGW9YTarmXU/UskP+MgzpSaLkkUrKrOaRuRC7
+	WgkMYwfP3gdFreV3P4zDF9/MESPbDM2v8DQkwbFqr2p0L25uhIesyYpC2/DC1kd/3uFCsLNtbUk
+	hO4MIwucGFlxw3mNbuQx3N+UT0DobGbSl9Qe07gK6pcCCccESyBtG8dMXANBsHbFk+yQSHhgrnT
+	STsAzCayMt15Vyqe8i0x8q+hF32qzsOTl7ZKAGk1mlPeAEOEFMKB
+X-Received: by 2002:a17:90b:17c5:b0:37c:607b:2cd9 with SMTP id 98e67ed59e1d1-3903b9f3ee3mr4007895a91.0.1785914323088;
+        Wed, 05 Aug 2026 00:18:43 -0700 (PDT)
+Received: from spider.bream-herring.ts.net ([103.252.203.158])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-38fedc650a0sm3638742a91.14.2026.08.05.00.18.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 05 Aug 2026 00:18:42 -0700 (PDT)
+From: Matthias Goergens <matthias.goergens@gmail.com>
+To: fstests@vger.kernel.org
+Cc: Matthias Goergens <matthias.goergens@gmail.com>,
+	Zorro Lang <zlang@kernel.org>
+Subject: [PATCH 0/2] fstests: expect and test truthful FIDEDUPERANGE progress
+Date: Wed,  5 Aug 2026 15:18:37 +0800
+Message-ID: <20260805071839.3423779-1-matthias.goergens@gmail.com>
+X-Mailer: git-send-email 2.55.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Spam-Score: -3.51
-X-Spam-Level: 
-X-Rspamd-Action: no action
-X-Rspamd-Queue-Id: 9A45D3FBB
-X-Spamd-Result: default: False [-3.51 / 50.00];
-	BAYES_HAM(-3.00)[99.98%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_CONTAINS_FROM(1.00)[];
-	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	ARC_NA(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	MISSING_XM_UA(0.00)[];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	TO_DN_SOME(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	RCPT_COUNT_TWO(0.00)[2];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:mid,suse.de:email,suse.de:dkim,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns];
-	URIBL_BLOCKED(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns,suse.de:mid,suse.de:email,suse.de:dkim];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	DKIM_TRACE(0.00)[suse.de:+]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Spam-Flag: NO
+Content-Transfer-Encoding: 8bit
 
-Looks fine.
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+This series pairs with the kernel series "vfs: report truthful
+FIDEDUPERANGE progress safely", posted separately to linux-fsdevel:
 
-On Mon,  3 Aug 2026 13:58:19 +0200, Anthony Iliopoulos wrote:
+  https://lore.kernel.org/linux-fsdevel/20260805071414.3414870-1-matthias.goergens@gmail.com/
 
-> Some implementations of man(1) do not support the long option --path to
-> display the actual location of a man page, which can cause these tests
-> to fail on systems using alternative man packages, such as mandoc.
-> 
-> Switch to using the more standard -w flag across these tests to improve
-> portability while maintaining the same behavior
+Patch 1 corrects generic/517's expected output: an unaligned 131172-byte
+request is shortened to 131072 bytes, and the 100-byte remainder that
+xfs_io retries now fails per destination with -EINVAL instead of
+reporting success. These expectations encode the paired kernel change;
+on an unpatched kernel the test fails on exactly these corrected lines,
+as it did when the original kernel fix was briefly merged in 2022.
 
-The mandoc man.options.1 page seems to do a pretty good job of
-tracking where the various flags appear across man utils.
+Patch 2 adds generic/806, a raw FIDEDUPERANGE ioctl test covering the
+cases the retrying xfs_io interface cannot express precisely: an
+explicit zero-length request succeeds with bytes_deduped=0, and mixed
+multi-destination requests report the shortened count for an interior
+destination and the full count for a destination ending at EOF. The new
+number follows for-next's generic/798 and the publicly claimed numbers
+through 805.
+
+generic/517 and generic/806 both pass on Btrfs and XFS against the
+paired kernel.
+
+Matthias Goergens (2):
+  generic/517: expect truthful dedupe progress
+  generic: test FIDEDUPERANGE result reporting
+
+ src/Makefile          |   2 +-
+ src/fideduperange.c   | 138 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/517     |   6 ++
+ tests/generic/517.out |   6 +-
+ tests/generic/806     |  83 +++++++++++++++++++++++++
+ tests/generic/806.out |   4 ++
+ 6 files changed, 235 insertions(+), 4 deletions(-)
+ create mode 100644 src/fideduperange.c
+ create mode 100755 tests/generic/806
+ create mode 100644 tests/generic/806.out
+
+-- 
+2.55.0
+
