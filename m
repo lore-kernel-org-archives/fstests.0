@@ -1,42 +1,47 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25B8F41CB2D
-	for <fstests@vger.kernel.org>; Wed, 12 Aug 2026 09:58:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 20BA5435AAA;
+	Wed, 12 Aug 2026 15:56:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786528701; cv=none; b=hwNwHEPlCQW8LqocBusQKdCUs68bQGhB+TB9890W7OcthuwWzw2kyFkENchDYHkmUbnFKhEHO3BzNgFl7UJy39bQDg879SerLWl6FAUVAW5jwiNg/ZAz9V1ruN8CN7ErVEg5Z2SKxTBA8KWkqKvkmYg2CajpX1O271j/JYiOpAE=
+	t=1786550200; cv=none; b=SR3g7571/1iMsgptCI7yn5tlhTfxwjQKq7+pDcBYTFy7Vw33yIvjr4jX92axKeOrpJi2sHqkXL8Aa5YBgZMcWeF84xjjZrqBCpU+pkBxeKo1QnhFEGCEccBwCHOHeH2UFj//hH5o4XsC6SMiELZM9U8EVKRK0agyGSzXc/W/HPw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786528701; c=relaxed/simple;
-	bh=p4dlw/4ZqHpnpXrxukO340oJFU/sBOEESgjhRVhuNR8=;
+	s=arc-20240116; t=1786550200; c=relaxed/simple;
+	bh=UXOT7UfYAmTDExcTvUrH03rt3P6CCxFC1eG27pxtvlg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pPdqc4rogVIiIyHbjnHGcTb049YEuMAcyiTXbasFuhwpKgkABKV4N6F5r6WiwYjaHnmkQkL/vux5JKcPx60BOnOTT9AFmubjIiCEeaYGNJqr22w9q4AZC7hRO5MaNtaMmJWQVLnv8sEdaKB2u3aGTBre765ejX4MQccSGckcJrc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aZDdX7av; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=YpCNROXCCl7fYTTb7X6XC1M0p7OLXNl/z7XXwHwo17Va7mDImaqBaufbmNAcAqxCCkUa939EPndnFpFETGCGpws1HQUQTeI79qhvjT0O3VvvC+axjXT8hdjgazflUP5rqXnl1M2vyqCjwcz5SnBWf9BCVpbCLKpoJpV/9/IC4t8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=I3YZhT4g; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aZDdX7av"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 74AB51F000E9;
-	Wed, 12 Aug 2026 09:58:18 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="I3YZhT4g"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ED6221F000E9;
+	Wed, 12 Aug 2026 15:56:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1786528699;
-	bh=juwc4TR4TJGZCuomB5VceZdR9BVexSnJUuq/3pObPtA=;
+	s=k20260515; t=1786550198;
+	bh=lgNtBeh/+/UdWsvoe7xMVluV4NtZC4OzReKJyZrcEeM=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=aZDdX7avo0sMNmyRNofps8F2Jq9sjd3YlTilKShU+lflHcW9GXWRGWWhEwyCiC9zC
-	 K7sOWUd4yQWf/n+luDuP6F+omF1kiLor7ePtW4du1V3RlgOhWiK4r4lDPqWSdz07qK
-	 4mJJkgnsOQzcwMsBH+PJPZKrKfwm/0FUu6xIYyVXLy0XXUV0v3AGzpCGD+U4IrSvek
-	 BRYMqVK7lKDaEAJ1CaAje/jC1zja8xLMQSJfgE7ziBerS2QEvvotTcmBBV2PVzaIWJ
-	 zotKBqPYI05j6VENbr0e3VDA1fOP7HAMT6deGTEhbqo0AuI9OQ4TR3s1u/osPXYEEq
-	 6zvJ+KxIi1tAw==
-Date: Wed, 12 Aug 2026 11:58:15 +0200
-From: Christian Brauner <brauner@kernel.org>
-To: Zorro Lang <zlang@kernel.org>
-Cc: Zizhi Wo <wozizhi@huaweicloud.com>, fstests@vger.kernel.org, 
-	yangerkun@huawei.com, chengzhihao1@huawei.com
-Subject: Re: [PATCH] idmapped-mounts: probe O_TMPFILE support with the
- caller's mapped id
-Message-ID: <20260812-kurzarbeit-unabdingbar-mutter-e31cef822206@brauner>
-References: <20260731090253.1665192-1-wozizhi@huaweicloud.com>
- <f705ea52-36da-4fdb-a41e-a67a10830919@huaweicloud.com>
- <anoyQqDV_ga7ttCg@zlang-mailbox>
+	b=I3YZhT4gJX4OVP+Rl6xOHpD0i9hgu6QtLixA2jkE7L1R19AQFhT+cs3wQY1+P7qNC
+	 q613k57GmuQNg1c4iU63c8z1N0AZkFqZ4TsGSCNwiqQG7PTH1Z9FHc4Tta50mw2aoM
+	 oh5xIr32ve8PZU0ulcwA1PaxILUYd0DlP4RVBWApqYUcf1V1G05NoPbZdM2mohoaN/
+	 /6wK35wHWrbbGL8aggGW14TQuFYdfH1c0Mb2mad7MjSESg2qcbkoFzyhMUmoQO80sS
+	 h1HCAj9we4SerTpnQ47lrC/riVLZheumvYwMgN0gKNspwXnWspCbsxLaiiRDhVwGkN
+	 uVihMK7WMjtAw==
+Date: Wed, 12 Aug 2026 23:56:31 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc: Christian Brauner <brauner@kernel.org>, 
+	Miklos Szeredi <miklos@szeredi.hu>, Amir Goldstein <amir73il@gmail.com>, 
+	linux-unionfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] src/vfs: probe O_TMPFILE support on the base mount
+ in the idmapped tests
+Message-ID: <anyWAp6UjfojZtAL@zlang-mailbox>
+Mail-Followup-To: Qu Wenruo <quwenruo.btrfs@gmx.com>, 
+	Christian Brauner <brauner@kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, 
+	Amir Goldstein <amir73il@gmail.com>, linux-unionfs@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+	fstests@vger.kernel.org
+References: <20260615-overlay-idmapped-vfstest-v1-0-c6b3b2228092@kernel.org>
+ <20260615-overlay-idmapped-vfstest-v1-1-c6b3b2228092@kernel.org>
+ <fbfbafef-2b42-4f5e-ac8e-9c680a0be5ad@gmx.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,23 +50,109 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <anoyQqDV_ga7ttCg@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <fbfbafef-2b42-4f5e-ac8e-9c680a0be5ad@gmx.com>
 
-On Tue, Aug 11, 2026 at 04:40:18AM +0800, Zorro Lang wrote:
-> On Thu, Aug 06, 2026 at 02:11:55PM +0800, Zizhi Wo wrote:
-> > friendly ping...
+On Mon, Jul 20, 2026 at 06:15:31PM +0930, Qu Wenruo wrote:
 > 
-> Hi Zizhi, actually I'm waiting for the fix from vfs list.
 > 
-> Hi Christian,
+> 在 2026/6/16 01:03, Christian Brauner 写道:
+> > openat_tmpfile_supported() in the idmapped mount tests probes O_TMPFILE
+> > on the idmapped mount (open_tree_fd) as the test's fsuid -- but that
+> > fsuid is not mapped by the idmapped mount under test, so it really asks
+> > "can this unmapped caller create a tmpfile through this idmap?" instead
+> > of "does the filesystem support O_TMPFILE?".
+> > 
+> > On overlayfs this is a false negative: the backing tmpfile ends up owned
+> > by an unmapped id, overlayfs opens it with O_NOATIME and may_open()
+> > returns -EPERM, so the tmpfile sub-tests are wrongly skipped.
+> > 
+> > O_TMPFILE support is a property of the filesystem, not of the idmapped
+> > mount or the caller's mapping. Probe info->t_dir1_fd, the base mount
+> > that the caller owns, exactly as the non-idmapped setgid tests already
+> > do. The probe then succeeds on every filesystem and the tmpfile
+> > sub-tests run as the mapped fsuid.
+> > 
+> > Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
 > 
-> Could you please take a look at this issue? Quite a few people have submitted
-> patches trying to fix this test issue. Given that you are the authority on
-> this topic and previously sent a patchset [1] to fix this kind of issue, I think
-> accepting your patch would be the best approach to stay aligned with upstream
-> VFS. Christoph also metioned that [2] last time. I don't want to make this issue
-> fixing any more complicated. Could you please provide your review point or
-> rebase your fix on the latest fstests for-next branch, we'll review it ASAP.
+> Reviewed-by: Qu Wenruo <wqu@suse.com>
+> 
+> Furthermore, since kernel commit 539dce114465 ("fs: refuse O_TMPFILE
+> creation with an unmapped fsuid or fsgid"), even without overlayfs the
+> involved tests will fail due to the extra checks.
+> 
+> So this is not only affecting overlayfs but all regular fses now.
+> 
+> I hope we can at least merge this one asap.
 
-Just seeing this now.
-Please accept my patch which is a lot simpler imho. Thanks!
+Hi Wenruo,
+
+Before merging this patch, I've merged your:
+  commit 1cca2bc0d7a9462bb1b59edb108bac7c9e7c424d
+  Author: Qu Wenruo <wqu@suse.com>
+  Date:   Fri Jul 17 16:37:17 2026 +0930
+
+      fstests: vfstest: skip rejected tmpfile creation
+
+Since (Christian's) patch seems to replace yours (I think), so do you mind
+if I revert your patch and merge this one instead?
+
+Thanks,
+Zorro
+
+> 
+> Thanks,
+> Qu
+> 
+> > ---
+> >   src/vfs/idmapped-mounts.c | 12 ++++++------
+> >   1 file changed, 6 insertions(+), 6 deletions(-)
+> > 
+> > diff --git a/src/vfs/idmapped-mounts.c b/src/vfs/idmapped-mounts.c
+> > index ed9992f9..8f8441c9 100644
+> > --- a/src/vfs/idmapped-mounts.c
+> > +++ b/src/vfs/idmapped-mounts.c
+> > @@ -3838,7 +3838,7 @@ int tcore_setgid_create_idmapped(const struct vfstest_info *info)
+> >   		goto out;
+> >   	}
+> > -	supported = openat_tmpfile_supported(open_tree_fd);
+> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
+> >   	pid = fork();
+> >   	if (pid < 0) {
+> > @@ -4014,7 +4014,7 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+> >   		goto out;
+> >   	}
+> > -	supported = openat_tmpfile_supported(open_tree_fd);
+> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
+> >   	pid = fork();
+> >   	if (pid < 0) {
+> > @@ -7733,7 +7733,7 @@ static int setgid_create_umask_idmapped(const struct vfstest_info *info)
+> >   		goto out;
+> >   	}
+> > -	supported = openat_tmpfile_supported(open_tree_fd);
+> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
+> >   	pid = fork();
+> >   	if (pid < 0) {
+> > @@ -7947,7 +7947,7 @@ static int setgid_create_umask_idmapped_in_userns(const struct vfstest_info *inf
+> >   		goto out;
+> >   	}
+> > -	supported = openat_tmpfile_supported(open_tree_fd);
+> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
+> >   	/*
+> >   	 * Below we verify that setgid inheritance for a newly created file or
+> > @@ -8181,7 +8181,7 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+> >   		goto out;
+> >   	}
+> > -	supported = openat_tmpfile_supported(open_tree_fd);
+> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
+> >   	pid = fork();
+> >   	if (pid < 0) {
+> > @@ -8536,7 +8536,7 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
+> >   		goto out;
+> >   	}
+> > -	supported = openat_tmpfile_supported(open_tree_fd);
+> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
+> >   	/*
+> >   	 * Below we verify that setgid inheritance for a newly created file or
+> > 
+> 
