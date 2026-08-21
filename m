@@ -1,59 +1,79 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from 013.lax.mailroute.net (013.lax.mailroute.net [199.89.1.16])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 442EB356A38;
-	Fri, 21 Aug 2026 15:42:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB8AF36B908;
+	Fri, 21 Aug 2026 16:14:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=199.89.1.16
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787326923; cv=none; b=EO4mgp9w941EfvJDzt1fePdrEiFwb85q5wyqnlmxsr/E2vZcNWJEtkCnPp9Qpnk8/aukdyyvujIr5q9EBEiCtwF+tsXyuYsdq5EC80ripUdsJlhsDfVQyfNRC130oI2tqgLATeq+/IbWJf/qgxjH+oefoanBSt2KxOx4fqpJkXk=
+	t=1787328879; cv=none; b=AOCuUhfjaKwaoO5fPIPh+tYe4K78QfAD62J17WmMIU6iNT4HxpsOESwl4UiTJQmlgEW8LYiHuc2V/8Ls/EkdtAV/HJigsCWyUgGLTDGPnX8UWXd9QiLnDIEhoAKx+zQBLcH/iXDA1uQucKpVIs/M2CrQGfOUvNxTMYE4nBNEbwo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787326923; c=relaxed/simple;
-	bh=qOpt3D+DYcT6WpNCf+zDD62epunJnGQQn6mykR7nIKY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=mX4xPRbMaMCVQv7E/p2fecWslqIgnUT9RZ0cRoH0qgTkgW7r9uu399XA8NAUqoC5rzbF4E13xw1s3M7xZU2XrKztTtt/Uucd45kW+Ckd5Yh1OPl/l1e01ZKal2T47q6azLZlloONGIPrikvgm4Ivopp6rfREPFpOu24RBb63B4g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cCdG81aH; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1787328879; c=relaxed/simple;
+	bh=5HQ6LKMAfYJOcaRPpNVwXNgm7nStCMcmJUbjgtK+j+A=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=DJx2O8gNhrZqx1M1GMCz+sF5WMUTpOx5pyQo4paNKX3FGi4XitcdKq8u9h1PkPQgR4Qp0HqWSY0YoQS0tpMaKhJKkSsad10srJ87Fc6emU2mzITW+wNHN0nvPn0NjFW6u21igGmDjh2WiQHlfi4uaClA/CYTS81XI7tQ0h6z77k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org; spf=pass smtp.mailfrom=acm.org; dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b=Yl6tLHTE; arc=none smtp.client-ip=199.89.1.16
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cCdG81aH"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id D5C731F000E9;
-	Fri, 21 Aug 2026 15:42:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1787326921;
-	bh=CFVoxXCEF0eW2g+Gvl8Jg3nJiMJMUTjFU05vm91K838=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=cCdG81aHDkLjLCSgaaSfvILR5FnhZxMXpl738uDOIDg7PzLvWGLd5TH0Ak3pm6SiU
-	 4nYFAENZ7uKPOFTrUWsxVgFN1tFWympltY4agHlnxamD++/9oy6G4A3q7v3ArH2EzP
-	 X85jXIfm7A66H2BQ8PFmiuh/wfv7vr5t8Px/DQVia7O5CKTFBborGNQ8s+bTW5XV1W
-	 B6ZJg5tJ7/rhfTAPIMCfJdmYPVNsDzZFcn0UwhIDCZmcw0zKpIsfwEWN9Fntb4NJPv
-	 e1o10p4H0bJpjtsk49wzlCEHMNPWLmoNIm9nI6kCffUqtZt4yGQSUS+97u98nmCodx
-	 /UwQ/4qPy54+w==
-Date: Fri, 21 Aug 2026 08:42:01 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Zorro Lang <zlang@kernel.org>, qsa@qualys.com,
-	fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] generic: regression test for refluxfs fixes
-Message-ID: <20260821154201.GL6072@frogsfrogsfrogs>
-References: <20260819155432.GC839663@frogsfrogsfrogs>
- <aofjt-8uJvl994E7@infradead.org>
+	dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b="Yl6tLHTE"
+Received: from localhost (localhost [127.0.0.1])
+	by 013.lax.mailroute.net (Postfix) with ESMTP id 4hRQP926zDzlfq9x;
+	Fri, 21 Aug 2026 16:14:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
+	content-transfer-encoding:content-type:content-type:in-reply-to
+	:from:from:content-language:references:subject:subject
+	:user-agent:mime-version:date:date:message-id:received:received;
+	 s=mr01; t=1787328873; x=1789920874; bh=8pfpPXTgOfF4lURELYBCo77Q
+	gdRT2xOc5dBqD1JjLNA=; b=Yl6tLHTEVCztXQf1GvEG0WhmBlKR1A48LX150JrW
+	5nqa/hHQgMtGtM+qCIhVjjdkNlfzah3Q6hRKCC2yy7EG19k0d7IFKCYKhSFIUIOw
+	IZraebTOuAugrjYGO06WAWXk7uTKEVTcrr4k1jbrp5eTVMZ97gt0Ac7ddNPU+57G
+	A82MS8RzXa/cfzj6lS++rELOt+ziS3yTMSZRgFtgJpRVP3MrPEaMKODeS06s5PI4
+	oEWkc9jCBNI06tmqvyFedg6ns41WhUpyl2gQ19oRN4UdraGF4b4ZsaiJo2cex44C
+	CiiTgSW1bjAazgM+hZs9ZnN6FtxZVX44wTIbKgQadVwj3Q==
+X-Virus-Scanned: by MailRoute
+Received: from 013.lax.mailroute.net ([127.0.0.1])
+ by localhost (013.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
+ id hIJGUDIfx9oc; Fri, 21 Aug 2026 16:14:33 +0000 (UTC)
+Received: from [192.168.50.14] (c-73-231-117-72.hsd1.ca.comcast.net [73.231.117.72])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: bvanassche@acm.org)
+	by 013.lax.mailroute.net (Postfix) with ESMTPSA id 4hRQP33LKvzlfvpS;
+	Fri, 21 Aug 2026 16:14:30 +0000 (UTC)
+Message-ID: <23760489-a45c-4b00-8500-9e8f4c9189df@acm.org>
+Date: Fri, 21 Aug 2026 09:14:29 -0700
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aofjt-8uJvl994E7@infradead.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/5] common/scsi_debug: don't slow down I/O
+To: John Garry <john.g.garry@oracle.com>, Christoph Hellwig <hch@lst.de>,
+ Zorro Lang <zlang@kernel.org>
+Cc: fstests@vger.kernel.org, "Martin K. Petersen"
+ <martin.petersen@oracle.com>, Kanchan Joshi <joshi.k@samsung.com>,
+ Anuj Gupta <anuj20.g@samsung.com>, linux-scsi@vger.kernel.org
+References: <20260821051133.1817670-1-hch@lst.de>
+ <20260821051133.1817670-2-hch@lst.de>
+ <d3289f5b-7b4c-44ce-99ba-c7ff0f59404d@oracle.com>
+Content-Language: en-US
+From: Bart Van Assche <bvanassche@acm.org>
+In-Reply-To: <d3289f5b-7b4c-44ce-99ba-c7ff0f59404d@oracle.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Thu, Aug 20, 2026 at 10:35:51PM -0700, Christoph Hellwig wrote:
-> On Wed, Aug 19, 2026 at 08:54:32AM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > Regression test for refluxfs as found by Qualys.
+On 8/21/26 12:41 AM, John Garry wrote:
+> On 21/08/2026 06:11, Christoph Hellwig wrote:
+>> scsi_debug by defaults delays I/O 
 > 
-> Looks good.  Should this get a Cc and Co-Developed-by for the authors
-> of the C code?
+> Maybe we can just make delay=0 default for that driver. Or use ndelay > 0.
 
-Probably.  I'll respin this one.
+I'm in favor of changing the default delay to zero. It's what most users
+need and it's easy to forget to specify delay=0 when loading scsi_debug.
 
---D
+Thanks,
+
+Bart.
