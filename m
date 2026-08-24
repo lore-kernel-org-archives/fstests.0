@@ -1,214 +1,124 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com [209.85.208.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D1C9430CE5;
-	Mon, 24 Aug 2026 14:05:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7236F367F45
+	for <fstests@vger.kernel.org>; Mon, 24 Aug 2026 15:11:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787580333; cv=none; b=n4OLCEnR3f0qnvlHyqfWMJhX1he+2zq3JsMiObZsKdJFKZ6eXmE3/Klz6GrFdkE1B78sfDKQ1n/j37q3yF64PaLiFfkY804K6kc2B6NoTZ5C8mYXa+1iFZrgkSzXz52uxt3OYxDFLx6v0mI9JAQb27Oka7HRzamUnYOhdvKpWC8=
+	t=1787584272; cv=none; b=YqszKqbCYb4ZswDdFnxa2w8Vln0MWxIdj3JS/uDpi+IaDTa0eWjhUX8knvCvdKyBSvJOlr9C5Fex18uXf9yHZRx7dlxe+beYVUEznBuPagbvWkG2dxP7dfxe5cvkB5okRgflCPM2by3khxNU+vGQI5VKa363GcB6yBmBua65WRw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787580333; c=relaxed/simple;
-	bh=TVNuWznbi7z461LCNQ0VjLK7cUNilIMQSiLkD3Jk/a0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GFbQcRlRzXNh7xHDCLFkr4tzRkx5tMN0rcJjZvJVSeVUgK/SjDP5sDEd0N87ZLcGnM9QPT8lmkiWdQiqGyXG/qZ9766QPVtKFXHzutLq7YW54qKnsjMfazHOm/cMBygFHHhsaATRorKkOomU1gZZ6Gc9meRuEnLxgBXs/fUHpmA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=m9JnrWsr; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1787584272; c=relaxed/simple;
+	bh=Lv7SCqkEbZdeAKVX0F54kAnkD9mFuUJbzasVQAaSxfg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=E6Pb67tuiwKXBJ2dDqUUOcdC/E3rqofRdY+IFVkSdCyBTL2upPzLTqDuBswrLkm3Zu4C7tMLWotYSOqhFo7KvFjznQmAAuCDhoJTg/i0biGxbE7zjXNnm1TfO177z60sfI4vGsJ+2qUIm1Qcdc7nBJY2Dfy42gMePBCS7Fow6Bo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=duT86rcx; arc=none smtp.client-ip=209.85.208.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="m9JnrWsr"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CBD341F000E9;
-	Mon, 24 Aug 2026 14:05:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1787580331;
-	bh=rf07oECWzg7mA/SbvL9XANAEcqw84tovmNvakjtYx30=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=m9JnrWsrSN/c8jJlw7IiR2dLMG9AwIGOnnqwVWk6H+/hsj+9pSIJ7XmGUFgrR+Pj9
-	 w+v2RpRsFIdcOO0dzztKp81+wLyHBfnSIuOcFMB6JKgzAnZ9wxYdRNvcJCb+6QSuy/
-	 fYvivPQK/+u5/w01+3/oyqQb2nCbFB0MAmb3A+N1VX2BBr9jmDBpDZ8xSpyEG25pdT
-	 /ZYy1Q33zN/+jgP49uc5xRpRVVR7sBfvJNKYi6edhOM7IZ3R7ae/V4Y/n1gOy3PqGz
-	 SCfJwVOgAV7fLE6aexKXDJZqtMD3GcfqsOZkhpxbuSMlkuIatSrtXCgTypLPjcFaGd
-	 h6yXrcf/bXcxg==
-Date: Mon, 24 Aug 2026 22:05:25 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: qsa@qualys.com, fstests <fstests@vger.kernel.org>, 
-	xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH v2] generic: regression test for refluxfs fixes
-Message-ID: <aoxJrUoCCy5Kxgh8@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>, qsa@qualys.com, 
-	fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
-References: <20260821235155.GK839663@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="duT86rcx"
+Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-6a20319d030so5419332a12.2
+        for <fstests@vger.kernel.org>; Mon, 24 Aug 2026 08:11:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1787584269; x=1788189069; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=Y76bQQkK8WF+8yOj/wH5p+zurvQ5FlQ1Fo5WsfZhoDE=;
+        b=duT86rcx2g41BExOSuTN0kWZO4kloc4YC++jkAdGQzGrocYSGIENYVzqK6Id3aotfj
+         dSzn0Br6tYULv6B60ZnyNDC34qRX7hrlRI3ltfbE8444oNUY2aaJPOTM9NyC286vQCCK
+         gI9Qil3b2nIAqGm07ndGd+OGtPf3fII6kaE8zJ5+qAXsaXB/ROS46xXl4DpSiRl2R6tu
+         YvSHBXHW07VvREV7KKQzqrW/3+oV49kb9KjIbqiy/Yaz+aYQZBZHW/qakrEwOEnmSTwb
+         pJV1Wmo74Ldw+4pxM3Ka45flwkm1lRmf0EqsX8IErZpDqdvIKY+mq+nWx+o6SqYwt0H8
+         hnCg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1787584269; x=1788189069;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=Y76bQQkK8WF+8yOj/wH5p+zurvQ5FlQ1Fo5WsfZhoDE=;
+        b=OgkBDqvPnIKJ2aMtQWxn+Vp2FhWFuBRTUmUvNk3YENbg5cBQdTxpq3XQRjzkfwRpGQ
+         cJ1QhYAxfgNlCW/8+khkDKYYn9PcVnMlRjpEc+nfYLDLSmDn4z5MgLJM8CWeZqv4HNCI
+         mV6aN1A9PzQRGtnkUhBRuPjW6rPCuDukmYEf5o3KzpXQRp3aixfvYhNaxbpLbCO8Oclp
+         bYZqYIuCob3v99a3+VHoGoRDR4uAapdHNoo+ExQGdZTnkuCrmm5O4eMrlOvjp79TRErR
+         x+nzeNp1qqAlG0cAzg5vIxZ6Gaxm7PNwcmIAHT2r4AETEXp69wLfquJGgOQ/6YST/U5R
+         oDGA==
+X-Gm-Message-State: AFuF++kKdlfTr16PCFpLh6DQ/Lh904eBYtUrdocHnYB2pomAUVW8tibS
+	ZTVo6Ze4PyE6x8Keg/Louc7PGj6Srjam4sP1oYQwy+L3S9Mj2Whmk8dFAADtEReWj+/iR61EWrI
+	J3YHaNuQ=
+X-Gm-Gg: AR+sD13dMtLeyTQhc9L9otb4jDGezyAqVmVEGoTBj8DmHerD4rXlp68OVDUTZMk2Aob
+	/IdAv5oaMmMUwvXYjEze4z60tQmfyd+nGbv7rGTvg2Jmp0XpSHdyZks6ISzPEG1SLaMEzCSjPh2
+	aO0UByC4r7Ah3rW+I/NeXVQ8H4wHy2GuGpQp0PT/MLqHkPfWNzGcGfpZTc5Fj+hUv/7LkaVROrY
+	4dH2sjWKwJ7QH4c53vF2hW1SCsSprrfuTLq0KZ0zn8qs/pw5Nf3E63qbQra2jLOfXdkgKhKOrcm
+	R3XVFVFWTh+aSzynRmz6j3LGfcjYVuYKAymts99UWXtFYVNXkZrLVIlbEurJpytneGRT04Hp7ao
+	FY+KOCbG40ILgFEgvluFcV399Snnr4EqrSTCoDkprLULQWmkAfEGg///NEO2cIwfzKyUxyK3TbG
+	O+W19HTpMq9xx0GyVv5l2DM9YcbMFkJ+1wEY1hhrUn3V782Q==
+X-Received: by 2002:a05:6402:320c:b0:6a3:fdb0:c374 with SMTP id 4fb4d7f45d1cf-6a42f2054b1mr32473280a12.13.1787584268136;
+        Mon, 24 Aug 2026 08:11:08 -0700 (PDT)
+Received: from localhost ([2a07:b241:1004:8300::1000])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-6a59e1aeab9sm10383661a12.22.2026.08.24.08.11.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 24 Aug 2026 08:11:07 -0700 (PDT)
+From: Avinesh Kumar <avinesh.kumar@suse.com>
+To: fstests@vger.kernel.org
+Cc: wqu@suse.com
+Subject: [PATCH] generic/798: exclude nfs from cachestat dirty page reporting test
+Date: Mon, 24 Aug 2026 17:11:06 +0200
+Message-ID: <20260824151107.209027-1-avinesh.kumar@suse.com>
+X-Mailer: git-send-email 2.55.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260821235155.GK839663@frogsfrogsfrogs>
+Content-Transfer-Encoding: 8bit
 
-On Fri, Aug 21, 2026 at 04:51:55PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Regression test for refluxfs as found by Qualys.
-> 
-> Reported-by: qsa@qualys.com
-> Co-developed-by: qsa@qualys.com
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
-> v2: add co-author credits
-> ---
+From: Avinesh Kumar <avinesh.kumar@suse.com>
 
-Hi Darrick,
+generic/798 checks cachestat() page cache dirty state between write and
+fsync operations.
 
-I just gave this patch a try on linux v7.2+ which contains the commit
-2f4acd0fcd862e, but the test still fails as shown below on both xfs
-and btrfs. Did I miss anything?
+On NFS, the client flushes dirty pages to the server during close() to
+enforce its close-to-open consistency model. Because the test uses separate
+xfs_io invocations, the file is closed after writing, leaving pages already
+clean by the time the subsequent cachestat command executes, causing the
+test to fail.
 
-root@bogon:~/git/linux# git tag --contains 2f4acd0fcd862e
-v7.2
-v7.2-rc4
-v7.2-rc5
-v7.2-rc6
-v7.2-rc7
-
-root@bogon:~/git/xfstests-dev# ./check generic/1956
-FSTYP         -- xfs (debug)
-PLATFORM      -- Linux/x86_64 bogon 7.2.0-mainline+ #3 SMP PREEMPT_DYNAMIC Mon Aug 24 20:34:26 CST 2026
-MKFS_OPTIONS  -- -f /dev/sdc1
-MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sdc1 /mnt/scratch
-
-generic/1956       - output mismatch (see /root/git/xfstests-dev/results//generic/1956.out.bad)
-    --- tests/generic/1956.out  2026-08-24 14:19:18.790104900 +0800
-    +++ /root/git/xfstests-dev/results//generic/1956.out.bad    2026-08-24 21:41:51.884222239 +0800
-    @@ -1,2 +1,2 @@
-     QA output created by 1956
-    -corruption not observed
-    +unknown outcome 126
+- output mismatch (see /opt/xfstests/results//generic/798.out.bad)
+    --- tests/generic/798.out	2026-08-20 05:25:39.000000000 -0400
+    +++ /opt/xfstests/results//generic/798.out.bad	2026-08-21 12:30:39.831381108 -0400
+    @@ -1,16 +1,16 @@
+     QA output created by 798
+     === Test with 1 pages ===
+    -Cached: 1, Dirty: 1, Writeback: 0, Evicted: 0, Recently Evicted: 0
+    +Cached: 1, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
+     Cached: 1, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
+     === Test with 2 pages ===
+    -Cached: 2, Dirty: 2, Writeback: 0, Evicted: 0, Recently Evicted: 0
     ...
-    (Run 'diff -u /root/git/xfstests-dev/tests/generic/1956.out /root/git/xfstests-dev/results//generic/1956.out.bad'  to see the entire diff)
 
-HINT: You _MAY_ be missing kernel fix:
-      2f4acd0fcd862e xfs: resample the data fork mapping after cycling ILOCK
+Exclude 'nfs' from running this test.
 
-Ran: generic/1956
-Failures: generic/1956
-Failed 1 of 1 tests
+Signed-off-by: Avinesh Kumar <avinesh.kumar@suse.com>
+---
+ tests/generic/798 | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-root@bogon:~/git/xfstests-dev# ./check generic/1956
-FSTYP         -- btrfs
-PLATFORM      -- Linux/x86_64 bogon 7.2.0-mainline+ #3 SMP PREEMPT_DYNAMIC Mon Aug 24 20:34:26 CST 2026
-MKFS_OPTIONS  -- /dev/sdc1
-MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sdc1 /mnt/scratch
+diff --git a/tests/generic/798 b/tests/generic/798
+index 0fe37646..80b2acc9 100755
+--- a/tests/generic/798
++++ b/tests/generic/798
+@@ -16,6 +16,12 @@ _require_scratch
+ _exclude_scratch_mount_option "dax"
+ _exclude_scratch_mount_option "sync"
+ 
++# NFS flushes dirty data back to the server on close() as part of its
++# close-to-open cache consistency model, so a page written and closed in
++# one xfs_io invocation is no longer dirty by the time cachestat runs in
++# a later invocation.
++_exclude_fs nfs
++
+ pagesize=$(_get_page_size)
+ 
+ _scratch_mkfs > /dev/null
+-- 
+2.55.0
 
-generic/1956       - output mismatch (see /root/git/xfstests-dev/results//generic/1956.out.bad)
-    --- tests/generic/1956.out  2026-08-24 14:19:18.790104900 +0800
-    +++ /root/git/xfstests-dev/results//generic/1956.out.bad    2026-08-24 21:44:35.654443414 +0800
-    @@ -1,2 +1,2 @@
-     QA output created by 1956
-    -corruption not observed
-    +unknown outcome 126
-    ...
-    (Run 'diff -u /root/git/xfstests-dev/tests/generic/1956.out /root/git/xfstests-dev/results//generic/1956.out.bad'  to see the entire diff)
-Ran: generic/1956
-Failures: generic/1956
-Failed 1 of 1 tests
-
-
->  .gitignore             |    1 
->  src/Makefile           |    2 
->  src/refluxfs.c         |  461 ++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/1956     |   58 ++++++
->  tests/generic/1956.out |    2 
->  5 files changed, 523 insertions(+), 1 deletion(-)
->  create mode 100644 src/refluxfs.c
->  create mode 100755 tests/generic/1956
->  create mode 100644 tests/generic/1956.out
->
-
-[snip]
-
-> +#ifndef FICLONE
-> +#define FICLONE _IOW(0x94, 9, int)
-> +#endif
-> +#ifndef XFS_SUPER_MAGIC
-> +#define XFS_SUPER_MAGIC 0x58465342
-> +#endif
-> +
-> +#define BLK 4096
-
-This's a hard code, what if the fs blocksize or pagesize isn't 4096?
-
-> +
-> +/* ---- configuration (overridable via CLI) --------------------------------- */
-> +static const char *target_path   = "/etc/passwd";
-> +static const char *clone_dir     = "/var/tmp";
-> +static int         nr_writers    = 32;
-> +static int         nr_pressure   = 8;
-> +static int         budget_s      = 300;
-> +
-
-[snip]
-
-> +
-> +#if 0
-> +static int is_xfs(const char *p)
-> +{
-> +    struct statfs s;
-> +    if (statfs(p, &s)) return -1;
-> +    return s.f_type == XFS_SUPER_MAGIC;
-> +}
-> +#endif
-
-If this's useless, how about remove them?
-
-> +
-> +/* FIEMAP: is the target's first extent already shared (refcount > 1)?
-> + * If so the race can never see refcount==1. */
-> +static int target_first_extent_shared(void)
-> +{
-
-[snip]
-
-> +#if 0
-> +    /* 2. target on XFS */
-> +    int x = is_xfs(target_path);
-> +    if (x < 0) die(1, "statfs target", NULL);
-> +    if (!x) {
-> +        BAD("target is not on XFS (f_type != XFS_SUPER_MAGIC).");
-> +        INFO("RefluXFS only affects XFS with reflink=1 (mkfs.xfs default since");
-> +        INFO("xfsprogs 5.1.0; backported by Red Hat for RHEL 8 GA).  Default root");
-> +        INFO("fs on RHEL/CentOS/Rocky/Alma/OL/CloudLinux 8+, Fedora Server 31+,");
-> +        INFO("Amazon Linux 2023.");
-> +        exit(1);
-> +    }
-> +    OK("target is on XFS");
-> +#endif
-
-Same
-
-> +
-> +    /* 3. clone_dir on the same superblock */
-> +    if (access(clone_dir, W_OK)) die(1, "clone dir not writable",
-> +        "Need a writable directory on the SAME XFS filesystem as the target.");
-
-[snip]
-
-> +static void *pressure(void *arg)
-> +{
-> +    char p[600];
-> +    snprintf(p, sizeof p, "%s/press.%d", workdir, (int)(intptr_t)arg);
-> +    int fd = open(p, O_RDWR|O_CREAT|O_TRUNC, 0600);
-> +    if (fd < 0) return NULL;
-> +    char b = 0;
-> +    while (!atomic_load(&stop)) {
-> +        /* return values irrelevant -- goal is XFS log traffic, not the data */
-> +        (void)!pwrite(fd, &b, 1, 0);
-> +        (void)!ftruncate(fd, BLK);
-> +        fdatasync(fd);
-> +        (void)!ftruncate(fd, 0);
-
-As this's a generic test case, the pressure() works for XFS CIL, does it work
-for other filesystems?
-
-Thanks,
-Zorro
