@@ -1,33 +1,44 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 965D0372EFB;
-	Mon, 24 Aug 2026 04:59:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 81BB53B2FFB;
+	Mon, 24 Aug 2026 05:41:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787547584; cv=none; b=TZt1SZwZVMkB5Z6yuS3Xwtjd5Erhlxm9gsL05R1Y++P22qajT1pD4GwW4eQqZs7E2uWX94hPPjoHpo4RalZ9iAsjwucjt72EWVSYiOY4lW2HT16LqtSBAcFmHlKa3jYoNxj2PJJlFrWGrUSDThbL/a3PSbm9Wqv7OxOrRg++GMo=
+	t=1787550108; cv=none; b=J7CQPXcR5dXqB4zMrFA+C54bs1nrulJMcqN4iyqES85wMizZwz9kIHM4lNpYmsbOl55PKTreDIzDLCkprDsqP4yAL+VS2sGcqU5g2VjmEc+QiVb2J1cTFeISj54et2zmgUU7uyJtbakbGJ6usq5wOoAD8kYmxRS4cZnf8jDIOv0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787547584; c=relaxed/simple;
-	bh=LCAxVObHYIfq6I8Hguf7IJ8YGuUWC1rKisVjDAZWsuY=;
+	s=arc-20240116; t=1787550108; c=relaxed/simple;
+	bh=vtBXSmr97fdxKpbsd8fMYJRRkUyqTEg271wwUSMrtZs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=kQSjRGMZW0b6OZWBvmJj7FcoERr5DGEQ5baxi1bqcll39NUwGTus33Fh0yYIwedWIs9OoXSO5Walkh0J1J6VLfsbyIrz3WAFdiN5bJY49WQglfg3MqUtKlbe4naZh5qteXXs+AFe/+7QDiQAMfXGcD6Nc4zzNQxXupzWyWL2Q7I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id EA4DE68BFE; Mon, 24 Aug 2026 06:59:39 +0200 (CEST)
-Date: Mon, 24 Aug 2026 06:59:39 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>,
-	fstests@vger.kernel.org,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,
-	Kanchan Joshi <joshi.k@samsung.com>,
-	Anuj Gupta <anuj20.g@samsung.com>, linux-scsi@vger.kernel.org
-Subject: Re: [PATCH 4/5] generic: test I/O on devices with T10 protection
- information
-Message-ID: <20260824045939.GC29550@lst.de>
-References: <20260821051133.1817670-1-hch@lst.de> <20260821051133.1817670-5-hch@lst.de> <20260821233749.GG839663@frogsfrogsfrogs>
+	 Content-Type:Content-Disposition:In-Reply-To; b=ssgk9Fd33LLrBtICOcJnwmAkqO6SbpZFudAayLponLjOQVaKqN0FKsw6K31vofijZPwV1FPC3g8Z7x5rA/59HXrP87repLi3y1E9ObJhI10UoiTPd8ORtKdD8CLblEDFObk53iqUbF/fihvvdhtaxokAhyIErJtCVkROpIrgaa0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FVQ+TuVn; arc=none smtp.client-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FVQ+TuVn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 90EEA1F000E9;
+	Mon, 24 Aug 2026 05:41:44 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1787550107;
+	bh=rtLDm1LHdG8WVsTsWinQVUSlDvN3tHsCEqXyUA4lr1w=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=FVQ+TuVnQj7aMkF022XbDh/VQII9D0eTB/TY44U07RXWcA99Gtpxep8DaZbLBgQGK
+	 N8uwr4cODikzo6K0HwUqHS7THVTp0bO4dlG7w9SFD9CLOAllu17/F/6GwnWDcr1P8R
+	 kgf9nD/14sEnHS38J9bWxTxX2CiAHBcm9CtewZ8hJbBkBhC8vTSNbwxRmLdfipy9YY
+	 DOzVl/6IGJuBucS5T3IMtBxUEfV7OD95zipO/7N0keUpSnnYpiqJmmeYPpHVfPKgz9
+	 HeQ/qCuUO3A1y2+W/bVPOn48D8g4TYV2LNUCQ374p3I7D24OKUh8FSO6KlfjVxLnsB
+	 G9U55UzxZpqtQ==
+Date: Mon, 24 Aug 2026 13:41:41 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Johannes Thumshirn <johannes.thumshirn@wdc.com>, 
+	Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH v2 3/5] generic/746: skip on zoned btrfs
+Message-ID: <aovWTFh_7Xo1s_i7@zlang-mailbox>
+Mail-Followup-To: Christoph Hellwig <hch@infradead.org>, 
+	Johannes Thumshirn <johannes.thumshirn@wdc.com>, Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, 
+	linux-btrfs@vger.kernel.org
+References: <20260819131606.1478488-1-johannes.thumshirn@wdc.com>
+ <20260819131606.1478488-4-johannes.thumshirn@wdc.com>
+ <aofkT7rrfQYCr6yK@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -36,24 +47,25 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260821233749.GG839663@frogsfrogsfrogs>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <aofkT7rrfQYCr6yK@infradead.org>
 
-On Fri, Aug 21, 2026 at 04:37:49PM -0700, Darrick J. Wong wrote:
-> > @@ -0,0 +1,91 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2026 Christoph Hellwig
-> > +#
-> > +# FS QA Test No. 2301
-> > +#
-> > +# Basix FSX sanity check when using T10 protection information
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto rw pi dangerous
+On Thu, Aug 20, 2026 at 10:38:23PM -0700, Christoph Hellwig wrote:
+> On Wed, Aug 19, 2026 at 03:16:03PM +0200, Johannes Thumshirn wrote:
+> > The test relies on loop device discards punching holes in the backing
+> > image file (holes are then detected via fiemap on the backing file).
+> > Zoned btrfs does not support fallocate/punch hole, so fstrim on the
+> > loop device cannot free space in the backing file and the test cannot
+> > work.
+> > 
+> > Skip the test on filesystems that do not support "fpunch"
 > 
-> Why dangerous?  Can this crash the system?
+> Shouldn't _require_fstrim return false for zoned btrfs given that
+> trimming makes zero sense?  Otherwise once zoned btrfs at some point
+> supports fpunch (which it really should), this starts breaking again.
 
-Yes, the strip/insert case (which needs to be enabled through sysfs
-crashes all release kernels up to and including 7.2.
+Currently _require_fstrim only checks whether the FSTRIM_PROG binary is
+installed, can _require_batched_discard help that? Or should we explicitly
+skip zoned btrfs inside this helper?
 
+> 
+> 
