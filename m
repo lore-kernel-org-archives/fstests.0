@@ -1,42 +1,32 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9B3A493646;
-	Mon, 24 Aug 2026 04:48:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 62F2235AC1E;
+	Mon, 24 Aug 2026 04:58:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787546894; cv=none; b=lYxbxekORRX+MeIWdxn0Mp+VrPMei2UPKpFSBwi5ebk9uDXQ4LLlFlTPIIXScJlodhCusEWbQWaZBtK7G7LZ3zvOZgcrYLzZXcMIxzRs+jL3mcMOQqsSGheF7Bp2FThEDsDwb+puAalT/tNQnD/WSty4h6/hwv03OngqKfyHK/U=
+	t=1787547517; cv=none; b=D5iuiWGyA42IJlSeVUdItjJPTSwrZfXntrGXPF3hUvwmor75C2W93jfEckB3oPvGuctjKJdDH7Qcb/RjKAliMaC2kqBXftqZmgO3uvs7jpfMHMVIoIXbqaJynr/D+EeyMOs5uboiyBdzb6CaNcQNayQdDC//1RBL+kBui7TZwUM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787546894; c=relaxed/simple;
-	bh=kSh8VZ5n5RSlE1dJ9L1kbjCCsJOkib4L1c3HfEj74Dg=;
+	s=arc-20240116; t=1787547517; c=relaxed/simple;
+	bh=XJBLDJ4AW0gi0XS5kKB/URu6yfLB2VWh7ue5geCqCrU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rEqsplwBp7A/LE6q7i3ATD5hSLZEoQ/guBmiHvY1SCF/GsGUD7vC2tD+lmUZs4UqiD/HHdFJACPjjmILkVhzaqb9JBErP8MSRu/ye6po3870wccVxFEib4Tk+J8Ant2UAZthHD23OJdxMzuH89007bd7c/XSCX/ykDxtSf6ESlk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=zxkmnsjp; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="zxkmnsjp"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=zQ2WYiA7nw9ST8ZZTo3/t3CeNOTOB+UESBq5hdBVPtE=; b=zxkmnsjp2IboQMMHAaxGYvb++w
-	ePBx0ZzBEu4FLDbuDKO2Nxp6M3a3Yt03WxfVYisCgWkl71VecLjZlLu6YeUekOJFnuDxNykSScC0L
-	6/23QvUzAo5380BFY4oyqXo6kYAB4tkCOIs/D+SWwhGFKakNbozaVOYyGKMXsMOlJ2iOcmm72ap/W
-	So11j9bi9S/04kmsKy4YBSs4tCcvAeZ+p4hQ6mCfblasIXhIBFRDjvwyvFJBw+/1QIwTZUsvLWRrX
-	lhAtRvJAbu1Fz4vYNICrqTuRiytmMF5hj7+2PbK1PjurejA559OQzjDuDRHfvxhZqF/VImjSQsHUa
-	qZWx8liQ==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wyMbT-0000000FuzF-0hL1;
-	Mon, 24 Aug 2026 04:48:11 +0000
-Date: Sun, 23 Aug 2026 21:48:11 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, qsa@qualys.com,
-	fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH v2] generic: regression test for refluxfs fixes
-Message-ID: <aovNC5JeOiA2L56R@infradead.org>
-References: <20260821235155.GK839663@frogsfrogsfrogs>
+	 Content-Type:Content-Disposition:In-Reply-To; b=en63WPbBOkij1pcs7I9GP5MIUJOVwJF8xeCilT2CaUOO0Fr1seyc8HrOoU/D/mr4d8c/IrnL8Rn9+1oKgdtW1IYbgiGiN/QUb0noKEJ52GUixDDhnmeBv9jj9Ld/BaWx2iddNDRfdE49hvYFDm65DLeYq1HE295PdA2IsUQ8Ju4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 99B2268BFE; Mon, 24 Aug 2026 06:58:30 +0200 (CEST)
+Date: Mon, 24 Aug 2026 06:58:30 +0200
+From: Christoph Hellwig <hch@lst.de>
+To: Bart Van Assche <bvanassche@acm.org>
+Cc: John Garry <john.g.garry@oracle.com>, Christoph Hellwig <hch@lst.de>,
+	Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	"Martin K. Petersen" <martin.petersen@oracle.com>,
+	Kanchan Joshi <joshi.k@samsung.com>,
+	Anuj Gupta <anuj20.g@samsung.com>, linux-scsi@vger.kernel.org
+Subject: Re: [PATCH 1/5] common/scsi_debug: don't slow down I/O
+Message-ID: <20260824045830.GA29550@lst.de>
+References: <20260821051133.1817670-1-hch@lst.de> <20260821051133.1817670-2-hch@lst.de> <d3289f5b-7b4c-44ce-99ba-c7ff0f59404d@oracle.com> <23760489-a45c-4b00-8500-9e8f4c9189df@acm.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,15 +35,19 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260821235155.GK839663@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <23760489-a45c-4b00-8500-9e8f4c9189df@acm.org>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-On Fri, Aug 21, 2026 at 04:51:55PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Regression test for refluxfs as found by Qualys.
+On Fri, Aug 21, 2026 at 09:14:29AM -0700, Bart Van Assche wrote:
+> On 8/21/26 12:41 AM, John Garry wrote:
+>> On 21/08/2026 06:11, Christoph Hellwig wrote:
+>>> scsi_debug by defaults delays I/O 
+>>
+>> Maybe we can just make delay=0 default for that driver. Or use ndelay > 0.
+>
+> I'm in favor of changing the default delay to zero. It's what most users
+> need and it's easy to forget to specify delay=0 when loading scsi_debug.
 
-Looks good:
-
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+I won't object such a patch.  But we'll still want to force this
+in xfstests to not rely on such a change.
 
