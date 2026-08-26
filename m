@@ -1,141 +1,94 @@
-Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E39E2449999
-	for <fstests@vger.kernel.org>; Wed, 26 Aug 2026 15:01:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7960940855
+	for <fstests@vger.kernel.org>; Wed, 26 Aug 2026 15:15:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787756506; cv=none; b=Xq/AHrO6cDWK1bn4M0O3GciIIvT2OVtJFDvtS/57yU9JlxSffFBaO3s9XlOg0LHSHE1um+tFfVJuUp1wrE8amTqaQWKxQOF3P1WTefLqjQ8LoYOeMmRU31acVrKhW574j4wYCUO3Oe3mFxZg4VQyxr6fx7QtmsD1LgiZpn80Aeg=
+	t=1787757307; cv=none; b=Pc3n8cfNYVViaCb5FYWTOn51O0WVD1zGCkLhEawD374jx3VgOEf33JPvHrjkIP2s2hUisnxMswmSS3QzzSQ2E6Hx0ES4vwZrwu6Jvs67MkdhRwdaeFJvsHA9C5JjWrHz0mN31vec2YhEO7oqQHJN5iHHoG6Vcv4zAWYvUQ/J90o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787756506; c=relaxed/simple;
-	bh=BcwIAtbaQ0O4P/yTvpf11oruY1C/RW5BDDDxRO8bmGM=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=c59qGEd8byn7U4erqMIt4QYQ38Ij9POJ0M7OR3s7+FJt4bgKIR+FBdjL2Ncy89JpJCeWsoba52PACYuIUSX6q+fsTsjy/PpCWQjKME2mTw5alA90/10s+BrLM0qsXQ7B0eFq1H3q5RSsCixHJCkgjn1MNACDBWkmkKgsl4Te0Bw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=c4OE9h9A; arc=none smtp.client-ip=209.85.208.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1787757307; c=relaxed/simple;
+	bh=uFqHHRjqwiX2bRrKDtNpF4qoHrGVXyVus/LKPXzXD/8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=WjT1SNsLsDF61okqm7n2RdqckWtefFwYwahPSJCFHbVofiqYh1O5x86NjCiW38+ftBNWuLjImQ1WBLDXoUT60qpiJPXLYv4vBm0PKhGZll0cf4hbwLMYL9/5P9thGoCeYZs1G9tH7IZxNZLe4SSjOGAvrlcpzAfg12VmuOM2cAs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jMDnZfZx; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="c4OE9h9A"
-Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-6a1a546a6bbso1789721a12.1
-        for <fstests@vger.kernel.org>; Wed, 26 Aug 2026 08:01:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1787756503; x=1788361303; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=bCX1usaL9N3tibEVJPVuprx9gNSWLcbm5Db+04YOsiY=;
-        b=c4OE9h9A6HMIzvkiXya8z37ysTJ6e22gB8orw/+lHRTQoezA5/Ws42J1yw5tGf2R7P
-         2GQEWeBCucpqgEFElJujoPvLE/Ifsv99VVYhp3zWJf8+0ux90nuQwJmHXoqZtGhD9UWx
-         SYx8gpebQkS1apkE2jeM6W33exXNCtZ+WajUWXH6x4jnUVDBAqOSihuuefCnJDWrnhVj
-         CLeQpalUBOiJr8WFtoZgxLMzICbPXBRE+HYy4hi4l6A3QXM8vf275YHWpNJT3bOd8p+S
-         dYv8mL5KHpD37/9bbErDl5RjI2/L7zym9kOs3f4FHvJq1Ex8d2VkE85dxjrFNh+kB67G
-         Qkgg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787756503; x=1788361303;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=bCX1usaL9N3tibEVJPVuprx9gNSWLcbm5Db+04YOsiY=;
-        b=qRWY7r8Rry68jtG933ToTMnxWHvbYaN8bd36PebX1PIb6xHE91qW0i/jnpYCsJDC+t
-         NRjRvwBYYfbZUTA48ms3iqTh1AGuiipi2ncadeGcvYkAAinpoCYoaCjoKBB8NxO/vsi5
-         lxssSI/hU+0isS96IlfFcyIwXZ6/++DE6VstPMyDxgJ32+h8ZYVJJSspk0lXup/YFnhU
-         5+VpyTC5SKyB2RfZ0riQUAZZ6Eewd/DDwkt5tvKIGgPzOzyiq02beoGWIf2wok0AxVxz
-         oZSXZMj+8vkXc7f0R/ZSx/gRqfjss6z9QBCH87iXmGpZwdnKP88WPsP48oYrNZptNKIG
-         o45w==
-X-Gm-Message-State: AFuF++kjYWaotDlNeMkgxwFao9o++V/2h7KrOz7oVTU58eEcP87BF7/l
-	IglUBtWNVtXWNNfMQnmocxeY4jEmuxvbjzx5q2JxfQINblo5ZknRxic1+71N8bP6sX8GdzjA2ck
-	drRBWABw=
-X-Gm-Gg: AR+sD13Tk1DHpsM9nEcP77N6M0IKeaJ9hbK1W00dcQQb4bYzFVdBmu8+At6O50uHW0l
-	ovoCcoQcI97p2j48xmdypK3aUQtCSRAtcHGD0IFGhKpM37ltFVJvLoyLh8v4l5Wv2yHg7oiSnt2
-	eAaFvMb6DkxWoXdK+SW5B9Vk1JMTV865suD99jvuBYyUDyO3L+uCd6FjDxp+nauouOPsrEbx2mZ
-	TZwai/1banCPTyqx4KYDx+GTt5ACCdstXzQrxOCwl966/SCSWIZTHcmUWtYDdj7boCsEDF0DOvW
-	4P6iXea54DtlMup6funK25bakgRLmCK/aL/Yk23uqQKfKz0u2dRg9YaxMfOQB7b4Ue/9tTfyfwR
-	+6tG1vQwA88SgJj2l2OySOeae8V0i6KoTAloKK9uerYFY4jhSb7+FJy5ji4BIPc7GbOpyqpWKvO
-	GsQgwYKfNVydil9xKqLhIaqmlAxBLGardiNwFNh9DcRwSGdA==
-X-Received: by 2002:a17:907:e1d3:20b0:c25:d03:6794 with SMTP id a640c23a62f3a-c250d036dcdmr710645466b.16.1787756479743;
-        Wed, 26 Aug 2026 08:01:19 -0700 (PDT)
-Received: from localhost ([2a07:b241:1004:8300::1000])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c250a5d69a7sm807039466b.8.2026.08.26.08.01.19
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Aug 2026 08:01:19 -0700 (PDT)
-From: Avinesh Kumar <avinesh.kumar@suse.com>
-To: fstests@vger.kernel.org
-Cc: wqu@suse.com,
-	"Darrick J. Wong" <djwong@kernel.org>
-Subject: [PATCH v2] generic/798: chain xfs_io commands into a single invocation
-Date: Wed, 26 Aug 2026 17:01:14 +0200
-Message-ID: <20260826150118.177196-1-avinesh.kumar@suse.com>
-X-Mailer: git-send-email 2.55.0
-In-Reply-To: <20260824161518.GP839663@frogsfrogsfrogs>
-References: <20260824161518.GP839663@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jMDnZfZx"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DAC0B1F000E9;
+	Wed, 26 Aug 2026 15:15:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1787757306;
+	bh=mkGe10c+2l/fp0mTq09eAdaCTXnAYZJd3S5UoBx+SLI=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=jMDnZfZxLSuYN9KPw/WDxvgT1zJ6y/XRVw4ysOtuVguzHhewAiAKkINbTZ1F29oN3
+	 eIlZ1lg7KMMX6jg6g2688zzjZ0+T8P1qLkiOxSh7HGZpOFVVvBZhPxkBeqHiPAvgKT
+	 5WJheLMMxGmFNsQvd2DwHE9J/R3IyB0/jTGMTaSV5KEIfRq5egRWUTt1kxd9UG2Fh6
+	 WHkFWrthdr/dxxUVrTPAsd2fnvgRbvKS9bnmtzZZUkOnUUUjNl1l4I2WIikmp1h+/j
+	 Gf+2+1N2bvWphYeSJjbBNRmW79PTqDPj5Y2yJqbVodGkZQyuPsllH+tCYQiJIMU3aW
+	 ZjbWbLn/mkOCg==
+Date: Wed, 26 Aug 2026 23:15:01 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Eric Sandeen <sandeen@redhat.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH 1/5] generic: remove chmod of $seqres.full file
+Message-ID: <ao8C0KyuizVTgQzH@zlang-mailbox>
+Mail-Followup-To: Eric Sandeen <sandeen@redhat.com>, 
+	fstests@vger.kernel.org
+References: <20260825001337.449670-1-sandeen@redhat.com>
+ <20260825001337.449670-2-sandeen@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260825001337.449670-2-sandeen@redhat.com>
 
-From: Avinesh Kumar <avinesh.kumar@suse.com>
+On Mon, Aug 24, 2026 at 07:11:08PM -0500, Eric Sandeen wrote:
+> This appears to be an historical artifact.
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> ---
 
-The write, cachestat, fsync, and cachestat calls were each run as
-separate xfs_io invocations, closing and reopening the file in
-between. Some filesystems flush dirty data back on close(), clearing
-the dirty bit before the first cachestat ever ran, causing test failure
+Makes sense,
 
-- output mismatch (see /opt/xfstests/results//generic/798.out.bad)
-    --- tests/generic/798.out	2026-08-20 05:25:39.000000000 -0400
-    +++ /opt/xfstests/results//generic/798.out.bad	2026-08-21 12:30:39.831381108 -0400
-    @@ -1,16 +1,16 @@
-     QA output created by 798
-     === Test with 1 pages ===
-    -Cached: 1, Dirty: 1, Writeback: 0, Evicted: 0, Recently Evicted: 0
-    +Cached: 1, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
-     Cached: 1, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
-     === Test with 2 pages ===
-    -Cached: 2, Dirty: 2, Writeback: 0, Evicted: 0, Recently Evicted: 0
-    ...
+Reviewed-by: Zorro Lang <zlang@kernel.org>
 
-Run the whole sequence on one open file descriptor instead by chaining
-all xfs_io commands in single invocation.
-
-Suggested-by: "Darrick J. Wong" <djwong@kernel.org>
-Signed-off-by: Avinesh Kumar <avinesh.kumar@suse.com>
----
- tests/generic/798 | 18 ++++++++++++++----
- 1 file changed, 14 insertions(+), 4 deletions(-)
-
-diff --git a/tests/generic/798 b/tests/generic/798
-index 0fe37646..171878ee 100755
---- a/tests/generic/798
-+++ b/tests/generic/798
-@@ -27,12 +27,22 @@ for num_page in 1 2 4 8 16; do
- 	echo "=== Test with $num_page pages ==="
- 
- 	rm -f $SCRATCH_MNT/foobar
--	$XFS_IO_PROG -f -c "pwrite -b $pagesize 0 $size" $SCRATCH_MNT/foobar > /dev/null
--	# Basic cached number reporting
--	$XFS_IO_PROG -c "cachestat 0 $size" $SCRATCH_MNT/foobar
- 
--	# Test dirty page number reporting after a fsync.
-+	# Basic cached number reporting and test dirty page number
-+	# reporting after a fsync.
-+	#
-+	# Do the whole write+cachestat+fsync+cachestat sequence in a
-+	# single xfs_io invocation. Some filesystems (e.g. NFS) flush
-+	# dirty data back to the server as part of their own close()-time
-+	# cache consistency, which would clear the dirty bits before the
-+	# second xfs_io process ever got to run cachestat.
- 	$XFS_IO_PROG -c "fsync" -c "cachestat 0 $size" $SCRATCH_MNT/foobar
-+		$XFS_IO_PROG -f \
-+		-c "pwrite -q -b $pagesize 0 $size" \
-+		-c "cachestat 0 $size" \
-+		-c "fsync" \
-+		-c "cachestat 0 $size" \
-+		$SCRATCH_MNT/foobar
- done
- 
- _scratch_unmount
--- 
-2.55.0
-
+>  tests/generic/379 | 3 ---
+>  tests/generic/384 | 3 ---
+>  2 files changed, 6 deletions(-)
+> 
+> diff --git a/tests/generic/379 b/tests/generic/379
+> index 4c7fc939..9e5889b9 100755
+> --- a/tests/generic/379
+> +++ b/tests/generic/379
+> @@ -22,9 +22,6 @@ _cleanup()
+>  }
+>  
+>  
+> -cp /dev/null $seqres.full
+> -chmod ugo+rwx $seqres.full
+> -
+>  _require_scratch
+>  _require_quota
+>  _require_xfs_quota_foreign
+> diff --git a/tests/generic/384 b/tests/generic/384
+> index f2344380..69fe3695 100755
+> --- a/tests/generic/384
+> +++ b/tests/generic/384
+> @@ -42,9 +42,6 @@ cat >$tmp.projid <<EOF
+>  test:1
+>  EOF
+>  
+> -cp /dev/null $seqres.full
+> -chmod a+rwx $seqres.full	# arbitrary users will write here
+> -
+>  _require_scratch
+>  _scratch_mkfs >/dev/null 2>&1
+>  _scratch_enable_pquota
+> -- 
+> 2.55.0
+> 
+> 
