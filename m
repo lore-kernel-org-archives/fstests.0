@@ -1,142 +1,596 @@
-Received: from mail-ej1-f46.google.com (mail-ej1-f46.google.com [209.85.218.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D598A3128CC
-	for <fstests@vger.kernel.org>; Wed, 26 Aug 2026 15:54:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0889C2236F2
+	for <fstests@vger.kernel.org>; Wed, 26 Aug 2026 16:09:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787759667; cv=none; b=gtcYLt76cXmKU0W7QTC6kAqWcLI96R+bog/HouHc1bKVT6kF9RBjP2yzULoa1bts9xNVqyBrao8RPUc1efIbTsa8vnSxO8QsMhM8rxwTTUBU6dfKKcJ5dXpAqEyS/NR5s4ipUcvs0bIZKc/Exo/cL2Jx877+WrOcY8dcOXtApG0=
+	t=1787760556; cv=none; b=hHTrZ9ngpuhgBvMg76nMONzMCZ1Piqp/l5crPpTBgpVtmA8wl2S1dnxWrb7dNDhyDZQ50/vfSdfQLUvVTtUvWrLOdO66dHvxz/juYloT+hgODhbV5sssCpfT66FYj3xLXNJh5cfkr9l3oYBWikFiNEYBx5GdP61Xh61GajpFxMs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787759667; c=relaxed/simple;
-	bh=+B8bLSKXLeIfCYJH3PW70BAyzHD6bTPP45EpR1KmA+0=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Ggq6Kbi8Nk6M84Bv2rMunHCalUK/bbQu7chA8hYqr5TflCH0w5l42897DaxDTyj7CD5I7kyiVT9fIG2Sx8eijywS3LL5WVclhlISgf2zm72j+tlHY4dotwUYYzODQ1BvufvC8djDsGsdjL3F7oi5alG40bp3aXfznlMyV6EdO8s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=XudhWNkW; arc=none smtp.client-ip=209.85.218.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1787760556; c=relaxed/simple;
+	bh=6v5cCObz24LjExUYDiPPI8JaCMPRlge+3e2r0yxEhz8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Duz2UaBcTVcpNEBkNemZYSVDTOEElT9adkdvLnPomVKvUnVpqyG6VNiW4NwGU00DTvCtBDAv4b0aNnvcAC6XSLO8NPh0IX1CkpOUSBvcdwWE8C3AwLuLGbh8hOQe5p7MOFXkzwTuJC4hQMGL8bE1MxlRoLoJTGrcfTZ0Tm99dUo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KD4FwTUd; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="XudhWNkW"
-Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-c25344a8c6cso26012366b.0
-        for <fstests@vger.kernel.org>; Wed, 26 Aug 2026 08:54:25 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1787759664; x=1788364464; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=pFse/vYxtG5kld0lYEc5lD9aTNjYM3kCzlc1Lv8bCXc=;
-        b=XudhWNkWlvLu/iqhv0mi91u4nMmXmD3Q5Z0k1RAXXgAG4gu4+s2J4Krw4HeNGOMbxP
-         uHdYxC9Uw5xiloEgF2QjnW39JBXjTWf0SbLyEOpQ+JVv3dNtKUYl4nnr31gVvYn+GPaG
-         LkKmtSLeK4noRREJ35q5XNA3avob0DUV+h/NMAcgSrL9nI1eWd7H2Az+N5n6xPG1C3kQ
-         VHH0vPwZEYkB8B4Rs3fi5iafe5R2e9fTB+xCZHYKwNpmCxOZtJDI1rOK5bSHQxwdeFT6
-         qromfzSNAkm4rluvrgwgfyo4fQ3jRRmmdmzsbLSQu/Nwme7vpyVwWQi9DE5gT2lwD/sK
-         293Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787759664; x=1788364464;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=pFse/vYxtG5kld0lYEc5lD9aTNjYM3kCzlc1Lv8bCXc=;
-        b=fUgjMb83DQAZzrA+0Aqou01T5D8u3a4Fm77SXIU0VduIPprlmPAfIGA2UpBsHhMvDH
-         imt5kvVg29kTmPv2r4MMLNhXjoxglsnYrVQEJbWVR7p8fQtHz5JXHfmYUVpV3GmGuZeH
-         x4/3+kXrUoEc1ya2rUErjqkHDSCP5T6gDZkFlk6ZkaYyDRQkoE3/MtEaPIS7iMdh+lyu
-         pDi+/NEF2NmfyYHjkLdCmajg1hwSJnVkSr/qxupPTPqJzTYd1I//ivC2Jb9wGmKw88LZ
-         fYFUEIJoGxMqbLPvXM9vVDhFs3Ly2DR5EqN8e/EBMIFFPJ2Q8yxm6dhHu91apM5mQOdQ
-         N9sQ==
-X-Forwarded-Encrypted: i=1; AHgh+RrcaAtVjyWKTvzZWwSkpzF6kCrq+TzmUlMuenaH7dsoEWwPP6gBXmtKStGOj5SdBWpmC2epsDtI@vger.kernel.org
-X-Gm-Message-State: AFuF++nDke9OTTUrvuUSZjD/Lrk6c+TfsPIigxnuAKQQhoxu4DmxZ/Z3
-	AMbBTnY/+gR7eH63kpFOxERFvWTYicSahV2b96oTXG4yunD1Qib7eTduSr/EVux5Ats=
-X-Gm-Gg: AR+sD13khxJxMC9NOKN9aplBu+TaecpF2BEhytniICPOJUMtejgI9gwOEHM1HTRyeew
-	xS44FgHuP/m2Zc/r1VJN8ry2Q/Qe+Vo2f06qVyFzX/SHKbISUzt4Vfrwx0OAiXJP6WiyChDdTTA
-	dCM3IC/AsVPmJjxXQouxI4+1rS2bDYZIvhzR/tw4oDuFI9TH7S6rk4ss9TBX28sXIKPlv6Ifgin
-	w8mtmDj4fOTfvxTZ/gldDWFo01eEoFk/pixKO5FXT1wZ4xKIZbqEo+ixP8YXF6+PNeVSnuB8D2O
-	EqVwnOCwHQd7lJMIo97hyTBbAnNpsyhnDwSD68Ppo7rklG/hY5M50scN3ylPoF0YIprDUxsEsQW
-	ShZJNz8X4ccNY201EZzrAlfVLelIXm8tbCX2bzwD9PqEVk1oTIpPYiNx4B1HShCIXR8x0Ch+qBa
-	5NE6eFAOFO/ZBEk1HaT8rdyfWAxvcXpIs5935QrnNK5Kso14is2ZrV1AFA
-X-Received: by 2002:a17:907:3cd6:b0:c1f:922d:34c3 with SMTP id a640c23a62f3a-c250c308f96mr858858166b.14.1787759663959;
-        Wed, 26 Aug 2026 08:54:23 -0700 (PDT)
-Received: from localhost ([2a07:b241:1004:8300::1000])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c250a5d647dsm528239366b.13.2026.08.26.08.54.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Aug 2026 08:54:23 -0700 (PDT)
-From: Avinesh Kumar <avinesh.kumar@suse.com>
-To: djwong@kernel.org,
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KD4FwTUd"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ABDF21F000E9;
+	Wed, 26 Aug 2026 16:09:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1787760554;
+	bh=LYFRqwRBwheutzC+Rcu/lf6KDDI++WTB8b1pslTqRoY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=KD4FwTUd7oTulVuiJ8mRM7kHliUCORODdgYfLdRAlaUy5wC/BaGmmpdSplarDczsx
+	 ik2qYYyJHu4THRSvGdbX3TZ6Rnq7FdMB1GyLyWyVuUIfJHJpqXzeh2Zc+0ex2kOrcQ
+	 OuZG8UU+t2jxnZoy14ESQcyB6oC3IbMJBpIMBS4huzzCZAzSEDlGENQKSt9VTNLEUn
+	 tRU3FRzJlaTwg89mV9HXOKDzQFGj1zGDDsAQKWwmhv4Q6QeDIahw9qcxW09gDpNUYd
+	 5CggGOL9L3k2xB8c2KZnqoXAmeeBRkHn/Z6Zedl/OUiKH53oqg7wFiETM1t/LxhC3C
+	 e30WtbwUdnmCg==
+Date: Thu, 27 Aug 2026 00:09:05 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Eric Sandeen <sandeen@redhat.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH 2/5] Add _require_chmod as needed
+Message-ID: <ao8MydLN9zutR5hB@zlang-mailbox>
+Mail-Followup-To: Eric Sandeen <sandeen@redhat.com>, 
 	fstests@vger.kernel.org
-Cc: avinesh.kumar@suse.com,
-	wqu@suse.com
-Subject: [PATCH v3] generic/798: chain xfs_io commands into a single invocation
-Date: Wed, 26 Aug 2026 17:54:23 +0200
-Message-ID: <20260826155423.183785-1-avinesh.kumar@suse.com>
-X-Mailer: git-send-email 2.55.0
-In-Reply-To: <20260826152014.GT839663@frogsfrogsfrogs>
-References: <20260826152014.GT839663@frogsfrogsfrogs>
+References: <20260825001337.449670-1-sandeen@redhat.com>
+ <20260825001337.449670-3-sandeen@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260825001337.449670-3-sandeen@redhat.com>
 
-From: Avinesh Kumar <avinesh.kumar@suse.com>
+On Mon, Aug 24, 2026 at 07:11:09PM -0500, Eric Sandeen wrote:
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> ---
 
-The write, cachestat, fsync, and cachestat calls were each run as
-separate xfs_io invocations, closing and reopening the file in
-between. Some filesystems flush dirty data back on close(), clearing
-the dirty bit before the first cachestat ever ran, causing test failure
+Maybe we need a helper likes `_require_posix_fs` to filter out non-POSIX
+filesystems such as exFAT, NTFS, and CIFS etc :)
 
-- output mismatch (see /opt/xfstests/results//generic/798.out.bad)
-    --- tests/generic/798.out	2026-08-20 05:25:39.000000000 -0400
-    +++ /opt/xfstests/results//generic/798.out.bad	2026-08-21 12:30:39.831381108 -0400
-    @@ -1,16 +1,16 @@
-     QA output created by 798
-     === Test with 1 pages ===
-    -Cached: 1, Dirty: 1, Writeback: 0, Evicted: 0, Recently Evicted: 0
-    +Cached: 1, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
-     Cached: 1, Dirty: 0, Writeback: 0, Evicted: 0, Recently Evicted: 0
-     === Test with 2 pages ===
-    -Cached: 2, Dirty: 2, Writeback: 0, Evicted: 0, Recently Evicted: 0
-    ...
+Reviewed-by: Zorro Lang <zlang@kernel.org>
 
-Run the whole sequence on one open file descriptor instead by chaining
-all xfs_io commands in single invocation.
-
-Suggested-by: "Darrick J. Wong" <djwong@kernel.org>
-Signed-off-by: Avinesh Kumar <avinesh.kumar@suse.com>
----
- tests/generic/798 | 19 ++++++++++++++-----
- 1 file changed, 14 insertions(+), 5 deletions(-)
-
-diff --git a/tests/generic/798 b/tests/generic/798
-index 0fe37646..5c81b429 100755
---- a/tests/generic/798
-+++ b/tests/generic/798
-@@ -27,12 +27,21 @@ for num_page in 1 2 4 8 16; do
- 	echo "=== Test with $num_page pages ==="
- 
- 	rm -f $SCRATCH_MNT/foobar
--	$XFS_IO_PROG -f -c "pwrite -b $pagesize 0 $size" $SCRATCH_MNT/foobar > /dev/null
--	# Basic cached number reporting
--	$XFS_IO_PROG -c "cachestat 0 $size" $SCRATCH_MNT/foobar
- 
--	# Test dirty page number reporting after a fsync.
--	$XFS_IO_PROG -c "fsync" -c "cachestat 0 $size" $SCRATCH_MNT/foobar
-+	# Basic cached number reporting and test dirty page number
-+	# reporting after a fsync.
-+	#
-+	# Do the whole write+cachestat+fsync+cachestat sequence in a
-+	# single xfs_io invocation. Some filesystems (e.g. NFS) flush
-+	# dirty data back to the server as part of their own close()-time
-+	# cache consistency, which would clear the dirty bits before the
-+	# second xfs_io process ever got to run cachestat.
-+	$XFS_IO_PROG -f \
-+		-c "pwrite -q -b $pagesize 0 $size" \
-+		-c "cachestat 0 $size" \
-+		-c "fsync" \
-+		-c "cachestat 0 $size" \
-+		$SCRATCH_MNT/foobar
- done
- 
- _scratch_unmount
--- 
-2.55.0
-
+>  tests/generic/093 | 1 +
+>  tests/generic/099 | 1 +
+>  tests/generic/184 | 1 +
+>  tests/generic/193 | 1 +
+>  tests/generic/230 | 1 +
+>  tests/generic/256 | 1 +
+>  tests/generic/314 | 1 +
+>  tests/generic/317 | 1 +
+>  tests/generic/355 | 1 +
+>  tests/generic/370 | 1 +
+>  tests/generic/375 | 1 +
+>  tests/generic/378 | 1 +
+>  tests/generic/444 | 1 +
+>  tests/generic/449 | 1 +
+>  tests/generic/462 | 1 +
+>  tests/generic/495 | 1 +
+>  tests/generic/514 | 1 +
+>  tests/generic/535 | 1 +
+>  tests/generic/572 | 1 +
+>  tests/generic/573 | 1 +
+>  tests/generic/581 | 1 +
+>  tests/generic/597 | 1 +
+>  tests/generic/603 | 1 +
+>  tests/generic/622 | 1 +
+>  tests/generic/636 | 1 +
+>  tests/generic/641 | 1 +
+>  tests/generic/673 | 1 +
+>  tests/generic/674 | 1 +
+>  tests/generic/675 | 1 +
+>  tests/generic/682 | 1 +
+>  tests/generic/683 | 1 +
+>  tests/generic/684 | 1 +
+>  tests/generic/685 | 1 +
+>  tests/generic/686 | 1 +
+>  tests/generic/687 | 1 +
+>  tests/generic/688 | 1 +
+>  tests/generic/698 | 1 +
+>  tests/generic/699 | 1 +
+>  tests/generic/726 | 1 +
+>  tests/generic/727 | 1 +
+>  tests/generic/792 | 1 +
+>  41 files changed, 41 insertions(+)
+> 
+> diff --git a/tests/generic/093 b/tests/generic/093
+> index 047cc821..9c3c855b 100755
+> --- a/tests/generic/093
+> +++ b/tests/generic/093
+> @@ -29,6 +29,7 @@ filefilter()
+>  _require_test
+>  _require_attrs security
+>  _require_user
+> +_require_chmod
+>  _require_test_program "writemod"
+>  _require_command "$SETCAP_PROG" "setcap"
+>  _require_command "$GETCAP_PROG" "getcap"
+> diff --git a/tests/generic/099 b/tests/generic/099
+> index 980fd38f..cf54e96b 100755
+> --- a/tests/generic/099
+> +++ b/tests/generic/099
+> @@ -47,6 +47,7 @@ _cleanup()
+>  #
+>  
+>  _require_test
+> +_require_chmod
+>  _require_runas
+>  
+>  _acl_setup_ids
+> diff --git a/tests/generic/184 b/tests/generic/184
+> index c82876d9..81663a65 100755
+> --- a/tests/generic/184
+> +++ b/tests/generic/184
+> @@ -13,6 +13,7 @@ _begin_fstest metadata auto quick
+>  . ./common/filter
+>  
+>  _require_test
+> +_require_chmod
+>  _require_mknod
+>  
+>  rm -f $TEST_DIR/null
+> diff --git a/tests/generic/193 b/tests/generic/193
+> index ba557428..4e23f33d 100755
+> --- a/tests/generic/193
+> +++ b/tests/generic/193
+> @@ -49,6 +49,7 @@ _filter_files()
+>  
+>  _require_test
+>  _require_user
+> +_require_chmod
+>  _require_chown
+>  
+>  test_root=$TEST_DIR/$seq.$$.root
+> diff --git a/tests/generic/230 b/tests/generic/230
+> index a8caf5a8..793e3a8f 100755
+> --- a/tests/generic/230
+> +++ b/tests/generic/230
+> @@ -17,6 +17,7 @@ _begin_fstest auto quota quick
+>  _require_scratch
+>  _require_quota
+>  _require_user
+> +_require_chmod
+>  
+>  test_files()
+>  {
+> diff --git a/tests/generic/256 b/tests/generic/256
+> index fe8be022..eba2ba32 100755
+> --- a/tests/generic/256
+> +++ b/tests/generic/256
+> @@ -19,6 +19,7 @@ _require_xfs_io_command "fpunch"
+>  _require_scratch
+>  _require_user
+>  _require_test
+> +_require_chmod
+>  
+>  testfile=$TEST_DIR/256.$$
+>  
+> diff --git a/tests/generic/314 b/tests/generic/314
+> index 65f7f9d9..b0fdd567 100755
+> --- a/tests/generic/314
+> +++ b/tests/generic/314
+> @@ -15,6 +15,7 @@ _begin_fstest auto quick perms
+>  _require_test
+>  _require_user
+>  _require_chown
+> +_require_chmod
+>  _require_sgid_inheritance
+>  
+>  rm -rf $TEST_DIR/$seq-dir
+> diff --git a/tests/generic/317 b/tests/generic/317
+> index 1afec6a7..67dcbf91 100755
+> --- a/tests/generic/317
+> +++ b/tests/generic/317
+> @@ -33,6 +33,7 @@ file=$SCRATCH_MNT/file1
+>  
+>  _require_scratch
+>  _require_user
+> +_require_chmod
+>  _require_ugid_map
+>  _require_userns
+>  _require_chown
+> diff --git a/tests/generic/355 b/tests/generic/355
+> index 6b4f7eba..443c17a3 100755
+> --- a/tests/generic/355
+> +++ b/tests/generic/355
+> @@ -14,6 +14,7 @@ _begin_fstest auto quick perms
+>  
+>  _require_test
+>  _require_user
+> +_require_chmod
+>  _require_odirect
+>  _require_chown
+>  
+> diff --git a/tests/generic/370 b/tests/generic/370
+> index b5d942de..1b04eab1 100755
+> --- a/tests/generic/370
+> +++ b/tests/generic/370
+> @@ -23,6 +23,7 @@ _fixed_by_fs_commit btrfs 03018e5d8508 \
+>      "btrfs: fix swap file activation failure due to extents that used to be shared"
+>  _fixed_by_fs_commit xfs 2d873efd174b "xfs: flush inodegc before swapon"
+>  
+> +_require_chmod
+>  _require_scratch_swapfile
+>  _require_scratch_reflink
+>  _require_cp_reflink
+> diff --git a/tests/generic/375 b/tests/generic/375
+> index eb675144..1e2ee334 100755
+> --- a/tests/generic/375
+> +++ b/tests/generic/375
+> @@ -15,6 +15,7 @@ _begin_fstest auto quick acl perms
+>  . ./common/attr
+>  
+>  _require_test
+> +_require_chmod
+>  _require_runas
+>  _require_acls
+>  
+> diff --git a/tests/generic/378 b/tests/generic/378
+> index 5a6bd2b0..7c3a8d93 100755
+> --- a/tests/generic/378
+> +++ b/tests/generic/378
+> @@ -20,6 +20,7 @@ _begin_fstest auto quick metadata
+>  
+>  _require_test
+>  _require_user
+> +_require_chmod
+>  _require_hardlinks
+>  
+>  # Setup testfile and its hardlink
+> diff --git a/tests/generic/444 b/tests/generic/444
+> index 31e0e43e..9094743e 100755
+> --- a/tests/generic/444
+> +++ b/tests/generic/444
+> @@ -15,6 +15,7 @@ _begin_fstest auto quick acl perms
+>  . ./common/attr
+>  
+>  _require_test
+> +_require_chmod
+>  _require_runas
+>  _require_acls
+>  
+> diff --git a/tests/generic/449 b/tests/generic/449
+> index 9cf814ad..370b0db1 100755
+> --- a/tests/generic/449
+> +++ b/tests/generic/449
+> @@ -19,6 +19,7 @@ _begin_fstest auto quick acl attr enospc
+>  # Modify as appropriate.
+>  _require_scratch
+>  _require_test
+> +_require_chmod
+>  _require_acls
+>  _require_attrs trusted
+>  
+> diff --git a/tests/generic/462 b/tests/generic/462
+> index 49b0df40..d886a26e 100755
+> --- a/tests/generic/462
+> +++ b/tests/generic/462
+> @@ -19,6 +19,7 @@ _begin_fstest auto quick dax mmap
+>  
+>  # Modify as appropriate.
+>  _require_test
+> +_require_chmod
+>  _require_scratch_dax_mountopt "dax"
+>  _require_test_program "t_mmap_write_ro"
+>  # running by unpriviliged user is not necessary to reproduce
+> diff --git a/tests/generic/495 b/tests/generic/495
+> index dd18693b..4cc4c646 100755
+> --- a/tests/generic/495
+> +++ b/tests/generic/495
+> @@ -12,6 +12,7 @@ _begin_fstest auto quick swap
+>  # Import common functions.
+>  . ./common/filter
+>  
+> +_require_chmod
+>  _require_scratch_swapfile
+>  _require_test_program mkswap
+>  _require_test_program swapon
+> diff --git a/tests/generic/514 b/tests/generic/514
+> index a2086a25..02537b21 100755
+> --- a/tests/generic/514
+> +++ b/tests/generic/514
+> @@ -15,6 +15,7 @@ _begin_fstest auto quick clone
+>  
+>  _require_scratch_reflink
+>  _require_user
+> +_require_chmod
+>  
+>  _scratch_mkfs >>$seqres.full 2>&1
+>  _scratch_mount
+> diff --git a/tests/generic/535 b/tests/generic/535
+> index 9f552ee8..c8e193cc 100755
+> --- a/tests/generic/535
+> +++ b/tests/generic/535
+> @@ -34,6 +34,7 @@ _cleanup()
+>  
+>  
+>  _require_scratch
+> +_require_chmod
+>  _require_dm_target flakey
+>  
+>  _scratch_mkfs >/dev/null 2>&1
+> diff --git a/tests/generic/572 b/tests/generic/572
+> index 80356760..97656c4b 100755
+> --- a/tests/generic/572
+> +++ b/tests/generic/572
+> @@ -27,6 +27,7 @@ _cleanup()
+>  . ./common/verity
+>  
+>  _require_scratch_verity
+> +_require_chmod
+>  _disable_fsverity_signatures
+>  
+>  _scratch_mkfs_verity &>> $seqres.full
+> diff --git a/tests/generic/573 b/tests/generic/573
+> index d3f3296c..3f056b57 100755
+> --- a/tests/generic/573
+> +++ b/tests/generic/573
+> @@ -24,6 +24,7 @@ _cleanup()
+>  
+>  _require_scratch_verity
+>  _require_user
+> +_require_chmod
+>  _require_chattr ia
+>  _disable_fsverity_signatures
+>  
+> diff --git a/tests/generic/581 b/tests/generic/581
+> index 2773c910..b36a1b89 100755
+> --- a/tests/generic/581
+> +++ b/tests/generic/581
+> @@ -29,6 +29,7 @@ _cleanup()
+>  . ./common/encrypt
+>  
+>  _require_user
+> +_require_chmod
+>  _require_scratch_encryption -v 2
+>  
+>  _scratch_mkfs_encrypted &>> $seqres.full
+> diff --git a/tests/generic/597 b/tests/generic/597
+> index b97265fb..62f83cd6 100755
+> --- a/tests/generic/597
+> +++ b/tests/generic/597
+> @@ -27,6 +27,7 @@ _cleanup()
+>  
+>  # Modify as appropriate.
+>  _require_test
+> +_require_chmod
+>  _require_sysctl_variable fs.protected_symlinks
+>  _require_sysctl_variable fs.protected_hardlinks
+>  _require_user fsgqa2
+> diff --git a/tests/generic/603 b/tests/generic/603
+> index 9b5e8245..853d3b16 100755
+> --- a/tests/generic/603
+> +++ b/tests/generic/603
+> @@ -115,6 +115,7 @@ _require_setquota_project
+>  _require_quota
+>  _require_user
+>  _require_group
+> +_require_chmod
+>  
+>  _scratch_mkfs >$seqres.full 2>&1
+>  _scratch_enable_pquota
+> diff --git a/tests/generic/622 b/tests/generic/622
+> index e8ead300..cb0f5828 100755
+> --- a/tests/generic/622
+> +++ b/tests/generic/622
+> @@ -77,6 +77,7 @@ _cleanup()
+>  # This test uses the shutdown command, so it has to use the scratch filesystem
+>  # rather than the test filesystem.
+>  _require_scratch
+> +_require_chmod
+>  _require_scratch_shutdown
+>  _require_metadata_journaling
+>  _require_xfs_io_command "pwrite"
+> diff --git a/tests/generic/636 b/tests/generic/636
+> index 2ae74310..402fc917 100755
+> --- a/tests/generic/636
+> +++ b/tests/generic/636
+> @@ -13,6 +13,7 @@ _begin_fstest auto quick swap
+>  # Import common functions.
+>  . ./common/filter
+>  
+> +_require_chmod
+>  _require_scratch_swapfile
+>  _require_test_program mkswap
+>  _require_test_program swapon
+> diff --git a/tests/generic/641 b/tests/generic/641
+> index a6efcd4c..809204d9 100755
+> --- a/tests/generic/641
+> +++ b/tests/generic/641
+> @@ -15,6 +15,7 @@ _begin_fstest auto quick swap collapse
+>  . ./common/filter
+>  
+>  _require_scratch
+> +_require_chmod
+>  _require_scratch_swapfile
+>  _require_test_program mkswap
+>  _require_test_program swapon
+> diff --git a/tests/generic/673 b/tests/generic/673
+> index 6c54ade8..832fdd72 100755
+> --- a/tests/generic/673
+> +++ b/tests/generic/673
+> @@ -16,6 +16,7 @@ _begin_fstest auto clone quick perms
+>  
+>  # Modify as appropriate.
+>  _require_user
+> +_require_chmod
+>  _require_scratch_reflink
+>  
+>  _scratch_mkfs >> $seqres.full
+> diff --git a/tests/generic/674 b/tests/generic/674
+> index 41fbdeb7..e5a32782 100755
+> --- a/tests/generic/674
+> +++ b/tests/generic/674
+> @@ -16,6 +16,7 @@ _begin_fstest auto clone quick perms dedupe
+>  
+>  # Modify as appropriate.
+>  _require_user
+> +_require_chmod
+>  _require_scratch_dedupe
+>  _require_xfs_io_command dedupe
+>  
+> diff --git a/tests/generic/675 b/tests/generic/675
+> index 87dfbdfe..e648182e 100755
+> --- a/tests/generic/675
+> +++ b/tests/generic/675
+> @@ -17,6 +17,7 @@ _begin_fstest auto clone quick
+>  
+>  # Modify as appropriate.
+>  _require_user
+> +_require_chmod
+>  _require_command "$GETCAP_PROG" getcap
+>  _require_command "$SETCAP_PROG" setcap
+>  _require_scratch_reflink
+> diff --git a/tests/generic/682 b/tests/generic/682
+> index 6914a549..a3bb42ac 100755
+> --- a/tests/generic/682
+> +++ b/tests/generic/682
+> @@ -23,6 +23,7 @@ _begin_fstest auto quick quota
+>  _require_quota
+>  _require_user
+>  _require_scratch
+> +_require_chmod
+>  
+>  _scratch_mkfs > "$seqres.full" 2>&1
+>  _qmount_option usrquota
+> diff --git a/tests/generic/683 b/tests/generic/683
+> index 883905da..226d2758 100755
+> --- a/tests/generic/683
+> +++ b/tests/generic/683
+> @@ -24,6 +24,7 @@ _cleanup()
+>  # Modify as appropriate.
+>  _require_user
+>  _require_test
+> +_require_chmod
+>  verb=falloc
+>  _require_xfs_io_command $verb
+>  _require_congruent_file_oplen $TEST_DIR 65536
+> diff --git a/tests/generic/684 b/tests/generic/684
+> index 9cdfe4ab..7595f58a 100755
+> --- a/tests/generic/684
+> +++ b/tests/generic/684
+> @@ -24,6 +24,7 @@ _cleanup()
+>  # Modify as appropriate.
+>  _require_user
+>  _require_test
+> +_require_chmod
+>  verb=fpunch
+>  _require_xfs_io_command $verb
+>  _require_congruent_file_oplen $TEST_DIR 65536
+> diff --git a/tests/generic/685 b/tests/generic/685
+> index 55672550..aa7fc848 100755
+> --- a/tests/generic/685
+> +++ b/tests/generic/685
+> @@ -24,6 +24,7 @@ _cleanup()
+>  # Modify as appropriate.
+>  _require_user
+>  _require_test
+> +_require_chmod
+>  verb=fzero
+>  _require_xfs_io_command $verb
+>  _require_congruent_file_oplen $TEST_DIR 65536
+> diff --git a/tests/generic/686 b/tests/generic/686
+> index a3fa8e06..03270a7d 100755
+> --- a/tests/generic/686
+> +++ b/tests/generic/686
+> @@ -24,6 +24,7 @@ _cleanup()
+>  # Modify as appropriate.
+>  _require_user
+>  _require_test
+> +_require_chmod
+>  verb=finsert
+>  _require_xfs_io_command $verb
+>  _require_congruent_file_oplen $TEST_DIR 65536
+> diff --git a/tests/generic/687 b/tests/generic/687
+> index 0c4b09d2..cd564a7d 100755
+> --- a/tests/generic/687
+> +++ b/tests/generic/687
+> @@ -24,6 +24,7 @@ _cleanup()
+>  # Modify as appropriate.
+>  _require_user
+>  _require_test
+> +_require_chmod
+>  verb=fcollapse
+>  _require_xfs_io_command $verb
+>  _require_congruent_file_oplen $TEST_DIR 65536
+> diff --git a/tests/generic/688 b/tests/generic/688
+> index 77db2946..1d16261d 100755
+> --- a/tests/generic/688
+> +++ b/tests/generic/688
+> @@ -23,6 +23,7 @@ _cleanup()
+>  
+>  # Modify as appropriate.
+>  _require_user
+> +_require_chmod
+>  _require_command "$GETCAP_PROG" getcap
+>  _require_command "$SETCAP_PROG" setcap
+>  _require_xfs_io_command falloc
+> diff --git a/tests/generic/698 b/tests/generic/698
+> index 0029df90..a0cccfe7 100755
+> --- a/tests/generic/698
+> +++ b/tests/generic/698
+> @@ -26,6 +26,7 @@ _fixed_by_kernel_commit 168f91289340 \
+>  	"fs: account for group membership"
+>  _require_scratch
+>  _require_chown
+> +_require_chmod
+>  _require_idmapped_mounts
+>  _require_test_program "vfs/mount-idmapped"
+>  _require_user fsgqa2
+> diff --git a/tests/generic/699 b/tests/generic/699
+> index 2a6f857d..6e94043f 100755
+> --- a/tests/generic/699
+> +++ b/tests/generic/699
+> @@ -25,6 +25,7 @@ _require_extra_fs overlay
+>  
+>  _require_scratch
+>  _require_chown
+> +_require_chmod
+>  _require_idmapped_mounts
+>  _require_test_program "vfs/mount-idmapped"
+>  _require_user fsgqa2
+> diff --git a/tests/generic/726 b/tests/generic/726
+> index d2a2a2ce..a6c12133 100755
+> --- a/tests/generic/726
+> +++ b/tests/generic/726
+> @@ -23,6 +23,7 @@ _begin_fstest auto fiexchange quick
+>  
+>  # Modify as appropriate.
+>  _require_user
+> +_require_chmod
+>  _require_xfs_io_command exchangerange
+>  _require_xfs_io_command startupdate
+>  _require_scratch
+> diff --git a/tests/generic/727 b/tests/generic/727
+> index 9551e47c..92d3743c 100755
+> --- a/tests/generic/727
+> +++ b/tests/generic/727
+> @@ -24,6 +24,7 @@ _begin_fstest auto fiexchange quick
+>  
+>  # Modify as appropriate.
+>  _require_user
+> +_require_chmod
+>  _require_command "$GETCAP_PROG" getcap
+>  _require_command "$SETCAP_PROG" setcap
+>  _require_xfs_io_command exchangerange
+> diff --git a/tests/generic/792 b/tests/generic/792
+> index d1896728..c457ad6d 100755
+> --- a/tests/generic/792
+> +++ b/tests/generic/792
+> @@ -22,6 +22,7 @@ _cleanup()
+>  . ./common/dmflakey
+>  
+>  _require_scratch
+> +_require_chmod
+>  _require_test_program unlink-fsync
+>  _require_dm_target flakey
+>  
+> -- 
+> 2.55.0
+> 
+> 
