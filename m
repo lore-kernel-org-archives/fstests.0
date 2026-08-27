@@ -1,76 +1,112 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from fhigh-a3-smtp.messagingengine.com (fhigh-a3-smtp.messagingengine.com [103.168.172.154])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B338037DAA2;
-	Thu, 27 Aug 2026 17:04:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25AB83749E8;
+	Thu, 27 Aug 2026 23:48:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.154
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787850255; cv=none; b=iB4H56pFVZ8OtReGUATSGLp3jE6SRX4ymnfEP9VBvCvxi9bMHmdejiVCoQQWY18WxbLVd3XFiLIRJlQBqU91OulBmQZXp6aB6gaaXfHnIfc0NSpKjxpHJNSmmUSeRlQCeSQLRTIeAEDscHE7QvNkx6YAnVi3qg35y+SX+n6JdHM=
+	t=1787874490; cv=none; b=im0vbjsN1HKNkNSM3yYiVOvF/PL8B5j+ieztPF8iowJELQk6NZLu1QhKG6m6CLLhtMVq03748ebBevsShO3BQw54bJYKy4MWv5rSdUPw8YWwcbWydmzzUt9sUPlZu1uy0pDFjJlc6wW/KuIGiZ+LjahkOWbdVXzEuEtN81TJb7c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787850255; c=relaxed/simple;
-	bh=8bYadG4FPItoSQIZfDXmgSiVVp48vksxylqWE8vC8Ec=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=DaDBXva5mc1SXZcXJUeDO/65nc70Saxke3BhvsaoaWJ77u4W4txJz6ZODxPsnfcCoHhY6m7XkMsn24disAhm7a+RGtulZc8X/IeNttnLi/H7iEGW/8kap9D9gLqfClCp2POUX3HzLik33A0Tacnj8ETLvnmih/jkExePq9BW9Tw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=U234qU+q; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1787874490; c=relaxed/simple;
+	bh=uF917bhMGJvIOIlqNFYZ3khhRUIenft4+mCGUqCoBGU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=JqEHKybRMppYHFyCIlkNDDdYhqQ/jtP0P9yvoWLUJbFzYna13JW38lV4XnCkxVv3sInJB2nuHbqihOxnUYD+RD6QA2PU605N4b9p2ypjVfoVWrowjWrmi07G59VgVIsnWciAuMbQClYcB/MGxyPfbCE94KbpD5VPFrN4lfp7DbY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net; spf=pass smtp.mailfrom=ownmail.net; dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b=SoGwGdzj; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=kswkiuj1; arc=none smtp.client-ip=103.168.172.154
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ownmail.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ownmail.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="U234qU+q"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B28201F000E9;
-	Thu, 27 Aug 2026 17:04:12 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1787850254;
-	bh=9nQCcoh/iWa3ZmG4gxWpr3xCFPvBh871HY8x5Es9S6c=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=U234qU+qdWLjSKb2qa12pXPlaAvZp+GB4Vm4FahO45n8vwUXxVKTpdoLfLgIxX4EM
-	 EnvdBNNo5fsVLeTGHbIQa6uE5RH1TG0dOgZqAXSzID5mDck+Q41q4buZs0U3RVfWLu
-	 jia95z5PiUHe3XfzrMfV7GqOpOqU/dCrEIqNadbllIwUDH0mk+QwjEzD7EFTpZfE8P
-	 VG99N4JL7EL1sUtJ6OglsKEVX9uNVib5Ef+yiN6MBmfbi7nmcIPYJg+mHQ7nUGpEU0
-	 BElk6UlgNDWAf5cQOSckkpXM4nUN8aUW+TvRPeVH8nkpnFyfhn+dmIQW8g1t/cSTgH
-	 caQYcgzxxZVmg==
-Date: Fri, 28 Aug 2026 01:04:09 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] xfs/030: skip this test if metadir gets enabled anyway
-Message-ID: <apBt4bXTmE9nDKGn@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>, 
-	fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
-References: <20260826183026.GW839663@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=ownmail.net header.i=@ownmail.net header.b="SoGwGdzj";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="kswkiuj1"
+Received: from phl-compute-04.internal (phl-compute-04.internal [10.202.2.44])
+	by mailfhigh.phl.internal (Postfix) with ESMTP id 22D1A1400132;
+	Thu, 27 Aug 2026 19:48:07 -0400 (EDT)
+Received: from phl-frontend-03 ([10.202.2.162])
+  by phl-compute-04.internal (MEProxy); Thu, 27 Aug 2026 19:48:07 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ownmail.net; h=
+	cc:cc:content-transfer-encoding:content-type:date:date:from:from
+	:in-reply-to:message-id:mime-version:reply-to:reply-to:subject
+	:subject:to:to; s=fm3; t=1787874487; x=1787960887; bh=e+p7nDiRQi
+	Ubj+L3Ep/bgIrhuakpHxcNBRoC2kRwpQA=; b=SoGwGdzjt2JOtZYkLgGM6SSkrC
+	3TE6ySKny2nSJsKGo3CKFF7tbnfrsb0p8Z1CL/JJ6BsrnRqcdNmARtnRTLmTo2KP
+	K57+qZ5HrNXG/nwNm5c/f/qmDPYpS1JheiZbhsGf8DQZ9bo6Q+fMoEtJizXXGKGX
+	im+Ste1Z6a6bgH1ctdrBtGNLk0K3I0laLeuDZ3kBRJuIITYVjc69UgfXZX6dqwjz
+	YCnklrGKbnjoESy1pqLRHHQQphCp2/jjKZQBXt4TQ0JogHhleINLPS9WZb5ZctfL
+	WXcUQq+01iGrl7ynLvSgFKonOa32krUteQXPVe+99WAJThpD8/Mcd3wT6frg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:date:date:feedback-id:feedback-id:from:from
+	:in-reply-to:message-id:mime-version:reply-to:reply-to:subject
+	:subject:to:to:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm3; t=1787874487; x=1787960887; bh=e+p7nDiRQiUbj+L3Ep/bgIrhuakp
+	HxcNBRoC2kRwpQA=; b=kswkiuj1iG6ZxhVh9itc82nI0vFtYY8PjjPJS8W969LW
+	ncq1fqZWlgKlRwJhLS4roypZboCTXP0cQWlzkLFYmGBbmioTrSpobJAF1jquqn4d
+	YTxgquc14tquOfeAKKkvRBF5paOsq9gM8BSj8jJHZ2Uv/bBNjp9/hPxsTmLZBFSa
+	JcG6ljOpiKsumvb+QfQCHeMHAafq7Ad0CFdB9IFeuTCcgUvDzko1qGoL1IwUmM/8
+	FZYB5oN24sa/tXXKFL1Wb1YZd0TNxvu5p6tf+XyduKGeHpOUjFHkDzB2UdyNEU/l
+	qoITQ4r7sEeJXHnIi4ffqBOBjdhOp07RxoC43jgFNA==
+X-ME-Sender: <xms:t8yQardN3nbdOjfYfMe4el3yy4kksHTyDsnhvkJfLd_uKTni-9oY0g>
+    <xme:t8yQao8E-JW0IE0Gig8yfvGOBGNA77wUUWznDz9bOgYp3kCFyTSioslrLg39jxfG3
+    8Z9qdM-YUbkO9JEx8IKFzJeKvkHitd8bWnoIV5lrTKmub7-SGM>
+X-ME-Received: <xmr:t8yQannm506XBF8IzKBoX47h7ZSKr8wak354lxQXi8Iab3jXcxr5twLxXL4E6nlGYnI-GbHT7cepFOF-dRFvc0UVgz3dsrI>
+X-ME-Proxy-Cause: dmFkZTG1EIgqdMDgIMbDUd5cdHDc6pRiI5hwcEXVV7kyXcmJO9z4jArlP+ei/R3KCgtOAc
+    pqTIyTyVrCLtkPOW8fGEdckErr0fhc2iWEkVDHEzJrZdlGSWTZ9rRRT/wmwcowt6J0MR7W
+    zqSHcME15RWAMDQPNP11qSLCHpZJ2OvQbn6VK2ADQEbVgdcQbBpxrgi7+QY99TJsALGd8N
+    163elRUSBoUHhbyA0EzUmqW6bNmQ0C8/+WQKINAjQGoYvJVZLsslkjaIgLW0y9nTS9Jd5v
+    skM9SkKHqdMVrxiEsHQjesOiv6b0ofJdCkRstUz5OTqwRlEBDy82l9E+ZpwgyHlwt5McmX
+    bYJerHyu28y3vAM35Bs8k8CckRDvrOKvE0lt9lQQOhBfYmpEO8+O11iL+FWHLrTtPhfOwk
+    b9L+lFBD9Iy5efP7ndGjY61C9cmN6dekom2lwtMl1DoPGLA6PiVw8izFhQ2pkyysn362pU
+    I7vPa115X7NnzBaUtovw5avw5XeMDU4gQtd+3XVnkImlFoWs5i2I8B54RbD2wPtnxpXmpY
+    wumRQAw4fs1in2+tYQmC1e3yxhHqfe9bDWv40L7Dq/WKkm+qYWXPLKRhIgE3kHRu0MSmsf
+    Oo8HWPkIK946oLRbL6azti39iYhaGsAo4xSN0W0n6qbzwBPvtavVtoTHcK5A
+X-ME-Proxy: <xmx:t8yQaq9Y62EU6cdBn3zUCB98m88QyhJ51d-8zAcMr3pauY5_f22fQA>
+    <xmx:t8yQalkGCRQ5hNFameMeY1qNjXl7EL9SZqSR9x6Qm3sdleYGtom6LQ>
+    <xmx:t8yQan1qxg4PX5hmUF0kfXe6Dp5OqsHvShfC1IY2ZEnEcg9YLgi1Rw>
+    <xmx:t8yQagqzTY0u3jkWGADyMsXqSa0WmgOKzE58ZwnCD82pivTx_HJ1gA>
+    <xmx:t8yQapOD6qMD6a2XyhJo2hyBElYTishb8dQI1cxw6BVEmr5ZcWQZaRmW>
+Feedback-ID: i9d664b8f:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
+ 27 Aug 2026 19:48:05 -0400 (EDT)
+From: NeilBrown <neilb@ownmail.net>
+To: fstests@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org,
+	Chuck Lever <cel@kernel.org>
+Subject: fstests: Verify behaviour of "seek" in a directory
+Date: Fri, 28 Aug 2026 09:36:09 +1000
+Message-ID: <20260827234743.2389778-1-neilb@ownmail.net>
+X-Mailer: git-send-email 2.50.0.107.gf914562f5916.dirty
+Reply-To: NeilBrown <neil@brown.name>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260826183026.GW839663@frogsfrogsfrogs>
+Content-Transfer-Encoding: 8bit
 
-On Wed, Aug 26, 2026 at 11:30:26AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> This test requires metadir not to be enabled, but under certain
-> circumstances (aka _scratch_mkfs_xfs trying to be helpful and dropping
-> MKFS_OPTIONS) it can get enabled anyway if mkfs.xfs defaults to enabling
-> metadir.  Check the fs feature set after formatting and skip the test if
-> metadir gets enabled.
-> 
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
->  tests/xfs/030 |    1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/tests/xfs/030 b/tests/xfs/030
-> index 22fbdb2fdbc999..d0b8f413bb9afd 100755
-> --- a/tests/xfs/030
-> +++ b/tests/xfs/030
-> @@ -72,6 +72,7 @@ else
->  		_notrun "PQuota are enabled, test needs controlled sb recovery"
->  	_scratch_unmount
->  fi
-> +_xfs_has_feature "$SCRATCH_DEV" metadir && _notrun "metadir enabled anyway"
+Hi,
 
-Reviewed-by: Zorro Lang <zlang@kernel.org>
+ I would like to propose the following test to be added to fstests.  It
+ checks the behaviour of a directory with respect to seek.  As described
+ in the patch and the code, it expects names which are not removed or
+ moved to have a stable position in the result of getdents64 with
+ respect to each other and with respect to any seek offset (d_off)
+ reported of any entry.  This means that if we stop and any point while
+ scanning a directory, remember the most recent d_off, close the
+ directory, then later open and seek to that offset and keep reading,
+ then we will find all the names that existed for the whole time and see
+ those only once.
 
->  clear=""
->  eval `_scratch_xfs_db -r -c "sb 1" -c stack | perl -ne '
->  	if (/byte offset (\d+), length (\d+)/) {
+ Names that are added or removed are not tests as we expect them
+ possibly appear not at all or even multiple times.
+
+ My particular motivation is to confirm that the current tmpfs doesn't
+ behave correctly, and to test an alternate implementation that I will
+ propose which does pass this test.
+
+ I discovered that while xfs and ext4 pass the test, btrfs doesn't.
+ It appears that with btrfs the target of a rename does not keep its
+ position in the directory listing order.
+
+Thanks,
+NeilBrown
+
+ [PATCH] fstests: generic: Add test of seek in directories
