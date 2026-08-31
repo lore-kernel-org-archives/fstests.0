@@ -1,147 +1,123 @@
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+Received: from mx0a-00154904.pphosted.com (mx0a-00154904.pphosted.com [148.163.133.20])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E69A395D9F
-	for <fstests@vger.kernel.org>; Mon, 31 Aug 2026 08:15:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C88AB39EF01
+	for <fstests@vger.kernel.org>; Mon, 31 Aug 2026 10:41:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.133.20
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788164143; cv=none; b=iJbQaPNjFVLnt1ldG619CQaWBJolIiZHJAntATW653sppYyIBsa/F0DN76xNu0Ot9VIIzcw7WbdTWYuOS5dMUygUk9VXichzF4eG9CW6+N8+VVAlxnhIDYZDyKsC95SYjfp/JtYaSQ86U3OoMCGGHh/ByQZyuJo89HdO8nytP+4=
+	t=1788172911; cv=none; b=aM6zEgDJ0HqtLRXM2KfzgKU6DLlBlcaPg4PG+4DoYFBs5EkFveucJRQsZ0PxeuvQdMwFvT01lUA7qw/psWm+yHSw0ApQof1YGd6DhdwLb2Sy+UQ4OzR2e6xp18zeOVjojGIG/LObkeQZ6tVt40WxzA2EhHOIL1/Gj67ELox1dnk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788164143; c=relaxed/simple;
-	bh=hZOeBCAjgYWrXmtOE4W5ZQeqc8LvSbAuBq/T40SA3DY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=QhTrGw40SZ6sa2BRX8oAxNJ9mNplJZcIu2i6aBOuguE13CFyvfaAe8U6h/XfMVjTzfPgo4ybht61fUAdan3I5CUbCWRD7AS+QYikWU1EO6bjBM3dc/qw/+huAyPeCYN4LQj3+8+WwUkvLnfypdArmfUGB623IX2qsmWB1to4GDk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=VIzWWhPn; arc=none smtp.client-ip=148.163.156.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	s=arc-20240116; t=1788172911; c=relaxed/simple;
+	bh=WBzRrUw6Ep/kY/rYKdwUcwxa6hPnbl0N25b39KcLRG0=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=dBwrhqhhK9x22Elu4zEILQToK8kIbtP9DXZKbXB2W0yBydzSDuKnnkZNNHTL96FDkHFZjhwg6AolH4OPpgXbXeauQw2Uv7S3eWiV/BauepRt/wBt5B0XWqxCAjN5+QJy1oe+MFKy98qUAN80fxrdU1DI0JyLfsL1ZtkT0U64+eM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com; spf=pass smtp.mailfrom=dell.com; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=Zuo6oZDb; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=d9EZJC/S; arc=none smtp.client-ip=148.163.133.20
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dell.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="VIzWWhPn"
-Received: from pps.filterd (m0356517.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 67V82PFo1640269;
-	Mon, 31 Aug 2026 08:15:39 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=pp1; bh=Qfaq4cvDKDrqjkmYNo17yOrEXX+o72
-	y40fNhRniA0gQ=; b=VIzWWhPnz+GetWzzGP/bXSfaKYhgzrwabJPXQI1O8Cklbd
-	rSCOMGdptECnokJnrOjA594QPqncq2iab0E8fZhbSiDqEDK293W5AHBSlwGLXqlV
-	6uY4SrIVge8rxLpVpZFR+jyCJ0fxQkAQGAvx4NX51DWskaIZ33tHMwidEkzZNA9O
-	hrjXxMfO3Mwe0Mec99ertXZD+EJIxY3OA9zHXzF6GiEvEYw/Ue8wjLvpNcvg5Rve
-	yGVwN23yp3Yu110Im6MXKr4slEWJenLSaxMmrDA03fM6Ss2LTDAveAS44X3P70mt
-	DSyLOtDi3+QSViX+qppq14Oo06JxJTdeqHIlCIOA==
-Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4gbq54g0hn-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 31 Aug 2026 08:15:38 +0000 (GMT)
-Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
-	by ppma11.dal12v.mail.ibm.com (8.18.1.7/8.18.1.7) with ESMTP id 67V8Bdk6018677;
-	Mon, 31 Aug 2026 08:15:37 GMT
-Received: from smtprelay02.fra02v.mail.ibm.com ([9.218.2.226])
-	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 4gccexvj9j-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 31 Aug 2026 08:15:37 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (smtpav02.fra02v.mail.ibm.com [10.20.54.101])
-	by smtprelay02.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 67V8Fabb45482284
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 31 Aug 2026 08:15:36 GMT
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 02AD520040;
-	Mon, 31 Aug 2026 08:15:36 +0000 (GMT)
-Received: from smtpav02.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 02DEF20043;
-	Mon, 31 Aug 2026 08:15:35 +0000 (GMT)
-Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.123.13.2])
-	by smtpav02.fra02v.mail.ibm.com (Postfix) with ESMTPS;
-	Mon, 31 Aug 2026 08:15:34 +0000 (GMT)
-Date: Mon, 31 Aug 2026 13:46:02 +0530
-From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org, "Theodore Ts'o" <tytso@mit.edu>,
-        "Darrick J . Wong" <djwong@kernel.org>
-Subject: Re: [PATCH 1/4] check: refactor argument parsing with getopt
-Message-ID: <apU4Qj-pmdY4ZQDr@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
-References: <20260826102857.3224318-1-zlang@kernel.org>
- <20260826102857.3224318-2-zlang@kernel.org>
+	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="Zuo6oZDb";
+	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="d9EZJC/S"
+Received: from pps.filterd (m0170392.ppops.net [127.0.0.1])
+	by mx0a-00154904.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 67V7xHG62780970
+	for <fstests@vger.kernel.org>; Mon, 31 Aug 2026 06:41:49 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dell.com; h=cc
+	:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=smtpout1; bh=x6knYLxBGqt2H4ZybVlyxcPpLJoFsdskIEri
+	IIXWLDo=; b=Zuo6oZDbg4COcsEBoBPwsEUUR6t3S50E2ix/4/BIVRGzrSTYqRlK
+	fCYaGBrecGqKX9bjQEGRxGfgDiIriauU73QVThT7hnbRPUobZsWYYptLzNbaakIj
+	k7HZeBbq+fuVueTFaOP8Mn5LV2ypmQY6ZBTKr1t+EgQlSXfMmUE/DTtZVe9gER++
+	1SKlMjMGQlDUUYY7gV3IUQE5DqLtHzzqZ8b+T9jVZxS3xmo5hAsXz9bXNHg2EKEs
+	nYq/Dp8tqLddLTHOUX+SDNXUFkF96r+h20MLnO6T4ufqcQDVW78tuDBwiO5XZJAl
+	kIZk9neqCmgw+DTRnL5hUMzOd/kIj6jFjg==
+Received: from mx0a-00154901.pphosted.com (mx0a-00154901.pphosted.com [67.231.149.39])
+	by mx0a-00154904.pphosted.com (PPS) with ESMTPS id 4gbtk6wev1-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT)
+	for <fstests@vger.kernel.org>; Mon, 31 Aug 2026 06:41:49 -0400 (EDT)
+Received: from pps.filterd (m0090351.ppops.net [127.0.0.1])
+	by mx0b-00154901.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 67V7weCN3771633
+	for <fstests@vger.kernel.org>; Mon, 31 Aug 2026 06:41:48 -0400
+Received: from esapsmtplv07.us.dell.com (esapsmtplv07.us.dell.com [143.166.203.154])
+	by mx0b-00154901.pphosted.com (PPS) with ESMTPS id 4gd4wejbwk-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Mon, 31 Aug 2026 06:41:48 -0400 (EDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=dell.com; i=@dell.com; q=dns/txt; s=smtpdev1;
+  t=1788172908; x=1819708908;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=x6knYLxBGqt2H4ZybVlyxcPpLJoFsdskIEriIIXWLDo=;
+  b=d9EZJC/SFOb6ofsu7kXhEB3xrk3IBVkLnHEDWBIz86A5S7AeuS7qV0Ch
+   pWvaG++Pewmvgd+0MOxdfYCb9wKkwpBSpngGCmAo6LOSHj84UayybWHFY
+   WPmJXA8AINykzJhwXDixNqqArVyZ1VvA3S5r0tVaQl5roE3CjjBksoFmr
+   K7lOi3afX5+9PmNGEvFG35z27EA9pTEk2yCNENacl4ykJTc0bf51AMLII
+   wrDlyUAsx7M8oOXzufItTdbGiR0q5zo3pw6guaUYJeRCVuiRb85U5JgA5
+   VhwVeGRLDSc+N3F5Xrncr8j6DGNTgPbH6aTP/w/I2wXRBs0tx7xP96jPi
+   w==;
+X-CSE-ConnectionGUID: 2fc6uPgOSra3dZg08u0HDA==
+X-CSE-MsgGUID: IdHSqLpiRlmjLaMwJOutzA==
+X-LoopCount0: from 10.94.8.206
+X-MS-Exchange-CrossPremises-AuthAs: Internal
+Received: from w-96j1th4.apac.dell.com (HELO W-96J1TH4.blr.amer.dell.com) ([10.94.8.206])
+  by esapsmtplv07.us.dell.com with ESMTP/TLS/TLS_AES_256_GCM_SHA384; 31 Aug 2026 10:41:46 +0000
+From: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+To: fstests@vger.kernel.org
+Cc: Prabhakar Pujeri <prabhakar.pujeri@dell.com>,
+        Zorro Lang <zlang@kernel.org>, linux-f2fs-devel@lists.sourceforge.net
+Subject: [PATCH] f2fs/024: add missing execute permission
+Date: Mon, 31 Aug 2026 10:41:42 +0000
+Message-ID: <20260831104142.2229-1-prabhakar.pujeri@dell.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260826102857.3224318-2-zlang@kernel.org>
-X-TM-AS-GCONF: 00
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODMxMDA2OCBTYWx0ZWRfXxPPi7wBoxh/6
- KjQxpjwdP/1xGUiHjpsHYZK4HE4+WRCvxUNxi+jU8zwA0G3Cm7n22hZSKmG3AEKfQGHRO52lcN2
- SEJlYRyVIDzGHik6XMos+ZAIcDghDNsV1p/kM2HK8jlbTRlbRpWYudrNmA/9C9fL9WraqAHLhA5
- iU00LDiDtQtndXTqBtdaS3EjjnEGTZ0qci+dYKP3Y0MRowvqkQ0Eu8a9Achi6rjUD9uvrCZa8KL
- VDzE/35FOFGT8QkWrkZLBY2J47tUQ+z4EB8FqMPjjs4pF9WcVlYgMU2zRe2awWU/PcZlSwdXtaC
- eqFnzXK3PlA6aq+hhjUx2H4F960MAus3r6y4A4rOusFM/iw4nMRGgSM9lIsuZk+48YraPm6d680
- lu6lRxm92QY1ypKD3Ldm7sEgYaYcdOGTEL/gBJfvjcFXfmc/m6btTI03LbIbnfyMc7N6Vgs0Vy9
- SzupyJUjNVkCpOUHrSQ==
-X-Proofpoint-ORIG-GUID: eZdJZmzYUOgkn7oIOMp7OCHk0aFfwsJv
-X-Authority-Analysis: v=2.4 cv=CNgamxrD c=1 sm=1 tr=0 ts=6a95382a cx=c_pps
- a=aDMHemPKRhS1OARIsFnwRA==:117 a=aDMHemPKRhS1OARIsFnwRA==:17
- a=kj9zAlcOel0A:10 a=Sv0fKeRqtYgA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=RnoormkPH1_aCDwRdu11:22 a=U7nrCbtTmkRpXpFmAIza:22 a=VwQbUJbxAAAA:8
- a=VnNF1IyMAAAA:8 a=IG1fr5jiejmAYYErJMIA:9 a=CjuIK1q_8ugA:10
-X-Proofpoint-GUID: eZdJZmzYUOgkn7oIOMp7OCHk0aFfwsJv
-X-Proofpoint-Spam-Info: AW1haW4tMjYwODMxMDA2OCBTYWx0ZWRfX/mSagLaPQ+1/
- OISk2yTxj8/hZ3O2g7h1RVfNEyBRDk//HDzGESLQdvI3FmeEhCcA4rDX1i8EFwNV/x+MP0xNvHO
- /n2ec6b3vaPfinCkMM1gu7cnew7u8AI=
+Content-Transfer-Encoding: 8bit
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-08-31_03,2026-08-27_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- spamscore=0 bulkscore=0 suspectscore=0 phishscore=0 lowpriorityscore=0
- priorityscore=1501 clxscore=1015 impostorscore=0 adultscore=0 malwarescore=0
+ spamscore=0 clxscore=1011 phishscore=0 bulkscore=0 priorityscore=1501
+ impostorscore=0 adultscore=0 malwarescore=0 lowpriorityscore=0 suspectscore=0
  classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2608310068
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2608310091
+X-Proofpoint-ORIG-GUID: V6kRLpruQAhXp3GKhNonq0DTlEdzTnHI
+X-Authority-Analysis: v=2.4 cv=PL0/P/qC c=1 sm=1 tr=0 ts=6a955a6d cx=c_pps
+ a=j0++y401J6f/BxNAf5EDow==:117 a=FlBIjDbFArVVlnHZBJJA7g==:17
+ a=Sv0fKeRqtYgA:10 a=ke5jqHz-1hQA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=6gNNCFAoQcIphELLPWWu:22 a=m3zZTHMLHbwB7Lmtoed2:22 a=iLNU1ar6AAAA:8
+ a=ZFVciXT5ayevmQCRhY8A:9 a=gbU3OgOOxF9bX48Letew:22
+X-Proofpoint-Spam-Info: AW1haW4tMjYwODMxMDA5MiBTYWx0ZWRfX+9NQ4E392SCZ
+ 1BKjmEkwtLcwoR+j/CVhBpkX0ZLWwB3H886X9vrxg1HVaYZhtsZ7jbyuhrH55KA6ozefLpnv0p3
+ ZAnbVSvurII9wBAC13xFx/QsF51QoF8=
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODMxMDA5MiBTYWx0ZWRfX2BA9KTOvQV00
+ +mQn/ycEOy4Wk1y0jTOcKoWyQbXzFXWSTRKcAJINHhwxE9XddaTMP5LUcJFL8McFgp+rz171pgO
+ aEEXebXwhZC4CTyexbTu7nRAUzogME1cHB07kN24RmXw2/+qWidUny6pMFLa4sQ5WCxfw9H8xZY
+ T7YtiHpaTj+gN8v/g+PXmF086V3jLAvwuaoB5sv0v/Acl/Wr2t9lx4WyDP8LzsIOqNt3ojqvF2b
+ pZLDhw7bBMedu2FTGO0kQoRZn5/1wWcqa5FrsreHHCwrJdWL0kqNTpgAujzWZ0cMNUI6HuD/+2Q
+ XpfwfvUHZBOf5pJ/8BpktaW0xF4EHAmY4FvkK8SV55st/n0SXYfzwxBTHvmdLEs2WOzEs/uPuwg
+ /FAud1MflBrhdOaI1roLQV/cvQZ1rJ4Wl59QamGubKwEzRl+MkMay292npu74JXRMPBkC50w1Wv
+ UJLuq5mWaXgXXwms2GA==
+X-Proofpoint-GUID: V6kRLpruQAhXp3GKhNonq0DTlEdzTnHI
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0
+ lowpriorityscore=0 bulkscore=0 malwarescore=0 adultscore=0 impostorscore=0
+ phishscore=0 clxscore=1011 priorityscore=1501 suspectscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2608310092
 
-On Wed, Aug 26, 2026 at 06:28:54PM +0800, Zorro Lang wrote:
-> Replace the legacy, hand-written argument parsing loop with getopt.
-> Also compatible with old-style options (e.g. -nfs, -afs, -glusterfs,
-> -cifs, -9p, -fuse, -virtiofs, -pvfs2, -tmpfs, -ubifs, -overlay,
-> -udiff), pre-process them into long options before giving to getopt.
-> 
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
-> Reviewed-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> ---
->  check | 180 +++++++++++++++++++++++++++++++++++++++++-----------------
->  1 file changed, 127 insertions(+), 53 deletions(-)
-> 
-> diff --git a/check b/check
-> index ad685edc..548b01b5 100755
-> --- a/check
-> +++ b/check
-> @@ -272,48 +272,98 @@ _prepare_test_list()
->  	rm -f $tmp.list
->  }
->  
-> -# Process command arguments first.
-> +# Backward compatible with the old options mode. Translate word-style options
-> +# that getopt would misinterpret into long options.
-> +compat_old_option()
-> +{
-> +	check_args=()
-> +	while [ $# -gt 0 ]; do
-> +		case "$1" in
-> +		-nfs)		check_args+=("--fs" "nfs") ;;
-> +		-afs)		check_args+=("--fs" "afs") ;;
-> +		-glusterfs)	check_args+=("--fs" "glusterfs") ;;
-> +		-cifs)		check_args+=("--fs" "cifs") ;;
-> +		-9p)		check_args+=("--fs" "9p") ;;
-> +		-fuse)		check_args+=("--fs" "fuse") ;;
-> +		-virtiofs)	check_args+=("--fs" "virtiofs") ;;
-> +		-pvfs2)		check_args+=("--fs" "pvfs2") ;;
-> +		-tmpfs)		check_args+=("--fs" "tmpfs") ;;
-> +		-ubifs)		check_args+=("--fs" "ubifs") ;;
-> +		-overlay)	check_args+=("--fs" "overlay") ;;
-> +		-udiff)		check_args+=("--udiff") ;;
-> +		-\?)		check_args+=("--help") ;;
+The test script was committed with mode 100644 while all other test
+scripts are 100755, so check fails to execute it directly with
+"Permission denied".  Fix the file mode.
 
-Thanks for taking care of -?, looks good now.
+Signed-off-by: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+---
+ tests/f2fs/024 | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ mode change 100644 => 100755 tests/f2fs/024
 
-Regards,
-ojaswin
+diff --git a/tests/f2fs/024 b/tests/f2fs/024
+old mode 100644
+new mode 100755
+-- 
+2.55.0
 
