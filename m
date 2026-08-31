@@ -1,145 +1,95 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 42C0428F5
-	for <fstests@vger.kernel.org>; Sun, 30 Aug 2026 23:14:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1393C33F59C
+	for <fstests@vger.kernel.org>; Mon, 31 Aug 2026 01:44:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788131656; cv=none; b=qWT//Rruzp5tlYz+iemBI/71V/OioV142FUiUE7MBNYulNf3VjLCP6YH2MGJDfMRd9qsVNDRjjhfY5YQ/ZiUprxKTC29LD40PxN2oAl2tYICqO6zelm8c1220uQ4LF/WK/1zzFX0KJcra2oH7pNjMHt0JU2LpFjHrHF6pR5SpDc=
+	t=1788140656; cv=none; b=WvZTkhew0B47WRcz6mv6fA6/e1UZriLUkOhjvzGuE4P0vAfGoejVCIQGQQEg1/vToJhYBGiYRZgeRoXfU791a9mLCFh4lieFu4QNRGz3tkctPiKOhgwQSeZhE+by46CRgrfI7uHs27KCf1TZ48To0uA+Mel5hjieqV/U0wLknd0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788131656; c=relaxed/simple;
-	bh=sWvWi63qnqXkLg50mfl2yCmFZbSL0c2QQUd+d3IJwsg=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=SiysYfINXqW9OgWiQ8PdUJ1Siw3dA/0nxq17Te09Wrc6hZmbMNtAD/WwreyCYhBy1s8OE8zneTPAcSRUdHRk+bDKnCt6YIRnV9g2T9OILwajqttL8ymjZpnGql5wv36SHxDLUVAxfnAict5nbdDplWr0BFB4hmeO+EWPhGb0Ww0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=T6KRi7rP; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788140656; c=relaxed/simple;
+	bh=N3SxOXDxqIZpSuNF3O3pltZGSJF1dS/splDua73TgM4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=acqbH5Sq949lpdfeDVtD/9YDYwQpSHnsHfW2Qi/BGJdA+w4v121k1g7s02N2PcQtxxpkS8iSfh4iO+mkHsrfjkGXHkz7HxlTQi7PqK4+pVf9ZRuhTUW6pbBKFnC14WYU9DSAm5HLoB1KctMwPnCW8TxpEJdrn8CLqsSk2YnoY9I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=pmCUIHio; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="T6KRi7rP"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AA6CB1F00A3D
-	for <fstests@vger.kernel.org>; Sun, 30 Aug 2026 23:14:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788131654;
-	bh=5iHkvC7WHRmbVtiMjSDUBc8+v7BhLkSXGXSdVc+gbls=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject;
-	b=T6KRi7rPp1hLp1Gy5KYtBdz03pqZrdrXumOTfw/BVUkS5iFfzh2+F6V8T6UKeHfxt
-	 nm0rmCLWzK4v0pvNrbkiO/Fyij6S8uZSyVcDIFeiLhgyqC5d3gaLgewGViAe9OcfLo
-	 Jn9CM2IXmXM1ZRtPHme0ybwMPFCvRlsx80pcDpSR1mV/eS8WW9sQ2IJ7BSInXiyyoS
-	 yPjD5FZq202gNU7GVYnD0QLr/yYKtnekConOEqqcfGTGboxCLZoolSvOd8RFMqE5h+
-	 u1joSpIhagn3UVhjqD3HZNQ//1WYGRjHWp6ruW3KZGLpKNmp44RG7/bAkrJGqgcRbL
-	 WpMBcZ8j0RwWw==
-Received: from phl-compute-10.internal (phl-compute-10.internal [10.202.2.50])
-	by mailfauth.phl.internal (Postfix) with ESMTP id B6CB1F40066;
-	Sun, 30 Aug 2026 19:14:13 -0400 (EDT)
-Received: from phl-imap-15 ([10.202.2.104])
-  by phl-compute-10.internal (MEProxy); Sun, 30 Aug 2026 19:14:13 -0400
-X-ME-Sender: <xms:RbmUalX3kqybJy2eNJtg4Imn8wJIfEG5443PSHqSI5TAPXLq4Rw9TQ>
-    <xme:RbmUagaBtBgrXCOroZLCzcK1O6hKoGZumaOyY7eHo1la4qSoPKVwiyHNKO13-g2cE
-    NDkCIK7XOM86M8Owww0ACO0Kl4QpX5q5AYIJkR1OCDPB5t4q9YYN9GU>
-X-ME-Proxy-Cause: dmFkZTGaOChUc6KWp7f+rm4x3fk8MUoGXRUsVZwFOddJL4G2SGkk57/+6CZGb/HaUzkBph
-    194BxJatuO0SqZ3CE1cPBoPkGPayKct12Tvz4eZF0iHLLrto6H39wJmymOh5IgiXj1jbBa
-    UoCFjDcQy6XpBm2S/hQXAZX+NJRlWgF/dpHQEso1yOImHY6v15irNMPjVOYfl3DiojvQev
-    XccDqwd08dllRYeDECQPgeor5yVIgFgwRvJ02o/9GkflazUYCzHVeGpRpjc3pAgk9eEj0T
-    OhwKSxdGPxO57T/KK4QwM/Cd4J8ob5sSolx0a6epul4WnhwGCLRTURarGSm38h27as9jdC
-    hEISh7+gqmBAdv5Jjl/AhEUjhGNoQgkdXOStkKYC8qTu2xKmtjKdUZiCSywnODyXgE0S9F
-    IKE+EJe3eI9Sbr1mwLX3FRru/BUaNMmncWlCwafuDrXt8XRownpAlLuDBbKgMIlPBkumop
-    UcWj44L6ub3F+VnoXcPwfLUQHUgI6vaXqvDhW/fC9jducK5JACmNZrjPnA1SIX0mj0FeSN
-    QNam/eDP9areeJWBno4EDr04Jj4RqDCVIymjGezbgdoG1Z9fwsp0wsxsveL1fsq9uNuX9K
-    DJLUyXxpEO4T6L5kAEAJetx67YOSZgCxB+pRZCvsZLWP/xJU4R8FTWRMm8cQ
-X-ME-Proxy: <xmx:RbmUak7ziDj4SJiJ3ANK3tNSkHvhjpav6TCba1pyG785wgIV7nzHEQ>
-    <xmx:RbmUamAtYRdSgKTE8d8Ovg2FwjDbktdv1KfFMQ3R8IqsakFCInL4Rw>
-    <xmx:RbmUarabd8WTKOnX9KPRwUYiQQmD7feOGxI8umBSVp3vUQODmC4Yhg>
-    <xmx:RbmUahaRyUwGcJXQn3sVOBlWapfndjpmFereh6j3-v5zK9ajVx7IYA>
-    <xmx:RbmUai-YXgyDRzDHs9eCwckqBXehkKreSoSZAub6m3Y02lFKmhqyHgwl>
-Feedback-ID: ifa6e4810:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id 8A9B77811F0; Sun, 30 Aug 2026 19:14:13 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="pmCUIHio"
+Received: from macsyma.thunk.org (pool-108-26-156-67.bstnma.fios.verizon.net [108.26.156.67])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 67V1cXjn001816
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sun, 30 Aug 2026 21:38:34 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1788140316; bh=RCR5S19ATwvjEbuGYYFZbN3IvLES8GyxgToyyoGWn1s=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=pmCUIHioAd/lbeV+yFIicx4WnIb2hrDl1xaxpyS6mcJvp56vkF+5f25X0qNKumJHA
+	 xNn8DfTkYXocP1dfrc+gZc3BBUYUz/i6RHggeB5UCRw24ceLgCOTCRmjH0H05cV4bf
+	 316V0fXdxN1dokWaaiz+JXWcrx4ROZxEjlf8p58AHFue6QAPu37xtBaf60KQqTvBgH
+	 r7J67MBhVH0O3sYqPNAm6CKFUepoRnRQT/Nzy5cgqgxpdUvHwAh+2x8AWxqwUjK3fs
+	 pN0Jujp7Vm0oz4Mjr4jO5ih1QRGnhrFTW9wN+tFcOKMGEmk8cVJaAOr+GRB9H/kC6b
+	 B6YMgNNRRpYeA==
+Received: by macsyma.thunk.org (Postfix, from userid 15806)
+	id 67806129CC87; Sun, 30 Aug 2026 21:37:33 -0400 (EDT)
+Date: Sun, 30 Aug 2026 21:37:33 -0400
+From: "Theodore Tso" <tytso@mit.edu>
+To: NeilBrown <neil@brown.name>
+Cc: Matthew Wilcox <willy@infradead.org>, fstests@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, Chuck Lever <cel@kernel.org>
+Subject: Re: [PATCH] fstests: generic: Add test of seek in directories
+Message-ID: <apTQqcuR7bI6qY54@mit.edu>
+References: <20260827234743.2389778-1-neilb@ownmail.net>
+ <20260827234743.2389778-2-neilb@ownmail.net>
+ <apEK5uirjyLZUfmA@casper.infradead.org>
+ <178791556100.3510150.18132687067056760170@noble.neil.brown.name>
+ <apGfAFkNdD5mrASi@mit.edu>
+ <178812852153.3510150.11411436066299613954@noble.neil.brown.name>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ThreadId: AflgjeobGf1w
-Date: Sun, 30 Aug 2026 19:13:56 -0400
-From: "Chuck Lever" <cel@kernel.org>
-To: NeilBrown <neil@brown.name>, fstests@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org
-Message-Id: <114f727b-86bc-40b8-8487-35bccf101d2c@app.fastmail.com>
-In-Reply-To: <20260827234743.2389778-2-neilb@ownmail.net>
-References: <20260827234743.2389778-1-neilb@ownmail.net>
- <20260827234743.2389778-2-neilb@ownmail.net>
-Subject: Re: [PATCH] fstests: generic: Add test of seek in directories
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <178812852153.3510150.11411436066299613954@noble.neil.brown.name>
 
+On Mon, Aug 31, 2026 at 08:22:01AM -0500, NeilBrown wrote:
+> Given that the requirements predates the htree design, isn't this "pain
+> and performance hit" a deliberate design choice?  Or maybe an
+> unfortunate design omission?  Such things can be fixed.
 
-On Thu, Aug 27, 2026, at 7:36 PM, NeilBrown wrote:
-> Add a test for consistency of readdir (getdents64) results.
+The requirements assumed that the directory was a linear structure,
+much like the V7 and BSD FFS structure.  That's why
+telldir()/seekdir() interface used a 32-biit cookie --- e.g., a seek
+offset.  This doesn't deal well with a b-tree or equivalent structure
+where when you insert an item into the tree, the tree might require a
+node to be split or the tree to be rebalanced.
 
-Thanks for writing this!
+> ext4 already has two indexing schemes - indirect and extent-based.  How
+> hard would it be to add a third that effectively moved the current
+> directory index blocks out of the "file" and into the "file-index"?
+> Obviously the 32 block address in dx_entry would need to become a 48 bit
+> device address etc, and there are bound to be details I've glossed over,
+> but this approach would amortise all metadata access of a lot data
+> access, and would allow read-ahead.
 
-Note that it asserts more than exactly-once: the relative order of
-every stable name must hold for the life of the directory, across
-independent opens. That is the right property needed for NFS. Either
-the internal documentation or the commit message should say that,
-and explain why: between two READDIRs there is no open state, so the
-server can be handed any cookie against any later state of the
-directory. POSIX does not require this, certainly, but NFS does. 
+The primary detail that you've glossed over is that the tree would
+have to be a B-tree.  Ext4 currently uses a b+tree which means that we
+don't need to store the file name (key) in the index nodes.  The index
+node in the htree is a fixed size, and compact, and this allows for a
+much greater fanout (340 nodes in each node).  This makes the tree
+much shallower, and reduces the number of seeks when doing lookups.
 
-The seek check picks n from all names, including unstable ones
-unlinked many loops earlier, using the d_off from the first scan.
-That is the "rm -rf over NFS" case and the most valuable check here,
-but it reads like an oversight. Can you add a comment saying it is
-deliberate?
+Switching to a b-tree would almost double the size of the overhead of
+the tree, and the tree would be deeper, and thus require more seeks
+when doing a lookup.
 
-The seven op classes run mixed in one invocation, so a failure says
-"loop 37 with seed 1234567" and not which *semantic* broke. btrfs
-fails only on renames onto a stable name, and nobody can tell that
-from the output without rerunning with -T. It might be nicer to have
-the wrapper invoke the binary once per class, or at least once each
-for churn, rename onto an existing name, and RENAME_EXCHANGE. Then
-put exchange in its own test gated by _require_renameat2 exchange,
-which replaces the FSTYP == nfs check and _notruns everywhere the
-flag is unsupported.
+So it's a tradeoff, and it depends on whether you think readdir or
+directory lookups are more frequent.
 
-> +_begin_fstest auto dir quick
+Cheers,
 
-Add rename, perhaps?
-
-> +$here/src/t_dir_seek -p $TEST_DIR -S 1234567 $extra
-
-$TEST_DIR/testdir is not scoped to $seq and there is no _cleanup().
-A run interrupted before clean_files() makes the next one fail in
-mkdir with exit status 1. Use $TEST_DIR/$seq-dir and rm -rf it before
-the run and in _cleanup().
-
-> +		case op_create:
-> +			n = get_file(&unused);
-> +			if (n > 0) {
-
-n >= 0. Name 0 is a valid index. Drawn here it is removed from unused
-and never put back anywhere.
-
-> +	lseek(fd, off, SEEK_SET);
-
-For both get_order() and check_order(), a rejected cookie should fail
-with the errno, not proceed from 0 and report bad order.
-
-Nits: copyright 2025 vs 2026; typos in both header comments; %lu for
-uint64_t; usage says "-p 10" for -o; the -n and -o range errors name
-the wrong flags; d_name[] rather than d_name[0].
-
-With the wrapper and op_create fixes:
-
-Reviewed-by: Chuck Lever <cel@kernel.org>
-
-I will also note that, despite the new failures, users of NFS-
-exported tmpfs and btrfs filesystems have not observed or reported
-problems. So the severity of these failures is not high, IMO, but it
-would still be good to correct them. It's great to see more of the
-specific NFS requirements for directories materialized in a set of
-unit tests.
-
-
--- 
-Chuck Lever (Come to NFS bake-a-thon! https://nfsv4bat.org)
+						- Ted
