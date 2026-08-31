@@ -1,95 +1,71 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1393C33F59C
-	for <fstests@vger.kernel.org>; Mon, 31 Aug 2026 01:44:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C51CC43AB0;
+	Mon, 31 Aug 2026 06:46:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788140656; cv=none; b=WvZTkhew0B47WRcz6mv6fA6/e1UZriLUkOhjvzGuE4P0vAfGoejVCIQGQQEg1/vToJhYBGiYRZgeRoXfU791a9mLCFh4lieFu4QNRGz3tkctPiKOhgwQSeZhE+by46CRgrfI7uHs27KCf1TZ48To0uA+Mel5hjieqV/U0wLknd0=
+	t=1788158764; cv=none; b=h4liL7n5xkZWfvx6PQh758MTF4TSS0EhBytoihgNAb/+nVCK2jrp8GaF9Or9WhG5o4VHE7rn2T/7OSY38iCdQRKXMw7E44S9CKgHjoGiz/Ka4vc+PBp2xmPgpBDykAO6chwML997f5N0s54YchfCmmEX2OyomNv+6UGlrAf+950=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788140656; c=relaxed/simple;
-	bh=N3SxOXDxqIZpSuNF3O3pltZGSJF1dS/splDua73TgM4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=acqbH5Sq949lpdfeDVtD/9YDYwQpSHnsHfW2Qi/BGJdA+w4v121k1g7s02N2PcQtxxpkS8iSfh4iO+mkHsrfjkGXHkz7HxlTQi7PqK4+pVf9ZRuhTUW6pbBKFnC14WYU9DSAm5HLoB1KctMwPnCW8TxpEJdrn8CLqsSk2YnoY9I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=pmCUIHio; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1788158764; c=relaxed/simple;
+	bh=J4w2zvhxfCDz/AT3qGjGqJBWjT3Z55yf49IEQ0IrwEs=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=EruLrHZ/LDParm/hCmPtsEIBaWkZakyDF1YlES1HqlNelzRmaneMVbgD2nDmZTAs0PNRSafq5YDtDn3U+gAW0rLz7XwS4v5XzNrZNgEu3LA94uZuQtIJ48SJt/NPyOynDRai59g9GKRZjtHBh3eXmcaoQwofvjvOXiTo604hxZs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=hCh7qaQ7; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="pmCUIHio"
-Received: from macsyma.thunk.org (pool-108-26-156-67.bstnma.fios.verizon.net [108.26.156.67])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 67V1cXjn001816
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Sun, 30 Aug 2026 21:38:34 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1788140316; bh=RCR5S19ATwvjEbuGYYFZbN3IvLES8GyxgToyyoGWn1s=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=pmCUIHioAd/lbeV+yFIicx4WnIb2hrDl1xaxpyS6mcJvp56vkF+5f25X0qNKumJHA
-	 xNn8DfTkYXocP1dfrc+gZc3BBUYUz/i6RHggeB5UCRw24ceLgCOTCRmjH0H05cV4bf
-	 316V0fXdxN1dokWaaiz+JXWcrx4ROZxEjlf8p58AHFue6QAPu37xtBaf60KQqTvBgH
-	 r7J67MBhVH0O3sYqPNAm6CKFUepoRnRQT/Nzy5cgqgxpdUvHwAh+2x8AWxqwUjK3fs
-	 pN0Jujp7Vm0oz4Mjr4jO5ih1QRGnhrFTW9wN+tFcOKMGEmk8cVJaAOr+GRB9H/kC6b
-	 B6YMgNNRRpYeA==
-Received: by macsyma.thunk.org (Postfix, from userid 15806)
-	id 67806129CC87; Sun, 30 Aug 2026 21:37:33 -0400 (EDT)
-Date: Sun, 30 Aug 2026 21:37:33 -0400
-From: "Theodore Tso" <tytso@mit.edu>
-To: NeilBrown <neil@brown.name>
-Cc: Matthew Wilcox <willy@infradead.org>, fstests@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, Chuck Lever <cel@kernel.org>
-Subject: Re: [PATCH] fstests: generic: Add test of seek in directories
-Message-ID: <apTQqcuR7bI6qY54@mit.edu>
-References: <20260827234743.2389778-1-neilb@ownmail.net>
- <20260827234743.2389778-2-neilb@ownmail.net>
- <apEK5uirjyLZUfmA@casper.infradead.org>
- <178791556100.3510150.18132687067056760170@noble.neil.brown.name>
- <apGfAFkNdD5mrASi@mit.edu>
- <178812852153.3510150.11411436066299613954@noble.neil.brown.name>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="hCh7qaQ7"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=J4w2zvhxfCDz/AT3qGjGqJBWjT3Z55yf49IEQ0IrwEs=; b=hCh7qaQ7R0pHnCPlErSL7vW0g7
+	y1NdOgI/3kyYEHZIcoH+yTDcHIpow1DacUec7S+3Tyw1pLv7grV6kYYlJe8bR8OhKwaTJ4StF9UDn
+	DMsggPBUZzv+qSXrSuIlldGiccF5YMYR/kBnvVqCFO8as5tpxCvNz5kULZZzm5CVJl8FaOhIgej3l
+	0IKFfzybFrbBzmfYEqPCIQMcZzDnpftDPo1D9XbFV3aSSQ6DyLVe7Fh2FzB3swO3JAQ2N1lkUpnrR
+	vgomMos17u121JfpTdEOYoSRCtihHs6OiVInaHgVb3RzPYn7Zoi4PVYaXpJAqyHHA9gexr0OmSAmb
+	2Qu/NPVg==;
+Received: from [2001:4bb8:2f9:3a59:1608:d03f:db12:ee92] (helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.99.1 #2 (Red Hat Linux))
+	id 1x0vmM-00000008dFU-1TUO;
+	Mon, 31 Aug 2026 06:46:02 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: Zorro Lang <zlang@kernel.org>
+Cc: fstests@vger.kernel.org,
+	"Martin K. Petersen" <martin.petersen@oracle.com>,
+	Kanchan Joshi <joshi.k@samsung.com>,
+	Anuj Gupta <anuj20.g@samsung.com>,
+	John Garry <john.g.garry@oracle.com>,
+	"Darrick J. Wong" <djwong@kernel.org>,
+	linux-scsi@vger.kernel.org
+Subject: add tests for file system on devices using protection information v3
+Date: Mon, 31 Aug 2026 09:45:44 +0300
+Message-ID: <20260831064557.2577241-1-hch@lst.de>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <178812852153.3510150.11411436066299613954@noble.neil.brown.name>
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Mon, Aug 31, 2026 at 08:22:01AM -0500, NeilBrown wrote:
-> Given that the requirements predates the htree design, isn't this "pain
-> and performance hit" a deliberate design choice?  Or maybe an
-> unfortunate design omission?  Such things can be fixed.
+Hi all,
 
-The requirements assumed that the directory was a linear structure,
-much like the V7 and BSD FFS structure.  That's why
-telldir()/seekdir() interface used a 32-biit cookie --- e.g., a seek
-offset.  This doesn't deal well with a b-tree or equivalent structure
-where when you insert an item into the tree, the tree might require a
-node to be split or the tree to be rebalanced.
+this series adds support to exercise I/O on file systems using protection
+information in the device, including that corruption is properly
+reported.
 
-> ext4 already has two indexing schemes - indirect and extent-based.  How
-> hard would it be to add a third that effectively moved the current
-> directory index blocks out of the "file" and into the "file-index"?
-> Obviously the 32 block address in dx_entry would need to become a 48 bit
-> device address etc, and there are bound to be details I've glossed over,
-> but this approach would amortise all metadata access of a lot data
-> access, and would allow read-ahead.
+The second test requires a patch to inject corruption into scsi_debug
+that was posted to the linux-scsi list.
 
-The primary detail that you've glossed over is that the tree would
-have to be a B-tree.  Ext4 currently uses a b+tree which means that we
-don't need to store the file name (key) in the index nodes.  The index
-node in the htree is a fixed size, and compact, and this allows for a
-much greater fanout (340 nodes in each node).  This makes the tree
-much shallower, and reduces the number of seeks when doing lookups.
+Changes since v2:
+ - factor out a _bdev_disk_name helper
 
-Switching to a b-tree would almost double the size of the overhead of
-the tree, and the tree would be deeper, and thus require more seeks
-when doing a lookup.
-
-So it's a tradeoff, and it depends on whether you think readdir or
-directory lookups are more frequent.
-
-Cheers,
-
-						- Ted
+Changes since v1:
+ - fix various requirements
+ - use _exit
+ - cleanup up the scsi_debug options building
+ - add a new PI group
+ - mark one of the new tests dangerous as it can crash Linux 7.2 and earlier
