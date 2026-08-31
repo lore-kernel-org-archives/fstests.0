@@ -1,41 +1,41 @@
 Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC7E727E1DC
-	for <fstests@vger.kernel.org>; Mon, 31 Aug 2026 06:51:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E8153BED4F
+	for <fstests@vger.kernel.org>; Mon, 31 Aug 2026 06:51:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788159091; cv=none; b=DaF/W9Qh3za5bGcfoCPQmtjzRUi9TjcMuJ12He48qywT/xO2g8/d50ilF8v1LYItQt365MPH7XykzmruYewyVG9x+YW6Ng2ASQievKWZ6es8lAp8UxfE2za5DQlWNwPyqAh8sAVlcaDmr9G4ggmseEBbuWGKq+u9Bk3QOFWUCMc=
+	t=1788159095; cv=none; b=OhSXIelpyHqcFEgnRN0cI0jRkzl6xEqx/grOd3B4fY375ORAlFK9cNadflqPJ+jcjCJOMYtSo1A2ndUGbx5OuqHVFykHSDreE80/QvLldtIzbi1pWalDzQzuB0+bLIGjt56sKh33LYDUx6SnwudHl38Ov02EzKrMqoG99bLv3ZM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788159091; c=relaxed/simple;
-	bh=272A+WGOcSZyMrCrNDf56BW7+LlUnWFM/Lk8FkFiyCw=;
+	s=arc-20240116; t=1788159095; c=relaxed/simple;
+	bh=wncC8HDi5MqnfufZRW2xNT95FnQHfboFZ7OZ+C9Wef4=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=M2nyVYFYAp1G9oaBWfxida/SnSaZ3bhEfRsCqjpE/hq/maOAt11TnyXadhoV+QUjVlT2f/eAyKxdoFmWlAIVKjlTV+kEyWcnyzuU6cjEgE5/g1k+/l2Oj7U2FKi/ZrdqY1Qt3SRsqCiDqUALIauAhbq57j9ZgHFoLCSSYbuvMJs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=F93ZgwxX; arc=none smtp.client-ip=198.137.202.133
+	 MIME-Version; b=qAJ7lUToOkDIRg9y0j8xlFAIiJb5zmScUekLlTFOutrVtTZzJuqMEbNuQ3WRKvunQjl+IwP4mZrluU9e+ZSnp0zROa9B91CWeaxe4gS1E9x4wDj9SUTbG58EW9lCY7FiOoK2Huxp5YELulva/rEBqzJ5urVsfJEJUDJx7i4L7bk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=z/VBG2zi; arc=none smtp.client-ip=198.137.202.133
 Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="F93ZgwxX"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="z/VBG2zi"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender
 	:Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=RoInsf6Ojyti4nHDOsk9sZnL7O4HLTaBprRa/Lj4Ey0=; b=F93ZgwxXgDhsONB/6FLlSRom8O
-	66D4Ktd4DgW/aXwAjfw+fIdbq8UwMO5CIsxANLhWoBEAMMRQN/D1VmgA46XnHFK5/KhywYv1xteTG
-	y3xtY0jNimauvXUSsGIDOOmK1PQY3HM6U/1DGDG4vEL9G9Ktwsvs9BKEluJnm0wZvPNfmVvkwn6Y+
-	3NUKlqcZ3Y1IGMfD2xDTOt7rL99RPMFhg4b6q18JaA7X4RP95GnvvU82reUCt7L2UW2QZELIKjqJk
-	FeXddqP5Yp+yke5PlxQ/ImhyzmT4shL/4f6bNwiCofFAykvencWphyh+2PRtjLV9QeF+lVeE+46sb
-	Ff1S1Thg==;
+	bh=w/Yg8M/+T0IDOlKqAm4qjuj5riHshsVQUSScEhTfrJY=; b=z/VBG2ziKou7V7UGHd4iUoO0I8
+	fu3lR6PJyW76/p6BteOP0tUrV4KsK2LXkzRCr+6J4mfcQ6HJvRqujwmSuKzYSJF2rDwj6+RqryI2m
+	hAM9mUTH8kWIranwMqgVyjwWxuwXwXbdkmFw22/ixlzU6VeDSmI6CFxOdJNtTeVFyI9vm3nA8RiJ9
+	nDi7VTRmpkD7tCxOMwctaFgMW0oiTqWy/rjjPD4I1Fka/qgqEew7aaBIOzJbmpVZ0K+hLvOsdUHTj
+	wS1diF5CVaTbxnUIR+gqSxVQS1u76qmZMPeQh1skayr2ZjsOIfHzn7hF2/VCQ+f80yJeR1p1Iuna9
+	PfF3CfDw==;
 Received: from [2001:4bb8:2f9:3a59:1608:d03f:db12:ee92] (helo=localhost)
 	by bombadil.infradead.org with esmtpsa (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1x0vrc-00000008eY2-26FI;
-	Mon, 31 Aug 2026 06:51:29 +0000
+	id 1x0vrg-00000008eYQ-2OEl;
+	Mon, 31 Aug 2026 06:51:33 +0000
 From: Christoph Hellwig <hch@lst.de>
 To: Zorro Lang <zlang@kernel.org>
 Cc: fstests@vger.kernel.org
-Subject: [PATCH 1/5] statx.h: update to latest kernel UAPI
-Date: Mon, 31 Aug 2026 09:51:04 +0300
-Message-ID: <20260831065120.2578146-2-hch@lst.de>
+Subject: [PATCH 2/5] min_dio_alignment: add a -r option to query read alignment
+Date: Mon, 31 Aug 2026 09:51:05 +0300
+Message-ID: <20260831065120.2578146-3-hch@lst.de>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20260831065120.2578146-1-hch@lst.de>
 References: <20260831065120.2578146-1-hch@lst.de>
@@ -48,179 +48,100 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-Update the localy provided statx definition to the kernel UAPI as of
-7.3-rc1.
+Add an option to query the STATX_DIO_READ_ALIGN if provided.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- src/statx.h | 126 +++++++++++++++++++++++++++++++++++++++-------------
- 1 file changed, 96 insertions(+), 30 deletions(-)
+ src/min_dio_alignment.c | 44 ++++++++++++++++++++++++++++++-----------
+ 1 file changed, 33 insertions(+), 11 deletions(-)
 
-diff --git a/src/statx.h b/src/statx.h
-index bae1c86f6201..0a27bf030b1d 100644
---- a/src/statx.h
-+++ b/src/statx.h
-@@ -95,44 +95,97 @@ struct statx_timestamp {
-  */
- struct statx {
- 	/* 0x00 */
--	__u32	stx_mask;	/* What results were written [uncond] */
--	__u32	stx_blksize;	/* Preferred general I/O size [uncond] */
--	__u64	stx_attributes;	/* Flags conveying information about the file [uncond] */
-+	/* What results were written [uncond] */
-+	__u32	stx_mask;
-+
-+	/* Preferred general I/O size [uncond] */
-+	__u32	stx_blksize;
-+
-+	/* Flags conveying information about the file [uncond] */
-+	__u64	stx_attributes;
-+
- 	/* 0x10 */
--	__u32	stx_nlink;	/* Number of hard links */
--	__u32	stx_uid;	/* User ID of owner */
--	__u32	stx_gid;	/* Group ID of owner */
--	__u16	stx_mode;	/* File mode */
-+	/* Number of hard links */
-+	__u32	stx_nlink;
-+
-+	/* User ID of owner */
-+	__u32	stx_uid;
-+
-+	/* Group ID of owner */
-+	__u32	stx_gid;
-+
-+	/* File mode */
-+	__u16	stx_mode;
- 	__u16	__spare0[1];
-+
- 	/* 0x20 */
--	__u64	stx_ino;	/* Inode number */
--	__u64	stx_size;	/* File size */
--	__u64	stx_blocks;	/* Number of 512-byte blocks allocated */
--	__u64	stx_attributes_mask; /* Mask to show what's supported in stx_attributes */
-+	/* Inode number */
-+	__u64	stx_ino;
-+
-+	/* File size */
-+	__u64	stx_size;
-+
-+	/* Number of 512-byte blocks allocated */
-+	__u64	stx_blocks;
-+
-+	/* Mask to show what's supported in stx_attributes */
-+	__u64	stx_attributes_mask;
- 
- 	/* 0x40 */
--	struct statx_timestamp	stx_atime;	/* Last access time */
--	struct statx_timestamp	stx_btime;	/* File creation time */
--	struct statx_timestamp	stx_ctime;	/* Last attribute change time */
--	struct statx_timestamp	stx_mtime;	/* Last data modification time */
-+	/* Last access time */
-+	struct statx_timestamp	stx_atime;
-+
-+	/* File creation time */
-+	struct statx_timestamp	stx_btime;
-+
-+	/* Last attribute change time */
-+	struct statx_timestamp	stx_ctime;
-+
-+	/* Last data modification time */
-+	struct statx_timestamp	stx_mtime;
-+
- 	/* 0x80 */
--	__u32	stx_rdev_major;	/* Device ID of special file [if bdev/cdev] */
-+	/* Device ID of special file [if bdev/cdev] */
-+	__u32	stx_rdev_major;
- 	__u32	stx_rdev_minor;
--	__u32	stx_dev_major;	/* ID of device containing file [uncond] */
-+
-+	/* ID of device containing file [uncond] */
-+	__u32	stx_dev_major;
- 	__u32	stx_dev_minor;
-+
- 	/* 0x90 */
- 	__u64	stx_mnt_id;
--	__u32	stx_dio_mem_align;	/* Memory buffer alignment for direct I/O */
--	__u32	stx_dio_offset_align;	/* File offset alignment for direct I/O */
-+
-+	/* Memory buffer alignment for direct I/O */
-+	__u32	stx_dio_mem_align;
-+
-+	/* File offset alignment for direct I/O */
-+	__u32	stx_dio_offset_align;
-+
- 	/* 0xa0 */
--	__u64	stx_subvol;	/* Subvolume identifier */
--	__u32	stx_atomic_write_unit_min;	/* Min atomic write unit in bytes */
--	__u32	stx_atomic_write_unit_max;	/* Max atomic write unit in bytes */
-+	/* Subvolume identifier */
-+	__u64	stx_subvol;
-+
-+	/* Min atomic write unit in bytes */
-+	__u32	stx_atomic_write_unit_min;
-+
-+	/* Max atomic write unit in bytes */
-+	__u32	stx_atomic_write_unit_max;
-+
- 	/* 0xb0 */
--	__u32   stx_atomic_write_segments_max;	/* Max atomic write segment count */
--	__u32   __spare1[1];
--	/* 0xb8 */
--	__u64	__spare3[9];	/* Spare space for future expansion */
-+	/* Max atomic write segment count */
-+	__u32   stx_atomic_write_segments_max;
-+
-+	/* File offset alignment for direct I/O reads */
-+	__u32	stx_dio_read_offset_align;
-+
-+	/* Optimised max atomic write unit in bytes */
-+	__u32	stx_atomic_write_unit_max_opt;
-+	__u32	__spare2[1];
-+
-+	/* 0xc0 */
-+	__u64	__spare3[8];	/* Spare space for future expansion */
-+
- 	/* 0x100 */
- };
- 
-@@ -162,19 +215,32 @@ struct statx {
- #define STATX_MNT_ID_UNIQUE	0x00004000U	/* Want/got extended stx_mount_id */
- #define STATX_SUBVOL		0x00008000U	/* Want/got stx_subvol */
- #define STATX_WRITE_ATOMIC	0x00010000U	/* Want/got atomic_write_* fields */
-+#define STATX_DIO_READ_ALIGN	0x00020000U	/* Want/got dio read alignment info */
- 
--#define STATX_ALL		0x00000fffU	/* All currently supported flags */
-+#define STATX__RESERVED		0x80000000U	/* Reserved for future struct statx expansion */
- 
-+#ifndef __KERNEL__
+diff --git a/src/min_dio_alignment.c b/src/min_dio_alignment.c
+index 866fba1546c4..143cee684ab4 100644
+--- a/src/min_dio_alignment.c
++++ b/src/min_dio_alignment.c
+@@ -1,17 +1,19 @@
+ // SPDX-License-Identifier: GPL-2.0
  /*
-- * Attributes to be found in stx_attributes
-+ * This is deprecated, and shall remain the same value in the future.  To avoid
-+ * confusion please use the equivalent (STATX_BASIC_STATS | STATX_BTIME)
-+ * instead.
-+ */
-+#define STATX_ALL		0x00000fffU
-+#endif
-+
-+/*
-+ * Attributes to be found in stx_attributes and masked in stx_attributes_mask.
-  *
-  * These give information about the features or the state of a file that might
-  * be of use to ordinary userspace programs such as GUIs or ls rather than
-  * specialised tools.
-  *
-- * Note that the flags marked [I] correspond to generic FS_IOC_FLAGS
-+ * Note that the flags marked [I] correspond to the FS_IOC_SETFLAGS flags
-  * semantically.  Where possible, the numerical value is picked to correspond
-- * also.
-+ * also.  Note that the DAX attribute indicates that the file is in the CPU
-+ * direct access state.  It does not correspond to the per-inode flag that
-+ * some filesystems support.
-+ *
+- * Copyright (c) 2024 Christoph Hellwig
++ * Copyright (c) 2024,2026 Christoph Hellwig
   */
- #define STATX_ATTR_COMPRESSED		0x00000004 /* [I] File is compressed by the fs */
- #define STATX_ATTR_IMMUTABLE		0x00000010 /* [I] File is marked immutable */
+ #include <fcntl.h>
++#include <stdbool.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <unistd.h>
++#include <getopt.h>
+ #include <sys/mount.h>
+ #include <sys/ioctl.h>
+ #include <sys/stat.h>
+ #include "statx.h"
+ 
+-static int min_dio_alignment(const char *mntpnt, const char *devname)
++static int min_dio_alignment(const char *mntpnt, const char *devname, bool read)
+ {
+ 	struct statx stx = { };
+ 	struct stat st;
+@@ -27,9 +29,16 @@ static int min_dio_alignment(const char *mntpnt, const char *devname)
+ 	 */
+ 	fd = open(mntpnt, O_TMPFILE | O_RDWR | O_EXCL, 0600);
+ 	if (fd >= 0 &&
+-	    xfstests_statx(fd, "", AT_EMPTY_PATH, STATX_DIOALIGN, &stx) == 0 &&
+-	    (stx.stx_mask & STATX_DIOALIGN) && stx.stx_dio_offset_align != 0)
+-		return stx.stx_dio_offset_align;
++	    xfstests_statx(fd, "", AT_EMPTY_PATH, STATX_DIOALIGN, &stx) == 0) {
++		if (read &&
++		    (stx.stx_mask & STATX_DIO_READ_ALIGN) &&
++		    stx.stx_dio_read_offset_align != 0)
++			return stx.stx_dio_read_offset_align;
++
++		if ((stx.stx_mask & STATX_DIOALIGN) &&
++		    stx.stx_dio_offset_align != 0)
++			return stx.stx_dio_offset_align;
++	}
+ 
+ 	/*
+ 	 * If we are on a block device and no explicit aligned is reported, use
+@@ -42,9 +51,8 @@ static int min_dio_alignment(const char *mntpnt, const char *devname)
+ 		if (dev_fd > 0 &&
+ 		    fstat(dev_fd, &st) == 0 &&
+ 		    S_ISBLK(st.st_mode) &&
+-		    ioctl(dev_fd, BLKSSZGET, &logical_block_size) == 0) {
++		    ioctl(dev_fd, BLKSSZGET, &logical_block_size) == 0)
+ 			return logical_block_size;
+-		}
+ 	}
+ 
+ 	/*
+@@ -56,11 +64,25 @@ static int min_dio_alignment(const char *mntpnt, const char *devname)
+ 
+ int main(int argc, char **argv)
+ {
+-	if (argc != 3) {
+-		fprintf(stderr, "usage: %s mountpoint devicename\n", argv[0]);
+-		exit(1);
++	bool read = false;
++	int c;
++
++	while ((c = getopt(argc, argv, "r")) != -1) {
++		switch(c) {
++		case 'r':
++			read = 1;
++			break;
++		default:
++			goto usage;
++		}
+ 	}
+ 
+-	printf("%d\n", min_dio_alignment(argv[1], argv[2]));
++	if (argc - optind != 2)
++		goto usage;
++
++	printf("%d\n", min_dio_alignment(argv[optind], argv[optind + 1], read));
+ 	exit(0);
++usage:
++	fprintf(stderr, "usage: %s [-r] mountpoint devicename\n", argv[0]);
++	exit(1);
+ }
 -- 
 2.53.0
 
