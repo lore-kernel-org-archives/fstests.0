@@ -1,138 +1,272 @@
-Received: from mx0b-00154904.pphosted.com (mx0b-00154904.pphosted.com [148.163.137.20])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CF65438014;
-	Tue,  1 Sep 2026 13:24:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.137.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C5BD1A6809;
+	Tue,  1 Sep 2026 13:52:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788269093; cv=none; b=JkPd+EgDpNHS045mqN3vORDenLXVWWJ+l+Ch7k1FkGUUxeXa9Nq/3LR6K4sgB2jDZ7LYkjgyTd0y+gKywyWoFJJuF6F2YzUAxufDZn/iXuv5GgPqlliUSQDF6qfPh7fqb1Yh87yOPOsuRFvQ7FvziU4f4c00h2NczT4stCelauM=
+	t=1788270762; cv=none; b=Ic+KIih6L4MoVCkF5p/f4sAoOrxWfoMLQbSw4fZHIjXBOHvfue91Nt1iYglkkj06e+3FqQtESZV2QjzBQfkf+evdfzLs82hNwS9yb7GlQPF2cUf2xXrQU84WtSjj5E9fyMPG4umnhgj3Wi7ZBGvCWabVjoGligJU5ftxJ6yXXJ8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788269093; c=relaxed/simple;
-	bh=xdZNdbVi+h47vGlliB0yEb3OJwUf21wxbbPccVrSVLA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=cec1HIrhHm32pMEb6V9BlxnNfaIe8EZcVWD+wRdRt9fc3k2XkMgkO6ZFXlhPmp+omPTZMP0kUP+rTXzIaze+uqIGRwvYtAucw691/1aQbegf3otQfDEFKq2xwP1GpxR9GMUo4P31OUoop2t2VyOGk+3CDZ9asAmeM9bC8qZEiq4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com; spf=pass smtp.mailfrom=dell.com; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=VmvcYBU9; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=k3au6ZkA; arc=none smtp.client-ip=148.163.137.20
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dell.com
+	s=arc-20240116; t=1788270762; c=relaxed/simple;
+	bh=3ZLnb7VbGB4e/0RgyN/Bz5Akor7xy34ULeCjaWrJ2gU=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:References:
+	 In-Reply-To:Content-Type; b=hVaozDKoU532/V9DPgjXrKI9O3vOsMtCBOwTMQ6ISDoRlAeuHvznOPFQ9QigSmP8f70fx2Hp0Lq3Jz9YR5+LXViW3NTSEhOTv7YjJxvZxkWwM54MdCm70yMJA0LJ6uZAJvHBw2khbibuGK8Gwi9K84mmcdxIs01NRl+oYzkcwhI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dEOPtGto; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="VmvcYBU9";
-	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="k3au6ZkA"
-Received: from pps.filterd (m0170398.ppops.net [127.0.0.1])
-	by mx0b-00154904.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 681DN25b1980169;
-	Tue, 1 Sep 2026 09:24:45 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dell.com; h=cc
-	:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=smtpout1; bh=FcRhtIym0NpYPAe6eAEZanzaw3jFg51z3gpc
-	EQgc2rg=; b=VmvcYBU9ta7O08qea23/EGCjr7YSIk8H/8kqytWSkSqTHHOALjyU
-	6kMeEIN+mFPywu5oMO+XjKY4wgLGYQtW5+qlpmOrsqMMq+2Eb3PtQFCTtcYLCTU1
-	NH48LJp1ErsjCC+wHv/JmC6+5zDaXGBLrl+fDBfdk6jn1kGwPdwA5KNPhqczpFLO
-	N/vQmhUDAiXTJGWqISD2FTS3uPbxdk5PmeotgPJYociHWZtIhNLN2mRUHr+zLOqt
-	Tv2j/gwGTWF7pJnc7MLnigQ1D4f9Q8Mki96pYXVepmk06UdUeVDgH9EZz4LXmLgx
-	wcPYCWNCxahOk+V0wZU7VuzHtkGfDPwWig==
-Received: from mx0a-00154901.pphosted.com (mx0a-00154901.pphosted.com [67.231.149.39])
-	by mx0b-00154904.pphosted.com (PPS) with ESMTPS id 4gbtn53uaf-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Tue, 01 Sep 2026 09:24:44 -0400 (EDT)
-Received: from pps.filterd (m0142699.ppops.net [127.0.0.1])
-	by mx0a-00154901.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 681DGilw3547693;
-	Tue, 1 Sep 2026 09:24:43 -0400
-Received: from esapsmtplv04.us.dell.com (esapsmtplv04.us.dell.com [143.166.203.152])
-	by mx0a-00154901.pphosted.com (PPS) with ESMTPS id 4gdu4gbvkc-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=FAIL);
-	Tue, 01 Sep 2026 09:24:43 -0400 (EDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=dell.com; i=@dell.com; q=dns/txt; s=smtpdev1;
-  t=1788269083; x=1819805083;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=FcRhtIym0NpYPAe6eAEZanzaw3jFg51z3gpcEQgc2rg=;
-  b=k3au6ZkAPjzAsVXuXgt4SXW+0g+4ybrg+Gct6+ABJ2IC6s+JiYa/es73
-   rcEqcXqYlOi8HzKWiSPazHQC6IIw9aIlt/kU0mr7+8RZZ5Y0KsZsjEYNc
-   nrvqr30aIH4Z/1GpP2EUmpqZXbcUgvaGfCjZzFAhk2l9P8QXZc0D24R6P
-   U0cOwKHsMjDWQPs7pmftLKP19Sr/vr4Dles7d6gwdxfEUzsxW+Cqfafzh
-   D1Hcz4XUwBItQ82ReijKtcvxLa6iRNy51lWxdEEykflh4NEWRv5XDY9X/
-   rju5YXQKOQhBzZy3kJOQs6jgLwGdOC9zjmnjvHAOJTRq4+2Zcww0bA5SK
-   Q==;
-X-CSE-ConnectionGUID: ngpyk2NfQNe6Mc2sz31gig==
-X-CSE-MsgGUID: T4d2EtJXT0eG9byRC3a2kw==
-X-LoopCount0: from 10.94.8.206
-X-MS-Exchange-CrossPremises-AuthAs: Internal
-Received: from w-96j1th4.apac.dell.com (HELO W-96J1TH4.blr.amer.dell.com) ([10.94.8.206])
-  by esapsmtplv04.us.dell.com with ESMTP/TLS/TLS_AES_256_GCM_SHA384; 01 Sep 2026 13:24:41 +0000
-From: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
-To: fstests@vger.kernel.org
-Cc: Prabhakar Pujeri <prabhakar.pujeri@dell.com>,
-        Zorro Lang <zlang@kernel.org>, Amir Goldstein <amir73il@gmail.com>,
-        linux-unionfs@vger.kernel.org
-Subject: [PATCH v2] overlay/081: add missing _require_scratch check
-Date: Tue,  1 Sep 2026 13:24:38 +0000
-Message-ID: <20260901132438.759-1-prabhakar.pujeri@dell.com>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dEOPtGto"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B82341F000E9;
+	Tue,  1 Sep 2026 13:52:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788270761;
+	bh=HXnPG0/LcG0lxd3ZdKJGWDWrH5H/kviA78EYIxQw82Y=;
+	h=Date:From:Subject:To:References:In-Reply-To;
+	b=dEOPtGtoy/fSficVO7Rzbw4A8lsrKRivNCm4qWDHc04g2zGDNVi1qXnljsdIQ7yHQ
+	 H4jItzM+fJ7a8cts9UPBACiy5A2fMIlU2t3ejf2MvwJmZxAc0dLRlvnCoLXdNMlABK
+	 UsZHzTfYwtbT23OMkk8vmMYXbIzAWcaGe/JqB4+fw8Hqp6IqGqAYg1qFjHXc7HqwBR
+	 sIhEKi5rH8GwUmIY6kyCUXg9XRMOCSiQpBX/fvdiY2+B3rtHiar4WehHv4iK1aJvD1
+	 Bud+C+uzemfL82nphnep4BYxh7sWv9YIjidfmOO2kiveEqK4Fp0eFeKzCL1A1AdRwt
+	 srz4db27eXonQ==
+Message-ID: <345c5451-2d23-4df9-8c2b-ae2a3d29b383@kernel.org>
+Date: Tue, 1 Sep 2026 21:52:37 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-09-01_03,2026-09-01_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- bulkscore=0 adultscore=0 priorityscore=1501 suspectscore=0 clxscore=1015
- spamscore=0 lowpriorityscore=0 impostorscore=0 phishscore=0 malwarescore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2609010117
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTAxMDExOSBTYWx0ZWRfXyi7uw9DrReRa
- d7SLOyaGegI5QJABD6dbkuSuVjdbT4MZVi/75bPixDrAjgCcLwBbEdePEFon8VW6YTDNkCAMY/M
- ZCTfCCSC3T6QSO4X9LgU40GKUnl3ykM=
-X-Proofpoint-ORIG-GUID: bjB1hlG-fjmDoYqCIhBvBmzSKBum2ess
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTAxMDExOSBTYWx0ZWRfX/KIN0xlbJcX+
- qVHRc3B7DPbqGcFqCsV6zqv1rMRJNLnx2SecwOhiucvfrzIue1QAYV+2QvpaXoaBm9f/jQHYp3O
- nANZocGWNaE2kcyqWzzQbWI4qfyUeADP8HHQ9eGK8qKS14+Ny7M39eEjGkV7WqpuSoJG4yOj/jZ
- 76AAH5pCD6shayzF9vtBUKyGjQoySrdaJC2SHJHsLF/w0R6SUzwRElKy8HHwH5fL33Vr9sf3UIB
- shlgjt3mPWVJmWtgfDfenRNA3Bf0cJgS6gHw7DBYl4oTl7JLZx4lMSOzrzp18/6nC+3yZXkPs3I
- Ghxkmddj/OTa5IE58oS0AkB+v6aXuojxSfZzmloP6nbNs8E+JrFtkM5rey+fLtR4qjjgiFBEirq
- 9UlV/0du3AVjS4gIr/sSVvYzKgQSFqYrriNyJBocnzu58P4wnd7wfCubfvKfNBJLw8gBflylDBs
- QRymkGtZsPHjC90fsCw==
-X-Authority-Analysis: v=2.4 cv=FMIrAeos c=1 sm=1 tr=0 ts=6a96d21c cx=c_pps
- a=j0++y401J6f/BxNAf5EDow==:117 a=XtseytAk/c9oG0Kwoj6KRQ==:17
- a=VdqzKS8jKosA:10 a=ke5jqHz-1hQA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=6gNNCFAoQcIphELLPWWu:22 a=vUAfKriDyi6VqHAKCLgX:22 a=VwQbUJbxAAAA:8
- a=iLNU1ar6AAAA:8 a=pGLkceISAAAA:8 a=agzMk0wusT9Gg33094gA:9
- a=gbU3OgOOxF9bX48Letew:22
-X-Proofpoint-GUID: bjB1hlG-fjmDoYqCIhBvBmzSKBum2ess
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0
- priorityscore=1501 clxscore=1015 adultscore=0 bulkscore=0 suspectscore=0
- malwarescore=0 phishscore=0 lowpriorityscore=0 impostorscore=0 spamscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2609010119
+User-Agent: Mozilla Thunderbird
+From: Anand Suveer Jain <asj@kernel.org>
+Subject: Re: [PATCH v8 01/13] fstests: add _loop_image_create_clone() helper
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+ linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
+ linux-f2fs-devel@lists.sourceforge.net, djwong@kernel.org
+References: <cover.1784949154.git.asj@kernel.org>
+ <4fa4f6bc500e0496e3d8598d38cf69597493a25b.1784949154.git.asj@kernel.org>
+ <apa_4wZ21FydhN8U@zlang-mailbox>
+Content-Language: en-US
+In-Reply-To: <apa_4wZ21FydhN8U@zlang-mailbox>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-The test runs _scratch_mkfs without first requiring a scratch device, so it fails messily instead of skipping when no scratch device is configured.  Add _require_scratch so the test skips cleanly when no scratch device is present.
 
-Signed-off-by: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
----
-Changes in v2:
-- Use _require_scratch instead of _require_scratch_nocheck and drop the
-  comment copied from overlay/079/080, which does not apply to this test.
-  Add Amir's Reviewed-by.
-v1: https://lore.kernel.org/fstests/20260831104154.2256-1-prabhakar.pujeri@dell.com/
 
- tests/overlay/081 | 1 +
- 1 file changed, 1 insertion(+)
+On 1/9/26 20:33, Zorro Lang wrote:
+> On Sat, Jul 25, 2026 at 03:38:58PM +0800, Anand Jain wrote:
+>> Introduce _loop_image_create_clone() and _loop_image_destroy() to mkfs an
+>> image file and clone it to another image file, and attach a loop device to
+>> them. And its destroy part.
+>>
+>> Signed-off-by: Anand Jain <asj@kernel.org>
+>> ---
+>>  common/rc | 65 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>  1 file changed, 65 insertions(+)
+>>
+>> diff --git a/common/rc b/common/rc
+>> index 106f044adc2d..e8ff5be0c547 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -1520,6 +1520,71 @@ _scratch_resvblks()
+>>  	esac
+>>  }
+>>  
+>> +# Create a small loop image, run an optional tuning function ($2) on it,
+>> +# clone it, and attach both to loop devices, returned in ($1).
+>> +# Args:
+>> +#   $1: Nameref to return the array of allocated loop devices [base, clone].
+>> +#   $2: Optional callback function to tune the base filesystem before cloning.
+>> +_loop_image_create_clone()
+> 
+> To capture both the relationship and distinction between this function and
+> existing _create_loop_device, I'd like to rename it to *_create_cloned_loop_devs*.
 
-diff --git a/tests/overlay/081 b/tests/overlay/081
-index 2270a04..e0ab558 100755
---- a/tests/overlay/081
-+++ b/tests/overlay/081
-@@ -14,6 +14,7 @@ _begin_fstest auto quick
- . ./common/filter
- . ./common/attr
- 
-+_require_scratch
- 
- _scratch_mkfs >>$seqres.full 2>&1
- 
--- 
-2.55.0
+ I'm fine with _create_cloned_loop_devs() and other patches must be
+updated accordingly.
+
+>> +{
+>> +	local -n _ret=$1
+>> +	local pre_clone_tune_func="$2"
+>> +	local img_file=$TEST_DIR/${seq}.img
+>> +	local img_file_clone=$TEST_DIR/${seq}_clone.img
+>> +	local size=$(_small_fs_size_mb 128) # Smallest possible
+>> +	local loop_devs=()
+>> +
+>> +	# Since we copy the block device image, we keep its size small.
+>> +	_require_fs_space $TEST_DIR $((size * 1024 * 2))
+>> +
+>> +	_create_file_sized $((size * 1024 * 1024)) $img_file ||
+>> +				_fail "Failed: Create $img_file $size"
+>> +
+
+
+>> +	loop_devs=("$(_create_loop_device $img_file)")
+>> +
+>> +	case $FSTYP in
+>> +	xfs)
+>> +		_mkfs_dev -s size=4096 "${loop_devs[0]}"
+> 
+> Why xfs needs a specific "-s size=4096" ? Hardcoding this parameter might cause
+> failures in certain incompatible environments.
+>> +		;;
+>> +	btrfs)
+>> +		_mkfs_dev "${loop_devs[0]}"
+> 
+> If btrfs is handled the same way as the default `*)` branch below, there is
+> no need to have a dedicated branch for it.
+> 
+>> +		;;
+>> +	*)
+>> +		_mkfs_dev "${loop_devs[0]}"
+>> +		;;
+>> +	esac
+>> +
+>> +	# Only execute if the function argument is not empty
+>> +	if [ -n "$pre_clone_tune_func" ]; then
+>> +		$pre_clone_tune_func "${loop_devs[0]}"
+>> +	fi
+>> +
+>> +	sync "${loop_devs[0]}"
+> 
+> Since the mkfs command above operates directly on a loop device, I wanted to
+> make sure, can the sync command be targeted at a block device, and does it
+> guarantee a cache flush or blockdev page cache sync ?
+> 
+> How about:
+>   sync -d "${loop_devs[0]}"
+>   blockdev --flushbufs "${loop_devs[0]}"
+> or any better idea?
+> 
+
+Spotted stale code here while refactoring pre_clone_tune_func.
+The updated code with the suggested renames is below.
+
+Agreed that <dev> in sync is redundant. Adding sync serves
+as a safeguard if a future mkfs fails to do so. Flushing
+via blockdev --flushbufs followed by a global sync properly
+follows the data flow path it may not be strictly required
+but it is safer.
+
+
+>> +	cp $img_file $img_file_clone || _fail "Failed to copy cloned image"
+>> +
+>> +	loop_devs+=("$(_create_loop_device $img_file_clone)")
+>> +
+>> +	_ret=()
+>> +	for i in "${loop_devs[@]}"; do
+>> +		_ret+=("$i")
+>> +	done
+> 
+> How about:
+>   _ret=("${loop_devs[@]}")
+> directly?
+> 
+
+yeah. added.
+
+>> +}
+>> +
+>> +# Teardown loop devices and delete their underlying backing image files.
+>> +# Accepts a list of loop device paths (e.g., /dev/loop0 /dev/loop1).
+>> +_loop_image_destroy()
+> 
+> To keep it consistent with the renamed function above, we could rename this
+> to *_destroy_cloned_loop_devs*. Alternatively, if we don't consider it
+> clone-specific, *destroy_loop_devs* would also be good to me.
+> 
+
+ _destroy_cloned_loop_devs() is fine.
+
+
+
+Updated code:
+
+---------------------------------
+diff --git a/common/rc b/common/rc
+index 45cf9360ba73..285463b4e3db 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1561,7 +1561,7 @@ _change_metadata_uuid()
+ # Args:
+ #   $1: Nameref to return the array of allocated loop devices [base,
+clone].
+ #   $2: Optional callback function to tune the base filesystem before
+cloning.
+-_loop_image_create_clone()
++_create_cloned_loop_devs()
+ {
+ 	local -n _ret=$1
+ 	local pre_clone_tune_func="$2"
+@@ -1578,37 +1578,28 @@ _loop_image_create_clone()
+
+ 	loop_devs=("$(_create_loop_device $img_file)")
+
+-	case $FSTYP in
+-	xfs)
+-		_mkfs_dev -s size=4096 "${loop_devs[0]}"
+-		;;
+-	btrfs)
+-		_mkfs_dev "${loop_devs[0]}"
+-		;;
+-	*)
+-		_mkfs_dev "${loop_devs[0]}"
+-		;;
+-	esac
++	_mkfs_dev "${loop_devs[0]}"
+
+ 	# Only execute if the function argument is not empty
+ 	if [ -n "$pre_clone_tune_func" ]; then
+ 		$pre_clone_tune_func "${loop_devs[0]}"
+ 	fi
+
+-	sync "${loop_devs[0]}"
++	# We are about to copy the loop device's backing file
++	# Flush loop device's buffer cache
++	blockdev --flushbufs "${loop_devs[0]}"
++	# Sync system's dirty pages including backing file's
++	sync
+ 	cp $img_file $img_file_clone || _fail "Failed to copy cloned image"
+
+ 	loop_devs+=("$(_create_loop_device $img_file_clone)")
+
+-	_ret=()
+-	for i in "${loop_devs[@]}"; do
+-		_ret+=("$i")
+-	done
++	_ret=("${loop_devs[@]}")
+ }
+
+ # Teardown loop devices and delete their underlying backing image files.
+ # Accepts a list of loop device paths (e.g., /dev/loop0 /dev/loop1).
+-_loop_image_destroy()
++_destroy_cloned_loop_devs()
+ {
+ 	for d in "$@"; do
+ 		# Retrieve the path of the backing file
+-------------------------------
+
+
+Thanks.
+Anand
+
+
+> Thanks,
+> Zorro
+> 
+>> +{
+>> +	for d in "$@"; do
+>> +		# Retrieve the path of the backing file
+>> +		local f=$(losetup --noheadings --output BACK-FILE $d)
+>> +
+>> +		# Detach the loop device from the backing file
+>> +		_destroy_loop_device "$d"
+>> +
+>> +		# Clean up the backing disk image file
+>> +		[ -n "$f" ] && rm -f "$f"
+>> +	done
+>> +}
+>>  
+>>  # Repair scratch filesystem.  Returns 0 if the FS is good to go (either no
+>>  # errors found or errors were fixed) and nonzero otherwise; also spits out
+>> -- 
+>> 2.43.0
+>>
 
