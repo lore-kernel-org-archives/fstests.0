@@ -1,111 +1,175 @@
-Received: from mailout4.samsung.com (mailout4.samsung.com [203.254.224.34])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 400E6365A02
-	for <fstests@vger.kernel.org>; Tue,  1 Sep 2026 06:39:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 944E9310784;
+	Tue,  1 Sep 2026 08:39:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788244754; cv=none; b=vBV1mMJIhdnB7//pBq/TC+BC47sqZngS/A03FuL59IxdSMhJzNHCKsgSOaZlX3Ru75WCOf2zVtG5DnfkpfMNro+OCHLeHZH2scXwOyR8dRKk1S0indetiTgWbvd0ERSoOp1Zb3rGQP8/XsdLHNULUFLH3qRJKi8dyYYAGRYUI3Y=
+	t=1788251943; cv=none; b=ntE/UWR3A6QUymEXVvGNVxD9N/WZrCuENneVeU3/zazHqZTwjku7wDMItEJU+nCQSnSbxmdQKcS1+W7lgiB1Wy43zUrJd/l2LOM2DyQUGQ+6LUE4ZPCGkwBp5S3NSPav4spqSRsKyqFK6zcMtIeFYnavbQoDdlwI6BizPXtXqSE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788244754; c=relaxed/simple;
-	bh=QaUJqixc5p56dJUuTFjnO21Y468gXDL1Pm8qwURtvEk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:From:In-Reply-To:
-	 Content-Type:References; b=LymzAiw9Girt3zGvTU8CStQRv88fPzHBq+/xjmdcTvGNS6Xs0mbW5ijk4fWkOHLoKSxhdMjZ4X+VBEV7sQlmm9eRRAGWhwpf3BYL7ytZezNqAMU2b/76LxEGzmmMxC+o4ncf6LlU/S0cFF6lGUTnFjc/OMbPD5LwXcfDbV1F2UY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=d/92eRMA; arc=none smtp.client-ip=203.254.224.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1788251943; c=relaxed/simple;
+	bh=Q8rtIrAI/5YduudyVzsG7RUzA/U5EKFszaVpxqG/Uuk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=SBb7bK7YBPp352b2S+gqpTOIU/sX1aZJrfmBMd3T+eHTMgB6CsIKl9s8iZbjeomVEpVDQrBfkRqQb2hiRU2sThSLcPct6uu+GepMw+hRizSw3Pe6QDUN6syhWaQnzejXAa6u21CIqJ0ld5jeLgzsa9Nu3H1uFVVTkfQFqM/zxSY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WJuxSrOJ; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="d/92eRMA"
-Received: from epcas5p3.samsung.com (unknown [182.195.41.41])
-	by mailout4.samsung.com (KnoxPortal) with ESMTP id 20260901063903epoutp04dd67ceaa68655e112f4b7eb067e658a9~RHx67IWIJ1820918209epoutp04p
-	for <fstests@vger.kernel.org>; Tue,  1 Sep 2026 06:39:03 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20260901063903epoutp04dd67ceaa68655e112f4b7eb067e658a9~RHx67IWIJ1820918209epoutp04p
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1788244743;
-	bh=1KBKRNb4Pg0waoBINnyrSkjLe0L4GFcJudbfyIlafDg=;
-	h=Date:Subject:To:Cc:From:In-Reply-To:References:From;
-	b=d/92eRMApv+2r08JfWjv0082xwOu9VQ4BVXdERKRmPM5OaJ3ZaInc6B/Cbu0pfAx4
-	 7xEgKHaMw9dP7oJZBkexiyzKj0MpnwTQehgPFqmr68s8zfMLtZLxH/gZHLh4aYYQMp
-	 SOB0iAHouojMWs6foMt9thbziMk01c5LP0Ezf3fE=
-Received: from epsnrtp03.localdomain (unknown [182.195.42.155]) by
-	epcas5p1.samsung.com (KnoxPortal) with ESMTPS id
-	20260901063903epcas5p1283fffbf631d1f6e400f2eabd979e885~RHx6VQke50893608936epcas5p1L;
-	Tue,  1 Sep 2026 06:39:03 +0000 (GMT)
-Received: from epcas5p4.samsung.com (unknown [182.195.38.87]) by
-	epsnrtp03.localdomain (Postfix) with ESMTP id 4hYx5y3c8wz3hhT4; Tue,  1 Sep
-	2026 06:39:02 +0000 (GMT)
-Received: from epsmtip1.samsung.com (unknown [182.195.34.30]) by
-	epcas5p1.samsung.com (KnoxPortal) with ESMTPA id
-	20260901063901epcas5p16e676dcecbc321a446034c2499f0586e~RHx4_XH6j1062110621epcas5p15;
-	Tue,  1 Sep 2026 06:39:01 +0000 (GMT)
-Received: from [107.122.11.51] (unknown [107.122.11.51]) by
-	epsmtip1.samsung.com (KnoxPortal) with ESMTPA id
-	20260901063900epsmtip1b58195720c1abcc3c80d601c13796c88~RHx3475Z20173201732epsmtip1i;
-	Tue,  1 Sep 2026 06:39:00 +0000 (GMT)
-Message-ID: <bd707d1a-3af1-4d1d-b6da-ac676a9c666d@samsung.com>
-Date: Tue, 1 Sep 2026 12:08:59 +0530
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WJuxSrOJ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 53A971F000E9;
+	Tue,  1 Sep 2026 08:38:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788251942;
+	bh=zhkPVoqdfinJ81L4Qda11eGJhGh7cb57yzPtQyej4UY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=WJuxSrOJHVIaYS/NlK4tlQD+/TDWYLeVY0YHxIv5/5+arLO9bCoXq1XQQn7W0WQTk
+	 OewR+G1WLuEEQ+OVVVUDoXomVVDUtVLtYmSfvmJlgYBvxOEJxQDt+fPlqyfleE0N6x
+	 6JaEjX/c975qqbBneSKvwQ2atHc60iK+VjMn9cDm4V+2e1FMsDIaGHM1F0BA6rubXZ
+	 PRCmjJzQa08KshgjKq3q/5CxJz5kElWeVWNpyAE3dAJJsf7pOFfzmQ6Of1v3ekrRrp
+	 LX0sK1h/kPFqx8mqDAWL/Pvl3zJIQpUTzcOClDHpsD+KDzNFPXWGitJiEhThdYJndt
+	 w4+dB9trevm6g==
+Date: Tue, 1 Sep 2026 20:33:35 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Anand Jain <asj@kernel.org>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org, 
+	linux-f2fs-devel@lists.sourceforge.net, djwong@kernel.org
+Subject: Re: [PATCH v8 01/13] fstests: add _loop_image_create_clone() helper
+Message-ID: <apa_4wZ21FydhN8U@zlang-mailbox>
+Mail-Followup-To: Anand Jain <asj@kernel.org>, fstests@vger.kernel.org, 
+	linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org, 
+	linux-f2fs-devel@lists.sourceforge.net, djwong@kernel.org
+References: <cover.1784949154.git.asj@kernel.org>
+ <4fa4f6bc500e0496e3d8598d38cf69597493a25b.1784949154.git.asj@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 5/6] generic: test I/O on devices with T10 protection
- information
-To: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org, "Martin K. Petersen"
-	<martin.petersen@oracle.com>, Anuj Gupta <anuj20.g@samsung.com>, John Garry
-	<john.g.garry@oracle.com>, "Darrick J. Wong" <djwong@kernel.org>,
-	linux-scsi@vger.kernel.org
-Content-Language: en-US
-From: Kanchan Joshi <joshi.k@samsung.com>
-In-Reply-To: <20260831064557.2577241-6-hch@lst.de>
-Content-Transfer-Encoding: 7bit
-X-CMS-MailID: 20260901063901epcas5p16e676dcecbc321a446034c2499f0586e
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-CMS-TYPE: 105P
-cpgsPolicy: CPGSC10-542,Y
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20260831064632epcas5p4bc3e4268e46c28a70a5c6b36ee4d7b83
-References: <20260831064557.2577241-1-hch@lst.de>
-	<CGME20260831064632epcas5p4bc3e4268e46c28a70a5c6b36ee4d7b83@epcas5p4.samsung.com>
-	<20260831064557.2577241-6-hch@lst.de>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <4fa4f6bc500e0496e3d8598d38cf69597493a25b.1784949154.git.asj@kernel.org>
 
-On 8/31/2026 12:15 PM, Christoph Hellwig wrote:
-> +test_dif()
+On Sat, Jul 25, 2026 at 03:38:58PM +0800, Anand Jain wrote:
+> Introduce _loop_image_create_clone() and _loop_image_destroy() to mkfs an
+> image file and clone it to another image file, and attach a loop device to
+> them. And its destroy part.
+> 
+> Signed-off-by: Anand Jain <asj@kernel.org>
+> ---
+>  common/rc | 65 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 65 insertions(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index 106f044adc2d..e8ff5be0c547 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1520,6 +1520,71 @@ _scratch_resvblks()
+>  	esac
+>  }
+>  
+> +# Create a small loop image, run an optional tuning function ($2) on it,
+> +# clone it, and attach both to loop devices, returned in ($1).
+> +# Args:
+> +#   $1: Nameref to return the array of allocated loop devices [base, clone].
+> +#   $2: Optional callback function to tune the base filesystem before cloning.
+> +_loop_image_create_clone()
+
+To capture both the relationship and distinction between this function and
+existing _create_loop_device, I'd like to rename it to *_create_cloned_loop_devs*.
+
 > +{
-> +	local pi_type=$1
-> +	local pi_enable="$2"
+> +	local -n _ret=$1
+> +	local pre_clone_tune_func="$2"
+> +	local img_file=$TEST_DIR/${seq}.img
+> +	local img_file_clone=$TEST_DIR/${seq}_clone.img
+> +	local size=$(_small_fs_size_mb 128) # Smallest possible
+> +	local loop_devs=()
 > +
-> +	scsi_debug_pi_opts="write_same_length=0 dif=${pi_type} dix=1"
-> +	SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 $size $scsi_debug_pi_opts`
+> +	# Since we copy the block device image, we keep its size small.
+> +	_require_fs_space $TEST_DIR $((size * 1024 * 2))
 > +
-> +	SCSI_DEBUG_MNT="$TEST_DIR/scsi_debug_$seq"
-> +	rm -rf $SCSI_DEBUG_MNT
-> +	mkdir $SCSI_DEBUG_MNT
+> +	_create_file_sized $((size * 1024 * 1024)) $img_file ||
+> +				_fail "Failed: Create $img_file $size"
 > +
-> +	_mkfs_dev $SCSI_DEBUG_DEV || \
-> +		_fail "Can't make $FSTYP on DIF-enabled scsi_debug device"
-> +	run_check _mount $SCSI_DEBUG_DEV $SCSI_DEBUG_MNT
-> +	bsize=$($here/src/min_dio_alignment $SCSI_DEBUG_MNT $SCSI_DEBUG_DEV)
-
-bsize remains unused.
-
+> +	loop_devs=("$(_create_loop_device $img_file)")
 > +
-> +	local integrity_path="$(_sysfs_block_integrity_path $SCSI_DEBUG_DEV)"
-> +	echo $pi_enable > $integrity_path/read_verify
-> +	echo $pi_enable > $integrity_path/write_generate
+> +	case $FSTYP in
+> +	xfs)
+> +		_mkfs_dev -s size=4096 "${loop_devs[0]}"
 
-Can integrity_path be empty when CONFIG_BLK_DEV_INTEGRITY is off?> +
-> +	# fsx load similar to generic/091
-> +	echo "Testing direct I/O for DIF type $pi_type (enabled: $pi_enable)"
-> +	local dio_opts="-r PSIZE -t BSIZE -w BSIZE"
+Why xfs needs a specific "-s size=4096" ? Hardcoding this parameter might cause
+failures in certain incompatible environments.
 
-dio_opts is unused.
+> +		;;
+> +	btrfs)
+> +		_mkfs_dev "${loop_devs[0]}"
 
-> +	fsx_run -N 10000            -l 500000 -r BSIZE -w BSIZE -Z -R -W
+If btrfs is handled the same way as the default `*)` branch below, there is
+no need to have a dedicated branch for it.
 
-Is passing BSIZE correct?
+> +		;;
+> +	*)
+> +		_mkfs_dev "${loop_devs[0]}"
+> +		;;
+> +	esac
+> +
+> +	# Only execute if the function argument is not empty
+> +	if [ -n "$pre_clone_tune_func" ]; then
+> +		$pre_clone_tune_func "${loop_devs[0]}"
+> +	fi
+> +
+> +	sync "${loop_devs[0]}"
 
+Since the mkfs command above operates directly on a loop device, I wanted to
+make sure, can the sync command be targeted at a block device, and does it
+guarantee a cache flush or blockdev page cache sync ?
+
+How about:
+  sync -d "${loop_devs[0]}"
+  blockdev --flushbufs "${loop_devs[0]}"
+or any better idea?
+
+> +	cp $img_file $img_file_clone || _fail "Failed to copy cloned image"
+> +
+> +	loop_devs+=("$(_create_loop_device $img_file_clone)")
+> +
+> +	_ret=()
+> +	for i in "${loop_devs[@]}"; do
+> +		_ret+=("$i")
+> +	done
+
+How about:
+  _ret=("${loop_devs[@]}")
+directly?
+
+> +}
+> +
+> +# Teardown loop devices and delete their underlying backing image files.
+> +# Accepts a list of loop device paths (e.g., /dev/loop0 /dev/loop1).
+> +_loop_image_destroy()
+
+To keep it consistent with the renamed function above, we could rename this
+to *_destroy_cloned_loop_devs*. Alternatively, if we don't consider it
+clone-specific, *destroy_loop_devs* would also be good to me.
+
+Thanks,
+Zorro
+
+> +{
+> +	for d in "$@"; do
+> +		# Retrieve the path of the backing file
+> +		local f=$(losetup --noheadings --output BACK-FILE $d)
+> +
+> +		# Detach the loop device from the backing file
+> +		_destroy_loop_device "$d"
+> +
+> +		# Clean up the backing disk image file
+> +		[ -n "$f" ] && rm -f "$f"
+> +	done
+> +}
+>  
+>  # Repair scratch filesystem.  Returns 0 if the FS is good to go (either no
+>  # errors found or errors were fixed) and nonzero otherwise; also spits out
+> -- 
+> 2.43.0
+> 
