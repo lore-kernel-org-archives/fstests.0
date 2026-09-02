@@ -1,162 +1,125 @@
-Received: from mail-ed1-f42.google.com (mail-ed1-f42.google.com [209.85.208.42])
+Received: from mta0.migadu.com (out-161.mta0.migadu.com [91.218.175.161])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D9BB3A0E99
-	for <fstests@vger.kernel.org>; Wed,  2 Sep 2026 08:26:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.42
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788337572; cv=pass; b=en4Zf6tMD+pcHCnBQN/SQ/3GEQjadBmvqpGnqi43wXLvEi9aLR2bTtFkjuf542jy4aDTqmw2UkZHIaEk+P9WQvdrG3luEyeD37/4BMG6Oq9CndCUHI015m6fa4L8UzvAh1nvAJ4L4deiO06fEMN3KSMDd/betT6Xge99PWIb97o=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788337572; c=relaxed/simple;
-	bh=18m0kRZmf6MlU62CpUnHUbGhhrK1KxYBWnnR092MWJg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=kkdPjZMPLWAMCt+NNxGfPREV0o6bzCH/ZQKXQ4J5kfFE1YHl/DurE7sbS7toKmvsts07EufcS19WHi+vWXtj8n8c6dWaS1sUxKwLo9jYj2TAyB74GQfKhs0YQ9BarhPlJPRF4t9zmK/mjrVWJKNLNE1I5s/cH2oppVQbzaqwy+o=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Ps52ZK4G; arc=pass smtp.client-ip=209.85.208.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DBC87417D99
+	for <fstests@vger.kernel.org>; Wed,  2 Sep 2026 09:28:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.161
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1788341341; cv=none; b=tHOMfXUzXrNSGEL9IHmXrqIuHQT9++Gd+tSJXdbPQXtofJmCM9FUWmeGI9DGNxUW2Rh7irvaVUjV+N2q7CKxLGgY6sHOGmnGGpaYz0RhWPLiJfGn9GypOhUmygNj/RXQ1PN+FVOfa5cVxJPSXbAM8Ykvl2sOHvYsK28WucPYSnE=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1788341341; c=relaxed/simple;
+	bh=peZnTaKnvDeoh2LG4G9grBL+W1Kp7tQuGWd/KnYr4P4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kIGp6ynyExRhTpvT3mZAmkgDI2lENTAxqDFWysgMbcH9PE19btwcWWzIvOA23zPNFZyhCdq8ClqNJZvuIeQ1J0LgW7ltzNaP4BzEps1RNM5crP9CoGJNVlMKWDx5EY4OPi0SIE0oN6n3ct5sZpRKpq879TWZeOHlmN8+e4UKCx8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=tYKNDwri; arc=none smtp.client-ip=91.218.175.161
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ps52ZK4G"
-Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-6a20319d030so1031878a12.2
-        for <fstests@vger.kernel.org>; Wed, 02 Sep 2026 01:26:11 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1788337569; cv=none;
-        d=google.com; s=arc-20260327;
-        b=e/kfnqj1NPvKo6L7g+hvVBC3knLwh/PJ2bVeyJg4DbTYI3NL3uhzNQM7R9PWHj/mab
-         GtSZOhYc4SUMCqbGLOzkG16S6Mg5GB/KW2NC7JjJvXJAefjqjSwPOfGOfXabmyCNJQ5S
-         1h3D0/H+zdBbwj3n5SHUkI7/e0YLaaiQLaBNiLG4yh5t8gquaMchl/nwcX3S1Fqs6Je5
-         GPhqvuNlrOTD6xJKArI/MTfhh2qIZVD1KhDQDB3CA4hwPfP8b+Z5X3Bueq2DPw6oY5eb
-         cpAFl5N0mSYjtebzNzYRj1ZPrJUtW+UDLxM3tMe0X2CZiBmB/3QJyw3wm6s95EFyL/lI
-         bUjw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=0eczbwjeDgTfTo8E/jMH3HqYNa1P/k0/V0rEwa8jamw=;
-        fh=a+YStTnwWt0ISVNiRQuiRbHHpuvFIwT/L5MKBrlM+Ac=;
-        b=UAYWPFm4ZcS4qTx06j1Fv6N+WtQHHrnCLefbMU1Y7rjzix5V+IUIP2KR3uX3k06Tzp
-         XarWAmbd+asn2j2f+6FMhlET+39bR/dtNB2YpVYa6vOkNg9SkvsPMYlJMDX9hwW5fnjd
-         mNTtPUxhG/4KvGjVpiWdkYh0eS8P992vjhJQrAQJWUGNiPXBiF1Yj6mVTk85UaeLav22
-         /abxHkYT58J7Ims7fior5INg4ascjqzrWj7IOLvYlezFtKG8z1seQS0kBJG/iIYZ34jC
-         Gh8AM1St9QfSIUDq4oFApBsy6WGfXLLbzGf1eWdPj+hnZCb4BGfKcbqHVH9NzMgQaRgq
-         4CvA==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1788337569; x=1788942369; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=0eczbwjeDgTfTo8E/jMH3HqYNa1P/k0/V0rEwa8jamw=;
-        b=Ps52ZK4GjTuuaA9yhnsvmG8euoVd6aJosws46pRmZAQEaqXQ1avg9TL2+lujljEsUG
-         YGRySL/5901Scdin6yFzv4IY60ZdXmYCSdMyTDjHwG4xX49YQEq0QwcQDNdmwlMPr418
-         8d/i6MEYhNGsRFroX06zpbhwHBb3AZckt3g2fLLO4CkeaWIrTQf0amrqCgn7EvtMP4ND
-         TiaURKEXjQRbxS3mi1yReQhRuUvMuM1qRhEdm9QqaRwLZOGiH7WbCs75AwHhRdc6OH1d
-         mdKmPXrKARJ4G5c21/iW2bsEID5hM05vfRib0bgnCrSwoJzK9wt9MynBkzEOxmJxOQJD
-         afqg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788337569; x=1788942369;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=0eczbwjeDgTfTo8E/jMH3HqYNa1P/k0/V0rEwa8jamw=;
-        b=KReTXuPCZRPdH51wAPPP/Vk1Za+ipy2MgcuPYHkWgf9Gp03racF/tOwRsOypo1Yck6
-         wjXczxpBFhQhL1eLep2ekvTK1dwZucznI++LRZ7uaLlNRfRyFTqtQE6YFj/tF2QycbtY
-         YkeMKvoNFBnOfKF+ts7khoUZQmtDmhCORZwtMdEznIR3Sv6QU0c3uUnru3lMrzMEsDlL
-         6vIpBCAWXL0JOjjZlnOZeo8Y0OMfWF4teDD+JcPtfHwi9uZhiWrT4qH+O4dfsyaWmOwg
-         5hu2NejTu2Iv7PyMg9H7aceaz49U9gD1KdZQxd/bglVlplrO+FRp7OCUevHMLH6EXled
-         ea1g==
-X-Forwarded-Encrypted: i=1; AKwUvBzJMCaGJ54rbcv2dzD03xtIhC7LDlowgUSEntRgr7LhBNyv0hcZd5mv1D10l6UfeCkNJATXkuy8@vger.kernel.org
-X-Gm-Message-State: AFuF++mKsQdXBTr3o5aY3S4z2qJ7QrxEgu6kZWyvnio8G6iLhf8Zog0b
-	6pCl/rNi8ktNCNGmr2X/6oEDpZxIBxlGZuB1xtkOl20QEmU6fbTN4SN2V5qrsaEOqvii6+y836f
-	V414NqoAR8oLYMxC0pavCUPQK72bUZEZJBuU3Q6E=
-X-Gm-Gg: AYBFou1X/2p7840mLifsvTqj00LyfCY+KF0zsnAC252UBqUHvdIYIhWR+4JNG7Y4yy/
-	/kCKDf70JPn+vm/zbmljr+Yj3FLV2nIHAfP5So8/3Q7brD7f6C5EJwVVe7EqbylBkQ6llctNwS0
-	0RYViUJpkHeYl78v3FjitysMQzMsB8Xb2UJ76iVuQeWDrJilJIQT+hMyk6ehNJopOTjUFGbKMcJ
-	qxpFGdpOHc0KJwDwS14YrYyfueNrovvV2L5nv71BlwuH1Gw2x6SngPN9S58EyKpKa0D+1PBtlwQ
-	yvFguHJ2jw8h7bvX6s1RfB6sRDgaKqoCEPvX9Ig4o50GEg==
-X-Received: by 2002:a05:6402:440b:b0:6a5:f9ab:bdfd with SMTP id
- 4fb4d7f45d1cf-6a6817d4555mr2318992a12.0.1788337568940; Wed, 02 Sep 2026
- 01:26:08 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="tYKNDwri"
+X-Envelope-To: fstests@vger.kernel.org
+DKIM-Signature: a=rsa-sha256; bh=peZnTaKnvDeoh2LG4G9grBL+W1Kp7tQuGWd/KnYr4P4=;
+ c=simple/simple; d=linux.dev;
+ h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
+ t=1788341337; v=1; x=1788946137;
+ b=tYKNDwrio7EVyw+6PXFyS7UU5KC0QqT/3Mbtd6fAsj4oaOThWF2EM5z+QG+aG8esuhg2cG3R
+ O77uaZIIFr/4tZ4Xk5UF2YmzBjLFHwmPp5VWJpFWr1VWO3a8hHNUyRgXasw1X+vVADfmwBVTDjq
+ JhwtQGNHoMrKjSvBDn7ItCHg=
+X-Envelope-To: fstests@vger.kernel.org
+Received: by mta11.migadu.com with ESMTPS id 50ff65e1dfcd947f;
+	Wed, 02 Sep 2026 09:28:57 +0000
+X-Mizu-Trace-ID: 50ff65e1dfcd947f
+X-Migadu-Flow: FLOW_OUT
+From: John Garry <john.garry@linux.dev>
+To: James.Bottomley@HansenPartnership.com,
+	mkp@kernel.org
+Cc: linux-scsi@vger.kernel.org,
+	djwong@kernel.org,
+	hch@lst.de,
+	fstests@vger.kernel.org,
+	bvanassche@acm.org,
+	John Garry <john.garry@linux.dev>
+Subject: [PATCH] scsi: scsi_debug: default to a higher throughput config
+Date: Wed,  2 Sep 2026 10:28:44 +0100
+Message-ID: <20260902092844.1741533-1-john.garry@linux.dev>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260901132438.759-1-prabhakar.pujeri@dell.com>
- <ape4hyfwsv5LrYxB@zlang-mailbox> <20260902073507.5074-1-prabhakar.pujeri@dell.com>
-In-Reply-To: <20260902073507.5074-1-prabhakar.pujeri@dell.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 2 Sep 2026 10:25:57 +0200
-X-Gm-Features: AcwNN1XLGgAON-P3OIfSkTy_E2k-15GdqCzq9mG85IZV3dwPkw5Tn7MT9lpCzII
-Message-ID: <CAOQ4uxjBc5CfCpjrq8Ut4xHHaenKicTxBCbNuQkBFuu-Mz9=EQ@mail.gmail.com>
-Subject: Re: [PATCH v2] overlay/081: add missing _require_scratch check
-To: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Wed, Sep 2, 2026 at 9:35=E2=80=AFAM Prabhakar Pujeri
-<prabhakar.pujeri@dell.com> wrote:
->
-> On Wed, Sep 02, 2026 at 01:51:08PM +0800, Zorro Lang wrote:
-> > As you're fixing this patch, I'm wondering if we need a _require_* help=
-er to
-> > make sure the mount options *uuid=3Dnull/auto/on* is supported by curre=
-nt system?
-> > Due to the comment says "mount options uuid=3Dnull/auto/on introduced i=
-n kernel
-> > v6.6" :)
->
-> Thanks for looking.  That case is already covered a few lines below the
-> change, at the first use of the uuid=3D option (line 40):
->
->         _overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o uuid=
-=3Dnull \
->                 2>/dev/null || \
->                 _notrun "Overlayfs does not support unique fsid feature"
->
-> overlayfs rejects unknown mount options with EINVAL, so on kernels older
-> than v6.6 that probe mount fails and the test skips with the _notrun
-> reason instead of failing.  The uuid=3D options are also exercised only b=
-y
-> this test (it is the sole user of uuid=3Dnull/on/auto in the tree), so a
-> dedicated _require_* helper would have exactly one call site.  Happy to
-> factor it out anyway if you would rather have an explicit requirement.
->
+Currently the default config goes not give as high a throughput as some
+would like.
 
-*IF* we would want this, I would not recommend a dedicated require_
-for uuid feature.
+Give a higher default throughput by modifying the following:
+- set completion response delay as 0
+- increase shost can_queue to 4096, which aligns better with modern
+  high-speed HBAs
+- turn on clustering
 
-I would recommend teaching _require_scratch_overlay_features/
-_check_overlay_feature to deal with mount options (e.g. uuid=3Don)
-which do not have a module parameter to tune the default.
+Signed-off-by: John Garry <john.garry@linux.dev>
 
-So if /sys/module/overlay/parameters/uuid does not exist, instead of
-assuming it is not supported, assume that it defaults to off.
+diff --git a/drivers/scsi/scsi_debug.c b/drivers/scsi/scsi_debug.c
+index 3346562275f8..f2afe757c438 100644
+--- a/drivers/scsi/scsi_debug.c
++++ b/drivers/scsi/scsi_debug.c
+@@ -79,7 +79,7 @@ static const char *sdebug_version_date = "20210520";
+  */
+ #define DEF_ATO 1
+ #define DEF_CDB_LEN 10
+-#define DEF_JDELAY   1		/* if > 0 unit is a jiffy */
++#define DEF_JDELAY   0		/* if > 0 unit is a jiffy */
+ #define DEF_DEV_SIZE_PRE_INIT   0
+ #define DEF_DEV_SIZE_MB   8
+ #define DEF_ZBC_DEV_SIZE_MB   128
+@@ -106,6 +106,7 @@ static const char *sdebug_version_date = "20210520";
+ #define DEF_PTYPE   TYPE_DISK
+ #define DEF_RANDOM false
+ #define DEF_REMOVABLE false
++#define DEF_CLUSTERING true
+ #define DEF_SCSI_LEVEL   7    /* INQUIRY, byte2 [6->SPC-4; 7->SPC-5] */
+ #define DEF_SECTOR_SIZE 512
+ #define DEF_UNMAP_ALIGNMENT 0
+@@ -217,8 +218,7 @@ struct tape_block {
+  * /sys/class/scsi_device/<h:c:t:l>/device/queue_depth
+  * but cannot exceed SDEBUG_CANQUEUE .
+  */
+-#define SDEBUG_CANQUEUE_WORDS  3	/* a WORD is bits in a long */
+-#define SDEBUG_CANQUEUE  (SDEBUG_CANQUEUE_WORDS * BITS_PER_LONG)
++#define SDEBUG_CANQUEUE  (4096)
+ #define DEF_CMD_PER_LUN  SDEBUG_CANQUEUE
+ 
+ /* UA - Unit Attention; SA - Service Action; SSU - Start Stop Unit */
+@@ -850,7 +850,7 @@ static int sdebug_num_hosts;
+ static int sdebug_add_host = DEF_NUM_HOST;  /* in sysfs this is relative */
+ static int sdebug_ato = DEF_ATO;
+ static int sdebug_cdb_len = DEF_CDB_LEN;
+-static int sdebug_jdelay = DEF_JDELAY;	/* if > 0 then unit is jiffies */
++static int sdebug_jdelay = DEF_JDELAY;
+ static int sdebug_dev_size_mb = DEF_DEV_SIZE_PRE_INIT;
+ static int sdebug_dif = DEF_DIF;
+ static int sdebug_dix = DEF_DIX;
+@@ -899,7 +899,7 @@ static int sdebug_uuid_ctl = DEF_UUID_CTL;
+ static bool sdebug_random = DEF_RANDOM;
+ static bool sdebug_per_host_store = DEF_PER_HOST_STORE;
+ static bool sdebug_removable = DEF_REMOVABLE;
+-static bool sdebug_clustering;
++static bool sdebug_clustering = DEF_CLUSTERING;
+ static bool sdebug_host_lock = DEF_HOST_LOCK;
+ static bool sdebug_strict = DEF_STRICT;
+ static bool sdebug_no_rwlock;
+@@ -7373,8 +7373,8 @@ MODULE_VERSION(SDEBUG_VERSION);
+ MODULE_PARM_DESC(add_host, "add n hosts, in sysfs if negative remove host(s) (def=1)");
+ MODULE_PARM_DESC(ato, "application tag ownership: 0=disk 1=host (def=1)");
+ MODULE_PARM_DESC(cdb_len, "suggest CDB lengths to drivers (def=10)");
+-MODULE_PARM_DESC(clustering, "when set enables larger transfers (def=0)");
+-MODULE_PARM_DESC(delay, "response delay (def=1 jiffy); 0:imm, -1,-2:tiny");
++MODULE_PARM_DESC(clustering, "when set enables larger transfers (def=1)");
++MODULE_PARM_DESC(delay, "response delay (def=0 jiffy); 0:imm, -1,-2:tiny");
+ MODULE_PARM_DESC(dev_size_mb, "size in MiB of ram shared by devs(def=8)");
+ MODULE_PARM_DESC(dif, "data integrity field type: 0-3 (def=0)");
+ MODULE_PARM_DESC(dix, "data integrity extensions mask (def=0)");
+-- 
+2.43.0
 
-I am not saying this is worth the trouble, which is probably why I took the
-easy lane and added the local _notrun condition adhoc in the test.
-
-Overlayfs enum mount options that can be tested with the generic
-features helper: redirect_dir, index, nfs_export, metacopy
-
-Overlayfs enum mount options that cannot be tested with the
-generic features helper because they do not have a corresponding
-module param of same name:
-uuid, xino, verity, fsync
-
-verity - has a dedicated helper because it has special conditions.
-fsync - test 087 has _require_scratch_shutdown_and_syncfs
-            which is technically enough to test support for -o volatile
-uuid - can benefit from generalization of features helper
-xino - all these tests 041, 043, 044, 067, 070, 071 practically open
-          code the suggested improvement of the generic helper
-
-So for the uuid test alone it might not be worth it, but unless I am mistak=
-en
-for all the xino tests, this would be a nice cleanup/improvement.
-
-But of course, this should not block this trivial and correct fix patch.
-
-Thanks,
-Amir.
