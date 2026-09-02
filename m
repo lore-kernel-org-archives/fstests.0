@@ -1,135 +1,162 @@
-Received: from mx0a-00154904.pphosted.com (mx0a-00154904.pphosted.com [148.163.133.20])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f42.google.com (mail-ed1-f42.google.com [209.85.208.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BEB92191F91
-	for <fstests@vger.kernel.org>; Wed,  2 Sep 2026 07:35:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.133.20
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788334516; cv=none; b=To/eGhC9zrjfkiDMAn6pxNwjM4VlU6KIL9fbuIb/Tc7cmk7gLOPv5jXHZ2g8RY+PStC9w6fzB2RLxjMteOBYdAt0+7LYYmYhSZJ3v9noUn1IAeAeKu9sfDYQV8hrZGhNEr/yroBkBD6BCnFdmXqptngSKuyWdFXiy2sM/zyP+V8=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788334516; c=relaxed/simple;
-	bh=3suPJxjig9DLOJgCE03khOOsWS6+lwmfcwTH6NBKPOo=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=fW6Kp/U06JRmhMqJ2jHa6YXWxvoSED8KFq9SIk5Tl+pAqyjRN+iMyo+tPYq/f4OlqfUrOdPJZp3ucbpthDCp9CYxEZ1qTEuFQWTsSctBuvULMvF9Paak8YeOEyekmMndgM6rFjP3Qw8+2fMrTZJnbGGzSsihp7LKpi94/Lso5Q8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com; spf=pass smtp.mailfrom=dell.com; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=V4GMTL8S; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=AdqYREzO; arc=none smtp.client-ip=148.163.133.20
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dell.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D9BB3A0E99
+	for <fstests@vger.kernel.org>; Wed,  2 Sep 2026 08:26:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.42
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1788337572; cv=pass; b=en4Zf6tMD+pcHCnBQN/SQ/3GEQjadBmvqpGnqi43wXLvEi9aLR2bTtFkjuf542jy4aDTqmw2UkZHIaEk+P9WQvdrG3luEyeD37/4BMG6Oq9CndCUHI015m6fa4L8UzvAh1nvAJ4L4deiO06fEMN3KSMDd/betT6Xge99PWIb97o=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1788337572; c=relaxed/simple;
+	bh=18m0kRZmf6MlU62CpUnHUbGhhrK1KxYBWnnR092MWJg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=kkdPjZMPLWAMCt+NNxGfPREV0o6bzCH/ZQKXQ4J5kfFE1YHl/DurE7sbS7toKmvsts07EufcS19WHi+vWXtj8n8c6dWaS1sUxKwLo9jYj2TAyB74GQfKhs0YQ9BarhPlJPRF4t9zmK/mjrVWJKNLNE1I5s/cH2oppVQbzaqwy+o=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Ps52ZK4G; arc=pass smtp.client-ip=209.85.208.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="V4GMTL8S";
-	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="AdqYREzO"
-Received: from pps.filterd (m0170392.ppops.net [127.0.0.1])
-	by mx0a-00154904.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6826VbPg207145
-	for <fstests@vger.kernel.org>; Wed, 2 Sep 2026 03:35:14 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dell.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=smtpout1; bh=8
-	uWBD/iZE6fk2/Zg1GdAgyJuYuPi3UhI3l/HQl+piQY=; b=V4GMTL8S5F/icG/8d
-	nEwnmDp4MFSNaWtsPtnTikOYqsRqvEotW26nXKPeW5VqBWmGCyyThuwUh5Nagbab
-	Y9S1m8LeCDWFfQPdhGhDVtWHEdOihx6xI8s9mBpQovSQ/Xy1Aia8HsZUxFCnDH2f
-	zM11Pl5HDZcZ4gzKn7nqeSqLbuJLN0TFpdoHJN46sHHB4RDmcHmg/+C90zTyWf7E
-	z8dqhFTBT1/nPZ8ea8dfrCkdTLZwbiMb0LpWlPeWy5Rg6fFxjbMjtjf1wDW4rQV9
-	si/lHShj8L12ds65N3rFaiwrZYZmncyjgXUlZ/aH52TPyJQmsXY2SlrS8tcZvRdn
-	EP/ag==
-Received: from mx0b-00154901.pphosted.com (mx0b-00154901.pphosted.com [67.231.157.37])
-	by mx0a-00154904.pphosted.com (PPS) with ESMTPS id 4gbtk78cc0-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT)
-	for <fstests@vger.kernel.org>; Wed, 02 Sep 2026 03:35:13 -0400 (EDT)
-Received: from pps.filterd (m0144103.ppops.net [127.0.0.1])
-	by mx0b-00154901.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6826WY1e2744546
-	for <fstests@vger.kernel.org>; Wed, 2 Sep 2026 03:35:12 -0400
-Received: from esapsmtpat05.us.dell.com (esapsmtpat05.us.dell.com [143.166.211.154])
-	by mx0b-00154901.pphosted.com (PPS) with ESMTPS id 4ge8vc4d7x-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Wed, 02 Sep 2026 03:35:12 -0400 (EDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ps52ZK4G"
+Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-6a20319d030so1031878a12.2
+        for <fstests@vger.kernel.org>; Wed, 02 Sep 2026 01:26:11 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1788337569; cv=none;
+        d=google.com; s=arc-20260327;
+        b=e/kfnqj1NPvKo6L7g+hvVBC3knLwh/PJ2bVeyJg4DbTYI3NL3uhzNQM7R9PWHj/mab
+         GtSZOhYc4SUMCqbGLOzkG16S6Mg5GB/KW2NC7JjJvXJAefjqjSwPOfGOfXabmyCNJQ5S
+         1h3D0/H+zdBbwj3n5SHUkI7/e0YLaaiQLaBNiLG4yh5t8gquaMchl/nwcX3S1Fqs6Je5
+         GPhqvuNlrOTD6xJKArI/MTfhh2qIZVD1KhDQDB3CA4hwPfP8b+Z5X3Bueq2DPw6oY5eb
+         cpAFl5N0mSYjtebzNzYRj1ZPrJUtW+UDLxM3tMe0X2CZiBmB/3QJyw3wm6s95EFyL/lI
+         bUjw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=0eczbwjeDgTfTo8E/jMH3HqYNa1P/k0/V0rEwa8jamw=;
+        fh=a+YStTnwWt0ISVNiRQuiRbHHpuvFIwT/L5MKBrlM+Ac=;
+        b=UAYWPFm4ZcS4qTx06j1Fv6N+WtQHHrnCLefbMU1Y7rjzix5V+IUIP2KR3uX3k06Tzp
+         XarWAmbd+asn2j2f+6FMhlET+39bR/dtNB2YpVYa6vOkNg9SkvsPMYlJMDX9hwW5fnjd
+         mNTtPUxhG/4KvGjVpiWdkYh0eS8P992vjhJQrAQJWUGNiPXBiF1Yj6mVTk85UaeLav22
+         /abxHkYT58J7Ims7fior5INg4ascjqzrWj7IOLvYlezFtKG8z1seQS0kBJG/iIYZ34jC
+         Gh8AM1St9QfSIUDq4oFApBsy6WGfXLLbzGf1eWdPj+hnZCb4BGfKcbqHVH9NzMgQaRgq
+         4CvA==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=dell.com; i=@dell.com; q=dns/txt; s=smtpdev1;
-  t=1788334513; x=1819870513;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=8uWBD/iZE6fk2/Zg1GdAgyJuYuPi3UhI3l/HQl+piQY=;
-  b=AdqYREzOeb605LRR9dFhCx8gW527Slmda0SDfBW9xdaWeRAQfJ6SLYh0
-   Mgq9G9bHaqXUuAja1mkPoUX6MVGy6JI/pCn3/69hN0pT8JUowGNpwgPKb
-   2Xo9/h+U/mdUCg7facd2wLLwL9PPe5idxtAW8KpfxdxiRi7NOuOonFJde
-   uc2w+rl0+ndSjQq4mHFjLo2p7CzUqg/4v7sKfKhqFx5WV+R/jM3yCBUDX
-   P3vVnZ+DRfCFNktTXKw9BnpGwWpLLrM1qCW6luPk2Lr8AsauWo8V2kSBk
-   QsSnFckPLflPcbflE5+Y1LSe/fOtUIpLnNf0UH4IHANIdMPqgA+00kVip
-   g==;
-X-CSE-ConnectionGUID: LssTErpzTLuiQbpEelPAcg==
-X-CSE-MsgGUID: xbpcvp3uSQKQg52pAMAdnw==
-X-LoopCount0: from 10.94.14.196
-X-MS-Exchange-CrossPremises-AuthAs: Internal
-Received: from w-96j1th4.apac.dell.com (HELO W-96J1TH4.blr.amer.dell.com) ([10.94.14.196])
-  by esapsmtpat05.us.dell.com with ESMTP/TLS/TLS_AES_256_GCM_SHA384; 02 Sep 2026 07:35:11 +0000
-From: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
-To: Zorro Lang <zlang@kernel.org>
-Cc: Prabhakar Pujeri <prabhakar.pujeri@dell.com>, fstests@vger.kernel.org,
-        Amir Goldstein <amir73il@gmail.com>
-Subject: Re: [PATCH v2] overlay/081: add missing _require_scratch check
-Date: Wed,  2 Sep 2026 07:35:07 +0000
-Message-ID: <20260902073507.5074-1-prabhakar.pujeri@dell.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <ape4hyfwsv5LrYxB@zlang-mailbox>
-References: <20260901132438.759-1-prabhakar.pujeri@dell.com> <ape4hyfwsv5LrYxB@zlang-mailbox>
+        d=gmail.com; s=20251104; t=1788337569; x=1788942369; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=0eczbwjeDgTfTo8E/jMH3HqYNa1P/k0/V0rEwa8jamw=;
+        b=Ps52ZK4GjTuuaA9yhnsvmG8euoVd6aJosws46pRmZAQEaqXQ1avg9TL2+lujljEsUG
+         YGRySL/5901Scdin6yFzv4IY60ZdXmYCSdMyTDjHwG4xX49YQEq0QwcQDNdmwlMPr418
+         8d/i6MEYhNGsRFroX06zpbhwHBb3AZckt3g2fLLO4CkeaWIrTQf0amrqCgn7EvtMP4ND
+         TiaURKEXjQRbxS3mi1yReQhRuUvMuM1qRhEdm9QqaRwLZOGiH7WbCs75AwHhRdc6OH1d
+         mdKmPXrKARJ4G5c21/iW2bsEID5hM05vfRib0bgnCrSwoJzK9wt9MynBkzEOxmJxOQJD
+         afqg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1788337569; x=1788942369;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=0eczbwjeDgTfTo8E/jMH3HqYNa1P/k0/V0rEwa8jamw=;
+        b=KReTXuPCZRPdH51wAPPP/Vk1Za+ipy2MgcuPYHkWgf9Gp03racF/tOwRsOypo1Yck6
+         wjXczxpBFhQhL1eLep2ekvTK1dwZucznI++LRZ7uaLlNRfRyFTqtQE6YFj/tF2QycbtY
+         YkeMKvoNFBnOfKF+ts7khoUZQmtDmhCORZwtMdEznIR3Sv6QU0c3uUnru3lMrzMEsDlL
+         6vIpBCAWXL0JOjjZlnOZeo8Y0OMfWF4teDD+JcPtfHwi9uZhiWrT4qH+O4dfsyaWmOwg
+         5hu2NejTu2Iv7PyMg9H7aceaz49U9gD1KdZQxd/bglVlplrO+FRp7OCUevHMLH6EXled
+         ea1g==
+X-Forwarded-Encrypted: i=1; AKwUvBzJMCaGJ54rbcv2dzD03xtIhC7LDlowgUSEntRgr7LhBNyv0hcZd5mv1D10l6UfeCkNJATXkuy8@vger.kernel.org
+X-Gm-Message-State: AFuF++mKsQdXBTr3o5aY3S4z2qJ7QrxEgu6kZWyvnio8G6iLhf8Zog0b
+	6pCl/rNi8ktNCNGmr2X/6oEDpZxIBxlGZuB1xtkOl20QEmU6fbTN4SN2V5qrsaEOqvii6+y836f
+	V414NqoAR8oLYMxC0pavCUPQK72bUZEZJBuU3Q6E=
+X-Gm-Gg: AYBFou1X/2p7840mLifsvTqj00LyfCY+KF0zsnAC252UBqUHvdIYIhWR+4JNG7Y4yy/
+	/kCKDf70JPn+vm/zbmljr+Yj3FLV2nIHAfP5So8/3Q7brD7f6C5EJwVVe7EqbylBkQ6llctNwS0
+	0RYViUJpkHeYl78v3FjitysMQzMsB8Xb2UJ76iVuQeWDrJilJIQT+hMyk6ehNJopOTjUFGbKMcJ
+	qxpFGdpOHc0KJwDwS14YrYyfueNrovvV2L5nv71BlwuH1Gw2x6SngPN9S58EyKpKa0D+1PBtlwQ
+	yvFguHJ2jw8h7bvX6s1RfB6sRDgaKqoCEPvX9Ig4o50GEg==
+X-Received: by 2002:a05:6402:440b:b0:6a5:f9ab:bdfd with SMTP id
+ 4fb4d7f45d1cf-6a6817d4555mr2318992a12.0.1788337568940; Wed, 02 Sep 2026
+ 01:26:08 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-09-02_01,2026-09-01_03,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 spamscore=0 clxscore=1015 adultscore=0 malwarescore=0
- priorityscore=1501 suspectscore=0 lowpriorityscore=0 impostorscore=0
- bulkscore=0 classifier=typeunknown authscore=0 authtc= authcc= route=outbound
- adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
- definitions=main-2609020066
-X-Proofpoint-ORIG-GUID: o2Mk4WEDn968RTxWgY5KuxyqzLM-AZtf
-X-Authority-Analysis: v=2.4 cv=PL0/P/qC c=1 sm=1 tr=0 ts=6a97d1b1 cx=c_pps
- a=Z2e5DKjA+8LiMDv5v6mwwA==:117 a=uswt3CficuEu8DJvSCSroA==:17
- a=IkcTkHD0fZMA:10 a=VdqzKS8jKosA:10 a=ke5jqHz-1hQA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=6gNNCFAoQcIphELLPWWu:22 a=m3zZTHMLHbwB7Lmtoed2:22
- a=jRo2XLh-ulI_c8mEkXIA:9 a=QEXdDO2ut3YA:10 a=hlJyneSgMmFPbskH-t2w:22
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTAyMDA2NiBTYWx0ZWRfX1SnHGmpjwWWS
- e8DaJWTNWUb1jiUVdt6HkWcc0NAjrPHn5Tvire7OJO47sHVvmQy34PupYJtcdMCKoNIMPciUO/C
- EhP2DC8I5E9rz3GO/NvW2p+cMlUNb/A=
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTAyMDA2NiBTYWx0ZWRfX7Cezx0h5eiDf
- 4KdQAqdoN7LWb/B3WlkLxkGq9eYI08fmnB0iKxa3Vy4XTCm2im6VBOj2kY8YQTQ4GNXcPPlxWG2
- 6HgS6lmvu+2LO87ZxkV2Qm92wulwRAhQEtSN7JhAAYsn1kBF0kYkC27bjuXAyR8Xtn4SYKI5hoq
- jlMcVr/F33CaWdD+8nVsxuYCaXRGHKfBdkVjOSLOjj5tKi/FO6c8fqs6PBNKHkXU2Ihm0huHyBB
- usr/6uRavYYXVvrAviLqw/XfQRti1/oOTy08m1YIewg9NsXGGVQZZ1dxvhoHPcYIK6noINVTB/S
- wwdUOdp8EXsIvw8tPTIp8zCY6YZUYWDLC+lH7s69p8/r+70I2wC2SHZRoijsxPhEP+Ce+SFLk/f
- zC5giG/Hfwo/IQ94C2ORFxDVI+FOGBMwg4cBucDNDQNr6EkvyVMw1cALMM6h2feongXIYGe6i6l
- kvqWoGO+YZvuQdQ5ZLg==
-X-Proofpoint-GUID: o2Mk4WEDn968RTxWgY5KuxyqzLM-AZtf
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0
- lowpriorityscore=0 bulkscore=0 malwarescore=0 adultscore=0 impostorscore=0
- phishscore=0 clxscore=1015 priorityscore=1501 suspectscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2609020066
+References: <20260901132438.759-1-prabhakar.pujeri@dell.com>
+ <ape4hyfwsv5LrYxB@zlang-mailbox> <20260902073507.5074-1-prabhakar.pujeri@dell.com>
+In-Reply-To: <20260902073507.5074-1-prabhakar.pujeri@dell.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 2 Sep 2026 10:25:57 +0200
+X-Gm-Features: AcwNN1XLGgAON-P3OIfSkTy_E2k-15GdqCzq9mG85IZV3dwPkw5Tn7MT9lpCzII
+Message-ID: <CAOQ4uxjBc5CfCpjrq8Ut4xHHaenKicTxBCbNuQkBFuu-Mz9=EQ@mail.gmail.com>
+Subject: Re: [PATCH v2] overlay/081: add missing _require_scratch check
+To: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Sep 02, 2026 at 01:51:08PM +0800, Zorro Lang wrote:
-> As you're fixing this patch, I'm wondering if we need a _require_* helper to
-> make sure the mount options *uuid=null/auto/on* is supported by current system?
-> Due to the comment says "mount options uuid=null/auto/on introduced in kernel
-> v6.6" :)
+On Wed, Sep 2, 2026 at 9:35=E2=80=AFAM Prabhakar Pujeri
+<prabhakar.pujeri@dell.com> wrote:
+>
+> On Wed, Sep 02, 2026 at 01:51:08PM +0800, Zorro Lang wrote:
+> > As you're fixing this patch, I'm wondering if we need a _require_* help=
+er to
+> > make sure the mount options *uuid=3Dnull/auto/on* is supported by curre=
+nt system?
+> > Due to the comment says "mount options uuid=3Dnull/auto/on introduced i=
+n kernel
+> > v6.6" :)
+>
+> Thanks for looking.  That case is already covered a few lines below the
+> change, at the first use of the uuid=3D option (line 40):
+>
+>         _overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o uuid=
+=3Dnull \
+>                 2>/dev/null || \
+>                 _notrun "Overlayfs does not support unique fsid feature"
+>
+> overlayfs rejects unknown mount options with EINVAL, so on kernels older
+> than v6.6 that probe mount fails and the test skips with the _notrun
+> reason instead of failing.  The uuid=3D options are also exercised only b=
+y
+> this test (it is the sole user of uuid=3Dnull/on/auto in the tree), so a
+> dedicated _require_* helper would have exactly one call site.  Happy to
+> factor it out anyway if you would rather have an explicit requirement.
+>
 
-Thanks for looking.  That case is already covered a few lines below the
-change, at the first use of the uuid= option (line 40):
+*IF* we would want this, I would not recommend a dedicated require_
+for uuid feature.
 
-	_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o uuid=null \
-		2>/dev/null || \
-		_notrun "Overlayfs does not support unique fsid feature"
+I would recommend teaching _require_scratch_overlay_features/
+_check_overlay_feature to deal with mount options (e.g. uuid=3Don)
+which do not have a module parameter to tune the default.
 
-overlayfs rejects unknown mount options with EINVAL, so on kernels older
-than v6.6 that probe mount fails and the test skips with the _notrun
-reason instead of failing.  The uuid= options are also exercised only by
-this test (it is the sole user of uuid=null/on/auto in the tree), so a
-dedicated _require_* helper would have exactly one call site.  Happy to
-factor it out anyway if you would rather have an explicit requirement.
+So if /sys/module/overlay/parameters/uuid does not exist, instead of
+assuming it is not supported, assume that it defaults to off.
 
-Cheers,
-Prabhakar
+I am not saying this is worth the trouble, which is probably why I took the
+easy lane and added the local _notrun condition adhoc in the test.
+
+Overlayfs enum mount options that can be tested with the generic
+features helper: redirect_dir, index, nfs_export, metacopy
+
+Overlayfs enum mount options that cannot be tested with the
+generic features helper because they do not have a corresponding
+module param of same name:
+uuid, xino, verity, fsync
+
+verity - has a dedicated helper because it has special conditions.
+fsync - test 087 has _require_scratch_shutdown_and_syncfs
+            which is technically enough to test support for -o volatile
+uuid - can benefit from generalization of features helper
+xino - all these tests 041, 043, 044, 067, 070, 071 practically open
+          code the suggested improvement of the generic helper
+
+So for the uuid test alone it might not be worth it, but unless I am mistak=
+en
+for all the xino tests, this would be a nice cleanup/improvement.
+
+But of course, this should not block this trivial and correct fix patch.
+
+Thanks,
+Amir.
