@@ -1,46 +1,73 @@
-Received: from mta0.migadu.com (out-161.mta0.migadu.com [91.218.175.161])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-00154904.pphosted.com (mx0b-00154904.pphosted.com [148.163.137.20])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DBC87417D99
-	for <fstests@vger.kernel.org>; Wed,  2 Sep 2026 09:28:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.161
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9B7B38644D;
+	Wed,  2 Sep 2026 09:42:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.137.20
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788341341; cv=none; b=tHOMfXUzXrNSGEL9IHmXrqIuHQT9++Gd+tSJXdbPQXtofJmCM9FUWmeGI9DGNxUW2Rh7irvaVUjV+N2q7CKxLGgY6sHOGmnGGpaYz0RhWPLiJfGn9GypOhUmygNj/RXQ1PN+FVOfa5cVxJPSXbAM8Ykvl2sOHvYsK28WucPYSnE=
+	t=1788342132; cv=none; b=phM5n1SzE/xCKeE81H9xbiRMYIpzWvSAGUWgt8SS+Sx3lItLG5gRBXAgnDK0wrnB3rv9SPbryjV+bRsNzc2hoSMW2kk52dP6dcpbdB0JVg9+YESDucvuzgDnCudR290vBC6damYF7a1CgikCgDHRdi75ZkLDUgzuNNR1SrLZcns=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788341341; c=relaxed/simple;
-	bh=peZnTaKnvDeoh2LG4G9grBL+W1Kp7tQuGWd/KnYr4P4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kIGp6ynyExRhTpvT3mZAmkgDI2lENTAxqDFWysgMbcH9PE19btwcWWzIvOA23zPNFZyhCdq8ClqNJZvuIeQ1J0LgW7ltzNaP4BzEps1RNM5crP9CoGJNVlMKWDx5EY4OPi0SIE0oN6n3ct5sZpRKpq879TWZeOHlmN8+e4UKCx8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=tYKNDwri; arc=none smtp.client-ip=91.218.175.161
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	s=arc-20240116; t=1788342132; c=relaxed/simple;
+	bh=muTaDowgq+2Bm9BrvlSfI/WoD0EhKNZSlU/urjQgRH0=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=MJp/cu9Y+JBPJfVYfFx9ei/4S8pxYq7Ylfco1xXQNq+hP6P0B70aeIvKXYYlkJNUgceOw5tt3eiSqgM/dyD5E0Lm99bQov+X2iI+pzTwV3aGBF1uVU9ORQaP+DBB9ULQw1fogDfkYAdCx4z34rkVY6704vS7Ugr2RcwHOcl5OeE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com; spf=pass smtp.mailfrom=dell.com; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=a4151vkd; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=Xq7t7/gZ; arc=none smtp.client-ip=148.163.137.20
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dell.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="tYKNDwri"
-X-Envelope-To: fstests@vger.kernel.org
-DKIM-Signature: a=rsa-sha256; bh=peZnTaKnvDeoh2LG4G9grBL+W1Kp7tQuGWd/KnYr4P4=;
- c=simple/simple; d=linux.dev;
- h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
- t=1788341337; v=1; x=1788946137;
- b=tYKNDwrio7EVyw+6PXFyS7UU5KC0QqT/3Mbtd6fAsj4oaOThWF2EM5z+QG+aG8esuhg2cG3R
- O77uaZIIFr/4tZ4Xk5UF2YmzBjLFHwmPp5VWJpFWr1VWO3a8hHNUyRgXasw1X+vVADfmwBVTDjq
- JhwtQGNHoMrKjSvBDn7ItCHg=
-X-Envelope-To: fstests@vger.kernel.org
-Received: by mta11.migadu.com with ESMTPS id 50ff65e1dfcd947f;
-	Wed, 02 Sep 2026 09:28:57 +0000
-X-Mizu-Trace-ID: 50ff65e1dfcd947f
-X-Migadu-Flow: FLOW_OUT
-From: John Garry <john.garry@linux.dev>
-To: James.Bottomley@HansenPartnership.com,
-	mkp@kernel.org
-Cc: linux-scsi@vger.kernel.org,
-	djwong@kernel.org,
-	hch@lst.de,
-	fstests@vger.kernel.org,
-	bvanassche@acm.org,
-	John Garry <john.garry@linux.dev>
-Subject: [PATCH] scsi: scsi_debug: default to a higher throughput config
-Date: Wed,  2 Sep 2026 10:28:44 +0100
-Message-ID: <20260902092844.1741533-1-john.garry@linux.dev>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="a4151vkd";
+	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="Xq7t7/gZ"
+Received: from pps.filterd (m0170395.ppops.net [127.0.0.1])
+	by mx0b-00154904.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6829M2lf989524;
+	Wed, 2 Sep 2026 05:42:09 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dell.com; h=cc
+	:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=smtpout1; bh=3AUNxz58vDoxYSvA8k5ZM/r33BED3JsGq8RI
+	d98C0kU=; b=a4151vkd5WG5l3nW3Tz4sZ9BlWjbIqdnW3CVmXNAIdhsDAkbgEZ/
+	gje0AMvVPfgQUgb44R89rLYW1GJ6fhhuWkF+kBls3A6WDEV9opBdOUXIPteHee1x
+	IIxMELtd2glRcLA4GgM18Vcfu0YUIPpW3A0/qMNSbO8QDA1d8AwFyz/PcZs+tXoY
+	T0yo2S+L9fRR2FOBcX1DzvCNsOBkCHYd77cnXcrZlTI3jkuOABtgQ+MXdR6cI91j
+	ox0GVbKg8KaJe2Q5JQSjWjPnW2l0EzVXEhsnGtvg2BpoaqXhsd+bPJ4PbEHofE+N
+	sZ5UOfgjH4ZfthAMnnKRS66S5+V8Sr70xw==
+Received: from mx0a-00154901.pphosted.com (mx0a-00154901.pphosted.com [67.231.149.39])
+	by mx0b-00154904.pphosted.com (PPS) with ESMTPS id 4gbv3ggnpb-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
+	Wed, 02 Sep 2026 05:42:09 -0400 (EDT)
+Received: from pps.filterd (m0133268.ppops.net [127.0.0.1])
+	by mx0a-00154901.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6829O1xH2418422;
+	Wed, 2 Sep 2026 05:42:08 -0400
+Received: from esapsmtpat08.us.dell.com (esapsmtpat08.us.dell.com [143.166.211.148])
+	by mx0a-00154901.pphosted.com (PPS) with ESMTPS id 4gefjw9eb9-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=FAIL);
+	Wed, 02 Sep 2026 05:42:08 -0400 (EDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=dell.com; i=@dell.com; q=dns/txt; s=smtpdev1;
+  t=1788342128; x=1819878128;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=3AUNxz58vDoxYSvA8k5ZM/r33BED3JsGq8RId98C0kU=;
+  b=Xq7t7/gZu2BKhwzps0Afb1ESCymotsAl7QNVRUbC+J1k9sZDjtRILMLg
+   H4EYKsI2PJPE8vqPSH1a0IsB9e/z5ebrNhzN2FIJnCcjNZh/fMxNe/tCq
+   DQAhhCzuTdpLJOaJcWt2r+/nk7ib22ZCn128q3D0nrp7DAKZ/AZuLTuUc
+   532df/aPc4zwQbAvUc6I0ZFsvnQWFR9vjPJrWMMkM85SFw+E4YqPyIS/v
+   N2q+33vzgA/MEPOH5V8btJLAjjUCjp5594bDu/JcBUwdxr9qcr5ZMWq07
+   dMA7O/mgoLVJq79KYRGQHK37XD/qSsuOOJLUjtWRGpWBGGOe9uw+6t+yt
+   g==;
+X-CSE-ConnectionGUID: okrmZRLCR0uS8MZdT/Vhmw==
+X-CSE-MsgGUID: b6XiNk71SS+CheVp4BF9Aw==
+X-LoopCount0: from 10.94.14.196
+X-MS-Exchange-CrossPremises-AuthAs: Internal
+Received: from w-96j1th4.apac.dell.com (HELO W-96J1TH4.blr.amer.dell.com) ([10.94.14.196])
+  by esapsmtpat08.us.dell.com with ESMTP/TLS/TLS_AES_256_GCM_SHA384; 02 Sep 2026 09:42:04 +0000
+From: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+To: fstests@vger.kernel.org
+Cc: Prabhakar Pujeri <prabhakar.pujeri@dell.com>,
+        Zorro Lang <zlang@kernel.org>, Anand Jain <asj@kernel.org>,
+        Filipe Manana <fdmanana@suse.com>, Qu Wenruo <quwenruo.btrfs@gmx.com>,
+        linux-btrfs@vger.kernel.org, Qu Wenruo <wqu@suse.com>
+Subject: [PATCH v2] btrfs/273: add missing _require_scratch check
+Date: Wed,  2 Sep 2026 09:42:00 +0000
+Message-ID: <20260902094200.6270-1-prabhakar.pujeri@dell.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -48,78 +75,67 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-09-02_02,2026-09-01_03,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 adultscore=0 phishscore=0 bulkscore=0 impostorscore=0
+ malwarescore=0 spamscore=0 clxscore=1015 lowpriorityscore=0 suspectscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2609020085
+X-Proofpoint-ORIG-GUID: b2gIGZmbzNaMLnYTPfrm99aleHxHf-g4
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTAyMDA4NSBTYWx0ZWRfX+cPXQjJZ1/dk
+ RtBKZmDvFTBZyKT/pBijj0aJCXejDMTAXIkUoMumg7HIngX+jYFuWuMRX737AyxXaJaSkk+6Sgi
+ /iHYHdcKutcR1nagyTW9wUG8Ewbj3ajS8s2GYzbz8WB7llKJmoLmKaaWORvR++xtru+tORSgv94
+ L2k2pOAUES7Fc7Gg1LLVuaNdILeilJN2hcrnuqTYIsjP7+LB0fQHsVr9rXfvPAkRkd8jQMMdPvK
+ P2vy6h4QJ+y62CL9aBdJGa42VZyz3O3VQUMvNj9QjXEXRe63F8QYuJ3J3zH4HQtwXpzPuNW9AmX
+ sRG1ZTfsPqGw6RnZyZKG+Qwb8vmTP8+94LIbQcFQHHLjGdWFfHNyX7K58L3JMuCL3caft+KZk4a
+ /M9SLMwRwgmPH8nSabJv+5/kr+8ds21d0bcbw/zT2x64rzxf26nbPcRWBdkQojyRBwtj9SAG2m4
+ KOiGOXtZacWMPyOnUGw==
+X-Proofpoint-GUID: b2gIGZmbzNaMLnYTPfrm99aleHxHf-g4
+X-Authority-Analysis: v=2.4 cv=B7SJFutM c=1 sm=1 tr=0 ts=6a97ef71 cx=c_pps
+ a=j0++y401J6f/BxNAf5EDow==:117 a=yMHKiRmgHdO7ybaHu+/uXg==:17
+ a=VdqzKS8jKosA:10 a=ke5jqHz-1hQA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=6gNNCFAoQcIphELLPWWu:22 a=Qy6CKLcU0MZ4grw4BCWD:22 a=VwQbUJbxAAAA:8
+ a=iLNU1ar6AAAA:8 a=iox4zFpeAAAA:8 a=ud7VmjWcpcx5hLGjRdQA:9
+ a=gbU3OgOOxF9bX48Letew:22 a=WzC6qhA0u3u7Ye7llzcV:22
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTAyMDA4NSBTYWx0ZWRfX4ZcOG7pPzdAO
+ gPzFoH46/sosgqj8jXA+jV+mOWf6/6NO2BuJYiVMcMUzneDXYbCA6KPbxkUKS0DQJZAdF0wH7Hc
+ LT/bpWTlR2XuSrQR1+L6kEBX2juSPP8=
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 clxscore=1015
+ suspectscore=0 spamscore=0 lowpriorityscore=0 bulkscore=0 impostorscore=0
+ priorityscore=1501 malwarescore=0 phishscore=0 adultscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2609020085
 
-Currently the default config goes not give as high a throughput as some
-would like.
+The test passes $SCRATCH_DEV to _require_zoned_device() and mkfs/mount
+without first requiring a scratch device, so it fails messily instead
+of skipping when no scratch device is configured.
 
-Give a higher default throughput by modifying the following:
-- set completion response delay as 0
-- increase shost can_queue to 4096, which aligns better with modern
-  high-speed HBAs
-- turn on clustering
+Reviewed-by: Qu Wenruo <wqu@suse.com>
+Signed-off-by: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+---
+Changes in v2:
+- Wrap the commit message at 74 columns, per Qu Wenruo's review.
+- Add Qu Wenruo's Reviewed-by; Cc him.
 
-Signed-off-by: John Garry <john.garry@linux.dev>
+v1: https://lore.kernel.org/fstests/20260902050145.2439-1-prabhakar.pujeri@dell.com/
 
-diff --git a/drivers/scsi/scsi_debug.c b/drivers/scsi/scsi_debug.c
-index 3346562275f8..f2afe757c438 100644
---- a/drivers/scsi/scsi_debug.c
-+++ b/drivers/scsi/scsi_debug.c
-@@ -79,7 +79,7 @@ static const char *sdebug_version_date = "20210520";
-  */
- #define DEF_ATO 1
- #define DEF_CDB_LEN 10
--#define DEF_JDELAY   1		/* if > 0 unit is a jiffy */
-+#define DEF_JDELAY   0		/* if > 0 unit is a jiffy */
- #define DEF_DEV_SIZE_PRE_INIT   0
- #define DEF_DEV_SIZE_MB   8
- #define DEF_ZBC_DEV_SIZE_MB   128
-@@ -106,6 +106,7 @@ static const char *sdebug_version_date = "20210520";
- #define DEF_PTYPE   TYPE_DISK
- #define DEF_RANDOM false
- #define DEF_REMOVABLE false
-+#define DEF_CLUSTERING true
- #define DEF_SCSI_LEVEL   7    /* INQUIRY, byte2 [6->SPC-4; 7->SPC-5] */
- #define DEF_SECTOR_SIZE 512
- #define DEF_UNMAP_ALIGNMENT 0
-@@ -217,8 +218,7 @@ struct tape_block {
-  * /sys/class/scsi_device/<h:c:t:l>/device/queue_depth
-  * but cannot exceed SDEBUG_CANQUEUE .
-  */
--#define SDEBUG_CANQUEUE_WORDS  3	/* a WORD is bits in a long */
--#define SDEBUG_CANQUEUE  (SDEBUG_CANQUEUE_WORDS * BITS_PER_LONG)
-+#define SDEBUG_CANQUEUE  (4096)
- #define DEF_CMD_PER_LUN  SDEBUG_CANQUEUE
+ tests/btrfs/273 | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tests/btrfs/273 b/tests/btrfs/273
+index 60c3967b..197cfb02 100755
+--- a/tests/btrfs/273
++++ b/tests/btrfs/273
+@@ -28,6 +28,7 @@ _fixed_by_kernel_commit 2ce543f47843 \
+ # which is further fixed by
+ _fixed_by_kernel_commit d5b81ced74af \
+ 	"btrfs: zoned: fix API misuse of zone finish waiting"
++_require_scratch
+ _require_zoned_device "$SCRATCH_DEV"
+ _require_limited_active_zones "$SCRATCH_DEV"
  
- /* UA - Unit Attention; SA - Service Action; SSU - Start Stop Unit */
-@@ -850,7 +850,7 @@ static int sdebug_num_hosts;
- static int sdebug_add_host = DEF_NUM_HOST;  /* in sysfs this is relative */
- static int sdebug_ato = DEF_ATO;
- static int sdebug_cdb_len = DEF_CDB_LEN;
--static int sdebug_jdelay = DEF_JDELAY;	/* if > 0 then unit is jiffies */
-+static int sdebug_jdelay = DEF_JDELAY;
- static int sdebug_dev_size_mb = DEF_DEV_SIZE_PRE_INIT;
- static int sdebug_dif = DEF_DIF;
- static int sdebug_dix = DEF_DIX;
-@@ -899,7 +899,7 @@ static int sdebug_uuid_ctl = DEF_UUID_CTL;
- static bool sdebug_random = DEF_RANDOM;
- static bool sdebug_per_host_store = DEF_PER_HOST_STORE;
- static bool sdebug_removable = DEF_REMOVABLE;
--static bool sdebug_clustering;
-+static bool sdebug_clustering = DEF_CLUSTERING;
- static bool sdebug_host_lock = DEF_HOST_LOCK;
- static bool sdebug_strict = DEF_STRICT;
- static bool sdebug_no_rwlock;
-@@ -7373,8 +7373,8 @@ MODULE_VERSION(SDEBUG_VERSION);
- MODULE_PARM_DESC(add_host, "add n hosts, in sysfs if negative remove host(s) (def=1)");
- MODULE_PARM_DESC(ato, "application tag ownership: 0=disk 1=host (def=1)");
- MODULE_PARM_DESC(cdb_len, "suggest CDB lengths to drivers (def=10)");
--MODULE_PARM_DESC(clustering, "when set enables larger transfers (def=0)");
--MODULE_PARM_DESC(delay, "response delay (def=1 jiffy); 0:imm, -1,-2:tiny");
-+MODULE_PARM_DESC(clustering, "when set enables larger transfers (def=1)");
-+MODULE_PARM_DESC(delay, "response delay (def=0 jiffy); 0:imm, -1,-2:tiny");
- MODULE_PARM_DESC(dev_size_mb, "size in MiB of ram shared by devs(def=8)");
- MODULE_PARM_DESC(dif, "data integrity field type: 0-3 (def=0)");
- MODULE_PARM_DESC(dix, "data integrity extensions mask (def=0)");
 -- 
-2.43.0
+2.55.0
 
