@@ -1,38 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 17BB54AA3FE
-	for <fstests@vger.kernel.org>; Wed,  2 Sep 2026 16:26:31 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3457E4AA571
+	for <fstests@vger.kernel.org>; Wed,  2 Sep 2026 16:31:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788366393; cv=none; b=A5Tv3o1YtJEGbvJSPiS3/7l9IQa7ysPZIMeIVhMvEYeLFXNiSla5+zceriGYVRDzca7l5chNkbKaF4ZGQFnpLuDW8aIQmDUrAVBYcFNuosrWSL4Xf/SqljB1qoL6MuZ3n+BH4W9v3hb7UV9dkBCtenvoLdIgs9NezfFK0X4et/0=
+	t=1788366697; cv=none; b=mnHncukRaN9uqgTh4F9kYLDpn2WpGGVE1zAzaj1htsCI7/cnfLmxctAWZU3k3/WCAfSD6XC2FyR8HEgkfXEGk+mAzSaHHa4gGphZA1epCE/sEY7DpCqSC03f9y4vU1mGVFs2v366Bi0vxieqHO6wzsPEXwq0T3OmC5aqhMPyIvo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788366393; c=relaxed/simple;
-	bh=1gd1ovilkFquYuKLh+18QDhOVrVW1VhpXJUuYBP4w3Q=;
+	s=arc-20240116; t=1788366697; c=relaxed/simple;
+	bh=5klSK4X0S9PdoLyVB3nED9lhXDgsG73XHzvOMXu6d54=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=NG/ICb9kOM6HFveTuWJgUhD8E449Jrh1FxRZBrZzUqXplLLXxXkYJoEW0EOrg67s+GsNtOazqmSAYmJ+/Nl8hsH1U07jzliN1XXu3/yzEjaPPh1yEEmftEc+KUhNzvTi1Z8zz2UViM3r76cMOq6rtaOkZLVU9H1/RKVtg9Uk/4Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JAnqtw1h; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=lLElt4PTCp4Xg4Np4LaIJmDoSzTdymN/UnTbkQKeVrcahdgdLd+I715ai4rFbr1YoLgE2AQZ4aUcwxkMs9fGOmBQFBVSp0JkPrMR/9P1QLgrkS8D8rbaIk9EEvxQBPyNVhPrv5GtDeyNUMsh90tjBio0e3hnn2Zt8aDqcyh7hHQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WIX0zmIr; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JAnqtw1h"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A7B001F000E9;
-	Wed,  2 Sep 2026 16:26:29 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WIX0zmIr"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 32EEF1F000E9;
+	Wed,  2 Sep 2026 16:31:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788366391;
-	bh=gJCYO7vO1VKZ4Q1bP0MyX4OrS8YLyq/z0pM2IABNPpA=;
+	s=k20260515; t=1788366695;
+	bh=jjB3a1klBZ1bBTQiVm/om3y0tBoZq2SwQ5dUMwEKlEo=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=JAnqtw1h343QvgoJsBiIJlaZ8iLOCozeZUywvRnoKPDxJ8f8bz39sWFmaE8n/NCpi
-	 gU2rwRwx1S4wb7Ysxx0OYhE7nea2gJw6gGbIXZIxiWyQtHXgKfyZpJHPRCapiF7h1I
-	 81inToZY6cyS1Z++zz6GxCCwvwKTHzCtDLlSIavTleI4e4E81JXd0BIR02RWFM/HvP
-	 0ZJHpLAXjegLPOfpfMjs8YDO2Gj3+9tinstev640JYFQ9Znh+LIha54kKQa1e2zcGN
-	 tqhYQFrlpcNcnjUWOMvPy2a8aSnRZE39AarAZdX/rOUdkk9HIUc5EVZ0tioiJJ8ea4
-	 j5iReqwQPNAfg==
-Date: Thu, 3 Sep 2026 00:26:26 +0800
+	b=WIX0zmIrHGJ6edAXvJkIH82jrSX/UG16ZIg6H1e9OvY2cA6tmAmPDcrKXvn2AXXJd
+	 vSb1P/61KjfhdOoRNyD1MbBLqayJBBW4T1EGO506PxEYBvob0B9v3kKsieZrUsAuRj
+	 kVmHdCfE0UDwJHIwbIakEWpDWYcJSvrgmWUW8j9Yg29+eT93b4oDUueHtSje58msxI
+	 1QJlQ7I+Yu6E0UKCQQ8d9si8TkhTxYzS9Su7Tdww/2gDpN/SzzUPateZLSkmWrEskR
+	 gsw6iIXwU7vySbPSjCTXyjsI+M9NS9cDC2bge8bH4OrH1XGGQq24nTEsaBejy5gmxx
+	 c1Osx/k95dYBQ==
+Date: Thu, 3 Sep 2026 00:31:30 +0800
 From: Zorro Lang <zlang@kernel.org>
 To: Christoph Hellwig <hch@lst.de>
 Cc: fstests@vger.kernel.org
 Subject: Re: [PATCH 2/5] min_dio_alignment: add a -r option to query read
  alignment
-Message-ID: <aphNSwwkbZTSkBRz@zlang-mailbox>
+Message-ID: <aphPQV7nLIr8rmzX@zlang-mailbox>
 Mail-Followup-To: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
 References: <20260831065120.2578146-1-hch@lst.de>
  <20260831065120.2578146-3-hch@lst.de>
@@ -88,13 +88,6 @@ On Mon, Aug 31, 2026 at 09:51:05AM +0300, Christoph Hellwig wrote:
 > -	    (stx.stx_mask & STATX_DIOALIGN) && stx.stx_dio_offset_align != 0)
 > -		return stx.stx_dio_offset_align;
 > +	    xfstests_statx(fd, "", AT_EMPTY_PATH, STATX_DIOALIGN, &stx) == 0) {
-
-
-Hmm... shouldn't STATX_DIO_READ_ALIGN be passed in the request mask as well?
-
-  xfstests_statx(fd, "", AT_EMPTY_PATH,
-                 STATX_DIOALIGN|STATX_DIO_READ_ALIGN, &stx)
-
 > +		if (read &&
 > +		    (stx.stx_mask & STATX_DIO_READ_ALIGN) &&
 > +		    stx.stx_dio_read_offset_align != 0)
@@ -132,6 +125,9 @@ Hmm... shouldn't STATX_DIO_READ_ALIGN be passed in the request mask as well?
 > +		switch(c) {
 > +		case 'r':
 > +			read = 1;
+
+read = true;
+
 > +			break;
 > +		default:
 > +			goto usage;
