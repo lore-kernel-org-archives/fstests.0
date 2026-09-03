@@ -1,80 +1,64 @@
-Received: from mailout1.samsung.com (mailout1.samsung.com [203.254.224.24])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31DAB3403EC
-	for <fstests@vger.kernel.org>; Thu,  3 Sep 2026 06:01:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.24
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 532534457BD;
+	Thu,  3 Sep 2026 11:21:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788415271; cv=none; b=RJhTHCSCIcdWeJPO4yJEEab1VbenJgaZutTNsNOOrAYP8hgUHHOvRCemaCXX6eqdf7VPdptJkW0YhDGyDS5aNE8VosU9HMUkAHtk43EiLjZ4nuAgPte9k77ooTzpVTCx3KGXQU/HNpdNryEpUaLXR8HrOb0XhRpoaVP0/UrDgdI=
+	t=1788434515; cv=none; b=B3THa2hEbtaUwdhq8/+qP67PK0QvzvIG94Z5XKBg+kqyN84O8t+KuRYTu46A35rSYaBB2Ue3WPEVjc4foJng9TMjsJ/nW8LRN62PRQOh8eFfxA6W5I101OohwmYD5eP5AVtGehIxD3TPdIq2lIXTkQaLuSyUWcjC6VLBU3nMPzc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788415271; c=relaxed/simple;
-	bh=0F0/wppzj8EZN/czrkFmVD6Pits/wZzDSbvylgHb7Ug=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:From:In-Reply-To:
-	 Content-Type:References; b=ie6XckAxY4VtHjRHG+JKCIzP0TQAgWRnTW8FPwjJenKDz/JAqGhEMkpdCcvAq4iv2LGZfoWryqM/wp0/Zl6a/Vb+SJFGZzjhZYWX3ELtxlNBiALhHGqBHL0n4HVGqmSGfIcRFy5aghG9P7BJd0wwR1vV/Pe2IvezLorYOBBQ0Og=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=hbyVyYHV; arc=none smtp.client-ip=203.254.224.24
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1788434515; c=relaxed/simple;
+	bh=18z8T6RNwfGpu4FdM+1Krdgr0LUvbHj1QlXEGHIv5YE=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Y30Y/GyjyrpSm8cxyh1PdyGDMXgU0hE7i2kJcaDNgww22Sc4GPsuLLsPmPclNA6L6oGzyS4g6fxyxplkP+tNAiV/zvG2wiLXbI2Xagc18s3S5a0vbr/bBmwqRBdQvQdMcAB9RHyOhC6C5eR6zfzbCthf1W4Hzs4s9Z5hX3Z0Kdg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gf/euQXe; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="hbyVyYHV"
-Received: from epcas5p1.samsung.com (unknown [182.195.41.39])
-	by mailout1.samsung.com (KnoxPortal) with ESMTP id 20260903060107epoutp0131428cad402b480eaf3c09b9e5b5d955~RujXqjhYi0926109261epoutp01J
-	for <fstests@vger.kernel.org>; Thu,  3 Sep 2026 06:01:07 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.samsung.com 20260903060107epoutp0131428cad402b480eaf3c09b9e5b5d955~RujXqjhYi0926109261epoutp01J
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1788415267;
-	bh=0F0/wppzj8EZN/czrkFmVD6Pits/wZzDSbvylgHb7Ug=;
-	h=Date:Subject:To:Cc:From:In-Reply-To:References:From;
-	b=hbyVyYHVZjbDmzDOkhaji0d5X3oHZ1unVa9D27/FrvtzyVX/ouEuU9Z3DIDKgMxmh
-	 gPYDNIqqGDY8fsw/c5XkNU8jHZTpHpezI9mSYZoYjRdJVpUggpSPOBTNYuPLU70qTH
-	 AvaQsDV6KIsxNobPOkcDOArSc7H52EKFvYtYSKR4=
-Received: from epsnrtp02.localdomain (unknown [182.195.42.154]) by
-	epcas5p2.samsung.com (KnoxPortal) with ESMTPS id
-	20260903060107epcas5p22b92740d247d2ca79a6d1cd874be7c57~RujXYBVXl0234402344epcas5p2p;
-	Thu,  3 Sep 2026 06:01:07 +0000 (GMT)
-Received: from epcas5p3.samsung.com (unknown [182.195.38.91]) by
-	epsnrtp02.localdomain (Postfix) with ESMTP id 4hb89H02XFz2SSKx; Thu,  3 Sep
-	2026 06:01:07 +0000 (GMT)
-Received: from epsmtip1.samsung.com (unknown [182.195.34.30]) by
-	epcas5p3.samsung.com (KnoxPortal) with ESMTPA id
-	20260903060106epcas5p38d772562bb61a8a9f3a9748397ef4f79~RujWgBAX71210512105epcas5p31;
-	Thu,  3 Sep 2026 06:01:06 +0000 (GMT)
-Received: from [107.122.10.194] (unknown [107.122.10.194]) by
-	epsmtip1.samsung.com (KnoxPortal) with ESMTPA id
-	20260903060105epsmtip18afba9371c5c482a8daba7bcbcf863b3~RujVaS5vL2830128301epsmtip1Z;
-	Thu,  3 Sep 2026 06:01:05 +0000 (GMT)
-Message-ID: <670be9cf-e6e9-436e-ac7b-f2c759c1ceac@samsung.com>
-Date: Thu, 3 Sep 2026 11:31:04 +0530
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gf/euQXe"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D01411F000E9;
+	Thu,  3 Sep 2026 11:21:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788434513;
+	bh=iNtvG+NceKc7rz8vd3pkivaiCUD3PHOrzWYe/Ie2B5Q=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=gf/euQXeS8DvLmz5kFHFQCblgP2HwVPrIbYaATW0mDZ0XPCGWfVGjWCdDwTwIVrXF
+	 Gkkz3ruOTEfFRQBahFoPLaxJXRCuIzdAQWRBcO9/C50jsD312GET1t9MXm+C4zgPDF
+	 fZQlw3wMPm1jle3HrlSqCtDOfIrnFQAzpaO+ofz6CXmCKGHdYdByoiMQ2RkPM1CBiU
+	 O3baP4vaVzwNv3nSvX911mr15fPK5Njw48S+gGiq6PemK8mIs8L8oa8UH2BP7zxhEH
+	 bo1Z9AfwPfWI0DAu7UDto9rf+o+stxNAWmYcTg2kYtAd6P9OHGcTy/N26tES2z7C9T
+	 I0AD5KGTul7YQ==
+Date: Thu, 3 Sep 2026 13:21:50 +0200
+From: Andrey Albershteyn <aalbersh@kernel.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests <fstests@vger.kernel.org>, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH RFC] xfs: test mkfs.xfs config file generation
+Message-ID: <aplYLUHLGTq7CaYI@aalbersh-thinkpadx1carbongen13.rmtcz.csb>
+References: <178821870568.2381199.9038448943413709082.stgit@frogsfrogsfrogs>
+ <20260831233430.GK1933798@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 5/6] generic: test I/O on devices with T10 protection
- information
-To: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org, "Martin K. Petersen"
-	<martin.petersen@oracle.com>, Kanchan Joshi <joshi.k@samsung.com>, John
-	Garry <john.g.garry@oracle.com>, "Darrick J. Wong" <djwong@kernel.org>,
-	linux-scsi@vger.kernel.org
-Content-Language: en-US
-From: Anuj Gupta/Anuj Gupta <anuj20.g@samsung.com>
-In-Reply-To: <20260831064557.2577241-6-hch@lst.de>
-Content-Transfer-Encoding: 7bit
-X-CMS-MailID: 20260903060106epcas5p38d772562bb61a8a9f3a9748397ef4f79
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-CMS-TYPE: 105P
-cpgsPolicy: CPGSC10-542,Y
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20260831064632epcas5p179755b26ebfe06406a7b640cb1fa8a3b
-References: <20260831064557.2577241-1-hch@lst.de>
-	<CGME20260831064632epcas5p179755b26ebfe06406a7b640cb1fa8a3b@epcas5p1.samsung.com>
-	<20260831064557.2577241-6-hch@lst.de>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260831233430.GK1933798@frogsfrogsfrogs>
 
-On 8/31/2026 12:15 PM, Christoph Hellwig wrote:
-> +#
-> +# Basix FSX sanity check when using T10 protection information
-> +#
-s/Basix/Basic
+On 2026-08-31 16:34:30, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> Test configuration file generation via mkfs, xfs_db, and xfs_spaceman.
+> 
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> ---
+>  tests/xfs/1909     |  123 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/1909.out |    2 +
+>  2 files changed, 125 insertions(+)
+>  create mode 100755 tests/xfs/1909
+>  create mode 100644 tests/xfs/1909.out
+
+Looks good to me
+Reviewed-by: Andrey Albershteyn <aalbersh@kernel.org>
+
+-- 
+- Andrey
