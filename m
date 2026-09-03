@@ -1,43 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 174DC4A8412
-	for <fstests@vger.kernel.org>; Thu,  3 Sep 2026 13:39:27 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3BDE73A9870
+	for <fstests@vger.kernel.org>; Thu,  3 Sep 2026 13:53:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788442778; cv=none; b=srMvy4aJU3QAJfBuH23UvU9T1NYqkvscZ1+L55GoKvK/AREYwYD6z3Yb4o0GvG47ei1XJQ5ipUFE+0QqnlJgrz+1lyYrgvACePQKd7My4O7H8Q4QqyRppFU3Yo2/jfbxpYxoPCk+K13O+tnpfldYiEr+c2J/rG8KZZFrGi3F2Rg=
+	t=1788443644; cv=none; b=InPOvSE2Jb+O1wE+G+pVr4pyKkuI2yFSIMzm5/EM1Fzf0PkuBGMSoRVFlVRTJOPApG6WBzjQ+hCo+pVw0q73YEEX0Il94MoMAu45/iP23gSNaMfn8sHMGOfdiL+lBNGJJRo0vtv3K2PPnn7jUQcPuG2KpRNXIN3SBxm5PySpzsw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788442778; c=relaxed/simple;
-	bh=EwAtfIw8yCwsmp0ZWd7UMh6dnzUP6S13fg7zbZbQ4CM=;
+	s=arc-20240116; t=1788443644; c=relaxed/simple;
+	bh=FqeyNZEssjYG4315AwkCV9nCywE0yyVUaQvFESEAYX0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uA7VWfwd7YMWrbhxaUcfaQseY+JTSsWeG08qC4WvKpN00EdzXZ1CIoQcc+GAzjpfy3FIwyGwhY6EZ2jdwM5DofQtIjdDFSdXcpEOFPenKiAowib03/5tSNWj+svv9G9fLjypdwEGOym6abaNOB1LMi38zeSJUoyGu1yeOz3b32A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jSBVC4Ie; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=ikqRWKPmaF/3InXtXFi+zwit/cscwytrxgOQLiG0i1gyKXMvu6S5Zbx2Mop3BOum2f/7BOCXptH7M2DU82I0mnV3D/pg6L38zyHbxx5TgDeFM3s+sRVcaB9tvGkm21rRwCorWvwpCtVyFI5czKz3LY5iskYLDoGi+vcZm22YIFk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=L7EhgQTx; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jSBVC4Ie"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2AB581F00A3A;
-	Thu,  3 Sep 2026 13:39:23 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="L7EhgQTx"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7C7401F00ACA;
+	Thu,  3 Sep 2026 13:53:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788442765;
-	bh=DL5wfCWEHuJXr66JqeuVPqyZD7djEh0RNicbPhKIjMA=;
+	s=k20260515; t=1788443627;
+	bh=ubpiXP9zeY6nisNbCcAy6QTgfx5te8bKLPjfwaRbbSI=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=jSBVC4IeI/O6aUyeIyIVMt4QnQNlLtmVvgBa1osuwMzYQkQ+OIXcTOWRMLA54ahzQ
-	 Tq2UunRzMdZbfEGMBEZsSaVNW0Qx8y7pDWc3+y1EfSxk+wj9hBdJDC26n8cbRdkEeO
-	 7WfxHKBLE5fneLswnF4Z3qKoWXARQTlb4gCAtYcZv/9RFXhKVpTFPpQ/l03F9eTpvM
-	 ztxoi4NTKiE+aiewzLStE1fhACkZMsIq7C5PfGc9gmhnmThNMiu4wPX+zfPWJwfMtL
-	 yr3rNCA7wVTtJzwfMW/hJRvHF2ig/x0ctOi8CjD2UT8Zjwh4xVkKLpOXyJM7/u1GUM
-	 ivDfeMKaTIXSA==
-Date: Thu, 3 Sep 2026 21:39:18 +0800
+	b=L7EhgQTxHjykEO3rkq+Ngk1hG/LI6d5jCcaGEWaQX7WJOdOQB9+5aZ0nn6eVOqrKd
+	 tzxRBQAtmUG9qkkbNK/+OcBcyfD6qiJSS8XiR4ZDpg2edAYsRoqI+JCEGI5MRrcy52
+	 TuX+ennaH/PLJ/DZknVRKN1BPx7RZoutDcp4zjnS8uJR8XgD9Ic6sAqUVoTCFBs7uQ
+	 nt+dI/6N8q3ovcE9AJeK1Ss99ONKKCypn8eNnYj4tFiYVSycr2TwC2Po6qaQL5h95Q
+	 mavBdpltO3HesbVHZp8B2YzOKYt+TBy43F6Byf074uk/35o/Rog05oaabkWDOMczB2
+	 vk6mNrEYw/ZAg==
+Date: Thu, 3 Sep 2026 21:53:39 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 2/5] min_dio_alignment: add a -r option to query read
- alignment
-Message-ID: <apl3SkiDvs7hPD5O@zlang-mailbox>
-Mail-Followup-To: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
-References: <20260831065120.2578146-1-hch@lst.de>
- <20260831065120.2578146-3-hch@lst.de>
- <aphNSwwkbZTSkBRz@zlang-mailbox>
- <20260903053409.GA16469@lst.de>
+To: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+Cc: fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>
+Subject: Re: [PATCH v2 0/3] xfstests: add missing _require_scratch checks
+Message-ID: <apl53bE5aZMJmZII@zlang-mailbox>
+Mail-Followup-To: Prabhakar Pujeri <prabhakar.pujeri@dell.com>, 
+	fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>
+References: <20260903035344.752-1-prabhakar.pujeri@dell.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -46,74 +43,58 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260903053409.GA16469@lst.de>
+In-Reply-To: <20260903035344.752-1-prabhakar.pujeri@dell.com>
 
-On Thu, Sep 03, 2026 at 07:34:09AM +0200, Christoph Hellwig wrote:
-> On Thu, Sep 03, 2026 at 12:26:26AM +0800, Zorro Lang wrote:
-> > On Mon, Aug 31, 2026 at 09:51:05AM +0300, Christoph Hellwig wrote:
-> > > Add an option to query the STATX_DIO_READ_ALIGN if provided.
-> > > 
-> > > Signed-off-by: Christoph Hellwig <hch@lst.de>
-> > > ---
-> > >  src/min_dio_alignment.c | 44 ++++++++++++++++++++++++++++++-----------
-> > >  1 file changed, 33 insertions(+), 11 deletions(-)
-> > > 
-> > > diff --git a/src/min_dio_alignment.c b/src/min_dio_alignment.c
-> > > index 866fba1546c4..143cee684ab4 100644
-> > > --- a/src/min_dio_alignment.c
-> > > +++ b/src/min_dio_alignment.c
-> > > @@ -1,17 +1,19 @@
-> > >  // SPDX-License-Identifier: GPL-2.0
-> > >  /*
-> > > - * Copyright (c) 2024 Christoph Hellwig
-> > > + * Copyright (c) 2024,2026 Christoph Hellwig
-> > >   */
-> > >  #include <fcntl.h>
-> > > +#include <stdbool.h>
-> > >  #include <stdio.h>
-> > >  #include <stdlib.h>
-> > >  #include <unistd.h>
-> > > +#include <getopt.h>
-> > >  #include <sys/mount.h>
-> > >  #include <sys/ioctl.h>
-> > >  #include <sys/stat.h>
-> > >  #include "statx.h"
-> > >  
-> > > -static int min_dio_alignment(const char *mntpnt, const char *devname)
-> > > +static int min_dio_alignment(const char *mntpnt, const char *devname, bool read)
-> > >  {
-> > >  	struct statx stx = { };
-> > >  	struct stat st;
-> > > @@ -27,9 +29,16 @@ static int min_dio_alignment(const char *mntpnt, const char *devname)
-> > >  	 */
-> > >  	fd = open(mntpnt, O_TMPFILE | O_RDWR | O_EXCL, 0600);
-> > >  	if (fd >= 0 &&
-> > > -	    xfstests_statx(fd, "", AT_EMPTY_PATH, STATX_DIOALIGN, &stx) == 0 &&
-> > > -	    (stx.stx_mask & STATX_DIOALIGN) && stx.stx_dio_offset_align != 0)
-> > > -		return stx.stx_dio_offset_align;
-> > > +	    xfstests_statx(fd, "", AT_EMPTY_PATH, STATX_DIOALIGN, &stx) == 0) {
-> > 
-> > 
-> > Hmm... shouldn't STATX_DIO_READ_ALIGN be passed in the request mask as well?
-> > 
-> >   xfstests_statx(fd, "", AT_EMPTY_PATH,
-> >                  STATX_DIOALIGN|STATX_DIO_READ_ALIGN, &stx)
+On Thu, Sep 03, 2026 at 03:53:41AM +0000, Prabhakar Pujeri wrote:
+> Consolidated resend of the remaining _require_scratch fixes, as
+> requested by Zorro.  The first three of this batch (btrfs/333 v3,
+> overlay/081 v2, btrfs/273 v2) are already in his local tree.
 > 
-> Yeah, strictly speaking we should.  Currently this is only supported
-> for XFS, and XFS automatically adds STATX_DIO_READ_ALIGN when
-> STATX_DIOALIGN is requested, so it works.  But more by chance than
-> design.
+> v2:
+> - Resent as a single series, per Zorro's request.
+> - Carry Darrick J. Wong's Reviewed-by (generic/590,735 and generic/795)
+>   and Zorro Lang's Reviewed-by (f2fs/015,016); besides message
+>   re-formatting there is no code change.
+> 
+> v1 pieces for reference:
+> - generic/590,735: https://lore.kernel.org/fstests/20260831104148.2243-1-prabhakar.pujeri@dell.com/
+> - generic/795:     https://lore.kernel.org/fstests/20260902050139.2426-1-prabhakar.pujeri@dell.com/
+> - f2fs/015,016:    https://lore.kernel.org/fstests/20260902050133.2413-1-prabhakar.pujeri@dell.com/
+> 
+> 
+> Prabhakar Pujeri (3):
+>   generic/590,735: add missing _require_scratch check
+>   generic/795: add missing _require_scratch check
+>   f2fs/015,016: add missing _require_scratch checks
 
-I couldn't find any mention in the statx doc that STATX_DIO_READ_ALIGN is
-added by default, explicitly specifying it seems more aligned with how
-the mask parameter is intended to work. Would you like me to fold this in
-when merging? or did you omit it due to other concerns?
+Hi,
 
-This is the only open point left for the patchset, once we reach consensus,
-I'm good to merge it :)
+Thanks for this work, I'm wondering why generic/590 and generic/735 are
+combined into one patch while generic/795 is split out?
+
+Given that they all just add a single line of _require_scratch. While I think
+this could easily be a single patch, if you prefer splitting them up, grouping
+them per-directory (generic, f2fs, btrfs, overlay ...) would make sense.
+
+Also, I recall you had a few other similar patches, such as:
+  btrfs/333: require scratch before checking encoded reads
+  btrfs/273: add missing _require_scratch check
+  overlay/081: add missing _require_scratch check
+
+Please bundle all of them into a single patch series (keeping any existing
+Reviewed-by tags) so they can be reviewed and merged together.
 
 Thanks,
 Zorro
 
+>
+>  tests/f2fs/015    | 1 +
+>  tests/f2fs/016    | 1 +
+>  tests/generic/590 | 1 +
+>  tests/generic/735 | 1 +
+>  tests/generic/795 | 2 ++
+>  5 files changed, 6 insertions(+)
 > 
+> -- 
+> 2.55.0
 > 
