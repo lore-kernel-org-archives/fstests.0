@@ -1,94 +1,103 @@
-Received: from mailout4.samsung.com (mailout4.samsung.com [203.254.224.34])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58BEE55293D
-	for <fstests@vger.kernel.org>; Tue,  8 Sep 2026 14:36:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B0BE302CC1;
+	Wed,  9 Sep 2026 06:12:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788878197; cv=none; b=b2+IW3V2MyfREbuC3h3qN8dUFMtQaqdc8RBul5fABQ3X4ldBdOeuIyISjjgonaa0e3N7SjHL4AskhGndcMpgoUhJdmtjLHKhxYUAGjyhVQpeIf0WeO227SOROBisuxbAoF8o+CtsSgwL34KmQcTQJ/rBfNQ+OoaSxX+y9gphhhA=
+	t=1788934350; cv=none; b=UwOaPIXTx2NIxCiwX0Oel1tqBFJ/kZmIM63Pxd91UZ/WaKBfBU09YqWnEaZSM53eYiN8vsnk7FnJFM6Fm1ee2Qm7olvrkpyZCkam1nEBxYRJ2k67vH6Baoma5AnmmjEau5MFx9Ogw8myEi3Geu7Fx0dHm9HkFiT2GYOPmd0VNyE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788878197; c=relaxed/simple;
-	bh=uCQv/JPbj2UAl1fUOP3Qo2PfyF9548XXIZUCrJEouDg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:From:In-Reply-To:
-	 Content-Type:References; b=ltH63Acpu9TfKx/CtAaGTZaBXoMwLGGkdb7MWR4CjW+tX6lP1E5O1/aT6lEuOlUiAMlrsSdC7VQLwLGWSv7EdAb3+WbxLnY3CxGdX+nkup8aJuV2Qn8YYzIw8DhcT/m9gxnInC6AFpgo2wcixjmQw9SwVZ8TXypmwcc/sYEsOgI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=P+rH3BBQ; arc=none smtp.client-ip=203.254.224.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1788934350; c=relaxed/simple;
+	bh=/HSGzhhCGfAKOr0ksyK5rCyWeTHFO6fV07hOmKs+MHw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=F5XbZ8NQl2fleRe8S5cxpPh1WNdYhHjh3nA4hHm9D1CgXj6/gwWX6C39bwb5Pj2yN5Ch71xzXYhQlkICOVSaKSPKGwCBffpMKmw+862TRkOFDkdH69KdQ5dZ1GturNYzcj71QznvCqQdO54kD8ZntoBHB1n5LuUznYFFmng7tDM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=ZCII80jm; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="P+rH3BBQ"
-Received: from epcas5p4.samsung.com (unknown [182.195.41.42])
-	by mailout4.samsung.com (KnoxPortal) with ESMTP id 20260908143617epoutp049e63174eee29e4ab4a4485b6771a4cb8~TXzlo4KPM1446214462epoutp04O
-	for <fstests@vger.kernel.org>; Tue,  8 Sep 2026 14:36:17 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20260908143617epoutp049e63174eee29e4ab4a4485b6771a4cb8~TXzlo4KPM1446214462epoutp04O
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1788878177;
-	bh=x5eQ4QWvTQMMsZQPhCLPBfxlH4gL0gok2xTNYH4eMJE=;
-	h=Date:Subject:To:Cc:From:In-Reply-To:References:From;
-	b=P+rH3BBQ52QQcZUTvB2qERaSxfdVos6YczXTSEROpmQR8uAYSpjLrN2eKFtxIVkdv
-	 /xBcMzcEci/o9+n1SxZgrCxgGnoScKpiFQ3KOCvLtTMx9CfFbVie3iJasXePJg1C60
-	 Jg2ScVdNWxySEL7ED9MQih2UVakvmgH3c2Mu4Ysg=
-Received: from epsnrtp01.localdomain (unknown [182.195.42.153]) by
-	epcas5p4.samsung.com (KnoxPortal) with ESMTPS id
-	20260908143616epcas5p450e3cbd323cf9f442386b3e09f16bf0c~TXzk0_xXj2415024150epcas5p4I;
-	Tue,  8 Sep 2026 14:36:16 +0000 (GMT)
-Received: from epcas5p4.samsung.com (unknown [182.195.38.87]) by
-	epsnrtp01.localdomain (Postfix) with ESMTP id 4hfRMM49Yfz6B9m4; Tue,  8 Sep
-	2026 14:36:15 +0000 (GMT)
-Received: from epsmtip2.samsung.com (unknown [182.195.34.31]) by
-	epcas5p4.samsung.com (KnoxPortal) with ESMTPA id
-	20260908143615epcas5p494e0e1c946cc898dc276b444e2dabd4d~TXzjwbXaM1445514455epcas5p4c;
-	Tue,  8 Sep 2026 14:36:15 +0000 (GMT)
-Received: from [107.122.11.51] (unknown [107.122.11.51]) by
-	epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
-	20260908143614epsmtip2bff5a6122f5cb969c39203afff00ee28~TXzitZ0wX1706617066epsmtip27;
-	Tue,  8 Sep 2026 14:36:13 +0000 (GMT)
-Message-ID: <bf8ef20b-44ea-42ca-9629-fe75056491bc@samsung.com>
-Date: Tue, 8 Sep 2026 20:06:12 +0530
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="ZCII80jm"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=5RTlTTuTGuZI8S4XM7VIrtv7XQ6b3ZOyGtBEq4+Q7N4=; b=ZCII80jmHC7kLXJW6qYVWEJheg
+	zTqXpVZj2uq8lJZqB63d/VyG/nMkP+allHu+cqis6iUT7aG5WK2WH+l2nduz09BByCjayA5zXh8YJ
+	C/hb1xWuS99ItmAYRLtCfLKVRAbeeMoBapRB7SfF/6Hk27D3f4COXmmwxfGioZq5R7wPAQMTN3/RM
+	qdZptBpyRn7bNBKbka3+5HibDZPnilBD6DExQzzkSMeDPmfECI5nNrgPWJL3QB3juqjLg6lS6iNDJ
+	EbWQEAbKG3sKs2kntplY+k/w/qdmaPst2elzRaemYHzTCkqILyspaW9egHrH0ug9NZtthROHyh77B
+	ivgAjf4g==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
+	id 1x4BXo-0000000ArD8-3vsN;
+	Wed, 09 Sep 2026 06:12:28 +0000
+Date: Tue, 8 Sep 2026 23:12:28 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: cem@kernel.org, zlang@kernel.org, linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org, jack@suse.cz, Chuck Lever <cel@kernel.org>,
+	Jeff Layton <jlayton@kernel.org>, linux-nfs@vger.kernel.org
+Subject: Re: [RFC PATCH 1/2] common/nfs: add management helpers
+Message-ID: <aqD4zBD06P1LJKM2@infradead.org>
+References: <20260907164054.111393-1-cem@kernel.org>
+ <20260907164054.111393-2-cem@kernel.org>
+ <20260908142226.GL839663@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 6/6] generic: test corruption detection using T10
- protection information
-To: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org, "Martin K. Petersen"
-	<martin.petersen@oracle.com>, Anuj Gupta <anuj20.g@samsung.com>, John Garry
-	<john.g.garry@oracle.com>, "Darrick J. Wong" <djwong@kernel.org>,
-	linux-scsi@vger.kernel.org
-Content-Language: en-US
-From: Kanchan Joshi <joshi.k@samsung.com>
-In-Reply-To: <20260907075822.749818-7-hch@lst.de>
-Content-Transfer-Encoding: 7bit
-X-CMS-MailID: 20260908143615epcas5p494e0e1c946cc898dc276b444e2dabd4d
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-CMS-TYPE: 105P
-cpgsPolicy: CPGSC10-542,Y
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20260907075913epcas5p424ad3a711f971e1664c112eea4ba34bc
-References: <20260907075822.749818-1-hch@lst.de>
-	<CGME20260907075913epcas5p424ad3a711f971e1664c112eea4ba34bc@epcas5p4.samsung.com>
-	<20260907075822.749818-7-hch@lst.de>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260908142226.GL839663@frogsfrogsfrogs>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On 9/7/2026 1:28 PM, Christoph Hellwig wrote:
-> +	local phys_sector=$(_get_file_extent_sector $testfile 0)
-> +	if [ -z "$phys_sector" ]; then
-> +		_fail "$test_name: failed to get physical block offset via fiemap"
-> +	fi
-> +
-> +	local dev=$(_short_dev $SCSI_DEBUG_DEV)
-> +	local debugfs_dir=$(ls/sys/block/$dev/device/scsi_device/)
-> +	local debugfs_file="/sys/kernel/debug/scsi_debug/$debugfs_dir/corrupt"
-> +
-> +	if [ ! -f "$debugfs_file" ]; then
-> +		_notrun "scsi_debug corruption injection not supported"
-> +	fi
-> +
-> +	if [ "$last" -eq 1 ]; then
-> +		echo "adding to $phys_sector" >> $seqres.full
-> +		phys_blk=$((phys_blk + (128 * blksz / 512) - 1))
+On Tue, Sep 08, 2026 at 07:22:26AM -0700, Darrick J. Wong wrote:
+> > +# Start rpcbind if it is not already running.
+> > +_start_rpcbind()
+> > +{
+> > +	rpcinfo -p localhost > /dev/null 2>&1 && return 0
+> > +	rpcbind 2>> $seqres.full || _notrun "Cannot start rpcbind"
+> > +	/usr/sbin/rpc.statd 2>> $seqres.full || _notrun "Cannot start rpc.statd"
+> > +	/usr/sbin/rpc.idmapd 2>> $seqres.full || _notrun "Cannot start rpc.idmapd"
+> > +	/usr/sbin/nfsdcld 2>> $seqres.full || _notrun "Cannot start nfsdcld"
+> 
+> Aren't these daemons usually configured as system services?
+> 
+> # service rpcbind start
+> 
+> etc?
 
-Maybe you want this to be phys_sector and not phys_blk.
+They usually are, but doing that as part of a test feels wrong.
+Adding the relevant maintainers and list.
+
+> 
+> > +}
+> > +
+> > +# Stop rpcbind.
+> > +_stop_rpcbind()
+> > +{
+> > +	pkill rpcbind 2>/dev/null
+> > +}
+> > +
+> > +# Start the NFS server if not already running.
+> > +_start_nfsd()
+> > +{
+> > +	rpcinfo -p localhost 2>/dev/null | grep -q nfs && return 0
+> > +	rpc.nfsd 2>> $seqres.full || _notrun "Cannot start rpc.nfsd"
+> > +	rpc.mountd 2>> $seqres.full || _notrun "Cannot start rpc.mountd"
+> > +}
+> > +
+> > +# Stop the NFS server.
+> > +_stop_nfsd()
+> > +{
+> > +	rpc.nfsd 0 2>/dev/null
+> > +	pkill rpc.mountd 2>/dev/null
+> 
+> If the system under test has nfs filesystems mounted, won't killing
+> those daemons also break the mounts?
+> 
+> I think that might break testing of nfs itself, and nfs-booted testing
+> nodes as well?
+
+Possibly.  I guess if we want to save we need to launch a container
+or at least a network namespace this is bound too. 
