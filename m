@@ -1,118 +1,57 @@
-Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 283A04BFE84
-	for <fstests@vger.kernel.org>; Thu, 10 Sep 2026 00:05:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07621339375;
+	Thu, 10 Sep 2026 01:59:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788998714; cv=none; b=JmYDVk8+hhKHXb8HnI9pFVDMY9lBDkeH5LaTqy8fFj4/zCgiuXlphgFUAsgNhJ8Q0zb5eahGhntg6xhuQQKSIGxVsOQjQbiCFTmRyDSyGtZT4Qwa4rSnXy/F2nCGxGi3lFUeTis35xeATvGi1It0tQIoU1ZdGx7fdfS6eXmUYVY=
+	t=1789005559; cv=none; b=S0JupPK1teTYBHmgyN2oUFYSaj2IupEK8i/+uLX1ruW8ICUyTbsUTrk7SgdJnxmCBU0RkzfvVbqid+CM8kWPBFa5DIEkRobYS1UXwibmbpy6jJKP+FErNLyv1PyhV60PmOL6A9SnCm3NncgQxS/lhoJ7PrQWH9ZSjTZAyYrOL/U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788998714; c=relaxed/simple;
-	bh=vPGGigZtbn609VllmdxIrfgs2wVQVwK4tTE8Lofg/mA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=hTGhWuarVmZI45KMRcD1qDPecTMwFeuo67hjPet0ghHAZkYWMDQI5EHW9w10ns7b5980I7BTZvVf8gkt7RzWipJaq9vMlz2p9/dq6bl0cwCb5CMa8lYNn5eqRty+K6nPLSWLZTD7f7ODQTJJUsBff7+IcYNMoGn23eLn1zAaX0w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=n/unJEpP; arc=none smtp.client-ip=209.85.128.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
+	s=arc-20240116; t=1789005559; c=relaxed/simple;
+	bh=yMcLrII1F9t9n6wEoypnjFH0EXjbZPj8dvKx14Q5Mic=;
+	h=To:Cc:Subject:From:In-Reply-To:Message-ID:References:Date:
+	 MIME-Version:Content-Type; b=Em/25n4H1ZirXjIOEOA95p3Y1WZUU8PsuKoIUOmho2bYC2vCO93P9kPW8sXsMynRMyf4AKf529Qwoir3W/SINGh7XgMwrfX6kIICZmR0dDYDlgX1pj6IcvL9ByioVAj6kfojKVfFqSoGbM28q9a7gwkvL+lllt7Svi1/6qtxpr0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ccA61knI; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="n/unJEpP"
-Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-857ff9fef54so64068197b3.1
-        for <fstests@vger.kernel.org>; Wed, 09 Sep 2026 17:05:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1788998712; x=1789603512; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=SBS5mNZmCsiLBp7HvXFMoNdv6DnLngpLQ6EQEUK1Hco=;
-        b=n/unJEpP0izSh1Guwp4X1e84gw4dp4dz85xPeBi/uLDts4snOuJtwQDOeeqUw2yCFJ
-         3CuuMg0OUb3mrL84n+JH3z/aHbOizez/8KSKUmtC6RllS7u9xNJ/lBJTPr571R2P6Sub
-         XDZfNQsAYQUlQRMFOjNFsX+ThucsM/laHB7onnNMiBACKnBErZl+PDqldWSDBmn9MhRS
-         ExQLIPGzuJHa0YcRH0yIRO3xfoDLOmAatrWku/WXP2dJNtyHP7FViQxA+hELPA1oQfnr
-         RWAiLZs5ljOt2QcwFdG3h79R1TBlDCOFNFo3KSnuO4uW+cx1Yxa9iWHyvL1J1wETLKHM
-         36Hw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788998712; x=1789603512;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=SBS5mNZmCsiLBp7HvXFMoNdv6DnLngpLQ6EQEUK1Hco=;
-        b=XoJgok4jrQsdOK9RV4PX21A9ArIPfdyt+Lkrzq7NpapglUCw5Mprj8PK2jvMUshgao
-         MqFVxbF+sdRXoxSNiafx7XbOSZVRGWU+EnRiSt57b9Q4TppUpxEu1kVrYBjST3cHw/9F
-         llJ8Cs4/0vtWPCzTh9Em/M5+0lrCeiSuS46jqN89vxeH7tTe+ZnWdXczmKGZmrQubiqv
-         cHVWuhc0vsJsvHu+YW7F7Lcudb0IrqQoQoCQFCobByWfDVv0+ETZE3ds+wrouHvy9fho
-         jFY8RG1eyFzQmDTB4bFBjE+lRdd2l3Er/H2nKbV8NuxunXNnOrwVXY4whBMKbfcYl3Wi
-         6wUg==
-X-Forwarded-Encrypted: i=1; AKwUvBwtyxLTFKeRNg9kM+GGS8fBW+WyJVImsBLeQet5QlRj+38zqubpR6LxEYRUbI22z+twUQ0NGegp@vger.kernel.org
-X-Gm-Message-State: AFuF++mx0lJuKEV7nthjWsmSLaz9vUs3WvZolVl5/OfrQaQeSVRJGyA/
-	orHHVGOwn3neyyEbXuvpIaoYpfni6rKPXfG6GC4QIFFp/tIERGA01jhLBxWYBActYN8=
-X-Gm-Gg: AYBFou3shxvRvTvRpLJ032ZobRH2V/H7sLqrlGY75PEn8Buoj2uDsnns2cdk9f6dwvS
-	7s8oskc9I//rBay4y3xeBqNXgSFhAy2GijVuh74KBqB0lzADj7OKvR5eyKM8WaXfa/LyKQXwIIi
-	88sAoj1X9OIEsE5TLqSVYyNsQukXGtmJKUikQHtfobR/ZJ5DYWar54sV0WHdEnaasIiiuUpcnd1
-	6Yj9M8USsJAhmTfk9vzMKCZt5A4tfbfQFC1Anv9cvhoDzKz+s4j/VAzAQ2BJxQwsnuteMD94Z7h
-	/T8yJQWpzZMcRO//h0lWHxuMadXqeaRWawaYt38ZiAV4dar1bW1/tiPhtXIlENYE1NbNCqJFfJG
-	UfGtefEj7JooPXrgvkl49FSjkXNL3jBBT/cOkynmZbx1s1ZtXw5DexafOHOC1VE1qJ/vFq7ueW3
-	iZ8IAamnqrU+2a8SBa6wqrZXk3rqI8Nu4O0m8Fn1OeP91xjbdi4xqL1Xw6i6mTngNTTrtS8vUBG
-	jQzdk6VSsbFj3GDKIpEljQxjDNiBTNNm1T3NLdCIQ7ucbZAXod5rd4IC1ihwI9XNl9OW5I86poF
-	rZj5o6vCqxV4rtaYi4ns/I16I4ccg3VGtlWdFLM=
-X-Received: by 2002:a05:690c:dc2:b0:870:47a0:6fce with SMTP id 00721157ae682-871225989c2mr154470257b3.4.1788998711977;
-        Wed, 09 Sep 2026 17:05:11 -0700 (PDT)
-Received: from pop-os.attlocal.net ([2600:1700:6476:1430:bfe2:d67c:7903:eb5e])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-8714b62503dsm118699177b3.38.2026.09.09.17.05.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 09 Sep 2026 17:05:10 -0700 (PDT)
-From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: zlang@redhat.com,
-	fstests@vger.kernel.org
-Cc: glaubitz@physik.fu-berlin.de,
-	vdubeyko@coreweave.com,
-	linux-fsdevel@vger.kernel.org,
-	frank.li@vivo.com,
-	Viacheslav Dubeyko <slava@dubeyko.com>
-Subject: [PATCH] xfstests: exclude hfs/hfsplus from generic/339 run
-Date: Wed,  9 Sep 2026 17:04:50 -0700
-Message-ID: <20260910000449.747189-2-slava@dubeyko.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ccA61knI"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6C15D1F0089A;
+	Thu, 10 Sep 2026 01:59:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1789005557;
+	bh=XzoY9CGQ2h20Uwy8PDrDd7+SbG37XW+ZqPfbqM5fceU=;
+	h=To:Cc:Subject:From:In-Reply-To:References:Date;
+	b=ccA61knIPjqgLDYrX68Khye42Pb5D/3JGsZq1PWYdUg9nGtgm3u7w8BduIdeSYeew
+	 WLoHhXXhu0YQHN2ywThdfRyrKMLzVvQqD5sU7jWImCPIlbmzdcAFyssUOsukCNPCpM
+	 dbLfVZOvmmne1X5uENztjIfVCypNVwbsTTnrEsHez27OTdFs9h/iplcBVTN6lZhv67
+	 57vkefW7zGrrNB3HqjjnkSjWD/SSIanuPPCus4HzrQzYBnsb+eCOYLkTXBpO77BcrJ
+	 Y2kafVM/c9lrbeEgJSk07O6ok4kgLzHOw2JpXsY8/twSN8qkU0zcBGJf7b021jya3w
+	 WzuPIfs9RWSUw==
+To: John Garry <john.garry@linux.dev>
+Cc: James.Bottomley@HansenPartnership.com,  mkp@kernel.org,
+  linux-scsi@vger.kernel.org,  djwong@kernel.org,  hch@lst.de,
+  fstests@vger.kernel.org,  bvanassche@acm.org
+Subject: Re: [PATCH] scsi: scsi_debug: default to a higher throughput config
+From: "Martin K. Petersen (Oracle)" <mkp@kernel.org>
+In-Reply-To: <20260902092844.1741533-1-john.garry@linux.dev> (John Garry's
+	message of "Wed, 2 Sep 2026 10:28:44 +0100")
+Message-ID: <yq1ecf1c1ez.fsf@mail.kernel.org>
+References: <20260902092844.1741533-1-john.garry@linux.dev>
+Date: Wed, 09 Sep 2026 21:59:16 -0400
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 
-The dirhash_collide generates filenames from arbitrary random
-bytes (only '.' and '/' are filtered out), which are not valid
-UTF-8 in general. Catalog names on both classic HFS and HFS+ are
-Unicode. Feeding random bytes causes fsck to report "Illegal name"
-or catalog corruption that has nothing to do with directory
-hash-collision handling, which is what this test is actually meant
-to exercise.
 
-This patch excludes HFS/HFS+ file systems from generic/339 run.
+John,
 
-Signed-off-by: Viacheslav Dubeyko <slava@dubeyko.com>
----
- tests/generic/339 | 9 +++++++++
- 1 file changed, 9 insertions(+)
+> Currently the default config goes not give as high a throughput as
+> some would like.
 
-diff --git a/tests/generic/339 b/tests/generic/339
-index bf8f7729..5cc1086f 100755
---- a/tests/generic/339
-+++ b/tests/generic/339
-@@ -17,6 +17,15 @@ _begin_fstest auto dir
- _require_scratch
- _require_test_program "dirhash_collide"
- 
-+# dirhash_collide generates filenames from arbitrary random bytes (only
-+# '.' and '/' are filtered out), which are not valid UTF-8 in general.
-+# Catalog names on both classic HFS and HFS+ are Unicode. Feeding random
-+# bytes causes fsck to report "Illegal name" / catalog corruption that has
-+# nothing to do with directory hash-collision handling, which is what this
-+# test is actually meant to exercise.
-+_exclude_fs hfs
-+_exclude_fs hfsplus
-+
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
- 
+Applied to 7.4/scsi-staging, thanks!
+
 -- 
-2.43.0
-
+Martin K. Petersen
