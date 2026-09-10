@@ -1,57 +1,120 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07621339375;
-	Thu, 10 Sep 2026 01:59:17 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4F6FB3C3F56;
+	Thu, 10 Sep 2026 09:45:52 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789005559; cv=none; b=S0JupPK1teTYBHmgyN2oUFYSaj2IupEK8i/+uLX1ruW8ICUyTbsUTrk7SgdJnxmCBU0RkzfvVbqid+CM8kWPBFa5DIEkRobYS1UXwibmbpy6jJKP+FErNLyv1PyhV60PmOL6A9SnCm3NncgQxS/lhoJ7PrQWH9ZSjTZAyYrOL/U=
+	t=1789033555; cv=none; b=s4Wdov0YcLeOIbENo5g3g+uwmEBrjfzJlme9QsFB+HWmCFf2vHZPn4dPPycOeHzqCJdJleM81FLhtoG+CvPx+grFZ9nuG1Nbcbt4xBB+fw0lbU2SqJYLx1mGcs220UbE1I6dmY25lxrARBiIcq2S5CE/WtxPSJZ00GMactChKGo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789005559; c=relaxed/simple;
-	bh=yMcLrII1F9t9n6wEoypnjFH0EXjbZPj8dvKx14Q5Mic=;
-	h=To:Cc:Subject:From:In-Reply-To:Message-ID:References:Date:
-	 MIME-Version:Content-Type; b=Em/25n4H1ZirXjIOEOA95p3Y1WZUU8PsuKoIUOmho2bYC2vCO93P9kPW8sXsMynRMyf4AKf529Qwoir3W/SINGh7XgMwrfX6kIICZmR0dDYDlgX1pj6IcvL9ByioVAj6kfojKVfFqSoGbM28q9a7gwkvL+lllt7Svi1/6qtxpr0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ccA61knI; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789033555; c=relaxed/simple;
+	bh=csESozxErtQjNOPRbAd1+0bBzb9dIpicyIwuiqnP10A=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=lp6CR1IUpmYfwDJ61qOjGFwxwIzU6oiIsk3RwD6JgIr1J2IFq0vP3FRFpVBHMjFfWir4ZVqidODH/k9/GTS30y4fUuktSYj1Kzbt5ITQKS2G0sW/PKgR5dK+WqGjp3g/fNY3w562C1Y4CgXE85/KoXBHJ19jJDx6VzBA2RJGg/o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UEYdSSOs; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ccA61knI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6C15D1F0089A;
-	Thu, 10 Sep 2026 01:59:17 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UEYdSSOs"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4A0131F000FF;
+	Thu, 10 Sep 2026 09:45:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789005557;
-	bh=XzoY9CGQ2h20Uwy8PDrDd7+SbG37XW+ZqPfbqM5fceU=;
-	h=To:Cc:Subject:From:In-Reply-To:References:Date;
-	b=ccA61knIPjqgLDYrX68Khye42Pb5D/3JGsZq1PWYdUg9nGtgm3u7w8BduIdeSYeew
-	 WLoHhXXhu0YQHN2ywThdfRyrKMLzVvQqD5sU7jWImCPIlbmzdcAFyssUOsukCNPCpM
-	 dbLfVZOvmmne1X5uENztjIfVCypNVwbsTTnrEsHez27OTdFs9h/iplcBVTN6lZhv67
-	 57vkefW7zGrrNB3HqjjnkSjWD/SSIanuPPCus4HzrQzYBnsb+eCOYLkTXBpO77BcrJ
-	 Y2kafVM/c9lrbeEgJSk07O6ok4kgLzHOw2JpXsY8/twSN8qkU0zcBGJf7b021jya3w
-	 WzuPIfs9RWSUw==
-To: John Garry <john.garry@linux.dev>
-Cc: James.Bottomley@HansenPartnership.com,  mkp@kernel.org,
-  linux-scsi@vger.kernel.org,  djwong@kernel.org,  hch@lst.de,
-  fstests@vger.kernel.org,  bvanassche@acm.org
-Subject: Re: [PATCH] scsi: scsi_debug: default to a higher throughput config
-From: "Martin K. Petersen (Oracle)" <mkp@kernel.org>
-In-Reply-To: <20260902092844.1741533-1-john.garry@linux.dev> (John Garry's
-	message of "Wed, 2 Sep 2026 10:28:44 +0100")
-Message-ID: <yq1ecf1c1ez.fsf@mail.kernel.org>
-References: <20260902092844.1741533-1-john.garry@linux.dev>
-Date: Wed, 09 Sep 2026 21:59:16 -0400
+	s=k20260515; t=1789033552;
+	bh=VyWNnrPW/HP25ItR9KF1992mjUCoCMkFMvf3FwtLiI0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=UEYdSSOsH+1gdsAvcElFZKtXkZho4L7TCrJ1zGphMgNcst3uLprux2fCTW6r+nTZY
+	 z86AB9LyV8ZCIsTNw9ttNVgCRvJvZ923wRKYOBhw27XWdtj5VGGFjVNStdCjNSrvR3
+	 Ow/CBUaqli9kbYDv+Mw57xf2Qe6uP9uD/D2LmppOlYCnL1PavAtIu8VPh/mEMfRRDC
+	 Y92JNrEHG4uliV73f5J9RoWER9F6TumKag0ng7NwCtXpIIYYmkSansW/T4NGxmXnq8
+	 i/Szf/njGyC7CWm6IVKEsRvDeIVyKXj1ZmRGyMSak7BXwygckYt6Bf9QButrhVZwAP
+	 xSpGsLEQBu8/Q==
+Date: Thu, 10 Sep 2026 11:45:47 +0200
+From: Carlos Maiolino <cem@kernel.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@infradead.org>, zlang@kernel.org, 
+	linux-xfs@vger.kernel.org, fstests@vger.kernel.org, jack@suse.cz, 
+	Chuck Lever <cel@kernel.org>, Jeff Layton <jlayton@kernel.org>, linux-nfs@vger.kernel.org
+Subject: Re: [RFC PATCH 1/2] common/nfs: add management helpers
+Message-ID: <aqJ8BdzSlasSNXRd@andromeda.toxiclabs.cc>
+References: <20260907164054.111393-1-cem@kernel.org>
+ <20260907164054.111393-2-cem@kernel.org>
+ <20260908142226.GL839663@frogsfrogsfrogs>
+ <aqD4zBD06P1LJKM2@infradead.org>
+ <20260909161342.GM839663@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260909161342.GM839663@frogsfrogsfrogs>
 
+On Wed, Sep 09, 2026 at 09:13:42AM -0700, Darrick J. Wong wrote:
+> On Tue, Sep 08, 2026 at 11:12:28PM -0700, Christoph Hellwig wrote:
+> > On Tue, Sep 08, 2026 at 07:22:26AM -0700, Darrick J. Wong wrote:
+> > > > +# Start rpcbind if it is not already running.
+> > > > +_start_rpcbind()
+> > > > +{
+> > > > +	rpcinfo -p localhost > /dev/null 2>&1 && return 0
+> > > > +	rpcbind 2>> $seqres.full || _notrun "Cannot start rpcbind"
+> > > > +	/usr/sbin/rpc.statd 2>> $seqres.full || _notrun "Cannot start rpc.statd"
+> > > > +	/usr/sbin/rpc.idmapd 2>> $seqres.full || _notrun "Cannot start rpc.idmapd"
+> > > > +	/usr/sbin/nfsdcld 2>> $seqres.full || _notrun "Cannot start nfsdcld"
+> > > 
+> > > Aren't these daemons usually configured as system services?
+> > > 
+> > > # service rpcbind start
+> > > 
+> > > etc?
+> > 
+> > They usually are, but doing that as part of a test feels wrong.
+> > Adding the relevant maintainers and list.
+> 
+> <nod> I guess for this test we actually want to launch our own nfs
+> daemons in a separate pid / network namespace so that they don't
+> interfere with nfs operations outside of the test (e.g. testing nfs
+> itself, nfsboot, etc)
+> 
+> > > 
+> > > > +}
+> > > > +
+> > > > +# Stop rpcbind.
+> > > > +_stop_rpcbind()
+> > > > +{
+> > > > +	pkill rpcbind 2>/dev/null
+> > > > +}
+> > > > +
+> > > > +# Start the NFS server if not already running.
+> > > > +_start_nfsd()
+> > > > +{
+> > > > +	rpcinfo -p localhost 2>/dev/null | grep -q nfs && return 0
+> > > > +	rpc.nfsd 2>> $seqres.full || _notrun "Cannot start rpc.nfsd"
+> > > > +	rpc.mountd 2>> $seqres.full || _notrun "Cannot start rpc.mountd"
+> > > > +}
+> > > > +
+> > > > +# Stop the NFS server.
+> > > > +_stop_nfsd()
+> > > > +{
+> > > > +	rpc.nfsd 0 2>/dev/null
+> > > > +	pkill rpc.mountd 2>/dev/null
+> > > 
+> > > If the system under test has nfs filesystems mounted, won't killing
+> > > those daemons also break the mounts?
+> > > 
+> > > I think that might break testing of nfs itself, and nfs-booted testing
+> > > nodes as well?
+> > 
+> > Possibly.  I guess if we want to save we need to launch a container
+> > or at least a network namespace this is bound too. 
+> 
+> Agreed, some isolation from the main system is necessary.
 
-John,
+Perhaps couldn't we just:
+	- start nfs server if not started
+	- only stop nfs server if we started it
 
-> Currently the default config goes not give as high a throughput as
-> some would like.
+And just take advantage of the server running if one is already there?
 
-Applied to 7.4/scsi-staging, thanks!
-
--- 
-Martin K. Petersen
+> 
+> --D
+> 
