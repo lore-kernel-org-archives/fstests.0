@@ -1,77 +1,76 @@
-Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
+Received: from mail-yx1-f52.google.com (mail-yx1-f52.google.com [74.125.224.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80CCB377ED7
-	for <fstests@vger.kernel.org>; Thu, 10 Sep 2026 20:13:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB217429CE8
+	for <fstests@vger.kernel.org>; Thu, 10 Sep 2026 21:14:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789071201; cv=none; b=SA7d3mZIqcoX0fmZBIXC+NH58UjZuFwpZDyVchbfljC4U28EA3DHghQlVMysYSELsJ5TaBYyRGBq78UFP4lkmTGcyK2KdMjr+J5EhDe4qxBTa9svMmJD45V8AGcVVnsknPPQx8hgNqwoWPxIVQ5z4izW8Dipfkg8BHgRYWJ6tJk=
+	t=1789074863; cv=none; b=Gx2X5TMVMJ1tt9lEInL8oVwg/BdHpEx8Tm4h3kRm/639smLHFCESMmhG1vEXtpTWb6pRCdxZ+mfV0GgwNybLwa4O8poXTn8lOBDY0NxEfruDqdrr4gHt1dowl1+x5Lpi3XqqOfxIG9Z8hLnDrfjQCNdPCgA+YCljYSSW6McDwXw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789071201; c=relaxed/simple;
-	bh=Hx7GILGkHVxQZsZ4Pp5OLN+Ni+x/TR2uCF0JuD+o6Ks=;
+	s=arc-20240116; t=1789074863; c=relaxed/simple;
+	bh=5oE2uZvsUyaYXny0+JJJPSa84KiRPnythZashd3Qn4s=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=pwI5fd3Ca9VBDfiBIMElpB5Jcuxnc05Uh0ncyaPAkPsGIG+skQMQ9qMCBeytPFQEobYdY5ruf18s1YO9sITj53M3NqKrGXy2QiCN/SkARBA1oA6RJlSSkj+HDQ4dWwfWLn4bk3hTEBa7WD/oOltvF57Mlasfx9hSnJ6byHvEANw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=vk7prv2x; arc=none smtp.client-ip=209.85.128.172
+	 Content-Type:MIME-Version; b=AEgsUMrLm9MSzg9QPrs+xVkG0TksxLf9MVJIaDVFI75SigaLLTv2v7wxBH1BFndCHKm8fmuxbtk1JvqLHuWNU/qzYF6vAPD+6aivGkaziWHGxynx85atZGkFsXS8EZx0yCjGb3Ky3xitGb+Qsy2SpAwbKyqSu1X9NdJbs3uzu3s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=0gkTl/OJ; arc=none smtp.client-ip=74.125.224.52
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="vk7prv2x"
-Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-8664769db58so1043397b3.3
-        for <fstests@vger.kernel.org>; Thu, 10 Sep 2026 13:13:18 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="0gkTl/OJ"
+Received: by mail-yx1-f52.google.com with SMTP id 956f58d0204a3-67123200bf5so273041d50.2
+        for <fstests@vger.kernel.org>; Thu, 10 Sep 2026 14:14:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1789071197; x=1789675997; darn=vger.kernel.org;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1789074851; x=1789679651; darn=vger.kernel.org;
         h=mime-version:user-agent:content-transfer-encoding:content-type
          :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=Hx7GILGkHVxQZsZ4Pp5OLN+Ni+x/TR2uCF0JuD+o6Ks=;
-        b=vk7prv2xrdDGzyGRbV6CcDLk6EKwueTFC625l3stOzpsnmTgA8DAq1VYlRkTY3DiDk
-         bq/6l6iacSaVaiSCoTzJtvchLZ0KyBsalXBHBu+UMg0rG5qa78k7IWPQr5PkDqdSHnoz
-         Bx03L/8dcyFGuE/1TlAd9qHu5TWpGLLxj5WdkVz62vMI80y5ykDz69gLnMxcSCTMZFFc
-         0k54gN+lA8KxuEnEU3G0kHczcDFmhevlLIVrFV9yk/8NhdZZSZONE8UJre5zRoAvGniW
-         LkpUINqIFLjjesvtRKFAbf5lN+yEni4wkVdNiaIn+1Qelw44kGpfSwnp+T/9jTFz3sGz
-         LSRg==
+        bh=5oE2uZvsUyaYXny0+JJJPSa84KiRPnythZashd3Qn4s=;
+        b=0gkTl/OJmBjWfwJAbU4LrFEwm9ZOE8sbJErQ5DuRCrXF+JVUSKvesLUAehm+xHXX8j
+         emNADLursV5iwQlJ6QLQ1J+8jAe9iTuNezhpZD0bekGb4xRIAziTjpUJQ+cH7wspZqlA
+         4FLZEWiD0GMDYnM67EqdsoT2a8cWsrZBJ3hh/njJ2tdvx0CSiieIKPEsePQAQ1CMTm8r
+         kfLTQu/2LqzOnYca35ZYV96frEeTaC+wspg/dI9IkANwwXIqPeMEDbjdlAEccscgJdxe
+         Au0wbt5bSfm43T27bip4JxAJzxVasT70RV8Ra24TM2O2krt/UyvAElyziQinRN0DE8g7
+         05yw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1789071197; x=1789675997;
+        d=1e100.net; s=20251104; t=1789074851; x=1789679651;
         h=mime-version:user-agent:content-transfer-encoding:content-type
          :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
          :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to:content-type;
-        bh=Hx7GILGkHVxQZsZ4Pp5OLN+Ni+x/TR2uCF0JuD+o6Ks=;
-        b=NDQJ9ZfKK7c4tDayEDLfNk+wQYcnPQaxN5jxT1SXvm1mK84ycOCbYSUPLKscEAccLm
-         WVVKdZ/HOGBqabZ7yphQd1WmrJpD9yPxiRtx2pV74Skl9Iv2fR54rQ7UD9rJ58sK63cF
-         uYNNrEXLaZ/RQDyUnCTd6JYbDd5ublHdLEb4M9PHydcUrH2ZEnJ+1ihEPKf0LVvZ27SN
-         X3w1YmoDt6SMSxhFvVFBAQYkGGzQk5jCXvoSWPlD7mrON/EidUwRcuXZwR+V4m9fP3qZ
-         +BbGZT0znFYJsNtoA8XdGBqPRDBoJjQw8hOo73AYDnNTTdFRF/Ky+LEsLq76EfnzkVJP
-         oo0Q==
-X-Forwarded-Encrypted: i=1; AKwUvBzt//iOnxxbSYWk3qS+AzcxmV13hKmUGkhAyQu+muVueD8Nf5lKaRrntmgaUWwVWa2f1zxkCDbY@vger.kernel.org
-X-Gm-Message-State: AFuF++nnciCEjNh5JtIlEVOW/N6MOiaQ0dIJpcrQ1Hf7woIKuoH5Ki+A
-	Damo7UkqkddS3hg/P5vKF6M5+PG6FnDZ1eZ4NdatIb1ht7haAyGNsy0Ku7ZWUdqtMVY=
-X-Gm-Gg: AYBFou0sdac4VDX+/YVexj9iYxZ2lqpAoiyrxohA5xLrqSZirXWY/hJrHAYR8lr85q3
-	iXTtmAag7PosdAAhNiDAsPXJ1cICAKdR+3DDDo7uyQny9BSXJ0wcm7dnLWlL9BFJr6Wfn0voVGG
-	SYnFM6DlZ3X+dDFTSfa4sio0KhRz6nxC2Y6FoewtmK3slusq66zJgvtYRzsd7PSWer5oaIlDA+O
-	CjKiV+SqvZhIhmyuiNp46VyiEMB8/tV/nkVDyQhC5deuDi6MjObIKQRuSCV1qkZxSX828rS5p/Y
-	Ii1t4Z692OedDLEjyMWtUYAZ0kexM31PEYKPWCkOsPFulbQq7JMJ1I1HAUuTV0MJyph8e1xeYc2
-	/vyeyTFXRD3gBNw23AuwxmXvbTBePGIOnqfFuRbl3lsgYqi7IUu+lzntL8bvFw6tbSYrSoOpFXP
-	VpuKM1i/Wp32ZEiuAtW2uFI58MIDqb5wxqTPrTtDt2sQiy/UiwPjEtdqsgxSSlFF8ALxdDKLzUX
-	dZkKxW5zHnRS70pXEqUCFTZURdsx/eTXb3tO2/pV3IfCBAbhsHLULrCbLrIgnCczmjjkmerMxtX
-	TygTCk0P9RBdtELWABgl0mSN/hUqoSwMYtxhAfdbhRdogDMWDCyidN3zkzVHT2ut7b93c5oSZDQ
-	=
-X-Received: by 2002:a05:690c:d83:b0:855:37f6:a73c with SMTP id 00721157ae682-884ad33b089mr5792907b3.1.1789071196769;
-        Thu, 10 Sep 2026 13:13:16 -0700 (PDT)
+        bh=5oE2uZvsUyaYXny0+JJJPSa84KiRPnythZashd3Qn4s=;
+        b=cpGz2hYCtKQNswws9G2slDagOrPBdUVpEy5KRbWvSOCx6GYHvYMJV2L4TTKzGvNGAb
+         UKFoTuJAez8oS2RGsDDX8PIfneEICO4fcOEWiopKNl3CP5wBnXx4njdgG2CH4UhtYOH/
+         ui6mBidHUNRcATx2YjPKufBu/VDENytL0KEKphbTANQymighbppNsNRE6vC2M/obbZ8w
+         zdTTzvasI4NgNpnTuL92N30Eo9UiQdsNksHOe+ED2Jiyp2W2aAZP6jd577tyvqwR7ycd
+         62RQ9uRdSWe4Fl3mXpTJlHQfDrBJnx/veX7e0Wx5937vMbKll3j8cxi3cykou4ak8WNo
+         Ux5Q==
+X-Forwarded-Encrypted: i=1; AKwUvBwvGhqluQHNvmlDkzlQPw5IOwJxPbB3svLoN3Af+vnocihQpb7s/2kZuMBM52W4s/qx64/fipgo@vger.kernel.org
+X-Gm-Message-State: AFuF++m+5P/6EP2GNwZuzsRInL2UKzHuTZ4lrgbEISMduiOslTL5+V89
+	ZnOGU53cLudrmnW2W+5Sc9UCW2NMtxbAPcpWC+C6ZzgLCfbZPrR7mpAtZNaRk1sX8QU=
+X-Gm-Gg: AYBFou1K4de2Sgz4En3SI2SqQnGDXGD5Mz1MYywtmzsJONand1hlIRgvGYMz7vOezb/
+	gz8F9WPpX1kcxyIICiQr7AlFVmSCTxLu4PHvqXhektyYHErU2TlKno9Iyx85LI+lF6VFUlEQL9i
+	7llw7xNZDO9PzEZeqaUmK5vtzcKV7F4gobPhpYApOSrdy36fYfnn2qG6jDhIg/z9MKkJbTaLbaY
+	SLV3xWJ3cl92PhjUXrmfsB1/KFMMo1Jy/yoEgCNfnkfmBCzxe4xhX+B03FlJatoItXqAotwU/39
+	mxzFjLCnGxYtJhcJO97ptb1Zhj+VQuvykh1wR4xfZYVzNNpzNTVoIFo3SXCnQz8eJPKV1kNTPr+
+	E+Im14Fi70ZByx0dNr+Qm22jM1M1swFTf/DF6Ua9qARcSQ685t5zZQqRrEJwuBR6lFOF3mMjWiD
+	yZR2JmjWIR4qolAGHyoH+HojMRHnQP/RLtrkubJDfeCkCWFs2LLMlyRogVMYC1OXYPsFD/2Di4T
+	n4lJm2yzni2/LHYkIdJEI//YRnLIOqpG7pd+5Wqt/H4a9YlHfBAvgXE7YWty0+/suA397L/Uj9I
+	i9wWfs/C15m68HusVQOXXgemc6PUoIxUjFRasRVKH589bVtq4dSGBjb4FjRbKaf3
+X-Received: by 2002:a05:690e:12c2:b0:66f:c1bc:4095 with SMTP id 956f58d0204a3-6712472b6cbmr664487d50.88.1789074850705;
+        Thu, 10 Sep 2026 14:14:10 -0700 (PDT)
 Received: from ?IPv6:2600:1700:6476:1430:2670:dacd:b84e:82bb? ([2600:1700:6476:1430:2670:dacd:b84e:82bb])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-8847db40648sm4125197b3.4.2026.09.10.13.13.13
+        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-67125df80e6sm155378d50.10.2026.09.10.14.14.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 10 Sep 2026 13:13:14 -0700 (PDT)
-Message-ID: <730a395bb6eed86bdff7eb21668f4f1fb42f664f.camel@dubeyko.com>
+        Thu, 10 Sep 2026 14:14:10 -0700 (PDT)
+Message-ID: <f156a3665404751b29fd21d9ee136f2d66d5fe87.camel@dubeyko.com>
 Subject: Re: [PATCH] xfstests: exclude hfs/hfsplus from generic/339 run
 From: Viacheslav Dubeyko <slava@dubeyko.com>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: zlang@kernel.org, fstests@vger.kernel.org, glaubitz@physik.fu-berlin.de,
+To: Theodore Tso <tytso@mit.edu>, Christoph Hellwig <hch@infradead.org>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, glaubitz@physik.fu-berlin.de,
  	vdubeyko@coreweave.com, linux-fsdevel@vger.kernel.org, frank.li@vivo.com
-Date: Thu, 10 Sep 2026 13:13:12 -0700
-In-Reply-To: <aqJ--AqubS-CWiV-@infradead.org>
+Date: Thu, 10 Sep 2026 14:14:08 -0700
+In-Reply-To: <aqKzDpccJgkmzC5E@mit.edu>
 References: <20260910000449.747189-2-slava@dubeyko.com>
-	 <aqJ--AqubS-CWiV-@infradead.org>
+	 <aqJ--AqubS-CWiV-@infradead.org> <aqKzDpccJgkmzC5E@mit.edu>
 Autocrypt: addr=slava@dubeyko.com; prefer-encrypt=mutual;
  keydata=mQINBGgaTLYBEADaJc/WqWTeunGetXyyGJ5Za7b23M/ozuDCWCp+yWUa2GqQKH40dxRIR
  zshgOmAue7t9RQJU9lxZ4ZHWbi1Hzz85+0omefEdAKFmxTO6+CYV0g/sapU0wPJws3sC2Pbda9/eJ
@@ -126,26 +125,59 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-On Thu, 2026-09-10 at 02:57 -0700, Christoph Hellwig wrote:
-> On Wed, Sep 09, 2026 at 05:04:50PM -0700, Viacheslav Dubeyko wrote:
-> > The dirhash_collide generates filenames from arbitrary random
-> > bytes (only '.' and '/' are filtered out), which are not valid
-> > UTF-8 in general. Catalog names on both classic HFS and HFS+ are
-> > Unicode. Feeding random bytes causes fsck to report "Illegal name"
-> > or catalog corruption that has nothing to do with directory
-> > hash-collision handling, which is what this test is actually meant
-> > to exercise.
+On Thu, 2026-09-10 at 09:49 -0400, Theodore Tso wrote:
+> On Thu, Sep 10, 2026 at 02:57:12AM -0500, Christoph Hellwig wrote:
+> > On Wed, Sep 09, 2026 at 05:04:50PM -0700, Viacheslav Dubeyko wrote:
+> > > The dirhash_collide generates filenames from arbitrary random
+> > > bytes (only '.' and '/' are filtered out), which are not valid
+> > > UTF-8 in general. Catalog names on both classic HFS and HFS+ are
+> > > Unicode. Feeding random bytes causes fsck to report "Illegal
+> > > name"
+> > > or catalog corruption that has nothing to do with directory
+> > > hash-collision handling, which is what this test is actually
+> > > meant
+> > > to exercise.
 >=20
-> If user file name creation manage to trigger fsck complaints, you
-> need
-> to righten the input checks in the file systems first to fix this.
->=20
-> We can then find a programmatic way to deal with these rejects in
-> xfstests, as ext4/f2fs in case insensiive mode probably have the same
-> issue.
+> I'm curious --- does HFS/HFS+ reject unofficial Unicode characters
+> such as those used by Klingon?=C2=A0 (Klingon is an invented/artificial
+> language, so it's considered out of scope by Unicode; so Star Trek
+> enthusiasts are camping on an unofficial block of the Unicode code
+> set.)
 
-I see your point. And I really like your suggestion. But what is your
-vision of the proper way to check the validity of Unicode symbols?
+I need to double check which particular Unicode characters fsck.hfsplus
+treats as invalid one.
+
+>=20
+> Invalid Unicode characters could also happen because newer versions
+> of Unicode have added new emoji's, which might be added as support in
+> the mobile handset userspace, but since we aren't regularly updating
+> the Unicode tables, they might still be considered invalid if you
+> enable strict mode in ext4/f2fs.
+>=20
+> > If user file name creation manage to trigger fsck complaints, you
+> > need
+> > to righten the input checks in the file systems first to fix this.
+> >=20
+> > We can then find a programmatic way to deal with these rejects in
+> > xfstests, as ext4/f2fs in case insensiive mode probably have the
+> > same
+> > issue.
+>=20
+> Well, strict mode isn't enabled by default, since users might want to
+> use Klingon or emoji's with a skin color that matches their own.=C2=A0 An=
+d
+> no one has been invested enough to continuously update our Unicode
+> tables, and add support in the userspace tooling for upgrading the
+> Unicode version in the file system superblock (which would then break
+> compatibility with older kernels --- for example, if they downgrade
+> to
+> an older version of Android, etc.)
+>=20
+> Isn't Unicode **fun**?=C2=A0 :-)
+
+Could we have any generic way to detect that file system could not
+support some Unicode characters?
 
 Thanks,
 Slava.
+
