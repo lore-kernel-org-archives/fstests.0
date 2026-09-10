@@ -1,110 +1,118 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02F2B569F04;
-	Wed,  9 Sep 2026 16:13:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 283A04BFE84
+	for <fstests@vger.kernel.org>; Thu, 10 Sep 2026 00:05:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788970424; cv=none; b=bcJP8+4C/D7sW1vBJWJ5jr1ZTMlQ9krA2OnChW3BKNl75Pb6Z2DZgCaPxmrfx7187JnjJtZeJlTY53Ai3vI3Z32zxqouwpCVLlZYXxSnERDV6++cVzzXFZsxXDUJLlecW7/ZuntLCv3e0q9WhD2Gv3S9lt7fnqYXWsdgQ45hIHc=
+	t=1788998714; cv=none; b=JmYDVk8+hhKHXb8HnI9pFVDMY9lBDkeH5LaTqy8fFj4/zCgiuXlphgFUAsgNhJ8Q0zb5eahGhntg6xhuQQKSIGxVsOQjQbiCFTmRyDSyGtZT4Qwa4rSnXy/F2nCGxGi3lFUeTis35xeATvGi1It0tQIoU1ZdGx7fdfS6eXmUYVY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788970424; c=relaxed/simple;
-	bh=RBJxlg/idykcuwi3HDJDLPf7t991+IfOkI0IzHDwDN0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KQJI9tUU4Zmq8RxcVzme1dPPl6xgBxYcyu/ISOBFlSsXdUPxGNclfEUw5xfc6FR0wWPbQA7fxHTxW/y47irocicOoWSQ+G7teSmcg2JrYlkiS+pEty2cN2kBiHz5tfYhjV5jF+u+opAio2rBad5VSnIQtZkCe3cvMHNx42PMV4o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JIOzgYYJ; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788998714; c=relaxed/simple;
+	bh=vPGGigZtbn609VllmdxIrfgs2wVQVwK4tTE8Lofg/mA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=hTGhWuarVmZI45KMRcD1qDPecTMwFeuo67hjPet0ghHAZkYWMDQI5EHW9w10ns7b5980I7BTZvVf8gkt7RzWipJaq9vMlz2p9/dq6bl0cwCb5CMa8lYNn5eqRty+K6nPLSWLZTD7f7ODQTJJUsBff7+IcYNMoGn23eLn1zAaX0w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com; spf=pass smtp.mailfrom=dubeyko.com; dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b=n/unJEpP; arc=none smtp.client-ip=209.85.128.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dubeyko.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dubeyko.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JIOzgYYJ"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id D0D381F00A3A;
-	Wed,  9 Sep 2026 16:13:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788970422;
-	bh=9R6n5gAut7J0vGQO3tV0Eu91YgLXk3i204riuAduC7c=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=JIOzgYYJf7ydObpr+295j/CRPFkQFFADV+Ly/dnEZKE84U9LyQlCFRJZ8wjlNMUFu
-	 bzk8eNhiMGhm2xTAAXrDc1PULzuwncWdbej6HyMHoZxta2LNRfir98IhM/b1+Vuy+r
-	 VtO3DYMehjPlwOdFtctDpItoXnm6wy+47cpGo9Fus5nDmJ06ehTacjjHLMfpWl04+7
-	 7u1b4ywO+ZfwyCErQK1tWmIpQCvi7rgyQ8Oo5dIVbmJmjV/wDhFaV0trzmJ4mjF2Ax
-	 PtJEKVuO+QPj7EufEGaPjS6jIqu43BvoE+TEj89LgI5IL6hikDwKAv6KdToTRnYeUn
-	 8sroh8oOa4BoQ==
-Date: Wed, 9 Sep 2026 09:13:42 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: cem@kernel.org, zlang@kernel.org, linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org, jack@suse.cz, Chuck Lever <cel@kernel.org>,
-	Jeff Layton <jlayton@kernel.org>, linux-nfs@vger.kernel.org
-Subject: Re: [RFC PATCH 1/2] common/nfs: add management helpers
-Message-ID: <20260909161342.GM839663@frogsfrogsfrogs>
-References: <20260907164054.111393-1-cem@kernel.org>
- <20260907164054.111393-2-cem@kernel.org>
- <20260908142226.GL839663@frogsfrogsfrogs>
- <aqD4zBD06P1LJKM2@infradead.org>
+	dkim=pass (2048-bit key) header.d=dubeyko-com.20251104.gappssmtp.com header.i=@dubeyko-com.20251104.gappssmtp.com header.b="n/unJEpP"
+Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-857ff9fef54so64068197b3.1
+        for <fstests@vger.kernel.org>; Wed, 09 Sep 2026 17:05:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=dubeyko-com.20251104.gappssmtp.com; s=20251104; t=1788998712; x=1789603512; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=SBS5mNZmCsiLBp7HvXFMoNdv6DnLngpLQ6EQEUK1Hco=;
+        b=n/unJEpP0izSh1Guwp4X1e84gw4dp4dz85xPeBi/uLDts4snOuJtwQDOeeqUw2yCFJ
+         3CuuMg0OUb3mrL84n+JH3z/aHbOizez/8KSKUmtC6RllS7u9xNJ/lBJTPr571R2P6Sub
+         XDZfNQsAYQUlQRMFOjNFsX+ThucsM/laHB7onnNMiBACKnBErZl+PDqldWSDBmn9MhRS
+         ExQLIPGzuJHa0YcRH0yIRO3xfoDLOmAatrWku/WXP2dJNtyHP7FViQxA+hELPA1oQfnr
+         RWAiLZs5ljOt2QcwFdG3h79R1TBlDCOFNFo3KSnuO4uW+cx1Yxa9iWHyvL1J1wETLKHM
+         36Hw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1788998712; x=1789603512;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=SBS5mNZmCsiLBp7HvXFMoNdv6DnLngpLQ6EQEUK1Hco=;
+        b=XoJgok4jrQsdOK9RV4PX21A9ArIPfdyt+Lkrzq7NpapglUCw5Mprj8PK2jvMUshgao
+         MqFVxbF+sdRXoxSNiafx7XbOSZVRGWU+EnRiSt57b9Q4TppUpxEu1kVrYBjST3cHw/9F
+         llJ8Cs4/0vtWPCzTh9Em/M5+0lrCeiSuS46jqN89vxeH7tTe+ZnWdXczmKGZmrQubiqv
+         cHVWuhc0vsJsvHu+YW7F7Lcudb0IrqQoQoCQFCobByWfDVv0+ETZE3ds+wrouHvy9fho
+         jFY8RG1eyFzQmDTB4bFBjE+lRdd2l3Er/H2nKbV8NuxunXNnOrwVXY4whBMKbfcYl3Wi
+         6wUg==
+X-Forwarded-Encrypted: i=1; AKwUvBwtyxLTFKeRNg9kM+GGS8fBW+WyJVImsBLeQet5QlRj+38zqubpR6LxEYRUbI22z+twUQ0NGegp@vger.kernel.org
+X-Gm-Message-State: AFuF++mx0lJuKEV7nthjWsmSLaz9vUs3WvZolVl5/OfrQaQeSVRJGyA/
+	orHHVGOwn3neyyEbXuvpIaoYpfni6rKPXfG6GC4QIFFp/tIERGA01jhLBxWYBActYN8=
+X-Gm-Gg: AYBFou3shxvRvTvRpLJ032ZobRH2V/H7sLqrlGY75PEn8Buoj2uDsnns2cdk9f6dwvS
+	7s8oskc9I//rBay4y3xeBqNXgSFhAy2GijVuh74KBqB0lzADj7OKvR5eyKM8WaXfa/LyKQXwIIi
+	88sAoj1X9OIEsE5TLqSVYyNsQukXGtmJKUikQHtfobR/ZJ5DYWar54sV0WHdEnaasIiiuUpcnd1
+	6Yj9M8USsJAhmTfk9vzMKCZt5A4tfbfQFC1Anv9cvhoDzKz+s4j/VAzAQ2BJxQwsnuteMD94Z7h
+	/T8yJQWpzZMcRO//h0lWHxuMadXqeaRWawaYt38ZiAV4dar1bW1/tiPhtXIlENYE1NbNCqJFfJG
+	UfGtefEj7JooPXrgvkl49FSjkXNL3jBBT/cOkynmZbx1s1ZtXw5DexafOHOC1VE1qJ/vFq7ueW3
+	iZ8IAamnqrU+2a8SBa6wqrZXk3rqI8Nu4O0m8Fn1OeP91xjbdi4xqL1Xw6i6mTngNTTrtS8vUBG
+	jQzdk6VSsbFj3GDKIpEljQxjDNiBTNNm1T3NLdCIQ7ucbZAXod5rd4IC1ihwI9XNl9OW5I86poF
+	rZj5o6vCqxV4rtaYi4ns/I16I4ccg3VGtlWdFLM=
+X-Received: by 2002:a05:690c:dc2:b0:870:47a0:6fce with SMTP id 00721157ae682-871225989c2mr154470257b3.4.1788998711977;
+        Wed, 09 Sep 2026 17:05:11 -0700 (PDT)
+Received: from pop-os.attlocal.net ([2600:1700:6476:1430:bfe2:d67c:7903:eb5e])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-8714b62503dsm118699177b3.38.2026.09.09.17.05.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 09 Sep 2026 17:05:10 -0700 (PDT)
+From: Viacheslav Dubeyko <slava@dubeyko.com>
+To: zlang@redhat.com,
+	fstests@vger.kernel.org
+Cc: glaubitz@physik.fu-berlin.de,
+	vdubeyko@coreweave.com,
+	linux-fsdevel@vger.kernel.org,
+	frank.li@vivo.com,
+	Viacheslav Dubeyko <slava@dubeyko.com>
+Subject: [PATCH] xfstests: exclude hfs/hfsplus from generic/339 run
+Date: Wed,  9 Sep 2026 17:04:50 -0700
+Message-ID: <20260910000449.747189-2-slava@dubeyko.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aqD4zBD06P1LJKM2@infradead.org>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Sep 08, 2026 at 11:12:28PM -0700, Christoph Hellwig wrote:
-> On Tue, Sep 08, 2026 at 07:22:26AM -0700, Darrick J. Wong wrote:
-> > > +# Start rpcbind if it is not already running.
-> > > +_start_rpcbind()
-> > > +{
-> > > +	rpcinfo -p localhost > /dev/null 2>&1 && return 0
-> > > +	rpcbind 2>> $seqres.full || _notrun "Cannot start rpcbind"
-> > > +	/usr/sbin/rpc.statd 2>> $seqres.full || _notrun "Cannot start rpc.statd"
-> > > +	/usr/sbin/rpc.idmapd 2>> $seqres.full || _notrun "Cannot start rpc.idmapd"
-> > > +	/usr/sbin/nfsdcld 2>> $seqres.full || _notrun "Cannot start nfsdcld"
-> > 
-> > Aren't these daemons usually configured as system services?
-> > 
-> > # service rpcbind start
-> > 
-> > etc?
-> 
-> They usually are, but doing that as part of a test feels wrong.
-> Adding the relevant maintainers and list.
+The dirhash_collide generates filenames from arbitrary random
+bytes (only '.' and '/' are filtered out), which are not valid
+UTF-8 in general. Catalog names on both classic HFS and HFS+ are
+Unicode. Feeding random bytes causes fsck to report "Illegal name"
+or catalog corruption that has nothing to do with directory
+hash-collision handling, which is what this test is actually meant
+to exercise.
 
-<nod> I guess for this test we actually want to launch our own nfs
-daemons in a separate pid / network namespace so that they don't
-interfere with nfs operations outside of the test (e.g. testing nfs
-itself, nfsboot, etc)
+This patch excludes HFS/HFS+ file systems from generic/339 run.
 
-> > 
-> > > +}
-> > > +
-> > > +# Stop rpcbind.
-> > > +_stop_rpcbind()
-> > > +{
-> > > +	pkill rpcbind 2>/dev/null
-> > > +}
-> > > +
-> > > +# Start the NFS server if not already running.
-> > > +_start_nfsd()
-> > > +{
-> > > +	rpcinfo -p localhost 2>/dev/null | grep -q nfs && return 0
-> > > +	rpc.nfsd 2>> $seqres.full || _notrun "Cannot start rpc.nfsd"
-> > > +	rpc.mountd 2>> $seqres.full || _notrun "Cannot start rpc.mountd"
-> > > +}
-> > > +
-> > > +# Stop the NFS server.
-> > > +_stop_nfsd()
-> > > +{
-> > > +	rpc.nfsd 0 2>/dev/null
-> > > +	pkill rpc.mountd 2>/dev/null
-> > 
-> > If the system under test has nfs filesystems mounted, won't killing
-> > those daemons also break the mounts?
-> > 
-> > I think that might break testing of nfs itself, and nfs-booted testing
-> > nodes as well?
-> 
-> Possibly.  I guess if we want to save we need to launch a container
-> or at least a network namespace this is bound too. 
+Signed-off-by: Viacheslav Dubeyko <slava@dubeyko.com>
+---
+ tests/generic/339 | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-Agreed, some isolation from the main system is necessary.
+diff --git a/tests/generic/339 b/tests/generic/339
+index bf8f7729..5cc1086f 100755
+--- a/tests/generic/339
++++ b/tests/generic/339
+@@ -17,6 +17,15 @@ _begin_fstest auto dir
+ _require_scratch
+ _require_test_program "dirhash_collide"
+ 
++# dirhash_collide generates filenames from arbitrary random bytes (only
++# '.' and '/' are filtered out), which are not valid UTF-8 in general.
++# Catalog names on both classic HFS and HFS+ are Unicode. Feeding random
++# bytes causes fsck to report "Illegal name" / catalog corruption that has
++# nothing to do with directory hash-collision handling, which is what this
++# test is actually meant to exercise.
++_exclude_fs hfs
++_exclude_fs hfsplus
++
+ _scratch_mkfs >>$seqres.full 2>&1
+ _scratch_mount
+ 
+-- 
+2.43.0
 
---D
