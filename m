@@ -1,46 +1,46 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 913BC340A6F;
-	Sun, 13 Sep 2026 12:23:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C2FB3016F5;
+	Sun, 13 Sep 2026 12:55:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789302225; cv=none; b=ijvXAizCPLYhfUb5MAFx+9gvP3uyvpHFzptYGXeorI+/bwmAtkcSzjIl+ej2a8SmmFHlnVIxL4v4wwLX/KUC3TOILPjROiMxrGpPALYOvB+wBS42yUeF2Z7jx+wsmRJCakZ7ys/s4JY3J4M1BdmnP+HTnvh6zI0Rs4QgAuwTQPY=
+	t=1789304119; cv=none; b=i7qIeVOu6M34gttO/i5ct8csMtGLj0vf8RgWNBg89HE4MbsLnhCv8ufgbfl8tGUGQckxIcyPXK/23X9itEweRRs15VpsMLi3U2y3nVfYlgfOYs0K6YQZH/EGFy1TaiklCNtkS+ASMbYspfmQPG1aY3E1EVrhZgDqK8o9mHr6dwk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789302225; c=relaxed/simple;
-	bh=IUsTkp6R/lIDoLolOR9bw/dplukHMn4IZHpCV5ypD0k=;
+	s=arc-20240116; t=1789304119; c=relaxed/simple;
+	bh=HSJRb8JfSizoHWOHRKKd8rUhu6RlBApMJU9w0p8oBlQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=u8f/akbd5PJ9VDhqQAyZC9Bd2U8aDfNyjBYQjnnuuD/MYtGolmVl8WI2jGzMlAu1NYaeuSpq4O0sdZq6QRPCUzl9K5NFqCmt1injCszP95kCpt+4hs24YofvPE+SZu9IftNgAhvOlt3ZB1DyVE0D03rGspvbWBF7qOck5bq68/s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CFqv15Nb; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=SUlKbonQdFIZfiI6xU+jnNti4oC7WHuA5uyXd0IYqyLhlMHejSNomtqCb7Ry7mbapG4EKbybtQSAZtYzirXTAkgml70P2EWB3YZ6s92veNnm3g+vi5PLsOAezYSiEgyVIXIXjomcvayBM3ACXED5ksYyh8zQDqGRAgGWbJ6BLT4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UQOXF0BL; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CFqv15Nb"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B2E131F000FF;
-	Sun, 13 Sep 2026 12:23:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UQOXF0BL"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2C0F41F000FF;
+	Sun, 13 Sep 2026 12:55:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789302224;
-	bh=q3iW2d+dNDfH8/204Oq28laQUREzLslBtoZT6sWn1G0=;
+	s=k20260515; t=1789304117;
+	bh=RIjU+VdGMHIaGTXB0kTIlm9CeG9FJvJChOCZHsDdMlQ=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=CFqv15Nb0ybB1W8rMJiwnFpQHjsvsZ3T6q6pjwD15IpZkdOtlnEpS3yvgTMuUqyj1
-	 ojtPwfRt7BF7TYGFUlt/JRuSJ2quE7BLQuLWJwt8dCSq41WzyaO9YU6OIpcw4egaBM
-	 jvllP+vU17rzqgFNUp/RgAkwX+Kp+mf/26ydHp4WhGwkDigBi0JatLWyM9LwXM2VzI
-	 FyxN7I8Lq9nPFNUX92tELKwDT3qNlPMHp6c2vQgON+Ki9g890CvC7srV1AuZj2vaaP
-	 SywimIsmSi4rgWMLkYD9w7cpNiPV8LUKffCv1M9/Om6aeAUFMGhEiMViYhJxSSfSmE
-	 TPb66LtsQINGA==
-Date: Sun, 13 Sep 2026 20:23:35 +0800
+	b=UQOXF0BLSZnGCaBix1IjDNLzebSbGmO3LtUHCKxY5t9iIIc5fkz20DpkpeZ1MsohI
+	 DKFMmZBOwrkCIah7AAZZug3tLh8lGA3hTc/qvlr0SLsoZNZsXA5ooU+swEmaGKrDwa
+	 VaVcc/xOuf4kmUmEhor27p9PP4HpCfRoe8L3EL3nhvrKkbR18+TuLQfARBhSWCDxK5
+	 HmHYN5M2xF8HEHyoR50/fl0DfErk+sfKQ0rOp/fyqoOut1YJnfdnSV9WLnUCaV0QJv
+	 1C3PFaAIbNuuvqz96WerzVRz/9gFJd1X8CxIJXlTvD2gD7OHhO3qXHwdCEbTknpk+e
+	 vDgvJOyq2LUQg==
+Date: Sun, 13 Sep 2026 20:55:10 +0800
 From: Zorro Lang <zlang@kernel.org>
 To: Christoph Hellwig <hch@lst.de>
 Cc: fstests@vger.kernel.org, 
 	"Martin K. Petersen" <martin.petersen@oracle.com>, Kanchan Joshi <joshi.k@samsung.com>, 
 	Anuj Gupta <anuj20.g@samsung.com>, John Garry <john.g.garry@oracle.com>, 
 	"Darrick J. Wong" <djwong@kernel.org>, linux-scsi@vger.kernel.org
-Subject: Re: [PATCH 1/6] common/scsi_debug: don't slow down I/O
-Message-ID: <aqaVf-R3D9KhxCYG@zlang-mailbox>
+Subject: Re: [PATCH 2/6] common: factor out a _bdev_disk_name helper
+Message-ID: <aqadFscVWs2U_mvr@zlang-mailbox>
 Mail-Followup-To: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, 
 	"Martin K. Petersen" <martin.petersen@oracle.com>, Kanchan Joshi <joshi.k@samsung.com>, 
 	Anuj Gupta <anuj20.g@samsung.com>, John Garry <john.g.garry@oracle.com>, 
 	"Darrick J. Wong" <djwong@kernel.org>, linux-scsi@vger.kernel.org
 References: <20260911070831.1760646-1-hch@lst.de>
- <20260911070831.1760646-2-hch@lst.de>
+ <20260911070831.1760646-3-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -49,52 +49,72 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260911070831.1760646-2-hch@lst.de>
+In-Reply-To: <20260911070831.1760646-3-hch@lst.de>
 
-On Fri, Sep 11, 2026 at 09:08:19AM +0200, Christoph Hellwig wrote:
-> scsi_debug by defaults delays I/O and doesn't support multi-page I/O.
-> Flipping these defaults speed up each test using scsi_debug by more than
-> an order of magnitute on my test systems.
+On Fri, Sep 11, 2026 at 09:08:20AM +0200, Christoph Hellwig wrote:
+> This will be reused to look for the integrity subdirectory soon.
 > 
 > Signed-off-by: Christoph Hellwig <hch@lst.de>
-> Reviewed-by: John Garry <john.g.garry@oracle.com>
 > Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 > ---
->  common/scsi_debug | 16 +++++++++++++---
->  1 file changed, 13 insertions(+), 3 deletions(-)
-> 
-> diff --git a/common/scsi_debug b/common/scsi_debug
-> index c3fe7be623fa..af51905dc4ba 100644
-> --- a/common/scsi_debug
-> +++ b/common/scsi_debug
-> @@ -59,9 +59,19 @@ _get_scsi_debug_dev()
->  		let physical=physical/2
->  		let phys_exp=phys_exp+1
->  	done
-> -	opts="sector_size=$logical physblk_exp=$phys_exp lowest_aligned=$unaligned dev_size_mb=$size $@"
-> -	echo "scsi_debug options $opts" >> $seqres.full
-> -	modprobe scsi_debug $opts
-> +
-> +	local opts=(
-> +		"sector_size=$logical"
-> +		"physblk_exp=$phys_exp"
-> +		"lowest_aligned=$unaligned"
-> +		"dev_size_mb=$size"
-> +		"delay=0"
-> +		"clustering=1"
-> +	)
-> +	opts+=("$@")
-> +
-> +	echo "scsi_debug options ${opts[*]}" >> $seqres.full
-> +	modprobe scsi_debug "${opts[@]}"
 
-Thanks Christoph, this version is good to me now.
+Good to me,
 
 Reviewed-by: Zorro Lang <zlang@kernel.org>
 
->  	[ $? -eq 0 ] || _fail "scsi_debug modprobe failed"
->  	$UDEV_SETTLE_PROG
->  	device=`grep -wl scsi_debug /sys/block/sd*/device/model | awk -F / '{print $4}'`
+>  common/rc | 27 +++++++++++++++++----------
+>  1 file changed, 17 insertions(+), 10 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 8add0eedf942..2fa7ddebd8fd 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -5233,28 +5233,35 @@ _sysfs_dev()
+>  	echo /sys/dev/block/$maj:$min
+>  }
+>  
+> -# Get the sysfs queue path for a block device, handling partitions correctly.
+> -_sysfs_queue_path()
+> +#
+> +# Get the name for the main disk block device given an arbitrary blockdevice
+> +# /dev/ entry
+> +#
+> +_bdev_disk_name()
+>  {
+> -	local dev parent
+> -	dev=$(_short_dev "$1")
+> +	local dev=$(_short_dev "$1")
+>  
+>  	# For partitions, queue details are in the parent device's sysfs dir
+>  	if [ -e "/sys/class/block/$dev/partition" ]; then
+> -		parent=$(basename "$(readlink -f /sys/class/block/$dev/..)")
+> -	else
+> -		parent="$dev"
+> +		dev=$(basename "$(readlink -f /sys/class/block/$dev/..)")
+>  	fi
+>  
+> -	local queue_path="/sys/block/$parent/queue"
+> +	echo "$dev"
+> +}
+> +
+> +# Get the sysfs queue path for a block device, handling partitions correctly.
+> +_sysfs_queue_path()
+> +{
+> +	local disk=$(_bdev_disk_name "$1")
+> +	local queue_path="/sys/block/$disk/queue"
+>  
+>  	# Verify the path exists before returning
+>  	if [ -e "$queue_path" ]; then
+>  		echo "$queue_path"
+>  		return 0
+> -	else
+> -		return 1
+>  	fi
+> +
+> +	return 1
+>  }
+>  
+>  # Get the minimum block size of a file.  Usually this is the
 > -- 
 > 2.53.0
 > 
