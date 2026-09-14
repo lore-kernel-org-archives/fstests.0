@@ -1,129 +1,195 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD46B41DDE1
-	for <fstests@vger.kernel.org>; Mon, 14 Sep 2026 09:44:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1311F41D239
+	for <fstests@vger.kernel.org>; Mon, 14 Sep 2026 10:08:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789379053; cv=none; b=ThcYE/arEIZCeSqkH2GCIqb/drxSRNEn9IYZbHXU6yDrq9kTDN0pbuVf56M9c291CwRPehHyaneJIU5X5kcM0UZ8k8bP0oic3O/MtIv2w9kQ19tyBmKo+ODxQF2tCxO047q+LXrBTLDy/I1+NcDymUZm5Ve/m5VxtNk97tNljRA=
+	t=1789380518; cv=none; b=Oar4dJReNYGQ0RHrQeXOYQpwd4NDzm/CxdYQNaUXeKuPGqwEYjgyrGVMIVb6dGune0+n3s2lqQN+AFo5+epPD7lv8MfyyQlswiQtVAxy96UVqrhTOo4dcCB5q39KO/+vBVSOdADrumD5oogSwR9er/FQ/eZZ9DGCl52UBhnE08s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789379053; c=relaxed/simple;
-	bh=DpKT4ZgDypZTf812CCVRDrPRbDXmVNIYi8HXM2OGs1A=;
-	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=aMFxTMiv+hVDIElyC+iLgmBys/+IQZ3PLlaQi64+dG2FPBaXbXBXg7HlOhfCBisNJO8Ye2AbWm7qGJd62WSv30oDmfB9ee5VcEgNN30kQC+3L3hZiQdluUAtZdplsRRxt/H6oscmDOyH4UzGbAVEzNbrhZbo+qngGNkr40mc4P4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=l0VKD6ps; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789380518; c=relaxed/simple;
+	bh=Vn5SM3iIAQTmu8sUIMw9mRBm48UPeubHk2u1XWc7q3U=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=BPG7yMTr7eFlEfTeS4B1DmyJRY9mKfOsKR3dJkLFmMvaTwGTSFhouRuBe20lTt0rkH7YJoZzZweAMPfnz/vQWMLEZ1L/An0gZFm0JLDm0XguZyBEkiExh5qDMa68/vh1PBmqeC7WyOmaOIxXu2kas7GQRO4FST4rxKr7mskKqXs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=hC6S7vmS; arc=none smtp.client-ip=209.85.221.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="l0VKD6ps"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3DA6D1F000FF;
-	Mon, 14 Sep 2026 09:44:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789379051;
-	bh=T3HWGO73bRPuRcS7wNOsBUmNNXc+qzgADfU5jeABbaM=;
-	h=Date:From:To:Subject:References:In-Reply-To;
-	b=l0VKD6ps78tg8+rfBmfq8IBqmXO6FdAShOTFpPF7Oknoy/HW4JZ3715J/inRT3Whs
-	 tlZUCj+1cifoRjMnOkdQ1WDm5p4mVZ4JTLt39G7zv+4HQb/OTG538AQURW7ayfwgpi
-	 WDd2JwLDuqy+eGdnrpRZbqrUq8VD10PUjHXhXk6uIRXseN+iXuOgbOvzJxERJEN77k
-	 7qkAs8mwZoCcmRfjphCMGf2uM9g5Q5h6GvjHe5uR61sDcC9gULZ28vTRVeU+yfAdsl
-	 3VsfjWxH0/fOnY8tMYgjccTY6+25TaI98JLzJAR1Qtat/+ck8SYCQhORAoap749vt2
-	 /uSQD37Az5i6w==
-Date: Mon, 14 Sep 2026 17:44:07 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/5] min_dio_alignment: add a -r option to query read
- alignment
-Message-ID: <aqfAZC5O21fYmVNP@zlang-mailbox>
-Mail-Followup-To: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
-References: <20260831065120.2578146-1-hch@lst.de>
- <20260831065120.2578146-3-hch@lst.de>
- <aphNSwwkbZTSkBRz@zlang-mailbox>
- <20260903053409.GA16469@lst.de>
- <apl3SkiDvs7hPD5O@zlang-mailbox>
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="hC6S7vmS"
+Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-47ddf7b09e5so3104430f8f.1
+        for <fstests@vger.kernel.org>; Mon, 14 Sep 2026 03:08:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1789380515; x=1789985315; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=mueyJH6jKrLKyFHlry3q5pCHpBw5xJU1ZO67WrC/x5w=;
+        b=hC6S7vmS6nmW1in/u265/9TfpftCF6rH2849I5BC4sK/m7JSWU1zxIJZjj0vmD0ZJO
+         3fWGc8xDfTVrEAwsi2+0lMTyebAk5yAJhafBuFJ0CR6EU8gN678/TOHQtB4YwXUx9abD
+         Dh/efUAsOb17AVAxvShhnSCCCLmBfVgNOpLisNpdq/BXGOTiYSKX3HTFkW2ra22Z+Ueh
+         +Ct87cPe0xUvn+qAY5sPX1JMU+ESviVFKscWKXpOZJ8oZrxapCQfHrsDRhwdKINCp8Km
+         X7h26nR/jZ00zhylB1S3khygN9skx099tLGlJl+fd0o7k++5lDJWMHb7WXOzEhsbeL1j
+         FyAQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1789380515; x=1789985315;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=mueyJH6jKrLKyFHlry3q5pCHpBw5xJU1ZO67WrC/x5w=;
+        b=a5GCuvEYTDl8s2cPijSizWEhPKhYoqAhs3fZqDERNBT9RQgpJugAkJYuVeE1oC4krR
+         e2XZeutwgW21/UB/YlUlnr7U/JuJTNnuw1eVu7VFOnV2hDoLgexhXz0BgE0aUGpIVQTc
+         K7cPz7+a+98/NicnpB/NbrI1B0tIjbEye8TSD4C3OQjfrYOd02vGp8IRowBIvwppXlmp
+         x//nMGNING/tTYb/t+wNRdu9rwn9Vo0KHJAuSDnFpprk67SkXcHjxFySBJMu76G5QKrE
+         pMaeaOmRsK45SqESU+5kAgckQtly7gft6Jgbb0cgYHplCIaDV4V7IgOl7nsunwIWObib
+         fl/g==
+X-Forwarded-Encrypted: i=1; AKwUvBxQZy0WfhRCuRYIA51mlS5KFux8fO2nzbUy6flrUYf3Su3KAMosBaBeoLTLQK/WbdphW6CEfC6u@vger.kernel.org
+X-Gm-Message-State: AFuF++nQMC2JF63/UTtRO0zuAzBezAWAbgXt962Zw8pcWSJPpfrF/ttI
+	+so8r4g3wF0/tR6hIGVRJgVltHuIDiabShWeVx/HQho3D8wqzQRRtF4VlhvXVESTBA6hbjltQ6K
+	ZG1hEku0=
+X-Gm-Gg: AYBFou3xsGnoRLwtceAtiZwR0RCXkLqNLxOxUFIwNkGs9ykE1bodUrcHSLbhQcXQZY9
+	OzMwyeJ/cSRf/9JDJe9HtcfQFBbazRwA6trXsyAZB8QTXLXPqYz3p+3I1CKJ4ECP/GLRXr+R7KK
+	1+1fxmDY5vd3peCqxCzZGYvUp78fG974s/5Oj64BkOKL7fnXCB/iQEEDfo1IYeVleo82ON2NIUa
+	5RmJc7oZWtioaG0AQkA8ceaFBvv4TjUwBZEYUlvmeoT35gJ9OkuH7Etutc3N5ifU95BquiTVUkf
+	Fbj2/gLXC6IvD5GPHCrC78KYCE1xGIY4KCtNGiI3Zj+js7TvdEi9np1490BCcHEt0drB2mI/OYK
+	1/MaraoauUWqJZ1Us+wvXIfAKr77ykQK4EyypkxSAzR6X3rUf7otw2TLFQujm7ZORVC03xj28N9
+	WdI8eocVF2gFvHAkyl1rH1YWjBXcy35/G2WBzo2TwlQDmtxi/6Y5Xf/DBO
+X-Received: by 2002:a05:6000:2685:b0:484:4880:449d with SMTP id ffacd0b85a97d-48702aceed7mr2467071f8f.3.1789380515102;
+        Mon, 14 Sep 2026 03:08:35 -0700 (PDT)
+Received: from localhost ([2a07:b241:1004:8300::1000])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-486f0403125sm22836283f8f.8.2026.09.14.03.08.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 14 Sep 2026 03:08:34 -0700 (PDT)
+From: Avinesh Kumar <avinesh.kumar@suse.com>
+To: zlang@kernel.org
+Cc: avinesh.kumar@suse.com,
+	djwong@kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH v5] common: strip attr 2.6.0 --restore safety warnings
+Date: Mon, 14 Sep 2026 12:08:34 +0200
+Message-ID: <20260914100834.117301-1-avinesh.kumar@suse.com>
+X-Mailer: git-send-email 2.55.0
+In-Reply-To: <ame8dTuRy-A_NjGV@zlang-mailbox>
+References: <ame8dTuRy-A_NjGV@zlang-mailbox>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <apl3SkiDvs7hPD5O@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
 
-On Thu, Sep 03, 2026 at 09:39:18PM +0800, Zorro Lang wrote:
-> On Thu, Sep 03, 2026 at 07:34:09AM +0200, Christoph Hellwig wrote:
-> > On Thu, Sep 03, 2026 at 12:26:26AM +0800, Zorro Lang wrote:
-> > > On Mon, Aug 31, 2026 at 09:51:05AM +0300, Christoph Hellwig wrote:
-> > > > Add an option to query the STATX_DIO_READ_ALIGN if provided.
-> > > > 
-> > > > Signed-off-by: Christoph Hellwig <hch@lst.de>
-> > > > ---
-> > > >  src/min_dio_alignment.c | 44 ++++++++++++++++++++++++++++++-----------
-> > > >  1 file changed, 33 insertions(+), 11 deletions(-)
-> > > > 
-> > > > diff --git a/src/min_dio_alignment.c b/src/min_dio_alignment.c
-> > > > index 866fba1546c4..143cee684ab4 100644
-> > > > --- a/src/min_dio_alignment.c
-> > > > +++ b/src/min_dio_alignment.c
-> > > > @@ -1,17 +1,19 @@
-> > > >  // SPDX-License-Identifier: GPL-2.0
-> > > >  /*
-> > > > - * Copyright (c) 2024 Christoph Hellwig
-> > > > + * Copyright (c) 2024,2026 Christoph Hellwig
-> > > >   */
-> > > >  #include <fcntl.h>
-> > > > +#include <stdbool.h>
-> > > >  #include <stdio.h>
-> > > >  #include <stdlib.h>
-> > > >  #include <unistd.h>
-> > > > +#include <getopt.h>
-> > > >  #include <sys/mount.h>
-> > > >  #include <sys/ioctl.h>
-> > > >  #include <sys/stat.h>
-> > > >  #include "statx.h"
-> > > >  
-> > > > -static int min_dio_alignment(const char *mntpnt, const char *devname)
-> > > > +static int min_dio_alignment(const char *mntpnt, const char *devname, bool read)
-> > > >  {
-> > > >  	struct statx stx = { };
-> > > >  	struct stat st;
-> > > > @@ -27,9 +29,16 @@ static int min_dio_alignment(const char *mntpnt, const char *devname)
-> > > >  	 */
-> > > >  	fd = open(mntpnt, O_TMPFILE | O_RDWR | O_EXCL, 0600);
-> > > >  	if (fd >= 0 &&
-> > > > -	    xfstests_statx(fd, "", AT_EMPTY_PATH, STATX_DIOALIGN, &stx) == 0 &&
-> > > > -	    (stx.stx_mask & STATX_DIOALIGN) && stx.stx_dio_offset_align != 0)
-> > > > -		return stx.stx_dio_offset_align;
-> > > > +	    xfstests_statx(fd, "", AT_EMPTY_PATH, STATX_DIOALIGN, &stx) == 0) {
-> > > 
-> > > 
-> > > Hmm... shouldn't STATX_DIO_READ_ALIGN be passed in the request mask as well?
-> > > 
-> > >   xfstests_statx(fd, "", AT_EMPTY_PATH,
-> > >                  STATX_DIOALIGN|STATX_DIO_READ_ALIGN, &stx)
-> > 
-> > Yeah, strictly speaking we should.  Currently this is only supported
-> > for XFS, and XFS automatically adds STATX_DIO_READ_ALIGN when
-> > STATX_DIOALIGN is requested, so it works.  But more by chance than
-> > design.
-> 
-> I couldn't find any mention in the statx doc that STATX_DIO_READ_ALIGN is
-> added by default, explicitly specifying it seems more aligned with how
-> the mask parameter is intended to work. Would you like me to fold this in
-> when merging? or did you omit it due to other concerns?
-> 
-> This is the only open point left for the patchset, once we reach consensus,
-> I'm good to merge it :)
+From: Avinesh Kumar <avinesh.kumar@suse.com>
 
-Hi Christoph, friendly ping, I'm still waiting on your confirmation before
-merging this patchset. Would you prefer I keep it as is, or should I add
-STATX_DIO_READ_ALIGN?
+attr 2.6.0 (CVE-2026-54371 hardening) makes "setfattr --restore" print a
+warning to stderr when options -P and -h are not given, claiming it may
+traverse or dereference symlinks in the dump's pathnames [0]. This warning
+leaks into test output and breaks generic/062 and xfs/083 (via
+_scratch_populate).
 
-Thanks,
-Zorro
+Add a _setfattr_restore helper that takes the restore source as its first
+argument, filters out just the expected warning line, and preserves any
+other (unexpected) stderr. Convert the callers in common/populate,
+common/overlay and generic/062 to use it.
 
-> 
-> Thanks,
-> Zorro
-> 
-> > 
-> > 
-> 
+[0] https://cgit.git.savannah.nongnu.org/cgit/attr.git/commit/?id=3fb06b9ba314d37035d0877e6de313de754f1ac8
+
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Suggested-by: Darrick J. Wong <djwong@kernel.org>
+Signed-off-by: Avinesh Kumar <avinesh.kumar@suse.com>
+---
+ common/overlay    |  2 +-
+ common/populate   |  4 ++--
+ common/rc         | 14 ++++++++++++++
+ tests/generic/062 |  9 ++-------
+ 4 files changed, 19 insertions(+), 10 deletions(-)
+
+diff --git a/common/overlay b/common/overlay
+index d32f3219..8e89d6e4 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -494,7 +494,7 @@ _overlay_trusted_to_user()
+ 	local dir=$1
+ 
+ 	for file in `find $dir`; do
+-		_getfattr --absolute-names -d -m '^trusted.overlay.(redirect|metacopy)$' $file  | sed 's/^trusted/user/' | $SETFATTR_PROG --restore=-
++		_getfattr --absolute-names -d -m '^trusted.overlay.(redirect|metacopy)$' $file  | sed 's/^trusted/user/' | _setfattr_restore -
+ 		for xattr in `_getfattr --absolute-names -d -m '^trusted.overlay.' $file  | tail -n +2 | cut -d= -f1`; do
+ 			$SETFATTR_PROG -x $xattr $file;
+ 		done
+diff --git a/common/populate b/common/populate
+index 1c0dd03e..f3672c1a 100644
+--- a/common/populate
++++ b/common/populate
+@@ -151,7 +151,7 @@ __populate_create_attr() {
+ 		echo "# file: ${name}";
+ 		seq --format "user.%08g=\"abcdefgh\"" 0 "${nr}"
+ 		echo
+-	) | setfattr --restore -
++	) | _setfattr_restore -
+ 
+ 	test -z "${missing}" && return
+ 	seq 1 2 "${nr}" | while read d; do
+@@ -200,7 +200,7 @@ __populate_xfs_create_btree_attr() {
+ 			seq --format "user.%08g=\"abcdefgh\"" "${nr}" "$((nr + incr + 1))"
+ 			echo "user.v$(printf "%.08d" "$nr")=\"${bigval}\""
+ 			echo
+-		) | setfattr --restore -
++		) | _setfattr_restore -
+ 	done
+ 
+ 	# ... and in the second loop we delete all the remote attrs to
+diff --git a/common/rc b/common/rc
+index 8add0eed..ccbc02b8 100644
+--- a/common/rc
++++ b/common/rc
+@@ -132,6 +132,20 @@ _test_fsxattr_xflag()
+ 	grep -q "fsxattr.xflags.*\[.*$2.*\]" <($XFS_IO_PROG -c "stat -v" "$1")
+ }
+ 
++# Restore xattrs from a getfattr-style dump given as $1 (a dump file, or "-"
++# for stdin); any extra setfattr options follow.  attr 2.6.0 (CVE-2026-54371)
++# makes --restore warn unless both -P and -h are given, so filter out just
++# those warning lines, keep other unexpected stderr.
++_setfattr_restore()
++{
++	local restore_from="$1"
++	shift
++
++	$SETFATTR_PROG "$@" --restore="$restore_from" 2>&1 | \
++		sed -e '/--restore=.*unsafe.*without/d'
++	return ${PIPESTATUS[0]}
++}
++
+ # This test requires extsize support on the  filesystem
+ _require_scratch_extsize()
+ {
+diff --git a/tests/generic/062 b/tests/generic/062
+index ddf0a478..845d62f2 100755
+--- a/tests/generic/062
++++ b/tests/generic/062
+@@ -30,12 +30,7 @@ getfattr()
+ 
+ setfattr()
+ {
+-    # attr >= 2.6.0 (CVE-2026-54371 fix) warns that "setfattr --restore" without
+-    # -P/--physical is unsafe because it can traverse symlinks. Older attr does
+-    # not accept -P, so just filter the warning to stay version-agnostic.
+-    $SETFATTR_PROG $@ 2>&1 | \
+-        sed -e '/^Warning: option --restore=file is unsafe without option/d' | \
+-        _filter_scratch
++    $SETFATTR_PROG $@ 2>&1 | _filter_scratch
+ }
+ 
+ _create_test_bed()
+@@ -191,7 +186,7 @@ _create_test_bed
+ _extend_test_bed
+ 
+ echo "*** restore everything"
+-setfattr -h --restore=$tmp.backup1
++_setfattr_restore "$tmp.backup1" -h 2>&1 | _filter_scratch
+ _backup $tmp.backup2
+ 
+ echo "AFTER RESTORE" >>$seqres.full
+-- 
+2.55.0
+
