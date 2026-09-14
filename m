@@ -1,144 +1,111 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B4B948643D;
-	Mon, 14 Sep 2026 15:05:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F076B489FA4;
+	Mon, 14 Sep 2026 17:25:24 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789398352; cv=none; b=a0N6DzRf6qaz5VELJhp3DWvbkVuc3drzmNE9guVesRP1wzpRp7pyh4b5m15grxJ8rCIyEGZxbbVApT1RUzUS5tRjHTz2C17V9rvVJJXaYHvYtt2x3uGqAImO7eDeDm4T4/g/Aq+iDtZh5riftdZRw/tKO5iRXGAmYSatHHUByyk=
+	t=1789406726; cv=none; b=X99NNgpP3LvkUfUsouZI/sn9vKU1mczjtmYGMtteM09GM8dcBkltrTOwz33mNsrv8t8SfKFvPPfWTyao0fNeDF52Z/2XEc/LW/OnjbkH06dj8ejrvjQrG0kdinEIyukh7Y7ZnkQhQ1iNSojvPdyHwn8C3c5MeMxH4VJQ9qQjuh8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789398352; c=relaxed/simple;
-	bh=xZWQ2zjSflSPtpH8GxcGKdnWuzWgxzBvXnwYXAYqhl4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Gd3dbY8ZusEcxc13bRFldquyTOqsqsNGwRDt05cTnr3VOTv7njm1B8iu+UlFDGYtOQI99gkSlxvQiWRgjkAiPHy+p/SQVlaJmwpSizrfHAp5cyhylDf2LY6iCD4h7DLp+BQs3ZWOMlEek7YdvMG8zjwem1ctbJ0lpQzFVRWcSzY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IioRmap/; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789406726; c=relaxed/simple;
+	bh=yEWavbDR54J7O38WRPJJjQYsphw9f1Z5wC76+14JCic=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=qUpNzDQehm/E49TTZi9RHZ3aCcJZm8gCO6zw3m7WsNBsalYOWBCv7Ipr5EGeazktdymf59tuDb95UJ1xgej/3YkFUK6Yh0UG0dZQHf3Tb38wkT0sdhBPPdROXODO+czT2zPWGxTkqI2coy80MabgBJU6NaH4Yh6ZiNdwU+noxYM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mqL5ttEr; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IioRmap/"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id D16991F00893;
-	Mon, 14 Sep 2026 15:05:49 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mqL5ttEr"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC50E1F000FF;
+	Mon, 14 Sep 2026 17:25:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789398349;
-	bh=vvKITJcYQgzh2hEi+wt48NuedpLUcXbpT6DKOA9q8kk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=IioRmap/0CkLbsriKWFcwzhWnyFDK12tE2OrlADRCCt0D/d1Ul9636m+cGPGlPDNW
-	 Uk6JH9Mn7rkqBRna6wbOtoTmJ3KBv88eGT+mwSEmhAHN0Dx2MSMPUYo4xzY10rdR9h
-	 3sSFq52KEpUwVPGV+G/SmcDSg9YVG+vKZY3uryYtuF00S2jzwwmttMrvL50PZ5NL96
-	 bqyXBHar60y4GPW9rmf3andlzjReoib511nVVoY+nTGv6hfqrufQtsykMNBv0XApci
-	 U1NuN4CIRjDODQF+1346BH6uTiIGL3Pd1dx+egu61+UeYwxf91ZeSfR+nDU0x2LgoY
-	 +w4lLyv3wVYNQ==
-Date: Mon, 14 Sep 2026 08:05:49 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs: test libxfs handling of missing RT devices
-Message-ID: <20260914150549.GO6265@frogsfrogsfrogs>
-References: <20260914113634.2448723-1-hch@lst.de>
+	s=k20260515; t=1789406724;
+	bh=ivTCssQ80Q5rXGcqqme9BCrgHmJUgofDp4I5tlkj8iw=;
+	h=From:To:Cc:Subject:Date;
+	b=mqL5ttErVCBhu3/itcbjExCEntGnVsT+dDmyAebTMDZGbp4otbJwJCnqq+xadI6ia
+	 9ZZKGbCGMxPOOIl+RB/K6BMTd3pz26l4IYG3lc3fOy0Rsk3ajmZIghcKOUnRTv2ioO
+	 AcxaUI5Z6Fl4F+px3iYteMGgSlTtKakK5qO3rD6QIqAc4RFvULtKknIyhoksCyqIOs
+	 8OXiyOg7IvOMcR/2B/qS9fH/kbjfa2CPoZwVPNU5b4mJc/jX0JYn9oMLlBgUnI6maJ
+	 5pt8rS8L+eR2mS3h0NML6jWzZKPV7zqHMvuTwbiA3rZCbrzGOuwhuSKzd9QbvS5Irb
+	 C6TsTH5BFhNMg==
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org,
+	linux-btrfs@vger.kernel.org,
+	Anand Suveer Jain <asj@kernel.org>,
+	Chao Yu <chao@kernel.org>
+Subject: [PATCH 0/5] Refactor *_fs_sysfs_* helpers
+Date: Tue, 15 Sep 2026 01:25:04 +0800
+Message-ID: <20260914172509.3799016-1-zlang@kernel.org>
+X-Mailer: git-send-email 2.55.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260914113634.2448723-1-hch@lst.de>
+Content-Transfer-Encoding: 8bit
 
-On Mon, Sep 14, 2026 at 01:36:34PM +0200, Christoph Hellwig wrote:
-> Test that libxfs rejects initializing a file systems unless in debugger
-> mode by running xfs_repair and xfs_db with missing arguments.  For
-> db additionally test that command that require a RT device still do not
-> work even after libxfs can be initialized using a missing RT device.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/xfs/2300     | 48 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/2300.out | 14 ++++++++++++++
->  2 files changed, 62 insertions(+)
->  create mode 100755 tests/xfs/2300
->  create mode 100644 tests/xfs/2300.out
-> 
-> diff --git a/tests/xfs/2300 b/tests/xfs/2300
-> new file mode 100755
-> index 000000000000..70c1d6bad9cc
-> --- /dev/null
-> +++ b/tests/xfs/2300
-> @@ -0,0 +1,48 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2026 Christoph Hellwig.
-> +#
-> +# FS QA Test No. 2300
-> +#
-> +# Tests that repair refuses to work without -r argument, and xfs_db works fine
-> +# even without it to check libxfs initialization behavior with missing RT
-> +# devices.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick repair db
-> +
-> +. ./common/filter
-> +
-> +_cleanup()
-> +{
-> +	_unmount $LOOP_MNT 2>/dev/null
-> +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> +	rm -rf $LOOP_IMG $LOOP_MNT
+As we talked in:
+  https://lore.kernel.org/fstests/amhKovVDjwawoWdQ@zlang-mailbox/
 
-I don't see any users of loop devices here?
+This patchset refactors two redundant and messy sets of *_fs_sysfs_* helpers
+(PATCH 1/5 2/5), introduces helpers for /sys/fs/$FSTYP/features (PATCH 3/5 4/5),
+and replaces the original btrfs-specific helpers with these common ones
+(PATCH 5/5).
 
-Otherwise this test looks ok to me.
+Thanks,
+Zorro
 
---D
+Zorro Lang (5):
+  fstests: consolidate _require_fs_sysfs and _require_fs_sysfs_attr
+  common/sysfs: adjust function naming
+  common/rc: add helpers for /sys/fs/$FSTYP/features/
+  common/rc: use common helper in _require_fanotify_ioerrors for f2fs
+  fstests: replace btrfs specific helpers with common sysfs helpers
 
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +_require_scratch_nocheck
-> +_require_realtime
-> +
-> +if [ -z "$SCRATCH_RTDEV" ]; then
-> +	_notrun "external RT device required"
-> +fi
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +
-> +echo "Dumping superblock using xfs_db without rtdev"
-> +$XFS_DB_PROG $SCRATCH_DEV -c 'sb 0' -c 'p' >> $seqres.full
-> +
-> +echo "Loading RT superblock using xfs_db without rtdev, should fail"
-> +$XFS_DB_PROG $SCRATCH_DEV -c 'rtsb'
-> +
-> +echo "Running xfs_repair -n without rt device, should fail"
-> +$XFS_REPAIR_PROG -n $SCRATCH_DEV
-> +
-> +echo "Running xfs_repair without rt device, should fail"
-> +$XFS_REPAIR_PROG $SCRATCH_DEV
-> +
-> +
-> +status=0
-> +exit
-> diff --git a/tests/xfs/2300.out b/tests/xfs/2300.out
-> new file mode 100644
-> index 000000000000..50aab2b83ec9
-> --- /dev/null
-> +++ b/tests/xfs/2300.out
-> @@ -0,0 +1,14 @@
-> +QA output created by 2300
-> +Dumping superblock using xfs_db without rtdev
-> +Loading RT superblock using xfs_db without rtdev, should fail
-> +realtime device not loaded, use -R.
-> +Running xfs_repair -n without rt device, should fail
-> +Phase 1 - find and verify superblock...
-> +xfs_repair: filesystem has a realtime subvolume
-> +xfs_repair: realtime device init failed
-> +xfs_repair: cannot repair this filesystem.  Sorry.
-> +Running xfs_repair without rt device, should fail
-> +Phase 1 - find and verify superblock...
-> +xfs_repair: filesystem has a realtime subvolume
-> +xfs_repair: realtime device init failed
-> +xfs_repair: cannot repair this filesystem.  Sorry.
-> -- 
-> 2.53.0
-> 
-> 
+ common/btrfs      |  41 ++----------------
+ common/rc         | 103 ++++++++++++++++++++++++++++++++--------------
+ common/sysfs      |  72 ++++++++++++++++----------------
+ common/xfs        |  22 +++++-----
+ tests/btrfs/010   |   3 +-
+ tests/btrfs/055   |   2 +-
+ tests/btrfs/056   |   2 +-
+ tests/btrfs/112   |   2 +-
+ tests/btrfs/131   |   2 +-
+ tests/btrfs/165   |   2 +-
+ tests/btrfs/188   |   2 +-
+ tests/btrfs/192   |   2 +-
+ tests/btrfs/201   |   2 +-
+ tests/btrfs/205   |   2 +-
+ tests/btrfs/209   |   2 +-
+ tests/btrfs/211   |   2 +-
+ tests/btrfs/219   |   3 +-
+ tests/btrfs/231   |   2 +-
+ tests/btrfs/253   |  28 ++++++-------
+ tests/btrfs/285   |   3 +-
+ tests/btrfs/296   |   8 +---
+ tests/btrfs/304   |   4 +-
+ tests/btrfs/305   |   4 +-
+ tests/btrfs/306   |   4 +-
+ tests/btrfs/307   |   4 +-
+ tests/btrfs/308   |   4 +-
+ tests/btrfs/311   |   2 +-
+ tests/btrfs/313   |   2 +-
+ tests/btrfs/314   |   2 +-
+ tests/btrfs/315   |   2 +-
+ tests/btrfs/329   |   4 +-
+ tests/btrfs/334   |   4 +-
+ tests/btrfs/342   |   2 +-
+ tests/btrfs/352   |   2 +-
+ tests/f2fs/025    |   2 +-
+ tests/generic/098 |   2 +-
+ tests/generic/101 |   2 +-
+ tests/xfs/006     |   4 +-
+ tests/xfs/177     |   4 +-
+ tests/xfs/264     |  14 +++----
+ tests/xfs/668     |   6 +--
+ tests/xfs/669     |   6 +--
+ tests/xfs/670     |   2 +-
+ 43 files changed, 194 insertions(+), 195 deletions(-)
+
+-- 
+2.55.0
+
