@@ -1,74 +1,38 @@
-Received: from mx0b-00154904.pphosted.com (mx0b-00154904.pphosted.com [148.163.137.20])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C9084A99AE
-	for <fstests@vger.kernel.org>; Tue, 15 Sep 2026 15:27:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.137.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3C37481661;
+	Tue, 15 Sep 2026 15:28:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789486046; cv=none; b=GLn4NOuFseLmlTkaNYbKy7gLHOV8DoAVGo0MIGmcLHbrirV1vbiaOiEc0EcYWaddU9lKheoPePGm/5qtYYW3enxjCLHuf6yDeLTgM7tECaRGXmzxXcxV4OLJPbYaWXhlgcVF6fUMKNuG5gGlWHPF4KKKUWa8DxJ7b7bu8UAZgRg=
+	t=1789486098; cv=none; b=NK8yZ3IqGA25pjVQZ6Pgf3XZ97yIqzbOZLiInNHzEMYTIQhMUL+DuPP7mq4A3JADa5VYY2TSjE6BAuT5uZf0Ozv/7yHmXKE83Jo02peXenmoW9OAIuh4hIRNZY0tONmX1exGBXm29lv5z3n/XeqkVgs8wOzmEy/lOIFuAi+2kn8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789486046; c=relaxed/simple;
-	bh=2i24WeWgGvv7g5BUc3Ruu/IH9zlQMA9TaHU9WMKi0wQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=ELyNjifMEdU91HCMz7rQFkKefvTNxlXhv7ax/mtsNkcAyWFiX92r01eUKOonaacxwZsiXt6nVCN0aqeb4tWRCV33N72KMdmYLel+0dRulWQfGnvLAd1pVDQkyrDhkDQoogHfKJ9pOnLxRav9gGGWo6+D8cIWOUH/OjiQwfyC+zk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com; spf=pass smtp.mailfrom=dell.com; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=Km9poefN; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=dIkBEqpi; arc=none smtp.client-ip=148.163.137.20
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dell.com
+	s=arc-20240116; t=1789486098; c=relaxed/simple;
+	bh=JOdEfRTtMZN6n6VGu0E6F3Hk9pPD6V56mSdxTH9IcU8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=bvj0BEPNU4xZjI0MBkFk9NWL0isM/ceASpJ9USLeFKay3zdabz976r5J/c98qhrHNo1T4+u/c0NZkXsfkcQNEPWc57zQkrpYk2JRNkha1hq2MCxSNE5zhU4JTJOjr0HFvaMg8qMXDBqyPJPKdS7nMUBPsvGsQvgxXtgB9Q/bdvw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jpvF0HSI; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="Km9poefN";
-	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="dIkBEqpi"
-Received: from pps.filterd (m0170398.ppops.net [127.0.0.1])
-	by mx0b-00154904.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68FD1jLP251208
-	for <fstests@vger.kernel.org>; Tue, 15 Sep 2026 10:17:56 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dell.com; h=cc
-	:content-transfer-encoding:date:from:in-reply-to:message-id
-	:mime-version:references:subject:to; s=smtpout1; bh=M9W/SlQ7ja5m
-	PgEMq7pRdcXF2hcFGbtyJi91ryM9DDo=; b=Km9poefNv2X+kcsh5f7JuC/5qWKj
-	I/1/OKgPc+PVM4VZFgrNr0qa4GQ8SXiXJu/oOgkt3MeSneVlLTFZB43hwOMGFied
-	7NDeFgX6yTDh5EsRh96dgXCpaKeG0Ii2dTFOu8QenG4ig5/YflhzmoC6wgwK7TCG
-	XAiodFxfyvHj54E2km6o00VEcs/6T8pmXh00bsGq7haqAl/NhsYNP4JdBhepJvXy
-	XPeHAnqjs7cpoXY8bxbHVmIlAqIjQoHikdsQMiZJgOtG9+v5H/pBxNP+K8IlzNOl
-	B+kLQOagCRT05VnZHKs9L8TIFH+++4G9F3hKXYUMwPk0xUAldziMYr1Qig==
-Received: from mx0a-00154901.pphosted.com (mx0b-00154901.pphosted.com [67.231.157.37])
-	by mx0b-00154904.pphosted.com (PPS) with ESMTPS id 4gn1y4kr4t-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT)
-	for <fstests@vger.kernel.org>; Tue, 15 Sep 2026 10:17:56 -0400 (EDT)
-Received: from pps.filterd (m0089484.ppops.net [127.0.0.1])
-	by mx0b-00154901.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68FDxS9D3661268
-	for <fstests@vger.kernel.org>; Tue, 15 Sep 2026 10:17:55 -0400
-Received: from esapsmtpat02.us.dell.com (esapsmtpat02.us.dell.com [143.166.211.150])
-	by mx0b-00154901.pphosted.com (PPS) with ESMTPS id 4gq4m0k5v9-2
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=FAIL)
-	for <fstests@vger.kernel.org>; Tue, 15 Sep 2026 10:17:55 -0400 (EDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=dell.com; i=@dell.com; q=dns/txt; s=smtpdev1;
-  t=1789481876; x=1821017876;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=M9W/SlQ7ja5mPgEMq7pRdcXF2hcFGbtyJi91ryM9DDo=;
-  b=dIkBEqpiGq9jPBfKar3UgcNLayPUKZK+rmqrB79oufr+ZhXAaVwhagUP
-   N3hSdn+ZChDBPb4uC8f8JUfI2fuLxo7eb11i/r/t5fPwOZH3r0l6dm0ED
-   6oM0Dj7vUtt/JjWetj5cpu+Wg3CYGJQ7xBK2l7oa0e/2xVjDSSeSegADq
-   nZ/4JAktIwQX9UN/Lm5TL4Slvjmcz+QsQkuZfl3TxLJqBX5wYTxV1v7Ll
-   vNSnA2EHtJZFa2kinvGNFWqGRs3epjN6Rx6TE5OuIeCAMF2RI+zwhUG0x
-   jWgI4qlHwjSXH4KvQQ/KDnMZLByI5Fvo3W/hlVva2bdHXZkh/+iwXeaLv
-   w==;
-X-CSE-ConnectionGUID: dcz9DbIdTrWeH33/gIpnGw==
-X-CSE-MsgGUID: GQF9kMqSTJWVnJhRLj5I5w==
-X-LoopCount0: from 10.94.9.174
-X-MS-Exchange-CrossPremises-AuthAs: Internal
-Received: from w-96j1th4.apac.dell.com (HELO W-96J1TH4.blr.amer.dell.com) ([10.94.9.174])
-  by esapsmtpat02.us.dell.com with ESMTP/TLS/TLS_AES_256_GCM_SHA384; 15 Sep 2026 14:17:54 +0000
-From: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jpvF0HSI"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AC2C61F000FF;
+	Tue, 15 Sep 2026 15:28:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1789486096;
+	bh=5DGCZcHHdkA+UN8dpXqZ/x6neiJo+BN7XDoFIp2bcj4=;
+	h=From:To:Cc:Subject:Date;
+	b=jpvF0HSIJgOOBcqOWJpov3Fjjc5L650ruvhQS7oFNXg2PIf5akkn5xx3qAHfAZYSJ
+	 8Ewnwh/EFdsrVA+nlIUU4DlGo75rnrIOYJXx8abQoxhoevI9zVugNKWmuppa0uGOcC
+	 xyGr71ZfpeoB9kUUj6bafKMnPsIpR+I+SlGrZ2qEldI2xKEaXQQklvZXYZB4R5j59O
+	 LdWFnZwXixtcL0GR/oOVWYgb0pNy0Oj6zlAiPBGZ3xuUo77zjyIWDMFQjmp1nbre7s
+	 ADn1dSqWrHVfBrVP3AbTLePSbz9JRTtQQ9WIOM1Wsk/bimwZ+AYwNw0ReaDD7/5ohc
+	 heoZ7/OBr2EOg==
+From: fdmanana@kernel.org
 To: fstests@vger.kernel.org
-Cc: Prabhakar Pujeri <prabhakar.pujeri@dell.com>,
-        Zorro Lang <zlang@kernel.org>, "Darrick J. Wong" <djwong@kernel.org>
-Subject: [PATCH v3 1/6] generic/590,735: add missing _require_scratch check
-Date: Tue, 15 Sep 2026 14:17:40 +0000
-Message-ID: <20260915141745.4299-2-prabhakar.pujeri@dell.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260915141745.4299-1-prabhakar.pujeri@dell.com>
-References: <20260915141745.4299-1-prabhakar.pujeri@dell.com>
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] common/btrfs: exercise all algorithms in _btrfs_stress_remount_compress()
+Date: Tue, 15 Sep 2026 16:28:12 +0100
+Message-ID: <cc052d6b35788720c6cdc93be7eb6af637a9fc96.1789486070.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -76,72 +40,36 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-09-15_04,2026-09-14_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- priorityscore=1501 clxscore=1015 malwarescore=0 impostorscore=0 phishscore=0
- spamscore=0 bulkscore=0 suspectscore=0 lowpriorityscore=0 adultscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609150207
-X-Proofpoint-ORIG-GUID: MrzQVJE46aY_VmAik8bWnoSVtMVorwaX
-X-Proofpoint-GUID: MrzQVJE46aY_VmAik8bWnoSVtMVorwaX
-X-Proofpoint-Spam-Info: AW1haW4tMjYwOTE1MDIwOCBTYWx0ZWRfX2TNvBWdtbTKK
- HKuXKdZnjvIvpfBQIGlUoRVPp5fnFQ/gaQn4ClyrlFAmJA/cBcLC2aI7JaGXwcdjWzOitJjNT+z
- WM5loGfZP7vlL51KGhPRoWtZ/rvpIZU=
-X-Authority-Analysis: v=2.4 cv=cLN1IVeN c=1 sm=1 tr=0 ts=6aa95394 cx=c_pps
- a=Z2e5DKjA+8LiMDv5v6mwwA==:117 a=i8a7nF7jFa3EbZrjgrQYpA==:17
- a=VdqzKS8jKosA:10 a=ke5jqHz-1hQA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=6gNNCFAoQcIphELLPWWu:22 a=vUAfKriDyi6VqHAKCLgX:22 a=VwQbUJbxAAAA:8
- a=iLNU1ar6AAAA:8 a=EoK_iTtilsJg0zOig5gA:9 a=hlJyneSgMmFPbskH-t2w:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTE1MDIwOCBTYWx0ZWRfX/I+txvY5aWWk
- DzkoGYB0zOqTVJqbwdHERjKTk7D1dwv2QImGnVIf2bskR9ZqsjR8+7OeRIjEFGabt5+LqaB0CRw
- ieUsHi18HSj/g4Y2czbouePOvtS2TQx0HzWfsB9PGAaa487xA0ERzR1g7UAjXmANLbJ95YTruXo
- 5pT1mB5VEy0l/CkCIjJPc7XY3V2/O275XbIIlhqOJptwQQiqlyo2G3Eq1ZCmxcvje06/a0S86RW
- K5cPo5jdxIetlDD7xCvXi1barOLsURm4+A4gvjJL376L2MqanFLlrSb0LnZt8BiZ7izh/UTBMDF
- AlpEEynlBF/xiqBCfXOJmNucXP4NEndReLVOeLVZtOtiFOupe6c+P5J0Os6Usq3wev+iuEV4AN6
- ey8Mv8dF90pq34uBtP2vm2ojWHM9L5BKYL38ntbDFYm0Nxj6hzlPQ8vuOVtHF39Au9HGZSvDaab
- u9OIfndPOH7kBPD+4VQ==
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0
- malwarescore=0 clxscore=1015 impostorscore=0 bulkscore=0 suspectscore=0
- priorityscore=1501 lowpriorityscore=0 phishscore=0 spamscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609150208
 
-Both tests use the scratch device without first requiring one, so they
-fail messily instead of skipping when no scratch device is configured.
+From: Filipe Manana <fdmanana@suse.com>
 
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
-Signed-off-by: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+_btrfs_stress_remount_compress() is using a hard coded list of algorithms
+which is incomplete as zstd is missing as is supported for some years now.
+
+So remove the hard coded list and use _btrfs_compression_algos() to get
+the list of supported compression algorithms.
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/generic/590 | 1 +
- tests/generic/735 | 1 +
- 2 files changed, 2 insertions(+)
+ common/btrfs | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/tests/generic/590 b/tests/generic/590
-index 54c26f2a..0775d6ff 100755
---- a/tests/generic/590
-+++ b/tests/generic/590
-@@ -13,6 +13,7 @@ _begin_fstest auto prealloc preallocrw
- 
- . ./common/filter
- 
-+_require_scratch
- _require_xfs_io_command "falloc"
- 
- maxextlen=$((0x1fffff))
-diff --git a/tests/generic/735 b/tests/generic/735
-index 60fa3dce..d7e732bc 100755
---- a/tests/generic/735
-+++ b/tests/generic/735
-@@ -20,6 +20,7 @@ if [[ "$FSTYP" =~ ext[0-9]+ ]]; then
- fi
- 
- _require_odirect
-+_require_scratch
- _require_xfs_io_command "falloc"
- _require_xfs_io_command "finsert"
- _require_max_file_range_blocks $(( (1 << 32) - 1 ))
+diff --git a/common/btrfs b/common/btrfs
+index 0bfb02dd..3eb68beb 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -449,8 +449,10 @@ _btrfs_kill_stress_defrag_pid()
+ _btrfs_stress_remount_compress()
+ {
+ 	local btrfs_mnt=$1
++	local algo_list=("no" $(_btrfs_compression_algos))
++
+ 	while true; do
+-		for algo in no zlib lzo; do
++		for algo in ${algo_list[@]}; do
+ 			_mount -o remount,compress=$algo $btrfs_mnt
+ 		done
+ 	done
 -- 
-2.55.0
+2.47.2
 
