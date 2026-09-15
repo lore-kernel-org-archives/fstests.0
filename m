@@ -1,263 +1,166 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mx0a-00154904.pphosted.com (mx0a-00154904.pphosted.com [148.163.133.20])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F2F0407CCF;
-	Tue, 15 Sep 2026 16:09:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 27C60415B60;
+	Tue, 15 Sep 2026 16:44:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.133.20
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789488565; cv=none; b=p2G5AbHDUalQcz8erOOlsVFej/VwYEdbcW6ZAKluVvf4HIdpUxEw/ts0kUNpWndsbhq7x8ZralriprTqzztHXuAILupZFyiwUJCQZGdKywusv3yXF+OgOtnwg0DfGvOI9GeFq6eCPQZrGE8bLyXNijGjai/BMOvidifAlE/9IeI=
+	t=1789490674; cv=none; b=N79JSLrn9YTiIkDXFGfLpZnQLwSJk1KhkK9lzYBTXH5zA6lQP9O/Z9zggImxPDBH8Tqi6Yjr6t5O8VRoKNx+u7+/ca/SbD++dbPoTwPhQIr/Xs+fkyAydM0O8KmBi+xBedo1Q8Kqqv2njD1F58Mmw9ilnyyY/x4r7aCFVaZN97E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789488565; c=relaxed/simple;
-	bh=jHfOudUjX8drKG1nKyLcAmR0LLqg/RGEai2aWIL6GcE=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=DjOSJhO/s/cZlaU7DvuW5fMYpVJsfQKCwnEBbG76eF1aaoPX9jcX9765VY0q+Ld2uZ9tlY414bEb9D4CBl0R7iJLbcLW+3bmoypO/TVHAJXQhr6Dh+6YteKBNnNKnPCtW18vR26tczeRyKV8id9RQXkZzd7aaJRY3pxjWoUbjSg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GezNAYNX; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789490674; c=relaxed/simple;
+	bh=cyZbHAUWM7KDcyZfNdNEZ5jRfh1aR2gD/Lg3eL1i7BM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=LLiAc1ZgcMyHMAEID4i10vdoqvWbouEBRdsZZIteZWfbaXsibgrVSIyOSESThLe7KEHPW3WX8BjKZ8I0x0RVgdrCDAI2EmMGjOZYbdznSkqkucarpvCQiB8YlFWUa5t0cRG61xy5sJD3ZnYQ1kOX7Mpj50Yv/Wukqb5C8RYXXCg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com; spf=pass smtp.mailfrom=dell.com; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=HW66NxeM; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=FJ1Kp9P1; arc=none smtp.client-ip=148.163.133.20
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dell.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GezNAYNX"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 69A6F1F000FF;
-	Tue, 15 Sep 2026 16:09:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789488562;
-	bh=ssLi6wNWxgiYZQfctaOoNM9Kl/674OmF/UB8RIgzfag=;
-	h=From:Date:Subject:To:Cc;
-	b=GezNAYNXr6vAx4sTEmSfg+iON25jy3cgX3WrZ6zqgVY+9661FAwW/qIaetBR6ItVf
-	 +bcUx9tAzlS/D39Rl+gyBf0gpahg73Q+IQpJ3pRI0a0FilBzooOatNpiVUreoOqwO7
-	 UujA0FzCcumbvtEsXVKa0XFidv1lMmprWACcPeuMxHSpzdXYU8uOwxwzQH37w1pfUq
-	 UyT0iRZbFYiFYVzhZ31D/NmKIoeSvT9nDSIRixWCvfEUyHsslJ8cTbOolw0PDqRAUE
-	 AK4r54QJcq0HF2DcUB6PvZQUDtB1b61lZ79EAVElzzbKZcYOSZOXD388VRxWlb+M8Q
-	 Z+T7KvWPGPPqQ==
-From: Jeff Layton <jlayton@kernel.org>
-Date: Tue, 15 Sep 2026 12:09:17 -0400
-Subject: [PATCH fstests] btrfs: test graceful ENOMEM handling in
- synchronous dirops
+	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="HW66NxeM";
+	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="FJ1Kp9P1"
+Received: from pps.filterd (m0170390.ppops.net [127.0.0.1])
+	by mx0a-00154904.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68FD1ePI2980031;
+	Tue, 15 Sep 2026 10:17:55 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dell.com; h=cc
+	:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=smtpout1; bh=988TgQoS7paHUwcJekFHCNErcojXHWon2mhW
+	c/T1nOs=; b=HW66NxeMMOKLPd5KSj41xxqzT5JRlY/l3kvALTtJjZ1HciDCoJsO
+	Nzx3dAuyeasH9HJMRVT3pd6OenIRfsOexZ9XdYUg/TyMjDjm7PVlEaClpBBlQJ8w
+	nLOAEaya6QaiZwNDP98QNfRtjfo5QmwavGwQgU/JJ52Zu6+uzctRgAq7lQn0OTf1
+	jHG0v4cQ0W3GvBtDjGPLL38QwP+Xz8pXgUZPM/mwK9h5/7jyszjECGQ6NsrVZn2h
+	l8fP0z2JLJVoPFmTGmUnr+8mLhCiTD2162XGXSTietWhHop42Zg15+nDPkuWqlSq
+	PgATC064aV1Cz0DZCmmmcqun2yxoaaAaqQ==
+Received: from mx0a-00154901.pphosted.com (mx0b-00154901.pphosted.com [67.231.157.37])
+	by mx0a-00154904.pphosted.com (PPS) with ESMTPS id 4gn1sy3rkn-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
+	Tue, 15 Sep 2026 10:17:54 -0400 (EDT)
+Received: from pps.filterd (m0089484.ppops.net [127.0.0.1])
+	by mx0b-00154901.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68FDxS9C3661268;
+	Tue, 15 Sep 2026 10:17:54 -0400
+Received: from esapsmtpat02.us.dell.com (esapsmtpat02.us.dell.com [143.166.211.150])
+	by mx0b-00154901.pphosted.com (PPS) with ESMTPS id 4gq4m0k5v9-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=FAIL);
+	Tue, 15 Sep 2026 10:17:53 -0400 (EDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=dell.com; i=@dell.com; q=dns/txt; s=smtpdev1;
+  t=1789481874; x=1821017874;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=988TgQoS7paHUwcJekFHCNErcojXHWon2mhWc/T1nOs=;
+  b=FJ1Kp9P1yR2NPgq8xCh0ssGvjYNSvYMBUA+lk3TU6Gjf5M7FwC2TP2Gy
+   QotfsPU4s/CZ9NBQ/GlkKkuX31mbcXIlg6j9VtmdAuzSMcRtlhOhe7jqX
+   w63lDMcm15pRBZOH2+hap0/LKgJCbpV1ATNKflTKLKG8kxCJbAeMHii6d
+   lZunEEGAnqBALEbFYznzZCftY5e6tZr1lvM/fjo6ooLIXkMrbb6zIAUHS
+   DDpEIOVQNINTNJxuDQ5N9Xev2nRZdKUmbEOIPCkeF/zArUIGzDE/i2hqN
+   1BMOrembSZrkzpk/z7/I0qvhfpeAidIqr3eURDGwMlYYrhDZR4+T1iW/q
+   w==;
+X-CSE-ConnectionGUID: 7YLh5tLUSvWO+o0wcNw0JQ==
+X-CSE-MsgGUID: xdf7yzi3SBi1NpfElWHKPQ==
+X-LoopCount0: from 10.94.9.174
+X-MS-Exchange-CrossPremises-AuthAs: Internal
+Received: from w-96j1th4.apac.dell.com (HELO W-96J1TH4.blr.amer.dell.com) ([10.94.9.174])
+  by esapsmtpat02.us.dell.com with ESMTP/TLS/TLS_AES_256_GCM_SHA384; 15 Sep 2026 14:17:49 +0000
+From: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+To: fstests@vger.kernel.org
+Cc: Prabhakar Pujeri <prabhakar.pujeri@dell.com>,
+        Zorro Lang <zlang@kernel.org>, "Darrick J. Wong" <djwong@kernel.org>,
+        Qu Wenruo <wqu@suse.com>,
+        Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
+        Jaegeuk Kim <jaegeuk@kernel.org>, Chao Yu <chao@kernel.org>,
+        Amir Goldstein <amir73il@gmail.com>, Anand Jain <asj@kernel.org>,
+        Filipe Manana <fdmanana@suse.com>, quwenruo.btrfs@gmx.com,
+        linux-f2fs-devel@lists.sourceforge.net, linux-btrfs@vger.kernel.org,
+        linux-unionfs@vger.kernel.org
+Subject: [PATCH v3 0/6] xfstests: add missing _require_scratch checks
+Date: Tue, 15 Sep 2026 14:17:39 +0000
+Message-ID: <20260915141745.4299-1-prabhakar.pujeri@dell.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260915-btrfs-enomem-v1-1-ca07610ebcad@kernel.org>
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/x3MOwqAMBBF0a3I1AaSgEbdilj4edEpjJIJIoh7N
- 1ie4t6HBJEh1BUPRVwsfIQMUxY0b2NYoXjJJqttrVtTqSlFLwrh2LErOK2da2prjKOcnBGe73/
- Xk5cESULD+36UiL0KZwAAAA==
-X-Change-ID: 20260915-btrfs-enomem-e70077862117
-To: Zorro Lang <zlang@kernel.org>, Anand Jain <asj@kernel.org>, 
- Filipe Manana <fdmanana@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, 
- Jeff Layton <jlayton@kernel.org>
-X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=7062; i=jlayton@kernel.org;
- h=from:subject:message-id; bh=jHfOudUjX8drKG1nKyLcAmR0LLqg/RGEai2aWIL6GcE=;
- b=owEBbQKS/ZANAwAKAQAOaEEZVoIVAcsmYgBqqW2yR4B/u5wuIrUuxMCG0BoxIiZSxzqT4eknB
- ell0eyigbWJAjMEAAEKAB0WIQRLwNeyRHGyoYTq9dMADmhBGVaCFQUCaqltsgAKCRAADmhBGVaC
- FVUKD/9aOmN+FHbUIbZgd8FzBf40iQOH5/zEHO0nEPCavLcuOXmHZ1TvaNdffx7NeONiMgv/Qk8
- 6tkIFcOrUllDWqnASEXV66GdTK59aR/PVWDtpdD/s9A1bTKAUPJoJCw6yTMc+6GLRDcajO7HRtA
- Co3rwBoh/0Rhg4jbh9KsAlJPhjMiZOyJJOtTx2YEyINcvA/1gCD9BE3YLNKq/wFqGJqgYRVHpvJ
- wZOOmAj1gSMQ4TmY1jVlvkuVVJfhs185Zch3/NuUPkkmDWcWwvq2BbGRg401VDXTDhtfk077VnR
- hNgw2YqhFaayISMJYm5cECIUGyDGp+eZs/8SjL/pTKCyN2M3icwvrvS2pIm7pOaOT7zCK4+FBEU
- WyZsNAqS0fRIzyfM03gJsL0y3eWRGduGVl0krkcE6m688DsA8f2P5V8zQTZ7Yp9BAyfsssZehaK
- WYb20g5J0Wp4RofFi4jc05P6mqSjqWwzxdyBNw+wO1y3NTKtbQmW5VWMJisXEiCc/TsWF+4h1C3
- zxUcEY2c424xwmImIKEdXuTcIhPfoYd3Kl5dGzjI9ymTt/BfR/5B0qj4PinZ+ltu9pAuhJR37at
- e8tH1JJA6xDQipf47nyZKsIAj9F+Uk57MOsJYbf6V0+lPaF9D8Qmtf8Ux+Q+Ge4kwrXqkNVoO/d
- FXf+ekiJCD8K6Cg==
-X-Developer-Key: i=jlayton@kernel.org; a=openpgp;
- fpr=4BC0D7B24471B2A184EAF5D3000E684119568215
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-09-15_04,2026-09-14_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 clxscore=1015 malwarescore=0 impostorscore=0 phishscore=0
+ spamscore=0 bulkscore=0 suspectscore=0 lowpriorityscore=0 adultscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609150207
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTE1MDIwOCBTYWx0ZWRfXy2izKdu5663A
+ PaJ9TiQUkj+z2GnspR2/rL10538Ru59IM0hEzOUZ6NdosseGUx4VTSy/WfSvieOoeZP4Ds1H9SL
+ XQnF/LrPxCJ+N1oQ3K6Px+AT3+Ujxug=
+X-Authority-Analysis: v=2.4 cv=FtyQbGrq c=1 sm=1 tr=0 ts=6aa95392 cx=c_pps
+ a=Z2e5DKjA+8LiMDv5v6mwwA==:117 a=i8a7nF7jFa3EbZrjgrQYpA==:17
+ a=VdqzKS8jKosA:10 a=ke5jqHz-1hQA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=6gNNCFAoQcIphELLPWWu:22 a=sEWawkeXllE7TocFc0N_:22 a=VwQbUJbxAAAA:8
+ a=iLNU1ar6AAAA:8 a=EjSTBG_SgHjXaJ5rYncA:9 a=hlJyneSgMmFPbskH-t2w:22
+X-Proofpoint-GUID: SAmdIxzceeLNuBvbBfLcobUJw-PdDxxP
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTE1MDIwOCBTYWx0ZWRfXxSwF33Gsva9k
+ RadiwCJX5KOOjvFr+Fulx9U7GBNDtdhZCTAj6ryD/BLLkhb1B4ke9GsG2hipGIvPwvyYczv73gS
+ ldvOLxMOKYPQzwJxgt2ZLRPi7uaPY1e4ci4i2gJ/d5VePqR5q6cAIeU6qyTOd8xyrpN6x/D6dMF
+ ifp4ye/MqxMWawDmpkA7Ac5f6mfMbAxohIHhkhtg+ut9lhy3tK3BhUeU/YLdg5oG+FXIFP/Inis
+ hKyqV1niTU1OT64XwcRm1rcDHHXdObbGJVxm3h5kdBOhg3FvWQPBdX9R5p937usCCrpXgSvIQtt
+ ibU82I7bN52J9Npz73w94AQGrmgeKIZqc+DtX6jB9yHvzgBqOJyLfHCj6OAaRAmkLZsI73EqEo7
+ JpcUCw455fK7Iw1RKhsixIy9RJ1Pxy+2OJXpBMJBM/ulHo4rxj69zznEjKbv3xK02ZzOkb8rMqA
+ 1r72ehE5aB2IYT94uAQ==
+X-Proofpoint-ORIG-GUID: SAmdIxzceeLNuBvbBfLcobUJw-PdDxxP
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0
+ priorityscore=1501 spamscore=0 bulkscore=0 lowpriorityscore=0 adultscore=0
+ phishscore=0 suspectscore=0 malwarescore=0 impostorscore=0 clxscore=1015
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609150208
 
-Recently, we added some patches to allow btrfs to handle -ENOMEM errors
-in dir-morphing codepaths [1]. As part of that, we added fault injection
-knobs to a few functions so we could test that error handling.
+Fully consolidated resend of all remaining _require_scratch fixes, as
+requested by Zorro on the v2 cover.
 
-Add btrfs/354, which uses the fail_function facility to inject -ENOMEM
-into btrfs_prealloc_delayed_dir_index() and confirms that a
-dir-modifying operation returns ENOMEM to userspace without aborting the
-filesystem:
+All of these patches add a single missing _require_scratch check; with
+the exception of btrfs/333 (which places it at the top of
+_require_btrfs_iouring_encoded_read(), per Qu Wenruo's earlier review)
+they are plain one-line adds directly after the resource checks.  No
+other changes.
 
-- mkdir fails with ENOMEM (not EROFS),
-- a subsequent create succeeds (fs is not read-only/aborted),
-- a mount cycle runs orphan cleanup and the automatic fsck confirms
-  consistency.
+v3:
+- Merge ALL six single-line fixes into one series, per Zorro's request
+  of 2026-09-03 on the v2 cover letter.
+- Add Johannes Thumshirn's R-b for btrfs/273 and Chao Yu's R-b for
+  f2fs/015,016 (both since v2).
+- No code changes; patch contents are identical to the v2/v3 versions
+  previously posted individually.
 
-The injection is global, so any other btrfs dir-entry creation can
-consume it first -- including the test's own $tmp redirection when /tmp
-is itself on btrfs. Pre-create that file and retry until the mkdir takes
-the error.
+v2 pieces (this and the three it pulls forward) for reference:
+- [PATCH v2 0/3] https://lore.kernel.org/fstests/20260903035344.752-1-prabhakar.pujeri@dell.com/
+- btrfs/333 v3 https://lore.kernel.org/fstests/20260831104200.2269-1-prabhakar.pujeri@dell.com/ (v1; v3 was posted but is not archived)
+- btrfs/273 v2 https://lore.kernel.org/fstests/20260902050145.2439-1-prabhakar.pujeri@dell.com/ (v1; v2 was posted but is not archived)
+- overlay/081 v2 https://lore.kernel.org/fstests/20260901132438.759-1-prabhakar.pujeri@dell.com/
 
-Add generic _require_function_error_injection / _inject_function_error /
-_uninject_function_error helpers to common/inject for driving the kernel
-fail_function interface.
+Reviewed-bys carried (per the individual threads):
+- Darrick J. Wong: generic/590,735 and generic/795
+- Zorro Lang + Chao Yu: f2fs/015,016
+- Qu Wenruo: btrfs/333 (v3) and btrfs/273 (v2)
+- Johannes Thumshirn: btrfs/273 (v2, second R-b)
+- Amir Goldstein: overlay/081 (as Acked/Reviewed on v1; kept)
 
-[1]: https://lore.kernel.org/linux-btrfs/20260825-btrfs-enomem-v4-0-b9363fa8714a@kernel.org/
+Prabhakar Pujeri (6):
+  generic/590,735: add missing _require_scratch check
+  generic/795: add missing _require_scratch check
+  f2fs/015,016: add missing _require_scratch checks
+  btrfs/333: require scratch before checking encoded reads
+  btrfs/273: add missing _require_scratch check
+  overlay/081: add missing _require_scratch check
 
-Assisted-by: LLM
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- common/inject       | 50 ++++++++++++++++++++++++++++++++
- tests/btrfs/354     | 83 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/354.out |  2 ++
- 3 files changed, 135 insertions(+)
+ common/btrfs      | 1 +
+ tests/btrfs/273   | 1 +
+ tests/f2fs/015    | 1 +
+ tests/f2fs/016    | 1 +
+ tests/generic/590 | 1 +
+ tests/generic/735 | 1 +
+ tests/generic/795 | 2 ++
+ tests/overlay/081 | 1 +
+ 8 files changed, 9 insertions(+)
 
-diff --git a/common/inject b/common/inject
-index 6b590804d1ea..da78c1931135 100644
---- a/common/inject
-+++ b/common/inject
-@@ -111,3 +111,53 @@ _scratch_inject_error()
- 		_fail "Cannot inject error ${type} value ${value}."
- 	fi
- }
-+
-+# Requires the kernel fail_function facility (CONFIG_FUNCTION_ERROR_INJECTION
-+# and CONFIG_FAIL_FUNCTION) and, if a function name is given, that the function
-+# is annotated with ALLOW_ERROR_INJECTION().
-+_require_function_error_injection()
-+{
-+	local func="$1"
-+
-+	test -d "$DEBUGFS_MNT/fail_function" || \
-+		_notrun "$DEBUGFS_MNT/fail_function not found; CONFIG_FAIL_FUNCTION not enabled"
-+
-+	if [ -n "$func" ]; then
-+		grep -qw "$func" "$DEBUGFS_MNT/error_injection/list" 2>/dev/null || \
-+			_notrun "$func is not registered for error injection"
-+	fi
-+}
-+
-+# Inject a fixed return value into a kernel function via fail_function.
-+#   $1 - function name (must be ALLOW_ERROR_INJECTION annotated)
-+#   $2 - return value to inject (e.g. -12 for -ENOMEM)
-+#   $3 - number of times to fail (default 1)
-+_inject_function_error()
-+{
-+	local func="$1"
-+	local retval="$2"
-+	local times="${3:-1}"
-+
-+	# Writing the function name to "inject" creates its per-function dir.
-+	echo "$func" > "$DEBUGFS_MNT/fail_function/inject"
-+	# The retval file is an unsigned hex attribute (DEFINE_DEBUGFS_ATTRIBUTE
-+	# "%llx"), so a negative errno like -12 must be written as its unsigned
-+	# 64-bit (two's-complement) hex form; a bare "-12" is rejected with EINVAL.
-+	printf '%#x\n' "$retval" > "$DEBUGFS_MNT/fail_function/$func/retval"
-+	echo 100 > "$DEBUGFS_MNT/fail_function/probability"
-+	echo 0 > "$DEBUGFS_MNT/fail_function/interval"
-+	echo 0 > "$DEBUGFS_MNT/fail_function/space"
-+	echo 0 > "$DEBUGFS_MNT/fail_function/verbose"
-+	echo "$times" > "$DEBUGFS_MNT/fail_function/times"
-+}
-+
-+# Stop injecting errors into a kernel function set up by
-+# _inject_function_error().
-+_uninject_function_error()
-+{
-+	local func="$1"
-+
-+	echo 0 > "$DEBUGFS_MNT/fail_function/times" 2>/dev/null
-+	echo 0 > "$DEBUGFS_MNT/fail_function/probability" 2>/dev/null
-+	echo "!$func" > "$DEBUGFS_MNT/fail_function/inject" 2>/dev/null
-+}
-diff --git a/tests/btrfs/354 b/tests/btrfs/354
-new file mode 100755
-index 000000000000..9b9e601d6405
---- /dev/null
-+++ b/tests/btrfs/354
-@@ -0,0 +1,83 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Jeff Layton.  All Rights Reserved.
-+#
-+# FS QA Test No. 354
-+#
-+# Verify that an -ENOMEM in the synchronous directory entry insertion path is
-+# returned to userspace without aborting the filesystem.
-+#
-+# btrfs pre-allocates the delayed dir index before modifying the btree, so a
-+# failure in btrfs_prealloc_delayed_dir_index() must surface as -ENOMEM from
-+# mkdir()/create()/etc. rather than a transaction abort. Use the fail_function
-+# facility to force that allocation to fail and confirm the fs survives.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+. ./common/inject
-+. ./common/filter
-+
-+_require_scratch
-+# For the automatic fsck at unmount, which confirms the orphaned inode left by
-+# the failed operation is cleaned up and the fs is consistent.
-+_require_check_dmesg
-+_require_function_error_injection btrfs_prealloc_delayed_dir_index
-+
-+func=btrfs_prealloc_delayed_dir_index
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+# Pre-create the stderr file. fail_function has no usable task filter, so the
-+# injection is global, and $tmp may well live on a btrfs filesystem itself. If
-+# the shell had to create this file it would insert a dir entry and swallow the
-+# injected failure before mkdir() ever ran.
-+touch $tmp.err
-+
-+# For the same reason any other btrfs dir-entry creation on the system can
-+# consume the one-shot failure, so retry until our mkdir is the operation that
-+# takes it.
-+err=""
-+for i in $(seq 1 20); do
-+	rm -rf "$SCRATCH_MNT/dir"
-+
-+	# Force a single -ENOMEM (-12) into the prealloc path.
-+	_inject_function_error $func -12 1
-+	mkdir "$SCRATCH_MNT/dir" 2>$tmp.err
-+	res=$?
-+	_uninject_function_error $func
-+
-+	# mkdir succeeded, so something else consumed the injected failure.
-+	# Note we must not leave the directory behind, or the next attempt
-+	# would fail with EEXIST rather than the injected error.
-+	if [ $res -eq 0 ]; then
-+		continue
-+	fi
-+
-+	err=$(cat $tmp.err)
-+	break
-+done
-+
-+if [ -z "$err" ]; then
-+	_notrun "injected error did not reach mkdir"
-+fi
-+
-+# The error returned to userspace must be ENOMEM, not EROFS (which would mean
-+# the transaction was aborted and the fs went read-only).
-+echo "$err" | grep -qi "cannot allocate memory" || \
-+	{ echo "unexpected error from mkdir:"; echo "$err" | _filter_scratch; }
-+
-+# The filesystem must still be usable: a create with injection disabled must
-+# succeed. On an aborted (read-only) fs this would fail with EROFS.
-+mkdir "$SCRATCH_MNT/dir2" || _fail "filesystem unusable after injected ENOMEM"
-+
-+# Cycle the mount to run orphan cleanup for the inode left behind by the failed
-+# mkdir, then keep using the fs to be sure it is healthy.
-+_scratch_cycle_mount
-+touch "$SCRATCH_MNT/dir2/file"
-+
-+echo "silence is golden"
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/354.out b/tests/btrfs/354.out
-new file mode 100644
-index 000000000000..afe30ed36fea
---- /dev/null
-+++ b/tests/btrfs/354.out
-@@ -0,0 +1,2 @@
-+QA output created by 354
-+silence is golden
-
----
-base-commit: a370dcbed43563f0462801e889e0eceb93c7cfad
-change-id: 20260915-btrfs-enomem-e70077862117
-
-Best regards,
+Base: upstream master a370dcbed43563f0462801e889e0eceb93c7cfad
 -- 
-Jeff Layton <jlayton@kernel.org>
+2.55.0
 
