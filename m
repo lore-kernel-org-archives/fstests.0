@@ -1,204 +1,136 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mx0b-00154904.pphosted.com (mx0b-00154904.pphosted.com [148.163.137.20])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF2483DD86C
-	for <fstests@vger.kernel.org>; Tue, 15 Sep 2026 15:06:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 408CD4A263A
+	for <fstests@vger.kernel.org>; Tue, 15 Sep 2026 15:22:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.137.20
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789484798; cv=none; b=MuFaX2l2IRFPj6grhvQppkcMJZ4yGLXHAt8lrk9fFcUs+D6TlwOGJTudhp3OJ2maP0PV1fohqqGehushjJHM/6FLXyslpxUPLiB8XJmDhxykgRKIJWGS0vWC+bmSLtBTF7o67M63TTeOVPBGhHj78upqjjTzss+tYPbczDXDnnM=
+	t=1789485756; cv=none; b=dXgA2gPxCNfk1qUXI3NGzDtD8Vnj4PzvLDlf1EcDEO2fvA1Cc1c545Nnl4RV4AeipYg3kqd660b9bsJZHntv2RHHj6iyzywIxhz9oD19V01EiUG0v+KAYqy65sLU/egiFXiKwW7fABNnV7VOo5ukAf0q3qcP6RNqLa8thEFbXpY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789484798; c=relaxed/simple;
-	bh=MokpD9HepXX8dM27xnqptcSpwA3CZ7fsGD+AzLYoPSo=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=e6RAhJnknDeTFnRL2Yoys0Nng3RPj5HQxNSK5XUe1xlm92Cc2+px2v4gsY2hhpkMjg/LtkibbtAwyrFIgLgt+9bBKTVpHHHeNi5Q1C7YCruaFTyQmcdbDhcj7Fjs4gLt6edo4Wpugc1gN4cyfk6JoCtfDKS787x/fnsbSUe/Kbc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Q8fAFqvn; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789485756; c=relaxed/simple;
+	bh=u+Ul4rHd6A11EYpEDSt/Kiaj5PMne2PLrXwIpbJiWHA=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=rjeXaYA0GKs67AS4RfKL3/Or5fidIORLn3zi2GnacSqMSAHBcx4a2nPH23YPU6bIRKhvIZDUujnjTkgfK6mWBB01PmkxHfuMkJt/7zkoXKEsNdXlYccIcijK6UBU2SZGxQXHhVfFlfKkvdCWtV+4SS7hPXQF/OcL/y2WRazBO0A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com; spf=pass smtp.mailfrom=dell.com; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=Dpb5yQe9; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=GyxRDwDx; arc=none smtp.client-ip=148.163.137.20
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dell.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Q8fAFqvn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 724661F00893
-	for <fstests@vger.kernel.org>; Tue, 15 Sep 2026 15:06:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789484796;
-	bh=27aLuGp91Uyti5BzrexLrNlw4BDHdbUU8zXPfXmlnq0=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=Q8fAFqvnWQLR8WeeK4N6lbguD0nGJwoOooPSEMJkiA6llAI4QctbUnkxrcD7io1uJ
-	 F0LWvC+wZLmCKzqcM6MXzPiA2AQCYOgoR85PpQZAW59rapNWSeJh0awXYBxVS2F3Ez
-	 87FgpPaeS7jEOfhf+BdcIFwakR2pPsS7XnJi2Q8PCcadLZvyCjLM1oNQPno3lY4XOD
-	 dHTTiG+1h8J1FHjI5PphAuELKK+WNgVl5ngx67+XPGNPJxmIKanTLRiMwY9f8MjNdk
-	 OJZ5A7qqWWzVwvubHQ2zGemf/MHpWSdqjh1GWUGfeObgMPz9MuU6YnngT6soqqleg0
-	 vZtGGsBm6R/Lg==
-Received: by mail-oi2-f12.google.com with SMTP id 5614622812f47-4b37a3ed715so2479717b6e.3
-        for <fstests@vger.kernel.org>; Tue, 15 Sep 2026 08:06:36 -0700 (PDT)
-X-Gm-Message-State: AFuF++koNFhPy8cxWD5GXBfcddZ0DXN0MiTHg5xhbJrM7vmgy9tp+IKf
-	iAOK99+twNKNL8uAjM9OOU6DEcsRV8Z/eLo2nXrBwGxAHiWOpTgbmku/+8rsjCFGbzDCc4exfUP
-	KqNwVJWvoReTxJxpWaFto3wX3CjTJdBM=
-X-Received: by 2002:a05:6808:15a2:b0:4a3:fefb:899b with SMTP id
- 5614622812f47-4c7b2dfaebamr5326613b6e.7.1789484795649; Tue, 15 Sep 2026
- 08:06:35 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="Dpb5yQe9";
+	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="GyxRDwDx"
+Received: from pps.filterd (m0170394.ppops.net [127.0.0.1])
+	by mx0b-00154904.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68FD1hnT548080
+	for <fstests@vger.kernel.org>; Tue, 15 Sep 2026 10:17:58 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dell.com; h=cc
+	:content-transfer-encoding:date:from:in-reply-to:message-id
+	:mime-version:references:subject:to; s=smtpout1; bh=n92ZgNPaqmHp
+	qIBzwaHbM6DS22O4oYnHfZYTRXw/zMk=; b=Dpb5yQe9qWbYIsrZyknJwjJvccP+
+	dATS4qFeIBeM3BHm999o5InxpDjzhgyQ1OjlwlweX3ETakME8EkYC1SnsVXpy014
+	NUjI2wSVWToK+YzBD+MB5FqnnOeMGe8CQcLvsQyxm+J9Hj9Z4fuQJVA/tsdLUCEK
+	wB+O4Vy0sSMNpV9z+b9uOu7J3tPiWaUkP2yARRVvDiuXILNOPBzwc/zediS9C1pC
+	mE3xFhB+ewh00ZYFYqsA5h+h21cTuXtS6x3vkw9voYNQ78o3DbgsMT/+kbS/5gZc
+	/u2ervcMuWV88Nok7Ce99bf0fBM23EYclji/L0irgSCz4NcppaeTQ//F/Q==
+Received: from mx0a-00154901.pphosted.com (mx0b-00154901.pphosted.com [67.231.157.37])
+	by mx0b-00154904.pphosted.com (PPS) with ESMTPS id 4gn1a13v7y-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT)
+	for <fstests@vger.kernel.org>; Tue, 15 Sep 2026 10:17:58 -0400 (EDT)
+Received: from pps.filterd (m0089484.ppops.net [127.0.0.1])
+	by mx0b-00154901.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68FDxS9E3661268
+	for <fstests@vger.kernel.org>; Tue, 15 Sep 2026 10:17:58 -0400
+Received: from esapsmtpat02.us.dell.com (esapsmtpat02.us.dell.com [143.166.211.150])
+	by mx0b-00154901.pphosted.com (PPS) with ESMTPS id 4gq4m0k5v9-3
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=FAIL)
+	for <fstests@vger.kernel.org>; Tue, 15 Sep 2026 10:17:57 -0400 (EDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=dell.com; i=@dell.com; q=dns/txt; s=smtpdev1;
+  t=1789481878; x=1821017878;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=n92ZgNPaqmHpqIBzwaHbM6DS22O4oYnHfZYTRXw/zMk=;
+  b=GyxRDwDxK460pxuA46Pd24lsZG9k4oefph0JkLtR1+aXwtx0D7njfPtL
+   NE88aiqh1BXYj2UeZxbcUIomsMw/USn4yB4PFgo6+56I9YpOJ8qh8YzJ3
+   YYk2MbKg8TYQegzrmQFB9t6OCjrAok6vZ7EtIS7XnuA5VVgbvKV9a4KU0
+   k/pwvMHANJdDHPRMCPeIHLrrHazPUQTWqeZLLQuuzGFwkP8D69/Y4t50t
+   z/m2/RW5274GTPHN59XCFU5kPl97F1tssK8I8glhDchNNROcDqrbQY/3/
+   pc/wyzXwKkb88eaPLGU8yeBc+/RYBu2fAUt6jsnqLvzwf5R23byXssErC
+   Q==;
+X-CSE-ConnectionGUID: zYkaOg1/T6+YUm33t1AJFQ==
+X-CSE-MsgGUID: +CwMI5eJSQC6g2XQUXSo8Q==
+X-LoopCount0: from 10.94.9.174
+X-MS-Exchange-CrossPremises-AuthAs: Internal
+Received: from w-96j1th4.apac.dell.com (HELO W-96J1TH4.blr.amer.dell.com) ([10.94.9.174])
+  by esapsmtpat02.us.dell.com with ESMTP/TLS/TLS_AES_256_GCM_SHA384; 15 Sep 2026 14:17:56 +0000
+From: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+To: fstests@vger.kernel.org
+Cc: Prabhakar Pujeri <prabhakar.pujeri@dell.com>,
+        Zorro Lang <zlang@kernel.org>, "Darrick J. Wong" <djwong@kernel.org>
+Subject: [PATCH v3 2/6] generic/795: add missing _require_scratch check
+Date: Tue, 15 Sep 2026 14:17:41 +0000
+Message-ID: <20260915141745.4299-3-prabhakar.pujeri@dell.com>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20260915141745.4299-1-prabhakar.pujeri@dell.com>
+References: <20260915141745.4299-1-prabhakar.pujeri@dell.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <83e3a8678c5eafb1cfcf10741a53b6e586cd72d8.1789408399.git.fdmanana@suse.com>
- <20260915214431.72728a7a.ddiss@suse.de>
-In-Reply-To: <20260915214431.72728a7a.ddiss@suse.de>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Tue, 15 Sep 2026 16:05:58 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H40TjYdmh=3jJ7kz9vYE-cbgEMDmRwKM-Ddzju+3hGvOQ@mail.gmail.com>
-X-Gm-Features: AcwNN1U-h-7Xh1evQP-bfS1VK5Tbg3jnyF6Z9bvSclyqPhPjchq0SP1uNwFpPLM
-Message-ID: <CAL3q7H40TjYdmh=3jJ7kz9vYE-cbgEMDmRwKM-Ddzju+3hGvOQ@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: test that we don't create pointless compressed
- inline extents
-To: David Disseldorp <ddiss@suse.de>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
-	Filipe Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-09-15_04,2026-09-14_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 clxscore=1015 malwarescore=0 impostorscore=0 phishscore=0
+ spamscore=0 bulkscore=0 suspectscore=0 lowpriorityscore=0 adultscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609150207
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTE1MDIwOCBTYWx0ZWRfXyzxwEPFFUTJe
+ Vs4qPZuL/2JXJel+Yk6247pemcL0mCZnEwe1Q160fqCGX9t9V1M++uHioSpV2vI3YEXJSacM3D+
+ i2PSK7+q6OCTOMArEPUyIn3tQekSxiEOzJQVph5B2z8y3UA4iGTNQQa0ab6l0LJ2ihO95N9BFbb
+ Xallfecd1LV7VGSDRlCuAJIxLTVI19BxucAQ63C66YNOBLCH8UsywNNuNApZbzSgtvxGRTL/WtY
+ jGVKdesLLSKRcYOB9OzYyQrPMxxteVVNJIosqlcUeytj7jOjPhITAPNLZ2iPVVrEw2RIevZYqM0
+ q+7zBd0b+sZE6hE9YMVzln+ls0NbYB6LWXT8zqhAbkTWuN8rifB2qrhug9+n/OV8pydMDL/Ycuj
+ ZZz5Zx6qTW4pOKYpPn3gpxOpJ4h0EUj4gdIO8afLMXOfx63OtLmbRKw1WzfOUvFFc0FaCYULXWY
+ RcmwW20H1+C4E5xbAJg==
+X-Authority-Analysis: v=2.4 cv=Jt1kP84C c=1 sm=1 tr=0 ts=6aa95396 cx=c_pps
+ a=Z2e5DKjA+8LiMDv5v6mwwA==:117 a=i8a7nF7jFa3EbZrjgrQYpA==:17
+ a=VdqzKS8jKosA:10 a=ke5jqHz-1hQA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=6gNNCFAoQcIphELLPWWu:22 a=gLxAKuEMs0EQMVFiDJnH:22 a=VwQbUJbxAAAA:8
+ a=iLNU1ar6AAAA:8 a=wPallV7q4Y9WyMEzn_EA:9 a=hlJyneSgMmFPbskH-t2w:22
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTE1MDIwOCBTYWx0ZWRfXzsSuQ50N2kuy
+ WW0XROyAGf4JUVy6nS9NIY9jqLj4/uNyOLu3NQJOJ/5DNcK48TeV3fzikRrlfCJJV2OgA15tNFW
+ 8NIc6Z8/YkpAp06/rw6BttPVRDl2pMY=
+X-Proofpoint-ORIG-GUID: nqI1BaZMR58wuGjSFG9lmsAbCpm36gHO
+X-Proofpoint-GUID: nqI1BaZMR58wuGjSFG9lmsAbCpm36gHO
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0
+ clxscore=1015 impostorscore=0 lowpriorityscore=0 suspectscore=0 bulkscore=0
+ adultscore=0 malwarescore=0 priorityscore=1501 phishscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609150208
 
-On Tue, Sep 15, 2026 at 12:45=E2=80=AFPM David Disseldorp <ddiss@suse.de> w=
-rote:
->
-> On Mon, 14 Sep 2026 18:54:23 +0100, fdmanana@kernel.org wrote:
->
-> > From: Filipe Manana <fdmanana@suse.com>
-> >
-> > Verify that we don't create compressed inline extents when the compress=
-ed
-> > data size is not smaller than the uncompressed data size.
-> >
-> > This exercises a regression introduced in kernel 7.1 and that is fixed =
-by
-> > the following patch:
-> >
-> >   "btrfs: fix creation of compressed inline extents that don't save spa=
-ce"
-> >
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
->
-> Looks good and works for me:
-> Reviewed-by: David Disseldorp <ddiss@suse.de>
->
-> A couple of minor nits below...
->
-> > ---
-> >  tests/btrfs/354     | 44 ++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/btrfs/354.out |  2 ++
-> >  2 files changed, 46 insertions(+)
-> >  create mode 100755 tests/btrfs/354
-> >  create mode 100644 tests/btrfs/354.out
-> >
-> > diff --git a/tests/btrfs/354 b/tests/btrfs/354
-> > new file mode 100755
-> > index 00000000..801dc587
-> > --- /dev/null
-> > +++ b/tests/btrfs/354
-> > @@ -0,0 +1,44 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 354
-> > +#
-> > +# Verify that we don't create compressed inline extents when the compr=
-essed
-> > +# data size is not smaller than the uncompressed data size.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick compress
-> > +
-> > +. ./common/filter
-> > +
-> > +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> > +     "btrfs: fix creation of compressed inline extents that don't save=
- space"
-> > +
-> > +_require_scratch
-> > +_require_btrfs_command inspect-internal dump-tree
-> > +
-> > +algo_list=3D($(_btrfs_compression_algos))
-> > +for algo in ${algo_list[@]}; do
-> > +     _scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-> > +     _scratch_mount "-o compress=3D$algo"
-> > +
-> > +     echo 'a file with test content' > $SCRATCH_MNT/foobar
-> > +     _scratch_unmount
-> > +     _check_scratch_fs
-> > +
-> > +     extent_size=3D$($BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 =
-$SCRATCH_DEV | \
-> > +           grep 'inline extent' | \
-> > +           $AWK_PROG '{ for (i =3D 1; i < NF; i++) if ($i ~ /^size$/) =
-print $(i + 1) }')
-> > +     ram_size=3D$($BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SC=
-RATCH_DEV | \
-> > +                grep 'inline extent' | \
-> > +                $AWK_PROG '{ for (i =3D 1; i < NF; i++) if ($i ~ /^ram=
-_bytes$/) print $(i + 1) }')
-> > +
-> > +     if [ "$extent_size" -gt "$ram_size" ]; then
-> > +             echo "inline extent size ($extent_size) greater than ram_=
-size ($ram_size) for algo $algo"
-> > +     fi
->
-> It might be a little nicer to avoid multiple dumps and do the check in
-> awk. The following works for me, feel free to squash in...
+The test runs _scratch_mkfs and _scratch_mount without first requiring
+a scratch device, so it fails messily instead of skipping when no
+scratch device is configured.
 
-Integrated in v2, thanks.
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+Signed-off-by: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+---
+ tests/generic/795 | 2 ++
+ 1 file changed, 2 insertions(+)
 
->
-> diff --git a/tests/btrfs/354 b/tests/btrfs/354
-> index 801dc587..e744b945 100755
-> --- a/tests/btrfs/354
-> +++ b/tests/btrfs/354
-> @@ -27,18 +27,20 @@ for algo in ${algo_list[@]}; do
->         _scratch_unmount
->         _check_scratch_fs
->
-> -       extent_size=3D$($BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 =
-$SCRATCH_DEV | \
-> -             grep 'inline extent' | \
-> -             $AWK_PROG '{ for (i =3D 1; i < NF; i++) if ($i ~ /^size$/) =
-print $(i + 1) }')
-> -       ram_size=3D$($BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SC=
-RATCH_DEV | \
-> -                  grep 'inline extent' | \
-> -                  $AWK_PROG '{ for (i =3D 1; i < NF; i++) if ($i ~ /^ram=
-_bytes$/) print $(i + 1) }')
-> -
-> -       if [ "$extent_size" -gt "$ram_size" ]; then
-> -               echo "inline extent size ($extent_size) greater than ram_=
-size ($ram_size) for algo $algo"
-> -       fi
-> +       $BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV | \
-> +               tee -a $seqres.full | \
-> +               $AWK_PROG -v algo=3D"$algo" '
-> +                       /inline extent/ {
-> +                               for (i =3D 1; i < NF; i++) {
-> +                                       if ($i ~ /^size$/)
-> +                                               extent_size =3D $(i + 1)
-> +                                       if ($i ~ /^ram_bytes$/)
-> +                                               ram_size =3D $(i + 1)
-> +                               }
-> +                               if (extent_size > ram_size)
-> +                                       printf "inline extent size (%d) g=
-reater than ram_size (%d) for algo %s\n", extent_size, ram_size, algo
-> +                       }'
->
-> > +done
-> > +
-> > +# success, all done
->
-> Delete the line above, as we get here on failure too.
->
-> > +echo "Silence is golden"
-> > +_exit 0
-> > diff --git a/tests/btrfs/354.out b/tests/btrfs/354.out
-> > new file mode 100644
-> > index 00000000..8bc7ecf6
-> > --- /dev/null
-> > +++ b/tests/btrfs/354.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 354
-> > +Silence is golden
->
+diff --git a/tests/generic/795 b/tests/generic/795
+index fa5474c5..4c0e7bdb 100755
+--- a/tests/generic/795
++++ b/tests/generic/795
+@@ -27,6 +27,8 @@ _cleanup()
+ 
+ . ./common/filter
+ 
++_require_scratch
++
+ fsv_file_size=10000000
+ nproc_enabler=$((4 * LOAD_FACTOR))
+ nproc_reader=$((6 * LOAD_FACTOR))
+-- 
+2.55.0
+
