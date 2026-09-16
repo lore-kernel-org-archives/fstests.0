@@ -1,157 +1,301 @@
-Received: from mail-ej1-f46.google.com (mail-ej1-f46.google.com [209.85.218.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A150445DF65
-	for <fstests@vger.kernel.org>; Wed, 16 Sep 2026 07:40:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.46
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789544471; cv=pass; b=adem7y9ecxOnylsJioYB5ifKPIyiNHxMg4ZAZSStrbYGkrl++Gnj6VEAAttef93GoPnBHk+0SJZrj+8wNgX9Qv77+nKyymgRUnFvbHTBz4vDHmf75DzWOzYiFqhobwKjajd+9qORUWi1QX83UQEEfy27RdJ60bsuwUsdCvdeNAA=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789544471; c=relaxed/simple;
-	bh=M8pRcMGQRTIP+kQ8VfnfZ54kvYrrn3fp/02SwxtALTY=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE7EE4AAC45
+	for <fstests@vger.kernel.org>; Wed, 16 Sep 2026 16:04:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789574657; cv=none; b=U9gKSlxZXODn5gRxLw3XDQJ7xo7bGjmU1pvoRBAZ8VuLqgKFu4dDo9QOz4lhG04z3PFemYoRBrGPZ0l4yaW0lXsJey/Z7ot5vVBtJ9nePna5O/JohHoxdTnWM1kZtzp9Vt933KEErsxhDKiUM9KjXddml5LIb2oFZpqr0KWjtgE=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789574657; c=relaxed/simple;
+	bh=7f7pgDb3cVbwNL/undFad2w+7ywuk1GF4onbwjuLpcs=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ha7xGwmO7IJXL8FW+ljeLkuia8t/d9Fr+8+pvCMbSplqWTSTwVV1BzBWdvA2tqiFT9CguGQD/FcTbmxfiMX2ILbduTz5LYwvdaolTKyScHdQbFFOCwwF/ucTstdirMRKWIItYEL7RDUpLE4Pt3b2/c6IOpE2Vc2sDmjpzZNgFm8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=iIhuOsRz; arc=pass smtp.client-ip=209.85.218.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 To:Cc:Content-Type; b=ErJedujcZiLMpLHr1DUb7+EokU3AjLBNqQxWpT//1yUL09ztNce9F2B9nlRS4xxyKLGltxqURu87mCGpZdqYKRfxTSG5YcKeMusEh60sLFz1CYXexGDkF0ejKR3eEjEnXMiV+QY900pUJrRlsvufdfHQy1WItJ9GXas5QtJRWa0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KvxYFmkO; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="iIhuOsRz"
-Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-c20ce3c118aso227405766b.0
-        for <fstests@vger.kernel.org>; Wed, 16 Sep 2026 00:40:53 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1789544447; cv=none;
-        d=google.com; s=arc-20260327;
-        b=VGKbrxdCNmm/DTAWdvyHfHnO8balH4rsimeSXUBN5M4/eyTsOev7bRpFvc5yjrQmnj
-         f5TYu6Vjy5gMSrZEJB3QKCcu/7/KMG4HTqo5gBePJHMCcuajilcbcv+22u3zPHqwditc
-         91gWJ0iveWDGVxX6oGT3yg1YJu4WRrpZAsIX0g6RrJ1ONOtdgINVa/ygu2Tcc7b8Lo/2
-         pHP1zuwQop6X4bdP9s+vIEu+WvI6GEZUxeey+rV5AZ665Z4ZZlM90ti5sz2bbxw5U48U
-         ISZ9vBl3Fy3N71yw4gaDDr+IjSOuIuJCuRi5aeibqEyXecewkFfSk81FfdHQLU7dLJ0m
-         na5w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=+M4oZ9nb/hEYtuRbtOM0Toay3Yhov8xHH6hfoGELzcw=;
-        fh=eW8f3VYcB8wgxVAJ8YhHCa1ZUrGHqjIiaoLmujEtgG0=;
-        b=UUg/zcGD3n2IQP+c1KKannSuI99bLUykwaYG3ECN7ZOv8f5ZedtVkvjrYn9+7f/yCv
-         ej42GZaEfCforcfWN9cx/eNLX1nrE8iaeXA7uZ4L2PSrDfH4DK7ob5f+aB2uDOV8gI9U
-         dIvy6G4Z6sg1rIdC0ADczG1bGD4x7qeLrXpXd8yxgaOzcDkY9JdpU9fCaDQWVnHGJFuu
-         ea2DvhTtqJHns5JURa2p0ouoCx4fXiagKzDogw9qFhzE5QlrITHuT0ZTSBRKGZHeaioK
-         Pe8jaoB5vjSVhiiMUDJaqhz/UkCmV/65JQ+FQ8GAVMtPAfnOuA4XPwRmd40He7vJ03fQ
-         TiXQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1789544447; x=1790149247; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=+M4oZ9nb/hEYtuRbtOM0Toay3Yhov8xHH6hfoGELzcw=;
-        b=iIhuOsRzi2qZWsH/pG74vySYpIQEjjah8gatUbi6FlRgVLR6IFy4+hHKmKjFMUnrhB
-         /QDmVYBDGO9EU6z//J3m5o1g2aGeSjULMCx2OOGmlqV4Kiz/SPy89Vx89mPUvKuOpJod
-         ehS4Ojq2ggohGQ0WbLUzpmRYO9jSiiQTOg/nQnU9H0fFA6H71h0ItuKhi2NmXFhtmU/b
-         WkyPUCISyjf+p8XCKUSso3TWjYeC8cDUtqA02LQBD7Vn/PIW4a+CRkhhVRyzqpSlz/t+
-         33LA8fUMn6iDPRFIBnlYB6nHggkqthbFAfIWzF2eA+oQV2lqzmNpWIeq7y/QshhdLSav
-         kp6Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789544447; x=1790149247;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=+M4oZ9nb/hEYtuRbtOM0Toay3Yhov8xHH6hfoGELzcw=;
-        b=AvQ+0Gatt5vlF+wJgL5ZE0tcZDNF30JqlP1sgWa1sGLlNTii/f91/ntK3yuYgB+XZr
-         l+Vbn3Pl9Ru2zgWyQTfJJts5Z50UM69ZzyF8QTETDU3CaPQRycp40CspN2dpXgB+cwp5
-         YYn2fWm0R8XH+Ai8i7odekJcUe3vwF2US9Iy/JvFF8Zzsg678h5E+F0hb5Mi+K4dgqMk
-         2DrTfPkUlqQ+jQHtnbMJObjGCOCepAS86gbt5j1sv5gaLEK/jOVCfM1ilEflHM+haeN2
-         shw2CeQqBH4nWNQEPMzNz6up74XnCUu+q8M1IappPoIS/gXcfsrFxK30OB5Rr12ORJZ+
-         2gzQ==
-X-Gm-Message-State: AFuF++l0Py/189p379qxuC/FoGQ6+Ti2mY/F0NZnrqCduV9KEDXwW38b
-	VqZqMdIiOF1C6WPl5w7eK3Bem17Ngpar/Vj/ZTcC88Xy09ONjB8qIuujdCE2rSFh9uUUxIk+MPC
-	pGRY8APoxPxQ5JlpR0tDJUX+DyEM6VJk=
-X-Gm-Gg: AYBFou3rBiPKdsFVeQTNlGRSKUSzHSBT/HxxLrJz3RQQlsTdYMwINuy3c5+LoD5wrqp
-	YozC6DSJmzOSq8q82+kzyB/vADh/mvNRHf7IqzJlRDQG9SJT96/Y3rz23jEPlaFHOfZSPIF/FR0
-	s3GMqtelApzAa257twc4gJbUtib099NZDCuROe+8cxvIZ66hSuzn1+oVgzZ1cuIhbfCKSdQlGay
-	58IjwKKkiaG0CW5qG5B6CplRzTdOYa5FkW2/YOdAXN117tDUu5MBrQoy7cASqUf/wr2HGIHz0P3
-	C7WyyQ5LGytMv7x/AGlT4gdQ4TYF7xyYOQsmckb8WRAlf29P+OS5mKYY
-X-Received: by 2002:a17:907:3e29:b0:c25:5e10:1ca9 with SMTP id
- a640c23a62f3a-c29c8909440mr497060866b.5.1789544446596; Wed, 16 Sep 2026
- 00:40:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KvxYFmkO"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 65E941F00899
+	for <fstests@vger.kernel.org>; Wed, 16 Sep 2026 16:04:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1789574655;
+	bh=ny026t7rUNJsTan8gmG/Ss10INArhWWwB4LVmZPvaso=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc;
+	b=KvxYFmkOu/BDKyXX/YWcfdJOWMJ2URFSk5+/y8pDcL4p/SXafBSccXPla9oJfy+AA
+	 /coI39y+qCKXm5lUFbvomOEucqfMG3DhEzfap0SLq6jRCzJ+XXclEnetNKTB9LwwPJ
+	 gWOQBumStk+fziBptTFA3ZcQ57xBJoIsqz8/JslEEHTRrjU1QBUjQLFZWDtwqO8ZfZ
+	 KvvXZnugtCeLD4TTd+Pgm7ypdFXLAxH8FFYs+wCgYcDuUb0wmm1F9julV9Qa2kkpJ3
+	 l8Eq60pUdta/AZrVPQS19DdyEHLr94sZAXi8jaMwesHsN8iZj+nmH6r2WzXsrlWF40
+	 L1wNQPpsptguw==
+Received: by mail-vs2-f42.google.com with SMTP id 71dfb90a1353d-5c8319dd4a5so473942e0c.1
+        for <fstests@vger.kernel.org>; Wed, 16 Sep 2026 09:04:15 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AKwUvBwSb2rPYVGQSLYAFPDKocRb7chWB5BsIbK+BDaNWoQOLofnvX80PLy66gmeKqL8iIXWMW7u66Cy@vger.kernel.org
+X-Gm-Message-State: AFuF++mj/u+cxT9ZeACXY6/YsT/NtcyUWgrIvZPdYqa8SZDR+6oi+3v9
+	qG8Z17Gaa5vxem1q5I6+hqXUAbPoJQBIgaTi2CcY9UKBimqQ5/GkY2DmmTW+xbKzUnmBACTbu5N
+	LVT90m7/g1IclNf594y+cgwCHkOrY3Io=
+X-Received: by 2002:a05:6122:6612:b0:5c8:4409:602a with SMTP id
+ 71dfb90a1353d-5c99ad237fdmr4719846e0c.8.1789574654513; Wed, 16 Sep 2026
+ 09:04:14 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260915153608.5197-1-prabhakar.pujeri@dell.com> <20260915153608.5197-4-prabhakar.pujeri@dell.com>
-In-Reply-To: <20260915153608.5197-4-prabhakar.pujeri@dell.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 16 Sep 2026 09:40:35 +0200
-X-Gm-Features: AcwNN1X4MoyZ92wboGsfOYs8Iuj1ZOnM6KNgoCDVKfP0RDJ8hZDI72D4_NWZ5lg
-Message-ID: <CAOQ4uxgYKTVKg_zYAj+pEYFNvDPZcX0VXWJTzwLYKqXACwps3g@mail.gmail.com>
-Subject: Re: [PATCH 3/3] overlay/081: require uuid via _require_scratch_overlay_features
-To: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
-Cc: fstests@vger.kernel.org, Zorro Lang <zlang@kernel.org>, 
-	linux-unionfs@vger.kernel.org
+References: <20260915-btrfs-enomem-v1-1-ca07610ebcad@kernel.org>
+In-Reply-To: <20260915-btrfs-enomem-v1-1-ca07610ebcad@kernel.org>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Wed, 16 Sep 2026 17:03:38 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H4P32sBFHoUkD6NhxhJs=aLGMFKqB9ZGO0716Vx3r5vag@mail.gmail.com>
+X-Gm-Features: AcwNN1UcqSIE1NJnSo0_XXvgzE8A29mzmeswawqQP-vFLyZIOfupe3-gIeBLyM0
+Message-ID: <CAL3q7H4P32sBFHoUkD6NhxhJs=aLGMFKqB9ZGO0716Vx3r5vag@mail.gmail.com>
+Subject: Re: [PATCH fstests] btrfs: test graceful ENOMEM handling in
+ synchronous dirops
+To: Jeff Layton <jlayton@kernel.org>
+Cc: Zorro Lang <zlang@kernel.org>, Anand Jain <asj@kernel.org>, Filipe Manana <fdmanana@suse.com>, 
+	linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Sep 15, 2026 at 5:36=E2=80=AFPM Prabhakar Pujeri
-<prabhakar.pujeri@dell.com> wrote:
+On Tue, Sep 15, 2026 at 5:33=E2=80=AFPM Jeff Layton <jlayton@kernel.org> wr=
+ote:
 >
-> The ad-hoc check hid the mount output and treated any mount failure as
-> 'overlayfs does not support uuid'.  Route the requirement through the
-> generalized helper instead: the probe mount still rejects on a pre-6.6
-> kernel with EINVAL, and the options check remains via mount options.
+> Recently, we added some patches to allow btrfs to handle -ENOMEM errors
+> in dir-morphing codepaths [1]. As part of that, we added fault injection
+> knobs to a few functions so we could test that error handling.
 >
-> Signed-off-by: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+> Add btrfs/354, which uses the fail_function facility to inject -ENOMEM
+
+Please don't add here the test number, as this is very likely to be
+changed at commit time as we have already 2 other pending test cases
+with that number.
+Just say "Add a test case...".
+
+> into btrfs_prealloc_delayed_dir_index() and confirms that a
+> dir-modifying operation returns ENOMEM to userspace without aborting the
+> filesystem:
+>
+> - mkdir fails with ENOMEM (not EROFS),
+> - a subsequent create succeeds (fs is not read-only/aborted),
+> - a mount cycle runs orphan cleanup and the automatic fsck confirms
+>   consistency.
+>
+> The injection is global, so any other btrfs dir-entry creation can
+> consume it first -- including the test's own $tmp redirection when /tmp
+> is itself on btrfs. Pre-create that file and retry until the mkdir takes
+> the error.
+>
+> Add generic _require_function_error_injection / _inject_function_error /
+> _uninject_function_error helpers to common/inject for driving the kernel
+> fail_function interface.
+>
+> [1]: https://lore.kernel.org/linux-btrfs/20260825-btrfs-enomem-v4-0-b9363=
+fa8714a@kernel.org/
+>
+> Assisted-by: LLM
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
 > ---
-
-Thanks for following up on this.
-You may add
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
-
-after fixing the nit below
-
->  tests/overlay/081 | 8 ++++++--
->  1 file changed, 6 insertions(+), 2 deletions(-)
+>  common/inject       | 50 ++++++++++++++++++++++++++++++++
+>  tests/btrfs/354     | 83 +++++++++++++++++++++++++++++++++++++++++++++++=
+++++++
+>  tests/btrfs/354.out |  2 ++
+>  3 files changed, 135 insertions(+)
 >
-> diff --git a/tests/overlay/081 b/tests/overlay/081
-> index 2270a047..bef54470 100755
-> --- a/tests/overlay/081
-> +++ b/tests/overlay/081
-> @@ -14,6 +14,11 @@ _begin_fstest auto quick
->  . ./common/filter
->  . ./common/attr
->
-> +# Unique fsid mount options (uuid=3Dnull/auto/on) were added in kernel
-> +# v6.6 and have no module parameter; the probe mount in this helper
-> +# _notrun's when the kernel is too old.
-
-This is really too much of a comment.
-It should be pretty clear to test writers what's the purpose of _require_
-and the v6.6 information is already written in the test description less th=
-an
-10 lines above.
-
-Thanks,
-Amir.
-
-> +_require_scratch_overlay_features uuid
+> diff --git a/common/inject b/common/inject
+> index 6b590804d1ea..da78c1931135 100644
+> --- a/common/inject
+> +++ b/common/inject
+> @@ -111,3 +111,53 @@ _scratch_inject_error()
+>                 _fail "Cannot inject error ${type} value ${value}."
+>         fi
+>  }
 > +
+> +# Requires the kernel fail_function facility (CONFIG_FUNCTION_ERROR_INJE=
+CTION
+> +# and CONFIG_FAIL_FUNCTION) and, if a function name is given, that the f=
+unction
+> +# is annotated with ALLOW_ERROR_INJECTION().
+> +_require_function_error_injection()
+> +{
+> +       local func=3D"$1"
+> +
+> +       test -d "$DEBUGFS_MNT/fail_function" || \
+> +               _notrun "$DEBUGFS_MNT/fail_function not found; CONFIG_FAI=
+L_FUNCTION not enabled"
+> +
+> +       if [ -n "$func" ]; then
+> +               grep -qw "$func" "$DEBUGFS_MNT/error_injection/list" 2>/d=
+ev/null || \
+> +                       _notrun "$func is not registered for error inject=
+ion"
+> +       fi
+> +}
+> +
+> +# Inject a fixed return value into a kernel function via fail_function.
+> +#   $1 - function name (must be ALLOW_ERROR_INJECTION annotated)
+> +#   $2 - return value to inject (e.g. -12 for -ENOMEM)
+> +#   $3 - number of times to fail (default 1)
+> +_inject_function_error()
+> +{
+> +       local func=3D"$1"
+> +       local retval=3D"$2"
+> +       local times=3D"${3:-1}"
+> +
+> +       # Writing the function name to "inject" creates its per-function =
+dir.
+> +       echo "$func" > "$DEBUGFS_MNT/fail_function/inject"
+> +       # The retval file is an unsigned hex attribute (DEFINE_DEBUGFS_AT=
+TRIBUTE
+> +       # "%llx"), so a negative errno like -12 must be written as its un=
+signed
+> +       # 64-bit (two's-complement) hex form; a bare "-12" is rejected wi=
+th EINVAL.
+> +       printf '%#x\n' "$retval" > "$DEBUGFS_MNT/fail_function/$func/retv=
+al"
+> +       echo 100 > "$DEBUGFS_MNT/fail_function/probability"
+> +       echo 0 > "$DEBUGFS_MNT/fail_function/interval"
+> +       echo 0 > "$DEBUGFS_MNT/fail_function/space"
+> +       echo 0 > "$DEBUGFS_MNT/fail_function/verbose"
+> +       echo "$times" > "$DEBUGFS_MNT/fail_function/times"
+> +}
+> +
+> +# Stop injecting errors into a kernel function set up by
+> +# _inject_function_error().
+> +_uninject_function_error()
+> +{
+> +       local func=3D"$1"
+> +
+> +       echo 0 > "$DEBUGFS_MNT/fail_function/times" 2>/dev/null
+> +       echo 0 > "$DEBUGFS_MNT/fail_function/probability" 2>/dev/null
+> +       echo "!$func" > "$DEBUGFS_MNT/fail_function/inject" 2>/dev/null
+> +}
+> diff --git a/tests/btrfs/354 b/tests/btrfs/354
+> new file mode 100755
+> index 000000000000..9b9e601d6405
+> --- /dev/null
+> +++ b/tests/btrfs/354
+> @@ -0,0 +1,83 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 Jeff Layton.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 354
+> +#
+> +# Verify that an -ENOMEM in the synchronous directory entry insertion pa=
+th is
+> +# returned to userspace without aborting the filesystem.
+> +#
+> +# btrfs pre-allocates the delayed dir index before modifying the btree, =
+so a
+> +# failure in btrfs_prealloc_delayed_dir_index() must surface as -ENOMEM =
+from
+> +# mkdir()/create()/etc. rather than a transaction abort. Use the fail_fu=
+nction
+> +# facility to force that allocation to fail and confirm the fs survives.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +. ./common/inject
+> +. ./common/filter
+> +
+> +_require_scratch
+> +# For the automatic fsck at unmount, which confirms the orphaned inode l=
+eft by
+> +# the failed operation is cleaned up and the fs is consistent.
+> +_require_check_dmesg
+> +_require_function_error_injection btrfs_prealloc_delayed_dir_index
+
+Please add here somewhere a call to  _fixed_by_kernel_commit so that
+when test case fails on an unpatched kernel we get an informative
+message.
+
+Otherwise it looks good, thanks.
+
+> +
+> +func=3Dbtrfs_prealloc_delayed_dir_index
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +# Pre-create the stderr file. fail_function has no usable task filter, s=
+o the
+> +# injection is global, and $tmp may well live on a btrfs filesystem itse=
+lf. If
+> +# the shell had to create this file it would insert a dir entry and swal=
+low the
+> +# injected failure before mkdir() ever ran.
+> +touch $tmp.err
+> +
+> +# For the same reason any other btrfs dir-entry creation on the system c=
+an
+> +# consume the one-shot failure, so retry until our mkdir is the operatio=
+n that
+> +# takes it.
+> +err=3D""
+> +for i in $(seq 1 20); do
+> +       rm -rf "$SCRATCH_MNT/dir"
+> +
+> +       # Force a single -ENOMEM (-12) into the prealloc path.
+> +       _inject_function_error $func -12 1
+> +       mkdir "$SCRATCH_MNT/dir" 2>$tmp.err
+> +       res=3D$?
+> +       _uninject_function_error $func
+> +
+> +       # mkdir succeeded, so something else consumed the injected failur=
+e.
+> +       # Note we must not leave the directory behind, or the next attemp=
+t
+> +       # would fail with EEXIST rather than the injected error.
+> +       if [ $res -eq 0 ]; then
+> +               continue
+> +       fi
+> +
+> +       err=3D$(cat $tmp.err)
+> +       break
+> +done
+> +
+> +if [ -z "$err" ]; then
+> +       _notrun "injected error did not reach mkdir"
+> +fi
+> +
+> +# The error returned to userspace must be ENOMEM, not EROFS (which would=
+ mean
+> +# the transaction was aborted and the fs went read-only).
+> +echo "$err" | grep -qi "cannot allocate memory" || \
+> +       { echo "unexpected error from mkdir:"; echo "$err" | _filter_scra=
+tch; }
+> +
+> +# The filesystem must still be usable: a create with injection disabled =
+must
+> +# succeed. On an aborted (read-only) fs this would fail with EROFS.
+> +mkdir "$SCRATCH_MNT/dir2" || _fail "filesystem unusable after injected E=
+NOMEM"
+> +
+> +# Cycle the mount to run orphan cleanup for the inode left behind by the=
+ failed
+> +# mkdir, then keep using the fs to be sure it is healthy.
+> +_scratch_cycle_mount
+> +touch "$SCRATCH_MNT/dir2/file"
+> +
+> +echo "silence is golden"
+> +
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/354.out b/tests/btrfs/354.out
+> new file mode 100644
+> index 000000000000..afe30ed36fea
+> --- /dev/null
+> +++ b/tests/btrfs/354.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 354
+> +silence is golden
 >
->  _scratch_mkfs >>$seqres.full 2>&1
+> ---
+> base-commit: a370dcbed43563f0462801e889e0eceb93c7cfad
+> change-id: 20260915-btrfs-enomem-e70077862117
 >
-> @@ -36,8 +41,7 @@ lower_fsid=3D$(stat -f -c '%i' $lowerdir)
->         echo "lower fs and upper fs fsid differ"
->
->  # Test legacy behavior - ovl fsid inherited from upper fs
-> -_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o uuid=3Dnull =
-2>/dev/null || \
-> -       _notrun "Overlayfs does not support unique fsid feature"
-> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o uuid=3Dnull
->
->  # Lookup of test_dir marks upper root as "impure", so following (uuid=3D=
-auto) mounts
->  # will NOT behave as first time mount of a new overlayfs
+> Best regards,
 > --
-> 2.55.0
+> Jeff Layton <jlayton@kernel.org>
+>
 >
