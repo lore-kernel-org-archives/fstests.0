@@ -1,66 +1,33 @@
-Received: from mail-pj2-f18.google.com (mail-pj2-f18.google.com [74.125.227.146])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E0333F8250
-	for <fstests@vger.kernel.org>; Sun, 20 Sep 2026 12:12:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.227.146
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32006349B15;
+	Sun, 20 Sep 2026 14:10:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789906337; cv=none; b=t7ISIMVWXkLbxcdyrlsG1RnT3p9O6p4pEoopE1mo+zruW9oEFeay3tMY9KDwN52PzctqzqXn+DZDykt2lKQ8ZvVqGkO7kpZUGGz2B3duw0pALgQbcqJ1poLBY7uRDNCDbNjmfquxsGHjeZzXm/zqTlAjEJz73RoUA5xmzOem408=
+	t=1789913446; cv=none; b=WFgxvYZJx4Vy9ZNoHFcaQEruwOkZ3YDj2LRefPShSr9VR+kbjV2W6qC5ricy5FSJycLgBPrf8m55DUgRHRv6qsnqvnIQLSQzJfJ1DNjEQ6JVZYBbKgIzXVb8vOxvryMhCSV2tT8mA24sT0lmrzuX6luU7KyBtFoQ0fm2MXWvpJI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789906337; c=relaxed/simple;
-	bh=FLQaCojTIYKtZz9lp1iUllvaUMlIpuLdOcCsbKSuhF4=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:Content-Type; b=JEEjQZF5YwPZcxcZ5+5EtaI/9k9auw1PMxHw2IvWFeHUeFGk8n0Ar1A3XYCJbF3cbxlTCTIaiR6tnhV4X9czqYYk1rJ4O1tNMSyfomQEiwQEX/SiIKUSak8lxLhNZvY33mTwaddK/TCQzZT6T9usbNckZ0qiz/r68rZJubprYLA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Eeqscdg4; arc=none smtp.client-ip=74.125.227.146
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1789913446; c=relaxed/simple;
+	bh=2IbgxxtBZJ9rQLYwiDjkkwArWTmIa3n8reudQLDHi+k=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=V3p+koU7KPxNGsgpY3dnUfH+8pbOUQUP0IpN7ew40T8u4r2GVsuWgQF4nBG/TST/tmhs5yDBr+u+MgkufLOpGnMyR3yIZhH+klcysmWHT9c2HMkS0R6oOpBnCl03J7ZPE8whpzWofzyYh8fWubH+2boQBDJ0NNRH5EEfy807M+g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OY14vxyo; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Eeqscdg4"
-Received: by mail-pj2-f18.google.com with SMTP id d9443c01a7336-2db22383fe8so13253795ad.2
-        for <fstests@vger.kernel.org>; Sun, 20 Sep 2026 05:12:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1789906322; x=1790511122; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:content-language
-         :subject:from:user-agent:mime-version:date:message-id:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=Ogh9Mk3f/m0St1QHerxCwh0l+xtJUuv7NoYjKrMImpo=;
-        b=Eeqscdg4HuAx8yvcDHBVOjRRDY4VHG4/DSicgnxCNLNQvMROnKSycdkDlKiMUA+Lxr
-         Zf0kxZrHLlHkanHDi4NTYgSWN2kWdRSncamqWe9prJwj+lXfKSxR/EJ+YWM/q5TfGEL3
-         aWsTpwn9OQ7rKEC5eV+oH8+WayvfksQ0tZcrfeCxCIqi3FrzAGfSbsQ8yYKUS0IkegxU
-         eVr6tqcW023uuWs/L3LkEzOQi8YIDe0XkwYi397E7iDPH4JDHYQeY03rkiOZ91Kc4KaE
-         nUE87fvABWM+U0ohE0/1pHwkqCdHlCPuhx0AmTDMdN3TRkZSo3btFPH2pjM6wyCKOifP
-         MDwQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789906322; x=1790511122;
-        h=content-transfer-encoding:content-type:cc:to:content-language
-         :subject:from:user-agent:mime-version:date:message-id:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=Ogh9Mk3f/m0St1QHerxCwh0l+xtJUuv7NoYjKrMImpo=;
-        b=zl1NMdyvHiIbSp3PxhH0keYOo2PZJ4RA/YFMX/E3CO9fLZCpBASVblwxaGK8m4vL0A
-         fOMUESxX5bV+lj+n976ahM2fOP9jPn4jptd0tPYMvWOERP02iDQEJ8eA6iukSbSDEVpe
-         8Z+8a1U8Af49IGF5UKzTtXBcUxJ5e2gXioZm/s+XxnZEmK7zpoyVfSvHpZ9Bxe4k/WrC
-         VBr3LID2y6yjbp/3fWWV/HY23C5LMBdW5c4qzISLELHhd5NRxekqLCXClxVQsneZ8c6M
-         dydgVOcSusOUUdcbWdZTTdS2IJcfaZpjpgo3fZ6z9Lrk/6J5d1C8Hd4oAw+lwfuuuidX
-         ZoEA==
-X-Forwarded-Encrypted: i=1; AKwUvBzU19AW706+qBOOm9Y+oaCTHmXgsPQPaEuQ0A17FYDGiNs0ImCL1F9DCrDpaRuDGJIk8C5855kJ@vger.kernel.org
-X-Gm-Message-State: AFuF++nfitB4O0NPNyfLwmAvI2pmbqJUFpDUu+pdJPPNAP9HcMCCbfSt
-	a04Rcdsk5egOmpi97vZHuzY1Ohn+DHl8Ogp3KQewAy4CKOFsOCnkEhhS
-X-Gm-Gg: AYBFou1xhaENSxOu3xgq7jVyLe+jpkIlOp51I4jTiy19YWWvV590kJSGh3B9x1JrX7X
-	iPhM8/8fmHqQ9sI1FnPA0HhVwDyp4W/wROtjXEA/TfiOrLrY4l+VSHm4fgSHHycFCVjkECwJ2Ll
-	r1Iqbd9YjfhiO2r8yOnSF/at9ataarTlcdgI89wBvk5lImQOY4rRJoZngt/IYkbCmT3cdPP+lfb
-	JXdwuHVS/DYM65rjw+2hHyW/67r7tRjkj5Irsql/1NISkgKAyRDeZrHmIw7Iy83Th07jat1XomM
-	/9J9pvnsJw/9jOsNN9mzFNUvEV6ihOg4rqOEb7/FzFu9/q+Uv9UyBx18VoQtnzv22QsVPZfwAkh
-	V2fNULSWroZpk6LW1LnurW9Apdro/SRwMTUSiY9xq+7kKASskfvcT+CZLxH5e4TSdgyStdG+CZ5
-	ttIF35yGto/wiirV/i3j1BiZFIzmk7bdL0+j0YbG160DnX2ISiIL9JDMgNcQ6M3LbDsrOhnLbYn
-	V6wr6Ls0ZvZkt+hHUe+bEbzeh64ZSrALZeh2EUVjhcHVfY4
-X-Received: by 2002:a17:902:f546:b0:2dd:c053:82f2 with SMTP id d9443c01a7336-2ddc0538461mr69955255ad.41.1789906321781;
-        Sun, 20 Sep 2026 05:12:01 -0700 (PDT)
-Received: from ?IPV6:2406:7400:56:e503:ad72:fda5:83e8:be95? ([2406:7400:56:e503:ad72:fda5:83e8:be95])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-33c331b0d6esm10230618eec.27.2026.09.20.05.11.58
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 20 Sep 2026 05:12:01 -0700 (PDT)
-Message-ID: <d8930005-39c7-405f-96ac-ea0530e9b2c1@gmail.com>
-Date: Sun, 20 Sep 2026 17:41:56 +0530
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OY14vxyo"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 158EC1F000FF;
+	Sun, 20 Sep 2026 14:10:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1789913444;
+	bh=L9U8x29FUMYYuun6BO6TXnYXUZdKJvqLoY6TjdR/gGg=;
+	h=Date:Subject:To:References:From:In-Reply-To;
+	b=OY14vxyofU4iSX/+urwWgT4p8rLI95Hj5FWX4subo5GURa0SrjeP7fS6DWA7YBOQz
+	 i1O2qFs410fkP5MFiDlObENnIjMrVl98e0lHlIPRev+rKcXQBfV5B+gnonpsb4DZGr
+	 BYDt5ZPzD1LHOs3bf9QFN3T/mcIrCPFH74okdOKSQ+1FNUcu1s+GV6QI/0MrCvFfXS
+	 O5/t6Hj6w6rdkHMAsKCBRTq1PmglCWdlqDn6QjDQM8vEcXXKadYRLwkWaPyB8PCINq
+	 H3fn8qdPEDV4NMRpBcQHh2+PbbI6TBgazZI0VILZPRxEeiMIovMn+ITMsw4I1mCrX+
+	 II09xWKQycbhg==
+Message-ID: <e58634ab-9b04-4ae9-bc36-88f60724e8b1@kernel.org>
+Date: Sun, 20 Sep 2026 22:10:40 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -68,150 +35,136 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-From: Dhruva G <goledhruva@gmail.com>
-Subject: [PATCH v2] btrfs: test defrag --nocomp converts compressed extents to
- uncompressed
+Subject: Re: [PATCH v8 08/13] fstests: verify f_fsid for cloned filesystems
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+ linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
+ linux-f2fs-devel@lists.sourceforge.net, djwong@kernel.org
+References: <cover.1784949154.git.asj@kernel.org>
+ <f68b3bd9fcee878289f8ddd7c85a6913c89772cd.1784949155.git.asj@kernel.org>
+ <apcdo8K-Lfi5imbg@zlang-mailbox>
 Content-Language: en-US
-To: linux-btrfs@vger.kernel.org, kernel-team@fb.com, fstests@vger.kernel.org
-Cc: Boris Burkov <boris@bur.io>, Anand Jain <asj@kernel.org>,
- goledhruva@gmail.com, Qu Wenruo <quwenruo.btrfs@gmx.com>
+From: Anand Suveer Jain <asj@kernel.org>
+In-Reply-To: <apcdo8K-Lfi5imbg@zlang-mailbox>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-"btrfs filesystem defragment --nocomp" rewrites already compressed file
-data as uncompressed data. The kernel flag was added by commit
-009b2056cb25 ("btrfs: defrag: add flag to force no-compression") in
-v6.17, and the userspace option shipped in btrfs-progs v6.16. There is
-no test for it.
+On 2/9/26 02:51, Zorro Lang wrote:
+> On Sat, Jul 25, 2026 at 03:39:05PM +0800, Anand Jain wrote:
+>> Verify that the cloned filesystem provides an f_fsid that is persistent
+>> across mount cycles, yet unique from the original filesystem's f_fsid.
+>>
+>> Signed-off-by: Anand Jain <asj@kernel.org>
+>> ---
+>>  tests/generic/802     | 64 +++++++++++++++++++++++++++++++++++++++++++
+>>  tests/generic/802.out |  4 +++
+>>  2 files changed, 68 insertions(+)
+>>  create mode 100644 tests/generic/802
+>>  create mode 100644 tests/generic/802.out
+>>
+>> diff --git a/tests/generic/802 b/tests/generic/802
+>> new file mode 100644
+>> index 000000000000..910807c11584
+>> --- /dev/null
+>> +++ b/tests/generic/802
+>> @@ -0,0 +1,64 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2026 Anand Jain <asj@kernel.org>.  All Rights Reserved.
+>> +#
+>> +# FS QA Test 802
+>> +# Check that the cloned filesystem provides an f_fsid that is persistent
+>> +# across mount cycles if the block device maj:min remains unchanged.
+>> +
+>> +. ./common/preamble
+>> +
+>> +_begin_fstest auto quick mount clone
+>> +
+>> +_require_test
+>> +_require_block_device $TEST_DEV
+>> +_require_loop
+>> +
+>> +_fixed_by_fs_commit btrfs xxxxxxxxxxxx \
+>> +	"btrfs: use on-disk uuid for s_uuid in temp_fsid mounts"
+>> +_fixed_by_fs_commit btrfs xxxxxxxxxxxx \
+>> +	"btrfs: derive f_fsid from on-disk fsuuid and dev_t"
+>> +
+>> +_cleanup()
+>> +{
+>> +	cd /
+>> +	rm -r -f $tmp.*
+>> +	umount $mnt1 $mnt2 2>/dev/null
+>> +	_loop_image_destroy "${devs[@]}" 2> /dev/null
+>> +}
+>> +
+>> +# Setup base loop device and its clone
+>> +devs=()
+>> +_loop_image_create_clone devs
+>> +mkdir -p $TEST_DIR/$seq
+> 
+> Better to `rm -rf $TEST_DIR/$seq` before creating a new one.
+> 
 
-Add a test that writes compressible data in 128K blocks on a filesystem
-mounted with compress=zlib, runs defragment with --nocomp, and uses the
-FIEMAP encoded flag to verify that no extent remains compressed. Also
-verify that the file contents are unchanged after a remount. Keeping
-compression enabled throughout the test confirms that the defrag ioctl
-takes precedence over the mount option.
+Applied.
 
-Regular defrag deliberately leaves maximum-sized compressed extents
-alone, as asserted by btrfs/259. Creating maximum-sized compressed
-extents therefore ensures that an implementation which silently treats
---nocomp as regular defrag fails the test.
+>> +mnt1=$TEST_DIR/$seq/mnt1
+>> +mnt2=$TEST_DIR/$seq/mnt2
+>> +mkdir -p $mnt1
+>> +mkdir -p $mnt2
+>> +
+>> +# Mount both filesystems simultaneously using mandatory clone mount options
+>> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[0]} $mnt1 || \
+>> +						_fail "Failed to mount dev1"
+>> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
+>> +						_fail "Failed to mount dev2"
+>> +
+>> +# Capture baseline filesystem IDs for comparison
+>> +fsid_scratch=$(stat -f -c "%i" $mnt1)
+>> +fsid_clone=$(stat -f -c "%i" $mnt2)
+>> +
+>> +# Verify that the fsids remain stable after a mount cycle, even when the
+>> +# mount order is reversed.
+>> +echo "**** fsid after mount cycle ****"
+>> +_unmount $mnt1
+>> +_unmount $mnt2
+>> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
+>> +						_fail "Failed to mount dev2"
+>> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[0]} $mnt1 || \
+>> +						_fail "Failed to mount dev1"
+>> +
+>> +# Compare post mount-cycle values against the baseline
+>> +stat -f -c "%i" $mnt1 | sed -e "s/$fsid_scratch/FSID_SCRATCH/g"
+>> +stat -f -c "%i" $mnt2 | sed -e "s/$fsid_clone/FSID_CLONE/g"
+> 
 
-Check support in two stages: first require btrfs-progs to advertise
---nocomp, then invoke it on a 10-byte file to verify that the kernel
-accepts the flag. Kernels with the unknown-flag validation from commit
-173431b274a9 return EOPNOTSUPP when NOCOMPRESS is unavailable. Kernels
-predating that validation may silently ignore the flag and fail the
-semantic checks instead of skipping.
+> Hmm... what if "$fsid_scratch" is same with "$fsid_clone"?
+> 
 
-Signed-off-by: Dhruva Gole <goledhruva@gmail.com>
----
+That falls into the same category as ext4 (and likely Btrfs as well,
+pending a regression report fix that is delaying this fstests patch as
+well), where both the original and cloned filesystems share the same
+`f_fsid`. However, since the objective of this test case is to verify
+consistency within the filesystem across reboots, this behavior is fine.
 
-Link to v1:
-https://lore.kernel.org/linux-btrfs/d17a93e6-1613-4113-a75a-8ea89efb2bdb@gmail.com/
+>> +
+>> +status=0
+>> +exit
+> 
+> _exit 0
 
-Changes since v1:
-- Use FIEMAP's encoded flag instead of dump-tree to identify compressed
-  extents.
-- Write in 128K blocks so the test reliably creates maximum-sized compressed
-  extents, even under memory pressure.
-- Fold the initial sync into the xfs_io write command.
+Applied.
 
----
+> 
+>> diff --git a/tests/generic/802.out b/tests/generic/802.out
+>> new file mode 100644
+>> index 000000000000..0202a9a2c108
+>> --- /dev/null
+>> +++ b/tests/generic/802.out
+>> @@ -0,0 +1,4 @@
+>> +QA output created by 802
+>> +**** fsid after mount cycle ****
+>> +FSID_SCRATCH
+>> +FSID_CLONE
+>> -- 
+>> 2.43.0
+>>
 
- tests/btrfs/354     | 75 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/354.out |  2 ++
- 2 files changed, 77 insertions(+)
- create mode 100755 tests/btrfs/354
- create mode 100644 tests/btrfs/354.out
-
-diff --git a/tests/btrfs/354 b/tests/btrfs/354
-new file mode 100755
-index 00000000..8a19b7c3
---- /dev/null
-+++ b/tests/btrfs/354
-@@ -0,0 +1,75 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Meta Platforms, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 354
-+#
-+# Make sure "btrfs filesystem defragment --nocomp" rewrites compressed extents
-+# as uncompressed ones, even though the filesystem is mounted with compression
-+# enabled, and without changing the file contents.
-+#
-+# Note that regular defrag deliberately skips compressed extents that are
-+# already at their maximum size (see btrfs/259), so a broken --nocomp that
-+# simply does nothing would go unnoticed without this test.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick defrag fiemap compress
-+
-+. ./common/filter
-+. ./common/punch # for _filter_fiemap_flags
-+
-+# real QA test starts here
-+
-+_require_scratch
-+_require_xfs_io_command "fiemap"
-+_require_btrfs_command filesystem defragment --nocomp
-+
-+_wants_kernel_commit 009b2056cb25 \
-+	"btrfs: defrag: add flag to force no-compression"
-+
-+_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-+_scratch_mount -o compress=zlib
-+
-+# Probe kernel support separately from the userspace check above. Kernels
-+# without the flag reject it with EOPNOTSUPP when unknown-flag validation is
-+# available.
-+$XFS_IO_PROG -f -c "pwrite 0 10" "$SCRATCH_MNT/probe" >> $seqres.full
-+$BTRFS_UTIL_PROG filesystem defragment --nocomp "$SCRATCH_MNT/probe" \
-+	>> $seqres.full 2>&1 || _notrun "defrag --nocomp not supported"
-+
-+# Default xfs_io pattern is highly compressible. Use a 128K block size so the
-+# file lands as maximum-size compressed extents even under memory pressure,
-+# and sync so that fiemap below observes stable extents.
-+$XFS_IO_PROG -f -c "pwrite -b 128K 0 1m" -c "sync" \
-+	"$SCRATCH_MNT/foo" >> $seqres.full
-+
-+# fiemap reports compressed extents with the ENCODED (0x8) flag, printed as
-+# "encoded" by _filter_fiemap_flags (see btrfs/280, btrfs/281).
-+$XFS_IO_PROG -c "fiemap -v" "$SCRATCH_MNT/foo" | \
-+	_filter_fiemap_flags 1 > $tmp.before
-+cat $tmp.before >> $seqres.full
-+grep -q "encoded" $tmp.before || \
-+	echo "file has no compressed extents before --nocomp defrag"
-+
-+csum_before=$(_md5_checksum "$SCRATCH_MNT/foo")
-+
-+$BTRFS_UTIL_PROG filesystem defragment --nocomp "$SCRATCH_MNT/foo" \
-+	>> $seqres.full 2>&1
-+
-+# Should no longer be compressed, despite the compress mount option: no
-+# extent of the file may still carry the ENCODED flag.
-+$XFS_IO_PROG -c "fiemap -v" "$SCRATCH_MNT/foo" | \
-+	_filter_fiemap_flags 1 > $tmp.after
-+cat $tmp.after >> $seqres.full
-+grep -q "encoded" $tmp.after && \
-+	echo "file still has compressed extents after --nocomp defrag"
-+
-+# Contents must survive the rewrite, read back from disk and not page cache
-+_scratch_cycle_mount "compress=zlib"
-+csum_after=$(_md5_checksum "$SCRATCH_MNT/foo")
-+[ "$csum_before" = "$csum_after" ] || echo "file content changed"
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+_exit 0
-diff --git a/tests/btrfs/354.out b/tests/btrfs/354.out
-new file mode 100644
-index 00000000..8bc7ecf6
---- /dev/null
-+++ b/tests/btrfs/354.out
-@@ -0,0 +1,2 @@
-+QA output created by 354
-+Silence is golden
--- 
-2.43.0
