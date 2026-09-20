@@ -1,165 +1,217 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj2-f18.google.com (mail-pj2-f18.google.com [74.125.227.146])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F7CB385D7A
-	for <fstests@vger.kernel.org>; Sun, 20 Sep 2026 12:02:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E0333F8250
+	for <fstests@vger.kernel.org>; Sun, 20 Sep 2026 12:12:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.227.146
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789905765; cv=none; b=FdZKU8hw0XFsg5f4EelGbrCm1/agFyCUrsy6U2sYaXUGdfH0dY/cOtOPpS62JArmqbmkJ8s7/oPcGcJtRxta7UfvM0ZKEDHNOrXdY+CQyPnJtS3/Cqfpx9G37fQbwC/UyJTcUwjKlfT+5/HTxaGP/Z3TWWf5aqj+KEH9DPjIcNs=
+	t=1789906337; cv=none; b=t7ISIMVWXkLbxcdyrlsG1RnT3p9O6p4pEoopE1mo+zruW9oEFeay3tMY9KDwN52PzctqzqXn+DZDykt2lKQ8ZvVqGkO7kpZUGGz2B3duw0pALgQbcqJ1poLBY7uRDNCDbNjmfquxsGHjeZzXm/zqTlAjEJz73RoUA5xmzOem408=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789905765; c=relaxed/simple;
-	bh=hgtCxGxHyTefrAmZCRre0qes8TnlLSITVIRan76v+e4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ffi8TTB68uYQ7+nhl7QWYjS94Ogu7dn7NR+VJ9RfhosMgtwQ7dAQGEc/o0w+BYG9FfhCuhx/KT8Bp3N9hEr0lf8Nd/hgXfe0mB4XfLsTXp7EaVCl1xXxNFHVLzQ+pN2fYCoBa4CYtXDccnBZIU1N85mSnvQ67mYpC4N6nW0pDQY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hfcLj2bc; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789906337; c=relaxed/simple;
+	bh=FLQaCojTIYKtZz9lp1iUllvaUMlIpuLdOcCsbKSuhF4=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:Content-Type; b=JEEjQZF5YwPZcxcZ5+5EtaI/9k9auw1PMxHw2IvWFeHUeFGk8n0Ar1A3XYCJbF3cbxlTCTIaiR6tnhV4X9czqYYk1rJ4O1tNMSyfomQEiwQEX/SiIKUSak8lxLhNZvY33mTwaddK/TCQzZT6T9usbNckZ0qiz/r68rZJubprYLA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Eeqscdg4; arc=none smtp.client-ip=74.125.227.146
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hfcLj2bc"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 333F71F000FF;
-	Sun, 20 Sep 2026 12:02:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789905763;
-	bh=otc92/TjtqOpZJNknonzPRJr4Gv5fyM3H1EvmHQYim0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=hfcLj2bcFyh3fUlLmxQwdLHa/+vbJEpbd5r0X7BmCUdEKqwexL4AqkqB0EGgzkpkP
-	 jwr4ffUHmzTj56Wj4rxO9/E1cyeu0ntp2AH5IF78O1brieAISzt0mFgBolweUmY93z
-	 vq/MJXlMbuv56tex/xxGvtJX+q0Kv1kTbDxxE1P0ce87BGtV/nC7nqlSjRZZAfUk65
-	 hDz1TyHTnMauFYO3zk5fFTlLG/ogUtma0awZhfKs3irt+49XS50OXLGSEHn11p2i4m
-	 CbZf0DVBE1YonO9puX4N1tpAsYx5VrCRL9/aYQURe5Df6BXRWNKNrKlBcK8or4C5ou
-	 vL6fNw7EzIoBQ==
-Date: Sun, 20 Sep 2026 20:02:37 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Moritz Tanner <moritz.tanner@linbit.com>
-Cc: fstests@vger.kernel.org, Christian Brauner <brauner@kernel.org>, 
-	Lars Ellenberg <lars.ellenberg@linbit.com>, Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH] generic: test bdev freeze count leak on nested thaw
-Message-ID: <aq_LAV1YmwpPgwGm@zlang-mailbox>
-Mail-Followup-To: Moritz Tanner <moritz.tanner@linbit.com>, 
-	fstests@vger.kernel.org, Christian Brauner <brauner@kernel.org>, 
-	Lars Ellenberg <lars.ellenberg@linbit.com>, Christoph Hellwig <hch@lst.de>
-References: <20260917065938.51819-1-moritz.tanner@linbit.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Eeqscdg4"
+Received: by mail-pj2-f18.google.com with SMTP id d9443c01a7336-2db22383fe8so13253795ad.2
+        for <fstests@vger.kernel.org>; Sun, 20 Sep 2026 05:12:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1789906322; x=1790511122; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:content-language
+         :subject:from:user-agent:mime-version:date:message-id:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=Ogh9Mk3f/m0St1QHerxCwh0l+xtJUuv7NoYjKrMImpo=;
+        b=Eeqscdg4HuAx8yvcDHBVOjRRDY4VHG4/DSicgnxCNLNQvMROnKSycdkDlKiMUA+Lxr
+         Zf0kxZrHLlHkanHDi4NTYgSWN2kWdRSncamqWe9prJwj+lXfKSxR/EJ+YWM/q5TfGEL3
+         aWsTpwn9OQ7rKEC5eV+oH8+WayvfksQ0tZcrfeCxCIqi3FrzAGfSbsQ8yYKUS0IkegxU
+         eVr6tqcW023uuWs/L3LkEzOQi8YIDe0XkwYi397E7iDPH4JDHYQeY03rkiOZ91Kc4KaE
+         nUE87fvABWM+U0ohE0/1pHwkqCdHlCPuhx0AmTDMdN3TRkZSo3btFPH2pjM6wyCKOifP
+         MDwQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1789906322; x=1790511122;
+        h=content-transfer-encoding:content-type:cc:to:content-language
+         :subject:from:user-agent:mime-version:date:message-id:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=Ogh9Mk3f/m0St1QHerxCwh0l+xtJUuv7NoYjKrMImpo=;
+        b=zl1NMdyvHiIbSp3PxhH0keYOo2PZJ4RA/YFMX/E3CO9fLZCpBASVblwxaGK8m4vL0A
+         fOMUESxX5bV+lj+n976ahM2fOP9jPn4jptd0tPYMvWOERP02iDQEJ8eA6iukSbSDEVpe
+         8Z+8a1U8Af49IGF5UKzTtXBcUxJ5e2gXioZm/s+XxnZEmK7zpoyVfSvHpZ9Bxe4k/WrC
+         VBr3LID2y6yjbp/3fWWV/HY23C5LMBdW5c4qzISLELHhd5NRxekqLCXClxVQsneZ8c6M
+         dydgVOcSusOUUdcbWdZTTdS2IJcfaZpjpgo3fZ6z9Lrk/6J5d1C8Hd4oAw+lwfuuuidX
+         ZoEA==
+X-Forwarded-Encrypted: i=1; AKwUvBzU19AW706+qBOOm9Y+oaCTHmXgsPQPaEuQ0A17FYDGiNs0ImCL1F9DCrDpaRuDGJIk8C5855kJ@vger.kernel.org
+X-Gm-Message-State: AFuF++nfitB4O0NPNyfLwmAvI2pmbqJUFpDUu+pdJPPNAP9HcMCCbfSt
+	a04Rcdsk5egOmpi97vZHuzY1Ohn+DHl8Ogp3KQewAy4CKOFsOCnkEhhS
+X-Gm-Gg: AYBFou1xhaENSxOu3xgq7jVyLe+jpkIlOp51I4jTiy19YWWvV590kJSGh3B9x1JrX7X
+	iPhM8/8fmHqQ9sI1FnPA0HhVwDyp4W/wROtjXEA/TfiOrLrY4l+VSHm4fgSHHycFCVjkECwJ2Ll
+	r1Iqbd9YjfhiO2r8yOnSF/at9ataarTlcdgI89wBvk5lImQOY4rRJoZngt/IYkbCmT3cdPP+lfb
+	JXdwuHVS/DYM65rjw+2hHyW/67r7tRjkj5Irsql/1NISkgKAyRDeZrHmIw7Iy83Th07jat1XomM
+	/9J9pvnsJw/9jOsNN9mzFNUvEV6ihOg4rqOEb7/FzFu9/q+Uv9UyBx18VoQtnzv22QsVPZfwAkh
+	V2fNULSWroZpk6LW1LnurW9Apdro/SRwMTUSiY9xq+7kKASskfvcT+CZLxH5e4TSdgyStdG+CZ5
+	ttIF35yGto/wiirV/i3j1BiZFIzmk7bdL0+j0YbG160DnX2ISiIL9JDMgNcQ6M3LbDsrOhnLbYn
+	V6wr6Ls0ZvZkt+hHUe+bEbzeh64ZSrALZeh2EUVjhcHVfY4
+X-Received: by 2002:a17:902:f546:b0:2dd:c053:82f2 with SMTP id d9443c01a7336-2ddc0538461mr69955255ad.41.1789906321781;
+        Sun, 20 Sep 2026 05:12:01 -0700 (PDT)
+Received: from ?IPV6:2406:7400:56:e503:ad72:fda5:83e8:be95? ([2406:7400:56:e503:ad72:fda5:83e8:be95])
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-33c331b0d6esm10230618eec.27.2026.09.20.05.11.58
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 20 Sep 2026 05:12:01 -0700 (PDT)
+Message-ID: <d8930005-39c7-405f-96ac-ea0530e9b2c1@gmail.com>
+Date: Sun, 20 Sep 2026 17:41:56 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260917065938.51819-1-moritz.tanner@linbit.com>
+User-Agent: Mozilla Thunderbird
+From: Dhruva G <goledhruva@gmail.com>
+Subject: [PATCH v2] btrfs: test defrag --nocomp converts compressed extents to
+ uncompressed
+Content-Language: en-US
+To: linux-btrfs@vger.kernel.org, kernel-team@fb.com, fstests@vger.kernel.org
+Cc: Boris Burkov <boris@bur.io>, Anand Jain <asj@kernel.org>,
+ goledhruva@gmail.com, Qu Wenruo <quwenruo.btrfs@gmx.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Thu, Sep 17, 2026 at 08:59:38AM +0200, Moritz Tanner wrote:
-> Since kernel v6.8, a nested thaw that drops its freeze reference
-> while other freezers remain returns -EINVAL although it succeeded.
-> bdev_thaw() then keeps bd_fsfreeze_count elevated, and since
-> device-mapper's unlock_fs() ignores the error, a dm suspend/resume
-> cycle on a filesystem frozen with FIFREEZE leaks the count. After
-> unfreezing and unmounting, the block device can never be mounted
-> again:
-> 
->     dm-1: Can't mount, blockdev is frozen
-> 
-> Add a regression test that freezes a filesystem on a dm-linear
-> device, runs a dm suspend/resume cycle inside the freeze, unfreezes
-> and remounts. On buggy kernels the final mount fails with EBUSY.
-> 
-> Suggested-by: Christoph Hellwig <hch@lst.de>
-> Lore: https://lore.kernel.org/linux-fsdevel/20260821085451.65206-1-moritz.tanner@linbit.com/
-> Signed-off-by: Moritz Tanner <moritz.tanner@linbit.com>
-> ---
+"btrfs filesystem defragment --nocomp" rewrites already compressed file
+data as uncompressed data. The kernel flag was added by commit
+009b2056cb25 ("btrfs: defrag: add flag to force no-compression") in
+v6.17, and the userspace option shipped in btrfs-progs v6.16. There is
+no test for it.
 
-Looks good to me,
+Add a test that writes compressible data in 128K blocks on a filesystem
+mounted with compress=zlib, runs defragment with --nocomp, and uses the
+FIEMAP encoded flag to verify that no extent remains compressed. Also
+verify that the file contents are unchanged after a remount. Keeping
+compression enabled throughout the test confirms that the defrag ioctl
+takes precedence over the mount option.
 
-Reviewed-by: Zorro Lang <zlang@kernel.org>
+Regular defrag deliberately leaves maximum-sized compressed extents
+alone, as asserted by btrfs/259. Creating maximum-sized compressed
+extents therefore ensures that an implementation which silently treats
+--nocomp as regular defrag fails the test.
 
->  tests/generic/802     | 69 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/802.out |  2 ++
->  2 files changed, 71 insertions(+)
->  create mode 100755 tests/generic/802
->  create mode 100644 tests/generic/802.out
-> 
-> diff --git a/tests/generic/802 b/tests/generic/802
-> new file mode 100755
-> index 00000000..d3b84200
-> --- /dev/null
-> +++ b/tests/generic/802
-> @@ -0,0 +1,69 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026 LINBIT HA-Solutions GmbH.  All Rights Reserved.
-> +#
-> +# FS QA Test 802
-> +#
-> +# Test that a device-mapper suspend/resume cycle on a filesystem that is
-> +# already frozen by userspace does not leak a block device freeze reference.
-> +#
-> +# On buggy kernels thaw_super() returns -EINVAL for a nested thaw although
-> +# it dropped its freeze reference, so bdev_thaw() leaves bd_fsfreeze_count
-> +# elevated. Once the filesystem is unmounted, the block device can never
-> +# be mounted again:
-> +#
-> +#     dm-1: Can't mount, blockdev is frozen
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick freeze mount
-> +
-> +_fixed_by_kernel_commit fe967191e585 \
-> +	"fs: don't return -EINVAL for successful nested thaw"
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
-> +	$DMSETUP_PROG resume $lvdev >> $seqres.full 2>&1
-> +	_unmount -q $SCRATCH_MNT
-> +	_dmsetup_remove $node
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +_require_scratch
-> +_require_dm_target linear
-> +_require_freeze
-> +
-> +echo "Silence is golden"
-> +
-> +size=$((256 * 1024 * 1024))
-> +size_in_sector=$((size / 512))
-> +_scratch_mkfs_sized $size >> $seqres.full 2>&1
-> +
-> +node=$seq-test
-> +lvdev=/dev/mapper/$node
-> +table="0 $size_in_sector linear $SCRATCH_DEV 0"
-> +_dmsetup_create $node --table "$table" || \
-> +	_fail "failed to create dm device"
-> +
-> +_mount $lvdev $SCRATCH_MNT || _fail "failed to mount dm device"
-> +
-> +# Freeze the filesystem from userspace first, then nest a block device
-> +# initiated freeze/thaw cycle inside it via dm suspend/resume.
-> +xfs_freeze -f $SCRATCH_MNT || _fail "failed to freeze filesystem"
-> +$DMSETUP_PROG suspend $lvdev >> $seqres.full 2>&1 || \
-> +	_fail "failed to suspend dm device"
-> +$DMSETUP_PROG resume $lvdev >> $seqres.full 2>&1 || \
-> +	_fail "failed to resume dm device"
-> +xfs_freeze -u $SCRATCH_MNT || _fail "failed to unfreeze filesystem"
-> +
-> +# On buggy kernels the resume leaked a block device freeze reference,
-> +# and the device cannot be mounted again once unmounted.
-> +_unmount $SCRATCH_MNT
-> +_mount $lvdev $SCRATCH_MNT || \
-> +	_fail "failed to mount dm device after nested freeze/thaw"
-> +_unmount $SCRATCH_MNT
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/802.out b/tests/generic/802.out
-> new file mode 100644
-> index 00000000..a69c0539
-> --- /dev/null
-> +++ b/tests/generic/802.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 802
-> +Silence is golden
-> -- 
-> 2.55.0
-> 
+Check support in two stages: first require btrfs-progs to advertise
+--nocomp, then invoke it on a 10-byte file to verify that the kernel
+accepts the flag. Kernels with the unknown-flag validation from commit
+173431b274a9 return EOPNOTSUPP when NOCOMPRESS is unavailable. Kernels
+predating that validation may silently ignore the flag and fail the
+semantic checks instead of skipping.
+
+Signed-off-by: Dhruva Gole <goledhruva@gmail.com>
+---
+
+Link to v1:
+https://lore.kernel.org/linux-btrfs/d17a93e6-1613-4113-a75a-8ea89efb2bdb@gmail.com/
+
+Changes since v1:
+- Use FIEMAP's encoded flag instead of dump-tree to identify compressed
+  extents.
+- Write in 128K blocks so the test reliably creates maximum-sized compressed
+  extents, even under memory pressure.
+- Fold the initial sync into the xfs_io write command.
+
+---
+
+ tests/btrfs/354     | 75 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/354.out |  2 ++
+ 2 files changed, 77 insertions(+)
+ create mode 100755 tests/btrfs/354
+ create mode 100644 tests/btrfs/354.out
+
+diff --git a/tests/btrfs/354 b/tests/btrfs/354
+new file mode 100755
+index 00000000..8a19b7c3
+--- /dev/null
++++ b/tests/btrfs/354
+@@ -0,0 +1,75 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 Meta Platforms, Inc.  All Rights Reserved.
++#
++# FS QA Test 354
++#
++# Make sure "btrfs filesystem defragment --nocomp" rewrites compressed extents
++# as uncompressed ones, even though the filesystem is mounted with compression
++# enabled, and without changing the file contents.
++#
++# Note that regular defrag deliberately skips compressed extents that are
++# already at their maximum size (see btrfs/259), so a broken --nocomp that
++# simply does nothing would go unnoticed without this test.
++#
++. ./common/preamble
++_begin_fstest auto quick defrag fiemap compress
++
++. ./common/filter
++. ./common/punch # for _filter_fiemap_flags
++
++# real QA test starts here
++
++_require_scratch
++_require_xfs_io_command "fiemap"
++_require_btrfs_command filesystem defragment --nocomp
++
++_wants_kernel_commit 009b2056cb25 \
++	"btrfs: defrag: add flag to force no-compression"
++
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
++_scratch_mount -o compress=zlib
++
++# Probe kernel support separately from the userspace check above. Kernels
++# without the flag reject it with EOPNOTSUPP when unknown-flag validation is
++# available.
++$XFS_IO_PROG -f -c "pwrite 0 10" "$SCRATCH_MNT/probe" >> $seqres.full
++$BTRFS_UTIL_PROG filesystem defragment --nocomp "$SCRATCH_MNT/probe" \
++	>> $seqres.full 2>&1 || _notrun "defrag --nocomp not supported"
++
++# Default xfs_io pattern is highly compressible. Use a 128K block size so the
++# file lands as maximum-size compressed extents even under memory pressure,
++# and sync so that fiemap below observes stable extents.
++$XFS_IO_PROG -f -c "pwrite -b 128K 0 1m" -c "sync" \
++	"$SCRATCH_MNT/foo" >> $seqres.full
++
++# fiemap reports compressed extents with the ENCODED (0x8) flag, printed as
++# "encoded" by _filter_fiemap_flags (see btrfs/280, btrfs/281).
++$XFS_IO_PROG -c "fiemap -v" "$SCRATCH_MNT/foo" | \
++	_filter_fiemap_flags 1 > $tmp.before
++cat $tmp.before >> $seqres.full
++grep -q "encoded" $tmp.before || \
++	echo "file has no compressed extents before --nocomp defrag"
++
++csum_before=$(_md5_checksum "$SCRATCH_MNT/foo")
++
++$BTRFS_UTIL_PROG filesystem defragment --nocomp "$SCRATCH_MNT/foo" \
++	>> $seqres.full 2>&1
++
++# Should no longer be compressed, despite the compress mount option: no
++# extent of the file may still carry the ENCODED flag.
++$XFS_IO_PROG -c "fiemap -v" "$SCRATCH_MNT/foo" | \
++	_filter_fiemap_flags 1 > $tmp.after
++cat $tmp.after >> $seqres.full
++grep -q "encoded" $tmp.after && \
++	echo "file still has compressed extents after --nocomp defrag"
++
++# Contents must survive the rewrite, read back from disk and not page cache
++_scratch_cycle_mount "compress=zlib"
++csum_after=$(_md5_checksum "$SCRATCH_MNT/foo")
++[ "$csum_before" = "$csum_after" ] || echo "file content changed"
++
++echo "Silence is golden"
++
++# success, all done
++_exit 0
+diff --git a/tests/btrfs/354.out b/tests/btrfs/354.out
+new file mode 100644
+index 00000000..8bc7ecf6
+--- /dev/null
++++ b/tests/btrfs/354.out
+@@ -0,0 +1,2 @@
++QA output created by 354
++Silence is golden
+-- 
+2.43.0
