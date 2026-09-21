@@ -1,99 +1,151 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mx0b-00154904.pphosted.com (mx0b-00154904.pphosted.com [148.163.137.20])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 097CB3537E5;
-	Mon, 21 Sep 2026 05:27:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 589FE3B42EC;
+	Mon, 21 Sep 2026 07:16:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.137.20
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789968453; cv=none; b=Sa6AZg6IIAWGUSK+3oCgEbJQMxD+L8I0uiqNvBNqQSAM9o+uYng1fxfFimyo4Ug+k/o6jjl4tvveqiPbajS5nwmnt5iuT+c7kiUGOVVYx7j7EghOxBMtzXvccl1CfeWXFKTOlS415wlK22mwaZSQKV76jvGX53AHBX9gN9m0n6E=
+	t=1789975021; cv=none; b=hmV6xaor+e+ghsK+/vOd5/JK0ELNcfH5ZQK5Nnp1ZQH/9SidNxEAx96slp9VjYttW2D252L/UpJLV3jipGRvaUMDpDkF9zGLb3KHBy3fqE7OCd+F/4GpudReYzUl37P6h7ecXrhntnwAmhoqogHrBPPbPS+GEG94ElQZh+eZluo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789968453; c=relaxed/simple;
-	bh=3rw5XDzLO95BT3ztdS/2a1sEBq3g9JIFEagCJUGTigo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Ip5Io+5vAzyi+92d9PaLna36LeTtbsI1yFhIBb/BfXfhhYmWHrAWpWNAglp0LK6IZcg+O7WSqaGjQvbkBFasNS1sFceXYihQeIfMWfJTK5aUc/Mb5RC6m+sWLOj+GWB7LK6L3jEnPvDee57yvvrTBQvCppkuDJATiU+Rt1wbDQA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jgmAL00E; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789975021; c=relaxed/simple;
+	bh=Y5+egbtyVos1ApfOIeG4h2RnvLnV87NCUdwAIuPwEpc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ac3nJ19rJY3CZ2rojSkqqmexLf1MJiIvPajcqWzZgm2BC2RxlpDmOVw3XfXzmXdZ7m08PTzF2NRDIBUPZrD1BfNx6vZG5peGdy0Dx3IdP3JGGKuKJV16jGchqk90qGcoEYBRXzW81J9DDlKHLCj+mD9rLLIRi/citwUje55aLAA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com; spf=pass smtp.mailfrom=dell.com; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=vky9nmNe; dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b=K8HW7naZ; arc=none smtp.client-ip=148.163.137.20
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=dell.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dell.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jgmAL00E"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 9DE131F00893;
-	Mon, 21 Sep 2026 05:27:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789968439;
-	bh=xFMEKYbRwNC7H91OdSH+p2qEtamOLU+cDxpa6fNv0sY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=jgmAL00EFcIJ51rrNVmSDisE4IxqREdir669lzXT+7Q/dL82nILSXr5cAZLlLpE0e
-	 es73SS3UgbFvDYxHpdNwdcvRrJ3pYcasWSV2torB741zyjXrPF0Wo5zg/dTYub4HUU
-	 Kr4ONIHNlQCXynzMDsxliqWVDaIiGBpjELn7A7Re9UjF5EBhN9P5SNjA9AJwMQyjrl
-	 SmdgfUaHxb0UhmTXoDhCeLZT8qsU9+YjnFaVx4gXxGoCXTmCNuyrk1jrHl/Q2riOG6
-	 7URn1t/ITEB0o+o2KK5G6VuXxig6p9hD/sxQBh3QX+I5jEcPfxld9fzdGYZEBRUHrz
-	 AO1C07LZoolvw==
-Date: Sun, 20 Sep 2026 22:27:19 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Baokun Li <libaokun@linux.alibaba.com>
-Cc: fstests@vger.kernel.org, zlang@kernel.org,
-	linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org,
-	sandeen@redhat.com, dgc@kernel.org
-Subject: Re: [PATCH] generic/492: bypass the blkid cache when probing the
- label
-Message-ID: <20260921052719.GB6253@frogsfrogsfrogs>
-References: <20260920094137.2749428-1-libaokun@linux.alibaba.com>
+	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="vky9nmNe";
+	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="K8HW7naZ"
+Received: from pps.filterd (m0170394.ppops.net [127.0.0.1])
+	by mx0b-00154904.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68L79Hvo239330;
+	Mon, 21 Sep 2026 03:16:58 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dell.com; h=cc
+	:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=smtpout1; bh=U8vY59JA/YYtEJKsExbkIFXq5nnt9KqDX7+/
+	JwlYE4E=; b=vky9nmNeNpzdsGJRPwhDrA71C5drFEki7shFFLHQx/nxIIUSuwnK
+	DAFa82O4QETOppuEHRDMgky3F4EaIPiCJW+rm2HM35D9SsyaSuFksIzbJvv48OKp
+	tato57EGy5d2vXPeosxvQ/KTsR2LcClt3fuYolZriY2zIIOnLR9xZHcEffpseKR3
+	veo9Zi2ANFtTg4I4zwbYOXhLq0N6RRUd3gAZwA0qhEipK38o4xBCkGr8TshPsC8/
+	D2wM3ra6eB4DPjMWV7l3cJXt3tLLyIW4xIVy8yYvryutwmfzCNR9fT7w5z/YA8MG
+	PvWKEdrOOprb7vxF1URkUdFyuj0JQZnxZA==
+Received: from mx0a-00154901.pphosted.com (mx0a-00154901.pphosted.com [67.231.149.39])
+	by mx0b-00154904.pphosted.com (PPS) with ESMTPS id 4gsmxyd1q9-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
+	Mon, 21 Sep 2026 03:16:58 -0400 (EDT)
+Received: from pps.filterd (m0134746.ppops.net [127.0.0.1])
+	by mx0a-00154901.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68L78iaD2613475;
+	Mon, 21 Sep 2026 03:16:57 -0400
+Received: from esapsmtplv03.us.dell.com (esapsmtplv03.us.dell.com [143.166.203.148])
+	by mx0a-00154901.pphosted.com (PPS) with ESMTPS id 4gty35rrf8-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=FAIL);
+	Mon, 21 Sep 2026 03:16:56 -0400 (EDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=dell.com; i=@dell.com; q=dns/txt; s=smtpdev1;
+  t=1789975017; x=1821511017;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=U8vY59JA/YYtEJKsExbkIFXq5nnt9KqDX7+/JwlYE4E=;
+  b=K8HW7naZ0W0Tg8As2L3uULnErBhjUnSClbXMfhqVWajtHFCYZ3kqrD4p
+   /oWCPP3hb9O5+XbiHd67npek4j6zhQzMo4VEtKBbmjcKQQPQC58hk4CbE
+   4ifdWcMXopPcUUUn7TgdDS2pz1jib/Kax3uivw5oJHADsK/WyV2hBPxnl
+   aB6+EWW4fkFJwhlivksd7QxLJ6rWo6E7i/89xAEnTM3iNd/8aLAVlodDa
+   GXJR9pah3K+0ytda8iNT93LdzEFTeV/hD0fJNmBHs+fAEaGFiaL1hwqro
+   csrRtIhGNtf/9mV+j/X9mseZNitPa7SIobRwySeIfQAk1V7FDjqZSR6Dz
+   Q==;
+X-CSE-ConnectionGUID: Am8HFbG8SwaXyptIO2ExMw==
+X-CSE-MsgGUID: h5L+dz8/Rc2sBLMcqKbzhw==
+X-LoopCount0: from 10.94.9.174
+X-MS-Exchange-CrossPremises-AuthAs: Internal
+Received: from w-96j1th4.apac.dell.com (HELO W-96J1TH4.blr.amer.dell.com) ([10.94.9.174])
+  by esapsmtplv03.us.dell.com with ESMTP/TLS/TLS_AES_256_GCM_SHA384; 21 Sep 2026 07:16:55 +0000
+From: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+To: fstests@vger.kernel.org
+Cc: Prabhakar Pujeri <prabhakar.pujeri@dell.com>,
+        Zorro Lang <zlang@kernel.org>, Amir Goldstein <amir73il@gmail.com>,
+        linux-unionfs@vger.kernel.org
+Subject: [PATCH v2 0/3] overlay tests: generalize _check_overlay_feature for param-less mount options
+Date: Mon, 21 Sep 2026 07:16:48 +0000
+Message-ID: <20260921071651.25862-1-prabhakar.pujeri@dell.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260920094137.2749428-1-libaokun@linux.alibaba.com>
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-09-21_03,2026-09-16_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ phishscore=0 malwarescore=0 lowpriorityscore=0 priorityscore=1501
+ suspectscore=0 impostorscore=0 adultscore=0 spamscore=0 bulkscore=0
+ clxscore=1015 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2609040000
+ definitions=main-2609210102
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTIxMDEwMSBTYWx0ZWRfXzQ4FLdvP8a37
+ IyhSERejApGKNmQbrTIOLeRwzYPFN4uz0n5KC06PPTXA8HHI7V4hEx+y4I6dkZ7bF5olvMJNEpG
+ 3e529dytc28e4/PQw68j1nYce7+Ff6E/OpOYQA4H+hdkivl8XZpVoAtNxQXaQd6zEcDcHPdivgH
+ 3ZemY30uXrbYcK0K+BQrVaw+6VGWnG3AUqCJ2DWkGQQswyNEfSCNvfh79lHI8kICiseAX7P38De
+ XiPW/B2iXRZGazTO6fQdBufyDoSduwNgYvvExWBouEMjmbnyUOTKNL28Q2uVrqSEymgC5EEaCi4
+ zIj1t+JbKWwkopd7gUQrCQFXSg/yzLnbB7Uq1mJpxDnE+2Pvi+6Fi4J6tNGYpgpo3z3alfrqVcL
+ x0Vf5R8WxFacM90SDecHKVjKFt86mRJRo4CemmbUEeBE++FVplfEM3/0IdjdtKKhNc4kR4T21gd
+ ID6O5U1kuk3iyleFlLA==
+X-Authority-Analysis: v=2.4 cv=M9jYuCws c=1 sm=1 tr=0 ts=6ab0d9ea cx=c_pps
+ a=j0++y401J6f/BxNAf5EDow==:117 a=iGMIhCliR854E25UHWhNxg==:17
+ a=VdqzKS8jKosA:10 a=ke5jqHz-1hQA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=6gNNCFAoQcIphELLPWWu:22 a=gLxAKuEMs0EQMVFiDJnH:22 a=VwQbUJbxAAAA:8
+ a=iLNU1ar6AAAA:8 a=9Ar1pYLYXZfDu7jisZkA:9 a=gbU3OgOOxF9bX48Letew:22
+X-Proofpoint-GUID: __DGgAXGVvf4FP2Ye-ihLhlbtaZmE3gf
+X-Proofpoint-ORIG-GUID: __DGgAXGVvf4FP2Ye-ihLhlbtaZmE3gf
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTIxMDEwMSBTYWx0ZWRfX06XbXKOLQ27q
+ x+VTHXyjIvVgVK0HZwyjfNNE5Kot5k54qsZu2sXlAs13XqrlNUYlrMjoLzAT7+sd8CfbE/S3ZpW
+ 4ir/S7WMvJOEQmoiXOhlrRSjhvFPPT0=
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0
+ adultscore=0 malwarescore=0 suspectscore=0 impostorscore=0 priorityscore=1501
+ lowpriorityscore=0 phishscore=0 clxscore=1015 spamscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2609040000 definitions=main-2609210101
 
-On Sun, Sep 20, 2026 at 05:41:37PM +0800, Baokun Li wrote:
-> blkid may serve a stale label from its cache instead of probing the
-> device, so the label just set via xfs_io can be missed and the output
-> mismatch is non-deterministic.
-> 
-> Pass "-c /dev/null" so that blkid always probes the on-disk superblock
-> directly.  Unlike the low-level probing mode (-p), which requires
-> util-linux 2.16 or later, this is also supported by the legacy blkid
-> shipped with e2fsprogs.
-> 
-> Fixes: c3c9630968a6 ("generic: test online label ioctl")
-> Signed-off-by: Baokun Li <libaokun@linux.alibaba.com>
+The overlay tests that need param-less overlayfs mount options (uuid,
+xino, verity) currently open-code their probes.  Generalize
+_check_overlay_feature/_require_scratch_overlay_features once in
+common/overlay (1/3), fold the six open-coded xino probes onto the
+helper (2/3), and switch overlay/081's ad-hoc uuid=null probe to it
+(3/3).
 
-Seems fine to me; I guess blkid could be racing with whatever updates
-the cache...udev?
+Changes in v2 (per Amir Goldstein's review of v1, all three patches
+now carry his Reviewed-by):
+- 1/3: drop fsync from the list of param-less mount options - it has
+  no on/off values and cannot be validated with this helper; and
+  replace the out-of-context comment in _require_scratch_overlay_
+  features with a simple 'Validate that mount option can be enabled.'
+- 3/3: trim the verbose comment - the v6.6 requirement is already
+  documented in the test description.
+- 2/3: no code change.
 
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+v1: https://lore.kernel.org/fstests/20260915153608.5197-1-prabhakar.pujeri@dell.com/
+Suggested-by: Amir Goldstein (from the overlay/081 review thread)
 
---D
+Prabhakar Pujeri (3):
+  common/overlay: let _check_overlay_feature handle param-less options
+  tests/overlay: use _require_scratch_overlay_features for xino
+  overlay/081: require uuid via _require_scratch_overlay_features
 
-> ---
->  tests/generic/492 | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
-> 
-> diff --git a/tests/generic/492 b/tests/generic/492
-> index 51a46b510453..0b4f69b80f17 100755
-> --- a/tests/generic/492
-> +++ b/tests/generic/492
-> @@ -28,14 +28,15 @@ $XFS_IO_PROG -c "label -c" $SCRATCH_MNT
->  $XFS_IO_PROG -c "label" $SCRATCH_MNT
->  
->  # And that userspace can see it now, while mounted
-> -# NB: some blkid has trailing whitespace, filter it out here
-> +# NB: bypass the blkid cache which may hold a stale label, and filter
-> +# out the trailing whitespace some blkid versions emit
->  $XFS_IO_PROG -c "label -s label.$seq" $SCRATCH_MNT
->  $XFS_IO_PROG -c "label" $SCRATCH_MNT
-> -blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g"
-> +blkid -c /dev/null -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g"
->  
->  # And that the it is still there when it's unmounted
->  _scratch_unmount
-> -blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g"
-> +blkid -c /dev/null -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g"
->  
->  # And that it persists after a remount
->  _scratch_mount
-> -- 
-> 2.43.7
-> 
-> 
+  common/overlay: let _check_overlay_feature handle param-less options
+  tests/overlay: use _require_scratch_overlay_features for xino
+  overlay/081: require uuid via _require_scratch_overlay_features
+
+ common/overlay    | 16 ++++++++++------
+ tests/overlay/041 |  6 ++----
+ tests/overlay/043 |  6 ++----
+ tests/overlay/044 |  6 ++----
+ tests/overlay/067 |  4 ++--
+ tests/overlay/070 |  7 ++-----
+ tests/overlay/071 | 12 +++---------
+ tests/overlay/081 |  5 +++--
+ 8 files changed, 26 insertions(+), 36 deletions(-)
+
+-- 
+2.55.0
+
