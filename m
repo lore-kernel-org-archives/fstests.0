@@ -1,133 +1,223 @@
-Received: from out30-97.freemail.mail.aliyun.com (out30-97.freemail.mail.aliyun.com [115.124.30.97])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 46B864CDDFC;
-	Tue, 22 Sep 2026 07:17:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.124.30.97
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F5E6438000
+	for <fstests@vger.kernel.org>; Tue, 22 Sep 2026 11:49:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790061462; cv=none; b=GesWE8CmYfXf+0bK0tMW7C6gicMWa0D5S/J5fmjw8TsbgFEHb8w968UGuGZn7q38S9/RbeMlnQfTMRvbFVHDHvP2F2BIVyNyb5OTGsDsldv6KAzi1zSUf8grcutubAomXJ8qKI8sMl6DZOK4tPO7TVDDCotUUAVZqWF6bghzESw=
+	t=1790077748; cv=none; b=rrT0kmdNodbU3Y2u1518hoxujgPjd2hkzg6sCNpo0q9F6XR9X1v4YWHMLamIJXkxk484nLRRltWSKfTtJHIui4L3tPD23B3V2I060s5p//0lpsM+Dkr5/9Ib9f5fX5/RVulWGtBAuXQBMH/K7H7ZNLjPBvl2bWYvu138vBkId3Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790061462; c=relaxed/simple;
-	bh=g3WT5fQmj5Duph7hbDiDZSq+20odEp9msKA7Z/xy+w8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=R+wXwbzZSG8Qec2h/NWWoFNvYvzHncHi068vNK9yl4ZYOvKzQstQmU0huT47FM7HDLiiP29BeTHA2iQBR/On5rEW5sxuw61s6m07PUPN97AWpJZ6Jn5L0mQBdXWGv2uq1/f/+u7VC9nUBEI/qwusDbZmxHFopcuuGRkWOh8isd8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com; spf=pass smtp.mailfrom=linux.alibaba.com; dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b=W0+oxVka; arc=none smtp.client-ip=115.124.30.97
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.alibaba.com
+	s=arc-20240116; t=1790077748; c=relaxed/simple;
+	bh=CI1Cq40uROQ9p2tssY9wQC9yepP/afUYAchrbRjms3E=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=iojLZssAxU9CsUnfGklPGVGvJudnA4zy0DL+eGX+w4bPJaS+DNWRLvZjY3qMU3YdraavdfMKNH7IL6tVHwxzyxF2z/7QKEy6pa3mjd6saMYiIsHtHEYlULv5YtIYywmpRHE8h1E03ioac86K7gXVbYMD5F+S8pF8zvfKqqXCXlI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lODgLBK+; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b="W0+oxVka"
-DKIM-Signature:v=1; a=rsa-sha256; c=relaxed/relaxed;
-	d=linux.alibaba.com; s=default;
-	t=1790061449; h=Message-ID:Date:MIME-Version:Subject:To:From:Content-Type;
-	bh=2o4XTylnChwZeUtYXxHKFY/+eW5nR2VcYkBulaZBLeI=;
-	b=W0+oxVkaRH9QxaGMjJuGaOQuV/MpmMw7/KEkGEmHx+S9qoN3rNW3mG/pZ+5YkIKGM4ZzGSDhsC9XzH4uhnZnh6K7OxW5gfBJHmmJ65sBHL1z4oJw0XJ/LxG7CVW9Y8d4rQhp65l5omExcASJL/zcO8Xh5mCrg9cBnN60iT38ggc=
-X-Alimail-AntiSpam:AC=PASS;BC=-1|-1;BR=01201311R101e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=maildocker-contentspam033037026112;MF=libaokun@linux.alibaba.com;NM=1;PH=DS;RN=8;SR=0;TI=SMTPD_---0XBT05Qt_1790061448;
-Received: from 30.221.148.19(mailfrom:libaokun@linux.alibaba.com fp:SMTPD_---0XBT05Qt_1790061448 cluster:ay36)
-          by smtp.aliyun-inc.com;
-          Tue, 22 Sep 2026 15:17:28 +0800
-Message-ID: <74463cb5-14af-47bb-9380-ca75dc5d293a@linux.alibaba.com>
-Date: Tue, 22 Sep 2026 15:17:27 +0800
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lODgLBK+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 434C01F000FF
+	for <fstests@vger.kernel.org>; Tue, 22 Sep 2026 11:49:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1790077747;
+	bh=oxz1DRsekrZkrcivEj/wfmsazmBahWeHU5oz8w0+lXE=;
+	h=Date:From:To:Subject;
+	b=lODgLBK+C8KwUNz/EmYJXB/SILHISabZ63iFAmWmDjC0BKqnjmIP4vxfiRCHDf9xS
+	 gavKcCSh6ZBVLdFZMy9N6H3jp5avcfVPMHqvzFsUeuxm2rV+qW5PuE4oAGOq+BGY1c
+	 kPE2k3u0GKd5Xb1KpprmpyFdpcR4g/q1WlYn92C8+xcOLYofZ2IX/AnWHXOiiNWdxF
+	 GebeLjiHBVcyNDD7uTbWXuVPZU2XJQarYUC41STN2gONBxvXEX/46JnQpnU/BIfcFe
+	 K6RzGI7p+tQE1Dgg6pIvghewWjXX7rXziQ1RT1M4rD82jGals56OsiQM/PCmn+rsjH
+	 q7n/BOY1pdzRg==
+Date: Tue, 22 Sep 2026 19:49:02 +0800
+Message-ID: <113fe2750efeb08bb47c93fb34900d21@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2026.09.02 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] generic/492: bypass the blkid cache when probing the
- label
-To: Theodore Tso <tytso@mit.edu>, "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests@vger.kernel.org, zlang@kernel.org, linux-fsdevel@vger.kernel.org,
- linux-ext4@vger.kernel.org, sandeen@redhat.com, dgc@kernel.org
-References: <20260920094137.2749428-1-libaokun@linux.alibaba.com>
- <20260921052719.GB6253@frogsfrogsfrogs>
- <b4a10712-1658-4fba-a037-095fab466270@linux.alibaba.com>
- <20260921234910.GC6253@frogsfrogsfrogs> <arHaTLxSEk3yQxU4@mit.edu>
-Content-Language: en-US
-From: Baokun Li <libaokun@linux.alibaba.com>
-In-Reply-To: <arHaTLxSEk3yQxU4@mit.edu>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+  protocol="application/pgp-signature"; boundary="KnuXu1qmRak5"
+Content-Disposition: inline
 
-On 2026/9/22 11:43, Theodore Tso wrote:
-> On Mon, Sep 21, 2026 at 04:49:10PM -0500, Darrick J. Wong wrote:
->>> The difference between the e2fsprogs and util-linux libblkid is the
->>> time granularity: the former stores seconds only (TIME="%ld",
->>> bid_time = time(0), compares st_mtime <= bid_time), while the latter
->>> stores usec (TIME="sec.usec") and has an nsec tie-break in the compare,
->>> so the same-second case is much easier to hit with the e2fsprogs blkid.
->> Perhaps xfstests-bld should use the system blkid then?  IIRC the one
->> in e2fsprogs is very old and out of date.
-> Historically, xfstests-bld was built in environments where libblkid
-> wasn't available.  This included Android's runtime (which uses the
-> bionic libc), and grte (Google Runtime Environment)[1].
->
-> [1] https://github.com/bazelment/lrte/blob/master/grte/grte-build
->
-> However, as more and more tests require utilities from util-linux,
-> xfstests-bld was taught to build util-linux.  And if util-linux is
-> being built, then we don't use e2fsprogs-libs any more, which is where
-> libblkid is built.  From build-all:
->
-> if test -z "$USE_LOCAL_E2FSLIBS" -o -d util-linux; then
->     SKIP_E2FSLIBS=yes
-> fi
->
-> I've always built xfstesets-bld with util-linux, even though it is
-> listed as an optional repository.  This is because (a) util-linux is
-> needed for Android and other non-standard Linux environments, and (b)
-> the version of util-linux used by earlier Debian Stable was too old
-> for some of the newer tests in fstests and blktests.
->
-> If you aren't building xfstests-bld with util-linux, it falls back to
-> building libblkid from e2fsprogs-libs.  HOWEVER, we don't actually
-> blkid, and libblkid is always built statically.  So what seems to be
-> going on is that one of the programs built by xfstests-bld is using
-> the older libblkid, and that results in the blkid cache being writen
-> with a second granularity.
->
-> I've never noticed this issue because I've always built with
-> util-linux.  The way to solve this is to require building with the
-> system libblkid if util-linux is not being built, and to drop
-> e2fsprogs-libs from xfstests-bld.  Or just build xfstests-bld with
-> util-linux.  :-)
+--KnuXu1qmRak5
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
+Hi all,
 
-Thanks for the detailed explanation.
+The master branch of the xfstests repository at:
 
-I checked my environment again though -- it turned out not to be
-xfstests-bld at all.  xfstests-bld never touches e2fsprogs.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-What happened is that I had manually run "make install" of a locally
-patched e2fsprogs in the test VM, which overwrote util-linux's blkid
-and fsck.
+has just been updated to v2026.09.02 version.
 
-Rebuilding e2fsprogs with these options disabled made the test pass:
+Thanks,
+Zorro
 
-    ./configure --disable-libblkid --disable-fsck \
-            --disable-libuuid --disable-uuidd
+The new head of the master branch is commit:
 
-I ran unpatched generic/492 60 times on each side in a VM: 12/60
-failures with the hand-installed strays, 0/60 with util-linux's
-blkid/fsck.
+3e1ee800e52a check: add deprecated options warning
 
-That said, I think the patch is still needed, because
-FS_IOC_SETFSLABEL does not update the block device's mtime:
+New commits:
 
-    blkid -s LABEL ...    # get A
-    FS_IOC_SETFSLABEL     # set B (device mtime unchanged)
-    blkid -s LABEL ...    # still get A (within 2s)
+Avinesh Kumar (1):
+      [3084fca70da9] generic/798: chain xfs_io commands into a single invocation
 
-The first read writes a cache entry with TIME=now, and the ioctl
-leaves the device mtime untouched, so a second read within the 2s
-window still trusts the cache.
+Christoph Hellwig (3):
+      [ec1de92a465e] generic/730: don't override $SCRATCH_DEV
+      [63ff3b39b21c] xfs/649: don't override $SCRATCH_DEV
+      [440d41ec2eac] xfs/073: destroy loop device when mount fails
 
-I reproduced this with util-linux 2.41.5 too, so
-"blkid -c /dev/null" is what keeps the test deterministic
-regardless of which blkid the image carries.
+Darrick J. Wong (4):
+      [328d1f426d9b] generic: test reflux with exchange-range
+      [a27e980f7d88] generic/800: TEST_DIR, not TEST_MNT
+      [1b0edd611283] xfs/030: skip this test if metadir gets enabled anyway
+      [329a50b47d25] xfs/837: set rtinherit on the root directory programmatically
+
+Eric Sandeen (5):
+      [dc4787e81310] generic: remove chmod of $seqres.full file
+      [f94089087b34] Add _require_chmod as needed
+      [3ad176c78926] Add _require_chown as needed
+      [b9d514422d99] Add _require_hardlinks as needed
+      [9ed087ccc9f2] Add _require_mknod as needed
+
+Johannes Thumshirn (4):
+      [c2d757a9d1bf] common/btrfs: fix awk field separator in _check_temp_fsid
+      [45cc03678313] btrfs/199: skip on zoned devices
+      [bcd1ff37a5cb] btrfs/284: skip on zoned devices
+      [139aeb3493df] generic/781: fix copyright
+
+Manognya Singuru (1):
+      [623b555aa32a] common/xfs: filter mkfs.xfs stripe geometry warning
+
+Zorro Lang (4):
+      [984845aec939] check: refactor argument parsing with getopt
+      [d0f510629f94] check: update usage and README to reflect new argument parsing
+      [a5eccab3a040] check: consolidate argument handling into function
+      [3e1ee800e52a] check: add deprecated options warning
 
 
-Cheers,
-Baokun
+Code Diffstat:
 
+ README                |  10 +-
+ README.overlay        |  18 +--
+ check                 | 440 +++++++++++++++++++++++++++++++++-----------------
+ common/btrfs          |   2 +-
+ common/config         |   8 +-
+ common/rc             |   2 +-
+ common/xfs            |   3 +-
+ tests/btrfs/199       |   1 +
+ tests/btrfs/284       |   1 +
+ tests/generic/066     |   1 +
+ tests/generic/084     |   1 +
+ tests/generic/093     |   2 +
+ tests/generic/099     |   2 +
+ tests/generic/105     |   1 +
+ tests/generic/184     |   1 +
+ tests/generic/193     |   1 +
+ tests/generic/219     |   1 +
+ tests/generic/230     |   2 +
+ tests/generic/235     |   1 +
+ tests/generic/237     |   1 +
+ tests/generic/244     |   1 +
+ tests/generic/256     |   1 +
+ tests/generic/305     |   1 +
+ tests/generic/314     |   1 +
+ tests/generic/317     |   1 +
+ tests/generic/318     |   1 +
+ tests/generic/326     |   1 +
+ tests/generic/327     |   1 +
+ tests/generic/328     |   1 +
+ tests/generic/355     |   1 +
+ tests/generic/370     |   1 +
+ tests/generic/375     |   2 +
+ tests/generic/378     |   1 +
+ tests/generic/379     |   4 +-
+ tests/generic/380     |   1 +
+ tests/generic/384     |   3 -
+ tests/generic/398     |   2 +
+ tests/generic/400     |   1 +
+ tests/generic/423     |   1 +
+ tests/generic/440     |   1 +
+ tests/generic/444     |   2 +
+ tests/generic/449     |   1 +
+ tests/generic/462     |   2 +
+ tests/generic/479     |   1 +
+ tests/generic/495     |   1 +
+ tests/generic/505     |   1 +
+ tests/generic/514     |   1 +
+ tests/generic/520     |   1 +
+ tests/generic/535     |   1 +
+ tests/generic/556     |   1 +
+ tests/generic/566     |   1 +
+ tests/generic/572     |   3 +
+ tests/generic/573     |   1 +
+ tests/generic/581     |   1 +
+ tests/generic/587     |   1 +
+ tests/generic/597     |   3 +
+ tests/generic/598     |   2 +
+ tests/generic/603     |   2 +
+ tests/generic/622     |   1 +
+ tests/generic/636     |   1 +
+ tests/generic/641     |   1 +
+ tests/generic/673     |   1 +
+ tests/generic/674     |   1 +
+ tests/generic/675     |   1 +
+ tests/generic/681     |   2 +
+ tests/generic/682     |   3 +
+ tests/generic/683     |   1 +
+ tests/generic/684     |   1 +
+ tests/generic/685     |   1 +
+ tests/generic/686     |   1 +
+ tests/generic/687     |   1 +
+ tests/generic/688     |   1 +
+ tests/generic/698     |   1 +
+ tests/generic/699     |   1 +
+ tests/generic/709     |   1 +
+ tests/generic/710     |   1 +
+ tests/generic/721     |   1 +
+ tests/generic/726     |   1 +
+ tests/generic/727     |   1 +
+ tests/generic/730     |  11 +-
+ tests/generic/781     |   2 +-
+ tests/generic/782     |   1 +
+ tests/generic/789     |   1 +
+ tests/generic/790     |   1 +
+ tests/generic/792     |   1 +
+ tests/generic/798     |  19 ++-
+ tests/generic/800     |   6 +-
+ tests/generic/802     |  65 ++++++++
+ tests/generic/802.out |  16 ++
+ tests/xfs/030         |   1 +
+ tests/xfs/073         |   1 +
+ tests/xfs/649         |  17 +-
+ tests/xfs/837         |   6 +-
+ 93 files changed, 524 insertions(+), 200 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
 
+--KnuXu1qmRak5
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Disposition: inline; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmqyaxoACgkQlNbPkfr2
+tMz/zRAAqQf92MadEQ//pF563enytgse9x2lGMNs8fvztdR+F5DWa5vxP/Fk/qwS
+mmvuMT9UQOg7TN3zUgc36fxnenBu8jxo2QAa4+4VcI1CzE+Uv4gRvpO2dMNcY266
+I+WXAIiG6vHuXl2tKemgHzgV1fhyI9ZptwqMcIBgrAGFCQvQdjok66Td8V8kV78Y
+bme0fi+0d+LHwUtlykbnkNk7Q75YExH1x2WjkGPsT+cIAMReU6ypKc8xXgXRKCxk
+UMsRol4FebIcSMagwUj5R/dbA+hfy+ML/HAFNHf6l+ZGA9oqpqZmsV2Tue2dqnpi
+rZofuesi0jd7c/pV1etFNet9FtwAqtDM4snlVhUCvIskvLiswKUjFvTOY76H3LS/
+d0rVJOtbbCkAA0YVGUv63cRB6lg1fpvXMCJONA+cVy/6mgNCCXZCaqM9CWlESV8L
+7aq7YKC7iQZANLhgim2DU+Vvc5E7vVfIKzKp/HbTYjPo5o6JLF34/QbBft0FHvMw
+lfWoKuDnfLnowRO6fNl7DQRAhBMvyBUhhvBQzoljK6dudMbTQPOJpyP+lgfeXRen
+rsmHEd/Nomf+l8FY9SFTd/GygnoBuGii1vTMHct+geDK0i8POl16i05KjMDDeSRa
+U5Xm+PnbhkoKuY8oLnYsjUAcKIj2tZApJI5biVyiBUoPvhcf0y8=
+=Z5WE
+-----END PGP SIGNATURE-----
+
+--KnuXu1qmRak5--
