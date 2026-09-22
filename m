@@ -1,40 +1,47 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 666892EDD53;
-	Tue, 22 Sep 2026 14:53:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E05CD552955
+	for <fstests@vger.kernel.org>; Tue, 22 Sep 2026 15:57:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790088817; cv=none; b=CaHBlxYmJuH7hwcHjnu3yfj5hvg8Pe0cwcn5TyVn7CVW5SNlGIk/aqy5+wVNoJg9kv/KO2HY3u+Jmak1t5NI6a7n4JClejXqisyw8mEv9eUVDNadlMjx90yNEpd/U69zieEGEHfAnLEnQSlyGJT8SGye5KUhfFZvVvAbVgMklA8=
+	t=1790092656; cv=none; b=qvs6ggGs+xgz7tmyREQZoLbLnaGC7NXoLlNtdSvQklj5rp+TcI/bVmpB0+lXms2SlWC5/WR7nQucmkQ18sgNwtFCcUfsv/lMVOkbsc7Yiion9y3fTgidnkbwvTYpNyjtkI8YQ7i8OFXpyt/SsxcZbrM+JmKbiskliyArXQGfiEs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790088817; c=relaxed/simple;
-	bh=3zStg+Of3SIDA6p7npUPWy+g0iFtuiOXyrEBpcSnHLQ=;
+	s=arc-20240116; t=1790092656; c=relaxed/simple;
+	bh=Oth2R5uA2OQWFqOlcPw7fCNt1VAfsHFYhLQIktYv3YI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=hb4c0K0pwbBQ9LV8Q5b4vhRV0H8ITdvb+BHGXjNV3z7GmHKzxaJ+NVbgMYd+AY42/gBZXCfZdbb4Klmydwcfzsek4As7soeXCcjRyNT/RVyjMB8zFhjl9Y2IMyopalSFjI5agMt9kwdulXo/ghjJdaCGkwjLtNkp75Uv6Jjlsa0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MZaz7KBK; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=sQ/syVFkeF7G/kTEzPe2pAqjmDb4UbnG+hG5fDzQjLT07KuPVsH0VfbpjqLq0/qYyKh2wWxLid21ktkY4FSVgsthq2eMklz895Mbaw1FTD1VuHzXqRv08FUVA/kGeKFXul6cYSdbcJpcFl51li+m6JfA3a03KtixcvCeBu7WQ5Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=FAW0xhum; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MZaz7KBK"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id DBB4F1F00893;
-	Tue, 22 Sep 2026 14:53:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790088816;
-	bh=Dy2JhPeTjTCbkklm8rLHvN3UFSIZRPRM35gZ5rMoV+M=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=MZaz7KBKX6mpqgw8T+lwgsl4gL0IoBvFbgRMRYZqvSBmZPWiYJ6HESBSwGjUVWaKt
-	 LU8JjwiLdOg3u4n5BmWtDZG+F5eTM/4T6QEV6YoIIBMO4EXQaYzGqwbShyjxzwHwFa
-	 OVXalWXaoJlCWwsilexubk7a2XM7ln9MygpsS6j+c4ztVUklshuA/0XeJuZMmYes4m
-	 qREKi1tcMbH67D+jynd894r+ujWjJygb27XxnNhfvFUPLB2UFh5PK10oxbZYG9sEs0
-	 VP1aacopMEN/kEmSMvquYPrjaarrs6kyk3IdMWu6pTTtpCyL+AbhOlKBppdAJPxtQx
-	 0In30ndvgNd5Q==
-Date: Tue, 22 Sep 2026 07:53:35 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="FAW0xhum"
+Received: from macsyma.thunk.org (pool-108-26-156-67.bstnma.fios.verizon.net [108.26.156.67])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 68MFvIQJ030854
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 22 Sep 2026 11:57:19 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1790092641; bh=W17EuRjsRrgDf5dIH9mzKrl6ZdtS1hulCXAE8MXDe00=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=FAW0xhumfgkV3y6oBa8nWeIUaIMBmQLDWxhGNYVCk7tyin9/XoBrC+L+3TmGzp7a0
+	 3nI+jNoHMu7RVXvFLyqegqKP0K8RHy12+Ynizm4KoGJB4THkFlN1JnlgzZuzx1/wJe
+	 iqHej0aI/UV3tFiF8cg7wcOLUb47AwC+fCmJ5oLgyb51oNHY7NieYBxvRcAaDO+NsH
+	 jPSGHRBsteMwy69DrEild/8+7ydKoX+qxzQGwhDsPEKIaKCGJkUcgxUfN9x68svT4n
+	 k3SS6bGtIA2Ij+X+hSmUcbF4g2NQOQH4gI3s2z2gwj9qdmYQS3FHCOdBg0QxDBAP65
+	 ClBI17LU0ijZQ==
+Received: by macsyma.thunk.org (Postfix, from userid 15806)
+	id 16E2F1C992A4; Tue, 22 Sep 2026 11:56:18 -0400 (EDT)
+Date: Tue, 22 Sep 2026 11:56:17 -0400
+From: "Theodore Tso" <tytso@mit.edu>
 To: Baokun Li <libaokun@linux.alibaba.com>
-Cc: Theodore Tso <tytso@mit.edu>, fstests@vger.kernel.org, zlang@kernel.org,
-	linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org,
-	sandeen@redhat.com, dgc@kernel.org
+Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
+        zlang@kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-ext4@vger.kernel.org, sandeen@redhat.com, dgc@kernel.org
 Subject: Re: [PATCH] generic/492: bypass the blkid cache when probing the
  label
-Message-ID: <20260922145335.GV6283@frogsfrogsfrogs>
+Message-ID: <arKZu30pMe0ZavVA@mit.edu>
 References: <20260920094137.2749428-1-libaokun@linux.alibaba.com>
  <20260921052719.GB6253@frogsfrogsfrogs>
  <b4a10712-1658-4fba-a037-095fab466270@linux.alibaba.com>
@@ -52,74 +59,50 @@ Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
 In-Reply-To: <74463cb5-14af-47bb-9380-ca75dc5d293a@linux.alibaba.com>
 
-On Tue, Sep 22, 2026 at 03:17:27PM +0800, Baokun Li wrote:
-> On 2026/9/22 11:43, Theodore Tso wrote:
-> > On Mon, Sep 21, 2026 at 04:49:10PM -0500, Darrick J. Wong wrote:
-> >>> The difference between the e2fsprogs and util-linux libblkid is the
-> >>> time granularity: the former stores seconds only (TIME="%ld",
-> >>> bid_time = time(0), compares st_mtime <= bid_time), while the latter
-> >>> stores usec (TIME="sec.usec") and has an nsec tie-break in the compare,
-> >>> so the same-second case is much easier to hit with the e2fsprogs blkid.
-> >> Perhaps xfstests-bld should use the system blkid then?  IIRC the one
-> >> in e2fsprogs is very old and out of date.
-> > Historically, xfstests-bld was built in environments where libblkid
-> > wasn't available.  This included Android's runtime (which uses the
-> > bionic libc), and grte (Google Runtime Environment)[1].
-> >
-> > [1] https://github.com/bazelment/lrte/blob/master/grte/grte-build
-> >
-> > However, as more and more tests require utilities from util-linux,
-> > xfstests-bld was taught to build util-linux.  And if util-linux is
-> > being built, then we don't use e2fsprogs-libs any more, which is where
-> > libblkid is built.  From build-all:
-> >
-> > if test -z "$USE_LOCAL_E2FSLIBS" -o -d util-linux; then
-> >     SKIP_E2FSLIBS=yes
-> > fi
-> >
-> > I've always built xfstesets-bld with util-linux, even though it is
-> > listed as an optional repository.  This is because (a) util-linux is
-> > needed for Android and other non-standard Linux environments, and (b)
-> > the version of util-linux used by earlier Debian Stable was too old
-> > for some of the newer tests in fstests and blktests.
-> >
-> > If you aren't building xfstests-bld with util-linux, it falls back to
-> > building libblkid from e2fsprogs-libs.  HOWEVER, we don't actually
-> > blkid, and libblkid is always built statically.  So what seems to be
-> > going on is that one of the programs built by xfstests-bld is using
-> > the older libblkid, and that results in the blkid cache being writen
-> > with a second granularity.
-> >
-> > I've never noticed this issue because I've always built with
-> > util-linux.  The way to solve this is to require building with the
-> > system libblkid if util-linux is not being built, and to drop
-> > e2fsprogs-libs from xfstests-bld.  Or just build xfstests-bld with
-> > util-linux.  :-)
-> 
-> 
-> Thanks for the detailed explanation.
-> 
+On Tue, Sep 22, 2026 at 03:17:27PM -0500, Baokun Li wrote:
 > I checked my environment again though -- it turned out not to be
 > xfstests-bld at all.  xfstests-bld never touches e2fsprogs.
 > 
 > What happened is that I had manually run "make install" of a locally
 > patched e2fsprogs in the test VM, which overwrote util-linux's blkid
 > and fsck.
-> 
+
+What e2fsprogs's configure script will do is that it checks to see if
+the blkid libraries are available for building against.  That is, if
+you are using Debian or Ubuntu, you need to have the libblkid-dev
+package install.  Among other things, this makes the following files
+available:
+
+/usr/include/blkid/blkid.h
+/usr/lib/x86_64-linux-gnu/libblkid.a
+/usr/lib/x86_64-linux-gnu/libblkid.so
+
+... which are the files needed to build against libblkid and then link
+against it statically or dynamically.  If these files aren't
+available, then e2fsprogs will assume that it needs to build the local
+libblkid, which is what is needed when building on Android, MacOS,
+NetBSD, Open Solaris, etc.
+
 > Rebuilding e2fsprogs with these options disabled made the test pass:
 > 
 >     ./configure --disable-libblkid --disable-fsck \
 >             --disable-libuuid --disable-uuidd
-> 
-> I ran unpatched generic/492 60 times on each side in a VM: 12/60
-> failures with the hand-installed strays, 0/60 with util-linux's
-> blkid/fsck.
-> 
+
+This works, but this wll also disable those e2fsprogs features that
+require those libraries.  So mke2fs will not generate UUID's in the
+superblock, e2fsck won't handle LABEL=xyzzy specifiers, etc.
+Fortunately xfstests don't depend on these featuers, so this will work.
+
+The way I build with a locally patched e2fsprogs is that I'll build it
+using the Debian build tools, which will enforce building with the
+necessary prereqsuite packages, and then I'll put the built packages
+in the directory test-appliance/debs and then build a fresh test
+appliance image.  Or I'll just upload the packages to the VM and then
+install it before launching the tests.
+
 > That said, I think the patch is still needed, because
 > FS_IOC_SETFSLABEL does not update the block device's mtime:
-
-Many filesystems /never/ update the bdev mtime, why would they?
-
+> 
 >     blkid -s LABEL ...    # get A
 >     FS_IOC_SETFSLABEL     # set B (device mtime unchanged)
 >     blkid -s LABEL ...    # still get A (within 2s)
@@ -127,17 +110,11 @@ Many filesystems /never/ update the bdev mtime, why would they?
 > The first read writes a cache entry with TIME=now, and the ioctl
 > leaves the device mtime untouched, so a second read within the 2s
 > window still trusts the cache.
-> 
-> I reproduced this with util-linux 2.41.5 too, so
-> "blkid -c /dev/null" is what keeps the test deterministic
-> regardless of which blkid the image carries.
 
-<nod> That was the problem I thought you were solving here ;)
+The patch to xfstests might still be appropriate, but it seems to me
+that tune2fs should get fixed to update the device mtime (if it can),
+and perhaps the kernel should try to update block device inode as well
+as part of the FS_IOC_SETFSLABEL ioctl to address potential corner
+cases with systemd/udev.
 
---D
-
-> 
-> Cheers,
-> Baokun
-> 
-> 
+						- Ted
