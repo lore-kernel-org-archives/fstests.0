@@ -1,81 +1,141 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from out30-111.freemail.mail.aliyun.com (out30-111.freemail.mail.aliyun.com [115.124.30.111])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D81D3B2D04
-	for <fstests@vger.kernel.org>; Wed, 23 Sep 2026 09:33:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 92B7240A940;
+	Wed, 23 Sep 2026 10:02:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.124.30.111
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790156003; cv=none; b=YWmXCeEsvtrv0JLlP1Hd/N5rLr/uR9NuIJOnABoowqqyNTAsHKfU3KgSZn8IO3GUTmtWB03qODRCMmMqKYtVrPE8WYNX+4MK78+hyLidR4wEsvdcmVsenGUdIaJX80vrb2xSKxxBBEAJ1JdCRKQnfkfbl+oO1oJO1tlLiyl4BuU=
+	t=1790157772; cv=none; b=J0v7fwcajswFLnN/r0DrCHr+8hk2eNj7SdNk79Yr0bjorrS22fp6CK0nHUDK9ozgTo4Cg3N/NFvDb8NnqWWkoZ35+xRODzg3gFTrr75uoZkdsu25g+ZT6DduH8NAZDN94PuwsZzUKaYKLUrkYooi7+TKAQ/i5BiD2kyFReXdY54=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790156003; c=relaxed/simple;
-	bh=aTTIXzlwIeYNVGarIEzS/knWaFxA5iplG7KPC6IDv9I=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=qbtJTfpzCb6ZmGOY23ZUCj0zJWDMH6+7TjCf9vmhz4prkeX0UY4MgAA2m9bP2PUAlFiSzdW0b60O6Ly3qqd+XM9/Z3LjjC56iC0Q0gdZBUhpfjXEuAitPv4bu7VgoxnRJRn1+jeiAHavqzfiEKhdWcchbjy2jNqGm8GLZRUL6k4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hDKOtI99; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1790157772; c=relaxed/simple;
+	bh=UXuCaDlmLLKzcXoPVndGfwOywoXKG3yQILcEYGnX2Rw=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=MZ9zEdmzD88FUCo0GAWqXUhgymTmTWK1eGm82RuuqFM/sVGW5RnScQtI5u98Un+dhxU1Hv5peaiVHxJO0yjc02/bMVItaFW7fnKbfFWIUTc7WuuAG6dp0eL+8WHlanw4YakqQn4tdVBfyjp9phuQ9NzHLxomjEBTb/CLqbRVbKY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com; spf=pass smtp.mailfrom=linux.alibaba.com; dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b=UWJxP7Zy; arc=none smtp.client-ip=115.124.30.111
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.alibaba.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hDKOtI99"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1B1A81F000FF;
-	Wed, 23 Sep 2026 09:33:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790156002;
-	bh=R9eJNOiXIpL9V+W9oZ9q0R2bcGoXRQ0c/m9nVC7O2dI=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=hDKOtI993F6jbpPV6cMgF7j4nZ/P/1KLbYlkn43QfnZXSNzXJCFkSEWeb9hGnwUyi
-	 mFuas7YTlAMlt2S1NjgkjDFoK05795nyn59SJDvtrNYHkWF72NbBJopJU6ibCcWzsA
-	 pWqUhjZiGP//TF1/vuhRgcXBAKGH5AChEzH33XdK/YeutODRdG4VuFz51LuBBsYLyu
-	 IyoF99h52+jG7o9aAwteX6bPVWMp8Ci9Q9fqhfPEeF62CLIIe3GagnZDOeyzFjHHlR
-	 Rnk4Abn1VxmkMyO7EDWWx9XErxRWlNGgyM+4C2BB5KReVoUXLCiJYwP2siAVVeVjM+
-	 KveIij3rmv0+A==
-From: Andrey Albershteyn <aalbersh@kernel.org>
-To: fstests@vger.kernel.org,
-	zlang@kernel.org
-Cc: Andrey Albershteyn <aalbersh@kernel.org>,
-	Christoph Hellwig <hch@lst.de>
-Subject: [PATCH v2 4/4] xfstests: fix permissions on system file installed by libtoolize
-Date: Wed, 23 Sep 2026 11:32:55 +0200
-Message-ID: <20260923093259.16199-5-aalbersh@kernel.org>
-X-Mailer: git-send-email 2.54.0
-In-Reply-To: <20260923093259.16199-1-aalbersh@kernel.org>
-References: <20260923093259.16199-1-aalbersh@kernel.org>
+	dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b="UWJxP7Zy"
+DKIM-Signature:v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=linux.alibaba.com; s=default;
+	t=1790157760; h=Message-ID:Date:MIME-Version:Subject:To:From:Content-Type;
+	bh=RGclB5mo0HMup1GTonOpeUl/PPpEqlOL7mLAbExQtxI=;
+	b=UWJxP7Zy0I9myRexeMJo0tAidtXMOuRqpvAGK7H83e+VYDBsWG65C/RB5BjbFT0mf/AbXSA3B6pjoc65kvIfv78uJrIO41JlvXC4FKT5TAlLqTx4EpElnmGoXmw20nQHV5HCAVsUl8E5z2u/b9HtYN/Fc56+hBP5HCxc+ZkqJpA=
+X-Alimail-AntiSpam:AC=PASS;BC=-1|-1;BR=01201311R121e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=maildocker-contentspam033037026112;MF=libaokun@linux.alibaba.com;NM=1;PH=DS;RN=8;SR=0;TI=SMTPD_---0XBWj.C7_1790157759;
+Received: from 30.221.148.48(mailfrom:libaokun@linux.alibaba.com fp:SMTPD_---0XBWj.C7_1790157759 cluster:ay36)
+          by smtp.aliyun-inc.com;
+          Wed, 23 Sep 2026 18:02:39 +0800
+Message-ID: <8cc9f978-6365-4898-b3db-9f0b232aeb4c@linux.alibaba.com>
+Date: Wed, 23 Sep 2026 18:02:38 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] generic/492: bypass the blkid cache when probing the
+ label
+To: Theodore Tso <tytso@mit.edu>
+Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
+ zlang@kernel.org, linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org,
+ sandeen@redhat.com, dgc@kernel.org
+References: <20260920094137.2749428-1-libaokun@linux.alibaba.com>
+ <20260921052719.GB6253@frogsfrogsfrogs>
+ <b4a10712-1658-4fba-a037-095fab466270@linux.alibaba.com>
+ <20260921234910.GC6253@frogsfrogsfrogs> <arHaTLxSEk3yQxU4@mit.edu>
+ <74463cb5-14af-47bb-9380-ca75dc5d293a@linux.alibaba.com>
+ <arKZu30pMe0ZavVA@mit.edu>
+Content-Language: en-US
+From: Baokun Li <libaokun@linux.alibaba.com>
+In-Reply-To: <arKZu30pMe0ZavVA@mit.edu>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Libtoolize installs set of auxiliary files from its system package.
-Not all distributions have the same permissions set on these files.
-For example, read-only libtoolize system package will copy those
-files without write permissions. This causes build to fail as next
-line copies ./include/install-sh over ./install-sh which will fail.
+On 2026/9/22 23:56, Theodore Tso wrote:
+> On Tue, Sep 22, 2026 at 03:17:27PM -0500, Baokun Li wrote:
+>> I checked my environment again though -- it turned out not to be
+>> xfstests-bld at all.  xfstests-bld never touches e2fsprogs.
+>>
+>> What happened is that I had manually run "make install" of a locally
+>> patched e2fsprogs in the test VM, which overwrote util-linux's blkid
+>> and fsck.
+> What e2fsprogs's configure script will do is that it checks to see if
+> the blkid libraries are available for building against.  That is, if
+> you are using Debian or Ubuntu, you need to have the libblkid-dev
+> package install.  Among other things, this makes the following files
+> available:
+>
+> /usr/include/blkid/blkid.h
+> /usr/lib/x86_64-linux-gnu/libblkid.a
+> /usr/lib/x86_64-linux-gnu/libblkid.so
+>
+> ... which are the files needed to build against libblkid and then link
+> against it statically or dynamically.  If these files aren't
+> available, then e2fsprogs will assume that it needs to build the local
+> libblkid, which is what is needed when building on Android, MacOS,
+> NetBSD, Open Solaris, etc.
 
-Fix this by setting permission explicitly on files copied by libtoolize.
+Indeed, I originally built and installed it manually in an
+environment without libblkid-dev.
 
-See similar commit in xfsprogs:
-6b32423addd2 ("xfsprogs: fix permissions on files installed by libtoolize")
+>> Rebuilding e2fsprogs with these options disabled made the test pass:
+>>
+>>     ./configure --disable-libblkid --disable-fsck \
+>>             --disable-libuuid --disable-uuidd
+> This works, but this wll also disable those e2fsprogs features that
+> require those libraries.  So mke2fs will not generate UUID's in the
+> superblock, e2fsck won't handle LABEL=xyzzy specifiers, etc.
+> Fortunately xfstests don't depend on these featuers, so this will work.
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
-Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
----
- Makefile | 3 +++
- 1 file changed, 3 insertions(+)
 
-diff --git a/Makefile b/Makefile
-index a48d8d62f038..6c3de609bf38 100644
---- a/Makefile
-+++ b/Makefile
-@@ -76,6 +76,9 @@ endif
- 
- configure: configure.ac
- 	libtoolize -cfi
-+	chmod 755 config.guess config.sub install-sh
-+	chmod 644 ltmain.sh m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 \
-+		m4/ltversion.m4 m4/lt~obsolete.m4
- 	cp include/install-sh .
- 	aclocal -I m4
- 	autoheader
--- 
-2.54.0
+Hmm, what I disabled is exactly the set duplicated by util-linux:
+the blkid/uuid libs and UUID/LABEL= handling all live there, so
+the tools just link the system ones -- there is no functional loss.
+
+> The way I build with a locally patched e2fsprogs is that I'll build it
+> using the Debian build tools, which will enforce building with the
+> necessary prereqsuite packages, and then I'll put the built packages
+> in the directory test-appliance/debs and then build a fresh test
+> appliance image.  Or I'll just upload the packages to the VM and then
+> install it before launching the tests.
+
+That sounds much better than a hand install -- I'll give it a try.
+
+>> That said, I think the patch is still needed, because
+>> FS_IOC_SETFSLABEL does not update the block device's mtime:
+>>
+>>     blkid -s LABEL ...    # get A
+>>     FS_IOC_SETFSLABEL     # set B (device mtime unchanged)
+>>     blkid -s LABEL ...    # still get A (within 2s)
+>>
+>> The first read writes a cache entry with TIME=now, and the ioctl
+>> leaves the device mtime untouched, so a second read within the 2s
+>> window still trusts the cache.
+> The patch to xfstests might still be appropriate, but it seems to me
+> that tune2fs should get fixed to update the device mtime (if it can),
+> and perhaps the kernel should try to update block device inode as well
+> as part of the FS_IOC_SETFSLABEL ioctl to address potential corner
+> cases with systemd/udev.
+
+
+Yes -- we need to add a utime() in tune2fs's ioctl path to update
+the device mtime; I'll send a patch shortly.
+
+For the kernel side, we don't have the dev path that the caller
+is using, so it is not doable there: the inode we can reach
+inside the ioctl is not the one userspace sees.  Details are in my
+reply to Darrick:
+
+https://lore.kernel.org/all/eeeab8d8-dfd3-45ff-9f30-d83c527210f2@linux.alibaba.com
+
+Also, a thought that just came up: on the blkid side, would it be
+feasible to not trust the cache for mounted devices and always
+re-probe?  The mount / set label / umount / get label (within 2s)
+window would remain, but it would be much smaller.
+
+
+Thanks,
+Baokun
+
 
