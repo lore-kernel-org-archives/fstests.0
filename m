@@ -1,128 +1,120 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 42AA253D0B6
-	for <fstests@vger.kernel.org>; Wed, 23 Sep 2026 15:18:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 373563D3CF7
+	for <fstests@vger.kernel.org>; Thu, 24 Sep 2026 02:26:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790176704; cv=none; b=qNJLmdruaBMnW+3rjl+9vVBS6k7HmqFOZ0ji5o//LtRz+xU4t2D580RiEEyFAXtzAljcCjZuRLI2eHBvlUzelhLXIvkSNnUW/B5r94pPCb/4Krc0nwjGwhvrcmWm0/2HDHBWk4ZysE1qfQFmONMqXAMT90loTTB6jCN+uUN3rIs=
+	t=1790216794; cv=none; b=V2O9etFDIxEmHn2MAKT1888AEaZxi5zX17SGk1VPU9zngIkNOQJybt+6U4rqOresRb/2clcIaf2TKGPJ17vBKvra7sHMNQJMxDhTE2uaurtofrg54qH6WPwS4D14nYc6a898dK3FmeQFMusX9Dzep3yiPmakzm1qjDeImww3pqQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790176704; c=relaxed/simple;
-	bh=pUT6K5jsnKutA5wys0QukUbNqXKAxfZS0Qp9/zbwpUs=;
+	s=arc-20240116; t=1790216794; c=relaxed/simple;
+	bh=PSpuNemmEVccQBew0m90VLs4TbBdovTZObkeg+WCVQw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=J4oPsplX4GkOe2LjgTxYNhXZUxFWYeCdjiBohWCoCOCdiUcNdJtfxaxAWDvidbRTwSUAzHtIAKerOswX/ExQjb3Q6n9LwYJd/IxZeJNgdeM5jf6Xx0vDDbTjemY7aoOfgQWTg8sMSLGlXzLuxT/g7qg4vgBrRYxakmHFhFIqD7g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eKfIex9C; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=K5icrYQeKfK0ufXGCiA5ha6Z2Y+ZDBdvUheEkqJoXvGHoVm90lBZvM+ndfWOOXJgbmcZS5lFb+H0L7+RbLWgsR28LXkaS2ywwNm8OKBdoGLukSV9CoIv0+Vqbaap+hZUPacivHXn3Vcdh86YVoNX4PTanLYRaPrYEmU26vkpGNQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=g3J2q0Md; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eKfIex9C"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 11BBE1F00893;
-	Wed, 23 Sep 2026 15:18:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790176703;
-	bh=Y7M/zWqHLTthi7HwDlJl+WG91ZyzFRdzUj7lPYymTBs=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=eKfIex9C48bcna40X+aotHNhDthfaPQIIiFPGzd82Wx/hedDOXiR+Z5/TtI2sAGVP
-	 lXKFca1L6Q2sY1qwDwmyikB7BF493pIxftCrWRtm62XGzFzfke4CKeM0S/FW7rRsf6
-	 GeGKuu3qOhgfSArFLb2CdCmh7HXdYWuRZwFNCRP+B0v7LqbQ90nkEr7MSDunP0kvSk
-	 SE0u0hNaNBahFf3IPQI8u8hjC7/hLl30lDxvGO58n3gDNoAoKbD5UJpULzV3mL7l7V
-	 jNs9etWIT4K3NEHbgnBF0bJfTYnfMrnxynYMCLR84ar96bLVkUdNsz4lzcU63sKztU
-	 Sp8Wa6Kx55ggw==
-Date: Wed, 23 Sep 2026 08:18:22 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Andrey Albershteyn <aalbersh@kernel.org>
-Cc: fstests@vger.kernel.org, zlang@kernel.org,
-	Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH v2 2/4] common: link .out file to the output directory
-Message-ID: <20260923151822.GD6253@frogsfrogsfrogs>
-References: <20260923093259.16199-1-aalbersh@kernel.org>
- <20260923093259.16199-3-aalbersh@kernel.org>
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="g3J2q0Md"
+Received: from macsyma.thunk.org (pool-108-26-156-67.bstnma.fios.verizon.net [108.26.156.67])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 68O2Q38S027265
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 23 Sep 2026 22:26:05 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1790216766; bh=XOPG7Wm5YRPy1BsFIYcUDaWJyTqesRHLONHeV9V4AFI=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=g3J2q0MdxfvwhvfSUgsWQVy7rO/nOPcYkqhxRvG3u4G4H5ecW6nD07GjQ+hzdb3J8
+	 dzujBuWWfHqmBUk6FrZO+oTq7DA6ZmsZGjJCIrbVqDP5XPl2lX7G+RsW3a3hBmX/Zn
+	 GFuM5Jcqw6fAXWFpNZnVmfJm7Gs9OyTTCn8sQhD960W+HVkU9fhIXip+VbkOzUGlLo
+	 OLFEBfq6VHAFHtk7CQw6R0IaqnATlVGj7SeoSvUusqpoBkEPIUmPWDgNzVL1jVA/EC
+	 fNeCr672tNsYDcjc+MSyofXJoqz2/U0qy0DhKWdY9rWclmBkSc+S+PrBYA40Mp3rz0
+	 wvssWDrTQ/73w==
+Received: by macsyma.thunk.org (Postfix, from userid 15806)
+	id 4059D1CCDE0A; Wed, 23 Sep 2026 22:25:03 -0400 (EDT)
+Date: Wed, 23 Sep 2026 22:25:03 -0400
+From: "Theodore Tso" <tytso@mit.edu>
+To: Baokun Li <libaokun@linux.alibaba.com>
+Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
+        zlang@kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-ext4@vger.kernel.org, sandeen@redhat.com, dgc@kernel.org
+Subject: Re: [PATCH] generic/492: bypass the blkid cache when probing the
+ label
+Message-ID: <arRIECW5MBX7fwfe@mit.edu>
+References: <20260920094137.2749428-1-libaokun@linux.alibaba.com>
+ <20260921052719.GB6253@frogsfrogsfrogs>
+ <b4a10712-1658-4fba-a037-095fab466270@linux.alibaba.com>
+ <20260921234910.GC6253@frogsfrogsfrogs>
+ <arHaTLxSEk3yQxU4@mit.edu>
+ <74463cb5-14af-47bb-9380-ca75dc5d293a@linux.alibaba.com>
+ <arKZu30pMe0ZavVA@mit.edu>
+ <8cc9f978-6365-4898-b3db-9f0b232aeb4c@linux.alibaba.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <20260923093259.16199-3-aalbersh@kernel.org>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <8cc9f978-6365-4898-b3db-9f0b232aeb4c@linux.alibaba.com>
 
-On Wed, Sep 23, 2026 at 11:32:53AM +0200, Andrey Albershteyn wrote:
-> On immutable systems with read-only system packages 'ln' will fail to
-> link .out files into system xfstests root directory. Fix this by linking
-> golden output file to the results output directory as a .out.good.
+On Wed, Sep 23, 2026 at 06:02:38PM -0500, Baokun Li wrote:
+> >>     ./configure --disable-libblkid --disable-fsck \
+> >>             --disable-libuuid --disable-uuidd
+> > This works, but this wll also disable those e2fsprogs features that
+> > require those libraries.  So mke2fs will not generate UUID's in the
+> > superblock, e2fsck won't handle LABEL=xyzzy specifiers, etc.
+> > Fortunately xfstests don't depend on these featuers, so this will work.
 > 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
-> ---
->  check     | 12 ++++++++----
->  common/rc |  4 ++--
->  2 files changed, 10 insertions(+), 6 deletions(-)
-> 
-> diff --git a/check b/check
-> index bca302151955..aaed9f4af2ac 100755
-> --- a/check
-> +++ b/check
-> @@ -1181,7 +1181,11 @@ function run_section()
->  		$timestamp && _timestamp
->  		stop=`_wallclock`
->  
-> -		if [ ! -f $seq.out ]; then
-> +		local out=$seq.out
-> +		if [ -f $seqres.out.good ]; then
-> +			out=$seqres.out.good
-> +		fi
-> +		if [ ! -f $out ]; then
->  			_dump_err "no qualified output"
->  			tc_status="fail"
->  			rm -f "$seqres.mountfail?"
-> @@ -1193,7 +1197,7 @@ function run_section()
->  		# from `foo' to 'foo'. Filter old versions to match the new
->  		# version.
->  		sed -i "s/\`/\'/g" $tmp.out
-> -		if diff $seq.out $tmp.out >/dev/null 2>&1 ; then
-> +		if diff $out $tmp.out >/dev/null 2>&1 ; then
->  			if [ "$tc_status" != "fail" ]; then
->  				echo "$seqnum `expr $stop - $start`" >>$tmp.time
->  				echo -n " `expr $stop - $start`s"
-> @@ -1202,13 +1206,13 @@ function run_section()
->  		else
->  			_dump_err "- output mismatch (see $seqres.out.bad)"
->  			mv $tmp.out $seqres.out.bad
-> -			$diff $seq.out $seqres.out.bad | {
-> +			$diff $out $seqres.out.bad | {
->  			if test "$DIFF_LENGTH" -le 0; then
->  				cat
->  			else
->  				head -n "$DIFF_LENGTH"
->  				echo "..."
-> -				echo "(Run '$diff $here/$seq.out $seqres.out.bad'" \
-> +				echo "(Run '$diff $here/$out $seqres.out.bad'" \
+> Hmm, what I disabled is exactly the set duplicated by util-linux:
+> the blkid/uuid libs and UUID/LABEL= handling all live there, so
+> the tools just link the system ones -- there is no functional loss.
 
-Should this be $out not $here/$out , since $out is really just
-$seqres.out.good ?
+The fact that you needed the --disable options implies that e2fsprogs
+wasn't able to use the util-linux supplied libraries.  If the
+configure script determines libblkid and libuuid are available for
+linking against, (e.g., libblkid-dev and uuid-dev are installed), the
+built-in libblkid and libuuid file systems are disabled.
 
-echo "(Run '$diff $out $seqres.out.bad' to see the entire diff)"
+From the configure script output:
 
---D
+checking for blkid_get_cache in -lblkid... yes
+Using system blkid library by default
 
->  					" to see the entire diff)"
->  			fi; } | sed -e 's/^\(.\)/    \1/'
->  			tc_status="fail"
-> diff --git a/common/rc b/common/rc
-> index 3958ac934980..1eccd60c0bc0 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3907,8 +3907,8 @@ _link_out_file_named()
->  		print $result
->  		' <$seqfull.cfg)
->  	rm -f $1 || _fail "_link_out_file_named: failed to remove existing output file"
-> -	ln -fs $(basename $1).$suffix $1 || _fail "$(basename $1).$suffix: could not setup output file"
-> -	test -r $1 || _fail "$(basename $1).$suffix: output file for feature set \"$2\" not found"
-> +	ln -fs $(realpath $1).$suffix $seqres.out.good || _fail "$(basename $1).$suffix: could not setup output file"
-> +	test -r $seqres.out.good || _fail "$(basename $1).$suffix: output file for feature set \"$2\" not found"
->  }
->  
->  _link_out_file()
-> -- 
-> 2.54.0
-> 
-> 
+checking for uuid_generate in -luuid... yes
+Using system uuid by default
+Disabling uuidd by default
+
+In contrast, if you run the configure script on MacOS, NetBSD, or a
+Linux system missing the libuuid / libblkid development files, you
+will see:
+
+checking for uuid_generate in -luuid... no
+Enabling private uuid library by default
+Building uuidd by default
+
+> Also, a thought that just came up: on the blkid side, would it be
+> feasible to not trust the cache for mounted devices and always
+> re-probe?  The mount / set label / umount / get label (within 2s)
+> window would remain, but it would be much smaller.
+
+Maybe.  It's not clear how often people might be trying to query the
+blkid data.  Also, figuring out whether or not a device is mounted is
+not free.  That would mean that for every blkid query, it would have
+to read /proc/mounts to make that determination.  And note that on
+some data center servers, there could potentially be hundreds if not
+thousands of entries in /proc/mounts, either because you have a huge
+number of bind mounts or overlayfs, and/or because you might have a
+huge number of read-only iscsi mounts to deliver software packages to
+your container based Borg or Kubernetes jobs.
+
+I suppose you could put in the blkid cache a hint as to whether the
+file system is mounted, but that in itself could get stale and out of
+date.
+
+Cheers,
+
+					- Ted
