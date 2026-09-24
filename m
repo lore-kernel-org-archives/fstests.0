@@ -1,128 +1,197 @@
-Received: from out30-113.freemail.mail.aliyun.com (out30-113.freemail.mail.aliyun.com [115.124.30.113])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EEDE042CB0D;
-	Thu, 24 Sep 2026 08:09:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.124.30.113
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2387420465
+	for <fstests@vger.kernel.org>; Thu, 24 Sep 2026 09:13:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790237367; cv=none; b=GP+CQucrM78b8v6as12QysrZoM4GXGjtQpn9ioFBx2+hoinpoXqJmtz1jITOndoFX1pnkf9cnQlRv5h+pL/AMBhf1dnWlZsrIl+wVzcp2uFpX87ndrXso+mwYDCVS5a1g4OT+Va+AcS00jouyJHOyd2/OHSZCG2DhSCunA9bswI=
+	t=1790241231; cv=none; b=a0IN7bz3HFO8PuiVys9AxjT+2JIZ5Gc1qgVxqR0lSYQoILuJhkGszhiJkSBoQQojGTYEcOfNBDjO77Po1+w5dN5xfOhWs+I4iLiDBVGGhjC+hkTSE5fJH2dpMaKo8FboEXCJMkNn/k2HORp8fNzV0L+fK3Q7wOHbgrGWq8Neztw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790237367; c=relaxed/simple;
-	bh=YPu10d4gCbWLiq/SiXEDGdgQk3zAzOEMn+Dzlo5otdA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=MoMDlvIGK5fv6jWK9/wPUrg9+zyhfFdp+GiiETOfsIMa2CKiecEl4fGJ1E5XnlBET8gQXwjD+P6JTdzVeGRr31kMIpSsm/3h63da4AFTRyPVZ+RuZnUP0BcZcubJS4IBmCwrYy2OzROowvw51KYVrDvKATH9FqShojSs1nXQ81U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com; spf=pass smtp.mailfrom=linux.alibaba.com; dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b=ZzOEDoHf; arc=none smtp.client-ip=115.124.30.113
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.alibaba.com
+	s=arc-20240116; t=1790241231; c=relaxed/simple;
+	bh=juyi4OjVWA80iRkJ3ycXk+GZZld7CzggVm97TSrxBK0=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=J4oZbqtdFfGCffMiVBEdFQmvrlRjyzeisHwtomIwd+6e1x2C5yKlASTISahxcagqZIzj249oi6lKbGTIWarqcFeps6ARlJAPzo6pYE+uaoXfGq99bYM38Ht5nkSrm6JjK1u18IBXHK2KRNgE45ZlLfdMiYISnNuIrx+WH8xXvB8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=T92mBs52; arc=none smtp.client-ip=209.85.128.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b="ZzOEDoHf"
-DKIM-Signature:v=1; a=rsa-sha256; c=relaxed/relaxed;
-	d=linux.alibaba.com; s=default;
-	t=1790237357; h=Message-ID:Date:MIME-Version:Subject:To:From:Content-Type;
-	bh=851eSIVYb4TgX8lgc+kKPtDZIkWTqS9p38FkXCV2hko=;
-	b=ZzOEDoHfdGUVoPogJY/oHH0FKpIpacG7y2E41HS3s6I3U5ORf7nomjYd/PFOtgSxSgZlMtH2tyM3czL+gH9CreUXUVMDIXwfgNPY3DeyjAYxqfEs3gI4jLU/MYOzEhLr3Mx85vd5TM9iCm9UR7SkAbkGDda6tA0GD9UNC+suMl4=
-X-Alimail-AntiSpam:AC=PASS;BC=-1|-1;BR=01201311R931e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=maildocker-contentspam033037033178;MF=libaokun@linux.alibaba.com;NM=1;PH=DS;RN=8;SR=0;TI=SMTPD_---0XBZ2a3w_1790237356;
-Received: from 30.221.147.180(mailfrom:libaokun@linux.alibaba.com fp:SMTPD_---0XBZ2a3w_1790237356 cluster:ay36)
-          by smtp.aliyun-inc.com;
-          Thu, 24 Sep 2026 16:09:16 +0800
-Message-ID: <b020985c-2784-4438-baae-07d16f3afc7b@linux.alibaba.com>
-Date: Thu, 24 Sep 2026 16:09:15 +0800
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="T92mBs52"
+Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-49e73611928so4406885e9.1
+        for <fstests@vger.kernel.org>; Thu, 24 Sep 2026 02:13:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1790241228; x=1790846028; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=xPVKV8/dlbuxm2O8DaNNJgk0/9BiC4IkG7M+UZS5G88=;
+        b=T92mBs52lSvyTObT4fQGpGdwPQ5AbYdghWZ4SqTb5jDdcJSWGwvMsQ09wFHOb4T7nx
+         tCn/HefmTkAsT9b7xLL9uEF7er7F3lxNfS5tkzgiWgUPdAxmVlLwDA+wtnR4qirs8Fea
+         SUygNF/6W7hOmKM5wPiHdzcw5T12SFgMEZky3ycMTHtmNjXsVvvYbplFSAP0NXmOfRw7
+         xfS5fxaowX0BmAzaP/G2eobMoE+qrmHE0/Auj84txPhwtiYarnwgAvk4FESoK8zb++Ft
+         V5PfdMSOp0VnSl7cZPpPUaCVfvZGPT/n+Cpp81VS6/5+mh4IxScXvdP6aM4GuannbsYE
+         4aYw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1790241228; x=1790846028;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=xPVKV8/dlbuxm2O8DaNNJgk0/9BiC4IkG7M+UZS5G88=;
+        b=W3Nv8TOtZsxoVFvx2QODnnXaa4N/3mKPmdoIw6RodCja73quh6YZIW4VNYAFXj379i
+         AlJWtPlgRc+Cw4PTUfBBVYIDI3INKNWIXDjJDzumS21ovtp1/CRWCVMokVpKaYdPPS7a
+         QjWViDauMtBSgxlA9uVJRv/ekatQxR6X2jpN3ZMEct+uD5Smv7aQFY4qE9OR8y5bjgQ7
+         JoxpvzSRJLRfQngP4i00e42iC5ZRs9q7xoAK+drnavqmMQ2ArCW//oVbXotVp7M47FMR
+         J4jJvpEjwl7DJqbBmh0d/kIH+fNDzGr73eizOIGoQqPCRYXpFRQkcxBrHjHwM+wQM01l
+         54CQ==
+X-Gm-Message-State: AFuF++n9ba/GGazN09t1IK3ceJ9rxAWlQEj/rzi3BewVZrOFeYLP68+i
+	SytG7GI1Vp4d10JugvAR6vdZEjjW8Pe/axZThcLMI5wr5Brlf7k54XbhsLuXxE6TXCQ=
+X-Gm-Gg: AYBFou35l4XpZV+pJVe8xqMh9c0AZwtrJ0O4XRktrkkQui4XkfB7Y3dSg9JJfUTzEWl
+	DKUGpogDdeHd1i5cLvIEkH+PPD28OeQNg+NFP/yFldozcj5HHo3pZUYgR05vCCHnFd4WOcj2QHr
+	CyKNbedtMWus922I29tqM4wkZL/3SpFMUMUlfe4vAkTfpC4wAEyYff+j06OS70AUGTEoghCAS1b
+	qE45wpogamBSRMRkGaxzlwNwjtCN01Bcv4j1UzvezPBB94Y8zeE0k1LYR/LJS+V+e/pvRMhjddC
+	wEXYkW3hrtqYC0gx9fIQe7fc4AhfZJmfvw4AZ4raA7LJunxvb0kxStGZUMC9ouDFPvA/y7YxLsL
+	0lUjANIJqu89kbAjT7mRHeU0dsGvbZbs+AsS4ZdIlXbq2yHvvr3QQwkr3IUDlAK8ovOijNJuEns
+	bUqfZIX1rSmaPEWe6sioO1ZQa1hsMfQlgbVhvTfTdaeT8gSra564epTd9eP7oYqQ4h49Lpmquq1
+	g6SFDxyUVbHU81iN3v2lzkx7Izi0SE+J+OHgn5W4cEmoIk7TU8JycnKbKZytWILoIWV3byycIDk
+	NU0ge+f1fShGydQ=
+X-Received: by 2002:a05:600c:c101:b0:49d:27ee:79c9 with SMTP id 5b1f17b1804b1-49fe66d63fcmr25086305e9.8.1790241227757;
+        Thu, 24 Sep 2026 02:13:47 -0700 (PDT)
+Received: from andreayoga.localdomain (93-42-14-189.ip84.fastwebnet.it. [93.42.14.189])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48868779472sm13583550f8f.23.2026.09.24.02.13.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 24 Sep 2026 02:13:47 -0700 (PDT)
+From: Andrea Parri <parri.andrea@gmail.com>
+To: fstests@vger.kernel.org
+Cc: Andrea Parri <parri.andrea@gmail.com>,
+	"Darrick J . Wong" <djwong@kernel.org>,
+	Zorro Lang <zlang@kernel.org>,
+	Christoph Hellwig <hch@infradead.org>,
+	linux-xfs@vger.kernel.org
+Subject: [PATCH] xfs: exercise a failed CoW conversion during writeback
+Date: Thu, 24 Sep 2026 11:13:36 +0200
+Message-ID: <20260924091338.198407-1-parri.andrea@gmail.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] generic/492: bypass the blkid cache when probing the
- label
-To: Theodore Tso <tytso@mit.edu>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
- zlang@kernel.org, linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org,
- sandeen@redhat.com, dgc@kernel.org
-References: <20260920094137.2749428-1-libaokun@linux.alibaba.com>
- <20260921052719.GB6253@frogsfrogsfrogs>
- <b4a10712-1658-4fba-a037-095fab466270@linux.alibaba.com>
- <20260921234910.GC6253@frogsfrogsfrogs> <arHaTLxSEk3yQxU4@mit.edu>
- <74463cb5-14af-47bb-9380-ca75dc5d293a@linux.alibaba.com>
- <arKZu30pMe0ZavVA@mit.edu>
- <8cc9f978-6365-4898-b3db-9f0b232aeb4c@linux.alibaba.com>
- <arRIECW5MBX7fwfe@mit.edu>
-Content-Language: en-US
-From: Baokun Li <libaokun@linux.alibaba.com>
-In-Reply-To: <arRIECW5MBX7fwfe@mit.edu>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-On 2026/9/24 10:25, Theodore Tso wrote:
-> On Wed, Sep 23, 2026 at 06:02:38PM -0500, Baokun Li wrote:
->>>>     ./configure --disable-libblkid --disable-fsck \
->>>>             --disable-libuuid --disable-uuidd
->>> This works, but this wll also disable those e2fsprogs features that
->>> require those libraries.  So mke2fs will not generate UUID's in the
->>> superblock, e2fsck won't handle LABEL=xyzzy specifiers, etc.
->>> Fortunately xfstests don't depend on these featuers, so this will work.
->> Hmm, what I disabled is exactly the set duplicated by util-linux:
->> the blkid/uuid libs and UUID/LABEL= handling all live there, so
->> the tools just link the system ones -- there is no functional loss.
-> The fact that you needed the --disable options implies that e2fsprogs
-> wasn't able to use the util-linux supplied libraries.  If the
-> configure script determines libblkid and libuuid are available for
-> linking against, (e.g., libblkid-dev and uuid-dev are installed), the
-> built-in libblkid and libuuid file systems are disabled.
->
-> From the configure script output:
->
-> checking for blkid_get_cache in -lblkid... yes
-> Using system blkid library by default
->
-> checking for uuid_generate in -luuid... yes
-> Using system uuid by default
-> Disabling uuidd by default
->
-> In contrast, if you run the configure script on MacOS, NetBSD, or a
-> Linux system missing the libuuid / libblkid development files, you
-> will see:
->
-> checking for uuid_generate in -luuid... no
-> Enabling private uuid library by default
-> Building uuidd by default
+iomap_add_to_ioend() submits the pending ioend through
+->writeback_submit() before allocating a new one for the current
+range.  For XFS, xfs_writeback_submit() converts the ioend's CoW
+extents via xfs_reflink_convert_cow() before submitting the bio; if
+that conversion fails, ->writeback_submit() completes the ioend with
+an error and returns it.  A kernel bug left the stale ioend behind in
+wpc->wb_ctx, which iomap_writepages() then submitted a second time,
+corrupting XFS's ip->i_ioend_list.
 
-Right.  The flags went in only after the development packages were
-installed.  The original hand build had no libblkid-dev, so it built
-and installed the private copies, which is how the distro's
-blkid/fsck/findfs got shadowed.
+Exercise this path with the wb_cow_convert_error error tag: reflink a
+file, dirty several widely separated ranges of the shared extent so
+that a single writepages() call has to build and submit more than one
+ioend, inject the error, and let writeback run.  On a kernel without
+the fix this reliably hits a "list_add double add" WARN from
+xfs_end_bio(); on a fixed kernel writeback just fails cleanly.
 
-With libblkid-dev, uuid-dev and pkg-config installed, a plain
-./configure now prints exactly your first output.  Compared with my
---disable build, the only extra program it produces is the fsck
-wrapper.
+This requires the wb_cow_convert_error XFS error tag; the test cleanly
+not-runs on kernels without it.
 
->> Also, a thought that just came up: on the blkid side, would it be
->> feasible to not trust the cache for mounted devices and always
->> re-probe?  The mount / set label / umount / get label (within 2s)
->> window would remain, but it would be much smaller.
-> Maybe.  It's not clear how often people might be trying to query the
-> blkid data.  Also, figuring out whether or not a device is mounted is
-> not free.  That would mean that for every blkid query, it would have
-> to read /proc/mounts to make that determination.  And note that on
-> some data center servers, there could potentially be hundreds if not
-> thousands of entries in /proc/mounts, either because you have a huge
-> number of bind mounts or overlayfs, and/or because you might have a
-> huge number of read-only iscsi mounts to deliver software packages to
-> your container based Borg or Kubernetes jobs.
->
-> I suppose you could put in the blkid cache a hint as to whether the
-> file system is mounted, but that in itself could get stale and out of
-> date.
+Signed-off-by: Andrea Parri <parri.andrea@gmail.com>
+---
+ tests/xfs/842     | 70 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/842.out |  7 +++++
+ 2 files changed, 77 insertions(+)
+ create mode 100755 tests/xfs/842
+ create mode 100644 tests/xfs/842.out
 
-Agreed -- checking whether a device is mounted on every probe might
-cost more than simply re-probing the device.  Updating the mtime on
-the write side (e.g., in tune2fs, xfs_io, or the kernel) looks like
-the better approach.
-
-
-Cheers,
-Baokun
-
+diff --git a/tests/xfs/842 b/tests/xfs/842
+new file mode 100755
+index 0000000000000..c15760a4c7f89
+--- /dev/null
++++ b/tests/xfs/842
+@@ -0,0 +1,70 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 Andrea Parri.  All Rights Reserved.
++#
++# FS QA Test No. 842
++#
++# Regression test for a failed ->writeback_submit() call leaving a stale
++# wpc->wb_ctx behind.  iomap_writepages() then resubmits whatever
++# wpc->wb_ctx points to, i.e. the ioend that ->writeback_submit() already
++# completed with an error.  For XFS the second bio_endio() lands back in
++# xfs_end_bio(), which list_add_tail()s the already-linked ioend into
++# ip->i_ioend_list a second time, corrupting the list.
++#
++# The only in-tree way for XFS's ->writeback_submit() to fail is a
++# failing xfs_reflink_convert_cow(), so this uses the
++# wb_cow_convert_error error tag to force that on a reflinked file whose
++# CoW extents are dirtied in several widely separated ranges, so that a
++# single writepages() call has to submit more than one ioend.
++#
++. ./common/preamble
++_begin_fstest auto quick clone
++
++# Import common functions.
++. ./common/filter
++. ./common/reflink
++. ./common/inject
++
++_require_cp_reflink
++_require_scratch_reflink
++_require_xfs_io_error_injection "wb_cow_convert_error"
++_require_kernel_config CONFIG_LIST_HARDENED
++
++blksz=65536
++nr=8
++sz=$((blksz * nr * 2))
++
++echo "Format and mount"
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++
++echo "Create reflinked file with several CoW extents"
++_pwrite_byte 0x58 0 $sz $SCRATCH_MNT/file1 >> $seqres.full
++_scratch_sync
++_cp_reflink $SCRATCH_MNT/file1 $SCRATCH_MNT/file2
++
++# Dirty several widely separated ranges of file2's CoW extents so that a
++# single writepages() call has to submit more than one ioend.
++seq=0
++while [ $seq -lt $nr ]; do
++	off=$((seq * blksz * 2))
++	_pwrite_byte 0x59 $off $blksz $SCRATCH_MNT/file2 >> $seqres.full
++	seq=$((seq + 1))
++done
++
++echo "Inject wb_cow_convert_error"
++_scratch_inject_error "wb_cow_convert_error"
++
++echo "Trigger writeback with CoW conversion forced to fail"
++_scratch_sync
++
++_scratch_inject_error "wb_cow_convert_error" 0
++
++echo "Remount"
++_scratch_cycle_mount
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/842.out b/tests/xfs/842.out
+new file mode 100644
+index 0000000000000..72c9c67e7d5fb
+--- /dev/null
++++ b/tests/xfs/842.out
+@@ -0,0 +1,7 @@
++QA output created by 842
++Format and mount
++Create reflinked file with several CoW extents
++Inject wb_cow_convert_error
++Trigger writeback with CoW conversion forced to fail
++Remount
++Silence is golden
+-- 
+2.53.0
 
