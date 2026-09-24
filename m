@@ -1,129 +1,88 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AEB8F388379;
-	Thu, 24 Sep 2026 06:03:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13D3038B7CD
+	for <fstests@vger.kernel.org>; Thu, 24 Sep 2026 06:21:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790229798; cv=none; b=biFztDgGX07A0yUMfiWZJFmAtd446hiYC3zOITF7i3H63CTMaNUVoG0v+7ZsIPGoxs5RJnM2VUOGRrYnqgluGs1f4ZUszZgg1GQlwJ47VC91On+DOlcA6k81h4WzqCCgBFc3QVb7IvB9g3wNdZmPxSW9mbPdMT6M3ToP3QTb8/w=
+	t=1790230885; cv=none; b=sW5wyWwG+zrcuiCXiPU0MyeHrgEX5MEkoV+ttmeLeX4O0KNgTEQ9na6P+h+kUvLjFXqe6PkhF9WHIwXo6dY6tFuDVvRK448X7IHLjv+R8xCEfkMnGF5dM4vGNUJ0Mi8FGydpnPUI+lEG6c7wwmUVPdUQjt+2p/xs13JdsFq1LMo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790229798; c=relaxed/simple;
-	bh=CVc2ZN/8gUe6mfwlgbx0pGlggpoveNKAuukR7cETk7I=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=V7Te7b2TDS+/nH9NO01w0rf98dtjCFcEv9kGzyPLot4yEKv7NLCGTYXHhntK/3rNz3pJGD8EdLqRBGZmpZS2sNAsINF7MuJovY4v4OnzUY8bfyQ5kHDHRPEgJAZVcNx94Uw7e99TM0LdAr7Tz8scWxuDH15l7QucKmWNpLtIcyw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YiUDfJkz; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1790230885; c=relaxed/simple;
+	bh=k046fZ8rAMK00DIy+O7aPmFPUM9pW3eF6YtbML+WLaM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=j2s04TyeovnzWibAKOypDrprELPKh1vSKsVpg7qvRBg24WXr2GeGOz7m/ry680kPflXfW2Z6f1Iyr4DPygOL9vexTBI9PuX90nu9e12mSNPmVAJGxyb88cvvAwR+MxcxDpfcnhUZWGFalDW8qBHij9XKmxzu8/zIHvTbS74DIxw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=fJOb9n94; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YiUDfJkz"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id DEF541F00893;
-	Thu, 24 Sep 2026 06:03:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790229796;
-	bh=NiKagCKFf7UtHLLMSvYsFjI6GWPVcFpSJjIISlscCRk=;
-	h=Date:From:To:Cc:Subject;
-	b=YiUDfJkzXufG63XSvdO1tb6t7O9iqqhGILJpQqFb2HqoZ8iCBWC8kSU2CbLzwfrN9
-	 gRB0fKHE/iKBEshgCeKcxofS7bznii/j6RxWb/X1GaZyc7hj8j0iAYJlFyJ/fjZwnW
-	 DXqrKdxwHfWmJuxrQ30qeicof281jnUnyfssMNWwlKYISy8Pzt6W6tjFWsFLi1/DVi
-	 qCNVjQd2jkt6H7nNqIwMukzg/T0XtUfpTeDMeMz/vj+91LkqZGw3y24RaYgb0bDu96
-	 At7G7TID5rXLt+2k/NZxOCdl3TZh8dFpVmCxnygi5KvRn3T1EbOAigiDvbrZwKvotB
-	 ntuoIFeM1Mv0A==
-Date: Wed, 23 Sep 2026 23:03:15 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
-Subject: [PATCH] generic/{349,350,351}: fix scsi_debug parameter quoting
- issues
-Message-ID: <20260924060315.GF6253@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="fJOb9n94"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=DUB3CYaSRX/QNftDEm/XxJ5sVTyPXpjODx8P2kF/YbQ=; b=fJOb9n94staWxgQ8ITcr1g2RQh
+	cfANseX3gvizT0uwef8gTFk5bHoCfcxcGX0B4rj7RZrlrfhPIe5/ZRvgnQzHcucZbDVAiUytnwzC9
+	gSi7/fDN9DNTsl54pW3/P1p+rkoJ1G0PwZPnlGlBsNOF0tAAkZIrhIf07UHaopVY53HQZvgBFvUNa
+	F37MUsU4Fr0zdL2sqQz4qxNgH80zIMwZ+TgXT5gjzeSwTLvbRMHI29soQUuJhoR3EeSgUeen0YyQF
+	o4WTPtpHCIFNuWeJegP5LoR3VELXBXjpLSD/XSuKC4vcmIMysf7D1olJO0mPwymPOas1ny0273zEd
+	cBbdx4lA==;
+Received: from 2a02-8389-2301-9f00-b711-947d-6c5b-1af5.cable.dynamic.v6.surfer.at ([2a02:8389:2301:9f00:b711:947d:6c5b:1af5] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.99.1 #2 (Red Hat Linux))
+	id 1x9cpf-0000000A8zk-1DDR;
+	Thu, 24 Sep 2026 06:21:23 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: zlang@kernel.org
+Cc: moritz.tanner@linbit.com,
+	fstests@vger.kernel.org
+Subject: [PATCH] generic/805: fix for external RT devices
+Date: Thu, 24 Sep 2026 08:21:18 +0200
+Message-ID: <20260924062118.2684441-1-hch@lst.de>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-From: Darrick J. Wong <djwong@kernel.org>
+use _mkfs_dev on the dm device instead of _scratch_mkfs_sized, otherwise
+the file system could be created with an external RT device, and will
+then fail to mount without it.
 
-Commit a90ba59dca447d reworked the argument handling code inside
-_get_scsi_debug_dev to put all the remaining arguments (after we extract
-the first four arguments) inside an array that gets passed to modprobe:
-
-	opts+=("$@")
-
-This code takes every command line argument and copies them into the
-array verbatim.  Contrast this to what it did before (excerpted):
-
-	opts="...dev_size_mb=$size $@"
-	echo "scsi_debug options $opts" >> $seqres.full
-	modprobe scsi_debug $opts
-
-The old code put all the arguments into a string, then passed the string
-unquoted to modprobe, which means that any spaces in the parameters
-given to _get_scsi_debug_dev become argument separators in the modprobe
-call.  Put more simply, passing "foo=1 bar=1" to _get_scsi_debug_dev
-results in "foo=1" "bar=1" being passed to modprobe.
-
-Now we no longer do that, which causes these three tests to fail with:
-
-	scsi_debug: `1 lbpws10=1' invalid for parameter `lbpws'
-
-because we're effectively passing lbpws="1 lbpws10=1" to scsi_debug.
-Fix this by removing the quoting from the three tests.
-
-Cc: <fstests@vger.kernel.org> # v2026.09.22
-Fixes: a90ba59dca447d ("common/scsi_debug: don't slow down I/O")
-Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- tests/generic/349 |    2 +-
- tests/generic/350 |    2 +-
- tests/generic/351 |    4 ++--
- 3 files changed, 4 insertions(+), 4 deletions(-)
+ tests/generic/805 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/tests/generic/349 b/tests/generic/349
-index 72fbda412ea41c..0d019d4ab46170 100755
---- a/tests/generic/349
-+++ b/tests/generic/349
-@@ -20,7 +20,7 @@ _require_scsi_debug
- _require_xfs_io_command "fzero"
+diff --git a/tests/generic/805 b/tests/generic/805
+index ae498f5c6698..401829c4c6fc 100755
+--- a/tests/generic/805
++++ b/tests/generic/805
+@@ -31,7 +31,7 @@ _cleanup()
+ 	rm -f $tmp.*
+ }
  
- echo "Create and format"
--dev=$(_get_scsi_debug_dev 512 512 0 4 "lbpws=1 lbpws10=1")
-+dev=$(_get_scsi_debug_dev 512 512 0 4 lbpws=1 lbpws10=1)
- _pwrite_byte 0x62 0 4m $dev >> $seqres.full
+-_require_scratch
++_require_scratch_nocheck
+ _require_dm_target linear
+ _require_freeze
  
- echo "Zero range"
-diff --git a/tests/generic/350 b/tests/generic/350
-index 6079a8d5032303..7dcdda03a613ff 100755
---- a/tests/generic/350
-+++ b/tests/generic/350
-@@ -20,7 +20,7 @@ _require_scsi_debug
- _require_xfs_io_command "fpunch"
+@@ -39,13 +39,13 @@ echo "Silence is golden"
  
- echo "Create and format"
--dev=$(_get_scsi_debug_dev 512 512 0 4 "lbpws=1 lbpws10=1")
-+dev=$(_get_scsi_debug_dev 512 512 0 4 lbpws=1 lbpws10=1)
- _pwrite_byte 0x62 0 4m $dev >> $seqres.full
+ size=$((256 * 1024 * 1024))
+ size_in_sector=$((size / 512))
+-_scratch_mkfs_sized $size >> $seqres.full 2>&1
  
- echo "Zero punch"
-diff --git a/tests/generic/351 b/tests/generic/351
-index e73b70e4d7957e..374ea1afe46d76 100755
---- a/tests/generic/351
-+++ b/tests/generic/351
-@@ -27,7 +27,7 @@ _require_xfs_io_command "fzero"
- _require_xfs_io_command "fpunch"
+ node=$seq-test
+ lvdev=/dev/mapper/$node
+ table="0 $size_in_sector linear $SCRATCH_DEV 0"
+ _dmsetup_create $node --table "$table" || \
+ 	_fail "failed to create dm device"
++_mkfs_dev $lvdev >> $seqres.full 2>&1
  
- echo "Create and format"
--dev=$(_get_scsi_debug_dev 4096 4096 0 4 "lbpws=1 lbpws10=1")
-+dev=$(_get_scsi_debug_dev 4096 4096 0 4 lbpws=1 lbpws10=1)
- _pwrite_byte 0x62 0 4m $dev >> $seqres.full
- $XFS_IO_PROG -c "fsync" $dev
+ _mount $lvdev $SCRATCH_MNT || _fail "failed to mount dm device"
  
-@@ -70,7 +70,7 @@ echo "Destroy device"
- _put_scsi_debug_dev
- 
- echo "Create w/o unmap or writesame and format"
--dev=$(_get_scsi_debug_dev 512 512 0 4 "lbpws=0 lbpws10=0 lbpu=0 write_same_length=0 unmap_max_blocks=0")
-+dev=$(_get_scsi_debug_dev 512 512 0 4 lbpws=0 lbpws10=0 lbpu=0 write_same_length=0 unmap_max_blocks=0)
- _pwrite_byte 0x62 0 4m $dev >> $seqres.full
- $XFS_IO_PROG -c "fsync" $dev
- 
+-- 
+2.53.0
+
