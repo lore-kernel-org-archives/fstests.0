@@ -1,81 +1,56 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FDD8346E47
-	for <fstests@vger.kernel.org>; Fri, 25 Sep 2026 10:45:25 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB42A376A0D;
+	Fri, 25 Sep 2026 14:49:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790333127; cv=none; b=ExQd+TX/rhsRVR2FfRr9bogHjaN3WljZ4yzZSTOtuNRzDC82qA2zIlNS5YPAgmNFW1DYaYbgVIx7WWqSfThC4iUORmKF9xMeg8k710ObBsIelfGga3eHlh4/UKt/F2WJlN0aUF7kaDXpRDTvu/S34zV1XVQFrCXRMqOjwNuxpKA=
+	t=1790347788; cv=none; b=iELncGY8Klrte4uAPq8JzOoZQtkr2vPnFw0E142ORSvPXIs5FGCMUqesSW19w4hnPaE88zHhUFLh+ESN0xU91vTQ8lMw3OTZrKBruAYWb2c0Uyk49KYaJf37HPLgDBIE0RXeqvkNUi8M2osOUe/9W3eQRG4/cKx42MuM4E6qzu4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790333127; c=relaxed/simple;
-	bh=aTTIXzlwIeYNVGarIEzS/knWaFxA5iplG7KPC6IDv9I=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=MKC7jFK0yllDlWkvM4LpKnKUW68fh4lHS+ef5mKhy+nPyil9Y1pL4UXQdrHiTdomOsm69efrZNstFo01gdF0c691fQgcTPxJRVU29lrPbs2p110+LQsUd1eapWhbvuEbdvZhrCUYfCH00FS1gdnHZkMGxkHRMztpauG3aI5d0/U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LzClRhmg; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1790347788; c=relaxed/simple;
+	bh=a3R1OhS54AAEPr5eBSMSeAzCNr0p77mW1cVE++7Chbg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=lvG8GZYvE69jWdnMA6ztwwmFXlutETKQqyECuJpGS089UYkcFu7oHQXOnUK5KS+i81lV/SFEnVVTHjM5pb82/UbgKy6MgYgpcNzeUsN/YjXT4X7S+KZU18V94Cd/pUXwSXPGTEZvHE9pcrlqwJsOK58PLoa8L7nG7LLZ7ah+dl4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jG0V+PnC; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LzClRhmg"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4BE8A1F0089A;
-	Fri, 25 Sep 2026 10:45:24 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jG0V+PnC"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 385DD1F000FF;
+	Fri, 25 Sep 2026 14:49:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790333125;
-	bh=R9eJNOiXIpL9V+W9oZ9q0R2bcGoXRQ0c/m9nVC7O2dI=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=LzClRhmgY+ovUf8d+3ROM0Xlzui8kXcyn+knYf2WwglnRdHbfcGvehbZpnVNpLQWH
-	 fYT4eUmf4Bds5jP9EOn4qKbpW+ZVrNKt4YLUGNA4VlzhZT9NXoUokB2nn2cyzeLkoz
-	 76EWmr49ATElYUQ96X4l5MoNbB9KvIWQ0SwpLLyhyLgbEhDzchD8hKCroTGU5+Ts3f
-	 el48YpiTarORhbGQTqkKt6YncQKH2wAm4Q3UPhKzEImiWXL4vATYT0ZVtTp2+T/N4R
-	 DfSfVfQcLdaBlSVMQ+mi0gMJWJYAwmNAzK3vz1hG6Lb7SRti0VI6ArMwfeQFWIKQwB
-	 xKc8qx39gHWlw==
-From: Andrey Albershteyn <aalbersh@kernel.org>
-To: fstests@vger.kernel.org,
-	zlang@kernel.org
-Cc: Andrey Albershteyn <aalbersh@kernel.org>,
-	Christoph Hellwig <hch@lst.de>
-Subject: [PATCH v3 4/4] xfstests: fix permissions on system file installed by libtoolize
-Date: Fri, 25 Sep 2026 12:45:12 +0200
-Message-ID: <20260925104514.664260-5-aalbersh@kernel.org>
-X-Mailer: git-send-email 2.54.0
-In-Reply-To: <20260925104514.664260-1-aalbersh@kernel.org>
-References: <20260925104514.664260-1-aalbersh@kernel.org>
+	s=k20260515; t=1790347786;
+	bh=a3R1OhS54AAEPr5eBSMSeAzCNr0p77mW1cVE++7Chbg=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=jG0V+PnC7CAb8eJoq3y/yLH4MpFo0d5f7hLd1vCXn8G8m1EkoHv2lwWrzd1buBU0v
+	 xnLJT3LAM94Fx9NAWh41sXgmLUNxbi3GMa8wFWVI01YigL/KINy38RZq0kdjaKdGcF
+	 P/EFnLKOwCURjYjOqXgQsS8nQEnQHKvaQDzsXTlJX/ekHqKQ9BN20jQ+joQLbv6Tp2
+	 N3ozxeTh6L4GUQyhee7uF1V/5UQTLNV2xruX33a522G4jwc5veGphH0b9pl/7CsAax
+	 nac6xg+0iDhHS+/5hevJBuJ6v08hRZLaPr4YBShSFQzcKfTafJmCHgGJMGqEqekUcB
+	 CGR35BVAmt6aQ==
+Date: Fri, 25 Sep 2026 07:49:45 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Zorro Lang <zlang@kernel.org>, fstests <fstests@vger.kernel.org>,
+	xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH] generic/805: skip this test if we can't mount the
+ filesystem
+Message-ID: <20260925144945.GN2705364@frogsfrogsfrogs>
+References: <20260924060245.GE6253@frogsfrogsfrogs>
+ <arX_YZb_Gmxrx3zb@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <arX_YZb_Gmxrx3zb@infradead.org>
 
-Libtoolize installs set of auxiliary files from its system package.
-Not all distributions have the same permissions set on these files.
-For example, read-only libtoolize system package will copy those
-files without write permissions. This causes build to fail as next
-line copies ./include/install-sh over ./install-sh which will fail.
+On Thu, Sep 24, 2026 at 09:58:09PM -0700, Christoph Hellwig wrote:
+> I think my version of this is better - we really should never
+> use the scratch helpers unless using a real scratch fs.
 
-Fix this by setting permission explicitly on files copied by libtoolize.
+<nod> I think your patch works too, though if we can't _mkfs the
+synthesized device then there's no point in continuing the test.
 
-See similar commit in xfsprogs:
-6b32423addd2 ("xfsprogs: fix permissions on files installed by libtoolize")
-
-Reviewed-by: Christoph Hellwig <hch@lst.de>
-Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
----
- Makefile | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/Makefile b/Makefile
-index a48d8d62f038..6c3de609bf38 100644
---- a/Makefile
-+++ b/Makefile
-@@ -76,6 +76,9 @@ endif
- 
- configure: configure.ac
- 	libtoolize -cfi
-+	chmod 755 config.guess config.sub install-sh
-+	chmod 644 ltmain.sh m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 \
-+		m4/ltversion.m4 m4/lt~obsolete.m4
- 	cp include/install-sh .
- 	aclocal -I m4
- 	autoheader
--- 
-2.54.0
-
+--D
