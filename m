@@ -1,56 +1,131 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB42A376A0D;
-	Fri, 25 Sep 2026 14:49:46 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 36B613AE1BC;
+	Fri, 25 Sep 2026 16:50:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790347788; cv=none; b=iELncGY8Klrte4uAPq8JzOoZQtkr2vPnFw0E142ORSvPXIs5FGCMUqesSW19w4hnPaE88zHhUFLh+ESN0xU91vTQ8lMw3OTZrKBruAYWb2c0Uyk49KYaJf37HPLgDBIE0RXeqvkNUi8M2osOUe/9W3eQRG4/cKx42MuM4E6qzu4=
+	t=1790355055; cv=none; b=OMvmBrzve+fUpl0vbfz7vO3MgfDkOCmMUGag0AjSpvixCDKD/pPkZnPJ/VrQJP9TAbFcrfehLnPa68RDHi5Tos7JbXYRG2odUDj76iip2aLZkGC4sno19oVgymKiKZtDVrqpX+vmRV14mB/g7p55jsM0AK/L8Nmu/SCCH3kMhlo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790347788; c=relaxed/simple;
-	bh=a3R1OhS54AAEPr5eBSMSeAzCNr0p77mW1cVE++7Chbg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=lvG8GZYvE69jWdnMA6ztwwmFXlutETKQqyECuJpGS089UYkcFu7oHQXOnUK5KS+i81lV/SFEnVVTHjM5pb82/UbgKy6MgYgpcNzeUsN/YjXT4X7S+KZU18V94Cd/pUXwSXPGTEZvHE9pcrlqwJsOK58PLoa8L7nG7LLZ7ah+dl4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jG0V+PnC; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1790355055; c=relaxed/simple;
+	bh=qGw/ns8BKlqeazX6UsFC0P0FZM2PdsV85GaHr/D2hOc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=EFR/2wY/+RjNhNVr5QGeda4yUUbw/qHR7wCitzA2VQCIZGxU870cm6j/BYGrx+YawezBWTEe4n4I66oCjrFWIPyUx+TGj+KYmyZ9CagbQD/3JkVuIyH/X3w81RDSqOa9tn7OlWVswHmOe9PqRIBnjn5kfAtScpsLZy1mGkIxzsU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UxuHXBCK; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jG0V+PnC"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 385DD1F000FF;
-	Fri, 25 Sep 2026 14:49:46 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UxuHXBCK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 640CB1F00893;
+	Fri, 25 Sep 2026 16:50:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790347786;
-	bh=a3R1OhS54AAEPr5eBSMSeAzCNr0p77mW1cVE++7Chbg=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=jG0V+PnC7CAb8eJoq3y/yLH4MpFo0d5f7hLd1vCXn8G8m1EkoHv2lwWrzd1buBU0v
-	 xnLJT3LAM94Fx9NAWh41sXgmLUNxbi3GMa8wFWVI01YigL/KINy38RZq0kdjaKdGcF
-	 P/EFnLKOwCURjYjOqXgQsS8nQEnQHKvaQDzsXTlJX/ekHqKQ9BN20jQ+joQLbv6Tp2
-	 N3ozxeTh6L4GUQyhee7uF1V/5UQTLNV2xruX33a522G4jwc5veGphH0b9pl/7CsAax
-	 nac6xg+0iDhHS+/5hevJBuJ6v08hRZLaPr4YBShSFQzcKfTafJmCHgGJMGqEqekUcB
-	 CGR35BVAmt6aQ==
-Date: Fri, 25 Sep 2026 07:49:45 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests <fstests@vger.kernel.org>,
-	xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] generic/805: skip this test if we can't mount the
- filesystem
-Message-ID: <20260925144945.GN2705364@frogsfrogsfrogs>
-References: <20260924060245.GE6253@frogsfrogsfrogs>
- <arX_YZb_Gmxrx3zb@infradead.org>
+	s=k20260515; t=1790355051;
+	bh=+ocbp023lvvpBmAsueB+RooN2GIs+B7oKo5b+YLp+jA=;
+	h=From:To:Cc:Subject:Date;
+	b=UxuHXBCK1PXO0xYCD1hqP/jwl8A9IPm2ujmCw9deDPB+aDERW8K6wN7kTMYLxdAc4
+	 g1/MQdG7frAW26wh95YgV5Ewz4YV63Y7KAQowGGJ+7tTcAY32u42O5Bi1BeEh3oK/2
+	 ZLPZynXHtyie0yqN5KoR3uyU1SC3p6nAcgITO4OeTDauolQSKzTUz7qHiekqqs6owb
+	 jDdONpDhgzq5cbVppu8TNCKB2zCwXONlkO5m8H6j1IC30M0j7kh6Wl0R+eqLjMUEce
+	 1hVdAjsUYMweTjRWDN+//QprOkOVoBsbz+4xHhgFFAr5PxNc4RZB9hq+G+YZg5Thb1
+	 IeSrgV5phltIA==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic: test replacing a xattr with a larger value
+Date: Fri, 25 Sep 2026 17:50:46 +0100
+Message-ID: <8916aea263bc59af6cfb1accacc2eaf78aaffe89.1790354960.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <arX_YZb_Gmxrx3zb@infradead.org>
+Content-Transfer-Encoding: 8bit
 
-On Thu, Sep 24, 2026 at 09:58:09PM -0700, Christoph Hellwig wrote:
-> I think my version of this is better - we really should never
-> use the scratch helpers unless using a real scratch fs.
+From: Filipe Manana <fdmanana@suse.com>
 
-<nod> I think your patch works too, though if we can't _mkfs the
-synthesized device then there's no point in continuing the test.
+Test that replacing a xattr's value with a larger value works. This is a
+test that exercises a specific scenario on btrfs where two xattrs are
+stored in the same item, and for that to happen their names must result
+in the same crc32c hash.
 
---D
+This was recently fixed by the following patch:
+
+  "btrfs: fix xattr replace when multiple xattrs are packed in the same item"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/806     | 43 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/806.out | 11 +++++++++++
+ 2 files changed, 54 insertions(+)
+ create mode 100755 tests/generic/806
+ create mode 100644 tests/generic/806.out
+
+diff --git a/tests/generic/806 b/tests/generic/806
+new file mode 100755
+index 00000000..6d74f445
+--- /dev/null
++++ b/tests/generic/806
+@@ -0,0 +1,43 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
++#
++# FS QA Test 806
++#
++# Test replacing a xattr's value with a larger value.
++#
++. ./common/preamble
++_begin_fstest auto quick metadata attr
++
++. ./common/filter
++. ./common/attr
++
++_require_scratch
++_require_attrs
++
++fixed_by_fs_commit btrfs xxxxxxxxxxxx \
++   "btrfs: fix xattr replace when multiple xattrs are packed in the same item"
++
++_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
++_scratch_mount
++
++touch $SCRATCH_MNT/testfile
++
++# Add two xattrs that, on btrfs, have the same hash (crc32c) for their name
++# and therefore are packed into the same btrfs_dir_item.
++$SETFATTR_PROG -n user.foobar -v 123 $SCRATCH_MNT/testfile
++$SETFATTR_PROG -n user.WvG1c1Td -v qwerty $SCRATCH_MNT/testfile
++
++# Verify the xattrs are present.
++echo "xattrs before:"
++_getfattr --absolute-names --dump $SCRATCH_MNT/testfile | _filter_scratch
++
++# Now replace the value of the foobar xattr with a significantly larger value.
++$SETFATTR_PROG -n user.foobar -v abcdefghijklmnopqrstuvwxyz $SCRATCH_MNT/testfile
++
++# Check the xattrs have the expected values.
++echo "xattrs after:"
++_getfattr --absolute-names --dump $SCRATCH_MNT/testfile | _filter_scratch
++
++# success, all done
++_exit 0
+diff --git a/tests/generic/806.out b/tests/generic/806.out
+new file mode 100644
+index 00000000..620a953e
+--- /dev/null
++++ b/tests/generic/806.out
+@@ -0,0 +1,11 @@
++QA output created by 806
++xattrs before:
++# file: SCRATCH_MNT/testfile
++user.WvG1c1Td="qwerty"
++user.foobar="123"
++
++xattrs after:
++# file: SCRATCH_MNT/testfile
++user.WvG1c1Td="qwerty"
++user.foobar="abcdefghijklmnopqrstuvwxyz"
++
+-- 
+2.47.2
+
