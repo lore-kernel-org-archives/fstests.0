@@ -1,41 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6040D38F642
-	for <fstests@vger.kernel.org>; Fri, 25 Sep 2026 20:03:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 610ED3DE431
+	for <fstests@vger.kernel.org>; Fri, 25 Sep 2026 20:04:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790366625; cv=none; b=lOcc9YNvVk1+7KD6Lzv+c+Y8nUbX397YmM3w3QY95oiJ5I188bgrBQ+AWbFAH0uaWGBvtf68acELDLVEDxZRJA2siO3CQ/yEu/jBEWTaMvAx3m2beOSkK+NCVmPWLeJ8AiH3zdlVsCVVBQrRusn8GoqIBfMYyL9rDTvpdghqsdI=
+	t=1790366652; cv=none; b=Z+aiu2XChP7Ucw/4m0lvR6w16WEBcn0QIY7rLa09GxvsHYHDtoFBm9BJMJB5riAM/Z3dYMZRgqsdHXth1u49JBWOTcQ/VTcEbii8bw7xom8Td2BeQWc2BMH3CekgfJJd7zwazgAVu96nw1lVxM9Xh7BStJUn0fAkTJh7IjbXMYo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790366625; c=relaxed/simple;
-	bh=FDxXoC0HxRB/EME1oDBALmd0Rvwcay5FVJY/bRBUZa4=;
+	s=arc-20240116; t=1790366652; c=relaxed/simple;
+	bh=LOYMJdW+MJL0lU0PrfizpdK5Inti62YunMTTwn7R4XY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gk2el+g6BFN0w2OAqSfUk+vG1w19zTW7/9ZDUmr2fJ8syM2ypuPKnLXSlKGHMjghE9BXLDK0vpa85E8YggqIGOhIG47L1YMjphH8RjtaXT8WmFIeOX+TPsOE3ABvgSrWIavfs2bMmB2sla4iwPqgHgyL5CIb9EIJQXiacTWAJ68=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RVlIlBr2; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=rBfG/VPMEUASWUcqCE6JzxQp5usceRW2MXARXZcA3Jj92Lw12H1ozAqgEvOJjAAIVp7sd/aHfS7w6mNEbS536emXKSdcGfUGycQukd9rOIs13PA4++bOZckffjoGheq0UzwVGeCRBcKz50AYURkTuymi6zIJ/KbR99+Lh0MeAGU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SJZmgxDD; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RVlIlBr2"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 2F9D81F000FF;
-	Fri, 25 Sep 2026 20:03:44 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SJZmgxDD"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id E136B1F00893;
+	Fri, 25 Sep 2026 20:04:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790366624;
-	bh=e9PrfueXgQ2qtAjngCLPlwTcYz3gqBh5hRUZ1ICZ5X8=;
+	s=k20260515; t=1790366651;
+	bh=i7cpcYeSRdu9swp/BRIXXnkNypfx/bhmVrZOHVQqtq0=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=RVlIlBr2kO6JiA1RkjP37Re9bCACFWBAJy/0CMQ5a8P6bi97U7UTL8E2WT+FRIHHf
-	 Im2r+s3lGtxeoE/olnRcreOCosVF3sYgOco4E+ERyVIYvvzfm+NarwcD/99IqYpgik
-	 XaAg8OFbtPliCFod8oNq9HRC3bPG0OrIUvUFkg6Dh35HbhSJ8VGJBCIvEk9OdaHHbz
-	 wOjqMr6/7/XK80n3hNV3/uCERoU3yoYjS3BJvhzvmuMnGNH3spWGknCgHns0m9LYp+
-	 j9cUo9ZrTYArWo+XB4CsTt4PSJ/ga4OcgFGhoMcHcCZe2NgJJqtOcQjKxJLqFOzlmk
-	 i0tvbsUqMUcrw==
-Date: Fri, 25 Sep 2026 13:03:43 -0700
+	b=SJZmgxDD1j50BmTS5n3mokdnSYyTBqHziBf5kktEDyDADScNIcOiizBhmhYtexDIk
+	 qgAH7BJi6qS2cGklS/J27436AsDedDn2W83ofZSl1h7AJRHdji3WpB64AUTdNYxbfl
+	 eP/pEA50T57Kf2hQGB5wVkMHTmmIuBALZwW6kuYfffrFFggfoRR+gwZPT+EjjF4qMt
+	 fu8cipCnABuCdUuITIKyyNabfrRQPRx41XZhpxbMA2Zejm8B4V8B5ARurDApl7Tdcz
+	 7yZsmMcsIGVsMd8G3JcELo7y5XRkXbFAC4d+U/RGwGrzZTC68l8MCFnG6bT91H/7GI
+	 W5NV+QFoPTdng==
+Date: Fri, 25 Sep 2026 13:04:10 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: Andrey Albershteyn <aalbersh@kernel.org>
 Cc: fstests@vger.kernel.org, zlang@kernel.org,
 	Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH v3 1/4] xfs/071: use _link_out_link instead of opencoding
- file picking
-Message-ID: <20260925200343.GM6253@frogsfrogsfrogs>
+Subject: Re: [PATCH v3 2/4] common: link .out file to the output directory
+Message-ID: <20260925200410.GN6253@frogsfrogsfrogs>
 References: <20260925104514.664260-1-aalbersh@kernel.org>
- <20260925104514.664260-2-aalbersh@kernel.org>
+ <20260925104514.664260-3-aalbersh@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,66 +43,92 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260925104514.664260-2-aalbersh@kernel.org>
+In-Reply-To: <20260925104514.664260-3-aalbersh@kernel.org>
 
-On Fri, Sep 25, 2026 at 12:45:09PM +0200, Andrey Albershteyn wrote:
-> There's function which handles picking the right output file based on
-> the .cfg.
+On Fri, Sep 25, 2026 at 12:45:10PM +0200, Andrey Albershteyn wrote:
+> On immutable systems with read-only system packages, 'ln' will fail to
+> link .out files into system xfstests root directory. Fix this by linking
+> golden output file to the results output directory as a .out.good.
 > 
 > Reviewed-by: Christoph Hellwig <hch@lst.de>
 > Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
 
-Looks ok,
+Looks good, thanks for fixing the diff instructions.
 Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
 --D
 
 > ---
->  tests/xfs/071                             | 7 +++----
->  tests/xfs/071.cfg                         | 1 +
->  tests/xfs/{071.out.64 => 071.out.default} | 0
->  3 files changed, 4 insertions(+), 4 deletions(-)
->  create mode 100644 tests/xfs/071.cfg
->  rename tests/xfs/{071.out.64 => 071.out.default} (100%)
+>  check     | 14 +++++++++-----
+>  common/rc |  4 ++--
+>  2 files changed, 11 insertions(+), 7 deletions(-)
 > 
-> diff --git a/tests/xfs/071 b/tests/xfs/071
-> index c4722f67181a..47874e505c01 100755
-> --- a/tests/xfs/071
-> +++ b/tests/xfs/071
-> @@ -5,7 +5,6 @@
->  # FS QA Test No. 071
->  #
->  # Exercise IO at large file offsets.
-> -seqfull=$0
->  . ./common/preamble
->  _begin_fstest rw auto
+> diff --git a/check b/check
+> index bca302151955..534c2cdf7a06 100755
+> --- a/check
+> +++ b/check
+> @@ -1050,7 +1050,7 @@ function run_section()
+>  		mkdir -p $RESULT_DIR
+>  		rm -f ${RESULT_DIR}/require_scratch*
+>  		rm -f ${RESULT_DIR}/require_test*
+> -		rm -f $seqres.out.bad $seqres.hints
+> +		rm -f $seqres.out.bad $seqres.hints $seqres.out.good
 >  
-> @@ -22,11 +21,11 @@ _cleanup()
+>  		# check if we really should run it
+>  		if _expunge_test $seqnum; then
+> @@ -1181,7 +1181,11 @@ function run_section()
+>  		$timestamp && _timestamp
+>  		stop=`_wallclock`
 >  
->  bitsperlong=`$here/src/feature -w`
->  # link correct .out file
-> -rm -f $seqfull.out
-> +seqfull=$0
->  if [ "$bitsperlong" -eq 32 ]; then
-> -	ln -s $seq.out.32 $seqfull.out
-> +	_link_out_file "32"
->  else
-> -	ln -s $seq.out.64 $seqfull.out
-> +	_link_out_file ""
->  fi
+> -		if [ ! -f $seq.out ]; then
+> +		local out=$here/$seq.out
+> +		if [ -f $seqres.out.good ]; then
+> +			out=$seqres.out.good
+> +		fi
+> +		if [ ! -f $out ]; then
+>  			_dump_err "no qualified output"
+>  			tc_status="fail"
+>  			rm -f "$seqres.mountfail?"
+> @@ -1193,7 +1197,7 @@ function run_section()
+>  		# from `foo' to 'foo'. Filter old versions to match the new
+>  		# version.
+>  		sed -i "s/\`/\'/g" $tmp.out
+> -		if diff $seq.out $tmp.out >/dev/null 2>&1 ; then
+> +		if diff $out $tmp.out >/dev/null 2>&1 ; then
+>  			if [ "$tc_status" != "fail" ]; then
+>  				echo "$seqnum `expr $stop - $start`" >>$tmp.time
+>  				echo -n " `expr $stop - $start`s"
+> @@ -1202,13 +1206,13 @@ function run_section()
+>  		else
+>  			_dump_err "- output mismatch (see $seqres.out.bad)"
+>  			mv $tmp.out $seqres.out.bad
+> -			$diff $seq.out $seqres.out.bad | {
+> +			$diff $out $seqres.out.bad | {
+>  			if test "$DIFF_LENGTH" -le 0; then
+>  				cat
+>  			else
+>  				head -n "$DIFF_LENGTH"
+>  				echo "..."
+> -				echo "(Run '$diff $here/$seq.out $seqres.out.bad'" \
+> +				echo "(Run '$diff $out $seqres.out.bad'" \
+>  					" to see the entire diff)"
+>  			fi; } | sed -e 's/^\(.\)/    \1/'
+>  			tc_status="fail"
+> diff --git a/common/rc b/common/rc
+> index 3958ac934980..1eccd60c0bc0 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3907,8 +3907,8 @@ _link_out_file_named()
+>  		print $result
+>  		' <$seqfull.cfg)
+>  	rm -f $1 || _fail "_link_out_file_named: failed to remove existing output file"
+> -	ln -fs $(basename $1).$suffix $1 || _fail "$(basename $1).$suffix: could not setup output file"
+> -	test -r $1 || _fail "$(basename $1).$suffix: output file for feature set \"$2\" not found"
+> +	ln -fs $(realpath $1).$suffix $seqres.out.good || _fail "$(basename $1).$suffix: could not setup output file"
+> +	test -r $seqres.out.good || _fail "$(basename $1).$suffix: output file for feature set \"$2\" not found"
+>  }
 >  
->  _filter_io()
-> diff --git a/tests/xfs/071.cfg b/tests/xfs/071.cfg
-> new file mode 100644
-> index 000000000000..e806b07bc08b
-> --- /dev/null
-> +++ b/tests/xfs/071.cfg
-> @@ -0,0 +1 @@
-> +32: 32
-> diff --git a/tests/xfs/071.out.64 b/tests/xfs/071.out.default
-> similarity index 100%
-> rename from tests/xfs/071.out.64
-> rename to tests/xfs/071.out.default
+>  _link_out_file()
 > -- 
 > 2.54.0
 > 
