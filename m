@@ -1,50 +1,112 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej2-f43.google.com (mail-ej2-f43.google.com [74.125.228.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 732C91DED42;
-	Fri, 25 Sep 2026 20:05:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 98248361973
+	for <fstests@vger.kernel.org>; Sat, 26 Sep 2026 05:58:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.228.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790366759; cv=none; b=dpSqZZKEQtsnrIThHPS7g3KP9X7+WIW658QAD2nxwSME2n+jDC6lONNOTB5HpE4bi1UpZd4uv1c5630P2ahNzP7g7YXg4YTyfVv+h+ViH2WuJd/dOh657dv4rTob2ec+SGXyO15ZwgFM0EDKEcp2qVGmnGC7NUBZ5bsyCAPP16s=
+	t=1790402330; cv=none; b=Vlzudq2Xb6BczKKauhKJa5uuCLBxTOtGYPiaKo9N408Y54w/h4wu9/l/fE/QJ+Z5avgHnDC9924siKjAOs1RaV78Mrw4iZB7gQALzAPx6j5zGV2ja5sfkcYsl6GG0ss8ivHhaZMkUSSfLhPJROmSUnEi1Q2wxkPKfHVW2/tQuts=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790366759; c=relaxed/simple;
-	bh=l3ThGiJMgb9rhho1E3w4d7JnOgAw3D/u44OfMM7zZkM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=UxB/iQ68BVf53wlQlxLmPmLWB3X0LLVKie7ioE0vNpgCridccGuIB9f+yov9n713CY2lN/m9J/AydlYV7Vtlqmtywlq7XUxPrHpinOvKz8U7LUtff5F4j3a07U51W/mNbea8QEqX+8b+RhqFJm5k76FoPyFNyr3keVbQYCeSqxY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cWYZEVPP; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1790402330; c=relaxed/simple;
+	bh=B7ZZi1+CkoYMDPVqiu77qo4+K9oTgZr7dOowfG+dB1E=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=PntV6C5HffnuUG+583P1GrYVhWfqJ/AD5WJCCx4BsBYVclLMm2ib/1NbfPAQ/8WXvSgEjTcvak6xpg9zgLL7l1HS0FK86kKnzeDKPDNqjHlO6n6o7arW1XQiMePDwaJyJK6PtxryVA6IgQpoN/wWNsrjhe/i3lCg9WBbihb4Xmk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=gxkxg/PT; arc=none smtp.client-ip=74.125.228.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cWYZEVPP"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 135FE1F000FF;
-	Fri, 25 Sep 2026 20:05:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790366758;
-	bh=fp0fe0FsrKQjjUZo12CazaHcaNLawPYrmwzj2EW6jsk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=cWYZEVPPSijyH/82gHfO7Rua92G4qyWpQrj8amr+cjrpVzjyZlhUap6SdwUOgXMpJ
-	 rEH1/tUZuTmZsjp1ss1ne3cxno1LMhuHruZJ4jEantwp7R86hIogkrca/XuT5U8VJX
-	 MGZfz63OPX7BWc7wHQhN/efWhO4syfKex4asquzq6X6rMwORsF745h8cSO7SV7dRmx
-	 +p8C3+chBqgEKxiMHQ/q7uSMjA8U5ff2VgShokcK9FlvCbnwoXp6WjtOtj7vWGfnpd
-	 uiFuNT/gp3zB4nZbwmGuKhZvHmMyPn984sLtfzzYMCT3pp1X7GGUsqdPE+WFb+UAuI
-	 2IwaRIFNvygBw==
-Date: Fri, 25 Sep 2026 13:05:57 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v2] generic: test replacing a xattr with a larger value
-Message-ID: <20260925200557.GP6253@frogsfrogsfrogs>
-References: <8916aea263bc59af6cfb1accacc2eaf78aaffe89.1790354960.git.fdmanana@suse.com>
- <7d2caec7b8ecd95ad63fcbbc7e1cc1c84ee50d7f.1790356355.git.fdmanana@suse.com>
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="gxkxg/PT"
+Received: by mail-ej2-f43.google.com with SMTP id a640c23a62f3a-c2af3701927so172416766b.3
+        for <fstests@vger.kernel.org>; Fri, 25 Sep 2026 22:58:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1790402327; x=1791007127; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=eRoOKu7wWDUfVEc6t+RlTgBMVjPXjuwtLo+K2bN36aA=;
+        b=gxkxg/PTkFDBHDVmJgJ0sIUOm6XS1V15sMeH9FJ6ChujSyFpNJlB4fCB7jvkQH2ilm
+         ZVxKblRphRXcD+Uyoc93GTw0JxoioxhHxPAeEgRAccZILhXsoFeK7AbgQXNvV+I80BWL
+         5B0wWAbrJzi8fTRhbNWQDkknXTeJUD3LlR7i1S4dqOgAwHzckcHZSSvLo8hAH7rI/9Ms
+         oN3eC/YpHh7ZG+MZmmymaQnz4Zmke6P3MQGJvwm9GBekPpMG5mccd+O0y7jTYgf1CLJ9
+         z2Extg08iyWFGyhILn+kMYWjwBNL/9YdFJvIYtrFXcv7oupFxATC1txWYIqlWhX6JoPL
+         HaXw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1790402327; x=1791007127;
+        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=eRoOKu7wWDUfVEc6t+RlTgBMVjPXjuwtLo+K2bN36aA=;
+        b=WyzLJ80L5K3M9XeL/UC0HXnQI0SxQSR7UqPCetmReYiy8mLKRm8kjEx6hwS3X6Uiti
+         +bzpIj0a2QM46i7nc80yJD5Y33xiyTSWT+93kpcrjHk/OkQVgjHaPnmJEVSv43/MgH3R
+         mKDahP3uuu1xpTLyCV+y1tXcUiayRogX5+uPUCrOl1U4hwsUSrPmfk3S7oF2cOJDH/1B
+         boCS6kyTD2EW+r8arm7SdgschIP0+1PTxTVPbB7HgB26qmKIOHeWIUzHAjQZvIgPCtVG
+         6NCejhAazJdGS/0UZUpd7JcpVoSnWU/XHf9esdUnjzJnc/oCHuTfYwW/WD95ZZeyrj6I
+         xM2g==
+X-Forwarded-Encrypted: i=1; AKwUvByYkaMcE9PxTUXxX1f4pIaX0pbbuUwCqf7s6wGKiSwbqEYfH8exOONv02qpCdwCKjQ3TBwB7XP1@vger.kernel.org
+X-Gm-Message-State: AFuF++nwIDQeAF3BNXO5SWlEjyYLrUFF/y+xfbAOOx3m5DudpozLHsqJ
+	3Jd3bD1R0Yh509V7Vex+IyQudaw07eubl8B4O4y5NTVyQLbAP6xbKmCD6YzgLbK5dfo=
+X-Gm-Gg: AYBFou0cBMBR371Rw14kx4i6SEH3sjTcxEhanPNIrWV7X5VLYZZZACo/7IUf2t7ZWqH
+	PjA5VD1U/3VcpbjfBQEhnHeUDNvq8sqQqeJFdSfFy/1AJ99NF0QvHbvm3RzzFeQDoi30wjQRfOE
+	xysdaRVv9EEqYW6xIC78ikG/Yw8rXSUXGNduf+R8nJ0UqiVSxl7ppwM2uYguwT9kzDtB2r/5lRt
+	3AzAjv8sxrCJzmRaUaJZDgaCcxgnsLnQo8P2fLjna3Hv6XUo9600BxwYDxbt94ufJJp/7/Zkc6f
+	lHQBz5+cJP079wT9Veycbx9DcSY9ItNYL4QkwCIcNdMr6o+B4wrioHlBaCccGSs1RI6Kuhsfm5I
+	TZj6I6YMAl7h11T20WunJrZitsnhtuyJ7ygJptRBey1Vw+i1Q+MQyVqfBqpS4jZjeR96CwXXiKA
+	pd4J6+XBV3dbRJwz9jtUWIYSx0nE9lyTxROobtzbotuYLa1aMxs6P/MyWtY5/Qrqh/DhOA8ntA
+X-Received: by 2002:a17:907:9346:b0:c29:f5d8:9c80 with SMTP id a640c23a62f3a-c2ac22d5a02mr679182266b.47.1790402326784;
+        Fri, 25 Sep 2026 22:58:46 -0700 (PDT)
+Received: from [10.86.128.19] ([149.22.87.44])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3a0b998dbf2sm8161692a91.12.2026.09.25.22.58.43
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 25 Sep 2026 22:58:45 -0700 (PDT)
+Message-ID: <a76bf043-e379-4e7a-883b-cd2bfc1a5c05@suse.com>
+Date: Sat, 26 Sep 2026 15:28:40 +0930
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2] generic: test replacing a xattr with a larger value
+To: fdmanana@kernel.org, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
+References: <8916aea263bc59af6cfb1accacc2eaf78aaffe89.1790354960.git.fdmanana@suse.com>
+ <7d2caec7b8ecd95ad63fcbbc7e1cc1c84ee50d7f.1790356355.git.fdmanana@suse.com>
+Content-Language: en-US
+From: Qu Wenruo <wqu@suse.com>
+Autocrypt: addr=wqu@suse.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
+ FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJqqw0NBQkUl/JeAAoJEMI9kfOh
+ Jf6o/xYH/3AaWnGSq58XnY/T3/YYjr6g+TUZxa7MPyiYTELNpNlvmNlbtbAL0nW0LNvkeiqf
+ SmYA+xkwY4RbxnZYQK0H5iv2w1eqa9qqFZb4bIBRmTapu26GEEkpad0W0ZhoSPMO8bV2Bwkf
+ YdtPZQLaeUKvHZqNqBKnmtRLQj2Cgy3kuXX3bEGvWjzUOxPUSCj/S++JWBewMdMBPT62vZM0
+ 3156gfn5mHA94s2p+NFJoWkERY+JPTMu9NISkpD7yuGhXN88qd/aqD0RrlhxvKsrQogdPwn9
+ vP18FGG3CRlHtOvOLVoY5NKSOWTDc+o+8t2XEETFTGbKYTcqeTzi4SxhvBLtTinOwE0EWdWB
+ rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
+ Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
+ E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
+ vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
+ g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
+ AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
+ cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
+ qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
+ /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
+ o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
+ JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
 In-Reply-To: <7d2caec7b8ecd95ad63fcbbc7e1cc1c84ee50d7f.1790356355.git.fdmanana@suse.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On Fri, Sep 25, 2026 at 06:16:36PM +0100, fdmanana@kernel.org wrote:
+
+
+在 2026/9/26 02:46, fdmanana@kernel.org 写道:
 > From: Filipe Manana <fdmanana@suse.com>
 > 
 > Test that replacing a xattr's value with a larger value works. This is a
@@ -54,17 +116,27 @@ On Fri, Sep 25, 2026 at 06:16:36PM +0100, fdmanana@kernel.org wrote:
 > 
 > This was recently fixed by the following patch:
 > 
->   "btrfs: fix xattr replace when multiple xattrs are packed in the same item"
+>    "btrfs: fix xattr replace when multiple xattrs are packed in the same item"
 > 
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+
+Missing the "---" line, which makes b4 include the digest and changelog.
+
+Otherwise looks good to me.
+
+Reviewed-by: Qu Wenruo <wqu@suse.com>
+
+Thanks,
+Qu
+
 > 
 > V2: Fix missing _ on _fixed_by_fs_commit call.
 > 
->  tests/generic/806     | 43 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/806.out | 11 +++++++++++
->  2 files changed, 54 insertions(+)
->  create mode 100755 tests/generic/806
->  create mode 100644 tests/generic/806.out
+>   tests/generic/806     | 43 +++++++++++++++++++++++++++++++++++++++++++
+>   tests/generic/806.out | 11 +++++++++++
+>   2 files changed, 54 insertions(+)
+>   create mode 100755 tests/generic/806
+>   create mode 100644 tests/generic/806.out
 > 
 > diff --git a/tests/generic/806 b/tests/generic/806
 > new file mode 100755
@@ -101,12 +173,6 @@ On Fri, Sep 25, 2026 at 06:16:36PM +0100, fdmanana@kernel.org wrote:
 > +# and therefore are packed into the same btrfs_dir_item.
 > +$SETFATTR_PROG -n user.foobar -v 123 $SCRATCH_MNT/testfile
 > +$SETFATTR_PROG -n user.WvG1c1Td -v qwerty $SCRATCH_MNT/testfile
-
-Heh, glad there's a test for this sort of collision thing. :)
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
-
---D
-
 > +
 > +# Verify the xattrs are present.
 > +echo "xattrs before:"
@@ -138,7 +204,4 @@ Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 > +user.WvG1c1Td="qwerty"
 > +user.foobar="abcdefghijklmnopqrstuvwxyz"
 > +
-> -- 
-> 2.47.2
-> 
-> 
+
