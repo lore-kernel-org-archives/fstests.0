@@ -1,165 +1,87 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6C6137DE8D;
-	Sun, 27 Sep 2026 11:44:09 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5E4A2E2663
+	for <fstests@vger.kernel.org>; Sun, 27 Sep 2026 11:50:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790509451; cv=none; b=ixuC7R4OeFYNK386yZD56Mdczj5wmPqHEOlnB7r45zovtLAH3YRy5ZktT248KcfgUPKAKIHozYdOhdD7as9nkrN3h57uAn14lHKfRZOlcZldsPOA8SVBOJOTt57ilhAb1C9OK5GXxqbXD7cpv2/NPvnLwuBKJvvfC3Vm+V/6vdg=
+	t=1790509823; cv=none; b=IfJHhzf+2RNyU9k3w4rQF4kT9oNrqZ4xk92KcjXauyPxmShTy1agbZ1moX3PL+tMcrwsb+B88vdRDeAfwD5sry3JjJSLGm6T1M7F/kKS6LNokn8tg+wisqOBt0wZgRsW5EH7ommPZK3s+01DKOz1Y0QBZRbUwzjeJnFxO4xkwYI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790509451; c=relaxed/simple;
-	bh=grUnnrpmj7P9ZpajDjsdApm2vvg4P64KbcC5aWOOfwE=;
+	s=arc-20240116; t=1790509823; c=relaxed/simple;
+	bh=GMrGwF3fHYGSdPg/z8YiD76NQQvSFGUjfdziE91SRKc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=iCEtF4u9qMl8W1Pm1sBvJtZqc+pNNNzH1jnpn9ehSfRX/y+mndM1zPBRfJa+DIFc7wgeT0dYm7BodDiRtz+Nbgh+gCrXByBO9LQYA16fDQDdqFCPAH7mpHGMRhGOSijWzWO1GDSrSkGJMstz0VT6plzvRGbCy1LrgsmVYuGXy78=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=flh7eVne; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=EWeLMWCuLxz6L7QtNXluVFKuMDnVNjRuUXsV96VIWpQ7boHUzWOdZF9pHD9Ucbg7fI11+70tiRelKt4k+X5XNtXmKHXVD+NCfW9BcOKCu8bogPoRdk+xej17WtsYN5pcfbSpYywU9YywsCPAelUeDdirt7mp9c64Gwa3Jtslc0w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=C5qHIj/1; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="flh7eVne"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C98B41F000FF;
-	Sun, 27 Sep 2026 11:44:06 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="C5qHIj/1"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5623C1F000FF;
+	Sun, 27 Sep 2026 11:50:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790509449;
-	bh=PVsqUaDCBkcMKFA40RfomO9m0tbOmNe96AwQlkrcTtQ=;
+	s=k20260515; t=1790509822;
+	bh=1pRw3ovBfT7hJACOpx8nZVxK/0/d6YiuXDeIJw9552w=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=flh7eVnebxc79LLOSveyzXkyvyBULs0qiuZQwclNVi/Zt8aRx4qlpsfch2TTRtsFA
-	 BY+1/xD42ZD/dHKo+gtoQv79geH20Dbch4dI1NhCnA7MFO/WUne30BYmnWIdKjk3DP
-	 d5ZaZUdeZyLBEbqJ1sVDMl/Vz1IM1oPIrSRFz1cyF/p8XulDFVs+8t0mItJKl7DOcS
-	 lqmG2Lscev9sYyhm4+jbEM/2ZnuIsg5rfYT2qRLD7z8fTMi2w2OxNTmtWY0CB6Y8z1
-	 mZpxzB/A8F5YvGE5BvP7DhFkBpO0w4z48mCtZoqbo4eaeGeNCvE/DJGtbU9CMB4Ogh
-	 OhXa8FSsKdK8g==
-Date: Sun, 27 Sep 2026 19:44:02 +0800
+	b=C5qHIj/1lbkBHM3nKvZk5HhyRH6Cwm2met5es1JpIiBc/k9yKRoKJlQtFqkDUto33
+	 MTdVxAl5Dsg9Tskah87zDdIh8uxakYBg9h3v1XUmtLqxY2up996wfHWGf+MmOyRgNk
+	 u3u1re7g3+UmI7lJVrds06Th4CfTxOVT90eXrVKl+YKDxCpVW+67Qd/EofEINJKlQ3
+	 G5fpd0bgH/G6q2eB+KK9uaIUJZ9g72M61tUruri0bSuZBS64wlhIUBmSIpf56p05FR
+	 OFADyRzx0gtI1EXojN5isvq2ddM31ivI/uQmWBvCDZj+C9PfRVF5IZWHZqtPDtO5Rz
+	 9dXSamP5JmHvw==
+Date: Sun, 27 Sep 2026 19:50:18 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org, 
-	linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v2] generic: test replacing a xattr with a larger value
-Message-ID: <arkBaZIY8xt0iSgI@zlang-mailbox>
-Mail-Followup-To: Filipe Manana <fdmanana@kernel.org>, 
-	Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-References: <8916aea263bc59af6cfb1accacc2eaf78aaffe89.1790354960.git.fdmanana@suse.com>
- <7d2caec7b8ecd95ad63fcbbc7e1cc1c84ee50d7f.1790356355.git.fdmanana@suse.com>
- <a76bf043-e379-4e7a-883b-cd2bfc1a5c05@suse.com>
- <CAL3q7H6NE1VyYffJj5rdZGdmU2FQz5i_wv7oF8ZhQqRq8eOuXQ@mail.gmail.com>
+To: Andrey Albershteyn <aalbersh@kernel.org>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH v3 0/4] xfstests: random fixes
+Message-ID: <arkCzpcJlBYCU3yh@zlang-mailbox>
+Mail-Followup-To: Andrey Albershteyn <aalbersh@kernel.org>, 
+	fstests@vger.kernel.org
+References: <20260925104514.664260-1-aalbersh@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAL3q7H6NE1VyYffJj5rdZGdmU2FQz5i_wv7oF8ZhQqRq8eOuXQ@mail.gmail.com>
+In-Reply-To: <20260925104514.664260-1-aalbersh@kernel.org>
 
-On Sat, Sep 26, 2026 at 07:19:46PM +0100, Filipe Manana wrote:
-> On Sat, Sep 26, 2026 at 6:58 AM Qu Wenruo <wqu@suse.com> wrote:
-> >
-> >
-> >
-> > 在 2026/9/26 02:46, fdmanana@kernel.org 写道:
-> > > From: Filipe Manana <fdmanana@suse.com>
-> > >
-> > > Test that replacing a xattr's value with a larger value works. This is a
-> > > test that exercises a specific scenario on btrfs where two xattrs are
-> > > stored in the same item, and for that to happen their names must result
-> > > in the same crc32c hash.
-> > >
-> > > This was recently fixed by the following patch:
-> > >
-> > >    "btrfs: fix xattr replace when multiple xattrs are packed in the same item"
-> > >
-> > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> >
-> > Missing the "---" line, which makes b4 include the digest and changelog.
+On Fri, Sep 25, 2026 at 12:45:08PM +0200, Andrey Albershteyn wrote:
+> Hi folks,
 > 
-> Looks like I may have accidentally deleted it.
-> Maybe Zorro can add it when he picks the patch.
+> This series contain a few random fixes I apply for xfstests in my
+> immutable test machines. These make it easier to work with read-only
+> xfstests package.
+> 
+> Changes from v2:
+> - Remove .out.good before running the test
+> - Fix "diff ..." message for tests with .out.good
+> Changes from v1:
+> - Add RvB
+> - Add comment in generic/452
 
-Sure, done!
+Thanks, this patchset is good to me now. I'll merge it.
+
+Reviewed-by: Zorro Lang <zlang@kernel.org>
 
 > 
-> Thanks.
+> Andrey Albershteyn (4):
+>   xfs/071: use _link_out_link instead of opencoding file picking
+>   common: link .out file to the output directory
+>   generic/452: make coping work with multi-call binary
+>   xfstests: fix permissions on system file installed by libtoolize
 > 
-> >
-> > Otherwise looks good to me.
-> >
-> > Reviewed-by: Qu Wenruo <wqu@suse.com>
-> >
-> > Thanks,
-> > Qu
-> >
-> > >
-> > > V2: Fix missing _ on _fixed_by_fs_commit call.
-> > >
-> > >   tests/generic/806     | 43 +++++++++++++++++++++++++++++++++++++++++++
-> > >   tests/generic/806.out | 11 +++++++++++
-> > >   2 files changed, 54 insertions(+)
-> > >   create mode 100755 tests/generic/806
-> > >   create mode 100644 tests/generic/806.out
-> > >
-> > > diff --git a/tests/generic/806 b/tests/generic/806
-> > > new file mode 100755
-> > > index 00000000..1fcf0145
-> > > --- /dev/null
-> > > +++ b/tests/generic/806
-> > > @@ -0,0 +1,43 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test 806
-> > > +#
-> > > +# Test replacing a xattr's value with a larger value.
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick metadata attr
-> > > +
-> > > +. ./common/filter
-> > > +. ./common/attr
-> > > +
-> > > +_require_scratch
-> > > +_require_attrs
-> > > +
-> > > +_fixed_by_fs_commit btrfs xxxxxxxxxxxx \
-> > > +   "btrfs: fix xattr replace when multiple xattrs are packed in the same item"
-> > > +
-> > > +_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-> > > +_scratch_mount
-> > > +
-> > > +touch $SCRATCH_MNT/testfile
-> > > +
-> > > +# Add two xattrs that, on btrfs, have the same hash (crc32c) for their name
-> > > +# and therefore are packed into the same btrfs_dir_item.
-> > > +$SETFATTR_PROG -n user.foobar -v 123 $SCRATCH_MNT/testfile
-> > > +$SETFATTR_PROG -n user.WvG1c1Td -v qwerty $SCRATCH_MNT/testfile
-> > > +
-> > > +# Verify the xattrs are present.
-> > > +echo "xattrs before:"
-> > > +_getfattr --absolute-names --dump $SCRATCH_MNT/testfile | _filter_scratch
-> > > +
-> > > +# Now replace the value of the foobar xattr with a significantly larger value.
-> > > +$SETFATTR_PROG -n user.foobar -v abcdefghijklmnopqrstuvwxyz $SCRATCH_MNT/testfile
-> > > +
-> > > +# Check the xattrs have the expected values.
-> > > +echo "xattrs after:"
-> > > +_getfattr --absolute-names --dump $SCRATCH_MNT/testfile | _filter_scratch
-> > > +
-> > > +# success, all done
-> > > +_exit 0
-> > > diff --git a/tests/generic/806.out b/tests/generic/806.out
-> > > new file mode 100644
-> > > index 00000000..620a953e
-> > > --- /dev/null
-> > > +++ b/tests/generic/806.out
-> > > @@ -0,0 +1,11 @@
-> > > +QA output created by 806
-> > > +xattrs before:
-> > > +# file: SCRATCH_MNT/testfile
-> > > +user.WvG1c1Td="qwerty"
-> > > +user.foobar="123"
-> > > +
-> > > +xattrs after:
-> > > +# file: SCRATCH_MNT/testfile
-> > > +user.WvG1c1Td="qwerty"
-> > > +user.foobar="abcdefghijklmnopqrstuvwxyz"
-> > > +
-> >
+>  Makefile                                  |  3 +++
+>  check                                     | 14 +++++++++-----
+>  common/rc                                 |  4 ++--
+>  tests/generic/452                         |  7 +++++--
+>  tests/generic/452.out                     |  4 ++--
+>  tests/xfs/071                             |  7 +++----
+>  tests/xfs/071.cfg                         |  1 +
+>  tests/xfs/{071.out.64 => 071.out.default} |  0
+>  8 files changed, 25 insertions(+), 15 deletions(-)
+>  create mode 100644 tests/xfs/071.cfg
+>  rename tests/xfs/{071.out.64 => 071.out.default} (100%)
+> 
+> -- 
+> 2.54.0
+> 
