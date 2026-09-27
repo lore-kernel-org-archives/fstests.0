@@ -1,40 +1,44 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A13F2384CEE;
-	Sun, 27 Sep 2026 12:20:22 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 361B4379EF5;
+	Sun, 27 Sep 2026 15:06:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790511633; cv=none; b=l0rqL52dOIzXJ/dUTOG4ILzloYP7XzL/3X6Qb9RYAjEpq2orTfj6Qs2seBKQ5YHRQZZdD0ZlO1sVM/1JTYrqdJCjy1ybQSgQlNf/gBMiD8JARUEA1OPnGpSTEDbhpE1eav5AOCFZbIToDrtUhvKWC9odD17AoJvB15D8dh79anI=
+	t=1790521580; cv=none; b=jrrz2ZxKCtOuDva/lusdBiPYb/tQBelEgZNwuKjBc9ewhbZ0O4gGD1lQsQvjc/BS8v7hbtY8lbBTncgYkZqwBIyvu//wF1HkdUF1EigRwJQYyubRzKrVGnki/2GQ+ikF5Y/BMocT4kYlvv2tnXnlwz9gpMoZnjvy1H3VIVQhjEg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790511633; c=relaxed/simple;
-	bh=G/0V/tVdB+1vy6LhPLO5n/2OrJBu9NFwhz9OHan2Hrw=;
+	s=arc-20240116; t=1790521580; c=relaxed/simple;
+	bh=cehWBRom1egDZ/wQmrT68b2iHHIuhGD42Fxp6GPLbak=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=sFl2usUtKy8ZdL/E7tEPgphGa1q1ey8biTkEA4chzOlZi0ffSvljL0/cPegcZ22wLR9TCefu1NIPhrW7AeQT0CL5tO7niH7d9zMXcnZYor6/dNl/0In8Q8JEhwtIfqOHkWShm5w34E2WHmwcYcPJ2cv8s7/aKAbCxlsCotGTN3k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=caztystI; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=t5iu7Ml43A14aqS6WtXQZfZ+Istft+R54OH8XEVQvDXApSArHv3wT7KKNVMLezpHqOytLkne4gnW+sWc3WaM0EJ2drj5nqHHu2z8n0WXk5bmIFulZQQhqWob+/zbKUFspRg1y1asoldGPGz3Ok2FVvEwkZp9bSNK8KUedR+6Av0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ma1cAF5H; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="caztystI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DA3301F000FF;
-	Sun, 27 Sep 2026 12:20:16 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ma1cAF5H"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 01F201F000FF;
+	Sun, 27 Sep 2026 15:06:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790511618;
-	bh=27VfbBYrgETQGkFdL79NZbtbr3yqew4IO/tOyRnGkes=;
+	s=k20260515; t=1790521579;
+	bh=hRe0FLP4Z/GQs9oxTcORN2hCNFjQ7djxlHIhDcwiwKA=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=caztystILC3QgadFTMF9F17i4htyxDj/tcf3mMDLf1bA7+l2/8HKvahjv01DL9Wge
-	 gmPAtcFzHi3t4pwUHT1ffXPfn5B9M6zFvcq4xDObjKpuOvbfqRRNmFkx+lYa1ln+Gr
-	 5D0JoaqKAUw0W6LnN2n1AZEBvXeK820F179vSYyme1hiK2uCsP/xFkVtz2EhsaD8lb
-	 e6UcAK1bvJGbbR7sim2JvgxOgkIXg2+1vNJDD+oDgnm6HdqV7aWaILoDYhOyjG4Cul
-	 ZEtteKuAKVTub/+yJq6qfHXjMp8nZhHiLKezXtAOnWQM0Vd0+4nCz4WirbtSy/Nc/s
-	 K/ZQNgaOICnCQ==
-Date: Sun, 27 Sep 2026 20:20:12 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: djwong@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs: test libxfs handling of missing RT devices
-Message-ID: <arkF56Qtd-kQS9jH@zlang-mailbox>
-Mail-Followup-To: Christoph Hellwig <hch@lst.de>, djwong@kernel.org, 
-	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-References: <20260925051519.3002168-1-hch@lst.de>
+	b=ma1cAF5HNGtcWmhf6z1+cEN3WONC9jYnw2/c46P6f3McV5+RPy+sI7zQ0pOkco8iy
+	 QcUOWdKmBgcEnKBNdPjDP5k/iVEPhdPKwReKmwlx32PDdpaCM9CGVUdiF7bwhrB+uf
+	 +804YkhJhf9NPEkvtlPSPLk909iUPr+Jlseq/RYF7frwr/WL8uLmmqnYbaymb2B7o5
+	 SHL37NA71QxgIy/RSkB/sgfOso9KbEZ+JRkJRnFiVAGiTGZBO6u/39ZFalLDABtNuH
+	 0pII3eFMT2yx2vZ+LbKVPG0xyNHEhGGK/TYfbZfSPZehdOrBOH6SOMlwyl1LG/Capr
+	 fiSW1zS/+0BSw==
+Date: Sun, 27 Sep 2026 08:06:18 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Anand Suveer Jain <asj@kernel.org>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-f2fs-devel@lists.sourceforge.net, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH v8 13/13] fstests: test UUID consistency for clones with
+ metadata_uuid
+Message-ID: <20260927150618.GZ6253@frogsfrogsfrogs>
+References: <cover.1784949154.git.asj@kernel.org>
+ <905a961a3bb2ec345285f056053e3016ad3bef6e.1784949155.git.asj@kernel.org>
+ <apc5PMJFYtrUyG8U@zlang-mailbox>
+ <ea5b61d4-0cba-4afc-b5e0-8720d4717872@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,100 +47,171 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260925051519.3002168-1-hch@lst.de>
+In-Reply-To: <ea5b61d4-0cba-4afc-b5e0-8720d4717872@kernel.org>
 
-On Fri, Sep 25, 2026 at 07:15:15AM +0200, Christoph Hellwig wrote:
-> Test that libxfs rejects initializing a file systems unless in debugger
-> mode by running xfs_repair and xfs_db with missing arguments.  For
-> db additionally test that command that require a RT device still do not
-> work even after libxfs can be initialized using a missing RT device.
+On Sun, Sep 27, 2026 at 12:41:46PM +0800, Anand Suveer Jain wrote:
+> On 2/9/26 04:51, Zorro Lang wrote:
+> > On Sat, Jul 25, 2026 at 03:39:10PM +0800, Anand Jain wrote:
+> >> Btrfs and xfs uses the metadata_uuid superblock feature to change the
+> >> on-disk UUID without rewriting every block header. This patch adds a
+> >> sanity check to ensure UUID consistency when a filesystem with
+> >> metadata_uuid enabled is cloned.
+> >>
+> >> Signed-off-by: Anand Jain <asj@kernel.org>
+> >> ---
+> >>  tests/generic/806     | 74 +++++++++++++++++++++++++++++++++++++++++++
+> >>  tests/generic/806.out |  6 ++++
+> >>  2 files changed, 80 insertions(+)
+> >>  create mode 100644 tests/generic/806
+> >>  create mode 100644 tests/generic/806.out
+> >>
+> >> diff --git a/tests/generic/806 b/tests/generic/806
+> >> new file mode 100644
+> >> index 000000000000..6d3166491006
+> >> --- /dev/null
+> >> +++ b/tests/generic/806
+> >> @@ -0,0 +1,74 @@
+> >> +#! /bin/bash
+> >> +# SPDX-License-Identifier: GPL-2.0
+> >> +# Copyright (c) 2026 Anand Jain <asj@kernel.org>.  All Rights Reserved.
+> >> +#
+> >> +# FS QA Test 806
+> >> +#
+> >> +# Verify that the cloned filesystem UUID remains consistent, even when the
+> >> +# `metadata_uuid` feature is enabled.
+> >> +#
+> >> +
+> >> +. ./common/preamble
+> >> +. ./common/filter
+> >> +
+> >> +_begin_fstest auto quick mount clone
+> >> +
+> >> +_require_test
+> >> +_require_block_device $TEST_DEV
+> >> +_require_loop
+> >> +
+> >> +_cleanup()
+> >> +{
+> >> +	cd /
+> >> +	rm -r -f $tmp.*
+> >> +	umount $mnt1 $mnt2 2>/dev/null
+> >> +	_loop_image_destroy "${devs[@]}" 2> /dev/null
+> >> +}
+> >> +
+> >> +filter_pool()
+> >> +{
+> >> +	sed -e "s|${devs[0]}|DEV1|g" -e "s|${mnt1}|MNT1|g" \
+> >> +	    -e "s|${devs[1]}|DEV2|g" -e "s|${mnt2}|MNT2|g" | _filter_spaces
+> >> +}
+> >> +
 > 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/xfs/2300     | 39 +++++++++++++++++++++++++++++++++++++++
->  tests/xfs/2300.out | 14 ++++++++++++++
->  2 files changed, 53 insertions(+)
->  create mode 100755 tests/xfs/2300
->  create mode 100644 tests/xfs/2300.out
 > 
-> diff --git a/tests/xfs/2300 b/tests/xfs/2300
-> new file mode 100755
-> index 000000000000..9d8bd9c6ae44
-> --- /dev/null
-> +++ b/tests/xfs/2300
-> @@ -0,0 +1,39 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2026 Christoph Hellwig.
-> +#
-> +# FS QA Test No. 2300
-> +#
-> +# Tests that repair refuses to work without -r argument, and xfs_db works fine
-> +# even without it to check libxfs initialization behavior with missing RT
-> +# devices.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick repair db
-> +
-> +. ./common/filter
-> +
-> +_require_scratch_nocheck
-> +_require_realtime
-> +
-> +if [ -z "$SCRATCH_RTDEV" ]; then
-> +	_notrun "external RT device required"
-> +fi
+> >> +# Create base loop device and its clone, applying the metadata_uuid tuning
+> >> +# callback to the base filesystem before the copy occurs.
+> >> +devs=()
+> >> +_loop_image_create_clone devs _change_metadata_uuid
+> > 
+> > Should we have and run a _require_metadata_uuid before changing it?
+> > As I know, btrfs can do `_require_btrfs_fs_feature metadata_uuid`.
+> > 
+> 
+> _require_metadata_uuid() is better than doing the same thing within
+> _change_metadata_uuid(). Now _change_metadata_uuid() calls
+> _require_metadata_uuid(), as shown below.
+> 
+> 
+> _require_metdata_uuid()
+> {
+>         case $FSTYP in
+>         xfs)
+>                 _require_command "$XFS_ADMIN_PROG" "xfs_admin"
 
-I think "_require_realtime -> _require_external_realtime_device" already covers
-the "_notrun" above. I'll help to remove above redundant code when merging.
+The presence of xfs_admin doesn't guarantee metauuid support on xfs;
+the script predates the creation of that feature flag + cli args.
 
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +
-> +echo "Dumping superblock using xfs_db without rtdev"
-> +$XFS_DB_PROG $SCRATCH_DEV -c 'sb 0' -c 'p' >> $seqres.full
-> +
-> +echo "Loading RT superblock using xfs_db without rtdev, should fail"
-> +$XFS_DB_PROG $SCRATCH_DEV -c 'rtsb'
-> +
-> +echo "Running xfs_repair -n without rt device, should fail"
-> +$XFS_REPAIR_PROG -n $SCRATCH_DEV
-> +
-> +echo "Running xfs_repair without rt device, should fail"
-> +$XFS_REPAIR_PROG $SCRATCH_DEV
-> +
-> +
-> +status=0
-> +exit
+--D
 
-_exit 0
-
-I'll remove the extra blank line above.
-
-Others look good to me, thanks!
-
-Reviewed-by: Zorro Lang <zlang@kernel.org>
-
-> diff --git a/tests/xfs/2300.out b/tests/xfs/2300.out
-> new file mode 100644
-> index 000000000000..50aab2b83ec9
-> --- /dev/null
-> +++ b/tests/xfs/2300.out
-> @@ -0,0 +1,14 @@
-> +QA output created by 2300
-> +Dumping superblock using xfs_db without rtdev
-> +Loading RT superblock using xfs_db without rtdev, should fail
-> +realtime device not loaded, use -R.
-> +Running xfs_repair -n without rt device, should fail
-> +Phase 1 - find and verify superblock...
-> +xfs_repair: filesystem has a realtime subvolume
-> +xfs_repair: realtime device init failed
-> +xfs_repair: cannot repair this filesystem.  Sorry.
-> +Running xfs_repair without rt device, should fail
-> +Phase 1 - find and verify superblock...
-> +xfs_repair: filesystem has a realtime subvolume
-> +xfs_repair: realtime device init failed
-> +xfs_repair: cannot repair this filesystem.  Sorry.
-> -- 
-> 2.53.0
+>                 ;;
+>         btrfs)
+>                 _require_btrfs_fs_feature "metadata_uuid"
+>                 _require_command "$BTRFS_TUNE_PROG" "btrfstune"
+>                 ;;
+>         *)
+>                 _notrun "Require filesystem with metadata_uuid feature"
+>                 ;;
+>         esac
+> }
+> 
+> 
+> _change_metadata_uuid()
+> {
+>         local dev=$1
+> 
+>         _require_metdata_uuid
+> 
+>         case $FSTYP in
+>         xfs)
+>                 $XFS_ADMIN_PROG -U generate $dev >> $seqres.full
+>                 ;;
+>         btrfs)
+>                 $BTRFS_TUNE_PROG -m $dev
+>                 ;;
+>         esac
+> }
+> 
+> 
+> 
+> >> +mkdir -p $TEST_DIR/$seq
+> >> +mnt1=$TEST_DIR/$seq/mnt1
+> >> +mnt2=$TEST_DIR/$seq/mnt2
+> >> +mkdir -p $mnt1
+> >> +mkdir -p $mnt2
+> >> +
+> >> +# Get the uuid from the source device
+> >> +fsuuid=$(blkid -s UUID -o value ${devs[0]})
+> >> +
+> >> +# Mount both clone and baseline
+> >> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[0]} $mnt1 || \
+> >> +						_fail "Failed to mount dev1"
+> >> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
+> >> +						_fail "Failed to mount dev2"
+> >> +
+> >> +findmnt -o SOURCE,TARGET,UUID "${devs[0]}" | tail -n +2 | \
+> >> +				sed -e "s/${fsuuid}/FSUUID/g" | filter_pool
+> >> +findmnt -o SOURCE,TARGET,UUID "${devs[1]}" | tail -n +2 | \
+> >> +				sed -e "s/${fsuuid}/FSUUID/g" | filter_pool
+> >> +
+> >> +# Cycle mounts and reverse the initialization order to ensure UUID tracking
+> >> +# doesn't mismatch or flip when metadata_uuid optimization is active.
+> >> +echo "**** mount cycle ****"
+> >> +_unmount $mnt1
+> >> +_unmount $mnt2
+> >> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[1]} $mnt2 || \
+> >> +						_fail "Failed to mount dev2"
+> >> +_mount $(_common_dev_mount_options) $(_clone_mount_option) ${devs[0]} $mnt1 || \
+> >> +						_fail "Failed to mount dev1"
+> >> +
+> >> +findmnt -o SOURCE,TARGET,UUID "${devs[0]}" | tail -n +2 | \
+> >> +				sed -e "s/${fsuuid}/FSUUID/g" | filter_pool
+> >> +findmnt -o SOURCE,TARGET,UUID "${devs[1]}" | tail -n +2 | \
+> >> +				sed -e "s/${fsuuid}/FSUUID/g" | filter_pool
+> >> +
+> >> +status=0
+> >> +exit
+> >> diff --git a/tests/generic/806.out b/tests/generic/806.out
+> >> new file mode 100644
+> >> index 000000000000..918f422ecddf
+> >> --- /dev/null
+> >> +++ b/tests/generic/806.out
+> >> @@ -0,0 +1,6 @@
+> >> +QA output created by 806
+> >> +DEV1 MNT1 FSUUID
+> >> +DEV2 MNT2 FSUUID
+> >> +**** mount cycle ****
+> >> +DEV1 MNT1 FSUUID
+> >> +DEV2 MNT2 FSUUID
+> >> -- 
+> >> 2.43.0
+> >>
+> 
 > 
