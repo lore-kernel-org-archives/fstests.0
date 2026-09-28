@@ -1,213 +1,93 @@
-Received: from mail-wm2-f12.google.com (mail-wm2-f12.google.com [74.125.225.140])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94ECF49250D
-	for <fstests@vger.kernel.org>; Mon, 28 Sep 2026 08:51:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.225.140
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 560E0492E39
+	for <fstests@vger.kernel.org>; Mon, 28 Sep 2026 09:50:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790585471; cv=none; b=YCGAnTjQJXi/hWJI7DjqUG0muy3l+PUC5FtCoO+/euG1obB1RNClZlNGDx+gbhvY2fXu8OmZ6xV77ogu48p4vKBs9n5nR63TjK2nPAoK+URuq0h77bDneeHK6wnhI3cfLoNil4yJe7UVFUSQO6I9ZBcNyqMTqm3B9fJFptAUsvM=
+	t=1790589044; cv=none; b=r0kQosCwjoSLSMz+TsZH6qK6+bM2ossHzBQPNVHWSdoeGN1vUX5mC5ZvHl5WdF1QEzBIqkE17KYeGdhhdT87m9M4qEw6SUy3y25MLOEMdwTty8wgpywygewDRxAZN2rfAOBAzXlw5hf6cv3JdUJvcn7SDuNkYRrnQGLwfOKBe+M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790585471; c=relaxed/simple;
-	bh=i1xaD+GQtotG05Y1g1ad3sS/GUQ2zhFzCij3jOg5ZN4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=DxtL61S6/2699g2005p6wfblUk8D5i4qRnBcQWGjvocf+HpElr/8tuN1LwkV/pu/rs3ht4Q9Et7TRFWX2wkQHc002SmWX0UVzFEdFGTShzxivMQmsApM8+hHNbGF1T7kzQdkzwMZeBLph7CMnaZRaq8nt+uLntcR7mK/YCF9iz8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=J6PfCJ/d; arc=none smtp.client-ip=74.125.225.140
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1790589044; c=relaxed/simple;
+	bh=jlDDwnGIo+5xSyDY11lM/zo5Jky5y6u2mE7xFpz70TI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=nq7+2rASRKcIx8FKmgKnFJ8GL4QFw/L1YZ8snfNMnhxA9FZMbHKGIYncigChl4XZtDvnvxa0mUhL/+v6yjx0mzdqoA5jAjp0ayduzrNNUvYP0noSZgQuQHNDNyZ0xksZMqz5tVOHGaXKVmQb1ADTAoQDoKjrmq4awM/8z4EwrFg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ipRtxDKG; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="J6PfCJ/d"
-Received: by mail-wm2-f12.google.com with SMTP id 5b1f17b1804b1-49b912e4b11so15079055e9.3
-        for <fstests@vger.kernel.org>; Mon, 28 Sep 2026 01:51:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1790585468; x=1791190268; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=70HYNxWy1mK2Bp5EVL/Q0ipyOiBKRZxQ8tWA4Mxi4qA=;
-        b=J6PfCJ/dxIP+QHBD5qGUQmKWGSbvbNgcwtwLvO8UqwSmodArZ6vT/rnyeEBzFAggoI
-         KdHopNWUi9rZdKB+hl99gcbzwxouFbVpQPq8JeRhw308Qc/sG3K/Wrbt7Jey7aTeY3Hl
-         PLiPKzObGOLC3cDKMc+TsjSV3CVBIMNQ8m04ZTwvuRkvA7rm5Eyjvt7SQCQ8bNhCO5Tl
-         j+0Vm0nRNAE+EwXYAaXWtGCI68zLwGp2HxzoObCNqXfRGQV3ujL9zKdTW3/iHKloXaco
-         sIdPTQshUtnUQ7Jo2n2OWIjuzGr5j1HohH1lWlTN0Jj5Q35WZgA/9fhS0dSOb51dYwpa
-         UbPQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1790585468; x=1791190268;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=70HYNxWy1mK2Bp5EVL/Q0ipyOiBKRZxQ8tWA4Mxi4qA=;
-        b=gcGzGHXBURQbSfx2ypsJqqG/9Xwx7flYUpAX7Ru25UpQd+0U+Z6gTRZaYgNregiw7g
-         ouuF+XROWBrPFl4XKhcPzcTHt/GzW52VItN2WH282pbxso/nsPQcDlyM7yZybQSCwH5r
-         BcdY+ZbXy5krPe0T+mo3NAtPmgyB5eGDQfSpuP7DeuvvYmIZpw2+twTGc9iTi9Ls6EG8
-         x9Bont7GAQxKvtmDyG6rE67+aTYC91OlXptzY8mIgMOKauu7lKAITqx1EBQ2DbYYvxTO
-         AM2lKewupjdMfq3KpPk6CgIBFhXgrobcmeS1MZQjrhHiK0GNZG1tHKzsSATPKxvclwoU
-         xmwA==
-X-Gm-Message-State: AFuF++kukspJOccKarphUfM1UpDP+yeZDEiuHolzaZQCAWuM0Ko7hJyl
-	Gr7YtoEtvXQdmF5+gJ9iypGLY+sKOWsfLRnl9QmcoNh7PXLtoBPp3nzxc8/l9GM1
-X-Gm-Gg: AYBFou2SuHp4w/OvlzgSUydUMGBfFKxLsIEwhJrKOws4bdxeTFYXlQGFS0/RIsnB1Vg
-	m/+3UAtdbiMhxMo5dsBDUVIxvM5gIWdpvbAqDc/acpyVCh5nl10ADozddvAgLJod/onRviV4j09
-	KZvfdB7fW6Hl8ut+RW/cbwI9g9aU7mIsINYFQu5e65GYSMygWfs24+U2N6oQKEkVgqmzXhw7+zD
-	HTDpXY6LbQhZuwf2xuX7FL4F+ftyPBzRhpPMDtZ//nowVygWIypde9qxcibCdu5P8TwDfTAIv8P
-	thIADL5PVgrC6EkWZNSqIo85EYF16Rml/3zxHtykc/bfJxV+F/IjrlgJYeCAL5k8C6Xw8wPYUqt
-	BhA1EJnmo3h6ZwWV0yunPoGz09uUYrZ3TFm+w1Tx2SPLoTMra2e6Ad6taz89kB1qaIaWd2/IHJm
-	zO0SJq5xTcoQ0DrmcITB7VMuKEbP1oa1VEGtN9JxD5vop2QDB9q3JDplj8WvLf8eKA7NqDZkRfq
-	70q66tCMfZxuAjgOpPypt9yE4peUu16EIHz2wSpKsVoxqlAKTEoq8R+XgAxgjmW3R8qG+HlUZCG
-	OfpWhKGzMmRvdQc=
-X-Received: by 2002:a05:600c:6388:b0:4a0:1d2:1a8a with SMTP id 5b1f17b1804b1-4a001d21b90mr51057765e9.16.1790585467667;
-        Mon, 28 Sep 2026 01:51:07 -0700 (PDT)
-Received: from andreayoga.localdomain (93-42-14-189.ip84.fastwebnet.it. [93.42.14.189])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4a0016a8c2asm129029035e9.0.2026.09.28.01.51.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Sep 2026 01:51:07 -0700 (PDT)
-From: Andrea Parri <parri.andrea@gmail.com>
-To: fstests@vger.kernel.org
-Cc: Andrea Parri <parri.andrea@gmail.com>,
-	"Darrick J . Wong" <djwong@kernel.org>,
-	Zorro Lang <zlang@kernel.org>,
-	Christoph Hellwig <hch@infradead.org>,
-	linux-xfs@vger.kernel.org,
-	Christoph Hellwig <hch@lst.de>
-Subject: [PATCH v2] xfs: exercise a failed CoW conversion during writeback
-Date: Mon, 28 Sep 2026 10:50:46 +0200
-Message-ID: <20260928085047.7250-1-parri.andrea@gmail.com>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ipRtxDKG"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4D0761F000FF;
+	Mon, 28 Sep 2026 09:50:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1790589043;
+	bh=zFWGeYStz8yg84u1yxEezXrsA6K3Shx6smatWK1szvM=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=ipRtxDKGk5Q3CMPU8/WjZyodZohNtHvVgS3Rrd56ERsCivhuAyaZQehko40g5BojM
+	 W92VBdsohIC+bl0dZnCqGB5qlBuWB1W6R+wfnm1MNFysUT8qmEadPYfvQ+AdHeqdcm
+	 lYqRvThvIxcjLpuusrPF6FoDZolWOyAcM6FAnPgZ/L24fqFpvzuqqpy9a4QEQl5M7l
+	 ufO00seq2O9zJ+SBgZi0T343pg/gcweSyTRSboT9P5JFWl2zCZwi1ird4t3WFxjqeN
+	 so2bOVtoJowyRjS9shcsOHdlG9C2lzLx1xrxTqdDqHCsT1b0qSzAxoslHNwPkwQmwo
+	 knlEYt1ehzXVA==
+Date: Mon, 28 Sep 2026 17:50:38 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: moritz.tanner@linbit.com, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/805: fix for external RT devices
+Message-ID: <aro32oI1akyaTv8i@zlang-mailbox>
+Mail-Followup-To: Christoph Hellwig <hch@lst.de>, moritz.tanner@linbit.com, 
+	fstests@vger.kernel.org
+References: <20260924062118.2684441-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260924062118.2684441-1-hch@lst.de>
 
-iomap_add_to_ioend() submits the pending ioend through
-->writeback_submit() before allocating a new one for the current
-range.  For XFS, xfs_writeback_submit() converts the ioend's CoW
-extents via xfs_reflink_convert_cow() before submitting the bio; if
-that conversion fails, ->writeback_submit() completes the ioend with
-an error and returns it.  A kernel bug left the stale ioend behind in
-wpc->wb_ctx, which iomap_writepages() then submitted a second time,
-corrupting XFS's ip->i_ioend_list.
+On Thu, Sep 24, 2026 at 08:21:18AM +0200, Christoph Hellwig wrote:
+> use _mkfs_dev on the dm device instead of _scratch_mkfs_sized, otherwise
+> the file system could be created with an external RT device, and will
+> then fail to mount without it.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
 
-Exercise this path with the wb_cow_convert_error error tag: reflink a
-file, dirty several widely separated ranges of the shared extent so
-that a single writepages() call has to build and submit more than one
-ioend, inject the error, and let writeback run.  On a kernel without
-the fix this reliably hits a "list_add double add" WARN from
-xfs_end_bio(); on a fixed kernel writeback just fails cleanly.
+This change is good to me,
 
-This requires the wb_cow_convert_error XFS error tag; the test cleanly
-not-runs on kernels without it.
+Reviewed-by: Zorro Lang <zlang@kernel.org>
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
-Signed-off-by: Andrea Parri <parri.andrea@gmail.com>
----
-The kernel fix and the wb_cow_convert_error error tag this test relies
-on are part of the series at:
-
-  https://lore.kernel.org/all/cover.1790342457.git.parri.andrea@gmail.com/
-
-Changes since v1:
- - Cite the kernel fix with _fixed_by_kernel_commit (Darrick).
- - Don't reset the error tag before the remount; the unmount clears it
-   anyway (Darrick).
- - Picked up Christoph's Reviewed-by.
-
-v1: https://lore.kernel.org/all/20260924091338.198407-1-parri.andrea@gmail.com/
-
- tests/xfs/842     | 71 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/842.out |  7 +++++
- 2 files changed, 78 insertions(+)
- create mode 100755 tests/xfs/842
- create mode 100644 tests/xfs/842.out
-
-diff --git a/tests/xfs/842 b/tests/xfs/842
-new file mode 100755
-index 0000000000000..4495e9bdfa530
---- /dev/null
-+++ b/tests/xfs/842
-@@ -0,0 +1,71 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Andrea Parri.  All Rights Reserved.
-+#
-+# FS QA Test No. 842
-+#
-+# Regression test for a failed ->writeback_submit() call leaving a stale
-+# wpc->wb_ctx behind.  iomap_writepages() then resubmits whatever
-+# wpc->wb_ctx points to, i.e. the ioend that ->writeback_submit() already
-+# completed with an error.  For XFS the second bio_endio() lands back in
-+# xfs_end_bio(), which list_add_tail()s the already-linked ioend into
-+# ip->i_ioend_list a second time, corrupting the list.
-+#
-+# The only in-tree way for XFS's ->writeback_submit() to fail is a
-+# failing xfs_reflink_convert_cow(), so this uses the
-+# wb_cow_convert_error error tag to force that on a reflinked file whose
-+# CoW extents are dirtied in several widely separated ranges, so that a
-+# single writepages() call has to submit more than one ioend.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick clone
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/reflink
-+. ./common/inject
-+
-+_fixed_by_kernel_commit XXXXXXXXXXXX \
-+	"iomap: don't resubmit an ioend after ->writeback_submit() failed"
-+
-+_require_cp_reflink
-+_require_scratch_reflink
-+_require_xfs_io_error_injection "wb_cow_convert_error"
-+_require_kernel_config CONFIG_LIST_HARDENED
-+
-+blksz=65536
-+nr=8
-+sz=$((blksz * nr * 2))
-+
-+echo "Format and mount"
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+echo "Create reflinked file with several CoW extents"
-+_pwrite_byte 0x58 0 $sz $SCRATCH_MNT/file1 >> $seqres.full
-+_scratch_sync
-+_cp_reflink $SCRATCH_MNT/file1 $SCRATCH_MNT/file2
-+
-+# Dirty several widely separated ranges of file2's CoW extents so that a
-+# single writepages() call has to submit more than one ioend.
-+seq=0
-+while [ $seq -lt $nr ]; do
-+	off=$((seq * blksz * 2))
-+	_pwrite_byte 0x59 $off $blksz $SCRATCH_MNT/file2 >> $seqres.full
-+	seq=$((seq + 1))
-+done
-+
-+echo "Inject wb_cow_convert_error"
-+_scratch_inject_error "wb_cow_convert_error"
-+
-+echo "Trigger writeback with CoW conversion forced to fail"
-+_scratch_sync
-+
-+echo "Remount"
-+_scratch_cycle_mount
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/842.out b/tests/xfs/842.out
-new file mode 100644
-index 0000000000000..72c9c67e7d5fb
---- /dev/null
-+++ b/tests/xfs/842.out
-@@ -0,0 +1,7 @@
-+QA output created by 842
-+Format and mount
-+Create reflinked file with several CoW extents
-+Inject wb_cow_convert_error
-+Trigger writeback with CoW conversion forced to fail
-+Remount
-+Silence is golden
--- 
-2.53.0
-
+>  tests/generic/805 | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/tests/generic/805 b/tests/generic/805
+> index ae498f5c6698..401829c4c6fc 100755
+> --- a/tests/generic/805
+> +++ b/tests/generic/805
+> @@ -31,7 +31,7 @@ _cleanup()
+>  	rm -f $tmp.*
+>  }
+>  
+> -_require_scratch
+> +_require_scratch_nocheck
+>  _require_dm_target linear
+>  _require_freeze
+>  
+> @@ -39,13 +39,13 @@ echo "Silence is golden"
+>  
+>  size=$((256 * 1024 * 1024))
+>  size_in_sector=$((size / 512))
+> -_scratch_mkfs_sized $size >> $seqres.full 2>&1
+>  
+>  node=$seq-test
+>  lvdev=/dev/mapper/$node
+>  table="0 $size_in_sector linear $SCRATCH_DEV 0"
+>  _dmsetup_create $node --table "$table" || \
+>  	_fail "failed to create dm device"
+> +_mkfs_dev $lvdev >> $seqres.full 2>&1
+>  
+>  _mount $lvdev $SCRATCH_MNT || _fail "failed to mount dm device"
+>  
+> -- 
+> 2.53.0
+> 
