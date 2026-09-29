@@ -1,45 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7174A369D47;
-	Mon, 28 Sep 2026 21:47:30 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 182631A9F91;
+	Tue, 29 Sep 2026 01:31:21 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790632051; cv=none; b=VWjT8Cl27BV+TFBrp00Ec0x2tdU++HpDNxhNjQY8rU/SXxXBQw9vnL93AeYeyemLRUUOs8gsbk6gwHywfeJWtiTTTffstktI7/NdTwUlnPSJc7wQMuNQYyoLvXru1nUSJ11TzGmnB/9/EguMPjesOdKxEpWNt+kkyTPl7GPTMcM=
+	t=1790645483; cv=none; b=achi2SmmZpegPS2FjyNrskca6HK03Bm80hbQxTH7nFoq3FCOjdJROD8ZeUAT3Zva5u7Ln4Eehhv4C05f2dWsi0s9a72f0FsRfdFxIB9O3PMjt5/woDXe3mJ/Cb3CUPmSMMMRGxWVGaiGcdd00dx9tZvmPdq95SOXuuCsIW9+wZI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790632051; c=relaxed/simple;
-	bh=XDhmANSHnsKMZgpjJGvMLm+X2Jo+EJiswUPfknfgl4w=;
+	s=arc-20240116; t=1790645483; c=relaxed/simple;
+	bh=5xkg5ShQm6N95J+EKVd3F0z/0w+9HePOobTZKTLCaSQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=kBpa1CnizUK5x3zHWDxJP5cGdEkpXwrpc/nmdDAOFt9rzWDaHEIQFr+f75DHdq7yWEvKG7lqP5y8pBEiNUnRpQt0XnG8GuIWjAhTBa7jH3asFWU8FVKssTxRmEk2Emf+zyDJGzLSQl5n/8iGFSL2m4s9GgN2UZ5GN0zsn4szvpg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=inMMAmeo; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=bxrLLStux7ppOmePoqT6SCbWRd3U62B+BisATX8BwDD9DjhtVXSC7MO1IikvK+Bp0ojsUH5uEOmSQLOwJzjTkSN6mmP5CN5+NczJNvVqHFFwJglivIBiJc+IpOTACnE/OYgyYn7TL7+8BL5BwUlB1W4d3oKWkL8UkVnlRUu+3bM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ncITCQlf; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="inMMAmeo"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7CB111F000FF;
-	Mon, 28 Sep 2026 21:47:27 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ncITCQlf"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id A6E061F000FF;
+	Tue, 29 Sep 2026 01:31:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1790632050;
-	bh=xMR3e2G5T4zW/+hbNeFbKTp7voX4uiEQlNEhBuxOoUI=;
+	s=k20260515; t=1790645481;
+	bh=BGF7Lf+wPaqkor4SarpKCkdrwZhOSKDnWSRJ55HaNk0=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=inMMAmeo762n7w76mTSS95s8wLxKcWoO23u28kpZaAvJWthvjS376wy8FBMCmZ3ZS
-	 DQyvDaEglAm3/QFEKQfqcemRyjAlBB3Safz0FwFt1HtVBV9n0XjY7XPzZ+sokeD4vF
-	 TkQHqZpXVzkyHDzu+OR91h4bPBwuuICYT4ZNhnzx1wjJ3GEddTLJ42Cxn5P6vO79Iw
-	 6rir4JdsXDupSEq0/j/2KjqtrW2eeOsI5p9d+6KWQl4XEfHmf6jdN6EmxQOpbivL8O
-	 arh8HC+xKbnwFMZOEm16Rk1SuvczsKOUkXZHbGg/S75iIktolCf4nypw45vD3ysrem
-	 gFotxFJ08JldA==
-Date: Tue, 29 Sep 2026 05:47:24 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Andrea Parri <parri.andrea@gmail.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org, 
-	Christoph Hellwig <hch@infradead.org>, linux-xfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH v2] xfs: exercise a failed CoW conversion during writeback
-Message-ID: <arrf6KFNPOPUldgd@zlang-mailbox>
-Mail-Followup-To: Andrea Parri <parri.andrea@gmail.com>, 
-	"Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org, Christoph Hellwig <hch@infradead.org>, 
-	linux-xfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>
-References: <20260928085047.7250-1-parri.andrea@gmail.com>
- <arprh9oyZEXs25CQ@zlang-mailbox>
- <20260928154149.GA6253@frogsfrogsfrogs>
- <20260928162443.352542-1-parri.andrea@gmail.com>
+	b=ncITCQlf6VzWiq8+XwN22l4RZnU/Nj6vDx/aNnTX7SoEtQszIAHH6gHlmMBkUsCN0
+	 FZJ12CnipOGU8YJdn2q62niZBH6KLsaa43umzIb3RIvrONshfLECrD2ngckjqLk1aK
+	 UwV4PSFp+Ct/NKPKM3FGZ+eq3ukPVXpEAhaJLGR5ndLGu9C4QDjFbWComYz1VlLABb
+	 yv2nFyPp5P+jwVIZYznXtb2n4NFGA1WXQesSjSitBHEUbPiLrOhmWRIjF2Noc5BA+N
+	 eaJ7Vg6VYc0QMEiiproYfbEHoZBYnYbK1cpVMVpnRK+dYxdTpRvsgO8bRvpSa7ryvz
+	 hUKBdZR/aqQWA==
+Date: Mon, 28 Sep 2026 18:31:21 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 01/13] add a "datacsum" group
+Message-ID: <20260929013121.GD2705364@frogsfrogsfrogs>
+References: <20260924100855.2734089-1-hch@lst.de>
+ <20260924100855.2734089-2-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -48,41 +43,38 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260928162443.352542-1-parri.andrea@gmail.com>
+In-Reply-To: <20260924100855.2734089-2-hch@lst.de>
 
-On Mon, Sep 28, 2026 at 06:24:42PM +0200, Andrea Parri wrote:
-> On Mon, Sep 28, 2026 at 08:41:49AM -0700, Darrick J. Wong wrote:
-> > for ((off = 0; off < (blksz * nr * 2); off += (blksz * 2))); do
-> > 	_pwrite_byte 0x59 $off $blksz $SCRATCH_MNT/file2 >> $seqres.full
-> > done
+On Thu, Sep 24, 2026 at 12:07:42PM +0200, Christoph Hellwig wrote:
+> Add a group for test exercising data checksum functionality.
 > 
-> That's nicer, no loop counter at all, and it writes the same eight
-> ranges as before.
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  doc/group-names.txt | 1 +
+>  1 file changed, 1 insertion(+)
 > 
-> Zorro, if you're folding the fix in at merge time, please use Darrick's
-> version rather than the rename I suggested earlier, i.e.:
-> 
-> @@ -48,11 +48,8 @@ _cp_reflink $SCRATCH_MNT/file1 $SCRATCH_MNT/file2
->  
->  # Dirty several widely separated ranges of file2's CoW extents so that a
->  # single writepages() call has to submit more than one ioend.
-> -seq=0
-> -while [ $seq -lt $nr ]; do
-> -	off=$((seq * blksz * 2))
-> +for ((off = 0; off < (blksz * nr * 2); off += (blksz * 2))); do
->  	_pwrite_byte 0x59 $off $blksz $SCRATCH_MNT/file2 >> $seqres.full
-> -	seq=$((seq + 1))
->  done
->  
->  echo "Inject wb_cow_convert_error"
-> 
-> Again, happy to send a v3 with this if that's easier.
+> diff --git a/doc/group-names.txt b/doc/group-names.txt
+> index ef6b8f51cf87..101c72688c02 100644
+> --- a/doc/group-names.txt
+> +++ b/doc/group-names.txt
+> @@ -34,6 +34,7 @@ dangerous		dangerous test that can crash the system
+>  dangerous_fuzzers	fuzzers that can crash your computer
+>  dangerous_selftest	selftests that crash/hang
+>  data			data loss checkers
+> +datacsum		data checksumming
 
-I've merged it with above changes, feel free to check *patches-in-queue* branch.
+Seems like a reasonable addition to me.  That said ... I bet at least
+btrfs/282 is a data checksum test that's incorrectly in the (metadata)
+scrub group.
 
-Thanks,
-Zorro
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
+--D
+
+>  dax			direct access mode for persistent memory files
+>  db			xfs_db functional tests
+>  dedupe			FIEDEDUPERANGE ioctl
+> -- 
+> 2.53.0
 > 
-> Thanks!
->   Andrea
+> 
