@@ -1,30 +1,45 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 46B5F4B270F;
-	Mon,  5 Oct 2026 14:56:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 990C74C0420;
+	Mon,  5 Oct 2026 15:20:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791212184; cv=none; b=NWhNgQJJqG91+hRnr4phu9M0Cnt9gputvKVVgmi9HRLcXSMf4mRuAxNzuEYqcPUKc28jH+fNXtrnuqeRXDsWa5hNyoDpUkGUU++kulcPGVrAptaBKBI40bemv8jKXPNVpdRZXYEUjVg7i3MoKs6pRlh39Yke/pDSadxWYFZafhg=
+	t=1791213659; cv=none; b=TCh0ttBPVtkSc9RIYqyhIgx3nvCr0kkCJQn7rAw1wBmmMvFNte3NKyPJJTyXJtddpJ93sMDBuv5u0nrzUm5HGeMepLV8AhWffKap07vqCAQ/kEJESprF64xhonqRbvZSwItWwEo6dGcxIhx1FsSUNnt6tF2PXF5OKuUVgVBs9qY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791212184; c=relaxed/simple;
-	bh=f6M8maBSI2NdZJ9giH259dDbC529zfb2lTJV8qd4odk=;
+	s=arc-20240116; t=1791213659; c=relaxed/simple;
+	bh=eYogfqbCFjpN3nb4+0jvS9G9bRa7bCK98tyzGW0sITk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=kYrbT3j8gSatfrrPt75wcjENBw0y9MgGkrjoNFiJPfTQZCMl7OJjM0mLaOHZwOaI4Jx5a5lYoqlvUVkxDlk/RZ+sR2Wm+mSqklPzjZGwm65Cm+Kn3JU5gO/uK6SAbJQhE9T/T3DjM0Ng1jl7JC3/UF0QsbcNhfX7rLmVEZWa5Q0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id DDD6168AFE; Mon,  5 Oct 2026 16:56:15 +0200 (CEST)
-Date: Mon, 5 Oct 2026 16:56:15 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>,
-	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=adeS/wE4/qwq++OfdqJHEXxko6G27qZQ0tAUc7oF9AQ8swnwwDWPGJpwR3nBD5fJv1nihueTF00YaER/6MU6tqvn6b0rLMqfXmEmymKZ3qe1xQC85S2w1RsRxzgWIdzXAOSFKqvTLHXdfUzOeLKojwCm1NgU2Ld8/9kARp5qqgs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Q7or3/kk; arc=none smtp.client-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Q7or3/kk"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id D2B4B1F000FF;
+	Mon,  5 Oct 2026 15:20:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1791213657;
+	bh=MZ8jWH01nNtxeW8Q3dRgNwgB1z9TT0AKTtsyR9tFoII=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=Q7or3/kk93LSD8sJc1XkbQ69kmT0gIUumyC1KrH/TOzPJs8tfIhVyTmfmOzu/KqdT
+	 bdMrqzfqoXcbN4sdqNr96onykXPQQDtx5Z736812SSpbOC9CZL7pHFh3Zfg5Gv66m3
+	 mOiBnSCZSCH+GRjy+d4p30rFdOJEBVETXiVlj4rT+qqs7wAyn9jmVGUWokPTgJVYCp
+	 0G0HI7lH7DQ7rSz4ovxB+trpD9Uvq4aH7JkWCOR8cAA77bxGyEmkzX9UehC2QjFNNz
+	 FOYk7CTC2ox2OEnaxuHmI98rCM6JtkszygLLUJPqdJ8fB+KCt7GCa+P1pt1q7rGeJx
+	 9kA9r1KCyg3+w==
+Date: Mon, 5 Oct 2026 08:20:57 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
 Subject: Re: [PATCH 09/13] xfs/2304: version of generic/388 that run
  xfs_scrub -x for each iteration
-Message-ID: <20261005145615.GB2082@lst.de>
-References: <20260924100855.2734089-1-hch@lst.de> <20260924100855.2734089-10-hch@lst.de> <20260929015645.GL2705364@frogsfrogsfrogs> <20261005132522.GN26805@lst.de> <20261005145123.GB2705364@frogsfrogsfrogs>
+Message-ID: <20261005152057.GC2705364@frogsfrogsfrogs>
+References: <20260924100855.2734089-1-hch@lst.de>
+ <20260924100855.2734089-10-hch@lst.de>
+ <20260929015645.GL2705364@frogsfrogsfrogs>
+ <20261005132522.GN26805@lst.de>
+ <20261005145123.GB2705364@frogsfrogsfrogs>
+ <20261005145615.GB2082@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -33,14 +48,27 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20261005145123.GB2705364@frogsfrogsfrogs>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <20261005145615.GB2082@lst.de>
 
-On Mon, Oct 05, 2026 at 07:51:23AM -0700, Darrick J. Wong wrote:
-> I'm ok with g388 running more slowly if it'll catch data checksum bugs
-> and whatnot.  I'm a little surprised that it doesn't already run
-> _check_filesystems every loop iteration.
+On Mon, Oct 05, 2026 at 04:56:15PM +0200, Christoph Hellwig wrote:
+> On Mon, Oct 05, 2026 at 07:51:23AM -0700, Darrick J. Wong wrote:
+> > I'm ok with g388 running more slowly if it'll catch data checksum bugs
+> > and whatnot.  I'm a little surprised that it doesn't already run
+> > _check_filesystems every loop iteration.
+> 
+> Maybe we should patch that in first, and then XFS_VERIFY_FILE_DATA
+> magically does the right thing?
 
-Maybe we should patch that in first, and then XFS_VERIFY_FILE_DATA
-magically does the right thing?
+I was about to repy "Sounds like a good idea for g388 and probably g475
+as well" but then I remembered something from my notes.  The two tests
+run without _check_filesystems on the assumption that accidental
+corruptions will multiply until either (a) the cycle_mount will fail or
+(b) the post-test _check_filesystems will have a lot to complain about.
+Doing the check every loop cycle reduces the number of log recoveries
+that we can do in a given SOAK_DURATION by a significant amount.
 
+What if we ran $XFS_IO_PROG -c verifymedia once per loop if
+XFS_VERIFY_FILE_DATA?  That would avoid a full xfs_{repair,scrub} run
+(+ extra mount cycle) but catch problems earlier.
+
+--D
