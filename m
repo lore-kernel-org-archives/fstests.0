@@ -1,30 +1,42 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 47F68483BC8;
-	Mon,  5 Oct 2026 13:28:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E20544A3849;
+	Mon,  5 Oct 2026 14:48:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791206888; cv=none; b=splthkcPqAZxnMLv/DwT2I/b09T0wGSP3l/KWFI8XEU6UWYpuPwOqk4b6MJ1/GSz7zmgiiNta1IiE7sl50R8bNXwNORY4D3Yb0lv6r3EVxxdhp3nGyMHC6O3T8YpCdOMw+9HOQurxc8SAwB+hwQjjFFfexOcryjt6U0ARhVPUZk=
+	t=1791211741; cv=none; b=jpc0Xb7MDepWj08DbMuc4X1PKZzzayLpxzF6RLiPB8WfZFnZdXp2gzPYulQ9S2lhU6jPsjuPgXHbKm0iOvFakSsguVh2Y6ydpj4lyhnkQyLMyWNAJ3Ap+wpO5z3bFSor3utCFF/g7IMXaqL0Yuil1GG0/YAeR/nbQxYTb0BDOwE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791206888; c=relaxed/simple;
-	bh=j9zlFKy2dzNwQ+tv5v1cp1DRU7vWsmuKwlfc/Kq/ZcY=;
+	s=arc-20240116; t=1791211741; c=relaxed/simple;
+	bh=iUc4VbdCVONPvsvtxlVbcNKAyNfxC+G1VjwkGuIBI4k=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ubNYil5TsnTgTOxL28m6IhkODGYpoN3Gtf2IZ8HJ4ks+xZ0rEoHU5a5fKUirAF+uRMNo7idkchu2vSTlTfa8cXyhZoJln3XBaYn3I6OCH1wrXFKUEi0GMVMmEZD8La/1596VXxhSZ2dyxwl0QyvQ/WPe707L316U0zk4aTIvzow=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id E980F68C4E; Mon,  5 Oct 2026 15:27:54 +0200 (CEST)
-Date: Mon, 5 Oct 2026 15:27:54 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>,
-	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 12/13] xfs/2307: test checksum handling using corrupted
- checksums
-Message-ID: <20261005132754.GB29227@lst.de>
-References: <20260924100855.2734089-1-hch@lst.de> <20260924100855.2734089-13-hch@lst.de> <20260929020509.GP2705364@frogsfrogsfrogs>
+	 Content-Type:Content-Disposition:In-Reply-To; b=kINEpInXDSmWVyYzztLskLHhkPbEiPs/4K15MxzmynND1XjcNpBSTqfoPgjnAUX/nNHD12hH7TxmuvFkdNDyGKCoE4S0UTBIwbqVMUmfjemGx26AxGccPlWgt9otakp/A9o3R7KHH4XSe5jM/9auLN3YDcNCoKUF4QcScDvwCzY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lF5PHMsj; arc=none smtp.client-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lF5PHMsj"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id E5CA01F000FF;
+	Mon,  5 Oct 2026 14:48:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1791211737;
+	bh=DJib5vYkCU87E0pxL3TZj3IEDUc7lIe0SqAR3sx2Gco=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=lF5PHMsjFbBkj11RNjkl9BWBCQlsNgIh/fyqZWyHOqtAEUh+GO3MVZ3I1wluALtlb
+	 ktp182eDiKe6I8qkcr7WA4qLODuxP86u+iQwND8NX5vz2T/UJu5Iyuy2Ks2hcplL3z
+	 zddfWgyfb2l3uDpR8EtmiH/xBDyNNAcJ2gS5DUCVSHX6ssBi27wzOTvg3T/j7lf5k/
+	 4wCoN8H1YmFCdAilJG1ZPsw07VUxKOTICxuFyJrgAozXFOFJ+DLJOs167ZNymkEvlN
+	 J8jzNgLS74tzdxSiwxA+JE7O+REoQ6AWRV6qUdF6LUQScs+7CY4t/72UsJpYxBgtp+
+	 D6CzXVOyJereQ==
+Date: Mon, 5 Oct 2026 07:48:56 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 05/13] xfs: add a _require_xfs_data_csum helper
+Message-ID: <20261005144856.GA2705364@frogsfrogsfrogs>
+References: <20260924100855.2734089-1-hch@lst.de>
+ <20260924100855.2734089-6-hch@lst.de>
+ <20260929013850.GH2705364@frogsfrogsfrogs>
+ <20261005132029.GJ26805@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -33,12 +45,31 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260929020509.GP2705364@frogsfrogsfrogs>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <20261005132029.GJ26805@lst.de>
 
-On Mon, Sep 28, 2026 at 07:05:09PM -0700, Darrick J. Wong wrote:
-> Want to try something wild and less obvious like ... shrinking one of
-> the extent maps so that there's a sparse hole in the rtcsum file?
+On Mon, Oct 05, 2026 at 03:20:29PM +0200, Christoph Hellwig wrote:
+> On Mon, Sep 28, 2026 at 06:38:50PM -0700, Darrick J. Wong wrote:
+> > Any chance we could export file data checksum type via statx or
+> > somewhere?
+> 
+> I think Christian would hate that.  But maybe fsxattrs?
+> Note that the io_uring support when I get around it will implement
+> FS_IOC_GETLBMD_CAP, which also has this information, although in a
+> somewhat convoluted way.
 
-Sure, if you provide the xfs_db magic to inject it :)
+Oh wow, a new ioctl.  Having not tried to do anything with it, it looks
+promising.  Would it be useful for a filesystem with software checksums
+to advertise something like this:
 
+struct logical_block_metadata_cap foo = {
+	.lbmd_flags = LBMD_FS_CSUM_CRC32C, /* doesn't yet exist */
+	.lbmd_interval = i_blocksize(...),
+	.lbmd_size = 4,
+};
+
+Even though userspace cannot (yet) access the per-fsblock crc32c data?
+
+Also, if the fs supports per-fsblock checksums and the storage supports
+per-LBA PI, which gets advertised?
+
+--D
