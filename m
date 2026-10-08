@@ -1,82 +1,105 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A446B4D37BE;
-	Thu,  8 Oct 2026 14:47:24 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 368AC38D401;
+	Thu,  8 Oct 2026 15:17:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791470850; cv=none; b=ul5pIu6QG6l3kzYVaglTojTxcCLkBZqszxA/8Wz2SH24x6oZ184lYC17/CoVbQ/8b3dBSZ31QYbpZ3Z7C8SRyh1KpvgLJWQRPB2Ma8UQkMQN9UjWH135ocUtUn6yse0KCidRzcInHthH7GXFoPgZS9WYvBQwRaU5LK4q308sqdQ=
+	t=1791472657; cv=none; b=FFYhj/wpF3hF79lINw6bXVR2EL3530xcx5T0fholhKsQup3MMHwak6cwFZR+CpGtOMJyh84uEGYnbHp7Si9qor4ssSTqHjIcsPetHOLkRQxmKkcfK7y+FcAKnitJIY+jnlcUI/5YAdG44NZz86+T4PTMZnWH+d9ibBgOPhC1ki8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791470850; c=relaxed/simple;
-	bh=lAauYL+l11S9K3GzHRBsDd5P/phcHKRv1cApD5uJC4Q=;
+	s=arc-20240116; t=1791472657; c=relaxed/simple;
+	bh=qIlQImlPtEwA2AQpBZMWspWqmPYwn7vDtp1w5u29PTY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=RLK1U/upsChCfzMksW0vHT2+0OjZ/GvzK+w9OYvYm3kNQ66Hhl4WelET9eXiqN8fI1ASuXyAWjR3v9YX8IUQ5RaXfrlaSp2G/S6+dUfwAjY/X+VCktrJo8TQxCDz0fpcalHWerxIE707nORCCTc+ZNgSBQuwsAm7J52iLRst1+s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IEZL0n3E; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=Mpez5uQhGrSkhOIruwyJaTvi2QIvxbifTSE4E/vqsHVfltgme1bcBaDRDrSQ+f+rV1m3gmB1sQKYh5AEX/E7YeaJxbYPgi0YmFh1/TDqPVfEsrzuWoCOCliCd5IhULaz/R8avK3AuJjnxxRqieUxPCVMoytGsjqOj6YLvNaLBjA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Hb1BQdsk; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IEZL0n3E"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4C3B41F00893;
-	Thu,  8 Oct 2026 14:47:21 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Hb1BQdsk"
+Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 93DB81F000FF;
+	Thu,  8 Oct 2026 15:17:31 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1791470844;
-	bh=/R0BmBD3FiRhcGJos7pzOhr3R16YlnWKVAHWOffyqow=;
+	s=k20260515; t=1791472651;
+	bh=UJc7WsmWyAXsQtpa2UsM/mLW1e5WhzmbNnUzvUDyqVI=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=IEZL0n3Ecubs+Le2WnxJTPo4mjq8KOo2YOJEMlGpTsCpbm6TQAiLQohsRdW+oc3gm
-	 JipXVjKT//IDwRsHjb2gZQQFkMi/+N8VDEVjwwtWbxvNoowInjRz3FbogU7p5frDqB
-	 puvHR971J5NduN6Dw5pt4a0fNXlRENa/IwAfeLlhT4PDUJ9d0xMCyvPF3v32CEnKhW
-	 ho5rHdMARw8onaSTBYVgYvY94yW4YMgDtxJgMueTbGl/WS36ivm4pa9rlHI0ZMcWui
-	 zhvztYVLanvWdlr5twlBEevCUUg7lZx/SlLz8gu51sB0J1xRol/GV3BWONozbl5U+/
-	 fiD0wsugTtbTA==
-Date: Thu, 8 Oct 2026 22:47:19 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/4] common/xfs: add zoned/rtstart info to mkfs filter
- output
-Message-ID: <ases1bGt9Hx5UT10@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>, 
-	linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-References: <179060965752.790984.3511820348115861306.stgit@frogsfrogsfrogs>
- <179060965805.790984.4333974916537243304.stgit@frogsfrogsfrogs>
+	b=Hb1BQdskgYgUACJJdW/fHoJKHZ+PUj2ktXWFY89IMPaV0IF+Dyc37hKwNJrBX8IUz
+	 XZBSAl8j5+P1PnSaCLOm+n115YQLBZoGn3YuxQ42kM0FoJdwoYuz5UfU4SzVn9Bt4G
+	 6SD1HZU/zaRYO+bE2DXa7qbwoTmo7hBNE8odpLXN8cF+pE9YdWHSYzTxiu828wBv4e
+	 L//ztOksaa1q+7eTwd6qpFoCfJyo2AvIFZPeClnt5vZp0DiU2XOwo66dgUFR5pqN+6
+	 HYfioyCampjNj7NCNHw9YzWCZhpN/KKG/Yor+yhbKD9kIkPRKu5aAuyhVaEUgmyLGE
+	 2Pzri9ifVOakg==
+Date: Thu, 8 Oct 2026 08:17:31 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Lukas Herbolt <lukas@herbolt.com>
+Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+	linux-ext4@vger.kernel.org
+Subject: Re: [PATCH 1/1] lib/random.c fix undefined behavior on signed
+ integer overflow.
+Message-ID: <20261008151731.GN2705364@frogsfrogsfrogs>
+References: <20261006135205.400485-1-lukas@herbolt.com>
+ <20261006135205.400485-2-lukas@herbolt.com>
+ <20261007170058.GG2705364@frogsfrogsfrogs>
+ <d000ae8abba884b0a58be93e6e63f486@herbolt.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <179060965805.790984.4333974916537243304.stgit@frogsfrogsfrogs>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <d000ae8abba884b0a58be93e6e63f486@herbolt.com>
 
-On Mon, Sep 28, 2026 at 08:36:27AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Thu, Oct 08, 2026 at 10:23:59AM +0200, Lukas Herbolt wrote:
+> On 2026-10-07 19:00, Darrick J. Wong wrote:
+> > On Tue, Oct 06, 2026 at 03:51:52PM +0200, Lukas Herbolt wrote:
+> > > The random.c now expects that signed integer to overflow and
+> > > triggers the  ^MASK branch. But signed int overflow is undefined
+> > > behavior and GCC can optimize this branch out with certain
+> > > CFLAGS/LDFLAGS.
+> > > 
+> > > Signed-off-by: Lukas Herbolt <lukas@herbolt.com>
+> > > ---
+> > >  lib/random.c | 13 +++++++------
+> > >  1 file changed, 7 insertions(+), 6 deletions(-)
+> > > 
+> > > diff --git a/lib/random.c b/lib/random.c
+> > > index d5c81be817c8..f767ed1d1337 100644
+> > > --- a/lib/random.c
+> > > +++ b/lib/random.c
+> > > @@ -186,14 +186,15 @@ _random (int32_t is [2])
+> > >  int32_t
+> > >  _irandm (int32_t is [2])
+> > >  {
+> > > -	int32_t it, leh, nit;
+> > > -
+> > > +	int32_t it, leh, nit, apply_mask;
+> > >  	it = is [0];
+> > >  	leh = is [1];
+> > > -	if (it <= 0)
+> > > -		it = (it + it) ^ MASK;
+> > > -	else
+> > > -		it = it + it;
+> > > +
+> > > +/* 	evaluate on original value — no UB here */
+> > > +	apply_mask = (it <= 0);
+> > > +/*	double via unsigned shift — well-defined */
+> > > +	it = (unsigned)it << 1;
+> > > +	if (apply_mask) it ^= MASK;
+> > 
+> > Doesn't _random suffer the same flaw?
+> > 
+> > Oh.  It's dead code, maybe it should go away?
+> Good point.
+> > 
+> > Also, what about converting all the variables to unsigned?
 > 
-> A subsequent patch will want to be able to extract the start of an
-> internal rt volume from the xfs_info output, so add the necessary lines
-> to _xfs_filter_mkfs to transform the output into bash variables.
-> 
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
+> It would break two signed checks: `it <= 0` (LFSR feedback -
+> only fires at zero instead of when MSB set) and `leh < 0`
+> (output folding — never fires). The `it` register degenerates
+> to 33 repeating values after 64 calls. Reducing the pool of
+> random numbers.
 
-Makes sense,
+Ah.  Well in that case I'm satisfied, so
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
-Reviewed-by: Zorro Lang <zlang@kernel.org>
-
->  common/xfs |    3 +++
->  1 file changed, 3 insertions(+)
-> 
-> 
-> diff --git a/common/xfs b/common/xfs
-> index 98981e624ddade..318b1a3b245ae6 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -1787,6 +1787,9 @@ _xfs_filter_mkfs()
->  	}
->  	if (/^\s+=\s+rgcount=(\d+)\s+rgsize=(\d+) extents/) {
->  		print STDERR "rgcount=$1\nrgextents=$2\n";
-> +	}
-> +	if (/^\s+=\s+zoned=(\d+)\s+start=(\d+) reserved=(\d+)/) {
-> +		print STDERR "zoned=$1\nrtstart=$2\nrtreserved=$3\n";
->  	}'
->  }
->  
-> 
+--D
