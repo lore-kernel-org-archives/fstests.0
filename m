@@ -1,246 +1,104 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qt1-f176.google.com (mail-qt1-f176.google.com [209.85.160.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59FC247CC96;
-	Thu,  8 Oct 2026 10:18:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791454705; cv=none; b=RflsiPUFG9XwLGRVPkFbnk0cOs0i+FpjEbGfmJJkWBEehpdhD0EWzqfFjJlWFuLa2/mleqFmTHokGCqwWaIGuzSz3J+l07dEv9g42K8juJ7uOaF36mM8VH9rZhB7d/ET42Hv7GdmLaFR5Q2eD/3oN5F1T9HaDxFtfdtfg6W2iHo=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791454705; c=relaxed/simple;
-	bh=4PAVJIQ1iWZznf87QREqdj7wgQzZxrm9wXmgoaYrsdo=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=aWQbStFiu6ENYTgzUXAggBFyGbiu5I1ogycjYT+yo8UX5QWn4ZI/PMQmWbPEfPy3IbSt9/TjE5VATZ80dnxwvr7Lfl0N1HhFqdjIVjT3o/rXNf+F4ZHhqcaHmbnmSgZCiXG/C0wvy8/6HZk4WCn4dy9xke/wiM80h21G+hOLIyI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kpaTjppy; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C3C043846B
+	for <fstests@vger.kernel.org>; Thu,  8 Oct 2026 10:53:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.160.176
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1791456820; cv=pass; b=Oa1GRZRfeVtYhlAu1k/tJI8Bz5GQwZ5JJay/sZmPRIXZnHxU5al43h5tRm1HMKOIwUIAZFPmvcU1zulubYcfWCUh2nSSYGhdM+fqNadAC5yrBQRrCNue9W4ErI7WmxsIWUiTiO8GoLSzGFsAY3l+VX8veQ7GfttF+6K92YurWM0=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1791456820; c=relaxed/simple;
+	bh=Y4fyfcQSH1fht1ENIEiaER3sPYluHfnLd38vJ3h+S38=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=O+8+9h9XmuF8togqMUKd9QpydWMelP1EisAy5hv9dLkDaxXIFvSEPfnQCnXkz+4l6w7LJbEwNH0xYaw5k/G7bxTZWV+kemmDPII4tOVhQeY0nuBb776teoX3rRXyBqXcNiNLJIYFJzPgzDB7zjQk1PzKy5/js521J0/fqq42ueE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=t9cBkMdX; arc=pass smtp.client-ip=209.85.160.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kpaTjppy"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id CBBBEC2BCC7;
-	Thu,  8 Oct 2026 10:18:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1791454704;
-	bh=4PAVJIQ1iWZznf87QREqdj7wgQzZxrm9wXmgoaYrsdo=;
-	h=From:Date:Subject:To:Cc:Reply-To:From;
-	b=kpaTjppy0bRIKCP8XCNEKH6VbafPAtIAN4ieTtYoIdbPQR7PJPo6hj4FNeUluizq0
-	 a7Jz+ypakBDi7enl2onsgkx/sNi6I5c+5brdBMPcKamoTV/Ms9JKia9BlFDWVym6jB
-	 cVBDlmpZEu+tWQGQd6pGzh5RbEfBzukr6kzw5Ya3kJT7fqsWPoJF5pQf8FKyffrpqq
-	 Rg81u0tHlma6wlleFKQGS+n5+l7Jcqe1TqdWcJxFWzB0WlyFkGgtL/xDBhZg0DfdjF
-	 26czPhgiPGK/FngcFKyC+c/w44xTAcMcQovlVoEHyKWwTY6QuqTFyB2oNlP3e/tT9V
-	 5C2cXThs5C0FA==
-Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A74E7CA600B;
-	Thu,  8 Oct 2026 10:18:24 +0000 (UTC)
-From: Daejun Park via B4 Relay <devnull+daejun7.park.samsung.com@kernel.org>
-Date: Thu, 08 Oct 2026 19:18:24 +0900
-Subject: [PATCH v2] generic: test that preallocated blocks still read
- zeroes after I/O errors
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="t9cBkMdX"
+Received: by mail-qt1-f176.google.com with SMTP id d75a77b69052e-5337fa12431so204821cf.1
+        for <fstests@vger.kernel.org>; Thu, 08 Oct 2026 03:53:39 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1791456818; cv=none;
+        d=google.com; s=arc-20260327;
+        b=h+zUzExZhLLD//zPRMRj2VwmUbLrSQxm9tEGzav+7RFyXtIVXi4o5gpCMZAqkwGr2Y
+         aNzJ4B1zW8c/fK9ie/L5wiO71VnbUQV8FScPgbM9uIIeXo4G+pwZhhgWVuDY5wCTjRYL
+         l+wlGe+9Y8DrH3Bn6/Dxiw9pYMGcidaGczv7m/JjI4yM+Bh5p/7K2azgDTqlKIqffzsI
+         vvwOYBUVTfkqK+NryQOC6hc8hGWrgGGGM6vC9Vl0WIpJrjEVxuKEHfCIOYWSg674JUOV
+         irEbnXhtL64jwMewkn+4fG+QNSk+KtsohLW28U14YjYRHoIHsKEJz8NzNkSaVbFPKvZ1
+         GY7A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=RdIfW0TB1524JNRu+zC/enwNslep7VME5A2W7emIiNg=;
+        fh=0T2m50aTd39Z+8VctvI4BSkmn8seDHAD0oNGCrDxMcE=;
+        b=KtikOsg212pTkF1nE0R+A6Mow/Wytbh6ucl0JukbuBO6/+6ZuabeXsBWRfE4dNMx6D
+         J8SumpnV0Oh7VysrVmuqFPJcSjfneQGyu0ev45HKHSlCr0McPSSZhN3hieM5ZtHCqRIn
+         DkGs/ivTop/qa+sbdggKNOqk0nZlrdACIMgA8jNhefPmrppHHtKZ1rFZzvq5d9A+fLwO
+         EBgkmewEhCyxorpSaqIC8VGBYvo9gx+PDh0pGJmCexFGiMKuMaaWUYKRagEKEUuHXE6N
+         KUPIqAnmKruEa2ttrpLa/bDrI0et1K4O56DLmQYhXq+RAkrFNT/fGg0Z37JIplGGShPU
+         Os7g==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20251104; t=1791456818; x=1792061618; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=RdIfW0TB1524JNRu+zC/enwNslep7VME5A2W7emIiNg=;
+        b=t9cBkMdXHwvoaafXHydnqitQcYnwJAWOBtgzk5KE9voimuVt1WhCPR/mpKIk5dNRRH
+         qSIe3Oj0uLchyReh+6TYbv4DUT3rcUUOEhrvpg87lnZpxwMJGvCfHOvkWdnUS7A8SH6K
+         8phA2OaTiMg55l7E4lQTrjio/oYc8h98bk9Sok+m+yWqR6X9QXwsf7d3OyrmlhSoAdLt
+         1tiDtXV0m68igQHLVsvZuR7qYtydQEYCr50k6Y6pqLjF7ZqGYQHPtU77PyOHXbX7vJwO
+         y38MQNyR66RuJbRVmMj1Nahrit2EQ25Xvlp1DEQMAMKXQ7u99zCzb5dOlt9z7u76HHX5
+         E+BQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1791456818; x=1792061618;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=RdIfW0TB1524JNRu+zC/enwNslep7VME5A2W7emIiNg=;
+        b=JnBizxtUKVjYLvghkTajX6dZLe8rmJunFfAI4dl/L2+egHHY7lghrhdjncW/KY0yyZ
+         ZcKR3Hxu9DLcUzS7D/93NbqdqUguYKeiRVugkP8laLF49MDtoiTPy43qkpBXzm8lUDYA
+         ZNAh+aJ8/F521XF6c2JH6n+m1KA5VOaDjsIfQQdJHd9UPP1u0k6IEpbmlMGC09HDWfcE
+         Y14LIvxtwSONp0U3fhhpaSJTL1+VQM75E7ywHUWI+0pzAfRsaf0j7GJA44RCSQD1YeQP
+         Ao1I046P28d+FxoE+iXGVsIbCF38+VyzaNgbWsZWjFQ126Meb/7QEtZq9qnQx8IXkdem
+         J9kA==
+X-Forwarded-Encrypted: i=1; AKwUvBz8Kj3um5uQDYir/Cl5yD6AG3XU/C9vyiFTPrJ9ueCg/fF0b5YaxK4SJOH2jfL1IXVvX50FZFNt@vger.kernel.org
+X-Gm-Message-State: AFuF++mrVSWxY9SXHOEtzkqAqQB6WqYwvmRtSsYdr2em6yBIQ3vrp9xa
+	6alHzgAKMLzZflInwRt8tQUyJ9fTCju8a87v5keRI1W8G8tjreD6LztAkApwwpZY4UnLrZ89Uvp
+	ghmafKnhUUsNfF7cveUzB5gRzfDguI6V27j3+k4/I
+X-Gm-Gg: AYBFou144qDsDFMbijCoIc6v58s7tkhHP++Tg4fGNFv+QsjrrSjVO/6x96II8ugeXvj
+	MZ1dzeRyB8oaVW5roXAIV69ND7TMZnNSWQWXjN6GsF3JaJNF+7A1R0QGeHShu9Up9SsLQ9uaFKW
+	lrYHa5WMYzrxkxBmjW3J8wxenuBDvn3na3U8yWInPmvW+7tmrubnZxxWfO/CEAU0neTrr1rnVSJ
+	HWTMJ/OclUcGnjvglhqaAqegGYtKUuxDIwiafvcZtuX8aO3U4i3cOiv239OSiZmyI8cHndEFhDh
+	orPFvHuWrg0eNIlxF1XtGq0VvJY896O1mOnAy/T7RYW4r9wQuhGtZ/xbOpwvHmoreBRmGrHUaGk
+	I4jo6KvX0KF2ckg==
+X-Received: by 2002:a05:622a:8cb:b0:531:282:6560 with SMTP id
+ d75a77b69052e-5358ba57e28mr13693771cf.15.1791456817740; Thu, 08 Oct 2026
+ 03:53:37 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20261008-ext4-zeroout-eio-test-v2-1-883ac28de4cf@samsung.com>
-X-B4-Tracking: v=1; b=H4sIAO9tx2oC/4WNQQ6CMBBFr0Jm7ZiWYFFX3sOwaGGAWUBNpzQo4
- e5WLuDuv5/89zcQCkwC92KDQImF/ZyhPBXQjnYeCLnLDKUqjVbqirTGCj8UvF8iEnuMJDlQbRx
- ZZS+6hrx9Bep5PbzPJvPIEn14HzdJ/9p/xqRR4805YzqyvanMQ+wkyzycWz9Bs+/7F//tTZ+8A
- AAA
-To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org, Zorro Lang <zlang@kernel.org>, 
- Christoph Hellwig <hch@infradead.org>, 
- Ojaswin Mujoo <ojaswin@linux.ibm.com>, Jan Kara <jack@suse.cz>, 
- Theodore Ts'o <tytso@mit.edu>, Daejun Park <daejun7.park@samsung.com>
-X-Mailer: b4 0.13.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1791454703; l=6468;
- i=daejun7.park@samsung.com; s=20261006; h=from:subject:message-id;
- bh=bQ9R3OIOFgPENEMm5FZziQo5b0dVQOH5X5ABnSjdIRU=;
- b=4yudI3ooTojxPcpGuXzftjwu0HiF+LVdly7MhZ4z4WRwXqssiC6zC+vvjXDbhTbZaQb5nWrWz
- 3QgG7ZBfJ3PCd6p/Hd0y3czUV8LO20C5eAZZUrg3tQotFXRelON4tRw
-X-Developer-Key: i=daejun7.park@samsung.com; a=ed25519;
- pk=4yUfDqGRZTIj0Ik43z1GoMZRWCNm/rgX6uJuM9dtNIg=
-X-Endpoint-Received: by B4 Relay for daejun7.park@samsung.com/20261006 with
- auth_id=1122
-X-Original-From: Daejun Park <daejun7.park@samsung.com>
-Reply-To: daejun7.park@samsung.com
+References: <20261008093102.2791457-1-jprusakowski@google.com> <asdjv0byRIgx2DBO@infradead.org>
+In-Reply-To: <asdjv0byRIgx2DBO@infradead.org>
+From: Jan Prusakowski <jprusakowski@google.com>
+Date: Thu, 8 Oct 2026 12:53:26 +0200
+X-Gm-Features: AclHuK8T47iztnOQ3wUy_EMdakQ9CJulz201rAPWZy9Jb7GPVkr9zBdUs-yMDfs
+Message-ID: <CAHwWncgG88o3dbhHuHYgCoqGZJ_X8C7wLP0S5ppwRDM450jMcA@mail.gmail.com>
+Subject: Re: [PATCH] generic/794: add fsync_mode=strict mount option for f2fs
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Zorro Lang <zlang@kernel.org>, Chao Yu <chao@kernel.org>, fstests@vger.kernel.org, 
+	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
+Content-Type: text/plain; charset="UTF-8"
 
-From: Daejun Park <daejun7.park@samsung.com>
+> It looks like this sneaked into the other tests, but this option
+> is bullshit and we should remove it from the other tests.
+>
+> The f2fs default is simply broken, and the justification in the
+> documentation is incorrect.  f2fs should absolutely fail all these
+> tests in default mode because it actually is broken.
 
-Write one block of a preallocated range while I/O to the rest of the
-range fails, and check that the rest still reads back as zeroes rather
-than the old contents of the disk.
-
-ext4 got this wrong. When a write converts part of a small unwritten
-extent, ext4 may zero out the rest of the extent and convert all of it
-to written. If that zeroout fails, ext4 falls back to splitting the
-extent, but it cached the blocks it failed to zero out as written in the
-extent status tree, so reads of those blocks returned the old contents
-of the disk.
-
-On ext4 the test mounts with dioread_lock and nodelalloc and sets
-extent_max_zeroout_kb to get into that path: with the default
-dioread_nolock, the extent stays unwritten until the I/O completes and
-is converted then, without this zeroout. generic/250 and generic/252 do
-not hit it either, as they write with direct I/O while dm-error is
-loaded, which also leaves the extent unwritten. btrfs is excluded, as
-fiemap does not report device offsets there.
-
-The ext4 fix is "ext4: don't cache unzeroed blocks as written after a
-failed zeroout".
-
-Link: https://lore.kernel.org/r/20261008-ext4-fc-zeroout-v2-1-55cab1e24fa3@samsung.com
-Suggested-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Signed-off-by: Daejun Park <daejun7.park@samsung.com>
----
-The ext4 fix is 1/2 of the series in the Link: and is not merged yet,
-hence xxxxxxxxxxxx in _fixed_by_fs_commit. The test number may need to
-change.
-
-Tested in QEMU. On ext4 dev 9091c97be340 without the fix, blocks 1-7
-read back as 0x53. With the fix, alone or with the rest of the series,
-the test passes with 1k and 4k blocks. It passes on xfs with 1k and 4k
-blocks.
----
-Changes in v2:
-- Make it a generic test (Christoph). The ext4 mount options and
-  extent_max_zeroout_kb are set only on ext4. btrfs is excluded, as
-  fiemap does not report device offsets there, and xfs gets the zoned
-  and realtime handling of generic/791.
-- Link to v1: https://lore.kernel.org/r/20261008-ext4-zeroout-eio-test-v1-1-9bb66deaf646@samsung.com
----
- tests/generic/806     | 106 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/806.out |   5 +++
- 2 files changed, 111 insertions(+)
-
-diff --git a/tests/generic/806 b/tests/generic/806
-new file mode 100755
-index 0000000..8991b6e
---- /dev/null
-+++ b/tests/generic/806
-@@ -0,0 +1,106 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Samsung Electronics Co., Ltd. All Rights Reserved.
-+#
-+# FS QA Test No. 806
-+#
-+# Write one block of a preallocated range while I/O to the rest of the range
-+# fails, then check that the rest still reads back as zeroes, not as the old
-+# contents of the disk.
-+#
-+# ext4 zeroes out the rest of a small unwritten extent when a write converts
-+# part of it. When that zeroout failed, it fell back to splitting the extent,
-+# but it cached the blocks it failed to zero out as written in the extent
-+# status tree, so reading them returned the old contents of the disk.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick rw prealloc eio
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	_dmerror_cleanup
-+}
-+
-+. ./common/dmerror
-+
-+# The test writes to the device at the offsets fiemap reports, which are not
-+# device offsets on btrfs.
-+_exclude_fs btrfs
-+
-+_require_scratch
-+_require_dm_target error
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "fiemap"
-+test $FSTYP = ext4 && _require_scratch_ext4_feature_enabled "extent"
-+
-+_fixed_by_fs_commit ext4 xxxxxxxxxxxx \
-+	"ext4: don't cache unzeroed blocks as written after a failed zeroout"
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+
-+# dm-error table sizes need zone alignment on zoned devices, and the check
-+# needs a mounted file system.
-+_scratch_mount
-+test $FSTYP = xfs && _require_xfs_scratch_non_zoned
-+_scratch_unmount
-+
-+# ext4 does the zeroout when a write converts the extent itself. With the
-+# default dioread_nolock, the extent stays unwritten until the I/O completes,
-+# so mount with dioread_lock, and with nodelalloc to convert the extent at
-+# write time.
-+mount_opts=
-+test $FSTYP = ext4 && mount_opts="-o nodelalloc,dioread_lock"
-+
-+do_mount()
-+{
-+	_dmerror_mount $mount_opts >> $seqres.full 2>&1 || _fail "mount failed"
-+	test $FSTYP = xfs && _xfs_force_bdev data $SCRATCH_MNT
-+}
-+
-+_dmerror_init
-+do_mount
-+
-+nblks=8
-+blksz=$(_get_file_block_size $SCRATCH_MNT)
-+sects_per_blk=$((blksz / 512))
-+file=$SCRATCH_MNT/file
-+
-+$XFS_IO_PROG -f -c "falloc 0 $((nblks * blksz))" -c fsync $file >> $seqres.full
-+extent="$($XFS_IO_PROG -c "fiemap -v" $file | grep "^[[:space:]]*0:")"
-+echo "$extent" >> $seqres.full
-+phys=$(echo "$extent" | $AWK_PROG '{print $3}' | sed -e 's/\.\..*//')
-+len=$(echo "$extent" | $AWK_PROG '{print $4}')
-+flags=$(echo "$extent" | $AWK_PROG '{print $5}')
-+flags=${flags:-0}
-+test "$len" = $((nblks * sects_per_blk)) -a $((flags & 0x800)) -ne 0 || \
-+	_notrun "could not allocate one unwritten extent of $nblks blocks"
-+
-+# Put something other than zeroes in the preallocated blocks
-+_dmerror_unmount
-+$XFS_IO_PROG -d \
-+	-c "pwrite -S 0x53 -b $blksz $((phys * 512)) $((nblks * blksz))" \
-+	$DMERROR_DEV >> $seqres.full
-+do_mount
-+
-+# ext4 zeroes out the rest of the extent if the whole extent fits in
-+# extent_max_zeroout_kb, which mount resets.
-+test $FSTYP = ext4 && _set_fs_sysfs_attr $DMERROR_DEV \
-+	extent_max_zeroout_kb $((nblks * blksz / 1024))
-+
-+# Fail I/O to blocks 1 to the end of the range and write block 0
-+_dmerror_reset_table
-+_dmerror_mark_range_bad $((phys + sects_per_blk)) \
-+	$(((nblks - 1) * sects_per_blk))
-+_dmerror_load_error_table
-+$XFS_IO_PROG -c "pwrite -S 0x41 0 $blksz" -c fsync $file >> $seqres.full
-+_dmerror_load_working_table
-+
-+echo "block 0:"
-+od -An -v -tx1 -N $blksz $file | sort -u
-+echo "blocks 1-$((nblks - 1)):"
-+od -An -v -tx1 -j $blksz $file | sort -u
-+
-+# success, all done
-+_exit 0
-diff --git a/tests/generic/806.out b/tests/generic/806.out
-new file mode 100644
-index 0000000..84b3a35
---- /dev/null
-+++ b/tests/generic/806.out
-@@ -0,0 +1,5 @@
-+QA output created by 806
-+block 0:
-+ 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41
-+blocks 1-7:
-+ 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-
----
-base-commit: 22348afe338c0f6d540c0d7ef0db749eaa51b218
-change-id: 20261008-ext4-zeroout-eio-test-ee76bea0a517
-
-Best regards,
--- 
-Daejun Park <daejun7.park@samsung.com>
-
-
+Hi Christoph, I can see your point. Let me look into it again.
