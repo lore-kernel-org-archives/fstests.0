@@ -1,105 +1,126 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com [209.85.218.70])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 368AC38D401;
-	Thu,  8 Oct 2026 15:17:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4AAC3D75A1
+	for <fstests@vger.kernel.org>; Fri,  9 Oct 2026 08:55:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.70
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791472657; cv=none; b=FFYhj/wpF3hF79lINw6bXVR2EL3530xcx5T0fholhKsQup3MMHwak6cwFZR+CpGtOMJyh84uEGYnbHp7Si9qor4ssSTqHjIcsPetHOLkRQxmKkcfK7y+FcAKnitJIY+jnlcUI/5YAdG44NZz86+T4PTMZnWH+d9ibBgOPhC1ki8=
+	t=1791536159; cv=none; b=i70nTK+a1LhpwuA0Lxe848O7zMewZg5JDmqh6Ef9NSrxcaJUZCsQr3GDstHAPZaEOScrDy5iPAaM2JoUJ/e4nBBANCFa8yFlvECY6OxocbpiXLhii0Zvi/Eub61P8SjBjGqJkj0z4IThbpnuAV2bOgzW7k1b1y+eedTTHgRQH8M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791472657; c=relaxed/simple;
-	bh=qIlQImlPtEwA2AQpBZMWspWqmPYwn7vDtp1w5u29PTY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Mpez5uQhGrSkhOIruwyJaTvi2QIvxbifTSE4E/vqsHVfltgme1bcBaDRDrSQ+f+rV1m3gmB1sQKYh5AEX/E7YeaJxbYPgi0YmFh1/TDqPVfEsrzuWoCOCliCd5IhULaz/R8avK3AuJjnxxRqieUxPCVMoytGsjqOj6YLvNaLBjA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Hb1BQdsk; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1791536159; c=relaxed/simple;
+	bh=OGv9e4kZdiF9RgD1EliE6XHLgPk3GmgettAYWl1fA+M=;
+	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=ey05OknqQN1spRgKUwuGM4c8QMs1pxWt1xNBPPX5pg7vA4Zwc1oVuhfdv0Y+puGNexCj7wBB/jxaJYabsAVJ73uEJj9l93PrCqkbwi57GgP+HxAeDRrnJ8VXBHn3zrVRmrfOYhwGhSxrBb6JLgYm03WhcBXkQe3QeOix/anpjGs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=IiMKIK9a; arc=none smtp.client-ip=209.85.218.70
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Hb1BQdsk"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 93DB81F000FF;
-	Thu,  8 Oct 2026 15:17:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1791472651;
-	bh=UJc7WsmWyAXsQtpa2UsM/mLW1e5WhzmbNnUzvUDyqVI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=Hb1BQdskgYgUACJJdW/fHoJKHZ+PUj2ktXWFY89IMPaV0IF+Dyc37hKwNJrBX8IUz
-	 XZBSAl8j5+P1PnSaCLOm+n115YQLBZoGn3YuxQ42kM0FoJdwoYuz5UfU4SzVn9Bt4G
-	 6SD1HZU/zaRYO+bE2DXa7qbwoTmo7hBNE8odpLXN8cF+pE9YdWHSYzTxiu828wBv4e
-	 L//ztOksaa1q+7eTwd6qpFoCfJyo2AvIFZPeClnt5vZp0DiU2XOwo66dgUFR5pqN+6
-	 HYfioyCampjNj7NCNHw9YzWCZhpN/KKG/Yor+yhbKD9kIkPRKu5aAuyhVaEUgmyLGE
-	 2Pzri9ifVOakg==
-Date: Thu, 8 Oct 2026 08:17:31 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Lukas Herbolt <lukas@herbolt.com>
-Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-	linux-ext4@vger.kernel.org
-Subject: Re: [PATCH 1/1] lib/random.c fix undefined behavior on signed
- integer overflow.
-Message-ID: <20261008151731.GN2705364@frogsfrogsfrogs>
-References: <20261006135205.400485-1-lukas@herbolt.com>
- <20261006135205.400485-2-lukas@herbolt.com>
- <20261007170058.GG2705364@frogsfrogsfrogs>
- <d000ae8abba884b0a58be93e6e63f486@herbolt.com>
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="IiMKIK9a"
+Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-c2e6affec80so591618766b.2
+        for <fstests@vger.kernel.org>; Fri, 09 Oct 2026 01:55:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20251104; t=1791536156; x=1792140956; darn=vger.kernel.org;
+        h=content-type:cc:to:from:subject:message-id:mime-version:date:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=XkufVygYf3das1AkCg5Yl8KsorAKzoeCOi7nexNmHV0=;
+        b=IiMKIK9a3qxUnYUp+M4GD8hyhwMkS1XTI7vDG+WFBnuAIIz92LaVPghIdqkOnbCFdS
+         gNZGcVikqVI8BNvkzHF8UQ2PKc9S/k6EKJCVMpVElcqLcbMHIvv9ccIA1gJAwzNUuzJm
+         Q9y2tcM9nCP2lVcdlmxQCp9yV4XXo2FFBp5R4SlrBGuTqNMk7WdbJWQGP26scwxG9jb6
+         Cg3dihCLFb6hV6QzWLiAfGkh1HRj9CwGSQGxaTDY90f3U0RAuWZhZ/dCWHbCLzvFn7NT
+         BBSN4I7MkFHHBUjid0MXEVFsEM0JK5R1qgNnEVqpaghbUS6IwEQUDm+lqCOfPfSJi55D
+         vwcw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1791536156; x=1792140956;
+        h=content-type:cc:to:from:subject:message-id:mime-version:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=XkufVygYf3das1AkCg5Yl8KsorAKzoeCOi7nexNmHV0=;
+        b=MP4/mXGq7yHa55N7aLtI/gPHtCSaJoHeLIWt1p8BDorkiHJrBstdHigF8/TF0sz29c
+         aB57cyU2SuZ7uzdFSHWs34KAQlIoYaskfebt1zGoKaY+VIAwE7NV6mEtw8xTVj2YOeX7
+         7aSqA5OCKmFNx/4CcBCNqmfDN0/zCwugqPb6RhiY08Ca68l6VNOUKragt240h8r107CJ
+         g9UKudZOhUGSMZlQU5PLhv9G4DQKCpI9SZ68clw+PqQnEZYPzlgK/WrT6vJ89K14X4q0
+         vuOKNInmgoB3GJS8tEeSH1RJrFyjzmBjvRKyBJtT1RtaD11YasZ//KdObyVbfn+6SfBL
+         lZXg==
+X-Forwarded-Encrypted: i=1; AKwUvBzEAKn3Y8+TjDa1pknrEgTdLRHE6Er4XzsHaGk0RIu4ity74eCswx725wR3LI4Hl7QgIvKfLtvz@vger.kernel.org
+X-Gm-Message-State: AFq9FYKTKFGXozKZP2ThZRUhlt6Nse5hZ4N9prGGuf35QxX1BFU9I90s
+	IBdGbbSVbonk9RY+bFFbUIcid6QOBPsoRwJw91tdxEsd1NJv/BJTk5ogTjPxwZTagUU6yWNeyUL
+	vP3HNK9P0UJsLSiyhz9ObmC4ZhXhvUw==
+X-Received: from ejcxk3.prod.google.com ([2002:a17:907:d803:b0:c2a:e413:97d5])
+ (user=jprusakowski job=prod-delivery.src-stubby-dispatcher) by
+ 2002:a17:907:961a:b0:c25:2a78:15ed with SMTP id a640c23a62f3a-c31a9a04e08mr114472166b.6.1791536155187;
+ Fri, 09 Oct 2026 01:55:55 -0700 (PDT)
+Date: Fri,  9 Oct 2026 08:55:43 +0000
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <d000ae8abba884b0a58be93e6e63f486@herbolt.com>
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.56.0.385.gd3acb90ef8-goog
+Message-ID: <20261009085544.2450966-1-jprusakowski@google.com>
+Subject: [PATCH v2] generic/622: increase sleep time for lazytime expiration
+From: Jan Prusakowski <jprusakowski@google.com>
+To: Zorro Lang <zlang@kernel.org>, Chao Yu <chao@kernel.org>, fstests@vger.kernel.org
+Cc: jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net, 
+	Jan Prusakowski <jprusakowski@google.com>
+Content-Type: text/plain; charset="UTF-8"
 
-On Thu, Oct 08, 2026 at 10:23:59AM +0200, Lukas Herbolt wrote:
-> On 2026-10-07 19:00, Darrick J. Wong wrote:
-> > On Tue, Oct 06, 2026 at 03:51:52PM +0200, Lukas Herbolt wrote:
-> > > The random.c now expects that signed integer to overflow and
-> > > triggers the  ^MASK branch. But signed int overflow is undefined
-> > > behavior and GCC can optimize this branch out with certain
-> > > CFLAGS/LDFLAGS.
-> > > 
-> > > Signed-off-by: Lukas Herbolt <lukas@herbolt.com>
-> > > ---
-> > >  lib/random.c | 13 +++++++------
-> > >  1 file changed, 7 insertions(+), 6 deletions(-)
-> > > 
-> > > diff --git a/lib/random.c b/lib/random.c
-> > > index d5c81be817c8..f767ed1d1337 100644
-> > > --- a/lib/random.c
-> > > +++ b/lib/random.c
-> > > @@ -186,14 +186,15 @@ _random (int32_t is [2])
-> > >  int32_t
-> > >  _irandm (int32_t is [2])
-> > >  {
-> > > -	int32_t it, leh, nit;
-> > > -
-> > > +	int32_t it, leh, nit, apply_mask;
-> > >  	it = is [0];
-> > >  	leh = is [1];
-> > > -	if (it <= 0)
-> > > -		it = (it + it) ^ MASK;
-> > > -	else
-> > > -		it = it + it;
-> > > +
-> > > +/* 	evaluate on original value — no UB here */
-> > > +	apply_mask = (it <= 0);
-> > > +/*	double via unsigned shift — well-defined */
-> > > +	it = (unsigned)it << 1;
-> > > +	if (apply_mask) it ^= MASK;
-> > 
-> > Doesn't _random suffer the same flaw?
-> > 
-> > Oh.  It's dead code, maybe it should go away?
-> Good point.
-> > 
-> > Also, what about converting all the variables to unsigned?
-> 
-> It would break two signed checks: `it <= 0` (LFSR feedback -
-> only fires at zero instead of when MSB set) and `leh < 0`
-> (output folding — never fires). The `it` register degenerates
-> to 33 repeating values after 64 calls. Reducing the pool of
-> random numbers.
+In generic/622, expire_timestamps() tests whether lazytime timestamp
+updates are persisted after dirtytime expiration. It configures
+dirtytime_expire_seconds to 1 second and enables continuous writeback
+of dirty inodes, followed by sleeping for 2 seconds to allow the
+asynchronous VFS flusher thread to expire the I_DIRTY_TIME inode,
+invoke the filesystem's write_inode callback, and flush the dirty
+metadata before the test executes _scratch_shutdown -f.
 
-Ah.  Well in that case I'm satisfied, so
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+However, on filesystems or configurations with higher writeback
+overhead -- such as F2FS with transparent compression enabled, where
+compressed files cannot use inline data and writes use out-of-place
+updates (OPU) with higher latency in the compression and writeback
+pipeline -- the 2-second sleep window can occasionally be insufficient.
+Because the inode is only eligible for expiration after 1 second, only
+about 1 second remains in the 2-second sleep window for the flusher
+thread to schedule, expire the inode, and mark the inode page dirty
+before restore_expiration_settings resets dirtytime_expire_seconds to
+24 hours and shutdown occurs. If the flusher thread is delayed, the
+subsequent shutdown checkpoint ignores the unexpired I_DIRTY_TIME inode,
+causing the test to intermittently fail with:
 
---D
+    FAIL: lazytime mtime wasn't persisted by expiration
+    ondisk_time (...) != expected_time (...)
+
+Increase the sleep duration in expire_timestamps() from 2 to 4 seconds
+to give sufficient margin for the flusher thread to reliably expire the
+lazytime inode and dirty the inode page before shutdown.
+
+Signed-off-by: Jan Prusakowski <jprusakowski@google.com>
+---
+Changes in v2:
+- Increase sleep time to 4 seconds unconditionally with an explanatory
+  comment instead of using an F2FS-specific conditional.
+- Remove the non-standard Change-Id trailer.
+
+ tests/generic/622 | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/tests/generic/622 b/tests/generic/622
+index cb0f5828..16088199 100755
+--- a/tests/generic/622
++++ b/tests/generic/622
+@@ -60,8 +60,12 @@ expire_timestamps()
+ 	__expire_inodes
+ 
+ 	# Userspace doesn't have direct visibility into when inodes are dirty,
+-	# so the best we can do is sleep for a couple seconds.
+-	sleep 2
++	# so the best we can do is sleep for a few seconds.  Because
++	# dirtytime_expire_seconds is 1 second, sleeping for 4 seconds leaves
++	# enough margin after expiration for background writeback to finish even
++	# on filesystems with higher writeback overhead (e.g. F2FS with file
++	# compression).
++	sleep 4
+ 	restore_expiration_settings
+ }
+ 
+-- 
+2.56.0.360.g66cac248cb-goog
+
