@@ -1,126 +1,184 @@
-Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com [209.85.218.70])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4AAC3D75A1
-	for <fstests@vger.kernel.org>; Fri,  9 Oct 2026 08:55:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.70
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 259823C0621;
+	Sat, 10 Oct 2026 03:25:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791536159; cv=none; b=i70nTK+a1LhpwuA0Lxe848O7zMewZg5JDmqh6Ef9NSrxcaJUZCsQr3GDstHAPZaEOScrDy5iPAaM2JoUJ/e4nBBANCFa8yFlvECY6OxocbpiXLhii0Zvi/Eub61P8SjBjGqJkj0z4IThbpnuAV2bOgzW7k1b1y+eedTTHgRQH8M=
+	t=1791602744; cv=none; b=m/sHjKctba8XZALKP0DWzF0E6B0EjUTpGAMkh9G1ZXYpg6nqCJ5HFhIYFH4qrAXerLHR6LKvIy0iXYnAqIzmrG20TRtNPqX7ORz+0gT4lsNgFgON2/odlB8HTVszLP+uKNZxkGQ+TH5YAPNJTCh/xO7Agi0FHreIf7U3yxAV7b4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791536159; c=relaxed/simple;
-	bh=OGv9e4kZdiF9RgD1EliE6XHLgPk3GmgettAYWl1fA+M=;
-	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=ey05OknqQN1spRgKUwuGM4c8QMs1pxWt1xNBPPX5pg7vA4Zwc1oVuhfdv0Y+puGNexCj7wBB/jxaJYabsAVJ73uEJj9l93PrCqkbwi57GgP+HxAeDRrnJ8VXBHn3zrVRmrfOYhwGhSxrBb6JLgYm03WhcBXkQe3QeOix/anpjGs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=IiMKIK9a; arc=none smtp.client-ip=209.85.218.70
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--jprusakowski.bounces.google.com
+	s=arc-20240116; t=1791602744; c=relaxed/simple;
+	bh=nBexOR2WuYmTcu6491ggksEg67z8yp8mbPNMbwJzxSU=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=VyG+S5rwyeHVSgXLAuqZRNbzxQqWmsmEkeUj+YbaSyHeSPOz58MJeDFR7sT8Lr8I4urYHXDc1xJHz1ViERva3sWCEcA/EiWH3emtBbbePCj9It0xRu2x3e3GQ1D9iUG/xKu0+L+jBtkijm5DuWeOs3uFH5lCniff2K5GYzkEQyg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=g7BIAA4H; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=g7BIAA4H; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="IiMKIK9a"
-Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-c2e6affec80so591618766b.2
-        for <fstests@vger.kernel.org>; Fri, 09 Oct 2026 01:55:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1791536156; x=1792140956; darn=vger.kernel.org;
-        h=content-type:cc:to:from:subject:message-id:mime-version:date:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=XkufVygYf3das1AkCg5Yl8KsorAKzoeCOi7nexNmHV0=;
-        b=IiMKIK9a3qxUnYUp+M4GD8hyhwMkS1XTI7vDG+WFBnuAIIz92LaVPghIdqkOnbCFdS
-         gNZGcVikqVI8BNvkzHF8UQ2PKc9S/k6EKJCVMpVElcqLcbMHIvv9ccIA1gJAwzNUuzJm
-         Q9y2tcM9nCP2lVcdlmxQCp9yV4XXo2FFBp5R4SlrBGuTqNMk7WdbJWQGP26scwxG9jb6
-         Cg3dihCLFb6hV6QzWLiAfGkh1HRj9CwGSQGxaTDY90f3U0RAuWZhZ/dCWHbCLzvFn7NT
-         BBSN4I7MkFHHBUjid0MXEVFsEM0JK5R1qgNnEVqpaghbUS6IwEQUDm+lqCOfPfSJi55D
-         vwcw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791536156; x=1792140956;
-        h=content-type:cc:to:from:subject:message-id:mime-version:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=XkufVygYf3das1AkCg5Yl8KsorAKzoeCOi7nexNmHV0=;
-        b=MP4/mXGq7yHa55N7aLtI/gPHtCSaJoHeLIWt1p8BDorkiHJrBstdHigF8/TF0sz29c
-         aB57cyU2SuZ7uzdFSHWs34KAQlIoYaskfebt1zGoKaY+VIAwE7NV6mEtw8xTVj2YOeX7
-         7aSqA5OCKmFNx/4CcBCNqmfDN0/zCwugqPb6RhiY08Ca68l6VNOUKragt240h8r107CJ
-         g9UKudZOhUGSMZlQU5PLhv9G4DQKCpI9SZ68clw+PqQnEZYPzlgK/WrT6vJ89K14X4q0
-         vuOKNInmgoB3GJS8tEeSH1RJrFyjzmBjvRKyBJtT1RtaD11YasZ//KdObyVbfn+6SfBL
-         lZXg==
-X-Forwarded-Encrypted: i=1; AKwUvBzEAKn3Y8+TjDa1pknrEgTdLRHE6Er4XzsHaGk0RIu4ity74eCswx725wR3LI4Hl7QgIvKfLtvz@vger.kernel.org
-X-Gm-Message-State: AFq9FYKTKFGXozKZP2ThZRUhlt6Nse5hZ4N9prGGuf35QxX1BFU9I90s
-	IBdGbbSVbonk9RY+bFFbUIcid6QOBPsoRwJw91tdxEsd1NJv/BJTk5ogTjPxwZTagUU6yWNeyUL
-	vP3HNK9P0UJsLSiyhz9ObmC4ZhXhvUw==
-X-Received: from ejcxk3.prod.google.com ([2002:a17:907:d803:b0:c2a:e413:97d5])
- (user=jprusakowski job=prod-delivery.src-stubby-dispatcher) by
- 2002:a17:907:961a:b0:c25:2a78:15ed with SMTP id a640c23a62f3a-c31a9a04e08mr114472166b.6.1791536155187;
- Fri, 09 Oct 2026 01:55:55 -0700 (PDT)
-Date: Fri,  9 Oct 2026 08:55:43 +0000
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="g7BIAA4H";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="g7BIAA4H"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id EAD8B1F7CB;
+	Sat, 10 Oct 2026 03:25:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1791602738; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=yGd5PSWnSswVwv55NdkcXTI7APoFgmjY0WMMohECnZ0=;
+	b=g7BIAA4H22+tJdiSP5LVraxov2Bf4v2DduEE1jmAorR3WURbqEp9ZIhDzX8reXjY1EKIy8
+	mleytVqwOwXZrVlCWzjStS+AckMvR0ecOY8VcCjpGRppbApT0CI+YHyxTaGvcx1JTSA1RV
+	Qpl6LIuRCDcu2gAw2wIFPfW8APfCC4M=
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=g7BIAA4H
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1791602738; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=yGd5PSWnSswVwv55NdkcXTI7APoFgmjY0WMMohECnZ0=;
+	b=g7BIAA4H22+tJdiSP5LVraxov2Bf4v2DduEE1jmAorR3WURbqEp9ZIhDzX8reXjY1EKIy8
+	mleytVqwOwXZrVlCWzjStS+AckMvR0ecOY8VcCjpGRppbApT0CI+YHyxTaGvcx1JTSA1RV
+	Qpl6LIuRCDcu2gAw2wIFPfW8APfCC4M=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id B3F5A1326D;
+	Sat, 10 Oct 2026 03:25:34 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id T5VAFi6wyWptPQAAD6G6ig
+	(envelope-from <wqu@suse.com>); Sat, 10 Oct 2026 03:25:34 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] fstests: btrfs: add a test case to verify fsverity on compressed files
+Date: Sat, 10 Oct 2026 13:55:08 +1030
+Message-ID: <20261010032508.36935-1-wqu@suse.com>
+X-Mailer: git-send-email 2.56.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-X-Mailer: git-send-email 2.56.0.385.gd3acb90ef8-goog
-Message-ID: <20261009085544.2450966-1-jprusakowski@google.com>
-Subject: [PATCH v2] generic/622: increase sleep time for lazytime expiration
-From: Jan Prusakowski <jprusakowski@google.com>
-To: Zorro Lang <zlang@kernel.org>, Chao Yu <chao@kernel.org>, fstests@vger.kernel.org
-Cc: jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net, 
-	Jan Prusakowski <jprusakowski@google.com>
-Content-Type: text/plain; charset="UTF-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Rspamd-Queue-Id: EAD8B1F7CB
+X-Rspamd-Action: no action
+X-Spam-Level: 
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:dkim,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns];
+	ARC_NA(0.00)[];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	RCPT_COUNT_TWO(0.00)[2];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_TLS_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DKIM_TRACE(0.00)[suse.com:+]
+X-Spam-Flag: NO
+X-Spam-Score: -3.01
 
-In generic/622, expire_timestamps() tests whether lazytime timestamp
-updates are persisted after dirtytime expiration. It configures
-dirtytime_expire_seconds to 1 second and enables continuous writeback
-of dirty inodes, followed by sleeping for 2 seconds to allow the
-asynchronous VFS flusher thread to expire the I_DIRTY_TIME inode,
-invoke the filesystem's write_inode callback, and flush the dirty
-metadata before the test executes _scratch_shutdown -f.
+There is a bug report that with the recently enabled large folios
+support, compressed files on btrfs can give random but reproducible
+warnings about file corruption.
 
-However, on filesystems or configurations with higher writeback
-overhead -- such as F2FS with transparent compression enabled, where
-compressed files cannot use inline data and writes use out-of-place
-updates (OPU) with higher latency in the compression and writeback
-pipeline -- the 2-second sleep window can occasionally be insufficient.
-Because the inode is only eligible for expiration after 1 second, only
-about 1 second remains in the 2-second sleep window for the flusher
-thread to schedule, expire the inode, and mark the inode page dirty
-before restore_expiration_settings resets dirtytime_expire_seconds to
-24 hours and shutdown occurs. If the flusher thread is delayed, the
-subsequent shutdown checkpoint ignores the unexpired I_DIRTY_TIME inode,
-causing the test to intermittently fail with:
+It turns out to be a bug in the verification range, where blocks not
+included in the read range are passed to be verified.
 
-    FAIL: lazytime mtime wasn't persisted by expiration
-    ondisk_time (...) != expected_time (...)
+Add a new regression test case for it, the workload is pretty simple:
 
-Increase the sleep duration in expire_timestamps() from 2 to 4 seconds
-to give sufficient margin for the flusher thread to reliably expire the
-lazytime inode and dirty the inode page before shutdown.
+- Create a 64M file with compressed file extents
+- Enable fsverity digest on that file
+- Drop page cache
+- Read that file
+- Verify there is no "FILE CORRUPTED!" warning
 
-Signed-off-by: Jan Prusakowski <jprusakowski@google.com>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
-Changes in v2:
-- Increase sleep time to 4 seconds unconditionally with an explanatory
-  comment instead of using an F2FS-specific conditional.
-- Remove the non-standard Change-Id trailer.
+ tests/btrfs/359     | 45 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/359.out |  6 ++++++
+ 2 files changed, 51 insertions(+)
+ create mode 100755 tests/btrfs/359
+ create mode 100644 tests/btrfs/359.out
 
- tests/generic/622 | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
-
-diff --git a/tests/generic/622 b/tests/generic/622
-index cb0f5828..16088199 100755
---- a/tests/generic/622
-+++ b/tests/generic/622
-@@ -60,8 +60,12 @@ expire_timestamps()
- 	__expire_inodes
- 
- 	# Userspace doesn't have direct visibility into when inodes are dirty,
--	# so the best we can do is sleep for a couple seconds.
--	sleep 2
-+	# so the best we can do is sleep for a few seconds.  Because
-+	# dirtytime_expire_seconds is 1 second, sleeping for 4 seconds leaves
-+	# enough margin after expiration for background writeback to finish even
-+	# on filesystems with higher writeback overhead (e.g. F2FS with file
-+	# compression).
-+	sleep 4
- 	restore_expiration_settings
- }
- 
+diff --git a/tests/btrfs/359 b/tests/btrfs/359
+new file mode 100755
+index 00000000..2047d965
+--- /dev/null
++++ b/tests/btrfs/359
+@@ -0,0 +1,45 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
++#
++# FS QA Test 359
++#
++# Test if btrfs handles fsverity read correctly without corruption warning
++#
++. ./common/preamble
++_begin_fstest auto quick verity compress
++
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: fix the fsverity callback where unexpected range is verified"
++
++. ./common/filter
++. ./common/verity
++
++_require_scratch_verity
++
++_scratch_mkfs_verity >> $seqres.full
++
++# We need a read range that doesn't cover the full folio, the easiest way
++# to create such read is compression, which limits the extent size to 128K,
++# much smaller than the supported large folio size (256K or 2M for 4K page size).
++_scratch_mount -o compress
++
++# Create a large enough file that can contain multiple compressed file extents.
++_pwrite_byte "0xcd" 0 64m "$SCRATCH_MNT/foobar" | _filter_xfs_io
++
++# Enable verity on that file
++_fsv_enable "$SCRATCH_MNT/foobar"
++
++# Cycle mount to drop page cache
++_scratch_cycle_mount
++
++# Read the file, unpatched kernel will race and trigger fs-verity warnings.
++# But the read itself should still be fine, as the failed part will be retried.
++_hexdump "$SCRATCH_MNT/foobar"
++
++# Check for any kernel warnings from fs-verity on file corruption.
++if _check_dmesg_for "FILE CORRUPTED!"; then
++	echo "fs-verity detected corruption"
++fi
++
++_exit 0
+diff --git a/tests/btrfs/359.out b/tests/btrfs/359.out
+new file mode 100644
+index 00000000..96bd78d7
+--- /dev/null
++++ b/tests/btrfs/359.out
+@@ -0,0 +1,6 @@
++QA output created by 359
++wrote 67108864/67108864 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++000000 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  >................<
++*
++4000000
 -- 
-2.56.0.360.g66cac248cb-goog
+2.56.0
 
