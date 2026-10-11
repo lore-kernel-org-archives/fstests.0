@@ -1,66 +1,66 @@
-Received: from mail-dy1-f174.google.com (mail-dy1-f174.google.com [74.125.82.174])
+Received: from mail-dl1-f53.google.com (mail-dl1-f53.google.com [74.125.82.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8CD5455612
-	for <fstests@vger.kernel.org>; Sun, 11 Oct 2026 19:40:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7AD5449988
+	for <fstests@vger.kernel.org>; Sun, 11 Oct 2026 19:41:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791747647; cv=none; b=N9qovb0LZObtfJRUzG4bXjRFrNFpSQxxY9AWQs8IFWQ8vExbEYHqKYkDmzoPuplky0XU8W0LyYLmTBri61vsnMTyYFAgjFovmVb8i9kfUzqBF+bRbQPhdIFjNpcmbYsqJ2LeyvIh2rzjuh4gBFEL4Mi6OHuUnaxpnvoiWADmJ3w=
+	t=1791747684; cv=none; b=X81rVygfVs4z/cQGNZfAlNMVqFRiFIp0LS8lhHCyRSjwzPqGr2IthMGbKfFBVj5ShpQVMZVIojz58qxtMPU0Rz5DPM0ae/4O2rFZ88rO8Be/XiGtw+nLhhgNyCp1sMQuBYS6SgQvmT2+ywClO/vP3h9Sovz7/lpis+lhr+gL9lU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791747647; c=relaxed/simple;
-	bh=+vGWaFXbaoJoA4p5C4mfwfDAXJjqa2mutmk1FhJC5uU=;
+	s=arc-20240116; t=1791747684; c=relaxed/simple;
+	bh=qxaW5OKIv5w7s/7Tax+iVDcj4okxytxmwYjP8BRlKh8=;
 	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=taZzpJwyrgYBtEuPGESUw6icVGTdPmQNFeKE2vFH3NjtTlsJ/f6L8SHSDyXgDYjGp6RqC5Vb1beHnOSsdywi/4jJ0bBvghs4d1gyLityWnAqM9lRSyOi3SeJbTknIcoHp9h2yxpb2k7ua7i+CjC0Vhkj/x/Qv4z4C8YD/+rqASY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GG7p8Ye1; arc=none smtp.client-ip=74.125.82.174
+	 In-Reply-To:Content-Type; b=eGVtAwDldw+Bc+EMnytEm6xifcR8e5D7pIqwDyrDhU6WqZAvhjciv3QPJbh7LYa9XwP5pQtVaubFCo0KW7R8EIj0KvL+bbV+XDbOas1wSo1hQiIStVNq95Zzf+TicNB0USz7ddlG8Slebq8TBhV7VvI6gPmhOkhtfCFahPwtwYY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=NyWvdsn3; arc=none smtp.client-ip=74.125.82.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GG7p8Ye1"
-Received: by mail-dy1-f174.google.com with SMTP id 5a478bee46e88-3535a54bed9so1750643eec.1
-        for <fstests@vger.kernel.org>; Sun, 11 Oct 2026 12:40:45 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="NyWvdsn3"
+Received: by mail-dl1-f53.google.com with SMTP id a92af1059eb24-141395927feso2208918c88.0
+        for <fstests@vger.kernel.org>; Sun, 11 Oct 2026 12:41:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1791747645; x=1792352445; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1791747683; x=1792352483; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:in-reply-to:content-language
          :references:cc:to:subject:from:user-agent:mime-version:date
          :message-id:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=OLwEBcjUHQd7DKUmZ8kTQHV1NUa7SX06QFw8Dxzfm7M=;
-        b=GG7p8Ye1dyLpy9UjBsdLlnsVQeUiKQEw8eHO4PVSgiksAOwmG7gh/3MMUhmDTdGs8J
-         x2gAA3eJ/mIpUh6Adli8bEXsmadMwGaFJU+BKk5RTsco/M6T+wnCXCgnNOunRrOWtVnG
-         Qo1WiuFh9ojz/zskw2+rJxVGJj4yDMiJE7A4+ylfg24VWS549CJqDMMoek70hGJOApkW
-         cgA5VW/7G6DJ3H4FW7aVAYi8RpchnJubadyan59bV/jFr9UQDICsNXS7RG9yJ+/wwI8a
-         Ut8KSQOhD0TTMJAR7SA7ZyX5KU0sAHUNhW1cv5qzoOWleI7NU2qqHv+2uVvrNwZ+X1Gq
-         r3Cw==
+        bh=6ZOd2QHYy5OTZsLVHh3acUf6GMxhs+2lZfOBKUt378E=;
+        b=NyWvdsn3vi9pvLADbnd9urZpWk8tbow7o0EUU0K+IbKMBpl6OVOU4fuyJHR99YaMpM
+         6JIwuYPBXyb/BXZ95VCtdWM+Q8Rl6YhtrRDWkWLWzPpgW/wK/guylSqt1orWrMAnwELE
+         xZR1lcaFdgQZN5uaKHulqpw6DkXDGOwV5g3fPO29tlY8Q2GwoogJK601q/KOQSVBym4u
+         B2q6b1liMgN3mNmq+GRLBXos38fe/djrenM1T7wYdSMpMh3TsRTVfQuzO4GAhMj/OxF7
+         u+5z461SNIHPk2zfsBCi+BUUehAwcLBMEPPhpioN127SLIv8gfxo1KON2Es1e+bm9fCy
+         MPKA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791747645; x=1792352445;
+        d=1e100.net; s=20260707; t=1791747683; x=1792352483;
         h=content-transfer-encoding:content-type:in-reply-to:content-language
          :references:cc:to:subject:from:user-agent:mime-version:date
          :message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=OLwEBcjUHQd7DKUmZ8kTQHV1NUa7SX06QFw8Dxzfm7M=;
-        b=JZtOIlaLuMXtls9qGXtsTM3lt0umoF+xe9Ddf9Qc2hHqsVXCDgAeJgFL/cjlx/j8Lj
-         WD2+71Ru31FQn27yq4SsQbQrcS9dTEutPk8ziGVio8VWgV0AocBJlgmo1x+B7wZNjeR3
-         lA66xoOrEZYu/oCigFhgfBzxFhU99OT05kzasr07HCGLHVaRae9TarTja7A4E0KPwrYz
-         J0WfqRVTEeV1n7TpVxCD7ga3XqPWOg9GQWFDqTOYe1HBXuhUvlYe9BQiKpKxKnrVrlMH
-         /GOPp2kWpa4qExgez7jp1wzIEKIX4Ly9DrxdGwlelBJkG8G/d5IprKicWOEUPiw6sWaI
-         A8Ug==
-X-Gm-Message-State: AFq9FYIRMe2fd+uPhn1LAZfP4MIO1z2zzT1ElcFLOVZ13ghZfR+Pw6Fv
-	bEluQPbnCGb0pQ8/LLo1mVuHcmpApPblS4ZR/fJDJvmNJp1hYSOJM82AIc+ct2OsjOY=
-X-Gm-Gg: AYBFou0nvuvxz53cKitE1Qd6wke8NX+98zvPjYsa4r5dm1EtHicHkibDCO1i0NO8cT7
-	mMiyv2T3dH+/+4p0zb+7A9JF3Jl0sWNsL5AIpoZky3KTaoNH5SRroDO137MquSF8VhGziTWiXwS
-	zs+7Vl6J+6DabX47QTQFDrbK6fr1qGLtXgAuVlubQj4sWBTQjG0YfHdg7IHu/H8+ng54ocjytNJ
-	PA/XDGr90qLkt0gm6mDWekdga6A1XeaAXKsAiySl9MwmNUOIlcARokr6RWC6wkhlPfQvRfAkEEq
-	2BxGGLQAn2t1EAa3PUv/KkY2oZeD7BSJEBqY2T56LJwVnd1WZXk3Tg/epiOLPVlgMor3EZUrtxE
-	hxzvJCoYfuEfJEemln6oYjqpjAq8jj7ZKKwTFQRE5+RRN6Wg6ONjVrS+lEm1wYwjWV17ec2wS8x
-	d7BIRLF9pY+KPqDITI8j/SOFAx5I8NXrF4dhX+/4BWfJfOuq62x+5luZIMbydeV3+NtmaVXOnax
-	p4IVSyNBJC++r9osi4pgm3tdHX/ZzFvlPSTutmHrWKx48cN
-X-Received: by 2002:a05:7301:fd17:b0:359:62d4:82c0 with SMTP id 5a478bee46e88-35962d48511mr4006940eec.41.1791747644396;
-        Sun, 11 Oct 2026 12:40:44 -0700 (PDT)
+        bh=6ZOd2QHYy5OTZsLVHh3acUf6GMxhs+2lZfOBKUt378E=;
+        b=DDxiUYYHc0WKIuXUmEJ7Wt3lnnkkZ7KnTLfP+FeHu67W5Kxy4e2ucLFBqjJSgWeJp/
+         lZKgIVDMR+RI3i2FuJuHfrRiMeKnjfJ8KOmcd2gDbf9C9M0p5P9c30yw5fhv23pTfEon
+         RErS1VINUTjKLwxtLamf3IVgxgm4KDy1MMMM3XyvNU/y2LKAfDaDyNsFIC4Td/bigYiD
+         WtZXS++W/UBRU0MzlPoCVP+jI/sShipUXmfsBNk+n/ISShacNSbczcCs30xVo3PayCxH
+         XLHgUxvc/eOcMGk3O8tucZyK/kUfKiOJYWNZ2fsVX+wTIhKEuwSY4y765eJoxzohDydr
+         pmLw==
+X-Gm-Message-State: AFq9FYIKCzLhjgtQdtwtBRrUITwMglI76PbluBc4a02Y04/cJqt+TVo4
+	+7ShalnWCnYA97+4pa94/fI6RA2U+EEKISeLZU69bo3aSTkkiFratB1otqRCRraQFmk=
+X-Gm-Gg: AYBFou15RqerEry0MMOhkc9gbhXs70WXPWZ+jxdhhwdEi3nCchwGMFYexDS5KzrXflh
+	z7AJ7YsFI4NcAB1flhLplxVgdxnxKotFstxKiVsS8JHlZq30xQ/f50moiC+rY8H1eCtg3RaHmjy
+	PYPhKjDWvxLUIS3R6YwSLzJa3wkIF3DeUSjqvL3+YI6T1a2OwsUtu3Ly5MY9CHEoQ6PeVCizK8C
+	217GC+zsAxWB9N4i65T97tBtBoIK5ML8GGV3syFDmuXJrde27I8CqZxL7O+m2ePKb/H6zWrNFjB
+	moGGPd6BoIkT/RP4oue60p5WZttKsHqKFz/g9mmssjcbe79MvuNFSVB/3K+z4W59QaIgzYuZ0RC
+	+4BgS7pfYzi/DwDRf6jNCwIk5kmUbnmJozgv5U9UL87+xOjPzFKuVc9TJVm6g2FJ/ltPVYbNYlj
+	MpjqzwmAHP9CMfC5/C6tMFqWPP/hTAXulBXHnL6nHxL9m0nFyWgraH70p2AYkl3FwelQj/oRjFL
+	ErlxcRemexXF5bEm/1mEf+gY/VGd25DP4QsdQHb9K9IfPuf
+X-Received: by 2002:a05:7022:3b87:b0:14c:e31e:5dd4 with SMTP id a92af1059eb24-16a60ce6e71mr13011010c88.36.1791747682453;
+        Sun, 11 Oct 2026 12:41:22 -0700 (PDT)
 Received: from ?IPV6:2406:7400:56:97af:bd42:ace4:1245:4b57? ([2406:7400:56:97af:bd42:ace4:1245:4b57])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3537cab27d5sm29691364eec.17.2026.10.11.12.40.41
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-16996eac537sm23338358c88.1.2026.10.11.12.41.19
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 11 Oct 2026 12:40:43 -0700 (PDT)
-Message-ID: <b99615bd-9b7c-48b6-ac70-d450a606388c@gmail.com>
-Date: Mon, 12 Oct 2026 01:10:39 +0530
+        Sun, 11 Oct 2026 12:41:22 -0700 (PDT)
+Message-ID: <17ce825e-5edd-4bdb-8a0b-e4820c23ca80@gmail.com>
+Date: Mon, 12 Oct 2026 01:11:17 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -69,7 +69,7 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 From: Dhruva G <goledhruva@gmail.com>
-Subject: [PATCH 1/3] btrfs: exercise NOCOMPRESS range and EOF handling
+Subject: [PATCH 2/3] btrfs: check NOCOMPRESS preserves holes and preallocation
 To: fstests@vger.kernel.org
 Cc: Anand Jain <asj@kernel.org>, Filipe Manana <fdmanana@suse.com>,
  Zorro Lang <zlang@kernel.org>, linux-btrfs@vger.kernel.org,
@@ -80,359 +80,107 @@ In-Reply-To: <cover.1791395660.git.goledhruva@gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-Check that a bounded --nocomp request rewrites compressed extents in the
-selected range while distant untouched regions still point to their
-original compressed storage.
-Cover a partial final sector, zero length, a length extending past EOF,
-start at EOF, and the empty-file no-op. Preserve contents and sizes across
-the conversion and a remount.
+Place compressed data islands around holes and preallocated extents,
+including a KEEP_SIZE reservation beyond EOF. Defragment the file with
+--nocomp and require every data island to become uncompressed.
 
-Add shared FIEMAP and integrity helpers for the NOCOMPRESS tests. Require
-full mapping coverage and inspect every overlapping extent so holes and
-partly converted ranges cannot pass. Include a small ioctl helper to
-probe kernel support and check errno without btrfs-progs translation.
+Check that each hole stays unmapped and both reservations retain their
+complete physical mappings and UNWRITTEN state. Verify the layout,
+contents, and file size again after remounting with compression enabled.
+This extends btrfs/257 to NOCOMPRESS and compressed sparse files.
 
 Signed-off-by: Dhruva Gole <goledhruva@gmail.com>
 ---
- .gitignore                |   1 +
- common/btrfs_nocomp       | 134 ++++++++++++++++++++++++++++++++++++++
- src/Makefile              |   2 +-
- src/btrfs_defrag_nocomp.c |  63 ++++++++++++++++++
- tests/btrfs/355           |  80 +++++++++++++++++++++++
- tests/btrfs/355.out       |   2 +
- 6 files changed, 281 insertions(+), 1 deletion(-)
- create mode 100644 common/btrfs_nocomp
- create mode 100644 src/btrfs_defrag_nocomp.c
- create mode 100755 tests/btrfs/355
- create mode 100644 tests/btrfs/355.out
+ tests/btrfs/356     | 71 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/356.out |  2 ++
+ 2 files changed, 73 insertions(+)
+ create mode 100755 tests/btrfs/356
+ create mode 100644 tests/btrfs/356.out
 
-diff --git a/.gitignore b/.gitignore
-index 0b6b9452..1bfa12ef 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -216,6 +216,7 @@ tags
- /src/truncate
- /src/t_btrfs_received_uuid_ioctl
- /src/btrfs_ioctl
-+/src/btrfs_defrag_nocomp
- 
- # Symlinked files
- /tests/generic/035.out
-diff --git a/common/btrfs_nocomp b/common/btrfs_nocomp
-new file mode 100644
-index 00000000..7e2111e1
---- /dev/null
-+++ b/common/btrfs_nocomp
-@@ -0,0 +1,134 @@
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) Meta Platforms, Inc. and affiliates.
-+# Helpers for BTRFS_DEFRAG_RANGE_NOCOMPRESS tests.
-+
-+_nc_require()
-+{
-+	_require_scratch
-+	_require_test_program btrfs_defrag_nocomp
-+	_require_xfs_io_command fiemap ranged
-+	_require_btrfs_command filesystem defragment --nocomp
-+	_require_btrfs_no_nodatacow
-+	_require_btrfs_no_nodatasum
-+	_require_btrfs_no_autodefrag
-+	_require_btrfs_support_sectorsize 4096
-+	_wants_kernel_commit 009b2056cb25 \
-+		"btrfs: defrag: add flag to force no-compression"
-+}
-+
-+_nc_write()
-+{
-+	$XFS_IO_PROG -f -c "pwrite -S $4 -b 128K $2 $3" -c fsync "$1" \
-+		>> "$seqres.full" 2>&1 || _fail "write failed: $1"
-+}
-+
-+_nc_probe()
-+{
-+	local result
-+
-+	_nc_write "$SCRATCH_MNT/probe" 0 131072 0x5a
-+	result=$($here/src/btrfs_defrag_nocomp "$SCRATCH_MNT/probe" 0 131072) ||
-+		_fail "NOCOMPRESS probe failed"
-+	case "$result" in
-+	OK) ;;
-+	EOPNOTSUPP|ENOTTY) _notrun "kernel does not support NOCOMPRESS" ;;
-+	*) _fail "unexpected NOCOMPRESS probe result: $result" ;;
-+	esac
-+	rm -f "$SCRATCH_MNT/probe"
-+}
-+
-+_nc_defrag()
-+{
-+	local file="${@: -1}"
-+
-+	$BTRFS_UTIL_PROG filesystem defragment --nocomp "$@" \
-+		>> "$seqres.full" 2>&1 || _fail "NOCOMPRESS defrag failed"
-+	$XFS_IO_PROG -c fsync "$file" >> "$seqres.full" 2>&1 ||
-+		_fail "fsync after defrag failed"
-+}
-+
-+_nc_map()
-+{
-+	$XFS_IO_PROG -c "fiemap -v $2 $3" "$1" > "$tmp.nc-map" \
-+		2>> "$seqres.full" || _fail "fiemap failed: $1"
-+	cat "$tmp.nc-map" >> "$seqres.full"
-+}
-+
-+# FIEMAP prints logical offsets in 512-byte units. Check every overlapping
-+# extent and complete coverage, so a hole or a partly converted range fails.
-+# The caller supplies byte offsets and lengths, including a partial EOF sector.
-+_nc_check_range()
-+{
-+	_nc_map "$1" "$2" "$3"
-+	$AWK_PROG -v start="$2" -v len="$3" -v mode="$4" '
-+	BEGIN {
-+		first = int(start / 512)
-+		end = int((start + len + 511) / 512)
-+		next_block = first
-+	}
-+	$1 ~ /^[0-9]+:$/ && $5 ~ /^0x/ {
-+		gsub(/[^0-9]/, " ", $2)
-+		split($2, logical)
-+		lo = logical[1] + 0
-+		hi = logical[2] + 1
-+		if (hi <= first || lo >= end)
-+			next
-+		if (mode == "hole") {
-+			bad = 1
-+			next
-+		}
-+		flags = strtonum($5)
-+		encoded = and(flags, 0x8) != 0
-+		unwritten = and(flags, 0x800) != 0
-+		inline = and(flags, 0x200) != 0
-+		if (and(flags, 0x6) || lo > next_block)
-+			bad = 1
-+		if (mode == "compressed" && (!encoded || unwritten || inline))
-+			bad = 1
-+		if (mode == "regular" && (encoded || unwritten || inline))
-+			bad = 1
-+		if (mode == "inline" && (!encoded || unwritten || !inline))
-+			bad = 1
-+		if (mode == "prealloc" && (encoded || !unwritten || inline))
-+			bad = 1
-+		if (hi > next_block)
-+			next_block = hi
-+	}
-+	END { exit bad || (mode != "hole" && next_block < end) }
-+	' "$tmp.nc-map" || _fail "unexpected $4 mapping: $1 ($2, $3)"
-+}
-+
-+# Ignore flags such as LAST, which may change when another range is rewritten.
-+_nc_mapping()
-+{
-+	_nc_map "$1" "$2" "$3"
-+	_filter_xfs_io_fiemap < "$tmp.nc-map" | \
-+		$AWK_PROG '{ print $1, $2, $3, $4 }'
-+}
-+
-+_nc_save_file()
-+{
-+	md5sum "$1" >> "$tmp.nc-checksums" || _fail "checksum failed: $1"
-+	stat -c '%s %n' "$1" >> "$tmp.nc-sizes" || _fail "stat failed: $1"
-+}
-+
-+_nc_verify_files()
-+{
-+	local size file actual
-+
-+	md5sum -c "$tmp.nc-checksums" >> "$seqres.full" 2>&1 ||
-+		_fail "file contents changed"
-+	while read -r size file; do
-+		actual=$(stat -c %s "$file") || _fail "stat failed: $file"
-+		[ "$actual" = "$size" ] || _fail "file size changed: $file"
-+	done < "$tmp.nc-sizes"
-+}
-+
-+_nc_raw_expect()
-+{
-+	local expected="$1" result
-+	shift
-+	result=$($here/src/btrfs_defrag_nocomp "$@") || _fail "raw ioctl failed"
-+	[ "$result" = "$expected" ] ||
-+		_fail "expected $expected, got $result"
-+}
-diff --git a/src/Makefile b/src/Makefile
-index 76cf50c3..07bf681d 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -36,7 +36,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
- 	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
- 	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
--	rw_hint fs-monitor btrfs_ioctl
-+	rw_hint fs-monitor btrfs_ioctl btrfs_defrag_nocomp
- 
- EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
- 	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-diff --git a/src/btrfs_defrag_nocomp.c b/src/btrfs_defrag_nocomp.c
-new file mode 100644
-index 00000000..4b066418
---- /dev/null
-+++ b/src/btrfs_defrag_nocomp.c
-@@ -0,0 +1,63 @@
-+// SPDX-License-Identifier: GPL-2.0
-+// Copyright (c) Meta Platforms, Inc. and affiliates.
-+/* Issue NOCOMPRESS requests without userspace range/error translation. */
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <linux/btrfs.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/ioctl.h>
-+#include <unistd.h>
-+
-+#ifndef BTRFS_DEFRAG_RANGE_NOCOMPRESS
-+#define BTRFS_DEFRAG_RANGE_NOCOMPRESS (1ULL << 3)
-+#endif
-+
-+static unsigned long long number(const char *s)
-+{
-+	char *end;
-+	unsigned long long value;
-+
-+	errno = 0;
-+	value = strtoull(s, &end, 0);
-+	if (errno || *end || end == s || *s == '-') {
-+		fprintf(stderr, "invalid number: %s\n", s);
-+		exit(2);
-+	}
-+	return value;
-+}
-+
-+int main(int argc, char **argv)
-+{
-+	struct btrfs_ioctl_defrag_range_args range = { 0 };
-+	int fd, err = 0;
-+	const char *result;
-+
-+	if (argc != 4) {
-+		fprintf(stderr, "usage: %s file start len\n", argv[0]);
-+		return 2;
-+	}
-+	range.flags = BTRFS_DEFRAG_RANGE_NOCOMPRESS;
-+	range.start = number(argv[2]);
-+	range.len = number(argv[3]);
-+	fd = open(argv[1], O_RDONLY | O_CLOEXEC);
-+	if (fd < 0) {
-+		perror("open");
-+		return 2;
-+	}
-+	if (ioctl(fd, BTRFS_IOC_DEFRAG_RANGE, &range) < 0)
-+		err = errno;
-+	close(fd);
-+	switch (err) {
-+	case 0: result = "OK"; break;
-+	case EINVAL: result = "EINVAL"; break;
-+	case EOPNOTSUPP: result = "EOPNOTSUPP"; break;
-+	case ENOTTY: result = "ENOTTY"; break;
-+	default:
-+		fprintf(stderr, "unexpected errno %d (%s)\n", err, strerror(err));
-+		return 1;
-+	}
-+	puts(result);
-+	return 0;
-+}
-diff --git a/tests/btrfs/355 b/tests/btrfs/355
+diff --git a/tests/btrfs/356 b/tests/btrfs/356
 new file mode 100755
-index 00000000..12befb91
+index 00000000..829c6e95
 --- /dev/null
-+++ b/tests/btrfs/355
-@@ -0,0 +1,80 @@
++++ b/tests/btrfs/356
+@@ -0,0 +1,71 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) Meta Platforms, Inc. and affiliates.
 +#
-+# FS QA Test 355
++# FS QA Test 356
 +#
-+# Verify bounded NOCOMPRESS conversion and EOF range handling.
++# Verify NOCOMPRESS skips holes and preallocated extents.
 +#
 +. ./common/preamble
-+_begin_fstest auto quick defrag compress fiemap
++_begin_fstest auto quick defrag compress prealloc fiemap
 +
 +. ./common/filter
 +. ./common/btrfs_nocomp
 +
 +_nc_require
++_require_xfs_io_command falloc -k
 +_scratch_mkfs -s 4k >> "$seqres.full" 2>&1 || _fail "mkfs failed"
 +_scratch_mount -o compress=zlib
 +_nc_probe
 +
-+file="$SCRATCH_MNT/range"
-+_nc_write "$file" 0 4194304 0x5a
-+_nc_save_file "$file"
-+_nc_check_range "$file" 0 4194304 compressed
-+_nc_mapping "$file" 0 131072 > "$tmp.prefix"
-+_nc_mapping "$file" 4063232 131072 > "$tmp.suffix"
-+
-+_nc_defrag -s 1M -l 512K "$file"
-+_nc_check_range "$file" 1048576 524288 regular
-+_nc_check_range "$file" 0 1048576 compressed
-+_nc_check_range "$file" 1572864 2621440 compressed
-+_nc_mapping "$file" 0 131072 > "$tmp.prefix-after"
-+_nc_mapping "$file" 4063232 131072 > "$tmp.suffix-after"
-+cmp -s "$tmp.prefix" "$tmp.prefix-after" || _fail "prefix mapping changed"
-+cmp -s "$tmp.suffix" "$tmp.suffix-after" || _fail "suffix mapping changed"
-+
-+# The two-sector tail can be compressed, unlike a single-sector tail on a
-+# 4K filesystem. First convert a one-byte range, then use an unaligned start
-+# and end the request at EOF, one byte into the final 4K sector.
-+tail="$SCRATCH_MNT/partial"
-+_nc_write "$tail" 0 135169 0x39
-+_nc_save_file "$tail"
-+_nc_check_range "$tail" 131072 4097 compressed
-+_nc_defrag -s 128K -l 1 "$tail"
-+_nc_check_range "$tail" 131072 4096 regular
-+_nc_defrag -s 131073 -l 4096 "$tail"
-+_nc_check_range "$tail" 131072 4097 regular
-+
-+# Zero length means to EOF; a length extending past EOF must be clamped.
-+for mode in zero huge; do
-+	f="$SCRATCH_MNT/$mode"
-+	_nc_write "$f" 0 262144 0x38
-+	_nc_save_file "$f"
-+	_nc_check_range "$f" 0 262144 compressed
-+	case "$mode" in
-+	zero) _nc_defrag -s 128K -l 0 "$f" ;;
-+	huge) _nc_defrag -s 128K -l 16M "$f" ;;
-+	esac
-+	_nc_check_range "$f" 0 131072 compressed
-+	_nc_check_range "$f" 131072 131072 regular
++file="$SCRATCH_MNT/islands"
++_nc_write "$file" 0 131072 0x31
++_nc_write "$file" 524288 131072 0x32
++_nc_write "$file" 1048576 131072 0x33
++for offset in 0 524288 1048576; do
++	_nc_check_range "$file" "$offset" 131072 compressed
 +done
++$XFS_IO_PROG -c 'falloc 256K 128K' -c 'falloc -k 1280K 128K' -c fsync \
++	"$file" >> "$seqres.full" 2>&1 || _fail "fallocate failed"
++[ "$(stat -c %s "$file")" = 1179648 ] || _fail "fallocate extended EOF"
++_nc_save_file "$file"
 +
-+# A nonempty file rejects start == EOF, but an empty file is a no-op.
-+_nc_raw_expect EINVAL "$file" 4194304 4096
-+touch "$SCRATCH_MNT/empty" || _fail "create empty file failed"
-+_nc_save_file "$SCRATCH_MNT/empty"
-+_nc_raw_expect OK "$SCRATCH_MNT/empty" 0 0
++check_layout()
++{
++	local offset
++
++	for offset in 262144 1310720; do
++		_nc_check_range "$file" "$offset" 131072 prealloc
++		_nc_mapping "$file" "$offset" 131072 > "$tmp.prealloc-$offset-now"
++		cmp -s "$tmp.prealloc-$offset" "$tmp.prealloc-$offset-now" ||
++			_fail "prealloc mapping changed at $offset"
++	done
++	_nc_check_range "$file" 131072 131072 hole
++	_nc_check_range "$file" 393216 131072 hole
++	_nc_check_range "$file" 655360 393216 hole
++	_nc_check_range "$file" 1179648 131072 hole
++}
++
++# Include the KEEP_SIZE reservation beyond EOF in the baseline. FIEMAP
++# reports preallocation there even though there are no bytes to read.
++for offset in 262144 1310720; do
++	_nc_check_range "$file" "$offset" 131072 prealloc
++	_nc_mapping "$file" "$offset" 131072 > "$tmp.prealloc-$offset"
++done
++check_layout
++_nc_defrag "$file"
++for offset in 0 524288 1048576; do
++	_nc_check_range "$file" "$offset" 131072 regular
++done
++check_layout
 +_nc_verify_files
++
 +_scratch_cycle_mount compress=zlib
 +_nc_verify_files
-+_nc_check_range "$file" 1048576 524288 regular
-+_nc_check_range "$file" 0 1048576 compressed
-+_nc_check_range "$file" 1572864 2621440 compressed
-+_nc_check_range "$tail" 131072 4097 regular
-+for mode in zero huge; do
-+	_nc_check_range "$SCRATCH_MNT/$mode" 0 131072 compressed
-+	_nc_check_range "$SCRATCH_MNT/$mode" 131072 131072 regular
++check_layout
++for offset in 0 524288 1048576; do
++	_nc_check_range "$file" "$offset" 131072 regular
 +done
 +
 +echo "Silence is golden"
 +_exit 0
-diff --git a/tests/btrfs/355.out b/tests/btrfs/355.out
+diff --git a/tests/btrfs/356.out b/tests/btrfs/356.out
 new file mode 100644
-index 00000000..4e4c5e98
+index 00000000..78eedd26
 --- /dev/null
-+++ b/tests/btrfs/355.out
++++ b/tests/btrfs/356.out
 @@ -0,0 +1,2 @@
-+QA output created by 355
++QA output created by 356
 +Silence is golden
 -- 
 2.43.0
