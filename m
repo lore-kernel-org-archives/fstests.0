@@ -1,66 +1,67 @@
-Received: from mail-dl1-f53.google.com (mail-dl1-f53.google.com [74.125.82.53])
+Received: from mail-wm1-f46.google.com (mail-wm1-f46.google.com [209.85.128.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97BCD340416
-	for <fstests@vger.kernel.org>; Sun, 11 Oct 2026 19:41:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9CEA42AA9
+	for <fstests@vger.kernel.org>; Sun, 11 Oct 2026 21:23:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791747714; cv=none; b=PvkcfCjXnY2X10o9FajVL1oYOp6r3a5vd4uAfGLtSQHK2l5jNKGQcObKhq9LP7PYwX1MQfhUVCLGoRF2PxSifxWIr9sUx9CaXAN++mM1QrsVSplWlm7JfEcVu4tqMbYkIdl/cVpArFQni3mqhuHotFi7sYzlm2kfI4nyBOD41mg=
+	t=1791753813; cv=none; b=iBkra5kyZE8iyMdhsQ96FVIPgJOZZPYp81Df3jlsAEhlCeHjiqoNkaBEzMShujFeicdzWlaD9U9OpQv2BPKo7E8SQi9EU2o139BM3Bl8UoQwmZvTIIrHwynJ26+265y4CnfogGxfW4OxtBBhyyvE/nC9Bd30AKKD1ff6MgH6zYs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791747714; c=relaxed/simple;
-	bh=Rhx6P2cQyIBn30NQTWk0if+lTEE+UGQ/7ic2Vnou+z8=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=uhT86/Mm9J+iYddgkWR+FNyrJ6EKdqdibVa2NWXwtAS/uAJQ2maFZNbIIlV6zjIARWlqQcTfWlHlnJMMOLCRiyjKt1nFwJKGn2DO5WXqLXOi015Q/wtwtpUnCIR5bgBgNEpRd8967Ls14lHBpTZd2w9v7uR0c2dwxgPer2Py5M8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ocGDSRPB; arc=none smtp.client-ip=74.125.82.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1791753813; c=relaxed/simple;
+	bh=zjPE5zTj8PO+aNeJHCeGEEYHwzZ6X+Z5pJ7yEUO3wRg=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=Y2nWPV0tAQvIv3bLhnmq1KqokNeTeUlY1kg7yBu9mK9opU4UDruORNFSxzU78tSSkbxGn9UDzjPUN4rEdQ8DnX5GaBOtnR8Mg6RzlnyjrpflgzjG69XGPhs1X+8/lK5RJCGwek6wbI4Pt0CN1MK54S3c4VTw6n82uQ4SP4whNwE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=DoYqa9hw; arc=none smtp.client-ip=209.85.128.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ocGDSRPB"
-Received: by mail-dl1-f53.google.com with SMTP id a92af1059eb24-1438d9363fbso331063c88.0
-        for <fstests@vger.kernel.org>; Sun, 11 Oct 2026 12:41:53 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="DoYqa9hw"
+Received: by mail-wm1-f46.google.com with SMTP id 5b1f17b1804b1-4a180fbeef5so11629855e9.1
+        for <fstests@vger.kernel.org>; Sun, 11 Oct 2026 14:23:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1791747713; x=1792352513; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:content-language
-         :references:cc:to:subject:from:user-agent:mime-version:date
+        d=suse.com; s=google; t=1791753810; x=1792358610; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
+         :content-language:references:to:subject:user-agent:mime-version:date
          :message-id:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=0QWIy+E8kq1ytUirl1aTo4BviuYYcSNIquVKTIFJ5+4=;
-        b=ocGDSRPBEbb2ntAOTwYzXOfhCWlE9Xi6BgttLrp/EEpmUUGezWjhdFoVPDKcZG0skB
-         XGNUUEW7ko/QoQ8yj1JB+vh0LV5mAUn+eokaiK7MjMgMfPfCqcmeJtesd16teHS9xS7R
-         sduzYN7gUhlkzcBOTCajDhqIUt1O17KsXbISR++YoWKD4I1Ke4Fitli2qwkX4l53kh0K
-         2GDMxXWOtjc65VT9xtX6W7pa7vnhUKZLW7Un/rJLPQ8t4HVo/vYZQfS9fthmMmUQ7O7P
-         jCVHXSt+157hLB5kO3IVrdUn02c9Cky47jap6r1BYItOB5hx6ielJyNhEfGgLmxxhYd+
-         +qWQ==
+        bh=NtR6Oup1vyS42rk0xqVvYxoHAQHA6UwyWoozV7iO88o=;
+        b=DoYqa9hw6OpiQ4j4Dw1NeALw2Jv7GDCYEujGs8IppLtjZ/JfboxeTy5rjYx/VbGpld
+         5kG40L7c1Xp61QcZNpSG/Ay4tPSv8Fm01l9y/Xiu4MyIZ6ezfhhzGxW3VrcmymRY/sjM
+         plQEeNSNOzOrYUELdNbs/nVngdl9CwEKb7hUpl4x53pABhcED59iH+JxQYzfx6S+AASW
+         DxE4a1U0wFABR5s48Lhr7LJWtrVRdGyv7z6gjeN9yRMtdNSR+rTqZhsIjwuKmQujJB2i
+         hYvgrXIquGg4VnGuUfxbyUaHGx1XIX6FaBxbGOZhXiOj676tW39zsiV0pVTo3R++ryqo
+         j4dQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791747713; x=1792352513;
-        h=content-transfer-encoding:content-type:in-reply-to:content-language
-         :references:cc:to:subject:from:user-agent:mime-version:date
+        d=1e100.net; s=20260707; t=1791753810; x=1792358610;
+        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
+         :content-language:references:to:subject:user-agent:mime-version:date
          :message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=0QWIy+E8kq1ytUirl1aTo4BviuYYcSNIquVKTIFJ5+4=;
-        b=PMFEN8sFLVBmZC2D0vesQCiqLAHGl06yhRCU90vObQv1tLo9uV1AcZdOdX2ppBxguA
-         3ZDSZ0CcED3WdQvSwDeeZeqfd7oiYsKHw6epWkn/Gc0HNoTRr5BZfvCJyvDsD8B089Zy
-         SDJPywYEP6FcwZ91Tu1ZStm7TlLbjaXdvJMrFWLypi5igeqvQ6TU6ZoJ0mdV8l9quSYY
-         y6ugq95bxQePQPfw2ejcEddYsJItqz+Fg/3u0NA/Jqqo1WpWGdeuOuYlgpS5PzG7wp/I
-         b8RxPol7KYMT4Mm6W2erZA+xuXcIlx0ApptiWj03JB1NB1QW0sO6hs8o3ODc6PKB170Y
-         Q9XQ==
-X-Gm-Message-State: AFq9FYI0XIcUmeOBH2FhAkaRs+QW6BuPtsqIrWXQ8n8Nth/uZg5Sqq0Z
-	x2avIh8FJVRmkAIbDswuUxhcoZS2AmRIR0QiHbE0nyAPDVLcXDH/a/8juYevNlJsp7c=
-X-Gm-Gg: AYBFou2a1qeg86PMYEJLDaNB3N8SxX+qOszXzY+lbholuRx6lkyhtPHg4eTAhWBMNeb
-	b4HEuA+gHDyiVstFTPkjRG8sSbHcPJtws7axjJBQA42fyVBB8S7+SM7drm0UOQ40Owha0ATit9z
-	QbF6oU8KDX0lPoM/92xPjqGLpEkl5xKc/miBfRGUHW4UxnKOQIlqdNNURCjZJflk14dt6xD1IZj
-	I3DEqdkm59vm1a+DN68MCQY3ZAQK1GTNAwUMRG3Si+8rp6Swr0TcVnl5jHIsA/2O23qd/XO+/33
-	qg7bbNNdgj/qVP3j3BGBLLCttGxFeWGT6jnQ4VPd/cxg+f5bfjsJ0nYSKcTH8uX9Rs38HuIG+Ls
-	ag4obTQWMrJYIBdHvxOkkga8klscHedlMWzzzg7aUT2ZV5Fyecq/Ep/b4SJNELNpKTfQavjE1HT
-	J+6sPfSX6cmtq/W7AAmnD/CG3b6uK/eDGfDYoF3QI5NdEJwCikndqMerRzpkIQD+Rg6s0ozkTxe
-	YNXHGSE4Fa68fmKgIwapEG4kvQ873M3rhNGAs4hx63z7tJQ
-X-Received: by 2002:a05:701b:4284:10b0:146:84fd:7b58 with SMTP id a92af1059eb24-16a10f2a74fmr10799353c88.9.1791747712614;
-        Sun, 11 Oct 2026 12:41:52 -0700 (PDT)
-Received: from ?IPV6:2406:7400:56:97af:bd42:ace4:1245:4b57? ([2406:7400:56:97af:bd42:ace4:1245:4b57])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-169a442ac67sm37218715c88.18.2026.10.11.12.41.50
+        bh=NtR6Oup1vyS42rk0xqVvYxoHAQHA6UwyWoozV7iO88o=;
+        b=wC2+Jqr8Ultm9Qio5fPsXUDIXD1IOP51E+AABmmJqpGzFPxczM1LZiPUwJB+waYH43
+         r/vcXMyOp3TbDVNYYK444UcR7/d7zr6b4eYKnifTLpyZqJxy812rcsOxXTNrOtVDDlXT
+         kjMgIsU70fYWF32FuTgkQrpK+vC2zR+1V//tLVe6XYjgp9NqdTCJqi48E+hy6/FdaITy
+         vPsp1qyjshRP3A3gaOoPQJR5q/LLDYuwdhUB+9o7NLCgtNi5GZQcqDkbxb7oMz2U4mQq
+         DYqgtoWNDbNlnLGHZVzOu7O93lIOOH5GYQQsNRR9eD462qnV51EPUXhK3eP19FkilN/V
+         mrfg==
+X-Forwarded-Encrypted: i=1; AKwUvBwqn4YOVWiszwXmXIdOS/Piu7jekYHXyoj2XbMdQCeqhI3n0HvFe1AfesahEpi8opmGUPJ21FNe@vger.kernel.org
+X-Gm-Message-State: AFq9FYJMkQjPEvxfZ4v44XQ3rqK9rqXrIXzC8IaaBIfZRctkMIiWIwn9
+	bHVPRg+g2dFuHQujFoeeuQ/UZhK/mw0OzLx5Wm7utYU8NffUEIP3zzQu6HjrWLRO9YPP1GHrsE4
+	SDpaTBXeDMg==
+X-Gm-Gg: AYBFou2QVkfa+RA4jH5FNS8VhDr9GbFC/7Uh9yXcInyfkosJ442rwxcFZWAdw1zR0we
+	Dbf8J4AjDp3oLohiDrrqLo3+2+rgTiiSJfldMVue4VsOB/5qUYE02F/Eqfjw4dkPgHj7VUg/F7a
+	/uUTOHU+6I0FAWZFJZcWilLJc0pNToljwxMg5d8EnolCDx2nCzSUCujXb6Ckp1FDa47F/Y/xFgC
+	drjBrC8TZbYyN7b97cvv6obv2TwogTxQzfiyQkA53kK6zRJIeC8jCdYD5O68JJLvf4BYpTr+yRE
+	/UR5yM+F3H1Aa5ah5WUOBIYeJs9P5nzg0WjHN7cricuDP08o/RFhPFkNWkh2JwlaWN3U4Fgqfkv
+	gMD9YpKaxl0qN1kQMmOe+XiDlawwjZxc8qnPJYJSDQ50OhMem0x5X92McaU65KNg5GKoD2FavFc
+	vtOGHXO2dQ+sx9nhLb8gEcy6fjmZId9kWqAGSToh0NMHYJnFFauBe7gElJcLTj4e4=
+X-Received: by 2002:a05:600d:644f:10b0:4a1:9661:14b5 with SMTP id 5b1f17b1804b1-4a196611aa3mr53282695e9.29.1791753810027;
+        Sun, 11 Oct 2026 14:23:30 -0700 (PDT)
+Received: from [172.16.0.229] ([159.196.52.54])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3ab38ddac6dsm12716817a91.7.2026.10.11.14.23.23
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 11 Oct 2026 12:41:52 -0700 (PDT)
-Message-ID: <11049c99-ddd9-4495-a46e-34d830e6a15d@gmail.com>
-Date: Mon, 12 Oct 2026 01:11:47 +0530
+        Sun, 11 Oct 2026 14:23:26 -0700 (PDT)
+Message-ID: <7932729c-0e40-47e1-baf1-3e8de645b486@suse.com>
+Date: Mon, 12 Oct 2026 07:53:21 +1030
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -68,111 +69,52 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-From: Dhruva G <goledhruva@gmail.com>
-Subject: [PATCH 3/3] btrfs: cover NOCOMPRESS inline eligibility and short
- tails
-To: fstests@vger.kernel.org
-Cc: Anand Jain <asj@kernel.org>, Filipe Manana <fdmanana@suse.com>,
- Zorro Lang <zlang@kernel.org>, linux-btrfs@vger.kernel.org,
- Qu Wenruo <quwenruo.btrfs@gmx.com>
-References: <cover.1791395660.git.goledhruva@gmail.com>
+Subject: Re: [PATCH v2] fstests: generic: add a test case to check fsverity
+ reads
+To: Dhruva G <goledhruva@gmail.com>, linux-btrfs@vger.kernel.org,
+ fstests@vger.kernel.org
+References: <20261010090422.59743-1-wqu@suse.com>
+ <745a6dae-ff3c-45de-8bba-1e2efd45ca47@gmail.com>
 Content-Language: en-US
-In-Reply-To: <cover.1791395660.git.goledhruva@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+From: Qu Wenruo <wqu@suse.com>
+Autocrypt: addr=wqu@suse.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
+ FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJqqw0NBQkUl/JeAAoJEMI9kfOh
+ Jf6o/xYH/3AaWnGSq58XnY/T3/YYjr6g+TUZxa7MPyiYTELNpNlvmNlbtbAL0nW0LNvkeiqf
+ SmYA+xkwY4RbxnZYQK0H5iv2w1eqa9qqFZb4bIBRmTapu26GEEkpad0W0ZhoSPMO8bV2Bwkf
+ YdtPZQLaeUKvHZqNqBKnmtRLQj2Cgy3kuXX3bEGvWjzUOxPUSCj/S++JWBewMdMBPT62vZM0
+ 3156gfn5mHA94s2p+NFJoWkERY+JPTMu9NISkpD7yuGhXN88qd/aqD0RrlhxvKsrQogdPwn9
+ vP18FGG3CRlHtOvOLVoY5NKSOWTDc+o+8t2XEETFTGbKYTcqeTzi4SxhvBLtTinOwE0EWdWB
+ rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
+ Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
+ E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
+ vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
+ g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
+ AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
+ cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
+ qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
+ /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
+ o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
+ JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
+In-Reply-To: <745a6dae-ff3c-45de-8bba-1e2efd45ca47@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-Check that --nocomp preserves a compressed inline extent while it remains
-eligible under max_inline, including after a remount. Lower max_inline to
-zero and require the same extent to become regular, uncompressed data.
 
-Exercise one-byte, sector-minus-one, sector-plus-one, and
-maximum-compressed-extent-plus-one file sizes. Check every mapped byte
-range for regular uncompressed data after defrag, and verify all file
-contents, sizes, and converted mappings again after a remount.
 
-Use FIEMAP INLINE and ENCODED flags instead of parsing dump-tree output,
-and skip configurations without inline extent creation support.
+在 2026/10/12 05:19, Dhruva G 写道:
+> On 10-10-2026 14:34, Qu Wenruo wrote:
+>> There is a bug report that with the recently enabled large folios
+> 
+> Do you want to perhaps add a link to this bug report? Just for more context,
+> no hard requirement as such.
 
-Signed-off-by: Dhruva Gole <goledhruva@gmail.com>
----
- tests/btrfs/357     | 59 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/357.out |  2 ++
- 2 files changed, 61 insertions(+)
- create mode 100755 tests/btrfs/357
- create mode 100644 tests/btrfs/357.out
+If you want the report, just check the btrfs fix patch.
 
-diff --git a/tests/btrfs/357 b/tests/btrfs/357
-new file mode 100755
-index 00000000..0d7b1e33
---- /dev/null
-+++ b/tests/btrfs/357
-@@ -0,0 +1,59 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) Meta Platforms, Inc. and affiliates.
-+#
-+# FS QA Test 357
-+#
-+# Verify NOCOMPRESS inline eligibility and short EOF tails.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick defrag compress fiemap
-+
-+. ./common/filter
-+. ./common/btrfs_nocomp
-+
-+_nc_require
-+_require_btrfs_inline_extents_creation
-+_scratch_mkfs -s 4k >> "$seqres.full" 2>&1 || _fail "mkfs failed"
-+_scratch_mount -o compress=zlib,max_inline=4096
-+_nc_probe
-+
-+file="$SCRATCH_MNT/inline"
-+_nc_write "$file" 0 2048 0x34
-+_nc_save_file "$file"
-+_nc_check_range "$file" 0 2048 inline
-+_nc_defrag "$file"
-+_nc_check_range "$file" 0 2048 inline
-+_nc_verify_files
-+_scratch_cycle_mount compress=zlib,max_inline=4096
-+_nc_check_range "$file" 0 2048 inline
-+_nc_verify_files
-+
-+# Lowering max_inline makes the same extent eligible for conversion.
-+_scratch_cycle_mount compress=zlib,max_inline=0
-+_nc_defrag "$file"
-+_nc_check_range "$file" 0 2048 regular
-+_nc_verify_files
-+
-+for length in 1 4095 4097 131073; do
-+	f="$SCRATCH_MNT/tail-$length"
-+	_nc_write "$f" 0 "$length" 0x36
-+	_nc_save_file "$f"
-+	# One-sector files cannot save a sector through compression. The larger
-+	# fixtures must contain compressed data before testing conversion.
-+	if [ "$length" -gt 4096 ]; then
-+		_nc_check_range "$f" 0 4096 compressed
-+	fi
-+	_nc_defrag "$f"
-+	_nc_check_range "$f" 0 "$length" regular
-+done
-+_nc_verify_files
-+_scratch_cycle_mount compress=zlib,max_inline=0
-+_nc_verify_files
-+_nc_check_range "$file" 0 2048 regular
-+for length in 1 4095 4097 131073; do
-+	_nc_check_range "$SCRATCH_MNT/tail-$length" 0 "$length" regular
-+done
-+
-+echo "Silence is golden"
-+_exit 0
-diff --git a/tests/btrfs/357.out b/tests/btrfs/357.out
-new file mode 100644
-index 00000000..25875c6d
---- /dev/null
-+++ b/tests/btrfs/357.out
-@@ -0,0 +1,2 @@
-+QA output created by 357
-+Silence is golden
--- 
-2.43.0
+A regression test doesn't care about the initial report, only a kernel 
+fix care.
