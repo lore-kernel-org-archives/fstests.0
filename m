@@ -1,60 +1,66 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11BEE46AED1;
-	Sun, 11 Oct 2026 23:07:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C417371D02
+	for <fstests@vger.kernel.org>; Mon, 12 Oct 2026 02:57:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791760069; cv=none; b=e3yWtPmw4AqicnNyvBFhhvFGPJmJeHetTNWucgfM7DipUeK2QDQViHDpS/0l2Ye8uE8D3N16uwbYbdhxDTjqCBbkoFG1gYY0WEFoVuadT4mbu+6bGanwu9VJy5rm9ObHFu5heTx9+kO9mgCRjlxw6+dVV/g5TBKCaxgu7K1tjjI=
+	t=1791773844; cv=none; b=IheK+9HpZwUyat/MogfBLilpivbDxoMkyO8aGZN7uBDSXR3yzJsu/Z3/w7XtA4hjy4rTuZq8EHhuVSxrF+2plnXvki6wYZsKBWkiKm0NC4PQCvsQhvAxWZ21DVv0arjVUypiyrkCCUgJHw0zOd3my+OWTjT3zbZXEJYb05thQAI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791760069; c=relaxed/simple;
-	bh=wTUcoaooCGpWK9DcCeN7rOdQklu4Ed77T5mGoahW2QU=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=WT8TiT8jks8QjirU4al1pr0+xel8L9DhcTi8CPTAjgNy4I/9Cr8Suifd1LxikSZ0PPRMrdOwxeMB1RIAB9FqWeecIgqywSEP5O8jYUoXsOlWHJRTG+s0OtBgT7HepI29ACvqAGsp8+j29QrXvrpLqhkLQlaTJ8xyWvlkTIijvQc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=EAonVRPy; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=EAonVRPy; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1791773844; c=relaxed/simple;
+	bh=dnJRa0RzGpb/zGVAqf0twncTg3Poml5y1fNjIs8V3ps=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=pMuubqKPpaTHrEJ2CWGBh9P2Z22OxQc7pchYbjRlF3YBOKBorldwGYpca3f3hg3xgXECvTYx4esE+e7zcLC2Z8jED8eFS+kzl4lCHe8Fr+2B3wCO9R5wnGIztLgpK+fa0q90CG5bpgwHtHYFTPQXJFJQeDM2M26TGbblFLj88dc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Y4HQsy3L; arc=none smtp.client-ip=209.85.128.52
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="EAonVRPy";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="EAonVRPy"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id D7F5C21E2F;
-	Sun, 11 Oct 2026 23:07:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1791760064; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=ih3u3637LYMFs46cx2BtyrLir/Gb82cGgbDN0GAiC2E=;
-	b=EAonVRPy39BvZ65TH7WXlj7gXzxe3R508SzqCT02EmZHTAYGYYwd1M9lKdLvdA8jTPwCna
-	a8eMuZprje60HfAKEBkK/T2/RZorSb6uHmL/1xx7wp/IMLE4n+C45hTyt/g3bSFyvglb/c
-	wVBfTeA6qBBwTgETJbGM2xBVrFBX9jI=
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1791760064; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=ih3u3637LYMFs46cx2BtyrLir/Gb82cGgbDN0GAiC2E=;
-	b=EAonVRPy39BvZ65TH7WXlj7gXzxe3R508SzqCT02EmZHTAYGYYwd1M9lKdLvdA8jTPwCna
-	a8eMuZprje60HfAKEBkK/T2/RZorSb6uHmL/1xx7wp/IMLE4n+C45hTyt/g3bSFyvglb/c
-	wVBfTeA6qBBwTgETJbGM2xBVrFBX9jI=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 5E83D13408;
-	Sun, 11 Oct 2026 23:07:43 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id 6XaHKr4WzGo4ZwAAD6G6ig
-	(envelope-from <wqu@suse.com>); Sun, 11 Oct 2026 23:07:43 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH] fstests: btrfs: test if btrfs control file rejects unknown ioctls
-Date: Mon, 12 Oct 2026 09:37:16 +1030
-Message-ID: <20261011230716.16860-1-wqu@suse.com>
-X-Mailer: git-send-email 2.56.0
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Y4HQsy3L"
+Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-49d0da752ffso13574815e9.3
+        for <fstests@vger.kernel.org>; Sun, 11 Oct 2026 19:57:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1791773841; x=1792378641; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=ce1clVE6qRJfn5ktjbgwhdFyB+v1r7C+GeWcoqq4MXA=;
+        b=Y4HQsy3LyX7QtsFctCWqm+HgWHs46dxxn974p0Nn6Be5/wxbuIJzy8JyrhN8Wbfn+G
+         P79OstpkF17HWVvJmH1szVblPZWuJJPGhsutbmqIHcvzw4NbzmiMWRrqIYCAKyntkQpI
+         dhskGXmzGkkXYAdbzFDYEhlqkC8uwDxoi0Jq7dTRyK0fKy426Fb7/p5YgKnq8AcX2lNy
+         WcC+V9EO9MYi73kkcCBM7Pa/+JIQVH7OJ1Ds3BXaOXqbcXSzfuCalKXB9kUjiqdBBkGk
+         wNK7BDZaUdFoSauEcdEYE74rEDhOPlgXUpcrVHKbm6G9gmdGAIJpTso1Abbki87KOd5N
+         FsXg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1791773841; x=1792378641;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=ce1clVE6qRJfn5ktjbgwhdFyB+v1r7C+GeWcoqq4MXA=;
+        b=OxeMNBxUCeHU1d68VQ5Nu1ItYC+3drgdpfS8LcMTFGOOQJg5AjGswXpXjN2a3KqDnZ
+         AFppo0hhcde77JhKQpGV1N2EC+1RYzZAwYCkh4wjzv4U/PRa1Fo12qi5N7+t178G1Hb7
+         ALi6je4Sg8/EnjH4FdrsKuidY3J6TMFOrCp6FqC879yRmlmpqn0XMaOraH/63LVHDgBR
+         mDCnW/ZL6Ua0V457rPq9uhhFWiIikLTr+Z5/G++SYHU7bAdwO/JKuH4Lyxxdv+PdCzSO
+         VXfhSyBDwFeh1v5cYfxNrIdDr7e5d3YmlnByQP3ZbCjSGhZxrGRcXIk3iabMV07KKM/J
+         bDBg==
+X-Gm-Message-State: AFq9FYLxL6MPHqkwsFZSQS7QJ3/HUCnMYRYRyuJDLcOUz8DzlYPlY+yM
+	9BiBaNgmSlyat6xj35je6aDDhcYoSKin2A4jHid4yjfouZ3vevjOC3RF4o+AIKjSZfizBVg/2Zy
+	aIXIrXy15yA==
+X-Gm-Gg: AYBFou1Mr2lQ56aXZrtJH8GiQ1/8rsfvqvnrygz9c65VkSp3Cl2mTpg/JVgV+Rov9Ms
+	R7qkyFUR9PVB8p5vUmtem9uAoJaROXQdDyMkUr4sofvIqYojY+9BT7nXCiab00rw5rCoBmScUN3
+	QDOapvHwMtdtY1t/9zQgjMOIUzc/ESrm1keNHNh2mzyKlQnIquE38TqEWW8jabTxtaYWqR4DonS
+	O80Awv1zSIFNk7QPpETG+11SrwH/BYUUwxcErehTB5vEY408my9+Pcr8D0QXgTEAzMUZjbNsow+
+	tya+HL2xkcag/panlam9zXb8vA7hbBt+r/1Hwb384m4t6PMDTbG7i0bhoRqPFubZx78FEbW4xkf
+	2pjAXQR36sCIzzm8SxerO0V2ldCWS/QHqgu65oB8xN7zZ83oSyMqRQYv9VGtLDLc52mSkCyhD8W
+	1mjlbAPX6HqArpQOPXl9Hv4f0WGTsWNjF5FfpX9ryu+6ildTIYsR+ugWXkIRKw
+X-Received: by 2002:a05:600c:3f0f:b0:49c:ffab:551f with SMTP id 5b1f17b1804b1-4a18e4cd231mr153062705e9.22.1791773841251;
+        Sun, 11 Oct 2026 19:57:21 -0700 (PDT)
+Received: from localhost.com ([240e:304:4be4:0:8ce8:cc4e:be82:2880])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2e8422b8dd5sm38792205ad.55.2026.10.11.19.57.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 11 Oct 2026 19:57:19 -0700 (PDT)
+From: lan@suse.com
+To: fstests@vger.kernel.org
+Cc: An Long <lan@suse.com>
+Subject: [PATCH] generic/095: ignore EBUSY for job5 on NFS
+Date: Mon, 12 Oct 2026 10:57:07 +0800
+Message-ID: <20261012025707.16720-1-lan@suse.com>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -62,90 +68,79 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spam-Flag: NO
-X-Spam-Score: -2.80
-X-Spam-Level: 
-X-Spamd-Result: default: False [-2.80 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	RCPT_COUNT_TWO(0.00)[2];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,imap1.dmz-prg2.suse.org:helo];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	FROM_EQ_ENVFROM(0.00)[];
-	TO_DN_NONE(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	RCVD_TLS_ALL(0.00)[]
 
-This is a regression test for a recent bug fix, where unsupported ioctls
-are not properly rejected for btrfs control file (normally at
-"/dev/btrfs-control").
+From: An Long <lan@suse.com>
 
-The test case itself is super simple, which doesn't even require test or
-scratch device, it just run the "btrfs_ioctl" program using
-"get_subvol_info" ioctl on "/dev/btrfs-control", which should fail as
-that ioctl only makes sense on a mounted btrfs, not the btrfs control
-file.
+On NFS, the buffered read in job5 occasionally fails with EBUSY:
 
-The error will be outputted to the golden output so that we can catch
-any unexpected success.
+  fio: io_u error on file <dir>/file2: Device or resource busy: read ...
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
+This most likely happens because the client has to invalidate its page
+cache before reading a file that other jobs may have modified, and that
+cannot complete while those jobs keep mixing direct, buffered and mmap
+writes on the same files.
+
+Make this error ignorable for job5 reads only, and only when testing
+NFS, so that unexpected errors from other jobs or other filesystems are
+still reported. Since ignore_error given on the fio command line applies
+to all jobs, move it into the job file, where it can be overridden per
+job. Behaviour for other filesystems and jobs is unchanged.
+
+Signed-off-by: An Long <lan@suse.com>
 ---
- tests/btrfs/359     | 26 ++++++++++++++++++++++++++
- tests/btrfs/359.out |  2 ++
- 2 files changed, 28 insertions(+)
- create mode 100755 tests/btrfs/359
- create mode 100644 tests/btrfs/359.out
+ tests/generic/095 | 19 +++++++++++++++----
+ 1 file changed, 15 insertions(+), 4 deletions(-)
 
-diff --git a/tests/btrfs/359 b/tests/btrfs/359
-new file mode 100755
-index 00000000..46457f57
---- /dev/null
-+++ b/tests/btrfs/359
-@@ -0,0 +1,26 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
+diff --git a/tests/generic/095 b/tests/generic/095
+index 828274fd..53afb1de 100755
+--- a/tests/generic/095
++++ b/tests/generic/095
+@@ -25,12 +25,25 @@ numjobs=$((5 * LOAD_FACTOR))
+ fio_config=$tmp.fio
+ fio_out=$tmp.fio.out
+ blksz=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
++
++# There's a known EIO failure to report collisions between directio and buffered
++# writes to userspace, refer to upstream linux 5a9d929d6e13. So ignore EIO error
++# at here.
 +#
-+# FS QA Test 359
-+#
-+# Make sure the btrfs control file (/dev/btrfs-control) properly rejects
-+# an unsupported ioctl.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick ioctl
-+
-+_fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: return -ENOTTY for unknown ioctls on the control device"
-+
-+_require_test_program btrfs_ioctl
-+
-+path="/dev/btrfs-control"
-+if [ ! -c "$path" ]; then
-+	_notrun "No btrfs control file at \"$path\""
-+fi
-+
-+# This should fail with -ENOTTY error.
-+$here/src/btrfs_ioctl get_subvol_info "$path" >> $seqres.full
-+
-+_exit 0
-diff --git a/tests/btrfs/359.out b/tests/btrfs/359.out
-new file mode 100644
-index 00000000..89090e22
---- /dev/null
-+++ b/tests/btrfs/359.out
-@@ -0,0 +1,2 @@
-+QA output created by 359
-+ioctl failed: Inappropriate ioctl for device
++# On NFS, the buffered read in job5 may fail with EBUSY, most likely because
++# the client has to invalidate its page cache before reading a stale file, as
++# the file may have been modified by other jobs doing writes, and that cannot
++# complete while those jobs are mixing direct, buffered and mmap I/O on the same
++# files. Ignore EBUSY on reads for job5 on NFS.
++job5_ignore_error=",EIO"
++[ "$FSTYP" = "nfs" ] && job5_ignore_error="EBUSY,EIO"
+ cat >$fio_config <<EOF
+ [global]
+ bs=8k
+ iodepth=$iodepth
+ iodepth_batch=$iodepth_batch
+ randrepeat=1
++ignore_error=,EIO
+ size=1m
+ directory=$SCRATCH_MNT
+ numjobs=$numjobs
+@@ -57,6 +70,7 @@ direct=1
+ rw=randwrite
+ filename=file1:file2
+ [job5]
++ignore_error=$job5_ignore_error
+ bs=1k
+ ioengine=sync
+ rw=randread
+@@ -86,10 +100,7 @@ echo 'bs=$pagesize' >> $fio_config
+ 
+ _require_fio $fio_config
+ 
+-# There's a known EIO failure to report collisions between directio and buffered
+-# writes to userspace, refer to upstream linux 5a9d929d6e13. So ignore EIO error
+-# at here.
+-$FIO_PROG $fio_config --ignore_error=,EIO --output=$fio_out
++$FIO_PROG $fio_config --output=$fio_out
+ cat $fio_out >> $seqres.full
+ echo "Silence is golden"
+ 
 -- 
-2.56.0
+2.51.0
 
