@@ -1,68 +1,68 @@
-Received: from mail-dy1-f178.google.com (mail-dy1-f178.google.com [74.125.82.178])
+Received: from mail-dy1-f170.google.com (mail-dy1-f170.google.com [74.125.82.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4798637F319
-	for <fstests@vger.kernel.org>; Mon, 12 Oct 2026 16:33:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4DFCA30C16A
+	for <fstests@vger.kernel.org>; Mon, 12 Oct 2026 16:46:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791822784; cv=none; b=Jwa+JOh0QBcJ6ntwv5Lxmg2TJ0WxW5+nZJcELgQo7mkWRlO2H+YV+FcNLyCNhVnZpX9Em5MDXSFRRsleZANM22Yr6SzrPHDgyDsjUP6LFZDrLztuZs/5VjRgWfGcfDqB5HPO1JjgMy6WnEZV2rLj40m7IgibcmXpp8+V8T6PLM0=
+	t=1791823615; cv=none; b=Fry8erKek7P4KKCnsrj7ELgdYqw2CmVcuQz7CQoGGr1d0AlUto8AUt7HBfC2l+xAfzsfLzRSuCLpOHEL2NjKIzAeDUPfDXyJBxfj2dG+1hu2S9/u0Wmf+HdHa5Q+5eirISR1Gt2AYnRtQGDn16RNe0tbARxFs2RB6ATA+t5RYtM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791822784; c=relaxed/simple;
-	bh=LMFg21ea/HRdvWr+H0MkJEaf5T9Sro/gkMGlzvdg1MQ=;
+	s=arc-20240116; t=1791823615; c=relaxed/simple;
+	bh=WAMRkCfr7H5QN6A4aQbcqsVChqM0nwv/H92TRsaVOlc=;
 	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=ByIUCp7uBG5GDwyCYjGqouTTNIUM4pdVM5jqh9WbQf5GejEeYDqxOTLk4qiF73YjmAoe5GyNfkVnBzrIJS6+GuVocYL6qGLkUCExoSGDyro0pL+HOe0IkgtaGyGMFOAdat62U3cc8+vra4IuioONR/Pg3gLGTEi4GmLksthXj04=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=CRtq0FcH; arc=none smtp.client-ip=74.125.82.178
+	 In-Reply-To:Content-Type; b=JkDFRrQrq0212WEI5GUA1hKn22qUn30WiC65lnHwh3ADDeZ/JRiEPQ56oaHE83uZEKxh2ZW1gC1I3kXG4OiN64IV0cXC4MqjN0ajxjERFYn98Mka2i0ucwJI/Ms2HJOVXpXZjWEqnQKM0oKctoYMMSYc5920N4xMW1ivos4Qk1g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=g8JAGs+q; arc=none smtp.client-ip=74.125.82.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CRtq0FcH"
-Received: by mail-dy1-f178.google.com with SMTP id 5a478bee46e88-35834f72d94so3533036eec.0
-        for <fstests@vger.kernel.org>; Mon, 12 Oct 2026 09:33:03 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="g8JAGs+q"
+Received: by mail-dy1-f170.google.com with SMTP id 5a478bee46e88-354ba08cfd1so3686992eec.1
+        for <fstests@vger.kernel.org>; Mon, 12 Oct 2026 09:46:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1791822782; x=1792427582; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1791823612; x=1792428412; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:in-reply-to:from
          :content-language:references:to:subject:user-agent:mime-version:date
          :message-id:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=NRiPvD4kcSR893VSUB5l9+rGNh0y4KbElZYbWs0AB+s=;
-        b=CRtq0FcHOhSNaMjTsS0MHnqfabWmh8BZ0EXnouz+y2UVt4UJTDG3l5b3Vx6DvGQsBd
-         lP85KT+PZKqPDQAsPXr2Hsh86yHUpi/f3YSFRF/rlgEGLglFLMYsFNKrMRYN0O2PX/3f
-         BJ8AmrFmD8Q7eKfS2V/MBkk5MeDM4HZYE+PknH9qonV2aKfjO2Vk6zU+T/lUnb42GuD9
-         hd6KJZyyIrXIERNNc+8y0oMTKOaYNWO5SjPjHAX3oyK8YuZz+heBe/bL+8xBBBE2Lvb3
-         nHZZaus0RqYO+13eWs2ZJli8/RieyTvYrropmQY7LsudwWHBANz1T8LWT7tr+R0rxIQT
-         G+FA==
+        bh=EfiNe+XyA8zhOMOl60OM1lT0ru0Yw38SRDVvcZ2Pv9w=;
+        b=g8JAGs+qkBzqRG/EKXX54kowehahV9aUOVgycQZzcxnutRdEgI9w3ybGXxbzreyupi
+         TZtVJkIK5tD4ZfQAf5fdTG1XDPsZTTuVVho6csyfcqjGm1SOSosLPKScob5orxGPoJ6d
+         khq0kt3mydVBT/ytcB6fB8z+4Kd6UIs7QWHrXkH5InXzt5CncE+7t0sKKcJRFqIcvmyJ
+         /OmnoDP0BMr8nIjkizDSxEMWMr1/fdikDrQQFR5kWc8TGEQ+v6cCpcpDWe/TgdZaouIF
+         ilsj2Mv3OA9NT2AabCHpGZiIZQPGgH/1pLizW67ecNhtc+QO5GwuiwDAqzsMkedN+pOC
+         0+zg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791822782; x=1792427582;
+        d=1e100.net; s=20260707; t=1791823612; x=1792428412;
         h=content-transfer-encoding:content-type:in-reply-to:from
          :content-language:references:to:subject:user-agent:mime-version:date
          :message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=NRiPvD4kcSR893VSUB5l9+rGNh0y4KbElZYbWs0AB+s=;
-        b=bk/VHkNdzISsARjp/2vHODB5BC4FNLOce72gZI4bgYkAQOZDHwzm8QckuskNRzHg0r
-         bNVPmtgAqF6A6LRY3rSmM0rkZCR3Cp9LLuGDvCCUcOtmgfzGzys24uQUnY+HHtns8Irz
-         RHVDifFF6DENqXyYiHFdnOY4G40N7A+CC9EZMyPleiIOYo/OlURLXlp4YEeaoypxPmll
-         nXPBXRA3kPYmMtFWWYqJwZMevC5x2BOYqNY3h1CMx43jVp1gIY4QzStTEEl23arv4C3F
-         ykKv/q28Ic4PAon/UkLN6TwO1KSqYi+ji7b9pgCZtg2sN8qbYkg/Ld0Fp4gfPu/GdBTn
-         K62g==
-X-Forwarded-Encrypted: i=1; AKwUvBxlnHwBXiiADwK9J1Y3W06U/bh8i55RLyJPK9n6sQaI7OQVo5e0hQ45yAzyAX6QvJTx14Rhy4N4@vger.kernel.org
-X-Gm-Message-State: AFq9FYLCGN+OFlKm/frAR9Ux7FHeOSkqhhggxe2J43i0bWddqqDkeTPm
-	zI75VT7XUmH+ytPwmP7D2fj5x/pF/fyfXsSJcfv235kqKKUdCSZInsOY
-X-Gm-Gg: AYBFou3FrWzAEjKcxThGVLWmBWvLAAVGA+UQhdTC3n6LL2I7oK9mSROAZI66EASnxa7
-	yPo77NSRNwyT7v2Hndqsjd83r9c9fzdstxEj02gaq3NmbA4GtRabUnoHnKBfF92+XSpBXgqmnYd
-	As4xqYIVwHzdsHQxdk9DN1/ZcpXfxfKmIwnhfcUQ47UgoS0ofNaY/xlv/r7Ey7kgjUQiqMU0nhU
-	8ZO2UdBv/bNSccindeQX9MI/uc7BOIMTPN6Jul+cODTMk3L4lbBax08BIzk0PJF+6ewGYXocfsx
-	+nLJbrWUG3Z6KYriquevdbMoSa4lF/VoddgXGrFhOCi+KnUvcfjx+SlBc6+I/l1Ex8jNUlQbyyg
-	+dalXvPUA4Quyl+UehPGWpqGOoL0brIlViUCxZLzOzjZ5yW2ZfAw+d651XkaA0jMyVb67wO6s6p
-	HW9QxAdH4jOD1OpsRWxqaGVvz18rKs6M+EAQvZQH0qc1zz+5XYcifLpr47OAEccRyxYUpQV6U1Z
-	U91InBlAiaIVaHphwsSamn1HS37UJqk2ANInxjDdhcxA7odmKw9uxLafwqDK6V/vIcpWHfnTSAD
-	n8pbSKOjqkgVB6E=
-X-Received: by 2002:a05:7022:b0d4:b0:166:780c:60b6 with SMTP id a92af1059eb24-16a5fc91686mr13865643c88.9.1791822782053;
-        Mon, 12 Oct 2026 09:33:02 -0700 (PDT)
+        bh=EfiNe+XyA8zhOMOl60OM1lT0ru0Yw38SRDVvcZ2Pv9w=;
+        b=mmJ3g7Wy3lOjRoeVEnZZH1qDBg1CsqlnaDEWsjsUalj0OF11NkCEA5IkTBfpz2Cb2U
+         Asdz9kCjGFKPnoLFGGIZCYQaqtr0rKDwX4VOy7P9Je6ueinjy662vgqjqTveuD46fFb0
+         fDT/Ev7L3UcYeL7bWi58lFAyUtiUad9h9iL6Z1ys7N5RV4w0+t6yUD28CNfEmc13Jvqi
+         TDHMv62oTXDE5HfH1VQVT2sjwgH85xK7xxi/xi0OmgiuSDSbYGdh0YG4NJRmgz46/eQY
+         roKVzWCBBWv9oEJFfi5PEv0Of4kpq5xkc8l6CTY5QcVzRnFcXmkW/sfZJB3QGJ6fQEZJ
+         Ke0Q==
+X-Forwarded-Encrypted: i=1; AKwUvBw7VM+TU8Xx+CIlMpRpnqHIjNQrp99dwRxANcvUHJtBiej9WDZ2gYrb2wbtAKfEW6KDLtZVltIO@vger.kernel.org
+X-Gm-Message-State: AFq9FYKWUP2/Q8Ng1ur8/Sni7lPwGkRjIeDohBVGVg1DJ8+JEK6Ij3vE
+	prvN9JSLIU0WelLWYAbmPx/s8V0OzK+wFpZsij+c+Q7fwb1iGzImPh+Y
+X-Gm-Gg: AYBFou3uAJzRO2xQtIBrW0fFo8Vx/wO3slL/fynXaadS6CTMqK/OeDBWp4T49zR8JRM
+	VB/TT+KM6PaM3HtyEASSS02J6awJHjZxMzEmZaiTeA5juf/bqzDXXSUPsAcNtLKR4XDnmEbszyL
+	CaYQV7bXoahkkOZp3LklzTCaaMCYsPZmXJBtivm17BCD+m7yPjrxeqDKigzaq+QoY8gV5xBP4Ja
+	8WU95lrpaRSN5e2jqYlEhVeQshipUt02iEy4svl/QDJ2jjbMgqk7GnuW4L9NoiCUHBYXn8q72sl
+	uGkpvONigWYLS8gyFZGZSEmQD3L7hvaeg7Sl6wNSovZ6rQHe0q9QdLYhkybMOMYsx2KmeQSsSO4
+	2bXmXRj9jp1ybaX2/+S6687nfUGiGjD75c9SQZ54hSSjp69LUeOvb86rbTLoqyxteTV0GUPP573
+	/9hXM0P8Ilh7UPWMWytK6sXby7eGrdENEXohKfROevcfpiQS8x8+Vc7IjJKaii1qFp0KlbbhWJX
+	fxTdEGcR7e5OCq0Xp5KbV6QdiNSfEfIUvkWI4HXTgb0/GnIG8P5Xz9IEeS07fd3OHGTd2RFMwQf
+	wX/w
+X-Received: by 2002:a05:7301:1603:b0:351:1e89:66ab with SMTP id 5a478bee46e88-3537e03cdcamr14286574eec.7.1791823611968;
+        Mon, 12 Oct 2026 09:46:51 -0700 (PDT)
 Received: from ?IPV6:2406:7400:56:97af:5038:b049:4f32:e620? ([2406:7400:56:97af:5038:b049:4f32:e620])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-169a32eb7ebsm36603339c88.12.2026.10.12.09.32.59
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3537ca329d9sm38195439eec.5.2026.10.12.09.46.50
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 12 Oct 2026 09:33:01 -0700 (PDT)
-Message-ID: <75e589b7-9a03-4f23-938e-e1b9ce5bf01e@gmail.com>
-Date: Mon, 12 Oct 2026 22:02:57 +0530
+        Mon, 12 Oct 2026 09:46:51 -0700 (PDT)
+Message-ID: <6fcc096d-c049-4a72-a33f-54aef6151a0e@gmail.com>
+Date: Mon, 12 Oct 2026 22:16:47 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -70,58 +70,39 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3] fstests: generic: add a test case to check fsverity
- reads
+Subject: Re: [PATCH] fstests: btrfs: test if btrfs control file rejects
+ unknown ioctls
 To: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
  fstests@vger.kernel.org
-References: <20261011222613.10793-1-wqu@suse.com>
+References: <20261011230716.16860-1-wqu@suse.com>
 Content-Language: en-US
 From: Dhruva G <goledhruva@gmail.com>
-In-Reply-To: <20261011222613.10793-1-wqu@suse.com>
+In-Reply-To: <20261011230716.16860-1-wqu@suse.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 12-10-2026 03:56, Qu Wenruo wrote:
-> There is a bug report that with the recently enabled large folios
-> support, fsverity enabled files on btrfs can trigger reproducible
-> warnings about file corruption, but in the end no error is returned to
-> user space.
+On 12-10-2026 04:37, Qu Wenruo wrote:
+> This is a regression test for a recent bug fix, where unsupported ioctls
+> are not properly rejected for btrfs control file (normally at
+> "/dev/btrfs-control").
 > 
-> It turns out to be a bug in the btrfs fsverity integration, where blocks
-> not included in the read range are passed to be verified.
+> The test case itself is super simple, which doesn't even require test or
+> scratch device, it just run the "btrfs_ioctl" program using
+> "get_subvol_info" ioctl on "/dev/btrfs-control", which should fail as
+> that ioctl only makes sense on a mounted btrfs, not the btrfs control
+> file.
 > 
-> This is a long-standing bug where btrfs fsverity always assumed that one
-> folio contains exactly one fs block, ignoring the fact that btrfs had
-> block size < page size support before fsverity support was added.
-> 
-> Add a new regression test case for it. The workload is pretty simple:
-> 
-> - Create a 32M file
-> 
-> - Punch a 64K hole for every 128K
->   This will limit the read bio size to 64K, which is smaller than
->   a lot of large folios, and thus can trigger the btrfs bug.
-> 
-> - Enable fsverity digest and drop page cache
-> 
-> - Read that file
-> 
-> - Verify there is no "FILE CORRUPTED!" warning
+> The error will be outputted to the golden output so that we can catch
+> any unexpected success.
 > 
 > Signed-off-by: Qu Wenruo <wqu@suse.com>
 > ---
-> Changelog
-> v3:
-> - Disable signature verification temporarily for the test
->   Pointed out by Dhruva, as it's a user configurable behavior that if
->   signature is required, reading the file without a signature will lead
->   to an EPERM error.
+>  tests/btrfs/359     | 26 ++++++++++++++++++++++++++
 
-Thanks, looks good.
+fails before the fix, passes after it on a local x86_64 Btrfs VM.
 
 Tested-by: Dhruva Gole <goledhruva@gmail.com>
 Reviewed-by: Dhruva Gole <goledhruva@gmail.com>
 
-
 Regards,
-Dhruva
+Dhruva Gole
