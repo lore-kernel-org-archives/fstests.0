@@ -1,230 +1,127 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-dy1-f178.google.com (mail-dy1-f178.google.com [74.125.82.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A4D32931EE;
-	Mon, 12 Oct 2026 14:42:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4798637F319
+	for <fstests@vger.kernel.org>; Mon, 12 Oct 2026 16:33:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791816178; cv=none; b=apNM5ZXcD7rnM2hhFINrjI47UdjEkG29do16/9Be/hJz4HaGaLcHJYXWhHnf617XLZcmVlUN4bwH0xF/kMzqDy/tacVFhVWAwlYULXted1m1+EMJY78xvReB8TuG8UgrQMgpqXuQrEdIp/4SxuXc3UyNT1inWuQ4c6uHhD28utU=
+	t=1791822784; cv=none; b=Jwa+JOh0QBcJ6ntwv5Lxmg2TJ0WxW5+nZJcELgQo7mkWRlO2H+YV+FcNLyCNhVnZpX9Em5MDXSFRRsleZANM22Yr6SzrPHDgyDsjUP6LFZDrLztuZs/5VjRgWfGcfDqB5HPO1JjgMy6WnEZV2rLj40m7IgibcmXpp8+V8T6PLM0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791816178; c=relaxed/simple;
-	bh=KVbEiWwysjQWusF2JU6OhD088LERiyV/zZ7cuOz3Tgo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=lfoXDJ+hP33M6MmQHxyMO6BjX109FDLRK9dWx43KWkeZoPJUMiAsqyk7f0IpEGlG9x0hUhTjvXCoCN+KcNrhXuxOmf1En55UrDakqo7LyKmAQJ7gqKFigE31sXLc0LnsQAJtpzjtKycqnFsaOArxzLaZ/Yi35DQ3s0fFxb3Czgc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gEAlM/Kj; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1791822784; c=relaxed/simple;
+	bh=LMFg21ea/HRdvWr+H0MkJEaf5T9Sro/gkMGlzvdg1MQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=ByIUCp7uBG5GDwyCYjGqouTTNIUM4pdVM5jqh9WbQf5GejEeYDqxOTLk4qiF73YjmAoe5GyNfkVnBzrIJS6+GuVocYL6qGLkUCExoSGDyro0pL+HOe0IkgtaGyGMFOAdat62U3cc8+vra4IuioONR/Pg3gLGTEi4GmLksthXj04=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=CRtq0FcH; arc=none smtp.client-ip=74.125.82.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gEAlM/Kj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9691C1F0089B;
-	Mon, 12 Oct 2026 14:42:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1791816177;
-	bh=BgN6ieNRJXO4xtx7ABVudda8hNvF/8BKfaVLG1zDr3E=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=gEAlM/KjYJx+bBGK0OyFfJO+0y3QxZPEQI2No4uczdH/VRkHfE2mZcDcI5CMmWfeU
-	 Jx5umRIpYVc7tfq+JiLot/FjzLFslzPW+auESrETVhGUt1XVcRDN+kRTJduqOIIHdh
-	 MAjY16ounm7uLN29ZQ226RRugD18T1QLAkR1icoRjt4Z/BVkbPr7fs6vlS0fs9r533
-	 vICNU4CC2BaWmdNE7wjH4w8fpWsHSciDWvQ7q9yU4WMXgw2/ug8DmkMaGxhUafg/92
-	 Sch53pS0SMHN+zsmoGYoyNJlvm4msSVmVSL3/ncwvAmYSQwz3Epou1mB7W/OnEeeZB
-	 lAwB6nYO2uaZg==
-Date: Mon, 12 Oct 2026 22:42:50 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Lukas Herbolt <lukas@herbolt.com>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Subject: Re: [PATCH] src/locktest.c: fix build failure of struct delegation
-Message-ID: <aszxpKDR3-Ktb0dE@zlang-mailbox>
-Mail-Followup-To: Lukas Herbolt <lukas@herbolt.com>, 
-	fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
-References: <20260813150846.280498-1-zlang@kernel.org>
- <aqaxjGZ6rSR1mZCf@zlang-mailbox>
- <dabaefbef09950a167e315b05c6c2fe7@herbolt.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CRtq0FcH"
+Received: by mail-dy1-f178.google.com with SMTP id 5a478bee46e88-35834f72d94so3533036eec.0
+        for <fstests@vger.kernel.org>; Mon, 12 Oct 2026 09:33:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1791822782; x=1792427582; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:to:subject:user-agent:mime-version:date
+         :message-id:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=NRiPvD4kcSR893VSUB5l9+rGNh0y4KbElZYbWs0AB+s=;
+        b=CRtq0FcHOhSNaMjTsS0MHnqfabWmh8BZ0EXnouz+y2UVt4UJTDG3l5b3Vx6DvGQsBd
+         lP85KT+PZKqPDQAsPXr2Hsh86yHUpi/f3YSFRF/rlgEGLglFLMYsFNKrMRYN0O2PX/3f
+         BJ8AmrFmD8Q7eKfS2V/MBkk5MeDM4HZYE+PknH9qonV2aKfjO2Vk6zU+T/lUnb42GuD9
+         hd6KJZyyIrXIERNNc+8y0oMTKOaYNWO5SjPjHAX3oyK8YuZz+heBe/bL+8xBBBE2Lvb3
+         nHZZaus0RqYO+13eWs2ZJli8/RieyTvYrropmQY7LsudwWHBANz1T8LWT7tr+R0rxIQT
+         G+FA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1791822782; x=1792427582;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:to:subject:user-agent:mime-version:date
+         :message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=NRiPvD4kcSR893VSUB5l9+rGNh0y4KbElZYbWs0AB+s=;
+        b=bk/VHkNdzISsARjp/2vHODB5BC4FNLOce72gZI4bgYkAQOZDHwzm8QckuskNRzHg0r
+         bNVPmtgAqF6A6LRY3rSmM0rkZCR3Cp9LLuGDvCCUcOtmgfzGzys24uQUnY+HHtns8Irz
+         RHVDifFF6DENqXyYiHFdnOY4G40N7A+CC9EZMyPleiIOYo/OlURLXlp4YEeaoypxPmll
+         nXPBXRA3kPYmMtFWWYqJwZMevC5x2BOYqNY3h1CMx43jVp1gIY4QzStTEEl23arv4C3F
+         ykKv/q28Ic4PAon/UkLN6TwO1KSqYi+ji7b9pgCZtg2sN8qbYkg/Ld0Fp4gfPu/GdBTn
+         K62g==
+X-Forwarded-Encrypted: i=1; AKwUvBxlnHwBXiiADwK9J1Y3W06U/bh8i55RLyJPK9n6sQaI7OQVo5e0hQ45yAzyAX6QvJTx14Rhy4N4@vger.kernel.org
+X-Gm-Message-State: AFq9FYLCGN+OFlKm/frAR9Ux7FHeOSkqhhggxe2J43i0bWddqqDkeTPm
+	zI75VT7XUmH+ytPwmP7D2fj5x/pF/fyfXsSJcfv235kqKKUdCSZInsOY
+X-Gm-Gg: AYBFou3FrWzAEjKcxThGVLWmBWvLAAVGA+UQhdTC3n6LL2I7oK9mSROAZI66EASnxa7
+	yPo77NSRNwyT7v2Hndqsjd83r9c9fzdstxEj02gaq3NmbA4GtRabUnoHnKBfF92+XSpBXgqmnYd
+	As4xqYIVwHzdsHQxdk9DN1/ZcpXfxfKmIwnhfcUQ47UgoS0ofNaY/xlv/r7Ey7kgjUQiqMU0nhU
+	8ZO2UdBv/bNSccindeQX9MI/uc7BOIMTPN6Jul+cODTMk3L4lbBax08BIzk0PJF+6ewGYXocfsx
+	+nLJbrWUG3Z6KYriquevdbMoSa4lF/VoddgXGrFhOCi+KnUvcfjx+SlBc6+I/l1Ex8jNUlQbyyg
+	+dalXvPUA4Quyl+UehPGWpqGOoL0brIlViUCxZLzOzjZ5yW2ZfAw+d651XkaA0jMyVb67wO6s6p
+	HW9QxAdH4jOD1OpsRWxqaGVvz18rKs6M+EAQvZQH0qc1zz+5XYcifLpr47OAEccRyxYUpQV6U1Z
+	U91InBlAiaIVaHphwsSamn1HS37UJqk2ANInxjDdhcxA7odmKw9uxLafwqDK6V/vIcpWHfnTSAD
+	n8pbSKOjqkgVB6E=
+X-Received: by 2002:a05:7022:b0d4:b0:166:780c:60b6 with SMTP id a92af1059eb24-16a5fc91686mr13865643c88.9.1791822782053;
+        Mon, 12 Oct 2026 09:33:02 -0700 (PDT)
+Received: from ?IPV6:2406:7400:56:97af:5038:b049:4f32:e620? ([2406:7400:56:97af:5038:b049:4f32:e620])
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-169a32eb7ebsm36603339c88.12.2026.10.12.09.32.59
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 12 Oct 2026 09:33:01 -0700 (PDT)
+Message-ID: <75e589b7-9a03-4f23-938e-e1b9ce5bf01e@gmail.com>
+Date: Mon, 12 Oct 2026 22:02:57 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <dabaefbef09950a167e315b05c6c2fe7@herbolt.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3] fstests: generic: add a test case to check fsverity
+ reads
+To: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
+ fstests@vger.kernel.org
+References: <20261011222613.10793-1-wqu@suse.com>
+Content-Language: en-US
+From: Dhruva G <goledhruva@gmail.com>
+In-Reply-To: <20261011222613.10793-1-wqu@suse.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Wed, Oct 07, 2026 at 07:30:12PM +0200, Lukas Herbolt wrote:
-> On 2026-09-13 16:29, Zorro Lang wrote:
-> > On Thu, Aug 13, 2026 at 11:08:46PM +0800, Zorro Lang wrote:
-> > > Since glibc commit f2e3dacbff88 ("Add new constants from Linux 6.12,
-> > > 6.18 and 6.19 to bits/fcntl-linux.h"), the F_GETDELEG and F_SETDELEG
-> > > constants from Linux 6.19 have been added directly into <fcntl.h>.
-> > > However, the corresponding full definition for 'struct delegation'
-> > > was not included in glibc's userspace wrapper. That causes below
-> > > build error:
-> > > 
-> > >  locktest.c:1065:16: error: variable 'deleg' has initializer but
-> > > incomplete type
-> > >   1065 |         struct delegation deleg = { .d_type = F_UNLCK };
-> > >  ...
-> > > 
-> > > Fix this by isolating the definition of 'struct delegation' from the
-> > > command macros via autoconf capability probing:
-> > > 
-> > > 1. Add an AC_CHECK_TYPES check for 'struct delegation' in
-> > > configure.ac.
-> > > 2. In locktest.c, unbind 'struct delegation' from the '#ifndef
-> > > F_GETDELEG'
-> > >    guard and wrap it with '#ifndef HAVE_STRUCT_DELEGATION' instead.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@kernel.org>
-> > > ---
-> > > 
-> > > Hi,
-> > > 
-> > > fstests currently fails to build against the latest glibc, with the
-> > > root
-> > > cause detailed in the commit log above.
-> > > 
-> > > The glibc now defines F_GETDELEG and F_SETDELEG, but leaves out the
-> > > actual
-> > > 'struct delegation' definition. The complete struct is available in
-> > > <linux/fcntl.h>,
-> > > but we cannot simply include both <fcntl.h> and <linux/fcntl.h> due
-> > > to nasty
-> > > namespace redefinition conflicts.
-> > > 
-> > > I am not entirely sure if glibc will bring in 'struct delegation',
-> > > so for now,
-> > > I chose to decouple and handle the structure definition
-> > > independently via
-> > > autoconf.
-> > > 
-> > > Any thoughts or better suggestions on how we should handle this
-> > > transition?
-> > 
-> > Friendly ping...
-> > 
-> > Am I the only one seeing this? Without this patch, xfstests won't
-> > compile on
-> > the latest Fedora：
-> >   glibc-devel-2.44.9000-1.fc46.x86_64
-> >   gcc-16.2.1-2.fc46.x86_64
-> > 
-> > I keep running into the build error below [1].
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > [1]
-> > locktest.c: In function 'initialize':
-> > locktest.c:1018:17: warning: variable 'offset' set but not used
-> > [-Wunused-but-set-variable=]
-> >  1018 |     int         offset = 0;
-> >       |                 ^~~~~~
-> > locktest.c: In function 'release_lease':
-> > locktest.c:1065:16: error: variable 'deleg' has initializer but
-> > incomplete type
-> >  1065 |         struct delegation deleg = { .d_type = F_UNLCK };
-> >       |                ^~~~~~~~~~
-> > locktest.c:1065:38: error: 'struct delegation' has no member named
-> > 'd_type'
-> >  1065 |         struct delegation deleg = { .d_type = F_UNLCK };
-> >       |                                      ^~~~~~
-> > locktest.c:1065:47: warning: excess elements in struct initializer
-> >  1065 |         struct delegation deleg = { .d_type = F_UNLCK };
-> >       |                                               ^~~~~~~
-> > locktest.c:1065:47: note: (near initialization for 'deleg')
-> > locktest.c:1065:27: error: storage size of 'deleg' isn't known
-> >  1065 |         struct delegation deleg = { .d_type = F_UNLCK };
-> >       |                           ^~~~~
-> > locktest.c:1065:27: warning: unused variable 'deleg' [-Wunused-variable]
-> > locktest.c: In function 'do_deleg':
-> > locktest.c:1365:12: error: variable 'deleg' has initializer but
-> > incomplete type
-> >  1365 |     struct delegation deleg = { .d_type = arg };
-> >       |            ^~~~~~~~~~
-> > locktest.c:1365:34: error: 'struct delegation' has no member named
-> > 'd_type'
-> >  1365 |     struct delegation deleg = { .d_type = arg };
-> >       |                                  ^~~~~~
-> > locktest.c:1365:43: warning: excess elements in struct initializer
-> >  1365 |     struct delegation deleg = { .d_type = arg };
-> >       |                                           ^~~
-> > locktest.c:1365:43: note: (near initialization for 'deleg')
-> > locktest.c:1365:23: error: storage size of 'deleg' isn't known
-> >  1365 |     struct delegation deleg = { .d_type = arg };
-> >       |                       ^~~~~
-> > locktest.c:1365:23: warning: unused variable 'deleg' [-Wunused-variable]
-> > locktest.c: In function 'main':
-> > locktest.c:1615:16: error: variable 'deleg' has initializer but
-> > incomplete type
-> >  1615 |         struct delegation deleg = { .d_type = F_UNLCK };
-> >       |                ^~~~~~~~~~
-> > locktest.c:1615:38: error: 'struct delegation' has no member named
-> > 'd_type'
-> >  1615 |         struct delegation deleg = { .d_type = F_UNLCK };
-> >       |                                      ^~~~~~
-> > locktest.c:1615:47: warning: excess elements in struct initializer
-> >  1615 |         struct delegation deleg = { .d_type = F_UNLCK };
-> >       |                                               ^~~~~~~
-> > locktest.c:1615:47: note: (near initialization for 'deleg')
-> > locktest.c:1615:27: error: storage size of 'deleg' isn't known
-> >  1615 |         struct delegation deleg = { .d_type = F_UNLCK };
-> >       |                           ^~~~~
-> > locktest.c:1615:27: warning: unused variable 'deleg' [-Wunused-variable]
-> >     [CC]    chprojid_fail
-> >     [CC]    detached_mounts_propagation
-> > gmake[2]: *** [Makefile:139: locktest] Error 1
-> > gmake[2]: *** Waiting for unfinished jobs....
-> > gmake[1]: *** [include/buildrules:30: src] Error 2
-> > make: *** [Makefile:65: default] Error 2
-> > 
-> > > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > >  configure.ac   | 4 ++++
-> > >  src/locktest.c | 2 ++
-> > >  2 files changed, 6 insertions(+)
-> > > 
-> > > diff --git a/configure.ac b/configure.ac
-> > > index feb24ddd..6d7ff3ba 100644
-> > > --- a/configure.ac
-> > > +++ b/configure.ac
-> > > @@ -111,6 +111,10 @@ AC_CHECK_TYPES([struct
-> > > btrfs_ioctl_received_subvol_args], [], [], [[
-> > >  #include <stddef.h>
-> > >  #include <linux/btrfs.h>
-> > >  ]])
-> > > +AC_CHECK_TYPES([struct delegation], [], [], [[
-> > > +#include <stddef.h>
-> > > +#include <fcntl.h>
-> > > +]])
-> > >  AC_CHECK_HEADERS([linux/btrfs.h linux/btrfs_tree.h])
-> > >  AC_CHECK_MEMBERS([struct btrfs_ioctl_vol_args_v2.subvolid], [], [],
-> > > [[
-> > >  #include <stddef.h>
-> > > diff --git a/src/locktest.c b/src/locktest.c
-> > > index 54ee1f07..d0264c94 100644
-> > > --- a/src/locktest.c
-> > > +++ b/src/locktest.c
-> > > @@ -80,7 +80,9 @@ extern int h_errno;
-> > >  #ifndef F_GETDELEG
-> > >  #define F_GETDELEG	(1024 + 15)
-> > >  #define F_SETDELEG	(1024 + 16)
-> > > +#endif
-> > > 
-> > > +#ifndef HAVE_STRUCT_DELEGATION
-> > >  struct delegation {
-> > >  	uint32_t d_flags;
-> > >  	uint16_t d_type;
-> > > --
-> > > 2.55.0
-> > > 
-> > > 
+On 12-10-2026 03:56, Qu Wenruo wrote:
+> There is a bug report that with the recently enabled large folios
+> support, fsverity enabled files on btrfs can trigger reproducible
+> warnings about file corruption, but in the end no error is returned to
+> user space.
 > 
-> Hit the same on fedora-rawhide looks good to me.
-> Reviewed-by: "Lukas Herbolt" <lukas@herbolt.com>
+> It turns out to be a bug in the btrfs fsverity integration, where blocks
+> not included in the read range are passed to be verified.
+> 
+> This is a long-standing bug where btrfs fsverity always assumed that one
+> folio contains exactly one fs block, ignoring the fact that btrfs had
+> block size < page size support before fsverity support was added.
+> 
+> Add a new regression test case for it. The workload is pretty simple:
+> 
+> - Create a 32M file
+> 
+> - Punch a 64K hole for every 128K
+>   This will limit the read bio size to 64K, which is smaller than
+>   a lot of large folios, and thus can trigger the btrfs bug.
+> 
+> - Enable fsverity digest and drop page cache
+> 
+> - Read that file
+> 
+> - Verify there is no "FILE CORRUPTED!" warning
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+> Changelog
+> v3:
+> - Disable signature verification temporarily for the test
+>   Pointed out by Dhruva, as it's a user configurable behavior that if
+>   signature is required, reading the file without a signature will lead
+>   to an EPERM error.
 
-Thanks! I finally don't have to keep rebasing this patch locally :)
+Thanks, looks good.
 
-> 
-> -- 
-> -lhe
-> 
+Tested-by: Dhruva Gole <goledhruva@gmail.com>
+Reviewed-by: Dhruva Gole <goledhruva@gmail.com>
+
+
+Regards,
+Dhruva
