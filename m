@@ -1,506 +1,386 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yx1-f51.google.com (mail-yx1-f51.google.com [74.125.224.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 151AD3A9635
-	for <fstests@vger.kernel.org>; Mon, 12 Oct 2026 11:05:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F28CB3D1CC6
+	for <fstests@vger.kernel.org>; Mon, 12 Oct 2026 11:20:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791803129; cv=none; b=oW1iJHIxy/NHwgxCsGSJWY0jJS5+EGpTGcUW44wZ7rLKzMLlPUpeVwt66I2JzQWczJBSVEmeiJJkqtG1/KGsLFp98Sm8IeCxJ5iHVXyedI6Dm/f2URVn/AaBUjQSDkoLMm0CQRcl+Q9buLosVHtS9IgYAmoC/2y5x37bXN8Npdc=
+	t=1791804033; cv=none; b=dx9ZafC7Xaua1QGqMhlH2Krff4tyx7q5b3lRWfnWgzJlLEj4HEtS2ErpS8DXtyqkJKJtJ8Jj1FbmJwIxSb7ZCEQMpgL5d3jvxd6KPgGjW3W+SksJqO+B9wNBZ6yIZbsQFPjB64ZUQyENS+R80XjKiG2xXmnjshEuXy5tdOo8IbA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791803129; c=relaxed/simple;
-	bh=uSYuJuxYf5CYLSkKjCsurqq7KxXCdfdNnxu4pQitVZA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=uR9sBWNqaSMwbuJ7EQK/pwcPF+1p9+DoeqzOTOSYHQlKzuylZyHIJBGxzdskgNYT9ccZpLHNgTiqvY56BsfLDYdVucmbUql5+kSdBGsMi4kpWNVZS4mCdfd2k6KGBS3r3AbDBHOm7Oz8l4Zeg9XsW46otcHfpqAWAiKw5G6++Sk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kzjtJ+Qk; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1791804033; c=relaxed/simple;
+	bh=ezAWYSiOMHcOstdnvKfBU9bKQrJnh5QmDMoZwJpeMDo=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kwMkKhCxVdREnwXiH9kHsQpifw9GCjFYzT84xZFNufhH1VBwZ4vpnuax9LJeisSXVbA7V5fLDGtN/WpReET3SE1Vy6D06x3HIhTynbSwmL03rIzM9DRJ/Pq51zmPdRedbqIw1LF2xmwTEZ3Lh3KE9w1GlaY4OM+kbXJ3yjm3hJU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=C//A1cln; arc=none smtp.client-ip=74.125.224.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kzjtJ+Qk"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F039A1F008A2
-	for <fstests@vger.kernel.org>; Mon, 12 Oct 2026 11:05:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1791803123;
-	bh=jium8qoRQff7tf7aIB2kyynHhKF7RdmHYmbH57IDVSk=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=kzjtJ+Qk8DYbklXBmIGvv1pfDMZE+SqZlICcklFhE38ljq8MuJQb9nXRALOdmPDvE
-	 Usg0/MIex9lIe1wmbZrzQfVBMySWp1iMThJv/9Onhy7lGOxt0ln1Etxud9Rtm3ygsx
-	 Oql8xwJl7n+7lLCRWRFUrVDLLGHRxEZzQm3/wLxUKzLpXalo5jpO8iEGDoYbDygI2H
-	 PrEXrgZS2DLALuj5tzqbleyRb4DKV7LSv+VmrhoAscvqfcn9tZunA0BrAN53GJQblC
-	 5SA8pbk31RUCKq3EXDS4f6uzqZ7ZUUwIN+dyokETvu31iRNWzhpbSa3v52u292VViK
-	 fsEZbEDYE5SsQ==
-Received: by mail-vs1-f54.google.com with SMTP id ada2fe7eead31-7c03a445cb8so1269717137.0
-        for <fstests@vger.kernel.org>; Mon, 12 Oct 2026 04:05:22 -0700 (PDT)
-X-Gm-Message-State: AFq9FYIBqXFzf7iTZmQERPFAFt2SAenbyQIT+0sl6z8Ch5Z376sNPCUj
-	JBjfjNy0rQ5eLiQTDuI+fUaaPgI22r7A3BrAozNygMM2wpakRCjrroCYiNOyzkEeMDffgJdXQZT
-	FkMi98/0rKRACA4WEV0ZSxu/NHfgu/mU=
-X-Received: by 2002:a05:6102:160a:b0:7c1:bc57:c7f3 with SMTP id
- ada2fe7eead31-7cb3668a2c0mr2765728137.5.1791803121988; Mon, 12 Oct 2026
- 04:05:21 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="C//A1cln"
+Received: by mail-yx1-f51.google.com with SMTP id 956f58d0204a3-6768403e9bbso1291120d50.1
+        for <fstests@vger.kernel.org>; Mon, 12 Oct 2026 04:20:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1791804031; x=1792408831; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=QP2S9DQXjUWI2uMwvTrTir7We1C5El/+/5eKCgZBZu4=;
+        b=C//A1clnWYnFjVMCPsTxlsi8wPcW5fMHsWQpbiAD9YRnu+CjyExnZDKlrtQ3E/5oCy
+         q6GCIaXAFqpr1UnOETpa2VRE/kcl9gswLNP1qsl4ELQUfcxyldvmbRg4SgQfRUdCkU1a
+         R8H7dt4wXYe40c+cb+Too4vMFre4FQOlM6ZFrbrHjgnUMvQXGq3il7CX3UOKKpxTcETj
+         u/+w6ts0bVLkq1DyLuoLnd1YyNx+fuhHwWbXG++RmT1lY7VLIt2BsKjtUPMWT0QZdJi9
+         XXKEIMgJuTSLykm1N9P35a/vgE7rbVKEq3/camePM+XH2LINcPyommyNgifvz7dt61lr
+         L93A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1791804031; x=1792408831;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=QP2S9DQXjUWI2uMwvTrTir7We1C5El/+/5eKCgZBZu4=;
+        b=dr4DUzPlo0udvjw7puj4lz6TBLF65KxYaPaLSbAVKuyTRfxDJGKAutduKkvWID71Ni
+         Dh9b58mmJFiDPugDrQ6jsK36oSCp9zhzaSobtAPAkgTeFwxhPL+ISoB18WZvujGeciw/
+         KtzqMwkIVbB3MB4spCwhawJo/rIsJd0etJyyi6peYYOP4n0LJsb34fRay2Ausk4RjbFm
+         K3qn0stVCHF+fanl2NAb4EsK1aswhaWHDOhVpS+gIoDp8JPwmVwxFmv4N/TbeSmFWCIM
+         Mj92BHRNcjFb1MRlXWae2mzFiSQ460gRe1OFtNJxnv/cy74cNKrvEWyUBoxsRylGMqp7
+         YVYA==
+X-Gm-Message-State: AFq9FYKWmk0R6k1/+mZ4I6kwRsZjaSwmVgrit9uP4v+2Z+W9C/mEvCSC
+	f0zKsu88K2zavP4Zfy/BR25YhqFmkmiBeaiK4ZOmyVQP9hC/1xZQt+FiICrzDSFf
+X-Gm-Gg: AYBFou0sf0SSs8op7fuivplqiRJaHZ00unYCLUeTEDeBmV18kUNGPHx7BzWhauiaAAd
+	fkebvjUfmK9g6vCKuaC4Wua84J6iOgSW0CQ0n4yOHsxtt/ctpCoNs0N+2ZZKX9ylZMg2xnTnhDR
+	2ySIDYIWLVRfgQG1X/M0ntsryRTPSNs4ErX4f5aq9aEH2P/P8uRpIDfoAgLsNDO3Pr8GXRHOTXj
+	lLDIbG+0TULemdeen+5/Zg+aOSUdg6lw8Zal6kecVWdtv5RO9bhjEEAvVCUBYlR8ZRF/ysUKK2F
+	ZlxhR6avHcxBcF2Zou1synv6pzkyACIXz2vNGcQirN22p4XYIdQZlIU8h8AIccVyS6o58E85sXi
+	JAlSVZC1ZWScpKAOWu+kInz3KTzrDNsLW44KdzuJwnSYzWddNhXv3n8q4xXuyFmt36l4unOYKqz
+	etu59CRwjSUiFnU4dPUdsQtLxRTQdK6aKw/y5ABLuu+VXa13Jk9+NbEquDDRoKhOnZKnrQw1rcU
+	1pG9LwnRPkGDfh5AUi14icvTvJMVSzv
+X-Received: by 2002:a05:690e:b49:b0:675:6da9:1473 with SMTP id 956f58d0204a3-67936984122mr3438760d50.19.1791804030782;
+        Mon, 12 Oct 2026 04:20:30 -0700 (PDT)
+Received: from obadmin-Precision-3680.atlascopco.group ([136.226.232.167])
+        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-6793566418bsm3662569d50.12.2026.10.12.04.20.28
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 12 Oct 2026 04:20:30 -0700 (PDT)
+From: Sahaj Chaudhari <sahaj123.sc@gmail.com>
+To: fstests@vger.kernel.org
+Cc: Jan Kara <jack@suse.cz>
+Subject: [PATCH] ext4: test reserved GID block allocation
+Date: Mon, 12 Oct 2026 16:51:09 +0530
+Message-ID: <20261012112109.3363168-1-sahaj123.sc@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1791395660.git.goledhruva@gmail.com> <b99615bd-9b7c-48b6-ac70-d450a606388c@gmail.com>
-In-Reply-To: <b99615bd-9b7c-48b6-ac70-d450a606388c@gmail.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Mon, 12 Oct 2026 12:04:44 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H6FG=gWjJ-fy7FTBKSYyfUha2n93YbwtFFadMYU7ZuZjg@mail.gmail.com>
-X-Gm-Features: AclHuK8jt1Zpu2UUOvRzMmgjp9cGQrMgtqQRcNtiOcV91NH7E1xMjXLl0ubm97U
-Message-ID: <CAL3q7H6FG=gWjJ-fy7FTBKSYyfUha2n93YbwtFFadMYU7ZuZjg@mail.gmail.com>
-Subject: Re: [PATCH 1/3] btrfs: exercise NOCOMPRESS range and EOF handling
-To: Dhruva G <goledhruva@gmail.com>
-Cc: fstests@vger.kernel.org, Anand Jain <asj@kernel.org>, 
-	Filipe Manana <fdmanana@suse.com>, Zorro Lang <zlang@kernel.org>, linux-btrfs@vger.kernel.org, 
-	Qu Wenruo <quwenruo.btrfs@gmx.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Sun, Oct 11, 2026 at 8:40=E2=80=AFPM Dhruva G <goledhruva@gmail.com> wro=
-te:
->
-> Check that a bounded --nocomp request rewrites compressed extents in the
-> selected range while distant untouched regions still point to their
-> original compressed storage.
-> Cover a partial final sector, zero length, a length extending past EOF,
-> start at EOF, and the empty-file no-op. Preserve contents and sizes acros=
-s
-> the conversion and a remount.
->
-> Add shared FIEMAP and integrity helpers for the NOCOMPRESS tests. Require
-> full mapping coverage and inspect every overlapping extent so holes and
-> partly converted ranges cannot pass. Include a small ioctl helper to
-> probe kernel support and check errno without btrfs-progs translation.
->
-> Signed-off-by: Dhruva Gole <goledhruva@gmail.com>
-> ---
->  .gitignore                |   1 +
->  common/btrfs_nocomp       | 134 ++++++++++++++++++++++++++++++++++++++
->  src/Makefile              |   2 +-
->  src/btrfs_defrag_nocomp.c |  63 ++++++++++++++++++
->  tests/btrfs/355           |  80 +++++++++++++++++++++++
->  tests/btrfs/355.out       |   2 +
->  6 files changed, 281 insertions(+), 1 deletion(-)
->  create mode 100644 common/btrfs_nocomp
->  create mode 100644 src/btrfs_defrag_nocomp.c
->  create mode 100755 tests/btrfs/355
->  create mode 100644 tests/btrfs/355.out
->
-> diff --git a/.gitignore b/.gitignore
-> index 0b6b9452..1bfa12ef 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -216,6 +216,7 @@ tags
->  /src/truncate
->  /src/t_btrfs_received_uuid_ioctl
->  /src/btrfs_ioctl
-> +/src/btrfs_defrag_nocomp
->
->  # Symlinked files
->  /tests/generic/035.out
-> diff --git a/common/btrfs_nocomp b/common/btrfs_nocomp
-> new file mode 100644
-> index 00000000..7e2111e1
-> --- /dev/null
-> +++ b/common/btrfs_nocomp
-> @@ -0,0 +1,134 @@
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) Meta Platforms, Inc. and affiliates.
-> +# Helpers for BTRFS_DEFRAG_RANGE_NOCOMPRESS tests.
-> +
-> +_nc_require()
-> +{
+Add an xfstests regression test that exhausts ordinary free space, then
+checks that a process using ext4's reserved GID can allocate a block.
 
-Such a odd name because:
+Link: https://lore.kernel.org/r/20261008065651.3517824-1-sahaj123.sc@gmail.com
+Signed-off-by: Sahaj Chaudhari <sahaj123.sc@gmail.com>
+---
+ .gitignore          |   1 +
+ src/Makefile        |   1 +
+ src/t_ext4_resgid.c | 207 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/309      |  43 +++++++++
+ tests/ext4/309.out  |   2 +
+ 5 files changed, 254 insertions(+)
+ create mode 100644 src/t_ext4_resgid.c
+ create mode 100755 tests/ext4/309
+ create mode 100644 tests/ext4/309.out
 
-1. All our require functions are named as _require_something, but here
-the logic is inverted.
+diff --git a/.gitignore b/.gitignore
+index d52ba4ad..9baf0aa4 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -149,6 +149,7 @@ tags
+ /src/t_enospc
+ /src/t_ext4_dax_inline_corruption
+ /src/t_ext4_dax_journal_corruption
++/src/t_ext4_resgid
+ /src/t_futimens
+ /src/t_get_file_time
+ /src/t_getcwd
+diff --git a/src/Makefile b/src/Makefile
+index 0ff607ae..aba5da1e 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -16,6 +16,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	holetest af_unix t_mmap_stale_pmd \
+ 	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
+ 	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
++	t_ext4_resgid \
+ 	t_ofd_locks t_mmap_collision mmap-write-concurrent \
+ 	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+ 	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
+diff --git a/src/t_ext4_resgid.c b/src/t_ext4_resgid.c
+new file mode 100644
+index 00000000..3085a06a
+--- /dev/null
++++ b/src/t_ext4_resgid.c
+@@ -0,0 +1,207 @@
++// SPDX-License-Identifier: GPL-2.0
++
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE
++#endif
++#include <errno.h>
++#include <fcntl.h>
++#include <grp.h>
++#include <limits.h>
++#include <stdbool.h>
++#include <stdio.h>
++#include <string.h>
++#include <sys/stat.h>
++#include <sys/types.h>
++#include <sys/wait.h>
++#include <unistd.h>
++
++#define TEST_UID 1000
++#define FILL_GID 1001
++#define RESGID 456
++#define TEST_BLOCK_SIZE 4096
++#define MAX_BLOCKS 32768
++#define TEST_SKIP 77
++
++struct worker_result {
++	off_t offset;
++	int error;
++	int setup_error;
++};
++
++static int report_error(const char *message, int error)
++{
++	fprintf(stderr, "%s: %s\n", message, strerror(error));
++	return 1;
++}
++
++static void worker(int fd, gid_t gid, bool fill, off_t offset, int pipefd)
++{
++	struct worker_result result = {
++		.offset = offset,
++	};
++	ssize_t n;
++	int i;
++
++	if (setgroups(0, NULL) || setresgid(gid, gid, gid) ||
++	    setresuid(TEST_UID, TEST_UID, TEST_UID)) {
++		result.setup_error = errno;
++		goto report;
++	}
++
++	if (fill) {
++		for (i = 0; i < MAX_BLOCKS; i++) {
++			if (fallocate(fd, 0, result.offset, TEST_BLOCK_SIZE)) {
++				result.error = errno;
++				goto report;
++			}
++			result.offset += TEST_BLOCK_SIZE;
++		}
++		result.error = EFBIG;
++	} else if (fallocate(fd, 0, result.offset, TEST_BLOCK_SIZE)) {
++		result.error = errno;
++	}
++
++report:
++	do {
++		n = write(pipefd, &result, sizeof(result));
++	} while (n < 0 && errno == EINTR);
++	if (n != sizeof(result))
++		_exit(1);
++	_exit(0);
++}
++
++static int read_result(int fd, struct worker_result *result)
++{
++	char *data = (char *)result;
++	size_t remaining = sizeof(*result);
++
++	while (remaining) {
++		ssize_t n = read(fd, data, remaining);
++
++		if (n < 0 && errno == EINTR)
++			continue;
++		if (n < 0)
++			return -errno;
++		if (!n)
++			return -EIO;
++		data += n;
++		remaining -= n;
++	}
++
++	return 0;
++}
++
++static int run_worker(int fd, gid_t gid, bool fill, off_t offset,
++		      struct worker_result *result)
++{
++	int pipefd[2], status, ret;
++	pid_t pid, waited;
++
++	if (pipe(pipefd))
++		return -errno;
++
++	pid = fork();
++	if (pid < 0) {
++		ret = -errno;
++		close(pipefd[0]);
++		close(pipefd[1]);
++		return ret;
++	}
++	if (!pid) {
++		close(pipefd[0]);
++		worker(fd, gid, fill, offset, pipefd[1]);
++	}
++
++	close(pipefd[1]);
++	ret = read_result(pipefd[0], result);
++	close(pipefd[0]);
++
++	do {
++		waited = waitpid(pid, &status, 0);
++	} while (waited < 0 && errno == EINTR);
++	if (waited < 0)
++		return -errno;
++	if (waited != pid || !WIFEXITED(status) || WEXITSTATUS(status))
++		return -EIO;
++
++	return ret;
++}
++
++int main(int argc, char **argv)
++{
++	char filename[PATH_MAX];
++	struct worker_result fill_result, group_result;
++	int fd = -1, ret = 1, result;
++	bool created = false;
++
++	if (argc != 2) {
++		fprintf(stderr, "usage: %s mountpoint\n", argv[0]);
++		return 2;
++	}
++	result = snprintf(filename, sizeof(filename), "%s/ext4_resgid.fill",
++			  argv[1]);
++	if (result < 0 || (size_t)result >= sizeof(filename)) {
++		fprintf(stderr, "mountpoint path is too long\n");
++		return 2;
++	}
++
++	fd = open(filename, O_CREAT | O_EXCL | O_RDWR, 0666);
++	if (fd < 0)
++		return report_error("creating test file", errno);
++	created = true;
++
++	if (fchown(fd, TEST_UID, FILL_GID))
++		goto fail_file;
++	if (fchmod(fd, 0666))
++		goto fail_file;
++
++	result = run_worker(fd, FILL_GID, true, 0, &fill_result);
++	if (result)
++		goto fail_worker;
++	if (fill_result.setup_error) {
++		fprintf(stderr, "dropping fill-worker credentials: %s\n",
++			strerror(fill_result.setup_error));
++		ret = fill_result.setup_error == EPERM ? TEST_SKIP : 1;
++		goto out;
++	}
++	if (fill_result.error != ENOSPC) {
++		fprintf(stderr, "unprivileged fill stopped with %s, expected ENOSPC\n",
++			strerror(fill_result.error));
++		goto out;
++	}
++
++	result = run_worker(fd, RESGID, false, fill_result.offset, &group_result);
++	if (result)
++		goto fail_worker;
++	if (group_result.setup_error) {
++		fprintf(stderr, "setting reserved-GID credentials: %s\n",
++			strerror(group_result.setup_error));
++		ret = group_result.setup_error == EPERM ? TEST_SKIP : 1;
++		goto out;
++	}
++	if (group_result.error) {
++		fprintf(stderr, "reserved-GID allocation failed: %s\n",
++			strerror(group_result.error));
++		goto out;
++	}
++
++	ret = 0;
++	goto out;
++
++fail_file:
++	ret = report_error("setting test-file owner and mode", errno);
++	goto out;
++fail_worker:
++	ret = report_error("running allocation worker", -result);
++out:
++	if (fd >= 0 && close(fd)) {
++		fprintf(stderr, "closing test file: %s\n", strerror(errno));
++		ret = 1;
++	}
++	if (created && unlink(filename)) {
++		fprintf(stderr, "removing test file: %s\n", strerror(errno));
++		ret = 1;
++	}
++
++	return ret;
++}
+diff --git a/tests/ext4/309 b/tests/ext4/309
+new file mode 100755
+index 00000000..0702a3dd
+--- /dev/null
++++ b/tests/ext4/309
+@@ -0,0 +1,43 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 Sahaj Chaudhari.  All Rights Reserved.
++#
++# FS QA Test No. 309
++#
++# Verify that the ext4 reserved GID can allocate blocks after ordinary
++# free space is exhausted.
++#
++. ./common/preamble
++_begin_fstest auto enospc quick
++
++_exclude_fs ext2
++_exclude_fs ext3
++_exclude_scratch_mount_option "resuid=" "resgid="
++
++_fixed_by_kernel_commit c87abbab6147 \
++	"ext4: fix incorrect function call when initializing s_resgid"
++
++_require_scratch
++_require_command "$TUNE2FS_PROG" tune2fs
++_require_test_program "t_ext4_resgid"
++
++echo "Silence is golden"
++
++MKFS_OPTIONS="-m 10 -N 1024 -O ^has_journal $MKFS_OPTIONS" \
++	_scratch_mkfs_sized $((16 * 1024 * 1024)) 4096 >>"$seqres".full 2>&1
++"$TUNE2FS_PROG" -u 123 -g 456 "$SCRATCH_DEV" >>"$seqres".full 2>&1
++_scratch_mount
++
++if "$here/src/t_ext4_resgid" "$SCRATCH_MNT" >>"$seqres".full 2>&1; then
++	:
++else
++	ret=$?
++	if [ "$ret" -eq 77 ]; then
++		_notrun "cannot drop worker privileges"
++	fi
++	_fail "reserved-GID allocation test failed"
++fi
++
++_scratch_unmount
++status=0
++exit
+diff --git a/tests/ext4/309.out b/tests/ext4/309.out
+new file mode 100644
+index 00000000..56330d65
+--- /dev/null
++++ b/tests/ext4/309.out
+@@ -0,0 +1,2 @@
++QA output created by 309
++Silence is golden
+-- 
+2.43.0
 
-2. "nc" is not really intuitive, is rather cryptic, specially taking
-into account this is specific for the no compress option for defrag -
-there's no indication in the name this is defrag related.
-
-> +       _require_scratch
-> +       _require_test_program btrfs_defrag_nocomp
-> +       _require_xfs_io_command fiemap ranged
-> +       _require_btrfs_command filesystem defragment --nocomp
-> +       _require_btrfs_no_nodatacow
-> +       _require_btrfs_no_nodatasum
-> +       _require_btrfs_no_autodefrag
-> +       _require_btrfs_support_sectorsize 4096
-> +       _wants_kernel_commit 009b2056cb25 \
-> +               "btrfs: defrag: add flag to force no-compression"
-> +}
-> +
-> +_nc_write()
-> +{
-> +       $XFS_IO_PROG -f -c "pwrite -S $4 -b 128K $2 $3" -c fsync "$1" \
-> +               >> "$seqres.full" 2>&1 || _fail "write failed: $1"
-> +}
-
-A useless wrapper. Just make the tests call XFS_IO_PROG, this does not
-add any value at all.
-
-> +
-> +_nc_probe()
-> +{
-> +       local result
-> +
-> +       _nc_write "$SCRATCH_MNT/probe" 0 131072 0x5a
-> +       result=3D$($here/src/btrfs_defrag_nocomp "$SCRATCH_MNT/probe" 0 1=
-31072) ||
-> +               _fail "NOCOMPRESS probe failed"
-> +       case "$result" in
-> +       OK) ;;
-> +       EOPNOTSUPP|ENOTTY) _notrun "kernel does not support NOCOMPRESS" ;=
-;
-> +       *) _fail "unexpected NOCOMPRESS probe result: $result" ;;
-> +       esac
-> +       rm -f "$SCRATCH_MNT/probe"
-> +}
-
-Too complex, we usually just call the user space utility on a simple
-scenario that should never fail and if it fails we skip the test
-saying the feature is not supported by the kernel.
-And we do it in a _require_something function as well.
-
-> +
-> +_nc_defrag()
-> +{
-> +       local file=3D"${@: -1}"
-> +
-> +       $BTRFS_UTIL_PROG filesystem defragment --nocomp "$@" \
-> +               >> "$seqres.full" 2>&1 || _fail "NOCOMPRESS defrag failed=
-"
-> +       $XFS_IO_PROG -c fsync "$file" >> "$seqres.full" 2>&1 ||
-> +               _fail "fsync after defrag failed"
-> +}
-
-Another pointless wrapper.
-I also dislike this practice of adding a _fail for everything.
-Just let the tests fail with a golden output mismatch.
-
-> +
-> +_nc_map()
-> +{
-> +       $XFS_IO_PROG -c "fiemap -v $2 $3" "$1" > "$tmp.nc-map" \
-> +               2>> "$seqres.full" || _fail "fiemap failed: $1"
-> +       cat "$tmp.nc-map" >> "$seqres.full"
-> +}
-
-Yet another wrapper.
-
-> +
-> +# FIEMAP prints logical offsets in 512-byte units. Check every overlappi=
-ng
-> +# extent and complete coverage, so a hole or a partly converted range fa=
-ils.
-> +# The caller supplies byte offsets and lengths, including a partial EOF =
-sector.
-> +_nc_check_range()
-> +{
-> +       _nc_map "$1" "$2" "$3"
-> +       $AWK_PROG -v start=3D"$2" -v len=3D"$3" -v mode=3D"$4" '
-> +       BEGIN {
-> +               first =3D int(start / 512)
-> +               end =3D int((start + len + 511) / 512)
-> +               next_block =3D first
-> +       }
-> +       $1 ~ /^[0-9]+:$/ && $5 ~ /^0x/ {
-> +               gsub(/[^0-9]/, " ", $2)
-> +               split($2, logical)
-> +               lo =3D logical[1] + 0
-> +               hi =3D logical[2] + 1
-> +               if (hi <=3D first || lo >=3D end)
-> +                       next
-> +               if (mode =3D=3D "hole") {
-> +                       bad =3D 1
-> +                       next
-> +               }
-> +               flags =3D strtonum($5)
-> +               encoded =3D and(flags, 0x8) !=3D 0
-> +               unwritten =3D and(flags, 0x800) !=3D 0
-> +               inline =3D and(flags, 0x200) !=3D 0
-> +               if (and(flags, 0x6) || lo > next_block)
-> +                       bad =3D 1
-> +               if (mode =3D=3D "compressed" && (!encoded || unwritten ||=
- inline))
-> +                       bad =3D 1
-> +               if (mode =3D=3D "regular" && (encoded || unwritten || inl=
-ine))
-> +                       bad =3D 1
-> +               if (mode =3D=3D "inline" && (!encoded || unwritten || !in=
-line))
-> +                       bad =3D 1
-> +               if (mode =3D=3D "prealloc" && (encoded || !unwritten || i=
-nline))
-> +                       bad =3D 1
-> +               if (hi > next_block)
-> +                       next_block =3D hi
-> +       }
-> +       END { exit bad || (mode !=3D "hole" && next_block < end) }
-> +       ' "$tmp.nc-map" || _fail "unexpected $4 mapping: $1 ($2, $3)"
-> +}
-
-Why do we need this level of complexity?
-Adding an awk script to process fiemap output and detect unexpected
-results is overly complex.
-
-Why not do what we do in every other test that checks the extent
-layout of a file?
-Simply call fiemap in the test and add the expected output to the
-golden output file.
-That's simple, does the work and it's the preferred way to do things in fst=
-ests.
-
-> +
-> +# Ignore flags such as LAST, which may change when another range is rewr=
-itten.
-> +_nc_mapping()
-> +{
-> +       _nc_map "$1" "$2" "$3"
-> +       _filter_xfs_io_fiemap < "$tmp.nc-map" | \
-> +               $AWK_PROG '{ print $1, $2, $3, $4 }'
-> +}
-> +
-> +_nc_save_file()
-> +{
-> +       md5sum "$1" >> "$tmp.nc-checksums" || _fail "checksum failed: $1"
-> +       stat -c '%s %n' "$1" >> "$tmp.nc-sizes" || _fail "stat failed: $1=
-"
-> +}
-
-This name "save_file" is totally confusing.
-
-> +
-> +_nc_verify_files()
-> +{
-> +       local size file actual
-> +
-> +       md5sum -c "$tmp.nc-checksums" >> "$seqres.full" 2>&1 ||
-> +               _fail "file contents changed"
-> +       while read -r size file; do
-> +               actual=3D$(stat -c %s "$file") || _fail "stat failed: $fi=
-le"
-> +               [ "$actual" =3D "$size" ] || _fail "file size changed: $f=
-ile"
-> +       done < "$tmp.nc-sizes"
-> +}
-> +
-> +_nc_raw_expect()
-> +{
-> +       local expected=3D"$1" result
-> +       shift
-> +       result=3D$($here/src/btrfs_defrag_nocomp "$@") || _fail "raw ioct=
-l failed"
-> +       [ "$result" =3D "$expected" ] ||
-> +               _fail "expected $expected, got $result"
-> +}
-
-This is all stuff we can do in the tests by calling md5sum and placing
-the expected digest in the golden output file, like we do in many
-other tests.
-
-> diff --git a/src/Makefile b/src/Makefile
-> index 76cf50c3..07bf681d 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -36,7 +36,7 @@ LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesize pre=
-allo_rw_pattern_reader \
->         fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail=
- \
->         detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
->         uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alig=
-nment \
-> -       rw_hint fs-monitor btrfs_ioctl
-> +       rw_hint fs-monitor btrfs_ioctl btrfs_defrag_nocomp
->
->  EXTRA_EXECS =3D dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
->               btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-> diff --git a/src/btrfs_defrag_nocomp.c b/src/btrfs_defrag_nocomp.c
-> new file mode 100644
-> index 00000000..4b066418
-> --- /dev/null
-> +++ b/src/btrfs_defrag_nocomp.c
-> @@ -0,0 +1,63 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +// Copyright (c) Meta Platforms, Inc. and affiliates.
-> +/* Issue NOCOMPRESS requests without userspace range/error translation. =
-*/
-
-Why do we need a C program?
-Why not just have the tests call btrfs-progs:  btrfs filesystem
-defragment --nocomp ....
-
-This patchset adds an insane level of complexity for no good reason,
-making the tests hard to read and maintain.
-
-I can't see why just calling btrfs-progs, fiemap and md5sum directly
-in the tests and then placing the expected output in the golden file
-is not enough...
-
-Thanks.
-
-
-> +#include <errno.h>
-> +#include <fcntl.h>
-> +#include <linux/btrfs.h>
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <string.h>
-> +#include <sys/ioctl.h>
-> +#include <unistd.h>
-> +
-> +#ifndef BTRFS_DEFRAG_RANGE_NOCOMPRESS
-> +#define BTRFS_DEFRAG_RANGE_NOCOMPRESS (1ULL << 3)
-> +#endif
-> +
-> +static unsigned long long number(const char *s)
-> +{
-> +       char *end;
-> +       unsigned long long value;
-> +
-> +       errno =3D 0;
-> +       value =3D strtoull(s, &end, 0);
-> +       if (errno || *end || end =3D=3D s || *s =3D=3D '-') {
-> +               fprintf(stderr, "invalid number: %s\n", s);
-> +               exit(2);
-> +       }
-> +       return value;
-> +}
-> +
-> +int main(int argc, char **argv)
-> +{
-> +       struct btrfs_ioctl_defrag_range_args range =3D { 0 };
-> +       int fd, err =3D 0;
-> +       const char *result;
-> +
-> +       if (argc !=3D 4) {
-> +               fprintf(stderr, "usage: %s file start len\n", argv[0]);
-> +               return 2;
-> +       }
-> +       range.flags =3D BTRFS_DEFRAG_RANGE_NOCOMPRESS;
-> +       range.start =3D number(argv[2]);
-> +       range.len =3D number(argv[3]);
-> +       fd =3D open(argv[1], O_RDONLY | O_CLOEXEC);
-> +       if (fd < 0) {
-> +               perror("open");
-> +               return 2;
-> +       }
-> +       if (ioctl(fd, BTRFS_IOC_DEFRAG_RANGE, &range) < 0)
-> +               err =3D errno;
-> +       close(fd);
-> +       switch (err) {
-> +       case 0: result =3D "OK"; break;
-> +       case EINVAL: result =3D "EINVAL"; break;
-> +       case EOPNOTSUPP: result =3D "EOPNOTSUPP"; break;
-> +       case ENOTTY: result =3D "ENOTTY"; break;
-> +       default:
-> +               fprintf(stderr, "unexpected errno %d (%s)\n", err, strerr=
-or(err));
-> +               return 1;
-> +       }
-> +       puts(result);
-> +       return 0;
-> +}
-> diff --git a/tests/btrfs/355 b/tests/btrfs/355
-> new file mode 100755
-> index 00000000..12befb91
-> --- /dev/null
-> +++ b/tests/btrfs/355
-> @@ -0,0 +1,80 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) Meta Platforms, Inc. and affiliates.
-> +#
-> +# FS QA Test 355
-> +#
-> +# Verify bounded NOCOMPRESS conversion and EOF range handling.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick defrag compress fiemap
-> +
-> +. ./common/filter
-> +. ./common/btrfs_nocomp
-> +
-> +_nc_require
-> +_scratch_mkfs -s 4k >> "$seqres.full" 2>&1 || _fail "mkfs failed"
-> +_scratch_mount -o compress=3Dzlib
-> +_nc_probe
-> +
-> +file=3D"$SCRATCH_MNT/range"
-> +_nc_write "$file" 0 4194304 0x5a
-> +_nc_save_file "$file"
-> +_nc_check_range "$file" 0 4194304 compressed
-> +_nc_mapping "$file" 0 131072 > "$tmp.prefix"
-> +_nc_mapping "$file" 4063232 131072 > "$tmp.suffix"
-> +
-> +_nc_defrag -s 1M -l 512K "$file"
-> +_nc_check_range "$file" 1048576 524288 regular
-> +_nc_check_range "$file" 0 1048576 compressed
-> +_nc_check_range "$file" 1572864 2621440 compressed
-> +_nc_mapping "$file" 0 131072 > "$tmp.prefix-after"
-> +_nc_mapping "$file" 4063232 131072 > "$tmp.suffix-after"
-> +cmp -s "$tmp.prefix" "$tmp.prefix-after" || _fail "prefix mapping change=
-d"
-> +cmp -s "$tmp.suffix" "$tmp.suffix-after" || _fail "suffix mapping change=
-d"
-> +
-> +# The two-sector tail can be compressed, unlike a single-sector tail on =
-a
-> +# 4K filesystem. First convert a one-byte range, then use an unaligned s=
-tart
-> +# and end the request at EOF, one byte into the final 4K sector.
-> +tail=3D"$SCRATCH_MNT/partial"
-> +_nc_write "$tail" 0 135169 0x39
-> +_nc_save_file "$tail"
-> +_nc_check_range "$tail" 131072 4097 compressed
-> +_nc_defrag -s 128K -l 1 "$tail"
-> +_nc_check_range "$tail" 131072 4096 regular
-> +_nc_defrag -s 131073 -l 4096 "$tail"
-> +_nc_check_range "$tail" 131072 4097 regular
-> +
-> +# Zero length means to EOF; a length extending past EOF must be clamped.
-> +for mode in zero huge; do
-> +       f=3D"$SCRATCH_MNT/$mode"
-> +       _nc_write "$f" 0 262144 0x38
-> +       _nc_save_file "$f"
-> +       _nc_check_range "$f" 0 262144 compressed
-> +       case "$mode" in
-> +       zero) _nc_defrag -s 128K -l 0 "$f" ;;
-> +       huge) _nc_defrag -s 128K -l 16M "$f" ;;
-> +       esac
-> +       _nc_check_range "$f" 0 131072 compressed
-> +       _nc_check_range "$f" 131072 131072 regular
-> +done
-> +
-> +# A nonempty file rejects start =3D=3D EOF, but an empty file is a no-op=
-.
-> +_nc_raw_expect EINVAL "$file" 4194304 4096
-> +touch "$SCRATCH_MNT/empty" || _fail "create empty file failed"
-> +_nc_save_file "$SCRATCH_MNT/empty"
-> +_nc_raw_expect OK "$SCRATCH_MNT/empty" 0 0
-> +_nc_verify_files
-> +_scratch_cycle_mount compress=3Dzlib
-> +_nc_verify_files
-> +_nc_check_range "$file" 1048576 524288 regular
-> +_nc_check_range "$file" 0 1048576 compressed
-> +_nc_check_range "$file" 1572864 2621440 compressed
-> +_nc_check_range "$tail" 131072 4097 regular
-> +for mode in zero huge; do
-> +       _nc_check_range "$SCRATCH_MNT/$mode" 0 131072 compressed
-> +       _nc_check_range "$SCRATCH_MNT/$mode" 131072 131072 regular
-> +done
-> +
-> +echo "Silence is golden"
-> +_exit 0
-> diff --git a/tests/btrfs/355.out b/tests/btrfs/355.out
-> new file mode 100644
-> index 00000000..4e4c5e98
-> --- /dev/null
-> +++ b/tests/btrfs/355.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 355
-> +Silence is golden
-> --
-> 2.43.0
->
