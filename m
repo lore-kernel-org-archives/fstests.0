@@ -1,68 +1,67 @@
-Received: from mail-dy1-f179.google.com (mail-dy1-f179.google.com [74.125.82.179])
+Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39EAE52F274
-	for <fstests@vger.kernel.org>; Tue, 13 Oct 2026 18:08:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD25D55C323
+	for <fstests@vger.kernel.org>; Tue, 13 Oct 2026 21:38:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791914910; cv=none; b=e9+FSvdkgjcB9YQR86NBz8OhdS0rzHcOmOq5jxmktMFt7DSH8KwIXonjfCNOwfk6OLVrlfmQyn29JNPBDGpRvVTc/6g6k2B+rhmYgfr6sPirWakhlEohmN6VZ1+4yqnKFCKcdqHl6Yuu1OrKezEBO2tcFIqP/EYSafZoxifJ1Ls=
+	t=1791927510; cv=none; b=jGkb2xqmi/nggJOgaqHeuuFdW/na3lavzHW49+teSoZAUlDcVpfwY0do/pOuJRmz818Be+2Jqb74KHJ2VvzzoCfEvdaxQqJL9Ca1s1/GyeOa0ksq6ecNvcSH9YITfcyNSqoEyTf+k0YvvpEfDxe7OT8IE0zWZ+6294zjh8w7vbw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791914910; c=relaxed/simple;
-	bh=LZPKGkI1Yv5YmO3ttQTiYNy6rcCEdTnLwf6hyjEz834=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=t1KN+1X7buugUeNvSX2tohHdv+vQdSBM/i/qk7+A0hwsZoXg9BlpWbLt7jABCIQhgOEKpaGX40qCvQ2kBFmlgLPF3iDuMEP5BE91sbjb8UaoaVLX6CmwsSsdb4AKH8QeEAx3Kq0C16Ng6GEA84ZrGFpOaT1KwraQxo/gSdd31vw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ceir0auE; arc=none smtp.client-ip=74.125.82.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1791927510; c=relaxed/simple;
+	bh=7uJANPnEzNDLXlPyZwKfbEqFxxB+0ct/9ss+XSn4Wo0=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=oOpW+/Fu6jzpCFdp3gEFBTojsED5D4+OgJ/PKd48d87tUKsHn4UvLJILOgYSjPCxRXywyooWaz2tMk3x2rUnHheSdYbX0VQjyI7ysS53oSefhMlIAxfqfp27qPx3gMKNKt5NMNPjftvXk/Cc8yMXfsLSfQlGqi50GhvcLDzEw1w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Q6chdQsZ; arc=none smtp.client-ip=209.85.128.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ceir0auE"
-Received: by mail-dy1-f179.google.com with SMTP id 5a478bee46e88-35cd4e8bdbdso1637438eec.1
-        for <fstests@vger.kernel.org>; Tue, 13 Oct 2026 11:08:27 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Q6chdQsZ"
+Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-4a16c399641so34310045e9.2
+        for <fstests@vger.kernel.org>; Tue, 13 Oct 2026 14:38:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1791914907; x=1792519707; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:in-reply-to:content-language
-         :references:cc:to:subject:from:user-agent:mime-version:date
-         :message-id:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=gprYPlgfoQpVrxbMi9RFaOy8N2la4zZ3lXLuamJ3l58=;
-        b=ceir0auENeBv6v5QJ7PjvNtmeqh2aVzlHv653mxaDPAn2AROrGjlMobKK2JqUK5WRP
-         1N7Lp1/zx/LWh/vIdD4A6jjT602WNuNCROd8onvbQgo8+f60Xj9Mhb2WySF/51bDbpX3
-         Fn2f8bFPKSVwX1tuFwxrWLJzebOdzfaaH3dpWHRNrE149sImxCMZesLi978FxmA0d32Z
-         y8weHH00VYtvWMRHuOrzTuSu+awpRx4sZEqIRKz4gsNKhN82ZSf8KkMZ+bC/T3CNTTgI
-         8uBURsNgipjQfFhuxhe8Ttn1UghdduHwY2Dz2+7Oaw/lP/BRV/LqkVE3VYJ5iwqjRa6I
-         kZXA==
+        d=suse.com; s=google; t=1791927507; x=1792532307; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=SeiK8ZyxkQIyZd1Pses16K7o3z7KWoWsXpfBOJdg54g=;
+        b=Q6chdQsZ5etu1dRJWw6ueroFeXK2gE0DR7rs1dzrxGuy7KrgXvoQ59KfvbUT0ouYan
+         t810YH2ro8G+UL7ng/Geq9jkoTe2otZB8SZ4WJIslzraQm5Olzd8zOPHY8BGIGV8j9fq
+         ilBBsRIk1Q5CzJkSpPFeKgcIvRAwlT1Sq9UHbmFUDmp+DiAze4N7yEFVtZ4RxrODCACV
+         v6vF7sufs1nEMCnLuNnV7VIzFPuaSF10GdXb9xZMO+U6tXMODXtRr/PZ/NmutdvIhrJC
+         DAR4h+I+oXb7sxPiYmWf0jEtwC14YYEyn1Tca+Ka/ggShfc2nVSaw56gCEd9USytZaz2
+         O9YQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1791914907; x=1792519707;
-        h=content-transfer-encoding:content-type:in-reply-to:content-language
-         :references:cc:to:subject:from:user-agent:mime-version:date
-         :message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=1e100.net; s=20260707; t=1791927507; x=1792532307;
+        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=gprYPlgfoQpVrxbMi9RFaOy8N2la4zZ3lXLuamJ3l58=;
-        b=XAfXg+gOkj/wnhzMy8Uwm1DUdIKDCjwWIwoNwy+EmuvE3zJbK67axQAgXxDFSkSI52
-         nvpMzOhg/Xj2mxBiK93CyTtP5MPr3epBSyD4vsmEYSxYB9pS+/awAN/KGIN9SWjZWvXz
-         GdvW/7kqfTFi9bUC3vnRzmX4kikk1kcF3CkxhOVRGb65wLTAJh8zvukXgSED7Y00q6uQ
-         fu0KXENm3ayUVDYPjmU3ksx+iVEdY2kgnRoRnkDj13W5lU79vERFKx+t/KdVXsMp9sk7
-         fJcY8IPlQZp9dYTpnrcWrWUxepmIPlStmSD4Xtn3eeDX+IhL9dTmRNJ3HZoB56fZNfjT
-         qaGA==
-X-Forwarded-Encrypted: i=1; AKwUvBxFtc5wuFAUI74VfFN6YBcoZHp4kyrgvksWrPnlNnWsuuLNwE38GlD7pqfN4GLAIhe5dKcEGP5e@vger.kernel.org
-X-Gm-Message-State: AFq9FYLsoBiKzVL9UKmhfb7YmxNnlVkYnfmYvlExhdW5gsSY9/iEwK3/
-	9GbPdiSC+UYqNOXrLXdXlMr9vKFhQxNs2lakXT4p5dX8O4JJ0nkLBDoJ
-X-Gm-Gg: AYBFou1jkbzUs/no2PS8v3ubPkif3a/qTJjXDuhaEbO0VGkkPhr3hr6NVug7Ch4k5yd
-	SOj2zZPYiLgbGFAwBBYO9iE5u3guciHkiBwoUINhIIrDCCy0IaeHQU8hi/s250VvXy753plsh96
-	V/IyjS/2YyfgSMk1oRhZLrNAxy/JMEJDkzLLbvHcPeawuYHxz9tvavxGm3mtedrzLfS9qkW/HtB
-	EoBRIafbAWBEjRY/aVdSu2nVdmvD1gLOVmw9YN2MxZQ+Ym9PzAOjHB6cTx5X8ixIIdpsm61eG/1
-	xjvzQ/IDkj+89BKNlFntSQgBuR07/IJdeKYx4Jm9VXNCZVnh6CCnIdT7ehmH3ohVWXpRrU5jeYA
-	n3rdUfB+kmDsVCMFiHl/4IZdQjRdo2RP+zJUAKZAZLNTBY+6FSkA+i3nA7CMBo6NZxkHVw5hhzr
-	5QWbO9qw8/kHOlsBIT22BbrvEhP7cRWNWrbn/+cZCzn5pXgg6iqO9xg9WLwaPwqfKmPR1qBl0uk
-	l1vDk5VG/A96PdoBqrkniLLOKUNLIEk5DWWl3i69+nl30w0/AoM2ohXgSoH+J/rDWYzymDC1Dqr
-	As61
-X-Received: by 2002:a05:693c:8954:20b0:351:8cc4:e18b with SMTP id 5a478bee46e88-3537dfb8632mr16917641eec.20.1791914906817;
-        Tue, 13 Oct 2026 11:08:26 -0700 (PDT)
-Received: from ?IPV6:2406:7400:56:97af:ddc7:ec87:e5c4:79f7? ([2406:7400:56:97af:ddc7:ec87:e5c4:79f7])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-35ca33b4065sm7841600eec.4.2026.10.13.11.08.23
+        bh=SeiK8ZyxkQIyZd1Pses16K7o3z7KWoWsXpfBOJdg54g=;
+        b=BPkjXRapmHe+aS2xnhdaEfQHxHyVoxtOjTx7N2wGMNP06uiYsyNs18L+hsMlnqYfv6
+         Wj1lkc+vUpvgaLypAqQtWGYIUhFsuDlrwyhAEWlVlrM0ZoKt2M6BnNwtt3eIhO8oof/d
+         TOxIMY+1rso51ZAu/gWMhUa6baZyXv+9ePWaafEQNaKc3BwcwmIlifqZabYagb+/yg1U
+         3a0fuYsXonPvuV6mfAfMaYSoy4ayTcUyu7Bajrx+0wvBHbMmvlF+buZNHXT9PhrWR41n
+         ZGDs8YQAIAAMVZdc/ScD7m82Yizgm7AELNcYE3s5T0GfLFU4Oz2hqTKo/qm9FX+1oqMi
+         Pcvg==
+X-Forwarded-Encrypted: i=1; AKwUvBzUg6v+Lo4x+OLjYcbfGFtZjcQjfehhbDjxkaXmVfp0mGzkwJtB55XCWaluO5ejgT0LHkVs26zC@vger.kernel.org
+X-Gm-Message-State: AFq9FYLfwvJ3q+SVoixvlBKgXEuot2dzd24YzYegGLIFmg6ibn91/tYc
+	7EKWWG5ZplODfo6WZo79KL+p09Uf6+g3UCtdn5xKJHeOM0VjwmR5t5Bib514onIJhT8=
+X-Gm-Gg: AYBFou2rZkFv5/c/iqIhDAskDviC+C37sCx7MAxo1jUJ4lPxdJESA3c+a7twkzx+mAK
+	RRiUl2LWY9SGQzfUG5NSRMW7N9OmsHHvlkjTdhi6RvbgMMEojwBrOoHaqgwlYTtNy8nEPoI0c+U
+	MJRaM0skBv7YT1TiAmiGvEPHEOQFXG8QWWooWhOCiQsZLIkMz+M6c3EUPeWIz6GP9MK3ya55VkH
+	dJMluBgLKAIQ9ckvcoRCBwW+KR2rV7WHivPpUf703/VC7K8MY5gSZLokfHebZAa2umxchq1Sv2w
+	MwbslYv8q+Z3K2yAj+TcK8i3YKTypUeZlqz6uz1IltCa01sFm7MYn5DfB7Z1Weyvmpt0AQ/TRwC
+	sVWkYWMawcusUWFICLviO+FIlo9MFvzVFB0LQXoKmrdzRLWq14/iHN7wYkSfL1wA9OyDH3Cpg/4
+	d5aXI7yCjXmNhh5iK8MqI4KuWknIQxqwyRh0ckwm5Tk40DQyaS3o9KT/pvqzK8UPI=
+X-Received: by 2002:a05:600c:674a:b0:4a1:7cf8:5433 with SMTP id 5b1f17b1804b1-4a18e443ee9mr256401635e9.3.1791927506957;
+        Tue, 13 Oct 2026 14:38:26 -0700 (PDT)
+Received: from [172.16.0.229] ([159.196.52.54])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3ac5f2a88b4sm1450688a91.14.2026.10.13.14.38.22
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 13 Oct 2026 11:08:26 -0700 (PDT)
-Message-ID: <ea99086d-94ea-4b44-a2f2-076047fb22d4@gmail.com>
-Date: Tue, 13 Oct 2026 23:38:21 +0530
+        Tue, 13 Oct 2026 14:38:25 -0700 (PDT)
+Message-ID: <e3df2af3-9bb9-428d-a0f3-dee98c25a7ab@suse.com>
+Date: Wed, 14 Oct 2026 08:08:20 +1030
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -70,167 +69,80 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-From: Dhruva G <goledhruva@gmail.com>
 Subject: Re: [PATCH 1/3] btrfs: exercise NOCOMPRESS range and EOF handling
-To: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org
+To: Dhruva G <goledhruva@gmail.com>, fstests@vger.kernel.org
 Cc: Anand Jain <asj@kernel.org>, Filipe Manana <fdmanana@suse.com>,
  Zorro Lang <zlang@kernel.org>, linux-btrfs@vger.kernel.org,
  Qu Wenruo <quwenruo.btrfs@gmx.com>
 References: <cover.1791395660.git.goledhruva@gmail.com>
  <b99615bd-9b7c-48b6-ac70-d450a606388c@gmail.com>
  <2920bc87-3d1e-4bfa-99cc-8b4af37fec5e@suse.com>
+ <ea99086d-94ea-4b44-a2f2-076047fb22d4@gmail.com>
 Content-Language: en-US
-In-Reply-To: <2920bc87-3d1e-4bfa-99cc-8b4af37fec5e@suse.com>
-Content-Type: text/plain; charset=UTF-8
+From: Qu Wenruo <wqu@suse.com>
+Autocrypt: addr=wqu@suse.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
+ FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJqqw0NBQkUl/JeAAoJEMI9kfOh
+ Jf6o/xYH/3AaWnGSq58XnY/T3/YYjr6g+TUZxa7MPyiYTELNpNlvmNlbtbAL0nW0LNvkeiqf
+ SmYA+xkwY4RbxnZYQK0H5iv2w1eqa9qqFZb4bIBRmTapu26GEEkpad0W0ZhoSPMO8bV2Bwkf
+ YdtPZQLaeUKvHZqNqBKnmtRLQj2Cgy3kuXX3bEGvWjzUOxPUSCj/S++JWBewMdMBPT62vZM0
+ 3156gfn5mHA94s2p+NFJoWkERY+JPTMu9NISkpD7yuGhXN88qd/aqD0RrlhxvKsrQogdPwn9
+ vP18FGG3CRlHtOvOLVoY5NKSOWTDc+o+8t2XEETFTGbKYTcqeTzi4SxhvBLtTinOwE0EWdWB
+ rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
+ Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
+ E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
+ vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
+ g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
+ AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
+ cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
+ qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
+ /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
+ o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
+ JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
+In-Reply-To: <ea99086d-94ea-4b44-a2f2-076047fb22d4@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 
-On 12-10-2026 03:30, Qu Wenruo wrote:
-> 
-> 
-> 在 2026/10/12 06:10, Dhruva G 写道:
->> Check that a bounded --nocomp request rewrites compressed extents in the
->> selected range while distant untouched regions still point to their
->> original compressed storage.
->> Cover a partial final sector, zero length, a length extending past EOF,
->> start at EOF, and the empty-file no-op. Preserve contents and sizes across
->> the conversion and a remount.
->>
->> Add shared FIEMAP and integrity helpers for the NOCOMPRESS tests. Require
->> full mapping coverage and inspect every overlapping extent so holes and
->> partly converted ranges cannot pass. Include a small ioctl helper to
->> probe kernel support and check errno without btrfs-progs translation.
->>
->> Signed-off-by: Dhruva Gole <goledhruva@gmail.com>
->> ---
->>   .gitignore                |   1 +
->>   common/btrfs_nocomp       | 134 ++++++++++++++++++++++++++++++++++++++
->>   src/Makefile              |   2 +-
->>   src/btrfs_defrag_nocomp.c |  63 ++++++++++++++++++
->>   tests/btrfs/355           |  80 +++++++++++++++++++++++
->>   tests/btrfs/355.out       |   2 +
->>   6 files changed, 281 insertions(+), 1 deletion(-)
->>   create mode 100644 common/btrfs_nocomp
->>   create mode 100644 src/btrfs_defrag_nocomp.c
->>   create mode 100755 tests/btrfs/355
->>   create mode 100644 tests/btrfs/355.out
->>
->> diff --git a/.gitignore b/.gitignore
->> index 0b6b9452..1bfa12ef 100644
->> --- a/.gitignore
->> +++ b/.gitignore
->> @@ -216,6 +216,7 @@ tags
->>   /src/truncate
->>   /src/t_btrfs_received_uuid_ioctl
->>   /src/btrfs_ioctl
->> +/src/btrfs_defrag_nocomp
->>   
->>   # Symlinked files
->>   /tests/generic/035.out
->> diff --git a/common/btrfs_nocomp b/common/btrfs_nocomp
->> new file mode 100644
->> index 00000000..7e2111e1
->> --- /dev/null
->> +++ b/common/btrfs_nocomp
->> @@ -0,0 +1,134 @@
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) Meta Platforms, Inc. and affiliates.
->> +# Helpers for BTRFS_DEFRAG_RANGE_NOCOMPRESS tests.
-> 
-> I don't like a dedicated file just do all those.
-> Why not put them into common/btrfs?
-> 
->> +
->> +_nc_require()
-> 
-> And "nc" is too generic, _require_btrfs_defrag_nocompress() would make 
-> more sense.
-> 
-> All the namings here look just some temporary scaffolding, not for 
-> generic purposes.
-
-Agreed. I'll move the shared helpers into common/btrfs and use more descriptive names in v2.
-
-> 
->> +{
->> +	_require_scratch
->> +	_require_test_program btrfs_defrag_nocomp
->> +	_require_xfs_io_command fiemap ranged
->> +	_require_btrfs_command filesystem defragment --nocomp
->> +	_require_btrfs_no_nodatacow
->> +	_require_btrfs_no_nodatasum
->> +	_require_btrfs_no_autodefrag
->> +	_require_btrfs_support_sectorsize 4096
->> +	_wants_kernel_commit 009b2056cb25 \
->> +		"btrfs: defrag: add flag to force no-compression"
->> +}
->> +
->> +_nc_write()
->> +{
->> +	$XFS_IO_PROG -f -c "pwrite -S $4 -b 128K $2 $3" -c fsync "$1" \
->> +		>> "$seqres.full" 2>&1 || _fail "write failed: $1"
->> +}
->> +
->> +_nc_probe()
->> +{
->> +	local result
->> +
->> +	_nc_write "$SCRATCH_MNT/probe" 0 131072 0x5a
->> +	result=$($here/src/btrfs_defrag_nocomp "$SCRATCH_MNT/probe" 0 131072) ||
->> +		_fail "NOCOMPRESS probe failed"
-> 
-> Why we need such dedicated probe program while the kernel is already 
-> rejecting unknown flags with ENOTTY?
-> 
-> And I think this probing should also be done inside the 
-> _require_btrfs_defrag_nocompress().
-
-Agreed. I'll do this in v2.
-
-> 
->> +	case "$result" in
->> +	OK) ;;
->> +	EOPNOTSUPP|ENOTTY) _notrun "kernel does not support NOCOMPRESS" ;;
->> +	*) _fail "unexpected NOCOMPRESS probe result: $result" ;;
->> +	esac
->> +	rm -f "$SCRATCH_MNT/probe"
->> +}
->> +
->> +_nc_defrag()
->> +{
->> +	local file="${@: -1}"
->> +
->> +	$BTRFS_UTIL_PROG filesystem defragment --nocomp "$@" \
->> +		>> "$seqres.full" 2>&1 || _fail "NOCOMPRESS defrag failed"
->> +	$XFS_IO_PROG -c fsync "$file" >> "$seqres.full" 2>&1 ||
->> +		_fail "fsync after defrag failed"
->> +}
->> +
->> +_nc_map()
->> +{
->> +	$XFS_IO_PROG -c "fiemap -v $2 $3" "$1" > "$tmp.nc-map" \
->> +		2>> "$seqres.full" || _fail "fiemap failed: $1"
->> +	cat "$tmp.nc-map" >> "$seqres.full"
->> +}
->> +
->> +# FIEMAP prints logical offsets in 512-byte units. Check every overlapping
->> +# extent and complete coverage, so a hole or a partly converted range fails.
->> +# The caller supplies byte offsets and lengths, including a partial EOF sector.
->> +_nc_check_range()
-> 
-> This looks a little overkilled to me.
-> > For regular hole/compression flags, what about filtering out the 
-> non-hole logical bytenr (e.g. replace them with 'XXX' or 'regular'), 
-> then output to the stdout, and use golden output to verify?
 
 
-For patch 3, the test also needs to distinguish compressed inline extents from compressed non-inline extents.
-_filter_fiemap_flags 1 retains the encoded flag, but currently filters out the inline flag.
+在 2026/10/14 04:38, Dhruva G 写道:
+> On 12-10-2026 03:30, Qu Wenruo wrote:
+[...]
+>> This looks a little overkilled to me.
+>>> For regular hole/compression flags, what about filtering out the
+>> non-hole logical bytenr (e.g. replace them with 'XXX' or 'regular'),
+>> then output to the stdout, and use golden output to verify?
+> 
+> 
+> For patch 3, the test also needs to distinguish compressed inline extents from compressed non-inline extents.
+> _filter_fiemap_flags 1 retains the encoded flag, but currently filters out the inline flag.
+> 
+> Would you prefer a small opt-in extension to retain the inline flag, or a test-local filter?
 
-Would you prefer a small opt-in extension to retain the inline flag, or a test-local filter?
-With the extension, existing callers would retain their current output, and the inline test could use:
-_filter_fiemap_flags 1 1.
+I think for now a local filter would be good enough if there is only one 
+test case requiring this.
 
-Thanks for reviewing and suggestions!
+But in the long run, we want a filter that only filters out the bytenr.
+Maybe something like _filter_fiemap_keep_flags().
 
-Regards,
-Dhruva Gole
+> With the extension, existing callers would retain their current output, and the inline test could use:
+> _filter_fiemap_flags 1 1.
+
+More than one boolean parameters in a row is never a good idea to me.
+
+Thus I'd prefer a dedicated filter.
+
+Thanks,
+Qu
+
+> 
+> Thanks for reviewing and suggestions!
+> 
+> Regards,
+> Dhruva Gole
+
