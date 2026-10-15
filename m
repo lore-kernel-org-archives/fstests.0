@@ -1,164 +1,204 @@
-Received: from mx0a-00364e01.pphosted.com (mx0a-00364e01.pphosted.com [148.163.135.74])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65035494801
-	for <fstests@vger.kernel.org>; Thu, 15 Oct 2026 20:56:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.135.74
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E7BB859B68C
+	for <fstests@vger.kernel.org>; Thu, 15 Oct 2026 21:09:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792097800; cv=none; b=jqGqfjf5JNJ8vjbnNlDrlNCBuppqwmGlpoylTQG+l+3z6F/kCVgC2pYuv3mzKWs/Y8qbhMkOyOMC89Kd4PyB2Okqfj+r2hFULAiZEhEaPCvDOSlHn00lP6+OYCuHwClxdxhDNwx4JisN2N8oNj4tQEQOyhKcYl49Lsnx1IvSVmM=
+	t=1792098598; cv=none; b=eIewIEQSJCi32+eb4jDovb10cxW7+/xvvCZ9yFGgbNUe6imyDzv28eoT0OpOUDpniS1qrVD9yQLsmI/1/D0pK6dZMOMWGPp6pLuksxpLOGJ8eB+7WHSpfzAL/WAegh/4kzreEL3C+zIvLvXxdrkLjGFdWd3O8Qr14VVhe1n81b4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792097800; c=relaxed/simple;
-	bh=KewLqlkj9HfaC+aOJYKAu061lljKKowhtkC9ghOwU38=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=jrRhGiFyEmLTYi77/CzJmlAwd6iRofIOX2YMxi4J2gO3KK/V5oOeEeW8lvTbf25yazxSjge2446npDkoplfQ/R5ocLHGgPPX47zXuEN/lSRRfVAILXIpmWWsgl/3FX++hocXzAaFqHAhvkuWZmCBVru4PCK+TTNJ5bz8hqk6+Ww=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu; spf=pass smtp.mailfrom=columbia.edu; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=GX5gIjGP; dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b=JcTXeW28; arc=none smtp.client-ip=148.163.135.74
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=columbia.edu
+	s=arc-20240116; t=1792098598; c=relaxed/simple;
+	bh=K+mkkYvEdMzx8jwAQDC1stA5w6bGt1j/ga05vKOFcxs=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=NQ2OCvC84Lt4C6fDN80MTtMgdoNGJsHba8baNDhFOPp2uHZcUMZvmsqwcbqXG9i30/sWfOaCKMlPqUPW++L2oGq18lKF8fKkK5pYTS6UYdSj5gJsbLzRxyBn/Yo/e3Kc6oUGCdcBvmyJaqgV1O+8/QEGpQH+lUQXJ60XfhKq+o0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Gx3v4OUD; arc=none smtp.client-ip=209.85.128.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="GX5gIjGP";
-	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.b="JcTXeW28"
-Received: from pps.filterd (m0167072.ppops.net [127.0.0.1])
-	by mx0a-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 69FKaURb1569077
-	for <fstests@vger.kernel.org>; Thu, 15 Oct 2026 16:56:23 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=columbia.edu; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pps01; bh=dfSs
-	h0cs3XLj2wlU1kGst3AnO7cgcsSohbFCtj+DeeM=; b=GX5gIjGPRc+YhDVJlK07
-	8iRgH3cWRzheqRoQRLxh+Z88CkXiyM0/RzHeTwEk2XtiAZedp7HLqpawtsi4zGpc
-	/H+++IIaFE+WaKrDSh2sLFg4ALTkxjH+I96nXZtZ7PcYizvcB8koH9EUX1GnhrPM
-	Unkx9pGBTVqgwZy0HFr0pTAVlVaBDoEijfZi0aPRchL+8DTN1NAQ+C6hNKMP2/dw
-	jE0weC+dN8TkZZL9HsfchNxzqU4+LEg4VSpYS2QBFrjbc+n0bjXUbYM1M5OqCDY8
-	xXUb9JW2R9iGVlqwbXckP0dt9tH2tAfw8J94v5/lqHIvDGeuY0dNzDp9sA67/O56
-	yA==
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com [209.85.222.198])
-	by mx0a-00364e01.pphosted.com (PPS) with ESMTPS id 4hb2mua7qa-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <fstests@vger.kernel.org>; Thu, 15 Oct 2026 16:56:23 -0400 (EDT)
-Received: by mail-qk1-f198.google.com with SMTP id af79cd13be357-934956beec8so385298585a.0
-        for <fstests@vger.kernel.org>; Thu, 15 Oct 2026 13:56:23 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Gx3v4OUD"
+Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-4a19cba5c14so52408465e9.3
+        for <fstests@vger.kernel.org>; Thu, 15 Oct 2026 14:09:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=columbia.edu; s=lionmail; t=1792097782; x=1792702582; darn=vger.kernel.org;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :content-type:mime-version:subject:date:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=dfSsh0cs3XLj2wlU1kGst3AnO7cgcsSohbFCtj+DeeM=;
-        b=JcTXeW28sUP8lbCHvaoyZoaq2u9/VYez4O10riNicexgp1ICAp/r+/yINSfFNnZd/n
-         OP88JsMwO4GkVe61cJxMRqE1UTmVO/Gulj/M2s6MzLVC0Pq09WavgyKJTCnMT77z0Lcu
-         cTs0zesKerNYSP2jQLZR+1gNBHDKWL+9CblnSLDVEwTDtCdI0QFsjDuv6+ZjXTiJa2Ia
-         7SYD4/9Skq/ZiV5FeHz+pNGH/dYE5stLofpaKHe4F7PnU2B8J0CBWF+ehnNd0ifw4LRM
-         HJ+t0fU50M/x8KaEN94IcrMcoQ2z3yFl/UqxknVRHEo8QAuh232ynvM72ZyvOkRA7hvH
-         Gg9A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792097782; x=1792702582;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :content-type:mime-version:subject:date:from:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+        d=suse.com; s=google; t=1792098589; x=1792703389; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=dfSsh0cs3XLj2wlU1kGst3AnO7cgcsSohbFCtj+DeeM=;
-        b=PldzOSS2nJFAgyPsoGcy28wFJU0gdns9k4Wolgi5nCv5LlZvej9TKLyalihJCaJrc9
-         0h1VV4aXVXeQtlS8Q/EaCjniulCP1kG8s+VnifDXOMGRZXlR8/XQTy+mL3WFgmCa6dL4
-         grCM8bRuOEbJIxliTgGoMfwbw3l4Na7mX6AEuBXvTjcn/7lI0mQpTcYVeiZkT7JGRpvX
-         DXR4TD6uNe88Wcq7WKw6Tv4Mnj+/qy5LoXBb54Pf5DKc7FVQr63Q47yBhQXzkQIqt23i
-         luRoJHVoam72AG/XYb/D+uyRtNVoHZTdkbj/sGuYNJzsvq+qf4zEpqRahJoYGeE3F3ln
-         qqug==
-X-Gm-Message-State: AFq9FYIs73DD58gQV7AOuisU9+pnPeK+KsJjgD2XmsilY9g0xYKkNT7w
-	XekFNx8T6CkwutVLW+Q/otvJXyG/TOz9RSAWwTUDsM5saj79TYhQPQ8Qxp9u5c9bUWOiIcLqJii
-	Y/m4+T+KfcaKI4j5hTwdTIScaBlpdJrTBKA49q0u4BPDpVn6Et3ttzOQuwRa886w=
-X-Gm-Gg: AYBFou1/kxtKWktFxDEpZKFFZGkMgQcIXQPspU1BCup1V1wGkAqlDHwx6CQPWEDWpJQ
-	XVjBsh4tDecKbhWC/Y2MSKeURa9+AOHz0Q0v40EXVcotxko9W54nohd6EkSMI+gMQscK4z1QSUi
-	dwKL3D8ZVfVYf+fsNZtc7dRXkCXqZ6cAPEfMlAyRcwetTm7UK20h4SIfEwX3bZb6vhN+B/0SVw5
-	ZiA7MMcjZ044kax9VuojHmhzLVb5Bo8L98FC+qerIrehndgbYNmGfekB4E1hxSXW8zMLQnH68+q
-	b2jnKTeidC/FvmhH/HlJo4aE21s5/tHjwW6ARZmJAqtbWMt2QWJFRSxtpKNdDBkjsojUc+D1rTE
-	Jiw8V8dzO5nWQbepZvM6cdZrUTZeBMRtYSr5CDsWfuLHI
-X-Received: by 2002:a05:620a:c50:b0:914:afc1:c66d with SMTP id af79cd13be357-93ebd0e4d5bmr3487233585a.11.1792097782376;
-        Thu, 15 Oct 2026 13:56:22 -0700 (PDT)
-X-Received: by 2002:a05:620a:c50:b0:914:afc1:c66d with SMTP id af79cd13be357-93ebd0e4d5bmr3487230485a.11.1792097781953;
-        Thu, 15 Oct 2026 13:56:21 -0700 (PDT)
-Received: from [127.0.1.1] (nat-128-59-176-51.net.columbia.edu. [128.59.176.51])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-93f1a1d1bf6sm29062485a.47.2026.10.15.13.56.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 15 Oct 2026 13:56:21 -0700 (PDT)
-From: Tal Zussman <tz2294@columbia.edu>
-Date: Thu, 15 Oct 2026 16:54:02 -0400
-Subject: [PATCH 1/3] common/rc: probe pread options with a real read
+        bh=68BOcddZL2NMOKM0FEt+ujFOu0/Ai8Do5blcAevTB4M=;
+        b=Gx3v4OUD0TaAR/w1EqQd5zX0Gt3WwKlqcbV6WEWS5O7kpASZAzjuM6kepDhDL5XdhJ
+         nuwoCG+y78It6dDqUvfbGbaqcnfMq+qvDspwKqZYVUBaluqqtbI939x9VfWg8Zt1MZVK
+         YquWWgp9vBeaCqzmGuJK3JqY8mn/c84W+Pt8YBv3q8wSZz2uHYudAdj2L0iMSaP69tvo
+         2C7X5fE3NIOAUrbhXFhhBBRfEwRIoJDlh0JSYwo5u1C357r7Ewa/AWjGkncbLRfGSpsR
+         jWmoszBqGbOARlL84M6ZuUBIj3Pxw1hQ9KiGY+3cGyqGw6zkk/lVykm7TPDUbeAraSG1
+         rEFQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1792098589; x=1792703389;
+        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=68BOcddZL2NMOKM0FEt+ujFOu0/Ai8Do5blcAevTB4M=;
+        b=oh9NhntdFOQhszA8KaWk90E+V4ZscOQnUmKbln+sT4M2rX1EIB9H66PMDyWOdzbBmY
+         iN5pxFnj9j2Yj0c1RCik27yjkQtJvCiJpOrBpLxTMrveM3+PFclrBTmheJ45qDDkS5vl
+         LdEn+9EmXNVSC1J2pSPuQIyM6vjLqixYWrqG+jxJdS72cgDr2DrNh4wnCUqy/JN3JWcM
+         mZyzJDzizmfpr/8TEaU5ifPlfjGbmkYF5LjEt7UaEsiSlIr9BJXWXzN5uts0nNuWNthW
+         GA2kVXHwkeR1chrM2XDYFk7Zj50Aq90I64msUds0W77YTRqTEYNZ+gDGigktMvirHyMl
+         BLTg==
+X-Forwarded-Encrypted: i=1; AKwUvBxYNrQHXn4/jMA2ocEUfYARZ17N4PIVF6bKJsK1osXj9QaU0tAP1WL3xUyjy1mF7Gb6rDc4rik0@vger.kernel.org
+X-Gm-Message-State: AFq9FYKqTYTneiFucZTQ15i/rzVBdEZEVnlwkxOkGqpHVVcTHJ0dw59v
+	sfQypoiHhpwUOo60h1Ij7eLpYFdWVmkd7yst4L2TCyLkFeb+1nxmOd21wyfazM/RUck=
+X-Gm-Gg: AYBFou3k8fChOBJcdDPZqcl7vcKzgPdxgTHiwcZBlWt1H09x5NTRDIYZzJ8jxnB03vY
+	4DuGkfSzCcLgR3X4+7obvC8BTdLemfc8o3aH6368M0ensI0mmBXIjqRusqjHLumTK7U565IP+AE
+	opirgReQIKT2DRRpzRearhYwYUeY/fRdMiuVAIR2tvthdSBhejbr0Q1dsmExSuAwccMKCVPXWOr
+	Adk+8vbJi/i4M73mN/2phzLI6DAv8o+cVvXw1xEYfSObb9N7twzfwoNa6QqvR4ebpPQTJvin9h7
+	jekMeroJN8jnwYsEwKgiXw493ZegnrV9dn+oiffY4ep4YmVHLogxcxSA0LcYlMmHMuQKempPtPO
+	nVSnNSo0yOlUkeYNXFR07YG96OXf4HUdbukKMy3ybnilPzMzWO7MqVB7uogtJZIVX7Ppw+qljKI
+	Op/nA7roALpAAifOvlLpqIYNu4OQXb7on8DeunUHQ3w1zUaAw4yE73YXR1EgisVOIMXdi6G51BX
+	Q==
+X-Received: by 2002:a05:600c:4689:b0:4a0:1cfd:321 with SMTP id 5b1f17b1804b1-4a18e4a9b31mr436383485e9.12.1792098589066;
+        Thu, 15 Oct 2026 14:09:49 -0700 (PDT)
+Received: from [172.16.0.229] ([159.196.52.54])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3acc98139ccsm180034a91.0.2026.10.15.14.09.43
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 15 Oct 2026 14:09:47 -0700 (PDT)
+Message-ID: <a8f56485-f2c1-40d0-96e5-b858b693984f@suse.com>
+Date: Fri, 16 Oct 2026 07:39:40 +1030
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20261015-dontcache-test-v1-1-6aa7583973a9@columbia.edu>
-References: <20261015-dontcache-test-v1-0-6aa7583973a9@columbia.edu>
-In-Reply-To: <20261015-dontcache-test-v1-0-6aa7583973a9@columbia.edu>
-To: fstests@vger.kernel.org, Zorro Lang <zlang@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, linux-ext4@vger.kernel.org,
-        Jens Axboe <axboe@kernel.dk>, "Darrick J. Wong" <djwong@kernel.org>,
-        Jan Kara <jack@suse.cz>, Tal Zussman <tz2294@columbia.edu>
-X-Mailer: b4 0.17-dev
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1792097779; l=965;
- i=tz2294@columbia.edu; s=20250528; h=from:subject:message-id;
- bh=KewLqlkj9HfaC+aOJYKAu061lljKKowhtkC9ghOwU38=;
- b=WSyRU2SY8Sew3m9bOIxFRL9FVHk1D0DpCPckLSn3Ls6NVlmM092jU6uF/Rn+8mnHV/Iw+8ZVw
- TcG7BbWA2DWD2aJorUG1m8LMvUG49aRvLHuYmIG+e2Rii2gADw8ObAc
-X-Developer-Key: i=tz2294@columbia.edu; a=ed25519;
- pk=BIj5KdACscEOyAC0oIkeZqLB3L94fzBnDccEooxeM5Y=
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMDE1MDA4MyBTYWx0ZWRfXyw/Kvc+U/JWL
- N6EWAOVaGdwimnaB0YFgqMeeQTRbqDFRR0tePuPgr9DW8NmFQKBLPP1mbLSOUKityuIvag+fKFo
- evWmbTHqFM94Twn0X68SrNpp6JbJvS3qO9tho+Ettf4HWrZpt41i
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMDE1MDA4MyBTYWx0ZWRfX8GP7jkHLTVRk
- jVQ29vuUa43SGg3KP/oSuhBdJrntIvFEqcmUo1HQ3Mui0BQUJ+QZfPYBz8OU0Czbb4NdHEb3C4s
- OJBSKaeLXcxGDF72qbxSW++r8hwAkCUdoXlNYo7f1nq65nivfypkVib5oMaCjZ/mPGU158c2zUJ
- 8VLt43UKSPQicT9yHbJTNxBSNDwWgxDmwM1aqFaV0imqwXFWhodHZdbd5nGv4bZp5D1QInFI2qy
- x49LUVMHOsI2iPd0TagavKqxFne04CgZ27uBYDc+g3HK1/geJxHnIiAVp5iJl2QcZQgwiFMuUWp
- u2uVB+m0DbQDD+2axF1BW8GMNdkNiS0DlTgqb8ICXn0zQ/mz6cHzPqZzKjB8lCrEflon415QelZ
- gKTJrMiVECCvR5iVPcTedmDvZFbL3rVBw5t8hFDeuSsIRXjmhBqjh3QH9u9mczAIFSL/LBSmf7W
- n42zQSP5C3OzuYCgbpQ==
-X-Authority-Analysis: v=2.4 cv=Z4d5j3RA c=1 sm=1 tr=0 ts=6ad13df7 cx=c_pps
- a=qKBjSQ1v91RyAK45QCPf5w==:117 a=NKoNGjn6KhAaSQkl0TXC/A==:17
- a=IkcTkHD0fZMA:10 a=660iZSQnnn4A:10 a=x7bEGLp0ZPQA:10 a=A0y_DWxS2BwA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=SsB-OO3BMngHh3ZO9fOt:22
- a=zozjgnHnxDr4c7FHEr8A:9 a=QEXdDO2ut3YA:10 a=NFOGd7dJGGMPyQGDc5-O:22
-X-Proofpoint-GUID: D7RZGWWVFhgIIkEt8uN7z3f8VkTjCvEq
-X-Proofpoint-ORIG-GUID: D7RZGWWVFhgIIkEt8uN7z3f8VkTjCvEq
-X-Proofpoint-Virus-Version: vendor=nai engine=6900 definitions=11936
- signatures=596817
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- adultscore=0 lowpriorityscore=10 priorityscore=1501 suspectscore=0
- malwarescore=0 impostorscore=10 spamscore=0 phishscore=0 bulkscore=10
- clxscore=1011 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2610080000
- definitions=main-2610150083
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] btrfs: test fiemap does not merge compressed extents
+To: fdmanana@kernel.org, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+References: <5b73c7dc792763acc71d3f4286bccc473114fca3.1792077449.git.fdmanana@suse.com>
+Content-Language: en-US
+From: Qu Wenruo <wqu@suse.com>
+Autocrypt: addr=wqu@suse.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
+ FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJqqw0NBQkUl/JeAAoJEMI9kfOh
+ Jf6o/xYH/3AaWnGSq58XnY/T3/YYjr6g+TUZxa7MPyiYTELNpNlvmNlbtbAL0nW0LNvkeiqf
+ SmYA+xkwY4RbxnZYQK0H5iv2w1eqa9qqFZb4bIBRmTapu26GEEkpad0W0ZhoSPMO8bV2Bwkf
+ YdtPZQLaeUKvHZqNqBKnmtRLQj2Cgy3kuXX3bEGvWjzUOxPUSCj/S++JWBewMdMBPT62vZM0
+ 3156gfn5mHA94s2p+NFJoWkERY+JPTMu9NISkpD7yuGhXN88qd/aqD0RrlhxvKsrQogdPwn9
+ vP18FGG3CRlHtOvOLVoY5NKSOWTDc+o+8t2XEETFTGbKYTcqeTzi4SxhvBLtTinOwE0EWdWB
+ rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
+ Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
+ E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
+ vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
+ g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
+ AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
+ cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
+ qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
+ /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
+ o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
+ JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
+In-Reply-To: <5b73c7dc792763acc71d3f4286bccc473114fca3.1792077449.git.fdmanana@suse.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-_require_xfs_io_command has no pread case, so a pread option falls back
-to a grep of the help text, and that only matches options that take an
-argument. A bare -U is reported as unsupported even when xfs_io has it.
-Add a pread case that does a real read with the option, like the pwrite
-case does.
 
-Signed-off-by: Tal Zussman <tz2294@columbia.edu>
----
- common/rc | 5 +++++
- 1 file changed, 5 insertions(+)
 
-diff --git a/common/rc b/common/rc
-index 1eccd60c..945c9e42 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3120,6 +3120,11 @@ _require_xfs_io_command()
- 		        "pwrite $pwrite_opts $param 0 $write_size" $testfile 2>&1`
- 		param_checked="$pwrite_opts $param"
- 		;;
-+	"pread")
-+		testio=`$XFS_IO_PROG -f -c "pwrite 0 4k" \
-+			-c "pread $param 0 4k" $testfile 2>&1`
-+		param_checked="$param"
-+		;;
- 	"scrub"|"repair")
- 		test -z "$param" && param="probe"
- 		testio=`$XFS_IO_PROG -x -c "$command $param" $TEST_DIR 2>&1`
+在 2026/10/16 01:51, fdmanana@kernel.org 写道:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Test that fiemap does not report logically adjacent compressed extents
+> as a single extent.
+> 
+> This is a reproducer for a bug that is fixed by the following kernel
+> patch:
+> 
+>    "btrfs: fix fiemap merging compressed extents"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
--- 
-2.39.5
+Reviewed-by: Qu Wenruo <wqu@suse.com>
+
+Thanks,
+Qu
+
+> ---
+>   tests/btrfs/361     | 50 +++++++++++++++++++++++++++++++++++++++++++++
+>   tests/btrfs/361.out |  8 ++++++++
+>   2 files changed, 58 insertions(+)
+>   create mode 100755 tests/btrfs/361
+>   create mode 100644 tests/btrfs/361.out
+> 
+> diff --git a/tests/btrfs/361 b/tests/btrfs/361
+> new file mode 100755
+> index 00000000..96eff971
+> --- /dev/null
+> +++ b/tests/btrfs/361
+> @@ -0,0 +1,50 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
+> +#
+> +# FS QA Test 361
+> +#
+> +# Test that fiemap does not report logically adjacent compressed extents as a
+> +# single extent.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick compress fiemap
+> +
+> +. ./common/filter
+> +. ./common/punch # for _filter_fiemap_flags
+> +
+> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +	"btrfs: fix fiemap merging compressed extents"
+> +
+> +_require_btrfs_support_sectorsize 4096
+> +_require_xfs_io_command "falloc"
+> +_require_xfs_io_command "fiemap"
+> +_require_scratch
+> +
+> +_scratch_mkfs -s 4K >> $seqres.full 2>&1 || _fail "mkfs failed"
+> +_scratch_mount "-o compress"
+> +
+> +# Do a write that compresses to a single 4K extent and represents the maximum
+> +# compressed chunk size (128K).
+> +$XFS_IO_PROG -f -c "pwrite 0 128K" $SCRATCH_MNT/foo | _filter_xfs_io
+> +
+> +# Sync to flush delalloc and allocate the 4K extent.
+> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foo
+> +
+> +# Now allocate a 124K extent in some other file, which will be adjacent (to the
+> +# right) of the 4K extent previously allocated.
+> +$XFS_IO_PROG -f -c "falloc 0 124K" $SCRATCH_MNT/filler
+> +
+> +# Do another write to the main file at its current EOF that is compressible and
+> +# fits in a 4K extent.
+> +$XFS_IO_PROG -c "pwrite 128K 128K" $SCRATCH_MNT/foo | _filter_xfs_io
+> +
+> +# Sync to flush delalloc and allocate the 4K extent.
+> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foo
+> +
+> +# Run fiemap which should report 2 encoded extents, each with a logical size
+> +# of 128K.
+> +echo "Fiemap output:"
+> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foo | _filter_fiemap_flags 1
+> +
+> +_exit 0
+> diff --git a/tests/btrfs/361.out b/tests/btrfs/361.out
+> new file mode 100644
+> index 00000000..b09afa3d
+> --- /dev/null
+> +++ b/tests/btrfs/361.out
+> @@ -0,0 +1,8 @@
+> +QA output created by 361
+> +wrote 131072/131072 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 131072/131072 bytes at offset 131072
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +Fiemap output:
+> +0: [0..255]: encoded
+> +1: [256..511]: encoded|last
 
