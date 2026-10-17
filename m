@@ -1,61 +1,74 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE2473F1ABE;
-	Sat, 17 Oct 2026 09:04:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4943D4CF487
+	for <fstests@vger.kernel.org>; Sat, 17 Oct 2026 09:22:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792227849; cv=none; b=dtxgd3w2hjwDLzH3VCwwpvx2CeQeY/5QWLyWTyYvTrkO+dilFFp1TVtUywl9FSzabODbnd0EPsCqdBAm0Q6uLIHoDUXYlYC2x5BNZqUn6SmVpSSWmzhHYKOLcZZ8KRTSfnRGWfqlr4n6Dnmel1a7DUuBnAG+cCZXBKl+uRoE29Y=
+	t=1792228955; cv=none; b=SF5wLbzynTNcHIEbBO3eiOkgsDkgxxgf0WsJPjb4r2DU0GvBwKaiS/kPUF8RQkC01YIrxMfHry2ml7NahZI1sF7mR4DDADFQ2oJsS4MWA4xX1J/JTjXEn1LtL0MFobZ8PJDjFSeGZiBLa20zuGesGTnSgJFv00hbbFFZVxPBMl4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792227849; c=relaxed/simple;
-	bh=lz0GsTPA+3iW46pKNTTm6B2kS/4MbtaXuX+tqmhhrgk=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=PINiDtvm/0oSuSJ8MY5Cos6/N9BeRM9eMA//GdjeTXuOV3K61lE06G8PUKrgM0YBkf9htPm3I3tuBQJcoGNV4yKeX8oLm9G936WN0m0g629pGVy2GxPbHgxDNO9Xm9MGFM0Y4uE8gW+HKmfvKDtwkI8Bz3+MUlnLEvLzba4n6g0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=GlHBun7k; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=GlHBun7k; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1792228955; c=relaxed/simple;
+	bh=uNSWk2DcH3LPZICBD746TFu+sNzj0B8D3y9K7VrQniM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=lDEM0gfNDUB8HAXaXEcC5+mkh9RCT19PgEo7P9rNzsHIedT8HvVkRQZ8En4xls95Ot/IgXqI5bEDJ+IwxeZNB2yCxG3GSPLI79zM/n1n8hrl/cfQlRKte7FyB6aCVCDNb3GG65LdNrFXfXbZeU2x4zDW+rGxFpT9OP19HHD6Ftk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=tN8+rCNv; arc=none smtp.client-ip=209.85.218.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="GlHBun7k";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="GlHBun7k"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 059571F747;
-	Sat, 17 Oct 2026 09:04:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1792227843; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=QVobapDrWbXN4UzNk2eIR9AG35N5cQ8prywvZ6HdP6o=;
-	b=GlHBun7kh4pUBU9Ntjh1JB4sPLI47G1y2slrZfCbnIkm+mUl7TD6xUO2QxuMx/BiEj7fKo
-	9lH3Y2cERfOZia7vnPbfKyfeTBh4ZPvYGvSvvNAYUO/1SE0jpTf12eYi9ugKPOzTsXh9DK
-	18wuLHak/cNoDxXm+xCpzVKd2yZzx00=
-Authentication-Results: smtp-out2.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1792227843; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=QVobapDrWbXN4UzNk2eIR9AG35N5cQ8prywvZ6HdP6o=;
-	b=GlHBun7kh4pUBU9Ntjh1JB4sPLI47G1y2slrZfCbnIkm+mUl7TD6xUO2QxuMx/BiEj7fKo
-	9lH3Y2cERfOZia7vnPbfKyfeTBh4ZPvYGvSvvNAYUO/1SE0jpTf12eYi9ugKPOzTsXh9DK
-	18wuLHak/cNoDxXm+xCpzVKd2yZzx00=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id DAFAE133A7;
-	Sat, 17 Oct 2026 09:04:00 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id y36pGf8502oCSwAAD6G6ig
-	(envelope-from <wqu@suse.com>); Sat, 17 Oct 2026 09:04:00 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org,
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="tN8+rCNv"
+Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-c20ce3c118aso137380066b.0
+        for <fstests@vger.kernel.org>; Sat, 17 Oct 2026 02:22:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1792228951; x=1792833751; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=lRwoqnriejBBoRSldEqkxsXtNf0LoDQmOzWPLuj7UWI=;
+        b=tN8+rCNvR9IrrV59N9T800x962aj39WN7iC+FWrtsRLMAPQYBQ3QASrsAlLFsKjfwq
+         wn/GPFvbNxS03u7eUcu3SFv44bVSgiWfN9hb+6OzRIzEmyf6Dy8lHiQsoM8RpJkcHnry
+         9U2RW/biJiymTViof1hy8NggFuVD97IL6/N8RoUhBhYGQ2CyJuLiKCPE/5FmTXh8dfFl
+         RRd62JS92Sag9WiYbItfzDAdD9xR17lHzTc85l+at3p/PmxRnwK4xznkMeev78e8HFSc
+         j0ot/iDTuoTw4XuogM/UqGV+rP4RfXQvBVH3GvMRFxBiexper1kS0Q3xJZfrO9+CP1ZA
+         OK9g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1792228951; x=1792833751;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=lRwoqnriejBBoRSldEqkxsXtNf0LoDQmOzWPLuj7UWI=;
+        b=efD8L7vHoyGoHrcbWFIllgwRwZfjhlP72H4LxhC41V/I0lC0qIxVcGdaIiukd3qtn2
+         fak0IKvg6JYqksz890juAkj9AIByBePMkXu7HfP3NN+oToqNDIwUsLoaoysnBoK2CH09
+         jNkHTBHiOksSGjZV7lGyTzCz7R6JchLOUbgQMUrnoVspc6jNOx8nM28xQ3qSdsomvsjz
+         VG5TLZlob6DQ+ZW7ov8JTnX7krwxQTR+Ef+FxWbkFWBmY0J0wIgmgXaAU9p8OInROU3t
+         0o/LzWqOm0NyZzDNDbU5W4VbwtHQeQURiwMPo8/eD/bbdrIS+2HMmBViyW1XAS9otFzF
+         2s2g==
+X-Forwarded-Encrypted: i=1; AKwUvBz/Y1QIYPgpNM+VjEeIL+PEyWLQ4unZ0Y7lolgMEEblkYuVFyl/E3IS1N2zBCfAQlqVIq2iPzk7@vger.kernel.org
+X-Gm-Message-State: AFq9FYJ7CXjvl0Kgyfnm4XkjqU/J5stbbOKhnL99iQj3WJD1UWpv4c/w
+	KJEMFCct64drLiRMUNC7zylr+juXYihCERJXN81ZL/YJe2IpYDGqInL9cuXlLA==
+X-Gm-Gg: AYBFou2qQjDZA0Qz9Dj75sQ8cyI8RTEwJzHRw3xJ2DAZowh5Aq/skfVXO3H3scGms+v
+	s0mK3C8bmDE6A/jFSsRos8YkWH9Rr7AliOe05n5kI+vbVnU9h5eV28Lqb6kFHZPibeoXr93ghxq
+	Ye/4gKhDq1anTuzhyLrixw+GiNJsGchlmNrSmCstI7NHOeVLJPCLA9wu3cW0q1bMJ2oQRyuqrPI
+	vgVNBpRCpBhyxUeRxg7iJ1nRTewAlwUureNy/zkKGA9Hn0ZQA2fqpXLBpR+nxFi5llcAZJSbw2x
+	pPF1eYSFd6ln3s9lEqTkxC/xaePLUHxNXn/uEpYL3zH2tqbBPByhcdPoq972phhZ3fDKv/Uh9B9
+	o9IyOQP7KtdGKkU//IRxSs7JgxPocqAITOwFCKNP4A9oBOtBDzl/72qIa6z4kzybR725TLWy6ot
+	r+lPRwS/taM8Oioh0cTdP6Qtss4EK6weTPfcQV85YEXl+xQhiQ+DTDCTV+QVoXyUR/XEBKbPd/g
+	xPsZnUpHjREmmn4GllKuDaPCA==
+X-Received: by 2002:a17:906:99c2:b0:c41:825d:ed8c with SMTP id a640c23a62f3a-c41825dfa20mr182468866b.26.1792228951225;
+        Sat, 17 Oct 2026 02:22:31 -0700 (PDT)
+Received: from localhost (178-84-201-199.dynamic.upc.nl. [178.84.201.199])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c40918c6e6asm156844966b.53.2026.10.17.02.22.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 17 Oct 2026 02:22:30 -0700 (PDT)
+From: Amir Goldstein <amir73il@gmail.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>,
+	Christian Brauner <brauner@kernel.org>,
+	Christoph Hellwig <hch@lst.de>,
+	linux-unionfs@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org,
 	fstests@vger.kernel.org
-Cc: ebiggers@kernel.org
-Subject: [PATCH v4] fstests: generic: add a test case to check fsverity reads
-Date: Sat, 17 Oct 2026 19:33:41 +1030
-Message-ID: <20261017090341.72079-1-wqu@suse.com>
-X-Mailer: git-send-email 2.56.0
+Subject: [PATCH v2] src/vfs: skip whiteout-device fixtures on overlayfs
+Date: Sat, 17 Oct 2026 11:22:29 +0200
+Message-ID: <20261017092229.2363746-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.55.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -63,177 +76,729 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spam-Flag: NO
-X-Spam-Score: -2.80
-X-Spam-Level: 
-X-Spamd-Result: default: False [-2.80 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	TO_DN_NONE(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	ARC_NA(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	FROM_EQ_ENVFROM(0.00)[];
-	RCPT_COUNT_THREE(0.00)[3];
-	RCVD_TLS_ALL(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.com:email]
 
-There is a bug report that with the recently enabled large folios
-support, fsverity enabled files on btrfs can trigger reproducible
-warnings about file corruption, but in the end no error is returned to
-user space.
+From: Christian Brauner <brauner@kernel.org>
 
-It turns out to be a bug in the btrfs fsverity integration, where blocks
-not included in the read range are passed to be verified.
+The idmapped mount tests create a whiteout device,
+mknod(S_IFCHR, makedev(0, 0)), as a fixture: a whiteout device is the
+only character device an unprivileged caller may create, since it is
+exempt from the CAP_MKNOD check. overlayfs reserves a 0:0 character
+device as its on-disk whiteout marker, so ovl_mknod() returns -EPERM
+and the fixture cannot be created, failing generic/633, generic/696 and
+generic/697 on overlayfs.
 
-This is a long-standing bug where btrfs fsverity always assumed that one
-folio contains exactly one fs block, ignoring the fact that btrfs had
-block size < page size support before fsverity support was added.
+Add a whiteout_device_supported() helper and skip the whiteout-device
+fixtures and the checks that depend on them on overlayfs. The
+makedev(5, 1) "creation must fail" probes are unaffected and keep
+running. No-op on every other filesystem.
 
-Add a new regression test case for it. The workload is pretty simple:
-
-- Create a 32M file
-
-- Punch a 64K hole for every 128K
-  This will limit the read bio size to 64K, which is smaller than
-  a lot of large folios, and thus can trigger the btrfs bug.
-
-- Enable fsverity digest and drop page cache
-
-- Read that file and verify its content
-
-- Verify there is no "FILE CORRUPTED!" warning
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
+Signed-off-by: Christian Brauner (Amutable) <brauner@kernel.org>
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
-Changelog
-v4:
-- Also output the checksum for the file for content verification
 
-- Update the comment to show the requirement more clearly
-  It requires the folio size larger than the fs block size.
+Changes since v1 [1]:
+- Patch "probe O_TMPFILE support..." already merged
+- Repalce is_overlayfs() probe with whiteout_device_supported()
 
-  This means either a system with larger page size (e.g. 64K page sized
-  arm64 with 4K block size), or large folio support (which requires
-  transparent huge page).
+[1] https://lore.kernel.org/linux-unionfs/20260615-overlay-idmapped-vfstest-v1-0-c6b3b2228092@kernel.org/
 
-- Minor comment updates
-  * Concentrate the mention of large folio to the triggering part
-  * Explain why fserror is not utilized for error detection
+ src/vfs/idmapped-mounts.c | 154 ++++++++++++++++++++------------------
+ src/vfs/utils.c           |  25 +++++++
+ src/vfs/utils.h           |   1 +
+ 3 files changed, 107 insertions(+), 73 deletions(-)
 
-v3:
-- Disable signature verification temporarily for the test
-  Pointed out by Dhruva, as it's a user configurable behavior that if
-  signature is required, reading the file without a signature will lead
-  to an EPERM error.
-
-v2:
-- Do not use btrfs specific mount options to limit read bio size
-  Use holes to limit the size of read bios instead, now the test case
-  can be generic other than btrfs specific.
-
-- Add the missing _require_check_dmesg call
----
- tests/generic/807     | 72 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/807.out |  2 ++
- 2 files changed, 74 insertions(+)
- create mode 100755 tests/generic/807
- create mode 100644 tests/generic/807.out
-
-diff --git a/tests/generic/807 b/tests/generic/807
-new file mode 100755
-index 00000000..db3c6fbb
---- /dev/null
-+++ b/tests/generic/807
-@@ -0,0 +1,72 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-+#
-+# FS QA Test 807
-+#
-+# Verify that reading a large file with holes won't trigger fsverity warnings
-+#
-+. ./common/preamble
-+_begin_fstest auto quick verity
-+
-+_fixed_by_fs_commit btrfs xxxxxxxxxxxx \
-+	"btrfs: fix the fsverity callback where unexpected range is verified"
-+
-+. ./common/verity
-+
-+# Override the default cleanup function.
-+_cleanup()
+diff --git a/src/vfs/idmapped-mounts.c b/src/vfs/idmapped-mounts.c
+index 3e1b6987..1cca86dc 100644
+--- a/src/vfs/idmapped-mounts.c
++++ b/src/vfs/idmapped-mounts.c
+@@ -432,6 +432,7 @@ out:
+ 
+ int tcore_fsids_mapped(const struct vfstest_info *info)
+ {
++	bool whiteout_dev = whiteout_device_supported(info->t_dir1_fd);
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, hardlink_target_fd = -EBADF, open_tree_fd = -EBADF;
+ 	struct mount_attr attr = {
+@@ -534,7 +535,7 @@ int tcore_fsids_mapped(const struct vfstest_info *info)
+ 			die("failure: create");
+ 
+ 		/* create character device */
+-		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | 0644, makedev(0, 0)))
++		if (whiteout_dev && mknodat(open_tree_fd, CHRDEV1, S_IFCHR | 0644, makedev(0, 0)))
+ 			die("failure: create");
+ 
+ 		/* create symlink */
+@@ -734,6 +735,7 @@ out:
+ /* Validate that changing file ownership works correctly on idmapped mounts. */
+ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ {
++	bool whiteout_dev = whiteout_device_supported(info->t_dir1_fd);
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd1 = -EBADF, open_tree_fd2 = -EBADF;
+ 	struct mount_attr attr1 = {
+@@ -763,7 +765,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 	}
+ 
+ 	/* create character device */
+-	if (mknodat(info->t_dir1_fd, CHRDEV1, S_IFCHR | 0644, makedev(0, 0))) {
++	if (whiteout_dev && mknodat(info->t_dir1_fd, CHRDEV1, S_IFCHR | 0644, makedev(0, 0))) {
+ 		log_stderr("failure: mknodat");
+ 		goto out;
+ 	}
+@@ -824,7 +826,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 0, 0)) {
++	if (whiteout_dev && !expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 0, 0)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -856,7 +858,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 10000, 10000)) {
++	if (whiteout_dev && !expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 10000, 10000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -911,7 +913,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 30000, 30000)) {
++	if (whiteout_dev && !expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 30000, 30000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -941,7 +943,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: fchownat");
+ 		goto out;
+ 	}
+-	if (fchownat(info->t_dir1_fd, CHRDEV1, 2000, 2000, 0)) {
++	if (whiteout_dev && fchownat(info->t_dir1_fd, CHRDEV1, 2000, 2000, 0)) {
+ 		log_stderr("failure: fchownat");
+ 		goto out;
+ 	}
+@@ -971,7 +973,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 2000, 2000)) {
++	if (whiteout_dev && !expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 2000, 2000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1001,7 +1003,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 12000, 12000)) {
++	if (whiteout_dev && !expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 12000, 12000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1031,7 +1033,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 32000, 32000)) {
++	if (whiteout_dev && !expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 32000, 32000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1063,7 +1065,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: fchownat");
+ 		if (!fchownat(info->t_dir1_fd, HARDLINK1, 1000, 1000, 0))
+ 			die("failure: fchownat");
+-		if (!fchownat(info->t_dir1_fd, CHRDEV1, 1000, 1000, 0))
++		if (whiteout_dev && !fchownat(info->t_dir1_fd, CHRDEV1, 1000, 1000, 0))
+ 			die("failure: fchownat");
+ 		if (!fchownat(info->t_dir1_fd, SYMLINK1, 2000, 2000, AT_EMPTY_PATH | AT_SYMLINK_NOFOLLOW))
+ 			die("failure: fchownat");
+@@ -1078,7 +1080,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: fchownat");
+ 		if (!fchownat(open_tree_fd2, HARDLINK1, 1000, 1000, 0))
+ 			die("failure: fchownat");
+-		if (!fchownat(open_tree_fd2, CHRDEV1, 1000, 1000, 0))
++		if (whiteout_dev && !fchownat(open_tree_fd2, CHRDEV1, 1000, 1000, 0))
+ 			die("failure: fchownat");
+ 		if (!fchownat(open_tree_fd2, SYMLINK1, 2000, 2000, AT_EMPTY_PATH | AT_SYMLINK_NOFOLLOW))
+ 			die("failure: fchownat");
+@@ -1093,7 +1095,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: fchownat");
+ 		if (fchownat(open_tree_fd1, HARDLINK1, 1000, 1000, 0))
+ 			die("failure: fchownat");
+-		if (fchownat(open_tree_fd1, CHRDEV1, 1000, 1000, 0))
++		if (whiteout_dev && fchownat(open_tree_fd1, CHRDEV1, 1000, 1000, 0))
+ 			die("failure: fchownat");
+ 		if (fchownat(open_tree_fd1, SYMLINK1, 2000, 2000, AT_EMPTY_PATH | AT_SYMLINK_NOFOLLOW))
+ 			die("failure: fchownat");
+@@ -1108,7 +1110,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(info->t_dir1_fd, HARDLINK1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+-		if (!expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
++		if (whiteout_dev && !expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(info->t_dir1_fd, SYMLINK1, AT_SYMLINK_NOFOLLOW, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+@@ -1123,7 +1125,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd2, HARDLINK1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+-		if (!expected_uid_gid(open_tree_fd2, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd2, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd2, SYMLINK1, AT_SYMLINK_NOFOLLOW, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+@@ -1138,7 +1140,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd1, HARDLINK1, 0, 1000, 1000))
+ 			die("failure: expected_uid_gid");
+-		if (!expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 1000, 1000))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 1000, 1000))
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd1, SYMLINK1, AT_SYMLINK_NOFOLLOW, 2000, 2000))
+ 			die("failure: expected_uid_gid");
+@@ -1166,7 +1168,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 1000, 1000)) {
++	if (whiteout_dev && !expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 1000, 1000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1196,7 +1198,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 11000, 11000)) {
++	if (whiteout_dev && !expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 11000, 11000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1226,7 +1228,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 31000, 31000)) {
++	if (whiteout_dev && !expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 31000, 31000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1258,7 +1260,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: fchownat");
+ 		if (!fchownat(info->t_dir1_fd, HARDLINK1, 0, 0, 0))
+ 			die("failure: fchownat");
+-		if (!fchownat(info->t_dir1_fd, CHRDEV1, 0, 0, 0))
++		if (whiteout_dev && !fchownat(info->t_dir1_fd, CHRDEV1, 0, 0, 0))
+ 			die("failure: fchownat");
+ 		if (!fchownat(info->t_dir1_fd, SYMLINK1, 3000, 3000, AT_EMPTY_PATH | AT_SYMLINK_NOFOLLOW))
+ 			die("failure: fchownat");
+@@ -1273,7 +1275,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: fchownat");
+ 		if (!fchownat(open_tree_fd1, HARDLINK1, 0, 0, 0))
+ 			die("failure: fchownat");
+-		if (!fchownat(open_tree_fd1, CHRDEV1, 0, 0, 0))
++		if (whiteout_dev && !fchownat(open_tree_fd1, CHRDEV1, 0, 0, 0))
+ 			die("failure: fchownat");
+ 		if (!fchownat(open_tree_fd1, SYMLINK1, 3000, 3000, AT_EMPTY_PATH | AT_SYMLINK_NOFOLLOW))
+ 			die("failure: fchownat");
+@@ -1288,7 +1290,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: fchownat");
+ 		if (fchownat(open_tree_fd2, HARDLINK1, 0, 0, 0))
+ 			die("failure: fchownat");
+-		if (fchownat(open_tree_fd2, CHRDEV1, 0, 0, 0))
++		if (whiteout_dev && fchownat(open_tree_fd2, CHRDEV1, 0, 0, 0))
+ 			die("failure: fchownat");
+ 		if (!fchownat(open_tree_fd2, SYMLINK1, 3000, 3000, AT_EMPTY_PATH | AT_SYMLINK_NOFOLLOW))
+ 			die("failure: fchownat");
+@@ -1303,7 +1305,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(info->t_dir1_fd, HARDLINK1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+-		if (!expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
++		if (whiteout_dev && !expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(info->t_dir1_fd, SYMLINK1, AT_SYMLINK_NOFOLLOW, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+@@ -1318,7 +1320,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd1, HARDLINK1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+-		if (!expected_uid_gid(open_tree_fd1, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd1, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd1, SYMLINK1, AT_SYMLINK_NOFOLLOW, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+@@ -1333,7 +1335,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd2, HARDLINK1, 0, 0, 0))
+ 			die("failure: expected_uid_gid");
+-		if (!expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 0, 0))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 0, 0))
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd2, SYMLINK1, AT_SYMLINK_NOFOLLOW, 2000, 2000))
+ 			die("failure: expected_uid_gid");
+@@ -1361,7 +1363,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 0, 0)) {
++	if (whiteout_dev && !expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 0, 0)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1391,7 +1393,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 10000, 10000)) {
++	if (whiteout_dev && !expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 10000, 10000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1421,7 +1423,7 @@ int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 30000, 30000)) {
++	if (whiteout_dev && !expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 30000, 30000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -3781,6 +3783,7 @@ out:
+ 
+ int tcore_setgid_create_idmapped(const struct vfstest_info *info)
+ {
++	bool whiteout_dev = whiteout_device_supported(info->t_dir1_fd);
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+ 	struct mount_attr attr = {
+@@ -3881,10 +3884,10 @@ int tcore_setgid_create_idmapped(const struct vfstest_info *info)
+ 			die("failure: is_setgid");
+ 
+ 		/* create a whiteout device via mknodat() vfs_mknod */
+-		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
++		if (whiteout_dev && mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
+ 			die("failure: mknodat");
+ 
+-		if (is_setgid(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && is_setgid(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_setgid");
+ 
+ 		/*
+@@ -3906,7 +3909,7 @@ int tcore_setgid_create_idmapped(const struct vfstest_info *info)
+ 		if (!expected_uid_gid(open_tree_fd, FILE2, 0, 10000, 10000))
+ 			die("failure: check ownership");
+ 
+-		if (!expected_uid_gid(open_tree_fd, CHRDEV1, 0, 10000, 10000))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd, CHRDEV1, 0, 10000, 10000))
+ 			die("failure: check ownership");
+ 
+ 		if (unlinkat(open_tree_fd, FILE1, 0))
+@@ -3918,7 +3921,7 @@ int tcore_setgid_create_idmapped(const struct vfstest_info *info)
+ 		if (unlinkat(open_tree_fd, FILE2, 0))
+ 			die("failure: delete");
+ 
+-		if (unlinkat(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && unlinkat(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: delete");
+ 
+ 		/* create tmpfile via filesystem tmpfile api */
+@@ -3957,6 +3960,7 @@ out:
+ 
+ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ {
++	bool whiteout_dev = whiteout_device_supported(info->t_dir1_fd);
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+ 	struct mount_attr attr = {
+@@ -4051,10 +4055,10 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ 			die("failure: is_setgid");
+ 
+ 		/* create a whiteout device via mknodat() vfs_mknod */
+-		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
++		if (whiteout_dev && mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
+ 			die("failure: mknodat");
+ 
+-		if (!is_setgid(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && !is_setgid(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_setgid");
+ 
+ 		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 0, 0))
+@@ -4066,7 +4070,7 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (!expected_uid_gid(open_tree_fd, FILE2, 0, 0, 0))
+ 			die("failure: check ownership");
+ 
+-		if (!expected_uid_gid(open_tree_fd, CHRDEV1, 0, 0, 0))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd, CHRDEV1, 0, 0, 0))
+ 			die("failure: check ownership");
+ 
+ 		if (unlinkat(open_tree_fd, FILE1, 0))
+@@ -4078,7 +4082,7 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (unlinkat(open_tree_fd, FILE2, 0))
+ 			die("failure: delete");
+ 
+-		if (unlinkat(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && unlinkat(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: delete");
+ 
+ 		/* create tmpfile via filesystem tmpfile api */
+@@ -4168,10 +4172,10 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ 			die("failure: is_setgid");
+ 
+ 		/* create a whiteout device via mknodat() vfs_mknod */
+-		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
++		if (whiteout_dev && mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
+ 			die("failure: mknodat");
+ 
+-		if (is_setgid(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && is_setgid(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_setgid");
+ 
+ 		/*
+@@ -4193,7 +4197,7 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (!expected_uid_gid(open_tree_fd, FILE2, 0, 0, 1000))
+ 			die("failure: check ownership");
+ 
+-		if (!expected_uid_gid(open_tree_fd, CHRDEV1, 0, 0, 1000))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd, CHRDEV1, 0, 0, 1000))
+ 			die("failure: check ownership");
+ 
+ 		if (unlinkat(open_tree_fd, FILE1, 0))
+@@ -4205,7 +4209,7 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (unlinkat(open_tree_fd, FILE2, 0))
+ 			die("failure: delete");
+ 
+-		if (unlinkat(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && unlinkat(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: delete");
+ 
+ 		/* create tmpfile via filesystem tmpfile api */
+@@ -4293,10 +4297,10 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ 			die("failure: is_setgid");
+ 
+ 		/* create a whiteout device via mknodat() vfs_mknod */
+-		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
++		if (whiteout_dev && mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
+ 			die("failure: mknodat");
+ 
+-		if (is_setgid(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && is_setgid(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_setgid");
+ 
+ 		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 0, 0))
+@@ -4308,7 +4312,7 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (!expected_uid_gid(open_tree_fd, FILE2, 0, 0, 0))
+ 			die("failure: check ownership");
+ 
+-		if (!expected_uid_gid(open_tree_fd, CHRDEV1, 0, 0, 0))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd, CHRDEV1, 0, 0, 0))
+ 			die("failure: check ownership");
+ 
+ 		if (unlinkat(open_tree_fd, FILE1, 0))
+@@ -4320,7 +4324,7 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (unlinkat(open_tree_fd, FILE2, 0))
+ 			die("failure: delete");
+ 
+-		if (unlinkat(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && unlinkat(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: delete");
+ 
+ 		/* create tmpfile via filesystem tmpfile api */
+@@ -7675,6 +7679,7 @@ out:
+  */
+ static int setgid_create_umask_idmapped(const struct vfstest_info *info)
+ {
++	bool whiteout_dev = whiteout_device_supported(info->t_dir1_fd);
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+ 	struct mount_attr attr = {
+@@ -7793,13 +7798,13 @@ static int setgid_create_umask_idmapped(const struct vfstest_info *info)
+ 			die("failure: is_ixgrp");
+ 
+ 		/* create a whiteout device via mknodat() vfs_mknod */
+-		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
++		if (whiteout_dev && mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
+ 			die("failure: mknodat");
+ 
+-		if (is_setgid(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && is_setgid(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_setgid");
+ 
+-		if (is_ixgrp(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && is_ixgrp(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_ixgrp");
+ 
+ 		/*
+@@ -7821,7 +7826,7 @@ static int setgid_create_umask_idmapped(const struct vfstest_info *info)
+ 		if (!expected_uid_gid(open_tree_fd, FILE2, 0, 10000, 10000))
+ 			die("failure: check ownership");
+ 
+-		if (!expected_uid_gid(open_tree_fd, CHRDEV1, 0, 10000, 10000))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd, CHRDEV1, 0, 10000, 10000))
+ 			die("failure: check ownership");
+ 
+ 		if (unlinkat(open_tree_fd, FILE1, 0))
+@@ -7833,7 +7838,7 @@ static int setgid_create_umask_idmapped(const struct vfstest_info *info)
+ 		if (unlinkat(open_tree_fd, FILE2, 0))
+ 			die("failure: delete");
+ 
+-		if (unlinkat(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && unlinkat(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: delete");
+ 
+ 		/* create tmpfile via filesystem tmpfile api */
+@@ -7889,6 +7894,7 @@ out:
+  */
+ static int setgid_create_umask_idmapped_in_userns(const struct vfstest_info *info)
+ {
++	bool whiteout_dev = whiteout_device_supported(info->t_dir1_fd);
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+ 	struct mount_attr attr = {
+@@ -8028,13 +8034,13 @@ static int setgid_create_umask_idmapped_in_userns(const struct vfstest_info *inf
+ 			die("failure: is_ixgrp");
+ 
+ 		/* create a whiteout device via mknodat() vfs_mknod */
+-		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
++		if (whiteout_dev && mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
+ 			die("failure: mknodat");
+ 
+-		if (is_setgid(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && is_setgid(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_setgid");
+ 
+-		if (is_ixgrp(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && is_ixgrp(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_ixgrp");
+ 
+ 		/*
+@@ -8056,7 +8062,7 @@ static int setgid_create_umask_idmapped_in_userns(const struct vfstest_info *inf
+ 		if (!expected_uid_gid(open_tree_fd, FILE2, 0, 0, 1000))
+ 			die("failure: check ownership");
+ 
+-		if (!expected_uid_gid(open_tree_fd, CHRDEV1, 0, 0, 1000))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd, CHRDEV1, 0, 0, 1000))
+ 			die("failure: check ownership");
+ 
+ 		if (unlinkat(open_tree_fd, FILE1, 0))
+@@ -8068,7 +8074,7 @@ static int setgid_create_umask_idmapped_in_userns(const struct vfstest_info *inf
+ 		if (unlinkat(open_tree_fd, FILE2, 0))
+ 			die("failure: delete");
+ 
+-		if (unlinkat(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && unlinkat(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: delete");
+ 
+ 		/* create tmpfile via filesystem tmpfile api */
+@@ -8123,6 +8129,7 @@ out:
+  */
+ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+ {
++	bool whiteout_dev = whiteout_device_supported(info->t_dir1_fd);
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+ 	struct mount_attr attr = {
+@@ -8248,13 +8255,13 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+ 			die("failure: is_ixgrp");
+ 
+ 		/* create a whiteout device via mknodat() vfs_mknod */
+-		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
++		if (whiteout_dev && mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
+ 			die("failure: mknodat");
+ 
+-		if (is_setgid(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && is_setgid(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_setgid");
+ 
+-		if (is_ixgrp(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && is_ixgrp(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_ixgrp");
+ 
+ 		/*
+@@ -8276,7 +8283,7 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+ 		if (!expected_uid_gid(open_tree_fd, FILE2, 0, 10000, 10000))
+ 			die("failure: check ownership");
+ 
+-		if (!expected_uid_gid(open_tree_fd, CHRDEV1, 0, 10000, 10000))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd, CHRDEV1, 0, 10000, 10000))
+ 			die("failure: check ownership");
+ 
+ 		if (unlinkat(open_tree_fd, FILE1, 0))
+@@ -8288,7 +8295,7 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+ 		if (unlinkat(open_tree_fd, FILE2, 0))
+ 			die("failure: delete");
+ 
+-		if (unlinkat(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && unlinkat(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: delete");
+ 
+ 		/* create tmpfile via filesystem tmpfile api */
+@@ -8383,13 +8390,13 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+ 			die("failure: is_ixgrp");
+ 
+ 		/* create a whiteout device via mknodat() vfs_mknod */
+-		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
++		if (whiteout_dev && mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
+ 			die("failure: mknodat");
+ 
+-		if (is_setgid(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && is_setgid(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_setgid");
+ 
+-		if (!is_ixgrp(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && !is_ixgrp(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_ixgrp");
+ 
+ 		/*
+@@ -8411,7 +8418,7 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+ 		if (!expected_uid_gid(open_tree_fd, FILE2, 0, 10000, 10000))
+ 			die("failure: check ownership");
+ 
+-		if (!expected_uid_gid(open_tree_fd, CHRDEV1, 0, 10000, 10000))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd, CHRDEV1, 0, 10000, 10000))
+ 			die("failure: check ownership");
+ 
+ 		if (unlinkat(open_tree_fd, FILE1, 0))
+@@ -8423,7 +8430,7 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+ 		if (unlinkat(open_tree_fd, FILE2, 0))
+ 			die("failure: delete");
+ 
+-		if (unlinkat(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && unlinkat(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: delete");
+ 
+ 		/* create tmpfile via filesystem tmpfile api */
+@@ -8478,6 +8485,7 @@ out:
+  */
+ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
+ {
++	bool whiteout_dev = whiteout_device_supported(info->t_dir1_fd);
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+ 	struct mount_attr attr = {
+@@ -8624,13 +8632,13 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
+ 			die("failure: is_ixgrp");
+ 
+ 		/* create a whiteout device via mknodat() vfs_mknod */
+-		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
++		if (whiteout_dev && mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
+ 			die("failure: mknodat");
+ 
+-		if (is_setgid(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && is_setgid(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_setgid");
+ 
+-		if (is_ixgrp(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && is_ixgrp(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_ixgrp");
+ 
+ 		/*
+@@ -8652,7 +8660,7 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (!expected_uid_gid(open_tree_fd, FILE2, 0, 0, 1000))
+ 			die("failure: check ownership");
+ 
+-		if (!expected_uid_gid(open_tree_fd, CHRDEV1, 0, 0, 1000))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd, CHRDEV1, 0, 0, 1000))
+ 			die("failure: check ownership");
+ 
+ 		if (unlinkat(open_tree_fd, FILE1, 0))
+@@ -8664,7 +8672,7 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (unlinkat(open_tree_fd, FILE2, 0))
+ 			die("failure: delete");
+ 
+-		if (unlinkat(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && unlinkat(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: delete");
+ 
+ 		/* create tmpfile via filesystem tmpfile api */
+@@ -8766,13 +8774,13 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (!is_ixgrp(open_tree_fd, FILE2, 0))
+ 			 die("failure: is_ixgrp");
+ 		/* create a whiteout device via mknodat() vfs_mknod */
+-		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
++		if (whiteout_dev && mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
+ 			die("failure: mknodat");
+ 
+-		if (is_setgid(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && is_setgid(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: is_setgid");
+ 
+-		if (!is_ixgrp(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && !is_ixgrp(open_tree_fd, CHRDEV1, 0))
+ 			 die("failure: is_ixgrp");
+ 
+ 		/*
+@@ -8794,7 +8802,7 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (!expected_uid_gid(open_tree_fd, FILE2, 0, 0, 1000))
+ 			die("failure: check ownership");
+ 
+-		if (!expected_uid_gid(open_tree_fd, CHRDEV1, 0, 0, 1000))
++		if (whiteout_dev && !expected_uid_gid(open_tree_fd, CHRDEV1, 0, 0, 1000))
+ 			die("failure: check ownership");
+ 
+ 		if (unlinkat(open_tree_fd, FILE1, 0))
+@@ -8806,7 +8814,7 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
+ 		if (unlinkat(open_tree_fd, FILE2, 0))
+ 			die("failure: delete");
+ 
+-		if (unlinkat(open_tree_fd, CHRDEV1, 0))
++		if (whiteout_dev && unlinkat(open_tree_fd, CHRDEV1, 0))
+ 			die("failure: delete");
+ 
+ 		/* create tmpfile via filesystem tmpfile api */
+diff --git a/src/vfs/utils.c b/src/vfs/utils.c
+index 0b435afe..0094adc3 100644
+--- a/src/vfs/utils.c
++++ b/src/vfs/utils.c
+@@ -955,6 +955,31 @@ bool openat_tmpfile_supported(int dirfd)
+ 	return true;
+ }
+ 
++/*
++ * A 0:0 character device is the only device node an unprivileged caller may
++ * create, so the idmapped mount tests use one as a fixture. overlayfs reserves
++ * that dev_t as its whiteout marker and ovl_mknod() rejects it with EPERM.
++ * Probe on the base mount as the filesystem owner so a filesystem that later
++ * allows the node keeps the coverage. Any error other than EPERM is reported.
++ */
++bool whiteout_device_supported(int dirfd)
 +{
-+	cd /
-+	_restore_fsverity_signatures
-+	rm -f $tmp.*
++	static const char name[] = ".whiteout_probe";
++
++	if (!mknodat(dirfd, name, S_IFCHR | 0644, makedev(0, 0))) {
++		if (unlinkat(dirfd, name, 0))
++			return log_errno(false, "failure: unlinkat");
++		return true;
++	}
++
++	if (errno == EPERM) {
++		errno = 0;
++		return false;
++	}
++
++	return log_errno(false, "failure: mknodat");
 +}
 +
-+_require_xfs_io_command "fpunch"
-+_require_check_dmesg
-+_require_scratch_verity
-+_disable_fsverity_signatures
-+
-+filesize=$(( 32 * 1024 * 1024 ))
-+interval=$(( 128 * 1024 ))
-+holesize=$(( 64 * 1024 ))
-+
-+_scratch_mkfs_verity >> $seqres.full
-+_scratch_mount
-+
-+# Create a large enough file so that readahead is triggered.
-+_pwrite_byte "0xcd" 0 "$filesize" "$SCRATCH_MNT/foobar" > /dev/null
-+
-+# Create a hole for every $interval bytes. This should limit the read to
-+# $(( $interval - $holesize )), which should be much smaller than the maximum
-+# folio size (2M for x86_64).
-+for (( i = 0; i < $(( $filesize / $interval )); i++ )); do
-+	$XFS_IO_PROG -c "fpunch $(( $i * $interval )) $holesize" \
-+		"$SCRATCH_MNT/foobar" > /dev/null
-+done
-+
-+_fsv_enable "$SCRATCH_MNT/foobar"
-+
-+# Cycle mount to drop page cache
-+_scratch_cycle_mount
-+
-+# Read the file, unpatched btrfs will verify blocks outside the read range and
-+# trigger fs-verity warnings.
-+#
-+# This warning is triggered when the folio size is larger than the fs block
-+# size, either from block size < page size (e.g. 4K block size on 64K page
-+# size systems), or from large folios (requires transparent huge page).
-+#
-+# But the read itself should still be fine, as the failed part will be retried.
-+_md5_checksum "$SCRATCH_MNT/foobar"
-+
-+# Check for any kernel warnings from fs-verity on file corruption.
-+#
-+# Using fserror would be more reliable, but unfortunately btrfs doesn't fully
-+# support it yet, and the fserror support for fsverity is not available in v7.2,
-+# where large folios made this easy to trigger.
-+if _check_dmesg_for "FILE CORRUPTED!"; then
-+	echo "fs-verity detected corruption"
-+fi
-+
-+_exit 0
-diff --git a/tests/generic/807.out b/tests/generic/807.out
-new file mode 100644
-index 00000000..744d48c9
---- /dev/null
-+++ b/tests/generic/807.out
-@@ -0,0 +1,2 @@
-+QA output created by 807
-+9ff4ff01a9e149fcd1c36314ea42102c
+ /*
+  * There'll be scenarios where you'll want to see the attributes associated with
+  * a directory tree during debugging or just to make sure things look correct.
+diff --git a/src/vfs/utils.h b/src/vfs/utils.h
+index c086885a..41b2f499 100644
+--- a/src/vfs/utils.h
++++ b/src/vfs/utils.h
+@@ -372,5 +372,6 @@ extern bool is_setgid(int dfd, const char *path, int flags);
+ extern bool is_sticky(int dfd, const char *path, int flags);
+ extern bool is_ixgrp(int dfd, const char *path, int flags);
+ extern bool openat_tmpfile_supported(int dirfd);
++extern bool whiteout_device_supported(int dirfd);
+ 
+ #endif /* __IDMAP_UTILS_H */
 -- 
-2.56.0
+2.55.0
 
