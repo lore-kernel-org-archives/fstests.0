@@ -1,42 +1,43 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mta1.migadu.com (out-135.mta1.migadu.com [95.215.58.135])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AABC91A682B;
-	Mon, 19 Oct 2026 00:39:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9730A4DEC02
+	for <fstests@vger.kernel.org>; Mon, 19 Oct 2026 11:42:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.135
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1792370342; cv=none; b=gKiu/AXk3UzEz5Di7f6Al4QSKxjo6DlFCL3RT43+E3BOErA0RQk8fsyHISUov798L8XH6AGFz+bTRGd27pS4YZGJiL1+tX9r7wVAZKKg2WU31djwoPiTItcTObV8E+yV4bH/OBT1/jEvDLA9j0owPRQmyUjVkJcnfm1gTx2p0kc=
+	t=1792410138; cv=none; b=aP/aK5onyjJxYvw0LvobJX6JryojNgyyOHZ1HW31s8xigi1Pyl+0RybWpTMxZy70HNPJ/W3SxQ4qBI8qiqOu0wAaGxMd29AEQf3lTW3ZuKQ91t8WUlFHXcE1zk/74QV2MsH+1KfoGCGl7/RFdXZi1bhPQvKFTOggp9SSfkoaWtM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1792370342; c=relaxed/simple;
-	bh=iTAU7Z/FVjQDXJ79nJbFiM64zT2NzjOrxU6Up1/777Q=;
-	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Ve62OAcGq7RoFRnwk8YwXWzzzFDLLcG3fbSE6rH6u8h00wdW3Wt2/iPdnA/BasVYF0AzvVjNR/Ki53vPIl1qgyiCS0xJraYc7WeAaFJ9mO30g3kDU7LOloePNz/YVQjLCjWqBdrEwFla19cU3lN13XQ9KdP38TyJ9A/EW7Oi/BU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VHezdVGc; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1792410138; c=relaxed/simple;
+	bh=KFm12keBM4ZiHGUH54ySLgTMy9yf6j2gcebjLhj1UTM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=PmCsEaJZROXjEGQ6aXt38fMCAIBYfTaIaHk6W8Y5m8jxWmp5yC77Yh5sNi3bYwEbIcNRffBRgxqE8IFOjbxJqCDOWOfhZHIztQqRFQ/rRfebZ6Hgev5iub903/Hws2ZhvSoDcJuIPFTZm2jbjTcNvKGR8ClWSSem+vS9BHEWUrk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=Qf4pVrq9; arc=none smtp.client-ip=95.215.58.135
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VHezdVGc"
-Received: by smtp.kernel.org (Postfix) with UTF8SMTPSA id 42E761F000C4;
-	Mon, 19 Oct 2026 00:39:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1792370341;
-	bh=Gf/XssmHO0esWQvkBTP1Aq6T9AXyBuDYPkDHYkZgwlQ=;
-	h=Date:From:To:Subject:References:In-Reply-To;
-	b=VHezdVGcbMO+KmIjAq6ZNsISylCdOeeuk02cHrFABtlvjEfeGq3tKV2RmKNl4wT4T
-	 OcxfU5G/62tK44lXBw34+ojxuf51eFeOaBg79KdcvIMti0F2h9VLcOmsLaULIEX1hE
-	 KeIGTf/5lEtua+c8+WD38VUgr/1Wxlz+lBEqHCh6wG7TTy4wuvBL3VWNYfY2iBCNTV
-	 W4IWDJG3QW33V+iLE1orSam8gB87HzFHDYzOzQ8feSc1r++P8GNah2Lgh/VLAmXdXe
-	 /9kdX7bzv9K0d3S4B9/nA/5itlTliNVQ50uofQFwIxyXZ/9bZDIzWl/EdiBLj9Ak/f
-	 Ws0eAIoqaAirg==
-Date: Sun, 18 Oct 2026 17:39:00 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: xfs <linux-xfs@vger.kernel.org>,
-	linux-ext4 <linux-ext4@vger.kernel.org>,
-	linux-fsdevel <linux-fsdevel@vger.kernel.org>,
-	fuse-devel <fuse-devel@lists.linux.dev>,
-	fstests <fstests@vger.kernel.org>
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="Qf4pVrq9"
+X-Envelope-To: fstests@vger.kernel.org
+DKIM-Signature: a=rsa-sha256; bh=KFm12keBM4ZiHGUH54ySLgTMy9yf6j2gcebjLhj1UTM=;
+ c=simple/simple; d=linux.dev;
+ h=from:to:subject:date:message-id:mime-version:content-type; s=key1;
+ t=1792410133; v=1; x=1793014933;
+ b=Qf4pVrq9oLYsiXzrSWYNSU7jTkRLEGk0PfenWKINWyugkYkJ/kJwZ+2r47B/unkSlfMTWGa/
+ oiKh8ru500lcjvjKv5qaihvOSSXoyXVYF/kTZ19hxZn7gWbZenTlJMQng+NH4P6TkK14d9G/0P4
+ xAEm9v8nRP51DNInS3GO2jBo=
+X-Envelope-To: fstests@vger.kernel.org
+Received: by smtp.migadu.com with ESMTPS id 6a4e5febb37f0903;
+	Mon, 19 Oct 2026 11:42:13 +0000
+X-Mizu-Trace-ID: 6a4e5febb37f0903
+X-Migadu-Flow: FLOW_OUT
+Date: Mon, 19 Oct 2026 13:42:00 +0200
+From: "Pankaj Raghav (Samsung)" <pankaj.raghav@linux.dev>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: xfs <linux-xfs@vger.kernel.org>, 
+	linux-ext4 <linux-ext4@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, 
+	fuse-devel <fuse-devel@lists.linux.dev>, fstests <fstests@vger.kernel.org>
 Subject: Re: Farewell!
-Message-ID: <20261019003900.GU107868@frogsfrogsfrogs>
+Message-ID: <atYAnu6wfblHw4LG@quentin>
 References: <20261016160037.GA107919@frogsfrogsfrogs>
- <atN8YUvYy0VyvFBm@MacBookPro>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,40 +46,30 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <atN8YUvYy0VyvFBm@MacBookPro>
+In-Reply-To: <20261016160037.GA107919@frogsfrogsfrogs>
 
-On Sat, Oct 17, 2026 at 03:47:13PM +0200, Gao Xiang wrote:
-> On Fri, Oct 16, 2026 at 09:00:37AM -0700, Darrick J. Wong wrote:
-> > Hi everyone,
-> > 
-> > After 14 years at Oracle and 23 years working on Linux, I've decided to
-> > take an extended break.  Today, October 16th, 2026, is my last day.
-> > 
-> > I don't have any immediate plans to drop the djwong@kernel.org
-> > forwarding, though ultimately that's up to the sysadmins to decide.
-> > 
-> > I have very much enjoyed working with you all, and I'm proud of what
-> > we've accomplished together.  Good luck!
-> > 
-> > --Darrick
+On Fri, Oct 16, 2026 at 09:00:37AM -0700, Darrick J. Wong wrote:
+> Hi everyone,
 > 
-> Hi Darrick,
+> After 14 years at Oracle and 23 years working on Linux, I've decided to
+> take an extended break.  Today, October 16th, 2026, is my last day.
 > 
-> It is still a bit of a surprise for me to hear this news, although
-> things seem to be changing so quickly these days.
 
-I know, right? :)
+Thank you for what you have done in the kernel.
 
-> Thank you for all the chats online over the years. I've always enjoyed
-> them. I wish we'd had a chance to meet in person.
+I hope the break gives you the energy to come back stronger.
 
-Me too.  I hope some day things will calm down across the Pacific. :/
+> I don't have any immediate plans to drop the djwong@kernel.org
+> forwarding, though ultimately that's up to the sysadmins to decide.
+> 
+> I have very much enjoyed working with you all, and I'm proud of what
+> we've accomplished together.  Good luck!
 
-> I hope you have a great and well-deserved break.
+We will miss your practical decision mindset and of course, your witty
+comments.
 
-Thank you!  And I wish you the best in your Linux (or other!) endeavors!
+You will be missed, Darrick. All the best with whatever you do in the
+future.
 
---D
-
-> Best Regards,
-> Gao Xiang
+-- 
+Pankaj
