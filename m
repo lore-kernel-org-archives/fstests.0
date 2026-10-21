@@ -1,55 +1,52 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792603267;
-	b=T+SnhDGPuMN0gT0lxL29e1Wc+scQl10sFbg22VycFvTYca4fuT5IUEU0MXm6yJTgfCr1
-	 AQeHVoddk/PArZvUYvExojYe/VL+ylwXd4Pud6tGTJXCCqEXpnZIrNUdOGv+wT53D9l/h
-	 p0UQsVDbWIu+mIaDtyR1xXHtSnIzyyAOgY95CNnwz481hTfmN2cIYkdiOU3PGp9rjWrGw
-	 7uDoC0QUYaOC2yx47aSlctnLh6nZ7I8hzoOtlMnLmTmBDBIn69TXZyDuzqtTfRe6Wfknq
-	 gdlO5McJKU+p7TGW2QZeyp8ohiJovVpcD4HJJ1qAGHS2DdyYY3G3/BnoxaJD44Xtx2Q==
+	t=1792613851;
+	b=pHZjltbT5X1WDiwPRf4qhwDNd997H057gsXLW9Oxu1dMPlhnvrE6xEDMVoopbb2bFlci
+	 ApM72OwozkJrQ2J6X3hvrOkxeDaiJ8LspOr3czIpqoLkuLF1hKY2TqknPR1V/YUctF4LJ
+	 0XRycjmalouMDydLAmVETNf4RxsTuxq6mLYYa8JW9t7MgFqJoMR3Dgv8dPkMrGNKT/b6P
+	 6x7/3+TXuvrkpfzzDiQQdv8Ds1QSfwyV+d3/FfRcFDEQY0FHBz1OB/OgSaTqrwb1qiRP7
+	 Ik5QIrAw9QuAEHQMDhcLYKAmdyitwUEO1JJnxoZOHS7Wrrk/JuqW/NFqJa+ir/xsOQg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792603267;
-	h=Received:DKIM-Signature:Received:X-Forwarded-Encrypted:
-	 X-Gm-Message-State:X-Received:MIME-Version:References:In-Reply-To:
-	 From:Date:X-Gmail-Original-Message-ID:X-Gm-Features:Message-ID:
-	 Subject:To:Cc:Content-Type:Content-Transfer-Encoding;
-	bh=kdDm2D3+zT6wf0nOyXjJoXtYRQlFcHHl3U5EpV07zvk=;
-	b=G0JgHW/NsXuJh66V6kf5NL7EwAWEJwCQW4jzEpRxlYujXR03AAa0EIA0ZECfOtUDluaf
-	 /fBN3zctoKTIl+l+9s77nSbArnIAVAxZjRYv7Ez381EJp5+IKWrGmcPLNg513F4i0sp4n
-	 fSD+NuSVSwDh7imQ9MKURqGIgrBSsoCMLhkct3LeUd3apnpP1k4bWe+sdIvlTYwTlr0kK
-	 sOn43PtLv5p2ksL24FzaM3D0Dhf/iRAgBAaW+tUEoav3vmt0JWYEsVrlciuZoeRsfSn4P
-	 NJP/jf2BBjPYjNjpJOH0hRvOmikUOjLZHB0VYayAX+GGlUhKTjHA7yUIiQin82c7Dtw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1792613851;
+	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
+	 MIME-Version:Content-Transfer-Encoding;
+	bh=zpb1dKklnwN9LyFwkZ3G4CZM/i75l1SEsykH37jekwY=;
+	b=sLuaAb+kZjRydS9m44DQQX2VEguPWdePYgdRWg2rKWFn0TgYZQDiKL7GYgHvPxok8PTZ
+	 EgGyKPZwVjLQU/FGPIjuF9jJAi/V0ooPmtpCNkqCu4tmW4vt0q7sjfO1Kbh+bv4KsSWS0
+	 nps6Ac0r9vpS/RlbbmFo4rK+/rQcgyZES1SNw+2wuWruU8+V9VG03gvVbYg5i8DQco2/F
+	 lrKjT/SyV7BNxINm1TBDM1/1wdVGpCFPB9qN+ZEmgfJSUFjUj3sqyAl0LzUXdsTHxJFE4
+	 ko8Gm7+AKHKYPnuU4TDNy7CxPY732K4jCjhHMQXKesSVqG7L9hX8m5cgVdcEUc+G8ew==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="kv3eNR/T";
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=YfHFDVO8;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ADE83606A31A
-	for <fstests@vger.kernel.org>; Wed, 21 Oct 2026 17:21:06 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 919E6606A319;
+	Wed, 21 Oct 2026 20:17:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=kv3eNR/T
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 87A9C1F000C1
-	for <fstests@vger.kernel.org>; Wed, 21 Oct 2026 17:21:06 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=YfHFDVO8
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 447B71F000C1;
+	Wed, 21 Oct 2026 20:17:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1792603266;
-	bh=kdDm2D3+zT6wf0nOyXjJoXtYRQlFcHHl3U5EpV07zvk=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc;
-	b=kv3eNR/T4cFfWoDzASPhoWcIP2tIjJc2msZPHIKfUpmje0GrrEInjnxPpmWBH/q/1
-	 CkgJQLosr2VMnLmd/5bxavWA6ZZZIyoiN5JkIayYgiQMYWNYZfaHb0Nf6/vor5awFy
-	 dppxsPfsU5miz9rTV/MFydbC38TcZdFeVkr3cRPG6gM4fNhZKP9vIEbKWMzqeLFBs4
-	 flgZujGsaw1gpAgoZ677M2zfTQvUw+zjEPLVSrm24PoefU8L4ar4/n3JV1da/1p+Sl
-	 cE6rIVEXZNFtQLtHeBg91zhYH1S3WKcW74ZcPzhFQuv7qLSIHs7or9o3tzWmdbBqGG
-	 L0RIWXzfiPB8Q==
-Received: by mail-ua1-f47.google.com with SMTP id a1e0cc1a2514c-9908e3cd939so465080241.3
-        for <fstests@vger.kernel.org>; Wed, 21 Oct 2026 10:21:06 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AKwUvBwYtHWQsWLiqEG+McdfWwudzL3EQv0ldiwJZ3fLYpSw7CjS+raF+7G/A1l4em8zO5gtlWkVIcpV@vger.kernel.org
-X-Gm-Message-State: AFq9FYLEECRuT1J6t9TN1f4LuOE/GT53a7/G1pz9VsVJh+8TtcVsxCc2
-	+8znDlhsRFfoHYYi1yDeqXBDc/VGWLYPOlTcUWCuUJqoyBfVilkvmYdN70jrk2aMcsYWJRibIeN
-	BP5qW53dPox7fzCcG+jAmzDD16ZG+26E=
-X-Received: by 2002:a05:6102:3fab:b0:7b8:1a1b:8e79 with SMTP id
- ada2fe7eead31-7cc9225029emr1048595137.0.1792603265671; Wed, 21 Oct 2026
- 10:21:05 -0700 (PDT)
+	s=k20260515; t=1792613851;
+	bh=zpb1dKklnwN9LyFwkZ3G4CZM/i75l1SEsykH37jekwY=;
+	h=From:To:Cc:Subject:Date;
+	b=YfHFDVO8PT+QZYGtbK1U/Yjod4KR+7sCd9NwQ8Y/pWKUgMSTBnd18E7QvLne0gYiB
+	 RAF/E3c0p0NeFqVqdzSgKuX8D4Q0uNiWJYGlBHMrqvwH8wOSdTttkz4t7BV0CgAJij
+	 EaHDfpaOJFnQgn+duB+ZWl8Qi3ykJXZZch18xD2FqeQOkItbp7ziXEtSpiT8YSvs2u
+	 VlImbvbaCeTY4gvdZLZ7WXLOpnE2IPWiV2FMVyTmWQxTglOQ8+/OOWQNlBvZeavP8P
+	 toQhGEnClHyBfwvL6hpLjnrGe/xQHi6YSX1RyhQQmKp7d7TQA8wayyT42a+Yu2Bi+z
+	 hzHXmDYma4sCw==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: test an incremental send scenario with hole punching
+Date: Wed, 21 Oct 2026 21:17:25 +0100
+Message-ID: <233845be4bd0fd12b4c62b5ca5243ec1ef4d44f8.1792613768.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.53.0
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -59,142 +56,130 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261021164637.2439627-1-johannes.thumshirn@wdc.com>
-In-Reply-To: <20261021164637.2439627-1-johannes.thumshirn@wdc.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Wed, 21 Oct 2026 18:20:29 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H7tQKjPj_A72PBuwBO8Pp_McqPkGpP5hH+BvSjTXHmu2w@mail.gmail.com>
-X-Gm-Features: AclHuK8nWHJNH19-35Hq6jV9auf52pt-A3UKkKYcVivdrX3Z-LJWTaTOsC0hyo4
-Message-ID: <CAL3q7H7tQKjPj_A72PBuwBO8Pp_McqPkGpP5hH+BvSjTXHmu2w@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: test that fsynced data on a RAID stripe tree
- survives a power failure
-To: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Cc: linux-btrfs@vger.kernel.org, Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, 
-	Filipe Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Wed, Oct 21, 2026 at 5:47=E2=80=AFPM Johannes Thumshirn
-<johannes.thumshirn@wdc.com> wrote:
->
-> A data extent in a block-group that uses the RAID stripe tree has its log=
-ical
-> to physical mapping stored in that tree, which only becomes durable when =
-the
-> stripe tree is written out at transaction commit. The log tree cannot car=
-ry
-> that mapping, so a fast fsync logged a file-extent item whose logical ran=
-ge
-> could not be resolved afterwards. Log replay restored the file with the
-> correct size, but reading it failed with EIO.
->
-> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-> ---
->  tests/btrfs/363     | 56 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/363.out |  8 +++++++
->  2 files changed, 64 insertions(+)
->  create mode 100755 tests/btrfs/363
->  create mode 100644 tests/btrfs/363.out
->
-> diff --git a/tests/btrfs/363 b/tests/btrfs/363
-> new file mode 100755
-> index 00000000..68723f28
-> --- /dev/null
-> +++ b/tests/btrfs/363
-> @@ -0,0 +1,56 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026 Western Digital Corporation.  All Rights Reserved.
-> +#
-> +# FS QA Test 363
-> +#
-> +# Test that data fsynced on a RAID stripe tree file system is still read=
-able
-> +# after a power failure.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick log volume raid-stripe-tree
-> +
-> +_fixed_by_kernel_commit XXXXXXXXXXXX \
-> +       "btrfs: force a transaction commit when fsyncing stripe tree exte=
-nts"
-> +
-> +_cleanup()
-> +{
-> +       _cleanup_flakey
-> +       rm -fr $tmp
-> +}
-> +
-> +. ./common/filter
-> +. ./common/dmflakey
-> +
-> +_require_btrfs_mkfs_feature "raid-stripe-tree"
-> +_require_btrfs_fs_feature "raid_stripe_tree"
-> +_require_scratch
-> +_require_dm_target flakey
-> +_require_btrfs_no_compress
-> +
-> +# DUP is one of the profiles that keeps its mapping in the stripe tree, =
-so a
-> +# single device is enough and dm-flakey can be layered on top of it.
-> +_scratch_mkfs -d dup -m dup -O raid-stripe-tree >> $seqres.full 2>&1 || =
-\
-> +       _fail "mkfs failed"
-> +
-> +_init_flakey
-> +_scratch_mount
-> +
-> +# Get the file committed first, so that the overwrite below takes the fa=
-st
-> +# fsync path through the log tree rather than committing the transaction=
-.
-> +$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 128K" -c fsync $SCRATCH_MNT/foo | \
-> +       _filter_xfs_io
-> +_scratch_sync
+From: Filipe Manana <fdmanana@suse.com>
 
-Doing an fsync followed by _scratch_sync is going to be confusing for
-most readers.
-This should explain that the fsync triggers a full fsync so that the
-next fsync will be a fast fsync.
+Test an incremental send scenario where we punched a hole into a tail
+section of a file extent item that is the last item in a leaf and the
+next leaf in the subvolume tree was not changed (remains shared between
+the parent and send snapshots).
 
-I also think we should expand the test to cover both the fast and full
-fsync paths, as we don't have any tests covering the full fsync case
-IIRC.
+This currently fails and is fixed by the following kernel patch:
 
-Thanks.
+  btrfs: send: fix missing hole punching during incremental send
 
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/362     | 84 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/362.out |  7 ++++
+ 2 files changed, 91 insertions(+)
+ create mode 100755 tests/btrfs/362
+ create mode 100644 tests/btrfs/362.out
 
+diff --git a/tests/btrfs/362 b/tests/btrfs/362
+new file mode 100755
+index 00000000..aca56540
+--- /dev/null
++++ b/tests/btrfs/362
+@@ -0,0 +1,84 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
++#
++# FS QA Test 362
++#
++# Test an incremental send scenario where we punched a hole into a tail section
++# of a file extent item that is the last item in a leaf and the next leaf in the
++# subvolume tree was not changed (remains shared between the parent and send
++# snapshots).
++#
++. ./common/preamble
++_begin_fstest auto quick send
++
++_cleanup()
++{
++	cd /
++	rm -fr $tmp.*
++	rm -fr $send_files_dir
++}
++
++. ./common/filter
++
++_require_test
++_require_scratch
++_require_btrfs_support_sectorsize 4096
++_require_xfs_io_command "fpunch"
++
++_fixed_by_kernel_commit xxxxxxxxxx \
++	"btrfs: send: fix missing hole punching during incremental send"
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
++
++rm -fr $send_files_dir
++mkdir $send_files_dir
++
++first_stream="$send_files_dir/1.send"
++second_stream="$send_files_dir/2.send"
++
++# We need a very specific leaf layout where we punch a hole in the last file
++# extent item of a leaf and the next leaf was not modified in the send snapshot,
++# so we set a fixed size of 16K.
++_scratch_mkfs -n 16K >> $seqres.full 2>&1 || _fail "first mkfs failed"
++_scratch_mount
++
++touch $SCRATCH_MNT/foo
++# 205 extents of 64K each with a 64K hole between them.
++for ((i = 0; i < 410; i += 2)); do
++	offset=$((i * 64 * 1024))
++	$XFS_IO_PROG -c "pwrite -b 64K -S 0xab $offset 64K" \
++		$SCRATCH_MNT/foo > /dev/null
++done
++
++_btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap1
++
++# Punch a hole in the last 16K of the last file extent item of the first leaf,
++# which starts at file offset 12845056, so 12845056 + 64K - 16K = 12894208.
++# This does not cause any change in the second leaf of the fs tree, so it will
++# be shared between the snapshots.
++$XFS_IO_PROG -c "fpunch 12894208 16K" $SCRATCH_MNT/foo
++
++_btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2
++
++echo "File digest in the original fs: $(_md5_checksum $SCRATCH_MNT/snap2/foo)"
++
++_btrfs send -f $first_stream $SCRATCH_MNT/snap1
++_btrfs send -f $second_stream -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2
++
++# Create a new fs and apply both send streams.
++_scratch_unmount
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "second mkfs failed"
++_scratch_mount
++
++_btrfs receive -f $first_stream $SCRATCH_MNT
++_btrfs receive -f $second_stream $SCRATCH_MNT
++
++echo "File digest in the new fs:      $(_md5_checksum $SCRATCH_MNT/snap2/foo)"
++
++# Check the region we punched a hole is full of zeroes.
++echo "Hole data:"
++od -A d -t x1 -j 12894208 -N $((16 * 1024)) $SCRATCH_MNT/snap2/foo
++
++# success, all done
++_exit 0
+diff --git a/tests/btrfs/362.out b/tests/btrfs/362.out
+new file mode 100644
+index 00000000..789abb53
+--- /dev/null
++++ b/tests/btrfs/362.out
+@@ -0,0 +1,7 @@
++QA output created by 362
++File digest in the original fs: a5a06694d9f7fc3245afb2f391636e44
++File digest in the new fs:      a5a06694d9f7fc3245afb2f391636e44
++Hole data:
++12894208 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++*
++12910592
+-- 
+2.53.0
 
-> +
-> +# Overwrite it and fsync only. Nothing will commit the stripe tree after=
- this.
-> +$XFS_IO_PROG -c "pwrite -S 0xbb 0 128K" -c fsync $SCRATCH_MNT/foo | \
-> +       _filter_xfs_io
-> +
-> +_flakey_drop_and_remount
-> +_hexdump $SCRATCH_MNT/foo
-> +
-> +_scratch_unmount
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/363.out b/tests/btrfs/363.out
-> new file mode 100644
-> index 00000000..02adaec5
-> --- /dev/null
-> +++ b/tests/btrfs/363.out
-> @@ -0,0 +1,8 @@
-> +QA output created by 363
-> +wrote 131072/131072 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 131072/131072 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +000000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb  >...............=
-.<
-> +*
-> +020000
-> --
-> 2.56.0
->
->
