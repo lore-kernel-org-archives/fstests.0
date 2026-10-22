@@ -1,76 +1,73 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.129.124
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792675569;
-	b=R9/IXj24hdaNZZOHs0fwFBwAS7Hf0E8EFSmZX1nrAuvON5o0FXuPkqyb3g/FJKFtnZ1f
-	 Tq8WK9eMvrtubfaumwO008DJoLOd5ap15k9VYaFHOAMN+gpNlps7Q6eV0sFxamgMACKqE
-	 eznTR4x3JLFDimQZ0RHcdq8dz708pXDs44jVSG3bBO7g+zK/7Qk4cXvZRj6+XOnil8maD
-	 eirx1Zl/J0UYo0I16q41LJ3Od1fVP/P09CRWg6Ard13Byaxb2m6UbanHPH0xfUieSnHXO
-	 cKsLSCrt1q+0P1RyHS9g8cEJed0Pt+I8CGYYo8HMThebFs5t+1jjeI9MzkjU6dT8dFw==
+	t=1792675582;
+	b=Hlj233D+g7Y6C0stZJJmlHkWfa+PeNo9Fa41FGxuHIUy2MwkxyJry49Oqwfj3Ux5tmqB
+	 5Dd+/+lCe0Ca4aIvSLkbJRrBBEtbRrZIz+wfcO4oK3Or0Opo6EzV1oHLQYPxeSMWFBgnz
+	 seBCEnoj80KZfK+f51pppvPXMWvNoMCmAXzaVbK8YyGSf+ELRRqv5UmkmtxF0Dx7Nq6jB
+	 R3lR8JQhgWH1UTTKe6Fh3wnvY21V8Vc755Z0YEQMSIPoOydtl/2cO10EVjSm+OskPDkr0
+	 0eo3tiXUgBFjoUlVIjDenFtvSb9dHDgmpIEAFqZ3xtRoJo8j5blKFH/NhE25fd5lFww==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792675569;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792675582;
 	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
 	 X-Mimecast-MFC-AGG-ID:Received:Received:Date:From:To:Cc:Subject:
 	 Message-ID:References:MIME-Version:Content-Type:Content-Disposition:
 	 In-Reply-To:X-Scanned-By;
-	bh=T8lyr8kdMdWUxPK0y3IxLAHzFnJ3weOFR/RvDwkfPew=;
-	b=rOqAis+/LkixfCCWmEbIls9u06LVLDwG+2eIv7Cc5eZsiESCron4NjxbYHH53+a6JpDz
-	 yt8Mq3C4GWX6c/45vwNDUocsnsTDitT9Q1dYDvmHrDkObpHVavhdR8Vhtl6lQM9eEHnVs
-	 f5SuFgssW0cGbPbwpUM2aWjMJQoDXK1Z6CCVwVcOwca7sYW3mIrc69gVdUHr2ELHSC8nd
-	 bpeE8XnArVyzyjuqX55uZsfLetdu64khMAUOOFi7YHW3um6ukOKvGH5nxvvVoiXqHlo3+
-	 64rml7mH3wPN7Pnoj6z1rQKKXimY5Pe6e6efqLVUUKVqA+FA6mOy4U1ExyzRh8Dr4Ww==
+	bh=4/DGRkNQiV1KJWdtQ6rC+i/U0wKyT8NwFnLB9VWxUA0=;
+	b=5R8RfI+wmFLiIplp+hY+8CpuircOeiwo1iweLo0k2tLXU1ae54B5O90lNhJ6Nu/4Y9zo
+	 OHD3mD8kPPiZVt1xv4oUXjhw7ozZngIX6PFCZb6EV2eIwhs7EuBS4ztQwSbm9YHLyOBFI
+	 tvDZq1t2zEe926126tLS3uIoBanfafOgTub1b4pKh6BfK7Hs6UxtfPrwHZT3Zp0MM0L+H
+	 Ho4+g0r2Un0xmhZP9P5pXO7/dZc3gp52uPf+SdR5OLYEvrbQFoEy+PxiiCTnUQqC/ILQ9
+	 UW5Div7UBbo3A8LBAMAVqdmSfiT/1/6dKSJ8Eo/CWwDFa5ZpE2Qg/BDRSk1g0cI1TnA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=redhat.com;
 	spf=pass smtp.mailfrom=redhat.com;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=SHOsKFul;
-	arc=none smtp.remote-ip=170.10.133.124
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=QWTXHGEQ;
+	arc=none smtp.remote-ip=170.10.129.124
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C471606A327
-	for <fstests@vger.kernel.org>; Thu, 22 Oct 2026 13:26:08 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 0C471606A327
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A06CB606A31A
+	for <fstests@vger.kernel.org>; Thu, 22 Oct 2026 13:26:21 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A06CB606A31A
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=SHOsKFul
+	dkim=pass (1024-bit key, unprotected) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=QWTXHGEQ
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1792675568;
+	s=mimecast20190719; t=1792675580;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=T8lyr8kdMdWUxPK0y3IxLAHzFnJ3weOFR/RvDwkfPew=;
-	b=SHOsKFulj7IwM2HXSef1I2Ka/ZV74LjsQq6MGlcpJMX31XAUhRtQPtGAYQOCy1jS1azcJo
-	8Crdq4PchyZoLvfPdWD9hMmvBsz5HwcCwUmYDXwSNdGRAIwNRJ+xxnO7rik75k27mL1MKu
-	lspWxSkINadcioQeytqaApbTA4M9MDI=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
+	bh=4/DGRkNQiV1KJWdtQ6rC+i/U0wKyT8NwFnLB9VWxUA0=;
+	b=QWTXHGEQkarq/I2HtChCHr7CqCiBCAqAmwo1OV0c1Zq9QoqcI/SsXs8Kuva2gTBt20Eg9o
+	BpKpDsD9b2Xk4thhOSanTQn9RxyyYuUPg3Ztehg0SyMLVlZBzuUb2Uvfq+//wGH8y8Ul5i
+	O/lrf7TLO6YtvohuIzs5yKJrW7n32jM=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
  (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-36-tTm7Z_I7MFKIOsBIrl20pg-1; Thu,
- 22 Oct 2026 09:26:04 -0400
-X-MC-Unique: tTm7Z_I7MFKIOsBIrl20pg-1
-X-Mimecast-MFC-AGG-ID: tTm7Z_I7MFKIOsBIrl20pg_1792675563
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-137-1-ZdFnIKOK2CuXx6ZuU4YQ-1; Thu,
+ 22 Oct 2026 09:26:13 -0400
+X-MC-Unique: 1-ZdFnIKOK2CuXx6ZuU4YQ-1
+X-Mimecast-MFC-AGG-ID: 1-ZdFnIKOK2CuXx6ZuU4YQ_1792675572
 Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id DDA651955D9E;
-	Thu, 22 Oct 2026 13:26:02 +0000 (UTC)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 053171955DC0;
+	Thu, 22 Oct 2026 13:26:12 +0000 (UTC)
 Received: from bfoster (headnet04.pony-001.prod.iad2.dc.redhat.com [10.2.32.116])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 5C2881956089;
-	Thu, 22 Oct 2026 13:26:01 +0000 (UTC)
-Date: Thu, 22 Oct 2026 09:25:59 -0400
+	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id DB1791956089;
+	Thu, 22 Oct 2026 13:26:10 +0000 (UTC)
+Date: Thu, 22 Oct 2026 09:26:08 -0400
 From: Brian Foster <bfoster@redhat.com>
-To: Tal Zussman <tz2294@columbia.edu>
-Cc: fstests@vger.kernel.org, Zorro Lang <zlang@kernel.org>,
-	Christoph Hellwig <hch@lst.de>, linux-ext4@vger.kernel.org,
-	Jens Axboe <axboe@kernel.dk>, "Darrick J. Wong" <djwong@kernel.org>,
-	Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH 3/3] generic/810: check that RWF_DONTCACHE I/O drops its
- folios
-Message-ID: <atoO5y_YzaYWmoc-@bfoster>
-References: <20261015-dontcache-test-v1-0-6aa7583973a9@columbia.edu>
- <20261015-dontcache-test-v1-3-6aa7583973a9@columbia.edu>
+To: Lukas Herbolt <lherbolt@redhat.com>
+Cc: zlang@kernel.org, fstests@vger.kernel.org, hch@lst.de,
+	linux-xfs@vger.kernel.org, Eric Sandeen <sandeen@redhat.com>
+Subject: Re: [PATCH 1/1] xfs: add test for ENOSR/ENOSPC on DIO into delalloc
+ extents
+Message-ID: <atoO8FTTt97n5oXv@bfoster>
+References: <20261016091628.295119-1-lherbolt@redhat.com>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -82,145 +79,257 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20261015-dontcache-test-v1-3-6aa7583973a9@columbia.edu>
+In-Reply-To: <20261016091628.295119-1-lherbolt@redhat.com>
 X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
 
-On Thu, Oct 15, 2026 at 04:54:04PM -0400, Tal Zussman wrote:
-> A dontcache write drops its folios from the page cache once writeback
-> completes, and a dontcache read drops them once the read completes.
+On Fri, Oct 16, 2026 at 11:16:25AM +0200, Lukas Herbolt wrote:
+>   Test if a DIO extending write into a speculative delalloc region on a
+>   fragmented XFS filesystem does not trigger a dirty transaction cancel
+>   (-ENOSR) or return a spurious -ENOSPC.
 > 
-> Test this by writing and reading a 1M file with and without
-> RWF_DONTCACHE and checking with mincore how much of it is cached
-> afterwards: all of it for plain I/O, none of it for dontcache I/O.
+>   With allocsize=128MB, a buffered write creates a large delalloc extent.
+>   A subsequent DIO write at i_size lands in the speculative prealloc
+>   region. On a fragmented filesystem, xfs_bmapi_write converts the
+>   delalloc starting from offset 0 but the allocation is too short to
+>   reach the DIO offset, causing either -ENOSR (dirty transaction cancel
+>   and filesystem shutdown) or -ENOSPC (wrong error from xfs_bmapi_write).
 > 
-> The overwrite is a separate case because the drop is skipped when
-> writeback completes in interrupt context, which is what happens on ext4
-> without commit "ext4: complete dropbehind writeback in task context"
-> [1].
+>   Assisted by LLM.
 > 
-> Link: https://lore.kernel.org/linux-ext4/20261012-ext4-dontcache-complete-in-task-v1-1-6ac801557041@columbia.edu/ [1]
-> Signed-off-by: Tal Zussman <tz2294@columbia.edu>
+>   Fixed by kernel commits:
+>     2a9b99d45be0 xfs: pass the actual offset and len to xfs_bmapi_allocate
+>     21255afdd729 xfs: do not allocate the entire delalloc extent
+>     6773da870ab8 xfs: fix error returns from xfs_bmapi_write
+> 
+> Co-developed-by: Eric Sandeen <sandeen@redhat.com>
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> Signed-off-by: Lukas Herbolt <lherbolt@redhat.com>
 > ---
->  tests/generic/810     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/810.out | 11 +++++++
->  2 files changed, 93 insertions(+)
+>  .gitignore                 |   2 +
+>  src/Makefile               |   3 +-
+>  src/buffer_direct_io.c     | 154 ++++++++++++++++++++++++++++++++
+>  src/fragment_fs.c          | 101 +++++++++++++++++++++
+>  src/mix_buffer_direct_io.c | 175 +++++++++++++++++++++++++++++++++++++
+>  tests/xfs/842              |  63 +++++++++++++
+>  tests/xfs/842.out          |   2 +
+>  7 files changed, 499 insertions(+), 1 deletion(-)
+>  create mode 100644 src/buffer_direct_io.c
+>  create mode 100644 src/fragment_fs.c
+>  create mode 100644 src/mix_buffer_direct_io.c
+>  create mode 100755 tests/xfs/842
+>  create mode 100644 tests/xfs/842.out
 > 
-> diff --git a/tests/generic/810 b/tests/generic/810
-> new file mode 100755
-> index 00000000..9022c26a
-> --- /dev/null
-> +++ b/tests/generic/810
-> @@ -0,0 +1,82 @@
 ...
-> +# Count the bytes of the file that are in the page cache.
-> +cached_bytes()
-> +{
-> +	local pages
+
+Just a few higher level comments..
+
+> diff --git a/src/buffer_direct_io.c b/src/buffer_direct_io.c
+> new file mode 100644
+> index 000000000000..01b19994a2e2
+> --- /dev/null
+> +++ b/src/buffer_direct_io.c
+...
+> diff --git a/src/fragment_fs.c b/src/fragment_fs.c
+> new file mode 100644
+> index 000000000000..cee4edef73ff
+> --- /dev/null
+> +++ b/src/fragment_fs.c
+> @@ -0,0 +1,101 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Copyright (c) 2026 Eric Sandeen, Lukas Herbolt
+> + */
 > +
-> +	pages=$($XFS_IO_PROG -c "mmap -r 0 $size" -c "mincore" $file | \
-> +		awk '{ n += $4 } END { print n + 0 }')
-> +	echo $((pages * pagesize))
+> +/*
+> + * Fragment filesystem by creating fixed-size files and then deleting
+> + * every n-th one.
+> + *
+> + * Usage:
+> + *	fragment_fs <directory> <prefix> <file size> <delete every n-th file>
+> + */
+> +
+> +#include <stdio.h>
+> +#include <stdlib.h>
+> +#include <unistd.h>
+> +#include <fcntl.h>
+> +#include <errno.h>
+> +#include <sys/statvfs.h>
+> +
+> +static int fragment_fs(const char *dir, const char *prefix,
+> +		       off_t size, int delete_nth)
+> +{
+> +	char path[4096];
+> +	int i, fd;
+> +	int created = 0;
+> +
+> +	fprintf(stderr, "Fragmenting filesystem (filling to ENOSPC)...\n");
+> +
+> +	for (i = 0; ; i++) {
+> +		snprintf(path, sizeof(path), "%s/%s_%06d", dir, prefix, i);
+> +		fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+> +		if (fd < 0) {
+> +			if (errno == ENOSPC)
+> +				break;
+> +			perror("open frag file");
+> +			return -1;
+> +		}
+> +		if (fallocate(fd, 0, 0, size) < 0) {
+> +			close(fd);
+> +			unlink(path);
+> +			if (errno == ENOSPC)
+> +				break;
+> +			perror("fallocate frag file");
+> +			return -1;
+> +		}
+> +		close(fd);
+> +		created++;
+> +	}
+> +	fprintf(stderr, "Created %d files\n", created);
+> +
+> +	fprintf(stderr, "Deleting every %d-th file...\n", delete_nth);
+> +	for (i = 0; i < created; i += delete_nth) {
+> +		snprintf(path, sizeof(path), "%s/%s_%06d", dir, prefix, i);
+> +		unlink(path);
+> +	}
+> +	sync();
+> +
+> +	{
+> +		struct statvfs st;
+> +		if (statvfs(dir, &st) == 0) {
+> +			unsigned long free_mb = (st.f_bfree * st.f_bsize)
+> +						/ (1024 * 1024);
+> +			fprintf(stderr,
+> +				"%d files remain, ~%lu MB free\n",
+> +				created - created / delete_nth, free_mb);
+> +		}
+> +	}
+> +
+> +	return 0;
 > +}
 > +
-> +report_cached()
+
+Any chance we can reuse existing code in fstests for this sort of free
+space fragmentation? For example, see the punch-alternating tool and/or
+something like generic/186 (if useful, maybe that code can be lifted
+into a common helper).
+
+...
+> diff --git a/src/mix_buffer_direct_io.c b/src/mix_buffer_direct_io.c
+> new file mode 100644
+> index 000000000000..0af227a7c9f0
+> --- /dev/null
+> +++ b/src/mix_buffer_direct_io.c
+> diff --git a/tests/xfs/842 b/tests/xfs/842
+...
+
+It looks like we have two mix I/O helper programs here, where this one
+appears unused..?
+
+Also both appear to have some minor whitespace damage in the form of
+trailing spaces at the end of some lines, so it might be worth fixing
+that up as well.
+
+> new file mode 100755
+> index 000000000000..b2b2f7c493e7
+> --- /dev/null
+> +++ b/tests/xfs/842
+> @@ -0,0 +1,63 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 Lukas Herbolt.  All Rights Reserved.
+> +#
+> +# FS QA Test 842
+> +#
+> +# Regression test for XFS -ENOSR dirty transaction cancel during DIO
+> +# write into a speculative delalloc region on a fragmented filesystem.
+> +# With allocsize=128MB, a buffered write creates a large delalloc extent.
+> +# A subsequent DIO extending write at i_size triggers xfs_bmapi_write to
+> +# convert the delalloc from offset 0; on a fragmented FS the allocation
+> +# is too short to reach the DIO offset, returning -ENOSR and cancelling
+> +# a dirty transaction, which shuts down the filesystem.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto enospc
+> +
+> +_cleanup()
 > +{
-> +	echo "$(cached_bytes) of $size bytes cached"
+> +	cd /
+> +	rm -r -f $tmp.*
 > +}
 > +
-> +# Dontcache writeback drops a folio right after it clears the writeback flag,
-> +# so a check immediately after fsync returns can run a moment too early. Give
-> +# the drop a little time before reporting.
-> +report_cached_after_writeback()
-> +{
-> +	local i
+> +_require_test
+
+Looks like we don't use the test dev in this test.
+
+> +_require_scratch
+> +_require_test_program "fragment_fs"
+> +_require_test_program "buffer_direct_io"
 > +
-> +	for ((i = 0; i < 50; i++)); do
-> +		[ "$(cached_bytes)" -eq 0 ] && break
-> +		sleep 0.1
-> +	done
-> +	report_cached
-> +}
+> +_scratch_mkfs_sized $((1<<30)) > "$seqres.full" 2>&1
+> +_scratch_mount -o allocsize=131072k >> "$seqres.full" 2>&1
+> +
+> +src/fragment_fs $SCRATCH_MNT frag 4096 2 >> "$seqres.full" 2>&1
+> +src/buffer_direct_io $SCRATCH_MNT >> "$seqres.full" 2>&1
+> +RET=$?
+> +
+> +_dmesg_since_test_start | grep -q "detected at xfs_trans_cancel"
+> +DMESG_CHECK=$?
+> +
+> +if [ $RET -eq 5 -a $DMESG_CHECK -eq 0 ]; then
+> +	_fixed_by_kernel_commit 2a9b99d45be0 \
+> +		"xfs: pass the actual offset and len to xfs_bmapi_allocate"
+> +	_fixed_by_kernel_commit 21255afdd729 \
+> +		"xfs: do not allocate the entire delalloc extent"
+> +	_fail "ENOSR dirty transaction cancel detected (ret=$RET)"
+> +
+> +elif [ $RET -eq 28 ]; then
+> +	_fixed_by_kernel_commit 2a9b99d45be0 \
+> +		"xfs: pass the actual offset and len to xfs_bmapi_allocate"
+> +	_fixed_by_kernel_commit 21255afdd729 \
+> +		"xfs: do not allocate the entire delalloc extent"
+> +	_fixed_by_kernel_commit 6773da870ab8 \
+> +		"xfs: fix error returns from xfs_bmapi_write"
+> +	_fail "ENOSPC returned from xfs_bmapi_write (ret=$RET)"
+> +
+> +elif [ $RET -eq 0 ]; then
+> +	echo "Silence is golden"
+> +else
+> +	_fail "Unknown error: src/buffer_direct_io error code $RET"
+> +fi
 
-So if I understand this right, the fsync completion isn't technically
-sufficient to prevent the don't cache drops from racing with the mincore
-check, right?
+A brief comment above this might be helpful. I'm also curious if it can
+be simplified a little. For example, I'm not sure we need to explicitly
+_fail when we can rely on golden output and/or the dmesg checking that
+happens by default. Also it looks like the commit hints are duplicate
+except for the -ENOSPC specific one. So perhaps we could do something
+like the following?
 
-If so, then we give the system up to 5 seconds or so to report the don't
-cache results. That seems reasonable to me, but I find the interface a
-little unclear since it seems not universally used for write(back)
-cases.
+echo "Silence is golden"
 
-IOW (and I realize this is a wonky example), suppose don't cache breaks
-in some way where it starts to apply to cases where it shouldn't.. do we
-want to try and test for that?
-
-This is kind of a nit and I'm not opposed to the test as is, so FWIW:
-
-Reviewed-by: Brian Foster <bfoster@redhat.com>
-
-But I do wonder whether this might be a little more robust if we just
-gave the writeback case some unconditional settle time before checking
-the result. The caveat I suppose is reclaim could still technically
-occur at any time and cause false results either way, so *shrug*.
-
-An idea that comes to mind could be to perhaps combine these two
-report_cached helpers into one with an optional delay parameter. If not
-specified then return the immediate result. If a delay is specified then
-still check the initial result, but wait up to $delay seconds for the
-result to change. Then maybe the don't cache case could use a little
-more aggressive of a delay, but we could still have a short one for the
-normal cached case(s). Hm?
+# words about the error codes, i.e. EIO vs ENOSPC?
+if [ $RET -neq 0 ]; then
+	_fixed_by_kernel_commit <X>
+	_fixed_by_kernel_commit <Y>
+	[ $RET -eq 28 ] && _fixed_by_kernel_commit <Z>
+	echo "... error code $RET"
+fi
 
 Brian
 
 > +
-> +echo "plain write"
-> +$XFS_IO_PROG -f -c "pwrite -q 0 $size" -c fsync $file
-> +report_cached
-> +
-> +echo "dontcache write to a new file"
-> +rm -f $file
-> +$XFS_IO_PROG -f -c "pwrite -q -U -V 1 -b $size 0 $size" -c fsync $file
-> +report_cached_after_writeback
-> +
-> +# Start each of the remaining cases from an empty page cache.
-> +echo "dontcache overwrite"
-> +_scratch_cycle_mount
-> +$XFS_IO_PROG -c "pwrite -q -U -V 1 -b $size 0 $size" -c fsync $file
-> +report_cached_after_writeback
-> +
-> +echo "dontcache read"
-> +_scratch_cycle_mount
-> +$XFS_IO_PROG -c "pread -q -U -V 1 -b $size 0 $size" $file
-> +report_cached
-> +
-> +echo "plain read"
-> +_scratch_cycle_mount
-> +$XFS_IO_PROG -c "pread -q 0 $size" $file
-> +report_cached
-> +
-> +_scratch_unmount
-> +_exit 0
-> diff --git a/tests/generic/810.out b/tests/generic/810.out
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/842.out b/tests/xfs/842.out
 > new file mode 100644
-> index 00000000..cb6c3f2a
+> index 000000000000..643d05289a33
 > --- /dev/null
-> +++ b/tests/generic/810.out
-> @@ -0,0 +1,11 @@
-> +QA output created by 810
-> +plain write
-> +1048576 of 1048576 bytes cached
-> +dontcache write to a new file
-> +0 of 1048576 bytes cached
-> +dontcache overwrite
-> +0 of 1048576 bytes cached
-> +dontcache read
-> +0 of 1048576 bytes cached
-> +plain read
-> +1048576 of 1048576 bytes cached
-> 
+> +++ b/tests/xfs/842.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 842
+> +Silence is golden
 > -- 
-> 2.39.5
+> 2.56.0
 > 
 > 
 
