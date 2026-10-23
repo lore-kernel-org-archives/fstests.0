@@ -1,57 +1,85 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.46
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792787502;
-	b=3qKbtCGyB3iCGBosLaRtGOWLCDMa3AFj+TiCgyr36RyX2PC74M2Prh8snzP+6tqlsDT1
-	 1cloR2wqaCoOiQObOqY4HReVu70YwgR/vLSDU9MHYtqX4AVNzZe4SV3WbUR+z94781J5A
-	 MWz1iFLXemTDEoXDOTjBaHmpWVCkXDzk+JKda0uBYE4AnCmm0TqZQQFOf0rw3nOZzBuGB
-	 xrh0v6aJBjOaLnYPU20gfGDEErBNeZSpFN+cwt5zBWbFyXcEXOaDbpRH07OfV/9D/g7N6
-	 D72FnQUy2M1hbZCQypuOY54QGDqMPOXceJDYhUZ/B8kKRhUDUoYCXD2cAMaXr1p2Mig==
+	t=1792787770;
+	b=TEZ8pfpBBYFoss3dUvRzI7AS+lmdY4wofRUh+VEiukDUb4VnYEh3gLbVs2+w/8tezKuM
+	 eKBb/RjcjfUwLYcFFl9uRksuc+ObkuAaFaRGStv8HuNMrUy+twASRMhOj6YOmSqlozr6w
+	 XGhYDM5ahN3ZoMnRkf39VELX3VZrEt6xTyyUCjgavnYbi3DWBhg5H5rs74icjFhF+sL8L
+	 ZkmZ5svXXgqGcbHCahb83le6pr6Hiiso/drKTjSdru34tfmAeSdAi6yttg7usoRk1cdXO
+	 eeJO6yx2x790lFwGkGA6yT6/mEZZzN9AncBwDc9W+u0hsgsbLGr/iVaKjFXqsnH1tNQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792787502;
-	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
-	 In-Reply-To:References:MIME-Version:Content-Transfer-Encoding;
-	bh=1/1HecssCeLrwIPyr3j/LqOWXW8H4LZyuRbZpctSnXI=;
-	b=aiPOkIhsQSsDixOYVDpbAi0FFB8enJ6pBDgANJw7mNdm2GIGfYJusYI04SktlBoGeBiW
-	 uj8yfp/rNaUaaYygVo4mLp3f5NhzGDNsGb7LXb3incVRh4I86qsp2FWeE2eAxDgsAOAfl
-	 dzldexgTqUejijhHLHU6XAuWnpXmIbTkZlJkSBgdLU5DPfDkEsBKmtSc8vS4jjPHdV+rh
-	 xVW8GfRfvWau98sqO4peQgzPARNnhmhOWnzf4PUeEqDntkke8zsPRp/8QVCftiVsZIAFE
-	 389CjwKb4NpmZ4c09I5d/Tl+9dlL51PgKQu2XdcAVjjwBvej0HMb26+DeImfe3c2hhg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1792787770;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:Message-ID:Date:
+	 MIME-Version:User-Agent:Subject:To:Cc:References:Content-Language:
+	 From:In-Reply-To:Content-Type:Content-Transfer-Encoding;
+	bh=d+LXvysxA09RADHZgW0rureFghxgx1xihsGMtL2Cs0E=;
+	b=LuFH2+OMfdDXdZjEX3/xtku50eLDhq1VeC9LGyZnISjNkXj3dOdvCTXq2EeGp2oTTl5c
+	 zVzo6bvZF2GsNyibFCcjiztYAkv6iI+0iMf9bfC/iVqRS+OxLsfDGZystEjQ9mWNbohIy
+	 0Z2IlBzC4lNbyYoBq2ALaZ9iVwgqshErQ/EDTkYZXafy2D8i9qqTAfjyPmjERxFb5e6O9
+	 GqyLc8XhBbNr6oWiAckMWCVigJ8B0zTzByDLtjgtdu2Qalu93nlAX4bF7DFFqTHM9arXb
+	 rfz6tIZFfwWdAG3PH7qYxOoMBMNTm2GZIfu9QZssfPx/mtCjDTZXsQDs6ldOGQb7uZA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="PhsI/pRl";
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	dmarc=pass header.from=suse.com;
+	spf=pass smtp.mailfrom=suse.com;
+	dkim=pass header.d=suse.com header.i=@suse.com header.a=rsa-sha256 header.s=google header.b="TV7T2/x3";
+	arc=none smtp.remote-ip=209.85.128.46
+Received: from mail-wm1-f46.google.com (mail-wm1-f46.google.com [209.85.128.46])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59848606A325;
-	Fri, 23 Oct 2026 20:31:41 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2EF5606A31A
+	for <fstests@vger.kernel.org>; Fri, 23 Oct 2026 20:36:08 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A2EF5606A31A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=PhsI/pRl
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C9ABC1F01825;
-	Fri, 23 Oct 2026 20:31:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1792787501;
-	bh=1/1HecssCeLrwIPyr3j/LqOWXW8H4LZyuRbZpctSnXI=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=PhsI/pRlcwQ21c9HrhVKSF2IamhJZiDEO4Eh3uzZ5aPaluemaLvtdcwEjCN+KKBhl
-	 x/GwFu1DdnCK7va1aMXxNXHgVBni/e6MKKIFvh/be5wfS+uPT8StTix3eYjiI7eLm3
-	 cis08RtD8iVKFA/dT65UizzpY/2Coj1+vhkvoQI+C7pKwygiQ9KpgibEkgzFzwFN37
-	 qgUei6XNxYtDAzBq2K7ssrt8JNpGGB3r/tgASS3DZx7r2Q6yha/ALCW/M/eUOhSnW0
-	 A1qT82ux+uYBERHo/X2BKwxUrfdXkaG5NhzNZWnnuPAUfQ4xd+gZCjzTj2IxanCRQM
-	 lChtHzJvalR3g==
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org,
-	linux-btrfs@vger.kernel.org,
-	Anand Suveer Jain <asj@kernel.org>,
-	Chao Yu <chao@kernel.org>,
-	Christoph Hellwig <hch@infradead.org>
-Subject: [PATCH v2 6/6] fstests: replace btrfs specific helpers with common sysfs helpers
-Date: Sat, 24 Oct 2026 04:31:14 +0800
-Message-ID: <20261023203114.1655019-7-zlang@kernel.org>
-X-Mailer: git-send-email 2.55.0
-In-Reply-To: <20261023203114.1655019-1-zlang@kernel.org>
-References: <20261023203114.1655019-1-zlang@kernel.org>
+	dkim=pass (2048-bit key, unprotected) header.d=suse.com header.i=@suse.com header.a=rsa-sha256 header.s=google header.b=TV7T2/x3
+Received: by mail-wm1-f46.google.com with SMTP id 5b1f17b1804b1-4a3517554f7so2542405e9.2
+        for <fstests@vger.kernel.org>; Fri, 23 Oct 2026 13:36:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1792787767; x=1793392567; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=d+LXvysxA09RADHZgW0rureFghxgx1xihsGMtL2Cs0E=;
+        b=TV7T2/x3FSmtWCAXTRLWl8nCGijOxvgBIdwsvlwj9oU2tn1CTVZ8SB+CH3VVs7VPGx
+         kXibkq7WMRThG/Qon7DG5Xmjnf7YbODteDm6pj0EIYR2NzvXkYUsvaUpiWtc57J2HXHo
+         c7vGzrQQhfVl8QbyRXyQDirE2+RchriLmQLQLtTiDXdc8eR1yzk9K2QYSuTF4MDnd44V
+         ZtZroYj4/lSNVTw5ddPN+XiiYCOuLC3i6kC9DgiJwXsDzc5vZFKoWP+Cwps3FyoXSbsl
+         G1+fKN+xKW0Y4hDdELO8poQvlBw/mv7DBYRcJdC4rqYbtoUzi2tjlHHEVxJJD5D1RZRN
+         FSww==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1792787767; x=1793392567;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=d+LXvysxA09RADHZgW0rureFghxgx1xihsGMtL2Cs0E=;
+        b=E2GvHp21cU/+9oFEWuqbX2X1kLRf2kf8RBMkw+XRXUTQiFK0dDVur9r9njIQikmCwF
+         ON3B3b1nnurkMmI225CpwmA4BtR9dluePVy7MSRkdMkVikSHI57qseUpOUqMtGrIkvSp
+         9rjMYwvsRDvPXGOG8tJl+DKt2fxNCmIzsz7zm3CcyHVECJu0YQf8jJ/gUAOt1zlNX24/
+         yNpGDy3MDuKP5pKipI9B9Yae369RxT8XazSUvpyQzcPyp+nIIaDCuhL5Llg35G43flYi
+         6N7FCs1XDV2HP5mt2fix/GDVU/tVknfwUqb11Vnl82keu5G9POAov1h73iib9R2xygv4
+         hlcA==
+X-Gm-Message-State: AFq9FYJx8I+tiUfA9n9mPg16YBWHOuKXMhGsopFYl/636rxqJf1nrKhc
+	eWVLeIqB8dpnNixwvN+7oOvF5TD/MIE/GV+SPi8CUfYQ6dnztmwD8zCDK0Cmeo3k1bc=
+X-Gm-Gg: AYBFou1PMqoSoRs5lbSi5Q248ed96nYVhO6nIFWK5ANaAtIk37JBnr/oaSRKghNYPxc
+	m7qK4symhw/s/7U+VvStm6gaDQNQgV0I35wioMfE1fZnDM0TSWxt4KwyzGl6OqHdqq4HNlvK5ui
+	cOrz9W2Zl91EmDRVYvnyw0oteO6ZD/bCAM98+X5dwDPOjgK9Wu2+FjMzFpUHJSLwzZrYUusHeZb
+	pxjT5404ncridPoo/CCMI9QykJSPIL3JEaTGDXPszTR7HHUKWCQSLZ0f2JgFcO4i+HIgozInnbR
+	AOOO1hw/N0dUu7E6Wq4cwhlLnZgL6XNsiKEBGT42WV1Dm8oQAhueJLEuh5Dd/4uGsEa3Y3j53dJ
+	mU/BFM1sUi1kntLcUpB/kUQvvkf9fUYwkAysWw6lyRbYbuLcrI3ygPJlIJXNy3vbxVxPuQpOJ+O
+	rSUbAiP/RLGQgulMFMvk8bwuNof1NKWWNdiZWVD9ASmXPcZbRAO2+ACfqGk2gYQbh0uoBsQeAfW
+	//p7NVzumqiEZjh1TfEDmg64n9o6bVSNR3mGfxXIWGUgWBB
+X-Received: by 2002:a05:600c:4e12:b0:4a2:9cda:57cb with SMTP id 5b1f17b1804b1-4a35ac3f00amr1119465e9.1.1792787766994;
+        Fri, 23 Oct 2026 13:36:06 -0700 (PDT)
+Received: from [172.16.0.229] ([159.196.52.54])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3adebadfeb1sm321585a91.9.2026.10.23.13.36.03
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 23 Oct 2026 13:36:05 -0700 (PDT)
+Message-ID: <e356eead-cb63-488a-90f8-8ec4edbb544c@suse.com>
+Date: Sat, 24 Oct 2026 07:06:00 +1030
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -61,531 +89,145 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3] btrfs: test that fsynced data on a RAID stripe tree
+ survives a power failure
+To: Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+ Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>,
+ linux-btrfs@vger.kernel.org
+References: <20261023123451.90365-1-johannes.thumshirn@wdc.com>
+Content-Language: en-US
+From: Qu Wenruo <wqu@suse.com>
+In-Reply-To: <20261023123451.90365-1-johannes.thumshirn@wdc.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 
-Switch from btrfs specific helpers to the generic sysfs helpers
-across btrfs test cases, reduce code duplication.
 
-Signed-off-by: Zorro Lang <zlang@kernel.org>
----
- common/btrfs      | 37 ++-----------------------------------
- common/rc         |  3 ++-
- tests/btrfs/010   |  3 ++-
- tests/btrfs/055   |  2 +-
- tests/btrfs/056   |  2 +-
- tests/btrfs/112   |  2 +-
- tests/btrfs/131   |  2 +-
- tests/btrfs/165   |  2 +-
- tests/btrfs/188   |  2 +-
- tests/btrfs/192   |  2 +-
- tests/btrfs/201   |  2 +-
- tests/btrfs/205   |  2 +-
- tests/btrfs/209   |  2 +-
- tests/btrfs/211   |  2 +-
- tests/btrfs/219   |  3 +--
- tests/btrfs/231   |  2 +-
- tests/btrfs/285   |  1 -
- tests/btrfs/296   |  8 +-------
- tests/btrfs/304   |  4 ++--
- tests/btrfs/305   |  4 ++--
- tests/btrfs/306   |  4 ++--
- tests/btrfs/307   |  4 ++--
- tests/btrfs/308   |  4 ++--
- tests/btrfs/311   |  2 +-
- tests/btrfs/313   |  2 +-
- tests/btrfs/314   |  2 +-
- tests/btrfs/315   |  2 +-
- tests/btrfs/342   |  2 +-
- tests/btrfs/352   |  2 +-
- tests/generic/098 |  2 +-
- tests/generic/101 |  2 +-
- 31 files changed, 38 insertions(+), 77 deletions(-)
 
-diff --git a/common/btrfs b/common/btrfs
-index 38658a11..0bbcb830 100644
---- a/common/btrfs
-+++ b/common/btrfs
-@@ -100,26 +100,6 @@ _require_btrfs_mkfs_uuid_option()
- 	fi
- }
- 
--_require_btrfs_fs_feature()
--{
--	if [ -z $1 ]; then
--		echo "Missing feature name argument for _require_btrfs_fs_feature"
--		_exit 1
--	fi
--	feat=$1
--	modprobe btrfs > /dev/null 2>&1
--	[ -e /sys/fs/btrfs/features/$feat ] || \
--		_notrun "Feature $feat not supported by the available btrfs version"
--}
--
--_require_btrfs_fs_sysfs()
--{
--	modprobe btrfs > /dev/null 2>&1
--	[ -e /sys/fs/btrfs/features ] || \
--		_notrun "Sysfs not supported by the available btrfs version"
--
--}
--
- _require_btrfs_no_compress()
- {
- 	if _normalize_mount_options "$MOUNT_OPTIONS" | grep -q "compress"; then
-@@ -962,18 +942,6 @@ _require_scratch_enable_simple_quota()
- 	_scratch_unmount
- }
- 
--_has_btrfs_sysfs_feature_attr()
--{
--	local feature_attr=$1
--
--	[ -z $feature_attr ] && \
--		_fail "Missing feature name argument for _has_btrfs_sysfs_attr"
--
--	modprobe btrfs &> /dev/null
--
--	test -e /sys/fs/btrfs/features/$feature_attr
--}
--
- # Print the fsid and metadata uuid replaced with constant strings FSID and
- # METADATA_UUID. Compare temp_fsid with fsid and metadata_uuid, then echo what
- # it matches to or TEMP_FSID. This helps in comparing with the golden output.
-@@ -983,9 +951,8 @@ _check_temp_fsid()
- 	local fsid
- 	local metadata_uuid
- 
--	_require_btrfs_fs_sysfs
--	_require_btrfs_fs_feature temp_fsid
--	_require_btrfs_fs_feature metadata_uuid
-+	_require_fs_sysfs_feature_attr temp_fsid
-+	_require_fs_sysfs_feature_attr metadata_uuid
- 	_require_btrfs_command inspect-internal dump-super
- 
- 	# on disk fsid
-diff --git a/common/rc b/common/rc
-index 66a4209d..36f3ce6c 100644
---- a/common/rc
-+++ b/common/rc
-@@ -5618,6 +5618,7 @@ _require_fs_sysfs_feature_attr()
- {
- 	local attr=$1
- 
-+	modprobe $FSTYP > /dev/null 2>&1
- 	_has_fs_sysfs_feature_attr "$attr" && return
- 
- 	_notrun "This test requires /sys/fs/${FSTYP}/features/${attr}"
-@@ -6120,7 +6121,7 @@ _require_duplicate_fsid()
- {
- 	case "$FSTYP" in
- 	"btrfs")
--		_require_btrfs_fs_feature temp_fsid
-+		_require_fs_sysfs_feature_attr temp_fsid
- 		;;
- 	"ext4")
- 		;;
-diff --git a/tests/btrfs/010 b/tests/btrfs/010
-index d27c6dd2..10d30b70 100755
---- a/tests/btrfs/010
-+++ b/tests/btrfs/010
-@@ -23,7 +23,8 @@ _cleanup()
- . ./common/filter
- 
- _require_test
--_require_btrfs_fs_sysfs
-+_require_fs_sysfs_dev_attr $TEST_DEV allocation/metadata/bytes_may_use
-+_require_fs_sysfs_dev_attr $TEST_DEV allocation/global_rsv_reserved
- 
- # Create 32k extents. All of these extents will be accounted as outstanding and
- # reserved.
-diff --git a/tests/btrfs/055 b/tests/btrfs/055
-index bd0755d2..5d6fba4b 100755
---- a/tests/btrfs/055
-+++ b/tests/btrfs/055
-@@ -25,7 +25,7 @@ _cleanup()
- 
- _require_scratch
- _require_cloner
--_require_btrfs_fs_feature "no_holes"
-+_require_fs_sysfs_feature_attr "no_holes"
- _require_btrfs_mkfs_feature "no-holes"
- 
- test_btrfs_clone_with_holes()
-diff --git a/tests/btrfs/056 b/tests/btrfs/056
-index 08f9aac6..10e676a7 100755
---- a/tests/btrfs/056
-+++ b/tests/btrfs/056
-@@ -29,7 +29,7 @@ _cleanup()
- 
- _require_scratch
- _require_cloner
--_require_btrfs_fs_feature "no_holes"
-+_require_fs_sysfs_feature_attr "no_holes"
- _require_btrfs_mkfs_feature "no-holes"
- _require_dm_target flakey
- 
-diff --git a/tests/btrfs/112 b/tests/btrfs/112
-index 1326b824..5ff5eb73 100755
---- a/tests/btrfs/112
-+++ b/tests/btrfs/112
-@@ -15,7 +15,7 @@ _begin_fstest auto quick clone prealloc compress
- 
- _require_scratch
- _require_cloner
--_require_btrfs_fs_feature "no_holes"
-+_require_fs_sysfs_feature_attr "no_holes"
- _require_btrfs_mkfs_feature "no-holes"
- _require_xfs_io_command "falloc"
- 
-diff --git a/tests/btrfs/131 b/tests/btrfs/131
-index b54b8326..fa9c00ae 100755
---- a/tests/btrfs/131
-+++ b/tests/btrfs/131
-@@ -16,7 +16,7 @@ _begin_fstest auto quick
- 
- _require_scratch
- _require_btrfs_command inspect-internal dump-super
--_require_btrfs_fs_feature free_space_tree
-+_require_fs_sysfs_feature_attr free_space_tree
- _require_btrfs_v1_cache
- 
- _scratch_mkfs >/dev/null 2>&1
-diff --git a/tests/btrfs/165 b/tests/btrfs/165
-index a1099d88..9dc8afab 100755
---- a/tests/btrfs/165
-+++ b/tests/btrfs/165
-@@ -34,7 +34,7 @@ rm_r_subvol() {
- . ./common/filter
- 
- _require_scratch
--_require_btrfs_fs_feature "rmdir_subvol"
-+_require_fs_sysfs_feature_attr "rmdir_subvol"
- 
- _scratch_mkfs > /dev/null 2>&1 || _fail "mkfs failed"
- _scratch_mount
-diff --git a/tests/btrfs/188 b/tests/btrfs/188
-index 6a3e9831..24169040 100755
---- a/tests/btrfs/188
-+++ b/tests/btrfs/188
-@@ -24,7 +24,7 @@ _cleanup()
- 
- _require_test
- _require_scratch
--_require_btrfs_fs_feature "no_holes"
-+_require_fs_sysfs_feature_attr "no_holes"
- _require_btrfs_mkfs_feature "no-holes"
- _require_xfs_io_command "fpunch"
- _require_xfs_io_command "falloc" "-k"
-diff --git a/tests/btrfs/192 b/tests/btrfs/192
-index 56ec2b28..f40ef46e 100755
---- a/tests/btrfs/192
-+++ b/tests/btrfs/192
-@@ -28,7 +28,7 @@ _cleanup()
- 
- 
- _require_command "$BLKDISCARD_PROG" blkdiscard
--_require_btrfs_fs_feature "no_holes"
-+_require_fs_sysfs_feature_attr "no_holes"
- _require_btrfs_mkfs_feature "no-holes"
- _require_log_writes
- _require_scratch
-diff --git a/tests/btrfs/201 b/tests/btrfs/201
-index 50262086..a40bd77b 100755
---- a/tests/btrfs/201
-+++ b/tests/btrfs/201
-@@ -27,7 +27,7 @@ _require_scratch
- _require_dm_target flakey
- _require_attrs
- _require_xfs_io_command "fpunch"
--_require_btrfs_fs_feature "no_holes"
-+_require_fs_sysfs_feature_attr "no_holes"
- _require_btrfs_mkfs_feature "no-holes"
- _require_odirect
- 
-diff --git a/tests/btrfs/205 b/tests/btrfs/205
-index a557ab14..4f5161a6 100755
---- a/tests/btrfs/205
-+++ b/tests/btrfs/205
-@@ -22,7 +22,7 @@ _begin_fstest auto quick clone compress prealloc
- _require_scratch_reflink
- _require_xfs_io_command "falloc" "-k"
- _require_command "$CHATTR_PROG" chattr
--_require_btrfs_fs_feature "no_holes"
-+_require_fs_sysfs_feature_attr "no_holes"
- _require_btrfs_mkfs_feature "no-holes"
- # We want to create a compressed inline extent representing 4K of data for file
- # foo1 and then clone it into a file without compression, and since compression
-diff --git a/tests/btrfs/209 b/tests/btrfs/209
-index bd98b635..10876731 100755
---- a/tests/btrfs/209
-+++ b/tests/btrfs/209
-@@ -26,7 +26,7 @@ _cleanup()
- 
- _require_scratch
- _require_dm_target flakey
--_require_btrfs_fs_feature "no_holes"
-+_require_fs_sysfs_feature_attr "no_holes"
- _require_btrfs_mkfs_feature "no-holes"
- _require_xfs_io_command "sync_range"
- 
-diff --git a/tests/btrfs/211 b/tests/btrfs/211
-index 38dbadf9..3a8b22a1 100755
---- a/tests/btrfs/211
-+++ b/tests/btrfs/211
-@@ -27,7 +27,7 @@ _require_scratch
- _require_xfs_io_command "falloc" "-k"
- # fiemap needed by _count_extents()
- _require_xfs_io_command "fiemap"
--_require_btrfs_fs_feature "no_holes"
-+_require_fs_sysfs_feature_attr "no_holes"
- _require_btrfs_mkfs_feature "no-holes"
- _require_dm_target flakey
- 
-diff --git a/tests/btrfs/219 b/tests/btrfs/219
-index 052f61a3..358cccb4 100755
---- a/tests/btrfs/219
-+++ b/tests/btrfs/219
-@@ -47,7 +47,6 @@ loop_dev2=""
- 
- _require_test
- _require_loop
--_require_btrfs_fs_sysfs
- _require_btrfs_forget_or_module_loadable
- _fixed_by_kernel_commit 5f58d783fd78 \
- 	"btrfs: free device in btrfs_close_devices for a single device filesystem"
-@@ -91,7 +90,7 @@ _btrfs_forget_or_module_reload
- 
- _mount $loop_dev1 $loop_mnt1 > /dev/null 2>&1 || \
- 	_fail "Failed to mount the third time"
--if ! _has_btrfs_sysfs_feature_attr temp_fsid; then
-+if ! _has_fs_sysfs_feature_attr temp_fsid; then
- 	_mount $loop_dev2 $loop_mnt2 > /dev/null 2>&1 && \
- 		_fail "We were allowed to mount when we should have failed"
- fi
-diff --git a/tests/btrfs/231 b/tests/btrfs/231
-index 5ebb2fdd..9e7f3eb1 100755
---- a/tests/btrfs/231
-+++ b/tests/btrfs/231
-@@ -25,7 +25,7 @@ _cleanup()
- . ./common/dmflakey
- 
- _require_scratch
--_require_btrfs_fs_feature "no_holes"
-+_require_fs_sysfs_feature_attr "no_holes"
- _require_btrfs_mkfs_feature "no-holes"
- _require_dm_target flakey
- 
-diff --git a/tests/btrfs/285 b/tests/btrfs/285
-index 6a1eb236..d45779d5 100755
---- a/tests/btrfs/285
-+++ b/tests/btrfs/285
-@@ -15,7 +15,6 @@ sysfs_size_classes() {
- }
- 
- _require_scratch
--_require_btrfs_fs_sysfs
- _require_fs_sysfs_dev_attr allocation/data/size_classes
- 
- f="$SCRATCH_MNT/f"
-diff --git a/tests/btrfs/296 b/tests/btrfs/296
-index 0baf89c0..19e3fdea 100755
---- a/tests/btrfs/296
-+++ b/tests/btrfs/296
-@@ -14,14 +14,8 @@ _require_scratch_dev_pool 3
- _fixed_by_kernel_commit b7625f461da6 \
- 	"btrfs: sysfs: update fs features directory asynchronously"
- 
--# We need the global features support
--_require_btrfs_fs_sysfs
--
--global_features="/sys/fs/btrfs/features"
- # Make sure we have support RAID1C34 first
--if [ ! -f "${global_features}/raid1c34" ]; then
--	_notrun "no RAID1C34 support"
--fi
-+_require_fs_sysfs_feature_attr raid1c34
- 
- _scratch_dev_pool_get 3
- 
-diff --git a/tests/btrfs/304 b/tests/btrfs/304
-index 18f73590..ec165a21 100755
---- a/tests/btrfs/304
-+++ b/tests/btrfs/304
-@@ -16,8 +16,8 @@ _begin_fstest auto quick raid remount volume raid-stripe-tree
- _require_btrfs_command inspect-internal dump-tree
- _require_btrfs_mkfs_feature "raid-stripe-tree"
- _require_scratch_dev_pool 4
--_require_btrfs_fs_feature "raid_stripe_tree"
--_require_btrfs_fs_feature "free_space_tree"
-+_require_fs_sysfs_feature_attr "raid_stripe_tree"
-+_require_fs_sysfs_feature_attr "free_space_tree"
- _require_btrfs_free_space_tree
- _require_btrfs_no_compress
- _require_btrfs_support_sectorsize 4096
-diff --git a/tests/btrfs/305 b/tests/btrfs/305
-index 45747627..ddb3a8ee 100755
---- a/tests/btrfs/305
-+++ b/tests/btrfs/305
-@@ -17,8 +17,8 @@ _begin_fstest auto quick raid remount volume raid-stripe-tree
- _require_btrfs_command inspect-internal dump-tree
- _require_btrfs_mkfs_feature "raid-stripe-tree"
- _require_scratch_dev_pool 4
--_require_btrfs_fs_feature "raid_stripe_tree"
--_require_btrfs_fs_feature "free_space_tree"
-+_require_fs_sysfs_feature_attr "raid_stripe_tree"
-+_require_fs_sysfs_feature_attr "free_space_tree"
- _require_btrfs_free_space_tree
- _require_btrfs_no_compress
- _require_btrfs_support_sectorsize 4096
-diff --git a/tests/btrfs/306 b/tests/btrfs/306
-index db3defc8..ebc21190 100755
---- a/tests/btrfs/306
-+++ b/tests/btrfs/306
-@@ -17,8 +17,8 @@ _begin_fstest auto quick raid remount volume raid-stripe-tree
- _require_btrfs_command inspect-internal dump-tree
- _require_btrfs_mkfs_feature "raid-stripe-tree"
- _require_scratch_dev_pool 4
--_require_btrfs_fs_feature "raid_stripe_tree"
--_require_btrfs_fs_feature "free_space_tree"
-+_require_fs_sysfs_feature_attr "raid_stripe_tree"
-+_require_fs_sysfs_feature_attr "free_space_tree"
- _require_btrfs_free_space_tree
- _require_btrfs_no_compress
- _require_btrfs_support_sectorsize 4096
-diff --git a/tests/btrfs/307 b/tests/btrfs/307
-index 02a9d4d3..552fdf19 100755
---- a/tests/btrfs/307
-+++ b/tests/btrfs/307
-@@ -16,8 +16,8 @@ _begin_fstest auto quick raid remount volume raid-stripe-tree
- _require_btrfs_command inspect-internal dump-tree
- _require_btrfs_mkfs_feature "raid-stripe-tree"
- _require_scratch_dev_pool 4
--_require_btrfs_fs_feature "raid_stripe_tree"
--_require_btrfs_fs_feature "free_space_tree"
-+_require_fs_sysfs_feature_attr "raid_stripe_tree"
-+_require_fs_sysfs_feature_attr "free_space_tree"
- _require_btrfs_free_space_tree
- _require_btrfs_no_compress
- 
-diff --git a/tests/btrfs/308 b/tests/btrfs/308
-index c4ccaa0f..9fab9795 100755
---- a/tests/btrfs/308
-+++ b/tests/btrfs/308
-@@ -17,8 +17,8 @@ _begin_fstest auto quick raid remount volume raid-stripe-tree
- _require_btrfs_command inspect-internal dump-tree
- _require_btrfs_mkfs_feature "raid-stripe-tree"
- _require_scratch_dev_pool 4
--_require_btrfs_fs_feature "raid_stripe_tree"
--_require_btrfs_fs_feature "free_space_tree"
-+_require_fs_sysfs_feature_attr "raid_stripe_tree"
-+_require_fs_sysfs_feature_attr "free_space_tree"
- _require_btrfs_free_space_tree
- _require_btrfs_no_compress
- _require_btrfs_no_nodatacow
-diff --git a/tests/btrfs/311 b/tests/btrfs/311
-index 9ac997db..81d57da1 100755
---- a/tests/btrfs/311
-+++ b/tests/btrfs/311
-@@ -24,7 +24,7 @@ _cleanup()
- 
- _require_cp_reflink
- _require_scratch
--_require_btrfs_fs_feature temp_fsid
-+_require_fs_sysfs_feature_attr temp_fsid
- 
- mnt1=$TEST_DIR/$seq/mnt1
- mkdir -p $mnt1
-diff --git a/tests/btrfs/313 b/tests/btrfs/313
-index 7d09aaad..4729d2a4 100755
---- a/tests/btrfs/313
-+++ b/tests/btrfs/313
-@@ -22,7 +22,7 @@ _cleanup()
- 
- _require_cp_reflink
- _require_scratch_dev_pool 2
--_require_btrfs_fs_feature temp_fsid
-+_require_fs_sysfs_feature_attr temp_fsid
- 
- _scratch_dev_pool_get 2
- 
-diff --git a/tests/btrfs/314 b/tests/btrfs/314
-index 01646157..8f4dfd82 100755
---- a/tests/btrfs/314
-+++ b/tests/btrfs/314
-@@ -22,7 +22,7 @@ _cleanup()
- . ./common/filter.btrfs
- 
- _require_scratch_dev_pool 2
--_require_btrfs_fs_feature temp_fsid
-+_require_fs_sysfs_feature_attr temp_fsid
- 
- _scratch_dev_pool_get 2
- 
-diff --git a/tests/btrfs/315 b/tests/btrfs/315
-index b9fdba6a..74574bdd 100755
---- a/tests/btrfs/315
-+++ b/tests/btrfs/315
-@@ -21,7 +21,7 @@ _cleanup()
- . ./common/filter
- 
- _require_scratch_dev_pool 3
--_require_btrfs_fs_feature temp_fsid
-+_require_fs_sysfs_feature_attr temp_fsid
- 
- _scratch_dev_pool_get 3
- 
-diff --git a/tests/btrfs/342 b/tests/btrfs/342
-index e88b47e0..96446640 100755
---- a/tests/btrfs/342
-+++ b/tests/btrfs/342
-@@ -13,7 +13,7 @@ _begin_fstest auto quick
- 
- _require_scratch
- _require_btrfs_command inspect-internal dump-super
--_require_btrfs_fs_feature free_space_tree
-+_require_fs_sysfs_feature_attr free_space_tree
- 
- # The block-group-tree feature relies on v2 cache, thus it doesn't support
- # "nospace_cache" mount option.
-diff --git a/tests/btrfs/352 b/tests/btrfs/352
-index 1d40c09c..9551f3d4 100755
---- a/tests/btrfs/352
-+++ b/tests/btrfs/352
-@@ -14,7 +14,7 @@ _begin_fstest auto quick remount
- _fixed_by_kernel_commit XXXXXXXXXXXX \
- 	"btrfs: fix leaking BTRFS_FS_STATE_REMOUNTING flag"
- 
--_require_btrfs_fs_feature supported_rescue_options
-+_require_fs_sysfs_feature_attr supported_rescue_options
- 
- if ! grep -q "ignorebadroots" "/sys/fs/btrfs/features/supported_rescue_options"; then
- 	_notrun "\"rescue=ignorebadroots\" mount option not supported"
-diff --git a/tests/generic/098 b/tests/generic/098
-index ff6cf908..ff003f60 100755
---- a/tests/generic/098
-+++ b/tests/generic/098
-@@ -24,7 +24,7 @@ _require_scratch
- # feature is enabled (introduced in kernel 3.14). So enable the feature if the
- # fs being tested is btrfs.
- if [ $FSTYP == "btrfs" ]; then
--	_require_btrfs_fs_feature "no_holes"
-+	_require_fs_sysfs_feature_attr "no_holes"
- 	_require_btrfs_mkfs_feature "no-holes"
- 	MKFS_OPTIONS="$MKFS_OPTIONS -O no-holes"
- fi
-diff --git a/tests/generic/101 b/tests/generic/101
-index 31660277..e51be5b5 100755
---- a/tests/generic/101
-+++ b/tests/generic/101
-@@ -32,7 +32,7 @@ _require_dm_target flakey
- # feature is enabled (introduced in kernel 3.14). So enable the feature if the
- # fs being tested is btrfs.
- if [ $FSTYP == "btrfs" ]; then
--	_require_btrfs_fs_feature "no_holes"
-+	_require_fs_sysfs_feature_attr "no_holes"
- 	_require_btrfs_mkfs_feature "no-holes"
- 	MKFS_OPTIONS="$MKFS_OPTIONS -O no-holes"
- fi
--- 
-2.55.0
+在 2026/10/23 23:04, Johannes Thumshirn 写道:
+> A data extent in a block-group that uses the RAID stripe tree has its logical
+> to physical mapping stored in that tree, which only becomes durable when the
+> stripe tree is written out at transaction commit. The log tree cannot carry
+> that mapping, so an fsync served by the log logs a file-extent item whose
+> logical range could not be resolved afterwards. Log replay restored the file
+> with the correct size, but reading it failed with EIO.
+> 
+> Extents reach the log both from log_one_extent() and from copy_items(), so
+> cover a fast fsync and a full fsync. Each one is followed by its own power
+> failure, so a transaction commit triggered by one cannot hide a bug in the
+> other.
+> 
+> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+
+Reviewed-by: Qu Wenruo <wqu@suse.com>
+
+Thanks,
+Qu
+
+> ---
+> Changes to v2:
+> - Add a _flakey_drop_and_remount between the fast and full fsync
+> 
+>   tests/btrfs/363     | 68 +++++++++++++++++++++++++++++++++++++++++++++
+>   tests/btrfs/363.out | 15 ++++++++++
+>   2 files changed, 83 insertions(+)
+>   create mode 100755 tests/btrfs/363
+>   create mode 100644 tests/btrfs/363.out
+> 
+> diff --git a/tests/btrfs/363 b/tests/btrfs/363
+> new file mode 100755
+> index 00000000..b71dff0f
+> --- /dev/null
+> +++ b/tests/btrfs/363
+> @@ -0,0 +1,68 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 Western Digital Corporation.  All Rights Reserved.
+> +#
+> +# FS QA Test 363
+> +#
+> +# Test that data fsynced on a RAID stripe tree file system is still readable
+> +# after a power failure, both for a fast fsync and for a full fsync.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick log volume raid-stripe-tree
+> +
+> +_fixed_by_kernel_commit XXXXXXXXXXXX \
+> +	"btrfs: force a transaction commit when fsyncing stripe-tree extents"
+> +
+> +_cleanup()
+> +{
+> +	_cleanup_flakey
+> +	rm -fr $tmp
+> +}
+> +
+> +. ./common/filter
+> +. ./common/dmflakey
+> +
+> +_require_btrfs_mkfs_feature "raid-stripe-tree"
+> +_require_btrfs_fs_feature "raid_stripe_tree"
+> +_require_scratch
+> +_require_dm_target flakey
+> +
+> +# DUP keeps its mapping in the stripe tree, so a single device is enough and
+> +# dm-flakey can be layered on top of it.
+> +_scratch_mkfs -d dup -m dup -O raid-stripe-tree >> $seqres.full 2>&1 || \
+> +	_fail "mkfs failed"
+> +
+> +_init_flakey
+> +_scratch_mount
+> +
+> +# The first fsync of an inode is always a full fsync. Do one here and then
+> +# commit the transaction, so that the second fsync of this file below is a
+> +# fast fsync.
+> +$XFS_IO_PROG -f -c "pwrite -S 0xaa 0 128K" -c fsync $SCRATCH_MNT/fast | \
+> +	_filter_xfs_io
+> +_scratch_sync
+> +
+> +# Fast fsync: only the extents changed since the last fsync are logged.
+> +$XFS_IO_PROG -c "pwrite -S 0xbb 0 128K" -c fsync $SCRATCH_MNT/fast | \
+> +	_filter_xfs_io
+> +
+> +_flakey_drop_and_remount
+> +
+> +echo "fast fsync:"
+> +_hexdump $SCRATCH_MNT/fast
+> +
+> +# Full fsync: this is the first fsync of this inode, so all of its items are
+> +# logged.
+> +$XFS_IO_PROG -f -c "pwrite -S 0xcc 0 128K" -c fsync $SCRATCH_MNT/full | \
+> +	_filter_xfs_io
+> +
+> +_flakey_drop_and_remount
+> +
+> +echo "full fsync:"
+> +_hexdump $SCRATCH_MNT/full
+> +
+> +_scratch_unmount
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/363.out b/tests/btrfs/363.out
+> new file mode 100644
+> index 00000000..9e5f1fa2
+> --- /dev/null
+> +++ b/tests/btrfs/363.out
+> @@ -0,0 +1,15 @@
+> +QA output created by 363
+> +wrote 131072/131072 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 131072/131072 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +fast fsync:
+> +000000 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb  >................<
+> +*
+> +020000
+> +wrote 131072/131072 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +full fsync:
+> +000000 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  >................<
+> +*
+> +020000
 
