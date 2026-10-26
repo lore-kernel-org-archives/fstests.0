@@ -1,78 +1,79 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1792948956;
-	b=G3Honn0Yaad6Av9K6OBGBve642gK4Bp0VGG55HYaWwqOY4Iod5SMauqKq51tmEKUiTL5
-	 JU+X9rv2grcxPwKvST6pxeQjZxo63KmQFcued86EqD31jrWUcbJ3OxEPdRkK8c4zJK8oD
-	 HyL1xxxZzAI/wnsyWq4NWToe5WTrHwPAvi2PacCvzl86DAdCoqUehAneShja2jD9eTXkO
-	 qfFsm5wOgwo8Cj57EDN6dBxq2WVNiL3TZhPOvC7w6hOvXC6hgHkby3kL3WbK0NkLHXwHG
-	 nySj1VtbbUjhCX7ye4KvnYiw61v7L22cwDk4qkBWUMPUvsJ7uMydthhmU2JG+FDqy8g==
+	t=1792979698;
+	b=wnUbpzYMUPoh4adt1OSkNeSqZPbhTEnyJeveVNOTEu9dnsp0W2hcKqPHpWe41ICIVTR1
+	 J9yoxx59uuRTNRcPkQhZDWwSd9FrrruSe8kp37uixX4FB+TAR9+xLdXVb9/xK5ZO1GBjS
+	 WsFkkjTJJUnH00KIfBh+TMOfa9y9c9avCzdnVG1kDI75NCpZwjlDG3to/10n8DWYLPaVL
+	 s3qKda6AD6r5a+6M7FDClpeFg7Vl21d412zMx4o1buCiM+Ov6XOmU8ef32VJD5PUfaCwg
+	 Y/XF20czTKOxnD2ZsJlZdg49W4aa5wQT64HCCxuI0GIpbOcO+W0f41hF1L2pnNmnbDQ==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792948956;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792979698;
 	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
-	 Content-Type:Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
+	 Content-Type:Message-Id:X-B4-Tracking:To:Cc:X-Mailer:
 	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
 	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=h1nGHx4vMQ+43ZjYamu+W6gEkU9ENuft+DX8Y06qt+g=;
-	b=ehbnDozzcyoPZvNg8ymEOj12eBY7yHbS0QJNl/xWdTZ8i7Hp/L9pHn01hddf9xeDUjFM
-	 eKMds1j1WH0g6AMlBT3BbndvAWECg2ueERMVCerP/McOl3lkjtp73Mog3jeL/2UHVduNj
-	 Vgl/7T4B4bagW4pq9H4OARHAHHGCQuJxcbYRogp+BvyqGiSXo/v47NkGxInWqlQiE2JbF
-	 mteSHRUCSw1cSqcGLI46z2vgGb2mW7GUCY8i1gHX7sTMPJXA8wQzP/nk6nTEyK6IudpTI
-	 0yIpXqi692aXLxTLOR6YvqSf0fJNgaUTfrO+wtWa1uCRIXzKJ6zRcwFSUN1inmGamug==
+	bh=Sp9xVnQiW9XAnSBSll47Js3D+fz7Pvqk1cGPk4dlJgw=;
+	b=2yvUgMfXYQ3XeX8zUzKSF3uhiFzX3oDEOPhZw/4LYeM0szyHf+NGMMLpd+/sfh2VI1Gf
+	 WiFQmdZSHRxvV1B2VVskbo1syZ9HEAkujAomNBn4yJd0TCNKvjdUq/9O6D19ttJ/9KKMv
+	 whDDcJ6Pw7wVnLWR7okRafWLcdRVMvKV8DY/rERnidFE3J14Dp7H8BY6LCkYRGqvpZNSj
+	 +yMD2Rvfi+mM1xKDhHq/2SQluu/BmBVCK9D8kNaJ6R7KCe2FLTP0y9Nd3Hfkrvlt0Gvhk
+	 Bz+CS9roCS7Q0eZ2GbK422ifUy7SlDrfOk7kyBvl1ds95QqssS0R2eeMpMi9w22GD3w==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=a0HYBK0I;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=o1L7lXq8;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BFE6606A31D;
-	Sun, 25 Oct 2026 17:22:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD1EE606A31A;
+	Mon, 26 Oct 2026 01:54:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=a0HYBK0I
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=o1L7lXq8
 Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
 ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
-	t=1792948956;
-	b=XBrs0WQkt9gFTAAvI1kiIlI59+V4lMv2vY79Tchs7XLMGmjAAiJw0RYGQ+eraNC6OQV7
-	 pjdTRXlGL+60987WW3xPiBfa2fe9GIAPa55lv4zADofDR0M3iLv4nNp2orphZbkAT0Bwk
-	 kE3ldRlahLS0jqb/0DBAaNuBSLm6dZlJ+mW6ux4XQQYRT4QThBNkA0xww2KjkJZkMLK20
-	 dDZWosg/PPAvieauwnwv+w9jRbnc67hFA7A7gpFGMQL/MeHE2K0ECUN/nGMXDyk5c/MCQ
-	 x9cDQs8T5YgB9W1ocljozA83zOWhCInAgEvBRCXqYRKqI8Ewt2lgiwom62PUbfXI4cg==
+	t=1792979697;
+	b=cYn/Ac384VAKKqV3myLKbNEj8DIQ0CX7eR8hab4Hb06lv5ZS8hWXUelRqMn7lpVVXlBG
+	 qRnebr65RyIbVgakjf4efPbqqg5pCA1NP0ae5vVIdxE7u/10ESNJpPlgPRwoHH/KGYzTH
+	 GRFFRmgtEwSPMNzmwnW/Wi440gYAytYOrzNIKywOS+/FVC9RHsvzT2xsuRGot90UbGsR6
+	 6lVuQUbd8i/Bble7bx0elhCM9CmzCXPg0iXR8Y6aynECetSPDjZlUk7WHi17aVOHsv/g7
+	 lQc4lSRcCtvoTBC77ge4r/z49KZHLS5aMqvK5HpGakRumg/hPrtOnBeUIT9BGyyFVMg==
 ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
-	c=relaxed/relaxed; t=1792948956;
+	c=relaxed/relaxed; t=1792979697;
 	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
-	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
-	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=h1nGHx4vMQ+43ZjYamu+W6gEkU9ENuft+DX8Y06qt+g=;
-	b=2rN0VIvYnFYHRAK3x/bYO60tmTl7rc2J6ky3Xd+Cbqf+SOqKZGkFyLcif3HSdf6UTzuU
-	 W2Mgf7u1a0mQ0y0xwRfsudp4hq9H0MS2ER/6NM2t3CTJVpukhu2kebOHC09NyfucG2ucL
-	 UaURtKQL4S/hCpSuDaKbEWLhSPPLUW8YbRLryaYoxLuP/b9EV/LHLJXGF+yPyiEMR34pV
-	 r02J1BeMVPwBX7WzeJVDDN57uEeRg6CL7uDnxiC4awEb2LLE7GUxN1O2K1hBl/X5VRViV
-	 RL7DZ48xSg9LKvGPYz/XIHKrcbESrNCjJl4TdCA2MKArYgwE8lRqHPEMLaFNKXXm7hg==
+	 Message-Id:X-B4-Tracking:To:Cc:X-Mailer:X-Developer-Signature:
+	 X-Developer-Key:X-Endpoint-Received:X-Original-From:Reply-To:
+	 Content-Transfer-Encoding;
+	bh=Sp9xVnQiW9XAnSBSll47Js3D+fz7Pvqk1cGPk4dlJgw=;
+	b=xoiLDKhCKJuDKAcVxljnXf9glZdzf2qvM5OwBna8G9XRMb6UMVN7Z36d9d+4t7gcT/fH
+	 zEMhipzh3Ba1k7j0KPgeaXdytFdJTEIyaKX8Yo1mUZ0eHvNkkxBuEEETMZE2mIX8Zq5y8
+	 Nd7dkgUWyCsohONDNMP1n0mwiKI/MNdta+jcnllCMhfHOhrFgP4SaOuhyOS+tgW6zQti5
+	 BZJ7CHFwnCGzBLmX+xc/ff5lbc+4YPFs/85GxLCZdZ42ETeFxd7Kd+TrDkkE7UgtTn4yW
+	 2NduJD6+GYmzm4laHUmoMUIgAKcN2u1LDFfHnMPbuyV5/49HffYupwg/1YAvVDO2/mg==
 ARC-Authentication-Results: i=1; smtp.kernel.org; 
 	arc=none smtp.remote-ip=100.80.115.77
 Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id D67D51F01829;
-	Sun, 25 Oct 2026 17:22:34 +0000 (UTC)
+	by smtp.kernel.org (Postfix) with ESMTPS id CFFC41F01825;
+	Mon, 26 Oct 2026 01:54:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1792948955;
-	bh=h1nGHx4vMQ+43ZjYamu+W6gEkU9ENuft+DX8Y06qt+g=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To;
-	b=a0HYBK0Ipsr4da69QIHlVSLgMR5fC13Ra63TJ32vmvY6yH3xf7cTVpTDjZUr3gKqJ
-	 QxnbqMFEhFNLD6WphAMjI+5vTvPP4atdpzsG2NckQxYIR/ehYf5bsRvpahnJ+pU0gQ
-	 G0hKP+RhtY7lwbOWUu2aY0AOq/LxL31/Yq3kQuuePtKT03dcc+TSk11xua8H8OsD1j
-	 +O6z8EoLYAFOdKgeG94BAvJBdzs0mkjU8z/g01nbY5DgaD9hxpJqpYNWsZpgI2JzuK
-	 xQJFCYX99q1kVq/loFkxSxzWTMa8H0P4E0ImlTs6iR4ZJCgfEDoysCfIeucfjPFCHN
-	 jlUcgNteZtOsg==
+	s=k20260515; t=1792979697;
+	bh=Sp9xVnQiW9XAnSBSll47Js3D+fz7Pvqk1cGPk4dlJgw=;
+	h=From:Date:Subject:To:Cc:Reply-To;
+	b=o1L7lXq8nKs3b1E9n83K5gyuofQaOV1JVp/3SQeG7lmCOM9MKhE/FNFZSd/NnRgNC
+	 OJraFnpSdJn3hergqQddfYpw81ZA12osXKLjiZ4wDVfi9GgFXcsYqu8wLK7dgFMaSu
+	 TdlrUyc+Hgc0I9oVrZZ9CVALufKEpBiPNh41MnJ5LlmUco2433o9IoF4DVNMjieLsz
+	 x62RaZ81BGznPz95BYrBNCFoLMmd9xoHgeYVu+hhCTZRUS07j0hMAbnK54/A8oX+or
+	 UpMRVE9Tf41gw5wJx0pdWtofC+Jz8r5mf9HRiU7e63wkKFpYScckXblgsAyEpFp99M
+	 jL9c7pKufhVEQ==
 Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id 3E0A144A7D;
-	Sun, 25 Oct 2026 17:22:34 +0000 (UTC)
-From: Dhruva Gole via B4 Relay <devnull+goledhruva.gmail.com@kernel.org>
-Date: Sun, 25 Oct 2026 17:21:50 +0000
-Subject: [PATCH v2 1/3] btrfs: exercise NOCOMPRESS range and EOF handling
+	by lkml.kernel.org (Postfix) with ESMTP id 64C9F44B8D;
+	Mon, 26 Oct 2026 01:54:56 +0000 (UTC)
+From: Daejun Park via B4 Relay <devnull+daejun7.park.samsung.com@kernel.org>
+Date: Mon, 26 Oct 2026 10:54:56 +0900
+Subject: [PATCH] xfs: test that FITRIM discards every free extent of a
+ fragmented AG
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -83,203 +84,290 @@ List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Message-Id: <20261025-b4-btrfs-nocomp-v2-v2-1-628c1986f9b9@gmail.com>
-References: <20261025-b4-btrfs-nocomp-v2-v2-0-628c1986f9b9@gmail.com>
-In-Reply-To: <20261025-b4-btrfs-nocomp-v2-v2-0-628c1986f9b9@gmail.com>
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Anand Jain <asj@kernel.org>, 
- Filipe Manana <fdmanana@suse.com>, Zorro Lang <zlang@kernel.org>, 
- Qu Wenruo <wqu@suse.com>, Dhruva Gole <goledhruva@gmail.com>
-X-Mailer: b4 0.16.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1792948953; l=6350;
- i=goledhruva@gmail.com; s=remote-20261025; h=from:subject:message-id;
- bh=rRd6hUvaJQlEGRR2dEfgYnu+HGutmczMTsoASyOLXxY=;
- b=SkharaxXvjVQZxtxYZQCPXM0qx1I8o3U9QmitPNI3GoUELseXrPfKAiHr4T6SAqVfPmUX6+ms
- aL/MbOIzyS0BAQ2UFyXSp4MffcfV4rBbclpuS+IiaKPv0Af3p5b8LaH
-X-Developer-Key: i=goledhruva@gmail.com; a=ed25519;
- pk=OBz78Vw5K+/+HyXjxg9mNOV2Bq087eJgHL749H+Xe/k=
-X-Endpoint-Received: by B4 Relay for goledhruva@gmail.com/remote-20261025
- with auth_id=1318
-X-Original-From: Dhruva Gole <goledhruva@gmail.com>
-Reply-To: goledhruva@gmail.com
+Message-Id: <20261026-xfs-fitrim-test-v1-1-494775ebc15d@samsung.com>
+X-B4-Tracking: v=1; b=H4sIAPCy3moC/x3MMQqAMAxA0atIZgO1gqBXEQdbE81glaaIUHp3i
+ +Mb/s+gFIUUpiZDpEdUrlDRtQ34Yw07oWzVYI0dOmN7fFmRJUU5MZEmdOwMu9X7kRlqdUdief/
+ jvJTyAb7AmMNhAAAA
+To: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Cc: "Darrick J. Wong" <djwong@kernel.org>, linux-xfs@vger.kernel.org, 
+ Daejun Park <daejun7.park@samsung.com>
+X-Mailer: b4 0.13.0
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1792979696; l=8775;
+ i=daejun7.park@samsung.com; s=20261006; h=from:subject:message-id;
+ bh=Xg/V81glUEGFoz4Dtf/RjKN9TErRqDNanvKKGok4Sl8=;
+ b=5XNcQQDUc3glVwRb7lheYpWfdcoouuVu+TSRl+Rn4aCgULtSn5uwgD2efG8lvbw/kKZ3kmVFt
+ anQm0IQFGC3B2pZSN6My1zBHbEp/9pLtsgIuiUPeiw3OBZUhTDESV5/
+X-Developer-Key: i=daejun7.park@samsung.com; a=ed25519;
+ pk=4yUfDqGRZTIj0Ik43z1GoMZRWCNm/rgX6uJuM9dtNIg=
+X-Endpoint-Received: by B4 Relay for daejun7.park@samsung.com/20261006 with
+ auth_id=1122
+X-Original-From: Daejun Park <daejun7.park@samsung.com>
+Reply-To: daejun7.park@samsung.com
 Content-Transfer-Encoding: 7bit
 
-From: Dhruva Gole <goledhruva@gmail.com>
+From: Daejun Park <daejun7.park@samsung.com>
 
-Test that defrag --nocomp only uncompresses the requested range of a file
-with compressed extents, and that the range handling works for a partial
-final sector, a zero length (up to EOF) and a length extending past EOF.
-Check the resulting layout with fiemap and the file contents with md5sum
-after a remount, against the golden output.
+A whole-device FITRIM walks each AG but the last by length. Two
+kernel bugs left free extents of such an AG undiscarded.
 
-Also, add _require_btrfs_defrag_nocompress() to common/btrfs, which skips
-the test if either btrfs-progs or the kernel lacks support for
-defrag --nocomp.
+Build one free space layout for each bug on a loop device. After
+fstrim, check that each free extent that held data is a hole in the
+image file.
 
-Signed-off-by: Dhruva Gole <goledhruva@gmail.com>
+Signed-off-by: Daejun Park <daejun7.park@samsung.com>
 ---
- common/btrfs        | 14 ++++++++++
- tests/btrfs/355     | 76 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/355.out | 45 +++++++++++++++++++++++++++++++
- 3 files changed, 135 insertions(+)
+The kernel patches are at https://lore.kernel.org/r/20261026-xfs-fitrim-skip-v1-0-cddd8414f99c@samsung.com
 
-diff --git a/common/btrfs b/common/btrfs
-index 0bfb02dd..609f3f0a 100644
---- a/common/btrfs
-+++ b/common/btrfs
-@@ -1080,3 +1080,17 @@ _require_btrfs_iouring_encoded_read()
- 		_notrun "btrfs io_uring encoded read failed with -EOPNOTSUPP"
- 	fi
- }
-+
-+# Check that both btrfs-progs and the kernel support defrag --nocomp.
-+_require_btrfs_defrag_nocompress()
-+{
-+	_require_scratch
-+	_require_btrfs_command filesystem defragment --nocomp
-+
-+	_scratch_mkfs > /dev/null 2>&1
-+	_scratch_mount
-+	touch $SCRATCH_MNT/foo
-+	$BTRFS_UTIL_PROG filesystem defragment --nocomp $SCRATCH_MNT/foo \
-+		> /dev/null 2>&1 || _notrun "kernel does not support defrag --nocomp"
-+	_scratch_unmount
-+}
-diff --git a/tests/btrfs/355 b/tests/btrfs/355
+Without them the test fails: 409 of 512 and 6 of 15 free extents
+that held data were not discarded. With both it passes, also with
+MKFS_OPTIONS "-m rmapbt=0,reflink=0" and "-d agcount=16" (first
+layout only).
+---
+ tests/xfs/842     | 220 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/842.out |   2 +
+ 2 files changed, 222 insertions(+)
+
+diff --git a/tests/xfs/842 b/tests/xfs/842
 new file mode 100755
-index 00000000..13934de3
+index 0000000..73c1ede
 --- /dev/null
-+++ b/tests/btrfs/355
-@@ -0,0 +1,76 @@
++++ b/tests/xfs/842
+@@ -0,0 +1,220 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Meta Platforms, Inc. and affiliates. All Rights Reserved.
++# Copyright (c) 2026 Samsung Electronics Co., Ltd. All Rights Reserved.
 +#
-+# FS QA Test 355
++# FS QA Test No. 842
 +#
-+# Test that defrag --nocomp only uncompresses the requested range, including
-+# a partial final sector, a zero length and a length extending past EOF.
++# Check that a whole-device FITRIM discards every free extent. It walks the
++# free space of each AG but the last by length, from the longest free extent
++# down, in batches of XFS_DISCARD_MAX_EXAMINE (100) records. Kernels got two
++# layouts wrong:
++#
++# - an AG with more than one batch of free extents: the second and later
++#   batches skipped the free extents below the block where the previous batch
++#   stopped;
++# - an AG with several free extents of the longest length: only the one with
++#   the lowest block number was discarded.
 +#
 +. ./common/preamble
-+_begin_fstest auto quick defrag compress fiemap
++_begin_fstest auto quick trim
 +
-+. ./common/filter
-+. ./common/punch # for _filter_fiemap_flags
++_cleanup()
++{
++	cd /
++	_unmount $loop_mnt &> /dev/null
++	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
++	rm -rf $tmp.* $img_file
++}
 +
-+_require_btrfs_defrag_nocompress
-+_require_btrfs_support_sectorsize 4096
-+_require_btrfs_no_nodatacow
-+_require_btrfs_no_nodatasum
-+_require_btrfs_no_autodefrag
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"xfs: don't skip free extents in later batches of a whole-AG FITRIM"
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"xfs: don't skip free extents of the longest length in a whole-AG FITRIM"
++
++_require_test
++_require_loop
++_require_fstrim
++_require_test_program "punch-alternating"
++_require_xfs_io_command "falloc"
++_require_xfs_io_command "fpunch"
 +_require_xfs_io_command "fiemap"
++_require_xfs_spaceman_command "freesp"
 +
-+_wants_kernel_commit 009b2056cb25 \
-+	"btrfs: defrag: add flag to force no-compression"
++img_file=$TEST_DIR/$seq.img
++img_size=$((512 << 20))
++loop_mnt=$tmp.mnt
++mkdir -p $loop_mnt
 +
-+_scratch_mkfs -s 4k >> $seqres.full 2>&1 || _fail "mkfs failed"
-+_scratch_mount -o compress=zlib
++touch $img_file
++_xfs_force_bdev data $img_file
++_require_fs_space $img_file 262144
 +
-+# 4M is chosen as a convenient size, uncompress [1M, 1.5M) later
-+$XFS_IO_PROG -f -c "pwrite -S 0xab 0 4M" $SCRATCH_MNT/range | _filter_xfs_io
++# Make a filesystem on a new image file and mount it, with file data on the
++# data device.
++make_fs()
++{
++	local gran
 +
-+# A file with a compressed extent covering a partial final sector at
-+# [128K, 132K + 1). Uncompress one byte of it, then the rest up to EOF.
-+$XFS_IO_PROG -f -c "pwrite -S 0xcd 0 $((132 * 1024 + 1))" $SCRATCH_MNT/partial_sector | \
-+	_filter_xfs_io
++	_unmount $loop_mnt &> /dev/null
++	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
++	loop_dev=
++	rm -f $img_file
++	touch $img_file
++	_xfs_force_bdev data $img_file
++	truncate -s $img_size $img_file
++	loop_dev=$(_create_loop_device $img_file)
++	_mkfs_dev $loop_dev
++	_mount $loop_dev $loop_mnt
++	_xfs_force_bdev data $loop_mnt
 +
-+# Zero length means up to EOF, a length past EOF is clamped to EOF.
-+# The name zero_length refers to the later -l 0 argument.
-+$XFS_IO_PROG -f -c "pwrite -S 0xef 0 256K" $SCRATCH_MNT/zero_length | _filter_xfs_io
-+# An independent file here lets -l 16M be tested without the earlier -l 0 conversion
-+# affecting it
-+$XFS_IO_PROG -f -c "pwrite -S 0xef 0 256K" $SCRATCH_MNT/past_eof | _filter_xfs_io
++	block_size=$(_get_block_size $loop_mnt)
++	gran=$(cat /sys/block/$(basename $loop_dev)/queue/discard_granularity)
++	[ "$gran" -le "$block_size" ] || \
++		_notrun "discard granularity $gran > block size $block_size"
++}
 +
-+# As in btrfs/280, defrag first to avoid writeback timing leaving compressed
-+# extents smaller than 128K and changing the last extent's logical start.
-+for f in range partial_sector zero_length past_eof; do
-+	$BTRFS_UTIL_PROG filesystem defragment -czlib -f $SCRATCH_MNT/$f \
-+		>> $seqres.full 2>&1
++# Record the free extents, FITRIM the whole filesystem and report each free
++# extent that held data in the image file and is not a hole in it afterwards.
++# $1 names the layout. $2 is an awk condition on n0, the number of such free
++# extents of an AG, and t0, the number of them that have the AG's longest
++# length; an AG walked by length must meet it for the layout to show the bug.
++# Returns 1 if no AG does.
++check_trim()
++{
++	local name=$1 cond=$2
++	local agcount agsize spb formed written missed
++
++	# Cycle the mount so that no freed extent is still busy.
++	_unmount $loop_mnt
++	_mount $loop_dev $loop_mnt
++
++	agcount=$(_xfs_mount_agcount $loop_mnt)
++	agsize=$($XFS_INFO_PROG $loop_mnt | \
++		sed -n 's/.*agsize=\([0-9]*\) blks.*/\1/p')
++	spb=$((block_size / 512))
++
++	# Ranges of the image file that hold data. Free space that was never
++	# written is a hole already and cannot show whether it was discarded.
++	$XFS_IO_PROG -c fiemap $img_file | grep -v hole | \
++		sed -n 's/.*\[\([0-9]*\)\.\.\([0-9]*\)\]:.*/\1 \2/p' > $tmp.data
++
++	# Free extents from GETFSMAP, as "agno agbno length first last written"
++	# with the first and last sector on the loop device. xfs_db freesp
++	# also counts the blocks on the AGFL, which are not free space and are
++	# not discarded.
++	$XFS_SPACEMAN_PROG -c "freesp -d" $loop_mnt | \
++		awk -v spb=$spb -v agsize=$agsize '
++		FILENAME == ARGV[1] {
++			ds[FNR] = $1; de[FNR] = $2; n = FNR; next
++		}
++		NF == 3 && $1 ~ /^[0-9]+$/ && $2 ~ /^[0-9]+$/ &&
++		$3 ~ /^[0-9]+$/ {
++			s = spb * ($1 * agsize + $2)
++			e = s + spb * $3 - 1
++			w = 0
++			for (i = 1; i <= n; i++)
++				if (ds[i] <= e && s <= de[i])
++					w = 1
++			print $1, $2, $3, s, e, w
++		}' $tmp.data - > $tmp.free
++	echo "$name: free extents (agno agbno length first last written)" \
++		>> $seqres.full
++	cat $tmp.free >> $seqres.full
++
++	# A whole-device FITRIM walks the last AG by block number and every
++	# other AG by length.
++	formed=$(awk -v last=$((agcount - 1)) '
++		$1 != last {
++			if ($3 > m[$1]) { m[$1] = $3; t[$1] = 0 }
++			if ($3 == m[$1]) t[$1] += $6
++			n[$1] += $6
++		}
++		END {
++			for (a in n) {
++				n0 = n[a]; t0 = t[a]
++				if (n0 > 0 && ('"$cond"')) c++
++			}
++			print c + 0
++		}' $tmp.free)
++	if [ "$formed" -eq 0 ]; then
++		echo "$name: no AG walked by length has the layout" \
++			>> $seqres.full
++		return 1
++	fi
++
++	$FSTRIM_PROG $loop_mnt >> $seqres.full 2>&1 || \
++		_fail "$name: fstrim failed"
++	_unmount $loop_mnt
++
++	# Holes in the image file, which are the ranges that were discarded.
++	$XFS_IO_PROG -c fiemap $img_file | grep hole | \
++		sed 's/.*\[\(.*\)\.\.\(.*\)\].*/\1 \2/' > $tmp.holes
++	[ -s $tmp.holes ] || _fail "$name: no holes in $img_file"
++
++	written=$(awk '$6 == 1' $tmp.free | wc -l)
++	missed=$(awk -v full=$seqres.full -v name=$name '
++		FILENAME == ARGV[1] {
++			hs[FNR] = $1; he[FNR] = $2; n = FNR; next
++		}
++		$6 == 1 {
++			for (i = 1; i <= n; i++)
++				if (hs[i] <= $4 && $5 <= he[i])
++					next
++			print name ": not discarded: sectors " $4 "-" $5 >> full
++			missed++
++		}
++		END { print missed + 0 }' $tmp.holes $tmp.free)
++	echo "$name: written free extents: $written, not discarded: $missed" \
++		>> $seqres.full
++	[ "$missed" -eq 0 ] || \
++		echo "$name: $missed free extents were not discarded"
++	return 0
++}
++
++layouts=0
++
++make_fs
++_require_batched_discard $loop_mnt
++
++# Write a 64 MiB file and punch out every other 64k of it. The file is allocated
++# from one AG, which is left with about 512 written free extents below the free
++# space after the file.
++$XFS_IO_PROG -f -c "falloc 0 64m" -c "pwrite -S 0x58 -b 1m 0 64m" -c fsync \
++	$loop_mnt/file >> $seqres.full
++blks=$((65536 / block_size))
++[ "$blks" -gt 0 ] || blks=1
++$here/src/punch-alternating -s $blks -i $((2 * blks)) $loop_mnt/file
++check_trim batches "n0 > 200" && layouts=$((layouts + 1))
++
++make_fs
++
++# Fill the filesystem with one file, then write 8 MiB of every 32 MiB of it and
++# punch that out. The punched ranges are written in the image file, and in most
++# AGs they are the longest free extents, several of the same length. A failed
++# fallocate does not change the file size; older xfs_io exits 0 after one.
++size=0
++touch $loop_mnt/fill
++for step in $((64 << 20)) $((1 << 20)) $((64 << 10)); do
++	while [ $((size + step)) -le $img_size ]; do
++		$XFS_IO_PROG -c "falloc $size $step" $loop_mnt/fill &> /dev/null
++		[ "$(stat -c %s $loop_mnt/fill)" -eq $((size + step)) ] || break
++		size=$((size + step))
++	done
 +done
-+
-+echo "fiemap before defrag:"
-+for f in range partial_sector zero_length past_eof; do
-+	echo "$f:"
-+	$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/$f | _filter_fiemap_flags 1
++echo "filled $size bytes" >> $seqres.full
++hole=$((8 << 20))
++period=$((32 << 20))
++writes=()
++punches=()
++for ((off = 0; off + hole <= size; off += period)); do
++	writes+=(-c "pwrite -S 0x59 -b 1m $off $hole")
++	punches+=(-c "fpunch $off $hole")
 +done
++$XFS_IO_PROG "${writes[@]}" -c fsync $loop_mnt/fill >> $seqres.full
++$XFS_IO_PROG "${punches[@]}" $loop_mnt/fill
++check_trim ties "t0 >= 2" && layouts=$((layouts + 1))
 +
-+$BTRFS_UTIL_PROG filesystem defragment --nocomp -s 1M -l 512K $SCRATCH_MNT/range
-+$BTRFS_UTIL_PROG filesystem defragment --nocomp -s 128K -l 1 $SCRATCH_MNT/partial_sector
-+echo "partial_sector after uncompressing one byte:"
-+$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/partial_sector | _filter_fiemap_flags 1
-+$BTRFS_UTIL_PROG filesystem defragment --nocomp -s $((128 * 1024 + 1)) -l 4K \
-+	$SCRATCH_MNT/partial_sector
-+$BTRFS_UTIL_PROG filesystem defragment --nocomp -s 128K -l 0 $SCRATCH_MNT/zero_length
-+$BTRFS_UTIL_PROG filesystem defragment --nocomp -s 128K -l 16M $SCRATCH_MNT/past_eof
++[ "$layouts" -gt 0 ] || _notrun "no AG walked by length has either layout"
 +
-+# Check the new layout and data are persisted.
-+_scratch_cycle_mount compress=zlib
-+
-+echo "fiemap after defrag:"
-+for f in range partial_sector zero_length past_eof; do
-+	echo "$f:"
-+	$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/$f | _filter_fiemap_flags 1
-+done
-+md5sum $SCRATCH_MNT/{range,partial_sector,zero_length,past_eof} | _filter_scratch
-+
++echo "Silence is golden"
 +_exit 0
-diff --git a/tests/btrfs/355.out b/tests/btrfs/355.out
+diff --git a/tests/xfs/842.out b/tests/xfs/842.out
 new file mode 100644
-index 00000000..340105d7
+index 0000000..643d052
 --- /dev/null
-+++ b/tests/btrfs/355.out
-@@ -0,0 +1,45 @@
-+QA output created by 355
-+wrote 4194304/4194304 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 135169/135169 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 262144/262144 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 262144/262144 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+fiemap before defrag:
-+range:
-+0: [0..7935]: encoded
-+1: [7936..8191]: encoded|last
-+partial_sector:
-+0: [0..255]: encoded
-+1: [256..271]: encoded|last
-+zero_length:
-+0: [0..255]: encoded
-+1: [256..511]: encoded|last
-+past_eof:
-+0: [0..255]: encoded
-+1: [256..511]: encoded|last
-+partial_sector after uncompressing one byte:
-+0: [0..255]: encoded
-+1: [256..263]: none
-+2: [264..271]: encoded|last
-+fiemap after defrag:
-+range:
-+0: [0..2047]: encoded
-+1: [2048..3071]: none
-+2: [3072..7935]: encoded
-+3: [7936..8191]: encoded|last
-+partial_sector:
-+0: [0..255]: encoded
-+1: [256..271]: last
-+zero_length:
-+0: [0..255]: encoded
-+1: [256..511]: last
-+past_eof:
-+0: [0..255]: encoded
-+1: [256..511]: last
-+e9295e0e0a926a8922168f1fc481ef90  SCRATCH_MNT/range
-+6190a9bc8f51d424927964094f0ce4d1  SCRATCH_MNT/partial_sector
-+832cb356cb2524376d8faa4f76cfcfcd  SCRATCH_MNT/zero_length
-+832cb356cb2524376d8faa4f76cfcfcd  SCRATCH_MNT/past_eof
++++ b/tests/xfs/842.out
+@@ -0,0 +1,2 @@
++QA output created by 842
++Silence is golden
 
+---
+base-commit: d07dca72d2455f4ba8c660ad4c008541ccccb707
+change-id: 20261023-xfs-fitrim-test-bfb0fbacc9ff
+
+Best regards,
 -- 
-2.43.0
+Daejun Park <daejun7.park@samsung.com>
 
 
