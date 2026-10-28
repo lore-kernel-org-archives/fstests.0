@@ -1,54 +1,56 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793207925;
-	b=M8ZRTxNjO90T7tgZBahJZUdThwifn/jZQHC6Vf7l4kX+phvOApKl1Xvb9uCie2vqrsqm
-	 YxWzdW3TId6OLketgScsL+9MWCFnyT4wuTuTs3QYqDoCJ210fVIMYmTqCx1dcmXF9zgfL
-	 b4i3WaO34yiOsi2cRr1cB5wfYDhlpCvVwmVDTYLmild9A7ZZJGSOCoJbqiPduAjQWKpGG
-	 JLf8SCgA6cQx3bq2CZFLFDz6QzRP1O79zrG7WECHW92nEykqu5Fpp1+NF7V8TPM+/nsxA
-	 zqRkASVIklZamwdfTj3A5atXKh9BtpaB2KTymz144MdC6jJANVe48cjJKGa5G/i0EpA==
+	t=1793208027;
+	b=ntY+9sbBNNJYN159h1bmtgCr6ThpJwnajhTDE80COO22AbsqCsx/TR1sBSNxK0Ql2uSO
+	 SBKr2uSWlB+8EyZ0TeVjhjtJxt2Fp5vwuJ/2zyqSHbE/yYCoZ2VhJ2OzCoufDEcadPs2I
+	 42rNlq+fhXT6qwcQSA8qeRsBahgdB8L5GFgcAyARWPB9yD0xFrLbi/Oz5epxCGmfSAl4t
+	 T56pCTMeYb/aAsR0MI28lGGZU2dHQzkPFiz1cs3L17s+zqhbDBFXtJdDT8Xv/RP8FnAJl
+	 epO+e1XQID+A7cLqplJMU9qXVpvhSaJhvYgymSXd7W6mgAnFB0/sol1NT2LZ7OE9dAw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793207925;
-	h=Received:DKIM-Signature:Message-ID:Subject:From:To:Date:In-Reply-To:
-	 References:Autocrypt:Content-Type:Content-Transfer-Encoding:
-	 User-Agent:MIME-Version;
-	bh=nmm6p/aVRIiyeeH9qBfQTXSvfdUnDIGvowqdqE6h+VQ=;
-	b=ta5mU21rvt/dget9KtZrt8eoaS+p8wIQC+X3W5FwFmCyfta455yUduW3dAxXxiiH8ghL
-	 If4EBGT4EqyUC3MEMty9j3T1rdqESpkUL9eqegH/DUXl3ViyGNfQY4ut7B3WYbVESRMRX
-	 9mItaAesQn0wu44C6rrQDCDvTambBxHT2aq8awNfN2XK5v2qp3F7rdwp3BgwD9r1BRsBP
-	 6xtDGExokzwKu0gzfg4D5zwHrNzYvQbdSp+L6DI+yiIjy3OgJNSiQQepStjFthe+RGKVM
-	 lxaVYuchibR+WjsTLjwSWz1unoD8Ea9H3HNEIZt6lzypqq5va+JZ6Xg0gFWZlKn/7WQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793208027;
+	h=Received:DKIM-Signature:Message-ID:Subject:From:To:Cc:Date:
+	 In-Reply-To:References:Autocrypt:Content-Type:
+	 Content-Transfer-Encoding:User-Agent:MIME-Version;
+	bh=Jyz5jeE6e0Lc2tu2mEkLEw3LQE0FMfSOeYQ4TiqqUfs=;
+	b=S/UFAIoltdE1XpSroNdAODwUnZ9PeQn7/1BzpL7gdneGV8gAxwshK2Kw2HuAR3hVFbys
+	 wUFc50SkStQsywxBnOhNt+UD7F7PEyRJpcyaGbYE+P6lzPdLhtMk+qbnXr/ey67hdL1Pq
+	 cMxSbFon7RMkH5gHIVdBDSVWSMMsYe2eTJE/pLNuZO+lTKPpfyCY6TA5MtTG0OlFU1v8D
+	 pygjcSjLH/SzT8Bq1U6qwLGBGzbQT60OQ6WRMgeO80bhtSiMoaqx1hZwYgDXx3vfPJ3kU
+	 d3SOfP+1c3WAj/B7OStLrEeq6/1tq4Bca4Pk7uqOmSGFk9QMvAHgCex7d0wEU8Ixxmg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=OWF8p0EY;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=awnqYfeg;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B6CD606A31D
-	for <fstests@vger.kernel.org>; Wed, 28 Oct 2026 17:18:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97A38606A31A;
+	Wed, 28 Oct 2026 17:20:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=OWF8p0EY
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3EC1C1F01825
-	for <fstests@vger.kernel.org>; Wed, 28 Oct 2026 17:18:44 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=awnqYfeg
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 138C41F01825;
+	Wed, 28 Oct 2026 17:20:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793207924;
-	bh=nmm6p/aVRIiyeeH9qBfQTXSvfdUnDIGvowqdqE6h+VQ=;
-	h=Subject:From:To:Date:In-Reply-To:References;
-	b=OWF8p0EYPVh55awA3tJ3yJu616kwXCnyloNK6PdLpDhM5qUcYLo/jxHErokqANRry
-	 46JtHz/H5znFE4xyR+44hLz7CxOILsQY5X89Bd6N7pXB/rzUaEI5gYGbqQdBTno52i
-	 tVlynRMs/vM7W58D/7uTb3W28ww+KO7wW0pFmpPbQQeTPtR8MsFuOPFRirh+NVN4U5
-	 HEU7ltKTB+iE+vxIOtNRVo1vycOFt57BNWxG9WqlkYS0Aa4LW8W72tUyrMdRNMwgZq
-	 q1luCrchAS5jcO0761bDWFWj6EIczeXfqtMZVnOPAHPPdk01H1K37QlTxzqS2zkUFm
-	 SaPuZqYJGoFZA==
-Message-ID: <c236e40a7e6094f35fb0cb529282e25827c2741b.camel@kernel.org>
-Subject: Re: [PATCH] tools/get_maintainer.pl: accept and ignore
- --nogit-chief-penguins
+	s=k20260515; t=1793208027;
+	bh=Jyz5jeE6e0Lc2tu2mEkLEw3LQE0FMfSOeYQ4TiqqUfs=;
+	h=Subject:From:To:Cc:Date:In-Reply-To:References;
+	b=awnqYfeg56pS3qYA2Tk/wS2m4fmsDvbTM8CHEEXl2LlrFxu1Zps1jedbb4E1si18B
+	 rZbJY15Qr4yqMPgIRpME9FAvSW7oUi9JYSZ4fzwQ7rg2E5P8isTbFhtge6SU2ly0wt
+	 nNaL5LHrVFUsGw0PEXvwxK6Ublj+ZiE1DSvaAEVlJgyz3dwFk1PW695WrGCgm4gcX/
+	 GCGpYyOGcO4poinoCN+eD59c+I9nkqPYT6DfzmlsHCbqZaEvyAkMEauMqNTAyPcQ0v
+	 HQUoStaLGtfhzobLY1r/e9Vx0L41TTjyv4Rtl6IkqoOfQjg28N9Dxc5RpwGxMgy9pk
+	 4ddeuBHqcOwJg==
+Message-ID: <3a5b0778c77df7cce94bf9fce974b1bf1dfb6324.camel@kernel.org>
+Subject: Re: [PATCH RFC fstests] generic: add a test for multigrain
+ timestamps
 From: Jeff Layton <jlayton@kernel.org>
-To: fstests@vger.kernel.org
-Date: Wed, 28 Oct 2026 13:18:41 -0400
-In-Reply-To: <auId2GI01gShq9uf@zlang-mailbox>
-References: <20261027-b4-v1-1-a87dca9172c9@kernel.org>
-	 <auId2GI01gShq9uf@zlang-mailbox>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org, 
+	linux-fsdevel@vger.kernel.org
+Date: Wed, 28 Oct 2026 13:20:24 -0400
+In-Reply-To: <auIavey7CFq_l38s@infradead.org>
+References: <20261027-mgtime-v1-1-ec68914a116e@kernel.org>
+	 <auIavey7CFq_l38s@infradead.org>
 Autocrypt: addr=jlayton@kernel.org; prefer-encrypt=mutual;
  keydata=mQINBE6V0TwBEADXhJg7s8wFDwBMEvn0qyhAnzFLTOCHooMZyx7XO7dAiIhDSi7G1NPxw
  n8jdFUQMCR/GlpozMFlSFiZXiObE7sef9rTtM68ukUyZM4pJ9l0KjQNgDJ6Fr342Htkjxu/kFV1Wv
@@ -136,62 +138,24 @@ List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 
-On Thu, 2026-10-29 at 01:09 +0800, Zorro Lang wrote:
-> On Tue, Oct 27, 2026 at 09:51:54AM -0400, Jeff Layton wrote:
-> > b4 prep --auto-to-cc passes --nogit-chief-penguins as an option to
-> > get_maintainer.pl. Ensure that it accepts and ignores it.
+On Wed, 2026-10-28 at 08:54 -0700, Christoph Hellwig wrote:
+> On Tue, Oct 27, 2026 at 09:58:50AM -0400, Jeff Layton wrote:
+> > Ensure that the mtime and ctime apparently change, even when there are
+> > multiple writes in quick succession. Since this is opt-in for in-kernel
+> > filesystems and there is no way to test for this feature in userland,
+> > limit it to just ext4, f2fs, btrfs, tmpfs and xfs for now.
 > >=20
 > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
 > > ---
+> > I'd like to start testing this to make sure it doesn't break, but it's
+> > not universally supported on all filesystems. Is an explicit allowlist
+> > like this the right approach?
 >=20
-> Makes sense to me, thanks Jeff!
->=20
-> Reviewed-by: Zorro Lang <zlang@kernel.org>
->=20
-> Just out of curiosity, how did you configure your environment to trigger
-> this in fstests? Did you symlink "scripts" to "tools" (e.g. ln -s tools s=
-cripts),
-> or did you set some b4 git config :)
->=20
-> Thanks,
-> Zorro
->=20
+> Can we please expose the fact that multi-grain timestamp are supported
+> from the kernel?  This seems like it would be just one bit we'd need
+> in sttx or something similar.
 
-Yes, actually -- I symlinked it. We could probably do that as part of
-this patch if you like. I can respin or you can just add it.
-=20
-> >  tools/get_maintainer.pl | 2 ++
-> >  1 file changed, 2 insertions(+)
-> >=20
-> > diff --git a/tools/get_maintainer.pl b/tools/get_maintainer.pl
-> > index 671ffe26a799..02c02eea3e67 100755
-> > --- a/tools/get_maintainer.pl
-> > +++ b/tools/get_maintainer.pl
-> > @@ -31,6 +31,7 @@ my $email_fixes =3D 1;
-> >  my $email_list =3D 1;
-> >  my $email_moderated_list =3D 1;
-> >  my $email_subscriber_list =3D 0;
-> > +my $email_git_penguin_chiefs =3D 0;
-> >  my $email_git =3D 0;
-> >  my $email_git_all_signature_types =3D 0;
-> >  my $email_git_blame =3D 0;
-> > @@ -228,6 +229,7 @@ if (!GetOptions(
-> >  		'git-blame!' =3D> \$email_git_blame,
-> >  		'git-blame-signatures!' =3D> \$email_git_blame_signatures,
-> >  		'git-fallback!' =3D> \$email_git_fallback,
-> > +		'git-chief-penguins!' =3D> \$email_git_penguin_chiefs,
-> >  		'git-min-signatures=3Di' =3D> \$email_git_min_signatures,
-> >  		'git-max-maintainers=3Di' =3D> \$email_git_max_maintainers,
-> >  		'git-min-percent=3Di' =3D> \$email_git_min_percent,
-> >=20
-> > ---
-> > base-commit: 22348afe338c0f6d540c0d7ef0db749eaa51b218
-> > change-id: 20261027-b4-5ff755f4716c
-> >=20
-> > Best regards,
-> > --=20
-> > Jeff Layton <jlayton@kernel.org>
-> >=20
-
+I'd been resisting that, but maybe it's a good idea. I'll see what I
+can come up with. We can probably just add a flag to stx_attributes?
 --=20
 Jeff Layton <jlayton@kernel.org>
