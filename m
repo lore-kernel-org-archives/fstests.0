@@ -1,62 +1,45 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=213.95.11.211
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793203120;
-	b=udPRHeEhB9kNwKqxaECN3Pv7bOlEnr5qW2WNheT86beHNGTyrJ1/kwWFT9AXDnXTFOy4
-	 DhIvGJz5I/3HjN6G6SjXJ7mByStUUcEU2bV9wN/EByLRmrw/IL1AfTj8aFyTuG8Feu1Yp
-	 K0u6RmJPZRQiu77XxGVrIHoTUSM5FnWGRmr0nNCxFWbZYTe8dzcP5Ek+9yysq3aGKuut3
-	 vN+Q+QmRJG3Aue+sRwHC7Wg+KFA/i/Uqin7yZ94ZUUUTCS9ZZEonuL8vXgObU4FpV/t4h
-	 hHvlq3PEKWox0KzauKdN7yq58VWS7c6MONnpQMlaNijM2GT9KShuOGzPjn5Sv9BK2/w==
+	t=1793203171;
+	b=hliwI0jY0Cej23Gsn/PkbMyP4Mczyt9ET05lmhorG61I5RP2xeowap/2ci12txruvXc/
+	 xMDMGif0FyHs+xUMu0L8/uI6sqReUGDN10xdJsAYLUujNZ/jAsGEMKBW/WdhTm2MdnrSr
+	 cZXZQoHGd0s7xQ0rWDhrwUKdtcTf3kpvgpWy3jpyrXHZlVhdRtmsCeEjZk83S4XbI0QP4
+	 +YzCnz5Kfjp7dMR1AtHDHgLl7iBe9y92JkL8pmPFU/BRAreTURwQ80RmH6X78MLf9nSd9
+	 fWxYfDaJhoZVDiuTPeIdMpaj7KTY5+CJ7TqTBANw6qu3BVR+KtA1p7eLB2PeYrvbfwg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793203120;
-	h=DMARC-Filter:DKIM-Signature:Received:Date:From:To:Cc:Subject:
-	 Message-ID:References:MIME-Version:Content-Type:Content-Disposition:
-	 In-Reply-To:X-SRS-Rewrite;
-	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=;
-	b=Wxa3Mtrl13fLM/Tqmy85yhq1vmpiVCQNdDH38gCdnQpgqofnN2xwwkhiI+X5/uiHTsPc
-	 ly3cAQMIPA5PlpMkvjHNYhbLxZzZN/ubtQetzy5Wkhp1BfmqXZFRCkaFXpiM9mO1l81fR
-	 +QN5d91nllZQVEZjrIqpuwOw4BIynFRAiLMuA8DYF9xq8x1eAdp4ibNSkL1t0VGkKn6AQ
-	 J5U3d4F1IZt6gRyBR064BYO9jzL6HlOmZz2B/bvbTDBdkww082Qos2boUGB40tvMnkXad
-	 zCkXiiRR28J9UR0zJcy3uHNGoy3hkDatOWUXabYup/DUYgZkBmKrMlZwSHCtZJKWFoA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793203171;
+	h=DMARC-Filter:Received:Date:From:To:Cc:Subject:Message-ID:References:
+	 MIME-Version:Content-Type:Content-Disposition:In-Reply-To:User-Agent;
+	bh=tPemWb2rCPGtbEKexorlNRNCXDQ/EWhUdVHMfdkbSJM=;
+	b=Eq7NzkjsTkTpdK85kFHd2fBx+VGnxrgWqNyv/5BjjdCF4rtdbufX3Q3Smg3zOzCGJ5UZ
+	 1gK1F0RUtdpzdvFURflZSbLseOEwGbc/ps4KFLF/XC+wbochRg1Ru5UIqut+UuGlreJDn
+	 +S8yD0kBJzun1anUUECjHnM3TOvbat1CtBD1haOfEpysVTe8r9g0LhwQ3rz3rIuocFb+5
+	 hskhLWeXduwgcbaIZOAG9SoHH9L1bx2lKqJFfsU07TR1TBwndGA25+x0XbjZpr0hLfh9Q
+	 PV8PPKEAQ0PQZPxmikPk2/y3VbyQqlGp3LhR+ydy/oEwGp45c2xu5Cjej2Hi79LSypg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=infradead.org;
-	spf=none smtp.mailfrom=bombadil.srs.infradead.org;
-	dkim=pass header.d=infradead.org header.i=@infradead.org header.a=rsa-sha256 header.s=bombadil.20210309 header.b=lrdrXwrL;
-	arc=none smtp.remote-ip=198.137.202.133
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dmarc=pass header.from=lst.de;
+	spf=pass smtp.mailfrom=lst.de;
+	arc=none smtp.remote-ip=213.95.11.211
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1EE40606A320;
-	Wed, 28 Oct 2026 15:58:39 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 1EE40606A320
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=infradead.org header.i=@infradead.org header.a=rsa-sha256 header.s=bombadil.20210309 header.b=lrdrXwrL
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=lrdrXwrLoFOTWcSsCPFeo1oKQb
-	kStEXqax7ntAkpDUO2MZ06XjFQAmG6Ne+8YRD6FF434elHtMES0K6W4bzOra4Ek2gMGhf92Dj6nx7
-	1nWOvfkbG/UOhCXIzEXKwPqSgQ2GTlWHkdsXP4KpH3eZpAsxyp6nhrb7Uo/VSLt67vKeZAUMwAn8s
-	QtFS+32ZC96ymukxzwaD7lA4sP2obnxvrS3TFfVb14VcA1Hkf4oLwi44z4dqUmh3fybQw1GEIdgRy
-	JuLQv9KxqKfMeUlOpdKUxcLbphoI6exl+rIUGgNIr+/6xC1EZb/5/ALBTCQywZ5QC22XKJzBBRzgJ
-	QnCJYLTw==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.100.1 #2 (Red Hat Linux))
-	id 1xM62x-00000007Tep-2Vlq;
-	Wed, 28 Oct 2026 15:58:39 +0000
-Date: Wed, 28 Oct 2026 08:58:39 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-	linux-btrfs@vger.kernel.org, Anand Suveer Jain <asj@kernel.org>,
-	Chao Yu <chao@kernel.org>, Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH v2 6/6] fstests: replace btrfs specific helpers with
- common sysfs helpers
-Message-ID: <auIbr44GkKwofZs3@infradead.org>
-References: <20261023203114.1655019-1-zlang@kernel.org>
- <20261023203114.1655019-7-zlang@kernel.org>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C617F606A321;
+	Wed, 28 Oct 2026 15:59:30 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C617F606A321
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 8A55068AFE; Wed, 28 Oct 2026 16:59:26 +0100 (CET)
+Date: Wed, 28 Oct 2026 16:59:26 +0100
+From: Christoph Hellwig <hch@lst.de>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Zorro Lang <zlang@kernel.org>, Miklos Szeredi <miklos@szeredi.hu>,
+	Christian Brauner <brauner@kernel.org>,
+	Christoph Hellwig <hch@lst.de>, linux-fsdevel@vger.kernel.org,
+	linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v2] src/vfs: skip whiteout-device fixtures on overlayfs
+Message-ID: <20261028155926.GA20501@lst.de>
+References: <20261017092841.2364286-1-amir73il@gmail.com>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -68,10 +51,26 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20261023203114.1655019-7-zlang@kernel.org>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <20261017092841.2364286-1-amir73il@gmail.com>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-Looks good:
+On Sat, Oct 17, 2026 at 11:28:40AM +0200, Amir Goldstein wrote:
+> From: Christian Brauner <brauner@kernel.org>
+> 
+> The idmapped mount tests create a whiteout device,
+> mknod(S_IFCHR, makedev(0, 0)), as a fixture: a whiteout device is the
+> only character device an unprivileged caller may create, since it is
+> exempt from the CAP_MKNOD check. overlayfs reserves a 0:0 character
+> device as its on-disk whiteout marker, so ovl_mknod() returns -EPERM
+> and the fixture cannot be created, failing generic/633, generic/696 and
+> generic/697 on overlayfs.
+> 
+> Add a whiteout_device_supported() helper and skip the whiteout-device
+> fixtures and the checks that depend on them on overlayfs. The
+> makedev(5, 1) "creation must fail" probes are unaffected and keep
+> running. No-op on every other filesystem.
+
+Looks fine:
 
 Reviewed-by: Christoph Hellwig <hch@lst.de>
 
