@@ -1,95 +1,98 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.45
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.216.48
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793276941;
-	b=W8rH16t5MqU36edbmegbklqhpSVb09+/7AAXbgMivMk/5CQ9t4ZQ5zsRGgXvSh/oXjwo
-	 AXJE4wZJhK0+WHG/X3drJ5mWcXgGjoCsXGi3T+EYyzv3BRFNHxi76dkkJToFQZsQA3oXk
-	 DlIeY1X+E4cQxlzq2L9Yy/EwqaiXBc+/0tfccUyb1/ezrbrCg4NeNGSUB79fkLrhe0Vyj
-	 ivzKlpn+Lr44ieCDJ4EOTK0EWZ+kzFGn5PmamYgeoKsc57DjbqqT3vaQL8WXZUU2JPTps
-	 /qfy2wCUxrRZSBoBLQtJpH4RFiUsJoUvORVErKxpbzS/jLn5wz8yXuDK0ktLrOS/STQ==
+	t=1793349248;
+	b=x+mnISCYDmEqCegX/RsiPul7bM5Th0OIBXZWNZEgT7AciP+oUJ1P1LxIW1MeaWmYsP08
+	 Gw7WggQgnu1Md2ju5oDOGCBYbjMt1Etqh3iT/WRCNdxT8wRq9TT9g+i5nHK2I5WrKz99S
+	 k3gxdbv8D0GXAk/ZAVx8pdyp5zA4qKzVk9Ic4VixmzIy0Xk1LsrmJAqpXETNTxqkyDtHX
+	 eVvuvowUcr2nbYxRjEP9F5w8+kEFpNpahjgz8rekjJXdtVbl4zt+P00kd05tTQ6YGz3AX
+	 XsBke5DnrvhhMpAnjpos2abFQJNPti5zVKMTlVhYvznV6NEjXcaR+dqScjLWmczpjWQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793276941;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793349248;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:
-	 X-Google-Original-From:To:Cc:Subject:Date:Message-ID:X-Mailer:
-	 In-Reply-To:References:MIME-Version:Content-Transfer-Encoding;
-	bh=4OGFr7kDHZY+j8TMyBgS5H6nx5zjbqSGG4iF4apesuk=;
-	b=Kn2bow0GGEJ3Kwt8sdHggJd9kK1ae2GUzL1KtEdo+YCf0gtQtTpA2RCsfpeSMjMg0cCY
-	 omH+YK9UtmLf090DBnRKssiObzjP0FE4kluha+R9XiOKWj/n1pEtvTdgemi4pP5KFmydi
-	 qSwq+gQuIF2ZKntpkjBuLTaZX3bHK4Th6cdjKhY3q5iG6iRsXrQXoO3ZajCjrnQJJ6tN8
-	 2/95oAOTFfw1UMZ8202fbg/S2NNbEHJYVcD6xUny/OXoTYurT3M48snE0Fg8xoEP/eEKL
-	 foEnu11cJ5iIq5aPZEBB9jQTK0Lh17aCc4x+TMIcAMG8spnA/uRbcb3GsKW1sMJG8jg==
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
+	 Date:Message-ID:X-Mailer:In-Reply-To:References:MIME-Version:
+	 Content-Transfer-Encoding;
+	bh=ZdFlKAdQE4/ZTqkRXdV4kEJA5/zwRfRs5jP160wiz4Q=;
+	b=EzdPXhd8JLsVLlA4LdlkgUQ+czftAhMSSGDv5jS2U7GS+Lhq1Rpv0cssntXSXi5H3HVi
+	 JnqsSQDjjqNDvXcJOkdACOk86W0h9nVX1SsCKz5mPvsg+4V9XnJK3pnGD+gKs4cALK4yp
+	 NzP6pYmfmICkbr3LFMBQpaHqSGYLDObZjY/JUXhRYOtt3SdxGuZf+3ORSV2qjsck4loyf
+	 yO3+sPXib//H7wNxekXmo3dJLnK0jRLeTNWEevxkAWUzj7jhGDRezu2N3f415Wu2jy0lA
+	 GJPxWQZFmCDP5b7NLnBQI8kYrTQCrawN71rI9O+tEDt0UhrSZpHJOn/tHK5U4mRnlfQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=gmail.com;
 	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Skodb+wg;
-	arc=none smtp.remote-ip=209.85.128.45
-Received: from mail-wm1-f45.google.com (mail-wm1-f45.google.com [209.85.128.45])
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=ko77PEhy;
+	arc=none smtp.remote-ip=209.85.216.48
+Received: from mail-pj1-f48.google.com (mail-pj1-f48.google.com [209.85.216.48])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38766606A322
-	for <fstests@vger.kernel.org>; Thu, 29 Oct 2026 12:29:01 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 38766606A322
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3841B606A321
+	for <fstests@vger.kernel.org>; Fri, 30 Oct 2026 08:34:08 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3841B606A321
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Skodb+wg
-Received: by mail-wm1-f45.google.com with SMTP id 5b1f17b1804b1-4a20bde60a0so17054845e9.3
-        for <fstests@vger.kernel.org>; Thu, 29 Oct 2026 05:29:01 -0700 (PDT)
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=ko77PEhy
+Received: by mail-pj1-f48.google.com with SMTP id 98e67ed59e1d1-3ae1d0caaedso186455a91.2
+        for <fstests@vger.kernel.org>; Fri, 30 Oct 2026 01:34:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1793276940; x=1793881740; darn=vger.kernel.org;
+        d=gmail.com; s=20260707; t=1793349247; x=1793954047; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=4OGFr7kDHZY+j8TMyBgS5H6nx5zjbqSGG4iF4apesuk=;
-        b=Skodb+wgQoWoPeNWPw+LErtBDhy5tIGuvjoxoSdDqSdPMX5yGO8NzP4KO2pOR3jvtW
-         9Mj9Mq/yoVpubpJdTmVbFeKXUp92US7YtqegxMy8yACFeoOaQaw1gra+B9vBa7SxnDa5
-         b6acl5WvsQI8H6xUcJlsb81N8ktGcOrFaEGeNt6JGcibZ3cI/uSVdJb1ni3JsxaijNn4
-         YSa9H4uRXiKxSFjhgS0ZIAXlzPtukLuVx0IQK7rEtcyDiGxpFyq+6pwew8o4AG/9OmPe
-         5GNIywnQPckRgrr0xVBoYAZv/UaKgH7SbCEbjURiJ3XxfkVhlAR0rNu4L0+JUG3ptitM
-         rKGQ==
+        bh=ZdFlKAdQE4/ZTqkRXdV4kEJA5/zwRfRs5jP160wiz4Q=;
+        b=ko77PEhyaeBjXEph+s3SfTjNPDyeiZtyTmCGpwv4s9ZGmkvtmMdrtAJwxibAwKih/7
+         kzwO+dgD/XDGMd8TxnbnRWhTxGYwQHCNTfoItE4dxVlz+iV7/DJeZ23oIgmO31GOPyEi
+         v1n3rL/n4upVFKsqgtF+lIUwKiJ48R8Y0gG2uY6Wo0PH9ynwQXkjMXtAtbS+n6HmDILp
+         8pgHA4CvDvJa31dmIzLHFdVgG9zoSKjfUZUAAAZ7YJIDw3aNT2hkhAe79UqwiqKNC+kt
+         oc3O4/DzFaseb6CeSW88qWJTW2JeZJA38+9HkJU8Bpj1/Zld3Ks5BoOK5I2758FM7hGx
+         xTwg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793276940; x=1793881740;
+        d=1e100.net; s=20260707; t=1793349247; x=1793954047;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=4OGFr7kDHZY+j8TMyBgS5H6nx5zjbqSGG4iF4apesuk=;
-        b=CVUWIV+O9toGkc23k9VsLQSlxCque5m2FFK3Ta1KG9Fz9TcQt3Ar4HsTn1r74GtLoe
-         II8lECjijHaS0Y87OTdkrvlRACMpgmIGzItF1sXegsdG7jpwQxf5eCj3HXANWAQSSEqL
-         n0veQ2c3cQidtY3Yjko1oVd1xjX1FOSoehfTMpgQWQAkruBDBFg3x3WhV7aPzUOPjeJS
-         fN+wCppGgas0A0Rvqsw9PpPEhQJreFywDJ74mR3PrQWOgWf8F55dxxPFCpyuaK6i6oKZ
-         7AzwryFb0ccw2oB3HzEMNtXcBdP27PBa1HYmngx0pKMB1TeaTrhA2D48KP9Fu95tbf+q
-         vt5w==
-X-Gm-Message-State: AFq9FYLBsXTI8PTLDVQmxaAISwhwOltvuw0JEWg2YWKJfd2lgpb9XE5U
-	MetvRlHmszaXH8B3yNYA0Qf7+mZkui/aiu+7a5/Tkf7MJGa+sw/q5LDkB2ZiwMVu
-X-Gm-Gg: AYBFou3VLHjsKYdVFgD4mfritlcWqwGWK0LcN+7IfEPwKqh/qoFxF36sEhe/2gJEW3y
-	ISYwepPX0z3kQOMTcqxeviR1TtThO4kd3Z3JVxDyOC/4DGc3ebovUgAwtjC8uY5kNEE/Sc+GW59
-	DlGMiF4Y74Lc3dAmEU9GQxlVu2KyuoBKtpz+iRBZ0BDxlfq8sUnRd9xKmf1rcWYrzlJfLKQRwlO
-	MTS2RBk+vjgfPKI29BbbxFnu7UYAXP5ArXoaEIyMA1Z3Sd53CaYJTKGKUi8N7mU6Dg+uIO7dQou
-	upOhBQx874ozM9x6ho8pbRIyE1Sd5nDoibaqGg+yOHrRwHsjuoeMGQjpbuwCZU7fQwhRJGYTI4J
-	+5wXOCGtDeA07A2GWeWEEIdkhhyB8Norl/Iu+moW0+n/U33+BD5reBEkUH+OIEqcbYs10LLNIuf
-	82IpL+K+ba7LT+yP1+aOALDwvWbDgD7szi+9ShobkEyl/hXe4Q71Dxvdv0JonI4wPnBXC7mDZ69
-	ygAyaDZVTEb1ynFVCluVA8H/o9a4Qwui3hXc19sCjORRVr6DHitcFDL4VWWX2DbN5aN7jCmk5f4
-	l+ZA3gQ4OGGUNL6k1V7QIzUeO+Nv5d/11QsmvizJVZPtXpIwmoAz0Kt9RQph3Q==
-X-Received: by 2002:a05:600c:314f:b0:4a3:59c9:a744 with SMTP id 5b1f17b1804b1-4a965be619dmr112126955e9.7.1793276939523;
-        Thu, 29 Oct 2026 05:28:59 -0700 (PDT)
-Received: from Cluster2.powerhub ([2a0a:ef40:18b5:9e01:225:90ff:fefc:9ffe])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4aa7f7f50d3sm92477915e9.8.2026.10.29.05.28.58
+        bh=ZdFlKAdQE4/ZTqkRXdV4kEJA5/zwRfRs5jP160wiz4Q=;
+        b=CnmctI8vE4nMOP8kq6u2owALbZ7XoDwVuy2SK56uJqIk3MKSUzFT/mvWip3xS1zC0U
+         ycvBnoKh8XioPGUxKHnGF7HVMJJMI0H69+PEbIojnab0pFrYb8BAFbrjlqDI/ANPtQyW
+         nFjo5Y/NMWqclc8756X25RK+NEDq8waFOZTsE6KvhIrrDBd+RL0pd9R7CQHmUQ/jtKgO
+         V6z65bq5mXNGTvFpHMp+SATkxu3jmLOYAayNEfWAn8mxGLzVjP6p9nUKi6m/4gp0Zfoj
+         Vy1tseVypp5hk7xhygaxDNQuxcG+6QsVC0SDYHaGqkSIVI6KTVO+5OrTMFTlvhM0HXOv
+         vrxQ==
+X-Gm-Message-State: AFq9FYKZr+f/wgta7Jbj4tDRSUMhNMLVM/qOde8M3d0ZO26FUUOTbi7e
+	FQqYRMnGuOVPg0KVL6JfdwK2DzSsRpQObKwgIdEaVOl/1F0QUgQJ1qRU9hkHLKYy
+X-Gm-Gg: AYBFou2Zf4h1SMFJdYVdQE4EtwE201mtpQZWriAM6RxCJwJTy/GbQx9LI6kZNaKtUUc
+	YNxLnmO2x7dsR9iA62ez+SFsb/ldKFRxeqMCTjdece53uKS2Zv/rW69E2vzfEFe6xt8cOD890pI
+	iXTS6n3moeM5Hy5cKidRH4RBFGYaregv5pYvBe1WxZwkHn/zMD32PRXrR7mtyCS4VaAEtlyjIwN
+	hV8EA+jESWMg9fTbRE4pjx9Pszrt+RXSybEr+BrZiKSz+D8HDvW9BRg2s5PHy6WpW1ZSQumtz04
+	M75PQREx487NcPcUn236cst6KZhD2+WVyXeE3bL1Sq9i/22oqY2aWvsMaqIn5UiGpa+xuX7gckA
+	QvLu1s/r7RRwNiE3mJMU5h+tfhb4YhnuNQwcm9HsUE/Wawn9NuLVJSzffgIszPkrNCXCYmsezfw
+	b0hums2Dm1CaAh8KDX/e+DZs5qWuQH8gv0TYLXge4+FkZnpr+Qj7WB3dXaT2ekTZ3CwQ3fFOQdp
+	7d1w+De3hiG8twpw57UW2hRARUno/geb8CJ0FH99OFq3+IU9jDj0zEPCiRora8LgBSpyplDcUPx
+	RkIjsdPoPSkWqtHQos28+1iRwF5EGio8ce1zEelDgrxfW+v8s45EWs+yQQJCUM30PY7D8pd6O70
+	7ISRW3Syie+v/R+81BtMIoYzm8p5aA5EGPByvYYVvRIttvOKOX/teQya3OuiCi8UB3K97cZDvWj
+	FpedjXE6P1Cf1L9w==
+X-Received: by 2002:a17:90b:5111:b0:3ab:f38:2b43 with SMTP id 98e67ed59e1d1-3ae89772eaemr1169719a91.34.1793349247420;
+        Fri, 30 Oct 2026 01:34:07 -0700 (PDT)
+Received: from spider.bream-herring.ts.net ([103.6.151.236])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3ae6e8fb2fesm7596386a91.4.2026.10.30.01.34.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 29 Oct 2026 05:28:59 -0700 (PDT)
-From: Artem Blagodarenko <artem.blagodarenko@gmail.com>
-X-Google-Original-From: Artem Blagodarenko <ablagodarenko@thelustrecollective.com>
+        Fri, 30 Oct 2026 01:34:07 -0700 (PDT)
+From: Matthias Goergens <matthias.goergens@gmail.com>
 To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org,
-	adilger.kernel@dilger.ca,
-	ablagodarenko@thelustrecollective.com,
-	Artem Blagodarenko <artem.blagodarenko@gmail.com>
-Subject: [RFC PATCH v5 8/8] ext4/069: test LUFID in inline_data directory entries
-Date: Thu, 29 Oct 2026 12:28:39 +0000
-Message-ID: <20261029122842.230704-9-ablagodarenko@thelustrecollective.com>
-X-Mailer: git-send-email 2.52.0
-In-Reply-To: <20261029122842.230704-1-ablagodarenko@thelustrecollective.com>
-References: <20261029122842.230704-1-ablagodarenko@thelustrecollective.com>
+Cc: zlang@kernel.org,
+	fdmanana@kernel.org,
+	linux-xfs@vger.kernel.org,
+	linux-btrfs@vger.kernel.org,
+	djwong@kernel.org,
+	amir73il@gmail.com
+Subject: [PATCH v3] generic: test FIDEDUPERANGE result reporting with REPORT_PROGRESS
+Date: Fri, 30 Oct 2026 16:34:03 +0800
+Message-ID: <20261030083403.3041196-1-matthias.goergens@gmail.com>
+X-Mailer: git-send-email 2.56.0
+In-Reply-To: <20260817095017.948979-1-matthias.goergens@gmail.com>
+References: <20260817095017.948979-1-matthias.goergens@gmail.com>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -101,211 +104,433 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: Artem Blagodarenko <artem.blagodarenko@gmail.com>
+Add a raw FIDEDUPERANGE helper that reports each destination's
+bytes_deduped and status, and a test for the new
+FILE_DEDUPE_RANGE_REPORT_PROGRESS flag: explicit zero-length success, a
+request shortened for an interior destination but not for one ending at
+EOF, a sub-block request that makes no progress, differing contents
+(status DIFFERS, zero bytes), a per-destination error, rejection of an
+unknown flag bit, and one unflagged case pinning the legacy reporting of
+the requested length.  The test is skipped on kernels that reject the
+flag.
 
-Verify that a LUFID set via EXT4_IOC_SET_LUFID on an entry in an
-inline_data directory is correctly stored on disk.
+xfs_io retries shortened dedupe operations, so its output cannot verify
+one raw multi-destination ioctl or distinguish an explicit zero-length
+request from a nonzero request shortened to zero; hence the helper.
 
-The test formats a filesystem with -O dirdata,inline_data, creates a
-directory with two entries (small enough to remain inline), sets a LUFID
-on one entry, and confirms the fid= field is present in the raw
-directory data via debugfs.
-
-The require guard probes the combined dirdata+inline_data mount so that
-a kernel that accepts each feature individually but rejects the
-combination emits [not run] rather than FAIL.
-
-Signed-off-by: Artem Blagodarenko <artem.blagodarenko@gmail.com>
+Signed-off-by: Matthias Goergens <matthias.goergens@gmail.com>
 ---
- tests/ext4/069     | 164 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/069.out |   7 ++
- 2 files changed, 171 insertions(+)
- create mode 100755 tests/ext4/069
- create mode 100644 tests/ext4/069.out
+Christian Brauner applied the kernel series to vfs-7.5.misc on
+21 October.  Reference the flag commit in _wants_kernel_commit:
+847f74d6293b (vfs: add FILE_DEDUPE_RANGE_REPORT_PROGRESS flag to
+FIDEDUPERANGE).
+https://lore.kernel.org/all/20261021-rente-privat-mitfiebern-1b76f4650038@brauner/
 
-diff --git a/tests/ext4/069 b/tests/ext4/069
-new file mode 100755
-index 00000000..b8b3e459
+v3:
+- reference the applied kernel flag commit
+- renumber 806 to 810: for-next already uses 806 for an xattr test
+- use _get_file_block_size instead of _get_block_size (Zorro, on v1)
+- the kernel side (v5) now has Reviewed-by from Amir and Darrick, the
+  acks Zorro asked to wait for; it reports bytes_deduped = 0 on DIFFERS
+  (the advance hint tested in v2 was dropped), so both DIFFERS cases
+  expect zero
+- new case: an unknown flag bit is rejected with EINVAL (helper -F)
+- new case: two small differing files ending at EOF report 0 bytes,
+  status DIFFERS
+- _notrun on kernels that reject the flag, rather than failing
+- .gitignore entry moved into alphabetical order
+
+Previously tested on 2 October as generic/806 under QEMU on v7.3-rc4
+with and without the v5 series, on btrfs, XFS (4k and 1k blocks) and
+ext4.  With the series generic/517 and
+generic/806 pass on btrfs and both XFS configurations; without it 806 is
+not run ("kernel does not support FILE_DEDUPE_RANGE_REPORT_PROGRESS")
+and 517 passes.  On ext4 both are not run (no dedupe).
+
+Validation refreshed on 30 October against fstests for-next d07dca72:
+helper builds with -Wall -Wextra -Werror -O2; bash -n passes.  The
+filesystem tests have not been rerun on that base.
+
+ .gitignore            |   1 +
+ src/Makefile          |   2 +-
+ src/fideduperange.c   | 172 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/810     | 144 +++++++++++++++++++++++++++++++++++
+ tests/generic/810.out |   9 +++
+ 5 files changed, 327 insertions(+), 1 deletion(-)
+ create mode 100644 src/fideduperange.c
+ create mode 100755 tests/generic/810
+ create mode 100644 tests/generic/810.out
+
+diff --git a/.gitignore b/.gitignore
+index cdcfa06..418ef7c 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -86,6 +86,7 @@ tags
+ /src/fake-dump-rootino
+ /src/fault
+ /src/feature
++/src/fideduperange
+ /src/fiemap-tester
+ /src/fill
+ /src/fill2
+diff --git a/src/Makefile b/src/Makefile
+index eaf0621..774447e 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -25,7 +25,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+-	locktest unwritten_mmap bulkstat_unlink_test deduperace \
++	locktest unwritten_mmap bulkstat_unlink_test deduperace fideduperange \
+ 	bulkstat_unlink_test_modified t_dir_offset t_futimens t_immutable \
+ 	stale_handle pwrite_mmap_blocked t_dir_offset2 seek_sanity_test \
+ 	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
+diff --git a/src/fideduperange.c b/src/fideduperange.c
+new file mode 100644
+index 0000000..d8aef98
 --- /dev/null
-+++ b/tests/ext4/069
-@@ -0,0 +1,164 @@
++++ b/src/fideduperange.c
+@@ -0,0 +1,172 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ * Issue a raw FIDEDUPERANGE ioctl and report each destination's result.
++ */
++#include <errno.h>
++#include <fcntl.h>
++#include <getopt.h>
++#include <inttypes.h>
++#include <linux/fs.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/ioctl.h>
++#include <unistd.h>
++
++/*
++ * Local copies of the UAPI types: the system linux/fs.h may predate the
++ * FILE_DEDUPE_RANGE_REPORT_PROGRESS flag.  The layout matches the kernel
++ * UAPI.
++ */
++#ifndef FILE_DEDUPE_RANGE_REPORT_PROGRESS
++#define FILE_DEDUPE_RANGE_REPORT_PROGRESS (1U << 0)
++#endif
++#define FILE_DEDUPE_RANGE_SAME		0
++#define FILE_DEDUPE_RANGE_DIFFERS	1
++
++struct file_dedupe_range_info_local {
++	__s64 dest_fd;
++	__u64 dest_offset;
++	__u64 bytes_deduped;
++	__s32 status;
++	__u32 reserved;
++};
++
++struct file_dedupe_range_local {
++	__u64 src_offset;
++	__u64 src_length;
++	__u16 dest_count;
++	__u16 reserved1;
++	__u32 flags;
++	struct file_dedupe_range_info_local info[0];
++};
++
++#ifndef FIDEDUPERANGE
++#define FIDEDUPERANGE _IOWR(0x94, 54, struct file_dedupe_range_local)
++#endif
++
++static __u32 range_flags;
++
++static void
++usage(const char *progname)
++{
++	fprintf(stderr,
++		"Usage: %s [-f] [-F flags] src src_offset length dest dest_offset "
++		"[dest dest_offset ...]\n"
++		"  -f: set FILE_DEDUPE_RANGE_REPORT_PROGRESS\n"
++		"  -F: set the raw flags value (e.g. 0x2 for an unknown bit)\n",
++		progname);
++	exit(EXIT_FAILURE);
++}
++
++static uint64_t
++parse_u64(const char *arg, const char *name)
++{
++	char *end;
++	unsigned long long value;
++
++	errno = 0;
++	value = strtoull(arg, &end, 0);
++	if (errno || end == arg || *end != '\0') {
++		fprintf(stderr, "Invalid %s: %s\n", name, arg);
++		exit(EXIT_FAILURE);
++	}
++
++	return value;
++}
++
++int
++main(int argc, char **argv)
++{
++	struct file_dedupe_range_local *range;
++	size_t range_size;
++	unsigned int dest_count;
++	unsigned int i;
++	int src_fd;
++	int ret;
++	int c;
++
++	const char *progname = argv[0];
++
++	while ((c = getopt(argc, argv, "fF:")) != -1) {
++		switch (c) {
++		case 'f':
++			range_flags |= FILE_DEDUPE_RANGE_REPORT_PROGRESS;
++			break;
++		case 'F':
++			range_flags |= (__u32)parse_u64(optarg, "flags");
++			break;
++		default:
++			usage(progname);
++		}
++	}
++	argc -= optind;
++	argv += optind;
++
++	if (argc < 5 || (argc - 3) % 2 != 0)
++		usage(progname);
++
++	dest_count = (argc - 3) / 2;
++	if (dest_count > UINT16_MAX) {
++		fprintf(stderr, "Too many destinations: %u\n", dest_count);
++		return EXIT_FAILURE;
++	}
++
++	range_size = sizeof(*range) +
++		dest_count * sizeof(struct file_dedupe_range_info_local);
++	range = calloc(1, range_size);
++	if (!range) {
++		perror("calloc");
++		return EXIT_FAILURE;
++	}
++
++	src_fd = open(argv[0], O_RDONLY);
++	if (src_fd < 0) {
++		perror(argv[0]);
++		free(range);
++		return EXIT_FAILURE;
++	}
++
++	range->src_offset = parse_u64(argv[1], "source offset");
++	range->src_length = parse_u64(argv[2], "length");
++	range->dest_count = dest_count;
++	range->flags = range_flags;
++
++	for (i = 0; i < dest_count; i++) {
++		const char *dest_path = argv[3 + i * 2];
++
++		range->info[i].dest_fd = open(dest_path, O_RDWR);
++		if (range->info[i].dest_fd < 0) {
++			perror(dest_path);
++			ret = EXIT_FAILURE;
++			goto close_destinations;
++		}
++		range->info[i].dest_offset =
++			parse_u64(argv[4 + i * 2], "destination offset");
++		/* Sentinels: the kernel must overwrite both output fields. */
++		range->info[i].bytes_deduped = ~0ULL;
++		range->info[i].status = INT32_MIN;
++	}
++
++	if (ioctl(src_fd, FIDEDUPERANGE, range) < 0) {
++		perror("FIDEDUPERANGE");
++		ret = EXIT_FAILURE;
++		goto close_destinations;
++	}
++
++	for (i = 0; i < dest_count; i++)
++		printf("destination %u: bytes=%" PRIu64 " status=%d\n", i,
++		       (uint64_t)range->info[i].bytes_deduped,
++		       range->info[i].status);
++	ret = EXIT_SUCCESS;
++
++close_destinations:
++	while (i > 0) {
++		i--;
++		close(range->info[i].dest_fd);
++	}
++	close(src_fd);
++	free(range);
++	return ret;
++}
+diff --git a/tests/generic/810 b/tests/generic/810
+new file mode 100755
+index 0000000..2c09315
+--- /dev/null
++++ b/tests/generic/810
+@@ -0,0 +1,144 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 The Lustre Collective. All Rights Reserved.
-+# Author: Artem Blagodarenko <ablagodarenko@thelustrecollective.com>
++# Copyright (c) 2026 Matthias Goergens. All Rights Reserved.
 +#
-+# FS QA Test ext4/069
++# FS QA Test No. 810
 +#
-+# Regression test for inline directory + dirdata LUFID loss.
++# Check FIDEDUPERANGE result reporting with FILE_DEDUPE_RANGE_REPORT_PROGRESS:
++# bytes_deduped is the length actually deduplicated for zero-length,
++# shortened and zero-progress requests, and zero for differing requests and
++# errors; unknown flag bits are rejected; one unflagged case pins the legacy
++# reporting.
 +#
-+# ext4_add_dirent_to_inline() was passing NULL instead of dfid to
-+# ext4_insert_dentry_data(), silently dropping the LUFID for every entry
-+# created while the directory fits in the inode's inline-data area.
-+#
-+# The test creates a directory small enough to stay inline, sets a LUFID
-+# on one of its entries, and verifies the LUFID is present on disk via
-+# debugfs.  Without the fix, debugfs reports no fid= field and the test
-+# fails.
-+
 +. ./common/preamble
-+_begin_fstest auto quick
++_begin_fstest auto quick dedupe clone
 +
-+. ./common/filter
-+. ./common/ext4
++. ./common/reflink
 +
-+_exclude_fs ext2
-+_exclude_fs ext3
++_require_scratch_dedupe
++_require_test_program "fideduperange"
 +
-+_require_scratch_nocheck
-+_require_command "$SET_LUFID_PROG"
++_wants_kernel_commit 847f74d6293b \
++	"vfs: add FILE_DEDUPE_RANGE_REPORT_PROGRESS flag to FIDEDUPERANGE"
 +
-+_require_scratch_dirdata()
-+{
-+	if test ! -f /sys/fs/ext4/features/dirdata ; then
-+		_notrun "dirdata feature not supported by kernel"
-+	fi
-+	if ! $MKFS_EXT4_PROG -O dirdata -n $SCRATCH_DEV &>>$seqres.full ; then
-+		_notrun "mkfs.ext4 does not support dirdata feature"
-+	fi
-+	if ! _scratch_mkfs -O dirdata,inline_data &>>$seqres.full ; then
-+		_notrun "failed to create filesystem with dirdata+inline_data"
-+	fi
-+	if ! _try_scratch_mount &>>$seqres.full ; then
-+		_notrun "kernel cannot mount filesystem with dirdata+inline_data"
-+	fi
-+	_scratch_unmount
-+}
-+
-+_require_scratch_ext4_feature "inline_data"
-+_require_scratch_dirdata
-+
-+# ---- helpers ----------------------------------------------------------------
-+
-+_u32_to_le_hex()
-+{
-+	local v=$1
-+	local h
-+	h=$(printf '%08x' "$((v & 0xffffffff))")
-+	printf '%s%s%s%s' "${h:6:2}" "${h:4:2}" "${h:2:2}" "${h:0:2}"
-+}
-+
-+_build_default_expected_fid()
-+{
-+	local path=$1
-+	local inode version ino_lo ver_lo ver_hi seq_hex oid_hex ver_hex
-+
-+	inode=$(stat -c '%i' "$path") || return 1
-+	version=$(debugfs -R "stat <${inode}>" $SCRATCH_DEV 2>/dev/null | \
-+		sed -n 's/.*Generation:[[:space:]]*\([0-9xa-fA-F]\+\).*/\1/p' | head -1)
-+	[ -z "$version" ] && return 1
-+
-+	ino_lo=$((inode & 0xffffffff))
-+	ver_lo=$((version & 0xffffffff))
-+	ver_hi=$(((version >> 32) & 0xffffffff))
-+
-+	# ext4 inode numbers are 32-bit so f_seq fits in 8 hex chars; avoid a
-+	# 16-char $((16#...)) that would overflow for values >= 0x8000000000.
-+	seq_hex="$(_u32_to_le_hex "$ino_lo")"
-+	oid_hex="$(_u32_to_le_hex "$ver_lo")"
-+	ver_hex="$(_u32_to_le_hex "$ver_hi")"
-+
-+	printf '[0x%x:0x%x:0x%x]' "$((16#$seq_hex))" "$((16#$oid_hex))" \
-+		"$((16#$ver_hex))"
-+}
-+
-+# Confirm the directory inode carries the Inline_Data flag.
-+_check_inline()
-+{
-+	local dir=$1
-+	local inode flags
-+
-+	inode=$(stat -c '%i' "$dir")
-+	flags=$(debugfs -R "stat <${inode}>" $SCRATCH_DEV 2>/dev/null | \
-+		sed -n 's/^.*Flags: \([0-9a-fx]*\).*$/\1/p')
-+	# EXT4_INLINE_DATA_FL = 0x10000000
-+	if (( (16#${flags#0x}) & 0x10000000 )); then
-+		return 0
-+	fi
-+	return 1
-+}
-+
-+# ---- test -------------------------------------------------------------------
-+
-+echo "== Create dirdata + inline_data filesystem =="
-+_scratch_mkfs -O dirdata,inline_data &>>$seqres.full
++_scratch_mkfs >>$seqres.full 2>&1
 +_scratch_mount
 +
-+TESTDIR=$SCRATCH_MNT/inline_dir
-+mkdir "$TESTDIR"
++block_size=$(_get_file_block_size "$SCRATCH_MNT")
++short_length=$((2 * block_size))
++full_length=$((short_length + 100))
 +
-+# Two entries keep the directory comfortably within the inline-data area
-+# (~160 bytes available in a 256-byte inode) so ext4 does not convert it
-+# to an on-disk block before we set the LUFID.
-+echo "content" > "$TESTDIR/file_a"
-+echo "content" > "$TESTDIR/file_b"
++src=$SCRATCH_MNT/src
++src_short=$SCRATCH_MNT/src-short
++src_diff=$SCRATCH_MNT/src-diff
++dest_interior=$SCRATCH_MNT/dest-interior
++dest_eof=$SCRATCH_MNT/dest-eof
++dest_short_eof=$SCRATCH_MNT/dest-short-eof
++dest_diff=$SCRATCH_MNT/dest-diff
 +
-+sync
++$XFS_IO_PROG -f -c "pwrite -S 0x6b 0 $full_length" "$src" \
++	>>$seqres.full 2>&1
++$XFS_IO_PROG -f -c "pwrite -S 0x6b 0 100" "$src_short" \
++	>>$seqres.full 2>&1
++$XFS_IO_PROG -f -c "pwrite -S 0x6b 0 $((full_length + block_size))" \
++	"$dest_interior" >>$seqres.full 2>&1
++$XFS_IO_PROG -f -c "pwrite -S 0x6b 0 $full_length" "$dest_eof" \
++	>>$seqres.full 2>&1
++$XFS_IO_PROG -f -c "pwrite -S 0x6b 0 100" "$dest_short_eof" \
++	>>$seqres.full 2>&1
++$XFS_IO_PROG -f -c "pwrite -S 0x61 0 $full_length" "$src_diff" \
++	>>$seqres.full 2>&1
++$XFS_IO_PROG -f -c "pwrite -S 0x62 0 $full_length" "$dest_diff" \
++	>>$seqres.full 2>&1
 +
-+echo "== Verify directory is inline =="
-+if ! _check_inline "$TESTDIR"; then
-+	echo "SKIP: directory was not kept inline (inode too small or inline_data inactive)"
-+	_scratch_unmount
-+	status=0
-+	exit
-+fi
-+echo "  inline_dir: inline data confirmed"
-+
-+echo "== Set LUFID on file_a (inline directory entry) =="
-+$SET_LUFID_PROG "$SCRATCH_MNT/inline_dir" file_a >>$seqres.full
-+if [ $? -ne 0 ]; then
-+	echo "FAIL: set_lufid returned error"
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
-+fi
-+
-+expected=$(_build_default_expected_fid "$TESTDIR/file_a")
-+if [ -z "$expected" ]; then
-+	echo "FAIL: could not compute expected LUFID"
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
++# Kernels without the flag reject it with EINVAL before looking at any
++# destination.
++result=$($here/src/fideduperange -f "$src" 0 0 "$dest_interior" 0 2>&1)
++echo "flag probe: $result" >>$seqres.full
++if echo "$result" | grep -q "Invalid argument"; then
++	_notrun "kernel does not support FILE_DEDUPE_RANGE_REPORT_PROGRESS"
 +fi
 +
-+sync
++check_results()
++{
++	local description="$1"
++	local expected="$2"
++	shift 2
++	local result
++	local ret
 +
-+echo "== Verify LUFID stored in inline directory entry =="
-+# _dump_dir_structure reads from the raw block device via debugfs and
-+# reports the fid= field written by ext4_dirdata_set().  Before the fix,
-+# ext4_add_dirent_to_inline() passed NULL instead of dfid, so no fid=
-+# field was written and this check would fail.
-+if ! _dump_dir_structure "$TESTDIR" file_a "$expected"; then
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
++	result=$($here/src/fideduperange "$@" 2>&1)
++	ret=$?
++	{
++		echo "$description"
++		echo "$result"
++	} >>$seqres.full
++
++	if [ $ret -ne 0 ]; then
++		_fail "$description: ioctl helper failed"
++	fi
++	if [ "$result" != "$expected" ]; then
++		_fail "$description: unexpected ioctl result"
++	fi
++
++	echo "$description"
++}
++
++# With the flag, bytes_deduped is the length the filesystem reports as
++# deduplicated on SAME, and zero on DIFFERS or an error.
++
++expected="destination 0: bytes=0 status=0"
++check_results "zero length: 0 bytes, SAME" "$expected" \
++	-f "$src" 0 0 "$dest_interior" 0
++
++expected="destination 0: bytes=$short_length status=0
++destination 1: bytes=$full_length status=0"
++check_results "mixed partial request: shortened, full" "$expected" \
++	-f "$src" 0 "$full_length" "$dest_interior" 0 "$dest_eof" 0
++
++expected="destination 0: bytes=0 status=0
++destination 1: bytes=100 status=0"
++check_results "sub-block request: zero progress, full" "$expected" \
++	-f "$src_short" 0 100 "$dest_interior" 0 "$dest_short_eof" 0
++
++expected="destination 0: bytes=0 status=1"
++check_results "differing contents: DIFFERS, zero bytes" "$expected" \
++	-f "$src_diff" 0 "$full_length" "$dest_diff" 0
++
++# Small differing files ending at EOF: still zero, not the request length.
++
++$XFS_IO_PROG -f -c "pwrite -S 0x41 0 512" "$SCRATCH_MNT/tiny-src" >>$seqres.full 2>&1
++$XFS_IO_PROG -f -c "pwrite -S 0x42 0 512" "$SCRATCH_MNT/tiny-dst" >>$seqres.full 2>&1
++
++expected="destination 0: bytes=0 status=1"
++check_results "small-file DIFFERS: zero bytes" "$expected" \
++	-f "$SCRATCH_MNT/tiny-src" 0 512 "$SCRATCH_MNT/tiny-dst" 0
++
++# On a per-destination error, status carries the errno and bytes_deduped
++# is zero (the huge offset fails VFS validation with EINVAL).
++
++expected="destination 0: bytes=0 status=-22"
++check_results "error: bytes zero on EINVAL" "$expected" \
++	-f "$src" 0 "$full_length" "$dest_interior" 9223372036854775807
++
++# An unknown flag bit is rejected before any destination is processed.
++
++result=$($here/src/fideduperange -F 0x2 "$src" 0 "$full_length" "$dest_interior" 0 2>&1)
++echo "unknown flag bit: $result" >>$seqres.full
++if echo "$result" | grep -q "Invalid argument"; then
++	echo "unknown flag bit: EINVAL"
++else
++	_fail "unknown flag bit: expected EINVAL, got: $result"
 +fi
 +
-+_scratch_unmount
-+_check_scratch_fs
++# Without the flag, the legacy reporting is unchanged: the requested
++# length is reported even when the VFS shortens the range.
 +
++expected="destination 0: bytes=$full_length status=0
++destination 1: bytes=$full_length status=0"
++check_results "unflagged legacy reporting: full length" "$expected" \
++	"$src" 0 "$full_length" "$dest_interior" 0 "$dest_eof" 0
++
++# success, all done
 +status=0
 +exit
-diff --git a/tests/ext4/069.out b/tests/ext4/069.out
+diff --git a/tests/generic/810.out b/tests/generic/810.out
 new file mode 100644
-index 00000000..2c8c4d9f
+index 0000000..f88ac62
 --- /dev/null
-+++ b/tests/ext4/069.out
-@@ -0,0 +1,7 @@
-+QA output created by 069
-+== Create dirdata + inline_data filesystem ==
-+== Verify directory is inline ==
-+  inline_dir: inline data confirmed
-+== Set LUFID on file_a (inline directory entry) ==
-+== Verify LUFID stored in inline directory entry ==
-+  Directory structure of inline_dir: OK (dirdata verified)
++++ b/tests/generic/810.out
+@@ -0,0 +1,9 @@
++QA output created by 810
++zero length: 0 bytes, SAME
++mixed partial request: shortened, full
++sub-block request: zero progress, full
++differing contents: DIFFERS, zero bytes
++small-file DIFFERS: zero bytes
++error: bytes zero on EINVAL
++unknown flag bit: EINVAL
++unflagged legacy reporting: full length
+
+base-commit: d07dca72d2455f4ba8c660ad4c008541ccccb707
 -- 
-2.52.0
+2.56.0
 
