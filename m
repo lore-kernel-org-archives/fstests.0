@@ -1,54 +1,55 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793604326;
-	b=DMjRRdOvBfxCrw3EaKsT4QDiQcUajvNZIrDPwayKS+s6OMIA3h/EB+cutpBsmnhd5Foa
-	 qZRSZDx+oBVXJW/OCaXr258zp2E+E8wtTpp4T6ELLYYGW90+REAVy5iH8E9SiAlcFakxb
-	 GJUowUubAhe9Oaebm4SWRMq4ntXfrY38utdxdpMMDx2YaXzGjE4WbZUw7R1fW0wPOAq9e
-	 j/1rfzeGDi8Uk5vxZV+URlIDD5fSHzA02LMiO4+C2wzniaCLQuifVZSbIOAPMQ2v3BEFs
-	 8z0I90KJ65S6ERB8Prrvfbnajug86yMaEwTqEnc1CZlIG8Ba10EH0bHflqaqCAL9Uxw==
+	t=1793605028;
+	b=WtzIfNwDvTGelBQlkeDuc42TKmchLh3VNDUZsHgZQT8+JNgbem8nSgGklNTAEjy6lTy+
+	 eBf9BQvtAvTAkSNCh1720tpPLmJ67VCi69qGGDMhRsMXKYuqCpD8i/KDhavVZ90uKjQI8
+	 fsEyyAF9zz4IjNlJ6BhFopRCyhVGQY7/kKw5bAxFOjB5pw6m3Vb9RKBcyKzxk+p1UcCAX
+	 AuX0vld2Fj2n1KjkMf46lDE0oPhBHwa9eipd3ZNeufXuLa5vBezn3Q2gQnYJIKYtb/9ti
+	 7bnbP7YRiAwkJoAtSFkGNSNjXRhXBMhxAg/zzpcsTQusezjBtMYDW/WuQ0p9zKqRaDA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793604326;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793605028;
 	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
 	 Mail-Followup-To:References:MIME-Version:Content-Type:
 	 Content-Disposition:In-Reply-To;
-	bh=NbA0kDNqPiXckhs8noTGcFxFWOPxzuhpHlR/zDjIdW8=;
-	b=c2e2C8KXLfkp4hxi+sO6SRWDy5VMAykCyKyFAR+kKDN62JJDwmhqmvYzt/V9WmT36UZN
-	 v7AF//dx3r8i7qg7D1C3t8Vo0njS6MClC51WceLco/2D3hNDiJQekjFwjE5McInMCjbzQ
-	 bjHQH5k5ReRoWvfWmWkqkL3+0hB9pvLtCoCW8q1x+Ej/XTWqKCWx7UGH8tIqZkeMI5g2P
-	 NimL/olIPE5i9M2bs3VUcRBR+wPslVi0XQjv1pHNQiYE/4kX2XKmon1rmx32kxRVuPpn2
-	 o1PLJFmSHJYLZJMRtZamvco0lNGjJ9V71TD0uCYh5q/3UyUnhd63u9Tyivc09NL+VxA==
+	bh=GuieGMbyNSD13Qn2uxd14dcXP56/y9iy+bE6dEAYbbw=;
+	b=aVD7b0bu2t8hTWFydVPuvPMS/sys6TT1K3NcL5lEN4GAZiIwjCNXYpgc6t1RtwYj6oLV
+	 wKLviiRva2ghLfSit0UJUo4VH2dlIRrZgpvYuIl3nSCalxoBd67CSgF8g9bRLlEy+BeKp
+	 7y/auhtcwUzCBlxC8C4YJJ4aMZf1U62OsMkAeNLrI9cXR+csgT1j4Fy+NFYOTF0Dg21BG
+	 on9IA9WRc+r5DZKoIY2hf0+UzsMEveK2tD68HbrAvvuHsJuE3zcIaiaoDk7+Z/Rvz9m6m
+	 Ql8x3RBoUHadEWmJZCLWERJqu70V+cmw42++s86cmfMWaRwAYtF3QZN4UqcCV3iP4tg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=daKOCbM1;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=JGOdajgH;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D223606A326
-	for <fstests@vger.kernel.org>; Mon,  2 Nov 2026 07:25:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF69160A260A;
+	Mon,  2 Nov 2026 07:37:07 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=daKOCbM1
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C7DAE1F00919;
-	Mon,  2 Nov 2026 07:25:24 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=JGOdajgH
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 78E331F00A1A;
+	Mon,  2 Nov 2026 07:37:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793604326;
-	bh=NbA0kDNqPiXckhs8noTGcFxFWOPxzuhpHlR/zDjIdW8=;
+	s=k20260515; t=1793605027;
+	bh=GuieGMbyNSD13Qn2uxd14dcXP56/y9iy+bE6dEAYbbw=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=daKOCbM1JaOkwJDfLnrle6KVatAiWXPbt1zCvugSvlvPojRLlSUP4DSwDgYN9shUo
-	 hPAic/CPwJPBuEAS8ahI2MJ45m+lgFmrwv9/h5u+eugjLq5TZe/q0P/yXRhZdlNPdx
-	 2AxE3Y2Z5KKaUCwq7OBufOD/KzgtHSRllMQxwl/hiHNBHj8jU4euVcPqhd+dh7bllE
-	 zC0CqmGQKI2ayt3DsNkRPlNnUGqdPYzmKAgfnIAWGqZhAJyxtmj70DuPR3slkwjVr6
-	 Gp85Qna3Wkeamf9/JiTKdxq8itUi6DjBWo4FN/f3CyxWEJGV+bnTXnfPt+L3cmLNm1
-	 gJd74aJHiv/Xg==
-Date: Mon, 2 Nov 2026 15:25:21 +0800
+	b=JGOdajgHk6a6gDnapdaHnQIFiPnu92ijaZvkOp0W1/85eTy+rCP3r194vLz3qr7Nb
+	 CVtifjaphjaU84ILk/EJcWjFygIsxeGmclDWPAEFPeq0rvOwKjvgwCM1NyxfzmkOnY
+	 290vImhV/ARO+lewI5+VjONLJTs2mOkXdDDd66JANLvyEqe/eg31Ax8eUEEgl/aIEo
+	 UXkaUovX+7oTgAD2PLYl65jpkSR93MdYzJ9YJ2QjKKE7th0WI02avw0pEyWZq1EjZg
+	 B+lxs2xmGGpWQ74vDrinP59RPehWD5JZF4fp0mhqZdaDE0419DdjqYU+X2L5uFBzPD
+	 Wawaq0bRAukmw==
+Date: Mon, 2 Nov 2026 15:37:02 +0800
 From: Zorro Lang <zlang@kernel.org>
 To: Lukas Herbolt <lukas@herbolt.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] xfstests: Unify the build targets under LINUX_TARGET
-Message-ID: <aug5aYetKZ46O-J4@zlang-mailbox>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH v2] lib/random.c fix undefined behavior on signed integer
+ overflow.
+Message-ID: <aug9g-osyv31_yQN@zlang-mailbox>
 Mail-Followup-To: Lukas Herbolt <lukas@herbolt.com>, 
-	fstests@vger.kernel.org
-References: <20261006103937.276181-3-lukas@herbolt.com>
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+References: <20261016092111.296275-1-lukas@herbolt.com>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -60,152 +61,74 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20261006103937.276181-3-lukas@herbolt.com>
+In-Reply-To: <20261016092111.296275-1-lukas@herbolt.com>
 
-On Tue, Oct 06, 2026 at 12:39:39PM +0200, Lukas Herbolt wrote:
-> As discussed previously, the only supported target for now
-> is LINUX_TARGET. Merging the TARGET into LINUX_TARGET and
-> fix indentation in the Makefile.
+On Fri, Oct 16, 2026 at 11:21:11AM +0200, Lukas Herbolt wrote:
+> The random.c now expects that signed integer to overflow and
+> triggers the  ^MASK branch. But signed int overflow is undefined
+> behavior and GCC can optimize this branch out with certain
+> CFLAGS/LDFLAGS. And cleaning up the dead code.
 > 
 > Signed-off-by: Lukas Herbolt <lukas@herbolt.com>
 > ---
->  src/Makefile | 55 ++++++++++++++++++++++++++--------------------------
->  1 file changed, 28 insertions(+), 27 deletions(-)
+
+V2 looks good to me,
+
+Reviewed-by: Zorro Lang <zlang@kernel.org>
+
+>  lib/random.c | 34 +++++++---------------------------
+>  1 file changed, 7 insertions(+), 27 deletions(-)
 > 
-> diff --git a/src/Makefile b/src/Makefile
-> index 0ff607ae1593..1f7f9fd61987 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -6,7 +6,9 @@
->  TOPDIR = ..
->  include $(TOPDIR)/include/builddefs
+> diff --git a/lib/random.c b/lib/random.c
+> index d5c81be817c8..558da4e6888d 100644
+> --- a/lib/random.c
+> +++ b/lib/random.c
+> @@ -162,38 +162,18 @@ static int32_t mt [128] =   {
+>            69069
+>  		};
 >  
-> -TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
-> +TARGETS =
-> +
-> +LINUX_TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
-
-Since Linux is the only supported platform now, why not just use TARGETS
-directly?
-
-Thanks,
-Zorro
-
->  	nametest permname randholes runas truncfile usemem \
->  	mmapcat append_reader append_writer dirperf metaperf \
->  	devzero feature alloc fault fstest t_access_root \
-> @@ -21,9 +23,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->  	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
->  	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test \
->  	readdir-while-renames dio-append-buf-fault dio-write-fsync-same-fd \
-> -	dio-writeback-race unlink-fsync truncate dio-read-into-mmap
+> -double 
+> -_random (int32_t is [2])
+> -{
+> -	int32_t it, leh, nit;
 > -
-> -LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
-> +	dio-writeback-race unlink-fsync truncate dio-read-into-mmap \
-> +	xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
->  	locktest unwritten_mmap bulkstat_unlink_test deduperace \
->  	bulkstat_unlink_test_modified t_dir_offset t_futimens t_immutable \
-> @@ -48,68 +49,64 @@ SUBDIRS = log-writes perf
->  LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt -luuid
->  
->  ifeq ($(HAVE_XLOG_ASSIGN_LSN), true)
-> -LINUX_TARGETS += loggen
-> +    LINUX_TARGETS += loggen
->  endif
->  
->  ifeq ($(HAVE_FIEMAP), true)
-> -LINUX_TARGETS += fiemap-tester t_stripealign
-> +    LINUX_TARGETS += fiemap-tester t_stripealign
->  endif
->  
->  ifeq ($(HAVE_OPEN_BY_HANDLE_AT), true)
-> -LINUX_TARGETS += open_by_handle
-> +    LINUX_TARGETS += open_by_handle
->  endif
->  
->  ifeq ($(HAVE_FALLOCATE), true)
-> -LCFLAGS += -DHAVE_FALLOCATE
-> +    LCFLAGS += -DHAVE_FALLOCATE
->  endif
->  
->  ifeq ($(HAVE_FILE_GETATTR), yes)
-> -LINUX_TARGETS += file_attr
-> -LCFLAGS += -DHAVE_FILE_GETATTR
-> -endif
+> -	it = is [0];
+> -	leh = is [1];
+> -	if (it <= 0)	
+> -		it = (it + it) ^ MASK;
+> -	else
+> -		it = it + it;
+> -	nit = it - 1;
+> -/*	to ensure all-ones pattern omitted    */
+> -	leh = leh * mt[nit & 127] + nit;
+> -	is [0] = it;    is [1] = leh;
+> -	if (leh < 0) leh = ~leh;
+> -	return (SCALE * ((int32_t) (leh | 1)));
+> -}
 > -
-> -ifeq ($(PKG_PLATFORM),linux)
-> -TARGETS += $(LINUX_TARGETS)
-> +    LINUX_TARGETS += file_attr
-> +    LCFLAGS += -DHAVE_FILE_GETATTR
->  endif
->  
->  ifeq ($(HAVE_DB), true)
-> -TARGETS += dbtest
-> -LLDLIBS += $(LIBGDBM)
-> +    TARGETS += dbtest
-> +    LLDLIBS += $(LIBGDBM)
->  endif
->  
->  ifeq ($(HAVE_AIO), true)
-> -TARGETS += t_mmap_dio
-> -SUBDIRS += aio-dio-regress
-> -LLDLIBS += -laio
-> +    LINUX_TARGETS += t_mmap_dio
-> +    SUBDIRS += aio-dio-regress
-> +    LLDLIBS += -laio
->  endif
->  
->  ifeq ($(HAVE_URING), true)
-> -LINUX_TARGETS += btrfs_encoded_read btrfs_encoded_write
-> -TARGETS += uring_read_fault
-> -LLDLIBS += -luring
-> +    LINUX_TARGETS += btrfs_encoded_read btrfs_encoded_write \
-> +		     uring_read_fault
-> +    LLDLIBS += -luring
->  endif
->  
->  SUBDIRS += vfs
->  ifeq ($(HAVE_LIBCAP), true)
-> -LLDLIBS += -lcap
-> +    LLDLIBS += -lcap
->  endif
->  
->  ifeq ($(HAVE_SEEK_DATA), yes)
->   ifeq ($(HAVE_NFTW), yes)
->    ifeq ($(HAVE_BMV_OF_SHARED), yes)
->     ifeq ($(HAVE_RLIMIT_NOFILE), yes)
-> -     TARGETS += xfsfind
-> +     LINUX_TARGETS += xfsfind
->     endif
->    endif
->   endif
->  endif
->  
->  ifeq ($(HAVE_FICLONE),yes)
-> -     TARGETS += t_reflink_read_race
-> +     LINUX_TARGETS += t_reflink_read_race
->  endif
->  
->  ifeq ($(HAVE_FANOTIFY_FID),yes)
-> -     TARGETS += fs-monitor
-> +     LINUX_TARGETS += fs-monitor
->  endif
->  
->  ifeq ($(HAVE_LIBBTRFSUTIL), true)
-> @@ -117,7 +114,11 @@ ifeq ($(HAVE_LIBBTRFSUTIL), true)
->  endif
->  
->  ifeq ($(NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE),yes)
-> -LCFLAGS += -DNEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE
-> +     LCFLAGS += -DNEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE
-> +endif
+> -
+> -
+>  int32_t 
+>  _irandm (int32_t is [2])
+>  {
+> -	int32_t it, leh, nit;
+> -
+> +	int32_t it, leh, nit, apply_mask;
+>  	it = is [0];
+>  	leh = is [1];
+> -	if (it <= 0)	
+> -		it = (it + it) ^ MASK;
+> -	else
+> -		it = it + it;
 > +
-> +ifeq ($(PKG_PLATFORM),linux)
-> +     TARGETS += $(LINUX_TARGETS)
->  endif
->  
->  CFILES = $(TARGETS:=.c)
+> +/* 	evaluate on original value - no UB here */
+> +	apply_mask = (it <= 0);
+> +/*	double via unsigned shift - well-defined */
+> +	it = (unsigned)it << 1;
+> +	if (apply_mask) it ^= MASK;
+>  	nit = it - 1;
+>  /*	to ensure all-ones pattern omitted    */
+>  	leh = leh * mt[nit & 127] + nit;
 > -- 
-> 2.55.0
+> 2.56.0
 > 
