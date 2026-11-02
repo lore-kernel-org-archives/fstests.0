@@ -1,54 +1,59 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793627883;
-	b=UODKP5ekitoA+YNnt1/COHmhwiGHZSGaBTPLP9VI4YNK6K/GUeS9eI2q3FQd0P5I/3hA
-	 WAaVc/uVA48Kkvd3KzMQEQcHNSc5xoCTtn39VjNgqe21B1DPBGMPzcPNTuHy6WawJC76v
-	 nIHQinGd5TzSppDGCKlvXQiRzeiQyJ52UegV/3rYRQmKgdUEjHjMfx8oIwrTvVGTeiSOu
-	 mn8mqlyCQpWbezdaljE4K9O+fphkUcVBjM80nXJYXpvKbQqKeW9mxHVXb8gOZun0KtyTM
-	 OPd9+YvDcoLB7Vm9mq02E+ODZ6ZZProFtDgANrAEXnsOuL7I4NpJVavugkDY5kOkTBg==
+	t=1793631308;
+	b=eN2mkqFQ9Vp31IwiiWMwmgBc64SlB4llZOsoM43luWNBFHuTwrJ0/Mzd47HBYejJjKgu
+	 lz/SB96/YXfKCGVd7mGePCEiCK9vGHHHv0jyZQnLy1fPynoB5B91y7dYZF2HT64tuKnaG
+	 KDL1kvLRPxx6R/Zn9ScYgjto4U9BTFIdDsWtR9bLO7sWqoj4mKlZK2Fsw8EEyd5/VbMQJ
+	 tXCa6CCItH4IhXyqL4fPm+GwmhaWlBuuqW5vqd/JDxNQc/gHDhzdk4txlRoupS8HrlBtN
+	 0v7AAYGuKav63TJqEsnzyTTus/YDH6D1/Ur/sLN0G08UZ18SjhPKhTkD3n9UN75Lj9A==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793627883;
-	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
-	 MIME-Version:Content-Transfer-Encoding;
-	bh=iMMEhJRBgs9kKWN6y+JGRrzIlOVn3cdfNcULBxWDsNc=;
-	b=hO87SUvKrKVqXLBy4DrHn7GL4AF9oRMLn86zRr2CD4vI85KgovqcL235hZU0saiLv2Gv
-	 czj2dJEAfVNkPjoO9nyoRwEzcLgDGveNOxmXJ1Hxl8vLvidwbcas+jnotirZmgf6OI4W5
-	 MWgikO3y+ZIjyjJhPPlFmr04gqZHwclewc1uf4pZdZ1bXskqwztj94CUZqjqgMJHJMVrL
-	 GtoStQCiy671NV1LBj3hK9T191aL9CN7Tg/qWXfWBcmcNxzd2jsp36zUsX4ZYTzG0g4Uy
-	 5sI+KTxs9Dql941RhISn63cS5byMrqtvzzdlNr4r2Qz0KsPeQmyac8iaJFBA1e5kHyw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793631308;
+	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
+	 Mail-Followup-To:References:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To;
+	bh=JgVRWDDgxfnt1UNm4iJSAE8im0t1NobTbuAeI75ZQrM=;
+	b=JuQyz5czZ3tXnrMN7Rah2dY3lKiR4soiAzrYBJ4T2U8b1ZYLlxoW7AY3XWT113GHzwH4
+	 1EJXSlnQ5tuyDvBDRBppW5m6GHS3W2xo+cvNl3RSXS857MOP4u+hPrTTy9WSL9cm0Ffer
+	 Z8WdCly/bsEEBqNgNmy0LOxp88qQXCftmmGtGYD5ifWgygmC0TTRmUuZXfCqxu6x+9KfZ
+	 7Qawq5PUBHDKKAneBVkGeXYmWZ/N/N0eri3U/yJ6HA1DBAW4fdMxyfKUDbA2KoKvweUf0
+	 hp1+HrlPcDC6KcQDGaqjO1zcNMfyfmViS6ZesrJKUBXNBYMBP4l2WVfCiNEWOPtM1yQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ZAYqGlP9;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=kpf+c897;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23E97606A32C
-	for <fstests@vger.kernel.org>; Mon,  2 Nov 2026 13:58:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 14326606A596;
+	Mon,  2 Nov 2026 14:55:08 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ZAYqGlP9
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 66CE91F00A16;
-	Mon,  2 Nov 2026 13:58:01 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=kpf+c897
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2CC7C1F00A17;
+	Mon,  2 Nov 2026 14:55:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793627882;
-	bh=iMMEhJRBgs9kKWN6y+JGRrzIlOVn3cdfNcULBxWDsNc=;
-	h=From:To:Cc:Subject:Date;
-	b=ZAYqGlP9qDwmJlAwW86loSE7eJVARfu6zdI5UmLngFaRnzTX/2K+t9HRXtAvqcKyr
-	 FLCIiBBgxGn+ND7oLVizo4wWi260Yob3RWn/lH6iGOjpscrpB3wa9jxaT0oSVNSr0U
-	 FIv/YrePB6Om9NkcncRZKGzB9/ZDHFMCRdmAJzTP2lg6UgBfWkd2sdRkkxTGaWfRUI
-	 vnlMDFETRKmUMCeWinvXYe5zP8o3RKlqDEth4WSCP9ChVGfQeHsOx+P+Qt9kh97bIP
-	 IOuM6CtMYJP+fQNpbBypTXKmgzlEyq3JdmFifM5Kn4ACvAgiEdIgOSiRwvAghq1GnA
-	 uzC+wBn9KrxAw==
-From: Andrey Albershteyn <aalbersh@kernel.org>
-To: fstests@vger.kernel.org,
-	zlang@kernel.org
-Cc: ojaswin@linux.ibm.com,
-	hch@lst.de,
-	Andrey Albershteyn <aalbersh@kernel.org>
-Subject: [PATCH] check: set seqres before calling init_rc which could write there
-Date: Mon,  2 Nov 2026 14:57:31 +0100
-Message-ID: <20261102135730.2143873-2-aalbersh@kernel.org>
-X-Mailer: git-send-email 2.54.0
+	s=k20260515; t=1793631307;
+	bh=JgVRWDDgxfnt1UNm4iJSAE8im0t1NobTbuAeI75ZQrM=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=kpf+c897g1wkGVh2koigX2VvT9hw81kGK1I50cMJ9/x1lgmqFNArFxRX7iwwfspet
+	 ABJsMkVdfKPy3T9AzijVMT7rZLzI6tarNCrMJSWGWLkgo2W34+ukNW/sSbp9tWvAfS
+	 MdgpCOz9GtDSySBZlCigMidyvVgb8YZgmSkzoDTBlfmQZ+UHQQ0Os/C2X9CheQ3S5h
+	 4pIN6QRG1onM5U5vlHSQkkRKqDkT7GCvDpqhohs6EZFFthgRbVW9a/rfsg1Ah6wRMM
+	 CMEYW+gdgYx346sLa69ZyeypEiYOi44FHmFXTOWm37WTbJXPA0flmbgsJ6GIc/uhJT
+	 hUBhi58yOofNw==
+Date: Mon, 2 Nov 2026 22:55:00 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, 
+	linux-btrfs@vger.kernel.org, Anand Suveer Jain <asj@kernel.org>, Chao Yu <chao@kernel.org>
+Subject: Re: [PATCH v2 2/6] fstests: consolidate _require_fs_sysfs and
+ _require_fs_sysfs_dev_attr
+Message-ID: <auij080MipLBdTfy@zlang-mailbox>
+Mail-Followup-To: Christoph Hellwig <hch@infradead.org>, 
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	Anand Suveer Jain <asj@kernel.org>, Chao Yu <chao@kernel.org>
+References: <20261023203114.1655019-1-zlang@kernel.org>
+ <20261023203114.1655019-3-zlang@kernel.org>
+ <auIbZuqnQBrNdqDF@infradead.org>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -58,62 +63,45 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <auIbZuqnQBrNdqDF@infradead.org>
 
-There's path where >>$seqres is used in init_rc:
+On Wed, Oct 28, 2026 at 08:57:26AM -0700, Christoph Hellwig wrote:
+> On Sat, Oct 24, 2026 at 04:31:10AM +0800, Zorro Lang wrote:
+> > There is heavy overlap between _require_fs_sysfs and
+> > _require_fs_sysfs_dev_attr, and their ambiguous names make it
+> > difficult to tell them apart.
+> > 
+> > Teach _require_fs_sysfs_dev_attr to default to $TEST_DEV when only
+> > an attribute is given, remove _has_fs_sysfs and _require_fs_sysfs,
+> > and update their callers.
+> 
+> I find the optional device argument a bit confusing.  What speaks against
+> making it mandatory and having _require_{test,scratch}_sysfs_dev_attr
+> wrappers?
 
--> init_rc
-	-> _test_mount
-		-> _prepare_for_eio_shutdown
-			->_xfs_prepare_for_eio_shutdown
-				-> _set_fs_sysfs_attr
+Thanks for reviewing! Sure, that makes more sense.
 
-Which will try to write to .full because $seqres is not set. Fix this by
-setting seqres first, this way it should go to $RESULT_DIR/check.full.
+> 
+> > +	_has_fs_sysfs_dev_attr $dev "$ctlfile" && _set_fs_sysfs_dev_attr $dev "$ctlfile" 1
+> 
+> Please turn this into an if to make it more readable and avoid the
+> long line.
 
-The init_rc is called in the top context and then per section, however,
-for top context we don't have environment set up yet. These logs are
-just a few sysfs_attr writes and aren't that important, so, let's save
-those to /tmp/xxx.check.full just in case.
+Sure, I'll send v3 with this patch updated.
 
-Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
----
- check | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+Thanks,
+Zorro
 
-diff --git a/check b/check
-index 534c2cdf7a06..52e4ace34fd7 100755
---- a/check
-+++ b/check
-@@ -534,6 +534,10 @@ if ! . ./common/rc; then
- 	_fatal "check: failed to source common/rc"
- fi
- 
-+# The init_rc could write to the $seqres.full, however we don't have any context
-+# here yet, and no RESULT_BASE is setup. These logs aren't that important but
-+# let's keep them in /tmp anyway.
-+seqres=$tmp.check
- init_rc
- 
- # If the test config specified a soak test duration, see if there are any
-@@ -932,8 +936,6 @@ function run_section()
- 		_test_unmount 2> /dev/null
- 	fi
- 
--	init_rc
--
- 	seq="check.$$"
- 	check="$RESULT_BASE/check"
- 	seqres="$check"
-@@ -941,6 +943,8 @@ function run_section()
- 	# don't leave old full output behind on a clean run
- 	rm -f $check.full
- 
-+	init_rc
-+
- 	[ -f $check.time ] || touch $check.time
- 
- 	# print out our test configuration
--- 
-2.54.0
-
+> 
+> >  
+> >  	# Disable retry of metadata writes that fail with EIO
+> >  	for ctl in max_retries retry_timeout_seconds; do
+> >  		ctlfile="error/metadata/EIO/$ctl"
+> >  
+> > -		_has_fs_sysfs "$ctlfile" && _set_fs_sysfs_dev_attr $dev "$ctlfile" 0
+> > +		_has_fs_sysfs_dev_attr $dev "$ctlfile" && _set_fs_sysfs_dev_attr $dev "$ctlfile" 0
+> 
+> Same.
+> 
