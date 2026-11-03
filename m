@@ -1,42 +1,44 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=5.59.97.199
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=213.95.11.211
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793652152;
-	b=ey7REXYiFnW+f7bfGtqkpX1VYzkRoKQ7c/S7cNCDhJydyzKGMCABKfy4sklg/OLteImm
-	 WMxq5VooHscQ5vPTe914U4ULqw7NDzleeisKj7V87PmxnG2uy5YR5QJgqLVujsSiz1Ok4
-	 hrFXg5rmdbS9li5RWUxs/Tf97oEYTfurZ54ba7+Lxz8+/5HLwcEqkVEWYhQ7dQwK6ct82
-	 bhh+SNlNoyof9Hq91bPTY8yF2s1b5tL76imA3r7+QTFgmdtLloPGjPfRgI73rJxhfo5XC
-	 1/W7P/yaaZc+mAfbqX4TTr/wZuZOrLa01a0tWY0lGRw/NX6pXbjrVqnttAwfLSgojPw==
+	t=1793692051;
+	b=Oyumelz+HJcz8ZLDYH2XlisSbliMP+hgF16Vy9ywMaQsHzrqaHNkqFrzRSlY7XBDIUEs
+	 byzhiaxKf2GpU4CXzXkC82yuOPdx97+Fok2qDVEWkcrfZVH1wqS99u7LlXwypvspMCtDT
+	 vyh3CT/Cdz7qhjnbpCP3qH0cg1U7Vx+i2wjPgDAEIb1x44LfhF9qu1TMsl+4qz+TJRlGx
+	 rKJSM5ma4zCYramT28bFG5hCTI0BT0RJL1JqTi/1+MDleOs3EuE9CRtOroSRdaYWqqa2a
+	 ceu+D+Ey38bM0FJfuoNm/0BXmUnhwkqPvCQDKP0zoQGHB9djaXi4AlluaryWMfHggxw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793652152;
-	h=DMARC-Filter:Received:Received:MIME-Version:Date:From:To:Cc:Subject:
-	 In-Reply-To:References:Message-ID:X-Sender:Content-Type:
-	 Content-Transfer-Encoding:X-Spam-Status:X-Spam-Checker-Version;
-	bh=wsgqg3ipvoHzFtyMvNJklAHGTqSyJ+bX6cJoSVX2hoM=;
-	b=keH554IalNydkr29Btj7Xui/AT3W60LKcg/R7lWxLHGrXIund9BN5x8KvrmOmwPrVgbd
-	 wnWnvB+ca6TTOtM0zqdbItMoaRAexNy7saZEJXlGvROXJGdf0RFgJIWTPcx50S881mYCM
-	 jSPPjdPVnRQIrlPtHW1d34wlvjWWoDDjsaU0xMUghbYZvynTNhfOAwen4UGtwt+pubMjj
-	 AS9wUeTUCUE8z8AMqpub/1/bvp4d9gKZzgoueJ2tcSZhWiqSxdi3xRy8HjuVb2JyxpZ16
-	 UHjKHXRuK0oqFoB4tos4V2coSNBP/DykSzjrZqvKHYH8jRIBLPh3WPD6aztwEackWzQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793692051;
+	h=DMARC-Filter:Received:Date:From:To:Cc:Subject:Message-ID:References:
+	 MIME-Version:Content-Type:Content-Disposition:In-Reply-To:User-Agent;
+	bh=KqzwWnonRTHAQln7fCrKwH8SAkySueb7rruPE0g88jk=;
+	b=a9ujg/KH1jTQ6Ewiqvyyj1hUI2zG06jBfqBZm0sMUwnODnlhJ7rsbB6ZSDhhjuvNGkRu
+	 tACHpgV19otrCNdQhXeq8UbH0addggrbIhfxy2c55aNO0MVQI73YIK/cpey2bjluy1Gpj
+	 31+q/et0OopM8BnsZXmVWzfLfn+G8p3jmXWLo6i8LB6RagKsaYJyCe/hRKYA1U8Q+VwQ/
+	 S8EWA1+kFQD/xweH4qVzSurcmOyfBj5ZE8ira3y/qJVEwo1BIdpQctPUaC8uGb3eQh1rs
+	 Kh4Tm69/67QMvZX2aCqPosQU+aZMkBC160yegfTslxOWRjXOZVe6pweqZ0kcHUD0vjQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=herbolt.com;
-	spf=pass smtp.mailfrom=herbolt.com;
-	arc=none smtp.remote-ip=5.59.97.199
-Received: from mx0.herbolt.com (mx0.herbolt.com [5.59.97.199])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dmarc=pass header.from=lst.de;
+	spf=pass smtp.mailfrom=lst.de;
+	arc=none smtp.remote-ip=213.95.11.211
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4F54B606A326;
-	Mon,  2 Nov 2026 20:42:27 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4F54B606A326
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=herbolt.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=herbolt.com
-Received: from mx0.herbolt.com (localhost [127.0.0.1])
-	by mx0.herbolt.com (Postfix) with ESMTP id DC04F180F2D3;
-	Mon, 02 Nov 2026 21:42:23 +0100 (CET)
-Received: from mail.herbolt.com ([172.16.31.10])
-	by mx0.herbolt.com with ESMTPSA
-	id NAz8MK/16GpYHQcAKEJqOA
-	(envelope-from <lukas@herbolt.com>); Mon, 02 Nov 2026 21:42:23 +0100
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19A22606A324
+	for <fstests@vger.kernel.org>; Tue,  3 Nov 2026 07:47:30 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 19A22606A324
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id BAEB168AFE; Tue,  3 Nov 2026 08:47:27 +0100 (CET)
+Date: Tue, 3 Nov 2026 08:47:27 +0100
+From: Christoph Hellwig <hch@lst.de>
+To: Andrey Albershteyn <aalbersh@kernel.org>
+Cc: fstests@vger.kernel.org, zlang@kernel.org, ojaswin@linux.ibm.com,
+	hch@lst.de
+Subject: Re: [PATCH] check: set seqres before calling init_rc which could
+ write there
+Message-ID: <20261103074727.GB3678@lst.de>
+References: <20261102135730.2143873-2-aalbersh@kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -46,41 +48,47 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Date: Mon, 02 Nov 2026 21:42:23 +0100
-From: Lukas Herbolt <lukas@herbolt.com>
-To: Andrey Albershteyn <aalbersh@kernel.org>
-Cc: fstests@vger.kernel.org, zlang@kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs/619: fix mistyped seqres.full variable
-In-Reply-To: <20261102081156.640279-2-aalbersh@kernel.org>
-References: <20261102081156.640279-2-aalbersh@kernel.org>
-Message-ID: <6414c0a66a3708e7793810c8ffe7df59@herbolt.com>
-X-Sender: lukas@herbolt.com
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20261102135730.2143873-2-aalbersh@kernel.org>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-On 2026-11-02 09:11, Andrey Albershteyn wrote:
+On Mon, Nov 02, 2026 at 02:57:31PM +0100, Andrey Albershteyn wrote:
+> There's path where >>$seqres is used in init_rc:
+> 
+> -> init_rc
+> 	-> _test_mount
+> 		-> _prepare_for_eio_shutdown
+> 			->_xfs_prepare_for_eio_shutdown
+> 				-> _set_fs_sysfs_attr
+> 
+> Which will try to write to .full because $seqres is not set. Fix this by
+> setting seqres first, this way it should go to $RESULT_DIR/check.full.
+> 
+> The init_rc is called in the top context and then per section, however,
+> for top context we don't have environment set up yet. These logs are
+> just a few sysfs_attr writes and aren't that important, so, let's save
+> those to /tmp/xxx.check.full just in case.
+> 
 > Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
 > ---
->  tests/xfs/619 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  check | 8 ++++++--
+>  1 file changed, 6 insertions(+), 2 deletions(-)
 > 
-> diff --git a/tests/xfs/619 b/tests/xfs/619
-> index 7e542f705e60..583be7160be2 100755
-> --- a/tests/xfs/619
-> +++ b/tests/xfs/619
-> @@ -36,7 +36,7 @@ file1 ---755 3 1 /dev/null
->  $
->  EOF
-> 
-> -_scratch_mkfs -f -n parent=1 -p $protofile >>$seqresres.full 2>&1 \
-> +_scratch_mkfs -f -n parent=1 -p $protofile >>$seqres.full 2>&1 \
->  	|| _fail "mkfs failed"
->  _check_scratch_fs
+> diff --git a/check b/check
+> index 534c2cdf7a06..52e4ace34fd7 100755
+> --- a/check
+> +++ b/check
+> @@ -534,6 +534,10 @@ if ! . ./common/rc; then
+>  	_fatal "check: failed to source common/rc"
+>  fi
+>  
+> +# The init_rc could write to the $seqres.full, however we don't have any context
 
-Looks good to me.
+s/The //
 
-Reviewed-by: Lukas Herbolt <lukas@herbolt.com>
+?
 
--- 
--lhe
+Otherwise this looks good:
+
+Reviewed-by: Christoph Hellwig <hch@lst.de>
