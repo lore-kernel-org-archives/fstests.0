@@ -1,82 +1,82 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.47
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.45
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793713880;
-	b=5lGwOWJO1fjyD0vx+Ce3VcaGLwMU1LZiIDtAa6iI97eoj7SUS1orE0CKZ/HrhqfWCU86
-	 G5KGCha4uiYm3jNE7+1vi8etbz4Ls+1dDPb/pEffaYyrkIDdvNjyR1174x0jq9SoyOlbJ
-	 PG/TSyqsGBXjrzszDZ+8uR16Dy77Mzkene8A7q9B4pvFoE6TqV30UXQFLexLLegnM+BP6
-	 5q8s9lPl09LPoG3/3//DPzDFX8wEBMqbgdhrukoYIdaTEz+qqdYM8OOvQKDsHZ70yG662
-	 oI3frsWBcNzuYDPgt61j4dSjVsEaYjra1FxH5bHyBeUJwfWPqNyp0o/OuMr6qxh6KQg==
+	t=1793713881;
+	b=af5CgN4+LEF6nphb7zOONJ+I8iq67yAwdZJYclvmJDEcobRyS3t+3A/JeNAj1YklmwRa
+	 iWVEgV42cRg8s9+6kGPama1Fhbr33QRy3iGvh7vyLqoA1Q7TihuOuIOz9xbziCwuEISSR
+	 K9P11PG4e84oonXHFXOnoxn9nDePubEhlwZjpw0eyuHpr612kKMtBHrdwW7oepV2bAq5t
+	 gNhDVsfPYWnwBp+RA66mGj4FiE2V0H1F6V3zT5usy+NZczjMLXGSPvATWUwPDfrXtUmtL
+	 rqFKfKx2A+RX0OcPHG0P5pFfTjWyxW8uN6Z5jRbAL418SO6E6j3HtjbMkVpoD/qqpyQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793713880;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793713881;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:
 	 X-Google-Original-From:To:Cc:Subject:Date:Message-ID:X-Mailer:
 	 In-Reply-To:References:MIME-Version:Content-Transfer-Encoding;
-	bh=UcfbjUbt3TsKg3vyIYDkse8xWvJAfIv3IG9VfRSpZwI=;
-	b=IAEKXkwWL5QLgKx5mx9820MnWEA9MXnGVwMTgzjXpwfOlrlC+Kyj7Rnyk7LH2FTTeABH
-	 FSFrGL1FjGaMpvK/AGn5nK/mzAUkZAayFeLowNIli/EW5UN/8II6QHtbsTFnU3JTq9MVB
-	 nBOaAE2fpF1DCPXCRNvCKfAg21s/V1wEC3ZGVUvGyV7HTSaUj/7km1QsBN2e8IBXozVj1
-	 tSvVXgNgLbnP4dw0Xu+ZinQWsCgeB9t1nkCVOipBi0OcY5oW6pZwiPpk6P6o9oI/3wbvB
-	 5glq/PMgGFNLJ8S4u4fYTpIdTzdJA/g2hQ5Z/Hf20mqbuP5NxWlgQlaeeX9FGETB8Gw==
+	bh=Hp3kP48xuTrTKK7wCJLZCredy5L8Nv2jBeLHqVbKxMU=;
+	b=NjmWcLRrzr5s0vS2NJuYQGvJFBhM2xAph84PuYpbvYhtFIUc/122Qgvx5bS3l8Fa3MLO
+	 udT4gBEHKvjjDEO+NtEx1uLMGQbLYzNs+QDT49KvIIsoG016MTxwQhOcXdFFyx9LrwyTu
+	 ips5GOHv016lD+l8xu+dm5AsiLpZYnyHJUCN5MQwCGYQA1H5DJkQQOoSypLF5kTVU1D3R
+	 7F9kwB+lXb/aGc6VAoCakYPLIuG8aRVwfY08AbfeeaBxNCbc71qHJaRPamnLJ1hvTnDzk
+	 /yNVL8Jlw8vrm+YCAuU+2fNFnXHNpms/0TSS6Un5CvpO0ZiLhtI9PQ6gA7aUQnzL2RA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=gmail.com;
 	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=vsBfM1S3;
-	arc=none smtp.remote-ip=209.85.128.47
-Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=mwpAiwG4;
+	arc=none smtp.remote-ip=209.85.128.45
+Received: from mail-wm1-f45.google.com (mail-wm1-f45.google.com [209.85.128.45])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B5F3F6083610
-	for <fstests@vger.kernel.org>; Tue,  3 Nov 2026 13:51:19 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B5F3F6083610
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AECCC608508F
+	for <fstests@vger.kernel.org>; Tue,  3 Nov 2026 13:51:20 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org AECCC608508F
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=vsBfM1S3
-Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-4a20bdaf39cso47105775e9.1
-        for <fstests@vger.kernel.org>; Tue, 03 Nov 2026 05:51:19 -0800 (PST)
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=mwpAiwG4
+Received: by mail-wm1-f45.google.com with SMTP id 5b1f17b1804b1-4a208d93758so44814485e9.3
+        for <fstests@vger.kernel.org>; Tue, 03 Nov 2026 05:51:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1793713878; x=1794318678; darn=vger.kernel.org;
+        d=gmail.com; s=20260707; t=1793713879; x=1794318679; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=UcfbjUbt3TsKg3vyIYDkse8xWvJAfIv3IG9VfRSpZwI=;
-        b=vsBfM1S3yNF30z7HLATpJAu6biyES7KB4ZqxjZzptKkej3JDZNki8DeG6cnzVcvhF3
-         4ATpDVg2mmFl3IXvRH/6w7oTVYdfnaU6qyYV7jw16s9EOsaeDpxLi8eVEjUDUiw8Xbe6
-         6GoJNBpwMippVuios5zyv4VMLQOZVcATpsfUqJ15muS+mvz0VsFzQVAFb02iXVfM8QoV
-         s0GQ8ZhGODq8IxN4D2aTLPn5RfaqcJxlR+W4Cx4UGLxby8MREU9JS10QWI3nhFQQCzOh
-         Rl6h3TR4/SGHVvr5XwoqWBEopH9GwA6P5aw5+PC02fht3PctrhpaLtX/h+h8VIroG3HB
-         FIrQ==
+        bh=Hp3kP48xuTrTKK7wCJLZCredy5L8Nv2jBeLHqVbKxMU=;
+        b=mwpAiwG4+u9182LIGWvwmdDWBa3DQICh2YzzG0hCB1MST77g7LNIKAsN40ZLbyvZyX
+         azKD28rle7uqSsWXSzr+xgczbZrSlbKwsqTE4NTYlFoHG4RRVm2UAnZ/VDQ0d3+MXtFu
+         q9T1H7k4mYI0j6yGkTs/WJnKzR5JojMgcGwtsTKbIIKcGV5mOj8EydoGW2nQ2lFht9S6
+         hptEajmjC3E0NzLX+zdu2w+/g9kqkNbLZGH7QHLorzCvyp1kRFNsn2mwNZLMdDNQWnWQ
+         DCrEQi8vXOgJ1bKBbkkj9A8vtJXW7GtLG/40qag4SxOAnv392ArlzrSRJB4PnOlQn9Cl
+         NVNw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793713878; x=1794318678;
+        d=1e100.net; s=20260707; t=1793713879; x=1794318679;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=UcfbjUbt3TsKg3vyIYDkse8xWvJAfIv3IG9VfRSpZwI=;
-        b=akLeDxv+k10YBkfkaCWPi/LBRRoDaIZVH+TZy4JES5807OwGXSg292sn6tVCNt8ciH
-         TodlakgyjAVQGvb6SDjD71DTwiBV1leBX7Sn4ldgL36UiFn+molUC/I3wnzJuSWDatLD
-         3Y5vefNZS2iiXSPJ2M3KUgHwlqmsvzz8ICFp5Iq5HIblKcObNbg3ZXok505Be3DZ/X3U
-         LkpurJEdDAQRo6n5FaOC40HW3zkIowXb67EAlGsJPx+mE+rpddGCXMqPYuKI68Q84M1Q
-         EzAZNjqDtx+9f51s+cDB8XebjOBq301bl6/5gDUwDrFWzTi62hVRMLhHdFolpX0WEWFs
-         H9Xw==
-X-Gm-Message-State: APuU4Z/ODyNKqLjHlIyvaOlntlV4sy1q6qxbua8WKJcBLxN+8UGvIQR6
-	iaO2xQ+MWlS/KN46Tpf8YGo19cO2YcsMviAL5+900AZC5u82Qjd25IvMrcqmveiPHyU=
-X-Gm-Gg: AYBFou0fAyBHMoGQka+Xfupkm5wUi8iGi7BPjrupciuN5hv8IVpiet5rj91Ct6mz+G6
-	2VATv0zFg9eFnf9bPiKQrTRQ7abHHb+jHGAHVBfId94CWJb0NKck0AmAJ5yhPuyU05ZO3JihcAM
-	R8MiSUaEXv5CShr3aVNzhxlGo3vpP3cOFpib+y9z4BeOM9mRa8Xsvp4spGfjbeQWKR/ZxS05cVQ
-	U3YS75UpSNSjGS/dYxvC1MK3QQ0pdZICaOoqpM8gWzz15qawT69m9wZEiKeUTWfe9TXO2ojlUyG
-	iy0kQFBZWINObEzTF0u+5FjDTFZlaHWfeEjVDGUUCEGnVpVhMmX2JqsJFY8vibIQjYmo96eqnAS
-	8WT8rqchwfSfCV0LDivFFH0c+SPiJkiTl9UKMlGULSJtYCcrRWhj4zW8Icp2sT7WbQZCkDPhwnS
-	pG/uss/oq1NpEu7lisyRDNUKyfrJ0B4CIoElOLWHd+YUDKHl6PgHE1NNzeLmM3Bjju9vNzfz0d7
-	728Me0owEv/v9jMF/i/86YMMonrrRyUKnjoZqT4IwrQEs9PFWRF/UQtpVIrhxMfYBRraQ8I1rDv
-	j73kJJpqX0YuQKb9+5KSfgmmt9oDG4w884SD6X+zfgJQO3U3bfuxjRjEtWsf
-X-Received: by 2002:a05:600c:3556:b0:4a7:6bc7:f778 with SMTP id 5b1f17b1804b1-4ac1932a355mr283051635e9.30.1793713877899;
-        Tue, 03 Nov 2026 05:51:17 -0800 (PST)
+        bh=Hp3kP48xuTrTKK7wCJLZCredy5L8Nv2jBeLHqVbKxMU=;
+        b=gDhYa7NEd/OlmkAN3HTbSTlBzpL7Ac0VT/4+5iX1aKFM9sG5aR51eNG5nbCmqmZXQy
+         +WTPpGBKB+dqtTPUMK+H+vOG+Z7NFZwY9zO68h0XnW6vGSweGaPINq2HzToQKA6nQF0U
+         rzLirzh/+75JTQH5CFNh49jJ4UyMt5sH5sL49WpoCSj+zUBEmFxTvnuKh8a6WxrB2ewx
+         VGVNnygixEc083TC/DKenwtBVvuSfFYtDHEmSRX7tuDqjJKei2Wvb4x6Z2cUhwK73hcB
+         g4C4Ff5gHyPox8PtT0oR4ymaQfwAodfEhh/1pVuR/mqGTJuYag6gl6lTH4TxBTAvKKXd
+         Amvg==
+X-Gm-Message-State: APuU4Z+A7JeyolepbFj785pjPizUlp/3Ir5f8PFthQGVi+FqqTeKYFHD
+	2w4iW8nGxYveLqPMZmEw9ZALiemijGaN/nB1pF2tDUSBNUj4UXgpaD7XKJEvnwPir+Y=
+X-Gm-Gg: AYBFou2ZkU5lQXLa9cgw0/nNUCK767lCQbJwIwev7LBRs9QgXmSti73XuINmt6baOnU
+	iJcQRgoh7UhWYJgzNNMYG/Il7+VwrJo8MATLVAkLoXqMv/woTZ+s+qmCv8we+RkmAcViZIMg/Ya
+	MsPds0o2C8OHNzNJKiXVGETOxA2BbWrtEFdKhDNaU4LpajBeAP+4a5cAVj08xxoLsk5PekYWbf1
+	0RvMwjeRQfjDmdfARMYunWbLi04nHU+j4FETq3q4VPFl37JHzBy0E/zalZXIQt4NqzQc7D9QGIA
+	IcN4FWJn/ezw+VQZ6brjpQ4/fwaJTrULglM4LofJcdKmUl6cJ0kB78wzevokAAmeddWXXv95MTd
+	eyI7P1cIJGkfxwZUBI4qeT96vLQVWc4amVy0hTQDmz0gn9bRQx+ihi6qQSexKnDUdGhd33D2JzK
+	MMygUHCPBq6+82EQAVy6HcgT7M9YseEo7A6VGu5OO3ONyCmWXtp5KUKRtISK6nlCGWq8iswzzLg
+	rUmNdUo8BPcgD2M2Kr8zG2jP2ZQTwprZ9G+pjNDYQYlw6l17k2FKbSI0XzXebQW7X1uzoEM3nTi
+	gWSXbG2bIRviAo54xb7fn/lZJ5hmVI+8MAxp2UO05iJoCd7fYIseDucLZN5q4A==
+X-Received: by 2002:a05:600c:5397:b0:4a4:4d57:8462 with SMTP id 5b1f17b1804b1-4ac18b7e65bmr297316825e9.24.1793713879003;
+        Tue, 03 Nov 2026 05:51:19 -0800 (PST)
 Received: from Cluster2.powerhub ([2a0a:ef40:18b5:9e01:225:90ff:fefc:9ffe])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4b2a96fc87fsm55320335e9.12.2026.11.03.05.51.17
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4b2a96fc87fsm55320335e9.12.2026.11.03.05.51.18
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 03 Nov 2026 05:51:17 -0800 (PST)
+        Tue, 03 Nov 2026 05:51:18 -0800 (PST)
 From: Artem Blagodarenko <artem.blagodarenko@gmail.com>
 X-Google-Original-From: Artem Blagodarenko <ablagodarenko@thelustrecollective.com>
 To: fstests@vger.kernel.org
@@ -84,9 +84,9 @@ Cc: linux-ext4@vger.kernel.org,
 	adilger.kernel@dilger.ca,
 	ablagodarenko@thelustrecollective.com,
 	Artem Blagodarenko <artem.blagodarenko@gmail.com>
-Subject: [RFC PATCH v6 3/8] ext4/065 encryption + casefold + dirdata feature combination
-Date: Tue,  3 Nov 2026 13:50:59 +0000
-Message-ID: <20261103135106.610169-4-ablagodarenko@thelustrecollective.com>
+Subject: [RFC PATCH v6 4/8] ext4: add set_lufid utility
+Date: Tue,  3 Nov 2026 13:51:00 +0000
+Message-ID: <20261103135106.610169-5-ablagodarenko@thelustrecollective.com>
 X-Mailer: git-send-email 2.52.0
 In-Reply-To: <20261103135106.610169-1-ablagodarenko@thelustrecollective.com>
 References: <20261103135106.610169-1-ablagodarenko@thelustrecollective.com>
@@ -103,309 +103,249 @@ Content-Transfer-Encoding: 8bit
 
 From: Artem Blagodarenko <artem.blagodarenko@gmail.com>
 
-Test ext4 encryption + casefold + dirdata feature combination.
-This test verifies that files created in directories with encryption,
-case-insensitive (casefold), and dirdata attributes work correctly.
-See ext4/064 for the same test WITHOUT dirdata feature.
+EXT4 provides the EXT4_IOC_SET_LUFID ioctl, which allows setting
+or replacing the LUFID dirdata field for an existing directory entry.
+
+The set_lufid utility uses this ioctl and accepts a directory path,
+directory entry name, and LUFID value as arguments.
+
+This utility is used by subsequent dirdata-related tests.
 
 Signed-off-by: Artem Blagodarenko <artem.blagodarenko@gmail.com>
 ---
- tests/ext4/065     | 252 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/065.out |  26 +++++
- 2 files changed, 278 insertions(+)
- create mode 100755 tests/ext4/065
- create mode 100644 tests/ext4/065.out
+ common/config   |   1 +
+ src/Makefile    |   2 +-
+ src/set_lufid.c | 196 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 198 insertions(+), 1 deletion(-)
+ create mode 100644 src/set_lufid.c
 
-diff --git a/tests/ext4/065 b/tests/ext4/065
-new file mode 100755
-index 00000000..b86d3146
---- /dev/null
-+++ b/tests/ext4/065
-@@ -0,0 +1,252 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 The Lustre Collective.  All Rights Reserved.
-+# Author: Artem Blagodarenko <ablagodarenko@thelustrecollective.com>
-+#
-+# FS QA Test ext4/065
-+#
-+# Test ext4 encryption + casefold + dirdata feature combination.
-+# This test verifies that files created in directories with encryption,
-+# case-insensitive (casefold), and dirdata attributes work correctly.
-+# See ext4/064 for the same test WITHOUT dirdata feature.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick encrypt casefold
-+
-+# get standard environment and checks
-+. ./common/filter
-+. ./common/encrypt
-+. ./common/casefold
-+. ./common/attr
-+. ./common/ext4
-+
-+_exclude_fs ext2
-+_exclude_fs ext3
-+
-+# Check if dirdata feature is supported and can be used with encrypt+casefold
-+_require_scratch_dirdata()
-+{
-+	if test ! -f /sys/fs/ext4/features/dirdata ; then
-+		_notrun "dirdata feature not supported by kernel"
-+	fi
-+
-+	# Debug: log e2fsprogs tool paths and versions
-+	echo "=== _require_scratch_dirdata debug info ===" >> $seqres.full
-+	echo "E2FSCK_PROG: $E2FSCK_PROG" >> $seqres.full
-+	echo "E2FSCK_PROG resolved: $(type -P e2fsck)" >> $seqres.full
-+	echo "MKFS_EXT4_PROG: $MKFS_EXT4_PROG" >> $seqres.full
-+	echo "fsck -t ext4 resolves to: $(type -P fsck.ext4)" >> $seqres.full
-+	$E2FSCK_PROG -V >> $seqres.full 2>&1
-+	$MKFS_EXT4_PROG -V >> $seqres.full 2>&1
-+	echo "=== end debug info ===" >> $seqres.full
-+
-+	# Also verify that mkfs supports dirdata
-+	if ! $MKFS_EXT4_PROG -O dirdata -n $SCRATCH_DEV &>>$seqres.full ; then
-+		_notrun "mkfs.ext4 does not support dirdata feature"
-+	fi
-+
-+	# Verify kernel can mount filesystem with encrypt+casefold+dirdata
-+	echo "Running: _scratch_mkfs -O encrypt,casefold,dirdata" >> $seqres.full
-+	if ! _scratch_mkfs -O encrypt,casefold,dirdata &>>$seqres.full ; then
-+		_notrun "failed to create filesystem with encrypt+casefold+dirdata"
-+	fi
-+	if ! _try_scratch_mount &>>$seqres.full ; then
-+		_notrun "kernel cannot mount filesystem with encrypt+casefold+dirdata"
-+	fi
-+	_scratch_unmount
-+}
-+
-+_require_scratch_nocheck
-+_require_scratch_encryption
-+_require_scratch_casefold
-+_require_scratch_dirdata
-+_require_xfs_io_command "set_encpolicy"
-+_require_xfs_io_command "add_enckey"
-+
-+# Helper to add a v2 encryption key and set policy on a directory
-+_setup_encrypted_casefold_dir()
-+{
-+	local dir=$1
-+	local raw_key=$(_generate_raw_encryption_key)
-+	local keyspec=$(_add_enckey $SCRATCH_MNT "$raw_key" | awk '{print $NF}')
-+	_set_encpolicy $dir $keyspec
-+	_casefold_set_attr $dir
-+	echo $keyspec
-+}
-+
-+# Create a filesystem with encrypt, casefold, and dirdata features
-+# Debug: log e2fsprogs tool paths and versions
-+echo "=== e2fsprogs debug info ===" >> $seqres.full
-+echo "E2FSCK_PROG: $E2FSCK_PROG" >> $seqres.full
-+echo "E2FSCK_PROG resolved: $(type -P e2fsck)" >> $seqres.full
-+echo "MKFS_EXT4_PROG: $MKFS_EXT4_PROG" >> $seqres.full
-+echo "FSCK_OPTIONS: $FSCK_OPTIONS" >> $seqres.full
-+echo "fsck -t ext4 resolves to: $(type -P fsck.ext4)" >> $seqres.full
-+$E2FSCK_PROG -V >> $seqres.full 2>&1
-+$MKFS_EXT4_PROG -V >> $seqres.full 2>&1
-+echo "=== end e2fsprogs debug info ===" >> $seqres.full
-+
-+_scratch_mkfs -O encrypt,casefold,dirdata &>>$seqres.full
-+_scratch_mount
-+
-+# Test 1: Create an encrypted + casefolded directory and verify lookups work
-+echo "Test 1: Basic encrypted casefold lookup with dirdata"
-+mkdir $SCRATCH_MNT/test1
-+_setup_encrypted_casefold_dir $SCRATCH_MNT/test1 > /dev/null
-+
-+# Create file with lowercase, lookup with uppercase
-+echo "hello" > $SCRATCH_MNT/test1/testfile.txt
-+if [ -f "$SCRATCH_MNT/test1/TESTFILE.TXT" ]; then
-+	echo "Case-insensitive lookup works in encrypted dir"
-+else
-+	echo "FAIL: Case-insensitive lookup failed in encrypted dir"
-+fi
-+
-+# Verify the exact name on disk is preserved
-+if _casefold_check_exact_name "$SCRATCH_MNT/test1" "testfile.txt"; then
-+	echo "Original filename preserved"
-+else
-+	echo "FAIL: Original filename not preserved"
-+fi
-+if ! _dump_dir_structure $SCRATCH_MNT/test1; then
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
-+fi
-+
-+# Test 2: Create files with different case variations
-+echo "Test 2: Conflicting names in encrypted casefold dir"
-+mkdir $SCRATCH_MNT/test2
-+_setup_encrypted_casefold_dir $SCRATCH_MNT/test2 > /dev/null
-+
-+echo "first" > $SCRATCH_MNT/test2/MyFile.txt
-+# This should fail or overwrite since "MYFILE.TXT" is equivalent
-+echo "second" > $SCRATCH_MNT/test2/MYFILE.TXT 2>/dev/null
-+content=$(cat $SCRATCH_MNT/test2/myfile.txt)
-+echo "Content after writes: $content"
-+if ! _dump_dir_structure $SCRATCH_MNT/test2; then
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
-+fi
-+
-+# Test 3: Unicode normalization in encrypted casefold dir
-+echo "Test 3: Unicode in encrypted casefold dir"
-+mkdir $SCRATCH_MNT/test3
-+_setup_encrypted_casefold_dir $SCRATCH_MNT/test3 > /dev/null
-+
-+# Test with UTF-8 characters
-+fr_file1=$(echo -e "cafe\xcc\x81.txt")
-+fr_file2=$(echo -e "caf\xc3\xa9.txt")
-+echo "french" > "$SCRATCH_MNT/test3/$fr_file1"
-+if [ -f "$SCRATCH_MNT/test3/$fr_file2" ]; then
-+	echo "Unicode normalization works in encrypted dir"
-+else
-+	echo "FAIL: Unicode normalization failed in encrypted dir"
-+fi
-+if ! _dump_dir_structure $SCRATCH_MNT/test3; then
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
-+fi
-+
-+# Test 4: Directory operations in encrypted casefold dir
-+echo "Test 4: Directory operations in encrypted casefold dir"
-+mkdir $SCRATCH_MNT/test4
-+_setup_encrypted_casefold_dir $SCRATCH_MNT/test4 > /dev/null
-+
-+mkdir $SCRATCH_MNT/test4/SubDir
-+if [ -d "$SCRATCH_MNT/test4/SUBDIR" ]; then
-+	echo "Directory case-insensitive lookup works"
-+else
-+	echo "FAIL: Directory case-insensitive lookup failed"
-+fi
-+if ! _dump_dir_structure $SCRATCH_MNT/test4; then
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
-+fi
-+
-+# Test 5: Verify inheritance of casefold+encryption in subdirectories
-+echo "Test 5: Inheritance of attributes"
-+mkdir $SCRATCH_MNT/test5
-+_setup_encrypted_casefold_dir $SCRATCH_MNT/test5 > /dev/null
-+
-+mkdir $SCRATCH_MNT/test5/child
-+echo "data" > $SCRATCH_MNT/test5/child/file.txt
-+if [ -f "$SCRATCH_MNT/test5/CHILD/FILE.TXT" ]; then
-+	echo "Attributes inherited correctly"
-+else
-+	echo "FAIL: Attributes not inherited"
-+fi
-+if ! _dump_dir_structure $SCRATCH_MNT/test5; then
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
-+fi
-+
-+# Test 6: Remove and recreate with different case
-+echo "Test 6: Remove and recreate with different case"
-+mkdir $SCRATCH_MNT/test6
-+_setup_encrypted_casefold_dir $SCRATCH_MNT/test6 > /dev/null
-+
-+echo "original" > $SCRATCH_MNT/test6/RemoveMe.txt
-+rm $SCRATCH_MNT/test6/REMOVEME.TXT
-+echo "recreated" > $SCRATCH_MNT/test6/REMOVEME.TXT
-+if _casefold_check_exact_name "$SCRATCH_MNT/test6" "REMOVEME.TXT"; then
-+	echo "Recreated file has new case"
-+else
-+	echo "FAIL: Recreated file case incorrect"
-+fi
-+if ! _dump_dir_structure $SCRATCH_MNT/test6; then
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
-+fi
-+
-+# Test 7: Hard links in encrypted casefold dir
-+echo "Test 7: Hard links in encrypted casefold dir"
-+mkdir $SCRATCH_MNT/test7
-+_setup_encrypted_casefold_dir $SCRATCH_MNT/test7 > /dev/null
-+
-+echo "linkdata" > $SCRATCH_MNT/test7/original.txt
-+ln $SCRATCH_MNT/test7/original.txt $SCRATCH_MNT/test7/hardlink.txt
-+if [ -f "$SCRATCH_MNT/test7/HARDLINK.TXT" ]; then
-+	echo "Hard link case-insensitive lookup works"
-+else
-+	echo "FAIL: Hard link case-insensitive lookup failed"
-+fi
-+if ! _dump_dir_structure $SCRATCH_MNT/test7; then
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
-+fi
-+
-+# Cleanup and verify filesystem
-+_scratch_unmount
-+
-+# Dirdata analysis summary
-+echo ""
-+echo "Dirdata analysis:"
-+echo "=== e2fsprogs debug info (before _check_scratch_fs) ===" >> $seqres.full
-+echo "E2FSCK_PROG: $E2FSCK_PROG" >> $seqres.full
-+echo "E2FSCK_PROG resolved: $(type -P e2fsck)" >> $seqres.full
-+echo "fsck -t ext4 resolves to: $(type -P fsck.ext4)" >> $seqres.full
-+echo "FSCK_OPTIONS: $FSCK_OPTIONS" >> $seqres.full
-+$E2FSCK_PROG -V >> $seqres.full 2>&1
-+echo "=== end e2fsprogs debug info ===" >> $seqres.full
-+
-+_check_scratch_fs
-+
-+echo "Encrypted casefold tests with dirdata completed"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ext4/065.out b/tests/ext4/065.out
+diff --git a/common/config b/common/config
+index 69e5d833..e0cd9ccd 100644
+--- a/common/config
++++ b/common/config
+@@ -210,6 +210,7 @@ export LVM_PROG="$(type -P lvm)"
+ export LSATTR_PROG="$(type -P lsattr)"
+ export CHATTR_PROG="$(type -P chattr)"
+ export DEBUGFS_PROG="$(type -P debugfs)"
++export SET_LUFID_PROG="$(type -P set_lufid || echo $here/src/set_lufid)"
+ export UUIDGEN_PROG="$(type -P uuidgen)"
+ export KEYCTL_PROG="$(type -P keyctl)"
+ export XZ_PROG="$(type -P xz)"
+diff --git a/src/Makefile b/src/Makefile
+index eaf0621f..fd70f407 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -37,7 +37,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
+ 	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
+ 	rw_hint btrfs_ioctl refluxfs xfs-exchange-to-eof \
+-	xfs-exchange-to-dirty-eof xfs-swapext-reflink
++	xfs-exchange-to-dirty-eof xfs-swapext-reflink set_lufid
+ 
+ EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+ 	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+diff --git a/src/set_lufid.c b/src/set_lufid.c
 new file mode 100644
-index 00000000..c1316430
+index 00000000..42fc5a6d
 --- /dev/null
-+++ b/tests/ext4/065.out
-@@ -0,0 +1,26 @@
-+QA output created by 065
-+Test 1: Basic encrypted casefold lookup with dirdata
-+Case-insensitive lookup works in encrypted dir
-+Original filename preserved
-+  Directory structure of test1: OK (dirdata verified)
-+Test 2: Conflicting names in encrypted casefold dir
-+Content after writes: second
-+  Directory structure of test2: OK (dirdata verified)
-+Test 3: Unicode in encrypted casefold dir
-+Unicode normalization works in encrypted dir
-+  Directory structure of test3: OK (dirdata verified)
-+Test 4: Directory operations in encrypted casefold dir
-+Directory case-insensitive lookup works
-+  Directory structure of test4: OK (dirdata verified)
-+Test 5: Inheritance of attributes
-+Attributes inherited correctly
-+  Directory structure of test5: OK (dirdata verified)
-+Test 6: Remove and recreate with different case
-+Recreated file has new case
-+  Directory structure of test6: OK (dirdata verified)
-+Test 7: Hard links in encrypted casefold dir
-+Hard link case-insensitive lookup works
-+  Directory structure of test7: OK (dirdata verified)
++++ b/src/set_lufid.c
+@@ -0,0 +1,196 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * set_lufid.c --- Set LUFID on a directory entry using IOCTL
++ *
++ * Copyright (C) 2026 The Lustre Collective. All Rights Reserved.
++ */
 +
-+Dirdata analysis:
-+Encrypted casefold tests with dirdata completed
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <fcntl.h>
++#include <dirent.h>
++#include <sys/ioctl.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <errno.h>
++#include <libgen.h>
++#include <stdint.h>
++#include <linux/fs.h>
++
++/* Structure for EXT4_IOC_SET_LUFID - should match kernel definition */
++struct ext4_dirdata_fid {
++	__u8 edf_data_len;
++	char edf_data[255];
++} __attribute__((packed));
++
++struct ext4_set_lufid {
++        __u8 esl_name_len;
++        char esl_name[255 + 1];
++        union {
++                char esl_data[1 + 255];
++                struct ext4_dirdata_fid esl_edf;
++        };
++} __attribute__((packed));
++
++#ifndef EXT4_IOC_SET_LUFID
++#define EXT4_IOC_SET_LUFID	_IOW('f', 47, struct ext4_set_lufid)
++#endif
++
++static void usage(const char *prog)
++{
++	fprintf(stderr, "Usage: %s DIRECTORY FILENAME [LUFID]\n", prog);
++	fprintf(stderr, "  DIRECTORY: path to the directory containing the FILENAME\n");
++	fprintf(stderr, "  FILENAME:  name of the file to set LUFID on\n");
++	fprintf(stderr, "  LUFID: data to attach (generated if not passed)\n");
++	exit(1);
++}
++
++static void dump_lufid_payload(const char *data, int len)
++{
++	int i;
++
++	printf("LUFID payload length: %d bytes\n", len);
++	printf("LUFID payload hex:");
++	for (i = 0; i < len; i++)
++		printf(" %02x", (unsigned char)data[i]);
++	printf("\n");
++}
++
++static int build_default_lufid(int dir_fd, const char *dir_path, const char *filename,
++			       uint32_t fid[4])
++{
++	int file_fd;
++	unsigned long ver = 0;
++	struct stat st;
++
++	/* Build an IGIF-style default payload from inode + version. */
++	file_fd = openat(dir_fd, filename, O_RDONLY | O_CLOEXEC);
++	if (file_fd < 0) {
++		fprintf(stderr, "Error opening %s/%s: %s\n",
++			dir_path, filename, strerror(errno));
++		return -1;
++	}
++
++	if (fstat(file_fd, &st) < 0) {
++		fprintf(stderr, "Error stating %s/%s: %s\n",
++			dir_path, filename, strerror(errno));
++		close(file_fd);
++		return -1;
++	}
++
++	fid[0] = (uint32_t)(st.st_ino >> 32);
++	fid[1] = (uint32_t)st.st_ino;
++
++	if (ioctl(file_fd, FS_IOC_GETVERSION, &ver) < 0) {
++		fprintf(stderr, "Error calling EXT4_IOC_GETVERSION for %s/%s: %s\n",
++			dir_path, filename, strerror(errno));
++		close(file_fd);
++		return -1;
++	}
++
++	fid[2] = (uint32_t)ver;
++	fid[3] = (uint32_t)(ver >> 32);
++
++	close(file_fd);
++	return 0;
++}
++
++int main(int argc, char *argv[])
++{
++	const char *dir_path;
++	const char *filename;
++	const char *lufid_data;
++	DIR *dirp;
++	int fd;
++	int name_len, data_len;
++	struct ext4_set_lufid lufid_args;
++	struct stat st;
++	uint32_t fid[4];
++	int rc;
++
++	if (argc < 2) {
++		usage(argv[0]);
++	}
++
++	dir_path = argv[1];
++	filename = argv[2];
++	name_len = strlen(filename);
++
++	if (name_len == 0 || name_len > 255) {
++		fprintf(stderr, "Error: Invalid filename length: %d (must be 1-256 with NUL)\n",
++			name_len);
++		return 1;
++	}
++
++	/* Check if directory exists and is a directory */
++	if (stat(dir_path, &st) < 0) {
++		fprintf(stderr, "Error accessing %s: %s\n", dir_path, strerror(errno));
++		return 1;
++	}
++
++	if (!S_ISDIR(st.st_mode)) {
++		fprintf(stderr, "Error: %s is not a directory\n", dir_path);
++		return 1;
++	}
++
++	/* Open the directory */
++	dirp = opendir(dir_path);
++	if (!dirp) {
++		fprintf(stderr, "Error opening directory %s: %s\n", dir_path, strerror(errno));
++		return 1;
++	}
++
++	fd = dirfd(dirp);
++	if (fd < 0) {
++		fprintf(stderr, "Error getting directory fd: %s\n", strerror(errno));
++		closedir(dirp);
++		return 1;
++	}
++
++	if (argc > 3) {
++		lufid_data = argv[3];
++		data_len = strlen(lufid_data);
++	} else {
++		rc = build_default_lufid(fd, dir_path, filename, fid);
++		if (rc) {
++			fprintf(stderr, "Error getting lufid for %s/%s\n",
++				dir_path, filename);
++			closedir(dirp);
++			return 1;
++		}
++		lufid_data = (char *)fid;
++		data_len = sizeof(fid);
++	}
++
++	if (data_len == 0 || data_len > 255) {
++		fprintf(stderr, "Error: Invalid LUFID data length: %d (must be 1-255)\n",
++			data_len);
++		closedir(dirp);
++		return 1;
++	}
++
++	/* Prepare LUFID data */
++	memset(&lufid_args, 0, sizeof(lufid_args));
++	lufid_args.esl_name_len = name_len;
++	lufid_args.esl_edf.edf_data_len = data_len;
++	/* Ensure filename is properly NUL-terminated at the correct position */
++	strncpy(lufid_args.esl_name, filename, name_len);
++	lufid_args.esl_name[name_len] = '\0';
++	memcpy(lufid_args.esl_edf.edf_data, lufid_data, data_len);
++
++	/* Call the ioctl */
++	if (ioctl(fd, EXT4_IOC_SET_LUFID, &lufid_args)) {
++		fprintf(stderr, "Error calling EXT4_IOC_SET_LUFID for %s/%s: %s\n",
++			dir_path, filename, strerror(errno));
++		closedir(dirp);
++		return 1;
++	}
++
++	closedir(dirp);
++	printf("Successfully set LUFID  on %s in directory %s\n", filename, dir_path);
++	dump_lufid_payload(lufid_args.esl_edf.edf_data, data_len);
++
++	return 0;
++}
 -- 
 2.52.0
 
