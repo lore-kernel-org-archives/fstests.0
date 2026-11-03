@@ -1,57 +1,79 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793735599;
-	b=p8JclbkaYwrSkz8x3jMqqUUQl2tsA2jE6fXe3orowJUmpMtuEA8CbaYBJuk2vzLWx+A+
-	 fgaL2DatFwo02wXQqop8yoIQMFAGd14L+x5fSVD6ob5FKEV2R9K/n25EqKL+ms4scxHqF
-	 02irWqGquZKLeId1TFSbJ9lUzlDRRuiKqn6gUBBcYJ/mArh/fHYdoQPKAOBnC0r7k8CtI
-	 TAvfwss91zAmc92exYVW5n7VC3JoCccAfziKx7XL+X9TpAkYZZpTE2jwsXPVwB1qnoPJ0
-	 675kt0lsNgyXtQ6o3SA7d3HqQsXPaZGM5N/nMYF9fmQlPzzHXHjj1yzO7vHn7vM6wVQ==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793735599;
-	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
-	 Mail-Followup-To:References:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To;
-	bh=65RX+VfCk+dq17hXxxdv+4/NRmJc42WooAZ095RswII=;
-	b=o6hW9KFADzsj6pUT1vxorrDP552nVaqe9EGR4TvUStd8Fahb86SUQydIHtBaqCDsTHaS
-	 fPn9XbavnHT9IdtLswepmbpknPhxkyucGX4rODaHrPvKH2WDUF+yUIM1/qMDoV7u/tOOB
-	 o3KpFK4LEIYQnhXNcrLOCei7PP6W1RJDnVfdouVcbcF8UMBVXnA0OHWcOXmikIPPZgvUR
-	 k0IvKwJYXv1UJCSGHypZU4Sqvvb1tfsE4IFLOzNzd0SgntuWna3DIklV6BPz0Fmhqmmxh
-	 Dle/33wZkSlP/nghyOisd0SwmItloWiypd5Trk6JtMn6oYtWJ3KK9tAQW5nyUmY+ZEQ==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=J6c64cB9;
-	arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1793738379;
+	b=AfNqAvXj1jzberYUxa4Qb/2Ay0MHOvOEswwAUESnwuz49S0P10Ms6ahiUzJpjiQP4mjC
+	 mGdl/Mdp9pR5rfMIRcSqANnt/MYv5arcGQxB2OX1/QDmVX+h+ukHGihojXZA3MZ4sm4xL
+	 B+urD+x4KkXh0zAd5GZ7CGvfTcfwUnb61mcNJnjXWYxX5BRANPcwJxDpHjZg0TFfJ9iTf
+	 gsXB0ubHqVYDrbE8sGUVA/oLtRYRLR+XaelATd2PIQnmdbFHUkfTLIXkdanUo270sSMm9
+	 rb0i0XvKtlQLEHyIoxew3wPgxePnxrqk6TCYpwjja9Kr/H/x7YR1xGV+9Hf3R2AIsVg==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793738379;
+	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
+	 Content-Type:Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=XBYEto4s3YC8PjNdOx2QhYF/Zwijh+0ZFjolktp8CrU=;
+	b=IXoR5lWBC1Br/nVQT3/sVqHQOeN/45iIeR1agbdrNBqDnzGJgHH/oYNShlE8vS7tItFE
+	 1jaECUtC2a7n5k5zTZlkziemKlzAVeITLigxwlrtjtmvFHs3YRP6qCqGtTWqDKMU0cUBl
+	 s0WCZVoPp4ePRYuAM7q5v3HvD4cYKh6jjehNwOzHQRxyINDTxJbfZ8BUXqXVP72qdB5wY
+	 YnToNDfyOutgMAgXeMm429sTZRU+nJ3wDK8QM8lv88o1uEB9yHdWcmyyWg7Z8oTpWm8mE
+	 5wCMG+ZUu8N7PcF69LfqAvFxliyy5WZBz0UrDv8YdGEwOU25iuVd+o7WinLEhftKhHw==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=GAVbPa+q;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A196F606A32C
-	for <fstests@vger.kernel.org>; Tue,  3 Nov 2026 19:53:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12ACA606A31B;
+	Tue,  3 Nov 2026 20:39:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=J6c64cB9
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 136631F000C1;
-	Tue,  3 Nov 2026 19:53:17 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=GAVbPa+q
+Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
+ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
+	t=1793738378;
+	b=NRIRMKXY03r2l10B3j3q0Z26L4IcCbDKbd4akMmwisWlJaUqZSvQh5E9wizevk2w+ww7
+	 G00FiSe53cbwpWR87tqzIGZHpebJE17NJ+t4bnX0/hnjGvfJYTyOTE+Onhvk5qO/6bTqK
+	 fwYAAvWavsW8HdolbThXYPY+PmdqymycDu7cBzfgN9kx4dUf6lx4Hy8GCyQsD1zFasOMZ
+	 dcllMO765y2dDauBYJdYhOfgL3ogRYJnyOy7JI+pv4tqSCY4pnN9AbdeAxjEauzktKXYv
+	 C1f1rUT2tBIQvyzs+4D5fr2Su6iO61mbL5j3Ckhy1CRJaXqtjgpgLdm98kY+4w000fA==
+ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
+	c=relaxed/relaxed; t=1793738378;
+	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
+	 Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=XBYEto4s3YC8PjNdOx2QhYF/Zwijh+0ZFjolktp8CrU=;
+	b=Aly1foccHDoUEh93k2lD7ked4nPdDSfHWljAMurOtQuPQYq1wt46xKZsnQ2ryov3UPhF
+	 737mo6II+N8h3h8IYbct7Rta+vLXe0WI5VFVsn7Nzipszdhl0PEHPFMG0eONyMdpyIQgw
+	 Zz+oSjgNcNNfTW8RPB0yyk1ymBS3+ZKHS/Iu7xI69S7SKWZEH3EAUuaj/ZtBuE9ierhm1
+	 Z7ezWe/pxISJAltfIFFJFu+NyG0WQLp58BE7yiyVnvKkOc2B/Y4vtpo6hhMQ9MMVQqFW8
+	 pLPzp/cL7qmswdahiv+Pc0BqPOIkHALWtFyNNpY9KWpptJNMbIXR5m8Bn9D1IGdy0bw==
+ARC-Authentication-Results: i=1; smtp.kernel.org; 
+	arc=none smtp.remote-ip=100.80.115.77
+Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	(No client certificate requested)
+	by smtp.kernel.org (Postfix) with ESMTPS id E670E1F00919;
+	Tue,  3 Nov 2026 20:39:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793735599;
-	bh=65RX+VfCk+dq17hXxxdv+4/NRmJc42WooAZ095RswII=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=J6c64cB963aPuvgVFp6NMHJ7fzJyvOVq6EsqR+FBJMVnpwQRAl1UjOjY6IiU5s6E0
-	 YQxO/Uhu9WSUEh79+7xhV/ex/dFWqgUybHTcygfsTPn4e0gtd++ljfxkrOxa/GOgv+
-	 SLH1lqQcjszjrVSf1SdLNpTk/EHRrzdk3g+mV/szkpdaYCIKUurafmBlP7J3lZUi4r
-	 Y4o2kLP7UGzwya7ekjxmCZR7Fxk2e9H/TyM68ORAnma+evDH8zJJAI9GsdH4D4/uFP
-	 W5fA+1TDyXOq0f7WIOpL/I56tXn47uCzffWmxwSasEg/125QSve1Q/sm7f36BMjFdM
-	 QYGXOLM1OZNgw==
-Date: Wed, 4 Nov 2026 03:53:14 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] tools/get_maintainer.pl: accept and ignore
- --nogit-chief-penguins
-Message-ID: <auo5rGN2D7_akSuF@zlang-mailbox>
-Mail-Followup-To: Jeff Layton <jlayton@kernel.org>, 
-	fstests@vger.kernel.org
-References: <20261027-b4-v1-1-a87dca9172c9@kernel.org>
- <auId2GI01gShq9uf@zlang-mailbox>
- <c236e40a7e6094f35fb0cb529282e25827c2741b.camel@kernel.org>
+	s=k20260515; t=1793738378;
+	bh=XBYEto4s3YC8PjNdOx2QhYF/Zwijh+0ZFjolktp8CrU=;
+	h=From:Date:Subject:To:Cc:Reply-To;
+	b=GAVbPa+qTyUhiaOxWp487eb5/LV+GBwRDrqxPh1nn6z5j+hZ65darC0De0Eg2kwSx
+	 +MQtseHvhCJIpVWUlWNO3kSefXrgqWCczLnaegzNwg88Vn8+yA/QJeTrfZWDgz0Zq1
+	 mTIFJsObzFRu0EaOqLXpuweVK6i5IANiOXsJZT6mmQVNQwQtKw1w/mCbByVOgjmjg1
+	 yNRC+am3pmjUCTbbjHCaUrM41C7PkotmZ4o8uQWuVw4cP5UbXprU6gy3Wi0vjWSZuC
+	 otnO+meFGD+9mUNd/cUYWSkDwqYstYWGbnTjyfO9bUfAauo6oGRAxL8Hm7wfkusNUp
+	 rhwT+3tLFK5Ag==
+Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
+	by lkml.kernel.org (Postfix) with ESMTP id 6258F46AFD;
+	Tue,  3 Nov 2026 20:39:37 +0000 (UTC)
+From: Peter Lamberg via B4 Relay <devnull+kernel.pelam.fi@kernel.org>
+Date: Tue, 03 Nov 2026 22:39:32 +0200
+Subject: [PATCH] btrfs: test that a resumed snapshot deletion keeps its
+ drop progress
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -61,78 +83,241 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <c236e40a7e6094f35fb0cb529282e25827c2741b.camel@kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Message-Id: <20261103-btrfs-355-v1-1-fb0a30b4983b@pelam.fi>
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXMQQ5AMBBA0avIrDXpKCKuIhZtDcYC6SAScXfF8
+ iU//wKhwCRQJxcEOlh4mSMwTcCPdh5IcRcNmc5KRG2U20IvyhSFQo/GWbI6rzzEfg3U8/m9mva
+ 37G4iv70DuO8HglLW+20AAAA=
+X-Change-ID: 20261103-btrfs-355-1c13baea048c
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, asj@kernel.org, fdmanana@suse.com
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1793738376; l=7537;
+ i=kernel@pelam.fi; s=20261103; h=from:subject:message-id;
+ bh=vPs9slwRx0isQyVtBajLr+Y9W7onpaaZGuikppHgV+Y=;
+ b=bvXxMmhlz5VyEKlugJi9fkHlbas74ZjjEkRhzEZWmAo9ZWrRZmFlELwkyrvEaTIhG87VPwkn9
+ E6JqAyZLyDaDerRENUC+KKueC1PEDQ3G/vEwIuD6W+i2634zAp8xY+F
+X-Developer-Key: i=kernel@pelam.fi; a=ed25519;
+ pk=qpD/xh/xwDGEMdfQk/5prChHF0mXHXDTrs35FxiJgrk=
+X-Endpoint-Received: by B4 Relay for kernel@pelam.fi/20261103 with
+ auth_id=1398
+X-Original-From: Peter Lamberg <kernel@pelam.fi>
+Reply-To: kernel@pelam.fi
+Content-Transfer-Encoding: 7bit
 
-On Wed, Oct 28, 2026 at 01:18:41PM -0400, Jeff Layton wrote:
-> On Thu, 2026-10-29 at 01:09 +0800, Zorro Lang wrote:
-> > On Tue, Oct 27, 2026 at 09:51:54AM -0400, Jeff Layton wrote:
-> > > b4 prep --auto-to-cc passes --nogit-chief-penguins as an option to
-> > > get_maintainer.pl. Ensure that it accepts and ignores it.
-> > > 
-> > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > > ---
-> > 
-> > Makes sense to me, thanks Jeff!
-> > 
-> > Reviewed-by: Zorro Lang <zlang@kernel.org>
-> > 
-> > Just out of curiosity, how did you configure your environment to trigger
-> > this in fstests? Did you symlink "scripts" to "tools" (e.g. ln -s tools scripts),
-> > or did you set some b4 git config :)
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> 
-> Yes, actually -- I symlinked it. We could probably do that as part of
-> this patch if you like. I can respin or you can just add it.
+From: Peter Lamberg <kernel@pelam.fi>
 
-Thanks Jeff, but let's skip this for this patch for now. I recall a previous
-patch wanting to add a separate "scripts" directory.
+When a partially dropped subvolume is resumed, btrfs_drop_snapshot()
+can write drop_progress (0 0 0) back to the root item if a commit or
+unmount happens before the resumed run drops its first reference. The
+next run then restarts from the first slot and tries to free blocks
+still shared with a snapshot again, and the transaction aborts with
+"unable to find ref byte nr". See the kernel fix:
 
-If you want to see if more people actually need this, you can send a separate
-patch to discuss adding this symlink, along with a doc update to explain its
-usage :)
+  "btrfs: keep drop_progress when resuming snapshot deletion"
 
-Thanks,
-Zorro
+The test builds a subvolume S1 with a level 3 tree (nodesize 4096,
+30000 files with one 3000 byte xattr each), takes a read-only snapshot
+S2 and deletes S1. It unmounts once a root child has been dropped, then
+does five quick mount/unmount cycles and checks that the drop key never
+goes back to zero. Finally it lets the deletion finish and checks that
+S2's content is unchanged and S1's root item is gone.
 
->  
-> > >  tools/get_maintainer.pl | 2 ++
-> > >  1 file changed, 2 insertions(+)
-> > > 
-> > > diff --git a/tools/get_maintainer.pl b/tools/get_maintainer.pl
-> > > index 671ffe26a799..02c02eea3e67 100755
-> > > --- a/tools/get_maintainer.pl
-> > > +++ b/tools/get_maintainer.pl
-> > > @@ -31,6 +31,7 @@ my $email_fixes = 1;
-> > >  my $email_list = 1;
-> > >  my $email_moderated_list = 1;
-> > >  my $email_subscriber_list = 0;
-> > > +my $email_git_penguin_chiefs = 0;
-> > >  my $email_git = 0;
-> > >  my $email_git_all_signature_types = 0;
-> > >  my $email_git_blame = 0;
-> > > @@ -228,6 +229,7 @@ if (!GetOptions(
-> > >  		'git-blame!' => \$email_git_blame,
-> > >  		'git-blame-signatures!' => \$email_git_blame_signatures,
-> > >  		'git-fallback!' => \$email_git_fallback,
-> > > +		'git-chief-penguins!' => \$email_git_penguin_chiefs,
-> > >  		'git-min-signatures=i' => \$email_git_min_signatures,
-> > >  		'git-max-maintainers=i' => \$email_git_max_maintainers,
-> > >  		'git-min-percent=i' => \$email_git_min_percent,
-> > > 
-> > > ---
-> > > base-commit: 22348afe338c0f6d540c0d7ef0db749eaa51b218
-> > > change-id: 20261027-b4-5ff755f4716c
-> > > 
-> > > Best regards,
-> > > -- 
-> > > Jeff Layton <jlayton@kernel.org>
-> > > 
-> 
-> -- 
-> Jeff Layton <jlayton@kernel.org>
-> 
+Without the fix the test fails on the first resume; with it the test
+passes. It takes about 15 seconds on loop devices on a SATA SSD.
+
+Assisted-by: LLM
+Signed-off-by: Peter Lamberg <kernel@pelam.fi>
+---
+Kernel fix, sent to linux-btrfs:
+https://lore.kernel.org/linux-btrfs/20261103-drop-progress-v1-1-16e345565109@pelam.fi/
+
+Reproducers and logs: https://pelam.fi/btrfs-drop-progress/
+
+btrfs/355 fails 3/3 on the stock Ubuntu 7.3.0-9-generic btrfs.ko and 3/3
+on a module built from the same source without the fix; it passes 3/3
+with the fix. About 15 s on a SATA SSD, 11-13 s with the devices on
+tmpfs. It _notrun's if the tree stays too shallow or the window is
+missed.
+
+_fixed_by_kernel_commit has a placeholder hash until the fix is merged;
+I'll send a v2 with the real one. The test number may need adjusting if
+355 gets taken first.
+---
+
+---
+ tests/btrfs/355     | 153 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/355.out |   2 +
+ 2 files changed, 155 insertions(+)
+
+diff --git a/tests/btrfs/355 b/tests/btrfs/355
+new file mode 100755
+index 00000000..40e41c00
+--- /dev/null
++++ b/tests/btrfs/355
+@@ -0,0 +1,153 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 Peter Lamberg
++#
++# FS QA Test 355
++#
++# Test that a resumed snapshot deletion keeps its saved drop progress.
++#
++# If the drop progress is reset to zero on resume (a commit or unmount before
++# the resumed run drops its first reference), the next run restarts from the
++# first slot and tries to free blocks still shared with a snapshot again: the
++# transaction aborts with "unable to find ref byte nr".
++#
++. ./common/preamble
++_begin_fstest auto quick snapshot subvol
++
++. ./common/attr
++. ./common/filter
++
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: keep drop_progress when resuming snapshot deletion"
++
++_require_scratch
++_require_attrs user
++_require_btrfs_command inspect-internal dump-tree
++_require_btrfs_command inspect-internal rootid
++_require_command "$TIMEOUT_PROG" timeout
++
++# One big user xattr per file gives roughly one 4K leaf per file. A level 2
++# node covers at most ~14600 leaves, so 30000 files make a level 3 tree with a
++# few root children of several thousand leaves each.
++# The resumed drop has to walk a whole such child before it drops anything,
++# which is the window the second unmount must land in.
++nfiles=30000
++per_dir=1000
++pad=$(printf '%3000s' '' | tr ' ' x)
++
++drop_caches()
++{
++	sync
++	echo 3 > /proc/sys/vm/drop_caches
++}
++
++# Print the S1 root item's "drop_progress objectid" and "drop_level", or
++# "ABSENT" if the root item is gone (deletion finished).
++drop_state()
++{
++	$BTRFS_UTIL_PROG inspect-internal dump-tree -t root $SCRATCH_DEV \
++		2>/dev/null | $AWK_PROG -v want=$s1_id '
++		/item [0-9]+ key \(/ {
++			split($0, a, "("); split(a[2], b, " "); cur = b[1]; next
++		}
++		cur == want && /drop_progress key/ {
++			match($0, /key \([0-9]+/); obj = substr($0, RSTART + 5, RLENGTH - 5)
++			match($0, /drop_level [0-9]+/); lvl = substr($0, RSTART + 11, RLENGTH - 11)
++			print obj, lvl; found = 1
++		}
++		END { if (!found) print "ABSENT" }'
++}
++
++root_level()
++{
++	$BTRFS_UTIL_PROG inspect-internal dump-tree -t root $SCRATCH_DEV \
++		2>/dev/null | $AWK_PROG -v want=$s1_id '
++		/item [0-9]+ key \(/ {
++			split($0, a, "("); split(a[2], b, " "); cur = b[1]; next
++		}
++		cur == want && /^[[:space:]]*level [0-9]+ generation_v2/ {
++			match($0, /level [0-9]+/); print substr($0, RSTART + 6, RLENGTH - 6); exit
++		}'
++}
++
++s2_digest()
++{
++	$GETFATTR_PROG --absolute-names -R -d -m user.pad $SCRATCH_MNT/S2 2>&1 | \
++		_filter_scratch | md5sum | cut -d' ' -f1
++}
++
++_scratch_mkfs -n 4096 >> $seqres.full 2>&1 || \
++	_notrun "mkfs with nodesize 4096 failed"
++_scratch_mount
++
++$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/S1 >> $seqres.full
++for ((d = 0; d < nfiles / per_dir; d++)); do
++	dir=$SCRATCH_MNT/S1/d$d
++	mkdir $dir
++	(cd $dir && seq -f "f%04.0f" 0 $((per_dir - 1)) | xargs touch &&
++	 seq -f "f%04.0f" 0 $((per_dir - 1)) | \
++		xargs $SETFATTR_PROG -n user.pad -v "$pad") || \
++		_fail "populating S1 failed"
++done
++s1_id=$($BTRFS_UTIL_PROG inspect-internal rootid $SCRATCH_MNT/S1)
++
++# S2 shares every block of S1, S1 owns them.
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/S1 $SCRATCH_MNT/S2 \
++	>> $seqres.full
++$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
++digest_before=$(s2_digest)
++level=$(root_level)
++echo "S1 id $s1_id root level $level files $nfiles" >> $seqres.full
++[ -n "$level" ] && [ $level -ge 3 ] || \
++	_notrun "S1 tree too shallow (level $level)"
++
++$BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/S1 >> $seqres.full
++drop_caches
++
++# First drop run: unmount once at least one root child has been dropped, so
++# the saved drop progress is non-zero and at the root level.
++for ((i = 0; i < 600; i++)); do
++	$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
++	read -r obj lvl < <(drop_state)
++	[ "$obj" = ABSENT ] && \
++		_notrun "subvolume deletion finished before it was interrupted"
++	[ "$obj" != 0 ] && [ "$lvl" = "$level" ] && break
++	# dump-tree reads through the block device page cache, which goes
++	# stale while the fs is mounted
++	drop_caches
++	sleep 0.1
++done
++[ "$obj" != 0 ] || _notrun "subvolume deletion made no progress"
++_scratch_unmount
++echo "first run interrupted at drop key ($obj) level $lvl" >> $seqres.full
++
++# Resumed runs, each interrupted right away. The saved progress must never go
++# back to zero.
++for ((i = 0; i < 5; i++)); do
++	drop_caches
++	_scratch_mount
++	_scratch_unmount
++	read -r obj lvl < <(drop_state)
++	echo "resume $i: drop key ($obj) level $lvl" >> $seqres.full
++	[ "$obj" = ABSENT ] && break
++	if [ "$obj" = 0 ]; then
++		echo "drop progress of the deleted subvolume reset to zero on resume"
++		break
++	fi
++done
++
++# Let the deletion finish. With a reset drop progress this tries to free blocks
++# still used by S2 again and the transaction aborts.
++_scratch_mount
++$TIMEOUT_PROG 600 $BTRFS_UTIL_PROG subvolume sync $SCRATCH_MNT \
++	>> $seqres.full 2>&1
++drop_caches
++digest_after=$(s2_digest)
++[ "$digest_before" = "$digest_after" ] || \
++	echo "S2 content changed after deleting S1"
++_scratch_unmount
++[ "$(drop_state)" = ABSENT ] || echo "S1 deletion did not finish"
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/355.out b/tests/btrfs/355.out
+new file mode 100644
+index 00000000..4e4c5e98
+--- /dev/null
++++ b/tests/btrfs/355.out
+@@ -0,0 +1,2 @@
++QA output created by 355
++Silence is golden
+
+
+
+
