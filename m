@@ -1,55 +1,91 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.51
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793708128;
-	b=hjWHDAOflKcbG/eGgjVCkdZI83xqvU8biFgN6+2tIufHWn/IHdUdpjC6tQ0U2S0ZD7yH
-	 27z1ntPjgn847GZZ/gvMk9q5CBp1P6rhjSJkge9VkMKT6MMalbibuY9xB7t9f+aeGhhf9
-	 gmHKPHnjb2JShMvAde3718145x4W1mHn+KNSaoY+iAFFtNm9GQ+lLP+carTcgvzIPQn+N
-	 sNStLeCcVTJbJpI03LPZSEug0VkQlchSzb0l4J7lmCT/YrU2g1GbFDKV7cfcxBVw8I7y5
-	 MbHK7NRjAx54+J5HllSugeITXBcVoz7Dwdf8pr3uh0dZPAdO1MBHK4gZ/pqcfCQlbzA==
+	t=1793713877;
+	b=XXPLM9SMOWk3AdiNKFq+uumvmEtyMGRY9G838w/0ybZw6uOJxbjQAbxOWdh2vNCbxeaf
+	 Vt05v9Dm+oEjqes8SCKY5Hx3gIHZ6zTAqVxMjJHsm6rNAQDeRpYW/aWFyXgItR28D7PjZ
+	 uxwCQsCF1B1/dvb8Vp/pRsnJq4sKfIdeOBAOVPe43Lqn9y04KS/NuMys3Dz5za1VY4zUC
+	 OS0AG3lPk8Xu4Epj41MZinuE0ee3qztDzX6EC5CfLKE3xHtpDKzKPLU9EvWMJIokO2644
+	 h6LKa38XC8xmw7TlScBezNFwDUJ2xhsEyHw1X/NVxT/cYteVd/bwy8K3UmwiPYC/m+A==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793708128;
-	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
-	 Mail-Followup-To:References:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To;
-	bh=R3yfT0Z5AizC5oWl6flmH7h7ox4+VVz1ugI9xf78nN4=;
-	b=vHNXNQrxT4k1uPXN6BdTLTD2iZ/DLXE/G3P8zpSpEwWgmb7tlhxl4U8LxWW3flmoXayG
-	 5qyfVmRA+a8W0EeCEzA22UHfU6CKd6xpYkg6G6tBDmL9VX08Pd7vWK0fEyob6u+GHT/1d
-	 XiVVi8qpOg2oqb5Da3HoWAkxtghkK5RzybT27P9M21C5KGmb+jEPAuXNhfKR/jCf8u9Ll
-	 u4HujLdx+8GM+h9U1V48ptVZwesq26B6IR+hnJ40XbhzO54aq1Dj62MNhu5DnV0EjCoNq
-	 /C1Qs/bxTrjHfpH5fDRlZZC5VotnXB76fgbkHKnNcBn0V4zsUtpawN5jgBET//jnysA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793713877;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:
+	 X-Google-Original-From:To:Cc:Subject:Date:Message-ID:X-Mailer:
+	 MIME-Version:Content-Transfer-Encoding;
+	bh=mBJlz7yMX0N/7af4hSUS50hoXHbP9fZz8A/BckYYgew=;
+	b=HXDiCpHbdOZVDgxbBszXK6UtLz1Tj9c5nBMRk+skaay6+IEfEX48uvCpdM6Z1xxYKGC7
+	 Cq7UXXyqkHMXDetU2Z3JHvFbNmDh9mWMlTHWMU7MmR/JtT3oeA3r2978m8o7MWJtFlC9G
+	 t62DEsqQ4w3OGrXllN3MUPZoakIB3E/+dXnVcHhm4jhRtpTaVcnou7IUGERqjibcVs2TP
+	 P89CH53at2v+9/TLq8BUOF+G6WljS+9tL6j6NTatr7DNuj/r+IlVb9aJqPAmDBVUgUR0u
+	 15gz9A54YUHht2p/8oTzO0OGUp4egZ9VDQSFhpy8b8vG9hw1aV0p7tCzV7Wc+864oXQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=FMAYj6cY;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	dmarc=pass header.from=gmail.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Jc35+wFp;
+	arc=none smtp.remote-ip=209.85.128.51
+Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF226606A328
-	for <fstests@vger.kernel.org>; Tue,  3 Nov 2026 12:15:27 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 001E4606D830
+	for <fstests@vger.kernel.org>; Tue,  3 Nov 2026 13:51:16 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 001E4606D830
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=FMAYj6cY
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 940021F000C1;
-	Tue,  3 Nov 2026 12:15:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793708127;
-	bh=R3yfT0Z5AizC5oWl6flmH7h7ox4+VVz1ugI9xf78nN4=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=FMAYj6cYazu3FiCkC86RcjKr7j2SAWIiX8PUGL8upflzKOMY6LZhHl04os0eSXvZd
-	 siMOAcZ8YRFWko4f8XvauyBv44KhjTQ4D9RkT687X9GZSD1RsR0Bs6elIlp5qSK/3u
-	 TraHACWPrvKSeoeuZEaAuZQs1lwpYGI3iXXuSE9udpywimHPV946um/yWA5VroO9dk
-	 AOBwpt935NK4h/XoTLWMpIRfxJDedGczKL7dwbpfub1/9UiNF5MyhDW0e/HqOB5aP1
-	 eMDNYUn4qNH53batw1bYoMmZyHmAT7LqqcLs7swmrW14ytxI88O2biokUAGZ1VfgqW
-	 w/DWGEzJq+XFA==
-Date: Tue, 3 Nov 2026 20:15:21 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Andrey Albershteyn <aalbersh@kernel.org>
-Cc: fstests@vger.kernel.org, ojaswin@linux.ibm.com, hch@lst.de
-Subject: Re: [PATCH v2] check: set seqres before calling init_rc which could
- write there
-Message-ID: <aunJIPo777UWbpd4@zlang-mailbox>
-Mail-Followup-To: Andrey Albershteyn <aalbersh@kernel.org>, 
-	fstests@vger.kernel.org, ojaswin@linux.ibm.com, hch@lst.de
-References: <20261103093116.2850916-2-aalbersh@kernel.org>
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Jc35+wFp
+Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-4a2072b9832so4523585e9.1
+        for <fstests@vger.kernel.org>; Tue, 03 Nov 2026 05:51:16 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20260707; t=1793713875; x=1794318675; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=mBJlz7yMX0N/7af4hSUS50hoXHbP9fZz8A/BckYYgew=;
+        b=Jc35+wFpLDWcuZJHtOzePccoeMO3a4G39hb/c06rDgnBbioizCaQLO3So6/tmcGpGa
+         Y8jTyTmVM7wZdqM9tfjvw5NoFwG9ZSsXgfB5Mz2S4FEShRXLmY3ul0lMtwb/nDGxYpmW
+         WKFX+j/VQNY6/UpfW2XSVhejSpNgnfAcksT3LgrtreaTbV70yC6hCI4H39k+/dxN+ULq
+         zMlelnTNsC1ExNUL+S/Uranap6xveQ6zTrCb/5FX8tSgP9cheXYvYcb4SaVX7x5IVrbs
+         Ljg/J2GtoE/JgCTPnQRln5Kw2zsI+1B3DOgL+fT2CWYcMz9z/0kFvOKrXyOVWfmvUi7L
+         P3HA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1793713875; x=1794318675;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=mBJlz7yMX0N/7af4hSUS50hoXHbP9fZz8A/BckYYgew=;
+        b=x8Dy62QMezTjl3AvH2abBr152rYSA5xqGFQq9BuJsW97Nx0fwZNvybFzjVq9o8StK0
+         mNboFT5VG9o3k428EYmcgDpDQDifXgh9koB0pwDH3VeZsRks2OTLE5/nKCNQ4ouqiMDe
+         2t4apVfSeY0X0pCAtW4U7JrlBtOyhjMmC8Le4kDLi3PnZMl65Zdl9KeMhiItI5TVGTVR
+         UxVxhwl20VlL75dLkqxutgCAEtDcZhgY/EtaiS6msFUPooQWbz2CLos9OG+2eDcYPh/c
+         xLQqklCVl8gFdXPW5xcxXcgRCJXTq93de12DylAMKBlCg7+UJm4skuoiuw0Pr/Jlq+48
+         oDKg==
+X-Gm-Message-State: APuU4Z+Z6czAnK/Yll5c1Ovzs2qg1E9hqxaanm8Ar/XGfhuY7H/KfYzI
+	2vNL611f+aB5H5zoVzcpcobkoTvr8bRmKX0FqfC7unw1QxS+Z57AwDcMLK5ZdS2j8KE=
+X-Gm-Gg: AYBFou2OaaKDozC7M4DkIR9y8Bp+JefXFTRndqKM7xm5Y5/9AQws6CRMmWpT8XWao47
+	huEGju/b1MgP2Fg4lKR1fJPmHYh3GOH2LMlz/QQkkjW8Ef6rEheu2ry0/h3y5kT3Js4fPxuHuOf
+	Kes+rrsHRbUwGPbKyPc7UF7jbhIeOQl7f+/FGwq5EJ5df5UVGLYMGu/Xm2EkibE8cOaLnPmViM0
+	MeEeFTFsiZVJuunFjr2qS1qDDDIWbu3JmSM5LpUiGKDAtUv6YE5nP/8aQN/+t0bQLlGv21yD+bo
+	QY+PDIgjctmB1h3zgLNu+iOspJxPHJT37jf7MFfSLP3Ystq2jj+3Qw7y8VHZLYGoOszy0tI9GVF
+	/b9CfRtSW1gwshzn/EvLz2zJE0PZKLBT0e1R68JMKb7aucO4sdH1HiihCFAf5eNT5jKVrznU4vV
+	dgW98jQlw7RFvcr76sv0JAXuXK+8fR34zSUwJe6NEexXR9j36768ylODp1oKPj61lENe0NPMo9m
+	Bpi4u0vgPQmpb05x7GLJwpMEuF5P9XNMT+oN7x9yl48YK7WI+2abHWovY4bCzLnMxBobQ14aJzr
+	qYSu0l6EACYXKvhWY7ZdBoHPqdQqEnZi/wMy981WUGqMSs6czGXWkcYyOxyL
+X-Received: by 2002:a05:600c:4687:b0:4a2:10f9:37db with SMTP id 5b1f17b1804b1-4ac16fa4dadmr297818665e9.7.1793713875405;
+        Tue, 03 Nov 2026 05:51:15 -0800 (PST)
+Received: from Cluster2.powerhub ([2a0a:ef40:18b5:9e01:225:90ff:fefc:9ffe])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4b2a96fc87fsm55320335e9.12.2026.11.03.05.51.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 03 Nov 2026 05:51:14 -0800 (PST)
+From: Artem Blagodarenko <artem.blagodarenko@gmail.com>
+X-Google-Original-From: Artem Blagodarenko <ablagodarenko@thelustrecollective.com>
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org,
+	adilger.kernel@dilger.ca,
+	ablagodarenko@thelustrecollective.com
+Subject: [RFC PATCH v6 0/8] ext4: tests for the dirdata feature (encryption+casefold, LUFID)
+Date: Tue,  3 Nov 2026 13:50:56 +0000
+Message-ID: <20261103135106.610169-1-ablagodarenko@thelustrecollective.com>
+X-Mailer: git-send-email 2.52.0
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -59,75 +95,108 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261103093116.2850916-2-aalbersh@kernel.org>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Nov 03, 2026 at 10:31:17AM +0100, Andrey Albershteyn wrote:
-> There's path where >>$seqres is used in init_rc:
-> 
-> -> init_rc
-> 	-> _test_mount
-> 		-> _prepare_for_eio_shutdown
-> 			->_xfs_prepare_for_eio_shutdown
-> 				-> _set_fs_sysfs_attr
-> 
-> Which will try to write to .full because $seqres is not set. Fix this by
-> setting seqres first, this way it should go to $RESULT_DIR/check.full.
-> 
-> The init_rc is called in the top context and then per section, however,
-> for top context we don't have environment set up yet. These logs are
-> just a few sysfs_attr writes and aren't that important, so, let's save
-> those to /tmp/xxx.check.full just in case.
-> 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
-> ---
-> Changes in v2:
-> - remove The before init_rc in the comment
-> ---
->  check | 8 ++++++--
->  1 file changed, 6 insertions(+), 2 deletions(-)
-> 
-> diff --git a/check b/check
-> index 534c2cdf7a06..afe855bcf0ed 100755
-> --- a/check
-> +++ b/check
-> @@ -534,6 +534,10 @@ if ! . ./common/rc; then
->  	_fatal "check: failed to source common/rc"
->  fi
->  
-> +# init_rc could write to the $seqres.full, however we don't have any context
-> +# here yet, and no RESULT_BASE is setup. These logs aren't that important but
-> +# let's keep them in /tmp anyway.
-> +seqres=$tmp.check
+These tests cover the ext4 "dirdata" feature (storing extra metadata
+in directory entries beyond the file name), sent separately from the
+kernel and e2fsprogs dirdata patch series for reference and review.
 
-The code around init_rc is definitely messy and deserves a proper refactor.
-For this patch specifically, though, it looks good to me.
+The companion series are:
+  [PATCH v14 00/12] Data in direntry (dirdata) feature
+  [PATCH v4 00/13] e2fsprogs: Add support for dirdata feature
 
-Reviewed-by: Zorro Lang <zlang@kernel.org>
+ext4/064 and ext4/065 verify that encryption and case-insensitive
+(casefold) directories continue to work both without and with
+dirdata enabled. ext4/066 and ext4/067 exercise the LUFID (Locally
+Unique File ID) use of dirdata via a new EXT4_IOC_SET_LUFID ioctl,
+using a small set_lufid helper utility added in this series.
+ext4/068 verifies that LUFID is correctly carried through overwrite
+rename and RENAME_EXCHANGE. ext4/069 covers LUFID in inline_data
+directories.
 
->  init_rc
->  
->  # If the test config specified a soak test duration, see if there are any
-> @@ -932,8 +936,6 @@ function run_section()
->  		_test_unmount 2> /dev/null
->  	fi
->  
-> -	init_rc
-> -
->  	seq="check.$$"
->  	check="$RESULT_BASE/check"
->  	seqres="$check"
-> @@ -941,6 +943,8 @@ function run_section()
->  	# don't leave old full output behind on a clean run
->  	rm -f $check.full
->  
-> +	init_rc
-> +
->  	[ -f $check.time ] || touch $check.time
->  
->  	# print out our test configuration
-> -- 
-> 2.54.0
-> 
+Changes in v6:
+- ext4/067, ext4/068: run set_lufid through $SET_LUFID_PROG, as
+  ext4/066 and ext4/069 do.  They used the bare name, so they only
+  passed when set_lufid happened to be in $PATH.
+- The kernel series (v14) now limits the EXT4_IOC_SET_LUFID payload to
+  48 bytes.  The tests already use 48-byte payloads and are unchanged.
+
+v5: https://lore.kernel.org/fstests/20261029122842.230704-1-ablagodarenko@thelustrecollective.com/
+
+Changes in v5:
+- Rebased onto fstests for-next (d07dca72 "xfs: test unlinked inode
+  list checking and repair with loops"). src/Makefile: set_lufid is
+  added to the updated LINUX_TARGETS list (fs-monitor is now a
+  conditional target upstream).
+- set_lufid: declare build_default_lufid()'s fid argument as
+  uint32_t[4] to match the caller; this fixes a -Wstringop-overflow
+  warning.
+- ext4/069: fixed the patch author, which was a placeholder identity
+  in v4.
+
+Changes in v4:
+- Added ext4/068: two-part rename test (overwrite rename and
+  RENAME_EXCHANGE) that verifies the destination directory slot
+  carries the source inode's LUFID after the rename, not the stale
+  LUFID of the replaced inode. Tests the fix in ext4_setent() that
+  copies the LUFID dirdata payload through rename.
+- Added ext4/069: inline_data directory regression test. Verifies
+  that a LUFID set via EXT4_IOC_SET_LUFID on an entry in an
+  inline_data directory survives to disk. Catches the bug where
+  ext4_add_dirent_to_inline() was passing NULL instead of dfid,
+  silently losing the LUFID.
+- Expanded _dump_dir_structure() in common/ext4 to match directory
+  entries by inode number instead of filename when the directory is
+  encrypted (ciphertext names on disk do not match the plaintext
+  filenames visible through the VFS).
+- Minor updates to ext4/065 to use the improved helper and add
+  verification of the fid= field in the encrypted+dirdata case.
+
+
+Artem Blagodarenko (8):
+  ext4: add common helper to check whether dirdata is applied
+  ext4/064 encryption + casefold feature combination WITHOUT dirdata
+  ext4/065 encryption + casefold + dirdata feature combination
+  ext4: add set_lufid utility
+  ext4/066: verify LUFID dirdata operations
+  ext4/067: LUFID and encryption+casefold+dirdata
+  ext4/068: test LUFID is carried through overwrite rename and
+    RENAME_EXCHANGE
+  ext4/069: test LUFID in inline_data directory entries
+
+ common/config      |   1 +
+ common/ext4        |  63 ++++++++++++
+ src/Makefile       |   2 +-
+ src/set_lufid.c    | 196 +++++++++++++++++++++++++++++++++++
+ tests/ext4/064     | 153 +++++++++++++++++++++++++++
+ tests/ext4/064.out |  17 +++
+ tests/ext4/065     | 252 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/065.out |  26 +++++
+ tests/ext4/066     | 159 ++++++++++++++++++++++++++++
+ tests/ext4/066.out |   4 +
+ tests/ext4/067     | 137 ++++++++++++++++++++++++
+ tests/ext4/067.out |   4 +
+ tests/ext4/068     | 202 ++++++++++++++++++++++++++++++++++++
+ tests/ext4/068.out |   5 +
+ tests/ext4/069     | 164 +++++++++++++++++++++++++++++
+ tests/ext4/069.out |   7 ++
+ 16 files changed, 1391 insertions(+), 1 deletion(-)
+ create mode 100644 src/set_lufid.c
+ create mode 100755 tests/ext4/064
+ create mode 100644 tests/ext4/064.out
+ create mode 100755 tests/ext4/065
+ create mode 100644 tests/ext4/065.out
+ create mode 100755 tests/ext4/066
+ create mode 100644 tests/ext4/066.out
+ create mode 100755 tests/ext4/067
+ create mode 100644 tests/ext4/067.out
+ create mode 100755 tests/ext4/068
+ create mode 100644 tests/ext4/068.out
+ create mode 100755 tests/ext4/069
+ create mode 100644 tests/ext4/069.out
+
+
+base-commit: d07dca72d2455f4ba8c660ad4c008541ccccb707
+-- 
+2.52.0
+
