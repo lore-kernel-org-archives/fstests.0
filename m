@@ -1,82 +1,84 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.54
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.54
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793713882;
-	b=RcBSc9jjHb8/dWSM4x3OXNtD/pGaJ4WqBW6CePbQaRhQVpX5LoszMUkLL3mjvR2tbdND
-	 /boWkewi9K7RrBsOtxTSFsaAA2pLe3CCZmLCLVlsIDGRSc6w+QG9ltqcQ12RB9rr2Dr7q
-	 l1tMqOi4WMk3yaKcXMkBZCousMHz91jHZy7HS78Ps9pDAp+BwLibmlT6iHH3o5vNf10YN
-	 k8MGz1uH7f9pmDWysDHN1oRIwP2jna9Uqp3tebJ0+nA2Dxr8eJI4SDO3nMwadfu89US7H
-	 h/EvplVw+Dj2c1yEH5NDbFCasd8d8FocWmkLEGk4B0RBslyRR8y9FjhWzxVelCMNx7g==
+	t=1793713883;
+	b=4+Y2jSJlMUJXP2KIG6vPYhTfVyIkxW0y8C65Gl855r1svEh8MGpC242aCvRTjijIliNd
+	 +tgzOjMDhrr7UV32mJPgsUZKatxj6coC7kxFs04Nitmwj6fNY2rfSs7P6BuzwpI9kH6d/
+	 Kcp05YY4Mz5tMN/Wh4eOk1VtmWI4MRWLFWUZvGhXbsy4Vm/Fa+jFtrWFpVGOdKdIHu+Yq
+	 HJCRLNv5F4DYkdT8qOvVyPEBVY8NhxnGWBlCs5CyN4bziKdM120ZwTZG1g4V5DytkbA6K
+	 G4AhZnU7Ft9U5zCcJBeKwWdMx5dxLki9SXmWT2k/KXlnqDWI5HhoBH+DTQHljrrUtcA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793713882;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793713883;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:
 	 X-Google-Original-From:To:Cc:Subject:Date:Message-ID:X-Mailer:
-	 In-Reply-To:References:MIME-Version:Content-Transfer-Encoding;
-	bh=EwSYmBPXLPw1tk7iLfciWOV5ID+lkPR/nxuVHvPcV1Y=;
-	b=TDs5C0YAEgwTAuB98PHI5sda13a/mqM7E7G8sTfANmfL9QPpeqAuwjI5mCgonH2NIMSD
-	 dzIjdIgosmOYgmfjo92GYovdjyVJZzrelCnQfJDp7hqVQGgUdqGvmub3raN/AvTZNVq+7
-	 vzqA45TD2wsAI7gmTgrd4faeqKjWiXBQM3AQMZH304klGOLXNlFhR3nmfFcjMxjRdiqWX
-	 tk0plFjwPsc2uWLeqafvHHLjj0mvyDnwcYIWfytZnNC9q/gp4O5FQFsOa+ddPkMGU/8pf
-	 0GIZtqm7fAcDJnn3IJveXbQ4rGEtzA/Hu1VGYVY4lETHrMipQ+5ROniyMzkzsjZNftw==
+	 In-Reply-To:References:MIME-Version:Content-Type:
+	 Content-Transfer-Encoding;
+	bh=N+Ur3jH9SKa+XQp3dEfnTs5dyXMeMX7UWyTETGXtqZE=;
+	b=Muy0yR5m5+1YSZzS8y7UYePfzwBl1TydPIZWh5l2/6Yl0C+Z4Y2IOVTEDPu/TXDQT26n
+	 D6tEAnNR23Ulzy9c4/bBCwjgq5Gl0qLFrSZtvMQw00cg8Outq7SMUFvGnwgvxXqYZACEO
+	 6vF8vP9QzP0NZc3wbohBJBHi1/fy/BCqfdnJAyKu6MfjKfLvV2uYITRIuycaNAUsUWIMo
+	 gfaXcEIalj/mm/sQMYrLB6ifSFPzp+Ijajz8yXGCqOzGbGfEwLFNzTDi1ycJzvz6a+l2m
+	 BeSsoWG8SGDD7QoKYk8cvXmY5hQbdNNW4SELYaf/aNnTlTyurjAWWqOUzLxwXKBRUdA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=gmail.com;
 	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=ZZM4W2rQ;
-	arc=none smtp.remote-ip=209.85.128.54
-Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=ukC+GPBz;
+	arc=none smtp.remote-ip=209.85.221.54
+Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com [209.85.221.54])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7AF2E6085089
-	for <fstests@vger.kernel.org>; Tue,  3 Nov 2026 13:51:22 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 7AF2E6085089
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A134608509E
+	for <fstests@vger.kernel.org>; Tue,  3 Nov 2026 13:51:23 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6A134608509E
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=ZZM4W2rQ
-Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-4a35db1f202so44076045e9.3
-        for <fstests@vger.kernel.org>; Tue, 03 Nov 2026 05:51:22 -0800 (PST)
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=ukC+GPBz
+Received: by mail-wr1-f54.google.com with SMTP id ffacd0b85a97d-48c4d99c32bso2856099f8f.1
+        for <fstests@vger.kernel.org>; Tue, 03 Nov 2026 05:51:23 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1793713881; x=1794318681; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=EwSYmBPXLPw1tk7iLfciWOV5ID+lkPR/nxuVHvPcV1Y=;
-        b=ZZM4W2rQvOHVsaLgeCAMlg7bD/6YIJ4w0BrvvgSUTeHFAJuLxaD+T3Kv/cHdlx0JCZ
-         cp3NiMB9gGdIhRC2yrIxiXutSZmGYz8INZPYbxOjuPRIkAo5EDTDRqBuMfJ+V1DAwD+v
-         83cI47GrbDTvdBETdOoITox+u/0Fd+G2/UJ/I2GKD5zuHN6K2Y9UWZUdClA8e5dR/Omy
-         wYiFywNgnfAkq1oNR5q72Q5IITMCK7YTeqkazail1HyF+IaXpOB7m5xiwPOeKyX56DIJ
-         y0IPlgF+ZBV3pd4Lw8IxEyo9KmTJnvY0jXO+HCWFrXNuVybDu9/RDC+W/h77dJBRd0sl
-         YrOA==
+        d=gmail.com; s=20260707; t=1793713882; x=1794318682; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:date:subject:cc:to:from:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=N+Ur3jH9SKa+XQp3dEfnTs5dyXMeMX7UWyTETGXtqZE=;
+        b=ukC+GPBz9hX0A3V0P1HgKuU5jAKseerxz0haRJ9q3YXAY43ilobmZvZ08fAopmlwXZ
+         gacx77vGSK9yvhT6oW0k68FKU19Rg3D1eJWfvksSt4WBAzygMN6+2ABMqWPMLOtOAyr6
+         HkXJ4+9JEGFx+zdJcAWzosnMT1JwcLwfpXbcrqWdYFHkk0FVz3fVV+HD9lztsSRxbI02
+         HoQ2OVuPnvPKx5j4ZpVbo/20OGeDMHZiItKhOwTwciKECHqqIWx1uc0gzc324JxMyAtE
+         XmxK9Zn8dJ6jlIcNtK95IQ3JSXz8wEZLfnckWFHL9FYYmauBTNoRo6TekV7lVNeN00C/
+         wKOg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793713881; x=1794318681;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=EwSYmBPXLPw1tk7iLfciWOV5ID+lkPR/nxuVHvPcV1Y=;
-        b=ueMC8S4xUXIoxisKLtz7vWvb46ugWDGMAm1UMtJImOYXjsJsNkFfQTLqvFLX2/lVCD
-         sy54tx4lHOaBfkVbOC111EkHkVZySH/HTdzdTJwOGaTyhZoGUjG3ckegP8FTuETsgsgn
-         TF2IkCokp1nBFbw+ER8Oh0+aBLAGPdNp8QywDFoxBI6edRtUdPbFGAaUTBoDLI4HzvMI
-         kqBRDr0pkn9onu1hNW7KPY3r7bBYwVu1c97r6rnnSZz8bHBPv3ADW3eoSzD9oo08xqmp
-         WvkruI/4OJ3znKvfl0fxJ6GrojcLuuSSsqh+9dhayA9GqwReJNJXvn0hXNSYClQBo2Bd
-         hA4Q==
-X-Gm-Message-State: APuU4Z8yaQ1GdVGNnvxxEBUwyjWklPaqAT/swA96GeetjA+ROtYMoMuH
-	iTugn9xcBbTqXPgeFdijpQ87dFOK7szBiMOIC8hUfyoXYoHtBNqrCYeNE6/wf0n5Y+Y=
-X-Gm-Gg: AYBFou2wXSQp9fcfIoUqte62oPKVlQ2LoP/Q/fry1Q1HTowayQcwmcHBbLW3UmZTN+c
-	gHcSXeFugyh6Wtvo8pND0wRUzbda5mCWe3Kc46xSgoo0FCq+TYI3EGkdX5gwpr5lnX/9A0AjZhj
-	Jxow5idb/inwrUuY05GI0N4tx774QRjzUN/PVkCTDS53e63StWmEKlniGEkVuLVMABF6A9HqZve
-	FdQkQrUwStvd565fpt1KlxkP/YRp8mdYhq07Gr7MNFMEnELCJZQYUGmoUEsi1cPAevQcTW7BFQR
-	pjfA6+0kVjnOnsKIHtYCWkZklLrXuuoRbtxbpcje45YjRJuQlGnNS0koucYxD4eEFQbgusW/E5W
-	FRUw9pMBmMlWIniNm/ie3n2+gTNYlj2fAwdJWZKuy1Rf1TZ4KSuGmku776At2wm0IlE2M18HTUY
-	G6UuvYn7JPcxC4CloGZkHyP8MLcVmBrcYNI/P0sOk4B8GHzg5Lt1HF6hTbKWxAqXRlPZBQOlCJC
-	4IxCyc6mH4atr1JI/zKhcasi179HzLhSZdWIGsbBrGWW639jICFZMovgVs0HZsuJOvUBR4Z2G0R
-	rY2TOLg1FwambXfSIuoWeY3LxoOZLleyomLUPMqYk+C9RV8oz0S/vkwD9DCZ
-X-Received: by 2002:a05:600c:8b06:b0:4a2:d:5ccc with SMTP id 5b1f17b1804b1-4ac17b2bc63mr310059355e9.10.1793713880479;
-        Tue, 03 Nov 2026 05:51:20 -0800 (PST)
+        d=1e100.net; s=20260707; t=1793713882; x=1794318682;
+        h=content-transfer-encoding:content-type:mime-version:references
+         :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=N+Ur3jH9SKa+XQp3dEfnTs5dyXMeMX7UWyTETGXtqZE=;
+        b=wm9ROtoemviQeoWuVm1RYbhozj8L/4wrfb6A1H2m8ChWQbctHVVyDv+QFjLg74U+0t
+         C0zP9NOqSTtpP2B66UYAVp3nPXjker6/4xNpW/g3tAkKamlagdRgVhwbMNL6hU6brlJW
+         OWc8pTKtGEAx5zquQpFNePe3jeOErwkKZAAtUx9TVcPqA7GSFBzQp41Gv09eAnQOoP4S
+         F1Y0zQDFnbLg9lPEvOnCKrqfOOlYY4P19udJpLjA7YPIYDLAv0IiIO3X5YL84yUzoqUw
+         YLI1M7BhSNugbfw3CQMkUHiHDnpZ3kY7o/+nOJUEIYrJKu5uA5Og3JAlywCX+ZunHpwp
+         0K+Q==
+X-Gm-Message-State: APuU4Z8GuIjzsqWRYZlTJFbZk0PGQDywlVB2c8tE/oN/66uKdrB4FhvZ
+	sgcCerQgavMyP3e5tScyyWrwVemzancPWb/uzsA2YR8QMc/9yRBAAI/sv/k4ryeURwM=
+X-Gm-Gg: AYBFou12fXYsGRU9+5sv7ymta3wSmHNsdop1zaGjI/4ImpyDvyjiY48wkNBpFGP7GM3
+	V7s86bs3cjNs5NSGjwhIrXx861dyH/PoPtV067NKpWSF7J9vm5Oi+SS40i50E4S44cq7MoLjVro
+	UF6FqMzjo6/233q63Ul7j7zADBY1yqITl4Od6XN15S0PweXkrMzKJaErbTLWPqp39MU3QFdx3Jm
+	CMfF8V8fI3mfPtBVHx7QjZeMWsaHUtWx+AgJqB4s50NE2OK59EZ7wavnM6CAnJaAyvejpNEnNwg
+	yc+CUZ30JxAtBdnw3VOTaOYJNsu93HVllXoqLtP6wDoZ6C+9aXyL+pvFbx1OOrklhOjFrX1dgQr
+	nM5bbiJSfUQw3ACbybXChFQbFQo4hzCVndFfMdqvTebzzOYUPj5NUS+P30seZYKSvXoj6kWCjph
+	i2AvV0HW97v4fET8va8W558KcE/3eZEm756fdvGX+Y/2dOaZOtQJhJHmpBr65rL0qKika0ibKq9
+	h09V4O9rvAd4ygyR5AYOSyM0A9tMxzrmeVpssP5s/paadPUUR7B0mvlKqqG3r6NROtdSu4w06rV
+	5p3qkpGk9Fe6nf+cX4+cL7nlQ5XaIs3KObVJfP+s8uXmb6qCsvcnlxi3TzUM
+X-Received: by 2002:a05:600c:4f86:b0:4a7:669c:c988 with SMTP id 5b1f17b1804b1-4ac18b7df2cmr309532605e9.23.1793713881678;
+        Tue, 03 Nov 2026 05:51:21 -0800 (PST)
 Received: from Cluster2.powerhub ([2a0a:ef40:18b5:9e01:225:90ff:fefc:9ffe])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4b2a96fc87fsm55320335e9.12.2026.11.03.05.51.19
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4b2a96fc87fsm55320335e9.12.2026.11.03.05.51.20
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 03 Nov 2026 05:51:20 -0800 (PST)
+        Tue, 03 Nov 2026 05:51:21 -0800 (PST)
 From: Artem Blagodarenko <artem.blagodarenko@gmail.com>
 X-Google-Original-From: Artem Blagodarenko <ablagodarenko@thelustrecollective.com>
 To: fstests@vger.kernel.org
@@ -84,9 +86,9 @@ Cc: linux-ext4@vger.kernel.org,
 	adilger.kernel@dilger.ca,
 	ablagodarenko@thelustrecollective.com,
 	Artem Blagodarenko <artem.blagodarenko@gmail.com>
-Subject: [RFC PATCH v6 6/8] ext4/067: LUFID and encryption+casefold+dirdata
-Date: Tue,  3 Nov 2026 13:51:02 +0000
-Message-ID: <20261103135106.610169-7-ablagodarenko@thelustrecollective.com>
+Subject: [RFC PATCH v6 7/8] ext4/068: test LUFID is carried through overwrite rename and RENAME_EXCHANGE
+Date: Tue,  3 Nov 2026 13:51:03 +0000
+Message-ID: <20261103135106.610169-8-ablagodarenko@thelustrecollective.com>
 X-Mailer: git-send-email 2.52.0
 In-Reply-To: <20261103135106.610169-1-ablagodarenko@thelustrecollective.com>
 References: <20261103135106.610169-1-ablagodarenko@thelustrecollective.com>
@@ -99,64 +101,70 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-From: Artem Blagodarenko <artem.blagodarenko@gmail.com>
+Two-part test for the fix in ext4_setent() that copies LUFID dirdata
+payload through rename:
 
-Test ext4 LUFID  functionality in the complex combination of
-encryption, casefold (case-insensitive), and dirdata features.
+Test 1 (overwrite rename): create two files in a dirdata directory, set
+distinct 16-byte LUFIDs on each via EXT4_IOC_SET_LUFID, then rename the
+source file over the destination.  After rename the destination slot must
+carry the source inode's LUFID, not the stale LUFID of the replaced inode.
 
-Verification uses 'debugfs ls -lD' to check for 'fid: or hash:' markers.
-Tests also verify that case-insensitive lookups work correctly and that
-encrypted file content is preserved after setting LUFID.
+Test 2 (RENAME_EXCHANGE): same setup with two files, then swap them with
+renameat2 -x.  After the exchange each slot must carry the LUFID of the
+inode that moved into it.
 
-This test validates that LUFID works correctly when encryption and
-casefold features are enabled, ensuring feature interactions don't
-break the LUFID functionality.
+Uses all-same-byte LUFID payloads (0xAA.../0xBB...) so the expected FID
+string is trivially known without parsing inode numbers.
 
 Signed-off-by: Artem Blagodarenko <artem.blagodarenko@gmail.com>
 Assisted-by: Claude:claude-opus-5-5
 ---
- tests/ext4/067     | 137 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/067.out |   4 ++
- 2 files changed, 141 insertions(+)
- create mode 100755 tests/ext4/067
- create mode 100644 tests/ext4/067.out
+ tests/ext4/068     | 202 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/068.out |   5 ++
+ 2 files changed, 207 insertions(+)
+ create mode 100755 tests/ext4/068
+ create mode 100644 tests/ext4/068.out
 
-diff --git a/tests/ext4/067 b/tests/ext4/067
+diff --git a/tests/ext4/068 b/tests/ext4/068
 new file mode 100755
-index 00000000..bd3dca48
+index 00000000..4dd30f1b
 --- /dev/null
-+++ b/tests/ext4/067
-@@ -0,0 +1,137 @@
++++ b/tests/ext4/068
+@@ -0,0 +1,202 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2026 The Lustre Collective. All Rights Reserved.
 +# Author: Artem Blagodarenko <ablagodarenko@thelustrecollective.com>
 +#
-+# FS QA Test ext4/067
++# FS QA Test ext4/068
 +#
-+# Test ext4 LUFID  with encryption and casefold.
-+# EXT4_IOC_SET_LUFID is an ioctl that allows LUFID data to be set on a directory entry.
-+# directory name hash is stored by EXT4 when casefold and encryption features are enabled.
++# Test that the LUFID dirdata extension is correctly carried through rename.
++#
++# When a file with a LUFID is renamed over another file that also has a LUFID
++# (overwrite rename), the destination directory entry must end up with the
++# source inode's LUFID, not the stale LUFID of the destination inode that was
++# replaced.
++#
++# Also tests RENAME_EXCHANGE (cross-rename): each file's LUFID must follow its
++# inode to the new slot.
 +
 +. ./common/preamble
-+_begin_fstest auto quick encrypt casefold
++_begin_fstest auto quick
 +
 +# Import common functions
 +. ./common/filter
-+. ./common/encrypt
-+. ./common/casefold
-+. ./common/attr
 +. ./common/ext4
++. ./common/renameat2
 +
 +_exclude_fs ext2
 +_exclude_fs ext3
 +
 +_require_scratch_nocheck
-+_require_scratch_encryption
-+_require_scratch_casefold
 +_require_command "$SET_LUFID_PROG"
++_require_renameat2 exchange
 +
 +# Check if dirdata feature is supported (required for LUFID IOCTL)
 +_require_scratch_dirdata()
@@ -165,99 +173,161 @@ index 00000000..bd3dca48
 +		_notrun "dirdata feature not supported by kernel (required for LUFID)"
 +	fi
 +
-+	# Verify that mkfs supports dirdata
 +	if ! $MKFS_EXT4_PROG -O dirdata -n $SCRATCH_DEV &>>$seqres.full ; then
 +		_notrun "mkfs.ext4 does not support dirdata feature"
 +	fi
 +
-+	# Verify kernel can mount filesystem with encrypt+casefold+dirdata
-+	if ! _scratch_mkfs -O encrypt,casefold,dirdata &>>$seqres.full ; then
-+		_notrun "failed to create filesystem with encrypt+casefold+dirdata"
++	if ! _scratch_mkfs -O dirdata &>>$seqres.full ; then
++		_notrun "failed to create filesystem with dirdata"
 +	fi
 +	if ! _try_scratch_mount &>>$seqres.full ; then
-+		_notrun "kernel cannot mount filesystem with encrypt+casefold+dirdata"
++		_notrun "kernel cannot mount filesystem with dirdata"
 +	fi
 +	_scratch_unmount
 +}
 +
 +_require_scratch_dirdata
 +
-+# Helper to add a v2 encryption key and set policy on a directory
-+_setup_encrypted_dir()
++# _get_entry_fid DIR ENTRYNAME
++#
++# Print the fid= value for the named entry inside DIR, as shown by
++# "debugfs ls -lD".  DIR must be a path relative to the filesystem root
++# (e.g. "rename_test/subdir").  Returns 1 if the entry or its fid is not found.
++_get_entry_fid()
 +{
 +	local dir=$1
-+	local raw_key=$(_generate_raw_encryption_key)
-+	local keyspec=$(_add_enckey $SCRATCH_MNT "$raw_key" | awk '{print $NF}')
-+	_set_encpolicy $dir $keyspec
-+	_casefold_set_attr $dir
-+	echo $keyspec
++	local entry=$2
++	local dir_name
++
++	# debugfs cd takes a path; basename handles nested dirs
++	dir_name=$(basename "$dir")
++
++	# Flush dirty filesystem buffers before reading the raw device via debugfs.
++	sync
++	echo 3 > /proc/sys/vm/drop_caches
++
++	local fid
++	fid=$({
++		echo "cd $dir_name"
++		echo "ls -lD ."
++		echo "quit"
++	} | debugfs $SCRATCH_DEV 2>/dev/null | \
++		grep -E " ${entry}$" | grep -o "fid=[^ ]*" | sed 's/^fid=//')
++
++	if [ -z "$fid" ]; then
++		return 1
++	fi
++	echo "$fid"
 +}
 +
-+# Create a filesystem with encryption, casefold, and dirdata features
-+_scratch_mkfs -O encrypt,casefold,dirdata &>>$seqres.full
++# Create a filesystem with the dirdata feature
++_scratch_mkfs -O dirdata &>>$seqres.full
 +_scratch_mount
 +
-+# Test: Create file in encrypted+casefolded directory and set three 16-byte LUFIDs
-+echo "Test: Set three 16-byte LUFIDs on file in encrypted+casefolded directory"
-+mkdir $SCRATCH_MNT/encrypted_dir
-+_setup_encrypted_dir $SCRATCH_MNT/encrypted_dir > /dev/null
++# -----------------------------------------------------------------------
++# Test 1: overwrite rename — LUFID follows the source inode
++# -----------------------------------------------------------------------
++echo "Test 1: overwrite rename copies LUFID from source to destination slot"
 +
-+echo "encrypted content" > $SCRATCH_MNT/encrypted_dir/testfile.txt
++mkdir -p $SCRATCH_MNT/rename_test
 +
-+lufid_payload=$'\xde\xad\xbe\xef\x01\x02\x03\x04\x11\x12\x13\x14\x21\x22\x23\x24\xca\xfe\xba\xbe\x05\x06\x07\x08\x31\x32\x33\x34\x41\x42\x43\x44\xfe\xed\xfa\xce\x09\x0a\x0b\x0c\x51\x52\x53\x54\x61\x62\x63\x64'
-+expected_fid='[0xdeadbeef01020304:0x11121314:0x21222324],[0xcafebabe05060708:0x31323334:0x41424344],[0xfeedface090a0b0c:0x51525354:0x61626364]'
++echo "src" > $SCRATCH_MNT/rename_test/src_file
++echo "dst" > $SCRATCH_MNT/rename_test/dst_file
 +
-+# Set three LUFIDs on the file at the same time (48 bytes total: three 16-byte FIDs)
-+# First FID:  [part1 (8 bytes):part2 (4 bytes):part3 (4 bytes)]
-+# Second FID: [part1 (8 bytes):part2 (4 bytes):part3 (4 bytes)]
-+# Third FID:  [part1 (8 bytes):part2 (4 bytes):part3 (4 bytes)]
-+$SET_LUFID_PROG $SCRATCH_MNT/encrypted_dir testfile.txt "$lufid_payload" >>$seqres.full 2>&1
-+if [ $? -ne 0 ]; then
-+	echo "FAIL: Could not set three LUFIDs on encrypted+casefolded file"
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
++# Use three 16-byte FIDs per entry to verify multi-FID LUFID handling.
++# src carries FIDs 0xAA×16, 0xCC×16, 0xEE×16 (48 bytes total payload).
++# dst carries FIDs 0xBB×16, 0xDD×16, 0x11×16 (48 bytes total payload).
++src_lufid=$'\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee'
++dst_lufid=$'\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11'
++src_fid_expected='[0xaaaaaaaaaaaaaaaa:0xaaaaaaaa:0xaaaaaaaa],[0xcccccccccccccccc:0xcccccccc:0xcccccccc],[0xeeeeeeeeeeeeeeee:0xeeeeeeee:0xeeeeeeee]'
++dst_fid_expected='[0xbbbbbbbbbbbbbbbb:0xbbbbbbbb:0xbbbbbbbb],[0xdddddddddddddddd:0xdddddddd:0xdddddddd],[0x1111111111111111:0x11111111:0x11111111]'
++
++$SET_LUFID_PROG $SCRATCH_MNT/rename_test src_file "$src_lufid" >>$seqres.full 2>&1 || \
++	{ echo "FAIL: could not set LUFID on src_file"; status=1; exit; }
++
++$SET_LUFID_PROG $SCRATCH_MNT/rename_test dst_file "$dst_lufid" >>$seqres.full 2>&1 || \
++	{ echo "FAIL: could not set LUFID on dst_file"; status=1; exit; }
++
++# Overwrite rename: src_file → dst_file
++mv $SCRATCH_MNT/rename_test/src_file $SCRATCH_MNT/rename_test/dst_file
++
++if [ -e $SCRATCH_MNT/rename_test/src_file ]; then
++	echo "FAIL: src_file still exists after rename"
++	_scratch_unmount; _check_scratch_fs; status=1; exit
 +fi
 +
-+# Verify file is still accessible
-+if [ ! -f $SCRATCH_MNT/encrypted_dir/testfile.txt ]; then
-+	echo "FAIL: Encrypted file not accessible after setting LUFID"
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
++# After rename the dst_file slot must carry src's LUFID
++fid=$(_get_entry_fid rename_test dst_file)
++if [ $? -ne 0 ] || [ -z "$fid" ]; then
++	echo "FAIL: no fid found for dst_file after rename"
++	_scratch_unmount; _check_scratch_fs; status=1; exit
 +fi
 +
-+# Verify file content is preserved
-+enc_content=$(cat $SCRATCH_MNT/encrypted_dir/testfile.txt 2>/dev/null)
-+if [ "$enc_content" != "encrypted content" ]; then
-+	echo "FAIL: Encrypted file content not preserved after setting LUFID"
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
++if [ "$fid" != "$src_fid_expected" ]; then
++	echo "FAIL: dst_file has wrong LUFID after overwrite rename"
++	echo "  expected: $src_fid_expected"
++	echo "  got:      $fid"
++	_scratch_unmount; _check_scratch_fs; status=1; exit
 +fi
 +
-+# Test case-insensitive lookup still works with LUFID
-+if [ ! -f "$SCRATCH_MNT/encrypted_dir/TESTFILE.TXT" ]; then
-+	echo "FAIL: Case-insensitive lookup doesn't work with LUFID"
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
++echo "PASS: dst_file carries src inode's LUFID after overwrite rename"
++
++# -----------------------------------------------------------------------
++# Test 2: RENAME_EXCHANGE — each LUFID follows its inode to the new slot
++# -----------------------------------------------------------------------
++echo "Test 2: RENAME_EXCHANGE swaps LUFIDs along with inodes"
++
++mkdir -p $SCRATCH_MNT/xrename_test
++
++echo "aaa" > $SCRATCH_MNT/xrename_test/file_a
++echo "bbb" > $SCRATCH_MNT/xrename_test/file_b
++
++a_lufid=$'\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee\xee'
++b_lufid=$'\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xbb\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\xdd\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11'
++a_fid_expected='[0xaaaaaaaaaaaaaaaa:0xaaaaaaaa:0xaaaaaaaa],[0xcccccccccccccccc:0xcccccccc:0xcccccccc],[0xeeeeeeeeeeeeeeee:0xeeeeeeee:0xeeeeeeee]'
++b_fid_expected='[0xbbbbbbbbbbbbbbbb:0xbbbbbbbb:0xbbbbbbbb],[0xdddddddddddddddd:0xdddddddd:0xdddddddd],[0x1111111111111111:0x11111111:0x11111111]'
++
++$SET_LUFID_PROG $SCRATCH_MNT/xrename_test file_a "$a_lufid" >>$seqres.full 2>&1 || \
++	{ echo "FAIL: could not set LUFID on file_a"; status=1; exit; }
++
++$SET_LUFID_PROG $SCRATCH_MNT/xrename_test file_b "$b_lufid" >>$seqres.full 2>&1 || \
++	{ echo "FAIL: could not set LUFID on file_b"; status=1; exit; }
++
++# Cross-rename: exchange file_a and file_b
++$here/src/renameat2 -x \
++	$SCRATCH_MNT/xrename_test/file_a \
++	$SCRATCH_MNT/xrename_test/file_b >>$seqres.full 2>&1 || \
++	{ echo "FAIL: renameat2 -x failed"; status=1; exit; }
++
++# After exchange: the slot named file_a must carry b's LUFID (b's inode is now there)
++# and the slot named file_b must carry a's LUFID.
++fid_a=$(_get_entry_fid xrename_test file_a)
++if [ $? -ne 0 ] || [ -z "$fid_a" ]; then
++	echo "FAIL: no fid found for file_a after exchange"
++	_scratch_unmount; _check_scratch_fs; status=1; exit
 +fi
 +
-+echo "Successfully set and verified three 16-byte LUFIDs on encrypted+casefolded file"
-+
-+# Dump directory structure to verify dirdata
-+if ! _dump_dir_structure $SCRATCH_MNT/encrypted_dir testfile.txt "$expected_fid"; then
-+	echo "FAIL: Stored LUFID does not match expected value"
-+	_scratch_unmount
-+	_check_scratch_fs
-+	status=1
-+	exit
++fid_b=$(_get_entry_fid xrename_test file_b)
++if [ $? -ne 0 ] || [ -z "$fid_b" ]; then
++	echo "FAIL: no fid found for file_b after exchange"
++	_scratch_unmount; _check_scratch_fs; status=1; exit
 +fi
++
++if [ "$fid_a" != "$b_fid_expected" ]; then
++	echo "FAIL: file_a slot has wrong LUFID after exchange"
++	echo "  expected (b's LUFID): $b_fid_expected"
++	echo "  got:                  $fid_a"
++	_scratch_unmount; _check_scratch_fs; status=1; exit
++fi
++
++if [ "$fid_b" != "$a_fid_expected" ]; then
++	echo "FAIL: file_b slot has wrong LUFID after exchange"
++	echo "  expected (a's LUFID): $a_fid_expected"
++	echo "  got:                  $fid_b"
++	_scratch_unmount; _check_scratch_fs; status=1; exit
++fi
++
++echo "PASS: LUFIDs correctly swapped after RENAME_EXCHANGE"
 +
 +# Cleanup and verify filesystem
 +_scratch_unmount
@@ -266,16 +336,17 @@ index 00000000..bd3dca48
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/ext4/067.out b/tests/ext4/067.out
+diff --git a/tests/ext4/068.out b/tests/ext4/068.out
 new file mode 100644
-index 00000000..1c9a8126
+index 00000000..ceb00698
 --- /dev/null
-+++ b/tests/ext4/067.out
-@@ -0,0 +1,4 @@
-+QA output created by 067
-+Test: Set three 16-byte LUFIDs on file in encrypted+casefolded directory
-+Successfully set and verified three 16-byte LUFIDs on encrypted+casefolded file
-+  Directory structure of encrypted_dir: OK (dirdata verified)
++++ b/tests/ext4/068.out
+@@ -0,0 +1,5 @@
++QA output created by 068
++Test 1: overwrite rename copies LUFID from source to destination slot
++PASS: dst_file carries src inode's LUFID after overwrite rename
++Test 2: RENAME_EXCHANGE swaps LUFIDs along with inodes
++PASS: LUFIDs correctly swapped after RENAME_EXCHANGE
 -- 
 2.52.0
 
