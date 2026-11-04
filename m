@@ -1,54 +1,79 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793821716;
-	b=AiHlRt59EPV+fxvxXWFgF7bbadPSxdURKxf7JBbMnEDxTiCiHc/mVWu34WO2GbOi4pMk
-	 v2vm0iE0MeKsXeL6sOZOok/10gHoTHCE0qdLqbPWwEhLll3LaDGrIOeoxItxKNe7EaSGH
-	 uJ2SwldMVdD//cNuEocgOcRLrcifp9Vty6rYn+GKDR/dMYYkrapwkA/uDS1VSgD67+eTC
-	 rUMzmBLAGRGhazMRYK1x4A3wXVzagJmrbJopfuw+ai3LcwVltwUWV6xyZMHviLfa1kPrI
-	 5W0WPikgYac0s44RzmSUUXd7ev3jARu+d3a6jfL3972pJtm8nRKLjT1n1vx5MpvSs2w==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793821716;
-	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
-	 Mail-Followup-To:References:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To;
-	bh=hEIB0cmVP2l6hm7F3bLDAUHAA1FOzXbZxdXaNn4cGy0=;
-	b=dJ/ozTZ5VvJG3ykjohZ/ZUYGY1FW7MN7NYTvum52uWi8B09lwdtyVC96nXrBgzn+/2LG
-	 EShbnsEpOSEhD2FTNFY1bKtVejRG+qYJfOyxcriEEzPfzxBOJMOrZDo6DV8ZzbuccEJFY
-	 1X7mViE+0yR2uk2M1NnTyhlFRoVcV6+B+rZfG9eql+laazTNYafVOk4vJILjHrj4oOfan
-	 azlTKkZnZLa7mKlBGRRb5vaLuW1QEuaK6w5LpMKmYMQ7VChwdXC8B7EjNEW8THwhzHFfR
-	 Xs9k7uikQG3UwonvTOkOOzNBpRc9+GSNLd3+taLZR8YdNCmpbAse4UE2MMp1j5Fi/GQ==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=BT4hC+q9;
-	arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1793824552;
+	b=IxULAaDxc+6xJQoVtwYoryqGTQIGGYLUMurwksgmDGNYTcOtjD8uf7s2jpoWqsV9cSMK
+	 bwigBxYbj0d5uHGJCwsPGQdLMsI+lOnToZxBbgWegLE1CfLcHRTdzLv1R1dtt6DmZE1xN
+	 13Enq8ULRLNAHqwcKt6qNzFHHu0GiyWTSX93Mh8rTRbml+7Bo19MRnbe0SIU9aT9vwpZS
+	 rrDh3mChPTAqIubKI+nO1JhZDtuyeHqMvHRSGwKj/qVDkuYRMDiVJzHBWoT8iLtKMNyhi
+	 1Y7gvZeolhL/LYLQV6zkkxX8QLywqvJd64/rFZyV7KFV5mpE+ojqvCcNk1J9uSr9UPQ==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793824552;
+	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
+	 Content-Type:Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=A/AJg4SnNtS2w7UA+hbHnttGFwPXEg73kchtHP3yZKQ=;
+	b=KzJKbLZSAwYOL1W3NDaEiDB/c2ojoD0I3jlqPQM7EddIARU6L5AFZtfQOMIwGoSEnM3H
+	 LCCz/P8s0MOybuDvp4AdOKAy+PcEr7y2VFw4YQ2zsOvUtwMcK92GWdpYT5+TAdlstGmbz
+	 aP7SG+g5Qc8vN4TFZkmgbIZFff5WIBIFp7gXYIQW0t3i7gSW8HQf0ssq3sixOOwlICVSJ
+	 rO7d8gA0BeJWnlGvzC2x3N4xKuQxOflyXNTWLRM369Nyito0zt6ba2kZOzReMIngGfMz+
+	 GCUpV0ZjO2q3+g7gINfOtz1JjrvsfOrwBcU33NKaXST6u6ZBzT0lf4ErtVad9MVnH6g==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=SsH68vez;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D0CCB608F13F;
-	Wed,  4 Nov 2026 19:48:35 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF3096074FB6;
+	Wed,  4 Nov 2026 20:35:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=BT4hC+q9
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9A40A1F000C1;
-	Wed,  4 Nov 2026 19:48:33 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=SsH68vez
+Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
+ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
+	t=1793824551;
+	b=oIwxMJXHPqEt/SuYYWKX6vrR8Rke8q8w9suuiPDzodzun3p7mVvmnfWNQ3HP9N/tFj6H
+	 0xq2mf0g/aakDtEo+5Bkzi/57rvmptMR1a6x+FDqVUrnBylqaR8uF2QYDakvQ+q1e4xH4
+	 fHMtbbFZHqo2d1iIoXvd2LJF2wdAqMS3k2Z1pTb4ug63yCeYSvHN60BQWTLUhuXcfmwqu
+	 KIA/tNZ7Ut0xc1jNIH6MXXPbwrMmVWjqm03EohBrutoPSVFoFxvSw+Z8ksDx+1G1HpvIu
+	 XkebyxPIjKBgG9nGU4SYixNkYXaLBFyJw6PwrrOS9NeOnt9eIY93XgztPvmEd3q1XUw==
+ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
+	c=relaxed/relaxed; t=1793824551;
+	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
+	 Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=A/AJg4SnNtS2w7UA+hbHnttGFwPXEg73kchtHP3yZKQ=;
+	b=18OLYjp+co+bp1PgvxfXuTK/Uea1NCdZpzhN/280uf0yfJHdIETeCyjRoyCY32XkA96y
+	 Z7jYkxc+iV20wUjVb2JS2/HmM2lLh41H4wPkHw8WmNGRdKR81oMBc5OpzftKl5+qjUbkS
+	 RSBFdg1pP66tHz8oVIv4fUcNEpD62JA2l6FpVqPLIi3UmTNB0kh3vTHRo5akpEbGODSY3
+	 86q4bPaaeXG/3NUdStvRJAjgbe8YLXVZ3TtL8k17Xvcxk/4efSq4ya8zj/xsAJkgJa7hc
+	 y9nAZlNC/1lsTtj/4uQceFigi2o66BAfzmZNH6rwkMIg5VAQ7m/a0jXOliVJVZUndMw==
+ARC-Authentication-Results: i=1; smtp.kernel.org; 
+	arc=none smtp.remote-ip=100.80.115.77
+Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	(No client certificate requested)
+	by smtp.kernel.org (Postfix) with ESMTPS id 994BC1F000C1;
+	Wed,  4 Nov 2026 20:35:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793821715;
-	bh=hEIB0cmVP2l6hm7F3bLDAUHAA1FOzXbZxdXaNn4cGy0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=BT4hC+q9wBgWDKTP5v4y/mPVZqsiGn782o06mp28oBZBw4uTAvBeklYhj092R9yZB
-	 cCB3EzL3KntS91tTs3Mhq+7oFvZCA+rFHIkceRfo1aBNkZc+cMS77/C57W2O0YaeIw
-	 PjkmxFsa2u0IJIU9xti2wK0+gWMF9y8SKy8MCI4JRL+p5Tp32vYOHd5rhafF7Gk4SY
-	 VCF3FEwkrC1bGurWx3zmz56PjBF10KdaApicB86EX9j3mxEZpvg4I7dnmMAx177e9J
-	 UtcIYqG4UXR/5istaCVM46imA3lWgqVmG6soOe53zeD17Gsr/jW9lL7jhl3C3w/91p
-	 dOd5qhh/5gWwg==
-Date: Thu, 5 Nov 2026 03:48:30 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Subject: Re: [PATCH RFC fstests] generic: add a test for multigrain timestamps
-Message-ID: <auuAoDQDrDhuBvE5@zlang-mailbox>
-Mail-Followup-To: Jeff Layton <jlayton@kernel.org>, 
-	fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
-References: <20261027-mgtime-v1-1-ec68914a116e@kernel.org>
+	s=k20260515; t=1793824551;
+	bh=A/AJg4SnNtS2w7UA+hbHnttGFwPXEg73kchtHP3yZKQ=;
+	h=From:Date:Subject:To:Cc:Reply-To;
+	b=SsH68vezKIra3rxghkZI1D18iWzcd9Bh/95o7cXLkqvnAo+tIoXzriKtweOGGT8hB
+	 tijei0ZxMU/MPYXMaYZUBYGRwbL2ICa5qDgTvLGuV//VLRlAWU58Bvu9F0iUQ3AxQo
+	 qIMryXTifxMQz3q4KynB+JL+j+w1mO6ZEzAbUyB83JoC3hpgBvlUH4vpAqCx7CeGmC
+	 +13xk+LS89d2ysCMLk4w692HH+kmPF0cGRxt8xjQ3Pqx0QL7vhVNNsb3kyiIokzJA9
+	 cBp2URVHF3T98JTPZi7uukIa6cJeCuvS6iloQvbwgXhyEceHAZrNwo5RXreI5ZzPHA
+	 5xP4ylvJ1YcKw==
+Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
+	by lkml.kernel.org (Postfix) with ESMTP id F14D246F83;
+	Wed,  4 Nov 2026 20:35:49 +0000 (UTC)
+From: Peter Lamberg via B4 Relay <devnull+kernel.pelam.fi@kernel.org>
+Date: Wed, 04 Nov 2026 22:35:39 +0200
+Subject: [PATCH v2] btrfs: test that a resumed snapshot deletion keeps its
+ drop progress
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -58,262 +83,242 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261027-mgtime-v1-1-ec68914a116e@kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Message-Id: <20261104-btrfs-355-v2-1-4b1ec6c23c44@pelam.fi>
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/22NQQ6CMBAAv0L2bE23BYOe/Ifh0NatrFEg3Uo0h
+ L8LePU4yWRmAqHEJHAqJkg0snDfLWB2BYTWdTdSfF0YjDYHRG2VzymKslWlMKD1jpwu6wCLPyS
+ K/N5al+bH8vJ3CnkNrEbLkvv02WYjrt6/7ogKVfTaWe3LY239eaCHe+4jQzPP8xds7wHnswAAA
+ A==
+X-Change-ID: 20261103-btrfs-355-1c13baea048c
+To: fstests@vger.kernel.org
+Cc: quwenruo.btrfs@gmx.com, linux-btrfs@vger.kernel.org, fdmanana@suse.com, 
+ asj@kernel.org
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1793824549; l=8417;
+ i=kernel@pelam.fi; s=20261103; h=from:subject:message-id;
+ bh=6BolEpS0wnHLee4MIs6gKR0KwTGwm8SS4vQl94fYdOI=;
+ b=LLGsVq9hcRprx0LQub2L/fxTg1BUZx6NQ0As0bCaeFiBrOFLATCy6sefhoWVZaFu2fj/g9BZz
+ 2zIRSEP7wcsDdB2ZTy28ghUzlwBe+7sZOam51H9BaOsvyJRSRMjdT9e
+X-Developer-Key: i=kernel@pelam.fi; a=ed25519;
+ pk=qpD/xh/xwDGEMdfQk/5prChHF0mXHXDTrs35FxiJgrk=
+X-Endpoint-Received: by B4 Relay for kernel@pelam.fi/20261103 with
+ auth_id=1398
+X-Original-From: Peter Lamberg <kernel@pelam.fi>
+Reply-To: kernel@pelam.fi
+Content-Transfer-Encoding: 7bit
 
-On Tue, Oct 27, 2026 at 09:58:50AM -0400, Jeff Layton wrote:
-> Ensure that the mtime and ctime apparently change, even when there are
-> multiple writes in quick succession. Since this is opt-in for in-kernel
-> filesystems and there is no way to test for this feature in userland,
-> limit it to just ext4, f2fs, btrfs, tmpfs and xfs for now.
-> 
-> Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> ---
-> I'd like to start testing this to make sure it doesn't break, but it's
-> not universally supported on all filesystems. Is an explicit allowlist
-> like this the right approach?
-> ---
->  src/Makefile          |   2 +-
->  src/mgtime.c          | 108 ++++++++++++++++++++++++++++++++++++++++++++++++++
+From: Peter Lamberg <kernel@pelam.fi>
 
-Add src/mgtime to .gitignore too.
+When a partially dropped subvolume is resumed, btrfs_drop_snapshot()
+can write drop_progress (0 0 0) back to the root item if a commit or
+unmount happens before the resumed run drops its first reference. The
+next run then restarts from the first slot and tries to free blocks
+still shared with a snapshot again, and the transaction aborts with
+"unable to find ref byte nr". See the kernel fix:
 
->  tests/generic/999     |  35 ++++++++++++++++
->  tests/generic/999.out |   1 +
->  4 files changed, 145 insertions(+), 1 deletion(-)
-> 
-> diff --git a/src/Makefile b/src/Makefile
-> index 0ff607ae1593..07bf749a1b8c 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -36,7 +36,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
->  	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
->  	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
-> -	rw_hint btrfs_ioctl
-> +	rw_hint btrfs_ioctl mgtime
->  
->  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
->  	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-> diff --git a/src/mgtime.c b/src/mgtime.c
-> new file mode 100644
-> index 000000000000..4ff7c206d31f
-> --- /dev/null
-> +++ b/src/mgtime.c
-> @@ -0,0 +1,108 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Older Linux kernels always use coarse-grained timestamps, with a
-> + * resolution of around 1 jiffy. Writes that are done in quick succession
-> + * on those kernels apparent change to the ctime or mtime.
-> + *
-> + * Newer kernels attempt to ensure that fine-grained timestamps are used
-> + * when the mtime or ctime are queried from userland.
-> + *
-> + * Open a file and do a 1 byte write to it and then statx the mtime and ctime.
-> + * Do that in a loop 1000 times and ensure that the value is different from
-> + * the last.
-> + *
-> + * Copyright (c) 2023: Jeff Layton <jlayton@kernel.org>
-                    ^^^^
-                    2026 ?
+  "btrfs: keep drop_progress when resuming snapshot deletion"
 
-> + */
-> +#define _GNU_SOURCE 1
-> +#include <stdio.h>
-> +#include <fcntl.h>
-> +#include <errno.h>
-> +#include <sys/stat.h>
-> +#include <unistd.h>
-> +#include <stdint.h>
-> +#include <getopt.h>
-> +#include <stdbool.h>
-> +
-> +#define NUM_WRITES 1000
-> +
-> +static int64_t statx_ts_cmp(struct statx_timestamp *ts1, struct statx_timestamp *ts2)
-> +{
-> +	int64_t ret = ts2->tv_sec - ts1->tv_sec;
-> +
-> +	if (ret)
-> +		return ret;
-> +
-> +	ret = ts2->tv_nsec;
-> +	ret -= ts1->tv_nsec;
-> +
-> +	return ret;
-> +}
-> +
-> +int main(int argc, char **argv)
-> +{
-> +	int ret, fd, i;
-> +	struct statx stx = { };
-> +	struct statx_timestamp ctime, mtime;
-> +	bool verbose = false;
-> +
-> +	while ((i = getopt(argc, argv, "v")) != -1) {
-> +		switch (i) {
-> +		case 'v':
-> +			verbose = true;
-> +			break;
-> +		}
-> +	}
-> +
-> +	if (argc < 2) {
-> +		errno = -EINVAL;
-> +		perror("usage");
-> +	}
-> +
-> +	fd = open(argv[1], O_WRONLY|O_CREAT|O_TRUNC, 0644);
+The test builds a subvolume S1 with a level 3 tree (nodesize 4096,
+30000 files with a 2000 byte inline extent each), takes a read-only
+snapshot S2 and deletes S1. It unmounts once a root child has been
+dropped, then does five quick mount/unmount cycles and checks that the
+drop key never goes back to zero. Finally it lets the deletion finish
+and, after a mount cycle, checks that S2's content is unchanged and
+S1's root item is gone.
 
-If you use "-v" option, won't argv[1] be "-v"? Maybe you should check optind,
-and use argv[optind].
+Without the fix the test fails on the first resume; with it the test
+passes. It takes about 12 seconds on loop devices on a SATA SSD.
 
-> +	if (fd < 0) {
-> +		perror("open");
-> +		return 1;
-> +	}
-> +
-> +	ret = statx(fd, "", AT_EMPTY_PATH, STATX_MTIME|STATX_CTIME, &stx);
+Assisted-by: LLM
+Signed-off-by: Peter Lamberg <kernel@pelam.fi>
+---
+Kernel fix, sent to linux-btrfs:
+https://lore.kernel.org/linux-btrfs/20261103-drop-progress-v1-1-16e345565109@pelam.fi/
 
-statx() is a relatively new system call that might not be supported on older
-systems. Perhaps you could refer to src/stat_test.c and use xfstests_statx() ?
+Reproducers and logs: https://pelam.fi/btrfs-drop-progress/
 
-> +	if (ret < 0) {
-> +		perror("stat");
-> +		return 1;
-> +	}
-> +
-> +	ctime = stx.stx_ctime;
-> +	mtime = stx.stx_mtime;
-> +
-> +	for (i = 0; i < NUM_WRITES; ++i) {
-> +		ssize_t written;
-> +
-> +		written = write(fd, "a", 1);
-> +		if (written < 0) {
-> +			perror("write");
-> +			return 1;
-> +		}
-> +
-> +		ret = statx(fd, "", AT_EMPTY_PATH, STATX_MTIME|STATX_CTIME, &stx);
-> +		if (ret < 0) {
-> +			perror("stat");
-> +			return 1;
-> +		}
-> +
-> +		if (verbose)
-> +			printf("%d: %llu.%u\n", i, stx.stx_ctime.tv_sec, stx.stx_ctime.tv_nsec);
-> +
-> +		if (!statx_ts_cmp(&ctime, &stx.stx_ctime)) {
+v2 fails 3/3 on the stock Ubuntu 7.3.0-9-generic btrfs.ko and 3/3 on a
+module built from the same source without the fix; it passes 3/3 with
+the fix, 12-13 s on loop devices on a SATA SSD. Same 3/3 results with
+the devices on tmpfs, 10-11 s. Also run with MKFS_OPTIONS="-s 4096":
+fails without the fix, passes with it. It _notrun's if the tree stays
+too shallow or the window is missed.
 
-It looks like this currently only checks whether the timestamp changed.
-Changing the condition from checking non-zero to "<= 0" might can
-also catch clock rollback bugs (even if that scenario seems unlikely:)
+Without the fix the transaction aborts during the final deletion.
+btrfs subvolume sync then returns because the fs went read-only
+(btrfs-progs 7.1 here; the read-only check is in progs since 6.6.3).
 
-> +			printf("Duplicate ctime after write!\n");
-> +			return 1;
-> +		}
-> +
-> +		if (!statx_ts_cmp(&mtime, &stx.stx_mtime)) {
-> +			printf("Duplicate mtime after write!\n");
-> +			return 1;
-> +		}
-> +
-> +		ctime = stx.stx_ctime;
-> +		mtime = stx.stx_mtime;
-> +	}
-> +	return 0;
-> +}
-> diff --git a/tests/generic/999 b/tests/generic/999
-> new file mode 100755
-> index 000000000000..878247515e71
-> --- /dev/null
-> +++ b/tests/generic/999
-> @@ -0,0 +1,35 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026, Jeff Layton <jlayton@kernel.org>
-> +#
-> +# FS QA Test No. 999
-> +#
-> +# Multigrain time test
-> +#
-> +# Open a file, and do 1 byte writes to it, and statx the file for
-> +# the ctime and mtime after each write. Ensure that they have changed
-> +# since the previous write.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
+_fixed_by_kernel_commit has a placeholder hash until the fix is merged.
+The test number may need adjusting if 355 gets taken first.
+---
+Changes in v2, following Qu Wenruo's review:
+- Add _require_btrfs_support_sectorsize 4096 and mkfs -s 4096.
+- Fill S1 with 2000 byte inline extents instead of 3000 byte xattrs;
+  drop _require_attrs. Still a level 3 tree with 30000 files (about
+  31200 leaves), created with a plain shell loop.
+- Read S1's root item with grep and sed instead of awk.
+- Compare S2 before and after with md5sum instead of getfattr.
+- drop_caches: keep only the one in the poll loop. Without it dump-tree
+  read a stale root item while mounted (the loop saw drop key 6072, the
+  key on disk after the unmount was 20592). Before the final md5sum a
+  mount cycle replaces it, so S2 is read from disk.
+- Wait for the deletion with filesystem sync + subvolume sync instead of
+  timeout 600; drop _require_command timeout.
 
-I just checked doc/group-names.txt and noticed that it only lists the 'atime'
-group. I think it would make sense to introduce a 'timestamp' group. There
-are already quite a few tests covering atime, ctime, and mtime in xfstests,
-but they all seem to be lumped under the 'atime' group for now.
+Other changes:
+- _require_btrfs_inline_extents_creation; S1's id from _btrfs_get_subvolid
+  instead of inspect-internal rootid.
+- _notrun, not a silent pass, if the first run is not interrupted at the
+  root level or the deletion finished before the first resume.
 
-Of course, if you'd rather not deal with introducing a new group in this patch,
-sticking with the 'atime' group for now is totally fine.
+- Link to v1: https://lore.kernel.org/fstests/20261103-btrfs-355-v1-1-fb0a30b4983b@pelam.fi/
+---
+ tests/btrfs/355     | 127 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/355.out |   2 +
+ 2 files changed, 129 insertions(+)
 
-> +
-> +# Override the default cleanup function.
+diff --git a/tests/btrfs/355 b/tests/btrfs/355
+new file mode 100755
+index 00000000..7a272660
+--- /dev/null
++++ b/tests/btrfs/355
+@@ -0,0 +1,127 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 Peter Lamberg
++#
++# FS QA Test 355
++#
++# Test that a resumed snapshot deletion keeps its saved drop progress.
++#
++# If the drop progress is reset to zero on resume (a commit or unmount before
++# the resumed run drops its first reference), the next run restarts from the
++# first slot and tries to free blocks still shared with a snapshot again: the
++# transaction aborts with "unable to find ref byte nr".
++#
++. ./common/preamble
++_begin_fstest auto quick snapshot subvol
++
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: keep drop_progress when resuming snapshot deletion"
++
++_require_scratch
++_require_btrfs_support_sectorsize 4096
++_require_btrfs_inline_extents_creation
++_require_btrfs_command inspect-internal dump-tree
++
++# A 2000 byte inline extent per file gives about one 4K leaf per file, and a
++# 4K node holds up to 121 pointers. 30000 files give ~31200 leaves under ~268
++# level 1 nodes: a level 3 tree whose root has 3 children of 62, 120 and 86
++# pointers. Level 3 needs more than 121 level 1 nodes, i.e. ~14000 files.
++# The resumed drop has to walk a whole root child before it drops anything,
++# which is the window the second unmount must land in.
++nfiles=30000
++data=$(printf '%2000s' '')
++
++# Print S1's root item from the root tree, nothing once it is gone.
++s1_root_item()
++{
++	$BTRFS_UTIL_PROG inspect-internal dump-tree -t root $SCRATCH_DEV \
++		2>> $seqres.full | \
++		grep -A 4 "key ($s1_id ROOT_ITEM 0)"
++}
++
++# Print "<drop_progress objectid> <drop_level>" of S1, nothing once it is gone.
++drop_state()
++{
++	s1_root_item | \
++		sed -n 's/.*drop_progress key (\([0-9]*\) .* drop_level \([0-9]*\)$/\1 \2/p'
++}
++
++s2_digest()
++{
++	(cd $SCRATCH_MNT/S2 && find . -type f | sort | xargs md5sum | md5sum)
++}
++
++_scratch_mkfs -n 4096 -s 4096 >> $seqres.full 2>&1 || \
++	_notrun "mkfs with nodesize 4096 failed"
++_scratch_mount -o max_inline=2048,compress=none
++
++$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/S1 >> $seqres.full
++for ((i = 0; i < nfiles; i++)); do
++	echo -n "$data" > $SCRATCH_MNT/S1/f$i
++done
++s1_id=$(_btrfs_get_subvolid $SCRATCH_MNT S1)
++
++# S2 shares every block of S1, S1 owns them.
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/S1 $SCRATCH_MNT/S2 \
++	>> $seqres.full
++$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
++digest_before=$(s2_digest)
++level=$(s1_root_item | sed -n 's/^\s*level \([0-9]*\) generation_v2.*/\1/p')
++echo "S1 id $s1_id root level $level files $nfiles" >> $seqres.full
++[ -n "$level" ] && [ $level -ge 3 ] || \
++	_notrun "S1 tree too shallow (level $level)"
++
++$BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/S1 >> $seqres.full
++
++# First drop run: unmount once at least one root child has been dropped, so
++# the saved drop progress is non-zero and at the root level.
++for ((i = 0; i < 600; i++)); do
++	# dump-tree reads the device through its page cache, which goes stale
++	# while the fs is mounted
++	echo 3 > /proc/sys/vm/drop_caches
++	$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
++	read -r obj lvl < <(drop_state)
++	[ -z "$obj" ] && \
++		_notrun "subvolume deletion finished before it was interrupted"
++	[ "$obj" != 0 ] && [ "$lvl" = "$level" ] && break
++	sleep 0.1
++done
++[ "$obj" != 0 ] && [ "$lvl" = "$level" ] || \
++	_notrun "subvolume deletion did not progress to the root level"
++_scratch_unmount
++echo "first run interrupted at drop key ($obj) level $lvl" >> $seqres.full
++
++# Resumed runs, each interrupted right away. The saved progress must never go
++# back to zero.
++for ((i = 0; i < 5; i++)); do
++	_scratch_mount
++	_scratch_unmount
++	read -r obj lvl < <(drop_state)
++	echo "resume $i: drop key ($obj) level $lvl" >> $seqres.full
++	if [ -z "$obj" ]; then
++		[ $i = 0 ] && \
++			_notrun "S1 deletion finished before it was resumed"
++		break
++	fi
++	if [ "$obj" = 0 ]; then
++		echo "drop progress of the deleted subvolume reset to zero on resume"
++		break
++	fi
++done
++
++# Let the deletion finish. With a reset drop progress this tries to free blocks
++# still used by S2 again and the transaction aborts.
++_scratch_mount
++$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT	# wakes the cleaner
++$BTRFS_UTIL_PROG subvolume sync $SCRATCH_MNT >> $seqres.full
++# Read S2 back from disk, not from the page cache filled by digest_before.
++_scratch_cycle_mount
++digest_after=$(s2_digest)
++[ "$digest_before" = "$digest_after" ] || \
++	echo "S2 content changed after deleting S1"
++_scratch_unmount
++[ -z "$(drop_state)" ] || echo "S1 deletion did not finish"
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/355.out b/tests/btrfs/355.out
+new file mode 100644
+index 00000000..4e4c5e98
+--- /dev/null
++++ b/tests/btrfs/355.out
+@@ -0,0 +1,2 @@
++QA output created by 355
++Silence is golden
 
-If you want to clean up "$TEST_DIR/test_mgtime_file.$$" in _cleanup, you
-can define a local _cleanup function here. Otherwise, you can drop the
-stale comment above.
 
-> +_require_test_program mgtime
 
-_require_test
 
-> +
-> +# Multigrain timestamps are opt-in per filesystem; only allowlist the ones
-> +# known to support them.
-> +case "$FSTYP" in
-> +ext4|btrfs|tmpfs|xfs|f2fs)
-> +	;;
-> +*)
-> +	_notrun "multigrain timestamps not supported on $FSTYP"
-> +	;;
-> +esac
-
-We could wrap this logic into a _require_multigrain_timestamps() helper.
-If there is a better way than probing FSTYP, we can always discuss
-and update it later.
-
-> +
-> +testfile="$TEST_DIR/test_mgtime_file.$$"
-> +
-
-rm -f $testfile
-
-> +$here/src/mgtime $testfile
-
-echo "Silence is golden"
-
-> +
-> +# success, all done
-> +status=0
-> +exit
-
-_exit 0
-
-Thanks,
-Zorro
-
-> diff --git a/tests/generic/999.out b/tests/generic/999.out
-> new file mode 100644
-> index 000000000000..7fbc67688211
-> --- /dev/null
-> +++ b/tests/generic/999.out
-> @@ -0,0 +1 @@
-> +QA output created by 999
-> 
-> ---
-> base-commit: 333c067ccf2f389f5558860336a7fa64157cd46e
-> change-id: 20261027-mgtime-64194b4e22b4
-> 
-> Best regards,
-> -- 
-> Jeff Layton <jlayton@kernel.org>
-> 
