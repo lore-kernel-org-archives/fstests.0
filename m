@@ -1,111 +1,55 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793769769;
-	b=GJZiVYoW72y5N6E8lo+mOfe8yEoq6mz7ppSyhv6sieJzNuYvzzivI12nPmywOhA8IedC
-	 U7wnlsuYRE8s8FtapbaqqSnl3vLyQvsT4s+hQifAtsnMA8DtCWJigcqr9y8QP6VLHtyWR
-	 OEIca7FTbnzg51PRCBAvvF4ieiYWkfMnGyzM1sHjc+4ACtWsJSOvirK76hgid/3ubCo9t
-	 RKlMoFNfx5Wz7ifEC8tYWQUn1J3j7I35WXswKbONY7r1VKET/VtzLl79X7JE5ZorVpDo1
-	 rtzsOPvFB/GttBjY8MzJvNe4L41K3eRS2PcccA5jKYtHTswPp9U97A1wsMeidr+YJTg==
+	t=1793773392;
+	b=x2ZX45PBFsX9k5QNzp+K3OHUfw+y500nAKt6GIBjdWRjO2CmMLgLPIftBeF6aR/nktJS
+	 or1eAbM5V/z20QgOsm/KPbSo/lWPGif5bYTmZNiVKI1wu08oOyuB1tH8Ax9e4BShyfhRr
+	 ovAPugBOFTMreOEoEQ5U0pdAaWJ0CXFDyAVFrHEhDyTYR6PeheAkbS2NLHO8YLYVuHIzv
+	 uIiF+9Gm7vK1EB0wbYaUIu2dc0aMe9ORYXiZCUHTazg3qGlE1XeXCBzLQL8tCTCbaxQjO
+	 g+cafG2ofBVS6y3reVvaCncx8vneRvrPz32XK8bAdtZutpMvPUywsqXUMWUpKVn0Rxg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793769769;
-	h=DMARC-Filter:Received:DKIM-Signature:DKIM-Signature:DKIM-Signature:
-	 DKIM-Signature:Received:Received:Date:From:To:Cc:Subject:Message-ID:
-	 In-Reply-To:References:MIME-Version:Content-Type:
-	 Content-Transfer-Encoding:X-Spamd-Result:X-Rspamd-Server:
-	 X-Rspamd-Action:X-Spam-Flag:X-Spam-Score:X-Spam-Level:
-	 X-Rspamd-Queue-Id;
-	bh=el/iNndBSWTdd+fmLuxFqV0bntRy08pW/ElsLqnixow=;
-	b=uj7cUS7npPCmH6D3VozfYjb5wTsaCWlmvyNXFGnCWd+ty5s7eV5qoKuWepxDukYDUIDf
-	 4gAxkZlgBs8kZPCMIa/lzF0LjvNQkw69LYvACXYOqATlr2ksAyw0fa+u7rfypwopdKe7G
-	 iTU8xUC3Cxeo3PYX2fv4zuUfPR/GbBsVhGCqSLjxBQsqYiWZTufXjwG9U7z5ehIcj/6Rz
-	 PkDlpMIw8ET/ZaMv8TnUAwc4d/G1cwiCTlKzs8wI4s70D9505HPkMbzIIp2jKn9zg7nff
-	 TQ4dgmjOd0mq8N5LoweDDlJG0rJ1oAu+nYzuzIrHUUhKm8K9YNntqDsOvm6H7wDKaIw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793773392;
+	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
+	 Mail-Followup-To:References:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To;
+	bh=TkkipuRHglZISv6QaoBuPAhIdxbeLfpVHPZho14mPmc=;
+	b=pWDA5Fg2JisSa5D2ZDFjKaUzIBnMkxV4NHkQLdAjn+sd+QmWu06k17WyXc7R+XAMus6O
+	 OOOexff/HkWlTGS8yLZF869PyKP4KSQt1Airs6hg8+/u/XZ34ke8turXL/BNesYAGL8JC
+	 qn4Vlu5/aOSLwoddWtfHt3oNzilld8YpylxPkxBrNFC+bubFhuUryKxToD9C9uqe/yYKR
+	 r1R3JT/qYWzzn6ZBTmlCQ5isfw+W6D8v3lwuwjRPCy5BsA/UF5dPIR1d2zJM/gHc3WXpc
+	 /ilMF6djjVdhFrXm5MVxUnZRs9iWjbE9kkRg3Haq28/HIpnJKe5iqpymn9J8cNO/NSA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=suse.de;
-	spf=pass smtp.mailfrom=suse.de;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=eiLrnyMU;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=Hq9PwbUx;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=eiLrnyMU;
-	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=Hq9PwbUx;
-	arc=none smtp.remote-ip=195.135.223.131
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=U2VubMzB;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30BD6606A31B;
-	Wed,  4 Nov 2026 05:22:48 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 30BD6606A31B
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C3A6606A31B;
+	Wed,  4 Nov 2026 06:23:12 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=eiLrnyMU;
-	dkim=pass header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=Hq9PwbUx;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.a=rsa-sha256 header.s=susede2_rsa header.b=eiLrnyMU;
-	dkim=neutral header.d=suse.de header.i=@suse.de header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=Hq9PwbUx
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 5DAF11FB22;
-	Wed,  4 Nov 2026 05:22:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1793769767; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=el/iNndBSWTdd+fmLuxFqV0bntRy08pW/ElsLqnixow=;
-	b=eiLrnyMUH7kSFhWH1CZTGbjpHa3svzH/i3eHUJEHMoOTVn+uy2up2OG1k553zLpHO2yow/
-	RST1OZIdlOApuFjfFufl9gnBcMU4S5VUmxWYDkTqp7p5Apy4TfkvSr3Rir8V/67YcgKxKe
-	LH3Cu5GCe+tOTarSZ/DyBkGjqxWtNfA=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1793769767;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=el/iNndBSWTdd+fmLuxFqV0bntRy08pW/ElsLqnixow=;
-	b=Hq9PwbUxLZ6p/CnyKmMauJrIBJc7yrZYTcGLRXSRhD7IX+5CmX/hbVKUxLyYl3f0DvTiZC
-	T9AvykRj/zohOPAg==
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=eiLrnyMU;
-	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=Hq9PwbUx
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1793769767; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=el/iNndBSWTdd+fmLuxFqV0bntRy08pW/ElsLqnixow=;
-	b=eiLrnyMUH7kSFhWH1CZTGbjpHa3svzH/i3eHUJEHMoOTVn+uy2up2OG1k553zLpHO2yow/
-	RST1OZIdlOApuFjfFufl9gnBcMU4S5VUmxWYDkTqp7p5Apy4TfkvSr3Rir8V/67YcgKxKe
-	LH3Cu5GCe+tOTarSZ/DyBkGjqxWtNfA=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1793769767;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=el/iNndBSWTdd+fmLuxFqV0bntRy08pW/ElsLqnixow=;
-	b=Hq9PwbUxLZ6p/CnyKmMauJrIBJc7yrZYTcGLRXSRhD7IX+5CmX/hbVKUxLyYl3f0DvTiZC
-	T9AvykRj/zohOPAg==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 639AB134A5;
-	Wed,  4 Nov 2026 05:22:45 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id SP89MCTB6mq3OwAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Wed, 04 Nov 2026 05:22:45 +0000
-Date: Wed, 4 Nov 2026 16:22:35 +1100
-From: David Disseldorp <ddiss@suse.de>
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=U2VubMzB
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 133311F000C1;
+	Wed,  4 Nov 2026 06:23:09 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793773392;
+	bh=TkkipuRHglZISv6QaoBuPAhIdxbeLfpVHPZho14mPmc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=U2VubMzBHP31traQIhNFFT0l0qiClH5gOATHqqOSepw/Gs3iNfW+Jp1/uIKFS3HVy
+	 7TOzAzk1G4AnxTvT+YhXEWwQeDtj6mEdOOTM1YxQ2yuNOF4VUqBl994mKVQ7L20WLv
+	 MxjZ2J50AHca2Ne+vza00XMqbgtilaWO0b5fIhQ8bKl7WakzbHQMoA5khJFlfIGYZx
+	 zo22DTba6miSpBOCW02MD2nPqke1YsdEd2yd7Lx31b4gROL3hDDhrRkBm98hxY/z7c
+	 UjUVPhgVDrEqo71a2h9jpeJ80nmG8lFp3tcUIHJNiaRaY8mca7lJaQvSK3Y1DV3rmH
+	 lR9CxBa9L2pNQ==
+Date: Wed, 4 Nov 2026 14:23:04 +0800
+From: Zorro Lang <zlang@kernel.org>
 To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana
- <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: test compression attribute on filesystems
- mounted with nodatacow
-Message-ID: <20261104162235.3bb19a1e.ddiss@suse.de>
-In-Reply-To: <19d06a11c66590ec2a053781c79bf00e39361a70.1793648537.git.fdmanana@suse.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] btrfs: test compression attribute on filesystems mounted
+ with nodatacow
+Message-ID: <aurOsMiyb2pP43eH@zlang-mailbox>
+Mail-Followup-To: fdmanana@kernel.org, fstests@vger.kernel.org, 
+	linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 References: <19d06a11c66590ec2a053781c79bf00e39361a70.1793648537.git.fdmanana@suse.com>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -116,49 +60,101 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Spamd-Result: default: False [-12.51 / 50.00];
-	SUSE_INTERNAL_BYPASS(-9.00)[];
-	BAYES_HAM(-3.00)[99.99%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_CONTAINS_FROM(1.00)[];
-	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	MIME_TRACE(0.00)[0:+];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	MISSING_XM_UA(0.00)[];
-	TO_DN_SOME(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	RCPT_COUNT_THREE(0.00)[4];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email,suse.de:dkim,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	DKIM_TRACE(0.00)[suse.de:+]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Rspamd-Action: no action
-X-Spam-Flag: NO
-X-Spam-Score: -12.51
-X-Spam-Level: 
-X-Rspamd-Queue-Id: 5DAF11FB22
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <19d06a11c66590ec2a053781c79bf00e39361a70.1793648537.git.fdmanana@suse.com>
 
-Looks good.
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+On Mon, Nov 02, 2026 at 07:57:17PM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Test that if we mount a filesystem with "-o nodatacow", set the
+> compression attribute on a directory and then create a file under it, the
+> file should inherit compression and setting an additional attribute (like
+> +A, write append mode) should work.
+> 
+> This exercises a bug fixed by the following kernel patch:
+> 
+>   btrfs: dont propagate nodatacow mount option on files with inherited compression
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
 
-On Mon,  2 Nov 2026 19:57:17 +0000, fdmanana@kernel.org wrote:
+This test case is simple and good enough,
 
-...
+Reviewed-by: Zorro Lang <zlang@kernel.org>
 
+>  tests/btrfs/364     | 45 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/364.out |  5 +++++
+>  2 files changed, 50 insertions(+)
+>  create mode 100755 tests/btrfs/364
+>  create mode 100644 tests/btrfs/364.out
+> 
+> diff --git a/tests/btrfs/364 b/tests/btrfs/364
+> new file mode 100755
+> index 00000000..d59e1cab
+> --- /dev/null
+> +++ b/tests/btrfs/364
+> @@ -0,0 +1,45 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
+> +#
+> +# FS QA Test 364
+> +#
+> +# Test that if we mount a filesystem with "-o nodatacow", set the compression
+> +# attribute on a directory and then create a file under it, the file should
+> +# inherit compression and setting an additional attribute (like +A, write append
+> +# mode) should work.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick compress fiemap
+> +
+> +. ./common/filter
+> +. ./common/punch # for _filter_fiemap_flags
+> +
+> +_require_xfs_io_command "fiemap"
 > +_require_chattr c
 > +_require_chattr A
 
-Nit: this could be collapsed into "_require_chattr cA"
-It's not worth a v2 respin though.
+I'll squash these two lines into one when merging (as David mentioned).
+
+> +_require_scratch
+> +
+> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +	"btrfs: dont propagate nodatacow mount option on files with inherited compression"
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+> +_scratch_mount "-o nodatacow"
+> +
+> +# Create a directory with the compression attribute, so that all files created
+> +# under it inherit the compression attribute.
+> +mkdir $SCRATCH_MNT/dir
+> +$CHATTR_PROG +c $SCRATCH_MNT/dir
+> +
+> +# Now create a file with some data inside the directory.
+> +$XFS_IO_PROG -f -c "pwrite 0 128K" $SCRATCH_MNT/dir/foo | _filter_xfs_io
+> +
+> +# Now try to make the file append only, it should work.
+> +$CHATTR_PROG +A $SCRATCH_MNT/dir/foo
+> +
+> +# A fiemap should report an encoded extent, which means it's compressed.
+> +echo "Fiemap output:"
+> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/dir/foo | _filter_fiemap_flags 1
+> +
+> +# success, all done
+> +_exit 0
+> diff --git a/tests/btrfs/364.out b/tests/btrfs/364.out
+> new file mode 100644
+> index 00000000..205d5ca2
+> --- /dev/null
+> +++ b/tests/btrfs/364.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 364
+> +wrote 131072/131072 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +Fiemap output:
+> +0: [0..255]: encoded|last
+> -- 
+> 2.53.0
+> 
+> 
