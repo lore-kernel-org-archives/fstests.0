@@ -1,79 +1,79 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1793824552;
-	b=IxULAaDxc+6xJQoVtwYoryqGTQIGGYLUMurwksgmDGNYTcOtjD8uf7s2jpoWqsV9cSMK
-	 bwigBxYbj0d5uHGJCwsPGQdLMsI+lOnToZxBbgWegLE1CfLcHRTdzLv1R1dtt6DmZE1xN
-	 13Enq8ULRLNAHqwcKt6qNzFHHu0GiyWTSX93Mh8rTRbml+7Bo19MRnbe0SIU9aT9vwpZS
-	 rrDh3mChPTAqIubKI+nO1JhZDtuyeHqMvHRSGwKj/qVDkuYRMDiVJzHBWoT8iLtKMNyhi
-	 1Y7gvZeolhL/LYLQV6zkkxX8QLywqvJd64/rFZyV7KFV5mpE+ojqvCcNk1J9uSr9UPQ==
+	t=1793846941;
+	b=TBZycIdZT5Sr/7QEbmRkr3rriE9VaIaKzPbP8eBxSeHlVy7QK/HkKyf9y6dOazRmiu+Z
+	 tAGM25He0jdTcLIIJ/r4MEHOmomMuLATou1Af5Hi2toKYp6pDdjvKlITZL2uqxalU9nMO
+	 UJZDhP/SlSQe+HWp7gsz0qc2HuyyCn5kUuMNG74mRVHz9owTE6+2ADGwvsPJUrZ6TtFcB
+	 kJNiOP8/s1GZytRBLLQr1afpFNvw4ZJIJxvtEFqwjr8bll58hU7QqwlHlWmVOb/ThvBlX
+	 Dzp2xgOan1nat5E1J9QywUtIGzmHe907MyZ+59h6mcCsPvhUcmZgrfJPKj+pIzBxANg==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793824552;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793846941;
 	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
-	 Content-Type:Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
+	 Content-Type:Message-Id:X-B4-Tracking:To:Cc:X-Mailer:
 	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
 	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=A/AJg4SnNtS2w7UA+hbHnttGFwPXEg73kchtHP3yZKQ=;
-	b=KzJKbLZSAwYOL1W3NDaEiDB/c2ojoD0I3jlqPQM7EddIARU6L5AFZtfQOMIwGoSEnM3H
-	 LCCz/P8s0MOybuDvp4AdOKAy+PcEr7y2VFw4YQ2zsOvUtwMcK92GWdpYT5+TAdlstGmbz
-	 aP7SG+g5Qc8vN4TFZkmgbIZFff5WIBIFp7gXYIQW0t3i7gSW8HQf0ssq3sixOOwlICVSJ
-	 rO7d8gA0BeJWnlGvzC2x3N4xKuQxOflyXNTWLRM369Nyito0zt6ba2kZOzReMIngGfMz+
-	 GCUpV0ZjO2q3+g7gINfOtz1JjrvsfOrwBcU33NKaXST6u6ZBzT0lf4ErtVad9MVnH6g==
+	bh=FKBNEnYTdFQwZoVoFH6/jkTZRVpG1zL+lcRWLILZ58U=;
+	b=u0oBqaJh2E7shNJDieUfTaZ4szuabS00Yg1+eVn1ZaIpZ14T84qc6ZxKkt2FybgBPgjK
+	 to7IjpYifpoyNm3k+Fq1UCK4ZiVM15qbr00wMzZ/jO8wWDfh7RzAEr/ELTekpnkywMyJB
+	 IKzrPo2lCziZKa8jqMt9sIv2va42COfriO6f28B4FK6EMBB9Tz5yOjHAhDkZMVyI60Llr
+	 c1Z4Mj5xm2oRtdT49/kSDU1+lGxMss7itWkcCZ8gpFBun6i/xknXMSZ93nOU2G7nv/YSf
+	 7dutIBemVrBfgu6Og6dFzPSrva5xc99ycLPwCoLbrybHe3B+YqyPZUF+xdUvDZweuHA==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=SsH68vez;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=b585LFOd;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF3096074FB6;
-	Wed,  4 Nov 2026 20:35:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 707C3606A326;
+	Thu,  5 Nov 2026 02:49:01 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=SsH68vez
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=b585LFOd
 Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
 ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
-	t=1793824551;
-	b=oIwxMJXHPqEt/SuYYWKX6vrR8Rke8q8w9suuiPDzodzun3p7mVvmnfWNQ3HP9N/tFj6H
-	 0xq2mf0g/aakDtEo+5Bkzi/57rvmptMR1a6x+FDqVUrnBylqaR8uF2QYDakvQ+q1e4xH4
-	 fHMtbbFZHqo2d1iIoXvd2LJF2wdAqMS3k2Z1pTb4ug63yCeYSvHN60BQWTLUhuXcfmwqu
-	 KIA/tNZ7Ut0xc1jNIH6MXXPbwrMmVWjqm03EohBrutoPSVFoFxvSw+Z8ksDx+1G1HpvIu
-	 XkebyxPIjKBgG9nGU4SYixNkYXaLBFyJw6PwrrOS9NeOnt9eIY93XgztPvmEd3q1XUw==
+	t=1793846941;
+	b=Df4MJKgAFqapVFsyYMzwYH/h2mGgurMkKm+lSFJy7ok2xjBDZRS1sTpdzD4v0xao2Wup
+	 ltBTj8LTJkB7f8BOgZyKmgAR3wHS8QlfIoXI5Pyjv9Adckbg5CGU9AMJAFr+KslB7jRd9
+	 rEaINQpW+mMPr8twyEOgV/ZeSpdq6cjZrpkTPlgoHw1uAeQBeZ/b/P4rElY6+UjFY8cJL
+	 TCSNaR0ZxPKfOT05uu7lJV5lFd63gDvcKFGOnM+i+dfWGqxUXb+chrZfGf5R5QUi14Kce
+	 9Fqijrah1eD+m3c+MGCa/A5TkCBGSYcb0qsG+vMLUUvR/Y+PmPrc/C24LouAgpxJQng==
 ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
-	c=relaxed/relaxed; t=1793824551;
+	c=relaxed/relaxed; t=1793846941;
 	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
-	 Message-Id:X-B4-Tracking:X-Change-ID:To:Cc:X-Mailer:
-	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=A/AJg4SnNtS2w7UA+hbHnttGFwPXEg73kchtHP3yZKQ=;
-	b=18OLYjp+co+bp1PgvxfXuTK/Uea1NCdZpzhN/280uf0yfJHdIETeCyjRoyCY32XkA96y
-	 Z7jYkxc+iV20wUjVb2JS2/HmM2lLh41H4wPkHw8WmNGRdKR81oMBc5OpzftKl5+qjUbkS
-	 RSBFdg1pP66tHz8oVIv4fUcNEpD62JA2l6FpVqPLIi3UmTNB0kh3vTHRo5akpEbGODSY3
-	 86q4bPaaeXG/3NUdStvRJAjgbe8YLXVZ3TtL8k17Xvcxk/4efSq4ya8zj/xsAJkgJa7hc
-	 y9nAZlNC/1lsTtj/4uQceFigi2o66BAfzmZNH6rwkMIg5VAQ7m/a0jXOliVJVZUndMw==
+	 Message-Id:X-B4-Tracking:To:Cc:X-Mailer:X-Developer-Signature:
+	 X-Developer-Key:X-Endpoint-Received:X-Original-From:Reply-To:
+	 Content-Transfer-Encoding;
+	bh=FKBNEnYTdFQwZoVoFH6/jkTZRVpG1zL+lcRWLILZ58U=;
+	b=2KaIaqBD4rOGNpNwP/1NP5KEsj4UrDZfozAzp6kNjVITNU4ozgklwci3GyehxTC44JPY
+	 PGgMUmoC+RQy29qFEhBG8yb2bfYtIDPEVS5R0jsXv9/8JGyzOieZ0WnZ8yUrbvInP13yc
+	 o0P4//0JTgp8tNRkuUpsaro9c2VBSebzIysWOqtpcJpc6QVU8HJn471OfM20BKP4j9/Tf
+	 3atRVCmq4YdTrJtK0cKWODxOzCyb9BTRl7Ja5poBWcsCJedk6DotgMW66jaLq9N6MQptU
+	 32Ut/HTRiEaNirDnHR+UAWE1qbnn4oXo8xTaWILt8QJkWeDDRPNoqTopBHmwAEe5CDA==
 ARC-Authentication-Results: i=1; smtp.kernel.org; 
 	arc=none smtp.remote-ip=100.80.115.77
 Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id 994BC1F000C1;
-	Wed,  4 Nov 2026 20:35:50 +0000 (UTC)
+	by smtp.kernel.org (Postfix) with ESMTPS id 589471F000C1;
+	Thu,  5 Nov 2026 02:49:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793824551;
-	bh=A/AJg4SnNtS2w7UA+hbHnttGFwPXEg73kchtHP3yZKQ=;
+	s=k20260515; t=1793846940;
+	bh=FKBNEnYTdFQwZoVoFH6/jkTZRVpG1zL+lcRWLILZ58U=;
 	h=From:Date:Subject:To:Cc:Reply-To;
-	b=SsH68vezKIra3rxghkZI1D18iWzcd9Bh/95o7cXLkqvnAo+tIoXzriKtweOGGT8hB
-	 tijei0ZxMU/MPYXMaYZUBYGRwbL2ICa5qDgTvLGuV//VLRlAWU58Bvu9F0iUQ3AxQo
-	 qIMryXTifxMQz3q4KynB+JL+j+w1mO6ZEzAbUyB83JoC3hpgBvlUH4vpAqCx7CeGmC
-	 +13xk+LS89d2ysCMLk4w692HH+kmPF0cGRxt8xjQ3Pqx0QL7vhVNNsb3kyiIokzJA9
-	 cBp2URVHF3T98JTPZi7uukIa6cJeCuvS6iloQvbwgXhyEceHAZrNwo5RXreI5ZzPHA
-	 5xP4ylvJ1YcKw==
+	b=b585LFOd6PoGVcUY+koOjRbY7jcmMttI1FUjVplyfa7agfoRVP8L+JvWZ1MQtlamR
+	 Z8lU5v7t3g+aqdd7kjOn0+7eGYCDjTMzmbzU/JLnkRHH0LfdTEnYd6Vp7DIzsVPizZ
+	 +yF8LyMJMfYC7te38EXJ5x78PjOX+cAqTq8ero3BuoGOgMhkgSM0ks6ubgRqNhU6Gl
+	 /FaFKa0HXMvCkPoKlZo8PpjIHmF0ym+0kUiKFiTmc/WDgJiqZg/kbz2mrlCWbZephR
+	 JIatxY69i1kHfyZUbK4bKgSe7erR7WuvDuxjYWVskz1Z1ESq32/3WvCCShtN8KaduA
+	 7mqN2djaTRNbg==
 Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id F14D246F83;
-	Wed,  4 Nov 2026 20:35:49 +0000 (UTC)
-From: Peter Lamberg via B4 Relay <devnull+kernel.pelam.fi@kernel.org>
-Date: Wed, 04 Nov 2026 22:35:39 +0200
-Subject: [PATCH v2] btrfs: test that a resumed snapshot deletion keeps its
- drop progress
+	by lkml.kernel.org (Postfix) with ESMTP id ABEAA4704A;
+	Thu,  5 Nov 2026 02:48:59 +0000 (UTC)
+From: Daejun Park via B4 Relay <devnull+daejun7.park.samsung.com@kernel.org>
+Date: Thu, 05 Nov 2026 11:49:00 +0900
+Subject: [PATCH] dm-log-writes: log earlier flushes' writes when a later
+ flush completes
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -84,241 +84,170 @@ List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Message-Id: <20261104-btrfs-355-v2-1-4b1ec6c23c44@pelam.fi>
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/22NQQ6CMBAAv0L2bE23BYOe/Ifh0NatrFEg3Uo0h
- L8LePU4yWRmAqHEJHAqJkg0snDfLWB2BYTWdTdSfF0YjDYHRG2VzymKslWlMKD1jpwu6wCLPyS
- K/N5al+bH8vJ3CnkNrEbLkvv02WYjrt6/7ogKVfTaWe3LY239eaCHe+4jQzPP8xds7wHnswAAA
- A==
-X-Change-ID: 20261103-btrfs-355-1c13baea048c
-To: fstests@vger.kernel.org
-Cc: quwenruo.btrfs@gmx.com, linux-btrfs@vger.kernel.org, fdmanana@suse.com, 
- asj@kernel.org
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1793824549; l=8417;
- i=kernel@pelam.fi; s=20261103; h=from:subject:message-id;
- bh=6BolEpS0wnHLee4MIs6gKR0KwTGwm8SS4vQl94fYdOI=;
- b=LLGsVq9hcRprx0LQub2L/fxTg1BUZx6NQ0As0bCaeFiBrOFLATCy6sefhoWVZaFu2fj/g9BZz
- 2zIRSEP7wcsDdB2ZTy28ghUzlwBe+7sZOam51H9BaOsvyJRSRMjdT9e
-X-Developer-Key: i=kernel@pelam.fi; a=ed25519;
- pk=qpD/xh/xwDGEMdfQk/5prChHF0mXHXDTrs35FxiJgrk=
-X-Endpoint-Received: by B4 Relay for kernel@pelam.fi/20261103 with
- auth_id=1398
-X-Original-From: Peter Lamberg <kernel@pelam.fi>
-Reply-To: kernel@pelam.fi
+Message-Id: <20261105-dmlw-flush-order-v1-1-4f154e06bc78@samsung.com>
+X-B4-Tracking: v=1; b=H4sIAJvu62oC/x3MSQqAMAxA0auUrA3YguNVxIW0qQbUSooDFO9uc
+ fkW/yeIJEwRepVA6OLIYc/QhQK7TPtMyC4bTGlqrcsK3bbe6NczLhjEkeBETdcaWzlvasjZIeT
+ 5+ZfD+L4fp3Lx02IAAAA=
+To: Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@kernel.org>, 
+ Mikulas Patocka <mpatocka@redhat.com>, 
+ Benjamin Marzinski <bmarzins@redhat.com>, dm-devel@lists.linux.dev
+Cc: Josef Bacik <josef@toxicpanda.com>, fstests@vger.kernel.org, 
+ linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Daejun Park <daejun7.park@samsung.com>
+X-Mailer: b4 0.13.0
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1793846939; l=5569;
+ i=daejun7.park@samsung.com; s=20261006; h=from:subject:message-id;
+ bh=QMRPbrKH67WwaocGnLh1SuH2BjgDRIWTU01gSB6rW3k=;
+ b=tqLmSXBijEpYe5T4s0jo8SrtcUdu54mPjNscxK+IvpTmPO+zaxGm2962Y69S4Y0hU5qGV/HEb
+ us+23pU/duUDY/1bGrXInEfptTzvY5eKlV5MdiRw8qNavJFmTaKqhzH
+X-Developer-Key: i=daejun7.park@samsung.com; a=ed25519;
+ pk=4yUfDqGRZTIj0Ik43z1GoMZRWCNm/rgX6uJuM9dtNIg=
+X-Endpoint-Received: by B4 Relay for daejun7.park@samsung.com/20261006 with
+ auth_id=1122
+X-Original-From: Daejun Park <daejun7.park@samsung.com>
+Reply-To: daejun7.park@samsung.com
 Content-Transfer-Encoding: 7bit
 
-From: Peter Lamberg <kernel@pelam.fi>
+From: Daejun Park <daejun7.park@samsung.com>
 
-When a partially dropped subvolume is resumed, btrfs_drop_snapshot()
-can write drop_progress (0 0 0) back to the root item if a commit or
-unmount happens before the resumed run drops its first reference. The
-next run then restarts from the first slot and tries to free blocks
-still shared with a snapshot again, and the transaction aborts with
-"unable to find ref byte nr". See the kernel fix:
+Each flush takes the writes that completed since the previous flush
+was issued, and logs them when it completes. If a later flush
+completes first, the earlier flush's writes are logged after anything
+logged in between, such as a mark. A replay to that mark then misses
+writes that were already stable. Crash consistency tests report this
+as data loss.
 
-  "btrfs: keep drop_progress when resuming snapshot deletion"
+Those writes completed before the later flush was issued, so its
+completion makes them stable. Log them when it completes, and document
+this in log-writes.rst.
 
-The test builds a subvolume S1 with a level 3 tree (nodesize 4096,
-30000 files with a 2000 byte inline extent each), takes a read-only
-snapshot S2 and deletes S1. It unmounts once a root child has been
-dropped, then does five quick mount/unmount cycles and checks that the
-drop key never goes back to zero. Finally it lets the deletion finish
-and, after a mount cycle, checks that S2's content is unchanged and
-S1's root item is gone.
-
-Without the fix the test fails on the first resume; with it the test
-passes. It takes about 12 seconds on loop devices on a SATA SSD.
-
-Assisted-by: LLM
-Signed-off-by: Peter Lamberg <kernel@pelam.fi>
+Fixes: 0e9cebe72459 ("dm: add log writes target")
+Signed-off-by: Daejun Park <daejun7.park@samsung.com>
 ---
-Kernel fix, sent to linux-btrfs:
-https://lore.kernel.org/linux-btrfs/20261103-drop-progress-v1-1-16e345565109@pelam.fi/
-
-Reproducers and logs: https://pelam.fi/btrfs-drop-progress/
-
-v2 fails 3/3 on the stock Ubuntu 7.3.0-9-generic btrfs.ko and 3/3 on a
-module built from the same source without the fix; it passes 3/3 with
-the fix, 12-13 s on loop devices on a SATA SSD. Same 3/3 results with
-the devices on tmpfs, 10-11 s. Also run with MKFS_OPTIONS="-s 4096":
-fails without the fix, passes with it. It _notrun's if the tree stays
-too shallow or the window is missed.
-
-Without the fix the transaction aborts during the final deletion.
-btrfs subvolume sync then returns because the fs went read-only
-(btrfs-progs 7.1 here; the read-only check is in progs since 6.6.3).
-
-_fixed_by_kernel_commit has a placeholder hash until the fix is merged.
-The test number may need adjusting if 355 gets taken first.
+Found on XFS (xfs for-next, QEMU guest, loop devices on tmpfs) with 8
+writers that each write a block, fsync it and log a mark. A replay to
+the mark missed the fsynced block at 3 of 1408 marks without this
+patch and at none of 1408 with it. generic/455 457 482 757 pass with
+and without it, and KASAN and lockdep report nothing.
 ---
-Changes in v2, following Qu Wenruo's review:
-- Add _require_btrfs_support_sectorsize 4096 and mkfs -s 4096.
-- Fill S1 with 2000 byte inline extents instead of 3000 byte xattrs;
-  drop _require_attrs. Still a level 3 tree with 30000 files (about
-  31200 leaves), created with a plain shell loop.
-- Read S1's root item with grep and sed instead of awk.
-- Compare S2 before and after with md5sum instead of getfattr.
-- drop_caches: keep only the one in the poll loop. Without it dump-tree
-  read a stale root item while mounted (the loop saw drop key 6072, the
-  key on disk after the unmount was 20592). Before the final md5sum a
-  mount cycle replaces it, so S2 is read from disk.
-- Wait for the deletion with filesystem sync + subvolume sync instead of
-  timeout 600; drop _require_command timeout.
+ .../admin-guide/device-mapper/log-writes.rst       |  6 +++++
+ drivers/md/dm-log-writes.c                         | 30 ++++++++++++++++++++++
+ 2 files changed, 36 insertions(+)
 
-Other changes:
-- _require_btrfs_inline_extents_creation; S1's id from _btrfs_get_subvolid
-  instead of inspect-internal rootid.
-- _notrun, not a silent pass, if the first run is not interrupted at the
-  root level or the deletion finished before the first resume.
-
-- Link to v1: https://lore.kernel.org/fstests/20261103-btrfs-355-v1-1-fb0a30b4983b@pelam.fi/
----
- tests/btrfs/355     | 127 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/355.out |   2 +
- 2 files changed, 129 insertions(+)
-
-diff --git a/tests/btrfs/355 b/tests/btrfs/355
-new file mode 100755
-index 00000000..7a272660
---- /dev/null
-+++ b/tests/btrfs/355
-@@ -0,0 +1,127 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Peter Lamberg
-+#
-+# FS QA Test 355
-+#
-+# Test that a resumed snapshot deletion keeps its saved drop progress.
-+#
-+# If the drop progress is reset to zero on resume (a commit or unmount before
-+# the resumed run drops its first reference), the next run restarts from the
-+# first slot and tries to free blocks still shared with a snapshot again: the
-+# transaction aborts with "unable to find ref byte nr".
-+#
-+. ./common/preamble
-+_begin_fstest auto quick snapshot subvol
+diff --git a/Documentation/admin-guide/device-mapper/log-writes.rst b/Documentation/admin-guide/device-mapper/log-writes.rst
+index 23141f2ffb7..1223803684e 100644
+--- a/Documentation/admin-guide/device-mapper/log-writes.rst
++++ b/Documentation/admin-guide/device-mapper/log-writes.rst
+@@ -36,6 +36,12 @@ Again this is to simulate what is actually on disk, this allows us to detect
+ cases where a power failure at a particular point in time would create an
+ inconsistent file system.
+ 
++If a later REQ_PREFLUSH request completes while an earlier one is still in
++flight, the WRITEs attached to the earlier request are logged then, ahead of the
++later request's own WRITEs. They completed before the later REQ_PREFLUSH was
++issued, so they are on disk as well. The earlier FLUSH is logged when it
++completes.
 +
-+_fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: keep drop_progress when resuming snapshot deletion"
-+
-+_require_scratch
-+_require_btrfs_support_sectorsize 4096
-+_require_btrfs_inline_extents_creation
-+_require_btrfs_command inspect-internal dump-tree
-+
-+# A 2000 byte inline extent per file gives about one 4K leaf per file, and a
-+# 4K node holds up to 121 pointers. 30000 files give ~31200 leaves under ~268
-+# level 1 nodes: a level 3 tree whose root has 3 children of 62, 120 and 86
-+# pointers. Level 3 needs more than 121 level 1 nodes, i.e. ~14000 files.
-+# The resumed drop has to walk a whole root child before it drops anything,
-+# which is the window the second unmount must land in.
-+nfiles=30000
-+data=$(printf '%2000s' '')
-+
-+# Print S1's root item from the root tree, nothing once it is gone.
-+s1_root_item()
+ Any REQ_FUA requests bypass this flushing mechanism and are logged as soon as
+ they complete as those requests will obviously bypass the device cache.
+ 
+diff --git a/drivers/md/dm-log-writes.c b/drivers/md/dm-log-writes.c
+index c72e07c3f5a..982a240f031 100644
+--- a/drivers/md/dm-log-writes.c
++++ b/drivers/md/dm-log-writes.c
+@@ -115,6 +115,7 @@ struct log_writes_c {
+ 	spinlock_t blocks_lock;
+ 	struct list_head unflushed_blocks;
+ 	struct list_head logging_blocks;
++	struct list_head inflight_flushes;
+ 	wait_queue_head_t wait;
+ 	struct task_struct *log_kthread;
+ 	struct completion super_done;
+@@ -128,6 +129,7 @@ struct pending_block {
+ 	char *data;
+ 	u32 datalen;
+ 	struct list_head list;
++	struct list_head flush_list;
+ 	struct bio_vec vecs[];
+ };
+ 
+@@ -526,6 +528,7 @@ static int log_writes_ctr(struct dm_target *ti, unsigned int argc, char **argv)
+ 	}
+ 	spin_lock_init(&lc->blocks_lock);
+ 	INIT_LIST_HEAD(&lc->unflushed_blocks);
++	INIT_LIST_HEAD(&lc->inflight_flushes);
+ 	INIT_LIST_HEAD(&lc->logging_blocks);
+ 	init_waitqueue_head(&lc->wait);
+ 	init_completion(&lc->super_done);
+@@ -629,6 +632,7 @@ static void log_writes_dtr(struct dm_target *ti)
+ 
+ 	WARN_ON(!list_empty(&lc->logging_blocks));
+ 	WARN_ON(!list_empty(&lc->unflushed_blocks));
++	WARN_ON(!list_empty(&lc->inflight_flushes));
+ 	dm_put_device(ti, lc->dev);
+ 	dm_put_device(ti, lc->logdev);
+ 	kfree(lc);
+@@ -688,6 +692,7 @@ static int log_writes_map(struct dm_target *ti, struct bio *bio)
+ 		spin_unlock_irq(&lc->blocks_lock);
+ 		return DM_MAPIO_KILL;
+ 	}
++	INIT_LIST_HEAD(&block->flush_list);
+ 	INIT_LIST_HEAD(&block->list);
+ 	pb->block = block;
+ 	atomic_inc(&lc->pending_blocks);
+@@ -717,6 +722,7 @@ static int log_writes_map(struct dm_target *ti, struct bio *bio)
+ 	if (flush_bio && !bio_sectors(bio)) {
+ 		spin_lock_irq(&lc->blocks_lock);
+ 		list_splice_init(&lc->unflushed_blocks, &block->list);
++		list_add_tail(&block->flush_list, &lc->inflight_flushes);
+ 		spin_unlock_irq(&lc->blocks_lock);
+ 		goto map_bio;
+ 	}
+@@ -764,6 +770,29 @@ static int log_writes_map(struct dm_target *ti, struct bio *bio)
+ 	return DM_MAPIO_REMAPPED;
+ }
+ 
++/*
++ * A flush mapped before @block holds writes that completed before @block was
++ * mapped, so @block's completion makes them stable. Queue them ahead of
++ * @block's own writes. inflight_flushes holds the empty flushes, in map order,
++ * whose writes are not yet queued.
++ */
++static void log_earlier_flushes(struct log_writes_c *lc,
++				struct pending_block *block)
 +{
-+	$BTRFS_UTIL_PROG inspect-internal dump-tree -t root $SCRATCH_DEV \
-+		2>> $seqres.full | \
-+		grep -A 4 "key ($s1_id ROOT_ITEM 0)"
++	struct pending_block *prev;
++
++	lockdep_assert_held(&lc->blocks_lock);
++	if (list_empty(&block->flush_list))
++		return;
++	while ((prev = list_first_entry(&lc->inflight_flushes,
++					struct pending_block,
++					flush_list)) != block) {
++		list_splice_tail_init(&prev->list, &lc->logging_blocks);
++		list_del_init(&prev->flush_list);
++	}
++	list_del_init(&block->flush_list);
 +}
 +
-+# Print "<drop_progress objectid> <drop_level>" of S1, nothing once it is gone.
-+drop_state()
-+{
-+	s1_root_item | \
-+		sed -n 's/.*drop_progress key (\([0-9]*\) .* drop_level \([0-9]*\)$/\1 \2/p'
-+}
-+
-+s2_digest()
-+{
-+	(cd $SCRATCH_MNT/S2 && find . -type f | sort | xargs md5sum | md5sum)
-+}
-+
-+_scratch_mkfs -n 4096 -s 4096 >> $seqres.full 2>&1 || \
-+	_notrun "mkfs with nodesize 4096 failed"
-+_scratch_mount -o max_inline=2048,compress=none
-+
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/S1 >> $seqres.full
-+for ((i = 0; i < nfiles; i++)); do
-+	echo -n "$data" > $SCRATCH_MNT/S1/f$i
-+done
-+s1_id=$(_btrfs_get_subvolid $SCRATCH_MNT S1)
-+
-+# S2 shares every block of S1, S1 owns them.
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/S1 $SCRATCH_MNT/S2 \
-+	>> $seqres.full
-+$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
-+digest_before=$(s2_digest)
-+level=$(s1_root_item | sed -n 's/^\s*level \([0-9]*\) generation_v2.*/\1/p')
-+echo "S1 id $s1_id root level $level files $nfiles" >> $seqres.full
-+[ -n "$level" ] && [ $level -ge 3 ] || \
-+	_notrun "S1 tree too shallow (level $level)"
-+
-+$BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/S1 >> $seqres.full
-+
-+# First drop run: unmount once at least one root child has been dropped, so
-+# the saved drop progress is non-zero and at the root level.
-+for ((i = 0; i < 600; i++)); do
-+	# dump-tree reads the device through its page cache, which goes stale
-+	# while the fs is mounted
-+	echo 3 > /proc/sys/vm/drop_caches
-+	$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
-+	read -r obj lvl < <(drop_state)
-+	[ -z "$obj" ] && \
-+		_notrun "subvolume deletion finished before it was interrupted"
-+	[ "$obj" != 0 ] && [ "$lvl" = "$level" ] && break
-+	sleep 0.1
-+done
-+[ "$obj" != 0 ] && [ "$lvl" = "$level" ] || \
-+	_notrun "subvolume deletion did not progress to the root level"
-+_scratch_unmount
-+echo "first run interrupted at drop key ($obj) level $lvl" >> $seqres.full
-+
-+# Resumed runs, each interrupted right away. The saved progress must never go
-+# back to zero.
-+for ((i = 0; i < 5; i++)); do
-+	_scratch_mount
-+	_scratch_unmount
-+	read -r obj lvl < <(drop_state)
-+	echo "resume $i: drop key ($obj) level $lvl" >> $seqres.full
-+	if [ -z "$obj" ]; then
-+		[ $i = 0 ] && \
-+			_notrun "S1 deletion finished before it was resumed"
-+		break
-+	fi
-+	if [ "$obj" = 0 ]; then
-+		echo "drop progress of the deleted subvolume reset to zero on resume"
-+		break
-+	fi
-+done
-+
-+# Let the deletion finish. With a reset drop progress this tries to free blocks
-+# still used by S2 again and the transaction aborts.
-+_scratch_mount
-+$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT	# wakes the cleaner
-+$BTRFS_UTIL_PROG subvolume sync $SCRATCH_MNT >> $seqres.full
-+# Read S2 back from disk, not from the page cache filled by digest_before.
-+_scratch_cycle_mount
-+digest_after=$(s2_digest)
-+[ "$digest_before" = "$digest_after" ] || \
-+	echo "S2 content changed after deleting S1"
-+_scratch_unmount
-+[ -z "$(drop_state)" ] || echo "S1 deletion did not finish"
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/355.out b/tests/btrfs/355.out
-new file mode 100644
-index 00000000..4e4c5e98
---- /dev/null
-+++ b/tests/btrfs/355.out
-@@ -0,0 +1,2 @@
-+QA output created by 355
-+Silence is golden
+ static int normal_end_io(struct dm_target *ti, struct bio *bio,
+ 		blk_status_t *error)
+ {
+@@ -776,6 +805,7 @@ static int normal_end_io(struct dm_target *ti, struct bio *bio,
+ 
+ 		spin_lock_irqsave(&lc->blocks_lock, flags);
+ 		if (block->flags & LOG_FLUSH_FLAG) {
++			log_earlier_flushes(lc, block);
+ 			list_splice_tail_init(&block->list, &lc->logging_blocks);
+ 			list_add_tail(&block->list, &lc->logging_blocks);
+ 			wake_up_process(lc->log_kthread);
 
+---
+base-commit: 6628e7d4c6b25c8d18f1345e3a20d21829aae7e4
+change-id: 20261105-dmlw-flush-order-ae7982c5df26
 
+Best regards,
+-- 
+Daejun Park <daejun7.park@samsung.com>
 
 
