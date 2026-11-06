@@ -1,54 +1,91 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.219.54
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793894764;
-	b=wnuXSSowDmWLQ0A5qJf6hERxL5or+yUgaFE1g6YwXv4zy+0y3KJtG2T2chqneMm9Jb4g
-	 +FaCxc+6111N5puEjGqGa6QQleemdlAlRUAZ5H+4EC05HY4tYCLlr0h7GOQ1BdbBTp30v
-	 pHyj4EvXo/01hCzJO+aylHJXayLQU+TmH7uOOI2/AeU1vgepxh4tq39WqpUts3fGjseYk
-	 YKBefDFQb5GicvJy3F/SQcZ7uNmeUpqQgxa8psyVAHDczRYK2Gk5RLNPIAKIzmiGYjg+S
-	 hZAjVzYDB9YzirIDNrJJhCb8NexGD/Y4yxm08tYDU0rbfINSa51YyroVW3jlzlNwrmA==
+	t=1793977491;
+	b=N+g+MHNDq02k/omxRxS3ya6IUQdfsmXelLZxeoWZhN0aMLuXudxrPOrfPewPKbLp8+vb
+	 wsUTA8pVvJA75ghk1IgSWq6iQfvh3fCJOiXNcmRp0HTBAHzuj1HvzOtwNoUtU6zz0iCyp
+	 SsQsS+w5CqJFbAaakRWoZXGZWZMxsg2/drijARTcAiKo+99LseScPyoRmBZOsFvahzN31
+	 bAxiWaeb1e6m0BkG7ZIczN1RaGaYqUrCWxy+1m5XlPa2Fv0SfB80K/BhCCmGt7RGDGHxV
+	 5ruJLDzbJXWClzCs8zAaL3u+6vMzAcQK2u7yNnBCUUBUxlD4yeqt3STOoE2GajxgSyg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793894764;
-	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
-	 MIME-Version:Content-Transfer-Encoding;
-	bh=DmHcoJJIk4zbH+BUNcu8mTpRZCizYlcJfoe6e12QLEs=;
-	b=hoaJ3N8esSkOT45lmCfr+5bdMiHaRSpBX8nt1RVdhNf4pZqMXot/FOZHbUGLq4c9xQJ+
-	 wXI2DrqDhTFj/EM4ZspyCYu3/elmS98l3tTZLYO0sh1tU5O3SPFWhRQBnlimJNCs3Mu2R
-	 tU10Ou3bO9PNlQy5e+YShm5ZdPapaPTzyQAoIpHqAlN5gN0ghq4118itGiYKcgUf/BeAM
-	 bwXLMGpBDFnxEhlc2fLo27Uz1wBmlF/jt4jYMiWT10TPwc2abjuhMUGk0T+muWs+fwYoJ
-	 /osc63MY+yfVyqoz6wKEoXw+Otko16u8K7LeXi+p2cdmoWuj2QVzbVlg/ay/rmf5Q5g==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793977491;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:Date:Message-ID:From:
+	 Subject:To:Cc:MIME-Version:Content-Type:Content-Transfer-Encoding;
+	bh=osUGiBYO++jmzwgjV1q+vpCIJklcqDLlUevv7q/8lJ8=;
+	b=efjX5p7lCD5tzlj+ISKH4nPn53K74Gbs3hCD/QbpXeSM8bn/HZ9ZKg0lCllxJJIuSRGc
+	 3fNPiTa8ein17eVrkAyM9qEmsrbBaV8mxvKEgP7R5e3/gB8JlOYrZ8Lskc5VwL/brwG7m
+	 gYtXHrtAVRwhpelXTekpByw9nuUx8DDgeM5iWUj6Y0Q9gPUACxtTNbph3A+8o2QitWgin
+	 Ko3boJsuWMopixhz9IbXJGQwEGqn1TfAc0CSrMHhhWwDgxLJMhIsfJJ3zhZ15UY6iAqDn
+	 ENHcdYiCD7MYOqBepwfrHE3YJR/N46LlTxHDUlvDbE5ZxnatfW5gY/HsCSkNWmfj8qg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=YTvMvG0y;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	dmarc=none header.from=toxicpanda.com;
+	spf=pass smtp.mailfrom=toxicpanda.com;
+	dkim=pass header.d=toxicpanda.com header.i=@toxicpanda.com header.a=rsa-sha256 header.s=google header.b=hronv365;
+	arc=none smtp.remote-ip=209.85.219.54
+Received: from mail-qv1-f54.google.com (mail-qv1-f54.google.com [209.85.219.54])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0FDB1606A32E
-	for <fstests@vger.kernel.org>; Thu,  5 Nov 2026 16:06:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 831A6606A326
+	for <fstests@vger.kernel.org>; Fri,  6 Nov 2026 15:04:50 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 831A6606A326
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=toxicpanda.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=YTvMvG0y
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 706BA1F000C1;
-	Thu,  5 Nov 2026 16:06:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793894763;
-	bh=DmHcoJJIk4zbH+BUNcu8mTpRZCizYlcJfoe6e12QLEs=;
-	h=From:To:Cc:Subject:Date;
-	b=YTvMvG0yHAv2ltctznC6XJ2ydBCZ5ddR4+CsxLawt+49goT1gXPGXOI7JwCsMxZI/
-	 gsayUIyV+46XbbNPlkqeo42BfUi0t3gAiW/zeibpLqbgGynCzbAqv7tSnAbk7IMr2g
-	 gRECZY/Q87/yhiAkmxOwY8FPDu38RPkbxKYyNNRHPkgRrKSS7WbNRqOto+ogpvTkkk
-	 QaqCiQf7uoLL6uDPaGidTk96WvETGNuTFVcjsu2rDciWXYhZO8M19fnpihQbgONw25
-	 TzEXvEI2E5eFbZMJbsSV49pWe2rqX/p4vr5314o/o8b0wXWfKHM1FmC4cd1hQS2PMR
-	 LE//gsvPMLZWg==
-From: cem@kernel.org
-To: zlang@kernel.org
-Cc: fstests@vger.kernel.org,
-	hch@lst.de,
-	sandeen@sandeen.net,
-	Carlos Maiolino <cmaiolino@redhat.com>
-Subject: [PATCH] add tmt as a new output format
-Date: Thu,  5 Nov 2026 17:05:20 +0100
-Message-ID: <20261105160526.44266-1-cem@kernel.org>
-X-Mailer: git-send-email 2.56.0
+	dkim=pass (2048-bit key, unprotected) header.d=toxicpanda.com header.i=@toxicpanda.com header.a=rsa-sha256 header.s=google header.b=hronv365
+Received: by mail-qv1-f54.google.com with SMTP id 6a1803df08f44-91ea0c05c92so8497676d6.0
+        for <fstests@vger.kernel.org>; Fri, 06 Nov 2026 07:04:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda.com; s=google; t=1793977489; x=1794582289; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:mime-version:cc:to:subject
+         :from:message-id:date:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=osUGiBYO++jmzwgjV1q+vpCIJklcqDLlUevv7q/8lJ8=;
+        b=hronv365PmnuJpTpgwn77mWjRX8H7rQhSPym5savjx6/KsmnzUwbuYxONptwC/P+4a
+         v1qK4Lg4hjYSI+K2LMXQe8jQVn0gFLQn9asKETbMvivRMIDOelMVbSfv09ATleY8Jsxg
+         WpeS5eVSN5b4bMoLY59ll4kGJ9cZ7/nRVzMwIoTVAx9Xf+jIfkytCNdCoFRj8XZVe5+1
+         6DNRW2thk1MON+r8CBaNCEH8cdRadcYK6NBVvxo8Wn3y7ZMW6C4ZWFx06UfHwWTQYTsb
+         gxtKoE/sMQaBCZ94565uA1SGfxtMcWLiGEqXfYdlGfUXwUH3nJ1jXUtMa2RGOFMYRCZj
+         73gw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1793977489; x=1794582289;
+        h=content-transfer-encoding:content-type:mime-version:cc:to:subject
+         :from:message-id:date:x-gm-gg:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=osUGiBYO++jmzwgjV1q+vpCIJklcqDLlUevv7q/8lJ8=;
+        b=NeiGu4OjozOgA9O9NWi4nOQKssKgglovRMJlCnd4bRxlt18POLsLQiDeGYGdAODDoK
+         cXojiOrCuFXlKDzl4ioyOCWYhYUa9AZkiu+qXepgz06I2BBud9PV7Z0NY49O/86YgH5D
+         PaHyAsbKbydrxJG86Y494LircTizMRXATR9EkO3ZU0XJfyeYeL61n0CTLVG16wQdI/T5
+         GOISWIPDCEgkwXWxopkR13fshZ0r6PtOxuvrzhdp8rcwJ78GNXFH9dyKsH/kSOQySh3t
+         NdfH2omjMLosXN5ykdJQ2kR78oorsC7ueTHPKMlzaaEy7XDRGGzlSwxxCyBDZUcMSs+6
+         zCbg==
+X-Gm-Message-State: APuU4Z8BpX+qpFW3n+hn0HIC11W3iqQywtxbf9dQ9ytQwkWaN6PF4Jx6
+	pR/o3aQGT/zyyatJWjUIeGIaWpCuYwFUer5Cn2QQgoigmerXB7s5u/+uiVNmS/vqcGfAipv0n+N
+	fEI5uB54=
+X-Gm-Gg: AYBFou0cRMG33nSyuBWjtF+pjIkDFYW/4+72uTOWj6sStXkT1iXbUnFdyMdE4kg2zZt
+	ZcXQFoZ2+g+6tD6yFRFgCt+wr9lgHsdEKvBhTEatJsflSO0AL0OgMdEmpupfPpq/hgmRNjL8WEB
+	IbJtLuonC9jkYBcWRuOIlQSECvgJ96tVDzkFBTWghsQu38AB6kn7CViAiTr8SCsHblQWe32jUEr
+	iN97bmxL21gYw8xuzPfIP+azhbAru6cqRRaVv2oFQgsSXdtPmdFb/OUwqRy09fnltdvjZqKHB7Z
+	8ql6Xcg9hcYUfQ2oR6wqtRWa/4+J6lzfXgrwoKYL5DW0Uh33JsDNNigEtRG1nFEx0jvGGWiUx+f
+	qPzoEiVKqzWC4WuxA2JW0AW8B1oXpP6iLKFzpcMTIdIlzV8EydkGbjmHUy722i+z+ZBbO2n+aUP
+	To4ijxyZbD7wkUm3zfuh/HFbyjY577E5P2k2wQyWqW/x0d+HvdbVx8Yi+VmXbGfF5UxPn9xbagW
+	gVFAeMCvBPY4eq4rktnJJ9LDgeUimnycfJd6ITNs9PpcVVuYdoRqv2XHAnK7b/3rPFzoOtPwY/2
+	lV71vQk6ihaR8wzAmuTMw03W0FiiWGXI7OIYjhlFJKHK5Q==
+X-Received: by 2002:a05:622a:2592:b0:533:3a14:6a2e with SMTP id d75a77b69052e-54e130945c1mr42726921cf.17.1793977489385;
+        Fri, 06 Nov 2026 07:04:49 -0800 (PST)
+Received: from toxicpanda.com ([153.61.196.249])
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-54edd55b971sm9255121cf.10.2026.11.06.07.04.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 06 Nov 2026 07:04:48 -0800 (PST)
+Date: Fri, 06 Nov 2026 15:04:47 +0000
+Message-ID: <773faf2a275e0a51bd38cf68f492856c.josef@toxicpanda.com>
+From: Josef Bacik <josef@toxicpanda.com>
+Subject: [PATCH fstests] overlay: test that syncfs and unmount persist all
+ changes
+To: fstests@vger.kernel.org
+Cc: Zorro Lang <zlang@kernel.org>,
+    Amir Goldstein <amir73il@gmail.com>,
+    linux-unionfs@vger.kernel.org
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -58,224 +95,236 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 
-From: Carlos Maiolino <cmaiolino@redhat.com>
+overlayfs is about to stop syncing the whole upper filesystem on syncfs(2)
+and unmount.  With fsync=relaxed it only writes the upper inodes that were
+modified through the overlay, so it has to know about all of them.
 
-I've been trying to expand my testing matrix leveraging the testing-farm
-cloud (https://testing-farm.io/), which is a public testing cloud available
-for opensource testing.
+Modify an overlay in many ways: new files and directories, data and
+metadata copy up, stores through a shared mapping, sendfile, copy_range,
+an O_TMPFILE, links, renames, whiteouts, a file written before the inode
+caches are dropped.  Then sync or unmount the overlay, shut down the base
+filesystem without flushing its log, cycle the mounts and check that
+nothing has changed.
 
-Testing-farm uses tmt (https://github.com/teemtee) to orchestrate the
-tests within the provisioned VMs.
-tmt however expects each individual test to be, well, an individual
-test so by default it would put a whole xfstests run as a single test
-case with a looooong report.
-However we can use a tmt-report-result tool to report each test ran
-individually as a sub-test, so the report looks a bit more granular,
-easy to read and prevent my eyes from bleeding while looking at its
-testing reports.
+Do that with the default mount options, with every fsync mode that syncs
+and with redirect_dir=on,metacopy=on.  Options that the kernel does not
+know are skipped.
 
-I know tmt can also be used to orchestrate tests on a local machine.
-Although I have no use for that, it might be useful for someone else,
-reason why at the end of the run it will also print out the tmt report
-file location. This also makes the output consistent to what xunit
-format does.
-
-Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
+This is for "ovl: only sync what was written through the overlay" [1], Amir
+suggested a test like this in his review.
 
-Here is an example report of a '-g quick' run with this patch against a
-regular distro kernel (Fedora 44). I'm not adding it to the patch
-description because honestly I have no clue how long those reports are
-kept so it may very well get stale in a few months.
-https://artifacts.dev.testing-farm.io/ccd9d09a-f8fc-4460-bdbb-005e1a18bad8/
+It passes without the series on ext4 and xfs, there it skips fsync=relaxed
+and fsync=on, and it passes with the series. With the series and the
+function that marks the overlay inode dirty turned into a no-op it fails in
+the default, fsync=relaxed and metacopy rounds, the file data is gone.
 
- check         |   2 +-
- common/report | 129 +++++++++++++++++++++++++++++++++++++++++++++++++-
- 2 files changed, 129 insertions(+), 2 deletions(-)
+[1] https://lore.kernel.org/r/20261106-b4-ovl-containerized-sync-v4-0-6ddde0b7dd8a@toxicpanda.com
 
-diff --git a/check b/check
-index bca302151955..47a76ba04c59 100755
---- a/check
-+++ b/check
-@@ -74,7 +74,7 @@ General options:
-     -S section              exclude the specified section from the config file
-     -T                      output timestamps
-     -R fmt[,fmt]            generate report in formats specified. Supported
--                              formats: xunit, xunit-quiet
-+                              formats: xunit, xunit-quiet, tmt
-     --exact-order           run tests in the exact order specified
-     --extra-space <size>    require minimum free space on scratch device
-     --fs <type>             test the given FSTYP; valid types include:
-diff --git a/common/report b/common/report
-index 2fa15e62f1e7..7d5e973a6e02 100644
---- a/common/report
-+++ b/common/report
-@@ -14,6 +14,8 @@ REPORT_ENV_LIST_OPT=("TAPE_DEV" "RMT_TAPE_DEV" "FSSTRESS_AVOID" "FSX_AVOID"
- 		     "KCONFIG_PATH" "PERF_CONFIGNAME" "MIN_FSSIZE"
- 		     "IDMAPPED_MOUNTS")
- 
-+TMT_REPORT_RESULT_PROG="${TMT_REPORT_RESULT_PROG:-tmt-report-result}"
+ tests/overlay/118     | 180 ++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/118.out |   2 +
+ 2 files changed, 182 insertions(+)
+ create mode 100755 tests/overlay/118
+ create mode 100644 tests/overlay/118.out
+
+diff --git a/tests/overlay/118 b/tests/overlay/118
+new file mode 100755
+index 00000000..796f6d7b
+--- /dev/null
++++ b/tests/overlay/118
+@@ -0,0 +1,180 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 Josef Bacik.  All Rights Reserved.
++#
++# FS QA Test 118
++#
++# Test that syncfs(2) on an overlay, and unmounting one, persist everything
++# that was modified through it.
++#
++# overlayfs used to sync the whole upper filesystem for that.  With
++# fsync=relaxed it only writes the upper inodes that were modified through this
++# overlay, so it has to know about all of them.
++#
++# Modify the overlay in every way we can think of, sync it, shut down the base
++# filesystem without flushing its log, cycle the mounts and check that nothing
++# has changed.
++#
++. ./common/preamble
++_begin_fstest auto quick shutdown copyup whiteout mmap redirect metacopy
 +
- encode_xml()
- {
- 	cat -v | \
-@@ -244,7 +246,122 @@ _xunit_make_testcase_report()
- }
- 
- 
--#
++. ./common/attr
 +
-+_tmt_assert_env()
++_require_scratch
++_require_scratch_shutdown
++_require_metadata_journaling $SCRATCH_DEV
++_require_xfs_io_command "syncfs"
++_require_xfs_io_command "sendfile"
++_require_xfs_io_command "copy_range"
++_require_xfs_io_command "-T"
++_require_xfs_io_command "flink"
++_require_attrs
++_require_chown
++_require_mknod
++# These never sync
++_exclude_scratch_mount_option "volatile" "fsync=off"
++
++lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
++
++create_lower()
 +{
-+	if [ -z "$TMT_TEST_PIDFILE" ]; then
-+		_fatal "report format 'tmt' can only be used when xfstests is run as a tmt test"
-+	fi
-+	if ! command -v "$TMT_REPORT_RESULT_PROG" >/dev/null 2>&1; then
-+		_fatal "report format 'tmt' requires $TMT_REPORT_RESULT_PROG to be installed"
-+	fi
++	local f
++
++	# This leaves the base filesystem mounted
++	_scratch_mkfs >> $seqres.full 2>&1
++
++	mkdir -p $lowerdir/dir $lowerdir/rmdir $lowerdir/mvdir
++	for f in append truncate mmap chmod chown chown_append xattr link \
++		 rename remove dir/append rmdir/file mvdir/file; do
++		$XFS_IO_PROG -f -c "pwrite -S 0x6c 0 256k" $lowerdir/$f \
++			>> $seqres.full
++	done
++
++	# These were not written through the overlay, so it does not have to
++	# sync them.
++	$XFS_IO_PROG -c "syncfs" $OVL_BASE_SCRATCH_MNT
 +}
 +
-+# tmt subresult names have to be unique within a tmt test, so prefix each test
-+# name with its specific section.
-+_tmt_testcase_name()
++modify()
 +{
-+	local sect_name="$1"
-+	local test_name="$2"
++	local m=$SCRATCH_MNT
 +
-+	if [ $sect_name == '-no-sections-' ]; then
-+		echo "/$test_name"
++	# New files and directories
++	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 1m" $m/new >> $seqres.full
++	mkdir $m/newdir
++	$XFS_IO_PROG -f -c "pwrite -S 0x62 0 64k" $m/newdir/new >> $seqres.full
++	$XFS_IO_PROG -f -c "pwrite -S 0x63 0 64k" $m/dir/new >> $seqres.full
++	ln -s new $m/symlink
++	mkfifo $m/fifo
++
++	# Copy up, then change the data
++	$XFS_IO_PROG -c "pwrite -S 0x64 256k 64k" $m/append >> $seqres.full
++	$XFS_IO_PROG -c "pwrite -S 0x65 256k 64k" $m/dir/append >> $seqres.full
++	$XFS_IO_PROG -c "truncate 4k" $m/truncate
++
++	# Stores through a shared mapping, also after a syncfs, no msync
++	$XFS_IO_PROG -c "mmap -rw 0 256k" -c "mwrite -S 0x66 0 64k" \
++		-c "syncfs" -c "mwrite -S 0x67 64k 64k" $m/mmap >> $seqres.full
++
++	# The other ways to write data
++	$XFS_IO_PROG -f -c "sendfile -i $m/link 0 256k" $m/sendfile \
++		>> $seqres.full
++	$XFS_IO_PROG -f -c "copy_range -l 256k $m/link" $m/copy_range
++	$XFS_IO_PROG -T -c "pwrite -S 0x69 0 64k" -c "flink $m/tmpfile" $m \
++		>> $seqres.full
++
++	# Copy up, then change the metadata
++	chmod 640 $m/chmod
++	chown 1234:1234 $m/chown
++	$SETFATTR_PROG -n user.test -v value $m/xattr
++
++	# With metacopy=on the first one only copies up the metadata
++	chown 1234:1234 $m/chown_append
++	$XFS_IO_PROG -c "pwrite -S 0x6a 256k 64k" $m/chown_append \
++		>> $seqres.full
++
++	# Names
++	ln $m/link $m/link2
++	mv $m/rename $m/renamed
++	# Without redirect_dir=on mv gets EXDEV and copies the directory
++	mv $m/mvdir $m/mvdir2
++	rm $m/remove
++	rm -r $m/rmdir
++
++	# An overlay inode that nobody holds on to
++	$XFS_IO_PROG -f -c "pwrite -S 0x68 0 1m" $m/evicted >> $seqres.full
++	echo 2 > /proc/sys/vm/drop_caches
++}
++
++# No inode numbers, no timestamps, and no sizes and link counts of directories
++snapshot()
++{
++	local f
++
++	cd $SCRATCH_MNT
++	find . | LC_ALL=C sort | while read -r f; do
++		if [ -L "$f" ]; then
++			echo "$f $(stat -c '%F %u:%g' "$f") $(readlink "$f")"
++		elif [ -f "$f" ]; then
++			echo "$f $(stat -c '%F %a %u:%g %h %s' "$f")" \
++			     "$(md5sum < "$f")"
++		else
++			echo "$f $(stat -c '%F %a %u:%g' "$f")"
++		fi
++	done
++	_getfattr --absolute-names -n user.test xattr 2>&1
++	cd - > /dev/null
++}
++
++# <syncfs|umount> [mount options]
++do_test()
++{
++	local how=$1
++	shift
++	local label="$how${*:+ $*}"
++
++	echo "=== $label" >> $seqres.full
++
++	create_lower
++	if [ $# -eq 0 ]; then
++		_scratch_mount
++	elif ! _try_scratch_mount $* >> $seqres.full 2>&1; then
++		# Not every kernel knows every option
++		echo "cannot mount" >> $seqres.full
++		_unmount $OVL_BASE_SCRATCH_MNT
++		return
++	fi
++
++	modify
++	snapshot > $tmp.before
++
++	if [ $how = syncfs ]; then
++		$XFS_IO_PROG -c "syncfs" $SCRATCH_MNT
++		_scratch_shutdown | tee -a $seqres.full
++		_scratch_unmount
 +	else
-+		echo "/$sect_name/$test_name"
++		# Only the overlay, the base filesystem stays mounted
++		_unmount $SCRATCH_MNT
++		_scratch_shutdown | tee -a $seqres.full
++		_unmount $OVL_BASE_SCRATCH_MNT
 +	fi
++
++	_scratch_mount $*
++	snapshot > $tmp.after
++	cat $tmp.after >> $seqres.full
++	diff -u $tmp.before $tmp.after | sed -e "s/^/$label: /"
++	_scratch_unmount
 +}
 +
-+__tmt_log_append()
-+{
-+	local log="$1"
-+	local title="$2"
-+	local file="$3"
++for how in syncfs umount; do
++	do_test $how
++	for mode in relaxed on strict; do
++		do_test $how -o fsync=$mode
++	done
++	do_test $how -o redirect_dir=on,metacopy=on
++done
 +
-+	test -s "$file" || return 0
-+	echo "--- $title ---" >> "$log"
-+	cat "$file" | tr -dc '[:print:][:space:]' >> "$log"
-+	echo >> "$log"
-+}
-+
-+# tmt-report-result can attach a single log to a subresult and display that
-+# on its web interface. Gather whatever logs a specific test left behind
-+# so we can see it on the web interface instead of digging into the resulting
-+# artifacts. Do that only for failed / notrun tests as we don't need it if a test
-+# passed properly.
-+_tmt_make_testcase_log()
-+{
-+	local test_name="$1"
-+	local test_status="$2"
-+	local log="${REPORT_DIR}/${test_name}.tmt.log"
-+
-+	# $REPORT_DIR/<group> is created by check before the test is run
-+	rm -f "$log"
-+
-+	case $test_status in
-+	"notrun")
-+		__tmt_log_append "$log" "not run" "${REPORT_DIR}/${test_name}.notrun"
-+		;;
-+	"fail")
-+		local out_src="${SRC_DIR}/${test_name}.out"
-+		local outbad_file="${REPORT_DIR}/${test_name}.out.bad"
-+
-+		if [ -n "$_err_msg" ]; then
-+			echo "$_err_msg" >> "$log"
-+		fi
-+		if [ -s "$outbad_file" ]; then
-+			echo "--- output mismatch ---" >> "$log"
-+			$diff "$out_src" "$outbad_file" >> "$log"
-+		fi
-+		__tmt_log_append "$log" "hints" "${REPORT_DIR}/${test_name}.hints"
-+		__tmt_log_append "$log" "dmesg" "${REPORT_DIR}/${test_name}.dmesg"
-+		__tmt_log_append "$log" "mount failures" "${REPORT_DIR}/${test_name}.mountfail"
-+		__tmt_log_append "$log" "full output" "${REPORT_DIR}/${test_name}.full"
-+		;;
-+	esac
-+
-+	test -s "$log" && echo "$log"
-+	return 0
-+}
-+
-+_tmt_make_testcase_report()
-+{
-+	local sect_name="$1"
-+	local test_name="$2"
-+	local test_status="$3"
-+	local outcome
-+	local log
-+
-+	case $test_status in
-+	"pass")
-+		outcome="pass"
-+		;;
-+	"fail")
-+		outcome="fail"
-+		;;
-+	"notrun"|"list")
-+		outcome="skip"
-+		;;
-+	*)
-+		outcome="error"
-+		;;
-+	esac
-+
-+	log=`_tmt_make_testcase_log "$test_name" "$test_status"`
-+
-+	# tmt-report-result is chatty on stdout, which would interleave with
-+	# the test results printed by check.
-+	"$TMT_REPORT_RESULT_PROG" \
-+		"`_tmt_testcase_name "$sect_name" "$test_name"`" \
-+		"$outcome" ${log:+-o "$log"} >/dev/null ||
-+		echo "check: failed to report $test_name to tmt"
-+}
-+
-+# Only useful if using tmt locally, but keeps consistent with xunit implementation
-+_tmt_make_section_report()
-+{
-+	echo "tmt report: $TMT_TEST_DATA/tmt-report-results.yaml"
-+}
-+
- #  Common report generator entry points
- _make_section_report()
- {
-@@ -260,6 +377,9 @@ _make_section_report()
- 						   "$bad_count" "$notrun_count" \
- 						   "$sect_time"
- 			;;
-+		"tmt")
-+			_tmt_make_section_report
-+			;;
- 		*)
- 			_dump_err "format '$report' is not supported"
- 			;;
-@@ -279,6 +399,10 @@ _make_testcase_report()
- 			_xunit_make_testcase_report "$sect_name" "$test_seq" \
- 						    "$test_status" "$test_time" "$report"
- 			;;
-+		"tmt")
-+			_tmt_make_testcase_report "$sect_name" "$test_seq" \
-+						  "$test_status"
-+			;;
- 		*)
- 			_dump_err "report format '$report' is not supported"
- 			;;
-@@ -291,6 +415,9 @@ _assert_report_list() {
- 		case "$report" in
- 		"xunit"|"xunit-quiet")
- 			;;
-+		"tmt")
-+			_tmt_assert_env
-+			;;
- 		*)
- 			_fatal "report format '$report' is not supported"
- 			;;
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/overlay/118.out b/tests/overlay/118.out
+new file mode 100644
+index 00000000..3daed864
+--- /dev/null
++++ b/tests/overlay/118.out
+@@ -0,0 +1,2 @@
++QA output created by 118
++Silence is golden
 -- 
-2.56.0
+2.55.0
 
