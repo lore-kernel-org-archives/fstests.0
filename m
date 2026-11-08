@@ -1,110 +1,112 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=148.163.139.74
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
 	t=1794104392;
-	b=tDwAIK/v6xe/Er+kbXdSacaMjgH2uCUG7BqYPNL8Y/i815MGrYvTO/yY3IusibCanKsj
-	 5D0+DKvsXNEBvWTI8cX487Ax1W9cGTNJT0fWxiYi42gT+/j6rkXSKEeyqisV+aRYgF7a9
-	 3z8Fn7FKmcK5Y5B3jlwUX12DuYYll9HuQiUlYa55R5I8ZD1lnkBH2Bl8FLOcht4oWRUSC
-	 gZ0e5aWIoQiV1U8JuibScqGGHw/8oyKvpkzrpl7P1svBNc9XaYMfPJ5M/lmYD0Mie/+X1
-	 ZlsymYRQILMQSBgchinPPJdOmIbh2059ScUOHoDMxtNNIDjKFaZsTDa2ABHJCRebcaw==
+	b=S6SNgtOn7QMdbkLDrgVH7Cjqm/f5vkBO9iOCU2lPVygwn2cbyz+2N7ot2DGs2w50O2sO
+	 JYcJRNhIVW6kWXUr2CACBgbWT7H1dXZ8wlkx47J6YaSScTO+hRPQzV5smJZzf73TGTUAM
+	 s9s+FFhqBvfJgVxAXEE2V/93plLMKEHQqY4nlyD0xrM/CTWElS1EbdteeetKk9K7XtR76
+	 d0Yze6fymqLoI3Q5AmJ6AEab6XaynPj7U6D1/ULsHPxM6gm6uvrlo+2C/f+ayoIsA9f9x
+	 mKHujJg2BReFAV3Ik3B9jMpithpY9LY+r5bpvlbca6ObcCQBRMqreTcna3Tz45XkgoA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1794104392;
 	h=DMARC-Filter:Received:DKIM-Signature:Received:Received:
 	 DKIM-Signature:X-Google-DKIM-Signature:X-Gm-Message-State:X-Gm-Gg:
-	 X-Received:X-Received:Received:From:Subject:Date:Message-Id:
-	 MIME-Version:Content-Type:Content-Transfer-Encoding:X-B4-Tracking:
-	 X-Change-ID:To:Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:
+	 X-Received:X-Received:Received:From:Date:Subject:MIME-Version:
+	 Content-Type:Content-Transfer-Encoding:Message-Id:References:
+	 In-Reply-To:To:Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:
+	 X-Proofpoint-GUID:X-Proofpoint-ORIG-GUID:
 	 X-Proofpoint-Spam-Details-Enc:X-Authority-Analysis:
-	 X-Proofpoint-ORIG-GUID:X-Proofpoint-GUID:X-Proofpoint-Spam-Info:
-	 X-Proofpoint-Virus-Version:X-Proofpoint-Spam-Details;
-	bh=whgMGO08w0bti6oHmDssbLwFbA/tph+QoSDdsYvM5SQ=;
-	b=H34qoRAeTy70CKCQ1iKwWa/YtMDe2opRwjocrQj6SH5smPK672p+5RAanl6e6qK4W4hU
-	 7w/htaV2Qg72ClToq6xDeqHoI76abbScOBD9XNVW3rUD53RDI7VtN4rg1K4SqO889In8x
-	 Zq9Anlk+v01ejHbx7w7wG0A4jmHPbGUFAzGqbY7n08qyFwR3fubJXW4+JPw6TZsIFFagN
-	 O7b1P/AdqYSQbFV0B56YBLEXCxqjULAZmkNTYj7sabkx25Qzdw66GcRDUFdTcB2ZhHtvB
-	 oqIrwnulLn7Tbo3i5NOm1U59VZD1Q/5oPrI3hP/aCKbhOLcH8N/9klkwSfN9uY/nU/A==
+	 X-Proofpoint-Spam-Info:X-Proofpoint-Virus-Version:
+	 X-Proofpoint-Spam-Details;
+	bh=cCdrrxx7mhDNtuHXVTKYbLje1iTXY6HrNZ9671EV91E=;
+	b=Iu2DaBEAnNmJNMuLrfJ1yH5I6WBWh571ppnwsfH5vv48wKDwvjFZ7d8hL46FwVtKEzNn
+	 kW/TojPny3i8SaHqjzHMhU0HZXUtlNSFoTs4qF/hLpjRgsy4dYcDVLeHovGgOxFwFUcn4
+	 ByOVsRHFERXIdQdSk765C0UKUBAEFLUW3uAHdKnhpb5yQU7Og18Em+qYhI2I2S+phZnP0
+	 jnti5vffHYb8F4rI3LRRgNfg79SVITAMe8lVM/jfW9XqG5XgytIUYBoHmQiDqZltN/+OU
+	 1RaE5xYIKRrYlIxUOtU9NmCEsHq8RezgpzjhI2Tvhu8J6KkxdofEK4+lDyUVlVlHQMQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=columbia.edu;
 	spf=pass smtp.mailfrom=columbia.edu;
-	dkim=pass header.d=columbia.edu header.i=@columbia.edu header.a=rsa-sha256 header.s=pps01 header.b=TSHvCuHl;
-	dkim=pass header.d=columbia.edu header.i=@columbia.edu header.a=rsa-sha256 header.s=lionmail header.b=c2W59vAp;
+	dkim=pass header.d=columbia.edu header.i=@columbia.edu header.a=rsa-sha256 header.s=pps01 header.b=cL7EFWth;
+	dkim=pass header.d=columbia.edu header.i=@columbia.edu header.a=rsa-sha256 header.s=lionmail header.b=W0n9Wuhb;
 	arc=none smtp.remote-ip=148.163.139.74
 Received: from mx0b-00364e01.pphosted.com (mx0b-00364e01.pphosted.com [148.163.139.74])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2C0F9606A31A
-	for <fstests@vger.kernel.org>; Sun,  8 Nov 2026 02:19:50 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2C0F9606A31A
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3801C606A31F
+	for <fstests@vger.kernel.org>; Sun,  8 Nov 2026 02:19:51 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3801C606A31F
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=columbia.edu
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=columbia.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.a=rsa-sha256 header.s=pps01 header.b=TSHvCuHl;
-	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.a=rsa-sha256 header.s=lionmail header.b=c2W59vAp
-Received: from pps.filterd (m0167075.ppops.net [127.0.0.1])
-	by mx0b-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6A7NbIOQ1730580
-	for <fstests@vger.kernel.org>; Sat, 7 Nov 2026 21:19:43 -0500
+	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.a=rsa-sha256 header.s=pps01 header.b=cL7EFWth;
+	dkim=pass (2048-bit key) header.d=columbia.edu header.i=@columbia.edu header.a=rsa-sha256 header.s=lionmail header.b=W0n9Wuhb
+Received: from pps.filterd (m0167077.ppops.net [127.0.0.1])
+	by mx0b-00364e01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6A7NdWRl1411349
+	for <fstests@vger.kernel.org>; Sat, 7 Nov 2026 21:19:45 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=columbia.edu; h=
-	cc:content-transfer-encoding:content-type:date:from:message-id
-	:mime-version:subject:to; s=pps01; bh=whgMGO08w0bti6oHmDssbLwFbA
-	/tph+QoSDdsYvM5SQ=; b=TSHvCuHluZLbe+ARxX/LUHN9fXLeiN+Dn+3bv/W8/N
-	jkFc1Tcktu7NR91Ohrw/u/3263BeXycQ6Tp/i/A6SI+4CBG4lKx3igHjrPc0d/bu
-	N1uZInkHRxuWTnaXuDvoZoq9funBIhsMBnTVtxhhEdh2U9nkDv1QUb5HaxfQjCQO
-	sAJ9LPrWgYNbxXPCo1LiIp3dKENcrk8yNOp7VO4zxGICCBtM17MBI0w5B72xF7ku
-	wRenwNaClKmT9TvIYgC2qaIMQnjBNOa7j1DYdTUkPAJhrkJHtq+Wya2CCOLlDNhn
-	Wcl4Ujoz5Dy0pDALyd9luwkY9J4hhLU1ARouoWdNUVVg==
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=pps01; bh=cCdr
+	rxx7mhDNtuHXVTKYbLje1iTXY6HrNZ9671EV91E=; b=cL7EFWthlbV0AsCq1cXL
+	4XtPz2pXol1EcfsuAYG4BOE+jldqt6pWv3BjUgT6bo0Rg6YnhHo2LRRWyE16HPdJ
+	9fMcQNVowmgGUy/4gObjcLywe/PMT2e59+arLa0AvVz4JoA/z8UwHzIjMcGYQ7XZ
+	fe+Gl+LU+2hu2wamm+MMCzepY+TeE00LATBTfFJgCSBIY+C92tSborkbgudS5wLs
+	S1W/MF/W/fjm/aQsSKSHtNUpefLL1CJtmDyBMUxUUsDmMZ2iFiXsGp8DKPZL8nS2
+	zUA3rfa548R/VcTcjkXpLkOTm+39rO/zrEs70mjmv06W8siLtFYHIHyFQjSq0/k4
+	aw==
 Received: from mail-qt1-f200.google.com (mail-qt1-f200.google.com [209.85.160.200])
-	by mx0b-00364e01.pphosted.com (PPS) with ESMTPS id 4ht0ur3nb9-1
+	by mx0b-00364e01.pphosted.com (PPS) with ESMTPS id 4hsxev4074-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <fstests@vger.kernel.org>; Sat, 07 Nov 2026 21:19:43 -0500 (EST)
-Received: by mail-qt1-f200.google.com with SMTP id d75a77b69052e-534f3fe0236so4204841cf.2
-        for <fstests@vger.kernel.org>; Sat, 07 Nov 2026 18:19:43 -0800 (PST)
+	for <fstests@vger.kernel.org>; Sat, 07 Nov 2026 21:19:45 -0500 (EST)
+Received: by mail-qt1-f200.google.com with SMTP id d75a77b69052e-5337f26ee19so2182201cf.2
+        for <fstests@vger.kernel.org>; Sat, 07 Nov 2026 18:19:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=columbia.edu; s=lionmail; t=1794104383; x=1794709183; darn=vger.kernel.org;
-        h=cc:to:content-transfer-encoding:content-type:mime-version
-         :message-id:date:subject:from:from:to:cc:subject:date:message-id
-         :reply-to:content-type;
-        bh=whgMGO08w0bti6oHmDssbLwFbA/tph+QoSDdsYvM5SQ=;
-        b=c2W59vAp8vrzW4Kf8YZnsNQG0BQg0Yn2OhT5YPcbEe957YPvaq01bSF/DxAepzEHLr
-         L5Tvu6EePI9hrR/Thod0nK2tTLfUybTq4BbyUkJnJivDnWUKpn9VC17xFg75uzs4WZlh
-         0Y2oR9yfC9SZRrLWxERcT/wX1BSLISkg0qgYkmWVe+gaUqRgZ7YQOc3iYHJWJTIFFAaF
-         CdxyMlPdpiatHzjg2qCWAdQ4hx2KfZ/429jKKcAIQmEwY0aMCChoOoRbTqP5ssmmeVlF
-         aBuNbDDYJcjfs0ICjcDfAqRyLRZtmz/GTImry15cpjQiNrHOM0qBtsqAxsrCoBePhizF
-         PV1Q==
+        d=columbia.edu; s=lionmail; t=1794104385; x=1794709185; darn=vger.kernel.org;
+        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
+         :content-type:mime-version:subject:date:from:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=cCdrrxx7mhDNtuHXVTKYbLje1iTXY6HrNZ9671EV91E=;
+        b=W0n9WuhbZi+p1ustNkNv0hbTZRs13aOkEuclRc5Ot9rnIpf65Slaa+fjLUeS0VGrf7
+         bPdeEYZ/gSagRWEaY/aciIgHUpLynhGjjSzStj/fcMkzeOtfUuurR3WUaGFGYri91D8R
+         dRfmbZsvv/B0BJBYTC7b74aXGgFJmWDz76+DAo9dKXeDL5eWcHzjVLICmENCssJfSmsd
+         4C5QUx92Gh58diExoovAilavWBOtV37tKZeDsKvV39EwLM34lgaJ5dEeZ33GnkFR8xGO
+         J7JIyEviu5h9tJmugT/bQSFsnKzOPGNUqd+QjGKTPHSLRCiZPTbFSxkvor2Z+6/w94Hd
+         pbyQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794104383; x=1794709183;
-        h=cc:to:content-transfer-encoding:content-type:mime-version
-         :message-id:date:subject:from:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to:content-type;
-        bh=whgMGO08w0bti6oHmDssbLwFbA/tph+QoSDdsYvM5SQ=;
-        b=vA89JBhV43fzH1UAkLBFHEm9DJZ6A3sTbeB/TnKSaPmFHfHzihvzO45C+exv5di6P+
-         IUsXOq+kPZlFV2sCADKqO97WJZT92KUV1SWcagcNstZlL3W3quwhyB+iSVF7SRfThWXh
-         F8EPtKGqI8m9ofKFCA/PEJg8+JCUZGjJfNZ3Ty9M5TVOQf1X7G7WK2t/bmKNo7TbMnLt
-         GKXKQMQKPQqNtdpzSjYe/7ZSWkbndrpzfm22YL8EQ8YXTbfaqcEltnq7/G1FPeq21n4d
-         tg7I65BZ2oDyC/MMd7Bhdm1mEFpNRfeOMGTD0bWFrSxzRa6zyWyhxdvT1lYpgSahELBQ
-         y4zw==
-X-Gm-Message-State: APuU4Z/W5+KcligQsNE32+u4lgRn6EcsWFiPgGriXt93TzKlrBxd/prJ
-	Ias1An3eXPoAWUijWMbuURz/lCk7pYImachgJN6rrlZEd5TA7HhozDYh7nMbl71aegxRXK4b8TQ
-	2FyaLVhlQRFvXMOCELdMso0SbDDiXPQveh+waHTboLnOKXVGnrsTsczo=
-X-Gm-Gg: AYBFou2sIfi4zhFYTpiEMJPICZ729L3SrSUGUsbZCIWxN7wM3PYmGRUKXVQ3Ft/zJdG
-	BCXWLTVMP+2PUaUBfn8oJq0tOaNM0w5Cm1WLV3dHCOSxm0/lGuKPqNP5hpf5Z7Vz+x3i0x8Egxr
-	Z8osskgF91Cuthy2YXAuLYJzmW0L5Q1R0cLp1ASKMPjsOqd2wxtcQNkynC3S8zUBg5KUV4gszLs
-	PwRTdXnBwna5RGIJzHsTtLphXMZpntSUpUg6Xx/QxykjczRkxNGRHDFI+ouUx8FKNo5LnEYG94h
-	wsFO1qPVrh2HhZz77bWuDmvjqF2253cI8YcEeq75OlMheVNz/9h0tt53Ulm4cGy8xrNFNyA7qED
-	k6+aSrdJt8VeZy8PIOosu+YV+RD2lWD/liIZB3TCHRbO1LhKedpKBo7zWrw1QyBpjYUZDWKqGT0
-	Hrt989sf81/2qLu9ENQA==
-X-Received: by 2002:a05:622a:14d2:b0:536:8f5a:64a with SMTP id d75a77b69052e-552a604e7b7mr4343631cf.63.1794104383133;
-        Sat, 07 Nov 2026 18:19:43 -0800 (PST)
-X-Received: by 2002:a05:622a:14d2:b0:536:8f5a:64a with SMTP id d75a77b69052e-552a604e7b7mr4343381cf.63.1794104382729;
-        Sat, 07 Nov 2026 18:19:42 -0800 (PST)
+        d=1e100.net; s=20260707; t=1794104385; x=1794709185;
+        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
+         :content-type:mime-version:subject:date:from:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=cCdrrxx7mhDNtuHXVTKYbLje1iTXY6HrNZ9671EV91E=;
+        b=bF7oW/9pVaX5g1l1bri/rg+bUnhczp9fFZJggKcdjg0yFTxL2xEVfuwLQSgXhsCJbz
+         AZ1e6doSFmFKTntBaciL2mqVm0aHllla70xvvXFhkb70OPZTklASKrhsD0lboy1CW71r
+         nmx3yjLjg1ib96tBCdq5igQ3/FtMwgU/SWLgJ5RsyQO59mFbMXxV24b6+CJ4/F8TxqAH
+         QD36VtLa5SaoBlYnTG3FXoqtXx4j3jxKvNqBmGmR0afq4wuk94h46S1SuK57mG2PB5zS
+         rtY90vDJTXblRpuQS4RHtg70VA2cX6q07ZevF5PwbcH9OvkaXKXb9TH7b+i5mIWn5Ltq
+         BGBQ==
+X-Gm-Message-State: APuU4Z9V2N/MRAVgOVwdUPXPK7zMKLySO2eCmMCj+DZdjmDaWW5p0j+a
+	cVWy3SUX2KGvsNOQG1/QFbmJottG7ww+VVK8EW92WqKBH+j7PjjwYRs/2jbgf7Ubwgyj6ZT8HBU
+	Mdcxkw69D0KYpFQ9RANLvFPzzFs5T8kEt5ycub/KIaFbtji8/3ODzFlg=
+X-Gm-Gg: AYBFou2X8cltGL1BKN5R+6P2WjTPgGmbvhPNClzhzCSiwgktjxSFxT8hwgv6aEluxCM
+	djiTXQAEKJPqsrl98zsAx7O3sVFZHwU5TB0P/sF6p9F87AYIKEW42YW+BmXQyvASVld6kHN8HlE
+	+3M9HQmvk4MllxuilxvSljY5KTXiEodeAHyZBIU65qfqN7uh/aGYSZDTDe+rtA50a4bsjvHmMBG
+	vrnMeyrsYBqSoEzhUyMbVKpHgX3vIedwqwCEin2EtuINyagZ9EA5O88H0yD+HGG6YvmKpRQfff1
+	4YSLVioQOjdLRAEiN3iFzJTL4D7PSm5qzrNMSn8l2vNSStHpEm1BZcjXEXuBGd3EPRi0CUG/RNZ
+	8GXXgrOOgdN9fxox5jeOlxwH95DkyYqMFwPQ/uqivzIUNAKNjq38tdLAG1H/3MdYms4ME+wnZUo
+	+k7MKGWbRWzLTCHjbC1w==
+X-Received: by 2002:a05:622a:13ce:b0:534:d369:f398 with SMTP id d75a77b69052e-552a5a71827mr4424761cf.41.1794104384979;
+        Sat, 07 Nov 2026 18:19:44 -0800 (PST)
+X-Received: by 2002:a05:622a:13ce:b0:534:d369:f398 with SMTP id d75a77b69052e-552a5a71827mr4424611cf.41.1794104384617;
+        Sat, 07 Nov 2026 18:19:44 -0800 (PST)
 Received: from [127.0.1.1] (dyn-160-39-33-242.dyn.columbia.edu. [160.39.33.242])
-        by smtp.gmail.com with ESMTPSA id d75a77b69052e-55263e65c37sm7398731cf.11.2026.11.07.18.19.41
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-55263e65c37sm7398731cf.11.2026.11.07.18.19.43
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 07 Nov 2026 18:19:42 -0800 (PST)
+        Sat, 07 Nov 2026 18:19:44 -0800 (PST)
 From: Tal Zussman <tz2294@columbia.edu>
-Subject: [PATCH v2 0/3] fstests: test that RWF_DONTCACHE I/O drops its
- folios
-Date: Sat, 07 Nov 2026 21:19:38 -0500
-Message-Id: <20261107-dontcache-test-v2-0-7655bf08d6d1@columbia.edu>
+Date: Sat, 07 Nov 2026 21:19:40 -0500
+Subject: [PATCH v2 2/3] common/rc: pass -V 1 when probing pwrite and pread
+ -U
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -116,85 +118,92 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIADrc72oC/3WNyw6CMBBFf4XM2pq2CAgr/8OwmJZBxig1fRAN4
- d8FXLs8ybnnzhDIMwVoshk8TRzYjSvoQwZ2wPFGgruVQUtdKqkK0bkxWrQDiUghCkOlrE+Iea8
- lrKOXp57fe/Da/jgkcycbt8pmDByi85/9cVKb9zc+KSFFiVgV57yucqwv1j3S0zAeqUvQLsvyB
- QUlS2jBAAAA
-X-Change-ID: 20261015-dontcache-test-be6094aa3f20
+Message-Id: <20261107-dontcache-test-v2-2-7655bf08d6d1@columbia.edu>
+References: <20261107-dontcache-test-v2-0-7655bf08d6d1@columbia.edu>
+In-Reply-To: <20261107-dontcache-test-v2-0-7655bf08d6d1@columbia.edu>
 To: fstests@vger.kernel.org, Zorro Lang <zlang@kernel.org>
 Cc: Christoph Hellwig <hch@lst.de>, linux-ext4@vger.kernel.org,
         Jens Axboe <axboe@kernel.dk>, "Darrick J. Wong" <djwong@kernel.org>,
         Jan Kara <jack@suse.cz>, Brian Foster <bfoster@redhat.com>,
         Tal Zussman <tz2294@columbia.edu>
 X-Mailer: b4 0.17-dev
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1794104381; l=1340;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1794104381; l=1379;
  i=tz2294@columbia.edu; s=20250528; h=from:subject:message-id;
- bh=cUVzEdFJA8DVFpv8wyZ2e8aXWqSn/lSJpUmAg78NDT0=;
- b=i92OW7DNVG7bu7wfx+in3o/xG/FKWWFrwocolmMLSsQl6SxvzRiSyTnklpaLTIKEHiSeEAdMw
- 6UUNVBKlMTSC+muh0WcJY5Srmohd2TjPR80l7akK08UlEHgYuoWVEUq
+ bh=bl2XVOU514ZVTDOk9o3rGSu3PXlMZ7AH+3VsW9sOo0A=;
+ b=a7hotu4mJZ5ra8tG+YPWDnJoODG5oPGdJ5UucsopP1udghS7eYUZ/LI1R0SDgzY7LT7EHJhI7
+ 8UzAs+fHuq4CbWQkFWskHfgsBBsuQb0f51jbpbYGuIkyo5azxdGjkSj
 X-Developer-Key: i=tz2294@columbia.edu; a=ed25519;
  pk=BIj5KdACscEOyAC0oIkeZqLB3L94fzBnDccEooxeM5Y=
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTA4MDAwOCBTYWx0ZWRfX+ENDgrmKqyPk
- vIqkJ4jWrJsxJqrE+Ox4ufwZC29tPbVsRHWnTUHcNSsJWgvEqUCpyNrfZD4YuRV0eXgEEpYjGny
- MUZ+8+vZy9YS4oPBAUZEh/wyfJFyvj55gMr79CCYh/Asatjojs/dwSS9Vd4lttsh1f0ZuSSv9Nd
- 0gJp7xoSueqluNpnJQMgtPlfwauTfdDQFo5tBPuktLLfkPDMPfcedHqoeJ9r2z3I4MTXLKTDxUD
- YBK4FM5uqRMHgOH9HPeAYpkefErtHe44oTJI9H4BWIUw81LVkwxR8hhyH2/q9DGeahu+3SWQYwH
- y9QNeD3XmeSxO8G0r+QoHObX1gxwQLPUfize10dkn9TlcdY5H1xCP2DGaSGLlExbc83l8aEC22B
- tv8vYThCUEd5//Uxfs1ZFtT1VGxVuT7ioZV8ZlnWeditzqlmCNrrMvPBSVTA9qk9phqZPKwuRRK
- 8KUpE0Wr2qE8XKqPOYg==
-X-Authority-Analysis: v=2.4 cv=K/a3jCWI c=1 sm=1 tr=0 ts=6aefdc3f cx=c_pps
+X-Proofpoint-GUID: 4zBSp77LhZfUpBkzv0wJK4lhs-BDBwdM
+X-Proofpoint-ORIG-GUID: 4zBSp77LhZfUpBkzv0wJK4lhs-BDBwdM
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYxMTA4MDAwOCBTYWx0ZWRfX5Qxwo7AaUk2s
+ UXe5apQj4ZvU9WjC+xqR7+oWo2hv6ekBg/GddjznpCZCjw7NScZt/b3dg6EWUpudejixUz1pZW3
+ pLo0TV7d61ogHjMvVPP8SqY7w/1KyVnO61wR2Bc/ieOZ25nyn+/LPBqaa6YMJ2wt6IBgMd9nYgc
+ A9aaSqEQ9xOFo9zBSdMGQUk4gj+tmLLV2p1fSjWVffu5/HiwVTxFe50g34fI0yhywBGsLzLxYwG
+ QXaaSXzj8FVAr4FKercGn+6YE2C2wLZVFjWgHS+ikPDG/GSYswYrfW4ChLJoecf68oRF+HNFLFS
+ At010g/DSiZSvaMUu9DFAD/unMYbkZnhT/L11sy3g7/D6GhcJvRGNk3B5gtXjtgNLZMFVMApIH/
+ 2QFAoX1OK+ZnJy4ryBZF07gE4FxkNtnG0oDtc7NdkBt9Ga8hr6Q87Vp4nYF1dRGBLgk08bVCj8I
+ DdfGOEorG7Zm1CAZNGg==
+X-Authority-Analysis: v=2.4 cv=BIYmP1QG c=1 sm=1 tr=0 ts=6aefdc41 cx=c_pps
  a=JbAStetqSzwMeJznSMzCyw==:117 a=GaPK54s0Se3oFqK5NkZy0g==:17
  a=IkcTkHD0fZMA:10 a=zJRp6_cAMcgA:10 a=x7bEGLp0ZPQA:10 a=A0y_DWxS2BwA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=HpS3TJQ9O3Ob1ozEcmik:22
- a=VwQbUJbxAAAA:8 a=bC-a23v3AAAA:8 a=Ty6xO_GhrNNmo2U9QisA:9 a=QEXdDO2ut3YA:10
- a=uxP6HrT_eTzRwkO_Te1X:22 a=FO4_E8m0qiDe52t0p3_H:22
-X-Proofpoint-ORIG-GUID: -otw3ad7XKNhtCie5a2MZDeYYxScV5o4
-X-Proofpoint-GUID: -otw3ad7XKNhtCie5a2MZDeYYxScV5o4
-X-Proofpoint-Spam-Info: AW1haW4tMjYxMTA4MDAwOCBTYWx0ZWRfX7QSRWTr2OJ3o
- rFqoUfBKJW+cT8mX1S76x8VYMHMSoIriBZ2KyZdGiJ85uB74SKAHHQpoC8uv/1QELNoyQOr5p7x
- rFSy0v95BfN+1xbNdAsB2Ucuauj/tldDuKYX1aJ+uxM6DQ5rjx+5
+ a=VkNPw1HP01LnGYTKEx00:22 a=Da8U98TiO7q1upZEImrf:22 a=QOCMdifcju39GKoXhKua:22
+ a=20KFwNOVAAAA:8 a=DjKFJ4GTv1yLP1aJ184A:9 a=QEXdDO2ut3YA:10
+ a=uxP6HrT_eTzRwkO_Te1X:22
+X-Proofpoint-Spam-Info: AW1haW4tMjYxMTA4MDAwOCBTYWx0ZWRfX524b16pHyQR6
+ 7G/IUmR9oOpiqPmx9H2o0SVz0OJFQrpsuBCiW9uekC242CVvrgXN9OnXqKquSKTnM+uObssoh01
+ WoT7MiRfNGJsf6KLKew6Lp722o8PXiLBlG4/cg/oND84E0sL2EXg
 X-Proofpoint-Virus-Version: vendor=nai engine=6900 definitions=11959
  signatures=596817
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- bulkscore=10 lowpriorityscore=10 clxscore=1015 priorityscore=1501 spamscore=0
- impostorscore=10 adultscore=0 phishscore=0 suspectscore=0 malwarescore=0
+ spamscore=0 impostorscore=10 priorityscore=1501 bulkscore=10 malwarescore=0
+ clxscore=1015 lowpriorityscore=10 adultscore=0 phishscore=0 suspectscore=0
  classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
  reason=mlx scancount=1 engine=8.22.0-2611040001 definitions=main-2611080008
 
-Add a test for RWF_DONTCACHE, as suggested by Christoph. [1]
+xfs_io refuses pwritev2() and preadv2() flags unless -V is given, so
+probing -U without it always fails. Pass -V 1 for -U in both the pwrite
+and pread cases.
 
-generic/810 writes and reads a 1M file with and without RWF_DONTCACHE
-and checks with mincore how much of it is still cached after each step.
-On ext4 without the fix, the dontcache overwrite leaves the whole file
-cached.
-
-The first two patches make _require_xfs_io_command able to probe
-"pwrite -U" and "pread -U".
-
-[1] https://lore.kernel.org/linux-ext4/20261012-ext4-dontcache-complete-in-task-v1-1-6ac801557041@columbia.edu/
-
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+Signed-off-by: Tal Zussman <tz2294@columbia.edu>
 ---
-Changes in v2:
-- generic/810: fold the writeback wait into report_cached() with an
-  optional delay, and give the plain cases a short delay, per Brian
-  Foster.
-- Link to v1: https://patch.msgid.link/20261015-dontcache-test-v1-0-6aa7583973a9@columbia.edu
+ common/rc | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
 
----
-Tal Zussman (3):
-      common/rc: probe pread options with a real read
-      common/rc: pass -V 1 when probing pwrite and pread -U
-      generic/810: check that RWF_DONTCACHE I/O drops its folios
+diff --git a/common/rc b/common/rc
+index 945c9e42..a0239034 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3105,6 +3105,10 @@ _require_xfs_io_command()
+ 			opts+=" -d"
+ 			pwrite_opts+="-V 1 -b $write_size"
+ 		fi
++		# -U (RWF_DONTCACHE) only works with vectored I/O writes
++		if [ "$param" == "-U" ]; then
++			pwrite_opts+="-V 1 -b $write_size"
++		fi
+ 		if [ "$param" == "-A" ]; then
+ 			opts+=" -d"
+ 			# try to write the minimum supported atomic write size
+@@ -3121,9 +3125,14 @@ _require_xfs_io_command()
+ 		param_checked="$pwrite_opts $param"
+ 		;;
+ 	"pread")
++		# -U (RWF_DONTCACHE) only works with vectored I/O reads
++		local pread_opts=" "
++		if [ "$param" == "-U" ]; then
++			pread_opts+="-V 1 -b 4k"
++		fi
+ 		testio=`$XFS_IO_PROG -f -c "pwrite 0 4k" \
+-			-c "pread $param 0 4k" $testfile 2>&1`
+-		param_checked="$param"
++			-c "pread $pread_opts $param 0 4k" $testfile 2>&1`
++		param_checked="$pread_opts $param"
+ 		;;
+ 	"scrub"|"repair")
+ 		test -z "$param" && param="probe"
 
- common/rc             | 14 ++++++++++
- tests/generic/810     | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/810.out | 11 ++++++++
- 3 files changed, 102 insertions(+)
----
-base-commit: d07dca72d2455f4ba8c660ad4c008541ccccb707
-change-id: 20261015-dontcache-test-be6094aa3f20
-
-Best regards,
---  
-Tal Zussman <tz2294@columbia.edu>
+-- 
+2.39.5
 
