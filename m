@@ -1,117 +1,88 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=103.168.172.154
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.217.51
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794087591;
-	b=gjXwAZx6jTuqG4TZ0InlztgQLS90phq4+qRY0jffidd4yKYn1vtBhGq2AFiYftuN1Bp6
-	 wOKzQIsXISD7OO+4bEoxoU2h8OIhCbzL2BGGCIAxdm0Bm9bZYm3STqhrXTJsfur+wRuLg
-	 dSe9xq0SmgB0Uem0Vcb0yJYZ8tNweX1QV0UEFA/z04HCrSpEwepEOeR+LdfhvOU4fz7m9
-	 1/7H/8ibyQCe+W7oibPr+4zcs3x2+pFbIowJkdCs+x2Ch5St3ukB278KnN9HTQNtGtGLo
-	 z37hiiSyH/betO9QA3OPVZ843bzrSmACU59DiQlOhem5ANhFM/myRA9G05jNiLwtMfw==
+	t=1794101982;
+	b=21k5h/R37xCZgBmsydma7mJng5d3GnRCytfegDLa4ehHL2GUkW4P8D8R/eP+BkUOg23l
+	 YcClbFjLK60y/KufIxXDmEbnXKfnId6dNRbhN9tnUN0JEhrYNAt8dJa61gSL8XrPcM/UZ
+	 AZzq7yy+6/AFu2B+kqAEPaQCdgpuEwkoIbYFppiZQMUDKkYWu5n2S9rBQ66Cds8SpLD9X
+	 +rqlFk+jfxZ/R7ocqi0Rg5bAEEFrUpoyZZYKItomc9EzDiO2K9GWIHk7x12YqH01u4X04
+	 E4V/e62J9iSGQ+xkgl2OUK8CujGQ9W94CiuvORCBS7IecBiAWtH7yRiwd9m5wws/ECw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794087591;
-	h=DMARC-Filter:Received:Received:DKIM-Signature:DKIM-Signature:
-	 X-DKIM2-Info:DKIM2-Signature:X-DKIM2-Info:Message-Instance:
-	 X-ME-Sender:X-ME-Received:X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:
-	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=SujSmBmBUnH7YMY+XVgj4WjL+rZygLQJ+Fwv8jab90E=;
-	b=E2w3yEkHkraZcrhCJn+S9qwLGsCg6z5x4dCem63bIaOeCMI4sHNhGmaMFgl+X8c64jid
-	 wNB9LIp15muxFOJWOb4Ffg4XnpI6M+LmqfkonOTZzQjiVQ6VkpQM6wMi+JM7634LE4/nv
-	 qZEd/ncZ9QBT4orz0/1ZLYoMY9z+cFJ3WLgpsatpw2Fm8Dhh3pbc6sUDrmuLVkjxBiwgf
-	 6oGfZe6snovtcEU4FydkWNBCci2f835PA46b0s4Q8Iz5SjDSXXiJHO2F3eSk3alDw78R0
-	 GolSasAxb/UrLPZ7v9om2l9J8tOTVaFGMvAxZCiji8cx+vVvVXsuLXtxVD4irOHPW1g==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794101982;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
+	 Date:Message-ID:X-Mailer:MIME-Version:Content-Transfer-Encoding;
+	bh=ZLeTlITFAOFZPhutPAGIGwQCM2NSiyP5wkq6aWFFYoY=;
+	b=Z55Ep+RNLaVMXWd4pI7ztaXCLiTuqnGE5jJGtOtR6/zgZBPy9D28LT01xiZTSN6bMkzt
+	 Dls6E5q40lVoWMakTOZ+Kj3iSWxFtbhhue2oooOQ7O8kDKjLOr3SIgnai/Q8xGMP+O/fk
+	 5TMlPz649ZDYrz3rPBGdOWzlBMoAzK4Ki0QSufCCv1tH6efxY8vAlo4ofMq3hMbQV6R/H
+	 gz2eRLzgpSRJ1JZchmngqypzTwl1ONAaAqMrRVmhiNw/sSghMBMPIzuFnTwq4V2llqSUS
+	 heQsM6AuoFT2KF54fsZhM0h1r6kVsb+BFHFCWT2QQf3Ft1wBddB1dMrO7OBvgBrhDaw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=scrivano.org;
-	spf=pass smtp.mailfrom=scrivano.org;
-	dkim=pass header.d=scrivano.org header.i=@scrivano.org header.a=rsa-sha256 header.s=fm3 header.b=KRWeN+YP;
-	dkim=pass header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm3 header.b=emm8ejTw;
-	arc=none smtp.remote-ip=103.168.172.154
-Received: from fhigh-a3-smtp.messagingengine.com (fhigh-a3-smtp.messagingengine.com [103.168.172.154])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	dmarc=pass header.from=gmail.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=oAO4Ppow;
+	arc=none smtp.remote-ip=209.85.217.51
+Received: from mail-vs1-f51.google.com (mail-vs1-f51.google.com [209.85.217.51])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 16831606A32C
-	for <fstests@vger.kernel.org>; Sat,  7 Nov 2026 21:39:50 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 16831606A32C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=scrivano.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=scrivano.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BDA0606A326
+	for <fstests@vger.kernel.org>; Sun,  8 Nov 2026 01:39:41 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 7BDA0606A326
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=scrivano.org header.i=@scrivano.org header.a=rsa-sha256 header.s=fm3 header.b=KRWeN+YP;
-	dkim=pass (2048-bit key, unprotected) header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm3 header.b=emm8ejTw
-Received: from phl-compute-01.internal (phl-compute-01.internal [10.202.2.41])
-	by mailfhigh.phl.internal (Postfix) with ESMTP id 302FF1400089
-	for <fstests@vger.kernel.org>; Sat,  7 Nov 2026 16:39:50 -0500 (EST)
-Received: from phl-frontend-04 ([10.202.2.163])
-  by phl-compute-01.internal (MEProxy); Sat, 07 Nov 2026 16:39:50 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=scrivano.org; h=
-	cc:cc:content-transfer-encoding:content-type:date:date:from:from
-	:in-reply-to:message-id:mime-version:reply-to:subject:subject:to
-	:to; s=fm3; t=1794087590; x=1794173990; bh=SujSmBmBUnH7YMY+XVgj4
-	WjL+rZygLQJ+Fwv8jab90E=; b=KRWeN+YP/IEWIOAPeJncmvsGmOJKYqOIGSVOz
-	0gAxZ8DBMR0fNPrenxob5/S+HujuV1j5jcKrpWEzh3WXN15Omo68v+sWffgpYkv7
-	tEmm5NVHeHjn/R5++4uOMKFrbDGIjd4Z/aOKwDW0zFISg6f/c8t3HXOGklR4iTEB
-	uzJcuGdkmL4KQ0uyfUJXiUa+3TGc6QJZFwN4kxnHDbM5n5Fj6VPP2BdAgqRd9wHZ
-	RwLM9HVBr9aTeJX1hc3GJurDCEEmohZYn/dP6P6iHXiLx9zXnaqyR6bF0u9oJiqX
-	4HBykcKsTpi932dVZr3pqFM9xRXta3dy3tnIul6ZGz6hNQMtA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:date:date:feedback-id:feedback-id:from:from
-	:in-reply-to:message-id:mime-version:reply-to:subject:subject:to
-	:to:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=
-	1794087590; x=1794173990; bh=SujSmBmBUnH7YMY+XVgj4WjL+rZygLQJ+Fw
-	v8jab90E=; b=emm8ejTw/r7BK0B6TKVbKS0yv4xfo9rEJDDB4K++3yIARyqETPF
-	U3w2WFnDq0V2M2OSxl+vQzEDhT1JJIB8RGDmAFmiH3pPxDGLRD5yRJvlri6LFYyp
-	JbkYt+iGsRLCTDXeWem/F/XKNcQvnWELEZ6YgxThYF7x7628qaW1lvybdTORcpKl
-	EUf6R+6XtvN14DcJqBQOMxCT0lcXBWQUVh8QNsZBHmp4ZGZosc6c6xAHitahb/pA
-	RRt1P3aelh4USigLuLVEnc2VkDrT/zcUDNqih/5eogPUH0f/H5ieLA1F0i6mmnt8
-	c/SM6m253u7EBhV5uMpDvJMslTtvDErpz1A==
-X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-09;
-	repo=github.com/dkim2wg/interop; date=2026-11-03; sw=lmtpprox;
-	action=sign d=scrivano.org a=rsa-sha256;
-DKIM2-Signature: i=1; m=1; t=1794087590; d=scrivano.org;
-	mf=PGdpdXNlcHBlQHNjcml2YW5vLm9yZz4=;
-	rt=PGZzdGVzdHNAdmdlci5rZXJuZWwub3JnPg==;
-	s=fm3:rsa-sha256:ESsuGXvZXI6GsL8ezpSnQdTZIrrNbihzr9g5iPIp9KHvSys
-	1Xtf/II1KnOnpwFGPwpD3+8OExOcNNlJb9HR3lSH4+wCwD1BimpeSoIiuH51hbU/
-	SRnYbecO09M0/HsRiQ5cIr3oISspDbQLwFyxeN/LH33XIyNbZXroQit2FmCvbTHZ
-	AIud8PRcHfBUCA6iOG3Csf4ao8Cg0fsG/1ZP96NgYUKf0lWGoPg8oOV/zRuWZtYg
-	kW+w7EvmfPkMRgBiwtWixJQat8E4HN/eDi0nKoZ9Y1QJWJlVGAp6HWj7AZ0nmgii
-	NsddMZgBCqM9EWq+dRpo2IcWXcMSVTbfjvkd48Q==;
-X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-09;
-	repo=github.com/dkim2wg/interop; date=2026-11-03; sw=lmtpprox;
-	action=mi-m=1; hc=9;
-	hn=cc,content-transfer-encoding,date,feedback-id,from,
-	message-id,mime-version,subject,to;
-Message-Instance: m=1; h=sha256:L5byLwGQfeU9kNepEPMOZmiKQf6QeLInfhsdmTnQHbM=:geD1EVrJ3mh6gvK7R48AGiJf2a4RU674OYrgB2EC8zs=;
-X-ME-Sender: <xms:pprvajqLOhQoxzYZdMtRTFBzytaWa2iwdqtCiOLyWBKEGuULGHBQNg>
-    <xme:pprvalbnRcTwRfo0l9p2P-BLKoCVEoIvmO6MUlRSNZnHyW48eU5s5q_aScFvp118Y
-    Rd5l5NYDi9QhNJKzymLdYJHJGrxqZyhxLojVCdA4qDF-6wZ0sJtBQQ>
-X-ME-Received: <xmr:pprvajQ_RKHinFhbdzTnWp3SEokD7a1-r_wVvgXgZ6rnoXqFTtOJIghkAmqiYQaX292dlVJq1Fq5iRtghnLZFI_vW4RD>
-X-ME-Proxy-Cause: dmFkZTEHem0WXMo8pIDKDe5KCHuBRcG2/KY6ep9CjXPrfCrKCPHhttE+YBYzOW4c19NQL5
-    Kuwrjnm4wSXWz5jsPQoDNIz0uLynoav50OIILTxAotHC/30hUeWuUAoDpMtm3ohz9jryF5
-    HuWZvZYPeKF8UhjXS2hWR7uZD7fXLcVDtGZZEX+9jBx6CFbjCEUR/bFdxJoV3PEqsHq4Au
-    0BoA1eVAz6x5jzqnRewm4icQ8sMl+PPyXp7nrjTSrL0AsuTb5E8mpncXA1QW73zSgsfY8H
-    kBnMPebm+EoP1OeXhhbT016A0gdYTYf6ObAj3W0t6vXnfnN7tgu1gDrICjaddrHRC3HZHY
-    0vAgPpUyUlFSq5VnedtTG055wv43n57qOBwSNWy8eqS/RM+pxwqCQoeeEvjnUYIDbRTNOJ
-    uHN7oyY0++VYyzN3rvJFvr7Gb8v8in3TL3OLNGx8n8XVCJqF4BNHT2umMMIT1aWp6rMiju
-    HPoHSzsMSqO1u+bkatVjR3rJuz3Q5P+tv5i/+XmXPODKOJQbYH/+5O/qG1sJkubnJKacuN
-    5eX0HsYPwT/vehg8Vagg0Ato7mYGT5Cf95hpcA5Dfz8qMPJM1D5Xfs4MH8e4mt/AalOQz+
-    KU2PHV2IMb7g8ZFFEWVN3+Bj9Js53Ug/XSuOXXXlznN/UPyKhC9MImZA8Nzg
-X-ME-Proxy: <xmx:pprvak4iWWGnUGiMpWWPR5BnE7uXw-Y0u0RJZEHhsZxIit__UdIqoA>
-    <xmx:pprvagy5gDkhOkwJm4idgjL3Qu2IJqK5idNfGw5sIbTbV22KzuU9qA>
-    <xmx:pprvarRSToQuN5XM-aFPqzrtCRsJDfpF_FCIRMknDy45vKn75Tp2wg>
-    <xmx:pprvanX8gHcJeVTKyAz11-eog7S6eboWeKlRbsH0551aaYMuQWOuVQ>
-    <xmx:pprvavYN-y31Y41dS2vSc6HHfeIvEzL7z9My5oU0jiBhvJwrWpKY-r-J>
-Feedback-ID: i8e6e4897:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Sat,
- 7 Nov 2026 16:39:49 -0500 (EST)
-From: Giuseppe Scrivano <giuseppe@scrivano.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=oAO4Ppow
+Received: by mail-vs1-f51.google.com with SMTP id ada2fe7eead31-7a6e560f580so109122137.1
+        for <fstests@vger.kernel.org>; Sat, 07 Nov 2026 17:39:41 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20260707; t=1794101980; x=1794706780; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=ZLeTlITFAOFZPhutPAGIGwQCM2NSiyP5wkq6aWFFYoY=;
+        b=oAO4Ppowjo8eUlF76N/DZJN1tgfjfQ+1MNJri4U0iKNeio2NArPZBfDPAvVw8DCQ7c
+         25vWS1cc+XvUst6SBK4T4jdV4SIZMVS99h7xY2DvETcX541RWsF1EBO8Bq7G3s32RBC5
+         CPn0Hm+b3LZPL/ehEmNch1HNN+wGHiQx8dyHjMUfr89/vu4LfqL6ew9Y8RpV/skb2+JA
+         7uUqdUdZ4c4uGoWxKmKEybnV9VB3p4NLQ6bK5LZb2gDfSBs1fJfD947yQUUkTF2aEtQI
+         mgBFJgBFRw9zi6OI+bsBwaQbBlRPNiDzO+K7RqBRocWrcbzt8l748MuF+ovpE/hKTno0
+         5m4A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1794101980; x=1794706780;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=ZLeTlITFAOFZPhutPAGIGwQCM2NSiyP5wkq6aWFFYoY=;
+        b=Jxf4A7XIxTPJD4NbuYd3mxAjVymplsaf6pLL9q0YQUVF6uNwAjueLX5d1DvnHdKH6U
+         7LrUUmwTI9Mc1osBgqR4g+Q4Nn1I7fzZsQdfiCqIxGlo+si9rIXGhvVzvIdBhd53ESX1
+         Gp/C2fP0cf9MRIGpAIICkBQ6ZFVlppEZXzFytEp7s+XJgWfuGP4esIZAFCUCJhnLvbA/
+         FzCoXN88t7IMrTvYxLl8RpZmVHbUe9njz7hCAKjPKlGw7WIg7ZAL17Djfgjx32o1GThk
+         08ujvqqRD3KuXzxl7bv9D5fou8cQIVbfvUS/BgN6mRi+tj1O6AKghUzeg9yEoIf0P9kc
+         lP/Q==
+X-Gm-Message-State: APuU4Z/hxqY/dLWOieOU90vmjN/Cq9vT0xnb5CayOOjarf9dfQdkNV7p
+	OPx+buj9TQtwpq80X3z7aksvKeeaQ8WdOV+ORG5a+Oybv0qV7ByU08vHOOmLiQ==
+X-Gm-Gg: AYBFou1DA0TxT37r7ZAzdiqDP/JtBtXbIgFHWSRMbtz3IsW1FpOs9YxZVjkTNoudhRG
+	qcTE+l+2qD43Jly423XrBLo18LoR1ZxmPq49rxHLkBuDQlySntuZ2zSKaFQxjaHWJ2KpjJvU7PX
+	YuQowRJsHhgH5cBB16F7R/95w9WYfoLkZ0xrgXOibwZk4DDJXSAIv/NyColcW/yrWsWqI+TCgjS
+	CdohtxfJ7eMXDUYhg7IfYR2dAmJ7bgmg8NSBV4R/K2SHT/fyY9rvzcw/8EoOQmPE5xTAdXM0kk3
+	8vahb3o9UASr3Y/CRCvk5FdOQDq5tyTrQAJn4bKnHwZxi/Ouy/hL7HAtr6KTmdGVCvuMQMio8Vf
+	yDUBsX2GO3nMttrJ5AP5T5Xlp/18MqNREda0chri/X72OJTxdSnTK7IDfgstSUUCKNcue5gjD3I
+	OMPcRrW5Gh9f9c7f+SpOYUeh149S4JfOP8vYFN9O8H19YB4p1dMr8gMQcJuf55gIKtjih4tWLRm
+	VVZ5yxPGkrhvQyCZfkBCHLrW5jijYVEUSfJR1q4bgJdTn9HdY0O/Fa/UPlkftyxHyBj8131+D+G
+	11qk88elifiOPuHHCZpO64JyLSlGviBWIqmt
+X-Received: by 2002:a05:6102:38cd:b0:7b4:879c:bb8d with SMTP id ada2fe7eead31-7d2db23ff6amr110544137.37.1794101980344;
+        Sat, 07 Nov 2026 17:39:40 -0800 (PST)
+Received: from diego.local ([186.151.96.233])
+        by smtp.gmail.com with ESMTPSA id ada2fe7eead31-7d2db605322sm501538137.7.2026.11.07.17.39.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 07 Nov 2026 17:39:39 -0800 (PST)
+From: Diego Rivera <diego.rivera.cr@gmail.com>
 To: fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org,
-	amir73il@gmail.com
-Subject: [PATCH fstests] overlay: add a test for redirect_dir=followdata
-Date: Sat,  7 Nov 2026 22:39:17 +0100
-Message-ID: <20261107213943.1765902-1-giuseppe@scrivano.org>
-X-Mailer: git-send-email 2.56.0
+Cc: zlang@kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: [PATCH fstests] xfs: test xfsdump dump levels above 9
+Date: Sat,  7 Nov 2026 19:39:27 -0600
+Message-ID: <20261108013927.3185548-1-diego.rivera.cr@gmail.com>
+X-Mailer: git-send-email 2.43.0
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -123,269 +94,214 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Test that data-only layers select redirect_dir=followdata, which follows
-redirects from lower to lowerdata from any lower layer, with userxattr
-and trusted xattrs, and that redirect_dir=nofollow is refused with
-data-only layers.
+xfsdump used to accept dump levels 0-9 only. Add a test, cribbed from
+xfs/064, that dumps a chain of incrementals across that old limit and
+up to the new maximum of 254, checks that each one is based on the
+previous dump, that a level past the maximum is rejected, that the
+inventory records and filters the real levels (with 255 still meaning
+"any level" for xfsdump -I level=), and that a cumulative restore of
+the whole chain reproduces the original tree.
 
-Also test following an absolute redirect past a lower layer that has the
-parent directory of the target, which failed with EIO before the fix
-"ovl: do not always clear absolute_redirect".
+Add _require_xfsdump_level to common/dump, so the test is skipped with
+an xfsdump that does not support the levels it needs. It relies on
+xfsdump naming its maximum level when it rejects an out of range -l,
+which every version does.
 
-Signed-off-by: Giuseppe Scrivano <giuseppe@scrivano.org>
+Drafted with an AI coding assistant (Claude); details in the cover
+letter of the xfsdump series linked below.
+
+Signed-off-by: Diego Rivera <diego.rivera.cr@gmail.com>
 ---
- common/overlay        |  15 ++++
- tests/overlay/090     | 158 ++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/090.out |  49 +++++++++++++
- 3 files changed, 222 insertions(+)
- create mode 100755 tests/overlay/090
- create mode 100644 tests/overlay/090.out
 
-diff --git a/common/overlay b/common/overlay
-index 8e89d6e4..382960c3 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -286,6 +286,21 @@ _require_scratch_overlay_datadir_without_metacopy()
- 
+Notes:
+    Needs the xfsdump series at
+    https://lore.kernel.org/linux-xfs/20261108012410.3156325-1-diego.rivera.cr@gmail.com/
+    xfs/842 is skipped with released xfsdump.
+
+ common/dump       | 17 ++++++++++
+ tests/xfs/842     | 83 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/842.out | 52 +++++++++++++++++++++++++++++
+ 3 files changed, 152 insertions(+)
+ create mode 100755 tests/xfs/842
+ create mode 100644 tests/xfs/842.out
+
+diff --git a/common/dump b/common/dump
+index 09859006..4d240685 100644
+--- a/common/dump
++++ b/common/dump
+@@ -80,6 +80,23 @@ _require_legacy_v2_format()
+     _notrun "xfsrestore -K option required"
  }
  
-+# Check kernel support for the "redirect_dir=followdata" mount option
-+_require_scratch_overlay_redirect_followdata()
++#
++# Require xfsdump to accept dump levels up to and including $1.
++# xfsdump rejects an out of range -l before doing anything else, and
++# names the highest level it supports when it does.
++#
++_require_xfsdump_level()
 +{
-+	local lowerdir="$OVL_BASE_SCRATCH_MNT/$OVL_UPPER"
-+	local datadir="$OVL_BASE_SCRATCH_MNT/$OVL_LOWER"
++    local want="$1"
++    local max=""
 +
-+	_scratch_mkfs > /dev/null 2>&1
-+	_overlay_scratch_mount_opts \
-+		-o"lowerdir+=$lowerdir,datadir+=$datadir" \
-+		-o"userxattr,redirect_dir=followdata" > /dev/null 2>&1 || \
-+		_notrun "overlay redirect_dir=followdata not supported on ${SCRATCH_DEV}"
-+
-+	_scratch_unmount
++    max=`$XFSDUMP_PROG -JF -l 999999 -f /dev/null 2>&1 |
++	sed -n -e 's/.*-l argument must be between 0 and \([0-9]*\).*/\1/p'`
++    [ -n "$max" ] || _notrun "cannot determine xfsdump maximum dump level"
++    [ "$max" -ge "$want" ] || \
++	_notrun "xfsdump dump level $want required (supports 0-$max)"
 +}
 +
- 
- # Helper function to check underlying dirs of overlay filesystem
- _overlay_fsck_dirs()
-diff --git a/tests/overlay/090 b/tests/overlay/090
+ #
+ # do a remote/local mt
+ #
+diff --git a/tests/xfs/842 b/tests/xfs/842
 new file mode 100755
-index 00000000..18e3d1f5
+index 00000000..462665dc
 --- /dev/null
-+++ b/tests/overlay/090
-@@ -0,0 +1,158 @@
++++ b/tests/xfs/842
+@@ -0,0 +1,83 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Giuseppe Scrivano.  All Rights Reserved.
++# Copyright (c) 2026 Diego Rivera.  All Rights Reserved.
 +#
-+# FS QA Test 090
++# FS QA Test No. 842
 +#
-+# Test the redirect_dir=followdata mount option.
-+#
-+# Data-only layers select redirect_dir=followdata, which follows redirects
-+# from any lower layer to a data-only layer, and cannot be used with
-+# redirect_dir=nofollow.
-+#
-+# Also test following an absolute redirect past a lower layer that has the
-+# parent directory of the redirect target, with metacopy=on.
++# Test multilevel dumps and cumulative restores at dump levels above 9, up
++# to the maximum of 254, and that a level beyond that is rejected.
++# This procedure is cribbed from:
++#     xfs/064: test multilevel dump and restores with hardlinks
 +#
 +. ./common/preamble
-+_begin_fstest auto quick metacopy redirect verity attr
++_begin_fstest dump auto
++
++# Override the default cleanup function.
++_cleanup()
++{
++	_cleanup_dump
++	cd /
++	rm -f $tmp.*
++}
 +
 +# Import common functions.
 +. ./common/filter
-+. ./common/attr
-+. ./common/verity
++. ./common/dump
 +
-+# We use non-default scratch underlying overlay dirs, we need to check
-+# them explicitly after test.
-+_require_scratch_nocheck
-+_require_attrs user
-+_require_attrs trusted
-+_require_scratch_overlay_redirect_followdata
-+_require_scratch_overlay_verity
-+_require_scratch_overlay_features redirect_dir metacopy
-+_require_scratch_overlay_lowerdata_layers
++_require_scratch
++_require_xfsdump_level 254
 +
-+data=$OVL_BASE_SCRATCH_MNT/data
-+l1=$OVL_BASE_SCRATCH_MNT/lower1
-+l2=$OVL_BASE_SCRATCH_MNT/lower2
-+l3=$OVL_BASE_SCRATCH_MNT/lower3
-+upper=$OVL_BASE_SCRATCH_MNT/upper
-+work=$OVL_BASE_SCRATCH_MNT/work
-+layers="$l3:$l2:$l1::$data"
++_scratch_mkfs_xfs >>$seqres.full
++_scratch_mount
 +
-+# Make a metacopy file <file> with the redirect <redirect> and the optional
-+# metacopy xattr value <metacopy> (default: no fs-verity digest), for both
-+# userxattr and trusted xattr mounts
-+make_stub()
-+{
-+	local file=$1 redirect=$2 metacopy=$3 x
++_create_dumpdir_hardlinks 3 >>$seqres.full
 +
-+	touch $file
-+	for x in user.overlay. ${OVL_XATTR_METACOPY%metacopy}; do
-+		$SETFATTR_PROG -n ${x}metacopy ${metacopy:+-v $metacopy} $file
-+		$SETFATTR_PROG -n ${x}redirect -v $redirect $file
-+	done
-+	truncate -s 4 $file
-+}
++# Cross the old limit of 9, then go up to the maximum. Each dump is at a
++# higher level than the one before it, so each is based on the previous one.
++levels="0 1 9 10 11 99 253 254"
 +
-+# Mount the layers $layers with the options <opts>, print redirect_dir=followdata
-+# if the mount shows it and <opts> has userxattr or redirect_dir (otherwise it
-+# depends on the kernel config), and the content of each of the following files,
-+# or the error reading it
-+check()
-+{
-+	local opts=$1 f
++echo "Do the incremental dumps"
++for i in $levels; do
++	if [ $i -gt 0 ]; then
++		sleep 2
++		_modify_level $i
++	fi
 +
-+	shift
-+	echo "== $opts"
-+	_overlay_scratch_mount_dirs "$layers" $upper $work -o $opts
-+	case $opts in
-+	*userxattr*|*redirect_dir=*)
-+		_fs_options $OVL_BASE_SCRATCH_MNT | grep -o redirect_dir=followdata
-+		;;
-+	esac
-+	for f; do
-+		echo "$f: $(cat $SCRATCH_MNT/$f 2>&1 | sed 's/^cat: .*: //')"
-+	done
-+	_unmount $SCRATCH_MNT
-+}
++	_stable_fs
++	sleep 2
 +
-+# Mounting the layers $layers with the options <opts> must fail
-+check_fail()
-+{
-+	local opts=$1
-+
-+	echo "== $opts"
-+	_overlay_scratch_mount_dirs "$layers" $upper $work -o $opts \
-+		>> $seqres.full 2>&1 && echo "mount succeeded" && \
-+		_unmount $SCRATCH_MNT
-+}
-+
-+_scratch_mkfs
-+mkdir -p $data/base $l1/base $l2/base $l3 $upper $work
-+echo -n "data" > $data/base/file
-+_fsv_enable $data/base/file
-+digest=$(_fsv_measure $data/base/file)
-+
-+make_stub $l1/s1 /base/file
-+make_stub $l2/s2 /base/file
-+make_stub $l3/s3 /base/file
-+# The redirect target in a lower layer below s3, which is not looked up
-+echo -n "lowr" > $l2/base/file
-+# Redirects that are not followed: relative, directory, upper
-+echo -n "lowr" > $l2/reltarget
-+make_stub $l3/rel reltarget
-+mkdir $l3/dir
-+$SETFATTR_PROG -n user.overlay.redirect -v /base $l3/dir
-+$SETFATTR_PROG -n $OVL_XATTR_REDIRECT -v /base $l3/dir
-+make_stub $upper/up /base/file
-+# fs-verity digest of a metacopy file in a middle layer: right and wrong
-+make_stub $l2/vok /base/file 0x00240001${digest#sha256:}
-+make_stub $l2/vbad /base/file "0x00240001$(printf '%064d' 0)"
-+
-+# followdata is selected by default with userxattr and a data-only layer
-+check userxattr s1 s2 s3
-+check userxattr,redirect_dir=followdata s1 s2 s3 rel dir up
-+# a data-only layer cannot be used without following redirects
-+check_fail userxattr,redirect_dir=nofollow
-+check_fail userxattr,redirect_dir=off
-+echo "(no data-only layer)"
-+layers="$l3:$l2:$l1" check userxattr
-+check userxattr,redirect_dir=followdata,verity=require vok vbad
-+
-+check metacopy=off s1 s2 s3
-+check redirect_dir=followdata s1 s2 s3 rel dir up
-+check redirect_dir=follow,metacopy=off s1 s2 s3
-+check redirect_dir=on,metacopy=off s1 s2 s3
-+check_fail redirect_dir=nofollow
-+echo "(no data-only layer)"
-+layers="$l3:$l2:$l1" check redirect_dir=nofollow
-+
-+# An explicit option requires a data-only layer and conflicts with metacopy=on
-+_overlay_scratch_mount_dirs "$l3:$l2:$l1" $upper $work \
-+	-o userxattr,redirect_dir=followdata >> $seqres.full 2>&1 && \
-+	echo "mount without a data-only layer succeeded"
-+_overlay_scratch_mount_dirs "$layers" $upper $work \
-+	-o redirect_dir=followdata,metacopy=on >> $seqres.full 2>&1 && \
-+	echo "mount with metacopy=on succeeded"
-+
-+# The directory "/base" in a lower layer without a redirect must not make the
-+# lookup forget that the redirect of the metacopy file is absolute.
-+echo "== metacopy=on,redirect_dir=follow"
-+_scratch_mkfs
-+mkdir -p $data/base $l1 $l2
-+echo -n "data" > $data/base/file
-+touch $l1/file
-+$SETFATTR_PROG -n $OVL_XATTR_METACOPY $l1/file
-+$SETFATTR_PROG -n $OVL_XATTR_REDIRECT -v /base/file $l1/file
-+truncate -s 4 $l1/file
-+for f in "" base base/file; do
-+	[ "$f" = base ] && mkdir $l2/base
-+	[ "$f" = base/file ] && echo -n "lowr" > $l2/base/file
-+	_overlay_scratch_mount_dirs "$l1:$l2::$data" - - \
-+		-o ro,redirect_dir=follow,metacopy=on
-+	echo "lower2 /$f: $(cat $SCRATCH_MNT/file 2>&1 | sed 's/^cat: .*: //')"
-+	_unmount $SCRATCH_MNT
++	echo "********* level $i ***********" >>$seqres.full
++	_do_dump_file -f $tmp.df.level$i -l $i | \
++		grep -E '^xfsdump: (level|Dump Status)'
 +done
 +
++echo "Dump at a level beyond the maximum"
++$XFSDUMP_PROG -JF -l 255 -f /dev/null $SCRATCH_MNT 2>&1 | \
++	tee -a $seqres.full | \
++	sed -n -e 's/^.*\(-l argument must be\)/\1/p'
++
++echo "Levels recorded in the inventory"
++$XFSDUMP_PROG -I depth=2 | tee -a $seqres.full | \
++	$AWK_PROG '/level:/ { l = l (l == "" ? "" : " ") $2 } END { print l }'
++echo "Inventory sessions at level 254"
++$XFSDUMP_PROG -I depth=2,level=254 | \
++	$AWK_PROG '/level:/ { l = l (l == "" ? "" : " ") $2 } END { print l }'
++echo "Inventory sessions at level 255 (any level)"
++$XFSDUMP_PROG -I depth=2,level=255 | \
++	$AWK_PROG '/level:/ { l = l (l == "" ? "" : " ") $2 } END { print l }'
++
++echo "Do the cumulative restores"
++_prepare_restore_dir
++for i in $levels; do
++	echo "restoring from df.level$i"
++	_do_restore_file_cum -f $tmp.df.level$i | \
++		grep -E '^xfsrestore: (level|Restore Status)'
++done
++
++echo "Compare the restored tree with the original"
++diff -r $dump_dir $restore_dir/$dump_sdir >>$seqres.full 2>&1 || \
++	echo "restored tree differs from the original"
++
 +# success, all done
-+_exit 0
-diff --git a/tests/overlay/090.out b/tests/overlay/090.out
++status=0
++exit
+diff --git a/tests/xfs/842.out b/tests/xfs/842.out
 new file mode 100644
-index 00000000..e5f28463
+index 00000000..2b4bea03
 --- /dev/null
-+++ b/tests/overlay/090.out
-@@ -0,0 +1,49 @@
-+QA output created by 090
-+== userxattr
-+redirect_dir=followdata
-+s1: data
-+s2: data
-+s3: data
-+== userxattr,redirect_dir=followdata
-+redirect_dir=followdata
-+s1: data
-+s2: data
-+s3: data
-+rel: Operation not permitted
-+dir: Operation not permitted
-+up: Operation not permitted
-+== userxattr,redirect_dir=nofollow
-+== userxattr,redirect_dir=off
-+(no data-only layer)
-+== userxattr
-+== userxattr,redirect_dir=followdata,verity=require
-+redirect_dir=followdata
-+vok: data
-+vbad: Input/output error
-+== metacopy=off
-+s1: data
-+s2: data
-+s3: data
-+== redirect_dir=followdata
-+redirect_dir=followdata
-+s1: data
-+s2: data
-+s3: data
-+rel: Operation not permitted
-+dir: Operation not permitted
-+up: Operation not permitted
-+== redirect_dir=follow,metacopy=off
-+s1: data
-+s2: data
-+s3: data
-+== redirect_dir=on,metacopy=off
-+s1: data
-+s2: data
-+s3: data
-+== redirect_dir=nofollow
-+(no data-only layer)
-+== redirect_dir=nofollow
-+== metacopy=on,redirect_dir=follow
-+lower2 /: data
-+lower2 /base: data
-+lower2 /base/file: lowr
++++ b/tests/xfs/842.out
+@@ -0,0 +1,52 @@
++QA output created by 842
++Do the incremental dumps
++xfsdump: level 0 dump of HOSTNAME:SCRATCH_MNT
++xfsdump: Dump Status: SUCCESS
++xfsdump: level 1 incremental dump of HOSTNAME:SCRATCH_MNT based on level 0 dump begun DATE
++xfsdump: Dump Status: SUCCESS
++xfsdump: level 9 incremental dump of HOSTNAME:SCRATCH_MNT based on level 1 dump begun DATE
++xfsdump: Dump Status: SUCCESS
++xfsdump: level 10 incremental dump of HOSTNAME:SCRATCH_MNT based on level 9 dump begun DATE
++xfsdump: Dump Status: SUCCESS
++xfsdump: level 11 incremental dump of HOSTNAME:SCRATCH_MNT based on level 10 dump begun DATE
++xfsdump: Dump Status: SUCCESS
++xfsdump: level 99 incremental dump of HOSTNAME:SCRATCH_MNT based on level 11 dump begun DATE
++xfsdump: Dump Status: SUCCESS
++xfsdump: level 253 incremental dump of HOSTNAME:SCRATCH_MNT based on level 99 dump begun DATE
++xfsdump: Dump Status: SUCCESS
++xfsdump: level 254 incremental dump of HOSTNAME:SCRATCH_MNT based on level 253 dump begun DATE
++xfsdump: Dump Status: SUCCESS
++Dump at a level beyond the maximum
++-l argument must be between 0 and 254
++Levels recorded in the inventory
++0 1 9 10 11 99 253 254
++Inventory sessions at level 254
++254
++Inventory sessions at level 255 (any level)
++0 1 9 10 11 99 253 254
++Do the cumulative restores
++restoring from df.level0
++xfsrestore: level: 0
++xfsrestore: Restore Status: SUCCESS
++restoring from df.level1
++xfsrestore: level: 1
++xfsrestore: Restore Status: SUCCESS
++restoring from df.level9
++xfsrestore: level: 9
++xfsrestore: Restore Status: SUCCESS
++restoring from df.level10
++xfsrestore: level: 10
++xfsrestore: Restore Status: SUCCESS
++restoring from df.level11
++xfsrestore: level: 11
++xfsrestore: Restore Status: SUCCESS
++restoring from df.level99
++xfsrestore: level: 99
++xfsrestore: Restore Status: SUCCESS
++restoring from df.level253
++xfsrestore: level: 253
++xfsrestore: Restore Status: SUCCESS
++restoring from df.level254
++xfsrestore: level: 254
++xfsrestore: Restore Status: SUCCESS
++Compare the restored tree with the original
+
+base-commit: d07dca72d2455f4ba8c660ad4c008541ccccb707
 -- 
-2.56.0
+2.43.0
 
