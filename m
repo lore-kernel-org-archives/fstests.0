@@ -1,100 +1,106 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.44
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794225008;
-	b=c7M+QhGhF0uiJ6lMqg/ikugvsPwR9BGFU8wqyBm4e6ffiCM/izymIuvQdVnL3l8/UIda
-	 pFj62tTJL5g7gCDebT7+xZ9IEZp5WoYaYhYmOCgur5C13VL6YMUG3MJePjFyiLsjzF8h9
-	 AAiZuwDmZoPjhWsHJ0sCA54x09tbvjdRIflttyoeFO5zyxBs9GDXVeB97/H7FlMB0ex39
-	 CUWk0zPRxv8EahuckYqEsb13IiXGQmvvFRdpCJ8hE5z0EucxCLndJxJ4XziEEcSJYGf2c
-	 hzG4O9QqWMbJsP4CkcBUqWJnTje1ZT3+luKRCbFsmO2lnBXOE4/HvZj3VkmxaIITPkQ==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794225008;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:MIME-Version:References:
-	 In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:Cc:
-	 Content-Type:Content-Transfer-Encoding;
-	bh=dUXJbPkbPQbxqnKJ8y0qnmrfPGLpFP/HxY2nsE4CeoY=;
-	b=M+qo+EjKYmFyXcAqJCmbkOxo7ikK9oJHjP4tZtAnPun+N5Zb/bGVUPnPxHXfeyogQiCG
-	 GjJ7XCwzqnyc3FcP/8Vi1mTPjA2rnnHfvjLZoFPKkJT8tBIPOEAr9xRiiIYUpOfg7S15Q
-	 uyoyI41N4pjKACs/o71QdMlfxmlOPNkZrbYKOPD6qlc1p0WCDlp1gCE1E5dWt/wFU3itG
-	 yOBFcg5CwQ7wVvPZkmMrfqDT3fYRGVPIYZ5YN4ORldTCowG2tEoIRJYAwYHsV/b2STy3A
-	 /XN6IOOpMulizaN3+bFfudaiikx5s1KBqeDjpdOV4pkiEuCDmv4SDROeJhLBoaMNHKg==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Ly7TFV1W;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.44
-Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com [209.85.208.44])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=195.135.223.130
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1794229690;
+	b=TUKG0Hx4zzk9FOyUw7Gg72GX7GEwu8eW4hjRmYPCTRQV4+QPMptIxeJSr1P+kve13ipy
+	 KLGJ6Kqsufg3Y00aHp6b2fkbw6+95rmrMz9W2sVkLuZLfbq93IPa3z5k1LmoiU2b5IVc5
+	 KA0nop8uug4spYEiRYGwwgwto8JWr3SFpWquu/OlNmRmR3aMNvFUyKeDMQeHXIWLRghtA
+	 m11WYxk0xjTcUkCDAOC8QqkxbZmnM+i3f9d3m8epbSjuNqqnUUScT3h8H1sJOOwjr+dhG
+	 xOm/y6ZmC/Ay3smSeD56V2NY01vgxOZtBfva2MQnunpMulunkdGsneY/FEI3e7YSSiQ==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794229690;
+	h=DMARC-Filter:Received:DKIM-Signature:DKIM-Signature:DKIM-Signature:
+	 DKIM-Signature:Received:Received:Received:Date:From:To:Cc:Subject:
+	 Message-ID:References:MIME-Version:Content-Type:Content-Disposition:
+	 In-Reply-To:X-Spamd-Result:X-Spam-Score:X-Spam-Level:X-Spam-Flag;
+	bh=zAwiO5k3OPBsYbF4B77nSbIf14d/o8yXU5UEbi4oX84=;
+	b=32i4k1hAYBJiIaiO5gsjfiehO4GLp9OARojuhCSobGAWbqcWz4kkPpQwLjEbx/6LNDQP
+	 ZzW0qVv9aCU2p1UwPw+YFVb0UzjM8CaPJjS9vj8DdiIjjEsrFg3kKolC9wWkF2/olyWOb
+	 oBtbbcmVpRiQMvwT8S1J+YKgR6LTARq7YXd4C+H2rPue8SeEG20EjlqNh4b718krCcLkv
+	 ox1qou15/5Zo3LkemRN44lBa+zprApMRKMb8a2K+cEzz2tf7hOpAtnpcMVdbRhuR34apR
+	 otx8Ak1fhmpo3kShPEXk3EFm7RuXtfQ2eLXFXzBWAK9ZZ1VMrYmpmeIymvgspHzMGSw==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=none header.from=suse.cz;
+	spf=pass smtp.mailfrom=suse.cz;
+	dkim=pass header.d=suse.cz header.i=@suse.cz header.a=rsa-sha256 header.s=susede2_rsa header.b=U+ReDomn;
+	dkim=pass header.d=suse.cz header.i=@suse.cz header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=OtHQ+k7Q;
+	dkim=pass header.d=suse.cz header.i=@suse.cz header.a=rsa-sha256 header.s=susede2_rsa header.b=IaiHbX0J;
+	dkim=neutral header.d=suse.cz header.i=@suse.cz header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=vZ420DqW;
+	arc=none smtp.remote-ip=195.135.223.130
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CAC0606A334
-	for <fstests@vger.kernel.org>; Mon,  9 Nov 2026 11:50:08 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4CAC0606A334
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 93730606A31C;
+	Mon,  9 Nov 2026 13:08:09 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 93730606A31C
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Ly7TFV1W
-Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-6b566cf56c1so949831a12.2
-        for <fstests@vger.kernel.org>; Mon, 09 Nov 2026 03:50:08 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1794225007; cv=none;
-        d=google.com; s=arc-20260327;
-        b=UupY8wCxvSg0UEskOHYCOcDjwTjl5x3k60YGdmRmICoXoueKo1ANQYe/CFtxg7HN3f
-         17nNzTypZDMzI1vk4igATBLA3YSKbjlmMAsuqjbQ81b840ht0OZw6hCeFScFt2BRZGrG
-         cpvIqXafw1/sRXIHh9UDj7UQfpwuQiQdEERBJr1YNDCOYLBhvWPMkYGpxfouUQbkuPgf
-         hxPR0ShT5cM+JEDcWIeGfhkJV3vDVaF65Iu844ctUMOBIKw7jQzfFz3BsWx9AedZzgt6
-         0UdahVexl0i27fjdms39YSGBAAMqHy1JdZEsaNDUykUMztgQijPECoXTpEXkzJuhX+a1
-         Kb4w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=dUXJbPkbPQbxqnKJ8y0qnmrfPGLpFP/HxY2nsE4CeoY=;
-        fh=KwMEtdkmyVjNwGs2Qh1Hxc3ZiVL7IU7E5hZcRIv0Vmg=;
-        b=dXAt5tNjp1flB2u6byPFE2B2c09hSKY2RWzyH0hYhWTrBRdk+Dz926nDo6uTHqb4XG
-         sAL3QsM7R+p7uyIvrG7FijgOSLDT7FCLSzNSD71KEi2lOGV4ZjPLmpjI/HOQ7xyf9EcP
-         BgctrPNMRTZjamPKPF7BLZoVFbT+K4+1eRqGsXhLJuex4UeUJLmlxUTSPwNtcYK/uYYu
-         tczoshAvcgYf1aTqLXAxuGabnMkITIND2GVwJBrysxTBDrwthVue1stlKnBiSeVLbpr6
-         AlL7rijkV/H1op1DzQ1grxOLtwXMR4bvRQcJjZR3j7Q8U45tNivmwr55MDOJeBlK5JbJ
-         afMQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1794225007; x=1794829807; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=dUXJbPkbPQbxqnKJ8y0qnmrfPGLpFP/HxY2nsE4CeoY=;
-        b=Ly7TFV1WCO4oStUtHoBcWLJYrwr5cwsv6OZDWPQ/yHoZ4m69aYMO/Ue2yamef+l68v
-         JTsFpIVVmYYC+Ii7s1+Qc/97yINgfv4wMSKE8zDOyZwQDzWgNGunn1+AaWq7w1xs0Tac
-         nSGEr1sf6Um8WPwFX6yUref5SYpO/2hRI9sDuVZ7ryZAWqxwPfElBoVrDtUD671eOlwE
-         Ov0NXQE7FH/jghjZwrG0y2WoHz1vtj7KESXRMOuuoax7lo6zN1fSpzxFFuZLUQbOUBLh
-         Ie//IsDMhfsi+Fr8jKdo2DKW5ljuV2J2fzzl4WiNsBlL1DmHBa3rbfzV2X/QNQIKC9Kg
-         /HhA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794225007; x=1794829807;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=dUXJbPkbPQbxqnKJ8y0qnmrfPGLpFP/HxY2nsE4CeoY=;
-        b=G7sxLgE7z18tm2fTkfUMh2m4ggaw3/mChOpghmtGtppe3TrmLLxKtM81zDebA3OGBy
-         8qGyKaoV5PGW4JCZwbbGOR4yO3MOWx0JvMl5LWJIxi/wnKeJw9Ov37phjLcMn3gQvKUa
-         X9ZHZ66akpzpyDalB9ZQ6feVhHb5Ik5nve//wkhx/XNEMPXx1Z13m3lcN+XD0h4+Gxo3
-         TfgVQ++tYmHxnzQ6Wu1JesCAfvTv0d0psGIpuT3En6RXDKXkGQpJUM9YSYuVyY03sg+g
-         U3aQju3HEwIlf7krmX0C+gRLSJvCM7YZI2FExuYNQtP34D/7Yk8dgovntvnoLURXYVcs
-         Xcjg==
-X-Gm-Message-State: APuU4Z++gse/nioTO+YgVAUQJfdZJRLbg1oS+FoMPs8L4vn+4DTSbfbR
-	mfKHNUWadYkvECFkxwW0UI7tlybdnnavVmC0e5F2++Ec0+CHAlpvtiAYwGfKc6mG1v5inKM0nFP
-	8xoFzv3N4JCt4odAK3+Orq6ilY5GgIUGkmNK2Kyo=
-X-Gm-Gg: AYBFou2ayPJtj6LmHteDb1jVfZofcfIdiJuCZz5sBf5lx/RXbnIDTRUJmITuw/p17/G
-	XbEnlyySEbup+qdswq8EY8aaQk7agkOOGKwv/uTior6KXPlnkRUpxtSzlsok17/kf2e7cxzx8MA
-	36/G8x/usgPv3YP7vtMOdS3RvqgMvMJ4QdR4OMB7DjGHaA8/ke9PSMVS2waghn5t4wrgsmr+Cll
-	4FFtBJGMvvV5NehBshourB5BGa8wb16uhb8HiakyJRCHMmje2/4vhjbrvgqKh1KYO2MCQODiUOd
-	f0czSC5qm7JWeXAYjE1uaW3ZjxpFxk34ii089R99/bP+9YeXwtDkzNskLvFsUZtykOgxnGCDfdc
-	tyE2EhEnl8a+C0y56E7ZAMHw/BJqfwNSlQzOEcD6T3IFeADAqnhWeKO7GTIktP04/xF67raQHKO
-	J1LIZr0U50sMvDK1o=
-X-Received: by 2002:a05:6402:2116:b0:6b5:911a:f4be with SMTP id
- 4fb4d7f45d1cf-6b7223f91e1mr2252630a12.13.1794225006497; Mon, 09 Nov 2026
- 03:50:06 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.a=rsa-sha256 header.s=susede2_rsa header.b=U+ReDomn;
+	dkim=pass header.d=suse.cz header.i=@suse.cz header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=OtHQ+k7Q;
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.a=rsa-sha256 header.s=susede2_rsa header.b=IaiHbX0J;
+	dkim=neutral header.d=suse.cz header.i=@suse.cz header.a=ed25519-sha256 header.s=susede2_ed25519 header.b=vZ420DqW
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 6035321FA6;
+	Mon,  9 Nov 2026 13:08:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1794229687; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=zAwiO5k3OPBsYbF4B77nSbIf14d/o8yXU5UEbi4oX84=;
+	b=U+ReDomnDFv8aAmF1o1ZYRi8oRPvfWehA1KbI/CdZHIFdwo7Duf343roa6sRdo8wHMbZYt
+	uEo7JXae+JufecKGmhfQXfkTzTZhzXA31JWegn0dICtVGIOIgMbQu4y/tkIo/VOeriJFAg
+	OOsY8EPSZRBJryScAFG2CZpzySY7RWY=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1794229687;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=zAwiO5k3OPBsYbF4B77nSbIf14d/o8yXU5UEbi4oX84=;
+	b=OtHQ+k7QBV8ZSLjDJQR9E3zvK2ukAPdCsHeqKkkOlQjQGDFzXkc+qjb86l1S9U3re5MBwN
+	rA9N/T0wgrfpipBQ==
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1794229686; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=zAwiO5k3OPBsYbF4B77nSbIf14d/o8yXU5UEbi4oX84=;
+	b=IaiHbX0JZ4ni1iy/evfx3GZMYt8U97nlARFUPFK639PvgLHF894q3axwmdtT78vaf/K2iA
+	nJh0Ucos0Q4VIP26KA40IYo5otto+6AS38o3bkO5muyGsxEyvNJcHK/uKzcEFc1xBYVo0r
+	cdWT9uPwsQEKoO21i+pGUk2X/4P2bYg=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1794229686;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=zAwiO5k3OPBsYbF4B77nSbIf14d/o8yXU5UEbi4oX84=;
+	b=vZ420DqWsvhLj+HzBbi8A/s9qYu7stWr00jS9+kikIgpDlpe7eN8Z9FxKwoEAPs3bDMTOp
+	XxHy882ZjZ9/S7Bw==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 163F313302;
+	Mon,  9 Nov 2026 13:08:06 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id e0QQN7XF8WqFFAAAD6G6ig
+	(envelope-from <jack@suse.cz>); Mon, 09 Nov 2026 13:08:06 +0000
+Received: by quack.suse.cz (Postfix, from userid 1000)
+	id 931E922013; Mon, 09 Nov 2026 14:08:05 +0100 (CET)
+Date: Mon, 9 Nov 2026 14:08:05 +0100
+From: Jan Kara <jack@suse.cz>
+To: Sahaj Chaudhari <sahaj123.sc@gmail.com>
+Cc: fstests@vger.kernel.org, Zorro Lang <zlang@kernel.org>, 
+	Jan Kara <jack@suse.cz>, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v2] ext4: test reserved GID block allocation
+Message-ID: <wicb5d6bpnqo2vhodhocekneqflqsw5fh45polocrejjcvxtpu@7qtxcbjkvldn>
+References: <20261012112109.3363168-1-sahaj123.sc@gmail.com>
+ <20261107193050.330685-1-sahaj123.sc@gmail.com>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -104,262 +110,169 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261107213943.1765902-1-giuseppe@scrivano.org>
-In-Reply-To: <20261107213943.1765902-1-giuseppe@scrivano.org>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 9 Nov 2026 12:49:54 +0100
-X-Gm-Features: AclHuK_-gij5Sey83fEjiKFLIVqziqeoiL41T17fc3I4PhkdpIK24T1LXyLPRTU
-Message-ID: <CAOQ4uxicSe4Fk2twHoQUKQNz5BNGiDDnz-b-kVBON__M7rwUMw@mail.gmail.com>
-Subject: Re: [PATCH fstests] overlay: add a test for redirect_dir=followdata
-To: Giuseppe Scrivano <giuseppe@scrivano.org>
-Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20261107193050.330685-1-sahaj123.sc@gmail.com>
+X-Spamd-Result: default: False [-11.30 / 50.00];
+	SUSE_INTERNAL_BYPASS(-9.00)[];
+	BAYES_HAM(-3.00)[100.00%];
+	SUSPICIOUS_RECIPS(1.50)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_RHS_NOT_FQDN(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com];
+	MIME_TRACE(0.00)[0:+];
+	MISSING_XM_UA(0.00)[];
+	TO_DN_SOME(0.00)[];
+	TAGGED_RCPT(0.00)[];
+	RCVD_COUNT_THREE(0.00)[3];
+	RCPT_COUNT_FIVE(0.00)[5];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	FREEMAIL_TO(0.00)[gmail.com];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	RCVD_TLS_LAST(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.cz:email,suse.com:email]
+X-Spam-Score: -11.30
+X-Spam-Level: 
+X-Spam-Flag: NO
 
-On Sat, Nov 7, 2026 at 10:39=E2=80=AFPM Giuseppe Scrivano <giuseppe@scrivan=
-o.org> wrote:
->
-> Test that data-only layers select redirect_dir=3Dfollowdata, which follow=
-s
-> redirects from lower to lowerdata from any lower layer, with userxattr
-> and trusted xattrs, and that redirect_dir=3Dnofollow is refused with
-> data-only layers.
->
-> Also test following an absolute redirect past a lower layer that has the
-> parent directory of the target, which failed with EIO before the fix
-> "ovl: do not always clear absolute_redirect".
->
-> Signed-off-by: Giuseppe Scrivano <giuseppe@scrivano.org>
+On Sun 08-11-26 01:00:50, Sahaj Chaudhari wrote:
+> Create a small ext4 filesystem with a nonzero reserved block pool and a
+> reserved GID stored in the superblock. Fill ordinary free space as an
+> unprivileged user outside that group, verify that another allocation is
+> denied, then verify that the same user can allocate a block with the
+> reserved group as its primary and only supplementary group.
+> 
+> This exercises loading s_resgid from the superblock rather than overriding
+> it with a resgid mount option, and detects the regression fixed by:
+> 
+> commit c87abbab6147 ("ext4: fix incorrect function call when initializing s_resgid")
+> 
+> Use su and xfs_io for the credential changes and allocations instead of
+> adding a dedicated C helper. Exclude mount options that override the
+> reserved IDs and skip configurations without the required users, groups
+> or fallocate support.
+> 
+> Link: https://lore.kernel.org/r/20261008065651.3517824-1-sahaj123.sc@gmail.com
+> Signed-off-by: Sahaj Chaudhari <sahaj123.sc@gmail.com>
 
-Very nice!
+Thanks! The patch looks good to me. Feel free to add:
 
-Apart from some nits below feel free to add
+Reviewed-by: Jan Kara <jack@suse.cz>
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+								Honza
 
 > ---
->  common/overlay        |  15 ++++
->  tests/overlay/090     | 158 ++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/090.out |  49 +++++++++++++
->  3 files changed, 222 insertions(+)
->  create mode 100755 tests/overlay/090
->  create mode 100644 tests/overlay/090.out
->
-> diff --git a/common/overlay b/common/overlay
-> index 8e89d6e4..382960c3 100644
-> --- a/common/overlay
-> +++ b/common/overlay
-> @@ -286,6 +286,21 @@ _require_scratch_overlay_datadir_without_metacopy()
->
->  }
->
-> +# Check kernel support for the "redirect_dir=3Dfollowdata" mount option
-> +_require_scratch_overlay_redirect_followdata()
-> +{
-> +       local lowerdir=3D"$OVL_BASE_SCRATCH_MNT/$OVL_UPPER"
-> +       local datadir=3D"$OVL_BASE_SCRATCH_MNT/$OVL_LOWER"
-> +
-> +       _scratch_mkfs > /dev/null 2>&1
-> +       _overlay_scratch_mount_opts \
-> +               -o"lowerdir+=3D$lowerdir,datadir+=3D$datadir" \
-> +               -o"userxattr,redirect_dir=3Dfollowdata" > /dev/null 2>&1 =
-|| \
-> +               _notrun "overlay redirect_dir=3Dfollowdata not supported =
-on ${SCRATCH_DEV}"
-> +
-> +       _scratch_unmount
-> +}
-> +
->
->  # Helper function to check underlying dirs of overlay filesystem
->  _overlay_fsck_dirs()
-> diff --git a/tests/overlay/090 b/tests/overlay/090
+> Changes since v1:
+> - Replace the C helper and its build registration with su and xfs_io,
+>   following Jan's and Zorro's suggestions.
+> - Set both primary and supplementary groups explicitly, and compare
+>   ordinary and reserved-GID allocations using the same unprivileged UID.
+> - Exclude resuid/resgid mount overrides; leave _user_do unchanged.
+> 
+> Review:
+> https://lore.kernel.org/all/j2dthue3fzup753jrndn6kh44qfvihx2bylmiwcoxubnrxpgdk@zx6shyx3hbb6/
+> https://lore.kernel.org/all/aurRSqrRkEfyp6M7@zlang-mailbox/
+> 
+> Testing:
+> - Exact ./check ext4/309 in x86-64 QEMU: ordinary allocation is denied
+>   after filling free space; reserved-GID allocation succeeds on the fixed
+>   kernel. The pre-c87abbab6147 kernel fails at the reserved-GID allocation
+>   as expected. Both TEST_DEV and SCRATCH_DEV pass e2fsck -fn afterward.
+> - Exact ./check ext4/309 passes natively on an AM642 ARM64 board running
+>   6.12.57-ti-gd00ea986335d; both loop-backed filesystems pass e2fsck -fn.
+> - Validation is limited to ext4/309, not the full xfstests suite.
+> 
+>  tests/ext4/309     | 63 ++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/309.out |  2 ++
+>  2 files changed, 65 insertions(+)
+>  create mode 100755 tests/ext4/309
+>  create mode 100644 tests/ext4/309.out
+> 
+> diff --git a/tests/ext4/309 b/tests/ext4/309
 > new file mode 100755
-> index 00000000..18e3d1f5
+> index 00000000..3bd12009
 > --- /dev/null
-> +++ b/tests/overlay/090
-> @@ -0,0 +1,158 @@
+> +++ b/tests/ext4/309
+> @@ -0,0 +1,63 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2026 Giuseppe Scrivano.  All Rights Reserved.
+> +# Copyright (c) 2026 Sahaj Chaudhari.  All Rights Reserved.
 > +#
-> +# FS QA Test 090
+> +# FS QA Test No. 309
 > +#
-> +# Test the redirect_dir=3Dfollowdata mount option.
-> +#
-> +# Data-only layers select redirect_dir=3Dfollowdata, which follows redir=
-ects
-> +# from any lower layer to a data-only layer, and cannot be used with
-> +# redirect_dir=3Dnofollow.
-> +#
-> +# Also test following an absolute redirect past a lower layer that has t=
-he
-> +# parent directory of the redirect target, with metacopy=3Don.
+> +# Verify that the ext4 reserved GID can allocate blocks after ordinary
+> +# free space is exhausted.
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto quick metacopy redirect verity attr
-
-pls remove verity
-
+> +_begin_fstest auto enospc quick
 > +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/attr
-> +. ./common/verity
-
-pls remove verity
-
+> +_exclude_fs ext2
+> +_exclude_fs ext3
+> +_exclude_scratch_mount_option "resuid=" "resgid="
 > +
-> +# We use non-default scratch underlying overlay dirs, we need to check
-> +# them explicitly after test.
-> +_require_scratch_nocheck
-> +_require_attrs user
-> +_require_attrs trusted
-> +_require_scratch_overlay_redirect_followdata
-> +_require_scratch_overlay_verity
-
-Please remove verity requirement and the single verity test case
-It is not worth the test coverage lost by not running on most base fs
-and the followdata code changes are mostly orthogonal to verity anyway.
-
-> +_require_scratch_overlay_features redirect_dir metacopy
-> +_require_scratch_overlay_lowerdata_layers
+> +_fixed_by_kernel_commit c87abbab6147 \
+> +	"ext4: fix incorrect function call when initializing s_resgid"
 > +
-> +data=3D$OVL_BASE_SCRATCH_MNT/data
-> +l1=3D$OVL_BASE_SCRATCH_MNT/lower1
-> +l2=3D$OVL_BASE_SCRATCH_MNT/lower2
-> +l3=3D$OVL_BASE_SCRATCH_MNT/lower3
-> +upper=3D$OVL_BASE_SCRATCH_MNT/upper
-> +work=3D$OVL_BASE_SCRATCH_MNT/work
-> +layers=3D"$l3:$l2:$l1::$data"
+> +_require_scratch
+> +_require_command "$TUNE2FS_PROG" tune2fs
+> +_require_xfs_io_command "falloc"
+> +_require_user
+> +_require_group
+> +RES_GROUP=$qa_group
+> +_require_group root
+> +FILL_GROUP=root
 > +
-> +# Make a metacopy file <file> with the redirect <redirect> and the optio=
-nal
-> +# metacopy xattr value <metacopy> (default: no fs-verity digest), for bo=
-th
-> +# userxattr and trusted xattr mounts
-> +make_stub()
-> +{
-> +       local file=3D$1 redirect=3D$2 metacopy=3D$3 x
+> +echo "Silence is golden"
 > +
-> +       touch $file
-> +       for x in user.overlay. ${OVL_XATTR_METACOPY%metacopy}; do
-> +               $SETFATTR_PROG -n ${x}metacopy ${metacopy:+-v $metacopy} =
-$file
-> +               $SETFATTR_PROG -n ${x}redirect -v $redirect $file
-> +       done
-> +       truncate -s 4 $file
-> +}
+> +RESGID=$(_cat_group | awk -F: -v group="$RES_GROUP" \
+> +	'$1 == group { print $3 }')
+> +FILLGID=$(_cat_group | awk -F: -v group="$FILL_GROUP" \
+> +	'$1 == group { print $3 }')
+> +[ "$RESGID" != "$FILLGID" ] || _notrun "reserved and fill groups are identical"
+> +[ "$(id -u "$qa_user")" -ne 0 ] || _notrun "test user is root"
+> +TEST_FILE="$SCRATCH_MNT/ext4_resgid.fill"
 > +
-> +# Mount the layers $layers with the options <opts>, print redirect_dir=
-=3Dfollowdata
-> +# if the mount shows it and <opts> has userxattr or redirect_dir (otherw=
-ise it
-> +# depends on the kernel config), and the content of each of the followin=
-g files,
-> +# or the error reading it
-> +check()
-> +{
-> +       local opts=3D$1 f
+> +MKFS_OPTIONS="-m 10 -N 1024 -O ^has_journal $MKFS_OPTIONS" \
+> +	_scratch_mkfs_sized $((16 * 1024 * 1024)) 4096 >>"$seqres".full 2>&1
+> +"$TUNE2FS_PROG" -u 0 -g "$RESGID" "$SCRATCH_DEV" >>"$seqres".full 2>&1
+> +_scratch_mount
 > +
-> +       shift
-> +       echo "=3D=3D $opts"
-> +       _overlay_scratch_mount_dirs "$layers" $upper $work -o $opts
-> +       case $opts in
-> +       *userxattr*|*redirect_dir=3D*)
-> +               _fs_options $OVL_BASE_SCRATCH_MNT | grep -o redirect_dir=
-=3Dfollowdata
-> +               ;;
-> +       esac
-> +       for f; do
-> +               echo "$f: $(cat $SCRATCH_MNT/$f 2>&1 | sed 's/^cat: .*: /=
-/')"
-> +       done
-> +       _unmount $SCRATCH_MNT
-> +}
+> +touch "$TEST_FILE"
+> +chmod 0666 "$TEST_FILE"
 > +
-> +# Mounting the layers $layers with the options <opts> must fail
-> +check_fail()
-> +{
-> +       local opts=3D$1
+> +su -s /bin/bash -g "$FILL_GROUP" -G "$FILL_GROUP" "$qa_user" -c \
+> +	"$XFS_IO_PROG -f -c 'pwrite 0 16M' '$TEST_FILE'" \
+> +	>>"$seqres".full 2>&1
 > +
-> +       echo "=3D=3D $opts"
-> +       _overlay_scratch_mount_dirs "$layers" $upper $work -o $opts \
-> +               >> $seqres.full 2>&1 && echo "mount succeeded" && \
-> +               _unmount $SCRATCH_MNT
-> +}
+> +if su -s /bin/bash -g "$FILL_GROUP" -G "$FILL_GROUP" "$qa_user" -c \
+> +	"$XFS_IO_PROG -c 'falloc 16M 4k' '$TEST_FILE'" \
+> +	>>"$seqres".full 2>&1; then
+> +	_fail "ordinary user allocated from the reserved pool"
+> +fi
 > +
-> +_scratch_mkfs
-> +mkdir -p $data/base $l1/base $l2/base $l3 $upper $work
-> +echo -n "data" > $data/base/file
-> +_fsv_enable $data/base/file
-> +digest=3D$(_fsv_measure $data/base/file)
-
-pls remove verity
-
+> +su -s /bin/bash -g "$RES_GROUP" -G "$RES_GROUP" "$qa_user" -c \
+> +	"$XFS_IO_PROG -c 'falloc 16M 4k' '$TEST_FILE'" \
+> +	>>"$seqres".full 2>&1 || _fail "reserved GID failed to allocate a block"
 > +
-> +make_stub $l1/s1 /base/file
-> +make_stub $l2/s2 /base/file
-> +make_stub $l3/s3 /base/file
-> +# The redirect target in a lower layer below s3, which is not looked up
-> +echo -n "lowr" > $l2/base/file
-> +# Redirects that are not followed: relative, directory, upper
-> +echo -n "lowr" > $l2/reltarget
-> +make_stub $l3/rel reltarget
-> +mkdir $l3/dir
-> +$SETFATTR_PROG -n user.overlay.redirect -v /base $l3/dir
-> +$SETFATTR_PROG -n $OVL_XATTR_REDIRECT -v /base $l3/dir
-> +make_stub $upper/up /base/file
-> +# fs-verity digest of a metacopy file in a middle layer: right and wrong
-> +make_stub $l2/vok /base/file 0x00240001${digest#sha256:}
-> +make_stub $l2/vbad /base/file "0x00240001$(printf '%064d' 0)"
-
-pls remove verity
-
-> +
-> +# followdata is selected by default with userxattr and a data-only layer
-> +check userxattr s1 s2 s3
-> +check userxattr,redirect_dir=3Dfollowdata s1 s2 s3 rel dir up
-> +# a data-only layer cannot be used without following redirects
-> +check_fail userxattr,redirect_dir=3Dnofollow
-> +check_fail userxattr,redirect_dir=3Doff
-> +echo "(no data-only layer)"
-
-Suggest echo -n "no data-only layer "
-will make the expected output more clear as part of the test case title
-
-> +layers=3D"$l3:$l2:$l1" check userxattr
-> +check userxattr,redirect_dir=3Dfollowdata,verity=3Drequire vok vbad
-
-pls remove verity
-
-> +
-> +check metacopy=3Doff s1 s2 s3
-> +check redirect_dir=3Dfollowdata s1 s2 s3 rel dir up
-> +check redirect_dir=3Dfollow,metacopy=3Doff s1 s2 s3
-> +check redirect_dir=3Don,metacopy=3Doff s1 s2 s3
-> +check_fail redirect_dir=3Dnofollow
-> +echo "(no data-only layer)"
-
-Suggest echo -n "no data-only layer "
-
-> +layers=3D"$l3:$l2:$l1" check redirect_dir=3Dnofollow
-> +
-> +# An explicit option requires a data-only layer and conflicts with metac=
-opy=3Don
-> +_overlay_scratch_mount_dirs "$l3:$l2:$l1" $upper $work \
-> +       -o userxattr,redirect_dir=3Dfollowdata >> $seqres.full 2>&1 && \
-> +       echo "mount without a data-only layer succeeded"
-
-"mount redirect_dir=3Dfollowdata without a data-only layer succeeded"
-
-> +_overlay_scratch_mount_dirs "$layers" $upper $work \
-> +       -o redirect_dir=3Dfollowdata,metacopy=3Don >> $seqres.full 2>&1 &=
-& \
-> +       echo "mount with metacopy=3Don succeeded"
-> +
-
-"mount with edirect_dir=3Dfollowdata,metacopy=3Don succeeded"
-
-Thanks!
-Amir.
+> +_scratch_unmount
+> +status=0
+> +exit
+> diff --git a/tests/ext4/309.out b/tests/ext4/309.out
+> new file mode 100644
+> index 00000000..56330d65
+> --- /dev/null
+> +++ b/tests/ext4/309.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 309
+> +Silence is golden
+> -- 
+> 2.43.0
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
