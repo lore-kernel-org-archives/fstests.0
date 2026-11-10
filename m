@@ -1,100 +1,99 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.52
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.43
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794320871;
-	b=o9MU5XeIfQr06yXp7+sx+nVXhS4WEXxzPB52zuNf26UhdxlXha6s4OUsUxKBI5HbZP+R
-	 joOiIQWtiEqIIxQwDTEbje0WEjwBRK4iLIYdCgof0PmH4ZyEKEUrlutMpMpOuupjEthAD
-	 HtdiNi3w3DhRAK9hUyC5aJJbrVeCitZkFlzuGNwpaMhiD2wcnv2PfCEOY3XZ7jFzVGGgC
-	 Ho3lakcE7PbzkIS5KVa3s+VzV5c87wrhNgo0TlCkF8T6MkJiABBSXkyURaKLZ9CT4MOfG
-	 1daJT+9gZoS2Eg5cahQY2fnxLqg51g/KJEaTag2u6wiNs33Nm6rcjj/e02MWx+neYEQ==
+	t=1794324845;
+	b=pKR7WllvilWF8gXOORuPnvFvmMCtxu2IO05KJ4Rv7fdPyLFb+eVAvZkwnK6NL4OnYZWp
+	 To95OAJwRdF3jw6IXiBDNhUxQaMDYUNVXQw0MFa124CgJJyz5ZRONFMfTt6m+yX0Mw4cZ
+	 64rriVASSpoOvMUmTuyBzMixGx+dr9WHQjDhhbs+0Moekhi260c6CtSF1vlFM4uY7UsSR
+	 AV1HbWu551HyUk+EQ8hFHz2GoJskxJV1N6vNP8FAZXas+kQYfNcW0/PO3N1dGJIKIwTJ6
+	 zkV00B7A8fMvye3FygMNKj3GJUbD74a7JsRDX7BpqevygUm5Kd8Ja5eJdCvjMeZHlaQ==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794320871;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794324845;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Gm-Message-State:X-Gm-Gg:X-Received:MIME-Version:References:
 	 In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:Cc:
 	 Content-Type:Content-Transfer-Encoding;
-	bh=f9P5XeW3DtwtPTvJxPp7qfhlB84hJFAHsurgSSK1OMg=;
-	b=m0qmj6m/IwzQQQJf0X9yebescXMhTeNAmrlYtdN0Z6bLE/gvVE7k59WhMZDSVw+bOjA2
-	 WpJoqwbNO0zWzJWnaPBeLAh1V2BznBjPgkJjIVQ0tFbuCXz2o8w4q/Fm/a4KQQlIIEQYh
-	 EGb374/tJ13JayYBRqwvvQ6VlUXgKWOzhEfll2ZEL9jgSJjlBeYhXOhZVhR1Ul8zw/tKm
-	 5dCMW1qQYwwTX3yvJpcY929/QNr0h/VweO9L4QexzKQQDuAVufk0xHrOsHDCbACYK05SS
-	 ezVCy6Q76Z/+DibI3z7GxySHQ3VR4Dr8/kKKoCHiVWxQSSieYrBRNNcK3V6mR/zUOww==
+	bh=zlp+b6aXAaDg8cECS2ZSmA7rI3yE9bTLJjk2dHCmIwE=;
+	b=poKqjnGYJy7fllZ/QXMxVvGqmEHFZssWHekQcNQX+waOeitsuZj2kFB+Zh/56aC9ruHA
+	 heIbSHcU06vX1GyJGFIGmF7+LTYYod6aFdnMaKHwewvMRkXPpfcuWAAhe2y/lQICSY/Tx
+	 hSEn3w0RpH8FfwOteKmXkIB0e+mTHjCLVReQsI00+u/jm1i4L1rETYuHkuP6HiObaVNu0
+	 pK3hnADm0Nao4T5z4t20jZyO/I9bUAnyswWvBBJqkdv5U9iypX8C59ff+0+xtLBZnBiCi
+	 2+frCQahFm78ByjQAtWveK2AgM2TEUQCJg3AgtL6Mlx6VVelJAW0RpyXVrYlltjLKow==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=gmail.com;
 	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b="J3/tzxtK";
-	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.52
-Received: from mail-ed1-f52.google.com (mail-ed1-f52.google.com [209.85.208.52])
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=fLDtc0yG;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.43
+Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB60E606A335
-	for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 14:27:50 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org EB60E606A335
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C316B606A332
+	for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 15:34:03 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C316B606A332
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=J3/tzxtK
-Received: by mail-ed1-f52.google.com with SMTP id 4fb4d7f45d1cf-6ae305e3bd9so3347982a12.0
-        for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 06:27:50 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1794320869; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=fLDtc0yG
+Received: by mail-ed1-f43.google.com with SMTP id 4fb4d7f45d1cf-6b71b012e3cso940722a12.1
+        for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 07:34:03 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1794324842; cv=none;
         d=google.com; s=arc-20260327;
-        b=LnL+ZEY6yYM2dILLVju3cfDWZHNtxgItl41qC9C4+4ibDDTKp1aboGFhpRGuPxj7SS
-         Keqy8xibfbu4JYVRXRhaDmcESa4pwtOWPSYfoTsvTmPm+aGSiRkrGHyFHJhdwPW5SMaE
-         HA3Omtfx7NoXbgY/AUIddX3Swuin6b3nvccjSTVMJWrW6gr8TNguRenVzAeGuC6m4fSk
-         1dWB/RIwyHPD5jxnG8WooBCeEWTvqx2gHCYPPuILog/SvBGPCmEVIOwY4KKlGeWMBb+p
-         bwNwVRwNCUwiCEawrHv/z2XysFaMtqj5z30LXL91GIb4Ze6FfpzEoIoDimOA2w7acVus
-         ntaw==
+        b=Er5X1FeLd5X7w81kZ8ff4jOwd8QjrYnmpmPe6BUl6FkpHKgk7LpZJbdbhRNzPsjrK1
+         ggsT+i3P9vGStAAh8Wy9t1N3fdJMmmbwPaTKkAoDaxzMo69vxjgo3sOhqm+fNrVgyO/4
+         CkYTa4G16weMQuboSCHHgs08fTEdDR44g+/xIdT8ZWBYetaoAtJL2bG1R1Sso76hycyB
+         j+omxNKMlan/olTR6/FphO+0gWlaW/XsUeLn1Om9I89wCGtelfH43KHEyK6Dp7rhirkp
+         t0cDIHc+yxcnMOE5dpTpePKMHkp8k3H2M2CuH46/i86HtdHZ1jmX7VfFydUvRCqVReQU
+         sVow==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=f9P5XeW3DtwtPTvJxPp7qfhlB84hJFAHsurgSSK1OMg=;
-        fh=KwMEtdkmyVjNwGs2Qh1Hxc3ZiVL7IU7E5hZcRIv0Vmg=;
-        b=BbNh1ZWLf1xW1uWPeUP+3qGkuUFJOmKPh0yOMKDACU/sIqY8uFDIgFOO4RB4KuCYVG
-         1Rj/tNAyf2Eedpiohw1m+4PR54+cnqY8p6pn8zDy7HAWCDFd9qmErtR1qMs9MOXGenPo
-         03QRBCjC421oZE1hsK+wfG1jeFTcqpqtbJyxu2QMhGsqPGABWjqokEhGpKcCbf3k3Jlf
-         k3RjFjpiTVs4YWIwqvXXJ3XUZPrF/MoP+mX3S7rYwg16ft0rZJEtL9q0jDKSFxkhd23j
-         EtLPR4arUvYqGkAFgQsoPQH3DVtz/8P8uhfOgH9YKkZfWNvOV/g0dwLfpH5Jk5b1JA2v
-         gCzQ==;
+        bh=zlp+b6aXAaDg8cECS2ZSmA7rI3yE9bTLJjk2dHCmIwE=;
+        fh=BySdCAgMxts57IlqcWILwaVmZh6HNtc8CsMAkipQdGQ=;
+        b=QN/grpxMwGMdpMVko4amJQYUPxdcD6lPyI3mbTunntVRdO34RkvobII6FK4nYL3HJW
+         7NjTXQF/egB5wYUQzSdRC/5ASXjskB3aiJt/nHmV2MAWo2DsUlihFwaKJ8/P0EYKLW9R
+         4zb7Z9HX404FO9CH0wBihSHq4V2mLBZHFiUCVEhSFhXmmdxkaCtAFCIRvv8f0IFamaHq
+         E1Vd3y8KwXyaWvvfIuZ+SABHnoEi70+LO8kOD68XUgFU9wGNGV6vHER3C4rrQXp+9DyX
+         NCga5bL0lt5Tb0vK6JochvU+BwZ63ZFmydsyzL6pjneTHx9ld2IEXLK73dL8oJSnHqTt
+         KRJA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1794320869; x=1794925669; darn=vger.kernel.org;
+        d=gmail.com; s=20260707; t=1794324842; x=1794929642; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=f9P5XeW3DtwtPTvJxPp7qfhlB84hJFAHsurgSSK1OMg=;
-        b=J3/tzxtK0VxfigEui6a74Y/ndoi+64tPV4zCxulashweHsWnphEMUuSXY2Rhal1Syx
-         gFDWDceej7SjvBMNKysr5z882cRnowOSNoVASPVtrdTAYX3KwPIgPVvIAhBm4gClTXt6
-         AjKCkUHmPp2r+hGUQjn9yOnENoN/nYQNSrEplcD2IcxYdfGCYD+8QBRMYWKFmJNWFlxe
-         TF7YjJ3VXB/l4XE9tCeJSf1KfuxJCXWdjMmHyLPY15LgUwj0J0slXhiD80Bzexnbmmjt
-         65HsGfTO4Qp9PGhr1xOdVXIrjZ0WVZBNP+N8tkusOHcnc5YbwUNueXNLbInpHHfvde90
-         aAWw==
+        bh=zlp+b6aXAaDg8cECS2ZSmA7rI3yE9bTLJjk2dHCmIwE=;
+        b=fLDtc0yGAEqSYzB4uSdd1JAwYpi+STBUzN1jhtPeOCecrjURdHE8PiEGPIE10Ae+qv
+         OfDN4d7rYaxL1EpxkejgK1Yy954mhaji1CtDg9AZAaVt+GFGcc8OPa8llzyJjIhtz1oY
+         WrwmJEyHySGLS0HHYR2KnOMWeQsHXDuBy7ZVXDs8MiFO642DgYFIAnN1ARElewaKSJSB
+         NHUOhEcbVavO1ADlfxcKihR7VwygfBBHr6HNKcbHDj5rKFDxUP8QHiQ1Sw8wBxvYkTEz
+         aBYCsBtAD+Qrk20zJFGONPUc5Ixh6JwanXx1y6+dKCXkjpl8LhZEabpPde/YeIceynsY
+         YNwg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794320869; x=1794925669;
+        d=1e100.net; s=20260707; t=1794324842; x=1794929642;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=f9P5XeW3DtwtPTvJxPp7qfhlB84hJFAHsurgSSK1OMg=;
-        b=S5Eh549/IrJxvVK5xkvDz/BXNQ3vDM2l67BaHJ/yhq0uZtUUD0pQJEJcPIFl3I41hr
-         ZlvaTZ6JFS0Zi/iB8mWm8m8jVAbyUSX1T9K5nZhxAPkRiVZidXX2r1YDAri0Twb1wwbo
-         JZhxXch+aXa0FgOe6eKbWFNPTvUF0+L90giJisJ7oSav/X0UPjet9c2+SIovv+qLSNHy
-         C2hycB7RWv9xQhX/gBR9cx7hVzCZsMl3Y1m/lr7E8Z/lxlt4CCLUNT5PXaQ/LMn+XPNa
-         BEWvlbw86ofri19wHTkU/LWCQouc2oqqQwc5flj0TA49k6Ma4FP/ryquZWz++bhoHQev
-         9k+w==
-X-Gm-Message-State: APuU4Z9r+kqsCoc0oFCbdH/6oxZ2idjRK8bdxETvtZnENLl1NKwY/w58
-	ABUVGk3fHQiKiX4NFJqMuHWpToYk4UZinvegyQrR9M50ojxTfpzapG+78sQ/mQssm1mvzmRgFi2
-	FaZRwRKoNywAVHy09dqb/uHtqSJbc6zcL4syUMfQ=
-X-Gm-Gg: AYBFou1FCxr7r4g6R8maDNMl0/zSdiP0VaXdUukbaelEhi2ttQIghFOCO0i0kRde+cS
-	PIdDWbFBs87gpC6PVOc/0nMYSUlnCBIquk71/rexzxw/b9kit8a1TVa5jwUKVHZ7ydtSV2F7/iO
-	++tEvDcL0WPPrxn0l77b+hmLA5a0VygDBxbROb6p6pwe7wkcCAaFv5a2Emsba9HLBwVniLX8oxn
-	wNt0VnTc7Urzv1Tkonnm6nStol53nNRNmh/SgaQyCjbXzUkbUBapk4J5lFC8c+3umZYnjP6vO2R
-	4f7kjdBcNB2gJNnvNISfMQpB5PlqBzPK2ag5Z4PvXNU7ozPv3eOdtA2si2IHrpRiEwN2cFz3YhA
-	om3h7RcLp2yLmyFCQmneytw/ADoLoYJjSEUwXTOpPeDKJMsFI+ikkfngud34PamKSVQfUIrQwle
-	w2aeRjDeeDmo/BaO8=
-X-Received: by 2002:a05:6402:1ed5:b0:6b7:182c:5d69 with SMTP id
- 4fb4d7f45d1cf-6b7568d7f77mr2593156a12.11.1794320868634; Tue, 10 Nov 2026
- 06:27:48 -0800 (PST)
+        bh=zlp+b6aXAaDg8cECS2ZSmA7rI3yE9bTLJjk2dHCmIwE=;
+        b=YqSBVDlfGemDnFmFfhA38r2kdW65j1XkY8qVfB5zHbAlMsDScbb5WnR9n+fDHpZc6k
+         ZGlCyVDtt9tUT+jIvQrVcyoHWCHwYHvYU2bgHBnyxCAq1oMWBAoWjPsjK74pbquaEcRQ
+         etC8svRcooJcq0aDILKKIumDGerKAl1qvL/ZFuTTkdIolHFpmDqJs8lyxAvDg4DJ5/Cl
+         Wc4Mf5uAY+2IhBlwCdLulUWOP9IqUbhAgZhu32h14rYvHTGGR23/0eGnC4btUctS57WK
+         d00JQdd+VGuIpFxFQhHMaT8YCFee/vc5ccS/6eSzcsG6JdoJwJ19KAWeGBlXlKZIKFPU
+         98hQ==
+X-Gm-Message-State: APuU4Z/NU4G53Hmvz8AqPZ2zKGwGYZBBUtJKt27SjTAQKpvqnVJorwjS
+	8zXvJccGbWKyQ0B7S3uIhbvYlIcomVI66LjNMfCbVNhTJHkkSliX9Juuq9bgX6s3gBShXeW9T0U
+	SXNn/fbsVJlfXRGhz5CeOexA0x/OxrVXoD4DP6tA=
+X-Gm-Gg: AYBFou2KxpFkM98puIp8rlIWMMdMIqJ0NTemZT9KUc/srkpJbPmZb/ogso3HPOY82jg
+	yzqu6y+X28bteV+BIPEJ+hP2/lfrifH1nCc6Kk2y9q2b4RjPAfnxBuiT+rwEleYupBK/zQ1dYbR
+	gqqShzP9gEx5QMQQ95gqvM0kIWBWk7xAEbP5rT8NRaasJqW3eaArqnHGhI/+SaSushjSxsx5Tk3
+	pOnujCUi9AC0WcT1S0ufmx3O5Gp+Fk32bf3b4SozzbA0ThZNzwvapXFMqYC57zke9MQIH/tKH7X
+	3NEjGW4yaLqjDx01HfkRjH0eBse8UwR0qZLH1xeuOZHhpf0nkH6JdmA8p9wNXu4nqsDNCsieAlM
+	CEEu/f+6vFDNbO/8YOoRlQ3PsOFmEDgmTMsLZUX07uIL5IW966Snx+j78K1M075YV31DudA==
+X-Received: by 2002:aa7:cad8:0:b0:6b5:90b9:e1f4 with SMTP id
+ 4fb4d7f45d1cf-6b756503732mr1958212a12.15.1794324842006; Tue, 10 Nov 2026
+ 07:34:02 -0800 (PST)
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -104,333 +103,396 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-References: <20261109134006.2555438-1-giuseppe@scrivano.org>
- <CAOQ4uxjsNEyB0H8CqGp9En1bFCH92bYAu8UJ8SovXUeaG=z-DA@mail.gmail.com> <878q30ss20.fsf@scrivano.org>
-In-Reply-To: <878q30ss20.fsf@scrivano.org>
+References: <20261110-ovl077-stale-next-v1-1-948a5a434ae2@samsung.com>
+In-Reply-To: <20261110-ovl077-stale-next-v1-1-948a5a434ae2@samsung.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 10 Nov 2026 15:27:36 +0100
-X-Gm-Features: AclHuK99NKO4t5MUK_24LAqamBSwDk-4-YAs2lUfPMrJG2dNWKxDwrVEbrMjL0o
-Message-ID: <CAOQ4uxgzDHp2PO+ETuLZu4Q48y-sG=qmTbzR1MHz8wh6YXkO6A@mail.gmail.com>
-Subject: Re: [PATCH fstests v2] overlay: add a test for redirect_dir=followdata
-To: Giuseppe Scrivano <giuseppe@scrivano.org>
-Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
+Date: Tue, 10 Nov 2026 16:33:50 +0100
+X-Gm-Features: AclHuK8tKVN6oJ1ZVdLK5C5uF2bVbWTbU-1nULInPwTlctPriCZ11xIRhtV4rRY
+Message-ID: <CAOQ4uxgxzee1dqLcYHPWFhkcAxP_WRrJn5DiiL9mB0ZjC83vbQ@mail.gmail.com>
+Subject: Re: [PATCH] overlay/077: check a stale entry in an impure dir on any
+ hash seed
+To: daejun7.park@samsung.com
+Cc: fstests@vger.kernel.org, Zorro Lang <zlang@kernel.org>, 
+	Miklos Szeredi <miklos@szeredi.hu>, Hungyu Lin <dennylin0707@gmail.com>, 
+	linux-unionfs@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Nov 10, 2026 at 3:02=E2=80=AFPM Giuseppe Scrivano <giuseppe@scrivan=
-o.org> wrote:
+On Tue, Nov 10, 2026 at 9:04=E2=80=AFAM Daejun Park via B4 Relay
+<devnull+daejun7.park.samsung.com@kernel.org> wrote:
 >
-> Hi Amir,
+> From: Daejun Park <daejun7.park@samsung.com>
 >
-> Amir Goldstein <amir73il@gmail.com> writes:
+> overlay/077 already fails on a stale entry in an impure upper dir, but
+> only when the dir hash order puts the removed file where ext4 keeps it
+> between getdents calls. ext4 returns the entry that did not fit in the
+> previous buffer first in the next call, even after it was removed.
 >
-> > On Mon, Nov 9, 2026 at 2:40=E2=80=AFPM Giuseppe Scrivano <giuseppe@scri=
-vano.org> wrote:
-> >>
-> >> Test that data-only layers select redirect_dir=3Dfollowdata, which fol=
-lows
-> >> redirects from lower to lowerdata from any lower layer, with userxattr
-> >> and trusted xattrs, and that redirect_dir=3Dnofollow is refused with
-> >> data-only layers.
-> >>
-> >> Also test following an absolute redirect past a lower layer that has t=
-he
-> >> parent directory of the target, which failed with EIO before the fix
-> >> "ovl: do not always clear absolute_redirect".
-> >>
-> >> Signed-off-by: Giuseppe Scrivano <giuseppe@scrivano.org>
-> >> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
-> >> ---
-> >>  common/overlay        |  15 +++++
-> >>  tests/overlay/090     | 149 +++++++++++++++++++++++++++++++++++++++++=
-+
-> >>  tests/overlay/090.out |  43 ++++++++++++
-> >>  3 files changed, 207 insertions(+)
-> >>  create mode 100755 tests/overlay/090
-> >>  create mode 100644 tests/overlay/090.out
-> >>
-> >> diff --git a/common/overlay b/common/overlay
-> >> index 8e89d6e4..382960c3 100644
-> >> --- a/common/overlay
-> >> +++ b/common/overlay
-> >> @@ -286,6 +286,21 @@ _require_scratch_overlay_datadir_without_metacopy=
-()
-> >>
-> >>  }
-> >>
-> >> +# Check kernel support for the "redirect_dir=3Dfollowdata" mount opti=
-on
-> >> +_require_scratch_overlay_redirect_followdata()
-> >> +{
-> >> +       local lowerdir=3D"$OVL_BASE_SCRATCH_MNT/$OVL_UPPER"
-> >> +       local datadir=3D"$OVL_BASE_SCRATCH_MNT/$OVL_LOWER"
-> >> +
-> >> +       _scratch_mkfs > /dev/null 2>&1
-> >> +       _overlay_scratch_mount_opts \
-> >> +               -o"lowerdir+=3D$lowerdir,datadir+=3D$datadir" \
-> >> +               -o"userxattr,redirect_dir=3Dfollowdata" > /dev/null 2>=
-&1 || \
-> >> +               _notrun "overlay redirect_dir=3Dfollowdata not support=
-ed on ${SCRATCH_DEV}"
-> >> +
-> >> +       _scratch_unmount
-> >> +}
-> >> +
-> >>
-> >>  # Helper function to check underlying dirs of overlay filesystem
-> >>  _overlay_fsck_dirs()
-> >> diff --git a/tests/overlay/090 b/tests/overlay/090
-> >> new file mode 100755
-> >> index 00000000..6eeeacdf
-> >> --- /dev/null
-> >> +++ b/tests/overlay/090
-> >> @@ -0,0 +1,149 @@
-> >> +#! /bin/bash
-> >> +# SPDX-License-Identifier: GPL-2.0
-> >> +# Copyright (c) 2026 Giuseppe Scrivano.  All Rights Reserved.
-> >> +#
-> >> +# FS QA Test 090
-> >> +#
-> >> +# Test the redirect_dir=3Dfollowdata mount option.
-> >> +#
-> >> +# Data-only layers select redirect_dir=3Dfollowdata, which follows re=
-directs
-> >> +# from any lower layer to a data-only layer, and cannot be used with
-> >> +# redirect_dir=3Dnofollow.
-> >> +#
-> >> +# Also test following an absolute redirect past a lower layer that ha=
-s the
-> >> +# parent directory of the redirect target, with metacopy=3Don.
-> >> +#
-> >> +. ./common/preamble
-> >> +_begin_fstest auto quick metacopy redirect attr
-> >> +
-> >> +# Import common functions.
-> >> +. ./common/filter
-> >> +. ./common/attr
-> >> +
-> >> +# We use non-default scratch underlying overlay dirs, we need to chec=
-k
-> >> +# them explicitly after test.
-> >> +_require_scratch_nocheck
-> >> +_require_attrs user
-> >> +_require_attrs trusted
-> >> +_require_scratch_overlay_redirect_followdata
-> >> +_require_scratch_overlay_features redirect_dir metacopy
-> >> +_require_scratch_overlay_lowerdata_layers
-> >> +
-> >> +data=3D$OVL_BASE_SCRATCH_MNT/data
-> >> +l1=3D$OVL_BASE_SCRATCH_MNT/lower1
-> >> +l2=3D$OVL_BASE_SCRATCH_MNT/lower2
-> >> +l3=3D$OVL_BASE_SCRATCH_MNT/lower3
-> >> +upper=3D$OVL_BASE_SCRATCH_MNT/upper
-> >> +work=3D$OVL_BASE_SCRATCH_MNT/work
-> >> +layers=3D"$l3:$l2:$l1::$data"
-> >> +
-> >> +# Make a metacopy file <file> with the redirect <redirect>, for both
-> >> +# userxattr and trusted xattr mounts
-> >> +make_stub()
-> >> +{
-> >> +       local file=3D$1 redirect=3D$2 x
-> >> +
-> >> +       touch $file
-> >> +       for x in user.overlay. ${OVL_XATTR_METACOPY%metacopy}; do
-> >> +               $SETFATTR_PROG -n ${x}metacopy $file
-> >> +               $SETFATTR_PROG -n ${x}redirect -v $redirect $file
-> >> +       done
-> >> +       truncate -s 4 $file
-> >> +}
-> >> +
-> >> +# Mount the layers $layers with the options <opts>, print redirect_di=
-r=3Dfollowdata
-> >> +# if the mount shows it and <opts> has userxattr or redirect_dir (oth=
-erwise it
-> >> +# depends on the kernel config), and the content of each of the follo=
-wing files,
-> >> +# or the error reading it
-> >> +check()
-> >> +{
-> >> +       local opts=3D$1 f
-> >> +
-> >> +       shift
-> >> +       echo "=3D=3D $opts"
-> >> +       _overlay_scratch_mount_dirs "$layers" $upper $work -o $opts
-> >> +       case $opts in
-> >> +       *userxattr*|*redirect_dir=3D*)
-> >> +               _fs_options $OVL_BASE_SCRATCH_MNT | grep -o redirect_d=
-ir=3Dfollowdata
-> >> +               ;;
-> >> +       esac
-> >> +       for f; do
-> >> +               echo "$f: $(cat $SCRATCH_MNT/$f 2>&1 | sed 's/^cat: .*=
-: //')"
-> >> +       done
-> >> +       _unmount $SCRATCH_MNT
-> >> +}
-> >> +
-> >> +# Mounting the layers $layers with the options <opts> must fail
-> >> +check_fail()
-> >> +{
-> >> +       local opts=3D$1
-> >> +
-> >> +       echo "=3D=3D $opts"
-> >> +       _overlay_scratch_mount_dirs "$layers" $upper $work -o $opts \
-> >> +               >> $seqres.full 2>&1 && echo "mount succeeded" && \
-> >> +               _unmount $SCRATCH_MNT
-> >> +}
-> >> +
-> >> +_scratch_mkfs
-> >> +mkdir -p $data/base $l1/base $l2/base $l3 $upper $work
-> >> +echo -n "data" > $data/base/file
-> >> +
-> >> +make_stub $l1/s1 /base/file
-> >> +make_stub $l2/s2 /base/file
-> >> +make_stub $l3/s3 /base/file
-> >> +# The redirect target in a lower layer below s3, which is not looked =
-up
-> >> +echo -n "lowr" > $l2/base/file
-> >> +# Redirects that are not followed: relative, directory, upper
-> >> +echo -n "lowr" > $l2/reltarget
-> >> +make_stub $l3/rel reltarget
-> >> +mkdir $l3/dir
-> >> +$SETFATTR_PROG -n user.overlay.redirect -v /base $l3/dir
-> >> +$SETFATTR_PROG -n $OVL_XATTR_REDIRECT -v /base $l3/dir
-> >> +make_stub $upper/up /base/file
-> >> +
-> >> +# followdata is selected by default with userxattr and a data-only la=
-yer
-> >> +check userxattr s1 s2 s3
-> >> +check userxattr,redirect_dir=3Dfollowdata s1 s2 s3 rel dir up
-> >> +# a data-only layer cannot be used without following redirects
-> >> +check_fail userxattr,redirect_dir=3Dnofollow
-> >> +check_fail userxattr,redirect_dir=3Doff
-> >
-> > The test looks good but this expectation of failure is problematic.
-> >
-> > First of all the test would fail with redirect_always_follow=3DN
-> > because that makes redirect_dir=3Doff =3D> followdata
-> >
-> > But I also think that redirect_dir=3Doff should not fail with
-> > redirect_always_follow=3DY.
-> >
-> > I will explain with the documentation.
-> > You documentation v2 patch says:
-> >
-> > :A data-only layer selects "redirect_dir=3Dfollowdata", unless
-> > "redirect_dir=3Dfollow"
-> > :or "redirect_dir=3Don" is in effect.
-> >
-> > So it implies redirect_dir=3Doff =3D> followdata
-> >
-> > All that redirect_dir=3Doff really means is "don't create redirects".
-> >
-> > I amended the document as follows to clarify that:
-> >
-> > - "redirect_dir=3Don":
-> >     Redirects are created and followed.
-> > - "redirect_dir=3Dfollow":
-> >     Redirects are not created, but followed.
-> > - "redirect_dir=3Dfollowdata":
-> >     Redirects are not created.
-> >     Only redirects from lower to lowerdata are followed.
-> > - "redirect_dir=3Dnofollow":
-> >     Redirects are not created and not followed.
-> > - "redirect_dir=3Doff":
-> >     Redirects are not created.
-> >     Which redirects are followed depends on "redirect_always_follow" in=
- the
-> >     kernel/module config, on data-only lower layers and on the "userxat=
-tr"
-> >     mount option.
-> >
-> > Made this off =3D> followdata change in the code and pushed to ovl-fixe=
-s:
-> >
-> > -static int ovl_redirect_follow_mode(size_t nr_data)
-> > +int ovl_redirect_follow_mode(bool follow_lower, size_t nr_data)
-> >  {
-> > -       return ovl_redirect_always_follow ? OVL_REDIRECT_FOLLOW :
-> > -                                           ovl_redirect_nofollow_mode(=
-nr_data);
-> > +       if (ovl_redirect_always_follow && follow_lower)
-> > +               return OVL_REDIRECT_FOLLOW;
-> > +
-> > +       /* Data-only layers cannot be used without following redirects
-> > to them */
-> > +       return nr_data ? OVL_REDIRECT_FOLLOWDATA : OVL_REDIRECT_NOFOLLO=
-W;
-> >  }
-> >
-> >  /*
-> > @@ -137,7 +140,7 @@ static int ovl_redirect_follow_mode(size_t nr_data)
-> >  static int ovl_redirect_mode_def(void)
-> >  {
-> >         return ovl_redirect_dir_def ? OVL_REDIRECT_ON :
-> > -                                     ovl_redirect_follow_mode(0);
-> > +                                     ovl_redirect_follow_mode(true, 0)=
-;
-> >  }
-> >
-> >  static const struct constant_table ovl_parameter_verity[] =3D {
-> > @@ -896,6 +899,9 @@ int ovl_fs_params_verify(const struct ovl_fs_contex=
-t *ctx,
-> >         struct ovl_opt_set set =3D ctx->set;
-> >         /* The requested redirect_dir=3D, for reporting conflicts with =
-it */
-> >         int redirect_opt =3D config->redirect_mode;
-> > +       /* The redirect follow mode for redirect_dir=3Doff and for the =
-default */
-> > +       int follow_mode =3D ovl_redirect_follow_mode(!config->userxattr=
-,
-> > +                                                  ctx->nr_data);
-> >
-> >         /* Workdir/index are useless in non-upper mount */
-> >         if (!config->upperdir) {
-> > @@ -922,9 +928,12 @@ int ovl_fs_params_verify(const struct ovl_fs_conte=
-xt *ctx,
-> >                 config->uuid =3D OVL_UUID_NULL;
-> >         }
-> >
-> > -       /* Resolve redirect_dir=3Doff to the default redirect follow mo=
-de */
-> > +       /*
-> > +        * Resolve redirect_dir=3Doff to the default redirect follow mo=
-de.
-> > +        * With userxattr, redirects are not followed to lower by defau=
-lt.
-> > +        */
-> >         if (config->redirect_mode =3D=3D OVL_REDIRECT_OFF)
-> > -               config->redirect_mode =3D ovl_redirect_follow_mode(ctx-=
->nr_data);
-> > +               config->redirect_mode =3D follow_mode;
-> >
-> >         /*
-> >          * This is to make the logic below simpler.  It doesn't make an=
-y other
-> > @@ -1038,7 +1047,7 @@ int ovl_fs_params_verify(const struct ovl_fs_cont=
-ext *ctx,
-> >                  * userxattr.
-> >                  */
-> >                 if (!set.redirect)
-> > -                       config->redirect_mode =3D
-> > ovl_redirect_nofollow_mode(ctx->nr_data);
-> > +                       config->redirect_mode =3D follow_mode;
-> >                 config->metacopy =3D false;
-> >         }
-> >
-> >
-> > Please amend the test and test with the latest ovl-fixes:
-> > d0d57557b76de ovl: follow lower to lowerdata redirects from any lower l=
-ayer
->
-> I've tested this modified version and it works fine.  Do you want me to
-> send a v3 or will you amend it?
+> Add a bare "-" and a bare "=3D" argument to t_dir_offset2. They remove or
+> recreate the entry the next getdents call returns first. The old fd may
+> list a recreated name with the st_ino of the old or the new file.
 
-Please send v3 to Zoro/fstests because he will be applying it to fstests
-after his review, not me.
+That's a very cool improvement for the test util, but I don't want
+to fix this behavior in overlayfs so only if ext4 fix is planned would this
+test be relevant.
 
-Please keep my Reviewed-by on v3 I trust that you modified the test case
-correctly and fixed the golden output accordingly.
+>
+> Use both on a new impure dir that only has entries with origin. The
+> existing impure dir also has o0, which has no origin. If the next entry
+> is o0, its d_ino is the same whether it is stale or not, and the case
+> is not checked.
+>
+> With an ext4 upper, overlay/077 now fails on every hash seed until the
+> kernel fix "ovl: skip stale entries in impure dir iteration" is applied.
+>
+> Link: https://lore.kernel.org/linux-unionfs/CAGEkeHcg06kHshHQ=3D9U6Yrs_wm=
+8W9H28o9bcC2Qh3fw3tANbWA@mail.gmail.com/
+> Signed-off-by: Daejun Park <daejun7.park@samsung.com>
+> ---
+> Please hold this patch until the kernel fix is accepted. With this
+> change, overlay/077 fails on every ext4 run of a kernel without it.
+> The fix is "ovl: skip stale entries in impure dir iteration":
+> https://lore.kernel.org/linux-unionfs/20261110-ovl-impure-stale-v1-1-1a4c=
+2039e89d@samsung.com/
+
+Sorry but I am not planning to take this fix.
+
+For the problem of spurious test failure, I suggest to relax the expectatio=
+n
+for the first entry in the buffer or to fix ext4 to avoid emitting the stal=
+e
+entry.
 
 Thanks,
 Amir.
+
+> ---
+>  src/t_dir_offset2.c | 126 ++++++++++++++++++++++++++++++++++++++++++++++=
++++---
+>  tests/overlay/077   |  25 ++++++++++-
+>  2 files changed, 143 insertions(+), 8 deletions(-)
+>
+> diff --git a/src/t_dir_offset2.c b/src/t_dir_offset2.c
+> index 026bc8f3..621255e6 100644
+> --- a/src/t_dir_offset2.c
+> +++ b/src/t_dir_offset2.c
+> @@ -10,6 +10,7 @@
+>
+>  #include <errno.h>
+>  #include <fcntl.h>
+> +#include <limits.h>
+>  #include <stdio.h>
+>  #include <unistd.h>
+>  #include <stdint.h>
+> @@ -31,13 +32,63 @@ struct linux_dirent64 {
+>
+>  static uint64_t d_off_history[HISTORY_LEN];
+>  static uint64_t d_ino_history[HISTORY_LEN];
+> +static char next_name[NAME_MAX + 1];
+>
+>  void usage()
+>  {
+>         fprintf(stderr, "usage: t_dir_offset2: <dir> [[bufsize] [-|+]<fil=
+ename> [-v]]\n");
+> +       fprintf(stderr, "       t_dir_offset2: <dir> bufsize -|=3D [-v]\n=
+");
+> +       fprintf(stderr, "  a bare - removes, a bare =3D recreates, the en=
+try\n"
+> +                       "  the next getdents returns\n");
+>         exit(EXIT_FAILURE);
+>  }
+>
+> +/*
+> + * Find the entry that the next getdents call on fd returns first: read =
+one
+> + * entry from a second fd at the same offset. ext4 with a hashed dir kee=
+ps
+> + * the entry that did not fit in the previous buffer and returns it in t=
+he
+> + * next call even after it was removed, so removing or recreating this
+> + * entry gets a stale entry on any hash seed.
+> + */
+> +static int find_next_entry(const char *dir, int fd)
+> +{
+> +       char buf[BUF_SIZE];
+> +       struct linux_dirent64 *d;
+> +       off_t off =3D lseek(fd, 0, SEEK_CUR);
+> +       int fd3, nread, bpos;
+> +
+> +       if (off =3D=3D -1) {
+> +               perror("lseek");
+> +               return -1;
+> +       }
+> +       fd3 =3D open(dir, O_RDONLY | O_DIRECTORY);
+> +       if (fd3 < 0) {
+> +               perror("open");
+> +               return -1;
+> +       }
+> +       if (lseek(fd3, off, SEEK_SET) !=3D off) {
+> +               perror("lseek");
+> +               close(fd3);
+> +               return -1;
+> +       }
+> +       while ((nread =3D syscall(SYS_getdents64, fd3, buf, sizeof(buf)))=
+ > 0) {
+> +               for (bpos =3D 0; bpos < nread; bpos +=3D d->d_reclen) {
+> +                       d =3D (struct linux_dirent64 *) (buf + bpos);
+> +                       if (!strcmp(d->d_name, ".") || !strcmp(d->d_name,=
+ ".."))
+> +                               continue;
+> +                       snprintf(next_name, sizeof(next_name), "%s", d->d=
+_name);
+> +                       close(fd3);
+> +                       return 0;
+> +               }
+> +       }
+> +       if (nread < 0)
+> +               perror("getdents");
+> +       else
+> +               fprintf(stderr, "no entry after the first getdents\n");
+> +       close(fd3);
+> +       return -1;
+> +}
+> +
+>  int main(int argc, char *argv[])
+>  {
+>         int fd, fd2 =3D -1;
+> @@ -50,7 +101,8 @@ int main(int argc, char *argv[])
+>         int retval =3D EXIT_SUCCESS;
+>         const char *filename =3D NULL;
+>         int exists =3D 0, found =3D 0;
+> -       int modify =3D 0, verbose =3D 0;
+> +       int modify =3D 0, verbose =3D 0, next =3D 0, recreate =3D 0;
+> +       uint64_t old_ino =3D 0;
+>
+>         if (argc > 2) {
+>                 bufsize =3D atoi(argv[2]);
+> @@ -61,13 +113,21 @@ int main(int argc, char *argv[])
+>
+>                 if (argc > 3) {
+>                         filename =3D argv[3];
+> -                       /* +<filename> creates, -<filename> removes */
+> +                       /*
+> +                        * +<filename> creates, -<filename> removes, a ba=
+re -
+> +                        * removes and a bare =3D recreates the entry tha=
+t the
+> +                        * next getdents returns
+> +                        */
+>                         if (filename[0] =3D=3D '+')
+>                                 modify =3D 1;
+>                         else if (filename[0] =3D=3D '-')
+>                                 modify =3D -1;
+> +                       else if (!strcmp(filename, "=3D"))
+> +                               modify =3D recreate =3D 1;
+>                         if (modify)
+>                                 filename++;
+> +                       if ((modify < 0 || recreate) && !filename[0])
+> +                               next =3D 1;
+>                         if (argc > 4 && !strcmp(argv[4], "-v"))
+>                                 verbose =3D 1;
+>                 }
+> @@ -81,7 +141,7 @@ int main(int argc, char *argv[])
+>                 exit(EXIT_FAILURE);
+>         }
+>
+> -       if (filename) {
+> +       if (filename && !next) {
+>                 exists =3D !fstatat(fd, filename, &st, AT_SYMLINK_NOFOLLO=
+W);
+>                 if (!exists && errno !=3D ENOENT) {
+>                         perror("fstatat");
+> @@ -100,8 +160,52 @@ int main(int argc, char *argv[])
+>                 if (modify && fd2 < 0 && total =3D=3D 0) {
+>                         printf("getdents at offset 0 returned %d bytes\n"=
+, nread);
+>
+> -                       /* create/unlink entry after first getdents */
+> -                       if (modify > 0) {
+> +                       if (next) {
+> +                               if (find_next_entry(argv[1], fd))
+> +                                       exit(EXIT_FAILURE);
+> +                               filename =3D next_name;
+> +                       }
+> +
+> +                       /* create/unlink/recreate entry after first getde=
+nts */
+> +                       if (recreate) {
+> +                               /*
+> +                                * Keep the old inode open so that the ne=
+w file
+> +                                * cannot get its inode number. The old f=
+d may
+> +                                * still list the old file with its old s=
+t_ino.
+> +                                */
+> +                               int flags =3D O_PATH | O_NOFOLLOW;
+> +                               int ofd =3D openat(fd, filename, flags);
+> +                               struct stat ost;
+> +                               int nfd;
+> +
+> +                               if (ofd < 0) {
+> +                                       perror("openat");
+> +                                       exit(EXIT_FAILURE);
+> +                               }
+> +                               if (fstat(ofd, &ost) < 0) {
+> +                                       perror("fstat");
+> +                                       exit(EXIT_FAILURE);
+> +                               }
+> +                               old_ino =3D ost.st_ino;
+> +                               if (unlinkat(fd, filename, 0) < 0) {
+> +                                       perror("unlinkat");
+> +                                       exit(EXIT_FAILURE);
+> +                               }
+> +                               nfd =3D openat(fd, filename, O_CREAT | O_=
+EXCL,
+> +                                            0600);
+> +                               if (nfd < 0) {
+> +                                       perror("openat");
+> +                                       exit(EXIT_FAILURE);
+> +                               }
+> +                               if (fstat(nfd, &st) < 0) {
+> +                                       perror("fstat");
+> +                                       exit(EXIT_FAILURE);
+> +                               }
+> +                               close(nfd);
+> +                               close(ofd);
+> +                               exists =3D 1;
+> +                               printf("recreated entry %s\n", filename);
+> +                       } else if (modify > 0) {
+>                                 if (openat(fd, filename, O_CREAT, 0600) <=
+ 0) {
+>                                         perror("openat");
+>                                         exit(EXIT_FAILURE);
+> @@ -109,6 +213,11 @@ int main(int argc, char *argv[])
+>                                 exists =3D 1;
+>                                 printf("created entry %s\n", filename);
+>                         } else if (modify < 0) {
+> +                               if (next && fstatat(fd, filename, &st,
+> +                                                   AT_SYMLINK_NOFOLLOW))=
+ {
+> +                                       perror("fstatat");
+> +                                       exit(EXIT_FAILURE);
+> +                               }
+>                                 if (unlinkat(fd, filename, 0) < 0) {
+>                                         perror("unlinkat");
+>                                         exit(EXIT_FAILURE);
+> @@ -164,8 +273,13 @@ int main(int argc, char *argv[])
+>                                                i, d->d_name, (long long i=
+nt)d->d_ino,
+>                                                (long long int)d->d_off);
+>                                 if (!strcmp(filename, d->d_name)) {
+> +                                       /* the old fd may list it stale *=
+/
+> +                                       int stale =3D fd !=3D fd2 && old_=
+ino &&
+> +                                                   d->d_ino =3D=3D old_i=
+no;
+> +
+>                                         found =3D 1;
+> -                                       if (st.st_ino && d->d_ino !=3D st=
+.st_ino) {
+> +                                       if (!stale && st.st_ino &&
+> +                                           d->d_ino !=3D st.st_ino) {
+>                                                 fprintf(stderr, "entry %s=
+ has inconsistent d_ino (%lld !=3D %lld)\n",
+>                                                                 filename,
+>                                                                 (long lon=
+g int)d->d_ino,
+> diff --git a/tests/overlay/077 b/tests/overlay/077
+> index 00de0825..6426bc26 100755
+> --- a/tests/overlay/077
+> +++ b/tests/overlay/077
+> @@ -9,6 +9,7 @@
+>  # This is a regression test for kernel commits:
+>  # 65cd913ec9d9 ("ovl: invalidate readdir cache on changes to dir with or=
+igin")
+>  # 9011c2791e63 ("ovl: skip stale entries in merge dir cache iteration")
+> +# xxxxxxxxxxxx ("ovl: skip stale entries in impure dir iteration")
+>  #
+>  . ./common/preamble
+>  _begin_fstest auto quick dir
+> @@ -20,6 +21,8 @@ _fixed_by_kernel_commit 65cd913ec9d9 \
+>         "ovl: invalidate readdir cache on changes to dir with origin"
+>  _fixed_by_kernel_commit 9011c2791e63 \
+>         "ovl: skip stale entries in merge dir cache iteration"
+> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +       "ovl: skip stale entries in impure dir iteration"
+>
+>  _require_scratch_nocheck
+>
+> @@ -40,16 +43,20 @@ create_files() {
+>  _scratch_mkfs
+>
+>  # Create test area with a merge dir, a "former" merge dir,
+> -# a pure upper dir and impure upper dir. For each case, overlayfs
+> +# a pure upper dir and two impure upper dirs. For each case, overlayfs
+>  # readdir cache is used a bit differently.
+>  lowerdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+>  upperdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+>
+> -mkdir -p $lowerdir/merge $lowerdir/former $upperdir/pure $upperdir/impur=
+e
+> +mkdir -p $lowerdir/merge $lowerdir/former $upperdir/pure $upperdir/impur=
+e \
+> +       $upperdir/impure2
+>  # Lower files in merge dir are listed first
+>  create_files $lowerdir/merge m
+>  # Files to be moved into impure upper dir
+>  create_files $lowerdir o
+> +# Files to be moved into another impure upper dir, which only has entrie=
+s
+> +# with origin
+> +create_files $lowerdir n
+>  # File to be moved into former merge dir to make it impure
+>  touch $lowerdir/f100
+>
+> @@ -61,6 +68,7 @@ create_files $SCRATCH_MNT/former f
+>  touch $SCRATCH_MNT/merge/m100
+>  # Move copied up files so readdir will need to lookup origin d_ino
+>  mv $SCRATCH_MNT/o* $SCRATCH_MNT/impure/
+> +mv $SCRATCH_MNT/n* $SCRATCH_MNT/impure2/
+>  mv $SCRATCH_MNT/f100 $SCRATCH_MNT/former/
+>
+>  # Remove the lower directory and mount overlay again to create
+> @@ -84,6 +92,19 @@ $here/src/t_dir_offset2 $SCRATCH_MNT/impure $bufsize "=
++o0" 2>&1 >> $seqres.full
+>  echo -e "\nRemove file in impure upper dir:" >> $seqres.full
+>  $here/src/t_dir_offset2 $SCRATCH_MNT/impure $bufsize  "-o100" 2>&1 >> $s=
+eqres.full || \
+>         echo "Found unlinked file in impure upper dir (see $seqres.full f=
+or details)"
+> +# Remove the entry that the next getdents call returns first. An ext4 up=
+per
+> +# with a hashed dir returns it even after it was removed, so this checks=
+ the
+> +# stale entry case on every hash seed, not only when ext4 happens to kee=
+p the
+> +# removed file.
+> +echo -e "\nRemove next file in impure upper dir:" >> $seqres.full
+> +$here/src/t_dir_offset2 $SCRATCH_MNT/impure2 $bufsize "-" 2>&1 >> $seqre=
+s.full || \
+> +       echo "Found unlinked next file in impure upper dir (see $seqres.f=
+ull for details)"
+> +# Recreate the entry that the next getdents call returns first. A new fd
+> +# must list the name with the d_ino of the new file. The old fd may list=
+ it,
+> +# with the d_ino of the old or the new file.
+> +echo -e "\nRecreate next file in impure upper dir:" >> $seqres.full
+> +$here/src/t_dir_offset2 $SCRATCH_MNT/impure2 $bufsize "=3D" 2>&1 >> $seq=
+res.full || \
+> +       echo "Missing recreated next file in impure upper dir (see $seqre=
+s.full for details)"
+>
+>  # Check readdir cache invalidate on merge dir
+>  echo -e "\nCreate file in merge dir:" >> $seqres.full
+>
+> ---
+> base-commit: d07dca72d2455f4ba8c660ad4c008541ccccb707
+> change-id: 20261110-ovl077-stale-next-af1a98ce7151
+>
+> Best regards,
+> --
+> Daejun Park <daejun7.park@samsung.com>
+>
+>
