@@ -1,116 +1,99 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=216.71.153.144
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.41
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794304795;
-	b=rpH7lbDjINm3Fwa/diRdm6OFz6OkPiN+ns8Y62nUBRGeOL9fG1WhnbBMnxB8t8ioDVbn
-	 0yw/wd3DJVVzXkCZgP4nvhEotlknXUtzYPa5+NgBMj5yu070gsMpdkXCpbbXA8BAKkVfh
-	 crqeRO9KgfYOP5HYJ2KLYN5gqv5gZQl8KtBHbyziHmDhFLoAU+7PJ265s7JlPo3QJiinW
-	 D96fwt/ninNwFtZevFo+t1WXKt96M44hDlUtxnSHJLCnf93YMFc2UBsk1lCCxSbnN3VET
-	 lXroMHEXv6aek+Nu0x/XMuQjA158w5q+9N+p9yUOfLNzExhNe4UlrJqy0/8CVYuo3hA==
+	t=1794307390;
+	b=BaNYbW3ve9Ul83gIxt/hb3l5Utq1aWtq7DENWWaSX35opV3usmWY6kH4VUXOF0CGdihS
+	 IvHzYU/7Oefa6Gtya1SgXycxm31SvYiza2YYcbEM3SdfRhyDipBz4Nsp9k/56l1xn3wk1
+	 tGmbOnuiwB/ZVJBy2YlVfhQAKIXlWmrG/aKKjYyjySCYKeuIBvQWrKCc1ZuJQYIeS36vc
+	 zRjDuYLP7enleiXKcMXnKaG3Pw2tZRvPM7Lv/sIAzevU3Go6vLMSwZog+NfC0RYOXID2b
+	 zQRvq3vQNzM1+FT7g99OvDeLV7K/mvaqPVrlVdvIhfD7qLgkcFHooSMqumcUwXJw6Yw==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794304795;
-	h=DMARC-Filter:DKIM-Signature:X-CSE-ConnectionGUID:X-CSE-MsgGUID:
-	 X-IronPort-AV:Received:DKIM-Signature:Received:Received:From:To:Cc:
-	 Subject:Date:Message-ID:X-Mailer:Content-Transfer-Encoding:
-	 Content-Type:X-ClientProxiedBy:MIME-Version:X-MS-PublicTrafficType:
-	 X-MS-TrafficTypeDiagnostic:X-MS-Office365-Filtering-Correlation-Id:
-	 WDCIPOUTBOUND:X-MS-Exchange-SenderADCheck:
-	 X-MS-Exchange-AntiSpam-Relay:X-Microsoft-Antispam:
-	 X-Microsoft-Antispam-Message-Info:X-Forefront-Antispam-Report:
-	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
-	 X-MS-Exchange-AntiSpam-MessageData-0:
-	 X-MS-Exchange-AntiSpam-MessageData-1:X-Exchange-RoutingPolicyChecked:
-	 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount:
-	 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:X-OriginatorOrg:
-	 X-MS-Exchange-CrossTenant-Network-Message-Id:
-	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
-	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
-	 X-MS-Exchange-CrossTenant-FromEntityHeader:
-	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
-	 X-MS-Exchange-CrossTenant-UserPrincipalName:
-	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=ZbxD0n3NzE77ixQtSTgF0SF76bSPx3FdCgD3gLeGDIs=;
-	b=YqG3/SvF00NgLYQmcQj3Wkx+2wn3qr0p6drFasJLd/HVgaGEIdDt++o29w9SFV6cpQMn
-	 kINzbCZYpnLYGOq+YdSyH485CHsDlo7F+smVP2HBZgsydiYOsthRmPcB0N2PP49Yt5Fwx
-	 CtSNEFaALKAlaE/rHQH3rfkONTmnq9LAA74i9P8vpGMCaFV5RjaX2wPbfznig2aCvwPSC
-	 Wm0LVpUqgBJMA9vO9qoMnQSSzi7M362a3SSDx7Mm3IinCZOptrnhU71+2qCALCWs41swc
-	 3BJ+zifRTl2nAp6QqzSVN/6ylaNQIOkyiDCrGh/y5vzag6vUNhpUfc+jqyPKA/0aJWw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794307390;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:MIME-Version:References:
+	 In-Reply-To:From:Date:X-Gm-Features:Message-ID:Subject:To:Cc:
+	 Content-Type:Content-Transfer-Encoding;
+	bh=JsXSzGM4ezYqcoxi44l1Ddz5hqSKR6Ud8nVac2rGrQc=;
+	b=cKi5TSeq/9Dk5i0Dhinmk2uWCQrOet3m4OxAmuCyyLcK1BDau+IlT/uehDZWoB3W5GRp
+	 Y7MVjJzLuY59EAGu5/8O5h18ZalFR2TkyqIlecwNKHLqlrX7F0MZ14VrFFmqZPv6xDkCX
+	 N0qvRi5O6lorVqyvXlHQad/Hy6tfvisCJf3xjqZSzyaC5GC39pAqdHWwr/SKy+EnTvj2k
+	 3A2x21JIX3unqb1z4KFOxmWn1Pi5M/GU4hc63HX/w9Gllh8muhZmi9uv5Jgt+lT74TyRW
+	 Ia32ecQ6FIeJeRAySaNLjKFL7mdW9hpy6aD7pbs5SKwTROOww207pQwJUk4dUKOL9mA==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=wdc.com;
-	spf=pass smtp.mailfrom=wdc.com;
-	dkim=pass header.d=wdc.com header.i=@wdc.com header.a=rsa-sha256 header.s=dkim.wdc.com header.b=P7VZBFF6;
-	dkim=pass header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.a=rsa-sha256 header.s=selector2-sharedspace-onmicrosoft-com header.b=ctUxYy23;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=216.71.153.144
-Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
-	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
+	dmarc=pass header.from=gmail.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=ue05gr7h;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=209.85.208.41
+Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com [209.85.208.41])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D15A60A380B;
-	Tue, 10 Nov 2026 09:59:54 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6D15A60A380B
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 722E8606A321
+	for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 10:43:10 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 722E8606A321
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=wdc.com header.i=@wdc.com header.a=rsa-sha256 header.s=dkim.wdc.com header.b=P7VZBFF6;
-	dkim=pass (1024-bit key, unprotected) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.a=rsa-sha256 header.s=selector2-sharedspace-onmicrosoft-com header.b=ctUxYy23
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1794304801; x=1825840801;
-  h=from:to:cc:subject:date:message-id:
-   content-transfer-encoding:mime-version;
-  bh=THltjYHXV/tjAM1usySTk38HKFSZ7rzu2hrtptLuxiE=;
-  b=P7VZBFF6kIr4dMb9k/iwmuKnRI1XSksk+3EhdSB5gn/nrC/EyaDOehNi
-   UPTZ3eRasISw4m4VfLDqo5HIUDeFuUevoVv5PQLBudh9m5+PtvT/5331b
-   s9xqOPZFE4wpxPaR4kKthlkhtEWxO8I/TVGHO3/BTAXF0LBYvhsF9RnDA
-   3ST+SKMNCOMsRljwpErhPItGNlfZJU14dwGhHCz0nt3ALg0J11Cfze/FF
-   W6Rr1WFb44PHa1nx0FiiJ01ESbcHbg9VsrroAV7s9Bw9Q74dMk+v3SJbw
-   OgeB13gO3Oai+Q+qwRo6Cp1iQQwYdSTo6JY6+pSjsYvozK+HMT8ToDqt6
-   A==;
-X-CSE-ConnectionGUID: IIA5rFnnThagCSrYX8cMiQ==
-X-CSE-MsgGUID: KK4ktS5IT/qKbZVAVMJ0oQ==
-X-IronPort-AV: E=Sophos;i="6.27,205,1786982400"; 
-   d="scan'208";a="159534236"
-Received: from mail-southcentralusazon11012033.outbound.protection.outlook.com (HELO SN4PR2101CU001.outbound.protection.outlook.com) ([40.93.195.33])
-  by ob1.hgst.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 10 Nov 2026 18:00:00 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=a3nKqh/LFKcMBD4z5pPDCoe8eJkqm/Fa4MAmFrJfZ6hmqEVn2UobEgjvo3zHiAJmR80HwhGO7ltKCH86JkPNFjH5MxowYFtryVp+iwsUjzz2YR32jvIw4BkZ+P1croOoj6aligOIoyTsoHfk/9v6hXP4FoSvBspAOoZ8K7RULki5DjssrGJv1XmDMUEfuZLDSvbsSHsEugt+0szkWgL00UpwRm4wFYQvup1Sfugej925ufe8EmUDqqOrqvNQNv+oKrpO4Kr3pCz5HvjiU7s195yrEXc4Xsn4ZRgumHG9GIOc9JDRU44f0iveu1l59E8QMNB9CpfX9c7Rin7DuAeevw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ZbxD0n3NzE77ixQtSTgF0SF76bSPx3FdCgD3gLeGDIs=;
- b=yvs+DV6xcOqvTDMAHrLWWt4OpiFr3Y8UWjAtESlYhNHz665NYDxZ98jvQxrW7tt6RqqgpRziLhpN73+1PKoPRUiawN3IKa9mv5ynAVkAHUN02tMqSAhTze/AWghzeLhfI27CH3C8Ve6PpWRBBL4SueVxlHtCA3rZ3T5hf90YAv0K6rJRI0My5Kw5denCQDbvC2x8ZAk+eeDvHLfTRTEeih9m9eCysxU3onSdlEQzpTEmKP7h/0e/Muyp7AZwayY3vYltg4j5HWDPMqwnxc2XddNUUuvQ6qzY9cSUv47ZqfAQGPVy4BYhMaOuG2wAKZe+j2Jhu597Ix5MKB4KR6dysQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=ue05gr7h
+Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-6b58cb69927so2951514a12.0
+        for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 02:43:10 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1794307389; cv=none;
+        d=google.com; s=arc-20260327;
+        b=Fd1gfeJ7fJMfG7RwfoF9/xtnU98vkxiwsv3BtIAYFHKm1iEPNMa507fIXo/cGlNUlW
+         Vu7dmAdama58POiNWCEO6zwjOfASa2CAvxfTOeJwqtDtjwwV7iRCjv7VZWSjFYa/8wFe
+         CfMTUvWI6/YKYAMzcepiPJpkhR3O6COdu985lct69IHp4j7VsgdMKoLkSiffPOao2h9x
+         BLkkEzHT5j91eNCKVUwfX28W64JUj24Xv5jm7ULNfw6teFsqAvTgv3RZeT7gBL9gT8nM
+         uRKFyV0rZdkq1fyG1XEHCYiEWZGR6CuczFDD6WXVybFfCfBMJl5nHduN2OdxVoQyA7tZ
+         Rp2Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=JsXSzGM4ezYqcoxi44l1Ddz5hqSKR6Ud8nVac2rGrQc=;
+        fh=VIlGCOL5rRBzh+UXY33BBwPas1hHrWaR7c2lxhPDtsM=;
+        b=jGDsFaarpVzxbrpZLr6tZlACkbR5lrMkmqnVe75C7Da1r063YWXzkNZK54FiKmodD3
+         QF9xquarEqiVajCm2n6uMgdiN+LI93xYLHaMFErSjJMUMVsPTbNjHLH8+Uv4u6DGsSwX
+         xVZ/i1Y6FzYRfwRcarVkeLAkIHlhy9gUXYL8D3qUI9MlkhIBLfT46+DL86nYrUj4hLzV
+         DaNsMo+DWckg/rhmrWH1pOqbe0SuhofqmiZ6Vpj9cFnkF7gSMFI/Ik1Rdoszb7Cw47jV
+         vbHyJyeK62lMeWyGm7VQfmCB74Yqo9+CbGpeERQvbVGydPhIJEQR9IpWw1/Y5qw3fPTP
+         59MA==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=ZbxD0n3NzE77ixQtSTgF0SF76bSPx3FdCgD3gLeGDIs=;
- b=ctUxYy23RZjnZboDE7Cd6INL64mfRKr2tlVri+qagQdaR5kwxrv/diFsmnO1nfW7zdJG9vmF4oYfdEDFj4JadnqR5/ql9zdODEd/cdQb+ED/t1lq2iQdfy5D/ir1NGgsy73tCm2Ig7U/gpggVN0ptcEupSFRjOSeBAE74jUNXoE=
-Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-Received: from SA6PR04MB9447.namprd04.prod.outlook.com (2603:10b6:806:436::21)
- by CO6PR04MB7697.namprd04.prod.outlook.com (2603:10b6:303:a3::8) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.615.8; Tue, 10 Nov
- 2026 09:59:51 +0000
-Received: from SA6PR04MB9447.namprd04.prod.outlook.com
- ([fe80::14c6:1c14:485f:1825]) by SA6PR04MB9447.namprd04.prod.outlook.com
- ([fe80::14c6:1c14:485f:1825%6]) with mapi id 15.21.0592.012; Tue, 10 Nov 2026
- 09:59:51 +0000
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org,
-	Naohiro Aota <naohiro.aota@wdc.com>,
-	Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Subject: [PATCH] btrfs: test that fsync on zoned doesn't fail with -EAGAIN
-Date: Tue, 10 Nov 2026 10:59:11 +0100
-Message-ID: <20261110095911.2013053-1-johannes.thumshirn@wdc.com>
-X-Mailer: git-send-email 2.56.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: FR4P281CA0371.DEUP281.PROD.OUTLOOK.COM
- (2603:10a6:d10:f8::7) To SA6PR04MB9447.namprd04.prod.outlook.com
- (2603:10b6:806:436::21)
+        d=gmail.com; s=20260707; t=1794307389; x=1794912189; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=JsXSzGM4ezYqcoxi44l1Ddz5hqSKR6Ud8nVac2rGrQc=;
+        b=ue05gr7hkq0LMlQyIx3GcR+I9IKM6HARTjfFpYeNzp6dZb8eukCIrVKVmXr+gr9MuK
+         uRIiRGyqhPVijll0vNK/7cPIWAumEdylVj60lmg7WQLI/FlDr/BsyKfGw4+p4SQMAmZW
+         qHgkOAU9fd1mgl2W4tCEbBwKdB/Fy9L9q8tdK5IUI3yELM1dcYOfC4GArqNXyihFCqoc
+         iVSat2NB9LU0dDsxl3YwIjHnPT52kDNcOXSbZQ4mXyThNO7vafgIXQyqi+fIalUVzKWm
+         rS+keYApigUTvcfTKPImzUGsybC+wVLt4fyvgWnDlJTVWdsy29ZEDCYPPop07QWrrhOW
+         pZhA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1794307389; x=1794912189;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=JsXSzGM4ezYqcoxi44l1Ddz5hqSKR6Ud8nVac2rGrQc=;
+        b=BVuTO8f4iFL0koNxRBhToNuNYhhepFQ5fNx3qo1ZXnYlh+Tml5o8uhsJrolEwlXo9w
+         CFWP1DiXtdeVp/gXfBLOYooye7YBjQkuqCnOAmsYP30dGz14xGFnfq4lsdzAw4ncmcj0
+         +GW/AY0u8kXZLHqV0RExvkm2o+EVm8Jh5DqOeFz4qxyn/oLeAaZ2CfY02y9JDQJaDwlr
+         D7yMdKYeModxxyVeDhb2iG8lXLHtxeqvWqUij+Wu9T3xNpF7LS6UVyqOSphvfLbAM/ts
+         3Ogmh5lG2oukBgGomUX+aH9ItVkSqQqARVH9GqHRwKDFSUTxd879YquVsRBbetk7+IoF
+         i6rQ==
+X-Gm-Message-State: APuU4Z96u9kkR1PbCCeRYPLQEfiYb6348VSC9pEpVpyfn1kFU8YLiLbw
+	MXAhmkBrMq+Um8Cf/k/Ph0vNZqR1FsdRZQWFcAGxQGQ68a58ijE5bHeVj3oBa6uFs9ZoCJLOdsw
+	4jqIyTsPPVy3YUoBIOfkoYG6S5ljmsAs=
+X-Gm-Gg: AYBFou2nRQEMG6TG03kQsEFXRzD+JaDr0ohW5EJghRT05pTzEThu92T4+0GgIO0Ou5C
+	+aB4PIeMLcjO5juI9LxZQlHop4fXK4VK8CdwUh0XApCE6itmjP/a3bQ+6GQ33s2kn+C5NY5BLJB
+	YNmFw/YwtKvvsFQfYmuoD3Q4oKCSoGN3NwSHYTkojqNkdA03KE8LrCOOsmmqLpurE0sylITImz4
+	H01I/6OnB03g0uZdcoKrS+WjLEnkuOLL7CSOmq1Vnw8GcJOeSQNpRnqYHSMi1NLJ/AQ4qdiMkD7
+	Nkk275jdBJNH6LsHaf1kEJcBUUkXZi0k4j8puL7YNYMaeP0z5ayL7WV6BrgiXbgG4v5YaQzjYSJ
+	2izG+22PEEtGtrT3RHJWTS2sg2fwtPNfTcr065gfjHwufOslGIwB/mWQFhKFMcWUnv9lHDw==
+X-Received: by 2002:aa7:da1a:0:b0:6b5:8c7c:d540 with SMTP id
+ 4fb4d7f45d1cf-6b7572120b4mr1034301a12.13.1794307388306; Tue, 10 Nov 2026
+ 02:43:08 -0800 (PST)
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -120,176 +103,411 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SA6PR04MB9447:EE_|CO6PR04MB7697:EE_
-X-MS-Office365-Filtering-Correlation-Id: eda59316-c606-4dcc-2455-08df3f115cf2
-WDCIPOUTBOUND: EOP-TRUE
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|1800799024|376014|10070799003|23010399003|19092799006|11063799006|56012099006|261022113327099003|261022105027099003|261022075727099003|261021123027099003|261021121427099003|261026121527099003|10067099003|261026140227099003|261028144727099003|261102123227099003|261009223027099003|18002099003|3023799007;
-X-Microsoft-Antispam-Message-Info:
-	0O9c/wzMhedq8Sv10TlFDfGSEnZypFc6bsp8emq99PHSO3dJIz+UNk3ayRDwiXam9zm0RUguGb/r2G4kO5m5pKlQdba/CFXXIStp9VYEPCIR3oelvVRzeu/4oN/kFkJEf8m8Og5ybGKr/x0c6FURwu3XHjpNfNOABziSknyfLfvfwFAnYF/qlFrhhM2TyYPHAohhTQdNwoyLrNwnphjVt/89Ok8dIKozUQz8pnTco4XvbxVxuH4np71bJbP4kbzeBxgWECHiBRmMfKLO4gZk+4TloNNdAabpEli8JCWuYDEikc+QgWlxMI0/bzvU17FpI6T+1smS9GM3bfUbOaZdWeZlg7qadHcl+r6fr9KfmB61xE3px0uXxfNKkOsFcCwudZlA6KPt1NA6ZcJRVhVISBOF8sxNG7fW6TFXWhYLL/9ZLQzWZbQQZ4hQRLEVVrYmu7cdvxP2LqFtfVYRzXUA8YdiJ3YgaOK+zJyArKTOi9K6xqJOm/jHio3YI9MNWw4VAZsi7eEKrnk7wcL0Ucycd/grl9MmIud9ATIx10e31k66HDFwZHG30YrAmx67hyZJp+XbfAI/g3xqrYuRRTDejF5JUT8tVdU4NzxDNMiJtujSy+E6B8M/AUsepA1keRC6qzStkdK/ZG8PhwspP2w8SQsjAz62Mh1MLqVwNSKYSZg=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA6PR04MB9447.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(10070799003)(23010399003)(19092799006)(11063799006)(56012099006)(261022113327099003)(261022105027099003)(261022075727099003)(261021123027099003)(261021121427099003)(261026121527099003)(10067099003)(261026140227099003)(261028144727099003)(261102123227099003)(261009223027099003)(18002099003)(3023799007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 2
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?QTLTkjcepdLPgLZWpXeKOXeb8YOGYAjryydDPRtaA4Ac+bR1KHVhwsa+3H5C?=
- =?us-ascii?Q?ZH05CQtzuQeXN6JTWTHDD9nlCWydiHD0pnr8RjXs9gRhW5fmnCyTvDbBY5pu?=
- =?us-ascii?Q?RvaastREFiSDVNT/tI5Q6aM38iP5uRrdYdFqYi9OGXu6TGHHtTnNqFc+kWFe?=
- =?us-ascii?Q?5Bez8LdHB5HIvovEV9qHb6A06KUpKhRiDcTVtRbWxZfdCd8pYAR3ED9RSm5e?=
- =?us-ascii?Q?iqmo1ZBhcZQ6yTvYIACIJ2m5iSbHBpgpOoCJDGHsn0oP+lDHyIu9sTnUl1mW?=
- =?us-ascii?Q?zs4X6Sf64WtgYTKEF+mi9LFlCTYftjRmbsPlIVJZfmmcAAaKREev8vPX77SS?=
- =?us-ascii?Q?HhYBzI+2rrUo/tJJNADZVS54e+0yGogxP3DNeqrGPJmhz6kqwY7UvAZBVkjm?=
- =?us-ascii?Q?xEF5wZfPHIMdLto7IxWJbemxNAMiEBPXWpraPVJ8ktXlEn6ko0VfaHHZcnGo?=
- =?us-ascii?Q?DOpHxDvIcNFd55KhREx2bpx0dD6HNOvkH0aqf9NwAtDcYeTVO6dCqlw36lnI?=
- =?us-ascii?Q?iC1m8bntFdHyMoY7KpA09jGCmTLn8AkqKPaie2tFjSRY0s/eE0f2/r40rORi?=
- =?us-ascii?Q?cajiFr/6kyUqfoZSpuV+Qh+vofPu4+hjP1VmpVngnNmCElFxZ664sPVzul8C?=
- =?us-ascii?Q?YrwyF6E/Guqwdg3rdcGQp2BC/xekBvnHQZpx3io8C02j32soNe9dxzuQKMf/?=
- =?us-ascii?Q?WuJWqJEsTRg+tVVGtBP9HquJApnj6ninTQcsrzjHVSXfNINqRmjNbO3J6U5V?=
- =?us-ascii?Q?KGZqcM9hkM7y6ujc1feHlSc2WEewHjhwNvqRlJbtYNzZ4xY5GGU6qtx7FIek?=
- =?us-ascii?Q?nIBvG7JPtei04pm/ceisRqMtD7iP6ISCajalwUMc6ta99ifKrAcW8PqGN9gs?=
- =?us-ascii?Q?T3Llj5d9Fi5r9DTt+1y8ZTs2OL5xxMRJvNptoI8iSophctHjwenLyXGuzRET?=
- =?us-ascii?Q?jWB9tJJWNS4FSTdKFTIMR5bRG+9KxXchGptYZAEZQyZJGQPHBalxik6Ej1wA?=
- =?us-ascii?Q?O34aY5EuDCtNwz6+qTVXtbVDqpYQVDmYEu3m1kZmmRkUKYvn+QEWudiN7+ZS?=
- =?us-ascii?Q?c6U/iGiaXeMZ8fr7FN711JKpnyI5owq2SlvT3hzJVJ2n9xkBitlL5g6l5xxz?=
- =?us-ascii?Q?n2kisUbN0u1WXo4I0VvuAI6EuoeqHaSPjvdYh5dbH16rdkUcJ9w9L2U2BKKA?=
- =?us-ascii?Q?q2qGfrp5zoq2WOyffAaaSXTE3nEhUW336mpcewcGemo9Uaoo+LYoXwFU+HGu?=
- =?us-ascii?Q?bjECyFOqWPMK6linjVOH0IDNiEpMsxAa2r6v9ZIQUNnVwKadds81BY6/DYFt?=
- =?us-ascii?Q?l9yzR7Lhp4YUFjdNvmHMjo4fYhN1R3Y4TAK2ghwU/J8+iNF/RxopQELJjm5e?=
- =?us-ascii?Q?RER9HydBmM+r4x9/LflSMS+pQAzOV37vHUMrWLnCLZlvXIptcxs6vVSiyrhw?=
- =?us-ascii?Q?yPmNOrinO15rWNnbWFtODoNsSIGl6tTgbi15eYFSmIc4esfLhjCxUJLD+kyd?=
- =?us-ascii?Q?m0IMcZ5VUki3iq2PBbZaIyvQDtO514zPmw3A8sEFlmsmsjbvOgrzfMEomSLy?=
- =?us-ascii?Q?4TcmxqgcyMUMx8bTh6mW5GVU0720d/9SPkJCKEa5fCKGO78WVmuDbCejT3B/?=
- =?us-ascii?Q?+Vd8rK4gwlbW2/9EYf3mja2Zhye04/gLgbfgGG+RkhDJPTfl8cr47AbTKEIm?=
- =?us-ascii?Q?a5TmfhLJxHly49b0Hflol6wzz4cZ8jtEJxsIUszfZnVcczQd2DkhKd+bTzBn?=
- =?us-ascii?Q?WeBY0S20ZK/0f898gVX2Sl+F2hvSw6YI3A2bl/1oGKzfx+TbQSqAQyEpoqIO?=
-X-MS-Exchange-AntiSpam-MessageData-1: HYarcM/btgSIdTeVDFTiRDjDtPRFTIPvNMo=
-X-Exchange-RoutingPolicyChecked:
-	z+Gqi5NILtpRCv9Gmrw1cYXRf2Qj22mFvXGhCREEsxsQfhaHP1p6cDsWDaqmJT93R7ewKkLRJ/ZTmWmiaRzTwxPCUvxF1Cr/OOchcNjxJRzbnNLdwiQ9szKhG27lzLiomq82JVNbEMpjnyxnsgt9AZsrl03SwJM0wkwqe+UI4leU/hy0rH11jZCis595gwwhMW5RLEO7GMLnLBgxR2kxJqdTVweGyPHEDQjDr9T9Rn5Ss6UxmJ2puPU+7PJcW+L4H2ccq4sRXvrBt+kZHlFi1K/KR8hFn3Z0b07h6/5BHTnhBkVPllB20Rrb9meIfQTOMMyehh02NC4rTOAsppbJaQ==
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	K4Eok/z8Cd+o8/Mw78MmNPheMSKqn3t5GxjINZdkAceSgOwExqc+kvm/UUJ1Oq+ocjTyqcm6YEM9AsQRUgSvPsN+u1hKYQWijKr/luBV4Wxhjxjfk0VY3Hrm3orhohD5jwYpbq99WU3M93905lK71ev7pKXLv5Q6xsiTFECLY45fhwcVWiX1eV0lthjyZ5r9r82v7Nc9kYA4OIaPh5OWoXOgPvIN/HLz8IkzCgjFol4+kiA0Cjsn5/2M99rbo5SEdDXx7kuD7zSIpeHvqnM70Ho7OdIea9c8ckdGQbdE5MdwpgVB5AoQLUJ9+enw6F/kHgvX4j+Koe7Tm6oAhONtdMU/P4tWT4UBdXIoxCTPZtUHdod1A1M1C8e+DsH5W/iY0yY1rTTNlhRo/WKrqhlMDBUSVMfXHzM+1utyQRkmtWvR4asNFCGFE+QHhSZKFWzwlixqpUDZ6E79zABR+xkQ2a3wWVSygOIK6/W8AIMRMeLW6BbbsBhxo+L5Z4llvlFBYygnQ64t+GTOFF1bvTX3QXyM8SII3GIfsLdaozoweuEDIyuuvDFAiumsITv4wb4y7bfGqHWRCY96jLd89zfHgUviPiq0x18p/klbnbpyZLWVulYMognRjfFmCfvBLoha
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: eda59316-c606-4dcc-2455-08df3f115cf2
-X-MS-Exchange-CrossTenant-AuthSource: SA6PR04MB9447.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2026 09:59:51.7090
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: JoSfcV6IZkpWgOkZqoqXCbRLbPoTTTvO/cKlBLTa+xCPqrsmnaShyc78GmgdvfxFgtQpwrOVVxOCFN6jPpWW4mx9eLlDhU8Y1zbCXlLEjMc=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CO6PR04MB7697
+References: <773faf2a275e0a51bd38cf68f492856c.josef@toxicpanda.com>
+ <946b46fbf1c555a47a8a9304f2ee31af.josef@toxicpanda.com> <94833333cf2c5dd487022cb290174393.josef@toxicpanda.com>
+In-Reply-To: <94833333cf2c5dd487022cb290174393.josef@toxicpanda.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 10 Nov 2026 11:42:57 +0100
+X-Gm-Features: AclHuK9mWhcDtue243tQ4Mj46I6cdgJnb0dkdjX_eWuab2zVh5UpLwcHCmk3ZRY
+Message-ID: <CAOQ4uxjM_-yFt5is2k0Vrk_5LrLBoPqgmepTzSrmJf561_uRnQ@mail.gmail.com>
+Subject: Re: [PATCH fstests v3] overlay: test that syncfs and unmount persist
+ all changes
+To: Josef Bacik <josef@toxicpanda.com>
+Cc: fstests@vger.kernel.org, Zorro Lang <zlang@kernel.org>, 
+	Christian Brauner <brauner@kernel.org>, linux-unionfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On a zoned filesystem, btrfs_start_transaction() forces a transaction
-commit when the delayed refs reservation exceeds its zoned cap. If the
-cap is still exceeded after the commit, it returned -EAGAIN, which
-fsync passed on to user space.
+On Mon, Nov 9, 2026 at 11:52=E2=80=AFPM Josef Bacik <josef@toxicpanda.com> =
+wrote:
+>
+> overlayfs is about to stop syncing the whole upper filesystem on syncfs(2=
+)
+> and unmount.  With fsync=3Drelaxed it only writes the upper inodes that w=
+ere
+> modified through the overlay, so it has to know about all of them.
+>
+> Modify an overlay in many ways: new files and directories, data and
+> metadata copy up, stores through a shared mapping, sendfile, copy_range,
+> an O_TMPFILE, a short and a long symlink, hard links, renames, whiteouts.
+> Do the same to files that were synced before, so that nothing but the
+> modification itself tells overlayfs about them.  Then drop the caches, sy=
+nc
+> or unmount the overlay, shut down the base filesystem without flushing it=
+s
+> log, cycle the mounts and check that nothing has changed.
+>
+> Do that with every fsync mode that syncs, with and without redirect_dir a=
+nd
+> metacopy.
+>
+> The base filesystem has to have a journal, so what gets lost if overlayfs
+> misses a modification is data in the page cache.  Changes of metadata are
+> in the log, which overlayfs commits in any case.
+>
+> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+> ---
+> v1: https://lore.kernel.org/r/773faf2a275e0a51bd38cf68f492856c.josef@toxi=
+cpanda.com
+> v2: https://lore.kernel.org/r/946b46fbf1c555a47a8a9304f2ee31af.josef@toxi=
+cpanda.com
+>
+> v2->v3:
+> - It's overlay/090 now. (Amir)
 
-Run parallel writers creating, overwriting and deleting small files with
-an fsync after every write on a zoned device with a limited number of
-active zones, and check that no fsync fails.
+Sorry to nag. Zorro renumbers test conflicts anyway before merge,
+but I have a staged 090 test for bugfix already staged on ovl-fixes:
+https://lore.kernel.org/linux-unionfs/20261109134006.2555438-1-giuseppe@scr=
+ivano.org/
+so please take 091 to ease my own workflow (apply and test your patch).
 
-Assisted-by: LLM
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
----
- tests/btrfs/364     | 76 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/364.out |  2 ++
- 2 files changed, 78 insertions(+)
- create mode 100755 tests/btrfs/364
- create mode 100644 tests/btrfs/364.out
+> - Every round passes fsync=3D, with fsync=3Dauto in place of the default,=
+ and
+>   _exclude_scratch_mount_option is gone. (Amir)
+> - Added _require_scratch_overlay_features fsync redirect_dir metacopy. Th=
+at
+>   needs [2], and the test doesn't run on older kernels any more. (Amir)
+> - The rounds are in the golden output. (Amir)
+> - Every fsync mode runs with redirect_dir and metacopy off and on, that's=
+ 16
+>   rounds. It takes 70s here, so it's not in quick any more. (Amir)
 
-diff --git a/tests/btrfs/364 b/tests/btrfs/364
-new file mode 100755
-index 00000000..39b0141e
---- /dev/null
-+++ b/tests/btrfs/364
-@@ -0,0 +1,76 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Western Digital Corporation.  All Rights Reserved.
-+#
-+# FS QA Test 364
-+#
-+. ./common/preamble
-+_begin_fstest auto quick zone
-+
-+_cleanup()
-+{
-+	cd /
-+	[ -n "$pids" ] && kill $pids &> /dev/null
-+	wait
-+	rm -r -f $tmp.*
-+}
-+
-+. ./common/zoned
-+
-+_fixed_by_kernel_commit XXXXXXXXXXXX \
-+	"btrfs: zoned: don't fail start_transaction() after a forced commit"
-+
-+_require_scratch_size $((4 * 1024 * 1024)) # kB
-+_require_zoned_device "$SCRATCH_DEV"
-+_require_limited_active_zones "$SCRATCH_DEV"
-+
-+nr_writers=$((8 * LOAD_FACTOR))
-+nr_files=250
-+nr_rounds=$((4 * TIME_FACTOR))
-+
-+_scratch_mkfs -d single -m single >> $seqres.full 2>&1 || _fail "mkfs failed"
-+_scratch_mount
-+
-+# Every other file is deleted per round to churn data and metadata.
-+writer()
-+{
-+	local dir=$SCRATCH_MNT/w$1
-+	local r i sz
-+
-+	mkdir -p $dir
-+	for r in $(seq $nr_rounds); do
-+		for i in $(seq $nr_files); do
-+			# 4K - 256K
-+			sz=$(( ((i + r + $1) % 64 + 1) * 4096 ))
-+			$XFS_IO_PROG -f -c "pwrite -q -S $i -b 64k 0 $sz" \
-+				-c fsync $dir/$i || return 1
-+		done
-+		for i in $(seq 1 2 $nr_files); do
-+			rm -f $dir/$i
-+		done
-+	done
-+}
-+
-+pids=""
-+for w in $(seq $nr_writers); do
-+	writer $w > $tmp.writer.$w 2>&1 &
-+	pids="$pids $!"
-+done
-+
-+ret=0
-+for p in $pids; do
-+	wait $p || ret=1
-+done
-+unset pids
-+cat $tmp.writer.* >> $seqres.full
-+[ $ret -eq 0 ] || echo "writer failed, see $seqres.full"
-+
-+find $SCRATCH_MNT -type f | sort | xargs md5sum > $tmp.md5.before
-+_scratch_cycle_mount
-+find $SCRATCH_MNT -type f | sort | xargs md5sum > $tmp.md5.after
-+diff -q $tmp.md5.before $tmp.md5.after > /dev/null || echo "data mismatch"
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+_exit 0
-diff --git a/tests/btrfs/364.out b/tests/btrfs/364.out
-new file mode 100644
-index 00000000..6bc54ae6
---- /dev/null
-+++ b/tests/btrfs/364.out
-@@ -0,0 +1,2 @@
-+QA output created by 364
-+Silence is golden
--- 
-2.56.0
+Damn, this sucks. This is a simple test is should by all means be quick.
+Some suggestion (pick any):
+1. Test only relaxed and on, which your patch set add
+    auto is always one of them and strict is not related to syncfs/umount a=
+t all
+2. md5sum all the file at one invocation
+3. find . -printf '%p %y %m %U:%G %n %s %l\n' in place of many stat invocat=
+ions
 
+2 and 3 are quick suggestions from Opus 5.5 based on guess work
+I am sure that your models with access to the test run can do much better
+no need to overdo and no need to pay penalty for test readability
+but 70 seconds is way off the mark for a test like this
+
+> - The mmap step with the syncfs in it comes first, it used to write
+>   everything that came before it. (Sashiko, Amir)
+> - The caches are dropped after the snapshot, for all files. (Sashiko, Ami=
+r)
+> - The overlay is mounted with noatime. The snapshot reads every file, the
+>   atime update marks the overlay inode dirty, and that hid any modificati=
+on
+>   that overlayfs had missed.
+> - Added files that are synced before they are modified. Creating a file a=
+nd
+>   copying it up mark the overlay inode dirty, and that hid any later
+>   modification that overlayfs had missed.
+> - Added fallocate, and a copy_range that isn't aligned so xfs can't refli=
+nk
+>   it.
+
+Oh my, so many "hid modification that missed"
+I guess I need to trust the AI test/review process which found them ;)
+
+Thanks,
+Amir.
+
+>
+> This is for "ovl: only sync what was written through the overlay" [1].
+>
+> It passes on ext4 and xfs with the series, and with only the first patch =
+of
+> it, which adds the mount options and still syncs the whole upper file
+> system.
+>
+> I ran it on four kernels that I broke on purpose. All of them fail, only =
+in
+> the fsync=3Dauto and fsync=3Drelaxed rounds:
+>
+> - The function that marks the overlay inode dirty does nothing: the file
+>   data is gone.
+> - Only ovl_copyattr() doesn't mark the inode: the pwrite, the sendfile an=
+d
+>   the copy_range to the files that were synced before are gone. v2 passes=
+ on
+>   this one.
+> - A dirty overlay inode isn't kept after the last iput(): the file data i=
+s
+>   gone. v2 only notices in its unmount rounds.
+> - Nothing is written at unmount: the unmount rounds lose the file data.
+>
+> [1] https://lore.kernel.org/r/20261107-b4-ovl-containerized-sync-v5-0-d34=
+b4ae57fdf@toxicpanda.com
+> [2] https://lore.kernel.org/r/20261106155832.3867017-1-amir73il@gmail.com
+>
+>  tests/overlay/090     | 214 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/090.out |  17 ++++
+>  2 files changed, 231 insertions(+)
+>  create mode 100755 tests/overlay/090
+>  create mode 100644 tests/overlay/090.out
+>
+> diff --git a/tests/overlay/090 b/tests/overlay/090
+> new file mode 100755
+> index 00000000..7f6e58f4
+> --- /dev/null
+> +++ b/tests/overlay/090
+> @@ -0,0 +1,214 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 Josef Bacik.  All Rights Reserved.
+> +#
+> +# FS QA Test 090
+> +#
+> +# Test that syncfs(2) on an overlay, and unmounting one, persist everyth=
+ing
+> +# that was modified through it.
+> +#
+> +# overlayfs used to sync the whole upper filesystem for that.  With
+> +# fsync=3Drelaxed it only writes the upper inodes that were modified thr=
+ough this
+> +# overlay, so it has to know about all of them.
+> +#
+> +# Modify the overlay in every way we can think of, sync it, shut down th=
+e base
+> +# filesystem without flushing its log, cycle the mounts and check that n=
+othing
+> +# has changed.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto shutdown copyup whiteout mmap redirect metacopy
+> +
+> +. ./common/attr
+> +
+> +_require_scratch
+> +_require_scratch_shutdown
+> +_require_metadata_journaling $SCRATCH_DEV
+> +_require_scratch_overlay_features fsync redirect_dir metacopy
+> +_require_xfs_io_command "syncfs"
+> +_require_xfs_io_command "sendfile"
+> +_require_xfs_io_command "copy_range"
+> +_require_xfs_io_command "falloc"
+> +_require_xfs_io_command "-T"
+> +_require_xfs_io_command "flink"
+> +_require_attrs
+> +_require_chown
+> +_require_mknod
+> +
+> +lowerdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+> +
+> +create_lower()
+> +{
+> +       local f
+> +
+> +       # This leaves the base filesystem mounted
+> +       _scratch_mkfs >> $seqres.full 2>&1
+> +
+> +       mkdir -p $lowerdir/dir $lowerdir/rmdir $lowerdir/mvdir
+> +       for f in append truncate mmap chmod chown chown_append xattr link=
+ \
+> +                rename remove dir/append rmdir/file mvdir/file; do
+> +               $XFS_IO_PROG -f -c "pwrite -S 0x6c 0 256k" $lowerdir/$f \
+> +                       >> $seqres.full
+> +       done
+> +
+> +       # These were not written through the overlay, so it does not have=
+ to
+> +       # sync them.
+> +       $XFS_IO_PROG -c "syncfs" $OVL_BASE_SCRATCH_MNT
+> +}
+> +
+> +# Creating a file and copying it up are modifications.  overlayfs rememb=
+ers them
+> +# until the file is synced, and a later modification that it misses does=
+ not
+> +# show.  So make files that are in the upper layer and have been synced.
+> +prepare()
+> +{
+> +       local m=3D$SCRATCH_MNT
+> +       local f
+> +
+> +       mkdir $m/clean
+> +       for f in pwrite truncate fallocate mmap sendfile copy_range chmod=
+ \
+> +                chown xattr link rename remove; do
+> +               $XFS_IO_PROG -f -c "pwrite -S 0x70 0 256k" $m/clean/$f \
+> +                       >> $seqres.full
+> +       done
+> +       $XFS_IO_PROG -c "syncfs" $m
+> +}
+> +
+> +modify()
+> +{
+> +       local m=3D$SCRATCH_MNT
+> +
+> +       # Stores through a shared mapping, also after a syncfs, no msync.=
+  This
+> +       # has to be the first one, the syncfs must not write anything els=
+e.
+> +       $XFS_IO_PROG -c "mmap -rw 0 256k" -c "mwrite -S 0x66 0 64k" \
+> +               -c "syncfs" -c "mwrite -S 0x67 64k 64k" $m/mmap >> $seqre=
+s.full
+> +
+> +       # The files that overlayfs has nothing to remember about
+> +       $XFS_IO_PROG -c "pwrite -S 0x71 64k 64k" $m/clean/pwrite >> $seqr=
+es.full
+> +       $XFS_IO_PROG -c "truncate 4k" $m/clean/truncate
+> +       $XFS_IO_PROG -c "falloc 256k 64k" $m/clean/fallocate
+> +       $XFS_IO_PROG -c "mmap -rw 0 256k" -c "mwrite -S 0x72 64k 64k" \
+> +               $m/clean/mmap >> $seqres.full
+> +       $XFS_IO_PROG -c "sendfile -i $m/link 0 64k" $m/clean/sendfile \
+> +               >> $seqres.full
+> +       # Not aligned, so that the data is copied and not shared
+> +       $XFS_IO_PROG -c "copy_range -s 1 -d 1 -l 64k $m/link" \
+> +               $m/clean/copy_range
+> +       chmod 640 $m/clean/chmod
+> +       chown 1234:1234 $m/clean/chown
+> +       $SETFATTR_PROG -n user.test -v value $m/clean/xattr
+> +       ln $m/clean/link $m/clean/link2
+> +       mv $m/clean/rename $m/clean/renamed
+> +       rm $m/clean/remove
+> +
+> +       # New files and directories
+> +       $XFS_IO_PROG -f -c "pwrite -S 0x61 0 1m" $m/new >> $seqres.full
+> +       mkdir $m/newdir
+> +       $XFS_IO_PROG -f -c "pwrite -S 0x62 0 64k" $m/newdir/new >> $seqre=
+s.full
+> +       $XFS_IO_PROG -f -c "pwrite -S 0x63 0 64k" $m/dir/new >> $seqres.f=
+ull
+> +       ln -s new $m/symlink
+> +       # Too long to be stored in the inode
+> +       ln -s $(printf 'a%.0s' $(seq 1000)) $m/longsymlink
+> +       mkfifo $m/fifo
+> +
+> +       # Copy up, then change the data
+> +       $XFS_IO_PROG -c "pwrite -S 0x64 256k 64k" $m/append >> $seqres.fu=
+ll
+> +       $XFS_IO_PROG -c "pwrite -S 0x65 256k 64k" $m/dir/append >> $seqre=
+s.full
+> +       $XFS_IO_PROG -c "truncate 4k" $m/truncate
+> +
+> +       # The other ways to write data
+> +       $XFS_IO_PROG -f -c "sendfile -i $m/link 0 256k" $m/sendfile \
+> +               >> $seqres.full
+> +       $XFS_IO_PROG -f -c "copy_range -l 256k $m/link" $m/copy_range
+> +       $XFS_IO_PROG -T -c "pwrite -S 0x69 0 64k" -c "flink $m/tmpfile" $=
+m \
+> +               >> $seqres.full
+> +
+> +       # Copy up, then change the metadata
+> +       chmod 640 $m/chmod
+> +       chown 1234:1234 $m/chown
+> +       $SETFATTR_PROG -n user.test -v value $m/xattr
+> +
+> +       # With metacopy=3Don the first one only copies up the metadata
+> +       chown 1234:1234 $m/chown_append
+> +       $XFS_IO_PROG -c "pwrite -S 0x6a 256k 64k" $m/chown_append \
+> +               >> $seqres.full
+> +
+> +       # Names
+> +       ln $m/link $m/link2
+> +       mv $m/rename $m/renamed
+> +       # Without redirect_dir=3Don mv gets EXDEV and copies the director=
+y
+> +       mv $m/mvdir $m/mvdir2
+> +       rm $m/remove
+> +       rm -r $m/rmdir
+> +}
+> +
+> +# No inode numbers, no timestamps, and no sizes and link counts of direc=
+tories
+> +snapshot()
+> +{
+> +       local f
+> +
+> +       cd $SCRATCH_MNT
+> +       find . | LC_ALL=3DC sort | while read -r f; do
+> +               if [ -L "$f" ]; then
+> +                       echo "$f $(stat -c '%F %u:%g' "$f") $(readlink "$=
+f")"
+> +               elif [ -f "$f" ]; then
+> +                       echo "$f $(stat -c '%F %a %u:%g %h %s' "$f")" \
+> +                            "$(md5sum < "$f")"
+> +               else
+> +                       echo "$f $(stat -c '%F %a %u:%g' "$f")"
+> +               fi
+> +       done
+> +       _getfattr --absolute-names -n user.test xattr clean/xattr 2>&1
+> +       cd - > /dev/null
+> +}
+> +
+> +# <syncfs|umount> <mount options>
+> +do_test()
+> +{
+> +       local how=3D$1
+> +       local opts=3D$2
+> +
+> +       echo "=3D=3D=3D $how $opts" | tee -a $seqres.full
+> +
+> +       create_lower
+> +
+> +       # An atime update is a modification too.  With atime the snapshot=
+ would
+> +       # make overlayfs write every file that it reads, also one that
+> +       # overlayfs has lost track of.
+> +       _scratch_mount -o noatime,$opts
+> +
+> +       prepare
+> +       modify
+> +       snapshot > $tmp.before
+> +
+> +       # Nobody holds on to the overlay inodes when they are synced
+> +       echo 2 > /proc/sys/vm/drop_caches
+> +
+> +       if [ $how =3D syncfs ]; then
+> +               $XFS_IO_PROG -c "syncfs" $SCRATCH_MNT
+> +               _scratch_shutdown | tee -a $seqres.full
+> +               _scratch_unmount
+> +       else
+> +               # Only the overlay, the base filesystem stays mounted
+> +               _unmount $SCRATCH_MNT
+> +               _scratch_shutdown | tee -a $seqres.full
+> +               _unmount $OVL_BASE_SCRATCH_MNT
+> +       fi
+> +
+> +       _scratch_mount -o noatime,$opts
+> +       snapshot > $tmp.after
+> +       cat $tmp.after >> $seqres.full
+> +       diff -u $tmp.before $tmp.after
+> +       _scratch_unmount
+> +}
+> +
+> +for how in syncfs umount; do
+> +       for mode in auto relaxed on strict; do
+> +               for meta in off on; do
+> +                       do_test $how \
+> +                               fsync=3D$mode,redirect_dir=3D$meta,metaco=
+py=3D$meta
+> +               done
+> +       done
+> +done
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/overlay/090.out b/tests/overlay/090.out
+> new file mode 100644
+> index 00000000..d6b46515
+> --- /dev/null
+> +++ b/tests/overlay/090.out
+> @@ -0,0 +1,17 @@
+> +QA output created by 090
+> +=3D=3D=3D syncfs fsync=3Dauto,redirect_dir=3Doff,metacopy=3Doff
+> +=3D=3D=3D syncfs fsync=3Dauto,redirect_dir=3Don,metacopy=3Don
+> +=3D=3D=3D syncfs fsync=3Drelaxed,redirect_dir=3Doff,metacopy=3Doff
+> +=3D=3D=3D syncfs fsync=3Drelaxed,redirect_dir=3Don,metacopy=3Don
+> +=3D=3D=3D syncfs fsync=3Don,redirect_dir=3Doff,metacopy=3Doff
+> +=3D=3D=3D syncfs fsync=3Don,redirect_dir=3Don,metacopy=3Don
+> +=3D=3D=3D syncfs fsync=3Dstrict,redirect_dir=3Doff,metacopy=3Doff
+> +=3D=3D=3D syncfs fsync=3Dstrict,redirect_dir=3Don,metacopy=3Don
+> +=3D=3D=3D umount fsync=3Dauto,redirect_dir=3Doff,metacopy=3Doff
+> +=3D=3D=3D umount fsync=3Dauto,redirect_dir=3Don,metacopy=3Don
+> +=3D=3D=3D umount fsync=3Drelaxed,redirect_dir=3Doff,metacopy=3Doff
+> +=3D=3D=3D umount fsync=3Drelaxed,redirect_dir=3Don,metacopy=3Don
+> +=3D=3D=3D umount fsync=3Don,redirect_dir=3Doff,metacopy=3Doff
+> +=3D=3D=3D umount fsync=3Don,redirect_dir=3Don,metacopy=3Don
+> +=3D=3D=3D umount fsync=3Dstrict,redirect_dir=3Doff,metacopy=3Doff
+> +=3D=3D=3D umount fsync=3Dstrict,redirect_dir=3Don,metacopy=3Don
+> --
+> 2.55.0
+>
