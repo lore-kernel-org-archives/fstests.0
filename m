@@ -1,52 +1,54 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794330572;
-	b=rpQf1h6K6LEkZMiv+YVezI0a3YpGLuwiVyimKIOtbe0Lx7ilAECaOtNxbKWK457fyxYl
-	 tiRmqA2/pxJ7huGZNQc004ukBwX41gMLJv22xy4oJQNqRySRWEnyEZz5/gof33Q6LLm96
-	 sS8bUw3YYoTWkHhqcliL2rOabyITZ9zBXgplOqbyqGpZZtEP6CW3zcYzdIg7ZRnSyhnK7
-	 zo8ByvHYP35t2xvPqobJXOlOuhj3v6YfSX+v6h1qHwcVzLu6yCVGnASA9CMjKInKgtnV0
-	 F59rawqTJuQzDedyJQaROedt4N9E2GCooxwJCIuuoR6DAGSk1yzRJK+sSekKTQjdsVg==
+	t=1794330578;
+	b=PbyoqIOCDH1Ce7TCf1fQQ3RJxh6uHW6ELy3YIqduaiuqNIOKOqpG7q/ZTfjAZ2oFWr0P
+	 TJlyg6I8+zaZ6slpztRg47qMWyx63az04FmgRysmIhGdTyQ7c253t2CpBkgCvDNfL7aHl
+	 IQ+3r+GSjLzFodMIOywhYRZ7Tam00wFLX/5LQqDGLibeb6AMEscZDMgwRu0xFLBWvVUfE
+	 BlUdiqOoj5Nap9K4YOCZ3dymDthySu+uWyQGqlqpblha3OPf67ZBgwseda0WYqDyQ0GvU
+	 y0lcaHU9kPiUURS1Quvt0otXnIVpMRi74xkby6fU79ka9SRnWOfh7bLOyjlIyovg+vw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794330572;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794330578;
 	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
-	 MIME-Version:Content-Transfer-Encoding;
-	bh=27zA0eunO5kr2ltAP+GWYEimQmCVTnvdM7p9hNCqBys=;
-	b=4MqDvC/PMM746yTNa3o7bqqiayMwFS/AbAkiAnDVL8VAwm6QKerppGh4fLXSXcqgVC50
-	 jYvOo/zCKZe3GCwM2lSsp9uw2uHJCXmq61XQ8Uj+x1SZvYGNgSchK3dfjwM13g6he96mW
-	 LoPpPdZiOfcrKVVmQ02NJ/zjqxTAFSYhkozT+AXCWGmmob4MFzCSpb0Pq7731/EAhUjdp
-	 ekL8dZPFEJ9xrmHmDne/1sQ1HmnwgYMTwWwxzoiKTfr3huLDV6vkmZh8OnqRKZxL/pJqD
-	 rwjfGJ4yCHpirWqDamwU0J/3KXMKn1jumvC2Ltu8xULa6bL3Cjm/kuJpBgbHEEffw1w==
+	 In-Reply-To:References:MIME-Version:Content-Transfer-Encoding;
+	bh=I6ACTNi79TArT7Q3AYZeilVRSz9T9xrU8SPHrEtn37E=;
+	b=jbxlKPShonxf0pz1l8EFgUniei/YcoHmLLtmxOyqXM5uJM1aZWNaPbyARp5alki8ItET
+	 +xnQ/Z7V5A8GVRaY2QdCqPnx9PVyc2C/JvR0e2WbhLbh9s5VlA4/0BiyYVd+ye8gm2J00
+	 9FfqQHcJQ5do7hgPCYAF3zDju/TpvAEEsmzM+oUdOVqy8dH8n7ptuP6znfC8lHbwjyvBu
+	 lcsHnC+VVzC57ZX5JF2kQYIwpwjXPg7vGPjLiEQ8DBhehhLDkH2298JqlpjSLRB4UIdqi
+	 IyMZU6xUS40VY/rNP3XtuHHmt3wYCR4E16orh/H1Vk6zpJ1U1GGJRJPeQytgtJw7g6A==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=DedyqaZW;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=OQNUpBv1;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 20D1A606A31C;
-	Tue, 10 Nov 2026 17:09:32 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BDAC606A33C;
+	Tue, 10 Nov 2026 17:09:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=DedyqaZW
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0160D1F0089F;
-	Tue, 10 Nov 2026 17:09:30 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=OQNUpBv1
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3EED31F008A1;
+	Tue, 10 Nov 2026 17:09:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794330572;
-	bh=27zA0eunO5kr2ltAP+GWYEimQmCVTnvdM7p9hNCqBys=;
-	h=From:To:Cc:Subject:Date;
-	b=DedyqaZW2/ti/u5Q0pU4jg0W7coCAPFxoTk6RTvoQ5/o+oTj7grNOGyo+y84sZUDG
-	 iYy73yhb3hVrbpZUKAlEUG//ub/AaO5AW7orh9+uN6JW+uvHeW0S8nTcZcfIaOJg6e
-	 mRYRjwOt1q3Y/ibvAbx69rcGDU+GCbnOoUdx3AkHxzp21B+2D7m/Z16MUs3UXQ6JSg
-	 v5HpTPBRVdSkcXjCZmrGFFc9t3zwKzLa1torAxLQw8x1hkRymecTBBpIPcjgsYGcH8
-	 nahNcl6uxC7YbpLeuL+bTVwy7CrzNtZptrdOUWQ1/MDfmaIU7tZpPMRsf9L1eBdgbQ
-	 FMCZYd7o9Ow9w==
+	s=k20260515; t=1794330578;
+	bh=I6ACTNi79TArT7Q3AYZeilVRSz9T9xrU8SPHrEtn37E=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References;
+	b=OQNUpBv109hpdWnKRUEEMespmCKox99sTwgEWVXh9NPIpRzHOVvmSLPsxI9g7qfWH
+	 BvutnA1DGevp1oKuAfYUR/5VHbhFtdRnoePKW0eamX49PId7aLpjAOx0NdFoMXW1lQ
+	 hT1zDrbPXZl9BlcFX/35oq0qHh0yYzXp2Vw5EEH2+mc9KImLuYWbuZTbkPrBbdBKbd
+	 EuhHT/az9hWsgV0qxmGU3BITH+f+B7UCOTWWJuGeWMIlsQ3kX98utOUwo01ryA6D6o
+	 EakU2/TZ+u1bCBBqm3pmTVZF6r4iI05K4BXROtRQgQwJPq0n6MCtvknfav7Xnh+5GF
+	 vqef7GP2nL2gg==
 From: Zorro Lang <zlang@kernel.org>
 To: fstests@vger.kernel.org
 Cc: Theodore Ts'o <tytso@mit.edu>,
 	linux-ext4@vger.kernel.org
-Subject: [RFC PATCH 0/4] check: add --loop* family options for repeating tests
-Date: Wed, 11 Nov 2026 01:09:16 +0800
-Message-ID: <20261110170920.3302511-1-zlang@kernel.org>
+Subject: [RFC PATCH 4/4] check: add --loop-while-successful option
+Date: Wed, 11 Nov 2026 01:09:20 +0800
+Message-ID: <20261110170920.3302511-5-zlang@kernel.org>
 X-Mailer: git-send-email 2.56.0
+In-Reply-To: <20261110170920.3302511-1-zlang@kernel.org>
+References: <20261110170920.3302511-1-zlang@kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -58,76 +60,112 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This series originates from Ted Ts'o's RFC:
+Add one more member of the --loop family: --loop-while-successful runs
+each test up to <n> times but stops rerunning it at the first failure.
+This is faster than --loop for bisecting flaky tests, since the loop
+ends as soon as the failure is reproduced.  The failing run is recorded
+in @bad, so a reproduced failure is still reported as a failed test.
 
-  [PATCH RFC] check: add new option "--loop <n>" which runs each test multiple times
-  https://lore.kernel.org/fstests/20260415213248.1795275-1-tytso@mit.edu/
+Signed-off-by: Zorro Lang <zlang@kernel.org>
+---
+ check | 32 +++++++++++++++++++++++++-------
+ 1 file changed, 25 insertions(+), 7 deletions(-)
 
-At the time, we didn't reach a consensus, and because the argument parsing in
-./check was quite messy, I decided to refactor it before introducing more
-options. That refactoring is now complete:
-
-  https://lore.kernel.org/fstests/20260826102857.3224318-1-zlang@kernel.org/
-
-so I think it's time to revisit this RFC and the follow-up changes.
-
- --loop re-runs each test unconditionally, fixing two problems of "-i
- <n>": per-run artifacts (e.g. NNN.out.bad) were not preserved, and
-result.xml was rewritten for every test set, losing cumulative junit
-statistics.  That RFC predates the check argument-parsing rewrite to
-getopt, so patch 2 was rewritten on top of it, generalizing the -L
-rerun state machine to support multiple loop modes.
-
-Per-test looping options (mutually exclusive; repeating the same mode
-overrides its count):
-
-  --loop <n>              run each test <n> times.  Artifacts of every
-                          run are stashed with .rerunN suffixes, the
-                          junit report gets one testcase per run, an
-                          aggregate pass/fail line is printed, and the
-                          test fails if any of its runs fails.
-  -L, --loop-on-fail <n>  rerun a test <n> times after its first
-                          failure (<n>+1 runs in total).  Existing -L
-                          behaviour, now with a long name.
-  --loop-while-successful <n>
-                          run each test up to <n> times, stopping at
-                          the first failure; handy for bisecting
-                          flaky tests.
-
-Whole-list iteration gets long names as well:
-
-  -i, --iterate <n>       iterate the entire test list <n> times
-  -I, --iterate-while-successful <n>
-                          same, but stop after the first round that
-                          contains a failure
-
-The short options -i, -I and -L keep their existing behaviour and
-remain available. Maybe we can remove them one day, or keep them.
-
-One open question about the junit report: with --loop each run adds a
-testcase to result.xml, but the testsuite tests/failures attributes
-still count unique tests, consistent with the "Ran: ... / Failed ..."
-summary.  Before this series the two were always equal, so report
-consumers that assume tests matches the number of testcase elements
-would see them diverge for the first time.  We kept the current
-semantics for now; comments on whether the attributes should count
-per-run testcases instead (a follow-up common/report change) are
-welcome.
-
-Thanks,
-Zorro
-
-Theodore Ts'o (1):
-  check: add --loop option to run each test multiple times
-
-Zorro Lang (3):
-  check: add long aliases --iterate and --iterate-while-successful
-  check: add --loop-on-fail long name for -L
-  check: add --loop-while-successful option
-
- check | 153 +++++++++++++++++++++++++++++++++++++++++++++-------------
- 1 file changed, 120 insertions(+), 33 deletions(-)
-
+diff --git a/check b/check
+index 96e4f2fd..6b7bd23e 100755
+--- a/check
++++ b/check
+@@ -26,7 +26,8 @@ do_report=false
+ DUMP_OUTPUT=false
+ iterations=1
+ istop=false
+-# Selected by -L / --loop and its siblings: "", "always" or "on-fail"
++# Selected by -L / --loop and its siblings: "", "always", "on-fail" or
++# "while-successful"
+ loop_mode=""
+ # Total number of runs for the current loop mode
+ loop_total=0
+@@ -74,6 +75,9 @@ General options:
+                               aggregate pass/fail metrics
+     --loop <n>              run each test <n> times, measuring aggregate
+                               pass/fail metrics (test fails if any run fails)
++    --loop-while-successful <n>
++                              run each test up to <n> times, stopping at the
++                              first failure
+     -n                      show me, do not run tests
+     -r                      randomize test order
+     -s section              run only specified section from config file
+@@ -402,7 +406,7 @@ _set_loop_mode()
+ 
+ 	[[ $count =~ ^[0-9]+$ ]] || usage
+ 	if [ -n "$loop_mode" ] && [ "$loop_mode" != "$mode" ]; then
+-		echo "check: conflicting loop modes: -L, --loop-on-fail and --loop are mutually exclusive" >&2
++		echo "check: conflicting loop modes: -L, --loop, --loop-on-fail and --loop-while-successful are mutually exclusive" >&2
+ 		usage
+ 	fi
+ 	loop_mode="$mode"
+@@ -418,7 +422,9 @@ _set_loop_mode()
+ parse_check_args()
+ {
+ 	local short_opts="g:x:X:e:E:s:S:lnri:I:TdbR:L:h"
+-	local long_opts="fs:,exact-order,large-fs,extra-space:,udiff,help,iterate:,iterate-while-successful:,loop:,loop-on-fail:"
++	local long_opts="fs:,exact-order,large-fs,extra-space:,udiff,help,"
++	long_opts+="iterate:,iterate-while-successful:,"
++	long_opts+="loop:,loop-on-fail:,loop-while-successful:"
+ 
+ 	compat_old_option "$@"
+ 
+@@ -534,6 +540,10 @@ parse_check_args()
+ 			_set_loop_mode always "$2"
+ 			shift
+ 			;;
++		--loop-while-successful)
++			_set_loop_mode while-successful "$2"
++			shift
++			;;
+ 		-h|--help)
+ 			usage
+ 			;;
+@@ -805,11 +815,13 @@ _add_bad() {
+ 
+ # Print the aggregate results of the current loop once all loop_total runs
+ # have been recorded, then reset the loop state so that the next test can
+-# start.
++# start.  A non-empty @force argument ends the loop before loop_total runs,
++# which is used to stop a while-successful loop at the first failure.
+ _try_loop_aggregate() {
+ 	local test_seq="$1"
++	local force="$2"
+ 
+-	if ((${#loop_status[*]} >= loop_total)); then
++	if [ -n "$force" ] || ((${#loop_status[*]} >= loop_total)); then
+ 		printf "%s aggregate results across %d runs: " \
+ 			"$test_seq" "${#loop_status[*]}"
+ 		awk "BEGIN {
+@@ -845,7 +857,12 @@ _stash_test_status() {
+ 			# any failed run fails the test
+ 			_add_bad "$test_seq"
+ 		fi
+-		_try_loop_aggregate "$test_seq"
++		# a while-successful loop stops at the first failed run
++		if [ "$test_status" = "fail" ] && [ "$loop_mode" = "while-successful" ]; then
++			_try_loop_aggregate "$test_seq" force
++		else
++			_try_loop_aggregate "$test_seq"
++		fi
+ 		# the rerun loop handles @bad/@notrun by itself
+ 		return
+ 	fi
+@@ -865,7 +882,8 @@ _stash_test_status() {
+ 		notrun+=("$test_seq")
+ 		;;
+ 	pass)
+-		if [ "$loop_mode" = "always" ] && ((loop_total > 1)); then
++		if { [ "$loop_mode" = "always" ] || [ "$loop_mode" = "while-successful" ]; } \
++		   && ((loop_total > 1)); then
+ 			# start a rerun loop
+ 			_stash_loop_files "$test_seq" ".rerun0"
+ 			loop_status+=("$test_status")
 -- 
 2.56.0
 
