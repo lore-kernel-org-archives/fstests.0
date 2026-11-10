@@ -1,117 +1,54 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=103.168.172.152
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794328698;
-	b=Z/cdeh9/E886kSlI7237+V/j6aUqGDY5sUefMiDX+U8o1BXYcfa1TfKp6qogo5NvDOyB
-	 9Rw51doJbJE2mmcErgfEa3pe3CFgumRryUVphgezcnpf2aMHXJg/DiQZpVJfBiIBFGnYI
-	 sIhl8ygedj3jWA8D+OttD7bwUUUNqJlAyv0IOc0An6CmdqINI/xE5abNIdr4onEZAXkwU
-	 d0O0sh/19oV5R5fN2g+PYBrOkrJmdEzBJIwEaNiPnqU1kOkkbhgHfavBwoTst5125mR2+
-	 CTRQ1oW8A+bMeXk/gFOI8nTQhouzERHGVQWGz67fi0guRKjsYJ0f327jWCRDjdx2ylA==
+	t=1794330574;
+	b=EPqjHxRTo9sp4Eye9egcPpVpXgrIjhOq9/94ZC03vNr2pURnRaXVIIjvvsntH0c4saOl
+	 ML78J6ZnEojJVYtsaNaalSwsPy+nXEqV9uvHiv3x6lcW/Ac7REzBqkxVPgyc1vZwPBrEw
+	 iFu7YJf4o551dr7tturR+xC9iwigv78XEemw233+2iVWQVF69STkfvS3GPjrFYocJfZLy
+	 AJQ2CxuwZEuTh/YWI1t9rlv8ZVHPXen70bQIw1PkVJxg7k5FmvoIUX+Cg4srIH09lURAc
+	 GhpF0bLyjF+xxTQSGm81ZNud/wSPzd6n7RRErZl93zjFBUUKoqVxvIl4h9fkvEPedPQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794328698;
-	h=DMARC-Filter:Received:Received:DKIM-Signature:DKIM-Signature:
-	 X-DKIM2-Info:DKIM2-Signature:X-DKIM2-Info:Message-Instance:
-	 X-ME-Sender:X-ME-Received:X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:
-	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=aaUKH2pXRne3pLtvgxSAkIPFlHdl82A7bfe/7smVH1k=;
-	b=YKFPYaw7oVr2aeor0sPHVc7BeEUxnwCwV4oLMJUQhoEZSFxcFtp8YzEoC2Ya31pV8/x6
-	 PUebK2HXpmKbfsiki0KY3M0HkjkOSMSKAG8O38pyYEMR2LuntLy9NPdLDiktRo8/3F/OG
-	 AXJWyErKCFGAAmQJa8O+f6MY5Ch8z/jvBAH5ikjKVsAayNykbiKwlxzwf3RhafUuJYDKP
-	 IkrOc6etnpA9e4U10HBlgNwLjAZ0lFLFfLJHM5m5JM0W6hJ/6qQ0kUlDwXdO1AUCjyWPh
-	 w82UCAT2OrqLn23kv89n50MY2Ewa8qvCMZNagr3sZqr3GzyNh1hcph54Bn9gU6467Tw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794330574;
+	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
+	 In-Reply-To:References:MIME-Version:Content-Transfer-Encoding;
+	bh=iztu3UTjVDiG3ZQe0zYGC6X7rQ6gTI+4J0TCR7Mw7Zc=;
+	b=oVJw3ZxAhygMuAYwNXDOfRzDK6DrBHugU67+TdsvvG6I3KGV59Ycj1J2jq53vxep9CFs
+	 hFShaDLPfSFIxaVgJYQlsKo99DZA7p9ltCbb02gG/ENeRBiCn8/54A3FyRitlpaCVeLhy
+	 H0osUpGT8VcAUk6k5pG0du1EesSklUD1bA2eC6LWDYN0X+XS1sGKEqKMR5SMIC3ckD6ZU
+	 tPerKdSFQUEdqGwFaN0BmDB4BI6Lhln5aUlRO7eFtcGy/tLIa0f+82ToL4eEWDmTfJ/D5
+	 bHSewPYKWWDJYIIugKQG51pTmQxyYGWnWJCrjg1qQzZyXqzTJ/YGW5KfMeEa8VYVMDA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=scrivano.org;
-	spf=pass smtp.mailfrom=scrivano.org;
-	dkim=pass header.d=scrivano.org header.i=@scrivano.org header.a=rsa-sha256 header.s=fm3 header.b="EhmKD+/G";
-	dkim=pass header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm3 header.b=KBAoD5WD;
-	arc=none smtp.remote-ip=103.168.172.152
-Received: from fhigh-a1-smtp.messagingengine.com (fhigh-a1-smtp.messagingengine.com [103.168.172.152])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=bB+GeAHT;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC44A606A216
-	for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 16:38:16 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org DC44A606A216
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=scrivano.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=scrivano.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E4390606A32D;
+	Tue, 10 Nov 2026 17:09:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=scrivano.org header.i=@scrivano.org header.a=rsa-sha256 header.s=fm3 header.b=EhmKD+/G;
-	dkim=pass (2048-bit key, unprotected) header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm3 header.b=KBAoD5WD
-Received: from phl-compute-05.internal (phl-compute-05.internal [10.202.2.45])
-	by mailfhigh.phl.internal (Postfix) with ESMTP id 1C7D51400208
-	for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 11:38:16 -0500 (EST)
-Received: from phl-frontend-04 ([10.202.2.163])
-  by phl-compute-05.internal (MEProxy); Tue, 10 Nov 2026 11:38:16 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=scrivano.org; h=
-	cc:cc:content-transfer-encoding:content-type:date:date:from:from
-	:in-reply-to:message-id:mime-version:reply-to:subject:subject:to
-	:to; s=fm3; t=1794328696; x=1794415096; bh=aaUKH2pXRne3pLtvgxSAk
-	IPFlHdl82A7bfe/7smVH1k=; b=EhmKD+/GAiigSaM54bUZVIVKBYZHK0F0Ox6wF
-	lugAfSsGQ7Qb5pSnRmCvt+0EGsC2RoR8T3PYDRmkRegUK97qwb6J4270plqqgwsd
-	pEQa5RuSUIlJaVhSBj5cPWj7FCiDWu9uzOfsCT4N+Ye+ypbUiRuJ8S209/M5y0Ef
-	kBxdRY6H+cYBO1yW5kOg0v7ZIStx4PnPmvSkTQm/y8pBQ9GZmzceuxDIQGty+prD
-	LeG1xd0uj7wdK496EsZwRkaRvWC0PdCcRo8pG1T+HTcZc5CeeNF8d/SY3AQcOh4d
-	SYvFsKRT5xuIdWx4wP++c7jfmO+K+ERuIGT68mEw+BXgB/ZXg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:date:date:feedback-id:feedback-id:from:from
-	:in-reply-to:message-id:mime-version:reply-to:subject:subject:to
-	:to:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=
-	1794328696; x=1794415096; bh=aaUKH2pXRne3pLtvgxSAkIPFlHdl82A7bfe
-	/7smVH1k=; b=KBAoD5WDHtzu0dFLN/K1oyd2Mu6sRFVDsavjzrTGe3C+W9u5rD+
-	vdV5+oxl7bhTbbsu3bqgKttv34xz6YAnfxB5ydZPvMR6ZYczsm3e0rysnLJk0V3/
-	WPiZ5BzjiFHxn/Z32Kw/gkkRzjm9NIsbMs4BoV3ytMJvjAK2OzDoK2hK/iUr7dix
-	gjYxU+n31xxg+xc0nqNO8RifZYoDd+r7GLDNJctKswbplPd//jjo+Qu4qOekYYyd
-	+fTsyzN6du9wcPH0iG3NYOpXNY032x8WAwjvCWhmoC3A4QhHzOVrwKS2m/9YQAfE
-	mCqkiOmma9jW6lROwYxMmCOHmKTr6lLHiWg==
-X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-09;
-	repo=github.com/dkim2wg/interop; date=2026-11-03; sw=lmtpprox;
-	action=sign d=scrivano.org a=rsa-sha256;
-DKIM2-Signature: i=1; m=1; t=1794328696; d=scrivano.org;
-	mf=PGdpdXNlcHBlQHNjcml2YW5vLm9yZz4=;
-	rt=PGZzdGVzdHNAdmdlci5rZXJuZWwub3JnPg==;
-	s=fm3:rsa-sha256:TzAF07KUl+RJN6zUUm0YjYJP6LYTz9j6LdZGU7u/HWgYnyA
-	NIneOANCvIE8DTVnq0hYZHK7qxFFnY/ZWDzAZX+mGshImgrlQV0ADeuAjib1X5lX
-	PLaMu+X0lvEDhtEMPZEe/A7yQRmj5pjTuNrVn7/0RYx0D4WRlZFA4BX812HvpQCY
-	XyYiGpwwyESfgM7P93iCIGuqDimLFzTH6qPY2ZXIqjuscmIbhHXoOrGhQ3gDub1D
-	KiHE0Uoox3QwBDqTeDWjixq+gh/mvNvPoy3jm47YUiO0i0TbFX9awgdnpu8TF+f6
-	vQ6pMvKnaknri+JZ4HQHrTOB2Z3TuuVAy3e/erA==;
-X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-09;
-	repo=github.com/dkim2wg/interop; date=2026-11-03; sw=lmtpprox;
-	action=mi-m=1; hc=9;
-	hn=cc,content-transfer-encoding,date,feedback-id,from,
-	message-id,mime-version,subject,to;
-Message-Instance: m=1; h=sha256:WB2OYj88dHKfVQ6lY5LLJKBrIr1yThZ6esoQuptYn5w=:Rq0NCxuHu9HpG+5wePA6cNFydSIlmHgBUYMr92DpdoQ=;
-X-ME-Sender: <xms:eEjzarIBxmVnvoYc_65dZdWYCLnO0XaV6XThOAu6BXWFPigHZG2u8A>
-    <xme:eEjzas-yDACvC1fo60vVR1Ccmouh_pycDXZda8L7e9-IcvD2i-PQu3UIwcLLj26Fk
-    pJO7wzjZuLzE7ys9YRV6185EPHWWQ1jSnHcKNUX_lNTS5R4JiZ8S55n>
-X-ME-Received: <xmr:eEjzauJRI3QxgbmiIAojtmDDtNidvS-GBK5ms9IFy6tzdm51aKP3LsWjX8ce1nx5o1RYdGk-ruH4-H1xewYDm8QwokMy>
-X-ME-Proxy-Cause: dmFkZTG3n9i6Ym6C6j+Gap2puwOR7D+9wVDOVkdF2oR6oiKiufWeM7mh01CTZfvYISsJsB
-    OvEMAv/ovlFyKhqFwYZJjEmjzk7vIauDPq8UPjBEJ5psK8XIVALYp24ZvusuOykQxfWOCR
-    bxlkyG19oFk2adadoqeumyCh5S3fO4OoJDFUOJtgdO9cJMpM9bOrHQsDr4KgNJYJR8nwZE
-    SfboveRLxIIl2cfNMCCnw2S1HuEnWqQOsTPkh5FVfyQH5q8y8ZnrPNWkv0G1ZH0lEsuaRw
-    KerDULHQF5ySvcZBZZeuIVtXMrkT0ZzUxL3QAG9OlkNd64ji/icas4nGbbGUu06Mow/pBs
-    7aDealOjnYumFfReOD8Fti5HZwXV9UJPpYCe3OvB6tefO21e2loXUAJYQN/P+bUpENxE76
-    4wdWu6LXbWcHVcL5EAHHAS4fhFM124DYlErCz4Xi2bl2d855Yr7gPkxbTbOZEzjTRFg5lF
-    o+5TS0bX7UQ0jgBx+Kx/9ad2triP1TdaSq0moDl4rkwE8CXTx/I67aH/dYKlEEOrq+PorS
-    PkHF/U2wtJcyT1mL8ADYNV+trKDtcYEa0GQ3wiVxjoJlmIpZ/HyzEq96toU65XWSPuHhCq
-    jEKkGZQJM4NxzIbowuDvSDwn4+WVPKep7ksQCBvlHdU29x6bxQP4kXnkz/vg
-X-ME-Proxy: <xmx:eEjzahk3ifXKm4-nebkgbm4eycHvbWJI7ihsxsrjyOY2BgHXHmNkZg>
-    <xmx:eEjzaiP_49MoPKioiM23hYTcj9WeAId7El-G4442ncBsp2mWt-lPeQ>
-    <xmx:eEjzan36vbjp7P_SPrg35LvGO_axlBLfvZNZZyWarUSseoGSEDxdAQ>
-    <xmx:eEjzahmIPkyTqs6rMHqI7yc5De0MrhyIP_h8ygI4m7W_-8GijKQk1Q>
-    <xmx:eEjzariGzWPb4sCVGM09qYht-Z6Tqy6CZyC9pYyRqYOtnn8TWHja0zTA>
-Feedback-ID: i8e6e4897:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
- 10 Nov 2026 11:38:15 -0500 (EST)
-From: Giuseppe Scrivano <giuseppe@scrivano.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=bB+GeAHT
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8392E1F0089F;
+	Tue, 10 Nov 2026 17:09:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1794330573;
+	bh=iztu3UTjVDiG3ZQe0zYGC6X7rQ6gTI+4J0TCR7Mw7Zc=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References;
+	b=bB+GeAHTTESdnnThV9OGq9pg3XzgKJLf/cllBUelwd+XZq2KaX6qHSFTcvpafKDgf
+	 VWcb/07Ec8+tXZVSj2E/2npIoDqHGwRfW+os7ZoMjXG6uoavzgZ5J0ItsTWEgWLJay
+	 pEMf89xo2iVqAzsn2DYygNUv55HGtFsbj5hh/ye7iU8PA3ycqQBYQzX50EwPzqWU0V
+	 6S2yOjXZineaURYF659iNvYZn/A8E0ePhdis770T0kTtzM22mi6XNhezG8NiQo4/lw
+	 vFZRcD0oKhtMrRfjGXuD1/VLjCaITtTrtFebsc68jKYo5yFQ5ARseUjfbREtISp+hZ
+	 BByrkmoxyI2cA==
+From: Zorro Lang <zlang@kernel.org>
 To: fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org,
-	amir73il@gmail.com
-Subject: [PATCH fstests v3] overlay: add a test for redirect_dir=followdata
-Date: Tue, 10 Nov 2026 17:38:11 +0100
-Message-ID: <20261110163812.3091063-1-giuseppe@scrivano.org>
+Cc: Theodore Ts'o <tytso@mit.edu>,
+	linux-ext4@vger.kernel.org
+Subject: [RFC PATCH 1/4] check: add long aliases --iterate and --iterate-while-successful
+Date: Wed, 11 Nov 2026 01:09:17 +0800
+Message-ID: <20261110170920.3302511-2-zlang@kernel.org>
 X-Mailer: git-send-email 2.56.0
+In-Reply-To: <20261110170920.3302511-1-zlang@kernel.org>
+References: <20261110170920.3302511-1-zlang@kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -123,264 +60,56 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Test that data-only layers select redirect_dir=followdata, which follows
-redirects from lower to lowerdata from any lower layer, with userxattr
-and trusted xattrs, and that redirect_dir=nofollow is refused with
-data-only layers.
+The -i and -I options iterate the whole test list, but their
+single-letter names don't describe what they do.  Add the long aliases
+--iterate and --iterate-while-successful so that they can be named
+consistently with the --loop family of per-test looping options that
+will be added next.
 
-Also test following an absolute redirect past a lower layer that has the
-parent directory of the target, which failed with EIO before the fix
-"ovl: do not always clear absolute_redirect".
-
-Signed-off-by: Giuseppe Scrivano <giuseppe@scrivano.org>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+Signed-off-by: Zorro Lang <zlang@kernel.org>
 ---
- common/overlay        |  15 +++++
- tests/overlay/090     | 151 ++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/090.out |  50 ++++++++++++++
- 3 files changed, 216 insertions(+)
- create mode 100755 tests/overlay/090
- create mode 100644 tests/overlay/090.out
+ check | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/common/overlay b/common/overlay
-index 8e89d6e4..382960c3 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -286,6 +286,21 @@ _require_scratch_overlay_datadir_without_metacopy()
+diff --git a/check b/check
+index afe855bc..538f22cf 100755
+--- a/check
++++ b/check
+@@ -62,8 +62,9 @@ General options:
+     -b                      brief test summary
+     -d                      dump test output to stdout
+     -h, --help              show this help message
+-    -i <n>                  iterate the test list <n> times
+-    -I <n>                  iterate the test list <n> times, but stops
++    -i, --iterate <n>       iterate the test list <n> times
++    -I, --iterate-while-successful <n>
++                              iterate the test list <n> times, but stops
+                               iterating further in case of any test failure
+     -l                      line mode diff
+     -L <n>                  loop tests <n> times following a failure, measuring
+@@ -388,7 +389,7 @@ process_remain_tests()
+ parse_check_args()
+ {
+ 	local short_opts="g:x:X:e:E:s:S:lnri:I:TdbR:L:h"
+-	local long_opts="fs:,exact-order,large-fs,extra-space:,udiff,help"
++	local long_opts="fs:,exact-order,large-fs,extra-space:,udiff,help,iterate:,iterate-while-successful:"
  
- }
+ 	compat_old_option "$@"
  
-+# Check kernel support for the "redirect_dir=followdata" mount option
-+_require_scratch_overlay_redirect_followdata()
-+{
-+	local lowerdir="$OVL_BASE_SCRATCH_MNT/$OVL_UPPER"
-+	local datadir="$OVL_BASE_SCRATCH_MNT/$OVL_LOWER"
-+
-+	_scratch_mkfs > /dev/null 2>&1
-+	_overlay_scratch_mount_opts \
-+		-o"lowerdir+=$lowerdir,datadir+=$datadir" \
-+		-o"userxattr,redirect_dir=followdata" > /dev/null 2>&1 || \
-+		_notrun "overlay redirect_dir=followdata not supported on ${SCRATCH_DEV}"
-+
-+	_scratch_unmount
-+}
-+
- 
- # Helper function to check underlying dirs of overlay filesystem
- _overlay_fsck_dirs()
-diff --git a/tests/overlay/090 b/tests/overlay/090
-new file mode 100755
-index 00000000..0c9b2148
---- /dev/null
-+++ b/tests/overlay/090
-@@ -0,0 +1,151 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Giuseppe Scrivano.  All Rights Reserved.
-+#
-+# FS QA Test 090
-+#
-+# Test the redirect_dir=followdata mount option.
-+#
-+# Data-only layers select redirect_dir=followdata, which follows redirects
-+# from any lower layer to a data-only layer, and cannot be used with
-+# redirect_dir=nofollow.
-+#
-+# Also test following an absolute redirect past a lower layer that has the
-+# parent directory of the redirect target, with metacopy=on.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick metacopy redirect attr
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/attr
-+
-+# We use non-default scratch underlying overlay dirs, we need to check
-+# them explicitly after test.
-+_require_scratch_nocheck
-+_require_attrs user
-+_require_attrs trusted
-+_require_scratch_overlay_redirect_followdata
-+_require_scratch_overlay_features redirect_dir metacopy
-+_require_scratch_overlay_lowerdata_layers
-+
-+data=$OVL_BASE_SCRATCH_MNT/data
-+l1=$OVL_BASE_SCRATCH_MNT/lower1
-+l2=$OVL_BASE_SCRATCH_MNT/lower2
-+l3=$OVL_BASE_SCRATCH_MNT/lower3
-+upper=$OVL_BASE_SCRATCH_MNT/upper
-+work=$OVL_BASE_SCRATCH_MNT/work
-+layers="$l3:$l2:$l1::$data"
-+
-+# Make a metacopy file <file> with the redirect <redirect>, for both
-+# userxattr and trusted xattr mounts
-+make_stub()
-+{
-+	local file=$1 redirect=$2 x
-+
-+	touch $file
-+	for x in user.overlay. ${OVL_XATTR_METACOPY%metacopy}; do
-+		$SETFATTR_PROG -n ${x}metacopy $file
-+		$SETFATTR_PROG -n ${x}redirect -v $redirect $file
-+	done
-+	truncate -s 4 $file
-+}
-+
-+# Mount the layers $layers with the options <opts>, print redirect_dir=followdata
-+# if the mount shows it and <opts> has userxattr or redirect_dir (otherwise it
-+# depends on the kernel config), and the content of each of the following files,
-+# or the error reading it
-+check()
-+{
-+	local opts=$1 f
-+
-+	shift
-+	echo "== $opts"
-+	_overlay_scratch_mount_dirs "$layers" $upper $work -o $opts
-+	case $opts in
-+	*userxattr*|*redirect_dir=*)
-+		_fs_options $OVL_BASE_SCRATCH_MNT | grep -o redirect_dir=followdata
-+		;;
-+	esac
-+	for f; do
-+		echo "$f: $(cat $SCRATCH_MNT/$f 2>&1 | sed 's/^cat: .*: //')"
-+	done
-+	_unmount $SCRATCH_MNT
-+}
-+
-+# Mounting the layers $layers with the options <opts> must fail
-+check_fail()
-+{
-+	local opts=$1
-+
-+	echo "== $opts"
-+	_overlay_scratch_mount_dirs "$layers" $upper $work -o $opts \
-+		>> $seqres.full 2>&1 && echo "mount succeeded" && \
-+		_unmount $SCRATCH_MNT
-+}
-+
-+_scratch_mkfs
-+mkdir -p $data/base $l1/base $l2/base $l3 $upper $work
-+echo -n "data" > $data/base/file
-+
-+make_stub $l1/s1 /base/file
-+make_stub $l2/s2 /base/file
-+make_stub $l3/s3 /base/file
-+# The redirect target in a lower layer below s3, which is not looked up
-+echo -n "lowr" > $l2/base/file
-+# Redirects that are not followed: relative, directory, upper
-+echo -n "lowr" > $l2/reltarget
-+make_stub $l3/rel reltarget
-+mkdir $l3/dir
-+$SETFATTR_PROG -n user.overlay.redirect -v /base $l3/dir
-+$SETFATTR_PROG -n $OVL_XATTR_REDIRECT -v /base $l3/dir
-+make_stub $upper/up /base/file
-+
-+# followdata is selected by default with userxattr and a data-only layer
-+check userxattr s1 s2 s3
-+check userxattr,redirect_dir=followdata s1 s2 s3 rel dir up
-+# redirect_dir=off does not follow redirects to lower with userxattr, also
-+# with redirect_always_follow=Y, so a data-only layer selects followdata
-+check userxattr,redirect_dir=off s1 s2 s3 rel dir up
-+# a data-only layer cannot be used without following redirects
-+check_fail userxattr,redirect_dir=nofollow
-+echo -n "no data-only layer "
-+layers="$l3:$l2:$l1" check userxattr
-+
-+check metacopy=off s1 s2 s3
-+check redirect_dir=followdata s1 s2 s3 rel dir up
-+check redirect_dir=follow,metacopy=off s1 s2 s3
-+check redirect_dir=on,metacopy=off s1 s2 s3
-+check_fail redirect_dir=nofollow
-+echo -n "no data-only layer "
-+layers="$l3:$l2:$l1" check redirect_dir=nofollow
-+
-+# An explicit option requires a data-only layer and conflicts with metacopy=on
-+_overlay_scratch_mount_dirs "$l3:$l2:$l1" $upper $work \
-+	-o userxattr,redirect_dir=followdata >> $seqres.full 2>&1 && \
-+	echo "mount redirect_dir=followdata without a data-only layer succeeded"
-+_overlay_scratch_mount_dirs "$layers" $upper $work \
-+	-o redirect_dir=followdata,metacopy=on >> $seqres.full 2>&1 && \
-+	echo "mount with redirect_dir=followdata,metacopy=on succeeded"
-+
-+# The directory "/base" in a lower layer without a redirect must not make the
-+# lookup forget that the redirect of the metacopy file is absolute.
-+echo "== metacopy=on,redirect_dir=follow"
-+_scratch_mkfs
-+mkdir -p $data/base $l1 $l2
-+echo -n "data" > $data/base/file
-+touch $l1/file
-+$SETFATTR_PROG -n $OVL_XATTR_METACOPY $l1/file
-+$SETFATTR_PROG -n $OVL_XATTR_REDIRECT -v /base/file $l1/file
-+truncate -s 4 $l1/file
-+for f in "" base base/file; do
-+	[ "$f" = base ] && mkdir $l2/base
-+	[ "$f" = base/file ] && echo -n "lowr" > $l2/base/file
-+	_overlay_scratch_mount_dirs "$l1:$l2::$data" - - \
-+		-o ro,redirect_dir=follow,metacopy=on
-+	echo "lower2 /$f: $(cat $SCRATCH_MNT/file 2>&1 | sed 's/^cat: .*: //')"
-+	_unmount $SCRATCH_MNT
-+done
-+
-+# success, all done
-+_exit 0
-diff --git a/tests/overlay/090.out b/tests/overlay/090.out
-new file mode 100644
-index 00000000..e3cd8fc8
---- /dev/null
-+++ b/tests/overlay/090.out
-@@ -0,0 +1,50 @@
-+QA output created by 090
-+== userxattr
-+redirect_dir=followdata
-+s1: data
-+s2: data
-+s3: data
-+== userxattr,redirect_dir=followdata
-+redirect_dir=followdata
-+s1: data
-+s2: data
-+s3: data
-+rel: Operation not permitted
-+dir: Operation not permitted
-+up: Operation not permitted
-+== userxattr,redirect_dir=off
-+redirect_dir=followdata
-+s1: data
-+s2: data
-+s3: data
-+rel: Operation not permitted
-+dir: Operation not permitted
-+up: Operation not permitted
-+== userxattr,redirect_dir=nofollow
-+no data-only layer == userxattr
-+== metacopy=off
-+s1: data
-+s2: data
-+s3: data
-+== redirect_dir=followdata
-+redirect_dir=followdata
-+s1: data
-+s2: data
-+s3: data
-+rel: Operation not permitted
-+dir: Operation not permitted
-+up: Operation not permitted
-+== redirect_dir=follow,metacopy=off
-+s1: data
-+s2: data
-+s3: data
-+== redirect_dir=on,metacopy=off
-+s1: data
-+s2: data
-+s3: data
-+== redirect_dir=nofollow
-+no data-only layer == redirect_dir=nofollow
-+== metacopy=on,redirect_dir=follow
-+lower2 /: data
-+lower2 /base: data
-+lower2 /base/file: lowr
+@@ -466,11 +467,11 @@ parse_check_args()
+ 			fi
+ 			exact_order=true
+ 			;;
+-		-i)
++		-i|--iterate)
+ 			iterations=$2
+ 			shift
+ 			;;
+-		-I)
++		-I|--iterate-while-successful)
+ 			iterations=$2
+ 			istop=true
+ 			shift
 -- 
 2.56.0
 
