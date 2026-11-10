@@ -1,78 +1,79 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794271105;
-	b=lVGvicavNalQaB3fj/BA4NDRppenAUPDsTf+RzgW1CFbJPFyxs3zs3cD8xeTwy+QFGes
-	 23aZF+XX0pf2Ls9YJ+YzUf4ZssW0FCf/bAgjV+yXP8qTKNr3ICQRc8gblxx+8Y3GNTMNY
-	 HJqEPx3dXLSoB+MzmHZtdqVgMQJEHe0/sAkn0RuGJU6SlPFWqfepZQWdjlXQ/rInWrn/O
-	 G2J9dEJRiHeHV1pIFrN4vAZjU+6TpKWSDt7evJayu6S/1jhlgiMN5TRdT37D3SE4lIDyb
-	 4PgBe4NBgukgpO6HiqaLpxHJPmlkn4YdcUK4K7imS9zX/tm1Ml+WZwO8h5ltAqwPCEA==
+	t=1794297898;
+	b=mBL2wI4RGjGWTosFI8dIk+opyYzwQHiLY/GxE73zAM+QnK/PhzX7m44wbDDH8TvcCOf3
+	 N1YbmI2cl3dIi8Zjy2N0XvjcPNoQsn9AsxgeNvj1NQyfKits+A+UewaWU3xvE0S2FJAWu
+	 /dp0+42slMFTA0nOBNtf276sVPjETdf9Q6G2quhS/+6vmByPek0q74+iWLBhXSQ1FqWSn
+	 3OCNDojkyFybC1q18giRn51RaqEMmSLGcgGSKn2C59YN6MfA6X6tb1rDn3FhGyTH9PYOn
+	 kybn1UayVDsaEJOFBd+FHsufoy8KFpGJrCXXkT94Iep5Nxu6jDlhYSM4N5j2BDqw5Sw==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794271105;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794297898;
 	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
 	 Content-Type:Message-Id:X-B4-Tracking:To:Cc:X-Mailer:
 	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
 	 X-Original-From:Reply-To:Content-Transfer-Encoding;
-	bh=YWqZWg4+x0UBJC+GEHi4fpGqrJdmCQnzyA022MQpTVc=;
-	b=QQhRnWnjeruOtbGKoFdfsDSWEIL5KqrCgiq92+4jTMvTTELIGk2h+LCUTlc4Puj73jPG
-	 qi8M2rUrxlU51jJZ3c4Ixk2G+9WR/NPPGibYMEvGekBNnrirlfB+xzJ9OIQnoicBSvEfU
-	 GwkpZfEcbiUceydoXNgefEbyac4QgvoU0dQv2szeZUpVvWpen857GHo0iMKHO/tCSi4ra
-	 G2mP98Uk4VMqDGXnA8/jEjxxh258WZMP3I7M5DmCP457r2aFsdNnWGNfv3kZkfHtA9U4+
-	 sAVdQeOOsr0aQs41bipVBlfOrfcgadX5kQQjP7hHn1+9Wr8bXGFAPxtE4EZllu5PNYQ==
+	bh=RaFRATRdJGKGjvX3uJXY0s/OhS2GhKkGePwOtrSiyv8=;
+	b=s5+054DxMXyTm5B1nenJj1YbFXwtBm/mmS2MrUMT76REzm9q47Gj+xNKyjICwh5TznJf
+	 CcP/90L5J4h9jBHxFaA9/jP1IujTIw2Ca2zTYsNeZPOaKGshs8E6YQfwObwtDHMEJHDZM
+	 BFL3BUPZ9utiTj+eOt3ilOcZL9SUYvYyK8wiwjiMQGaDQdZt6zWBcwx3ZwoELPOjMBEEX
+	 v6iS+Y7XeCaiSjeoDOqPQyrbERK4Bdp6+9kGbh5DTHyZJepWD1M2HSN0d9GprMuEfZ1EM
+	 VS0KJA19fAJMccPVd2J7BCIQanmeb4sptFTYSQ9hcadf0Kqdx0G8POv9XK0iy4T3heQ==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=IpgrRPca;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=L1Rea5A+;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B817C606A336;
-	Tue, 10 Nov 2026 00:38:24 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97997606A325;
+	Tue, 10 Nov 2026 08:04:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=IpgrRPca
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=L1Rea5A+
 Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
 ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
-	t=1794271104;
-	b=eWJrZSUSc3UtPJ9sq1dVe4VGc7pzx8u43H248XYRu+lfLRHbqoQrLPw1zkgCjzQWfEkJ
-	 +9rSZ8IBTNnQb48N0KIIvIEAoRnCFPgCnDKlfQccrWGOEhgKTC59PYU30Em/g/UTB7xnc
-	 iSZTG+H72/g0Z2AHm2EcgHB14tNlzfSKJ2jElVfpfOOHS+DNgj9EMTeoNvlhYjPqssK6Y
-	 g8cx+AkuwuSafw259RlEwNXHp3ldHMmJIxxPRi+AzUWN90JX86U4XFuw8uiXG0H30/jra
-	 u/iZqhMKL5LkOgvk2k3XW1uZqJnfbT2DRue6bywh7lN6zMy914XSLcbhGt56bbohPbg==
+	t=1794297897;
+	b=F+J6igNpsoz7gbLn8ibk14oDGm2WAdnqGxcgcBwfhuNcGwt736JNZgZ0/kVaCkEbHLkM
+	 NttWCqOl+oNUzMmY8MNmEf3bXrfha+nBMdprC9+vgGa/M3B8fxUlu1AcvLCCkG1WpIe+V
+	 av/EWsv4CSjPOB2hHUX5EQMHiw6cq9CkSqpyPOotBFkrQZATkglk/ys+eaHDaAH2CZpKg
+	 WUnegPqZ2+8UzGJMh/u/AkddNQVE5MxGbsFxLSxK/Wf6z9WZMrjXUg1DXScAduWvlZwVK
+	 3NHqFWbivqdjj7kwmxZeGXseVNu4S4SC6Ecnb9sCDyzwQN5rf4oNbRrzBfhgS0Ni8ww==
 ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
-	c=relaxed/relaxed; t=1794271104;
+	c=relaxed/relaxed; t=1794297897;
 	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
 	 Message-Id:X-B4-Tracking:To:Cc:X-Mailer:X-Developer-Signature:
 	 X-Developer-Key:X-Endpoint-Received:X-Original-From:Reply-To:
 	 Content-Transfer-Encoding;
-	bh=YWqZWg4+x0UBJC+GEHi4fpGqrJdmCQnzyA022MQpTVc=;
-	b=gOOK2lygoqKLazRuKvh6125gC841sGDiEa/WcuW4mh1+esUcLmBpEscEiTxJg8c9wdQF
-	 k7p1GKk3Rzp8JPSNYB0D9toyBbv9iKNtuXPdQTNrp2N6RNJOHyCX1HO0SuKCbB5L2/AK6
-	 I3ei4wWuZL+pCs6TY/dQLpQ8BuHfUxNB20ClcSY8Tx1LKpvixctwFZ4YN7F3+He4j80zo
-	 HPpaQleo3qlHqCEOS+yzXnmJc3d0lreUwF9cMD4gVQMz6dAyWEJ8zDpoO4xShoXc27eFI
-	 hb5dUM4CQz2PCcM06GrCAz+LrZRa1Ayl/y4LNI40pyBU0f4jUXxVqSorSLvLpLS55hg==
+	bh=RaFRATRdJGKGjvX3uJXY0s/OhS2GhKkGePwOtrSiyv8=;
+	b=z2l8ys/m3MkLaCGw0x9V5UzyGNN2gElQUDd1aZCw13hzlv/AXwFCV63H4BuiHa7ixkna
+	 XBDm6RCyMImJr83ijkXntd4E4DOrrRIQDNxgHAN6R54r2wizOsMaO4vs9eKn7p7nYHqg2
+	 +rdWIaEgw4gfBsskcZN50UdBYWycZ78BrKO0tivF/me+4mMUV5dxZnFfMw2o1LTCmUJHh
+	 Mkz9r7Wpk1sdR184KDly5CF00zI3dr9qj8DAGT5AyfWID0jKdLCeR4wOCCpDzJlpMr66c
+	 OOc2EyaWxg7rdkuqBI58O8MGkENX47hDfDzFvZj/gMfw6qF9w8IG1t6Ub3DDsuo+yTQ==
 ARC-Authentication-Results: i=1; smtp.kernel.org; 
 	arc=none smtp.remote-ip=100.80.115.77
 Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id D80E11F008A2;
-	Tue, 10 Nov 2026 00:38:23 +0000 (UTC)
+	by smtp.kernel.org (Postfix) with ESMTPS id 2775D1F0089F;
+	Tue, 10 Nov 2026 08:04:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794271104;
-	bh=YWqZWg4+x0UBJC+GEHi4fpGqrJdmCQnzyA022MQpTVc=;
+	s=k20260515; t=1794297897;
+	bh=RaFRATRdJGKGjvX3uJXY0s/OhS2GhKkGePwOtrSiyv8=;
 	h=From:Date:Subject:To:Cc:Reply-To;
-	b=IpgrRPcaQCL2iTWwCZGSJq11Sud8xZ9bmiHX3jNdmGlAH/fcrracm5PDaSmeZ9OH9
-	 SSaPr20Yjao5qMQLznafSCukza3gyS5gI2ordM6WVKx5NvmV8uMdevBEZa7oHA/xmQ
-	 8IM/OmKLD4cBWXkYVT9IJ6ViR/0Mr01VK922+YdeKGQDX9B+OhZynu61SNDxbSsjFP
-	 2cF+mpMLMNHBiCoAw0mIzsQ45M4edeVJiqxPYCyjoCyA+xRSjuD9S02QwtPISQttBL
-	 5VJPSNRhVk80c6DNtcDdxqUQSwFHL03r5pzjQzJZGhWrMgVi5yT3MiE3B2X5siZBd4
-	 ZZCrLSKv2L0IA==
+	b=L1Rea5A+1BSKC8w7W8vl4Ocsbfd36RaUDTdXBxjecH6eLLG/8jApF7XnDyLYnd8YF
+	 ooLgZJo2RuMHOC+BdnxFGd0mPk1r68/ga55GP2EF9XCcMkUH6HA4A+52c9XpLuwmHp
+	 x2+k3/F20/oCKcg8yMUFLqLTfNNBdgfPdTN8Bf9L3VsnjLM4gSeHYOTQrc8TAgv2qY
+	 mkgkn5Cc41QiOC3705TffXizSa+B4UYqHHgusrB0FY4/4WL0J0SiKeAJXLTAHmV7hb
+	 zFjQul2EZdcJff2QhdYtUZ2dug2hbvYnp6ZiW0iPFeivmxFGso1CgZw7Zde2bxHdfk
+	 H3SpV5u4/txlw==
 Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id 63B2C4872D;
-	Tue, 10 Nov 2026 00:38:23 +0000 (UTC)
+	by lkml.kernel.org (Postfix) with ESMTP id 92B7848A2F;
+	Tue, 10 Nov 2026 08:04:55 +0000 (UTC)
 From: Daejun Park via B4 Relay <devnull+daejun7.park.samsung.com@kernel.org>
-Date: Tue, 10 Nov 2026 09:38:24 +0900
-Subject: [PATCH] xfs: test that swapext waits for in-flight direct I/O
+Date: Tue, 10 Nov 2026 17:04:56 +0900
+Subject: [PATCH] overlay/077: check a stale entry in an impure dir on any
+ hash seed
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -83,19 +84,20 @@ List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Message-Id: <20261110-xfs-swapext-dio-test-v1-1-ead6ea3e23f1@samsung.com>
-X-B4-Tracking: v=1; b=H4sIAH9n8moC/x3MQQqAIBBA0avErBvQKLGuEi0sx5pNhSMlRHdPW
- r7F/w8IRSaBoXog0sXCx16g6wqWze0rIftiaFRjtFY95iAotzspJ/R8YCJJaOfeGtu51msFJT0
- jBc7/dpze9wMgO2BZZgAAAA==
-To: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
-Cc: "Darrick J. Wong" <djwong@kernel.org>, linux-xfs@vger.kernel.org, 
- Daejun Park <daejun7.park@samsung.com>
+Message-Id: <20261110-ovl077-stale-next-v1-1-948a5a434ae2@samsung.com>
+X-B4-Tracking: v=1; b=H4sIACfQ8moC/x3MQQqAIBBA0avErBtwgrK6SrSQGmsgLFREkO6et
+ HyL/wsE9sIB5qaA5yRBbldBbQPbadzBKHs1dKobiEjhnS6lNYZoLkbHOaKxZKZxY009Qe0ez1b
+ y/1zW9/0A4eMTKmMAAAA=
+To: fstests@vger.kernel.org
+Cc: Zorro Lang <zlang@kernel.org>, Amir Goldstein <amir73il@gmail.com>, 
+ Miklos Szeredi <miklos@szeredi.hu>, Hungyu Lin <dennylin0707@gmail.com>, 
+ linux-unionfs@vger.kernel.org, Daejun Park <daejun7.park@samsung.com>
 X-Mailer: b4 0.13.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1794271103; l=6049;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1794297895; l=11091;
  i=daejun7.park@samsung.com; s=20261006; h=from:subject:message-id;
- bh=ylPTRSWaZxLfITp48AQo3BS/GJN6yjbmiPbJVD9BHYM=;
- b=BJjlurFRKFPOIsqvCUq9/kQWgF6NqVSX1YbrnwvwdWVSrUrvIgzvpZb5RAa4IDSnyu5qFBdeG
- KAe7RSFL/WmBuP/o8N0a9z+3lnl+UikqKs6XeAMuyYHfZazE92hmj0t
+ bh=OLCueKykNIIjER7cHa0BSvlgWhhRdwwf3tOaDlx9BaE=;
+ b=97oPpS9XEj9T1lXCGWs92ZVwYdHxAAaWF+D7Otu9J99sSYSxKQfzvSmeOt1WOQiQ8txzPN1Tb
+ xYDvPkzlkC4AuVSm/bVxoSvV2o0QD4DcTLnb4ArAupbEDk890hssBu2
 X-Developer-Key: i=daejun7.park@samsung.com; a=ed25519;
  pk=4yUfDqGRZTIj0Ik43z1GoMZRWCNm/rgX6uJuM9dtNIg=
 X-Endpoint-Received: by B4 Relay for daejun7.park@samsung.com/20261006 with
@@ -106,177 +108,311 @@ Content-Transfer-Encoding: 7bit
 
 From: Daejun Park <daejun7.park@samsung.com>
 
-Test that XFS_IOC_SWAPEXT waits for in-flight direct I/O. A cgroup
-io.max limit holds back an AIO direct write during the swap. When the
-swap returns, the donor must already hold the write's data.
+overlay/077 already fails on a stale entry in an impure upper dir, but
+only when the dir hash order puts the removed file where ext4 keeps it
+between getdents calls. ext4 returns the entry that did not fit in the
+previous buffer first in the next call, even after it was removed.
 
+Add a bare "-" and a bare "=" argument to t_dir_offset2. They remove or
+recreate the entry the next getdents call returns first. The old fd may
+list a recreated name with the st_ino of the old or the new file.
+
+Use both on a new impure dir that only has entries with origin. The
+existing impure dir also has o0, which has no origin. If the next entry
+is o0, its d_ino is the same whether it is stale or not, and the case
+is not checked.
+
+With an ext4 upper, overlay/077 now fails on every hash seed until the
+kernel fix "ovl: skip stale entries in impure dir iteration" is applied.
+
+Link: https://lore.kernel.org/linux-unionfs/CAGEkeHcg06kHshHQ=9U6Yrs_wm8W9H28o9bcC2Qh3fw3tANbWA@mail.gmail.com/
 Signed-off-by: Daejun Park <daejun7.park@samsung.com>
 ---
-The kernel fix is "xfs: wait for direct I/O before swapping extents",
-posted to linux-xfs. Without it the test failed in 6 of 6 runs, 3 with
-always_cow and 3 without. With it the test passed in 6 of 6 runs.
+Please hold this patch until the kernel fix is accepted. With this
+change, overlay/077 fails on every ext4 run of a kernel without it.
+The fix is "ovl: skip stale entries in impure dir iteration":
+https://lore.kernel.org/linux-unionfs/20261110-ovl-impure-stale-v1-1-1a4c2039e89d@samsung.com/
 ---
- tests/xfs/843     | 139 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/843.out |   2 +
- 2 files changed, 141 insertions(+)
+ src/t_dir_offset2.c | 126 +++++++++++++++++++++++++++++++++++++++++++++++++---
+ tests/overlay/077   |  25 ++++++++++-
+ 2 files changed, 143 insertions(+), 8 deletions(-)
 
-diff --git a/tests/xfs/843 b/tests/xfs/843
-new file mode 100755
-index 0000000..2a4ab53
---- /dev/null
-+++ b/tests/xfs/843
-@@ -0,0 +1,139 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Samsung Electronics Co., Ltd. All Rights Reserved.
-+#
-+# FS QA Test No. 843
-+#
-+# Check that XFS_IOC_SWAPEXT waits for direct I/O that is still in flight.
-+# An AIO direct write to the target is held back by a cgroup io.max limit
-+# while the target's extents are swapped with a donor. When the swap
-+# returns, the donor must already hold the write's data.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick swapext aio
-+
-+_cleanup()
+diff --git a/src/t_dir_offset2.c b/src/t_dir_offset2.c
+index 026bc8f3..621255e6 100644
+--- a/src/t_dir_offset2.c
++++ b/src/t_dir_offset2.c
+@@ -10,6 +10,7 @@
+ 
+ #include <errno.h>
+ #include <fcntl.h>
++#include <limits.h>
+ #include <stdio.h>
+ #include <unistd.h>
+ #include <stdint.h>
+@@ -31,13 +32,63 @@ struct linux_dirent64 {
+ 
+ static uint64_t d_off_history[HISTORY_LEN];
+ static uint64_t d_ino_history[HISTORY_LEN];
++static char next_name[NAME_MAX + 1];
+ 
+ void usage()
+ {
+ 	fprintf(stderr, "usage: t_dir_offset2: <dir> [[bufsize] [-|+]<filename> [-v]]\n");
++	fprintf(stderr, "       t_dir_offset2: <dir> bufsize -|= [-v]\n");
++	fprintf(stderr, "  a bare - removes, a bare = recreates, the entry\n"
++			"  the next getdents returns\n");
+ 	exit(EXIT_FAILURE);
+ }
+ 
++/*
++ * Find the entry that the next getdents call on fd returns first: read one
++ * entry from a second fd at the same offset. ext4 with a hashed dir keeps
++ * the entry that did not fit in the previous buffer and returns it in the
++ * next call even after it was removed, so removing or recreating this
++ * entry gets a stale entry on any hash seed.
++ */
++static int find_next_entry(const char *dir, int fd)
 +{
-+	[ -n "$fio_pid" ] && wait $fio_pid > /dev/null 2>&1
-+	if [ -n "$cgdir" ]; then
-+		rmdir $cgdir/$seq-cg > /dev/null 2>&1
-+		[ -n "$drop_io_cgroup" ] && \
-+			echo "-io" > $cgdir/cgroup.subtree_control 2> /dev/null
-+	fi
-+	_unmount $SCRATCH_MNT > /dev/null 2>&1
-+	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev > /dev/null 2>&1
-+	cd /
-+	rm -f $tmp.*
++	char buf[BUF_SIZE];
++	struct linux_dirent64 *d;
++	off_t off = lseek(fd, 0, SEEK_CUR);
++	int fd3, nread, bpos;
++
++	if (off == -1) {
++		perror("lseek");
++		return -1;
++	}
++	fd3 = open(dir, O_RDONLY | O_DIRECTORY);
++	if (fd3 < 0) {
++		perror("open");
++		return -1;
++	}
++	if (lseek(fd3, off, SEEK_SET) != off) {
++		perror("lseek");
++		close(fd3);
++		return -1;
++	}
++	while ((nread = syscall(SYS_getdents64, fd3, buf, sizeof(buf))) > 0) {
++		for (bpos = 0; bpos < nread; bpos += d->d_reclen) {
++			d = (struct linux_dirent64 *) (buf + bpos);
++			if (!strcmp(d->d_name, ".") || !strcmp(d->d_name, ".."))
++				continue;
++			snprintf(next_name, sizeof(next_name), "%s", d->d_name);
++			close(fd3);
++			return 0;
++		}
++	}
++	if (nread < 0)
++		perror("getdents");
++	else
++		fprintf(stderr, "no entry after the first getdents\n");
++	close(fd3);
++	return -1;
 +}
 +
-+. ./common/cgroup2
+ int main(int argc, char *argv[])
+ {
+ 	int fd, fd2 = -1;
+@@ -50,7 +101,8 @@ int main(int argc, char *argv[])
+ 	int retval = EXIT_SUCCESS;
+ 	const char *filename = NULL;
+ 	int exists = 0, found = 0;
+-	int modify = 0, verbose = 0;
++	int modify = 0, verbose = 0, next = 0, recreate = 0;
++	uint64_t old_ino = 0;
+ 
+ 	if (argc > 2) {
+ 		bufsize = atoi(argv[2]);
+@@ -61,13 +113,21 @@ int main(int argc, char *argv[])
+ 
+ 		if (argc > 3) {
+ 			filename = argv[3];
+-			/* +<filename> creates, -<filename> removes */
++			/*
++			 * +<filename> creates, -<filename> removes, a bare -
++			 * removes and a bare = recreates the entry that the
++			 * next getdents returns
++			 */
+ 			if (filename[0] == '+')
+ 				modify = 1;
+ 			else if (filename[0] == '-')
+ 				modify = -1;
++			else if (!strcmp(filename, "="))
++				modify = recreate = 1;
+ 			if (modify)
+ 				filename++;
++			if ((modify < 0 || recreate) && !filename[0])
++				next = 1;
+ 			if (argc > 4 && !strcmp(argv[4], "-v"))
+ 				verbose = 1;
+ 		}
+@@ -81,7 +141,7 @@ int main(int argc, char *argv[])
+ 		exit(EXIT_FAILURE);
+ 	}
+ 
+-	if (filename) {
++	if (filename && !next) {
+ 		exists = !fstatat(fd, filename, &st, AT_SYMLINK_NOFOLLOW);
+ 		if (!exists && errno != ENOENT) {
+ 			perror("fstatat");
+@@ -100,8 +160,52 @@ int main(int argc, char *argv[])
+ 		if (modify && fd2 < 0 && total == 0) {
+ 			printf("getdents at offset 0 returned %d bytes\n", nread);
+ 
+-			/* create/unlink entry after first getdents */
+-			if (modify > 0) {
++			if (next) {
++				if (find_next_entry(argv[1], fd))
++					exit(EXIT_FAILURE);
++				filename = next_name;
++			}
 +
-+_require_scratch_nocheck
-+_require_cgroup2 io
-+_require_loop
-+_require_block_device $SCRATCH_DEV
-+_require_non_zoned_device $SCRATCH_DEV
-+_require_xfs_io_command swapext
-+_require_odirect
-+_require_aio
++			/* create/unlink/recreate entry after first getdents */
++			if (recreate) {
++				/*
++				 * Keep the old inode open so that the new file
++				 * cannot get its inode number. The old fd may
++				 * still list the old file with its old st_ino.
++				 */
++				int flags = O_PATH | O_NOFOLLOW;
++				int ofd = openat(fd, filename, flags);
++				struct stat ost;
++				int nfd;
 +
++				if (ofd < 0) {
++					perror("openat");
++					exit(EXIT_FAILURE);
++				}
++				if (fstat(ofd, &ost) < 0) {
++					perror("fstat");
++					exit(EXIT_FAILURE);
++				}
++				old_ino = ost.st_ino;
++				if (unlinkat(fd, filename, 0) < 0) {
++					perror("unlinkat");
++					exit(EXIT_FAILURE);
++				}
++				nfd = openat(fd, filename, O_CREAT | O_EXCL,
++					     0600);
++				if (nfd < 0) {
++					perror("openat");
++					exit(EXIT_FAILURE);
++				}
++				if (fstat(nfd, &st) < 0) {
++					perror("fstat");
++					exit(EXIT_FAILURE);
++				}
++				close(nfd);
++				close(ofd);
++				exists = 1;
++				printf("recreated entry %s\n", filename);
++			} else if (modify > 0) {
+ 				if (openat(fd, filename, O_CREAT, 0600) < 0) {
+ 					perror("openat");
+ 					exit(EXIT_FAILURE);
+@@ -109,6 +213,11 @@ int main(int argc, char *argv[])
+ 				exists = 1;
+ 				printf("created entry %s\n", filename);
+ 			} else if (modify < 0) {
++				if (next && fstatat(fd, filename, &st,
++						    AT_SYMLINK_NOFOLLOW)) {
++					perror("fstatat");
++					exit(EXIT_FAILURE);
++				}
+ 				if (unlinkat(fd, filename, 0) < 0) {
+ 					perror("unlinkat");
+ 					exit(EXIT_FAILURE);
+@@ -164,8 +273,13 @@ int main(int argc, char *argv[])
+ 					       i, d->d_name, (long long int)d->d_ino,
+ 					       (long long int)d->d_off);
+ 				if (!strcmp(filename, d->d_name)) {
++					/* the old fd may list it stale */
++					int stale = fd != fd2 && old_ino &&
++						    d->d_ino == old_ino;
++
+ 					found = 1;
+-					if (st.st_ino && d->d_ino != st.st_ino) {
++					if (!stale && st.st_ino &&
++					    d->d_ino != st.st_ino) {
+ 						fprintf(stderr, "entry %s has inconsistent d_ino (%lld != %lld)\n",
+ 								filename,
+ 								(long long int)d->d_ino,
+diff --git a/tests/overlay/077 b/tests/overlay/077
+index 00de0825..6426bc26 100755
+--- a/tests/overlay/077
++++ b/tests/overlay/077
+@@ -9,6 +9,7 @@
+ # This is a regression test for kernel commits:
+ # 65cd913ec9d9 ("ovl: invalidate readdir cache on changes to dir with origin")
+ # 9011c2791e63 ("ovl: skip stale entries in merge dir cache iteration")
++# xxxxxxxxxxxx ("ovl: skip stale entries in impure dir iteration")
+ #
+ . ./common/preamble
+ _begin_fstest auto quick dir
+@@ -20,6 +21,8 @@ _fixed_by_kernel_commit 65cd913ec9d9 \
+ 	"ovl: invalidate readdir cache on changes to dir with origin"
+ _fixed_by_kernel_commit 9011c2791e63 \
+ 	"ovl: skip stale entries in merge dir cache iteration"
 +_fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"xfs: wait for direct I/O before swapping extents"
-+
-+filesize=$((1024 * 1024))
-+# A 1 MiB write at this rate stays in the throttle for about 4 seconds.
-+wbps=262144
-+
-+fio_config=$tmp.fio
-+cat > $fio_config <<EOF
-+[swapext-dio]
-+filename=$SCRATCH_MNT/target
-+ioengine=libaio
-+direct=1
-+rw=write
-+bs=$filesize
-+size=$filesize
-+iodepth=1
-+overwrite=1
-+buffer_pattern=0x63
-+EOF
-+_require_fio $fio_config
-+
-+# io.max cannot be set on a partition, so use a loop device as generic/563
-+# does.
-+loopsize_mb=$(_small_fs_size_mb 256)
-+_require_scratch_size_nocheck $((loopsize_mb * 1024))
-+loop_dev=$(_create_loop_device_like_bdev $SCRATCH_DEV $SCRATCH_DEV \
-+					 $((loopsize_mb * 1024 * 1024)))
-+smajor=$((0x`stat -L -c %t $loop_dev`))
-+sminor=$((0x`stat -L -c %T $loop_dev`))
-+
-+_mkfs_dev $loop_dev >> $seqres.full 2>&1
-+_mount $loop_dev $SCRATCH_MNT || _fail "mount failed"
-+_xfs_force_bdev data $SCRATCH_MNT
-+
-+cgdir=$CGROUP2_PATH
-+drop_io_cgroup=
-+grep -q -w io $cgdir/cgroup.subtree_control || drop_io_cgroup=1
-+echo "+io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
-+mkdir -p $cgdir/$seq-cg
-+echo "$smajor:$sminor wbps=$wbps" > $cgdir/$seq-cg/io.max || \
-+	_notrun "cannot set io.max"
-+
-+$XFS_IO_PROG -f -d -c "pwrite -q -S 0x61 -b $filesize 0 $filesize" \
-+	$SCRATCH_MNT/target >> $seqres.full
-+$XFS_IO_PROG -f -d -c "pwrite -q -S 0x62 -b $filesize 0 $filesize" \
-+	$SCRATCH_MNT/donor >> $seqres.full
-+$XFS_IO_PROG -f -c "pwrite -q -S 0x63 -b $filesize 0 $filesize" \
-+	$tmp.expected >> $seqres.full
-+
-+# Start the throttled AIO direct write. XFS drops the iolock once the bio is
-+# submitted, so the swap below can take the iolock while the write is still
-+# in flight. The write updates the target's timestamps when it is submitted.
-+ctime0=$(stat -c %z $SCRATCH_MNT/target)
-+(echo $BASHPID > $cgdir/$seq-cg/cgroup.procs && \
-+	exec $FIO_PROG $fio_config --output=$tmp.fio.out) &
-+fio_pid=$!
-+for ((i = 0; i < 100; i++)); do
-+	[ "$(stat -c %z $SCRATCH_MNT/target)" != "$ctime0" ] && break
-+	sleep 0.1
-+done
-+[ "$(stat -c %z $SCRATCH_MNT/target)" != "$ctime0" ] || \
-+	_fail "direct write was not submitted"
-+
-+# io.stat counts the write when io.max lets it through. Fewer bytes than
-+# the write means it is still queued just before the swap.
-+wbytes=$(sed -n "s/^$smajor:$sminor .*wbytes=\([0-9]*\) .*/\1/p" \
-+	$cgdir/$seq-cg/io.stat)
-+echo "wbytes before swapext: ${wbytes:-0}" >> $seqres.full
-+[ "${wbytes:-0}" -lt $filesize ] || \
-+	_notrun "direct write was not held back by io.max"
-+
-+$XFS_IO_PROG -c "swapext $SCRATCH_MNT/donor" $SCRATCH_MNT/target
-+
-+# The donor now owns the target's old data. The swap waits for the write,
-+# so the donor already holds what the write wrote. This also holds when
-+# always_cow sends the write to CoW staging blocks. The swap drops the
-+# donor's page cache, so this first read comes from the disk.
-+donor_sum=$(_md5_checksum $SCRATCH_MNT/donor)
-+
-+wait $fio_pid || _fail "fio failed"
-+fio_pid=
-+cat $tmp.fio.out >> $seqres.full
-+
-+# A missing io.stat line also reads as 0 above. Make sure that io.max did
-+# account for the write, so the swap really ran while it was held back.
-+wbytes=$(sed -n "s/^$smajor:$sminor .*wbytes=\([0-9]*\) .*/\1/p" \
-+	$cgdir/$seq-cg/io.stat)
-+echo "wbytes after the write: ${wbytes:-0}" >> $seqres.full
-+[ "${wbytes:-0}" -ge $filesize ] || \
-+	_notrun "direct write was not charged to the io.max cgroup"
-+
-+[ "$donor_sum" = "$(_md5_checksum $tmp.expected)" ] || \
-+	echo "donor does not hold the direct write after swapext"
-+
-+_unmount $SCRATCH_MNT
-+_check_xfs_filesystem $loop_dev none none
-+
-+echo Silence is golden
-+_exit 0
-diff --git a/tests/xfs/843.out b/tests/xfs/843.out
-new file mode 100644
-index 0000000..87c1350
---- /dev/null
-+++ b/tests/xfs/843.out
-@@ -0,0 +1,2 @@
-+QA output created by 843
-+Silence is golden
++	"ovl: skip stale entries in impure dir iteration"
+ 
+ _require_scratch_nocheck
+ 
+@@ -40,16 +43,20 @@ create_files() {
+ _scratch_mkfs
+ 
+ # Create test area with a merge dir, a "former" merge dir,
+-# a pure upper dir and impure upper dir. For each case, overlayfs
++# a pure upper dir and two impure upper dirs. For each case, overlayfs
+ # readdir cache is used a bit differently.
+ lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+ upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+ 
+-mkdir -p $lowerdir/merge $lowerdir/former $upperdir/pure $upperdir/impure
++mkdir -p $lowerdir/merge $lowerdir/former $upperdir/pure $upperdir/impure \
++	$upperdir/impure2
+ # Lower files in merge dir are listed first
+ create_files $lowerdir/merge m
+ # Files to be moved into impure upper dir
+ create_files $lowerdir o
++# Files to be moved into another impure upper dir, which only has entries
++# with origin
++create_files $lowerdir n
+ # File to be moved into former merge dir to make it impure
+ touch $lowerdir/f100
+ 
+@@ -61,6 +68,7 @@ create_files $SCRATCH_MNT/former f
+ touch $SCRATCH_MNT/merge/m100
+ # Move copied up files so readdir will need to lookup origin d_ino
+ mv $SCRATCH_MNT/o* $SCRATCH_MNT/impure/
++mv $SCRATCH_MNT/n* $SCRATCH_MNT/impure2/
+ mv $SCRATCH_MNT/f100 $SCRATCH_MNT/former/
+ 
+ # Remove the lower directory and mount overlay again to create
+@@ -84,6 +92,19 @@ $here/src/t_dir_offset2 $SCRATCH_MNT/impure $bufsize "+o0" 2>&1 >> $seqres.full
+ echo -e "\nRemove file in impure upper dir:" >> $seqres.full
+ $here/src/t_dir_offset2 $SCRATCH_MNT/impure $bufsize  "-o100" 2>&1 >> $seqres.full || \
+ 	echo "Found unlinked file in impure upper dir (see $seqres.full for details)"
++# Remove the entry that the next getdents call returns first. An ext4 upper
++# with a hashed dir returns it even after it was removed, so this checks the
++# stale entry case on every hash seed, not only when ext4 happens to keep the
++# removed file.
++echo -e "\nRemove next file in impure upper dir:" >> $seqres.full
++$here/src/t_dir_offset2 $SCRATCH_MNT/impure2 $bufsize "-" 2>&1 >> $seqres.full || \
++	echo "Found unlinked next file in impure upper dir (see $seqres.full for details)"
++# Recreate the entry that the next getdents call returns first. A new fd
++# must list the name with the d_ino of the new file. The old fd may list it,
++# with the d_ino of the old or the new file.
++echo -e "\nRecreate next file in impure upper dir:" >> $seqres.full
++$here/src/t_dir_offset2 $SCRATCH_MNT/impure2 $bufsize "=" 2>&1 >> $seqres.full || \
++	echo "Missing recreated next file in impure upper dir (see $seqres.full for details)"
+ 
+ # Check readdir cache invalidate on merge dir
+ echo -e "\nCreate file in merge dir:" >> $seqres.full
 
 ---
 base-commit: d07dca72d2455f4ba8c660ad4c008541ccccb707
-change-id: 20261109-xfs-swapext-dio-test-8b98685a4d10
+change-id: 20261110-ovl077-stale-next-af1a98ce7151
 
 Best regards,
 -- 
