@@ -1,123 +1,49 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=103.168.172.159
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794319356;
-	b=kHzu2+CEAY9D7wBiHj6bc/3Pi6sfWPsGqd/qBzpj5F8aUVkiEVkgRGmH8QSSwf0oP13Z
-	 CVJGGm3g4u1xCRdJ/aGF8yNfM/IO8NtGF8Md6dpMV9Qt8IF1HFAcOp3aljfPnfa36ZOfS
-	 lLr2ldKs2JOWGQZWuODUI3r8GFwodMYaogsazajyjEFSHgImtG6t4CsBd98QzhVnwAtQc
-	 VrhyQQiSG6+38rbqLUhJYEz6MZrUZjLlahExXdyrWP/ejTTEwQjBUAPYLP1McDN5y1t1A
-	 BnWSPfBOe95zuBpkHNk6PCJ7ay9YyNSxErRW+Oi4SNqY0tV4+hhXnLbqdIZYL+Amo1A==
+	t=1794319367;
+	b=Ou0bSRXaTul8Kh65PJfTmuqgXi+2kp/cKZ+kQsXunKT5/Sx3ptSB0SheEQFfp5CSdMbE
+	 FFlkbB0thr/HVxNCpqbW0KvtXRb5TZQL6iUP4y76Bqm00hAu+Cvc9JqITqujvOAIoifSE
+	 Q/uUYV/XUIsz0BtCCKwgEK804WRc+SAkRhSGgZxjh1bA8RGo727brBfRHZcqO679w0v39
+	 cMVKWZxzm6MQfw9lQfvfiYBseoYQ9rCuMT1CgUuREneHA+ZMW+kNSKeN79+UWr53DIbgA
+	 6TZyXFWHnqgQd43lA42sVenSdIg4at20+7/uwGyR6SmcqlR+syMsWsuvhpQpZ1FzOVA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794319356;
-	h=DMARC-Filter:Received:Received:DKIM-Signature:DKIM-Signature:
-	 X-DKIM2-Info:DKIM2-Signature:X-DKIM2-Info:Message-Instance:
-	 X-ME-Sender:X-ME-Received:X-ME-Proxy-Cause:X-ME-Proxy:Feedback-ID:
-	 Received:From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 User-Agent:MIME-Version:Content-Type:Content-Transfer-Encoding;
-	bh=j1nk8NjkA9AXL9iHpQLbq2BpQLoDl5BSakDh9vIimL8=;
-	b=G9zd4DZHjmGuqJfYMwzimvQIYNa8Ia+NGX0X+J+cIgqfYDsGjbaKPF6IEOg5mmwtaCt6
-	 TNWLID0muH4eYMXfOiJnhgo5uDMlX5ufiUFjtU2TnjKlxkkYsG4OTYQ0rS5g5bHdzT6QF
-	 I+FdGZaTdBT1On6R6DZd92919oKbNje5qRFwFAPrz5bB7tzGn+0b5q2IZZlryH/FebK/3
-	 WtiuwJqBNsDBWffwLJEHnm093XkqBLr7H4hUZmx5+rQNQjZ6HVEfpPwmoPOqUi6+fSoBI
-	 6qYAO5JjaXz8TjRb6N3gHIy4tjeQ5RmDdicim0qN4wLDSA2NAY+1MWv2Har6A/+iVBw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794319367;
+	h=Received:DKIM-Signature:Date:Message-ID:From:To:Subject:MIME-Version:
+	 Content-Type:Content-Disposition;
+	bh=Kx0Lr/xT3FJlKEUL/xGgAlwMbaejUEdbNmYER5dhbC0=;
+	b=Io+5mLZ8TfpRuQylT4ef1+8Dl05EW+whYMLBv9tQdwgXG3352sufcUYttSHREvcA6wy0
+	 /SQkZDjzhTlcNB4HePZaez3IYFHJhJkVh+2Q4GOZLZlopLZsQi6KXGU/17GeJt2rlDGo8
+	 p/OZQvinQRNIV34XSPHifmgeN6/Q4AgR0q9h15lh2NyK/UtpYGLE1D4hySVMnkrl8RmYh
+	 kL06SiMgm6fFW/IWsU7+0f5fReTapkr2KvLfbrK6E+NOX0Ov2iEyrE+NbNvvMuDuzElMr
+	 Auq0ExHNYAVAV9av/tC6nIxcLxlryEBK3trWnjzid20GvlXWrVMNavZFIYDM0wVlLzg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=none header.from=scrivano.org;
-	spf=pass smtp.mailfrom=scrivano.org;
-	dkim=pass header.d=scrivano.org header.i=@scrivano.org header.a=rsa-sha256 header.s=fm3 header.b=WuhYSt9+;
-	dkim=pass header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm3 header.b=OSEAk0qK;
-	arc=none smtp.remote-ip=103.168.172.159
-Received: from fhigh-a8-smtp.messagingengine.com (fhigh-a8-smtp.messagingengine.com [103.168.172.159])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=D+q8Bwhx;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B13DF606A325
-	for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 14:02:35 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B13DF606A325
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=scrivano.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=scrivano.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3FD6E606A325
+	for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 14:02:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=scrivano.org header.i=@scrivano.org header.a=rsa-sha256 header.s=fm3 header.b=WuhYSt9+;
-	dkim=pass (2048-bit key, unprotected) header.d=messagingengine.com header.i=@messagingengine.com header.a=rsa-sha256 header.s=fm3 header.b=OSEAk0qK
-Received: from phl-compute-03.internal (phl-compute-03.internal [10.202.2.43])
-	by mailfhigh.phl.internal (Postfix) with ESMTP id D1DC614001E8
-	for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 09:02:34 -0500 (EST)
-Received: from phl-frontend-04 ([10.202.2.163])
-  by phl-compute-03.internal (MEProxy); Tue, 10 Nov 2026 09:02:34 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=scrivano.org; h=
-	cc:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm3; t=1794319354;
-	 x=1794405754; bh=j1nk8NjkA9AXL9iHpQLbq2BpQLoDl5BSakDh9vIimL8=; b=
-	WuhYSt9+sCZP8Cgt5gLBe2k0PXncD+WNAtyv6OkXvwKYDKlD9tDjpKnQtqIrtuOS
-	jO1KVRz3wiqBQzNm7xS4NU7tA1p4Y0TouVVGF91/vXK+JT/ebX78NZbaDjOMY/Y1
-	ZNDN6SdTu8ocVVkh9W7MI8eafhhiahlL1zsLGCyMSwAUpBvkaAXGbmm1vc5rUO9b
-	KV+3KVwdcnBr42RhlCpnFpCrN0fGWHblb4ZV4iYCZ4nxUjVyIZtUrQ7NpNEr3Sjf
-	4hphVLvvtzxzYjYDhhaj0pB+S+H58VNIYvp3tqcS1gqkmb7sTph6fxhIqyd13ul2
-	hjvEmxWR/h87ODpnxflxyw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1794319354; x=
-	1794405754; bh=j1nk8NjkA9AXL9iHpQLbq2BpQLoDl5BSakDh9vIimL8=; b=O
-	SEAk0qKq8ik+QtNJyo/QLidx3NqAZuV14QwhAD9tKtNMmDNaBodAV6342us/cV4J
-	Bm8dp7YtSbTOPRhv0jY23G6gK/6JT3wCjrrAQtYo9/wOunCqRYJjLyr+JCngJSkf
-	P+foZZXJk505YLsOqKSZA2rrMeMRWhwaLaY4xgUde7BLB1sernTwsERlVR91XdF1
-	H33lS5Sr2XeOLTiIOetppm+TRIQIMSa1rc+ZNOW+vwBWEy+CGU+mBklZfhkLqHqz
-	FZd1GZPFAIaXY5zJiECnwwE1vn2jQSvH6zdIm2ljqZ5z0S37AQWMKZOdDWWWsIZy
-	+J6yIbspZWSmc4Qj4cfkQ==
-X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-09;
-	repo=github.com/dkim2wg/interop; date=2026-11-03; sw=lmtpprox;
-	action=sign d=scrivano.org a=rsa-sha256;
-DKIM2-Signature: i=1; m=1; t=1794319354; d=scrivano.org;
-	mf=PGdpdXNlcHBlQHNjcml2YW5vLm9yZz4=;
-	rt=PGZzdGVzdHNAdmdlci5rZXJuZWwub3JnPg==;
-	s=fm3:rsa-sha256:VohKXMcDPWxkpkjHzNV2juI68rwl4oxhZbAsGDOHL8hA8q0
-	duoRAgW+ozPxYAxfdxTAIw4vApQv9zzfLC8UmBxr4xJRCT86WKk7wqKFK1+AmPqb
-	6Kb2ZlFg2WdFsSYXaHE1IwxtFFw8oGtgcZUSH7AJBnSsP57eoUtxIM5/09F9RMau
-	ze5b8EiOgeV/UyAFxi9+OFpI36eDkIH60vWv+XN580uv4g0rtaxG5QS0BAA6Xn8u
-	NaiDH5m1RbIknl2RcktJIvzQlXmkOkn8In0IlKp98xstVBmFkuUWoOuPiJ7pciiH
-	NpgeLJjaE3q7J7K9PxROGNdYRIj0Ilw4+3HHerQ==;
-X-DKIM2-Info: draft=ietf-dkim-dkim2-spec-09;
-	repo=github.com/dkim2wg/interop; date=2026-11-03; sw=lmtpprox;
-	action=mi-m=1; hc=13;
-	hn=cc,content-transfer-encoding,content-type,date,feedback-id,
-	from,in-reply-to,message-id,mime-version,references,subject,to,
-	user-agent;
-Message-Instance: m=1; h=sha256:X2fhfVS5gM8Br3bZpOQGd6pNMUYprG6wXSlsxAddjq0=:DZDMBy2Img7vfFiwIXxcUbJbJmzDaKr/cpERIy8rrBg=;
-X-ME-Sender: <xms:-iPzagwhwocr_NVnH5xTflittjOCaOR4u3Zib6lJnpqKXA8yM2x82g>
-    <xme:-iPzaiHoiO-pAXbsm0sFLU8xF46mnRa9HeYqZXjQI7bc2u9PnGbZzSzCiXQxcJBg9
-    l8UXuuGkDuM29Y7sfhrHLerYb1gwzdBkRG0huQoyHb1nsRsl1VzoYdR>
-X-ME-Received: <xmr:-iPzasyxhUfv7sgUojGOSqGRm8-qj7sMba_dReq0vaqd3yzHyZ_uzJzOv4qHj3YXy5cvr3Br0VkXQEW6GD5j1uKHtYp5>
-X-ME-Proxy-Cause: dmFkZTFhD/tu9sxPSWsr/o31R5+QK00TQgGdmo53ienhIzS2PM2Dqw1/ny6xchRIp0LyXM
-    QlOfN/2EwdofsdMiQielVg+Fw8OWRyOV9XvlzynGTCooxez71z1HOsALvBIH4MJDcwB+D5
-    9jVxVaopDvvPXSPEhiplFWtcZGln8XBOhNYM6ccPIXW3FD5VNdCDeRnwa/Hzg0ZxbKhBJm
-    HHX3Br2ZRp8xfdUVZXTBL0jcyw85dkkrZHzVKKwxkd0wjdO/Cu5Uhc+ErWGuYzMZV54DfL
-    CP1G7LsVf3rKmdylxvyJ1ePc9QqIW0jxXqTXimqgRQyguWKle17+mP53xv8TYPk5t83OqP
-    iIQrStNwc/Vb3jMyK0Vof562WcdTEJxy7fx8mbC+OP32kh9yBwguavhI3fo8caiHFhs46l
-    5fdiiJLdKANSuQ465tJaRnzEsKauYyPQi4YXRcXREz9MRo6R0AjPCpmcZHohkfwIKCNrj3
-    mAUEdmysSegQNGHe862oN8fdZbB0pixJGzJybdfeh80/9j9QaC6FgOrpVhtrXpo0DigHER
-    dSfDKKP0snjoZ4t27J1/A01qL/0v4rhxln/NCYFdWlfT1TGzDxSfjK6fKHdNYsL8MBFNog
-    8EJzV+xFYZzq/YZiMgnMs9ORzFHaI+qKafWuUyLn770mcL7Rx2p3WPrCcOlA
-X-ME-Proxy: <xmx:-iPzartJULBhxVkOFkqbPcDQQ0Bq3g_rF1crkRRfmUez86hooOjoHw>
-    <xmx:-iPzah16vN7TGD0wvkRefF_cw-rXdP4lsDxR6OfTgFxrE0xOBoSOzQ>
-    <xmx:-iPzau_y3v-RX5l3loh9j0YdKKCOIj1hdGMgOn4rbSt_8lLdK6Y7Cg>
-    <xmx:-iPzaqO8lhnNgauGWUyk-jkYjsypxpxMgB2XYyK5Kdbqwrpyv7yONw>
-    <xmx:-iPzaiIvxX8EGjLk2tFKvQCk5LMwc26mGyZKHKItBgIUU6X65z7f35S2>
-Feedback-ID: i8e6e4897:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
- 10 Nov 2026 09:02:34 -0500 (EST)
-From: Giuseppe Scrivano <giuseppe@scrivano.org>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: fstests@vger.kernel.org,  linux-unionfs@vger.kernel.org
-Subject: Re: [PATCH fstests v2] overlay: add a test for redirect_dir=followdata
-In-Reply-To: <CAOQ4uxjsNEyB0H8CqGp9En1bFCH92bYAu8UJ8SovXUeaG=z-DA@mail.gmail.com>
-	(Amir Goldstein's message of "Tue, 10 Nov 2026 12:43:47 +0100")
-References: <20261109134006.2555438-1-giuseppe@scrivano.org>
-	<CAOQ4uxjsNEyB0H8CqGp9En1bFCH92bYAu8UJ8SovXUeaG=z-DA@mail.gmail.com>
-Date: Tue, 10 Nov 2026 15:02:31 +0100
-Message-ID: <878q30ss20.fsf@scrivano.org>
-User-Agent: Gnus/5.13 (Gnus v5.13)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=D+q8Bwhx
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 67EFE1F008A1
+	for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 14:02:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1794319367;
+	bh=Kx0Lr/xT3FJlKEUL/xGgAlwMbaejUEdbNmYER5dhbC0=;
+	h=Date:From:To:Subject;
+	b=D+q8Bwhxy2iQjDwnqgQMvdX3k5H5suNodTz1q0WumOImMRveDCInNvyrDpUgP6rfw
+	 N+d/i/Stre/2mKQZvW3YZdi/TW9NASBqqyaessQt2tYHlBxsbvHhZiMMs8+XXK47Va
+	 w4HSXP2KsCDiiWTRD3JPouZojTQasXAtoFa61oCUFrYkoCv7DxIze6+8F7J/Mqad3f
+	 zSr8KIe3mYPPdHulFjhGkmAsaOknm+y/t3S6rhYFNRzXVzQp5ihXdtk49tkZtuwvG1
+	 RZH8zw6TsDV2ynmkrVDxjXVhLM4KU6GDPB8VbfV6vQaA2dJV+FjxDTCDXz+Heheu+G
+	 ECMOsJSH0OrZw==
+Date: Tue, 10 Nov 2026 22:02:43 +0800
+Message-ID: <d71459bb4537c332a0aed9379556c57d@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2026.11.10
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -127,300 +53,172 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: multipart/signed; micalg=pgp-sha256;
+  protocol="application/pgp-signature"; boundary="O3k74w17g0NM"
+Content-Disposition: inline
 
-Hi Amir,
+--O3k74w17g0NM
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Amir Goldstein <amir73il@gmail.com> writes:
+Hi all,
 
-> On Mon, Nov 9, 2026 at 2:40=E2=80=AFPM Giuseppe Scrivano <giuseppe@scriva=
-no.org> wrote:
->>
->> Test that data-only layers select redirect_dir=3Dfollowdata, which follo=
-ws
->> redirects from lower to lowerdata from any lower layer, with userxattr
->> and trusted xattrs, and that redirect_dir=3Dnofollow is refused with
->> data-only layers.
->>
->> Also test following an absolute redirect past a lower layer that has the
->> parent directory of the target, which failed with EIO before the fix
->> "ovl: do not always clear absolute_redirect".
->>
->> Signed-off-by: Giuseppe Scrivano <giuseppe@scrivano.org>
->> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
->> ---
->>  common/overlay        |  15 +++++
->>  tests/overlay/090     | 149 ++++++++++++++++++++++++++++++++++++++++++
->>  tests/overlay/090.out |  43 ++++++++++++
->>  3 files changed, 207 insertions(+)
->>  create mode 100755 tests/overlay/090
->>  create mode 100644 tests/overlay/090.out
->>
->> diff --git a/common/overlay b/common/overlay
->> index 8e89d6e4..382960c3 100644
->> --- a/common/overlay
->> +++ b/common/overlay
->> @@ -286,6 +286,21 @@ _require_scratch_overlay_datadir_without_metacopy()
->>
->>  }
->>
->> +# Check kernel support for the "redirect_dir=3Dfollowdata" mount option
->> +_require_scratch_overlay_redirect_followdata()
->> +{
->> +       local lowerdir=3D"$OVL_BASE_SCRATCH_MNT/$OVL_UPPER"
->> +       local datadir=3D"$OVL_BASE_SCRATCH_MNT/$OVL_LOWER"
->> +
->> +       _scratch_mkfs > /dev/null 2>&1
->> +       _overlay_scratch_mount_opts \
->> +               -o"lowerdir+=3D$lowerdir,datadir+=3D$datadir" \
->> +               -o"userxattr,redirect_dir=3Dfollowdata" > /dev/null 2>&1=
- || \
->> +               _notrun "overlay redirect_dir=3Dfollowdata not supported=
- on ${SCRATCH_DEV}"
->> +
->> +       _scratch_unmount
->> +}
->> +
->>
->>  # Helper function to check underlying dirs of overlay filesystem
->>  _overlay_fsck_dirs()
->> diff --git a/tests/overlay/090 b/tests/overlay/090
->> new file mode 100755
->> index 00000000..6eeeacdf
->> --- /dev/null
->> +++ b/tests/overlay/090
->> @@ -0,0 +1,149 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2026 Giuseppe Scrivano.  All Rights Reserved.
->> +#
->> +# FS QA Test 090
->> +#
->> +# Test the redirect_dir=3Dfollowdata mount option.
->> +#
->> +# Data-only layers select redirect_dir=3Dfollowdata, which follows redi=
-rects
->> +# from any lower layer to a data-only layer, and cannot be used with
->> +# redirect_dir=3Dnofollow.
->> +#
->> +# Also test following an absolute redirect past a lower layer that has =
-the
->> +# parent directory of the redirect target, with metacopy=3Don.
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick metacopy redirect attr
->> +
->> +# Import common functions.
->> +. ./common/filter
->> +. ./common/attr
->> +
->> +# We use non-default scratch underlying overlay dirs, we need to check
->> +# them explicitly after test.
->> +_require_scratch_nocheck
->> +_require_attrs user
->> +_require_attrs trusted
->> +_require_scratch_overlay_redirect_followdata
->> +_require_scratch_overlay_features redirect_dir metacopy
->> +_require_scratch_overlay_lowerdata_layers
->> +
->> +data=3D$OVL_BASE_SCRATCH_MNT/data
->> +l1=3D$OVL_BASE_SCRATCH_MNT/lower1
->> +l2=3D$OVL_BASE_SCRATCH_MNT/lower2
->> +l3=3D$OVL_BASE_SCRATCH_MNT/lower3
->> +upper=3D$OVL_BASE_SCRATCH_MNT/upper
->> +work=3D$OVL_BASE_SCRATCH_MNT/work
->> +layers=3D"$l3:$l2:$l1::$data"
->> +
->> +# Make a metacopy file <file> with the redirect <redirect>, for both
->> +# userxattr and trusted xattr mounts
->> +make_stub()
->> +{
->> +       local file=3D$1 redirect=3D$2 x
->> +
->> +       touch $file
->> +       for x in user.overlay. ${OVL_XATTR_METACOPY%metacopy}; do
->> +               $SETFATTR_PROG -n ${x}metacopy $file
->> +               $SETFATTR_PROG -n ${x}redirect -v $redirect $file
->> +       done
->> +       truncate -s 4 $file
->> +}
->> +
->> +# Mount the layers $layers with the options <opts>, print redirect_dir=
-=3Dfollowdata
->> +# if the mount shows it and <opts> has userxattr or redirect_dir (other=
-wise it
->> +# depends on the kernel config), and the content of each of the followi=
-ng files,
->> +# or the error reading it
->> +check()
->> +{
->> +       local opts=3D$1 f
->> +
->> +       shift
->> +       echo "=3D=3D $opts"
->> +       _overlay_scratch_mount_dirs "$layers" $upper $work -o $opts
->> +       case $opts in
->> +       *userxattr*|*redirect_dir=3D*)
->> +               _fs_options $OVL_BASE_SCRATCH_MNT | grep -o redirect_dir=
-=3Dfollowdata
->> +               ;;
->> +       esac
->> +       for f; do
->> +               echo "$f: $(cat $SCRATCH_MNT/$f 2>&1 | sed 's/^cat: .*: =
-//')"
->> +       done
->> +       _unmount $SCRATCH_MNT
->> +}
->> +
->> +# Mounting the layers $layers with the options <opts> must fail
->> +check_fail()
->> +{
->> +       local opts=3D$1
->> +
->> +       echo "=3D=3D $opts"
->> +       _overlay_scratch_mount_dirs "$layers" $upper $work -o $opts \
->> +               >> $seqres.full 2>&1 && echo "mount succeeded" && \
->> +               _unmount $SCRATCH_MNT
->> +}
->> +
->> +_scratch_mkfs
->> +mkdir -p $data/base $l1/base $l2/base $l3 $upper $work
->> +echo -n "data" > $data/base/file
->> +
->> +make_stub $l1/s1 /base/file
->> +make_stub $l2/s2 /base/file
->> +make_stub $l3/s3 /base/file
->> +# The redirect target in a lower layer below s3, which is not looked up
->> +echo -n "lowr" > $l2/base/file
->> +# Redirects that are not followed: relative, directory, upper
->> +echo -n "lowr" > $l2/reltarget
->> +make_stub $l3/rel reltarget
->> +mkdir $l3/dir
->> +$SETFATTR_PROG -n user.overlay.redirect -v /base $l3/dir
->> +$SETFATTR_PROG -n $OVL_XATTR_REDIRECT -v /base $l3/dir
->> +make_stub $upper/up /base/file
->> +
->> +# followdata is selected by default with userxattr and a data-only layer
->> +check userxattr s1 s2 s3
->> +check userxattr,redirect_dir=3Dfollowdata s1 s2 s3 rel dir up
->> +# a data-only layer cannot be used without following redirects
->> +check_fail userxattr,redirect_dir=3Dnofollow
->> +check_fail userxattr,redirect_dir=3Doff
->
-> The test looks good but this expectation of failure is problematic.
->
-> First of all the test would fail with redirect_always_follow=3DN
-> because that makes redirect_dir=3Doff =3D> followdata
->
-> But I also think that redirect_dir=3Doff should not fail with
-> redirect_always_follow=3DY.
->
-> I will explain with the documentation.
-> You documentation v2 patch says:
->
-> :A data-only layer selects "redirect_dir=3Dfollowdata", unless
-> "redirect_dir=3Dfollow"
-> :or "redirect_dir=3Don" is in effect.
->
-> So it implies redirect_dir=3Doff =3D> followdata
->
-> All that redirect_dir=3Doff really means is "don't create redirects".
->
-> I amended the document as follows to clarify that:
->
-> - "redirect_dir=3Don":
->     Redirects are created and followed.
-> - "redirect_dir=3Dfollow":
->     Redirects are not created, but followed.
-> - "redirect_dir=3Dfollowdata":
->     Redirects are not created.
->     Only redirects from lower to lowerdata are followed.
-> - "redirect_dir=3Dnofollow":
->     Redirects are not created and not followed.
-> - "redirect_dir=3Doff":
->     Redirects are not created.
->     Which redirects are followed depends on "redirect_always_follow" in t=
-he
->     kernel/module config, on data-only lower layers and on the "userxattr"
->     mount option.
->
-> Made this off =3D> followdata change in the code and pushed to ovl-fixes:
->
-> -static int ovl_redirect_follow_mode(size_t nr_data)
-> +int ovl_redirect_follow_mode(bool follow_lower, size_t nr_data)
->  {
-> -       return ovl_redirect_always_follow ? OVL_REDIRECT_FOLLOW :
-> -                                           ovl_redirect_nofollow_mode(nr=
-_data);
-> +       if (ovl_redirect_always_follow && follow_lower)
-> +               return OVL_REDIRECT_FOLLOW;
-> +
-> +       /* Data-only layers cannot be used without following redirects
-> to them */
-> +       return nr_data ? OVL_REDIRECT_FOLLOWDATA : OVL_REDIRECT_NOFOLLOW;
->  }
->
->  /*
-> @@ -137,7 +140,7 @@ static int ovl_redirect_follow_mode(size_t nr_data)
->  static int ovl_redirect_mode_def(void)
->  {
->         return ovl_redirect_dir_def ? OVL_REDIRECT_ON :
-> -                                     ovl_redirect_follow_mode(0);
-> +                                     ovl_redirect_follow_mode(true, 0);
->  }
->
->  static const struct constant_table ovl_parameter_verity[] =3D {
-> @@ -896,6 +899,9 @@ int ovl_fs_params_verify(const struct ovl_fs_context =
-*ctx,
->         struct ovl_opt_set set =3D ctx->set;
->         /* The requested redirect_dir=3D, for reporting conflicts with it=
- */
->         int redirect_opt =3D config->redirect_mode;
-> +       /* The redirect follow mode for redirect_dir=3Doff and for the de=
-fault */
-> +       int follow_mode =3D ovl_redirect_follow_mode(!config->userxattr,
-> +                                                  ctx->nr_data);
->
->         /* Workdir/index are useless in non-upper mount */
->         if (!config->upperdir) {
-> @@ -922,9 +928,12 @@ int ovl_fs_params_verify(const struct ovl_fs_context=
- *ctx,
->                 config->uuid =3D OVL_UUID_NULL;
->         }
->
-> -       /* Resolve redirect_dir=3Doff to the default redirect follow mode=
- */
-> +       /*
-> +        * Resolve redirect_dir=3Doff to the default redirect follow mode.
-> +        * With userxattr, redirects are not followed to lower by default.
-> +        */
->         if (config->redirect_mode =3D=3D OVL_REDIRECT_OFF)
-> -               config->redirect_mode =3D ovl_redirect_follow_mode(ctx->n=
-r_data);
-> +               config->redirect_mode =3D follow_mode;
->
->         /*
->          * This is to make the logic below simpler.  It doesn't make any =
-other
-> @@ -1038,7 +1047,7 @@ int ovl_fs_params_verify(const struct ovl_fs_contex=
-t *ctx,
->                  * userxattr.
->                  */
->                 if (!set.redirect)
-> -                       config->redirect_mode =3D
-> ovl_redirect_nofollow_mode(ctx->nr_data);
-> +                       config->redirect_mode =3D follow_mode;
->                 config->metacopy =3D false;
->         }
->
->
-> Please amend the test and test with the latest ovl-fixes:
-> d0d57557b76de ovl: follow lower to lowerdata redirects from any lower lay=
-er
+The for-next branch of the xfstests repository at:
 
-I've tested this modified version and it works fine.  Do you want me to
-send a v3 or will you amend it?
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated and tagged as v2026.11.10 release.
+
+Release Notes:
+1) There're 5 new cases in this release, include btrfs/361, btrfs/363
+   btrfs/364, generic/810 and generic/811. Most of them are known regression
+   tests.
+2) Refactor the common sysfs related helpers, including renaming
+   some common helpers, replacing btrfs specific helpers, adding
+   helpers for /sys/fs/$FSTYP/features/ etc.
+3) Fix several bugs found during xfs and btrfs testing, also resolve some
+   compile issues.
+
+More details please refer to below, thanks for all these contributions!
 
 Thanks,
-Giuseppe
+Zorro
+
+The new head of the for-next branch is commit:
+
+71641219a506 generic: check that RWF_DONTCACHE I/O drops its folios
+
+New commits:
+
+Andrey Albershteyn (2):
+      [7e636452ed4f] check: set seqres before calling init_rc which could write there
+      [88a7dde2f616] xfs/619: fix mistyped seqres.full variable
+
+Christian Brauner (1):
+      [2c441bfacee8] src/vfs: skip whiteout-device fixtures on overlayfs
+
+Darrick J. Wong (1):
+      [afc1dbc731b9] generic/805: mask unmount failures on cleanup
+
+Filipe Manana (2):
+      [9629b4c11da4] btrfs: test fiemap does not merge compressed extents
+      [591dc4f87a1e] btrfs: test compression attribute on filesystems mounted with nodatacow
+
+Jeff Layton (1):
+      [e1b8c0ff172c] tools/get_maintainer.pl: accept and ignore --nogit-chief-penguins
+
+Johannes Thumshirn (1):
+      [f0c21237aee6] btrfs: test that fsynced data on a RAID stripe tree survives a power failure
+
+Lukas Herbolt (2):
+      [2c690bd2955c] lib/random.c fix undefined behavior on signed integer overflow.
+      [b4afae2800be] xfstests: Unify the build targets under LINUX_TARGET
+
+Qu Wenruo (1):
+      [f6983d7fdbed] fstests: generic: add a test case to check fsverity reads
+
+Tal Zussman (3):
+      [d64bdb8a716e] common/rc: probe pread options with a real read
+      [77d36b1aae2a] common/rc: pass -V 1 when probing pwrite and pread -U
+      [71641219a506] generic: check that RWF_DONTCACHE I/O drops its folios
+
+Zorro Lang (6):
+      [5a210444809f] fstests: rename _*_fs_sysfs_attr helpers to _*_fs_sysfs_dev_attr
+      [36877358472e] fstests: consolidate _require_fs_sysfs and _require_fs_sysfs_dev_attr
+      [edb33f6e3d1d] common: move btrfs-only sysfs policy helpers out of common/sysfs
+      [18e17a0c7e8f] common/rc: add helpers for /sys/fs/$FSTYP/features/
+      [24be66f776ab] common/rc: use common helper in _require_fanotify_ioerrors for f2fs
+      [4c9f6e56ad64] fstests: replace btrfs specific helpers with common sysfs helpers
+
+
+Code Diffstat:
+
+ check                     |   8 ++-
+ common/btrfs              | 176 ++++++++++++++++++++++++++++++++++++----------
+ common/rc                 | 123 +++++++++++++++++++++++++-------
+ common/sysfs              | 145 --------------------------------------
+ common/xfs                |  24 ++++---
+ lib/random.c              |  34 ++-------
+ src/Makefile              |  55 ++++++++-------
+ src/vfs/idmapped-mounts.c | 154 +++++++++++++++++++++-------------------
+ src/vfs/utils.c           |  25 +++++++
+ src/vfs/utils.h           |   1 +
+ tests/btrfs/010           |   3 +-
+ tests/btrfs/055           |   2 +-
+ tests/btrfs/056           |   2 +-
+ tests/btrfs/112           |   2 +-
+ tests/btrfs/131           |   2 +-
+ tests/btrfs/165           |   2 +-
+ tests/btrfs/188           |   2 +-
+ tests/btrfs/192           |   2 +-
+ tests/btrfs/201           |   2 +-
+ tests/btrfs/205           |   2 +-
+ tests/btrfs/209           |   2 +-
+ tests/btrfs/211           |   2 +-
+ tests/btrfs/219           |   3 +-
+ tests/btrfs/231           |   2 +-
+ tests/btrfs/253           |  29 ++++----
+ tests/btrfs/285           |   3 +-
+ tests/btrfs/296           |   8 +--
+ tests/btrfs/304           |   4 +-
+ tests/btrfs/305           |   4 +-
+ tests/btrfs/306           |   4 +-
+ tests/btrfs/307           |   4 +-
+ tests/btrfs/308           |   4 +-
+ tests/btrfs/311           |   2 +-
+ tests/btrfs/313           |   2 +-
+ tests/btrfs/314           |   2 +-
+ tests/btrfs/315           |   2 +-
+ tests/btrfs/329           |   5 +-
+ tests/btrfs/334           |   5 +-
+ tests/btrfs/342           |   2 +-
+ tests/btrfs/352           |   2 +-
+ tests/btrfs/361           |  50 +++++++++++++
+ tests/btrfs/361.out       |   8 +++
+ tests/btrfs/363           |  66 +++++++++++++++++
+ tests/btrfs/363.out       |  15 ++++
+ tests/btrfs/364           |  44 ++++++++++++
+ tests/btrfs/364.out       |   5 ++
+ tests/f2fs/025            |   2 +-
+ tests/generic/098         |   2 +-
+ tests/generic/101         |   2 +-
+ tests/generic/805         |   2 +-
+ tests/generic/810         |  72 +++++++++++++++++++
+ tests/generic/810.out     |   2 +
+ tests/generic/811         |  77 ++++++++++++++++++++
+ tests/generic/811.out     |  11 +++
+ tests/xfs/006             |   4 +-
+ tests/xfs/177             |   4 +-
+ tests/xfs/264             |  14 ++--
+ tests/xfs/619             |   2 +-
+ tests/xfs/668             |   6 +-
+ tests/xfs/669             |   6 +-
+ tests/xfs/670             |   2 +-
+ tools/get_maintainer.pl   |   2 +
+ 62 files changed, 822 insertions(+), 433 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--O3k74w17g0NM
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Disposition: inline; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmrzI9kACgkQlNbPkfr2
+tMzv7xAAjCOdGdYNEzF1GVwQYyvuWmkCuxbH9JZuuafu41q2jCSH7kP+2/+WuCtn
+g0d88aTzRCqwyScqfpmYAsJpbIQps48+gUiSrg5C46q48idhFDe9rh6rp+BEq+T3
+439rKjyqGGOQaJv/tLk8vZ2y/XtreQRlq1L7Eavguaxj3w+n+2NADqr9mwDa05AT
+1nufyYo79Cuj/0TrV7NDI3bZTTlEaPTIhOzudRfBBrEqV7lex1/9SOExOZIIQgh7
+w27x/L38flnNivhVyiiEM7dvSCCrfb3G60i9UGJm0dwkOGOgxZQVuxmMlIxZY7Hp
+JHQ+HeY5iJ0wrZ4S/Zb0JAdQZ3V1YWJrVDx2ry/6FS7M9LaeoSM0J36LgBtp4I63
+3eWbqs9qp61bGvNxSCpL8rpDl0QnyrufeDQByKlKa4EDzKB0z6ufGnkonBi0XSdf
+YSEqKj4c1inNROSrc0sCucNdkgM74YYjhlh7iG7hUCQIoxxQw7fqSRk1iU2pGC4p
+gjyeCmDkNR0OMciq/G5/Xr5roPoivUNHKYHnyCzOfIGRWTB459XjPvRrWtLHdi0l
+VrDi9lr2N+yRieAkP+nYkLt1o4CseyblaYbYl1tLPFj6QroFRHQN4PV+fQSiJdaq
+A8KRQrSu6bhuJTwuijxuPN3kxWmt+B4fXlLxk4VspKJI59SCCNc=
+=I53N
+-----END PGP SIGNATURE-----
+
+--O3k74w17g0NM--
