@@ -1,93 +1,59 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=74.125.82.52
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=203.254.224.25
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794336692;
-	b=kd3ytsW91+jjHS5r0fVsf1jBUVm3mdtAfap6C5xBKuT5vsULQXwTSP6LuB9kAu4kAuCA
-	 mpoo24DnaPqVbMs3rLcUNRrXUzWDCkC2t8xJwQNJGk1vPd8AXwyI0nFJA1F53QKP0eGrG
-	 9Hw2N0pIh+Pkh+p60jdTSKtifpvTDgE7sXMgqDez1XLz4FlFi2Wd4bpsXWGt3mcgpiCQw
-	 oAlB17hAZcT4d55/fYUms/Rd0zxuy83G3/xc0ADmQt2dsDJPhWHWy9zSY7enwXQk4S4Fl
-	 g4HToIGP908kTXJB9yQSW6nAtKH9D4Y5spslPSgVop9kpHz5QMzSRb1sABr5YvZ3PkA==
+	t=1794372665;
+	b=J0XRabV9juh1Y064bhAFOFkOOvb6oGaWy9AxNj7bvUShny//M9VYJcx66KWlNHRLtPao
+	 Yi0yCAIUp4+i4zby27eeKTzU8u7WQX5rJ5zu8xQNhXahH0UeIIL4BMT6DDY9uNrfyIbV1
+	 wsVXZ5G4iwMsDiBefBukL68IX1D3UJJ0No0DENOshFI61miV0TB/uC9kmFM9a3lMV5KWT
+	 P5GoGpn0wWCuv8Xv2j2E4STlCgVi5e5a2Qi8jPoA6xIpe/3h/HxnV9nA7C22ZzsMWt6th
+	 KVDemQCUKyOIoWhQxuTCMUzWQbC1toDhMmB2hbeNba8G2hckysOfBIG/P/Oaifi+nLA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794336692;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
-	 Date:Message-ID:X-Mailer:In-Reply-To:References:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=eSWtkVU6mS+isDiyOe0c8DoQ/PK3FUw0h39/ptl7nhQ=;
-	b=NGTvMMfoNJs13MMDjUDW/gnYtjXBPakYtFZRP4K/pcG6FBtGd4xUnLaKmGgrq4WAWdC1
-	 jsgulyWJJknbckyr3v+BZCu8RD+nrbl6N9WVhQWuEvCymLN0TYo60XRWGJEJ6TIbL7ckD
-	 O36I/RokYMdkxZyVZdgdhmFVPxup7EvIgwJnsLK7cpM0TRTWuGYJ39zai7AZps+gL8gx5
-	 QebLUEnxPrWRtC2VOTBYRQazLefnBgBYBEXSuwUwLA6lTBFp/KiYWV6RmwMnYf6nipI6O
-	 8DUA6nqBcJLLKthMnt6vWl2TP7nTraQcngrYoJ9BWXHGN/yq/B1D4UvOorOBHvdCsgw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794372665;
+	h=DMARC-Filter:Received:DKIM-Filter:DKIM-Signature:Received:Received:
+	 Mime-Version:Subject:Reply-To:Sender:From:To:CC:X-Priority:
+	 X-Content-Kind-Code:In-Reply-To:X-CPGS-Detection:X-Drm-Type:
+	 X-Msg-Generator:X-Msg-Type:X-Reply-Demand:Message-ID:Date:
+	 X-CMS-MailID:Content-Transfer-Encoding:Content-Type:X-Sendblock-Type:
+	 CMS-TYPE:X-CPGSPASS:X-CPGSPASS:cpgsPolicy:X-CFilter-Loop:
+	 X-CMS-RootMailID:References;
+	bh=gh+NftpSqHgfZZ/G5//YTCUgo/7r9ac0BfabcTGSh/0=;
+	b=yxQ32PIEkCeqVzWd5tSVwvpopP4NXzWbB5Qlp6UTdliJKbUlAbRPFXpfFKQG+VxJd59w
+	 K+be0CQ1HIvKXMizOS621y6OF0tg08qhEri9/q7KTxWWIpculaeVIcFo6Hgxjcdqke4aI
+	 5earthCZIfJj52V224obbSmeHeBrBlsEPaAL690F97d8pOgGwoW8bJDcVMY1+BZyI3ApW
+	 jGvwXiR4dhmAKNkYgKDAuY07NfT4guUzY41DSKfcLLz7sCd1v5C98AKika8ESl0DvtpvE
+	 mjfp+xoccLLuDodmgmpcuB8qiztsXDbZNfNXEtQADAfQ1UJ6wZZFKHiSQzL07hKQRIA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=vCh6SPUY;
-	arc=none smtp.remote-ip=74.125.82.52
-Received: from mail-dl1-f52.google.com (mail-dl1-f52.google.com [74.125.82.52])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dmarc=pass header.from=samsung.com;
+	spf=pass smtp.mailfrom=samsung.com;
+	dkim=pass header.d=samsung.com header.i=@samsung.com header.a=rsa-sha256 header.s=mail20170921 header.b=D7VkqrrN;
+	arc=none smtp.remote-ip=203.254.224.25
+Received: from mailout2.samsung.com (mailout2.samsung.com [203.254.224.25])
+	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02113606A32E
-	for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 18:51:31 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 02113606A32E
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F0B01606A31C
+	for <fstests@vger.kernel.org>; Wed, 11 Nov 2026 04:51:04 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org F0B01606A31C
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=vCh6SPUY
-Received: by mail-dl1-f52.google.com with SMTP id a92af1059eb24-15dd124bbe7so3182905c88.1
-        for <fstests@vger.kernel.org>; Tue, 10 Nov 2026 10:51:31 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1794336691; x=1794941491; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=eSWtkVU6mS+isDiyOe0c8DoQ/PK3FUw0h39/ptl7nhQ=;
-        b=vCh6SPUYYBgQGIMv11JBHQ1ZpHG1YmpKKy5z+PXKqrS6wvzLt+Jd96wRXDx3xAl9Zs
-         eqHWZ1n9wDAWlHKO5CkPw4UotjvIcrK0884KDbHvz5p9p7KQTkJqv5sTw/JBAHknmVTc
-         +wP7x6qNAd7K8sNrY31mCjYhvP3jjfem3Lk+JNugwr9HA5oie3JA5NtyNSkVuubkdgRU
-         33Kk1iyy9S88ZnullO0/56DouCUG+sX8fPRgm8+uiTm/aE2cqdzBuXzSqiOAk6bbQAow
-         k8asWa5p9oAsXMqiHne/qDa3fprJ5tb89OjqiXvvDaYxMTTLrJineT/aeibpPyUQhXuV
-         hKJg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794336691; x=1794941491;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=eSWtkVU6mS+isDiyOe0c8DoQ/PK3FUw0h39/ptl7nhQ=;
-        b=e3t7gTFYx4cgcMudLXck4Sx3sflIcRbjwHSz1up4WBZL6crbQT++QtqUIrOXTH80Wx
-         74Ar1MzK1EHYxY9rbGiUxWn/zKtZkFwcvXZN0iOJqOT7kpJhgubTJMsqmMlyrgM05b7B
-         pMyA91+JkE4r8llmxxmuq2pPQeS7ywVeO5Hbf/tO+LXnCs7fWo1oVKVbX30Xjr6xnw0v
-         367FCD+DRvqbxPMKLNtrG7r2dbxDNF6TWvpEijNeHdd/uY2tYuPxOTfpz6DutB1aT45c
-         qtSvBZbhNhBTRNAccKOSuFsIosyOBaGPrDPcU5aFqngHF7PIwjcgC3QuOFv6QSwGmWRQ
-         zdFA==
-X-Gm-Message-State: APuU4Z/yFaCcnzfybIbC3Z0+1/nVuN/sJjDR8C2LpvhNi37a4iQDETgI
-	h5JmDznRd40VCJINkOHzdg2zP/TF6sBVBg4KlD0IZcnN6yjeyU1tLaqVoXuFyKbl
-X-Gm-Gg: AYBFou0jsWLwB5VJ47Bs94pvmVml517CcP1R3nSCpJTGGB8qw0bb/F2evZyMc63vHPU
-	8U0mdeu9dI6zIx7f2XDQzqiGBioaXxN3q9Z3FsX4altT2TcevadGc8ozJ5MNk0iqMO7SCT4tLxr
-	8CYZfpMtVnsYkCwQo7n35Q01vzkQ+CRSbS6zZzIOQYspTAx9OBNC+NG56kx+fwc7qU2BMQAHs3F
-	hMU/bJzKunYYaFMfzYO1Otut+YkLT3RbuTZw0uFs7Op6BCrZ6xwmSq56Vdk+6C/HrD/XIlVwDfP
-	b/9D8buLsYYntx05I53ww5nfpY8qSIuCh06jbTuHvGIx/OOHzM6Qeuc5x/vk1c+7JcEdtkXlG+E
-	ErU9bjKduBCR1mOYm/bg6VlEwE/x4Paf3RuLaa7AQmeFqT0yEjolBnGWIZUPDmbsUlge6jfMniu
-	KIbW6GRM/G8vN54WDgMrc2MOl/7NwJtvjCKywxy+vjimruYyTyKXjuTWs69ctbNEStkXQ6Db9AW
-	lWxpG9haceh6RzF+dAB3hygbLQ/zMVmRl9Vs7boG4h3h9nuDblvKq5NEEtEb3njL+whjc7aSu+w
-	yfDsDFEoV7cLAzQg++kWdmP1fGouogHfj35Lv4WWwc269QwFNo97/KcLLw==
-X-Received: by 2002:a05:7022:ed02:b0:1b2:4e2c:6838 with SMTP id a92af1059eb24-1b3b6057a1fmr4809191c88.15.1794336690874;
-        Tue, 10 Nov 2026 10:51:30 -0800 (PST)
-Received: from obadmin-Precision-3680.atlascopco.group ([167.103.3.1])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-1b3b5b75d42sm7359570c88.20.2026.11.10.10.51.28
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Nov 2026 10:51:30 -0800 (PST)
-From: Sahaj Chaudhari <sahaj123.sc@gmail.com>
-To: fstests@vger.kernel.org
-Cc: Zorro Lang <zlang@kernel.org>,
-	Jan Kara <jack@suse.cz>,
-	linux-ext4@vger.kernel.org
-Subject: Re: [PATCH v2] ext4: test reserved GID block allocation
-Date: Wed, 11 Nov 2026 00:22:17 +0530
-Message-ID: <20261110185217.867117-1-sahaj123.sc@gmail.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20261107193050.330685-1-sahaj123.sc@gmail.com>
-References: <20261012112109.3363168-1-sahaj123.sc@gmail.com> <20261107193050.330685-1-sahaj123.sc@gmail.com>
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.a=rsa-sha256 header.s=mail20170921 header.b=D7VkqrrN
+Received: from epcas2p1.samsung.com (unknown [182.195.41.53])
+	by mailout2.samsung.com (KnoxPortal) with ESMTP id 20261111045102epoutp0215a9e0cb69733f38cf827519bf884793~m5G4RZKsi3073230732epoutp025
+	for <fstests@vger.kernel.org>; Wed, 11 Nov 2026 04:51:02 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.samsung.com 20261111045102epoutp0215a9e0cb69733f38cf827519bf884793~m5G4RZKsi3073230732epoutp025
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1794372662;
+	bh=gh+NftpSqHgfZZ/G5//YTCUgo/7r9ac0BfabcTGSh/0=;
+	h=Subject:Reply-To:From:To:CC:In-Reply-To:Date:References:From;
+	b=D7VkqrrNmvPWwYDYAZPA0NfHRhsJUTZ8YAsnBRZwiks3y74bCQUDXJjL3ZnHiYUVs
+	 TzP8vF6+f3ZOMWNwYgFYpzunpPPZEs/SM6aXVEAXiHN6ISHnBBkIwWOLfAdCHcGyFb
+	 8TNUkYHz3NODmFMlKiwroNjcjrHO5Fa+WiXG6ibs=
+Received: from epsnrtp01.localdomain (unknown [182.195.42.153]) by
+	epcas2p1.samsung.com (KnoxPortal) with ESMTPS id
+	20261111045102epcas2p1b71cc6e9fba61bc89699db8efb11129f~m5G37_zDP2721727217epcas2p1C;
+	Wed, 11 Nov 2026 04:51:02 +0000 (GMT)
+Received: from epcas2p2.samsung.com (unknown [182.195.38.210]) by
+	epsnrtp01.localdomain (Postfix) with ESMTP id 4jPWLZ18Bzz6B9m7; Wed, 11 Nov
+	2026 04:51:02 +0000 (GMT)
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -96,19 +62,53 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Mime-Version: 1.0
+Subject: RE: [PATCH] overlay/077: check a stale entry in an impure dir on
+ any hash seed
+Reply-To: daejun7.park@samsung.com
+Sender: Daejun Park <daejun7.park@samsung.com>
+From: Daejun Park <daejun7.park@samsung.com>
+To: Daejun Park <daejun7.park@samsung.com>, "fstests@vger.kernel.org"
+	<fstests@vger.kernel.org>
+CC: Zorro Lang <zlang@kernel.org>, Amir Goldstein <amir73il@gmail.com>,
+	Miklos Szeredi <miklos@szeredi.hu>, Hungyu Lin <dennylin0707@gmail.com>,
+	"linux-unionfs@vger.kernel.org" <linux-unionfs@vger.kernel.org>
+X-Priority: 3
+X-Content-Kind-Code: NORMAL
+In-Reply-To: <20261110-ovl077-stale-next-v1-1-948a5a434ae2@samsung.com>
+X-CPGS-Detection: blocking_info_exchange
+X-Drm-Type: N,general
+X-Msg-Generator: Mail
+X-Msg-Type: PERSONAL
+X-Reply-Demand: N
+Message-ID: <20261111045101epcms2p442a57243edc0297369214e5d89d43d5e@epcms2p4>
+Date: Wed, 11 Nov 2026 13:51:01 +0900
+X-CMS-MailID: 20261111045101epcms2p442a57243edc0297369214e5d89d43d5e
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+X-Sendblock-Type: AUTO_CONFIDENTIAL
+CMS-TYPE: 102P
+X-CPGSPASS: Y
+X-CPGSPASS: Y
+cpgsPolicy: CPGSC10-223,Y
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20261110080502epcas2p31a01ccf5c32fd27f361a2364db9c3d87
+References: <20261110-ovl077-stale-next-v1-1-948a5a434ae2@samsung.com>
+	<CGME20261110080502epcas2p31a01ccf5c32fd27f361a2364db9c3d87@epcms2p4>
 
-Hi,
+Your mail below did not reach my mailbox, so I could not reply to it
+directly.
 
-I've posted v3 in a new thread, addressing Zorro's suggestions and the
-setup/error-checking concerns:
-https://lore.kernel.org/fstests/20261110182040.798390-1-sahaj123.sc@gmail.com/
+https://lore.kernel.org/all/CAOQ4uxgxzee1dqLcYHPWFhkcAxP_WRrJn5DiiL9mB0ZjC83vbQ@mail.gmail.com/
 
-It supersedes v2:
-https://lore.kernel.org/fstests/20261107193050.330685-1-sahaj123.sc@gmail.com/
+On Tue, Nov 10, 2026 at 04:33:50PM +0100, Amir Goldstein wrote:
+> For the problem of spurious test failure, I suggest to relax the expectation
+> for the first entry in the buffer or to fix ext4 to avoid emitting the stale
+> entry.
 
-Sorry for posting v3 separately without linking back to this thread.
+Thanks. v2 will relax the expectation in t_dir_offset2: the d_ino of
+the unlinked file's entry is not checked when it is the first entry of
+the first getdents call after the unlink.
 
-Thanks,
-Sahaj
+Best regards,
+Daejun
