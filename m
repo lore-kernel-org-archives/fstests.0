@@ -1,59 +1,53 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=203.254.224.25
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794372665;
-	b=J0XRabV9juh1Y064bhAFOFkOOvb6oGaWy9AxNj7bvUShny//M9VYJcx66KWlNHRLtPao
-	 Yi0yCAIUp4+i4zby27eeKTzU8u7WQX5rJ5zu8xQNhXahH0UeIIL4BMT6DDY9uNrfyIbV1
-	 wsVXZ5G4iwMsDiBefBukL68IX1D3UJJ0No0DENOshFI61miV0TB/uC9kmFM9a3lMV5KWT
-	 P5GoGpn0wWCuv8Xv2j2E4STlCgVi5e5a2Qi8jPoA6xIpe/3h/HxnV9nA7C22ZzsMWt6th
-	 KVDemQCUKyOIoWhQxuTCMUzWQbC1toDhMmB2hbeNba8G2hckysOfBIG/P/Oaifi+nLA==
+	t=1794392300;
+	b=mReRpd7JwTuLnRyV3eZYTBupFGC61jj0X94bUBN/jjtCEIopXcv2ls0fPSMLU2fLM6pm
+	 vlaEVXd0NHLs4ZNHz6HT0ylfn1ofJAtDtE2udkZtvxngRxchujo6TsZ/vRmo9qzpRROyh
+	 FljmpAELRwLCZufgEglYngmHJigp2RABsaLYcTSHB3pGYg/ElCK/Q8mZudjL8Td6Tce0q
+	 DOpT1PhTs++uFxd+sHB3Cf9ip+fXL+nrK+Bvp0mWgwQgN3np158aR27NhC6kxjUtZvGuw
+	 wOX2b/G5kspna/oBuf/5F18aTGLn52aCeECqDJgwzHmsyS27NSVMbLx3neigxyfdQdg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794372665;
-	h=DMARC-Filter:Received:DKIM-Filter:DKIM-Signature:Received:Received:
-	 Mime-Version:Subject:Reply-To:Sender:From:To:CC:X-Priority:
-	 X-Content-Kind-Code:In-Reply-To:X-CPGS-Detection:X-Drm-Type:
-	 X-Msg-Generator:X-Msg-Type:X-Reply-Demand:Message-ID:Date:
-	 X-CMS-MailID:Content-Transfer-Encoding:Content-Type:X-Sendblock-Type:
-	 CMS-TYPE:X-CPGSPASS:X-CPGSPASS:cpgsPolicy:X-CFilter-Loop:
-	 X-CMS-RootMailID:References;
-	bh=gh+NftpSqHgfZZ/G5//YTCUgo/7r9ac0BfabcTGSh/0=;
-	b=yxQ32PIEkCeqVzWd5tSVwvpopP4NXzWbB5Qlp6UTdliJKbUlAbRPFXpfFKQG+VxJd59w
-	 K+be0CQ1HIvKXMizOS621y6OF0tg08qhEri9/q7KTxWWIpculaeVIcFo6Hgxjcdqke4aI
-	 5earthCZIfJj52V224obbSmeHeBrBlsEPaAL690F97d8pOgGwoW8bJDcVMY1+BZyI3ApW
-	 jGvwXiR4dhmAKNkYgKDAuY07NfT4guUzY41DSKfcLLz7sCd1v5C98AKika8ESl0DvtpvE
-	 mjfp+xoccLLuDodmgmpcuB8qiztsXDbZNfNXEtQADAfQ1UJ6wZZFKHiSQzL07hKQRIA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794392300;
+	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
+	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
+	bh=9k5V3+dqOiShJRt1JwapzUiCjwV9ozeskwLymScoi9I=;
+	b=cIaXlSEhrSnho1MN2DsZ5G/lIxWgkav1esOoaDKWV2KVyeomiFmen/CO2vCwVgbkKExC
+	 XPgo4zmdZBnMcByUV9ecqg2+wIEr8YcxODAeBgsC1RcXra185aB0H1C+6QSQa13/Cq52y
+	 Z6+guB8UFguNgKy+RUTAe/TJG4OyNKKim232Lwx1b6T5Cn3lrIOTg8+OGWd93ycxJQERL
+	 kLLwi92wYv+IDdbaBggu7kL4ZEUxeqDQznyXe/DeIdEod4pMFdJZXOsxhQ2UFjXKqvjxP
+	 dhQVy1Dd5KuqBNZS/IOYoKyeD6uHkOqy7fZhaDnLr9aX62ekaLS3hKCdIwLVRRYTbiw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=samsung.com;
-	spf=pass smtp.mailfrom=samsung.com;
-	dkim=pass header.d=samsung.com header.i=@samsung.com header.a=rsa-sha256 header.s=mail20170921 header.b=D7VkqrrN;
-	arc=none smtp.remote-ip=203.254.224.25
-Received: from mailout2.samsung.com (mailout2.samsung.com [203.254.224.25])
-	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=SswqOGHZ;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F0B01606A31C
-	for <fstests@vger.kernel.org>; Wed, 11 Nov 2026 04:51:04 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org F0B01606A31C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B5089606A31C;
+	Wed, 11 Nov 2026 10:18:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.a=rsa-sha256 header.s=mail20170921 header.b=D7VkqrrN
-Received: from epcas2p1.samsung.com (unknown [182.195.41.53])
-	by mailout2.samsung.com (KnoxPortal) with ESMTP id 20261111045102epoutp0215a9e0cb69733f38cf827519bf884793~m5G4RZKsi3073230732epoutp025
-	for <fstests@vger.kernel.org>; Wed, 11 Nov 2026 04:51:02 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.samsung.com 20261111045102epoutp0215a9e0cb69733f38cf827519bf884793~m5G4RZKsi3073230732epoutp025
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1794372662;
-	bh=gh+NftpSqHgfZZ/G5//YTCUgo/7r9ac0BfabcTGSh/0=;
-	h=Subject:Reply-To:From:To:CC:In-Reply-To:Date:References:From;
-	b=D7VkqrrNmvPWwYDYAZPA0NfHRhsJUTZ8YAsnBRZwiks3y74bCQUDXJjL3ZnHiYUVs
-	 TzP8vF6+f3ZOMWNwYgFYpzunpPPZEs/SM6aXVEAXiHN6ISHnBBkIwWOLfAdCHcGyFb
-	 8TNUkYHz3NODmFMlKiwroNjcjrHO5Fa+WiXG6ibs=
-Received: from epsnrtp01.localdomain (unknown [182.195.42.153]) by
-	epcas2p1.samsung.com (KnoxPortal) with ESMTPS id
-	20261111045102epcas2p1b71cc6e9fba61bc89699db8efb11129f~m5G37_zDP2721727217epcas2p1C;
-	Wed, 11 Nov 2026 04:51:02 +0000 (GMT)
-Received: from epcas2p2.samsung.com (unknown [182.195.38.210]) by
-	epsnrtp01.localdomain (Postfix) with ESMTP id 4jPWLZ18Bzz6B9m7; Wed, 11 Nov
-	2026 04:51:02 +0000 (GMT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=SswqOGHZ
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 49A7C1F00A05;
+	Wed, 11 Nov 2026 10:18:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1794392300;
+	bh=9k5V3+dqOiShJRt1JwapzUiCjwV9ozeskwLymScoi9I=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=SswqOGHZ1t718bIr1XhSZ4ZfdcEY35DZonubgj1DQPfgvodJWl6mVWbrgsoybbLcS
+	 CgYTXzNgRp0xinix2mbuu5LZVPonM/fW1m7WMc0oK/+KBUGROBX9Vk2UZrPTNZH7lv
+	 um7NpADhGYNASnOk4rnSx8PmKL169mKUCRXtDWlOdEfTQ/XD5wi1ABaO+7JX0p2Xjx
+	 pjk8M6PjQVxecHu58OudlJafwpiKJwDCiM22A8W9aXRmXx+L9O3IwGbFm6miHdYJFK
+	 52bee1MUcCQAyMJI4NToLaqd+qYqzN5l9ZD5p0o28dbHUz2pi75EJHaseUZ1Ro/13D
+	 lG3EV7yPkPi4w==
+Date: Wed, 11 Nov 2026 11:18:15 +0100
+From: Carlos Maiolino <cem@kernel.org>
+To: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Cc: Zorro Lang <zlang@kernel.org>, Christoph Hellwig <hch@lst.de>, 
+	Naohiro Aota <naohiro.aota@wdc.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] common/zoned: allow setting the zloop device
+ capacity and extra parameters
+Message-ID: <avRActUZsyGVFKb6@cronus.toxiclabs.cc>
+References: <20261109175146.1146100-1-johannes.thumshirn@wdc.com>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -62,53 +56,50 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
-Mime-Version: 1.0
-Subject: RE: [PATCH] overlay/077: check a stale entry in an impure dir on
- any hash seed
-Reply-To: daejun7.park@samsung.com
-Sender: Daejun Park <daejun7.park@samsung.com>
-From: Daejun Park <daejun7.park@samsung.com>
-To: Daejun Park <daejun7.park@samsung.com>, "fstests@vger.kernel.org"
-	<fstests@vger.kernel.org>
-CC: Zorro Lang <zlang@kernel.org>, Amir Goldstein <amir73il@gmail.com>,
-	Miklos Szeredi <miklos@szeredi.hu>, Hungyu Lin <dennylin0707@gmail.com>,
-	"linux-unionfs@vger.kernel.org" <linux-unionfs@vger.kernel.org>
-X-Priority: 3
-X-Content-Kind-Code: NORMAL
-In-Reply-To: <20261110-ovl077-stale-next-v1-1-948a5a434ae2@samsung.com>
-X-CPGS-Detection: blocking_info_exchange
-X-Drm-Type: N,general
-X-Msg-Generator: Mail
-X-Msg-Type: PERSONAL
-X-Reply-Demand: N
-Message-ID: <20261111045101epcms2p442a57243edc0297369214e5d89d43d5e@epcms2p4>
-Date: Wed, 11 Nov 2026 13:51:01 +0900
-X-CMS-MailID: 20261111045101epcms2p442a57243edc0297369214e5d89d43d5e
-Content-Transfer-Encoding: 7bit
-Content-Type: text/plain; charset="utf-8"
-X-Sendblock-Type: AUTO_CONFIDENTIAL
-CMS-TYPE: 102P
-X-CPGSPASS: Y
-X-CPGSPASS: Y
-cpgsPolicy: CPGSC10-223,Y
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20261110080502epcas2p31a01ccf5c32fd27f361a2364db9c3d87
-References: <20261110-ovl077-stale-next-v1-1-948a5a434ae2@samsung.com>
-	<CGME20261110080502epcas2p31a01ccf5c32fd27f361a2364db9c3d87@epcms2p4>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20261109175146.1146100-1-johannes.thumshirn@wdc.com>
 
-Your mail below did not reach my mailbox, so I could not reply to it
-directly.
+On Mon, Nov 09, 2026 at 06:51:45PM +0100, Johannes Thumshirn wrote:
+> Add optional fourth and fifth arguments to _create_zloop() so tests can
+> size the backing device, which matters when the backing files share a
+> filesystem with the test data, and pass additional zloop parameters.
+> 
+> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+> ---
+>  common/zoned | 10 +++++++++-
+>  1 file changed, 9 insertions(+), 1 deletion(-)
+> 
+> diff --git a/common/zoned b/common/zoned
+> index 89d0a061..7fe794f9 100644
+> --- a/common/zoned
+> +++ b/common/zoned
+> @@ -81,9 +81,17 @@ _create_zloop()
+>          local conv_zones=",conv_zones=$3"
+>      fi
+>  
+> +    if [ -n "$4" ]; then
+> +        local capacity=",capacity_mb=$4"
+> +    fi
+> +
+> +    if [ -n "$5" ]; then
+> +        local extra=",$5"
+> +    fi
+> +
+>      mkdir -p "$zloop_base/$id"
+>  
+> -    local zloop_args="add id=$id,base_dir=$zloop_base$zone_size$conv_zones"
+> +    local zloop_args="add id=$id,base_dir=$zloop_base$zone_size$conv_zones$capacity$extra"
 
-https://lore.kernel.org/all/CAOQ4uxgxzee1dqLcYHPWFhkcAxP_WRrJn5DiiL9mB0ZjC83vbQ@mail.gmail.com/
+Looks good.
 
-On Tue, Nov 10, 2026 at 04:33:50PM +0100, Amir Goldstein wrote:
-> For the problem of spurious test failure, I suggest to relax the expectation
-> for the first entry in the buffer or to fix ext4 to avoid emitting the stale
-> entry.
+Reviewed-by: Carlos Maiolino <cmaiolino@redhat.com>
 
-Thanks. v2 will relax the expectation in t_dir_offset2: the d_ino of
-the unlinked file's entry is not checked when it is the first entry of
-the first getdents call after the unlink.
-
-Best regards,
-Daejun
+>  
+>      echo "$zloop_args" > /dev/zloop-control || \
+>          _fail "cannot create zloop device"
+> -- 
+> 2.56.0
+> 
+> 
