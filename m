@@ -1,89 +1,59 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.46
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=198.137.202.133
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794410427;
-	b=fK1S9S7dY46gw4NoTGLCTgj5XPYfCRRujPbtn+BOBRFatPD0HA6BQ7NDQ3FUedUh8Bs3
-	 fQKb7A5jJeFOLnLMOnS3+Ia9+jng+iB2caMFbXJ6zYJWegOYkqa68fASET5rTqM7bgIcJ
-	 rYHKJ+i4rF/xRiSRhkvgjoykOymWgas/RBpJlr9JPDdBUwoHEJJnhkTQrMiorwh3kP36n
-	 zwuhBbSiWqgzPrB+iqJbkqrPFhTMVUvBcbtq9uR7cqkecEnwDOnWzZv0oypFqrjRg8Gym
-	 DrNWJPdRNuCt73Gz8mVEhHuJ59R2PEgkj7NQGq9t+9x2R7bx8RCRWRqTm7cr1CbkJaQ==
+	t=1794411260;
+	b=eZAe9nOy2ZgPppkue0OA5bt1R1Z9HdiVl2Os3TSuW3DsWfFrafOveT0IysR1Oc5vAmZX
+	 RxQaf1LYGQ2O2jBDyorrbfflJRC9Y89mflesf0oKTXnLzl488H4Ro1ykeYnSewL25H/CJ
+	 DfBqUwgjd1IDOGtzUOaaQjTDg5EMCdQqjFM03Y6MSdiQvmX5LsWoBm8P2sZi6UnHDDIlM
+	 8102tGes2af3EeXQNREXbDxv+Qq5m6n97UCbU0XPcNbHBJQlarXVb4WmVWlrdJG1CqpjA
+	 cTjuMJFvAwjQaG8RKJphFmuYLUR8FBp9Oq9aDJmrFIssL8/hj8RNgzTv74mtf6gVs+A==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794410427;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
-	 Date:Message-ID:X-Mailer:MIME-Version:Content-Transfer-Encoding;
-	bh=x9B+elWlManW5RGxLQhyuSzNJDOz9MtxGMXilsfs/98=;
-	b=N2WVQ8anB3XpfiuXXtRa0Xc06fx9EWKI32yuRUWVtzLmCTDUYDhZ3Lk6eTHJHYI+eu8u
-	 Pkgnmmge1Miy5SAoqPqlZIyWrD7kzwhQXWfZfYl1wCQ0w48nDejjKvdnnrO7OkJHhYBM5
-	 n/5QiiUgBwf4Uh3g6/rgh5FXkTHWaEXxoNpgvhMO5zrStZOKXh7zKlaWbi3NYSAkTi3T+
-	 +JNQ/nQ7/YKuAGzJ2ebyS5HHuuDAdq2oeZf7abmg8/moELBqBA8Ywag11o0XEp8QHwWgC
-	 XptqZXDfY+PusnCGsSbC8vxQFvjeb6k6L6/eSTgx9Y6cxDDIDa4SLuhi+qrhrt1uJOA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794411260;
+	h=DMARC-Filter:DKIM-Signature:Received:Date:From:To:Cc:Subject:
+	 Message-ID:References:MIME-Version:Content-Type:Content-Disposition:
+	 In-Reply-To:X-SRS-Rewrite;
+	bh=EzK1hNSMxo32ItZf4bkuFg0x82A1x1EKC0sDK/fhMS4=;
+	b=ejRWjsNcPY+D5Pf4T6+V3nmSKXgz4NVTcXhs/Y24XZh5728/EKUSPYutwd54ZOwLESDp
+	 dQamKftRBOPbKIgeYX9upSYnPeuYCDvNmowCdgm60PPMzZ05roBD2se6djmb0rFw5r9dH
+	 VIRaTOwdtsijIWiO5G6dZNtZnqGUNjwDl4ZpsQx0w/AK5lLCrAKAnFCXtbbHKFPH5C7IS
+	 peFgvkfw5woCydGUSakvNltx3cy8XYWSGvu5T3JrdEJL4kSw+oodpd+sOPbJIn7UJbksq
+	 nhqZWQPJs9f9Z4WpTzx1OhttUsE/TMLg5dYjF6l/BTh5KgDIa19TcNYJVimbKzaoZ6w==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=suse.com;
-	spf=pass smtp.mailfrom=suse.com;
-	dkim=pass header.d=suse.com header.i=@suse.com header.a=rsa-sha256 header.s=google header.b="WoN/oSy8";
-	arc=none smtp.remote-ip=209.85.128.46
-Received: from mail-wm1-f46.google.com (mail-wm1-f46.google.com [209.85.128.46])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	dmarc=pass header.from=infradead.org;
+	spf=none smtp.mailfrom=bombadil.srs.infradead.org;
+	dkim=pass header.d=infradead.org header.i=@infradead.org header.a=rsa-sha256 header.s=bombadil.20210309 header.b=gBd7erp7;
+	arc=none smtp.remote-ip=198.137.202.133
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C319606A324
-	for <fstests@vger.kernel.org>; Wed, 11 Nov 2026 15:20:27 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6C319606A324
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7CA7F606A326;
+	Wed, 11 Nov 2026 15:34:20 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 7CA7F606A326
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.a=rsa-sha256 header.s=google header.b=WoN/oSy8
-Received: by mail-wm1-f46.google.com with SMTP id 5b1f17b1804b1-4a210470b49so27259945e9.2
-        for <fstests@vger.kernel.org>; Wed, 11 Nov 2026 07:20:27 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1794410426; x=1795015226; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=x9B+elWlManW5RGxLQhyuSzNJDOz9MtxGMXilsfs/98=;
-        b=WoN/oSy8mxOmHFh2pMk2OxyKVRLTp6nOQUB5CT8J35CZFncIhkaM3qd6g6s/un8+ge
-         Y2PMwPgGf6Sg3L/a0I+USLn+HdVujFCw6cfHBREQTHeiLgzDpD0+r+FKMLgBR1N8KTut
-         UYgA1NuQmNDcbmwT1/3czUVFDcWJfP0kRiDY4fxioewoomxgs2QVYWepu/11hE0jKpEo
-         SYfsKCMdLnzwaBO8Jfv1ybUPOZBeZK2s6OyC1nDZrve7W3xkGri6S17k6A674gUGqTXV
-         05GLwb5OlElvTPylXFD5Z43FQeYortcbanZBVFbhaUML54IjkfyIIdWX4qeLetNURZlx
-         ArIw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1794410426; x=1795015226;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=x9B+elWlManW5RGxLQhyuSzNJDOz9MtxGMXilsfs/98=;
-        b=sUeDZVHhN9BFfFnQpy4aIKbyB2NSTQt6gKUuRywD5abBDR0jtYX7lS4aXgAYjD9h24
-         HUs2AMtk4cmxOo082Z3PFfDJkSK8RTGP1BZLapGVzcOKY0y+B3LY8gs2aIu9llR9r1Mo
-         xKzlce2k6iB6P9y/JnHcZmkcdf3mNZjxkum0Kbg1SKHezJ7dV98fcCDkXVkR32wpJqh4
-         pijjNeiKBAhVM/QzdtPyAIdJ/ekguNwbPrMQ0HxJGujLP/GfrhvN4w68h3RwyP81WoIC
-         Jo0HMvFEvqcN3flCPTDZoB5GjJPU1MZOzNnlwkhD6eEGwfG25zfIFKtbdsUdXAfvePlw
-         DoSg==
-X-Gm-Message-State: APuU4Z/ZO9tlIiHL2fjDtOZaF71kGzCywGr8j1U26cxdFpkn9dIZeRkX
-	o18S9pRIfK+y5QCgABwhvyEArNtF0fFVHyp0Os8Kd2Wq54U/cnvi/Bm6QE7MJEdJLF9/zLYau9D
-	aBP36OA1eDA==
-X-Gm-Gg: AYBFou3glP9smm6l93ZVGOkNJGFl/uLMcbvKhPnpdoXWq/XscfkUM4CDlgC2B5GM1rP
-	cmjNCu4IBBRTFSvl9zM3BEp+YFxgfS51C9kUvovedEW8bxUfxrxAfv/ZGraWNIKtVHzhdEoBabI
-	kRRSWvWyyHTgeg1xVZSCBJc/lomAFinzD9WJH3Y0ykZP8igWBd4QOXmua+e9A/PShWWUJvDQPaX
-	zNsRQaHcFSagctVCiBlUM0npOTf1LKaw1gKfZduchYIze6Af5my7BtmeLDut26pocWGi2hkmAQ9
-	/kS6CXhzLKUbNeJSzhuHortrMeqjxlck7uVzM6KHQ37Bo3bsp2EhNnVRYgfPJKAA43BfSyMR2Mc
-	r3e61lg97bI5gtIbXZQVuLStMj/gwT383iTS5C9pxkcY1nUTeUs7o2pfC/dEleNaCkjPV6rDw29
-	Q4aZZDUs+ob1vT+bEMWo8AmDs2I30l9n3/gnr2hXx/xDz1iPF4wOIvoDoy3UguETNmq0EHMpEBs
-	SlzmydgCxvSk4TWuIMKWKqPde0BiPG6fbkE441AeuNLrJKEDyUOEF7xMOhi3na2qxTE/Kqhm349
-	yo97+NC2nry91mcWCjp69uveV1qL+D7GcX99+mVv2ewQd9dEkg==
-X-Received: by 2002:a05:600c:3f18:b0:4a0:1c0e:b057 with SMTP id 5b1f17b1804b1-4ba0931d91dmr49308585e9.4.1794410425682;
-        Wed, 11 Nov 2026 07:20:25 -0800 (PST)
-Received: from localhost ([176.114.240.8])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4bb4c5e2fd6sm1641195e9.10.2026.11.11.07.20.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 11 Nov 2026 07:20:25 -0800 (PST)
-From: Avinesh Kumar <avinesh.kumar@suse.com>
-To: fstests@vger.kernel.org,
-	zlang@redhat.com
-Cc: djwong@kernel.org
-Subject: [PATCH] xfs/654: don't complain if the healthmon xfs_io already exited
-Date: Wed, 11 Nov 2026 16:20:19 +0100
-Message-ID: <20261111152024.163855-1-avinesh.kumar@suse.com>
-X-Mailer: git-send-email 2.56.0
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.a=rsa-sha256 header.s=bombadil.20210309 header.b=gBd7erp7
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=EzK1hNSMxo32ItZf4bkuFg0x82A1x1EKC0sDK/fhMS4=; b=gBd7erp7OJf2pLw3ilFv6e8Q8v
+	ksbxnJaOih501hqS1N3dC/Zb9pLgQfugaBsv6VQn2Dyw/kqqj6pvFuReYLnyKWt+uAM+CI3rJAOnO
+	TPl+3o1pK4SxBPicQ6qz1fEAJT8pTK+L/ZIIHTI6bPuZC62kAGdtZoh4PSZZGxwHGFcdrcmUmIk1H
+	KG2iW3odUt41hsTCo5Ng9p2P2y6/IEoyjwS4J2NbGfgknQFB+uNeN7U2traYPxNypDPgzb7KNdjZH
+	cApMoEEKKRAW7TwlSP1eTK0gAiuHTNCWuebni89H9YCkxPw7UAFsg3/G32zFp8MZ0jDu/0WLJ0kb9
+	rU9Bx28w==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.100.1 #2 (Red Hat Linux))
+	id 1xRAL0-000000075vR-0pFt;
+	Wed, 11 Nov 2026 15:34:14 +0000
+Date: Wed, 11 Nov 2026 07:34:14 -0800
+From: Christoph Hellwig <hch@infradead.org>
+To: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
+Subject: Re: [PATCH] btrfs: test that fsync on zoned doesn't fail with -EAGAIN
+Message-ID: <avSK9s4cGKqqLpDA@infradead.org>
+References: <20261110095911.2013053-1-johannes.thumshirn@wdc.com>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -93,42 +63,20 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20261110095911.2013053-1-johannes.thumshirn@wdc.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-From: Avinesh Kumar <avinesh.kumar@suse.com>
+On Tue, Nov 10, 2026 at 10:59:11AM +0100, Johannes Thumshirn wrote:
+> On a zoned filesystem, btrfs_start_transaction() forces a transaction
+> commit when the delayed refs reservation exceeds its zoned cap. If the
+> cap is still exceeded after the commit, it returned -EAGAIN, which
+> fsync passed on to user space.
+> 
+> Run parallel writers creating, overwriting and deleting small files with
+> an fsync after every write on a zoned device with a limited number of
+> active zones, and check that no fsync fails.
 
-After the unmount, the test resumes the stopped xfs_io healthmon
-process, which reads the "filesystem unmounted" event, sees EOF, and
-exits on its own.  The test then sends it a SIGTERM anyway in case it
-did not exit.  If xfs_io has already exited and been reaped by the
-shell, kill prints "kill: (PID) - No such process" to stderr, which
-doesn't match the golden output:
-
-    +/opt/xfstests/tests/xfs/654: line 50: kill: (170710) - No such process
-     mount refcount is in range
-     mount + healthmon refcount is in range
-
-Redirect kill's output to $seqres.full, as _kill_xfs_healer does.
-
-Fixes: 79f6b1c3 ("xfs: test health monitoring code")
-Signed-off-by: Avinesh Kumar <avinesh.kumar@suse.com>
----
- tests/xfs/654 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tests/xfs/654 b/tests/xfs/654
-index 012f31a8..e8d815ae 100755
---- a/tests/xfs/654
-+++ b/tests/xfs/654
-@@ -47,7 +47,7 @@ mon_nomount_refcount="$(_module_refcount xfs)"
- # Capture mod refcount after continuing healthmon (which should exit due to the
- # unmount) and killing it.
- kill -CONT $healer_pid
--kill $healer_pid
-+kill $healer_pid &>> $seqres.full
- wait
- unset healer_pid
- nomon_nomount_refcount="$(_module_refcount xfs)"
--- 
-2.56.0
+Should this be a generic test?
 
