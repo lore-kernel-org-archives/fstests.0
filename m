@@ -1,76 +1,94 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.174
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794492673;
-	b=odboBNQXxtKpCHOqwuqMh0+IuN5GfUgZyOCmX7ngvFIfJQSzeAeHDx291enNqsK6SN81
-	 RPJ6xGIpqqC+JDF3DpFPHuHJgAPjMbllZGuCMNombxEXkCcf7yf7FMLvMfK62WekZTHS5
-	 D2Nco02d8u+0V3gfK0ClPO+w9MKxHko9I3V8fazKI1h86sVCmaZYXJvlDQCcKTEHQWlfp
-	 z5P3g4bpQGp8KVSCShtPy5DaQkfAwv/g7b6uzUY0mTm8QWCnqg7XRdElQHXe0WllNznFC
-	 u8VKnU2cS20tft7b6cIayquJ3HcuyRyXCb00sgdBwSyaiSe6K9fk28QToMcSzN5pYog==
+	t=1794498575;
+	b=LyhYqCVAj+m9R2lhUcTBwqvqkzGSTEcN3uxgoK+XkAjJGM/13XoM8ZntHWO0EpmNpfor
+	 zxuIb8KoH2RGtuTkvFrc6elaIt8owUyDGsZ1bOpswwG2dGXx8tI8k/XhvzZu1nQzBQf1t
+	 +NfWmx9QrR9EcVFxGatq6oKLJ1iXQIX9KYNXYa8LfYjapfKfdIhm//A6z3p3RGqmJUQ82
+	 dDryTWyxnNLdYwR+hxeY/M9IsP2gbI1UE+Ioh013KMDdmMKF49JrZow73MAdxeA/MSxQp
+	 J0wfWtEJG73e5Ylifi2t6n65L0qXHC2Cs9O9sMPRrehz6rk6TKALjXwlw/bVvt5FoTA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794492673;
-	h=DMARC-Filter:DKIM-Signature:Received:X-MC-Unique:
-	 X-Mimecast-MFC-AGG-ID:Received:Received:Date:From:To:Cc:Subject:
-	 Message-ID:References:MIME-Version:Content-Type:Content-Disposition:
-	 In-Reply-To:X-Scanned-By;
-	bh=hATKghkMU5Sg9ujrHWra+a3YAWi7gTCAQ7CHmAmpFz0=;
-	b=Zw2y3FKMPuV+t3BGujTtIdJe66PhfigsD191DDhRLjXOHQCKtKbCUsQDiBJcXJK5BcsQ
-	 n/dPe6FUmBkFotcCZ1TWOS6H+5FKYxcRunGscqTXdkIduE3fePsmUaizze6mogylsEy3R
-	 5GkvnaCyusDtjbyD131D2aHvKSMwrwOLdtQUY3pvSxGMWgc/ZZBkOMgPsorUfIh0u6+e3
-	 q7HbfJ8scixGUFQtpsviHQkKJlDeSFuwjwDMJc9LTvCKR2oz6fLWtHpycd+to9dy3MC8O
-	 33wMQs4G6g683j9jPf2Z4ScVMV2+E+w7b7jvLhWr73lXBlpan22G6gtnsS0LI09zKcg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794498575;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
+	 Date:Message-ID:X-Mailer:MIME-Version:Content-Transfer-Encoding;
+	bh=JB9RC+A5BbaSKEWWha0jLo9ULFAdBPRzEEnoru6E9DQ=;
+	b=BgxfT3DeQcNpYKIK/u2ezX8Fj1odx/Y5DPIs+Vr3laCltqPrc+Uo0Bc9qxy2dO7tUHM6
+	 zOIXfPJv6wGOK49br5DeNkf8x5/zmNSsMkO4kMUSPMU7pZCLgRtucOHkpaCs3Yo9p8gEt
+	 /YoSla0AcbVNcfuT5hXeZCURlK6Z73r1kRWrkHfJLdsqzReD3e+rvwtoUwAcBL6GMzeGh
+	 czTo7voBh1Oj754rib2NKhP7J96TbuMkMXuCU8N9crLL1WRXJ2yS48ipDbe4UxfrH2Xn4
+	 57KpXWaSkOwbeQxshp6IshJaAH0ZAc9prjqcfQdGAu14R24/dv3Z5+y2H3+LeO04Tdw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=redhat.com;
-	spf=pass smtp.mailfrom=redhat.com;
-	dkim=pass header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b="FjNj/lko";
-	arc=none smtp.remote-ip=170.10.133.124
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	dmarc=pass header.from=cs.unc.edu;
+	spf=pass smtp.mailfrom=cs.unc.edu;
+	dkim=pass header.d=cs.unc.edu header.i=@cs.unc.edu header.a=rsa-sha256 header.s=google header.b=RpcvTqLC;
+	arc=none smtp.remote-ip=209.85.128.174
+Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A729606A334
-	for <fstests@vger.kernel.org>; Thu, 12 Nov 2026 14:11:11 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3A729606A334
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E42F606A32A
+	for <fstests@vger.kernel.org>; Thu, 12 Nov 2026 15:49:34 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 7E42F606A32A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=cs.unc.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cs.unc.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.a=rsa-sha256 header.s=mimecast20190719 header.b=FjNj/lko
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1794492668;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=hATKghkMU5Sg9ujrHWra+a3YAWi7gTCAQ7CHmAmpFz0=;
-	b=FjNj/lko6ILT0/GZCxk7JFwlUC7smOGOSSuq+SMf6/+o4XUA7hyLEgzpZN6hCYppcHh7qZ
-	j9zo8NOM0JzbHoU9wcrQeseOl06nZkCxnnyWhpBuPlYgYJnwqB5FN9Y8jSr9sEaEibD0gC
-	fmtSc+CYWmEVOOzPdZppNbC151NSAx8=
-Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-694-mCKd3NSrMdeY-8F3AgouEg-1; Thu,
- 12 Nov 2026 09:10:26 -0500
-X-MC-Unique: mCKd3NSrMdeY-8F3AgouEg-1
-X-Mimecast-MFC-AGG-ID: mCKd3NSrMdeY-8F3AgouEg_1794492606
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id ACC0B195BDD1;
-	Thu, 12 Nov 2026 14:10:05 +0000 (UTC)
-Received: from bfoster (headnet04.pony-001.prod.iad2.dc.redhat.com [10.2.32.116])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 83F671956087;
-	Thu, 12 Nov 2026 14:10:04 +0000 (UTC)
-Date: Thu, 12 Nov 2026 09:10:02 -0500
-From: Brian Foster <bfoster@redhat.com>
-To: daejun7.park@samsung.com
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	dkim=pass (2048-bit key, unprotected) header.d=cs.unc.edu header.i=@cs.unc.edu header.a=rsa-sha256 header.s=google header.b=RpcvTqLC
+Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-8b33de9d2b1so36734547b3.3
+        for <fstests@vger.kernel.org>; Thu, 12 Nov 2026 07:49:34 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=cs.unc.edu; s=google; t=1794498573; x=1795103373; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=JB9RC+A5BbaSKEWWha0jLo9ULFAdBPRzEEnoru6E9DQ=;
+        b=RpcvTqLCZfaaZBfCfch6W8UhCFu7GYDnR43kqQUnZL9ZxjV/Tc65Id5KCj8AWwYeJN
+         j0ebk0vHxJt7lx1+Cvuj7Ju+QFOchRYzErPNT6qwr5YswiIBZCbL6kEUIF31cM9riu/i
+         YhEY18D9Zylj/5WE2W9aNC6g1Qrdga1cJNRr9JlriGANAgt4xBjIlVgq1bgZwHM5J3bx
+         4CCzWMIpCrrJnVwnulvc9xhsn8GDvls4JkevWYORFd/+4AlUJLSvIU08MkSBQg+TAgmM
+         Qs0j85g5b6tajMaVia0/dSjoQHidID+BR6DtKyxTe8PTpmf8ZoQDmuWXrFs9Q1ARwBRj
+         Cd+g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1794498573; x=1795103373;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=JB9RC+A5BbaSKEWWha0jLo9ULFAdBPRzEEnoru6E9DQ=;
+        b=vnS19M7JT+BMDS18oo7lHA6m3P4o5T7mGpu3pGP2mj7eIS1hEm2ZuAFZkFIdIBIQIW
+         roAG+ZTYw/p8M8pqQ2O/KlJOBF1LAYva9g+X28dS/g97ojcNzJ/qIRPwgEy+ZE9cUtHV
+         yCXTGqDxPa8ALhbaTAJU7GTGJ3Sv1vEO0MhabnQg/YJNdNzE/lNLYMTcWOkiqX97lHcn
+         PHSjlWJKUMszEQSoTXbHIUSlD7FwEeV/aBEF6zdXmAKcxFdAPqECTTNW9+eFEeM/+mnt
+         K7/K7Md9ptgdTL0kA6BisfRGcQ602LmrVaQN5JzSQ9uR0qjzFKgCVJXHP47bfTsaa5X5
+         LeuQ==
+X-Gm-Message-State: APuU4Z/lTw+fHv2EbgwNJqzNLoaKtQ7EDMBxcN5691j3XfDngE4qkGDK
+	AOYIwUzNjk0vfasNmqOP4fYubudwOzytmnL1vMM+IQJk2C08wy397RZLCHj1K9FaqWbliUFZUnb
+	taqZOlvyklgbTeoCp/d6BmzNkKWXMngdoq3UvrEV72huKOah0l9SMay5QBGHotAMB7X2NzKRxYr
+	nFxCCrA0Z9X6MfiAtHfJrreivQvSIB91mCD4hJxrE=
+X-Gm-Gg: AYBFou3AE6mXhqVe3uO75Abydx1d2q/rIhoIINjDmyq1fdPKiNJ4ezJrlTcyiyQpy/I
+	2NwgvnEtxwu8+o7NQDzoKPsflSZPVNOU8ZMEGE6A0Xjn4pIUjHHkEigxG3feYL75oJvUoWMukXO
+	xt2cMs5wt9kyT4Dj5+nheycnPCHtq3aJqv9zmSBvMz9yy7WVvS5mKdXU6iL1hlA4VSmSUz84GyH
+	kmBBLynsil4zXhTLavTc8Hwt3oDgx6T+45cvoEN6p+D5N79hNW6+IwcoPvvfX+LFKBQMWWE+RIj
+	VDEivO++YirYzot73tLfOY5kMsVWOiAQezcliObzLRb5yCoI4Gkglyf0Ox2moOm98g7tjk9MZYT
+	iKuH3XNgmEX3slRD1v5hdfEu5zZCxYUSEFhXY1SrB96htoOc2VBKDj7J3pIjR5cvop1Jg9cT9fR
+	Uvj4I5KvSZWCLtjICtXMkbx9U/hUF3wz5BtOGMbpSOQbT4rb1Mb31bcXHFOwB2nnmwnHoHdTAL4
+	niw64r7Y45e6AnbX7nvitbwkA2lb5W+X3hWAOrSBIfIuyewI6zDW4TihaTyy9glXHLsOthN5hAU
+	vc10p3gXTRtnCebSVpszlvaS7pgofsLJy0VoAVzSqpn4oB+brZX59YUGAOK6yIFYcQMkwgimFw=
+	=
+X-Received: by 2002:a05:690c:c6c5:b0:8b0:9eb3:dbd1 with SMTP id 00721157ae682-8b3a805c093mr23509097b3.37.1794498573459;
+        Thu, 12 Nov 2026 07:49:33 -0800 (PST)
+Received: from cobra01.cs.unc.edu (cobra01.cs.unc.edu. [152.2.130.143])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-8b393409120sm72617317b3.27.2026.11.12.07.49.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 12 Nov 2026 07:49:33 -0800 (PST)
+From: Hengyu Liang <hengyul@cs.unc.edu>
+To: fstests@vger.kernel.org
+Cc: Zorro Lang <zlang@kernel.org>,
 	"Darrick J. Wong" <djwong@kernel.org>,
-	Christoph Hellwig <hch@lst.de>, Dave Chinner <dgc@kernel.org>,
+	Christoph Hellwig <hch@lst.de>,
+	Carlos Maiolino <cem@kernel.org>,
 	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 2/2] xfs/438: fail metadata writes with the buf_ioerror
- error tag
-Message-ID: <avXIun_xcSUZ6ABx@bfoster>
-References: <20261112-xfs-438-dquot-retry-v1-0-73149b823246@samsung.com>
- <20261112-xfs-438-dquot-retry-v1-2-73149b823246@samsung.com>
+Subject: [PATCH] xfs: test that statfs does not report negative free blocks
+Date: Thu, 12 Nov 2026 10:49:17 -0500
+Message-ID: <20261112154917.751315-1-hengyul@cs.unc.edu>
+X-Mailer: git-send-email 2.53.0
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -80,169 +98,109 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261112-xfs-438-dquot-retry-v1-2-73149b823246@samsung.com>
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
+Content-Transfer-Encoding: 8bit
 
-On Thu, Nov 12, 2026 at 10:37:18AM +0900, Daejun Park via B4 Relay wrote:
-> From: Daejun Park <daejun7.park@samsung.com>
-> 
-> xfs/438 needs metadata writes to fail while the log keeps working.
-> With a write cache, dm-flakey also fails the flushes that dm sends it
-> with REQ_PREFLUSH log writes. The internal log survives only because
-> dm drops that error. The dm patch "dm: fail a REQ_PREFLUSH bio with
-> data when its preflush fails" fixes that. With an external log, the
-> flakey table fails the log device too.
-> 
-> Use the buf_ioerror error tag. It fails async metadata buffer writes
-> and leaves log writes alone. The test now needs XFS_DEBUG.
-> 
-> Signed-off-by: Daejun Park <daejun7.park@samsung.com>
-> ---
-> On v7.4-rc2 and on v7.4-rc2 with the dm patch, the test passes with
-> an internal log (3 of 3) and an external log (1 of 1). The failed
-> dquot write is retried until the unmount. On the TEST ONLY kernel of
-> patch 1 the unmount hangs with both logs (1 of 1 each).
-> ---
+Add a regression test for the f_bfree underflow in statfs().
 
-Nice simplification.
+Since kernel commit dd324cb79e54 ("xfs: refactor xfs_fs_statfs"), when
+the free block counter is below the number of blocks that are not
+available for allocation, statfs() reports f_bfree and f_bavail close
+to 2^64, and df prints negative sizes.
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+The test moves all free blocks into the reserve pool with the resblks
+command, then deletes every other file of many single-block files. The
+freed blocks refill the reserve pool first, while the free space btrees
+grow.
 
->  tests/xfs/438 | 76 ++++++-----------------------------------------------------
->  1 file changed, 7 insertions(+), 69 deletions(-)
-> 
-> diff --git a/tests/xfs/438 b/tests/xfs/438
-> index e4850ff..5c228e4 100755
-> --- a/tests/xfs/438
-> +++ b/tests/xfs/438
-> @@ -14,9 +14,9 @@
->  # get the same IO error, XFS will let xfsaild to restart the write and
->  # xfs_buf_do_callbacks() will not be inovked.
->  #
-> -# This test emulates the write error by using dm-flakey. The log
-> -# area of the XFS filesystem is excluded from the range covered by
-> -# dm-flakey, so the XFS will not be shutdown prematurely.
-> +# This test emulates the write error with the buf_ioerror error tag,
-> +# which fails async metadata buffer writes. Log writes are not buffer
-> +# writes, so the XFS will not be shutdown prematurely.
->  #
->  # Fixed by upstream commit 373b058 ("xfs: Properly retry failed dquot
->  # items in case of error during buffer writeback")
-> @@ -33,85 +33,27 @@ _cleanup()
->  	cd /
->  	rm -f $tmp.*
->  	_scratch_unmount >/dev/null 2>&1
-> -	_cleanup_flakey > /dev/null 2>&1
-> -}
-> -
-> -# inject IO write error for the XFS filesystem except its log section
-> -make_xfs_scratch_flakey_table()
-> -{
-> -	local tgt=flakey
-> -	local opt="0 1 1 error_writes"
-> -	local dev=${SCRATCH_DEV}
-> -	local dev_sz=$(blockdev --getsz $dev)
-> -
-> -	# If using an external log device, just making the writing of
-> -	# entire data/metadata area fail forever.
-> -	if [ "${USE_EXTERNAL}" = "yes" -a ! -z "$SCRATCH_LOGDEV" ]; then
-> -		echo "0 ${dev_sz} $tgt $dev 0 $opt"
-> -		return
-> -	fi
-> -
-> -	local blk_sz=$(_scratch_xfs_get_sb_field blocksize)
-> -	local log_ofs=$(_scratch_xfs_get_sb_field logstart)
-> -	local log_sz=$(_scratch_xfs_get_sb_field logblocks)
-> -	local table=""
-> -	local ofs=0
-> -	local sz
-> -
-> -	log_ofs=$(_scratch_xfs_db -r -c "convert fsb ${log_ofs} bb" | \
-> -			  $AWK_PROG '{gsub("[()]", "", $2); print $2}')
-> -	let "log_sz *= blk_sz / 512"
-> -
-> -	# Add a flakey target for the area before the log section
-> -	# to make the data/metadata write fail forever
-> -	if [ "$ofs" -lt "${log_ofs}" ]; then
-> -		let "sz = log_ofs - ofs"
-> -		table="$ofs $sz $tgt $dev $ofs $opt"
-> -	fi
-> -
-> -	# Add a linear target for the log section, so the log write
-> -	# will work normally
-> -	table="$table\n${log_ofs} ${log_sz} linear $dev ${log_ofs}"
-> -
-> -	# Add a flakey target for the area after the log section
-> -	# to make the data/metadata write fail forever
-> -	let "ofs = log_ofs + log_sz"
-> -	if [ "$ofs" -lt "${dev_sz}" ]; then
-> -		let "sz = dev_sz - ofs"
-> -		table="$table\n$ofs $sz $tgt $dev $ofs $opt"
-> -	fi
-> -
-> -	echo -e $table
->  }
->  
->  # Import common functions.
-> -. ./common/dmflakey
->  . ./common/quota
-> +. ./common/inject
->  
->  
->  # due to the injection of write IO error, the fs will be inconsistent
->  _require_scratch_nocheck
-> -_require_flakey_with_error_writes
->  _require_user
->  _require_xfs_quota
->  _require_freeze
->  _require_test_sysfs_dev_attr error/fail_at_unmount
->  _require_test_sysfs_dev_attr error/metadata/EIO/max_retries
->  _require_test_sysfs_dev_attr error/metadata/EIO/retry_timeout_seconds
-> +_require_xfs_io_error_injection buf_ioerror
->  
->  echo "Silence is golden"
->  
->  _scratch_mkfs > $seqres.full 2>&1
->  
-> -# this needs to happen after mkfs, but before _init_flakey overrides SCRATCH_DEV
-> -FLAKEY_TABLE_NON_LOG_ERROR=$(make_xfs_scratch_flakey_table)
-> -
-> -# no error will be injected
-> -_init_flakey
-> -FLAKEY_TABLE_ERROR=${FLAKEY_TABLE_NON_LOG_ERROR}
-> -$DMSETUP_PROG info >> $seqres.full
-> -$DMSETUP_PROG table >> $seqres.full
-> -
->  # save the old value for _cleanup()
->  interval=$(sysctl -n fs.xfs.xfssyncd_centisecs 2>/dev/null)
->  # shorten the time waiting for the push of ail items
-> @@ -139,10 +81,8 @@ $XFS_QUOTA_PROG -x -c "report -ih" $SCRATCH_MNT >> $seqres.full
->  xfs_freeze -f $SCRATCH_MNT
->  xfs_freeze -u $SCRATCH_MNT
->  
-> -# inject write IO error
-> -_load_flakey_table ${FLAKEY_ERROR_WRITES}
-> -$DMSETUP_PROG info >> $seqres.full
-> -$DMSETUP_PROG table >> $seqres.full
-> +# fail every async metadata buffer write from now on
-> +_scratch_inject_error buf_ioerror 1
->  
->  # update the dquota buffer
->  $XFS_QUOTA_PROG -x -c "limit -u isoft=400 $qa_user" $SCRATCH_MNT
-> @@ -160,8 +100,6 @@ stat $SCRATCH_MNT > /dev/null
->  
->  _scratch_unmount
->  
-> -_cleanup_flakey
-> -
->  # success, all done
->  status=0
->  exit
-> 
-> -- 
-> 2.43.0
-> 
-> 
+Without the fix, f_bfree is reported as 2^64 - 6 on a filesystem with
+4k blocks.
+
+Link: https://lore.kernel.org/linux-xfs/20261112102018.3922571-1-hengyul@cs.unc.edu/
+Signed-off-by: Hengyu Liang <hengyul@cs.unc.edu>
+---
+Tested in a VM on xfs for-next 48326a2382d8 (v7.4-rc2) with mkfs.xfs
+6.18 defaults, "-m rmapbt=0,reflink=0" and "-b size=1024": the test
+fails without the kernel fix and passes with it.
+
+ tests/xfs/842     | 57 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/842.out |  2 ++
+ 2 files changed, 59 insertions(+)
+ create mode 100755 tests/xfs/842
+ create mode 100644 tests/xfs/842.out
+
+diff --git a/tests/xfs/842 b/tests/xfs/842
+new file mode 100755
+index 00000000..c99dd4f3
+--- /dev/null
++++ b/tests/xfs/842
+@@ -0,0 +1,57 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 Hengyu Liang.  All Rights Reserved.
++#
++# FS QA Test No. 842
++#
++# Make sure that statfs() does not report a negative or huge number of free
++# blocks when the free block counter drops below the blocks that are not
++# available for allocation.
++#
++# Move all free blocks into the reserve pool, then free many small extents.
++# The freed blocks refill the reserve pool first, so the free block counter
++# stays the same, while the free space btrees grow.
++#
++. ./common/preamble
++_begin_fstest auto quick
++
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"xfs: fix f_bfree underflow in statfs()"
++
++_require_scratch
++_require_xfs_io_command "falloc"
++
++# Only the data device counters are checked.
++_disable_scratch_realtime
++
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++_require_xfs_scratch_non_zoned
++
++# A free space btree leaf holds about blksz / 8 records.  Deleting every
++# other file of blksz / 2 single-block files adds blksz / 4 records, which
++# takes a few more leaf blocks.
++blksz=$(_get_block_size $SCRATCH_MNT)
++nr_files=$((blksz / 2))
++_require_fs_space $SCRATCH_MNT $((nr_files * blksz * 2 / 1024))
++
++for ((i = 0; i < nr_files; i++)); do
++	$XFS_IO_PROG -f -c "falloc 0 $blksz" $SCRATCH_MNT/s$i
++done
++
++# Ask for more blocks than the filesystem has, so that the reserve pool takes
++# all free blocks and stays short of its target.
++nr_blocks=$(stat -f -c '%b' $SCRATCH_MNT)
++$XFS_IO_PROG -x -c "resblks $((nr_blocks * 2))" $SCRATCH_MNT >> $seqres.full
++
++find $SCRATCH_MNT -name 's*[13579]' -delete
++_scratch_sync
++
++# Before the fix, f_bfree and f_bavail were 2^64 minus a few blocks.  Some
++# versions of stat print that as a negative number.
++stat -f -c '%b %f %a' $SCRATCH_MNT | tee -a $seqres.full | $AWK_PROG '
++	$2 < 0 || $2 > $1 { print "f_bfree " $2 " out of range, f_blocks " $1 }
++	$3 < 0 || $3 > $1 { print "f_bavail " $3 " out of range, f_blocks " $1 }'
++
++echo "Silence is golden"
++_exit 0
+diff --git a/tests/xfs/842.out b/tests/xfs/842.out
+new file mode 100644
+index 00000000..643d0528
+--- /dev/null
++++ b/tests/xfs/842.out
+@@ -0,0 +1,2 @@
++QA output created by 842
++Silence is golden
+
+base-commit: 71641219a506ac62bfa231592394265ca812670e
+-- 
+2.53.0
 
