@@ -1,59 +1,119 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.127.231.115
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794569621;
-	b=CtUBhL5Pd/AbCMRd719v+UkXmiY8aocRaBC7CejSKvXQr9QFORUIRKZq/gdYnBAUR3y3
-	 9L5nMxm4TbTUAO7osLLpNz3tyWC6EH1zouNQxORc+VJDrMC7HgCDup7fPB4o5KSok0MHn
-	 V5FXcgplxcsv/GDaGpK82E6v9/SWTnNcePaFp3JGWkvbEYlOo549OA7NatAlooa28+ao/
-	 idrRiWGGCAwRWVFCsZwKGL7FbU/5D7NH99/OpOE+9BR+26Zr0y4I6udH8dIHZcaxpXzqM
-	 1CsD1IfQBviXaiMWEfcwGtvUMUwx1PmCmOf/GObzdEcsJDW+EV5wgWC61qKrgXh/rRg==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794569621;
-	h=DMARC-Filter:DKIM-Signature:Content-Type:From:Date:X-Original-From:
-	 Subject:Message-Id:Content-Transfer-Encoding:X-Lms-Return-Path:To:Cc:
-	 Mime-Version:X-Mailer;
-	bh=9qzXj5+nocOiDZ2q3E95BPDKr5xMDk58YWT+FmqPtTg=;
-	b=Z9eMUcnxbmLZSKoesTxi55pKqrSxLKi653QsQNmycy35xuH9IM85l2N7VxPEfDbMuJ6b
-	 j3puE1BpBxQdlgBK3w7SoRrHUWQROjmuWX5i5xXAMssZltOKi+nBmVmN9L2HPP7FWJejc
-	 1QVV20pYsX5QoD4AjVRN5/+EfTdJaIhzHW3s541jiINhyk3rtPZgxHtEhi5qYrckqTsUo
-	 51LofulnXDcVOEmBpLj2T75o9Kw3EVuUIBjdklRvM9NDi8CO2E/5F6Bwtb8l9WjOeOhR7
-	 W5Naipdl8uDppOG9P9PvKsxlCa5WPNjiYEJtN0nUpFuR0ZaqL3Lsy/my2Tj6P/QRk4Q==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=bytedance.com;
-	spf=pass smtp.mailfrom=bytedance.com;
-	dkim=pass header.d=bytedance.com header.i=@bytedance.com header.a=rsa-sha256 header.s=2212171451 header.b=Xc7Z2YWc;
-	arc=none smtp.remote-ip=209.127.231.115
-Received: from va-2-115.ptr.blmpb.com (va-2-115.ptr.blmpb.com [209.127.231.115])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=68.232.141.245
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1794580976;
+	b=VbrPyA4CfLnudjAZUyPpxAfDIKwaSE0e3Ir+7c1ACzV0w+YeBdqLe7Lwjrc9s8s7u/+s
+	 dmjiOOg/Xd/phq7EYsUlFbOy+hDxDRI+MWyNo62AgwNKCru8PS1I33tDsriTZrrGKgxOe
+	 KnvL/qLJsYCyns9If3g8WhT+AJyxkynhx/urSwr5P+jQd4rOf25XUgIO0+drLlFj8b6NF
+	 7k2H8YSS8uwYUMu/dbnUuf4oguAxW5Kj4UzbgMUTSpI0SzcYF+LHH0TZwKW4HhTjPWiOl
+	 m+7pONBoSXV5cR/rsQ8aIW2IByoHA8gxR+S1mVJk8q0AWZ3xwmfWXeJmlnJlqIXPYYQ==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794580976;
+	h=DMARC-Filter:DKIM-Signature:X-CSE-ConnectionGUID:X-CSE-MsgGUID:
+	 X-IronPort-AV:Received:DKIM-Signature:Received:Received:Message-ID:
+	 Date:User-Agent:Subject:To:Cc:References:Content-Language:From:
+	 In-Reply-To:Content-Type:Content-Transfer-Encoding:X-ClientProxiedBy:
+	 MIME-Version:X-MS-PublicTrafficType:X-MS-TrafficTypeDiagnostic:
+	 X-MS-Office365-Filtering-Correlation-Id:X-LD-Processed:WDCIPOUTBOUND:
+	 X-MS-Exchange-SenderADCheck:X-MS-Exchange-AntiSpam-Relay:
+	 X-Microsoft-Antispam:X-Microsoft-Antispam-Message-Info:
+	 X-Forefront-Antispam-Report:
+	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
+	 X-MS-Exchange-AntiSpam-MessageData-0:
+	 X-MS-Exchange-AntiSpam-MessageData-1:X-Exchange-RoutingPolicyChecked:
+	 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount:
+	 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:X-OriginatorOrg:
+	 X-MS-Exchange-CrossTenant-Network-Message-Id:
+	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
+	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
+	 X-MS-Exchange-CrossTenant-FromEntityHeader:
+	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
+	 X-MS-Exchange-CrossTenant-UserPrincipalName:
+	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
+	bh=JMMwh3CcOKJyuxNwjOT37k0VAF8vOytEjKVlS3rPSvI=;
+	b=Yh6td+zULSTK3/vLqCVs4hrP7tyZMCO795I5bFGoX1bonJc2kav6u8VzU3cTAlQ7Eul1
+	 QrCPsIsJYI9uGI6gK7tNWFvJ5NdGPfRLqYIrWRX9pj0e+jY9NGMWz8OKd8yrUD4DtLIKI
+	 m6jQzvN5BiaAnuw4KdfIJIgZTowd88RZEJbgqht884l+btBotv0vG6QO+uQbZXnJeVt55
+	 5tLGV/xA56LDghrXkEdopR9u7sNjU8ovbGULlnK/6gb41Oh51Wc+xbUC2kg0AHLNImKrr
+	 whNEs1EC95G4SE77bb4X146YfI/xU/qNa6aHbCOtqBhxQIG6G0xWHb58AZhDvSkVD5Q==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=wdc.com;
+	spf=pass smtp.mailfrom=wdc.com;
+	dkim=pass header.d=wdc.com header.i=@wdc.com header.a=rsa-sha256 header.s=dkim.wdc.com header.b=MocZZt+K;
+	dkim=pass header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.a=rsa-sha256 header.s=selector2-sharedspace-onmicrosoft-com header.b=F9BeBgHJ;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=68.232.141.245
+Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
+	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E7CC606A323
-	for <fstests@vger.kernel.org>; Fri, 13 Nov 2026 11:33:38 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2E7CC606A323
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=bytedance.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bytedance.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 78521606A327;
+	Fri, 13 Nov 2026 14:42:56 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 78521606A327
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=bytedance.com header.i=@bytedance.com header.a=rsa-sha256 header.s=2212171451 header.b=Xc7Z2YWc
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
- s=2212171451; d=bytedance.com; t=1794569614; h=from:subject:
- mime-version:from:date:message-id:subject:to:cc:reply-to:content-type:
- mime-version:in-reply-to:message-id;
- bh=9qzXj5+nocOiDZ2q3E95BPDKr5xMDk58YWT+FmqPtTg=;
- b=Xc7Z2YWcKkNHRLNjA4WS5+Su9gtTugdL1Khs5C+/MIn+Pr1n6iuvfr0J/TOk3KRjNpQkeg
- ZIg9kkyc9VoSKudrq1LrXSH5EI9yXpWs4pShnULPnmjMq/+ODvsyV9jFPjLzvszNHWYqAw
- BmQ1V7nGy51rxZqcs2TByi8WXW01STm5DpTrLnO6NwKgiQL49wpeTbhWVhIspBe9WtpKQ9
- jW7P+7p32rKllPH02J7Gc2CL3hSpGPziyb4hUifBXEi23op/gU1xtnjw3F7LirYaJCt1g6
- ZrxE/fvHycNaDsF4I3Idnd3F4heis0JROlxVXKMKqkx3kv0JSKTWWX1yjmW+ZA==
-Content-Type: text/plain; charset=UTF-8
-From: "Xianjun Zeng" <zengxianjun@bytedance.com>
-Date: Fri, 13 Nov 2026 19:33:11 +0800
-X-Original-From: Xianjun Zeng <zengxianjun@bytedance.com>
-Subject: [PATCH] ext4: test fallback after a failed stripe-aligned scan
-Message-Id: <20261113113310.77386-2-zengxianjun@bytedance.com>
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.a=rsa-sha256 header.s=dkim.wdc.com header.b=MocZZt+K;
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.a=rsa-sha256 header.s=selector2-sharedspace-onmicrosoft-com header.b=F9BeBgHJ
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1794580976; x=1826116976;
+  h=message-id:date:subject:to:cc:references:from:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=JMMwh3CcOKJyuxNwjOT37k0VAF8vOytEjKVlS3rPSvI=;
+  b=MocZZt+KxemHOcX46WLiLLlxkCixPehigUBc9b++NHDtEECBgO3WKH3z
+   5U+lXrVqrZEthQ33J7KLon5rNLdAfYOTjwJLNWfIaOBypeWVA1NQM3NRE
+   rPFWETt1kssKptcHaaVV1WqIR4sCcoapr6EdA81YrnJ50rzbooV9+HYTM
+   f58lZdiXxQI96qWOkUWXo3tXU51fO0f9mk0CR2IM8/fOho/JDz2DkRv+g
+   n2/btpLBPgS6hh+aTRCIAQ/XB5c3sw5OCo0M4/Pzv7qy3pfmCmJ8uQn0H
+   IGIn9tOSeAYJcTllV92JO2mMPv/3iDrTSep+S+4JmBfMJLJRqqTJ0sGm/
+   A==;
+X-CSE-ConnectionGUID: XIksEgs6Q3SkQwW5B1MnNw==
+X-CSE-MsgGUID: jt//x0u+RCuKAm543L2XrQ==
+X-IronPort-AV: E=Sophos;i="6.27,211,1786982400"; 
+   d="scan'208";a="160741992"
+Received: from mail-westus2azon11012067.outbound.protection.outlook.com (HELO MW6PR02CU001.outbound.protection.outlook.com) ([52.101.48.67])
+  by ob1.hgst.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 13 Nov 2026 22:42:49 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=GIYXpCDQR4CXJSZO0qXh2yISocl/34RRO+DTG0/lYch1BsG7ksbOHcHNqlTyFsy7HaIt4hWi26Z9Z9u9DnWjgzNaP+Sstib+tSlHkJQaPGY/9YRYlaY7FlAF0eSPA2pNqt0EMSo330CkTTEL9gD75pFukaYqoqzaCIz4G7b0T2FjI7Is7E15g7NIr7zZh10ACTrFkS1JBRWze2w+jVmeowT//RAjBEftjJgoYxUXBFtVZFU4/ZKGlemR5zs5Anj9ib3jt99Ye8Va1V1gqkcSSS8UUAY5htgAI9f763RxNvf5x1i98Lf6Ox0xEww/hCvH9FgNhxbFj9OKFWdQ23O3Nw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=JMMwh3CcOKJyuxNwjOT37k0VAF8vOytEjKVlS3rPSvI=;
+ b=vTrSta2cUFHCWqFNva5PRMEJteUOL6eFt4jXtdiDnplqrxb5A4CxVgClH6cFiIbScDPuIs3zdS8yME3ak13BD94XkHF0n1rQzzL8jdAfWkBNr+LKAli2NInTL/iOZMXJfxl6Ax2tRvWttVpzLdMleJi5xNOF9MR4Ql/8yEcviGaZUho5AfgQrBpYv77m9e5qXaK7ylx2ma8YnvtpSLA6Jhkp5WAHJetyn3UlQw5MZQwsv+eZrCQQgU4Id3eAj1DlYLi3LC+sMHuYTfSZeAiRilBVXTry5BDj+/avJxLznEs+AjN1dvsngIqfYVmwXxsWytcw9q65u8FcI1GjLd47SA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=JMMwh3CcOKJyuxNwjOT37k0VAF8vOytEjKVlS3rPSvI=;
+ b=F9BeBgHJ3O7uP1N2qXlrpTTwpIxyAXLNpEupov/idncfmPkN6zso7vZg0mpB7Zq1Q5a35faDBQ7KO+BBb0xUcq1NdE/Y2mPX6rccxY6y2P1BaFCuobSZx6/rUe9Qk417yVGKgoIVAycaefzP8+9DD75//QbPrGbWhUxzJ0ADesA=
+Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+Received: from SA6PR04MB9447.namprd04.prod.outlook.com (2603:10b6:806:436::21)
+ by CO6PR04MB7779.namprd04.prod.outlook.com (2603:10b6:303:13d::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.615.9; Fri, 13 Nov
+ 2026 14:42:48 +0000
+Received: from SA6PR04MB9447.namprd04.prod.outlook.com
+ ([fe80::14c6:1c14:485f:1825]) by SA6PR04MB9447.namprd04.prod.outlook.com
+ ([fe80::14c6:1c14:485f:1825%6]) with mapi id 15.21.0615.009; Fri, 13 Nov 2026
+ 14:42:48 +0000
+Message-ID: <38adc364-249b-4f66-a051-61624e477560@wdc.com>
+Date: Fri, 13 Nov 2026 15:42:44 +0100
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] btrfs: test that fsync on zoned doesn't fail with -EAGAIN
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+ linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
+References: <20261110095911.2013053-1-johannes.thumshirn@wdc.com>
+ <avSK9s4cGKqqLpDA@infradead.org>
+Content-Language: en-US
+From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+In-Reply-To: <avSK9s4cGKqqLpDA@infradead.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-Lms-Return-Path: <lba+26af6f58c+d5b619+vger.kernel.org+zengxianjun@bytedance.com>
-To: <fstests@vger.kernel.org>
-Cc: <linux-ext4@vger.kernel.org>, <zlang@kernel.org>, 
-	"Xianjun Zeng" <zengxianjun@bytedance.com>
+X-ClientProxiedBy: FR5P281CA0059.DEUP281.PROD.OUTLOOK.COM
+ (2603:10a6:d10:f0::13) To SA6PR04MB9447.namprd04.prod.outlook.com
+ (2603:10b6:806:436::21)
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -62,409 +122,91 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
-Mime-Version: 1.0
-X-Mailer: git-send-email 2.50.1
+MIME-Version: 1.0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: SA6PR04MB9447:EE_|CO6PR04MB7779:EE_
+X-MS-Office365-Filtering-Correlation-Id: bfe89ff8-4eec-4dbf-5555-08df4194630b
+X-LD-Processed: b61c8803-16f3-4c35-9b17-6f65f441df86,ExtAddr
+WDCIPOUTBOUND: EOP-TRUE
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|23010399003|19092799006|10070799003|376014|366016|1800799024|11063799006|4143699003|56012099006|261026140227099003|261022075727099003|261021123027099003|261028144727099003|261022105027099003|261022113327099003|261026121527099003|10067099003|18002099003|22082099003;
+X-Microsoft-Antispam-Message-Info:
+	U9GfzY9mQlFJdL4RleVEZTjrio7H06IhQcLCK67P+l76drAR8547IKM9c7pFYpAVuwigz5bLciLZPBLgYx84Lh2Sj1FWgwEMUcNsEQ6fYMURJjW1z5Rw3J3A2Ghx/8xSCUTU8y5wkXksJVPlipLT/Yh+zAX4gRf3GiKTVNtb5daFJgPJIRIYb/vVGcVK0/dKQ0Jif251Er5lW40/UVvr1TQmx10kJkZDdPhlEaj+9s/rsND9fZCacHEW8PcHHNoCt1A6b7CaRUVnBRINjD9DbgiIyoH+scDjqUbTFoqfpsCCAQF7CQnMaNvkRzGb1MEK4FnYd7qhCXnZZkFFqJESH6YqgBr8fLvRTjByuAGsvvg3PZcvbIbEBlOE6QOGUmaSLF459SU4SE75HCJnMFFm+IvSxc8Mwg+frdF8aUC6WkDLi+kJT8z1N9x+NTLk5cfa3gRGCGYv81wbhY9OBzmfZVBWHaMrXg9Fwp8tGrepDR6LbkSZg9Hr27TGT+5USWrReTAQsrNhFtitwEVtC21qnKLUQPjkRqLwE7U3D5anN4qU8zbJ/yE5cJpus+T8GduHzkiQPZLLamu5CVFIBH23gPSG7ybpxwlfkGijQLdyCmvYZ82ZR5JwEeBnlcxZeM80BCtgHZjvzMNzDZeoUCxHoYOp8WlImwoZUljhR2RT7yg=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA6PR04MB9447.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(19092799006)(10070799003)(376014)(366016)(1800799024)(11063799006)(4143699003)(56012099006)(261026140227099003)(261022075727099003)(261021123027099003)(261028144727099003)(261022105027099003)(261022113327099003)(261026121527099003)(10067099003)(18002099003)(22082099003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 2
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?eE5rYWxrdVlJcFFMTDUzQnhaOWx0d0JCeUo0N09wSUs5ZzFYR1VRU2lMc3E1?=
+ =?utf-8?B?QU1NOFhuNDdESE9zaUJHWTQzejlsdUpxZk9iMFdqOUt1OEJ1WExFZUh5WFJl?=
+ =?utf-8?B?T2pqeVlFY0svb25UTEFMU1RBMEc5WU5uelhqbzNnRnppd25PSmhoa3dYenlE?=
+ =?utf-8?B?QXU2aFhZOXo3bXdQVFBBOUQxajZJcEVnUjk5S0x4WXRqRUJYN0J6U29BNXl1?=
+ =?utf-8?B?Skh0bnV6bVl4Kzl3OFVObVdnYnhUbmtydWNXeTVEZkJxeU5MSmhaU3RqaVZw?=
+ =?utf-8?B?WnhOS3J1ZmdpUHE2RTR0ZXAvd0tNenp4Qnh2ZXpSQkZSZXk0NUdwb2YvRmgr?=
+ =?utf-8?B?SG1xaTlrZi9LNnVlZnBNZHBwb0VwYVR4Q0xOdGVVWVJUQmZzMk5RU1F3NUxu?=
+ =?utf-8?B?RmR1aDFvamgrbndnM2FDbnhSR0JhVnJQdXRHZVpoMnpwWDNFc0JrYkxXeVVi?=
+ =?utf-8?B?QkZvSk5VNVdPVkRwaHZvYjBLMXovajBnYUxuMUNLekYzUGVmTmtFK2dwN1lr?=
+ =?utf-8?B?d0RwV25Fdk9GbWxNSk45aDhmUVk3b0tCQjRCTzVWN01KUGQ2RU5Nb05MTTQy?=
+ =?utf-8?B?NTFtcmE5Z1dCV0ZDdmRKbE5tb1A5azlqcmpvZDlpYVBSdGcvZkwvVit3d21E?=
+ =?utf-8?B?d0hVQlJWSVpaWXFNU09wQ1lNVE93Vmk3dmlaRVBCZzJUMU9FVDA5RWVWdGkz?=
+ =?utf-8?B?b3lVcG1QeExuYkZMdlB3UkdCSlJlSGgwY0Y2MGFYQVV4QURGdW5nSUt5bkw4?=
+ =?utf-8?B?TlovaXBIdGVEWms5WWpwZkZvbUNnMGc3RzIzYzhnb2w2RUR4TkpOMUVzekNU?=
+ =?utf-8?B?YlFoRlRsOFEwYjRTaEU3NysxTHJ2TzVBcFVqMHd1alBvenZtMVRwekVLYlZZ?=
+ =?utf-8?B?R3N5RFVzYStwQ2tENFgyQU9XSHhjWG8xM05GMHJGaXBhQlhhWWFaNmJjR0Z6?=
+ =?utf-8?B?anQ0MVNvMFpVaEJ3RW4zMkFmU2htdU9NazlxQU9TVG1aV21TaC9tVFA4SGNw?=
+ =?utf-8?B?bjg1Y1BuOThOcDh3ME9oZ1dSbmFSN0J4TDVYTDJvcXdmcHpwZTFQVnBZS0ho?=
+ =?utf-8?B?NU94Qm1YMmM2ZUV6NjNQVTB5TkV5V01EalVhWEozdU5aSjVCWVJHSStWQkIv?=
+ =?utf-8?B?c1hEc3h4aUp4SytEaXg4a2tqTWZHUHVEcG9UVjdiOVJmVERYYXErbFJBaFEr?=
+ =?utf-8?B?M1hwaFJld2pPVzFLMFduaVcweGg5dTc3aUNTQ010RnV5TnhiU1FoZWxCZkJO?=
+ =?utf-8?B?SjZZVm12aUtham9OZnN0UjN3TklzQ2sxckhiTEFLV0hKSDgxbDFYYk5qYU8z?=
+ =?utf-8?B?cTFJdCs4Wmh0OWpsVysxTUVjc0srSmhhUlBEOUVUSlgrKzdmakNMQ2JuZ3Na?=
+ =?utf-8?B?Z2NxLzAvTEpFa1NKTVp4VDBTMXJKZTczWWJGbmFSOFFuM3Y3b2M4ZnduZGVJ?=
+ =?utf-8?B?VEFwTlRiR0NIeFpBME54bE0rZ2k0UlROR2tUYjdBVjg1aTRTS25NeFNNRnlS?=
+ =?utf-8?B?TmlRdXlDMUwzcFNwWDAxbm95OVpUTU16N1N4ZWc4SS85MUxlWWkxOGc4M0Na?=
+ =?utf-8?B?cEhiZTBXWm5pYWtoOHdJZFBZZkswbDlTeFJyMkJxT21jVm9sTVpHOUlPN05K?=
+ =?utf-8?B?VnZrZ0ltNm5iOHRpRGo5Uk1SakliRTdneGJhYjE4N3lsQjBlR1BXNWxLTlZr?=
+ =?utf-8?B?TUh5UXhuSDBvTVMyK25KVU1wZFd4ejNLdVc2WngvVmlhOGxTcTJSMUpZdk5D?=
+ =?utf-8?B?QlFpQ3pFeWR4dkZzbytCUURiVFlIOTZJVmk2QWxzQkYwU2lMZEI1VzFobEZm?=
+ =?utf-8?B?eDB5VzI1WGhianJYbFQ4cWRPTEdLQmFxQzRhcWYwdEhSaWszQXZ6Nnhwbmp5?=
+ =?utf-8?B?TEZ6UWNYbE9DQlVCRVdtRExDTjRZOFh4K3YzWXBycThiamROUmZCVTYvR2tO?=
+ =?utf-8?B?YXNXcituRU9XYXJoY0l4WDZtclVLV3ZTZEpGcHBiMUcvN2llenZHdFFqeHFP?=
+ =?utf-8?B?UFZyR0ZyMitaZTNteTNzWU5nNEk0aUEydnV0WUtWUDY3ZldBNjRYT1JnYmg4?=
+ =?utf-8?B?c1EzQnNGNGV5V1ZydUZKTHJUK0s3VTdSTTdid0hXS0lTTndQTCszUkZnUVQw?=
+ =?utf-8?B?L1NWUVJzb0NvWGtic0JjSkhrWE9mZWt1V25oMThPajcxQ1dEMG96RlRERlpm?=
+ =?utf-8?B?SjJpQXFKOXVZUFRpNmFyaVg1Z3FsWkUwbDRrYVpNUHZaL2FEb0lOenkrN0kx?=
+ =?utf-8?B?enQrUFd1Tm8yTmNBNWxaQlR5bmhVVkhPSUxQbTdsZUhxMVN1OVNNRWhNUC91?=
+ =?utf-8?B?bG9LcS8rR1UxRkM1endyMWljQWoyaTVlNEM4bXNvOTM5TVFaWDJqcFVUWmQw?=
+ =?utf-8?Q?gAHBWk0ZirEEdQaxKiW/e5sU2swJFFumcwbofmbguCZ71?=
+X-MS-Exchange-AntiSpam-MessageData-1: QDypf05xhRlYM5QHTpoQCjdZZtbDTNo2Jo0=
+X-Exchange-RoutingPolicyChecked:
+	lq9323yX1cexl7DOeJFzSzROLRWLr9TA7CKvHFK+4ihp47K+C2rBj4gUaFBkFcT1LjhuQuLRg8HTUW3sVMTQaULXheSXR9yRYbJ+TU1OUCZrFbAyh3+ibkJxg16s6xQQgUNCuShllyca6X0WKBIMl7x3Ma1EqLGgD7v8enqzQWDMnZX9OebHia0fKdTt5NVZPKA1vy2CdpIDWtnRh52bXHh/rEu1148OgNq+OnwpXKa0Yh/navHfrpUlatUaMbQFe600fQGb3ozEzCC9CbgjXqreSOPnClZPBNuferPbe8IfIhCxK4sBbpnGP/rBhA2ZN8j+TANOyzFznRaVOjdukg==
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	1a3X/d6pzF+B+7ZIbzJmm9MowSjS1Cqf5svEI3skqNK2M/OSlJS5xOMpG2FK0TAkyJGPjSZGwxcn2xi4easdDmFZ3xqWmuMzsLuXksl9AIv09pbAFlNF5Uek5dZKQVOpJ0s/oAwtLiIMEwsxe3dgF/mURcYBZwz6T2FNq8YbXd6jh3L/sEtws5w+6yvYcH4o1a8i4C6dxaqCNUlxOrSG9UswDaQwHAwwunboDW4wct5pesa+Y/fC8oH5Z7HekhTZj938VqgWl2AR7tB/QX2u7SIkvhvVXQ8eofaBKo7YV9mE0vOlv58GOna/2ZoslJiqk1KMzxK4RTPLuGyome5n30m2WGNXYp/uFQtBeY03OAqLcccFLC452tPftpu0M4G/NosZP69jSptkM00K9WnfDkszwC7oMWJLKnSmsKwx9DfrdbvbFsPTT5SHM4O8bDXuTytDNdKCCUVM6y+ffe7E6PHzuNT5HxkZ28kF3z3+hNOPaed2wGdMGmO2mwRXwDARXMCr7OG4rrGUe/DvxC8XO7zVAu8FD7v+9suM006NFfZdVA7Mfl4Dr6m8b/LRZjFHz8RwSXBaiezzkRWrVI6dmR6lOtbvzWRPrRBDk6Y4UOFq6z7frG/B8FoyfT53TvKq
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: bfe89ff8-4eec-4dbf-5555-08df4194630b
+X-MS-Exchange-CrossTenant-AuthSource: SA6PR04MB9447.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Nov 2026 14:42:48.4942
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: RlsV9urfef8FgzUbzPr+xW3V/ZZgnRXWU5dGc64xAgu7yeFXsKW6Y5yljjbE29Kycqdw/VDUcumYKIlHpxH9cobbTlO3623fqy1Ak4+l1kc=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CO6PR04MB7779
 
-Add a regression test for repeated scans of the same block group when
-a stripe-aligned allocation cannot be satisfied. Check that the allocator
-falls back to the complex scan.
+On 11/11/26 4:34 PM, Christoph Hellwig wrote:
+> On Tue, Nov 10, 2026 at 10:59:11AM +0100, Johannes Thumshirn wrote:
+>> On a zoned filesystem, btrfs_start_transaction() forces a transaction
+>> commit when the delayed refs reservation exceeds its zoned cap. If the
+>> cap is still exceeded after the commit, it returned -EAGAIN, which
+>> fsync passed on to user space.
+>>
+>> Run parallel writers creating, overwriting and deleting small files with
+>> an fsync after every write on a zoned device with a limited number of
+>> active zones, and check that no fsync fails.
+> Should this be a generic test?
 
-The kernel fix is 1f6bc02f1848 ("ext4: fallback to complex scan
-if aligned scan doesn't work").
+Sure I can make it a generic test.
 
-Signed-off-by: Xianjun Zeng <zengxianjun@bytedance.com>
----
- .gitignore                   |   1 +
- src/Makefile                 |   1 +
- src/t_ext4_mb_aligned_scan.c | 193 +++++++++++++++++++++++++++++++++++
- tests/ext4/064               | 145 ++++++++++++++++++++++++++
- tests/ext4/064.out           |   2 +
- 5 files changed, 342 insertions(+)
- create mode 100644 src/t_ext4_mb_aligned_scan.c
- create mode 100755 tests/ext4/064
- create mode 100644 tests/ext4/064.out
-
-diff --git a/.gitignore b/.gitignore
-index cdcfa06e..43749f4e 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -173,6 +173,7 @@ tags
- /src/t_reflink_read_race
- /src/t_rename_overwrite
- /src/t_snapshot_deleted_subvolume
-+/src/t_ext4_mb_aligned_scan
- /src/t_stripealign
- /src/t_truncate_cmtime
- /src/test-nextquota
-diff --git a/src/Makefile b/src/Makefile
-index eaf0621f..41ef94e9 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -54,6 +54,7 @@ endif
- 
- ifeq ($(HAVE_FIEMAP), true)
- LINUX_TARGETS += fiemap-tester t_stripealign
-+LINUX_TARGETS += t_ext4_mb_aligned_scan
- endif
- 
- ifeq ($(HAVE_OPEN_BY_HANDLE_AT), true)
-diff --git a/src/t_ext4_mb_aligned_scan.c b/src/t_ext4_mb_aligned_scan.c
-new file mode 100644
-index 00000000..214c353a
---- /dev/null
-+++ b/src/t_ext4_mb_aligned_scan.c
-@@ -0,0 +1,193 @@
-+// SPDX-License-Identifier: GPL-2.0+
-+/*
-+ * Construct an ext4 block group whose free extents cannot satisfy a
-+ * stripe-aligned allocation.
-+ */
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <inttypes.h>
-+#include <limits.h>
-+#include <linux/fiemap.h>
-+#include <linux/fs.h>
-+#include <stdint.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/ioctl.h>
-+#include <sys/types.h>
-+#include <unistd.h>
-+
-+#define FS_BLOCK_SIZE		1024ULL
-+#define BLOCKS_PER_GROUP	8192ULL
-+#define GROUP_SIZE		(FS_BLOCK_SIZE * BLOCKS_PER_GROUP)
-+#define STRIPE_BLOCKS		12ULL
-+#define FREE_BLOCKS		13ULL
-+#define FRAGMENT_PERIOD		24ULL
-+#define FILL_FILE_SIZE		(64ULL * 1024 * 1024)
-+#define FIEMAP_EXTENTS		1024
-+#define MIN_FRAGMENT_BLOCKS	4096ULL
-+
-+static void make_path(char *path, size_t size, const char *dir,
-+		      const char *name)
-+{
-+	if ((size_t)snprintf(path, size, "%s/%s", dir, name) >= size) {
-+		fprintf(stderr, "path is too long: %s/%s\n", dir, name);
-+		exit(1);
-+	}
-+}
-+
-+static int allocate_fill_file(const char *path)
-+{
-+	uint64_t offset;
-+	int fd;
-+
-+	fd = open(path, O_CREAT | O_EXCL | O_RDWR, 0600);
-+	if (fd < 0) {
-+		perror("open fill file");
-+		return -1;
-+	}
-+	/* Consume small free extents instead of skipping over them. */
-+	for (offset = 0; offset < FILL_FILE_SIZE; offset += FS_BLOCK_SIZE) {
-+		if (fallocate(fd, 0, offset, FS_BLOCK_SIZE)) {
-+			perror("fallocate fill file");
-+			close(fd);
-+			return -1;
-+		}
-+	}
-+	return fd;
-+}
-+
-+/*
-+ * Find a large region in the goal block group and one contiguous extent.
-+ * Return its logical file offset, physical device offset and length in blocks.
-+ */
-+static int find_fragment_region(int fd, uint64_t group, uint64_t *logical,
-+				uint64_t *physical, uint64_t *blocks)
-+{
-+	struct fiemap *fiemap;
-+	uint64_t extent_end;
-+	uint64_t group_start = (group * BLOCKS_PER_GROUP + 1) * FS_BLOCK_SIZE;
-+	uint64_t group_end = group_start + GROUP_SIZE;
-+	uint64_t region_start;
-+	uint64_t region_end;
-+	unsigned int i;
-+	int ret = -1;
-+
-+	fiemap = calloc(1, sizeof(*fiemap) +
-+			FIEMAP_EXTENTS * sizeof(struct fiemap_extent));
-+	if (!fiemap) {
-+		perror("calloc fiemap");
-+		return -1;
-+	}
-+	fiemap->fm_start = 0;
-+	fiemap->fm_length = ~0ULL;
-+	fiemap->fm_flags = FIEMAP_FLAG_SYNC;
-+	fiemap->fm_extent_count = FIEMAP_EXTENTS;
-+
-+	if (ioctl(fd, FS_IOC_FIEMAP, fiemap)) {
-+		perror("FS_IOC_FIEMAP");
-+		goto out;
-+	}
-+
-+	for (i = 0; i < fiemap->fm_mapped_extents; i++) {
-+		struct fiemap_extent *extent = &fiemap->fm_extents[i];
-+
-+		extent_end = extent->fe_physical + extent->fe_length;
-+		region_start = extent->fe_physical > group_start ?
-+			extent->fe_physical : group_start;
-+		region_end = extent_end < group_end ? extent_end : group_end;
-+		if (region_end <= region_start ||
-+		    region_end - region_start < MIN_FRAGMENT_BLOCKS * FS_BLOCK_SIZE)
-+			continue;
-+
-+		*physical = region_start;
-+		*blocks = (region_end - region_start) / FS_BLOCK_SIZE;
-+		*logical = extent->fe_logical + region_start -
-+			   extent->fe_physical;
-+		ret = 0;
-+		goto out;
-+	}
-+	fprintf(stderr, "no suitable region in goal group %" PRIu64 "\n", group);
-+out:
-+	free(fiemap);
-+	return ret;
-+}
-+
-+/*
-+ * Leave thirteen free blocks every twenty-four blocks.  Every free extent
-+ * starts at physical block 1 (mod 12), so none contains twelve blocks
-+ * starting at a stripe boundary.  The average free extent is nevertheless
-+ * large enough for ext4_mb_good_group() to keep selecting this group for a
-+ * twelve-block request.
-+ */
-+static int fragment_group(int fd, uint64_t logical, uint64_t physical,
-+			  uint64_t blocks, unsigned int *holes)
-+{
-+	uint64_t region_block = physical / FS_BLOCK_SIZE;
-+	uint64_t offset;
-+	uint64_t first;
-+
-+	first = (1 + STRIPE_BLOCKS - region_block % STRIPE_BLOCKS) %
-+		STRIPE_BLOCKS;
-+	*holes = 0;
-+	for (offset = first;
-+	     offset + FREE_BLOCKS <= blocks;
-+	     offset += FRAGMENT_PERIOD) {
-+		off_t pos = logical + offset * FS_BLOCK_SIZE;
-+
-+		if (fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
-+			      pos, FREE_BLOCKS * FS_BLOCK_SIZE)) {
-+			perror("punch fragmentation pattern");
-+			return -1;
-+		}
-+		(*holes)++;
-+	}
-+	if (fsync(fd)) {
-+		perror("fsync fill file");
-+		return -1;
-+	}
-+	return 0;
-+}
-+
-+int main(int argc, char **argv)
-+{
-+	char fill_path[PATH_MAX];
-+	uint64_t logical;
-+	uint64_t physical;
-+	uint64_t blocks;
-+	uint64_t group;
-+	unsigned int holes = 0;
-+	char *end;
-+	int fd;
-+
-+	if (argc != 4 || strcmp(argv[1], "setup")) {
-+		fprintf(stderr, "usage: %s setup MOUNTPOINT GROUP\n", argv[0]);
-+		return 1;
-+	}
-+	errno = 0;
-+	group = strtoull(argv[3], &end, 0);
-+	if (errno || *end || !argv[3][0]) {
-+		fprintf(stderr, "invalid block group: %s\n", argv[3]);
-+		return 1;
-+	}
-+
-+	make_path(fill_path, sizeof(fill_path), argv[2], "fragmentation-fill");
-+	/* Cover every other free data extent in the goal block group. */
-+	fd = allocate_fill_file(fill_path);
-+	if (fd < 0)
-+		return 1;
-+	if (find_fragment_region(fd, group, &logical, &physical, &blocks) ||
-+	    fragment_group(fd, logical, physical, blocks, &holes))
-+		goto error;
-+	close(fd);
-+	printf("fragmented block group %" PRIu64
-+	       " at physical block %" PRIu64
-+	       " with %u thirteen-block free extents\n",
-+	       group, (uint64_t)(physical / FS_BLOCK_SIZE), holes);
-+	return 0;
-+
-+error:
-+	close(fd);
-+	fprintf(stderr, "failed to fragment goal group %" PRIu64 "\n", group);
-+	return 1;
-+}
-diff --git a/tests/ext4/064 b/tests/ext4/064
-new file mode 100755
-index 00000000..5671ccda
---- /dev/null
-+++ b/tests/ext4/064
-@@ -0,0 +1,145 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026, ByteDance Ltd. and/or its affiliates. All rights reserved.
-+#
-+# FS QA Test No. 064
-+#
-+# Regression test for ext4 repeatedly choosing the same block group when a
-+# stripe-aligned allocation cannot be satisfied.  The allocator must fall back
-+# to the complex scan instead of spending time rescanning that block group.
-+#
-+. ./common/preamble
-+. ./common/tracing
-+. ./common/filter
-+_begin_fstest auto prealloc quick
-+
-+_cleanup()
-+{
-+	_ftrace_cleanup
-+	cd /
-+
-+	if [ -n "$loop_mnt" ]; then
-+		if [ -n "$(_is_dir_mountpoint "$loop_mnt" ext4)" ] &&
-+		   ! _unmount "$loop_mnt" > /dev/null 2>&1; then
-+			status=1
-+			return
-+		fi
-+		rmdir "$loop_mnt" 2>/dev/null || true
-+	fi
-+	if [ -n "$loop_dev" ]; then
-+		_destroy_loop_device "$loop_dev" > /dev/null 2>&1
-+		loop_dev=
-+	fi
-+	rm -f "$tmp".* "$fs_img"
-+}
-+
-+_require_test
-+_require_loop
-+_require_sparse_files
-+_require_test_program t_ext4_mb_aligned_scan
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "fiemap"
-+_require_command "$TIMEOUT_PROG" timeout
-+_require_ftrace
-+
-+_fixed_by_kernel_commit 1f6bc02f18489b9c9ea39b068d0695fb0e4567e9 \
-+	"ext4: fallback to complex scan if aligned scan doesn't work"
-+
-+loop_mnt=$TEST_DIR/$seq.mnt
-+fs_img=$TEST_DIR/$seq.img
-+
-+# A 1k block size gives us 2560 block groups in this sparse 20G image.  The
-+# large group count makes repeated selection of one bad group observable.
-+$XFS_IO_PROG -f -c "truncate 20G" $fs_img >> $seqres.full 2>&1
-+${MKFS_PROG} -t ext4 -b 1024 -N 32768 -O ^has_journal \
-+	-E stride=3,stripe_width=12,lazy_itable_init=1 $fs_img 20G \
-+	>> $seqres.full 2>&1 || _fail "mkfs failed"
-+
-+mkdir -p $loop_mnt
-+# The backing filesystem's direct I/O alignment may be 4k, which cannot
-+# hold this 1k ext4 filesystem.  Pin the loop logical sector size to 512.
-+loop_dev=$(_create_loop_device $fs_img 512)
-+_mount -t ext4 -o mb_optimize_scan=1 $loop_dev $loop_mnt \
-+	>> $seqres.full 2>&1 || _fail "could not loop mount ext4 filesystem"
-+
-+# Always use the optimized group selection path, including on rotational loop
-+# devices which otherwise perform a bounded linear scan first.
-+scan_ctl=/sys/fs/ext4/$(basename $loop_dev)/mb_max_linear_groups
-+[ -w $scan_ctl ] || _notrun "ext4 mb_max_linear_groups is unavailable"
-+echo 0 > $scan_ctl || _fail "could not disable linear group scanning"
-+
-+goal_file=$loop_mnt/aligned-allocation
-+$XFS_IO_PROG -f -c "falloc 0 1k" $goal_file >> $seqres.full 2>&1 || \
-+	_fail "could not initialize goal file"
-+goal_sector=$(_get_file_extent_sector $goal_file 0)
-+[ "$goal_sector" != "hole" ] || _fail "goal file has no mapped extent"
-+[ "$goal_sector" -gt 0 ] || _fail "invalid goal sector $goal_sector"
-+# _get_file_extent_sector returns 512-byte sectors.  Convert to a 1k ext4
-+# block number and account for s_first_data_block == 1 on this filesystem.
-+fragment_group=$(( (goal_sector / 2 - 1) / 8192 ))
-+goal_inode=$(stat -c '%i' $goal_file)
-+
-+$here/src/t_ext4_mb_aligned_scan setup $loop_mnt $fragment_group \
-+	>> $seqres.full 2>&1 || _fail "could not construct fragmented block group"
-+
-+_ftrace_setup
-+event_dir=$FTRACE_DIR/events/ext4/ext4_mballoc_alloc
-+[ -d $event_dir ] || _notrun "ext4_mballoc_alloc tracepoint is unavailable"
-+major=$(stat -c '%t' $loop_dev)
-+minor=$(stat -c '%T' $loop_dev)
-+trace_dev=$((0x$major * 1048576 + 0x$minor))
-+printf '%s' "orig_len == 12 && dev == $trace_dev && ino == $goal_inode" > \
-+	$event_dir/filter || _fail "could not set ext4 allocation trace filter"
-+_ftrace_record_events ext4_mballoc_alloc
-+
-+# The timeout is only a watchdog for a genuinely stuck kernel.  Determine
-+# whether this regressed from the number of groups scanned, not elapsed time.
-+rc=0
-+$TIMEOUT_PROG -k 5s 120s $XFS_IO_PROG -c "falloc 1k 12k" $goal_file \
-+	>> $seqres.full 2>&1 || rc=$?
-+case $rc in
-+0)
-+	;;
-+124|137)
-+	_fail "stripe-aligned allocation watchdog expired"
-+	;;
-+*)
-+	_fail "xfs_io fallocate exited with status $rc"
-+	;;
-+esac
-+rm -f $goal_file || _fail "could not remove goal file"
-+_ftrace_ignore_events
-+trace=$(_ftrace_dump)
-+echo "$trace" >> $seqres.full
-+trace_line=$(echo "$trace" | grep ': ext4_mballoc_alloc:')
-+trace_count=$(echo "$trace" | grep -c ': ext4_mballoc_alloc:')
-+[ "$trace_count" -eq 1 ] || \
-+	_fail "expected one target allocation tracepoint, got $trace_count"
-+groups=$(echo "$trace_line" | \
-+	sed -n 's/.* blks [0-9][0-9]* grps \([0-9][0-9]*\) .*/\1/p')
-+result=$(echo "$trace_line" | \
-+	sed -n 's/.* result \([0-9][0-9]*\)\/\([0-9][0-9]*\)\/\([0-9][0-9]*\)@.*/\1 \2 \3/p')
-+[ -n "$groups" ] || _fail "no ext4 allocation tracepoint recorded"
-+[ -n "$result" ] || _fail "could not parse allocation result"
-+result_group=${result%% *}
-+result_rest=${result#* }
-+result_start=${result_rest%% *}
-+result_len=${result_rest##* }
-+[ "$result_len" -eq 12 ] || _fail "allocation returned $result_len blocks, expected 12"
-+[ "$result_group" = "$fragment_group" ] || \
-+	_fail "allocation used group $result_group instead of $fragment_group"
-+
-+# With a 1k block size ext4_group_first_block_no() adds one block.  A
-+# non-aligned result proves that the complex scan supplied the allocation.
-+physical_block=$((result_group * 8192 + result_start + 1))
-+[ $((physical_block % 12)) -ne 0 ] || \
-+	_fail "aligned scan unexpectedly succeeded at block $physical_block"
-+
-+# The fixed allocator normally scans one group.  Allow a small margin for
-+# allocator implementation changes; the regression scans all 2560 groups.
-+[ "$groups" -le 16 ] || \
-+	_fail "allocator scanned $groups groups without falling back to complex scan"
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/ext4/064.out b/tests/ext4/064.out
-new file mode 100644
-index 00000000..d9076546
---- /dev/null
-+++ b/tests/ext4/064.out
-@@ -0,0 +1,2 @@
-+QA output created by 064
-+Silence is golden
--- 
-2.50.1 (Apple Git-155)
