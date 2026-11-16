@@ -1,58 +1,52 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794691299;
-	b=C5ekNo542CI/67yBMW6ufyUUO2GPAETZ1REpkkxwr0JU2olBIBZLV8qQ7TsJeDckGbN6
-	 wYQcaO0JPBupoXFVGBiv3DmNSjU4MMwRtJpAhYEWnF1qha6GM6Z2t7LwrtXI9ojGOHzvG
-	 jaViZUzisihkGuuT1uqIZEWmMbJS5k5mCDFlvGw0VRHtaiC5l9uDutxd8mxD0zuN8qbzl
-	 V4G2b/gUVDDWj8WV3TaiLh3KPSPh0trFWh4+8J3gyexmGnrUyxxfnDrd4oFPHl5pI8m5g
-	 9Md5lnpaOOfF2UvuDRi+A/0rW8reJnzL98JUgsSRTpR37+nS9P/dn+uQWbKk21pgppA==
+	t=1794839377;
+	b=I3iQFXJYw2HLuk5P3fpgEh+vDlbwnlX5UekZiH+ENJtM2U6VJYLKT37chVbO+itChVWQ
+	 BfEflKIoj1HAPu46WeuMtWaYdXy84LhavTnMlsy3JxDj+A2OGv2BWTpBq9BUDsfh3k9gJ
+	 tlk5C4ICW4XM28JbfKmVfh0nrglavq64aUDGm50t1LpF9/KQ7gThjx87HN51+gyLLYtsi
+	 tsMKakWtysTDodQVZ+PQUh/QJjnpqso9OS51EYu2rkDGJ8gdACvm0IPjBN5OCjOWMZStf
+	 xyssQ9YfDa1Kjv5ctQPOdrJs8l8cGakFWP6K8ZGsXrtzo3p1XJjrAF9kbeSHtWE3oPA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794691299;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794839377;
 	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
-	 Mail-Followup-To:References:MIME-Version:Content-Type:
-	 Content-Disposition:Content-Transfer-Encoding:In-Reply-To;
-	bh=9ZuyfI8WkgRbBjR5eKXmMTqwvLagRhNhdq+B2h7eXsM=;
-	b=opauw1fvuV/ZSTPIOANkjVyuLnCd1KefnAPzfnUghKOueJdKDgMDxzb2fB5VSA4zRi8T
-	 ZJEgRPXTiWR2M+8NVvlBqz3I08M7IvclHQO7MfaXgf8Z4UtKN6jQ0heZV8GbsxHMStBWq
-	 AEhblDwPNaOa4/pQOPb9rVaFb9JLFLmCjKtnOH0lnTXvzLH8swoiz4trm7V1d3STxw0s6
-	 tqOvTmYdr2zn8oZL5LmpaKn7Z+VfjZFWdB21IXxu8pti2ThdKduIvPisDjJ+aYoFZHAYg
-	 Ln4WCbAqI8eKfTtB5yT788zgp2LgE04/2ECSUOo4SfB0vAbXzPzQPvl/nkquDSVXg7Q==
+	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
+	bh=nivepE4Su1td4Uecx3ahOxPNd9urapRLLNbPutzGlHQ=;
+	b=cZvUfhBdPbNW+JjDxdv6ovIPOQItErgA8ZP+zlxN7lDCnQTC5eBl+HBOJprkhspOC7SV
+	 QbgxwLb9TU+YqFoR2yAoc7YuG1CXNEHpSqcrHunazvIRaRFgL66sSVu3zc7uu4qOeDHsc
+	 izUho0HXcbi6KjMI4HGbX5y9sySOG5JsOuUGT/35T3DAbsbSEvkpjunlgssnVrT98+VEX
+	 QLpXew5fbz/JGMC0ppBNRkHooDUemdrMcY3sf/PDHtlpg+vHEeso7fvtjCouR64lGn+5P
+	 K6Cuo8QM7+IyaBTb8xXK3fLlCJcyYAV349sEGeCvSpjm1CuNrb3BIZ7a09CQYBGMeig==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=hl2qXjvy;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=KAH+v8od;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A2C3606A323;
-	Sat, 14 Nov 2026 21:21:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C757E606A338
+	for <fstests@vger.kernel.org>; Mon, 16 Nov 2026 14:29:37 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=hl2qXjvy
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3A1DE1F000C4;
-	Sat, 14 Nov 2026 21:21:34 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=KAH+v8od
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 06FFD1F000C5;
+	Mon, 16 Nov 2026 14:29:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794691298;
-	bh=9ZuyfI8WkgRbBjR5eKXmMTqwvLagRhNhdq+B2h7eXsM=;
+	s=k20260515; t=1794839377;
+	bh=nivepE4Su1td4Uecx3ahOxPNd9urapRLLNbPutzGlHQ=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=hl2qXjvyTPbgveEoOYYSLcMi9XViHfZ8y+dP6GiiCm27R0EiaDvMkEhJEJa3QzLtZ
-	 olNOLDYswLR7Zh3Vydegv3MZl9W54nXROrvQ2gNVCgNWBj2ah+sY5CHDWlrajh1R7W
-	 jo3+jG+BUdPLAjyIQV5TL4sz7GWZV74mc8GemyoEwaXoHHIthTh1+aV8va5RCCClKU
-	 5QwMKzyDjJNGebdG4UnFZT8FPdRtpGm/PMIurxEQOHy+BxG4J0tIVOQNbxklBmR5E3
-	 4We2fIfihWd2ycyIh9e9uNSmYIh6KyzzhFUsNWmLZlh7ZxxqN7IZMWOe3tNFIPbw1f
-	 x2uKDXzoaCe3A==
-Date: Sun, 15 Nov 2026 05:21:30 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: test an incremental send scenario with hole
- punching
-Message-ID: <avjP-YcABrnO5RZ1@zlang-mailbox>
-Mail-Followup-To: Filipe Manana <fdmanana@kernel.org>, 
-	fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <233845be4bd0fd12b4c62b5ca5243ec1ef4d44f8.1792613768.git.fdmanana@suse.com>
- <avh4IU-M5jYkc1uE@zlang-mailbox>
- <CAL3q7H4KZ-xerun6qOCxQDd4GPPj=B6KLZwa16rNQEVUKjAYDA@mail.gmail.com>
+	b=KAH+v8odicfjxjkyuxyrP+RxdKSqJBgWuDVQg0/upxOvdXpSqynNMsYHNIhSVugFi
+	 rQx0kWu7AnwxS2vnugoc5XPFwBfqoAOF3cTI3+HsOiNaS2JHYeZZiuXxUW9h0cPpcw
+	 3BGhXeFe/MOTBz/iJ6O8SIhbr5HkdwpA/OT2bDa+VDCrkedMsu/DI+Kd2ET/79sWGX
+	 P5pgVq+FX5sIBvnwlwI+QiGabzFMz/2cqHg+1hdXNTY3vkSOysQQCDrq/cmR6R9NVg
+	 8CpoRWmSh52wiygLySvpUgLTK+Wqu4z/ntl/9DHGbRwnevyCitr7LQNul9xntPYYuF
+	 dg/8Ppnl4sWTA==
+Date: Mon, 16 Nov 2026 15:29:33 +0100
+From: Carlos Maiolino <cem@kernel.org>
+To: zlang@kernel.org
+Cc: fstests@vger.kernel.org, hch@lst.de, sandeen@sandeen.net, 
+	Carlos Maiolino <cmaiolino@redhat.com>
+Subject: Re: [PATCH] add tmt as a new output format
+Message-ID: <avsTOljvvZXh0lS2@nidhogg.toxiclabs.cc>
+References: <20261105160526.44266-1-cem@kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -62,166 +56,231 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAL3q7H4KZ-xerun6qOCxQDd4GPPj=B6KLZwa16rNQEVUKjAYDA@mail.gmail.com>
+In-Reply-To: <20261105160526.44266-1-cem@kernel.org>
 
-On Sat, Nov 14, 2026 at 04:51:27PM +0000, Filipe Manana wrote:
-> On Sat, Nov 14, 2026 at 3:05 PM Zorro Lang <zlang@kernel.org> wrote:
-> >
-> > On Wed, Oct 21, 2026 at 09:17:25PM +0100, fdmanana@kernel.org wrote:
-> > > From: Filipe Manana <fdmanana@suse.com>
-> > >
-> > > Test an incremental send scenario where we punched a hole into a tail
-> > > section of a file extent item that is the last item in a leaf and the
-> > > next leaf in the subvolume tree was not changed (remains shared between
-> > > the parent and send snapshots).
-> > >
-> > > This currently fails and is fixed by the following kernel patch:
-> > >
-> > >   btrfs: send: fix missing hole punching during incremental send
-> > >
-> > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > > ---
-> > >  tests/btrfs/362     | 84 +++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/btrfs/362.out |  7 ++++
-> > >  2 files changed, 91 insertions(+)
-> > >  create mode 100755 tests/btrfs/362
-> > >  create mode 100644 tests/btrfs/362.out
-> > >
-> > > diff --git a/tests/btrfs/362 b/tests/btrfs/362
-> > > new file mode 100755
-> > > index 00000000..aca56540
-> > > --- /dev/null
-> > > +++ b/tests/btrfs/362
-> > > @@ -0,0 +1,84 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test 362
-> > > +#
-> > > +# Test an incremental send scenario where we punched a hole into a tail section
-> > > +# of a file extent item that is the last item in a leaf and the next leaf in the
-> > > +# subvolume tree was not changed (remains shared between the parent and send
-> > > +# snapshots).
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick send
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +     cd /
-> > > +     rm -fr $tmp.*
-> > > +     rm -fr $send_files_dir
-> > > +}
-> > > +
-> > > +. ./common/filter
-> > > +
-> > > +_require_test
-> > > +_require_scratch
-> > > +_require_btrfs_support_sectorsize 4096
-> > > +_require_xfs_io_command "fpunch"
-> > > +
-> > > +_fixed_by_kernel_commit xxxxxxxxxx \
-> > > +     "btrfs: send: fix missing hole punching during incremental send"
-> > > +
-> > > +send_files_dir=$TEST_DIR/btrfs-test-$seq
-> > > +
-> > > +rm -fr $send_files_dir
-> > > +mkdir $send_files_dir
-> > > +
-> > > +first_stream="$send_files_dir/1.send"
-> > > +second_stream="$send_files_dir/2.send"
-> > > +
-> > > +# We need a very specific leaf layout where we punch a hole in the last file
-> > > +# extent item of a leaf and the next leaf was not modified in the send snapshot,
-> > > +# so we set a fixed size of 16K.
-> > > +_scratch_mkfs -n 16K >> $seqres.full 2>&1 || _fail "first mkfs failed"
-> > > +_scratch_mount
-> > > +
-> > > +touch $SCRATCH_MNT/foo
-> > > +# 205 extents of 64K each with a 64K hole between them.
-> > > +for ((i = 0; i < 410; i += 2)); do
-> > > +     offset=$((i * 64 * 1024))
-> > > +     $XFS_IO_PROG -c "pwrite -b 64K -S 0xab $offset 64K" \
-> > > +             $SCRATCH_MNT/foo > /dev/null
-> > > +done
-> > > +
-> > > +_btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap1
-> > > +
-> > > +# Punch a hole in the last 16K of the last file extent item of the first leaf,
-> > > +# which starts at file offset 12845056, so 12845056 + 64K - 16K = 12894208.
-> > > +# This does not cause any change in the second leaf of the fs tree, so it will
-> > > +# be shared between the snapshots.
-> > > +$XFS_IO_PROG -c "fpunch 12894208 16K" $SCRATCH_MNT/foo
-> > > +
-> > > +_btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2
-> > > +
-> > > +echo "File digest in the original fs: $(_md5_checksum $SCRATCH_MNT/snap2/foo)"
-> > > +
-> > > +_btrfs send -f $first_stream $SCRATCH_MNT/snap1
-> > > +_btrfs send -f $second_stream -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2
-> > > +
-> > > +# Create a new fs and apply both send streams.
-> > > +_scratch_unmount
-> > > +_scratch_mkfs >> $seqres.full 2>&1 || _fail "second mkfs failed"
-> > > +_scratch_mount
-> > > +
-> > > +_btrfs receive -f $first_stream $SCRATCH_MNT
-> > > +_btrfs receive -f $second_stream $SCRATCH_MNT
-> > > +
-> > > +echo "File digest in the new fs:      $(_md5_checksum $SCRATCH_MNT/snap2/foo)"
-> > > +
-> > > +# Check the region we punched a hole is full of zeroes.
-> > > +echo "Hole data:"
-> > > +od -A d -t x1 -j 12894208 -N $((16 * 1024)) $SCRATCH_MNT/snap2/foo
-> >
-> >
-> > Can this be replaced with common helper: _hexdump ?
+On Thu, Nov 05, 2026 at 05:05:20PM +0100, cem@kernel.org wrote:
+> From: Carlos Maiolino <cmaiolino@redhat.com>
 > 
-> I don't have a strong objection to that, but honestly I prefer it as
-> it is because it prints the addresses in decimal format, which is more
-> human readable and directly matches the value passed to the hole
-> punching operation above, making it easier to read.
+> I've been trying to expand my testing matrix leveraging the testing-farm
+> cloud (https://testing-farm.io/), which is a public testing cloud available
+> for opensource testing.
 > 
-> Do you want to make the change yourself, or should I send a new
-> version just for that?
-
-If I were to change it, I'd have to merge the kernel patch above, rebuild and
-install the kernel, run the tests, and then update the .out file.
-Never mind, just using od works fine too, since the _hexdump helper was
-originally introduced to replace the widespread use of the hexdump command
-anyway. Anyway, no need to send a new version. If I find some time, I'll
-make the change myself, or merging it directly :)
-
-Thanks,
-Zorro
-
+> Testing-farm uses tmt (https://github.com/teemtee) to orchestrate the
+> tests within the provisioned VMs.
+> tmt however expects each individual test to be, well, an individual
+> test so by default it would put a whole xfstests run as a single test
+> case with a looooong report.
+> However we can use a tmt-report-result tool to report each test ran
+> individually as a sub-test, so the report looks a bit more granular,
+> easy to read and prevent my eyes from bleeding while looking at its
+> testing reports.
 > 
-> >
-> > Thanks,
-> > Zorro
-> >
-> > > +
-> > > +# success, all done
-> > > +_exit 0
-> > > diff --git a/tests/btrfs/362.out b/tests/btrfs/362.out
-> > > new file mode 100644
-> > > index 00000000..789abb53
-> > > --- /dev/null
-> > > +++ b/tests/btrfs/362.out
-> > > @@ -0,0 +1,7 @@
-> > > +QA output created by 362
-> > > +File digest in the original fs: a5a06694d9f7fc3245afb2f391636e44
-> > > +File digest in the new fs:      a5a06694d9f7fc3245afb2f391636e44
-> > > +Hole data:
-> > > +12894208 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-> > > +*
-> > > +12910592
-> > > --
-> > > 2.53.0
-> > >
-> > >
+> I know tmt can also be used to orchestrate tests on a local machine.
+> Although I have no use for that, it might be useful for someone else,
+> reason why at the end of the run it will also print out the tmt report
+> file location. This also makes the output consistent to what xunit
+> format does.
+> 
+> Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+
+Gentle ping? :)
+
+> ---
+> 
+> Here is an example report of a '-g quick' run with this patch against a
+> regular distro kernel (Fedora 44). I'm not adding it to the patch
+> description because honestly I have no clue how long those reports are
+> kept so it may very well get stale in a few months.
+> https://artifacts.dev.testing-farm.io/ccd9d09a-f8fc-4460-bdbb-005e1a18bad8/
+> 
+>  check         |   2 +-
+>  common/report | 129 +++++++++++++++++++++++++++++++++++++++++++++++++-
+>  2 files changed, 129 insertions(+), 2 deletions(-)
+> 
+> diff --git a/check b/check
+> index bca302151955..47a76ba04c59 100755
+> --- a/check
+> +++ b/check
+> @@ -74,7 +74,7 @@ General options:
+>      -S section              exclude the specified section from the config file
+>      -T                      output timestamps
+>      -R fmt[,fmt]            generate report in formats specified. Supported
+> -                              formats: xunit, xunit-quiet
+> +                              formats: xunit, xunit-quiet, tmt
+>      --exact-order           run tests in the exact order specified
+>      --extra-space <size>    require minimum free space on scratch device
+>      --fs <type>             test the given FSTYP; valid types include:
+> diff --git a/common/report b/common/report
+> index 2fa15e62f1e7..7d5e973a6e02 100644
+> --- a/common/report
+> +++ b/common/report
+> @@ -14,6 +14,8 @@ REPORT_ENV_LIST_OPT=("TAPE_DEV" "RMT_TAPE_DEV" "FSSTRESS_AVOID" "FSX_AVOID"
+>  		     "KCONFIG_PATH" "PERF_CONFIGNAME" "MIN_FSSIZE"
+>  		     "IDMAPPED_MOUNTS")
+>  
+> +TMT_REPORT_RESULT_PROG="${TMT_REPORT_RESULT_PROG:-tmt-report-result}"
+> +
+>  encode_xml()
+>  {
+>  	cat -v | \
+> @@ -244,7 +246,122 @@ _xunit_make_testcase_report()
+>  }
+>  
+>  
+> -#
+> +
+> +_tmt_assert_env()
+> +{
+> +	if [ -z "$TMT_TEST_PIDFILE" ]; then
+> +		_fatal "report format 'tmt' can only be used when xfstests is run as a tmt test"
+> +	fi
+> +	if ! command -v "$TMT_REPORT_RESULT_PROG" >/dev/null 2>&1; then
+> +		_fatal "report format 'tmt' requires $TMT_REPORT_RESULT_PROG to be installed"
+> +	fi
+> +}
+> +
+> +# tmt subresult names have to be unique within a tmt test, so prefix each test
+> +# name with its specific section.
+> +_tmt_testcase_name()
+> +{
+> +	local sect_name="$1"
+> +	local test_name="$2"
+> +
+> +	if [ $sect_name == '-no-sections-' ]; then
+> +		echo "/$test_name"
+> +	else
+> +		echo "/$sect_name/$test_name"
+> +	fi
+> +}
+> +
+> +__tmt_log_append()
+> +{
+> +	local log="$1"
+> +	local title="$2"
+> +	local file="$3"
+> +
+> +	test -s "$file" || return 0
+> +	echo "--- $title ---" >> "$log"
+> +	cat "$file" | tr -dc '[:print:][:space:]' >> "$log"
+> +	echo >> "$log"
+> +}
+> +
+> +# tmt-report-result can attach a single log to a subresult and display that
+> +# on its web interface. Gather whatever logs a specific test left behind
+> +# so we can see it on the web interface instead of digging into the resulting
+> +# artifacts. Do that only for failed / notrun tests as we don't need it if a test
+> +# passed properly.
+> +_tmt_make_testcase_log()
+> +{
+> +	local test_name="$1"
+> +	local test_status="$2"
+> +	local log="${REPORT_DIR}/${test_name}.tmt.log"
+> +
+> +	# $REPORT_DIR/<group> is created by check before the test is run
+> +	rm -f "$log"
+> +
+> +	case $test_status in
+> +	"notrun")
+> +		__tmt_log_append "$log" "not run" "${REPORT_DIR}/${test_name}.notrun"
+> +		;;
+> +	"fail")
+> +		local out_src="${SRC_DIR}/${test_name}.out"
+> +		local outbad_file="${REPORT_DIR}/${test_name}.out.bad"
+> +
+> +		if [ -n "$_err_msg" ]; then
+> +			echo "$_err_msg" >> "$log"
+> +		fi
+> +		if [ -s "$outbad_file" ]; then
+> +			echo "--- output mismatch ---" >> "$log"
+> +			$diff "$out_src" "$outbad_file" >> "$log"
+> +		fi
+> +		__tmt_log_append "$log" "hints" "${REPORT_DIR}/${test_name}.hints"
+> +		__tmt_log_append "$log" "dmesg" "${REPORT_DIR}/${test_name}.dmesg"
+> +		__tmt_log_append "$log" "mount failures" "${REPORT_DIR}/${test_name}.mountfail"
+> +		__tmt_log_append "$log" "full output" "${REPORT_DIR}/${test_name}.full"
+> +		;;
+> +	esac
+> +
+> +	test -s "$log" && echo "$log"
+> +	return 0
+> +}
+> +
+> +_tmt_make_testcase_report()
+> +{
+> +	local sect_name="$1"
+> +	local test_name="$2"
+> +	local test_status="$3"
+> +	local outcome
+> +	local log
+> +
+> +	case $test_status in
+> +	"pass")
+> +		outcome="pass"
+> +		;;
+> +	"fail")
+> +		outcome="fail"
+> +		;;
+> +	"notrun"|"list")
+> +		outcome="skip"
+> +		;;
+> +	*)
+> +		outcome="error"
+> +		;;
+> +	esac
+> +
+> +	log=`_tmt_make_testcase_log "$test_name" "$test_status"`
+> +
+> +	# tmt-report-result is chatty on stdout, which would interleave with
+> +	# the test results printed by check.
+> +	"$TMT_REPORT_RESULT_PROG" \
+> +		"`_tmt_testcase_name "$sect_name" "$test_name"`" \
+> +		"$outcome" ${log:+-o "$log"} >/dev/null ||
+> +		echo "check: failed to report $test_name to tmt"
+> +}
+> +
+> +# Only useful if using tmt locally, but keeps consistent with xunit implementation
+> +_tmt_make_section_report()
+> +{
+> +	echo "tmt report: $TMT_TEST_DATA/tmt-report-results.yaml"
+> +}
+> +
+>  #  Common report generator entry points
+>  _make_section_report()
+>  {
+> @@ -260,6 +377,9 @@ _make_section_report()
+>  						   "$bad_count" "$notrun_count" \
+>  						   "$sect_time"
+>  			;;
+> +		"tmt")
+> +			_tmt_make_section_report
+> +			;;
+>  		*)
+>  			_dump_err "format '$report' is not supported"
+>  			;;
+> @@ -279,6 +399,10 @@ _make_testcase_report()
+>  			_xunit_make_testcase_report "$sect_name" "$test_seq" \
+>  						    "$test_status" "$test_time" "$report"
+>  			;;
+> +		"tmt")
+> +			_tmt_make_testcase_report "$sect_name" "$test_seq" \
+> +						  "$test_status"
+> +			;;
+>  		*)
+>  			_dump_err "report format '$report' is not supported"
+>  			;;
+> @@ -291,6 +415,9 @@ _assert_report_list() {
+>  		case "$report" in
+>  		"xunit"|"xunit-quiet")
+>  			;;
+> +		"tmt")
+> +			_tmt_assert_env
+> +			;;
+>  		*)
+>  			_fatal "report format '$report' is not supported"
+>  			;;
+> -- 
+> 2.56.0
+> 
 > 
