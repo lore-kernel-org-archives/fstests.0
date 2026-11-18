@@ -1,116 +1,67 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=216.71.154.42
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794898762;
-	b=Y+Pkw/X024OLh7MaSqtclZd9rkPOiQbUM21B9ldaQIVknfQpLEwsUw7migZclPtOyKg3
-	 Q15DJIR7HENphN7dUPu2brOTle1w/Jzc/P2yl2IE8SgIhwTx8iBwlEt2arfVlVeC18Sil
-	 9Qo1+rRGob/wdZLmrUvoau0lpQs3wgfdI6psaNZIpQVasPQ1GgpbwULnD8sjUrkPnyyMw
-	 rz0PRtp21LAlRTRCjQsENLGwCmCFrpLDmwcQWbDBV0nx8EWE+Ke5MW8PqlE8l8oIuoRzk
-	 7ePslgm5Nu2Zha+lsKSXajE1G5fWo8pQOMVfs1Rkow4gXfEldRY2Spd6qOpzY7le96g==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794898762;
-	h=DMARC-Filter:DKIM-Signature:X-CSE-ConnectionGUID:X-CSE-MsgGUID:
-	 X-IronPort-AV:Received:DKIM-Signature:Received:Received:From:To:Cc:
-	 Subject:Date:Message-ID:X-Mailer:Content-Transfer-Encoding:
-	 Content-Type:X-ClientProxiedBy:MIME-Version:X-MS-PublicTrafficType:
-	 X-MS-TrafficTypeDiagnostic:X-MS-Office365-Filtering-Correlation-Id:
-	 WDCIPOUTBOUND:X-MS-Exchange-SenderADCheck:
-	 X-MS-Exchange-AntiSpam-Relay:X-Microsoft-Antispam:
-	 X-Microsoft-Antispam-Message-Info:X-Forefront-Antispam-Report:
-	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
-	 X-MS-Exchange-AntiSpam-MessageData-0:
-	 X-MS-Exchange-AntiSpam-MessageData-1:X-Exchange-RoutingPolicyChecked:
-	 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount:
-	 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:X-OriginatorOrg:
-	 X-MS-Exchange-CrossTenant-Network-Message-Id:
-	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
-	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
-	 X-MS-Exchange-CrossTenant-FromEntityHeader:
-	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
-	 X-MS-Exchange-CrossTenant-UserPrincipalName:
-	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=55ebT/AJQkKCt8bjtwNqIGuv9KfCqDqOOTtGU0q0ngg=;
-	b=SEDfN2vVjsOglHNUL7NOWioUSPajQeYJf0CmePfrd5ZRJr1DGa9xALQR6Z+v0+WQHhLs
-	 DRGqSlOa5XrcEa6WOX2oxBElc1hLoZU5bQeNLw5WIhoGPWx2ANVXFCflceW7j4hbcvI26
-	 0pkQxn7iO2RyiSfX/oo21BpbyR0y+5yGGHOXBBzqzsDF5gknC7mXO1j/etsXbGunY8eTs
-	 ccYQxMeX++NMbOruhFbrapCoJbF+BLFscCkb8bsdKBODLrZDRkJdBfbLfI6au8TwumODj
-	 lB2axuVeD0FyhDQ9eB54Hh7CtDVkJQapsRC5GaexIHTYU6MiejSQmdYxLJSzvZepXbg==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=wdc.com;
-	spf=fail smtp.mailfrom=wdc.com;
-	dkim=pass header.d=wdc.com header.i=@wdc.com header.a=rsa-sha256 header.s=dkim.wdc.com header.b=N7oDV2CX;
-	dkim=pass header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.a=rsa-sha256 header.s=selector2-sharedspace-onmicrosoft-com header.b=sCInpkYA;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=216.71.154.42
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=203.205.221.155
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1794961106;
+	b=GREBk5BruQTJ1G32PK/d0eH1IUvUfBsLGLrXkD+kqUqs3hw5E1meT6VDsXr/b87kfpn1
+	 AqsXnXn3iBn9S4PWoTI7Zfj/iUqUa69383+A2Crs94+ko45KAC8kK5U0qozr9jNCPMqGk
+	 /ikK9QIqhbvH7wcNmcBT0nNFrt1ZOHfptXGVYCuc3AKlo9HwdLDOVeOcx29ygpzhik+OS
+	 svtEcS0UNRsia43DT0UySWOVeyAADagdozkfgW272fvZkMUHX1xs9ukxKmicBURdtg1F8
+	 jrAitTPMQJGNnreDCLfr0UaZxgRCRiVVZn59KMAPqLmUqVO3dTcOoYxOvt/N8IjSqug==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794961106;
+	h=DMARC-Filter:DKIM-Signature:Received:X-QQ-mid:Message-ID:
+	 X-QQ-XMAILINFO:X-QQ-XMRINFO:Content-Type:Mime-Version:Subject:From:
+	 In-Reply-To:Date:Cc:Content-Transfer-Encoding:X-OQ-MSGID:References:
+	 To:X-Mailer;
+	bh=DOYBjijvCjTsO0gslgPIzNJROzjoMeaUNzsPFSv78Fs=;
+	b=xoK+NV6R0d4OPtLxpT3ewpAkG+AgTtjks2w0EiaUgtqd3e5g3ucV7Y4feiBqhUtea3lq
+	 NG/0wFZB8rsu0hLb3o0q8FGkNGJg29wDIreC5G+6FDm0mxK1slUQiGzGLq0nC+ScYahi4
+	 k3yJIrkRAnjb2rK91NVHcGAsMHLTgD5dVWHVRC58dobCLaIlzfhvn9paBjQsc7SKUqF2W
+	 Q2iq3gdYSok9D2sTzwfRU2mYiYCK0KUwlFqyKL6mJFLkzzn/WdqFHi5AamDfaGpZo0cc5
+	 O+UKzy8Av1rhMM5LM0OHXPInVZy4/OpqQQwu7ZqRsqMMzGxrA/GHnLN7mgr2gdxxJYw==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=qq.com;
+	spf=pass smtp.mailfrom=qq.com;
+	dkim=pass header.d=qq.com header.i=@qq.com header.a=rsa-sha256 header.s=s201512 header.b="zLsPr6/Q";
+	arc=none smtp.remote-ip=203.205.221.155
+Received: from out203-205-221-155.mail.qq.com (out203-205-221-155.mail.qq.com [203.205.221.155])
 	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B15ED606A31C;
-	Tue, 17 Nov 2026 06:59:21 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org B15ED606A31C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=wdc.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0FBD6606A31C
+	for <fstests@vger.kernel.org>; Wed, 18 Nov 2026 00:18:23 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 0FBD6606A31C
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=qq.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qq.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=wdc.com header.i=@wdc.com header.a=rsa-sha256 header.s=dkim.wdc.com header.b=N7oDV2CX;
-	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.a=rsa-sha256 header.s=selector2-sharedspace-onmicrosoft-com header.b=sCInpkYA
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1794898769; x=1826434769;
-  h=from:to:cc:subject:date:message-id:
-   content-transfer-encoding:mime-version;
-  bh=2b09vOfJ/NxtmutnwSqcLpd4iD6vL2o6ejvxejgKTqw=;
-  b=N7oDV2CXy3c73jpRSrV+nEVpI0rgX3Qw8OvkB9PAndI07hKvgSIsxfI7
-   mbTzx7yaZcSM0+ZK8IJfFO6Cxy8a3rEOG5lvKYMsKh/Uiq15uuuR8UsVD
-   +9V40eUFuhb+uIcukhMMvENSnd+x/QPb6q6ERslpF6p/L48ea//R8Vx7m
-   eM3xKrURQbQC8XNJs7bs4sRywoWI37G3HdqptgQ7B24GGPJjlhpHpffho
-   cr+D61KjFRw4K5zUIGGHa337lbma5qb0k9FRmmJ61+pyBJpQDXLAgrDfb
-   ejoiWlywp9KRwdHjjUNW0TzSZPm5HKaTWZA4dKvK2JRUaOqeFs6DQK7YH
-   w==;
-X-CSE-ConnectionGUID: DC6b9d0IQFumje8mceKW2w==
-X-CSE-MsgGUID: N8j56t9rSJKhNOGXyCnNzQ==
-X-IronPort-AV: E=Sophos;i="6.27,218,1786982400"; 
-   d="scan'208";a="156831353"
-Received: from mail-eastusazon11012012.outbound.protection.outlook.com (HELO BL0PR03CU003.outbound.protection.outlook.com) ([52.101.53.12])
-  by ob1.hgst.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 17 Nov 2026 14:59:22 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=EFwqd6oNsJGC++qJ7Pj2IeTo9aXnNCOQfZNenHedZOUX1hhTiWIaD6ze6qUjqDnjdpsbhpNlkOaT7Zrb12teFN2actBjNBuJqhDc0avcKolME/QPAtJUldqCLJZv3fpQ+7Ri9FBvTfZ99VpVCyNuFi+JsOOtFaQDenOd7ggWi08NvUsgZfHgerylTkpvyUPgdadApY8pJeo+ROWz5udfP6xT4manquv0ltxYPdWt+oMoEkgfYiw7ZPQF9pp+BGn8MUklmbnuFBjBXSGa3HTWpIqU8lWrkPXopLntC+k0mb+QTInECA8SmcaIr9ToRo7ZmFO/tcA2V8ZSjIKtjCKHlg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=55ebT/AJQkKCt8bjtwNqIGuv9KfCqDqOOTtGU0q0ngg=;
- b=YhDLAEm58AUk7i2Cso/LDUyfd+lASMtSS9NTqbR9QLl2WnuMo0sao4wE7qSXyW92QL39+khGdd12jPzbWDi5Q4rirWhOfn2JlgeqseFEe5XicmESnujujCkhtP182butYcKklY5rB0BxERPB/pL5a5FSEMusgLMQh8uKAV/1wweXpfPp7AdKsCAxeUVINStwSFh27pFeF06AoFqgEA2JPNflZbTEC/7Lr7BPehrkdNqkIq9AUtFZgv2WFCKdiAJrZdjkDkKFal3G5269q0BUQ0VjAA45tnAv6qWoLzfO9XNMHxDKvw4ZW+Gx5IFM3FPrH5u3MZN3mBEEDN17MpaBrg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=55ebT/AJQkKCt8bjtwNqIGuv9KfCqDqOOTtGU0q0ngg=;
- b=sCInpkYA0z6z0OPMNcZ4bp3BjnY3YjLCTZWg/3iyY3hil1RIppITXnkUG0m1MT7XVR4vIVgTo1mh1p1x0sTa4GvPYVpwzdPtDeXCKhi78xHbIJaNREAeU7+fL4pR2p1or2SNL5eo+MKL2Gi7YwydhVZDpOm4FmVanL3OmXQv5Z0=
-Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-Received: from SA6PR04MB9447.namprd04.prod.outlook.com (2603:10b6:806:436::21)
- by CY5PR04MB994377.namprd04.prod.outlook.com (2603:10b6:930:125::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.615.14; Tue, 17 Nov
- 2026 06:59:11 +0000
-Received: from SA6PR04MB9447.namprd04.prod.outlook.com
- ([fe80::14c6:1c14:485f:1825]) by SA6PR04MB9447.namprd04.prod.outlook.com
- ([fe80::14c6:1c14:485f:1825%6]) with mapi id 15.21.0615.013; Tue, 17 Nov 2026
- 06:59:11 +0000
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-To: Zorro Lang <zlang@kernel.org>
-Cc: linux-btrfs@vger.kernel.org,
-	Christoph Hellwig <hch@lst.de>,
-	fstests@vger.kernel.org,
-	Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Subject: [PATCH v2] generic: test that fsync on zoned doesn't fail with -EAGAIN
-Date: Tue, 17 Nov 2026 07:58:48 +0100
-Message-ID: <20261117065848.3825371-1-johannes.thumshirn@wdc.com>
-X-Mailer: git-send-email 2.56.1
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: FR4P281CA0293.DEUP281.PROD.OUTLOOK.COM
- (2603:10a6:d10:e7::6) To SA6PR04MB9447.namprd04.prod.outlook.com
- (2603:10b6:806:436::21)
+	dkim=pass (1024-bit key, unprotected) header.d=qq.com header.i=@qq.com header.a=rsa-sha256 header.s=s201512 header.b=zLsPr6/Q
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qq.com; s=s201512;
+	t=1794961096; bh=DOYBjijvCjTsO0gslgPIzNJROzjoMeaUNzsPFSv78Fs=;
+	h=Subject:From:In-Reply-To:Date:Cc:References:To;
+	b=zLsPr6/QjA3QEyY6XP0NsglsswGc8sge4MqnAN51E8CLBI984qW3vwKels9v+p3BV
+	 234N7ZYhafCcFatB4YbPnsbbnJg50xPNZ1ZFxyK4FSjDNQPSilGHOGaeXL329YKley
+	 PiK5uaqqpNxXfDCboz6vSO8DT3uxxbvO8iRV0f1k=
+Received: from smtpclient.apple ([183.241.32.188])
+	by newxmesmtplogicsvrsza73-0.qq.com (NewEsmtp) with SMTP
+	id 48D1EEF4; Wed, 18 Nov 2026 08:18:13 +0800
+X-QQ-mid: xmsmtpt1794961093t230zfgow
+Message-ID: <tencent_87B50DCDE1A5161C60F2E950DD5D836C5F0A@qq.com>
+X-QQ-XMAILINFO: NT7uTz3cNku2wPCMvN1Fxx+v/JHMaGWtzZqRR1HEjujhq3AxBfpbVAAjK/bvMu
+	 Xctko7B4vGjXoB2J0AyxRzLeaebivAbJRKSy7u7NEZrASmia9QwvDsgZDdMOzvFcpdUf3tiq+LkT
+	 28byvfAxOh8Z7mkttg9cQ2SVbpbD7UZjRRNpS4sibTLPC1BnknrfCfIFImPVbpFwWgQAioy5Eq3e
+	 fOQ4uDxA2lTkQwtw2bsjqaZ0WHHRcBRHZBnhQV4PaQ62O/7eDr8pwJZBFyTA0gNWz0o1ktV95dQv
+	 oufh3iriIUipPwKufo6zdkca713XEeg6FjaazZhmDsfn7E/Ifrpe0WQOAugA8s9ueX/xluqWaEBz
+	 UhZM9+pbH5DVxVQjjNwtCz+t8Ys8DRpUclBp32SZg0Y31E0QqzfR8Uxv5O4drspX9fwFOeezwlBt
+	 MN1YRzcrreSCBmUiShZ0xGRSh4BcdgZkhy0cl6J+UA14OlaVHlmXkmBj5LRphupI9LoHPC4YPLJo
+	 EWHpA3pQRBrnzVZ1NZi7Lgt+K4wkbfSbcumFFQpbEbvP8I5fPZe2yVUJ6wxtuW3q3c4znjxkVAFZ
+	 AOCFBeQMAXJ0gVWaQMmfIiLMVQyzapP3m6y5SB07aofXP3r+pg0RDmpKQCieP99Q0Ipn32k2i2/1
+	 QMa1e8uusEKp81OKXdpceCbtGQDsn6xQNm1qoDcvlSOtNBrs1z8fDVJyG+F+3rW8SV+9PvDQ/WFr
+	 Mqt6Rgn8GThph9KkaAfv6n/qQyYOT8KVuSfz7nq+ai7jYJT/bi1+0h3T8Wq9SIJv4oA+HKn9INA0
+	 52xtfpCvYDRqrPRaO0i4CpODCqq+GY4oUVDUHnstPYrcQuSLrVV9dKnsCG4IQ9qwhIg58Gq39YmR
+	 aX33Mo8C5HT6ZophEIq7PKD1cUgDT1mmyx1jmCyY7tEbCtVD5uAYqENuK72hl+65yuAWEhDXKt5N
+	 xLxIqB0QX/3mp0fb8bJ0rsPjmicPQRVf/UU0B4UNSMSC+/4We7uGZvBm3IELFIUANyOclkUKHgy3
+	 VX0YoCnrKNkaQ3rphqQxSpgMq6y20DeNk8Vk1o4M3C6B8aUc1y
+X-QQ-XMRINFO: M/715EihBoGS47X28/vv4NpnfpeBLnr4Qg==
+Content-Type: text/plain;
+	charset=utf-8
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -119,187 +70,278 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
-MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SA6PR04MB9447:EE_|CY5PR04MB994377:EE_
-X-MS-Office365-Filtering-Correlation-Id: 1e7d3a40-dc43-4075-eb4c-08df4478485e
-WDCIPOUTBOUND: EOP-TRUE
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|1800799024|10070799003|376014|19092799006|366016|23010399003|261022105027099003|261021121427099003|11063799006|10067099003|56012099006|261026121527099003|261026140227099003|261028144727099003|261022075727099003|261022113327099003|261102123227099003|261021123027099003|261009223027099003|18002099003|3023799007;
-X-Microsoft-Antispam-Message-Info:
-	lr/13GKltwLoBUQwf1ESiVGOlrftm722CUreNOUmzDK2hMfoaWEQTGfuUgESIpWJNqyDyIQTxAs5jrrwPe4NDr1wArdHPhtdGryTwFPnHDhZQJ9Ci5zoEcNMvdc2gVLDsqoMpkfsG4M4sMSMkdvMWBxlYaNt3MceVsycFtvj9Vx3zH3WCKEp3iGuqtFVxAiUDSm0fKAE09tJAemgh2312kVisM59WZSF298uQsV4ZQH6Hch+8yfOU9Lryacp8r5jkTmh4wKs3PIB/dzHA22SDSYSVOZhH4fGEIQKbdkdf4fGUlspvJaZFiZ2ncQerUUZOpVJCt16v7mVhOgIesw94VwZK8o8KElXeC9f/Lo/wJ/DeOK2pFggUXsDuoUOf1HjpLE9hvIDF6ROMoK1OeDEF9McL3SaU+Daqvm5DFRfzft27+x4zIgOU3PeVClG0LTEYOkF+v/Q5Q76Ujm3t5BbPr//P2z3LLsaF5ysRCKjMkVJY+CaN2e4k5JMpZe1bH3f3V+L6rEauWrugD2s+09GH0INCnNfjYxNYuyIltkeR2cv6LmYrZr1Wl3YJolQyfpcHAy2TJXGThXTrhfqifXLcAZG2JHcY4w99B9tzjlsVmYONuZlhwUkMS4SInNNNaDR0dl88HhSIc8k2Qa0oiE2wRPYHAtflYUp+KF2o5rVd1Y=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA6PR04MB9447.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(10070799003)(376014)(19092799006)(366016)(23010399003)(261022105027099003)(261021121427099003)(11063799006)(10067099003)(56012099006)(261026121527099003)(261026140227099003)(261028144727099003)(261022075727099003)(261022113327099003)(261102123227099003)(261021123027099003)(261009223027099003)(18002099003)(3023799007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 2
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?DWlAq4JLAccJUlpJ6mO5QULzpMNzi7oPHi/XqzdOWCH4tEVAMxVc4hGe+WpH?=
- =?us-ascii?Q?ZWe9N1fRq5HVmKJI9zTQHN5U18wQ6TQAYZHR+iJbiGaOursVAXrjxkcT3f0B?=
- =?us-ascii?Q?PR6gIYvX6O60aaG4Fz1Yps8leB93bmMrg264vPDdun2kekX71aXWNns7f9jD?=
- =?us-ascii?Q?KYOdeHB2UbyZ4CU0TGKn1KbDkXayZL/wd7G8pqDdLB1g/FFktX5dZq0+ktFS?=
- =?us-ascii?Q?HhZzF1TBlwDFIWyW6Mjyr509IIC2O19p0Q7oNN/YeihBxBcHWW+63TXprsjR?=
- =?us-ascii?Q?sZ0mwLD7gdUzwMH40bbH7yDEvaO55+tZARMMDrKjC07lM3a35QQziFvDo9PY?=
- =?us-ascii?Q?4ocv8oc6OlNNMO3KLWjThKlHdOPAdIKipqfDFCVLs8650SO6NTxt9+WBlXQ/?=
- =?us-ascii?Q?Ex2wL4BeuHxkBCCyL+av/MBi8HajfvfNI/1bRubud3Dbt2z1+MayuH0+cr3L?=
- =?us-ascii?Q?K3gA6yxhAGwhh2riOGrkDM7tIQHEh0OP3B7TrqgzUa/qyCvIYuNb4EGrIFrj?=
- =?us-ascii?Q?xE13D4cQbBTMpHTOn5lSSm4w775Y/hFPgYcgD5ac031LTwj8Tx2r+Pnn9u1m?=
- =?us-ascii?Q?rcUOPyV3ToL/lmQ0v74GckfI7yQkeex43AaTXSFOYkI35j8M0WxDbKddpZ2a?=
- =?us-ascii?Q?W5trNn12mYs7poptmt43E4tcc+UTAe2CELVQYcmtOFPXm7nZY2xL0mMwQoHM?=
- =?us-ascii?Q?buUe6oMWBapDytgogHN5fbJnfNkDiav9V6q186DOhjxDNNycxZrfft8jfF7y?=
- =?us-ascii?Q?W6FOKZga8URv7xu2j4G382jMchnvOfzoDJPhXhdHK0DAt0QRI6Ptnd3KaGSf?=
- =?us-ascii?Q?7YlirQViERq/c0Yx1PnogG4uDo4rdIK31PqgE1hHeqq69e1w6Dy6EAURL/Qy?=
- =?us-ascii?Q?ef3z+V7Pz9HNP0bImYru0kl060ktHqURGScA/qfSsUKlc4eDI5QuQEgWP5wd?=
- =?us-ascii?Q?+9L747X2sfN8UOv+LjfVqOqhDrm3wRpU9okbihr7Gy0SoQYxH2JhhOaqaGRB?=
- =?us-ascii?Q?jLkr6utoZf6ILe9LIgaXWXsnr8T34P4w4Lg3J4h7aGsTM37T/cxcW90ywRRh?=
- =?us-ascii?Q?Bt221HyrsTGjrKWX4wIB+mboRJfTkMEmiM8RawKjhf/jFX/Tko+pjUDo7tsn?=
- =?us-ascii?Q?tf/U6ruIUHirPUJQsCwJXA+PeEnSbI7WRe0jkKswqyzFtV+Cr06DGRfMLBr7?=
- =?us-ascii?Q?yslBDa8VP9JQhq0kMrjjzYxO8rxpcLOAeEF+2E/czcb0H4ptOQU3yedn6O47?=
- =?us-ascii?Q?+4TMDNQ8gz2rpXLU0FOC4pn/KOUHjZVgiaT2qgj/0lRJrYaPqy4ZTHwl8Q0R?=
- =?us-ascii?Q?YIS9UFXgGjpJAUSBDo+UJI/mMmN4x5d7PL2ztwT9NaYeBrPz5aO3pjVA0Tqi?=
- =?us-ascii?Q?drtPphd2pQ0vsAVdop9/EpC5VOXAyWpZCcypMgS0GEHn5JGEgn8bbB8+UlkC?=
- =?us-ascii?Q?+0iQsvVvyTlxZ95+wyBOVbsYrmxsrC8H8i/juwF6LHTgiYrZbRA/6n5GGeyx?=
- =?us-ascii?Q?TBK5ZQ4PkHKtn1c4vb/GfomZ021ZRWOctYeUTq8QGidx2DlbblJMlRZS7LaO?=
- =?us-ascii?Q?JOYTQiqA60gdmc1ZvMBidWMYnWXKEeJZ/MXvb/AT8GFCJezow0WXsG9a30Vn?=
- =?us-ascii?Q?QshakxGtzMhHeJAsxJiMhzraZW1PQBCoQN2APq3R8y08SPp9FVBIzhDzA9fK?=
- =?us-ascii?Q?ZD8IqT31KRdGuNKTaRBwUw3MJAtTiF7+h52JIknrk3HeVOQLJRR/0mifnNGQ?=
- =?us-ascii?Q?0hdadZn+/hO+4xQUgFqz+tteLYQdE+qWsfc7AZUkb0v2B/DNADq8vvFh6NGN?=
-X-MS-Exchange-AntiSpam-MessageData-1: XLF1vgTOBPKJsjg3p6C5bpfhXyoHdaISnKA=
-X-Exchange-RoutingPolicyChecked:
-	xgBWAFQOVO329sqUJeRYGOCmvUtBJgxYEKge6h59US9jQoUTJNOldo/hcy0P/WVhNYEOaoulLY+Rn6gPSXQR+gn4Bf5pll7mTzYJwCBOyC6Yg1vrjE5ZcRzFJYQgMFAq/sFpqhhjzJ3nfhS/RQ50BZbUuEB8aBEq0sNnMIsZP6fDYGqPdV4EYeV8PeLamgRsYZBnKQo+6gKOCWrXL2gvNh57r3MHgpIbzSXmAIuEKc0CTL3Spg6+VImCswg3mrZUfjWpgxTxc4Wn7khQPgkSFSt7OjyprmreRRZR150yxYa63HMaygbDgf4C4zxzsjVpT/Zar0h0G9IRKUbueYyOcw==
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	0sSSuMLQnFJhiourwJds61v6pKw+b16ZRGQBMR++BeXfqM8+6QaMTI7wb1CZqXTwt1C2lv0hXAKJkQTX55I5/p03+RLuJcBMOqxkR47XiB0S3TOXicSDWIwI6oaLn/oUIF9fygbz39bOv5tbnwN9TaLIMXsuXs7xpHHPnADttAfCflm1Md72Hn/8qxoA+y4obJwvIyojb7KIrfdSV7uVx8+s3hOMWMvl3n91aqG7j+KuqqyAW9LyDWY/+xAByhXcXLVDRut0api3vE+1ft9jwzbWxPOlPAeYaDiJ0H6yQkOzVD1tXSAbU4AhULcCnrKo44SeW6VkWYh08wTci0mOnFyPwO7Ete4BPtcDs6mLxSxxYM6Na6nS505pXA7mL960F4EOhKqtMFHx2YL4eaPHYH0/3XpArw+I7zncFRYWuFY56xAXK5hVBFMCxRlP5w4ljM9GLX5rss372rjkX5f1zxrC5eZNwCSLO9k/s/D6wEDQfzfwDuf0TJospTB9B94ucBbxrDhDHyIMx5oQSZBGAoEbOWA76/FQdgL0JXYwdcOPqKnjoJaOQpt0z3pVsdqJEnjgHfrc5TMTwXXNqeO6J3PIZGzSoEejMbbzwj8Y+zRyoefrI45mCxMisu1P30Ul
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 1e7d3a40-dc43-4075-eb4c-08df4478485e
-X-MS-Exchange-CrossTenant-AuthSource: SA6PR04MB9447.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 17 Nov 2026 06:59:11.1837
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: QlVOHS1poVx5ikYKJSyKRpxXU96ZaWRYPB2VGzcOQrQraX3xbmUHAsqNPIRkuqg/CuxTtZEhsKyVTYIzV71KpWLykGnyaZi6TRbe4oabPHw=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY5PR04MB994377
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3731.700.6.1.21\))
+Subject: Re: [PATCH] add tmt as a new output format
+From: Zhou Xiong <jencce2002@qq.com>
+In-Reply-To: <20261105160526.44266-1-cem@kernel.org>
+Date: Wed, 18 Nov 2026 08:18:03 +0800
+Cc: zlang@kernel.org,
+ fstests@vger.kernel.org,
+ hch@lst.de,
+ sandeen@sandeen.net,
+ Carlos Maiolino <cmaiolino@redhat.com>
+Content-Transfer-Encoding: quoted-printable
+X-OQ-MSGID: <411E8EE1-9DC4-4383-959A-5EB87D66AEC2@qq.com>
+References: <20261105160526.44266-1-cem@kernel.org>
+To: cem@kernel.org
+X-Mailer: Apple Mail (2.3731.700.6.1.21)
 
-On a zoned btrfs, btrfs_start_transaction() forces a transaction commit
-when the delayed refs reservation exceeds its zoned cap. If the cap is
-still exceeded after the commit, it returned -EAGAIN, which fsync passed
-on to user space.
+Hi
 
-Run parallel writers creating, overwriting and deleting small files with
-an fsync after every write on a zoned device with a limited number of
-active zones, and check that no fsync fails.
+> On Nov 6, 2026, at 00:05, cem@kernel.org wrote:
+>=20
+> From: Carlos Maiolino <cmaiolino@redhat.com>
+>=20
+> I've been trying to expand my testing matrix leveraging the =
+testing-farm
+> cloud (https://testing-farm.io/), which is a public testing cloud =
+available
+> for opensource testing.
+>=20
+> Testing-farm uses tmt (https://github.com/teemtee) to orchestrate the
+> tests within the provisioned VMs.
+> tmt however expects each individual test to be, well, an individual
+> test so by default it would put a whole xfstests run as a single test
+> case with a looooong report.
+> However we can use a tmt-report-result tool to report each test ran
+> individually as a sub-test, so the report looks a bit more granular,
+> easy to read and prevent my eyes from bleeding while looking at its
+> testing reports.
+This is useful when it is possible to run xfstests directly in TF=20
+without a wrapper. If a wrapper is needed anyway, this part
+of work can be done easily in the wrapper. Tmt results can
+be customized somehow.
+https://tmt.readthedocs.io/en/stable/spec/results.html
+>=20
+>=20
+> I know tmt can also be used to orchestrate tests on a local machine.
+> Although I have no use for that, it might be useful for someone else,
+> reason why at the end of the run it will also print out the tmt report
+> file location. This also makes the output consistent to what xunit
+> format does.
+>=20
+> Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+> ---
+>=20
+> Here is an example report of a '-g quick' run with this patch against =
+a
+> regular distro kernel (Fedora 44). I'm not adding it to the patch
+> description because honestly I have no clue how long those reports are
+> kept so it may very well get stale in a few months.
+> =
+https://artifacts.dev.testing-farm.io/ccd9d09a-f8fc-4460-bdbb-005e1a18bad8=
+/
+>=20
+> check         |   2 +-
+> common/report | 129 +++++++++++++++++++++++++++++++++++++++++++++++++-
+> 2 files changed, 129 insertions(+), 2 deletions(-)
+>=20
+> diff --git a/check b/check
+> index bca302151955..47a76ba04c59 100755
+> --- a/check
+> +++ b/check
+> @@ -74,7 +74,7 @@ General options:
+>     -S section              exclude the specified section from the =
+config file
+>     -T                      output timestamps
+>     -R fmt[,fmt]            generate report in formats specified. =
+Supported
+> -                              formats: xunit, xunit-quiet
+> +                              formats: xunit, xunit-quiet, tmt
+>     --exact-order           run tests in the exact order specified
+>     --extra-space <size>    require minimum free space on scratch =
+device
+>     --fs <type>             test the given FSTYP; valid types include:
+> diff --git a/common/report b/common/report
+> index 2fa15e62f1e7..7d5e973a6e02 100644
+> --- a/common/report
+> +++ b/common/report
+> @@ -14,6 +14,8 @@ REPORT_ENV_LIST_OPT=3D("TAPE_DEV" "RMT_TAPE_DEV" =
+"FSSTRESS_AVOID" "FSX_AVOID"
+>     "KCONFIG_PATH" "PERF_CONFIGNAME" "MIN_FSSIZE"
+>     "IDMAPPED_MOUNTS")
+>=20
+> +TMT_REPORT_RESULT_PROG=3D"${TMT_REPORT_RESULT_PROG:-tmt-report-result}"=
 
-Assisted-by: LLM
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
----
-Changes to v1:
-- Move to a generic test
+> +
+> encode_xml()
+> {
+> cat -v | \
+> @@ -244,7 +246,122 @@ _xunit_make_testcase_report()
+> }
+>=20
+>=20
+> -#
+> +
+> +_tmt_assert_env()
+> +{
+> + if [ -z "$TMT_TEST_PIDFILE" ]; then
+> + _fatal "report format 'tmt' can only be used when xfstests is run as =
+a tmt test"
+> + fi
+> + if ! command -v "$TMT_REPORT_RESULT_PROG" >/dev/null 2>&1; then
+> + _fatal "report format 'tmt' requires $TMT_REPORT_RESULT_PROG to be =
+installed"
+> + fi
+> +}
+> +
+> +# tmt subresult names have to be unique within a tmt test, so prefix =
+each test
+> +# name with its specific section.
+> +_tmt_testcase_name()
+> +{
+> + local sect_name=3D"$1"
+> + local test_name=3D"$2"
+> +
+> + if [ $sect_name =3D=3D '-no-sections-' ]; then
+> + echo "/$test_name"
+> + else
+> + echo "/$sect_name/$test_name"
+> + fi
+> +}
+> +
+> +__tmt_log_append()
+> +{
+> + local log=3D"$1"
+> + local title=3D"$2"
+> + local file=3D"$3"
+> +
+> + test -s "$file" || return 0
+> + echo "--- $title ---" >> "$log"
+> + cat "$file" | tr -dc '[:print:][:space:]' >> "$log"
+> + echo >> "$log"
+> +}
+> +
+> +# tmt-report-result can attach a single log to a subresult and =
+display that
+> +# on its web interface. Gather whatever logs a specific test left =
+behind
+> +# so we can see it on the web interface instead of digging into the =
+resulting
+> +# artifacts. Do that only for failed / notrun tests as we don't need =
+it if a test
+> +# passed properly.
+> +_tmt_make_testcase_log()
+> +{
+> + local test_name=3D"$1"
+> + local test_status=3D"$2"
+> + local log=3D"${REPORT_DIR}/${test_name}.tmt.log"
+> +
+> + # $REPORT_DIR/<group> is created by check before the test is run
+> + rm -f "$log"
+> +
+> + case $test_status in
+> + "notrun")
+> + __tmt_log_append "$log" "not run" =
+"${REPORT_DIR}/${test_name}.notrun"
+> + ;;
+> + "fail")
+> + local out_src=3D"${SRC_DIR}/${test_name}.out"
+> + local outbad_file=3D"${REPORT_DIR}/${test_name}.out.bad"
+> +
+> + if [ -n "$_err_msg" ]; then
+> + echo "$_err_msg" >> "$log"
+> + fi
+> + if [ -s "$outbad_file" ]; then
+> + echo "--- output mismatch ---" >> "$log"
+> + $diff "$out_src" "$outbad_file" >> "$log"
+> + fi
+> + __tmt_log_append "$log" "hints" "${REPORT_DIR}/${test_name}.hints"
+> + __tmt_log_append "$log" "dmesg" "${REPORT_DIR}/${test_name}.dmesg"
+> + __tmt_log_append "$log" "mount failures" =
+"${REPORT_DIR}/${test_name}.mountfail"
+> + __tmt_log_append "$log" "full output" =
+"${REPORT_DIR}/${test_name}.full"
+> + ;;
+> + esac
+> +
+> + test -s "$log" && echo "$log"
+> + return 0
+> +}
+> +
+> +_tmt_make_testcase_report()
+> +{
+> + local sect_name=3D"$1"
+> + local test_name=3D"$2"
+> + local test_status=3D"$3"
+> + local outcome
+> + local log
+> +
+> + case $test_status in
+> + "pass")
+> + outcome=3D"pass"
+> + ;;
+> + "fail")
+> + outcome=3D"fail"
+> + ;;
+> + "notrun"|"list")
+> + outcome=3D"skip"
+> + ;;
+> + *)
+> + outcome=3D"error"
+> + ;;
+> + esac
+> +
+> + log=3D`_tmt_make_testcase_log "$test_name" "$test_status"`
+> +
+> + # tmt-report-result is chatty on stdout, which would interleave with
+> + # the test results printed by check.
+> + "$TMT_REPORT_RESULT_PROG" \
+> + "`_tmt_testcase_name "$sect_name" "$test_name"`" \
+> + "$outcome" ${log:+-o "$log"} >/dev/null ||
+> + echo "check: failed to report $test_name to tmt=E2=80=9D
+                                                   `_tmt_testcase_name =
+"$sect_name" "$test_name=E2=80=9D`
 
- tests/generic/814     | 83 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/814.out |  2 ++
- 2 files changed, 85 insertions(+)
- create mode 100755 tests/generic/814
- create mode 100644 tests/generic/814.out
+Others looks great.
 
-diff --git a/tests/generic/814 b/tests/generic/814
-new file mode 100755
-index 00000000..316925c1
---- /dev/null
-+++ b/tests/generic/814
-@@ -0,0 +1,83 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 Western Digital Corporation.  All Rights Reserved.
-+#
-+# FS QA Test 814
-+#
-+. ./common/preamble
-+_begin_fstest auto quick zone
-+
-+_cleanup()
-+{
-+	cd /
-+	[ -n "$pids" ] && kill $pids &> /dev/null
-+	wait
-+	rm -r -f $tmp.*
-+}
-+
-+. ./common/zoned
-+
-+_fixed_by_fs_commit btrfs XXXXXXXXXXXX \
-+	"btrfs: zoned: don't fail start_transaction() after a forced commit"
-+
-+_require_scratch_size $((4 * 1024 * 1024)) # kB
-+
-+if [ -b "$SCRATCH_RTDEV" ]; then
-+	zoned_dev=$SCRATCH_RTDEV
-+else
-+	zoned_dev=$SCRATCH_DEV
-+fi
-+
-+_require_zoned_device "$zoned_dev"
-+_require_limited_active_zones "$zoned_dev"
-+
-+nr_writers=$((8 * LOAD_FACTOR))
-+nr_files=250
-+nr_rounds=$((4 * TIME_FACTOR))
-+
-+_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-+_scratch_mount
-+
-+# Every other file is deleted per round to churn data and metadata.
-+writer()
-+{
-+	local dir=$SCRATCH_MNT/w$1
-+	local r i sz
-+
-+	mkdir -p $dir
-+	for r in $(seq $nr_rounds); do
-+		for i in $(seq $nr_files); do
-+			# 4K - 256K
-+			sz=$(( ((i + r + $1) % 64 + 1) * 4096 ))
-+			$XFS_IO_PROG -f -c "pwrite -q -S $i -b 64k 0 $sz" \
-+				-c fsync $dir/$i || return 1
-+		done
-+		for i in $(seq 1 2 $nr_files); do
-+			rm -f $dir/$i
-+		done
-+	done
-+}
-+
-+pids=""
-+for w in $(seq $nr_writers); do
-+	writer $w > $tmp.writer.$w 2>&1 &
-+	pids="$pids $!"
-+done
-+
-+ret=0
-+for p in $pids; do
-+	wait $p || ret=1
-+done
-+unset pids
-+cat $tmp.writer.* >> $seqres.full
-+[ $ret -eq 0 ] || echo "writer failed, see $seqres.full"
-+
-+find $SCRATCH_MNT -type f | sort | xargs md5sum > $tmp.md5.before
-+_scratch_cycle_mount
-+find $SCRATCH_MNT -type f | sort | xargs md5sum > $tmp.md5.after
-+diff -q $tmp.md5.before $tmp.md5.after > /dev/null || echo "data mismatch"
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+_exit 0
-diff --git a/tests/generic/814.out b/tests/generic/814.out
-new file mode 100644
-index 00000000..95532d3d
---- /dev/null
-+++ b/tests/generic/814.out
-@@ -0,0 +1,2 @@
-+QA output created by 814
-+Silence is golden
--- 
-2.56.1
+Thanks,
+Murphy
+> +}
+> +
+> +# Only useful if using tmt locally, but keeps consistent with xunit =
+implementation
+> +_tmt_make_section_report()
+> +{
+> + echo "tmt report: $TMT_TEST_DATA/tmt-report-results.yaml"
+> +}
+> +
+> #  Common report generator entry points
+> _make_section_report()
+> {
+> @@ -260,6 +377,9 @@ _make_section_report()
+>   "$bad_count" "$notrun_count" \
+>   "$sect_time"
+> ;;
+> + "tmt")
+> + _tmt_make_section_report
+> + ;;
+> *)
+> _dump_err "format '$report' is not supported"
+> ;;
+> @@ -279,6 +399,10 @@ _make_testcase_report()
+> _xunit_make_testcase_report "$sect_name" "$test_seq" \
+>    "$test_status" "$test_time" "$report"
+> ;;
+> + "tmt")
+> + _tmt_make_testcase_report "$sect_name" "$test_seq" \
+> +  "$test_status"
+> + ;;
+> *)
+> _dump_err "report format '$report' is not supported"
+> ;;
+> @@ -291,6 +415,9 @@ _assert_report_list() {
+> case "$report" in
+> "xunit"|"xunit-quiet")
+> ;;
+> + "tmt")
+> + _tmt_assert_env
+> + ;;
+> *)
+> _fatal "report format '$report' is not supported"
+> ;;
+> --=20
+> 2.56.0
+>=20
+>=20
 
