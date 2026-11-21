@@ -1,88 +1,61 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.43
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795278017;
-	b=dGCLy2E2Rr0KTdnrR33Br8oelDNVpg6wKKwlXwxRiADQp4+qgup4n+TrfyiiTgFkdCWv
-	 tcK/FzDfktTe2pX12ERrbtP9hGKqj2f9rJr+vuKRxUQF49GELj6+ecmeQJDTz4OiVsRVZ
-	 z6PBseVMvJcJt4tEv5uGbJdaT1smLL5XI2DVfbKWyl+DZL4/OB9rPgnsYUKyUhZ6RKgWP
-	 bvgJKWZ259GRsJoi1IwR5SDafTE6xIQGUChX9j2i8yGd+LpesXK2Yq34Mzx6+xKbDjFnq
-	 m3DQ1a31nKyYO0bRlZGQSKGNzf0OBgE39NaFFVJNZuUNRjXcKIaDabpR1oUWMCC4xFw==
+	t=1795280705;
+	b=DVcrmgOSgueEa4s6GsXl08gBDI3PHye+Ib3uV0LPjx2rDAxkBr78aAzlIiZfh/VqpPEN
+	 4dE3Ww8JJBHFhlMjHZQK2AX9QVFS8CxNFlCsjxDNxiWmaEHYc/akXsRr0XxdPgiXZpxK9
+	 VJgkJq9uoSxKvK0bXgRYF4t5NW3WvAC4UCMHzrT5HSaOZJdDrow3DdlILAUkRFsPTVFyQ
+	 VBA50/Hbw5MQjCzWeGThRI/JemtaIdn2O+AQioRWldM5CZHH37VzI6OJNLbOvLl3nzJ7Y
+	 fBeItPFwDdg3rj/rx1y9ZcmygFyqAcw4UsysiRLCZlxsaxd6rg2fg/TDZfGhRISHrXQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795278017;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
-	 Date:Message-ID:X-Mailer:MIME-Version:Content-Transfer-Encoding;
-	bh=VW9VRCvOuiUXItd/QvLY7J0ZG4GH9DREJ7eQb7fYodg=;
-	b=QK+cUs8rXj4coOHYAeKTH998deZVvk8h/+ZwC/JQp6fV56Sk5qsbktXxP8tJj6CDFhAA
-	 5JGz68v0nfR5CEtr7elYKiF77/RpgwzP+JFtV4e2Y2ZOwJ7LGUPXYw6IUgb1AddmWCZQi
-	 YGVRRGgjI24cRfJmBKdHIYw5IJBzYhf2VaEL9QYcAogOMkbm25PZtzfJdh55OEIAvmilE
-	 Rkf46CKeH9yDbE2PpB4SKzWu26NkXfo6c8d3Gextq1w0jkSzNwqNSVdrCPQ2pJzWAFkec
-	 5T6iqnuOhAXWhnjEU1Bk6+0RqqW5zw6sZUir0oT2mhUdgO0bi/fel3sRyrT5KT1GbLA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795280705;
+	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
+	 Mail-Followup-To:References:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To;
+	bh=UNb0wSOh+ggizWXdLZ8B0dcP+pg0Eb6nL8do3bvWSZ4=;
+	b=a4Qq3446B6wAWYXxYqrm8dzHjNSQ7pvPRy5WEXn9zEeCtZkT4kvk+CI63VEigWHbMuNW
+	 nMPDtZvkPdfSBCqiIjLkCF947dAcN+IL1Hvn09/yn6iR7AyM+X5zhY21R5fj77XApDD7m
+	 TRCR7n4iwwcrtCzkhZfCue9qSli3XAme5MZuIghrEaOFe9f3iJV/sXMC3MNWzlXkrGfVE
+	 jpHjVA9wfcWyWM1Z5BReHoNNykOxKbNoL5MumfY/wzyW2/ZP+udO+QE8MG5sCY6yRG1u0
+	 qS8W8yc91+uYdOEn5NTQ6d0EQr0FGssz26Y41qthBc+jUaHDB9d6PCLgbp92Awm/p3w==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Bd9HNujU;
-	arc=none smtp.remote-ip=209.85.128.43
-Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QrkluMnX;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 327A7606A320
-	for <fstests@vger.kernel.org>; Sat, 21 Nov 2026 16:20:17 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 327A7606A320
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A78C6606A320;
+	Sat, 21 Nov 2026 17:05:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Bd9HNujU
-Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-4bb6886d30aso18339015e9.3
-        for <fstests@vger.kernel.org>; Sat, 21 Nov 2026 08:20:16 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1795278015; x=1795882815; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=VW9VRCvOuiUXItd/QvLY7J0ZG4GH9DREJ7eQb7fYodg=;
-        b=Bd9HNujUrMCthXMlYRglu6iPubWQ/1h6bW1lHsJbzlilmUpcS5+xMfTHUbEUOhOlz7
-         f5Yj1ZgG+CCnG4xTIh69ZH+tUWOKfRf9BjUNDXxMLT5V6H/YmLbSBl15/AGt1A3+QNLi
-         AdMgf8MoqxtZ4vN6nE/8gz9gpSCCbQOOwJIYrTqjdBsxynCqkgM+b4JrxMRAxS2hUX3h
-         Wc0tc2N7CW9JN5REZT0OSy3d+rdYPRONnAXJ66GXErvOXP89SgsK871R2hxfiLZi1X7t
-         fG/cKRXnRXA01Ar4qSHK1+viyU2U/HOzVjpJ7rxLQpCQ7joWJWXL7Xv9g8XFiCsbvdGt
-         DbBA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795278015; x=1795882815;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=VW9VRCvOuiUXItd/QvLY7J0ZG4GH9DREJ7eQb7fYodg=;
-        b=d7ynn1eHxsE6qA+usy5LZ7s+ytjMkAasAnCRGYY64pxSSsTMBYpJOSaOXDD87dK/x+
-         HoOoK5HFRiYcmgtknp15Hk/l/OxXJ33GxO1bejYInGKq1USkLi5Q719OZEeOzGP8qXVo
-         7T8P3+oR/+U8LfvB64NiKl/efJ9meu+Qx3Eq3s5AI6jYna0r24NGUJFRreYLyWimKlnf
-         dDW2rK5VONu73de6zR6hsFZnMZ0B90vZa9WOaD+xWeivcr2VAYygNg5dWkjrkkaY1Tl5
-         lyjac+lz+BArsfY/q0KreU3Xd7Wz7YxVqQbcUscAuI+UsJbPsl9SvRP03qZTayxnM1Ch
-         b7AQ==
-X-Gm-Message-State: APuU4Z8NL2QLAHB2uLX0IBhQm47zMDwL1DWKHVfmizErCwM2npA3dijd
-	n9z+Tk7lfeHO9nlmmV2TWafiLWI3NyNrqdcPorCHMDXnfNNGQlq6n2KA
-X-Gm-Gg: AZFdTZcDMPEskmEV45NA2yd2Fv0gB7g+f2JLVmmFiss5RDIEvQ2pCNQfnH+RlBMD1Ck
-	itbrRt4qn4SQjEHZi2iqI5GlTM7RMhAJCQTO8AQRo4tG1ZU0dB/u0gbwtYJuRCcxetli7/ih0CS
-	tqCUkXwF8hn+BlfE2hJZ1TFH/s+TzzRiLP+tdQwL6Q36oPFpwv5C6Fvdl+skNdO99VIIeNWT+zc
-	JftOZFhJwY31SW09kiacqnvHytzn+ogISNd47ASJoXtELzY4LZ0cYS83WTWzh/dsdsZiv7TL18/
-	3cz85eRECcasOQtzJVLHgEc1Y6cqX9Dhkbqa4cv+7itVy34A9gRU+wviPz7N0aG9L67jizxAVBp
-	sVNt0riXGkduF7a+hZ0YbLBG+mY2A10bwSfQznz2saPMAoPa3FIxPqA3ZPPGzdr9xwRVv15MbBH
-	lTGPO4tD6L0BKHwIlLAOghWJ3zK+FQpw0V0pe9mbLo2yr5SkIno7rKUsoPkCkRNnV3sm+Yp5Zwn
-	VmCiCkuDGdMUKfnglaa7pbVtNKpOjGQp93plBVXrkrXnsJ6FUU1zq8vXlKSQnejvkhYw+ItZuMz
-	S5+oUGiJGyi0RIOMWc+EnTcuwA==
-X-Received: by 2002:a05:600c:6749:b0:4bb:5f95:c014 with SMTP id 5b1f17b1804b1-4bb8880f283mr153429965e9.19.1795278015242;
-        Sat, 21 Nov 2026 08:20:15 -0800 (PST)
-Received: from infinity ([2001:b07:5d26:7a6a:365a:60ff:fe0d:cfc6])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4bb8d4f9aa8sm138956685e9.4.2026.11.21.08.20.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 21 Nov 2026 08:20:14 -0800 (PST)
-From: koraynilay <koray.fra@gmail.com>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org,
-	koraynilay <koray.fra@gmail.com>
-Subject: [PATCH v2] generic: add test for garbled stat output from negative nanoseconds
-Date: Sat, 21 Nov 2026 17:20:03 +0100
-Message-ID: <20261121162003.234307-1-koray.fra@gmail.com>
-X-Mailer: git-send-email 2.56.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QrkluMnX
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 52EA81F000C0;
+	Sat, 21 Nov 2026 17:04:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795280705;
+	bh=UNb0wSOh+ggizWXdLZ8B0dcP+pg0Eb6nL8do3bvWSZ4=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=QrkluMnXo6/JIkDevuGtgZBjhz23uAKGN6eyuBu6mFD36gyV/nOyt5Ve9OPZHZM4r
+	 M8L9LySmgrMCPIvXMj1sFG6o0lLC6LvOYPGSmUIfVHdoP88lDV20upPO4RHrTRXu6R
+	 090gTV7TW6aBu4EVcf2+VB9IgDa8vAwP4ZXtWPvruawUwMr8HJzE/EAcagUuF4ehDa
+	 ZUBrayEzna9+mXmNdik23nqthY/z1oyfPLrQdliZWFkraxBobiCQA80WPd1Q2Vi6pN
+	 mFEWT06uU/rkufWwGXTsmQPFEfguYlcetLZJLpveWLQC/Yqnhj5U5+d9vJxhJqp31C
+	 iDUx/BZX5EIEQ==
+Date: Sun, 22 Nov 2026 01:04:48 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Baokun Li <libaokun@linux.alibaba.com>
+Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org, 
+	ebiggers@kernel.org, jaegeuk@kernel.org, tytso@mit.edu, linux-ext4@vger.kernel.org, 
+	adilger.kernel@dilger.ca, jack@suse.cz, yi.zhang@huawei.com, ojaswin@linux.ibm.com, 
+	ritesh.list@gmail.com, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] common/encrypt: support block sizes larger than the page
+ size
+Message-ID: <awHJso_ELIgRjbdg@zlang-mailbox>
+Mail-Followup-To: Baokun Li <libaokun@linux.alibaba.com>, 
+	fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org, ebiggers@kernel.org, 
+	jaegeuk@kernel.org, tytso@mit.edu, linux-ext4@vger.kernel.org, 
+	adilger.kernel@dilger.ca, jack@suse.cz, yi.zhang@huawei.com, ojaswin@linux.ibm.com, 
+	ritesh.list@gmail.com, linux-kernel@vger.kernel.org
+References: <20261103160906.188544-1-libaokun@linux.alibaba.com>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -92,110 +65,239 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20261103160906.188544-1-libaokun@linux.alibaba.com>
 
-Some filesystems don't use set_normalized_timespec64() to handle their
-timestamps format conversion, leading to a garbled stat command output
-for timestamps.
+On Wed, Nov 04, 2026 at 12:09:06AM +0800, Baokun Li wrote:
+> v1 encryption policies use the filesystem block size as their data unit
+> size, so they cannot be used on a filesystem whose block size exceeds
+> the page size.  Make _require_scratch_encryption() skip such tests
+> when a v1 policy is requested.  Tests that request a v2 policy but
+> also exercise v1 policies, i.e. generic/580, 581, 593, and 613,
+> call _require_v1_encryption_support() explicitly.
+> 
+> A v2 policy with log2_data_unit_size 0 uses min(bs, PS) as its data
+> unit size, not the block size. Add _get_encryption_du_size() and
+> use it to calculate the expected ciphertext.
+> 
+> Also skip the v1 policy probe in _require_scratch_encryption() when a
+> v2 policy is requested.  Update the ext4/309 and ext4/310 comments for
+> the new default data unit size.
+> 
+> Signed-off-by: Baokun Li <libaokun@linux.alibaba.com>
+> ---
+>  common/encrypt    | 68 +++++++++++++++++++++++++++++++++++++++--------
+>  tests/ext4/309    |  6 ++---
+>  tests/ext4/310    |  2 +-
+>  tests/generic/580 |  1 +
+>  tests/generic/581 |  1 +
+>  tests/generic/593 |  1 +
+>  tests/generic/613 |  1 +
+>  7 files changed, 65 insertions(+), 15 deletions(-)
+> 
+> diff --git a/common/encrypt b/common/encrypt
+> index c9e0853d8d8c..feaef0682a44 100644
+> --- a/common/encrypt
+> +++ b/common/encrypt
+> @@ -18,15 +18,21 @@
+>  _require_scratch_encryption()
+>  {
+>  	local arg
+> +	local policy_version=1
+> +	local prev=
+>  
+>  	_require_scratch
+>  	_require_xfs_io_command "set_encpolicy"
+>  
+>  	for arg; do
+> +		if [ "$prev" = "-v" ]; then
+> +			policy_version=$arg
+> +		fi
+>  		if [ "$arg" = "-s" ]; then
+>  			# -s option was added later.  Make sure it's available.
+>  			_require_xfs_io_command "set_encpolicy" "-s"
+>  		fi
+> +		prev=$arg
+>  	done
+>  
+>  	# The 'test_dummy_encryption' mount option interferes with trying to use
+> @@ -56,13 +62,24 @@ _require_scratch_encryption()
+>  	# to set an encryption policy.  (For ext4 we could instead check for the
+>  	# presence of /sys/fs/ext4/features/encryption, but this is broken on
+>  	# some older kernels and is ext4-specific anyway.)
+> -	mkdir $SCRATCH_MNT/tmpdir
+> -	if _set_encpolicy $SCRATCH_MNT/tmpdir 2>&1 >>$seqres.full | \
+> -		grep -Eq 'Inappropriate ioctl for device|Operation not supported'
+> -	then
+> -		_notrun "kernel does not support $FSTYP encryption"
+> +	#
+> +	# If the test requires a v2 policy, don't probe with a v1 policy:
+> +	# v1 policies are not supported when the block size exceeds the page
+> +	# size.  _require_encryption_policy_support() will check for the
+> +	# requested policy version below.
+> +	if [ "$policy_version" -le 1 ]; then
+> +		mkdir $SCRATCH_MNT/tmpdir
+> +		if _set_encpolicy $SCRATCH_MNT/tmpdir 2>&1 >>$seqres.full | \
+> +			grep -Eq 'Inappropriate ioctl for device|Operation not supported'
+> +		then
+> +			_notrun "kernel does not support $FSTYP encryption"
+> +		fi
+> +		rmdir $SCRATCH_MNT/tmpdir
+> +
+> +		# v1 policies use the block size as their data unit size,
+> +		# which doesn't work if the block size exceeds the page size.
+> +		_require_v1_encryption_support
 
-For example:
-     from cache:   1960-01-01 01:01:01.123456789 +0000
-  after remount:   1960-01-01 01:01:02.()*+,--00 +0000
+How about do _require_v1_encryption_support at first:
 
-This bug also violates a struct timespec64 invariant, as documented in
-the set_normalized_timespec64() kernel-doc:
-[...]
- * Note: The tv_nsec part is always in the range of 0 <= tv_nsec <
- * NSEC_PER_SEC.
- * For negative values only the tv_sec field is negative !
- */
+  if [ "$policy_version" -le 1 ]; then
+      _require_v1_encryption_support
+      mkdir $SCRATCH_MNT/tmpdir
+      if _set_encpolicy $SCRATCH_MNT/tmpdir 2>&1 >>$seqres.full | \
 
-Example patches that fix the problem[1][2].
+In that case, if block_size > page_size, we can directly skip the test
+with an explicit reason, avoids a redundant mkdir/rmdir and ioctl call.
 
-Link: https://lore.kernel.org/linux-cifs/20261112111637.184045-1-koray.fra@gmail.com/ [1]
-Link: https://lore.kernel.org/linux-cifs/20261112111637.184045-2-koray.fra@gmail.com/ [2]
-Signed-off-by: koraynilay <koray.fra@gmail.com>
----
-v2 changes:
-- use _fixed_by_fs_commit for ksmbd and cifs
-- add _fixed_by_fs_commit for ntfs3
-- fix cleanup function
-- remove useless comment
-- wrap more the other comments so they're easier to read
+>  	fi
+> -	rmdir $SCRATCH_MNT/tmpdir
+>  
+>  	# If required, check for support for the specific type of encryption
+>  	# policy required by the test.
+> @@ -73,6 +90,39 @@ _require_scratch_encryption()
+>  	_scratch_unmount
+>  }
+>  
+> +# Require that the filesystem supports v1 encryption policies.  v1
+> +# policies use the filesystem block size as their data unit size, so
+> +# they aren't supported when the block size exceeds the page size.
+> +#
+> +# The scratch filesystem must be mounted.
+> +_require_v1_encryption_support()
+> +{
+> +	local block_size=$(_get_block_size $SCRATCH_MNT)
+> +
+> +	if [ "$block_size" -gt "$(_get_page_size)" ]; then
+> +		_notrun "v1 encryption policies aren't supported on filesystems with block size > page size"
+> +	fi
+> +}
+> +
+> +# Get the data unit size in bytes for a v2 encryption policy with the
+> +# given log2_data_unit_size on the filesystem mounted at $1.  A zero
+> +# value selects min(filesystem block size, page size).
+> +_get_encryption_du_size()
+> +{
+> +	local mnt=$1
+> +	local log2_dusize=$2
+> +	local block_size=$(_get_block_size "$mnt")
+> +	local page_size=$(_get_page_size)
+> +
+> +	if [ "$log2_dusize" -ne 0 ]; then
+> +		echo $((1 << log2_dusize))
+> +	elif [ "$block_size" -gt "$page_size" ]; then
+> +		echo "$page_size"
+> +	else
+> +		echo "$block_size"
+> +	fi
+> +}
+> +
+>  _require_encryption_policy_support()
+>  {
+>  	local mnt=$1
+> @@ -1014,11 +1064,7 @@ _verify_ciphertext_for_encryption_policy()
+>  	fi
+>  	_scratch_mount
+>  
+> -	if (( log2_dusize != 0 )); then
+> -		crypt_util_contents_args+=" --data-unit-size=$((1 << log2_dusize))"
+> -	else
+> -		crypt_util_contents_args+=" --data-unit-size=$(_get_block_size $SCRATCH_MNT)"
+> -	fi
+> +	crypt_util_contents_args+=" --data-unit-size=$(_get_encryption_du_size $SCRATCH_MNT $log2_dusize)"
+>  
+>  	crypt_util_args+=" --fs-uuid=$(blkid -s UUID -o value $SCRATCH_DEV | tr -d -)"
+>  
+> diff --git a/tests/ext4/309 b/tests/ext4/309
+> index 6bc9b8cb4a4a..aa1b3b68fc8c 100755
+> --- a/tests/ext4/309
+> +++ b/tests/ext4/309
+> @@ -5,9 +5,9 @@
+>  # FS QA Test No. ext4/309
+>  #
+>  # Verify that file contents encryption works on a filesystem with a block size
+> -# larger than the page size.  fscrypt uses the block size as the data unit size
+> -# by default, so this tests data units that span multiple pages, both for the
+> -# writeback path and for the on-disk ciphertext.
+> +# larger than the page size.  fscrypt uses min(block size, page size) as the
+> +# default data unit size, so this tests 4K data units on a 32K-block
 
-Thanks.
+Does ext4/309 hardcode 32k ?
 
- tests/generic/812     | 48 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/812.out |  3 +++
- 2 files changed, 51 insertions(+)
- create mode 100755 tests/generic/812
- create mode 100644 tests/generic/812.out
-
-diff --git a/tests/generic/812 b/tests/generic/812
-new file mode 100755
-index 00000000..eb76f2e5
---- /dev/null
-+++ b/tests/generic/812
-@@ -0,0 +1,48 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 koraynilay.  All Rights Reserved.
-+#
-+# FS QA Test No. 812
-+#
-+# Based on generic/258, but tests timestamps prior to epoch with sub-second
-+# precision.
-+#
-+# ksmbd, cifs, ntfs3 and other filesystem drivers violate timespec64
-+# non-negative nanoseconds constraint, garbling output of stat.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick bigtime
-+
-+_fixed_by_fs_commit cifs 6a75ce0866bb \
-+	"smb: client: fix negative timestamps being read from smb"
-+_fixed_by_fs_commit cifs f2f961e0983c \
-+	"ksmbd: fix negative timestamps being saved to disk"
-+_fixed_by_fs_commit ntfs3 xxxxxxxxxxxx \
-+	"ntfs3: fix negative timestamps corrupting stat output"
-+
-+_require_test
-+_require_negative_timestamps
-+
-+TESTFILE=$TEST_DIR/timestamp-test.txt
-+# we use 123456700 instead of 123456789 because some
-+# filesystems support only 100ns precision
-+DATE="1960-01-01 01:01:01.123456700 UTC"
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f "$TESTFILE"
-+}
-+
-+# create a file with a timestamp prior to the
-+# epoch with nanosecond precision
-+touch -d "$DATE" "$TESTFILE"
-+
-+TZ=UTC stat -c "%y" "$TESTFILE"
-+
-+# unmount, remount, and check the timestamp
-+_test_cycle_mount
-+
-+TZ=UTC stat -c "%y" "$TESTFILE"
-+
-+_exit 0
-diff --git a/tests/generic/812.out b/tests/generic/812.out
-new file mode 100644
-index 00000000..f0267fbb
---- /dev/null
-+++ b/tests/generic/812.out
-@@ -0,0 +1,3 @@
-+QA output created by 812
-+1960-01-01 01:01:01.123456700 +0000
-+1960-01-01 01:01:01.123456700 +0000
-
-base-commit: 71641219a506ac62bfa231592394265ca812670e
--- 
-2.56.0
-
+> +# filesystem, both for the writeback path and for the on-disk ciphertext.
+>  #
+>  . ./common/preamble
+>  _begin_fstest auto quick encrypt
+> diff --git a/tests/ext4/310 b/tests/ext4/310
+> index 215d3a83cd6d..84473930f8cb 100755
+> --- a/tests/ext4/310
+> +++ b/tests/ext4/310
+> @@ -6,7 +6,7 @@
+>  #
+>  # Test reading and writing an encrypted file with O_DIRECT on a filesystem
+>  # with a block size larger than the page size.  The data unit size is the
+> -# block size by default, so each data unit spans several pages here.
+> +# page size by default on such a filesystem.
+>  #
+>  . ./common/preamble
+>  _begin_fstest auto quick encrypt
+> diff --git a/tests/generic/580 b/tests/generic/580
+> index eff3f2104bfe..bcb984d1fd82 100755
+> --- a/tests/generic/580
+> +++ b/tests/generic/580
+> @@ -20,6 +20,7 @@ _require_scratch_encryption -v 2
+>  
+>  _scratch_mkfs_encrypted &>> $seqres.full
+>  _scratch_mount
+> +_require_v1_encryption_support
+>  
+>  test_with_policy_version()
+>  {
+> diff --git a/tests/generic/581 b/tests/generic/581
+> index 2773c9108b35..54f31595a832 100755
+> --- a/tests/generic/581
+> +++ b/tests/generic/581
+> @@ -33,6 +33,7 @@ _require_scratch_encryption -v 2
+>  
+>  _scratch_mkfs_encrypted &>> $seqres.full
+>  _scratch_mount
+> +_require_v1_encryption_support
+>  
+>  dir=$SCRATCH_MNT/dir
+>  
+> diff --git a/tests/generic/593 b/tests/generic/593
+> index 05f868f92422..61976df8194d 100755
+> --- a/tests/generic/593
+> +++ b/tests/generic/593
+> @@ -21,6 +21,7 @@ _require_command "$KEYCTL_PROG" keyctl
+>  _init_session_keyring
+>  _scratch_mkfs_encrypted &>> $seqres.full
+>  _scratch_mount
+> +_require_v1_encryption_support
+>  _require_add_enckey_by_key_id $SCRATCH_MNT
+>  
+>  test_with_policy_version()
+> diff --git a/tests/generic/613 b/tests/generic/613
+> index 499af18ef476..aadb3893e73e 100755
+> --- a/tests/generic/613
+> +++ b/tests/generic/613
+> @@ -26,6 +26,7 @@ _require_command "$XZ_PROG" xz
+>  
+>  _scratch_mkfs_encrypted &>> $seqres.full
+>  _scratch_mount
+> +_require_v1_encryption_support
+>  
+>  echo -e "\n# Adding encryption keys"
+>  _add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
+> -- 
+> 2.43.7
+> 
