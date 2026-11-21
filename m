@@ -1,54 +1,56 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795262420;
-	b=WiVHhAXwahRx450nzMsbKU+DNpP4EuhpT2B8YuGlJElWdSFwHBcYul1/im2AteSKNpXq
-	 mGK9ck4LTujYrrv1tGUI7A3Mc8DrE1kZhJ05MFP12xnCbq6u6gUo/b2XABgCPJLzjc+bx
-	 JgAHKw5KUy8u/BmDR1s1UP3n1yprfEOGrXCAwHORu+qAwuRHAXHruBVaGr0KpRmcJ4xny
-	 8W98oJ/MHnGfc9bDvtrBTgPrJUHNxzNNPH0eF2Ji/MgaO9LLt0cZCNgt1kPZbc0R0MpUX
-	 KG/Qm9nhJHyGdAEtO8I1rB5d3Mq35U56YpwHDZIzcDobeoJLtc9GVw9p/Wrgv30j2MA==
+	t=1795263046;
+	b=kf0FFtU0T5OE14bnUfo/KBFGrdaVXu3Ko0KRNpMBAZzDVAWu2XNW1hb4bZ/Koxv/axZR
+	 uuSK3U3eGbFb+mhrviLm2VFLRyyZhRSvWFj8Vq0sq0zkhzPzVD5IbydDijtzhghlulHc5
+	 tFYrmPFQwQH7FgcR/jCj6Vz0Ej/IIVk6vT6olVbbWkBugvhG5MEEp3NpUIXzhUwCj87IE
+	 wpr9ep5nzv0zMFU1/AoC80r6qQ+GVQPKxld4XpOcbZtcIB73VbkWb2M2a8pY7waL3BfC5
+	 oIZztbjFcLnmEcLCTj+Kgi3JsDZTMiAN7RksBOaHa1GSmfY9l7ZCgoemB9rj8t51R6A==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795262420;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795263046;
 	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
 	 Mail-Followup-To:References:MIME-Version:Content-Type:
 	 Content-Disposition:In-Reply-To;
-	bh=bOhPmJ0c/gwsHyswiX5b1LrtPcYG4XKm2JbLiiOXoh8=;
-	b=RlNmUwMqSeIPY08A6KRc8aayKARhHgKAtywq5PAngbEQwbDigIyXyo/bCenNUrXKJSRG
-	 QcaQBhIwy1QbDr+bChuVIrV3kGZNNqvQcAM3aRMbtvN/iDPyuN4JD0BuDkS5uqWmw5H5L
-	 gPswTZfZ0ygzHNGCUxAdCpSTa+rImOwlyvPueXVwarypgRzNBJxKAfnfAB54rKetn1Why
-	 MLZv4nY/A+47eCx/XR1PzoZnJ88LsBz/xnY/4eSIsSjGGbc1dDNh5Uk1MU1LxwK+GkTWg
-	 ySXsrcl8174MUs3NKtujVq/Z6nmSKev1ypjqy6OSyCXLe61w237BNAeMzyNjcItB6rA==
+	bh=wBac+v4fBKiwSpBWCxyLKlLb4EBnT8hxj94EO4RzRH8=;
+	b=XFBbHbBApLVcliu3re2RkJMkWx6AJolQIrK+0BIYcL4/qiQfEgyfzMFsEEqo0xqTWmNT
+	 ZPWnKKz6XrXvoEL0ZSaDCaLOjh9ruuoCFF8ZmZyBUcAY8ca2v3MFA5MaQn9jC4HxY0wAM
+	 4NuFJ8SFq+rOp3Iec7Q6OrrVLWIquqDeOe29lRCRi/ZiowHdWhla9C7YRg7E581kj6Jhi
+	 5z0m7F5LuHJDWukBhV7sAo+2zLQSpeCJ+TT58Qv/p26nn5h/ymJUSCwB2mplBb9dB21Pm
+	 DXQS9fkPMkfEDCWUneiOCq1pvE6GaWf0Bt+WH2MNpAWn8fOA6Uq34LdGZ6+62WSusqA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=cwBrEKGZ;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ClFx6Hom;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB39C606A32A
-	for <fstests@vger.kernel.org>; Sat, 21 Nov 2026 12:00:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31723606A320;
+	Sat, 21 Nov 2026 12:10:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=cwBrEKGZ
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 65B201F000C4;
-	Sat, 21 Nov 2026 12:00:15 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ClFx6Hom
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 082451F000C0;
+	Sat, 21 Nov 2026 12:10:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795262419;
-	bh=bOhPmJ0c/gwsHyswiX5b1LrtPcYG4XKm2JbLiiOXoh8=;
+	s=k20260515; t=1795263045;
+	bh=wBac+v4fBKiwSpBWCxyLKlLb4EBnT8hxj94EO4RzRH8=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=cwBrEKGZHng1WZ/cj9wJ6YZs1+td7UnLrCNPYEdQ/pwnJL6pIEKaLOf8kK4Yz/8cE
-	 Xk46aFZ36XZd0+9YUCAN4SuqwH1LdKloyLGFMgbLc1ZAZewr7tdMxyDi0ClYW0dI+Q
-	 xDExeo6YefEIoy8IshZvVIaukrOITLjQfa+SD7HaL+WgROCZGO7Ib7O5bro6eGCnum
-	 C/Net0AZxOXIBunwO2LMd3pNM8futG8q1LsJQrOmMcQAV6x9AK62RzN+1zDq6u9IJr
-	 BimMF8WKUeMAsVXQ4/crwQEhPIoBGDVPHwAFLRy5O845SLkKIybqE7NC8Uxb+o6dJ7
-	 R9/U4kqeW/o1w==
-Date: Sat, 21 Nov 2026 20:00:08 +0800
+	b=ClFx6HomIOpqiuxnhzY8Pvwa7hghJqvePYG90avqQLHxaxto8FixbKXq5xy5/eTgP
+	 bhDikGHSuW2IN90I4NQsbN02Me1CBgnH8uArrqNEro07wEzvJdqz7M307vN+9KPQO4
+	 yIa88dxLA13obIKexU1deAf3kZ8JDZyF4xfrSicdGS0u+tLwKnqSEPlvqBJBuBSutj
+	 w2WPDw8IPtHZHMTED3axUfmptMnmyUNd95WhqfkzsGuQz9Q14Htg8QIshKMN81AcbE
+	 +MFrmbczUIG7cBgN+EPagHiwYIwikz1kYZaCoRs28Ijvb3JYxWVDZ/EyfBEeEcXCCn
+	 J8NcT6z8/jGmQ==
+Date: Sat, 21 Nov 2026 20:10:35 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: cem@kernel.org
-Cc: fstests@vger.kernel.org, jencce2002@qq.com
-Subject: Re: [PATCH v2] add tmt as a new output format
-Message-ID: <awF45u5jVxv4R5TQ@zlang-mailbox>
-Mail-Followup-To: cem@kernel.org, fstests@vger.kernel.org, 
-	jencce2002@qq.com
-References: <20261119123910.294544-1-cem@kernel.org>
+To: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Cc: linux-btrfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>, 
+	fstests@vger.kernel.org
+Subject: Re: [PATCH v2] generic: test that fsync on zoned doesn't fail with
+ -EAGAIN
+Message-ID: <awGKG7Z5XBiqzxdu@zlang-mailbox>
+Mail-Followup-To: Johannes Thumshirn <johannes.thumshirn@wdc.com>, 
+	linux-btrfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
+References: <20261117065848.3825371-1-johannes.thumshirn@wdc.com>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -60,258 +62,132 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20261119123910.294544-1-cem@kernel.org>
+In-Reply-To: <20261117065848.3825371-1-johannes.thumshirn@wdc.com>
 
-On Thu, Nov 19, 2026 at 01:38:55PM +0100, cem@kernel.org wrote:
-> From: Carlos Maiolino <cmaiolino@redhat.com>
+On Tue, Nov 17, 2026 at 07:58:48AM +0100, Johannes Thumshirn wrote:
+> On a zoned btrfs, btrfs_start_transaction() forces a transaction commit
+> when the delayed refs reservation exceeds its zoned cap. If the cap is
+> still exceeded after the commit, it returned -EAGAIN, which fsync passed
+> on to user space.
 > 
-> I've been trying to expand my testing matrix leveraging the testing-farm
-> cloud (https://testing-farm.io/), which is a public testing cloud available
-> for opensource testing.
+> Run parallel writers creating, overwriting and deleting small files with
+> an fsync after every write on a zoned device with a limited number of
+> active zones, and check that no fsync fails.
 > 
-> Testing-farm uses tmt (https://github.com/teemtee) to orchestrate the
-> tests within the provisioned VMs.
-> tmt however expects each individual test to be, well, an individual
-> test so by default it would put a whole xfstests run as a single test
-> case with a looooong report.
-> However we can use a tmt-report-result tool to report each test ran
-> individually as a sub-test, so the report looks a bit more granular,
-> easy to read and prevent my eyes from bleeding while looking at its
-> testing reports.
-> 
-> I know tmt can also be used to orchestrate tests on a local machine.
-> Although I have no use for that, it might be useful for someone else,
-> reason why at the end of the run it will also print out the tmt report
-> file location. This also makes the output consistent to what xunit
-> format does.
-> 
-> Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+> Assisted-by: LLM
+> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 > ---
-> V2:
-> 	- Add Murphy's suggestion to the log output if it fails
-> 	  to add a test result to the final report
+> Changes to v1:
+> - Move to a generic test
+
+Thanks for this update.
+
+Reviewed-by: Zorro Lang <zlang@kernel.org>
+
 > 
->  check         |   2 +-
->  common/report | 129 +++++++++++++++++++++++++++++++++++++++++++++++++-
->  2 files changed, 129 insertions(+), 2 deletions(-)
+>  tests/generic/814     | 83 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/814.out |  2 ++
+>  2 files changed, 85 insertions(+)
+>  create mode 100755 tests/generic/814
+>  create mode 100644 tests/generic/814.out
 > 
-> diff --git a/check b/check
-> index afe855bcf0ed..420ac7d274df 100755
-> --- a/check
-> +++ b/check
-> @@ -74,7 +74,7 @@ General options:
->      -S section              exclude the specified section from the config file
->      -T                      output timestamps
->      -R fmt[,fmt]            generate report in formats specified. Supported
-> -                              formats: xunit, xunit-quiet
-> +                              formats: xunit, xunit-quiet, tmt
->      --exact-order           run tests in the exact order specified
->      --extra-space <size>    require minimum free space on scratch device
->      --fs <type>             test the given FSTYP; valid types include:
-> diff --git a/common/report b/common/report
-> index 2fa15e62f1e7..0a4a39285ef4 100644
-> --- a/common/report
-> +++ b/common/report
-> @@ -14,6 +14,8 @@ REPORT_ENV_LIST_OPT=("TAPE_DEV" "RMT_TAPE_DEV" "FSSTRESS_AVOID" "FSX_AVOID"
->  		     "KCONFIG_PATH" "PERF_CONFIGNAME" "MIN_FSSIZE"
->  		     "IDMAPPED_MOUNTS")
->  
-> +TMT_REPORT_RESULT_PROG="${TMT_REPORT_RESULT_PROG:-tmt-report-result}"
+> diff --git a/tests/generic/814 b/tests/generic/814
+> new file mode 100755
+> index 00000000..316925c1
+> --- /dev/null
+> +++ b/tests/generic/814
+> @@ -0,0 +1,83 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 Western Digital Corporation.  All Rights Reserved.
+> +#
+> +# FS QA Test 814
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick zone
 > +
->  encode_xml()
->  {
->  	cat -v | \
-> @@ -244,7 +246,122 @@ _xunit_make_testcase_report()
->  }
->  
->  
-> -#
-> +
-> +_tmt_assert_env()
+> +_cleanup()
 > +{
-> +	if [ -z "$TMT_TEST_PIDFILE" ]; then
-> +		_fatal "report format 'tmt' can only be used when xfstests is run as a tmt test"
-> +	fi
-> +	if ! command -v "$TMT_REPORT_RESULT_PROG" >/dev/null 2>&1; then
-> +		_fatal "report format 'tmt' requires $TMT_REPORT_RESULT_PROG to be installed"
-> +	fi
-
-Does $TMT_TEST_DATA need to be checked too?
-
-I'd like to move the `_tmt_*` helpers into a separate `common/report.tmt` file
-and sourcing it only when `tmt` is requested (e.g. in `_assert_report_list()`)?
-That keeps `common/report` clean and isolates harness-specific code from the
-core reporting logic, which also makes it easier to maintain (or refactor later).
-
+> +	cd /
+> +	[ -n "$pids" ] && kill $pids &> /dev/null
+> +	wait
+> +	rm -r -f $tmp.*
 > +}
 > +
-> +# tmt subresult names have to be unique within a tmt test, so prefix each test
-> +# name with its specific section.
-> +_tmt_testcase_name()
-> +{
-> +	local sect_name="$1"
-> +	local test_name="$2"
+> +. ./common/zoned
 > +
-> +	if [ $sect_name == '-no-sections-' ]; then
-
-if [ "$sect_name" = "-no-sections-" ]
-
-> +		echo "/$test_name"
-> +	else
-> +		echo "/$sect_name/$test_name"
-
-What happens if someone runs the same test multiple times in a single check
-run (e.g. `./check -i 3` or `-I 3`)?
-
-> +	fi
+> +_fixed_by_fs_commit btrfs XXXXXXXXXXXX \
+> +	"btrfs: zoned: don't fail start_transaction() after a forced commit"
+> +
+> +_require_scratch_size $((4 * 1024 * 1024)) # kB
+> +
+> +if [ -b "$SCRATCH_RTDEV" ]; then
+> +	zoned_dev=$SCRATCH_RTDEV
+> +else
+> +	zoned_dev=$SCRATCH_DEV
+> +fi
+> +
+> +_require_zoned_device "$zoned_dev"
+> +_require_limited_active_zones "$zoned_dev"
+> +
+> +nr_writers=$((8 * LOAD_FACTOR))
+> +nr_files=250
+> +nr_rounds=$((4 * TIME_FACTOR))
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+> +_scratch_mount
+> +
+> +# Every other file is deleted per round to churn data and metadata.
+> +writer()
+> +{
+> +	local dir=$SCRATCH_MNT/w$1
+> +	local r i sz
+> +
+> +	mkdir -p $dir
+> +	for r in $(seq $nr_rounds); do
+> +		for i in $(seq $nr_files); do
+> +			# 4K - 256K
+> +			sz=$(( ((i + r + $1) % 64 + 1) * 4096 ))
+> +			$XFS_IO_PROG -f -c "pwrite -q -S $i -b 64k 0 $sz" \
+> +				-c fsync $dir/$i || return 1
+> +		done
+> +		for i in $(seq 1 2 $nr_files); do
+> +			rm -f $dir/$i
+> +		done
+> +	done
 > +}
 > +
-> +__tmt_log_append()
-> +{
-> +	local log="$1"
-> +	local title="$2"
-> +	local file="$3"
+> +pids=""
+> +for w in $(seq $nr_writers); do
+> +	writer $w > $tmp.writer.$w 2>&1 &
+> +	pids="$pids $!"
+> +done
 > +
-> +	test -s "$file" || return 0
-> +	echo "--- $title ---" >> "$log"
-> +	cat "$file" | tr -dc '[:print:][:space:]' >> "$log"
-
-We can drop the `cat` process and pipeline:
-  tr -dc '[:print:][:space:]' < "$file" >> "$log"
-
-> +	echo >> "$log"
-> +}
+> +ret=0
+> +for p in $pids; do
+> +	wait $p || ret=1
+> +done
+> +unset pids
+> +cat $tmp.writer.* >> $seqres.full
+> +[ $ret -eq 0 ] || echo "writer failed, see $seqres.full"
 > +
-> +# tmt-report-result can attach a single log to a subresult and display that
-> +# on its web interface. Gather whatever logs a specific test left behind
-> +# so we can see it on the web interface instead of digging into the resulting
-> +# artifacts. Do that only for failed / notrun tests as we don't need it if a test
-> +# passed properly.
-> +_tmt_make_testcase_log()
-> +{
-> +	local test_name="$1"
-> +	local test_status="$2"
-> +	local log="${REPORT_DIR}/${test_name}.tmt.log"
+> +find $SCRATCH_MNT -type f | sort | xargs md5sum > $tmp.md5.before
+> +_scratch_cycle_mount
+> +find $SCRATCH_MNT -type f | sort | xargs md5sum > $tmp.md5.after
+> +diff -q $tmp.md5.before $tmp.md5.after > /dev/null || echo "data mismatch"
 > +
-> +	# $REPORT_DIR/<group> is created by check before the test is run
-> +	rm -f "$log"
+> +echo "Silence is golden"
 > +
-> +	case $test_status in
-> +	"notrun")
-> +		__tmt_log_append "$log" "not run" "${REPORT_DIR}/${test_name}.notrun"
-> +		;;
-> +	"fail")
-> +		local out_src="${SRC_DIR}/${test_name}.out"
-> +		local outbad_file="${REPORT_DIR}/${test_name}.out.bad"
-> +
-> +		if [ -n "$_err_msg" ]; then
-> +			echo "$_err_msg" >> "$log"
-> +		fi
-> +		if [ -s "$outbad_file" ]; then
-> +			echo "--- output mismatch ---" >> "$log"
-> +			$diff "$out_src" "$outbad_file" >> "$log"
-
-You already filter non-printable characters with tr -dc '[:print:][:space:]'
-in __tmt_log_append(). Why not do the same here for the diff output too?
-
-> +		fi
-> +		__tmt_log_append "$log" "hints" "${REPORT_DIR}/${test_name}.hints"
-> +		__tmt_log_append "$log" "dmesg" "${REPORT_DIR}/${test_name}.dmesg"
-> +		__tmt_log_append "$log" "mount failures" "${REPORT_DIR}/${test_name}.mountfail"
-> +		__tmt_log_append "$log" "full output" "${REPORT_DIR}/${test_name}.full"
-> +		;;
-> +	esac
-> +
-> +	test -s "$log" && echo "$log"
-> +	return 0
-> +}
-> +
-> +_tmt_make_testcase_report()
-> +{
-> +	local sect_name="$1"
-> +	local test_name="$2"
-> +	local test_status="$3"
-> +	local outcome
-> +	local log
-> +
-> +	case $test_status in
-> +	"pass")
-> +		outcome="pass"
-> +		;;
-> +	"fail")
-> +		outcome="fail"
-> +		;;
-> +	"notrun"|"list")
-> +		outcome="skip"
-> +		;;
-> +	*)
-> +		outcome="error"
-> +		;;
-> +	esac
-> +
-> +	log=`_tmt_make_testcase_log "$test_name" "$test_status"`
-> +
-> +	# tmt-report-result is chatty on stdout, which would interleave with
-> +	# the test results printed by check.
-> +	"$TMT_REPORT_RESULT_PROG" \
-> +		"`_tmt_testcase_name "$sect_name" "$test_name"`" \
-> +		"$outcome" ${log:+-o "$log"} >/dev/null ||
-> +		echo "check: failed to report `_tmt_testcase_name "$sect_name" "$test_name"` to tmt"
-
-Too many nested quotes and backticks here, how about something like:
-
-local tmt_name=$(_tmt_testcase_name "$sect_name" "$test_name")
-"$TMT_REPORT_RESULT_PROG" "$tmt_name" "$outcome" ${log:+-o "$log"} >/dev/null ||
-
-Just curious, does `tmt-report-result` support passing `$test_time`? I
-remember rstrnt-report-result supports that (as $score), I forget the
-details of tmt-report-result.
-
-Thanks,
-Zorro
-
-> +}
-> +
-> +# Only useful if using tmt locally, but keeps consistent with xunit implementation
-> +_tmt_make_section_report()
-> +{
-> +	echo "tmt report: $TMT_TEST_DATA/tmt-report-results.yaml"
-> +}
-> +
->  #  Common report generator entry points
->  _make_section_report()
->  {
-> @@ -260,6 +377,9 @@ _make_section_report()
->  						   "$bad_count" "$notrun_count" \
->  						   "$sect_time"
->  			;;
-> +		"tmt")
-> +			_tmt_make_section_report
-> +			;;
->  		*)
->  			_dump_err "format '$report' is not supported"
->  			;;
-> @@ -279,6 +399,10 @@ _make_testcase_report()
->  			_xunit_make_testcase_report "$sect_name" "$test_seq" \
->  						    "$test_status" "$test_time" "$report"
->  			;;
-> +		"tmt")
-> +			_tmt_make_testcase_report "$sect_name" "$test_seq" \
-> +						  "$test_status"
-> +			;;
->  		*)
->  			_dump_err "report format '$report' is not supported"
->  			;;
-> @@ -291,6 +415,9 @@ _assert_report_list() {
->  		case "$report" in
->  		"xunit"|"xunit-quiet")
->  			;;
-> +		"tmt")
-> +			_tmt_assert_env
-> +			;;
->  		*)
->  			_fatal "report format '$report' is not supported"
->  			;;
+> +# success, all done
+> +_exit 0
+> diff --git a/tests/generic/814.out b/tests/generic/814.out
+> new file mode 100644
+> index 00000000..95532d3d
+> --- /dev/null
+> +++ b/tests/generic/814.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 814
+> +Silence is golden
 > -- 
-> 2.56.0
+> 2.56.1
 > 
