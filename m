@@ -1,61 +1,57 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795280705;
-	b=DVcrmgOSgueEa4s6GsXl08gBDI3PHye+Ib3uV0LPjx2rDAxkBr78aAzlIiZfh/VqpPEN
-	 4dE3Ww8JJBHFhlMjHZQK2AX9QVFS8CxNFlCsjxDNxiWmaEHYc/akXsRr0XxdPgiXZpxK9
-	 VJgkJq9uoSxKvK0bXgRYF4t5NW3WvAC4UCMHzrT5HSaOZJdDrow3DdlILAUkRFsPTVFyQ
-	 VBA50/Hbw5MQjCzWeGThRI/JemtaIdn2O+AQioRWldM5CZHH37VzI6OJNLbOvLl3nzJ7Y
-	 fBeItPFwDdg3rj/rx1y9ZcmygFyqAcw4UsysiRLCZlxsaxd6rg2fg/TDZfGhRISHrXQ==
+	t=1795281568;
+	b=zXjshWSzup9+ZmRUXLvGnysAAeHV5tInCZzQDLQjJDT34pjzXbh8iC/ZQag9uIqUUXpT
+	 TX/Rl8qWga9VmSCnqaqwqYjvE63tx34wdNH7/WH4kkBbCOO/eqMCjbqA1WTDcaAi/ol1c
+	 H8iG1Gxwk4fXdJELpOYq6ZySffRmeD6rYIF70NFTq1YonALR6yWuKyg+GQI9UgxK/XIrB
+	 m72AqBGMXUIM5GYHUT2sEqB18Z59T0DbkGtboj7fmA9cy0M/D3ZLiz3H4bsFpcQ+PZLMl
+	 8Xc6lvSxC8bnwka3ESg5PATVJBf9HT9RqZKFv41vRJCuhwjr+A7jp4XRxrqE/FCvPPw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795280705;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795281568;
 	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
 	 Mail-Followup-To:References:MIME-Version:Content-Type:
 	 Content-Disposition:In-Reply-To;
-	bh=UNb0wSOh+ggizWXdLZ8B0dcP+pg0Eb6nL8do3bvWSZ4=;
-	b=a4Qq3446B6wAWYXxYqrm8dzHjNSQ7pvPRy5WEXn9zEeCtZkT4kvk+CI63VEigWHbMuNW
-	 nMPDtZvkPdfSBCqiIjLkCF947dAcN+IL1Hvn09/yn6iR7AyM+X5zhY21R5fj77XApDD7m
-	 TRCR7n4iwwcrtCzkhZfCue9qSli3XAme5MZuIghrEaOFe9f3iJV/sXMC3MNWzlXkrGfVE
-	 jpHjVA9wfcWyWM1Z5BReHoNNykOxKbNoL5MumfY/wzyW2/ZP+udO+QE8MG5sCY6yRG1u0
-	 qS8W8yc91+uYdOEn5NTQ6d0EQr0FGssz26Y41qthBc+jUaHDB9d6PCLgbp92Awm/p3w==
+	bh=Ssw+DqUMswGGFnd0hmK6VkHcR14rpbon5k46W9ZVRX8=;
+	b=iuUgXE1I4gz6DGEwPIDrrp+QP7m1ZFJJNkzWhkBR/vR+f7Rty8jL9/sOEx2U4YjY+kVc
+	 tUpVDoslOb8g4amTRoZbuRodBdm2XtbECbZO6kGBIMH53WTgSbfu4fb+XqUpBu1UOUUUw
+	 NnozjzYRMCO3Tv8lqKsDEXHtgFjtQZ0IVDzOjLpfDTMEyT9DYCF5MLFAEcOIJCwL9q3Pp
+	 Jq5B1z38ZVVCXXdw84nOfwnrpjZnRGNmShQv8IhQ+C+HNTfqfOEMffhF574BsZDVUP2ON
+	 YEb4VKgVdss5tU+QX9I4P3Xl5wORlBFlwKfjPgg0XrTk8LYtMl1LZKE6E4b4NPQyVlg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QrkluMnX;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=HfzP3hTi;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A78C6606A320;
-	Sat, 21 Nov 2026 17:05:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CED1B606A320;
+	Sat, 21 Nov 2026 17:19:28 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=QrkluMnX
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 52EA81F000C0;
-	Sat, 21 Nov 2026 17:04:54 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=HfzP3hTi
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BBA481F000C4;
+	Sat, 21 Nov 2026 17:19:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795280705;
-	bh=UNb0wSOh+ggizWXdLZ8B0dcP+pg0Eb6nL8do3bvWSZ4=;
+	s=k20260515; t=1795281568;
+	bh=Ssw+DqUMswGGFnd0hmK6VkHcR14rpbon5k46W9ZVRX8=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=QrkluMnXo6/JIkDevuGtgZBjhz23uAKGN6eyuBu6mFD36gyV/nOyt5Ve9OPZHZM4r
-	 M8L9LySmgrMCPIvXMj1sFG6o0lLC6LvOYPGSmUIfVHdoP88lDV20upPO4RHrTRXu6R
-	 090gTV7TW6aBu4EVcf2+VB9IgDa8vAwP4ZXtWPvruawUwMr8HJzE/EAcagUuF4ehDa
-	 ZUBrayEzna9+mXmNdik23nqthY/z1oyfPLrQdliZWFkraxBobiCQA80WPd1Q2Vi6pN
-	 mFEWT06uU/rkufWwGXTsmQPFEfguYlcetLZJLpveWLQC/Yqnhj5U5+d9vJxhJqp31C
-	 iDUx/BZX5EIEQ==
-Date: Sun, 22 Nov 2026 01:04:48 +0800
+	b=HfzP3hTiDS0/XOinjFibodrC0Gpu8Um+4wbMsE6D3ruc1YRy4MXRp3qzOUFYQuO8Y
+	 FeVVfgEgHcApezuswStlAxdHfOCOlUH7njKIqpj0RKmlfIx8AF00OhXzNFNGZdIgMy
+	 ZuXbqheCccA9uWWYMcRR7VeJvRfYhWfFvfbo0eNlItt4DfRgTeJwYrccAg0ZKjLezo
+	 xZXr/GbEBCIm2X+w61+yFSLySb43NotB5pthjZomrfjGVRI6w3wbFL68EuVadr7uJI
+	 0rQNyDA1ecCp9LTXt+TAamgzvp1cZz4p8cWr23GS8gBpJFE1sW99xqE4N9i9ezq79T
+	 BNGEsLbYd1I1g==
+Date: Sun, 22 Nov 2026 01:19:19 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Baokun Li <libaokun@linux.alibaba.com>
-Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org, 
-	ebiggers@kernel.org, jaegeuk@kernel.org, tytso@mit.edu, linux-ext4@vger.kernel.org, 
-	adilger.kernel@dilger.ca, jack@suse.cz, yi.zhang@huawei.com, ojaswin@linux.ibm.com, 
-	ritesh.list@gmail.com, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] common/encrypt: support block sizes larger than the page
- size
-Message-ID: <awHJso_ELIgRjbdg@zlang-mailbox>
-Mail-Followup-To: Baokun Li <libaokun@linux.alibaba.com>, 
-	fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org, ebiggers@kernel.org, 
-	jaegeuk@kernel.org, tytso@mit.edu, linux-ext4@vger.kernel.org, 
-	adilger.kernel@dilger.ca, jack@suse.cz, yi.zhang@huawei.com, ojaswin@linux.ibm.com, 
-	ritesh.list@gmail.com, linux-kernel@vger.kernel.org
-References: <20261103160906.188544-1-libaokun@linux.alibaba.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, 
+	fstests@vger.kernel.org, Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+Subject: Re: [PATCH] common/overlay: fix _check_overlay_feature for
+ default-on param-less options
+Message-ID: <awHSXIxDUNu2kacw@zlang-mailbox>
+Mail-Followup-To: Amir Goldstein <amir73il@gmail.com>, 
+	Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org, 
+	Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+References: <20261106155832.3867017-1-amir73il@gmail.com>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -67,237 +63,70 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20261103160906.188544-1-libaokun@linux.alibaba.com>
+In-Reply-To: <20261106155832.3867017-1-amir73il@gmail.com>
 
-On Wed, Nov 04, 2026 at 12:09:06AM +0800, Baokun Li wrote:
-> v1 encryption policies use the filesystem block size as their data unit
-> size, so they cannot be used on a filesystem whose block size exceeds
-> the page size.  Make _require_scratch_encryption() skip such tests
-> when a v1 policy is requested.  Tests that request a v2 policy but
-> also exercise v1 policies, i.e. generic/580, 581, 593, and 613,
-> call _require_v1_encryption_support() explicitly.
+On Fri, Nov 06, 2026 at 04:58:31PM +0100, Amir Goldstein wrote:
+> Overlayfs only displays a mount option if it differs from the default.
+> Commit 73a018cb treated a feature without a module parameter of the same
+> name (e.g. xino) as default off and required "${feature}=on" in the mount
+> options.  On a samefs xfs setup xino is on by default and is not displayed,
+> so tests requiring xino (e.g. overlay/041, 043, 044, 067, 070, 071) were
+> wrongly skipped.
 > 
-> A v2 policy with log2_data_unit_size 0 uses min(bs, PS) as its data
-> unit size, not the block size. Add _get_encryption_du_size() and
-> use it to calculate the expected ciphertext.
+> For features without a boolean module parameter, assume the feature may
+> be on by default and only verify that the mount options do not show it
+> with a value other than "on", same as for features that default to Y.
 > 
-> Also skip the v1 policy probe in _require_scratch_encryption() when a
-> v2 policy is requested.  Update the ext4/309 and ext4/310 comments for
-> the new default data unit size.
-> 
-> Signed-off-by: Baokun Li <libaokun@linux.alibaba.com>
+> Fixes: 73a018cbf57b ("common/overlay: let _check_overlay_feature handle param-less options")
+> Cc: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 > ---
->  common/encrypt    | 68 +++++++++++++++++++++++++++++++++++++++--------
->  tests/ext4/309    |  6 ++---
->  tests/ext4/310    |  2 +-
->  tests/generic/580 |  1 +
->  tests/generic/581 |  1 +
->  tests/generic/593 |  1 +
->  tests/generic/613 |  1 +
->  7 files changed, 65 insertions(+), 15 deletions(-)
+
+Looks good to me!
+
+Reviewed-by: Zorro Lang <zlang@kernel.org>
+
+>  common/overlay | 22 +++++++++-------------
+>  1 file changed, 9 insertions(+), 13 deletions(-)
 > 
-> diff --git a/common/encrypt b/common/encrypt
-> index c9e0853d8d8c..feaef0682a44 100644
-> --- a/common/encrypt
-> +++ b/common/encrypt
-> @@ -18,15 +18,21 @@
->  _require_scratch_encryption()
->  {
->  	local arg
-> +	local policy_version=1
-> +	local prev=
->  
->  	_require_scratch
->  	_require_xfs_io_command "set_encpolicy"
->  
->  	for arg; do
-> +		if [ "$prev" = "-v" ]; then
-> +			policy_version=$arg
-> +		fi
->  		if [ "$arg" = "-s" ]; then
->  			# -s option was added later.  Make sure it's available.
->  			_require_xfs_io_command "set_encpolicy" "-s"
->  		fi
-> +		prev=$arg
->  	done
->  
->  	# The 'test_dummy_encryption' mount option interferes with trying to use
-> @@ -56,13 +62,24 @@ _require_scratch_encryption()
->  	# to set an encryption policy.  (For ext4 we could instead check for the
->  	# presence of /sys/fs/ext4/features/encryption, but this is broken on
->  	# some older kernels and is ext4-specific anyway.)
-> -	mkdir $SCRATCH_MNT/tmpdir
-> -	if _set_encpolicy $SCRATCH_MNT/tmpdir 2>&1 >>$seqres.full | \
-> -		grep -Eq 'Inappropriate ioctl for device|Operation not supported'
-> -	then
-> -		_notrun "kernel does not support $FSTYP encryption"
-> +	#
-> +	# If the test requires a v2 policy, don't probe with a v1 policy:
-> +	# v1 policies are not supported when the block size exceeds the page
-> +	# size.  _require_encryption_policy_support() will check for the
-> +	# requested policy version below.
-> +	if [ "$policy_version" -le 1 ]; then
-> +		mkdir $SCRATCH_MNT/tmpdir
-> +		if _set_encpolicy $SCRATCH_MNT/tmpdir 2>&1 >>$seqres.full | \
-> +			grep -Eq 'Inappropriate ioctl for device|Operation not supported'
-> +		then
-> +			_notrun "kernel does not support $FSTYP encryption"
-> +		fi
-> +		rmdir $SCRATCH_MNT/tmpdir
-> +
-> +		# v1 policies use the block size as their data unit size,
-> +		# which doesn't work if the block size exceeds the page size.
-> +		_require_v1_encryption_support
-
-How about do _require_v1_encryption_support at first:
-
-  if [ "$policy_version" -le 1 ]; then
-      _require_v1_encryption_support
-      mkdir $SCRATCH_MNT/tmpdir
-      if _set_encpolicy $SCRATCH_MNT/tmpdir 2>&1 >>$seqres.full | \
-
-In that case, if block_size > page_size, we can directly skip the test
-with an explicit reason, avoids a redundant mkdir/rmdir and ioctl call.
-
->  	fi
-> -	rmdir $SCRATCH_MNT/tmpdir
->  
->  	# If required, check for support for the specific type of encryption
->  	# policy required by the test.
-> @@ -73,6 +90,39 @@ _require_scratch_encryption()
->  	_scratch_unmount
+> diff --git a/common/overlay b/common/overlay
+> index 132b2bf7..0cf6db2d 100644
+> --- a/common/overlay
+> +++ b/common/overlay
+> @@ -172,24 +172,20 @@ _check_overlay_feature()
+>  	# parameter (the system default) and per mount by mount
+>  	# option ${feature}=[on|off].
+>  	local default=`_get_fs_module_param ${feature}`
+> -	if [ "$default" != Y ] && [ "$default" != N ]; then
+> -		# Some mount options (e.g. uuid, xino, verity) have no
+> -		# on/off module parameter of the same name.  For those,
+> -		# a missing (or non-boolean) parameter means that the
+> -		# feature defaults to off rather than that it is
+> -		# unsupported.  Unsupported options are rejected by the
+> -		# probe mount in _require_scratch_overlay_features.
+> -		default=N
+> -	fi
+> +	local value=`_fs_options $dev | tr ',' '\n' | grep "^${feature}=" | cut -d= -f2`
+>
+>  	# Check options to be sure. For example, Overlayfs will fallback to
+>  	# index=off if underlying fs does not support file handles.
+>  	# Overlayfs only displays mount option if it differs from the default.
+> +	# Without a module param of the same name (e.g. xino), the feature
+> +	# may be on by default, so only require it is not shown as non-on.
+>  	# Overlayfs may enable the feature, but fallback to read-only mount.
+> -	((( [ "$default" = N ] && _fs_options $dev | grep -q "${feature}=on" ) || \
+> -	  ( [ "$default" = Y ] && ! _fs_options $dev | grep -q "${feature}=off" )) && \
+> -	    touch $mnt/foo 2>/dev/null ) || \
+> -	        _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${dev}"
+> +	if [ "$default" = N ]; then
+> +		[ "$value" = on ]
+> +	else
+> +		[ -z "$value" -o "$value" = on ]
+> +	fi && touch $mnt/foo 2>/dev/null || \
+> +		_notrun "${FSTYP} feature '${feature}' cannot be enabled on ${dev}"
 >  }
 >  
-> +# Require that the filesystem supports v1 encryption policies.  v1
-> +# policies use the filesystem block size as their data unit size, so
-> +# they aren't supported when the block size exceeds the page size.
-> +#
-> +# The scratch filesystem must be mounted.
-> +_require_v1_encryption_support()
-> +{
-> +	local block_size=$(_get_block_size $SCRATCH_MNT)
-> +
-> +	if [ "$block_size" -gt "$(_get_page_size)" ]; then
-> +		_notrun "v1 encryption policies aren't supported on filesystems with block size > page size"
-> +	fi
-> +}
-> +
-> +# Get the data unit size in bytes for a v2 encryption policy with the
-> +# given log2_data_unit_size on the filesystem mounted at $1.  A zero
-> +# value selects min(filesystem block size, page size).
-> +_get_encryption_du_size()
-> +{
-> +	local mnt=$1
-> +	local log2_dusize=$2
-> +	local block_size=$(_get_block_size "$mnt")
-> +	local page_size=$(_get_page_size)
-> +
-> +	if [ "$log2_dusize" -ne 0 ]; then
-> +		echo $((1 << log2_dusize))
-> +	elif [ "$block_size" -gt "$page_size" ]; then
-> +		echo "$page_size"
-> +	else
-> +		echo "$block_size"
-> +	fi
-> +}
-> +
->  _require_encryption_policy_support()
->  {
->  	local mnt=$1
-> @@ -1014,11 +1064,7 @@ _verify_ciphertext_for_encryption_policy()
->  	fi
->  	_scratch_mount
->  
-> -	if (( log2_dusize != 0 )); then
-> -		crypt_util_contents_args+=" --data-unit-size=$((1 << log2_dusize))"
-> -	else
-> -		crypt_util_contents_args+=" --data-unit-size=$(_get_block_size $SCRATCH_MNT)"
-> -	fi
-> +	crypt_util_contents_args+=" --data-unit-size=$(_get_encryption_du_size $SCRATCH_MNT $log2_dusize)"
->  
->  	crypt_util_args+=" --fs-uuid=$(blkid -s UUID -o value $SCRATCH_DEV | tr -d -)"
->  
-> diff --git a/tests/ext4/309 b/tests/ext4/309
-> index 6bc9b8cb4a4a..aa1b3b68fc8c 100755
-> --- a/tests/ext4/309
-> +++ b/tests/ext4/309
-> @@ -5,9 +5,9 @@
->  # FS QA Test No. ext4/309
->  #
->  # Verify that file contents encryption works on a filesystem with a block size
-> -# larger than the page size.  fscrypt uses the block size as the data unit size
-> -# by default, so this tests data units that span multiple pages, both for the
-> -# writeback path and for the on-disk ciphertext.
-> +# larger than the page size.  fscrypt uses min(block size, page size) as the
-> +# default data unit size, so this tests 4K data units on a 32K-block
-
-Does ext4/309 hardcode 32k ?
-
-> +# filesystem, both for the writeback path and for the on-disk ciphertext.
->  #
->  . ./common/preamble
->  _begin_fstest auto quick encrypt
-> diff --git a/tests/ext4/310 b/tests/ext4/310
-> index 215d3a83cd6d..84473930f8cb 100755
-> --- a/tests/ext4/310
-> +++ b/tests/ext4/310
-> @@ -6,7 +6,7 @@
->  #
->  # Test reading and writing an encrypted file with O_DIRECT on a filesystem
->  # with a block size larger than the page size.  The data unit size is the
-> -# block size by default, so each data unit spans several pages here.
-> +# page size by default on such a filesystem.
->  #
->  . ./common/preamble
->  _begin_fstest auto quick encrypt
-> diff --git a/tests/generic/580 b/tests/generic/580
-> index eff3f2104bfe..bcb984d1fd82 100755
-> --- a/tests/generic/580
-> +++ b/tests/generic/580
-> @@ -20,6 +20,7 @@ _require_scratch_encryption -v 2
->  
->  _scratch_mkfs_encrypted &>> $seqres.full
->  _scratch_mount
-> +_require_v1_encryption_support
->  
->  test_with_policy_version()
->  {
-> diff --git a/tests/generic/581 b/tests/generic/581
-> index 2773c9108b35..54f31595a832 100755
-> --- a/tests/generic/581
-> +++ b/tests/generic/581
-> @@ -33,6 +33,7 @@ _require_scratch_encryption -v 2
->  
->  _scratch_mkfs_encrypted &>> $seqres.full
->  _scratch_mount
-> +_require_v1_encryption_support
->  
->  dir=$SCRATCH_MNT/dir
->  
-> diff --git a/tests/generic/593 b/tests/generic/593
-> index 05f868f92422..61976df8194d 100755
-> --- a/tests/generic/593
-> +++ b/tests/generic/593
-> @@ -21,6 +21,7 @@ _require_command "$KEYCTL_PROG" keyctl
->  _init_session_keyring
->  _scratch_mkfs_encrypted &>> $seqres.full
->  _scratch_mount
-> +_require_v1_encryption_support
->  _require_add_enckey_by_key_id $SCRATCH_MNT
->  
->  test_with_policy_version()
-> diff --git a/tests/generic/613 b/tests/generic/613
-> index 499af18ef476..aadb3893e73e 100755
-> --- a/tests/generic/613
-> +++ b/tests/generic/613
-> @@ -26,6 +26,7 @@ _require_command "$XZ_PROG" xz
->  
->  _scratch_mkfs_encrypted &>> $seqres.full
->  _scratch_mount
-> +_require_v1_encryption_support
->  
->  echo -e "\n# Adding encryption keys"
->  _add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
+>  # Require a set of overlayfs features
 > -- 
-> 2.43.7
+> 2.55.0
 > 
