@@ -1,57 +1,55 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795281568;
-	b=zXjshWSzup9+ZmRUXLvGnysAAeHV5tInCZzQDLQjJDT34pjzXbh8iC/ZQag9uIqUUXpT
-	 TX/Rl8qWga9VmSCnqaqwqYjvE63tx34wdNH7/WH4kkBbCOO/eqMCjbqA1WTDcaAi/ol1c
-	 H8iG1Gxwk4fXdJELpOYq6ZySffRmeD6rYIF70NFTq1YonALR6yWuKyg+GQI9UgxK/XIrB
-	 m72AqBGMXUIM5GYHUT2sEqB18Z59T0DbkGtboj7fmA9cy0M/D3ZLiz3H4bsFpcQ+PZLMl
-	 8Xc6lvSxC8bnwka3ESg5PATVJBf9HT9RqZKFv41vRJCuhwjr+A7jp4XRxrqE/FCvPPw==
+	t=1795282325;
+	b=aNIiEzeymMlax74D/BkvrYYNs3FkaMarIYsOPfqzQ6pf91+LlRyXuasBDZ9Kz4ckhRY8
+	 774gnBGTObxsiEQ4vvHO7QoovwBILqPhHXBWxeTtqLZPB3ggxu9oag1YPi87HlK3o9D8t
+	 L/ImaIbA4vuaalh+5QpBST0olux4+yDPMSilNmlBhQr0toqozuumR1xeAdxuIwZv17glG
+	 MxL2q38OastTvR75IAkXZFRYhZMn06kJcUd5Lv5XOxjmo+PYQYamEuPYg5gLmqd3C3y3B
+	 bA1I5emFEDOM1G6tIkOG4GmIiyrhlbBZIjOjk6BW3WvYo3IoWddugRR2eCEoq3FAcKg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795281568;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795282325;
 	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
 	 Mail-Followup-To:References:MIME-Version:Content-Type:
 	 Content-Disposition:In-Reply-To;
-	bh=Ssw+DqUMswGGFnd0hmK6VkHcR14rpbon5k46W9ZVRX8=;
-	b=iuUgXE1I4gz6DGEwPIDrrp+QP7m1ZFJJNkzWhkBR/vR+f7Rty8jL9/sOEx2U4YjY+kVc
-	 tUpVDoslOb8g4amTRoZbuRodBdm2XtbECbZO6kGBIMH53WTgSbfu4fb+XqUpBu1UOUUUw
-	 NnozjzYRMCO3Tv8lqKsDEXHtgFjtQZ0IVDzOjLpfDTMEyT9DYCF5MLFAEcOIJCwL9q3Pp
-	 Jq5B1z38ZVVCXXdw84nOfwnrpjZnRGNmShQv8IhQ+C+HNTfqfOEMffhF574BsZDVUP2ON
-	 YEb4VKgVdss5tU+QX9I4P3Xl5wORlBFlwKfjPgg0XrTk8LYtMl1LZKE6E4b4NPQyVlg==
+	bh=3ly2KYNJ9k4LBXvYbKtghQJxpj2UAoA6Fe2R68ADP+E=;
+	b=qDEjtQuliKC/oCmC6Sd23azJY8Oc6v5HSu+a+0Ib6+Y6jcHiZii73k5Volab9gpMqwYk
+	 5l7clieO46qhjHI6VYEtrQ9cY1Fe5TjhO8pg4Vu+Bis8OlcwrrC2zblejC2CdQ0tU1I9k
+	 TikJwu/3OWnv1AEBzzwJzO1Q7HGG47AVzu16iKfSGle28/cDguruyQdP/F//NVHF9PP4b
+	 mztZm8ZbwG0HQX8qOPvFniA8lwG0NFj6QM24cwiYiHf5LBotTrznIa7G5r8BKkLHT48rq
+	 5Xu0TF5Gt8aPlE5xg+I+Bw57CuVAtyyt3+yrz5dAPTSWrU5urrS5jEViEtYvyGRkbAg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=HfzP3hTi;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=J2rKSqGa;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CED1B606A320;
-	Sat, 21 Nov 2026 17:19:28 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02335606A320
+	for <fstests@vger.kernel.org>; Sat, 21 Nov 2026 17:32:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=HfzP3hTi
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BBA481F000C4;
-	Sat, 21 Nov 2026 17:19:24 +0000 (UTC)
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=J2rKSqGa
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B63371F000C4;
+	Sat, 21 Nov 2026 17:32:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795281568;
-	bh=Ssw+DqUMswGGFnd0hmK6VkHcR14rpbon5k46W9ZVRX8=;
+	s=k20260515; t=1795282324;
+	bh=3ly2KYNJ9k4LBXvYbKtghQJxpj2UAoA6Fe2R68ADP+E=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=HfzP3hTiDS0/XOinjFibodrC0Gpu8Um+4wbMsE6D3ruc1YRy4MXRp3qzOUFYQuO8Y
-	 FeVVfgEgHcApezuswStlAxdHfOCOlUH7njKIqpj0RKmlfIx8AF00OhXzNFNGZdIgMy
-	 ZuXbqheCccA9uWWYMcRR7VeJvRfYhWfFvfbo0eNlItt4DfRgTeJwYrccAg0ZKjLezo
-	 xZXr/GbEBCIm2X+w61+yFSLySb43NotB5pthjZomrfjGVRI6w3wbFL68EuVadr7uJI
-	 0rQNyDA1ecCp9LTXt+TAamgzvp1cZz4p8cWr23GS8gBpJFE1sW99xqE4N9i9ezq79T
-	 BNGEsLbYd1I1g==
-Date: Sun, 22 Nov 2026 01:19:19 +0800
+	b=J2rKSqGaF0UUjntKy4t6PBHsRk9YuEM/rRLnq39l3bT+8i975lRZWWADGD33S8nD4
+	 557sKXGW2Jlv59jrxfTSX7wnLF4GtotDeHPf9grOe0zQSaMKvbLSTqIRewH6X7EI9+
+	 gJKUKEhSM+XguRqBLlkoFfeafIWkMK5TkaW5foHFVkcX0PD0u2TvWImoG55TD7D66i
+	 ZwOBzeJ/5cAshfxwxyWWMiZZVQFHGmAo5OOWTrXHq80cII0Mwb8p60+kgs9t0sygtn
+	 CUO+1vB8g3z7p+XGYH2G1EKwHpVhWVM1dsFwlqCTcE7dFcAEjdC2lWn6W7cokI4Gww
+	 AxNckcg1JUUzQ==
+Date: Sun, 22 Nov 2026 01:31:58 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, 
-	fstests@vger.kernel.org, Prabhakar Pujeri <prabhakar.pujeri@dell.com>
-Subject: Re: [PATCH] common/overlay: fix _check_overlay_feature for
- default-on param-less options
-Message-ID: <awHSXIxDUNu2kacw@zlang-mailbox>
-Mail-Followup-To: Amir Goldstein <amir73il@gmail.com>, 
-	Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org, 
-	Prabhakar Pujeri <prabhakar.pujeri@dell.com>
-References: <20261106155832.3867017-1-amir73il@gmail.com>
+To: koraynilay <koray.fra@gmail.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH v2] generic: add test for garbled stat output from
+ negative nanoseconds
+Message-ID: <awHTU6F4imBlRW7p@zlang-mailbox>
+Mail-Followup-To: koraynilay <koray.fra@gmail.com>, 
+	fstests@vger.kernel.org
+References: <20261121162003.234307-1-koray.fra@gmail.com>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -63,70 +61,122 @@ Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20261106155832.3867017-1-amir73il@gmail.com>
+In-Reply-To: <20261121162003.234307-1-koray.fra@gmail.com>
 
-On Fri, Nov 06, 2026 at 04:58:31PM +0100, Amir Goldstein wrote:
-> Overlayfs only displays a mount option if it differs from the default.
-> Commit 73a018cb treated a feature without a module parameter of the same
-> name (e.g. xino) as default off and required "${feature}=on" in the mount
-> options.  On a samefs xfs setup xino is on by default and is not displayed,
-> so tests requiring xino (e.g. overlay/041, 043, 044, 067, 070, 071) were
-> wrongly skipped.
+On Sat, Nov 21, 2026 at 05:20:03PM +0100, koraynilay wrote:
+> Some filesystems don't use set_normalized_timespec64() to handle their
+> timestamps format conversion, leading to a garbled stat command output
+> for timestamps.
 > 
-> For features without a boolean module parameter, assume the feature may
-> be on by default and only verify that the mount options do not show it
-> with a value other than "on", same as for features that default to Y.
+> For example:
+>      from cache:   1960-01-01 01:01:01.123456789 +0000
+>   after remount:   1960-01-01 01:01:02.()*+,--00 +0000
 > 
-> Fixes: 73a018cbf57b ("common/overlay: let _check_overlay_feature handle param-less options")
-> Cc: Prabhakar Pujeri <prabhakar.pujeri@dell.com>
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> This bug also violates a struct timespec64 invariant, as documented in
+> the set_normalized_timespec64() kernel-doc:
+> [...]
+>  * Note: The tv_nsec part is always in the range of 0 <= tv_nsec <
+>  * NSEC_PER_SEC.
+>  * For negative values only the tv_sec field is negative !
+>  */
+> 
+> Example patches that fix the problem[1][2].
+> 
+> Link: https://lore.kernel.org/linux-cifs/20261112111637.184045-1-koray.fra@gmail.com/ [1]
+> Link: https://lore.kernel.org/linux-cifs/20261112111637.184045-2-koray.fra@gmail.com/ [2]
+> Signed-off-by: koraynilay <koray.fra@gmail.com>
 > ---
+> v2 changes:
+> - use _fixed_by_fs_commit for ksmbd and cifs
+> - add _fixed_by_fs_commit for ntfs3
+> - fix cleanup function
+> - remove useless comment
+> - wrap more the other comments so they're easier to read
+> 
+> Thanks.
+> 
+>  tests/generic/812     | 48 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/812.out |  3 +++
+>  2 files changed, 51 insertions(+)
+>  create mode 100755 tests/generic/812
+>  create mode 100644 tests/generic/812.out
+> 
+> diff --git a/tests/generic/812 b/tests/generic/812
+> new file mode 100755
+> index 00000000..eb76f2e5
+> --- /dev/null
+> +++ b/tests/generic/812
+> @@ -0,0 +1,48 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 koraynilay.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 812
+> +#
+> +# Based on generic/258, but tests timestamps prior to epoch with sub-second
+> +# precision.
+> +#
+> +# ksmbd, cifs, ntfs3 and other filesystem drivers violate timespec64
+> +# non-negative nanoseconds constraint, garbling output of stat.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick bigtime
+> +
+> +_fixed_by_fs_commit cifs 6a75ce0866bb \
+> +	"smb: client: fix negative timestamps being read from smb"
+> +_fixed_by_fs_commit cifs f2f961e0983c \
+> +	"ksmbd: fix negative timestamps being saved to disk"
+> +_fixed_by_fs_commit ntfs3 xxxxxxxxxxxx \
+> +	"ntfs3: fix negative timestamps corrupting stat output"
+> +
+> +_require_test
+> +_require_negative_timestamps
+> +
+> +TESTFILE=$TEST_DIR/timestamp-test.txt
+> +# we use 123456700 instead of 123456789 because some
+> +# filesystems support only 100ns precision
+> +DATE="1960-01-01 01:01:01.123456700 UTC"
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f "$TESTFILE"
+> +}
+> +
 
-Looks good to me!
+Haha, I probably didn't explain that clearly. I didn't mean changing the `rm`
+line in _cleanup. What I meant forcefully running `rm -f $TESTFILE` right
+before touch -d below, so that any existing file doesn't interfere with the
+test, since we don't strictly require TEST_DIR to be completely cleaned
+up after every test case run.
+
+Don't worry about sending a new version, I'll fix it when I merge. Then...
 
 Reviewed-by: Zorro Lang <zlang@kernel.org>
 
->  common/overlay | 22 +++++++++-------------
->  1 file changed, 9 insertions(+), 13 deletions(-)
+> +# create a file with a timestamp prior to the
+> +# epoch with nanosecond precision
+> +touch -d "$DATE" "$TESTFILE"
+> +
+> +TZ=UTC stat -c "%y" "$TESTFILE"
+> +
+> +# unmount, remount, and check the timestamp
+> +_test_cycle_mount
+> +
+> +TZ=UTC stat -c "%y" "$TESTFILE"
+> +
+> +_exit 0
+> diff --git a/tests/generic/812.out b/tests/generic/812.out
+> new file mode 100644
+> index 00000000..f0267fbb
+> --- /dev/null
+> +++ b/tests/generic/812.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 812
+> +1960-01-01 01:01:01.123456700 +0000
+> +1960-01-01 01:01:01.123456700 +0000
 > 
-> diff --git a/common/overlay b/common/overlay
-> index 132b2bf7..0cf6db2d 100644
-> --- a/common/overlay
-> +++ b/common/overlay
-> @@ -172,24 +172,20 @@ _check_overlay_feature()
->  	# parameter (the system default) and per mount by mount
->  	# option ${feature}=[on|off].
->  	local default=`_get_fs_module_param ${feature}`
-> -	if [ "$default" != Y ] && [ "$default" != N ]; then
-> -		# Some mount options (e.g. uuid, xino, verity) have no
-> -		# on/off module parameter of the same name.  For those,
-> -		# a missing (or non-boolean) parameter means that the
-> -		# feature defaults to off rather than that it is
-> -		# unsupported.  Unsupported options are rejected by the
-> -		# probe mount in _require_scratch_overlay_features.
-> -		default=N
-> -	fi
-> +	local value=`_fs_options $dev | tr ',' '\n' | grep "^${feature}=" | cut -d= -f2`
->
->  	# Check options to be sure. For example, Overlayfs will fallback to
->  	# index=off if underlying fs does not support file handles.
->  	# Overlayfs only displays mount option if it differs from the default.
-> +	# Without a module param of the same name (e.g. xino), the feature
-> +	# may be on by default, so only require it is not shown as non-on.
->  	# Overlayfs may enable the feature, but fallback to read-only mount.
-> -	((( [ "$default" = N ] && _fs_options $dev | grep -q "${feature}=on" ) || \
-> -	  ( [ "$default" = Y ] && ! _fs_options $dev | grep -q "${feature}=off" )) && \
-> -	    touch $mnt/foo 2>/dev/null ) || \
-> -	        _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${dev}"
-> +	if [ "$default" = N ]; then
-> +		[ "$value" = on ]
-> +	else
-> +		[ -z "$value" -o "$value" = on ]
-> +	fi && touch $mnt/foo 2>/dev/null || \
-> +		_notrun "${FSTYP} feature '${feature}' cannot be enabled on ${dev}"
->  }
->  
->  # Require a set of overlayfs features
+> base-commit: 71641219a506ac62bfa231592394265ca812670e
 > -- 
-> 2.55.0
+> 2.56.0
 > 
