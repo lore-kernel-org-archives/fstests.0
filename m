@@ -1,83 +1,56 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.45
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=117.135.210.2
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795282562;
-	b=UId+F+7jBqyfwqtyn0OtiUKfTLzC/f4E8byjcg7Tl/Sn66lHL0AjbammdfLIQraLdjnO
-	 SPKb0XYwA9zbxNhTk2mmLKovbs5s2r6vHNlvLcW1jxv57thjsV3whvDz4ZH0ivx2MrxQx
-	 5H6yGmaeccbYZRDX/75zBGRRPP1V/kgdyi7Vf8KKI6w5VHYVnGwGODyABUJNBMTC4ZHuz
-	 ZVDwEgwRNk6CJNuoeZ51D3UydMLahWtaqKxAZTgFiJ/7lz7ke63YjcSYZX+9YT48vCO1M
-	 t0UE3MnqfQaN4h6/ILW1JqQ6ZjjTqEjNxhWed3z1b7O1KaBbZMudivrOO7KXVIAMGGg==
+	t=1795352236;
+	b=yXNIgmgJLAF2ooppQeP3lUG7ST29ADomA1GAuARg3XG2cglUP79ARzvATRyqDNMV0Ppi
+	 YwQMerPvruStQiWw3U23jqiSud0y4HFmt/ir8X0WDQzZwbhN0a7qETEDE/9ydS+W266sI
+	 9bmakHumHeHdakQ2aD0k/r9LrdLxo+Z7+R+lHfGZ6pX87HvbNlyFT95gdkRzkE/KttqiR
+	 sB0Af5k+vq68AacxjTwP1a0FB10dAe+zSA+RmnSGUVFOrA+MCWUoCVZ651VpwJeUQPRH5
+	 7ZkoT1zOQNmR0A4nUFVlRrMkJYWUJ/7Es++kWT+/0R3SQj0bGZwqg2hSxaVSYavtGtg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795282562;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
-	 Mime-Version:Content-Type:Date:Message-Id:Subject:From:To:X-Mailer:
-	 References:In-Reply-To;
-	bh=iptS2vTGwyef/oQudP4H8mHhv5KvqnJZreLTYNNbBnY=;
-	b=vOh8aWEH4yAiNjK0R9OMBSsdUlPOiMboTJrVmZCmN9b3vrTkEXzdcdaRAuUeAnDl1Ny2
-	 uTH/Eh0YKVvgvqTa2lte8ScQsS58WWnCOpYJZjtyBgMM/t5glcjSaNMwaqf9aIab8LWOg
-	 ZZ6gXJjJQy0OicX3XHsDyuTsNyeJ78uYzVylHJlCnNny3YwBkKjB3khDU/XjESiHS0VIY
-	 lEWABRVk1D/pNE2W9Q+tm6gVFg+Z13Qql5gBeKV+NLRekVbm5C6qCcVdOCJRunNVmxrD0
-	 +9XddGKj3E00AlWQ+XNXcOj6DzE8aP9pXtAJchKL3kEm9jg6W1HnTB+6u5j+Z9p9wjA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795352236;
+	h=DMARC-Filter:DKIM-Signature:Received:From:To:Cc:Subject:Date:
+	 Message-ID:X-Mailer:MIME-Version:Content-Transfer-Encoding:
+	 X-CM-TRANSID:X-Coremail-Antispam:X-CM-SenderInfo;
+	bh=Q4RjsKon5d99Zr7ol90LruhFBUx6Ds/UmzYKksx0yfU=;
+	b=uBtHTWDcBvKy21cPpQ1rR1N5CO3S434Gt0UdUYf4kCZx/gc5y4QYALhwGA2ekqlSJcba
+	 lwGadJKjb0JmqU0uvMSZH5Cg8tlmFjFOtxx5uq5ilIpCw4DJ9/dd+sdQP4e2fhIEwWVQr
+	 nJrOtgY/vg4Yjgln18Kk5A+dDOjdB3ZRrXvtYmsYrSUnjPK3kkvdQayCARD7cOr8TPM/z
+	 xteWRhANSW69/VcBD+/vnQLhOsL2muscsacq8INg+f4whCGjvY0qk5GADje7clFifxLal
+	 iNPszn+3LSb3atvGvniOJdxR0dOB5lLMwPafeFJg29aIlwVvm1PH7tm5jBD+fll89qw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Bglsq8mj;
-	arc=none smtp.remote-ip=209.85.221.45
-Received: from mail-wr1-f45.google.com (mail-wr1-f45.google.com [209.85.221.45])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	dmarc=pass header.from=163.com;
+	spf=pass smtp.mailfrom=163.com;
+	dkim=pass header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=GUzvvSaG;
+	arc=none smtp.remote-ip=117.135.210.2
+Received: from m16.mail.163.com (m16.mail.163.com [117.135.210.2])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E62D606A337
-	for <fstests@vger.kernel.org>; Sat, 21 Nov 2026 17:36:02 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3E62D606A337
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF723606A330
+	for <fstests@vger.kernel.org>; Sun, 22 Nov 2026 12:57:14 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org DF723606A330
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=163.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=163.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=Bglsq8mj
-Received: by mail-wr1-f45.google.com with SMTP id ffacd0b85a97d-490c3ae81d3so1217757f8f.2
-        for <fstests@vger.kernel.org>; Sat, 21 Nov 2026 09:36:01 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1795282560; x=1795887360; darn=vger.kernel.org;
-        h=in-reply-to:references:to:from:subject:message-id:date:content-type
-         :mime-version:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=iptS2vTGwyef/oQudP4H8mHhv5KvqnJZreLTYNNbBnY=;
-        b=Bglsq8mj/iLIkJNeB1VrARoMiRx0+CHf+K0+lzevwI9mES7jRLbVhr28+rtkPEcGIL
-         fLoKdw+YC8wiv/YULlDRUi9EgkZZpLVyrTHV81S8L81ieUvx+xF9cWTNq6fPzHyGdAmd
-         jh/DL0c4nU2+nuXaPNC1AOGQFFEAp92usr1uSwY51HD5r3vaEE1CtlN6zJLEY8WBsZhg
-         oLAasgPkrZI7aQtICHkrPIRAzLPsMLBeNS3xK6TFWrXvk/P0/+tNlZG9nKb3YEd+0nGa
-         K3TomKoI86lCxjU6N/biCpNZ0t+8FN4MsfaeC0rz2FHqOvAopNfc//ChaZaZIeVjHOaD
-         auog==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795282560; x=1795887360;
-        h=in-reply-to:references:to:from:subject:message-id:date:content-type
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=iptS2vTGwyef/oQudP4H8mHhv5KvqnJZreLTYNNbBnY=;
-        b=KrmFGUbdH4uIPrZaSd+Fr22SPofBPlarZ5IbtJWaZZTrV0LbYdoi4WUYxj5K1eOANi
-         txbyS0qXbbsrHzYc8C7W6/z65T7TNgSZCt6F/D6SFkI5k8uxzwt00ModybmZAfp3DuFG
-         wjgMxSgK/ZfDIG/gVeqL0F2+3qjLCzYHWvHUlZ5BFrFhvX6rOAAcVQdu5G/znnS8PrW7
-         9TV+iPl5ERTttmxIS1Pc4kmMrP8zaL65oJZopv+QhxTa8AFt/4NcLsun2Z2LSuWnJDH0
-         cxtr0cwkuS6crC8y9XrNnuhXD+NJWNMomrzAJG7OpKxuo38xH59zduJWChqM2IxBEkTX
-         e9IQ==
-X-Forwarded-Encrypted: i=1; AL+hErEJlLHcNb/7Xf7PIMurrtgbm2fhW6/G6C/6iShQ7X1IH/extcqZZQijhECsUvb/uH6AiaavvAiO@vger.kernel.org
-X-Gm-Message-State: APuU4Z98b+St2Q/SIRLbqkMAJFpY3t1e1Mj5tV+JSSkgu9o8afn/VjSd
-	OkEyMbi7tGnPdtG4BUp50mHzqnBJyrR2cRmUnzRlS1N1g7yHGzZDUtpJOQeGCI9ofHA=
-X-Gm-Gg: AZFdTZfxOi7kwWT6cJz9MkGVb00oO5cRi2VW59DoKHxyEHsrD0gW/YFNmR0eJlXqnzW
-	j+2Edn0s/unth4pttkRO5k5F9a/Wx3hwsbckAaixy1PtrZuM/xKqqJp8iBgm2aZ0AxfpBOb1IDp
-	yvU+HNsVygfIz/U+E/VI8/3a6QSsH9fnIPFG/yRP6uOIsdvhtNUqWvIH1zVAQi6S6SBg2ns4NzA
-	Bs3YzTPllw8DgU5QI1ALbsLjkTTp9O3tttzgqZvxvAVOtciTS/94sl9RVUhdjqVFZkSd8Qy72Kw
-	u33ECNXjrwI1aFHuiNJePWQM9xK67N2bwv9zY4hZgPPWW/YDqWZIyGAh4cPSvCeVNWf6+p3nwKh
-	cTRi9DNS4QvsS0DJ1K/NgUYjdeuHQ1kuUa9l9XbMX266FR92fdFw2YtDbyA8k7TYOrjPqdFAeEK
-	39wOaxjyHqcrfklJZTMdfs6/2/yLzoaNYeV4KtFJGlIZVpPEYycwsX0zWzRyTEpdz/y1d9oYV47
-	AKz5YHjd2hN1k8wp3eQCt+d2UNoRSGAEq0hq1wx7hnGc0Kkk8uq425/e9bpe/3nSO1Zv3wHwljK
-	zXEQK0zs6jMUW7RIu5SYn+x6lg==
-X-Received: by 2002:a05:600c:4f10:b0:4a1:88de:9e8b with SMTP id 5b1f17b1804b1-4bb88807909mr156132435e9.5.1795282560058;
-        Sat, 21 Nov 2026 09:36:00 -0800 (PST)
-Received: from localhost ([2001:b07:5d26:7a6a:365a:60ff:fe0d:cfc6])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4bb884c3063sm197499165e9.15.2026.11.21.09.35.58
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 21 Nov 2026 09:35:58 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=GUzvvSaG
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
+	s=s110527; h=From:To:Subject:Date:Message-ID:MIME-Version; bh=Q4
+	RjsKon5d99Zr7ol90LruhFBUx6Ds/UmzYKksx0yfU=; b=GUzvvSaG8vN2rFz3Ys
+	az8PMBDkq+YEi+UCgJvHZc7VCltTfeISLyBHLh2/gsl0qgQbqrwPzLCHiZOgm6lq
+	kUTngg7KaSYX2nd/mQpMQuPoCs67S/ZDAtGLC1nbY3+EQxiEFv8Q6XXtoaMLneoU
+	JUnk3b3SnVETzhogSCeIO/Acc=
+Received: from ubuntu (unknown [])
+	by gzga-smtp-mtada-g1-2 (Coremail) with SMTP id _____wD3n6aF5gJrBljsJQ--.53548S2;
+	Sun, 22 Nov 2026 20:56:48 +0800 (CST)
+From: Shaopei Zhu <shaopei_1012@163.com>
+To: fstests@vger.kernel.org
+Cc: Zorro Lang <zlang@kernel.org>,
+	Namjae Jeon <linkinjeon@kernel.org>,
+	exfat@lists.linux.dev
+Subject: [PATCH] exfat: test EXFAT_IOC_COMBINE
+Date: Sun, 22 Nov 2026 20:56:34 +0800
+Message-ID: <20261122125634.624942-1-shaopei_1012@163.com>
+X-Mailer: git-send-email 2.53.0
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -86,170 +59,357 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
-Mime-Version: 1.0
-Content-Type: multipart/signed;
- boundary=f0c22b6c6a6b1cbda1de2ca74f3c9da1ab1be69871342b0bc9e65d2304d0;
- micalg=pgp-sha512; protocol="application/pgp-signature"
-Date: Sat, 21 Nov 2026 18:35:54 +0100
-Message-Id: <DN12JVQQ4QUC.DE95899OAGJT@gmail.com>
-Subject: Re: [PATCH v2] generic: add test for garbled stat output from
- negative nanoseconds
-From: "koraynilay" <koray.fra@gmail.com>
-To: "koraynilay" <koray.fra@gmail.com>, <fstests@vger.kernel.org>
-X-Mailer: aerc 0.22.0-0-gc2f86b7abde3
-References: <20261121162003.234307-1-koray.fra@gmail.com>
- <awHTU6F4imBlRW7p@zlang-mailbox>
-In-Reply-To: <awHTU6F4imBlRW7p@zlang-mailbox>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:_____wD3n6aF5gJrBljsJQ--.53548S2
+X-Coremail-Antispam: 1Uf129KBjvJXoW3WFWUXw1DCF4UCw4fWry5XFb_yoWftr18pa
+	yFyw4rJw4IqwsrGa4SkFy0qa4F9w4F9F15Cr92gw1UZFZrtr1kKrZFqrW7urZ3WrsrXFW5
+	KFs3tFyY9rn7XaDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07j1GQDUUUUU=
+X-CM-SenderInfo: pvkd01phlbiiirs6il2tof0z/xtbC6RI5x2sC5pKYvgAA3+
 
---f0c22b6c6a6b1cbda1de2ca74f3c9da1ab1be69871342b0bc9e65d2304d0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=UTF-8
+Add a test for EXFAT_IOC_COMBINE, which appends the clusters of one
+file to another without copying data, zero-filling the destination up
+to the next cluster boundary first, and then unlinks the source.
 
-On Sat Nov 21, 2026 at 6:31 PM CET, Zorro Lang wrote:
-> On Sat, Nov 21, 2026 at 05:20:03PM +0100, koraynilay wrote:
->> Some filesystems don't use set_normalized_timespec64() to handle their
->> timestamps format conversion, leading to a garbled stat command output
->> for timestamps.
->>=20
->> For example:
->>      from cache:   1960-01-01 01:01:01.123456789 +0000
->>   after remount:   1960-01-01 01:01:02.()*+,--00 +0000
->>=20
->> This bug also violates a struct timespec64 invariant, as documented in
->> the set_normalized_timespec64() kernel-doc:
->> [...]
->>  * Note: The tv_nsec part is always in the range of 0 <=3D tv_nsec <
->>  * NSEC_PER_SEC.
->>  * For negative values only the tv_sec field is negative !
->>  */
->>=20
->> Example patches that fix the problem[1][2].
->>=20
->> Link: https://lore.kernel.org/linux-cifs/20261112111637.184045-1-koray.f=
-ra@gmail.com/ [1]
->> Link: https://lore.kernel.org/linux-cifs/20261112111637.184045-2-koray.f=
-ra@gmail.com/ [2]
->> Signed-off-by: koraynilay <koray.fra@gmail.com>
->> ---
->> v2 changes:
->> - use _fixed_by_fs_commit for ksmbd and cifs
->> - add _fixed_by_fs_commit for ntfs3
->> - fix cleanup function
->> - remove useless comment
->> - wrap more the other comments so they're easier to read
->>=20
->> Thanks.
->>=20
->>  tests/generic/812     | 48 +++++++++++++++++++++++++++++++++++++++++++
->>  tests/generic/812.out |  3 +++
->>  2 files changed, 51 insertions(+)
->>  create mode 100755 tests/generic/812
->>  create mode 100644 tests/generic/812.out
->>=20
->> diff --git a/tests/generic/812 b/tests/generic/812
->> new file mode 100755
->> index 00000000..eb76f2e5
->> --- /dev/null
->> +++ b/tests/generic/812
->> @@ -0,0 +1,48 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2026 koraynilay.  All Rights Reserved.
->> +#
->> +# FS QA Test No. 812
->> +#
->> +# Based on generic/258, but tests timestamps prior to epoch with sub-se=
-cond
->> +# precision.
->> +#
->> +# ksmbd, cifs, ntfs3 and other filesystem drivers violate timespec64
->> +# non-negative nanoseconds constraint, garbling output of stat.
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick bigtime
->> +
->> +_fixed_by_fs_commit cifs 6a75ce0866bb \
->> +	"smb: client: fix negative timestamps being read from smb"
->> +_fixed_by_fs_commit cifs f2f961e0983c \
->> +	"ksmbd: fix negative timestamps being saved to disk"
->> +_fixed_by_fs_commit ntfs3 xxxxxxxxxxxx \
->> +	"ntfs3: fix negative timestamps corrupting stat output"
->> +
->> +_require_test
->> +_require_negative_timestamps
->> +
->> +TESTFILE=3D$TEST_DIR/timestamp-test.txt
->> +# we use 123456700 instead of 123456789 because some
->> +# filesystems support only 100ns precision
->> +DATE=3D"1960-01-01 01:01:01.123456700 UTC"
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -f "$TESTFILE"
->> +}
->> +
->
-> Haha, I probably didn't explain that clearly. I didn't mean changing the =
-`rm`
-> line in _cleanup. What I meant forcefully running `rm -f $TESTFILE` right
-> before touch -d below, so that any existing file doesn't interfere with t=
-he
-> test, since we don't strictly require TEST_DIR to be completely cleaned
-> up after every test case run.
+The test covers an aligned and an unaligned destination, empty
+destination and source, a fragmented source appended to a contiguous
+destination, a destination extended by truncate and by fallocate, a
+source unlinked before the call, and invalid requests, and checks that
+the source is unlinked.  The contents are compared with the expected
+result before and after a remount.
 
-Oh, yeah that makes more sense considering the template and other tests
-all keep the rm -f $tmp.* ahah.
+It is skipped on kernels without the ioctl.
 
-> Don't worry about sending a new version, I'll fix it when I merge. Then..=
-.
->
-> Reviewed-by: Zorro Lang <zlang@kernel.org>
->
+This was written with the help of an AI coding assistant (Claude Code,
+Opus 5.5) and reviewed and tested by me.
 
-Thank you.
+Signed-off-by: Shaopei Zhu <shaopei_1012@163.com>
+---
 
-Best,
-koraynilay
+Notes:
+    The ioctl is added by this kernel patch, under review:
+    https://lore.kernel.org/all/20261122124029.609636-1-shaopei_1012@163.com/
+    
+    The test is skipped on kernels without it.  Based on for-next.
 
->> +# create a file with a timestamp prior to the
->> +# epoch with nanosecond precision
->> +touch -d "$DATE" "$TESTFILE"
->> +
->> +TZ=3DUTC stat -c "%y" "$TESTFILE"
->> +
->> +# unmount, remount, and check the timestamp
->> +_test_cycle_mount
->> +
->> +TZ=3DUTC stat -c "%y" "$TESTFILE"
->> +
->> +_exit 0
->> diff --git a/tests/generic/812.out b/tests/generic/812.out
->> new file mode 100644
->> index 00000000..f0267fbb
->> --- /dev/null
->> +++ b/tests/generic/812.out
->> @@ -0,0 +1,3 @@
->> +QA output created by 812
->> +1960-01-01 01:01:01.123456700 +0000
->> +1960-01-01 01:01:01.123456700 +0000
->>=20
->> base-commit: 71641219a506ac62bfa231592394265ca812670e
->> --=20
->> 2.56.0
->>=20
+ .gitignore          |   1 +
+ src/Makefile        |   2 +-
+ src/exfat_combine.c |  91 +++++++++++++++++++++++++
+ tests/exfat/002     | 158 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/exfat/002.out |  15 +++++
+ 5 files changed, 266 insertions(+), 1 deletion(-)
+ create mode 100644 src/exfat_combine.c
+ create mode 100755 tests/exfat/002
+ create mode 100644 tests/exfat/002.out
 
+diff --git a/.gitignore b/.gitignore
+index cdcfa06..0876aee 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -82,6 +82,7 @@ tags
+ /src/dirperf
+ /src/dirstress
+ /src/e4compact
++/src/exfat_combine
+ /src/ext4_resize
+ /src/fake-dump-rootino
+ /src/fault
+diff --git a/src/Makefile b/src/Makefile
+index a1fc38d..b42d7d7 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -38,7 +38,7 @@ LINUX_TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
+ 	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
+ 	rw_hint btrfs_ioctl refluxfs xfs-exchange-to-eof \
+-	xfs-exchange-to-dirty-eof xfs-swapext-reflink
++	xfs-exchange-to-dirty-eof xfs-swapext-reflink exfat_combine
+ 
+ EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+ 	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+diff --git a/src/exfat_combine.c b/src/exfat_combine.c
+new file mode 100644
+index 0000000..2b0b795
+--- /dev/null
++++ b/src/exfat_combine.c
+@@ -0,0 +1,91 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (c) 2026 Shaopei Zhu.  All Rights Reserved.
++ *
++ * Call EXFAT_IOC_COMBINE to append the clusters of src to dst.
++ *
++ * Exits with 0 on success, 2 if the ioctl is not supported and 1 on any
++ * other error.
++ */
++#include <errno.h>
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <sys/ioctl.h>
++#include <linux/types.h>
++#include <linux/ioctl.h>
++
++#ifndef EXFAT_IOC_COMBINE
++struct exfat_combine_args {
++	__s32 src_fd;
++	__u32 flags;
++};
++#define EXFAT_IOC_COMBINE	_IOW('r', 0x20, struct exfat_combine_args)
++#endif
++
++static void usage(const char *prog)
++{
++	fprintf(stderr,
++		"usage: %s [-f flags] [-r|-w] [-U] dst src\n"
++		"  -f flags  value of exfat_combine_args.flags\n"
++		"  -r        open src read-only\n"
++		"  -w        open src write-only\n"
++		"  -U        unlink src before combining (use the open fd)\n",
++		prog);
++	exit(1);
++}
++
++int main(int argc, char **argv)
++{
++	struct exfat_combine_args args = { 0 };
++	int src_mode = O_RDWR, unlink_first = 0;
++	int c, dst, src;
++
++	while ((c = getopt(argc, argv, "f:rwU")) != -1) {
++		switch (c) {
++		case 'f':
++			args.flags = strtoul(optarg, NULL, 0);
++			break;
++		case 'r':
++			src_mode = O_RDONLY;
++			break;
++		case 'w':
++			src_mode = O_WRONLY;
++			break;
++		case 'U':
++			unlink_first = 1;
++			break;
++		default:
++			usage(argv[0]);
++		}
++	}
++	if (argc - optind != 2)
++		usage(argv[0]);
++
++	dst = open(argv[optind], O_RDWR);
++	if (dst < 0) {
++		perror(argv[optind]);
++		return 1;
++	}
++	src = open(argv[optind + 1], src_mode);
++	if (src < 0) {
++		perror(argv[optind + 1]);
++		return 1;
++	}
++	if (unlink_first && unlink(argv[optind + 1])) {
++		perror("unlink");
++		return 1;
++	}
++
++	args.src_fd = src;
++	if (ioctl(dst, EXFAT_IOC_COMBINE, &args)) {
++		fprintf(stderr, "EXFAT_IOC_COMBINE: %s\n", strerror(errno));
++		return errno == ENOTTY ? 2 : 1;
++	}
++
++	close(src);
++	close(dst);
++	return 0;
++}
+diff --git a/tests/exfat/002 b/tests/exfat/002
+new file mode 100755
+index 0000000..c2c0d26
+--- /dev/null
++++ b/tests/exfat/002
+@@ -0,0 +1,158 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 Shaopei Zhu.  All Rights Reserved.
++#
++# FS QA Test No. exfat/002
++#
++# Test EXFAT_IOC_COMBINE, which appends the clusters of one file to
++# another without copying any data and then unlinks the source.  A
++# destination that is not cluster aligned is zero-filled up to the next
++# cluster boundary first, so the appended data always starts at a cluster
++# boundary.  Check the result before and after a remount, covering
++# contiguous and fragmented files, a destination extended by truncate and
++# fallocate, an already unlinked source, and the error cases, in which the
++# source must be left alone.
++#
++. ./common/preamble
++_begin_fstest auto quick rw
++
++. ./common/filter
++
++_require_scratch
++_require_test_program "exfat_combine"
++_require_xfs_io_command "falloc"
++
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++
++combine=$here/src/exfat_combine
++mnt=$SCRATCH_MNT
++
++touch $mnt/probe_dst $mnt/probe_src
++$combine $mnt/probe_dst $mnt/probe_src >> $seqres.full 2>&1
++[ $? -eq 2 ] && _notrun "kernel does not support EXFAT_IOC_COMBINE"
++rm -f $mnt/probe_dst $mnt/probe_src
++
++# st_blksize is the cluster size on exFAT
++clu=$(stat -c %o $mnt)
++echo "cluster size $clu" >> $seqres.full
++
++# write <file> <pattern> <offset> <length>, to a scratch file and to the
++# file holding its expected contents
++write()
++{
++	$XFS_IO_PROG -f -c "pwrite -S $2 $3 $4" $mnt/$1 >> $seqres.full
++	$XFS_IO_PROG -f -c "pwrite -S $2 $3 $4" $tmp.$1 >> $seqres.full
++}
++
++# what the kernel does to <dst>: zero-fill to a cluster boundary and
++# append the contents of <src>, which is then unlinked
++expect_combine()
++{
++	local size=$(stat -c %s $tmp.$1)
++	local src_size=$(stat -c %s $tmp.$2)
++
++	[ $src_size -eq 0 ] && { rm -f $tmp.$2; return; }
++	size=$(( (size + clu - 1) / clu * clu ))
++	$XFS_IO_PROG -c "truncate $size" $tmp.$1
++	cat $tmp.$2 >> $tmp.$1
++}
++
++do_combine()
++{
++	$combine "$@" $mnt/$dst $mnt/$src || echo "combine $dst $src failed"
++	[ -e $mnt/$src ] && echo "$src still exists"
++	expect_combine $dst $src
++	rm -f $tmp.$src
++}
++
++check()
++{
++	local f
++
++	for f in "$@"; do
++		cmp $mnt/$f $tmp.$f || echo "$f: wrong contents"
++	done
++}
++
++echo "aligned destination, source still in the page cache"
++dst=a src=b
++write $dst 0x61 0 $((4 * clu))
++$XFS_IO_PROG -c fsync $mnt/$dst
++write $src 0x62 0 $((3 * clu + 123))
++do_combine
++
++echo "unaligned destination"
++dst=c src=d
++write $dst 0x63 0 $((clu + 1))
++write $src 0x64 0 $clu
++do_combine
++
++echo "empty destination"
++dst=e src=f
++touch $mnt/$dst $tmp.$dst
++write $src 0x65 0 $clu
++do_combine
++
++echo "empty source does not pad the destination"
++dst=g src=h
++write $dst 0x66 0 100
++touch $mnt/$src $tmp.$src
++do_combine
++
++echo "fragmented source, contiguous destination"
++dst=i src=j
++write $dst 0x67 0 $((2 * clu))
++$XFS_IO_PROG -c fsync $mnt/$dst
++for n in 0 1 2; do
++	write $src 0x68 $((n * clu)) $clu
++	$XFS_IO_PROG -c fsync $mnt/$src
++	write spacer 0x78 $((n * clu)) $clu
++	$XFS_IO_PROG -c fsync $mnt/spacer
++done
++write $src 0x68 $((3 * clu)) 100
++do_combine
++
++echo "destination extended by truncate"
++dst=k src=l
++write $dst 0x69 0 1000
++$XFS_IO_PROG -c fsync -c "truncate $((3 * clu + 10))" $mnt/$dst
++$XFS_IO_PROG -c "truncate $((3 * clu + 10))" $tmp.$dst
++write $src 0x6a 0 $clu
++do_combine
++
++echo "destination extended by fallocate"
++dst=m src=n
++write $dst 0x6b 0 10
++$XFS_IO_PROG -c "falloc 0 $((2 * clu + 5))" $mnt/$dst
++$XFS_IO_PROG -c "truncate $((2 * clu + 5))" $tmp.$dst
++write $src 0x6c 0 $((clu + 7))
++do_combine
++
++echo "source unlinked before combining"
++dst=o src=p
++write $dst 0x6d 0 $((3 * clu))
++write $src 0x6e 0 $((2 * clu + 77))
++do_combine -U
++
++echo "invalid requests"
++dst=q src=r
++write $dst 0x6f 0 $clu
++write $src 0x70 0 $clu
++$combine $mnt/$dst $mnt/$dst 2>&1
++$combine -f 1 $mnt/$dst $mnt/$src 2>&1
++$combine -r $mnt/$dst $mnt/$src 2>&1
++$combine -w $mnt/$dst $mnt/$src 2>&1
++
++check a c e g i k m o q r
++
++echo "after remount"
++_scratch_cycle_mount
++check a c e g i k m o q r
++for f in b d f h j l n p; do
++	[ -e $mnt/$f ] && echo "$f exists after remount"
++done
++
++# success, all done
++status=0
++exit
+diff --git a/tests/exfat/002.out b/tests/exfat/002.out
+new file mode 100644
+index 0000000..f061ae8
+--- /dev/null
++++ b/tests/exfat/002.out
+@@ -0,0 +1,15 @@
++QA output created by 002
++aligned destination, source still in the page cache
++unaligned destination
++empty destination
++empty source does not pad the destination
++fragmented source, contiguous destination
++destination extended by truncate
++destination extended by fallocate
++source unlinked before combining
++invalid requests
++EXFAT_IOC_COMBINE: Invalid argument
++EXFAT_IOC_COMBINE: Invalid argument
++EXFAT_IOC_COMBINE: Bad file descriptor
++EXFAT_IOC_COMBINE: Bad file descriptor
++after remount
+-- 
+2.53.0
 
-
---f0c22b6c6a6b1cbda1de2ca74f3c9da1ab1be69871342b0bc9e65d2304d0
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYKAB0WIQSgVimKafU5DQMcjcDmj22qf5IGXAUCawHWegAKCRDmj22qf5IG
-XB4aAQDVBc+ZDTCYN/dhnbnk1cv+ou3P6ITOPX5YxN47GD4VXwEAhMli0NGh2BSv
-FiGG8sHXB5wg/6qvdr7wAAEsoqdd7A4=
-=bw8P
------END PGP SIGNATURE-----
-
---f0c22b6c6a6b1cbda1de2ca74f3c9da1ab1be69871342b0bc9e65d2304d0--
