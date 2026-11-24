@@ -1,52 +1,52 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795516595;
-	b=Delnbv77CigJGOU3ZPgxtgrJztlGFzV0qL6K7wU5haZqk8RaDONl/RO7h3bnju5dMbn0
-	 BiqyiXIDXsCUIhiC+tm4ow0xvnBxYFo/BPmPJIwm6lXMVGolIUvIhvjIH93DE42QjNcPX
-	 9p5944qDPOnVCzZAz94cvzzfuFOWDubbnVw9fqrgYMBN+bBfpArehmtLIKEEM/dpA3k7Y
-	 L6D3QdQdGep6PkKJWxgXWVmdjlJfdvFkyizqA3G+u8UUBBvSu7fQJZb1vJ8rvIwe+Zewr
-	 EUluiSW/v1/nQMYVy4eTeKpVlejNbW4naCiBaHlFKEbL22W4mj2FrsLQllHF9Xz2kVA==
+	t=1795516596;
+	b=huVsTeJu0oEHzogjspDqdkcsg2OdAtsORmDoR1eC5yO4OTklFEOdlPhcfwocsCg/yZrX
+	 8we7Flox8dbdYOWFouiW7L6W6erUEZF8BPgjJG9L4ae1QDvTNb48EuyD1589Ab7mTjfgp
+	 GP6EnJG7qAiPw4KmKaLlaE0N4ojDN83AZZZWa9nYPsnfB/LivbcQBYcrS1gIh6D9qJ2J0
+	 FG1N82qU4s08+GagenN7oF2R7/rZ1WImddEGLpJ/a+3dvCGYESYpzkSGkew65NV4o+N4n
+	 3FdWgzfoYdr0gyS3wzxKCce0/++1+Rw7RQB7LOvb7dlXeGnwzMJmjO/WBeg2FDW736w==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795516595;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795516596;
 	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
 	 In-Reply-To:References:MIME-Version:Content-Transfer-Encoding;
-	bh=h7B/fWJTVzVDmzzWT+I7oQcUCTEsRyYcFHLC9C/m6dw=;
-	b=lS0QfavSNOFMfO4XsDjTKlvtaXlNajmPLGiU9kfzv8+I0XTcxouTONQh2ZY11rE1H/aO
-	 V1DZswmPNq3wEWU608viYZqvfeRUXqLJz/THpS3po+LTuV0Op2amiczHpMRhMPYQOMKZP
-	 luM9ht+7evPJUon+WPo14KIQ/qRfCCX+GF2jjfeu8FJMCGu/5e5+vtCBFqTpPIcs12MvP
-	 RCPkG6VcdGIbH1Jn5PRpdaXgq/YQa3J3+iXo8taxaU8fLjSQxNlE5A+PgnPdHquYcuSqc
-	 70DfOyoL6r45u9RHxpZuNrsjS5N+zc2+f28wCQkQgqClqVmRWVflzDcssTTQgSHyXrA==
+	bh=5/jdjGDbH01qpM9CoSNKgxl9X95h2YCH0P3QprQbt5g=;
+	b=ev+havnAtjSBW4EyMcPYraX+P30oL/NzT6Pn/iIVTGLh/FlUPXCqS51jK83iIqr840Ci
+	 +1ziHguHECu8JyiE71BtJwCWhlAumMxjg0VNt+FrldPWnmmtVRhYeoCuu/UV7Dqvlg29N
+	 /5PMEmmieKpl+7Xu6dRcpR+6zUaTt8aFPHkswskDFOlE2Qm52RglUsdmIixJHv2WJdB3F
+	 xgaVpe2mI8nMZ7Gt02oPg6nrfP36Epz+s2mhC/gIBzrpRnz2R+BSUFphjQTbVtkrc4M7H
+	 osm3WVNnQsIE8krLFSLfZlNcHWufjveh5YTvtU+MGDnB+M79RcooZ/LzAyqI+Z6QUiQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=cdk3t+3e;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=XgoDTXzm;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3801F606A31E
-	for <fstests@vger.kernel.org>; Tue, 24 Nov 2026 10:36:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF494606A31E
+	for <fstests@vger.kernel.org>; Tue, 24 Nov 2026 10:36:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=cdk3t+3e
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B02351F000CA;
-	Tue, 24 Nov 2026 10:36:33 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=XgoDTXzm
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 53EDE1F000C0;
+	Tue, 24 Nov 2026 10:36:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795516594;
-	bh=h7B/fWJTVzVDmzzWT+I7oQcUCTEsRyYcFHLC9C/m6dw=;
+	s=k20260515; t=1795516596;
+	bh=5/jdjGDbH01qpM9CoSNKgxl9X95h2YCH0P3QprQbt5g=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=cdk3t+3easoMrxGH4zi6LHOconP64aSDjJhDsdgRacvWIAwgh/TiqrcP/0/6/0862
-	 18Dy11qDNvnI3oHjenUPGiv4IiL7kfy2Xk8YRwD4vsCcEJHOmeM1YBTMwDVmzK70iP
-	 PiiFuR5bQntRgPJOpNgAONlKe/fDNI5QifrC3hVwPEZzzH+eZZFFhjM93e0U0OfFN9
-	 6Gxc/I09V2cIkOTnqpRUBgJpBuwUgXcus6v96S5ieBFIm5gNbrg7GiHVmgoNPQuL0Y
-	 LP31fxQfq2zqnnCxRALkMAti6dLLvx5WMPy9SKDr3nr0NCjOOmO8HRel7/XuiQu3Vs
-	 c3uUVstc7Na+Q==
+	b=XgoDTXzmt4Cpjfk5mW5wxjTBXWsnqMLdwgvcMsRduBFT0ec4x5oZVcSM+phSxKhI4
+	 ZUAYsFC1KNkJ7zHN1h9lE9PWiaJtkc77VDHH4EeN0mQEaNnF5nzS7Enl6FFjdl3OOv
+	 wilnvVGOxG244Stqslu6NZXOwQMicgwhAm85FGlN68DLUYkksKhN+ZpMagLg5mlzhy
+	 BEZ/DuVjKPSroMFhGtz8LtpRxh7bOvITslJjTqCo6Saf9d9+24Kd3ICAQdHAlYrF/1
+	 kq5jNKBDqf0hsw1TQ78nWsYOEiibE+FBoCr7HI9X578JPEeUD6xb4uxFoNxWIOHIw6
+	 ckx5ZHe9SIL7A==
 From: Andrey Albershteyn <aalbersh@kernel.org>
 To: "Zorro Lang" <zlang@kernel.org>,
 	"fstests" <fstests@vger.kernel.org>
 Cc: Andrey Albershteyn <aalbersh@kernel.org>,
 	preichl@redhat.com
-Subject: [PATCH 1/2] generic/453,generic/454: add a hint for the missing xfsprogs commit
-Date: Tue, 24 Nov 2026 11:36:14 +0100
-Message-ID: <20261124103617.4012647-2-aalbersh@kernel.org>
+Subject: [PATCH 2/2] xfs/349,xfs/556: both these tests require online repair in the kernel
+Date: Tue, 24 Nov 2026 11:36:15 +0100
+Message-ID: <20261124103617.4012647-3-aalbersh@kernel.org>
 X-Mailer: git-send-email 2.54.0
 In-Reply-To: <20261124103617.4012647-1-aalbersh@kernel.org>
 References: <20261124103617.4012647-1-aalbersh@kernel.org>
@@ -61,48 +61,44 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-These two test will fail with xfs_scrub before v7.0.0 which dropped
-warning about use of bidirectional characters. These tests trigger these
-warning and break the golden output on older xfsprogs.
+Both these tests run xfs_scrub without -n (scrub only, no repair),
+therefore, scrub tries to repair found issues. However, without online
+repair enabled in the kernel scrub exits with a message that online
+repair is not supported, breaking the golden output.
 
-+Unnecessary complaints about mixed bidi characters in a name?
-
-This warning was removed in the referenced commit.
+In the xfs/556 case, online repair will not repair anything but just
+prints a message that unrepairable issue found.
 
 Signed-off-by: Andrey Albershteyn <aalbersh@kernel.org>
 ---
- tests/generic/453 | 3 +++
- tests/generic/454 | 3 +++
- 2 files changed, 6 insertions(+)
+ tests/xfs/349 | 1 +
+ tests/xfs/556 | 1 +
+ 2 files changed, 2 insertions(+)
 
-diff --git a/tests/generic/453 b/tests/generic/453
-index 9b121d995ad1..7d1deb553cd3 100755
---- a/tests/generic/453
-+++ b/tests/generic/453
-@@ -17,6 +17,9 @@ _begin_fstest auto quick dir
+diff --git a/tests/xfs/349 b/tests/xfs/349
+index a03ab812dc9e..0940ced42121 100755
+--- a/tests/xfs/349
++++ b/tests/xfs/349
+@@ -18,6 +18,7 @@ _register_cleanup "_cleanup" BUS
+ 
  _require_scratch
- _require_names_are_bytes
+ _require_scrub
++_require_xfs_io_command "repair"	# online repair support
+ _require_xfs_stress_scrub
+ _require_populate_commands
  
-+_fixed_by_git_commit xfsprogs 5f5d7fe4a7ef \
-+	"xfs_scrub: drop the warning about mixed bidirectional codepoints in names"
-+
- echo "Format and mount"
- _scratch_mkfs > $seqres.full 2>&1
- _scratch_mount >> $seqres.full 2>&1
-diff --git a/tests/generic/454 b/tests/generic/454
-index 81c9a721561c..b55e9474c35a 100755
---- a/tests/generic/454
-+++ b/tests/generic/454
-@@ -19,6 +19,9 @@ _require_scratch
- _require_attrs
- _require_names_are_bytes
+diff --git a/tests/xfs/556 b/tests/xfs/556
+index f5ad90c869ba..022a8e674a5a 100755
+--- a/tests/xfs/556
++++ b/tests/xfs/556
+@@ -26,6 +26,7 @@ _cleanup()
+ _require_scratch
+ _require_scratch_xfs_crc
+ _require_scrub
++_require_xfs_io_command "repair"	# online repair support
+ _require_dm_target error
  
-+_fixed_by_git_commit xfsprogs 5f5d7fe4a7ef \
-+	"xfs_scrub: drop the warning about mixed bidirectional codepoints in names"
-+
- echo "Format and mount"
- _scratch_mkfs > $seqres.full 2>&1
- _scratch_mount >> $seqres.full 2>&1
+ filter_scrub_errors() {
 -- 
 2.54.0
 
