@@ -1,52 +1,57 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795542757;
-	b=LWhBd0e/NDkL6x9d5x3XdoMQVAZbEoX0YlJNoX6wEiweQEZsoPj7q0f3EmQxwHvnjob/
-	 dn9kIb41ysd+MGtBDff/TE0PUcNoWa/TuwKexbyB/NOWQUCHmEe2Ls8IDdI3G2DltWPOl
-	 nL5JH53cKU/QDv5jGb1/raz7ahKUNzYMTyXLLHk0sW8iGwKs401lDV8DqjLq0W9zArIjm
-	 42aeowNI3n/+A3TqbFapZ4DFMPnWbFBH5cU9oR79NJNpZoK4vnAnYt+t3cGXYLAdweeF8
-	 SGLuJmtR1Ehl2tC0VyTPx2mpBfleXWpaTeX9G2Cyd94dO0oPgNtdOVSe9W8FbpsmJsg==
+	t=1795551039;
+	b=U3i3EPwFVWcw8QHkasHhsUwfIw3nkPISBktXRGFXk1TS2o7IEAEY84mRWw9t4N8eLAmJ
+	 Ad3P9ygFFtAsUOaG4YNwQfSHLvgXJ8u5QSHgehGOLPFAFeQSWnbZIhAVqZO1EMZPb8HIB
+	 MPriX/ICsDybqVyzxSH7PpQzjC+rX780E0s3AXuaTkmSTDBfISs+I76sP0NCglE8n+KxU
+	 7MPWkDXSxebFpS68boUafk8C1+qcrFjMsSQZzzO2ewlj91Sv+Kz1PKpRxxkdHVuS3cZsv
+	 xMnUXMwYIYtDniR+ATDooCt+X0r/gQ78hf9adiXOCh2AUe3mJwsN0cwPiT9qBjR3SYA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795542757;
-	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
-	 MIME-Version:Content-Transfer-Encoding;
-	bh=Xy6EWSF99HGHeP8GhUp38WSqPd5ynd13YZgZPpIxi4g=;
-	b=bmn/n35Ap8ZZl3P/xbKSUqn/JSfeUZVWPkP0kZLRsI184TiX7T0hHfyRfX3dUjSlMbOj
-	 gJGA7ms52lNsVVbv9AxK7PtYoA6/9PLey0t+/MsBdeg0xemZ8gsxWN+tgRbAO57/Hv7ra
-	 SqARm1rZ7Ii9llmqaiYuV1QxHMzkglY89gUueYThtt9/XUa5N/ToMs65Hf/qo4B54+AT7
-	 b6Rtp39ugbFxOrsFhP0pN5HVh7cdhHXERwPdGpEZpvZqttHy8UjGXWca7D9/MzjJr5jsX
-	 IFCKx4KXXyEjWZxDJVmk0HFwB5I4GFQj/5Tf/+Uj5950fnZuVK32NKPM+9pcMYFWk7g==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795551039;
+	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
+	 Mail-Followup-To:References:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To;
+	bh=lZOSMWhPbYNMRPD8VuzkwPd59ueb73pp3UQLpO1IhZ4=;
+	b=nfUd/uwmK5Zm3HxqAM+E5sA+HP6gUsBK7mNYbDAhL14oVcyKV9tdnsfyyxfD2xzsjyvd
+	 eSRu/wMcrxwf+1Sh/bYJ/oQhaX0CWpMsw6b12w0cPP/XNqLfDDCP6HPu0f59yCOd+5DxY
+	 6OQFu0gG1iCeLcVxfqMUMWJVNfWMQ51S7XWQ08RUv5d1at0WAXaXUWWVfhTEW+L/AgC7f
+	 by8dggDkHBrs9fRSmBkUgC9QZbtLYCGv4UyZTjHmouZBvvlsRZxV7KNRSvs6YiRYIlXZS
+	 a+HJpIpv5ToxAGrgerOc0XrWHKDt7GUdKbhEQn1ZJvtY8f6smebbBZz9mzF+yO4CejQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=jTjKjEH2;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="IWQU2/pv";
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA66A606A31E;
-	Tue, 24 Nov 2026 17:52:37 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CCD67606A31E
+	for <fstests@vger.kernel.org>; Tue, 24 Nov 2026 20:10:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=jTjKjEH2
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E5C3C1F000C0;
-	Tue, 24 Nov 2026 17:52:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=IWQU2/pv
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3866E1F000CA;
+	Tue, 24 Nov 2026 20:10:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795542757;
-	bh=Xy6EWSF99HGHeP8GhUp38WSqPd5ynd13YZgZPpIxi4g=;
-	h=From:To:Cc:Subject:Date;
-	b=jTjKjEH28W1e5egdkVoBTDp+TafEZCunyEyNQItUC5wBQQ/USbCCBFrNIPLbmPrNo
-	 tSeF1lAWE5/vJxxMoUwlQxYtyWwKWjKZSKW0DsCQlm8bl9t5oeNpumaPz90c0ob4lB
-	 OFSDWazK2vNxnwO5PJHzgvDOjnC4rsuRHiCZFkBt78uvFqCpGj6SCFB/pi3Embpk7/
-	 zTr07w+arycISR/VkY/NgQm5aCcjs2kLFfZSifGehIyFXBBTHcmK7Wj8khPyZPkIKj
-	 /nWnyIV6EsZuleOUu0hgMKBspzRQXuBOEupijsHzbakqBy5AD1Wida1sDkJkmYziJR
-	 Xd93QKVNG2ZUA==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] generic: test fsync of a file in a new direcory with a hardlink removed
-Date: Tue, 24 Nov 2026 17:52:32 +0000
-Message-ID: <0e9facfab3e5b9750b551524cf95d8a29d0a3726.1795541960.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.53.0
+	s=k20260515; t=1795551039;
+	bh=lZOSMWhPbYNMRPD8VuzkwPd59ueb73pp3UQLpO1IhZ4=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=IWQU2/pvwkgAtNAKYkM7aC1u2zcETDPTXFpj4oELznPk8UUdQ0LvdE90fl+0/fjNZ
+	 HZRSXFYu+pNDGpx/4NJ7C9eHGYbxAOY4w1SBnMe1JvGfnmfZULC1PgSGQ+i40cPPKM
+	 pags8psDKFiVRVZrjKRJZZksz7bO5K4G8uE4o2EmiHB7+fjoMKijoEJ4elt2us3I7n
+	 a9FowilNZGkIMCUFY2o7dXxfjokaCERs7oDJtticMW4WVtoJ10PJgFHo2cAGKIoIiW
+	 uYu4tMUtUdLlIH0oTvd1Yjtkm3Vw1OQvmBm1e8KhesOvy42JfTvpGQIicrc/oDkax5
+	 E5EgabesV6GIA==
+Date: Wed, 25 Nov 2026 04:10:31 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Andrey Albershteyn <aalbersh@redhat.com>
+Cc: cem@kernel.org, fstests@vger.kernel.org, jencce2002@qq.com, 
+	Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v2] add tmt as a new output format
+Message-ID: <awXtyUXGTDbP5KLd@zlang-mailbox>
+Mail-Followup-To: Andrey Albershteyn <aalbersh@redhat.com>, cem@kernel.org, 
+	fstests@vger.kernel.org, jencce2002@qq.com, Dave Chinner <david@fromorbit.com>
+References: <20261119123910.294544-1-cem@kernel.org>
+ <awDMOOZxtQW8A4_v@zlang-mailbox>
+ <awWiVSZTul_KdB3H@aalbersh-thinkpadx1carbongen13.rmtcz.csb>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -56,120 +61,106 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <awWiVSZTul_KdB3H@aalbersh-thinkpadx1carbongen13.rmtcz.csb>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Tue, Nov 24, 2026 at 03:51:56PM +0100, Andrey Albershteyn wrote:
+> On 2026-11-21 07:19:26, Zorro Lang wrote:
+> > On Thu, Nov 19, 2026 at 01:38:55PM +0100, cem@kernel.org wrote:
+> > > From: Carlos Maiolino <cmaiolino@redhat.com>
+> > > 
+> > > I've been trying to expand my testing matrix leveraging the testing-farm
+> > > cloud (https://testing-farm.io/), which is a public testing cloud available
+> > > for opensource testing.
+> > > 
+> > > Testing-farm uses tmt (https://github.com/teemtee) to orchestrate the
+> > > tests within the provisioned VMs.
+> > > tmt however expects each individual test to be, well, an individual
+> > > test so by default it would put a whole xfstests run as a single test
+> > > case with a looooong report.
+> > > However we can use a tmt-report-result tool to report each test ran
+> > > individually as a sub-test, so the report looks a bit more granular,
+> > > easy to read and prevent my eyes from bleeding while looking at its
+> > > testing reports.
+> > > 
+> > > I know tmt can also be used to orchestrate tests on a local machine.
+> > > Although I have no use for that, it might be useful for someone else,
+> > > reason why at the end of the run it will also print out the tmt report
+> > > file location. This also makes the output consistent to what xunit
+> > > format does.
+> > > 
+> > > Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+> > > ---
+> > > V2:
+> > > 	- Add Murphy's suggestion to the log output if it fails
+> > > 	  to add a test result to the final report
+> > 
+> > Hi Carlos,
+> > 
+> > Sorry for the late reply. I wanted to wait and see what others thought about
+> > this first, though it seems there hasn't been much interest or feedback on
+> > it so far :-D
+> > 
+> > ...
+> > 
+> > More recently before I was laid off from Red Hat, I had been considering adding
+> > a generic hook mechanism to fstests instead, if a user sets an environment
+> > variable (e.g., REPORT_TESTCASE_HOOK="/path/to/my-script.sh"), fstests would
+> > invoke that script at the end of each testcase with arguments like (sect_name,
+> > test_seq, test_status, test_time, report_dir). That way, any CI system or test
+> > harness could simply provide its own lightweight hook.sh to reuse this reporting
+> > interface, without having to hardcode vendor or framework-specific tools into
+> > common/report. Also I thought about adding a streaming format like JSON Lines,
+> > where each completed test appends a self-contained, valid JSON record on the fly,
+> > ensuring that whatever has been flushed to disk remains intact and parseable even
+> > if the system crashes midway through a run.
+> 
+> Regarding the hooks, I continue to pull this patch by Dave [1]
+> into my test machines; it adds generic per-test hooks. I use it
+> mostly to run trace-cmd but this could probably be useful for some
+> kind of additional processing. I find it pretty useful.
+> 
+> The original posting didn't get merged, but I can resend it if other are
+> interested.
+> 
+> 1: https://lore.kernel.org/all/20210722064725.3077558-1-david@fromorbit.com/
 
-Test creating a file in a new directory, creating a hardlink inside a new
-subdirectory, open a fd to the file, remove the first link, fsync the file
-using the fd previously opened and power fail. After the fs is mounted
-again we expect the file and the directories to exist, but only the second
-link for the file exists.
+Hi Andrey,
 
-This exercises a bug in btrfs that is fixed by the following patch:
+Thanks a lot for pointing me to this patch! Classic Dave, while the design has
+some tricky parts, the overall idea is great. This is actually the exact kind
+of external hook mechanism I mentioned earlier, and it's a shame I missed it
+at the time.
 
-  "btrfs: fix loss of fsynced file after link into new dir and unlink"
+However, this design doesn't quite fit Carlos's use case. Since it places the
+hooks inside `_begin_fstest` and `_cleanup`, it won't be able to capture
+golden mismatch results etc.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/generic/900     | 65 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/900.out | 15 ++++++++++
- 2 files changed, 80 insertions(+)
- create mode 100755 tests/generic/900
- create mode 100644 tests/generic/900.out
+What I have in mind is introducing two hooks: a `pre-test` hook placed right
+before `_run_seq` is called in `check`, and a `post-test` hook inside
+`_stash_test_status`. That way, the `post-test` hook can get the test results
+and meet Carlos's requirements. *But!* this execution window might be a bit
+too wide for `ftrace`.
 
-diff --git a/tests/generic/900 b/tests/generic/900
-new file mode 100755
-index 00000000..1bcf2e59
---- /dev/null
-+++ b/tests/generic/900
-@@ -0,0 +1,65 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2026 SUSE S.A.  All Rights Reserved.
-+#
-+# FS QA Test 900
-+#
-+# Test creating a file in a new directory, creating a hardlink inside a new
-+# subdirectory, open a fd to the file, remove the first link, fsync the file
-+# using the fd previously opened and power fail. After the fs is mounted again
-+# we expect the file and the directories to exist, but only the second link for
-+# the file exists.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick log
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -r -f $tmp.*
-+}
-+
-+. ./common/filter
-+. ./common/dmflakey
-+
-+_require_scratch
-+_require_hardlinks
-+_require_test_program unlink-fsync
-+_require_dm_target flakey
-+
-+_fixed_by_fs_commit btrfs xxxxxxxxxxxx \
-+	"btrfs: fix loss of fsynced file after link into new dir and unlink"
-+
-+_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+_scratch_mount
-+
-+# Create our test file with some data.
-+mkdir $SCRATCH_MNT/testdir
-+$XFS_IO_PROG -f -c "pwrite -S 0xab 0K 64K" $SCRATCH_MNT/testdir/foo | _filter_xfs_io
-+
-+# Create a subdirectory and a link in it for our file.
-+mkdir $SCRATCH_MNT/testdir/subdir
-+ln $SCRATCH_MNT/testdir/foo $SCRATCH_MNT/testdir/subdir/bar
-+
-+# Now open an fd to our file using its first link, unlink that path and fsync
-+# the fd.
-+$here/src/unlink-fsync $SCRATCH_MNT/testdir/foo
-+
-+# Simulate a power failure and replay the log/journal.
-+# Our file should exist with a single link, as $SCRATCH_MNT/testdir/subdir/bar.
-+_flakey_drop_and_remount
-+
-+echo "Filesystem content after power failure:"
-+# Remove the 'lost+found' directory which only exists in some filesystems like
-+# extN and remove empty lines to have a consistent output regardless of the
-+# existence of the 'lost+found' directory.
-+ls -1R $SCRATCH_MNT/ | grep -v 'lost+found' | grep -v -e '^$' | _filter_scratch
-+
-+echo -e "\nFile data after power failure:"
-+_hexdump $SCRATCH_MNT/testdir/subdir/bar
-+
-+# success, all done
-+_exit 0
-diff --git a/tests/generic/900.out b/tests/generic/900.out
-new file mode 100644
-index 00000000..01988d0c
---- /dev/null
-+++ b/tests/generic/900.out
-@@ -0,0 +1,15 @@
-+QA output created by 900
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Filesystem content after power failure:
-+SCRATCH_MNT/:
-+testdir
-+SCRATCH_MNT/testdir:
-+subdir
-+SCRATCH_MNT/testdir/subdir:
-+bar
-+
-+File data after power failure:
-+000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab  >................<
-+*
-+010000
--- 
-2.53.0
+So I'm thinking maybe we could expose three hooks instead: `pre-test`,
+`post-test`, and `post-result`:
+- `pre-test`: stays the same (right before `_run_seq`).
+- `post-test`: runs right after `_run_seq` finishes.
+- `post-result`: runs inside `_stash_test_status` (or slightly later).
 
+This would keep `post-test` isolated from any interference caused by post-run
+operations like core dumps, `umount`, `_check_filesystems`, or `_check_dmesg`.
+
+What do you think? This is just an initial thought. I can find some time to
+implement it and send out a patch for everyone to review. Feel free to tell
+me if anyone has more suggestions :)
+
+Thanks,
+Zorro
+
+> 
+> -- 
+> - Andrey
+> 
+> 
