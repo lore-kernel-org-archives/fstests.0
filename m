@@ -1,79 +1,79 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795633429;
-	b=BC8Z/xnp6eDjIWuXEERJk+6t+qVcSz9RuFlmgbGAPEub2okFmtiuyJFCE5MNqB1mzQYj
-	 8tvOrAc37i4sB6Is+fiRupXHdIxx4Txkzg4wjJrBgtFCnzJYV7ZKo7r/6kpEjpIRTV3PG
-	 COdoJLzihO5FJ0j90QuMlR+c0qK3W/v7+7sMG7CxK9W7RUafPshpYFCWwxFdiUDwuGb4j
-	 ARJFX+aGIqNnm9aNMeGUKb9qtql0Gnq+Vg41aGP3loze6LXSWXkk7sJQAfVMOsig8osgH
-	 iapf4yq1xoZi2+F3Ta7oh5oUpWA1DrEuE8EQ8aokdqJdeQep713fMgFOwa/qJSMSvSw==
+	t=1795633433;
+	b=l0GHpg7/vfdpLLencwgsN28E5i656DA9eH811gkEtu/UyKK7ILrAwWUEk6yyGeBNLad5
+	 eQg7+4Z4VdP7byzLlniyMb7LKtuyoAmBrcNA4nf02OOLYCQY2gRISiDI/yXjFk7jQhQi9
+	 UY+xNTmsxKqvsODxmmKUxAJuwKyCnAT5vAgnEXNSztnJ3euDa+Auhul2Qqnteo7uwGlQJ
+	 znU8xI2AdgLxNn/luVWQNVO7tJDAZIpluYZRLquEo8O2exk1xxc6PBm2kM2hklh1sw9Fk
+	 PlPf6jWeOdrhlJWPOFFNuGTKYLngvEnjtyq0i01BMTkZ8KeMV6Kg9f3S5+gmzv9Q48Q==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795633429;
-	h=Received:DKIM-Signature:Received:From:Subject:Date:Message-Id:
-	 MIME-Version:Content-Type:Content-Transfer-Encoding:X-B4-Tracking:
-	 X-Change-ID:To:Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:
-	 X-Endpoint-Received:X-Original-From:Reply-To;
-	bh=uV1aI5FL9ieuBnbzhsUSHEOnbwBzA9+r3BgTJtby51A=;
-	b=LSU7lr+fpdiJTKzvhKLd52b/97QYlFLPaL6haeSbvyX62S7CskheE99ZRbYjhg5mP+ia
-	 cr/94TsmaIPKEkWfKkoCNzvM9OU3YTq7u8cFxF2zfinFDX76ogFdx4mwdUcnd9cZJoaHN
-	 hEtyDm74RHPyd4xEygz1BhHwLgXeiEHqrytLO7flDUPccgo/dn69mqBA1Aqfm2irkmJQx
-	 xW+p9v8wKybvtvnh0AoFbvhQejMZYAiacHfc0qTMBZUWXiI+P5MhPbHPixUMWv6STLHsv
-	 RGeKqi1cbY+Zg2i/K9VYoPug9lyo/ddDGmjk7tTGlq4gE/5kXyXRVa5GpCf9Cr9s9RQ==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795633433;
+	h=Received:DKIM-Signature:Received:From:Date:Subject:MIME-Version:
+	 Content-Type:Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=rxjsYp/eiZ71SqlJ1Bu3GEoCWdEB7F2BL3IPtvnHp5c=;
+	b=baQYhD7fz8j2QSgjeGjtpbj+vi4myXJ1qo67djKMkV7U9+e8elu+5sYbOuutyRmJyv4E
+	 HbXIVzaCYnLnm09TzNWAFtjG/QdJvPB1O6TLLAtnvCnPwgNg+E5rQ6ojnWYp+VuGA1iYc
+	 dNkyxWKZHT9rUpjlzpfYiGS9XOfvm7VxAwfp2uQ7buK09RBDITE/Y20BudI/LH7MBwQlG
+	 vk3kD8ghyq5sJXsAqUHzeUlU/jEL6cOefN6e133Iw3rL/pHH7zP/Fc+e2eBXVkgwpyLi1
+	 e+JgRv3fkHFT6FQWLxUuAm3pItALim/X12iLsTQeMTpAXXysg6zfuzidjuNxiOxiAVQ==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=PFQKVfXU;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=VkmiYA51;
 	arc=pass header.oldest-pass=0 smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1C51606A31E;
-	Wed, 25 Nov 2026 19:03:49 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23802606A329;
+	Wed, 25 Nov 2026 19:03:52 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=PFQKVfXU
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=VkmiYA51
 Authentication-Results: smtp.kernel.org; arc=none smtp.remote-ip=100.80.115.77
 ARC-Seal: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256; cv=none;
-	t=1795633429;
-	b=TfE1kpfXpmVqOoqn/rZtO5BEByeqqlNOYxxLFHpkyiaYedB6AnJc2CtMGCUqQKlo6kjN
-	 bN4cUdHNn8PmEEtzH48WnerhslDIbe4vK08Smg0rXLE24LlVvCUIUjF/g4qxPhsVMb75t
-	 /hNFBDRNcd6WI9MjYuEghd27Un3kuK3Xn+xfoyzM2LGA+Kr78i3ZjxwQ5/GH5zdb0AFiv
-	 NajHNA0AVnU9i9HOWpk7I3SrGhxzOoU29tehPxTJBuFXzggC5Uy3aj96o+jrP0fVK2a5p
-	 FqBgg4s1+nu10es/9jS46vrQiaM3R+xXKeHUgCF+aDGB5C+vR7+WbDffG/K61iQxcrw==
+	t=1795633432;
+	b=NwEp8Lkzxgbsjw3rAg1oiXPZRiusBfzonXUf4UEBbPUG48xWGGkwKyR1NSh3tf3yX8Fh
+	 ujiyrUEBSvIAmkMcXx9yYthz2m259ar9cQQf6eohA8abwXPIePpf02pEP9okhygJzePHT
+	 m4O5nyvxG8gowPTPjxT9VoOoyIpUd7yf8cZdpjjtCJ004fyVKVXKwsENvlX+m/sMHpFYs
+	 AWZQ+UvxoSzJJc0DY6tjq/JL0DhTYtvnSgKGweXBeCSRyZpjKO5IjMDdLSZBK5px+Q4Ok
+	 /MQYIN0jd5WPWLjLBO0zsPAxvIBpGVgAbkJ9nqUSQ1GbGy1/CSFKZEBU8gk+m3CS40A==
 ARC-Message-Signature: i=1; d=kernel.org; s=arc20260519; a=rsa-sha256;
-	c=relaxed/relaxed; t=1795633429;
-	h=DKIM-Signature:Received:From:Subject:Date:Message-Id:MIME-Version:
-	 Content-Type:Content-Transfer-Encoding:X-B4-Tracking:X-Change-ID:To:
-	 Cc:X-Mailer:X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
-	 X-Original-From:Reply-To;
-	bh=uV1aI5FL9ieuBnbzhsUSHEOnbwBzA9+r3BgTJtby51A=;
-	b=wkTXZ3P+mFlNgYxxc1M0Nrqc2InrSninQx4uknwf6fGp6w2TaLho+0L45QUA+2Ek1A0D
-	 SgD34UNJXsScZRx7BsI5O4U0mX5HkpVy+FzrLuOuz9PjtuiAMvJPrKrVtRXNjH/LRzaAH
-	 Z9Ztl74fWzPHXuhy1gUB7pzJLLD5iSdC9C47ugRY2aLyvL+luxJg4X0qQ87w4+Rf1BvC1
-	 oe78yvRHCGbx8F6PAs6DP8LSQ8YD01kb0L2TDk6vuyRCjKIihUwuisIrmCcTmJ5ynDKdn
-	 Rd/7aSkTLUcSyr07JiayfWyyofs14G4tXGh90XP0xvhp191EYR/UAGYdq5jdJDUYinQ==
+	c=relaxed/relaxed; t=1795633432;
+	h=DKIM-Signature:Received:From:Date:Subject:MIME-Version:Content-Type:
+	 Message-Id:References:In-Reply-To:To:Cc:X-Mailer:
+	 X-Developer-Signature:X-Developer-Key:X-Endpoint-Received:
+	 X-Original-From:Reply-To:Content-Transfer-Encoding;
+	bh=rxjsYp/eiZ71SqlJ1Bu3GEoCWdEB7F2BL3IPtvnHp5c=;
+	b=QAYQFHXMkV6s5nIytn+UlHwv3RkCbX0yZxThIMMJCSsQZJQPru/IQQz6WqwC1FtXlDGx
+	 8MdatNV1yCorSdUPWhA9cQb6b3J/l6VhjI71z2DtMbb4RAwQdO/Y/Kturr6zYpRJWxXF7
+	 crs4x+txy+dBH8e9469I3Du+iIxEwjDQHelOYva5PzcX/zX5BT+s46AoO8LWPrXVSAVJA
+	 ElhOi4OHKiCCwdt00tby1BwI29V90HKUzYQQQkiWpcxGtyeY4zCfVGfaGxZ4jQO48BdgA
+	 q/7fVta8dk4QH5w2B5Fy+NyJ4APUz7fzjwBQzsI68Mqjg+f9N71rfMgwYqAof740clw==
 ARC-Authentication-Results: i=1; smtp.kernel.org; 
 	arc=none smtp.remote-ip=100.80.115.77
 Received: from lkml.kernel.org (nexus.subspace.kernel.org [100.80.115.77])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.kernel.org (Postfix) with ESMTPS id 8FF6B1F000C6;
+	by smtp.kernel.org (Postfix) with ESMTPS id E37501F000D1;
 	Wed, 25 Nov 2026 19:03:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795633429;
-	bh=uV1aI5FL9ieuBnbzhsUSHEOnbwBzA9+r3BgTJtby51A=;
-	h=From:Subject:Date:To:Cc:Reply-To;
-	b=PFQKVfXUDZIQE/HIx1cVpZWp8l0eFirbuW1JCG4a574G9QZ+xJSIbB9YmlGO5CLgc
-	 x9wbIJguZWvbYR6MFS0264sTeMnbUlOumHpvQz8BrwRDawdSJg0VyajN+FfIcgqY+A
-	 wb5vBxwPJFhvo0UDfPTLZ7+m7u7aJpnKvSx0gBLs4/8jcmWJepu+dH7MJOXtmc8aH2
-	 NGhLZ7cF82qr714UOuCoXHEY0myw/EbS0skIRWjkVL3owg56N1iJKxe4RIcm4FkRVv
-	 A14K/Sbpz5kWCklKtLOJgTviosXCug55qWtOjKxFcdTKndUfPgwmgfI0Mh0P5YnYkz
-	 wW2ntUPfJF6+w==
+	s=k20260515; t=1795633432;
+	bh=rxjsYp/eiZ71SqlJ1Bu3GEoCWdEB7F2BL3IPtvnHp5c=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To;
+	b=VkmiYA51KOuY9WAnWa9kKluB0KHXpKO+U0iHK5wPcDhvq0BuasczDP45hX+a9ZecV
+	 pv4aDXa5hM0AVLEX8E3rhKQaM2C0b98eock4U3xqOnr/4fNMHhvEpAw49YXZD+8G/T
+	 F9TwDeChhqfDe3f7kSMOc7gYrE/3KNWeQRw3k7McxfOl531mXvv2sYRdy7vqvJ8HWE
+	 f8CBZ5txKNKtUWPwl5jy5U4tKoad8fkxCqzGSVj0pf3u5eFZI3BQWpbAOLcMN19yem
+	 4OlJ4QEYyK646q/2KozRODWvYt4SK/UEBK0d4SPZDM30XPB9pZ2hwkPWXdZNAcg2Da
+	 FYgmTBSbqKuFg==
 Received: from nexus.subspace.kernel.org (localhost [IPv6:::1])
-	by lkml.kernel.org (Postfix) with ESMTP id E51FF4CFF4;
-	Wed, 25 Nov 2026 19:03:43 +0000 (UTC)
+	by lkml.kernel.org (Postfix) with ESMTP id 6FA364D000;
+	Wed, 25 Nov 2026 19:03:44 +0000 (UTC)
 From: Ernest Borowski via B4 Relay <devnull+ernest.borowski.git.proton.me@kernel.org>
-Subject: [PATCH 0/4] fstests: ntfs support and three buffered write tests
-Date: Wed, 25 Nov 2026 20:03:42 +0100
-Message-Id: <20261125-ntfs-reproducers-v1-0-0cc67533d803@proton.me>
+Date: Wed, 25 Nov 2026 20:03:46 +0100
+Subject: [PATCH 4/4] generic: test a short copy into a hole of reused
+ blocks
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -84,83 +84,125 @@ List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXMQQqDMBBG4avIrBvIBBTaq4gLTX7tdBFlRosg3
- t20Lr/FewcZVGD0qg5SfMVkzgX8qCi++zzBSSqm4EPDHGqX19GcYtE5bRFqLnnw4PnpG+6pZIt
- ilP2/bLvbtg0fxPX3ofO8AJT3HC50AAAA
-X-Change-ID: 20261125-ntfs-reproducers-d0e1b019061a
+Message-Id: <20261125-ntfs-reproducers-v1-4-0cc67533d803@proton.me>
+References: <20261125-ntfs-reproducers-v1-0-0cc67533d803@proton.me>
+In-Reply-To: <20261125-ntfs-reproducers-v1-0-0cc67533d803@proton.me>
 To: fstests@vger.kernel.org, Zorro Lang <zlang@kernel.org>
 Cc: ntfs@lists.linux.dev, Namjae Jeon <linkinjeon@kernel.org>, 
  Hyunchul Lee <hyc.lee@gmail.com>, Zhan Xusheng <zhanxusheng1024@gmail.com>, 
  Ernest Borowski <ernest.borowski.git@proton.me>
 X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2462;
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3906;
  i=ernest.borowski.git@proton.me; s=default; h=from:subject:message-id;
- bh=XBaQBfKYzKkAfsMoyeeX7k9F8LyBCcyRyZ9ahXpBzLg=;
- b=owGbwMvMwCVWzJ65uCpJ5D/jabUkhmx2Q75f0vVsKXEdK/d+MrKc/PqpwykPZudlG65fm+R76
- cyqJ+ZlHaUsDGJcDLJiiiwd/2+E+IR8+7QsTqsPZg4rE8gQBi5OAZhIpgEjw5OvIRu/XxN5v72A
- rUYucZa4p9a8BwlRn/kTQxZoqPbXmTAyPBSJvuPLs+//w+i4ggNVMjMcK0NnLjB5P/vM8od+cp7
- JnAA=
+ bh=nJ56RhZFyeHeI9JCtM7gckxJWIkuFTyzgjE4m6wLb+E=;
+ b=owGbwMvMwCVWzJ65uCpJ5D/jabUkhmx2Q77UF21B5fv432RwSEmon0wM+CIvGn+E7d23fR9YY
+ jZPqLvcUcrCIMbFICumyNLx/0aIT8i3T8vitPpg5rAygQxh4OIUgInI7GRkuLlDWefa7nRfj4kz
+ cw4miyrL7Lhp0mf6SFi7YMb+yX9vNTL8lbV+0rqpSTfpV+CBV9/ONOcrdT84WHvqR/nrtbcTJwk
+ cZAYA
 X-Developer-Key: i=ernest.borowski.git@proton.me; a=openpgp;
  fpr=88FFD8544C54F6F2A65E2A8E730769A37A6214FF
 X-Endpoint-Received: by B4 Relay for ernest.borowski.git@proton.me/default
  with auth_id=1589
 X-Original-From: Ernest Borowski <ernest.borowski.git@proton.me>
 Reply-To: ernest.borowski.git@proton.me
+Content-Transfer-Encoding: 7bit
 
-This series lets fstests run on the ntfs driver in fs/ntfs and adds three
-generic tests for buffered write bugs found in it.
+From: Ernest Borowski <ernest.borowski.git@proton.me>
 
-Patch 1 adds FSTYP=ntfs for the kernel driver. Volumes are made with
-mkfs.ntfs and checked with fsck.ntfs from ntfsprogs-plus [1]. Mounts pass
--i, so that mount(8) always uses the kernel driver.
+When a buffered write into a hole stops part way through a block because
+its source buffer runs into an unreadable page, only the bytes copied are
+dirty. A filesystem that allocates in units larger than the blocks it
+tracks as dirty, as ntfs does, has to zero the rest of the allocation, or
+reads return what the reused clusters held before. On ntfs the rest of the
+cluster read back the old file contents after an fsync and a remount, with
+4 KiB and with 64 KiB clusters; the fix is "ntfs: zero the rest of a new
+cluster after a short buffered write" from the ntfs delayed allocation
+series, not merged yet. Free the blocks of a filled file by truncating it
+to zero and back, write its last byte, write two and a half blocks into the
+hole from a buffer that is readable for 1000, 5096 or 12800 bytes, and
+compare the file with the expected contents after a remount.
 
-Patches 2-4 add the tests. Each names its fix with _fixed_by_fs_commit;
-none of the fixes is merged yet:
-
-- generic/816 checks the size after a buffered write runs out of space.
-  Fixed by "ntfs: trim the sizes after a short write" from Zhan Xusheng,
-  at v10 now [2].
-- generic/817 runs fallocate, punch hole, collapse and insert range after
-  a buffered write that faulted. Fixed by patches 7 and 8 of the ntfs
-  delalloc series [3].
-- generic/818 makes a short copy into a hole over freed blocks and checks
-  that no old data shows. Fixed by patch 10 of the same series.
-
-The tests need only xfs_io and one small helper, src/pwrite-short-copy.c.
-I ran them on ntfs-next at cluster sizes 512, 4096 and 65536. All three
-fail on ntfs-next as it is; with the delalloc series 817 and 818 pass; with
-Zhan's patch on top all three pass.
-
-[1] https://github.com/ntfsprogs-plus/ntfsprogs-plus
-[2] https://lore.kernel.org/r/20261125051247.2880928-1-zhanxusheng1024@gmail.com
-[3] https://lore.kernel.org/r/20261124-b4-ntfs-delalloc-fixes-v2-0-f394c800ec03@proton.me
-
+Link: https://lore.kernel.org/all/20261124-b4-ntfs-delalloc-fixes-v2-0-f394c800ec03@proton.me/
+Signed-off-by: Ernest Borowski <ernest.borowski.git@proton.me>
 ---
-Ernest Borowski (4):
-      common: add support for the ntfs driver
-      generic: check the size after a buffered write runs out of space
-      generic: test fallocate after a buffered write that faulted
-      generic: test a short copy into a hole of reused blocks
+ tests/generic/818     | 58 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/818.out |  2 ++
+ 2 files changed, 60 insertions(+)
 
- .gitignore              |   1 +
- common/config           |   9 +++++
- common/rc               |  37 +++++++++++++++++-
- src/Makefile            |   2 +-
- src/pwrite-short-copy.c | 101 ++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/816       |  67 ++++++++++++++++++++++++++++++++
- tests/generic/816.out   |   2 +
- tests/generic/817       |  83 +++++++++++++++++++++++++++++++++++++++
- tests/generic/817.out   |   2 +
- tests/generic/818       |  58 +++++++++++++++++++++++++++
- tests/generic/818.out   |   2 +
- 11 files changed, 362 insertions(+), 2 deletions(-)
----
-base-commit: 71641219a506ac62bfa231592394265ca812670e
-change-id: 20261125-ntfs-reproducers-d0e1b019061a
+diff --git a/tests/generic/818 b/tests/generic/818
+new file mode 100755
+index 00000000..97c30767
+--- /dev/null
++++ b/tests/generic/818
+@@ -0,0 +1,58 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2026 Ernest Borowski <ernest.borowski.git@proton.me>.  All Rights Reserved.
++#
++# FS QA Test No. 818
++#
++# A buffered write into a hole whose copy from user space stops part way
++# through a block, because the source buffer runs into an unreadable page,
++# must leave everything it did not write reading as zeroes once the data is on
++# the disk.  The blocks the hole gets may have held data before, so a block
++# that is allocated but only partly written would expose that old data.
++#
++# Fill a file and fsync it, truncate it to zero and back to its size so that
++# its old blocks are free again, write its last byte, then write two and a
++# half blocks at a block boundary from a buffer with only part of it readable.
++# After an fsync and a remount the file must hold the bytes the write returned
++# and zeroes around them.
++#
++. ./common/preamble
++_begin_fstest auto quick rw
++
++_fixed_by_fs_commit ntfs xxxxxxxxxxxx \
++	"ntfs: zero the rest of a new cluster after a short buffered write"
++
++_require_scratch
++_require_test_program "pwrite-short-copy"
++
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++
++blksz=$(_get_file_block_size $SCRATCH_MNT)
++size=$((32 * blksz))
++off=$((8 * blksz))
++len=$((2 * blksz + blksz / 2))
++file=$SCRATCH_MNT/file
++
++# _scratch_cycle_mount sets $ret, so the write's result is kept in $written.
++# Short copies that end in the first, second and third block of the write.
++for copy in $((blksz / 4)) $((blksz + blksz / 4)) $((2 * blksz + blksz / 8)); do
++	$XFS_IO_PROG -f -c "pwrite -q -S 0xab 0 $size" -c fsync \
++		-c "truncate 0" -c "truncate $size" \
++		-c "pwrite -q -S 0x01 $((size - 1)) 1" $file
++	written=$($here/src/pwrite-short-copy $file $off $len $copy)
++	echo "copy $copy: write of $len bytes at $off returned $written" >> $seqres.full
++	$XFS_IO_PROG -c fsync $file
++	_scratch_cycle_mount
++
++	rm -f $tmp.expected
++	$XFS_IO_PROG -f -c "truncate $size" \
++		-c "pwrite -q -S 0x01 $((size - 1)) 1" $tmp.expected
++	[ "$written" -gt 0 ] && \
++		$XFS_IO_PROG -c "pwrite -q -S 0x5c $off $written" $tmp.expected
++	cmp -s $file $tmp.expected || \
++		echo "copy $copy: file contents differ after a short copy"
++done
++
++echo "Silence is golden"
++_exit 0
+diff --git a/tests/generic/818.out b/tests/generic/818.out
+new file mode 100644
+index 00000000..cb099786
+--- /dev/null
++++ b/tests/generic/818.out
+@@ -0,0 +1,2 @@
++QA output created by 818
++Silence is golden
 
-Best regards,
---  
-Ernest Borowski <ernest.borowski.git@proton.me>
+-- 
+2.56.1
 
 
