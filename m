@@ -1,58 +1,58 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795642134;
-	b=MBcEmDmzNatJ+7CXvRB2otKnpOzn3l3uwdZFEHOWAW8iIzjSbN+sWcAgKuxT5d9a7eFj
-	 DGBV0ieKNpi2IedIfp6vNww4/GZQEZt9Yq1ylxF83G+POSViOGjDnp3B8ExUn2SjyIEmD
-	 czwkHEbVngCCTfRs4XjMSrE6Xno1bNtm9Q1s9v99cjYvShDOl85KirY9nWa5amyJIoZUm
-	 m93S7aQGtWX01J2BLM+3HdGmCGlqyebpuahk/DKAc/RDVUSZm/peB+DJLK8Z9+eYfeHgS
-	 GdvHasJ5cz+unhpwsGER3zgzdpBlAg51mz7DYBBZ7Ulc5DJwfmrqM1xiEou7jE2t0kw==
+	t=1795642323;
+	b=yaMTvRqj6i2SYV3nxTYwCI0dTSSxpZ8jNci0cR0QuxMtEWCtByBaz8I/YBZBMsjvN8EB
+	 wIYIW2lPwdZNjrt9VRP5WtBTjfXfaSjiy8EwhbTxXhIv0tNM2vaQRCjTL2GvSQuV7PdwL
+	 t2XRvewgAFeAD2GeqOQla+75bmovGrASzxu1+3RWx5fv+JjdbksH4wX0XRKy06ytQgmhC
+	 jzHtf2+nGaUrVlhyWlN+gHIRrkFS6K2wyf18BR91AczBw+ngAtsGtSW/bgJv/JSo36kAz
+	 NBW/rms9rvu5TKSZ+pET2tbwyiTj6U81F9rDSiYQstVzDbtqMKPhvlowQyiIN5/XUEg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795642134;
-	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:X-Mailer:
-	 In-Reply-To:References:MIME-Version:Content-Transfer-Encoding;
-	bh=MWPxLPBjzgYO3dWxSzZ6tXIuaM5SPxZ096WFPx/GKtk=;
-	b=FddmbRkR3pUEbpVFk5n2XCUUZxwrzxW1b4nDKy+pqcN4877Cw5UpYYUzMszdAkWt1kDn
-	 Ab/1IerrRRhsJoiKpHhtRiAjgV0NKFJXLazfluRdqyQpxarRzpR1SWghjC4yYllgx//j4
-	 4Kw9apzZCuWFZy3/OJdfAP0c0ZPJA4sABEpbYzY2y7dPQVViOL46zyQdco1G1CmayQ5Yu
-	 4KjPh/YCd4sJ1ust5aG/5xor6jQgmY7OF5S2rd8kz79g31xuNWCqdKm15D40MFhG6e4tT
-	 UQ94zsultQ7dD2O664c348CkQpnZWYSpzNbMSi//7Hwn3i4sqK+UJcTLemd+5gNybtA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795642323;
+	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
+	 Mail-Followup-To:References:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To;
+	bh=adt8kMzu9vDyKuBydch38etJllhqG3yDIQpYyMUlwSE=;
+	b=4WRMlaBaq+L2o+PDhnxIIHcw7G+yTG2akpd3DDVlJEDNq53uNCVqkWAtONgKo1uQkucG
+	 SKKiWU2twNcnBILbcON55Qoy2bpSVh6SxwmqDmcs3sVP0uB8NTJIkKt13HrjM+3Rm3McI
+	 aHsXoKDqqRqsqlKnpZ0yayeJVskwjneqVZlEWJBBNTJtM0cf8JIMQgZ1I8LW0TvP4n1B0
+	 i92ERD4tnkgW88wuyihBYUzzKYMXTBjx7DuvTya7Y0zBDpHJpD8EXXFmlqYldn5jkkYRU
+	 qY9EJpQngh3EQDQNtXTgIQEexsN4nSx7kfwxUr9CFWn0uua22IdUYllVnEJwPdWDKrA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b="ghjEB/8A";
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=H6f6nf22;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0CAB606A695;
-	Wed, 25 Nov 2026 21:28:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C69EB606A31E
+	for <fstests@vger.kernel.org>; Wed, 25 Nov 2026 21:32:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ghjEB/8A
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 17A7C1F00A3C;
-	Wed, 25 Nov 2026 21:28:51 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=H6f6nf22
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4C3BB1F000C0;
+	Wed, 25 Nov 2026 21:32:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1795642134;
-	bh=MWPxLPBjzgYO3dWxSzZ6tXIuaM5SPxZ096WFPx/GKtk=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=ghjEB/8AMGQRFYVROIKs/FM5x9UGxt4f0TFoDU0PDtnwSFMHJwwGihl9cKCpraFjd
-	 MX0M2jiHz5Wzs+ovDbSMH+G8JHhCouI6Ag7SgTjUh29TMUDI1E/0Yf1x4W4ANN98Ix
-	 mdxPOlFYkpDVppsrxc4lTsIWSwq9H5EN/GOF6CWeZ3poUYv1JMCEeAtPheQ2TKc1eQ
-	 bfHu4ScdnBApXNXf+u3FXqFdqdhpIqv4U4LItAHsL84YQdkcstDv2tmo0hPpNFCj0f
-	 9ssd4U1GuIlQ+M//DCeT2fjtQ2xm10sa9trA2T4GaXU0BvzJFAfSNpoBHuTLFJeLNQ
-	 r5wxmiiaOo46Q==
+	s=k20260515; t=1795642323;
+	bh=adt8kMzu9vDyKuBydch38etJllhqG3yDIQpYyMUlwSE=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=H6f6nf223f1rvfDn15OThT9GuZC1QoGwJNQx+2SG+LWsvnXarEFi5gdET2q2OM+A6
+	 wZx/441M2TCbTPvfmXSeylfqWo2Jy6iywzXo7jrSwwIc39FpdE1Rc96eAYE2iBY9m2
+	 syFW1u0MlGFy2zqztqD0RCYGorzOlCMgqNKiQFL4AAs2p7wdQZLCHYlljqys29ELO9
+	 7AcYoUTO8sr48g3uFrdTSeqqXLow3nkNNex+U/3lg3ZcIZeWQzJK7qrOXxFcDbmNz5
+	 kYi+4yqqlIyb50tqQpYp3I4gpmsJSuiLB8X5+/5JuWY9dSG2gx2pKy8pSP+XxEMpx1
+	 3OQTANR6iid0Q==
+Date: Thu, 26 Nov 2026 05:31:56 +0800
 From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Cc: Andrey Albershteyn <aalbersh@redhat.com>,
-	cem@kernel.org,
-	Dave Chinner <david@fromorbit.com>,
-	linux-xfs@vger.kernel.org,
-	linux-btrfs@vger.kernel.org,
-	linux-ext4@vger.kernel.org
-Subject: [PATCH 5/6] check: introduce post-result hook and CLI option
-Date: Thu, 26 Nov 2026 05:28:22 +0800
-Message-ID: <20261125212823.3389430-6-zlang@kernel.org>
-X-Mailer: git-send-email 2.56.0
-In-Reply-To: <20261125212823.3389430-1-zlang@kernel.org>
-References: <20261125212823.3389430-1-zlang@kernel.org>
+To: Andrey Albershteyn <aalbersh@kernel.org>
+Cc: fstests <fstests@vger.kernel.org>, preichl@redhat.com
+Subject: Re: [PATCH 1/2] generic/453,generic/454: add a hint for the missing
+ xfsprogs commit
+Message-ID: <awdTtBNTHHFC_Phi@zlang-mailbox>
+Mail-Followup-To: Andrey Albershteyn <aalbersh@kernel.org>, 
+	fstests <fstests@vger.kernel.org>, preichl@redhat.com
+References: <20261124103617.4012647-1-aalbersh@kernel.org>
+ <20261124103617.4012647-2-aalbersh@kernel.org>
+ <awXwfJ-CuO7XpuzY@zlang-mailbox>
+ <awa5ubRKXD95vs-l@aalbersh-thinkpadx1carbongen13.rmtcz.csb>
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -62,61 +62,27 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <awa5ubRKXD95vs-l@aalbersh-thinkpadx1carbongen13.rmtcz.csb>
 
-Add the --hook-post-result option to run matching hooks once each
-test's final result (pass/fail/notrun/expunge) is determined, passing
-the result and runtime. Hooks run even when no report format (-R) is
-requested.
+On Wed, Nov 25, 2026 at 11:35:50AM +0100, Andrey Albershteyn wrote:
+> On 2026-11-25 04:16:22, Zorro Lang wrote:
+> > On Tue, Nov 24, 2026 at 11:36:14AM +0100, Andrey Albershteyn wrote:
+> > > These two test will fail with xfs_scrub before v7.0.0 which dropped
+> > > warning about use of bidirectional characters. These tests trigger these
+> > > warning and break the golden output on older xfsprogs.
+> > > 
+> > > +Unnecessary complaints about mixed bidi characters in a name?
+> > 
+> > Sorry, what's this question for?
+> 
+> This is the message printed in the bad.out (for anyone grepping). I
+> can add a note to make it more clear
 
-Signed-off-by: Zorro Lang <zlang@kernel.org>
----
- check | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+Sure, thanks!
 
-diff --git a/check b/check
-index 06c67cb2..5c4f16a8 100755
---- a/check
-+++ b/check
-@@ -82,6 +82,9 @@ General options:
-     --hook-post-test path=script[,mode=in|out][,match=glob]...
-                             run a hook after each matching test; may be
-                               given multiple times
-+    --hook-post-result path=script[,mode=in|out][,match=glob]...
-+                            run a hook with the result of each matching test;
-+                              may be given multiple times
-     --exact-order           run tests in the exact order specified
-     --extra-space <size>    require minimum free space on scratch device
-     --fs <type>             test the given FSTYP; valid types include:
-@@ -395,7 +398,7 @@ process_remain_tests()
- parse_check_args()
- {
- 	local short_opts="g:x:X:e:E:s:S:lnri:I:TdbR:L:h"
--	local long_opts="fs:,exact-order,large-fs,extra-space:,udiff,help,hook-pre-test:,hook-post-test:"
-+	local long_opts="fs:,exact-order,large-fs,extra-space:,udiff,help,hook-pre-test:,hook-post-test:,hook-post-result:"
- 
- 	compat_old_option "$@"
- 
-@@ -504,6 +507,10 @@ parse_check_args()
- 			_hook_parse_args post-test "$2"
- 			shift
- 			;;
-+		--hook-post-result)
-+			_hook_parse_args post-result "$2"
-+			shift
-+			;;
- 		--large-fs)
- 			export LARGE_SCRATCH_DEV=yes
- 			;;
-@@ -783,6 +790,8 @@ _stash_test_status() {
- 		_make_testcase_report "$section" "$test_seq" \
- 				      "$test_status" "$((stop - start))"
- 	fi
-+	_hook_run_event post-result "$test_seq" "$test_status" \
-+				      "$((stop - start))"
- 
- 	if ((${#loop_status[*]} > 0)); then
- 		# continuing or completing rerun-on-failure loop
--- 
-2.56.0
-
+> 
+> -- 
+> - Andrey
+> 
