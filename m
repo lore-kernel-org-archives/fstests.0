@@ -1,50 +1,50 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=117.135.210.4
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=220.197.31.4
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795660803;
-	b=lQgfwzJz9o8QC/wrI6dqenVJyYgOfSnQsd6XUhQe2dZZ/Nf+32jdmkkWqpjS3LG5Nffw
-	 lCGylpS1z4yfD963ypiHXFbzp9uRCVuOPnZ+G5BurMa/EeMtJfOh4FblZa0I7RE9z/KLH
-	 e8iRLRIaCqjn6bFkL9MCC2p2nKBy3Ry7FQa6T4uihwZZsHSC21e2r2qPyVp+g8f9HfXeJ
-	 U/1RvkZa6MSoGHT8iOO3zkDn6yHZKyD4qJm2ckXPxCVuW1XOxx6If3zl8ltBppBzK0Qu9
-	 NJGZNoQuI58P1nLfwanpJyBfegk7EgWNS968OU1mHEWz9agrYx33iaeq8x6vNKgnFgA==
+	t=1795661040;
+	b=PFmDjJUmLtolfZYbAu52LUS0J+jh1iSo6MwYEt88QpsvsojNdFO6FmbIk62Bq9cSpKm4
+	 Bkv0yvf5FozzW8D13jP4VBuxPOjfG0Y4pVZ0qqRVF0Nj4NKlhlUntk6kN1WZt28I+uyV1
+	 wjGIGsIxCZv4QXs1GOyuiHPyas6nzYehgm6etf3NKCzLvWK+YA2Of4OTMtfpGF5HUKeP3
+	 scFb3k5r4QF4dlFeN0lYvtzQwAXENpV+2daU5t3Ln78lloOGDqYNXJwYBH5mxeK63EcG8
+	 eYnDj+8mpyATbulYJAhlVMUFMj+RJZm1EACilOvhmB1L+Ucc+9cfUrQHVVgi/ZKCrdQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795660803;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795661040;
 	h=DMARC-Filter:DKIM-Signature:Received:Message-ID:Date:MIME-Version:
 	 User-Agent:Subject:To:Cc:References:Content-Language:From:In-Reply-To:
 	 Content-Type:Content-Transfer-Encoding:X-CM-TRANSID:
 	 X-Coremail-Antispam:X-Originating-IP:X-CM-SenderInfo;
-	bh=MoJkFGyUAUTAuMMeGnOa68n75dbTX49BJHPCxuilLKE=;
-	b=Y1n9p+GkgtE6lQ3svos856iAPE27eeuA/wZiS8eoZBTk4L2ks+btBd4RkQt1QyioeVkf
-	 JtAtVLHEtwmXBmdtxevzwMij1Z27GnNIVn+SKPf09aN4HKZ98RVTZc4tCUz0sopywZ8sD
-	 wxf+/PAp0/DFc2kuHYdprx1nmH+Fh2t8PhCJMK+Zg7MLILDTV9Pmo4iMGzD8UoOxuJmcD
-	 REq3RZ/ZNClNIzyu15bQRQJqEFvzGEOYIb1Bz9oGSuOgPSVEIa8Bp/SX8LRPtm1Jb71W6
-	 y71ZBQH+BdInRgCZHRqaw3GXg7oVAEi96mMV6VvtSp7gGN/GI8E/SWRTl+F1HmF+oIA==
+	bh=lz/EWl17W4qh5Fy/0QWWvFBH7U2qWk/cW54dVvefy2I=;
+	b=VcT7szv+gatnk/GfexD3S4cVK+51iuw4dDSBSoBJgZN9+wJqtd53r8nnXRwQGmOXwEAP
+	 POK6q3n2xCMFDQ3Ovy46uaqjt0IyXBtcW2Exzih4zlpPdx9Y48tZURP7I8F2mwF7fpkZJ
+	 7i8vEJzAUku8xRNLJewhGCukVzizcae1DEGvrd482xGzgf9azFCnsX4RoPvA8SEIVBykj
+	 mmcld467dgrIousHZEF67UL/ZnWyZGs/zG717da0X3QuuwvmsUGvFuKq4DUscUjju4xXh
+	 fY+Isq1KWfTFZf/Fx5yA3xRDsQ/tF8keVdELSbpM/Dend1ztb2InxYKO581yeFQWuEQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=163.com;
 	spf=pass smtp.mailfrom=163.com;
-	dkim=pass header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=JuX93e2R;
-	arc=none smtp.remote-ip=117.135.210.4
-Received: from m16.mail.163.com (m16.mail.163.com [117.135.210.4])
+	dkim=pass header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b="Bu4G/CV/";
+	arc=none smtp.remote-ip=220.197.31.4
+Received: from m16.mail.163.com (m16.mail.163.com [220.197.31.4])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A54F606A31E
-	for <fstests@vger.kernel.org>; Thu, 26 Nov 2026 02:40:01 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2A54F606A31E
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 99A1C606A333
+	for <fstests@vger.kernel.org>; Thu, 26 Nov 2026 02:43:58 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 99A1C606A333
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=163.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=163.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=JuX93e2R
+	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=Bu4G/CV/
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
 	s=s110527; h=Message-ID:Date:MIME-Version:Subject:To:From:
-	Content-Type; bh=MoJkFGyUAUTAuMMeGnOa68n75dbTX49BJHPCxuilLKE=;
-	b=JuX93e2RuRcuvQiUaCV33e564xTWu1wmCpXdlXMqoFdfiRntArEdTf9ORr2PEC
-	RI/RugYkJ4k+eg1rGxAU6CfUsU2FVf565t0Y2p01xsJg/lhLeDMfpygJKboNmpkI
-	oBrmKtweS2eOI63XAdcpVB7Nu4HCGLORWE3GXgEtTqFsw=
+	Content-Type; bh=lz/EWl17W4qh5Fy/0QWWvFBH7U2qWk/cW54dVvefy2I=;
+	b=Bu4G/CV/DkdOln7lvl1FGujHEU9ZloA3om8ELwrphVLurpnP1o/gvOUVGK1I4/
+	A3j+Bfg9giIYkNBB9M7nMHQ+6ILUBfIuwNqLoEc0fAcj3SDZ2i9STVJLKthZSln0
+	0/85rMUPJfl/zmC67Lvv3y4Nj5YLnPWdqtN4ZR3XZKDB8=
 Received: from [IPV6:2409:8900:1fda:c14d:483b:2970:cae3:221a] (unknown [])
-	by gzga-smtp-mtada-g0-4 (Coremail) with SMTP id _____wD3H+XcmwdrlHBVLA--.28889S2;
-	Thu, 26 Nov 2026 10:39:26 +0800 (CST)
-Message-ID: <2ff07282-cb19-4098-b171-bb0875939976@163.com>
-Date: Thu, 26 Nov 2026 10:39:24 +0800
+	by gzga-smtp-mtada-g0-0 (Coremail) with SMTP id _____wDXFzXOnAdrUO3WKw--.11047S2;
+	Thu, 26 Nov 2026 10:43:27 +0800 (CST)
+Message-ID: <362ec779-2133-40ff-894b-d0d96a756828@163.com>
+Date: Thu, 26 Nov 2026 10:43:26 +0800
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -67,12 +67,12 @@ From: liubaolin <liubaolin12138@163.com>
 In-Reply-To: <20261125-ntfs-reproducers-v1-1-0cc67533d803@proton.me>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:_____wD3H+XcmwdrlHBVLA--.28889S2
-X-Coremail-Antispam: 1Uf129KBjvJXoWxKFyxWry5uFy3XFWfKr4Durg_yoW7uFW7pF
-	yfCa43Kr48GF9xZr93tF45Xa4rCwn3JF1jgr17Wr1IgrZ5Kr1fAF42qFnY9F48Xry3Zr1v
-	gw1kWas7GasIyr7anT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07UTCJQUUUUU=
-X-CM-SenderInfo: xolxutxrol0iasrtmqqrwthudrp/xtbC6h66hWsHm94lFAAA3T
+X-CM-TRANSID:_____wDXFzXOnAdrUO3WKw--.11047S2
+X-Coremail-Antispam: 1Uf129KBjvJXoWxKFyxWry5uFy3XFWfKr4Durg_yoW7tr48pF
+	yfCa43Kr48GF9xu3s3tr45Xa4rCwn3Jr1UKr17Wrn2grZ5tr1fAF42qrnY9F48Wry5Zr1v
+	gw1kWas7GF9Iyr7anT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07Uq0PhUUUUU=
+X-CM-SenderInfo: xolxutxrol0iasrtmqqrwthudrp/xtbC6hD3wmsHnNBpYQAA3n
 
 
 
@@ -121,20 +121,6 @@ X-CM-SenderInfo: xolxutxrol0iasrtmqqrwthudrp/xtbC6h66hWsHm94lFAAA3T
 > +		# -i: always mount the kernel driver, never a mount.ntfs helper
 > +		echo "-i $NTFS_MOUNT_OPTIONS"
 > +		;;
-
-Hi Ernest,
-    Thanks for the series.
-   _common_mount_opts() is only called when the corresponding mount 
-options are unset. If someone sets MOUNT_OPTIONS or TEST_FS_MOUNT_OPTS 
-directly, for example to "-o noatime", that mount command will still be 
-missing -i and could invoke an installed mount.ntfs helper.
-    Could we add -i somewhere that also covers explicitly configured 
-mount options? That would make sure these configurations use the kernel 
-driver too.
-
-Thanks,
-Baolin.
-
 >   	*)
 >   		;;
 >   	esac
@@ -213,6 +199,20 @@ Baolin.
 > +		$MKFS_NTFS_PROG --quick --force $MKFS_OPTIONS $cluster_opt "$@" \
 > +			$SCRATCH_DEV $((fssize / sector_size))
 > +		;;
+
+Hi Ernest,
+    There is a mismatch here when -s/--sector-size is supplied. The 
+calculation uses the device's logical sector size, while mkfs.ntfs 
+interprets the sector count using the size specified by that option.
+    For example, with 512-byte device sectors and MKFS_OPTIONS="-s 4096 
+-c 4096", a 512 MiB request passes 1048576 sectors to mkfs, which it 
+interprets as roughly 4 GiB.
+    Could the calculation use the effective mkfs sector size, falling 
+back to the device sector size when no override is given?
+
+Thanks,
+Baolin.
+
 >   	*)
 >   		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
 >   		;;
