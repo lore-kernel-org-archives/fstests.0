@@ -1,50 +1,50 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=117.135.210.2
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795674550;
-	b=yz97lgT6UhIQf63RBMYH0tv7fiw4z/UuF5nmc0FPXZASxCgRtktLUQHlGDOmSL5zr8eM
-	 mCKnuwReENUbcguAibrqYPmsZPOnzza9sLAkU27YwF0YHI8hPTAgL3hEZaAcFjgybiJX8
-	 SJmaDLxl9DvVgY8ry/bq9IUHxR2nNSkATRsvF01sEWNiNHLKHTUlteLZmvD2NHNhiP5w9
-	 SxIzfz505NaXFGUBi4GcyaJEKI1fOxUHuMSO6HWLzr/jUFbAHbdoQXKgTKW4XctKZmw+f
-	 XfXVblVyRA88EP4c7Nm5o45wqbmTE59bXpQhaOIKBy7GZvZbu6taXSUKm/OBtrlYHfA==
+	t=1795675151;
+	b=bINokdEmJ3dTmxtLiXT85v844RPWjQ9WovmQMDUjF6r+gHdhByIBoMYlGovA5xBbg/yF
+	 CQqR8VqAqTDQvWq92Gpb0VzHU0LL1RxWvk4ezVMYuMsDUYxHJgBwp9yBeQAae4msbAi5s
+	 EAtCbbshujuMvX4EvsOa34K0NbaRTsbT/tMEn7wi3FMkNMIXisg+rzoaTjqMW1ZHrazwS
+	 fr+F9FzsS3yckUafyGCpZf1N4mLnJLqR29FSfyySMMouMVCI4vgw6lF0WrAuEDXET53F2
+	 nLiiLvyXWi9vIFdTl1Uvy21KF0Oo9Zx7dkLK+Xi+Nn53/zrsBbrsu5EaPRJ+WzPyQJw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795674550;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795675151;
 	h=DMARC-Filter:DKIM-Signature:Received:Message-ID:Date:MIME-Version:
 	 User-Agent:Subject:To:Cc:References:Content-Language:From:In-Reply-To:
 	 Content-Type:Content-Transfer-Encoding:X-CM-TRANSID:
 	 X-Coremail-Antispam:X-Originating-IP:X-CM-SenderInfo;
-	bh=ZH7vGnguPt41FP/7x9/v1Iw12AHQ3ftHn6doqgojHxU=;
-	b=avueAeKzH6oQSxviO3HXtxVNBMW8jV+2bZS5Au3Mm32xRj3T8gKm4SQGYHPnBdpC7R2z
-	 mTrg3XrCymezDdSpIneJXlUFk+i/R4hadAPYsKnXQ6E9TjzDOdedqZ3Kd7x8pzqLVl2tm
-	 SQxamcmJ+5xW7IMd3KFM4O+sB0hVhe2VNrgW+Zc+YoQQ687WTu89sCeYv8gO3blox5t1G
-	 jRrZD24KIntALkmrONolRIrRJAFv3/RYpiYpz/TLhGw6Ol31o8rqjfxpP8flLT/YCjhm3
-	 f5vXRf+0B+sPYJwO88FQnTOZ2XZJYHQaLLr6SdDzWK0LrdtRitQBnAX64iv5cwbFYhw==
+	bh=VoIVUCNtcY4UeRVmlU1KIubXSUlqBqHw4QhOLZwzs4I=;
+	b=B9yF9na5wRG5HKHh0hrfhHpSPP/H+/h8UObnhxP/GFLb2VR/IP0DznMlbK+mmxpbw5/Q
+	 CXIZP7qBV3HCj4/Yb31j4EcIoH+3oa2RWXGtOMIY+O3SymAHwk4nY3xtjz3YDGURUSnv0
+	 8RwXzNxAsmyLEVczFWueA9h90+jkEgn8h/pmkW41RqUSyOAWKh5FotiuPvvGi8t1CFEvx
+	 lzeCGaq6Kto9WdFzEAICAXS392Z7mHG72yGK7syGQsI9qMzzrWb17XPasNdTPHYq72bsF
+	 F10jXQw/D6vMoAH/qjK2/SiwGkbYQ2yFqxI6ZE6DVC/U2S8ZwTF4a29gypZ1LrElrZA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=163.com;
 	spf=pass smtp.mailfrom=163.com;
-	dkim=pass header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=SPKHWw4e;
+	dkim=pass header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b="YI9/QJh+";
 	arc=none smtp.remote-ip=117.135.210.2
 Received: from m16.mail.163.com (m16.mail.163.com [117.135.210.2])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D20EE606A31C
-	for <fstests@vger.kernel.org>; Thu, 26 Nov 2026 06:29:09 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D20EE606A31C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F979606A32C
+	for <fstests@vger.kernel.org>; Thu, 26 Nov 2026 06:39:09 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 5F979606A32C
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=163.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=163.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=SPKHWw4e
+	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=YI9/QJh+
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
 	s=s110527; h=Message-ID:Date:MIME-Version:Subject:To:From:
-	Content-Type; bh=ZH7vGnguPt41FP/7x9/v1Iw12AHQ3ftHn6doqgojHxU=;
-	b=SPKHWw4ef70BUB0G1qal4xfO1mORZst1G8VAyPvxcYaX7HD90Q6wsEzQdl/Z6K
-	xt04BG862Hn4oT+cjhQ+aa8vuSZORT/5PCsJEN4LnALvyAgjDu3yY1ifPbDIu0mO
-	017lby2gQ5FlT6Q5rgAVFZLWQi2bGitzQKTLjsQt3Qn8M=
+	Content-Type; bh=VoIVUCNtcY4UeRVmlU1KIubXSUlqBqHw4QhOLZwzs4I=;
+	b=YI9/QJh+7SkOcJdGlqQFNd/0hgK51yYj1ILQfceGQ+qRYLFpFCeTdimeral/AK
+	RztZ7y6lMwqI0ZfpCFRABKmY8jrKr98TqKqn/WiS3u93LLhJybNR+joA/9TPZ73o
+	eEIdrNB9bLRXqI0KAJ0QN2p6jEBnHrdF6/YSSdEExHY9Y=
 Received: from [IPV6:2409:8900:1fda:c14d:fe4b:463:9ed6:5819] (unknown [])
-	by gzsmtp5 (Coremail) with SMTP id QCgvCgDXN6uW0QdrcePSIA--.30686S2;
-	Thu, 26 Nov 2026 14:28:39 +0800 (CST)
-Message-ID: <fd96d9db-0ada-4d71-8927-c5bb756a72b5@163.com>
-Date: Thu, 26 Nov 2026 14:28:38 +0800
+	by gzsmtp5 (Coremail) with SMTP id QCgvCgBX5Jfr0wdrS4fUIA--.30970S2;
+	Thu, 26 Nov 2026 14:38:36 +0800 (CST)
+Message-ID: <8e55e631-96e0-464d-b29b-0db2f56c2911@163.com>
+Date: Thu, 26 Nov 2026 14:38:35 +0800
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -55,289 +55,153 @@ List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 3/4] generic: test fallocate after a buffered write that
- faulted
+Subject: Re: [PATCH 4/4] generic: test a short copy into a hole of reused
+ blocks
 To: ernest.borowski.git@proton.me, fstests@vger.kernel.org,
  Zorro Lang <zlang@kernel.org>
 Cc: ntfs@lists.linux.dev, Namjae Jeon <linkinjeon@kernel.org>,
  Hyunchul Lee <hyc.lee@gmail.com>, Zhan Xusheng <zhanxusheng1024@gmail.com>
 References: <20261125-ntfs-reproducers-v1-0-0cc67533d803@proton.me>
- <20261125-ntfs-reproducers-v1-3-0cc67533d803@proton.me>
+ <20261125-ntfs-reproducers-v1-4-0cc67533d803@proton.me>
 Content-Language: en-US
 From: liubaolin <liubaolin12138@163.com>
-In-Reply-To: <20261125-ntfs-reproducers-v1-3-0cc67533d803@proton.me>
+In-Reply-To: <20261125-ntfs-reproducers-v1-4-0cc67533d803@proton.me>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:QCgvCgDXN6uW0QdrcePSIA--.30686S2
-X-Coremail-Antispam: 1Uf129KBjvJXoW3GF4UurWkCrWxtFyUWr1Utrb_yoWfGr1xpF
-	Wrt3ZYkr4xt347Cwn3ZF17XF1rWwsYgF4Uur1xWF93ZFZ8XF4xXFW2gr98ur48Ar47Jr4j
-	vFs09ry3GFnrZ3DanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07U-Z2fUUUUU=
-X-CM-SenderInfo: xolxutxrol0iasrtmqqrwthudrp/xtbC6hg3AmsH0ZiQtwAA3F
+X-CM-TRANSID:QCgvCgBX5Jfr0wdrS4fUIA--.30970S2
+X-Coremail-Antispam: 1Uf129KBjvJXoW3WFy7ZFyxZryruFy5uF4kZwb_yoW7XrWxpF
+	yrta45trs7K347u34fuF17Jr9Ykws3uFWa9ryIqrykuFZ8Wr4IvFyYqryqvF4Utr1fWr4j
+	vrsYk3yfWr1DZrJanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07UatCcUUUUU=
+X-CM-SenderInfo: xolxutxrol0iasrtmqqrwthudrp/xtbC6QzMl2sH0+zUJQAA3c
 
 
 
 在 2026/11/26 03:03, Ernest Borowski via B4 Relay 写道:
 > From: Ernest Borowski <ernest.borowski.git@proton.me>
 > 
-> A buffered write into a hole may reserve or map space before it copies from
-> the user buffer, and when the copy faults on the first byte the write fails
-> with EFAULT and must leave nothing behind. On ntfs the delayed allocation
-> run it set up stayed in the runlist without any dirty data, and punching,
-> collapsing or inserting a range through it shifted the run onto clusters of
-> other files, so the file read their contents and ntfsck found the cluster
-> bitmap inconsistent. The fixes are "ntfs: punch out the delalloc
-> reservation of a failed buffered write" and "ntfs: do not shift the cluster
-> number of a delalloc run on split" from the ntfs delayed allocation series,
-> not merged yet. Fail a write over the first half of a sparse file, then
-> punch, collapse, insert or write a range inside that half, and compare each
-> file with its expected contents after a remount. The new helper
-> src/pwrite-short-copy calls pwrite(2) once from a buffer whose readable
-> part ends a given number of bytes in, and prints what it returned.
+> When a buffered write into a hole stops part way through a block because
+> its source buffer runs into an unreadable page, only the bytes copied are
+> dirty. A filesystem that allocates in units larger than the blocks it
+> tracks as dirty, as ntfs does, has to zero the rest of the allocation, or
+> reads return what the reused clusters held before. On ntfs the rest of the
+> cluster read back the old file contents after an fsync and a remount, with
+> 4 KiB and with 64 KiB clusters; the fix is "ntfs: zero the rest of a new
+> cluster after a short buffered write" from the ntfs delayed allocation
+> series, not merged yet. Free the blocks of a filled file by truncating it
+> to zero and back, write its last byte, write two and a half blocks into the
+> hole from a buffer that is readable for 1000, 5096 or 12800 bytes, and
+> compare the file with the expected contents after a remount.
 > 
 > Link: https://lore.kernel.org/all/20261124-b4-ntfs-delalloc-fixes-v2-0-f394c800ec03@proton.me/
 > Signed-off-by: Ernest Borowski <ernest.borowski.git@proton.me>
 > ---
->   .gitignore              |   1 +
->   src/Makefile            |   2 +-
->   src/pwrite-short-copy.c | 101 ++++++++++++++++++++++++++++++++++++++++++++++++
->   tests/generic/817       |  83 +++++++++++++++++++++++++++++++++++++++
->   tests/generic/817.out   |   2 +
->   5 files changed, 188 insertions(+), 1 deletion(-)
+>   tests/generic/818     | 58 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>   tests/generic/818.out |  2 ++
+>   2 files changed, 60 insertions(+)
 > 
-> diff --git a/.gitignore b/.gitignore
-> index cdcfa06e..afce03d4 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -123,6 +123,7 @@ tags
->   /src/preallo_rw_pattern_reader
->   /src/preallo_rw_pattern_writer
->   /src/punch-alternating
-> +/src/pwrite-short-copy
->   /src/pwrite_mmap_blocked
->   /src/randholes
->   /src/readdir-while-renames
-> diff --git a/src/Makefile b/src/Makefile
-> index a1fc38d8..0b031620 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -38,7 +38,7 @@ LINUX_TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->   	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
->   	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
->   	rw_hint btrfs_ioctl refluxfs xfs-exchange-to-eof \
-> -	xfs-exchange-to-dirty-eof xfs-swapext-reflink
-> +	xfs-exchange-to-dirty-eof xfs-swapext-reflink pwrite-short-copy
->   
->   EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
->   	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-> diff --git a/src/pwrite-short-copy.c b/src/pwrite-short-copy.c
-> new file mode 100644
-> index 00000000..2f1c36a3
-> --- /dev/null
-> +++ b/src/pwrite-short-copy.c
-> @@ -0,0 +1,101 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Copyright (c) 2026 Ernest Borowski <ernest.borowski.git@proton.me>.  All Rights Reserved.
-> + *
-> + * Call pwrite(2) once with a source buffer that ends in an inaccessible page,
-> + * so that the copy from user space stops after a given number of bytes: the
-> + * write comes up short, or fails with EFAULT when no byte is readable.
-> + *
-> + * usage: pwrite-short-copy [-p pattern] file offset length readable
-> + *
-> + * The first "readable" bytes of the buffer hold the pattern byte (default
-> + * 0x5c), and the page after them is PROT_NONE.  The program prints what
-> + * pwrite(2) returned: the number of bytes written, or minus the errno.
-> + * It exits 0 in both cases, and 1 on a usage or setup error.
-> + */
-> +#include <errno.h>
-> +#include <fcntl.h>
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <string.h>
-> +#include <sys/mman.h>
-> +#include <unistd.h>
-> +
-> +static void usage(const char *prog)
-> +{
-> +	fprintf(stderr,
-> +		"usage: %s [-p pattern] file offset length readable\n", prog);
-> +	exit(1);
-> +}
-> +
-> +static long long parse(const char *s, const char *prog)
-> +{
-> +	char *end;
-> +	long long v;
-> +
-> +	errno = 0;
-> +	v = strtoll(s, &end, 0);
-> +	if (errno || *end || v < 0)
-> +		usage(prog);
-> +	return v;
-> +}
-> +
-> +int main(int argc, char **argv)
-> +{
-> +	long long offset, length, readable;
-> +	size_t pagesize = getpagesize();
-> +	size_t npages;
-> +	int pattern = 0x5c;
-> +	char *map, *buf;
-> +	ssize_t ret;
-> +	int fd, c;
-> +
-> +	while ((c = getopt(argc, argv, "p:")) != -1) {
-> +		switch (c) {
-> +		case 'p':
-> +			pattern = parse(optarg, argv[0]) & 0xff;
-> +			break;
-> +		default:
-> +			usage(argv[0]);
-> +		}
-> +	}
-> +	if (argc - optind != 4)
-> +		usage(argv[0]);
-> +
-> +	offset = parse(argv[optind + 1], argv[0]);
-> +	length = parse(argv[optind + 2], argv[0]);
-> +	readable = parse(argv[optind + 3], argv[0]);
-> +
-> +	fd = open(argv[optind], O_WRONLY);
-> +	if (fd < 0) {
-> +		perror(argv[optind]);
-> +		return 1;
-> +	}
-> +
-> +	/* the readable bytes end where the last, inaccessible page starts */
-> +	npages = (readable + pagesize - 1) / pagesize + 1;
-> +	map = mmap(NULL, npages * pagesize, PROT_READ | PROT_WRITE,
-> +		   MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-> +	if (map == MAP_FAILED) {
-> +		perror("mmap");
-> +		return 1;
-> +	}
-> +	buf = map + (npages - 1) * pagesize - readable;
-> +	memset(buf, pattern, readable);
-> +	if (mprotect(map + (npages - 1) * pagesize, pagesize, PROT_NONE)) {
-> +		perror("mprotect");
-> +		return 1;
-> +	}
-> +
-> +	ret = pwrite(fd, buf, length, offset);
-> +	if (ret < 0)
-> +		printf("%d\n", -errno);
-> +	else
-> +		printf("%zd\n", ret);
-> +
-> +	if (close(fd)) {
-> +		perror("close");
-> +		return 1;
-> +	}
-> +	return 0;
-> +}
-> diff --git a/tests/generic/817 b/tests/generic/817
+> diff --git a/tests/generic/818 b/tests/generic/818
 > new file mode 100755
-> index 00000000..dff08a28
+> index 00000000..97c30767
 > --- /dev/null
-> +++ b/tests/generic/817
-> @@ -0,0 +1,83 @@
+> +++ b/tests/generic/818
+> @@ -0,0 +1,58 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +# Copyright (c) 2026 Ernest Borowski <ernest.borowski.git@proton.me>.  All Rights Reserved.
 > +#
-> +# FS QA Test No. 817
+> +# FS QA Test No. 818
 > +#
-> +# A buffered write into a hole that fails with EFAULT, because not one byte of
-> +# its source buffer is readable, must not leave anything behind that later
-> +# operations trip over.  After such a write over the first half of a sparse
-> +# file, punch a hole through that range, collapse a range out of it, insert a
-> +# range into it or write into it, and check that after a remount the file
-> +# reads back as zeroes, apart from the data written.
+> +# A buffered write into a hole whose copy from user space stops part way
+> +# through a block, because the source buffer runs into an unreadable page,
+> +# must leave everything it did not write reading as zeroes once the data is on
+> +# the disk.  The blocks the hole gets may have held data before, so a block
+> +# that is allocated but only partly written would expose that old data.
+> +#
+> +# Fill a file and fsync it, truncate it to zero and back to its size so that
+> +# its old blocks are free again, write its last byte, then write two and a
+> +# half blocks at a block boundary from a buffer with only part of it readable.
+> +# After an fsync and a remount the file must hold the bytes the write returned
+> +# and zeroes around them.
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto quick rw punch collapse insert
+> +_begin_fstest auto quick rw
 > +
 > +_fixed_by_fs_commit ntfs xxxxxxxxxxxx \
-> +	"ntfs: punch out the delalloc reservation of a failed buffered write"
-> +_fixed_by_fs_commit ntfs xxxxxxxxxxxx \
-> +	"ntfs: do not shift the cluster number of a delalloc run on split"
+> +	"ntfs: zero the rest of a new cluster after a short buffered write"
 > +
 > +_require_scratch
 > +_require_test_program "pwrite-short-copy"
-> +_require_xfs_io_command "fpunch"
-> +_require_xfs_io_command "fcollapse"
-> +_require_xfs_io_command "finsert"
 > +
 > +_scratch_mkfs >> $seqres.full 2>&1
 > +_scratch_mount
 > +
 > +blksz=$(_get_file_block_size $SCRATCH_MNT)
-> +unit=$((blksz > 65536 ? blksz : 65536))
-> +size=$((16 * unit))
-> +piece=$((2 * unit))
+> +size=$((32 * blksz))
+> +off=$((8 * blksz))
+> +len=$((2 * blksz + blksz / 2))
+> +file=$SCRATCH_MNT/file
 > +
-> +# Data in other files, so that blocks a broken mapping points to are not zero.
-> +for i in 1 2 3 4; do
-> +	$XFS_IO_PROG -f -c "pwrite -q -S 0x3$i 0 $((8 * unit))" \
-> +		$SCRATCH_MNT/other$i
-> +done
-> +_scratch_sync
+> +# _scratch_cycle_mount sets $ret, so the write's result is kept in $written.
+> +# Short copies that end in the first, second and third block of the write.
+> +for copy in $((blksz / 4)) $((blksz + blksz / 4)) $((2 * blksz + blksz / 8)); do
+> +	$XFS_IO_PROG -f -c "pwrite -q -S 0xab 0 $size" -c fsync \
+> +		-c "truncate 0" -c "truncate $size" \
+> +		-c "pwrite -q -S 0x01 $((size - 1)) 1" $file
+
+Hi Ernest,
+    The later write may get different blocks from the ones filled with 
+0xab.
+    There is also the discard case: if freeing the old blocks causes them
+to read back as zeroes, the test may no longer detect the missing zeroing.
+    Would it make sense to exclude discard configurations that clear the
+freed data, and make reuse of the patterned blocks more reliable?
+That would help avoid a pass simply because the newly allocated blocks 
+already contain zeroes.
+
+Thanks,
+Baolin.
+
+> +	written=$($here/src/pwrite-short-copy $file $off $len $copy)
+
+Hi Ernest,
+    Could we check the result here before continuing?
+    The helper exits with status zero even when pwrite() fails; it
+reports the negative errno on stdout. If it prints -EIO, -EFAULT, or
+zero and the file is unchanged, the expected file still matches and the
+test can pass without exercising a short write.
+
+    Checking the helper's exit status and requiring 0 < written <= copy
+and written < len should catch this. Unexpected errors should fail the
+test.
+    If we cannot get a positive short write with this setup, retrying or
+skipping would be better than reporting a pass.
+
+Thanks,
+Baolin.
+
+> +	echo "copy $copy: write of $len bytes at $off returned $written" >> $seqres.full
+> +	$XFS_IO_PROG -c fsync $file
+> +	_scratch_cycle_mount
 > +
-> +for op in none punch collapse insert write; do
-> +	file=$SCRATCH_MNT/$op
-> +	$XFS_IO_PROG -f -c "truncate $size" -c fsync $file
-> +
-> +	# EFAULT is errno 14
-> +	ret=$($here/src/pwrite-short-copy $file 0 $((size / 2)) 0)
-> +	[ "$ret" = "-14" ] || \
-> +		echo "$op: write from an unreadable buffer returned $ret"
-> +
-> +	newsize=$size
-> +	case $op in
-> +	punch)
-> +		$XFS_IO_PROG -c "fpunch $piece $piece" $file
-> +		;;
-> +	collapse)
-> +		$XFS_IO_PROG -c "fcollapse $piece $piece" $file
-> +		newsize=$((size - piece))
-> +		;;
-> +	insert)
-> +		$XFS_IO_PROG -c "finsert $piece $piece" $file
-> +		newsize=$((size + piece))
-> +		;;
-> +	write)
-> +		$XFS_IO_PROG -c "pwrite -q -S 0x77 $piece $unit" $file
-> +		;;
-> +	esac
-> +
-> +	$XFS_IO_PROG -f -c "truncate $newsize" $tmp.$op
-> +	[ $op = write ] && \
-> +		$XFS_IO_PROG -c "pwrite -q -S 0x77 $piece $unit" $tmp.$op
-> +done
-> +
-> +# Read everything back from the disk.
-> +_scratch_cycle_mount
-> +for op in none punch collapse insert write; do
-> +	cmp -s $SCRATCH_MNT/$op $tmp.$op || \
-> +		echo "$op: file contents differ after the failed write"
+> +	rm -f $tmp.expected
+> +	$XFS_IO_PROG -f -c "truncate $size" \
+> +		-c "pwrite -q -S 0x01 $((size - 1)) 1" $tmp.expected
+> +	[ "$written" -gt 0 ] && \
+> +		$XFS_IO_PROG -c "pwrite -q -S 0x5c $off $written" $tmp.expected
+> +	cmp -s $file $tmp.expected || \
+> +		echo "copy $copy: file contents differ after a short copy"
 > +done
 > +
 > +echo "Silence is golden"
 > +_exit 0
-> diff --git a/tests/generic/817.out b/tests/generic/817.out
+> diff --git a/tests/generic/818.out b/tests/generic/818.out
 > new file mode 100644
-> index 00000000..86920a4f
+> index 00000000..cb099786
 > --- /dev/null
-> +++ b/tests/generic/817.out
+> +++ b/tests/generic/818.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 817
+> +QA output created by 818
 > +Silence is golden
 > 
-
-
-Looks good to me.
-
-Reviewed-by: Baolin Liu <liubaolin@kylinos.cn>
 
