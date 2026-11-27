@@ -1,50 +1,50 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=220.197.31.2
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=117.135.210.5
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795778768;
-	b=iLBasfipKUaLAYeiZenvLFZL7XDN0li7VaoapCrgRUsPInTxoPADkQrKC5BLQmsJi61X
-	 1laLeLeViuoyTOwFTEjkO7L7GMoG8Qs87ZkmvjmnsTWwWHEJykL+pmAFhj23S8F4iBrTG
-	 PU9ElEI4qn7ST3TG2C1s4YANYcsMLX4R/0Be3RrJ8GBIeHrvwdFHE5cMZYQ0I/Q7R6WQ5
-	 71giyCVmgGo6ka/ZHIMTv0A11djVBTxtL8WGTrSfG+dppY5SoMXh3nFKk9IdOZ5f80i1f
-	 nmpdcrOEHhSKB7y5sH9a+V2LTJVUQPUXDRIY12s54q++q/ksIpPvSaZ/35U1X4dYAYw==
+	t=1795778783;
+	b=rfzZ16Vi2xFiQzGWnAgnY1pXrK8tkFw0w8AKvqODUCTucGwwiznJfR/012RbWq24cR41
+	 DzmC+tdEpxG6tY6AY3Br93kZ3IGHlT1PpG0ZpRFJQwT0wRq0rwoEqhts83fyadjVkk3G3
+	 1o2FvEPSupOVEiPhgpUAd5FaNBIIxXpNcdflEYHAbnF/s9FSYoqziOO0zmnv7ssQEcdZ0
+	 sUzIG+47L9dLQBKVc8ZtbIIMZK3HzJPtqU3qy4jHJBW7xh84y1RtMXeyiedTokCIVVKhm
+	 bYJVO4tVfiD2Zto9C3tZ2vpVO1Yc2vROXF2/CuHPD6j+UREgGUSTxcn8SHmbMm9FpAg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795778768;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795778783;
 	h=DMARC-Filter:DKIM-Signature:Received:Message-ID:Date:MIME-Version:
 	 User-Agent:Subject:To:Cc:References:Content-Language:From:In-Reply-To:
 	 Content-Type:Content-Transfer-Encoding:X-CM-TRANSID:
 	 X-Coremail-Antispam:X-Originating-IP:X-CM-SenderInfo;
-	bh=YW06WKoK89TiwPlf+zCnKNWkno6f1puL10q0E/OW7l8=;
-	b=gNjIZXnhNDGGFg1n2Z/+/0CsVhcO/AVwyMDAtwZfJG0qLlxiSs+nuM6Q4HktLpTEPgQz
-	 GK25WnjItIXG15urgJykPl4ZIOdQhuboNJNJjHDjbfWdv9zSRQHHtluh5o4lqiSwGcdhp
-	 2okiOs/tJMrDSVcGWN1Vmg/2GePPgqUt0T8P3NE9ZEhIYPyOEQc8HeiLw1VEjtPQY2sgF
-	 BvaBAU2SR5lrUAIuotQNVEPIHVimdpqHDT94ve5x1h7338SOI2Ro+WyA+gorr3CnwH0xt
-	 1QwAabQDF9xFNUuVrRnY53ViSxZSe6bewjaH8xvCB+zC5gFSv5LSjqxBpJBTyLLjz3g==
+	bh=lS4pVVRW6QqvdfoubWQCF/rI+dOHKE2lTWIFIMGQzfM=;
+	b=Vx7CCdH5hoFyNla+JWv40tZ1Q64w2nUn/V4XyuPrTl0fOv7hhtz75Js08m5GmvyMhRnF
+	 F4tzv3i/xnWUKPDdPJgLXWlIlC2rHpZ3EoFS63vKAGZphaO1UXdewZJbu+WUiwitKdItl
+	 YoLh3hb8cYs7C9UHwIWEhggLC5bLsIJO3VEQa5qwqVVUa07wP6S3yg3cu0b+WZv0iFDO1
+	 M6PIsaovFKhJpjF+uoowADRS9iOK2oIfrEgcq2/ABwhlCpwV7cEVHS7l+5PPmlaKLdbrO
+	 UZ0uvsntlBuHQ3SXa+j0Ql3+UkJMdSqkgSClo/24yJnauLSnvWVa0YFsUUCKOQRqsaQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=163.com;
 	spf=pass smtp.mailfrom=163.com;
-	dkim=pass header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=Z0H15JT4;
-	arc=none smtp.remote-ip=220.197.31.2
-Received: from m16.mail.163.com (m16.mail.163.com [220.197.31.2])
+	dkim=pass header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=GmOn4zcM;
+	arc=none smtp.remote-ip=117.135.210.5
+Received: from m16.mail.163.com (m16.mail.163.com [117.135.210.5])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E94F8606A681
-	for <fstests@vger.kernel.org>; Fri, 27 Nov 2026 11:26:06 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org E94F8606A681
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 73DED606A321
+	for <fstests@vger.kernel.org>; Fri, 27 Nov 2026 11:26:21 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 73DED606A321
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=163.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=163.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=Z0H15JT4
+	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.a=rsa-sha256 header.s=s110527 header.b=GmOn4zcM
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
 	s=s110527; h=Message-ID:Date:MIME-Version:Subject:To:From:
-	Content-Type; bh=YW06WKoK89TiwPlf+zCnKNWkno6f1puL10q0E/OW7l8=;
-	b=Z0H15JT4yhqMDIe7P8mAijNuwmMBz8BDhswKGihmbvoFC1VO0aJNDh0nOU6up9
-	MlyGnj9ewFzXKOBki4J6JpM9OkdALqsGqxz+c2cFpXE40pmriVycj5Drpbf4AVVn
-	J7vk/iGBzKaLkNmHAaH3Zuyqw5lYZbBtcZBkbDtHAG9BY=
+	Content-Type; bh=lS4pVVRW6QqvdfoubWQCF/rI+dOHKE2lTWIFIMGQzfM=;
+	b=GmOn4zcMxQjQH4EkXZHjTLjcXnjfT1tSXA1NBZgam3ymVIxAQs1r2CVY8jBNyT
+	Sv48JweVNDK9CeRI6QKjfQyMe8uAXbSfasH5vjbuCrtigqBG50cYJEVaL9suNWvg
+	cAz22Ctq0ZSDXSj/LctmOoGW6JUQ0lIn2Nuq0JTN+grZc=
 Received: from [IPV6:2409:8900:1fda:c14d:49cd:379b:bab1:5955] (unknown [])
-	by gzga-smtp-mtada-g0-4 (Coremail) with SMTP id _____wD3f+KXaAlraN7eLQ--.13998S2;
-	Fri, 27 Nov 2026 19:25:14 +0800 (CST)
-Message-ID: <99f7fc52-f97d-44a7-82cd-2ba60f7d28e6@163.com>
-Date: Fri, 27 Nov 2026 19:25:11 +0800
+	by gzsmtp4 (Coremail) with SMTP id PygvCgCnIYinaAlraV8EIg--.27558S2;
+	Fri, 27 Nov 2026 19:25:28 +0800 (CST)
+Message-ID: <c23e1ae0-18b0-4b53-abf1-2f0965253ae6@163.com>
+Date: Fri, 27 Nov 2026 19:25:27 +0800
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Post: <mailto:fstests@vger.kernel.org>
@@ -55,202 +55,159 @@ List-Owner: <mailto:fstests+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/4] common: add support for the ntfs driver
+Subject: Re: [PATCH v2 2/4] generic: check the size after a buffered write
+ runs out of space
 To: ernest.borowski.git@proton.me, fstests@vger.kernel.org,
  Zorro Lang <zlang@kernel.org>
 Cc: ntfs@lists.linux.dev, Namjae Jeon <linkinjeon@kernel.org>,
  Hyunchul Lee <hyc.lee@gmail.com>, Zhan Xusheng <zhanxusheng1024@gmail.com>
 References: <20261126-ntfs-reproducers-v2-0-7d5fa5a688b9@proton.me>
- <20261126-ntfs-reproducers-v2-1-7d5fa5a688b9@proton.me>
+ <20261126-ntfs-reproducers-v2-2-7d5fa5a688b9@proton.me>
 Content-Language: en-US
 From: liubaolin <liubaolin12138@163.com>
-In-Reply-To: <20261126-ntfs-reproducers-v2-1-7d5fa5a688b9@proton.me>
+In-Reply-To: <20261126-ntfs-reproducers-v2-2-7d5fa5a688b9@proton.me>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:_____wD3f+KXaAlraN7eLQ--.13998S2
-X-Coremail-Antispam: 1Uf129KBjvJXoWxKFyxWry5uF1xKw15JF4kCrg_yoWxCr4DpF
-	yfCa43KrW8GrnrX3s3ta13Xa45Cwn3tF1jgr17Ww12grZ5trn7JF42qF1F9F4jgrZ8Zr4F
-	9w1kW3s7WasIyr7anT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07UTCJQUUUUU=
-X-CM-SenderInfo: xolxutxrol0iasrtmqqrwthudrp/xtbC6RtdKGsJaJs-pAAA3N
+X-CM-TRANSID:PygvCgCnIYinaAlraV8EIg--.27558S2
+X-Coremail-Antispam: 1Uf129KBjvJXoW3XFW5uw1fKFy3GF48Wr1rZwb_yoW7AryxpF
+	yF93W5KrZ7Kw47Wrn3CF15trn8CF4fXFWavr929w1kurW5Wr129FWaqryDXrWUAr1fWr4j
+	vanY934IkryUXrJanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07UAPEhUUUUU=
+X-CM-SenderInfo: xolxutxrol0iasrtmqqrwthudrp/xtbC6ghhLGsJaKgw7gAA3T
 
 
 
 在 2026/11/27 04:29, Ernest Borowski via B4 Relay 写道:
 > From: Ernest Borowski <ernest.borowski.git@proton.me>
 > 
-> Volumes for the ntfs driver (fs/ntfs) are made and checked with mkfs.ntfs
-> and fsck.ntfs from ntfsprogs-plus, but FSTYP=ntfs only gets the generic
-> fallbacks today. mkfs.ntfs zeroes the whole device unless it is given
-> --quick and refuses a device that is not a partition unless it is given
-> --force, _scratch_mkfs_sized and _scratch_mkfs_blocksized skip every test
-> that calls them, and the tests that require metadata journaling run
-> although the driver only checks and empties $LogFile at mount and never
-> logs a change. Call mkfs.ntfs directly with --quick and --force and filter
-> its warnings about the device geometry, pass the size to mkfs.ntfs in
-> sectors of the size -s gives, or else of the device's, and the block size
-> as the cluster size unless MKFS_OPTIONS sets one (mkfs.ntfs refuses a
-> second -c), check that mkfs.ntfs and fsck.ntfs are installed, and list ntfs
-> among the filesystems without metadata journaling.
-> Pass -i in _mount() when FSTYP, or the base filesystem under overlayfs,
-> is ntfs, so that every mount and remount uses the kernel driver and never
-> a mount.ntfs helper, whatever the mount options are.
-> The check keeps the generic "fsck -t ntfs -n" path, which runs ntfsck.
+> A buffered write that runs out of free space part way returns a short
+> count, and the file size has to end at the last byte it wrote. ntfs raises
+> the size to the end of the whole request before it copies anything and
+> keeps it after the copy stops early, so the file grows by a tail of zeroes
+> that the caller never wrote; "ntfs: trim the sizes after a short write" by
+> Zhan Xusheng, under review on the ntfs list, fixes that. Fill a 512 MiB
+> filesystem, free 256 KiB or more again, write eight times as much to a file
+> in one write(2) that starts 64 KiB or one block before the end of the file,
+> and check the size before and after a remount and the contents of the file.
+> XFS and ext4 reserve space for all of a new range at once, so a write that
+> started at the end of the file failed there with nothing written; this one
+> stores the part over the old data and comes up short. A write error other
+> than ENOSPC fails the test, and a
+> write that fails with ENOSPC before storing anything is checked the same
+> way but then reported as not run. generic/275 also runs a filesystem out of
+> space with writes, but only checks that some data was written.
 > 
 > Signed-off-by: Ernest Borowski <ernest.borowski.git@proton.me>
 > ---
->   common/config |  9 +++++++++
->   common/rc     | 52 +++++++++++++++++++++++++++++++++++++++++++++++++---
->   2 files changed, 58 insertions(+), 3 deletions(-)
+>   tests/generic/816     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>   tests/generic/816.out |  2 ++
+>   2 files changed, 93 insertions(+)
 > 
-> diff --git a/common/config b/common/config
-> index 69e5d833..8d5c7178 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -335,6 +335,8 @@ export MKFS_AFS_PROG="false"
->   export MKFS_CIFS_PROG="false"
->   export MKFS_OVERLAY_PROG="false"
->   export MKFS_REISER4_PROG=$(type -P mkfs.reiser4)
-> +# shellcheck disable=SC2155 # written like the other _PROG lines
-> +export MKFS_NTFS_PROG=$(type -P mkfs.ntfs)
->   export E2FSCK_PROG=$(type -P e2fsck)
->   export TUNE2FS_PROG=$(type -P tune2fs)
->   export FSCK_OVERLAY_PROG=$(type -P fsck.overlay)
-> @@ -409,6 +411,9 @@ _common_mount_opts()
->   	ubifs)
->   		echo $UBIFS_MOUNT_OPTIONS
->   		;;
-> +	ntfs)
-> +		echo "$NTFS_MOUNT_OPTIONS"
-> +		;;
->   	*)
->   		;;
->   	esac
-> @@ -550,6 +555,10 @@ _source_specific_fs()
->   		;;
->   	pvfs2)
->   		;;
-> +	ntfs)
-> +		[ "$MKFS_NTFS_PROG" = "" ] && _fatal "mkfs.ntfs not found"
-> +		type -P fsck.ntfs >/dev/null || _fatal "fsck.ntfs not found"
-> +		;;
->   	ubifs)
->   		[ "$UBIUPDATEVOL_PROG" = "" ] && _fatal "ubiupdatevol not found"
->   		. ./common/ubifs
-> diff --git a/common/rc b/common/rc
-> index 750a8d83..891ca779 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -310,10 +310,16 @@ _has_dmesg_since_option()
->   
->   _mount()
->   {
-> -	$MOUNT_PROG "$@"
-> +	local opts=()
+> diff --git a/tests/generic/816 b/tests/generic/816
+> new file mode 100755
+> index 00000000..625a8429
+> --- /dev/null
+> +++ b/tests/generic/816
+> @@ -0,0 +1,91 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2026 Ernest Borowski <ernest.borowski.git@proton.me>.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 816
+> +#
+> +# A buffered write that runs out of space part way must leave the file size
+> +# at the end of the bytes it wrote.  Fill a small filesystem, free a little
+> +# space again, and write more than that to a file in one write(2) that starts
+> +# a little before the end of the file and goes past it.  Check that the size
+> +# ends at the end of the old data or of the bytes the write returned,
+> +# whichever is further, before and after a remount, and that the file holds
+> +# the old data with the bytes written over it.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick rw enospc
 > +
-> +	# mount(8) hands an ntfs mount to a mount.ntfs helper when one is
-> +	# installed; -i keeps every mount and remount on the kernel driver,
-> +	# including the base filesystem under overlayfs
-> +	[ "$FSTYP" = "ntfs" ] || [ "$OVL_BASE_FSTYP" = "ntfs" ] && opts=(-i)
-> +	$MOUNT_PROG "${opts[@]}" "$@"
->   	ret=$?
->   	if [ "$ret" -ne 0 ]; then
-> -		echo "\"$MOUNT_PROG $*\" failed at $(date)" >> "$seqres.mountfail?"
-> +		echo "\"$MOUNT_PROG ${opts[*]} $*\" failed at $(date)" >> "$seqres.mountfail?"
->   		if _has_dmesg_since_option; then
->   			dmesg --since '30s ago' >> "$seqres.mountfail?"
->   		else
-> @@ -904,6 +910,10 @@ _test_mkfs()
->       btrfs)
->           $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
->   	;;
-> +    ntfs)
-> +	# shellcheck disable=SC2048,SC2086 # one word may hold several options
-> +	$MKFS_NTFS_PROG --quick --force $MKFS_OPTIONS $* "$TEST_DEV" > /dev/null
-> +	;;
->       ext2|ext3|ext4)
->   	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
->   	;;
-> @@ -953,6 +963,10 @@ _try_mkfs_dev()
->       btrfs)
->           $MKFS_BTRFS_PROG $MKFS_OPTIONS $*
->   	;;
-> +    ntfs)
-> +	# shellcheck disable=SC2048,SC2086 # one word may hold several options
-> +	$MKFS_NTFS_PROG --quick --force $MKFS_OPTIONS $*
-> +	;;
->       ext2|ext3|ext4)
->   	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $*
->   	;;
-> @@ -1069,6 +1083,15 @@ _scratch_mkfs()
->   		mkfs_cmd="$MKFS_BCACHEFS_PROG"
->   		mkfs_filter="cat"
->   		;;
-> +	ntfs)
-> +		# --quick skips zeroing the whole device, --force formats a
-> +		# device that is not a partition; drop the warnings about that
-> +		# and about the boot geometry of such a device
-> +		mkfs_cmd="$MKFS_NTFS_PROG --quick --force"
-> +		mkfs_filter="grep -v -e \"is entire device\" -e \"forced anyway\""
-> +		mkfs_filter+=" -e \"could not be obtained automatically\""
-> +		mkfs_filter+=" -e \"boot from\""
-> +		;;
->   	*)
->   		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
->   		mkfs_filter="cat"
-> @@ -1313,6 +1336,9 @@ _try_scratch_mkfs_sized()
->   		# If no block size is given by local.confg or parameter, blocksize_opt is empty.
->   		# Let MKFS_BCACHEFS_PROG decide block size on its own.
->   		;;
-> +	ntfs)
-> +		def_blksz=$(echo "$MKFS_OPTIONS" | sed -rn 's/(.* )?(-c|--cluster-size)[ =]?([0-9]+).*/\3/p')
-> +		;;
->   	esac
->   
->   	[ -n "$def_blksz" ] && blocksize=$def_blksz
-> @@ -1425,6 +1451,19 @@ _try_scratch_mkfs_sized()
->   	bcachefs)
->   		$MKFS_BCACHEFS_PROG $MKFS_OPTIONS --fs_size=$fssize $blocksize_opt "$@" $SCRATCH_DEV
->   		;;
-> +	ntfs)
-> +		# mkfs.ntfs refuses a second -c, and takes the size after the
-> +		# device, in sectors of the size -s gives or else of the device's
-> +		local cluster_opt=(-c "$blocksize")
-> +		local sector_size
+> +. ./common/populate
 > +
-> +		sector_size=$(echo "$MKFS_OPTIONS" | sed -rn 's/(.* )?(-s|--sector-size)[ =]?([0-9]+).*/\3/p')
-> +		[ -n "$sector_size" ] || sector_size=$(blockdev --getss "$SCRATCH_DEV")
-> +		[ -n "$def_blksz" ] && cluster_opt=()
-> +		# shellcheck disable=SC2086 # MKFS_OPTIONS holds several options
-> +		$MKFS_NTFS_PROG --quick --force $MKFS_OPTIONS "${cluster_opt[@]}" "$@" \
-> +			"$SCRATCH_DEV" $((fssize / sector_size))
-> +		;;
->   	*)
->   		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
->   		;;
-> @@ -1517,6 +1556,13 @@ _scratch_mkfs_blocksized()
->   	udf)
->   		_scratch_mkfs -b $blocksize
->   		;;
-> +	ntfs)
-> +		# mkfs.ntfs refuses a second -c, so the size asked for here
-> +		# replaces one in MKFS_OPTIONS
-> +		MKFS_OPTIONS=$(echo "$MKFS_OPTIONS" | \
-> +			sed -E 's/(^| )(-c|--cluster-size)[ =]?[0-9]+//') \
-> +			_scratch_mkfs -c "$blocksize"
-> +		;;
->   	*)
->   		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_blocksized"
->   		;;
-> @@ -4386,7 +4432,7 @@ _has_metadata_journaling()
->   	fi
->   
->   	case "$FSTYP" in
-> -	ext2|vfat|msdos|udf|exfat|tmpfs|hfs|hfsplus)
-> +	ext2|vfat|msdos|udf|exfat|ntfs|tmpfs|hfs|hfsplus)
->   		echo "$FSTYP does not support metadata journaling"
->   		return 1
->   		;;
+> +_fixed_by_fs_commit ntfs xxxxxxxxxxxx \
+> +	"ntfs: trim the sizes after a short write"
+> +
+> +_require_scratch
+> +_require_no_compress
+> +
+> +_scratch_mkfs_sized $((512 * 1024 * 1024)) >> "$seqres.full" 2>&1
+> +_scratch_mount
+> +
+> +blksz=$(_get_file_block_size "$SCRATCH_MNT")
+> +unit=$((blksz > 65536 ? blksz : 65536))
+> +old=$((4 * unit))
+> +len=$((32 * unit))
+> +# The write starts inside the old data: a filesystem that reserves space for
+> +# all of a new range at once, as XFS does, then still stores the part over
+> +# allocated blocks and comes up short instead of failing with nothing written.
+> +pos=$((old - unit))
+> +file=$SCRATCH_MNT/file
+> +
+> +$XFS_IO_PROG -f -c "pwrite -q -S 0x11 0 $old" -c fsync "$file"
+> +$XFS_IO_PROG -f -c "pwrite -q -S 0x33 0 $old" -c fsync "$SCRATCH_MNT/spare"
+> +_fill_fs $((64 * 1024 * 1024)) "$SCRATCH_MNT/fill" "$blksz" 0 >> "$seqres.full" 2>&1
+> +rm -f "$SCRATCH_MNT/spare"
+> +_scratch_sync
+> +$DF_PROG "$SCRATCH_MNT" >> "$seqres.full"
+> +
+> +# One write(2) of $len bytes at $pos.  xfs_io prints the count
+> +# the write returned, or the error when the write failed.  ENOSPC before the
+> +# first byte is checked like a short write of zero bytes, any other error
+> +# fails the test.
+> +$XFS_IO_PROG -c "pwrite -S 0x22 -b $len $pos $len" "$file" > "$tmp.write" 2>&1
+> +cat "$tmp.write" >> "$seqres.full"
+> +written=$(sed -n -e 's/^wrote \([0-9]*\)\/.*/\1/p' "$tmp.write")
+> +if [ -z "$written" ]; then
+> +	grep -q "No space left on device" "$tmp.write" || \
+> +		_fail "write failed: $(cat "$tmp.write")"
+> +	written=0
+> +fi
+> +[ "$written" -lt "$len" ] || _notrun "could not run the filesystem out of space"
+> +
+> +end=$((pos + written > old ? pos + written : old))
+> +errors=0
+> +check_size()
+> +{
+> +	local size
+> +
+> +	size=$(_get_filesize "$file")
+> +	[ "$size" -eq "$end" ] && return
+> +	echo "$1: size $size after writing $written bytes at $pos"
+> +	errors=$((errors + 1))
+> +}
+> +
+> +check_size "after the write"
+> +# shellcheck disable=SC2119 # the mount options argument is optional
+> +_scratch_cycle_mount
+> +check_size "after remount"
+> +
+> +$XFS_IO_PROG -f -c "pwrite -q -S 0x11 0 $old" "$tmp.expected"
+> +[ "$written" -gt 0 ] && \
+> +	$XFS_IO_PROG -c "pwrite -q -S 0x22 $pos $written" "$tmp.expected"
+> +if ! cmp -s "$file" "$tmp.expected"; then
+> +	echo "file contents differ"
+> +	errors=$((errors + 1))
+> +fi
+> +
+> +# A write that failed before storing anything must not change the file either,
+> +# but it did not test a short write.
+> +[ "$written" -eq 0 ] && [ "$errors" -eq 0 ] && \
+> +	_notrun "the write failed with ENOSPC before storing anything"
+> +
+> +echo "Silence is golden"
+> +_exit 0
+> diff --git a/tests/generic/816.out b/tests/generic/816.out
+> new file mode 100644
+> index 00000000..a9d8f943
+> --- /dev/null
+> +++ b/tests/generic/816.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 816
+> +Silence is golden
 > 
 
 Looks good to me.
